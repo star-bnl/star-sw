@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.h,v 2.9 2007/07/11 23:06:45 perev Exp $
+ * $Id: StBbcTriggerDetector.h,v 2.10 2008/08/15 18:36:18 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.h,v $
+ * Revision 2.10  2008/08/15 18:36:18  ullrich
+ * Minor change, move zVertex().
+ *
  * Revision 2.9  2007/07/11 23:06:45  perev
  * Cleanup+fix StXXXTriggerDetector
  *
@@ -101,9 +104,10 @@ public:
     int   nHitAll();
     int   tdcEarliestEast(); // 2002 = common start = smaller channel is earlier
     int   tdcEarliestWest(); // 2003 = common stop  = larger channel os earlier
-    float zVertex(); //z vertex in cm
   // No longer supported after 2003. Do not use
   //////////////////////////////////////////////
+
+    float zVertex(); //z vertex in cm
 
     void  setAdc(unsigned int, unsigned short);
     void  setTdc(unsigned int, unsigned short);
