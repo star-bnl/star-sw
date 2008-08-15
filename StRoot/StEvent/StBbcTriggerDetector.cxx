@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.11 2007/10/11 21:39:56 ullrich Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.12 2008/08/15 17:33:04 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.12  2008/08/15 17:33:04  ullrich
+ * Modified zVertex(). Implemented calibrated BBC vertex z position code.
+ *
  * Revision 2.11  2007/10/11 21:39:56  ullrich
  * Removed unused variable i.
  *
@@ -49,7 +52,7 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.11 2007/10/11 21:39:56 ullrich Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.12 2008/08/15 17:33:04 ullrich Exp $";
 
 ClassImp(StBbcTriggerDetector)
     
@@ -388,22 +391,48 @@ StBbcTriggerDetector::tdcEarliestWest()
 float
 StBbcTriggerDetector::zVertex()
 {
-    unsigned short east=tdcEarliestEast();
-    unsigned short west=tdcEarliestWest();
     if (mYear==2002){
+        unsigned short east=tdcEarliestEast();
+        unsigned short west=tdcEarliestWest();
         if (east<2000 && west<2000 && east!=0 && west!=0)
 	  return (float(east-west))*5.0; //sign for common start
         else
 	  return -9999.0;			       
     }
     else if (mYear==2003){
+        unsigned short east=tdcEarliestEast();
+        unsigned short west=tdcEarliestWest();
         if (east>0 && west>0)
 	  return float(west-east)*3.0; //sign for common stop 
         else
 	  return -9999.0;
     }
     else{
-        cerr << "StBbcTriggerDetector::zVertex: No longer supported after 2003. Do not use" << endl;
+        float slope=2.0;
+        float tc[4]={49.89, -3.155, 4.537, -0.1471};
+        float off=-13.77l;
+        float offset[2][16] = {
+            {-2.00982,  4.09827, 4.83372, -4.71373,
+             -8.33428,  -8.51657, -2.16193, 14.6726,
+             1.61522,  0.605228, 4.98944, -1.86768,
+             -2.46653, -2.70569, -4.33065, -5.07069},
+            {-4.90599,  -2.62884, -2.87498, 5.58336,
+             0.100682,  0.065195, -0.35114, -2.96953,
+             1.2031,  2.94575, -1.93577, -1.13641,
+             1.86768, 4.27345, 7.0431, -1.16071}
+        };
+        float maxtac[2]={0.0, 0.0};
+        for(int iew=0; iew<2; iew++){
+            for(int ich=0; ich<16; ich++){
+                int j=iew*24+ich;	  
+                float tac = tdc(j) - offset[iew][ich] - (tc[0]+tc[1]/exp(-tc[2]*pow(adc(j),tc[3])))/slope;
+                if(adc(j)>10 && tac<200 && tac>maxtac[iew]) {maxtac[iew]=tac;}
+            }
+        }
+        if(maxtac[0]>0.0 && maxtac[1]>0.0){
+            float zvt=slope*(maxtac[1]-maxtac[0])+off;
+            return zvt;
+        }
     }
     return -9999.0;
 }
