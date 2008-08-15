@@ -1,8 +1,0 @@
-#!/bin/bash
-
-export DATA_NAME='Pure MC eta simulation using pp2005 geometry and BFC chain and MinBias timestamps'
-export DATA_TAG='pp2005Simulation'
-export DATA_SUBTAG=$DATA_TAG'_eta_MB'
-export DATA_QUERY="file:$DATA_PATH/starsim_eta_pp2005/*.event.root"
-export DATA_CONFIG='config_simulation_pp2005_MB.C'
-export DATA_DIR=$DATA_PATH'/simu_pp2005_eta_MB'

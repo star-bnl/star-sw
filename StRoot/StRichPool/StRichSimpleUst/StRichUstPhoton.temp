@@ -1,6 +1,0 @@
-	Int_t   ring
-	Int_t   track
-	Int_t   hit
-	Float_t d
-	Float_t sig
-	Float_t psi
