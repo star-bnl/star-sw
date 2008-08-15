@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.6 2008/07/30 14:11:55 lbarnby Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.7 2008/08/15 15:09:37 lbarnby Exp $
  *
  */
 
@@ -51,6 +51,7 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name) {
   }
   mFile = 0;
   mTree = 0;
+  mSkipMode = kTRUE;
 }
 //________________________________________________________________________________
 StPrepEmbedMaker::~StPrepEmbedMaker() { 
@@ -146,7 +147,14 @@ Int_t StPrepEmbedMaker::Make() {
 				    EvtHddr->GetEventNumber()),
 			       "goff");
   Double_t xyz[3] = {mTree->GetV1()[0],mTree->GetV2()[0],mTree->GetV3()[0]};
-
+  // Skip event if no primary vertex - effectively if tags say it is 0,0,0
+  if (mSkipMode == kTRUE){ 
+    if (fabs(xyz[0])<1e-7 && fabs(xyz[1])<1e-7 && fabs(xyz[2])<1e-7 ){
+      LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
+	       << " has tags with vertex approx at (0,0,0) - probably no PV, skipping." << endm;
+      return kStSKIP;
+    }
+  }
   //Done set up for event.
 
   //Setup embedded particle
@@ -207,6 +215,9 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.7  2008/08/15 15:09:37  lbarnby
+ * Skip embedding events without primary vertex + flag for this behaviour (default is to skip)
+ *
  * Revision 1.6  2008/07/30 14:11:55  lbarnby
  * Changed tags used to get multiplicity for calculating how many particle to embed from numberOfPrimaryTracks to uncorrectedNumberOfPrimaries because former is created by StPCollTagMaker which was not used in P08ic Au+Au 9 GeV production whereas latter is from StTagsMaker
  *
