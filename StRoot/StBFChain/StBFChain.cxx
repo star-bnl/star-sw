@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.540 2008/08/07 19:53:53 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.541 2008/08/15 16:38:32 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1549,7 +1549,8 @@ void StBFChain::SetTreeOptions()
     treeMk->IntoBranch("eventBranch","StEvent");
     if (GetOption("EvOutOnly")) return;
   }
-  treeMk->SetBranch("histBranch");
+  if (! GetOption("nohistos")) 
+    treeMk->SetBranch("histBranch");
   if (GetOption("dstOut"))      {
     treeMk->IntoBranch("dstBranch","dst");
     if (GetOption("HitsBranch")) {
