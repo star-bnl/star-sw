@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgHTWriter.h,v 1.1 2008/08/11 04:48:30 tai Exp $
+// $Id: StjTrgHTWriter.h,v 1.2 2008/08/17 11:29:19 tai Exp $
 #ifndef STJTRGHTWRITER_H
 #define STJTRGHTWRITER_H
 
@@ -33,6 +33,9 @@ private:
 
   Int_t    _nTowers;
   Int_t    _towerId[4800];
+  Int_t    _towerDsmAdc[4800];
+  UInt_t   _towerAdc[4800];
+  Double_t _towerEnergy[4800];
 
   StjTrg* _trg;
 };

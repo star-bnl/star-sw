@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.h,v 1.1 2008/08/08 23:18:49 tai Exp $
+// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.h,v 1.2 2008/08/17 11:29:15 tai Exp $
 #ifndef STJTRGMUDSTSOFTWAREEMCTRIGGERMAKER_H
 #define STJTRGMUDSTSOFTWAREEMCTRIGGERMAKER_H
 
@@ -22,14 +22,18 @@ public:
   bool soft(int trgId);
 
   std::vector<int> towers(int trgId);
+  std::vector<int> towerDsmAdc(int trgId);
 
   std::vector<int> jetPatches(int trgId);
+  std::vector<int> jetPatchDsmAdc(int trgId);
 
 private:
 
   int _trgId;
 
   StEmcTriggerMaker* _emcTrigMaker;
+
+  ClassDef(StjTrgMuDstSoftwareEmcTriggerMaker, 1)
 
 };
 
