@@ -1,18 +1,18 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDst.h,v 1.3 2008/08/18 06:20:45 tai Exp $
+// $Id: StjTrgMuDst.h,v 1.4 2008/08/18 06:37:20 tai Exp $
 #ifndef STJTRGMUDST_H
 #define STJTRGMUDST_H
 
 #include "StjTrg.h"
 
-class StjTrgMuDstSoftware;
+class StjTrgSoft;
 class StjTrgPassCondition;
 class StMuDstMaker;
 
 class StjTrgMuDst : public StjTrg {
 
 public:
-  StjTrgMuDst(int trgId, StjTrgPassCondition* passCondition, StMuDstMaker* uDstMaker, StjTrgMuDstSoftware* soft);
+  StjTrgMuDst(int trgId, StjTrgPassCondition* passCondition, StMuDstMaker* uDstMaker, StjTrgSoft* soft);
   virtual ~StjTrgMuDst() { }
 
   int id() { return _trgId; }
@@ -43,7 +43,7 @@ private:
 
   StjTrgPassCondition* _passCondition;
 
-  StjTrgMuDstSoftware* _soft;
+  StjTrgSoft* _soft;
 
   StMuDstMaker* _uDstMaker;
 

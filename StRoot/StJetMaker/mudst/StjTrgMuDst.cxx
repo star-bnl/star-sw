@@ -1,7 +1,7 @@
-// $Id: StjTrgMuDst.cxx,v 1.3 2008/08/18 06:20:45 tai Exp $
+// $Id: StjTrgMuDst.cxx,v 1.4 2008/08/18 06:37:20 tai Exp $
 #include "StjTrgMuDst.h"
 
-#include "StjTrgMuDstSoftware.h"
+#include "StjTrgSoft.h"
 #include "StjTrgPassCondition.h"
 #include "StjTrgBEMCJetPatchTowerIdMap.h"
 
@@ -15,7 +15,7 @@ ClassImp(StjTrgMuDst)
 
 using namespace std;
 
-StjTrgMuDst::StjTrgMuDst(int trgId, StjTrgPassCondition* passCondition, StMuDstMaker* uDstMaker, StjTrgMuDstSoftware* soft)
+StjTrgMuDst::StjTrgMuDst(int trgId, StjTrgPassCondition* passCondition, StMuDstMaker* uDstMaker, StjTrgSoft* soft)
   : _trgId(trgId)
   , _passCondition(passCondition)
   , _soft(soft)

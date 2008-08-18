@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftware.h,v 1.3 2008/08/18 06:20:45 tai Exp $
+// $Id: StjTrgSoft.h,v 1.1 2008/08/18 06:37:24 tai Exp $
 #ifndef STJTRGMUDSTSOFTWARE_H
 #define STJTRGMUDSTSOFTWARE_H
 
@@ -9,11 +9,11 @@
 
 class StjTrg;
 
-class StjTrgMuDstSoftware : public TObject {
+class StjTrgSoft : public TObject {
 
 public:
-  StjTrgMuDstSoftware() { }
-  virtual ~StjTrgMuDstSoftware() { }
+  StjTrgSoft() { }
+  virtual ~StjTrgSoft() { }
 
   virtual bool soft() = 0;
 
@@ -37,7 +37,7 @@ protected:
 
 private:
 
-  ClassDef(StjTrgMuDstSoftware, 1)
+  ClassDef(StjTrgSoft, 1)
 
 };
 

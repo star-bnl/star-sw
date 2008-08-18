@@ -1,6 +1,6 @@
-// $Id: StjTrgMuDstSoftwareGetAdcEt.cxx,v 1.1 2008/08/18 06:20:46 tai Exp $
+// $Id: StjTrgSoftGetAdcEt.cxx,v 1.1 2008/08/18 06:37:25 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StjTrgMuDstSoftwareGetAdcEt.h"
+#include "StjTrgSoftGetAdcEt.h"
 
 #include "StjTrgBEMCJetPatchTowerIdMap.h"
 
@@ -14,11 +14,11 @@
 
 #include <iostream>
 
-ClassImp(StjTrgMuDstSoftwareGetAdcEt)
+ClassImp(StjTrgSoftGetAdcEt)
 
 using namespace std;
 
-StjTrgMuDstSoftwareGetAdcEt::StjTrgMuDstSoftwareGetAdcEt(StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdMap* bemcJpTowerMap) 
+StjTrgSoftGetAdcEt::StjTrgSoftGetAdcEt(StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdMap* bemcJpTowerMap) 
   : _bemc(bemc), _bemcJpTowerMap(bemcJpTowerMap), _trg(0)
   , _runNumber(-1), _eventId(-1)
 {
@@ -26,14 +26,14 @@ StjTrgMuDstSoftwareGetAdcEt::StjTrgMuDstSoftwareGetAdcEt(StjBEMC* bemc, StjTrgBE
   _cut.addCut(new StjTowerEnergyCutBemcStatus(1));
 }
 
-bool StjTrgMuDstSoftwareGetAdcEt::isNewEvent()
+bool StjTrgSoftGetAdcEt::isNewEvent()
 {
   if(_runNumber != _trg->runNumber()) return true;
   if(_eventId != _trg->eventId()) return true;
   return false;
 }
 
-void StjTrgMuDstSoftwareGetAdcEt::read()
+void StjTrgSoftGetAdcEt::read()
 {
   _towerAdc.clear();
   _towerEnergy.clear();
@@ -89,37 +89,37 @@ void StjTrgMuDstSoftwareGetAdcEt::read()
 
 }
 
-vector<unsigned int> StjTrgMuDstSoftwareGetAdcEt::towerAdc()
+vector<unsigned int> StjTrgSoftGetAdcEt::towerAdc()
 {
   if(isNewEvent()) read();
   return _towerAdc;
 }
 
-vector<double> StjTrgMuDstSoftwareGetAdcEt::towerEnergy()
+vector<double> StjTrgSoftGetAdcEt::towerEnergy()
 {
   if(isNewEvent()) read();
   return _towerEnergy;
 }
 
-vector<double> StjTrgMuDstSoftwareGetAdcEt::towerEt()
+vector<double> StjTrgSoftGetAdcEt::towerEt()
 {
   if(isNewEvent()) read();
   return _towerEt;
 }
 
-vector<unsigned int> StjTrgMuDstSoftwareGetAdcEt::jetPatchAdc()
+vector<unsigned int> StjTrgSoftGetAdcEt::jetPatchAdc()
 {
   if(isNewEvent()) read();
   return _jetPatchAdc;
 }
 
-vector<double> StjTrgMuDstSoftwareGetAdcEt::jetPatchEnergy()
+vector<double> StjTrgSoftGetAdcEt::jetPatchEnergy()
 {
   if(isNewEvent()) read();
   return _jetPatchEnergy;
 }
 
-vector<double> StjTrgMuDstSoftwareGetAdcEt::jetPatchEt()
+vector<double> StjTrgSoftGetAdcEt::jetPatchEt()
 {
   if(isNewEvent()) read();
   return _jetPatchEt;

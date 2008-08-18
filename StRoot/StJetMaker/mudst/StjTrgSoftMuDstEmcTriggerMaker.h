@@ -1,23 +1,23 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.h,v 1.3 2008/08/18 06:20:45 tai Exp $
+// $Id: StjTrgSoftMuDstEmcTriggerMaker.h,v 1.1 2008/08/18 06:37:25 tai Exp $
 #ifndef STJTRGMUDSTSOFTWAREEMCTRIGGERMAKER_H
 #define STJTRGMUDSTSOFTWAREEMCTRIGGERMAKER_H
 
-#include "StjTrgMuDstSoftware.h"
+#include "StjTrgSoft.h"
 
 #include <map>
 #include <algorithm>
 
 class StEmcTriggerMaker;
 
-class StjTrgMuDstSoftwareGetAdcEt;
+class StjTrgSoftGetAdcEt;
 
-class StjTrgMuDstSoftwareEmcTriggerMaker : public StjTrgMuDstSoftware {
+class StjTrgSoftMuDstEmcTriggerMaker : public StjTrgSoft {
 
 public:
-  StjTrgMuDstSoftwareEmcTriggerMaker(StEmcTriggerMaker* emcTrigMaker, StjTrgMuDstSoftwareGetAdcEt* adcEt);
+  StjTrgSoftMuDstEmcTriggerMaker(StEmcTriggerMaker* emcTrigMaker, StjTrgSoftGetAdcEt* adcEt);
 
-  virtual ~StjTrgMuDstSoftwareEmcTriggerMaker() { }
+  virtual ~StjTrgSoftMuDstEmcTriggerMaker() { }
 
   bool soft();
 
@@ -39,9 +39,9 @@ private:
 
   StEmcTriggerMaker* _emcTrigMaker;
 
-  StjTrgMuDstSoftwareGetAdcEt* _adcEt;
+  StjTrgSoftGetAdcEt* _adcEt;
 
-  ClassDef(StjTrgMuDstSoftwareEmcTriggerMaker, 1)
+  ClassDef(StjTrgSoftMuDstEmcTriggerMaker, 1)
 
 };
 
