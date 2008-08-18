@@ -76,6 +76,8 @@ class StTpcRSMaker : public StMaker {
   void DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
   void SetClusterLength(Double_t m=0) {mClusterLength = m;}
+  void SetSigmaJitterI(Double_t p) {mSigmaJitterI = p;}
+  void SetSigmaJitterO(Double_t p) {mSigmaJitterO = p;}
   static Int_t    AsicThresholds(Short_t ADCs[512]);
   static Int_t    SearchT(const void *elem1, const void **elem2);
   static Int_t    CompareT(const void **elem1, const void **elem2);
@@ -141,7 +143,6 @@ class StTpcRSMaker : public StMaker {
   Double_t OmegaTauC; //!
   Double_t transverseDiffusionConstant; //!
   Double_t longitudinalDiffusionConstant; //!
-  Double_t OmegaTau; //! 
   Double_t InnerSectorGasGain; //!
   Double_t OuterSectorGasGain; //!
   Double_t Inner_wire_to_plane_coupling; //!
@@ -157,7 +158,7 @@ class StTpcRSMaker : public StMaker {
   const Double_t K3OR; //!
   const Double_t mAveragePedestal;    //!
   const Double_t mAveragePedestalRMS; //!
-  const Double_t mPedestalRMS; //!
+  const Double_t mAveragePedestalRMSX; //!
   const Double_t minSignal;    //!
   const Double_t LorenzAngle;  //!
   Double_t TanLorenzAngle; //!
@@ -181,18 +182,23 @@ class StTpcRSMaker : public StMaker {
   const Double_t tauF;//!
   const Double_t tauFx;//!
   const Double_t tauP;//!
+  Double_t   mSigmaJitterI;
+  Double_t   mSigmaJitterO;
   Altro *mAltro;//!
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.4 2008/07/30 23:53:19 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.5 2008/08/18 15:54:26 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.4 2008/07/30 23:53:19 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.5 2008/08/18 15:54:26 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.5  2008/08/18 15:54:26  fisyak
+// Version 20
+//
 // Revision 1.4  2008/07/30 23:53:19  fisyak
 // Freeze
 //
