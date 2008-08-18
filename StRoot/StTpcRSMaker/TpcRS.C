@@ -30,14 +30,15 @@ St_db_Maker *dbMk = 0;
 //________________________________________________________________________________
 void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",  
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "PAI", 
-	   Int_t tauC = 0, Int_t tauI = 0) {
+	   Double_t jitterI = 0, Double_t jitterO = 0) {
+	   //	   Int_t tauI = 0, Int_t tauIX = 0) {
   gROOT->LoadMacro("bfc.C"); 
   TString ChainOpt("");
   TString RootFile("");
   TString Opt(opt);
   TString RunOpt(Run);
   RunOpt.ToLower();
-  ChainOpt = "MakeEvent,ITTF,ForceGeometry,-SsdIt,-SvtIt,Idst,VFMinuit,-EventQA,-EvOut,-dstout,analysis,dEdxY2,noHistos,";
+  ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,-EventQA,-EvOut,-dstout,analysis,dEdxY2,noHistos,";
   ChainOpt += "McAna,McTpcAna,IdTruth,useInTracker,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += "tpc_daq,tpcI";
@@ -70,9 +71,15 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
   ChainOpt += RunOpt;
   RootFile += Form("_%s_%s_%i_%i",Run,Opt.Data(),First,NEvents);
   RootFile.ReplaceAll(",","_");
-  if (tauC > 0) {RootFile += "tauC=";RootFile += tauC; RootFile += "ns";}
-  if (tauI > 0) {RootFile += ",tauI=";RootFile += tauI; RootFile += "ns";}
+#if 0
+  if (tauI > 0) {RootFile += "tauI=";RootFile += tauI; RootFile += "ns";}
+  if (tauIX > 0) {RootFile += ",tauIX=";RootFile += tauIX; RootFile += "ns";}
+#else
+  if (jitterI > 0) {RootFile += "jI=";RootFile += jitterI;}
+  if (jitterO > 0) {RootFile += "jO=";RootFile += jitterO;}
+#endif
   RootFile += ".root";
+  RootFile.ReplaceAll(" ","");
   cout << "ChainOpt : " << ChainOpt.Data() << "\tOuput file " << RootFile.Data() << endl;
   TString output = RootFile;
   output.ReplaceAll(".root","O.root");
@@ -87,18 +94,20 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
       Int_t m_Mode = 0;
       if (Opt.Contains("pai",TString::kIgnoreCase))  SETBIT(m_Mode,StTpcRSMaker::kPAI); 
       if (Opt.Contains("bichsel",TString::kIgnoreCase))  SETBIT(m_Mode,StTpcRSMaker::kBICHSEL); 
-      //    SETBIT(m_Mode,StTpcRSMaker::kGAIN); 
-      //      SETBIT(m_Mode,StTpcRSMaker::kGAINO); 
-      if (Opt.Contains("fcf",TString::kIgnoreCase)) SETBIT(m_Mode,StTpcRSMaker::kGAINO);
-      SETBIT(m_Mode,StTpcRSMaker::kNONOISE);
+      //      SETBIT(m_Mode,StTpcRSMaker::kNONOISE);
       //    SETBIT(m_Mode,StTpcRSMaker::kPseudoPadRow);
       //    SETBIT(m_Mode,StTpcRSMaker::kPedestal);
       //    SETBIT(m_Mode,StTpcRSMaker::kAVERAGEPEDESTAL);
       //    SETBIT(m_Mode,StTpcRSMaker::kdEdxCorr);
       //    SETBIT(m_Mode,StTpcRSMaker::kTree);
       tpcRS->SetMode(m_Mode);
-      if (tauC > 0) tpcRS->SetTauC(1e-9*tauC);
-      if (tauI > 0) tpcRS->SettauIntegrationX(1e-9*tauI);
+#if 0
+      if (tauI  > 0) tpcRS->SettauIntegration (1e-9*tauI );
+      if (tauIX > 0) tpcRS->SettauIntegrationX(1e-9*tauIX);
+#else
+      if (jitterI  > 0) tpcRS->SetSigmaJitterI(jitterI);
+      if (jitterO  > 0) tpcRS->SetSigmaJitterO(jitterO);
+#endif
       //      tpcRS->SetDebug(112);
     }
   }

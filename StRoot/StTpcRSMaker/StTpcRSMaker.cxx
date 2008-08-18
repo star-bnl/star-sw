@@ -1,6 +1,6 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.6 2008/07/30 23:53:19 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.7 2008/08/18 15:54:25 fisyak Exp $
 // doxygen info here
 /*
  */
@@ -30,8 +30,9 @@
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StTpcRawData.h"
 #include "Altro.h"
+#include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.6 2008/07/30 23:53:19 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.7 2008/08/18 15:54:25 fisyak Exp $";
 static  Gccuts_t *ccuts = 0;
 
 #define Laserino 170
@@ -77,20 +78,26 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mTau(0),   mTimeBinWidth(0),
   I0(13.1),
   mCluster(3.2), tauGlobalOffSet(0), 
-  OmegaTauC(2.96), //OmegaTauC(3.58), 
-  transverseDiffusionConstant(0.0640), //transverseDiffusionConstant(0.0623), 
-  longitudinalDiffusionConstant(0.0370), 
-  OmegaTau(OmegaTauC), 
-  Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision wtih data
+  OmegaTauC(2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
+  transverseDiffusionConstant(0.0514), //transverseDiffusionConstant(0.0623), 
+  longitudinalDiffusionConstant(0.0360), 
+  Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision with data
   Outer_wire_to_plane_couplingScale(5.0718e-01*1.43), //  -"-
   FanoFactor(0.3),
+#if 1
   K3IP(0.68),    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 0.5
   K3IR(0.89),    // K3 from E.Mathieson, Fig. 5.3a (row)  for a/s = 2.5e-3 and h/s = 0.5
   K3OP(0.55),    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 1.0
   K3OR(0.61),    // K3 from E.Mathieson, Fig. 5.3a (row)  for a/s = 2.5e-3 and h/s = 1.0
-  mAveragePedestal(1.24102e+02), 
-  mAveragePedestalRMS(1.95684e+01),
-  mPedestalRMS(0.493),
+#else
+  K3IP(0.68*1.291/1.758),    // Correction for Run VIII AuAu 9 GeV
+  K3IR(0.89*1.291/1.758),    
+  K3OP(0.55*1.852/2.175),    
+  K3OR(0.61*1.852/2.175),    
+#endif
+  mAveragePedestal(50.0), //1.24102e+02), 
+  mAveragePedestalRMS(0.5), //  tonko's rms =1.4), //1.95684e+01),
+  mAveragePedestalRMSX(0.3), // tonkos rms = 0.8), //1.95684e+01),
   minSignal(1e-3),
   LorenzAngle(8), // degrees for P10 at B = 4 kG and E = 1.5 kV/cm
   InnerAlphaVariation(0),
@@ -112,16 +119,12 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   NoOfTimeBins(512),
   tauF(394.0e-9), 
   tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
-  tauP(775.0e-9)
+  tauP(775.0e-9),
+  mSigmaJitterI(0),
+  mSigmaJitterO(0)
 {
   memset (mShaperResponses, 0, sizeof(mShaperResponses));
   SETBIT(m_Mode,kPAI); 
-  //  SETBIT(m_Mode,kGAIN); 
-  SETBIT(m_Mode,kGAINOAtALL);
-  //  SETBIT(m_Mode,kGAINO);  // disactivated at all
-  //  SETBIT(m_Mode,kPedestal);
-  SETBIT(m_Mode,kNONOISE);
-  //  SETBIT(m_Mode,kdEdxCorr);
   //  SETBIT(m_Mode,kTree);
   TanLorenzAngle = TMath::Tan(LorenzAngle/180.*TMath::Pi())*5./4.; // for 5 kG
 }
@@ -213,8 +216,6 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   //  firstOuterSectorAnodeWire  = gStTpcDb->WirePlaneGeometry()->firstOuterSectorAnodeWire();
   samplingFrequency = 1.e6*gStTpcDb->Electronics()->samplingFrequency(); // Hz
   mTimeBinWidth     = 1./samplingFrequency;
-  //  static Double_t Gain;
-  //  Gain             =  gStTpcDb->Electronics()->nominalGain();
   numberOfInnerSectorAnodeWires  = gStTpcDb->WirePlaneGeometry()->numberOfInnerSectorAnodeWires ();
   firstInnerSectorAnodeWire = gStTpcDb->WirePlaneGeometry()->firstInnerSectorAnodeWire();
   lastInnerSectorAnodeWire  = gStTpcDb->WirePlaneGeometry()->lastInnerSectorAnodeWire ();
@@ -226,8 +227,6 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   Float_t BFieldG[3]; 
   Float_t xyz[3] = {0,0,0};
   StMagF::Agufld(xyz,BFieldG);
-  //  OmegaTau = 2.34*BFieldG[2]/5.0; // signed !
-  OmegaTau = OmegaTauC*BFieldG[2]/5.0;// from diffusion 586 um / 106 um at B = 0/ 5kG
   // Shapers
   Double_t timeBinMin = -0.5;
   Double_t timeBinMax = 24.5;
@@ -502,6 +501,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	TF1 *PadResponseFunction = mPadResponseFunctionInner;
 	TF1 *ChargeFraction      = mChargeFractionInner;
 	Double_t PadPitch        = gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch();
+	Double_t sigmaJitter     = mSigmaJitterI;
 	if(iPadrow > NoOfInnerRows) { // Outer
 	  rowMin                 = max(iPadrow - 1, NoOfInnerRows);
 	  rowMax                 = min(iPadrow + 1, NoOfRows);
@@ -511,6 +511,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  Gain                   = OuterSectorGasGain;
 	  PadPitch               = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
 	  padlength              = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
+	  sigmaJitter     = mSigmaJitterO;
 	}
 #if 0
 	// Distortions 
@@ -539,9 +540,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	static StTpcLocalSectorDirection BLocalSector;
 	transform(BA,BLocalSector);
 	Float_t BField[3] = {BLocalSector.position().x(), BLocalSector.position().y(), BLocalSector.position().z()};
-	//	OmegaTau = 2.34*BField[2]/5.0; // signed !
-	OmegaTau = OmegaTauC*BField[2]/5.0;// from diffusion 586 um / 106 um at B = 0/ 5kG
+	Double_t OmegaTau = OmegaTauC*BField[2]/5.0;// from diffusion 586 um / 106 um at B = 0/ 5kG
+#if 0
 	Double_t tangLorenzAngle = TanLorenzAngle*BField[2]/5.;
+#endif
 	StPhysicalHelixD track(dirLocalSector.position(),
 			       xyzLocalSector.position(),
 			       BField[2]*kilogauss,charge);  if (Debug() % 10 > 1) PrPP(Make,track);
@@ -553,8 +555,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t driftLength = xyzLocalSector.position().z(); 
 	if (driftLength <= 0) continue; 
 	Double_t D = 1. + OmegaTau*OmegaTau;
-	Double_t SigmaT = transverseDiffusionConstant*TMath::Sqrt(driftLength/D);
-	Double_t SigmaL = longitudinalDiffusionConstant*TMath::Sqrt(driftLength);
+	Double_t SigmaT = transverseDiffusionConstant*TMath::Sqrt(2*driftLength/D);
+	Double_t SigmaL = longitudinalDiffusionConstant*TMath::Sqrt(2*driftLength);
 	if (Debug()%10 > 1) { 	
 	  cout << "--> tpc_hit: " << sortedIndex << "\t"
 	       << tpc_hit->volume_id   << "\t"
@@ -601,6 +603,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t dSSum = 0;
 	Double_t padsdE[32]; memset (padsdE, 0, sizeof(padsdE));
 	Double_t tbksdE[64]; memset (tbksdE,  0, sizeof(tbksdE));
+	Double_t dESumC = 0;
+	Double_t dSSumC = 0;
+#if 0
+	Double_t sigma2X = 0, sigma2Y = 0, sigma2Z = 0;
+	Double_t xOnWireW = 0, yOnWireW = 0, zOnWireW = 0;
+#endif
+	Double_t QAvC = 0;
 	do {// Clusters
 	  Float_t dS = 0;
 	  Float_t dE = 0;
@@ -621,8 +630,24 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }	  
 	  dESum += dE;
 	  dSSum += dS;
-	  Double_t sigmaR = ElectronRange*TMath::Power(dE/ElectronRangeEnergy,ElectronRangePower);
-	  Double_t xRange = gRandom->Gaus(0,sigmaR);
+	  dESumC += dE;
+	  dSSumC += dS;
+	  Double_t xRange = ElectronRange*TMath::Power(dE/ElectronRangeEnergy,ElectronRangePower);
+	  Double_t phiXY = 2*TMath::Pi()*gRandom->Rndm();
+	  Double_t rX = TMath::Cos(phiXY);
+	  Double_t rY = TMath::Sin(phiXY);
+	  TRVector xyzRangeL(3, xRange*rX, xRange*rY, 0.);
+	  Double_t cxyz[3] = {dirLocalSector.position().x(),dirLocalSector.position().y(),dirLocalSector.position().z()};
+	  TRMatrix L2L(3,3, 
+		       cxyz[2], - cxyz[0]*cxyz[2], cxyz[0],
+		       cxyz[0], - cxyz[1]*cxyz[2], cxyz[1],
+		       0.0    , cxyz[0]*cxyz[0] + cxyz[1]*cxyz[1], cxyz[2]);
+	  TRVector xyzR(L2L,TRArray::kAxB,xyzRangeL);
+	  if (Debug() > 1) {
+	    cout << "xyzRangeL: " << xyzRangeL << endl;
+	    cout << "L2L: " << L2L << endl;
+	    cout << "xyzR: " << xyzR << endl;
+	  }
 	  Double_t E = dE*eV;
 	  if (E > ccuts->cutele) continue; // account delta-electrons
 	  nP++;
@@ -649,13 +674,18 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    sigmaL = SigmaL/TMath::Sqrt(dNt);
 	    for (Int_t i = 0; i < Nt - 1; i++) QAv += GainLocal*mPolya->GetRandom();
 	    Nt = 1;
+	    QAvC += QAv;
+	  } else {
+	    QAvC = QAv;
 	  }
 	  for (Int_t ie = 0; ie < Nt; ie++) {
 	    if (ie)  QAv = GainLocal*mPolya->GetRandom();
 	    // transport to wire
-	    StTpcLocalSectorCoordinate xyzE(xyzC.x()+xRange+gRandom->Gaus(0,sigmaT),
-					    xyzC.y()+gRandom->Gaus(0,sigmaT),
-					    xyzC.z()+gRandom->Gaus(0,sigmaL), sector, iPadrow);
+	    Double_t rX, rY;
+	    gRandom->Rannor(rX,rY);
+	    StTpcLocalSectorCoordinate xyzE(xyzC.x()+xyzR[0]+rX*sigmaT,
+					    xyzC.y()+xyzR[1]+rY*sigmaT,
+					    xyzC.z()+xyzR[2]+gRandom->Gaus(0,sigmaL), sector, iPadrow);
 	    Double_t y = xyzE.position().y();
 	    Double_t alphaVariation = InnerAlphaVariation;
 	    Double_t CrossTalk = CrossTalkInner;
@@ -685,7 +715,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // Ground plane (1 mm spacing) focusing effect
 	    Int_t iGroundWire = (Int_t ) TMath::Abs(10.*dist2Grid);
 	    Double_t distFocused = TMath::Sign(0.05 + 0.1*iGroundWire, dist2Grid);
+#if 0
 	    xOnWire += distFocused*tangLorenzAngle; // Lorentz shift
+#endif
 	    zOnWire += TMath::Abs(distFocused);
 	    if (! iGroundWire ) QAv *= TMath::Exp( alphaVariation);
 	    else                QAv *= TMath::Exp(-alphaVariation);
@@ -695,6 +727,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    Int_t binT = (Int_t) bin;
 	    if (binT < 0 || binT >= NoOfTimeBins) continue;
 	    Double_t dT = bin -  binT;
+	    if (sigmaJitter) {
+	      dT += gRandom->Gaus(0,sigmaJitter);
+	    }
 	    for(Int_t row = rowMin; row <= rowMax; row++) {              
 	      Double_t dely           = TMath::Abs(transform.yFromRow(row)-yOnWire);            
 	      Double_t localYDirectionCoupling = ChargeFraction->GetSave(&dely);
@@ -863,7 +898,7 @@ void  StTpcRSMaker::Print(Option_t *option) const {
   PrPP(Print, firstOuterSectorAnodeWire);
   PrPP(Print, lastOuterSectorAnodeWire);
   PrPP(Print, anodeWirePitch);
-  PrPP(Print, OmegaTau); // tan of Lorentz angle
+  PrPP(Print, OmegaTauC); // tan of Lorentz angle
   PrPP(Print, InnerSectorGasGain);
   PrPP(Print, OuterSectorGasGain);
   PrPP(Print, Inner_wire_to_plane_coupling);
@@ -875,7 +910,7 @@ void  StTpcRSMaker::Print(Option_t *option) const {
   if (TESTBIT(m_Mode, kAVERAGEPEDESTAL)) {
     PrPP(Print, mAveragePedestal);
     PrPP(Print, mAveragePedestalRMS);
-    PrPP(Print, mPedestalRMS);
+    PrPP(Print, mAveragePedestalRMSX);
   }
   PrPP(Print, FanoFactor);
   PrPP(Print, TanLorenzAngle);
@@ -887,6 +922,8 @@ void  StTpcRSMaker::Print(Option_t *option) const {
   PrPP(Print, K3OR);
   PrPP(Print, CrossTalkInner);
   PrPP(Print, CrossTalkOuter);
+  PrPP(Print, mSigmaJitterI);
+  PrPP(Print, mSigmaJitterO);
 }
 //________________________________________________________________________________
 void  StTpcRSMaker::DigitizeSector(Int_t sector){
@@ -917,25 +954,11 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
   for (row = 1;  row <= NoOfRows; row++) {
     Int_t NoOfPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
     for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
-      gain = 1;
-      if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
-	gain   = gStTpcDb->tpcGain()->Gain(Sector,row,pad);
-	if (gain <= 0.0) continue;
-      }
+      gain   = gStTpcDb->tpcGain()->Gain(Sector,row,pad);
+      if (gain <= 0.0) continue;
       ped    = mAveragePedestal;
-      pedRMS = 0; 
-#if 0
-      if (! TESTBIT(m_Mode, kNONOISE)) {
-	if (TESTBIT(m_Mode, kAVERAGEPEDESTAL)) {
-	  ped = gRandom->Gaus(mAveragePedestal,mAveragePedestalRMS);
-	  pedRMS = mPedestalRMS;
-	}
-	else {// if (TESTBIT(m_Mode, kPedestal)) {
-	  ped    = gStTpcDb->Pedestal()->Pedestal(sector,row,pad);
-	  pedRMS = gStTpcDb->Pedestal()->Rms(sector,row,pad);
-	}
-      }
-#endif
+      pedRMS = mAveragePedestalRMS;
+      if (St_TpcAltroParametersC::instance()->N(sector-1) >= 0) pedRMS = mAveragePedestalRMSX;
       if (pedRMS > 5.0) continue; // noisy pads
       static  Short_t ADCs[512];
       static UShort_t IDTs[512];
@@ -966,7 +989,9 @@ Can you get it from the RC databases?
 	//	altro->ConfigAltro(                    1,                      1,                         1,              1,                     0);
 	if (St_TpcAltroParametersC::instance()->N(sector-1) > 0) {// Tonko 06/25/08
 	  // ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
-	  altro->ConfigAltro(                    0,                      1,                         0,              1,                     0); 
+	  //altro->ConfigAltro(                    0,                      1,                         0,              1,                     0); 
+	  /* 	     Zerosuppression must be ON! It is always ON.	Tonko 08/07/08  */
+	  altro->ConfigAltro(                    0,                      1,                         0,              1,                     1); 
 	  //     ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
 	  //	altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
 	  Int_t *altro_reg = St_TpcAltroParametersC::instance()->altro_reg(sector-1);
@@ -977,10 +1002,16 @@ Can you get it from the RC databases?
 	  //	altro->ConfigZerosuppression(            3,                            3,              2,               3);
 	  altro->ConfigZerosuppression(            2,                            2,              0,               0); // Tonko 06/25/08
 	} else {
+	  /* Tonko, 08/07/08
+	     But for pp-data (no-tail suppression) you need this:
+	     ==> ConfigAltro(0,0,0,1,1);
+	     -- no BS1, NO tail, no BS2, yes clipping, yes ZS
+	     ==> ConfigZeroSuppression(2,2,0,0)	   */
 	  // ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
-	  altro->ConfigAltro(                    0,                      0,                         1,              1,                     0); 
+	  /*	  altro->ConfigAltro(                    0,                      0,                         1,              1,                     0);  */
+	  altro->ConfigAltro(0,0,0,1,1); // From Tonko , 08/07/08
 	  //     ConfigBaselineCorrection_2(int HighThreshold, int LowThreshold, int Offset, int Presamples, int Postsamples);
-	  altro->ConfigBaselineCorrection_2(                2,                2,          0,              0,               0); // Tonko 06/25/08
+	  altro->ConfigBaselineCorrection_2(                2,                2,          0,              0,               0); // Tonko 06/25/08 &&  08/07/08
 	}
 	altro->PrintParameters();
       }
@@ -1316,6 +1347,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.7  2008/08/18 15:54:25  fisyak
+// Version 20
+//
 // Revision 1.6  2008/07/30 23:53:19  fisyak
 // Freeze
 //
