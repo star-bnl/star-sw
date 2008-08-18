@@ -1,4 +1,4 @@
-// $Id: StjTrgTree.cxx,v 1.3 2008/08/17 11:29:22 tai Exp $
+// $Id: StjTrgTree.cxx,v 1.4 2008/08/18 06:20:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgTree.h"
 
@@ -58,6 +58,21 @@ vector<int> StjTrgTree::towerDsmAdc()
   return _reader->towerDsmAdc();
 }
 
+vector<unsigned int> StjTrgTree::towerAdc()
+{
+  return _reader->towerAdc();
+}
+
+vector<double> StjTrgTree::towerEnergy()
+{
+  return _reader->towerEnergy();
+}
+
+vector<double> StjTrgTree::towerEt()
+{
+  return _reader->towerEt();
+}
+
 vector<int> StjTrgTree::jetPatches()
 {
   return _reader->jetPatches();
@@ -78,3 +93,7 @@ vector<double> StjTrgTree::jetPatchEnergy()
   return _reader->jetPatchEnergy();
 }
 
+vector<double> StjTrgTree::jetPatchEt()
+{
+  return _reader->jetPatchEt();
+}

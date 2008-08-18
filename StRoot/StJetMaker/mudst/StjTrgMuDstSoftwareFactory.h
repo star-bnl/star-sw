@@ -1,17 +1,21 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftwareFactory.h,v 1.1 2008/08/08 23:18:50 tai Exp $
+// $Id: StjTrgMuDstSoftwareFactory.h,v 1.2 2008/08/18 06:20:46 tai Exp $
 #ifndef STJTRGMUDSTSOFTWAREFACTORY_H
 #define STJTRGMUDSTSOFTWAREFACTORY_H
 
+#include <TObject.h>
+
 class StjTrgMuDstSoftware;
 
-class StjTrgMuDstSoftwareFactory {
+class StjTrgMuDstSoftwareFactory : public TObject {
 
 public:
   StjTrgMuDstSoftwareFactory() { }
   virtual ~StjTrgMuDstSoftwareFactory() { }
 
   virtual StjTrgMuDstSoftware* create() = 0;
+
+  ClassDef(StjTrgMuDstSoftwareFactory, 1)
 
 };
 

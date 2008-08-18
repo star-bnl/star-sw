@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftwareTriggerSimuMaker.h,v 1.2 2008/08/17 11:29:15 tai Exp $
+// $Id: StjTrgMuDstSoftwareTriggerSimuMaker.h,v 1.3 2008/08/18 06:20:47 tai Exp $
 #ifndef STJTRGMUDSTSOFTWARETRIGGERSIMUMAKER_H
 #define STJTRGMUDSTSOFTWARETRIGGERSIMUMAKER_H
 
@@ -10,24 +10,36 @@
 
 class StTriggerSimuMaker;
 
+class StjTrgMuDstSoftwareGetAdcEt;
+
 class StjTrgMuDstSoftwareTriggerSimuMaker : public StjTrgMuDstSoftware {
 
 public:
-  StjTrgMuDstSoftwareTriggerSimuMaker(StTriggerSimuMaker* simuTrig)
-    : _simuTrig(simuTrig) { }
+
+  StjTrgMuDstSoftwareTriggerSimuMaker(StTriggerSimuMaker* simuTrig, StjTrgMuDstSoftwareGetAdcEt* adcEt);
   virtual ~StjTrgMuDstSoftwareTriggerSimuMaker() { }
 
-  bool soft(int trgId);
+  bool soft();
 
-  std::vector<int> towers(int trgId);
-  std::vector<int> towerDsmAdc(int trgId);
+  std::vector<int> towers();
+  std::vector<int> towerDsmAdc();
+  std::vector<unsigned int> towerAdc();
+  std::vector<double> towerEnergy();
+  std::vector<double> towerEt();
 
-  std::vector<int> jetPatches(int trgId);
-  std::vector<int> jetPatchDsmAdc(int trgId);
+  std::vector<int> jetPatches();
+  std::vector<int> jetPatchDsmAdc();
+  std::vector<unsigned int> jetPatchAdc();
+  std::vector<double> jetPatchEnergy();
+  std::vector<double> jetPatchEt();
+
+  void setTrg(StjTrg* trg);
 
 private:
 
   StTriggerSimuMaker* _simuTrig;
+
+  StjTrgMuDstSoftwareGetAdcEt* _adcEt;
 
   ClassDef(StjTrgMuDstSoftwareTriggerSimuMaker, 1)
 

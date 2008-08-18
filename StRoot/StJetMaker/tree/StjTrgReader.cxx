@@ -1,4 +1,4 @@
-// $Id: StjTrgReader.cxx,v 1.2 2008/08/17 11:29:19 tai Exp $
+// $Id: StjTrgReader.cxx,v 1.3 2008/08/18 06:20:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgReader.h"
 
@@ -22,6 +22,7 @@ void StjTrgReader::SetBranchAddress(TTree *tree)
     tree->SetBranchAddress("towerDsmAdc"   ,  _towerDsmAdc     );
     tree->SetBranchAddress("towerAdc"      ,  _towerAdc        );
     tree->SetBranchAddress("towerEnergy"   ,  _towerEnergy     );
+    tree->SetBranchAddress("towerEt"       ,  _towerEt         );
   }
   if(tree->GetBranch("nJetPatches")) {
     tree->SetBranchAddress("nJetPatches"   , &_nJetPatches     );
@@ -29,6 +30,7 @@ void StjTrgReader::SetBranchAddress(TTree *tree)
     tree->SetBranchAddress("jetPatchDsmAdc",  _jetPatchDsmAdc  );
     tree->SetBranchAddress("jetPatchAdc"   ,  _jetPatchAdc     );
     tree->SetBranchAddress("jetPatchEnergy",  _jetPatchEnergy  );
+    tree->SetBranchAddress("jetPatchEt"    ,  _jetPatchEt      );
   }
 }
 
@@ -47,11 +49,13 @@ void StjTrgReader::clearEntry()
   __towerDsmAdc.clear();
   __towerAdc.clear();
   __towerEnergy.clear();
+  __towerEt.clear();
 
   __jetPatches.clear();
   __jetPatchDsmAdc.clear();
   __jetPatchAdc.clear();
   __jetPatchEnergy.clear();
+  __jetPatchEt.clear();
 
   _nTowers = 0;
   _nJetPatches = 0;
@@ -73,6 +77,7 @@ void StjTrgReader::readEntry()
     __towerDsmAdc.push_back(_towerDsmAdc[i]);
     __towerAdc.push_back(_towerAdc[i]);
     __towerEnergy.push_back(_towerEnergy[i]);
+    __towerEt.push_back(_towerEt[i]);
   }
 
   for(int i = 0; i != _nJetPatches; ++i) {
@@ -80,6 +85,7 @@ void StjTrgReader::readEntry()
     __jetPatchDsmAdc.push_back(_jetPatchDsmAdc[i]);
     __jetPatchAdc.push_back(_jetPatchAdc[i]);
     __jetPatchEnergy.push_back(_jetPatchEnergy[i]);
+    __jetPatchEt.push_back(_jetPatchEt[i]);
   }
 }
 

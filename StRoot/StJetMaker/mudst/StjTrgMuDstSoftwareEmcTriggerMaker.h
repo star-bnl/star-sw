@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.h,v 1.2 2008/08/17 11:29:15 tai Exp $
+// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.h,v 1.3 2008/08/18 06:20:45 tai Exp $
 #ifndef STJTRGMUDSTSOFTWAREEMCTRIGGERMAKER_H
 #define STJTRGMUDSTSOFTWAREEMCTRIGGERMAKER_H
 
@@ -10,28 +10,36 @@
 
 class StEmcTriggerMaker;
 
+class StjTrgMuDstSoftwareGetAdcEt;
+
 class StjTrgMuDstSoftwareEmcTriggerMaker : public StjTrgMuDstSoftware {
 
 public:
-  StjTrgMuDstSoftwareEmcTriggerMaker(StEmcTriggerMaker* emcTrigMaker)
-    : _emcTrigMaker(emcTrigMaker) { }
-  StjTrgMuDstSoftwareEmcTriggerMaker(int trgId, StEmcTriggerMaker* emcTrigMaker)
-    : _trgId(trgId), _emcTrigMaker(emcTrigMaker) { }
+  StjTrgMuDstSoftwareEmcTriggerMaker(StEmcTriggerMaker* emcTrigMaker, StjTrgMuDstSoftwareGetAdcEt* adcEt);
+
   virtual ~StjTrgMuDstSoftwareEmcTriggerMaker() { }
 
-  bool soft(int trgId);
+  bool soft();
 
-  std::vector<int> towers(int trgId);
-  std::vector<int> towerDsmAdc(int trgId);
+  std::vector<int> towers();
+  std::vector<int> towerDsmAdc();
+  std::vector<unsigned int> towerAdc();
+  std::vector<double> towerEnergy();
+  std::vector<double> towerEt();
 
-  std::vector<int> jetPatches(int trgId);
-  std::vector<int> jetPatchDsmAdc(int trgId);
+  std::vector<int> jetPatches();
+  std::vector<int> jetPatchDsmAdc();
+  std::vector<unsigned int> jetPatchAdc();
+  std::vector<double> jetPatchEnergy();
+  std::vector<double> jetPatchEt();
+
+  void setTrg(StjTrg* trg);
 
 private:
 
-  int _trgId;
-
   StEmcTriggerMaker* _emcTrigMaker;
+
+  StjTrgMuDstSoftwareGetAdcEt* _adcEt;
 
   ClassDef(StjTrgMuDstSoftwareEmcTriggerMaker, 1)
 

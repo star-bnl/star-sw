@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftware.h,v 1.2 2008/08/17 11:29:15 tai Exp $
+// $Id: StjTrgMuDstSoftware.h,v 1.3 2008/08/18 06:20:45 tai Exp $
 #ifndef STJTRGMUDSTSOFTWARE_H
 #define STJTRGMUDSTSOFTWARE_H
 
@@ -7,19 +7,33 @@
 
 #include <vector>
 
+class StjTrg;
+
 class StjTrgMuDstSoftware : public TObject {
 
 public:
   StjTrgMuDstSoftware() { }
   virtual ~StjTrgMuDstSoftware() { }
 
-  virtual bool soft(int trgId) = 0;
+  virtual bool soft() = 0;
 
-  virtual std::vector<int> towers(int trgId)  = 0;
-  virtual std::vector<int> towerDsmAdc(int trgId)  = 0;
+  virtual std::vector<int> towers()  = 0;
+  virtual std::vector<int> towerDsmAdc()  = 0;
+  virtual std::vector<unsigned int> towerAdc()  = 0;
+  virtual std::vector<double> towerEnergy()  = 0;
+  virtual std::vector<double> towerEt()  = 0;
 
-  virtual std::vector<int> jetPatches(int trgId) = 0;
-  virtual std::vector<int> jetPatchDsmAdc(int trgId)  = 0;
+  virtual std::vector<int> jetPatches() = 0;
+  virtual std::vector<int> jetPatchDsmAdc()  = 0;
+  virtual std::vector<unsigned int> jetPatchAdc()  = 0;
+  virtual std::vector<double> jetPatchEnergy()  = 0;
+  virtual std::vector<double> jetPatchEt()  = 0;
+
+  virtual void setTrg(StjTrg* trg) { _trg = trg; }
+
+protected:
+
+  StjTrg* _trg;
 
 private:
 

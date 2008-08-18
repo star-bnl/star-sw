@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgTree.h,v 1.3 2008/08/17 11:29:22 tai Exp $
+// $Id: StjTrgTree.h,v 1.4 2008/08/18 06:20:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGTREE_H
 #define STJTRGTREE_H
@@ -26,11 +26,15 @@ public:
   double vertexZ();
   std::vector<int> towers();
   std::vector<int> towerDsmAdc();
+  std::vector<unsigned int> towerAdc();
+  std::vector<double> towerEnergy();
+  std::vector<double> towerEt();
 
   std::vector<int> jetPatches();
   std::vector<int> jetPatchDsmAdc();
   std::vector<unsigned int> jetPatchAdc();
   std::vector<double> jetPatchEnergy();
+  std::vector<double> jetPatchEt();
 
 private:
 
