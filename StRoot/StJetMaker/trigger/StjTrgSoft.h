@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoft.h,v 1.1 2008/08/18 06:37:24 tai Exp $
+// $Id: StjTrgSoft.h,v 1.1 2008/08/18 06:41:06 tai Exp $
 #ifndef STJTRGMUDSTSOFTWARE_H
 #define STJTRGMUDSTSOFTWARE_H
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftGetAdcEt.h,v 1.1 2008/08/18 06:37:25 tai Exp $
+// $Id: StjTrgSoftGetAdcEt.h,v 1.1 2008/08/18 06:41:07 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGMUDSTSOFTWAREGETADCET_H
 #define STJTRGMUDSTSOFTWAREGETADCET_H
