@@ -1,8 +1,9 @@
-// $Id: StjTowerEnergyPrint.cxx,v 1.4 2008/08/04 00:55:28 tai Exp $
+// $Id: StjTowerEnergyPrint.cxx,v 1.5 2008/08/18 08:50:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyPrint.h"
 
 #include <iostream>
+#include <iomanip>
 
 ClassImp(StjTowerEnergyPrint)
 
@@ -18,21 +19,21 @@ void StjTowerEnergyPrint::operator()(const StjTowerEnergyList &energyList)
 void StjTowerEnergyPrint::print(const StjTowerEnergy& energyDeposit)
 {
   cout 
-    << energyDeposit.runNumber      << " "
-    << energyDeposit.eventId        << " "
-    << energyDeposit.detectorId     << " "
-    << energyDeposit.towerId        << " "
-    << energyDeposit.towerR         << " "
-    << energyDeposit.towerEta       << " "
-    << energyDeposit.towerPhi       << " "
-    << energyDeposit.vertexX        << " "
-    << energyDeposit.vertexY        << " "
-    << energyDeposit.vertexZ        << " "
-    << energyDeposit.energy         << " "
-    << energyDeposit.adc            << " "
-    << energyDeposit.pedestal       << " "
-    << energyDeposit.rms            << " "
-    << energyDeposit.status         << " "
+    << setw(7) << energyDeposit.runNumber      << ", "
+    << setw(7) << energyDeposit.eventId        << ", "
+    << setw(4) << energyDeposit.detectorId     << ", "
+    << setw(4) << energyDeposit.towerId        << ", "
+    << setw(7) << energyDeposit.towerR         << ", "
+    << setw(7) << energyDeposit.towerEta       << ", "
+    << setw(7) << energyDeposit.towerPhi       << ", "
+    << setw(7) << energyDeposit.vertexX        << ", "
+    << setw(7) << energyDeposit.vertexY        << ", "
+    << setw(7) << energyDeposit.vertexZ        << ", "
+    << setw(10) << energyDeposit.energy        << ", "
+    << setw(7) << energyDeposit.adc            << ", "
+    << setw(7) << energyDeposit.pedestal       << ", "
+    << setw(7) << energyDeposit.rms            << ", "
+    << setw(3) << energyDeposit.status
     << endl;
 
 }
