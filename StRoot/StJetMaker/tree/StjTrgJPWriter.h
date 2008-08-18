@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgJPWriter.h,v 1.2 2008/08/17 11:29:19 tai Exp $
+// $Id: StjTrgJPWriter.h,v 1.3 2008/08/18 06:20:50 tai Exp $
 #ifndef STJTRGJPWRITER_H
 #define STJTRGJPWRITER_H
 
@@ -36,6 +36,7 @@ private:
   Int_t    _jetPatchDsmAdc[12];
   UInt_t   _jetPatchAdc[12];
   Double_t _jetPatchEnergy[12];
+  Double_t _jetPatchEt[12];
 
   StjTrg* _trg;
 };

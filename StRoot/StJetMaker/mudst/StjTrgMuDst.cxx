@@ -1,4 +1,4 @@
-// $Id: StjTrgMuDst.cxx,v 1.2 2008/08/17 11:29:14 tai Exp $
+// $Id: StjTrgMuDst.cxx,v 1.3 2008/08/18 06:20:45 tai Exp $
 #include "StjTrgMuDst.h"
 
 #include "StjTrgMuDstSoftware.h"
@@ -14,6 +14,15 @@
 ClassImp(StjTrgMuDst)
 
 using namespace std;
+
+StjTrgMuDst::StjTrgMuDst(int trgId, StjTrgPassCondition* passCondition, StMuDstMaker* uDstMaker, StjTrgMuDstSoftware* soft)
+  : _trgId(trgId)
+  , _passCondition(passCondition)
+  , _soft(soft)
+  , _uDstMaker(uDstMaker)
+{ 
+  _soft->setTrg(this);
+}
 
 int StjTrgMuDst::runNumber()
 {
@@ -32,7 +41,7 @@ bool StjTrgMuDst::hard() const
 
 bool StjTrgMuDst::soft() const
 {
-  return _soft->soft(_trgId);
+  return _soft->soft();
 }
 
 bool StjTrgMuDst::pass()
@@ -52,103 +61,50 @@ double StjTrgMuDst::vertexZ()
 
 vector<int> StjTrgMuDst::towers()
 {
-  return _soft->towers(_trgId);
+  return _soft->towers();
 }
 
 vector<int> StjTrgMuDst::towerDsmAdc()
 {
-  return _soft->towerDsmAdc(_trgId);
+  return _soft->towerDsmAdc();
 }
 
 vector<unsigned int> StjTrgMuDst::towerAdc()
 {
-  vector<unsigned int> ret;
-  vector<int> towers = _soft->towers(_trgId);
-  for(vector<int>::const_iterator tower = towers.begin(); tower != towers.end(); ++tower) {
-    if(isThereTowerEnergyFor(*tower)) {
-      StjTowerEnergy towerEnergy = findTowerEnergyFor(*tower);
-      ret.push_back(towerEnergy.adc);
-    } else {
-      ret.push_back(0);
-    }
-  }
-  return ret;
+  return _soft->towerAdc();
 }
 
 vector<double> StjTrgMuDst::towerEnergy()
 {
-  vector<double> ret;
-  vector<int> towers = _soft->towers(_trgId);
-  for(vector<int>::const_iterator tower = towers.begin(); tower != towers.end(); ++tower) {
-    if(isThereTowerEnergyFor(*tower)) {
-      StjTowerEnergy towerEnergy = findTowerEnergyFor(*tower);
-      ret.push_back(towerEnergy.energy);
-    } else {
-      ret.push_back(0);
-    }
-  }
-  return ret;
+  return _soft->towerEnergy();
 }
 
-bool StjTrgMuDst::isThereTowerEnergyFor(int towerId)
+vector<double> StjTrgMuDst::towerEt()
 {
-  StjTowerEnergyList energyList = _bemc->getEnergyList();
-  for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
-      if((*it).towerId == towerId) return true;
-  }
-  return false;
+  return _soft->towerEt();
 }
-
-StjTowerEnergy StjTrgMuDst::findTowerEnergyFor(int towerId)
-{
-  StjTowerEnergyList energyList = _bemc->getEnergyList();
-  for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
-    if((*it).towerId == towerId) return *it;
-  }
-  return StjTowerEnergy();
-}
-
 
 vector<int> StjTrgMuDst::jetPatches()
 {
-  return _soft->jetPatches(_trgId);
+  return _soft->jetPatches();
 }
 
 vector<int> StjTrgMuDst::jetPatchDsmAdc()
 {
-  return _soft->jetPatchDsmAdc(_trgId);
+  return _soft->jetPatchDsmAdc();
 }
 
 vector<unsigned int> StjTrgMuDst::jetPatchAdc()
 {
-  vector<unsigned int> ret;
-  vector<int> jetPatches = _soft->jetPatches(_trgId);
-  StjTowerEnergyList energyList = _bemc->getEnergyList();
-  for(vector<int>::const_iterator jp = jetPatches.begin(); jp != jetPatches.end(); ++jp) {
-    unsigned int adc = 0;
-    for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
-      if(*jp == _bemcJpTowerMap->getJetPatchIdForTower((*it).towerId)) {
-	if((*it).status == 1) adc += (*it).adc;
-      }
-    }
-    ret.push_back(adc);
-  }
-  return ret;
+  return _soft->jetPatchAdc();
 }
 
 vector<double> StjTrgMuDst::jetPatchEnergy()
 {
-  vector<double> ret;
-  vector<int> jetPatches = _soft->jetPatches(_trgId);
-  StjTowerEnergyList energyList = _bemc->getEnergyList();
-  for(vector<int>::const_iterator jp = jetPatches.begin(); jp != jetPatches.end(); ++jp) {
-    double energy = 0;
-    for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
-      if(*jp == _bemcJpTowerMap->getJetPatchIdForTower((*it).towerId)) {
-	if((*it).status == 1) energy += (*it).energy;
-      }
-    }
-    ret.push_back(energy);
-  }
-  return ret;
+  return _soft->jetPatchEnergy();
+}
+
+vector<double> StjTrgMuDst::jetPatchEt()
+{
+  return _soft->jetPatchEt();
 }

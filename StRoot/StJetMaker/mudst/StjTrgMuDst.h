@@ -1,28 +1,18 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDst.h,v 1.2 2008/08/17 11:29:15 tai Exp $
+// $Id: StjTrgMuDst.h,v 1.3 2008/08/18 06:20:45 tai Exp $
 #ifndef STJTRGMUDST_H
 #define STJTRGMUDST_H
 
 #include "StjTrg.h"
 
-#include "StjBEMCMuDst.h"
-
 class StjTrgMuDstSoftware;
 class StjTrgPassCondition;
-class StjTrgBEMCJetPatchTowerIdMap;
 class StMuDstMaker;
 
 class StjTrgMuDst : public StjTrg {
 
 public:
-  StjTrgMuDst(int trgId, StjTrgPassCondition* passCondition, StMuDstMaker* uDstMaker, StjTrgMuDstSoftware* soft, StjTrgBEMCJetPatchTowerIdMap* bemcJpTowerMap)
-    : _trgId(trgId)
-    , _passCondition(passCondition)
-    , _soft(soft)
-    , _uDstMaker(uDstMaker)
-    , _bemc(new StjBEMCMuDst(uDstMaker, true))
-    , _bemcJpTowerMap(bemcJpTowerMap)
- { }
+  StjTrgMuDst(int trgId, StjTrgPassCondition* passCondition, StMuDstMaker* uDstMaker, StjTrgMuDstSoftware* soft);
   virtual ~StjTrgMuDst() { }
 
   int id() { return _trgId; }
@@ -39,16 +29,15 @@ public:
   std::vector<int> towerDsmAdc();
   std::vector<unsigned int> towerAdc();
   std::vector<double> towerEnergy();
+  std::vector<double> towerEt();
 
   std::vector<int> jetPatches();
   std::vector<int> jetPatchDsmAdc();
   std::vector<unsigned int> jetPatchAdc();
   std::vector<double> jetPatchEnergy();
+  std::vector<double> jetPatchEt();
 
 private:
-
-  bool isThereTowerEnergyFor(int towerId);
-  StjTowerEnergy findTowerEnergyFor(int towerId);
 
   int _trgId;
 
@@ -57,10 +46,6 @@ private:
   StjTrgMuDstSoftware* _soft;
 
   StMuDstMaker* _uDstMaker;
-
-  StjBEMC* _bemc;
-
-  StjTrgBEMCJetPatchTowerIdMap* _bemcJpTowerMap;
 
   ClassDef(StjTrgMuDst, 1)
 

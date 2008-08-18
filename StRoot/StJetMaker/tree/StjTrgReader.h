@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgReader.h,v 1.2 2008/08/17 11:29:19 tai Exp $
+// $Id: StjTrgReader.h,v 1.3 2008/08/18 06:20:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGREADER_H
 #define STJTRGREADER_H
@@ -23,15 +23,17 @@ public:
   double           prescale()    const { return __prescale;      }
   double           vertexZ()     const { return __vertexZ;       }
 
-  std::vector<int> towers()            const { return __towers;        }
-  std::vector<int> towerDsmAdc()       const { return __towerDsmAdc;   }
-  std::vector<unsigned int> towerAdc() const { return __towerAdc;   }
-  std::vector<double> towerEnergy()    const { return __towerEnergy;   }
+  std::vector<int> towers()            const { return __towers;       }
+  std::vector<int> towerDsmAdc()       const { return __towerDsmAdc;  }
+  std::vector<unsigned int> towerAdc() const { return __towerAdc;     }
+  std::vector<double> towerEnergy()    const { return __towerEnergy;  }
+  std::vector<double> towerEt()        const { return __towerEt;      }  
 
-  std::vector<int> jetPatches()            const { return __jetPatches;    }
-  std::vector<int> jetPatchDsmAdc()        const { return __jetPatchDsmAdc;    }
+  std::vector<int> jetPatches()            const { return __jetPatches;     }
+  std::vector<int> jetPatchDsmAdc()        const { return __jetPatchDsmAdc; }
   std::vector<unsigned int> jetPatchAdc()  const { return __jetPatchAdc;    }
-  std::vector<double> jetPatchEnergy()     const { return __jetPatchEnergy;    }
+  std::vector<double> jetPatchEnergy()     const { return __jetPatchEnergy; }
+  std::vector<double> jetPatchEt()         const { return __jetPatchEt;     }
 
 private:
 
@@ -54,12 +56,14 @@ private:
   Int_t    _towerDsmAdc[4800];
   UInt_t    _towerAdc[4800];
   Double_t  _towerEnergy[4800];
+  Double_t  _towerEt[4800];
 
   Int_t    _nJetPatches;
   Int_t    _jetPatchId[12];
   Int_t     _jetPatchDsmAdc[12];
   UInt_t    _jetPatchAdc[12];
   Double_t  _jetPatchEnergy[12];
+  Double_t  _jetPatchEt[12];
 
   int              __id;
   int              __runNumber;
@@ -74,11 +78,13 @@ private:
   std::vector<int>          __towerDsmAdc;
   std::vector<unsigned int> __towerAdc;
   std::vector<double>       __towerEnergy;
+  std::vector<double>       __towerEt;
 
   std::vector<int>           __jetPatches;
   std::vector<int>           __jetPatchDsmAdc;
   std::vector<unsigned int>  __jetPatchAdc;
   std::vector<double>        __jetPatchEnergy;
+  std::vector<double>        __jetPatchEt;
 
   ClassDef(StjTrgReader, 1)
 
