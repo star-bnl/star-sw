@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCMuDst.h,v 1.6 2008/08/17 11:41:04 tai Exp $
+// $Id: StjBEMCMuDst.h,v 1.7 2008/08/18 02:41:22 tai Exp $
 #ifndef STJBEMCMUDST_H
 #define STJBEMCMUDST_H
 
@@ -31,10 +31,10 @@ private:
 
   StBemcTables* _bemcTables;
 
-  StjTowerEnergyList _list;
+  static StjTowerEnergyList _list;
 
-  int _runNumber;
-  int _eventId;
+  static int _runNumber;
+  static int _eventId;
 
   StjTowerEnergyList getlist();
   bool isNewEvent();

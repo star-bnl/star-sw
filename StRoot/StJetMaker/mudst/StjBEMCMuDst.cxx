@@ -1,4 +1,4 @@
-// $Id: StjBEMCMuDst.cxx,v 1.5 2008/08/17 11:41:04 tai Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.6 2008/08/18 02:41:22 tai Exp $
 #include "StjBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -23,11 +23,13 @@
 
 using namespace std;
 
+int StjBEMCMuDst::_runNumber = -1;
+int StjBEMCMuDst::_eventId = -1;
+StjTowerEnergyList StjBEMCMuDst::_list;
 
 StjBEMCMuDst::StjBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : _uDstMaker(uDstMaker)
   , _bemcTables(new StBemcTables(doTowerSwapFix))
-  , _runNumber(-1), _eventId(-1)
  {
 
  }
@@ -48,6 +50,9 @@ bool StjBEMCMuDst::isNewEvent()
 
 StjTowerEnergyList StjBEMCMuDst::getlist()
 {
+  _runNumber = _uDstMaker->muDst()->event()->runId();
+  _eventId = _uDstMaker->muDst()->event()->eventId();
+
   _bemcTables->loadTables((StMaker*)_uDstMaker);
 
   StjTowerEnergyList ret;
