@@ -1,33 +1,33 @@
-// $Id: StjTrgMuDstSoftwareEmcTriggerMaker.cxx,v 1.3 2008/08/18 06:20:45 tai Exp $
+// $Id: StjTrgSoftMuDstEmcTriggerMaker.cxx,v 1.1 2008/08/18 06:37:25 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StjTrgMuDstSoftwareEmcTriggerMaker.h"
+#include "StjTrgSoftMuDstEmcTriggerMaker.h"
 
 #include <StEmcTriggerMaker/StEmcTriggerMaker.h>
 
-#include <StjTrgMuDstSoftwareGetAdcEt.h>
+#include <StjTrgSoftGetAdcEt.h>
 
 #include <StjTrg.h>
 
-ClassImp(StjTrgMuDstSoftwareEmcTriggerMaker)
+ClassImp(StjTrgSoftMuDstEmcTriggerMaker)
 
-StjTrgMuDstSoftwareEmcTriggerMaker::StjTrgMuDstSoftwareEmcTriggerMaker(StEmcTriggerMaker* emcTrigMaker, StjTrgMuDstSoftwareGetAdcEt* adcEt)
+StjTrgSoftMuDstEmcTriggerMaker::StjTrgSoftMuDstEmcTriggerMaker(StEmcTriggerMaker* emcTrigMaker, StjTrgSoftGetAdcEt* adcEt)
 : _emcTrigMaker(emcTrigMaker), _adcEt(adcEt)
 {
 
 }
 
-void StjTrgMuDstSoftwareEmcTriggerMaker::setTrg(StjTrg* trg)
+void StjTrgSoftMuDstEmcTriggerMaker::setTrg(StjTrg* trg)
 {
   _trg = trg;
   _adcEt->setTrg(_trg);
 }
 
-bool StjTrgMuDstSoftwareEmcTriggerMaker::soft()
+bool StjTrgSoftMuDstEmcTriggerMaker::soft()
 {
   return _emcTrigMaker->isTrigger(_trg->id());
 }
 
-std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::towers()
+std::vector<int> StjTrgSoftMuDstEmcTriggerMaker::towers()
 {
   std::vector<int> ret;
   std::map<int,int> towerMap = _emcTrigMaker->barrelTowersAboveThreshold(_trg->id());
@@ -37,7 +37,7 @@ std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::towers()
   return ret;
 }
 
-std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::towerDsmAdc()
+std::vector<int> StjTrgSoftMuDstEmcTriggerMaker::towerDsmAdc()
 {
   std::vector<int> ret;
   std::map<int,int> towerMap = _emcTrigMaker->barrelTowersAboveThreshold(_trg->id());
@@ -47,7 +47,7 @@ std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::towerDsmAdc()
   return ret;
 }
 
-std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::jetPatches()
+std::vector<int> StjTrgSoftMuDstEmcTriggerMaker::jetPatches()
 {
   vector<int> ret;
   map<int,int> jetPatchMap = _emcTrigMaker->barrelJetPatchesAboveThreshold(_trg->id());
@@ -57,7 +57,7 @@ std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::jetPatches()
   return ret;
 }
 
-std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::jetPatchDsmAdc()
+std::vector<int> StjTrgSoftMuDstEmcTriggerMaker::jetPatchDsmAdc()
 {
   vector<int> ret;
   map<int,int> jetPatchMap = _emcTrigMaker->barrelJetPatchesAboveThreshold(_trg->id());
@@ -67,32 +67,32 @@ std::vector<int> StjTrgMuDstSoftwareEmcTriggerMaker::jetPatchDsmAdc()
   return ret;
 }
 
-std::vector<unsigned int> StjTrgMuDstSoftwareEmcTriggerMaker::towerAdc()
+std::vector<unsigned int> StjTrgSoftMuDstEmcTriggerMaker::towerAdc()
 {
   return _adcEt->towerAdc();
 }
 
-std::vector<double> StjTrgMuDstSoftwareEmcTriggerMaker::towerEnergy()
+std::vector<double> StjTrgSoftMuDstEmcTriggerMaker::towerEnergy()
 {
   return _adcEt->towerEnergy();
 }
 
-std::vector<double> StjTrgMuDstSoftwareEmcTriggerMaker::towerEt()
+std::vector<double> StjTrgSoftMuDstEmcTriggerMaker::towerEt()
 {
   return _adcEt->towerEt();
 }
 
-std::vector<unsigned int> StjTrgMuDstSoftwareEmcTriggerMaker::jetPatchAdc()
+std::vector<unsigned int> StjTrgSoftMuDstEmcTriggerMaker::jetPatchAdc()
 {
   return _adcEt->jetPatchAdc();
 }
 
-std::vector<double> StjTrgMuDstSoftwareEmcTriggerMaker::jetPatchEnergy()
+std::vector<double> StjTrgSoftMuDstEmcTriggerMaker::jetPatchEnergy()
 {
   return _adcEt->jetPatchEnergy();
 }
 
-std::vector<double> StjTrgMuDstSoftwareEmcTriggerMaker::jetPatchEt()
+std::vector<double> StjTrgSoftMuDstEmcTriggerMaker::jetPatchEt()
 {
   return _adcEt->jetPatchEt();
 }

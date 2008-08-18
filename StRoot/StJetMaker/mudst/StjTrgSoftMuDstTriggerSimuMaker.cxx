@@ -1,34 +1,34 @@
-// $Id: StjTrgMuDstSoftwareTriggerSimuMaker.cxx,v 1.3 2008/08/18 06:20:46 tai Exp $
+// $Id: StjTrgSoftMuDstTriggerSimuMaker.cxx,v 1.1 2008/08/18 06:37:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StjTrgMuDstSoftwareTriggerSimuMaker.h"
+#include "StjTrgSoftMuDstTriggerSimuMaker.h"
 
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
 
 #include <StjTrg.h>
 
-#include <StjTrgMuDstSoftwareGetAdcEt.h>
+#include <StjTrgSoftGetAdcEt.h>
 
-ClassImp(StjTrgMuDstSoftwareTriggerSimuMaker)
+ClassImp(StjTrgSoftMuDstTriggerSimuMaker)
 
-StjTrgMuDstSoftwareTriggerSimuMaker::StjTrgMuDstSoftwareTriggerSimuMaker(StTriggerSimuMaker* simuTrig, StjTrgMuDstSoftwareGetAdcEt* adcEt)
+StjTrgSoftMuDstTriggerSimuMaker::StjTrgSoftMuDstTriggerSimuMaker(StTriggerSimuMaker* simuTrig, StjTrgSoftGetAdcEt* adcEt)
 : _simuTrig(simuTrig), _adcEt(adcEt)
 {
 
 }
 
-void StjTrgMuDstSoftwareTriggerSimuMaker::setTrg(StjTrg* trg)
+void StjTrgSoftMuDstTriggerSimuMaker::setTrg(StjTrg* trg)
 {
   _trg = trg;
   _adcEt->setTrg(_trg);
 }
 
-bool StjTrgMuDstSoftwareTriggerSimuMaker::soft()
+bool StjTrgSoftMuDstTriggerSimuMaker::soft()
 {
   return _simuTrig->isTrigger(_trg->id());
 }
 
-std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::towers()
+std::vector<int> StjTrgSoftMuDstTriggerSimuMaker::towers()
 {
   StTriggerSimuResult trigResult = _simuTrig->detailedResult(_trg->id());
 
@@ -41,7 +41,7 @@ std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::towers()
   return ret;
 }
 
-std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::towerDsmAdc()
+std::vector<int> StjTrgSoftMuDstTriggerSimuMaker::towerDsmAdc()
 {
   StTriggerSimuResult trigResult = _simuTrig->detailedResult(_trg->id());
 
@@ -56,7 +56,7 @@ std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::towerDsmAdc()
   return ret;
 }
 
-std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::jetPatches()
+std::vector<int> StjTrgSoftMuDstTriggerSimuMaker::jetPatches()
 {
   StTriggerSimuResult trigResult = _simuTrig->detailedResult(_trg->id());
 
@@ -69,7 +69,7 @@ std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::jetPatches()
   return ret;
 }
 
-std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::jetPatchDsmAdc()
+std::vector<int> StjTrgSoftMuDstTriggerSimuMaker::jetPatchDsmAdc()
 {
   StTriggerSimuResult trigResult = _simuTrig->detailedResult(_trg->id());
 
@@ -84,32 +84,32 @@ std::vector<int> StjTrgMuDstSoftwareTriggerSimuMaker::jetPatchDsmAdc()
   return ret;
 }
 
-std::vector<unsigned int> StjTrgMuDstSoftwareTriggerSimuMaker::towerAdc()
+std::vector<unsigned int> StjTrgSoftMuDstTriggerSimuMaker::towerAdc()
 {
   return _adcEt->towerAdc();
 }
 
-std::vector<double> StjTrgMuDstSoftwareTriggerSimuMaker::towerEnergy()
+std::vector<double> StjTrgSoftMuDstTriggerSimuMaker::towerEnergy()
 {
   return _adcEt->towerEnergy();
 }
 
-std::vector<double> StjTrgMuDstSoftwareTriggerSimuMaker::towerEt()
+std::vector<double> StjTrgSoftMuDstTriggerSimuMaker::towerEt()
 {
   return _adcEt->towerEt();
 }
 
-std::vector<unsigned int> StjTrgMuDstSoftwareTriggerSimuMaker::jetPatchAdc()
+std::vector<unsigned int> StjTrgSoftMuDstTriggerSimuMaker::jetPatchAdc()
 {
   return _adcEt->jetPatchAdc();
 }
 
-std::vector<double> StjTrgMuDstSoftwareTriggerSimuMaker::jetPatchEnergy()
+std::vector<double> StjTrgSoftMuDstTriggerSimuMaker::jetPatchEnergy()
 {
   return _adcEt->jetPatchEnergy();
 }
 
-std::vector<double> StjTrgMuDstSoftwareTriggerSimuMaker::jetPatchEt()
+std::vector<double> StjTrgSoftMuDstTriggerSimuMaker::jetPatchEt()
 {
   return _adcEt->jetPatchEt();
 }

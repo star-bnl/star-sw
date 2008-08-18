@@ -11,8 +11,8 @@
 
 #include "StjTrgMuDst.h"
 
-#include "StjTrgMuDstSoftwareEmcTriggerMakerFactory.h"
-#include "StjTrgMuDstSoftwareTriggerSimuMakerFactory.h"
+#include "StjTrgSoftMuDstEmcTriggerMakerFactory.h"
+#include "StjTrgSoftMuDstTriggerSimuMakerFactory.h"
 
 class StjTrigger2005DataMaker : public StMaker {
 
@@ -20,25 +20,25 @@ public:
 
   StjTrigger2005DataMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StEmcTriggerMaker* emcTrigMaker)
   : StMaker(name), _file(file), _uDstMaker(uDstMaker)
-  , _softTrgFactory(new StjTrgMuDstSoftwareEmcTriggerMakerFactory(emcTrigMaker, uDstMaker, new StjTrgBEMCJetPatchTowerIdMap2005()))
+  , _softTrgFactory(new StjTrgSoftMuDstEmcTriggerMakerFactory(emcTrigMaker, uDstMaker, new StjTrgBEMCJetPatchTowerIdMap2005()))
   { }
 
   StjTrigger2005DataMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, StTriggerSimuMaker* simuTrig)
   : StMaker(name), _file(file), _uDstMaker(uDstMaker)
-  , _softTrgFactory(new StjTrgMuDstSoftwareTriggerSimuMakerFactory(simuTrig, uDstMaker, new StjTrgBEMCJetPatchTowerIdMap2005()))
+  , _softTrgFactory(new StjTrgSoftMuDstTriggerSimuMakerFactory(simuTrig, uDstMaker, new StjTrgBEMCJetPatchTowerIdMap2005()))
   { }
 
   virtual ~StjTrigger2005DataMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2005DataMaker.C,v 1.7 2008/08/18 06:20:40 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2005DataMaker.C,v 1.8 2008/08/18 06:37:16 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
   TDirectory* _file;
 
   StMuDstMaker* _uDstMaker;
-  StjTrgMuDstSoftwareFactory* _softTrgFactory;
+  StjTrgSoftFactory* _softTrgFactory;
 
   StjTrgWriter* _minbWriter;
   StjTrgWriter* _bht1Writer;

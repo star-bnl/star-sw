@@ -1,23 +1,23 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftwareTriggerSimuMaker.h,v 1.3 2008/08/18 06:20:47 tai Exp $
+// $Id: StjTrgSoftMuDstTriggerSimuMaker.h,v 1.1 2008/08/18 06:37:26 tai Exp $
 #ifndef STJTRGMUDSTSOFTWARETRIGGERSIMUMAKER_H
 #define STJTRGMUDSTSOFTWARETRIGGERSIMUMAKER_H
 
-#include "StjTrgMuDstSoftware.h"
+#include "StjTrgSoft.h"
 
 #include <map>
 #include <algorithm>
 
 class StTriggerSimuMaker;
 
-class StjTrgMuDstSoftwareGetAdcEt;
+class StjTrgSoftGetAdcEt;
 
-class StjTrgMuDstSoftwareTriggerSimuMaker : public StjTrgMuDstSoftware {
+class StjTrgSoftMuDstTriggerSimuMaker : public StjTrgSoft {
 
 public:
 
-  StjTrgMuDstSoftwareTriggerSimuMaker(StTriggerSimuMaker* simuTrig, StjTrgMuDstSoftwareGetAdcEt* adcEt);
-  virtual ~StjTrgMuDstSoftwareTriggerSimuMaker() { }
+  StjTrgSoftMuDstTriggerSimuMaker(StTriggerSimuMaker* simuTrig, StjTrgSoftGetAdcEt* adcEt);
+  virtual ~StjTrgSoftMuDstTriggerSimuMaker() { }
 
   bool soft();
 
@@ -39,9 +39,9 @@ private:
 
   StTriggerSimuMaker* _simuTrig;
 
-  StjTrgMuDstSoftwareGetAdcEt* _adcEt;
+  StjTrgSoftGetAdcEt* _adcEt;
 
-  ClassDef(StjTrgMuDstSoftwareTriggerSimuMaker, 1)
+  ClassDef(StjTrgSoftMuDstTriggerSimuMaker, 1)
 
 };
 

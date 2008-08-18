@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDstSoftwareGetAdcEt.h,v 1.1 2008/08/18 06:20:46 tai Exp $
+// $Id: StjTrgSoftGetAdcEt.h,v 1.1 2008/08/18 06:37:25 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGMUDSTSOFTWAREGETADCET_H
 #define STJTRGMUDSTSOFTWAREGETADCET_H
@@ -18,11 +18,11 @@ class StjTrg;
 
 class StjTrgBEMCJetPatchTowerIdMap;
 
-class StjTrgMuDstSoftwareGetAdcEt : public TObject {
+class StjTrgSoftGetAdcEt : public TObject {
 
 public:
-  StjTrgMuDstSoftwareGetAdcEt(StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdMap* bemcJpTowerMap);
-  virtual ~StjTrgMuDstSoftwareGetAdcEt() { }
+  StjTrgSoftGetAdcEt(StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdMap* bemcJpTowerMap);
+  virtual ~StjTrgSoftGetAdcEt() { }
 
   std::vector<unsigned int> towerAdc();
   std::vector<double> towerEnergy();
@@ -58,7 +58,7 @@ private:
 
   StjTowerEnergyListCut _cut;
 
-  ClassDef(StjTrgMuDstSoftwareGetAdcEt, 1)
+  ClassDef(StjTrgSoftGetAdcEt, 1)
 
 };
 
