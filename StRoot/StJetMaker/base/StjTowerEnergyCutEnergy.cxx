@@ -1,6 +1,6 @@
-// $Id: StjTowerEnergyCutEnergy.cxx,v 1.2 2008/08/04 21:27:16 tai Exp $
+// $Id: StjTowerEnergyCutEnergy.cxx,v 1.3 2008/08/18 08:50:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
-#include "StjTowerEnergyVariationEnergy.h"
+#include "StjTowerEnergyCutEnergy.h"
 
-ClassImp(StjTowerEnergyVariationEnergy)
+ClassImp(StjTowerEnergyCutEnergy)
  
