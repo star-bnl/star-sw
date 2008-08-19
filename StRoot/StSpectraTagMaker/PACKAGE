@@ -1,5 +1,0 @@
-# $Id $
-# package StSpectraTagMaker
-# author: 
-Library:libStSpectraTagMaker.so:LIBS +=   -lStBichsel  -lStChain     -l_StEvent
-#Library:libStSpectraTagMaker.so:LIBS +=   -lStBichsel  -lStChain  -lStEvent
