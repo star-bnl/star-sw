@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.1 2008/08/18 08:50:59 tai Exp $
+// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.2 2008/08/19 19:44:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBJP.h"
 
@@ -56,9 +56,11 @@ void StjTrgSoftEtThresholdBJP::read()
   }
 
   for(map<int, StjTowerEnergyList>::const_iterator it = jpMap.begin(); it != jpMap.end(); ++it) {
-    double Et = computeEtSum((*it).second);
+    int jpid = (*it).first;
+    const StjTowerEnergyList& energyList = (*it).second;
+    double Et = computeEtSum(energyList);
     if(Et <= _minEt) continue;
-    _jetPatches.push_back((*it).first);
+    _jetPatches.push_back(jpid);
     _jetPatchDsmAdc.push_back(0);
     _jetPatchAdc.push_back(0);
     _jetPatchEnergy.push_back(0);
@@ -71,7 +73,7 @@ void StjTrgSoftEtThresholdBJP::read()
 
 double StjTrgSoftEtThresholdBJP::computeEtSum(const StjTowerEnergyList& energyList)
 {
-  double ret;
+  double ret = 0;
   for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
     TVector3 vec3;
     vec3.SetPtEtaPhi((*it).towerR, (*it).towerEta, (*it).towerPhi);
