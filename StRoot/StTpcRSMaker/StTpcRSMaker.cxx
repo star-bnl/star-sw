@@ -1,6 +1,6 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.7 2008/08/18 15:54:25 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.8 2008/08/19 16:01:15 fisyak Exp $
 // doxygen info here
 /*
  */
@@ -32,7 +32,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.7 2008/08/18 15:54:25 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.8 2008/08/19 16:01:15 fisyak Exp $";
 static  Gccuts_t *ccuts = 0;
 
 #define Laserino 170
@@ -555,8 +555,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t driftLength = xyzLocalSector.position().z(); 
 	if (driftLength <= 0) continue; 
 	Double_t D = 1. + OmegaTau*OmegaTau;
-	Double_t SigmaT = transverseDiffusionConstant*TMath::Sqrt(2*driftLength/D);
-	Double_t SigmaL = longitudinalDiffusionConstant*TMath::Sqrt(2*driftLength);
+	Double_t SigmaT = transverseDiffusionConstant* TMath::Sqrt(   driftLength/D);
+	Double_t SigmaL = longitudinalDiffusionConstant*TMath::Sqrt(2*driftLength  );
 	if (Debug()%10 > 1) { 	
 	  cout << "--> tpc_hit: " << sortedIndex << "\t"
 	       << tpc_hit->volume_id   << "\t"
@@ -1347,6 +1347,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.8  2008/08/19 16:01:15  fisyak
+// Version 21
+//
 // Revision 1.7  2008/08/18 15:54:25  fisyak
 // Version 20
 //
