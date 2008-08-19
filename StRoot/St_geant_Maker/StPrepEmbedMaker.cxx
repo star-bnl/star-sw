@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.7 2008/08/15 15:09:37 lbarnby Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.8 2008/08/19 23:11:27 andrewar Exp $
  *
  */
 
@@ -24,6 +24,8 @@
 #include "StPrepEmbedMaker.h"
 #include "StEvtHddr.h"
 #include "TTree.h"
+
+#include <unistd.h>
 
 ClassImp(StPrepEmbedMaker)
 struct embedSettings{
@@ -59,6 +61,12 @@ StPrepEmbedMaker::~StPrepEmbedMaker() {
 }
 //________________________________________________________________________________
 Int_t StPrepEmbedMaker::Init() {
+
+	srand((unsigned)time(0));
+        mSettings->rnd1 = int(rand()*10000)+getpid();
+        mSettings->rnd2 = int(rand()*10000)+getpid();
+
+
     return StMaker::Init();
 }
 
@@ -215,6 +223,10 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.8  2008/08/19 23:11:27  andrewar
+ * Added initialization for RNDM seeds. Seeding now from the clock and the UNIX
+ * process ID (as suggested by Marco).
+ *
  * Revision 1.7  2008/08/15 15:09:37  lbarnby
  * Skip embedding events without primary vertex + flag for this behaviour (default is to skip)
  *
