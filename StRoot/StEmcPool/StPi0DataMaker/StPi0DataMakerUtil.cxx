@@ -709,9 +709,9 @@ void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *em
 	    //{LOG_DEBUG << "Jet branch " << (*mapIter).first << endm;}
 	    StppJetAnalyzer *jetAnalyzer = (*mapIter).second;
 	    if (jetAnalyzer) {
-		StppJetAnalyzer::JetList &jetList = jetAnalyzer->getJets();
+		StppJetAnalyzer::StjJetList &jetList = jetAnalyzer->getJets();
 		Float_t eTMax = -100;
-		for (StppJetAnalyzer::JetList::iterator jetIter = jetList.begin();jetIter != jetList.end();++jetIter) {
+		for (StppJetAnalyzer::StjJetList::iterator jetIter = jetList.begin();jetIter != jetList.end();++jetIter) {
 		    StProtoJet &jet = *jetIter;
 		    //{LOG_DEBUG << "Jet eta = " << jet.eta() << ", phi = " << jet.phi() << ", eT = " << jet.eT() << ", size = " << jet.size() << endm;}
 		    if (jet.eT() > eTMax) {
