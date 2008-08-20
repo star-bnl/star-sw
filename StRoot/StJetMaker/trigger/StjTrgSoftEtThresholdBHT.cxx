@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftEtThresholdBHT.cxx,v 1.1 2008/08/18 08:50:58 tai Exp $
+// $Id: StjTrgSoftEtThresholdBHT.cxx,v 1.2 2008/08/20 16:24:43 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBHT.h"
 
@@ -33,6 +33,9 @@ bool StjTrgSoftEtThresholdBHT::isNewEvent()
 
 void StjTrgSoftEtThresholdBHT::read()
 {
+  _runNumber = _trg->runNumber();
+  _eventId = _trg->eventId();
+
   _towers.clear();
   _towerDsmAdc.clear();
   _towerAdc.clear();

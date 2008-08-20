@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.2 2008/08/19 19:44:47 tai Exp $
+// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.3 2008/08/20 16:24:43 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBJP.h"
 
@@ -38,6 +38,9 @@ bool StjTrgSoftEtThresholdBJP::isNewEvent()
 
 void StjTrgSoftEtThresholdBJP::read()
 {
+  _runNumber = _trg->runNumber();
+  _eventId = _trg->eventId();
+
   _jetPatches.clear();
   _jetPatchDsmAdc.clear();
   _jetPatchAdc.clear();
