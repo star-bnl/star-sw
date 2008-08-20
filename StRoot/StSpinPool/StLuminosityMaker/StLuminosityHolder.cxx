@@ -16,7 +16,11 @@ void StLuminosityHolder::ClearVectors()
   mTriggers.clear();
   mLumTotal.clear();
   mLumCuts.clear();
+  mLumVertex.clear();
+  mLumSoftTrig.clear();
   mPrescales.clear();
   mNTotal.clear();
   mNCuts.clear();
+  mNVertex.clear();
+  mNSoftTrig.clear();
 }
