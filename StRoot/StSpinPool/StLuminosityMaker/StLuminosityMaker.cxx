@@ -57,6 +57,7 @@ Int_t StLuminosityMaker::InitRun(int run)
   for(unsigned int i = 0; i < mTriggers.size(); i++){
     mNTotal[i] = 0;
     mNCuts[i] = 0;
+    mNVertex[i] = 0;
     mPrescales[i] = 0.0;
   }
 
@@ -82,12 +83,14 @@ Int_t StLuminosityMaker::Make(){
 
   for(unsigned int i = 0; i < mTriggers.size(); i++){
     if(trigs.isTrigger(mTriggers[i])){
-      if(mTriggerSimuMaker && !mTriggerSimuMaker->isTrigger(mTriggers[i]))continue;
       float prs = dbtrig->getTotalPrescaleByTrgId(mTriggers[i]);
       mPrescales[i] = prs;
       mNTotal[i]++;
       passtrig++;
       float vertz = TMath::Abs(muevent->primaryVertexPosition().z());
+      if(vertz > 1e-5)mNVertex[i]++;
+      if(mTriggerSimuMaker && !mTriggerSimuMaker->isTrigger(mTriggers[i]))continue;
+      mNSoftTrig[i]++;
       if(mVertexCut > vertz && vertz > 1e-5){
 	mNCuts[i]++;
 	passvert++;
@@ -104,9 +107,13 @@ void StLuminosityMaker::addTrigger(unsigned int trigId)
   mTriggers.push_back(trigId);
   mNTotal.push_back(0);
   mNCuts.push_back(0);
+  mNVertex.push_back(0);
+  mNSoftTrig.push_back(0);
   mPrescales.push_back(0.0);
   mLumTotal.push_back(0.0);
   mLumCuts.push_back(0.0);
+  mLumVertex.push_back(0.0);
+  mLumSoftTrig.push_back(0.0);
 }
 //_____________________________________________________________________________
 void StLuminosityMaker::setMode(char* newMode)
@@ -193,13 +200,19 @@ void StLuminosityMaker::saveOutput()
 {
   for(unsigned int i = 0; i < mTriggers.size(); i++){
     float totalsampled = 0;
+    float vertsampled = 0;
+    float softtrigsampled = 0;
     float cutsampled = 0;
     if(mNTotal[i] > 0){
       totalsampled = mPrescales[0]*mNTotal[0]/(mPrescales[i]*mXsec);
       cutsampled = totalsampled * mNCuts[i] / mNTotal[i];
+      softtrigsampled = totalsampled * mNSoftTrig[i] / mNTotal[i];
+      vertsampled = totalsampled * mNVertex[i] / mNTotal[i];
     }
     mLumTotal[i] = totalsampled;
     mLumCuts[i] = cutsampled;
+    mLumSoftTrig[i] = softtrigsampled;
+    mLumVertex[i] = vertsampled;
   }
 
   StLuminosityHolder* lum = new StLuminosityHolder(runNumber);
@@ -207,8 +220,12 @@ void StLuminosityMaker::saveOutput()
   lum->setTriggers(mTriggers);
   lum->setLumTotal(mLumTotal);
   lum->setLumCuts(mLumCuts);
+  lum->setLumVertex(mLumVertex);
+  lum->setLumSoftTrig(mLumSoftTrig);
   lum->setNTotal(mNTotal);
   lum->setNCuts(mNCuts);
+  lum->setNVertex(mNVertex);
+  lum->setNSoftTrig(mNSoftTrig);
   lum->setPrescales(mPrescales);
   lum->setCrossSectionNB(mXsec);
   lum->setVertexCutcm(mVertexCut);
