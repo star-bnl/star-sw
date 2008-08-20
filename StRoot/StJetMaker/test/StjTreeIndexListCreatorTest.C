@@ -41,6 +41,11 @@ void StjTreeIndexListCreatorTest::testOne()
 
   StjTreeIndexList expectedList = createExpectedList();
 
+//  cout << endl;
+//  for(StjTreeIndexList::const_iterator it = actualList.begin(); it != actualList.end(); ++it) {
+//    cout << (*it) << endl;
+//  }
+
   CPPUNIT_ASSERT_EQUAL( expectedList, actualList);
 
 }
@@ -54,11 +59,10 @@ StjTreeIndexList StjTreeIndexListCreatorTest::createExpectedList()
 {
   StjTreeIndexList ret;
 
-  ret.push_back(StjTreeIndex(6143024,     3));;
-  ret.push_back(StjTreeIndex(6143024,     4));
-  ret.push_back(StjTreeIndex(6143024,     6));
-  ret.push_back(StjTreeIndex(6143024,  1095));
-  ret.push_back(StjTreeIndex(6143024,  4823));
+  ret.push_back(StjTreeIndex(6143024, 3	   ));;
+  ret.push_back(StjTreeIndex(6143024, 4	   ));
+  ret.push_back(StjTreeIndex(6143024, 6	   ));
+  ret.push_back(StjTreeIndex(6143024, 1095 ));
   ret.push_back(StjTreeIndex(6143024, 14619));
   ret.push_back(StjTreeIndex(6143024, 17180));
   ret.push_back(StjTreeIndex(6143024, 18358));
@@ -66,7 +70,6 @@ StjTreeIndexList StjTreeIndexListCreatorTest::createExpectedList()
   ret.push_back(StjTreeIndex(6143024, 23411));
   ret.push_back(StjTreeIndex(6143024, 24897));
   ret.push_back(StjTreeIndex(6143024, 28661));
-  ret.push_back(StjTreeIndex(6143024, 31930));
   ret.push_back(StjTreeIndex(6143024, 33177));
   ret.push_back(StjTreeIndex(6143024, 34414));
   ret.push_back(StjTreeIndex(6143024, 38442));
@@ -79,6 +82,7 @@ StjTreeIndexList StjTreeIndexListCreatorTest::createExpectedList()
   ret.push_back(StjTreeIndex(6143024, 53026));
   ret.push_back(StjTreeIndex(6143024, 55446));
   ret.push_back(StjTreeIndex(6143024, 55474));
+  ret.push_back(StjTreeIndex(6143024, 55646));
   ret.push_back(StjTreeIndex(6143024, 55720));
   ret.push_back(StjTreeIndex(6143024, 56694));
   ret.push_back(StjTreeIndex(6143024, 56712));
@@ -88,6 +92,7 @@ StjTreeIndexList StjTreeIndexListCreatorTest::createExpectedList()
   ret.push_back(StjTreeIndex(6143024, 72863));
   ret.push_back(StjTreeIndex(6143024, 80160));
   ret.push_back(StjTreeIndex(6143024, 81099));
+  ret.push_back(StjTreeIndex(6143024, 81234));
   ret.push_back(StjTreeIndex(6143024, 81290));
   ret.push_back(StjTreeIndex(6143024, 81384));
   ret.push_back(StjTreeIndex(6143024, 86137));
