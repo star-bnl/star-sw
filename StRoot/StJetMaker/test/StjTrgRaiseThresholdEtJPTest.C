@@ -24,7 +24,7 @@ void StjTrgRaiseThresholdEtJPTest::testOneJetPatchPass()
   StjTrgMock trgSrc;
   trgSrc._runNumber = 1;
   trgSrc._eventId = 1;
-  trgSrc._pass = true;
+  trgSrc._passed = true;
   trgSrc._hard = true;
   trgSrc._soft = true;
   trgSrc._jetPatches.push_back(1);
@@ -35,7 +35,7 @@ void StjTrgRaiseThresholdEtJPTest::testOneJetPatchPass()
 
   StjTrgRaiseThresholdEtJP trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 3.0);
 
-  CPPUNIT_ASSERT( trg.pass() );
+  CPPUNIT_ASSERT( trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
   CPPUNIT_ASSERT( trg.soft() );
   CPPUNIT_ASSERT_EQUAL( (size_t)1, trg.jetPatches().size() );
@@ -48,7 +48,7 @@ void StjTrgRaiseThresholdEtJPTest::testOneJetPatchNotPass()
   StjTrgMock trgSrc;
   trgSrc._runNumber = 1;
   trgSrc._eventId = 1;
-  trgSrc._pass = true;
+  trgSrc._passed = true;
   trgSrc._hard = true;
   trgSrc._soft = true;
   trgSrc._jetPatches.push_back(1);
@@ -59,7 +59,7 @@ void StjTrgRaiseThresholdEtJPTest::testOneJetPatchNotPass()
 
   StjTrgRaiseThresholdEtJP trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 4.0);
 
-  CPPUNIT_ASSERT( ! trg.pass() );
+  CPPUNIT_ASSERT( ! trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
   CPPUNIT_ASSERT( ! trg.soft() );
   CPPUNIT_ASSERT_EQUAL( (size_t)0, trg.jetPatches().size() );
@@ -70,7 +70,7 @@ void StjTrgRaiseThresholdEtJPTest::testTwoJetPatchesPass()
   StjTrgMock trgSrc;
   trgSrc._runNumber = 1;
   trgSrc._eventId = 1;
-  trgSrc._pass = true;
+  trgSrc._passed = true;
   trgSrc._hard = true;
   trgSrc._soft = true;
 
@@ -88,7 +88,7 @@ void StjTrgRaiseThresholdEtJPTest::testTwoJetPatchesPass()
 
   StjTrgRaiseThresholdEtJP trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 3.0);
 
-  CPPUNIT_ASSERT( trg.pass() );
+  CPPUNIT_ASSERT( trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
   CPPUNIT_ASSERT( trg.soft() );
   CPPUNIT_ASSERT_EQUAL( (size_t)1, trg.jetPatches().size() );
@@ -101,7 +101,7 @@ void StjTrgRaiseThresholdEtJPTest::testTwoJetPatchesNotPass()
   StjTrgMock trgSrc;
   trgSrc._runNumber = 1;
   trgSrc._eventId = 1;
-  trgSrc._pass = true;
+  trgSrc._passed = true;
   trgSrc._hard = true;
   trgSrc._soft = true;
 
@@ -119,7 +119,7 @@ void StjTrgRaiseThresholdEtJPTest::testTwoJetPatchesNotPass()
 
   StjTrgRaiseThresholdEtJP trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 4.0);
 
-  CPPUNIT_ASSERT( ! trg.pass() );
+  CPPUNIT_ASSERT( ! trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
   CPPUNIT_ASSERT( ! trg.soft() );
   CPPUNIT_ASSERT_EQUAL( (size_t)0, trg.jetPatches().size() );
