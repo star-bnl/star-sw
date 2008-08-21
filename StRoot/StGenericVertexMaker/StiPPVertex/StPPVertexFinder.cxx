@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.28 2008/04/03 16:24:31 fisyak Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.29 2008/08/21 22:09:31 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -69,6 +69,7 @@ StPPVertexFinder::StPPVertexFinder() {
 
   setMC(false);                      // default = real Data
   useCTB(true);                      // default CTB is in the data stream
+  setDropPostCrossingTrack(true);    // default PCT rejection on
   mTestMode=0;                       // expert only flag
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
 
@@ -152,10 +153,6 @@ StPPVertexFinder::InitRun(int runnumber){
   if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
 
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
-  if ( dateY >= 2008){
-    LOG_WARN << "ATTENTION REQUIRED - We will be using a default value of mMinAdcBemc = 8" << endm;
-  }
-
   if(isMC) {
     LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
     if(dateY>2006)  LOG_WARN <<
@@ -175,7 +172,7 @@ StPPVertexFinder::InitRun(int runnumber){
   eemcList->initRun();
 
   gMessMgr->Message("","I") 
-    << "PPV::cuts"
+    << "PPV::cuts "
     <<"\n MinFitPfrac=nFit/nPos  ="<< mMinFitPfrac 
     <<"\n MaxTrkDcaRxy/cm="<<mMaxTrkDcaRxy
     <<"\n MinTrkPt GeV/c ="<<mMinTrkPt
@@ -186,7 +183,8 @@ StPPVertexFinder::InitRun(int runnumber){
     <<"\n MinAdcEemc for MIP ="<<mMinAdcEemc
     <<"\n bool   isMC ="<<isMC
     <<"\n bool useCtb ="<<mUseCtb
-    //			    <<"\n  ="<<
+    <<"\n bool DropPostCrossingTrack ="<<mDropPostCrossingTrack
+    <<"\n"
     <<endm; 
 
 }
@@ -289,7 +287,7 @@ StPPVertexFinder::printInfo(ostream& os) const
   hA[7]->Fill(nTpcV);
   hA[15]->Fill(mTrackData.size());
   
-  LOG_INFO<< Form("PPVend  List of found %d vertices from pool of %d tracks\n",mVertexData.size(),mTrackData.size())<<endm;
+  LOG_INFO<< Form("PPVend  eveID=%d,  list of found %d vertices from pool of %d tracks\n",eveID,mVertexData.size(),mTrackData.size())<<endm;
   for(i=0;i<mVertexData.size();i++) {
     const VertexData *V=& mVertexData[i];
     V->print(os);
@@ -440,16 +438,23 @@ StPPVertexFinder::fit(StEvent* event) {
   int k=0;
   int kCtb=0,kBemc=0, kEemc=0,kTpc=0;
   int nmAny=0;
+
+  int ntrk[7]; for(int i=0; i<7; i++) ntrk[i]=0;
+
   for (StiTrackContainer::const_iterator it=(*tracks).begin();  it!=(*tracks).end(); ++it) {
     k++;
     const StiKalmanTrack* track = static_cast<StiKalmanTrack*>(*it);
-
-    if(track->getFlag()!=true) continue; // drop bad tracks
-    if(track->getPt()<mMinTrkPt)continue; //drop low pT tracks
-    
     TrackData t;
-    if( !examinTrackDca(track,t)) continue; 
-    if( !matchTrack2Membrane(track,t)) continue;// & kill if nFitP too small
+
+    ntrk[0]++;
+    if(track->getFlag()!=true)        {ntrk[1]++; continue;}
+    if(track->getPt()<mMinTrkPt)      {ntrk[2]++; continue;}
+    if(mDropPostCrossingTrack){
+      if(isPostCrossingTrack(track))  {ntrk[3]++; continue;}  // kill if it has hits in wrong z
+    }
+    if(!examinTrackDca(track,t))      {ntrk[4]++; continue;}  // drop from DCA		   
+    if(!matchTrack2Membrane(track,t)) {ntrk[5]++; continue;}  // kill if nFitP too small	   
+    ntrk[6]++;
 
     // cout <<"\n#e itr="<<k<<" gPt="<<track->getPt()<<" gEta="<<track->getPseudoRapidity()<<" nFitP="<<track->getFitPointCount()<<" of "<<track->getMaxPointCount()<<" poolSize="<< mTrackData->size()<<endl;
 
@@ -475,6 +480,14 @@ StPPVertexFinder::fit(StEvent* event) {
     if(t.mCtb>0 || t.mBemc>0 || t.mEemc>0 || t.mTpc>0 ) nmAny++ ;
     //  t.print();
   }
+
+  LOG_INFO<< Form("PPV:: # of input track          = %d\n",ntrk[0])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to flag       = %d\n",ntrk[1])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to pt         = %d\n",ntrk[2])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to PCT check  = %d\n",ntrk[3])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to DCA check  = %d\n",ntrk[4])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to NHit check = %d\n",ntrk[5])<<endm;
+  LOG_INFO<< Form("PPV:: # of track after all cuts = %d\n",ntrk[6])<<endm;
 
   if(mUseCtb) {
     ctbList ->print();
@@ -869,6 +882,7 @@ StPPVertexFinder::examinTrackDca(const StiKalmanTrack*track,TrackData &t){
   }
 
   float rxy=rxyG(bmNode);
+
   //1 cout<<"#e @beam global DCA x:"<< bmNode->x_g()<<" y:"<< bmNode->y_g()<<" z:"<< bmNode->z_g()<<" Rxy="<< rxy <<endl;
   if(rxy>mMaxTrkDcaRxy) return false;
   if( fabs(bmNode->z_g())> mMaxZrange )   return false ; 
@@ -1060,22 +1074,22 @@ StPPVertexFinder::matchTrack2EEMC(const StiKalmanTrack* track,TrackData &t,float
 //==========================================================
 bool  
 StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
-  const float RxyMin=59, RxyMax=190, zMax=200;
-  //generate bitt pattern for TPC nodes with hits
- 
+  const float RxyMin=59, RxyMax=199, zMax=200;
+  const float zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
+
+  //generate bitt pattern for TPC nodes with hits 
   vector<int> hitPatt;
   int nPos=0,nFit=0;
   int in=0;
   float lastRxy=9999;
   float lastZ=9999;
-  float zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
 
   int jz0=0;
   StiKTNBidirectionalIterator it;
   for (it=track->begin();it!=track->end();it++) {
     StiKalmanTrackNode* ktnp=& (*it);
     if(!ktnp->isValid()) continue; // from Victor
-    if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // from Victor
+    //if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // from Victor ---> those track need to be counted as npossiblehit, commented out
     float rxy=rxyG(ktnp); //ktn.getX();
     float z=zG(ktnp);  //ktn.z_g();
     if(rxy<RxyMin) continue;
@@ -1090,15 +1104,17 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     lastRxy=rxy;
     if(in==0) lastZ=z;
     in++;
-    if(lastZ*z<0. && fabsf(z)>zMembraneDepth) { // track just crossed Z=0 plane
-      if(jz0>0) {
-	LOG_WARN << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack crosses Z=0 for the 2nd time, this track has a strange list of nodes - continue"<<endm;
-	dumpKalmanNodes(track);
+    if(fabsf(z)>zMembraneDepth) { //ignore hits too close to z=0
+      if(lastZ*z<0) {             // track just crossed Z=0 plane
+	if(jz0>0) {
+	  LOG_WARN << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack crosses Z=0 for the 2nd time, this track has a strange list of nodes - continue"<<endm;
+	  dumpKalmanNodes(track);
+	}
+	//assert(jz0==0); // only one crosss point is expected
+	jz0=hitPatt.size();
       }
-      //assert(jz0==0); // only one crosss point is expected
-      jz0=hitPatt.size();
+      lastZ=z;
     }
-    lastZ=z;
     const StiDetector * det=ktnp->getDetector();
     assert(!(ktnp->x()) || det);
     bool active=!det || det->isActive(yL(ktnp), zL(ktnp));
@@ -1106,7 +1122,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     if(active) {
       hitPatt.push_back(hit);
       nPos++;
-      if(hit) nFit++;
+      if(hit && ktnp->getChi2() <=1000 ) nFit++;
     }
     // cout<<"#m in="<<in<<" act="<<active<<" hit="<<hit<<" size="<<hitPatt.size()<<" jz0="<<jz0<<" z="<<z<<" Rxy="<<rxy<<endl; 
   }
@@ -1118,11 +1134,57 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   return true;
 }
 
+//==========================================================
+//==========================================================
 
+bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
+  const float RxyMin=59, RxyMax=199, zMax=200;
+  const float zMembraneDepth=1.0; 
+  const int   nWrongZHitCut=2;
+  int nWrongZHit=0;
+  StiKTNBidirectionalIterator it;
+  for (it=track->begin();it!=track->end();it++) {
+    StiKalmanTrackNode* ktnp=& (*it);
+    if(!ktnp->isValid() || ktnp->getChi2()>1000 ) continue;
+    StiHit* stihit=ktnp->getHit();
+    if(stihit){
+      StHit* sthit=(StHit*)stihit->stHit();
+      if(sthit){
+	if(sthit->detector()==kTpcId){
+	  StTpcHit* hit=(StTpcHit*) sthit;
+	  float r=hit->position().perp();
+	  if (r < RxyMin) continue;
+	  if (r > RxyMax) continue;
+	  float z=hit->position().z();
+	  if (fabs(z) > zMax) continue;
+	  if (z < -zMembraneDepth && hit->sector() <= 12 ||
+	      z >  zMembraneDepth && hit->sector() >  12) {
+	    nWrongZHit++;
+	    if(nWrongZHit>=nWrongZHitCut) {return true;}
+	  }	
+	}
+      }
+    }
+  }
+  return false;
+}
 
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.29  2008/08/21 22:09:31  balewski
+ * - In matchTrack2Membrane()
+ *   - Cut on hit max R chanegd from 190 to 199cm
+ *   - Fixed logic failure of counting possible hits
+ *   - Fixed logic failure of crossing CM for certain pattern of hits
+ * - Added a new function bool isPostCrossingTrack()
+ *   - it returns true if track have 2 or more hits in wrong z
+ * - Use isPostCrossingTrack() in fit()
+ * - Added switch setDropPostCrossingTrack(bool), defaulted to true
+ * All changes tested & implemented by Akio in preparation for 2008 pp production.
+ * The key change (removing PostCrossingTrack) is in response to the change of the TPC cluster finder
+ * - now we use the on-line version which allows for longer range of TPC time buckets to be used.
+ *
  * Revision 1.28  2008/04/03 16:24:31  fisyak
  * replace sti->getToolkit() by StiToolkit::instance()
  *
