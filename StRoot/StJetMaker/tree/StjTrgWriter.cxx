@@ -1,4 +1,4 @@
-// $Id: StjTrgWriter.cxx,v 1.1 2008/08/11 04:48:31 tai Exp $
+// $Id: StjTrgWriter.cxx,v 1.2 2008/08/21 22:22:59 tai Exp $
 #include "StjTrgWriter.h"
 
 #include "StjTrg.h"
@@ -52,7 +52,7 @@ void StjTrgWriter::fillBranch_general()
 
   _soft = _trg->soft();
 
-  _passed = _trg->pass();
+  _passed = _trg->passed();
 
   _runNumber = _trg->runNumber();
 

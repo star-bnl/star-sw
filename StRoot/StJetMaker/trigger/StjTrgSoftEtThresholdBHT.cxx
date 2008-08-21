@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftEtThresholdBHT.cxx,v 1.2 2008/08/20 16:24:43 tai Exp $
+// $Id: StjTrgSoftEtThresholdBHT.cxx,v 1.3 2008/08/21 22:23:04 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBHT.h"
 
@@ -46,7 +46,7 @@ void StjTrgSoftEtThresholdBHT::read()
   energyList = _cut(energyList);
 
 
-  _pass = ( ! energyList.empty() );
+  _passed = ( ! energyList.empty() );
 
   for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
     _towers.push_back((*it).towerId);
@@ -64,7 +64,7 @@ void StjTrgSoftEtThresholdBHT::read()
 bool StjTrgSoftEtThresholdBHT::soft()
 {
   if(isNewEvent()) read();
-  return _pass;
+  return _passed;
 }
 
 vector<int> StjTrgSoftEtThresholdBHT::towers()

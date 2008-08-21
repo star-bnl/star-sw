@@ -1,4 +1,4 @@
-// $Id: StjTrgRaiseThresholdEtHT.cxx,v 1.1 2008/08/20 16:24:41 tai Exp $
+// $Id: StjTrgRaiseThresholdEtHT.cxx,v 1.2 2008/08/21 22:23:03 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgRaiseThresholdEtHT.h"
 
@@ -17,7 +17,7 @@ void StjTrgRaiseThresholdEtHT::read() const
   _towerEt.clear();
 
   if( ! _src->soft() ) {
-    _pass = false;
+    _passed = false;
     return;
   }
 
@@ -37,13 +37,13 @@ void StjTrgRaiseThresholdEtHT::read() const
     _towerEt.push_back(srcTowerEt[i]);
   }
 
-  _pass = ( ! _towers.empty() );
+  _passed = ( ! _towers.empty() );
 }
 
 bool StjTrgRaiseThresholdEtHT::soft() const
 {
   readIfNewEvent();
-  return _pass;
+  return _passed;
 }
 
 vector<int> StjTrgRaiseThresholdEtHT::towers()
