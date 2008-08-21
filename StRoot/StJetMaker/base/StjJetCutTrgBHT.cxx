@@ -1,4 +1,4 @@
-// $Id: StjJetCutTrgBHT.cxx,v 1.1 2008/08/12 04:01:25 tai Exp $
+// $Id: StjJetCutTrgBHT.cxx,v 1.2 2008/08/21 22:22:37 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetCutTrgBHT.h"
 
@@ -16,7 +16,7 @@ StjJetCutTrgBHT::StjJetCutTrgBHT(StjTrg* trg)
 
 bool StjJetCutTrgBHT::operator()(const StjJet& jet)
 {
-  if( ! _trg->pass() ) return true;
+  if( ! _trg->passed() ) return true;
 
   StjFourVecList fourPassed = _fourVecListCut(jet.fourVecList);
 

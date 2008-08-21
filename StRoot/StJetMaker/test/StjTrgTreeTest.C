@@ -41,7 +41,7 @@ void StjTrgTreeTest::testOne()
   CPPUNIT_ASSERT_EQUAL(    1095,  trg->eventId()   );
   CPPUNIT_ASSERT_EQUAL(    true,  trg->hard()      );
   CPPUNIT_ASSERT_EQUAL(    true,  trg->soft()      );
-  CPPUNIT_ASSERT_EQUAL(    true,  trg->pass()      );
+  CPPUNIT_ASSERT_EQUAL(    true,  trg->passed()      );
   CPPUNIT_ASSERT_EQUAL(     1.0,  trg->prescale()  );
   CPPUNIT_ASSERT_EQUAL( (size_t)0,  trg->towers().size() );
   CPPUNIT_ASSERT_EQUAL( (size_t)1,  trg->jetPatches().size() );
@@ -50,7 +50,7 @@ void StjTrgTreeTest::testOne()
   reader->GetEntryWithIndex(6143024, 2000);
   CPPUNIT_ASSERT_EQUAL(   false,  trg->hard()      );
   CPPUNIT_ASSERT_EQUAL(   false,  trg->soft()      );
-  CPPUNIT_ASSERT_EQUAL(   false,  trg->pass()      );
+  CPPUNIT_ASSERT_EQUAL(   false,  trg->passed()      );
   CPPUNIT_ASSERT_EQUAL( (size_t)0,  trg->towers().size() );
   CPPUNIT_ASSERT_EQUAL( (size_t)0,  trg->jetPatches().size() );
 
@@ -60,7 +60,7 @@ void StjTrgTreeTest::testOne()
   CPPUNIT_ASSERT_EQUAL(   24897,  trg->eventId()   );
   CPPUNIT_ASSERT_EQUAL(    true,  trg->hard()      );
   CPPUNIT_ASSERT_EQUAL(    true,  trg->soft()      );
-  CPPUNIT_ASSERT_EQUAL(    true,  trg->pass()      );
+  CPPUNIT_ASSERT_EQUAL(    true,  trg->passed()      );
   CPPUNIT_ASSERT_EQUAL(     1.0,  trg->prescale()  );
   CPPUNIT_ASSERT_EQUAL( (size_t)0,  trg->towers().size() );
   CPPUNIT_ASSERT_EQUAL( (size_t)1,  trg->jetPatches().size() );
@@ -72,7 +72,7 @@ void StjTrgTreeTest::testOne()
   CPPUNIT_ASSERT_EQUAL(   28661,  trg->eventId()   );
   CPPUNIT_ASSERT_EQUAL(    true,  trg->hard()      );
   CPPUNIT_ASSERT_EQUAL(    true,  trg->soft()      );
-  CPPUNIT_ASSERT_EQUAL(    true,  trg->pass()      );
+  CPPUNIT_ASSERT_EQUAL(    true,  trg->passed()      );
   CPPUNIT_ASSERT_EQUAL(     1.0,  trg->prescale()  );
   CPPUNIT_ASSERT_EQUAL( (size_t)0,  trg->towers().size() );
   CPPUNIT_ASSERT_EQUAL( (size_t)1,  trg->jetPatches().size() );

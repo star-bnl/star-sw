@@ -1,4 +1,4 @@
-// $Id: StjTrgMuDst.cxx,v 1.4 2008/08/18 06:37:20 tai Exp $
+// $Id: StjTrgMuDst.cxx,v 1.5 2008/08/21 22:22:41 tai Exp $
 #include "StjTrgMuDst.h"
 
 #include "StjTrgSoft.h"
@@ -44,7 +44,7 @@ bool StjTrgMuDst::soft() const
   return _soft->soft();
 }
 
-bool StjTrgMuDst::pass()
+bool StjTrgMuDst::passed()
 {
   return (*_passCondition)(this);
 }

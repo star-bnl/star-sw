@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMock.hh,v 1.2 2008/08/20 16:24:29 tai Exp $
+// $Id: StjTrgMock.hh,v 1.3 2008/08/21 22:22:44 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGMOCK_H
 #define STJTRGMOCK_H
@@ -18,7 +18,7 @@ public:
   int eventId() { return _eventId; }
   bool hard() const { return _hard; }
   bool soft() const { return _soft; }
-  bool pass() { return _pass; }
+  bool passed() { return _passed; }
   double prescale() { return _prescale; }
   double vertexZ() { return _vertexZ; }
 
@@ -41,7 +41,7 @@ public:
   int _eventId;
   bool _hard;
   bool _soft;
-  bool _pass;
+  bool _passed;
   double _prescale;
   double _vertexZ;
 
