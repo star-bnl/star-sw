@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftEtThresholdBHT.h,v 1.1 2008/08/18 08:50:58 tai Exp $
+// $Id: StjTrgSoftEtThresholdBHT.h,v 1.2 2008/08/21 22:23:05 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGSOFTETTHRESHOLDBHT_H
 #define STJTRGSOFTETTHRESHOLDBHT_H
@@ -37,7 +37,7 @@ private:
   int _runNumber;
   int _eventId;
 
-  bool                      _pass;
+  bool                      _passed;
   std::vector<int>          _towers;
   std::vector<int>          _towerDsmAdc;
   std::vector<unsigned int> _towerAdc;

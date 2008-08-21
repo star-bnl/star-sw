@@ -1,4 +1,4 @@
-// $Id: StjTrgRaiseThresholdEtJP.cxx,v 1.1 2008/08/20 16:24:42 tai Exp $
+// $Id: StjTrgRaiseThresholdEtJP.cxx,v 1.2 2008/08/21 22:23:04 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgRaiseThresholdEtJP.h"
 
@@ -17,7 +17,7 @@ void StjTrgRaiseThresholdEtJP::read() const
   _jetPatchEt.clear();
 
   if( ! _src->soft() ) {
-    _pass = false;
+    _passed = false;
     return;
   }
 
@@ -37,13 +37,13 @@ void StjTrgRaiseThresholdEtJP::read() const
     _jetPatchEt.push_back(srcJetPatchEt[i]);
   }
 
-  _pass = ( ! _jetPatches.empty() );
+  _passed = ( ! _jetPatches.empty() );
 }
 
 bool StjTrgRaiseThresholdEtJP::soft() const
 {
   readIfNewEvent();
-  return _pass;
+  return _passed;
 }
 
 vector<int> StjTrgRaiseThresholdEtJP::jetPatches()

@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.3 2008/08/20 16:24:43 tai Exp $
+// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.4 2008/08/21 22:23:05 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBJP.h"
 
@@ -70,7 +70,7 @@ void StjTrgSoftEtThresholdBJP::read()
     _jetPatchEt.push_back(Et);
   }
 
-  _pass = ( ! _jetPatches.empty() );
+  _passed = ( ! _jetPatches.empty() );
 
 }
 
@@ -88,7 +88,7 @@ double StjTrgSoftEtThresholdBJP::computeEtSum(const StjTowerEnergyList& energyLi
 bool StjTrgSoftEtThresholdBJP::soft()
 {
   if(isNewEvent()) read();
-  return _pass;
+  return _passed;
 }
 
 vector<int> StjTrgSoftEtThresholdBJP::jetPatches()

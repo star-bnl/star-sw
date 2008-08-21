@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgRaiseThresholdEtHT.h,v 1.1 2008/08/20 16:24:41 tai Exp $
+// $Id: StjTrgRaiseThresholdEtHT.h,v 1.2 2008/08/21 22:23:04 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGRAISETHRESHOLDETHT_H
 #define STJTRGRAISETHRESHOLDETHT_H
@@ -27,7 +27,7 @@ private:
 
   double _minEt;
 
-  mutable bool                      _pass;
+  mutable bool                      _passed;
   mutable std::vector<int>          _towers;
   mutable std::vector<int>          _towerDsmAdc;
   mutable std::vector<unsigned int> _towerAdc;
