@@ -1,9 +1,13 @@
-// $Id: StjMCParticleListReader.cxx,v 1.1 2008/08/22 17:25:33 tai Exp $
+// $Id: StjMCParticleListReader.cxx,v 1.2 2008/08/22 18:36:32 tai Exp $
 #include "StjMCParticleListReader.h"
 
 #include <TTree.h>
 
+#include <iostream>
+
 ClassImp(StjMCParticleListReader)
+
+using namespace std;
 
 void StjMCParticleListReader::SetBranchAddress(TTree *tree)
 {
