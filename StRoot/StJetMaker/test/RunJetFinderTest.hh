@@ -20,7 +20,7 @@ private:
 
   StjFourVecList createFourVecList();
   StjFourVec createFourVec(int runNumber, int eventId,
-			   int fourvecId, int type, int detectorId,  short trackId, int towerId,
+			   int fourvecId, int type, int detectorId,  short trackId, int towerId, int mcparticleId,
 			   double pt, double eta, double phi, double m,
 			   double vertexZ);
 
