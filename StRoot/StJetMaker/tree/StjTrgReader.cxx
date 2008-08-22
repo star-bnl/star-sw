@@ -1,4 +1,4 @@
-// $Id: StjTrgReader.cxx,v 1.4 2008/08/21 22:22:59 tai Exp $
+// $Id: StjTrgReader.cxx,v 1.5 2008/08/22 16:12:40 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgReader.h"
 
@@ -68,7 +68,7 @@ void StjTrgReader::readEntry()
   __eventId   = _eventId;
   __hard      = _hard;
   __soft      = _soft;
-  __passed      = _passed;
+  __passed    = _passed;
   __prescale  = _prescale;
   __vertexZ   = _vertexZ;
 
