@@ -1,4 +1,4 @@
-// $Id: StjFourVecPrint.cxx,v 1.6 2008/08/13 15:34:23 tai Exp $
+// $Id: StjFourVecPrint.cxx,v 1.7 2008/08/22 18:36:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecPrint.h"
 
@@ -26,6 +26,7 @@ void StjFourVecPrint::print(const StjFourVec& four)
     << setw(1) << four.detectorId  << ", "
     << setw(4) << four.trackId     << ", "
     << setw(4) << four.towerId     << ", "
+    << setw(4) << four.mcparticleId << ", "
     << setw(10) << four.pt         << ", "
     << setw(10) << four.eta        << ", "
     << setw(10) << four.phi        << ", "
