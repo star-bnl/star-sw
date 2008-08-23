@@ -1,4 +1,4 @@
-// $Id: StjTreeReader.cxx,v 1.1 2008/08/11 04:48:28 tai Exp $
+// $Id: StjTreeReader.cxx,v 1.2 2008/08/23 06:27:02 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTreeReader.h"
 
@@ -10,6 +10,7 @@ ClassImp(StjTreeReader)
 
 void StjTreeReader::Init()
 {
+  _tree->BuildIndex("runNumber", "eventId");
   SetBranchAddress(_tree);
 }
 
