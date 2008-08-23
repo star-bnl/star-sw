@@ -1,9 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StConeJetFinder.h,v 1.44 2008/05/08 05:02:13 tai Exp $
+// $Id: StConeJetFinder.h,v 1.45 2008/08/23 20:47:41 tai Exp $
 #ifndef StConeJetFinder_HH
 #define StConeJetFinder_HH
 
 #include "StConeJetFinderBase.h"
+
+#include <vector>
 
 class StConeJetFinder : public StConeJetFinderBase {
 
@@ -44,6 +46,8 @@ private:
 
   StJetSpliterMerger* mMerger;
 
+  std::vector<StEtaPhiCell*> _toDelete;
+  void deleteToDelete();
 
 };
 

@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.51 2008/05/08 05:02:13 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.52 2008/08/23 20:47:40 tai Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
@@ -27,6 +27,8 @@ StJetEtCellFactory* StConeJetFinder::makeCellFactory()
 
 void StConeJetFinder::findJets(JetList& protoJetList, const FourVecList& particleList)
 {
+  deleteToDelete();
+
   CellList orderedCellList = generateEtOrderedCellList(particleList);
 
   CellList toSearchCellList = generateToSearchListFrom(orderedCellList);
@@ -98,8 +100,19 @@ StEtaPhiCell* StConeJetFinder::createJetCellFor(StEtaPhiCell& cell)
     (*etCell)->update();
     cell.setEt(cell.Et() + (*etCell)->eT());
   }
-  return cell.clone();
+  StEtaPhiCell* ret = cell.clone();
+  _toDelete.push_back(ret);
+  return ret;
 }
+
+void StConeJetFinder::deleteToDelete()
+{
+  for(vector<StEtaPhiCell*>::iterator it = _toDelete.begin(); it != _toDelete.end(); ++it)
+    delete *it;
+
+  _toDelete.clear();
+}
+
 
 bool StConeJetFinder::shouldNotSearchForJetAroundThis(const StEtaPhiCell* cell) const
 {
