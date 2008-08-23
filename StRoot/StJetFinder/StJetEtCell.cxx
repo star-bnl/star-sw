@@ -1,26 +1,26 @@
-// $Id: StJetEtCell.cxx,v 1.12 2008/05/06 03:06:12 tai Exp $
+// $Id: StJetEtCell.cxx,v 1.13 2008/08/23 20:47:41 tai Exp $
 #include "StJetEtCell.h"
+
+#include <iostream>
+
+using namespace std;
 
 StJetEtCell::StJetEtCell(double etaMin, double etaMax, double phiMin, double phiMax)
   : StEtaPhiCell(etaMin, etaMax, phiMin, phiMax)
 {
-
 }
 
 StJetEtCell::StJetEtCell(const StJetEtCell& c)
   : StEtaPhiCell(c)
 {
-
 }
 
 StJetEtCell::StJetEtCell()
 {
-
 }
 
 StJetEtCell::~StJetEtCell()
 {
-
 }
 
 StEtaPhiCell* StJetEtCell::clone() const
