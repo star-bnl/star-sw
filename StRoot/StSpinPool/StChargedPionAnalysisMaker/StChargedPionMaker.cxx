@@ -1,4 +1,4 @@
-// $Id: StChargedPionMaker.cxx,v 1.16 2008/07/17 17:06:30 kocolosk Exp $
+// $Id: StChargedPionMaker.cxx,v 1.17 2008/08/25 20:55:35 kocolosk Exp $
 
 #include "StChargedPionMaker.h"
 
@@ -158,14 +158,12 @@ Int_t StChargedPionMaker::Init() {
                         GetMakerInheritsFrom("StJetMaker"));
     mTrgSimuMk  = dynamic_cast<StTriggerSimuMaker*>(
                         GetMakerInheritsFrom("StTriggerSimuMaker"));
-    // mAsymMk     = dynamic_cast<StMCAsymMaker*>(
-    //                     GetMakerInheritsFrom("StMCAsymMaker"));
     
-    // could do the setup for mPyJets here, since we only run on one file at a time
+    // do the setup for mPyJets here, since we only run on one file at a time
     if( dynamic_cast<StChargedPionMcEvent*>(mEvent) ) {
         if(mJetMk) {
             mPyJets = ((mJetMk->getJets()).find("PythiaConeJets"))->second->getmuDstJets();
-            // also need to assign mJets in a way that's not based on runnumber
+            LOG_INFO << "loaded mPyJets at " << mPyJets << endm;
         }
     }
     
@@ -178,14 +176,17 @@ Int_t StChargedPionMaker::Init() {
 Int_t StChargedPionMaker::InitRun(int runnumber) {
     if(mJetMk) {
         LOG_INFO << "found StJetMaker in the chain" << endm;
-        //if(runnumber < 7000000) {
+        if((mJetMk->getJets()).count("ConeJets")) {
             mJets = ((mJetMk->getJets()).find("ConeJets"))->second->getmuDstJets();
-        // }
-        // else {
-        //     mJets = ((mJetMk->getJets()).find("ConeJets12"))->second->getmuDstJets();
-        // }
+            LOG_INFO << "found Jets in Run 5 branch " << mJets << endm;
+        }
+        else {
+            mJets = ((mJetMk->getJets()).find("ConeJets12"))->second->getmuDstJets();
+            LOG_INFO << "found Jets in Run 6 branch " << mJets << endm;
+        }
     }
-    else { // try to get the jets off disk
+    else {
+        LOG_INFO << "trying to get the jets off disk" << endm;
         std::ostringstream os;
         if(runnumber < 7000000) {
             os << "/star/institutions/mit/common/run5/jets/jets_" << runnumber << ".tree.root";
@@ -457,6 +458,9 @@ void StChargedPionMaker::makeTriggerSimu(StChargedPionBaseEv *ev) {
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.cxx,v $
+ * Revision 1.17  2008/08/25 20:55:35  kocolosk
+ * get correct ConeJets/ConeJets12 branch w/o using runnumber
+ *
  * Revision 1.16  2008/07/17 17:06:30  kocolosk
  * big-bang integration StChargedPionMcEvent framework
  *
