@@ -1,10 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeIndexList.h,v 1.3 2008/08/11 01:28:41 tai Exp $
+// $Id: StjTreeIndexList.h,v 1.4 2008/08/28 04:57:08 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEINDEXLIST_H
 #define STJTREEINDEXLIST_H
 
 #include "StjTreeIndex.h"
+
+#include <vector>
 
 typedef std::vector<StjTreeIndex> StjTreeIndexList;
 

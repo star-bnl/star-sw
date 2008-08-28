@@ -1,10 +1,11 @@
-// $Id: StjTreeIndexListCreator.cxx,v 1.2 2008/08/11 01:28:41 tai Exp $
+// $Id: StjTreeIndexListCreator.cxx,v 1.3 2008/08/28 04:57:08 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTreeIndexListCreator.h"
 
 #include "StjTreeIndexList.h"
 
 #include <TTree.h>
+#include <TDirectory.h>
 
 #include <set>
 
