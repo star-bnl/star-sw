@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.12 2008/03/27 00:15:38 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.13 2008/08/28 18:43:20 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,8 +12,12 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.13  2008/08/28 18:43:20  dongx
+ * Added MRPC-TOF simulation parameters
+ * Added TOF/VPD fast simulation parameters
+ *
  * Revision 1.12  2008/03/27 00:15:38  dongx
- * Update for Run8 finished.
+ *  Update for Run8 finished.
  *
  * Revision 1.11  2007/11/22 00:04:13  dongx
  * - update for tof8++
@@ -72,7 +76,7 @@ void StTofrDaqMap::init(StMaker *maker) {
 
 void StTofrDaqMap::initFromDbase(StMaker *maker) {
 
-  gMessMgr->Info("StTofrDaqMap -- rertieving the daq mapping","OS");
+  gMessMgr->Info("StTofrDaqMap -- retrieving the daq mapping","OS");
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
   //    need "[shell] setenv Calibrations_tof reconV0"
@@ -141,7 +145,7 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
 // for tofr5------------------------------------------------------------------------
 void StTofrDaqMap::initFromDbaseY5(StMaker *maker) {
 
-  gMessMgr->Info("StTofrDaqMap -- rertieving the tofr5 channel mapping","OS");
+  gMessMgr->Info("StTofrDaqMap -- retrieving the tofr5 channel mapping","OS");
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
   //    need "[shell] setenv Calibrations_tof reconV0"
@@ -174,7 +178,7 @@ void StTofrDaqMap::initFromDbaseY5(StMaker *maker) {
 
 void StTofrDaqMap::initFromDbaseGeneral(StMaker *maker) {
 
-  gMessMgr->Info("StTofrDaqMap -- rertieving the tofr5 channel mapping","OS");
+  gMessMgr->Info("StTofrDaqMap -- retrieving the tof8++ channel mapping","OS");
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
   //    need "[shell] setenv Calibrations_tof reconV0"
