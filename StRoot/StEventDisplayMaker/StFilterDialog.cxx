@@ -1,13 +1,19 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   08/01/03  
-// $Id: StFilterDialog.cxx,v 1.4 2004/07/27 00:34:43 perev Exp $
+// $Id: StFilterDialog.cxx,v 1.5 2008/08/28 23:34:19 fine Exp $
 
 #include "StFilterDialog.h"
 #include <assert.h>
 #ifdef R__QT
-#include <qtable.h>
 #include <qlayout.h>
-#include <qhbox.h>
-#include <qpushbutton.h>
+#if (QT_VERSION < 0x040000)
+#  include <qpushbutton.h>
+#  include <qtable.h>
+#  include <qhbox.h>
+#  include <qvbox.h>
+#else
+#  include <QtGui/QTableView>
+#  include <QtGui/QPushButton>
+#endif
 
 //_______________________________________________________________________________________
 
@@ -41,7 +47,7 @@ static const float  DefsQQ[]={
 
 //_______________________________________________________________________________________
 StFilterDialog::StFilterDialog(const char *wName,const char **NamVal,const float *defs, float *vals,int *flagg, bool *active)
-: QVBox(),fActive(active), fOn(0)
+: QWidget(),fActive(active), fOn(0)
 {
   char cbuf[200];
   if (!wName) wName = "DefaultStFilterDialog";
@@ -58,11 +64,11 @@ StFilterDialog::StFilterDialog(const char *wName,const char **NamVal,const float
   fFlagg = flagg;
 
   setCaption(wName);
-
-  QVBox *columns = this; // new QVBox(this);
+  QVBoxLayout *columns = new QVBoxLayout(this);
+#if (QT_VERSION < 0x040000)
   {
      // table widget
-     fTable = new QTable(nRow,nCol,columns);
+     fTable = new QTable(nRow,nCol,this);
 //     fTable->setColumnReadOnly(0,true);
      fTable->horizontalHeader ()->setLabel( 0, tr( "Cuts" ) );//  setText(iRow,0,fNamVal[iRow]);
 
@@ -72,9 +78,11 @@ StFilterDialog::StFilterDialog(const char *wName,const char **NamVal,const float
         fTable->setText(iRow,0,cbuf);
      }
 //     fTable->adjustColumn(0);
+     columns->addWidget(fTable);
 
      // Ok / Reset buttons
-     QWidget *buttons = new QWidget(columns);
+     QWidget *buttons = new QWidget(this);
+     columns->addWidget(buttons);
      {
         QPushButton *ok         = new QPushButton("OK",buttons);
         connect(ok,SIGNAL(clicked()),this,SLOT(Update()));
@@ -102,6 +110,55 @@ StFilterDialog::StFilterDialog(const char *wName,const char **NamVal,const float
         l->addItem(new QSpacerItem(10,1));
      }
   }
+#else
+  {
+     // table widget
+     fTable = new QTableView(nRow,nCol,this);
+//     fTable->setColumnReadOnly(0,true);
+     QTableWidgetItem *newItem = new QTableWidgetItem(tr("Cuts"));
+
+     fTable->setHorizontalHeaderItem(0, newItem);//  setText(iRow,0,fNamVal[iRow]);
+
+     for (int iRow=0;iRow<nRow;iRow++) {
+        newItem = new QTableWidgetItem(tr( fNamVal[iRow] );
+        fTable->setVerticalHeaderItem(iRow, newItem );//  setText(iRow,0,fNamVal[iRow]);
+        sprintf(cbuf,"%+10g",fVals[iRow]);
+        newItem = new QTableWidgetItem(cbuf);
+        fTable->setItem(iRow,0,newItem);
+     }
+     columns->addWidget(fTable);
+     // Ok / Reset buttons
+     QWidget *buttons = new QWidget(this);
+     columns->addWidget(buttons);
+     {
+        QPushButton *ok         = new QPushButton("OK",buttons);
+        connect(ok,SIGNAL(clicked()),this,SLOT(Update()));
+        if (active) {
+           //  add activation button
+            fOn    = new QPushButton("ON",buttons);
+            fOn->setToggleButton(true);
+            connect(fOn,SIGNAL(clicked()),this,SLOT(Toggle()));
+            // Turn the button on
+            fOn->setOn(*active);
+            Toggle();
+         }
+        QPushButton *setDefault = new QPushButton("Reset",buttons);
+        connect(setDefault,SIGNAL(clicked()),this,SLOT(Reset()));
+
+        QBoxLayout * l = new QHBoxLayout( buttons );
+        l->addItem(new QSpacerItem(10,1));
+        l->addWidget( ok );
+        if (fOn) {
+           l->addItem(new QSpacerItem(10,1));
+           l->addWidget( fOn );
+        }
+        l->addItem(new QSpacerItem(10,1));
+        l->addWidget( setDefault );
+        l->addItem(new QSpacerItem(10,1));
+     }
+  }
+#endif
+//  this->setLayout(columns);
   Show();
 }  
 //_______________________________________________________________________________________
@@ -113,7 +170,12 @@ void StFilterDialog::Reset()
   char cbuf[100];  
   for (int irow=0; irow<fTable->numRows (); irow++) {
     sprintf(cbuf,"%+10g",fDefs[irow]);
+#if (QT_VERSION < 0x040000)
     fTable->setText(irow,0,cbuf);
+#else
+    QTableWidgetItem *newItem = new QTableWidgetItem(cbuf);
+    fTable->setItem(irow,0,cbuf);
+#endif
   }
   Show();
 }
