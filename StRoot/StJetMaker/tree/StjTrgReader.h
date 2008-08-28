@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgReader.h,v 1.4 2008/08/21 22:22:59 tai Exp $
+// $Id: StjTrgReader.h,v 1.5 2008/08/28 04:57:08 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGREADER_H
 #define STJTRGREADER_H
@@ -7,6 +7,8 @@
 #include "StjTreeReader.h"
 
 #include <Rtypes.h>
+
+#include <vector>
 
 class StjTrgReader : public StjTreeReader {
 
