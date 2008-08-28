@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.131 2008/02/13 00:21:36 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.132 2008/08/28 21:50:59 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -95,6 +95,7 @@
 #include "tables/St_dst_event_summary_Table.h"
 #include "TCoinEmcTower.h"
 #include "TDataProvider.h"
+#include "TQtRootViewer3D.h"
 
 #include "StEventControlPanel.h"
 #include "StPadControlPanel.h"
@@ -1503,6 +1504,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.132  2008/08/28 21:50:59  fine
+// Add the extra header file to define TQtRootViewer3D class
+//
 // Revision 1.131  2008/02/13 00:21:36  perev
 // mape the correct SVT G3 name to Sti name
 //
