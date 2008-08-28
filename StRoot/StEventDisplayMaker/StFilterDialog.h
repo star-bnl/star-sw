@@ -2,11 +2,13 @@
 #define STAR_StFilterDialog
 
 #ifdef R__QT
-#include <qvbox.h>
+#  include <qwidget.h>
+
 class QTable;
 class QPushButton;
+class QTableView;
 
-class StFilterDialog : public QVBox
+class StFilterDialog : public     QWidget
 {
    Q_OBJECT
 private:
@@ -16,7 +18,11 @@ private:
    int          fNVals;
    int         *fFlagg;
    bool        *fActive;
-   QTable      *fTable; 
+#if (QT_VERSION < 0x040000)
+   QTable      *fTable;
+#else
+   QTableView   *fTable;
+#endif
 private:
    QPushButton *fOn;
 public:
