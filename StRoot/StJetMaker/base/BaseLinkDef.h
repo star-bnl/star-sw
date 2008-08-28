@@ -86,5 +86,12 @@
 #pragma link C++ class StjTrackToTLorentzVector+;
 #pragma link C++ class StjTrackTowerEnergyListToFourVecList+;
 
+#pragma link C++ class vector<StjTrack>+; 
+#pragma link C++ class vector<StjTowerEnergy>+; 
+#pragma link C++ class vector<StjMCParticle>+; 
+#pragma link C++ class vector<StjFourVec>+; 
+#pragma link C++ class vector<StjJet>+; 
+#pragma link C++ class vector<StjDijet>+; 
+
 
 #endif

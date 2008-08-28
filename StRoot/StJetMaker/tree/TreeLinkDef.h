@@ -22,5 +22,7 @@
 #pragma link C++ class StjVertexReader+;
 #pragma link C++ class StjVertexWriter+;
 
+#pragma link C++ class vector<StjTreeIndex>+; 
+
 
 #endif
