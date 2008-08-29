@@ -71,6 +71,7 @@
 #pragma link C++ class StjTowerEnergyToFourVec+;
 #pragma link C++ class StjTowerEnergyToTLorentzVector+;
 #pragma link C++ class StjTowerEnergyVariation+;
+#pragma link C++ class StjTowerEnergyVariationEnergy+;
 #pragma link C++ class StjTowerEnergyCutEnergy+;
 #pragma link C++ class StjTrackCut+;
 #pragma link C++ class StjTrackCutDca+;
