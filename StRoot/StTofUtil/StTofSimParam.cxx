@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofSimParam.cxx,v 1.6 2008/08/28 18:43:19 dongx Exp $
+ * $Id: StTofSimParam.cxx,v 1.7 2008/09/02 18:39:43 dongx Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofSimParam.cxx,v $
+ * Revision 1.7  2008/09/02 18:39:43  dongx
+ * update on MRPC slow parameters
+ *
  * Revision 1.6  2008/08/28 18:43:19  dongx
  * Added MRPC-TOF simulation parameters
  * Added TOF/VPD fast simulation parameters
@@ -97,9 +100,9 @@ StTofSimParam::StTofSimParam(){
   m_nmean_e            = 2.42       ;
   m_nmax_e             = 1.6e+7     ;
   m_dt                 = 25.        ; //! in ps
-  m_ndt                = 300        ; //! maximum ndt in slow simulation
+  m_ndt                = 600        ; //! maximum ndt in slow simulation
   m_toffset            = 6000.      ; //! time to start slow simulation (ps)
-  m_adc_thre           = 0.0128     ;
+  m_adc_thre           = 12.8       ; //! femto-Coulomb
   m_xtalk_dy           = 1.0        ;
   m_res_fee            = 45.e-12    ;
 
