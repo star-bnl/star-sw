@@ -35,6 +35,8 @@ class StBemcTriggerDbThresholds;
 class StTriggerSimuMaker;
 class TDataSet;
 class St_db_Maker;
+class TList;
+class TH2;
 
 class StBemcTriggerSimu : public StVirtualTriggerSimu {
 private:
@@ -117,6 +119,18 @@ private:
   void FEEout();
   void get2006_DSMLayer0();
   void get2006_DSMLayer1();
+
+  //#define DEBUG			// Comment out to switch off debugging
+
+#ifdef DEBUG
+  // Histograms for debugging the BEMC layer 0 DSM algorithm
+  TH2* mBEMCLayer1DSMInputPatchSum;
+  TH2* mBEMCLayer1DSMInputPatchSumDiff;
+  TH2* mBEMCLayer2DSMInputPatchSum;
+  TH2* mBEMCLayer2DSMInputPatchSumDiff;
+  TH2* mBEMCLayer2DSMInputJetPatchBits;
+  TH2* mBEMCLayer2DSMInputJetPatchBitsDiff;
+#endif
   
 public:
   StBemcTriggerSimu();
