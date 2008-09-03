@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.19 2008/07/30 20:03:03 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.20 2008/09/03 22:30:43 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.20  2008/09/03 22:30:43  dongx
+ * mTStart added, applicable for Run8
+ *
  * Revision 1.19  2008/07/30 20:03:03  dongx
  * mBeamLine initialized in constructor to avoid null pointer when no calibration tables
  *
@@ -256,6 +259,7 @@ void StTofCalibMaker::resetPars()
     mVPDTot[i] = 0.0;
   }
 
+  mTStart = -9999.;
   mTDiff = -9999.;
   mVPDVtxZ = -9999.;
   mProjVtxZ = -9999.;
@@ -945,6 +949,7 @@ Int_t StTofCalibMaker::Make()
 {
   gMessMgr->Info(" StTofCalibMaker::Maker: starting ...","OS");
 
+  mTStart = -9999.;
   mTDiff = -9999.;
   mVPDVtxZ = -9999.;
   mProjVtxZ = -9999.;
@@ -1477,14 +1482,23 @@ Int_t StTofCalibMaker::processEventYear8(){
 //     } 
   }
   tsum8(mVPDTot, mVPDLeTime);
+  mTStart = tstart8(mProjVtxZ);
 
   gMessMgr->Info("","OS") << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
+  if(mTStart<-1000.) {
+    gMessMgr->Info("","OS") << " mTStart not available!" << endm;
+    mValidStartTime = kFALSE;
+  } else {
+    mValidStartTime = kTRUE;
+  }
+  gMessMgr->Info("","OS") << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
 
   /// Fill vpd information in StTofCollection
   theTof->setVpdEast(mVPDHitPatternEast);
   theTof->setVpdWest(mVPDHitPatternWest);
   theTof->setTdiff(mTDiff);
   theTof->setVzVpd(mVPDVtxZ);
+  theTof->setTstart(mTStart);
 
   gMessMgr->Info("","OS") << " TofCollection: NWest = " << theTof->numberOfVpdWest() << " NEast = " << theTof->numberOfVpdEast() << endm;
   gMessMgr->Info("","OS") << "Tdiff = " << mTDiff <<" vpd vz = " << mVPDVtxZ << " proj vz = " << mProjVtxZ<<endm;
@@ -1519,25 +1533,17 @@ Int_t StTofCalibMaker::processEventYear8(){
     Double_t L = tofPathLength(&tofPos, &aCell->position(), theTrackGeometry->helix().curvature());
     aHit->setPathLength((Float_t)L);
 
-    //double T0 = tstart8(dcatof.z());
-    double T0 = tstart8(mProjVtxZ);
+    //double mTStart = tstart8(dcatof.z());
     gMessMgr->Info("","OS") << " p(x,y,z) = "<<theTrackGeometry->momentum().x()<<"  "<<theTrackGeometry->momentum().y()<<"  "<<theTrackGeometry->momentum().z()<<endm;
-    gMessMgr->Info("","OS") << " Project Z = " << tofPos.z() << " T0 = " << T0 << endm;
-    if(T0<-1000.) {
-      gMessMgr->Info("","OS") << " T0 not available!" << endm;
-      mValidStartTime = kFALSE;
-    } else {
-      mValidStartTime = kTRUE;
-    }
+    gMessMgr->Info("","OS") << " Project Z = " << tofPos.z() << " mTStart = " << mTStart << endm;
 
     double tot = aCell->tot(); // ns
     double tdc = aCell->leadingEdgeTime();
     tdc -= mPhaseOffset8;
     while(tdc>TMAX) tdc -= TMAX;
-    double tof = tdc - T0;
+    double tof = tdc - mTStart;
     Double_t zhit = (Double_t)aCell->zHit();
 
-    gMessMgr->Info("","OS") << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
     
     if(mValidCalibPar&&mValidStartTime) {
       int moduleChan = (aCell->moduleIndex()-1)*6 + (aCell->cellIndex()-1);
