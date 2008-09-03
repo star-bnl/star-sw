@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.101 2008/03/11 00:29:24 fine Exp $
+# $Id: ConsDefs.pm,v 1.102 2008/09/03 18:14:08 fine Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -618,8 +618,12 @@
      }
 
     # Coin3D
-    if ( !defined($IVROOT) || -d $IVROOT) {
-      $IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package 
+    if ( !defined($IVROOT)) {
+       if ($QT_VERSION==4) {
+          $IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package 
+       } else {
+          $IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
+        }
     }
     if ( defined($IVROOT) &&  -d $IVROOT) {
       if (-e $IVROOT . "/bin/coin-config") {
