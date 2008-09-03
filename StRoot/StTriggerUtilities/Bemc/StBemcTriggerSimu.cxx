@@ -1,6 +1,7 @@
 #include "StBemcTriggerSimu.h"
 
 //General
+#include "TList.h"
 #include "TH2.h"
 #include "StMessMgr.h"
 #include "StTriggerSimuMaker.h"
@@ -21,6 +22,9 @@
 //Db
 #include "St_db_Maker/St_db_Maker.h"
 
+// MuDst
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
+
 ClassImp(StBemcTriggerSimu)
 //==================================================
 //==================================================
@@ -34,6 +38,7 @@ StBemcTriggerSimu::StBemcTriggerSimu() {
   mTables   = NULL;
   mHList    = NULL;
   mConfig =0;
+
 }
 //==================================================
 //==================================================
@@ -41,6 +46,7 @@ StBemcTriggerSimu::~StBemcTriggerSimu(){
 
   delete mDecoder;
   delete mDbThres;
+
 }
 //==================================================
 //==================================================
@@ -160,6 +166,25 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(200621);  //L2-gamma
 
   Clear();
+
+#ifdef DEBUG
+  // Histograms for debugging the BEMC layer 0 DSM algorithm
+  mBEMCLayer1DSMInputPatchSum = new TH2F("BEMCLayer1DSMInputPatchSum", "BEMC L1 DSM Input Patch Sum;BEMC L1 Input Channel;Patch Sum", 36, 0, 36, 100, 0, 100);
+  mBEMCLayer1DSMInputPatchSumDiff = new TH2F("BEMCLayer1DSMInputPatchSumDiff", "BEMC L1 DSM Input Patch Sum;BEMC L1 Input Channel;Patch Sum - Simulated", 36, 0, 36, 200, -100, 100);
+  mBEMCLayer2DSMInputPatchSum = new TH2F("BEMCLayer2DSMInputPatchSum", "BEMC L2 DSM Input Patch Sum;BEMC L2 Input Channel;Patch Sum", 6, 0, 6, 100, 0, 100);
+  mBEMCLayer2DSMInputPatchSumDiff = new TH2F("BEMCLayer2DSMInputPatchSumDiff", "BEMC L2 DSM Input Patch Sum;BEMC L2 Input Channel;Patch Sum - Simulated", 6, 0, 6, 200, -100, 100);
+  mBEMCLayer2DSMInputJetPatchBits = new TH2F("BEMCLayer2DSMInputJetPatchBits", "BEMC L2 DSM Input JP Bits;BEMC L2 Input Channel;Jet Patch Bits", 6, 0, 6, 4, 0, 4);
+  mBEMCLayer2DSMInputJetPatchBitsDiff = new TH2F("BEMCLayer2DSMInputJetPatchBitsDiff", "BEMC L2 DSM Input Jet Patch Bits;BEMC L2 Input Channel;Jet Patch Bits - Simulated", 6, 0, 6, 8, -4, 4);
+
+  mHList->Add(mBEMCLayer1DSMInputPatchSum);
+  mHList->Add(mBEMCLayer2DSMInputPatchSum);
+  mHList->Add(mBEMCLayer2DSMInputJetPatchBits);
+  mHList->Add(mBEMCLayer1DSMInputPatchSumDiff);
+  mHList->Add(mBEMCLayer2DSMInputPatchSumDiff);
+  mHList->Add(mBEMCLayer2DSMInputJetPatchBitsDiff);
+
+#endif
+
 }
 //==================================================
 //==================================================
@@ -183,7 +208,6 @@ void StBemcTriggerSimu::InitRun(int runnumber){
   HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
   
   for ( int tpid=0;tpid<kNPatches;tpid++) numMaskTow[tpid]=0;
-
 }
 //==================================================
 //==================================================
@@ -621,6 +645,18 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
   
     //Get array of TPid# from DSM module#
     mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP);
+
+#ifdef DEBUG
+    // Overwrite input to BEMC layer 0 DSMs (output of BEMC FEEs)
+    // with content of trigger bank from MuDst (data only).
+    if (mHeadMaker->GetDataSet("MuDst")) {
+      StEmcTriggerDetector& emcTrig = StMuDst::event()->emcTriggerDetector();
+      for (int triggerPatch = 0; triggerPatch < 300; ++triggerPatch) {
+	L0_HT_ADC[triggerPatch] = emcTrig.highTower(triggerPatch);
+	L0_TP_ADC[triggerPatch] = emcTrig.patch(triggerPatch);
+      }
+    }
+#endif
     
     //Loop over 10 inputs to each module 
     for (int j=0;j<kL0DsmInputs;j++){
@@ -631,7 +667,7 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       mDecoder->GetJetPatchAndSequenceFromTriggerPatch(tpid, jpid, seq); 
 
       //Skip modules 2,7,12,17,22,27 
-      if (((i+3)%5)!=0){
+      if (i%5!=2) {
 	
 	//apply HT thresholds to each HT adc in each TP
 	if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit[j]=0;
@@ -659,7 +695,7 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       }
       
       //Loop over 2x5 inputs(TP) for modules 2,7,12,17,22,29
-      if (((i+3)%5)==0){
+      if (i%5==2){
 	
 	//apply HT thresholds to each HT adc in each TP
 	if (j>4) 
@@ -706,9 +742,11 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	}
 	
 	//add up TP adc for 1/5 of JP
-	if (j>4) DSM0_TP_SUM_J1[i]+=L0_TP_ADC[tpid];
-	if (j<5) DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
-	
+	if (j%2)
+	  DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
+	else
+	  DSM0_TP_SUM_J1[i]+=L0_TP_ADC[tpid];
+
 	//apply HT/TP/HTTP thresholds to bits
 	if (DSM0_HT_Bit_J1[i]< DSM0_HT_tp_Bit_J1[j]) DSM0_HT_Bit_J1[i]=DSM0_HT_tp_Bit_J1[j];
 	if (DSM0_TP_Bit_J1[i]< DSM0_TP_tp_Bit_J1[j]) DSM0_TP_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
@@ -720,29 +758,15 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       }      
     }
     
-    
-    //Construct total output bits from DSMLayer0
-    Int_t two10 = (Int_t) pow(2.0,10.0);
-    Int_t two12 = (Int_t) pow(2.0,12.0);
-    Int_t two14 = (Int_t) pow(2.0,14.0);
-
-    if (((i+3)%5)!=0)
+    if (i%5!=2)
       {
-	L0_16bit_Out[k]=0;
-	L0_16bit_Out[k]=DSM0_TP_SUM[i]+DSM0_HT_Bit[i]*two10+ DSM0_TP_Bit[i]*two12+DSM0_HTTP_Bit[i]*two14;
-	k++;
+	L0_16bit_Out[k++]=DSM0_TP_SUM[i]+(DSM0_HT_Bit[i]<<10)+(DSM0_TP_Bit[i]<<12)+(DSM0_HTTP_Bit[i]<<14);
       }
-    if (((i+3)%5)==0)
+    if (i%5==2)
       {
-	L0_16bit_Out[k]=0;
-	L0_16bit_Out[k]=DSM0_TP_SUM_J1[i]+DSM0_HT_Bit_J1[i]*two10+DSM0_TP_Bit_J1[i]*two12+DSM0_HTTP_Bit_J1[i]*two14;
-	k++;
-
-	L0_16bit_Out[k]=0;
-	L0_16bit_Out[k]=DSM0_TP_SUM_J3[i]+DSM0_HT_Bit_J3[i]*two10+DSM0_TP_Bit_J3[i]*two12+DSM0_HTTP_Bit_J3[i]*two14;
-	k++;
+	L0_16bit_Out[k++]=DSM0_TP_SUM_J3[i]+(DSM0_HT_Bit_J3[i]<<10)+(DSM0_TP_Bit_J3[i]<<12)+(DSM0_HTTP_Bit_J3[i]<<14);
+	L0_16bit_Out[k++]=DSM0_TP_SUM_J1[i]+(DSM0_HT_Bit_J1[i]<<10)+(DSM0_TP_Bit_J1[i]<<12)+(DSM0_HTTP_Bit_J1[i]<<14);
       }
-
 
     mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP); 
     //NEED to eventually make this decision higher up but keep it here for now
@@ -761,6 +785,36 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
     }
 
   }
+
+#ifdef DEBUG
+  // Fill diagnostic histograms
+  if (mHeadMaker->GetDataSet("MuDst")) {
+    // BEMC layer 1 DSMs are stored in this order in the trigger bank:
+    // BE101, BE102, BE103, BW101, BW102, BW103
+    // DSM channels are read out in this order:
+    static const int dsm_read_map[] = { 3, 2, 1, 0, 7, 6, 5, 4 };
+    static const int TriggerBankToSimuMap[] = { 3, 4, 5, 0, 1, 2 };
+    StEmcTriggerDetector& emcTrig = StMuDst::event()->emcTriggerDetector();
+
+    // Loop over BEMC layer 1 DSMs
+    for (int dsm = 0; dsm < 6; ++dsm) {
+      // Loop over channels
+      for (int ch = 0; ch < 6; ++ch) {
+	int idx = dsm*8+dsm_read_map[ch];
+	int out = emcTrig.bemcLayer1(idx);
+	mBEMCLayer1DSMInputPatchSum->Fill(dsm*6+ch, out & 0x3ff);
+	// The BEMC trigger simulator processes BEMC layer 1 DSMs in
+	// this order (I think): BW101, BW102, BW103, BE101, BE102, BE103.
+	// So trigger bank <-> simulator ==> 0, 1, 2, 3, 4, 5 <-> 3, 4, 5, 0, 1, 2
+	int diff = (L0_16bit_Out[TriggerBankToSimuMap[ch]*6+ch] & 0x3ff) - (out & 0x3ff);
+	if (diff) {
+	  // Use the trigger bank ordering for comparison
+	  mBEMCLayer1DSMInputPatchSumDiff->Fill(dsm*6+ch, diff);
+	}
+      }	// End loop over channels
+    } // End loop over BEMC layer 1 DSMs
+  }
+#endif
 }
 
 
@@ -772,7 +826,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
   //DSM_Layer0 is passed to DSM_Layer1 in 8 UShort blocks (16 bits)
   //There are 6 DSM_Layer1 boards and each can take 120 bits total
   //So DSM_Layer0 passes 8 shorts (16*8=128) or 128 bits to each DSM_Layer1
-  //  int nShort[8] = {3, 2, 1, 0, 7, 6, 5, 4};
+  //int nShort[8] = {3, 2, 1, 0, 7, 6, 5, 4};
   for (int i=0; i<kL1DsmModule; i++)
     {
       for (int j=0; j<6; j++) //only loop over 6 shorts 
@@ -781,7 +835,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
 	}
     }
 
-  //zero out the DSMLayer1 Bits passed to DSMLayer2
+  //Zero out the DSMLayer1 Bits passed to DSMLayer2
   for (int i=0;i<kL1DsmModule;i++){
     DSM1_JP_Bit[i]=0;
     DSM1_HT_Bit[i]=0;
@@ -790,19 +844,44 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
     DSM1_ETOT_ADC[i]=0;
   }
 
+/*
+#ifdef DEBUG
+    // Overwrite input to BEMC layer 1 DSMs (output of BEMC layer 0 DSMs)
+    // with content of trigger bank from MuDst (data only).
+    if (mHeadMaker->GetDataSet("MuDst")) {
+      static const int dsm_read_map[] = { 3, 2, 1, 0, 7, 6, 5, 4 };
+      static const int TriggerBankToSimuMap[] = { 3, 4, 5, 0, 1, 2 };
+      StEmcTriggerDetector& emcTrig = StMuDst::event()->emcTriggerDetector();
+      for (int dsm = 0; dsm < 6; ++dsm) {
+	int offset = TriggerBankToSimuMap[dsm]*5;
+	DSM0_TP_SUM   [offset+0] = emcTrig.bemcLayer1(dsm*8+dsm_read_map[0]) & 0x3ff;
+	DSM0_TP_SUM   [offset+1] = emcTrig.bemcLayer1(dsm*8+dsm_read_map[1]) & 0x3ff;
+	DSM0_TP_SUM_J3[offset+2] = emcTrig.bemcLayer1(dsm*8+dsm_read_map[2]) & 0x1ff;
+	DSM0_TP_SUM_J1[offset+2] = emcTrig.bemcLayer1(dsm*8+dsm_read_map[3]) & 0x1ff;
+	DSM0_TP_SUM   [offset+3] = emcTrig.bemcLayer1(dsm*8+dsm_read_map[4]) & 0x3ff;
+	DSM0_TP_SUM   [offset+4] = emcTrig.bemcLayer1(dsm*8+dsm_read_map[5]) & 0x3ff;
+      }
+    }
+#endif
+*/    
   //Sum TP ADC into JP's
-  DSM1_JP_ADC[0]=DSM0_TP_SUM[0]+DSM0_TP_SUM[1]+DSM0_TP_SUM_J3[2];
-  DSM1_JP_ADC[1]=DSM0_TP_SUM[3]+DSM0_TP_SUM[4]+DSM0_TP_SUM_J1[2];
-  DSM1_JP_ADC[2]=DSM0_TP_SUM[5]+DSM0_TP_SUM[6]+DSM0_TP_SUM_J3[7];
-  DSM1_JP_ADC[3]=DSM0_TP_SUM[8]+DSM0_TP_SUM[9]+DSM0_TP_SUM_J1[7];
-  DSM1_JP_ADC[4]=DSM0_TP_SUM[10]+DSM0_TP_SUM[11]+DSM0_TP_SUM_J3[12];
-  DSM1_JP_ADC[5]=DSM0_TP_SUM[13]+DSM0_TP_SUM[14]+DSM0_TP_SUM_J1[12];
+
+  // West
+  DSM1_JP_ADC[0]=DSM0_TP_SUM[0]+DSM0_TP_SUM[1]+DSM0_TP_SUM_J1[2];
+  DSM1_JP_ADC[1]=DSM0_TP_SUM[3]+DSM0_TP_SUM[4]+DSM0_TP_SUM_J3[2];
+  DSM1_JP_ADC[2]=DSM0_TP_SUM[5]+DSM0_TP_SUM[6]+DSM0_TP_SUM_J1[7];
+  DSM1_JP_ADC[3]=DSM0_TP_SUM[8]+DSM0_TP_SUM[9]+DSM0_TP_SUM_J3[7];
+  DSM1_JP_ADC[4]=DSM0_TP_SUM[10]+DSM0_TP_SUM[11]+DSM0_TP_SUM_J1[12];
+  DSM1_JP_ADC[5]=DSM0_TP_SUM[13]+DSM0_TP_SUM[14]+DSM0_TP_SUM_J3[12];
+  
+  // East
   DSM1_JP_ADC[6]=DSM0_TP_SUM[15]+DSM0_TP_SUM[16]+DSM0_TP_SUM_J3[17];
   DSM1_JP_ADC[7]=DSM0_TP_SUM[18]+DSM0_TP_SUM[19]+DSM0_TP_SUM_J1[17];
   DSM1_JP_ADC[8]=DSM0_TP_SUM[20]+DSM0_TP_SUM[21]+DSM0_TP_SUM_J3[22];
   DSM1_JP_ADC[9]=DSM0_TP_SUM[23]+DSM0_TP_SUM[24]+DSM0_TP_SUM_J1[22];
   DSM1_JP_ADC[10]=DSM0_TP_SUM[25]+DSM0_TP_SUM[26]+DSM0_TP_SUM_J3[27];
   DSM1_JP_ADC[11]=DSM0_TP_SUM[28]+DSM0_TP_SUM[29]+DSM0_TP_SUM_J1[27];
+ 
   for (int hh=0;hh<12;hh++) {
     JP_adc_holder[hh]=DSM1_JP_ADC[hh];
   }
@@ -824,21 +903,28 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
     if (i < (kNJet/2)) mod = 0;
     else mod = 1;
     DSM1_ETOT_ADC[mod]+=DSM1_JP_ADC[i];
-    if ( DSM1_JP_Bit[mod] < DSM1_JP_jp_Bit[i]) DSM1_JP_Bit[mod]=DSM1_JP_jp_Bit[i];   
+    if ( DSM1_JP_Bit[i/2] < DSM1_JP_jp_Bit[i]) DSM1_JP_Bit[i/2]=DSM1_JP_jp_Bit[i];   
   }
 
 
   // again we will move this up to a higher level but for now keep this here
-  if ((DSM1_JP_Bit[0] >= 1)||(DSM1_JP_Bit[1] >=1 )) {
-    mFiredTriggers.push_back(127501);
-    mFiredTriggers.push_back(137501);
-    mFiredTriggers.push_back(127622);
-    mFiredTriggers.push_back(137622);
+  for (int dsm = 0; dsm < 6; ++dsm) {
+    if (DSM1_JP_Bit[dsm] >= 1) {
+      mFiredTriggers.push_back(127501);
+      mFiredTriggers.push_back(137501);
+      mFiredTriggers.push_back(127622);
+      mFiredTriggers.push_back(137622);
+      break;
+    }
   }
-  if ((DSM1_JP_Bit[0] >= 2)||(DSM1_JP_Bit[1] >=2 )) {
-    mFiredTriggers.push_back(127221);
-    mFiredTriggers.push_back(137221);
-    mFiredTriggers.push_back(137222);
+
+  for (int dsm = 0; dsm < 6; ++dsm) {
+    if (DSM1_JP_Bit[dsm] >= 2) {
+      mFiredTriggers.push_back(127221);
+      mFiredTriggers.push_back(137221);
+      mFiredTriggers.push_back(137222);
+      break;
+    }
   }
 
   for (int i=0;i<kL0DsmModule;i++){
@@ -863,6 +949,65 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
     DSM1_ETOT_ADC[i]/=4;
     if (DSM1_ETOT_ADC[i]>31) DSM1_ETOT_ADC[i]=31;
   }
+
+
+#ifdef DEBUG
+  // Fill diagnostic histograms
+  if (mHeadMaker->GetDataSet("MuDst")) {
+    StEmcTriggerDetector& emcTrig = StMuDst::event()->emcTriggerDetector();
+    static const int dsm_read_map[] = { 3, 2, 1, 0, 7, 6, 5, 4 };
+    static const int TriggerBankToSimuMap[] = { 3, 4, 5, 0, 1, 2 };
+
+    // Loop over BEMC layer 2 DSMs - there is only 1!
+    for (int dsm = 0; dsm < 1; ++dsm) {
+      // Loop over channels
+      for (int ch = 0; ch < 6; ++ch) {
+	int idx = dsm_read_map[ch];
+	int out = emcTrig.emcLayer2(idx);
+	int JP_ADC_AND=(out&0x1f);
+	int MT_1=(out&0x60);
+	int TP_HT=(out&0x80);
+	int MT_2=(out&0x100);
+	int TP=(out&0x200);
+	int JP=(out&0xC00);
+	int HT1=(out&0x3000);
+	int HT2=(out&0xC000);
+	int AddedTotal=HT1 + HT2 + JP + TP + MT_2 + TP_HT + MT_1 + JP_ADC_AND;
+	if (AddedTotal!=out) cout<<"Holy Crap!"<<endl;
+	cout<<" Total="<<out<<" ch="<<ch<<
+	  " JP ADC AND="<<(out&0x1f)<<
+	  /*    " MT="<<(out&0x60)/pow(2,5)<<
+		" TP.HT="<<(out&0x80)/pow(2,7)<<
+		" MT="<<(out&0x100)/pow(2,8)<<
+		" TP="<<(out&0x200)/pow(2,9)<<
+	  */
+	  " JP="<<(out&0xC00)/pow(2,10)<<
+	  " S1="<<DSM1_JP_Bit[0]<<
+	  " S2="<<DSM1_JP_Bit[1]<<endl;
+	mBEMCLayer2DSMInputPatchSum->Fill(ch, out & 0x1f);
+	mBEMCLayer2DSMInputJetPatchBits->Fill(ch, out >> 10 & 0x3);
+
+	/*ch0- 1.0x2.0 BEMC-BE101 10 and 12
+	  ch1- 1.0x2.0 BEMC-BE102 2 and 4
+	  ch2- 1.0x2.0 BEMC-BE103 6 and 8
+	  ch3- 1.0x2.0 BEMC-BW101 10 and 12
+	  ch4- 1.0x2.0 BEMC-BW102 2 and 4
+	  ch5- 1.0x2.0 BEMC-BW103 6 and 8
+	  ch6- 0.9x3.0 EEMC-E101 4, 6 and 8
+	  ch7- 0.9x3.0 EEMC-E102 10, 12 and 2
+	*/
+	int jetPatch = 2 * TriggerBankToSimuMap[ch];
+	int sum = DSM1_JP_ADC[jetPatch] + DSM1_JP_ADC[jetPatch+1];
+	sum = (sum >> 7) ? 31 : (sum >> 2 & 0x1f);
+	if (int diff = (out & 0x1f) - (sum & 0x1f))
+	  mBEMCLayer2DSMInputPatchSumDiff->Fill(ch, diff);
+	if (int diff = (out >> 10 & 0x3) - (DSM1_JP_Bit[TriggerBankToSimuMap[ch]]))
+	  mBEMCLayer2DSMInputJetPatchBits->Fill(ch, diff);
+      }	// End loop over channels
+    } // End loop over BEMC layer 2 DSMs
+  }
+#endif
+
 }
 
 
