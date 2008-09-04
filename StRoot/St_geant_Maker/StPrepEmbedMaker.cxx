@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.8 2008/08/19 23:11:27 andrewar Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.9 2008/09/04 00:07:27 fisyak Exp $
  *
  */
 
@@ -121,7 +121,7 @@ Int_t StPrepEmbedMaker::Make() {
     LOG_ERROR << "StPrepEmbedMaker::Make EvtHddr has not been found" << endm;
     return kStErr;
   }
-  Int_t nFound = mTree->Draw("uncorrectedNumberOfPrimaries",
+  Int_t nFound = mTree->Draw("uncorrectedNumberOfPrimaries:primaryVertexFlag",
 			     Form("mRunNumber==%i&&mEventNumber==%i",EvtHddr->GetRunNumber(),EvtHddr->GetEventNumber()),
 			     "goff");
   if (nFound != 1) {
@@ -129,6 +129,14 @@ Int_t StPrepEmbedMaker::Make() {
 	      << " has been found in tag file" << nFound << " times" <<  endm;
     return kStErr;
   }
+  LOG_INFO << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber() 
+	   << " has been found with uncorrectedNumberOfPrimaries = " <<  mTree->GetV1()[0] 
+	   << " and primaryVertexFlag = " << mTree->GetV2()[0]  <<  endm;
+   if (mTree->GetV1()[0] <= 0 || mTree->GetV2()[0] ) {
+     LOG_ERROR << "StPrepEmbedMaker::Make reject this event" << endm;
+     return kStErr;
+  }
+ 
   Int_t numberOfPrimaryTracks = (Int_t) mTree->GetV1()[0];
   // Extract info for mult for this event
   Int_t npart;
@@ -169,16 +177,23 @@ Int_t StPrepEmbedMaker::Make() {
   // gkine      npart ID        PTLOW,   PTHIGH,   YLOW,   YHIGH,   PHILOW,   PHIHIGH,   ZLOW,   ZHIGH
   //make sure zlow!=zhigh in particle definition - not sure of result. 
   //Z vertex will be forced in vxyz statement.
-  double zlow=xyz[2]-.01;
-  double zhigh=xyz[2]+.01;
 
-  TString cmd(Form("gkine %i %i %f %f %f %f %f %f %f %f;",
-		   npart, mSettings->pid,
-		   mSettings->ptlow, mSettings->pthigh,
-		   mSettings->etalow, mSettings->etahigh,
-		   mSettings->philow, mSettings->phihigh, zlow,zhigh));
+  TString cmd;
+#if 1
+  cmd = Form("gkine %i %i %f %f %f %f %f %f %f %f;",
+	     npart, mSettings->pid,
+	     mSettings->ptlow, mSettings->pthigh,
+	     mSettings->etalow, mSettings->etahigh,
+	     mSettings->philow, mSettings->phihigh, xyz[2], xyz[2]);
   Do(cmd.Data());
-  Do(Form("vxyz %f %f %f",xyz[0],xyz[1],xyz[2]));
+#endif
+  cmd = Form("phasespace %i %i %f %f %f %f;",
+	     npart, mSettings->pid,
+	     mSettings->ptlow, mSettings->pthigh,
+	     mSettings->etalow, mSettings->etahigh);
+  
+  Do(cmd.Data());
+  Do(Form("gvertex %f %f %f",xyz[0],xyz[1],xyz[2]));
   Do("vsig 0 0;");
 
   Do("trig 1");
@@ -223,6 +238,9 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.9  2008/09/04 00:07:27  fisyak
+ * Change default from gkine to phasespace
+ *
  * Revision 1.8  2008/08/19 23:11:27  andrewar
  * Added initialization for RNDM seeds. Seeding now from the clock and the UNIX
  * process ID (as suggested by Marco).
