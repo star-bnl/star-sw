@@ -32,11 +32,13 @@ struct tpx_rdo_event {
 
 
 struct tpx_altro_struct {
-	u_char id ;
-	u_char ch ;
+	u_char id ;		// original altro id; even if overriden
+	u_char ch ;	// original altro channel
 	u_char rdo ;	// from 0; this is an _incoming_ datum to the scanner!
 	u_char what ;	// bitfield: do what, see defines above...
 
+	u_char sector ;	// input: from 1
+	u_char fee ;	// TPC physical absolute FEE; will be correct even for overriden ALTROs!
 	u_char row ;
 	u_char pad ;
 
@@ -44,8 +46,8 @@ struct tpx_altro_struct {
 	u_int *where ;	// pointer to this altro's data...
 
 	u_short t ;	// token; incoming, for debugging
-	
 	u_short count ;		// length of data
+
 	u_short adc[512] ;
 	u_short tb[512] ;
 
@@ -65,7 +67,7 @@ extern void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad) ;
 extern void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch) ;
 extern int tpx_altro_to_fee(int rdo, int a) ;
 extern u_char tpx_rdo_fees(int rdo, int cou) ;
-extern u_char tpx_altro_ch_to_fee(int a, int ch) ;
+//extern u_char tpx_altro_ch_to_fee(int a, int ch) ;
 
 extern void tpx_analyze_log(int sector, int rdo, char *buff) ;
 extern int  tpx_analyze_msc(int sector, int rdo, char *buff, int *altro_list=0) ;

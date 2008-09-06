@@ -316,6 +316,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 	a.what = TPX_ALTRO_DO_ADC ;
 	a.rdo = rdo.rdo - 1 ;	// a.rdo counts from 0
 	a.t = t ;
+	a.sector = rdo.sector ;
 
 	r[a.rdo].count++ ;
 
