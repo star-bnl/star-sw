@@ -45,6 +45,8 @@ public:
 	void smooth() ;					// from ped_store to ped_store
 	int summarize(FILE *log=0) ;
 
+	int sector ; // if fee is overriden...
+
 private:
 	int smoothed ;	// boolean
 

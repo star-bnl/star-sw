@@ -12,7 +12,7 @@
 
 #include <DAQ_TPX/tpxCore.h>
 #include <DAQ_TPX/tpxPed.h>
-
+#include <TPX/tpx_altro_to_pad.h>
 
 
 	
@@ -27,7 +27,7 @@ tpxPed::tpxPed()
 
 	ped_store = 0 ;	// unassigned!
 
-
+	sector = -1 ;	// uniti...
 	return ;
 }
 
@@ -81,6 +81,7 @@ void tpxPed::accum(char *evbuff, int bytes)
 	a.what = TPX_ALTRO_DO_ADC ;
 	a.rdo = rdo.rdo - 1 ;	// a.rdo counts from 0
 	a.t = t ;
+	a.sector = rdo.sector ;
 
 	evts[a.rdo]++ ;
 
@@ -274,7 +275,28 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 			tcou++ ;
 		}
 
-		*addr = (a << 24) | (ch << 16) | tcou ;
+		int aid = a ;
+		for(int i=0;i<tpx_fee_override_cou;i++) {
+			if(sector == tpx_fee_override[i].sector) {
+			if(rb == (tpx_fee_override[i].rdo-1)) {
+			int fee = a & 0xFE ;
+			if(fee == tpx_fee_override[i].orig_altro) {
+				
+				if(a & 1) {
+					aid = tpx_fee_override[i].curr_altro | 1 ;
+
+				}
+				else {
+					aid = tpx_fee_override[i].curr_altro ;
+				}
+
+				LOG(WARN,"Sector %2d, RDO %d: overriding ALTRO from %3d to %3d",sector,rb+1,a,aid) ;
+			}
+			}
+			}
+		}
+
+		*addr = (aid << 24) | (ch << 16) | tcou ;
 
 		rbuff += 2 * tcou ;	// skip stored...
 	}

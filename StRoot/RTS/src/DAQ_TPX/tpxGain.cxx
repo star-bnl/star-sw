@@ -147,7 +147,8 @@ void tpxGain::ev_done()
 			float g = get_gains(s,r,p)->g ;
 
 			// calc only for sane values... typical peak is 300 so we go 3 times less/more...
-			if(tb && (g>100.0) && (g<900.0)) {
+			//if(tb && (g>300.0) && (g<900.0)) {
+			if(tb && (g>50.0) && (g<900.0)) {
 				mean_tb += tb ;
 				mean_peak += g ;
 				mean_cou++ ;
@@ -221,7 +222,7 @@ void tpxGain::accum(char *evbuff, int bytes)
 	a.rdo = rdo.rdo - 1 ;	// a.rdo counts from 0
 	a.what = TPX_ALTRO_DO_ADC ;
 	a.t = rdo.token ;
-
+	a.sector = rdo.sector ;
 
 	// got an rdo
 	fee_found[sec][rdo.rdo].got_one++ ;
@@ -297,18 +298,19 @@ void tpxGain::accum(char *evbuff, int bytes)
 			gs->g += charge ;
 			gs->t0 += mtb ;
 		
+			// NEEDS MORE WORK!
 			// since charge_peak is a TPX constant we must allow for
 			// row-to-row gain differences so the window should stay open...
 
 			if(peak < (0.5*charge_peak)) {
 				LOG(DBG,"EV %d:row %d:%d, peak %d, charge low %f",fee_found[sec][rdo.rdo].got_one,a.row,a.pad,peak,charge) ;
-				if(a.row && (a.pad==10)) LOG(WARN,"EV %d:row %d:%d, peak %d, charge low %f",fee_found[sec][rdo.rdo].got_one,a.row,a.pad,peak,charge) ;
+				//if(a.row && (a.pad==10)) LOG(WARN,"EV %d:row %d:%d, peak %d, charge low %f",fee_found[sec][rdo.rdo].got_one,a.row,a.pad,peak,charge) ;
 				
-				as->low_pulse++ ;
+				//as->low_pulse++ ;
 			}
 			else if(peak > (1.5*charge_peak)) {
 				LOG(DBG,"row %d:%d, peak %d, charge high %f",a.row,a.pad,peak,charge) ;
-				as->high_pulse++ ;
+				//as->high_pulse++ ;
 			}
 			else {	// just right!
 			}

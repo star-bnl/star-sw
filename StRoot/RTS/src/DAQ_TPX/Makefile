@@ -93,12 +93,14 @@ tpxPed.o: ../DAQ_TPX/tpxCore.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxPed.o: ../DAQ_TPX/tpxPed.h
 tpxPed.o: tpxCore.h
+tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxQA.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxQA.o: ../../../../StRoot/RTS/include/TPC/fee_readout.h
 tpxQA.o: tpxCore.h
 tpxQA.o: tpxQA.h
 tpxStat.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxStat.o: ../../../../StRoot/RTS/include/daqModes.h
+tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxStat.o: ../DAQ_TPX/tpxCore.h
 tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxStat.o: ../DAQ_TPX/tpxStat.h
