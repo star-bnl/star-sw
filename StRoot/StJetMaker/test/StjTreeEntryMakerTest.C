@@ -48,7 +48,7 @@ void StjTreeEntryMakerTest::testMake()
   for(int i = 0; i < 9313; ++i) {
     Int_t ret =  maker->Make();
     if(ret == kStEOF) break;
-    CPPUNIT_ASSERT( 37 != i );
+    CPPUNIT_ASSERT( 47 != i );
   }
 
 
