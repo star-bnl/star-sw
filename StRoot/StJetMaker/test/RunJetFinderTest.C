@@ -63,6 +63,40 @@ void RunJetFinderTest::testRun()
 
 }
 
+void RunJetFinderTest::testRunRepeat()
+{
+  StConePars* cpars = new StConePars();
+  cpars->setGridSpacing(56, -1.6, 1.6, 120, -3.141592613589793, 3.141592613589793);
+  cpars->setConeRadius(0.4);
+  cpars->setSeedEtMin(0.5);
+  cpars->setAssocEtMin(0.1);
+  cpars->setSplitFraction(0.5);
+  cpars->setPerformMinimization(true);
+  cpars->setAddMidpoints(true);
+  cpars->setRequireStableMidpoints(true);
+  cpars->setDoSplitMerge(true);
+  cpars->setDebug(false);
+  StjRunJetFinder jetFinder;
+  jetFinder.Init(cpars);
+
+  StjFourVecList fourList = createFourVecList();
+
+  StjFourVecPrint fourprint;
+  //  fourprint(fourList);
+
+  //  while(1) jetFinder(fourList);
+
+  StjJetList jetList = jetFinder(fourList);
+
+  StjJetPrint jetprint;
+  jetprint(jetList);
+
+  StjJetList expectedJetList = createJetList();
+
+  CPPUNIT_ASSERT_EQUAL( expectedJetList, jetList);
+
+}
+
 StjFourVecList RunJetFinderTest::createFourVecList()
 {
   StjFourVecList ret;
