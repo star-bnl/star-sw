@@ -82,8 +82,8 @@ sources	= \
 	StjTrackToTLorentzVector.cxx \
 	StjTrackTowerEnergyListToFourVecList.cxx \
 	StjDijetListTrigger.cxx \
-	StjDijetListTriggerBJP2.cxx \
-	StjDijetListTriggerBHT2.cxx
+	StjDijetListTriggerBJP.cxx \
+	StjDijetListTriggerBHT.cxx
 
 headers	= \
 	StjBEMC.h \
@@ -167,8 +167,8 @@ headers	= \
 	StjTrackToTLorentzVector.h \
 	StjTrackTowerEnergyListToFourVecList.h \
 	StjDijetListTrigger.h \
-	StjDijetListTriggerBJP2.h \
-	StjDijetListTriggerBHT2.h
+	StjDijetListTriggerBJP.h \
+	StjDijetListTriggerBHT.h
 
 
 lib_LTLIBRARIES = libStJetMakerBase.la

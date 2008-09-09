@@ -110,8 +110,8 @@ extern void G__set_cpp_environmentBaseDict();
 #include "StjTrackToTLorentzVector.h"
 #include "StjTrackTowerEnergyListToFourVecList.h"
 #include "StjDijetListTrigger.h"
-#include "StjDijetListTriggerBJP2.h"
-#include "StjDijetListTriggerBHT2.h"
+#include "StjDijetListTriggerBJP.h"
+#include "StjDijetListTriggerBHT.h"
 #include <algorithm>
 namespace std { }
 using namespace std;
@@ -269,8 +269,8 @@ extern G__linked_taginfo G__BaseDictLN_StjTrackToFourVec;
 extern G__linked_taginfo G__BaseDictLN_StjTrackTowerEnergyListToFourVecList;
 extern G__linked_taginfo G__BaseDictLN_pairlEvectorlEStjTrackcOallocatorlEStjTrackgRsPgRcOvectorlEStjTowerEnergycOallocatorlEStjTowerEnergygRsPgRsPgR;
 extern G__linked_taginfo G__BaseDictLN_StjDijetListTrigger;
-extern G__linked_taginfo G__BaseDictLN_StjDijetListTriggerBJP2;
-extern G__linked_taginfo G__BaseDictLN_StjDijetListTriggerBHT2;
+extern G__linked_taginfo G__BaseDictLN_StjDijetListTriggerBJP;
+extern G__linked_taginfo G__BaseDictLN_StjDijetListTriggerBHT;
 
 /* STUB derived class for protected member access */
 typedef vector<StjTowerEnergy,allocator<StjTowerEnergy> > G__vectorlEStjTowerEnergycOallocatorlEStjTowerEnergygRsPgR;
