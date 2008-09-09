@@ -1,4 +1,4 @@
-// $Id: StjDijetListCut.cxx,v 1.1 2008/08/13 19:44:55 tai Exp $
+// $Id: StjDijetListCut.cxx,v 1.2 2008/09/09 00:00:35 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjDijetListCut.h"
 
@@ -21,10 +21,10 @@ StjDijetList StjDijetListCut::operator()(const StjDijetList &dijetList)
 }
 
 
-bool StjDijetListCut::shouldNotKeep(const StjDijet& p4)
+bool StjDijetListCut::shouldNotKeep(const StjDijet& dijet)
 {
   for(CutList::iterator cut = _cutList.begin(); cut != _cutList.end(); ++cut){
-    if((**cut)(p4)) return true;
+    if((**cut)(dijet)) return true;
   }
 
   return false;
