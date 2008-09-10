@@ -75,8 +75,8 @@ clean :
 
 # should not be called by non-DAQ personel...
 install : 
-	@$(INSTALL) libevp.${VERSION}.a libevpSO.${VERSION}.so  $(LIBDIR)
-	@$(INSTALL) special ppreader $(BINDIR)
+	$(INSTALL) libevp.${VERSION}.a libevpSO.${VERSION}.so  $(LIBDIR)
+	$(INSTALL) special ppreader $(BINDIR)
 
 tarer: special
 	tar cvf evp_reader.tar 

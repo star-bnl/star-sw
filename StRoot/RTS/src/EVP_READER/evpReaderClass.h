@@ -16,6 +16,8 @@ public:
 	evpReader(char *fname) ;
 	~evpReader(void) ;
 
+	int writeCurrentFileToDisk(char *fname);
+
 	char *get(int which, int type=EVP_TYPE_ANY) ;	
         char *getSFSEventNumber();
 
