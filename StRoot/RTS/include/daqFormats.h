@@ -978,6 +978,7 @@ struct SCD {
 	unsigned int rich_scalers[16] ;	// ask Jamie Dunlop
 } ;
 
+  
 // Level 3 structures
 // Level 3 banks
 #include "L3/L3Formats.h"
