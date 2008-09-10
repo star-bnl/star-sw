@@ -28,6 +28,10 @@ typedef unsigned int UINT32;
 
 extern int sanityCheck(char *datap) ;
 
+int repack = 0;
+int repack_trigger = 0;
+char repack_filename[80];
+
 int main(int argc, char *argv[])
 {
 	char *mem ;
@@ -55,6 +59,8 @@ int main(int argc, char *argv[])
 	strcpy(loglevel,"WARN") ;
 	strcpy(mountpoint,"") ;
 
+	repack_filename[0] = '\0';
+
 #ifdef STAR_OFFLINE_ENVIRONMENT
 	logwhere = RTS_LOG_STDERR ;
 #else
@@ -68,7 +74,7 @@ int main(int argc, char *argv[])
 	first_event = 1;
 	max_events = 0xFFFFFFFF ;	// a lot...
 
-	while((c = getopt(argc,argv,"Ct:d:m:w:D:n:f:")) != EOF)
+	while((c = getopt(argc,argv,"Ct:d:m:w:D:n:f:r:T:")) != EOF)
 	switch(c) {
 	case 't' :
 		evtype = atoi(optarg) ;		// request type
@@ -94,8 +100,17 @@ int main(int argc, char *argv[])
 	case 'f' :
 	        first_event = atoi(optarg) ;
 		break;
+        case 'r' :
+	  repack = 1;
+	  strcpy(repack_filename, optarg);
+	  break;
+
+	case 'T' :
+	  repack_trigger = atoi(optarg);
+	  break;
+		
 	case '?' :
-		fprintf(stderr,"Usage: %s [-t type ] [-d LOG ] [-C] [-m mountpoint] [-w wherelog ] [-D det_id] [-f first] [-n num] <files...>\n",argv[0]) ;
+		fprintf(stderr,"Usage: %s [-t type ] [-d LOG ] [-C] [-m mountpoint] [-w wherelog ] [-D det_id] [-f first] [-n num] [-r repackfilename] [-T triggertorepack] <files...>\n",argv[0]) ;
 		return -1 ;
 		break ;
 	}
@@ -276,6 +291,20 @@ int main(int argc, char *argv[])
 
 		LOG(NOTE,"     Trigger Word 0x%02X, time %u (%s), daqbits 0x%04X, evpgroups 0x%04X",evp->trgword,evp->evt_time,(int)stime,evp->daqbits,evp->evpgroups) ;
 	
+
+		if(repack) {
+		  LOG(DBG, "Repack? 0x%x 0x%x",repack_trigger, evp->daqbits);
+		  if(((repack_trigger) & evp->daqbits)==repack_trigger) {
+		    if(strlen(repack_filename) > 0) {
+		      LOG(NOTE, "Repacking event");
+		      evp->writeCurrentFileToDisk(repack_filename);
+		    }
+		    else {
+		      LOG(ERR, "Not repacking because have no filename");
+		    }
+		  }
+		}
+
 
 		LOG(NOTE,"     Dets: 0x%x/0x%x    evpgroups: 0x%x/0x%x",
 		    evp->detectors,evp->detsinrun,evp->evpgroups,evp->evpgroupsinrun,0);
