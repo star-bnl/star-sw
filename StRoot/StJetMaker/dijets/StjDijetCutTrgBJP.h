@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjDijetCutTrgBJP.h,v 1.1 2008/08/13 06:08:41 tai Exp $
+// $Id: StjDijetCutTrgBJP.h,v 1.1 2008/09/11 23:34:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJDIJETCUTTRGBJP_H
 #define STJDIJETCUTTRGBJP_H

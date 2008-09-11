@@ -22,5 +22,6 @@ AC_CONFIG_FILES([
 	tree/Makefile
 	trigger/Makefile
 	vertex/Makefile
+	dijets/Makefile
 	])
 AC_OUTPUT

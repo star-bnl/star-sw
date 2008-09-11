@@ -5,20 +5,9 @@ sources	= \
 	StjBEMCNull.cxx \
 	StjBEMCTree.cxx \
 	StjBEMCTxt.cxx \
-	StjDijetCut.cxx \
-	StjDijetCutAsymmetricPt.cxx \
-	StjDijetCutDPhi.cxx \
-	StjDijetCutEta.cxx \
-	StjDijetCutEta3MinusEta4.cxx \
-	StjDijetCutTrgBHT.cxx \
-	StjDijetCutTrgBJP.cxx \
-	StjDijetList.cxx \
-	StjDijetListCut.cxx \
-	StjDijetPrint.cxx \
 	StjEEMC.cxx \
 	StjEEMCNull.cxx \
 	StjEEMCTxt.cxx \
-	StjFormDijet.cxx \
 	StjFourVecCut.cxx \
 	StjFourVecCutPt.cxx \
 	StjFourVecCutTrgBHT.cxx \
@@ -80,30 +69,16 @@ sources	= \
 	StjTrackPrint.cxx \
 	StjTrackToFourVec.cxx \
 	StjTrackToTLorentzVector.cxx \
-	StjTrackTowerEnergyListToFourVecList.cxx \
-	StjDijetListTrigger.cxx \
-	StjDijetListTriggerBJP.cxx \
-	StjDijetListTriggerBHT.cxx
+	StjTrackTowerEnergyListToFourVecList.cxx
 
 headers	= \
 	StjBEMC.h \
 	StjBEMCNull.h \
 	StjBEMCTree.h \
 	StjBEMCTxt.h \
-	StjDijetCut.h \
-	StjDijetCutAsymmetricPt.h \
-	StjDijetCutDPhi.h \
-	StjDijetCutEta.h \
-	StjDijetCutEta3MinusEta4.h \
-	StjDijetCutTrgBHT.h \
-	StjDijetCutTrgBJP.h \
-	StjDijetList.h \
-	StjDijetListCut.h \
-	StjDijetPrint.h \
 	StjEEMC.h \
 	StjEEMCNull.h \
 	StjEEMCTxt.h \
-	StjFormDijet.h \
 	StjFourVecCut.h \
 	StjFourVecCutPt.h \
 	StjFourVecCutTrgBHT.h \
@@ -165,10 +140,7 @@ headers	= \
 	StjTrackPrint.h \
 	StjTrackToFourVec.h \
 	StjTrackToTLorentzVector.h \
-	StjTrackTowerEnergyListToFourVecList.h \
-	StjDijetListTrigger.h \
-	StjDijetListTriggerBJP.h \
-	StjDijetListTriggerBHT.h
+	StjTrackTowerEnergyListToFourVecList.h
 
 
 lib_LTLIBRARIES = libStJetMakerBase.la

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjDijetCutDPhi.h,v 1.1 2008/08/13 04:55:31 tai Exp $
+// $Id: StjDijetCutDPhi.h,v 1.1 2008/09/11 23:34:46 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJDIJETCUTDPHI_H
 #define STJDIJETCUTDPHI_H

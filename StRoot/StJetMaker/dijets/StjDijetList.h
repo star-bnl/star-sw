@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjDijetList.h,v 1.2 2008/09/09 00:00:35 tai Exp $
+// $Id: StjDijetList.h,v 1.1 2008/09/11 23:34:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJDIJETLIST_H
 #define STJDIJETLIST_H

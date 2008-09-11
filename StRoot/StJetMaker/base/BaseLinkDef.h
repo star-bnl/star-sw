@@ -9,20 +9,9 @@
 #pragma link C++ class StjBEMCNull+;
 #pragma link C++ class StjBEMCTree+;
 #pragma link C++ class StjBEMCTxt+;
-#pragma link C++ class StjDijetCut+;
-#pragma link C++ class StjDijetCutAsymmetricPt+;
-#pragma link C++ class StjDijetCutDPhi+;
-#pragma link C++ class StjDijetCutEta+;
-#pragma link C++ class StjDijetCutEta3MinusEta4+;
-#pragma link C++ class StjDijetCutTrgBHT+;
-#pragma link C++ class StjDijetCutTrgBJP+;
-#pragma link C++ class StjDijet+;
-#pragma link C++ class StjDijetListCut+;
-#pragma link C++ class StjDijetPrint+;
 #pragma link C++ class StjEEMC+;
 #pragma link C++ class StjEEMCNull+;
 #pragma link C++ class StjEEMCTxt+;
-#pragma link C++ class StjFormDijet+;
 #pragma link C++ class StjFourVecCut+;
 #pragma link C++ class StjFourVecCutPt+;
 #pragma link C++ class StjFourVecCutTrgBHT+;
@@ -86,16 +75,12 @@
 #pragma link C++ class StjTrackToFourVec+;
 #pragma link C++ class StjTrackToTLorentzVector+;
 #pragma link C++ class StjTrackTowerEnergyListToFourVecList+;
-#pragma link C++ class StjDijetListTrigger+;
-#pragma link C++ class StjDijetListTriggerBJP+;
-#pragma link C++ class StjDijetListTriggerBHT+;
 
 #pragma link C++ class vector<StjTrack>+; 
 #pragma link C++ class vector<StjTowerEnergy>+; 
 #pragma link C++ class vector<StjMCParticle>+; 
 #pragma link C++ class vector<StjFourVec>+; 
 #pragma link C++ class vector<StjJet>+; 
-#pragma link C++ class vector<StjDijet>+; 
 
 
 #endif

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjDijetPrint.h,v 1.1 2008/08/13 04:04:00 tai Exp $
+// $Id: StjDijetPrint.h,v 1.1 2008/09/11 23:34:56 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJDIJETPRINT_H
 #define STJDIJETPRINT_H
