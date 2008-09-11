@@ -1434,7 +1434,7 @@ DATAP *getlegacydatap(char *mem, int bytes)
 // Assume LHRD at 
 //   this->file_name
 //   this->evt_offset_in_file
-int evpReader::writeCurrentFileToDisk(char *ofilename)
+int evpReader::writeCurrentEventToDisk(char *ofilename)
 {
   int fdi;
   int fdo;
