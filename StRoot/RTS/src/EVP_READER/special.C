@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
 		  if(((repack_trigger) & evp->daqbits)==repack_trigger) {
 		    if(strlen(repack_filename) > 0) {
 		      LOG(NOTE, "Repacking event");
-		      evp->writeCurrentFileToDisk(repack_filename);
+		      evp->writeCurrentEventToDisk(repack_filename);
 		    }
 		    else {
 		      LOG(ERR, "Not repacking because have no filename");
