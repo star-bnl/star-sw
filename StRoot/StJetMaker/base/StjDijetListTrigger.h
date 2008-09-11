@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjDijetListTrigger.h,v 1.1 2008/09/09 00:00:35 tai Exp $
+// $Id: StjDijetListTrigger.h,v 1.2 2008/09/11 22:24:35 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJDIJETLISTTRIGGER_H
 #define STJDIJETLISTTRIGGER_H
@@ -14,9 +14,11 @@ public:
   StjDijetListTrigger() { }
   virtual ~StjDijetListTrigger() { }
 
-  //  StjDijetList operator()(const StjDijetList& dijetList);
+  StjDijetList operator()(const StjDijetList& inList);
 
 private:
+
+  virtual StjDijetList processOneItem(const StjDijetList::value_type& item) = 0;
 
   ClassDef(StjDijetListTrigger, 1)
 
