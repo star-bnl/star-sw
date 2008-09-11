@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjFormDijet.h,v 1.1 2008/08/12 07:09:45 tai Exp $
+// $Id: StjFormDijet.h,v 1.1 2008/09/11 23:34:56 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJFORMDIJET_H
 #define STJFORMDIJET_H

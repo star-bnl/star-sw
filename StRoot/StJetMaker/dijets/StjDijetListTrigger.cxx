@@ -1,4 +1,4 @@
-// $Id: StjDijetListTrigger.cxx,v 1.2 2008/09/11 22:24:34 tai Exp $
+// $Id: StjDijetListTrigger.cxx,v 1.1 2008/09/11 23:34:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjDijetListTrigger.h"
 

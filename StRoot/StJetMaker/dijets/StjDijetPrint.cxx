@@ -1,4 +1,4 @@
-// $Id: StjDijetPrint.cxx,v 1.2 2008/08/13 15:34:22 tai Exp $
+// $Id: StjDijetPrint.cxx,v 1.1 2008/09/11 23:34:55 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjDijetPrint.h"
 

@@ -5,5 +5,7 @@ SUBDIRS = \
 	mckin \
 	tree \
 	trigger \
-	vertex
+	vertex \
+	dijets
+
 
