@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.27 2007/08/20 23:25:39 perev Exp $
+ * $Id: StHelix.cc,v 1.28 2008/09/11 20:34:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.28  2008/09/11 20:34:31  ullrich
+ * Fixed sign problem in seed calculation for helix-helix DCA.
+ *
  * Revision 1.27  2007/08/20 23:25:39  perev
  * BugFix #1016
  *
@@ -552,8 +555,10 @@ StHelix::pathLengths(const StHelix& h) const
 	    if (h.distance(at(a)) < h.distance(at(s))) s = a;
 	}
 	else {                              // no intersection (or exactly one)
-	    x = xcenter() + r1*dx/dd;
-	    y = ycenter() + r1*dy/dd;
+	    int rsign = ((r2-r1) > dd ? -1 : 1); // set -1 when *this* helix is
+                                                   // completely contained in the other              
+	    x = xcenter() + rsign*r1*dx/dd;
+	    y = ycenter() + rsign*r1*dy/dd;
 	    s = pathLength(x, y);
 	}
 	
