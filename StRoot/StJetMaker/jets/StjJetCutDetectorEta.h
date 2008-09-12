@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutDetectorEta.h,v 1.1 2008/08/12 05:38:09 tai Exp $
+// $Id: StjJetCutDetectorEta.h,v 1.1 2008/09/12 00:32:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTDETECTORETA_H
 #define STJJETCUTDETECTORETA_H

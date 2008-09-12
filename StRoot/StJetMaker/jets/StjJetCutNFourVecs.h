@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutNFourVecs.h,v 1.5 2008/08/04 06:10:22 tai Exp $
+// $Id: StjJetCutNFourVecs.h,v 1.1 2008/09/12 00:32:51 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTNFOURVECS_H
 #define STJJETCUTNFOURVECS_H

@@ -1,4 +1,4 @@
-// $Id: StjJetCutTrgBJP.cxx,v 1.3 2008/08/21 22:22:38 tai Exp $
+// $Id: StjJetCutTrgBJP.cxx,v 1.1 2008/09/12 00:32:54 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetCutTrgBJP.h"
 

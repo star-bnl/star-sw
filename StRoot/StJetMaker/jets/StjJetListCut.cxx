@@ -1,4 +1,4 @@
-// $Id: StjJetListCut.cxx,v 1.5 2008/08/12 04:01:27 tai Exp $
+// $Id: StjJetListCut.cxx,v 1.1 2008/09/12 00:32:56 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetListCut.h"
 
