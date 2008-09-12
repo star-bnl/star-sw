@@ -15,16 +15,6 @@ sources	= \
 	StjFourVecList.cxx \
 	StjFourVecListCut.cxx \
 	StjFourVecPrint.cxx \
-	StjJetCut.cxx \
-	StjJetCutDetectorEta.cxx \
-	StjJetCutEta.cxx \
-	StjJetCutNFourVecs.cxx \
-	StjJetCutPt.cxx \
-	StjJetCutTrgBHT.cxx \
-	StjJetCutTrgBJP.cxx \
-	StjJetList.cxx \
-	StjJetListCut.cxx \
-	StjJetPrint.cxx \
 	StjMC.cxx \
 	StjMCNull.cxx \
 	StjMCParticleCut.cxx \
@@ -86,16 +76,6 @@ headers	= \
 	StjFourVecList.h \
 	StjFourVecListCut.h \
 	StjFourVecPrint.h \
-	StjJetCut.h \
-	StjJetCutDetectorEta.h \
-	StjJetCutEta.h \
-	StjJetCutNFourVecs.h \
-	StjJetCutPt.h \
-	StjJetCutTrgBHT.h \
-	StjJetCutTrgBJP.h \
-	StjJetList.h \
-	StjJetListCut.h \
-	StjJetPrint.h \
 	StjMC.h \
 	StjMCNull.h \
 	StjMCParticleCut.h \

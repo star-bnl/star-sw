@@ -6,6 +6,7 @@ SUBDIRS = \
 	tree \
 	trigger \
 	vertex \
+	jets \
 	dijets
 
 

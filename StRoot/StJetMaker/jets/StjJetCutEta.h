@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetCutEta.h,v 1.6 2008/08/13 04:55:32 tai Exp $
+// $Id: StjJetCutEta.h,v 1.1 2008/09/12 00:32:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETCUTETA_H
 #define STJJETCUTETA_H

@@ -11,10 +11,10 @@ headers = \
 lib_LTLIBRARIES = libStJetMakerMisc.la
 
 libStJetMakerMisc_la_SOURCES = $(sources) $(headers) MiscLinkDef.h
-libStJetMakerMisc_la_CXXFLAGS = -I../.. -I../base $(ROOTCFLAGS)
+libStJetMakerMisc_la_CXXFLAGS = -I../.. -I../base -I../jets $(ROOTCFLAGS)
 libStJetMakerMisc_la_LDFLAGS = -version-info 1:0:0
 nodist_libStJetMakerMisc_la_SOURCES = MiscDict.cxx
 BUILT_SOURCES = MiscDict.cxx
 CLEANFILES = MiscDict.cxx MiscDict.h
 MiscDict.cxx: $(headers) MiscLinkDef.h
-	$(ROOTCINT) -f $@ -c -I../.. -I../base $^
+	$(ROOTCINT) -f $@ -c -I../.. -I../base -I../jets $^

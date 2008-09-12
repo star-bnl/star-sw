@@ -36,10 +36,10 @@ headers	= \
 lib_LTLIBRARIES = libStJetMakerDijets.la
 
 libStJetMakerDijets_la_SOURCES = $(sources) $(headers) DijetsLinkDef.h
-libStJetMakerDijets_la_CXXFLAGS = -I../tree -I../trigger -I../base $(ROOTCFLAGS)
+libStJetMakerDijets_la_CXXFLAGS = -I../tree -I../trigger -I../base -I../jets $(ROOTCFLAGS)
 libStJetMakerDijets_la_LDFLAGS = -version-info 1:0:0
 nodist_libStJetMakerDijets_la_SOURCES = DijetsDict.cxx
 BUILT_SOURCES = DijetsDict.cxx
 CLEANFILES = DijetsDict.cxx DijetsDict.h
 DijetsDict.cxx: $(headers) DijetsLinkDef.h
-	$(ROOTCINT) -f $@ -c -I../base $^
+	$(ROOTCINT) -f $@ -c -I../base -I../jets $^
