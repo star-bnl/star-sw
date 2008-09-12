@@ -6,6 +6,7 @@ sources	= \
 	StjDijetCutDPhi.cxx \
 	StjDijetCutEta.cxx \
 	StjDijetCutEta3MinusEta4.cxx \
+	StjDijetCutSameSideRt.cxx \
 	StjDijetCutTrgBHT.cxx \
 	StjDijetCutTrgBJP.cxx \
 	StjDijetList.cxx \
@@ -22,6 +23,7 @@ headers	= \
 	StjDijetCutDPhi.h \
 	StjDijetCutEta.h \
 	StjDijetCutEta3MinusEta4.h \
+	StjDijetCutSameSideRt.h \
 	StjDijetCutTrgBHT.h \
 	StjDijetCutTrgBJP.h \
 	StjDijetList.h \

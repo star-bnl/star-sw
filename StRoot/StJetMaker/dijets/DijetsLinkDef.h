@@ -10,6 +10,7 @@
 #pragma link C++ class StjDijetCutDPhi+;
 #pragma link C++ class StjDijetCutEta+;
 #pragma link C++ class StjDijetCutEta3MinusEta4+;
+#pragma link C++ class StjDijetCutSameSideRt+;
 #pragma link C++ class StjDijetCutTrgBHT+;
 #pragma link C++ class StjDijetCutTrgBJP+;
 #pragma link C++ class StjDijet+;

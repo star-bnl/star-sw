@@ -6,10 +6,14 @@ sources	= \
 	StjJetCutEta.cxx \
 	StjJetCutNFourVecs.cxx \
 	StjJetCutPt.cxx \
+	StjJetCutRt.cxx \
 	StjJetCutTrgBHT.cxx \
 	StjJetCutTrgBJP.cxx \
 	StjJetList.cxx \
 	StjJetListCut.cxx \
+	StjJetListVariation.cxx \
+	StjJetVariation.cxx \
+	StjJetVariationTrack.cxx \
 	StjJetPrint.cxx
 
 headers	= \
@@ -18,10 +22,14 @@ headers	= \
 	StjJetCutEta.h \
 	StjJetCutNFourVecs.h \
 	StjJetCutPt.h \
+	StjJetCutRt.h \
 	StjJetCutTrgBHT.h \
 	StjJetCutTrgBJP.h \
 	StjJetList.h \
 	StjJetListCut.h \
+	StjJetListVariation.h \
+	StjJetVariation.h \
+	StjJetVariationTrack.h \
 	StjJetPrint.h
 
 lib_LTLIBRARIES = libStJetMakerJets.la
