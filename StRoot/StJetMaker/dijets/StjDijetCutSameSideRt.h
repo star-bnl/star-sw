@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjDijetCutSameSideRt.h,v 1.1 2008/09/12 22:32:53 tai Exp $
+// $Id: StjDijetCutSameSideRt.h,v 1.2 2008/09/13 00:03:43 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJDIJETCUTSAMESIDERT_H
 #define STJDIJETCUTSAMESIDERT_H
@@ -17,9 +17,7 @@ public:
 
   bool operator()(const StjDijet& dijet)
   {
-    if(_jetcut(dijet.jet3)) return true;
-
-    if(_jetcut(dijet.jet4)) return true;
+    if(_jetcut(dijet.jetSameSide)) return true;
 
     return false;
   }
