@@ -1,4 +1,4 @@
-// $Id: StjDijetListWriter.cxx,v 1.1 2008/08/22 16:13:59 tai Exp $
+// $Id: StjDijetListWriter.cxx,v 1.2 2008/09/13 00:03:48 tai Exp $
 #include "StjDijetListWriter.h"
 
 #include <TFile.h>
@@ -28,6 +28,10 @@ StjDijetListWriter::StjDijetListWriter(const char* treeName, TDirectory* file)
   _tree->Branch("vertexZ"    , &_vertexZ      , "vertexZ/D"   );    
   _tree->Branch("jet3Id"     , &_jet3Id       , "jet3Id/I"    );     
   _tree->Branch("jet4Id"     , &_jet4Id       , "jet4Id/I"    );     
+  _tree->Branch("jetSameSideId", &_jetSameSideId, "jetSameSideId/I"    );     
+  _tree->Branch("jetAwaySideId", &_jetAwaySideId, "jetAwaySideId/I"    );     
+  _tree->Branch("neuRtSame"  , &_neuRtSame    , "neuRtSame/D"    );     
+  _tree->Branch("neuRtAway"  , &_neuRtAway    , "neuRtAway/D"    );     
   _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I" );
 }
 
@@ -45,6 +49,10 @@ void StjDijetListWriter::Fill(const StjDijetList& dijetList)
   _vertexZ   = dijetList[0].vertexZ;
   _jet3Id    = dijetList[0].jet3.jetId;
   _jet4Id    = dijetList[0].jet4.jetId;
+  _jetSameSideId = dijetList[0].jetSameSide.jetId;
+  _jetAwaySideId = dijetList[0].jetAwaySide.jetId;
+  _neuRtSame = dijetList[0].neuRtSameSide;
+  _neuRtAway = dijetList[0].neuRtAwaySide;
 
   _tree->Fill();
 }
