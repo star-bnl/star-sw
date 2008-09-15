@@ -1,4 +1,4 @@
-// $Id: StjJetListWriter.cxx,v 1.6 2008/09/15 03:53:56 tai Exp $
+// $Id: StjJetListWriter.cxx,v 1.7 2008/09/15 05:50:05 tai Exp $
 #include "StjJetListWriter.h"
 
 #include <TFile.h>
@@ -49,6 +49,7 @@ StjJetListWriter::StjJetListWriter(const char* jetTreeName, const char* jetFourV
   _jetFourVecTree->Branch("detectorId"  ,  _four_detectorId   , "detectorId[nFourVecs]/I"  );     
   _jetFourVecTree->Branch("fourvecId"   ,  _four_fourvecId    , "fourvecId[nFourVecs]/I"   );     
   _jetFourVecTree->Branch("runNumber"   , &_four_runNumber    , "runNumber/I"              );
+  _jetFourVecTree->Branch("vertexZ"     , &_four_vertexZ      , "vertexZ/D"              );
 }
 
 void StjJetListWriter::Fill(const StjJetList& jetList)
@@ -58,6 +59,8 @@ void StjJetListWriter::Fill(const StjJetList& jetList)
   _jet_runNumber = jetList[0].runNumber;
   _jet_eventId   = jetList[0].eventId;
   _jet_vertexZ   = jetList[0].vertexZ;
+
+  _four_nFourVecs = 0;
 
   _jet_nJets = jetList.size();
   for(int i = 0; i < _jet_nJets; ++i) {
@@ -73,6 +76,7 @@ void StjJetListWriter::Fill(const StjJetList& jetList)
   }
 
   _jetTree->Fill();
+  _jetFourVecTree->Fill();
 }
 
 void StjJetListWriter::fillFourVecTree(int jetId, const StjFourVecList& fourVecList)
@@ -80,26 +84,24 @@ void StjJetListWriter::fillFourVecTree(int jetId, const StjFourVecList& fourVecL
   if(fourVecList.empty()) return;
 
   _four_runNumber = fourVecList[0].runNumber;
-  _four_eventId = fourVecList[0].eventId;
+  _four_eventId   = fourVecList[0].eventId;
+  _four_vertexZ   = fourVecList[0].vertexZ;
 
-  _four_nFourVecs = fourVecList.size();
-  for(int i = 0; i < _four_nFourVecs; ++i) {
+  for(int i = 0; i < fourVecList.size(); ++i) {
     const StjFourVec& four = fourVecList[i];
-    _four_fourvecId[i]    = four.fourvecId;
-    _four_jetId[i]        = jetId;
-    _four_type[i]         = four.type;
-    _four_detectorId[i]   = four.detectorId;
-    _four_trackId[i]      = four.trackId;
-    _four_towerId[i]      = four.towerId;
-    _four_mcparticleId[i] = four.mcparticleId;
-    _four_pt[i]           = four.pt;
-    _four_eta[i]          = four.eta;
-    _four_phi[i]          = four.phi;
-    _four_m[i]            = four.m;
-    
+    _four_fourvecId[_four_nFourVecs]    = four.fourvecId;
+    _four_jetId[_four_nFourVecs]        = jetId;
+    _four_type[_four_nFourVecs]         = four.type;
+    _four_detectorId[_four_nFourVecs]   = four.detectorId;
+    _four_trackId[_four_nFourVecs]      = four.trackId;
+    _four_towerId[_four_nFourVecs]      = four.towerId;
+    _four_mcparticleId[_four_nFourVecs] = four.mcparticleId;
+    _four_pt[_four_nFourVecs]           = four.pt;
+    _four_eta[_four_nFourVecs]          = four.eta;
+    _four_phi[_four_nFourVecs]          = four.phi;
+    _four_m[_four_nFourVecs]            = four.m;
+    _four_nFourVecs++;
   }
-
-  _jetFourVecTree->Fill();
 }
 
 void StjJetListWriter::Finish()

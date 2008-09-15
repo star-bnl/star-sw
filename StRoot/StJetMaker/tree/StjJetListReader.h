@@ -1,36 +1,32 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListWriter.h,v 1.8 2008/09/15 05:50:06 tai Exp $
-#ifndef STJJETLISTWRITER_H
-#define STJJETLISTWRITER_H
+// $Id: StjJetListReader.h,v 1.1 2008/09/15 05:50:05 tai Exp $
+// Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
+#ifndef STJJETLISTREADER_H
+#define STJJETLISTREADER_H
 
-#include <TObject.h>
+#include "StjTreeReaderTwoTrees.h"
 
-#include "StjFourVecList.h"
-#include "StjJetList.h"
+#include <StjJetList.h>
 
 #include <Rtypes.h>
 
-class TDirectory;
-class TTree;
-
-
-class StjJetListWriter : public TObject {
+class StjJetListReader : public StjTreeReaderTwoTrees {
 
 public:
+  StjJetListReader(TTree *jettree, TTree *fourtree)
+    : StjTreeReaderTwoTrees(jettree, fourtree) { }
+  virtual ~StjJetListReader() { }
 
-  StjJetListWriter(const char* jetTreeName, const char* jetFourVecTreeName, TDirectory* file);
-  virtual ~StjJetListWriter() { }
-
-  void Fill(const StjJetList& jetList);
-  void Finish();
+  StjJetList getList() { return _list; }
 
 private:
 
-  void fillFourVecTree(int jetId, const StjFourVecList& fourVecList);
+  void SetBranchAddress(TTree *jettree, TTree *fourtree);
 
-  TDirectory* _file;
-  TTree* _jetTree;
-  TTree* _jetFourVecTree;
+  void clearEntry();
+  void readEntry();
+
+  StjJetList _list;
 
   Int_t    _jet_runNumber;
   Int_t    _jet_eventId;
@@ -60,10 +56,8 @@ private:
   Double_t _four_m[4096];
   Double_t _four_vertexZ;
 
-  int _ifourvec;
-
-  ClassDef(StjJetListWriter, 1)
+  ClassDef(StjJetListReader, 1)
 
 };
 
-#endif // STJJETLISTWRITER_H
+#endif // STJJETLISTREADER_H

@@ -3,6 +3,7 @@
 sources	= \
 	StjDijetListWriter.cxx \
 	StjJetListWriter.cxx \
+	StjJetListReader.cxx \
 	StjMCKinWriter.cxx \
 	StjMCParticleListReader.cxx \
 	StjMCParticleListWriter.cxx \
@@ -15,6 +16,7 @@ sources	= \
 	StjTreeIndexList.cxx \
 	StjTreeIndexListCreator.cxx \
 	StjTreeReader.cxx \
+	StjTreeReaderTwoTrees.cxx \
 	StjTrgHTWriter.cxx \
 	StjTrgJPWriter.cxx \
 	StjTrgMBWriter.cxx \
@@ -26,6 +28,7 @@ sources	= \
 headers	= \
 	StjDijetListWriter.h \
 	StjJetListWriter.h \
+	StjJetListReader.h \
 	StjMCKinWriter.h \
 	StjMCParticleListReader.h \
 	StjMCParticleListWriter.h \
@@ -38,6 +41,7 @@ headers	= \
 	StjTreeIndexList.h \
 	StjTreeIndexListCreator.h \
 	StjTreeReader.h \
+	StjTreeReaderTwoTrees.h \
 	StjTrgHTWriter.h \
 	StjTrgJPWriter.h \
 	StjTrgMBWriter.h \

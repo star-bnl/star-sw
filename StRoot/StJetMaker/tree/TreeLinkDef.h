@@ -7,6 +7,7 @@
 
 #pragma link C++ class StjDijetListWriter+;
 #pragma link C++ class StjJetListWriter+;
+#pragma link C++ class StjJetListReader+;
 #pragma link C++ class StjMCKinWriter+;
 #pragma link C++ class StjMCParticleListReader+;
 #pragma link C++ class StjMCParticleListWriter+;
@@ -18,6 +19,7 @@
 #pragma link C++ class StjTreeIndex+;
 #pragma link C++ class StjTreeIndexListCreator+;
 #pragma link C++ class StjTreeReader+;
+#pragma link C++ class StjTreeReaderTwoTrees+;
 #pragma link C++ class StjTrgReader+;
 #pragma link C++ class StjVertexReader+;
 #pragma link C++ class StjVertexWriter+;
