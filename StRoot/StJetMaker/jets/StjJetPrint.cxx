@@ -1,4 +1,4 @@
-// $Id: StjJetPrint.cxx,v 1.1 2008/09/12 00:32:56 tai Exp $
+// $Id: StjJetPrint.cxx,v 1.2 2008/09/15 05:49:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjJetPrint.h"
 
@@ -21,6 +21,7 @@ void StjJetPrint::operator()(const StjJetList &jetList)
 void StjJetPrint::print(const StjJet& jet)
 {
   cout 
+    << "jet "
     << setw(7)  << jet.runNumber      << ", "
     << setw(7)  << jet.eventId        << ", "
     << setw(4)  << jet.jetId          << ", "
