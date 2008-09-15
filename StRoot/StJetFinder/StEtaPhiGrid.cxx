@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.cxx,v 1.6 2008/05/07 21:44:45 tai Exp $
+// $Id: StEtaPhiGrid.cxx,v 1.7 2008/09/15 03:53:49 tai Exp $
 #include "StEtaPhiGrid.h"
 
 #include "StConePars.h"
@@ -43,8 +43,8 @@ void StEtaPhiGrid::fillGridWith(JetList& protoJetList)
     CellMap::iterator where = _EtCellMap.find(findKey((*protoJet).eta(), (*protoJet).phi()));
     if (where != _EtCellMap.end())
       (*where).second->addProtoJet(*protoJet);
-    else
-      cout << "StEtaPhiGrid::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
+    //    else
+      //      cout << "StEtaPhiGrid::fillGrid(). ERROR:\t" <<"Could not fill jet in grid."<< endl << *protoJet << endl;
   }
 
   for(CellList::iterator etCell = _EtCellList.begin(); etCell !=  _EtCellList.end(); ++etCell) {
@@ -103,9 +103,9 @@ StEtGridKey StEtaPhiGrid::findKey(double eta, double phi) const
   int iEta = findEtaKey(eta);
   int iPhi = findPhiKey(phi);
   if (iEta < 0 || iPhi < 0) {
-    cout << "StEtGridKey::findKey(double, double). ERROR:\t"
-	 << "eta:\t" << eta << "\tphi:\t" << phi << "\t"
-	 << "iEta<0|| iPhi<0\tabort()" << endl;
+    //    cout << "StEtGridKey::findKey(double, double). ERROR:\t"
+    //	 << "eta:\t" << eta << "\tphi:\t" << phi << "\t"
+    //	 << "iEta<0|| iPhi<0\tabort()" << endl;
   }
   return StEtGridKey(iEta, iPhi);
 }
