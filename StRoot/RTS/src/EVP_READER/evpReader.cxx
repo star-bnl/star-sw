@@ -1420,8 +1420,7 @@ DATAP *getlegacydatap(char *mem, int bytes)
       }
     }
     else {
-      LOG(ERR, "unknown bank: %c%c%c%c%c",
-	  curr[0],curr[1],curr[2],curr[3],curr[4]);
+      LOG(DBG, "There is no legacy datap");
       return NULL;
     }
   }
