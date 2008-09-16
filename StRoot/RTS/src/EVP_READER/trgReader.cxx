@@ -122,8 +122,7 @@ int DAQtrgReader(char *m)
 	    qswap32(swaptrgp, trgp->bh.length)*4,
 	    qswap32(swaptrgp, trgp->trgData.off),
 	    qswap32(swaptrgp, trgp->trgData.len),
-	    qswap32(swaptrgp, trgp->trgData.len),
-	    trgp_banks,0) ;
+	    trgp_banks) ;
 
 	// new: TRGID
 	if(trgp_banks >= 2) {
