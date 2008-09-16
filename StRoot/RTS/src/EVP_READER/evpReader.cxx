@@ -296,13 +296,16 @@ char *evpReader::get(int num, int type)
 
 	switch(status) {
 	case EVP_STAT_EVT :	// something wrong with last event...
+		LOG(DBG,"EVP_STAT_EVT") ;
 		usleep(500000) ;
 		break ;
 	case EVP_STAT_EOR :	// EndOfRun was the last status and yet we are asked again...
+		LOG(DBG,"EVP_STAT_EOR") ;
 		usleep(500000) ;
 		break ;
 	case EVP_STAT_CRIT :
 		if(crit_cou==30) LOG(WARN,"Previous error is unrecoverable! Why are you asking me again?",0,0,0,0,0) ;
+		LOG(DBG,"EVP_STAT_CRIT") ;
 		sleep(1) ;
 		crit_cou-- ;
 		if(crit_cou < 10) {
@@ -505,7 +508,7 @@ char *evpReader::get(int num, int type)
 		  event_number = num;
 
 		  if(readall_lastevt == 0) {
-		    LOG(DBG, "readall but don't have any events rundone=%d run=%d",readall_rundone,run);
+		    LOG(DBG, "EVP_ readall but don't have any events rundone=%d run=%d",readall_rundone,run);
 		    //    readall_reset();
 		    sleep(1);
 		    status = EVP_STAT_OK;
@@ -824,6 +827,7 @@ char *evpReader::get(int num, int type)
 	struct DATAP *datap = (struct DATAP *) mem ;
 
 	if(checkBank(datap->bh.bank_type,"DATAP") < 0) {	// something very wrong!
+		LOG(WARN,"Odd datap?") ;
 		status = EVP_STAT_EVT ;
 		return NULL ;
 	}
