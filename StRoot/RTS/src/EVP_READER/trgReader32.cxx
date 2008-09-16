@@ -87,8 +87,9 @@ int trgReader32(char *arg, int bytes, int swap)
 	}
 
 
-	LOG(DBG,"evt desc bytes %d, sum bytes %d, raw bytes %d",desc->TCUdataBytes,
-	    sum->TrgSumBytes,raw[0].RawDetBytes,0,0) ;
+//	LOG(DBG,"evt desc bytes %d, sum bytes %d, raw bytes %d",desc->TCUdataBytes,
+//	    sum->TrgSumBytes,raw[0].RawDetBytes,0,0) ;
+	LOG(DBG,"evt desc bytes %d, sum bytes %d, raw bytes %d",sizeof(EvtDescData),sizeof(TrgSumData),rdb,0) ;
 
 
 	trg.npre = swap ? swap16(desc->npre) : desc->npre ;
@@ -136,7 +137,7 @@ int trgReader32(char *arg, int bytes, int swap)
 	    raw[0].CTBdataHeader[0], 
 	    raw[0].CTBdataHeader[1],0) ;
 
-	LOG(DBG,"TrgSumBytes %d, 0x%04X %c %c %c", sum->TrgSumBytes,
+	LOG(DBG,"TrgSumBytes %d, 0x%04X %c %c", sum->TrgSumBytes,
 	    sum->L0SumHeader,
 	    raw[0].RawDetHeader[0], 
 	    raw[0].RawDetHeader[1],0) ;
