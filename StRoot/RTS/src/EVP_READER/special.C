@@ -447,17 +447,17 @@ int main(int argc, char *argv[])
 		if(dumped>=17) return 0 ;
 #endif
 
+
+
 		// TPC!
 		int sec ;
 		for(sec=0;sec<24;sec++) {
-//		for(sec=0;sec<24;sec+=13) {
-
 			ret = tpcReader(datap,sec) ;
 			//LOG("JEFF", " sec %d:  ret=%d",sec+1,ret);
 
 			switch(ret) {
 			case EVP_NO_DET :
-				LOG(NOTE,"TPC: not present...",0,0,0,0,0) ;
+				LOG(NOTE,"TPC: Sector %d not present...",sec+1,0,0,0,0) ;
 				break ;
 			case EVP_NO_DATA :
 				LOG(NOTE,"TPC: Sector %d not present...",sec+1,0,0,0,0) ;
@@ -473,9 +473,9 @@ int main(int argc, char *argv[])
 			//if(ret == EVP_NO_DET) break ;
 
 
-			if(ret < 0) continue ;	// try another sector
+			if(ret <= 0) continue ;	// try another sector
 
-
+			LOG(DBG,"Got TPC data...") ;
 
 			// example usage: calculate total charge and 
 			// print occupancy
