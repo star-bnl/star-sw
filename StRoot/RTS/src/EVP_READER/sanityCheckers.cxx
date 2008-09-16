@@ -858,8 +858,9 @@ static int emcCheck(char *c_p, int type)
 		LOG(CAUTION,"Sectors %d > expected %d!",secnum,6) ;
 		return -1 ;
 	}
-	
-
+	else {
+		LOG(DBG,"Sectors %d",secnum) ;
+	}
 
 	for(sec=0;sec<secnum;sec++) {
 		off = emcp->sec[sec].off ;
@@ -870,6 +871,7 @@ static int emcCheck(char *c_p, int type)
 		if(off && len) {
 			struct EMCSECP *secp = (struct EMCSECP *) ((char *)emcp + 4*off) ;
 
+			LOG(DBG,"Checking sector %d: off %d, len %d",sec,off,len) ;
 			if(chBank((char *)secp, c_secp)) {
 				err = 1 ;
 				continue ;
@@ -895,6 +897,7 @@ static int emcCheck(char *c_p, int type)
 
 					struct EMCRBP *rbp = (struct EMCRBP *)((char *)secp + 4*off) ;
 				
+					LOG(DBG,"checking sector %d, fiber %d",sec,f) ;
 					if(chBank((char *)rbp, c_rbp)) {
 						err = 1 ;
 						continue ;
@@ -916,18 +919,21 @@ static int emcCheck(char *c_p, int type)
 						off = rbp->banks[b].off ;
 						len = rbp->banks[b].len ;
 
+						if(b!=0) continue ; // I know of only the first bank - EMCADCR
+
 						if(off && len) {
 							is_swap(rbp, &off) ;
 
 							struct DUMMYDATA *adcr = (struct DUMMYDATA *)((char *)rbp + 4*off) ;
 
+							LOG(DBG,"checking sec %d, fiber %d, bank %d",sec,f,b) ;
 							if(chBank((char *)adcr, c_bank)) {
 								err = 1 ;
 								continue ;
 							}
 
 							// add _specific_ header corruption checks here...
-							if(b!=0) continue ; // I know of only the first bank - EMCADCR
+
 								
 							// ETOW
 							if((type != BTOW_ID) && (sec==0)) {
