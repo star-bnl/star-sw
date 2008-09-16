@@ -78,7 +78,7 @@ int DAQemcReader(char *m)
 	struct DUMMYDATA *emcadcr, *emcadcd ;
 	char *p, *secp, *rbp, *adcr, *adcd ;
 	u_int local_token, token ;
-
+	int adcd_found ;
 	int len, off ;
 	int i, j, k ;
 	int cou, cou2 ;
@@ -97,8 +97,7 @@ int DAQemcReader(char *m)
 
 	emc.btow_max_ch = 4800  ;
 	emc.bsmd_max_ch = 12*4800 ;	// extended with BPRE
-
-//	emc.bpre_max_ch = 4800 ;	// unknown...
+	adcd_found = 0 ;
 
 	emc.etow_max_ch = ETOW_MAXFEE*ETOW_DATSIZE ;	
 	emc.esmd_max_ch = ESMD_MAXFEE*ESMD_DATSIZE ;	// unknown...
@@ -106,16 +105,15 @@ int DAQemcReader(char *m)
 
 	emc.btow_ch = 0 ;
 	emc.bsmd_ch = 0 ;
-//	emc.bpre_ch = 0 ;
 
 	emc.etow_ch = 0 ;
 	emc.esmd_ch = 0 ;
 
 
-	emc.btow_in = emc.bsmd_in = 0 ;
-//	emc.bpre_in = 0 ;
+	emc.btow_in = emc.bsmd_in = emc.bsmd_raw_in = 0 ;
 	emc.etow_in = emc.esmd_in = 0 ;
 
+	
 
 	emc.btow_raw = 0 ;
 	emc.etow_raw = 0 ;
@@ -258,9 +256,10 @@ int DAQemcReader(char *m)
 
 				LOG(DBG,"EMC %s: instance %s: fiber %d: %d banks used",id2char(id),inst2char(instance),j+1,cou2,0) ;
 
+				if(cou2 == 2) adcd_found = 1 ;	// must be!
 				emcadcr = emcadcd = NULL ;
-
-				for(k=0;k<cou2;k++) {
+	
+				for(k=0;k<cou2;k++) {	// banks 0 & 1 might exist...
 					len = b2h32(emcrbp->banks[k].len) ;
 
 					if(len == 0) continue ;
@@ -268,6 +267,7 @@ int DAQemcReader(char *m)
 					off = b2h32(emcrbp->banks[k].off) ;
 
 					emcadcr = NULL ;
+					emcadcd = NULL ;
 
 					switch(k) {
 					case 0 :	// Raw, ADCR
@@ -279,7 +279,7 @@ int DAQemcReader(char *m)
 						break ;
 					case 1 :	// zero-suppressed...
 						emcadcd = (struct DUMMYDATA *)((u_int *)emcrbp + off) ;
-						if(checkBank(emcadcr->bh.bank_type,adcd) < 0) {
+						if(checkBank(emcadcd->bh.bank_type,adcd) < 0) {
 							continue ;
 						}
 
@@ -289,13 +289,15 @@ int DAQemcReader(char *m)
 						continue ;
 					}
 
+					/* this is not true anymore since BSMD can have ZS data
 					// I currently only know about RAW data
+					
 					if(emcadcr == NULL) {
 						LOG(WARN,"EMC %d: instance %d, format %d is not implemented yet!",
 						    id2char(id),inst2char(instance), k,0,0) ;
 						continue ;
 					}
-
+					*/
 
 					if((type==0) && (i == EMC_B_TOW)) {	// barrel tower
 					  if(trg_btow_data) {
@@ -304,21 +306,61 @@ int DAQemcReader(char *m)
 					  readBTOW((u_short *)((u_int)emcadcr + 40), token);
 					}
 					else if((type==0) && (i == EMC_B_SMD)) {	// barrel SMD
-						
 						u_short *data ;
 						int l ;
 
 						emc.bsmd_in = 1;
-						// get to the data: 40 bytes bank header, 4 bytes dummy,
-						// 256 bytes fiber header...
-						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 256) ; 
+					
+						// logic...
+						if(emcadcr) { //raw data present
+
+
+							// get to the data: 40 bytes bank header, 4 bytes dummy,
+							// 256 bytes fiber header...
+							data = (u_short *) ((u_int) emcadcr + 40 + 4 + 256) ; 
 					
 
-						emc.bsmd_cap[j] = *(u_char *)((u_int)emcadcr + 40 + 4 + 4*16) ;
-						for(l=0;l<4800;l++) {
-							emc.bsmd[j][l] = l2h16(*data++) ;
-							if(emc.bsmd[j][l] > 0) emc.bsmd_ch++ ;
-							//LOG(DBG,"BSMD %d: %d",l,emc.bsmd[j][l]) ;
+							emc.bsmd_cap[j] = *(u_char *)((u_int)emcadcr + 40 + 4 + 4*16) ;
+							if(adcd_found) {	// ALSO the ZS present!!!
+								emc.bsmd_raw_in = 1 ;
+								for(l=0;l<4800;l++) {
+									emc.bsmd_raw[j][l] = l2h16(*data++) ;
+								}
+							}
+							else {
+								for(l=0;l<4800;l++) {
+									emc.bsmd[j][l] = l2h16(*data++) ;
+									if(emc.bsmd[j][l] > 0) emc.bsmd_ch++ ;
+									
+								}
+							}
+
+							LOG(DBG,"BSMD raw data present. Sent to the bsmd_raw bank? -- %s",(emc.bsmd_raw_in?"Yes":"No")) ;
+						}
+
+						if(emcadcd) {
+
+							int datums = b2h32(emcadcd->bh.length)-10-1 ;	// 10 header, 1 fiber:count combo
+
+							LOG(DBG,"BSMD ZS data present, %d hits",datums) ;
+
+							data = (u_short *) ((uint) emcadcd + 40) ;	// skip header
+							LOG(DBG,"local fiber %d, channels %d [== %d]",b2h16(data[0]),b2h16(data[1]),datums) ;
+							data += 2 ;
+
+							for(l=0;l<datums;l++) {
+								int ch = b2h16(*data++) ;
+								int adc = b2h16(*data++) ;
+								
+								emc.bsmd[j][ch] = adc ;
+								
+								//LOG(DBG,"ch %4d = %4d",ch,adc) ;								
+
+								
+
+							}
+
+							emc.bsmd_ch += datums ;
 						}
 
 					}
@@ -393,7 +435,7 @@ int DAQemcReader(char *m)
 
 // Starts from after the EMCADCR bankHeader...
 //
-//    ie...   data = (u_int)emcadcr + 40
+//    ie...   data = (u_`int)emcadcr + 40
 //                 = (u_int)trg_btow_data
 //
 int readBTOW(u_short *_data, int token)

@@ -31,8 +31,11 @@ struct emc_t {
 	u_short bsmd_max_ch ;
 	u_short bsmd_ch ;
 	u_short bsmd[12][4800] ;	// Nov 2, 2004 - extended from 8 to 12 to encompass the BPRE
+	u_short bsmd_raw[12][4800] ;	// Sep 2008 -- this bank is filled from the raw,non-zerosuppressed data
+					// if the event contained both the ZS & NZS bank!
+	u_char bsmd_raw_in ;		// flag for above!
 	u_char  bsmd_cap[12] ;	// capacitor value...
-
+	
 #if 0
 	// the bpre is currently unused - the data is in the last 4ish fibers of BSMD...
 	u_char bpre_in ;
