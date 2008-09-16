@@ -22,6 +22,15 @@ struct tpx_rdo_dbg tpx_rdo_dbg[6] ;
 int tpx_fee_check ;
 
 // statics...
+u_int expected_usercode[5] = {
+	0x1a830000,
+	0x0283c6b3,
+	0x02b9ab26,
+	0x18a9352d,
+//	0x00acf6c3	//06Sep08
+	0x00ad0581	//07Sep08
+} ;
+
 static inline u_int get10(u_int *l, u_int p) ;
 static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)  ;
 
@@ -848,6 +857,12 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	    rdo->fpga_usercode[3],
 	    rdo->fpga_usercode[4]
 	    ) ;
+
+	for(int i=0;i<5;i++) {
+		if(expected_usercode[i] != rdo->fpga_usercode[i]) {
+			LOG(WARN,"RDO %d: FPGA %d usercode is 0x%08X, expect 0x%08X!?",rdo->rdo,i,rdo->fpga_usercode[i],expected_usercode[i]) ;
+		}
+	}
 
 	if(rdo->status_xilinx) {
 		LOG(ERR,"RDO %d: xilinx status: 0x%02X",rdo->rdo,rdo->status_xilinx) ;
