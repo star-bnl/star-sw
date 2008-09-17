@@ -1,10 +1,14 @@
-// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.4 2008/08/21 22:23:05 tai Exp $
+// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.5 2008/09/17 18:43:00 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBJP.h"
 
 #include "StjTowerEnergyCutEnergy.h"
 #include "StjTowerEnergyCutBemcStatus.h"
 #include "StjTowerEnergyPrint.h"
+#include "StjTowerEnergyCutBemcStatus.h"
+#include "StjTowerEnergyCutEnergy.h"
+#include "StjTowerEnergyCutEt.h"
+#include "StjTowerEnergyCutAdc.h"
 
 #include "StjTrgBEMCJetPatchTowerIdMap.h"
 
@@ -25,8 +29,10 @@ using namespace std;
 StjTrgSoftEtThresholdBJP::StjTrgSoftEtThresholdBJP(StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdMap* jpTowerMap, double minEt)
   : _bemc(bemc), _jpTowerMap(jpTowerMap), _minEt(minEt), _runNumber(-1), _eventId(-1)
 {
-  _cut.addCut(new StjTowerEnergyCutEnergy(0.0));
-  _cut.addCut(new StjTowerEnergyCutBemcStatus(1));
+  _cut.addCut(  new StjTowerEnergyCutEnergy(0.0)   );
+  _cut.addCut(  new StjTowerEnergyCutBemcStatus(1) );
+  _cut.addCut(  new StjTowerEnergyCutAdc(0, 2.0)   );
+  _cut.addCut(  new StjTowerEnergyCutEt(0.2)       );
 }
 
 bool StjTrgSoftEtThresholdBJP::isNewEvent()
