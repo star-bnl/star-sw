@@ -578,7 +578,7 @@ extern inline int rts2det(int ix)
 extern inline int rts2tcd(int rts)
 {
 	static const int map[32] = {
-		TCD_TPC,
+		TCD_TPC,	// gone...
 		TCD_SVT,	// gone...
 		TCD_TOF,
 		TCD_BTOW,
@@ -633,7 +633,7 @@ extern inline int tcd2rts(int tcd)
         BTOW_SYSTEM,
         FTP_SYSTEM,
         PMD_SYSTEM,
-        TPC_SYSTEM,
+        -1,		//TPC_SYSTEM,	// TPC was here... removed Sep 08
         -1,		// VPD
         -1,
         -1,
