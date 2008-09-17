@@ -1,10 +1,12 @@
-// $Id: StjTrgSoftEtThresholdBHT.cxx,v 1.3 2008/08/21 22:23:04 tai Exp $
+// $Id: StjTrgSoftEtThresholdBHT.cxx,v 1.4 2008/09/17 18:42:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBHT.h"
 
 #include "StjTowerEnergyCutEt.h"
 #include "StjTowerEnergyCutBemcStatus.h"
 #include "StjTowerEnergyPrint.h"
+#include "StjTowerEnergyCutEt.h"
+#include "StjTowerEnergyCutAdc.h"
 
 #include "StjBEMC.h"
 
@@ -20,8 +22,9 @@ using namespace std;
 StjTrgSoftEtThresholdBHT::StjTrgSoftEtThresholdBHT(StjBEMC* bemc, double minEt)
   : _bemc(bemc), _minEt(minEt), _runNumber(-1), _eventId(-1)
 {
-  _cut.addCut(new StjTowerEnergyCutEt(minEt));
-  _cut.addCut(new StjTowerEnergyCutBemcStatus(1));
+  _cut.addCut(  new StjTowerEnergyCutEt(minEt));
+  _cut.addCut(  new StjTowerEnergyCutBemcStatus(1));
+  _cut.addCut(  new StjTowerEnergyCutAdc(0, 2.0)   );
 }
 
 bool StjTrgSoftEtThresholdBHT::isNewEvent()
