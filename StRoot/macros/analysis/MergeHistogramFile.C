@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.15 2008/02/22 05:10:56 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.16 2008/09/17 15:45:47 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -203,6 +203,10 @@ void MergeComplexHistogramFile( const Char_t *TargetName=0, const Char_t *inputF
 void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPattern=0, Bool_t simple=kFALSE) 
 {  
    if (TargetName && TargetName[0] && inputFilesPattern && inputFilesPattern[0] ) {
+      // by default hadd can merge Trees in a file that can go up to 100 Gbytes
+      Long64_t maxsize = 100000000; //100GB
+      maxsize *= 100;  //to bypass some compiler limitations with big constants
+      TTree::SetMaxTreeSize(maxsize);
       if (simple) {
          // Use the deprecated version
          MergeSimpleHistogramFile(TargetName, inputFilesPattern);
