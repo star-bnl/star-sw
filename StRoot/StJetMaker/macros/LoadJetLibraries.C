@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.11 2008/08/22 22:10:21 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.12 2008/09/17 16:37:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -338,6 +338,8 @@ void setIncludePath()
   path = "-I./StRoot/StJetMaker/tree " + path;
   path = "-I./StRoot/StJetMaker/vertex " + path;
   path = "-I./StRoot/StJetMaker/mckin " + path;
+  path = "-I./StRoot/StJetMaker/jets " + path;
+  path = "-I./StRoot/StJetMaker/dijets " + path;
   path = "-I./StRoot " + path;
   path = TString("-I./.") + gSystem->Getenv("STAR_HOST_SYS") + "/include. " + path;
   path = "-I. " + path;
