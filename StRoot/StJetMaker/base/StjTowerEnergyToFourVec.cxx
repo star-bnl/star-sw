@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyToFourVec.cxx,v 1.4 2008/08/04 06:10:26 tai Exp $
+// $Id: StjTowerEnergyToFourVec.cxx,v 1.5 2008/09/18 20:49:01 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyToFourVec.h"
 
@@ -16,6 +16,8 @@ StjFourVec StjTowerEnergyToFourVec::operator()(const StjTowerEnergy& towerEnergy
   ret.detectorId  = towerEnergy.detectorId;
   ret.trackId     = 0;
   ret.towerId     = towerEnergy.towerId;
+  ret.mcparticleId = 0;
+  ret.vertexZ     = towerEnergy.vertexZ;
 
   TLorentzVector p4(_towerenergy2tlorentzvector(towerEnergy));
   ret.pt  = p4.Pt();
