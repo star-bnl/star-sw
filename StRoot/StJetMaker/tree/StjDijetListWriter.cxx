@@ -1,4 +1,4 @@
-// $Id: StjDijetListWriter.cxx,v 1.2 2008/09/13 00:03:48 tai Exp $
+// $Id: StjDijetListWriter.cxx,v 1.3 2008/09/19 23:19:21 tai Exp $
 #include "StjDijetListWriter.h"
 
 #include <TFile.h>
@@ -24,6 +24,7 @@ StjDijetListWriter::StjDijetListWriter(const char* treeName, TDirectory* file)
   _tree->Branch("m"          , &_m            , "m/D"         );
   _tree->Branch("eta"        , &_eta          , "eta/D"       );
   _tree->Branch("costh"      , &_costh        , "costh/D"     );
+  _tree->Branch("deta"       , &_deta         , "deta/D"      );
   _tree->Branch("dphi"       , &_dphi         , "dphi/D"      );
   _tree->Branch("vertexZ"    , &_vertexZ      , "vertexZ/D"   );    
   _tree->Branch("jet3Id"     , &_jet3Id       , "jet3Id/I"    );     
@@ -32,6 +33,8 @@ StjDijetListWriter::StjDijetListWriter(const char* treeName, TDirectory* file)
   _tree->Branch("jetAwaySideId", &_jetAwaySideId, "jetAwaySideId/I"    );     
   _tree->Branch("neuRtSame"  , &_neuRtSame    , "neuRtSame/D"    );     
   _tree->Branch("neuRtAway"  , &_neuRtAway    , "neuRtAway/D"    );     
+  _tree->Branch("neuRt3"     , &_neuRt3       , "neuRt3/D"    );     
+  _tree->Branch("neuRt4"     , &_neuRt4       , "neuRt4/D"    );     
   _tree->Branch("runNumber"  , &_runNumber    , "runNumber/I" );
 }
 
@@ -45,6 +48,7 @@ void StjDijetListWriter::Fill(const StjDijetList& dijetList)
   _m         = dijetList[0].m;
   _eta       = dijetList[0].eta;
   _costh     = dijetList[0].costh;
+  _deta      = dijetList[0].deta;
   _dphi      = dijetList[0].dphi;   
   _vertexZ   = dijetList[0].vertexZ;
   _jet3Id    = dijetList[0].jet3.jetId;
@@ -53,6 +57,8 @@ void StjDijetListWriter::Fill(const StjDijetList& dijetList)
   _jetAwaySideId = dijetList[0].jetAwaySide.jetId;
   _neuRtSame = dijetList[0].neuRtSameSide;
   _neuRtAway = dijetList[0].neuRtAwaySide;
+  _neuRt3    = dijetList[0].neuRt3;
+  _neuRt4    = dijetList[0].neuRt4;
 
   _tree->Fill();
 }
