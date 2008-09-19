@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjDijetListWriter.h,v 1.2 2008/09/13 00:03:49 tai Exp $
+// $Id: StjDijetListWriter.h,v 1.3 2008/09/19 23:19:22 tai Exp $
 #ifndef STJDIJETLISTWRITER_H
 #define STJDIJETLISTWRITER_H
 
@@ -33,6 +33,7 @@ private:
   Double_t _m;
   Double_t _eta;
   Double_t _costh;
+  Double_t _deta;
   Double_t _dphi;
   Double_t _vertexZ;
   Int_t    _jet3Id;
@@ -41,6 +42,8 @@ private:
   Int_t    _jetAwaySideId;
   double   _neuRtSame;
   double   _neuRtAway;
+  double   _neuRt3;
+  double   _neuRt4;
 
   ClassDef(StjDijetListWriter, 1)
 
