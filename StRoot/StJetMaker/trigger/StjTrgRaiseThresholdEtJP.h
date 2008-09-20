@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgRaiseThresholdEtJP.h,v 1.2 2008/08/21 22:23:04 tai Exp $
+// $Id: StjTrgRaiseThresholdEtJP.h,v 1.3 2008/09/20 01:02:18 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGRAISETHRESHOLDETJP_H
 #define STJTRGRAISETHRESHOLDETJP_H
@@ -9,8 +9,8 @@
 class StjTrgRaiseThresholdEtJP : public StjTrgRaiseThreshold {
 
 public:
-  StjTrgRaiseThresholdEtJP(StjTrg* src, StjTrgPassCondition* passCondition, double minEt)
-    : StjTrgRaiseThreshold(src, passCondition), _minEt(minEt) { }
+  StjTrgRaiseThresholdEtJP(StjTrg* src, double minEt)
+    : StjTrgRaiseThreshold(src), _minEt(minEt) { }
   virtual ~StjTrgRaiseThresholdEtJP() { }
 
   bool soft() const;
