@@ -1,18 +1,16 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgRaiseThreshold.h,v 1.2 2008/08/21 22:23:03 tai Exp $
+// $Id: StjTrgRaiseThreshold.h,v 1.3 2008/09/20 01:02:17 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGRAISETHRESHOLD_H
 #define STJTRGRAISETHRESHOLD_H
 
 #include <StjTrg.h>
 
-#include <StjTrgPassCondition.h>
-
 class StjTrgRaiseThreshold : public StjTrg {
 
 public:
-  StjTrgRaiseThreshold(StjTrg* src, StjTrgPassCondition* passCondition)
-    : _src(src), _passCondition(passCondition)
+  StjTrgRaiseThreshold(StjTrg* src)
+    : _src(src)
     , _runNumber(-1), _eventId(-1) { }
 virtual ~StjTrgRaiseThreshold() { }
 
@@ -22,7 +20,7 @@ virtual ~StjTrgRaiseThreshold() { }
   int    eventId()    { return _src->eventId(); }
   bool   hard() const { return _src->hard(); }
   virtual bool soft() const = 0;
-  bool   passed()       { return (*_passCondition)(this); }
+  bool   passed()     { return (_src->passed() && soft()); }
   double prescale()   { return _src->prescale(); }
   double vertexZ()    { return _src->vertexZ(); }
 
@@ -51,8 +49,6 @@ private:
   virtual void read() const = 0;
 
   void readNewEvent() const;
-
-  StjTrgPassCondition* _passCondition;
 
   mutable int _runNumber;
   mutable int _eventId;
