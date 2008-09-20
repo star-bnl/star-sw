@@ -1,4 +1,4 @@
-// $Id: StjDijetPrint.cxx,v 1.2 2008/09/12 22:32:54 tai Exp $
+// $Id: StjDijetPrint.cxx,v 1.3 2008/09/20 01:18:07 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjDijetPrint.h"
 
@@ -28,8 +28,8 @@ void StjDijetPrint::print(const StjDijet& dijet)
     << "eta: "     << setw(8) << dijet.eta            << ", "
     << "costh: "   << setw(8) << dijet.costh          << ", "
     << "dphi: "    << setw(8) << dijet.dphi           << ", "
-    << "Rt_s: "    << setw(8) << dijet.neuRtSameSide  << ", "
-    << "Rt_a: "    << setw(8) << dijet.neuRtAwaySide  << ", "
+    << "Rt3: "    << setw(8) << dijet.neuRt3  << ", "
+    << "Rt4: "    << setw(8) << dijet.neuRt4  << ", "
     << "vertexZ: " << setw(8) << dijet.vertexZ
     << endl;
 
