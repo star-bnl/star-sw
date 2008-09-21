@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftGetAdcEt.cxx,v 1.3 2008/09/21 03:21:57 tai Exp $
+// $Id: StjTrgSoftGetAdcEt.cxx,v 1.4 2008/09/21 03:32:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftGetAdcEt.h"
 
@@ -71,6 +71,7 @@ void StjTrgSoftGetAdcEt::read()
     if(!found) {
       _towerAdc.push_back(0);
       _towerEnergy.push_back(0);
+      _towerEt.push_back(0);
     }
   }
 
