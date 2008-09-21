@@ -43,6 +43,7 @@
 #pragma link C++ class StjTowerEnergyCutBemcWestOnly+;
 #pragma link C++ class StjTowerEnergyCutEnergy+;
 #pragma link C++ class StjTowerEnergyCutEt+;
+#pragma link C++ class StjTowerEnergyCutTowerId+;
 #pragma link C++ class StjTowerEnergy+;
 #pragma link C++ class StjTowerEnergyListCut+;
 #pragma link C++ class StjTowerEnergyListVariation+;
