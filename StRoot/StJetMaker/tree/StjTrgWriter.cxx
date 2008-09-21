@@ -1,10 +1,12 @@
-// $Id: StjTrgWriter.cxx,v 1.2 2008/08/21 22:22:59 tai Exp $
+// $Id: StjTrgWriter.cxx,v 1.3 2008/09/21 19:11:40 tai Exp $
 #include "StjTrgWriter.h"
 
 #include "StjTrg.h"
 
 #include <TDirectory.h>
 #include <TTree.h>
+
+ClassImp(StjTrgWriter)
 
 void StjTrgWriter::Init()
 {

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgHTWriter.h,v 1.3 2008/08/18 06:20:50 tai Exp $
+// $Id: StjTrgHTWriter.h,v 1.4 2008/09/21 19:11:40 tai Exp $
 #ifndef STJTRGHTWRITER_H
 #define STJTRGHTWRITER_H
 
@@ -39,6 +39,8 @@ private:
   Double_t _towerEt[4800];
 
   StjTrg* _trg;
+  ClassDef(StjTrgHTWriter, 1)
+
 };
 
 #endif // STJTRGHTWRITER_H
