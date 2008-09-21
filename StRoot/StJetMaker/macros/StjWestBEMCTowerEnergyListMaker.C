@@ -8,6 +8,7 @@
 #include "StjTowerEnergyCutEnergy.h"
 #include "StjTowerEnergyCutBemcStatus.h"
 #include "StjTowerEnergyCutAdc.h"
+#include "StjTowerEnergyCutTowerId.h"
 
 #include "StjTowerEnergyListWriter.h"
 
@@ -22,7 +23,7 @@ public:
   virtual ~StjWestBEMCTowerEnergyListMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjWestBEMCTowerEnergyListMaker.C,v 1.2 2008/08/06 05:49:53 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjWestBEMCTowerEnergyListMaker.C,v 1.3 2008/09/21 03:21:54 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -45,6 +46,7 @@ public:
     _bemcCut.addCut(new StjTowerEnergyCutEnergy(0.0));
     _bemcCut.addCut(new StjTowerEnergyCutBemcStatus(1));
     _bemcCut.addCut(new StjTowerEnergyCutAdc(0, 2.0));
+    _bemcCut.addCut(new StjTowerEnergyCutTowerId(1048));
 
     _writer = new StjTowerEnergyListWriter("bemcTowers", _file);
 

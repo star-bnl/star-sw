@@ -1,4 +1,4 @@
-// $Id: StjTrgSoftGetAdcEt.cxx,v 1.2 2008/09/17 14:11:47 tai Exp $
+// $Id: StjTrgSoftGetAdcEt.cxx,v 1.3 2008/09/21 03:21:57 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftGetAdcEt.h"
 
@@ -8,6 +8,7 @@
 #include "StjTowerEnergyCutEnergy.h"
 #include "StjTowerEnergyCutEt.h"
 #include "StjTowerEnergyCutAdc.h"
+#include "StjTowerEnergyCutTowerId.h"
 
 #include "StjTrg.h"
 
@@ -28,6 +29,7 @@ StjTrgSoftGetAdcEt::StjTrgSoftGetAdcEt(StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdM
   _cut.addCut(  new StjTowerEnergyCutBemcStatus(1) );
   _cut.addCut(  new StjTowerEnergyCutAdc(0, 2.0)   );
   _cut.addCut(  new StjTowerEnergyCutEt(0.2)       );
+  _cut.addCut(  new StjTowerEnergyCutTowerId(1048) );
 }
 
 bool StjTrgSoftGetAdcEt::isNewEvent()

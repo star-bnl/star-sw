@@ -39,6 +39,7 @@ sources	= \
 	StjTowerEnergyCutBemcWestOnly.cxx \
 	StjTowerEnergyCutEnergy.cxx \
 	StjTowerEnergyCutEt.cxx \
+	StjTowerEnergyCutTowerId.cxx \
 	StjTowerEnergyList.cxx \
 	StjTowerEnergyListCut.cxx \
 	StjTowerEnergyListVariation.cxx \
@@ -100,6 +101,7 @@ headers	= \
 	StjTowerEnergyCutBemcWestOnly.h \
 	StjTowerEnergyCutEnergy.h \
 	StjTowerEnergyCutEt.h \
+	StjTowerEnergyCutTowerId.h \
 	StjTowerEnergyList.h \
 	StjTowerEnergyListCut.h \
 	StjTowerEnergyListVariation.h \
