@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrg.h,v 1.8 2008/08/21 22:23:03 tai Exp $
+// $Id: StjTrg.h,v 1.9 2008/09/21 19:11:45 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRG_H
 #define STJTRG_H
@@ -20,7 +20,7 @@ public:
   virtual int eventId() = 0;
   virtual bool hard() const = 0;
   virtual bool soft() const = 0;
-  virtual bool passed() = 0;
+  virtual bool passed() const = 0;
   virtual double prescale() = 0;
   virtual double vertexZ() = 0;
 

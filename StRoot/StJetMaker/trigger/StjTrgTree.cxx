@@ -1,4 +1,4 @@
-// $Id: StjTrgTree.cxx,v 1.5 2008/08/21 22:23:05 tai Exp $
+// $Id: StjTrgTree.cxx,v 1.6 2008/09/21 19:11:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgTree.h"
 
@@ -33,7 +33,7 @@ bool StjTrgTree::soft() const
   return _reader->soft();
 }
 
-bool StjTrgTree::passed()
+bool StjTrgTree::passed() const
 {
   return _reader->passed();
 }

@@ -4,6 +4,9 @@ sources	= \
 	StjTrg.cxx \
 	StjTrgBEMCJetPatchTowerIdMap.cxx \
 	StjTrgBEMCJetPatchTowerIdMap2005.cxx \
+	StjTrgDisableTower.cxx \
+	StjTrgDisableTowerHT.cxx \
+	StjTrgDisableTowerJP.cxx \
 	StjTrgPassCondition.cxx \
 	StjTrgRaiseThreshold.cxx \
 	StjTrgRaiseThresholdEtHT.cxx \
@@ -16,10 +19,14 @@ sources	= \
 	StjTrgSoftPass.cxx \
 	StjTrgTree.cxx
 
+
 headers	= \
 	StjTrg.h \
 	StjTrgBEMCJetPatchTowerIdMap.h \
 	StjTrgBEMCJetPatchTowerIdMap2005.h \
+	StjTrgDisableTower.h \
+	StjTrgDisableTowerHT.h \
+	StjTrgDisableTowerJP.h \
 	StjTrgPassCondition.h \
 	StjTrgRaiseThreshold.h \
 	StjTrgRaiseThresholdEtHT.h \

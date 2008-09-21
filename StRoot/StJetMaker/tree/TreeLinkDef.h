@@ -20,7 +20,10 @@
 #pragma link C++ class StjTreeIndexListCreator+;
 #pragma link C++ class StjTreeReader+;
 #pragma link C++ class StjTreeReaderTwoTrees+;
+#pragma link C++ class StjTrgHTWriter+;
+#pragma link C++ class StjTrgJPWriter+;
 #pragma link C++ class StjTrgReader+;
+#pragma link C++ class StjTrgWriter+;
 #pragma link C++ class StjVertexReader+;
 #pragma link C++ class StjVertexWriter+;
 

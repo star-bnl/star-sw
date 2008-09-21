@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgPassCondition.h,v 1.5 2008/08/08 23:18:59 tai Exp $
+// $Id: StjTrgPassCondition.h,v 1.6 2008/09/21 19:11:47 tai Exp $
 #ifndef STJTRGPASSCONDITION_H
 #define STJTRGPASSCONDITION_H
 
@@ -62,6 +62,18 @@ public:
   }
 
   ClassDef(StjTrgPassConditionSoftOnly, 1)
+};
+
+class StjTrgPassConditionPass : public StjTrgPassCondition {
+public:
+  StjTrgPassConditionPass() { }
+  virtual ~StjTrgPassConditionPass() { }
+  bool operator()(const StjTrg* trg) 
+  {
+    return (trg->passed());
+  }
+
+  ClassDef(StjTrgPassConditionPass, 1)
 };
 
 #endif // STJTRGPASSCONDITION_H

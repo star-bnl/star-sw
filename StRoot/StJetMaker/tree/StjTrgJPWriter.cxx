@@ -1,4 +1,4 @@
-// $Id: StjTrgJPWriter.cxx,v 1.3 2008/08/18 06:20:50 tai Exp $
+// $Id: StjTrgJPWriter.cxx,v 1.4 2008/09/21 19:11:40 tai Exp $
 #include "StjTrgJPWriter.h"
 
 #include "StjTrg.h"
@@ -6,6 +6,8 @@
 #include <TTree.h>
 
 #include <vector>
+
+ClassImp(StjTrgJPWriter)
 
 using namespace std;
 
