@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgRaiseThreshold.h,v 1.3 2008/09/20 01:02:17 tai Exp $
+// $Id: StjTrgRaiseThreshold.h,v 1.4 2008/09/22 00:06:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGRAISETHRESHOLD_H
 #define STJTRGRAISETHRESHOLD_H
@@ -20,7 +20,7 @@ virtual ~StjTrgRaiseThreshold() { }
   int    eventId()    { return _src->eventId(); }
   bool   hard() const { return _src->hard(); }
   virtual bool soft() const = 0;
-  bool   passed()     { return (_src->passed() && soft()); }
+  bool   passed()  const   { return (_src->passed() && soft()); }
   double prescale()   { return _src->prescale(); }
   double vertexZ()    { return _src->vertexZ(); }
 
