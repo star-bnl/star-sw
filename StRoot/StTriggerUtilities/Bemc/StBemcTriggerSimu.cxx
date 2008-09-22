@@ -806,11 +806,9 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	// The BEMC trigger simulator processes BEMC layer 1 DSMs in
 	// this order (I think): BW101, BW102, BW103, BE101, BE102, BE103.
 	// So trigger bank <-> simulator ==> 0, 1, 2, 3, 4, 5 <-> 3, 4, 5, 0, 1, 2
-	int diff = (L0_16bit_Out[TriggerBankToSimuMap[ch]*6+ch] & 0x3ff) - (out & 0x3ff);
-	if (diff) {
-	  // Use the trigger bank ordering for comparison
-	  mBEMCLayer1DSMInputPatchSumDiff->Fill(dsm*6+ch, diff);
-	}
+	int diff = (L0_16bit_Out[TriggerBankToSimuMap[dsm]*6+ch] & 0x3ff) - (out & 0x3ff);
+	mBEMCLayer1DSMInputPatchSumDiff->Fill(dsm*6+ch, diff);
+
       }	// End loop over channels
     } // End loop over BEMC layer 1 DSMs
   }
