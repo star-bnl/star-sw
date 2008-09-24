@@ -398,17 +398,12 @@ fs_dirent *fs_index::readdirent(char *dir)
   char fullname[256];
   getFullPath(fullname,dir);
 
-
-
   fs_inode *node = root;
   char *name = strtok(fullname, "/");
 
-  while(name) {
-   
+  while(name) {   
     node = find_child(node, name);
     if(!node) return NULL;
-
- 
 
     name = strtok(NULL, "/");
   }
