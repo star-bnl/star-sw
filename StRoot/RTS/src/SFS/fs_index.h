@@ -126,7 +126,7 @@ class fs_index {
   // and want to use the buffers in place to avoid memcpy
   // access the data through the dirent's offset / size
   // 
-  inline fs_dirent *opendirent(char *name) { return readdirent(name) };
+  inline fs_dirent *opendirent(char *name) { return readdirent(name); };
 
   int mem_ls(fs_filelist *filelist, int recurse, fs_dir *dir);
 
