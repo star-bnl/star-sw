@@ -121,6 +121,13 @@ class fs_index {
   void closedir(fs_dir *dir);
   fs_dirent *readdir(fs_dir *dir);
   fs_dirent *readdirent(char *name);
+
+  // meant for users that have memory mapped/memory sfs indexes
+  // and want to use the buffers in place to avoid memcpy
+  // access the data through the dirent's offset / size
+  // 
+  inline fs_dirent *opendirent(char *name) { return readdirent(name) };
+
   int mem_ls(fs_filelist *filelist, int recurse, fs_dir *dir);
 
   // File operations
