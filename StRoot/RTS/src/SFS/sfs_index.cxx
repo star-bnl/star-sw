@@ -105,6 +105,7 @@ void stripfile(char *str)
   else strcpy(ostr, "/");
 }
 
+
 int SFS_ittr::checkIfLegacy()
 {
   char buff[12];
@@ -841,6 +842,14 @@ sfs_index::sfs_index() : fs_index()
   return;
 }
 
+int sfs_index::mountSingleDirMem(char *buffer, int size)
+{
+  wfile.close();   // just in case
+  oflags = O_RDONLY;
+  wfile.openmem(buffer, size);
+  return mountSingleDir();
+}
+
 // returns -1 on error
 // returns 0 on eof
 // returns 1 on valid dir
@@ -853,8 +862,16 @@ int sfs_index::mountSingleDir(char *fn, int offset)
   wfile.opendisk(fn, O_RDONLY);
   if(wfile.fd < 0) return wfile.fd;
   wfile.lseek(offset, SEEK_SET);
+
+  return mountSingleDir();
   
+}
+
+int sfs_index::mountSingleDir()   // mounts from current position of wfile...
+{
   if(singleDirIttr) delete singleDirIttr;
+  
+  int offset = wfile.lseek(0,SEEK_CUR);
 
   singleDirMount = 1;
   singleDirIttr = new SFS_ittr(offset);
