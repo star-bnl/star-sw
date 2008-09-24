@@ -105,6 +105,8 @@ class sfs_index : public fs_index {
   int singleDirMount;
   SFS_ittr *singleDirIttr;
   int mountSingleDir(char *fn, int offset=0);
+  int mountSingleDirMem(char *buff, int size);
+  int mountSingleDir();
   int mountNextDir();
 
   sfs_index();
