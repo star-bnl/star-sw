@@ -3,7 +3,7 @@ include ../rtsmakefile.def
 VPATH = ../LOG
 VOBJS = librtslog.a
 
-INCLUDES = -g -I. -I../ -I../../include -I$../../trg/include
+INCLUDES = -g -I. -I../ -I../../include -I../../trg/include
 DEFINES += -DRTS_LOG_COLORED
 
 BINS =  fs fs_ex  sfsTest sfs_single
@@ -27,7 +27,7 @@ sfs_experiment: libsfs.a sfs_experiment.o
 
 sfs_single: libsfs.a sfs_single.o
 
-libsfs.a: fs_index.o sfs_index.o get_line.o
+libsfs.a: fs_index.o sfs_index.o sfs_index_daq.o get_line.o
 	ar -rucvs libsfs.a $?
 
 $(LIBDIR)/libsfs.a: libsfs.a

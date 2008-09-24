@@ -63,13 +63,18 @@ class SFS_ittr {
   };
 
   int get(wrapfile *wrap);
-  int legacy_get(wrapfile *wrap);
+  //int legacy_get(wrapfile *wrap);
   //  int get(char *buff, int sz);
 
   int next();
-  int legacy_next();
+  //int legacy_next();
 
-  int checkIfLegacy();
+  // DAQ SPECIFIC
+  int nextLRHD();
+  int nextDatap();
+  int findEventNumber();
+  int findFullLength();
+  // END DAQ SPECIFIC
 
   wrapfile *wfile;
   void swapEntry();
