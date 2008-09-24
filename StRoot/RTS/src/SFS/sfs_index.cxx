@@ -105,7 +105,7 @@ void stripfile(char *str)
   else strcpy(ostr, "/");
 }
 
-
+/*
 int SFS_ittr::checkIfLegacy()
 {
   char buff[12];
@@ -175,7 +175,9 @@ int SFS_ittr::checkIfLegacy()
   wfile->lseek(cfpos, SEEK_SET);
   return ret;
 }
+*/
 
+ /*
 int SFS_ittr::legacy_get(wrapfile *wrap)
 {
   char buff[12];
@@ -218,6 +220,7 @@ int SFS_ittr::legacy_get(wrapfile *wrap)
   }
   return -1;
 }
+ */
 
 int SFS_ittr::get(wrapfile *wrap)
 {
@@ -228,15 +231,16 @@ int SFS_ittr::get(wrapfile *wrap)
 
   wfile = wrap;
 
-  legacy = checkIfLegacy();
-  LOG(DBG, "Legacy = %d",legacy);
+  //  legacy = checkIfLegacy();
+  // LOG(DBG, "Legacy = %d",legacy);
 
-  if(legacy) return legacy_get(wrap);
+  // if(legacy) return legacy_get(wrap);
 
 
   //fileoffset = 0;   // set by constructor...
   
 
+#ifdef DONTNEEDTHIS   // work is done in next()
   for(;;) {
     int ret = wfile->read(buff, 8);
     if(ret != 8) {
@@ -255,16 +259,27 @@ int SFS_ittr::get(wrapfile *wrap)
 
     if(memcmp(buff, "LRHD", 4) == 0) {
       LOG(DBG,"Found LRHD");
+
+      wfile->lseek(48, SEEK_CUR) {
+	char buff2[12];
+	memset(buff2, 0, sizeof(buff2));
+	wfile->read(buff2, 8);
+	wfile->lseek(-54, SEEK_CUR);
+	if(memcmp(buff2, "DATA", 4) == 0) {
+	  break;
+	}
+      }
+
       wfile->lseek(60, SEEK_CUR);
       fileoffset += 60;
       continue;
     }
 
-    if(memcmp(buff, "DATAP", 5) == 0) {
+    if(memcmp(buff, "DATAP ", 6) == 0) {
       LOG(DBG,"Found DATAP");
-      wfile->lseek(204, SEEK_CUR);
-      fileoffset += 204;
-      continue;
+      //wfile->lseek(204, SEEK_CUR);
+      //fileoffset += 204;
+      break;
     }
 
     if(memcmp(buff, "HEAD", 4) == 0) {
@@ -284,6 +299,7 @@ int SFS_ittr::get(wrapfile *wrap)
       return -1;
     }
   }
+#endif
 
   //printf("fileoffset %d\n",fileoffset);
   filepos = 0;
@@ -304,6 +320,7 @@ void SFS_ittr::swapEntry()
   entry.sz = swap32(entry.sz);
   entry.reserved = swap16(entry.reserved);
 }
+/*
 
 int SFS_ittr::legacy_next()
 {
@@ -377,18 +394,20 @@ int SFS_ittr::legacy_next()
 
   return 0;
 }
-
+*/
 
 // Return -1 on error
 // 0 on ok.
 int SFS_ittr::next() 
 {
-  if(legacy) return legacy_next();
+  //if(legacy) return legacy_next();
 
+  LOG(DBG, "Calling next:  fileoffset=%d filepos=%d",fileoffset,filepos);
   int ret;
 
   //printf("ittr next\n");
 
+  LOG(DBG, "filepos = %d, entry.sz=%d entry.head_sz=%d",filepos,entry.sz,entry.head_sz);
   if(filepos == 1) {  // need to jump to next...
     ret = wfile->lseek(seeksize(entry.sz), SEEK_CUR);
     if(ret < 0) {
@@ -396,6 +415,9 @@ int SFS_ittr::next()
       return -1;
     }
     filepos = 2;
+
+    LOG(DBG, "fileoffset=%d --> + %d + %d",
+	entry.sz, entry.head_sz);
     fileoffset += seeksize(entry.sz) + entry.head_sz;
   }
 
@@ -431,7 +453,8 @@ int SFS_ittr::next()
     filepos = 0;
   }
 
-  // expect a FILE record, but jump of LRHD & DATAP...
+
+  // expect a FILE record, LRHD or DATAP...  jump the rest...
   for(;;) {
     char buff[10];
     int ret = wfile->read(buff, 8);
@@ -448,6 +471,12 @@ int SFS_ittr::next()
 
     wfile->lseek(-8, SEEK_CUR);
 
+
+    int xxx = wfile->lseek(0,SEEK_CUR);
+    buff[5] = 0;
+    LOG(DBG, "fileoffset=%d xxx=%d buff=%s",fileoffset,xxx,buff);
+
+
     if(memcmp(buff, "SFS V", 5) == 0) {
       if(debug) LOG(DBG,"Found SFS version");
       wfile->lseek(12, SEEK_CUR);
@@ -457,6 +486,16 @@ int SFS_ittr::next()
 
     if(memcmp(buff, "LRHD", 4) == 0) {
       if(debug) LOG(DBG,"Found LRHD");
+
+      LOG(DBG, "BFR LRHD %d %d",wfile->lseek(0,SEEK_CUR),fileoffset);
+
+      if(nextLRHD() >= 0) {  // good data LRHD... got entry...
+	LOG(DBG, "AFTR LRHD %d %d",wfile->lseek(0,SEEK_CUR), fileoffset);
+     
+	LOG(DBG, "lrhd entry.sz = %d",entry.sz);
+	return 0;
+      }
+      
       wfile->lseek(60, SEEK_CUR);
       fileoffset += 60;
       continue;
@@ -464,6 +503,16 @@ int SFS_ittr::next()
 
     if(memcmp(buff, "DATAP", 5) == 0) {
       if(debug) LOG(DBG,"Found DATAP");
+
+      LOG(DBG, "Before datap: file=%d filepos=%d offset=%d entrysz=%d",
+	  wfile->lseek(0,SEEK_CUR), filepos,fileoffset,entry.sz);
+
+      if(nextDatap() >= 0) {  // DATAP and no following FILE.  got entry
+	LOG(DBG, "After datap: file=%d filepos=%d offset=%d entrysz=%d",
+	  wfile->lseek(0,SEEK_CUR), filepos,fileoffset,entry.sz);
+	return 0;
+      }
+
       wfile->lseek(204, SEEK_CUR);
       fileoffset += 204;
       continue;
@@ -528,7 +577,19 @@ int SFS_ittr::next()
     return -1;
   }
 
-  //printf("---DIR:  name=%s entry.attr = 0x%x\n",entry.name, entry.attr);
+
+  LOG(DBG,"---DIR:  name=%s entry.attr = 0x%x\n",entry.name, entry.attr);
+
+
+  // hacks for 2007
+  if(strstr(entry.name, "legacy")) {
+    entry.attr |= SFS_ATTR_POPSTICKY;
+  }
+
+  if(strstr(entry.name, "pad")) {
+    entry.attr |= SFS_ATTR_POPSTICKY;
+  }
+
   if(entry.attr & SFS_ATTR_POPSTICKY) {
     // doesn't reset stickypath!
     //printf("---DIR:   (pop) ppath %s stickypath %s\n",ppath,stickypath);
@@ -1019,8 +1080,9 @@ void sfs_index::addnode(SFS_ittr *ittr)
   char fullpath[256];
   char thispathonly[256];
   char *next[20];
-  
-  
+
+  LOG(DBG, "addnode: %s %d %d",ittr->fullpath, ittr->fileoffset, ittr->filepos);
+
   if(ittr->entry.attr == SFS_ATTR_INVALID) return;
   
   strcpy(thispathonly, ittr->fullpath);
