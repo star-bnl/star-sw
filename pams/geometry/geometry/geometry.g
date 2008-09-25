@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.167 2008/06/03 22:27:16 fisyak Exp $
+* $Id: geometry.g,v 1.168 2008/09/25 03:05:58 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.168  2008/09/25 03:05:58  perev
+* upgr16 (Jan)
+*
 * Revision 1.167  2008/06/03 22:27:16  fisyak
 * Add y2005g and y2007g geometries for SVT with latest Rene's corrections
 *
@@ -3749,6 +3752,57 @@ If LL>1
 * On Gerrit's request, we disable the cone:
                    ITSP=off; "prototype of the Inner Tracker SuPport structure"
                 }
+  on UPGR16   { New Tracking: HFT+IST+TPC+SSD-SVT
+                     SVTT=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Multiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "CALB" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ECAL"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     BBCM=on
+                  "forward pion detector "
+                     FPDM=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     PHMD=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     SISD=on;
+                     SisdConfig = 65;
+* careful! Achtung!
+                   PipeConfig=-1;   " Simplest.Gerrit"
+                   pipeFlag=-1; !   " Simplest.Gerrit"
+                   PIXL=on;        " put the pixel detector in"
+                   PixlConfig=-1;   " Simplest.Gerrit"
+
+                   ISTB=on;  "IST barrel"
+                   IstbConfig=-1;
+
+                   FSTD=off;  "no pixel based forward tracker in this tag"
+                   FstdConfig=0;
+
+* Forward STAR tracker disk
+                   FGTD=on;  "GEM forward tracker"
+                   FgtdConfig=3;
+* On Gerrit's request, we disable the cone:
+                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
+                }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
@@ -4442,11 +4496,10 @@ If LL>1
         Call fstdgeo
    endif
 
-   if (FGTD.and.FgtdConfig==1)    then
-      Call fgtdgeo  ! old, decomissioned
-   elseif(FGTD.and.FgtdConfig==2) then
-      write(*,*) '****** constructing the new 6-disk Forward Gem Tracker geometry ***********'
-      Call fgtdgeo1
+   if (FGTD) then
+     if (FgtdConfig==1)    Call fgtdgeo  ! old, decomissioned
+     if (FgtdConfig==2)    Call fgtdgeo1
+     if (FgtdConfig==3)    Call fgtdgeo2
    endif
 
    if (IGTD) then
