@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.168 2008/09/25 03:05:58 perev Exp $
+* $Id: geometry.g,v 1.169 2008/09/25 22:50:25 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.169  2008/09/25 22:50:25  perev
+* Add tpcConfig==4 for Upgr16
+*
 * Revision 1.168  2008/09/25 03:05:58  perev
 * upgr16 (Jan)
 *
@@ -3802,6 +3805,10 @@ If LL>1
                    FgtdConfig=3;
 * On Gerrit's request, we disable the cone:
                    ITSP=off; "prototype of the Inner Tracker SuPport structure"
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "We need an even bigger Cave"
+                     CaveConfig = 4;
                 }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
