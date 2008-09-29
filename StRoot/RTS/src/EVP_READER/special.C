@@ -339,7 +339,7 @@ int main(int argc, char *argv[])
 
 	      
 
-#ifdef RTS_PROJECT_PP
+
 		ret = pp2ppReader(datap) ;
 
 		if(ret < 0) {	// error
@@ -359,8 +359,24 @@ int main(int argc, char *argv[])
 					    pp2pp.sec[i].token,pp2pp.sec[i].seq,pp2pp.sec[i].xing,pp2pp.sec[i].type) ;
 				}
 			}
+			
+			//***************************************
+			// There is a bug in 2003-2004 pp2pp data
+			// which sets ALL detector data off/len to
+			// that of pp2pp.  (No other banks are 
+			// truly valid)
+			// 
+			// so continue here to avoid crashing
+			// on non-pp2pp banks...
+			//
+			// for rts_reader pp2pp reads starting in
+			// 2008, new logic:
+			//
+			// if legacy pp2pp, next event
+			// if ddl pp2pp, finish reading other dets
+			continue;   // There is a bug in pp2pp data
 		}
-#else
+
 
 		ret = scReader(datap);
 		if(ret <= 0) {
@@ -1047,7 +1063,6 @@ int main(int argc, char *argv[])
 
 		}
 
-#endif	// end of RTS_PROJECT_PP
 
 
 		}	// end of EVENT LOOP
