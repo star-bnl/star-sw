@@ -149,6 +149,13 @@ static int chBank(const char *m, const char *what)
 			if(isprint(*(bank+i))) ;	// do nothing
 			else *(bank+i) = '*' ;
 		}
+
+		if(memcmp(bank,"PP2PPP",5) == 0) {  // hack for 2003 pp2pp files
+		  // all empty banks say this!
+		  LOG(DBG, "2003 pp2pp file bug - [%s] bank says [%s].  ignoring.", what, bank);
+		  return -2;
+		}
+
 		LOG(CAUTION,"Wrong bank type: expecting [%s], is [%s]",what,bank) ;
 		return -1 ;
 	}
@@ -223,6 +230,8 @@ int DAQsanityCheck(char *c_datap)
 			len = swap32(len) ;
 		}
 
+		LOG(DBG, "DATAP %d: off=%d len=%d",i,off,len);
+
 		if(off && len) {
 			if(sanityCheckDet(i, c_datap + 4*off) < 0) bad |= (1<<i) ;
 			else if(i==EXT_SYSTEM) {
@@ -235,6 +244,8 @@ int DAQsanityCheck(char *c_datap)
 						off = swap32(off) ;
 						len = swap32(len) ;
 					}
+
+					LOG(DBG, "DATAPX %d: off=%d len=%d",j+10,off,len);
 
 					if(off && len) {
 						if(sanityCheckDet(j+10, (char *)datapx + 4*off)) bad |= (1<<(j+10)) ;
@@ -256,74 +267,101 @@ int DAQsanityCheck(char *c_datap)
 
 static int sanityCheckDet(int id, char *c_detp)
 {
-
+  int ret;
 	
-	switch(id) {
+  switch(id) {   // -2 means PP2PP bug...  call it good, but don't check deeper...
 	case TPC_SYSTEM :
-		if(chBank(c_detp,CHAR_TPCP)) return -1 ;
-		return tpcCheck(c_detp,id) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_TPCP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0 ;
+	  return tpcCheck(c_detp,id) ;
+	  break ;
 	case SVT_SYSTEM :
-		if(chBank(c_detp,CHAR_SVTP)) return -1 ;
-		return tpcCheck(c_detp,id) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_SVTP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return tpcCheck(c_detp,id) ;
+	  break ;
 	case TOF_SYSTEM :
-		if(chBank(c_detp,CHAR_TOFP)) return -1 ;
-		return tofCheck(c_detp) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_TOFP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return tofCheck(c_detp) ;
+	  break ;
 	case BTOW_SYSTEM :
-		if(chBank(c_detp,CHAR_EMCP)) return -1 ;
-		return emcCheck(c_detp,id) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_EMCP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return emcCheck(c_detp,id) ;
+	  break ;
 	case FPD_SYSTEM :
-		if(chBank(c_detp,CHAR_FPDP)) return -1 ;
-		return fpdCheck(c_detp) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_FPDP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return fpdCheck(c_detp) ;
+	  break ;
 	case FTP_SYSTEM :
-		if(chBank(c_detp,CHAR_FTPP)) return -1 ;
-		return tpcCheck(c_detp,id) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_FTPP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return tpcCheck(c_detp,id) ;
+	  break ;
 	case EXT_SYSTEM :
-		if(chBank(c_detp,CHAR_DATAPX)) return -1 ;
-		break ;
+	  if(chBank(c_detp,CHAR_DATAPX)) return -1 ;
+	  break ;
 	case RIC_SYSTEM :
-		if(chBank(c_detp,CHAR_RICP)) return -1 ;
-		break ;
+	  ret = chBank(c_detp,CHAR_RICP);
+	  if(ret == -1) return -1 ;
+	  else return 0;
+	  break ;
 	case TRG_SYSTEM :
-		if(chBank(c_detp,CHAR_TRGP)) return -1 ;
-		return trgCheck(c_detp) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_TRGP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return trgCheck(c_detp) ;
+	  break ;
 	case L3_SYSTEM :
-		if(chBank(c_detp,CHAR_L3_P)) return -1 ;
-		return l3Check(c_detp) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_L3_P);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return l3Check(c_detp) ;
+	  break ;
 	case SC_SYSTEM :
-		if(chBank(c_detp,CHAR_SCD)) return -1 ;
-		break ;
+	  if(chBank(c_detp,CHAR_SCD) == -1) return -1 ;
+	  break ;
 	case EXT2_SYSTEM :
-		if(chBank(c_detp,"DATAPX2")) return -1 ;
-		break ;
+	  if(chBank(c_detp,"DATAPX2") == -1) return -1 ;
+	  break ;
 	case PMD_SYSTEM :
-		if(chBank(c_detp,CHAR_PMDP)) return -1 ;
-		return pmdCheck(c_detp) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_PMDP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return pmdCheck(c_detp) ;
+	  break ;
 	case SSD_SYSTEM :
-		if(chBank(c_detp,CHAR_SSDP)) return -1 ;
-		return tpcCheck(c_detp,id) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_SSDP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return tpcCheck(c_detp,id) ;
+	  break ;
 	case ETOW_SYSTEM :
-		if(chBank(c_detp,CHAR_EECP)) return -1 ;
-		return emcCheck(c_detp, id) ;
-		break ;
+	  ret = chBank(c_detp,CHAR_EECP);
+	  if(ret == -1) return -1 ;
+	  if(ret == -2) return 0;
+	  return emcCheck(c_detp, id) ;
+	  break ;
 	case FP2_SYSTEM :
-		if(chBank(c_detp,CHAR_FP2P)) return -1 ;
-		break ;
+	  if(chBank(c_detp,CHAR_FP2P) == -1) return -1 ;
+	  break ;
+	case PP_SYSTEM:
+	  if(chBank(c_detp,"PP2PPP  ")) return -1;
+	  break;
 	case TPX_ID:
 	  //if(chBank(c_detp, "TPXD    ")) return -1;
 	  break;
-	default :
-		LOG(WARN,"Don't know how to check RTS System %d - assuming OK",id) ;
-		return 0 ;
+        default :
+          LOG(WARN,"Don't know how to check RTS System %d - assuming OK",id) ;
+	  return 0 ;
 	}
 
 

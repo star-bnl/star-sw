@@ -64,7 +64,7 @@ sfsSpecial:  sfsSpecial.o libevp.${VERSION}.a
 cfgutil: cfgutil.o libevp.${VERSION}.a
 
 
-ppreader: ppreader.o msgNQLib.o evpSupport.o evpReader.o pp2ppReader.o rtsLogUnix.o
+#ppreader: ppreader.o msgNQLib.o evpSupport.o evpReader.o pp2ppReader.o rtsLogUnix.o
 
 clean :
 	@rm -f *.o *.a *.so

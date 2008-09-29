@@ -95,8 +95,8 @@ int DAQpp2ppReader(char *m)
 	off = (datap->det[EXT_ID].off) ;
 
 	if(datap->bh.byte_order != DAQ_RAW_FORMAT_ORDER) {
-		swap32(len) ;
-		swap32(off) ;
+		len = swap32(len) ;
+		off = swap32(off) ;
 	}
 
 	datapx = (struct DATAPX *)(m + off*4) ;

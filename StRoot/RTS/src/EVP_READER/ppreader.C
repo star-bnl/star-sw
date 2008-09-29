@@ -10,13 +10,6 @@
 //#define NO_RTS_LOG
 
 // you must do this!
-#ifndef RTS_PROJECT_PP
-#define RTS_PROJECT_PP
-#endif
-
-#ifdef RTS_PROJECT_STAR
-#undef RTS_PROJECT_STAR
-#endif
 
 #ifdef NO_RTS_LOG
 #define LOG(a1,a2,b1,b2,b3,b4,b5)

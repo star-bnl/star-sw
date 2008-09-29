@@ -9,7 +9,6 @@
 
 #include <evpSupport.h>
 
-#ifndef RTS_PROJECT_PP	// STAR specific...
 
 #include <scReader.h>
 #include <trgReader.h>
@@ -27,9 +26,6 @@
 
 #include "SFS/sfs_index.h"
 #include "RTS_READER/rts_reader.h"
-
-
-#endif
 
 #include <pp2ppReader.h>
 #include "evpReaderClass.h"
