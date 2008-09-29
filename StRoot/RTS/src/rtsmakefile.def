@@ -160,7 +160,7 @@ ifeq (${HOST_CPU}, alpha)
 		HOSTFLAGS += -Dalpha
 else
 		HOSTFLAGS += 
-		HOSTLIBS := -lpthread -lncurses
+		HOSTLIBS := -lpthread 
 endif
 	HOSTDEFINES := 
 	HOSTINCLUDES :=

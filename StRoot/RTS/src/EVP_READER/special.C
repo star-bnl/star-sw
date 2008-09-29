@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 			case EVP_STAT_EOR :	// EOR or EOR - might contain token 0!
 			  LOG(DBG, "End of run");
 			  evp->readall_reset();
-				if(evp->isevp) {	// keep going until the next run...
+				if(evp->input_type == live) {	// keep going until the next run...
 					sleep(5) ;	// ...but let's be friendly...
 					continue ;
 				}
@@ -337,6 +337,7 @@ int main(int argc, char *argv[])
 		  }
 		}
 
+	      
 
 #ifdef RTS_PROJECT_PP
 		ret = pp2ppReader(datap) ;
