@@ -41,7 +41,7 @@ READER_FILES = msgNQLib.o evpSupport.o evpReader.o tpcReader.o svtReader.o ftpRe
 
 
 # Tonko: new style
-VPATH_AUX = rtsLogUnix.o fcfClass.o fcfAfterburner.o fs_index.o sfs_index.o  get_line.o  \
+VPATH_AUX = rtsLogUnix.o fcfClass.o fcfAfterburner.o fs_index.o sfs_index.o sfs_index_daq.o get_line.o  \
 	daq_tpx.o rts_reader.o daq_det.o daq_dta.o daq_tof.o tpxCore.o tpxFCF.o tpxGain.o tpxPed.o \
 	daq_pp2pp.o  daq_esmd.o emc_reader.o daq_tpc.o tpc_reader.o daq_legacy.o
 VPATH = ../RTS_READER ../DAQ_TOF ../DAQ_TPX ../DAQ_PP2PP ../DAQ_ESMD ../DAQ_TPC ../DAQ_LEGACY ../LOG ../SFS ../FCF
@@ -52,6 +52,8 @@ libevp.${VERSION}.a : ${READER_FILES} $(VPATH_AUX)
 #	ld -G -o libevpSO.${VERSION}.so $?
 
 special: special.o libevp.${VERSION}.a
+
+jtest: jtest.o libevp.${VERSION}.a
 
 grpRates: grpRates.o libevp.${VERSION}.a
 

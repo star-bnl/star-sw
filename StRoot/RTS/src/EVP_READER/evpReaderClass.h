@@ -8,117 +8,191 @@ typedef unsigned int UINT32;
 
 #include "evp.h"
 #include "cfgutil.h"
+#include "iccp2k.h"
 
 class sfs_index;
 class rts_reader;
+class MemMap;
+
+enum Input_Type { none, live, file, pointer, dir };
+
 class evpReader {
-public:
-	evpReader(char *fname) ;
-	~evpReader(void) ;
+ public:
+  
+  // Filename can be:
+  //    NULL      --> read from event pool
+  //    Directory --> read from each file "1, 2, 3, .... N" in the directory
+  //    filename  --> .daq file
+  //    space separated files  --> read from each file in turn
+  //
+  evpReader(char *buffer, int size);
+  evpReader(char *fname) ;
+  ~evpReader(void) ;
 
-	int writeCurrentEventToDisk(char *fname);
+  void init();
 
-	char *get(int which, int type=EVP_TYPE_ANY) ;	
-        char *getSFSEventNumber();
+  char *get(int which, int type=EVP_TYPE_ANY) ;	
 
-	int setMmap(int flag) ;		// flag=1 - enable memory mapping
-	int setOpen(int flag) ;		// flag=1 - enable file open
-	int setLog(int flag) ;		// flag=1 - enable logging...
-	char *setEvpDisk(char *fs) ;	// sets the local directory name where the evp.star disks
-                                        // are mounted
+  // The following are the descriptors and pointers defining the event
+  Input_Type input_type;
+	
+  // These variables describe the "input source"
+  //
+  // live    ->   file is:  file_name = evp_disk/base_dir/run#/evt#
+  // file    ->   file is:  file_name
+  // pointer ->   file is at:  *data_memory
+  // dir     ->   file is at:  file_name = fname/evt#
+  char *data_memory;     
+  int data_size;
 
-	int status ;		// 0 OK, all others should disregard the event!
+  char evp_disk[256]; 
+  char fname[256] ;     // This is the name argument of the evpReader
+  char file_name[256] ;	// fully qualified file name containing evt data
+  int file_size ;	// size of the file in bytes
+  int desc ;		// file descriptor
 
-	// all the variables below are valid ONLY if the status is 0!!!
+  // These variables describe the event storage
+  //
+  //    All events are eventually mapped into memory
+  //    The event_memory points to the first LRHD/DATAP/FILE record
+  //    whatever it might be...  
+  char *event_memory;
+  int event_size;
+
+  int evt_offset_in_file;
+
+  char *mem;            // a datap pointer if applicable...
+  sfs_index *sfs;       // the sfs reader object... (if no sfs only contains "/");
+  rts_reader *rts_rr ;  // the rts reader object... (if no rts dets contains nothing);
+
+
+  // These variables describe the characteristics of the event
+  //
+  
+  // year:  pre-2006  - .daq format
+  //        2007      - .daq format, tpx bank in sfs format
+  //        2008      - .sfs format/compat .daq format/ + legacy bank in .daq format
+  //        2009-     - .sfs format + legacy bank in .daq format  
+  //
+  
+  //int lrhd_offset;
+  //int datap_offset;
+
+  int sfs_lastevt;
+
+  //char *getSFSEventNumber();
+
+  int setMmap(int flag) ;		// flag=1 - enable memory mapping
+  int setOpen(int flag) ;		// flag=1 - enable file open
+  int setLog(int flag) ;		// flag=1 - enable logging...
+  char *setEvpDisk(char *fs) ;	// sets the local directory name where the evp.star disks
+  // are mounted
+
+
+  int writeCurrentEventToDisk(char *fname);
+  int status ;		// 0 OK, all others should disregard the event!
+
+  // all the variables below are valid ONLY if the status is 0!!!
 
   //  These parameters are used for the evp reads with event number non-zero
   //  readall_lastevt --
-        u_int readall_rundone;
-        u_int readall_lastevt;
-        u_int readall_run;
-        void readall_reset() { readall_rundone = 0; readall_lastevt = 0; readall_run=0; };
+  u_int readall_rundone;
+  u_int readall_lastevt;
+  u_int readall_run;
+  void readall_reset() { readall_rundone = 0; readall_lastevt = 0; readall_run=0; };
 
 
-	u_int event_number ;	// current event in the evp or file 
-	u_int total_events ;	// total number of events seen by this object so far
+  u_int event_number ;	// current event in the evp or file 
+  u_int total_events ;	// total number of events seen by this object so far
 
-	u_int bytes ;		// size of the current event
+  u_int bytes ;		// size of the current event
 	
 
-	char file_name[256] ;	// fully qualified file name (on evp.star)
-	u_int file_size ;	// size of the file in bytes
+
+  u_int run ;		// current run number
+
+  u_int evb_type ;	// event type	(only from ACTIVE run)
+  u_int evb_cou ;		// total events in this run (only from ACTIVE run)
+  u_int evb_type_cou ;	// total events of the above type in this run (only from ACTIVE run)
+
+  u_int token ;		// current token
+  u_int trgcmd ;		// current trigger command
+  u_int daqcmd ;		// current DAQ command
+  u_int trgword ;		// the Trigger Word
+  u_int phyword ;		// the Physics Word
+  u_int daqbits ;		// "offline" bits aka L3 summary...
+  u_int daqbits_l1;       // triggers satisfying l1 
+  u_int daqbits_l2;       // triggers satisfying l2
+  u_int evpgroups ;       // evp groups aka L3 summary[2]     
+
+  u_int evt_time ;	// time in UNIX seconds
+  u_int seq ;		// event sequence from EVB
+  u_int detectors ;	// detectors present bit mask according to DAQ!
+
+  u_int detsinrun ;
+  u_int evpgroupsinrun;
 
 
-	u_int run ;		// current run number
+  int fixDatapSummary(DATAP *datap);
+  char *getInputType();
+  int getNextEventFilename(int num, int type);
+  int getNextEventFilenameFromLive(int type);
+  int getNextEventFilenameFromDir(int eventNum);
+  int openEventFile();
+  int getEventSize();
 
-	u_int evb_type ;	// event type	(only from ACTIVE run)
-	u_int evb_cou ;		// total events in this run (only from ACTIVE run)
-	u_int evb_type_cou ;	// total events of the above type in this run (only from ACTIVE run)
+  int fillSummaryInfo(DATAP *datap);
+  int fillSummaryInfo(gbPayload *gbPayload);
 
-	u_int token ;		// current token
-	u_int trgcmd ;		// current trigger command
-	u_int daqcmd ;		// current DAQ command
-	u_int trgword ;		// the Trigger Word
-	u_int phyword ;		// the Physics Word
-	u_int daqbits ;		// "offline" bits aka L3 summary...
-	u_int daqbits_l1;       // triggers satisfying l1 
-	u_int daqbits_l2;       // triggers satisfying l2
-        u_int evpgroups ;       // evp groups aka L3 summary[2]     
+  MemMap *memmap;
 
-	u_int evt_time ;	// time in UNIX seconds
-	u_int seq ;		// event sequence from EVB
-	u_int detectors ;	// detectors present bit mask according to DAQ!
+ private:	// one shouldn't care... 
 
-        u_int detsinrun ;
-        u_int evpgroupsinrun;
+  int reconnect(void) ;
 
-	int isdir ;		// are we running through a directory?
-	int isfile ;		// ... or a file?
-	int isevp ;		// ... or the active run from EVP?
+  char _evp_basedir_[40];
+  char _last_evp_dir_[40];
+  int do_mmap ;
+  int do_open ;
+  int do_log ;
 
-	char *mem ;	
-	DATAP *sumdatap;         // pointer to a datap with valid summaries...
-        sfs_index *sfs;         // the sfs reader object...
-        int sfs_lastevt;
 
-	// new rts reader
-	rts_reader *rts_rr ;
+  int issued ;
+  int last_issued ;	// time
 
-        int evt_offset_in_file; // where is the start of the event
-        int evt_datap_offset_in_file;  // start of datap in file
-        int evt_mapping_offset;        // where the event is mapped from
+  int task ;
 
-	int bytes_mapped ;
-	u_int tot_bytes ;
-	char *mem_mapped ;
-	int page_size ;
 
-	int fixDatapSummary(DATAP *datap);
+  int evpDesc ;		// message queue desc.
+  // file variables
 
-private:	// one shouldn't care...
-	int reconnect(void) ;
+  struct stat stat_buf ;
 
-	int do_mmap ;
-	int do_open ;
-	int do_log ;
-	char evp_disk[256]; 
+  rccnf runconfig;
 
-	int issued ;
-	int last_issued ;	// time
-
-	int task ;
-	int desc ;		// file descriptor
-
-	int evpDesc ;		// message queue desc.
-	// file variables
-	char fname[256] ;
-	struct stat stat_buf ;
-
-        rccnf runconfig;
-
-	// mmap variables
+  int getStatusBasedEventDelay();
 
 } ;
+
+class MemMap {
+ public:
+  MemMap();
+  ~MemMap();
+
+  char *mem;
+  char *map(int fd, int _offset, int _size);
+  void unmap();
+
+  int offset;
+  int size;
+ private:
+  int page_size;
+  int actual_offset;
+  char *actual_mem_start;
+  int actual_size;
+  int fd;
+};
+  
 
 
 #endif
