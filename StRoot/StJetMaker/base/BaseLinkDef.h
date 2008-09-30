@@ -24,6 +24,7 @@
 #pragma link C++ class StjMCParticleCut+;
 #pragma link C++ class StjMCParticleCutEta+;
 #pragma link C++ class StjMCParticleCutEtaForStatus+;
+#pragma link C++ class StjMCParticleCutFirstMotherId+;
 #pragma link C++ class StjMCParticleCutStatus+;
 #pragma link C++ class StjMCParticle+;
 #pragma link C++ class StjMCParticleListCut+;

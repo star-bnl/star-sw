@@ -20,6 +20,7 @@ sources	= \
 	StjMCParticleCut.cxx \
 	StjMCParticleCutEta.cxx \
 	StjMCParticleCutEtaForStatus.cxx \
+	StjMCParticleCutFirstMotherId.cxx \
 	StjMCParticleCutStatus.cxx \
 	StjMCParticleList.cxx \
 	StjMCParticleListCut.cxx \
@@ -82,6 +83,7 @@ headers	= \
 	StjMCParticleCut.h \
 	StjMCParticleCutEta.h \
 	StjMCParticleCutEtaForStatus.h \
+	StjMCParticleCutFirstMotherId.h \
 	StjMCParticleCutStatus.h \
 	StjMCParticleList.h \
 	StjMCParticleListCut.h \
