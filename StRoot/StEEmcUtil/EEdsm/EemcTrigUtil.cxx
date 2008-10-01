@@ -131,7 +131,7 @@ EemcTrigUtil::getFeePed4(char *path,int yyyymmdd, int hhmmss, int mxChan, int *f
   } else {
     // assume it is MC, 12bit ADC peds are at 0
     int ped4val=5;
-    printf("set Endcap FeePed4 to val=%d\n",ped4val);
+   // printf("set Endcap FeePed4 to val=%d\n",ped4val);
     genPed4(ped4val,mxChan, feePed4);
   }
 }
