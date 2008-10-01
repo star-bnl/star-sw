@@ -34,7 +34,7 @@ class evpReader {
   char *get(int which, int type=EVP_TYPE_ANY) ;	
 
   // The following are the descriptors and pointers defining the event
-  Input_Type input_type;
+
 	
   // These variables describe the "input source"
   //
@@ -50,6 +50,10 @@ class evpReader {
   char file_name[256] ;	// fully qualified file name containing evt data
   int file_size ;	// size of the file in bytes
   int desc ;		// file descriptor
+
+  int isevp;   // backward compatability...
+  int IsEvp() { return (input_type == live); };
+
 
   // These variables describe the event storage
   //
@@ -171,7 +175,7 @@ class evpReader {
   rccnf runconfig;
 
   int getStatusBasedEventDelay();
-
+  Input_Type input_type;
 } ;
 
 class MemMap {

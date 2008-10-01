@@ -29,7 +29,7 @@ typedef unsigned int UINT32;
 extern int sanityCheck(char *datap) ;
 
 int repack = 0;
-int repack_trigger = 0;
+u_int repack_trigger = 0;
 char repack_filename[80];
 
 int main(int argc, char *argv[])
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 			case EVP_STAT_EOR :	// EOR or EOR - might contain token 0!
 			  LOG(DBG, "End of run");
 			  evp->readall_reset();
-				if(evp->input_type == live) {	// keep going until the next run...
+			  if(evp->IsEvp()) {	// keep going until the next run...
 					sleep(5) ;	// ...but let's be friendly...
 					continue ;
 				}
