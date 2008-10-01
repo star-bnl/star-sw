@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.65 2008/06/09 16:11:34 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.66 2008/10/01 18:12:19 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.66  2008/10/01 18:12:19  fine
+ * Adjust the code to satisfy the new evpReader interface
+ *
  * Revision 1.65  2008/06/09 16:11:34  fine
  * restore the DATAP summary information if needed. Thanx Jeff
  *
@@ -360,7 +363,7 @@ void StDAQReader::nextEvent()
     } else { // event is not valid
        switch(fDaqFileReader->status) {
           case EVP_STAT_EOR :  // EOR or EOR - might contain token 0!
-             if(fDaqFileReader->isevp) { // keep going until the next run...
+             if(fDaqFileReader->IsEvp()) { // keep going until the next run...
                 LOG_FATAL << "StEvpReader::NextEvent - waiting event" << endm;
                 nextEvent();
              } else {
