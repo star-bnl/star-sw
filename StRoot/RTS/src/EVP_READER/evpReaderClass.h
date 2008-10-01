@@ -143,6 +143,7 @@ class evpReader {
   int getNextEventFilenameFromLive(int type);
   int getNextEventFilenameFromDir(int eventNum);
   int openEventFile();
+  int addToEventSize(int sz);
   int getEventSize();
 
   int fillSummaryInfo(DATAP *datap);
