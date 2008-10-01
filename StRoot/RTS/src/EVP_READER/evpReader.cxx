@@ -70,6 +70,7 @@ evpReader::evpReader(char *name)
 
   if(name == NULL) {	// EVP
     input_type = live;
+    isevp = 1;
     reconnect() ;	// will loop until success or Cntrl-C I guess...
     return ;	// that's it....
   }
@@ -131,6 +132,7 @@ void evpReader::init()
   //	rtsLogOutput(RTS_LOG_NET) ;
   rtsLogAddDest("130.199.60.86",RTS_LOG_PORT_READER) ;	// reader.log to daqman
 
+  isevp = 0;   // assume not... 
   fname[0] = '\0';
   memmap = new MemMap();
   sfs = new sfs_index();
@@ -252,7 +254,6 @@ char *evpReader::get(int num, int type)
   //static struct LOGREC lrhd ;
   int ret ;
   //int leftover, tmp ;
-  u_int offset ;
   // char _evp_basedir_[40];
   //static char _last_evp_dir_[40];
 
@@ -336,7 +337,7 @@ char *evpReader::get(int num, int type)
   bytes = event_size;
 
   if((event_size + evt_offset_in_file) > file_size) {
-    LOG(WARN,"This event is truncated... Good events %d [%d+%d > %d]...", total_events,offset,event_size,file_size,0) ;
+    LOG(WARN,"This event is truncated... Good events %d [%d+%d > %d]...", total_events,evt_offset_in_file,event_size,file_size,0) ;
     if((input_type == pointer) ||
        (input_type == dir)) {
       status = EVP_STAT_EVT ;
@@ -542,7 +543,7 @@ int evpReader::getEventSize()
     LOG(DBG, "Space left = %d",space_left);
 
     if(space_left == 0) return 0;
-    if(space_left < sizeof(LOGREC)) return -1;
+    if(space_left < (int)sizeof(LOGREC)) return -1;
 
     m = headermap.map(desc, offset, space_left);
     if(!m) {
@@ -553,7 +554,7 @@ int evpReader::getEventSize()
 
   
   if(space_left == 0) return 0;
-  if(space_left < sizeof(LOGREC)) {
+  if(space_left < (int)sizeof(LOGREC)) {
     LOG(NOTE, "File truncated: only %d bytes left",space_left);
     status = EVP_STAT_EOR;
     goto done;
@@ -572,7 +573,7 @@ int evpReader::getEventSize()
       goto done;
     }
 
-    if(space_left < 8192 + sizeof(LOGREC)) {
+    if(space_left < (int)(8192 + sizeof(LOGREC))) {
       LOG(NOTE, "File truncated: only %d bytes left",space_left);
       status = EVP_STAT_EOR;
       goto done;
@@ -630,7 +631,7 @@ int evpReader::getEventSize()
       m += sizeof(LOGREC);  
       event_size += sizeof(LOGREC);
 
-      if(space_left < sizeof(LOGREC)) {
+      if(space_left < (int)sizeof(LOGREC)) {
 	LOG(NOTE, "File truncated: only %d bytes left",space_left);
 	status = EVP_STAT_EOR;
 	goto done;

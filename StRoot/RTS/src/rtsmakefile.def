@@ -17,6 +17,7 @@ else
 endif
 
 
+# jml...  TARGET_CPU_STRING to mean the full string...
 
 # go from "uname" to gcc -mcpu=TARGET_CPU variant
 ifeq ($(HOST_CPU),ppc)
@@ -142,8 +143,13 @@ export CXX := g++
 
 # by now we know the host system as well as the target
 INSTALL_SUFFIX :=
+
+ifeq (${TARGET_SYSTEM},LINUX) 
+HOSTFLAGS = -march=$(TARGET_CPU)
+else
 HOSTFLAGS = -mcpu=$(TARGET_CPU)
- 
+endif
+
 # any library used on the host i.e. -lsocket or such
 ifeq (${TARGET_SYSTEM},SUN)
 	HOSTFLAGS += 

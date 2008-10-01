@@ -15,7 +15,7 @@ VERSION := 2.0
 
 
 #override or addition to predefined variables
-CXXFLAGS +=  -g -I../../include/TPC -DEVP_VERSION=\"EVP_VERSION=${VERSION}\" -I..
+CXXFLAGS +=  -fno-strict-aliasing -g -I../../include/TPC -DEVP_VERSION=\"EVP_VERSION=${VERSION}\" -I..
 
 
 ifeq ($(TARGET_SYSTEM),SUN)

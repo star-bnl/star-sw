@@ -107,7 +107,7 @@ int SFS_ittr::findEventNumber()
 int SFS_ittr::findFullLength()
 {
   LOGREC lrhd;
-  int orig_pos = wfile->lseek(0, SEEK_CUR);
+  //  int orig_pos = wfile->lseek(0, SEEK_CUR);
   
   wfile->lseek(-sizeof(lrhd),SEEK_CUR);
   int ret = wfile->read(&lrhd, sizeof(lrhd));
