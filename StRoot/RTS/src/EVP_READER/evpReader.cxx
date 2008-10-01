@@ -317,7 +317,30 @@ char *evpReader::get(int num, int type)
   //     event_size, lrhd_offset, datap_offset & status if failure...
   int error = getEventSize();  
 
-  LOG(DBG, "Event size is %d (%d) %d",event_size, error, status);
+
+  int padchecks = 0;
+  for(;;) {
+    padchecks++;
+    int inc = addToEventSize(event_size);
+
+  
+  
+    if(inc == 0) {
+      LOG(DBG, "No extra increment... event size=%d",event_size);
+      break;
+    }
+
+    LOG(WARN, "Found a padding bug.  Adding %d to event size",inc);
+    event_size += inc;
+
+    if(padchecks > 5) {
+      LOG(ERR, "Error finding next event...");
+      status = EVP_STAT_EOR;
+      return NULL;
+    }
+  }
+
+  LOG(DBG, "Event size is %d (%d) %d",event_size, error, status); 
 
   if(status == EVP_STAT_EOR) {
     LOG(DBG, "Status = EOR");
@@ -351,7 +374,7 @@ char *evpReader::get(int num, int type)
     
 
   if(input_type != pointer) {
-    LOG(NOTE, "Mapping event file %s, offset %d, size %d",
+    LOG(DBG, "Mapping event file %s, offset %d, size %d",
 	file_name, evt_offset_in_file, event_size);
     
     char *mapmem = memmap->map(desc, evt_offset_in_file, event_size);
@@ -361,7 +384,7 @@ char *evpReader::get(int num, int type)
     }
   }
 
-  LOG(NOTE, "Event is now in memory:  start=0x%x, length=%d",memmap->mem,event_size);
+  LOG(DBG, "Event is now in memory:  start=0x%x, length=%d",memmap->mem,event_size);
 
   // Neccessary?
   if(input_type == pointer) {
@@ -413,7 +436,7 @@ char *evpReader::get(int num, int type)
   fs_dirent *datap = sfs->opendirent("legacy");
   if(datap) {
     mem = memmap->mem + datap->offset;
-    LOG(NOTE, "Event has a datap bank at 0x%x",mem);
+    LOG(DBG, "Event has a datap bank at 0x%x",mem);
   }
   else {
     mem = NULL;
@@ -517,6 +540,39 @@ char *evpReader::get(int num, int type)
 }
 
 // Get event size...
+int evpReader::addToEventSize(int sz)
+{
+  if(input_type == pointer) return 0;
+
+  int orig_offset = lseek(desc, 0, SEEK_CUR);
+
+  LOG(DBG, "orig_offset = %d",orig_offset);
+
+  lseek(desc, sz, SEEK_CUR);
+
+  char buff[10];
+  int ret = read(desc, buff, 8);
+  if(ret == 0) {
+    lseek(desc, orig_offset, SEEK_SET);
+    return 0;
+  }
+  
+  if(memcmp(buff, "LRHD",4) == 0) {
+    lseek(desc, orig_offset, SEEK_SET); 
+    return 0;
+  }
+
+  if(memcmp(buff, "DATAP",4) == 0) {
+    lseek(desc, orig_offset, SEEK_SET);
+    return 0;
+  }
+
+  lseek(desc, orig_offset, SEEK_SET);
+
+  
+  return 8192;
+}
+
 int evpReader::getEventSize()
 {
   MemMap headermap;
@@ -538,7 +594,7 @@ int evpReader::getEventSize()
     offset = lseek(desc, 0, SEEK_CUR);
     space_left = file_size - offset;
 
-    if(space_left > 8192*5) space_left = 8192 * 5;
+    if(space_left > 1024) space_left = 1024;
   
     LOG(DBG, "Space left = %d",space_left);
 
@@ -560,28 +616,17 @@ int evpReader::getEventSize()
     goto done;
   }
   
+  LOG(DBG, "OFFSET = %d", offset);
+
   // Check for extra padding bug
   padding_check=0;
   while((memcmp(m, "LRHD", 4) != 0) &&
 	(memcmp(m, "DATAP", 5) != 0)) {
     
-    LOG(ERR, "Event doesn't starts with %c%c%c%c%c not LRHD or DATAP.  Skipping 8192 bytes and trying again",m[0],m[1],m[2],m[3],m[4]);
+    LOG(ERR, "Event doesn't starts with %c%c%c%c%c not LRHD or DATAP.  Should not happen here...",m[0],m[1],m[2],m[3],m[4]);
     
-    padding_check++;
-    if(padding_check > 3) {
-      LOG(CRIT, "Corrupted event header: %c%c%c%c%c",m[0],m[1],m[2],m[3],m[4]);
-      goto done;
-    }
-
-    if(space_left < (int)(8192 + sizeof(LOGREC))) {
-      LOG(NOTE, "File truncated: only %d bytes left",space_left);
-      status = EVP_STAT_EOR;
-      goto done;
-    }
-      
-    m += 8192;
-    offset += 8192;
-    space_left -= 8192;
+    status = EVP_STAT_EVT;
+    goto done;
   }
 
   //  Now at the start of the real event!

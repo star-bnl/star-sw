@@ -382,7 +382,8 @@ int SFS_ittr::next()
 
   ret = wfile->read(entryBuff + 16, entry.head_sz - 16);
   if(ret != entry.head_sz - 16) {
-    LOG(ERR,"Error reading file entry: size mismatch %d\n",ret);
+    LOG(ERR,"Error reading file entry: size mismatch ret=%d sz=%d\n",ret,entry.head_sz);
+
     return -1;
   }
 

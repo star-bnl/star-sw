@@ -50,6 +50,8 @@ int wrapfile::read(void *buff, int sz)
   switch(type) {
   case WRAP_MEM:
 
+    LOG(DBG, "read: wfpos=%d wsize=%d sz=%d",wfpos,wsize,sz);
+
     if((wfpos + sz) > wsize) {   // max read is filesize...
       sz = wsize - wfpos;
     }
