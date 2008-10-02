@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.88 2008/05/13 12:20:58 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.89 2008/10/02 16:21:01 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.89  2008/10/02 16:21:01  jcs
+// standardize m_Mode LOG_INFO messages
+//
 // Revision 1.88  2008/05/13 12:20:58  jcs
 // only write FTPC calibration vertices with successful fit to StEvent
 //
@@ -481,7 +484,8 @@ Int_t StFtpcTrackMaker::Init()
   // Create Histograms
 
 if (m_Mode == 2 || m_Mode == 3) {
-  LOG_INFO << "StFtpcTrackMaker writing to DEBUGFILE (fdbg option selected)" << endm;
+  LOG_INFO << "StFtpcTrackMaker running with fdbg option selected" << endm;
+  if (m_Mode == 3) LOG_INFO << "StFtpcTrackMaker running with flaser option selected" << endm;
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
 }
 
@@ -500,6 +504,7 @@ if (m_Mode == 2 || m_Mode == 3) {
 
   if (IAttr(".histos")) {
      if (m_Mode == 4) {
+        LOG_INFO << "StFtpcTrackMaker running with fgain option selected" <<endm;
         m_pointFW = new TH1F("NPntFW","N points on trk,ftpc west", 8, 4.,12.);
         m_pointFE = new TH1F("NPntFE","N points on trk,ftpc east", 8, 4.,12.);
         m_ratiomFW = new TH1F("RnmFW","ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
@@ -1002,7 +1007,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.88 2008/05/13 12:20:58 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.89 2008/10/02 16:21:01 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
