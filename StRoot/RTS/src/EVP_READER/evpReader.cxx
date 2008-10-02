@@ -107,6 +107,7 @@ evpReader::evpReader(char *name)
 	
   // If not, it must be a file...
   file_size = stat_buf.st_size ;
+  evt_offset_in_file = 0;
   input_type = file;
 
   strcpy(file_name,fname) ;
