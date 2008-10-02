@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.99  2008/10/02 16:20:43  jcs
+// standardize m_Mode LOG_INFO messages
+//
 // Revision 1.98  2008/07/30 14:47:29  jcs
 // if microsecondsPerTimebin calculated from RHIC clock, write the new value for mMicrosecondsPerTimebin back into
 // Calibrations_ftpc/ftpcElectronics table
@@ -519,16 +522,16 @@ Int_t StFtpcClusterMaker::Init(){
   LOG_INFO << "StFtpcClusterMaker entered with m_Mode = "<< m_Mode <<endm;
   
   if (m_Mode == 2) {
-    LOG_INFO << "StFtpcClusterMaker writing to DEBUGFILE (fdbg option selected)"<<endm;
+    LOG_INFO << "StFtpcClusterMaker running with fdbg option selected"<<endm;
   }
 
   if (m_Mode == 4) {
-    LOG_INFO << "Running with fgain option selected"<<endm;
+    LOG_INFO << "StFtpcClusterMaker running with fgain option selected"<<endm;
   }
 
   St_DataSet *ftpc = GetDataBase("ftpc");
   if (!ftpc) {
-     LOG_ERROR << "Exiting - run parameter database StarDb/ftpc not found"<<endm;
+     LOG_ERROR << "StFtpcClusterMaker exiting - run parameter database StarDb/ftpc not found"<<endm;
      return kStErr;
   }
   St_DataSetIter       local(ftpc);
