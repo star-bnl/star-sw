@@ -358,8 +358,6 @@ char *evpReader::get(int num, int type)
     return NULL;
   }
 
-  bytes = event_size;
-
   if((event_size + evt_offset_in_file) > file_size) {
     LOG(WARN,"This event is truncated... Good events %d [%d+%d > %d]...", total_events,evt_offset_in_file,event_size,file_size,0) ;
     if((input_type == pointer) ||
@@ -444,7 +442,29 @@ char *evpReader::get(int num, int type)
     LOG(NOTE, "Event has no DATAP bank");
   }
 
-  // Now we need to fill in the summary information...
+
+  bytes = 0;
+  if(mem) {
+    bytes = event_size - (mem - memmap->mem);
+    LOG(DBG, "size = %d %d",event_size, bytes);
+  }
+
+  // Fill in run number
+  //
+  run = 0;
+  fs_dirent *lrhd_ent = sfs->opendirent("lrhd");
+  if(lrhd_ent) {
+    char *lrhd_buff = memmap->mem + lrhd_ent->offset;
+    LOGREC *lrhd_rec = (LOGREC *)lrhd_buff;
+    run = lrhd_rec->lh.run;
+
+    if(lrhd_rec->lh.byte_order != 0x04030201) {
+      run = swap32(run);
+    }
+  }
+
+
+  // Now we need to fill in the summary information from datap
   //
   fs_dirent *summary = sfs->opendirent("EventSummary");
   if(summary) {

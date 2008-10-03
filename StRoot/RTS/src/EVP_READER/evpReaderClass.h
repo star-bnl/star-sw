@@ -61,7 +61,8 @@ class evpReader {
   //    The event_memory points to the first LRHD/DATAP/FILE record
   //    whatever it might be...  
   char *event_memory;
-  int event_size;
+  int event_size;   // size of the current event measured from beginning of memmap
+  u_int bytes ;	    // size of the current event measured from beginning of datap
 
   int evt_offset_in_file;
 
@@ -109,7 +110,7 @@ class evpReader {
   u_int event_number ;	// current event in the evp or file 
   u_int total_events ;	// total number of events seen by this object so far
 
-  u_int bytes ;		// size of the current event
+
 	
 
 
