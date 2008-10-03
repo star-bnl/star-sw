@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.36 2008/10/03 14:04:34 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.37 2008/10/03 15:35:12 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -29,6 +29,7 @@
 #include <qwhatsthis.h> 
 #include <qlistbox.h> 
 #include "TColor.h" 
+#include "TVolumePosition.h" 
 
 //_____________________________________________________________________________
 class TUpdateList {
@@ -264,7 +265,7 @@ void GeomBrowser::editPaste()
 void GeomBrowser::editFind()
 {
 #if  ROOT_VERSION_CODE >= ROOT_VERSION(4,01,01)
-   // Draw the 3d image fomr the secoind pad only 
+   // Draw the 3d image from the second pad only 
    TVirtualPad *pad3d = tQtWidget1->GetCanvas() ? tQtWidget1->GetCanvas() : gPad;
 //   TVirtualViewer3D *viewer = TVirtualViewer3D::Viewer3D(gPad,"ogl");
    TVirtualViewer3D *viewer = TVirtualViewer3D::Viewer3D(pad3d,"ogl");
@@ -520,6 +521,17 @@ TQtObjectListItem* GeomBrowser::AddItemToListView( TObject *obj, bool /*expand*/
    return item;
 }
 
+//_____________________________________________________________________________
+inline static Int_t CountInstances(TVolume *parent,  TVolume *child) 
+{
+   // Find the number of the positions of the child volume 
+   Int_t counter = 0;
+   TList *positions = parent->GetListOfPositions();
+   TIter next(positions);
+   while (TVolumePosition *pos = (TVolumePosition *)next() )
+      if (pos->GetNode() == child ) counter++;
+   return counter;   
+}
 
 //_____________________________________________________________________________
 void GeomBrowser::listView1_expanded(QListViewItem *item)
@@ -538,6 +550,9 @@ void GeomBrowser::listView1_expanded(QListViewItem *item)
          TQtObjectListItem* itemChild = new TQtObjectListItem(child,itemRoot,child->GetName(),QCheckListItem::CheckBox);     
          itemChild->setText(1,child->GetTitle());
          itemChild->setText(3,child->ClassName());
+         Int_t nVolume = CountInstances(volume,child);
+         if (nVolume >1) 
+             itemChild->setText(2,QString("> #%1").arg(nVolume));
          itemChild->setExpandable(child->GetListSize());
          SetVisibility(itemChild, child->GetVisibility());
       }

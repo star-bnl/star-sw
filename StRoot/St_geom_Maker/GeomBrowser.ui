@@ -54,7 +54,7 @@
                     </property>
                     <property name="minimumSize">
                         <size>
-                            <width>204</width>
+                            <width>200</width>
                             <height>96</height>
                         </size>
                     </property>
@@ -151,7 +151,7 @@
                                         </column>
                                         <column>
                                             <property name="text">
-                                                <string>depth</string>
+                                                <string>Total</string>
                                             </property>
                                             <property name="clickable">
                                                 <bool>false</bool>
