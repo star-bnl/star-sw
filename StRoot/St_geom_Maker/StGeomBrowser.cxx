@@ -35,8 +35,8 @@ void StGeomBrowser::SetFile(const char *fileName)
    } else if (fFileName.EndsWith(".wrl") ) {         
         if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenInventor(fFileName.Data()); 
    }  else if ( (fFileName(0) == 'y' && fFileName.Length() <= 8) ||fFileName == "complete") {
-       // STAR geometry version
-       fBrowser->STAR_geometry_activated(fFileName.Data());
+        // STAR geometry version
+        fBrowser->SelectGeometry(fFileName.Data());
    } else  {
         // The last STAR geometry
         //fBrowser->fileOpenZebra(fFileName.Data());

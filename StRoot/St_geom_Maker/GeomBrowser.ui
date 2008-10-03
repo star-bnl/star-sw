@@ -54,8 +54,8 @@
                     </property>
                     <property name="minimumSize">
                         <size>
-                            <width>242</width>
-                            <height>115</height>
+                            <width>204</width>
+                            <height>96</height>
                         </size>
                     </property>
                     <property name="frameShape">
@@ -1098,6 +1098,7 @@
     <slot>helpIndex()</slot>
     <slot>helpContents()</slot>
     <slot>helpAbout()</slot>
+    <slot>listView1_selectionChanged()</slot>
     <slot>listView1_selectionChanged( QListViewItem * item )</slot>
     <slot>listView1_contextMenuRequested( QListViewItem * item, const QPoint &amp; pos, int col )</slot>
     <slot>slider1_valueChanged( int val )</slot>
@@ -1120,10 +1121,10 @@
     <slot>STAR_geometry_activated( const QString &amp; geoVersion )</slot>
     <slot>fileOpenZebra( const QString &amp; fileName )</slot>
     <slot>fileOpenInventor( const QString &amp; fileName )</slot>
-    <slot>RemakeGeom ( const QString &amp; fileName )</slot>
-    <slot>TurnGeomSrcEditor (bool)</slot>
+    <slot>RemakeGeom( const QString &amp; )</slot>
+    <slot>TurnGeomSrcEditor( bool on )</slot>
     <slot>ViewerDestroyed()</slot>
-    <slot>listView1_selectionChanged()</slot>
+    <slot>SelectGeometry( const QString &amp; )</slot>
 </slots>
 <functions>
     <function access="protected">SetVisibility( TQtObjectListItem * item, TVolume::ENodeSEEN vis )</function>
