@@ -56,8 +56,9 @@ class Altro{
 
 	short *channelIn;
 	short *channelShort;
+ public:
 	short *ADCkeep;
-
+ private:
 	int fOnBSL1;
 	int fOnTCF;
 	int fOnBSL2;
