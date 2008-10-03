@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.35 2008/08/08 18:31:29 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.36 2008/10/03 14:04:34 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -27,6 +27,7 @@
 
 #include <qcolordialog.h> 
 #include <qwhatsthis.h> 
+#include <qlistbox.h> 
 #include "TColor.h" 
 
 //_____________________________________________________________________________
@@ -1331,4 +1332,21 @@ void GeomBrowser::ViewerDestroyed()
 {
    // disconnect the current viewer 
    fCurrentViewer = 0;
+}
+
+
+//_____________________________________________________________________________
+void GeomBrowser::SelectGeometry( const QString &geomTag )
+{
+   // Select the standard geometry from the combobox if any
+   // Find the geometry
+   QListBox *list = comboBox2->listBox();
+   QListBoxItem *it = list->findItem (geomTag);
+   if (it) {
+       comboBox2->setCurrentItem(list->index(it));
+       // and load that geometry if found
+       STAR_geometry_activated(comboBox2->currentText());
+   } else  {
+       QMessageBox::warning (comboBox2,"STAR Geometry Tag",QString("STAR GEANT Geometry Tag <b>\"%1\"</b> was not found").arg(geomTag));
+   }
 }
