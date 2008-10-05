@@ -1,9 +1,0 @@
-/* sci_bad_anodes.idl                       */
-/* SVT Descriptor of bad anodes             */
-
-struct sci_bad_anodes{
-  long      anode;        /* bad anode index                    */
-  long      n_pixels;     /* number of bad pixels on this anode */
-};
-
-
