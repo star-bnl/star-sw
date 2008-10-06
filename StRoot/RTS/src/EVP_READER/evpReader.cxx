@@ -1443,116 +1443,17 @@ static int ask(int desc, ic_msg *m)
   }
 
 
-  // Assume LHRD at 
-  //   this->file_name
-  //   this->evt_offset_in_file
 int evpReader::writeCurrentEventToDisk(char *ofilename)
 {
-  int fdi;
   int fdo;
   int ret;
 
-  int construct_lrhd=0;
-  int evt_offset = evt_offset_in_file;
-  int evt_size=0;
-
-  fdi = open(file_name, O_RDONLY);
-  if(fdi < 0) {
-    LOG(ERR, "Error reopening input file %s (%s)", file_name, strerror(errno));
+  if(memmap->mem == NULL) {
+    LOG(ERR, "Can't write current event.  No event");
     return -1;
   }
 
-  off_t pos = lseek(fdi, evt_offset, SEEK_SET);
-  if(pos == ((off_t)-1)) {
-    LOG(ERR, "Error seeking to position %d in file %s (%s)",
-	evt_offset, file_name, strerror(errno));
-    return -1;
-  }
-
-  // Read to DATA LRHD then seek back...
-  LOGREC rec;
-
-  for(;;) {
-    ret = read(fdi, &rec, sizeof(rec));
-    if(ret < 0) {
-      LOG(ERR, "Error reading lrhd %s",strerror(errno));
-      close(fdi);
-      return -1;
-    }
-
-    if(memcmp(rec.lh.bank_type, "LRHD", 4) == 0) {  // Its a LRHD
-      if(memcmp(rec.record_type, "BEGR", 4) == 0) {  // but just begin run, skip
-	LOG(NOTE, "Got BEGR LRHD");
-	evt_offset += sizeof(rec);
-	continue;
-      }
-      else if (memcmp(rec.record_type, "ENDR", 4) == 0) {   // or endrun, skip
-	LOG(NOTE, "Got ENDR LRHD");
-	evt_offset += sizeof(rec);
-	continue;
-      }
-      if(memcmp(rec.record_type, "DATA", 4) == 0) {   // got it!
-	LOG(NOTE, "Got DATA LRHD");
-	construct_lrhd = 0;
-	evt_size = rec.length * 4;
-	break;
-      }
-    }
-    else if (memcmp(rec.lh.bank_type, "DATAP", 4) == 0) { // 
-      LOG(NOTE, "DATAP, but no LRHD");
-      construct_lrhd = 1;
-      DATAP *datap = (DATAP *)&rec;
-      evt_size = datap->len * 4;
-      break;
-    }
-    else {
-      LOG(ERR, "Got [%c%c%c%c%c] bank... invalid event", 
-	  rec.record_type[0], rec.record_type[1], rec.record_type[2], rec.record_type[3],rec.record_type[4]);
-      close(fdi);
-      return -1;
-    }
-  }
-      
-  pos = lseek(fdi, evt_offset, SEEK_SET);
-  if(pos == ((off_t)-1)) {
-    LOG(ERR, "Error seeking (%s)",strerror(errno));
-    close(fdi);
-    return -1;
-  }
-
-  char *buff = (char *)malloc(evt_size + construct_lrhd * sizeof(LOGREC));
-  if(!buff) {
-    LOG(ERR, "Error allocating %d bytes (%s)", evt_size + construct_lrhd * sizeof(LOGREC), strerror(errno));
-    close(fdi);
-    return -1;
-  }
- 
-  if(construct_lrhd) {
-    LOG(NOTE, "Constructing LRHD");
-    LOGREC *lr = (LOGREC *)buff;
-    
-    memcpy(lr->lh.bank_type, "LRHD    ",8);
-    lr->lh.length = sizeof(LOGREC) / 4;
-    lr->lh.format_ver = DAQ_RAW_FORMAT_VERSION;
-    lr->lh.byte_order = 0x04030201;
-    lr->lh.w7 = 0xdeadface;
-    lr->lh.w8 = 0xdeadface;
-    lr->lh.w9 = 0xdeadface;
-    lr->lh.crc = 0;
-    lr->length = (evt_size + sizeof(LOGREC)) / 4;
-    lr->blocking = 0;
-    memcpy(lr->record_type, "DATA    ",8);
-    lr->crc = 0;
-  }
-
-  ret = read(fdi, buff + construct_lrhd * sizeof(LOGREC), evt_size);
-  if(ret != evt_size) {
-    LOG(ERR, "Error reading event data (%s)",strerror(errno));
-    close(fdi);
-    free(buff);
-    return -1;
-  }
-
+  
   fdo = open(ofilename, O_APPEND | O_WRONLY | O_CREAT, 0666);
   if(fdo < 0) {  
     LOG(ERR, "Error  opening output file %s (%s)", ofilename, strerror(errno));
@@ -1561,18 +1462,13 @@ int evpReader::writeCurrentEventToDisk(char *ofilename)
 
   //LOG("JEFF", "fdo=%d",fdo);
 
-  ret = write(fdo, buff, evt_size + construct_lrhd * sizeof(LOGREC));
-  if(ret != (int)(evt_size + construct_lrhd * sizeof(LOGREC))) {
+  ret = write(fdo, memmap->mem, event_size);
+  if(ret != event_size) {
     LOG(ERR, "Error writing event data (%s)",strerror(errno));
-    close(fdi);
     close(fdo);
-    free(buff);
     return -1;
   }
 
-  free(buff);
-
-  close(fdi);
   close(fdo);
   return 0;
 }
