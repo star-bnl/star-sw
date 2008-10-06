@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.9 2008/10/03 20:25:29 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.10 2008/10/06 19:10:23 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.10  2008/10/06 19:10:23  fisyak
+// BichlePPMIP3
+//
 // Revision 1.9  2008/10/03 20:25:29  fisyak
 // Version BichselMIP2
 //
@@ -37,7 +40,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.9 2008/10/03 20:25:29 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.10 2008/10/06 19:10:23 fisyak Exp $";
 static  Gccuts_t *ccuts = 0;
 
 #define Laserino 170
@@ -444,9 +447,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
     SignalSum_t *SignalSum = ResetSignalSum();
     //    for (; i<=no_tpc_hits; i++,tpc_hit++){// it is assumed that hit are oreder by sector
     while (sortedIndex < no_tpc_hits) {
-      Int_t idnx = sorter.GetIndex(sortedIndex);
-      if (idnx < 0) break;
-      tpc_hit = tpc_hit_begin + idnx;
+      Int_t indx = sorter.GetIndex(sortedIndex);
+      if (indx < 0) break;
+      sortedIndex++;
+      tpc_hit = tpc_hit_begin + indx;
       Int_t volId = tpc_hit->volume_id%100000;
       Int_t iSector = volId/100;
       if (iSector != sector) {
@@ -455,6 +459,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	assert( iSector > sector );
 	break;
       }
+      Int_t isDet  = tpc_hit->volume_id/100000;
+      if (isDet) continue; // skip pseudo padrow
  #if 0
       if (tpc_track[Id-1].next_parent_p && ipart == 3) { // delta electrons ?
 	Id = tpc_track[Id-1].next_parent_p;
@@ -462,8 +468,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       }
 #endif
       do {
-	Int_t isDet  = tpc_hit->volume_id/100000;
-	if (isDet) continue; // skip pseudo padrow
 	Int_t iPadrow = volId%100;
 	Int_t Id         = tpc_hit->track_p;
 	Int_t TrackId    = Id;
@@ -564,7 +568,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	//	Double_t SigmaL = longitudinalDiffusionConstant*TMath::Sqrt(2*driftLength  );
 	Double_t SigmaL = longitudinalDiffusionConstant*TMath::Sqrt(   driftLength  );
 	if (Debug()%10 > 1) { 	
-	  cout << "--> tpc_hit: " << sortedIndex << "\t"
+	  cout << "--> tpc_hit: " << indx << "\t"
 	       << tpc_hit->volume_id   << "\t"
 	       << tpc_hit->de          << "\t"
 	       << tpc_hit->ds          << "\t" << endl;
@@ -742,7 +746,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      Double_t localYDirectionCoupling = ChargeFraction->GetSave(&dely);
 	      if(localYDirectionCoupling < minSignal) continue;
 	      Float_t padX = Pad.pad();
-	      Int_t CentralPad = TMath::Nint(padX);
+	      Int_t CentralPad = TMath::Nint(padX+0.5);
 	      if (CentralPad < 1) continue;
 	      Int_t PadsAtRow = gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row);
 	      if(CentralPad > PadsAtRow) continue;
@@ -806,7 +810,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	NoHitsInTheSector++;
       } while (0); // end do loop
-      sortedIndex++;
     } // hit in the sector
     if (NoHitsInTheSector) {
       DigitizeSector(sector);   
@@ -1385,6 +1388,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.10  2008/10/06 19:10:23  fisyak
+// BichlePPMIP3
+//
 // Revision 1.9  2008/10/03 20:25:29  fisyak
 // Version BichselMIP2
 //

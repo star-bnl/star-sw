@@ -50,8 +50,8 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
   
   TString FileIn(fileIn);
   if (FileIn == "") {
-    ChainOpt += "gstar,"; RootFile += "gstar_y4";
-    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2004,";
+    ChainOpt += "gstar,"; RootFile += "gstar_y8";
+    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2008,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
     else                                                     ChainOpt += "FieldOn,";
