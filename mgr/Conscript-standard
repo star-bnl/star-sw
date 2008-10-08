@@ -265,7 +265,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   print "-=-=-=-=- Will now test $pkg\n" if ($param::debug);
   if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0){
     # This make requires both ROOT Qt and QT libraries
-    if ( defined($env1->{Packages}->{QT}->{DIR}) && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
+    if ( defined($env1->{Packages}->{QT}->{DIR})) {# && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
       #print "-=-=-=-=-=-=-=- QT is defined -=-=-=-=-=-=-=-=-=-=\n";
       $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{QT}->{INCDIR};
       $LIBPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{QT}->{LIBDIR}; 
@@ -901,6 +901,28 @@ if ( $#src > -1 ) {
       if ($SO_PKG_PLAIN !~ /^lib/) {
 	my $lib = $LIB . "/lib" . $SO_PKG_PLAIN;
 	InstallAs $envPlain $lib, $SO_PKG_PLAIN;
+      }
+    }
+    if ($pkg eq "RTS" and -r "./StRoot/RTS/src/RTS_READER/Reader.C" and -r "./StRoot/RTS/src/EVP_READER/special.C") {
+      my $cppflags = "-DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN";
+      my $cpppath  = $main::PATH_SEPARATOR . "#StRoot/RTS/include" 
+	. $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
+	  . $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC"
+	    . $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS"
+	      . $main::PATH_SEPARATOR . "#StRoot/RTS/src"
+		. $main::PATH_SEPARATOR . "StRoot/RTS/src/EVP_READER";
+      $envRTS = $env2->clone('Package'  => $pkg,
+			     'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
+			     'CPPPATH'  => $cpppath,
+			     'CPPFLAGS' => $cppflags,
+			     'LIBPATH'  => $LIB,
+			     'LIBS'     => "-lRTS"
+		      );
+      my @programs = ("RTS_READER/Reader","EVP_READER/special");
+      foreach my $progD (@programs) {
+	my $prog = File::Basename::basename($progD);
+	Program      $envRTS $prog, ("#StRoot/RTS/src/" . $progD . ".C");
+	Install $envRTS $BIN, $prog;
       }
     }
   }
