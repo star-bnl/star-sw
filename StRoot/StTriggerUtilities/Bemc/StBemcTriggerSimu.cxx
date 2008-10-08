@@ -168,20 +168,55 @@ void StBemcTriggerSimu::Init(){
   Clear();
 
 #ifdef DEBUG
-  // Histograms for debugging the BEMC layer 0 DSM algorithm
-  mBEMCLayer1DSMInputPatchSum = new TH2F("BEMCLayer1DSMInputPatchSum", "BEMC L1 DSM Input Patch Sum;BEMC L1 Input Channel;Patch Sum", 36, 0, 36, 100, 0, 100);
-  mBEMCLayer1DSMInputPatchSumDiff = new TH2F("BEMCLayer1DSMInputPatchSumDiff", "BEMC L1 DSM Input Patch Sum;BEMC L1 Input Channel;Patch Sum - Simulated", 36, 0, 36, 200, -100, 100);
-  mBEMCLayer2DSMInputPatchSum = new TH2F("BEMCLayer2DSMInputPatchSum", "BEMC L2 DSM Input Patch Sum;BEMC L2 Input Channel;Patch Sum", 6, 0, 6, 100, 0, 100);
-  mBEMCLayer2DSMInputPatchSumDiff = new TH2F("BEMCLayer2DSMInputPatchSumDiff", "BEMC L2 DSM Input Patch Sum;BEMC L2 Input Channel;Patch Sum - Simulated", 6, 0, 6, 200, -100, 100);
-  mBEMCLayer2DSMInputJetPatchBits = new TH2F("BEMCLayer2DSMInputJetPatchBits", "BEMC L2 DSM Input JP Bits;BEMC L2 Input Channel;Jet Patch Bits", 6, 0, 6, 4, 0, 4);
-  mBEMCLayer2DSMInputJetPatchBitsDiff = new TH2F("BEMCLayer2DSMInputJetPatchBitsDiff", "BEMC L2 DSM Input Jet Patch Bits;BEMC L2 Input Channel;Jet Patch Bits - Simulated", 6, 0, 6, 8, -4, 4);
+  mBEMCLayer0HT6bitDiff=new TH2F("BEMCLayer0HT6bitDiff","BEMC Layer 0 HT6bit Difference",kNPatches,0,kNPatches,128,-64,64);
+  mBEMCLayer0TP6bitDiff=new TH2F("BEMCLayer0TP6bitDiff","BEMC Layer 0 TP6bit Difference",kNPatches,0,kNPatches,128,-64,64);
+  mBEMCLayer0HT6bit=new TH2F("BEMCLayer0HT6bit","BEMC Layer 0 HT6bit",kNPatches,0,kNPatches,32,0,32);
+  mBEMCLayer0TP6bit=new TH2F("BEMCLayer0TP6bit","BEMC Layer 0 TP6bit",kNPatches,0,kNPatches,32,0,32);
+  mBEMCLayer1HTBits = new TH2F("BEMCLayer1HTBits","BEMC Layer1 HT Threshold Bits", 36, 0, 36, 10, 0, 10);
+  mBEMCLayer1HTBitsDiff = new TH2F("BEMCLayer1HTBitsDiff","BEMC Layer1 HT Threshold Bits - Simulated",36, 0, 36, 20, -10, 10);
+  mBEMCLayer1TPBits = new TH2F("BEMCLayer1TPBits","BEMC Layer1 TP Threshold Bits", 36, 0, 36, 10, 0, 10);
+  mBEMCLayer1TPBitsDiff = new TH2F("BEMCLayer1TPBitsDiff","BEMC Layer1 TP Threshold Bits - Simulated",36, 0, 36, 20, -10, 10);
+  mBEMCLayer1HTTPBits = new TH2F("BEMCLayer1HTTPBits","BEMC Layer1 HT.TP Threshold Bits", 36, 0, 36, 10, 0, 10);
+  mBEMCLayer1HTTPBitsDiff = new TH2F("BEMCLayer1HTTPBitsDiff","BEMC Layer1 HT.TP Threshold Bits - Simulated",36, 0, 36, 20, -10, 10);
+  mBEMCLayer1PatchSum = new TH2F("BEMCLayer1PatchSum", "BEMC Layer1 Patch Sum", 36, 0, 36, 100, 0, 100);
+  mBEMCLayer1PatchSumDiff = new TH2F("BEMCLayer1PatchSumDiff", "BEMC Layer1   Patch Sum Diff", 36, 0, 36, 200, -100, 100);
+  mBEMCLayer2PatchSum = new TH2F("BEMCLayer2PatchSum", "BEMC Layer2 Patch Sum", 6, 0, 6, 100, 0, 100);
+  mBEMCLayer2PatchSumDiff = new TH2F("BEMCLayer2PatchSumDiff", "BEMC Layer2   Patch Sum Diff", 6, 0, 6, 200, -100, 100);
+  mBEMCLayer2HTTPBits = new TH2F("BEMCLayer2HTTPBits", "BEMC Layer2  HTTP Bits", 6, 0, 6, 4, 0, 4);
+  mBEMCLayer2HTTPBitsDiff = new TH2F("BEMCLayer2HTTPBitsDiff", "BEMC Layer2   HTTP Bits", 6, 0, 6, 8, -4, 4);
+  mBEMCLayer2TPBits = new TH2F("BEMCLayer2TPBits", "BEMC Layer2  TP Bits", 6, 0, 6, 4, 0, 4);
+  mBEMCLayer2TPBitsDiff = new TH2F("BEMCLayer2TPBitsDiff", "BEMC Layer2 TP Bits", 6, 0, 6, 8, -4, 4);
+  mBEMCLayer2JPBits = new TH2F("BEMCLayer2JPBits", "BEMC Layer2 JP Bits", 6, 0, 6, 4, 0, 4);
+  mBEMCLayer2JPBitsDiff = new TH2F("BEMCLayer2JPBitsDiff", "BEMC Layer2 JP Bits", 6, 0, 6, 8, -4, 4);
+  mBEMCLayer2HTj0Bits = new TH2F("BEMCLayer2HTj0Bits", "BEMC Layer2 HT_j0 Bits", 6, 0, 6, 4, 0, 4);
+  mBEMCLayer2HTj0BitsDiff = new TH2F("BEMCLayer2HTj0BitsDiff", "BEMC Layer2 HT_j0 Patch Bits", 6, 0, 6, 8, -4, 4);
+  mBEMCLayer2HTj1Bits = new TH2F("BEMCLayer2HTj1Bits", "BEMC Layer2 HT_j1 Bits", 6, 0, 6, 4, 0, 4);
+  mBEMCLayer2HTj1BitsDiff = new TH2F("BEMCLayer2HTj1BitsDiff", "BEMC Layer2 HT_j1 Bits", 6, 0, 6, 8, -4, 4);
 
-  mHList->Add(mBEMCLayer1DSMInputPatchSum);
-  mHList->Add(mBEMCLayer2DSMInputPatchSum);
-  mHList->Add(mBEMCLayer2DSMInputJetPatchBits);
-  mHList->Add(mBEMCLayer1DSMInputPatchSumDiff);
-  mHList->Add(mBEMCLayer2DSMInputPatchSumDiff);
-  mHList->Add(mBEMCLayer2DSMInputJetPatchBitsDiff);
+  mHList->Add(mBEMCLayer0HT6bit);
+  mHList->Add(mBEMCLayer0TP6bit);
+  mHList->Add(mBEMCLayer0HT6bitDiff);
+  mHList->Add(mBEMCLayer0TP6bitDiff);
+  mHList->Add(mBEMCLayer1HTBits);
+  mHList->Add(mBEMCLayer1HTBitsDiff);
+  mHList->Add(mBEMCLayer1TPBits);
+  mHList->Add(mBEMCLayer1TPBitsDiff);
+  mHList->Add(mBEMCLayer1HTTPBits);
+  mHList->Add(mBEMCLayer1HTTPBitsDiff);
+  mHList->Add(mBEMCLayer1PatchSum);
+  mHList->Add(mBEMCLayer2PatchSum);
+  mHList->Add(mBEMCLayer2HTTPBits);
+  mHList->Add(mBEMCLayer2TPBits);
+  mHList->Add(mBEMCLayer2JPBits);
+  mHList->Add(mBEMCLayer2HTj0Bits);
+  mHList->Add(mBEMCLayer2HTj1Bits);
+  mHList->Add(mBEMCLayer1PatchSumDiff);
+  mHList->Add(mBEMCLayer2PatchSumDiff);
+  mHList->Add(mBEMCLayer2HTTPBitsDiff);
+  mHList->Add(mBEMCLayer2TPBitsDiff);
+  mHList->Add(mBEMCLayer2JPBitsDiff);
+  mHList->Add(mBEMCLayer2HTj0BitsDiff);
+  mHList->Add(mBEMCLayer2HTj1BitsDiff);
 
 #endif
 
@@ -404,6 +439,7 @@ void StBemcTriggerSimu::Make(){
   if (year==2006){
     get2006_DSMLayer0();
     get2006_DSMLayer1();
+    get2006_DSMLayer2();
   }
 
 }
@@ -608,6 +644,27 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
   //12-13  TP threshold bits
   //14-15  HT&&TP threshold bits
 
+  //SWITCH MISMATCHED tpid HERE for 2006
+  int placeholder;
+  placeholder=L0_HT_ADC[291];
+  L0_HT_ADC[291]=L0_HT_ADC[294];
+  L0_HT_ADC[294]=placeholder;
+  placeholder=L0_HT_ADC[250];
+  L0_HT_ADC[250]=L0_HT_ADC[251];
+  L0_HT_ADC[251]=placeholder;
+  placeholder=L0_HT_ADC[263];
+  L0_HT_ADC[263]=L0_HT_ADC[267];
+  L0_HT_ADC[267]=placeholder;
+
+  placeholder=L0_TP_ADC[291];
+  L0_TP_ADC[291]=L0_TP_ADC[294];
+  L0_TP_ADC[294]=placeholder;
+  placeholder=L0_TP_ADC[250];
+  L0_TP_ADC[250]=L0_TP_ADC[251];
+  L0_TP_ADC[251]=placeholder;
+  placeholder=L0_TP_ADC[263];
+  L0_TP_ADC[263]=L0_TP_ADC[267];
+  L0_TP_ADC[267]=placeholder;
 
   //Loop over modules
   int k=0;
@@ -649,15 +706,21 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 #ifdef DEBUG
     // Overwrite input to BEMC layer 0 DSMs (output of BEMC FEEs)
     // with content of trigger bank from MuDst (data only).
+    // First fill the Layer0 histograms with results from FEEout()
     if (mHeadMaker->GetDataSet("MuDst")) {
       StEmcTriggerDetector& emcTrig = StMuDst::event()->emcTriggerDetector();
-      for (int triggerPatch = 0; triggerPatch < 300; ++triggerPatch) {
+      for (int triggerPatch = 0; triggerPatch < kNPatches; ++triggerPatch) {
+        mBEMCLayer0HT6bit->Fill(triggerPatch,emcTrig.highTower(triggerPatch));
+        mBEMCLayer0TP6bit->Fill(triggerPatch,emcTrig.patch(triggerPatch));
+        mBEMCLayer0HT6bitDiff->Fill(triggerPatch,emcTrig.highTower(triggerPatch)-L0_HT_ADC[triggerPatch]);
+        mBEMCLayer0TP6bitDiff->Fill(triggerPatch,emcTrig.patch(triggerPatch)-L0_TP_ADC[triggerPatch]);
 	L0_HT_ADC[triggerPatch] = emcTrig.highTower(triggerPatch);
-	L0_TP_ADC[triggerPatch] = emcTrig.patch(triggerPatch);
+	L0_TP_ADC[triggerPatch] = emcTrig.patch(triggerPatch); 
       }
     }
 #endif
     
+
     //Loop over 10 inputs to each module 
     for (int j=0;j<kL0DsmInputs;j++){
       
@@ -696,57 +759,60 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
       
       //Loop over 2x5 inputs(TP) for modules 2,7,12,17,22,29
       if (i%5==2){
-	
-	//apply HT thresholds to each HT adc in each TP
-	if (j>4) 
-	  {
-	    if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J1[j]=0;
-	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J1[j]=1;
-	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J1[j]=2;
-	    if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J1[j]=3;
-	  } 
-	if (j<5)
+
+	if (j%2)
 	  {
 	    if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J3[j]=0;
 	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J3[j]=1;
 	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J3[j]=2;
 	    if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J3[j]=3;
 	  }
+	else
+	  {
+	    if ( L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,0)) DSM0_HT_tp_Bit_J1[j]=0;
+	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,1)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,0))) DSM0_HT_tp_Bit_J1[j]=1;
+	    if ((L0_HT_ADC[tpid] <= mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) && (L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,1))) DSM0_HT_tp_Bit_J1[j]=2;
+	    if ( L0_HT_ADC[tpid] > mDbThres->GetHT_DSM0_threshold(i,timestamp,2)) DSM0_HT_tp_Bit_J1[j]=3;
+	  }
 	
 	//apply TP thresholds to each TP adc in each TP
-	if (j>4)
-	  {
-	    if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J1[j]=0;
-	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J1[j]=1;
-	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J1[j]=2;
-	    if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J1[j]=3;
-	  }
-	if (j<5)
+	if (j%2)
 	  {
 	    if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J3[j]=0;
 	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J3[j]=1;
 	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J3[j]=2;
 	    if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J3[j]=3;
 	  }                       
+	else
+	  {
+	    if ( L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,0)) DSM0_TP_tp_Bit_J1[j]=0;
+	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,1)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,0))) DSM0_TP_tp_Bit_J1[j]=1;
+	    if ((L0_TP_ADC[tpid] <= mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) && (L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,1))) DSM0_TP_tp_Bit_J1[j]=2;
+	    if ( L0_TP_ADC[tpid] > mDbThres->GetTP_DSM0_threshold(i,timestamp,2)) DSM0_TP_tp_Bit_J1[j]=3;
+	  }
+	
 	
 	//apply HTTP condition - TP&&HT
-	if (j>4) {
-	  if (DSM0_TP_tp_Bit_J1[j] >= DSM0_HT_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_HT_tp_Bit_J1[j];
-	  if (DSM0_HT_tp_Bit_J1[j] >= DSM0_TP_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_TP_tp_Bit_J1[j];
-	  if (DSM0_HTTP_tp_Bit_J1[j] > DSM0_HTTP_Bit_J1[j]) DSM0_HTTP_Bit_J1[j]=DSM0_HTTP_tp_Bit_J1[j];
-	}
-	if (j<5){
-	  if (DSM0_TP_tp_Bit_J3[j] >= DSM0_HT_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_HT_tp_Bit_J3[j];
-	  if (DSM0_HT_tp_Bit_J3[j] >= DSM0_TP_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_TP_tp_Bit_J3[j];
-	  if (DSM0_HTTP_tp_Bit_J3[j] > DSM0_HTTP_Bit_J3[j]) DSM0_HTTP_Bit_J3[j]=DSM0_HTTP_tp_Bit_J3[j];
-	}
+	if (j%2) 
+	  {
+	    if (DSM0_TP_tp_Bit_J3[j] >= DSM0_HT_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_HT_tp_Bit_J3[j];
+	    if (DSM0_HT_tp_Bit_J3[j] >= DSM0_TP_tp_Bit_J3[j]) DSM0_HTTP_tp_Bit_J3[j]=DSM0_TP_tp_Bit_J3[j];
+	    if (DSM0_HTTP_tp_Bit_J3[j] > DSM0_HTTP_Bit_J3[j]) DSM0_HTTP_Bit_J3[j]=DSM0_HTTP_tp_Bit_J3[j];
+	  }
+	else
+	  {
+	    if (DSM0_TP_tp_Bit_J1[j] >= DSM0_HT_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_HT_tp_Bit_J1[j];
+	    if (DSM0_HT_tp_Bit_J1[j] >= DSM0_TP_tp_Bit_J1[j]) DSM0_HTTP_tp_Bit_J1[j]=DSM0_TP_tp_Bit_J1[j];
+	    if (DSM0_HTTP_tp_Bit_J1[j] > DSM0_HTTP_Bit_J1[j]) DSM0_HTTP_Bit_J1[j]=DSM0_HTTP_tp_Bit_J1[j];
+	  }	
+	
 	
 	//add up TP adc for 1/5 of JP
 	if (j%2)
 	  DSM0_TP_SUM_J3[i]+=L0_TP_ADC[tpid];
 	else
 	  DSM0_TP_SUM_J1[i]+=L0_TP_ADC[tpid];
-
+	
 	//apply HT/TP/HTTP thresholds to bits
 	if (DSM0_HT_Bit_J1[i]< DSM0_HT_tp_Bit_J1[j]) DSM0_HT_Bit_J1[i]=DSM0_HT_tp_Bit_J1[j];
 	if (DSM0_TP_Bit_J1[i]< DSM0_TP_tp_Bit_J1[j]) DSM0_TP_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
@@ -754,65 +820,73 @@ void StBemcTriggerSimu::get2006_DSMLayer0() {
 	if (DSM0_HT_Bit_J3[i]< DSM0_HT_tp_Bit_J3[j]) DSM0_HT_Bit_J3[i]=DSM0_HT_tp_Bit_J3[j];
 	if (DSM0_TP_Bit_J3[i]< DSM0_TP_tp_Bit_J3[j]) DSM0_TP_Bit_J3[i]=DSM0_TP_tp_Bit_J3[j];
 	if (DSM0_HTTP_Bit_J3[i]< DSM0_HTTP_tp_Bit_J3[j]) DSM0_HTTP_Bit_J3[i]=DSM0_HTTP_tp_Bit_J3[j];
-      
-      }      
+	
+      } 
     }
     
+    //k==8 is the problem
     if (i%5!=2)
       {
+	L0_16bit_Out[k]=0;
 	L0_16bit_Out[k++]=DSM0_TP_SUM[i]+(DSM0_HT_Bit[i]<<10)+(DSM0_TP_Bit[i]<<12)+(DSM0_HTTP_Bit[i]<<14);
       }
     if (i%5==2)
       {
+	L0_16bit_Out[k]=0;
+	//cout<<k<<" DSM0_HT_Bit_J3="<<DSM0_HT_Bit_J3[i]<<endl;
 	L0_16bit_Out[k++]=DSM0_TP_SUM_J3[i]+(DSM0_HT_Bit_J3[i]<<10)+(DSM0_TP_Bit_J3[i]<<12)+(DSM0_HTTP_Bit_J3[i]<<14);
+	//cout<<k<<" DSM0_HT_Bit_J1="<<DSM0_HT_Bit_J1[i]<<endl;
 	L0_16bit_Out[k++]=DSM0_TP_SUM_J1[i]+(DSM0_HT_Bit_J1[i]<<10)+(DSM0_TP_Bit_J1[i]<<12)+(DSM0_HTTP_Bit_J1[i]<<14);
-      }
 
-    mDecoder->GetTriggerPatchesFromDSM(i,DSM_TP); 
-    //NEED to eventually make this decision higher up but keep it here for now
-    if ((DSM0_HTTP_Bit[i]>1)||(DSM0_HTTP_Bit_J3[i]>1)||(DSM0_HTTP_Bit_J1[i]>1)) {
-      mFiredTriggers.push_back(127611);
-      mFiredTriggers.push_back(127821);
-      mFiredTriggers.push_back(137821);
-      mFiredTriggers.push_back(137822);
-      mFiredTriggers.push_back(137611);
-      mFiredTriggers.push_back(5);
-    }
-    
-    if ((DSM0_HT_Bit[i]> 2)||(DSM0_HT_Bit_J3[i]>2)||(DSM0_HT_Bit_J1[i]>2)) {
-      mFiredTriggers.push_back(127212);
-      mFiredTriggers.push_back(137213);
-    }
+      }
 
   }
 
 #ifdef DEBUG
+
   // Fill diagnostic histograms
   if (mHeadMaker->GetDataSet("MuDst")) {
     // BEMC layer 1 DSMs are stored in this order in the trigger bank:
     // BE101, BE102, BE103, BW101, BW102, BW103
     // DSM channels are read out in this order:
     static const int dsm_read_map[] = { 3, 2, 1, 0, 7, 6, 5, 4 };
+    // Trigger bank <-> Emulator ==> 0, 1, 2, 3, 4, 5 <-> 3, 4, 5, 0, 1, 2
     static const int TriggerBankToSimuMap[] = { 3, 4, 5, 0, 1, 2 };
     StEmcTriggerDetector& emcTrig = StMuDst::event()->emcTriggerDetector();
 
     // Loop over BEMC layer 1 DSMs
-    for (int dsm = 0; dsm < 6; ++dsm) {
-      // Loop over channels
-      for (int ch = 0; ch < 6; ++ch) {
-	int idx = dsm*8+dsm_read_map[ch];
-	int out = emcTrig.bemcLayer1(idx);
-	mBEMCLayer1DSMInputPatchSum->Fill(dsm*6+ch, out & 0x3ff);
-	// The BEMC trigger simulator processes BEMC layer 1 DSMs in
-	// this order (I think): BW101, BW102, BW103, BE101, BE102, BE103.
-	// So trigger bank <-> simulator ==> 0, 1, 2, 3, 4, 5 <-> 3, 4, 5, 0, 1, 2
-	int diff = (L0_16bit_Out[TriggerBankToSimuMap[dsm]*6+ch] & 0x3ff) - (out & 0x3ff);
-	mBEMCLayer1DSMInputPatchSumDiff->Fill(dsm*6+ch, diff);
+    for (int dsm = 0; dsm < kL1DsmModule; ++dsm) {
+      // Loop over layer 1 input channels
+      for (int ch = 0; ch < kL1DsmInputs; ++ch) {
 
-      }	// End loop over channels
-    } // End loop over BEMC layer 1 DSMs
+	Int_t idx = dsm*8+dsm_read_map[ch];
+	Int_t TrigBankOut = emcTrig.bemcLayer1(idx);
+        Int_t TPSumout = (TrigBankOut & 0x3ff);
+        Int_t TPSumbits = (L0_16bit_Out[TriggerBankToSimuMap[dsm]*6+ch] & 0x3ff);
+        Int_t HTout = (TrigBankOut & 0xc00)/0x400;
+	Int_t HTbits = (L0_16bit_Out[TriggerBankToSimuMap[dsm]*6+ch] & 0xc00)/0x400; 
+ 	Int_t TPout = (TrigBankOut & 0x3000)/0x1000;
+	Int_t TPbits = (L0_16bit_Out[TriggerBankToSimuMap[dsm]*6+ch] & 0x3000)/0x1000;
+	Int_t HTTPout = (TrigBankOut & 0xc000)/0x4000;
+	Int_t HTTPbits = (L0_16bit_Out[TriggerBankToSimuMap[dsm]*6+ch] & 0xc000)/0x4000;
+	int TPSumdiff = (TPSumbits)-(TPSumout);
+	int HTdiff = (HTbits) - (HTout);
+	int TPdiff = (TPbits) - (TPout);
+	int HTTPdiff = (HTTPbits) - (HTTPout);
+	mBEMCLayer1PatchSum->Fill(dsm*6+ch, TPSumout);
+	mBEMCLayer1HTBits->Fill(dsm*6+ch, HTout);	
+	mBEMCLayer1TPBits->Fill(dsm*6+ch, TPout);
+	mBEMCLayer1HTTPBits->Fill(dsm*6+ch, HTTPout);
+	mBEMCLayer1PatchSumDiff->Fill(dsm*6+ch, TPSumdiff);
+	mBEMCLayer1HTBitsDiff->Fill(dsm*6+ch, HTdiff);
+	mBEMCLayer1TPBitsDiff->Fill(dsm*6+ch, TPdiff);
+	mBEMCLayer1HTTPBitsDiff->Fill(dsm*6+ch, HTTPdiff);  
+	if (HTdiff!=0) cout<<" DSM/ch="<<dsm<<"/"<<ch<<" HTout="<<HTout<<" Emu="<<HTbits<<endl;
+      }
+    }
   }
 #endif
+
 }
 
 
@@ -824,25 +898,18 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
   //DSM_Layer0 is passed to DSM_Layer1 in 8 UShort blocks (16 bits)
   //There are 6 DSM_Layer1 boards and each can take 120 bits total
   //So DSM_Layer0 passes 8 shorts (16*8=128) or 128 bits to each DSM_Layer1
-  //int nShort[8] = {3, 2, 1, 0, 7, 6, 5, 4};
-  for (int i=0; i<kL1DsmModule; i++)
-    {
-      for (int j=0; j<6; j++) //only loop over 6 shorts 
-	{
-	  // Int_t L0_Output_Channel = (i * 8) + nShort[j];
-	}
-    }
 
   //Zero out the DSMLayer1 Bits passed to DSMLayer2
   for (int i=0;i<kL1DsmModule;i++){
     DSM1_JP_Bit[i]=0;
-    DSM1_HT_Bit[i]=0;
+    DSM1_HTj0_Bit[i]=0;
+    DSM1_HTj1_Bit[i]=0;
     DSM1_TP_Bit[i]=0;
     DSM1_HTTP_Bit[i]=0;
     DSM1_ETOT_ADC[i]=0;
   }
 
-/*
+
 #ifdef DEBUG
     // Overwrite input to BEMC layer 1 DSMs (output of BEMC layer 0 DSMs)
     // with content of trigger bank from MuDst (data only).
@@ -861,9 +928,8 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
       }
     }
 #endif
-*/    
+    
   //Sum TP ADC into JP's
-
   // West
   DSM1_JP_ADC[0]=DSM0_TP_SUM[0]+DSM0_TP_SUM[1]+DSM0_TP_SUM_J3[2];
   DSM1_JP_ADC[1]=DSM0_TP_SUM[3]+DSM0_TP_SUM[4]+DSM0_TP_SUM_J1[2];
@@ -880,9 +946,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
   DSM1_JP_ADC[10]=DSM0_TP_SUM[25]+DSM0_TP_SUM[26]+DSM0_TP_SUM_J1[27];
   DSM1_JP_ADC[11]=DSM0_TP_SUM[28]+DSM0_TP_SUM[29]+DSM0_TP_SUM_J3[27];
  
-  for (int hh=0;hh<12;hh++) {
-    JP_adc_holder[hh]=DSM1_JP_ADC[hh];
-  }
+  for (int hh=0;hh<12;hh++) JP_adc_holder[hh]=DSM1_JP_ADC[hh];
   
   //Test each JP and see if it passed
   for (int i=0;i<kNJet;i++)
@@ -894,7 +958,7 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
       if ( DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,2)) DSM1_JP_jp_Bit[i]=3;
     }  
 
-  // there are 2 L2 BEMC modules
+
   int mod;
   //Translate JP's into 2 bits to pass to DSMLayer2
   for (int i=0;i<kNJet;i++){
@@ -905,43 +969,75 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
   }
 
 
-  // again we will move this up to a higher level but for now keep this here
-  for (int dsm = 0; dsm < 6; ++dsm) {
-    if (DSM1_JP_Bit[dsm] >= 1) {
-      mFiredTriggers.push_back(127501);
-      mFiredTriggers.push_back(137501);
-      mFiredTriggers.push_back(127622);
-      mFiredTriggers.push_back(137622);
-      break;
+  //HTTP and TP bits
+  for (int i=0; i<kL1DsmModule; i++){
+    for (int j=0; j<5; j++){
+      int k= i*5 + j;
+      int kk=i*5 + 2;
+      if ( DSM1_HTTP_Bit[i] < DSM0_HTTP_Bit[k]) DSM1_HTTP_Bit[i]=DSM0_HTTP_Bit[k];   
+      if ( DSM1_HTTP_Bit[i] < DSM0_HTTP_Bit_J3[kk]) DSM1_HTTP_Bit[i]=DSM0_HTTP_Bit_J3[kk];   
+      if ( DSM1_HTTP_Bit[i] < DSM0_HTTP_Bit_J1[kk]) DSM1_HTTP_Bit[i]=DSM0_HTTP_Bit_J1[kk];
+      if ( DSM1_TP_Bit[i] < DSM0_TP_Bit[k]) DSM1_TP_Bit[i]=DSM0_TP_Bit[k];      
+      if ( DSM1_TP_Bit[i] < DSM0_TP_Bit_J3[kk]) DSM1_TP_Bit[i]=DSM0_TP_Bit_J3[kk];   
+      if ( DSM1_TP_Bit[i] < DSM0_TP_Bit_J1[kk]) DSM1_TP_Bit[i]=DSM0_TP_Bit_J1[kk];         
     }
+
+    if (DSM1_HTTP_Bit[i]>=2) DSM1_HTTP_Bit[i]=1;
+    else if (DSM1_HTTP_Bit[i]<2) DSM1_HTTP_Bit[i]=0;
+
+    if (DSM1_TP_Bit[i]>=2) DSM1_TP_Bit[i]=1;
+    else if (DSM1_TP_Bit[i]<2) DSM1_TP_Bit[i]=0;
   }
 
-  for (int dsm = 0; dsm < 6; ++dsm) {
-    if (DSM1_JP_Bit[dsm] >= 2) {
-      mFiredTriggers.push_back(127221);
-      mFiredTriggers.push_back(137221);
-      mFiredTriggers.push_back(137222);
-      break;
-    }
-  }
 
-  for (int i=0;i<kL0DsmModule;i++){
+  //WEST  HT bits
+  if (DSM1_HTj0_Bit[0]<DSM0_HT_Bit[0]) DSM1_HTj0_Bit[0]=DSM0_HT_Bit[0];
+  if (DSM1_HTj0_Bit[0]<DSM0_HT_Bit[1]) DSM1_HTj0_Bit[0]=DSM0_HT_Bit[1];
+  if (DSM1_HTj0_Bit[0]<DSM0_HT_Bit_J3[2]) DSM1_HTj0_Bit[0]=DSM0_HT_Bit_J3[2];
+  if (DSM1_HTj1_Bit[0]<DSM0_HT_Bit_J1[2]) DSM1_HTj1_Bit[0]=DSM0_HT_Bit_J1[2];
+  if (DSM1_HTj1_Bit[0]<DSM0_HT_Bit[3]) DSM1_HTj1_Bit[0]=DSM0_HT_Bit[3];
+  if (DSM1_HTj1_Bit[0]<DSM0_HT_Bit[4]) DSM1_HTj1_Bit[0]=DSM0_HT_Bit[4];
 
-    if (i < (kL0DsmModule/2)) mod=0;
-    else  mod=1;
+  if (DSM1_HTj0_Bit[1]<DSM0_HT_Bit[5]) DSM1_HTj0_Bit[1]=DSM0_HT_Bit[5];
+  if (DSM1_HTj0_Bit[1]<DSM0_HT_Bit[6]) DSM1_HTj0_Bit[1]=DSM0_HT_Bit[6];
+  if (DSM1_HTj0_Bit[1]<DSM0_HT_Bit_J3[7]) DSM1_HTj0_Bit[1]=DSM0_HT_Bit_J3[7];
+  if (DSM1_HTj1_Bit[1]<DSM0_HT_Bit_J1[7]) DSM1_HTj1_Bit[1]=DSM0_HT_Bit_J1[7];
+  if (DSM1_HTj1_Bit[1]<DSM0_HT_Bit[8]) DSM1_HTj1_Bit[1]=DSM0_HT_Bit[8];
+  if (DSM1_HTj1_Bit[1]<DSM0_HT_Bit[9]) DSM1_HTj1_Bit[1]=DSM0_HT_Bit[9];
 
-    if ( DSM1_HT_Bit[mod] < DSM0_HT_Bit[i] ) DSM1_HT_Bit[mod]=DSM0_HT_Bit[i];
-    if ( DSM1_HT_Bit[mod] < DSM0_HT_Bit_J3[i] ) DSM1_HT_Bit[mod]=DSM0_HT_Bit_J3[i];
-    if ( DSM1_HT_Bit[mod] < DSM0_HT_Bit_J1[i] ) DSM1_HT_Bit[mod]=DSM0_HT_Bit_J1[i];
-    if ( DSM1_TP_Bit[mod] < DSM0_TP_Bit[i] ) DSM1_TP_Bit[mod]=DSM0_TP_Bit[i];
-    if ( DSM1_TP_Bit[mod] < DSM0_TP_Bit_J3[i] ) DSM1_TP_Bit[mod]=DSM0_TP_Bit_J3[i];
-    if ( DSM1_TP_Bit[mod] < DSM0_TP_Bit_J1[i] ) DSM1_TP_Bit[mod]=DSM0_TP_Bit_J1[i];
-    if ( DSM1_HTTP_Bit[mod] < DSM0_HTTP_Bit[i] ) DSM1_HTTP_Bit[mod]=DSM0_HTTP_Bit[i];
-    if ( DSM1_HTTP_Bit[mod] < DSM0_HTTP_Bit_J3[i] ) DSM1_HTTP_Bit[mod]=DSM0_HTTP_Bit_J3[i];
-    if ( DSM1_HTTP_Bit[mod] < DSM0_HTTP_Bit_J1[i] ) DSM1_HTTP_Bit[mod]=DSM0_HTTP_Bit_J1[i];
+  if (DSM1_HTj0_Bit[2]<DSM0_HT_Bit[10]) DSM1_HTj0_Bit[2]=DSM0_HT_Bit[10];
+  if (DSM1_HTj0_Bit[2]<DSM0_HT_Bit[11]) DSM1_HTj0_Bit[2]=DSM0_HT_Bit[11];
+  if (DSM1_HTj0_Bit[2]<DSM0_HT_Bit_J3[12]) DSM1_HTj0_Bit[2]=DSM0_HT_Bit_J3[12];
+  if (DSM1_HTj1_Bit[2]<DSM0_HT_Bit_J1[12]) DSM1_HTj1_Bit[2]=DSM0_HT_Bit_J1[12];
+  if (DSM1_HTj1_Bit[2]<DSM0_HT_Bit[13]) DSM1_HTj1_Bit[2]=DSM0_HT_Bit[13];
+  if (DSM1_HTj1_Bit[2]<DSM0_HT_Bit[14]) DSM1_HTj1_Bit[2]=DSM0_HT_Bit[14];
+
+  //EAST HT bits
+  if (DSM1_HTj0_Bit[3]<DSM0_HT_Bit[15]) DSM1_HTj0_Bit[3]=DSM0_HT_Bit[15];
+  if (DSM1_HTj0_Bit[3]<DSM0_HT_Bit[16]) DSM1_HTj0_Bit[3]=DSM0_HT_Bit[16];
+  if (DSM1_HTj0_Bit[3]<DSM0_HT_Bit_J1[17]) DSM1_HTj0_Bit[3]=DSM0_HT_Bit_J1[17];
+  if (DSM1_HTj1_Bit[3]<DSM0_HT_Bit_J3[17]) DSM1_HTj1_Bit[3]=DSM0_HT_Bit_J3[17];
+  if (DSM1_HTj1_Bit[3]<DSM0_HT_Bit[18]) DSM1_HTj1_Bit[3]=DSM0_HT_Bit[18];
+  if (DSM1_HTj1_Bit[3]<DSM0_HT_Bit[19]) DSM1_HTj1_Bit[3]=DSM0_HT_Bit[19];
+
+  if (DSM1_HTj0_Bit[4]<DSM0_HT_Bit[20]) DSM1_HTj0_Bit[4]=DSM0_HT_Bit[20];
+  if (DSM1_HTj0_Bit[4]<DSM0_HT_Bit[21]) DSM1_HTj0_Bit[4]=DSM0_HT_Bit[21];
+  if (DSM1_HTj0_Bit[4]<DSM0_HT_Bit_J1[22]) DSM1_HTj0_Bit[4]=DSM0_HT_Bit_J1[22];
+  if (DSM1_HTj1_Bit[4]<DSM0_HT_Bit_J3[22]) DSM1_HTj1_Bit[4]=DSM0_HT_Bit_J3[22];
+  if (DSM1_HTj1_Bit[4]<DSM0_HT_Bit[23]) DSM1_HTj1_Bit[4]=DSM0_HT_Bit[23];
+  if (DSM1_HTj1_Bit[4]<DSM0_HT_Bit[24]) DSM1_HTj1_Bit[4]=DSM0_HT_Bit[24];
+
+  if (DSM1_HTj0_Bit[5]<DSM0_HT_Bit[25]) DSM1_HTj0_Bit[5]=DSM0_HT_Bit[25];
+  if (DSM1_HTj0_Bit[5]<DSM0_HT_Bit[26]) DSM1_HTj0_Bit[5]=DSM0_HT_Bit[26];
+  if (DSM1_HTj0_Bit[5]<DSM0_HT_Bit_J1[27]) DSM1_HTj0_Bit[5]=DSM0_HT_Bit_J1[27];
+  if (DSM1_HTj1_Bit[5]<DSM0_HT_Bit_J3[27]) DSM1_HTj1_Bit[5]=DSM0_HT_Bit_J3[27];
+  if (DSM1_HTj1_Bit[5]<DSM0_HT_Bit[28]) DSM1_HTj1_Bit[5]=DSM0_HT_Bit[28];
+  if (DSM1_HTj1_Bit[5]<DSM0_HT_Bit[29]) DSM1_HTj1_Bit[5]=DSM0_HT_Bit[29];
   
-  }
 
+
+  
+  
   //Drop two lowest bits for ETOT and OR Bits>6 with 6
   for (int i=0;i<kL1DsmModule;i++) {
     DSM1_ETOT_ADC[i]/=4;
@@ -950,63 +1046,102 @@ void StBemcTriggerSimu::get2006_DSMLayer1(){
 
 
 #ifdef DEBUG
-  // Fill diagnostic histograms
+
   if (mHeadMaker->GetDataSet("MuDst")) {
     StEmcTriggerDetector& emcTrig = StMuDst::event()->emcTriggerDetector();
     static const int dsm_read_map[] = { 3, 2, 1, 0, 7, 6, 5, 4 };
     static const int TriggerBankToSimuMap[] = { 3, 4, 5, 0, 1, 2 };
-
-    // Loop over BEMC layer 2 DSMs - there is only 1!
-    for (int dsm = 0; dsm < 1; ++dsm) {
-      // Loop over channels
+    for (int dsm = 0; dsm < kL2DsmModule; ++dsm) {
       for (int ch = 0; ch < 6; ++ch) {
 	int idx = dsm_read_map[ch];
-	int out = emcTrig.emcLayer2(idx);
-	int JP_ADC_AND=(out&0x1f);
-	int MT_1=(out&0x60);
-	int TP_HT=(out&0x80);
-	int MT_2=(out&0x100);
-	int TP=(out&0x200);
-	int JP=(out&0xC00);
-	int HT1=(out&0x3000);
-	int HT2=(out&0xC000);
-	int AddedTotal=HT1 + HT2 + JP + TP + MT_2 + TP_HT + MT_1 + JP_ADC_AND;
-	if (AddedTotal!=out) cout<<"Holy Crap!"<<endl;
-	cout<<" Total="<<out<<" ch="<<ch<<
-	  " JP ADC AND="<<(out&0x1f)<<
-	  /*    " MT="<<(out&0x60)/pow(2,5)<<
-		" TP.HT="<<(out&0x80)/pow(2,7)<<
-		" MT="<<(out&0x100)/pow(2,8)<<
-		" TP="<<(out&0x200)/pow(2,9)<<
-	  */
-	  " JP="<<(out&0xC00)/pow(2,10)<<
-	  " S1="<<DSM1_JP_Bit[0]<<
-	  " S2="<<DSM1_JP_Bit[1]<<endl;
-	mBEMCLayer2DSMInputPatchSum->Fill(ch, out & 0x1f);
-	mBEMCLayer2DSMInputJetPatchBits->Fill(ch, out >> 10 & 0x3);
-
-	/*ch0- 1.0x2.0 BEMC-BE101 10 and 12
-	  ch1- 1.0x2.0 BEMC-BE102 2 and 4
-	  ch2- 1.0x2.0 BEMC-BE103 6 and 8
-	  ch3- 1.0x2.0 BEMC-BW101 10 and 12
-	  ch4- 1.0x2.0 BEMC-BW102 2 and 4
-	  ch5- 1.0x2.0 BEMC-BW103 6 and 8
-	  ch6- 0.9x3.0 EEMC-E101 4, 6 and 8
-	  ch7- 0.9x3.0 EEMC-E102 10, 12 and 2
-	*/
+	int TrigBankOut = emcTrig.emcLayer2(idx);
 	int jetPatch = 2 * TriggerBankToSimuMap[ch];
 	int sum = DSM1_JP_ADC[jetPatch] + DSM1_JP_ADC[jetPatch+1];
 	sum = (sum >> 7) ? 31 : (sum >> 2 & 0x1f);
-	if (int diff = (out & 0x1f) - (sum & 0x1f))
-	  mBEMCLayer2DSMInputPatchSumDiff->Fill(ch, diff);
-	if (int diff = (out >> 10 & 0x3) - (DSM1_JP_Bit[TriggerBankToSimuMap[ch]]))
-	  mBEMCLayer2DSMInputJetPatchBits->Fill(ch, diff);
-      }	// End loop over channels
-    } // End loop over BEMC layer 2 DSMs
+	int diff = (TrigBankOut & 0x1f) - (sum & 0x1f);
+	mBEMCLayer2PatchSum->Fill(ch, TrigBankOut & 0x1f);
+	mBEMCLayer2PatchSumDiff->Fill(ch, diff);
+	diff = (TrigBankOut >> 7 & 0x1) - (DSM1_HTTP_Bit[TriggerBankToSimuMap[ch]]);
+	mBEMCLayer2HTTPBits->Fill(ch, TrigBankOut >> 7 & 0x1);
+	mBEMCLayer2HTTPBitsDiff->Fill(ch,diff);
+	diff = (TrigBankOut >> 9 & 0x1) - (DSM1_TP_Bit[TriggerBankToSimuMap[ch]]);
+	mBEMCLayer2TPBits->Fill(ch, TrigBankOut >> 9 & 0x1);
+	mBEMCLayer2TPBitsDiff->Fill(ch,diff);
+	diff = (TrigBankOut >> 10 & 0x3) - (DSM1_JP_Bit[TriggerBankToSimuMap[ch]]);
+	mBEMCLayer2JPBits->Fill(ch, TrigBankOut >> 10 & 0x3);
+	mBEMCLayer2JPBitsDiff->Fill(ch, diff);
+	diff = (TrigBankOut >> 12 & 0x3) - (DSM1_HTj0_Bit[TriggerBankToSimuMap[ch]]);
+	mBEMCLayer2HTj0Bits->Fill(ch, TrigBankOut >> 12 & 0x3);
+	mBEMCLayer2HTj0BitsDiff->Fill(ch,diff);
+	diff = (TrigBankOut >> 14 & 0x3) - (DSM1_HTj1_Bit[TriggerBankToSimuMap[ch]]);
+	mBEMCLayer2HTj1Bits->Fill(ch, TrigBankOut >> 14 & 0x3);
+	mBEMCLayer2HTj1BitsDiff->Fill(ch,diff);
+ 
+      }
+    }
   }
 #endif
 
 }
+
+void StBemcTriggerSimu::get2006_DSMLayer2()
+{
+
+  // In hardware the final trigger decisions are made in the TCU 
+  // It is not possible to compare the emulator with the TCU input
+  // so all final trigger decisions for the BEMC are made at Layer2 
+  // in this code
+
+  Int_t DSM2_JP_Bit=0;
+  Int_t DSM2_HT_Bit=0;
+  //Int_t DSM2_Esum_Bit=0;
+  //Int_t DSM2_Topo_Bit=0;
+  Int_t DSM2_HTTP_Bit=0;
+  Int_t DSM2_TP_Bit=0;
+
+    
+  for (int dsm = 0; dsm < kL1DsmModule; ++dsm) {
+
+    if (DSM2_JP_Bit<DSM1_JP_Bit[dsm]) DSM2_JP_Bit=DSM1_JP_Bit[dsm];
+    if (DSM2_HTTP_Bit<DSM1_HTTP_Bit[dsm]) DSM2_HTTP_Bit=DSM1_HTTP_Bit[dsm];
+    if (DSM2_HT_Bit<DSM1_HTj0_Bit[dsm]) DSM2_HT_Bit=DSM1_HTj0_Bit[dsm];
+    if (DSM2_HT_Bit<DSM1_HTj1_Bit[dsm]) DSM2_HT_Bit=DSM1_HTj1_Bit[dsm];
+    if (DSM2_TP_Bit<DSM1_TP_Bit[dsm]) DSM2_TP_Bit=DSM1_TP_Bit[dsm];
+  }
+  
+  //HT
+  if (DSM2_HT_Bit > 2){
+    mFiredTriggers.push_back(127212);
+    mFiredTriggers.push_back(137213);
+  }
+  
+  //HTTP trigger
+  if (DSM2_HTTP_Bit==1) {
+      mFiredTriggers.push_back(127611);
+      mFiredTriggers.push_back(127821);
+      mFiredTriggers.push_back(137821);
+      mFiredTriggers.push_back(137822);
+      mFiredTriggers.push_back(137611);
+      mFiredTriggers.push_back(5);
+    } 
+
+
+  //JP Trigger
+  if (DSM2_JP_Bit >= 1) {  
+    mFiredTriggers.push_back(127501);
+    mFiredTriggers.push_back(137501);
+    mFiredTriggers.push_back(127622);
+    mFiredTriggers.push_back(137622);
+  }
+  
+  if (DSM2_JP_Bit >= 2) {
+    mFiredTriggers.push_back(127221);
+    mFiredTriggers.push_back(137221);
+    mFiredTriggers.push_back(137222);
+  }
+  
+}
+
 
 
 const vector< pair<int,int> > StBemcTriggerSimu::getTowersAboveThreshold(int trigId) const {  
