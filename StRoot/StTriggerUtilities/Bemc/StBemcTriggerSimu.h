@@ -25,6 +25,8 @@ using std::vector;
 #define kL0DsmInputs 10
 #define kNLayer0out 36
 #define kL1DsmModule 6
+#define kL1DsmInputs 6
+#define kL2DsmModule 1
 
 class StEvent;
 class StEmcDecoder;
@@ -102,6 +104,7 @@ private:
   Int_t L0_16bit_Out[kNLayer0out];
   //DSM1 Bits for JP, HT, TP and HTTP
   Int_t DSM1_JP_Bit[kL1DsmModule], DSM1_HT_Bit[kL1DsmModule], DSM1_TP_Bit[kL1DsmModule], DSM1_HTTP_Bit[kL1DsmModule];
+  Int_t DSM1_HTj1_Bit[kL1DsmModule], DSM1_HTj0_Bit[kL1DsmModule];
   Int_t DSM1_ETOT_ADC[kL1DsmModule];
   //Intermediate bits for each jet patch constructed in DSMLayer1
   Int_t DSM1_JP_jp_Bit[kNJet];
@@ -119,17 +122,37 @@ private:
   void FEEout();
   void get2006_DSMLayer0();
   void get2006_DSMLayer1();
+  void get2006_DSMLayer2();
 
   //#define DEBUG			// Comment out to switch off debugging
 
 #ifdef DEBUG
-  // Histograms for debugging the BEMC layer 0 DSM algorithm
-  TH2* mBEMCLayer1DSMInputPatchSum;
-  TH2* mBEMCLayer1DSMInputPatchSumDiff;
-  TH2* mBEMCLayer2DSMInputPatchSum;
-  TH2* mBEMCLayer2DSMInputPatchSumDiff;
-  TH2* mBEMCLayer2DSMInputJetPatchBits;
-  TH2* mBEMCLayer2DSMInputJetPatchBitsDiff;
+  
+  TH2 *mBEMCLayer0HT6bit;
+  TH2 *mBEMCLayer0TP6bit;
+  TH2 *mBEMCLayer0HT6bitDiff;
+  TH2 *mBEMCLayer0TP6bitDiff;
+  TH2 *mBEMCLayer1HTBits;
+  TH2 *mBEMCLayer1HTBitsDiff;
+  TH2 *mBEMCLayer1TPBits;
+  TH2 *mBEMCLayer1TPBitsDiff;
+  TH2 *mBEMCLayer1HTTPBits;
+  TH2 *mBEMCLayer1HTTPBitsDiff;
+  TH2 *mBEMCLayer1PatchSum;
+  TH2 *mBEMCLayer1PatchSumDiff;
+  TH2 *mBEMCLayer2PatchSum;
+  TH2 *mBEMCLayer2PatchSumDiff;
+  TH2 *mBEMCLayer2HTTPBits;
+  TH2 *mBEMCLayer2HTTPBitsDiff;
+  TH2 *mBEMCLayer2TPBits;
+  TH2 *mBEMCLayer2TPBitsDiff;
+  TH2 *mBEMCLayer2JPBits;
+  TH2 *mBEMCLayer2JPBitsDiff;
+  TH2 *mBEMCLayer2HTj0Bits;
+  TH2 *mBEMCLayer2HTj0BitsDiff;
+  TH2 *mBEMCLayer2HTj1Bits;
+  TH2 *mBEMCLayer2HTj1BitsDiff;
+
 #endif
   
 public:
