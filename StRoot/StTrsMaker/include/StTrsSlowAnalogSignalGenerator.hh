@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.6 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.7 2008/10/13 19:56:11 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.hh,v $
+ * Revision 1.7  2008/10/13 19:56:11  fisyak
+ * Account that Z-offset is sector dependent
+ *
  * Revision 1.6  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -69,7 +72,7 @@ public:
 
     // charge generation
     void   setChargeDistribution(StDistribution);
-    void   inducedChargeOnPad(StTrsWireHistogram*);
+  void   inducedChargeOnPad(StTrsWireHistogram*,Int_t sector);
     inline double signalOnPad(double, double, double, double, double, double);
 
     // sampling

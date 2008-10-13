@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.82 2008/06/20 15:00:57 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.83 2008/10/13 19:56:09 fisyak Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.83  2008/10/13 19:56:09  fisyak
+// Account that Z-offset is sector dependent
+//
 // Revision 1.82  2008/06/20 15:00:57  fisyak
 // move from StTrsData to StTpcRawData
 //
@@ -388,7 +391,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.82 2008/06/20 15:00:57 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.83 2008/10/13 19:56:09 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -953,7 +956,7 @@ Int_t StTrsMaker::Make(){
 	//
 	time_t inducedChargeBegin = time(0);
 	if (Debug()) {gMessMgr->QAInfo()  << "--->inducedChargeOnPad()..." << endm;}
-	mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
+	mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram,currentSectorProcessed);
 	if (Debug()) {
 	time_t inducedChargeEnd= time(0);
 	double inducedChargeTime = difftime(inducedChargeEnd,inducedChargeBegin);

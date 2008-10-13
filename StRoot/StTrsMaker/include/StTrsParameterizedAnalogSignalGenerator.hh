@@ -37,7 +37,7 @@ public:
     static StTrsAnalogSignalGenerator* instance(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*, StTrsSector*);
 
     // charge generation
-    void   inducedChargeOnPad(StTrsWireHistogram*);
+    void   inducedChargeOnPad(StTrsWireHistogram*, Int_t sector);
 
     // sampling
     void   sampleAnalogSignal();
