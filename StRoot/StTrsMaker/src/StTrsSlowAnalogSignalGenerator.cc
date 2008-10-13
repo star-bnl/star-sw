@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.28 2008/06/20 15:01:20 fisyak Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.29 2008/10/13 19:56:12 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.29  2008/10/13 19:56:12  fisyak
+ * Account that Z-offset is sector dependent
+ *
  * Revision 1.28  2008/06/20 15:01:20  fisyak
  * move from StTrsData to StTpcRawData
  *
@@ -347,7 +350,7 @@ void StTrsSlowAnalogSignalGenerator::setChargeDistribution(StDistribution v)
 // 	}
 // }
 
-void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
+void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram, Int_t sector)
 {
     //
     // coordinate transform is now a data member

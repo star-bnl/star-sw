@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.37 2008/06/20 15:01:18 fisyak Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.38 2008/10/13 19:56:12 fisyak Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.38  2008/10/13 19:56:12  fisyak
+ * Account that Z-offset is sector dependent
+ *
  * Revision 1.37  2008/06/20 15:01:18  fisyak
  * move from StTrsData to StTpcRawData
  *
@@ -398,8 +401,8 @@ double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
  
 
 
-void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
-{ double offset=transformer.zFromTB(0);
+void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram, Int_t sector)
+{ double offset=transformer.zFromTB(0,sector);
 
     int PadsAtRow;
     double sigma_xpad2;

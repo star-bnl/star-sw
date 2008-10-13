@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.9 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.10 2008/10/13 19:56:10 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
+ * Revision 1.10  2008/10/13 19:56:10  fisyak
+ * Account that Z-offset is sector dependent
+ *
  * Revision 1.9  2005/09/09 22:12:48  perev
  * Bug fix + IdTruth added
  *
@@ -92,7 +95,7 @@ public:
     virtual ~StTrsAnalogSignalGenerator() {/* nopt */}
 
     // Charge Induction
-    virtual void inducedChargeOnPad(StTrsWireHistogram*)     	= 0;
+  virtual void inducedChargeOnPad(StTrsWireHistogram*, Int_t sector)     	= 0;
 
     // Sampling
     virtual void   sampleAnalogSignal()                      	= 0;
