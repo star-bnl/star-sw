@@ -4,22 +4,28 @@ MODULE  CALBGEO2 is the geometry of the Barrel EM Calorimeter
    Created   December 12, 2006
 * Based on CALBGEO1 -- tower map removed due to a full calorimeter
 *
-* $Id: calbgeo2.g,v 1.1 2006/12/12 21:12:00 potekhin Exp $
+* $Id: calbgeo2.g,v 1.2 2008/10/13 02:57:18 perev Exp $
 * $Log: calbgeo2.g,v $
+* Revision 1.2  2008/10/13 02:57:18  perev
+* S.Trentalange modifications
+*
 * Revision 1.1  2006/12/12 21:12:00  potekhin
 * Since the CALB geo is pretty finalized, with full population,
 * it makes sense to rationalize the internal logic a little and
 * get rid of the population map (which effectively did not reflect
 * reality in 2006 tags). The new file solves this problem.
 *
+* New modification made by S.Trentalange
+* http://drupal.star.bnl.gov/STAR/blog-entry/trent/2008/sep/15/btwo-geometry-changes
+* http://drupal.star.bnl.gov/STAR/blog-entry/trent/2008/aug/26/btow-bsmd-geometry
 *
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
 external etsphit
 *
-      Content CALB,CHLV,CPHI,CSUP,CPBP,CSCI,CSMD,CSMG,CSDA,CSMC,CSMB,CSME,
-              CSHI,CBTW
+      Content CALB,CHLV,CPHI,CSZO,CSZU,CSUP,CPBP,CSCI,CSMD,CSMG,CSDA,CSMC,CSMB,CSME,
+              CSHI,CBTW,CSPT,CSPB,CSTP,CSLG
 
       Structure CALG { version,  Rmin,     Etacut,   CrackWd,
                        FrontThk, CompThk,  AirThk,   BackThk,  SpaceThk, 
@@ -41,7 +47,14 @@ external etsphit
                 sh_eta1,sh_eta2,sh_phi1,sh_phi2,Rmax,Hleng, Deta,
                 angular_offset,
                 DphiTot, DphiMod, DphiT, R1, R2, R3, R4, RR(2)
-      integer   layer,super,sub,i,j,ii,nn,imod
+      real      zz0,zz1,zz2,sin_theta,cut_length2,Hleng2,angle,
+                skindepth,skinoffset,skinoffset1,skinoffset2,skinthk
+      real      strap_dx,strap_dy,strap_dz,strap_r
+      real      slug_dx,slug_dy,slug_dz
+      real      strap_spacing
+      real      cut_radius2,calg_Rmin2,Rmax2,Rmax3
+
+      integer   layer,super,sub,i,j,ii,nn,imod,nslug
 *
 * ---------------------------------------------------------------------------
 *                          primary geometrical constant
@@ -94,6 +107,11 @@ external etsphit
 * ---------------------------------------------------------------------------
 *                          primary geometrical constant
 *
+      zz0=0.477              ! thickness of SS plate  eta=0
+      zz1=0.692              ! thickness of total gap eta=0
+      zz2=0.79375            ! thickness of SS plate  eta=1
+      calg_EtaCut=0.9835     ! needs to be set elsewhere in program
+
       smd_width=2.*calg_g10SbThk+2.*calg_SmAlfThk+2.*calg_AbPapThk
       smd_width1=2.*calg_g10SbThk+2.*calg_AbPapThk
       smd_width2=smd_width1+calg_SmGasThk+calg_SmGasRad
@@ -103,27 +121,51 @@ external etsphit
       do i=1,nint(calg_Nsuper)
         layer_width(i) = calg_ScintThk(i) + calg_AbsorThk+2.*calg_AbPapThk
         R2+=(calg_NsubLay(i)-i+1)*layer_width(i)*2.0
-	RR(i)=R2 
-      enddo
+  	    RR(i)=R2 
+         enddo
       R3=(calg_Nsuper*layer_width(1)+(calg_nsmd-calg_Nsuper)*layer_width(2))*2.
       R4=(smd_width+calg_scintThk(2)+2.*calg_AbPapThk)*2.0
       cut_radius=R1+R2+R4
       Rmax=cut_radius+2.*(Calg_BackThk+calg_SpaceThk+Calg_CompThk+calg_AirThk)
+      angle      = 2*atan(exp(-calg_EtaCut))*180./3.14159
       tan_theta  = tan(2*atan(exp(-calg_EtaCut)))
+      sin_theta  = sin(2*atan(exp(-calg_EtaCut)))
       cut_length = calg_Rmin/tan_theta
       Hleng   = cut_radius/tan_theta  
+      cut_length2 = cut_length + zz2/sin_theta
+      Hleng2 = Hleng + zz2/sin_theta
       nn      = max(calg_Nmodule(1),calg_Nmodule(2))
       Deta    = 1.0/calg_NetaT
       DphiMod = 360/calg_MaxModule
       DphiT   = DphiMod/calg_Nsub
       DphiTot = DphiMod*nn
-		
-      fill CALR                 ! barrel EMC radiuses
-	RMIN = R1               ! inner raduis of sensitive area
-	RPRS = R1+RR(1)/2.0     ! mean raduis of PRS
-	RSMD1= R1+R3+smd_width2 ! mean raduis of SMD
-	RSMD2= R1+R3+smd_width3 ! mean raduis of SMD
-	RMAX = cut_radius       ! outer raduis of sensitive area
+*
+      skinthk = 0.040                  ! thickness of aluminum cover
+      skinthk = (skinthk/Rmax)*180./3.14159         !convert to Dphi
+      skinoffset = (0.250/Rmax)*180./3.14159		!convert to Dphi
+      skinoffset1= -3+skinoffset
+      skinoffset2= +3-skinoffset
+      Rmax2 = cut_radius +2.*0.9525+ 0.291
+      calg_Rmin2 = calg_Rmin + 0.291
+      cut_radius2= cut_radius +0.291
+*
+      strap_spacing = 17.06        ! 15 places along module z0=6.5295
+      slug_dx       = 0.9525/2     ! half width of slug
+      slug_dy       = 3.1750/2     ! half width of slug
+      slug_dz       = 3.1750/2     ! half width of slug
+      strap_dx      = (Rmax2-calg_Rmin2)/2     ! half width of strap
+      strap_dy      = 0.2/2      ! half width of strap
+      strap_dz      = 3.175/2        ! half width of strap
+      strap_r       = (calg_Rmin2+Rmax2)/2 -0.291
+
+      fill CALR               ! barrel EMC radiuses
+      RMIN = R1               ! inner raduis of sensitive area
+	  RPRS = R1+RR(1)/2.0     ! mean raduis of PRS
+	  RSMD1= R1+R3+smd_width2 ! mean raduis of SMD
+	  RSMD2= R1+R3+smd_width3 ! mean raduis of SMD
+	  RMAX = cut_radius       ! outer raduis of sensitive area
+      Rmax3 = Rmax/cos(3.14159*DphiMod/360) 
+
       Endfill
       USE CALR
 *
@@ -139,9 +181,9 @@ block CALB is  EMC Barrel envelope
       attribute CALB  seen=0  colo=7
 *
       SHAPE     PCON  Phi1=0  Dphi=360  Nz=4,
-                      zi  = {-Hleng,      -cut_length, cut_length, Hleng},
+                      zi  = {-Hleng2,      -cut_length2, cut_length2, Hleng2},
                       rmn = { cut_radius,  Calg_rmin,  Calg_Rmin,  cut_radius},
-                      rmx = { Rmax,        Rmax,       Rmax,       Rmax };
+                      rmx = { Rmax3,        Rmax3,       Rmax3,       Rmax3 };
 
 *     write(*,*) 'CALB: Zi =', cut_length, Hleng
 *     write(*,*) 'CALB: Rmi=', Calg_Rmin,  cut_radius
@@ -157,9 +199,9 @@ EndBlock
 Block CHLV corresponds to double modules...
 *
       shape     PCON  Phi1=calg_shift(ii) Dphi=DphiMod*calg_Nmodule(ii)  Nz=3,
-                      zi  = { 0,          cut_length,  Hleng},
+                      zi  = { 0,          cut_length2,  Hleng2},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
-                      rmx = { Rmax,       Rmax,        Rmax };
+                      rmx = { Rmax3,       Rmax3,        Rmax3 };
 
       Create  CPHI
       do imod=1,calg_Nmodule(ii)
@@ -172,15 +214,75 @@ EndBlock
 Block CPHI corresponds to a single module
       attribute CPHI  seen=1   colo=5
       Shape  PCON Phi1=-3.0 DPhi=6.0 Nz=3,
-                      zi  = { 0,          cut_length,  Hleng},
+                      zi  = { 0,          cut_length2,  Hleng2},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
-                      rmx = { Rmax,       Rmax,        Rmax };
+                      rmx = { Rmax3,       Rmax3,        Rmax3 };
+*
+      Create CSZO    
+      Position CSZO  x = (Rmax+calg_Rmin)/2,
+                     z = zz0/2,
+                     AlphaX=90,
+                     AlphaZ=-90
+*
+      Create CSZU
+      Position CSZU  x = (cut_radius+calg_Rmin)/2,
+                     z = (cut_length+Hleng+zz2/sin_theta)/2,
+                     AlphaX=angle,
+                     AlphaZ=-90
+*
+      Create CSPT
+      Position CSPT
+*
+      Create CSPB
+      Position CSPB
 *
       current_depth = calg_Rmin
       c_dep=current_depth
       Create   CBTW   dx=calg_FrontThk
       Position CBTW   x =calg_Rmin+calg_FrontThk,
-                      z =current_depth/tan_theta/2 
+                      z =current_depth/tan_theta/2 +zz0/2
+
+      do nslug = 0,13
+      Create  CSLG
+      Position CSLG   x =calg_Rmin+slug_dx,
+       y = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd-slug_dy,
+                      z = 16.5849+nslug*strap_spacing+zz0
+      Create  CSLG
+      Position CSLG   x =calg_Rmin+slug_dx,
+       y = -1*current_depth*tan(TwoPi/360*DphiT)+calg_CrackWd+slug_dy,
+                      z = 16.5849+nslug*strap_spacing+zz0
+
+      Create CSTP
+      Position CSTP   x=strap_r,
+      y = +1*strap_r*tan(TwoPi/360*DphiT)-calg_CrackWd+strap_dy,
+                      z = 16.5849+nslug*strap_spacing+zz0,
+                      AlphaZ=+3
+      Create CSTP
+      Position CSTP   x=strap_r,
+      y = -1*strap_r*tan(TwoPi/360*DphiT)+calg_CrackWd-strap_dy,
+                      z = 16.5849+nslug*strap_spacing+zz0,
+                      AlphaZ=-3
+      enddo
+
+      Create  CSLG
+      Position CSLG   x =calg_Rmin+slug_dx,
+       y = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd-slug_dy,
+                      z =current_depth/tan_theta-zz0-3.679
+      Create  CSLG
+      Position CSLG   x =calg_Rmin+slug_dx,
+       y = -1*current_depth*tan(TwoPi/360*DphiT)+calg_CrackWd+slug_dy,
+                      z =current_depth/tan_theta-zz0-3.679
+      Create CSTP
+      Position CSTP   x=strap_r,
+      y = +1*strap_r*tan(TwoPi/360*DphiT)-calg_CrackWd+strap_dy,
+                      z =current_depth/tan_theta-zz0-3.679,
+                      AlphaZ=+3
+      Create CSTP
+      Position CSTP   x=strap_r,
+      y = -1*strap_r*tan(TwoPi/360*DphiT)+calg_CrackWd-strap_dy,
+                      z =current_depth/tan_theta-zz0-3.679,
+                      AlphaZ=-3
+
 
       current_depth = current_depth + 2*calg_FrontThk  
 
@@ -191,22 +293,92 @@ Block CPHI corresponds to a single module
 *                                  Module Back Plates
       Create   CBTW   dx=calg_CompThk
       Position CBTW   x =current_depth+calg_CompThk,
-                      z =current_depth/tan_theta/2       
+                      z =current_depth/tan_theta/2 +zz0/2      
 *
       c_dep=2.*calg_CompThk+2.*calg_AirThk
       Create   CBTW   dx=calg_BackThk
       Position CBTW x=current_depth+c_dep+calg_BackThk,
-                    z =current_depth/tan_theta/2 
+                    z =current_depth/tan_theta/2 +zz0/2
 *
       c_dep=c_dep+2.*calg_BackThk
       Create   CBTW   dx=calg_SpaceThk
       Position CBTW x=current_depth+c_dep+calg_SpaceThk,
-                    z =current_depth/tan_theta/2 
+                    z =current_depth/tan_theta/2 +zz0/2
       c_dep=c_dep+2.*calg_SpaceThk
       current_depth=current_depth+c_dep 
 
 *
 EndBlock
+*-----------------------------------------------------------------------------
+Block CSTP
+      Material  Iron
+      Material  CIron Isvol=0
+      Medium    Iron_emc
+      Attribute CSTP seen=1  colo=1
+      SHAPE  BOX  dx = strap_dx,
+                  dy = strap_dy,
+                  dz = strap_dz
+      Call CALBPAR(ag_imed,'ABSORBER')
+Endblock
+*-----------------------------------------------------------------------------
+Block CSPT is the side aluminum skin top 
+      Material Aluminium
+      Material CAluminium Isvol=0
+      Medium Al_emc
+      attribute CSPT seen=1 colo=6
+      Shape  PCON Phi1=-2.94 DPhi=0.0045 Nz=3,
+                      zi  = { 0,          cut_length,  Hleng},
+                      rmn = { Calg_Rmin2,  Calg_Rmin2,   cut_radius2},
+                      rmx = { Rmax2,       Rmax2,        Rmax2 };
+      Call CALBPAR(ag_imed,'ABSORBER')
+EndBlock
+*-----------------------------------------------------------------------------
+Block CSPB is the side aluminum skin bottom 
+      Material Aluminium
+      Material CAluminium Isvol=0
+      Medium Al_emc
+      attribute CSPB seen=1 colo=6
+      Shape  PCON Phi1=+2.94 DPhi=0.0045 Nz=3,
+                      zi  = { 0,          cut_length,  Hleng},
+                      rmn = { Calg_Rmin2,  Calg_Rmin2,   cut_radius2},
+                      rmx = { Rmax2,       Rmax2,        Rmax2 };
+      Call CALBPAR(ag_imed,'ABSORBER')
+EndBlock
+*-----------------------------------------------------------------------------
+Block CSLG
+      Material  Iron
+      Material  CIron Isvol=0
+      Medium    Iron_emc
+      Attribute CSLG seen=1  colo=1
+      SHAPE  BOX  dx = slug_dx,
+                  dy = slug_dy,
+                  dz = slug_dz
+      Call CALBPAR(ag_imed,'ABSORBER')
+Endblock
+*----------------------------------------------------------------------------
+Block CSZO
+      Material  Iron
+      Material  CIron Isvol=0
+      Medium    Iron_emc
+      Attribute CSZO seen=1  colo=1
+      Shape  TRD1  dx1 = calg_Rmin*tan(TwoPi/360*DphiT)-calg_CrackWd,
+                   dx2 = Rmax*tan(TwoPi/360*DphiT)-calg_CrackWd,
+                   dy  = zz0/2,
+                   dz  = (Rmax - calg_Rmin)/2
+      Call CALBPAR(ag_imed,'ABSORBER')
+Endblock
+*----------------------------------------------------------------------------
+Block CSZU 
+      Material  Iron
+      Material  CIron Isvol=0
+      Medium    Iron_emc
+      Attribute CSZU seen=1  colo=1
+      Shape  TRD1  dx1 = calg_Rmin*tan(TwoPi/360*DphiT)-calg_CrackWd,
+                   dx2 = cut_radius*tan(TwoPi/360*DphiT)-calg_CrackWd,
+                   dy  = zz2/2,
+                   dz  = (cut_radius - calg_Rmin)/(2.*sin_theta)
+      Call CALBPAR(ag_imed,'ABSORBER')
+Endblock
 *-----------------------------------------------------------------------------
 Block CSUP  is a super layer with few layers inside
       future_depth=current_depth+
@@ -219,7 +391,7 @@ Block CSUP  is a super layer with few layers inside
       Mixture   Cellulose Dens=0.35 Isvol=1       
       attribute CSUP  seen=0   colo=1
       shape     PCON  Phi1=-3.0  Dphi=DphiMod  Nz=3,
-                      zi ={0, current_depth/tan_theta, future_depth/tan_theta},
+                      zi ={zz1, current_depth/tan_theta, future_depth/tan_theta},
                       rmn={ current_depth,    current_depth,    future_depth },
                       rmx={ future_depth,     future_depth,     future_depth };
       Call CALBPAR(ag_imed,'ABSORBER')
@@ -229,22 +401,22 @@ Block CSUP  is a super layer with few layers inside
          if(layer.lt.nint(calg_NsubLay(1)+calg_NsubLay(2))) then
            Create   CSCI 
            Position CSCI x=current_depth+calg_ScintThk(super)+2.*calg_AbPapThk,
-                         z=current_depth/tan_theta/2 
+                         z=current_depth/tan_theta/2 +zz1/2
            Create   CPBP 
            c_lead_dep=2.*calg_ScintThk(super)+4.*calg_AbPapThk
            Position CPBP x=current_depth+c_lead_dep+calg_AbsorThk,
-                         z=current_depth/tan_theta/2 
+                         z=current_depth/tan_theta/2 +zz1/2
            current_depth = current_depth + 2*layer_width(super)
          else 
            Create   CSCI 
            Position CSCI x=current_depth+calg_ScintThk(2)+2.*calg_AbPapThk,
-                         z=current_depth/tan_theta/2 
+                         z=current_depth/tan_theta/2 +zz1/2
            current_depth = current_depth+c_lead_dep
          endif
 *                                    place SMD
          Check  layer==nint(calg_Nsmd)
          create and position CSMD  x=current_depth+smd_width,
-                                   z=current_depth/tan_theta/2 
+                                   z=current_depth/tan_theta/2 +zz0/2 
          current_depth = current_depth + 2*smd_width  
 *
       enddo      
@@ -257,7 +429,7 @@ Block CPBP
       Attribute CPBP seen=1  colo=1
       SHAPE  BOX  dx = calg_AbsorThk,
                   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
-                  dz = current_depth/tan_theta/2
+                  dz = current_depth/tan_theta/2 -zz1/2
       Call CALBPAR(ag_imed,'ABSORBER')
 
 *      write(*,*) 'super,sub:',super,' ',sub,' Pb dx,dy,dz ',
@@ -273,7 +445,7 @@ Block CSCI a scintillator layer.
       attribute CSCI  seen=1  colo=4
       Shape     BOX   dx=calg_ScintThk(super),  
                       dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
-                      dz = current_depth/tan_theta/2
+                      dz = current_depth/tan_theta/2 -zz1/2
       Call CALBPAR(ag_imed,'ABSORBER')
 
 * define Birks law parameters
@@ -295,7 +467,7 @@ Block CBTW  is the  Module Front Back Plate
       Medium Al_emc 
       attribute CBTW  seen=1  colo=6
       Shape     BOX   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
-                      dz = current_depth/tan_theta/2
+                      dz = current_depth/tan_theta/2 -zz0/2
       Call CALBPAR(ag_imed,'ABSORBER')
 
 EndBlock
@@ -310,7 +482,7 @@ Block CSMD is the shower maximum detector envelope
       attribute CSMD  seen=1  colo=6
       Shape BOX dx=smd_width,
                 dy=current_depth*tan(TwoPi/120.)-calg_CrackWd,
-                dz=current_depth/tan_theta/2
+                dz=current_depth/tan_theta/2 -zz0/2
       Call CALBPAR(ag_imed,'SENSITIVE')
 *
 * front back G10 plate
@@ -326,25 +498,25 @@ Block CSMD is the shower maximum detector envelope
           eta_lenght=calg_Netfirst*(calg_Seta1Wdh+calg_Set12Wdh)
           create CSDA
           Position CSDA x=current+calg_SmAlfThk,
-                        z=current_csda+2.*calg_SmetaWdh+eta_lenght
+                        z=current_csda+2.*calg_SmetaWdh+eta_lenght+zz0/2
         elseif(j.eq.2) then
           current_csda=current_csda+2.*(calg_SmetaWdh+eta_lenght)
           eta_lenght=calg_Netfirst*(calg_Seta2Wdh+calg_Set12Wdh)
           create CSDA
           Position CSDA x=current+calg_SmAlfThk,
-                        z=current_csda+eta_lenght
+                        z=current_csda+eta_lenght +zz0/2
         elseif(j.eq.3) then
           eta_lenght=calg_Netfirst*(calg_Seta1Wdh+calg_Set12Wdh)
           create CSDA
           Position CSDA x=current+3.*calg_SmAlfThk,
-                        z=current_csda+2.*calg_SmetaWdh+eta_lenght,
+                        z=current_csda+2.*calg_SmetaWdh+eta_lenght+zz0/2,
                         thetaX=90 phiX=180
         elseif(j.eq.4) then
           current_csda=current_csda+2.*(calg_SmetaWdh+eta_lenght)
           eta_lenght=calg_Netfirst*(calg_Seta2Wdh+calg_Set12Wdh)
           create CSDA
           Position CSDA x=current+3.*calg_SmAlfThk,
-                        z=current_csda+eta_lenght,
+                        z=current_csda+eta_lenght+zz0/2,
                         thetaX=90 phiX=180
         endif
       enddo
@@ -385,7 +557,7 @@ Block CSDA is Al block with sensitive gas volume
       attribute CSDA seen=1 colo=6 Serial=j      
       Shape BOX   dx = calg_SmAlfThk,
                   dy = calg_SmAlfWdh, 
-                  dz = eta_lenght
+                  dz = eta_lenght -zz0/2
       Call CALBPAR(ag_imed,'SENSITIVE')
 
       Create CSME
