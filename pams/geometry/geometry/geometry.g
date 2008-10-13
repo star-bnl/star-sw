@@ -1,7 +1,7 @@
-* $Id: geometry.g,v 1.169 2008/09/25 22:50:25 perev Exp $
+* $Id: geometry.g,v 1.170 2008/10/13 00:22:19 perev Exp $
 * $Log: geometry.g,v $
-* Revision 1.169  2008/09/25 22:50:25  perev
-* Add tpcConfig==4 for Upgr16
+* Revision 1.170  2008/10/13 00:22:19  perev
+* upgr16 pipe changed to provisional
 *
 * Revision 1.168  2008/09/25 03:05:58  perev
 * upgr16 (Jan)
@@ -2858,7 +2858,7 @@ If LL>1
                      MutdConfig = 3;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
-                   PipeFlag = 1;  "pipe wrap only"
+                     PipeFlag = 1;  "pipe wrap only"
                 }
 ****************************************************************************************
   on DUMM01   { R and D geometry: TPC+DUMM
@@ -3755,12 +3755,16 @@ If LL>1
 * On Gerrit's request, we disable the cone:
                    ITSP=off; "prototype of the Inner Tracker SuPport structure"
                 }
+****************************************************************************************
   on UPGR16   { New Tracking: HFT+IST+TPC+SSD-SVT
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
+                     ConeConfig=2 " new cable weight estimate ";
+
                   "tpc: standard, i.e.  "
-                     mwc=on " Multiwire chambers are read-out ";
+                     mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
+
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
                      BtofConfig=5;
@@ -3789,9 +3793,11 @@ If LL>1
                      SISD=on;
                      SisdConfig = 65;
 * careful! Achtung!
-                   PipeConfig=-1;   " Simplest.Gerrit"
+                   PipeConfig=4;   " provisional"
                    pipeFlag=-1; !   " Simplest.Gerrit"
-                   PIXL=on;        " put the pixel detector in"
+                   PipeFlag = 1;    "pipe wrap only"
+
+		   PIXL=on;         " put the pixel detector in"
                    PixlConfig=-1;   " Simplest.Gerrit"
 
                    ISTB=on;  "IST barrel"
