@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.170 2008/10/13 00:22:19 perev Exp $
+* $Id: geometry.g,v 1.171 2008/10/13 03:21:35 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.171  2008/10/13 03:21:35  perev
+* upgr17 added Wei(MingZhang)
+*
 * Revision 1.170  2008/10/13 00:22:19  perev
 * upgr16 pipe changed to provisional
 *
@@ -3815,6 +3818,72 @@ If LL>1
                      TpceConfig = 3;
                   "We need an even bigger Cave"
                      CaveConfig = 4;
+                }
+****************************************************************************************
+  on UPGR17   { UPGR16 - FGTD + FTPC  request Wei-Ming-Zhang
+                     SVTT=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "CALB" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ECAL"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     BBCM=on
+                  "forward pion detector "
+                     FPDM=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     PHMD=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     SISD=on;
+                     SisdConfig = 65;
+* careful! Achtung!
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=-1; !   " Simplest.Gerrit"
+                   PipeFlag = 1;    "pipe wrap only"
+
+		   PIXL=on;         " put the pixel detector in"
+                   PixlConfig=-1;   " Simplest.Gerrit"
+
+                   ISTB=on;  "IST barrel"
+                   IstbConfig=-1;
+
+                   FSTD=off;  "no pixel based forward tracker in this tag"
+                   FstdConfig=0;
+
+* No Forward STAR tracker disk
+                   FGTD=off;  "GEM forward tracker"
+* On Gerrit's request, we disable the cone:
+                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "We need an even bigger Cave"
+                     CaveConfig = 4;
+* FTPC from y2008
+                     SupoConfig = 1; 		"FTPC Support"
+                     FtpcConfig = 1; 		"ftpc configuration"
+                  "FTPC Readout barrel "
+                     FTRO=on;
+                     FtroConfig = 1;
+
                 }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
