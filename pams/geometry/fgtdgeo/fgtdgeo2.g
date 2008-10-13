@@ -1,5 +1,8 @@
-* $Id: fgtdgeo2.g,v 1.1 2008/09/25 03:05:44 perev Exp $
+* $Id: fgtdgeo2.g,v 1.2 2008/10/13 00:24:06 perev Exp $
 * $Log: fgtdgeo2.g,v $
+* Revision 1.2  2008/10/13 00:24:06  perev
+* upgr16 divisions of disks added
+*
 * Revision 1.1  2008/09/25 03:05:44  perev
 * upgr16 (Jan)
 *
@@ -60,22 +63,23 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 
 * Declare variables used in the code.
 
-      real centerZ     ! center of complete assembly along Z axis
-      real lengthZ      ! length of complete assembly along Z axis
-      real thickGG       ! thickness in Z of a single tripple-GEM disk
-      real Rin         ! inner radius a komponent
-      real Rout        ! outer radius a komponent
-      real zsum        ! accumulates Z position for set of components
-      integer disk    ! index for counting over the GEM disks
-      integer quad    ! index for counting quadrants in one GEM disk
-      integer cable   ! index for counting cables for one GEM disk
-      integer cabseg   ! index for counting cable segment
-      real x1,x2,x3  ! working variables 
-      real zD,z1,z2  ! working variables 
- 
+      real centerZ	! center of complete assembly along Z axis
+      real lengthZ     	! length of complete assembly along Z axis
+      real thickGG     	! thickness in Z of a single tripple-GEM disk
+      real Rin         	! inner radius a komponent
+      real Rout        	! outer radius a komponent
+      real zsum        	! accumulates Z position for set of components
+      integer disk    	! index for counting over the GEM disks
+      integer quad    	! index for counting quadrants in one GEM disk
+      integer cable   	! index for counting cables for one GEM disk
+      integer cabseg   	! index for counting cable segment
+      real x1,x2,x3  	! working variables 
+      real zD,z1,z2  	! working variables 
+
+      real FGSCrmin, FGSCrmax, FGSCdz ! variable size of FGSC
 
 * Declare the blocks to be defined in the code.
-      Content   FGMO, FGGD, FGSC, FGFP, FGFC, FGFA, FGFL, FGOC,FGXR,
+      Content   FGMO, FGGD, FGSC, FGZS, FGFP, FGFC, FGFA, FGFL, FGOC,FGXR,
      + FGGF,FGGN,FGGC,FGGK,FGGP,FGGR,FGOR,FGOA,FGOU,FGCT,FGRS,
      + FGAP,FGAL,FGAS,FGAB, FGSU,FGSV,FGXC,FGXD,FGXE
 * volumes added/changed by Jan:
@@ -95,6 +99,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 * FGGF - FR4 front foil of  tripple-GEM
 * FGGN - Nomex front support of  tripple-GEM
 * FGSC - active volume of tripple-GEM
+* FGZS - active volume divisions of FGSC
 * FGGC - Cu layer of  tripple-GEM
 * FGGK - Kapton layer of  tripple-GEM
 * FGGP - passive gas layer of  tripple-GEM
@@ -195,7 +200,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
       else  if(  FGTG_Config.eq.1) then 
         print *, ' 6 FGT disks, no additional 3 FGT test disks'
         FGTG_nDisk=6
-      else  
+      else  if(  FGTG_Config.eq.2) then
         print *, ' 6 FGT disks and  3 FGT test disks' 
       endif
 * Calculate some parameters from the input variables.
@@ -298,37 +303,37 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
      
 * SSD simplified mounting Alu ring 
       Create   FGXR
-      Position FGXR in CAVE z=57 kOnly='MANY'
+      Position FGXR in CAVE z=57 
 * SSD simplified supporting Carbon ring
       Create   FGXC
-      Position FGXC in CAVE z=51.0 kOnly='MANY'
+      Position FGXC in CAVE z=51.0 
 * SSD cables in front of FGT
       Create   FGSV
-      Position FGSV in CAVE z=58. kOnly='MANY'
+      Position FGSV in CAVE z=58. 
 * IST simplified supporting Carbon ring
       Create   FGXD
-      Position FGXD in CAVE z=24.0 kOnly='MANY'
+      Position FGXD in CAVE z=24.0 
 
 * HFT simplified supporting Carbon ring
       Create   FGXE
-      Position FGXE in CAVE z=11.0 kOnly='MANY'
+      Position FGXE in CAVE z=11.0 
 
 
 * TPC resistor chain in IFC
       Create   FGCT
       x1=FGTG_IFCrin-FGTG_IFCTUBrout  ! r-distance
       x2=(FGTG_IFCresAng-FGTG_IFCTUBdelA/2.0)/180.*3.1416 ! titl angle in rad
-      Create and Position FGCT z=0. x=x1*cos(x2) y=x1*sin(x2)  kOnly='MANY'    
+      Create and Position FGCT z=0. x=x1*cos(x2) y=x1*sin(x2)      
       x2=(FGTG_IFCresAng+FGTG_IFCTUBdelA/2.0)/180.*3.1416 ! titl angle in rad
-      Create and Position FGCT z=0. x=x1*cos(x2) y=x1*sin(x2)  kOnly='MANY'    
+      Create and Position FGCT z=0. x=x1*cos(x2) y=x1*sin(x2)      
 
       Create   FGRS
-      Create and Position FGRS  alphaZ=FGTG_IFCresAng kOnly='MANY'
+      Create and Position FGRS  alphaZ=FGTG_IFCresAng 
 
 * real FGT
 
       Create   FGMO
-      Position FGMO in CAVE z=centerZ kOnly='MANY'
+      Position FGMO in CAVE z=centerZ 
 
 * -------------------------------------------------------------
 Block FGMO is the mother volume for the whole FGT assembly
@@ -347,7 +352,7 @@ Block FGMO is the mother volume for the whole FGT assembly
 * rails
       x1=Rout+FGTG_FGORrad  ! r-distance
       x2=FGTG_FGORang/180.*3.1416 ! titl angle in rad
-      Create and Position FGOR z=FGTG_FPthk/2.0 x=x1*cos(x2) y=x1*sin(x2)     
+      Create and Position FGOR z=FGTG_FPthk/2.0 x= x1*cos(x2) y= x1*sin(x2)     
       Create and Position FGOR z=FGTG_FPthk/2.0 x=-x1*cos(x2) y=-x1*sin(x2)    
 
 * Loop over the regular triple-GEM disks.
@@ -382,8 +387,8 @@ Block FGMO is the mother volume for the whole FGT assembly
 
 * add one extra FGT sensitive volume in front, requested by Les
       if(  FGTG_Config.gt.1) then 
-      Create and Position FGSC z=-lengthZ/2.0+4.0 Rmin=2.5
-     +              Rmax=FGTG_RO Dz=FGTG_GGSCthk/2.0
+        FGSCrmin=2.5 ; FGSCrmax=FGTG_RO; FGSCdz=FGTG_GGSCthk/2.0;
+      Create and Position FGSC z=-lengthZ/2.0+4.0 alphaZ=-15
       endif
 
 * add SSD utility lines, continue engle 
@@ -417,7 +422,8 @@ Block FGGD is the mother volume of the individual tripple-GEM disks
 
         rin=FGTG_RI+FGTG_SR ! change Rin/Rout for the volumes below
         rout=FGTG_RO-FGTG_SR
-        Create and Position FGSC z=zsum+FGTG_GGSCthk/2.0 Rmin=rin Rmax=rout Dz=FGTG_GGSCthk/2.0
+        FGSCrmin=rin; FGSCrmax=rout; FGSCdz=FGTG_GGSCthk/2.0;
+        Create and Position FGSC z=zsum+FGTG_GGSCthk/2.0 alphaZ=-15
         zsum=zsum+FGTG_GGSCthk
 
         Create and Position FGGC z=zsum+ FGTG_GGCUthk/2.0
@@ -636,16 +642,22 @@ endblock
 * -------------------------------------------------------------------
 Block FGSC describes the sensitive area
       Material  ArCO2_70_30  
-      Material  Sensitive  Isvol=1
       Attribute FGSC  Seen=1 colo=6 
-      Shape TUBE Rmin=0 Rmax=0 Dz=0 
+      Shape TUBE Rmin=FGSCrmin Rmax=FGSCrmax Dz=FGSCdz 
 
-      HITS    FGSC   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+      Create FGZS
+endblock
+
+* -------------------------------------------------------------------
+Block FGZS describes the sensitive area
+      Material  Sensitive  Isvol=1
+      Attribute FGZS  Seen=1 colo=7 
+      Shape Division Iaxis=2 Ndiv=4 
+
+      HITS    FGZS   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
                      cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
                      ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
 endblock
-
 * ----------------------------------------------------------------------
       END
-
     
