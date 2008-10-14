@@ -9,9 +9,7 @@
 
 // STAR
 #include "StEventTypes.h"
-//#include "StDaqLib/EMC/StEmcDecoder.h"
-//#include "StDaqLib/TRG/trgStructures2005.h"
-#include "StL2_2006EmulatorMaker.h"
+#include "StL2_2008EmulatorMaker.h"
 
 // Local
 #include "JanEvent.h"
@@ -51,7 +49,7 @@ Int_t StJanEventMaker::Make()
   }
   JanEvent janEvent;
 
-  StL2_2006EmulatorMaker *L2EmuMk=(StL2_2006EmulatorMaker*)GetChain()->GetMaker("L2Emul2006"); // tmp, should have year dependent switch
+  StL2_2008EmulatorMaker *L2EmuMk=(StL2_2008EmulatorMaker*)GetChain()->GetMaker("L2Emul2008"); // tmp, should have year dependent switch
   assert(L2EmuMk);
   
   unsigned short *btow=0, *etow=0;
