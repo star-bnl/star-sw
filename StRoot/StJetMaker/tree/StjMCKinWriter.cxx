@@ -1,4 +1,4 @@
-// $Id: StjMCKinWriter.cxx,v 1.1 2008/08/22 22:10:27 tai Exp $
+// $Id: StjMCKinWriter.cxx,v 1.2 2008/10/14 17:16:22 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjMCKinWriter.h"
 
@@ -18,6 +18,7 @@ void StjMCKinWriter::Init()
   _tree->Branch("s"          , &_s            , "s/D"            );
   _tree->Branch("t"          , &_t            , "t/D"            );
   _tree->Branch("u"          , &_u            , "u/D"            );
+  _tree->Branch("pid"        , &_pid          , "pid/I"          );
   _tree->Branch("pt"         , &_pt           , "pt/D"           );
   _tree->Branch("costh"      , &_costh        , "costh/D"        );
   _tree->Branch("x1"         , &_x1           , "x1/D"           );
