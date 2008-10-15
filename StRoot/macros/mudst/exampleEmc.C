@@ -5,6 +5,7 @@ void exampleEmc(const Char_t *infile="/star/data23/reco/dAuCombined/FullField/P0
   gROOT->Macro("loadMuDst.C");
 
   // Load St_db_Maker and co
+  gSystem->Load("StMessageMgr.so");
   gSystem->Load("StDbLib.so");
   gSystem->Load("StDbBroker.so");
   gSystem->Load("St_db_Maker");
@@ -59,6 +60,12 @@ void exampleEmc(const Char_t *infile="/star/data23/reco/dAuCombined/FullField/P0
       StEmcDetector *barrel = emcCollection->detector(kBarrelEmcTowerId);
       if (barrel->cluster()) 
         cout << barrel->cluster()->clusters().size() << " barrel tower clusters" << endl;
+      StEmcDetector *smde = emcCollection->detector(kBarrelSmdEtaId);
+      if (barrel->cluster()) 
+        cout << smde->cluster()->clusters().size() << " smd eta clusters" << endl;
+      StEmcDetector *smdp = emcCollection->detector(kBarrelSmdPhiId);
+      if (barrel->cluster()) 
+        cout << smdp->cluster()->clusters().size() << " smd phi clusters" << endl;
     }
     else {
       cout << "No emc collection!" << endl;
