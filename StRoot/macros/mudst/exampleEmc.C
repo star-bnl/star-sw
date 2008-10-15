@@ -1,11 +1,10 @@
 // This is an example of how to read the MuDst and do the clusterfinding 
 // for the BEMC
 
-void exampleEmc(const Char_t *infile="/star/data23/reco/dAuCombined/FullField/P04if/2003/065/st_physics_4065003_raw_0010016.MuDst.root",const Int_t n_event=100) {
+void exampleEmc(const Char_t *infile="/star/data24/reco/production_dAu2008/ReversedFullField/P08ic/2008/026/9026032/st_physics_adc_9026032_raw_1070010.MuDst.root",const Int_t n_event=100) {
   gROOT->Macro("loadMuDst.C");
 
   // Load St_db_Maker and co
-  gSystem->Load("StMessageMgr.so");
   gSystem->Load("StDbLib.so");
   gSystem->Load("StDbBroker.so");
   gSystem->Load("St_db_Maker");
@@ -60,10 +59,10 @@ void exampleEmc(const Char_t *infile="/star/data23/reco/dAuCombined/FullField/P0
       StEmcDetector *barrel = emcCollection->detector(kBarrelEmcTowerId);
       if (barrel->cluster()) 
         cout << barrel->cluster()->clusters().size() << " barrel tower clusters" << endl;
-      StEmcDetector *smde = emcCollection->detector(kBarrelSmdEtaId);
+      StEmcDetector *smde = emcCollection->detector(kBarrelSmdEtaStripId);
       if (barrel->cluster()) 
         cout << smde->cluster()->clusters().size() << " smd eta clusters" << endl;
-      StEmcDetector *smdp = emcCollection->detector(kBarrelSmdPhiId);
+      StEmcDetector *smdp = emcCollection->detector(kBarrelSmdPhiStripId);
       if (barrel->cluster()) 
         cout << smdp->cluster()->clusters().size() << " smd phi clusters" << endl;
     }
