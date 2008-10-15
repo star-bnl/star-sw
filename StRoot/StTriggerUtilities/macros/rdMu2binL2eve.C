@@ -65,9 +65,9 @@ void rdMu2binL2eve( int nevents = 100,
   new StEEmcDbMaker("eemcDb");
 
   //Get BEMC adc values
-  StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();
+  StEmcADCtoEMaker *a2eMk = new StEmcADCtoEMaker();
+  a2eMk->setCheckStatus(kBarrelEmcTowerId,0);
 
-  
   /* 
      reads all input/setup files from  L2setup-yyyymmdd/
      writes all output files to L2out-yyyymmdd 
