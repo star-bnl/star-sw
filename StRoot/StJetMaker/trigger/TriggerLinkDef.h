@@ -8,6 +8,7 @@
 #pragma link C++ class StjTrg+;
 #pragma link C++ class StjTrgBEMCJetPatchTowerIdMap+;
 #pragma link C++ class StjTrgBEMCJetPatchTowerIdMap2005+;
+#pragma link C++ class StjTrgBEMCJetPatchTowerIdMap2006+;
 #pragma link C++ class StjTrgDisableTower+;
 #pragma link C++ class StjTrgDisableTowerHT+;
 #pragma link C++ class StjTrgDisableTowerJP+;

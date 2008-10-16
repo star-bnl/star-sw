@@ -4,6 +4,7 @@ sources	= \
 	StjTrg.cxx \
 	StjTrgBEMCJetPatchTowerIdMap.cxx \
 	StjTrgBEMCJetPatchTowerIdMap2005.cxx \
+	StjTrgBEMCJetPatchTowerIdMap2006.cxx \
 	StjTrgDisableTower.cxx \
 	StjTrgDisableTowerHT.cxx \
 	StjTrgDisableTowerJP.cxx \
@@ -24,6 +25,7 @@ headers	= \
 	StjTrg.h \
 	StjTrgBEMCJetPatchTowerIdMap.h \
 	StjTrgBEMCJetPatchTowerIdMap2005.h \
+	StjTrgBEMCJetPatchTowerIdMap2006.h \
 	StjTrgDisableTower.h \
 	StjTrgDisableTowerHT.h \
 	StjTrgDisableTowerJP.h \
