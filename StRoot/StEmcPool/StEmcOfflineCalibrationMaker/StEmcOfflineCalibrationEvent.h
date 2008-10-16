@@ -5,10 +5,12 @@
 #include "TClonesArray.h"
 #include "TVector3.h"
 #include "TArrayI.h"
+//#include "StEmcTowerCalibrationEvent.h"
 
 #include <vector>
 using namespace std;
 
+//------------------------------------------------
 class StEmcOfflineCalibrationTrack : public TObject
 {
 public:
@@ -26,9 +28,24 @@ public:
 	float			preshower_pedestal_rms[9];
 	int				preshower_status[9];
 	unsigned char	preshower_cap[9];
+
+	unsigned short smde_id[11];
+	unsigned short smde_adc[11];
+	float smde_pedestal[11];
+	float smde_pedestal_rms[11];
+	int smde_status[11];
+	unsigned char smde_cap[11];
+
+	unsigned short smdp_id[11];
+	unsigned short smdp_adc[11];
+	float smdp_pedestal[11];
+	float smdp_pedestal_rms[11];
+	int smdp_status[11];
+	unsigned char smdp_cap[11];
 	
 	unsigned short	vertexIndex;
 	
+
 	double			p;
 	float			deta;
 	float			dphi;
@@ -39,15 +56,35 @@ public:
 	double			dEdx;
 	double			nSigmaElectron;	
 	
+
+	//void takeTowerTrack(StEmcTowerCalibrationTrack* track);
 	StEmcOfflineCalibrationTrack();
 	~StEmcOfflineCalibrationTrack();
 	
 	void Clear(Option_t* option="");
 	
-	ClassDef(StEmcOfflineCalibrationTrack, 2)
+	ClassDef(StEmcOfflineCalibrationTrack, 3)
 };
 
 //----------------------------------------------------------------------
+class StEmcOfflineCalibrationCluster : public TObject
+{
+
+ public:
+  StEmcOfflineCalibrationCluster();
+  ~StEmcOfflineCalibrationCluster();
+  unsigned int nTracks;
+  TClonesArray* tracks;
+  StEmcOfflineCalibrationTrack centralTrack;
+
+  void addTrack(StEmcOfflineCalibrationTrack* track);
+  void Clear(Option_t* option="");
+
+  ClassDef(StEmcOfflineCalibrationCluster,1);
+
+};
+
+//------------------------------------------------------------
 
 class StEmcOfflineCalibrationVertex : public TObject
 {
