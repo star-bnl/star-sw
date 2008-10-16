@@ -1,5 +1,8 @@
-* $Id: fgtdgeo2.g,v 1.2 2008/10/13 00:24:06 perev Exp $
+* $Id: fgtdgeo2.g,v 1.3 2008/10/16 02:57:24 perev Exp $
 * $Log: fgtdgeo2.g,v $
+* Revision 1.3  2008/10/16 02:57:24  perev
+* HITS for FGSC recovery
+*
 * Revision 1.2  2008/10/13 00:24:06  perev
 * upgr16 divisions of disks added
 *
@@ -79,7 +82,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
       real FGSCrmin, FGSCrmax, FGSCdz ! variable size of FGSC
 
 * Declare the blocks to be defined in the code.
-      Content   FGMO, FGGD, FGSC, FGZS, FGFP, FGFC, FGFA, FGFL, FGOC,FGXR,
+      Content   FGMO, FGGD, FGSC, FGZC, FGFP, FGFC, FGFA, FGFL, FGOC,FGXR,
      + FGGF,FGGN,FGGC,FGGK,FGGP,FGGR,FGOR,FGOA,FGOU,FGCT,FGRS,
      + FGAP,FGAL,FGAS,FGAB, FGSU,FGSV,FGXC,FGXD,FGXE
 * volumes added/changed by Jan:
@@ -99,7 +102,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 * FGGF - FR4 front foil of  tripple-GEM
 * FGGN - Nomex front support of  tripple-GEM
 * FGSC - active volume of tripple-GEM
-* FGZS - active volume divisions of FGSC
+* FGZC - active volume divisions of FGSC
 * FGGC - Cu layer of  tripple-GEM
 * FGGK - Kapton layer of  tripple-GEM
 * FGGP - passive gas layer of  tripple-GEM
@@ -333,6 +336,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 * real FGT
 
       Create   FGMO
+
       Position FGMO in CAVE z=centerZ 
 
 * -------------------------------------------------------------
@@ -387,8 +391,9 @@ Block FGMO is the mother volume for the whole FGT assembly
 
 * add one extra FGT sensitive volume in front, requested by Les
       if(  FGTG_Config.gt.1) then 
+
         FGSCrmin=2.5 ; FGSCrmax=FGTG_RO; FGSCdz=FGTG_GGSCthk/2.0;
-      Create and Position FGSC z=-lengthZ/2.0+4.0 alphaZ=-15
+      Create and Position FGSC z=-lengthZ/2.0+4.0 alphaZ=-0.15
       endif
 
 * add SSD utility lines, continue engle 
@@ -423,6 +428,7 @@ Block FGGD is the mother volume of the individual tripple-GEM disks
         rin=FGTG_RI+FGTG_SR ! change Rin/Rout for the volumes below
         rout=FGTG_RO-FGTG_SR
         FGSCrmin=rin; FGSCrmax=rout; FGSCdz=FGTG_GGSCthk/2.0;
+
         Create and Position FGSC z=zsum+FGTG_GGSCthk/2.0 alphaZ=-15
         zsum=zsum+FGTG_GGSCthk
 
@@ -642,19 +648,19 @@ endblock
 * -------------------------------------------------------------------
 Block FGSC describes the sensitive area
       Material  ArCO2_70_30  
+      Material Sensitive  Isvol=1
       Attribute FGSC  Seen=1 colo=6 
       Shape TUBE Rmin=FGSCrmin Rmax=FGSCrmax Dz=FGSCdz 
 
-      Create FGZS
+      Create FGZC
 endblock
 
 * -------------------------------------------------------------------
-Block FGZS describes the sensitive area
-      Material  Sensitive  Isvol=1
-      Attribute FGZS  Seen=1 colo=7 
+Block FGZC describes the sensitive area
+      Attribute FGZC  Seen=1 colo=7 
       Shape Division Iaxis=2 Ndiv=4 
 
-      HITS    FGZS   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+      HITS    FGZC   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
                      cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
                      ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
 endblock
