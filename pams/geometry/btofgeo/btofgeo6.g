@@ -1,7 +1,10 @@
-* $Id: btofgeo6.g,v 1.3 2008/07/08 19:36:22 perev Exp $
+* $Id: btofgeo6.g,v 1.4 2008/10/16 02:47:27 perev Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo6.g,v $
+* Revision 1.4  2008/10/16 02:47:27  perev
+* change the tray selection to be the final tray design. Xin
+*
 * Revision 1.3  2008/07/08 19:36:22  perev
 * phi alignment XinDong
 *
@@ -574,7 +577,7 @@ Block BTOH is a half of trigger system (west-east)
       Shape     Tube      dz=btog_dz/2
 
       ! tof=0 means ctb, tof=1 means TOFp, tof=2 means TOFr, tof=3 means TOFr', tof=4 means TOFr5 '
-      ! tof=5 means TOFr6 tray (not active), tof=6 means TOFr7 tray
+      ! tof=5 means TOFr6 tray (not active), tof=6 means TOFr7 tray, tof=7 means TOFr8++ tray
       do is=1,60
          tof=0		                                !-> all CTB for choice=1                     
          if (choice==2)                       tof=1	!-> all TOFp
@@ -582,7 +585,7 @@ Block BTOH is a half of trigger system (west-east)
          if (choice==4 & is==btog_posit1(1))  tof=1	!-> Run-2 (one TOFp tray)
          if (choice==5 & is==btog_posit1(1))  tof=1	!-> Run-3 (one TOFp tray
          if (choice==5 & is==btog_posit2)     tof=2	!      and one TOFr tray)
-         if (choice==6)                       tof=2	!-> all TOFr
+         if (choice==6)                       tof=7	!-> all TOFr
          if (choice==7 & is==btog_posit1(2))  tof=1	!-> Run-4 (one TOFp tray moved 1 slot
          if (choice==7 & is==btog_posit2)     tof=3	!      and one TOFrp tray)
 	 if (choice==8  & is==btog_posit3)    tof=4  	!-> Run-5 (one TOFr5 tray)
