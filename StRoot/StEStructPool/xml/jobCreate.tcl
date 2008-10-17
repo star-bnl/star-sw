@@ -677,7 +677,7 @@ proc ::jobCreate::m+PythiaParameter {f el node} {
     label $f.$el -text $el
     variable cVal${f}$el $val
     ComboBox::create $f.combo$el \
-            -editable     false  \
+            -editable     true   \
             -values       $vals  \
             -textvariable ::jobCreate::cVal${f}$el \
             -modifycmd   [namespace code "modifyPythiaParameter $node \[$f.combo$el get\] $f.combo$el %V"]
@@ -1863,6 +1863,9 @@ proc ::jobCreate::checkAnalysisType {menu} {
 # I have added a fair amount of user feed-back and control over histogram
 # adding process. Not fully debugged at this point (Nov. 6, 2007)
 ################################################################################
+#>>>>> Files to add box gives incorrect feedback.
+#      Changed labels to indicate we are excluding files, but perhaps should actually
+#      indicate new files to add, files already included, and files to ignore. Tri-state button?
 proc ::jobCreate::addHistograms {} {
     if {![winfo exists .addHistograms]} {
         toplevel .addHistograms
@@ -2125,7 +2128,7 @@ proc ::jobCreate::editFilesToAdd {centrality} {
         raise .editFilesToAdd
     }
     if {$centrality ne ""} {
-        wm title .editFilesToAdd "Files that will be summed for centrality $centrality"
+        wm title .editFilesToAdd "Files to ignore in sum for centrality $centrality"
         set i 0
         foreach f $::jobCreate::filesToAdd($centrality) {
             checkbutton $sf.f$i -text [file tail $f] -command [namespace code [list toggleFileToAdd $f $centrality]]
@@ -2133,7 +2136,7 @@ proc ::jobCreate::editFilesToAdd {centrality} {
             incr i
         }
     } else {
-        wm title .editFilesToAdd "Files that will be summed"
+        wm title .editFilesToAdd "Files that will be ignored"
         set i 0
         foreach f $::jobCreate::filesToAdd {
             checkbutton $sf.f$i -text [file tail $f] -command [namespace code [list toggleFileToAdd $f {}]]
@@ -2274,7 +2277,7 @@ proc ::jobCreate::addDataHistograms {fileList numPerSet centrality} {
     # Need to add add files to the correct centrality log (hence the centrality argument.)
 
     # If user stopped adding of histograms by clicking on cancel button, then resumed
-    # adding via ADDS menu there will be Data_${centrality}_*.root files already exsiting.
+    # adding via ADDS menu there will be Data${centrality}_*.root files already exsiting.
     # The files that were added to create them will be properly accounted for in the
     # log files, so we want to include them in the grand sum.
     set tmpFiles [lsort -dictionary [glob -nocomplain [file join $path data Data${centrality}_*.root]]]
