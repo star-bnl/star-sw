@@ -295,6 +295,9 @@ hell is in this directory.
         <xs:enumeration value='centrality'>
             <xs:Comment>min, max reference multiplicity</xs:Comment>
         </xs:enumeration>
+        <xs:enumeration value='pileup'>
+            <xs:Comment>Exclude events with predicted pileup vertex between min and max distances.</xs:Comment>
+        </xs:enumeration>
     </xs:restriction>
 </xs:simpleType>
 
@@ -357,6 +360,9 @@ hell is in this directory.
         </xs:enumeration>
         <xs:enumeration value='Chi2'>
             <xs:Comment>min, max values for chi^2 fit of track</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='dPtByPt'>
+            <xs:Comment>min, max values for sigma of determination of sign of charge</xs:Comment>
         </xs:enumeration>
         <xs:enumeration value='Yt'>
             <xs:Comment>min, max values for transverse rapidity</xs:Comment>
@@ -455,7 +461,10 @@ hell is in this directory.
             <xs:Comment>Look in StEStructPairCuts.h for details (Michaels cut)</xs:Comment>
         </xs:enumeration>
         <xs:enumeration value='Crossing2'>
-            <xs:Comment>Mid TPC Z separation for tracks that crossed in phi (only need one value, usually 5cm)</xs:Comment>
+            <xs:Comment>Mid, Exit TPC Z separations for tracks that crossed in phi (usually 5cm)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='LUT'>
+            <xs:Comment>Use Look Up Table to see if pair may have interacted. dXY, dZ parameters (usually 5cm each)</xs:Comment>
         </xs:enumeration>
         <xs:enumeration value='pionOtherMass'>
             <xs:Comment>Assume both tracks pions. If m1 less than m2 then exclude range. If m2 less than m1 keep range</xs:Comment>
@@ -616,6 +625,7 @@ hell is in this directory.
             <xs:enumeration value='3' Comment='Cuts in Yt-Yt and eta_Delta phi_Delta space. Default mode'/>
             <xs:enumeration value='4' Comment='Alternate mode (should put purpose of mode here)'/>
             <xs:enumeration value='5' Comment='Cuts in dEdx and phi_Delta spaces.'/>
+            <xs:enumeration value='8' Comment='Yt-Yt cuts. Examining soft-hard LS pair cuts.'/>
         </xs:restriction>
     </xs:complexType>
 </xs:simpleType>

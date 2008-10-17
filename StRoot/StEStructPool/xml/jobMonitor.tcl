@@ -5,12 +5,12 @@ package require BWidget
 # agrep.tcl --
 #    Script to emulate the UNIX grep command with a small GUI
 #
-
+# That was the starting point. I expanded the program a bit since then.
 
 namespace eval ::jobMonitor:: {
     variable scriptDir
     variable logDir
-    variable pattern {}
+    variable pattern ""
     variable matchResults
     variable matchFrame
     variable ignoreCase yes
@@ -20,13 +20,12 @@ namespace eval ::jobMonitor:: {
     variable tagColor   [list #ffff00 #ffcc00 #ccff00 #ff6600 #ff2200]
     variable LOGTYPE    .log
     variable bWindow
-    variable jobList
+    variable jobList ""
     variable actionList
     variable viewMenu
     variable selectedJob ""
     variable anchorJob ""
     variable IOwnProcess false
-    variable types [list all UNKN SUBM PEND RUN DONE Eqw t qw r]
 }
 
 ################################################################################
@@ -80,21 +79,15 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
     set file [menu $m.file]
     $m add cascade -label File -menu $file
 #    $file add command -label "Select all jobs"           -command [namespace code selectAll]
-    set d [menu $file.select -postcommand [namespace code [list countTypes $file.select]]]
+    set d [menu $file.select -postcommand [namespace code [list countTypes $file.select selectJobs]]]
     $file add cascade -label "Select jobs" -menu $d
-    foreach el $::jobMonitor::types {
-        $d add command -label $el -command [namespace code [list selectJobs $el]]
-    }
-    set d [menu $file.deselect -postcommand [namespace code [list countTypes $file.deselect]]]
+    $d add command -label all -command [namespace code [list selectJobs all]]
+    set d [menu $file.deselect -postcommand [namespace code [list countTypes $file.deselect deselectJobs]]]
     $file add cascade -label "Deselect jobs" -menu $d
-    foreach el $::jobMonitor::types {
-        $d add command -label $el -command [namespace code [list deselectJobs $el]]
-    }
-    set d [menu $file.toggle -postcommand [namespace code [list countTypes $file.toggle]]]
+    $d add command -label all -command [namespace code [list deselectJobs all]]
+    set d [menu $file.toggle -postcommand [namespace code [list countTypes $file.toggle toggleSelect]]]
     $file add cascade -label "Toggle select" -menu $d
-    foreach el $::jobMonitor::types {
-        $d add command -label $el -command [namespace code [list toggleSelect $el]]
-    }
+    $d add command -label all -command [namespace code [list toggleSelect all]]
 
     $file add command -label "Submit selected jobs"      -command [namespace code submitSelected]
     $file add command -label "Kill selected jobs"        -command [namespace code killSelected]
@@ -251,6 +244,7 @@ proc ::jobMonitor::searchFiles {} {
     # For every job file in the scripts directory we look for
     # a corresponding log file in the logs directory.
     # If we find the log file we append it to the list.
+    # Require log file to have size bigger than 0.
     # If we do not find the log file append the scripts file.
     set ::jobMonitor::jobList    [list]
     set ::jobMonitor::actionList [list]
@@ -262,7 +256,7 @@ proc ::jobMonitor::searchFiles {} {
             set fileName [string map "sched {}" $fileName]
             lappend ::jobMonitor::jobList $fileName
             set logFile [file join $::jobMonitor::logDir $fileName$::jobMonitor::LOGTYPE]
-            if {[file exists $logFile] } {
+            if {[file exists $logFile] && [file size $logFile] > 0} {
                 lappend fileList $logFile
             } else {
                 lappend fileList $file
@@ -449,35 +443,36 @@ proc ::jobMonitor::findNext {pattern} {
 }
 
 # countTypes --
-#    Invoked just before showing meny
+#    Invoked just before showing menu
 #
 # Arguments: menu
 # Result:
 # Side effects:
+#    Remove buttons which have no jobs in their category.
+#    Add buttons as needed for jobs that have moved into a new category.
 #    Set selection indicators of all jobs that have a label matching
 #    type in their indicator buttons.
 #
-proc ::jobMonitor::countTypes {m} {
-    set count() 0
-    foreach t $::jobMonitor::types {
-        set count($t) 0
+proc ::jobMonitor::countTypes {m action} {
+    for {set i [$m index end]} {$i > 1} {incr i -1} {
+        $m delete $i
     }
+    set all 0
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
+        if {$val eq ""} {
+            set val none
+        }
         if {[info exists count($val)]} {
             incr count($val)
-        }
-        incr count(all)
-    }
-    set i 1
-    foreach t $::jobMonitor::types {
-        if {$count($t) > 0} {
-            set label "$t ($count($t))"
         } else {
-            set label $t
+            set count($val) 1
         }
-        $m entryconfigure $i -label $label
-        incr i
+        incr all
+    }
+    $m entryconfigure 1 -label "all ($all)" -command [namespace code [list $action all]]
+    foreach el [lsort [array names count]] {
+        $m add command -label "$el ($count($el))" -command [namespace code [list $action $el]]
     }
 }
 
@@ -923,7 +918,7 @@ proc ::jobMonitor::submitSelected {} {
                          } $line]
                 break
             }
-            # If script is submitted to condor the command is qsub.
+            # If script is submitted to SGE the command is qsub.
             # Expect to have a -o switch. (Is this always true?)
             # No guarrantee this is the right command, but...
             if {[regexp {^#.*qsub.*-o.*} $line]} {
@@ -934,6 +929,13 @@ proc ::jobMonitor::submitSelected {} {
                         "("    "\\("
                         ")"    "\\)"
                          } $line]
+                break
+            }
+            # If script is submitted to condor wwe actually have a simple submission command.
+            # (Comment for previous section claimed that was condor, but I must have mis-understood.
+            #  In any case it works at pdsf.)
+            if {[regexp {^#.*condor_submit} $line]} {
+                set runCmd [string map {"# "   ""} $line]
                 break
             }
         }
@@ -977,16 +979,30 @@ proc ::jobMonitor::killSelected {} {
     } else {
         set qstatList [list]
     }
+    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " procId -format " %s " CMD} formatted]} {
+        set condClustList $formatted
+    } else {
+        set condClustList [list]
+    }
     foreach job $::jobMonitor::actionList {
         set jobName [getJobName [file join $::jobMonitor::scriptDir sched$job.csh]]
-        if {![catch {eval exec bjobs -waJ $jobName} bResult]} {
-            set lines [split $bResult \n]
-            foreach def [lindex $lines 0] val [lindex $lines 1] {
-                if {$def eq "JOBID"} {
-                    catch {eval exec bkill $val}
+#        if {![catch {eval exec bjobs -waJ $jobName} bResult]} {
+#            set lines [split $bResult \n]
+#            foreach def [lindex $lines 0] val [lindex $lines 1] {
+#                if {$def eq "JOBID"} {
+#                    catch {eval exec bkill $val}
+#                }
+#            }
+#        } else {
+            set jName [string map {condor csh} $jobName]
+            foreach {clusterId procId cmd} $condClustList {
+                set f [file tail $cmd]
+                if {$f eq $jName} {
+                    #>>>>> condor_rm only works on node job was submitted from!!!!!
+                    # Seems that condClustList may include jobs that are no longer running.
+                    catch {exec condor_rm $clusterId.$procId}
                 }
             }
-        } else {
             set f [file tail $jobName]
             foreach qj $qstatList {
                 if {[lsearch $qj $f] >= 0} {
@@ -994,7 +1010,7 @@ proc ::jobMonitor::killSelected {} {
                     catch {eval exec qdel $jobID}
                 }
             }
-        }
+#        }
     }
     updateStatusIndicators
 }
@@ -1051,26 +1067,57 @@ proc ::jobMonitor::updateStatusIndicators {{job ""}} {
     } else {
         set qstatList [list]
     }
+    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " procId -format " %s " CMD -format " %d " JobStatus} formatted]} {
+        set condClustList $formatted
+    } else {
+        set condClustList [list]
+    }
+    if {![catch {exec condor_q -submitter $env(USER)} unFormatted]} {
+        set condJobList $unFormatted
+    } else {
+        set condJobList [list]
+    }
+
     foreach job $jobs {
         set jobName [getJobName [file join $::jobMonitor::scriptDir sched$job.csh]]
-        if {![catch {eval exec bjobs -waJ $jobName} bResult]} {
-            set lines [split $bResult \n]
-            set ::jobMonitor::var$job UNKN
-            # For some reason I had been taking the last two lines and parsing them.
-            # When the same job has been re-run it appears multiple times, but it
-            # appears the labelling information is always on the first line and
-            # the job info is sorted by most recent first. May be some reason I did it
-            # the wrong way though (like it used to be the right way?? Or I screwed up??)
-            foreach def [lindex $lines 0] val [lindex $lines 1] {
-                if {$def eq "STAT"} {
-                    set ::jobMonitor::var$job $val
-                    colorStatusIndicator $::jobMonitor::bWindow.f2.text.stat$job $val
-                    break
-                }
-            }
-        } else {
+#        if {![catch {eval exec bjobs -waJ $jobName} bResult]} {
+#            set lines [split $bResult \n]
+#            set ::jobMonitor::var$job UNKN
+#            # For some reason I had been taking the last two lines and parsing them.
+#            # When the same job has been re-run it appears multiple times, but it
+#            # appears the labelling information is always on the first line and
+#            # the job info is sorted by most recent first. May be some reason I did it
+#            # the wrong way though (like it used to be the right way?? Or I screwed up??)
+#            foreach def [lindex $lines 0] val [lindex $lines 1] {
+#                if {$def eq "STAT"} {
+#                    set ::jobMonitor::var$job $val
+#                    colorStatusIndicator $::jobMonitor::bWindow.f2.text.stat$job $val
+#                    break
+#                }
+#            }
+#        } else {
+            # Find job with cmd of jobName. Remember it's cluster.procid.
+            # Use that to parse result and get status.
+            # Would be so much easier if I could figure out how to specify status as an attribute
+            # in the ClasAd system.
             set ::jobMonitor::var$job ""
             $::jobMonitor::bWindow.f2.text.stat$job configure -fg black
+            set id ""
+            # Replace .condor with .csh in jobName
+            set jName [string map {condor csh} $jobName]
+            foreach {clusterId procId cmd jobStat} $condClustList {
+                if {[file tail $cmd] eq $jName} {
+                    if {$jobStat == 1} {
+                        set ST I
+                    } elseif {$jobStat == 2} {
+                        set ST R
+                    } else {
+                        set ST ""
+                    }
+                    set ::jobMonitor::var$job $ST
+                    colorStatusIndicator $::jobMonitor::bWindow.f2.text.stat$job $ST
+                }
+            }
             set fileName [file tail $jobName]
             foreach ql $qstatList {
                 set ind [lsearch $ql $fileName]
@@ -1081,7 +1128,7 @@ proc ::jobMonitor::updateStatusIndicators {{job ""}} {
                     colorStatusIndicator $::jobMonitor::bWindow.f2.text.stat$job $val
                 }
             }
-        }
+#        }
     }
 }
 # colorStatusIndicator --
@@ -1111,6 +1158,9 @@ proc ::jobMonitor::colorStatusIndicator {b v} {
         t    {$b configure -fg orange}
         qw   {$b configure -fg blue}
         r    {$b configure -fg red}
+        I    {$b configure -fg blue}
+        R    {$b configure -fg red}
+        H    {$b configure -fg yellow}
         default {$b configure -fg gray}
     }
 }
@@ -1149,6 +1199,10 @@ proc ::jobMonitor::getJobName {scriptFile} {
                     "("    "\\("
                     ")"    "\\)"
                      } $line]
+            break
+        }
+        if {[regexp {^#.*condor_submit} $line]} {
+            set runCmd [string map {"# "   ""} $line]
             break
         }
     }
@@ -1287,8 +1341,8 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "- The purpose of this program is to monitor the running " n
     $w insert end "and then browse the output of batch jobs. " n
     $w insert end "You can kill jobs you don't like, make minor changes " n
-    $w insert end "in filelists or other control files, and resubmit " n
-    $w insert end "jobs.\n" n
+    $w insert end "in filelists or other control files, and resubmit jobs." n
+    $w insert end "jobMonitor knows about LSF, SGE and condor so you don't have to.\n" n
     $w insert end "- The monitored jobs are those described by csh files " n
     $w insert end "in the script directory and/or the log files in " n
     $w insert end "the logs directory. These are not displayed in " n
@@ -1382,7 +1436,7 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "- Submit selected jobs: " n
     $w insert end "  Scans the csh script for a jobs submission command and " n
     $w insert end "invokes it. For each line we look for an lsf command then " n
-    $w insert end "an SGE command. As soon as we find one we use it.\n" n
+    $w insert end "an SGE command, then a condor command. As soon as we find one we use it.\n" n
     $w insert end "- Kill selected jobs: " n
     $w insert end " Hopefully only kills jobs that have been selected\n" n
     $w insert end "- Clear selected job errors: " n
