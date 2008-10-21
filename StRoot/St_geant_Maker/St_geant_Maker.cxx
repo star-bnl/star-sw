@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.121 2008/07/30 15:04:35 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.122 2008/10/21 18:02:50 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.122  2008/10/21 18:02:50  perev
+// FGSC==>FGZC its division, Wei-Ming
+//
 // Revision 1.121  2008/07/30 15:04:35  fisyak
 // Remove custom SetDebug, fix bug #1252
 //
@@ -1033,7 +1036,7 @@ Int_t St_geant_Maker::Make()
   }
 
   nhits = 0;
-  geant3->Gfnhit("FGTH","FGSC", nhits);
+  geant3->Gfnhit("FGTH","FGZC", nhits);
   
   if (nhits>0) { 
     St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
