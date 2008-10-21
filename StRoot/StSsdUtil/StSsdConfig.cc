@@ -51,17 +51,17 @@ void StSsdConfig::setConfiguration(const char* config)
   mConfig = TString(config);
 
   if ( !strncmp(config, "HALF", strlen("HALF")) ) {
-      setNumberOfLadders(10);
-      setNumberOfWafers(160);
-      setNumberOfHybrids(2);
-      setTotalNumberOfHybrids(320);
+     setNumberOfLadders(10);
+     setNumberOfWafers(160);
+     setNumberOfHybrids(2);
+     setTotalNumberOfHybrids(320);
   } else if ( !strncmp(config, "FULL", strlen("FULL")) ) {
-    setNumberOfLadders(20);
-    setNumberOfWafers(320);
-    setNumberOfHybrids(2);
-    setTotalNumberOfHybrids(640);
+     setNumberOfLadders(20);
+     setNumberOfWafers(320);
+     setNumberOfHybrids(2);
+     setTotalNumberOfHybrids(640);
   } else {
-      LOG_ERROR << "Configuration of SSD not defined! It must be LAD0 or HALF or FULL "<< endm;
+     LOG_ERROR << "Configuration of SSD not defined! It must be LAD0 or HALF or FULL "<< endm;
   }
 }
 
