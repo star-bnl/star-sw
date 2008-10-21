@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.9 2008/04/22 12:24:52 kocolosk Exp $
+ * $Id: StEmcGeom.cxx,v 1.10 2008/10/21 19:14:16 mattheww Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.10  2008/10/21 19:14:16  mattheww
+ * Update to Barrel Geometry (corrected edge locations to eta = 0.0035, 0.9835)
+ *
  * Revision 1.9  2008/04/22 12:24:52  kocolosk
  * bug was actually in the BSMDP mapping the whole time -- see RT #1162
  *
@@ -317,8 +320,8 @@ StEmcGeom::defineDefaultCommonConstants()
 {
   // Common information for all detectors
   mNModule  = 120;
-  mEtaMax   = 0.99;
-  mEtaMin   = 0.0;
+  mEtaMax   = 0.9835;
+  mEtaMin   = 0.0035;
 
   mPhiOffset[0] = (75.-3.)/ 180. * C_PI;
   mPhiOffset[1] = (105.+3.)/180. * C_PI;
@@ -335,8 +338,8 @@ StEmcGeom::defineCommonConstants()
 {
   Float_t lW[2], smdW;
   mNModule      = 120;  // mCalg_st->maxmodul;
-  mEtaMax       = 0.99; // mCalg_st->etacut;  ?? Why 1.0 in geometry
-  mEtaMin       = 0.0;
+  mEtaMax       = 0.9835; // mCalg_st->etacut;  ?? Why 1.0 in geometry
+  mEtaMin       = 0.0035;
 
   mPhiStepHalf  = 360. / (Float_t)mNModule; // in degree
 
@@ -404,7 +407,7 @@ StEmcGeom::initBEMCorBPRS()
   // Eta variable ( Z direction)
   mEtaB.Set(mNEta+1); Int_t i;
 
-  for(i=0; i<mNEta; i++) {mEtaB[i] = 0.05*i;} mEtaB[mNEta]=mEtaMax;
+  for(i=0; i<mNEta; i++) {mEtaB[i] = mEtaMin + 0.05*i;} mEtaB[mNEta]=mEtaMax;
 
   for(i=0; i< mNEta; i++){
     mEta[i]    = (mEtaB[i+1] + mEtaB[i])/2.;
