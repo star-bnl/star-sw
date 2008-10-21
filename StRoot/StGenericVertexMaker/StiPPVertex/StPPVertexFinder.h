@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.8 2008/08/21 22:09:31 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.9 2008/10/21 19:23:06 balewski Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -55,6 +55,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool   isMC;            // flag minor differences between Data & M-C
   bool   mUseCtb;         // disable CTB from matching/vetoing of tracks
   bool   mDropPostCrossingTrack;  // enable/disable post crossing tarck rejection
+  int    mStoreUnqualifiedVertex; // set the max # of vertices, sorted by rank
 
   // beam line
   double          mX0  ;     // starting point of beam parameterization
@@ -103,6 +104,9 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.9  2008/10/21 19:23:06  balewski
+ * store unqualified vertices on Akio's request
+ *
  * Revision 1.8  2008/08/21 22:09:31  balewski
  * - In matchTrack2Membrane()
  *   - Cut on hit max R chanegd from 190 to 199cm
