@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.36 2008/10/21 21:05:51 fine Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.37 2008/10/21 21:13:30 fine Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.37  2008/10/21 21:13:30  fine
+ * Initialize the class data-members see bug #1294
+ *
  * Revision 1.36  2008/10/21 21:05:51  fine
  * Initialize the class data-members see bug #1294
  *
@@ -199,24 +202,24 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
  , mNtFile(0)
  , mNTuple(0)
 { 
-  if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor"<<endm;
+  LOG_DEBUG << "StSvtSimulationMaker::constructor"<<endm;
   
   //initial cleanup
   mNumOfHybrids = 0; 
-  if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor...END"<<endm;
+  LOG_DEBUG << "StSvtSimulationMaker::constructor...END"<<endm;
 }
 
 //____________________________________________________________________________
 StSvtSimulationMaker::~StSvtSimulationMaker()
 {
-  if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor"<<endm;
+  LOG_DEBUG << "StSvtSimulationMaker::destructor"<<endm;
  
   SafeDelete(mSvtAngles);
   SafeDelete(mSvtSimulation);
   SafeDelete(mElectronCloud);
   SafeDelete(mCoordTransform);
 
-  if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor...END"<<endm; 
+  LOG_DEBUG << "StSvtSimulationMaker::destructor...END"<<endm; 
 }
 
 //____________________________________________________________________________
@@ -262,10 +265,10 @@ Int_t StSvtSimulationMaker::setOptions(int SigOption)
 Int_t StSvtSimulationMaker::Init()
 {
       
-  if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() ..."<<endm;
+  LOG_DEBUG << "In StSvtSimulationMaker::Init() ..."<<endm;
     
 
-  if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() -End"<<endm;
+  LOG_DEBUG << "In StSvtSimulationMaker::Init() -End"<<endm;
 
   return  StMaker::Init();
 }
@@ -274,7 +277,7 @@ Int_t StSvtSimulationMaker::Init()
 ///all database dependent data are read here 
 Int_t StSvtSimulationMaker::InitRun(int runumber)
 { //when the run changes
-  if(Debug()) gMessMgr->Info() <<"StSvtSimulationMaker::InitRun()"<<endm;
+ LOG_DEBUG << "StSvtSimulationMaker::InitRun()"<<endm;
   
   //read from database
   Int_t res;
@@ -321,7 +324,7 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   gufld(x,b);
   mBField = b[2]*tesla;
 
-  if(Debug()) gMessMgr->Info()<<"StSvtSimulationMaker::InitRun()-END"<<endm;
+  LOG_DEBUG << "StSvtSimulationMaker::InitRun()-END"<<endm;
  
   return StMaker::InitRun(runumber);
 }
@@ -329,13 +332,13 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
 //____________________________________________________________________________
 
 Int_t  StSvtSimulationMaker:: FinishRun(int oldrunumber){
-  gMessMgr->Info()<<"StSvtSimulationMaker::FinishRun()"<<endm;
+  LOG_INFO <<"StSvtSimulationMaker::FinishRun()"<<endm;
  
   TDataSet *set;
   if ((set=GetDataSet("StSvtPixelData"))) delete set;
   if ((set=GetDataSet("StSvt8bitPixelData"))) delete set;   
  
-  gMessMgr->Info()<<"StSvtSimulationMaker::FinishRun() - END"<<endm;
+  LOG_INFO <<"StSvtSimulationMaker::FinishRun() - END"<<endm;
   return StMaker::FinishRun(oldrunumber);
 }
 
@@ -383,7 +386,8 @@ void  StSvtSimulationMaker::resetPixelData(){
 ///create output data and put them into the chain
 void  StSvtSimulationMaker::setSvtPixelData()
 { //add pixeldata to chain->.data
-  if (GetDataSet("StSvtPixelData")) cout<<"Error: Found StSvtSimPIxels in the chain - should have been deleted"<<endl;
+  if (GetDataSet("StSvtPixelData")) 
+     LOG_ERROR <<"Error: Found StSvtSimPIxels in the chain - should have been deleted"<<endm;
      
   St_ObjectSet *set = new St_ObjectSet("StSvtPixelData");
   AddConst(set); 
@@ -405,7 +409,7 @@ void  StSvtSimulationMaker::setGeantData()
   St_ObjectSet* set=(St_ObjectSet*)GetDataSet("StSvtGeantHits");
 
   if (set) {
-    cout<<"Found StSvtGeantHits in the chain- replacing"<<endl;
+    LOG_DEBUG <<"Found StSvtGeantHits in the chain- replacing"<<endm;
     set->SetObject(0);
   } 
   else{
@@ -413,8 +417,9 @@ void  StSvtSimulationMaker::setGeantData()
     AddData(set);
   }
 
-  if (mSvtGeantHitColl) cout<<"!!!!!!m SvtGeantHitColl already exists in SvtSimulationMaker.cxx:setEval"<<endl;
-  else{
+  if (mSvtGeantHitColl) {
+         LOG_ERROR <<"!!!!!!m SvtGeantHitColl already exists in SvtSimulationMaker.cxx:setEval"<<endm;
+   } else{
     //owned by the SvtData
     mSvtGeantHitColl = new StSvtData(mConfig->getConfiguration());
     set->SetObject((TObject*)mSvtGeantHitColl);
@@ -437,14 +442,14 @@ Int_t  StSvtSimulationMaker::getSvtGeometry()
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtGeometry");
   if (!dataSet){
-    gMessMgr->Error()<<"BIG TROUBLE:No SVT geometry -impossible to run!!!!"<<endm;
+    LOG_ERROR <<"BIG TROUBLE:No SVT geometry -impossible to run!!!!"<<endm;
     return kStFatal;
-    }
+  }
  
 
   mSvtGeom = (StSvtGeometry*)dataSet->GetObject();
   if (!mSvtGeom){
-    gMessMgr->Error()<<"BIG TROUBLE:No SVT geometry -impossible to run!!!!"<<endm;
+    LOG_ERROR << "BIG TROUBLE:No SVT geometry -impossible to run!!!!"<<endm;
     return kStFatal;
     }
   
@@ -458,15 +463,15 @@ Int_t  StSvtSimulationMaker::getPedestalOffset()
     
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtDaq");
-  if (dataSet==NULL){
-    gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters for SVT!!!!"<<endm;
+  if (!dataSet){
+    LOG_ERROR <<"BIG TROUBLE:No DAQ parameters for SVT!!!!"<<endm;
     return kStFatal;
   }
  
 
   StSvtDaq *daq = (StSvtDaq*)dataSet->GetObject();
   if (daq==NULL){
-    gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters are empty!!!!"<<endm;
+    LOG_ERROR << "BIG TROUBLE:No DAQ parameters are empty!!!!"<<endm;
     return kStFatal;
     }
 
@@ -501,12 +506,12 @@ Int_t StSvtSimulationMaker::getSvtT0()
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtT0");
   if (!dataSet){
-    cout<<"Warning: no SVT T0 data available -using defalt T0 = 0"<<endl;
+    LOG_WARN <<"no SVT T0 data available -using defalt T0 = 0"<<endm;
     return kStErr;
   } //this might be obsolete, maybe it's better to give an error instead of running on
   
   mT0 = (StSvtT0*)dataSet->GetObject();
-  if (! mT0) cout<<"Warning: SVT T0 data empty - using default T0 = 0"<<endl;
+  if (! mT0)   LOG_WARN <<" SVT T0 data empty - using default T0 = 0"<<endm;
   
   return kStOk;
 }
@@ -520,7 +525,7 @@ Int_t StSvtSimulationMaker::getConfig()
   
   if (!dataSet)
     {
-      gMessMgr->Warning() << " No SvtConfig  data set" << endm;
+      LOG_WARN <<" No SvtConfig  data set" << endm;
       dataSet = new St_ObjectSet("StSvtConfig");                                                               
       AddConst(dataSet);
       mConfig=NULL;
@@ -529,7 +534,7 @@ Int_t StSvtSimulationMaker::getConfig()
   mConfig=((StSvtConfig*)(dataSet->GetObject()));
  
   if (!mConfig) {
-    gMessMgr->Warning() << "SvtConfig data set is empty- seting default full configuration" << endm;
+    LOG_WARN <<"SvtConfig data set is empty- seting default full configuration" << endm;
     mConfig=new StSvtConfig();
     mConfig->setConfiguration("FULL");
     dataSet->SetObject(mConfig);
@@ -656,8 +661,8 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::Make()
 {
-  if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Make()" << endm;
-   
+  LOG_DEBUG << "In StSvtSimulationMaker::Make()" << endm;
+
   int volId ,barrel, layer, ladder, wafer, hybrid;
   Int_t NumOfHitsPerHyb=0;
   StThreeVector<double> VecG(0,0,0);
@@ -707,7 +712,7 @@ Int_t StSvtSimulationMaker::Make()
   //################  Loop over geant hits ##########################
   //
  
-  cout<<"mNumOfGeantHits = "<<NumOfHitsPerHyb<<endl;
+  LOG_INFO <<"mNumOfGeantHits = "<<NumOfHitsPerHyb<<endm;
   int tmpBadCount=0;
   if (NumOfHitsPerHyb>0) 
    for (int j=0;j<NumOfHitsPerHyb ;j++)
@@ -777,9 +782,9 @@ static const int barrels[]={3,1,1,2,2};
       //if(Debug()) mNTuple->Fill(time,anode,trk_st[j].x[0],trk_st[j].x[1],trk_st[j].x[2],0 ,0,0,0,0,0);
 #endif      
       if( 1000*layer+100*wafer+ladder != volId){
-        cout << "trouble - skipping hit" << volId <<"\t"<< trk_st[j].x[0] << "\t" 
+        LOG_INFO << "trouble - skipping hit" << volId <<"\t"<< trk_st[j].x[0] << "\t" 
              << trk_st[j].x[1] <<"\t and our calc"<<"\t" << layer << " " 
-             << wafer << "\t" << ladder << "\t" << j <<endl;
+             << wafer << "\t" << ladder << "\t" << j <<endm;
         continue;
       }
       
@@ -821,8 +826,8 @@ static const int barrels[]={3,1,1,2,2};
     if (!svtSimDataPixels) continue;
     svtSimDataPixels->updateTruth();
   }
-  if (Debug()) gMessMgr->Info() <<"bad hits:"<<tmpBadCount<<endm;
-  if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Make()...END" << endm;
+  LOG_DEBUG <<"bad hits:"<<tmpBadCount<<endm;
+  LOG_DEBUG << "In StSvtSimulationMaker::Make()...END" << endm;
   return kStOK;
 }
 
@@ -857,7 +862,7 @@ void StSvtSimulationMaker::FillGeantHit(int barrel, int ladder, int wafer, int h
 void StSvtSimulationMaker::Clear(const char*)
 {
  
-  if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Clear" << endm;
+  LOG_DEBUG << "In StSvtSimulationMaker::Clear" << endm;
   
   
   //all will be deleted by StMaker::Clear()
@@ -867,7 +872,7 @@ void StSvtSimulationMaker::Clear(const char*)
 
   StMaker::Clear();
   
-  if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Clear..END" << endm; 
+  LOG_DEBUG << "In StSvtSimulationMaker::Clear..END" << endm; 
 }
 
 
@@ -875,7 +880,7 @@ void StSvtSimulationMaker::Clear(const char*)
 
 Int_t StSvtSimulationMaker::Finish()
 {
-  if (Debug()) gMessMgr->Info()<< "In StSvtSimulationMaker::Finish()"<< endm;
+  LOG_DEBUG << "In StSvtSimulationMaker::Finish()"<< endm;
 
   /*
   if (Debug()&&(mNtFile)) {
@@ -886,7 +891,7 @@ Int_t StSvtSimulationMaker::Finish()
   //mSvtSimulation->closeFiles(); 
   //mElectronCloud->closeFiles();
 
-  if (Debug()) gMessMgr->Info()<< "In StSvtSimulationMaker::Finish() ...END"<< endm;
+  LOG_DEBUG << "In StSvtSimulationMaker::Finish() ...END"<< endm;
   return kStOK;
 }
 
