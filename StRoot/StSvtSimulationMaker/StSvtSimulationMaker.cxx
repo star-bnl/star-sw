@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.35 2007/12/24 17:37:19 fisyak Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.36 2008/10/21 21:05:51 fine Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.36  2008/10/21 21:05:51  fine
+ * Initialize the class data-members see bug #1294
+ *
  * Revision 1.35  2007/12/24 17:37:19  fisyak
  * Add protection from missing geometry
  *
@@ -172,30 +175,34 @@ ClassImp(StSvtSimulationMaker)
 //___________________________________________________________________________
 /// the only place where electron cloud expansioin constants are set
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
+ , mTrapConst(cTrapConst)           // [us]   //default =0
+ , mDiffusionConst(cDiffusionConst) // [mm**2/micro seconds] default=0.0035 (for silicon)
+ , mTimeBinSize(cLifeTime)          // [us]   //default =1000000.0
+ , mAnodeSize(-1956)
+ , mPedOffset(-1956)                //  not absolutely necesary to be already here - could be added in EmbeddingMaker, but it works
+ , mSigOption(0)                    // use both PASA codes, mNumOfHybrids(-1956)             //!could be used to override number of simulated hybrids
+ , mDefaultDriftVelocity(-1956)     // obsolete? - used if no database, error might be better
+ , mBField(-1956)                   // z component of BField;
+ , mConfig(0)                       // created in constructor (desctructor kills)
+ , mDoEmbedding(kFALSE)             // embedding or plain simulation?
+ , mSvtAngles(0)                    // created in Init (desctructor kills)
+ , mElectronCloud(0)
+ , mSvtSimulation(0)
+ , mCoordTransform(0)               // created in Init (desctructor kills)
+ , mSvtGeom(0)                      // read for each run in InitRun(owned by SvtDbMaker - don't kill)
+ , mDriftSpeedColl(0)
+ , mT0(0)
+ , mSvtSimPixelColl(0)             // the simulated data - created for each run InitRun{in beginAnalyses} 
+ , mSvt8bitPixelColl(0)            // simulated final result written to 8 bits - would be cleaner if owned by OnlSeqAdj
+ , mSvtGeantHitColl(0)             //
+ , counter(0)
+ , mNtFile(0)
+ , mNTuple(0)
 { 
-   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor"<<endm;
-  //electron cloud settings - these can be tuned;
-  mDiffusionConst= cDiffusionConst;   // [mm**2/micro seconds] default=0.0035 (for silicon)
-  mLifeTime=cLifeTime;     // [us]   //default =1000000.0
-  mTrapConst=cTrapConst;       // [us]   //default =0
-
-  //options - can be set by setOptions
-  mSigOption = 0;          // use both PASA codes
-  
+  if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor"<<endm;
   
   //initial cleanup
   mNumOfHybrids = 0; 
-
-  mSvtGeantHitColl = NULL;
-  mSvtSimPixelColl = NULL;
-  mSvt8bitPixelColl = NULL; //final data 
-  mDriftSpeedColl=NULL;
-  
-  mCoordTransform = NULL;
-  mElectronCloud = 0;
-  mSvtSimulation = 0;
-
-  counter = NULL;
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor...END"<<endm;
 }
 
@@ -233,7 +240,6 @@ void StSvtSimulationMaker::setElectronLifeTime(double tLife)
 void StSvtSimulationMaker::setTrappingConst(double trapConst)
 {
   mTrapConst = trapConst;  //  [micro seconds] 
-
 }
 
 //____________________________________________________________________________
