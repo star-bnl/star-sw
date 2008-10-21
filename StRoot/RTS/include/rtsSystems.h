@@ -533,6 +533,8 @@ extern inline char *rts2name(int rts_id)
 	        return "HFT" ;
 	case PP_SYSTEM :
 	        return "PP2PP" ;
+	case RIC_SYSTEM :
+		return "RICH" ;
 	default :
 		return NULL ;	// unknown!
 	}
