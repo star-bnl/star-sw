@@ -1,31 +1,3 @@
-* $Id: fgtdgeo2.g,v 1.3 2008/10/16 02:57:24 perev Exp $
-* $Log: fgtdgeo2.g,v $
-* Revision 1.3  2008/10/16 02:57:24  perev
-* HITS for FGSC recovery
-*
-* Revision 1.2  2008/10/13 00:24:06  perev
-* upgr16 divisions of disks added
-*
-* Revision 1.1  2008/09/25 03:05:44  perev
-* upgr16 (Jan)
-*
-* Revision 1.4  2007/11/13 21:29:45  perev
-* material ALKAP fixed
-*
-* Revision 1.3  2007/02/23 21:16:37  potekhin
-* Replacing a dummy version (a placeholder) of the FGT (formerly known
-* as IGT) code with a piece that supposedly works, and has 6 GEM disks.
-* All the structures and volumes were renames to comply with the new
-* naming convention (i.e. FGT, not IGT anymore).
-*
-* Revision 1.2  2007/02/13 20:41:03  potekhin
-* Remove the hit declaration just to make sure
-* there is no confusion downstream -- this version
-* if for material balance puprpose only.
-*
-* Revision 1.1  2007/02/08 00:01:47  potekhin
-* First cut of the "new" FGT which is identical to the previously
-* used IGT. Will soon be replaced by a newer version.
 *
 *
 * FGTDGEO - Forward GEM Tracking Detector Geometry
@@ -84,7 +56,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 * Declare the blocks to be defined in the code.
       Content   FGMO, FGGD, FGSC, FGZC, FGFP, FGFC, FGFA, FGFL, FGOC,FGXR,
      + FGGF,FGGN,FGGC,FGGK,FGGP,FGGR,FGOR,FGOA,FGOU,FGCT,FGRS,
-     + FGAP,FGAL,FGAS,FGAB, FGSU,FGSV,FGXC,FGXD,FGXE
+     + FGAP,FGAL,FGAS,FGAB, FGAD, FGSU,FGSV,FGXC,FGXD,FGXE
 * volumes added/changed by Jan:
 * FGFP - front plate carbon nomex honeycomb
 * FGFC - front plate carbon fiber
@@ -113,27 +85,28 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 * FGAL - APV-chips large end-board
 * FGAS - APV-chips smale end-board
 * FGAB - APV-chips balde-boards, there are 2 
+* FGAD - APV-chips bottom-board, equivalent to edges between quadrants
 * FGSU - SSD utility cables-long, mix 
 * FGSV - SSD utility cables-tube , mix
 
 * Declare the structure FGTG which defines the detector geometry.
       integer mxDisk
-      parameter (mxDisk=12) !stupid, should be used below as param,Jan
-      Structure FGTG { Config, RI, RO, Zstart, Zdisk(12), SR, RThk,
+      parameter (mxDisk=8) !stupid, should be used below as param,Jan
+      Structure FGTG { ConfigJan, gemRI, gemRO, Zstart, Zdisk(12), SR, RThk,
      +  nDisk,GR2,GR3,FRArout,FRArin,FRAthk, FPthk, FPCthk,OCthk,OClen,
      +  FRALrin,
      +  GGSCthk, GGFR4thk, GGNthk, GGCUthk, GGKAthk, GGPAthk, GGRLthk,
-     +  APVx,APVy,APVz,APVang,nQuad, APVd,APVy2, APVdy, 
+     +  APVx,APVy,APVz,APVang,nQuad, APVd,APVy2, APVdy,APVDdz,APVDdy, 
      +  FGORrad, FGORang,  FGOAdelR, FGOAdelZ,  
      +  FGOUdelR,FGOUang,FGOUdelA, nCables,
      +  IFCrin, IFCTUBrin, IFCTUBrout, IFClenZ, IFCresAng, IFCTUBdelA,
-     +  IFCResDelA, IFCResDelR
+     +  IFCResDelA, IFCResDelR, RinLes
 
         }
 
 * ----------------------------------------------------------------------
  Fill FGTG  ! Inner GEM Tracker Geometry data
-      Config  =   2 ! Version
+      ConfigJan  =   3 ! internal reconfiguration of UPGR16, 3=default=all_in
 
       GR2=0.3 ! outer gap between FGT disk and skin
       GR3=2.3 !  outer artificial gap beyond skin for services
@@ -156,10 +129,11 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
       FGOUdelR=0.5 !  R-thickness  of the FGT cables
        
       nDisk =8    ! # of disks
-      RI     = 10.5 ! inner radii for physical GEM volume. 
-      RO     = 38.1 ! outer radii for physical GEM volume. 
+      gemRI     = 10.5 ! inner radii for physical GEM volume. 
+      gemRO     = 38.1 ! outer radii for physical GEM volume. 
       Zstart  =   62.98  ! starting position along Z axis
-      Zdisk = { 5.4, 15.4, 25.4, 35.4, 45.4, 55.4, 105., 155. 151, 152,153,154}  ! Z positions of GEM front face
+      Zdisk = { 5.4, 15.4, 25.4, 35.4, 45.4, 55.4, 105., 155.}  ! Z positions of GEM front face
+      RinLes=4.1 ! iner radii for the 9th disk for Les  
 
       GGSCthk=0.3 ! thickness of active gas volume
       GGFR4thk=0.025 ! thickness of FR4 layer in GEM disk
@@ -180,6 +154,8 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 *                 adjusted to yield 700g total for 1 FGT disk (4 assembly) 
       APVy2=3.0 ! Y-width of short end-board
       APVdy=1.2 ! separation between blade-boards
+      APVDdy=2. ! mimics dead area between quadrants
+      APVDdz=1. ! mimics dead area between quadrants
 
 * IFC resitor chain, one for EAST+WEST
       IFCrin=46.1 ! inner radii of IFC
@@ -195,16 +171,20 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 
 *****************************************************************
 
-      USE FGTG  config=2
-      print * ,'**********FGT UPGR16 geometry, config=',FGTG_Config
-      if(  FGTG_Config.le.0) then 
-        print *, ' no FGT disks, just West Cone'
-        FGTG_nDisk=0
-      else  if(  FGTG_Config.eq.1) then 
-        print *, ' 6 FGT disks, no additional 3 FGT test disks'
+      USE FGTG  
+      print * ,'**********FGT UPGR16 geometry, ConfigJan=',FGTG_ConfigJan
+      if(  FGTG_ConfigJan.le.0) then 
+        print *, '  EMPTY: no FGT disks, no West Cone, no cables, no IST/HFT/SSD suport'
+        return
+      else  if(  FGTG_ConfigJan.eq.1) then 
+        print *, '  no FGT disks, add West Cone, add cables, no IST/HFT/SSD suport'
+        FGTG_nDisk=6       
+      else  if(  FGTG_ConfigJan.eq.2) then 
+        print *, '  6 FGT disks, add West Cone, add cables, add IST/HFT/SSD suport' 
         FGTG_nDisk=6
-      else  if(  FGTG_Config.eq.2) then
-        print *, ' 6 FGT disks and  3 FGT test disks' 
+      else  if(  FGTG_ConfigJan.eq.3) then
+        print *, '  6 FGT disks, add West Cone, add cables, add IST/HFT/SSD suport' 
+        print *, ' and  2 FGT disks at large Z, and 2 large FGT active volumes at both ends of the cone' 
       endif
 * Calculate some parameters from the input variables.
 
@@ -297,8 +277,8 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
       thickGG=2*FGTG_GGFR4thk +FGTG_GGNthk +FGTG_GGCUthk +FGTG_GGKAthk
      +   +FGTG_GGPAthk  +FGTG_GGSCthk+ FGTG_GGRLthk
       print *,'thickGG=',thickGG
-      Rin = FGTG_RI
-      Rout = FGTG_RO+ FGTG_OCthk +FGTG_GR2
+      Rin = FGTG_gemRI
+      Rout = FGTG_gemRO+ FGTG_OCthk +FGTG_GR2
       lengthZ = FGTG_FPthk+FGTG_OClen
 
 * Calculate centre of assembly.
@@ -307,20 +287,22 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 * SSD simplified mounting Alu ring 
       Create   FGXR
       Position FGXR in CAVE z=57 
-* SSD simplified supporting Carbon ring
-      Create   FGXC
-      Position FGXC in CAVE z=51.0 
 * SSD cables in front of FGT
       Create   FGSV
       Position FGSV in CAVE z=58. 
+
+      if(  FGTG_ConfigJan.gt.1) then 
+* SSD simplified supporting Carbon ring
+        Create   FGXC
+        Position FGXC in CAVE z=51.0 
 * IST simplified supporting Carbon ring
-      Create   FGXD
-      Position FGXD in CAVE z=24.0 
+        Create   FGXD
+        Position FGXD in CAVE z=24.0 
 
 * HFT simplified supporting Carbon ring
-      Create   FGXE
-      Position FGXE in CAVE z=11.0 
-
+        Create   FGXE
+        Position FGXE in CAVE z=11.0 
+      endif
 
 * TPC resistor chain in IFC
       Create   FGCT
@@ -343,7 +325,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 Block FGMO is the mother volume for the whole FGT assembly
       Material  Air
       Attribute FGMO  Seen=0  colo=6
-      Shape     TUBE Rmin=Rin Rmax=Rout+FGTG_GR3 Dz=lengthZ/2.0
+      Shape     TUBE Rmin=FGTG_RinLes Rmax=Rout+FGTG_GR3 Dz=lengthZ/2.0
  
 * assembly enclosure
       Create and Position FGFP z=-lengthZ/2.0+FGTG_FPthk/2.0
@@ -362,18 +344,20 @@ Block FGMO is the mother volume for the whole FGT assembly
 * Loop over the regular triple-GEM disks.
  
       do disk=1,FGTG_nDisk
-         ! print *, 'do disk=',disk,  FGTG_Config
-         zD=-lengthZ/2.0 + thickGG/2.0 + FGTG_Zdisk(disk) ! Z of this disk
-         Create and Position FGGD z=zD
+       ! print *, 'do disk=',disk,  FGTG_ConfigJan
+         if(  FGTG_ConfigJan.gt.1) then 
+           zD=-lengthZ/2.0 + thickGG/2.0 + FGTG_Zdisk(disk) ! Z of this disk
+           Create and Position FGGD z=zD
 
-        ! add APV chips material, WARN: uses 'zsum' from FGGD
-        x3=rin+FGTG_APVx/2. ! Rxy of the APV-chip center
-        do quad=1,FGTG_nQuad
-            x2=FGTG_APVang+quad*360./FGTG_nQuad ! titl angle
-            Create and Position FGAP z=zD+zsum+FGTG_APVz/2.0 alphaZ=x2
-     +      x=x3*cos(x2/180.*3.1416) y=x3*sin(x2/180.*3.1416)
-        enddo
-
+           ! add APV chips material, WARN: uses 'zsum' from FGGD
+           x3=rin+FGTG_APVx/2. ! Rxy of the APV-chip center
+           do quad=1,FGTG_nQuad
+              x2=FGTG_APVang+quad*360./FGTG_nQuad ! titl angle
+              Create and Position FGAP z=zD+zsum+FGTG_APVz/2.0+FGTG_APVDdz/2
+     +        alphaZ=x2
+     +        x=x3*cos(x2/180.*3.1416) y=x3*sin(x2/180.*3.1416)
+           enddo
+         endif
 
 * FGT utility lines start at beginning of every disk: 
       do cable=1,FGTG_nCables
@@ -381,7 +365,7 @@ Block FGMO is the mother volume for the whole FGT assembly
           x3=x2+disk*FGTG_FGOUdelA*3.0 ! final phi orientation, space them apart
           z1=FGTG_OClen/2.0-zD ! cable length
       !  print *, 'disk=',disk, 'z1=',z1
-          x1=FGTG_RO+FGTG_GR2+FGTG_OCthk !' inner radii
+          x1=FGTG_gemRO+FGTG_GR2+FGTG_OCthk !' inner radii
           Create and Position FGOU Rmin=x1 Rmax=x1+FGTG_FGOUdelR
      +    dZ=z1/2.0
      +        z=(FGTG_OClen-z1)/2.0  alphaZ=x3
@@ -390,15 +374,14 @@ Block FGMO is the mother volume for the whole FGT assembly
       enddo ! end of regular disks
 
 * add one extra FGT sensitive volume in front, requested by Les
-      if(  FGTG_Config.gt.1) then 
-
-        FGSCrmin=2.5 ; FGSCrmax=FGTG_RO; FGSCdz=FGTG_GGSCthk/2.0;
-      Create and Position FGSC z=-lengthZ/2.0+4.0 alphaZ=-0.15
+      if(  FGTG_ConfigJan.gt.2) then 
+        FGSCrmin=FGTG_RinLes ; FGSCrmax=FGTG_gemRO; FGSCdz=FGTG_GGSCthk/2.0;
+      Create and Position FGSC z=+lengthZ/2.0-3.0 alphaZ=-15
       endif
 
 * add SSD utility lines, continue engle 
         do cable=1,FGTG_nCables
-           x1=FGTG_RO+FGTG_GR2+FGTG_OCthk+0.1 !' outer radii
+           x1=FGTG_gemRO+FGTG_GR2+FGTG_OCthk+0.1 !' outer radii
            Create and Position FGSU Rmin=x1 Rmax=x1+1.5 dZ=FGTG_OClen/2.0
      +        z=0  alphaZ=80+FGTG_FGOUang+cable*90 
      +        phi1=30 phi2=45 
@@ -409,12 +392,12 @@ Block FGMO is the mother volume for the whole FGT assembly
 Block FGGD is the mother volume of the individual tripple-GEM disks
       Material FR4
       Attribute FGGD  Seen=1  colo=7
-      Shape TUBE Rmin=FGTG_RI Rmax=FGTG_RO Dz=thickGG/2.0
+      Shape TUBE Rmin=FGTG_gemRI Rmax=FGTG_gemRO Dz=thickGG/2.0
 
 * assemble layres of one tripple-GEM disk
         zsum = -thickGG/2.0      ! Start at the front face.
-        rin=FGTG_RI
-        rout=FGTG_RO
+        rin=FGTG_gemRI
+        rout=FGTG_gemRO
 
         Create and Position FGGF z=zsum+ FGTG_GGFR4thk/2.0
         zsum=zsum+FGTG_GGFR4thk
@@ -425,8 +408,8 @@ Block FGGD is the mother volume of the individual tripple-GEM disks
         Create and Position FGGF z=zsum+ FGTG_GGFR4thk/2.0
         zsum=zsum+FGTG_GGFR4thk
 
-        rin=FGTG_RI+FGTG_SR ! change Rin/Rout for the volumes below
-        rout=FGTG_RO-FGTG_SR
+        rin=FGTG_gemRI+FGTG_SR ! change Rin/Rout for the volumes below
+        rout=FGTG_gemRO-FGTG_SR
         FGSCrmin=rin; FGSCrmax=rout; FGSCdz=FGTG_GGSCthk/2.0;
 
         Create and Position FGSC z=zsum+FGTG_GGSCthk/2.0 alphaZ=-15
@@ -607,41 +590,49 @@ endblock
 Block FGAP  APV-chips block encapsulation volume
       Material air
       Attribute FGAP  Seen=0  colo=6
-      Shape BOX dX=FGTG_APVx/2.0  dY=FGTG_APVy/2.0  dZ=FGTG_APVz/2.0  
+      Shape BOX dX=FGTG_APVx/2.0  dY=FGTG_APVy/2.0  dZ=FGTG_APVz/2.0+FGTG_APVDdz/2  
       * add PC boards  
-      Create and Position FGAS x=(-FGTG_APVx + FGTG_APVd)/2.0 y=0 z=0
-      Create and Position FGAL x=( FGTG_APVx - FGTG_APVd)/2.0 y=0 z=0
-      Create and Position FGAB x=0 y=-FGTG_APVdy/2.0 z=0
-      Create and Position FGAB x=0 y=+FGTG_APVdy/2.0 z=0
+      Create and Position FGAD x=0 y=0 z=-FGTG_APVz/2 
+      Create and Position FGAS x=(-FGTG_APVx + FGTG_APVd)/2.0 y=0 z=FGTG_APVDdz/2
+      Create and Position FGAL x=( FGTG_APVx - FGTG_APVd)/2.0 y=0 z=FGTG_APVDdz/2
+      Create and Position FGAB x=0 y=-FGTG_APVdy/2.0 z=FGTG_APVDdz/2
+      Create and Position FGAB x=0 y=+FGTG_APVdy/2.0 z=FGTG_APVDdz/2
 endblock
 
 
 * ---------------------------------------------------------------
-Block FGAL  APV- large end-board made of FR4
+Block FGAL  APV- large end-board made of FR4+Cu
       Material FR4Cu
       Attribute FGAL  Seen=1  colo=7
       Shape BOX dX=FGTG_APVd/2.0  dY=FGTG_APVy/2.0  dZ=FGTG_APVz/2.0 
 endblock
 
 * ---------------------------------------------------------------
-Block FGAS  APV- small end-board made of FR4
+Block FGAS  APV- small end-board made of FR4+Cu
       Material FR4Cu
       Attribute FGAS  Seen=1  colo=7
       Shape BOX dX=FGTG_APVd/2.0  dY=FGTG_APVy2/2.0  dZ=FGTG_APVz/2.0 
 endblock
 
 * ---------------------------------------------------------------
-Block FGAB  APV- blade-board made of FR4
+Block FGAB  APV- blade-board made of FR4+Cu
       Material FR4Cu
       Attribute FGAB  Seen=1  colo=7
       Shape BOX dX=FGTG_APVx/2.0-FGTG_APVd  dY=FGTG_APVd/2.0  dZ=FGTG_APVz/2.0 
 endblock
 
 * ---------------------------------------------------------------
+Block FGAD  APV- material between quadrants made of FR4+Cu
+      Material FR4Cu
+      Attribute FGAD  Seen=1  colo=1
+      Shape BOX dX=FGTG_APVx/2.0  dY=FGTG_APVDdy/2.0  dZ=FGTG_APVDdz/2.0 
+endblock
+
+* ---------------------------------------------------------------
 Block FGOC  outer cylinder, carbon fiber FGTG_OCthk
       Material CFiber
       Attribute FGOC  Seen=1  colo=3 
-      Shape TUBE Rmin=FGTG_RO+FGTG_GR2 Rmax=FGTG_RO+FGTG_GR2+FGTG_OCthk
+      Shape TUBE Rmin=FGTG_gemRO+FGTG_GR2 Rmax=FGTG_gemRO+FGTG_GR2+FGTG_OCthk
      +           Dz=FGTG_OClen/2.0
 endblock
 
@@ -667,3 +658,50 @@ endblock
 * ----------------------------------------------------------------------
       END
     
+* $Log: fgtdgeo2.g,v $
+* Revision 1.4  2008/10/22 17:46:39  perev
+* Jan: fix disk #9 sticking out of FGMO volume
+*
+* Revision 1.3  2008/10/16 02:57:24  perev
+* HITS for FGSC recovery
+*
+* Revision 1.2  2008/10/13 00:24:06  perev
+* upgr16 divisions of disks added
+*
+* Revision 1.1  2008/09/25 03:05:44  perev
+* upgr16 (Jan)
+* many of the volumes below were later changed
+* The single triple GEM assembly in GEANT as follows, in this order:
+* Front support disk:
+  * 0.25mm FR4, rho=1.91 g/cm3, composition as  G10
+  * 5.00mm Nomex,0.048 g/cm3
+  * 0.25mm FR4, rho=1.91 g/cm3
+* Equivalent to 3GEMs+HV layer + readout layer:
+  * 3.0mm ArC02_70_30  (active volume)
+  * 0.2mm Cu, rho=1.16 g/cm3  (stretch ~13 x and reduced density)
+  * 0.3mm Kapton, rho=1.02g/cm3  ( use 0.7 density to account for holes)
+  * 0.2mm FR4, rho=1.19g/cm3, strech factor=1.6 ???
+  * 5.8mm ArC02_70_30  (passive drift volume)
+  * 2 rings of FR4 at inner/outer radii, 1 cm wide, thickness=9.5 cm
+  * 4 bars at quadrant boundaries ???? 
+  * the above values are old , only approximate
+* Total depth=15.0mm
+*
+* Revision 1.4  2007/11/13 21:29:45  perev
+* material ALKAP fixed
+*
+* Revision 1.3  2007/02/23 21:16:37  potekhin
+* Replacing a dummy version (a placeholder) of the FGT (formerly known
+* as IGT) code with a piece that supposedly works, and has 6 GEM disks.
+* All the structures and volumes were renames to comply with the new
+* naming convention (i.e. FGT, not IGT anymore).
+*
+* Revision 1.2  2007/02/13 20:41:03  potekhin
+* Remove the hit declaration just to make sure
+* there is no confusion downstream -- this version
+* if for material balance puprpose only.
+*
+* Revision 1.1  2007/02/08 00:01:47  potekhin
+* First cut of the "new" FGT which is identical to the previously
+* used IGT. Will soon be replaced by a newer version.
+*
