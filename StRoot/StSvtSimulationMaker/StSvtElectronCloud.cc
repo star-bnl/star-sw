@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.8 2007/03/21 17:25:51 fisyak Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.9 2008/10/22 17:33:34 fine Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.9  2008/10/22 17:33:34  fine
+ * Initialize all data-members of the class StSvtElectronCloud
+ *
  * Revision 1.8  2007/03/21 17:25:51  fisyak
  * Ivan Kotov's drift velocities, TGeoHMatrix
  *
@@ -38,12 +41,24 @@ ClassImp(StSvtElectronCloud)
 
 
 StSvtElectronCloud::StSvtElectronCloud()
+  : mSigX(-1956),      mSigY(-1956),      mSigXY(-1956)
+  , mChargeNow(-1956), mTotCharge(-1956), mEnergy(-1956)
+  , mTheta(-1956)    , mPhi(-1956),       mInitPhi(-1956)
+  , mDriftVel(-1956) , mTimBinSize(-1956),mSDD_thickness(-1956)                      //  [mm]
+  , mTrapConst(-1956), mDiffusionConst(-1956)                           //  [mm**2/micro seconds] X and Y are calculated from this
+  , mDiffConstX(-1956)                          //  [mm**2/micro seconds] in drift direction
+  , mDiffConstY(-1956)                          //  [mm**2/micro seconds] in anode direction
+  , mSi_DielConst(-1956), mSi_EnergyGap(-1956)
+  , mPermitivity(-1956)                         // [e/(mm-V)]
+  , mSi_Mobility(-1956)                         // [mm**2/(V-micro seconds)]
+  , mLifeTime(-1956)                            // [micro seconds]
+  , mTrackId(-1956)
 {
   setSiliconProp();               //important - sets SVT silicon properties
   mTrackId = 0;
   mTotCharge = 0;
   mChargeNow = 0;
-  
+
   for(int i = 0; i < 4; i++)
     {
       m_dSigX[i] = 0;
