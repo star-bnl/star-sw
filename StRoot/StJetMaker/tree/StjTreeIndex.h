@@ -1,13 +1,21 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeIndex.h,v 1.4 2008/08/11 01:28:40 tai Exp $
+// $Id: StjTreeIndex.h,v 1.5 2008/10/22 19:50:06 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEINDEX_H
 #define STJTREEINDEX_H
 
 #include <Rtypes.h>
 #include <TObject.h>
-
 #include <ostream>
+
+
+#ifdef major
+#undef major
+#endif
+
+#ifdef minor
+#undef minor
+#endif
 
 class StjTreeIndex : public TObject {
 
