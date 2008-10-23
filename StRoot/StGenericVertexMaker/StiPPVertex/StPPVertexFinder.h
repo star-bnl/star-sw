@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.9 2008/10/21 19:23:06 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.10 2008/10/23 20:37:32 genevb Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -80,6 +80,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
 public:
   void setMC(bool x=true){isMC=x;}
   void useCTB(bool x=true){mUseCtb=x;}
+  void usePCT(bool x=true){setDropPostCrossingTrack(!x);}
   void setDropPostCrossingTrack(bool x=true){mDropPostCrossingTrack=x;}
   void Finish();
 
@@ -104,6 +105,9 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.10  2008/10/23 20:37:32  genevb
+ * Add switches for turning on/off use of Post-Crossing Tracks [default:off]
+ *
  * Revision 1.9  2008/10/21 19:23:06  balewski
  * store unqualified vertices on Akio's request
  *
