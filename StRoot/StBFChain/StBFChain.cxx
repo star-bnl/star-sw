@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.541 2008/08/15 16:38:32 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.542 2008/10/23 20:35:22 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -394,11 +394,13 @@ Int_t StBFChain::Instantiate()
       mk->SetMode(VtxOpt);
       
       // All VertexFinders implement those (or not)
-      if (GetOption("beamLine") || GetOption("CtbMatchVtx") || GetOption("min2trkVtx")) {
+      if (GetOption("beamLine") || GetOption("CtbMatchVtx") || GetOption("min2trkVtx") ||
+          GetOption("usePct4Vtx")) {
 	TString  cmd(Form("StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) %p;",mk));
 	if (GetOption("beamLine"))    {cmd += "gvtxMk->UseBeamLine();";}
 	if (GetOption("CtbMatchVtx")) {cmd += "gvtxMk->UseCTB();";}
 	if (GetOption("min2trkVtx"))  {cmd += "gvtxMk->SetMinimumTracks(2);";}
+	if (GetOption("usePct4Vtx"))  {cmd += "gvtxMk->UsePCT();";}
 	ProcessLine(cmd);
       }
     }
