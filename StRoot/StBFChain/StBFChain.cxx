@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.542 2008/10/23 20:35:22 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.543 2008/10/23 20:52:12 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -400,6 +400,12 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("beamLine"))    {cmd += "gvtxMk->UseBeamLine();";}
 	if (GetOption("CtbMatchVtx")) {cmd += "gvtxMk->UseCTB();";}
 	if (GetOption("min2trkVtx"))  {cmd += "gvtxMk->SetMinimumTracks(2);";}
+
+        // WARNING: introduction of this option (usePct4Vtx) with default:false
+        // breaks backward compatibility for any StGenericVertexMaker
+        // which implements dropping of Post-Crossing Tracks via a UsePCT()
+        // function. Use this option (make it true) to reproduce results
+        // from before the introduction of this option.
 	if (GetOption("usePct4Vtx"))  {cmd += "gvtxMk->UsePCT();";}
 	ProcessLine(cmd);
       }
