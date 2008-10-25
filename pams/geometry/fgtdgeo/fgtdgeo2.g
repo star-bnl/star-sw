@@ -318,7 +318,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 * real FGT
 
       Create   FGMO
-      write (*,*) '###################### FGMO Z=',centerZ
+*VP      write (*,*) '###################### FGMO Z=',centerZ
       Position FGMO in CAVE z=centerZ 
 
 * -------------------------------------------------------------
@@ -377,7 +377,7 @@ Block FGMO is the mother volume for the whole FGT assembly
       if(  FGTG_ConfigJan.gt.2) then 
         FGSCrmin=FGTG_RinLes ; FGSCrmax=FGTG_gemRO; FGSCdz=FGTG_GGSCthk/2.0;
         FGSCz = lengthZ/2.0-3.0
-        write(*,*)'########## FGSC rMin,rMax,Z=',FGSCrmin,FGSCrmax,FGSCz
+*VP        write(*,*)'########## FGSC rMin,rMax,Z=',FGSCrmin,FGSCrmax,FGSCz
       Create and Position FGSD z=FGSCz alphaZ=-15
       endif
 
@@ -680,6 +680,9 @@ endblock
       END
     
 * $Log: fgtdgeo2.g,v $
+* Revision 1.6  2008/10/25 02:10:16  perev
+* Remove debug prints
+*
 * Revision 1.5  2008/10/25 02:08:55  perev
 * FGSD is FGSC of differen size
 *
