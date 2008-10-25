@@ -51,10 +51,10 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
       real x1,x2,x3  	! working variables 
       real zD,z1,z2  	! working variables 
 
-      real FGSCrmin, FGSCrmax, FGSCdz ! variable size of FGSC
+      real FGSCrmin, FGSCrmax, FGSCdz, FGSCz ! variable size of FGSC
 
 * Declare the blocks to be defined in the code.
-      Content   FGMO, FGGD, FGSC, FGZC, FGFP, FGFC, FGFA, FGFL, FGOC,FGXR,
+      Content   FGMO, FGGD, FGSD, FGSC, FGZC, FGZD, FGFP, FGFC, FGFA, FGFL, FGOC,FGXR,
      + FGGF,FGGN,FGGC,FGGK,FGGP,FGGR,FGOR,FGOA,FGOU,FGCT,FGRS,
      + FGAP,FGAL,FGAS,FGAB, FGAD, FGSU,FGSV,FGXC,FGXD,FGXE
 * volumes added/changed by Jan:
@@ -318,7 +318,7 @@ Module FGTDGEO2 is the geometry of the forward GEM tracking detector, version UP
 * real FGT
 
       Create   FGMO
-
+      write (*,*) '###################### FGMO Z=',centerZ
       Position FGMO in CAVE z=centerZ 
 
 * -------------------------------------------------------------
@@ -376,7 +376,9 @@ Block FGMO is the mother volume for the whole FGT assembly
 * add one extra FGT sensitive volume in front, requested by Les
       if(  FGTG_ConfigJan.gt.2) then 
         FGSCrmin=FGTG_RinLes ; FGSCrmax=FGTG_gemRO; FGSCdz=FGTG_GGSCthk/2.0;
-      Create and Position FGSC z=+lengthZ/2.0-3.0 alphaZ=-15
+        FGSCz = lengthZ/2.0-3.0
+        write(*,*)'########## FGSC rMin,rMax,Z=',FGSCrmin,FGSCrmax,FGSCz
+      Create and Position FGSD z=FGSCz alphaZ=-15
       endif
 
 * add SSD utility lines, continue engle 
@@ -411,8 +413,8 @@ Block FGGD is the mother volume of the individual tripple-GEM disks
         rin=FGTG_gemRI+FGTG_SR ! change Rin/Rout for the volumes below
         rout=FGTG_gemRO-FGTG_SR
         FGSCrmin=rin; FGSCrmax=rout; FGSCdz=FGTG_GGSCthk/2.0;
-
-        Create and Position FGSC z=zsum+FGTG_GGSCthk/2.0 alphaZ=-15
+        FGSCz = zsum+FGTG_GGSCthk/2.0
+        Create and Position FGSC z=FGSCz alphaZ=-15
         zsum=zsum+FGTG_GGSCthk
 
         Create and Position FGGC z=zsum+ FGTG_GGCUthk/2.0
@@ -520,7 +522,7 @@ endblock
 * ---------------------------------------------------------------
 Block FGOA  outer  Alu ring
       Material Aluminium
-      Attribute FGFC  Seen=1  colo=1
+      Attribute FGOA  Seen=1  colo=1
       Shape TUBE Rmin=Rout Rmax=Rout+FGTG_FGOAdelR Dz=FGTG_FGOAdelZ/2.0
 endblock
 
@@ -541,7 +543,7 @@ endblock
 * ------------------------------
 Block FGSV  SSD  utility -tube, all mixed and averaged
       Material  Cable_SSD 
-      Attribute FGSU  Seen=1  colo=7
+      Attribute FGSV  Seen=1  colo=7
       Shape TUBE Rmin=36.10 Rmax=36.27 dZ=5.0
 endblock
 
@@ -656,9 +658,31 @@ Block FGZC describes the sensitive area
                      ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
 endblock
 * ----------------------------------------------------------------------
+* -------------------------------------------------------------------
+Block FGSD is FGSC of different size
+      Material  ArCO2_70_30  
+      Material Sensitive  Isvol=1
+      Attribute FGSC  Seen=1 colo=6 
+      Shape TUBE Rmin=FGSCrmin Rmax=FGSCrmax Dz=FGSCdz 
+
+      Create FGZD 
+endblock
+* -------------------------------------------------------------------
+Block FGZD describes the sensitive area
+      Attribute FGZD  Seen=1 colo=7 
+      Shape Division Iaxis=2 Ndiv=4 
+
+      HITS   FGZD   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+                    cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
+                    ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
+endblock
+* -------------------------------------------------------------------
       END
     
 * $Log: fgtdgeo2.g,v $
+* Revision 1.5  2008/10/25 02:08:55  perev
+* FGSD is FGSC of differen size
+*
 * Revision 1.4  2008/10/22 17:46:39  perev
 * Jan: fix disk #9 sticking out of FGMO volume
 *
