@@ -132,7 +132,7 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
 						PotI));
   Double_t ionization = matS->getIonization();
   StiElossCalculator *ElossCalculator = 
-    new StiElossCalculator(matS->getZOverA(), ionization*ionization, matS->getA(), matS->getZ(),matS->getDensity());
+    new StiElossCalculator(matS->getZOverA(), ionization, matS->getA(), matS->getZ(),matS->getDensity());
   StiShape     *sh     = findShape(volP->GetName());
   Double_t     *xyz    = hmat->GetTranslation();
   Double_t     *rot    = hmat->GetRotationMatrix();
