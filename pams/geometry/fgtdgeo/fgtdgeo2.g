@@ -662,7 +662,7 @@ endblock
 Block FGSD is FGSC of different size
       Material  ArCO2_70_30  
       Material Sensitive  Isvol=1
-      Attribute FGSC  Seen=1 colo=6 
+      Attribute FGSD  Seen=1 colo=6 
       Shape TUBE Rmin=FGSCrmin Rmax=FGSCrmax Dz=FGSCdz 
 
       Create FGZD 
@@ -680,6 +680,9 @@ endblock
       END
     
 * $Log: fgtdgeo2.g,v $
+* Revision 1.7  2008/10/28 17:59:24  perev
+* mistype FGSC ==> FGSD
+*
 * Revision 1.6  2008/10/25 02:10:16  perev
 * Remove debug prints
 *
