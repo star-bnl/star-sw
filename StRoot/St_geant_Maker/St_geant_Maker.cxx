@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.122 2008/10/21 18:02:50 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.123 2008/10/28 22:28:34 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.123  2008/10/28 22:28:34  perev
+// FGZD hits added
+//
 // Revision 1.122  2008/10/21 18:02:50  perev
 // FGSC==>FGZC its division, Wei-Ming
 //
@@ -1035,8 +1038,11 @@ Int_t St_geant_Maker::Make()
     //	     ===============================
   }
 
-  nhits = 0;
-  geant3->Gfnhit("FGTH","FGZC", nhits);
+  int myNhits=0;
+  geant3->Gfnhit("FGTH","FGZC", myNhits);
+  nhits = myNhits;
+  geant3->Gfnhit("FGTH","FGZD", myNhits);
+  nhits+= myNhits;
   
   if (nhits>0) { 
     St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
