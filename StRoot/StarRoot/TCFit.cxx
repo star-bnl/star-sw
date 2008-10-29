@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.3 2007/12/26 23:31:07 fisyak Exp $
+// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.4 2008/10/29 19:19:41 perev Exp $
 // Author: Victor Perev   05/08/03
 
 
@@ -615,6 +615,26 @@ TLorentzVector TkPars::P4() const
   return v;
 }
 //______________________________________________________________________________
+void TkPars::P4D(double D[4][5]) const
+{
+  enum {Kdca,Kz,Kphi,Kptin,Ktanl};
+
+  memset(D[0],0,4*5*sizeof(D[0][0]));
+  double pt = fabs(1./ptin);
+  double dpt = -pt/ptin;
+  double e = sqrt(pt*pt*(1.+tanl*tanl)+mass*mass);
+//  TLorentzVector v(pt*cos(phi),pt*sin(phi),pt*tanl,e);
+
+  D[3][Kptin] = pt*(1.+tanl*tanl)/e*dpt;
+  D[3][Ktanl] = pt*pt*tanl/e*dpt;
+
+  D[0][Kptin] = cos(phi)*dpt;
+  D[1][Kptin] = sin(phi)*dpt;
+  D[2][Kptin] = tanl*dpt;
+  D[2][Ktanl] = pt;
+
+}
+//______________________________________________________________________________
 void TkPars::Set(const TVector3 &v3,const TVector3 &d3,double pti)
 {
   dca = v3.Perp();
@@ -788,11 +808,15 @@ void TCFitV0::Update()
 
   }
   P4[2]= P4[0]+P4[1];
-  P4[2].Vect().Unit().GetXYZ(mDConDL[2]);
+  (P4[2].Vect()*(-1.)).Unit().GetXYZ(mDConDL[2]);
   Vx[2]= TVector3(mVx.x)+ P4[2].Vect().Unit()*mLen[2];
   (Vx[0]-Vx[2]).GetXYZ(mConr+0);  
   (Vx[1]-Vx[2]).GetXYZ(mConr+3);  
   mConr[6] = P4[2].M() - mMas;
+  mTkFit[0].P4D(mP4d[0]);
+  mTkFit[1].P4D(mP4d[1]);
+
+
   Modify(0);
 }
 //______________________________________________________________________________
@@ -870,14 +894,14 @@ double TCFitV0::DDFcn(int ipar,int jpar)
 double TCFitV0::DCon(int icon,int ipar)  		
 {
    if (ipar <20) return TCFitData::DCon(icon,ipar);
-   if (icon==36) return 0.;
-   int tcon = (icon-30)/3;
-   int jcon = (icon-30)%3;
-   int jpar = ipar-20;
+   if (icon==kCNRJ) return 0.;
+   int tcon = (icon-kCX_0)/3;
+   int jcon = (icon-kCX_0)%3;
+   int jpar = ipar-kLEN_0;
    switch(10*tcon+jpar) {
-     case  00: ;case 11: return  mDConDL[jpar][jcon];
-     case   1: ;case 10: return  0.;;
-     case   2: ;case 12: return -mDConDL[jpar][jcon];
+     case  00: ;case 11: ;
+     case   2: ;case 12: return  mDConDL[jpar][jcon];
+     case   1: ;case 10: return  0.;
      default: assert(0);
    }
    return 0;
