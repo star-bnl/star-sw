@@ -393,7 +393,7 @@ char *evpReader::get(int num, int type)
     }
   }
 
-  LOG("DBG", "about to mount sfs file: %s %d 0x%x",file_name, evt_offset_in_file, sfs);
+  LOG(DBG, "about to mount sfs file: %s %d 0x%x",file_name, evt_offset_in_file, sfs);
 
   // Now, mount the sfs file...
   // The mount unmounts and closes previous mount... 
@@ -517,7 +517,7 @@ char *evpReader::get(int num, int type)
    
     if(input_type != pointer) {
       if(getRccnf(rccnf_file, &runconfig) < 0) {
-	LOG("DBG", "No runconfig file %s",rccnf_file,0,0,0,0);
+	LOG(DBG, "No runconfig file %s",rccnf_file,0,0,0,0);
       }
     }
 
