@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: xTCL.h,v 1.2 2007/07/12 20:38:41 fisyak Exp $
+ * $Id: xTCL.h,v 1.3 2008/10/29 19:38:02 perev Exp $
  *
  * Author: Victor Perev, Feb 2007
  ***************************************************************************
@@ -47,5 +47,8 @@ static int SqProgSimple(      TVectorD &x
 		       ,const TVectorD &Min		   
 		       ,const TVectorD &Max,int iAkt);
 static double **makeMatrixD(int m,int n);
+static void toEuler(const double TT[3][3],double PhiThePsi[6]);
+
+
 };
 #endif// xTCL_h
