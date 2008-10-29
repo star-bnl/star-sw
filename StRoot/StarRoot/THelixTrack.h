@@ -203,7 +203,7 @@ public:
 
 ///		distance and DCAxy and DCAz to given space point (with error matrix)
         double Dca(const double point[3]
-                  ,double &dcaXY,double &dcaZ,double dcaEmx[3]) const;
+                  ,double &dcaXY,double &dcaZ,double dcaEmx[3],int kind=3) const;
 
         const double *GetXYZ() 	const {return fX;}
         const double *Pos()    	const {return fX;}

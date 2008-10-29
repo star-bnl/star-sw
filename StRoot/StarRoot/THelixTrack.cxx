@@ -751,16 +751,21 @@ double THelixTrack::Dca(double x,double y,double *dcaErr) const
 
 //_____________________________________________________________________________
 double THelixTrack::Dca(const double point[3]
-                       ,double &dcaXY,double &dcaZ,double dcaEmx[3]) const
+                       ,double &dcaXY,double &dcaZ,double dcaEmx[3],int kind) const
 /// Full 3d dca evaluation
 /// point[3] - x,y,z of vertex
 /// dcaXY - dca in xy plane
 /// dcaZ  - dca in Z direction
 /// dcaEmx[3] - err(dcaXY*dcaXY),err(dcaXY*dcaZ),err(dcaZ*dcaZ)
+/// kind - 3=3d dca,2=2d dca
 /// return distance to dca point
 {
    double dif[3];
-   double s = Path(point);
+   double s = 0;
+   assert(kind==2 || kind==3);
+   if (kind==3) s = Path(point);
+   else         s = Path(point[0],point[1]);
+
    THelixTrack th(*this);
    th.Move(s);
    const double *x=th.Pos();
@@ -1097,10 +1102,10 @@ double TCircle::Path(const double pnt[2]) const
     s = (CXP*(1.-CXPRho*(0.5-CXPRho*(1/3.-CXPRho*0.25)))).Im();
   }
 //   Check
-  double x[2],d[2];
-  Eval(s,x,d) ;
-  assert(fabs((pnt[0]-x[0])*d[0]+(pnt[1]-x[1])*d[1])<1e-6);
-  return s;
+//   double x[2],d[2];
+//   Eval(s,x,d) ;
+//   assert(fabs((pnt[0]-x[0])*d[0]+(pnt[1]-x[1])*d[1])<1e-6);
+   return s;
 }
 //______________________________________________________________________________
 double TCircle::Path(const double pnt[2],const double exy[3]) const
@@ -2879,7 +2884,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.35 2007/12/20 00:47:27 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.36 2008/10/29 19:36:25 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2895,6 +2900,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.36  2008/10/29 19:36:25  perev
+ * flag 2d and 3d dca added
+ *
  * Revision 1.35  2007/12/20 00:47:27  perev
  * WarnOff
  *
