@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TCFit.h,v 1.2 2007/12/20 00:49:02 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TCFit.h,v 1.3 2008/10/29 19:19:36 perev Exp $
 // Author: Victor Perev   05/07/2007
 // Class for Fit with constrains. 
 // TCFit   - fitter
@@ -199,6 +199,7 @@ const double *Arr() const 	{ return &dca;}
       double  P()   const 	{ return sqrt(1.+tanl*tanl)/fabs(ptin);}
       double  E()   const 	{ return sqrt((1.+tanl*tanl)/(ptin*ptin)+mass*mass);}
 TLorentzVector P4()  const;
+void           P4D(double D[4][5]) const;
 TVector3       V3()  const;
       void    Fill(THelixTrack &hlx);
       void    Set(const TVector3 &v3,const TVector3 &d3  ,double  pts  );
@@ -297,8 +298,9 @@ VxErrs mVE;			//Vertex errorss.    Not used now
 double mLen[3];			//Lengths to V0 vertex along tracks. 2==V0 track
 
 double mConr[7];		//Constrains. 6=energy conservation 
-double mDFcn[2][5];
-double mDConDL[3][3];
+double mDFcn[2][5]; 		// dFcn/dTkPars
+double mDConDL[3][3];           // dCon
+double mP4d[2][4][5];
 double mMas;			//V0 mass
 char   mEnd[1];
 
