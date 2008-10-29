@@ -1,8 +1,12 @@
 *
-* $Id: gfipar.F,v 1.1.1.1 2004/01/15 00:12:07 potekhin Exp $
+* $Id: gfipar.F,v 1.2 2008/10/29 19:50:31 perev Exp $
 *
 * $Log: gfipar.F,v $
+* Revision 1.2  2008/10/29 19:50:31  perev
+* printouts improved
+*
 * Revision 1.1.1.1  2004/01/15 00:12:07  potekhin
+*
 *
 * Revision 1.1.1.1  1997/11/03 15:29:59  atlascvs
 * Importing CERNLIB version 08.21.
@@ -35,6 +39,7 @@ C.
       DIMENSION  PAR(*), ATT(*), LVOLS(NLVMAX), LINDX(NLVMAX)
       CHARACTER*4 NAME
       LOGICAL BTEST
+      character *9 GNAME
 C.
 C.    ------------------------------------------------------------------
 C.
@@ -94,30 +99,98 @@ C.
       GO TO 999
 *
   910 CONTINUE
-      WRITE (CHMAIL, 1010) JIN
+      WRITE (CHMAIL, 1010) gname(JVO),JIN
       CALL GMAIL (0, 0)
- 1010 FORMAT (' GFIPAR : Error - JIN = ',I8,' LE 0 where Volume ',
+ 1010 FORMAT (' GFIPAR : vol=',a, 
+     +' Error - JIN = ',I8,' LE 0 where Volume ',
      +        'parameters not present in JVO')
       GO TO 999
 *
   930 CONTINUE
-      WRITE (CHMAIL, 1030)
+      WRITE (CHMAIL, 1030) gname(JVO)
       CALL GMAIL (0, 0)
- 1030 FORMAT (' GFIPAR : Error - NLDM is zero where development ',
+ 1030 FORMAT (' GFIPAR : vol=',a,
+     + '  Error - NLDM is zero where development ',
      +        'structure is expected')
       GO TO 999
 *
   940 CONTINUE
-      WRITE (CHMAIL, 1040)
+      WRITE (CHMAIL, 1040)GNAME(JVO)
       CALL GMAIL (0, 0)
- 1040 FORMAT (' GFIPAR : Error - JPAR is zero where development ',
+ 1040 FORMAT (' GFIPAR : vol=',a, 
+     +'  Error - JPAR is zero where development ',
      +        'structure is expected')
       GO TO 999
 *
   950 CONTINUE
-      WRITE (CHMAIL,1050) NPAR
+      WRITE (CHMAIL,1050) GNAME(JVO),NPAR
       CALL GMAIL (0, 0)
- 1050 FORMAT (' GFIPAR : Error - NPAR = ',I8,' LE zero')
+ 1050 FORMAT (' GFIPAR : vol=',a, 
+     +'  Error - NPAR = ',I8,' LE zero')
   999 CONTINUE
 *                                                             END GFIPAR
+      END
+
+#define CERNLIB_TYPE
+      subroutine GKOOL (JVO,IVO)
+C.
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       Search position IVO of volume addres JVO                 *
+C.    *                                                                *
+C.    *    ==>Called by : some GEANT and GEANG routines                *
+C.    *       Author    V.Perev *********                              *
+C.    *                                                                *
+C.    ******************************************************************
+C.
+C.
+      implicit none
+#undef CERNLIB_GEANT321_GCBANK_INC
+#undef CERNLIB_GEANT321_GTBANK_INC
+#undef CERNLIB_GEANT321_GCLINK_INC
+#undef CERNLIB_GEANT321_GTLINK_INC
+#include "geant321/gcbank.inc"
+C.
+      integer JVO,IVO
+C.
+C.    ------------------------------------------------------------------
+*
+      do IVO=1,IQ(JVOLUM-1)
+        if (LQ(JVOLUM-IVO).eq.JVO) return
+      enddo
+      IVO=0
+*                                                             
+      END
+      character *9 function GNAME (JVO)
+C.
+C.    ******************************************************************
+C.    *                                                                *
+C.    *       Get name of volume by addres JVO              *
+C.    *                                                                *
+C.    *    ==>Called by : some GEANT and GEANG routines                *
+C.    *       Author    V.Perev *********                              *
+C.    *                                                                *
+C.    ******************************************************************
+C.
+C.
+      implicit none
+#undef CERNLIB_GEANT321_GCBANK_INC
+#undef CERNLIB_GEANT321_GTBANK_INC
+#undef CERNLIB_GEANT321_GCLINK_INC
+#undef CERNLIB_GEANT321_GTLINK_INC
+#include "geant321/gcbank.inc"
+C.
+      integer JVO,IVO
+C.
+C.    ------------------------------------------------------------------
+*
+
+      GNAME = '0000'
+      if (JVO.eq.0) return
+      call GKOOL(JVO,IVO);
+      GNAME = '****'
+      if (IVO.ne.0) call UHTOC(IQ(JVOLUM+IVO),4,GNAME,4)
+      GNAME(5:5)='.'
+      call UHTOC(IQ(JVO-4),4,GNAME(6:9),4)
+*                                                             
       END
