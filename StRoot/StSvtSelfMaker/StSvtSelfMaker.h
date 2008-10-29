@@ -32,7 +32,7 @@ class StSvtSelfMaker : public StMaker
     virtual int Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSelfMaker.h,v 1.1 2006/02/14 19:02:09 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSelfMaker.h,v 1.2 2008/10/29 18:55:18 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
 private:
     int SelectTracks();
     int MapHits();  
@@ -63,31 +63,4 @@ TTree          *mTTree;
 
 ClassDef(StSvtSelfMaker,0)
 };
-
-class StSelfTrack : public TObject 
-{
-public:
-  StSelfTrack (){mHits.SetOwner();}
- ~StSelfTrack (){}
-void Add(StSelfHit *shit); 
-void Print(const char *opt="") const;
- int Fit(); 
-
-public:
-double mX[3];
-double mD[3];
-double mCurv;
-TList  mHits;
-int mId;
-double mXOld[3];
-double mDOld[3];
-double mCurvOld;
-
-
-ClassDef(StSelfTrack,0)
-};
- 
-
-
-
 #endif

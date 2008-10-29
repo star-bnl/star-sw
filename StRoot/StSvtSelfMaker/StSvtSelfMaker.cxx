@@ -2,8 +2,8 @@
 /// \File StSvtSelfMaker.cxx
 /// \author Victor Perev Jan2006
 // $Log: StSvtSelfMaker.cxx,v $
-// Revision 1.2  2006/04/07 17:33:30  perev
-// Too big Chi2 of VTX fit fixed
+// Revision 1.3  2008/10/29 18:55:18  perev
+// Last version
 //
 // Revision 1.1  2006/02/14 19:02:09  perev
 // Svt self alignment maker
@@ -15,12 +15,9 @@
 #include "TSystem.h"
 #include "TDataSet.h"
 #include "TDataSetIter.h"
-#include "StChain.h"
-#include "StBFChain.h"
 #include "StMessMgr.h"
 #include "SystemOfUnits.h"
 #include "StDetectorId.h"
-#include "StBFChain.h"
 #include "StEventTypes.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiPlacement.h"
@@ -29,8 +26,8 @@
 #include "Sti/StiHitContainer.h"
 
 #include "StSvtSelfMaker.h"
-#include "StSelfEvent.h"
-#include "StVertexKFit.h"
+#include "StiUtilities/StSelfEvent.h"
+#include "StiUtilities/StVertexKFit.h"
 
 #include "TFile.h"
 #include "TExMap.h"
@@ -110,16 +107,7 @@ int StSvtSelfMaker::Finish()
 int StSvtSelfMaker::Init()
 {
   mTreeFile = "test.self.root";
-  StBFChain *bfc = dynamic_cast<StBFChain*>(GetChain());
-//  if (bfc) { //invent TTree file name 
-//     mTreeFile = bfc->GetFileIn();
-//     mTreeFile = gSystem->BaseName(mTreeFile);
-//     int ext = mTreeFile.Index(".");
-//     if (ext>0) mTreeFile.Replace(ext,999,"");
-//     mTreeFile +=".self.root";
-//   }
-//   mTFile = new TFile(mTreeFile,"RECREATE","TTree SVT Self align ROOT file");
-  mTFile = bfc->GetTFile();
+  mTFile = GetTFile();
   mTFile->cd();
   mTTree = new TTree("SvtSelf","TTree SVT Self align");
   mTTree->SetAutoSave(100000000);  // autosave when 0.1 Gbyte written
@@ -164,8 +152,9 @@ int StSvtSelfMaker::SelectTracks()
   StVertexHelper vh(mEvent);
   if (!vh.IsValid()) 	return 0;
   TCL::ucopy(&(vh.GetPoint().x()),mVtx,3);
-  TCL::ucopy(&(vh.GetPoint().x()),mVtxOld,3);
-  TCL::ucopy(  vh.GetErrMtx(),mEtxOld,6);
+  TCL::ucopy(mVtx,mVtxOld,3);
+  TCL::ucopy(  vh.GetErrMtx(),mEtx,6);
+  TCL::ucopy(  mEtx,mEtxOld,6);
 
   StSPtrVecTrackNode& trackNode = mEvent->trackNodes();
   int nTracks = trackNode.size();
@@ -217,7 +206,7 @@ int StSvtSelfMaker::MakeSelfTracks()
    int nTracks = mStTrackList->GetLast()+1;
    for (int iTrack=0;iTrack<nTracks;iTrack++) {
      StTrack *stTrack = (StTrack*)mStTrackList->At(iTrack);
-     StSelfTrack *selfTrack = new StSelfTrack;
+     StSelfTrack *selfTrack = new StSelfTrack(1);
      selfTrack->mId = iTrack+1;
      mSelfTrackList->Add(selfTrack);
 
@@ -240,14 +229,15 @@ int StSvtSelfMaker::MakeSelfTracks()
        const StiPlacement *place = stiDet->getPlacement();
        StSelfHit *selfHit = new StSelfHit;
        selfTrack->Add(selfHit);
+
        selfHit->mHardwarePosition=stHit->hardwarePosition();
        selfHit->mTrackNumber=iTrack+1;
        selfHit->mNormalRefAngle = place->getNormalRefAngle();
        selfHit->mNormalRadius   = place->getNormalRadius();
        selfHit->mNormalYOffset  = place->getNormalYoffset();
        selfHit->mZCenter        = 0;
-       TCL::ucopy(&pos.x()      ,selfHit->mXg,3);
-       TCL::ucopy(&(stiHit->x()),selfHit->mXl,3);
+//       TCL::ucopy(&pos.x()      ,selfHit->mXg,3);
+
        int detId = stHit->detector();
        int layer,wafer,ladder,barrel;
        switch (detId) {
@@ -268,7 +258,8 @@ int StSvtSelfMaker::MakeSelfTracks()
 
          default: assert(0);
        }
-       
+       selfHit->SetXl(&(stiHit->x()));
+       selfHit->SetGlobal();
        selfHit->TestIt();
        nSHits++;
      }
@@ -284,20 +275,29 @@ static int OLD=0;
 int StSvtSelfMaker::MakeVertex()  
 {
   StVertexKFit vkf;
-  vkf.SetVtx(mVtx,0);
+  vkf.SetVtx(mVtx,mEtx);
   vkf.Print("Start");
   int nTrk=mSelfTrackList->GetLast()+1;
   for (int iTrk=0;iTrk<nTrk;iTrk++) {
     StSelfTrack *selfTrack = (StSelfTrack*)mSelfTrackList->At(iTrk);
-    vkf.AddTrk(selfTrack->mX,selfTrack->mD,selfTrack->mCurv);
+    vkf.AddTrk(selfTrack->mX,selfTrack->mD,selfTrack->mCurv,selfTrack->mErr);
 //    vkf.Print();
   }
   mChi2 = vkf.Fit();
   if (vkf.GetNFit() <5) return 1;
+  if (mChi2>33) 	return 2;
+
+  int discarded = 0;
+  for (int iTrk=0;iTrk<nTrk;iTrk++) {
+    if (vkf.IsUsed(iTrk)) continue;
+    discarded++;
+    (*mSelfTrackList)[iTrk] = 0;
+  }
+  if (discarded) mSelfTrackList->Compress();
+
   vkf.Print("Ended");
   TCL::ucopy(vkf.GetVtx(),mVtx,3);
   TCL::ucopy(vkf.GetEtx(),mEtx,6);
-  if (mChi2>33) 	return 1;
   return 0;
 }
 //______________________________________________________________________________
@@ -306,16 +306,7 @@ int StSvtSelfMaker::UpdateSelfTracks()
   int nTrk=mSelfTrackList->GetLast()+1;
   for (int iTrk=0;iTrk<nTrk;iTrk++) {
     StSelfTrack *selfTrack = (StSelfTrack*)mSelfTrackList->At(iTrk);
-    StSelfHit *selfHit = new StSelfHit;
-    selfTrack->Add(selfHit);
-    selfHit->mHardwarePosition=0;
-    selfHit->mTrackNumber=selfTrack->mId;
-    selfHit->mNormalRefAngle=atan2(selfTrack->mD[1],selfTrack->mD[0]);			//rotation angle in Sti style
-    TCL::ucopy(mVtx,selfHit->mXg,3);
-    StThreeVectorD vv(mVtx);
-    vv.rotateZ(-selfHit->mNormalRefAngle);
-    TCL::ucopy(&(vv.x()),selfHit->mXl,3);
-    selfTrack->Fit();
+    selfTrack->Fit(mVtx,mEtx);
 //    selfTrack->Print();
   }
   return 0;
@@ -347,14 +338,17 @@ int StSvtSelfMaker::FillEvent()
       hit->TestIt();
       StSelfHit *kHit = (StSelfHit*)mSelfEvent->mHits.New(iHit++);
       *kHit = *hit; gNHitsTotal++;
-      assert(fabs(kHit->mXl[1]-hit->mXl[1])<=0);
+      double kXl[4],hXl[4];
+      kHit->GetXl(kXl);
+      hit->GetXl(hXl);
+      assert(fabs(kXl[1]-hXl[1])<=0);
       kHit->TestIt();
-      kHit->Prepare();
     }
   }
   mTTree->Fill();
   return 0;
 }
+#if 0
 //______________________________________________________________________________
 int StSvtSelfMaker::TestVtx()
 {
@@ -383,105 +377,7 @@ int StSvtSelfMaker::TestVtx()
   vkf.Print("Ended");
   return nTSel;
 }
-
-
-ClassImp(StSelfTrack)
-//______________________________________________________________________________
-void StSelfTrack::Add(StSelfHit *shit)
-{
-  mHits.Add(shit);
-}
-//______________________________________________________________________________
-int StSelfTrack::Fit()
-{
-  double xyz[10][3];
-  int nHits=0;
-  TListIter next(&mHits);
-  StSelfHit *hit =0,*fstHit=0;
-  for (nHits=0;(hit=(StSelfHit*)next());nHits++) {
-    TCL::ucopy(hit->mXg,xyz[nHits],3); 
- }
-
-  TCircle circ,cirl;
-  double res=circ.Approx(nHits,xyz[0],3);
-  assert(res<1);
-  double Z0TanL[5];
-  circ.FitZ(Z0TanL,nHits,xyz[0],3,xyz[0]+2,3);
-
-  double s=0,xy[2]; 
-  double curv = circ.Rho();
-  next.Reset();
-  for (int iHit=0;(hit=(StSelfHit*)next());iHit++) {
-    fstHit=hit;
-    TCL::ucopy(hit->mXg,xy,2);
-    double ds = circ.Path(xy);
-    circ.Move(ds);
-    s+=ds;
-    StThreeVectorF PosG(hit->mXg[0],hit->mXg[1],hit->mXg[2]);
-    StThreeVectorF PosL(hit->mXl[0],hit->mXl[1],hit->mXl[2]);
-    StThreeVectorF DirG(circ.Dir()[0],circ.Dir()[1],Z0TanL[1]);
-    DirG=DirG.unit();
-    TCL::ucopy(&(DirG.x()),hit->mDg,3); 
-    cirl = circ;
-    double alfa = hit->mNormalRefAngle;
-    cirl.Rot(-alfa);
-    StThreeVectorF DirL(cirl.Dir()[0],cirl.Dir()[1],Z0TanL[1]);
-    DirL=DirL.unit();
-    TCL::ucopy(&(DirL.x()),hit->mDl,3); 
-
-    ds = (hit->mNormalRadius-cirl.Pos()[0])/hit->mDl[0];
-    StThreeVectorF FitL(cirl.Pos()[0],cirl.Pos()[1],Z0TanL[0]+Z0TanL[1]*s);
-    FitL +=ds*DirL;
-    TCL::ucopy(&(FitL.x()),hit->mFl,3);
-    ds = (hit->mNormalRadius-hit->mXl[0])/hit->mDl[0];
-    PosL +=ds*DirL;
-    PosG +=ds*DirG;
-    TCL::ucopy(&(PosL.x()),hit->mXl,3);
-    TCL::ucopy(&(PosG.x()),hit->mXg,3);
-    hit->TestIt();
-    StThreeVectorF FitG(FitL);
-    FitG.rotateZ(alfa);
-    TCL::ucopy(&(FitG.x()),hit->mFg,3);
-  }   
-//  	first hit used to fill track
-  mCurv = curv;
-  TCL::ucopy(fstHit->mFg,mX,3);
-  TCL::ucopy(fstHit->mDg,mD,3);
-  return 0;
-}
-//______________________________________________________________________________
-void StSelfTrack::Print(const char *opt) const
-{
- if (!opt) opt = "";
- int iOld=0;
- if (strchr(opt,'o')) iOld=1;
- if (strchr(opt,'O')) iOld=1;
- printf("StSelfTrack(%d)",mId);
-
- printf(" X(");
- for (int i=0;i<3;i++) {
-   printf("%g",mX[i]);
-   if (iOld) printf("=%g",mXOld[i]);
-   printf(" ");
- }
- printf(")");
- printf(" D(");
- for (int i=0;i<3;i++) {
-   printf("%g",mD[i]);
-   if (iOld) printf("=%g",mDOld[i]);
-   printf(" ");
- }
- printf(")");
- 
- printf(" C(");
-   printf("%g",mCurv);
-   if (iOld) printf("=%g",mCurvOld);
-   printf(" ");
- printf(")");
- printf("\n");
- 
-}
-
+#endif//0
 
 
 
