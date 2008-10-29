@@ -20,10 +20,10 @@ void GeomDrawUsage() {
           printf("One always can select the geometry from the \"file menu\" of the GUI interface later on too\n");          
           printf("\n");                
           printf("---------------\n"); 
-          printf("\n$Id: GeomBrowse.C,v 1.8 2008/05/12 20:36:17 fine Exp $\n");
+          printf("\n$Id: GeomBrowse.C,v 1.9 2008/10/29 19:41:54 perev Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
-void GeomBrowse(const char *fzFile="complete")
+void GeomBrowse(const char *fzFile="y2008")
 {
     GeomDrawUsage();
    // gSystem->Load("libGeomBrowser");  
