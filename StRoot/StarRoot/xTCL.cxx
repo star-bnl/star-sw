@@ -62,9 +62,12 @@ void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: xTCL.cxx,v 1.2 2007/07/12 20:38:41 fisyak Exp $
+* $Id: xTCL.cxx,v 1.3 2008/10/29 19:38:06 perev Exp $
 *
 * $Log: xTCL.cxx,v $
+* Revision 1.3  2008/10/29 19:38:06  perev
+* method toEuler added
+*
 * Revision 1.2  2007/07/12 20:38:41  fisyak
 * Add includes for ROOT 5.16
 *
@@ -252,3 +255,51 @@ static int nCall=0; nCall++;
   x = xx;
   return abs(con);
 }  	
+//______________________________________________________________________________
+void xTCL::toEuler(const double TT[3][3],double PhiThePsi[6])
+{
+
+//  TT[0][0] =  cPsi*cPhi - sPsi*cThe*sPhi
+//  TT[1][0] = -sPsi*cPhi - cPsi*cThe*sPhi
+//  TT[2][0] =  sThe*sPhi
+//  TT[0][1] =  cPsi*sPhi + sPsi*cThe*cPhi
+//  TT[1][1] = -sPsi*sPhi + cPsi*cThe*cPhi
+//  TT[2][1] = -sThe*cPhi
+//  TT[0][2] =  sPsi*sThe
+//  TT[1][2] =  cPsi*sThe
+//  TT[2][2] =  cThe
+
+  double cThe = TT[2][2]; if (cThe>1) cThe=1; if (cThe<-1) cThe=-1;
+  double sThe = (TT[0][2]*TT[0][2]+TT[1][2]*TT[1][2])
+              + (TT[2][0]*TT[2][0]+TT[2][1]*TT[2][1]);
+  sThe = sqrt(0.5*sThe);
+
+  double N = 0.5*(cThe*cThe+sThe*sThe+1);
+  cThe/=N; sThe/=N;
+
+  double sPsi = 0,cPsi=1; 
+  if (sThe>1e-6) { 
+    sPsi = TT[0][2]/sThe; cPsi = TT[1][2]/sThe;
+    N = 0.5*(cPsi*cPsi+sPsi*sPsi+1);
+    cPsi/=N; sPsi/=N;
+  }
+  double cPhi = cPsi*TT[0][0]-sPsi*TT[1][0];
+  double sPhi = cPsi*TT[0][1]-sPsi*TT[1][1];
+
+  PhiThePsi[0] = cPhi ;  PhiThePsi[1] = sPhi;  
+  PhiThePsi[2] = cThe ;  PhiThePsi[3] = sThe;  
+  PhiThePsi[4] = cPsi ;  PhiThePsi[5] = sPsi;  
+
+
+  double test 	= fabs(TT[0][0] -( cPsi*cPhi - sPsi*cThe*sPhi))
+              	+ fabs(TT[1][0] -(-sPsi*cPhi - cPsi*cThe*sPhi))
+ 			+ fabs(TT[2][0] -( sThe*sPhi))
+ 			+ fabs(TT[0][1] -( cPsi*sPhi + sPsi*cThe*cPhi))
+ 			+ fabs(TT[1][1] -(-sPsi*sPhi + cPsi*cThe*cPhi))
+ 			+ fabs(TT[2][1] -(-sThe*cPhi))
+ 			+ fabs(TT[0][2] -( sPsi*sThe))
+ 			+ fabs(TT[1][2] -( cPsi*sThe))
+ 			+ fabs(TT[2][2] -( cThe));
+  printf("EPS=%g\n",test);
+//
+}  
