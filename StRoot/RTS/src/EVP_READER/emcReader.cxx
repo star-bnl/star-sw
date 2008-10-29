@@ -123,6 +123,9 @@ int DAQemcReader(char *m)
 
 	bytes = 0 ;
 
+	// need to clear the static here!
+	memset(&emc,0,sizeof(emc)) ;
+
 	// Now read the emc banks...
 	char *trg_btow_data = getEmcTrgData(datap, BTOW_INDEX);
 
