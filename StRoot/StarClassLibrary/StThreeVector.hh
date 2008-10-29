@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.20 2007/02/23 22:41:42 ullrich Exp $
+ * $Id: StThreeVector.hh,v 1.21 2008/10/29 19:16:13 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.21  2008/10/29 19:16:13  perev
+ * set(x,y,z) added
+ *
  * Revision 1.20  2007/02/23 22:41:42  ullrich
  * Also add non-const version of xyz().
  *
@@ -132,6 +135,7 @@ public:
     void setX(T);
     void setY(T);
     void setZ(T);
+    void set(T x,T y, T z) {mX1=x;mX2=y;mX3=z;}
 
     void setPhi(T);
     void setTheta(T);
