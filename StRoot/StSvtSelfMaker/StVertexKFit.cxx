@@ -84,7 +84,7 @@ double StVertexKFit::Fit()
   for (int i=0;i<mNAux;i++) {
     THelixTrack ht(mAux[i].x,mAux[i].d,mAux[i].rho);
     ht.Backward();
-    dca2[i] = fabs(ht.GetDCA(0.,0.));
+    dca2[i] = fabs(ht.Dca(0.,0.));
   }
   TMath::Sort(mNAux,dca2,idx,1);
   mNTk = 0;
