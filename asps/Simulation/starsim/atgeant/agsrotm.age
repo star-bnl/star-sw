@@ -1,5 +1,5 @@
 *
-* $Id: agsrotm.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: agsrotm.age,v 1.2 2008/10/29 23:25:15 perev Exp $
 *
 * $Name:  $
 *
@@ -18,8 +18,36 @@
 #include "geant321/gcunit.inc"
   Real Rrot,Rot(6),Rota(6),eps/1.e-5/
   Integer k,Im,i,Nlink,JTM,ii
+  Integer ilMod,ilTit
   rrot(ii)=rot(mod(2*%OrtI+ii-1,6)+1)
 *
+  k=0;   
+  if (abs(%Alfax)>eps) k+=1;
+  if (abs(%Alfay)>eps) k+=1;
+  if (abs(%Alfaz)>eps) k+=1;
+  if (k>1) {
+    ilMod = index(%MODULE,' ')-1; ilTit  = index(%TITLE,' ')-1;
+    write(*,*)%MODULE(1:ilMod),'.',%TITLE(1:ilTit),'  ***ERRROR*** AgSROTM: Only one rotation(X,Y,Z) is allowed"'
+    write(*,*)%MODULE(1:ilMod),'.',%TITLE(1:ilTit),'  ***ERRROR*** AgSROTM: Sorry Result UNPREDICTABLE"'
+***    return;
+  }
+  if (k>0) {
+    k = 0;
+    if (abs(%Phix     ) > eps) k=1;
+    if (abs(%Phiy  -90) > eps) k=1;
+    if (abs(%Phiz     ) > eps) k=1;
+    if (abs(%Thetax-90) > eps) k=1;
+    if (abs(%Thetay-90) > eps) k=1;
+    if (abs(%Thetaz) > eps) k=1;
+    if (k>0) {
+      ilMod = index(%MODULE,' ')-1; ilTit  = index(%TITLE,' ')-1;
+      write(*,*)%MODULE(1:ilMod),'.',%TITLE(1:ilTit),'  ***ERRROR*** AgSROTM: Rotation+Axis definition is not allowed"'
+      write(*,*)%MODULE(1:ilMod),'.',%TITLE(1:ilTit),'  ***ERRROR*** AgSROTM: Sorry Result UNPREDICTABLE"'
+***    return;
+    }
+  }
+
+
   k=0;  %Irot=0;
   Thetax+%Alfay,90 => 1;   Thetay+%Alfax,90 => 3;   Thetaz+%Alfax+%Alfay,0 => 5;
   Phix + %Alfaz, 0 => 2;   Phiy + %Alfaz,90 => 4;   Phiz                ,0 => 6;
