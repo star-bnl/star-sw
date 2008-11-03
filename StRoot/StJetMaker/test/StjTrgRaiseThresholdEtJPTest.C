@@ -2,7 +2,6 @@
 #include "StjTrgMock.hh"
 
 #include <StjTrgRaiseThresholdEtJP.h>
-#include <StjTrgPassCondition.h>
 
 #include "StjTrgRaiseThresholdEtJPTest.hh"
 
@@ -33,7 +32,7 @@ void StjTrgRaiseThresholdEtJPTest::testOneJetPatchPass()
   trgSrc._jetPatchEnergy.push_back(0);
   trgSrc._jetPatchEt.push_back(3.4);
 
-  StjTrgRaiseThresholdEtJP trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 3.0);
+  StjTrgRaiseThresholdEtJP trg(&trgSrc, 3.0);
 
   CPPUNIT_ASSERT( trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
@@ -57,7 +56,7 @@ void StjTrgRaiseThresholdEtJPTest::testOneJetPatchNotPass()
   trgSrc._jetPatchEnergy.push_back(0);
   trgSrc._jetPatchEt.push_back(3.4);
 
-  StjTrgRaiseThresholdEtJP trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 4.0);
+  StjTrgRaiseThresholdEtJP trg(&trgSrc, 4.0);
 
   CPPUNIT_ASSERT( ! trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
@@ -86,7 +85,7 @@ void StjTrgRaiseThresholdEtJPTest::testTwoJetPatchesPass()
   trgSrc._jetPatchEnergy.push_back(0);
   trgSrc._jetPatchEt.push_back(2.5);
 
-  StjTrgRaiseThresholdEtJP trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 3.0);
+  StjTrgRaiseThresholdEtJP trg(&trgSrc, 3.0);
 
   CPPUNIT_ASSERT( trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
@@ -117,7 +116,7 @@ void StjTrgRaiseThresholdEtJPTest::testTwoJetPatchesNotPass()
   trgSrc._jetPatchEnergy.push_back(0);
   trgSrc._jetPatchEt.push_back(2.5);
 
-  StjTrgRaiseThresholdEtJP trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 4.0);
+  StjTrgRaiseThresholdEtJP trg(&trgSrc, 4.0);
 
   CPPUNIT_ASSERT( ! trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
