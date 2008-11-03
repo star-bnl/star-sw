@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.10 2008/10/21 19:14:16 mattheww Exp $
+ * $Id: StEmcGeom.cxx,v 1.11 2008/11/03 21:00:37 mattheww Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.11  2008/11/03 21:00:37  mattheww
+ * updated the geometry again
+ *
  * Revision 1.10  2008/10/21 19:14:16  mattheww
  * Update to Barrel Geometry (corrected edge locations to eta = 0.0035, 0.9835)
  *
@@ -320,7 +323,7 @@ StEmcGeom::defineDefaultCommonConstants()
 {
   // Common information for all detectors
   mNModule  = 120;
-  mEtaMax   = 0.9835;
+  mEtaMax   = 0.984;
   mEtaMin   = 0.0035;
 
   mPhiOffset[0] = (75.-3.)/ 180. * C_PI;
@@ -338,7 +341,7 @@ StEmcGeom::defineCommonConstants()
 {
   Float_t lW[2], smdW;
   mNModule      = 120;  // mCalg_st->maxmodul;
-  mEtaMax       = 0.9835; // mCalg_st->etacut;  ?? Why 1.0 in geometry
+  mEtaMax       = 0.984; // mCalg_st->etacut;  ?? Why 1.0 in geometry
   mEtaMin       = 0.0035;
 
   mPhiStepHalf  = 360. / (Float_t)mNModule; // in degree
@@ -407,7 +410,7 @@ StEmcGeom::initBEMCorBPRS()
   // Eta variable ( Z direction)
   mEtaB.Set(mNEta+1); Int_t i;
 
-  for(i=0; i<mNEta; i++) {mEtaB[i] = mEtaMin + 0.05*i;} mEtaB[mNEta]=mEtaMax;
+  for(i=0; i<mNEta; i++) {mEtaB[i] = 0.05*i;} mEtaB[mNEta]=mEtaMax; mEtaB[0]=mEtaMin;
 
   for(i=0; i< mNEta; i++){
     mEta[i]    = (mEtaB[i+1] + mEtaB[i])/2.;
