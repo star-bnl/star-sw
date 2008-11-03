@@ -2,7 +2,6 @@
 #include "StjTrgMock.hh"
 
 #include <StjTrgRaiseThresholdEtHT.h>
-#include <StjTrgPassCondition.h>
 
 #include "StjTrgRaiseThresholdEtHTTest.hh"
 
@@ -33,7 +32,7 @@ void StjTrgRaiseThresholdEtHTTest::testOneTowerPass()
   trgSrc._towerEnergy.push_back(0);
   trgSrc._towerEt.push_back(3.4);
 
-  StjTrgRaiseThresholdEtHT trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 3.0);
+  StjTrgRaiseThresholdEtHT trg(&trgSrc, 3.0);
 
   CPPUNIT_ASSERT( trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
@@ -57,7 +56,7 @@ void StjTrgRaiseThresholdEtHTTest::testOneTowerNotPass()
   trgSrc._towerEnergy.push_back(0);
   trgSrc._towerEt.push_back(3.4);
 
-  StjTrgRaiseThresholdEtHT trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 4.0);
+  StjTrgRaiseThresholdEtHT trg(&trgSrc, 4.0);
 
   CPPUNIT_ASSERT( ! trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
@@ -86,7 +85,7 @@ void StjTrgRaiseThresholdEtHTTest::testTwoTowersPass()
   trgSrc._towerEnergy.push_back(0);
   trgSrc._towerEt.push_back(2.5);
 
-  StjTrgRaiseThresholdEtHT trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 3.0);
+  StjTrgRaiseThresholdEtHT trg(&trgSrc, 3.0);
 
   CPPUNIT_ASSERT( trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );
@@ -117,7 +116,7 @@ void StjTrgRaiseThresholdEtHTTest::testTwoTowersNotPass()
   trgSrc._towerEnergy.push_back(0);
   trgSrc._towerEt.push_back(2.5);
 
-  StjTrgRaiseThresholdEtHT trg(&trgSrc, new StjTrgPassConditionHardAndSoft, 4.0);
+  StjTrgRaiseThresholdEtHT trg(&trgSrc, 4.0);
 
   CPPUNIT_ASSERT( ! trg.passed() );
   CPPUNIT_ASSERT( trg.hard() );

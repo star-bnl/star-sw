@@ -56,6 +56,9 @@ libStJetMakerTest_la_CXXFLAGS = \
 	-I../mudst \
 	-I../tree \
 	-I../trigger \
+	-I../jets \
+	-I../dijets \
+	-I../mckin \
 	-I../../StSpinPool \
 	-I../../StTriggerUtilities \
 	-I$(STAR)/.$(STAR_HOST_SYS)/include \
