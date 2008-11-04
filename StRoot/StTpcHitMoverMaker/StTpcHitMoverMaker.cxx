@@ -78,11 +78,6 @@ Int_t StTpcHitMover::Make() {
     StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
     if (TpcHitCollection) {
       UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
-      StTpcLocalSectorCoordinate local;
-      StTpcLocalSectorCoordinate  coorLS;
-      StTpcLocalCoordinate  coorLT, coorLTD;
-      StTpcLocalSectorAlignedCoordinate  coorLSA;
-      StGlobalCoordinate    coorG;
       for (UInt_t i = 0; i< numberOfSectors; i++) {
 	StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(i);
 	if (sectorCollection) {
@@ -95,11 +90,16 @@ Int_t StTpcHitMover::Make() {
 	      if (NoHits) {
 		for (UInt_t k = 0; k < NoHits; k++) {
 		  StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[k]);
-		  if (m_Mode < 0 && tpcHit->idTruth() && tpcHit->qaTruth() > 95) continue; // don't move embedded hits
+		  if (m_Mode < 0 && tpcHit->idTruth() && tpcHit->idTruth() < 10000 && 
+		      tpcHit->qaTruth() > 95) continue; // don't move embedded hits
 		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
+		  static StTpcLocalSectorCoordinate  coorLS;
 		  transform(coorL,coorLS);   // to sector 12
+		  static StTpcLocalSectorAlignedCoordinate  coorLSA;
 		  transform(coorLS,coorLSA); // alignment
+		  static StTpcLocalCoordinate  coorLT;
 		  transform(coorLSA,coorLT); //
+		  static StTpcLocalCoordinate  coorLTD;
 		  coorLTD = coorLT;          // distortions
 		  // ExB corrections
 		  Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
@@ -109,6 +109,7 @@ Int_t StTpcHitMover::Make() {
 		    StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
 		    coorLTD.setPosition(newPos);
 		  }
+		  static StGlobalCoordinate    coorG;
 		  transform(coorLTD,coorG);
 		  StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
 #ifdef DEBUG_DbUtil
@@ -121,7 +122,7 @@ Int_t StTpcHitMover::Make() {
 				     };
 		  Double_t dev = xA[0]*xA[0] + xA[1]*xA[1] +  xA[2]*xA[2];
 		  if (dev > 1.e-6) {
-		    StTpcPadCoordinate coorP;
+		    static StTpcPadCoordinate coorP;
 		    transform(coorLS,coorP);
 		    StTpcLocalSectorCoordinate  coorLSR; // reference for sector/row/pad
 		    transform(coorP,coorLSR);
@@ -253,7 +254,7 @@ void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
   StTpcCoordinateTransform transform(gStTpcDb);
 
   StTpcLocalCoordinate local(pos[0],pos[1],pos[2],sector,row);
-  StGlobalCoordinate global;
+  static StGlobalCoordinate global;
   transform(local,global);
 
   posMoved[0] = global.position().x();
