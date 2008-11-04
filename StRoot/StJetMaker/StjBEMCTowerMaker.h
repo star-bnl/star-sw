@@ -1,10 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCTowerMaker.h,v 1.4 2008/08/03 00:26:18 tai Exp $
+// $Id: StjBEMCTowerMaker.h,v 1.5 2008/11/04 05:54:35 tai Exp $
 #ifndef STJBEMCTOWERMAKER_H
 #define STJBEMCTOWERMAKER_H
 
 #include "StMaker.h"
 #include <Rtypes.h>
+
+#include <StjTowerEnergyListCut.h>
 
 class StjTowerEnergyListWriter;
 
@@ -14,7 +16,6 @@ class TTree;
 class StMuDstMaker;
 
 class StjBEMC;
-class StjTowerEnergyListCut;
 
 class StjBEMCTowerMaker : public StMaker {
 
@@ -28,7 +29,7 @@ public:
   Int_t Finish();
     
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjBEMCTowerMaker.h,v 1.4 2008/08/03 00:26:18 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjBEMCTowerMaker.h,v 1.5 2008/11/04 05:54:35 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 

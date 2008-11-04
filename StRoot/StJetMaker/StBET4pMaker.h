@@ -1,9 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.7 2008/08/11 02:22:11 tai Exp $
+// $Id: StBET4pMaker.h,v 1.8 2008/11/04 05:54:35 tai Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
 #include "StFourPMaker.h"
+
+#include <StjTowerEnergyListCut.h>
 
 class StMuDstMaker;
 class StjTreeEntryMaker;
@@ -12,7 +14,6 @@ class StBET4pMakerImp;
 class StjeBemcEnergySumCalculator;
 
 class StjTrackListCut;
-class StjTowerEnergyListCut;
 class StjeTrackListToStMuTrackFourVecList;
 class StjeTowerEnergyListToStMuTrackFourVecList;
 
@@ -47,7 +48,7 @@ public:
   StBET4pMakerImp* GetImp() { return _imp; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.7 2008/08/11 02:22:11 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.8 2008/11/04 05:54:35 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
