@@ -1,25 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StjTowerEnergyCut.h,v 1.5 2008/08/04 02:48:45 tai Exp $
+// $Id: StjTowerEnergyCut.h,v 1.6 2008/11/04 05:54:39 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYCUT_H
 #define STJTOWERENERGYCUT_H
-
-#include <TObject.h>
-
+#include "StkCut.h"
 #include "StjTowerEnergyList.h"
-
-class StjTowerEnergyCut : public TObject {
-
-public:
-  StjTowerEnergyCut() { }
-  virtual ~StjTowerEnergyCut() { }
-
-  virtual bool operator()(const StjTowerEnergy& deposit) = 0;
-
-private:
-
-  ClassDef(StjTowerEnergyCut, 1)
-
-};
-
+typedef StkCut<StjTowerEnergy> StjTowerEnergyCut;
 #endif // STJTOWERENERGYCUT_H
