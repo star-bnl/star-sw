@@ -132,6 +132,8 @@ struct TRG_DICT_ENTRY
   UINT32 index;
   UINT32 reg;
   char label[MAX_STR_LEN];
+  int dfault;
+  char comment[MAX_STR_LEN];
 };
 
 struct TRG_DICT
