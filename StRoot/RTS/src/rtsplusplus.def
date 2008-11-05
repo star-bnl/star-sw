@@ -26,7 +26,7 @@
 #       bintargets as a appropriate
 #
 
-STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLib.o fs_index.o sfs_index.o sfs_daq_index.o EthernetServer.o
+STD_DAQ_OBJS := rtsComLib.o rtsLogUnix.o ipcQLib.o rtsMother.o shmLib.o rtsCfgLib.o fs_index.o sfs_index.o sfs_index_daq.o EthernetServer.o
 
 EVPREADER_OBJS := cfgutil.o emcReader.o evpReader.o evpSupport.o fpdReader.o ftpReader.o l3Reader.o msgNQLib.o pmdReader.o pp2ppReader.o ricReader.o sanityCheckers.o scReader.o ssdReader.o svtReader.o tofReader.o tpcFCFReader.o tpcReader.o trgReader10.o trgReader12.o trgReader20.o trgReader21.o trgReader22.o trgReader30.o trgReader32.o trgReader.o rts_reader.o daq_dta.o daq_det.o 
 
