@@ -189,6 +189,8 @@ struct TrgLabels
   char label[MAX_STR_LEN];
   int object;
   int value;
+  int dfault;
+  char comment[MAX_STR_LEN];
 };
 
 struct LxAlgorithm
