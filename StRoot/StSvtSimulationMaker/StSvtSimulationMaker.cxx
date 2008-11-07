@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.37 2008/10/21 21:13:30 fine Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.38 2008/11/07 20:42:06 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.38  2008/11/07 20:42:06  caines
+ * Fix some mistakes in new way of initializing variables. lifetime was missing
+ *
  * Revision 1.37  2008/10/21 21:13:30  fine
  * Initialize the class data-members see bug #1294
  *
@@ -180,7 +183,8 @@ ClassImp(StSvtSimulationMaker)
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
  , mTrapConst(cTrapConst)           // [us]   //default =0
  , mDiffusionConst(cDiffusionConst) // [mm**2/micro seconds] default=0.0035 (for silicon)
- , mTimeBinSize(cLifeTime)          // [us]   //default =1000000.0
+ , mTimeBinSize(cTimeBinSize)          // [us]   //default =0.04 
+ , mLifeTime(cLifeTime)          // [us]   //default =1000000.0
  , mAnodeSize(-1956)
  , mPedOffset(-1956)                //  not absolutely necesary to be already here - could be added in EmbeddingMaker, but it works
  , mSigOption(0)                    // use both PASA codes, mNumOfHybrids(-1956)             //!could be used to override number of simulated hybrids
