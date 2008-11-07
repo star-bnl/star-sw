@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.27 2008/10/24 18:19:06 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.28 2008/11/07 22:37:55 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.28  2008/11/07 22:37:55  mattheww
+// update date for bprs swap fix
+//
 // Revision 1.27  2008/10/24 18:19:06  mattheww
 // Added option to throw out all hits in an event if any crates are corrupted
 //
@@ -637,7 +640,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         mDecoder->GetTowerBugCorrectionShift(id,shift);
         id+=shift;
     }
-    if(det==BPRS && mPsdMapBug2 && mDate<20080101)
+    if(det==BPRS && mPsdMapBug2 && mDate<20090101)
     {
         Int_t shift = 0;
         mDecoder->GetPreshowerBugCorrectionShift(id,shift);
