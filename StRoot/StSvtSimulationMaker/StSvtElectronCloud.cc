@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.9 2008/10/22 17:33:34 fine Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.10 2008/11/07 15:11:31 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.10  2008/11/07 15:11:31  caines
+ * Initialize variables (that REALLY do not need to be) to see if this makes valgrind happy
+ *
  * Revision 1.9  2008/10/22 17:33:34  fine
  * Initialize all data-members of the class StSvtElectronCloud
  *
@@ -489,7 +492,9 @@ void StSvtElectronCloud::adamsBushFort(int steps, double t0, double steplen)
 #endif
       
       tim = tim  + steplen;
-      double dX,dY,dXY;
+      double dX=0;
+      double dY=0;
+      double dXY=0;
       GetDerivatives(dX,dY,dXY,preX,preY,preXY,tim);
 
       //get the corrector...also final value
