@@ -1113,7 +1113,7 @@ int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index) const
     if(id<1 || id>4800)
         return 0;
         
-    if(fixPreshowerMap) id = PreshowerBugFixIndex[id-1];
+    //if(fixPreshowerMap) id = PreshowerBugFixIndex[id-1];
     
     RDO = PsdRDO[id-1];
     index = PsdIndex[id-1];
@@ -1250,9 +1250,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.54 2008/11/03 19:55:57 mattheww Exp $
+// $Id: StEmcDecoder.cxx,v 2.55 2008/11/07 22:34:16 mattheww Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.55  2008/11/07 22:34:16  mattheww
+// corrected swap logic for BPRS
+//
 // Revision 2.54  2008/11/03 19:55:57  mattheww
 // fixed a typo causing a mismapping
 //
