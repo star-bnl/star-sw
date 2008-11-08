@@ -140,7 +140,7 @@ public:
 	int iterate() ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.1 2008/11/08 21:40:50 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.2 2008/11/08 21:57:07 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
@@ -150,6 +150,7 @@ public:
 
 	union {	// UNION of pointers!!!! ONLY!!!! ;
 		// the following are system so DO NOT change foolishly
+		void *Void ;
 		unsigned char	*Byte ;
 		unsigned short *Short ;
 		unsigned int	*Int32 ;
