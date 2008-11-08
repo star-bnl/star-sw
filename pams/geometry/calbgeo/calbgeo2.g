@@ -4,8 +4,11 @@ MODULE  CALBGEO2 is the geometry of the Barrel EM Calorimeter
    Created   December 12, 2006
 * Based on CALBGEO1 -- tower map removed due to a full calorimeter
 *
-* $Id: calbgeo2.g,v 1.2 2008/10/13 02:57:18 perev Exp $
+* $Id: calbgeo2.g,v 1.3 2008/11/08 02:35:36 perev Exp $
 * $Log: calbgeo2.g,v $
+* Revision 1.3  2008/11/08 02:35:36  perev
+* CSZO CSZU poligons now. Simplification
+*
 * Revision 1.2  2008/10/13 02:57:18  perev
 * S.Trentalange modifications
 *
@@ -52,9 +55,11 @@ external etsphit
       real      strap_dx,strap_dy,strap_dz,strap_r
       real      slug_dx,slug_dy,slug_dz
       real      strap_spacing
-      real      cut_radius2,calg_Rmin2,Rmax2,Rmax3
+      real      cut_radius2,cutAng,calg_Rmin2,Rmax2,Rmax3
 
       integer   layer,super,sub,i,j,ii,nn,imod,nslug
+      real      geang(6)
+
 *
 * ---------------------------------------------------------------------------
 *                          primary geometrical constant
@@ -121,8 +126,8 @@ external etsphit
       do i=1,nint(calg_Nsuper)
         layer_width(i) = calg_ScintThk(i) + calg_AbsorThk+2.*calg_AbPapThk
         R2+=(calg_NsubLay(i)-i+1)*layer_width(i)*2.0
-  	    RR(i)=R2 
-         enddo
+  	RR(i)=R2 
+      enddo
       R3=(calg_Nsuper*layer_width(1)+(calg_nsmd-calg_Nsuper)*layer_width(2))*2.
       R4=(smd_width+calg_scintThk(2)+2.*calg_AbPapThk)*2.0
       cut_radius=R1+R2+R4
@@ -168,6 +173,7 @@ external etsphit
 
       Endfill
       USE CALR
+      cutAng = atan2(cut_radius-Calg_Rmin,Hleng2-cut_length2)
 *
       create and position CALB in CAVE
       prin1  calg_Version;            (' CALB geo. version    =',F7.1)
@@ -213,26 +219,22 @@ EndBlock
 * -----------------------------------------------------------------------------
 Block CPHI corresponds to a single module
       attribute CPHI  seen=1   colo=5
-      Shape  PCON Phi1=-3.0 DPhi=6.0 Nz=3,
+      Shape  PCON Phi1=-DphiMod/2 DPhi=DphiMod Nz=3,
                       zi  = { 0,          cut_length2,  Hleng2},
-                      rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
+                      rmn = { Calg_Rmin,  Calg_Rmin,   cut_radius},
                       rmx = { Rmax3,       Rmax3,        Rmax3 };
 *
       Create CSZO    
-      Position CSZO  x = (Rmax+calg_Rmin)/2,
-                     z = zz0/2,
-                     AlphaX=90,
-                     AlphaZ=-90
+      Position CSZO    
+
+*
 *
       Create CSZU
-      Position CSZU  x = (cut_radius+calg_Rmin)/2,
-                     z = (cut_length+Hleng+zz2/sin_theta)/2,
-                     AlphaX=angle,
-                     AlphaZ=-90
-*
+      Position CSZU  
+
       Create CSPT
       Position CSPT
-*
+
       Create CSPB
       Position CSPB
 *
@@ -361,10 +363,10 @@ Block CSZO
       Material  CIron Isvol=0
       Medium    Iron_emc
       Attribute CSZO seen=1  colo=1
-      Shape  TRD1  dx1 = calg_Rmin*tan(TwoPi/360*DphiT)-calg_CrackWd,
-                   dx2 = Rmax*tan(TwoPi/360*DphiT)-calg_CrackWd,
-                   dy  = zz0/2,
-                   dz  = (Rmax - calg_Rmin)/2
+      Shape  PGON Phi1=-DphiMod/2 DPhi=DphiMod NPDV=1 Nz=2,
+                  zi  = { 0        ,ZZ0      },
+                  rmn = { Calg_Rmin,Calg_Rmin},
+                  rmx = { Rmax     ,Rmax     };
       Call CALBPAR(ag_imed,'ABSORBER')
 Endblock
 *----------------------------------------------------------------------------
@@ -373,10 +375,10 @@ Block CSZU
       Material  CIron Isvol=0
       Medium    Iron_emc
       Attribute CSZU seen=1  colo=1
-      Shape  TRD1  dx1 = calg_Rmin*tan(TwoPi/360*DphiT)-calg_CrackWd,
-                   dx2 = cut_radius*tan(TwoPi/360*DphiT)-calg_CrackWd,
-                   dy  = zz2/2,
-                   dz  = (cut_radius - calg_Rmin)/(2.*sin_theta)
+      Shape  PGON Phi1=-DphiMod/2 DPhi=DphiMod NPDV=1 Nz=2,
+                  zi  = { cut_length2              ,Hleng2                    },
+                  rmn = { Calg_Rmin                ,cut_radius                },
+                  rmx = { Calg_Rmin+zz0/cos(cutAng),cut_radius+zz0/cos(cutAng)};
       Call CALBPAR(ag_imed,'ABSORBER')
 Endblock
 *-----------------------------------------------------------------------------
@@ -390,7 +392,7 @@ Block CSUP  is a super layer with few layers inside
       Component O  A=16.     Z=8.    W=5./21.
       Mixture   Cellulose Dens=0.35 Isvol=1       
       attribute CSUP  seen=0   colo=1
-      shape     PCON  Phi1=-3.0  Dphi=DphiMod  Nz=3,
+      shape     PCON  Phi1=-DphiMod/2  Dphi=DphiMod  Nz=3,
                       zi ={zz1, current_depth/tan_theta, future_depth/tan_theta},
                       rmn={ current_depth,    current_depth,    future_depth },
                       rmx={ future_depth,     future_depth,     future_depth };
