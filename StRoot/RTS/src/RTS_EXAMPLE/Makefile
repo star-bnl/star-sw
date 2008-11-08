@@ -8,7 +8,7 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 VOBJS += libsc.a libdaqReader.a libsfs.a librtslog.a
-VPATH += ../DAQ_READER ../DAQ_SC ../DAQ_ESMD ../DAQ_BTOW ../DAQ_EMC ../SFS ../LOG
+VPATH += ../DAQ_READER ../DAQ_SC ../SFS ../LOG
 
 
 BINS =  rts_example
