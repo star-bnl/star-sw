@@ -1,20 +1,39 @@
 #ifndef _EVP_READERCLASS_HH_
 #define _EVP_READERCLASS_HH_
-#include <sys/stat.h> 
+
 
 struct DATAP;
-
-typedef unsigned int UINT32;
-
-#include "evp.h"
-#include "cfgutil.h"
-#include "iccp2k.h"
+struct rccnf ;
+struct gbPayload ;
 
 class sfs_index;
-class rts_reader;
+//class rts_reader;
 class MemMap;
+class daq_det ;
 
 enum Input_Type { none, live, file, pointer, dir };
+
+#ifdef RTS_PROJECT_PP
+#define EVP_HOSTNAME    "ppdaq1.pp2pp.bnl.gov"
+#else
+#define EVP_HOSTNAME    "evp.starp.bnl.gov"
+#endif
+
+#define EVP_PORT        8020
+
+
+#define EVP_TYPE_0      1
+#define EVP_TYPE_PHYS   2
+#define EVP_TYPE_SPEC   4
+#define EVP_TYPE_ANY    (EVP_TYPE_PHYS|EVP_TYPE_SPEC|EVP_TYPE_0)
+#define EVT_TYPE_MON    8
+
+
+#define EVP_STAT_OK     0
+#define EVP_STAT_EOR    (-1)
+#define EVP_STAT_EVT    (-2)
+#define EVP_STAT_CRIT   (-3)
+
 
 class daqReader {
  public:
@@ -30,6 +49,14 @@ class daqReader {
   ~daqReader(void) ;
 
   void init();
+
+  static const int DAQ_READER_MAX_DETS = 32 ;
+  daq_det *dets[DAQ_READER_MAX_DETS] ;
+
+  daq_det *det(const char *det) ;
+  void insert(daq_det *which, int rts_id) ;
+  void de_insert(int rts_id) ;
+  void Make() ;
 
   char *get(int which, int type=EVP_TYPE_ANY) ;	
 
@@ -68,7 +95,7 @@ class daqReader {
 
   char *mem;            // a datap pointer if applicable...
   sfs_index *sfs;       // the sfs reader object... (if no sfs only contains "/");
-  rts_reader *rts_rr ;  // the rts reader object... (if no rts dets contains nothing);
+//  rts_reader *rts_rr ;  // the rts reader object... (if no rts dets contains nothing);
 
 
   // These variables describe the characteristics of the event
@@ -172,9 +199,9 @@ class daqReader {
   int evpDesc ;		// message queue desc.
   // file variables
 
-  struct stat stat_buf ;
+//  struct stat *stat_buf ;
 
-  rccnf runconfig;
+  rccnf *runconfig;
 
   int getStatusBasedEventDelay();
   Input_Type input_type;

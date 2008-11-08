@@ -16,7 +16,7 @@
 // main include file - resides in daqman.star.bnl.gov:/RTS/include
 // which MUST be in your include path....
 
-#include <daqReader.hh>
+#include "daqReader.h"
 
 int main(int argc, char *argv[])
 {

@@ -25,14 +25,18 @@
 #endif
 
 // MUST BE INCLUDED BEFORE ANY OTHER RTS INCLUDE!
-#include <daqReader.hh>
+//#include <daqReader.hh>
 
 #include <rtsLog.h>
 #include <daqFormats.h>
 #include <iccp.h>
-#include <msgNQLib.h>
+#include <SFS/sfs_index.h>
+#include <rts.h>
 
-
+#include "daqReader.h"
+#include "msgNQLib.h"
+#include "cfgutil.h"
+#include "daq_det.h"
 
 #ifndef MADV_DONTNEED
 #define madvise(x,y,z)
@@ -66,6 +70,8 @@ daqReader::daqReader(char *mem, int size)
 
 daqReader::daqReader(char *name) 
 {
+  struct stat stat_buf ;
+
   init();
 
   if(name == NULL) {	// EVP
@@ -77,6 +83,7 @@ daqReader::daqReader(char *name)
 
   // Move the filename in...
   strcpy(fname, name);
+
 
   // This code is reached only if the argument was non-NULL
   // file or directory?
@@ -123,7 +130,7 @@ daqReader::daqReader(char *name)
   }
 	 	  
   status = EVP_STAT_OK ;
-	  
+
   return ;
 }
 
@@ -139,11 +146,10 @@ void daqReader::init()
   sfs = new sfs_index();
   sfs_lastevt = 0;
 	
-  memset(&runconfig,0,sizeof(runconfig));
+  runconfig = (rccnf *) valloc(sizeof(rccnf)) ;
+  memset(runconfig,0,sizeof(rccnf));
 
-  rts_rr = new rts_reader("RR_evp") ;	// call myself for debugging
-  rts_rr->enable("*") ;			// enable all dets
-  rts_rr->add_input(sfs) ;		// my intput is the above sfs class
+  memset(dets,0,sizeof(dets)) ;
 
   // setup...
   do_open = 1 ;
@@ -231,7 +237,7 @@ daqReader::~daqReader(void)
 
 	if(memmap) delete(memmap);
 	if(sfs) delete(sfs) ;
-	if(rts_rr) delete(rts_rr) ;
+        if(runconfig) free(runconfig) ;
 
 	return ;
 }
@@ -499,10 +505,10 @@ char *daqReader::get(int num, int type)
   evt_offset_in_file = nexteventpos;
 
   // Now we want to make sure run info is up to date
-  if(run != (unsigned int)runconfig.run) {
+  if(run != (unsigned int)runconfig->run) {
     char rccnf_file[256];
 
-    runconfig.run = 0;   // set invalid to start...
+    runconfig->run = 0;   // set invalid to start...
 
    
     if(input_type == live) {
@@ -516,24 +522,24 @@ char *daqReader::get(int num, int type)
     }
    
     if(input_type != pointer) {
-      if(getRccnf(rccnf_file, &runconfig) < 0) {
+      if(getRccnf(rccnf_file, runconfig) < 0) {
 	LOG(DBG, "No runconfig file %s",rccnf_file,0,0,0,0);
       }
     }
 
-    if(runconfig.run == 0) {
+    if(runconfig->run == 0) {
       detsinrun = 0xffffffff;
       evpgroupsinrun = 0xffffffff;
     }
     else {
-      detsinrun = runconfig.detMask;
-      evpgroupsinrun = runconfig.grpMask;
+      detsinrun = runconfig->detMask;
+      evpgroupsinrun = runconfig->grpMask;
     }
   }
 
 
-  // Tonko: before we return, call rr's Make
-  rts_rr->Make() ;
+  // Tonko: before we return, call Make which prepares the DETs for operation...
+  Make() ;
 
   // *****
   // jml 2/13/07
@@ -750,6 +756,8 @@ char *daqReader::getInputType()
 
 int daqReader::openEventFile()
 {
+  struct stat stat_buf ;
+
   // First close file if any...
   if(desc > 0) {
     close(desc);
@@ -1010,6 +1018,107 @@ int daqReader::getNextEventFilenameFromLive(int type)
   LOG(DBG,"Live Event: file->%s",file_name,0,0,0,0) ;
   return 0;
 }
+
+/*
+	parse the string of the form i.e. "tpc ssd tpx" and
+	return a bitlist of RTS detectors
+*/
+static u_int parse_det_string(const char *list)
+{
+	u_int mask = 0 ;
+
+	//LOG(DBG,"Parsing \"%s\"",list) ;
+
+
+
+	reparse:;
+
+	for(int i=0;i<32;i++) {
+		char *name = rts2name(i) ;
+
+		if(name==0) continue ;
+
+		//LOG(DBG,"Checking id %d: %s",i,name) ;
+
+		if(strncasecmp(list,name,strlen(name))==0) {
+			//LOG(DBG,"********* Got %d: %s",i,name) ;
+			mask |= (1<<i) ;
+			break ;
+		}
+	}
+	
+	// move to either end or to the next space
+	int got_space = 0 ;
+	while(*list != 0) {
+		if(*list == ' ') got_space = 1 ;
+		list++ ;
+	
+		if(got_space) goto reparse ;
+
+	} ;
+
+//	LOG(DBG,"Returning 0x%08X",mask) ;
+	return mask ;
+}
+
+daq_det *daqReader::det(const char *which)
+{
+	if(!which) LOG(ERR,"det() needs a string!") ;
+	assert(which) ;
+
+	u_int mask = parse_det_string(which) ;
+
+	for(int i=0;i<DAQ_READER_MAX_DETS;i++) {
+		if(mask & (1<<i)) {
+			if(!dets[i]) {
+				LOG(ERR,"Requesting det %s but you didn't insert it into the class!",which) ;
+				assert(!"det not inserted") ;
+			}
+			return dets[i] ;
+		}
+	}
+
+	LOG(ERR,"Requesting det \"%s\" -- never heard of it!",which) ;
+	assert(!"UNKNOWN det") ;
+
+	return 0 ;
+}
+
+void daqReader::insert(class daq_det *which, int id)
+{
+	LOG(DBG,"calling insert(%d)",id) ;
+
+	if((id>=0) && (id<DAQ_READER_MAX_DETS)) {
+		dets[id] = which ;
+	}
+	else {
+		LOG(ERR,"rts_id %d out of bounds",id) ;
+	}
+
+}
+
+void daqReader::Make()
+{
+	for(int i=0;i<DAQ_READER_MAX_DETS;i++) {
+		if(dets[i]) {
+			LOG(DBG,"Calling %s make",dets[i]->name) ;
+			dets[i]->Make() ;
+		}
+	}
+}
+
+void daqReader::de_insert(int id)
+{
+	LOG(DBG,"calling de_insert(%d)",id) ;
+
+	if((id>=0) && (id<DAQ_READER_MAX_DETS)) {
+		dets[id] = 0 ;	// mark as freed
+	}
+	else {
+		LOG(ERR,"rts_id %d out of bounds",id) ;
+	}
+}
+
 
 /*
 char *daqReader::getSFSEventNumber()
