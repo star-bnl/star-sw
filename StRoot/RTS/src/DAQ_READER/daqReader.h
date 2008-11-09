@@ -57,7 +57,7 @@ class daqReader {
   void insert(daq_det *which, int rts_id) ;
   void de_insert(int rts_id) ;
   void Make() ;
-
+  char *get_sfs_name(char *snippet=0) ;	// returns the full name of the SFS
   char *get(int which, int type=EVP_TYPE_ANY) ;	
 
   // The following are the descriptors and pointers defining the event
@@ -95,8 +95,6 @@ class daqReader {
 
   char *mem;            // a datap pointer if applicable...
   sfs_index *sfs;       // the sfs reader object... (if no sfs only contains "/");
-//  rts_reader *rts_rr ;  // the rts reader object... (if no rts dets contains nothing);
-
 
   // These variables describe the characteristics of the event
   //
@@ -198,8 +196,6 @@ class daqReader {
 
   int evpDesc ;		// message queue desc.
   // file variables
-
-//  struct stat *stat_buf ;
 
   rccnf *runconfig;
 
