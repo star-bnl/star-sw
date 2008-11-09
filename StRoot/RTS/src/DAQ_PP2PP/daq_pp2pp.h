@@ -2,26 +2,25 @@
 #define _DAQ_PP2PP_H_
 
 
-#include <DAQ_READER/daq_det.h>
+#include <RTS_READER/daq_det.h>
 
+// temporary going back to 1.2!
 
 class daq_pp2pp : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
-	class daq_dta *handle_adc(int sec, int rdo) ;
 
 	class daq_dta *raw ;
-	class daq_dta *adc ;
 
 	static const int MAX_SEC = 2 ;
-	static const int MAX_RDO = 11 ;	// can be 0 for all RDOs; sequencers, typically 4
+	static const int MAX_RDO = 11 ;	// can be 0 for all RDOs 
 
 	static const char *help_string ;
 protected:
 
 
 public:
-	daq_pp2pp(daqReader *rts_caller=0) ;
+	daq_pp2pp(const char *dname="PP2PP", rts_reader *rts_caller=0) ;
 	~daq_pp2pp() ;
 
 
