@@ -394,11 +394,13 @@ void fs_index::umount()
 
 fs_dirent *fs_index::readdirent(char *dir)
 {
+  static fs_dirent ent;
  
   if(!index_created) return NULL;
 
   char fullname[256];
   getFullPath(fullname,dir);
+  strcpy(ent.full_name, fullname);
 
   fs_inode *node = root;
   char *name = strtok(fullname, "/");
@@ -410,10 +412,8 @@ fs_dirent *fs_index::readdirent(char *dir)
     name = strtok(NULL, "/");
   }
 
-  static fs_dirent ent;
-  strcpy(ent.d_name, node->name);
 
-  strcpy(ent.full_name, fullname);
+  strcpy(ent.d_name, node->name);
 
   ent.sz = node->sz;
   ent.offset = node->offset;
