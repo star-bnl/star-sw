@@ -1019,6 +1019,22 @@ int daqReader::getNextEventFilenameFromLive(int type)
   return 0;
 }
 
+/////// Tonko
+
+char *daqReader::get_sfs_name(char *right)
+{
+	if(sfs == 0) return 0 ;
+
+	if(right == 0) right = "/" ;
+
+	fs_dirent *d = sfs->opendirent(right) ;
+	if(d == 0) return 0 ;
+
+	LOG(DBG,"opendirent(%s) returns %s as full name, %s as d_name ",right,d->full_name,d->d_name) ;
+	return d->full_name ;
+
+}
+	
 /*
 	parse the string of the form i.e. "tpc ssd tpx" and
 	return a bitlist of RTS detectors
