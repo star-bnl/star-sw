@@ -14,9 +14,6 @@
 
 #include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TOF/daq_tof.h>
-#include <DAQ_PP2PP/daq_pp2pp.h>
-#include <DAQ_ESMD/daq_esmd.h>
-#include <DAQ_TPC/daq_tpc.h>
 
 #include "rts_reader.h"
 #include "daq_det.h"
@@ -380,18 +377,6 @@ int rts_reader::enable(u_int rts_mask)
 			case TOF_ID :
 				rts_dets_enabled |= (1<<rts_id) ;
 				dispatcher->mydet[rts_id] = new daq_tof(name,this) ;
-				break ;
-			case PP_ID :
-				rts_dets_enabled |= (1<<rts_id) ;
-				dispatcher->mydet[rts_id] = new daq_pp2pp(name,this) ;
-				break ;
-			case ESMD_ID :
-				rts_dets_enabled |= (1<<rts_id) ;
-				dispatcher->mydet[rts_id] = new daq_esmd(name,this) ;
-				break ;
-			case TPC_ID :
-				rts_dets_enabled |= (1<<rts_id) ;
-				dispatcher->mydet[rts_id] = new daq_tpc(name,this) ;
 				break ;
 			default :
 				if(rts_mask != 0xFFFFFFFF) LOG(ERR,"%s: %s[%d] has not been coded at this time!",iname,name,rts_id) ;
