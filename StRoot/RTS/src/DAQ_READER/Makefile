@@ -14,6 +14,9 @@ else
 LDLIBS :=
 endif
 
+ifdef PP_MVME
+	DEFINES += -DPP_MVME
+endif
 
 # real stuff
 

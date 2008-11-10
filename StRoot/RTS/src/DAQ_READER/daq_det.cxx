@@ -54,8 +54,9 @@ daq_det::~daq_det()
 {
 	LOG(DBG,"~daq_det: %s [%d]",name,rts_id) ;
 
+#ifndef PP_MVME
 	if(caller) caller->de_insert(rts_id) ;
-
+#endif
 	return ;
 }
 
@@ -64,15 +65,16 @@ void daq_det::managed_by(class daqReader *c)
 	caller = c ;
 
 	assert(caller) ;
-
+#ifndef PP_MVME
 	caller->insert(this, rts_id) ;
+#endif
 }
 
 int daq_det::Make() 
 {
 	present = 0 ;
 	LOG(NOTE,"daq_det: Make: %s [%d]: evt_num %d",name,rts_id,evt_num) ;
-
+	
 	evt_num++ ;
 
 	if(presence()) {
@@ -81,7 +83,6 @@ int daq_det::Make()
 	else if(legacyDetp(rts_id, caller->mem)) {
 		present |= 1 ;
 	}
-
 
 	LOG(NOTE,"%s: has DATAP: %s; has SFS: %s",name,(present&1)?"YES":"NO",(present&2)?"YES":"NO") ;
 
@@ -134,6 +135,10 @@ int daq_det::presence()
 		goto ret_here;
 	}
 
+#ifdef PP_MVME
+	pres = 1 ;
+	goto ret_here ;
+#else
 	if(caller->sfs == 0) goto ret_here ;
 
 	if(caller->sfs->opendirent((char *)sfs_name)) {
@@ -142,13 +147,13 @@ int daq_det::presence()
 	else {
 		pres = 0 ;
 	}
-
+#endif	
 	ret_here: ;
 
 	LOG(NOTE,"sfs presence(%s): %d",sfs_name,pres) ;
 
 	return pres ;
-	
+
 } ;
 
 
@@ -350,5 +355,4 @@ int *legacyDetp(int rts_id, char *m)
 
 	return ret_p ;		
 }
-
 
