@@ -23,19 +23,21 @@ class StjSimuBBCMaker : public StMaker {
 
 public:
 
-  StjSimuBBCMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker)
-  : StMaker(name), _file(file), _uDstMaker(uDstMaker)
+  StjSimuBBCMaker(const Char_t *name, TDirectory* file, StMuDstMaker* uDstMaker, int trgID)
+    : StMaker(name), _file(file), _uDstMaker(uDstMaker), _trgID(trgID)
   { }
 
   virtual ~StjSimuBBCMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjSimuBBCMaker.C,v 1.1 2008/11/11 23:24:17 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjSimuBBCMaker.C,v 1.2 2008/11/11 23:56:59 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
   TDirectory* _file;
   TTree* _tree;
+
+  int _trgID;
 
   StMuDstMaker* _uDstMaker;
 
@@ -64,7 +66,7 @@ public:
     _vertexZ = _uDstMaker->muDst()->event()->primaryVertexPosition().z();
 
     StTriggerSimuMaker* trigSimu = dynamic_cast<StTriggerSimuMaker*>(GetMaker("StarTrigSimu"));
-    StTriggerSimuResult trigResult = trigSimu->detailedResult(117001);
+    StTriggerSimuResult trigResult = trigSimu->detailedResult(_trgID);
 
     _bbc = trigResult.bbcDecision();
 
