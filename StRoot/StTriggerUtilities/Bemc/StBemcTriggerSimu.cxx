@@ -1,3 +1,4 @@
+
 #include "StBemcTriggerSimu.h"
 
 //General
@@ -386,7 +387,7 @@ void StBemcTriggerSimu::getPed() {
 
   //get Target Pedestal value from DB
   pedTargetValue=mTables->triggerPedestalShift();
-  
+
   //online 12 bit peds stored as Float_t
   if (mConfig==kOnline){
     for (int cr=1; cr <= kNCrates; cr++){
@@ -605,6 +606,10 @@ void StBemcTriggerSimu::FEEout() {
     
     if (mConfig==kOnline)
       {
+	/*cout<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<
+	  " LUTped="<<LUTped[cr-1][chan]+2<<" formula="<<formula[cr-1][chan]<<
+	  " LUTscale="<<LUTscale[cr-1][chan]<<" LUTpow="<<LUTpow[cr-1][chan]<<
+	  " LUTsig="<<LUTsig[cr-1][chan]<<" pedTargetValue="<<pedTargetValue<<endl;*/
 	if ( ((L0_TP_ADC[tpid]+LUTped[cr-1][chan]+2)>=0) && (formula[cr-1][chan]==2) && (LUTscale[cr-1][chan]==1) && 
 	     (LUTpow[cr-1][chan]!=0) && (LUTsig[cr-1][chan]==0) && (pedTargetValue==24))
 	  {
@@ -1631,6 +1636,9 @@ void StBemcTriggerSimu::get2007_DSMLayer2()
   if (DSM2_HT_Bit > 1){
     mFiredTriggers.push_back(200601);
     mFiredTriggers.push_back(200602);
+    mFiredTriggers.push_back(200213);
+    mFiredTriggers.push_back(200214);
+    
   }
 
   if (DSM2_HT_Bit > 2){
@@ -2155,7 +2163,7 @@ const vector< pair<int,int> > StBemcTriggerSimu::getTowersAboveThreshold(int tri
       mDecoder->GetTriggerPatchFromTowerId(i,tpid);
       mDecoder->GetDSMFromTriggerPatch(tpid,dsmid);
 
-      if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5 || trigId==200601 || trigId==200602) {
+      if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5 || trigId==200601 || trigId==200602||trigId==20213||trigId==200214) {
 	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,1)) {
 	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
 	}
