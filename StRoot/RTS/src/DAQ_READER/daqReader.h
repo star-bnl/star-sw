@@ -1,6 +1,7 @@
 #ifndef _EVP_READERCLASS_HH_
 #define _EVP_READERCLASS_HH_
 
+#include <ctype.h>
 
 struct DATAP;
 struct rccnf ;
@@ -172,6 +173,7 @@ class daqReader {
   int addToEventSize(int sz);
   int getEventSize();
 
+  int hackSummaryInfo();
   int fillSummaryInfo(DATAP *datap);
   int fillSummaryInfo(gbPayload *gbPayload);
 
@@ -201,6 +203,17 @@ class daqReader {
 
   int getStatusBasedEventDelay();
   Input_Type input_type;
+
+  int allnumeric(char *str)
+  {
+    int i=0;
+    while(str[i] != '\0') {
+      if(!isdigit(str[i])) return 0;
+      i++;
+    }
+    return 1;
+  }
+    
 } ;
 
 class MemMap {

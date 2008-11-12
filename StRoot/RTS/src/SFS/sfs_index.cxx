@@ -108,7 +108,8 @@ void stripfile(char *str)
 int SFS_ittr::get(wrapfile *wrap)
 {
   //  printf("ittr get file 0x%x %d\n",wrapbuff, fd);
-  
+  skipped_bytes = 0;
+
   char buff[12];
   memset(buff, 0, sizeof(buff));
 
@@ -137,6 +138,7 @@ int SFS_ittr::get(wrapfile *wrap)
 
       wfile->lseek(12, SEEK_CUR);
       fileoffset += 12;
+      skipped_bytes += 12;
       continue;
     }
 
@@ -155,6 +157,7 @@ int SFS_ittr::get(wrapfile *wrap)
 
       wfile->lseek(60, SEEK_CUR);
       fileoffset += 60;
+      skipped_bytes += 60;
       continue;
     }
 
@@ -169,6 +172,7 @@ int SFS_ittr::get(wrapfile *wrap)
       LOG(DBG,"Found HEAD");
       wfile->lseek(12, SEEK_CUR);
       fileoffset += 12;
+      skipped_bytes += 12;
       continue;
     }
 
@@ -210,6 +214,7 @@ void SFS_ittr::swapEntry()
 int SFS_ittr::next() 
 {
   //if(legacy) return legacy_next();
+  skipped_bytes = 0;
 
   LOG(DBG, "Calling next:  fileoffset=%d filepos=%d",fileoffset,filepos);
   int ret;
@@ -290,6 +295,7 @@ int SFS_ittr::next()
       if(debug) LOG(DBG,"Found SFS version");
       wfile->lseek(12, SEEK_CUR);
       fileoffset += 12;
+      skipped_bytes += 12;
       continue;
     }
 
@@ -307,6 +313,7 @@ int SFS_ittr::next()
       
       wfile->lseek(60, SEEK_CUR);
       fileoffset += 60;
+      skipped_bytes += 60;
       continue;
     }
 
@@ -324,6 +331,7 @@ int SFS_ittr::next()
 
       wfile->lseek(204, SEEK_CUR);
       fileoffset += 204;
+      skipped_bytes += 204;
       continue;
     }
 
@@ -331,6 +339,7 @@ int SFS_ittr::next()
       if(debug) LOG(DBG,"Found HEAD");
       wfile->lseek(12, SEEK_CUR);
       fileoffset += 12;
+      skipped_bytes += 12;
       continue;
     }
 
@@ -735,7 +744,64 @@ int sfs_index::mountSingleDir(char *fn, int offset)
   wfile.lseek(offset, SEEK_SET);
 
   return mountSingleDir();
+}
+
+int sfs_index::getSingleDirSize(char *fn, int offset)
+{
+  char topdir[40];
+  int topdirlen=0;
+  topdir[0] = '\0';
+
+  wfile.close();
+  wfile.opendisk(fn, O_RDONLY);
+  if(wfile.fd < 0) return wfile.fd;
+  wfile.lseek(offset, SEEK_SET);
+
+  int sz = 0;
   
+  SFS_ittr *ittr = new SFS_ittr(offset);
+  if(ittr->get(&wfile) < 0) {
+    delete ittr;
+    wfile.lseek(offset,SEEK_SET);
+    return sz;
+  }
+  sz += ittr->skipped_bytes;
+
+  while(ittr->next() >= 0) {
+
+    if(ittr->filepos == -1) break;   // EOF
+
+    // set topdir, if not yet set...
+    if(topdir[0] == '\0') {
+      strncpy(topdir,ittr->fullpath,40);
+      for(int i=0;i<40;i++) {
+	if(topdir[i] == '\0') break;
+	if((i>0) && (topdir[i] == '/')) {
+	  topdir[i] = '\0';
+	  topdirlen = strlen(topdir);
+	  break;
+	}
+      }
+    }
+
+    LOG(DBG, "Topdir=%s sz(before)=%d",topdir,sz);
+
+    if(memcmp(topdir, ittr->fullpath, topdirlen) != 0) {
+      break;
+    }
+
+    sz += ittr->skipped_bytes;
+    sz += ittr->entry.head_sz;
+    int esz = (ittr->entry.sz + 3) / 4;
+    esz *= 4;
+    sz += esz;
+  }
+
+  delete ittr;
+  wfile.close();
+
+  LOG(DBG, "returning %d",sz);
+  return sz;
 }
 
 int sfs_index::mountSingleDir()   // mounts from current position of wfile...
