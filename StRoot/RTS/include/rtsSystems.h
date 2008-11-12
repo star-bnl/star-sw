@@ -86,7 +86,7 @@
 #define TCD_BTOW        17      //
 #define TCD_FTPC        18      //
 #define TCD_PMD         19      //
-#define TCD_TPC         20      //
+#define TCD_TPC         20      // empty, Nov, 2008
 #define TCD_VPD		21      // Tonko,March07,instead of: TPC's cable driver slot
 
 #define TCD_HFT         TCD_TPC  // for now HFT uses TPC TCD
