@@ -52,10 +52,12 @@ class SFS_ittr {
 
   int fileoffset;  // from start of file.
   int filepos;  // 0 start of header, 1 end of header, 2 end of file record, -1 at end of file system
+  int skipped_bytes;   // bytes skipped due to ignored info...
 
   int legacy;
   SFS_ittr() {
     fileoffset = 0;
+    skipped_bytes = 0;
   };
 
   SFS_ittr(int offset) {
@@ -113,6 +115,7 @@ class sfs_index : public fs_index {
   int mountSingleDirMem(char *buff, int size);
   int mountSingleDir();
   int mountNextDir();
+  int getSingleDirSize(char *fn, int offset);
 
   sfs_index();
   int _create();

@@ -324,13 +324,14 @@ char *daqReader::get(int num, int type)
   //     event_size, lrhd_offset, datap_offset & status if failure...
   int error = getEventSize();  
 
-
+  // We handle the possible padding bug by
+  // searching and tacking the extra padding to the end of the event
+  // where it can do us no harm...
+  //
   int padchecks = 0;
   for(;;) {
     padchecks++;
     int inc = addToEventSize(event_size);
-
-  
   
     if(inc == 0) {
       LOG(DBG, "No extra increment... event size=%d",event_size);
@@ -423,7 +424,7 @@ char *daqReader::get(int num, int type)
       return NULL;
     }
 
-    LOG(DBG, "does dir (%s) satisfy '/#'",ent->full_name);
+    LOG(DBG, "does dir (%s) satisfy '/#' or '/nnnn'",ent->full_name);
 
     if(memcmp(ent->full_name, "/#", 2) == 0) {
       LOG(DBG, "change sfs dir to %s",ent->full_name);
@@ -434,6 +435,14 @@ char *daqReader::get(int num, int type)
       sfs->closedir(fsdir);
       break;
     }
+
+    if(allnumeric(&ent->full_name[1])) {
+      seq = atoi(&ent->full_name[1]);
+      sfs->cd(ent->full_name);
+      sfs->closedir(fsdir);
+      break;
+    }
+     
 
     LOG(DBG, "SFS event directory not yet found: %s",ent->full_name);
   }
@@ -481,12 +490,13 @@ char *daqReader::get(int num, int type)
     LOG(DBG, "No EventSummary, search for legacy datap");
     summary = sfs->opendirent("legacy");
     if(!summary) {
-      LOG(ERR, "No EventSummary and no DATAP");
-      status = EVP_STAT_EVT;
-      return NULL;
+      LOG(NOTE, "No EventSummary and no DATAP... hacking summary info");
+      hackSummaryInfo();
     }
-    char *buff = memmap->mem + summary->offset;
-    fillSummaryInfo((DATAP *)buff);
+    else {
+      char *buff = memmap->mem + summary->offset;
+      fillSummaryInfo((DATAP *)buff);
+    }
   }
 
   // all done - all OK
@@ -573,7 +583,7 @@ int daqReader::addToEventSize(int sz)
 
   int orig_offset = lseek(desc, 0, SEEK_CUR);
 
-  LOG(DBG, "orig_offset = %d",orig_offset);
+  LOG(DBG, "orig_offset = %d sz=%d",orig_offset,sz);
 
   lseek(desc, sz, SEEK_CUR);
 
@@ -593,6 +603,18 @@ int daqReader::addToEventSize(int sz)
     lseek(desc, orig_offset, SEEK_SET);
     return 0;
   }
+
+  if(memcmp(buff, "SFS", 3) == 0) {
+    lseek(desc, orig_offset, SEEK_SET);
+    return 0;
+  }
+
+  if(memcmp(buff, "FILE", 4) == 0) {
+    lseek(desc, orig_offset, SEEK_SET);
+    return 0;
+  }
+
+  LOG("JEFF", "buff = %c%c%c  off=%d",buff[0],buff[1],buff[2], orig_offset);
 
   lseek(desc, orig_offset, SEEK_SET);
 
@@ -645,14 +667,26 @@ int daqReader::getEventSize()
   
   LOG(DBG, "OFFSET = %d", offset);
 
-  // Check for extra padding bug
+  // Wait, we might not have a LRHD or DATAP...
   padding_check=0;
   while((memcmp(m, "LRHD", 4) != 0) &&
 	(memcmp(m, "DATAP", 5) != 0)) {
     
-    LOG(ERR, "Event doesn't starts with %c%c%c%c%c not LRHD or DATAP.  Should not happen here...",m[0],m[1],m[2],m[3],m[4]);
+    LOG(NOTE, "Event starts with %c%c%c%c%c not LRHD or DATAP.  Check if sfs file...",m[0],m[1],m[2],m[3],m[4]);
     
-    status = EVP_STAT_EVT;
+    sfs_index *tmp_sfs = new sfs_index();
+    int sz = tmp_sfs->getSingleDirSize(file_name, evt_offset_in_file);
+    delete tmp_sfs;
+    // 
+    if(sz < 0) {
+      LOG(ERR, "Event starts with %c%c%c%c%c not LRHD or DATAP and not a SFS file... bad event",m[0],m[1],m[2],m[3],m[4]);
+
+      status = EVP_STAT_EVT;
+      goto done;
+    }
+
+    event_size = sz;
+    ret = 0;
     goto done;
   }
 
@@ -809,6 +843,24 @@ int daqReader::getNextEventFilename(int num, int type)
   }
 }
 
+int daqReader::hackSummaryInfo()
+{
+  // gbPayload is mostly little endian...
+  token = 0;
+  evt_time = 0;
+  detectors = 0;
+  daqbits_l1 = 0;
+  daqbits_l2 = 0;
+  evpgroups = 0;
+  daqbits = 0;
+  evp_daqbits = 0;
+
+  // event descriptor is big endian...
+  trgword = 0;
+  trgcmd = 0;
+  daqcmd = 0;
+  return 0;
+}
 
 int daqReader::fillSummaryInfo(gbPayload *pay)
 {
