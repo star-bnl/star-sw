@@ -110,42 +110,42 @@ private:
 	inline int b2h(int x) { return b2h32(x) ; } ;
 	inline u_int b2h(u_int x) { return b2h32(x) ; } ;
 
+	daq_store *get(u_int obj_cou=0) ;
+
+	void clear() ;	// clears counters so it can be reused...
+
+	void release() ;	// releases memory
+
+
+
+	void commit(u_int bytes=0) ;
+
+	daq_store *store ;
 public:
 
 
 	daq_dta() ;
-
 	virtual ~daq_dta() ;
 
 	// used for writing!
 	daq_store *create(u_int bytes, char *name, int rts_id, const char *o_name, u_int obj_size) ;
 
-
-	daq_store *get(u_int obj_cou=0) ;
-	void commit(u_int bytes=0) ;
-
-
 	void *request(u_int obj_cou) ;
 	void finalize(u_int obj_cou, int s=0, int row=0, int pad=0) ;
-
-	// used during reading
 	void rewind() ;	// rewinds at the beggining
 
-	void clear() ;	// clears counters so it can be reused...
-
-	void release() ;	// releases memory
 
 	int is_empty() ;
 
 	int iterate() ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.2 2008/11/08 21:57:07 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.3 2008/11/13 00:18:45 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
 		
-	daq_store *store ;
+
 
 
 	union {	// UNION of pointers!!!! ONLY!!!! ;

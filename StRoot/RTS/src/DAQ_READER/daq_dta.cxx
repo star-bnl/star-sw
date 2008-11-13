@@ -55,27 +55,35 @@ void daq_dta::release()
 }
 
 /*
-	bytes is a first guess as to what we'll need, it is best that it is good!
+	objects is a first guess as to what we'll need, it is best that it is good!
 */
 daq_store *daq_dta::create(u_int bytes, char *name, int rts_id, const char *o_name, u_int obj_size) 
 {
-	u_int requested = bytes ;
+	u_int requested ;
 
-	// bytes is the raw storage needed but we'll add about 1/5th to it so we don't
-	// have to reallocate too often...
-	bytes += sizeof(daq_store) + sizeof(daq_store_hdr) + sizeof(daq_store) ;
-	bytes += bytes/5 ;
+	// size of the store's header
+	requested = sizeof(daq_store) + sizeof(daq_store_hdr) ;	// first "object" is the header
+	
+	// if I asked for less bytes than 1 object, I will overrule
+	if(bytes < obj_size) bytes = obj_size ;
+	// otherwise I will abide	
+	
+	requested += sizeof(daq_store) + bytes ;
 
-	if(bytes_alloced < bytes) {
-		release() ;
 
-		bytes_alloced = ((bytes/(16*1024))+1)*16*1024 ;	// 16 kB chunks
+	if(bytes_alloced < requested) {
+		u_int b_all_cache = bytes_alloced ;
+
+		release() ;	// free current store...
+
+		// allocate new one
+		bytes_alloced = requested ;
 		store = (daq_store *) valloc(bytes_alloced) ;
 		assert(store) ;
-		LOG(DBG,"Allocated %d bytes for %d bytes required",bytes_alloced,requested) ;
+		LOG(DBG,"Allocated %d bytes for %d bytes required (%d was available)",bytes_alloced,bytes,b_all_cache) ;
 	}
 	else {
-		LOG(DBG,"Reusing %d bytes for %d bytes required",bytes_alloced,requested) ;
+		LOG(DBG,"Reusing %d bytes for %d bytes required",bytes_alloced,bytes) ;
 	}
 		
 	// put header
@@ -136,8 +144,11 @@ void *daq_dta::request(u_int obj_cou)
 
 	LOG(DBG,"Requesting %d objects",obj_cou) ;
 
+	if(obj_cou == 0) obj_cou = 16 ;	// ad hoc rule...
+
 	tmp_store = get(obj_cou) ;
 
+	LOG(DBG,"get returns %p",tmp_store) ;
 
 	return (void *)(tmp_store + 1) ;
 
@@ -145,14 +156,20 @@ void *daq_dta::request(u_int obj_cou)
 
 void daq_dta::finalize(u_int obj_cou, int sec, int row, int pad)
 {
-	if(obj_cou==0) return ;
+	if(obj_cou==0) {
+		daq_store_hdr *hdr = (daq_store_hdr *)(store + 1 ) ;
+
+		LOG(WARN,"%s: finalize with obj cou 0?",hdr->describe) ;
+		return ;	// didn't find anything so just do nothing...
+	}
+
+
+	LOG(DBG,"Finilizing %d objects for sec %d, row %d, pad %d",obj_cou,sec,row,pad) ;
 
 	store_cur->sec = sec ;
 	store_cur->row = row ;
 	store_cur->pad = pad ;
 	store_cur->nitems = obj_cou ;
-
-
 	
 	int bytes = sizeof(daq_store) + store_cur->nitems * hdr->obj_bytes ;
 	commit(bytes) ;
@@ -169,13 +186,12 @@ daq_store *daq_dta::get(u_int obj_cou)
 	u_int avail ;
 	u_int need ;
 
-	if(obj_cou==0) {
-		need = bytes_alloced/5 ;
-	}
-	else {
-		need = 256 + sizeof(daq_store) + obj_cou * hdr->obj_bytes ;
-		if(need < bytes_alloced/5) need = bytes_alloced/5 ;
-	}
+	// how much to we need
+	if(obj_cou==0) obj_cou = 16 ;	// is not specified, as for 16...
+
+	assert(hdr) ;
+
+	need = sizeof(daq_store) + (obj_cou * hdr->obj_bytes) ;
 
 	// attempt heuristics for storage reallocation
 	avail = bytes_alloced - hdr->bytes_used ;
@@ -186,32 +202,50 @@ daq_store *daq_dta::get(u_int obj_cou)
 	LOG(DBG,"get(): avail bytes %d, need %d, objects %d requested of %d bytes each",avail, need, obj_cou,hdr->obj_bytes) ;
 
 	if(do_realloc) {
-		LOG(DBG,"Reallocing from %d to %d",bytes_alloced,bytes_alloced+need) ;
+		char *new_store ;
 
+		// round to 16 kB
+		const int chunk = 16*1024 ;
+		int cou16 = need/chunk ;
+		cou16++ ;
+		need = cou16 * chunk ;
 
-		bytes_alloced += need ;
+		u_int old_alloced = bytes_alloced ;
 
+		bytes_alloced = hdr->bytes_used + need ;
+
+		LOG(DBG,"Reallocing from %d to %d",old_alloced,bytes_alloced) ;
+
+		// remember pointers!
+		u_int hdr_off = (char *)hdr-(char *)store ;
+		u_int Byte_off = (char *)Byte - (char *)store ;
+		u_int store_cur_off = (char *)store_cur - (char *)store ;
+
+#define USE_REALLOC
+#ifdef USE_REALLOC
+		new_store = (char *) realloc(store, bytes_alloced) ;
+		if(new_store == 0) {
+			LOG(WARN,"realloc failed!") ;
+			assert(new_store) ;
+
+		}
+#else
+			
 		LOG(DBG,"Before valloc %d",bytes_alloced) ;
-		char *new_store = (char *)valloc(bytes_alloced) ;
+		new_store = (char *)valloc(bytes_alloced) ;
 		assert(new_store) ;
-
 		LOG(DBG,"Before memcopy of %d",hdr->bytes_used) ;
 		memcpy(new_store,store,hdr->bytes_used) ;
 
-		// adjust pointers!
-		u_int off = (char *)hdr-(char *)store ;
-		hdr = (daq_store_hdr *) ((char *)new_store + off) ;
-
-		// and current Byte
-		off = (char *)Byte - (char *)store ;
-		Byte = (u_char *)new_store + off ;
-
-		off = (char *)store_cur - (char *)store ;
-		store_cur = (daq_store *) ((char *)new_store + off) ;
-
-		LOG(DBG,"Before free %p",store) ;	
 		free(store) ;
-		LOG(DBG,"After free?") ;
+#endif
+
+
+
+		// apply ptrs
+		hdr = (daq_store_hdr *) ((char *)new_store + hdr_off) ;
+		Byte = (u_char *)new_store + Byte_off ;
+		store_cur = (daq_store *) ((char *)new_store + store_cur_off) ;
 
 		store = (daq_store *) new_store ;
 
