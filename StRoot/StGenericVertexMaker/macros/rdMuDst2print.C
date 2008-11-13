@@ -4,18 +4,16 @@ StChain *chain=0;
 
 
 int rdMuDst2print(
-	  char* file    = "R50530.MuDst.root",
-	  int nEve=100000,
+	  char* file    = "st_physics_adc_9067013_raw_1430001.MuDst.root",
+	  int nEve=1,
 	  Int_t nFiles  = 1, 
-	  char* inDir   = "./")
+	  char* inDir   = "/star/data05/scratch/balewski/bug1new/")
 { 
 
+  printf("BPRSX %s\n",inDir+20);
   
-  inDir="/star/institutions/iucf/balewski/2006-ppv-eval/test7/";
-  // inDir="/star/data05/scratch/balewski/bug1/";
-
-  //file="st_zerobias_7118050_raw_1110001.MuDst.root";
- file    = "st_physics_adc_7118049_raw_1070001.MuDst.root",
+  // inDir="/star/institutions/iucf/balewski/2006-ppv-eval/test7/";
+  //file    = "st_physics_adc_7118049_raw_1070001.MuDst.root",
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
@@ -103,7 +101,7 @@ int rdMuDst2print(
       int ntr=0;
       for(itr=0;itr<nPrimTrAll;itr++) {
 	StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
-	if(pr_track->vertexIndex()!=iv) continue;
+	assert((pr_track->vertexIndex()==iv));
 	if(pr_track->flag()<=0) continue;	
 	ntr++;
 	cout << "\nPrimary track " << ntr << " momentum " << pr_track->p() << endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< " vertID="<<  pr_track->vertexIndex()<< endl;
@@ -114,7 +112,7 @@ int rdMuDst2print(
       } // end of loop over tracks
     }// end of loop over vertices
     
-   continue; 
+    continue; 
 
     StMuEmcCollection* emc = muMk->muDst()->muEmcCollection();
     if (!emc) {
@@ -124,6 +122,7 @@ int rdMuDst2print(
     // printEEtower(emc);
     // printEEpre(emc);
     // printEEsmd(emc);
+    printBPRS(emc);
     
   }
   printf("****************************************** \n");
@@ -204,50 +203,20 @@ printEEsmd( StMuEmcCollection* emc ) {
   }
 }
 
-//=====================================================
-// PPV Evaluation code excerpts
+//===========================================
+//===========================================
+printBPRS( StMuEmcCollection* muEmc ) {
+  int nprshits = muEmc->getNPrsHits();
+  int prstot = 0;
+  int captot = 0;
+  printf("BPRSX %d hits====================\n",nprshits);
+  for(int j = 0; j < nprshits; j++){
+    StMuEmcHit* phit = muEmc->getPrsHit(j);
+    int adc = phit->getAdc();
+    int cap = phit->getCalType();
+    int id= phit->getId();
+    // printf("ih=%d softId=%d adc=%.1f cap=%d\n",j,id,adc,cap);
+    printf("BPRSX %d %d %d\n",id,adc,cap);
+  }
+}
 
-#if 0
-//Run 7118049
-char *ctrigB[]={"bjp1","bjp0L2","bht2","bhttp1"};
-int    trigB[]={127221, 127622, 127213, 127611,0};
-
-char *ctrigE[]={"ejp1","ejp0L2","eht2","ehttp1"};
-int    trigE[]={127271, 127652, 127262, 127641,0};
-
-char *ctrigM[]={"mb"  ,"zb"  ,"jpsi","upsilon","muon","fpd2"};
-int    trigM[]={117001,117300,117705,   117602,117402,117470,0};
-
-
-.........................
-
-  // create output summary file w/ vertex info
-  TString outF="ppvOut4/"; outF+=file;
-  outF.ReplaceAll("MuDst.root","ppv");
-  FILE *fd=fopen(outF.Data(),"w");
-  assert(fd);
-............................
-
-    fprintf(fd,"%d %d %d ", eventCounter,info.id(),nPrimV);
-    int i=0;
-    char trgS[9];
-    //..... BTOW trigs
-    sprintf(trgS,"00000000"); i=0;
-    while(trigB[i]>0){if(tic.nominal().isTrigger(trigB[i])) trgS[i]='1' ; i++;}
-    fprintf(fd,"%s ",trgS);
-    //.... Etow trigs
-    sprintf(trgS,"00000000"); i=0;
-    while(trigE[i]>0){if(tic.nominal().isTrigger(trigE[i])) trgS[i]='1' ; i++;}
-    fprintf(fd,"%s ",trgS);
-    //.... Other trigs
-    sprintf(trgS,"00000000"); i=0;
-    while(trigM[i]>0){if(tic.nominal().isTrigger(trigM[i])) trgS[i]='1' ; i++;}
-    fprintf(fd,"%s ",trgS);
-    fprintf(fd,"\n");
-...............
-      fprintf(fd,"  %.2f %d %g\n",r.z(),V->nTracksUsed(),V->ranking());
-
-...............
-  fclose(fd);
-
-#endif
