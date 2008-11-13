@@ -52,6 +52,12 @@ protected:
 
 	static int endianess ;	// of the executing machine -- 0 is little, 1 is big
 
+
+	virtual int presence() ;	// is this DET (not only the bank!) present in this event?
+	daqReader *caller ;
+
+	const char *sfs_name ;	// name in sfs bank (if any) i.e. "tpx"
+	int rts_id ;		// RTS_ID
 private:
 
 public:
@@ -68,13 +74,14 @@ public:
 
 
 	// needs to be overriden!
-	virtual daq_dta  *get(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
+	virtual daq_dta  *get(const char *bank="*",int sec=-1, int row=-1, int pad=-1, void *p1=0, void *p2=0) ;
+	virtual int bad_sanity() ;
 
 	// needs to be overriden!
 	virtual daq_dta  *put(const char *bank="*",int c1=-1, int c2=-1, int c3=-1, void *p1=0, void *p2=0) ;
 
 
-	virtual int presence() ;	// is this DET (not only the bank!) present in this event?
+
 
 	virtual void help() const ;
 
@@ -97,18 +104,16 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.1 2008/11/08 21:40:50 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.2 2008/11/13 00:18:45 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
 
 	void managed_by(class daqReader *c) ;
 
-	daqReader *caller ;
-	const char *name ;	// detector's name i.e. "SVT"
-	const char *sfs_name ;	// name in sfs bank (if any) i.e. "tpx"
 	
-	int rts_id ;		// RTS_ID
+
+	const char *name ;	// detector's name i.e. "SVT"
 
 	u_int event_mode ;
 

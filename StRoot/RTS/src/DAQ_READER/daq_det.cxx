@@ -72,10 +72,9 @@ void daq_det::managed_by(class daqReader *c)
 
 int daq_det::Make() 
 {
-	present = 0 ;
-	LOG(NOTE,"daq_det: Make: %s [%d]: evt_num %d",name,rts_id,evt_num) ;
+	present = 0 ;	// assume not...
 	
-	evt_num++ ;
+
 
 	if(presence()) {
 		present |= 2 ;	// in sfs
@@ -84,7 +83,13 @@ int daq_det::Make()
 		present |= 1 ;
 	}
 
-	LOG(NOTE,"%s: has DATAP: %s; has SFS: %s",name,(present&1)?"YES":"NO",(present&2)?"YES":"NO") ;
+	if(present) {
+		evt_num++ ;
+		LOG(TERR,"%s: %d: has DATAP: %s; has SFS(%s): %s",name,evt_num,(present&1)?"YES":"NO",sfs_name,(present&2)?"YES":"NO") ;
+	}
+	else {
+		LOG(NOTE, "%s: not found",name) ;
+	}
 
 	return present ;
 }
@@ -130,7 +135,7 @@ int daq_det::presence()
 	int pres = 0 ;
 
 	if(caller==0) {	// in case we are running online, there is no "caller" so assume presence!
-		LOG(WARN,"no caller? %s",name) ;
+		LOG(TERR,"no caller? %s",name) ;
 		pres = 1 ;
 		goto ret_here;
 	}
@@ -150,7 +155,7 @@ int daq_det::presence()
 #endif	
 	ret_here: ;
 
-	LOG(NOTE,"sfs presence(%s): %d",sfs_name,pres) ;
+	LOG(DBG,"sfs presence(%s): %d",sfs_name,pres) ;
 
 	return pres ;
 
@@ -187,6 +192,10 @@ int daq_det::get_l2(char *buff, int buff_bytes, daq_trg_word *trg, int prompt)
 	return 0 ;
 }
 
+int daq_det::bad_sanity()
+{
+	return 0 ;
+}
 
 daq_dta  *daq_det::get(const char *bank,int c1, int c2, int c3, void *p1, void *p2) 
 {
@@ -239,7 +248,7 @@ int *legacyDetp(int rts_id, char *m)
 
 
 	if(datap == 0) {
-		LOG(DBG,"No DATAP needed for %s [%d]",rts2name(rts_id),rts_id) ;
+		LOG(DBG,"No DATAP: I would need it for %s [%d]",rts2name(rts_id),rts_id) ;
 		return 0 ;
 	}
 
@@ -346,7 +355,7 @@ int *legacyDetp(int rts_id, char *m)
 	case BTOW_ID :
 	case ETOW_ID :
 		if(emcp->sec[0].len) return ret_p ;
-		else return 0 ;
+		else return 0 ;	// however, it is still possible that they are in trigger's bank
 	case BSMD_ID :
 	case ESMD_ID :
 		if(emcp->sec[1].len) return ret_p ;

@@ -1086,7 +1086,8 @@ char *daqReader::get_sfs_name(char *right)
 	return d->full_name ;
 
 }
-	
+
+#if 0	// unused	
 /*
 	parse the string of the form i.e. "tpc ssd tpx" and
 	return a bitlist of RTS detectors
@@ -1129,24 +1130,22 @@ static u_int parse_det_string(const char *list)
 	return mask ;
 }
 
+#endif
+
 daq_det *daqReader::det(const char *which)
 {
-	if(!which) LOG(ERR,"det() needs a string!") ;
 	assert(which) ;
 
-	u_int mask = parse_det_string(which) ;
-
 	for(int i=0;i<DAQ_READER_MAX_DETS;i++) {
-		if(mask & (1<<i)) {
-			if(!dets[i]) {
-				LOG(ERR,"Requesting det %s but you didn't insert it into the class!",which) ;
-				assert(!"det not inserted") ;
-			}
-			return dets[i] ;
+		if(dets[i]) {
+			if(strcasecmp(which, dets[i]->name)==0) return dets[i] ;
+		}
+		if(pseudo_dets[i]) {
+			if(strcasecmp(which, pseudo_dets[i]->name)==0) return pseudo_dets[i] ;
 		}
 	}
 
-	LOG(ERR,"Requesting det \"%s\" -- never heard of it!",which) ;
+	LOG(ERR,"Requesting det \"%s\" -- not created",which) ;
 	assert(!"UNKNOWN det") ;
 
 	return 0 ;
@@ -1154,14 +1153,23 @@ daq_det *daqReader::det(const char *which)
 
 void daqReader::insert(class daq_det *which, int id)
 {
-	LOG(DBG,"calling insert(%d)",id) ;
+	assert(which) ;
+	LOG(DBG,"calling insert(%d): name %s",id,which->name) ;
 
 	if((id>=0) && (id<DAQ_READER_MAX_DETS)) {
 		dets[id] = which ;
+		return ;
 	}
-	else {
-		LOG(ERR,"rts_id %d out of bounds",id) ;
+	else if(id <0) {
+		id *= -1 ;
+		if(id >= DAQ_READER_MAX_DETS) ;
+		else {
+			pseudo_dets[id] = which ;
+			return ;
+		}
 	}
+
+	LOG(ERR,"rts_id %d out of bounds for %s",id,which->name) ;
 
 }
 
@@ -1181,10 +1189,19 @@ void daqReader::de_insert(int id)
 
 	if((id>=0) && (id<DAQ_READER_MAX_DETS)) {
 		dets[id] = 0 ;	// mark as freed
+		return ;
 	}
-	else {
-		LOG(ERR,"rts_id %d out of bounds",id) ;
+	else if(id < 0) {
+		id *= -1 ;
+		if(id >= DAQ_READER_MAX_DETS) ;
+		else {
+			pseudo_dets[id] = 0 ;
+			return ;
+		}
+
 	}
+
+	LOG(ERR,"rts_id %d out of bounds",id) ;
 }
 
 

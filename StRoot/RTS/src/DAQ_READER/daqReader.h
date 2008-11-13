@@ -53,6 +53,7 @@ class daqReader {
 
   static const int DAQ_READER_MAX_DETS = 32 ;
   daq_det *dets[DAQ_READER_MAX_DETS] ;
+  daq_det *pseudo_dets[DAQ_READER_MAX_DETS] ;
 
   daq_det *det(const char *det) ;
   void insert(daq_det *which, int rts_id) ;
