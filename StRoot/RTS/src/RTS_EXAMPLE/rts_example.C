@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
 	while(evp->get(0,0)) {	// keep getting new events
 		daq_dta *dd ;	// generic data pointer; reused all the time
 
+		LOG(NOTE, "event #%d", evp->seq);
 
 		// get me the "legacy" bank of the "sc" detector
 		dd = evp->det("sc")->get("legacy") ;
