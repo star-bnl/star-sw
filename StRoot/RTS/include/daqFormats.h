@@ -984,23 +984,23 @@ struct EMCRBP {
 
 struct EMCADCD {
 	struct bankHeader bh ;
-	u_short version ;
-	u_short count ;
-	u_short cap ;	// or other stuff
-	u_short fiber ;
+	unsigned short version ;
+	unsigned short count ;
+	unsigned short cap ;	// or other stuff
+	unsigned short fiber ;
 	// the following repeats "count" times
-	// u_short channel ;
-	// u_short datum ;
+	// unsigned short channel ;
+	// unsigned short datum ;
 } ;
 
 struct EMCPEDR {
 	struct bankHeader bh ;
-	u_short version ;
-	u_short count ;
-	u_short cap ;
-	u_short fiber ;
+	unsigned short version ;
+	unsigned short count ;
+	unsigned short cap ;
+	unsigned short fiber ;
 	// cap*count shorts of this form
-	// u_short data = (rms*8)<<10 | ped ;
+	// unsigned short data = (rms*8)<<10 | ped ;
 } ;
 	
 struct PP2PPP {	// main pointer bank
