@@ -16,12 +16,11 @@
 #include <RC_Config.h>
 #include <rtsLog.h>
 #include <time.h>
-#include <trgStructures.h>
+#include <daqFormats.h>
 #include <daq100Decision.h>
 
 class Lxgbx {
 public:
-  int evtNumber;
   int run_type;
   int cl_run;     // clusters for tpx
   int raw_write;  // raw write for tpx
@@ -62,7 +61,6 @@ public:
   {
     int ret;
     
-    evtNumber = 0;   
     ret = configEvp(cfg);
 
     run_type = cfg->daq_setup.run_type;
@@ -138,15 +136,14 @@ public:
 
   // assume evtDescData comes in as big endian...
   // assume other args are host endian
-  int doEvent(gbPayload *pay, EvtDescData *evt, UINT32 l1trg, UINT32 l2trg, UINT32 l25abort)
+  int doEvent(gbPayload *pay, EvtDescData *evt, UINT32 l1trg, UINT32 l2trg, UINT32 l25abort, UINT32 token, UINT32 eventNumber)
   {
     // Stays big endian
     EvtDescData *paydesc = (EvtDescData *)pay->eventDesc;
     memcpy(paydesc, evt, sizeof(EvtDescData));
 
-    evtNumber++;
-    pay->eventNumber = l2h32(evtNumber);
-    pay->token = l2h16(evt->TrgToken);
+    pay->eventNumber = l2h32(eventNumber);
+    pay->token = l2h16(token);
 
     // The rest should be little endian 
     pay->L1summary[0] = l2h32(l1trg);
