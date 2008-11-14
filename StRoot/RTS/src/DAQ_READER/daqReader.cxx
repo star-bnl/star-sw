@@ -322,8 +322,24 @@ char *daqReader::get(int num, int type)
 
   // Sets:
   //     event_size, lrhd_offset, datap_offset & status if failure...
+
+ repeat:
+
   int error = getEventSize();  
 
+  if(status == EVP_STAT_LOG) { 
+    // we know this is a stand alone SFS file
+    // and we know it is a log message, or at least has no event
+    // try the next directory
+
+    LOG(DBG, "Skipping a non-event SFS file...");
+
+    lseek(desc, event_size, SEEK_CUR);
+    evt_offset_in_file += event_size;
+    event_size = 0;
+    goto repeat;
+  }
+  
   // We handle the possible padding bug by
   // searching and tacking the extra padding to the end of the event
   // where it can do us no harm...
@@ -420,6 +436,8 @@ char *daqReader::get(int num, int type)
     if(!ent) {
       sfs->closedir(fsdir);
       LOG(ERR, "Error finding event directory in sfs?");
+
+      // Skip directory... go to next
       status = EVP_STAT_EVT;
       return NULL;
     }
@@ -454,7 +472,7 @@ char *daqReader::get(int num, int type)
   }
   else {
     mem = NULL;
-    LOG(NOTE, "Event has no DATAP bank");
+    LOG(DBG, "Event has no DATAP bank");
   }
 
 
@@ -490,7 +508,7 @@ char *daqReader::get(int num, int type)
     LOG(DBG, "No EventSummary, search for legacy datap");
     summary = sfs->opendirent("legacy");
     if(!summary) {
-      LOG(NOTE, "No EventSummary and no DATAP... hacking summary info");
+      LOG(DBG, "No EventSummary and no DATAP... hacking summary info");
       hackSummaryInfo();
     }
     else {
@@ -633,6 +651,7 @@ int daqReader::getEventSize()
   int offset = 0;
   int space_left;
 
+  status = EVP_STAT_OK;
   event_size = 0;
 
   if(input_type == pointer) {
@@ -672,12 +691,53 @@ int daqReader::getEventSize()
   while((memcmp(m, "LRHD", 4) != 0) &&
 	(memcmp(m, "DATAP", 5) != 0)) {
     
-    LOG(NOTE, "Event starts with %c%c%c%c%c not LRHD or DATAP.  Check if sfs file...",m[0],m[1],m[2],m[3],m[4]);
+    LOG(DBG, "Event starts with %c%c%c%c%c not LRHD or DATAP.  Check if sfs file...",m[0],m[1],m[2],m[3],m[4]);
     
     sfs_index *tmp_sfs = new sfs_index();
     int sz = tmp_sfs->getSingleDirSize(file_name, evt_offset_in_file);
+
+    LOG(DBG, "single dir size = %d",sz);
+
+    // Check to see if its a valid directory...
+    if(sz > 0) {
+      tmp_sfs->mountSingleDir(file_name, evt_offset_in_file);
+      
+      int satisfy=0;
+
+      // CD to the current event...
+      fs_dir *fsdir = tmp_sfs->opendir("/");
+      fs_dirent *ent = tmp_sfs->readdir(fsdir);
+      if(!ent) {
+	tmp_sfs->closedir(fsdir);
+	LOG(ERR, "Error finding event directory in sfs?");
+	
+	// Skip directory... go to next
+	status = EVP_STAT_EVT;
+	sz = -1;
+	goto done;
+      }
+	
+      LOG(DBG, "does dir (%s) satisfy '/#' or '/nnnn'",ent->full_name);
+      
+      if(memcmp(ent->full_name, "/#", 2) == 0) {
+	satisfy = 1;
+      }
+	
+      if(allnumeric(&ent->full_name[1])) {
+	satisfy = 1;
+      }
+	
+      tmp_sfs->closedir(fsdir);
+
+      if(satisfy == 0) {
+	status = EVP_STAT_LOG;
+      } 
+
+      tmp_sfs->umount();
+    }
+
     delete tmp_sfs;
-    // 
+
     if(sz < 0) {
       LOG(ERR, "Event starts with %c%c%c%c%c not LRHD or DATAP and not a SFS file... bad event",m[0],m[1],m[2],m[3],m[4]);
 

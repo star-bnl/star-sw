@@ -752,20 +752,25 @@ int sfs_index::getSingleDirSize(char *fn, int offset)
   int topdirlen=0;
   topdir[0] = '\0';
 
+  LOG(DBG, "singledirdize file=%s, offset=%d",fn,offset);
+
   wfile.close();
   wfile.opendisk(fn, O_RDONLY);
   if(wfile.fd < 0) return wfile.fd;
   wfile.lseek(offset, SEEK_SET);
 
   int sz = 0;
-  
+
   SFS_ittr *ittr = new SFS_ittr(offset);
   if(ittr->get(&wfile) < 0) {
     delete ittr;
     wfile.lseek(offset,SEEK_SET);
     return sz;
   }
+
   sz += ittr->skipped_bytes;
+
+  LOG(DBG, "partial sz=%d, skipped=%d",sz,ittr->skipped_bytes);
 
   while(ittr->next() >= 0) {
 

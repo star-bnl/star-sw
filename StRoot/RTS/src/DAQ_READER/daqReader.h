@@ -34,7 +34,7 @@ enum Input_Type { none, live, file, pointer, dir };
 #define EVP_STAT_EOR    (-1)
 #define EVP_STAT_EVT    (-2)
 #define EVP_STAT_CRIT   (-3)
-
+#define EVP_STAT_LOG  (-4)
 
 class daqReader {
  public:
