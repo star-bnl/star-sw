@@ -152,10 +152,18 @@ public:
     pay->evp = l2h32(evpAssign(l2trg));
     pay->L3summary[3] = pay->evp;
     
+    /* not on kernel 2.4!
     struct timespec tm;
     clock_gettime(CLOCK_REALTIME, &tm);
     pay->sec = l2h32(tm.tv_sec);
     pay->usec = l2h32(tm.tv_nsec * 1000);
+    */
+
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    pay->sec = tm.tv_sec;
+    pay->usec = tm.tv_usec;
+
 
     pay->flags = daq100Decision(l2h32(pay->token), evt->actionWdDaqCommand, run_type, cl_run, raw_write);
     
