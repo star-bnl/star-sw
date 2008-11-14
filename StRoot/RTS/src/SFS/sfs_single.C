@@ -1,7 +1,7 @@
 #include <sfs_index.h>
 #include <stdio.h>
 
-extern int debug;
+//extern int debug;
 
 int main(int argc, char *argv[])
 {
@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 
  
   sfs_index sfs;
-  debug = 0;
+  //debug = 0;
 
   int ret = sfs.mountSingleDir(argv[1]);
   if(ret < 0) {

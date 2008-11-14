@@ -16,7 +16,7 @@
 #define swap16(x) bswap_16(x)
 #define swap32(x) bswap_32(x)
 
-int debug = 0;
+//int debug = 0;
 
 /********************************/
 /*  Utilities                   */
@@ -292,7 +292,7 @@ int SFS_ittr::next()
 
 
     if(memcmp(buff, "SFS V", 5) == 0) {
-      if(debug) LOG(DBG,"Found SFS version");
+      //if(debug) LOG(DBG,"Found SFS version");
       wfile->lseek(12, SEEK_CUR);
       fileoffset += 12;
       skipped_bytes += 12;
@@ -300,7 +300,7 @@ int SFS_ittr::next()
     }
 
     if(memcmp(buff, "LRHD", 4) == 0) {
-      if(debug) LOG(DBG,"Found LRHD");
+      //if(debug) LOG(DBG,"Found LRHD");
 
       LOG(DBG, "BFR LRHD %d %d",wfile->lseek(0,SEEK_CUR),fileoffset);
 
@@ -318,7 +318,7 @@ int SFS_ittr::next()
     }
 
     if(memcmp(buff, "DATAP", 5) == 0) {
-      if(debug) LOG(DBG,"Found DATAP");
+      //if(debug) LOG(DBG,"Found DATAP");
 
       LOG(DBG, "Before datap: file=%d filepos=%d offset=%d entrysz=%d",
 	  wfile->lseek(0,SEEK_CUR), filepos,fileoffset,entry.sz);
@@ -336,7 +336,7 @@ int SFS_ittr::next()
     }
 
     if(memcmp(buff, "HEAD", 4) == 0) {
-      if(debug) LOG(DBG,"Found HEAD");
+      //if(debug) LOG(DBG,"Found HEAD");
       wfile->lseek(12, SEEK_CUR);
       fileoffset += 12;
       skipped_bytes += 12;
@@ -898,10 +898,10 @@ int sfs_index::mountNextDir()
     strcpy(currdir, singleDirIttr->fullpath);
     striptofirstdir(currdir);
 
-    if(debug) {
-      LOG(DBG,"basedir=%s singleDirIttr->fullpath=%s currdir=%s\n",
-	     basedir, singleDirIttr->fullpath, currdir);
-    }
+    //if(debug) {
+    //  LOG(DBG,"basedir=%s singleDirIttr->fullpath=%s currdir=%s\n",
+    //     basedir, singleDirIttr->fullpath, currdir);
+    //}
 
     if(strcmp(basedir, currdir) != 0) {
       return (files_added > 0) ? 1 : 0;
