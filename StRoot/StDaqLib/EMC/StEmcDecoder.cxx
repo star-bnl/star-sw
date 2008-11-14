@@ -8,6 +8,7 @@
 #endif
 #include "StMessMgr.h"
 
+ClassImp(StEmcDecoder)
 //--------------------------------------------------------
 /*!
 Date and time should be in GMT
@@ -46,7 +47,7 @@ void StEmcDecoder::fixTowerBugIndexes()
 fixes the software indexes for the preshower based on 2006/2007 mapping indexes
 many changes correspond to the tower mapping bugs
 */
-void StEmcDecoder::fixPreshowerBugIndexes()
+void StEmcDecoder::fixPreshowerBugIndexes(int mDate)
 {
     for(int i=0; i<4800; i++) {
         int id = i+1;
@@ -55,6 +56,40 @@ void StEmcDecoder::fixPreshowerBugIndexes()
             PreshowerBugFixIndex[newId-1] = id;
         }
     }
+    if(mDate > 20080206){
+  PreshowerBugFixIndex[2308-1] = 2325;
+  PreshowerBugFixIndex[2325-1] = 2326;
+  PreshowerBugFixIndex[2326-1] = 2308;
+  PreshowerBugFixIndex[681-1] = 722;
+  PreshowerBugFixIndex[682-1] = 721;
+  PreshowerBugFixIndex[721-1] = 681;
+  PreshowerBugFixIndex[722-1] = 682;
+  PreshowerBugFixIndex[685-1] = 726;
+  PreshowerBugFixIndex[686-1] = 725;
+  PreshowerBugFixIndex[725-1] = 685;
+  PreshowerBugFixIndex[726-1] = 686;
+
+  PreshowerBugFixIndex[3797-1] = 3837;
+  PreshowerBugFixIndex[3798-1]    = 3838;
+  PreshowerBugFixIndex[3799-1]    = 3839;
+  PreshowerBugFixIndex[3800-1]    = 3840;
+
+  PreshowerBugFixIndex[3817-1] = 3857;
+  PreshowerBugFixIndex[3818-1]    = 3858;
+  PreshowerBugFixIndex[3819-1]    = 3859;
+  PreshowerBugFixIndex[3820-1]    = 3860;
+
+  PreshowerBugFixIndex[3837-1] = 3797;
+  PreshowerBugFixIndex[3838-1]    = 3798;
+  PreshowerBugFixIndex[3839-1]    = 3799;
+  PreshowerBugFixIndex[3840-1]    = 3800;
+
+  PreshowerBugFixIndex[3857-1] = 3817;
+  PreshowerBugFixIndex[3858-1]    = 3818;
+  PreshowerBugFixIndex[3859-1]    = 3819;
+  PreshowerBugFixIndex[3860-1]    = 3820;
+    }
+
 }
 //--------------------------------------------------------
 void StEmcDecoder::SetDateTime(unsigned int date, unsigned int time)
@@ -330,10 +365,15 @@ PSDTables:
     }
     if(date >= 20060101) //use mapping determined from Run 7 for Run 6 data as well
     {
-        #include "PreshowerBug2007.txt"
-        if(date >= 20080101) fixPreshowerMap = true;
+      if(date < 20080206){
+#include "PreshowerBug2007.txt"
+      }
+      else{
+#include "PreshowerBug2008.txt"
+      }
+        if(date >= 20071101) fixPreshowerMap = true;
     }
-    fixPreshowerBugIndexes();
+    fixPreshowerBugIndexes(date);
     
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -1250,9 +1290,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.55 2008/11/07 22:34:16 mattheww Exp $
+// $Id: StEmcDecoder.cxx,v 2.56 2008/11/14 23:25:33 mattheww Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.56  2008/11/14 23:25:33  mattheww
+// Fixed a lot of BPRS swaps
+//
 // Revision 2.55  2008/11/07 22:34:16  mattheww
 // corrected swap logic for BPRS
 //
