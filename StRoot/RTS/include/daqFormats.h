@@ -11,6 +11,10 @@ typedef unsigned char UINT8 ;
 
 #include <SECTOR/sector.h>	// for the size constants
 
+// Don't kill everybody else while John & Jeff work on trigger structs...
+#ifndef TRG_VERSION
+#define TRG_VERSION 0x32
+#endif
 
 #if (TRG_VERSION == 0x20)
 #include <TRG/trgStructures_20.h>
@@ -22,11 +26,14 @@ typedef unsigned char UINT8 ;
 #include <TRG/trgStructures_v22.h>
 #elif (TRG_VERSION == 0x30)
 #include <TRG/trgStructures_30.h>
+#elif (TRG_VERSION == 0x32)
+#include <trgStructures_32.h>
 #else	// default
 #ifndef TRG_VERSION
-#define TRG_VERSION 0x32	// changed on Feb 22, 2007
+#define TRG_VERSION 0x40	// changed on Feb 22, 2007
 #endif
-#include <trgStructures.h>
+#include <trgDataDefs.h>
+#define NOTRGD
 #endif
 
 #define FMT_ADCD	(1 << 0)
@@ -392,6 +399,29 @@ struct EventDescriptor2001 {
 } ;
 #endif
 
+typedef struct {
+unsigned short TCUdataBytes;
+char           TCUEvtDesc;
+unsigned char  TrgDataFmtVer;
+unsigned int   bunchXing_hi;
+unsigned int   bunchXing_lo;                /* Two parts of RHIC bunch crossing number */
+unsigned short actionWdDetectorBitMask;     /* from Fifo 1 */
+unsigned char  actionWdTrgCommand;          /* from Fifo 1 */
+unsigned char  actionWdDaqCommand;          /* from Fifo 1 */  
+unsigned short TrgToken;                    /* from Fifo 2 */
+unsigned short addBits;                     /* from Fifo 2 - bit 0=Contamination; bit 6=L2.5 abort; bit 7=1 is fake data */
+unsigned short DSMInput;                    /* from Fifo 3 */
+unsigned short externalBusy;                /* from Fifo 3 */
+unsigned short modifiedBusyStatus;          /* from Fifo 4 */
+unsigned short physicsWord;                 /* from Fifo 4 */
+unsigned short TriggerWord;                 /* from Fifo 5 */
+unsigned short DSMAddress;                  /* from Fifo 6 */
+unsigned short contaminationBusyStatus;     /* from Fifo 6 */
+unsigned short npre;                        /* pre value for detector raw data */
+unsigned short npost;                       /* post value for detector raw data */
+unsigned short dummy;                       /* dummy - filler */
+} EventDescriptor2007;        /* 40 bytes total */ 
+
 
 
 struct DATAP {
@@ -447,6 +477,8 @@ struct TRGP {
 };
 
 
+#ifndef NOTRGD
+
 struct TRGD {
 	struct bankHeader	bh ;
 	EvtDescData	desc ;
@@ -454,6 +486,7 @@ struct TRGD {
 	RawTrgDet	raw[MAX_RAW_DATA_BLOCKS] ;
 } ;
 
+#endif
 
 // Level 3 structures
 // Level 3 banks - most are defined in  file included at end
