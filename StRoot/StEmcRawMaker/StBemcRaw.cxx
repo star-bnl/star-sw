@@ -1,6 +1,12 @@
 //
-// $Id: StBemcRaw.cxx,v 1.26 2008/07/28 12:51:45 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.28 2008/11/07 22:37:55 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.28  2008/11/07 22:37:55  mattheww
+// update date for bprs swap fix
+//
+// Revision 1.27  2008/10/24 18:19:06  mattheww
+// Added option to throw out all hits in an event if any crates are corrupted
+//
 // Revision 1.26  2008/07/28 12:51:45  mattheww
 // Minor bug fix in StBemcRaw::createDecoder
 //
@@ -123,6 +129,9 @@ StBemcRaw::StBemcRaw():TObject()
     Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
     Int_t   status[]     = {0, 0, 0, 0, 0, 0, 0, 0};
     Int_t   crate[]      = {1, 1, 1, 1, 0, 0, 0, 0};
+
+    mCrateVeto = 0;
+    mAnyCorrupted = kFALSE;
 
     for(Int_t i=0; i<MAXDETBARREL; i++)
     {
@@ -409,6 +418,9 @@ void StBemcRaw::checkHeaders(StEmcRawData* RAW)
             mNCRATESOK[BPRS-1]++;
         }
     }
+    for(Int_t i = 0; i < MAXDETBARREL; i++){
+      if(mIsCorrupted[i])mAnyCorrupted = kTRUE;
+    }
 }
 void StBemcRaw::emptyEmcCollection(StEmcCollection *emc)
 {
@@ -628,7 +640,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         mDecoder->GetTowerBugCorrectionShift(id,shift);
         id+=shift;
     }
-    if(det==BPRS && mPsdMapBug2 && mDate<20080101)
+    if(det==BPRS && mPsdMapBug2 && mDate<20090101)
     {
         Int_t shift = 0;
         mDecoder->GetPreshowerBugCorrectionShift(id,shift);
@@ -640,6 +652,9 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
                 mCrateStatus[det-1][CRATE-1]!=crateUnknown) &&
                 !mSaveAllStEvent)
             return kCrate;
+
+    if(!mSaveAllStEvent && mCrateVeto && mAnyCorrupted)
+      return kCrate;
 
     if(ADC==0 && !mSaveAllStEvent)
         return kZero;
@@ -783,4 +798,12 @@ void StBemcRaw::setCheckStatus(Int_t det, Int_t flag, const char* option)
   getControlTable()->CheckStatus[det] = flag;
   return;
 
+}
+void StBemcRaw::setCrateVeto(Int_t flag)
+{
+  if(flag != 0 && flag != 1){
+    LOG_ERROR<<"Invalid flag passed to StBemcRaw::setCrateVeto, only 0 and 1 accepted"<<endm;
+    return;
+  }
+  mCrateVeto = flag;
 }

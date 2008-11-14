@@ -33,6 +33,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mBemcData = new StBemcData();
     mBemcData->towerMapBug(kTRUE); // corrects for tower map bug at analysis level by default
     mBemcData->psdMapBug2(kTRUE);
+    mBemcData->setCrateVeto(1);
     //status checking for all tables at analysis level by default
     StDetectorId bemcid = static_cast<StDetectorId>(kBarrelEmcTowerId);
     setCheckStatus(bemcid,1);

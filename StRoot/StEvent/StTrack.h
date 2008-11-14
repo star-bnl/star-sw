@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.21 2007/10/11 21:51:40 ullrich Exp $
+ * $Id: StTrack.h,v 2.22 2008/08/26 12:47:38 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -33,8 +33,9 @@
  *  (flag definition in EGR era can be found at
  *   http://www.star.bnl.gov/STAR/html/all_l/html/dst_track_flags.html)
  *
- *  mFlag=xyy, where x  indicates the detectors included in the fit and 
- *                   yy indicates the status of the fit. 
+ *  mFlag=zxyy, where  z = 1 for pile up track in TPC (otherwise 0) 
+ *                     x indicates the detectors included in the fit and 
+ *                    yy indicates the status of the fit. 
  *  Positive mFlag values are good fits, negative values are bad fits. 
  *
  *  The first digit indicates which detectors were used in the refit: 
@@ -62,6 +63,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.22  2008/08/26 12:47:38  fisyak
+ * add track pule up flag description
+ *
  * Revision 2.21  2007/10/11 21:51:40  ullrich
  * Added member to handle number of possible points fpr PXL and IST.
  *

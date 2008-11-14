@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.8 2008/05/07 22:48:36 bouchet Exp $
+// $Id: StSsdBarrel.hh,v 1.9 2008/10/20 19:30:37 bouchet Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.9  2008/10/20 19:30:37  bouchet
+// add methods for the calculation of quality
+//
 // Revision 1.8  2008/05/07 22:48:36  bouchet
 // calculation of quality of hits used embedding
 //
@@ -68,6 +71,10 @@ class St_ssdNoise;
 
 class St_ssdWaferConfiguration; 
 class StMcEvent;
+class StMcSsdHitCollection;
+class StMcSsdHit;
+#include <vector>
+
 class StSsdBarrel
 {
  public:
@@ -121,7 +128,10 @@ class StSsdBarrel
   void  sortListCluster();
   Int_t getNumberOfLadders() { return mNLadder;}
   Int_t getNWaferPerLadder() { return mNWaferPerLadder;}
-  Int_t getSsdLayer() { return mSsdLayer;}
+  Int_t getSsdLayer() { return mSsdLayer;};
+  void Calculation_Ratio(int idWafer,int idClusterP,int idClusterN,vector<const StMcSsdHit*> hitCol, int *ratio, int *idTruth);
+  Int_t FindMcHit(vector<int> id,vector<const StMcSsdHit*> hitCol);
+  Int_t isSplit(StSsdCluster *currentCluster,int iSide,int lad,int waf);
   StSsdLadder *getLadder(Int_t i=0) {return mLadders[i];}
   ssdDimensions_st *getDimensions() {return mDimensions;}
   StSsdClusterControl *getClusterControl() {return mClusterControl;}
