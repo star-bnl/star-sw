@@ -134,7 +134,7 @@ private:
   void get2008dAu_DSMLayer1();
   void get2008dAu_DSMLayer2();
 
-#define DEBUG			// Comment out to switch off debugging
+  //#define DEBUG			// Comment out to switch off debugging
 
 #ifdef DEBUG
   
