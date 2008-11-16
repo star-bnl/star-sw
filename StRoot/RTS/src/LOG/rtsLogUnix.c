@@ -179,12 +179,17 @@ int rtsLogUnix_v(const char *str, ...)
 		}
 		else if(strncmp(str,CAUTION,strlen(CAUTION))==0) {
 			colored = 1 ;
-			sprintf(string+len,"%s",ANSI_MAGENTA) ;
+			sprintf(string+len,"%s%s",ANSI_MAGENTA,ANSI_REVERSE) ;
 			len += strlen(string+len) ;
 		}
 		else if(strncmp(str,TERR,strlen(TERR))==0) {
 			colored = 1 ;
 			sprintf(string+len,"%s",ANSI_GREEN) ;
+			len += strlen(string+len) ;
+		}
+		else if(strncmp(str,OPER,strlen(OPER))==0) {
+			colored = 1 ;
+			sprintf(string+len,"%s%s",ANSI_BLUE,ANSI_REVERSE) ;
 			len += strlen(string+len) ;
 		}
 		else  {

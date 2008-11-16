@@ -23,6 +23,7 @@ rtsLog: rtsLog.o librtslog.a
 
 operDisplay.sh:	
 
+
 # DO NOT DELETE
 
 logTest.o: ../../../../StRoot/RTS/include/rtsLog.h
