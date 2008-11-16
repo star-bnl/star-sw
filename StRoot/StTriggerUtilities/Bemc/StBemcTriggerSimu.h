@@ -69,7 +69,7 @@ private:
   Int_t DSM_TPStatus[kNPatches];           //DSM_TPStatus only set online
   Int_t TowerStatus[kNTowers];             //tower status as determined online or offline
   unsigned long bitConvValue[kNTowers];    //gives window used to determine HT6Bit from adc10
-  Int_t year,timestamp;
+  Int_t year,timestamp,yyyymmdd,hhmmss;
 
   Int_t adc12[kNTowers];                   //12 bit adc from StEvent -> NOT pedestal adjusted!
   Int_t adc10[kNTowers],adc08[kNTowers];   //ped adjusted 10 and 8 bit adc
@@ -97,6 +97,10 @@ private:
   Int_t DSM0_HT_Bit[kL0DsmModule],DSM0_TP_Bit[kL0DsmModule],DSM0_HTTP_Bit[kL0DsmModule];
   Int_t DSM0_HT_Bit_J3[kL0DsmModule],DSM0_TP_Bit_J3[kL0DsmModule],DSM0_HTTP_Bit_J3[kL0DsmModule];
   Int_t DSM0_HT_Bit_J1[kL0DsmModule],DSM0_TP_Bit_J1[kL0DsmModule],DSM0_HTTP_Bit_J1[kL0DsmModule];
+  Int_t DSM0_HT_2Bit[kL0DsmModule],DSM0_HT_2Bit_J1[kL0DsmModule],DSM0_HT_2Bit_J3[kL0DsmModule];
+  Int_t DSM0_HT_Thr3_Bit[kL0DsmModule], DSM0_HT_Thr3_Bit_J1[kL0DsmModule], DSM0_HT_Thr3_Bit_J3[kL0DsmModule];
+  Int_t DSM0_HT_Masked_Bit[kL0DsmModule], DSM0_HT_Masked_Bit_J1[kL0DsmModule], DSM0_HT_Masked_Bit_J3[kL0DsmModule];
+
   //Intermediate bits for each trigger patch input to DSMLayer0
   Int_t DSM0_HT_tp_Bit[kL0DsmInputs], DSM0_TP_tp_Bit[kL0DsmInputs], DSM0_HTTP_tp_Bit[kL0DsmInputs];
   Int_t DSM0_HT_tp_Bit_J3[kL0DsmInputs], DSM0_TP_tp_Bit_J3[kL0DsmInputs],DSM0_HTTP_tp_Bit_J3[kL0DsmInputs];
@@ -126,11 +130,11 @@ private:
   void get2007_DSMLayer0();
   void get2007_DSMLayer1();
   void get2007_DSMLayer2();
-  void get2008_DSMLayer0();
-  void get2008_DSMLayer1();
-  void get2008_DSMLayer2();
+  void get2008dAu_DSMLayer0();
+  void get2008dAu_DSMLayer1();
+  void get2008dAu_DSMLayer2();
 
-  //#define DEBUG			// Comment out to switch off debugging
+#define DEBUG			// Comment out to switch off debugging
 
 #ifdef DEBUG
   
@@ -146,6 +150,10 @@ private:
   TH2 *mBEMCLayer1HTTPBitsDiff;
   TH2 *mBEMCLayer1PatchSum;
   TH2 *mBEMCLayer1PatchSumDiff;
+  TH2 *mBEMCLayer1HTmaskBits;
+  TH2 *mBEMCLayer1HTmaskDiff;
+  TH2 *mBEMCLayer1HTthr3Bits;
+  TH2 *mBEMCLayer1HTthr3Diff;
   TH2 *mBEMCLayer2PatchSum;
   TH2 *mBEMCLayer2PatchSumDiff;
   TH2 *mBEMCLayer2HTTPBits;

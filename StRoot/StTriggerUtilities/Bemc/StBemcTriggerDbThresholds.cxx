@@ -79,7 +79,17 @@ void StBemcTriggerDbThresholds::LoadTimeStamps(){
   start_2007[3].Set(2007,4,19,5,1,48);
   end_2007[3].Set(2007,6,26,12,57,41);
 
+  //settings for 2008  production_dAu2008
 
+  //#1 Runs#8340015 - 8344057  2007-12-06 12:39:20 - 2007-12-10 14:42:45
+  //210500 HT0, 210510 HT1, 210520 HT2
+  start_2008[0].Set(2007,12,6,12,39,10);
+  end_2008[0].Set(2007,12,10,2,42,55);
+
+  //#2 Runs#8344088 - 9027087 2007-12-10 19:42:37 - 2008-01-28 00:55:57 
+  //210501 HT0, 210511 HT1, 210521 HT2, 210541 HT4
+  start_2008[1].Set(2007,12,10,19,42,37);
+  end_2008[1].Set(2008,1,28,0,56,7);
 
 }
 
@@ -250,6 +260,51 @@ Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t t
 	  }
       }
   }
+
+
+  //2008 HT East and West Thresholds (no separation of east or west in 2007)
+  const Int_t HTW0_TH_2008[2]   = { 11, 11};
+  const Int_t HTW1_TH_2008[2]   = { 15, 15};
+  const Int_t HTW2_TH_2008[2]   = { 18, 18};
+  const Int_t HTW3_TH_2008[2]   = { 35, 35};
+  const Int_t HTW4_TH_2008[2]   = { 35, 35};
+
+  const Int_t HTE0_TH_2008[2]   = { 11, 11};
+  const Int_t HTE1_TH_2008[2]   = { 15, 15};
+  const Int_t HTE2_TH_2008[2]   = { 18, 18};
+  const Int_t HTE3_TH_2008[2]   = { 35, 35};
+  const Int_t HTE4_TH_2008[2]   = { 35, 35};
+
+ for (int i=0;i<2;i++){
+    
+    if (DSMmodule<15)
+      {//WEST
+	if ((timestamp>=start_2008[i].Get())&&(timestamp<=end_2008[i].Get()))
+	  {
+	    if (layer==0) threshold=HTW0_TH_2008[i];
+	    if (layer==1) threshold=HTW1_TH_2008[i];
+	    if (layer==2) threshold=HTW2_TH_2008[i];
+	    if (layer==3) threshold=HTW3_TH_2008[i];
+	    if (layer==4) threshold=HTW4_TH_2008[i];
+	  }
+	
+      }
+    
+    
+    if (DSMmodule>=15)
+      {//EAST 
+	if ((timestamp>=start_2008[i].Get())&&(timestamp<=end_2008[i].Get()))
+	  {
+	    if (layer==0) threshold=HTE0_TH_2008[i];
+	    if (layer==1) threshold=HTE1_TH_2008[i];
+	    if (layer==2) threshold=HTE2_TH_2008[i];
+	    if (layer==3) threshold=HTE3_TH_2008[i];
+	    if (layer==4) threshold=HTE4_TH_2008[i]; 
+	  }
+      }
+  }
+
+
 
   
   return threshold;
