@@ -76,9 +76,14 @@ int SFS_ittr::findEventNumber()
 	sz = swap32(sz);
       }
       
-      if(sz > 4) {
-	ret = wfile->read(fbuff, sz-4);
-	if(ret != sz-4) {
+      
+      if(sz > sizeof(SFS_File)) {
+	int sztogo = sz - sizeof(SFS_File);
+	char *btogo = fbuff;
+	btogo += sizeof(SFS_File);
+
+	ret = wfile->read(btogo, sztogo);
+	if(ret != sztogo) {
 	  LOG(ERR, "Error reading FILE: %d",ret);
 	  ret = -1;
 	  break;
