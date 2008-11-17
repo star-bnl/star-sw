@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.56 2008/01/24 15:22:36 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.57 2008/11/17 21:35:21 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -74,7 +74,10 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name) {
     mSimulatorMode[BTOW-1]  = StEmcVirtualSimulator::kPrimarySecondaryFullMode;
     mSimulatorMode[BPRS-1]  = StEmcVirtualSimulator::kPrimarySecondaryFullMode;
     mSimulatorMode[BSMDE-1] = StEmcVirtualSimulator::kSimpleMode;
-    mSimulatorMode[BSMDP-1] = StEmcVirtualSimulator::kSimpleMode;    
+    mSimulatorMode[BSMDP-1] = StEmcVirtualSimulator::kSimpleMode;
+    
+    mIsBFC = GetParentChain()->InheritsFrom("StBFChain");
+    LOG_INFO << "Is StEmcSimulatorMaker in BFC? " << mIsBFC << endm;
 }
 
 StEmcSimulatorMaker::~StEmcSimulatorMaker() {
@@ -263,6 +266,11 @@ void StEmcSimulatorMaker::makeRawHits() {
                         delete rawHit;
                         continue;
                     }
+                }
+                
+                // store GEANT dE in MuDST if this is BFC
+                if(mIsBFC) {
+                    rawHit->setEnergy(hits[i]->dE());
                 }
                 
                 detector->addHit(rawHit);
@@ -516,6 +524,9 @@ void StEmcSimulatorMaker::makeCrossTalk(StMcTrack *track)
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
+ *  Revision 1.57  2008/11/17 21:35:21  kocolosk
+ *  store GEANT dE in MuDST raw hit energy data member
+ *
  *  Revision 1.56  2008/01/24 15:22:36  kocolosk
  *  set MuDst's StEmcCollection pointer
  *
