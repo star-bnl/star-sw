@@ -1,4 +1,4 @@
-// $Id: StEmcSimpleSimulator.cxx,v 1.14 2007/12/12 22:12:25 kocolosk Exp $
+// $Id: StEmcSimpleSimulator.cxx,v 1.15 2008/11/17 21:08:36 kocolosk Exp $
 
 #include "StEmcSimpleSimulator.h"
 
@@ -26,11 +26,12 @@ StEmcSimpleSimulator::StEmcSimpleSimulator(StDetectorId det, StEmcSimulatorMode 
             mSF[2]  = 0.7484;
             break;
         
+        // BPRS should only report energy in scintillator
         case kBarrelEmcPreShowerId:
             mMaxADC = 1023.0;
-            mSF[0]  = 559.7;
-            mSF[1]  = -109.9;
-            mSF[2]  = -97.81;
+            mSF[0]  = 1.0;
+            mSF[1]  = 0.0;
+            mSF[2]  = 0.0;
             break;
             
         case kBarrelSmdEtaStripId:
@@ -136,6 +137,9 @@ double StEmcSimpleSimulator::samplingFraction(double eta) {
 
 /*****************************************************************************
  *  $Log: StEmcSimpleSimulator.cxx,v $
+ *  Revision 1.15  2008/11/17 21:08:36  kocolosk
+ *  set BPRS sampling fraction to 1.0 so energy is just energy in scintillator
+ *
  *  Revision 1.14  2007/12/12 22:12:25  kocolosk
  *  calibration spread should only operate on ped-subtracted ADCs, not raw
  *
