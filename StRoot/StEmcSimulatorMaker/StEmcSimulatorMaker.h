@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcSimulatorMaker
 #define STAR_StEmcSimulatorMaker
 
-// $Id: StEmcSimulatorMaker.h,v 1.26 2007/12/12 23:29:48 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.27 2008/11/17 21:35:21 kocolosk Exp $
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
@@ -56,6 +56,11 @@ private:
     /// The simulators should not add pedestal noise if we're doing embedding.  This flag
     /// is set automatically by looking for StEmcRawMaker or StEmcADCtoEMaker in the chain.
     bool                    mEmbeddingMode;
+    
+    /// if we're running in BFC, we should set raw hit energy == GEANT dE so it
+    /// gets stored in the MuDST.  If we're running in analysis mode, we should
+    /// just store reco energy as usual.
+    bool                    mIsBFC;
     
     /// convert StMcCalorimeterHits to StEmcRawHits here
     void                    makeRawHits();
@@ -129,7 +134,7 @@ public:
     StBemcTables*           getTables() { return mTables; }
 
     virtual const char*     GetCVS() const {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.26 2007/12/12 23:29:48 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.27 2008/11/17 21:35:21 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -140,6 +145,9 @@ public:
 
 /*****************************************************************************
  * $Log: StEmcSimulatorMaker.h,v $
+ * Revision 1.27  2008/11/17 21:35:21  kocolosk
+ * store GEANT dE in MuDST raw hit energy data member
+ *
  * Revision 1.26  2007/12/12 23:29:48  kocolosk
  * full pedestal simulation is now default for BTOW
  *
