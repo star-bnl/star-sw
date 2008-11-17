@@ -6,7 +6,7 @@ VOBJS = librtslog.a
 INCLUDES = -g -I. -I../ -I../../include -I../../trg/include
 DEFINES += -DRTS_LOG_COLORED
 
-BINS =  fs fs_ex  sfsTest sfs_single
+BINS =  fs fs_ex  sfsTest sfs_single example
 LIBS = libsfs.a
 
 all:  libs $(BINS) 
@@ -24,6 +24,8 @@ readPed: libsfs.a readPed.o
 sfsTest: libsfs.a sfsTest.o
 
 sfs_experiment: libsfs.a sfs_experiment.o
+
+example: libsfs.a example.o
 
 sfs_single: libsfs.a sfs_single.o
 
