@@ -30,6 +30,7 @@
 #define RUN_TYPE_TPX_TEST	21	// test: sets TPX defaults for zero-suppression
 #define RUN_TYPE_TPX_DBG	22	// test: same as 21 except sets very small timebins
 #define RUN_TYPE_TRG		30	// TPX: trigger only data
+#define RUN_TYPE_EVB_TEST	40	// same as physics but TPC will increase the data volume!
 #define RUN_TYPE_FLASH		100	// download flash to TPX RDOs
 #define RUN_TYPE_FEE_PROM	101	// download flash to TPX RDOs
 #define RUN_TYPE_BOB_PROM	102	// download flash to TPX RDOs
