@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.57 2008/11/17 21:35:21 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.58 2008/11/17 21:44:24 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -269,7 +269,7 @@ void StEmcSimulatorMaker::makeRawHits() {
                 }
                 
                 // store GEANT dE in MuDST if this is BFC
-                if(mIsBFC) {
+                if(mIsBFC && !mEmbeddingMode) {
                     rawHit->setEnergy(hits[i]->dE());
                 }
                 
@@ -524,8 +524,8 @@ void StEmcSimulatorMaker::makeCrossTalk(StMcTrack *track)
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
- *  Revision 1.57  2008/11/17 21:35:21  kocolosk
- *  store GEANT dE in MuDST raw hit energy data member
+ *  Revision 1.58  2008/11/17 21:44:24  kocolosk
+ *  don't store GEANT dE in MuDST if we're embedding
  *
  *  Revision 1.56  2008/01/24 15:22:36  kocolosk
  *  set MuDst's StEmcCollection pointer
