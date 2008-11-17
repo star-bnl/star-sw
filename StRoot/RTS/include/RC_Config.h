@@ -159,16 +159,16 @@ struct TcdSetup
 #define TOF_DSM_OBJECT   4
 #define BCW_DSM_OBJECT   5
 #define BCE_DSM_OBJECT   6
-#define FEQ_DSM_OBJECT   7
+#define FEQ_QT_OBJECT    7
 #define BBC_DSM_OBJECT   8
 #define FPE_DSM_OBJECT   9
 #define FMS_DSM_OBJECT  10
-#define QT1_FMS_OBJECT 11
-#define QT2_FMS_OBJECT 12
-#define QT3_FMS_OBJECT 13
-#define QT4_FMS_OBJECT 14
-#define MXQ_QT_OBJECT 15
-#define BBQ_QT_OBJECT 16
+#define QT1_FMS_OBJECT  11
+#define QT2_FMS_OBJECT  12
+#define QT3_FMS_OBJECT  13
+#define QT4_FMS_OBJECT  14
+#define MXQ_QT_OBJECT   15
+#define BBQ_QT_OBJECT   16
 #define TRG_OBJECT 29
 #define DAQ_OBJECT 30           // Reserved for DAQ use..
 #define PHYSICS_BIT_OBJECT 32
@@ -302,51 +302,51 @@ struct TRG_SETUP
 
 struct TRG_RUN 
 {
-  // L1CTL_User_Params
+  // L1 and L2 User_Parameters
   int configOpt;         // Force configuration depth
     
-  int res1;          // Where log messages are written
-  int res2;          // Severity of saved log messages
+  int QT_Ped_Offset;     // Pedestal offset for all QTs
+  int res2;
 
-  int useFastDMA;          // Where log messages are written
-  int res4;          // Severity of saved log messages
+  int useFastDMA;        // If 0, use slow DAM
+  int res4;
     
-  int res5;         // Where log messages are written
-  int res6;         // Severity of saved log messages
+  int res5;
+  int res6;
 
-  int res7;        // Where log messages are written
-  int res8;        // Severity of saved log messages
+  int res7;
+  int res8;
 
-  int res9;          // Where log messages are written
-  int res10;          // Severity of saved log messages
+  int res9;
+  int res10;
 
-  int res11;
-  int res12;
+  int l2Disable750;      // Flag for experts to disable 750Hz limit
+  int l2MyriAcc;         // L2 will use MyriNet for Accept/abort and not STP
 
-  int res13;
-  int res14;
+  int l2LogLevel;        // Debug level for L2
+  int l2DisableAlgos;    // Flag for experts to disable algorithms
 
-  int scaler_log_level;  
+  int scaler_log_level;  // Debug level for scaler VME software 
 
-  int res15;    // Max token value allowed in system
-  int nToken;    // Min token value allowed in system
-  int tokenBitsOn;          // Skip every n tokens
-  int tokenBitsOff;
-  int useSTPnetwork;      // Number of tokens to time 
-  int res17;        // turns of/on timing n tokens
+  int res15;
+  int nToken;            // Maximum number of tokens to be used in the system
+  int tokenBitsOn;       // Bits in token that must be present
+  int tokenBitsOff;      // Bits in token that must be absent
+  int useSTPnetwork;     // Use STP network 
+  int res17;
   
   int clockSource;       // Clock source
-  int res18;     // number of clock tick errors before setting flag
-  int stopRunOnError;    // set to stop run/restart clock on error
+  int res18;
+  int stopRunOnError;    // Set to stop run/restart clock on error
     
   int l2DataWrite;       // L2 data writing switch
-  int dataWriteTimer;    // L2 clock ticks between data writing
-  int everyNEvents;      // how many events to skip when writing
-  int nAbort;            // Frequency of test aborts
+  int dataWriteTimer;    // Not used in trigger
+  int everyNEvents;      // How many events to skip when writing
+  int nAbort;            // Not used in trigger
 
-  int res19;        // New 2003
+  int res19;
   int res20;
-  int EvpPolicy;
+  int EvpPolicy;         // Not used in trigger
  
 };
 
