@@ -86,7 +86,7 @@ public:
 
     tokenZeroTriggers = 0;
 
-    for(int i=0;i<MAX_TRIGGERS;i++) {
+    for(int i=0;i<TRIGGERS_MAX;i++) {
       Trigger *t = &cfg->trg_setup.triggers[i];
       if(t->userdata.tokenZero) {
 	tokenZeroTriggers |= (1<<i);
@@ -199,7 +199,7 @@ public:
 
     // Set event descriptor...  (in big endian)
     EvtDescData *des = (EvtDescData *)pay->eventDesc;
-    des->TrgToken = b2h16(token);
+    des->TrgToken = b2h16(0);
     des->actionWdDetectorBitMask = b2h16(dets_in_run_mask);
     // 
 
@@ -225,7 +225,7 @@ public:
     pay->usec = tm.tv_usec;
 #endif
 
-    detmask = grp2rts_mask(dets_in_run_mask);
+    int detmask = grp2rts_mask(dets_in_run_mask);
     pay->rtsDetMask = l2h32(detmask);    
 
     return 0;
