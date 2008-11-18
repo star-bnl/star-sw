@@ -272,7 +272,7 @@ ifeq (${TARGET_CPU}, i960)
 else
 ifeq (${TARGET_CPU}, 604)
 	HOSTDEFINES += -DRTS_BIG_ENDIAN
-	HOSTFLAGS := -mcpu=$(TARGET_CPU)
+#	HOSTFLAGS := -mcpu=$(TARGET_CPU)
 else
 ifeq (${TARGET_CPU}, ultrasparc)
 	HOSTDEFINES += -DRTS_BIG_ENDIAN
