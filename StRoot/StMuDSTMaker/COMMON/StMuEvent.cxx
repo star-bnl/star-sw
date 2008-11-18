@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.18 2008/06/26 15:46:13 tone421 Exp $
+ * $Id: StMuEvent.cxx,v 1.19 2008/11/18 15:34:32 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -180,10 +180,42 @@ unsigned short StMuEvent::refMultFtpcWest(int vtx_id) {
 }
 
 unsigned short StMuEvent::refMultFtpc(int vtx_id) {return refMultFtpcEast(vtx_id)+refMultFtpcWest(vtx_id);}
+
+StThreeVectorF StMuEvent::primaryVertexPosition(int vtx_id) { 
+	StThreeVectorF vz(-999,-999,-999);
+  // Check old format (no StMuPrimaryVertex stored)
+  if (StMuDst::numberOfPrimaryVertices()==0 && (vtx_id == 0 || vtx_id == -1)){
+	 if(fabs(mEventSummary.primaryVertexPosition().x()) < 1.e-5 && fabs(mEventSummary.primaryVertexPosition().y()) < 1.e-5 && fabs(mEventSummary.primaryVertexPosition().z()) < 1.e-5) return vz;   
+	 else return mEventSummary.primaryVertexPosition();
+	}
+  if (vtx_id == -1)
+     vtx_id = StMuDst::currentVertexIndex();
+  if (StMuDst::primaryVertex(vtx_id))
+     return StMuDst::primaryVertex(vtx_id)->position();
+  return vz;
+}
+StThreeVectorF StMuEvent::primaryVertexErrors(int vtx_id) {
+	StThreeVectorF vz(-999,-999,-999);
+  // Check old format (no StMuPrimaryVertex stored)
+  if (StMuDst::numberOfPrimaryVertices()==0 && (vtx_id == 0 || vtx_id == -1)){
+	 if(fabs(mEventSummary.primaryVertexPosition().x()) < 1.e-5 && fabs(mEventSummary.primaryVertexPosition().y()) < 1.e-5 && fabs(mEventSummary.primaryVertexPosition().z()) < 1.e-5) return vz;   
+	 else return mPrimaryVertexError;
+	}
+  if (vtx_id == -1)
+     vtx_id = StMuDst::currentVertexIndex();
+  if (StMuDst::primaryVertex(vtx_id))
+     return StMuDst::primaryVertex(vtx_id)->posError();
+  return vz;
+}
+
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.19  2008/11/18 15:34:32  tone421
+ * 2 changes. The first ensures StMuEvent::primaryVertexPosition() returns the position of current vertex (set by StMuDst::setVertexIndex(Int_t vtx_id)): previously it returned the position of best ranked vertex. The second insures events with no vertex have a PVx=PYy=PYz=-999 rather than 0.
+ *
  * Revision 1.18  2008/06/26 15:46:13  tone421
+ *
  * Add getter and setter for the vpd z vertex position
  *
  * Revision 1.17  2008/02/20 09:00:48  mvl

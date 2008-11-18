@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.21 2008/06/26 15:41:29 tone421 Exp $
+ * $Id: StMuEvent.h,v 1.22 2008/11/18 15:34:33 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -93,8 +93,8 @@ class StMuEvent : public TObject {
   double zdcAdcAttentuatedSumEast();
   double ctbMultiplicity();
   ///    The StMuDst is supposed to be structured in 'physical events'.  Therefore there is only 1 primary vertex per mu event.
-  StThreeVectorF primaryVertexPosition();
-  StThreeVectorF primaryVertexErrors();
+  StThreeVectorF primaryVertexPosition(int vtx_id = -1);
+  StThreeVectorF primaryVertexErrors(int vtx_id = -1);
   TArrayI& L2Result(); // Raw L2Result[] array
 
   // Calibrated VPD info from StTofCollection in StEvent
@@ -186,8 +186,6 @@ inline double StMuEvent::ctbMultiplicity() {
   }
   return ctb;
 }
-inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.primaryVertexPosition();}
-inline StThreeVectorF StMuEvent::primaryVertexErrors() { return mPrimaryVertexError;}
 inline TArrayI &StMuEvent::L2Result() { return mL2Result; }
 inline unsigned int StMuEvent::numberOfVpdEastHits() {  
   unsigned int num = 0;
@@ -210,7 +208,11 @@ inline float StMuEvent::vpdVz() { return mVpdVz; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.22  2008/11/18 15:34:33  tone421
+ * 2 changes. The first ensures StMuEvent::primaryVertexPosition() returns the position of current vertex (set by StMuDst::setVertexIndex(Int_t vtx_id)): previously it returned the position of best ranked vertex. The second insures events with no vertex have a PVx=PYy=PYz=-999 rather than 0.
+ *
  * Revision 1.21  2008/06/26 15:41:29  tone421
+ *
  * Add getter and setter for vpd z vertex position
  *
  * Revision 1.20  2008/02/20 09:00:48  mvl
