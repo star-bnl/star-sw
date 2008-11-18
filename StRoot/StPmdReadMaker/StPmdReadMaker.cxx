@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.29 2008/01/15 19:32:22 perev Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.30 2008/11/18 12:47:11 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.30  2008/11/18 12:47:11  rashmi
+ *BadChains for dAu added
+ *
  *Revision 1.29  2008/01/15 19:32:22  perev
  *No HOT CELLS, return with error flag
  *
@@ -231,7 +234,9 @@ void StPmdReadMaker::ReadBadChains(Int_t runNo){
   if(Debug())cout<<"runNo="<<runNo<<" year="<<year<<endl;
                                                              
   if(year==8){
-    if(runNo>8143000){
+    if(runNo>8342000){
+      BadChain = PmdClean::BadChain_y8d342;
+    }else if(runNo>8143000){
       BadChain = PmdClean::BadChain_y8d143;
     }else if(runNo>8135000){
       BadChain = PmdClean::BadChain_y8d135;
