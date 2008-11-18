@@ -26,6 +26,9 @@ public:
   int raw_write;  // raw write for tpx
   UINT32 dets_in_run_mask;
 
+  UINT32 tokenZeroTriggers;
+ 
+
   struct evpCfg {
     UINT32 groupdef[TRIGGERS_MAX];  // [trgger_group]
     float rate[TRIGGERS_MAX];   // -1 -> take every one, 0 -> take none
@@ -79,6 +82,15 @@ public:
       if(sys == TRG_SYSTEM) continue;
 
       dets_in_run_mask |= (1<<sys);
+    }
+
+    tokenZeroTriggers = 0;
+
+    for(int i=0;i<MAX_TRIGGERS;i++) {
+      Trigger *t = &cfg->trg_setup.triggers[i];
+      if(t->userdata.tokenZero) {
+	tokenZeroTriggers |= (1<<i);
+      }
     }
 
     return ret;
@@ -178,6 +190,44 @@ public:
     detmask |= (1<<TRG_SYSTEM);
     pay->rtsDetMask = l2h32(detmask);
     
+    return 0;
+  }
+
+  int prepareTokenZeroPayload(gbPayload *pay, int eventNumber)
+  {
+    memset(pay, 0, sizeof(gbPayload));
+
+    // Set event descriptor...  (in big endian)
+    EvtDescData *des = (EvtDescData *)pay->eventDesc;
+    des->TrgToken = b2h16(token);
+    des->actionWdDetectorBitMask = b2h16(dets_in_run_mask);
+    // 
+
+    pay->eventNumber = l2h32(eventNumber);
+    pay->token = 0;
+
+    // The rest should be little endian 
+    pay->L1summary[0] = l2h32(tokenZeroTriggers);
+    pay->L2summary[0] = l2h32(tokenZeroTriggers);
+    pay->L3summary[0] = l2h32(tokenZeroTriggers);
+    pay->evp = l2h32(1);
+    pay->L3summary[3] = pay->evp;
+    
+#ifdef __vxworks
+    struct timespec tm;
+    clock_gettime(CLOCK_REALTIME, &tm);
+    pay->sec = l2h32(tm.tv_sec);
+    pay->usec = l2h32(tm.tv_nsec * 1000);
+#else
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    pay->sec = tm.tv_sec;
+    pay->usec = tm.tv_usec;
+#endif
+
+    detmask = grp2rts_mask(dets_in_run_mask);
+    pay->rtsDetMask = l2h32(detmask);    
+
     return 0;
   }
 };
