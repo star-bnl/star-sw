@@ -12,7 +12,7 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 
-OBJS := daq_bsmd.o
+OBJS := daq_bsmd.o bsmd_reader.o
 
 LIBS = libbsmd.a
 BINS = 
@@ -26,6 +26,16 @@ libbsmd.a : $(OBJS)
 
 # DO NOT DELETE
 
+bsmd_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
+bsmd_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
+bsmd_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
+bsmd_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
+bsmd_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+bsmd_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
+bsmd_reader.o: ../../../../StRoot/RTS/include/rts.h
+bsmd_reader.o: ../DAQ_READER/daq_det.h
+bsmd_reader.o: daq_bsmd.h
+bsmd_reader.o: ../DAQ_EMC/daq_emc.h
 daq_bsmd.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_bsmd.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_bsmd.o: ../SFS/sfs_index.h

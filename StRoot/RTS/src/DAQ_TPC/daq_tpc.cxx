@@ -9,23 +9,23 @@
 
 
 #include <SFS/sfs_index.h>
-#include <RTS_READER/rts_reader.h>
-#include <RTS_READER/daq_dta.h>
+#include <DAQ_READER/daqReader.h>
+#include <DAQ_READER/daq_dta.h>
 
 
 #include "daq_tpc.h"
 
-extern int tpc_reader(char *m, int type, int sec, daq_dta **ddta) ;
+extern int tpc_reader(char *m, tpc_t *tpc, int sec, int flag) ;
 
-daq_tpc::daq_tpc(const char *dname, rts_reader *rts_caller) 
+daq_tpc::daq_tpc(daqReader *rts_caller) 
 {
 	rts_id = TPC_ID ;
-	name = rts2name(rts_id) ;
+	name = sfs_name = rts2name(rts_id) ;
 
 	caller = rts_caller ;
+	if(caller) caller->insert(this, rts_id) ;
 
-	adc = new daq_dta ;
-	cld = new daq_dta ;
+	legacy = new daq_dta ;
 	
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -35,8 +35,7 @@ daq_tpc::~daq_tpc()
 {
 	LOG(DBG,"%s: DEstructor",name) ;
 
-	delete cld ;
-	delete adc ;
+	delete legacy ;
 
 	return ;
 }
@@ -45,15 +44,12 @@ daq_tpc::~daq_tpc()
 
 daq_dta *daq_tpc::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
 {
-
+	if(!present) return 0 ;
 
 	LOG(DBG,"%s: looking for bank %s",name,bank) ;
 
-	if(strcasecmp(bank,"cld")==0) {
-		return handle_cld(sec,row) ;
-	}
-	else if(strcasecmp(bank,"adc")==0) {
-		return handle_adc(sec,row) ;
+	if(strcasecmp(bank,"legacy")==0) {
+		return handle_legacy(sec,row) ;
 	}
 
 
@@ -62,52 +58,43 @@ daq_dta *daq_tpc::get(const char *bank, int sec, int row, int pad, void *p1, voi
 	return 0 ;
 }
 
-
-
-daq_dta *daq_tpc::handle_cld(int sec, int rdo)
+daq_dta *daq_tpc::handle_legacy(int sec, int rdo)
 {
-	int min_sec, max_sec ;
+	int min_s, max_s ;
+	int found_something = 0 ;
 
-	if(sec<=0) {
-		min_sec = 1 ;
-		max_sec = 24 ;
+	if(sec <= 0) {
+		min_s = 1 ;
+		max_s = 24 ;
 	}
 	else {
-		min_sec = max_sec = sec ;
+		min_s = max_s = sec ;
 	}
 
+	legacy->create((max_s-min_s+1)*sizeof(tpc_t),"tpc_t",rts_id,DAQ_DTA_STRUCT(tpc_t)) ;
 
-	cld->create(100,(char *)"cld",TPC_ID,DAQ_DTA_STRUCT(daq_cld)) ;
+	for(int s=min_s;s<=max_s;s++) {
+		int have ;
 
-	for(int i=min_sec;i<=max_sec;i++) {
-		tpc_reader(caller->legacy_p, 1, i, &cld) ;
+		tpc_t *tpc_p = (tpc_t *) legacy->request(1) ;
+		
+		// old tpc_reader wanted sectors counting from 0!!!
+		have = tpc_reader(caller->mem, tpc_p, s-1, m_Debug) ;
+
+		if(have) {
+			found_something = 1 ;
+			legacy->finalize(1,s,0,0) ;	// accept
+		}
+		else {
+			LOG(NOTE,"%s: sector %d: not found",name,s) ;
+		}
+
 	}
 
-	cld->rewind() ;
-	return cld ;
-}
-
-daq_dta *daq_tpc::handle_adc(int sec, int rdo)
-{
-	int min_sec, max_sec ;
-
-	if(sec<=0) {
-		min_sec = 1 ;
-		max_sec = 24 ;
-	}
-	else {
-		min_sec = max_sec = sec ;
-	}
-
-
-	adc->create(100,(char *)"adc_tb",TPC_ID,DAQ_DTA_STRUCT(daq_adc_tb)) ;
-
-	for(int i=min_sec;i<=max_sec;i++) {
-		tpc_reader(caller->legacy_p, 0, i, &adc) ;
-	}
-
-	adc->rewind() ;
-	return adc ;
+	legacy->rewind() ;
+	
+	if(found_something) return legacy ;
+	else return 0 ;
 }
 
 

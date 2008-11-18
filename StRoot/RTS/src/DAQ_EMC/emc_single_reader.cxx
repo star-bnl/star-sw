@@ -45,7 +45,7 @@ char *emc_single_reader(char *e, int *bytes, int rts_id)
 		return 0 ;
 	}
 
-	if(checkBank(emcp->bh.bank_type, hdrs[hdr_ix].emcp)<=0) return 0 ;
+	if(checkBank(emcp->bh.bank_type, hdrs[hdr_ix].emcp)<0) return 0 ;
 
 	off = b2h32(emcp->sec[sec_ix].off) ;
 	len = b2h32(emcp->sec[sec_ix].len) ;
@@ -54,7 +54,7 @@ char *emc_single_reader(char *e, int *bytes, int rts_id)
 
 	struct EMCSECP *emcsecp = (struct EMCSECP *)((u_int *)emcp + off) ;
 
-	if(checkBank(emcsecp->bh.bank_type, hdrs[hdr_ix].secp)<=0) return 0 ;
+	if(checkBank(emcsecp->bh.bank_type, hdrs[hdr_ix].secp)<0) return 0 ;
 
 	// only 1 fiber
 	len = b2h32(emcsecp->fiber[0].len) ;
@@ -64,7 +64,7 @@ char *emc_single_reader(char *e, int *bytes, int rts_id)
 
 	struct EMCRBP *emcrbp = (struct EMCRBP *)((u_int *)emcsecp + off) ;
 
-	if(checkBank(emcrbp->bh.bank_type, hdrs[hdr_ix].rbp)<= 0) return 0 ;
+	if(checkBank(emcrbp->bh.bank_type, hdrs[hdr_ix].rbp)< 0) return 0 ;
 
 	// raw data is in bank 0
 	len = b2h32(emcrbp->banks[0].len) ;
@@ -74,11 +74,11 @@ char *emc_single_reader(char *e, int *bytes, int rts_id)
 
 	struct DUMMYDATA *emcadc = (DUMMYDATA *) ((u_int *)emcrbp + off) ;
 
-	if(checkBank(emcadc->bh.bank_type, hdrs[hdr_ix].adc)<=0) return 0 ;
+	if(checkBank(emcadc->bh.bank_type, hdrs[hdr_ix].adc)<0) return 0 ;
 
 	
 	*bytes = l2h32(emcadc->bh.length)*4 - 40 ;	// length is in words but includes the bankHeader
-	return ((char *)emcadc + 40) ;			// skip the 40 bytes bankHeader
+	return ((char *)emcadc + 40 + 4) ;			// skip the 40 bytes bankHeader + 4 bytes dummy word due to DAQ's RBs
 }
 
 

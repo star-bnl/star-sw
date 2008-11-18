@@ -38,7 +38,7 @@ daq_l3.o: daq_l3.h
 daq_l3.o: ../DAQ_READER/daq_det.h
 daq_l3.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_l3.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_l3.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+daq_l3.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 daq_l3.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 l3_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 l3_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
@@ -47,10 +47,10 @@ l3_reader.o: daq_l3.h
 l3_reader.o: ../DAQ_READER/daq_det.h
 l3_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 l3_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-l3_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+l3_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 l3_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 daq_l3.o: ../DAQ_READER/daq_det.h
 daq_l3.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_l3.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_l3.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+daq_l3.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 daq_l3.o: ../../../../StRoot/RTS/include/L3/L3Formats.h

@@ -8,18 +8,21 @@
 
 
 struct bsmd_t {
-	short adc[BSMD_FIBERS][BSMD_DATSIZE] ;
-	char  cap[BSMD_FIBERS] ;	// capacitor
+	short adc[BSMD_DATSIZE] ;
+	u_char  cap ;	// capacitor
 } ;
 
 
 class daq_bsmd : public daq_det {
 private:
-	class daq_dta *handle_raw() ;
-	class daq_dta *handle_adc() ;
+	class daq_dta *handle_adc(int rdo) ;
+	class daq_dta *handle_adc_non_zs(int rdo) ;
+	class daq_dta *handle_ped_rms(int rdo) ;
 
-	class daq_dta *raw ;	// "raw"
+
 	class daq_dta *adc ;	// "adc"
+	class daq_dta *adc_non_zs ;
+	class daq_dta *ped_rms ;	
 
 
 	static const char *help_string ;
@@ -42,5 +45,12 @@ public:
 
 } ;
 
+// internal support
+struct bsmd_desc {
+	char *dta[BSMD_FIBERS][3] ;	//0 is non-ZS, 1 is ZS, 2 is PED
+	int   bytes[BSMD_FIBERS][3] ;
+} ;
+
+extern char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d) ;
 
 #endif	// _DAQ_BSMD_H_

@@ -59,6 +59,10 @@ struct daq_det_gain {
 	float t0 ;
 } ;
 
+struct daq_det_pedrms {
+	float rms ;
+	u_short ped ;
+} ;
 
 size_t daq_dta_dict(const char *det, const char *bank) ;
 

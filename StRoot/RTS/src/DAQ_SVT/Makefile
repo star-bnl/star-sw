@@ -30,13 +30,20 @@ libsvt.a : $(OBJS)
 
 daq_svt.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_svt.o: ../../../../StRoot/RTS/include/rtsSystems.h
+daq_svt.o: ../DAQ_READER/daqReader.h
+daq_svt.o: ../DAQ_READER/daq_dta.h
+daq_svt.o: ../../../../StRoot/RTS/include/rts.h
+daq_svt.o: ../DAQ_READER/daq_dta_structs.h
 daq_svt.o: daq_svt.h
+daq_svt.o: ../DAQ_READER/daq_det.h
 svt_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 svt_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-svt_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+svt_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 svt_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 svt_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 svt_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 svt_reader.o: ../../../../StRoot/RTS/include/rts.h
+svt_reader.o: ../DAQ_READER/daq_det.h
 svt_reader.o: ../../../../StRoot/RTS/include/SVT/key_map.h
 svt_reader.o: daq_svt.h
+daq_svt.o: ../DAQ_READER/daq_det.h

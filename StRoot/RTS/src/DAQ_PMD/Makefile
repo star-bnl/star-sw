@@ -38,13 +38,13 @@ daq_pmd.o: daq_pmd.h
 daq_pmd.o: ../DAQ_READER/daq_det.h
 daq_pmd.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_pmd.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_pmd.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+daq_pmd.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 daq_pmd.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 pmd_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 pmd_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 pmd_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 pmd_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-pmd_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+pmd_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 pmd_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 pmd_reader.o: ../../../../StRoot/RTS/include/rts.h
 pmd_reader.o: daq_pmd.h
@@ -52,5 +52,5 @@ pmd_reader.o: ../DAQ_READER/daq_det.h
 daq_pmd.o: ../DAQ_READER/daq_det.h
 daq_pmd.o: ../../../../StRoot/RTS/include/daqFormats.h
 daq_pmd.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-daq_pmd.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+daq_pmd.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 daq_pmd.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
