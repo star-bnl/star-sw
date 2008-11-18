@@ -10,6 +10,10 @@
 #define BTOW_PRESIZE	4
 #define BTOW_DATSIZE	160
 
+//BARREL SMD constants
+#define BSMD_FIBERS	12
+#define BSMD_DATSIZE	4800
+
 // ENDCAP Tower constants; from Piotr
 #define ETOW_MAXFEE      6
 #define ETOW_PRESIZE     4
@@ -64,9 +68,11 @@ struct emc_t {
 
 } ;
 
+extern char *getEmcTrgData(char *input, int idx, int *bytes) ;
+extern char *emc_single_reader(char *e, int *bytes, int rts_id) ;
 
 extern int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[12], int bytes[12]) ;
-extern int emc_presence(char *datap, int rts_id) ;
+
 
 
 class daq_emc : public daq_det {

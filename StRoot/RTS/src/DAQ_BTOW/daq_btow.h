@@ -19,7 +19,6 @@ private:
 
 	class daq_dta *raw ;
 	class daq_dta *adc ;
-
 	
 	static const char *help_string ;
 

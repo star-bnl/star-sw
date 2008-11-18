@@ -17,12 +17,12 @@ const char *daq_trg::help_string = "TRG tst\n" ;
 
 daq_trg::daq_trg(daqReader *rts_caller) : daq_det(rts_caller)
 {
-	LOG(TERR,"TRG: rts_id %d, name %s, caller %p",rts_id,name,caller) ;
+	LOG(DBG,"TRG: rts_id %d, name %s, caller %p",rts_id,name,caller) ;
 
 	// dname is ignored 
 	rts_id  = TRG_ID ;
 	name = rts2name(rts_id) ;
-	sfs_name = name ;	// for now!
+	sfs_name = "trg" ;
 	
 	caller = rts_caller ;
 	if(caller) caller->insert(this, rts_id) ;

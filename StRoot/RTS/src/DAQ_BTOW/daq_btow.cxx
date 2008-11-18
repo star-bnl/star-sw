@@ -14,10 +14,7 @@
 
 #include <DAQ_EMC/daq_emc.h>	// need this for the old style stuff...
 
-
 #include "daq_btow.h"
-
-
 
 
 const char *daq_btow::help_string = "BTOW tst\n" ;
@@ -29,7 +26,6 @@ daq_btow::daq_btow(daqReader *rts_caller)
 
 	LOG(DBG,"BTOW: rts_id %d, name %s",rts_id,name) ;
 
-	// dname is ignored 
 	rts_id  = BTOW_ID ;
 	name = rts2name(rts_id) ;
 	sfs_name = "btow" ;
@@ -58,6 +54,8 @@ int daq_btow::Make()
 	int dummy ;
 
 	present = 0 ;	// assume not...
+
+
 	assert(caller) ;
 	
 	evt_num++ ;
@@ -74,7 +72,22 @@ int daq_btow::Make()
 		present |= 4 ;
 	}
 
-	if(present) LOG(NOTE,"%s: found, present: 0x%X",name,present) ;
+	switch(present) {
+	case 1 :
+		LOG(TERR,"%s: %d: has DATAP",name,evt_num) ;
+		break ;
+	case 2 :
+		LOG(TERR,"%s: %d: has SFS(%s)",name,evt_num,sfs_name) ;
+		break ;
+	case 4 :
+		LOG(TERR,"%s: %d: has DATAP within Trigger",name,present) ;
+		break ;
+	default:
+		LOG(NOTE,"%s: not present",name) ;
+		break ;
+	}
+
+
 
 	return present ;
 
@@ -103,42 +116,48 @@ daq_dta *daq_btow::handle_raw()
 {
 	char *from, *st ;
 	int bytes ;
-	
+	char str[256] ;	
+	char *full_name = "?" ;	// just a dummy...
+
+	from = 0 ;
+	full_name = "?" ;
+
 	assert(caller) ;
 
-	raw->create(1,"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
-	if(present & 2) {	// datap...		
-		from = emc_single_reader(caller->mem, &bytes, rts_id) ;	
+	if(present & 1) {	// datap...		
+		char *mem = (char *) legacyDetp(rts_id, caller->mem) ;
+		from = emc_single_reader(mem, &bytes, rts_id) ;	
 		if(from == 0) return 0 ;
+
 	}
 	else if(present & 4) {
 		from = getEmcTrgData(caller->mem,1,&bytes) ;
 		if(from == 0) return 0 ;
+
 	}
 	else {
-		char str[256] ;
-		char *full_name ;
-
 		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name,1,1) ;
 		full_name = caller->get_sfs_name(str) ;
 		if(!full_name) return 0 ;
 
 		bytes = caller->sfs->fileSize(full_name) ;
 
-		st = (char *) raw->request(bytes) ;
+	}
 
-		int ret = caller->sfs->read(str, st, bytes) ;
+	raw->create(bytes,"btow_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+	st = (char *) raw->request(bytes) ;
+
+	if(present & 2) {	// from SFS...
+		int ret = caller->sfs->read(full_name, st, bytes) ;
 		if(ret != bytes) {
 			LOG(ERR,"ret is %d") ;
 		}
-		goto done ;
 	}
-
-	st = (char *)raw->request(bytes) ;
-	memcpy(st, from, bytes) ;
-
-	done: ;
+	else {
+		assert(from) ;
+		memcpy(st, from, bytes) ;
+	}
 
 	raw->finalize(bytes,1,1,0) ;
 	raw->rewind() ;

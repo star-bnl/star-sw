@@ -7,26 +7,44 @@
 
 
 
-
 #include <SFS/sfs_index.h>
-#include <RTS_READER/rts_reader.h>
-#include <RTS_READER/daq_dta.h>
+#include <DAQ_READER/daqReader.h>
+#include <DAQ_READER/daq_dta.h>
 
 
 #include "daq_esmd.h"
 
-extern int emc_reader(char *m, int rts_id, char *retval[12], int retbytes[12]) ;
+int esmd_crate_map[] = {
+  0x40, 0x41, 0x42, 0x43,
+  0x44, 0x45, 0x46, 0x47,
+  0x48, 0x49, 0x4a, 0x4b,
+  0x4c, 0x4d, 0x4e, 0x4f,
+  0x50, 0x51, 0x52, 0x53,
+  0x54, 0x55, 0x56, 0x57,
+  0x58, 0x59, 0x5a, 0x5b,
+  0x5c, 0x5d, 0x5e, 0x5f,
+  0x60, 0x61, 0x62, 0x63,
+  0x64, 0x65, 0x66, 0x67,
+  0x68, 0x69, 0x6a, 0x6b,
+  0x6c, 0x6d, 0x6e, 0x6f
+};
 
-daq_esmd::daq_esmd(const char *dname, rts_reader *rts_caller) 
+const char *daq_esmd::help_string = "ESMD\n\
+adc	returns esmd_t;\n\
+raw	returns raw data\n" ;
+
+
+daq_esmd::daq_esmd(daqReader *rts_caller) 
 {
 	rts_id = ESMD_ID ;
 	name = rts2name(rts_id) ;
-
+	sfs_name = "esmd" ;
 	caller = rts_caller ;
+	
+	if(caller) caller->insert(this, rts_id) ;
 
 	raw = new daq_dta ;
 	adc = new daq_dta ;
-	preamble = new daq_dta ;
 	
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -38,7 +56,6 @@ daq_esmd::~daq_esmd()
 
 	delete raw ;
 	delete adc ;
-	delete preamble ;
 
 	return ;
 }
@@ -47,18 +64,14 @@ daq_esmd::~daq_esmd()
 
 daq_dta *daq_esmd::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
 {
+	if(present == 0) return 0 ;
 
-
-	LOG(DBG,"%s: looking for bank %s",name,bank) ;
 
 	if(strcasecmp(bank,"raw")==0) {
 		return handle_raw() ;
 	}
 	else if(strcasecmp(bank,"adc")==0) {
 		return handle_adc() ;
-	}
-	else if(strcasecmp(bank,"preamble")==0) {
-		return handle_preamble() ;
 	}
 
 
@@ -70,87 +83,87 @@ daq_dta *daq_esmd::get(const char *bank, int sec, int row, int pad, void *p1, vo
 
 daq_dta *daq_esmd::handle_raw()
 {
-	char str[128] ;
+	char *from , *st ;
 	int bytes ;
-	char *fiber_p[12] ;
-	int fiber_bytes[12] ;
-	int in_legacy ;
-	int ret ;
 
-	// bring in the bacon from the SFS file....
-	assert(caller) ;
+	assert(caller) ;	// sanity...
 
-	if(!presence()) {	// not in SFS
-		
-		// try legacy DATAP
-		if(emc_reader(caller->legacy_p, rts_id, fiber_p, fiber_bytes)==0) {	// not in legacy
-			return 0 ;
-		}
 
-		bytes = fiber_bytes[0] ;
-		in_legacy = 1 ;		
-		
+
+	if(!present) {
+		LOG(ERR,"%s: not present?",name) ;
+		return 0 ;
 	}
 	else {
-		sprintf(str,"%s/%s/sec%02d/rb%02d/raw",caller->fs_cur_evt, name, 1, 1) ;
+		LOG(DBG,"%s: present %d",name,present) ;
+	}
 
-		LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
+	if(present & 1) {	// in datap!
+		char *mem = (char *)legacyDetp(rts_id, caller->mem) ;
+		from = emc_single_reader(mem, &bytes, rts_id) ;
+		if(from == 0) return 0 ;
 
-		bytes = caller->sfs->fileSize(str) ;	// this is bytes
+		raw->create(bytes,"esmd_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+		st = (char *) raw->request(bytes) ;
+		
+		memcpy(st, from, bytes) ;
 
-		LOG(DBG,"Got %d",bytes) ;
+	}
+	else {	// SFS
+		char str[256] ;
+		char *full_name ;
 
-		if(bytes <= 0) {
-			LOG(NOTE,"%s: %s: not found in this event",name,str) ;
-			return 0  ;
+		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, 1, 1) ;
+		full_name = caller->get_sfs_name(str) ;
+		
+		if(!full_name) return 0 ;
+
+		bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		raw->create(bytes,"esmd_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+		st = (char *) raw->request(bytes) ;
+		
+		int ret = caller->sfs->read(str, st, bytes) ;
+		if(ret != bytes) {
+			LOG(ERR,"ret is %d") ;
 		}
-
-		in_legacy = 0 ;
 	}
 
 	
-	raw->create(bytes,(char *)name,rts_id,DAQ_DTA_STRUCT(u_short)) ;
-
-
-	char *st = (char *) raw->request(bytes/2) ;
-
-	if(in_legacy) {
-		memcpy(st, fiber_p[0], bytes) ;
-		ret = bytes ;
-	}
-	else {
-		ret = caller->sfs->read(str, st, bytes) ;
-	}
-
-	if(ret != bytes) {
-		LOG(ERR,"%s: error in read",name) ;
-		return 0 ;
-	}
-
-	raw->finalize(ret/2,1,1,0) ;	// sector 1; rdo 1; pad irrelevant...
-
-
+	raw->finalize(bytes,1,1,0) ;	// sector 1; rdo 1; pad irrelevant...
 	raw->rewind() ;
+
 	return raw ;
+	
 }
+
+	
 
 daq_dta *daq_esmd::handle_adc()
 {
-	u_short (*data)[192] ;
-	int max_fee ;
-	int ix ;
+	u_short *raw_dta ;
 
-	if(handle_raw()==0) return 0 ;
+	daq_dta *dd = handle_raw() ;
 
+	LOG(DBG,"%s: got raw %p",name,dd) ;
 
-	adc->create(raw->ncontent*2,(char *)name, rts_id, DAQ_DTA_STRUCT(u_short)) ;
+	if(dd && dd->iterate()) {
+		raw_dta = (u_short *) dd->Byte ;
+	}
+	else {
+		return 0 ;
+	}
 
+	adc->create(1,"esmd_adc", rts_id, DAQ_DTA_STRUCT(esmd_t)) ;
 
-	data = (u_short (*)[192]) adc->request(48*192) ;	// objecst
+	esmd_t *esmd_p = (esmd_t *) adc->request(1) ;	// 1 object
 
-	// FY04 data has only 30 instead of 48 so we need to zap this
-	memset(data,0,sizeof(short)*48*192) ;	
+	u_short *data = (u_short *)((u_int)raw_dta + 4 + 128) ;	// move to data start
+
+	// FY04 data has only 30 instead of 48 so we need to zap all...
+	memset(esmd_p,0,sizeof(esmd_t)) ;	
 	
+	int max_fee ;
 	if(raw->ncontent < (48*192)) {	// FY04 data
 		max_fee = 30 ;
 	}
@@ -158,74 +171,44 @@ daq_dta *daq_esmd::handle_adc()
 		max_fee = 48 ;
 	}
 
-	// skip preamble and header (64)
-	ix = 64 + max_fee * 4 ;
 	
-	for(int j=0;j<192;j++) {
+
+	
+	for(int j=0;j<ESMD_PRESIZE;j++) {
 		for(int i=0;i<max_fee;i++) {
-			data[i][j] = raw->Short[ix++] ;
+			esmd_p->preamble[i][j] = l2h16(*data++) ;
 		}
 	}
 
-	adc->finalize(48*192,1,1,0) ;
+	for(int j=0;j<ESMD_DATSIZE;j++) {
+		for(int i=0;i<max_fee;i++) {
+			esmd_p->adc[i][j] = l2h16(*data++) ;
+		}
+	}
+
+
+
+	adc->finalize(1,1,1,0) ;
 
 	adc->rewind() ;
 
 	return adc ;
 }
 
-daq_dta *daq_esmd::handle_preamble()
-{
-	u_short (*data)[4] ;
-	int max_fee ;
-	int ix ;
-
-	if(handle_raw()==0) return 0 ;
-
-
-	preamble->create(raw->ncontent*2,(char *)name, rts_id, DAQ_DTA_STRUCT(u_short)) ;
-
-
-	data = (u_short (*)[4]) preamble->request(48*4) ;	// objecst
-
-	// FY04 data has only 30 instead of 48 so we need to zap this
-	memset(data,0,sizeof(short)*48*4) ;	
-	
-	if(raw->ncontent < (48*192)) {	// FY04 data
-		max_fee = 30 ;
-	}
-	else {
-		max_fee = 48 ;
-	}
-
-	// skip header (64)
-	ix = 64  ;
-	
-	for(int j=0;j<4;j++) {
-		for(int i=0;i<max_fee;i++) {
-			data[i][j] = raw->Short[ix++] ;
-		}
-	}
-
-	preamble->finalize(48*4,1,1,0) ;
-
-	preamble->rewind() ;
-
-	return preamble ;
-
-}
 
 int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt)
 {
 	u_short *us = (u_short *)buff ;
 
+	// L0 part
 	trg[0].t = l2h16(us[2])*256 + l2h16(us[3]) ;
 	trg[0].daq = 0 ;
-	trg[0].trg = 4 ;	// ESMD does not give the correct L0, only L2
+	trg[0].trg = 4 ;	// ESMD does not give the correct L0, only L2 so we invent 4
 	trg[0].rhic = l2h16(us[4]) ;
 	
-	trg[1].t = trg[0].t ;
-	trg[1].trg = us[0] ;
+	// L2 part
+	trg[1].t = trg[0].t ;	// copy over token
+	trg[1].trg = us[0] ;	// this is where the trg cmd ought to be
 	trg[1].daq = us[1] ;
 	trg[1].rhic = trg[0].rhic + 1 ;
 

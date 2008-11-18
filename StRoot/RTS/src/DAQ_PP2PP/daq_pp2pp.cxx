@@ -6,13 +6,13 @@
 #include <rtsSystems.h>
 
 #include <SFS/sfs_index.h>
-#include <RTS_READER/daq_dta.h>
-#include <RTS_READER/rts_reader.h>
+#include <DAQ_READER/daq_dta.h>
+#include <DAQ_READER/daqReader.h>
 
 #include "daq_pp2pp.h"
 
 
-// temporary going back to 1.2!
+
 
 
 
@@ -20,21 +20,25 @@ const char *daq_pp2pp::help_string = "\
 \n\
 PP2PP Help: \n\
 Supported Banks: \n\
-	raw	returns=ptr of start of DDL data; c1=sector[1..2]; c2=rdo[0..0]; \n\
+	raw	returns=ptr of start of DDL data; c1=pp[1..2]; \n\
+	adc	returns=ptr of ADC data; c1=pp[1..2]; \n\
 \n\
 \n\
 " ;
 
 
 
-daq_pp2pp::daq_pp2pp(const char *dname, rts_reader *rts_caller) 
+daq_pp2pp::daq_pp2pp(daqReader *rts_caller) 
 {
 	rts_id = PP_ID ;
-	name = rts2name(rts_id) ;
-
-	raw = new daq_dta ;
-
+	sfs_name = name = rts2name(rts_id) ;
 	caller = rts_caller ;
+#ifndef PP_MVME
+	if(caller) caller->insert(this, rts_id) ;
+#endif
+	
+	raw = new daq_dta ;
+	adc = new daq_dta ;
 	
 
 	LOG(DBG,"%s: constructor: caller %p, endianess %d",name,rts_caller,endianess) ;
@@ -43,8 +47,9 @@ daq_pp2pp::daq_pp2pp(const char *dname, rts_reader *rts_caller)
 
 daq_pp2pp::~daq_pp2pp() 
 {
-	LOG(DBG,"%s: DEstructor",name) ;
-	delete raw ;
+	LOG(DBG,"%s: Destructor",name) ;
+	if(raw) delete raw ;
+	if(adc) delete adc ;
 
 	return ;
 }
@@ -53,13 +58,16 @@ daq_pp2pp::~daq_pp2pp()
 
 daq_dta *daq_pp2pp::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
 {
-	if(!presence()) return 0 ;	// this det is not in this event...
+	if(!present) return 0 ;	// this det is not in this event...
 
 
 	LOG(DBG,"%s: looking for bank %s",name,bank) ;
 
 	if(strcasecmp(bank,"raw")==0) {
 		return handle_raw(sec,row) ;		// actually sec, rdo; r1 is the number of bytes
+	}
+	else if(strcasecmp(bank,"adc")==0) {
+		return handle_adc(sec, row) ;
 	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
@@ -68,11 +76,55 @@ daq_dta *daq_pp2pp::get(const char *bank, int sec, int row, int pad, void *p1, v
 	return 0 ;
 }
 
+daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
+{
+	int min_sec, max_sec ;
+
+	// sanity
+	if(sec==-1) {
+		min_sec = 1 ;
+		max_sec = MAX_SEC ;
+	}
+	else if((sec<0) || (sec>MAX_SEC)) return 0 ;
+	else {
+		min_sec = max_sec = sec ;
+	}
+
+//	adc->create(8192,"adc",rts_id,DAQ_DTA_STRUCT(daq_adc_rb)) ;
+
+	for(int i=min_sec;i<=max_sec;i++) {
+		daq_dta *sec_dta ;
+
+		sec_dta = handle_raw(sec, -1) ;	// rdo is ignored...
+		if(sec_dta == 0) continue ;
+
+		int ret = sec_dta->iterate() ;
+		if(ret == 0) continue ;
+
+		if(sec_dta->ncontent == 0) continue ;
+
+
+		//u_int *dta = (u_int *) sec_dta->Byte ;
+		int words = sec_dta->ncontent / 4 ;
+
+		LOG(TERR,"pp2pp adc: sector %d, words %d",i,words) ;
+
+		// extract module
+		
+
+	}
+
+	adc->rewind() ;
+
+	return adc ;
+}
 
 
 daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 {
 	char str[128] ;
+	char *full_name ;
+
 	int tot_bytes ;
 	int min_rdo, max_rdo ;
 	int min_sec, max_sec ;
@@ -101,6 +153,9 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 		min_rdo = max_rdo = rdo ;
 	}
 
+#ifdef PP_MVME
+	return 0 ;
+#else
 	// bring in the bacon from the SFS file....
 	assert(caller) ;
 
@@ -110,8 +165,10 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 	for(int s=min_sec;s<=max_sec;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
 	
-		sprintf(str,"%s/%s/sec%02d/rb%02d/raw",caller->fs_cur_evt, "pp2pp", s, r) ;
-	
+		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, s, r) ;
+		full_name = caller->get_sfs_name(str) ;
+		if(!full_name) continue ;
+
 		LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
 
 		int size = caller->sfs->fileSize(str) ;	// this is bytes
@@ -139,32 +196,30 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 
 	for(int i=0;i<o_cou;i++) {
 
-		sprintf(str,"%s/%s/sec%02d/rb%02d/raw",caller->fs_cur_evt, "pp2pp", obj[i].sec, obj[i].rb) ;
+		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, obj[i].sec, obj[i].rb) ;
+		full_name = caller->get_sfs_name(str) ;
+		if(!full_name) continue ;
 
-		daq_store *st = raw->get() ;
+		char *mem = (char *)raw->request(obj[i].bytes) ;
 
-		st->sec = obj[i].sec ;
-		st->row = obj[i].rb ;
-		st->nitems = obj[i].bytes ;
+		int ret = caller->sfs->read(full_name, mem, obj[i].bytes) ;
 
-		char *mem = (char *)(st + 1) ;
-
-		int ret = caller->sfs->read(str, mem, st->nitems) ;
-
-                if(ret != (int)st->nitems) {
+                if(ret != (int)obj[i].bytes) {
                         LOG(ERR,"%s: %s: read failed, expect %d, got %d [%s]",name,str,
-                                st->nitems,ret,strerror(errno)) ;
+                                obj[i].bytes,ret,strerror(errno)) ;
                 }
                 else {
                         LOG(NOTE,"%s: %s read %d bytes",name,str,ret) ;
-                        raw->commit() ;
-                }
 
+                }
+		
+		raw->finalize(obj[i].bytes, obj[i].sec, obj[i].rb, 0) ;
 
 	}
 
 	raw->rewind() ;
 	return raw ;
+#endif
 }
 
 int daq_pp2pp::get_token(char *addr, int words)
@@ -186,7 +241,10 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 	u_int *d = (u_int *)addr ;
 	int t_cou = 0 ;
 	u_int datum ;
+	int trg_cou ;
+	u_int *trg_dta ;
 
+#ifdef OLDOLDOLD
 	// for now:
 	datum = d[1] ;
 	datum = swap32(datum) ;	// endianess swap
@@ -214,7 +272,82 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
         trgs[t_cou].rhic = 1 ;
         trgs[t_cou].rhic_delta = 1 ;
         t_cou++ ;
+#endif
 
-	
+	if(prompt) {
+
+		LOG(TERR,"words %d: dta 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",words,d[0],d[1],d[2],d[3],d[4]) ;
+
+	}
+	// get count
+	trg_cou = d[words-1] ;
+	// move to start
+	trg_dta = &(d[words-1-trg_cou]) ;
+
+	for(int i=0;i<trg_cou;i++) {
+		datum = trg_dta[i] ;
+		
+		if((datum & 0xFF000000) == 0xEE000000) {	// prompt
+
+			trgs[t_cou].t = (datum&0xF00) | ((datum & 0xF000)>>8) | ((datum & 0xF0000)>>16);
+			trgs[t_cou].daq = (datum>>4) & 0xF ;
+			trgs[t_cou].trg = datum & 0xF ;
+			trgs[t_cou].rhic = 0 ;
+			trgs[t_cou].rhic_delta = 0 ;
+
+			if(prompt) {
+				LOG(TERR,"T %4d (prompt): daq %d, trg %d",trgs[t_cou].t,trgs[t_cou].daq,trgs[t_cou].trg) ;
+			}
+
+			t_cou++ ;
+			break ;
+		}
+
+	}
+
+	if(t_cou == 0) {	// no prompt contrib! invent token 4097
+
+		trgs[t_cou].t = 4097 ;
+		trgs[t_cou].daq = 0 ;
+		trgs[t_cou].trg = 5 ;
+		trgs[t_cou].rhic = 0 ;
+		trgs[t_cou].rhic_delta = 0 ;
+
+		if(prompt) {
+			LOG(TERR,"T %4d (no data): daq %d, trg %d",trgs[t_cou].t,trgs[t_cou].daq,trgs[t_cou].trg) ;
+		}
+
+		t_cou++ ;
+
+
+	}
+
+	for(int i=0;i<trg_cou;i++) {
+		datum = trg_dta[i] ;
+		
+		if((datum & 0xFF000000) != 0xEE000000) {	// FIFO!
+
+			trgs[t_cou].t = (datum&0xF00) | ((datum & 0xF000)>>8) | ((datum & 0xF0000)>>16);
+			trgs[t_cou].daq = (datum>>4) & 0xF ;
+			trgs[t_cou].trg = datum & 0xF ;
+			trgs[t_cou].rhic = 1 ;
+			trgs[t_cou].rhic_delta = 1 ;
+
+			if(prompt) {
+				LOG(TERR,"T %4d (FIFO): daq %d, trg %d",trgs[t_cou].t,trgs[t_cou].daq,trgs[t_cou].trg) ;
+			}
+
+			if(trgs[t_cou].t == 0) {
+				LOG(ERR,"T %4d (FIFO): daq %d, trg %d -- token 0, skipping",trgs[t_cou].t,trgs[t_cou].daq,trgs[t_cou].trg) ;
+			}
+			else {
+				t_cou++ ;
+			}
+		}
+
+	}
+
+
+
 	return t_cou ;	
 }

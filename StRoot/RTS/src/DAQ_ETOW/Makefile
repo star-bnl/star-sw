@@ -26,3 +26,19 @@ libs: $(LIBS)
 libetow.a : $(OBJS)
 	@$(RTS_AR)
 
+# DO NOT DELETE
+
+daq_etow.o: ../../../../StRoot/RTS/include/rtsLog.h
+daq_etow.o: ../../../../StRoot/RTS/include/rtsSystems.h
+daq_etow.o: ../SFS/sfs_index.h
+daq_etow.o: ../SFS/fs_index.h
+daq_etow.o: ../SFS/sfs_base.h
+daq_etow.o: ../DAQ_READER/daqReader.h
+daq_etow.o: ../DAQ_READER/daq_dta.h
+daq_etow.o: ../../../../StRoot/RTS/include/rts.h
+daq_etow.o: ../DAQ_READER/daq_dta_structs.h
+daq_etow.o: ../DAQ_EMC/daq_emc.h
+daq_etow.o: ../DAQ_READER/daq_det.h
+daq_etow.o: daq_etow.h
+daq_etow.o: ../DAQ_READER/daq_det.h
+daq_etow.o: ../DAQ_EMC/daq_emc.h

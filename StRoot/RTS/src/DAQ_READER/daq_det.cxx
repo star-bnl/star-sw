@@ -85,7 +85,7 @@ int daq_det::Make()
 
 	if(present) {
 		evt_num++ ;
-		LOG(TERR,"%s: %d: has DATAP: %s; has SFS(%s): %s",name,evt_num,(present&1)?"YES":"NO",sfs_name,(present&2)?"YES":"NO") ;
+		LOG(NOTE,"%s: %d: has DATAP: %s; has SFS(%s): %s",name,evt_num,(present&1)?"YES":"NO",sfs_name,(present&2)?"YES":"NO") ;
 	}
 	else {
 		LOG(NOTE, "%s: not found",name) ;

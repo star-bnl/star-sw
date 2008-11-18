@@ -70,11 +70,21 @@ int daq_etow::Make()
 	else if(legacyDetp(rts_id, caller->mem)) {	// directly in DATAP
 		present |= 1 ;
 	}
-	else if(getEmcTrgData(caller->mem,1,&dummy)) {	// perhaps in the old TRG bank (FY08); ETOW has index 1!
+	else if(getEmcTrgData(caller->mem,2,&dummy)) {	// perhaps in the old TRG bank (FY08); ETOW has index 1!
 		present |= 4 ;
 	}
 
-	if(present) LOG(NOTE,"%s: found, present: 0x%X",name,present) ;
+	switch(present) {
+	case 1 :
+		LOG(TERR,"%s: %d: has DATAP",name,evt_num) ;
+		break ;
+	case 2 :
+		LOG(TERR,"%s: %d: has SFS(%s)",name,present,evt_num) ;
+		break ;
+	case 4 :
+		LOG(TERR,"%s: %d: has DATAP within Trigger",name,evt_num) ;
+		break ;
+	}
 
 	return present ;
 
@@ -106,14 +116,16 @@ daq_dta *daq_etow::handle_raw()
 	
 	assert(caller) ;
 
-	raw->create(1,"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
-	if(present & 2) {	// datap...		
-		from = emc_single_reader(caller->mem, &bytes, rts_id) ;	
+
+	if(present & 1) {	// datap...		
+		char *mem = (char *)legacyDetp(rts_id, caller->mem) ;
+		from = emc_single_reader(mem, &bytes, rts_id) ;	
 		if(from == 0) return 0 ;
+
 	}
 	else if(present & 4) {
-		from = getEmcTrgData(caller->mem,0,&bytes) ;	// etow is index "0"
+		from = getEmcTrgData(caller->mem,2,&bytes) ;	// etow is index "0"
 		if(from == 0) return 0 ;
 	}
 	else {
@@ -126,6 +138,8 @@ daq_dta *daq_etow::handle_raw()
 
 		bytes = caller->sfs->fileSize(full_name) ;
 
+		raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
+
 		st = (char *) raw->request(bytes) ;
 
 		int ret = caller->sfs->read(str, st, bytes) ;
@@ -135,6 +149,7 @@ daq_dta *daq_etow::handle_raw()
 		goto done ;
 	}
 
+	raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 	st = (char *)raw->request(bytes) ;
 	memcpy(st, from, bytes) ;
 

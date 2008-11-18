@@ -20,7 +20,7 @@
 
 
 
-static char *getEmcTrgData(char *input, int idx, int *bytes) ;
+//static char *getEmcTrgData(char *input, int idx, int *bytes) ;
 
 static int readBTOW(u_short *_data, int token);
 static int readETOW(u_short *_data, int token);
@@ -57,61 +57,7 @@ static char *inst2char(int inst)
 
 */
 
-/*
-int emc_presence(char *datap_m, int rts_id)
-{
-	int emc_id ;
 
-	if(datap_m == 0) return 0 ;
-
-	switch(rts_id) {
-	case BTOW_ID :
-	case ETOW_ID :
-		emc_id = rts_id ;
-		break ;	// no nothing, all is well
-	case BSMD_ID :
-		emc_id = BTOW_ID ;
-		break ;
-	case ESMD_ID :	
-		emc_id = ETOW_ID ;
-		break ;
-	default:
-		return 0 ;	// not EMC...
-	}
-
-
-
-	switch(rts_id) {
-	case BTOW_ID :
-		if(getEmcTrgData(datap_m, BTOW_INDEX)) return 4 ;	// found ya!
-		break ;
-	case ETOW_ID :
-		if(getEmcTrgData(datap_m, ETOW_INDEX)) return 4 ;	// found ya!
-		break ;
-	}
-
-	EMCP *emcp = (EMCP *)legacyDetp(rts_id, datap_m) ;
-	if(emcp == 0) return 0 ;	// no EMCs at all...
-
-	// OK, so there is a DATAP, let's check...
-	switch(rts_id) {
-	case BTOW_ID :
-		if(emcp->sec[0].len) return 1 ;
-		break ;
-	case BSMD_ID :
-		if(emcp->sec[1].len) return 1 ;
-		break ;
-	case ETOW_ID :
-		if(emcp->sec[0].len) return 1 ;
-		break ;
-	case ESMD_ID :
-		if(emcp->sec[1].len) return 1 ;
-		break ;
-	}
-
-	return 0 ;	// not found...
-}
-*/
 
 static struct emc_describe_t {
 	int id ;
@@ -724,6 +670,7 @@ char *getEmcTrgData(char *input, int idx, int *bytes)
   int len, off ;
 
   if(idx < 0) return 0 ;
+  if(datap == 0) return 0 ;
 
   int swapdatap=0;
   int swaptrgp=0;

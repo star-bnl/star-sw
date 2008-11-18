@@ -39,7 +39,7 @@ daq_sc.o: ../DAQ_READER/daq_det.h
 sc_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 sc_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 sc_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-sc_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+sc_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 sc_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 sc_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 sc_reader.o: ../../../../StRoot/RTS/include/rts.h

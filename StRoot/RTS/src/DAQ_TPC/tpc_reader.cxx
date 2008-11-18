@@ -4,36 +4,31 @@
 #include <daqFormats.h>
 #include <rtsSystems.h>
 #include <rtsLog.h>
-
-
-
+#include <rts.h>
 
 
 #define ROWS 45
 #define PADS_PER_ROW 182
 #include <TPC/offsets.h>
 #include <TPC/trans_table.hh>
+
+#include "daq_tpc.h"
 #include <fcfClass.hh>
 
+static struct tpc_t *tpc_cached;
 
-#include <RTS_READER/daq_dta.h>
-#include <DAQ_LEGACY/daq_legacy.h>
 
 static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *cppr, char *mem) ;
 static int unpackCld(int sec, struct TPCMZCLD_local *mzcld) ;
 static int dumpGainr(int sec, int rb, struct TPCGAINR *g) ;
 
-//static u_int max_ticks ;
-//static u_int max_clust ;
-//static u_int max_row ;
+/*
+static u_int max_ticks ;
+static u_int max_clust ;
+static u_int max_row ;
+*/
 
-static struct {
-	int mode ;
-} tpc ;
-
-static class daq_dta *ldta ;
-
-int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
+int tpc_reader(char *m, struct tpc_t *tpc, int sector, int flags)
 {
 	u_int rb, mz ;
 	u_int len  ;
@@ -43,14 +38,16 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 	u_int hsec ;
 	int ret ;
 	u_int tot_bytes ;
-	static u_int evt ;
+//	static u_int evt ;
 
 	int retval = 0;
 
+	int swapdatap=0;
 	int swaptpcp=0;
 	// clear tot_bytes
 	tot_bytes = 0 ;	
 
+	struct DATAP *datap ;
 	struct TPCP *tpcp  ;
 	struct TPCSECP *secp ;
 	struct TPCRBP *rbp ;
@@ -69,13 +66,52 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 	struct TPCSECLP *seclp ;
 	struct TPCRBCLP *rbclp ;
 
-	tpcp = (TPCP *)legacyDetp(TPC_ID,m) ;
-	if(tpcp == 0) return 0 ;
 
-	ldta = *ddta ;
+//	LOG(DBG,"Sizes %d %d %d %d %d",sizeof(tpc.counts),sizeof(tpc.timebin),
+//		sizeof(tpc.adc),sizeof(tpc.cl_counts),sizeof(tpc.cl)) ;
 
-	if(legacyCheckBank((char *)tpcp,CHAR_TPCP) < 0) return 0 ;	// wrong bank!
 
+	tpc_cached = tpc ;
+
+	memset(tpc_cached->rdo_present,0,sizeof(tpc_cached->rdo_present)) ;	// nix RDO presence bit...
+	// clear the data part - always
+	memset((char *)tpc_cached->counts,0,sizeof(tpc_cached->counts)) ;
+
+
+	// clear the cluster part - always
+	memset(tpc_cached->cl_counts,0,sizeof(tpc_cached->cl_counts)) ;
+	memset(tpc_cached->cl_p,0,sizeof(tpc_cached->cl_p)) ;
+
+	tpc_cached->mode = 0 ;
+	tpc_cached->max_channels_sector = 512*5692 ;
+	tpc_cached->max_channels_all = tpc_cached->max_channels_sector * 24 ;
+
+	tpc_cached->has_clusters = 0 ;
+
+	if(m == NULL) return 0 ;	// error
+
+	datap = (struct DATAP *)m ;
+
+	if(datap->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapdatap = 1;
+
+	len = qswap32(swapdatap, datap->det[TPC_ID].len) ;
+	if(len==0) {
+	  retval = 0 ;
+	  return retval;
+	}
+
+	len *= 4 ;	// make it bytes
+
+	off = qswap32(swapdatap, datap->det[TPC_ID].off) ;
+	if(off==0) {
+	  retval = 0 ;
+	  return retval;
+	}
+
+	LOG(DBG,"TPCP len %d, off %d",len,off) ;
+
+	tpcp = (struct TPCP *)((u_int *)m + off) ;
+	if(checkBank((char *)tpcp,"TPCP") < 0) return 0 ;	// wrong bank!
 	if(tpcp->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swaptpcp = 1;
 
 	t = qswap32(swaptpcp, tpcp->bh.token) ;
@@ -83,8 +119,8 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 
 
 	LOG(DBG,"Token %d...",t,0,0,0,0) ;
-	// sector goes from 0
-	sector-- ;
+
+	int found_something = 0 ;
 
 	// current (i.e. 2002) setup has 2 real sectors packed in
 	// one hyper-sector 
@@ -114,7 +150,10 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 	    hsec,tpcp->sb[hsec].len,tpcp->sb[hsec].off,tpcp->sb[hsec].len+tpcp->sb[hsec].off,0) ;
 	
 
-	if(tpcp->sb[hsec].len == 0) return 0 ;	// no present
+	if(tpcp->sb[hsec].len == 0) {
+	  retval =  0 ;	// no sector present 
+	  return retval;
+	}
 
 	// TPC can't rely on the tpcp lenghts due to 2sector/crate
 	// packing
@@ -126,8 +165,7 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 
 
 	secp = (struct TPCSECP *) ((char *)tpcp + qswap32(swaptpcp, tpcp->sb[hsec].off)*4) ;
-
-	if(legacyCheckBank((char *)secp,CHAR_TPCSECP) < 0) return 0 ;
+	if(checkBank((char *)secp,"TPCSECP") < 0) return 0 ;
 
 
 	if(t != b2h32(secp->bh.token)) {
@@ -136,7 +174,6 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 		return 0 ;
 	}
 
-	tpc.mode = 0 ;
 
 
 	// if after April 2002 we may have SECLP following in the reserved WORD9
@@ -146,14 +183,14 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 	if(b2h32(secp->bh.format_number)==2) {
 		if(secp->bh.w9) {
 			seclp = (struct TPCSECLP *)((u_int *)secp + b2h32(secp->bh.w9)) ;
-			if(legacyCheckBank((char *)seclp,CHAR_TPCSECLP) < 0) {
+			if(checkBank((char *)seclp,CHAR_TPCSECLP) < 0) {
 				seclp = NULL ;
 			}
 		}
 	}
 
 	// Do the cluster data here...
-	if(seclp && what==1) {	// Cluster data present!
+	if(seclp) {	// Cluster data present!
 
 		for(rb=first;rb<last;rb++) {
 			int rrb ;	// the real, TPC RB [0..5]
@@ -171,7 +208,7 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 			}
 
 			rbclp = (struct TPCRBCLP *) ((char *)seclp + b2h32(seclp->rb[rb].off)*4) ;
-			if(legacyCheckBank((char *)rbclp,CHAR_TPCRBCLP) < 0) {
+			if(checkBank((char *)rbclp,CHAR_TPCRBCLP) < 0) {
 				break ;
 			}
 
@@ -190,7 +227,7 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 				}
 
 				mzcld = (struct TPCMZCLD_local *)((char *)rbclp + l2h32(rbclp->mz[mz].off)*4) ;
-				if(legacyCheckBank((char *)mzcld,CHAR_TPCMZCLD) < 0) {
+				if(checkBank((char *)mzcld,CHAR_TPCMZCLD) < 0) {
 					LOG(ERR,"Bad TPCMZCLD data bank in sector %d, RB %d, MZ %d (t %d)!",
 					    sector+1,rrb+1,mz+1,t,0) ;
 
@@ -207,9 +244,10 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 				LOG(DBG,"TPCMZCLD MZ %d, token %d",mz,l2h32(mzcld->bh.token),0,0,0) ;
 
 				ret = unpackCld(sector, mzcld) ;
-				//if(ret > 0) {	// at least one hit found
-				//	tpc.has_clusters = 1 ;
-				//}
+				if(ret > 0) {	// at least one hit found
+					tpc_cached->has_clusters = 1 ;
+					found_something = 1 ;
+				}
 
 				if(DAQ_RAW_FORMAT_WORD9 != l2h32(mzcld->bh.w9)) {
 					//printf("%d %d %d %d %u %d\n",evt,sector,rb,l2h32(mzcld->bh.bank_id),l2h32(mzcld->bh.w9),ret) ;
@@ -223,7 +261,7 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 	}
 
 
-	if(what==1) return 1 ;
+	// the raw data parts
 
 	for(rb=first;rb<last;rb++) {
 		int rrb ;	// the real, TPC RB [0..5]
@@ -241,13 +279,13 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 		}
 
 		rbp = (struct TPCRBP *) ((char *)secp + b2h32(secp->rb[rb].off)*4) ;
-		if(legacyCheckBank((char *)rbp,CHAR_TPCRBP) < 0) {
+		if(checkBank((char *)rbp,"TPCRBP") < 0) {
 			continue ;
 		}
 
 
 		// mark the RB/RDO as present
-		//tpc.rdo_present[rrb] =  1;
+		tpc_cached->rdo_present[rrb] =  1;
 
 		// at this point (RBP) data is different endianess...
 
@@ -267,7 +305,7 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 
 
 			mzp = (struct TPCMZP *)((char *)rbp + l2h32(rbp->mz[mz].off)*4) ;
-			if(legacyCheckBank((char *)mzp,CHAR_TPCMZP) < 0) {
+			if(checkBank((char *)mzp,"TPCMZP") < 0) {
 				LOG(ERR,"Bad TPCMZP data bank in sector %d, RB %d, MZ %d (t %d)!",
 				    sector+1,rrb+1,mz+1,t,0) ;
 
@@ -296,7 +334,7 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 				LOG(DBG,"MZCLD len 0x%08X, off 0x%08X",l2h32(mzp->banks[TPC_MZCLD].len),l2h32(mzp->banks[TPC_MZCLD].off),0,0,0) ;
 
 				mzcld = (struct TPCMZCLD_local *)((char *)mzp + l2h32(mzp->banks[TPC_MZCLD].off)*4) ;
-				if(legacyCheckBank((char *)mzcld,CHAR_TPCMZCLD) < 0)  ;
+				if(checkBank((char *)mzcld,"TPCMZCLD") < 0)  ;
 
 				// do NOTHING!
 
@@ -305,7 +343,7 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 			if(mzp->banks[TPC_SEQD].len != 0) {	// RMS too 
 				seqd = (struct TPCSEQD *)((char *)mzp + l2h32(mzp->banks[TPC_SEQD].off)*4) ;
 
-				if(legacyCheckBank((char *)seqd,CHAR_TPCSEQD) < 0)  ;
+				if(checkBank((char *)seqd,CHAR_TPCSEQD) < 0)  ;
 
 
 			}
@@ -313,13 +351,13 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 			if(mzp->banks[TPC_ADCX].len != 0) {	// RMS too 
 				adcx = (struct TPCADCX *)((char *)mzp + l2h32(mzp->banks[TPC_ADCX].off)*4) ;
 
-				if(legacyCheckBank((char *)adcx,CHAR_TPCADCX) < 0)  ;
+				if(checkBank((char *)adcx,CHAR_TPCADCX) < 0)  ;
 			}
 
 
 
 			// what do we have here...
-			if((mzp->banks[TPC_ADCD].len != 0) && (tpc.mode==0)) {	// zero-suppressed
+			if((mzp->banks[TPC_ADCD].len != 0) && (tpc_cached->mode==0)) {	// zero-suppressed
 				int rr, pp ;
 
 
@@ -331,14 +369,14 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 				seqd = (struct TPCSEQD *)((char *)mzp + l2h32(mzp->banks[TPC_SEQD].off)*4) ;
 				adcd = (struct TPCADCD *)((char *)mzp + l2h32(mzp->banks[TPC_ADCD].off)*4) ;
 
-				if(legacyCheckBank((char *)seqd,CHAR_TPCSEQD) < 0) {
+				if(checkBank((char *)seqd,"TPCSEQD") < 0) {
 					LOG(ERR,"Bad TPCSEQD data bank in sector %d, RB %d, MZ %d!",
 					    sector+1,rrb+1,mz+1,0,0) ;
 
 					break ;
 				}
 
-				if(legacyCheckBank((char *)adcd,CHAR_TPCADCD) < 0) return 0 ;
+				if(checkBank((char *)adcd,"TPCADCD") < 0) return 0 ;
 
 				int len = l2h32(seqd->bh.length) - 10 ;
 				len *= 2 ;
@@ -348,8 +386,6 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 
 
 				rr = pp = 1 ;
-				daq_adc_tb *at = (daq_adc_tb *) ldta->request(512) ;
-				int counter = 0 ;
 
 				for(jj=0;jj<len;jj++) {
 					int start, last, length, stop ;
@@ -361,16 +397,10 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 
 
 					if(f8) {	// new pad flags
-						ldta->finalize(counter,sector+1,rr,pp) ;
-						counter = 0 ;
-
 						pp = (ss & 0x7FFF) % 256 ;	// pad
 						rr = (ss & 0x7FFF) / 256 ;	// row
 
 						if(pp == 0xff) break ;
-
-						at = (daq_adc_tb *) ldta->request(512) ;
-
 					}
 					else {
 						last = ss & 0x0020 ;
@@ -380,45 +410,35 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 							
 						for(tbin=start;tbin<stop;tbin++) {
 							u_char val ;
-							//int counter ;
+							int counter ;
 
 							val = adcd->adc[adccou++] ;
 																
 							if((rr > 45) || (pp > 182)) {
 							  LOG(CRIT, "rr = %d pp=%d",rr,pp);
 							}
-							//counter = tpc.counts[rr-1][pp-1] ;
+							counter = tpc_cached->counts[rr-1][pp-1] ;
 
 							if(counter>512) {
 							  LOG(CRIT, "%d %d %d counter = %d",ss,rr,pp,counter);
 							}
 
-							at[counter].tb = tbin ;
-							at[counter].adc = val ;
-							counter++ ;	
-							
-							//tpc.adc[rr-1][pp-1][counter] = val ;
-							//tpc.timebin[rr-1][pp-1][counter] = tbin ;
-							//tpc.counts[rr-1][pp-1] += 1 ;
-							//tpc.channels_sector++ ;
+
+							tpc_cached->adc[rr-1][pp-1][counter] = val ;
+							tpc_cached->timebin[rr-1][pp-1][counter] = tbin ;
+							tpc_cached->counts[rr-1][pp-1] += 1 ;
+							tpc_cached->channels_sector++ ;
 						}
 
-						if(last) {
-							ldta->finalize(counter,sector+1,rr,pp) ;
-							counter = 0 ;
-
-							at = (daq_adc_tb *) ldta->request(512) ;
-							pp++ ;	// increment the pad for next time
-						}
+						if(last) pp++ ;	// increment the pad for next time
 					}
 
 
 				}
 
-				if(pp != 0xFF) ldta->finalize(counter,sector+1,rr,pp) ;
-				counter = 0 ;
+				found_something = 1 ;
 
-				//printf("Found %d channels\n",tpc.channels-chSave) ;
+				//printf("Found %d channels\n",tpc_cached->channels-chSave) ;
 
 				continue ;	// don;t look at more banks!
 			}
@@ -427,7 +447,7 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 			padk = NULL ;
 			if((mzp->banks[TPC_PADK].len != 0)) {	// raw ...
 				padk = (struct TPCPADK *)((char *)mzp + l2h32(mzp->banks[TPC_PADK].off)*4) ;
-				if(legacyCheckBank((char *)padk,CHAR_TPCPADK) < 0) return 0 ;
+				if(checkBank((char *)padk,"TPCPADK") < 0) return 0 ;
 
 			}
 
@@ -435,20 +455,22 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 			if(mzp->banks[TPC_CPPR].len != 0) {
 
 				cppr = (struct TPCCPPR_l *)((char *)mzp + l2h32(mzp->banks[TPC_CPPR].off)*4) ;
-				if(legacyCheckBank((char *)cppr,CHAR_TPCCPPR) < 0) return 0 ;
+				if(checkBank((char *)cppr,"TPCCPPR") < 0) return 0 ;
 			}
 
 
 
-			if((mzp->banks[TPC_ADCR].len != 0) && (tpc.mode==0)) {	// raw ...
+			if((mzp->banks[TPC_ADCR].len != 0) && (tpc_cached->mode==0)) {	// raw ...
 				adcr = (struct TPCADCR_l *)((char *)mzp + l2h32(mzp->banks[TPC_ADCR].off)*4) ;
 
-				if(legacyCheckBank((char *)adcr,CHAR_TPCADCR) < 0) return 0 ;
+				if(checkBank((char *)adcr,"TPCADCR") < 0) return 0 ;
 
 				if(unpackRaw(sector, 0, padk, cppr, (char *)adcr) < 0) {
 					LOG(ERR,"Problems in RAW data in sector %d, RB %d, MZ %d - skipping...",
 					    sector+1,rrb+1,mz+1,0,0) ;
 				}
+		
+				found_something = 1 ;
 
 				LOG(DBG,"TPC Raw data bank in sector %d, RB %d, MZ %d!",
 				    sector+1,rrb+1,mz+1,0,0) ;
@@ -458,37 +480,40 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 			if(mzp->banks[TPC_PEDR].len != 0) {	// pedestal data!
 				pedr = (struct TPCPEDR *)((char *)mzp + l2h32(mzp->banks[TPC_PEDR].off)*4) ;
 
-				if(legacyCheckBank((char *)pedr,CHAR_TPCPEDR) < 0) return 0 ;
+				if(checkBank((char *)pedr,"TPCPEDR") < 0) return 0 ;
+
+				found_something = 1 ;
 
 				unpackRaw(sector, 1, padk, cppr, (char *)pedr) ;
-				tpc.mode = 1 ;	// pedestal data!
+				tpc_cached->mode = 1 ;	// pedestal data!
 		
 			}
 
 			if(mzp->banks[TPC_RMSR].len != 0) {	// RMS too 
 				rmsr = (struct TPCRMSR *)((char *)mzp + l2h32(mzp->banks[TPC_RMSR].off)*4) ;
 
-				if(legacyCheckBank((char *)rmsr,CHAR_TPCRMSR) < 0) return 0 ;
+				if(checkBank((char *)rmsr,"TPCRMSR") < 0) return 0 ;
 
 				unpackRaw(sector, 2, padk, cppr, (char *)rmsr) ;
-				tpc.mode = 1 ;	// pedestal data!
-
+				tpc_cached->mode = 1 ;	// pedestal data!
+				found_something = 1 ;
 			}
 
 			if(mzp->banks[TPC_GAINR].len != 0) {	// RMS too 
 				gainr = (struct TPCGAINR *)((char *)mzp + l2h32(mzp->banks[TPC_GAINR].off)*4) ;
 
-				if(legacyCheckBank((char *)gainr,CHAR_TPCGAINR) < 0)  ;
-					dumpGainr(sector, rrb, gainr) ;
+				if(checkBank((char *)gainr,CHAR_TPCGAINR) < 0)  ;
 
-				}
+				dumpGainr(sector, rrb, gainr) ;
+				found_something  = 1 ;
+
+			}				
 
 			if(mzp->banks[TPC_BADR].len != 0) {	// RMS too 
 				badr = (struct TPCBADR *)((char *)mzp + l2h32(mzp->banks[TPC_BADR].off)*4) ;
 
-				if(legacyCheckBank((char *)badr,CHAR_TPCBADR) < 0)  ;
-
-
+				if(checkBank((char *)badr,CHAR_TPCBADR) < 0)  ;
+				found_something = 1 ;
 			}
 
 
@@ -498,13 +523,13 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 	}
 
 #ifdef SOME_OTHER_DAY
-	if(tpc.has_clusters) {
+	if(tpc_cached->has_clusters) {
 		int i, j ;
 		for(i=0;i<45;i++) {
 			printf("Row %2d: ",i+1) ;
 			for(j=0;j<3;j++) {
-				if(tpc.cl_p[i][j]) {
-					printf(" %d[%2d] ",j,l2h32(*tpc.cl_p[i][j])) ;
+				if(tpc_cached->cl_p[i][j]) {
+					printf(" %d[%2d] ",j,l2h32(*tpc_cached->cl_p[i][j])) ;
 				}
 			}
 			printf("\n") ;
@@ -512,21 +537,22 @@ int tpc_reader(char *m, int what, int sector, daq_dta **ddta)
 	}
 #endif
 
-//	LOG(DBG,"FCF: sector %2d: worst timing %d (hits %d); last row %d",sector+1,max_ticks,max_clust,max_row) ;
 
-	if(tpc.mode == 1) {   // hack to prevent pedestal events from having invalid data...
+
+	if(tpc_cached->mode == 1) {   // hack to prevent pedestal events from having invalid data...
 	  for(int r=0;r<45;r++) {
 	    for(int p=0;p<182;p++) {
-//	      if(tpc.counts[r][p] == 0) {
-//		memset(tpc.adc[r][p], 0, sizeof(tpc.adc[r][p]));
-//		memset(tpc.timebin[r][p], 0, sizeof(tpc.timebin[r][p]));
-//	      }
+	      if(tpc_cached->counts[r][p] == 0) {
+		memset(tpc_cached->adc[r][p], 0, sizeof(tpc_cached->adc[r][p]));
+		memset(tpc_cached->timebin[r][p], 0, sizeof(tpc_cached->timebin[r][p]));
+	      }
 	    }
 	  }
 	}
 
-	evt++ ;
-	return tot_bytes ;
+//	evt++ ;
+//	return tot_bytes ;
+	return found_something ;
 }
 
 
@@ -587,8 +613,6 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 
 
 	for(i=0;i<384;i++) {
-		int counter = 0 ;
-
 		row = padk->rp[i].row ;
 		pad = padk->rp[i].pad ;
 
@@ -600,9 +624,7 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 
 		adcseq = (u_char *) adcdata + timebins*i ;
 
-		
-		daq_adc_tb *at = (daq_adc_tb *) ldta->request(512) ;
-	
+
 		switch(what) {
 		case 0 :
 			cppseq = (u_short *)((char *) cppdata + 2*2*32*i) ;	
@@ -610,7 +632,7 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 			for(j=0;j<cpps;j++) {
 				u_short start, stop ;
 				u_char val ;
-				//int counter ;
+				int counter ;
 
 
 
@@ -650,42 +672,30 @@ static int unpackRaw(int sec, int what, struct TPCPADK *padk, struct TPCCPPR_l *
 							//return -1 ;	// hardware error in the MZ!
 						}
 					}
-				
-					at[counter].tb = t ;
-					at[counter].adc = val ;
-					counter++ ;
 
-					//counter = tpc.counts[row][pad] ;
-					//tpc.adc[row][pad][counter] = val ;
-					//tpc.timebin[row][pad][counter] = t ;
-					//tpc.counts[row][pad]++ ;
-					//tpc.channels_sector++ ;
+
+					counter = tpc_cached->counts[row][pad] ;
+					tpc_cached->adc[row][pad][counter] = val ;
+					tpc_cached->timebin[row][pad][counter] = t ;
+					tpc_cached->counts[row][pad]++ ;
+					tpc_cached->channels_sector++ ;
 
 					//LOG(DBG,"Doing row %d, pad %d, tb %d, ADC %d",row,pad,t,val,0) ;
 				}
 
-
-
 			}
-			ldta->finalize(counter,sec+1,row+1,pad+1) ;
 			break ;
-		case 1 :	// PEDR is in tpc.adc!
+		case 1 :	// PEDR is in tpc_cached->adc!
 			for(j=0;j<timebins;j++) {
-				at[counter].adc = *adcseq++ ;
-				at[counter].tb = j ;
-				counter++ ;
-				//tpc.adc[row][pad][j] = *adcseq++ ;
-				//tpc.channels_sector++ ;	// count only once!
-				//tpc.counts[row][pad]++; // 
+				tpc_cached->adc[row][pad][j] = *adcseq++ ;
+				tpc_cached->channels_sector++ ;	// count only once!
+				tpc_cached->counts[row][pad]++; // 
 			}
-			ldta->finalize(counter,sec+1,row+1,pad+1) ;
 			break ;
-		case 2 :	// RMSR is in tpc.timebin!
-			LOG(WARN,"RMSR not done yet!") ;
+		case 2 :	// RMSR is in tpc_cached->timebin!
 			for(j=0;j<timebins;j++) {
-				
-				//tpc.timebin[row][pad][j] = *adcseq++ ;
-				//tpc.counts[row][pad]++;
+				tpc_cached->timebin[row][pad][j] = *adcseq++ ;
+				tpc_cached->counts[row][pad]++;
 			}
 			break ;
 		}
@@ -741,8 +751,8 @@ static int unpackCld(int sec, struct TPCMZCLD_local *mzcld)
 
 		int instance ;
 		for(instance=0;instance<3;instance++) {
-			//if(tpc.cl_p[row-1][instance]) continue ;
-			//tpc.cl_p[row-1][instance] = rdata -2 ;	// go back to the "row" pointer!
+			if(tpc_cached->cl_p[row-1][instance]) continue ;
+			tpc_cached->cl_p[row-1][instance] = rdata -2 ;	// go back to the "row" pointer!
 			break ;
 		}
 
@@ -754,7 +764,7 @@ static int unpackCld(int sec, struct TPCMZCLD_local *mzcld)
 
 		LOG(DBG,"Row %d (%d of %d), %d clusters (tot bytes %d)...",row,i,nrows,nclust,bytes) ;
 
-		daq_cld *dc = (daq_cld *) ldta->request(nclust) ;
+
 
 		for(j=0;j<nclust;j++) {
 			u_short pad, tm, flags, charge, fl ;
@@ -792,57 +802,45 @@ static int unpackCld(int sec, struct TPCMZCLD_local *mzcld)
 
 			double dpad, dtimebin ;
 
+			/* pre Apr 18, 2008 there was a 0.5 shift 
 			dpad = (double)(pad)/64.0 + 0.5 ;	// make pads count from 1.5
 			dtimebin = (double)(tm)/64.0 + 0.5 ;	// make timebins count from 0.5
+			*/
 
-			dc[j].tb = dtimebin ;
-			dc[j].pad = dpad ;
-			dc[j].charge = charge ;
-			dc[j].flags = flags ;
-			dc[j].t1  = t1 ;
-			dc[j].t2 = t2 ;
-			dc[j].p1 = p1 ;
-			dc[j].p2 = p2 ;
+			dpad = (double)(pad)/64.0  ;	
+			dtimebin = (double)(tm)/64.0 ;	
 
 			LOG(DBG,"   pad %d, timebin %d, charge %d, flags 0x%04X, t1 %d, t2 %d, p1 %d, p2 %d",(int)dpad,(int)dtimebin,charge,flags,t1,t2,p1,p2) ;
-#if 0		
-			u_int ix = tpc.cl_counts[row-1] ;	
 
+			u_int ix = tpc_cached->cl_counts[row-1] ;	
 			if(ix < TPC_READER_MAX_CLUSTERS) {
-				tpc.cl[row-1][ix].p = (float) dpad ;
-				tpc.cl[row-1][ix].t = (float) dtimebin ;
-				tpc.cl[row-1][ix].charge = charge ;
-				tpc.cl[row-1][ix].flags = flags ;
-				tpc.cl[row-1][ix].t1 = t1 ;
-				tpc.cl[row-1][ix].t2 = t2 ;
-				tpc.cl[row-1][ix].p1 = p1 ;
-				tpc.cl[row-1][ix].p2 = p2 ;
+				tpc_cached->cl[row-1][ix].p = (float) dpad ;
+				tpc_cached->cl[row-1][ix].t = (float) dtimebin ;
+				tpc_cached->cl[row-1][ix].charge = charge ;
+				tpc_cached->cl[row-1][ix].flags = flags ;
+				tpc_cached->cl[row-1][ix].t1 = t1 ;
+				tpc_cached->cl[row-1][ix].t2 = t2 ;
+				tpc_cached->cl[row-1][ix].p1 = p1 ;
+				tpc_cached->cl[row-1][ix].p2 = p2 ;
 
 			
 
 
-				tpc.cl_counts[row-1]++ ;
+				tpc_cached->cl_counts[row-1]++ ;
 				tot_hits++ ;
 			}
 			else {
 				LOG(WARN,"Too many clusters (%d) in sector %d, row %d",ix,sec+1,row,0,0) ;
 				return -1 ;
 			}
-#endif
+
 			//printf("%2d %2d %7.4f %7.4f %2d %d\n",
 			//       sec, row, pad, timebin, flags, charge) ;
 
 		}
 
-		ldta->finalize(nclust,sec+1,row,0) ;	// sector went from 0
-
 	}
 
-//	if(ticks > max_ticks) {
-//		max_ticks = ticks ;
-//		max_clust = tot_hits ;
-//		max_row = row ;
-//	}
 
 	LOG(DBG,"FCF: sec %d, mz %d (last row %d): %d clust in %u ticks",sec+1,l2h32(mzcld->bh.bank_id),row,tot_hits,ticks) ;
 

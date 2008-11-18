@@ -14,7 +14,7 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 
-OBJS := daq_tpc.o tpc_reader.o
+OBJS := daq_tpc.o tpc_reader.o tpc_FCFReader.o
 
 LIBS = libtpc.a
 BINS = 
@@ -33,23 +33,34 @@ daq_tpc.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_tpc.o: ../SFS/sfs_index.h
 daq_tpc.o: ../SFS/fs_index.h
 daq_tpc.o: ../SFS/sfs_base.h
-daq_tpc.o: ../RTS_READER/rts_reader.h
-daq_tpc.o: ../RTS_READER/daq_dta.h
+daq_tpc.o: ../DAQ_READER/daqReader.h
+daq_tpc.o: ../DAQ_READER/daq_dta.h
 daq_tpc.o: ../../../../StRoot/RTS/include/rts.h
-daq_tpc.o: ../RTS_READER/daq_dta_structs.h
+daq_tpc.o: ../DAQ_READER/daq_dta_structs.h
 daq_tpc.o: daq_tpc.h
-daq_tpc.o: ../RTS_READER/daq_det.h
+daq_tpc.o: ../DAQ_READER/daq_det.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/daqFormats.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/rtsSystems.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/fcfClass.hh
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/TPC/padfinder.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
+tpc_FCFReader.o: ../../../../StRoot/RTS/include/adcLogTable.h
+tpc_FCFReader.o: daq_tpc.h
+tpc_FCFReader.o: ../DAQ_READER/daq_det.h
 tpc_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
 tpc_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
-tpc_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures.h
+tpc_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 tpc_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 tpc_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 tpc_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpc_reader.o: ../../../../StRoot/RTS/include/rts.h
 tpc_reader.o: ../../../../StRoot/RTS/include/TPC/offsets.h
 tpc_reader.o: ../../../../StRoot/RTS/include/TPC/trans_table.hh
+tpc_reader.o: daq_tpc.h
+tpc_reader.o: ../DAQ_READER/daq_det.h
 tpc_reader.o: ../../../../StRoot/RTS/include/fcfClass.hh
-tpc_reader.o: ../RTS_READER/daq_dta.h
-tpc_reader.o: ../../../../StRoot/RTS/include/rts.h
-tpc_reader.o: ../RTS_READER/daq_dta_structs.h
-tpc_reader.o: ../DAQ_LEGACY/daq_legacy.h
-daq_tpc.o: ../RTS_READER/daq_det.h
+daq_tpc.o: ../DAQ_READER/daq_det.h
