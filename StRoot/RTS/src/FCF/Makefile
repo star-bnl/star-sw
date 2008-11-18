@@ -1,24 +1,28 @@
+-include ../rtsmakefile.def
+-include ../rtsplus.def
 
-include ../rtsmakefile.def
+LDLIBS = 
 
+DEFINES += -DRTS_LOG_COLORED
 
-all :
-	@echo "No compilation in this directory..."
+OBJS := fcfClass.o fcfAfterburner.o
 
-clean :
+LIBS = libtpcfcf.a
 
-install :
+all: $(LIBS)
 
-depend :
-	@$(MAKEDEPEND)
+libs: $(LIBS)
+
+libtpcfcf.a: $(OBJS)
+	@$(RTS_AR)
 
 # DO NOT DELETE
 
-fcfAfterburner.o: ../../include/rtsLog.h
-fcfAfterburner.o: ../../include/fcfClass.hh
-fcfAfterburner.o: ../../include/rts.h
-fcfAfterburner.o: ../../include/TPC/padfinder.h
-fcfClass.o: ../../include/rts.h
-fcfClass.o: ../../include/rtsSystems.h
-fcfClass.o: ../../include/fcfClass.hh
-fcfClass.o: ../../include/rtsLog.h
+fcfAfterburner.o: ../../../../StRoot/RTS/include/rtsLog.h
+fcfAfterburner.o: ../../../../StRoot/RTS/include/fcfClass.hh
+fcfAfterburner.o: ../../../../StRoot/RTS/include/rts.h
+fcfAfterburner.o: ../../../../StRoot/RTS/include/TPC/padfinder.h
+fcfClass.o: ../../../../StRoot/RTS/include/rts.h
+fcfClass.o: ../../../../StRoot/RTS/include/rtsSystems.h
+fcfClass.o: ../../../../StRoot/RTS/include/fcfClass.hh
+fcfClass.o: ../../../../StRoot/RTS/include/rtsLog.h
