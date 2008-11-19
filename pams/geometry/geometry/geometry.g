@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.171 2008/10/13 03:21:35 perev Exp $
+* $Id: geometry.g,v 1.172 2008/11/19 04:08:25 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.172  2008/11/19 04:08:25  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.171  2008/10/13 03:21:35  perev
 * upgr17 added Wei(MingZhang)
 *
@@ -756,7 +759,12 @@
 *
 * Revision 1.36  2000/11/22 17:51:41  nevski
 * tof geometry versions 1/2 preserved in btofgeo1, version 3 goes in btofgeo2
-*
+
+*********HELP***HELP***HELP***HELP***HELP***HELP***HELP***HELP***HELP***
+* ORT = XYZ ! (90,  0, 90, 90,  0,  0)
+* ORT = YZX ! (90, 90,  0,  0, 90,  0)
+* ORT = ZXY ! ( 0,  0, 90,  0, 90, 90)
+*********HELP***HELP***HELP***HELP***HELP***HELP***HELP***HELP***HELP***
 ***************************************************************************
    module geometry is the main steering module for the STAR geometry
    author  Pavel Nevski

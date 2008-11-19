@@ -789,7 +789,7 @@ Block ESPL  is one of the Shower max  PLanes
             Create and position EXSG AlphaZ=d3              Ncopy=isec
             Create and position EXGT z=msecwd AlphaZ=d3
 	 else if(exse_sectype(isec) = 2) then               !   U
-            Create and position EXSG AlphaZ=d3 AlphaX=180   Ncopy=isec
+            Create and position EXSG AlphaZ=d3 ORT=X-Y-Z   Ncopy=isec
             Create and position EXGT z=-msecwd AlphaZ=d3
 	 else if(exse_sectype(isec) = 3) then               !  cut V
 	    cut=2
@@ -797,7 +797,7 @@ Block ESPL  is one of the Shower max  PLanes
             Create and position EXGT z=msecwd AlphaZ=d3
 	 else if(exse_sectype(isec) = 4) then               !  cut U 
 	    cut=2
-            Create and position EXSG AlphaZ=d3 AlphaX=180   Ncopy=isec
+            Create and position EXSG AlphaZ=d3 ORT=X-Y-Z   Ncopy=isec
             Create and position EXGT z=-msecwd AlphaZ=d3
 	 endif
       enddo
@@ -900,7 +900,7 @@ Block EXSG  is the Shower max  Gap for scintillator strips
       	 if (mod(i_str,2) != 0 ) then                     
           	 Position EHMS  x=xc y=yc AlphaZ=-45
       	 else
-          	 Position EHMS  x=xc y=yc AlphaZ=-45 AlphaX=180
+          	 Position EHMS  x=xc y=yc AlphaZ=-45 ORT=X-Y-Z
       	 endif
         end do
      	 endif

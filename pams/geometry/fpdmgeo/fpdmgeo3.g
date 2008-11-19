@@ -1,7 +1,10 @@
 ******************************************************************************
-* $Id: fpdmgeo3.g,v 1.6 2007/09/21 23:00:08 perev Exp $
+* $Id: fpdmgeo3.g,v 1.7 2008/11/19 04:08:23 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo3.g,v $
+* Revision 1.7  2008/11/19 04:08:23  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.6  2007/09/21 23:00:08  perev
 * corrects E.Braidot@phys.uu.nl
 *
@@ -711,9 +714,9 @@ Block FSHM  is the SHower Max  section
       Create FHMS
       do i=1,FMXG_Nstrip
          if(mod(i,2)!= 0) then
-           Position FHMS x=xsmdh y=ysmdh z=zsmdh AlphaZ=90
+           Position FHMS x=xsmdh y=ysmdh z=zsmdh ORT=Y-XZ	   
          else
-           Position FHMS x=xsmdh y=ysmdh z=zsmdh AlphaZ=90 AlphaX=180
+           Position FHMS x=xsmdh y=ysmdh z=zsmdh ORT=YX-Z
          endif
          ysmdh=ysmdh+wsmd
       enddo

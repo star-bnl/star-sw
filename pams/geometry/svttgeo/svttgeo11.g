@@ -1,6 +1,9 @@
-* $Id: svttgeo11.g,v 1.1 2008/06/03 22:27:17 fisyak Exp $
+* $Id: svttgeo11.g,v 1.2 2008/11/19 04:08:31 perev Exp $
 *
 * $Log: svttgeo11.g,v $
+* Revision 1.2  2008/11/19 04:08:31  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.1  2008/06/03 22:27:17  fisyak
 * Add y2005g and y2007g geometries for SVT with latest Rene's corrections
 *
@@ -919,7 +922,7 @@ Block SLSD is a single ladder mother (sector of tube)
       ypos=cos(rad)*selc_ElcaWid/2+sin(rad)*elethk/2
 
       do s=-1,1,2
-	  Position SELE ORT=YZX AlphaZ=s*deg, x=svtl_radius-ladthk-xpos, y=s*(swca_WaferWid/2+ypos), AlphaX=-90*(1-s)
+	  Position SELE ORT=YZX x=svtl_radius-ladthk-xpos, y=s*(swca_WaferWid/2+ypos), AlphaX= 90*(1-s), AlphaZ=s*deg
       EndDo
 EndBlock
 *
