@@ -1,4 +1,4 @@
-* $Id: agecom.inc,v 1.2 2007/11/13 21:24:41 perev Exp $
+* $Id: agecom.inc,v 1.3 2008/11/19 03:51:10 perev Exp $
 * $Name:  $
       CHARACTER*20 AG_MODULE,  AG_TITLE,  AG_EXNAME,   AG_PARLIST,
      +             AG_MATERIAL,AG_MIXTURE,AG_COMPONENT,AG_MEDIUM,
@@ -15,7 +15,8 @@
      +             AG_IRESER,AG_LSTACK,AG_NWUHIT,AG_NWUVOL,AG_MAGIC,
      +             AG_LDETU,AG_NPDIV,AG_NZ,AG_IGEOM,AG_IDEBU,AG_IGRAP,
      +             AG_IHIST,AG_IMFLD,AG_SERIAL,AG_STANDALONE,AG_ISIMU,
-     +             AG_ENDSAVE,IPRIN
+     +             AG_ENDSAVE,IPRIN,
+     +             AG_ALPHAN,AG_ALPHAK(10)
       REAL         AG_FIELDM,AG_TMAXFD,AG_STEMAX,AG_DEEMAX,AG_EPSIL,
      +             AG_STMIN,AG_DENS,AG_RADL,AG_ABSL,AG_THETAX,AG_THETAY,
      +             AG_THETAZ,AG_ALFAX,AG_ALFAY,AG_ALFAZ,AG_PHIX,AG_PHIY,
@@ -30,7 +31,8 @@
      +             AG_STACK,AG_UBUF,AG_XHMAX,AG_YHMAX,AG_ZHMAX,
      +             AG_RHMAX,AG_FHMAX,AG_FHMIN,AG_BIN,AG_DMAXMS,
      +             AG_LX, AG_LY, AG_LZ, AG_HX, AG_HY, AG_HZ,
-     +             AG_P1, AG_P2
+     +             AG_P1, AG_P2,
+     +             AG_ALPHAL(10)
       PARAMETER   (AG_LSTACK=130, AG_NWUHIT=10, AG_NWUVOL=3,
      +             AG_MAGIC=-696969, AG_LDETU=250)
       COMMON/AGCGLOB/AG_MODULE, AG_CHDIR,   AG_LEVEL,   AG_IDTYPE,
@@ -61,12 +63,15 @@ C Inherited variables saved during internal calls
      +              AG_ZI(16),  AG_RMN(16), AG_RMX(16),
      +              AG_VOLUME,  AG_MOTHER,  AG_SHAPE,   AG_CNICK,
      +                                                  AG_ENDSAVE,
-     +              AG_RESET1,  AG_THETAX,  AG_THETAY,  AG_THETAZ,
+     +              AG_RESET1,
+     +              AG_THETAX,  AG_PHIX,
+     +              AG_THETAY,  AG_PHIY,
+     +              AG_THETAZ,  AG_PHIZ,
      +              AG_ALFAX,   AG_ALFAY,   AG_ALFAZ,
-     +              AG_PHIX,    AG_PHIY,    AG_PHIZ,
      +              AG_X,       AG_Y,       AG_Z,
      +              AG_STEP,    AG_C0,      AG_NDIV,
      +              AG_IAXIS,   AG_NDVMAX,  AG_ORTI,    AG_NCOPY,
+     +              AG_AlphaN,AG_AlphaK,AG_AlphaL,
      +              AG_RESET2,
      +              AG_KONLY,   AG_ORT,     AG_MARK
 C local variables valid inside same block

@@ -1,25 +1,41 @@
+#define AGROTF_TEST
 #ifdef AGROTF_TEST
       program test
-      real axi(3)/0,0,0/,RMX(3,3)
       real gang(6)
-      
-      
-      call GVGAMX(-999.,RMX)
-     
-      axi(1) = 1;
-      axi(2) = 1;
-      axi(3) = 1;
-      call GVROT (axi, 10., RMX)
-      call GVROT (axi,-10., RMX)
-      do n=1,3
-      write(*,*) RMX(n,1),RMX(n,2),RMX(n,3)
-      enddo
+      real gaTst(6)/159, 180, 93.9209, 79.7145, 110.596, 348.239/    
+      real gaUni(6)/90.0,    0.0,   90.0,   90.0,    0.0,    0.0/    
+      real xax(3) /1,0,0/
+      real RMX(3,3)
+      integer iax(3)/1,2,3/      
+      real    ang(3)/11,-222,333/
 
-      gang(1)=-999
-      call AGROT(gang,axi(1),axi(2),axi(3), 33.)
-      call AGROT(gang,axi(1),axi(2),axi(3),-33.)
+#if 1
+      write(*,*)'gaTst=',gaTst
+      call GVGAMX(gaTst,RMX)
+      write(*,*) 'RMX ',rmx(1,1),rmx(2,1),rmx(3,1)
+      write(*,*) 'RMX ',rmx(1,2),rmx(2,2),rmx(3,2)
+      write(*,*) 'RMX ',rmx(1,3),rmx(2,3),rmx(3,3)
+      write(*,*) ' '
+
+      call GVMXGA(RMX,gang)
+*      write(*,*)'GANG=',gang
+      call GVROT (xax, 111., RMX)
+      write(*,*) 'RMX2',rmx(1,1),rmx(2,1),rmx(3,1)
+      write(*,*) 'RMX2',rmx(1,2),rmx(2,2),rmx(3,2)
+      write(*,*) 'RMX2',rmx(1,3),rmx(2,3),rmx(3,3)
+      write(*,*) ' '
+
+
+#endif
+
+#if 1
+      call ucopy(gaUni,gang,6)
+**      gang(1) = -999
+      call AGROTS(iax,ang,3,gang)
+      write(*,*) 
+     +'CORRECT angles:132 153 98.1519 55.5894 136.844 316.802'     
       write(*,*)'GANG=',gang
-
+#endif
 
       end
 
@@ -69,7 +85,7 @@
 *                                                                      *
 *   GVMXGA (RMX,gang)                             VP Oct2008           *
 *       converts Rotation Transformation Matrix                        *
-*       into converts GEANT 6 angles                                   *
+*       into GEANT 6 angles                                            *
 *                                                                      *
 *                                                                      *
 *   ARGUMENTS:                                                         *
@@ -97,8 +113,15 @@
 	  PHI = atan2(SINPHI,COSPHI)*DEGR
           THE = atan2(sqrt(SINPHI**2+COSPHI**2),COSTHE)*DEGR
         endif
-        if (abs(the-ANINT(the)).le.1e-5) the = ANINT(the)
-        if (abs(phi-ANINT(phi)).le.1e-5) phi = ANINT(phi)
+        if (abs(the-ANINT(the)).le.1e-4) the = ANINT(the)
+        if (abs(phi-ANINT(phi)).le.1e-4) phi = ANINT(phi)
+        if (the .lt.0) the = the +360
+        if (the .gt.180) then
+	  the = 360-the
+	  phi = phi +180
+	endif
+        if (phi .lt.  0) phi = phi + 360
+        if (phi .gt.360) phi = phi - 360
 	gang(2*N-1)=the
 	gang(2*N-0)=phi
       enddo
@@ -115,7 +138,7 @@
 *   ARGUMENTS:                                                         *
 *       DIRC    direct cosinuses (may be not normalised)               *
 *       ANGP    rotation angle in degrees                              *
-*       TRANZ   rotation & shift matrix 4*4  (INPUT/OUTPUT)            *
+*       TRANZ   rotation & shift matrix 3*3  (INPUT/OUTPUT)            *
 *                                                                      *
 ************************************************************************
       REAL           DIRC(3),TRANS(3,3),AX(3),RMX(3,3),RMXt(3,3)
@@ -146,14 +169,11 @@
       TRANS(2,3) = TRANS(2,3) - SA*AX(1)
       TRANS(3,2) = TRANS(3,2) + SA*AX(1)
 *
-
       do J1 = 1,3
       do J2 = 1,3
-        S=0
-        do J3=1,3
-	  S = S + TRANS(J1,J3)*RMX(j3,J2)
-        enddo
-	RMXt(J1,J2) = S
+	RMXt(J2,J1) = TRANS(1,J1)*RMX(j2,1)
+     +	            + TRANS(2,J1)*RMX(j2,2)
+     +	            + TRANS(3,J1)*RMX(j2,3)
       enddo
       enddo
       call ucopy (RMXt,RMX,9)
@@ -183,10 +203,117 @@
       call gvgamx(gang,RotM)
       AX(1)= Xax
       AX(2)= Yax
-      AX(1)= Zax
+      AX(3)= Zax
       call gvrot(AX,angp,RotM)
       call gvmxga(RotM,gang)
      
       end  
 
-     
+      SUBROUTINE AGROTS(iax,ang,nang,gang)
+************************************************************************
+*                                                                      *
+*   AGROTS (iax,ang,nang,gang)                               VP Nov2008*
+*       Routine for 3 Rotation around X,Y,Z                            *
+*       output in form GEANT 6 angles array                            *
+*                                                                      *
+*   ARGUMENTS:                                                         *
+*       iAx     array with axis numbers. 1,2,3 = X,Y,Z                 *
+*       ang     array with rotation angles in degrees around this axis *
+*       nang    number of rotations             		       *
+*       gang    array with geant angles:			       *
+*               THETAx,PHIx,THETAy,PHIy,THETAz,PHIz (in  degrees )     *
+*                                                                      *
+************************************************************************
+      integer iAx(*)
+      real    gang(6),ang(*)
+      real    ax(3),RMX(3,3)
+      integer i
+
+      call GVGAMX(gang,RMX)
+      do 100 i=1,nang
+        if (iAx(i).eq.0) goto 100
+        call vzero(ax,3)
+	ax(iAx(i)) = 1
+ 	call GVROT (ax, ang(i), RMX)
+ 100  continue
+      call GVMXGA(RMX,gang)
+      end
+
+      integer function IGOR(ort)
+************************************************************************
+*                                                                      *
+*   IGOR (ort)                                               VP Nov2008*
+*       function to encode orts                                        *
+*       orts could be XYZ,YZX,-Z-YX etc                                *
+*                                                                      *
+*   ARGUMENTS:                                                         *
+*       ort     character string:			               *
+*                                                                      *
+************************************************************************
+      character *(*) ort     
+      integer pw2(3) /1,2,4/
+      integer i,j,minus,ix,msk
+      
+      igor = 0
+      j = 0
+      msk = 0
+      do i=1,3
+        j = j+1
+        igor = igor/10
+        minus = 0
+	if (ort(j:j) .eq. '-') then
+	  j = j+1
+	  minus = 3
+	endif
+        ix = index('XYZxyz',ort(j:j))
+        if (ix.gt.3) ix = ix-3
+        if (ix<1 .or. ix>3) then
+	  write(*,*) '*** WRONG ORT = ',ort,  '***'
+          igor = 0
+          return
+        endif
+        igor = igor + 100*(minus+ix)
+        msk = msk + pw2(ix)
+      enddo
+      if (msk .ne.7) then
+	write(*,*) '*** WRONG ORT = ',ort,  '***'
+        igor = 0
+      endif
+      end
+      subroutine OLEG(orti,gangI,gang)
+************************************************************************
+*                                                                      *
+*   OLEG (orti,gang)                                         VP Nov2008*
+*                                                                      *
+*       calculate geant angles vector from encoded ort information     *
+*       returnned by IGOR(ort)                                         *
+*                                                                      *
+*   ARGUMENTS:                                                         *
+*       orti     encodet by IGOR number:  (input)		       *
+*       gangI    initial  6 geant angles: (input)	               *
+*       gang     resuling 6 geant angles: (output)                     *
+*                                                                      *
+************************************************************************
+      integer 	orti,iort,i,j
+      real   	gang(2,3),gangI(2,3)
+
+      iort = orti
+      if (iort.eq.0) iort = 321
+      do i=1,3
+        j = mod(iort,10)
+        if (j<1 .or. j>6) then
+	  write(*,*) '*** WRONG ORTI = ',orti,  '***'
+          return
+	endif
+        if (j.le.3) then
+	  gang(1,i) = gangI(1,j)
+          gang(2,i) = gangI(2,j)
+        else
+	  gang(1,i) = 180 - gangI(1,j-3)
+          gang(2,i) = 180 + gangI(2,j-3)
+          if (gang(2,i).lt.-180) gang(2,i)=gang(2,i)+360
+          if (gang(2,i).gt. 180) gang(2,i)=gang(2,i)-360
+        endif
+        iort = iort/10
+      enddo
+      end
