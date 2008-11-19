@@ -26,6 +26,7 @@ public:
   Double_t getPVPDWest() {return St_trigDetSumsC::instance()->pvpdWest();}
   Double_t getPVPDEast() {return St_trigDetSumsC::instance()->pvpdEast();}
   UInt_t   getRichHVStatus() {return St_richvoltagesC::instance()->status();}
+  void     setValidityMargin(Double_t margin=0) {St_trigDetSumsC::instance()->validityMargin(margin);}
 protected:
     StDetectorDbRichScalers() {}
 private:
