@@ -201,6 +201,7 @@ public:
     EvtDescData *des = (EvtDescData *)pay->eventDesc;
     des->TrgToken = b2h16(0);
     des->actionWdDetectorBitMask = b2h16(dets_in_run_mask);
+    des->TrgDataFmtVer = 0x40;
     // 
 
     pay->eventNumber = l2h32(eventNumber);
