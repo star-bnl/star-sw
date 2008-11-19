@@ -1,3 +1,5 @@
+#ifndef TRG_DATA_DEFS
+#define TRG_DATA_DEFS
 /******
 *
 *     Layout of new Trigger Data Block
@@ -151,4 +153,5 @@ typedef struct {
 } TriggerDataBlk;
   
 
+#endif
 
