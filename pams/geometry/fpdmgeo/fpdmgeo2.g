@@ -1,7 +1,10 @@
 ******************************************************************************
-* $Id: fpdmgeo2.g,v 1.1 2006/06/12 18:33:40 potekhin Exp $
+* $Id: fpdmgeo2.g,v 1.2 2008/11/19 04:08:22 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo2.g,v $
+* Revision 1.2  2008/11/19 04:08:22  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.1  2006/06/12 18:33:40  potekhin
 * New version of the FPD re-designed by Akio and
 * with slight and minor cosmetic touches by Maxim
@@ -472,7 +475,7 @@ Block FSHM  is the SHower Max  section
          if(mod(i,2)!= 0) then
            Create and Position FHMS x=xxx y=yyy z=zzz AlphaZ=90
          else
-           Create and Position FHMS x=xxx y=yyy z=zzz AlphaZ=90 AlphaX=180
+           Create and Position FHMS x=xxx y=yyy z=zzz ORT=YX-Z
          endif
          yyy=yyy+wsmd
       enddo

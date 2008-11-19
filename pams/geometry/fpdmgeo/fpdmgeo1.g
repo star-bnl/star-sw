@@ -1,7 +1,10 @@
 *
-* $Id: fpdmgeo1.g,v 1.2 2005/01/04 15:54:18 potekhin Exp $
+* $Id: fpdmgeo1.g,v 1.3 2008/11/19 04:08:21 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo1.g,v $
+* Revision 1.3  2008/11/19 04:08:21  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.2  2005/01/04 15:54:18  potekhin
 * Removed an annoying print statement
 *
@@ -380,7 +383,7 @@ Block FSHM  is the SHower Max  section
          if(mod(i,2)!= 0) then
            Create and Position FHMS x=xxx y=yyy z=zzz AlphaZ=90
          else
-           Create and Position FHMS x=xxx y=yyy z=zzz AlphaZ=90 AlphaX=180
+           Create and Position FHMS x=xxx y=yyy z=zzz ORT=YX-Z
          endif
          yyy=yyy+wsmd
       enddo

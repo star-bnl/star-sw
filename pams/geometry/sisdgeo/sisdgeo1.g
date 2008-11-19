@@ -1,5 +1,8 @@
-* $Id: sisdgeo1.g,v 1.5 2005/01/03 22:09:57 potekhin Exp $
+* $Id: sisdgeo1.g,v 1.6 2008/11/19 04:08:28 perev Exp $
 * $Log: sisdgeo1.g,v $
+* Revision 1.6  2008/11/19 04:08:28  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.5  2005/01/03 22:09:57  potekhin
 * Need to optionally position the Strip Detector in
 * the CAVE, when the SVT is missing form the configuration
@@ -674,7 +677,7 @@ Endblock
 Block SFLT is (half) the top corner of the triangular ladder skeleton
 	Material Carbon
 	Attribute SFLT Seen=1, Colo=1 
-	Shape TRAP Dz=49.8, thet=0, phi=0, h1=0.02, bl1=0.2, tl1=0.2-0.02/tan(pi/5),
+	Shape TRAP Dz=49.8, thet=0, phi=0,         h1=0.02, bl1=0.2, tl1=0.2-0.02/tan(pi/5),
 	 alp1=(pi/2-atan(2*tan(pi/5)))*360/(2*pi), h2=0.02, bl2=0.2, tl2=0.2-0.02/tan(pi/5),
 	 alp2=(pi/2-atan(2*tan(pi/5)))*360/(2*pi)
 Endblock 

@@ -1,6 +1,9 @@
-* $Id: svttgeo7.g,v 1.4 2007/11/13 21:33:46 perev Exp $
+* $Id: svttgeo7.g,v 1.5 2008/11/19 04:08:35 perev Exp $
 *
 * $Log: svttgeo7.g,v $
+* Revision 1.5  2008/11/19 04:08:35  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.4  2007/11/13 21:33:46  perev
 * ALKAP fixed and innermost radius increased
 *
@@ -934,7 +937,7 @@ Block SLSD is a single ladder mother (sector of tube)
 
       do s=-1,1,2
           cS=(s*deg+aDisp)
-	  Position SELE ORT=YZX AlphaZ=cS, x=svtl_radius-ladthk-xpos, y=s*(swca_WaferWid/2+ypos), AlphaX=-90*(1-s)
+	  Position SELE ORT=YZX , x=svtl_radius-ladthk-xpos, y=s*(swca_WaferWid/2+ypos), AlphaX=90*(1-s), AlphaZ=cS 
       EndDo
 EndBlock
 *

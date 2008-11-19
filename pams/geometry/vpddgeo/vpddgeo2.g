@@ -1,5 +1,8 @@
-* $Id: vpddgeo2.g,v 1.2 2007/02/16 22:54:32 potekhin Exp $
+* $Id: vpddgeo2.g,v 1.3 2008/11/19 04:08:38 perev Exp $
 * $Log: vpddgeo2.g,v $
+* Revision 1.3  2008/11/19 04:08:38  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.2  2007/02/16 22:54:32  potekhin
 * Code improvements by Xin, aimed at a better code structure,
 * readability and removal of hardcoded values.
@@ -810,20 +813,20 @@ Created 21 June 2000
 *- - - - vertical pcs of 3" Al Angle on balcony...
        Create and Position IBSA in Cave z=vpds_IBSAZc y=vpds_IBSAYc x=vpds_IBSAXc 
                   Position IBSA in Cave z=vpds_IBSAZc y=vpds_IBSAYc x=-vpds_IBSAXc,
-                         AlphaZ=180
+                         ORT=-X-YZ
                   Position IBSA in Cave z=-(vpds_IBSAZc+EWshift) y=vpds_IBSAYc x=vpds_IBSAXc, 
-                         ThetaZ=180 
+                         ORT=-X-YZ 
                   Position IBSA in Cave z=-(vpds_IBSAZc+EWshift) y=vpds_IBSAYc x=-vpds_IBSAXc, 
-                         ThetaZ=180 AlphaZ=180 
+                         ORT=-X-Y-Z 
 *- - - - diagonal pcs of 3" Al Angle from balcony to I-beam...
-       Create and Position IBSB in Cave z=vpds_IBSBZc y=vpds_IBSBYc+UDshift x=vpds_IBSBXc,
-                                        AlphaX=45 
-                  Position IBSB in Cave z=vpds_IBSBZc y=vpds_IBSBYc+UDshift x=-vpds_IBSBXc,
-                                        AlphaX=45 ThetaX=270
-                  Position IBSB in Cave z=-(vpds_IBSBZc+EWshift) y=vpds_IBSBYc+UDshift,
-                                        x=vpds_IBSBXc AlphaX=-45 ThetaZ=180  
-                  Position IBSB in Cave z=-(vpds_IBSBZc+EWshift) y=vpds_IBSBYc+UDshift,
-                                        x=-vpds_IBSBXc AlphaX=-45 ThetaX=270 ThetaZ=180 
+       Create and Position IBSB in Cave z=vpds_IBSBZc      	 y=vpds_IBSBYc+UDshift x= vpds_IBSBXc,
+                                        AlphaX=-45 
+                  Position IBSB in Cave z=vpds_IBSBZc 		 y=vpds_IBSBYc+UDshift x=-vpds_IBSBXc,
+                                        AlphaY= 90 AlphaX=-45  
+                  Position IBSB in Cave z=-(vpds_IBSBZc+EWshift) y=vpds_IBSBYc+UDshift x= vpds_IBSBXc, 
+		                        AlphaY= -90 AlphaX= 45   
+                  Position IBSB in Cave z=-(vpds_IBSBZc+EWshift) y=vpds_IBSBYc+UDshift x=-vpds_IBSBXc,
+		                        AlphaY= 180 AlphaX= 45  
 *- - - - horizontal pcs of 4" channel+endcaps that connect diagonals and underside of I-beam...
        Create and Position IBSC in Cave z=vpds_IBSCZc y=vpds_IBSCYc+UDshift
                   Position IBSC in Cave z=-(vpds_IBSCZc+EWshift) y=vpds_IBSCYc+UDshift,

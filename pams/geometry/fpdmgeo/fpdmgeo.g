@@ -1,6 +1,9 @@
-* $Id: fpdmgeo.g,v 1.4 2004/03/31 16:34:56 potekhin Exp $
+* $Id: fpdmgeo.g,v 1.5 2008/11/19 04:08:21 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo.g,v $
+* Revision 1.5  2008/11/19 04:08:21  perev
+* updates to the corrected(vp) starsim
+*
 * Revision 1.4  2004/03/31 16:34:56  potekhin
 * Placed fppdstep and another subroutine
 * into a separate file due to code reorganization.
@@ -675,7 +678,7 @@ Block FXSG  is the Shower max  Gap for scintillator strips
       		if (mod(i_str,2) != 0 ) then			 
        			Create and Position FHMS  x=xc y=yc AlphaZ=45
 		else
-       			Create and Position FHMS  x=xc y=yc AlphaZ=45 AlphaX=180
+       			Create and Position FHMS  x=xc y=yc AlphaZ=45 ORT=X-Y-Z 
 		endif
 	End do
       else
@@ -702,7 +705,7 @@ Block FXSG  is the Shower max  Gap for scintillator strips
       		if (mod(i_str,2) != 0 ) then			 
        			Create and Position FHMS  x=xc y=yc AlphaZ=90
 		else
-       			Create and Position FHMS  x=xc y=yc AlphaZ=90 AlphaX=180
+       			Create and Position FHMS  x=xc y=yc ORT=YX-Z
 		endif
 	  End do
 	endif
