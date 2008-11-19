@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.86 2008/04/14 21:32:12 fisyak Exp $
+ * $Id: StMuDstMaker.cxx,v 1.87 2008/10/03 17:50:42 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -97,7 +97,7 @@ ClassImp(StMuDstMaker)
 StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
   mIOMaker(0), mTreeMaker(0),
-  mIoMode(1), mIoNameMode((int)ioTreeMaker), mEventList(0),
+  mIoMode(1), mIoNameMode((int)ioTreeMaker), mEventList(0), mVtxList(100),
   mTrackType(256), mReadTracks(1),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mTrackFilter(0), mL3TrackFilter(0),
@@ -1327,6 +1327,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.87  2008/10/03 17:50:42  tone421
+ * Added mVtxList(100); see http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/7529.html
+ *
  * Revision 1.86  2008/04/14 21:32:12  fisyak
  * Remove stripping TObject from StDcaGeometry, because StDcaGeometry is inherit from StObject and this stripping brakes schema evolution
  *

@@ -1,6 +1,9 @@
- // $Id: StSsdBarrel.cc,v 1.10 2008/07/16 21:00:37 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.11 2008/10/20 19:30:32 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.11  2008/10/20 19:30:32  bouchet
+// add methods for the calculation of quality
+//
 // Revision 1.10  2008/07/16 21:00:37  bouchet
 // default writePointToContainer : no quality hits calculation
 //
@@ -221,6 +224,7 @@ Int_t StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip){
   Float_t sigma       = 3.0;
   Int_t iPedestal     = 120;
   Int_t idMcHit[5]    = {0,0,0,0,0};
+  Int_t idMcTrack[5]  = {0,0,0,0,0};
   Int_t e = 0;
   for (Int_t i = 0 ; i < spa_strip->GetNRows(); i++)
     {
@@ -229,8 +233,12 @@ Int_t StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip){
       iWaf    = idWaferToWafer(idWaf);
       iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
       iSide   = (strip[i].id_strip - nStrip*100000 - idWaf)/10000;
-      for (e = 0 ; e < 5;e++) idMcHit[e] = strip[i].id_mchit[e];
-      StSsdStrip *newStrip = new StSsdStrip(nStrip, strip[i].adc_count, sigma, iPedestal, idMcHit);
+      for (e = 0 ; e < 5;e++) {
+	idMcHit[e]   = strip[i].id_mchit[e];
+	idMcTrack[e] = strip[i].id_mctrack[e];
+      }
+      //StSsdStrip *newStrip = new StSsdStrip(nStrip, strip[i].adc_count, sigma, iPedestal, idMcHit);
+      StSsdStrip *newStrip = new StSsdStrip(nStrip, strip[i].adc_count, sigma, iPedestal, idMcHit,idMcTrack);
       mLadders[iLad]->mWafers[iWaf]->addStrip(newStrip, iSide);
     }
   NumberOfStrip = spa_strip->GetNRows();  
@@ -848,27 +856,31 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 
 /***********************************************************/
 Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster,St_spa_strip *spa_strip,StSsdDynamicControl *mDynamicControl,StMcEvent *mcEvent){
+  vector<const StMcSsdHit*> hitCol;
   StMcSsdHitCollection *myCol;
+  int totRatio, ratio, idTruth;
   if(mcEvent)
     {
-      if(Debug())cout << "McEvent exists" << endl;
+      if(Debug()){cout << "McEvent exists" << endl;}
       myCol  = mcEvent->ssdHitCollection();
-      if ((myCol)&& Debug())  
+      if ((myCol))  
 	{ 
-	  printf("ssdMcHitCollection exists, size = %ld\n",myCol->numberOfHits());
+	  //printf("ssdMcHitCollection exists, size = %ld\n",myCol->numberOfHits());
 	    for (unsigned int iLadder=0; iLadder<myCol->numberOfLadders(); iLadder++) {
 	      for (unsigned int iWafer = 0; iWafer < myCol->ladder(iLadder)->numberOfWafers(); iWafer++) {
-		printf("Ladder =%d wafer=%d\n",iLadder,iWafer);
+		//printf("Ladder =%d wafer=%d\n",iLadder,iWafer);
 		for (StMcSsdHitIterator iter = myCol->ladder(iLadder)->wafer(iWafer)->hits().begin();
 		     iter != myCol->ladder(iLadder)->wafer(iWafer)->hits().end();
 		     iter++) {
 		  const StMcSsdHit   *hit = dynamic_cast<const StMcSsdHit   *> (*iter);
 		  assert(hit);
-		  printf("ladder=%d wafer=%d charge=%f volume id =%ld parentTrack=%ld\n",iLadder,iWafer,hit->dE(),hit->volumeId(),hit->parentTrack()->key());
+		  //printf("ladder=%d wafer=%d charge=%f id = %ld volume id =%ld parentTrack=%ld\n",iLadder,iWafer,hit->dE(),hit->key(),hit->volumeId(),hit->parentTrack()->key());
+		  hitCol.push_back(hit);
 		}
 	      }
 	    }
 	}
+      //cout << " Size of vector hits = " << hitCol.size() << endl;
     }
   else{cout<< "No ssdMcHitCollection" <<endl;
   }
@@ -877,33 +889,30 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
   //scf_cluster_st *on_cluster = scf_cluster->GetTable(); 
   scf_cluster_st *on_cluster = scf_cluster->GetTable(); 
   // table size is 148 bytes
-  Int_t i = 0, inContainer = 0, inTable = 0 ;
+  Int_t i = 0, inContainer = 0, inTable = 0;
   StThreeVectorF gPos; StThreeVectorF gPosError; 
   Int_t hw; Float_t q ; unsigned char c; 
   c =0;
-  Int_t charge[2];
   for (Int_t iLad = 0; iLad < mNLadder; iLad++)
     for (Int_t iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       {
 	Int_t idCurrentWaf = mSsdLayer*1000 + (iWaf+1)*100 + (iLad+1);//decode the wafer id
 	StSsdPointList *sptList = mLadders[iLad]->mWafers[iWaf]->getPoint();//loop over StSsdPoint list
 	StSsdPoint *pSpt = sptList->first();
-	Float_t ratio = 0.0;
+	totRatio = 0;
+	ratio    = 0;
 	while (pSpt){
 	  //printf("Ladder=%d wafer=%d\n",iLad,iWaf);
 	  if(mcEvent){
-	    Int_t chargeGEANT;
-	    charge[0]= 0 ;
-	    charge[1]= 0;
-	    chargeGEANT =0;
-	    //const Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
+	    //printf("Type of hit = %d\n",pSpt->getNMatched());
+	    
 	    //we look only idMcTrack for simulation
 	    //jb : we fill StEvent after getting the IdMctrack
 	    //jb : as it was done too for the strip and clusters --> see StSpaBarrel.cc and StScfBarrel.cc
 	    //printf("Now we find the idMcTrack from the cluster\n");	
-	    Int_t FirstStripCLUSTER = 0;
-	    Int_t sideCLUSTER       = 0;  
-	    Int_t idCLUSTER         = 0; 
+	    Int_t idCLUSTER = 0; 
+	    int idClusP     = 0;
+	    int idClusN     = 0;
 	    for (i = 0 ; i < 5 ; i++)
 	      {
 		spt.id_mchit[i]   = pSpt->getNMchit(i);
@@ -912,59 +921,22 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 		//we look on the clusters table to get the IdMctrack info
 		if (spt.id_mchit[i] == 0) spt.id_mctrack[i]=0;
 		else {
-		  for(Int_t j = 0 ; j < scf_cluster->GetNRows(); j++){
+		  int j =0;
+		  for(j = 0 ; j < scf_cluster->GetNRows(); j++){
 		    if(spt.id_mchit[i] == on_cluster[j].id_mchit[i]){
 		      spt.id_mctrack[i] = on_cluster[j].id_mctrack[i];
-		      idCLUSTER = on_cluster[j].id_mctrack[i];
+		      idCLUSTER = on_cluster[j].id_mchit[i];
+		      //printf("ok, found idMcTrack=%d  i=%d  j=%d for McHit =%d cluster_id =%d\n",on_cluster[j].id_mctrack[i],i,j,on_cluster[j].id_mchit[i],on_cluster[j].id_cluster);
+		      idClusP = 	    10000*(10*pSpt->getIdClusterP() + 0)+idCurrentWaf;
+		      idClusN = 	    10000*(10*pSpt->getIdClusterN() + 1)+idCurrentWaf;
+		      //printf("for the table :ClusterP for this hit = %d clusterN for this hit = %d\n",idClusP,idClusN);
 		      break;
 		    }
 		  }
-		  //printf("ok, idWafer=%d found idMcTrack=%d  i=%d j=%d\n",idCurrentWaf,on_cluster[j].id_mctrack[i],i,j);
-		  //printf("id cluster = %d  firstStrip=%d\n",on_cluster[j].id_cluster,on_cluster[j].first_strip);
-		  for(Int_t jj = 0 ; jj < scf_cluster->GetNRows(); jj++){
-		    FirstStripCLUSTER = (on_cluster[jj].first_strip/100000); 
-		    sideCLUSTER       = (on_cluster[jj].first_strip - FirstStripCLUSTER*100000 - idCurrentWaf)/10000; //decode the side of this cluster
-		    if((sideCLUSTER==0)&&(on_cluster[jj].id_mctrack[i]==idCLUSTER)){
-		      charge[sideCLUSTER] += on_cluster[jj].adc_count;
-		      //cout <<"i="<<i<<" lad="<<iLad<<" Waf="<<iWaf<<" side="<<sideCLUSTER<<" clusterP="<<charge[0]<<" clusterN ="<<charge[1]<<" current charge="<<on_cluster[jj].adc_count<<" current noise ="<<on_cluster[jj].noise_count <<endl;
-		      StSsdCluster *pClusterP = mLadders[iLad]->mWafers[iWaf]->getClusterP()->first();
-			while (pClusterP){
-			  //printf("cluster P idMcHit =%d from table =%d\n",pClusterP->getIdMcHit(i),on_cluster[jj].id_mctrack[i]);
-			  if((10000*(10*pClusterP->getNCluster() + 0)+idCurrentWaf)==on_cluster[jj].id_cluster){
-			    //printf(" side =%d totadc = %d totNoise = %f firstStrip=%d size=%d\n",sideCLUSTER,pClusterP->getTotAdc(),pClusterP->getTotNoise(),pClusterP->getFirstStrip(),pClusterP->getClusterSize());
-			    //now we loop over the strips of that cluster 
-			    StSsdStripList *stripP = mLadders[iLad]->mWafers[iWaf]->getStripP();
-			    int lastScan =0;//lastScan : a same strips can be used by 2 adjacents clusters : it must be be count twice
-			    for(int kk=pClusterP->getFirstStrip();kk<pClusterP->getFirstStrip()+pClusterP->getClusterSize();kk++)
-			      {
-				StSsdStrip *pStripP = stripP->first();
-				while (pStripP)
-				  {
-				    if((pStripP->getNStrip()==kk)&&(pStripP->getIdMcHit(i)==on_cluster[jj].id_mchit[i])&&(pStripP->getNStrip()!=lastScan))
-				      {
-					lastScan = pStripP->getNStrip();
-					chargeGEANT+=(int)(pStripP->getDigitSig());
-					//cout <<"kk=" <<kk << " adc =" << chargeGEANT <<endl;
-				      }
-				    pStripP    = stripP->next(pStripP);
-				  }
-			      }
-			    break;
-			  }
-			  pClusterP    = mLadders[iLad]->mWafers[iWaf]->getClusterP()->next(pClusterP);
-			}
-		    }
-		  }  
-		  Int_t max = 0;
-		  max = charge[0];
-		  //printf("charge Cluster = %d charge GEANT =%d\n",max,chargeGEANT);
-		  ratio = (float)chargeGEANT/max;
-		  //printf("ratio = %f\n",ratio);
-		  break;
+		  Calculation_Ratio(idCurrentWaf,idClusP,idClusN,hitCol,&totRatio,&idTruth);
 		}
 	      }
 	  }
-	  ratio = (int)(100*ratio);
 	  //now we fill StEvent and get the correct IdTruth 
 	  if (ssdHitColl){ // If Available, Fill the StEvent Container
 	    for (i = 0 ; i < 3 ; i++){
@@ -974,7 +946,8 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 	    hw = idCurrentWaf;
 	    q =  pSpt->getDe(0);
 	    currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
-	    currentSsdHit->setIdTruth(spt.id_mctrack[0],(int)ratio);// need to check first = most probable! ; new : qATruth is set with the ratio chargeCLUSTER/chargeGEANT
+	    //currentSsdHit->setIdTruth(spt.id_mctrack[0],(int)ratio);// need to check first = most probable! ; new : qATruth is set with the ratio chargeCLUSTER/chargeGEANT
+	    currentSsdHit->setIdTruth(idTruth,(int)totRatio);
 	    // Start of Point Loop
 	    //currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
 	    //currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
@@ -991,8 +964,6 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 		  break;
 		cluster_P_j = currentListP_j->next(cluster_P_j);
 	      }
-	    
-	    
 	    StSsdClusterList *currentListN_j = mLadders[iLad]->mWafers[iWaf]->getClusterN();
 	    StSsdCluster *cluster_N_j       = currentListN_j->first();
 	    while(cluster_N_j)
@@ -1010,17 +981,17 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 	    // 2^28 28-29 n-side cluster size(1-4) 
 	    // 2^30 30-31 p-side cluster size(1-4)
 	    hw  =         
-	                 8                                                                             
-  	      +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
- 	      +       8192 * (int)cluster_N_j->getStripMean()                                          
-  	      +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
- 	      +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
- 	      + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
-  	    currentSsdHit->setHardwarePosition(hw);
+	      8                                                                             
+	      +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
+	      +       8192 * (int)cluster_N_j->getStripMean()                                          
+	      +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
+	      +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
+	      + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
+	    currentSsdHit->setHardwarePosition(hw);
 	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
-  	    inContainer += ssdHitColl->addHit(currentSsdHit);
+	    inContainer += ssdHitColl->addHit(currentSsdHit);
 	  }// Container condition
-
+	  
 	  if (1) {//Jerome is Happy, Fill the Table
 	    spt.flag          = pSpt->getFlag();
 	    spt.id            = 10000*(pSpt->getNPoint())+idCurrentWaf;
@@ -1052,9 +1023,249 @@ Int_t StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection
 	  pSpt    = sptList->next(pSpt);
 	}// End of Point Loop
       }
+  if (hitCol.size()>0 )hitCol.clear();
   return inTable;
 }
 //________________________________________________________________________________
+void StSsdBarrel::Calculation_Ratio(int idWafer,int idClusterP,int idClusterN,vector<const StMcSsdHit*> hitCol, int *ratio, int *idTruth)
+{
+  Float_t charge[2]      = {0,0};
+  int DominatorP         = 0;
+  int DominatorN         = 0;
+  Float_t adc_DominatorP = 0;
+  Float_t adc_DominatorN = 0;
+  vector<StSsdStrip*> ListstripP;
+  vector<StSsdStrip*> ListstripN;
+  vector<int> GTrackP,GTrackN;
+  int isSplittedP=0,isSplittedN =0; 
+  //printf("ok, idWafer=%d idClusterP = %d idClusterN = %d\n",idWafer,idClusterP,idClusterN);
+  Int_t lad = idWaferToLadderNumb(idWafer);
+  Int_t waf = (int)((idWafer - mSsdLayer*1000)/100)-1;
+  // now p-side
+  //cout << " size of ClusterP list = " <<  mLadders[lad]->mWafers[waf]->getClusterP()->getSize() << endl;
+  StSsdCluster *pClusterP = mLadders[lad]->mWafers[waf]->getClusterP()->first();
+  while (pClusterP){
+    int idP  =  10000*(10*pClusterP->getNCluster() + 0)+idWafer;
+    if(idP==idClusterP){
+      charge[0] = pClusterP->getTotAdc();
+      if(pClusterP->getFlag()==1){
+	//splitted cluster
+	//cout << " Cluster is splitted ... " << endl;
+	isSplittedP = isSplit(pClusterP,0,lad,waf);
+      }
+      //printf(" side =%d totadc = %d totNoise = %f firstStrip=%d size=%d\n",0,pClusterP->getTotAdc(),pClusterP->getTotNoise(),pClusterP->getFirstStrip(),pClusterP->getClusterSize());
+      for(Int_t e =0 ;e<5;e++)GTrackP.push_back(pClusterP->getIdMcHit(e));
+      //now we loop over the strips of that cluster
+      StSsdStripList *stripP = StSsdBarrel::Instance()->mLadders[lad]->mWafers[waf]->getStripP();
+      int lastScan =0;//lastScan : a same strips can be used by 2 adjacents clusters : it must be count twice
+      for(int kk=pClusterP->getFirstStrip();kk<pClusterP->getFirstStrip()+pClusterP->getClusterSize();kk++)
+	{
+	  //cout << " id to find = " << kk << endl;
+	  StSsdStrip *pStripP = stripP->first();
+	  while (pStripP)
+	    {
+	      if((pStripP->getNStrip()==kk)&&(pStripP->getNStrip()!=lastScan))
+		{
+		  lastScan = pStripP->getNStrip();
+		  ListstripP.push_back(pStripP);
+		  //cout <<"kk=" <<kk << " strip adc = " << (int)(pStripP->getDigitSig()) <<endl;
+		}
+	      pStripP    = stripP->next(pStripP);
+	    }
+	}
+      break;
+    }
+    pClusterP    = mLadders[lad]->mWafers[waf]->getClusterP()->next(pClusterP);
+  }
+  // now n-side
+  //cout << " side N " << endl;
+  StSsdCluster *pClusterN = mLadders[lad]->mWafers[waf]->getClusterN()->first();
+  while (pClusterN){
+    int idN  =  10000*(10*pClusterN->getNCluster() + 1)+idWafer;
+    if(idN==idClusterN){
+      charge[1] = pClusterN->getTotAdc();
+      if(pClusterN->getFlag()==1){
+	//splitted cluster
+	isSplittedN = isSplit(pClusterN,1,lad,waf);
+      }
+      //printf(" side =%d totadc = %d totNoise = %f firstStrip=%d size=%d\n",1,pClusterN->getTotAdc(),pClusterN->getTotNoise(),pClusterN->getFirstStrip(),pClusterN->getClusterSize());
+      for(Int_t e =0 ;e<5;e++)GTrackN.push_back(pClusterN->getIdMcHit(e));
+      //now we loop over the strips of that cluster 
+      StSsdStripList *stripN = mLadders[lad]->mWafers[waf]->getStripN();
+      int lastScan =0;//lastScan : a same strip can be used by 2 adjacents clusters : it must be count twice
+      for(int kk=pClusterN->getFirstStrip();kk<pClusterN->getFirstStrip()+pClusterN->getClusterSize();kk++)
+	{
+	  StSsdStrip *pStripN = stripN->first();
+	  while (pStripN)
+	    {
+	      if((pStripN->getNStrip()==kk)&&(pStripN->getNStrip()!=lastScan)) 
+		{
+		  lastScan = pStripN->getNStrip();
+		  ListstripN.push_back(pStripN);
+		}
+	      pStripN    = stripN->next(pStripN);
+	    }
+	}
+      break;
+    }
+    pClusterN    = mLadders[lad]->mWafers[waf]->getClusterN()->next(pClusterN);
+  }
+  //cout << " Size of stripP collection = " << ListstripP.size() << " size of stripN collection = " << ListstripN.size() << endl;
+
+  // find dominator from cluster
+  DominatorP = FindMcHit(GTrackP,hitCol);
+  DominatorN = FindMcHit(GTrackN,hitCol);
+  //cout << " Dominator P = " << DominatorP <<" Dominator N  = " << DominatorN << endl;
+  if(DominatorP!=DominatorN) {
+    //cout << " different IdTruth , no matching, bye bye" << endl;
+    *ratio   = 0;
+    *idTruth = 0;
+    return;
+  }
+  if((ListstripN.size()>0)&&(ListstripP.size()>0)) 
+    {
+      unsigned int min ,max; 
+      // side P
+      //cout << "Track dominator for this strip = " << DominatorP << endl;
+      min=0; 
+      max=0;
+      if(isSplittedP==1){
+	min = 0;
+	max = ListstripP.size()-1;}
+      else 
+	if(isSplittedP==2){
+	  min = 1;
+	  max = ListstripP.size();}
+	else{
+	  min = 0;
+	  max = ListstripP.size();}
+      //cout << " min  =" << min << " max = " <<max << endl;
+      for(unsigned int ee = min;ee<max;ee++){
+	StSsdStrip* tempoStripP = ListstripP[ee];
+	if(DominatorP == tempoStripP->getIdMcTrack(0))
+	  {
+	    adc_DominatorP += tempoStripP->getDigitSig();
+	    //cout << " strips match , dominator updated , adc = " << adc_DominatorP << endl;
+	  }
+	else {
+	  //cout << " strips don't match , new dominator , adc = " << adc_DominatorP << endl;
+	  //cout<<" it remains the same because it was found as the biggest idTruth " << endl;
+	}
+      }
+      //cout << " side P Tot charge from GEANT = " << adc_DominatorP << " for dominator Track  = " << DominatorP << endl; 
+      
+      //side N
+      //cout << "Track dominator for this strip = " << DominatorN << endl;
+      min =0;
+      max =0;
+      if(isSplittedN==1){
+	min = 0;
+	max = ListstripN.size()-1;
+      }
+      else 
+	if(isSplittedN==2){
+	  min = 1;
+	  max = ListstripN.size();
+	}
+	else{
+	  min = 0;
+	  max = ListstripN.size();
+	}
+      for(unsigned int ee = min;ee<max;ee++){
+	StSsdStrip *tempoStripN = ListstripN[ee];
+	if(DominatorN == tempoStripN->getIdMcTrack(0))
+	  {
+	    adc_DominatorN += tempoStripN->getDigitSig();
+	    //cout << " strips match , dominator updated , adc = " << adc_DominatorN << endl;
+	  }
+	else {
+	  //cout << " strips don't match , new dominator , adc = " << adc_DominatorN << endl;
+	  //cout<<" it remains the same because it was found as the biggest idTruth " << endl;
+	}
+      }
+      //cout << " side N Tot charge from GEANT = " << adc_DominatorN << " for dominator Track  = " << DominatorN << endl; 
+    }
+  //cout << " side N Tot charge from GEANT = " << adc_DominatorN << " for dominator Track  = " << DominatorN << endl; 
+  //find the Dominant contributor
+  float ratioP   = 0 ;
+  float ratioN   = 0 ;
+  if(charge[0]!=0) ratioP = adc_DominatorP/charge[0];
+  if(charge[1]!=0) ratioN = adc_DominatorN/charge[1];
+  if(DominatorP == DominatorN){
+    *ratio = (int)(100*(ratioP*ratioN));
+    *idTruth = DominatorP;
+  }
+  else{
+    *ratio   = 0;
+    *idTruth = 0; 
+  }
+  if(ListstripP.size()>0) ListstripP.clear();
+  if(ListstripN.size()>0) ListstripN.clear();
+  if(GTrackP.size()>0) GTrackP.clear();
+  if(GTrackN.size()>0) GTrackN.clear();
+}
+//__________________________________________________________________
+Int_t StSsdBarrel::FindMcHit(vector<int> tempo,vector<const StMcSsdHit*> hitCol)
+{
+  float ChargeTrack = 0.0;
+  int idTrack =0;
+  for(int e=0;e<5;e++){
+    for (unsigned int hit = 0 ; hit<hitCol.size();hit++){
+      const StMcSsdHit* currHit = hitCol[hit];
+      if((tempo[e]>0)&&(currHit->key() == tempo[e])&&(currHit->dE()>ChargeTrack)){
+	ChargeTrack = currHit->dE();
+	idTrack = currHit->parentTrack()->key();
+      }
+    }
+  }
+  return idTrack;
+}
+//________________________________________________________________________________________
+Int_t StSsdBarrel::isSplit(StSsdCluster *currentCluster,int iSide,int lad,int waf){
+  StSsdCluster *firstClus;
+  StSsdCluster *lastClus;
+  StSsdCluster *nextClus;
+  StSsdCluster *prevClus;
+  int isSplitted =0 ;
+  if(iSide ==0){
+    firstClus = mLadders[lad]->mWafers[waf]->getClusterP()->first();
+    lastClus  = mLadders[lad]->mWafers[waf]->getClusterP()->last();
+  }
+  else {
+    firstClus = mLadders[lad]->mWafers[waf]->getClusterN()->first();
+    lastClus  = mLadders[lad]->mWafers[waf]->getClusterN()->last();
+  }
+  if(currentCluster->getNCluster() == firstClus->getNCluster()){
+    //cout <<"kind 1"<<endl;
+    isSplitted=1;
+  }
+  else if(currentCluster->getNCluster() == lastClus->getNCluster()){
+    //cout <<"kind 2"<<endl;
+    isSplitted=2;
+  }
+  else {
+    nextClus = currentCluster->getNextCluster();
+    //cout << " last strip of current cluster = " << (currentCluster->getFirstStrip()+currentCluster->getClusterSize()-1) << endl;
+    //cout << " first strip of next cluster = " << nextClus->getFirstStrip() << endl;
+    if(nextClus->getFirstStrip() == ((currentCluster->getFirstStrip()+currentCluster->getClusterSize()-1))) {
+      //cout << " last strip of current cluster = " << (currentCluster->getFirstStrip()+currentCluster->getClusterSize()-1)<<endl;
+      //cout << " first strip of next cluster = " << nextClus->getFirstStrip() << endl;
+      isSplitted =1;
+      //cout << " kind 3 isSplitted =" << isSplitted << endl;
+      prevClus = currentCluster->getPrevCluster();
+      //cout << " first strip of current cluster = " << (currentCluster->getFirstStrip())  << endl;
+      //cout << " last strip of prev cluster = "     << prevClus->getFirstStrip()+prevClus->getClusterSize() << endl;
+      if(currentCluster->getFirstStrip() == ((prevClus->getFirstStrip()+prevClus->getClusterSize()-1))) {
+	//cout << " first strip of current cluster = " << (currentCluster->getFirstStrip()) << endl;
+	//cout << " last strip of next cluster = " << prevClus->getFirstStrip()+prevClus->getClusterSize()-1 << endl;
+	isSplitted=2;
+	//cout << " kind 4 isSplitted =" << isSplitted << endl;
+      }
+    }
+  }
+  return isSplitted;
+}
+//___________________________________________________________________
 void StSsdBarrel::doSideClusterisation(Int_t *barrelNumbOfCluster){
   //  Int_t *wafNumbOfCluster = new int[2];
   Int_t wafNumbOfCluster[2];
@@ -1214,7 +1425,6 @@ Int_t StSsdBarrel::idWaferToLadderNumb(Int_t idWafer)
   return iL-1;
 }
 
-
 Int_t StSsdBarrel::waferNumbToIdWafer(Int_t waferNumb)
 {
   Int_t iL = 1+(int)((waferNumb)/mNWaferPerLadder);
@@ -1262,6 +1472,7 @@ void StSsdBarrel::convertToStrip(Double_t pairCreationEnergy,
 
   for (Int_t iLad = 0; iLad < mNLadder; iLad++)
     for (Int_t iWaf = 0; iWaf < mNWaferPerLadder; iWaf++) {
+      //printf("ladder = %d  wafer = %d\n",iLad,iWaf);
       mLadders[iLad]->mWafers[iWaf]->convertToStrip(mStripPitch,
 						    mNStripPerSide,
 						    pairCreationEnergy,
