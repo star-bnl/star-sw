@@ -555,10 +555,11 @@ Replace [^+([NUMBER][OPR][NUMBER]]   with  [^+([COMPUTE  #1#2#3]]
              {IF}[EXIST 3]{ %FhMax = #3; } {ELSE} { %FhMax = %Magic;}     ]
 ;
 " use %Orti instead if %ORT variable "
-  REPLACE [;%ORT=#;] with [      {IF} '#1'='XYZ'{;" standart axes used ";}
-                         {ELSE} {{IF} '#1'='YZX'{;%Orti=1;}
-                         {ELSE} {{IF} '#1'='ZXY'{;%Orti=2;} } }
-                          ]
+  REPLACE [;%ORT=#;] with [;%Orti=IGOR('#1');]
+  REPLACE [;%Alphax=#;] with [;%AlphaN+=1; %AlphaK(%AlphaN)=1; %AlphaL(%AlphaN)=#1;]
+  REPLACE [;%Alphay=#;] with [;%AlphaN+=1; %AlphaK(%AlphaN)=2; %AlphaL(%AlphaN)=#1;]
+  REPLACE [;%Alphaz=#;] with [;%AlphaN+=1; %AlphaK(%AlphaN)=3; %AlphaL(%AlphaN)=#1;]
+
   REPLACE [;POSITION [GSYSN] IN [NAME] ] with [;POSITION #1 MOTHER='#2' ]
   REPLACE [;CREATE AND POSITION [GSYSN]] with [;CREATE #1;  POSITION #1 ]
   Replace[AG_ERROR(#)] with
@@ -908,9 +909,11 @@ REPLACE [+CDE,AGECOM] with [;" - Advanced Geant interface ";
                 %Idtype,%Iset,%Idet,%Isvol,%level,%ireser,%Igeom,%Standalone,
                 %LSTACK,%NwuHit,%NwuVol,%Magic,%LDETU,%NpDiv,%NpDv,%Nz,%Ncopy,
                 %Idebu,%Igrap,%Ihist,%Imfld,%Isimu,%EndSave,%code,%trktyp,
-                %mode,%ecode,%pdg,Iprin;
+                %mode,%ecode,%pdg,Iprin,
+		%AlphaN,%AlphaK(10),IGOR;
   Real          %FIELDM,%TMAXFD,%STEMAX,%DEEMAX,%EPSIL,%STMIN,%Dens,%RadL,%AbsL,
-                %Thetax,%Thetay,%Thetaz,%Alfax,%Alfay,%Alfaz,%Phix,%Phiy,%Phiz,
+                %Thetax,%Phix,%Thetay,%Phiy,%Thetaz,%Phiz,%Alfax,%Alfay,%Alfaz,
+                %AlphaL(10),
                 %Alphax,%Alphay,%Alphaz,%Type,
                 %dx,   %dx1,  %dx2,  %dy,   %dy1,  %dy2, %DMAXMS, %Twist,
                 %thet, %the1, %the2, %phi,  %phi1, %phi2, %alph, %alp1, %alp2,
@@ -936,8 +939,11 @@ REPLACE [+CDE,AGECOM] with [;" - Advanced Geant interface ";
         %A, %Za, %W, %NLmat, %Work, %Seen, %Lsty, %Lwid, %Colo, %Fill,
         %Serial, %Isvol,  %Istatus, %Zi(16), %Rmn(16), %Rmx(16),
         %Volume, %Mother, %Shape,   %Cnick,                           %EndSave,
-        %Reset1,%Thetax,%Thetay,%Thetaz,%Alfax,%Alfay,%Alfaz,%Phix,%Phiy,%Phiz,
-        %x,%y,%z, %Step,%C0,%Ndiv,%Iaxis,%NdvMax,%Orti,%Ncopy,         %Reset2,
+        %Reset1,
+	%Thetax,%Phix,%Thetay,%Phiy,%Thetaz,%Phiz,%Alfax,%Alfay,%Alfaz,
+        %x,%y,%z, %Step,%C0,%Ndiv,%Iaxis,%NdvMax,%Orti,%Ncopy,
+        %AlphaN,%AlphaK,%AlphaL,
+	%Reset2,
         %Konly, %Ort, %Mark;
   "local variables valid inside same block "
   COMMON/AGCLOCA/ %begScr,%UBUF(100),%Par(100),%AA(20),%ZZ(20),%WW(20),%NwBuf,
