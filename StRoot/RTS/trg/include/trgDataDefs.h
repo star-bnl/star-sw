@@ -21,19 +21,11 @@
 #define MAX_TRG_BLK_SIZE          100000      /* Estimated at 100k bytes including pre/post */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
-
-//#define ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
-//#define ADD_BIT_FORCE          5              /* Force store of this event */
-//#define ADD_BIT_L2_5           6              /* Level 2.5 abort */
-#define ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
-
-
-
     /* Event Descriptor Data Structures */
     
 typedef struct {
   char           name[3];                     /* Contains  EVD */
-  unsigned char  TrgDataFmtVer;
+  char           TrgDataFmtVer;               /* Exception for use by DAQ */
   int            length;                      /* Byte count of data that follows */
   unsigned int   bunchXing_hi;
   unsigned int   bunchXing_lo;                /* Two parts of RHIC bunch crossing number */
@@ -59,16 +51,13 @@ typedef struct {
 typedef struct {
   char               name[4];                 /* Contains  L1DS */
   int                length;                  /* Byte count of data that follows */
-  unsigned short     CPA[16];                 /* Contents of 2 CTB DSM Input Buffers (IB's) - coarse pixel array */
-  unsigned short     MTD[8];                  /* TAC values for MTD's MRPCs and overlapping CTB trays */
-  unsigned short     VPD[8];                  /* ADC & TAC values for VPD detectors*/
-  unsigned short     CTB[8];                  /* CTB ADC sums and topology for East & West combined */ 
-  unsigned short     lastDSM[8];              /* Contents of last DSM IB - results of all DSM trees */
-  unsigned short     VTX[8];                  /* Separate ZDC and BBC DSMs have been replaced with this one */
+  unsigned short     TOF[8];                  /* TOF and MTD data */
+  unsigned short     VTX[8];                  /* Separate VPD, ZDC and BBC DSMs have been replaced with this one */
   unsigned short     EMC[8];                  /* Contents of 1 EMC IB - results of separate BEMC and EEMC DSMs */
   unsigned short     BCdata[16];              /* Contents of 2 Bunch Crossing DSMs IB's */       
   unsigned short     specialTriggers[8];      /* Contents of 1 Special Trigger DSM - all the special trigger requests */
-  unsigned short     FPD[8];                  /* Contents of 1 FPD IB */
+  unsigned short     FPD[8];                  /* Contents of 1 FMS and FPD IB */
+  unsigned short     lastDSM[8];              /* Contents of last DSM IB - results of all DSM trees */
 } L1_DSM_Data;
 
       /* Trigger Summary Data Structures */
