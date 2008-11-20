@@ -302,13 +302,13 @@ so we keep it here for source compatibility
 #define TRG_TOF_INSTANCE     6
 // #define TRG_EEC_INSTANCE     7    jml Aug 21,03
 #define TRG_SCALER48_INSTANCE 7
-#define TRG_MIX_INSTANCE     8
+//#define TRG_MIX_INSTANCE     8     jml Nov 20, 2008
 #define TRG_BC1_INSTANCE     9
 #define TRG_BCE_INSTANCE    10  
 #define TRG_BCW_INSTANCE    11
 #define TRG_SCALER_INSTANCE 12
 #define TRG_BBC_INSTANCE    13
-#define TRG_FPE_INSTANCE    14  
+//#define TRG_FPE_INSTANCE    14  
 #define TRG_FMS_INSTANCE    15  
 #define TRG_L0_INSTANCE		16 // Tonko. Feb25,03
 #define  TRG_QT1_INSTANCE  17
@@ -454,13 +454,13 @@ so we keep it here for source compatibility
 #define TRG_TOF_NODE       ((TRG_SYSTEM<<12) | TRG_TOF_INSTANCE)
 #define TRG_L1_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L1_SUBSYS<<8) | (x))
 #define TRG_L2_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L2_SUBSYS<<8) | (x))
-#define TRG_MIX_NODE	((TRG_SYSTEM<<12) | TRG_MIX_INSTANCE)
+// #define TRG_MIX_NODE	((TRG_SYSTEM<<12) | TRG_MIX_INSTANCE)     jml 
 #define TRG_BC1_NODE        ((TRG_SYSTEM<<12) | TRG_BC1_INSTANCE)
 #define TRG_BCE_NODE        ((TRG_SYSTEM<<12) | TRG_BCE_INSTANCE)
 #define TRG_BCW_NODE        ((TRG_SYSTEM<<12) | TRG_BCW_INSTANCE)
 #define TRG_SCALER_NODE ((TRG_SYSTEM<<12) | TRG_SCALER_INSTANCE)
 #define TRG_BBC_NODE        ((TRG_SYSTEM<<12) | TRG_BBC_INSTANCE)
-#define TRG_FPE_NODE        ((TRG_SYSTEM<<12) | TRG_FPE_INSTANCE)
+//#define TRG_FPE_NODE        ((TRG_SYSTEM<<12) | TRG_FPE_INSTANCE)
 #define TRG_FMS_NODE        ((TRG_SYSTEM<<12) | TRG_FMS_INSTANCE)
 #define TRG_L0_NODE		((TRG_SYSTEM<<12) | TRG_L0_INSTANCE)	// Tonko, Feb25,03
 #define  TRG_QT1_NODE   ((TRG_SYSTEM<<12) | TRG_QT1_INSTANCE)
