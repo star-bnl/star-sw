@@ -23,6 +23,11 @@
 #define MAX_TRG_BLK_SIZE          100000      /* Estimated at 100k bytes including pre/post */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
+#define ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
+#define ADD_BIT_FORCE          5              /* Force store of this event */
+#define ADD_BIT_L2_5           6              /* Level 2.5 abort */
+#define ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
+
     /* Event Descriptor Data Structures */
     
 typedef struct {
