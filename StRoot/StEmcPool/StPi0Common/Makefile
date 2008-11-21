@@ -2,11 +2,13 @@
 -include $(ROOTSYS)/test/Makefile.arch
 HSuf = h
 
+MODULE_NAME = StPi0Common
+
 ifeq (1$(OUTPUT_DIR),1)
 OUTPUT_DIR = $(shell pwd)
 endif
 ifeq (1$(OUTPUT_NAME),1)
-OUTPUT_NAME = StPi0Common
+OUTPUT_NAME = $(MODULE_NAME)
 endif
 ifeq (1$(INCDIR),1)
 INCDIR = ../..
@@ -19,20 +21,19 @@ MYDict   = $(OUTPUT_NAME)_Dict.$(SrcSuf)
 MYO      = $(MYS:.$(SrcSuf)=.$(ObjSuf)) $(MYDict:.$(SrcSuf)=.$(ObjSuf))
 MY       = $(OUTPUT_DIR)/$(OUTPUT_NAME).$(DllSuf)
 
-PROGRAMS      = $(MY)
-OBJS          = $(MYO)
 DICTIONARIES  = $(MYDict) *_Dict.$(SrcSuf)
 
 MYINCLUDES = -I$(INCDIR)
-CXXFLAGS += -Wall $(MYINCLUDES)
-LDFLAGS += -shared
+CXXFLAGS = $(shell root-config --cflags) -Wall -fPIC -g $(MYINCLUDES)
+LDFLAGS  = $(shell root-config --ldflags) -shared
+LIBS     = $(shell root-config --libs)
 
 #------------------------------------------------------------------------------
 
 .SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
 .PHONY : clean distclean 
 
-all: $(PROGRAMS)
+all: $(MY)
 
 $(MY): $(MYO)
 	@echo $(LD) $(LDFLAGS) $^ $(LIBS) $(OutPutOpt)$@
@@ -40,10 +41,10 @@ $(MY): $(MYO)
 	@echo "$@ done"
 
 clean:
-	@-rm -f $(OBJS) *.d $(DICTIONARIES) $(DICTIONARIES:.$(SrcSuf)=.$(HSuf)) $(DICTIONARIES:.$(SrcSuf)=.$(ObjSuf)) *.stackdump
+	@-rm -f $(MYO) *.d $(DICTIONARIES) $(DICTIONARIES:.$(SrcSuf)=.$(HSuf)) $(DICTIONARIES:.$(SrcSuf)=.$(ObjSuf)) *.stackdump
 
 distclean: clean
-	@-rm -f $(PROGRAMS)
+	@-rm -f $(MY)
 
 .SUFFIXES: .$(SrcSuf)
 

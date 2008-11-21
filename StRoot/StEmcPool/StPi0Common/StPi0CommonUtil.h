@@ -1,15 +1,18 @@
 #ifndef StPi0Common_Util_H
 #define StPi0Common_Util_H
 
+#include <RVersion.h>
 #include <TObject.h>
 #include <TNamed.h>
 #include <TString.h>
+#include <TPave.h>
 
 extern const Float_t EMCRadius;
 extern const Float_t truePionMass;
 extern const Float_t truePionBranchingRatio;
 extern const Float_t trueEtaMass;
 extern const Float_t trueEtaBranchingRatio;
+extern const Float_t trueOmegaMass;
 
 struct TMyDataAnalysisSettings : public TObject {
 public:
@@ -21,13 +24,13 @@ public:
     Int_t StPi0DataMaker_Version_data;
     Int_t StPi0DataSaveMaker_Version_data;
     Int_t StTimeRandomizerMaker_Version_data;
-    Int_t StPi0TriggerSimulatorMaker_Version_data;
     Int_t StPi0Analysis_Version_analysis;
     Int_t StPi0Analysis_Version_results;
     Int_t StPi0Results_Version_results;
 
     Bool_t isSimulation;
     Bool_t isEmbedding;
+    Bool_t isPythia;
     Bool_t saveHits;
     Bool_t saveHitsPlain;
     Bool_t saveClusters;
@@ -56,6 +59,9 @@ public:
     Bool_t saveMCEtas;
     Bool_t saveMCEtasPlain;
     Bool_t saveFirstMCEtaOnly;
+    Bool_t saveMCNbars;
+    Bool_t saveMCNbarsPlain;
+    Bool_t saveFirstMCNbarOnly;
     Bool_t saveEvents;
     Bool_t saveEventsPlain;
     Bool_t saveSMDThreshold;
@@ -73,15 +79,20 @@ public:
     Int_t HT1Threshold;
     Int_t HT2Threshold;
     Int_t TriggerAdc;
-    Bool_t useFullEmcTriggerSimulator;
     Bool_t useTriggerSimulatorOriginal;
     Bool_t useTriggerSimulatorEmbed;
     Int_t MixedEventsNumber;
     Bool_t MixingClassZ;
+    Float_t MixingClassZSize;
     Bool_t MixingClassBemcMult;
+    Float_t MixingClassBemcMultSize;
     Bool_t MixingClassTrigger;
     Bool_t MixingClassJetEta;
+    Float_t MixingClassJetEtaSize;
+    Bool_t MixingClassJetPhi;
+    Float_t MixingClassJetPhiSize;
     Bool_t MixingClassJetET;
+    Float_t MixingClassJetETSize;
     Int_t SubmixedEventsNumber;
     Bool_t ShuffleSubmixEnergy;
     Bool_t ShuffleSubmixEta;
@@ -126,26 +137,41 @@ public:
     ULong_t triggersHT2;
     TString adcToEMakerName;
     Bool_t useFullJetMaker;
+    Bool_t useSpinDbMaker;
     TString jetMakerName;
-    TString triggerSimulatorName;
-    TString triggerSimulatorNameEmbed;
-    TString triggerSimulatorNameFinal;
     TString triggerFullSimulatorName;
     TString triggerFullSimulatorNameEmbed;
     TString triggerFullSimulatorNameFinal;
     Bool_t jetFullMakerDoTowerSwapFix;
-    Bool_t jetFullMakerUse2003TowerCuts;
+    Bool_t jetFullMakerUse2003Cuts;
+    Bool_t jetFullMakerUse2005Cuts;
+    Bool_t jetFullMakerUse2006Cuts;
+    TString jetFullMakerBranchName;
+    TString spinDbMakerName;
     TString dataMakerName;
     TString datasetNameStEvent;
     TString datasetNameStMcEvent;
     Bool_t doTowerSwapFix;
 
-    ClassDef(TMyDataAnalysisSettings, 9);
+    ClassDef(TMyDataAnalysisSettings, 20);
 };
 
 TString findFile(const Char_t *filename);
 
 Int_t floatCompare(const Float_t &f1, const Float_t &f2, Float_t relPrec = 1e-5);
+
+Float_t getPseudorapidity(Float_t m, Float_t pT, Float_t y);
+Float_t getRapidity(Float_t m, Float_t pT, Float_t eta);
+
+class TH1;
+class TLegend;
+class TLatex;
+class TVirtualPad;
+void setHistFontSize(TH1 *hist, Float_t padWidthPt = 356 /*B5 text width*/, Float_t fontSizePt = 10 /*10pt*/, const TVirtualPad *pad = 0 /*gPad*/);
+void setLegendFontSize(TLegend *legend, Float_t padWidthPt = 356 /*B5 text width*/, Float_t fontSizePt = 10 /*10pt*/, const TVirtualPad *pad = 0 /*gPad*/);
+void setLatexFontSize(TLatex *latex, Float_t padWidthPt = 356 /*B5 text width*/, Float_t fontSizePt = 10 /*10pt*/, const TVirtualPad *pad = 0 /*gPad*/);
+
+void SetShadowColor(TPave *pave, Int_t color);
 
 class StPi0CommonUtil {public: Int_t i;}; // To make RootCint happy
 
