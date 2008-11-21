@@ -23,7 +23,7 @@ public:
   virtual ~StjBEMCTowerEnergyListMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjBEMCTowerEnergyListMaker.C,v 1.1 2008/10/16 20:25:12 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjBEMCTowerEnergyListMaker.C,v 1.2 2008/11/21 01:38:06 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -45,7 +45,6 @@ public:
     _bemcCut.addCut(new StjTowerEnergyCutEnergy(0.0));
     _bemcCut.addCut(new StjTowerEnergyCutBemcStatus(1));
     _bemcCut.addCut(new StjTowerEnergyCutAdc(0, 2.0));
-    _bemcCut.addCut(new StjTowerEnergyCutTowerId(1048));
 
     _writer = new StjTowerEnergyListWriter("bemcTowers", _file);
 
