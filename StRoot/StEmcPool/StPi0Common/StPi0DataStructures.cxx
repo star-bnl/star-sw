@@ -129,6 +129,13 @@ const Char_t *mcEtaBranchName = "mcEtaBranch";
 const Char_t *mcEtaDatasetName = "mcEtaDataset";
 const Char_t *mcEtaBranchType = "TMyMCDecayTreeData";
 
+const Char_t *mcNbarTreeName = "mcNbarTree";
+//const Char_t *mcNbarTreePlainName = "mcNbarTreePlain";
+const Char_t *mcNbarTreePlainName = mcNbarTreeName;
+const Char_t *mcNbarBranchName = "mcNbarBranch";
+const Char_t *mcNbarDatasetName = "mcNbarDataset";
+const Char_t *mcNbarBranchType = "TMyMCParticleTreeData";
+
 const Char_t *candidateTreeName = "candidatesTree";
 //const Char_t *candidateTreePlainName = "candidatesTreePlain";
 const Char_t *candidateTreePlainName = candidateTreeName;
@@ -198,6 +205,7 @@ const Char_t *getBranchType(const Char_t *name) {
     checkBrName(mcGammaBranchName, mcGammaBranchType);
     checkBrName(mcPionBranchName, mcPionBranchType);
     checkBrName(mcEtaBranchName, mcEtaBranchType);
+    checkBrName(mcNbarBranchName, mcNbarBranchType);
     checkBrName(candidateBranchName, candidateBranchType);
     checkBrName(eventBranchName, eventBranchType);
     checkBrName(pointBranchName, pointBranchType);

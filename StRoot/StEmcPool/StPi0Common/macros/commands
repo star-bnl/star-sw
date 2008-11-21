@@ -405,6 +405,25 @@ function copy_file_qa () {
     fi
 }
 
+function get_sys() {
+    if { which livesys &> /dev/null ; }
+    then
+	livesys
+    else
+	if { which sys &> /dev/null ; }
+	then
+	    sys
+	else
+	    if { which root-config &> /dev/null ; }
+	    then
+		root-config --arch
+	    else
+		echo 'unknown_sys'
+	    fi
+	fi
+    fi
+}
+
 function copy () {
     export COPY_STPI0COMMON='no'
     export COPY_MYSIMULATION='no'
@@ -508,6 +527,16 @@ function copy () {
     if [[ "$SRC_ANALYSIS_PATH" == "" ]] ; then export SRC_ANALYSIS_PATH=${SRC_PATH}/$ANALYSIS_PATH_DEFAULT ; fi
     if [[ "$DST_ANALYSIS_PATH" == "" ]] ; then export DST_ANALYSIS_PATH=${DST_PATH}${SRC_ANALYSIS_PATH#$SRC_PATH} ; fi
 
+    if [[ "$OPTIONS" == "" ]]
+    then
+	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) ]] ; then export COPY_STPI0COMMON='yes' ; fi
+	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) && ( -d $SRC_ANALYSIS_PATH/StPi0Simulation ) ]] ; then export COPY_MYSIMULATION='yes' ; fi
+	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) && ( -d $SRC_ANALYSIS_PATH/StPi0DataMaker ) ]] ; then export COPY_MYDATAMAKER='yes' ; fi
+	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) && ( -d $SRC_ANALYSIS_PATH/StPi0Analysis ) ]] ; then export COPY_STPI0ANALYSIS='yes' ; fi
+	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) && ( -d $SRC_ANALYSIS_PATH/StPi0Results ) ]] ; then export COPY_STPI0RESULTS='yes' ; fi
+	export COPY_COMPILED='no'
+    fi
+
     echo "Copy StPi0Common:          $COPY_STPI0COMMON"
     echo "Copy StPi0DataMaker:       $COPY_MYDATAMAKER"
     echo "Copy StPi0Simulation:      $COPY_MYSIMULATION"
@@ -546,8 +575,6 @@ function copy () {
     then
 	echo "Copying StPi0DataMaker..."
 	cp -rf $SRC_ANALYSIS_PATH/StPi0DataMaker $DST_ANALYSIS_PATH
-	echo "Copying StTimeRandomizerMaker..."
-	cp -rf $SRC_ANALYSIS_PATH/StTimeRandomizerMaker $DST_ANALYSIS_PATH
     fi
 
     if [[ "$COPY_MYSIMULATION" == "yes" ]]
@@ -570,7 +597,7 @@ function copy () {
 
     if [[ "$COPY_COMPILED" == "yes" ]]
     then
-	if [[ "$STAR_HOST_SYS" == "" ]] ; then export STAR_HOST_SYS=`root-config --platform` ; fi
+	if [[ "$STAR_HOST_SYS" == "" ]] ; then export STAR_HOST_SYS=`get_sys` ; fi
 	echo "Copying compiled libraries .$STAR_HOST_SYS ..."
 	cp -rf $SRC_PATH/.$STAR_HOST_SYS $DST_PATH
     fi
@@ -617,6 +644,14 @@ function configure () {
     export DST_PATH=`pwd`
     popd > /dev/null
 
+    if [[ "$OPTIONS" == "" ]]
+    then
+	if [[ ( -d $SRC_PATH/StPi0Common ) && ( -d $SRC_PATH/StPi0Simulation ) ]] ; then export CONFIGURE_SIMULATION='yes' ; fi
+	if [[ ( -d $SRC_PATH/StPi0Common ) && ( -d $SRC_PATH/StPi0DataMaker ) ]] ; then export CONFIGURE_DATA='yes' ; fi
+	if [[ ( -d $SRC_PATH/StPi0Common ) && ( -d $SRC_PATH/StPi0Analysis ) ]] ; then export CONFIGURE_ANALYSIS='yes' ; fi
+	if [[ ( -d $SRC_PATH/StPi0Common ) && ( -d $SRC_PATH/StPi0Results ) ]] ; then export CONFIGURE_RESULTS='yes' ; fi
+    fi
+
     echo "Configure simulation:      $CONFIGURE_SIMULATION"
     echo "Configure data:            $CONFIGURE_DATA"
     echo "Configure analysis:        $CONFIGURE_ANALYSIS"
@@ -627,19 +662,24 @@ function configure () {
     if [[ "${CONFIGURE_SIMULATION} ${CONFIGURE_DATA} ${CONFIGURE_ANALYSIS} ${CONFIGURE_RESULTS}" != "no no no no" ]]
     then
 
+	if [[ "$STAR_HOST_SYS" == "" ]] ; then export STAR_HOST_SYS=`get_sys` ; fi
+
 	export RCFILE_SH=$DST_PATH/.analysis.cfg.sh
 	rm -fr $RCFILE_SH
 	echo "#!/bin/bash" > $RCFILE_SH
+	echo "" >> $RCFILE_SH
 	echo "export ANALYSIS_DIR=$SRC_PATH" >> $RCFILE_SH
 	echo "export ANALYSIS_WORKING_DIR=$DST_PATH" >> $RCFILE_SH
 	echo "export ANALYSIS_MACRO_PATH=\". ./macros $SRC_PATH/StPi0Common/macros $SRC_PATH/StPi0Analysis/macros $SRC_PATH/StPi0Simulation/macros $SRC_PATH/StPi0DataMaker/macros $SRC_PATH/StPi0Results/macros\"" >> $RCFILE_SH
+	echo "export STAR_HOST_SYS=$STAR_HOST_SYS" >> $RCFILE_SH
+	echo "" >> $RCFILE_SH
+	echo "#export DEFAULT_SUBMIT_OPTIONS=\"\$DEFAULT_SUBMIT_OPTIONS check_script_data check_script_analysis debug discard_stdout=no discard_stderr=no sleep_analysis\"" >> $RCFILE_SH
 
 	export RCFILE_MAKE=$DST_PATH/Makefile.cfg
 	rm -fr $RCFILE_MAKE
 	echo "ANALYSIS_DIR=$SRC_PATH" >> $RCFILE_MAKE
 	echo "ANALYSIS_WORKING_DIR=$DST_PATH" >> $RCFILE_MAKE
-
-	if [[ "$STAR_HOST_SYS" == "" ]] ; then export STAR_HOST_SYS=`root-config --platform` ; fi
+	echo "STAR_HOST_SYS=$STAR_HOST_SYS" >> $RCFILE_MAKE
 
 	export RCFILE_ROOT=$DST_PATH/.rootrc
 	rm -fr $RCFILE_ROOT
@@ -661,20 +701,26 @@ function configure () {
 	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then       chmod a+x $SRC_PATH/StPi0DataMaker/macros/run_data ; fi
 	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then   chmod a+x $SRC_PATH/StPi0Analysis/macros/run_analysis ; fi
 	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then    chmod a+x $SRC_PATH/StPi0Results/macros/show_analysis ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then    chmod a+x $SRC_PATH/StPi0Results/macros/browse_analysis ; fi
 
-        #ln -sf $SRC_PATH/StPi0Common/macros/commands $DST_PATH
-        #ln -sf $SRC_PATH/StPi0Common/macros/configure $DST_PATH
-        #ln -sf $SRC_PATH/StPi0Common/macros/copy $DST_PATH
+        #ln -sf $SRC_PATH/StPi0Common/macros/commands    $DST_PATH
+        #ln -sf $SRC_PATH/StPi0Common/macros/configure   $DST_PATH
+        #ln -sf $SRC_PATH/StPi0Common/macros/copy        $DST_PATH
         ln -sf $SRC_PATH/StPi0Common/macros/clear_sched $DST_PATH
         ln -sf $SRC_PATH/StPi0Common/macros/resubmit    $DST_PATH
         ln -sf $SRC_PATH/StPi0Common/macros/submit      $DST_PATH
         ln -sf $SRC_PATH/StPi0Common/macros/Makefile    $DST_PATH
+        ln -sf $SRC_PATH/StPi0Common/macros/style.C     $DST_PATH
 	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then     ln -sf $SRC_PATH/StPi0DataMaker/macros/run_data.C          $DST_PATH ; fi
 	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then     ln -sf $SRC_PATH/StPi0DataMaker/macros/log4j.xml           $DST_PATH ; fi
 	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then ln -sf $SRC_PATH/StPi0Analysis/macros/run_analysis.C       $DST_PATH ; fi
 	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then ln -sf $SRC_PATH/StPi0Analysis/macros/run_analysis_final.C $DST_PATH ; fi
 	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/show_analysis.C       $DST_PATH ; fi
+	#if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/data_arrays_others.C  $DST_PATH ; fi
+	#if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/data_arrays_this.C    $DST_PATH ; fi
 	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/show_analysis         $DST_PATH ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/browse_analysis.C     $DST_PATH ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/browse_analysis       $DST_PATH ; fi
 
     fi
 }

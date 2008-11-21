@@ -11,8 +11,14 @@
 #pragma link C++ global truePionBranchingRatio;
 #pragma link C++ global trueEtaMass;
 #pragma link C++ global trueEtaBranchingRatio;
+#pragma link C++ global trueOmegaMass;
 #pragma link C++ function findFile;
 #pragma link C++ function floatCompare;
+#pragma link C++ function getPseudorapidity;
+#pragma link C++ function getRapidity;
+#pragma link C++ function setHistFontSize;
+#pragma link C++ function setLegendFontSize;
+#pragma link C++ function setLatexFontSize;
 
 #pragma link C++ class StPi0CommonUtil+;
 
@@ -61,6 +67,11 @@
 #pragma link C++ global mcEtaTreePlainName; 
 #pragma link C++ global mcEtaBranchName; 
 #pragma link C++ global mcEtaDatasetName; 
+
+#pragma link C++ global mcNbarTreeName; 
+#pragma link C++ global mcNbarTreePlainName; 
+#pragma link C++ global mcNbarBranchName; 
+#pragma link C++ global mcNbarDatasetName; 
 
 #pragma link C++ global candidateTreeName; 
 #pragma link C++ global candidateTreePlainName; 
