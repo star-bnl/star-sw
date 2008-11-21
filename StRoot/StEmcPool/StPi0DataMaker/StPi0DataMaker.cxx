@@ -35,8 +35,6 @@
 
 #include <StEmcPool/StPi0Common/StPi0DataStructures.h>
 
-#include <StEmcPool/StPi0DataMaker/StPi0TriggerSimulatorMaker.h>
-
 ClassImp(StPi0DataMaker);
 
 //_____________________________________________________________________________
@@ -53,6 +51,7 @@ StPi0DataMaker::StPi0DataMaker(const char *name)
     , mMCGammaTreeDataArray(0)
     , mMCPionTreeDataArray(0)
     , mMCEtaTreeDataArray(0)
+    , mMCNbarTreeDataArray(0)
     , mCandidateTreeDataArray(0)
     , mCandidateTreeDataMixArray(0)
     , mCandidateTreeDataSubmixArray(0)
@@ -111,11 +110,12 @@ Int_t StPi0DataMaker::Init() {
     {LOG_DEBUG << "StEmcDecoder created" << endm;}
 
     list<TEventMixerParameters::value_type> min; list<TEventMixerParameters::value_type> max; list<TEventMixerParameters::mixer_type::size_type> size;
-    if (this->settings.MixingClassZ)        { min.push_back(-70);   max.push_back(70);    size.push_back(14); } // Mixing class in Z_vertex
-    if (this->settings.MixingClassBemcMult) { min.push_back(0);     max.push_back(30);    size.push_back(10); } // Mixing class in the number of BEMC points
-    if (this->settings.MixingClassTrigger)  { min.push_back(0.5);   max.push_back(3.5);   size.push_back(3);  } // Mixing class in trigger
-    if (this->settings.MixingClassJetEta)   { min.push_back(-1.2);  max.push_back(1.2);   size.push_back(12); } // Mixing class in jet eta
-    if (this->settings.MixingClassJetET)    { min.push_back(0);     max.push_back(20);    size.push_back(10); } // Mixing class in jet E_T
+    if (this->settings.MixingClassZ)        { min.push_back(-70);   max.push_back(70);    size.push_back(TEventMixerParameters::mixer_type::size_type(((70) - (-70)) / this->settings.MixingClassZSize)); } // Mixing class in Z_vertex
+    if (this->settings.MixingClassBemcMult) { min.push_back(0);     max.push_back(30);    size.push_back(TEventMixerParameters::mixer_type::size_type(((30) - (0)) / this->settings.MixingClassBemcMultSize)); } // Mixing class in the number of BEMC points
+    if (this->settings.MixingClassTrigger)  { min.push_back(0.5);   max.push_back(3.5);   size.push_back(TEventMixerParameters::mixer_type::size_type(3));  } // Mixing class in trigger
+    if (this->settings.MixingClassJetEta)   { min.push_back(-1.2);  max.push_back(1.2);   size.push_back(TEventMixerParameters::mixer_type::size_type(((1.2) - (-1.2)) / this->settings.MixingClassJetEtaSize)); } // Mixing class in jet eta
+    if (this->settings.MixingClassJetPhi)   { min.push_back(-TMath::Pi());  max.push_back(+TMath::Pi());   size.push_back(TEventMixerParameters::mixer_type::size_type(((+TMath::Pi()) - (-TMath::Pi())) / this->settings.MixingClassJetPhiSize)); } // Mixing class in jet phi
+    if (this->settings.MixingClassJetET)    { min.push_back(0);     max.push_back(20);    size.push_back(TEventMixerParameters::mixer_type::size_type(((20) - (0)) / this->settings.MixingClassJetETSize)); } // Mixing class in jet E_T
 
     this->mEventMixer = new TEventMixerParameters(min, max, size, this->settings.MixedEventsNumber, 2);
     if (!this->mEventMixer) {LOG_ERROR << "mEventMixer not created!" << endm;}
@@ -129,25 +129,11 @@ Int_t StPi0DataMaker::Init() {
 void StPi0DataMaker::Clear(Option_t *option) {
     {LOG_DEBUG << "Starting Clear()" << endm;}
     this->inherited::Clear(option);
-/*
-    if (this->mMCGammaTreeDataArray)          delete this->mMCGammaTreeDataArray;
-    if (this->mMCPionTreeDataArray)           delete this->mMCPionTreeDataArray;
-    if (this->mMCEtaTreeDataArray)            delete this->mMCEtaTreeDataArray;
-    if (this->mCandidateTreeDataArray)        delete this->mCandidateTreeDataArray;
-    if (this->mCandidateTreeDataMixArray)     delete this->mCandidateTreeDataMixArray;
-    if (this->mCandidateTreeDataSubmixArray)  delete this->mCandidateTreeDataSubmixArray;
-    if (this->mEventTreeDataArray)            delete this->mEventTreeDataArray;
-    if (this->mHitTreeDataArray)              delete this->mHitTreeDataArray;
-    if (this->mClusterTreeDataArray)          delete this->mClusterTreeDataArray;
-    if (this->mPointTreeDataArray)            delete this->mPointTreeDataArray;
-    if (this->mSMDThresholdTreeDataArray)     delete this->mSMDThresholdTreeDataArray;
 
-    if (this->mEventSummary)                  delete this->mEventSummary;
-    if (this->mTriggerSummary)                delete this->mTriggerSummary;
-*/
     this->mMCGammaTreeDataArray = 0;
     this->mMCPionTreeDataArray = 0;
     this->mMCEtaTreeDataArray = 0;
+    this->mMCNbarTreeDataArray = 0;
     this->mCandidateTreeDataArray = 0;
     this->mCandidateTreeDataMixArray = 0;
     this->mCandidateTreeDataSubmixArray = 0;
@@ -178,6 +164,7 @@ Int_t StPi0DataMaker::Make() {
     createDataset(this->settings.saveMCGammas || this->settings.saveMCGammasPlain,                     this->mMCGammaTreeDataArray,         mcGammaDatasetName);
     createDataset(this->settings.saveMCPions || this->settings.saveMCPionsPlain,                       this->mMCPionTreeDataArray,          mcPionDatasetName);
     createDataset(this->settings.saveMCEtas || this->settings.saveMCEtasPlain,                         this->mMCEtaTreeDataArray,           mcEtaDatasetName);
+    createDataset(this->settings.saveMCNbars || this->settings.saveMCNbarsPlain,                       this->mMCNbarTreeDataArray,          mcNbarDatasetName);
     createDataset(this->settings.saveCandidates || this->settings.saveCandidatesPlain,                 this->mCandidateTreeDataArray,       candidateDatasetName);
     createDataset(this->settings.saveCandidatesMixed || this->settings.saveCandidatesMixedPlain,       this->mCandidateTreeDataMixArray,    candidateMixDatasetName);
     createDataset(this->settings.saveCandidatesSubmixed || this->settings.saveCandidatesSubmixedPlain, this->mCandidateTreeDataSubmixArray, candidateSubmixDatasetName);
@@ -209,35 +196,6 @@ Int_t StPi0DataMaker::Make() {
 	{LOG_ERROR << "No StEmcCollection" << endm;}
     }
 
-    StSPtrVecEmcPoint emcPoints;
-    if (emcCollection) {
-	const StSPtrVecEmcPoint &points = emcCollection->barrelPoints();
-	for(StSPtrVecEmcPointConstIterator pointIter = points.begin();pointIter != points.end();pointIter++) {
-	    const StEmcPoint *point = *pointIter;
-	    if (point) {
-		{LOG_DEBUG << "Copying point..." << endm;}
-		//StEmcPoint *pointNew = dynamic_cast<StEmcPoint*>(point->Clone());
-		StEmcPoint *pointNew = new StEmcPoint(
-		    point->position(), 
-		    point->positionError(), 
-		    point->size(), 
-		    point->hardwarePosition(), 
-		    point->charge(), 
-		    point->energy(), 
-		    point->chiSquare(), 
-		    point->trackReferenceCount()
-		);
-		{LOG_DEBUG << "Copied point." << endm;}
-		if (pointNew) {
-		    emcPoints.push_back(pointNew);
-		} else {
-		    {LOG_ERROR << "Cannot clone StEmcPoint " << point << endm;}
-		}
-	    }
-	}
-	{LOG_DEBUG << "Points copied from size " << points.size() << " to size " << emcPoints.size() << endm;}
-    }
-
     StPrimaryVertex* primaryVertex = event ? event->primaryVertex() : 0;
     if (event && !primaryVertex) {
 	if (mEventSummary) mEventSummary->Fill(6);
@@ -256,45 +214,78 @@ Int_t StPi0DataMaker::Make() {
     if (this->settings.isSimulation && event && mc_event) triggerData.triggered |= this->settings.triggersSim; // take pure MC event as certain trigger
     
     Int_t triggerMixingClass = -1;
-    if (triggerData.triggered & this->settings.triggersHT2) {
-        {LOG_DEBUG << "Event is in HighTower-2 mixing class" << endm;}
-        triggerMixingClass = 3;
-    } else if (triggerData.triggered & this->settings.triggersHT1) {
-        {LOG_DEBUG << "Event is in HighTower-1 mixing class" << endm;}
-        triggerMixingClass = 2;
-    } else if (triggerData.triggered & this->settings.triggersMB) {
-        {LOG_DEBUG << "Event is in MinBias mixing class" << endm;}
-        triggerMixingClass = 1; // Everything else counts as MinBias
-    }
+    if (this->settings.triggers[0] == 0) triggerMixingClass = 0;
+    for (UInt_t trgInd = 0;trgInd < (sizeof(triggerData.triggered) * 8);trgInd++) if (triggerData.triggered & (1 << trgInd)) triggerMixingClass = trgInd;
 
-    if (triggerData.triggered & (this->settings.triggersMB | this->settings.triggersHT1 | this->settings.triggersHT2)) {
+    if (triggerData.triggered || (this->settings.triggers[0] == 0)) {
 
     {LOG_DEBUG << "Event accepted " << event->runId() << " " << event->id() << endm;}
+    {LOG_DEBUG << "Trigger mixing class " << triggerMixingClass << endm;}
     if (mEventSummary) mEventSummary->Fill(1);
     for (UInt_t trgInd = 0;trgInd < (sizeof(triggerData.triggered) * 8);trgInd++) if (mTriggerSummary && (triggerData.triggered & (1 << trgInd))) mTriggerSummary->Fill(trgInd);
+
+    StSPtrVecEmcPoint emcPoints;
+    if (emcCollection) {
+	const StSPtrVecEmcPoint &points = emcCollection->barrelPoints();
+	for(StSPtrVecEmcPointConstIterator pointIter = points.begin();pointIter != points.end();pointIter++) {
+	    const StEmcPoint *point = *pointIter;
+	    if (point) {
+		{LOG_DEBUG << "Copying point..." << endm;}
+		//StEmcPoint *pointNew = dynamic_cast<StEmcPoint*>(point->Clone());
+		StEmcPoint *pointNew = new StEmcPoint(
+		    point->position(), 
+		    point->positionError(), 
+		    point->size(), 
+		    point->hardwarePosition(), 
+		    point->charge(), 
+		    point->energy(), 
+		    point->chiSquare(), 
+		    point->trackReferenceCount()
+		);
+		if (pointNew) {
+		    for (UInt_t i = 0;i < point->cluster(kBarrelEmcTowerId).size();i++) pointNew->addCluster(kBarrelEmcTowerId, point->cluster(kBarrelEmcTowerId)[i]);
+		    for (UInt_t i = 0;i < point->cluster(kBarrelEmcPreShowerId).size();i++) pointNew->addCluster(kBarrelEmcPreShowerId, point->cluster(kBarrelEmcPreShowerId)[i]);
+		    for (UInt_t i = 0;i < point->cluster(kBarrelSmdEtaStripId).size();i++) pointNew->addCluster(kBarrelSmdEtaStripId, point->cluster(kBarrelSmdEtaStripId)[i]);
+		    for (UInt_t i = 0;i < point->cluster(kBarrelSmdPhiStripId).size();i++) pointNew->addCluster(kBarrelSmdPhiStripId, point->cluster(kBarrelSmdPhiStripId)[i]);
+		}
+		{LOG_DEBUG << "Copied point." << endm;}
+		if (pointNew) {
+		    emcPoints.push_back(pointNew);
+		} else {
+		    {LOG_ERROR << "Cannot clone StEmcPoint " << point << endm;}
+		}
+	    }
+	}
+	{LOG_DEBUG << "Points copied from size " << points.size() << " to size " << emcPoints.size() << endm;}
+    }
 
     if (this->mEmcDecoder) {
 	this->mEmcDecoder->SetFixTowerMapBug(this->settings.doTowerSwapFix);
 	this->mEmcDecoder->SetDateTime(this->GetDate(), this->GetTime());
     }
     if (this->mBemcTables) this->mBemcTables->loadTables(this);
-    StMaker *trigSimMaker = this->GetMaker(this->settings.triggerSimulatorNameFinal);
+    StMaker *trigMaker = this->GetMaker(this->settings.triggerFullSimulatorNameFinal);
 
     TMyEventData eventData;
     list<TEventMixerParameters::value_type> eventMixingClass;
 
-    getEventData(event, mc_event, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->mBemcTables, &this->settings.triggers[0], this->GetMaker(this->settings.triggerSimulatorName), this->GetMaker(this->settings.triggerSimulatorNameEmbed), this->GetMaker(this->settings.triggerSimulatorNameFinal), this->GetMaker(this->settings.adcToEMakerName), this->settings.triggersHT1, this->settings.triggersHT2, this->settings.jetConeRadius, this->GetMaker(this->settings.jetMakerName), eventData);
+    getEventData(event, mc_event, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->mBemcTables
+	, &this->settings.triggers[0], this->GetMaker(this->settings.triggerFullSimulatorName), this->GetMaker(this->settings.triggerFullSimulatorNameEmbed), trigMaker
+	, this->GetMaker(this->settings.adcToEMakerName), this->settings.jetConeRadius, this->GetMaker(this->settings.jetMakerName), this->settings.jetFullMakerBranchName, this->GetMaker(this->settings.spinDbMakerName)
+	, this->GetDataSet("geant"), this->settings.isPythia, eventData);
     eventData.trigger = triggerData;
-    associateTracksWithEmcPoints(event, mc_event, emcPoints, trigSimMaker, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->mEmcPosition, this->mBemcTables);
+    associateTracksWithEmcPoints(event, mc_event, emcPoints, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->mEmcPosition, this->mBemcTables);
     if (this->settings.MixingClassZ)        eventMixingClass.push_back(eventData.zTPC);
     if (this->settings.MixingClassBemcMult) eventMixingClass.push_back(eventData.nPoints);
     if (this->settings.MixingClassTrigger)  eventMixingClass.push_back(triggerMixingClass);
     if (this->settings.MixingClassJetEta)   eventMixingClass.push_back(eventData.jet.eta);
+    if (this->settings.MixingClassJetPhi)   eventMixingClass.push_back(eventData.jet.phi);
     if (this->settings.MixingClassJetET)    eventMixingClass.push_back(eventData.jet.eT);
     eventData.mixerStatus = 0;
     if (this->mEventMixer && this->mEventMixer->withinParameters(eventMixingClass)) {
-	eventData.mixerStatus |= 1;
-    	if (this->mEventMixer->getMixer(eventMixingClass).preready()) eventData.mixerStatus |= 2;
+	eventData.mixerStatus |= (1 << 0);
+    	if (this->mEventMixer->getMixer(eventMixingClass).getCount() >= this->mEventMixer->getMixer(eventMixingClass).getSize() - 1) eventData.mixerStatus |= (1 << 1);
+    	if (this->mEventMixer->getMixer(eventMixingClass).getCount() >= 2 - 1) eventData.mixerStatus |= (1 << 2);
     }
 
     if (eventData.corruptedCrates) {LOG_WARN << "BEMC data is corrupted: crates bitmask " << (UInt_t)(eventData.corruptedCrates) << endm;}
@@ -312,7 +303,7 @@ Int_t StPi0DataMaker::Make() {
 		    {LOG_INFO << "Saving MC pion" << endm;}
 		    TMyMCDecayTreeData *mcPionTreeData = new TMyMCDecayTreeData();
 		    if (mcPionTreeData) {
-			getMCDecayData(mcTrack, event, trigSimMaker, this->mBemcTables, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->settings.triggersHT1, this->settings.triggersHT2, mcPionTreeData->decay);
+			getMCDecayData(mcTrack, event, this->mBemcTables, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, mcPionTreeData->decay);
 			mcPionTreeData->event = eventData;
 			TObjectSet *objSet = new TObjectSet(mcPionTreeData);
 			if (objSet) {
@@ -334,7 +325,7 @@ Int_t StPi0DataMaker::Make() {
 		    {LOG_INFO << "Saving MC eta" << endm;}
 		    TMyMCDecayTreeData *mcEtaTreeData = new TMyMCDecayTreeData();
 		    if (mcEtaTreeData) {
-			getMCDecayData(mcTrack, event, trigSimMaker, this->mBemcTables, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->settings.triggersHT1, this->settings.triggersHT2, mcEtaTreeData->decay);
+			getMCDecayData(mcTrack, event, this->mBemcTables, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, mcEtaTreeData->decay);
 			mcEtaTreeData->event = eventData;
 			TObjectSet *objSet = new TObjectSet(mcEtaTreeData);
 			if (objSet) {
@@ -342,6 +333,28 @@ Int_t StPi0DataMaker::Make() {
 			} else {
 			    {LOG_ERROR << "Cannot create TObjectSet" << endm;}
 			    delete mcEtaTreeData;
+			}
+		    } else {LOG_ERROR << "Cannot create structure" << endm;}
+		}
+	    }
+    }
+    if (mc_event && (this->settings.saveMCNbars || this->settings.saveMCNbarsPlain) && this->mMCNbarTreeDataArray) {
+	    {LOG_DEBUG << "Saving MC nbars" << endm;}
+    	    StPtrVecMcTrack &tracks = mc_event->tracks();
+    	    for (Int_t i = 0;i < (Int_t)tracks.size();i++) {
+		const StMcTrack *mcTrack = tracks[i];
+		if (((i == 0) || !this->settings.saveFirstMCNbarOnly) && mcTrack && (mcTrack->geantId() == 25) && (!tracks[i]->isShower())) {
+		    {LOG_INFO << "Saving MC nbar" << endm;}
+		    TMyMCParticleTreeData *mcNbarTreeData = new TMyMCParticleTreeData();
+		    if (mcNbarTreeData) {
+			getMCParticleData(mcTrack, event, this->mBemcTables, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, mcNbarTreeData->particle);
+			mcNbarTreeData->event = eventData;
+			TObjectSet *objSet = new TObjectSet(mcNbarTreeData);
+			if (objSet) {
+			    this->mMCNbarTreeDataArray->Add(objSet);
+			} else {
+			    {LOG_ERROR << "Cannot create TObjectSet" << endm;}
+			    delete mcNbarTreeData;
 			}
 		    } else {LOG_ERROR << "Cannot create structure" << endm;}
 		}
@@ -356,7 +369,7 @@ Int_t StPi0DataMaker::Make() {
 		    {LOG_INFO << "Saving MC gamma" << endm;}
 	    	    TMyMCParticleTreeData *mcGammaTreeData = new TMyMCParticleTreeData();
 		    if (mcGammaTreeData) {
-	    		getMCParticleData(mcTrack, event, trigSimMaker, this->mBemcTables, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->settings.triggersHT1, this->settings.triggersHT2, mcGammaTreeData->particle);
+	    		getMCParticleData(mcTrack, event, this->mBemcTables, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, mcGammaTreeData->particle);
     			mcGammaTreeData->event = eventData;
 			TObjectSet *objSet = new TObjectSet(mcGammaTreeData);
 			if (objSet) {
@@ -378,7 +391,7 @@ Int_t StPi0DataMaker::Make() {
 	if (point) {
     	    TMyPointTreeData *pointTreeData = new TMyPointTreeData();
 	    if (pointTreeData) {
-    	        getPointData(point, trigSimMaker, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->mBemcTables, this->settings.triggersHT1, this->settings.triggersHT2, pointTreeData->point);
+    	        getPointData(point, trigMaker, this->mEmcGeom, this->mSmdeGeom, this->mSmdpGeom, this->mPsdGeom, this->mBemcTables, &this->settings.triggers[0], pointTreeData->point);
 		{LOG_DEBUG << "Point: etaCoord = " << point->position().pseudoRapidity() << ", phiCoord = " << point->position().phi() << ", E = " << point->energy() << ", size = " << (Int_t)pointTreeData->point.clusterBTOW.size << " " << (Int_t)pointTreeData->point.clusterBSMDE.size << " " << (Int_t)pointTreeData->point.clusterBSMDP.size << endm;}
 		pointTreeData->event = eventData;
     	        pointsData.push_back(*pointTreeData);
@@ -468,8 +481,8 @@ Int_t StPi0DataMaker::Make() {
 	if (!this->mEventMixer->withinParameters(eventMixingClass)) {if (this->mEventSummary) this->mEventSummary->Fill(9);}
         TEventMixer &mixer = this->mEventMixer->getMixer(eventMixingClass);
         mixer.addEvent(pointsData);
-        if (mixer.ready()) {
-	    Int_t mixedPoint1 = mixer.getSize() - 1;
+        if (mixer.getCount() >= 2) {
+	    Int_t mixedPoint1 = mixer.getCount() - 1;
 	    TEventMixer::const_list_reference points1 = mixer.getList(mixedPoint1, 0);
 	    for (Int_t mixedPoint2 = 0;mixedPoint2 < mixedPoint1;mixedPoint2++) {
 		TEventMixer::const_list_reference points2 = mixer.getList(mixedPoint2, 1);
@@ -775,6 +788,7 @@ void StPi0DataMaker::postData() {
     postDataset(this, this->mMCGammaTreeDataArray);
     postDataset(this, this->mMCPionTreeDataArray);
     postDataset(this, this->mMCEtaTreeDataArray);
+    postDataset(this, this->mMCNbarTreeDataArray);
     postDataset(this, this->mCandidateTreeDataArray);
     postDataset(this, this->mCandidateTreeDataMixArray);
     postDataset(this, this->mCandidateTreeDataSubmixArray);

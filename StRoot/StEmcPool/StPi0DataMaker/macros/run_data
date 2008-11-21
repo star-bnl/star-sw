@@ -52,7 +52,7 @@ ls -al
 
 if [[ "$mydocons" == "yes" ]] ; then cons ; fi
 
-if [[ "$myfilelistsyntax" == "xrootd" ]] ; then /star/u/starlib/ROOT/xrootdpreStageFileList $myscratch/filelist_$myjobid.list ; fi
+if [[ "$myfilelistsyntax" == "xrootd" ]] ; then /star/u/starlib/ROOT/xrootd/bin/preStageFileList $myscratch/filelist_$myjobid.list ; fi
 
 if [[ "$myjprof" == "yes" ]] ; then export RUNJPROF='run_jprof.C' ; else export RUNJPROF='' ; fi
 

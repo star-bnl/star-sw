@@ -20,6 +20,7 @@ void load_data_libs() {
     LOAD_LIB("StTreeMaker");
     LOAD_LIB("StIOMaker");
     LOAD_LIB("StTpcDb");
+    LOAD_LIB("StDetectorDbMaker");
     LOAD_LIB("StDbUtilities");
     LOAD_LIB("StEvent");
     LOAD_LIB("StEventUtilities");
@@ -27,6 +28,7 @@ void load_data_libs() {
     LOAD_LIB("StMcEventMaker"); 
     LOAD_LIB("StStrangeMuDstMaker"); 
     LOAD_LIB("StEmcUtil"); 
+    LOAD_LIB("StBichsel"); 
     LOAD_LIB("StMuDSTMaker"); 
     LOAD_LIB("StDaqLib");
     LOAD_LIB("StDbLib");
@@ -41,14 +43,17 @@ void load_data_libs() {
     LOAD_LIB("StEmcRawMaker");
     LOAD_LIB("StEmcADCtoEMaker");
     LOAD_LIB("StEmcMixerMaker");
-    LOAD_LIB("StDetectorDbMaker");
     LOAD_LIB("StEEmcUtil");
     LOAD_LIB("StPreEclMaker");
     LOAD_LIB("StEpcMaker");
     LOAD_LIB("StEmcTriggerMaker");
+    LOAD_LIB("StTriggerUtilities");
     LOAD_LIB("StEEmcDbMaker");
     LOAD_LIB("StSpinDbMaker");
     LOAD_LIB("StJetFinder");
+    LOAD_LIB("StJetSkimEvent");
+    LOAD_LIB("StMCAsymMaker");
+    LOAD_LIB("StJets");
     LOAD_LIB("StJetMaker");
 
     LOAD_LIB("StTimeRandomizerMaker");

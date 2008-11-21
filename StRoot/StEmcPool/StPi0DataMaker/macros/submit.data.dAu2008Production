@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export DATA_NAME='Real data production_dAu2008 dataset'
+export DATA_TAG='dAu2008Production'
+export DATA_QUERY='catalog:'$CATALOG'?collision=dau200,production=P08ic,trgsetupname=production_dAu2008,'$MYQUERY_general
+export DATA_CONFIG='config_dAu2008.C'
+export DATA_DIR=$DATA_PATH'/data_dAu2008'

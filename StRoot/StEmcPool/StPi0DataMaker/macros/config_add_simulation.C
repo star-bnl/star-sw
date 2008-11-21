@@ -7,6 +7,8 @@
     dataAnalysisSettings.saveMCPionsPlain = true;
     dataAnalysisSettings.saveMCEtas = false;
     dataAnalysisSettings.saveMCEtasPlain = true;
+    dataAnalysisSettings.saveMCNbars = false;
+    dataAnalysisSettings.saveMCNbarsPlain = true;
     dataAnalysisSettings.saveMCGammas = false;
     dataAnalysisSettings.saveMCGammasPlain = true;
 

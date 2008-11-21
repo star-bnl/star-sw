@@ -32,6 +32,10 @@ StPi0DataSaveMaker::StPi0DataSaveMaker(const Char_t *name)
     , mMCEtaIndex(0)
     , mMCEtaTree(0)
     , mMCEtaTreePlain(0)
+    , mMCNbarTreeDataArray(0)
+    , mMCNbarIndex(0)
+    , mMCNbarTree(0)
+    , mMCNbarTreePlain(0)
     , mCandidateTreeDataArray(0)
     , mCandidateIndex(0)
     , mCandidateTree(0)
@@ -111,6 +115,7 @@ Int_t StPi0DataSaveMaker::Init() {
     initArray(this->settings.saveMCGammas,           this->mMCGammaTreeDataArray,         this->mMCGammaIndex,         mcGammaBranchName,      this->settings.clonesArraySize);
     initArray(this->settings.saveMCPions,            this->mMCPionTreeDataArray,          this->mMCPionIndex,          mcPionBranchName,       this->settings.clonesArraySize);
     initArray(this->settings.saveMCEtas,             this->mMCEtaTreeDataArray,           this->mMCEtaIndex,           mcEtaBranchName,        this->settings.clonesArraySize);
+    initArray(this->settings.saveMCNbars,            this->mMCNbarTreeDataArray,          this->mMCNbarIndex,          mcNbarBranchName,       this->settings.clonesArraySize);
     initArray(this->settings.saveCandidates,         this->mCandidateTreeDataArray,       this->mCandidateIndex,       candidateBranchName,    this->settings.clonesArraySize);
     initArray(this->settings.saveCandidatesMixed,    this->mCandidateTreeDataMixArray,    this->mCandidateMixIndex,    candidateBranchName,    this->settings.clonesArraySize);
     initArray(this->settings.saveCandidatesSubmixed, this->mCandidateTreeDataSubmixArray, this->mCandidateSubmixIndex, candidateBranchName,    this->settings.clonesArraySize);
@@ -125,6 +130,7 @@ Int_t StPi0DataSaveMaker::Init() {
     if (this->settings.saveMCGammas)                this->mMCGammaTree              = createTree(this->mFile, mcGammaTreeName, "Photons (simulated)", mcGammaBranchName, this->mMCGammaTreeDataArray->Class_Name(), this->mMCGammaTreeDataArray, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveMCPions)                 this->mMCPionTree               = createTree(this->mFile, mcPionTreeName, "Pions (simulated)", mcPionBranchName, this->mMCPionTreeDataArray->Class_Name(), this->mMCPionTreeDataArray, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveMCEtas)                  this->mMCEtaTree                = createTree(this->mFile, mcEtaTreeName, "Eta (simulated)", mcEtaBranchName, this->mMCEtaTreeDataArray->Class_Name(), this->mMCEtaTreeDataArray, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
+    if (this->settings.saveMCNbars)                 this->mMCNbarTree               = createTree(this->mFile, mcNbarTreeName, "Nbar (simulated)", mcNbarBranchName, this->mMCNbarTreeDataArray->Class_Name(), this->mMCNbarTreeDataArray, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveCandidates)              this->mCandidateTree            = createTree(this->mFile, candidateTreeName, "Pion candidates", candidateBranchName, this->mCandidateTreeDataArray->Class_Name(), this->mCandidateTreeDataArray, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveCandidatesMixed)         this->mCandidateMixTree         = createTree(this->mFile, candidateTreeMixName, "Pion candidates (event mixing)", candidateBranchName, this->mCandidateTreeDataMixArray->Class_Name(), this->mCandidateTreeDataMixArray, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveCandidatesSubmixed)      this->mCandidateSubmixTree      = createTree(this->mFile, candidateTreeSubmixName, "Pion candidates (subevent mixing)", candidateBranchName, this->mCandidateTreeDataSubmixArray->Class_Name(), this->mCandidateTreeDataSubmixArray, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
@@ -138,6 +144,7 @@ Int_t StPi0DataSaveMaker::Init() {
     if (this->settings.saveMCGammasPlain)           this->mMCGammaTreePlain         = createTree(this->mFile, mcGammaTreePlainName, "Photons (simulated)", mcGammaBranchName, getBranchType(mcGammaBranchName), &this->mMCGammaPlainStructure, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveMCPionsPlain)            this->mMCPionTreePlain          = createTree(this->mFile, mcPionTreePlainName, "Pions (simulated)", mcPionBranchName, getBranchType(mcPionBranchName), &this->mMCPionPlainStructure, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveMCEtasPlain)             this->mMCEtaTreePlain           = createTree(this->mFile, mcEtaTreePlainName, "Eta (simulated)", mcEtaBranchName, getBranchType(mcEtaBranchName), &this->mMCEtaPlainStructure, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
+    if (this->settings.saveMCNbarsPlain)            this->mMCNbarTreePlain          = createTree(this->mFile, mcNbarTreePlainName, "Nbar (simulated)", mcNbarBranchName, getBranchType(mcNbarBranchName), &this->mMCNbarPlainStructure, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveCandidatesPlain)         this->mCandidateTreePlain       = createTree(this->mFile, candidateTreePlainName, "Pion candidates", candidateBranchName, getBranchType(candidateBranchName), &this->mCandidatePlainStructure, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveCandidatesMixedPlain)    this->mCandidateMixTreePlain    = createTree(this->mFile, candidateTreeMixPlainName, "Pion candidates (event mixing)", candidateBranchName, getBranchType(candidateBranchName), &this->mCandidateMixPlainStructure, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
     if (this->settings.saveCandidatesSubmixedPlain) this->mCandidateSubmixTreePlain = createTree(this->mFile, candidateTreeSubmixPlainName, "Pion candidates (subevent mixing)", candidateBranchName, getBranchType(candidateBranchName), &this->mCandidateSubmixPlainStructure, maxVirtualSize, this->settings.basketSize, this->settings.splitLevel);
@@ -232,6 +239,7 @@ Int_t StPi0DataSaveMaker::Make() {
     {LOG_DEBUG << "Start reading datasets" << endm;}
     fillDataset<TMyMCDecayTreeData>      (maker, mcPionDatasetName,          this->mMCPionTreeDataArray,          this->mMCPionIndex,          this->mMCPionTree,          &this->mMCPionPlainStructure,          this->mMCPionTreePlain,          mcPionBranchName);
     fillDataset<TMyMCDecayTreeData>      (maker, mcEtaDatasetName,           this->mMCEtaTreeDataArray,           this->mMCEtaIndex,           this->mMCEtaTree,           &this->mMCEtaPlainStructure,           this->mMCEtaTreePlain,           mcEtaBranchName);
+    fillDataset<TMyMCParticleTreeData>   (maker, mcNbarDatasetName,          this->mMCNbarTreeDataArray,          this->mMCNbarIndex,          this->mMCNbarTree,          &this->mMCNbarPlainStructure,          this->mMCNbarTreePlain,          mcNbarBranchName);
     fillDataset<TMyMCParticleTreeData>   (maker, mcGammaDatasetName,         this->mMCGammaTreeDataArray,         this->mMCGammaIndex,         this->mMCGammaTree,         &this->mMCGammaPlainStructure,         this->mMCGammaTreePlain,         mcGammaBranchName);
     fillDataset<TMyCandidateTreeData>    (maker, candidateDatasetName,       this->mCandidateTreeDataArray,       this->mCandidateIndex,       this->mCandidateTree,       &this->mCandidatePlainStructure,       this->mCandidateTreePlain,       candidateBranchName);
     fillDataset<TMyCandidateTreeData>    (maker, candidateMixDatasetName,    this->mCandidateTreeDataMixArray,    this->mCandidateMixIndex,    this->mCandidateMixTree,    &this->mCandidateMixPlainStructure,    this->mCandidateMixTreePlain,    candidateBranchName);
@@ -288,6 +296,7 @@ Int_t StPi0DataSaveMaker::Finish() {
     finishArray(this->mMCGammaTreeDataArray,         this->mMCGammaIndex,         this->mMCGammaTree,         mcGammaBranchName,      &this->settings);
     finishArray(this->mMCPionTreeDataArray,          this->mMCPionIndex,          this->mMCPionTree,          mcPionBranchName,       &this->settings);
     finishArray(this->mMCEtaTreeDataArray,           this->mMCEtaIndex,           this->mMCEtaTree,           mcEtaBranchName,        &this->settings);
+    finishArray(this->mMCNbarTreeDataArray,          this->mMCNbarIndex,          this->mMCNbarTree,          mcNbarBranchName,       &this->settings);
     finishArray(this->mCandidateTreeDataArray,       this->mCandidateIndex,       this->mCandidateTree,       candidateBranchName,    &this->settings);
     finishArray(this->mCandidateTreeDataMixArray,    this->mCandidateMixIndex,    this->mCandidateMixTree,    candidateBranchName,    &this->settings);
     finishArray(this->mCandidateTreeDataSubmixArray, this->mCandidateSubmixIndex, this->mCandidateSubmixTree, candidateBranchName,    &this->settings);

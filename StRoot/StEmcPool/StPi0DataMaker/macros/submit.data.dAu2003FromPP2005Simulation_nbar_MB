@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export DATA_NAME='Pure MC antineutron simulation using pp2005 geometry and BFC chain and dAu2003 MinBias timestamps'
+export DATA_TAG='dAu2003FromPP2005Simulation'
+export DATA_SUBTAG=$DATA_TAG'_nbar_MB'
+export DATA_QUERY="file:$DATA_PATH/starsim_nbar_pp2005/*.event.root"
+export DATA_CONFIG='config_simulation_dAu2003_MB.C'
+export DATA_DIR=$DATA_PATH'/simu_dAu2003_nbar_MB'
