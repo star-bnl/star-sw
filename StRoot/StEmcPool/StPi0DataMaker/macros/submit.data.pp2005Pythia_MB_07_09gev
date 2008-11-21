@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set_option 'files_per_job_data=15 files_per_hour_data=1.7 eventroot xrootd=no discard_stdout'
+
+export DATA_NAME='PYTHIA simulation using 2005 geometry, 7_9gev dataset rcf1225, MinBias timestamps'
+export DATA_TAG='pp2005Pythia'
+export DATA_SUBTAG=$DATA_TAG'_MB_07_09gev'
+export DATA_QUERY='catalog:'$CATALOG'?runnumber=2000001225,production=P05ih,'$MYQUERY_general_sim
+export DATA_CONFIG='config_pythia_pp2005_MB.C'
+export DATA_DIR=$DATA_PATH'/pythia_pp2005_MB_07_09gev'

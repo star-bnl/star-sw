@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set_option 'files_per_job_data=5 files_per_hour_data=3 eventroot xrootd=no discard_stdout'
+
+export DATA_NAME='PYTHIA simulation using 2005 geometry, minbias dataset rcf1235, HighTower-2 timestamps'
+export DATA_TAG='pp2005Pythia'
+export DATA_SUBTAG=$DATA_TAG'_HT2_minbias'
+export DATA_QUERY='catalog:'$CATALOG'?runnumber=2000001235,production=P05ih,'$MYQUERY_general_sim
+export DATA_CONFIG='config_pythia_pp2005_HT2.C'
+export DATA_DIR=$DATA_PATH'/pythia_pp2005_HT2_minbias'

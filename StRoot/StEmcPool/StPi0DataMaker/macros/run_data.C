@@ -20,7 +20,7 @@
 #include <StSpinPool/StSpinDbMaker/StSpinDbMaker.h>
 #include <StDetectorDbMaker/StDetectorDbMaker.h>
 #include <StEmcSimulatorMaker/StEmcSimulatorMaker.h>
-#include <tables/St_controlEmcSimulatorMaker_Table.h>
+//#include <tables/St_controlEmcSimulatorMaker_Table.h>
 #include <StMcEventMaker/StMcEventMaker.h>
 #include <StEmcADCtoEMaker/StEmcADCtoEMaker.h>
 #include <StEmcTriggerMaker/StEmcTriggerMaker.h>
@@ -29,19 +29,16 @@
 #include <StPreEclMaker/StPreEclMaker.h>
 #include <StEpcMaker/StEpcMaker.h>
 #include <StJetMaker/StJetMaker.h>
-#include <StJetMaker/StFourPMakers/StBET4pMaker.h>
-#include <StJetFinder/StKtCluJetFinder.h>
+#include <StJetMaker/StppAnaPars.h>
+#include <StJetMaker/StBET4pMaker.h>
+#include <StJetFinder/StConeJetFinder.h>
 
 #include <StEmcPool/StPi0Common/StPi0CommonUtil.h>
-
 #include <StEmcPool/StPi0Common/StPi0DataStructures.h>
 
 #include <StEmcPool/StTimeRandomizerMaker/StTimeRandomizerMaker.h>
 
-#include <StEmcPool/StPi0DataMaker/StPi0TriggerSimulatorMaker.h>
-
 #include <StEmcPool/StPi0DataMaker/StPi0DataMaker.h>
-
 #include <StEmcPool/StPi0DataMaker/StPi0DataSaveMaker.h>
 
 #endif
@@ -77,12 +74,27 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
     dataAnalysisSettings.StPi0DataMaker_Version_data = StPi0DataMaker::Class_Version();
     dataAnalysisSettings.StPi0DataSaveMaker_Version_data = StPi0DataSaveMaker::Class_Version();
     dataAnalysisSettings.StTimeRandomizerMaker_Version_data = StTimeRandomizerMaker::Class_Version();
-    dataAnalysisSettings.StPi0TriggerSimulatorMaker_Version_data = StPi0TriggerSimulatorMaker::Class_Version();
+    dataAnalysisSettings.spinDbMakerName = "spinDb";
   
     Bool_t useEventRoot = false;
-    if (fileExact.BeginsWith("@") || fileExact.BeginsWith("filelist:") || fileExact.Contains(".list")) {
+    if (fileExact.BeginsWith("@") || fileExact.BeginsWith("filelist:") || fileExact.EndsWith(".list") || fileExact.EndsWith(".lis")) {
 	{gMessMgr->Info() << "Read filelist: " << fileExact << endm;}
-	ifstream ifstr(fileExact);
+        TString fileToRead = fileExact;
+        TString prefix;
+        TString pre = "://";
+        Int_t colPos = fileToRead.Index(pre);
+        if (colPos >= 0) {
+            prefix = fileToRead(0, colPos + pre.Length());
+            fileToRead = fileToRead(colPos + pre.Length(), fileToRead.Length() - (colPos + pre.Length()));
+        } else {
+            pre = ":";
+            colPos = fileToRead.Index(pre);
+            if (colPos >= 0) {
+                prefix = fileToRead(0, colPos + pre.Length());
+                fileToRead = fileToRead(colPos + pre.Length(), fileToRead.Length() - (colPos + pre.Length()));
+            }
+        }
+	ifstream ifstr(fileToRead);
 	if (ifstr.good()) {
 	    Char_t buffer[1024];
 	    ifstr.getline(buffer, 1024);
@@ -109,7 +121,7 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
 
     if (useEventRoot) {
         TString fileStr = fileExact;
-        if (fileStr.EndsWith(".list")) fileStr.Prepend("@");
+        if ((fileStr.EndsWith(".list") || fileStr.EndsWith(".lis")) && (!fileStr.BeginsWith("@"))) fileStr.Prepend("@");
         {gMessMgr->Info() << "Creating StIOMaker..." << endm;}
         StIOMaker* ioMaker = new StIOMaker("IO","r",fileStr);
         {gMessMgr->Info() << "Created " << ioMaker << endm;}
@@ -117,7 +129,7 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
     	    ioMaker->SetIOMode("r");
     	    ioMaker->SetBranch("*",0,"0");           //deactivate all branches
     	    ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
-    	    ioMaker->SetBranch("dstBranch",0,"r");   //activate dst Branch
+    	    //ioMaker->SetBranch("dstBranch",0,"r");   //activate dst Branch
     	    ioMaker->SetBranch("eventBranch",0,"r"); //activate Event Branch
 	}
 	dataAnalysisSettings.useFullJetMaker = false;
@@ -171,18 +183,24 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
     }
 
     if (dataAnalysisSettings.useFullJetMaker) {
-    	//EmcDb
-    	new StEEmcDbMaker("eemcDb");
-
-    	//SpinDb
-    	new StSpinDbMaker("spinDb");
-
-    	//Database interface
-    	//new StDetectorDbMaker();
+        //EmcDb
+        {gMessMgr->Info() << "Creating StEEmcDbMaker..." << endm;}
+        StEEmcDbMaker *eemcDbMaker = new StEEmcDbMaker("eemcDb");
+        {gMessMgr->Info() << "Created " << eemcDbMaker << endm;}
     }
+    if (dataAnalysisSettings.useSpinDbMaker) {
+        //SpinDb
+        {gMessMgr->Info() << "Creating StSpinDbMaker..." << endm;}
+        StSpinDbMaker *spinDbMaker = new StSpinDbMaker(dataAnalysisSettings.spinDbMakerName);
+        {gMessMgr->Info() << "Created " << spinDbMaker << endm;}
+    }
+        //Database interface
+        //{gMessMgr->Info() << "Creating StDetectorDbMaker..." << endm;}
+        //StDetectorDbMaker *detectorDbMaker = new StDetectorDbMaker();
+        //{gMessMgr->Info() << "Created " << detectorDbMaker << endm;}
 
     dataAnalysisSettings.jetMakerName = "emcJetMaker";
-    dataAnalysisSettings.adcToEMakerName = "Eread"; // Do NOT change this name! It is hardcoded in some standard BEMC makers, and in the Jet maker.
+    dataAnalysisSettings.adcToEMakerName = dataAnalysisSettings.isEmbedding ? "Eread" : "adToEmaker"; // Do NOT change this name "Eread"! It is hardcoded in some standard BEMC makers, and in the Jet maker.
     dataAnalysisSettings.triggerFullSimulatorName = "FullTriggerSimulator";
     dataAnalysisSettings.triggerFullSimulatorNameEmbed = "FullTriggerSimulatorEmbed";
     dataAnalysisSettings.triggerFullSimulatorNameFinal = "FullTriggerSimulatorFinal";
@@ -193,7 +211,7 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
 	{gMessMgr->Info() << "Created " << mcEvent << endm;}
 
 	{gMessMgr->Info() << "Creating StEmcSimulatorMaker..." << endm;}
-        emcSim = new StEmcSimulatorMaker("emcRaw");
+        emcSim = new StEmcSimulatorMaker("emcSim");
 	{gMessMgr->Info() << "Created " << emcSim << endm;}
     } else if (dataAnalysisSettings.isEmbedding) {
         {gMessMgr->Info() << "Creating StEmcADCtoEMaker EReadEmbed1" << endm;}
@@ -205,30 +223,9 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
 	}
     
         if (dataAnalysisSettings.useTriggerSimulatorOriginal) {
-    	    if (dataAnalysisSettings.useFullEmcTriggerSimulator) {
 		{gMessMgr->Info() << "Creating StEmcTriggerMaker" << endm;}
 		StEmcTriggerMaker *trgFullSim = new StEmcTriggerMaker(dataAnalysisSettings.triggerFullSimulatorName);
 		{gMessMgr->Info() << "Created " << trgFullSim << endm;}
-		if (trgFullSim) {
-		    trgFullSim->setDbMaker(dbMaker);
-		}
-    	    }
-
-    	    {gMessMgr->Info() << "Creating StPi0TriggerSimulatorMaker" << endm;}
-    	    StPi0TriggerSimulatorMaker *trgSim = new StPi0TriggerSimulatorMaker(dataAnalysisSettings.triggerSimulatorName);
-    	    {gMessMgr->Info() << "Created " << trgSim << endm;}
-	    if (trgSim) {
-		trgSim->datasetNameStEvent = dataAnalysisSettings.datasetNameStEvent;
-    		trgSim->isSimulation = dataAnalysisSettings.isSimulation || dataAnalysisSettings.isEmbedding;
-    		trgSim->HT1Threshold = dataAnalysisSettings.HT1Threshold;
-    	        trgSim->HT2Threshold = dataAnalysisSettings.HT2Threshold;
-    	        trgSim->TriggerADC = dataAnalysisSettings.TriggerAdc;
-    	        trgSim->triggersHT1 = dataAnalysisSettings.triggersHT1;
-	        trgSim->triggersHT2 = dataAnalysisSettings.triggersHT2;
-    	        trgSim->useFullEmcTriggerSimulator = dataAnalysisSettings.useFullEmcTriggerSimulator;
-    	        trgSim->triggerFullSimulatorName = dataAnalysisSettings.triggerFullSimulatorName;
-    	        trgSim->doTowerSwapFix = dataAnalysisSettings.doTowerSwapFix;
-	    }
 	}
 
         {gMessMgr->Info() << "Creating StEmcPreMixerMaker" << endm;}
@@ -259,30 +256,9 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
 	}
 
         if (dataAnalysisSettings.useTriggerSimulatorEmbed) {
-    	    if (dataAnalysisSettings.useFullEmcTriggerSimulator) {
     	        {gMessMgr->Info() << "Creating StEmcTriggerMaker embed" << endm;}
     	        StEmcTriggerMaker *trgFullSimEmbed = new StEmcTriggerMaker(dataAnalysisSettings.triggerFullSimulatorNameEmbed);
 	        {gMessMgr->Info() << "Created " << trgFullSimEmbed << endm;}
-		if (trgFullSimEmbed) {
-		    trgFullSimEmbed->setDbMaker(dbMaker);
-		}
-            }
-
-            {gMessMgr->Info() << "Creating StPi0TriggerSimulatorMaker embed" << endm;}
-            StPi0TriggerSimulatorMaker *trgSimEmbed = new StPi0TriggerSimulatorMaker(dataAnalysisSettings.triggerSimulatorNameEmbed);
-            {gMessMgr->Info() << "Created " << trgSimEmbed << endm;}
-	    if (trgSimEmbed) {
-		trgSimEmbed->datasetNameStEvent = dataAnalysisSettings.datasetNameStEvent;
-        	trgSimEmbed->isSimulation = dataAnalysisSettings.isSimulation || dataAnalysisSettings.isEmbedding;
-    		trgSimEmbed->HT1Threshold = dataAnalysisSettings.HT1Threshold;
-        	trgSimEmbed->HT2Threshold = dataAnalysisSettings.HT2Threshold;
-        	trgSimEmbed->TriggerADC = dataAnalysisSettings.TriggerAdc;
-		trgSimEmbed->triggersHT1 = dataAnalysisSettings.triggersHT1;
-		trgSimEmbed->triggersHT2 = dataAnalysisSettings.triggersHT2;
-        	trgSimEmbed->useFullEmcTriggerSimulator = dataAnalysisSettings.useFullEmcTriggerSimulator;
-        	trgSimEmbed->triggerFullSimulatorName = dataAnalysisSettings.triggerFullSimulatorNameEmbed;
-    	        trgSimEmbed->doTowerSwapFix = dataAnalysisSettings.doTowerSwapFix;
-	    }
 	}
 
         {gMessMgr->Info() << "Creating StEmcADCtoEMaker Eread" << endm;}
@@ -300,30 +276,9 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
 	}
   
         if (dataAnalysisSettings.useTriggerSimulatorOriginal) {
-    	    if (dataAnalysisSettings.useFullEmcTriggerSimulator) {
                 {gMessMgr->Info() << "Creating StEmcTriggerMaker" << endm;}
                 StEmcTriggerMaker *trgFullSim = new StEmcTriggerMaker(dataAnalysisSettings.triggerFullSimulatorName);
                 {gMessMgr->Info() << "Created " << trgFullSim << endm;}
-		if (trgFullSim) {
-		    trgFullSim->setDbMaker(dbMaker);
-		}
-            }
-
-            {gMessMgr->Info() << "Creating StPi0TriggerSimulatorMaker" << endm;}
-            StPi0TriggerSimulatorMaker *trgSim = new StPi0TriggerSimulatorMaker(dataAnalysisSettings.triggerSimulatorName);
-            {gMessMgr->Info() << "Created " << trgSim << endm;}
-	    if (trgSim) {
-		trgSim->datasetNameStEvent = dataAnalysisSettings.datasetNameStEvent;
-        	trgSim->isSimulation = dataAnalysisSettings.isSimulation || dataAnalysisSettings.isEmbedding;
-        	trgSim->HT1Threshold = dataAnalysisSettings.HT1Threshold;
-        	trgSim->HT2Threshold = dataAnalysisSettings.HT2Threshold;
-        	trgSim->TriggerADC = dataAnalysisSettings.TriggerAdc;
-		trgSim->triggersHT1 = dataAnalysisSettings.triggersHT1;
-		trgSim->triggersHT2 = dataAnalysisSettings.triggersHT2;
-        	trgSim->useFullEmcTriggerSimulator = dataAnalysisSettings.useFullEmcTriggerSimulator;
-    		trgSim->triggerFullSimulatorName = dataAnalysisSettings.triggerFullSimulatorName;
-    	        trgSim->doTowerSwapFix = dataAnalysisSettings.doTowerSwapFix;
-	    }
 	}
 
         {gMessMgr->Info() << "Creating StEmcADCtoEMaker" << endm;}
@@ -331,30 +286,9 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
         {gMessMgr->Info() << "Created " << adcToEMaker << endm;}
     }
 
-    if (dataAnalysisSettings.useFullEmcTriggerSimulator) {
-        {gMessMgr->Info() << "Creating StEmcTriggerMaker final" << endm;}
-        StEmcTriggerMaker *trgFullSimFinal = new StEmcTriggerMaker(dataAnalysisSettings.triggerFullSimulatorNameFinal);
-        {gMessMgr->Info() << "Created " << trgFullSimFinal << endm;}
-	if (trgFullSimFinal) {
-	    trgFullSimFinal->setDbMaker(dbMaker);
-	}
-    }
-
-    {gMessMgr->Info() << "Creating StPi0TriggerSimulatorMaker final" << endm;}
-    StPi0TriggerSimulatorMaker *trgSimFinal = new StPi0TriggerSimulatorMaker(dataAnalysisSettings.triggerSimulatorNameFinal);
-    {gMessMgr->Info() << "Created " << trgSimFinal << endm;}
-    if (trgSimFinal) {
-	trgSimFinal->datasetNameStEvent = dataAnalysisSettings.datasetNameStEvent;
-	trgSimFinal->isSimulation = dataAnalysisSettings.isSimulation || dataAnalysisSettings.isEmbedding;
-	trgSimFinal->HT1Threshold = dataAnalysisSettings.HT1Threshold;
-	trgSimFinal->HT2Threshold = dataAnalysisSettings.HT2Threshold;
-	trgSimFinal->TriggerADC = dataAnalysisSettings.TriggerAdc;
-	trgSimFinal->triggersHT1 = dataAnalysisSettings.triggersHT1;
-	trgSimFinal->triggersHT2 = dataAnalysisSettings.triggersHT2;
-	trgSimFinal->useFullEmcTriggerSimulator = dataAnalysisSettings.useFullEmcTriggerSimulator;
-	trgSimFinal->triggerFullSimulatorName = dataAnalysisSettings.triggerFullSimulatorNameFinal;
-        trgSimFinal->doTowerSwapFix = dataAnalysisSettings.doTowerSwapFix;
-    }
+    {gMessMgr->Info() << "Creating StEmcTriggerMaker final" << endm;}
+    StEmcTriggerMaker *trgFullSimFinal = new StEmcTriggerMaker(dataAnalysisSettings.triggerFullSimulatorNameFinal);
+    {gMessMgr->Info() << "Created " << trgFullSimFinal << endm;}
 
     {gMessMgr->Info() << "Creating StPreEclMaker" << endm;}
     StPreEclMaker *preEclMaker = new StPreEclMaker();
@@ -372,14 +306,15 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
         StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker, dataAnalysisSettings.jetFullMakerDoTowerSwapFix);
         {gMessMgr->Info() << "Created " << bet4pMaker << endm;}
 	if (bet4pMaker) {
-            bet4pMaker->setUse2003Cuts(dataAnalysisSettings.jetFullMakerUse2003TowerCuts);
+            bet4pMaker->setUse2003Cuts(dataAnalysisSettings.jetFullMakerUse2003Cuts);
+            bet4pMaker->setUse2005Cuts(dataAnalysisSettings.jetFullMakerUse2005Cuts);
+            bet4pMaker->setUse2006Cuts(dataAnalysisSettings.jetFullMakerUse2006Cuts);
 	}
 
         {gMessMgr->Info() << "Creating StJetMaker" << endm;}
         StJetMaker* emcJetMaker = new StJetMaker(dataAnalysisSettings.jetMakerName, muDstMaker, "/dev/null");
         {gMessMgr->Info() << "Created " << emcJetMaker << endm;}
      
-        //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
         {gMessMgr->Info() << "Creating StppAnaPars" << endm;}
         StppAnaPars* anapars = new StppAnaPars();
         {gMessMgr->Info() << "Created " << anapars << endm;}
@@ -388,21 +323,21 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
     	    anapars->setNhits(20); //track->nHitsFit()>20
     	    anapars->setCutPtMin(0.2); //track->pt() > 0.2
     	    anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
-    	    anapars->setJetPtMin(1.0); // was 5.0
+    	    anapars->setJetPtMin(5.0); // was 5.0
     	    anapars->setJetEtaMax(100.0);
     	    anapars->setJetEtaMin(0);
     	    anapars->setJetNmin(0);
 	}
          
-	//Setup the kt finder for measured particles (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
-        {gMessMgr->Info() << "Creating StKtCluPars" << endm;}
-        StKtCluPars* ktpars = new StKtCluPars();
-        {gMessMgr->Info() << "Created " << ktpars << endm;}
-	if (ktpars) {
-    	    ktpars->setR(dataAnalysisSettings.jetConeRadius);
+        {gMessMgr->Info() << "Creating StConePars" << endm;}
+        StConePars* pars = new StConePars();
+        {gMessMgr->Info() << "Created " << pars << endm;}
+	if (pars) {
+	    pars->setDebug(false);
+    	    pars->setConeRadius(dataAnalysisSettings.jetConeRadius);
 	}
 	if (emcJetMaker) {
-    	    emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker, "KtJet");
+    	    emcJetMaker->addAnalyzer(anapars, pars, bet4pMaker, dataAnalysisSettings.jetFullMakerBranchName);
 	}
     }
 
@@ -431,12 +366,16 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
     }
 */
 
-    {gMessMgr->Info() << "Initializing chain..." << endm;}
-    Int_t initStat = chain->Init(); 
-    if (initStat) chain->Fatal("StChain::Init()", TString(initStat));
-    {gMessMgr->Info() << "Done initializing chain." << endm;}
-
     if (emcSim) {
+	emcSim->setCalibSpread(kBarrelEmcTowerId, dataAnalysisSettings.CalibSpreadTower);
+	emcSim->setCalibOffset(kBarrelEmcTowerId, dataAnalysisSettings.CalibOffsetTower);
+	emcSim->setCalibSpread(kBarrelEmcPreShowerId, dataAnalysisSettings.CalibSpreadPreshower);
+	emcSim->setCalibOffset(kBarrelEmcPreShowerId, dataAnalysisSettings.CalibOffsetPreshower);
+	emcSim->setCalibSpread(kBarrelSmdEtaStripId, dataAnalysisSettings.CalibSpreadSMDE);
+	emcSim->setCalibOffset(kBarrelSmdEtaStripId, dataAnalysisSettings.CalibOffsetSMDE);
+	emcSim->setCalibSpread(kBarrelSmdPhiStripId, dataAnalysisSettings.CalibSpreadSMDP);
+	emcSim->setCalibOffset(kBarrelSmdPhiStripId, dataAnalysisSettings.CalibOffsetSMDP);
+/*
         if (!emcSim->getControlSimulator()) {gMessMgr->Error() << "No controlSimulator!" << endm;}
         else {
             controlEmcSimulatorMaker_st *ctrl = emcSim->getControlSimulator()->GetTable();
@@ -459,8 +398,14 @@ void run_data(long nevents = 1, char *outputFile = "/dev/null", char *file = "fi
 	        //ctrl->crosstalk[3] = dataAnalysisSettings.CrosstalkSMDP;
             }
         }
+*/
     }
   
+    {gMessMgr->Info() << "Initializing chain..." << endm;}
+    Int_t initStat = chain->Init(); 
+    if (initStat) chain->Fatal("StChain::Init()", TString(initStat));
+    {gMessMgr->Info() << "Done initializing chain." << endm;}
+
 /*
 defaults are:
 bemc	4,	0.7,	0.001,	0.1,	kFALSE
@@ -494,7 +439,7 @@ bsmdp	5,	0.4,	0.001,	0.1,	kFALSE
     Int_t result = 0;
     TMemStat m; m.PrintMem(0);
     while (chain && ((evt < nevents) || (nevents < 0)) && (result == 0/*kStOK*/)) {
-        if (((evt % 100) == 0) || dataAnalysisSettings.isSimulation || dataAnalysisSettings.isEmbedding) {gMessMgr->Info() << "Event " << (evt + 1) << endm;}
+        if (((evt % 100) == 0) || dataAnalysisSettings.isSimulation || dataAnalysisSettings.isEmbedding) {gMessMgr->Info() << "Event " << evt << endm;}
         chain->Clear();
         result = chain->Make(evt);
         evt++;

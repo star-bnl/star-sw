@@ -1,5 +1,8 @@
 #include "StPi0DataMakerUtil.h"
 
+#include <map>
+using std::map;
+
 #include <TTree.h>
 #include <TH1F.h>
 #include <TF1.h>
@@ -8,7 +11,6 @@
 #include <TSQLServer.h>
 #include <TSQLRow.h>
 #include <TSQLResult.h>
-#include <TVector3.h>
 #include <TMath.h>
 
 #include <St_base/StMessMgr.h>
@@ -31,13 +33,17 @@
 #include <StEmcADCtoEMaker/StEmcADCtoEMaker.h>
 #include <StEmcADCtoEMaker/StBemcData.h>
 #include <StEventUtilities/StuFtpcRefMult.hh>
+#include <StEmcTriggerMaker/StEmcTriggerMaker.h>
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_particle_Table.h"
+#include "tables/St_g2t_pythia_Table.h"
+#include <StSpinPool/StSpinDbMaker/StSpinDbMaker.h> 
+#include <StSpinPool/StJets/StJets.h> 
+#include <StSpinPool/StJets/StJet.h> 
 #include <StJetMaker/StJetMaker.h>
 
 #include <StEmcPool/StPi0Common/StPi0CommonUtil.h>
-
 #include <StEmcPool/StPi0Common/StPi0DataStructures.h>
-
-#include <StEmcPool/StPi0DataMaker/StPi0TriggerSimulatorMaker.h>
 
 //_____________________________________________________________________________
 Bool_t shuffleArray(Int_t *array, Int_t size, Bool_t init, Int_t numShuffle, Bool_t check) {
@@ -166,7 +172,7 @@ void getClusterData(const StEmcCluster *cluster, StEmcGeom *emcGeom, StEmcGeom *
 }
 
 //_____________________________________________________________________________
-void getPointData(const StEmcPoint *point, StMaker *trigSimMaker, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, StBemcTables *tables, triggered_type triggersHT1, triggered_type triggersHT2, TMyPointData &pointData) {
+void getPointData(const StEmcPoint *point, StMaker *trigMaker, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, StBemcTables *tables, const UInt_t *triggers, TMyPointData &pointData) {
   if (!point) return;
   pointData.etaCoord = point->position().pseudoRapidity();
   pointData.phiCoord = point->position().phi();
@@ -190,11 +196,9 @@ void getPointData(const StEmcPoint *point, StMaker *trigSimMaker, StEmcGeom *emc
   if (point->cluster(kBarrelSmdEtaStripId).size() > 0) getClusterData(point->cluster(kBarrelSmdEtaStripId)[0], emcGeom, smdeGeom, smdpGeom, psdGeom, tables, pointData.clusterBSMDE);
   if (point->cluster(kBarrelSmdPhiStripId).size() > 0) getClusterData(point->cluster(kBarrelSmdPhiStripId)[0], emcGeom, smdeGeom, smdpGeom, psdGeom, tables, pointData.clusterBSMDP);
 
-  Bool_t triggeredHT1 = false;
-  Bool_t triggeredHT2 = false;
-  StPi0TriggerSimulatorMaker *trgSimFinal = trigSimMaker ? dynamic_cast<StPi0TriggerSimulatorMaker*>(trigSimMaker) : 0;
-  const StPtrVecEmcCluster &bEmcClusters = point->cluster(kBarrelEmcTowerId);
-  for(StPtrVecEmcClusterConstIterator cIter = bEmcClusters.begin();cIter != bEmcClusters.end(); cIter++) {
+    StEmcTriggerMaker *trgFinal = trigMaker ? dynamic_cast<StEmcTriggerMaker*>(trigMaker) : 0;
+    const StPtrVecEmcCluster &bEmcClusters = point->cluster(kBarrelEmcTowerId);
+    for(StPtrVecEmcClusterConstIterator cIter = bEmcClusters.begin();cIter != bEmcClusters.end(); cIter++) {
 	const StEmcCluster *cluster = *cIter;
 	if (cluster) {
 		const StPtrVecEmcRawHit& bEmcHits = cluster->hit();
@@ -203,16 +207,18 @@ void getPointData(const StEmcPoint *point, StMaker *trigSimMaker, StEmcGeom *emc
 			if (hit) {
 				Int_t id;
 				if (emcGeom) emcGeom->getId(hit->module(), abs((Int_t)hit->eta()), abs((Int_t)hit->sub()), id);
-				if (trgSimFinal) {
-					triggeredHT1 |= trgSimFinal->towerTriggeredHT1[id - 1];
-					triggeredHT2 |= trgSimFinal->towerTriggeredHT2[id - 1];
+				if (trgFinal) {
+				    if (triggers) {
+					for (Int_t i = 0, it = 1;(i < (Int_t)(sizeof(triggered_type) * 8)) && triggers[i];i++, it = it << 1) {
+						map<int, int> triggerTowers = trgFinal->barrelTowersAboveThreshold(triggers[i]);
+						if (triggerTowers.count(id) > 0) pointData.trigger.triggered |= it;
+					}
+				    }
 				}
 			}
 		}
 	}
-  }
-  if (triggeredHT1) pointData.trigger.triggered |= triggersHT1;
-  if (triggeredHT2) pointData.trigger.triggered |= triggersHT2;
+    }
 
   Int_t mod, eta, sub;
   pointData.towerCenterDeta = -1;
@@ -332,18 +338,22 @@ void getTriggerDataFromDB(Int_t runId, const UInt_t *triggerIDs, const Char_t *c
 }
 
 //_____________________________________________________________________________
-void getTriggerSimulatedData(const StMaker *trigSimMaker, TMyTriggerSimulatedData &triggerSimulatedData) {
-  const StPi0TriggerSimulatorMaker *trgSim = trigSimMaker ? dynamic_cast<const StPi0TriggerSimulatorMaker*>(trigSimMaker) : 0;
-  if (trgSim) {
-    const TMyTriggerSimulatedData *data = trgSim->getData();
-    if (data) {
-      triggerSimulatedData = *data;
-    } else {LOG_ERROR << "Trigger simulator has NO data!" << endm;}
-  }
+void getTriggerSimulatedData(/*const */StMaker *trigMaker, const UInt_t *triggers, TMyTriggerSimulatedData &triggerSimulatedData) {
+    /*const */StEmcTriggerMaker *trg = trigMaker ? dynamic_cast</*const */StEmcTriggerMaker*>(trigMaker) : 0;
+    if (trg) {
+	UInt_t ind = 0;
+	while (triggers && triggers[ind] && (ind < (sizeof(triggered_type) * 8))) {
+    	    triggerSimulatedData.trigger.triggered |= (trg->isTrigger(triggers[ind]) > 0) ? (1 << ind) : 0;
+	    ind++;
+	}
+    }
 }
 
 //_____________________________________________________________________________
-void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, StBemcTables *tables, const UInt_t *triggers, StMaker *trigSimMaker, StMaker *trigSimMakerEmbed, StMaker *trigSimMakerFinal, StMaker *adcToEMaker, triggered_type triggersHT1, triggered_type triggersHT2, Float_t jetConeRadius, StMaker *jetMaker, TMyEventData &eventData) {
+void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, StBemcTables *tables
+	, const UInt_t *triggers, StMaker *trigMaker, StMaker *trigMakerEmbed, StMaker *trigMakerFinal
+	, StMaker *adcToEMaker, Float_t jetConeRadius, StMaker *jetMaker, const Char_t *jetBranchName, StMaker *spinDbMaker
+	, TDataSet *geantEventDS, Bool_t isPythia, TMyEventData &eventData) {
   if (!event) return;
   const StEmcCollection *emcCollection = event->emcCollection();
   eventData.runId = event->runId();
@@ -353,20 +363,58 @@ void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *em
   eventData.corruptedCrates |= (adcToE && adcToE->isCorrupted()) ? (1 << ((sizeof(eventData.corruptedCrates) * 8) - 1)) : 0;
   getTriggerData(event, triggers, eventData.trigger);
   if (mc_event) {
-    const StPtrVecMcTrack &tracks = mc_event->tracks();
-    for (UInt_t i = 0;i < tracks.size();i++) {
-	const StMcTrack *mcTrack = tracks[i];
-	if (mcTrack && (i == 0) && (!tracks[i]->isShower())) {
-	    TMySimulatedParticleData simulatedParticleData;
-	    getMCParticleData(mcTrack, event, trigSimMakerFinal, tables, emcGeom, smdeGeom, smdpGeom, psdGeom, triggersHT1, triggersHT2, simulatedParticleData);
-	    eventData.simulatedParticle = simulatedParticleData.summary;
+    Bool_t found = false;
+    if (!isPythia) {
+	const StPtrVecMcTrack &tracks = mc_event->tracks();
+        for (UInt_t i = 0;(i < tracks.size()) && (!found);i++) {
+	    const StMcTrack *mcTrack = tracks[i];
+	    if (mcTrack && (i == 0) && (!tracks[i]->isShower())) { // this works in the single particle simulation
+		TMySimulatedParticleData simulatedParticleData;
+	        getMCParticleData(mcTrack, event, tables, emcGeom, smdeGeom, smdpGeom, psdGeom, simulatedParticleData);
+		eventData.simulatedParticle = simulatedParticleData.summary;
+		found = true;
+	    }
 	}
+    }
+    if (!found || isPythia) { // this is Pythia simulation
+	eventData.simulatedParticle.z = mc_event->primaryVertex() ? mc_event->primaryVertex()->position().z() : 0;
+	eventData.simulatedParticle.daughters = (Byte_t)mc_event->subProcessId();;
+	// From StRoot/StJetMaker/StJetSimuUtil/StJetSimuWeightMaker.cxx:
+	// Werner definitions:
+	// 1: qq'->qq' (qqbar'->qqbar') 2: qq->qq   3: qqbar->q'qbar'  4: qqbar->qqbar 5: qqbar->gg   6: gg->qqbar  7: qg->qg   8: gg->gg
+	// PYTHIA definitions:
+	// 1: 11a                       2:11b       3: 12a             4:12b           5: 13          6: 53         7: 28       8: 68
+	{LOG_ERROR << "PYTHIA PID = " << (Int_t)eventData.simulatedParticle.daughters << endm;}
+	eventData.simulatedParticle.geantId = (Byte_t)-1;
+	eventData.simulatedParticle.pT = 0;
+	if (geantEventDS) {
+	    TDataSetIter geantDstI(geantEventDS);
+	    St_g2t_pythia *Pg2t_pythia = dynamic_cast<St_g2t_pythia *>(geantDstI("g2t_pythia"));
+	    if (Pg2t_pythia) {
+		g2t_pythia_st *g2t_pythia = Pg2t_pythia->GetTable();
+		if (g2t_pythia) {
+		    eventData.simulatedParticle.pT = g2t_pythia->hard_p;
+		    {LOG_DEBUG << "partonic Pt = " << eventData.simulatedParticle.pT << endm;}
+    		} else {LOG_WARN << "no g2t_pythia_st!!!" << endm;}
+    	    } else {LOG_WARN << "no St_g2t_pythia!!!" << endm;}
+	    St_g2t_event *Pg2t_event = dynamic_cast<St_g2t_event *>(geantDstI("g2t_event"));
+	    if (Pg2t_event) {
+		g2t_event_st *g2t_event = Pg2t_event->GetTable();
+		if (g2t_event) {
+		    eventData.simulatedParticle.geantId = (Byte_t)g2t_event->subprocess_id;
+		    {LOG_DEBUG << "GEANT PID = " << (Int_t)eventData.simulatedParticle.geantId << endm;}
+    		} else {LOG_WARN << "no g2t_event_st!!!" << endm;}
+    	    } else {LOG_WARN << "no St_g2t_event!!!" << endm;}
+	} else {LOG_WARN << "no geantEventDS!!!" << endm;}
     }
   }
 
-  getTriggerSimulatedData(trigSimMaker, eventData.triggerSimulated);
-  getTriggerSimulatedData(trigSimMakerEmbed ? trigSimMakerEmbed : trigSimMaker, eventData.triggerSimulatedEmbed);
-  getTriggerSimulatedData(trigSimMakerFinal ? trigSimMakerFinal : (trigSimMakerEmbed ? trigSimMakerEmbed : trigSimMaker), eventData.triggerSimulatedFinal);
+  eventData.triggerSimulatedFinal.highestAdcHit.adc = 0;
+  eventData.triggerSimulatedFinal.highestEtHit.energy = 0;
+
+  getTriggerSimulatedData(trigMaker, triggers, eventData.triggerSimulated);
+  getTriggerSimulatedData(trigMakerEmbed ? trigMakerEmbed : trigMaker, triggers, eventData.triggerSimulatedEmbed);
+  getTriggerSimulatedData(trigMakerFinal ? trigMakerFinal : (trigMakerEmbed ? trigMakerEmbed : trigMaker), triggers, eventData.triggerSimulatedFinal);
   const StPrimaryVertex* primaryVertex = event->primaryVertex();
   eventData.zTPC = 0;
   eventData.nPrimary = 0;
@@ -439,20 +487,50 @@ void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *em
   }
 
   eventData.bunchCrossingId7bit = 0;
+  eventData.bunchCrossingId48bit = 0;
+  eventData.spinBit = 0;
+  eventData.bunchCrossingFrom7bitDB = 0;
+  eventData.bunchCrossingFrom48bitDB = 0;
+  eventData.spinBitDBFrom7 = 0;
+  eventData.spinBitDBFrom48 = 0;
+  eventData.bunchCrossingOffset48bit7bitDB = 0;
+  eventData.spinDBStatus = 0;
+
   const StL0Trigger *l0trigger = (const StL0Trigger*)event->l0Trigger();
   if (l0trigger) {
     eventData.bunchCrossingId7bit = l0trigger->bunchCrossingId7bit(eventData.runId);
+    eventData.bunchCrossingId48bit = l0trigger->bunchCrossingId();
+    eventData.spinBit = l0trigger->spinBits(eventData.runId);
   }
-  eventData.bunchCrossingId48bit = 0;
-  eventData.spinBit = 0;
+
+/*
   const StTriggerData *triggerData = event->triggerData();
   if (triggerData) {
+    triggerData->dump();
+    eventData.bunchCrossingId7bit = triggerData->bunchId7Bit();
     eventData.bunchCrossingId48bit = triggerData->bunchId48Bit();
     eventData.spinBit = triggerData->spinBit();
-    {LOG_DEBUG << " bunch " << triggerData->bunchId7Bit() << endm;}
-    {LOG_DEBUG << " bunch48 " << eventData.bunchCrossingId48bit << endm;}
-    {LOG_DEBUG << " spinBit " << eventData.spinBit << endm;}
   }
+*/
+  StSpinDbMaker *spinDb = dynamic_cast<StSpinDbMaker*>(spinDbMaker);
+  if (spinDb) {
+    eventData.bunchCrossingFrom7bitDB = spinDb->BXyellowUsingBX7(eventData.bunchCrossingId7bit);
+    eventData.bunchCrossingFrom48bitDB = spinDb->BXyellowUsingBX48(eventData.bunchCrossingId48bit);
+    eventData.spinBitDBFrom7 = spinDb->spin8usingBX48(eventData.bunchCrossingId48bit);
+    eventData.spinBitDBFrom48 = spinDb->spin8usingBX7(eventData.bunchCrossingId7bit);
+    eventData.bunchCrossingOffset48bit7bitDB = spinDb->offsetBX48minusBX7(eventData.bunchCrossingId48bit, eventData.bunchCrossingId7bit);
+    if (spinDb->isValid()) eventData.spinDBStatus |= (1 << 0);
+    if (spinDb->isPolDirTrans()) eventData.spinDBStatus |= (1 << 1);
+    if (spinDb->isPolDirLong()) eventData.spinDBStatus |= (1 << 2);
+    if (spinDb->isBXfilledUsingBX48(eventData.bunchCrossingId48bit)) eventData.spinDBStatus |= (1 << 3);
+    if (spinDb->isMaskedUsingBX48(eventData.bunchCrossingId48bit)) eventData.spinDBStatus |= (1 << 4);
+    //if (spinDb->isBXfilledUsingBX7(eventData.bunchCrossingId7bit)) eventData.spinDBStatus |= (1 << 5); // not implemented in StSpinDbMaker
+    if (spinDb->isBXfilledUsingBXyellow(eventData.bunchCrossingFrom48bitDB)) eventData.spinDBStatus |= (1 << 6);
+    if (spinDb->isBXmaskedUsingBXyellow(eventData.bunchCrossingFrom48bitDB)) eventData.spinDBStatus |= (1 << 7);
+  }
+  {LOG_DEBUG << "Event: bunch7 " << (UInt_t)eventData.bunchCrossingId7bit << ", bunch48 " << (UInt_t)eventData.bunchCrossingId48bit << ", spin8 " << (UInt_t)eventData.spinBit << endm;}
+  {LOG_DEBUG << "SpinDb: status " << (UInt_t)eventData.spinDBStatus << ", bunch7 " << (UInt_t)eventData.bunchCrossingFrom7bitDB << ", bunch48 " << (UInt_t)eventData.bunchCrossingFrom48bitDB << ", spin8From7 " << (UInt_t)eventData.spinBitDBFrom7 << ", spin8From48 " << (UInt_t)eventData.spinBitDBFrom48 << ", phase offset " << (UInt_t)eventData.bunchCrossingOffset48bit7bitDB << endm;}
+
   const StTriggerDetectorCollection *trigDet = event->triggerDetectorCollection();
   if (trigDet) {
 #ifdef MYPI0ANALYSIS_OLDBBCMAKER
@@ -516,6 +594,8 @@ void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *em
   for (UInt_t icrate = 0;icrate < numCrates;icrate++) {cratesGoodTowers[icrate] = 0; cratesHits[icrate] = 0;}
   detector = emcCollection->detector(kBarrelEmcTowerId);
   if (detector) {
+    Float_t highestEtHitEt = -1;
+    Bool_t findHighestEtHitEt = (eventData.triggerSimulatedFinal.highestEtHit.energy == 0);
     Int_t numMod = detector->numberOfModules();
     for (Int_t imod = 1;imod <= numMod;imod++) {
       const StEmcModule *module = detector->module(imod);
@@ -528,10 +608,22 @@ void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *em
 	    eventData.totalBEMCHitsEnergy += hit->energy();
 	    Int_t id = -1;
 	    if (emcGeom) emcGeom->getId(hit->module(), abs((Int_t)hit->eta()), abs((Int_t)hit->sub()), id);
-	      Int_t half = hit->module() * 2 - (2 - hit->sub()) + 3;
-	      if (half > 120) half -= 120;
-	      Int_t crate = 30 - (half - 1) / 8;
-	      cratesHits[crate - 1] += 1;
+	    Int_t half = hit->module() * 2 - (2 - hit->sub()) + 3;
+	    if (half > 120) half -= 120;
+	    Int_t crate = 30 - (half - 1) / 8;
+	    cratesHits[crate - 1] += 1;
+            Int_t adc = hit->adc();
+            Float_t energy = hit->energy();
+            Float_t theta = 0;
+            emcGeom->getTheta(hit->module(), hit->eta(), theta);
+            Float_t Et = energy * sin(theta);
+            if (adc > eventData.triggerSimulatedFinal.highestAdcHit.adc) {
+                getHitData(hit, emcGeom, 0, 0, 0, tables, eventData.triggerSimulatedFinal.highestAdcHit);
+            }
+            if ((Et > highestEtHitEt) && findHighestEtHitEt) {
+                highestEtHitEt = Et;
+                getHitData(hit, emcGeom, 0, 0, 0, tables, eventData.triggerSimulatedFinal.highestEtHit);
+            }
 	  }
 	}
       }
@@ -650,7 +742,11 @@ void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *em
   }
 
   StThreeVectorF vPos;
-  if (event->primaryVertex()) {vPos = event->primaryVertex()->position();} else {if (mc_event) if (mc_event->primaryVertex()) {vPos = mc_event->primaryVertex()->position();}}
+  if (event && event->primaryVertex()) {
+    vPos = event->primaryVertex()->position();
+  } else if (mc_event && mc_event->primaryVertex()) {
+    vPos = mc_event->primaryVertex()->position();
+  }
   eventData.totalBEMCPointsEt = 0;
   eventData.totalBEMCPointsEnergy = 0;
   const StSPtrVecEmcPoint &points = emcCollection->barrelPoints();
@@ -703,29 +799,27 @@ void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *em
     eventData.jet.eT = 0.0;
     StJetMaker *jetMk = jetMaker ? dynamic_cast<StJetMaker*>(jetMaker) : 0;
     if (jetMk) {
-	{LOG_DEBUG << "Getting a jet from StJetMaker" << endm;}
-	StJetMaker::jetBranchesMap &jetsMap = jetMk->getJets();
-	for (StJetMaker::jetBranchesMap::iterator mapIter = jetsMap.begin();mapIter != jetsMap.end();++mapIter) {
-	    //{LOG_DEBUG << "Jet branch " << (*mapIter).first << endm;}
-	    StppJetAnalyzer *jetAnalyzer = (*mapIter).second;
-	    if (jetAnalyzer) {
-		StppJetAnalyzer::StjJetList &jetList = jetAnalyzer->getJets();
+	{LOG_DEBUG << "Getting a jet from StJetMaker branch " << jetBranchName << endm;}
+	StJets *stjets = jetMk->getStJets(jetBranchName);
+	if (stjets) {
+	    TClonesArray *jets = stjets->jets();
+	    if (jets) {
 		Float_t eTMax = -100;
-		for (StppJetAnalyzer::StjJetList::iterator jetIter = jetList.begin();jetIter != jetList.end();++jetIter) {
-		    StProtoJet &jet = *jetIter;
-		    //{LOG_DEBUG << "Jet eta = " << jet.eta() << ", phi = " << jet.phi() << ", eT = " << jet.eT() << ", size = " << jet.size() << endm;}
-		    if (jet.eT() > eTMax) {
-			eTMax = jet.eT();
-			eventData.jet.eta = jet.eta();
-			eventData.jet.phi = jet.phi();
-			eventData.jet.eT = jet.eT();
-			eventData.jet.nPoints = jet.size();
-			eventData.jet.nTracks = jet.size();
+		for (Int_t i = 0;i < jets->GetEntries();i++) {
+		    TObject *jetobj = (*jets)[i];
+		    StJet *jet = jetobj ? dynamic_cast<StJet *>(jetobj) : 0;
+		    if (jet && (jet->jetEt > eTMax)) {
+			eTMax = jet->jetEt;
+			eventData.jet.eta = jet->jetEta;
+			eventData.jet.phi = jet->jetPhi;
+			eventData.jet.eT = jet->jetEt;
+			eventData.jet.nPoints = jet->nBtowers;
+			eventData.jet.nTracks = jet->nTracks;
 		    }
 		}
-	    }
-	    //{LOG_DEBUG << "Jet branch " << (*mapIter).first << " finished." << endm;}
-	}
+		{LOG_DEBUG << "Jet eta = " << eventData.jet.eta << ", phi = " << eventData.jet.phi << ", eT = " << eventData.jet.eT << ", nPoints = " << eventData.jet.nPoints << ", nTracks = " << eventData.jet.nTracks << endm;}
+	    } else {LOG_DEBUG << "No jets found" << endm;}
+	} else {LOG_WARN << "Jet finder branch " << jetBranchName << " not found" << endm;}
 	if (eventData.jet.eT == 0.0) {LOG_INFO << "StJetMaker didn't provide a jet" << endm;}
     }
     if (eventData.jet.eT == 0.0) {
@@ -810,9 +904,9 @@ void findJet(const StSPtrVecEmcPoint &emcPoints, Float_t vZ, Float_t coneSize, F
     {LOG_INFO << "My jet eta = " << jet.eta << ", phi = " << jet.phi << ", eT = " << jet.eT << ", nPoints = " << jet.nPoints << endm;}
 }
 //_____________________________________________________________________________
-void getMCDecayData(const StMcTrack *mcTrack, const StEvent *event, StMaker *trigSimMaker, StBemcTables *tables, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, triggered_type triggersHT1, triggered_type triggersHT2, TMySimulatedDecayData &mcDecayData) {
+void getMCDecayData(const StMcTrack *mcTrack, const StEvent *event, StBemcTables *tables, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, TMySimulatedDecayData &mcDecayData) {
     if (!mcTrack) return;
-    getMCParticleData(mcTrack, event, trigSimMaker, tables, emcGeom, smdeGeom, smdpGeom, psdGeom, triggersHT1, triggersHT2, mcDecayData.parent);
+    getMCParticleData(mcTrack, event, tables, emcGeom, smdeGeom, smdpGeom, psdGeom, mcDecayData.parent);
     const StMcVertex *decayVert = mcTrack->stopVertex();
     if (decayVert) {
 	Bool_t firstDaughter = true;
@@ -824,14 +918,14 @@ void getMCDecayData(const StMcTrack *mcTrack, const StEvent *event, StMaker *tri
 		if (firstDaughter) daughter1 = daughter; else daughter2 = daughter;
 		TMySimulatedParticleData &daughterData = firstDaughter ? mcDecayData.daughter1 : mcDecayData.daughter2;
 		firstDaughter = false;
-		getMCParticleData(daughter, event, trigSimMaker, tables, emcGeom, smdeGeom, smdpGeom, psdGeom, triggersHT1, triggersHT2, daughterData);
+		getMCParticleData(daughter, event, tables, emcGeom, smdeGeom, smdpGeom, psdGeom, daughterData);
 	    }
 	}
     }
 }
 
 //_____________________________________________________________________________
-void getMCParticleData(const StMcTrack *mcTrack, const StEvent *event, StMaker *trigSimMaker, StBemcTables *tables, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, triggered_type triggersHT1, triggered_type triggersHT2, TMySimulatedParticleData &mcParticleData) {
+void getMCParticleData(const StMcTrack *mcTrack, const StEvent *event, StBemcTables *tables, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, TMySimulatedParticleData &mcParticleData) {
     if (!mcTrack) return;
     mcParticleData.summary.geantId = mcTrack->geantId();
     mcParticleData.summary.daughters = 0;
@@ -913,7 +1007,7 @@ void getSMDThresholdData(const StEmcDetector *detector, StEmcGeom *geom, StBemcT
 }
 
 //_____________________________________________________________________________
-void associateTracksWithEmcPoints(StEvent *event, StMcEvent *mc_event, StSPtrVecEmcPoint &emcPoints, StMaker *trigSimMaker, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, StEmcPosition *emcPosition, StBemcTables *tables) {
+void associateTracksWithEmcPoints(StEvent *event, StMcEvent *mc_event, StSPtrVecEmcPoint &emcPoints, StEmcGeom *emcGeom, StEmcGeom *smdeGeom, StEmcGeom *smdpGeom, StEmcGeom *psdGeom, StEmcPosition *emcPosition, StBemcTables *tables) {
   if(!event) {
     return;
   }

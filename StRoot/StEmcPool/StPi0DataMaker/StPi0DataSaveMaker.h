@@ -50,6 +50,12 @@ protected:
   TMyMCDecayTreeData mMCEtaPlainStructure;
   TTree* mMCEtaTreePlain;
 
+  TClonesArray *mMCNbarTreeDataArray;
+  Int_t mMCNbarIndex;
+  TTree* mMCNbarTree;
+  TMyMCParticleTreeData mMCNbarPlainStructure;
+  TTree* mMCNbarTreePlain;
+
   TClonesArray *mCandidateTreeDataArray;
   Int_t mCandidateIndex;
   TTree* mCandidateTree;

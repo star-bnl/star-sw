@@ -32,19 +32,17 @@ public:
   typedef typename pools_type::size_type size_type;
 
   TMixer(size_type _size, dimension_size_type _dimension) : mSize(_size), mDimension(_dimension) {}
-  
+
   size_type getSize() const {return this->mSize;}
+  size_type getCount() const {return this->mEvents.size();}
   dimension_size_type getDimension() const {return this->mDimension;}
 
-  bool ready() const {return this->mEvents.size() >= this->getSize();}
-  bool preready() const {return this->mEvents.size() >= (this->getSize() - 1);}
-  
   void addEvent(const_pool_reference _pool) {
-    if (this->ready()) this->mEvents.erase(this->mEvents.begin());
+    while (this->getCount() >= this->getSize()) this->mEvents.erase(this->mEvents.begin());
     this->mEvents.push_back(_pool);
   }
   void addEvent(const_list_reference _list) {this->addEvent(pool_type(this->getDimension(), _list));}
-  
+
   const_list_reference getList(size_type _index, dimension_size_type _dimensionIndex) const {return (this->mEvents[_index])[_dimensionIndex];}
 
 protected:

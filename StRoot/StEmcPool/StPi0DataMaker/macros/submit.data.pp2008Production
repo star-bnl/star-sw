@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export DATA_NAME='Real data ppProduction2008 dataset'
+export DATA_TAG='pp2008Production'
+export DATA_QUERY='catalog:'$CATALOG'?collision=pp200,production=P08ic,trgsetupname=ppProduction2008,runtype=fmsslow,sanity=1,storage=HPSS,emc=1,tpc=1,available=1,filetype=daq_reco_MuDst'
+export DATA_CONFIG='config_pp2008.C'
+export DATA_DIR=$DATA_PATH'/data_pp2008'

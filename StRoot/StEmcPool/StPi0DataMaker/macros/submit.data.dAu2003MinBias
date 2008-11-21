@@ -4,5 +4,5 @@ export DATA_NAME='Real data dAu2003 dAuMinBias dataset'
 export DATA_TAG='dAu2003MinBias'
 export DATA_QUERY='catalog:'$CATALOG'?collision=dau200,production=P04if,trgsetupname=dAuMinBias,'$MYQUERY_general
 #old productions were P03ia and P03ih
-export DATA_CONFIG='config_dAu2003.C'
+export DATA_CONFIG='config_dAu2003_MB.C'
 export DATA_DIR=$DATA_PATH'/data_dAu2003'

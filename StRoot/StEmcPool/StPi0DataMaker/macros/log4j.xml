@@ -11,14 +11,14 @@
 
   <logger name="BFC"><priority value="INFO"/></logger>
   <logger name="StChain"><priority value="INFO"/></logger>
-  <logger name="StEmcSimulatorMaker"><priority value="WARN"/></logger>
-  <logger name="St_db_Maker"><priority value="ERROR"/></logger>
-  <logger name="StEEmcDbMaker"><priority value="ERROR"/></logger>
-  <logger name="StSpinDbMaker"><priority value="ERROR"/></logger>
-  <logger name="StPi0DataMaker"><priority value="WARN"/></logger>
   <logger name="StTimeRandomizerMaker"><priority value="WARN"/></logger>
+  <logger name="St_db_Maker"><priority value="WARN"/></logger>
+  <logger name="StEmcSimulatorMaker"><priority value="WARN"/></logger>
+  <logger name="StEmcTriggerMaker"><priority value="WARN"/></logger>
+  <logger name="StSpinDbMaker"><priority value="WARN"/></logger>
+  <logger name="StJetMaker"><priority value="WARN"/></logger>
+  <logger name="StPi0DataMaker"><priority value="WARN"/></logger>
   <logger name="StPi0DataSaveMaker"><priority value="WARN"/></logger>
-  <logger name="StPi0TriggerSimulatorMaker"><priority value="WARN"/></logger>
 
   <root>
     <priority value="WARN" />

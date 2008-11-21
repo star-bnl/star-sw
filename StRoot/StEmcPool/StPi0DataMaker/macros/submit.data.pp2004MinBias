@@ -3,5 +3,5 @@
 export DATA_NAME='Real data pp2004 ppMinBias dataset'
 export DATA_TAG='pp2004MinBias'
 export DATA_QUERY='catalog:'$CATALOG'?collision=pp200,production=P04ik,trgsetupname=ppMinBias,'$MYQUERY_general
-export DATA_CONFIG='config_pp2004.C'
+export DATA_CONFIG='config_pp2004_MB.C'
 export DATA_DIR=$DATA_PATH'/data_pp2004'

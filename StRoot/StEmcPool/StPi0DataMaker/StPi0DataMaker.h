@@ -66,6 +66,7 @@ protected:
   TDataSet *mMCGammaTreeDataArray;
   TDataSet *mMCPionTreeDataArray;
   TDataSet *mMCEtaTreeDataArray;
+  TDataSet *mMCNbarTreeDataArray;
   TDataSet *mCandidateTreeDataArray;
   TDataSet *mCandidateTreeDataMixArray;
   TDataSet *mCandidateTreeDataSubmixArray;
