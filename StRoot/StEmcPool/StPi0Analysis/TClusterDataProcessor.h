@@ -11,6 +11,7 @@ DEFINE_HISTOGRAM_1D(SigmaEtaWide,          Int_t(TMath::Abs(cluster.etaCoord)/0.
 DEFINE_HISTOGRAM_1D(SigmaPhi,              cluster.sigmaPhi, "Phi RMS;#phi RMS");
 DEFINE_HISTOGRAM_2D(EtaPhiCoord,           cluster.etaCoord, cluster.phiCoord, "Eta-Phi Coord;#eta;#phi");
 DEFINE_HISTOGRAM_1D(DeadStripClose,        ((cluster.badClose | 0x0F) ? 1 : 0), "Dead strip close");
+DEFINE_HISTOGRAM_2D(HighestHitToTotalEnergy, cluster.energy, ((cluster.energy != 0) ? (cluster.highestEnergyHit.energy / cluster.energy) : -1), "Highest hit / total energy;Cluster energy, GeV;Highest hit / total energy");
 
 #else
 

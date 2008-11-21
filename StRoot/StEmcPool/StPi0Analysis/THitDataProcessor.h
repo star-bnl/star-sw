@@ -5,6 +5,7 @@ DEFINE_HISTOGRAM_1D(Id,                    hit.id, "ID;ID");
 DEFINE_HISTOGRAM_1D(Adc,                   hit.adc, "ADC;ADC");
 DEFINE_HISTOGRAM_1D(Adc2,                  hit.adc, "ADC2;ADC");
 DEFINE_HISTOGRAM_1D(Adc3,                  hit.adc, "ADC3;ADC");
+DEFINE_HISTOGRAM_1D(AdcPed,                hit.adc - hitParameters.ped, "ADC-PED;ADC-PED");
 DEFINE_HISTOGRAM_1D(EtaCoord,              hitParameters.etaCoord, "EtaCoord;#eta");
 DEFINE_HISTOGRAM_1D(PhiCoord,              hitParameters.phiCoord, "PhiCoord;#phi");
 DEFINE_HISTOGRAM_2D(EtaPhiCoord,           hitParameters.etaCoord, hitParameters.phiCoord, "Eta-Phi Coord;#eta;#phi");

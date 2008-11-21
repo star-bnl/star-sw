@@ -13,6 +13,7 @@ class TBinParameters : public TNamed {
 
 		TBinParameters(const Char_t *name = 0, const Char_t *title = 0);
 		TBinParameters(const this_type &binparam);
+		TBinParameters(TBinVariable avariable, Float_t amin, Float_t amax);
 		virtual ~TBinParameters();
 
 		this_type &operator=(const this_type &binparams);

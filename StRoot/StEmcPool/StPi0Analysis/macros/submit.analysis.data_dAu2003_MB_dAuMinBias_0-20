@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set_option 'files_per_job_analysis=1'
+
 export ANALYSIS_NAME='Real data dAu2003 analysis (0-20% most central events) - MinBias from dAuMinBias dataset'
 export ANALYSIS_TAG='data_dAu2003'
 export ANALYSIS_SUBTAG=$ANALYSIS_TAG'_MB_dAuMinBias_0-20'

@@ -22,6 +22,8 @@ DEFINE_HISTOGRAM_2D(OpenAngleResolutionEnergy, pionParameters.energy, recoSimuRa
 DEFINE_HISTOGRAM_2D(OpenAngleResolutionPt,     pionParameters.pT, recoSimuRatio, "Angle reconstruction resolution vs. simulated p_{T};simulated p_{T};reconstructed / simulated open angle")
 DEFINE_HISTOGRAM_2D(DayRun,                    eventParameters.day, eventParameters.runDay, "Statistics per run;Day;Run");
 DEFINE_HISTOGRAM_1D(StatDay,                   eventParameters.day, "Statistics per day;Day");
+DEFINE_HISTOGRAM_2D(PtPartonicPt,              pionParameters.pT, event.simulatedParticle.pT, "#pi^{0} vs. PYTHIA partonic p_{T};#pi^{0} p_{T};PYTHIA partonic p_{T}")
+DEFINE_HISTOGRAM_2D(EnergyOpenAngleSimu,       pionParameters.energy, pionParameters.openangle, "Angle vs. energy simulated;E, GeV/c^2;Opening angle, rad")
 
 #else
 
@@ -35,6 +37,7 @@ DEFINE_HISTOGRAM_1D(StatDay,                   eventParameters.day, "Statistics 
 using std::list;
 
 #include "StPi0AnalysisVersion.h"
+#include "StPi0AnalysisUtil.h"
 #include "TDataProcessor.h"
 #include "TBinStatistics.h"
 #include "TMCGammaDataProcessor.h"
@@ -75,6 +78,8 @@ class TSimuDataProcessor : public TDataProcessor {
 		    gammas.setCuts(newcuts);
 		}
 		*/
+
+                event_list_type badEvents;
 
 #define DEFINE_HISTOGRAMS
 #define DEFINE_HISTOGRAM_1D(NAME, X, TITLE)       HISTO_DEF(hist_type,  NAME, TITLE)

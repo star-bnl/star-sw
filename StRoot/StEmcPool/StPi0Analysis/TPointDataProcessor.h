@@ -32,6 +32,10 @@ DEFINE_HISTOGRAM_2D(EnergyTotalSmdeSigma,  point.energy, point.clusterBSMDE.sigm
 DEFINE_HISTOGRAM_2D(EnergyTotalSmdpSigma,  point.energy, point.clusterBSMDP.sigmaPhi, "Sigma phi vs. total energy in point;Total energy, GeV;SMDP sigma");
 DEFINE_HISTOGRAM_2D(EnergyTotalSmdeSize,   point.energy, point.clusterBSMDE.size, "Size eta vs. total energy in point;Total energy, GeV;SMDE size");
 DEFINE_HISTOGRAM_2D(EnergyTotalSmdpSize,   point.energy, point.clusterBSMDP.size, "Size phi vs. total energy in point;Total energy, GeV;SMDP size");
+DEFINE_HISTOGRAM_1D(PtWithSmd,             PASSED(passedPointCuts, POINT_TYPE_SMDE_CUT | POINT_TYPE_SMDP_CUT) ? pointParameters.pTRec : -1, "Point p_{T} with SMD;p_{T}");
+DEFINE_HISTOGRAM_1D(PtWithSmd1,            (PASSED(passedPointCuts, POINT_TYPE_SMDE_CUT) || PASSED(passedPointCuts, POINT_TYPE_SMDP_CUT)) ? pointParameters.pTRec : -1, "Point p_{T} with at least one SMD;p_{T}");
+DEFINE_HISTOGRAM_1D(PtWithSmdSize,         PASSED(passedPointCuts, POINT_SMDE_SIZE_CUT | POINT_SMDP_SIZE_CUT) ? pointParameters.pTRec : -1, "Point p_{T} with SMD size cut;p_{T}");
+DEFINE_HISTOGRAM_1D(PtWithSmdSize1,        (PASSED(passedPointCuts, POINT_SMDE_SIZE_CUT) || PASSED(passedPointCuts, POINT_SMDP_SIZE_CUT)) ? pointParameters.pTRec : -1, "Point p_{T} with at least one SMD size cut;p_{T}");
 
 #else
 
@@ -77,6 +81,7 @@ class TPointDataProcessor : public TDataProcessor {
 
 		list_distr_type multiplicityPrimaryDistributions;
 		list_distr_type multiplicityPointsDistributions;
+                list_distr_type pointTrackDistDistributions;
 	
 		TClusterDataProcessor clusterTower;
 		TClusterDataProcessor clusterSMDE;

@@ -36,10 +36,18 @@ DEFINE_HISTOGRAM_1D(TPCVertNoBBCVertNo,     NOT_PASSED(passedEventCuts1, EVENT_T
 DEFINE_HISTOGRAM_1D(JetYes,                 PASSED(passedEventCuts1, EVENT_JET_ET_CUT) ? candidateParameters.pTRec : -1.0, "p_{T} in the events with jet above threshold");
 DEFINE_HISTOGRAM_1D(JetNo,                  NOT_PASSED(passedEventCuts1, EVENT_JET_ET_CUT) ? candidateParameters.pTRec : -1.0, "p_{T} in the events without jet above threshold");
 DEFINE_HISTOGRAM_1D(InJetPointYes,          (PASSED(passedPointCuts1, POINT_IN_JET_CUT) && PASSED(passedPointCuts2, POINT_IN_JET_CUT)) ? candidateParameters.pTRec : -1.0, "p_{T}, points in jet cone");
+DEFINE_HISTOGRAM_1D(InJBkPtYes,((PASSED(passedPointCuts1,POINT_IN_JET_CUT)&&PASSED(passedPointCuts2,POINT_IN_JET_BACK_CUT))||(PASSED(passedPointCuts1,POINT_IN_JET_BACK_CUT)&&PASSED(passedPointCuts2,POINT_IN_JET_CUT)))?candidateParameters.pTRec:-1,"bk");
 DEFINE_HISTOGRAM_1D(InJetPointNo,           !(PASSED(passedPointCuts1, POINT_IN_JET_CUT) && PASSED(passedPointCuts2, POINT_IN_JET_CUT)) ? candidateParameters.pTRec : -1.0, "p_{T}, points out of jet cone");
 DEFINE_HISTOGRAM_1D(InJetYes,               PASSED(passedCandidateCuts, CANDIDATE_IN_JET_CUT) ? candidateParameters.pTRec : -1.0, "p_{T}, candidate in jet cone");
 DEFINE_HISTOGRAM_1D(InJetNo,                NOT_PASSED(passedCandidateCuts, CANDIDATE_IN_JET_CUT) ? candidateParameters.pTRec : -1.0, "p_{T}, candidate out of jet cone");
 DEFINE_HISTOGRAM_2D(CandidatePtJetEt,       candidateParameters.pTRec, TMath::Abs(candidate.point1.event.jet.eT), "Candidate p_{T} vs. jet E_{T};#pi^{0} p_{T}, GeV/c;Jet E_{T}, GeV");
+DEFINE_HISTOGRAM_1D(PtSmd,(PASSED(passedPointCuts1,POINT_TYPE_SMDE_CUT|POINT_TYPE_SMDP_CUT)&&PASSED(passedPointCuts2,POINT_TYPE_SMDE_CUT|POINT_TYPE_SMDP_CUT))?candidateParameters.pTRec:-1,"Both points both SMD;p_{T}, GeV/c");
+DEFINE_HISTOGRAM_1D(PtSmd1,(PASSED(passedPointCuts1,POINT_TYPE_SMDE_CUT|POINT_TYPE_SMDP_CUT)||PASSED(passedPointCuts2,POINT_TYPE_SMDE_CUT|POINT_TYPE_SMDP_CUT))?candidateParameters.pTRec:-1, "At least one point with both SMD;p_{T}, GeV/c");
+DEFINE_HISTOGRAM_1D(PtSmd01,(PASSED(passedPointCuts1,POINT_TYPE_SMDE_CUT)||PASSED(passedPointCuts1,POINT_TYPE_SMDP_CUT)||PASSED(passedPointCuts2,POINT_TYPE_SMDE_CUT)||PASSED(passedPointCuts2,POINT_TYPE_SMDP_CUT))?candidateParameters.pTRec:-1,"SMD01");
+DEFINE_HISTOGRAM_1D(PtSmdSz,(PASSED(passedPointCuts1,POINT_SMDE_SIZE_CUT|POINT_SMDP_SIZE_CUT)&&PASSED(passedPointCuts2,POINT_SMDE_SIZE_CUT|POINT_SMDP_SIZE_CUT))?candidateParameters.pTRec:-1,"Both points both SMD size;p_{T}, GeV/c");
+DEFINE_HISTOGRAM_1D(PtSmdSz1,(PASSED(passedPointCuts1,POINT_SMDE_SIZE_CUT|POINT_SMDP_SIZE_CUT)||PASSED(passedPointCuts2,POINT_SMDE_SIZE_CUT|POINT_SMDP_SIZE_CUT))?candidateParameters.pTRec:-1, "At least one point with both SMD size;p_{T}, GeV/c");
+DEFINE_HISTOGRAM_1D(PtSmdSz01,(PASSED(passedPointCuts1,POINT_SMDE_SIZE_CUT)||PASSED(passedPointCuts1,POINT_SMDP_SIZE_CUT)||PASSED(passedPointCuts2,POINT_SMDE_SIZE_CUT)||PASSED(passedPointCuts2,POINT_SMDP_SIZE_CUT))?candidateParameters.pTRec:-1,"SMDsz01");
+DEFINE_HISTOGRAM_2D(TpcRefmultTrackDist,    candidate.point1.event.uncorrectedNumberOfTpcPrimaries, candidateParameters.distTrackClosest, "Mult. vs. closest track dist.;Event mult.;Dist. to closest track");
 
 #else
 
@@ -87,6 +95,7 @@ class TCandidateDataProcessor : public TDataProcessor {
 		list_type multiplicityPrimaryDistributions;
 		list_type multiplicityPointsDistributions;
 		list_type pointTrackDistDistributions;
+		list_type pointTrackDist2Distributions;
 
 		point_processor_type point1;
 		point_processor_type point2;

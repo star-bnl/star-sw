@@ -131,50 +131,61 @@ void TDataProcessorMemberInspector::Inspect(TClass *cl, const char *parent, cons
 						TString *str = (TString*)((*name == '*') ? (*((TObject**)addr)) : ((TObject*)addr));
 						TString nameStr = name; nameStr += " = """; nameStr += *str; nameStr += """";
 						this->mFolder->Add(new TNamed(nameStr.Data(), ""));
+					} else if (TString(dataMember->GetTypeName()) == "event_list_type") {
+						list<pair<Int_t, Int_t> > *listEv = (list<pair<Int_t, Int_t> >*)((*name == '*') ? (*((TObject**)addr)) : ((TObject*)addr));
+						TString nameStr = Form("%s: %i events", name, listEv->size());
+						this->mFolder->Add(new TNamed(nameStr.Data(), ""));
 					} else {
 						cerr << "Don't know what to do with class " << dataMember->GetTypeName() << " " << name << " !!!" << endl;
 					}
 				}
 			} else {
 				if (((strcmp(dataMember->GetTypeName(), "UInt_t") == 0) || (strcmp(dataMember->GetTypeName(), "Int_t") == 0) || (strcmp(dataMember->GetTypeName(), "int") == 0))) {
-					Int_t num = 0;
-					if (strcmp(dataMember->GetTypeName(), "UInt_t") == 0) {
-					    num = (Int_t)(*((UInt_t*)((*name == '*') ? (*((TObject**)addr)) : ((TObject*)addr))));
-					} else {
-					    num = *((Int_t*)((*name == '*') ? (*((TObject**)addr)) : ((TObject*)addr)));
-					}
-					TString nameStr = name;
 					Bool_t addThis = true;
-					if (strstr(name, "_CUTS")) {
+					Bool_t isArray = false;
+					if (strcmp(name, "[") == 0) isArray = true;
+					Int_t arrayIndex = 0;
+					TString nameStr = name;
+					nameStr += " =";
+					Int_t num = 0;
+					do {
+					    if (strcmp(dataMember->GetTypeName(), "UInt_t") == 0) {
+						num = (Int_t)(*((UInt_t*)((*name == '*') ? (*((TObject**)addr)) : ((TObject*)addr)) + arrayIndex));
+					    } else {
+						num = *((Int_t*)((*name == '*') ? (*((TObject**)addr)) : ((TObject*)addr)) + arrayIndex);
+					    }
+					    if (strstr(name, "_CUTS")) {
 						if (num != 0) {
 							const Char_t *cut_class_ = strstr(name, "_");
 							TString cut_class_str(name, cut_class_ ? (cut_class_ - name) : 0);
-							nameStr += " = ";
 							stringstream strstr;
 							printCutNames(num, cut_class_str.Data(), strstr, ", ");
+							nameStr += " ";
 							nameStr += strstr.str();
 						} else {nameStr += " (not set)"; /*addThis = false;*/}
-					} else if (strstr(name, "numPassed") || strstr(name, "numTotal")) {
-					    TString unit = "";
-					    Float_t number = num;
-					    Bool_t append = true;
-					    if (num > 1000000) {
-						number = Float_t(num) / 1000000.0;
-						unit = "M";
-					    } else if (num > 1000) {
-						number = Float_t(num) / 1000.0;
-						unit = "K";
+					    } else if (strstr(name, "numPassed") || strstr(name, "numTotal")) {
+						TString unit = "";
+						Float_t number = num;
+						Bool_t append = true;
+						if (num > 1000000) {
+						    number = Float_t(num) / 1000000.0;
+						    unit = "M";
+						} else if (num > 1000) {
+						    number = Float_t(num) / 1000.0;
+						    unit = "K";
+						} else {
+						    append = false;
+						}
+						if (append) {
+    						    nameStr += " "; nameStr += Form("%.1f %s (%i)", number, unit.Data(), num);
+						} else {
+    						    nameStr += " "; nameStr += num;					    
+						}
 					    } else {
-						append = false;
+						nameStr += " "; nameStr += num;
 					    }
-					    if (append) {
-    						nameStr += " = "; nameStr += Form("%.1f %s (%i)", number, unit.Data(), num);
-					    } else {
-    						nameStr += " = "; nameStr += num;					    
-					    }
-					} else {
-					    nameStr += " = "; nameStr += num;
-					}
+					    arrayIndex++;
+					} while (isArray && (num != 0) && (num != -1));
 					TNamed *named = addThis ? (new TNamed(nameStr.Data(), "")) : 0;
 					if (named) this->mFolder->Add(named);
 				} else if (strcmp(dataMember->GetTypeName(), "Float_t") == 0) {

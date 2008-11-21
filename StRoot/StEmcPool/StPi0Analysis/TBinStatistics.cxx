@@ -81,6 +81,24 @@ Bool_t TBinStatistics::add(const this_type &stat, Bool_t check) {
 	}
 	return result;
 }
+Bool_t TBinStatistics::add(const Float_t x) {
+	Bool_t result = true;
+	if (!this->histHistogram) this->init();
+	if (this->histHistogram) this->histHistogram->SetBinContent(1, this->histHistogram->GetBinContent(1) + x);
+	return result;
+}
+
+Bool_t TBinStatistics::multiply(const this_type &stat) {
+	Bool_t result = false;
+	if (!this->histHistogram) this->init();
+	const parameters_type &binParameters = this->getParameters();
+	const parameters_type &binParametersNew = stat.getParameters();
+	if (binParameters == binParametersNew) {
+		result = true;
+		this->histHistogram->Multiply(stat.histHistogram);
+	}
+	return result;
+}
 
 Bool_t TBinStatistics::divide(const this_type &stat, Float_t nom, Float_t denom, Option_t *option) {
 	Bool_t result = false;
@@ -228,6 +246,31 @@ void divideBins(const bin_stat_list_type &nomList, const bin_stat_list_type &den
 	}
 }
 
+void multiplyBins(const bin_stat_list_type &x, const bin_stat_list_type &y, bin_stat_list_type &z) {
+	for (bin_stat_list_type::const_iterator iter = x.begin();iter != x.end();++iter) {
+		const TBinStatistics &bin = *iter;
+		Bool_t found = false;
+		Float_t Y = 0, Yerr = 0;
+		const TBinParameters par = bin.getParameters();
+		TBinStatistics vStat = bin;
+		for (bin_stat_list_type::const_iterator iterSim = y.begin();(iterSim != y.end()) && (!found);++iterSim) {
+			const TBinStatistics &binSim = *iterSim;
+			if (bin == binSim) {
+				vStat.multiply(binSim);
+				found = true;
+			}
+		}
+		Y = vStat.getValue();
+		Yerr = vStat.getError();
+		if (found) {
+			TBinStatistics binRatio(bin);
+			binRatio.setValue(Y);
+			binRatio.setError(Yerr);
+			z.push_back(binRatio);
+		}
+	}
+}
+
 void divideBinsFunc(const bin_stat_list_type &nomList, TF1 *funcDenom
 	, bin_stat_list_type &ratioList, Float_t denomI, Float_t denomIdrift
 	, Bool_t normalizeByBinWidth, Bool_t binomialErrors, Bool_t integral) {
@@ -255,7 +298,43 @@ void resetBinsError(const bin_stat_list_type &binsList, bin_stat_list_type &bins
 	}
 }
 
-void substractBins(const bin_stat_list_type &x, const bin_stat_list_type &y, bin_stat_list_type &z) {
+void addBins(const bin_stat_list_type &x, const bin_stat_list_type &y, bin_stat_list_type &z) {
+	for (bin_stat_list_type::const_iterator iter = x.begin();iter != x.end();++iter) {
+		const TBinStatistics &bin = *iter;
+		Bool_t found = false;
+		TBinStatistics Z = bin;
+		for (bin_stat_list_type::const_iterator iterSim = y.begin();(iterSim != y.end()) && (!found);++iterSim) {
+			const TBinStatistics &binSim = *iterSim;
+			if (bin == binSim) {
+				TBinStatistics Y = binSim;
+				//Y.scale(1.0);
+				Z.add(Y);
+				found = true;
+			}
+		}
+		if (found) z.push_back(Z);
+	}
+}
+
+void addBins(const bin_stat_list_type &x, const Float_t y, bin_stat_list_type &z) {
+	for (bin_stat_list_type::const_iterator iter = x.begin();iter != x.end();++iter) {
+		const TBinStatistics &bin = *iter;
+		TBinStatistics Z = bin;
+		Z.add(y);
+		z.push_back(Z);
+	}
+}
+
+void scaleBins(const bin_stat_list_type &x, const Float_t y, bin_stat_list_type &z) {
+	for (bin_stat_list_type::const_iterator iter = x.begin();iter != x.end();++iter) {
+		const TBinStatistics &bin = *iter;
+		TBinStatistics Z = bin;
+		Z.scale(y);
+		z.push_back(Z);
+	}
+}
+
+void subtractBins(const bin_stat_list_type &x, const bin_stat_list_type &y, bin_stat_list_type &z) {
 	for (bin_stat_list_type::const_iterator iter = x.begin();iter != x.end();++iter) {
 		const TBinStatistics &bin = *iter;
 		Bool_t found = false;
@@ -374,4 +453,99 @@ void mergePoints(const bin_stat_list_type &input, bin_stat_list_type &output) {
 void mergePoints(const list<bin_stat_list_type> &inputs, bin_stat_list_type &output, bin_stat_list_type &outputSys) {
 	for (list<bin_stat_list_type>::const_iterator iter = inputs.begin();iter != inputs.end();iter++)
 		mergePoints(*iter, output, outputSys);
+}
+
+void cropPoints(const bin_stat_list_type &input, bin_stat_list_type &output, Float_t low, Float_t high) {
+    for (bin_stat_list_type::const_iterator iterIn = input.begin();iterIn != input.end();iterIn++) {
+        const TBinStatistics &binIn = *iterIn;
+        if ((binIn.getParameters().getCenter() >= low) && (binIn.getParameters().getCenter() < high)) {
+            output.push_back(binIn);
+        }
+    }
+}
+
+TGraphErrors *createGraph(const bin_stat_list_type &points) {
+        Float_t *x = new Float_t[points.size()];
+        Float_t *xErr = new Float_t[points.size()];
+        Float_t *y = new Float_t[points.size()];
+        Float_t *yErr = new Float_t[points.size()];
+	Int_t npoints = 0;
+	for (list<TBinStatistics>::const_iterator iter = points.begin();iter != points.end();++iter) {
+	    const TBinStatistics &binStat = *iter;
+            Float_t xx = binStat.getParameters().getCenter();
+            x[npoints] = xx;
+            xErr[npoints] = 0; //binStat.getParameters().getWidth() / 2.0;
+            y[npoints] = binStat.getValue();
+            yErr[npoints] = binStat.getError();
+            npoints++;
+        }
+        TGraphErrors *graph = new TGraphErrors(npoints, x, y, xErr, yErr);
+	return graph;
+}
+
+
+bin_stat_list_type operator+(const bin_stat_list_type &a, const bin_stat_list_type &b) {
+    bin_stat_list_type c;
+    addBins(a, b, c);
+    return c;
+}
+bin_stat_list_type operator+(const bin_stat_list_type &a, const Float_t b) {
+    bin_stat_list_type c;
+    addBins(a, b, c);
+    return c;
+}
+bin_stat_list_type operator+(const Float_t b, const bin_stat_list_type &a) {
+    bin_stat_list_type c;
+    addBins(a, b, c);
+    return c;
+}
+
+bin_stat_list_type operator-(const bin_stat_list_type &a, const bin_stat_list_type &b) {
+    bin_stat_list_type bb;
+    scaleBins(b, -1, bb);
+    bin_stat_list_type c;
+    addBins(a, bb, c);
+    return c;
+}
+bin_stat_list_type operator-(const bin_stat_list_type &a, const Float_t b) {
+    bin_stat_list_type c;
+    addBins(a, -b, c);
+    return c;
+}
+bin_stat_list_type operator-(const Float_t b, const bin_stat_list_type &a) {
+    bin_stat_list_type c;
+    addBins(a, -b, c);
+    return c;
+}
+
+bin_stat_list_type operator*(const bin_stat_list_type &a, const bin_stat_list_type &b) {
+    bin_stat_list_type c;
+    multiplyBins(a, b, c);
+    return c;
+}
+bin_stat_list_type operator*(const bin_stat_list_type &a, const Float_t b) {
+    bin_stat_list_type c;
+    scaleBins(a, b, c);
+    return c;
+}
+bin_stat_list_type operator*(const Float_t b, const bin_stat_list_type &a) {
+    bin_stat_list_type c;
+    scaleBins(a, b, c);
+    return c;
+}
+
+bin_stat_list_type operator/(const bin_stat_list_type &a, const bin_stat_list_type &b) {
+    bin_stat_list_type c;
+    divideBins(a, b, c, 1.0, 0.0, false, false);
+    return c;
+}
+bin_stat_list_type operator/(const bin_stat_list_type &a, const Float_t b) {
+    bin_stat_list_type c;
+    scaleBins(a, 1.0 / b, c);
+    return c;
+}
+bin_stat_list_type operator/(const Float_t b, const bin_stat_list_type &a) {
+    bin_stat_list_type c;
+    scaleBins(a, 1.0 / b, c);
+    return c;
 }

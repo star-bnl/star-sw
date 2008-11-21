@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include <list>
+#include <map>
 using namespace std;
 
 class TMyEventData;
@@ -26,7 +27,10 @@ typedef list<bin_stat_type> bin_stat_list_type;
 extern TWeightCalculator pQCDweight;
 Double_t getNLOpQCD(Double_t *x, Double_t *p);
 extern TWeightCalculator pQCDPPweight;
+extern TWeightCalculator pQCDPPKweight;
 Double_t getNLOpQCDPP(Double_t *x, Double_t *p);
+extern TWeightCalculator pQCDPPweight_2;
+Double_t getNLOpQCDPP_2(Double_t *x, Double_t *p);
 
 enum TBinVariable {pT, eGamma};
 
@@ -46,9 +50,14 @@ struct TCandidateParameters {
 	Float_t jetDeltaEta;
 	Float_t jetDeltaPhi;
 	Float_t jetDist;
+	Float_t jetBackDeltaEta;
+	Float_t jetBackDeltaPhi;
+	Float_t jetBackDist;
 	Float_t massRegionLeft;
 	Float_t massRegionRight;
 	Float_t pTRecoToSimu;
+	Float_t distTrackClosest;
+	Float_t distTrackClosest2;
 };
 
 struct THitParameters {
@@ -57,6 +66,7 @@ struct THitParameters {
 	Float_t eta;
 	Float_t phi;
 	Float_t eT;
+	Float_t ped;
 };
 
 struct TPointParameters {
@@ -64,6 +74,8 @@ struct TPointParameters {
 	Bool_t triggeredHT2;
 	Bool_t triggeredHT1Et;
 	Bool_t triggeredHT2Et;
+	Bool_t triggeredTowerHT1Et;
+	Bool_t triggeredTowerHT2Et;
 	Float_t pTRec;
 	Float_t energy;
 	Float_t eta;
@@ -74,7 +86,12 @@ struct TPointParameters {
 	Float_t jetDeltaEta;
 	Float_t jetDeltaPhi;
 	Float_t distJet;
+	Float_t jetBackDeltaEta;
+	Float_t jetBackDeltaPhi;
+	Float_t distJetBack;
 	Float_t distTrack;
+	Bool_t passedCPV;
+	Float_t distTrack2;
 	Float_t distGamma;
 	Float_t smdAsymetry;
 	Float_t towerCenterDist;
@@ -99,6 +116,9 @@ struct TPionParameters {
 	Float_t jetDeltaEta;
 	Float_t jetDeltaPhi;
 	Float_t jetDist;
+	Float_t jetBackDeltaEta;
+	Float_t jetBackDeltaPhi;
+	Float_t jetBackDist;
 };
 
 struct TGammaParameters {
@@ -113,6 +133,9 @@ struct TGammaParameters {
 	Float_t jetDeltaEta;
 	Float_t jetDeltaPhi;
 	Float_t jetDist;
+	Float_t jetBackDeltaEta;
+	Float_t jetBackDeltaPhi;
+	Float_t jetBackDist;
 	Float_t associatedPointDeta;
 	Float_t associatedPointDphi;
 	Float_t distAssociated;
@@ -139,6 +162,8 @@ struct TEventParameters {
 	Float_t zTPC;
 	Float_t zBBC;
 	Float_t zUse;
+	Float_t jetBackEta;
+	Float_t jetBackPhi;
 };
 
 Float_t getMinimumOpenangle(Float_t m, Float_t energy);
@@ -172,6 +197,11 @@ Bool_t isGoodPP2005Run_ppProductionMinBias(Int_t runId, Int_t year, Int_t day, I
 Bool_t isBadPP2005Run(Int_t runId, Int_t year, Int_t day, Int_t runday);
 
 Bool_t isBadRun(Int_t parameter, Int_t runId, Int_t year, Int_t day, Int_t runday);
+
+typedef list<pair<Int_t, Int_t> > event_list_type;
+Bool_t isBadEvent(Int_t runId, Int_t eventId, const Char_t *badEventsListFilename);
+void readEventListFromFile(const Char_t *filename, event_list_type *eventList);
+void writeEventListToFile(const Char_t *filename, const event_list_type *eventList);
 
 void parseRunId(Int_t runId, Int_t &year, Int_t &day, Int_t &runDay);
 

@@ -22,12 +22,14 @@ public:
 
 		TInvariantMassDistribution(const Char_t *name = 0, const Char_t *title = 0);
 		TInvariantMassDistribution(const this_type &inv);
+		TInvariantMassDistribution(const parameters_type &par);
 		virtual ~TInvariantMassDistribution();
 
 		this_type &operator=(const this_type &inv);
 
 		Bool_t operator<(const this_type &inv) const;
 		Bool_t operator==(const this_type &inv) const;
+		Bool_t operator==(const parameters_type &par) const;
 		Bool_t operator!=(const this_type &inv) const;
 
 		Bool_t add(const this_type &inv, Bool_t check = true);

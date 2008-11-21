@@ -293,7 +293,7 @@ Int_t getEventNumbersFromDB(Int_t runNumber, Int_t &evNum_minBias, Int_t &evNum_
     return 0;
 }
 
-Int_t getRunTimesFromDB(Int_t runNumber, Int_t &date, Int_t &time, bool print) {
+Int_t getRunTimesFromDB(Int_t runNumber, Int_t &date, Int_t &time, bool print) {date=1;time=2;return 0;
     TSQLServer *db = 0;
     int nTry = 0;
     int maxTries = 10;

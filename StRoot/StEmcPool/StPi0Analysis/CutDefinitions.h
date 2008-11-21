@@ -54,13 +54,14 @@ DEFINE_CUT(EVENT, PT_VS_ET_TPC_VERTEX,          (event.zTPC == 0) || (((cutParam
 DEFINE_CUT(EVENT, JET_FOUND,                    (event.jet.eT > 0), "Jet finder found a jet")
 DEFINE_CUT(EVENT, HIGHEST_ADC,                  (event.triggerSimulatedFinal.highestAdcHit.adc >= cutParameters.highestAdcLow) && (event.triggerSimulatedFinal.highestAdcHit.adc < cutParameters.highestAdcHigh), "Highest ADC within a range")
 DEFINE_CUT(EVENT, HIGHEST_ET,                   (eventParameters.highestEtHit.eT >= cutParameters.highestEtLow) && (eventParameters.highestEtHit.eT < cutParameters.highestEtHigh), "Highest E_T within a range")
-DEFINE_CUT(EVENT, HIGHEST_ADC_STUCK,            (event.triggerSimulatedFinal.highestAdcHit.adc & 7) == 4, "Highest ADC stuck bits")
+//DEFINE_CUT(EVENT, HIGHEST_ADC_STUCK,            (event.triggerSimulatedFinal.highestAdcHit.adc & 7) == 4, "Highest ADC stuck bits")
+DEFINE_CUT(EVENT, BAD_EVENTS,                   !isBadEvent(event.runId, event.eventId, cutParameters.badEventsListFilename), "Bad events rejected")
 #endif
 
 #ifdef INCLUDE_POINT_CUTS
 // Point cuts definition
 DEFINE_CUT(POINT, VALID,                        point.isValid(), "Valid point")
-DEFINE_CUT(POINT, CPV,                          (pointParameters.distTrack >= cutParameters.trackDistCutLow) && ((pointParameters.distTrack < cutParameters.trackDistCutHigh) || (cutParameters.trackDistCutHigh < 0)), "TPC track veto within a cone")
+DEFINE_CUT(POINT, CPV,                          pointParameters.passedCPV, "TPC track veto within a cone")
 DEFINE_CUT(POINT, TYPE_SMDE,                    point.clusterBSMDE.energy > 0, "SMDE cluster present")
 DEFINE_CUT(POINT, TYPE_SMDP,                    point.clusterBSMDP.energy > 0, "SMDP cluster present")
 DEFINE_CUT(POINT, TYPE_SMDANY,                  (point.clusterBSMDE.energy > 0) || (point.clusterBSMDP.energy > 0), "At least one SMD cluster present")
@@ -82,6 +83,10 @@ DEFINE_CUT(POINT, SMDP_SIZE,                    (point.clusterBSMDP.size >= cutP
 DEFINE_CUT(POINT, IN_JET,                       (pointParameters.distJet >= cutParameters.jetDistCutLow) && ((pointParameters.distJet < cutParameters.jetDistCutHigh) || (cutParameters.jetDistCutHigh < 0)), "Point in jet cone")
 DEFINE_CUT(POINT, TRIGGERED_HT1,                pointParameters.triggeredHT1, "Point has triggered HighTower-1")
 DEFINE_CUT(POINT, TRIGGERED_HT2,                pointParameters.triggeredHT2, "Point has triggered HighTower-2")
+DEFINE_CUT(POINT, IN_JET_BACK,                  (pointParameters.distJetBack >= cutParameters.jetDistCutLow) && ((pointParameters.distJetBack < cutParameters.jetDistCutHigh) || (cutParameters.jetDistCutHigh < 0)), "Point in back jet cone")
+DEFINE_CUT(POINT, SMDE_HIGHEST_ADC,             (point.clusterBSMDE.highestEnergyHit.adc >= cutParameters.highestAdcLow) && (point.clusterBSMDE.highestEnergyHit.adc < cutParameters.highestAdcHigh), "SMDE highest ADC cut")
+DEFINE_CUT(POINT, SMDP_HIGHEST_ADC,             (point.clusterBSMDP.highestEnergyHit.adc >= cutParameters.highestAdcLow) && (point.clusterBSMDP.highestEnergyHit.adc < cutParameters.highestAdcHigh), "SMDP highest ADC cut")
+DEFINE_CUT(POINT, ETA,                          (pointParameters.eta >= cutParameters.etaLow) && (pointParameters.eta < cutParameters.etaHigh), "Cut on the eta coordinate")
 #endif
 
 #ifdef INCLUDE_CANDIDATE_CUTS
@@ -97,13 +102,14 @@ DEFINE_CUT(CANDIDATE, OPENANGLE_KINEMATIC_TRUE, candidateParameters.openangle >=
 DEFINE_CUT(CANDIDATE, PT,                       ((candidateParameters.pTRec >= cutParameters.ptLow) && (candidateParameters.pTRec < cutParameters.ptHigh)), "Reconstructed pi0 pT cut")
 DEFINE_CUT(CANDIDATE, ETA_COORD,                (candidateParameters.etaCoord >= cutParameters.etaCoordLow) && (candidateParameters.etaCoord < cutParameters.etaCoordHigh), "Cut on the detector eta coordinate")
 DEFINE_CUT(CANDIDATE, ETA,                      (candidateParameters.eta >= cutParameters.etaLow) && (candidateParameters.eta < cutParameters.etaHigh), "Cut on the eta coordinate")
-DEFINE_CUT(CANDIDATE, TRIGGERED_HT1_ET,         point1Parameters.triggeredHT1Et || point2Parameters.triggeredHT1Et, "Candidate has Et-triggered HighTower-1")
-DEFINE_CUT(CANDIDATE, TRIGGERED_HT2_ET,         point1Parameters.triggeredHT2Et || point2Parameters.triggeredHT2Et, "Candidate has Et-triggered HighTower-2")
-DEFINE_CUT(CANDIDATE, POINTS_MATCHED_ENERGY,    candidate.candidate.pointsMatched | 1, "Points (from mixed events) are matched in energy")
-DEFINE_CUT(CANDIDATE, POINTS_MATCHED_JETDIST,   candidate.candidate.pointsMatched | 2, "Points (from mixed events) are matched in distance to the jet axis")
-DEFINE_CUT(CANDIDATE, POINTS_MATCHED_ENERGY_CLOSEST, candidate.candidate.pointsMatched | 4, "Points (from mixed events) are matched in energy (closest)")
-DEFINE_CUT(CANDIDATE, POINTS_MATCHED_JETDIST_CLOSEST, candidate.candidate.pointsMatched | 8, "Points (from mixed events) are matched in distance to the jet axis (closest)")
+DEFINE_CUT(CANDIDATE, TRIGGERED_HT1_ET,         point1Parameters.triggeredTowerHT1Et || point2Parameters.triggeredTowerHT1Et, "Candidate contains tower that Et-triggered HighTower-1")
+DEFINE_CUT(CANDIDATE, TRIGGERED_HT2_ET,         point1Parameters.triggeredTowerHT2Et || point2Parameters.triggeredTowerHT2Et, "Candidate contains tower that Et-triggered HighTower-2")
+DEFINE_CUT(CANDIDATE, POINTS_MATCHED_ENERGY,    candidate.candidate.pointsMatched & 1, "Points (from mixed events) are matched in energy")
+DEFINE_CUT(CANDIDATE, POINTS_MATCHED_JETDIST,   candidate.candidate.pointsMatched & 2, "Points (from mixed events) are matched in distance to the jet axis")
+DEFINE_CUT(CANDIDATE, POINTS_MATCHED_ENERGY_CLOSEST, candidate.candidate.pointsMatched & 4, "Points (from mixed events) are matched in energy (closest)")
+DEFINE_CUT(CANDIDATE, POINTS_MATCHED_JETDIST_CLOSEST, candidate.candidate.pointsMatched & 8, "Points (from mixed events) are matched in distance to the jet axis (closest)")
 DEFINE_CUT(CANDIDATE, IN_JET,                   (candidateParameters.jetDist >= cutParameters.jetDistCutLow) && ((candidateParameters.jetDist < cutParameters.jetDistCutHigh) || (cutParameters.jetDistCutHigh < 0)), "Candidate in jet cone")
+DEFINE_CUT(CANDIDATE, CPV,                      point1Parameters.passedCPV && point2Parameters.passedCPV, "Charged particle veto on both points")
 #endif
 
 #ifdef INCLUDE_GAMMA_CUTS

@@ -3,26 +3,17 @@
 #pragma link off all functions;
 #ifdef __CINT__
 
-#pragma link C++ class TDataProcessorMemberInspector+;
-#pragma link C++ class TMySignalHandler+;
-#pragma link C++ global mySignalHandler;
-
-#pragma link C++ class TAnalysisSettingsTrigger+;
-#pragma link C++ class TAnalysisSettings+;
-#pragma link C++ class TAllSettings+;
-#pragma link C++ class TAnalysisRawResultsTrigger+;
-#pragma link C++ class TAnalysisResults+;
-#pragma link C++ class TAllResults+;
-
-#pragma link C++ global useBinDenomInterpolation;
 #pragma link C++ class TFitSettings+;
+#pragma link C++ class TDrawOptions+;
+#pragma link C++ class TDataPoints+;
+#pragma link C++ class list<TDataPoints>+;
 #pragma link C++ class TAnalysisSettingsTrigger+;
 #pragma link C++ class TAnalysisSettings+;
 #pragma link C++ class TAllSettings+;
 #pragma link C++ class TAnalysisRawResultsTrigger+;
 #pragma link C++ class TAnalysisResults+;
 #pragma link C++ class TAllResults+;
-
+#pragma link C++ global useBinDenomInterpolation;
 #pragma link C++ function findPeak;
 #pragma link C++ function findPeaks;
 #pragma link C++ function fitSpectraBins;
@@ -31,11 +22,13 @@
 #pragma link C++ function calculateBinPurity;
 #pragma link C++ function clearPtBinPosFuncFromQCD;
 #pragma link C++ function createPtBinPosFuncFromQCD;
-#pragma link C++ function calculatePtShiftCorrInv;
-#pragma link C++ function correctPtShiftInv;
-#pragma link C++ function correctPtShiftBins;
+#pragma link C++ function calculatePtShiftCorr;
+#pragma link C++ function correctPtShift;
+#pragma link C++ function calculateDerivatives;
 #pragma link C++ function selectInv;
 #pragma link C++ function selectInvSim;
+#pragma link C++ function selectInvPoint;
+#pragma link C++ function selectInvMCGamma;
 #pragma link C++ function showPointsRcp;
 #pragma link C++ function calculatePSFromPoints;
 #pragma link C++ function calculatePSFromSim;
@@ -52,52 +45,37 @@
 #pragma link C++ function calculatePSFromDB;
 #pragma link C++ function showList;
 #pragma link C++ function showLists;
+#pragma link C++ function calculateCutEff;
 #pragma link C++ function calculateVertexFindingEff;
 #pragma link C++ function calculateMeanAcceptance;
 #pragma link C++ function showResults;
-#pragma link C++ function showAnalysis;
 #pragma link C++ function showResultsOthers;
-#pragma link C++ function showResultsOthersDiv;
-#pragma link C++ function showResultsOthersDAuRcp;
 #pragma link C++ function showPointsRcp;
 #pragma link C++ function showPointsRcpEtaPhiCoord;
 #pragma link C++ function showResultsDAuCentrality;
 #pragma link C++ function showResultsRDA;
 #pragma link C++ function getCentralityBin;
+#pragma link C++ function setErrorOnZeroBins;
+#pragma link C++ function smearOutliers;
+#pragma link C++ function smoothHistPol2;
+#pragma link C++ function smoothHistGaus;
+#pragma link C++ function myHistHistFitChi2;
+#pragma link C++ function saveCanvases;
 #pragma link C++ global ptBinPosFuncFromQCD;
-#pragma link C++ global showPhenixPi0;
-#pragma link C++ global showPhenixPi0PP;
-#pragma link C++ global showStarChargedHadrons;
-#pragma link C++ global showStarChargedPions;
-#pragma link C++ global showMischkePi0;
-#pragma link C++ global showStolpovskyPi0;
-#pragma link C++ global showStolpovskyPi0PP;
-#pragma link C++ global showMartijnPi0dAu;
-#pragma link C++ global showSimonPi0PPCrossection;
-#pragma link C++ global showpQCD;
-#pragma link C++ global showStarRcp;
-#pragma link C++ global showPhenixPi0dA;
-#pragma link C++ global showPhenixPi0Legend;
-#pragma link C++ global showPhenixPi0PPLegend;
-#pragma link C++ global showStarChargedHadronsLegend;
-#pragma link C++ global showMischkePi0Legend;
-#pragma link C++ global showStolpovskyPi0Legend;
-#pragma link C++ global showStolpovskyPi0PPLegend;
-#pragma link C++ global showMartijnPi0dAuLegend;
-#pragma link C++ global showStolpovskyPi0PPLegend;
-#pragma link C++ global showpQCDLegend;
-#pragma link C++ global showStarRcpLegend1;
-#pragma link C++ global showStarRcpLegend2;
-#pragma link C++ global showPhenixPi0dALegend;
-#pragma link C++ global showStarChargedPionsPlusLegend;
-#pragma link C++ global showStarChargedPionsMinusLegend;
-#pragma link C++ global showSimonPi0PPCrossectionLegend;
 #pragma link C++ global fitFuncZero;
 #pragma link C++ global fitFuncConst;
 #pragma link C++ global fitFuncLinear;
+#pragma link C++ global fitFuncZeroLinear;
 #pragma link C++ global fitFuncTrackDist;
 #pragma link C++ global fitFuncTrackDistPeak;
 
 #pragma link C++ class StPi0ResultsUtil+;
+
+#pragma link C++ class TDataProcessorMemberInspector+;
+#pragma link C++ class TMySignalHandler+;
+#pragma link C++ global mySignalHandler;
+
+#pragma link C++ function showAnalysis;
+#pragma link C++ function show_analysis_final;
 
 #endif

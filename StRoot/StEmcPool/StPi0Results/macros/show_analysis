@@ -9,14 +9,15 @@ fi
 export DATA_DIRS="$@"
 if [[ "${DATA_DIRS}" == "" ]]
 then
-    export DATA_DIRS="2005_2007.04.21"
-    #export DATA_DIRS="current_cpv004"
-    #export DATA_DIRS="nosmdsizecut_cpv007"
+    #export DATA_DIRS="current"
+    #export DATA_DIRS="smd2_MB"
+    #export DATA_DIRS="smd2_MBHT1"
+    #export DATA_DIRS="nosmd_MB"
+    #export DATA_DIRS="smdadc"
+    #export DATA_DIRS="towerMB_smd2HT1"
+    export DATA_DIRS="towerMB_smd2HT1_gammaetacut"
 fi
 export OPTIONS=""
-
-#export DATA_DIRS="z30 z40 z50 z60 z70 t003 t004 t005 t006 t007 te00 te05 te10 te15 te20 te25 te30 se00 se05 se10 se15 se20 se25 se30"
-#export OPTIONS=-b -q
 
 for DATA_DIR in ${DATA_DIRS}
 do

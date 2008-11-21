@@ -19,15 +19,14 @@ TCuts::cut_type TCuts::noCutsRequired = 0;
 
 #define DEFINE_CUT(CLASS, NAME, CONDITION, TITLE) \
     if (strcmp(curClass, #CLASS) != 0) {i = 1; curClass = #CLASS; cutIndex = 0;} \
-    if (cutIndex < (sizeof(TCuts::cut_type) * 8)) { \
+    if (cutIndex < ((sizeof(TCuts::cut_type) * 8) - 1)) { \
 	CLASS##_##NAME##_CUT = i; \
 	i = i << 1; \
 	cutIndex++; \
 	/*cout << #CLASS << "_" << #NAME << "_CUT=" << CLASS##_##NAME##_CUT << endl;*/ \
-    } else cerr << #CLASS << "_" << #NAME << "_CUT not accepted (maximum " << (sizeof(TCuts::cut_type) * 8) << " cuts allowed)!" << endl;
+    } else cerr << #CLASS << "_" << #NAME << "_CUT not accepted (maximum " << ((sizeof(TCuts::cut_type) * 8) - 1) << " cuts allowed)!" << endl;
 void initCuts() {
-    TCuts::cut_type i_cut = 1;
-    for (UInt_t i = 0;i < (sizeof(TCuts::cut_type) * 8);i++, i_cut = i_cut << 1) TCuts::noCutsRequired |= i_cut;
+    TCuts::noCutsRequired = (1 << ((sizeof(TCuts::cut_type) * 8) - 1));
     TCuts::cut_type i = 1; const Char_t *curClass = ""; UInt_t cutIndex = 0;
 #include "CutDefinitions.h"
 }
@@ -64,7 +63,7 @@ void printCutNames(TCuts::cut_type cuts, const Char_t *type, ostream &ostr, cons
     if (!separatorNeeded) separatorNeeded = &separatorNeededTmp;
     if (!separator) separator = " ";
     TCuts::cut_type i_cut = 1;
-    for (UInt_t i = 0;i < (sizeof(TCuts::cut_type) * 8);++i, i_cut = i_cut << 1) {
+    for (UInt_t i = 0;i < ((sizeof(TCuts::cut_type) * 8) - 1);++i, i_cut = i_cut << 1) {
 	if ((cuts & i_cut) == i_cut) {
 	    if (separatorNeeded && (*separatorNeeded)) ostr << separator;
 	    ostr << getCutName(type, i_cut);
@@ -368,14 +367,14 @@ void TCuts::Print(Option_t* option) const {
 	}
 
 #define ADD_CUTS_COUNT_SEPARATE(TO, KEY, COUNT) \
-	for (UInt_t ind = 0;ind < (sizeof(TCuts::cut_type) * 8);ind++) { \
+	for (UInt_t ind = 0;ind < ((sizeof(TCuts::cut_type) * 8) - 1);ind++) { \
 	    TCuts::cut_type i = 1 << ind; \
 	    if (KEY & i) { \
 		ADD_CUTS_COUNT(TO, KEY & i, COUNT) \
 	    } \
 	}
 
-void TCuts::add(const this_type &cuts) {
+void TCuts::add(const this_type &cuts) const {
         if (this->debug) cout << "TCuts::add() started" << endl;
 
         this->numPassedEventCuts += cuts.numPassedEventCuts;
@@ -406,57 +405,45 @@ void TCuts::add(const this_type &cuts) {
         if (this->debug) cout << "TCuts::add() finished" << endl;
 }
 
-TCuts::cut_type TCuts::passEventCuts(const TMyEventData &event, TEventParameters &eventParameters, Bool_t getParameters) {
+TCuts::cut_type TCuts::passEventCuts(const TMyEventData &event, TEventParameters &eventParameters) const {
 	if (this->debug) cout << "TCuts::passEventCuts started" << endl;
 	cut_type result = 0;
     	const parameters_type &cutParameters = this->getParametersEvent();
-	if (getParameters) getEventParams(event, cutParameters, eventParameters);
-        if (this->EVENT_ALL_CUTS || this->EVENT_ALL_CUTS_NOT) {
-	    if (!getParameters) getEventParams(event, cutParameters, eventParameters);
+	getEventParams(event, cutParameters, eventParameters);
 #define INCLUDE_EVENT_CUTS
 #define DEFINE_CUT(CLASS, NAME, CONDITION, TITLE) if (CONDITION) result |= CLASS##_##NAME##_CUT;
 #include "CutDefinitions.h"
 #undef DEFINE_CUT
-	    ADD_CUTS_COUNT(this->EVENT_passedCuts, result & (this->EVENT_ALL_CUTS | this->EVENT_ALL_CUTS_NOT), 1)
-	    ADD_CUTS_COUNT(this->EVENT_passedCuts_all, result, 1)
-	    ADD_CUTS_COUNT_SEPARATE(this->EVENT_passedCuts_separate, result/* & (this->EVENT_ALL_CUTS | this->EVENT_ALL_CUTS_NOT)*/, 1)
-            if (((this->EVENT_ALL_CUTS == 0) || PASSED(result, this->EVENT_ALL_CUTS)) && ((this->EVENT_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->EVENT_ALL_CUTS_NOT))) {
-	    } else {
-		result = 0;
-	    }
-        } else {
-    	    result = noCutsRequired;
-        }
-	if (result) {
-	    this->numPassedEventCuts++;
+	ADD_CUTS_COUNT(this->EVENT_passedCuts, result & (this->EVENT_ALL_CUTS | this->EVENT_ALL_CUTS_NOT), 1)
+	ADD_CUTS_COUNT(this->EVENT_passedCuts_all, result, 1)
+	ADD_CUTS_COUNT_SEPARATE(this->EVENT_passedCuts_separate, result, 1)
+        if (((this->EVENT_ALL_CUTS == 0) || PASSED(result, this->EVENT_ALL_CUTS)) && ((this->EVENT_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->EVENT_ALL_CUTS_NOT))) {
+	} else {
+	    result = 0;
 	}
+        if (!(this->EVENT_ALL_CUTS | this->EVENT_ALL_CUTS_NOT)) result |= noCutsRequired;
+	if (result) this->numPassedEventCuts++;
 	return result;
 }
 
-TCuts::cut_type TCuts::passPointCuts(const TMyEventData &event, const TMyPointData &point, const TEventParameters &eventParameters, TPointParameters &pointParameters, Bool_t getParameters) {
+TCuts::cut_type TCuts::passPointCuts(const TMyEventData &event, const TMyPointData &point, const TEventParameters &eventParameters, TPointParameters &pointParameters) const {
 	if (this->debug) cout << "TCuts::passPointCuts started" << endl;
 	cut_type result = 0;
 	const parameters_type &cutParameters = this->getParametersPoint();
-	if (getParameters) getPointParams(event, point, eventParameters, cutParameters, pointParameters);
-        if (this->POINT_ALL_CUTS || this->POINT_ALL_CUTS_NOT) {
-	    if (!getParameters) getPointParams(event, point, eventParameters, cutParameters, pointParameters);
+	getPointParams(event, point, eventParameters, cutParameters, pointParameters);
 #define INCLUDE_POINT_CUTS
 #define DEFINE_CUT(CLASS, NAME, CONDITION, TITLE) if (CONDITION) result |= CLASS##_##NAME##_CUT;
 #include "CutDefinitions.h"
 #undef DEFINE_CUT
-	    ADD_CUTS_COUNT(this->POINT_passedCuts, result & (this->POINT_ALL_CUTS | this->POINT_ALL_CUTS_NOT), 1)
-	    ADD_CUTS_COUNT(this->POINT_passedCuts_all, result, 1)
-	    ADD_CUTS_COUNT_SEPARATE(this->POINT_passedCuts_separate, result/* & (this->POINT_ALL_CUTS | this->POINT_ALL_CUTS_NOT)*/, 1)
-            if (((this->POINT_ALL_CUTS == 0) || PASSED(result, this->POINT_ALL_CUTS)) && ((this->POINT_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->POINT_ALL_CUTS_NOT))) {
-	    } else {
-		result = 0;
-	    }
-        } else {
-    	    result = noCutsRequired;
-        }
-	if (result) {
-	    this->numPassedPointCuts++;
+	ADD_CUTS_COUNT(this->POINT_passedCuts, result & (this->POINT_ALL_CUTS | this->POINT_ALL_CUTS_NOT), 1)
+	ADD_CUTS_COUNT(this->POINT_passedCuts_all, result, 1)
+	ADD_CUTS_COUNT_SEPARATE(this->POINT_passedCuts_separate, result/* & (this->POINT_ALL_CUTS | this->POINT_ALL_CUTS_NOT)*/, 1)
+        if (((this->POINT_ALL_CUTS == 0) || PASSED(result, this->POINT_ALL_CUTS)) && ((this->POINT_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->POINT_ALL_CUTS_NOT))) {
+	} else {
+	    result = 0;
 	}
+        if (!(this->POINT_ALL_CUTS | this->POINT_ALL_CUTS_NOT)) result |= noCutsRequired;
+	if (result) this->numPassedPointCuts++;
 	return result;
 }
 
@@ -465,85 +452,67 @@ TCuts::cut_type TCuts::passCandidateCuts(const TMyCandidateTreeData &candidate
     , const TMyPointData &point1, const TPointParameters &point1Parameters
     , const TMyEventData &event2, const TEventParameters &event2Parameters
     , const TMyPointData &point2, const TPointParameters &point2Parameters
-    , TCandidateParameters &candidateParameters, Bool_t getParameters) {
+    , TCandidateParameters &candidateParameters) const {
 	if (this->debug) cout << "TCuts::passCandidateCuts started" << endl;
 	cut_type result = 0;
         const parameters_type &cutParameters = this->getParametersCandidate();
-	if (getParameters) getCandidateParams(candidate, event1, event1Parameters, point1, point1Parameters, event2, event2Parameters, point2, point2Parameters, cutParameters, candidateParameters);
+	getCandidateParams(candidate, event1, event1Parameters, point1, point1Parameters, event2, event2Parameters, point2, point2Parameters, cutParameters, candidateParameters);
 	Float_t massRegionLeft = 0;
 	Float_t massRegionRight = 0;
-        if (this->CANDIDATE_ALL_CUTS || this->CANDIDATE_ALL_CUTS_NOT) {
-	    if (!getParameters) getCandidateParams(candidate, event1, event1Parameters, point1, point1Parameters, event2, event2Parameters, point2, point2Parameters, cutParameters, candidateParameters);
 #define INCLUDE_CANDIDATE_CUTS
 #define DEFINE_CUT(CLASS, NAME, CONDITION, TITLE) if (CONDITION) result |= CLASS##_##NAME##_CUT;
 #include "CutDefinitions.h"
 #undef DEFINE_CUT
-	    ADD_CUTS_COUNT(this->CANDIDATE_passedCuts, result & (this->CANDIDATE_ALL_CUTS | this->CANDIDATE_ALL_CUTS_NOT), 1)
-	    ADD_CUTS_COUNT(this->CANDIDATE_passedCuts_all, result, 1)
-	    ADD_CUTS_COUNT_SEPARATE(this->CANDIDATE_passedCuts_separate, result/* & (this->CANDIDATE_ALL_CUTS | this->CANDIDATE_ALL_CUTS_NOT)*/, 1)
-            if (((this->CANDIDATE_ALL_CUTS == 0) || PASSED(result, this->CANDIDATE_ALL_CUTS)) && ((this->CANDIDATE_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->CANDIDATE_ALL_CUTS_NOT))) {
-	    } else {
-		result = 0;
-	    }
-        } else {
-    	    result = noCutsRequired;
-        }
-	if (result) {
-	    this->numPassedCandidateCuts++;
+	ADD_CUTS_COUNT(this->CANDIDATE_passedCuts, result & (this->CANDIDATE_ALL_CUTS | this->CANDIDATE_ALL_CUTS_NOT), 1)
+	ADD_CUTS_COUNT(this->CANDIDATE_passedCuts_all, result, 1)
+	ADD_CUTS_COUNT_SEPARATE(this->CANDIDATE_passedCuts_separate, result, 1)
+        if (((this->CANDIDATE_ALL_CUTS == 0) || PASSED(result, this->CANDIDATE_ALL_CUTS)) && ((this->CANDIDATE_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->CANDIDATE_ALL_CUTS_NOT))) {
+	} else {
+	    result = 0;
 	}
+        if (!(this->CANDIDATE_ALL_CUTS | this->CANDIDATE_ALL_CUTS_NOT)) result |= noCutsRequired;
+	if (result) this->numPassedCandidateCuts++;
 	return result;
 }
 
-TCuts::cut_type TCuts::passGammaCuts(const TMyEventData &event, const TMySimulatedParticleData &gamma, const TEventParameters &eventParameters, TGammaParameters &gammaParameters, Bool_t getParameters) {
+TCuts::cut_type TCuts::passGammaCuts(const TMyEventData &event, const TMySimulatedParticleData &gamma, const TEventParameters &eventParameters, TGammaParameters &gammaParameters) const {
 	if (this->debug) cout << "TCuts::passGammaCuts started" << endl;
 	cut_type result = 0;
 	const parameters_type &cutParameters = this->getParametersGamma();
-	if (getParameters) getGammaParams(event, gamma, eventParameters, cutParameters, gammaParameters);
-        if (this->GAMMA_ALL_CUTS || this->GAMMA_ALL_CUTS_NOT) {
-	    if (!getParameters) getGammaParams(event, gamma, eventParameters, cutParameters, gammaParameters);
+	getGammaParams(event, gamma, eventParameters, cutParameters, gammaParameters);
 #define INCLUDE_GAMMA_CUTS
 #define DEFINE_CUT(CLASS, NAME, CONDITION, TITLE) if (CONDITION) result |= CLASS##_##NAME##_CUT;
 #include "CutDefinitions.h"
 #undef DEFINE_CUT
-	    ADD_CUTS_COUNT(this->GAMMA_passedCuts, result & (this->GAMMA_ALL_CUTS | this->GAMMA_ALL_CUTS_NOT), 1)
-	    ADD_CUTS_COUNT(this->GAMMA_passedCuts_all, result, 1)
-	    ADD_CUTS_COUNT_SEPARATE(this->GAMMA_passedCuts_separate, result/* & (this->GAMMA_ALL_CUTS | this->GAMMA_ALL_CUTS_NOT)*/, 1)
-            if (((this->GAMMA_ALL_CUTS == 0) || PASSED(result, this->GAMMA_ALL_CUTS)) && ((this->GAMMA_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->GAMMA_ALL_CUTS_NOT))) {
-	    } else {
-		result = 0;
-	    }
-        } else {
-    	    result = noCutsRequired;
-        }
-	if (result) {
-	    this->numPassedGammaCuts++;
+	ADD_CUTS_COUNT(this->GAMMA_passedCuts, result & (this->GAMMA_ALL_CUTS | this->GAMMA_ALL_CUTS_NOT), 1)
+	ADD_CUTS_COUNT(this->GAMMA_passedCuts_all, result, 1)
+	ADD_CUTS_COUNT_SEPARATE(this->GAMMA_passedCuts_separate, result, 1)
+        if (((this->GAMMA_ALL_CUTS == 0) || PASSED(result, this->GAMMA_ALL_CUTS)) && ((this->GAMMA_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->GAMMA_ALL_CUTS_NOT))) {
+	} else {
+	    result = 0;
 	}
+        if (!(this->GAMMA_ALL_CUTS | this->GAMMA_ALL_CUTS_NOT)) result |= noCutsRequired;
+	if (result) this->numPassedGammaCuts++;
 	return result;
 }
 
-TCuts::cut_type TCuts::passPionCuts(const TMyEventData &event, const TMySimulatedDecayData &pion, const TEventParameters &eventParameters, const TGammaParameters &gamma1Parameters, const TGammaParameters &gamma2Parameters, TPionParameters &pionParameters, Bool_t getParameters) {
+TCuts::cut_type TCuts::passPionCuts(const TMyEventData &event, const TMySimulatedDecayData &pion, const TEventParameters &eventParameters, const TGammaParameters &gamma1Parameters, const TGammaParameters &gamma2Parameters, TPionParameters &pionParameters) const {
 	if (this->debug) cout << "TCuts::passSimuCuts started" << endl;
 	cut_type result = 0;
 	const parameters_type &cutParameters = this->getParametersPion();
-	if (getParameters) getPionParams(event, pion, eventParameters, gamma1Parameters, gamma2Parameters, cutParameters, pionParameters);
-        if (this->PION_ALL_CUTS || this->PION_ALL_CUTS_NOT) {
-	    if (!getParameters) getPionParams(event, pion, eventParameters, gamma1Parameters, gamma2Parameters, cutParameters, pionParameters);
+	getPionParams(event, pion, eventParameters, gamma1Parameters, gamma2Parameters, cutParameters, pionParameters);
 #define INCLUDE_PION_CUTS
 #define DEFINE_CUT(CLASS, NAME, CONDITION, TITLE) if (CONDITION) result |= CLASS##_##NAME##_CUT;
 #include "CutDefinitions.h"
 #undef DEFINE_CUT
-	    ADD_CUTS_COUNT(this->PION_passedCuts, result & (this->PION_ALL_CUTS | this->PION_ALL_CUTS_NOT), 1)
-	    ADD_CUTS_COUNT(this->PION_passedCuts_all, result, 1)
-	    ADD_CUTS_COUNT_SEPARATE(this->PION_passedCuts_separate, result/* & (this->PION_ALL_CUTS | this->PION_ALL_CUTS_NOT)*/, 1)
-            if (((this->PION_ALL_CUTS == 0) || PASSED(result, this->PION_ALL_CUTS)) && ((this->PION_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->PION_ALL_CUTS_NOT))) {
-	    } else {
-		result = 0;
-	    }
-        } else {
-    	    result = noCutsRequired;
-        }
-	if (result) {
-	    this->numPassedPionCuts++;
+	ADD_CUTS_COUNT(this->PION_passedCuts, result & (this->PION_ALL_CUTS | this->PION_ALL_CUTS_NOT), 1)
+	ADD_CUTS_COUNT(this->PION_passedCuts_all, result, 1)
+	ADD_CUTS_COUNT_SEPARATE(this->PION_passedCuts_separate, result, 1)
+        if (((this->PION_ALL_CUTS == 0) || PASSED(result, this->PION_ALL_CUTS)) && ((this->PION_ALL_CUTS_NOT == 0) || NOT_PASSED(result, this->PION_ALL_CUTS_NOT))) {
+	} else {
+	    result = 0;
 	}
+        if (!(this->PION_ALL_CUTS | this->PION_ALL_CUTS_NOT)) result |= noCutsRequired;
+	if (result) this->numPassedPionCuts++;
 	return result;
 }

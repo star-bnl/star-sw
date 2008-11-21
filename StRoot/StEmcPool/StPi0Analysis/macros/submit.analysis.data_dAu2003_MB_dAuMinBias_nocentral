@@ -17,6 +17,8 @@
 # 65-100     Most peripheral events, mostly beam bg
 # 60-100     Most peripheral events, mostly beam bg
 
+set_option 'files_per_job_analysis=1'
+
 export ANALYSIS_NAME='Real data dAu2003 analysis (no centrality selection) - MinBias from dAuMinBias dataset'
 export ANALYSIS_TAG='data_dAu2003'
 export ANALYSIS_SUBTAG=$ANALYSIS_TAG'_MB_dAuMinBias_nocentral'

@@ -39,13 +39,18 @@ void addPtBin(    Float_t lowPt, Float_t highPt, Float_t stepPt, const Char_t *t
 		Float_t ptLow = pT;
 		Float_t ptHigh = pT + stepPt;
 		Int_t numPt = Int_t((ptLow - lowPt) / stepPt);
+		Int_t numPtMax = Int_t((highPt - lowPt) / stepPt);
+		TString numPtStr;
+		if ((numPtMax > 100) && (numPt < 100)) numPtStr += "0";
+		if ((numPtMax > 10) && (numPt < 10)) numPtStr += "0";
+		numPtStr += numPt;
 		if ((ptShiftPass == 1) && ptShiftFunc) {
 			ptLow = ptShiftFunc->Eval(ptLow);
 			ptHigh = ptShiftFunc->Eval(ptHigh);
 		}	
-		TString name = distr ? "mult" : "inv"; name += tag; name += "_"; name += numPt; name += "_"; name += ptShiftPass;
-		TString nameBin = "bin"; nameBin += tag; nameBin += "_"; nameBin += numPt; name += "_"; name += ptShiftPass;
-		TString nameBinStat = "binStat"; nameBinStat += tag; nameBinStat += "_"; nameBinStat += numPt; name += "_"; name += ptShiftPass;
+		TString name = distr ? "mult" : "inv"; name += tag; name += "_"; name += numPtStr; name += "_"; name += ptShiftPass;
+		TString nameBin = "bin"; nameBin += tag; nameBin += "_"; nameBin += numPtStr; name += "_"; name += ptShiftPass;
+		TString nameBinStat = "binStat"; nameBinStat += tag; nameBinStat += "_"; nameBinStat += numPtStr; name += "_"; name += ptShiftPass;
 		TString title = titleTag; title += ", "; title += ptLow; title += " < p_{T} < "; title += ptHigh; title += " GeV/c";
 		if (distr == 0) title += ";M_{#gamma#gamma}, GeV/c^{2}";
 		else if (distr == 1) title += ";TPC Multiplicity";
@@ -54,6 +59,7 @@ void addPtBin(    Float_t lowPt, Float_t highPt, Float_t stepPt, const Char_t *t
 		else if (distr == 4) title += ";Simulated p_{T}, GeV/c";
 		else if (distr == 5) title += ";Point p_{T}, GeV/c";
 		else if (distr == 6) title += ";Point-to-track distance";
+		else if (distr == 7) title += ";Point-to-track distance 2";
 		TBinParameters binPar(nameBin.Data(), title.Data());
 		binPar.variable = (TBinVariable)0;
 		binPar.min = ptLow;
@@ -66,6 +72,7 @@ void addPtBin(    Float_t lowPt, Float_t highPt, Float_t stepPt, const Char_t *t
 		else if (distr == 4) nbins = 30;
 		else if (distr == 5) nbins = 30;
 		else if (distr == 6) nbins = 200;
+		else if (distr == 7) nbins = 200;
 		Float_t range = 1;
 		if (distr == 0) range = 6.0;
 		else if (distr == 1) range = 100.0;
@@ -74,6 +81,7 @@ void addPtBin(    Float_t lowPt, Float_t highPt, Float_t stepPt, const Char_t *t
 		else if (distr == 4) range = 30;
 		else if (distr == 5) range = 30;
 		else if (distr == 6) range = 1.0;
+		else if (distr == 7) range = 1.0;
 		
 		TH1F invHist(name.Data(), title.Data(), nbins, 0, range);
 		//TH2F invHistTower(name.Data(), title.Data(), nbins, 0, range, 2400, 0-0.5, 2400-0.5);
@@ -101,6 +109,8 @@ void addPtBin(    Float_t lowPt, Float_t highPt, Float_t stepPt, const Char_t *t
 				candidateDataProcessor->pointPtDistributions.push_back(inv);
 			} else if (distr == 6) {
 				candidateDataProcessor->pointTrackDistDistributions.push_back(inv);
+			} else if (distr == 7) {
+				candidateDataProcessor->pointTrackDist2Distributions.push_back(inv);
 			}
 		}
 		if (pointDataProcessor) {
@@ -111,6 +121,8 @@ void addPtBin(    Float_t lowPt, Float_t highPt, Float_t stepPt, const Char_t *t
 				pointDataProcessor->multiplicityPointsDistributions.push_back(inv);
 			//} else if (distr == 3) {
 			//	pointDataProcessor->multiplicityNeutralPointsDistributions.push_back(inv);
+			} else if (distr == 6) {
+				pointDataProcessor->pointTrackDistDistributions.push_back(inv);
 			}
 		}
 		TBinStatistics binStat(nameBinStat.Data(), title.Data());
@@ -130,31 +142,51 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	Bool_t useHighTowerEt = true;
 	Bool_t useHighTowerSimulated = true;
 	Bool_t useHighTowerOnlineTrigger = true;
-	Bool_t jetMixRequiresJet = false;
+	Bool_t jetMixRequiresJetInEvent = false;
+	Bool_t jetMixRequiresPointsInJet = false;
+	Bool_t jetMixRejectEnergyMatch = true;
+	Bool_t mixRejectEnergyMatch = true;
 	Bool_t requireTPCVertex = true;
 	Bool_t requireBBCPresent = true;
 	Bool_t rejectBeamBgEvents = true;
+	Bool_t usePythiaPartonicPtBinWeight = false;
+	Bool_t usePythiaPartonicPtBinXWeight = true;
+	Bool_t usePythiaPartonicPtWeight = false;
+	Bool_t usePythiaBadEventCut = false;
+	Bool_t usePythiaPartonicPtBadEventFiles = false;
 
 	TString weightFile = findFile(weightFileStr);
 	TString configuration = configurationStr;
 	Info(__FILE__, "Configuration: %s", configuration.Data());
+	Bool_t useMB = configuration.Contains("useMB");
+	Bool_t useHT1 = configuration.Contains("useHT1");
+	Bool_t useHT2 = configuration.Contains("useHT2");
+	Info(__FILE__, "useMB: %i, useHT1: %i, useHT2: %i", useMB, useHT1, useHT2);
 	Bool_t simulation = configuration.Contains("simulation");
 	Bool_t nocentral = configuration.Contains("nocentral");
 	Bool_t simulation_eta = configuration.Contains("eta_sim");
 	Bool_t simulation_eta_bg = configuration.Contains("eta_bg");
 	Bool_t simulation_gamma = configuration.Contains("gamma");
+	Bool_t simulation_nbar = configuration.Contains("nbar");
+	Bool_t simulation_pythia = configuration.Contains("pythia");
+	Bool_t processor_compare_ignore_weight = configuration.Contains("processor_compare_ignore_weight");
+	Bool_t processor_compare_ignore_cuts = configuration.Contains("processor_compare_ignore_weight");
+	TDataProcessor::compareIgnoreWeight = processor_compare_ignore_weight;
+	TDataProcessor::compareIgnoreCuts = processor_compare_ignore_cuts;
+	if (TDataProcessor::compareIgnoreWeight) {Info(__FILE__, "Ignoring weight when comparing data processors!");}
+	if (TDataProcessor::compareIgnoreCuts) {Info(__FILE__, "Ignoring cuts when comparing data processors!");}
 	if (simulation) useHighTowerOnlineTrigger = false;
 	Bool_t useNloPqcdPP = false;
 
 	if (configuration.Contains("dAu2003")) {
-	    useHighTowerEt = false;
+	    useHighTowerEt = true;
 	    useHighTowerSimulated = true;
-	    requireTPCVertex = false;
+	    requireTPCVertex = true;
 	    requireBBCPresent = false;
 	    rejectBeamBgEvents = true;
     	    useNloPqcdPP = false;
 	} else if (configuration.Contains("pp2005")) {
-	    useHighTowerEt = false;
+	    useHighTowerEt = true;
 	    useHighTowerSimulated = true;
 	    requireTPCVertex = false;
 	    requireBBCPresent = false;
@@ -162,11 +194,32 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
     	    useNloPqcdPP = true;
 	} else if (configuration.Contains("pp2006")) {
 	    useHighTowerEt = true;
-	    useHighTowerSimulated = false;
+	    useHighTowerSimulated = true;
 	    requireTPCVertex = false;
 	    requireBBCPresent = false;
 	    rejectBeamBgEvents = false;
     	    useNloPqcdPP = true;
+	} else if (configuration.Contains("dAu2008")) {
+	    useHighTowerEt = true;
+	    useHighTowerSimulated = true;
+	    requireTPCVertex = false;
+	    requireBBCPresent = false;
+	    rejectBeamBgEvents = false;
+    	    useNloPqcdPP = false;
+	} else if (configuration.Contains("pp2008")) {
+	    useHighTowerEt = false;
+	    useHighTowerSimulated = false;
+	    requireTPCVertex = false;
+	    requireBBCPresent = false;
+	    rejectBeamBgEvents = false;
+    	    useNloPqcdPP = false;
+	}
+	Bool_t useZSimuSmearing = !requireTPCVertex;
+	Bool_t useZSimuSmearingZero = !requireBBCPresent && false;
+	if (simulation && !simulation_pythia) {
+	    requireTPCVertex = false;
+	    requireBBCPresent = false;
+	    rejectBeamBgEvents = false;
 	}
 
 	TWeightCalculator weightZSimuSmearingPtMB("weightZSimuSmearingPtMB", "Z smearing probability in the simulation vs. pion p_{T} - MinBias");
@@ -185,13 +238,16 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	cutParameters.neutralPointsCutHigh = 1000;
 	cutParameters.useZTPC = true;
 	cutParameters.useZBBC = true;
-	cutParameters.zSimuSmearing = !requireTPCVertex;
-	cutParameters.zSimuSmearingZero = !requireBBCPresent;
+	cutParameters.zSimuSmearing = simulation && !simulation_pythia && useZSimuSmearing;
+	cutParameters.zSimuSmearingZero = simulation && !simulation_pythia && useZSimuSmearingZero;
+	cutParameters.calibrationSlope = 0.0;
+	TString dataSetStr;
 	if (configuration.Contains("dAu2003")) {
+	    dataSetStr = "dAu2003";
 	    cutParameters.HT1AdcThreshold = 8 * 32;
 	    cutParameters.HT2AdcThreshold = 13 * 32;
-	    cutParameters.HT1EtThreshold = 2.5 + 0.0;
-	    cutParameters.HT2EtThreshold = 4.5 + 0.0;
+	    cutParameters.HT1EtThreshold = 2.5 + 0.5;
+	    cutParameters.HT2EtThreshold = 4.5 + 0.5;
 	    cutParameters.triggersMB = 1 + 2;
 	    cutParameters.triggersHT1 = 4;
 	    cutParameters.triggersHT2 = 8;
@@ -201,31 +257,41 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	    cutParameters.zSimuSmearingPt = 0;
 	    cutParameters.zSimuMeanCoeff0 = 0.0;
 	    cutParameters.zSimuMeanCoeff1 = 1.0;
-	    cutParameters.zSimuSpreadCoeff0 = 25.0;
+	    cutParameters.zSimuSpreadCoeff0 = 40.0;
 	    cutParameters.zSimuSpreadCoeff1 = 0.0;
 	    cutParameters.zSimuSmearingZeroPt = 0;
+	    cutParameters.calibrationSlope = 0.0330;
 	} else if (configuration.Contains("pp2005")) {
+	    dataSetStr = "pp2005";
 	    cutParameters.HT1AdcThreshold = 13 * 32;
 	    cutParameters.HT2AdcThreshold = 17 * 32;
-	    cutParameters.HT1EtThreshold = 2.6 + 0.0;
-	    cutParameters.HT2EtThreshold = 3.5 + 0.0;
-	    cutParameters.triggersMB = 1 + 2;
-	    cutParameters.triggersHT1 = 4 + 8;
-	    cutParameters.triggersHT2 = 16 + 32;
+	    cutParameters.HT1EtThreshold = 2.6 + 0.5;
+	    cutParameters.HT2EtThreshold = 3.5 + 0.5;
+	    cutParameters.triggersMB = 1+2;//1;
+	    cutParameters.triggersHT1 = 4+8;//2;
+	    cutParameters.triggersHT2 = 16+32;//4;
+            if (simulation_nbar || useMB) {
+                // new trees
+                cutParameters.triggersMB = 1;
+                cutParameters.triggersHT1 = 2;
+                cutParameters.triggersHT2 = 4;
+	    }
 	    cutParameters.bunchCrossingIdOffsetsFilename = "bunchCrossingId7bitOffsets_pp2005.txt";
-	    cutParameters.zBBCcoeff0 = 10.77;
-	    cutParameters.zBBCcoeff1 = 2.82;
+	    cutParameters.zBBCcoeff0 = 11.0045;
+	    cutParameters.zBBCcoeff1 =  2.8236;
 	    cutParameters.zSimuSmearingPt = 0;
 	    cutParameters.zSimuMeanCoeff0 = 0.0;
 	    cutParameters.zSimuMeanCoeff1 = 1.0;
-	    cutParameters.zSimuSpreadCoeff0 = 25.0;
+	    cutParameters.zSimuSpreadCoeff0 = 40.0;
 	    cutParameters.zSimuSpreadCoeff1 = 0.0;
 	    cutParameters.zSimuSmearingZeroPt = 0;
+	    cutParameters.calibrationSlope = 0.0419;
 	} else if (configuration.Contains("pp2006")) {
+	    dataSetStr = "pp2006";
 	    cutParameters.HT1AdcThreshold = 17 * 16;
 	    cutParameters.HT2AdcThreshold = 24 * 16;
-	    cutParameters.HT1EtThreshold = 3.8 + 0.0;
-	    cutParameters.HT2EtThreshold = 5.4 + 0.0;
+	    cutParameters.HT1EtThreshold = 3.8 + 0.5;
+	    cutParameters.HT2EtThreshold = 5.4 + 0.5;
 	    cutParameters.triggersMB = 1;
 	    cutParameters.triggersHT1 = 2;
 	    cutParameters.triggersHT2 = 4 + 8 + 16 + 32 + 64;
@@ -238,8 +304,48 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	    cutParameters.zSimuSpreadCoeff0 = 25.0;
 	    cutParameters.zSimuSpreadCoeff1 = 0.0;
 	    cutParameters.zSimuSmearingZeroPt = 0;
+	    cutParameters.calibrationSlope = 0.0;
+	} else if (configuration.Contains("dAu2008")) {
+	    dataSetStr = "dAu2008";
+	    cutParameters.HT1AdcThreshold = 17 * 16;
+	    cutParameters.HT2AdcThreshold = 24 * 16;
+	    cutParameters.HT1EtThreshold = 3.8 + 0.5;
+	    cutParameters.HT2EtThreshold = 5.4 + 0.5;
+	    cutParameters.triggersMB = 1; // HT0
+	    cutParameters.triggersHT1 = 2; // HT1
+	    cutParameters.triggersHT2 = 4; // HT2
+	    cutParameters.bunchCrossingIdOffsetsFilename = "bunchCrossingId7bitOffsets_dAu2008.txt";
+	    cutParameters.zBBCcoeff0 = 6.7;
+	    cutParameters.zBBCcoeff1 = 2.2;
+	    cutParameters.zSimuSmearingPt = 0;
+	    cutParameters.zSimuMeanCoeff0 = 0.0;
+	    cutParameters.zSimuMeanCoeff1 = 1.0;
+	    cutParameters.zSimuSpreadCoeff0 = 25.0;
+	    cutParameters.zSimuSpreadCoeff1 = 0.0;
+	    cutParameters.zSimuSmearingZeroPt = 0;
+	    cutParameters.calibrationSlope = 0.0;
+	} else if (configuration.Contains("pp2008")) {
+	    dataSetStr = "pp2008";
+	    cutParameters.HT1AdcThreshold = 17 * 16;
+	    cutParameters.HT2AdcThreshold = 24 * 16;
+	    cutParameters.HT1EtThreshold = 3.8 + 0.5;
+	    cutParameters.HT2EtThreshold = 5.4 + 0.5;
+	    cutParameters.triggersMB = 8+16; // FMS-slow
+	    cutParameters.triggersHT1 = 2; // HT1
+	    cutParameters.triggersHT2 = 4; // HT2
+	    cutParameters.bunchCrossingIdOffsetsFilename = "bunchCrossingId7bitOffsets_pp2008.txt";
+	    cutParameters.zBBCcoeff0 = 6.7;
+	    cutParameters.zBBCcoeff1 = 2.2;
+	    cutParameters.zSimuSmearingPt = 0;
+	    cutParameters.zSimuMeanCoeff0 = 0.0;
+	    cutParameters.zSimuMeanCoeff1 = 1.0;
+	    cutParameters.zSimuSpreadCoeff0 = 25.0;
+	    cutParameters.zSimuSpreadCoeff1 = 0.0;
+	    cutParameters.zSimuSmearingZeroPt = 0;
+	    cutParameters.calibrationSlope = 0.0;
 	}
-	cutParameters.trackDistCutLow = 0.07;//0.04;
+	if (simulation) cutParameters.calibrationSlope = 0.0;
+	cutParameters.trackDistCutLow = 0.04;
 	cutParameters.trackDistCutHigh = -1;
 	cutParameters.gammaDistCutLow = 0.00;
 	cutParameters.gammaDistCutHigh = 0.05;
@@ -261,14 +367,14 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	cutParameters.smdEnergyHigh = 1000;
 	cutParameters.smdSizeLow = 2;
 	cutParameters.smdSizeHigh = 1000;
-	cutParameters.etaLow = 0.1;
-	cutParameters.etaHigh = 0.9;
+	cutParameters.etaLow = 0.0;
+	cutParameters.etaHigh = 1.0;
 	cutParameters.etaCoordLow = 0.1;
 	cutParameters.etaCoordHigh = 0.9;
 	cutParameters.phiCoordLow = -TMath::TwoPi();
 	cutParameters.phiCoordHigh = +TMath::TwoPi();
 	cutParameters.openAngleMinFraction = 0.0;
-	cutParameters.openAngleMinOffset = TMath::Max(Float_t(1.0 / 150), Float_t(TMath::TwoPi() / (60 * 15)));
+        cutParameters.openAngleMinOffset = useMB ? 0.05 : (TMath::Sqrt(((1.0/150.0)*(1.0/150.0)) + ((TMath::TwoPi()/(60.0*16.0))*(TMath::TwoPi()/(60.0*16.0)))) * 1.5);
 	cutParameters.clustersPerTrackLow = 0.0;
 	cutParameters.clustersPerTrackHigh = 0.5;
 	cutParameters.EMCEtNeutralToTotalLow = -0.5;
@@ -289,7 +395,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	cutParameters.TPCPt2VsEMCEt0 = 0.0;
 	cutParameters.TPCPt0VsEMCEt2 = -0.0045;
 	*/
-	// Martijn's E_t / (E_t + P_t) < 0/8 beam bg cut
+	// Martijn's E_t / (E_t + P_t) < 0.8 beam bg cut
 	cutParameters.TPCPt0VsEMCEt0 = 0.0;
 	cutParameters.TPCPt1VsEMCEt0 = +0.8;
 	cutParameters.TPCPt0VsEMCEt1 = +0.8 - 1.0;
@@ -298,12 +404,55 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	cutParameters.TPCPt0VsEMCEt2 = 0.0;
 	cutParameters.tpcRefMultLow = -1;
 	cutParameters.tpcRefMultHigh = 1000;
-	cutParameters.highestAdcLow = 0;
-	cutParameters.highestAdcHigh = 4096;
+	cutParameters.highestAdcLow = -1;
+	cutParameters.highestAdcHigh = 500;
 	cutParameters.highestEtLow = 5.5;
 	cutParameters.highestEtHigh = 6.5;
-	if (configuration.Contains("40-100")) {
-		cutParameters.ftpcRefMultLow = -1;
+	cutParameters.badEventsListFilename = "";
+	cutParameters.pythiaPi0PtCutoff = -1;
+	TString pythiaPtBinStr;
+	if (configuration.Contains("weight_pythia_00_02gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 3.0;
+	    pythiaPtBinStr = "00_02gev";
+	} else if (configuration.Contains("weight_pythia_02_03gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 3.0;
+	    pythiaPtBinStr = "02_03gev";
+	} else if (configuration.Contains("weight_pythia_03_04gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 4.0;
+	    pythiaPtBinStr = "03_04gev";
+	} else if (configuration.Contains("weight_pythia_04_05gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 5.0;
+	    pythiaPtBinStr = "04_05gev";
+	} else if (configuration.Contains("weight_pythia_05_07gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 6.0;
+	    pythiaPtBinStr = "05_07gev";
+	} else if (configuration.Contains("weight_pythia_07_09gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 7.0;
+	    pythiaPtBinStr = "07_09gev";
+	} else if (configuration.Contains("weight_pythia_09_11gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 9.0;
+	    pythiaPtBinStr = "09_11gev";
+	} else if (configuration.Contains("weight_pythia_11_15gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 10.0;
+	    pythiaPtBinStr = "11_15gev";
+	} else if (configuration.Contains("weight_pythia_15_25gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 15.0;
+	    pythiaPtBinStr = "15_25gev";
+	} else if (configuration.Contains("weight_pythia_25_35gev")) {
+	    cutParameters.pythiaPi0PtCutoff = 25.0;
+	    pythiaPtBinStr = "25_35gev";
+	} else if (configuration.Contains("weight_pythia_35_infgev")) {
+	    cutParameters.pythiaPi0PtCutoff = -1;
+	    pythiaPtBinStr = "35_infgev";
+	} else if (configuration.Contains("weight_pythia_minbias")) {
+	    cutParameters.pythiaPi0PtCutoff = -1;
+	    pythiaPtBinStr = "minbias";
+	}
+	if (configuration.Contains("0-100")) {
+		cutParameters.ftpcRefMultLow = 0;
+		cutParameters.ftpcRefMultHigh = 1000;
+	} else if (configuration.Contains("40-100")) {
+		cutParameters.ftpcRefMultLow = 0;
 		cutParameters.ftpcRefMultHigh = 10;
 	} else if (configuration.Contains("20-40")) {
 		cutParameters.ftpcRefMultLow = 10;
@@ -327,19 +476,19 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 		cutParameters.ftpcRefMultLow = 7;
 		cutParameters.ftpcRefMultHigh = 10;
 	} else if (configuration.Contains("80-100")) {
-		cutParameters.ftpcRefMultLow = -1;
+		cutParameters.ftpcRefMultLow = 0;
 		cutParameters.ftpcRefMultHigh = 3;
 	} else if (configuration.Contains("75-100")) {
-		cutParameters.ftpcRefMultLow = -1;
+		cutParameters.ftpcRefMultLow = 0;
 		cutParameters.ftpcRefMultHigh = 4;
 	} else if (configuration.Contains("70-100")) {
-		cutParameters.ftpcRefMultLow = -1;
+		cutParameters.ftpcRefMultLow = 0;
 		cutParameters.ftpcRefMultHigh = 5;
 	} else if (configuration.Contains("65-100")) {
-		cutParameters.ftpcRefMultLow = -1;
+		cutParameters.ftpcRefMultLow = 0;
 		cutParameters.ftpcRefMultHigh = 6;
 	} else if (configuration.Contains("60-100")) {
-		cutParameters.ftpcRefMultLow = -1;
+		cutParameters.ftpcRefMultLow = 0;
 		cutParameters.ftpcRefMultHigh = 7;
 	} else {
 		cutParameters.ftpcRefMultLow = -1;
@@ -347,6 +496,33 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 		nocentral = true;
 	}
 	cutParameters.isBadRun = 11000011 + (nocentral ? 0 : 100000);
+
+	TString badEventsFilenameMB = "badEvents_pythiaPi0Pt_";
+	badEventsFilenameMB += dataSetStr;
+	badEventsFilenameMB += "_MB";
+	if (usePythiaPartonicPtBadEventFiles) {
+	    badEventsFilenameMB += "_";
+	    badEventsFilenameMB += pythiaPtBinStr;
+	}
+	badEventsFilenameMB += ".txt";
+
+	TString badEventsFilenameHT1 = "badEvents_pythiaPi0Pt_";
+	badEventsFilenameHT1 += dataSetStr;
+	badEventsFilenameHT1 += "_HT1";
+	if (usePythiaPartonicPtBadEventFiles) {
+	    badEventsFilenameHT1 += "_";
+	    badEventsFilenameHT1 += pythiaPtBinStr;
+	}
+	badEventsFilenameHT1 += ".txt";
+
+	TString badEventsFilenameHT2 = "badEvents_pythiaPi0Pt_";
+	badEventsFilenameHT2 += dataSetStr;
+	badEventsFilenameHT2 += "_HT2";
+	if (usePythiaPartonicPtBadEventFiles) {
+	    badEventsFilenameHT2 += "_";
+	    badEventsFilenameHT2 += pythiaPtBinStr;
+	}
+	badEventsFilenameHT2 += ".txt";
 
 	TCutParameters cutParametersEvent = cutParameters;
         cutParametersEvent.SetNameTitle("parametersEvent", "Parameters - event");
@@ -358,19 +534,26 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	cutParametersEventPPMinBias.isBadRun = ((Int_t(cutParametersEvent.isBadRun / 10000000)) * 10000000) + 2000000 + (cutParametersEvent.isBadRun % 1000000);
 	cutParametersEventPPMinBias.zSimuSmearingPt = &weightZSimuSmearingPtMB;
 	cutParametersEventPPMinBias.zSimuSmearingZeroPt = &weightZSimuSmearingZeroPtMB;
+	cutParametersEventPPMinBias.badEventsListFilename = badEventsFilenameMB;
 
 	TCutParameters cutParametersEventHT1 = cutParametersEvent;
         cutParametersEventHT1.SetNameTitle("parametersEventHT1", "Parameters - event (HighTower-1)");
 	cutParametersEventHT1.zSimuSmearingPt = &weightZSimuSmearingPtHT1;
 	cutParametersEventHT1.zSimuSmearingZeroPt = &weightZSimuSmearingZeroPtHT1;
+	cutParametersEventHT1.badEventsListFilename = badEventsFilenameHT1;
 
 	TCutParameters cutParametersEventHT2 = cutParametersEvent;
         cutParametersEventHT2.SetNameTitle("parametersEventHT1", "Parameters - event (HighTower-2)");
 	cutParametersEventHT2.zSimuSmearingPt = &weightZSimuSmearingPtHT2;
 	cutParametersEventHT2.zSimuSmearingZeroPt = &weightZSimuSmearingZeroPtHT2;
+	cutParametersEventHT2.badEventsListFilename = badEventsFilenameHT2;
 
 	TCutParameters cutParametersPoint = cutParameters;
         cutParametersPoint.SetNameTitle("parametersPoint", "Parameters - point");
+
+	TCutParameters cutParametersPointCharged = cutParametersPoint;
+        cutParametersPointCharged.SetNameTitle("parametersPointCharged", "Parameters - charged point");
+	cutParametersPointCharged.trackDistCutLow = 0.03;
 
 	TCutParameters cutParametersCandidate = cutParameters;
         cutParametersCandidate.SetNameTitle("parametersCandidate", "Parameters - candidate");
@@ -389,10 +572,6 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TCutParameters cutParametersPion = cutParameters;
         cutParametersPion.SetNameTitle("parametersPion", "Parameters - pion");
                                         
-	Bool_t useMB = configuration.Contains("useMB");
-	Bool_t useHT1 = configuration.Contains("useHT1");
-	Bool_t useHT2 = configuration.Contains("useHT2");
-	Info(__FILE__, "useMB: %i, useHT1: %i, useHT2: %i", useMB, useHT1, useHT2);
 
 	//Bool_t wantPhotonRcp = false;
 	Bool_t wantMultiplicityRcp = false;
@@ -435,6 +614,67 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 		weightCalculator.power = 1.10996;
 		weightCalculator.rangeLow =    0;
 		weightCalculator.rangeHigh = 100;
+	} else if (configuration.Contains("weight_pythia")) {
+	    // PYTHIA simulation
+	    weightCalculator.SetName("weight_pythia");
+	    weightCalculator.mult =      1.0;
+	    weightCalculator.multDrift =   0;
+	    weightCalculator.pt0 =         0;
+	    weightCalculator.power =       0;
+	    weightCalculator.rangeLow =   -1;
+	    weightCalculator.rangeHigh = 100;
+	    if (usePythiaPartonicPtWeight) {
+		    TFile f(weightFile);
+	    	    if (f.IsOpen()) {
+			TWeightCalculator *weight = (TWeightCalculator*)f.Get(weightCalculator.GetName());
+			if (weight) {
+			    weightCalculator = *weight;
+			} else {Error(__FILE__, "Weight %s not found in %s !", weightCalculator.GetName(), weightFile.Data());}
+		    } else {Error(__FILE__, "Cannot open weights file %s", weightFile.Data());}
+	    }
+	    if (usePythiaPartonicPtBinWeight || usePythiaPartonicPtBinXWeight) {
+		// w = cross-section / N_events, for each partonic pT bin
+		// Cross sections are taken from:
+		// http://www.star.bnl.gov/HyperNews-star/protected/get/jetfinding/187.html
+		// http://www.star.bnl.gov/HyperNews-star/protected/get/jetfinding/257.html
+		if (configuration.Contains("weight_pythia_00_02gev")) { // Soft processes, cross section calculated as x_minbias - sum(x_other_bins)
+		    weightCalculator.SetName("weight_pythia_00_02gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 18.24400 : 1.0) / 600000.0;
+		} else if (configuration.Contains("weight_pythia_02_03gev")) {
+		    weightCalculator.SetName("weight_pythia_02_03gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 8.110e+0 : 1.0) / 508000.0;
+		} else if (configuration.Contains("weight_pythia_03_04gev")) {
+		    weightCalculator.SetName("weight_pythia_03_04gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 1.287e+0 : 1.0) / 400629.0;
+		} else if (configuration.Contains("weight_pythia_04_05gev")) {
+		    weightCalculator.SetName("weight_pythia_04_05gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 3.117e-1 : 1.0) / 600980.0;
+		} else if (configuration.Contains("weight_pythia_05_07gev")) {
+		    weightCalculator.SetName("weight_pythia_05_07gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 1.360e-1 : 1.0) / 431000.0;
+		} else if (configuration.Contains("weight_pythia_07_09gev")) {
+		    weightCalculator.SetName("weight_pythia_07_09gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 2.305e-2 : 1.0) / 414245.0;
+		} else if (configuration.Contains("weight_pythia_09_11gev")) {
+		    weightCalculator.SetName("weight_pythia_09_11gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 5.494e-3 : 1.0) / 416000.0;
+		} else if (configuration.Contains("weight_pythia_11_15gev")) {
+		    weightCalculator.SetName("weight_pythia_11_15gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 2.228e-3 : 1.0) / 422780.0;
+		} else if (configuration.Contains("weight_pythia_15_25gev")) {
+		    weightCalculator.SetName("weight_pythia_15_25gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 3.895e-4 : 1.0) / 408000.0;
+		} else if (configuration.Contains("weight_pythia_25_35gev")) {
+		    weightCalculator.SetName("weight_pythia_25_35gev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 1.016e-5 : 1.0) / 408000.0;
+		} else if (configuration.Contains("weight_pythia_35_infgev")) {
+		    weightCalculator.SetName("weight_pythia_35_infgev");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 5.299e-7 : 1.0) / 104000.0;
+		} else if (configuration.Contains("weight_pythia_minbias")) {
+		    weightCalculator.SetName("weight_pythia_minbias");
+		    weightCalculator.mult *= (usePythiaPartonicPtBinXWeight ? 28.12e+0 : 1.0) /  97295.0;
+		}
+	    }
 	} else {
 	    TString simulationWeight;
 #define TEST_WEIGHT(w) if (configuration.Contains(w)) simulationWeight = w;
@@ -457,8 +697,9 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	    weightCalculator.SetName(simulationWeight);
 	    TFile f(weightFile);
 	    if (f.IsOpen()) {
+	    } else {Error(__FILE__, "Cannot open weights file %s", weightFile.Data());}
 		if (simulationWeight != "") {
-		    if (((simulationWeight == "weight_pi0") || (simulationWeight == "weight_eta")) && (!f.Get(simulationWeight))) {
+		    if (((simulationWeight == "weight_pi0") || (simulationWeight == "weight_eta")) && (!f.IsOpen() || !f.Get(simulationWeight))) {
 			if (useNloPqcdPP) {
 			    {Error(__FILE__, "Weight %s not found in %s, using pQCD p+p weight", simulationWeight.Data(), weightFile.Data());}
 			    // pQCD p+p weight
@@ -475,7 +716,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 		    } else if (((simulationWeight == "weight_1gamma_pi0") || (simulationWeight == "weight_1gamma_eta")) && (!f.Get(simulationWeight))) {
 			TString subst = "weight_1gamma_data_MB";
 			{Error(__FILE__, "Weight %s not found in %s, using %s weight instead", simulationWeight.Data(), weightFile.Data(), subst.Data());}
-			TWeightCalculator *weight = (TWeightCalculator*)f.Get(subst);
+			TWeightCalculator *weight = f.IsOpen() ? (TWeightCalculator*)f.Get(subst) : 0;
 			if (weight) {
 			    weightCalculator = *weight;
 			} else {Error(__FILE__, "Weight %s not found in %s !", subst.Data(), weightFile.Data());}
@@ -488,11 +729,16 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 			} else {Error(__FILE__, "Weight %s not found in %s !", simulationWeight.Data(), weightFile.Data());}
 		    }
 		}
-	    } else {Error(__FILE__, "Cannot open weights file %s", weightFile.Data());}
 	}
 	weightCalculator.Print("");
 
-	if (simulation) {
+	weightZSimuSmearingPtMB.mult = 0;
+	weightZSimuSmearingPtHT1.mult = 0;
+	weightZSimuSmearingPtHT2.mult = 0;
+	weightZSimuSmearingZeroPtMB.mult = 0;
+	weightZSimuSmearingZeroPtHT1.mult = 0;
+	weightZSimuSmearingZeroPtHT2.mult = 0;
+	if (simulation && !simulation_pythia) {
 	    TFile f(weightFile);
 	    if (f.IsOpen()) {
 		TH1F *weightZSimuSmearingPtHistogramMB = (TH1F*)f.Get("zSimuSmearingPtMB");
@@ -508,9 +754,6 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 		TH1F *weightZSimuSmearingZeroPtHistogramHT2 = (TH1F*)f.Get("zSimuSmearingZeroPtHT2");
 		weightZSimuSmearingZeroPtHT2.histogram = weightZSimuSmearingZeroPtHistogramHT2;
 	    } else {Error(__FILE__, "Cannot open weights file %s", weightFile.Data());}
-	}
-
-	if (simulation) {
 	    weightZSimuSmearingPtMB.Print("");
 	    weightZSimuSmearingPtHT1.Print("");
 	    weightZSimuSmearingPtHT2.Print("");
@@ -548,35 +791,37 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TCuts cutsDummy = cuts;
 
 	cuts.EVENT_ALL_CUTS =      EVENT_VALID_CUT
-				 | (simulation ? EVENT_MC_VALID_CUT : 0)
-				 | ((simulation && !simulation_eta_bg && !simulation_gamma) ? EVENT_MC_VALID_DECAY_CUT : 0)
-				 | EVENT_BAD_RUNS_CUT
-				 | (requireTPCVertex ? (simulation ? 0 : EVENT_TPC_VERTEX_CUT) : 0)
-				 | (requireBBCPresent ? (simulation ? 0 : EVENT_BBC_VERTEX_CUT) : 0)
+				 | ((simulation && !simulation_pythia) ? EVENT_MC_VALID_CUT : 0)
+				 | ((simulation && !simulation_eta_bg && !(simulation_gamma || simulation_nbar) && !simulation_pythia) ? EVENT_MC_VALID_DECAY_CUT : 0)
+				 | (simulation ? 0 : EVENT_BAD_RUNS_CUT)
+				 | (requireTPCVertex ? EVENT_TPC_VERTEX_CUT : 0)
+				 | (requireBBCPresent ? EVENT_BBC_VERTEX_CUT : 0)
 				 | EVENT_Z_CUT
 				 | (nocentral ? 0 : EVENT_FTPC_REFMULT_CUT)
 				 | (simulation ? 0 : EVENT_CORRUPTION_CUT)
-				 | ((simulation || !rejectBeamBgEvents) ? 0 : (requireTPCVertex ? EVENT_PT_VS_ET_CUT : EVENT_PT_VS_ET_TPC_VERTEX_CUT))
+				 | (rejectBeamBgEvents ? (/*requireTPCVertex ? EVENT_PT_VS_ET_CUT : */EVENT_PT_VS_ET_TPC_VERTEX_CUT) : 0)
+				 | (simulation_pythia && usePythiaBadEventCut ? EVENT_BAD_EVENTS_CUT : 0)
 				// | (simulation ? 0 : EVENT_NOBADBUNCH_CUT)
 				// | EVENT_NEUTRAL_POINTS_CUT
 				// | EVENT_HIGHEST_ADC_CUT
 				// | EVENT_HIGHEST_ET_CUT
 				// | EVENT_HIGHEST_ADC_STUCK_CUT
 				 ;
-	cuts.EVENT_ALL_CUTS_NOT = ((simulation && simulation_eta_bg && !simulation_gamma) ? EVENT_MC_VALID_DECAY_CUT : 0);
+	cuts.EVENT_ALL_CUTS_NOT = ((simulation && simulation_eta_bg && !(simulation_gamma || simulation_nbar) && !simulation_pythia) ? EVENT_MC_VALID_DECAY_CUT : 0);
 	//cuts.EVENT_ALL_CUTS_NOT |= (simulation ? 0 : EVENT_PT_VS_ET_CUT);
 	//cuts.EVENT_ALL_CUTS_NOT |= (simulation ? 0 : EVENT_NOBADBUNCH_CUT);
 	cuts.POINT_ALL_CUTS =      POINT_VALID_CUT 
 				 | POINT_CPV_CUT 
-				 | POINT_TYPE_SMDE_CUT 
-				 | POINT_TYPE_SMDP_CUT
+				 | (useMB ? 0 : (POINT_TYPE_SMDE_CUT | POINT_TYPE_SMDP_CUT))
 				 | POINT_ETA_COORD_CUT 
 				// | POINT_ENERGY_CUT 
 				// | POINT_SMDE_ENERGY_CUT | POINT_SMDP_ENERGY_CUT
-				// | POINT_SMDE_SIZE_CUT | POINT_SMDP_SIZE_CUT
+				 | (useHT1 ? (POINT_SMDE_SIZE_CUT | POINT_SMDP_SIZE_CUT) : 0)
+				// | POINT_SMDE_HIGHEST_ADC_CUT | POINT_SMDP_HIGHEST_ADC_CUT
 				// | (simulation ? (POINT_ASSOCIATED_CUT) : 0)
 				// | (simulation ? (POINT_CLOSEST_CUT) : 0)
 				 ;
+	//cuts.POINT_ALL_CUTS_NOT = POINT_CPV_CUT;
 	//cuts.POINT_ALL_CUTS_NOT = (simulation ? (POINT_ASSOCIATED_CUT | POINT_CLOSEST_CUT) : 0);
 	cuts.CANDIDATE_ALL_CUTS =  CANDIDATE_VALID_CUT 
 				 | CANDIDATE_ASYMETRY_CUT
@@ -647,69 +892,77 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TCuts cutsSimHT2(cuts);
 	cutsSimHT2.SetNameTitle("cutsSimHT2", "Cuts - sim HighTower-2");
 	cutsSimHT2.setParametersEvent(cutParametersEventHT2);
-/*
-	TCuts cutsChargedPointsMB(cutsMB);
-	cutsChargedPointsMB.SetNameTitle("cutsChargedPointsMB", "Cuts charged points - MinBias");
-	cutsChargedPointsMB.POINT_ALL_CUTS &= ~(POINT_TRACKS_2_CUT | POINT_TRACKS_1_CUT);
-	cutsChargedPointsMB.POINT_ALL_CUTS_NOT |= POINT_TRACKS_2_CUT;
 
-	TCuts cutsChargedPointsHT1(cutsHT1);
-	cutsChargedPointsHT1.SetNameTitle("cutsChargedPointsHT1", "Cuts charged points - HighTower-1");
-	cutsChargedPointsHT1.POINT_ALL_CUTS &= ~(POINT_TRACKS_2_CUT | POINT_TRACKS_1_CUT);
-	cutsChargedPointsHT1.POINT_ALL_CUTS_NOT |= POINT_TRACKS_2_CUT;
+	TCuts cutsMixMB(cutsMB);
+	cutsMixMB.SetNameTitle("cutsMixMB", "Cuts mix - MinBias");
+	if (mixRejectEnergyMatch) {
+	    cutsMixMB.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
+	cutsMixMB.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
 
-	TCuts cutsChargedPointsHT2(cutsHT2);
-	cutsChargedPointsHT2.SetNameTitle("cutsChargedPointsHT2", "Cuts charged points - HighTower-2");
-	cutsChargedPointsHT2.POINT_ALL_CUTS &= ~(POINT_TRACKS_2_CUT | POINT_TRACKS_1_CUT);
-	cutsChargedPointsHT2.POINT_ALL_CUTS_NOT |= POINT_TRACKS_2_CUT;
+	TCuts cutsMixHT1(cutsHT1);
+	cutsMixHT1.SetNameTitle("cutsMixHT1", "Cuts mix - HighTower-1");
+	if (mixRejectEnergyMatch) {
+	    cutsMixHT1.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
+	cutsMixHT1.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
 
-	TCuts cutsAllPointsMB(cutsMB);
-	cutsAllPointsMB.SetNameTitle("cutsAllPointsMB", "Cuts all points - MinBias");
-	cutsAllPointsMB.POINT_ALL_CUTS &= ~(POINT_TRACKS_2_CUT | POINT_TRACKS_1_CUT);
+	TCuts cutsMixHT2(cutsHT2);
+	cutsMixHT2.SetNameTitle("cutsMixHT2", "Cuts mix - HighTower-2");
+	if (mixRejectEnergyMatch) {
+	    cutsMixHT2.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
+	cutsMixHT2.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
 
-	TCuts cutsAllPointsHT1(cutsHT1);
-	cutsAllPointsHT1.SetNameTitle("cutsAllPointsHT1", "Cuts all points - HighTower-1");
-	cutsAllPointsHT1.POINT_ALL_CUTS &= ~(POINT_TRACKS_2_CUT | POINT_TRACKS_1_CUT);
-
-	TCuts cutsAllPointsHT2(cutsHT2);
-	cutsAllPointsHT2.SetNameTitle("cutsAllPointsHT2", "Cuts all points - HighTower-2");
-	cutsAllPointsHT2.POINT_ALL_CUTS &= ~(POINT_TRACKS_2_CUT | POINT_TRACKS_1_CUT);
-*/
 	TCuts cutsJetmixMB(cutsMB);
 	cutsJetmixMB.SetNameTitle("cutsJetmixMB", "Cuts jet-mix - MinBias");
 	cutsJetmixMB.setParametersCandidate(cutParametersCandidateJetmix);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixMB.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixMB.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
+	if (jetMixRejectEnergyMatch) {
+	    cutsJetmixMB.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
 	cutsJetmixMB.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
-	//cutsJetmixMB.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
 
 	TCuts cutsJetmixHT1(cutsHT1);
 	cutsJetmixHT1.SetNameTitle("cutsJetmixHT1", "Cuts jet-mix - HighTower-1");
 	cutsJetmixHT1.setParametersCandidate(cutParametersCandidateJetmix);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixHT1.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixHT1.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
+	if (jetMixRejectEnergyMatch) {
+	    cutsJetmixHT1.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
 	cutsJetmixHT1.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
-	//cutsJetmixHT1.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
 
 	TCuts cutsJetmixHT2(cutsHT2);
 	cutsJetmixHT2.SetNameTitle("cutsJetmixHT2", "Cuts jet-mix - HighTower-2");
 	cutsJetmixHT2.setParametersCandidate(cutParametersCandidateJetmix);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixHT2.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixHT2.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
+	if (jetMixRejectEnergyMatch) {
+	    cutsJetmixHT2.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
 	cutsJetmixHT2.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
-	//cutsJetmixHT2.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
 
 	TCuts cutsJetmixNotmatchedMB(cutsMB);
 	cutsJetmixNotmatchedMB.SetNameTitle("cutsJetmixNotmatchedMB", "Cuts jet-mix not matched - MinBias");
 	cutsJetmixNotmatchedMB.setParametersCandidate(cutParametersCandidateJetmix);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixNotmatchedMB.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixNotmatchedMB.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
 	cutsJetmixNotmatchedMB.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
@@ -718,8 +971,10 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TCuts cutsJetmixNotmatchedHT1(cutsHT1);
 	cutsJetmixNotmatchedHT1.SetNameTitle("cutsJetmixNotmatchedHT1", "Cuts jet-mix not matched - HighTower-1");
 	cutsJetmixNotmatchedHT1.setParametersCandidate(cutParametersCandidateJetmix);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixNotmatchedHT1.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixNotmatchedHT1.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
 	cutsJetmixNotmatchedHT1.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
@@ -728,8 +983,10 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TCuts cutsJetmixNotmatchedHT2(cutsHT2);
 	cutsJetmixNotmatchedHT2.SetNameTitle("cutsJetmixNotmatchedHT2", "Cuts jet-mix not matched - HighTower-2");
 	cutsJetmixNotmatchedHT2.setParametersCandidate(cutParametersCandidateJetmix);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixNotmatchedHT2.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixNotmatchedHT2.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
 	cutsJetmixNotmatchedHT2.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
@@ -738,32 +995,44 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TCuts cutsJetmixBackMB(cutsMB);
 	cutsJetmixBackMB.SetNameTitle("cutsJetmixBackMB", "Cuts jet-mix back-to-back - MinBias");
 	cutsJetmixBackMB.setParametersCandidate(cutParametersCandidateJetmixBack);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixBackMB.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixBackMB.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
+	if (jetMixRejectEnergyMatch) {
+	    cutsJetmixBackMB.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
 	cutsJetmixBackMB.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
-	//cutsJetmixBackMB.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
 
 	TCuts cutsJetmixBackHT1(cutsHT1);
 	cutsJetmixBackHT1.SetNameTitle("cutsJetmixBackHT1", "Cuts jet-mix bact-to-back - HighTower-1");
 	cutsJetmixBackHT1.setParametersCandidate(cutParametersCandidateJetmixBack);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixBackHT1.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixBackHT1.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
+	if (jetMixRejectEnergyMatch) {
+	    cutsJetmixBackHT1.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
 	cutsJetmixBackHT1.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
-	//cutsJetmixBackHT1.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
 
 	TCuts cutsJetmixBackHT2(cutsHT2);
 	cutsJetmixBackHT2.SetNameTitle("cutsJetmixBackHT2", "Cuts jet-mix back-to-back - HighTower-2");
 	cutsJetmixBackHT2.setParametersCandidate(cutParametersCandidateJetmixBack);
-	if (jetMixRequiresJet) {
+	if (jetMixRequiresJetInEvent) {
 	    cutsJetmixBackHT2.EVENT_ALL_CUTS |= EVENT_JET_FOUND_CUT;
+	}
+	if (jetMixRequiresPointsInJet) {
 	    cutsJetmixBackHT2.POINT_ALL_CUTS |= POINT_IN_JET_CUT;
 	}
+	if (jetMixRejectEnergyMatch) {
+	    cutsJetmixBackHT2.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
+	}
 	cutsJetmixBackHT2.CANDIDATE_ALL_CUTS |= CANDIDATE_OPENANGLE_KINEMATIC_CUT;
-	//cutsJetmixBackHT2.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_POINTS_MATCHED_ENERGY_CUT;
 
 	TCuts cutsPSMB(cutsMB);
 	cutsPSMB.SetNameTitle("cutsPSMB", "Cuts for HT enhancement calculation - MinBias");
@@ -788,13 +1057,54 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 
 	TCuts cutsMcGammaMB(cutsSimMB);
 	cutsMcGammaMB.SetNameTitle("cutsMcGammaMB", "Simulated photons - MinBias");
-	//cutsMcGamma.GAMMA_ALL_CUTS |= GAMMA_ETA_COORD_CUT;
+	cutsMcGammaMB.GAMMA_ALL_CUTS |= GAMMA_ETA_CUT;
 
 	TCuts cutsMcGammaHT1(cutsSimHT1);
 	cutsMcGammaHT1.SetNameTitle("cutsMcGammaHT1", "Simulated photons - HighTower-1");
+	cutsMcGammaHT1.GAMMA_ALL_CUTS |= GAMMA_ETA_CUT;
 
 	TCuts cutsMcGammaHT2(cutsSimHT2);
 	cutsMcGammaHT2.SetNameTitle("cutsMcGammaHT2", "Simulated photons - HighTower-2");
+	cutsMcGammaHT2.GAMMA_ALL_CUTS |= GAMMA_ETA_CUT;
+
+	TCuts cutsPointMB(cutsMB);
+	cutsPointMB.SetNameTitle("cutsPointMB", "Points - MinBias");
+	cutsPointMB.POINT_ALL_CUTS |= POINT_ETA_CUT;
+
+	TCuts cutsPointHT1(cutsHT1);
+	cutsPointHT1.SetNameTitle("cutsPointHT1", "Points - HighTower-1");
+	cutsPointHT1.POINT_ALL_CUTS |= POINT_ETA_CUT;
+
+	TCuts cutsPointHT2(cutsHT2);
+	cutsPointHT2.SetNameTitle("cutsPointHT2", "Points - HighTower-2");
+	cutsPointHT2.POINT_ALL_CUTS |= POINT_ETA_CUT;
+
+	TCuts cutsPointNocpvMB(cutsPointMB);
+	cutsPointNocpvMB.SetNameTitle("cutsPointNocpvMB", "Points - no cpv cut - MinBias");
+	cutsPointNocpvMB.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+
+	TCuts cutsPointNocpvHT1(cutsPointHT1);
+	cutsPointNocpvHT1.SetNameTitle("cutsPointNocpvHT1", "Points - no cpv cut - HighTower-1");
+	cutsPointNocpvHT1.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+
+	TCuts cutsPointNocpvHT2(cutsPointHT2);
+	cutsPointNocpvHT2.SetNameTitle("cutsPointNocpvHT2", "Points - no cpv cut - HighTower-2");
+	cutsPointNocpvHT2.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+
+	TCuts cutsPointNotcpvMB(cutsPointMB);
+	cutsPointNotcpvMB.SetNameTitle("cutsPointNotcpvMB", "Points - not cpv cut - MinBias");
+	cutsPointNotcpvMB.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+	cutsPointNotcpvMB.POINT_ALL_CUTS_NOT |= POINT_CPV_CUT;
+
+	TCuts cutsPointNotcpvHT1(cutsPointHT1);
+	cutsPointNotcpvHT1.SetNameTitle("cutsPointNotcpvHT1", "Points - not cpv cut - HighTower-1");
+	cutsPointNotcpvHT1.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+	cutsPointNotcpvHT1.POINT_ALL_CUTS_NOT |= POINT_CPV_CUT;
+
+	TCuts cutsPointNotcpvHT2(cutsPointHT2);
+	cutsPointNotcpvHT2.SetNameTitle("cutsPointNotcpvHT2", "Points - not cpv cut - HighTower-2");
+	cutsPointNotcpvHT2.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+	cutsPointNotcpvHT2.POINT_ALL_CUTS_NOT |= POINT_CPV_CUT;
 
 //	TCuts cutsMcGammaAllValid(cuts);
 //	cutsMcGammaAllValid.SetNameTitle("cutsMcGammaAllValid", "All valid simulated photons");
@@ -814,15 +1124,36 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 
 	TCuts cutsNocpvMB(cutsMB);
 	cutsNocpvMB.SetNameTitle("cutsNocpvMB", "Cuts w/o CPV - MinBias");
-	cutsNocpvMB.POINT_ALL_CUTS = cutsNocpvMB.POINT_ALL_CUTS & (~POINT_CPV_CUT);
+	cutsNocpvMB.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
 
 	TCuts cutsNocpvHT1(cutsHT1);
 	cutsNocpvHT1.SetNameTitle("cutsNocpvHT1", "Cuts w/o CPV - HighTower-1");
-	cutsNocpvHT1.POINT_ALL_CUTS = cutsNocpvHT1.POINT_ALL_CUTS & (~POINT_CPV_CUT);
+	cutsNocpvHT1.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
 
 	TCuts cutsNocpvHT2(cutsHT2);
 	cutsNocpvHT2.SetNameTitle("cutsNocpvHT2", "Cuts w/o CPV - HighTower-2");
-	cutsNocpvHT2.POINT_ALL_CUTS = cutsNocpvHT2.POINT_ALL_CUTS & (~POINT_CPV_CUT);
+	cutsNocpvHT2.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+
+	TCuts cutsNotcpvMB(cutsMB);
+	cutsNotcpvMB.SetNameTitle("cutsNotcpvMB", "Cuts w/ not CPV - MinBias");
+	cutsNotcpvMB.setParametersPoint(cutParametersPointCharged);
+	cutsNotcpvMB.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+	cutsNotcpvMB.POINT_ALL_CUTS_NOT |= POINT_CPV_CUT;
+	//cutsNotcpvMB.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_CPV_CUT;
+
+	TCuts cutsNotcpvHT1(cutsHT1);
+	cutsNotcpvHT1.SetNameTitle("cutsNotcpvHT1", "Cuts w/ not CPV - HighTower-1");
+	cutsNotcpvHT1.setParametersPoint(cutParametersPointCharged);
+	cutsNotcpvHT1.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+	cutsNotcpvHT1.POINT_ALL_CUTS_NOT |= POINT_CPV_CUT;
+	//cutsNotcpvHT1.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_CPV_CUT;
+
+	TCuts cutsNotcpvHT2(cutsHT2);
+	cutsNotcpvHT2.SetNameTitle("cutsNotcpvHT2", "Cuts w/ not CPV - HighTower-2");
+	cutsNotcpvHT2.setParametersPoint(cutParametersPointCharged);
+	cutsNotcpvHT2.POINT_ALL_CUTS &= ~POINT_CPV_CUT;
+	cutsNotcpvHT2.POINT_ALL_CUTS_NOT |= POINT_CPV_CUT;
+	//cutsNotcpvHT2.CANDIDATE_ALL_CUTS_NOT |= CANDIDATE_CPV_CUT;
 
 /*
 	TCuts cutsPeakMB(cutsMB);
@@ -911,7 +1242,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TH1F histPhiCoord("histPhiCoord", "PhiCoord;#phi", 360, -TMath::Pi(), +TMath::Pi());
 	TH2F histEtaPhiCoord("histEtaPhiCoord", "EtaCoord-PhiCoord;#eta;#phi", 100, -0.4, 1.4, 180, -TMath::Pi(), +TMath::Pi());
 	TH2F histEtaPhiCoordCircle("histEtaPhiCoordCircle", "Inside is #eta=0, outside is #eta=1;x;y", 40, -1, 1, 40, -1, +1);
-	TH1F histOpenAngle("histOpenAngle", "Angle;open angle", 1000, 0, +TMath::Pi());
+	TH1F histOpenAngle("histOpenAngle", "Angle;open angle", 2000, 0, +TMath::Pi()/2);
 	TH1F histOpenAngleResolution("histOpenAngleResolution", "Angle reconstruction resolution;reconstructed / simulated open angle", 200, 0, 2);
 	TH2F histOpenAngleResolutionEnergy("histOpenAngleResolutionEnergy", "Opening angle resolution;Simulated #pi^{0} energy, GeV;Reconstructed / Simulated opening angle", 60, 0, 30, 200, 0, 2);
 	TH2F histOpenAngleResolutionPt("histOpenAngleResolutionPt", "Angle reconstruction resolution vs. simulated p_{T};simulated p_{T};reconstructed / simulated open angle", 60, 0, 15, 200, 0, 2);
@@ -922,16 +1253,20 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TH2F histPtResolution("histPtResolution", "#pi^{0} p_{T} resolution - p_{T MC} vs. p_{T reco};p_{T MC};p_{T reco}", 100, 0, 30, 100, 0, 30);
 	TH2F histPtResolutionPercent("histPtResolutionPercent", "#pi^{0} p_{T} resolution;p_{T MC};p_{T reco} / p_{T MC}", 40, 0, 20, 40, 0, 1.5);
 	TH1F histPt("histPt", "p_{T};p_{T}", 300, 0, 30);
+	TH1F histPartonicPt("histPartonicPt", "PYTHIA partonic p_{T};p_{T}", 800, 0, 40);
+	TH2F histPtPartonicPt("histPtPartonicPt", "#pi^{0} vs. PYTHIA partonic p_{T};#pi^{0} p_{T};PYTHIA partonic p_{T}", 80, 0, 20, 200, 0, 50);
 	//TH3F histPointPtEtaPhiCoord("histPointPtEtaPhiCoord", "Point p_{T} vs. #eta and #phi;p_{T};#eta;#phi", 40, 0, 20, 20, 0, 1, 60, -TMath::Pi(), +TMath::Pi());
 	TH2F histPtMult("histPtMult", "Multiplicity vs. #pi^{0} p_{T};#pi^{0} p_{T}, GeV/c;Multiplicity", 40, 0, 20, 30, 0, 30);
 	TH2F histPtM("histPtM", "#pi^{0} M_{inv} vs. p_{T};p_{T}, GeV/c;M_{inv}, GeV/c^{2}", 40, 0, 20, 100, 0, 0.4);
 	TH1F histMReco("histMReco", "Reconstructed M_{inv};Reconstructed M_{#gamma #gamma}", 600, 0, 7);
 	TH2F histPtOpenAngle("histPtOpenAngle", "#pi^{0} opening angle vs. p_{T};p_{T}, GeV/c;Opening angle", 200, -1, 20, 90, 0, +TMath::Pi()/4);
-	TH2F histEnergyOpenAngle("histEnergyOpenAngle", "#pi^{0} opening angle vs. energy;Energy, GeV;Opening angle", 200, -1, 30, 90, 0, +TMath::Pi()/4);
+	TH2F histEnergyOpenAngle("histEnergyOpenAngle", "#pi^{0} opening angle vs. energy;Energy, GeV;Opening angle", 150, 0, 24.99, 150, 0, 0.1);
 	TH2F histEnergyOpenAngleMin("histEnergyOpenAngleMin", "#pi^{0} min. opening angle vs. energy;Energy, GeV;Min. opening angle", 200, -1, 30, 90, 0, +TMath::Pi()/4);
 	TH2F histEnergyOpenAngleMinTrue("histEnergyOpenAngleMinTrue", "#pi^{0} min. opening angle (true pion mass) vs. energy;Energy, GeV;Min. open angle", 200, -1, 30, 90, 0, +TMath::Pi()/4);
-	TH1F histZ("histZ", "Z_{vert};Z_{vert}", 200, -100, 100);
+	TH1F histZ("histZ", "Z_{vert};Z_{vert}", 200, -200, 200);
 	TH2F histZBBCvsTPC("histZBBCtoTPC", "Z_{BBC} vs. Z_{TPC};Z_{TPC};Z_{BBC}", 60, -100, +100, 60, -100, +100);
+	TH1F histZBBCMinusTPC("histZBBCMinusTPC", "Z_{BBC} - Z_{TPC};Z_{BBC} - Z_{TPC}", 200, -200, +200);
+	TH2F histBBCWMinusEvsTPC("histBBCWMinusEtoTPC", "BBC W-E vs. Z_{TPC};Z_{TPC};BBC W-E", 60, -100, +100, 100, -50, +50);
 	TH2F histZBBCtoTPC("histZBBCtoTPC", "Z_{BBC} - Z_{TPC} vs. Z_{TPC};Z_{TPC};Z_{BBC} - Z_{TPC}", 60, -100, +100, 61, -60, +60);
 	TH1F histZDiff("histZDiff", "Z_{vert} - Z_{#pi^{0}};Z_{vert} - Z_{#pi^{0}}", 150, -150, 150);
 	TH1F histGammaEnergy("histGammaEnergy", "Simulated #gamma energy;Energy, GeV", 100, -2, 30);
@@ -949,9 +1284,9 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TH1F histHighestAdcFinal("histHighestAdcFinal", "Highest ADC in event - final;Highest tower ADC in the event", 800, 0, 800);
 	TH2F histDayRun("histDayRun", "Statistics per run;Day;Run", 200, 0, 200, 200, 0, 200);
 	//TH3F histDayRunBunchCrossing("histDayRunBunchCrossing", "Bunch crossing 7bit;Day;Run;Bunch crossing 7bit", 69, 111, 180, 180, 0, 180, 128, 0, 128);
-	TH1F histNumFtpcPrimaries("histNumFtpcPrimaries", "Number of FTPC primaries;Number of FTPC primaries", 50, 0, 50);
-	TH1F histNumFtpcPrimariesEast("histNumFtpcPrimariesEast", "Number of East FTPC primaries;Number of East FTPC primaries", 50, 0, 50);
-	TH1F histNumFtpcPrimariesWest("histNumFtpcPrimariesWest", "Number of West FTPC primaries;Number of West FTPC primaries", 50, 0, 50);
+	TH1F histNumFtpcPrimaries("histNumFtpcPrimaries", "Number of FTPC primaries;Number of FTPC primaries", 150, 0, 150);
+	TH1F histNumFtpcPrimariesEast("histNumFtpcPrimariesEast", "Number of East FTPC primaries;Number of East FTPC primaries", 150, 0, 150);
+	TH1F histNumFtpcPrimariesWest("histNumFtpcPrimariesWest", "Number of West FTPC primaries;Number of West FTPC primaries", 150, 0, 150);
 	TH2F histNumFtpcPrimariesEastDay("histNumFtpcPrimariesEastDay", "Number of East FTPC primaries vs. day;Day;Number of East FTPC primaries", 100, 0, 100, 50, 0, 50);
 	TH2F histNumFtpcPrimariesWestDay("histNumFtpcPrimariesWestDay", "Number of West FTPC primaries vs. day;Day;Number of West FTPC primaries", 100, 0, 100, 50, 0, 50);
 	TH2F histNumFtpcPrimariesPrimary("histNumFtpcPrimariesPrimary", "Number of FTPC primaries - all primaries;Number of FTPC primaries;Number of all primaries", 50, 0, 50, 100, 0, 300);
@@ -1020,6 +1355,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TH2F histCandidateEEventE("histCandidateEEventE", "Candidate energy vs. event energy;#pi^{0} energy, GeV;Event energy, GeV", 30, 0, 15, 30, 0, 15);
 	TH2F histPointJetDist("histPointJetDist", "Point-to-jet distance;#eta_{point} - #eta_{jet};#phi_{point} - #phi_{jet}", 30, -1.3, +1.3, 30, -TMath::TwoPi(), +TMath::TwoPi());
 	TH2F histBbcWE("histBbcWE", "BbcWE", 40, -10, +270, 40, -10, +270);
+	TH1F histBbcWMinusE("histBbcWMinusE", "BbcWMinusE", 512, -256, +256);
 	TH2F histDayPhiCoord("histDayPhiCoord", "#phi coord. vs. day;Day;#phi coord", 100, 0, 100, 36, -TMath::Pi(), +TMath::Pi());
 	TH1F histClusterSigmaEta("histClusterSigmaEta", "Eta RMS;#eta RMS", 100, 0, 0.03);
 	TH1F histClusterSigmaPhi("histClusterSigmaPhi", "Phi RMS;#phi RMS", 100, 0, 0.03);
@@ -1029,6 +1365,8 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TH2F histEnergyPointSmdeSize("histEnergyPointSmdeSize", "SMDE size vs. energy in point;Energy, GeV;SMDE size", 50, 0, 30, 5, 0.5, 5.5);
 	TH2F histEnergyPointSmdpSize("histEnergyPointSmdpSize", "SMDP size vs. energy in point;Energy, GeV;SMDP size", 50, 0, 30, 5, 0.5, 5.5);
 	TH2F histNumberHitsBTOWstuckbit("histNumberHitsBTOWstuckbit", "Number of BTOW hits: stuck bits vs. total;Number of BTOW hits;With stuck bits", 200, 0, 4000, 60, 0, 600);
+	TH2F histHighestHitToTotalEnergy("histHighestHitToTotalEnergy", "Highset hit / cluster energy;Cluster energy, GeV;Highest hit / cluster energy", 30, 0, 15, 20, 0.2, 1.1);
+	TH2F histTpcRefmultTrackDist("histTpcRefmultTrackDist", "Mult. vs track dist;TPC Refmult;Closest track", 25, 0, 50, 20, 0, 0.5);
 
 	THitDataProcessor hitDataProcessor("hitDataProcessor", "Hits processor");
 	hitDataProcessor.setTreeName(hitTreeName);
@@ -1040,6 +1378,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	hitDataProcessor.setAdc(histAdc);
 	hitDataProcessor.setAdc2(histAdc2);
 	hitDataProcessor.setAdc3(histAdc3);
+	hitDataProcessor.setAdcPed(histAdc);
 	hitDataProcessor.setEtaCoord(histEtaCoord);
 	hitDataProcessor.setPhiCoord(histPhiCoord);
 	hitDataProcessor.setEtaPhiCoord(histEtaPhiCoord);
@@ -1062,6 +1401,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	clusterDataProcessor.setSigmaPhi(histClusterSigmaPhi);
 	clusterDataProcessor.setEtaPhiCoord(histEtaPhiCoord);
 	clusterDataProcessor.setDeadStripClose(histBadStripClose);
+	clusterDataProcessor.setHighestHitToTotalEnergy(histHighestHitToTotalEnergy);
 	clusterDataProcessor.highestEnergyHit = hitDataProcessor;
 	clusterDataProcessor.highestEnergyHit.SetNameTitle("highestEnergyHit", "Highest energy hit in cluster");
 
@@ -1107,6 +1447,10 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	pointDataProcessor.setEnergyTotalSmdpSigma(histEnergyPointSmdpSigma);
 	pointDataProcessor.setEnergyTotalSmdeSize(histEnergyPointSmdeSize);
 	pointDataProcessor.setEnergyTotalSmdpSize(histEnergyPointSmdpSize);
+	pointDataProcessor.setPtWithSmd(histPt);
+	pointDataProcessor.setPtWithSmd1(histPt);
+	pointDataProcessor.setPtWithSmdSize(histPt);
+	pointDataProcessor.setPtWithSmdSize1(histPt);
 
 	TEventDataProcessor eventDataProcessor("eventDataProcessor", "Events processor");
 	eventDataProcessor.setTreeName(eventTreeName);
@@ -1122,6 +1466,8 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	eventDataProcessor.setZused(histZ);
 	eventDataProcessor.setZbbc(histZ);
 	eventDataProcessor.setZBBCvsTPC(histZBBCvsTPC);
+	eventDataProcessor.setZBBCMinusTPC(histZBBCMinusTPC);
+	eventDataProcessor.setBBCWMinusEvsTPC(histBBCWMinusEvsTPC);
 	eventDataProcessor.setZBBCtoTPC(histZBBCtoTPC);
 	eventDataProcessor.setTracksNumber(histTracksNumber);
 	eventDataProcessor.setPointsNumber(histPointsNumber);
@@ -1166,7 +1512,9 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	eventDataProcessor.setJetPhi(histPhi);
 	eventDataProcessor.setJetEnergy(histJetEnergy);
 	eventDataProcessor.setBbcWE(histBbcWE);
+	eventDataProcessor.setBbcWMinusE(histBbcWMinusE);
 	eventDataProcessor.setNumberHitsBTOWstuckbit(histNumberHitsBTOWstuckbit);
+	eventDataProcessor.setPartonicPt(histPartonicPt);
 
 	TCandidateDataProcessor candidateDataProcessor("candidateDataProcessor", "#pi^{0} candidates processor");
 	candidateDataProcessor.setTreeName(candidateTreeName);
@@ -1212,15 +1560,23 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	candidateDataProcessor.setTPCVertNoBBCVertYes(histPt);
 	candidateDataProcessor.setTPCVertNoBBCVertNo(histPt);
 	candidateDataProcessor.setJetYes(histPt);
-	candidateDataProcessor.setJetNo(histPt);
+	//candidateDataProcessor.setJetNo(histPt);
 	candidateDataProcessor.setInJetPointYes(histPt);
-	candidateDataProcessor.setInJetPointNo(histPt);
+	//candidateDataProcessor.setInJetPointNo(histPt);
 	candidateDataProcessor.setInJetYes(histPt);
-	candidateDataProcessor.setInJetNo(histPt);
+	//candidateDataProcessor.setInJetNo(histPt);
+	candidateDataProcessor.setInJBkPtYes(histPt);
+	candidateDataProcessor.setPtSmd(histPt);
+	candidateDataProcessor.setPtSmd1(histPt);
+	candidateDataProcessor.setPtSmd01(histPt);
+	candidateDataProcessor.setPtSmdSz(histPt);
+	candidateDataProcessor.setPtSmdSz1(histPt);
+	candidateDataProcessor.setPtSmdSz01(histPt);
+	candidateDataProcessor.setTpcRefmultTrackDist(histTpcRefmultTrackDist);
 
 	TMCGammaDataProcessor mcGammaDataProcessor("mcGamma", "Simulated photons processor");
-	mcGammaDataProcessor.setTreeName(mcGammaTreeName);
-	mcGammaDataProcessor.setBranchName(mcGammaBranchName);
+	mcGammaDataProcessor.setTreeName(simulation_nbar ? mcNbarTreeName : mcGammaTreeName);
+	mcGammaDataProcessor.setBranchName(simulation_nbar ? mcNbarBranchName : mcGammaBranchName);
 	mcGammaDataProcessor.setCuts(cutsDummy);
 	mcGammaDataProcessor.setWeightCalculator(weightCalculator);
 	mcGammaDataProcessor.associatedPoint = pointDataProcessor;
@@ -1248,6 +1604,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	simuDataProcessor.setCuts(cutsDummy);
 	simuDataProcessor.setWeightCalculator(weightCalculator);
 	simuDataProcessor.setPt(histPt);
+	if (simulation_pythia) simuDataProcessor.setPtPartonicPt(histPtPartonicPt);
 	simuDataProcessor.setMReco(histMReco);
 	simuDataProcessor.setEta(histEta);
 	simuDataProcessor.setPhi(histPhi);
@@ -1265,6 +1622,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	simuDataProcessor.setOpenAngleResolutionPt(histOpenAngleResolutionPt);
 	simuDataProcessor.setDayRun(histDayRun);
 	simuDataProcessor.setStatDay(histStatDay);
+	simuDataProcessor.setEnergyOpenAngleSimu(histEnergyOpenAngle);
 
 	TCandidateDataProcessor candidateDataProcessorMB(candidateDataProcessor);
 	candidateDataProcessorMB.SetNameTitle("candidateMB", "#pi^{0} candidates processor - MinBias");
@@ -1333,22 +1691,57 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	TEventDataProcessor eventDataProcessorPSMB(eventDataProcessor);
 	eventDataProcessorPSMB.SetNameTitle("eventPSMB", "Events processor - HT enhancement - MinBias");
 	eventDataProcessorPSMB.setCuts(cutsPSMB);
+	TBinParameters binParEventPSMB("binEventPSMB", "PSMB ev num");
+	binParEventPSMB.variable = (TBinVariable)0;
+	binParEventPSMB.min = 0.0;
+	binParEventPSMB.max = 0.0;
+	TBinStatistics binStatEventPSMB("binEventPSMB", "PSMB events number");
+	binStatEventPSMB.setParameters(binParEventPSMB);
+	eventDataProcessorPSMB.binStatistics.push_back(binStatEventPSMB);
 
 	TEventDataProcessor eventDataProcessorPSMBHT1(eventDataProcessor);
 	eventDataProcessorPSMBHT1.SetNameTitle("eventPSMBHT1", "Events processor - HT enhancement - MinBias && sim(HighTower-1)");
 	eventDataProcessorPSMBHT1.setCuts(cutsPSMBHT1);
+	TBinParameters binParEventPSMBHT1("binEventPSMBHT1", "PSMBHT1 ev num");
+	binParEventPSMBHT1.variable = (TBinVariable)0;
+	binParEventPSMBHT1.min = 0.0;
+	binParEventPSMBHT1.max = 0.0;
+	TBinStatistics binStatEventPSMBHT1("binEventPSMBHT1", "PSMBHT1 events number");
+	binStatEventPSMBHT1.setParameters(binParEventPSMBHT1);
+	eventDataProcessorPSMBHT1.binStatistics.push_back(binStatEventPSMBHT1);
 
 	TEventDataProcessor eventDataProcessorPSMBHT2(eventDataProcessor);
 	eventDataProcessorPSMBHT2.SetNameTitle("eventPSMBHT2", "Events processor - HT enhancement - MinBias && sim(HighTower-2)");
 	eventDataProcessorPSMBHT2.setCuts(cutsPSMBHT2);
+	TBinParameters binParEventPSMBHT2("binEventPSMBHT2", "PSMBHT2 ev num");
+	binParEventPSMBHT2.variable = (TBinVariable)0;
+	binParEventPSMBHT2.min = 0.0;
+	binParEventPSMBHT2.max = 0.0;
+	TBinStatistics binStatEventPSMBHT2("binEventPSMBHT2", "PSMBHT2 events number");
+	binStatEventPSMBHT2.setParameters(binParEventPSMBHT2);
+	eventDataProcessorPSMBHT2.binStatistics.push_back(binStatEventPSMBHT2);
 
 	TEventDataProcessor eventDataProcessorPSHT1(eventDataProcessor);
 	eventDataProcessorPSHT1.SetNameTitle("eventPSHT1", "Events processor - HT enhancement - HighTower-1");
 	eventDataProcessorPSHT1.setCuts(cutsPSHT1);
+	TBinParameters binParEventPSHT1("binEventPSHT1", "PSHT1 ev num");
+	binParEventPSHT1.variable = (TBinVariable)0;
+	binParEventPSHT1.min = 0.0;
+	binParEventPSHT1.max = 0.0;
+	TBinStatistics binStatEventPSHT1("binEventPSHT1", "PSHT1 events number");
+	binStatEventPSHT1.setParameters(binParEventPSHT1);
+	eventDataProcessorPSHT1.binStatistics.push_back(binStatEventPSHT1);
 
 	TEventDataProcessor eventDataProcessorPSHT1HT2(eventDataProcessor);
 	eventDataProcessorPSHT1HT2.SetNameTitle("eventPSHT1HT2", "Events processor - HT enhancement - HighTower-1 && sim(HighTower-2)");
 	eventDataProcessorPSHT1HT2.setCuts(cutsPSHT1HT2);
+	TBinParameters binParEventPSHT1HT2("binEventPSHT1HT2", "PSHT1HT2 ev num");
+	binParEventPSHT1HT2.variable = (TBinVariable)0;
+	binParEventPSHT1HT2.min = 0.0;
+	binParEventPSHT1HT2.max = 0.0;
+	TBinStatistics binStatEventPSHT1HT2("binEventPSHT1HT2", "PSHT1HT2 events number");
+	binStatEventPSHT1HT2.setParameters(binParEventPSHT1HT2);
+	eventDataProcessorPSHT1HT2.binStatistics.push_back(binStatEventPSHT1HT2);
 
 /*
 	TEventDataProcessor eventDataProcessorAllValid(eventDataProcessor);
@@ -1399,17 +1792,17 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 */
 	TPointDataProcessor pointDataProcessorMB(pointDataProcessor);
 	pointDataProcessorMB.SetNameTitle("pointMB", "Points processor - MinBias");
-	pointDataProcessorMB.setCuts(cutsMB);
+	pointDataProcessorMB.setCuts(cutsPointMB);
 	//if (wantPhotonRcp) pointDataProcessorMB.setPtEtaPhiCoord(histPointPtEtaPhiCoord);
 
 	TPointDataProcessor pointDataProcessorHT1(pointDataProcessor);
 	pointDataProcessorHT1.SetNameTitle("pointHT1", "Points processor - HighTower-1");
-	pointDataProcessorHT1.setCuts(cutsHT1);
+	pointDataProcessorHT1.setCuts(cutsPointHT1);
 	//if (wantPhotonRcp) pointDataProcessorHT1.setPtEtaPhiCoord(histPointPtEtaPhiCoord);
 
 	TPointDataProcessor pointDataProcessorHT2(pointDataProcessor);
 	pointDataProcessorHT2.SetNameTitle("pointHT2", "Points processor - HighTower-2");
-	pointDataProcessorHT2.setCuts(cutsHT2);
+	pointDataProcessorHT2.setCuts(cutsPointHT2);
 	//if (wantPhotonRcp) pointDataProcessorHT2.setPtEtaPhiCoord(histPointPtEtaPhiCoord);
 
 	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorMB, &simuDataProcessorMB, 0, 0, ptShiftMB);
@@ -1418,14 +1811,15 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	}
 	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorMB, 0, 5, 0, ptShiftMB);
 	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorMB, 0, 3, 0, ptShiftMB);
-	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorMB, 0, 6, 0, ptShiftMB);
+	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorMB, 0, 6, (!simulation || simulation_pythia) ? &pointDataProcessorMB : 0, ptShiftMB);
+	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorMB, 0, 7, 0, ptShiftMB);
 /*
 	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorKinTrueMB, 0, 0);
 
 	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorKinTrueNotMB, 0, 0);
 */
-	if (wantMultiplicityRcp) {
 	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorMB, 0, 1, &pointDataProcessorMB);
+	if (wantMultiplicityRcp) {
 /*
 	addPtBin(0, pTlimit, 0.25, "MB", "MinBias", &candidateDataProcessorPeakMB, 0, 1);
 */
@@ -1455,15 +1849,15 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	simuDataProcessorMB.binStatistics.push_back(binStatCumulativeMB);
 	TBinParameters binParEventMB("binEventMB", "MB ev num");
 	binParEventMB.variable = (TBinVariable)0;
-	binParEventMB.min = 0.5;
-	binParEventMB.max = 6.0;
+	binParEventMB.min = 0.0;
+	binParEventMB.max = 0.0;
 	TBinStatistics binStatEventMB("binEventMB", "MB events number");
 	binStatEventMB.setParameters(binParEventMB);
 	eventDataProcessorMB.binStatistics.push_back(binStatEventMB);
 	TBinParameters binParEvnumSim("binParEvnumSim", "MinBias events number");
 	binParEvnumSim.variable = (TBinVariable)0;
 	binParEvnumSim.min = 0;
-	binParEvnumSim.max = 100;
+	binParEvnumSim.max = 1000;
 	TBinStatistics binStatEvnumSim("binStatEvnumSim", "MinBias events number");
 	binStatEvnumSim.setParameters(binParEvnumSim);
 	simuDataProcessorMB.binStatistics.push_back(binStatEvnumSim);
@@ -1474,14 +1868,15 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	}
 	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorHT1, 0, 5, 0, ptShiftHT1);
 	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorHT1, 0, 3, 0, ptShiftHT1);
-	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorHT1, 0, 6, 0, ptShiftHT1);
+	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorHT1, 0, 6, (!simulation || simulation_pythia) ? &pointDataProcessorHT1 : 0, ptShiftHT1);
+	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorHT1, 0, 7, 0, ptShiftHT1);
 /*
 	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorKinTrueHT1, 0, 0);
 
 	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorKinTrueNotHT1, 0, 0);
 */
-	if (wantMultiplicityRcp) {
 	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorHT1, 0, 1, &pointDataProcessorHT1);
+	if (wantMultiplicityRcp) {
 /*
 	addPtBin(0, pTlimit, 0.5, "HT1", "HighTower-1", &candidateDataProcessorPeakHT1, 0, 1);
 */
@@ -1511,8 +1906,8 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	simuDataProcessorHT1.binStatistics.push_back(binStatCumulativeHT1);
 	TBinParameters binParEventHT1("binEventHT1", "HT1 ev num");
 	binParEventHT1.variable = (TBinVariable)0;
-	binParEventHT1.min = 1.0;
-	binParEventHT1.max = 11.0;
+	binParEventHT1.min = 0.0;
+	binParEventHT1.max = 0.0;
 	TBinStatistics binStatEventHT1("binEventHT1", "HT1 events number");
 	binStatEventHT1.setParameters(binParEventHT1);
 	eventDataProcessorHT1.binStatistics.push_back(binStatEventHT1);
@@ -1523,14 +1918,15 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	}
 	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorHT2, 0, 5, 0, ptShiftHT2);
 	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorHT2, 0, 3, 0, ptShiftHT2);
-	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorHT2, 0, 6, 0, ptShiftHT2);
+	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorHT2, 0, 6, (!simulation || simulation_pythia) ? &pointDataProcessorHT2 : 0, ptShiftHT2);
+	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorHT2, 0, 7, 0, ptShiftHT2);
 /*
 	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorKinTrueHT2, 0, 0);
 
 	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorKinTrueNotHT2, 0, 0);
 */
-	if (wantMultiplicityRcp) {
 	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorHT2, 0, 1, &pointDataProcessorHT2);
+	if (wantMultiplicityRcp) {
 /*
 	addPtBin(0, pTlimit, 0.5, "HT2", "HighTower-2", &candidateDataProcessorPeakHT2, 0, 1);
 */	
@@ -1560,8 +1956,8 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	simuDataProcessorHT2.binStatistics.push_back(binStatCumulativeHT2);
 	TBinParameters binParEventHT2("binEventHT2", "HT2 ev num");
 	binParEventHT2.variable = (TBinVariable)0;
-	binParEventHT2.min = 2.0;
-	binParEventHT2.max = 15.0;
+	binParEventHT2.min = 0.0;
+	binParEventHT2.max = 0.0;
 	TBinStatistics binStatEventHT2("binEventHT2", "HT2 events number");
 	binStatEventHT2.setParameters(binParEventHT2);
 	eventDataProcessorHT2.binStatistics.push_back(binStatEventHT2);
@@ -1571,24 +1967,28 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 //	TCandidateDataProcessor candidateDataProcessorMBShuffle(candidateDataProcessorMB);
 	TCandidateDataProcessor candidateDataProcessorMBJetmix(candidateDataProcessorMB);
 //	TCandidateDataProcessor candidateDataProcessorMBJetmixNotmatched(candidateDataProcessorMB);
-//	TCandidateDataProcessor candidateDataProcessorMBJetmixBack(candidateDataProcessorMB);
+	TCandidateDataProcessor candidateDataProcessorMBJetmixBack(candidateDataProcessorMB);
 	TCandidateDataProcessor candidateDataProcessorMBNocpv(candidateDataProcessorMB);
+	TCandidateDataProcessor candidateDataProcessorMBNotcpv(candidateDataProcessorMB);
 	candidateDataProcessorMBMix.setTreeName(candidateTreeMixName);
 //	candidateDataProcessorMBShuffle.setTreeName(candidateTreeSubmixName);
 	candidateDataProcessorMBJetmix.setTreeName(candidateTreeMixName);
 //	candidateDataProcessorMBJetmixNotmatched.setTreeName(candidateTreeMixName);
-//	candidateDataProcessorMBJetmixBack.setTreeName(candidateTreeMixName);
+	candidateDataProcessorMBJetmixBack.setTreeName(candidateTreeMixName);
 	candidateDataProcessorMBMix.SetNameTitle("candidateMBMix", "Mixed events - MinBias");
+	candidateDataProcessorMBMix.setCuts(cutsMixMB);
 //	candidateDataProcessorMBSubmix.SetNameTitle("candidateMBSubmix", "Mixed subevents - MinBias");
 //	candidateDataProcessorMBShuffle.SetNameTitle("candidateMBShuffle", "Shuffled subevents - MinBias");
 	candidateDataProcessorMBJetmix.SetNameTitle("candidateMBJetmix", "Jet-mixed events - MinBias");
 	candidateDataProcessorMBJetmix.setCuts(cutsJetmixMB);
 //	candidateDataProcessorMBJetmixNotmatched.SetNameTitle("candidateMBJetmixNotmatched", "Jet-mixed events not matched - MinBias");
 //	candidateDataProcessorMBJetmixNotmatched.setCuts(cutsJetmixNotmatchedMB);
-//	candidateDataProcessorMBJetmixBack.SetNameTitle("candidateMBJetmixBack", "Jet-mixed back-to-back events - MinBias");
-//	candidateDataProcessorMBJetmixBack.setCuts(cutsJetmixBackMB);
+	candidateDataProcessorMBJetmixBack.SetNameTitle("candidateMBJetmixBack", "Jet-mixed back-to-back events - MinBias");
+	candidateDataProcessorMBJetmixBack.setCuts(cutsJetmixBackMB);
 	candidateDataProcessorMBNocpv.SetNameTitle("candidateMBNocpv", "No CPV - MinBias");
 	candidateDataProcessorMBNocpv.setCuts(cutsNocpvMB);
+	candidateDataProcessorMBNotcpv.SetNameTitle("candidateMBNotcpv", "Not CPV - MinBias");
+	candidateDataProcessorMBNotcpv.setCuts(cutsNotcpvMB);
 
 //	TCandidateDataProcessor candidateDataProcessorHT1BadTrig(candidateDataProcessorHT1);
 	TCandidateDataProcessor candidateDataProcessorHT1Mix(candidateDataProcessorHT1);
@@ -1596,26 +1996,30 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 //	TCandidateDataProcessor candidateDataProcessorHT1Shuffle(candidateDataProcessorHT1);
 	TCandidateDataProcessor candidateDataProcessorHT1Jetmix(candidateDataProcessorHT1);
 //	TCandidateDataProcessor candidateDataProcessorHT1JetmixNotmatched(candidateDataProcessorHT1);
-//	TCandidateDataProcessor candidateDataProcessorHT1JetmixBack(candidateDataProcessorHT1);
+	TCandidateDataProcessor candidateDataProcessorHT1JetmixBack(candidateDataProcessorHT1);
 	TCandidateDataProcessor candidateDataProcessorHT1Nocpv(candidateDataProcessorHT1);
+	TCandidateDataProcessor candidateDataProcessorHT1Notcpv(candidateDataProcessorHT1);
 	candidateDataProcessorHT1Mix.setTreeName(candidateTreeMixName);
 //	candidateDataProcessorHT1Shuffle.setTreeName(candidateTreeSubmixName);
 	candidateDataProcessorHT1Jetmix.setTreeName(candidateTreeMixName);
 //	candidateDataProcessorHT1JetmixNotmatched.setTreeName(candidateTreeMixName);
-//	candidateDataProcessorHT1JetmixBack.setTreeName(candidateTreeMixName);
+	candidateDataProcessorHT1JetmixBack.setTreeName(candidateTreeMixName);
 //	candidateDataProcessorHT1BadTrig.SetNameTitle("candidateHT1BadTrig", "Bad trigger - HighTower-1");
 //	candidateDataProcessorHT1BadTrig.setCuts(cutsBadTrigHT1);
 	candidateDataProcessorHT1Mix.SetNameTitle("candidateHT1Mix", "Mixed events - HighTower-1");
+	candidateDataProcessorHT1Mix.setCuts(cutsMixHT1);
 //	candidateDataProcessorHT1Submix.SetNameTitle("candidateHT1Submix", "Mixed subevents - HighTower-1");
 //	candidateDataProcessorHT1Shuffle.SetNameTitle("candidateHT1Shuffle", "Shuffled subevents - HighTower-1");
 	candidateDataProcessorHT1Jetmix.SetNameTitle("candidateHT1Jetmix", "Jet-mixed events - HighTower-1");
 	candidateDataProcessorHT1Jetmix.setCuts(cutsJetmixHT1);
 //	candidateDataProcessorHT1JetmixNotmatched.SetNameTitle("candidateHT1JetmixNotmatched", "Jet-mixed events not matched - HighTower-1");
 //	candidateDataProcessorHT1JetmixNotmatched.setCuts(cutsJetmixNotmatchedHT1);
-//	candidateDataProcessorHT1JetmixBack.SetNameTitle("candidateHT1JetmixBack", "Jet-mixed back-to-back events - HighTower-1");
-//	candidateDataProcessorHT1JetmixBack.setCuts(cutsJetmixBackHT1);
+	candidateDataProcessorHT1JetmixBack.SetNameTitle("candidateHT1JetmixBack", "Jet-mixed back-to-back events - HighTower-1");
+	candidateDataProcessorHT1JetmixBack.setCuts(cutsJetmixBackHT1);
 	candidateDataProcessorHT1Nocpv.SetNameTitle("candidateHT1Nocpv", "No CPV - HighTower-1");
 	candidateDataProcessorHT1Nocpv.setCuts(cutsNocpvHT1);
+	candidateDataProcessorHT1Notcpv.SetNameTitle("candidateHT1Notcpv", "Not CPV - HighTower-1");
+	candidateDataProcessorHT1Notcpv.setCuts(cutsNotcpvHT1);
 
 //	TCandidateDataProcessor candidateDataProcessorHT2BadTrig(candidateDataProcessorHT2);
 	TCandidateDataProcessor candidateDataProcessorHT2Mix(candidateDataProcessorHT2);
@@ -1623,26 +2027,52 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 //	TCandidateDataProcessor candidateDataProcessorHT2Shuffle(candidateDataProcessorHT2);
 	TCandidateDataProcessor candidateDataProcessorHT2Jetmix(candidateDataProcessorHT2);
 //	TCandidateDataProcessor candidateDataProcessorHT2JetmixNotmatched(candidateDataProcessorHT2);
-//	TCandidateDataProcessor candidateDataProcessorHT2JetmixBack(candidateDataProcessorHT2);
+	TCandidateDataProcessor candidateDataProcessorHT2JetmixBack(candidateDataProcessorHT2);
 	TCandidateDataProcessor candidateDataProcessorHT2Nocpv(candidateDataProcessorHT2);
+	TCandidateDataProcessor candidateDataProcessorHT2Notcpv(candidateDataProcessorHT2);
 	candidateDataProcessorHT2Mix.setTreeName(candidateTreeMixName);
 //	candidateDataProcessorHT2Shuffle.setTreeName(candidateTreeSubmixName);
 	candidateDataProcessorHT2Jetmix.setTreeName(candidateTreeMixName);
 //	candidateDataProcessorHT2JetmixNotmatched.setTreeName(candidateTreeMixName);
-//	candidateDataProcessorHT2JetmixBack.setTreeName(candidateTreeMixName);
+	candidateDataProcessorHT2JetmixBack.setTreeName(candidateTreeMixName);
 //	candidateDataProcessorHT2BadTrig.SetNameTitle("candidateHT2BadTrig", "Bad trigger - HighTower-2");
 //	candidateDataProcessorHT2BadTrig.setCuts(cutsBadTrigHT2);
 	candidateDataProcessorHT2Mix.SetNameTitle("candidateHT2Mix", "Mixed events - HighTower-2");
+	candidateDataProcessorHT2Mix.setCuts(cutsMixHT2);
 //	candidateDataProcessorHT2Submix.SetNameTitle("candidateHT2Submix", "Mixed subevents - HighTower-2");
 //	candidateDataProcessorHT2Shuffle.SetNameTitle("candidateHT2Shuffle", "Shuffled subevents - HighTower-2");
 	candidateDataProcessorHT2Jetmix.SetNameTitle("candidateHT2Jetmix", "Jet-mixed events - HighTower-2");
 	candidateDataProcessorHT2Jetmix.setCuts(cutsJetmixHT2);
 //	candidateDataProcessorHT2JetmixNotmatched.SetNameTitle("candidateHT2JetmixNotmatched", "Jet-mixed events not matched - HighTower-2");
 //	candidateDataProcessorHT2JetmixNotmatched.setCuts(cutsJetmixNotmatchedHT2);
-//	candidateDataProcessorHT2JetmixBack.SetNameTitle("candidateHT2JetmixBack", "Jet-mixed back-to-back events - HighTower-2");
-//	candidateDataProcessorHT2JetmixBack.setCuts(cutsJetmixBackHT2);
+	candidateDataProcessorHT2JetmixBack.SetNameTitle("candidateHT2JetmixBack", "Jet-mixed back-to-back events - HighTower-2");
+	candidateDataProcessorHT2JetmixBack.setCuts(cutsJetmixBackHT2);
 	candidateDataProcessorHT2Nocpv.SetNameTitle("candidateHT2Nocpv", "No CPV - HighTower-2");
 	candidateDataProcessorHT2Nocpv.setCuts(cutsNocpvHT2);
+	candidateDataProcessorHT2Notcpv.SetNameTitle("candidateHT2Notcpv", "Not CPV - HighTower-2");
+	candidateDataProcessorHT2Notcpv.setCuts(cutsNotcpvHT2);
+
+	TPointDataProcessor pointDataProcessorNocpvMB(pointDataProcessorMB);
+	TPointDataProcessor pointDataProcessorNotcpvMB(pointDataProcessorMB);
+	pointDataProcessorNocpvMB.SetNameTitle("pointNocpvMB", "Points processor - no cpv cut - MinBias");
+	pointDataProcessorNotcpvMB.SetNameTitle("pointNotcpvMB", "Points processor - not cpv cut - MinBias");
+	pointDataProcessorNocpvMB.setCuts(cutsPointNocpvMB);
+	pointDataProcessorNotcpvMB.setCuts(cutsPointNotcpvMB);
+
+	TPointDataProcessor pointDataProcessorNocpvHT1(pointDataProcessorHT1);
+	TPointDataProcessor pointDataProcessorNotcpvHT1(pointDataProcessorHT1);
+	pointDataProcessorNocpvHT1.SetNameTitle("pointNocpvHT1", "Points processor - no cpv cut - HighTower-1");
+	pointDataProcessorNotcpvHT1.SetNameTitle("pointNotcpvHT1", "Points processor - not cpv cut - HighTower-1");
+	pointDataProcessorNocpvHT1.setCuts(cutsPointNocpvHT1);
+	pointDataProcessorNotcpvHT1.setCuts(cutsPointNotcpvHT1);
+
+	TPointDataProcessor pointDataProcessorNocpvHT2(pointDataProcessorHT2);
+	TPointDataProcessor pointDataProcessorNotcpvHT2(pointDataProcessorHT2);
+	pointDataProcessorNocpvHT2.SetNameTitle("pointNocpvHT2", "Points processor - no cpv cut - HighTower-2");
+	pointDataProcessorNotcpvHT2.SetNameTitle("pointNotcpvHT2", "Points processor - not cpv cut - HighTower-2");
+	pointDataProcessorNocpvHT2.setCuts(cutsPointNocpvHT2);
+	pointDataProcessorNotcpvHT2.setCuts(cutsPointNotcpvHT2);
+
 /*
 	TEventDataProcessor eventDataProcessorHT1BadTrig(eventDataProcessorHT1);
 	eventDataProcessorHT1BadTrig.SetNameTitle("eventHT1BadTrig", "Bad trigger events - HighTower-1");
@@ -1765,7 +2195,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	    if (useHT1) pool.processors.push_back(&candidateDataProcessorHT1);
 	    if (useHT2) pool.processors.push_back(&candidateDataProcessorHT2);
 	    
-	    if (!simulation) {
+	    if (!simulation || simulation_pythia) {
 		if (useMB) pool.processors.push_back(&candidateDataProcessorMBMix);
 		if (useHT1) pool.processors.push_back(&candidateDataProcessorHT1Mix);
 		if (useHT2) pool.processors.push_back(&candidateDataProcessorHT2Mix);
@@ -1778,9 +2208,9 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 //		if (useHT1) pool.processors.push_back(&candidateDataProcessorHT1JetmixNotmatched);
 //		if (useHT2) pool.processors.push_back(&candidateDataProcessorHT2JetmixNotmatched);
 
-//		if (useMB) pool.processors.push_back(&candidateDataProcessorMBJetmixBack);
-//		if (useHT1) pool.processors.push_back(&candidateDataProcessorHT1JetmixBack);
-//		if (useHT2) pool.processors.push_back(&candidateDataProcessorHT2JetmixBack);
+		if (useMB) pool.processors.push_back(&candidateDataProcessorMBJetmixBack);
+		if (useHT1) pool.processors.push_back(&candidateDataProcessorHT1JetmixBack);
+		if (useHT2) pool.processors.push_back(&candidateDataProcessorHT2JetmixBack);
 
 //		if (useMB) pool.processors.push_back(&candidateDataProcessorMBShuffle);
 //		if (useHT1) pool.processors.push_back(&candidateDataProcessorHT1Shuffle);
@@ -1789,6 +2219,10 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 		if (useMB) pool.processors.push_back(&candidateDataProcessorMBNocpv);
 		if (useHT1) pool.processors.push_back(&candidateDataProcessorHT1Nocpv);
 		if (useHT2) pool.processors.push_back(&candidateDataProcessorHT2Nocpv);
+
+		if (useMB) pool.processors.push_back(&candidateDataProcessorMBNotcpv);
+		if (useHT1) pool.processors.push_back(&candidateDataProcessorHT1Notcpv);
+		if (useHT2) pool.processors.push_back(&candidateDataProcessorHT2Notcpv);
 	    }
 	    
 	    if (useMB) pool.processors.push_back(&eventDataProcessorMB);
@@ -1799,6 +2233,14 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	    if (useHT1) pool.processors.push_back(&pointDataProcessorHT1);
 	    if (useHT2) pool.processors.push_back(&pointDataProcessorHT2);
 
+	    if (useMB) pool.processors.push_back(&pointDataProcessorNocpvMB);
+	    if (useHT1) pool.processors.push_back(&pointDataProcessorNocpvHT1);
+	    if (useHT2) pool.processors.push_back(&pointDataProcessorNocpvHT2);
+
+	    if (useMB) pool.processors.push_back(&pointDataProcessorNotcpvMB);
+	    if (useHT1) pool.processors.push_back(&pointDataProcessorNotcpvHT1);
+	    if (useHT2) pool.processors.push_back(&pointDataProcessorNotcpvHT2);
+
 	    if (simulation) {
 		if (includePi0Processor && useMB) pool.processors.push_back(&simuDataProcessorMB);
 		if (includePi0Processor && useHT1) pool.processors.push_back(&simuDataProcessorHT1);
@@ -1808,8 +2250,8 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 		if (includeGammaProcessor && useHT1) pool.processors.push_back(&mcGammaDataProcessorHT1);
 		if (includeGammaProcessor && useHT2) pool.processors.push_back(&mcGammaDataProcessorHT2);
 		//if (includeGammaProcessor && useMB) pool.processors.push_back(&mcGammaDataProcessorAllValid);
-	    } else {
-
+	    }
+	    if (!simulation || simulation_pythia) {
 		if (useMB) pool.processors.push_back(&eventDataProcessorPSMB);
 		if (useMB) pool.processors.push_back(&eventDataProcessorPSMBHT1);
 		if (useMB) pool.processors.push_back(&eventDataProcessorPSMBHT2);

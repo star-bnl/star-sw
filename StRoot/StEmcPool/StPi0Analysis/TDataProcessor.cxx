@@ -9,6 +9,9 @@
 
 ClassImp(TDataProcessor);
 
+Bool_t TDataProcessor::compareIgnoreWeight = false;
+Bool_t TDataProcessor::compareIgnoreCuts = false;
+
 TDataProcessor::TDataProcessor(const Char_t *name, const Char_t *title)
 	: inherited(name, title) {
 	this->debug = 0;
@@ -69,10 +72,14 @@ Bool_t TDataProcessor::operator==(const this_type &processor) const {
 	if (this->debug) cout << "branch name: " << result << endl;
 	if (result) result &= (strcmp(this->getHistogramName(), processor.getHistogramName()) == 0);
 	if (this->debug) cout << "histogram name: " << result << endl;
-	if (result) result &= (this->getCuts() == processor.getCuts());
-	if (this->debug) cout << "cuts: " << result << endl;
-	if (result) result &= (this->getWeightCalculator() == processor.getWeightCalculator());
-	if (this->debug) cout << "weight: " << result << endl;
+	if (!this_type::compareIgnoreCuts) {
+	    if (result) result &= (this->getCuts() == processor.getCuts());
+	    if (this->debug) cout << "cuts: " << result << endl;
+	}
+	if (!this_type::compareIgnoreWeight) {
+	    if (result) result &= (this->getWeightCalculator() == processor.getWeightCalculator());
+	    if (this->debug) cout << "weight: " << result << endl;
+	}
 
 	if (this->debug) cout << "TDataProcessor::operator==() finished: " << result << endl;
 	return result;

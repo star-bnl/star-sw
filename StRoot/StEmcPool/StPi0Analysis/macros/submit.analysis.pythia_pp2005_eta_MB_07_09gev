@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set_option 'files_per_job_analysis=1 discard_stdout'
+
+export ANALYSIS_NAME='Pythia pp2005 MB eta analysis, 7_9gev dataset'
+export ANALYSIS_TAG='pythia_pp2005'
+export ANALYSIS_SUBTAG=$ANALYSIS_TAG'_eta_MB_07_09gev'
+export ANALYSIS_DATA=$DATA_PATH'/pythia_pp2005_MB_07_09gev/*.root'
+export ANALYSIS_CONFIG='weight_pythia_07_09gev useMB pp2005 simulation pythia nocentral eta_sim'
+export ANALYSIS_WEIGHT='weights_pp2005_'$WEIGHT_ITERATION'.root'
+export ANALYSIS_OUTDIR=$DATAOUT_PATH'/pythia_pp2005_eta_MB_07_09gev'
+export ANALYSIS_FINALDIR=$DATAFINAL_PATH'/'
