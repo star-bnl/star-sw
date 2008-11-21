@@ -23,15 +23,29 @@
 // forward declarations
 class daq_dta ;
 class daqReader ;
+class daq_det ;
 
 // helpers
 extern int checkBank(char *in, char *expect) ;
 extern int *legacyDetp(int rts_id, char *datap) ;
 
+
+class daq_det_factory
+{
+public:
+	daq_det_factory() {} ;
+	virtual ~daq_det_factory() {} ;
+
+	static daq_det *make_det(int wh) ;
+protected:
+	static daq_det_factory *det_factories[32] ;	// for real dets
+	static daq_det_factory *pseudo_factories[32] ;	// for pseudo/internal dets such as whole EMC
+	virtual daq_det *create() = 0 ;
+} ;
+
+
 class daq_det {
 protected:
-//	u_int file_ix ;
-//	u_int evt_ix ;
 
 	u_char present ;	// in this event: bitmask: 1 in DATAP; 2 in SFS
 
@@ -104,7 +118,7 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.2 2008/11/13 00:18:45 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.3 2008/11/21 18:34:43 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
