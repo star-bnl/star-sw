@@ -1,7 +1,7 @@
 #ifndef VOGEL2_C
 #define VOGEL2_C
 
-#include <TGraph.h>
+//#include <TGraph.h>
 
 //#include <TBinParameters.h>
 //#include <TBinStatistics.h>
