@@ -1196,6 +1196,11 @@ daq_det *daqReader::det(const char *which)
 {
 	assert(which) ;
 
+
+
+
+
+	// for speed, first we try what we already created...
 	for(int i=0;i<DAQ_READER_MAX_DETS;i++) {
 		if(dets[i]) {
 			if(strcasecmp(which, dets[i]->name)==0) return dets[i] ;
@@ -1205,10 +1210,38 @@ daq_det *daqReader::det(const char *which)
 		}
 	}
 
-	LOG(ERR,"Requesting det \"%s\" -- not created",which) ;
-	assert(!"UNKNOWN det") ;
+	LOG(WARN,"det %s not yet created... attempting through factory...",which) ;
+	daq_det_factory *f ;
+	int id = -1000 ;	// assume not found
 
-	return 0 ;
+	// not yet created; try real dets first...
+	for(int i=0;i<DAQ_READER_MAX_DETS;i++) {
+		char *name = rts2name(i) ;
+		if(name == 0) continue ;
+
+		if(strcasecmp(name,which)==0) {
+
+			dets[i] = f->make_det(i) ;
+			dets[i]->managed_by(this) ;
+
+			return dets[i] ;	// done...
+		}
+	}
+
+	// not found in DAQ dets, try pseudo dets...
+	if(strcasecmp(which,"emc")==0) id = -BTOW_ID ;	// by definition...
+
+	if(id < -32) {	// not found even in pseudo
+		LOG(CRIT,"Requested det \"%s\" not created -- check spelling!",which) ;
+		assert(!"UNKNOWN DET") ;
+		return 0 ;
+	}
+
+	int wh = -id ;	// make positive for pseudo array...
+	pseudo_dets[wh] = f->make_det(id) ;
+	pseudo_dets[wh]->managed_by(this) ;
+	
+	return pseudo_dets[wh] ;
 }
 
 void daqReader::insert(class daq_det *which, int id)

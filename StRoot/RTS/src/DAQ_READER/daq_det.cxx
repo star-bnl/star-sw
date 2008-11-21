@@ -15,8 +15,64 @@
 #include "daq_dta.h"
 
 
-int daq_det::endianess = 0 ; // the executing machine is little endian (0)
+//static
+daq_det_factory *daq_det_factory::pseudo_factories[32] ;
+daq_det_factory *daq_det_factory::det_factories[32] ;
 
+
+//static
+daq_det *daq_det_factory::make_det(int wh)
+{
+	daq_det_factory *use_factory = 0  ;
+	char libname[64] ; 
+
+	libname[0] = 0 ;	// cautious...
+
+	if(wh < 0) {	// super-special rare pseudo det cases; deal by hand...
+		switch(wh) {
+		case -BTOW_ID :
+			sprintf(libname,"daq_emc.so") ;
+			break ;
+		}
+	}
+	else {
+		sprintf(libname,"daq_%s.so",rts2name(wh)) ;
+	}
+
+	// dets are in uppercase, turn all to lowercase...
+	for(u_int i=0;i<strlen(libname);i++) {
+		libname[i] = tolower(libname[i]) ;
+	}
+
+
+	if(wh < 0) {		// is this a pseudo det?
+		wh = -wh ;	// reverse sign!
+		use_factory = pseudo_factories[wh] ;
+	}
+	else {	// normal det
+		use_factory = det_factories[wh] ;
+	}
+
+
+	if(use_factory == 0) {	// not inserted? need shared lib load...
+#ifdef __ROOT__
+		gSomething->Loadsomething(libname) ;
+#else
+		// shared lib load not done yet, let it fail...
+#endif
+	}
+
+	if(use_factory == 0) {	// still nothing???
+		LOG(ERR,"Can't load or find detector %d,libname %s",wh,libname) ;
+	}
+
+	assert(use_factory) ;	// what else...
+
+	return use_factory->create() ;
+}
+
+
+int daq_det::endianess = 0 ; // the executing machine is little endian (0)
 
 
 daq_det::daq_det(daqReader *rts_caller) 

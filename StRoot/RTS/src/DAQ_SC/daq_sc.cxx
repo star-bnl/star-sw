@@ -11,6 +11,23 @@
 
 extern int sc_reader(char *m, struct sc_t *sc, u_int driver) ;
 
+
+class daq_det_sc_factory : public daq_det_factory
+{
+public:
+	daq_det_sc_factory() {
+		//fprintf(stderr,"SC: inserting into factory\n") ;
+		daq_det_factory::det_factories[SC_ID] = this ;
+	}
+
+	daq_det *create() {
+		//fprintf(stderr,"SC: creating\n") ;
+		return new daq_sc ;
+	}
+} ;
+
+static daq_det_sc_factory sc_factory ;
+
 const char *daq_sc::help_string = "SC tst\n" ;
 
 
