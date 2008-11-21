@@ -155,13 +155,13 @@ struct TcdSetup
 
 #define L1_DSM_OBJECT    1
 #define BC1_DSM_OBJECT   2
-#define MXQ_DSM_OBJECT   3
+#define MXQ_QT_OBJECT    3
 #define TOF_DSM_OBJECT   4
 #define BCW_DSM_OBJECT   5
 #define BCE_DSM_OBJECT   6
 #define FEQ_QT_OBJECT    7
 #define BBC_DSM_OBJECT   8
-#define BBQ_DSM_OBJECT   9
+#define BBQ_QT_OBJECT    9
 #define FMS_DSM_OBJECT  10
 #define QT1_FMS_OBJECT  11
 #define QT2_FMS_OBJECT  12
