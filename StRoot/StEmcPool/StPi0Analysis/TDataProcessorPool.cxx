@@ -1,6 +1,5 @@
 #include "TDataProcessorPool.h"
 #include "TDataProcessor.h"
-#include "TDataPreloader.h"
 
 #include <TTree.h>
 #include <TFile.h>
@@ -55,7 +54,6 @@ TDataProcessorPool::TDataProcessorPool(const Char_t *name, const Char_t *title)
 	this->splitLevel = 99;
 	this->basketSize = 32000;
 	this->compression = 9;
-	this->mPreloader = 0;
 }
 
 TDataProcessorPool::TDataProcessorPool(const this_type &pool)
@@ -68,7 +66,6 @@ TDataProcessorPool::TDataProcessorPool(const this_type &pool)
 	this->basketSize = 32000;
 	this->splitLevel = 99;
 	this->compression = 9;
-	this->mPreloader = 0;
 	this->operator=(pool);
 }
 
@@ -183,7 +180,6 @@ Bool_t TDataProcessorPool::processFile(const TFile *inFile, TFile *outFile) {
 					    Bool_t processorExist = false;
 					    for (list_type::iterator iter = this->processors.begin();iter != this->processors.end();++iter) {
 						processor_type_pointer &processor = *iter;
-						//if (processor && processor->getTreeName() && ((!isPlainTree && (strcmp(processor->getTreeName(), readTree->GetName()) == 0)) || (isPlainTree && (strcmp(TString(processor->getTreeName()) + "Plain", readTree->GetName()) == 0)))) {
 						if (processor && processor->getTreeName() && (strcmp(processor->getTreeName(), readTree->GetName()) == 0)) {
 						    procs[procsNum++] = processor;
 						    processorExist = true;
@@ -197,8 +193,6 @@ Bool_t TDataProcessorPool::processFile(const TFile *inFile, TFile *outFile) {
 						TClonesArray *arr = 0;
 						TObject *plainStructure = 0;
 						if (debug) cout << "Getting entry " << entryInd << ": setting input branch address" << endl;
-						TDataPreloader::thread_type *thread = this->mPreloader ? this->mPreloader->getThread() : 0;
-						if (thread) thread->Lock();
 						if (isPlainTree) {
 						    readTree->SetBranchAddress(branch->GetName(), &plainStructure);
 						    if (debug) cout << "set plain structure address" << endl;
@@ -206,7 +200,6 @@ Bool_t TDataProcessorPool::processFile(const TFile *inFile, TFile *outFile) {
 						    readTree->SetBranchAddress(branch->GetName(), &arr);
 						    if (debug) cout << "set array address" << endl;
 						}
-						if (thread) thread->UnLock();
 						if (debug) cout << "Done" << endl;
 						if (readTree->GetEntry(entryInd) <= 0) {
 						    cout << "Cannot get entry " << entryInd << endl;
@@ -349,9 +342,15 @@ Bool_t TDataProcessorPool::processFile(const Char_t *filename, const Char_t *out
 		if (strncmp(filename, "@", 1) == 0) {
 		    isFileList = true;
 		    rawFilename = filename + 1;
+		} else if (strncmp(filename, "filelist://", 11) == 0) {
+		    isFileList = true;
+		    rawFilename = filename + 11;
 		} else if (strncmp(filename, "filelist:", 9) == 0) {
 		    isFileList = true;
 		    rawFilename = filename + 9;
+		} else if (strncmp(filename, "file://", 7) == 0) {
+		    isFile = true;
+		    rawFilename = filename + 7;
 		} else if (strncmp(filename, "file:", 5) == 0) {
 		    isFile = true;
 		    rawFilename = filename + 5;
@@ -365,13 +364,6 @@ Bool_t TDataProcessorPool::processFile(const Char_t *filename, const Char_t *out
 		if (isFileList) {
 			cout << "Reading file list " << rawFilename << endl;
 			TString filenameExact = findFile(rawFilename);
-			//this->mPreloader = new TDataPreloader();
-			if (this->mPreloader) {
-			    this->mPreloader->debug = 1;//this->debug;
-			    this->mPreloader->preloadFiles = 5;
-			    this->mPreloader->openFilelist(filenameExact);
-			    sleep(10);
-			}
 			ifstream ifilelist(filenameExact);
 			Int_t fileNum = 1;
 			Char_t filenameBuf[1024];
@@ -384,11 +376,6 @@ Bool_t TDataProcessorPool::processFile(const Char_t *filename, const Char_t *out
 				result &= this->processFile(filenameBuf, outPath);
 				fileNum++;
 			}
-			if (this->mPreloader) {
-			    this->mPreloader->closeFilelist();
-			    delete this->mPreloader;
-			    this->mPreloader = 0;
-			}
 		} else if (isFile) {
 			cout << "File " << rawFilename;
 			TString dataFilenameStr = findFile(rawFilename);
@@ -396,12 +383,7 @@ Bool_t TDataProcessorPool::processFile(const Char_t *filename, const Char_t *out
 			if (dataFilename) {
 				Long_t id, size, flags, modtime;
 				if (gSystem->GetPathInfo(dataFilename, &id, &size, &flags, &modtime) == 0) {
-					TFile *dataFile = 0;
-					if (this->mPreloader) {
-					    dataFile = this->mPreloader->openFile(dataFilename);
-					} else {
-    					    dataFile = new TFile(dataFilename, "READ");
-    					}
+					TFile *dataFile = new TFile(dataFilename, "READ");
 					if (dataFile && dataFile->IsOpen()) {
 						cout << ": reading..." << endl;
 						TFile *outFile = 0;
@@ -436,12 +418,9 @@ Bool_t TDataProcessorPool::processFile(const Char_t *filename, const Char_t *out
 						}
 					} else cout << " not opened" << endl;
 					if (dataFile) {
-					    if (this->mPreloader) {
-						this->mPreloader->closeFile(dataFile);
-					    } else {
-						dataFile->Close();
-						delete dataFile;
-					    }
+					    dataFile->Close();
+					    delete dataFile;
+					    dataFile = 0;
 					}
 				} else cout << " does not exist" << endl;
 			} else cout << " ???" << endl;

@@ -2,7 +2,7 @@
 
 #include <TMath.h>
 #include <TAxis.h>
-#include <TVector3.h>
+//#include <TVector3.h>
 
 //#include <iostream>
 //using namespace std;
@@ -71,6 +71,7 @@ TCandidateDataProcessor::this_type &TCandidateDataProcessor::operator=(const thi
 	this->multiplicityPrimaryDistributions = proc.multiplicityPrimaryDistributions;
 	this->multiplicityPointsDistributions = proc.multiplicityPointsDistributions;
 	this->pointTrackDistDistributions = proc.pointTrackDistDistributions;
+	this->pointTrackDist2Distributions = proc.pointTrackDist2Distributions;
 	this->point1 = proc.point1;
 	this->point2 = proc.point2;
 	this->points = proc.points;
@@ -122,6 +123,10 @@ void TCandidateDataProcessor::Print(Option_t* option) const {
 		distr.Print(newPrefix.Data());
 	}
 	for (list_type::const_iterator iter = this->pointTrackDistDistributions.begin();iter != this->pointTrackDistDistributions.end();++iter) {
+		const distribution_type &distr = *iter;
+		distr.Print(newPrefix.Data());
+	}
+	for (list_type::const_iterator iter = this->pointTrackDist2Distributions.begin();iter != this->pointTrackDist2Distributions.end();++iter) {
 		const distribution_type &distr = *iter;
 		distr.Print(newPrefix.Data());
 	}
@@ -183,6 +188,12 @@ Bool_t TCandidateDataProcessor::add(const inherited &processor) {
 			for (list_type::iterator iterMy = this->pointTrackDistDistributions.begin();iterMy != this->pointTrackDistDistributions.end();++iterMy) added |= (*iterMy).add(distr);
 			if (!added) this->pointTrackDistDistributions.push_back(distr);
 		}
+		for (list_type::const_iterator iter = proc.pointTrackDist2Distributions.begin();iter != proc.pointTrackDist2Distributions.end();++iter) {
+			const distribution_type &distr = *iter;
+			Bool_t added = false;
+			for (list_type::iterator iterMy = this->pointTrackDist2Distributions.begin();iterMy != this->pointTrackDist2Distributions.end();++iterMy) added |= (*iterMy).add(distr);
+			if (!added) this->pointTrackDist2Distributions.push_back(distr);
+		}
 	}
 	if (this->debug) cout << "TCandidateDataProcessor::add finished: " << result << endl;
 	return result;
@@ -191,21 +202,21 @@ Bool_t TCandidateDataProcessor::add(const inherited &processor) {
 Bool_t TCandidateDataProcessor::process(const void *data, const void *evt, Float_t wRef) {
 	Bool_t result = this->inherited::process(data, evt, wRef);
 	if (data && result) {
-		cuts_type &cuts = this->getCuts();
+		const cuts_type &cuts = this->getCuts();
 		//const cuts_type::parameters_type &cutParameters = cuts.getParameters();
 		const weight_calculator_type &weightCalculator = this->getWeightCalculator();
 		const TMyCandidateTreeData &candidate = *((const TMyCandidateTreeData*)data);
 		result = false;
 		TEventParameters eventParameters1;
 		TEventParameters eventParameters2;
-		Int_t passedEventCuts1 = cuts.passEventCuts(candidate.point1.event, eventParameters1, true);
-		Int_t passedEventCuts2 = cuts.passEventCuts(candidate.point2.event, eventParameters2, true);
+		Int_t passedEventCuts1 = cuts.passEventCuts(candidate.point1.event, eventParameters1);
+		Int_t passedEventCuts2 = cuts.passEventCuts(candidate.point2.event, eventParameters2);
 		TPointParameters pointParameters1;
 		TPointParameters pointParameters2;
-		Int_t passedPointCuts1 = cuts.passPointCuts(candidate.point1.event, candidate.point1.point, eventParameters1, pointParameters1, true);
-		Int_t passedPointCuts2 = cuts.passPointCuts(candidate.point2.event, candidate.point2.point, eventParameters2, pointParameters2, true);
+		Int_t passedPointCuts1 = cuts.passPointCuts(candidate.point1.event, candidate.point1.point, eventParameters1, pointParameters1);
+		Int_t passedPointCuts2 = cuts.passPointCuts(candidate.point2.event, candidate.point2.point, eventParameters2, pointParameters2);
 		TCandidateParameters candidateParameters;
-		Int_t passedCandidateCuts = cuts.passCandidateCuts(candidate, candidate.point1.event, eventParameters1, candidate.point1.point, pointParameters1, candidate.point2.event, eventParameters2, candidate.point2.point, pointParameters2, candidateParameters, true);
+		Int_t passedCandidateCuts = cuts.passCandidateCuts(candidate, candidate.point1.event, eventParameters1, candidate.point1.point, pointParameters1, candidate.point2.event, eventParameters2, candidate.point2.point, pointParameters2, candidateParameters);
 		if (passedEventCuts1 && passedEventCuts2 && passedPointCuts1 && passedPointCuts2 && passedCandidateCuts) {
 			result = true;
 			this->numPassedAllCuts++;
@@ -238,7 +249,8 @@ Bool_t TCandidateDataProcessor::process(const void *data, const void *evt, Float
 			}
 			for (list_type::iterator iter = this->multiplicityPrimaryDistributions.begin();iter != this->multiplicityPrimaryDistributions.end();++iter) {
 				distribution_type &distr = *iter;
-				tempPar.m = candidate.point1.event.nPrimary;
+				//tempPar.m = candidate.point1.event.nPrimary;
+				tempPar.m = candidate.point1.event.uncorrectedNumberOfTpcPrimaries;
 				distr.fill(tempPar, w);
 			}
 			for (list_type::iterator iter = this->multiplicityPointsDistributions.begin();iter != this->multiplicityPointsDistributions.end();++iter) {
@@ -248,11 +260,12 @@ Bool_t TCandidateDataProcessor::process(const void *data, const void *evt, Float
 			}
 			for (list_type::iterator iter = this->pointTrackDistDistributions.begin();iter != this->pointTrackDistDistributions.end();++iter) {
 				distribution_type &distr = *iter;
-				//tempPar.m = pointParameters1.distTrack;
-				//distr.fill(tempPar, w);
-				//tempPar.m = pointParameters2.distTrack;
-				//distr.fill(tempPar, w);
-				tempPar.m = TMath::Min(pointParameters1.distTrack, pointParameters2.distTrack);
+				tempPar.m = candidateParameters.distTrackClosest;
+				distr.fill(tempPar, w);
+			}
+			for (list_type::iterator iter = this->pointTrackDist2Distributions.begin();iter != this->pointTrackDist2Distributions.end();++iter) {
+				distribution_type &distr = *iter;
+				tempPar.m = candidateParameters.distTrackClosest2;
 				distr.fill(tempPar, w);
 			}
 			this->point1.process(&candidate.point1.point, &candidate.point1.event, w);

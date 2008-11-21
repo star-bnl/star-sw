@@ -24,6 +24,14 @@ TBinParameters::TBinParameters(const this_type &binparam)
 	this->operator=(binparam);
 }
 
+TBinParameters::TBinParameters(TBinVariable avariable, Float_t amin, Float_t amax)
+	: inherited() {
+	this->variable = avariable;
+	this->min = amin;
+	this->max = amax;
+	this->trueCenter = 0;
+}
+
 TBinParameters::~TBinParameters() {
 }
 

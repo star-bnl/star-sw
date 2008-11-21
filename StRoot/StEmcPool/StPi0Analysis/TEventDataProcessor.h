@@ -5,6 +5,8 @@ DEFINE_HISTOGRAM_1D(Z,                             eventParameters.zTPC, "Z_{TPC
 DEFINE_HISTOGRAM_1D(Zused,                         eventParameters.zUse, "Z_{vert combined};Z_{vert combined}");
 DEFINE_HISTOGRAM_1D(Zbbc,                          eventParameters.zBBC, "Z_{BBC};Z_{BBC}");
 DEFINE_HISTOGRAM_2D(ZBBCvsTPC,                     eventParameters.zTPC, eventParameters.zBBC, "Z_{BBC} vs. Z_{TPC};Z_{TPC};Z_{BBC}");
+DEFINE_HISTOGRAM_1D(ZBBCMinusTPC,                  (eventParameters.zTPC != 0) ? (eventParameters.zBBC - eventParameters.zTPC) : -1000, "Z_{BBC} - Z_{TPC};Z_{BBC} - Z_{TPC}");
+DEFINE_HISTOGRAM_2D(BBCWMinusEvsTPC,               (eventParameters.zTPC != 0) ? eventParameters.zTPC : -1000, event.bbcEarliestWest - event.bbcEarliestEast, "BBC W-E vs. Z_{TPC};Z_{TPC};BBC W-E");
 DEFINE_HISTOGRAM_2D(ZBBCtoTPC,                     eventParameters.zTPC, eventParameters.zBBC - eventParameters.zTPC, "Z_{BBC} - Z_{TPC} vs. Z_{TPC};Z_{TPC};Z_{BBC} - Z_{TPC}");
 DEFINE_HISTOGRAM_1D(TracksNumber,                  event.nPrimary, "Number of primary tracks;Number of primary tracks");
 DEFINE_HISTOGRAM_1D(PointsNumber,                  event.nPoints, "Number of BEMC points;Number of BEMC points");
@@ -52,7 +54,9 @@ DEFINE_HISTOGRAM_1D(JetPhi,                        event.jet.phi, "Jet phi;Jet p
 DEFINE_HISTOGRAM_1D(JetEnergy,                     TMath::Abs(event.jet.eT), "Jet E_{T};Jet E_{T}, GeV");
 DEFINE_HISTOGRAM_2D(TotalEMCJetEt,                 event.totalBEMCPointsEt, TMath::Abs(event.jet.eT), "Total EMC vs. Jet E_{T};Total EMC E_{T}, GeV;Jet E_{T}, GeV");
 DEFINE_HISTOGRAM_2D(BbcWE,                         event.bbcEarliestWest, event.bbcEarliestEast, "BBC West vs. East;BBC West;BBC East")
+DEFINE_HISTOGRAM_1D(BbcWMinusE,                    event.bbcEarliestWest - event.bbcEarliestEast, "BBC West - East;BBC West - East;Events")
 DEFINE_HISTOGRAM_2D(NumberHitsBTOWstuckbit,        event.nHitsBTOW, event.nHitsBTOWstuckbit, "Number of BTOW hits: stuck bits vs. total;Number of BTOW hits;With stuck bits")
+DEFINE_HISTOGRAM_1D(PartonicPt,                    event.simulatedParticle.pT, "PYTHIA partonic p_{T};p_{T}");
 
 #else
 

@@ -68,7 +68,7 @@ DEFINE_CUT_PARAMETER(Float_t, highestHitEnergyFractionBTOW)
 DEFINE_CUT_PARAMETER(Float_t, jetEtLow)
 DEFINE_CUT_PARAMETER(Float_t, jetDistCutLow)
 DEFINE_CUT_PARAMETER(Float_t, jetDistCutHigh)
-DEFINE_CUT_PARAMETER(Char_t*, bunchCrossingIdOffsetsFilename)
+DEFINE_CUT_PARAMETER(TString, bunchCrossingIdOffsetsFilename)
 DEFINE_CUT_PARAMETER(Float_t, zBBCcoeff0)
 DEFINE_CUT_PARAMETER(Float_t, zBBCcoeff1)
 DEFINE_CUT_PARAMETER(Bool_t, useZTPC)
@@ -85,11 +85,18 @@ DEFINE_CUT_PARAMETER(Int_t, highestAdcLow)
 DEFINE_CUT_PARAMETER(Int_t, highestAdcHigh)
 DEFINE_CUT_PARAMETER(Float_t, highestEtLow)
 DEFINE_CUT_PARAMETER(Float_t, highestEtHigh)
+DEFINE_CUT_PARAMETER(TString, badEventsListFilename)
+DEFINE_CUT_PARAMETER(Float_t, pythiaPi0PtCutoff)
+DEFINE_CUT_PARAMETER(Float_t, calibrationSlope)
 
 #else
 
 #ifndef StPi0Analysis_TCutParameters_H
 #define StPi0Analysis_TCutParameters_H
+
+#include <list>
+#include <map>
+using namespace std;
 
 #include <TNamed.h>
 

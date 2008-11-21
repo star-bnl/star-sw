@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set_option 'files_per_job_analysis=1'
+
 export ANALYSIS_NAME='Real data pp2005 analysis - MinBias from ppProductionMinBias dataset'
 export ANALYSIS_TAG='data_pp2005'
 export ANALYSIS_SUBTAG=$ANALYSIS_TAG'_MB_ppProductionMinBias'

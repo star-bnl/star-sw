@@ -21,8 +21,6 @@
 //#pragma link C++ class list<TDataProcessor*>::reverse_iterator+;
 //#pragma link C++ class list<TDataProcessor*>::const_reverse_iterator+;
 
-#pragma link C++ class TDataPreloader+;
-
 #pragma link C++ class TDataProcessorPool+;
 #pragma link C++ global poolsList;
 #pragma link C++ function removePool;
@@ -50,7 +48,13 @@
 #pragma link C++ function isBadRun_normal;
 #pragma link C++ function isBadRun_strict;
 #pragma link C++ function isBadRun_verystrict;
+#pragma link C++ function isBadRun_beambg;
+#pragma link C++ function isBadRun_bunchCrossingId7bit;
 #pragma link C++ function isGoodFtpcRun;
+#pragma link C++ function isBadEvent;
+#pragma link C++ class event_list_type+;
+#pragma link C++ function readEventListFromFile;
+#pragma link C++ function writeEventListToFile;
 
 #pragma link C++ function initCuts;
 #pragma link C++ function getCutName;
@@ -61,9 +65,11 @@
 #pragma link C++ global pQCDweight;
 #pragma link C++ function getNLOpQCD;
 #pragma link C++ global pQCDPPweight;
+#pragma link C++ global pQCDPPKweight;
 #pragma link C++ function getNLOpQCDPP;
+#pragma link C++ global pQCDPPweight_2;
+#pragma link C++ function getNLOpQCDPP_2;
 #pragma link C++ function getBunchCrossingId7bitOffset;
-#pragma link C++ global ptBinPosFuncFromQCD;
 
 #pragma link C++ class StPi0AnalysisUtil+;
 #pragma link C++ class StPi0AnalysisUtilDB+;

@@ -2,7 +2,7 @@
 #include "StPi0AnalysisUtil.h"
 
 #include "TAxis.h"
-#include "TVector3.h"
+//#include "TVector3.h"
 #include "TClass.h"
 
 #include <cmath>
@@ -92,6 +92,10 @@ void TPointDataProcessor::Print(Option_t* option) const {
 		const distribution_type &distr = *iter;
 		distr.Print(newPrefix.Data());
 	}
+	for (list_distr_type::const_iterator iter = this->pointTrackDistDistributions.begin();iter != this->pointTrackDistDistributions.end();++iter) {
+		const distribution_type &distr = *iter;
+		distr.Print(newPrefix.Data());
+	}
 	this->clusterTower.Print(newPrefix.Data());
 	this->clusterSMDE.Print(newPrefix.Data());
 	this->clusterSMDP.Print(newPrefix.Data());
@@ -122,6 +126,12 @@ Bool_t TPointDataProcessor::add(const inherited &processor) {
 			for (list_distr_type::iterator iterMy = this->multiplicityPointsDistributions.begin();iterMy != this->multiplicityPointsDistributions.end();++iterMy) added |= (*iterMy).add(distr);
 			if (!added) this->multiplicityPointsDistributions.push_back(distr);
 		}
+		for (list_distr_type::const_iterator iter = proc.pointTrackDistDistributions.begin();iter != proc.pointTrackDistDistributions.end();++iter) {
+			const distribution_type &distr = *iter;
+			Bool_t added = false;
+			for (list_distr_type::iterator iterMy = this->pointTrackDistDistributions.begin();iterMy != this->pointTrackDistDistributions.end();++iterMy) added |= (*iterMy).add(distr);
+			if (!added) this->pointTrackDistDistributions.push_back(distr);
+		}
 		this->clusterTower.add(proc.clusterTower);
 		this->clusterSMDE.add(proc.clusterSMDE);
 		this->clusterSMDP.add(proc.clusterSMDP);
@@ -144,16 +154,16 @@ Bool_t TPointDataProcessor::process(const void *data, const void *evt, Float_t w
 		pointPtr = (const TMyPointData *)data;
 	}
 	if (pointPtr && eventPtr && result) {
-		cuts_type &cuts = this->getCuts();
+		const cuts_type &cuts = this->getCuts();
 		//const cuts_type::parameters_type &cutParameters = cuts.getParameters();
 		const weight_calculator_type &weightCalculator = this->getWeightCalculator();
 		const TMyPointData &point = *pointPtr;
 		const TMyEventData &event = *eventPtr;
 		result = false;
 		TEventParameters eventParameters;
-		Int_t passedEventCuts = cuts.passEventCuts(event, eventParameters, true);
+		Int_t passedEventCuts = cuts.passEventCuts(event, eventParameters);
 		TPointParameters pointParameters;
-		Int_t passedPointCuts = cuts.passPointCuts(event, point, eventParameters, pointParameters, true);
+		Int_t passedPointCuts = cuts.passPointCuts(event, point, eventParameters, pointParameters);
 		if (passedEventCuts && passedPointCuts) {
 			result = true;
 			this->numPassedAllCuts++;
@@ -168,7 +178,11 @@ Bool_t TPointDataProcessor::process(const void *data, const void *evt, Float_t w
 				distribution_type &distr = *iter;
 				distr.fill(pointParameters, event.nPoints, w);
 			}
-			this->clusterTower.process(&point.clusterBTOW, &event, w);
+                        for (list_distr_type::iterator iter = this->pointTrackDistDistributions.begin();iter != this->pointTrackDistDistributions.end();++iter) {
+                                distribution_type &distr = *iter;
+                                distr.fill(pointParameters, pointParameters.distTrack, w);
+                        }
+ 			this->clusterTower.process(&point.clusterBTOW, &event, w);
 			this->clusterSMDE.process(&point.clusterBSMDE, &event, w);
 			this->clusterSMDP.process(&point.clusterBSMDP, &event, w);
 			this->clusters.process(&point.clusterBTOW, &event, w);

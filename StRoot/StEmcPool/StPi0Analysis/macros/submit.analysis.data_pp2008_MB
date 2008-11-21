@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export ANALYSIS_NAME='Real data pp2008 analysis (no centrality selection) - FMS-slow'
+export ANALYSIS_TAG='data_pp2008'
+export ANALYSIS_SUBTAG=$ANALYSIS_TAG'_MB'
+export ANALYSIS_DATA=$DATA_PATH'/data_pp2008/pp2008Production*.root'
+export ANALYSIS_CONFIG='noweight useMB pp2008 0-100'
+export ANALYSIS_WEIGHT=''
+export ANALYSIS_OUTDIR=$DATAOUT_PATH'/data_pp2008'
+export ANALYSIS_FINALDIR=$DATAFINAL_PATH'/'

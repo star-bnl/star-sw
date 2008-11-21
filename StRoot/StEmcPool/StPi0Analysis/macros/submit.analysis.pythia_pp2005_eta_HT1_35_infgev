@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set_option 'files_per_job_analysis=1 files_per_hour_analysis=1.2 discard_stdout'
+
+export ANALYSIS_NAME='Pythia pp2005 HT1 eta analysis, above_35gev dataset'
+export ANALYSIS_TAG='pythia_pp2005'
+export ANALYSIS_SUBTAG=$ANALYSIS_TAG'_eta_HT1_35_infgev'
+export ANALYSIS_DATA=$DATA_PATH'/pythia_pp2005_HT1_35_infgev/*.root'
+export ANALYSIS_CONFIG='weight_pythia_35_infgev useHT1 pp2005 simulation pythia nocentral eta_sim'
+export ANALYSIS_WEIGHT='weights_pp2005_'$WEIGHT_ITERATION'.root'
+export ANALYSIS_OUTDIR=$DATAOUT_PATH'/pythia_pp2005_eta_HT1_35_infgev'
+export ANALYSIS_FINALDIR=$DATAFINAL_PATH'/'

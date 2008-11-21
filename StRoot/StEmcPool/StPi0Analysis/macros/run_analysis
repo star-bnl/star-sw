@@ -42,6 +42,8 @@ export myweightfile=${19}
 echo myweightfile=$myweightfile
 export mysleep=${20}
 echo mysleep=$mysleep
+export mydiscardstdout=${21}
+echo mydiscardstdout=$mydiscardstdout
 
 cd $myscratch
 
@@ -75,9 +77,11 @@ if [[ "$mydomake" == "yes" ]] ; then make ; fi
 if [[ "$NEED_RUN_TEMP" == "yes" ]]
 then
 
-    run_command $mydebug root -b -q load_libs.C $myscript+`bash_escape_all '("@'${myscratch}'/filelist_'$myjobid'.list","'${myscratchanalysis}'/StPi0Analysis/macros/'${myweightfile}'","'${myscratch}'/root_'${mytag}'_temp_'$myjobid'.root","'\`cpp_escape_quo $myconfig\`'")'` &> ${myscratch}/root_${mytag}_temp_${myjobid}.out
+    export STDOUTFILE=${myscratch}/root_${mytag}_temp_${myjobid}.out
+    if [[ "${mydiscardstdout}" == "true" ]] ; then export STDOUTFILE='/dev/null' ; fi
+    run_command $mydebug root -b -q load_libs.C $myscript+`bash_escape_all '("@'${myscratch}'/filelist_'$myjobid'.list","'${myscratchanalysis}'/StPi0Analysis/macros/'${myweightfile}'","'${myscratch}'/root_'${mytag}'_temp_'$myjobid'.root","'\`cpp_escape_quo $myconfig\`'")'` &> ${STDOUTFILE}
 
-    cat ${myscratch}/root_${mytag}_temp_${myjobid}.out
+    cat ${STDOUTFILE}
 
     ls -al
 
@@ -136,8 +140,7 @@ if [[ "$NEED_RUN_TEMP" == "yes" ]] ; then mv -f ${myscratch}/root_${mytag}_temp_
 mkdir -p $mypathout
 mkdir -p $mypathfinal
 
-copy_file_qa ${myscratch}/${mytag}_temp_${myjobid}.root  $mypathout/${mytag}_temp_${myjobid}.root
-#copy_file_qa ${myscratch}/${mytag}_final_${myjobid}.root $mypathfinal/${mytag}_final_${myjobid}.root
-copy_file_qa ${myscratch}/${mytag}_final_${myjobid}.root $mypathfinal/${mytag}.root
+if [[ -f ${myscratch}/${mytag}_temp_${myjobid}.root ]] ; then copy_file_qa ${myscratch}/${mytag}_temp_${myjobid}.root  $mypathout/${mytag}_temp_${myjobid}.root ; fi
+if [[ -f ${myscratch}/${mytag}_final_${myjobid}.root ]] ; then copy_file_qa ${myscratch}/${mytag}_final_${myjobid}.root $mypathfinal/${mytag}.root ; fi
 
 ls -al

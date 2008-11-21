@@ -45,6 +45,10 @@ Bool_t isEqual(const Float_t &op1, const Float_t &op2) {
 #endif
 }
 
+Bool_t isEqual(const TString &op1, const TString &op2) {
+    return op1 == op2;
+}
+
 Bool_t isEqual(const Int_t &op1, const Int_t &op2) {
     return op1 == op2;
 }
@@ -59,11 +63,11 @@ Bool_t isEqual(const Char_t *op1, const Char_t *op2) {
 
 Bool_t isEqual(const TWeightCalculator *op1, const TWeightCalculator *op2) {
     Bool_t result = (op1 && op2) ? ((*op1) == (*op2)) : (op1 == op2);
-/*if (!result) {
-    cout << "isEqualW = " << result << endl;
-    op1->Print("");
-    op2->Print("");
-}*/
+    return result;
+}
+
+Bool_t isEqual(const list<pair<Int_t, Int_t> > *op1, const list<pair<Int_t, Int_t> > *op2) {
+    Bool_t result = (op1 && op2) ? ((*op1) == (*op2)) : (op1 == op2);
     return result;
 }
 

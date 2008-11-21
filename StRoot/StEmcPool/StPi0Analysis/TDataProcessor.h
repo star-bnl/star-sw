@@ -57,6 +57,9 @@ public:
 		Int_t numTotal;
 		Int_t numPassedAllCuts;
 
+		static Bool_t compareIgnoreWeight;
+		static Bool_t compareIgnoreCuts;
+
 		ClassDef(TDataProcessor, STPI0ANALYSIS_VERSION)
 };
 

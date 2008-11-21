@@ -2,7 +2,7 @@
 #include "StPi0AnalysisUtil.h"
 
 #include "TAxis.h"
-#include "TVector3.h"
+//#include "TVector3.h"
 #include "TClass.h"
 
 #include <cmath>
@@ -110,13 +110,13 @@ Bool_t TSMDThresholdDataProcessor::process(const void *data, const void *evt, Fl
 		}
 	}
 	if (eventPtr && result) {
-		cuts_type &cuts = this->getCuts();
+		const cuts_type &cuts = this->getCuts();
 		//const cuts_type::parameters_type &cutParameters = cuts.getParameters();
 		const weight_calculator_type &weightCalculator = this->getWeightCalculator();
 		const TMyEventData &event = *eventPtr;
 		result = false;
 		TEventParameters eventParameters;
-		Int_t passedEventCuts = cuts.passEventCuts(event, eventParameters, true);
+		Int_t passedEventCuts = cuts.passEventCuts(event, eventParameters);
 		if (passedEventCuts) {
 			result = true;
 			this->numPassedAllCuts++;

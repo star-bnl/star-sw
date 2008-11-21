@@ -1,7 +1,7 @@
 #include "TMCGammaDataProcessor.h"
 
 #include "TAxis.h"
-#include "TVector3.h"
+//#include "TVector3.h"
 
 //#include <iostream>
 //using namespace std;
@@ -105,15 +105,15 @@ Bool_t TMCGammaDataProcessor::process(const void *data, const void *evt, Float_t
 		gammaPtr = (const TMySimulatedParticleData *)data;
 	}
 	if (gammaPtr && eventPtr && result) {
-		cuts_type &cuts = this->getCuts();
+		const cuts_type &cuts = this->getCuts();
     		const weight_calculator_type &weightCalculator = this->getWeightCalculator();
 		const TMySimulatedParticleData &gamma = *gammaPtr;
 		const TMyEventData &event = *eventPtr;
 		result = false;
 		TEventParameters eventParameters;
-		Int_t passedEventCuts = cuts.passEventCuts(event, eventParameters, true);
+		Int_t passedEventCuts = cuts.passEventCuts(event, eventParameters);
 		TGammaParameters gammaParameters;
-		Int_t passedGammaCuts = cuts.passGammaCuts(event, gamma, eventParameters, gammaParameters, true);
+		Int_t passedGammaCuts = cuts.passGammaCuts(event, gamma, eventParameters, gammaParameters);
 //cout << "="; cout.flush();
 		if (passedEventCuts && passedGammaCuts) {
 			result = true;

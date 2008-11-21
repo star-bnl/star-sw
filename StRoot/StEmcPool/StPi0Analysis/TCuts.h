@@ -55,20 +55,20 @@ class TCuts : public TNamed {
 		MEMBER_DEF(parameters_type, ParametersEvent)
 		cut_type EVENT_ALL_CUTS;
 		cut_type EVENT_ALL_CUTS_NOT;
-		cut_type passEventCuts(const TMyEventData &event, TEventParameters &eventParameters, Bool_t getParameters = true);
-                cut_number_type numPassedEventCuts;
-		cuts_map_type EVENT_passedCuts;
-		cuts_map_type EVENT_passedCuts_all;
-		cuts_map_type EVENT_passedCuts_separate;
+		cut_type passEventCuts(const TMyEventData &event, TEventParameters &eventParameters) const;
+                mutable cut_number_type numPassedEventCuts;
+		mutable cuts_map_type EVENT_passedCuts;
+		mutable cuts_map_type EVENT_passedCuts_all;
+		mutable cuts_map_type EVENT_passedCuts_separate;
 
 		MEMBER_DEF(parameters_type, ParametersPoint)
 		cut_type POINT_ALL_CUTS;
 		cut_type POINT_ALL_CUTS_NOT;
-		cut_type passPointCuts(const TMyEventData &event, const TMyPointData &point, const TEventParameters &eventParameters, TPointParameters &pointParameters, Bool_t getParameters = true);
-                cut_number_type numPassedPointCuts;
-		cuts_map_type POINT_passedCuts;
-		cuts_map_type POINT_passedCuts_all;
-		cuts_map_type POINT_passedCuts_separate;
+		cut_type passPointCuts(const TMyEventData &event, const TMyPointData &point, const TEventParameters &eventParameters, TPointParameters &pointParameters) const;
+                mutable cut_number_type numPassedPointCuts;
+		mutable cuts_map_type POINT_passedCuts;
+		mutable cuts_map_type POINT_passedCuts_all;
+		mutable cuts_map_type POINT_passedCuts_separate;
 
 		MEMBER_DEF(parameters_type, ParametersCandidate)
 		cut_type CANDIDATE_ALL_CUTS;
@@ -78,31 +78,31 @@ class TCuts : public TNamed {
 		    , const TMyPointData &point1, const TPointParameters &point1Parameters
 		    , const TMyEventData &event2, const TEventParameters &event2Parameters
 		    , const TMyPointData &point2, const TPointParameters &point2Parameters
-		    , TCandidateParameters &candidateParameters, Bool_t getParameters = true);
-                cut_number_type numPassedCandidateCuts;
-		cuts_map_type CANDIDATE_passedCuts;
-		cuts_map_type CANDIDATE_passedCuts_all;
-		cuts_map_type CANDIDATE_passedCuts_separate;
+		    , TCandidateParameters &candidateParameters) const;
+                mutable cut_number_type numPassedCandidateCuts;
+		mutable cuts_map_type CANDIDATE_passedCuts;
+		mutable cuts_map_type CANDIDATE_passedCuts_all;
+		mutable cuts_map_type CANDIDATE_passedCuts_separate;
 
 		MEMBER_DEF(parameters_type, ParametersGamma)
 		cut_type GAMMA_ALL_CUTS;
 		cut_type GAMMA_ALL_CUTS_NOT;
-		cut_type passGammaCuts(const TMyEventData &event, const TMySimulatedParticleData &gamma, const TEventParameters &eventParameters, TGammaParameters &gammaParameters, Bool_t getParameters = true);
-                cut_number_type numPassedGammaCuts;
-		cuts_map_type GAMMA_passedCuts;
-		cuts_map_type GAMMA_passedCuts_all;
-		cuts_map_type GAMMA_passedCuts_separate;
+		cut_type passGammaCuts(const TMyEventData &event, const TMySimulatedParticleData &gamma, const TEventParameters &eventParameters, TGammaParameters &gammaParameters) const;
+                mutable cut_number_type numPassedGammaCuts;
+		mutable cuts_map_type GAMMA_passedCuts;
+		mutable cuts_map_type GAMMA_passedCuts_all;
+		mutable cuts_map_type GAMMA_passedCuts_separate;
 
 		MEMBER_DEF(parameters_type, ParametersPion)
 		cut_type PION_ALL_CUTS;
 		cut_type PION_ALL_CUTS_NOT;
-		cut_type passPionCuts(const TMyEventData &event, const TMySimulatedDecayData &pion, const TEventParameters &eventParameters, const TGammaParameters &gamma1Parameters, const TGammaParameters &gamma2Parameters, TPionParameters &pionParameters, Bool_t getParameters = true);
-                cut_number_type numPassedPionCuts;
-		cuts_map_type PION_passedCuts;
-		cuts_map_type PION_passedCuts_all;
-		cuts_map_type PION_passedCuts_separate;
+		cut_type passPionCuts(const TMyEventData &event, const TMySimulatedDecayData &pion, const TEventParameters &eventParameters, const TGammaParameters &gamma1Parameters, const TGammaParameters &gamma2Parameters, TPionParameters &pionParameters) const;
+                mutable cut_number_type numPassedPionCuts;
+		mutable cuts_map_type PION_passedCuts;
+		mutable cuts_map_type PION_passedCuts_all;
+		mutable cuts_map_type PION_passedCuts_separate;
 
-                void add(const this_type &cuts);
+                void add(const this_type &cuts) const;
 
 		static cut_type noCutsRequired;
 

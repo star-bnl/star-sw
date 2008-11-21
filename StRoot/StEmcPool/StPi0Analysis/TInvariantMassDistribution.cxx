@@ -30,6 +30,16 @@ TInvariantMassDistribution::TInvariantMassDistribution(const this_type &inv)
 	if (this->debug) cout << "TInvariantMassDistribution::TInvariantMassDistribution(inv) finished" << endl;
 }
 
+TInvariantMassDistribution::TInvariantMassDistribution(const parameters_type &par)
+	: inherited() {
+	this->debug = 0;
+	this->mBinParameters.SetNameTitle("bin_parameters", "Bin parameters");
+	HISTO_INIT(Distribution)
+	HISTO_INIT(DistributionTower)
+	HISTO_INIT(DistributionEtaCoord)
+	this->setBinParameters(par);
+}
+
 TInvariantMassDistribution::~TInvariantMassDistribution() {
 	if (this->debug) cout << "~TInvariantMassDistribution " << this << " " << this->GetName() << endl;
 	HISTO_DELETE(Distribution)
@@ -59,6 +69,13 @@ Bool_t TInvariantMassDistribution::operator<(const this_type &inv) const {
 	const parameters_type &binParametersNew = inv.getBinParameters();
 	result = (binParameters < binParametersNew);
 	if (this->debug) cout << "TInvariantMassDistribution::operator< finished: " << result << endl;
+	return result;
+}
+
+Bool_t TInvariantMassDistribution::operator==(const parameters_type &par) const {
+	Bool_t result = false;
+	const parameters_type &binParameters = this->getBinParameters();
+	result = (binParameters == par);
 	return result;
 }
 

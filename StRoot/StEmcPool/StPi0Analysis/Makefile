@@ -2,11 +2,13 @@
 -include $(ROOTSYS)/test/Makefile.arch
 HSuf = h
 
+MODULE_NAME = StPi0Analysis
+
 ifeq (1$(OUTPUT_DIR),1)
 OUTPUT_DIR = $(shell pwd)
 endif
 ifeq (1$(OUTPUT_NAME),1)
-OUTPUT_NAME = StPi0Analysis
+OUTPUT_NAME = $(MODULE_NAME)
 endif
 ifeq (1$(INCDIR),1)
 INCDIR = ../..
@@ -19,7 +21,6 @@ MYS      = \
            TCutParameters.$(SrcSuf) \
            TCuts.$(SrcSuf) \
            TDataProcessor.$(SrcSuf) \
-           TDataPreloader.$(SrcSuf) \
            TDataProcessorPool.$(SrcSuf) \
            TEventDataProcessor.$(SrcSuf) \
            TInvariantMassDistribution.$(SrcSuf) \
@@ -36,33 +37,21 @@ MYDict   = $(OUTPUT_NAME)_Dict.$(SrcSuf)
 MYO      = $(MYS:.$(SrcSuf)=.$(ObjSuf)) $(MYDict:.$(SrcSuf)=.$(ObjSuf))
 MY       = $(OUTPUT_DIR)/$(OUTPUT_NAME).$(DllSuf)
 
-PROGRAMS      = $(MY)
-OBJS          = $(MYO)
 DICTIONARIES  = $(MYDict) *_Dict.$(SrcSuf)
 
 MYINCLUDES = -I$(INCDIR)
-CXXFLAGS += $(MYINCLUDES) -Wall
-LDFLAGS += -shared
+CXXFLAGS = $(shell root-config --cflags) $(MYINCLUDES) -Wall -fPIC -g
+LDFLAGS  = $(shell root-config --ldflags) -shared
+LIBS     = $(shell root-config --libs)
 
 ifeq ($(ARCH),win32gcc)
-# Windows with gcc
-
-ifeq (1$(DATASTRUCTURES_DIR),1)
-DATASTRUCTURES_DIR = DataStructures
-endif
-ifeq (1$(DATASTRUCTURES_NAME),1)
-DATASTRUCTURES_NAME = DataStructures
-endif
-LIBS += $(DATASTRUCTURES_DIR)/$(DATASTRUCTURES_NAME).$(DllSuf)
-
-ifeq (1$(STPI0COMMON_DIR),1)
-STPI0COMMON_DIR = StPi0Common
-endif
 ifeq (1$(STPI0COMMON_NAME),1)
 STPI0COMMON_NAME = StPi0Common
 endif
+ifeq (1$(STPI0COMMON_DIR),1)
+STPI0COMMON_DIR = $(STPI0COMMON_NAME)
+endif
 LIBS += $(STPI0COMMON_DIR)/$(STPI0COMMON_NAME).$(DllSuf)
-
 endif
 
 #------------------------------------------------------------------------------
@@ -70,7 +59,7 @@ endif
 .SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
 .PHONY : clean distclean
 
-all: $(PROGRAMS)
+all: $(MY)
 
 $(MY): $(MYO)
 	@echo $(LD) $(LDFLAGS) $^ $(LIBS) $(OutPutOpt)$@
@@ -78,10 +67,10 @@ $(MY): $(MYO)
 	@echo "$@ done"
 
 clean:
-	@-rm -f $(OBJS) *.d $(DICTIONARIES) $(DICTIONARIES:.$(SrcSuf)=.$(HSuf)) $(DICTIONARIES:.$(SrcSuf)=.$(ObjSuf)) *.stackdump
+	@-rm -f $(MYO) *.d $(DICTIONARIES) $(DICTIONARIES:.$(SrcSuf)=.$(HSuf)) $(DICTIONARIES:.$(SrcSuf)=.$(ObjSuf)) *.stackdump
 
 distclean: clean
-	@-rm -f $(PROGRAMS)
+	@-rm -f $(MY)
 
 .SUFFIXES: .$(SrcSuf)
 
@@ -98,8 +87,6 @@ TCuts.$(SrcSuf): TCuts.$(HSuf) TCutParameters.$(HSuf) CutDefinitions.$(HSuf) StP
 TDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
 TDataProcessorPool.$(SrcSuf): TDataProcessorPool.$(HSuf) StPi0AnalysisVersion.$(HSuf)
-
-TDataPreloader.$(SrcSuf): TDataPreloader.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
 TEventDataProcessor.$(SrcSuf): TEventDataProcessor.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
@@ -121,38 +108,35 @@ StPi0AnalysisUtil.$(SrcSuf): StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HS
 
 StPi0AnalysisUtilDB.$(SrcSuf): StPi0AnalysisUtilDB.$(HSuf)
 
-TBinParameters.$(HSuf): StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+# Header dependencies 
 
-TBinStatistics.$(HSuf): StPi0AnalysisUtil.$(HSuf) TBinParameters.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TBinParameters.$(SrcSuf): StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TCandidateDataProcessor.$(HSuf): TDataProcessor.$(HSuf) TInvariantMassDistribution.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TBinStatistics.$(SrcSuf): StPi0AnalysisUtil.$(HSuf) TBinParameters.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-#TCutParameters.$(HSuf): 
+TCandidateDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) TInvariantMassDistribution.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TDataProcessor.$(HSuf): StPi0AnalysisUtil.$(HSuf) TCuts.$(HSuf) TWeightCalculator.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TDataProcessor.$(SrcSuf): StPi0AnalysisUtil.$(HSuf) TCuts.$(HSuf) TWeightCalculator.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TDataProcessorPool.$(HSuf): TDataProcessor.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TDataProcessorPool.$(SrcSuf): TDataProcessor.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TEventDataProcessor.$(HSuf): TDataProcessor.$(HSuf) THitDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TEventDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) THitDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TInvariantMassDistribution.$(HSuf): StPi0AnalysisUtil.$(HSuf) TBinParameters.$(HSuf) TCuts.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TInvariantMassDistribution.$(SrcSuf): StPi0AnalysisUtil.$(HSuf) TBinParameters.$(HSuf) TCuts.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TPointDataProcessor.$(HSuf): TDataProcessor.$(HSuf) TClusterDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) TInvariantMassDistribution.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TPointDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) TClusterDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) TInvariantMassDistribution.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TClusterDataProcessor.$(HSuf): TDataProcessor.$(HSuf) THitDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) TInvariantMassDistribution.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TClusterDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) THitDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) TInvariantMassDistribution.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-THitDataProcessor.$(HSuf): TDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) TInvariantMassDistribution.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+THitDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) TInvariantMassDistribution.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TMCGammaDataProcessor.$(HSuf): TDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TMCGammaDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TSMDThresholdDataProcessor.$(HSuf): TDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TSMDThresholdDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TSimuDataProcessor.$(HSuf): TDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) StPi0AnalysisVersion.$(HSuf)
+TSimuDataProcessor.$(SrcSuf): TDataProcessor.$(HSuf) StPi0AnalysisUtil.$(HSuf) TBinStatistics.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
-TWeightCalculator.$(HSuf): StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HSuf)
-
-#StPi0AnalysisVersion.h:
-
+TWeightCalculator.$(SrcSuf): StPi0AnalysisUtil.$(HSuf) StPi0AnalysisVersion.$(HSuf)
 
 $(MYDict): \
            TBinParameters.$(HSuf) \
@@ -161,7 +145,6 @@ $(MYDict): \
            TCutParameters.$(HSuf) \
            TCuts.$(HSuf) \
            TDataProcessor.$(HSuf) \
-           TDataPreloader.$(HSuf) \
            TDataProcessorPool.$(HSuf) \
            TEventDataProcessor.$(HSuf) \
            TInvariantMassDistribution.$(HSuf) \

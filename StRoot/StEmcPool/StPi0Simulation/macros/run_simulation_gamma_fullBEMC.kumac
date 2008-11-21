@@ -1,4 +1,4 @@
-MACRO run_simulation_gamma nevent=3 file=somethingiswrong.fzd nparticles=1 geometrytag=nonexistent
+MACRO run_simulation_gamma_fullBEMC nevent=3 file=somethingiswrong.fzd nparticles=1 geometrytag=nonexistent
 RNDM $pid
 detp  geometry [geometrytag] Field_on hadr_on split_off
 gexec $STAR_LIB/geometry.so

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <job simulateSubmission="false" maxFilesPerProcess="&mymaxfiles;" minFilesPerProcess="&myminfiles;" filesPerHour="&myfilesperhour;" name="&mytag;">
     <command>
-	starver &mystarver;
-	cp -fr &mypwdanalysis;/StPi0Analysis/macros/&myrun; $SCRATCH/
-	$SCRATCH/&myrun; \
+starver &mystarver;
+cp -fr &mypwdanalysis;/StPi0Analysis/macros/&myrun; $SCRATCH/
+$SCRATCH/&myrun; \
 '&mypwd;' \
 '&mypwdanalysis;' \
 '&mydebug;' \
@@ -23,8 +23,10 @@ $SUMS_nProcesses \
 .$STAR_HOST_SYS \
 '&myfinal;' \
 '&myweightfile;' \
-'&mysleep;'
+'&mysleep;' \
+'&mydiscardstdout;'
     </command>
     <stdout discard="&mydiscardstdout;" URL="file:&mypathout;/&mystdout;"/>
+    <!--<stderr discard="&mydiscardstderr;" URL="file:&mypathout;/&mystderr;"/>-->
     <input URL="&myquery;"/>
 </job>

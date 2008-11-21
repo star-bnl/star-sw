@@ -1,7 +1,7 @@
 #include "TSimuDataProcessor.h"
 
 #include "TAxis.h"
-#include "TVector3.h"
+//#include "TVector3.h"
 
 //#include <iostream>
 //using namespace std;
@@ -60,6 +60,7 @@ TSimuDataProcessor::this_type &TSimuDataProcessor::operator=(const this_type &pr
 	this->gamma1 = proc.gamma1;
 	this->gamma2 = proc.gamma2;
 	this->gammas = proc.gammas;
+        this->badEvents = proc.badEvents;
 #define DEFINE_HISTOGRAMS
 #define DEFINE_HISTOGRAM_1D(NAME, X, TITLE)       HISTO_SET(proc, NAME)
 #define DEFINE_HISTOGRAM_2D(NAME, X, Y, TITLE)    HISTO_SET(proc, NAME)
@@ -77,6 +78,7 @@ void TSimuDataProcessor::Print(Option_t* option) const {
 	const Char_t *tab = "\t";
 	TString newPrefix(prefix);
 	newPrefix += tab;
+        cout << prefix << "Bad events: " << this->badEvents.size() << endl;
 	this->gamma1.Print(newPrefix.Data());
 	this->gamma2.Print(newPrefix.Data());
 	this->gammas.Print(newPrefix.Data());
@@ -101,6 +103,7 @@ Bool_t TSimuDataProcessor::add(const inherited &processor) {
 #undef DEFINE_HISTOGRAM_1D
 #undef DEFINE_HISTOGRAM_2D
 #undef DEFINE_HISTOGRAM_3D
+                this->badEvents.insert(this->badEvents.end(), proc.badEvents.begin(), proc.badEvents.end());
 		for (list_type::const_iterator iter = proc.binStatistics.begin();iter != proc.binStatistics.end();++iter) {
 			const bin_statistics_type &bin = *iter;
 			Bool_t added = false;
@@ -131,20 +134,20 @@ Bool_t TSimuDataProcessor::process(const void *data, const void *evt, Float_t wR
 		pionPtr = (const TMySimulatedDecayData *)data;
 	}
 	if (pionPtr && eventPtr && result) {
-		cuts_type &cuts = this->getCuts();
+		const cuts_type &cuts = this->getCuts();
     		//const cuts_type::parameters_type &cutParameters = cuts.getParameters();
     		const weight_calculator_type &weightCalculator = this->getWeightCalculator();
 		const TMySimulatedDecayData &pion = *pionPtr;
 		const TMyEventData &event = *eventPtr;
 		result = false;
 		TEventParameters eventParameters;
-		Int_t passedEventCuts = cuts.passEventCuts(event, eventParameters, true);
+		Int_t passedEventCuts = cuts.passEventCuts(event, eventParameters);
 		TGammaParameters gammaParameters1;
 		TGammaParameters gammaParameters2;
-		Int_t passedGammaCuts1 = cuts.passGammaCuts(event, pion.daughter1, eventParameters, gammaParameters1, true);
-		Int_t passedGammaCuts2 = cuts.passGammaCuts(event, pion.daughter2, eventParameters, gammaParameters2, true);
+		Int_t passedGammaCuts1 = cuts.passGammaCuts(event, pion.daughter1, eventParameters, gammaParameters1);
+		Int_t passedGammaCuts2 = cuts.passGammaCuts(event, pion.daughter2, eventParameters, gammaParameters2);
 		TPionParameters pionParameters;
-		Int_t passedPionCuts = cuts.passPionCuts(event, pion, eventParameters, gammaParameters1, gammaParameters2, pionParameters, true);
+		Int_t passedPionCuts = cuts.passPionCuts(event, pion, eventParameters, gammaParameters1, gammaParameters2, pionParameters);
 		if (passedEventCuts && passedGammaCuts1 && passedGammaCuts2 && passedPionCuts) {
 			result = true;
 			this->numPassedAllCuts++;
@@ -156,7 +159,8 @@ Bool_t TSimuDataProcessor::process(const void *data, const void *evt, Float_t wR
 			Float_t recoSimuRatio = (pionParameters.openangle != 0) ? (pionParameters.openangleReco / pionParameters.openangle) : 0;
 			for (list_type::iterator iter = this->binStatistics.begin();iter != this->binStatistics.end();++iter) {
 				bin_statistics_type &bin = *iter;
-				bin.fill(event.simulatedParticle.pT, pT, w);
+				//bin.fill(event.simulatedParticle.pT, pT, w);
+				bin.fill(pion.parent.summary.pT, pT, w);
 			}
 			this->gamma1.process(&pion.daughter1, &event, w);
 			this->gamma2.process(&pion.daughter2, &event, w);
@@ -164,6 +168,9 @@ Bool_t TSimuDataProcessor::process(const void *data, const void *evt, Float_t wR
 //if ((event.pTMC > 5)&&(w > 0.7)) cout << "pi0 w = " << w;
 			this->gammas.process(&pion.daughter2, &event, w);
 //if ((event.pTMC > 5)&&(w > 0.7)) cout << endl;
+			if ((cuts.getParametersPion().pythiaPi0PtCutoff > 0) && (pion.parent.summary.pT > cuts.getParametersPion().pythiaPi0PtCutoff)) {
+			    this->badEvents.push_back(pair<Int_t, Int_t>(event.runId, event.eventId));
+			}
 
 #define DEFINE_HISTOGRAMS
 #define DEFINE_HISTOGRAM_1D(NAME, X, TITLE)       if (this->hist##NAME) this->hist##NAME->Fill(X, w);

@@ -13,11 +13,8 @@ using std::list;
 #include "StPi0AnalysisVersion.h"
 
 class TDataProcessor;
-class TDataPreloader;
 
 class TDataProcessorPool : public TNamed {
-	protected: TDataPreloader *mPreloader;
-	
 	public:
 		typedef TDataProcessorPool this_type;
 		typedef TNamed inherited;
