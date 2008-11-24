@@ -22,7 +22,7 @@ public:
   virtual ~StjMCParticleListMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleListMaker.C,v 1.2 2008/09/17 19:04:13 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleListMaker.C,v 1.3 2008/11/24 22:46:55 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -41,8 +41,9 @@ public:
   {
     _mc = new StjMCMuDst(_uDstMaker);
 
-    int goodStatus[] = {1, 3};
-    _mcCut.addCut(new StjMCParticleCutStatus(2, goodStatus));
+    //    int goodStatus[] = {1, 3};
+    //    _mcCut.addCut(new StjMCParticleCutStatus(2, goodStatus));
+    _mcCut.addCut(new StjMCParticleCutEtaForStatus(-3.0, 3.0, 2));
     _mcCut.addCut(new StjMCParticleCutEtaForStatus(-3.0, 3.0, 1));
 
     _writer = new StjMCParticleListWriter("mcParticles", _file);
