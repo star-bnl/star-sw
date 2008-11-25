@@ -3,8 +3,8 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
-#include <rtsLog.h>
-#include <rtsSystems.h>
+#include <rtsLog.h>	// for my LOG() call
+
 
 // this needs to be always included
 #include <DAQ_READER/daqReader.h>
@@ -33,16 +33,19 @@
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
-static int bsmd_doer(daqReader *rdr, int do_print) ;
-static int tpc_doer(daqReader *rdr, int do_print) ;
-static int tpx_doer(daqReader *rdr, int do_print) ;
+static int bsmd_doer(daqReader *rdr, char  *do_print) ;
+static int esmd_doer(daqReader *rdr, char  *do_print) ;
+static int btow_doer(daqReader *rdr, char  *do_print) ;
+static int etow_doer(daqReader *rdr, char  *do_print) ;
+static int tpc_doer(daqReader *rdr, char *do_print) ;
+static int tpx_doer(daqReader *rdr, char *do_print) ;
 
 int main(int argc, char *argv[])
 {
 	extern char *optarg ;
 	extern int optind ;
 	int c ;
-	int print_det = -1 ;
+	char *print_det = "" ;
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel(WARN) ;
@@ -54,7 +57,7 @@ int main(int argc, char *argv[])
 			rtsLogLevel(optarg) ;
 			break ;
 		case 'D' :
-			print_det = atoi(optarg) ;
+			print_det = optarg ;
 			break ;
 		default :
 			break ;
@@ -113,28 +116,26 @@ int main(int argc, char *argv[])
 
 		
 		/***************** EMCs ************************/
-		// PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY!
-		dd = evp->det("emc_pseudo")->get("legacy") ;
-		if(dd) LOG(INFO,"EMC_PSEUDO LEGACY found") ;
 
-		// simple...
-		dd = evp->det("btow")->get("adc") ;
-		if(dd) LOG(INFO,"BTOW found") ;
+		if(btow_doer(evp, print_det)) LOG(INFO,"BTOW found") ;
 
-		dd = evp->det("etow")->get("adc") ;
-		if(dd) LOG(INFO,"ETOW found") ;
-
-		dd = evp->det("esmd")->get("adc") ;
-		if(dd) LOG(INFO,"ESMD found") ;
-
-		// BSMD
 		if(bsmd_doer(evp,print_det)) LOG(INFO,"BSMD found (any bank)") ;
 
-		// TPC
+		if(etow_doer(evp, print_det)) LOG(INFO,"ETOW found") ;
+
+		if(esmd_doer(evp, print_det)) LOG(INFO,"ESMD found") ;
+
+		/******************** TPC & TPX ***********************/
+
 		if(tpc_doer(evp,print_det)) LOG(INFO,"TPC found (legacy)") ;
 
-		// TPX
 		if(tpx_doer(evp,print_det)) LOG(INFO,"TPX found (any bank)") ;
+
+
+
+		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
+		dd = evp->det("emc_pseudo")->get("legacy") ;
+		if(dd) LOG(INFO,"EMC_PSEUDO LEGACY found") ;
 
 		
 
@@ -145,12 +146,12 @@ int main(int argc, char *argv[])
 
 
 
-static int tpx_doer(daqReader *rdr, int do_print)
+static int tpx_doer(daqReader *rdr, char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
 
-	if(do_print == TPX_ID) do_print = 1 ;
+	if(strcasestr(do_print,"tpx")) ;	// leave as is...
 	else do_print = 0 ;
 
 	// TPX
@@ -170,7 +171,7 @@ static int tpx_doer(daqReader *rdr, int do_print)
 					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				}
 
-				for(int i=0;i<dd->ncontent;i++) {
+				for(u_int i=0;i<dd->ncontent;i++) {
 					if(do_print) {
 
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
@@ -191,13 +192,14 @@ static int tpx_doer(daqReader *rdr, int do_print)
 
 }
 
-static int tpc_doer(daqReader *rdr, int do_print)
+static int tpc_doer(daqReader *rdr, char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
 
-	if(do_print == TPC_ID) do_print = 1 ;
+	if(strcasestr(do_print,"tpc")) ;	// leave as is...
 	else do_print = 0 ;
+
 
 	// although it is possible to have all sectors of the TPC
 	// present in memory, it is better to do this sector-by-sector
@@ -226,13 +228,14 @@ static int tpc_doer(daqReader *rdr, int do_print)
 	
 }
 	
-static int bsmd_doer(daqReader *rdr, int do_print)
+static int bsmd_doer(daqReader *rdr, char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
 
-	if(do_print == BSMD_ID) do_print = 1 ;
+	if(strcasestr(do_print,"bsmd")) ;	// leave as is...
 	else do_print = 0 ;
+
 
 	// do I see the non-zero-suppressed bank? let's do this by fiber...
 	for(int f=1;f<=12;f++) {
@@ -275,3 +278,97 @@ static int bsmd_doer(daqReader *rdr, int do_print)
 
 	return found ;
 }
+
+static int esmd_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"esmd")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("esmd")->get("adc") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			esmd_t *d = (esmd_t *) dd->Void ;
+
+			for(int i=0;i<ESMD_MAXFEE;i++) {
+				for(int j=0;j<ESMD_PRESIZE;j++) {
+					if(do_print) printf("ESMD: fee %2d: preamble %d: 0x%04X [%d dec]\n",i,j,d->preamble[i][j], d->preamble[i][j]) ;
+				}
+				for(int j=0;j<ESMD_DATSIZE;j++) {
+					if(do_print) printf("ESMD: fee %2d: data %d: 0x%04X [%d dec]\n",i,j,d->adc[i][j], d->adc[i][j]) ;
+				}
+
+			}
+		}
+	}
+
+	return found ;
+}
+
+static int etow_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"etow")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("etow")->get("adc") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			etow_t *d = (etow_t *) dd->Void ;
+
+			for(int i=0;i<ETOW_MAXFEE;i++) {
+				for(int j=0;j<ETOW_PRESIZE;j++) {
+					if(do_print) printf("ETOW: fee %2d: preamble %d: 0x%04X [%d dec]\n",i,j,d->preamble[i][j], d->preamble[i][j]) ;
+				}
+				for(int j=0;j<ETOW_DATSIZE;j++) {
+					if(do_print) printf("ETOW: fee %2d: data %d: 0x%04X [%d dec]\n",i,j,d->adc[i][j], d->adc[i][j]) ;
+				}
+
+			}
+		}
+	}
+
+	return found ;
+}
+
+static int btow_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"btow")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("btow")->get("adc") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			btow_t *d = (btow_t *) dd->Void ;
+
+			for(int i=0;i<BTOW_MAXFEE;i++) {
+				for(int j=0;j<BTOW_PRESIZE;j++) {
+					if(do_print) printf("BTOW: fee %2d: preamble %d: 0x%04X [%d dec]\n",i,j,d->preamble[i][j], d->preamble[i][j]) ;
+				}
+				for(int j=0;j<BTOW_DATSIZE;j++) {
+					if(do_print) printf("BTOW: fee %2d: data %d: 0x%04X [%d dec]\n",i,j,d->adc[i][j], d->adc[i][j]) ;
+				}
+
+			}
+		}
+	}
+
+	return found ;
+}
+
