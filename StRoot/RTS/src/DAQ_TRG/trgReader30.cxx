@@ -3,7 +3,7 @@
 #include <arpa/inet.h>
 
 #include <rtsLog.h>
-#include "rts.h"  // for the sake of swap32 entry
+#include <rts.h>  // for the sake of swap32 entry
 
 #include <rtsSystems.h>
 

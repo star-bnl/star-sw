@@ -11,7 +11,7 @@
 #include <rtsSystems.h>
 
 
-#include <daq_trg.h>
+#include "daq_trg.h"
 
 // this maps from the raw data to the following representation
 // sector1,slat1,ch1 ... ch5, sector1,slat2,ch1.... ch5, sector2,slat1,ch1...

@@ -9,7 +9,7 @@
 
 #define TRG_VERSION 0x32
 #include <daqFormats.h>
-#include "rts.h"  // for the sake of swap32 entry
+#include <rts.h>  // for the sake of swap32 entry
 
 #include "daq_trg.h"
 
