@@ -118,9 +118,15 @@ daq_dta *daq_esmd::handle_raw()
 		from = emc_single_reader(mem, &bytes, rts_id) ;
 		if(from == 0) return 0 ;
 
+		// in using the old VME RB, one needs to skip the first
+		// 4 bytes!
+		bytes -= 4 ;
+		from += 4 ;
+
 		raw->create(bytes,"esmd_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
 		st = (char *) raw->request(bytes) ;
-		
+
+				
 		memcpy(st, from, bytes) ;
 
 	}
@@ -173,7 +179,8 @@ daq_dta *daq_esmd::handle_adc()
 
 	esmd_t *esmd_p = (esmd_t *) adc->request(1) ;	// 1 object
 
-	u_short *data = (u_short *)((u_int)raw_dta + 4 + 128) ;	// move to data start
+//	u_short *data = (u_short *)((u_int)raw_dta + 4 + 128) ;	// move to data start
+	u_short *data = (u_short *)((u_int)raw_dta + 128) ;	// move to data start
 
 	// FY04 data has only 30 instead of 48 so we need to zap all...
 	memset(esmd_p,0,sizeof(esmd_t)) ;	
