@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.7 2008/04/28 18:44:53 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.8 2008/11/25 21:28:03 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.8  2008/11/25 21:28:03  fine
+ * preprae DAQ maker for DAQ_READER
+ *
  * Revision 1.7  2008/04/28 18:44:53  fine
  * Add the third numeric parameter for get method
  *
@@ -114,13 +117,14 @@ StRtsReaderMaker::~StRtsReaderMaker()
 }
 //_____________________________________________________________
 Int_t StRtsReaderMaker::Init() {
-
+#if 0
    if (!fFileName.IsNull() ) {
      fRtsReader = new rts_reader("R") ;  // call myself "R"; used for debugging prints...
      fRtsReader->enable("*") ;           // enable the selected det or dets
      fRtsReader->add_input(fFileName);   // add all files to the list...
      fSlaveMode = false;
    }
+#endif
    return 0;
 }
 
@@ -142,7 +146,7 @@ rts_reader *StRtsReaderMaker::InitReader()
             LOG_INFO << "StRtsReaderMaker::InitReader No evpReader available..." << endm;
          } else {
             LOG_INFO << "StRtsReaderMaker::InitReader: evpReader was found: "  << daqEvp << endm;
-            fRtsReader = daqEvp->rts_rr;
+            fRtsReader = daqEvp->rts();
             if (!fRtsReader) {
               LOG_ERROR << "StRtsReaderMaker::InitReader: no rts_reader was found!" << endm;
             }
