@@ -11,7 +11,7 @@
 // one needs to diffuse the crummy trigger stuff first
 #define TRG_VERSION	0x22
 #include <daqFormats.h>
-#include "rts.h"  // for the sake of swap32 entry
+#include <rts.h>  // for the sake of swap32 entry
 
 
 #include "daq_trg.h"
