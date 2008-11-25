@@ -22,6 +22,20 @@
 
 const char *daq_etow::help_string = "ETOW tst\n" ;
 
+class daq_det_etow_factory : public daq_det_factory
+{
+public:
+        daq_det_etow_factory() {
+                daq_det_factory::det_factories[ETOW_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_etow ;
+        }
+} ;
+
+static daq_det_etow_factory etow_factory ;
+
 
 
 daq_etow::daq_etow(daqReader *rts_caller)
@@ -76,13 +90,13 @@ int daq_etow::Make()
 
 	switch(present) {
 	case 1 :
-		LOG(TERR,"%s: %d: has DATAP",name,evt_num) ;
+		LOG(NOTE,"%s: %d: has DATAP",name,evt_num) ;
 		break ;
 	case 2 :
-		LOG(TERR,"%s: %d: has SFS(%s)",name,present,evt_num) ;
+		LOG(NOTE,"%s: %d: has SFS(%s)",name,present,evt_num) ;
 		break ;
 	case 4 :
-		LOG(TERR,"%s: %d: has DATAP within Trigger",name,evt_num) ;
+		LOG(NOTE,"%s: %d: has DATAP within Trigger",name,evt_num) ;
 		break ;
 	}
 
@@ -92,6 +106,7 @@ int daq_etow::Make()
 	
 daq_dta *daq_etow::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 

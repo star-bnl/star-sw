@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <arpa/inet.h>	// for htonl
+#include <dlfcn.h>	// shared lib support
+#include <errno.h>
 
 #include <rtsLog.h>
 #include <rts.h>
@@ -31,12 +33,12 @@ daq_det *daq_det_factory::make_det(int wh)
 	if(wh < 0) {	// super-special rare pseudo det cases; deal by hand...
 		switch(wh) {
 		case -BTOW_ID :
-			sprintf(libname,"daq_emc.so") ;
+			sprintf(libname,"libdaq_emc.so") ;
 			break ;
 		}
 	}
 	else {
-		sprintf(libname,"daq_%s.so",rts2name(wh)) ;
+		sprintf(libname,"libdaq_%s.so",rts2name(wh)) ;
 	}
 
 	// dets are in uppercase, turn all to lowercase...
@@ -44,6 +46,7 @@ daq_det *daq_det_factory::make_det(int wh)
 		libname[i] = tolower(libname[i]) ;
 	}
 
+	LOG(NOTE,"factory for det %d, lib %s",wh,libname) ;
 
 	if(wh < 0) {		// is this a pseudo det?
 		wh = -wh ;	// reverse sign!
@@ -59,6 +62,16 @@ daq_det *daq_det_factory::make_det(int wh)
 		gSomething->Loadsomething(libname) ;
 #else
 		// shared lib load not done yet, let it fail...
+		#if 0
+		errno = 0 ;
+		void *handle = dlopen("../DAQ_SC/libdaq_sc.so", RTLD_LAZY | RTLD_GLOBAL) ;
+		if(handle == 0) {
+			LOG(ERR,"dlopen failed for %s [%s]",libname,dlerror()) ;
+		}
+		else {
+			LOG(NOTE,"dlopen OK for det %d, lib %s",wh,libname) ;
+		}
+		#endif
 #endif
 	}
 
@@ -67,6 +80,8 @@ daq_det *daq_det_factory::make_det(int wh)
 	}
 
 	assert(use_factory) ;	// what else...
+
+	LOG(NOTE,"factory for %d: calling create",wh) ;
 
 	return use_factory->create() ;
 }

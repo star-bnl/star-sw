@@ -14,6 +14,20 @@ extern int fpd_reader(char *m, struct fpd_t *fpd, u_int driver) ;
 
 const char *daq_fpd::help_string = "FPD tst\n" ;
 
+class daq_det_fpd_factory : public daq_det_factory
+{
+public:
+        daq_det_fpd_factory() {
+                daq_det_factory::det_factories[FPD_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_fpd ;
+        }
+} ;
+
+static daq_det_fpd_factory fpd_factory ;
+
 
 
 daq_fpd::daq_fpd(daqReader *rts_caller)

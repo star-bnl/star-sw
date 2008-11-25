@@ -567,7 +567,7 @@ char *daqReader::get(int num, int type)
 
 
   // Tonko: before we return, call Make which prepares the DETs for operation...
-  Make() ;
+  //Make() ;
 
   // *****
   // jml 2/13/07
@@ -1211,7 +1211,6 @@ daq_det *daqReader::det(const char *which)
 	}
 
 	LOG(WARN,"det %s not yet created... attempting through factory...",which) ;
-	daq_det_factory *f ;
 	int id = -1000 ;	// assume not found
 
 	// not yet created; try real dets first...
@@ -1221,7 +1220,7 @@ daq_det *daqReader::det(const char *which)
 
 		if(strcasecmp(name,which)==0) {
 
-			dets[i] = f->make_det(i) ;
+			dets[i] = daq_det_factory::make_det(i) ;
 			dets[i]->managed_by(this) ;
 
 			return dets[i] ;	// done...
@@ -1229,7 +1228,7 @@ daq_det *daqReader::det(const char *which)
 	}
 
 	// not found in DAQ dets, try pseudo dets...
-	if(strcasecmp(which,"emc")==0) id = -BTOW_ID ;	// by definition...
+	if(strcasecmp(which,"emc_pseudo")==0) id = -BTOW_ID ;	// by definition...
 
 	if(id < -32) {	// not found even in pseudo
 		LOG(CRIT,"Requested det \"%s\" not created -- check spelling!",which) ;
@@ -1238,7 +1237,7 @@ daq_det *daqReader::det(const char *which)
 	}
 
 	int wh = -id ;	// make positive for pseudo array...
-	pseudo_dets[wh] = f->make_det(id) ;
+	pseudo_dets[wh] = daq_det_factory::make_det(id) ;
 	pseudo_dets[wh]->managed_by(this) ;
 	
 	return pseudo_dets[wh] ;

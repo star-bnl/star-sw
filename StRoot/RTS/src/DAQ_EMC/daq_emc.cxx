@@ -16,6 +16,20 @@
 
 const char *daq_emc::help_string = "EMC tst\n" ;
 
+class daq_det_emc_factory : public daq_det_factory
+{
+public:
+        daq_det_emc_factory() {
+                daq_det_factory::pseudo_factories[BTOW_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_emc ;
+        }
+} ;
+
+static daq_det_emc_factory emc_factory ;
+
 
 
 daq_emc::daq_emc(daqReader *rts_caller)

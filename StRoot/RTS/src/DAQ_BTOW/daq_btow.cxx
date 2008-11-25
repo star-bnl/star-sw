@@ -16,6 +16,20 @@
 
 #include "daq_btow.h"
 
+class daq_det_btow_factory : public daq_det_factory
+{
+public:
+	daq_det_btow_factory() {
+		daq_det_factory::det_factories[BTOW_ID] = this ;
+	}
+
+	daq_det *create() {
+		return new daq_btow ;
+	}
+} ;
+
+static daq_det_btow_factory btow_factory ;
+
 
 const char *daq_btow::help_string = "BTOW tst\n" ;
 
@@ -74,13 +88,13 @@ int daq_btow::Make()
 
 	switch(present) {
 	case 1 :
-		LOG(TERR,"%s: %d: has DATAP",name,evt_num) ;
+		LOG(NOTE,"%s: %d: has DATAP",name,evt_num) ;
 		break ;
 	case 2 :
-		LOG(TERR,"%s: %d: has SFS(%s)",name,evt_num,sfs_name) ;
+		LOG(NOTE,"%s: %d: has SFS(%s)",name,evt_num,sfs_name) ;
 		break ;
 	case 4 :
-		LOG(TERR,"%s: %d: has DATAP within Trigger",name,present) ;
+		LOG(NOTE,"%s: %d: has DATAP within Trigger",name,present) ;
 		break ;
 	default:
 		LOG(NOTE,"%s: not present",name) ;
@@ -95,6 +109,7 @@ int daq_btow::Make()
 	
 daq_dta *daq_btow::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 

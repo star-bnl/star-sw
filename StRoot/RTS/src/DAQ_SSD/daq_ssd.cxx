@@ -12,6 +12,20 @@
 
 const char *daq_ssd::help_string = "SSD tst\n" ;
 
+class daq_det_ssd_factory : public daq_det_factory
+{
+public:
+        daq_det_ssd_factory() {
+                daq_det_factory::det_factories[SSD_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_ssd ;
+        }
+} ;
+
+static daq_det_ssd_factory ssd_factory ;
+
 
 
 daq_ssd::daq_ssd(daqReader *rts_caller)
@@ -41,6 +55,7 @@ daq_ssd::~daq_ssd()
 	
 daq_dta *daq_ssd::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *

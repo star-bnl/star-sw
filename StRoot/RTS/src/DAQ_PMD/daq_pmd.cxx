@@ -13,6 +13,20 @@ extern int pmd_reader(char *m, struct pmd_t *pmd, u_int driver) ;
 
 const char *daq_pmd::help_string = "PMD tst\n" ;
 
+class daq_det_pmd_factory : public daq_det_factory
+{
+public:
+        daq_det_pmd_factory() {
+                daq_det_factory::det_factories[PMD_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_pmd ;
+        }
+} ;
+
+static daq_det_pmd_factory pmd_factory ;
+
 
 
 daq_pmd::daq_pmd(daqReader *rts_caller)
@@ -43,6 +57,7 @@ daq_pmd::~daq_pmd()
 	
 daq_dta *daq_pmd::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *

@@ -14,6 +14,21 @@ extern int ric_reader(char *m, struct ric_t *ric, u_int driver) ;
 const char *daq_ric::help_string = "RIC tst\n" ;
 
 
+class daq_det_ric_factory : public daq_det_factory
+{
+public:
+        daq_det_ric_factory() {
+                daq_det_factory::det_factories[RIC_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_ric ;
+        }
+} ;
+
+static daq_det_ric_factory ric_factory ;
+
+
 
 daq_ric::daq_ric(daqReader *rts_caller)
 {
@@ -43,6 +58,7 @@ daq_ric::~daq_ric()
 	
 daq_dta *daq_ric::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *

@@ -17,6 +17,24 @@
 
 extern int tpc_reader(char *m, tpc_t *tpc, int sec, int flag) ;
 
+
+class daq_det_tpc_factory : public daq_det_factory
+{
+public:
+	daq_det_tpc_factory() {
+		daq_det_factory::det_factories[TPC_ID] = this ;
+	}
+
+	daq_det *create() {
+		return new daq_tpc ;
+	}
+} ;
+
+static daq_det_tpc_factory tpc_factory ;
+
+
+
+
 daq_tpc::daq_tpc(daqReader *rts_caller) 
 {
 	rts_id = TPC_ID ;
@@ -44,9 +62,12 @@ daq_tpc::~daq_tpc()
 
 daq_dta *daq_tpc::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
 {
+	Make() ;
 	if(!present) return 0 ;
 
-	LOG(DBG,"%s: looking for bank %s",name,bank) ;
+
+	if(!bank || (strcasecmp(bank,"legacy")==0)) bank = "legacy" ;
+
 
 	if(strcasecmp(bank,"legacy")==0) {
 		return handle_legacy(sec,row) ;
@@ -93,6 +114,8 @@ daq_dta *daq_tpc::handle_legacy(int sec, int rdo)
 
 	legacy->rewind() ;
 	
+	LOG(NOTE,"%s: done",name) ;
+
 	if(found_something) return legacy ;
 	else return 0 ;
 }
@@ -100,7 +123,7 @@ daq_dta *daq_tpc::handle_legacy(int sec, int rdo)
 
 int daq_tpc::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt)
 {
-	trg[0].t = 0 ;
+	trg[0].t = 1234 ;
 	trg[0].daq = 0 ;
 	trg[0].trg = 4 ;	// TPC does not give the correct L0, only L2
 	trg[0].rhic = 0 ;

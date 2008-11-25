@@ -13,6 +13,19 @@
 
 
 
+class daq_det_pp2pp_factory : public daq_det_factory
+{
+public:
+        daq_det_pp2pp_factory() {
+                daq_det_factory::det_factories[PP_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_pp2pp ;
+        }
+} ;
+
+static daq_det_pp2pp_factory pp2pp_factory ;
 
 
 
@@ -58,6 +71,7 @@ daq_pp2pp::~daq_pp2pp()
 
 daq_dta *daq_pp2pp::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
 {
+	Make() ;
 	if(!present) return 0 ;	// this det is not in this event...
 
 
