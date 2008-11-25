@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.h,v 1.3 2008/10/15 20:23:20 fine Exp $
+ * $Id: StRtsReaderMaker.h,v 1.4 2008/11/25 21:28:03 fine Exp $
  * StRtsReaderMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -19,7 +19,6 @@ class StRtsReaderMaker:public StMaker
 {
    private:
      rts_reader *fRtsReader;
-     TString     fFileName;
      StRtsTable *fRtsTable;
      TString     fLastQuery;
      daq_dta    *fBank;
@@ -29,7 +28,6 @@ class StRtsReaderMaker:public StMaker
       TDataSet   *FillTable();
       StRtsTable *InitTable(const char *detName,const char *bankName);
       rts_reader *InitReader();
-      void  SetFileName (const char *fileName) {fFileName = fileName;}
 
    public:
 
@@ -41,8 +39,7 @@ class StRtsReaderMaker:public StMaker
      virtual Int_t Make();
      virtual Int_t Init();
      virtual Int_t InitRun(int run)  ;
-     const TString &FileName() const { return fFileName;}
-  
+
   // cvs
   virtual const char *GetCVS() const
     {
