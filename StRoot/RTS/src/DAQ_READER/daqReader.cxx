@@ -1210,7 +1210,7 @@ daq_det *daqReader::det(const char *which)
 		}
 	}
 
-	LOG(WARN,"det %s not yet created... attempting through factory...",which) ;
+	LOG(NOTE,"det %s not yet created... attempting through factory...",which) ;
 	int id = -1000 ;	// assume not found
 
 	// not yet created; try real dets first...
