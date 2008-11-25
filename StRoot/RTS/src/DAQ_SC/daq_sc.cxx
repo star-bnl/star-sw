@@ -28,6 +28,8 @@ public:
 
 static daq_det_sc_factory sc_factory ;
 
+
+
 const char *daq_sc::help_string = "SC tst\n" ;
 
 
@@ -62,9 +64,11 @@ daq_sc::~daq_sc()
 	
 daq_dta *daq_sc::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
+	LOG(NOTE,"SC get") ;
 	if(!present) return 0 ;
 
-	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *
+	if(!bank || strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *
 
 	if(strcasecmp(bank,"legacy") != 0) {
 		LOG(ERR,"%s: unknown bank %s",name,bank) ;

@@ -18,6 +18,20 @@ const char *daq_bsmd::help_string = "BSMD\n\
 adc	returns bsmd_t;\n\
 raw	returns raw data\n" ;
 
+class daq_det_bsmd_factory : public daq_det_factory
+{
+public:
+	daq_det_bsmd_factory() {
+		daq_det_factory::det_factories[BSMD_ID] = this ;
+	}
+
+	daq_det *create() {
+		return new daq_bsmd ;
+	}
+} ;
+
+static daq_det_bsmd_factory bsmd_factory ;
+
 
 daq_bsmd::daq_bsmd(daqReader *rts_caller) 
 {
@@ -52,6 +66,7 @@ daq_bsmd::~daq_bsmd()
 
 daq_dta *daq_bsmd::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
 {
+	Make() ;
 	if(present == 0) return 0 ;
 
 

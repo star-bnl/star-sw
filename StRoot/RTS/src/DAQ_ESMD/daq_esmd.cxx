@@ -33,6 +33,20 @@ const char *daq_esmd::help_string = "ESMD\n\
 adc	returns esmd_t;\n\
 raw	returns raw data\n" ;
 
+class daq_det_esmd_factory : public daq_det_factory
+{
+public:
+	daq_det_esmd_factory() {
+		daq_det_factory::det_factories[ESMD_ID] = this ;
+	}
+
+	daq_det *create() {
+		return new daq_esmd ;
+	}
+} ;
+
+static daq_det_esmd_factory esmd_factory ;
+
 
 daq_esmd::daq_esmd(daqReader *rts_caller) 
 {
@@ -63,7 +77,8 @@ daq_esmd::~daq_esmd()
 
 
 daq_dta *daq_esmd::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
-{
+{	
+	Make() ;
 	if(present == 0) return 0 ;
 
 

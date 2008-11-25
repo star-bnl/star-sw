@@ -13,6 +13,20 @@ extern int ftp_reader(char *m, struct ftp_t *ftp, u_int driver) ;
 
 const char *daq_ftp::help_string = "FTP tst\n" ;
 
+class daq_det_ftp_factory : public daq_det_factory
+{
+public:
+        daq_det_ftp_factory() {
+                daq_det_factory::det_factories[FTP_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_ftp ;
+        }
+} ;
+
+static daq_det_ftp_factory ftp_factory ;
+
 
 
 daq_ftp::daq_ftp(daqReader *rts_caller)
@@ -43,6 +57,7 @@ daq_ftp::~daq_ftp()
 	
 daq_dta *daq_ftp::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *

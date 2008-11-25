@@ -14,6 +14,21 @@ extern int svt_reader(char *m, struct svt_t *svt, u_int driver) ;
 const char *daq_svt::help_string = "SVT tst\n" ;
 
 
+class daq_det_svt_factory : public daq_det_factory
+{
+public:
+        daq_det_svt_factory() {
+                daq_det_factory::det_factories[SVT_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_svt ;
+        }
+} ;
+
+static daq_det_svt_factory svt_factory ;
+
+
 
 daq_svt::daq_svt(daqReader *rts_caller)
 {
@@ -46,6 +61,7 @@ daq_svt::~daq_svt()
 	
 daq_dta *daq_svt::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *

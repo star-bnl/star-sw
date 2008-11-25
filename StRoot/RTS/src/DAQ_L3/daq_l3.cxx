@@ -13,6 +13,20 @@ extern int l3_reader(char *m, struct l3_t *l3, u_int driver) ;
 
 const char *daq_l3::help_string = "L3 tst\n" ;
 
+class daq_det_l3_factory : public daq_det_factory
+{
+public:
+        daq_det_l3_factory() {
+                daq_det_factory::det_factories[L3_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_l3 ;
+        }
+} ;
+
+static daq_det_l3_factory l3_factory ;
+
 
 
 daq_l3::daq_l3(daqReader *rts_caller)

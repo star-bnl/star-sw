@@ -13,6 +13,20 @@
 
 const char *daq_trg::help_string = "TRG tst\n" ;
 
+class daq_det_trg_factory : public daq_det_factory
+{
+public:
+        daq_det_trg_factory() {
+                daq_det_factory::det_factories[TRG_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_trg ;
+        }
+} ;
+
+static daq_det_trg_factory trg_factory ;
+
 
 
 daq_trg::daq_trg(daqReader *rts_caller) : daq_det(rts_caller)
@@ -44,6 +58,7 @@ daq_trg::~daq_trg()
 	
 daq_dta *daq_trg::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *
