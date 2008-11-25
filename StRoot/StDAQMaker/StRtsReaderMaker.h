@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.h,v 1.4 2008/11/25 21:28:03 fine Exp $
+ * $Id: StRtsReaderMaker.h,v 1.5 2008/11/25 21:33:23 fine Exp $
  * StRtsReaderMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -11,7 +11,13 @@
 
 #include "StMaker.h"
 
-class rts_reader;
+#if !defined(OLD_EVP_READER) && !defined(NEW_DAQ_READER)
+class rts_reader; // new  2007 DAQ file reader
+#elif defined(NEW_DAQ_READER)
+class daqReader;
+typedef daqReader rts_reader;
+#endif
+
 class daq_dta;
 class StRtsTable;
 

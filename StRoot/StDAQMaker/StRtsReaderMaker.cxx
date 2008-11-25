@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.8 2008/11/25 21:28:03 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.9 2008/11/25 21:33:22 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.9  2008/11/25 21:33:22  fine
+ * preparing  DAQ maker for DAQ_READER
+ *
  * Revision 1.8  2008/11/25 21:28:03  fine
  * preprae DAQ maker for DAQ_READER
  *
@@ -90,14 +93,26 @@
 
 #include "TDataSetIter.h"
 
-#include "RTS/src/RTS_READER/rts_reader.h"
-#include "RTS/src/RTS_READER/daq_det.h"
-#include "RTS/src/RTS_READER/daq_dta.h"
-#include "RTS/src/RTS_READER/daq_dta_structs.h"
+#if !defined(OLD_EVP_READER) && !defined(NEW_DAQ_READER)
+#  include "RTS/src/RTS_READER/daq_det.h"
+#  include "RTS/src/RTS_READER/daq_dta.h"
+#  include "RTS/src/RTS_READER/daq_dta_structs.h"
     typedef unsigned int UINT32;
-#   include "RTS/include/evp.h"
-#   include "RTS/src/EVP_READER/cfgutil.h"
-#include "RTS/src/EVP_READER/evpReaderClass.h"
+#  include "RTS/include/evp.h"
+#  include "RTS/src/EVP_READER/cfgutil.h"
+#  include "RTS/src/EVP_READER/evpReaderClass.h"
+#  include "RTS/src/RTS_READER/rts_reader.h"
+#elif defined(NEW_DAQ_READER)
+#  include "RTS/src/DAQ_READER/daq_det.h"
+#  include "RTS/src/DAQ_READER/daq_dta.h"
+#  include "RTS/src/DAQ_READER/daq_dta_structs.h"
+    typedef unsigned int UINT32;
+#  include "RTS/include/evp.h"
+#  include "RTS/src/DAQ_READER/cfgutil.h"
+#  include "RTS/src/DAQ_READER/daqReader.h"
+#endif
+
+
 
 ClassImp(StRtsReaderMaker);
 
