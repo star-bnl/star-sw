@@ -1,14 +1,17 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 #include <rtsLog.h>
+#include <rtsSystems.h>
 
 // this needs to be always included
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
 // only the detectors we will use need to be included
+// for their structure definitions...
 #include <DAQ_BSMD/daq_bsmd.h>
 #include <DAQ_BTOW/daq_btow.h>
 #include <DAQ_EMC/daq_emc.h>
@@ -28,7 +31,8 @@
 #include <DAQ_TPX_t/daq_tpx.h>
 #include <DAQ_TRG/daq_trg.h>
 
-// more complicated detectors I wrapped inside their own functions...
+// I wrapped more complicated detectors inside their own functions
+// for this example
 static int bsmd_doer(daqReader *rdr, int do_print) ;
 static int tpc_doer(daqReader *rdr, int do_print) ;
 static int tpx_doer(daqReader *rdr, int do_print) ;
@@ -38,15 +42,19 @@ int main(int argc, char *argv[])
 	extern char *optarg ;
 	extern int optind ;
 	int c ;
+	int print_det = -1 ;
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel(WARN) ;
 
 
-	while((c = getopt(argc, argv, "d:h")) != EOF) {
+	while((c = getopt(argc, argv, "D:d:h")) != EOF) {
 		switch(c) {
 		case 'd' :
 			rtsLogLevel(optarg) ;
+			break ;
+		case 'D' :
+			print_det = atoi(optarg) ;
 			break ;
 		default :
 			break ;
@@ -56,28 +64,6 @@ int main(int argc, char *argv[])
 	class daqReader *evp ;			// tha main guy
 	evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
 
-#if 0
-	// create all the detectors we need 
-	// and assign them to our "driver" class daqReader
-	new daq_bsmd(evp) ;
-	new daq_btow(evp) ;
-	new daq_emc(evp) ;
-	new daq_esmd(evp) ;
-	new daq_etow(evp) ;
-	new daq_fpd(evp) ;
-	new daq_ftp(evp) ;
-	new daq_l3(evp) ;
-	new daq_pmd(evp) ;
-	new daq_pp2pp(evp) ;
-	new daq_ric(evp) ;
-	//new daq_sc(evp) ;
-	new daq_ssd(evp) ;
-	new daq_svt(evp) ;
-	new daq_tof(evp) ;
-	//new daq_tpc(evp) ;
-	new daq_tpx(evp) ;
-	new daq_trg(evp) ;
-#endif
 
 	while(evp->get(0,0)) {	// keep getting new events
 		daq_dta *dd ;	// generic data pointer; reused all the time
@@ -142,13 +128,13 @@ int main(int argc, char *argv[])
 		if(dd) LOG(INFO,"ESMD found") ;
 
 		// BSMD
-		if(bsmd_doer(evp,0)) LOG(INFO,"BSMD found (any bank)") ;
+		if(bsmd_doer(evp,print_det)) LOG(INFO,"BSMD found (any bank)") ;
 
 		// TPC
-		if(tpc_doer(evp,0)) LOG(INFO,"TPC found (legacy)") ;
+		if(tpc_doer(evp,print_det)) LOG(INFO,"TPC found (legacy)") ;
 
 		// TPX
-		if(tpx_doer(evp,0)) LOG(INFO,"TPX found (any bank)") ;
+		if(tpx_doer(evp,print_det)) LOG(INFO,"TPX found (any bank)") ;
 
 		
 
@@ -157,20 +143,42 @@ int main(int argc, char *argv[])
 	return 0 ;
 }
 
+
+
 static int tpx_doer(daqReader *rdr, int do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
 
+	if(do_print == TPX_ID) do_print = 1 ;
+	else do_print = 0 ;
+
 	// TPX
 	// it is better, more memory efficient, to call stuff sector by sector
 	for(int s=1;s<=24;s++) {
-		dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t!
+		/// TPX legacy not done yet!
+		dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t! but not done YET!
 		if(dd) found = 1 ;
 
+
 		dd = rdr->det("tpx")->get("adc",s) ;
-		if(dd) 	found = 1 ;
+		if(dd) 	{
+			found = 1 ;
 	
+			while(dd->iterate()) {
+				if(do_print) {
+					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				}
+
+				for(int i=0;i<dd->ncontent;i++) {
+					if(do_print) {
+
+						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
+					}
+				}
+			}
+		}
+
 		dd = rdr->det("tpx")->get("cld",s) ;
 		if(dd) 	found = 1 ;
 	
@@ -187,6 +195,9 @@ static int tpc_doer(daqReader *rdr, int do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
+
+	if(do_print == TPC_ID) do_print = 1 ;
+	else do_print = 0 ;
 
 	// although it is possible to have all sectors of the TPC
 	// present in memory, it is better to do this sector-by-sector
@@ -220,9 +231,12 @@ static int bsmd_doer(daqReader *rdr, int do_print)
 	int found = 0 ;
 	daq_dta *dd ;
 
+	if(do_print == BSMD_ID) do_print = 1 ;
+	else do_print = 0 ;
+
 	// do I see the non-zero-suppressed bank? let's do this by fiber...
 	for(int f=1;f<=12;f++) {
-		dd = rdr->det("bsmd")->get("adc_non_zs",0,f) ;
+		dd = rdr->det("bsmd")->get("adc_non_zs",0,f) ;	// sector is ignored (=0)
 		if(dd) {
 			while(dd->iterate()) {
 				found = 1 ;
