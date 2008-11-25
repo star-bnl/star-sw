@@ -105,14 +105,8 @@ int main(int argc, char *argv[])
 		dd = evp->det("pmd")->get("legacy") ;
 		if(dd) LOG(INFO,"PMD found") ;
 
-		/************* now come dets which have legacy and non-legacy banks... */
-
-		// TOF has 
 		dd = evp->det("tof")->get("legacy") ;
-		if(dd) LOG(INFO,"TOF LEGACY found") ;
-
-		dd = evp->det("tof")->get("raw") ;
-		if(dd) LOG(INFO,"TOF RAW(sfs) found") ;
+		if(dd) LOG(INFO,"TOF found") ;
 
 		
 		/***************** EMCs ************************/

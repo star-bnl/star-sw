@@ -3,7 +3,7 @@
 
 
 
-LDLIBS = -ldl
+LDLIBS = 
 DEFINES += -DRTS_LOG_COLORED
 
 
