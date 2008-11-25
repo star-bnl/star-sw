@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
 	class daqReader *evp ;			// tha main guy
 	evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
 
+#if 0
 	// create all the detectors we need 
 	// and assign them to our "driver" class daqReader
 	new daq_bsmd(evp) ;
@@ -69,13 +70,14 @@ int main(int argc, char *argv[])
 	new daq_pmd(evp) ;
 	new daq_pp2pp(evp) ;
 	new daq_ric(evp) ;
-	new daq_sc(evp) ;
+	//new daq_sc(evp) ;
 	new daq_ssd(evp) ;
 	new daq_svt(evp) ;
 	new daq_tof(evp) ;
-	new daq_tpc(evp) ;
+	//new daq_tpc(evp) ;
 	new daq_tpx(evp) ;
 	new daq_trg(evp) ;
+#endif
 
 	while(evp->get(0,0)) {	// keep getting new events
 		daq_dta *dd ;	// generic data pointer; reused all the time
@@ -87,7 +89,7 @@ int main(int argc, char *argv[])
 		dd = evp->det("trg")->get("legacy") ;
 		if(dd) LOG(INFO,"TRG found") ;
 
-		dd = evp->det("sc")->get("legacy") ;
+		dd = evp->det("sc")->get() ;
 		if(dd) LOG(INFO,"SC found") ;
 
 		dd = evp->det("fpd")->get("legacy") ;
@@ -192,12 +194,18 @@ static int tpc_doer(daqReader *rdr, int do_print)
 	for(int s=1;s<=24;s++) {
 		dd = rdr->det("tpc")->get("legacy",s) ;
 		if(dd) {
+			
 			found++ ;	// mark as found...
 			tpc_t *tpc = (tpc_t *) dd->Void ;
 			
 			// one can rerun the afterburner as well with:
-			daq_tpc *tpc_class = (daq_tpc *)rdr->det("tpc") ;
-			int cl_found = tpc_class->fcfReader(s,0,0,tpc) ;
+			//daq_tpc *tpc_class = (daq_tpc *)rdr->det("tpc") ;
+
+
+			int cl_found = 0 ;
+			//cl_found = tpc_class->fcfReader(s,0,0,tpc) ;
+
+
 			LOG(NOTE,"TPC: rerun cluster finder: sector %d: found %d clusters",s,cl_found) ;
 		}
 	}
