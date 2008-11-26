@@ -82,6 +82,7 @@ class daqReader {
 
   int isevp;   // backward compatability...
   int IsEvp() { return (input_type == live); };
+  daqReader *rts() const { return (daqReader *)this; } // to simplify the offline transition
 
 
   // These variables describe the event storage
