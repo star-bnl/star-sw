@@ -1,8 +1,25 @@
-#ifndef _EVP_READERCLASS_HH_
-#define _EVP_READERCLASS_HH_
+#ifndef _DAQ_READERCLASS_HH_
+#define _DAQ_READERCLASS_HH_
 
 #include <ctype.h>
+#include "RTS/src/DAQ_READER/daqConfig.h"
+// Define the old EVP_READER-based interface:
 
+#define DAQ_LEGACY_DEF(xxx)         \
+struct _NAME2_(xxx,_t) _NAME1_(xxx);\
+                                    \
+int _NAME2_(xxx,Reader)(char *m)  {  \
+  if(!m) return -1;                 \
+  daqReader *rrr = (daqReader *)m;  \
+  daq_dta *dd= rrr->det( _QUOTE_(xxx))->get("legacy"); \
+  int size = 0;                     \
+  if (dd && (size = dd->iterate())) \
+  memcpy(&_NAME1_(xxx),dd->Void,dd->ncontent); \
+  return dd->ncontent; }
+
+#define DAQ_LEGACY_DECL(xxx)               \
+extern struct  _NAME1_(xxx)_t _NAME1_(xxx);\
+extern int   _NAME1_(xxx)Reader(char *mem)
 struct DATAP;
 struct rccnf ;
 struct gbPayload ;
