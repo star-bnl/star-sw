@@ -1,10 +1,10 @@
-/*     bsmdeMapping.idl
+/*     bsmdeMap.idl
 *
-*  Table: bsmdeMapping
+*  Table: bsmdeMap
 *  
 *         description: // BSMDE mapping table
 */
-struct bsmdeMapping {
+struct bsmdeMap {
   octet m;                    /* module 1-120 */
   octet e;                    /* eta index 1-150 (eta), 1-10 (phi) */
   octet s;                    /* sub index 1 (eta), 1-15 (phi) */

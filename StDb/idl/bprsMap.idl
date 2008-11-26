@@ -1,11 +1,11 @@
-/*     bprsMapping.idl
+/*     bprsMap.idl
 *
-*  Table: bprsMapping
+*  Table: bprsMap
 *
 *         description: // BPRS mapping table
 */
 
-struct bprsMapping {
+struct bprsMap {
   octet m;                    /* module 1-120 */
   octet e;                    /* eta index 1-20 */
   octet s;                    /* sub index 1-2 */
