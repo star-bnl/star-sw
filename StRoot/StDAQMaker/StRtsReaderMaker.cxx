@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.9 2008/11/25 21:33:22 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.10 2008/11/26 18:01:30 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.10  2008/11/26 18:01:30  fine
+ * prepare StRtsReaderMaker for DAQ_READER transition
+ *
  * Revision 1.9  2008/11/25 21:33:22  fine
  * preparing  DAQ maker for DAQ_READER
  *
@@ -331,11 +334,13 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
 Int_t StRtsReaderMaker::InitRun(int run)
 {
   Int_t res = kStOK;
+#ifndef NEW_EVP_READER
   if (!fSlaveMode && fRtsReader) {
      LOG_INFO << "StRtsReaderMaker::InitRun"  << endm;
      fRtsReader->InitRun(run);               // some dummy for now
      fRtsReader->det("tpx")->SetMode(3);     // make TPX do all!  
   }
+#endif
   return res;
 }
 
@@ -345,8 +350,8 @@ Int_t StRtsReaderMaker::Make()
    // Force  RTS_READER to get the next event if it is not slave
    int res = kStOk;
    InitReader();
+#ifndef NEW_EVP_READER
    if (fSlaveMode)  return kStOk;
-   
    //-------------------------------------
    int rtsReturn = fRtsReader->Make();  //
    //-------------------------------------
@@ -368,4 +373,8 @@ Int_t StRtsReaderMaker::Make()
                 << kStOk << endm;
    }
    return res;
+#else
+   // with NEW_EVP_READER we are always in "slave" mode
+   return res;
+#endif
 }
