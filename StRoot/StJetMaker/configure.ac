@@ -18,6 +18,9 @@ AC_CONFIG_FILES([
 	Makefile
 	base/Makefile
 	tracks/Makefile
+	towers/Makefile
+	fourvec/Makefile
+	mcparticles/Makefile
 	misc/Makefile
 	mckin/Makefile
 	tree/Makefile

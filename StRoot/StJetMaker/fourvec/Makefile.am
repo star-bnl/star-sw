@@ -18,13 +18,13 @@ headers	= \
 	StjFourVecListCut.h \
 	StjFourVecPrint.h
 
-lib_LTLIBRARIES = libStJetMakerBase.la
+lib_LTLIBRARIES = libStJetMakerFourvec.la
 
-libStJetMakerBase_la_SOURCES = $(sources) $(headers) BaseLinkDef.h
-libStJetMakerBase_la_CXXFLAGS = -I../treer $(ROOTCFLAGS)
-libStJetMakerBase_la_LDFLAGS = -version-info 1:0:0
-nodist_libStJetMakerBase_la_SOURCES = BaseDict.cxx
-BUILT_SOURCES = BaseDict.cxx
-CLEANFILES = BaseDict.cxx BaseDict.h
-BaseDict.cxx: $(headers) BaseLinkDef.h
+libStJetMakerFourvec_la_SOURCES = $(sources) $(headers) FourvecLinkDef.h
+libStJetMakerFourvec_la_CXXFLAGS = -I../treer $(ROOTCFLAGS)
+libStJetMakerFourvec_la_LDFLAGS = -version-info 1:0:0
+nodist_libStJetMakerFourvec_la_SOURCES = FourvecDict.cxx
+BUILT_SOURCES = FourvecDict.cxx
+CLEANFILES = FourvecDict.cxx FourvecDict.h
+FourvecDict.cxx: $(headers) FourvecLinkDef.h
 	$(ROOTCINT) -f $@ -c $^
