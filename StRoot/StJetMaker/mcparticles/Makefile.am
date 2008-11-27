@@ -33,10 +33,10 @@ headers	= \
 lib_LTLIBRARIES = libStJetMakerMcparticles.la
 
 libStJetMakerMcparticles_la_SOURCES = $(sources) $(headers) McparticlesLinkDef.h
-libStJetMakerMcparticles_la_CXXFLAGS = -I../tracks -I../tree -I../trigger $(ROOTCFLAGS)
+libStJetMakerMcparticles_la_CXXFLAGS = -I../fourvec -I../tree -I../trigger $(ROOTCFLAGS)
 libStJetMakerMcparticles_la_LDFLAGS = -version-info 1:0:0
 nodist_libStJetMakerMcparticles_la_SOURCES = McparticlesDict.cxx
 BUILT_SOURCES = McparticlesDict.cxx
 CLEANFILES = McparticlesDict.cxx McparticlesDict.h
 McparticlesDict.cxx: $(headers) McparticlesLinkDef.h
-	$(ROOTCINT) -f $@ -c -I../tracks $^
+	$(ROOTCINT) -f $@ -c -I../fourvec $^

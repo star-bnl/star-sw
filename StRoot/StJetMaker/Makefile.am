@@ -1,6 +1,5 @@
 
 SUBDIRS = \
-	base \
 	tracks \
 	towers \
 	mcparticles \

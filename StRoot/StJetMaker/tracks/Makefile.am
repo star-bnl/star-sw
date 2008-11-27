@@ -42,10 +42,10 @@ headers	= \
 lib_LTLIBRARIES = libStJetMakerTracks.la
 
 libStJetMakerTracks_la_SOURCES = $(sources) $(headers) TracksLinkDef.h
-libStJetMakerTracks_la_CXXFLAGS = -I../tree $(ROOTCFLAGS)
+libStJetMakerTracks_la_CXXFLAGS = -I../fourvec -I../towers -I../tree $(ROOTCFLAGS)
 libStJetMakerTracks_la_LDFLAGS = -version-info 1:0:0
 nodist_libStJetMakerTracks_la_SOURCES = TracksDict.cxx
 BUILT_SOURCES = TracksDict.cxx
 CLEANFILES = TracksDict.cxx TracksDict.h
 TracksDict.cxx: $(headers) TracksLinkDef.h
-	$(ROOTCINT) -f $@ -c $^
+	$(ROOTCINT) -f $@ -c -I../fourvec -I../towers $^
