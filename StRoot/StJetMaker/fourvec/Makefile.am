@@ -21,10 +21,10 @@ headers	= \
 lib_LTLIBRARIES = libStJetMakerFourvec.la
 
 libStJetMakerFourvec_la_SOURCES = $(sources) $(headers) FourvecLinkDef.h
-libStJetMakerFourvec_la_CXXFLAGS = -I../treer $(ROOTCFLAGS)
+libStJetMakerFourvec_la_CXXFLAGS = -I../trigger -I../tree $(ROOTCFLAGS)
 libStJetMakerFourvec_la_LDFLAGS = -version-info 1:0:0
 nodist_libStJetMakerFourvec_la_SOURCES = FourvecDict.cxx
 BUILT_SOURCES = FourvecDict.cxx
 CLEANFILES = FourvecDict.cxx FourvecDict.h
 FourvecDict.cxx: $(headers) FourvecLinkDef.h
-	$(ROOTCINT) -f $@ -c $^
+	$(ROOTCINT) -f $@ -c -I../trigger $^

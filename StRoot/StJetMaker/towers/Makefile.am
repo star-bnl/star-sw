@@ -56,10 +56,10 @@ headers	= \
 lib_LTLIBRARIES = libStJetMakerTowers.la
 
 libStJetMakerTowers_la_SOURCES = $(sources) $(headers) TowersLinkDef.h
-libStJetMakerTowers_la_CXXFLAGS = -I../tracks -I../tree -I../trigger $(ROOTCFLAGS)
+libStJetMakerTowers_la_CXXFLAGS = -I../tracks -I../fourvec -I../tree -I../trigger $(ROOTCFLAGS)
 libStJetMakerTowers_la_LDFLAGS = -version-info 1:0:0
 nodist_libStJetMakerTowers_la_SOURCES = TowersDict.cxx
 BUILT_SOURCES = TowersDict.cxx
 CLEANFILES = TowersDict.cxx TowersDict.h
 TowersDict.cxx: $(headers) TowersLinkDef.h
-	$(ROOTCINT) -f $@ -c -I../tracks $^
+	$(ROOTCINT) -f $@ -c -I../tracks -I../fourvec $^
