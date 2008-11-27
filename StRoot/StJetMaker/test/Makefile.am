@@ -52,6 +52,7 @@ libStJetMakerTest_la_CXXFLAGS = \
 	-I../StFourPMakers \
 	-I../emulator \
 	-I../base \
+	-I../tracks \
 	-I../misc \
 	-I../mudst \
 	-I../tree \
