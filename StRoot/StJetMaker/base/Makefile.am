@@ -8,13 +8,6 @@ sources	= \
 	StjEEMC.cxx \
 	StjEEMCNull.cxx \
 	StjEEMCTxt.cxx \
-	StjFourVecCut.cxx \
-	StjFourVecCutPt.cxx \
-	StjFourVecCutTrgBHT.cxx \
-	StjFourVecCutTrgBJP.cxx \
-	StjFourVecList.cxx \
-	StjFourVecListCut.cxx \
-	StjFourVecPrint.cxx \
 	StjMC.cxx \
 	StjMCNull.cxx \
 	StjMCParticleCut.cxx \
@@ -54,13 +47,6 @@ headers	= \
 	StjEEMC.h \
 	StjEEMCNull.h \
 	StjEEMCTxt.h \
-	StjFourVecCut.h \
-	StjFourVecCutPt.h \
-	StjFourVecCutTrgBHT.h \
-	StjFourVecCutTrgBJP.h \
-	StjFourVecList.h \
-	StjFourVecListCut.h \
-	StjFourVecPrint.h \
 	StjMC.h \
 	StjMCNull.h \
 	StjMCParticleCut.h \

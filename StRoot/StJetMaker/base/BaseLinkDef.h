@@ -12,13 +12,6 @@
 #pragma link C++ class StjEEMC+;
 #pragma link C++ class StjEEMCNull+;
 #pragma link C++ class StjEEMCTxt+;
-#pragma link C++ class StjFourVecCut+;
-#pragma link C++ class StjFourVecCutPt+;
-#pragma link C++ class StjFourVecCutTrgBHT+;
-#pragma link C++ class StjFourVecCutTrgBJP+;
-#pragma link C++ class StjFourVec+;
-#pragma link C++ class StjFourVecListCut+;
-#pragma link C++ class StjFourVecPrint+;
 #pragma link C++ class StjMC+;
 #pragma link C++ class StjMCNull+;
 #pragma link C++ class StjMCParticleCut+;
@@ -53,6 +46,5 @@
 
 #pragma link C++ class vector<StjTowerEnergy>+; 
 #pragma link C++ class vector<StjMCParticle>+; 
-#pragma link C++ class vector<StjFourVec>+; 
 
 #endif

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjFourVecCutTrgBHT.h,v 1.1 2008/08/12 04:01:23 tai Exp $
+// $Id: StjFourVecCutTrgBHT.h,v 1.1 2008/11/27 07:29:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJFOURVECCUTTRGBHT_H
 #define STJFOURVECCUTTRGBHT_H

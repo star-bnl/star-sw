@@ -1,4 +1,4 @@
-// $Id: StjFourVecPrint.cxx,v 1.7 2008/08/22 18:36:18 tai Exp $
+// $Id: StjFourVecPrint.cxx,v 1.1 2008/11/27 07:29:52 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFourVecPrint.h"
 
