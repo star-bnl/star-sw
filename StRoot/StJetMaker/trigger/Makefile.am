@@ -44,10 +44,10 @@ headers	= \
 lib_LTLIBRARIES = libStJetMakerTrigger.la
 
 libStJetMakerTrigger_la_SOURCES = $(sources) $(headers) TriggerLinkDef.h
-libStJetMakerTrigger_la_CXXFLAGS = -I../.. -I../base -I../tree $(ROOTCFLAGS)
+libStJetMakerTrigger_la_CXXFLAGS = -I../.. -I../towers -I../tree $(ROOTCFLAGS)
 libStJetMakerTrigger_la_LDFLAGS = -version-info 1:0:0
 nodist_libStJetMakerTrigger_la_SOURCES = TriggerDict.cxx
 BUILT_SOURCES = TriggerDict.cxx
 CLEANFILES = TriggerDict.cxx TriggerDict.h
 TriggerDict.cxx: $(headers) TriggerLinkDef.h
-	$(ROOTCINT) -f $@ -c -I../base $^
+	$(ROOTCINT) -f $@ -c -I../towers $^
