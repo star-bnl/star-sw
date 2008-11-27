@@ -2,6 +2,9 @@
 SUBDIRS = \
 	base \
 	tracks \
+	towers \
+	mcparticles \
+	fourvec \
 	misc \
 	mckin \
 	tree \
