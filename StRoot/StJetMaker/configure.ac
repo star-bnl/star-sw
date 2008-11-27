@@ -17,6 +17,7 @@ AC_LANG(C++)
 AC_CONFIG_FILES([
 	Makefile
 	base/Makefile
+	tracks/Makefile
 	misc/Makefile
 	mckin/Makefile
 	tree/Makefile

@@ -28,10 +28,6 @@ sources	= \
 	StjMCParticlePrint.cxx \
 	StjMCParticleToFourVec.cxx \
 	StjMCTree.cxx \
-	StjTPC.cxx \
-	StjTPCNull.cxx \
-	StjTPCTree.cxx \
-	StjTPCTxt.cxx \
 	StjTowerEnergyCorrectionForTracks.cxx \
 	StjTowerEnergyCut.cxx \
 	StjTowerEnergyCut2003BemcTower.cxx \
@@ -48,20 +44,7 @@ sources	= \
 	StjTowerEnergyToFourVec.cxx \
 	StjTowerEnergyToTLorentzVector.cxx \
 	StjTowerEnergyVariation.cxx \
-	StjTowerEnergyVariationEnergy.cxx \
-	StjTrackCut.cxx \
-	StjTrackCutDca.cxx \
-	StjTrackCutDcaPtDependent.cxx \
-	StjTrackCutEta.cxx \
-	StjTrackCutFlag.cxx \
-	StjTrackCutNHits.cxx \
-	StjTrackCutPossibleHitRatio.cxx \
-	StjTrackList.cxx \
-	StjTrackListCut.cxx \
-	StjTrackPrint.cxx \
-	StjTrackToFourVec.cxx \
-	StjTrackToTLorentzVector.cxx \
-	StjTrackTowerEnergyListToFourVecList.cxx
+	StjTowerEnergyVariationEnergy.cxx
 
 headers	= \
 	StjBEMC.h \
@@ -91,10 +74,6 @@ headers	= \
 	StjMCParticlePrint.h \
 	StjMCParticleToFourVec.h \
 	StjMCTree.h \
-	StjTPC.h \
-	StjTPCNull.h \
-	StjTPCTree.h \
-	StjTPCTxt.h \
 	StjTowerEnergyCorrectionForTracks.h \
 	StjTowerEnergyCut.h \
 	StjTowerEnergyCut2003BemcTower.h \
@@ -111,20 +90,7 @@ headers	= \
 	StjTowerEnergyToFourVec.h \
 	StjTowerEnergyToTLorentzVector.h \
 	StjTowerEnergyVariation.h \
-	StjTowerEnergyVariationEnergy.h \
-	StjTrackCut.h \
-	StjTrackCutDca.h \
-	StjTrackCutDcaPtDependent.h \
-	StjTrackCutEta.h \
-	StjTrackCutFlag.h \
-	StjTrackCutNHits.h \
-	StjTrackCutPossibleHitRatio.h \
-	StjTrackList.h \
-	StjTrackListCut.h \
-	StjTrackPrint.h \
-	StjTrackToFourVec.h \
-	StjTrackToTLorentzVector.h \
-	StjTrackTowerEnergyListToFourVecList.h
+	StjTowerEnergyVariationEnergy.h
 
 
 lib_LTLIBRARIES = libStJetMakerBase.la

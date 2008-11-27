@@ -1,6 +1,7 @@
 
 SUBDIRS = \
 	base \
+	tracks \
 	misc \
 	mckin \
 	tree \
