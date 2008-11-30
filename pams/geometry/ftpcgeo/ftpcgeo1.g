@@ -1,6 +1,9 @@
-* $Id: ftpcgeo1.g,v 1.3 2005/04/07 19:51:46 potekhin Exp $
+* $Id: ftpcgeo1.g,v 1.4 2008/11/30 01:30:52 perev Exp $
 *
 * $Log: ftpcgeo1.g,v $
+* Revision 1.4  2008/11/30 01:30:52  perev
+* modifs for extending alpha,theta,phi,ort commandas
+*
 * Revision 1.3  2005/04/07 19:51:46  potekhin
 * The Ar+C02 mix exists everywhere in FTPC, not
 * just in the sensitive volumes
@@ -342,26 +345,26 @@ Block FGAS is the FTPC gas volume
 *
 
 	create FFSL
-	position FFSL ort=yzx AlphaZ=frbd_Phi4 _
+	position FFSL AlphaZ=frbd_Phi4 ort=yzx _
                         z=(ftpg_totLen/2)-5_
                         y=ffcc_StiRpos 
-	position FFSL ort=yzx AlphaZ=frbd_Phi8 _
+	position FFSL   AlphaZ=frbd_Phi8 ort=yzx _
                         z=(ftpg_totLen/2)-5 _
                         x=-ffcc_StiRpos*cos(pi/6.)_
                         y=-ffcc_StiRpos*sin(pi/6.)
-	position FFSL ort=yzx AlphaZ=-(frbd_Phi2) _
+	position FFSL AlphaZ=-(frbd_Phi2) ort=yzx _
                         z=(ftpg_totLen/2)-5 _
                         x=ffcc_StiRpos*cos(pi/6.) _
                         y=-ffcc_StiRpos*sin(pi/6.)
 *
-	position FFSL ort=yzx AlphaZ= frbd_Phi4 _
+	position FFSL AlphaZ= frbd_Phi4 ort=yzx _
                         z=-ftpg_totLen/2+5 _
                         y=ffcc_StiRpos 
-	position FFSL ort=yzx AlphaZ=frbd_Phi8 _
+	position FFSL AlphaZ=frbd_Phi8 ort=yzx _
                         z=-ftpg_totLen/2+5 _
                         x=-ffcc_StiRpos*cos(pi/6.)_
                         y=-ffcc_StiRpos*sin(pi/6.)
-	position FFSL ort=yzx AlphaZ=-(frbd_Phi2)_
+	position FFSL AlphaZ=-(frbd_Phi2) ort=yzx _
                         z=-ftpg_totLen/2+5 _
                         x=ffcc_StiRpos*cos(pi/6.)_
                         y=-ffcc_StiRpos*sin(pi/6.)
@@ -492,7 +495,7 @@ Block FROS is one Ring of Readout Modules in the support Structure
            Create FROT           
 
            Do gg=frbd_Phi2,frbd_Phi12,frbd_Phi3
-              Position FROT  ort=yzx alphaz=gg _
+              Position FROT  alphaz=gg ort=yzx _
                  y=-fssd_TrapR*sin(degrad*gg)_
                  x=-fssd_TrapR*cos(degrad*gg)      
            EndDo
