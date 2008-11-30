@@ -225,16 +225,23 @@
 *                                                                      *
 ************************************************************************
       integer iAx(*)
-      real    gang(6),ang(*)
+      real    gang(6),gangI(6),ang(*)
       real    ax(3),RMX(3,3)
-      integer i
+      integer i,k
 
       call GVGAMX(gang,RMX)
       do 100 i=1,nang
-        if (iAx(i).eq.0) goto 100
-        call vzero(ax,3)
-	ax(iAx(i)) = 1
- 	call GVROT (ax, ang(i), RMX)
+        k = iAx(i)
+        if (k.eq.0) goto 100
+        if (k.le.3) then
+          call vzero(ax,3)
+	  ax(iAx(i)) = 1
+ 	  call GVROT (ax, ang(i), RMX)
+        else 
+          call GVMXGA(RMX,gangI)
+          call OLEG(k,gangI,gang)
+          call GVGAMX(gang,RMX)
+        endif
  100  continue
       call GVMXGA(RMX,gang)
       end
@@ -252,6 +259,7 @@
 ************************************************************************
       character *(*) ort     
       integer pw2(3) /1,2,4/
+      integer pw10(3) /1,10,100/
       integer i,j,minus,ix,msk
       
       igor = 0
@@ -259,7 +267,6 @@
       msk = 0
       do i=1,3
         j = j+1
-        igor = igor/10
         minus = 0
 	if (ort(j:j) .eq. '-') then
 	  j = j+1
@@ -272,7 +279,7 @@
           igor = 0
           return
         endif
-        igor = igor + 100*(minus+ix)
+        igor = igor + pw10(i)*(minus+ix)
         msk = msk + pw2(ix)
       enddo
       if (msk .ne.7) then
@@ -289,7 +296,7 @@
 *       returnned by IGOR(ort)                                         *
 *                                                                      *
 *   ARGUMENTS:                                                         *
-*       orti     encodet by IGOR number:  (input)		       *
+*       orti     encoded by IGOR number:  (input)		       *
 *       gangI    initial  6 geant angles: (input)	               *
 *       gang     resuling 6 geant angles: (output)                     *
 *                                                                      *
