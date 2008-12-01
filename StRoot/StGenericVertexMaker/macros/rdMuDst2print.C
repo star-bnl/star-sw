@@ -5,14 +5,14 @@ StChain *chain=0;
 
 int rdMuDst2print(
 	  char* file    = "st_physics_9069005_raw_1010002.MuDst.root",
-	  int nEve=200,
+	  int nEve=3,
 	  char* inDir   = "/star/data05/scratch/balewski/bug3c/"
 	  )
 { 
   Int_t nFiles  = 1;
   
   //inDir="/star/data05/scratch/balewski/bug4d/"; file= "Wsample2.MuDst.root";
-  
+   
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
@@ -101,9 +101,9 @@ int rdMuDst2print(
 
     } 
 
-    continue;   // do NOT print prim tracks for each vertex  
+    // continue;   // do NOT print prim tracks for each vertex  
 
-    for(iv=0;iv<nPrimV;iv++) {
+    if(0)for(iv=0;iv<nPrimV;iv++) {
       printf("  Prim tracks belonging to %d prim vertex:\n",iv);      
       int itr; 
       int ntr=0;
@@ -120,8 +120,8 @@ int rdMuDst2print(
       } // end of loop over tracks
     }// end of loop over vertices
     
-   continue; 
-
+    // continue; 
+    
     StMuEmcCollection* emc = muMk->muDst()->muEmcCollection();
     if (!emc) {
       printf(" No EMC data for this event\n");
@@ -130,6 +130,10 @@ int rdMuDst2print(
     // printEEtower(emc);
     // printEEpre(emc);
     // printEEsmd(emc);
+    printBEtower(emc);
+    printBEpre(emc);
+    printBEsmd(emc);
+  
     
   }
   printf("****************************************** \n");
@@ -212,50 +216,75 @@ printEEsmd( StMuEmcCollection* emc ) {
   }
 }
 
-//=====================================================
-// PPV Evaluation code excerpts
+//===========================================
+//===========================================
+printBEtower( StMuEmcCollection* emc ) {
+  int sec,eta,sub,adc;
+  StMuEmcHit *hit;
 
-#if 0
-//Run 7118049
-char *ctrigB[]={"bjp1","bjp0L2","bht2","bhttp1"};
-int    trigB[]={127221, 127622, 127213, 127611,0};
+  int i, nh;
 
-char *ctrigE[]={"ejp1","ejp0L2","eht2","ehttp1"};
-int    trigE[]={127271, 127652, 127262, 127641,0};
+  printf("\Total hits in Tower (only ADC>0)\n");
+  nh=0;
+  for (i=0; i< 4800; i++) {
+    int adc = emc->getTowerADC(i);
+    if (adc<=4) continue; // print only non-zero values
+    nh++;
+    printf(" Tower id=%d   adc=%4d\n",i,adc );
+    //    assert(adc==adcX );
+}
+  printf("  --> %d towers with ADC>thr\n",nh);
+}
 
-char *ctrigM[]={"mb"  ,"zb"  ,"jpsi","upsilon","muon","fpd2"};
-int    trigM[]={117001,117300,117705,   117602,117402,117470,0};
 
 
-.........................
 
-  // create output summary file w/ vertex info
-  TString outF="ppvOut4/"; outF+=file;
-  outF.ReplaceAll("MuDst.root","ppv");
-  FILE *fd=fopen(outF.Data(),"w");
-  assert(fd);
-............................
+//===========================================
+//===========================================
+printBEpre( StMuEmcCollection* emc ) {
 
-    fprintf(fd,"%d %d %d ", eventCounter,info.id(),nPrimV);
-    int i=0;
-    char trgS[9];
-    //..... BTOW trigs
-    sprintf(trgS,"00000000"); i=0;
-    while(trigB[i]>0){if(tic.nominal().isTrigger(trigB[i])) trgS[i]='1' ; i++;}
-    fprintf(fd,"%s ",trgS);
-    //.... Etow trigs
-    sprintf(trgS,"00000000"); i=0;
-    while(trigE[i]>0){if(tic.nominal().isTrigger(trigE[i])) trgS[i]='1' ; i++;}
-    fprintf(fd,"%s ",trgS);
-    //.... Other trigs
-    sprintf(trgS,"00000000"); i=0;
-    while(trigM[i]>0){if(tic.nominal().isTrigger(trigM[i])) trgS[i]='1' ; i++;}
-    fprintf(fd,"%s ",trgS);
-    fprintf(fd,"\n");
-...............
-      fprintf(fd,"  %.2f %d %g\n",r.z(),V->nTracksUsed(),V->ranking());
+  int i, nh;
+  nh = emc->getNPrsHits();
+  printf("\nTotal %d hits in pre1\n",nh);
 
-...............
-  fclose(fd);
+  int n1=0;
+  for (i=0; i<nh; i++) {
+    StMuEmcHit * hit = emc->getPrsHit(i);
+    int adc = hit->getAdc();
+    int id=hit->getId();
+    if(adc<4) continue;
+    n1++;
+    printf("BPRS i=%d, id=%d adc = %d\n",i,id,adc);
+  } 
+  printf("   --> %d BPRS hits with ADC>thr\n",n1);
+}
 
-#endif
+//===========================================
+//===========================================
+printBEsmd( StMuEmcCollection* emc ) {
+
+  int n1=0,n2=0;
+  int nh = emc->getNSmdHits(3);
+  printf("\nTotal %d hits in SMDE\n",nh);
+  for (int i=0; i<nh; i++) {
+    StMuEmcHit * hit = emc->getSmdHit(i,3);
+    adc = hit->getAdc();
+    int id=hit->getId();
+     if(adc<4) continue;
+    n1++;
+    printf("BSMDE i=%d, id=%d adc = %d\n",i,id,adc);
+  }
+
+  int nh = emc->getNSmdHits(4);
+  printf("\nTotal %d hits in SMDP\n",nh);
+  for (int i=0; i<nh; i++) {
+    hit = emc->getSmdHit(i,4);
+    adc = hit->getAdc();
+    int id=hit->getId(); 
+    if(adc<4) continue;
+    n2++;
+    printf("BSMDP i=%d,id=%d adc = %d\n",i,id,adc);
+  }
+
+  printf("   --> %d BSMD-E & %d BSMD-P  hits with ADC>thr\n",n1,n2);
+}
