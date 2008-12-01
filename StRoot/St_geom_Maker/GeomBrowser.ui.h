@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.37 2008/10/03 15:35:12 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.38 2008/12/01 21:46:32 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -1356,7 +1356,7 @@ void GeomBrowser::SelectGeometry( const QString &geomTag )
    // Select the standard geometry from the combobox if any
    // Find the geometry
    QListBox *list = comboBox2->listBox();
-   QListBoxItem *it = list->findItem (geomTag);
+   QListBoxItem *it = list->findItem (geomTag,Qt::ExactMatch);
    if (it) {
        comboBox2->setCurrentItem(list->index(it));
        // and load that geometry if found
