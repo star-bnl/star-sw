@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.173 2008/11/30 01:30:53 perev Exp $
+* $Id: geometry.g,v 1.174 2008/12/01 23:45:10 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.174  2008/12/01 23:45:10  perev
+* ubgr16 last vers BTOF
+*
 * Revision 1.173  2008/11/30 01:30:53  perev
 * modifs for extending alpha,theta,phi,ort commandas
 *
@@ -3779,12 +3782,18 @@ If LL>1
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
 
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     BtofConfig=5;
+* X.Dong
+                 "ctb: central trigger barrer             ";
+                     Itof=6 " call btofgeo6 ";
+* NEW CONFIG!
+                     tofX0= 0.00;
+                     tofZ0=-0.50;
+                     BtofConfig=11;
+
                   "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                     CalbConfig = 2
                   "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
