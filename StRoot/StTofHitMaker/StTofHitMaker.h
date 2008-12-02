@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StTofHitMaker.h,v 1.1 2008/03/11 19:16:26 dongx Exp $
+ * $Id: StTofHitMaker.h,v 1.2 2008/12/02 23:58:45 fine Exp $
  * StTofHitMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -52,7 +52,7 @@ class StTofHitMaker:public StRTSBaseMaker
 
      
    protected:
-      Int_t GetNextRaw();
+      StRtsTable *GetNextRaw();
       
       StTofCollection *GetTofCollection();
       evpReader *InitReader();
