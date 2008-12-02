@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.6 2006/02/22 22:06:09 prindle Exp $
+ * $Id: StEStructTrack.h,v 1.7 2008/12/02 23:45:49 prindle Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -69,12 +69,14 @@ private:
   Float_t           mPtot; //!
   Float_t           mYt; //!
   Float_t           mXt; //!
+  Float_t           mCurvature; //!
   Float_t           mAssignedMass; //!
   StLorentzVectorF  mFourMomentum; //!
   StThreeVectorF    mStartPos; //!
   StThreeVectorF    mNominalTpcExitPoint; //!
   StThreeVectorF    mNominalTpcEntrancePoint; //!
   StThreeVectorF    mMidTpcPoint; //!
+  StThreeVectorF    mOuterMidTpcPoint; //!
   int               mytbin; //!
 
 
@@ -89,6 +91,7 @@ public:
   void evalPtot();
   void evalYt();
   void evalXt();
+  void evalCurvature();
   void evalFourMomentum(float mass=0);
   void evalTrajectory(float primvx, float primvy, float primvz, double bfield);
   void FillTpcReferencePoints();
@@ -157,6 +160,7 @@ public:
   const StThreeVectorF&   NominalTpcExitPoint()        const;
   const StThreeVectorF&   NominalTpcEntrancePoint()    const;
   const StThreeVectorF&   MidTpcPoint()                const;
+  const StThreeVectorF&   OuterMidTpcPoint()           const;
   const StThreeVectorF&   StartPos()                   const;
   const StLorentzVectorF& FourMomentum()               const;
   const StPhysicalHelixD& Helix()                      const;
@@ -164,6 +168,7 @@ public:
   Float_t  Xt() const;
   Float_t  Yt() const;
   Float_t  Yt(Float_t mass) const;
+  Float_t  Curvature() const;
 
   // functions used to set data members
   void SetPx(Float_t px) { mPx = px; }
@@ -218,12 +223,14 @@ inline void  StEStructTrack::evalPtot(){ mPtot=sqrt((mPx*mPx)+(mPy*mPy)+(mPz*mPz
 inline const StThreeVectorF& StEStructTrack::NominalTpcExitPoint() const { return mNominalTpcExitPoint; }
 inline const StThreeVectorF& StEStructTrack::NominalTpcEntrancePoint() const { return mNominalTpcEntrancePoint; };     
 inline const StThreeVectorF& StEStructTrack::MidTpcPoint() const{ return mMidTpcPoint; }; 
+inline const StThreeVectorF& StEStructTrack::OuterMidTpcPoint() const{ return mOuterMidTpcPoint; }; 
 inline const StThreeVectorF& StEStructTrack::StartPos() const{ return mStartPos; };
 inline const StLorentzVectorF& StEStructTrack::FourMomentum() const { return mFourMomentum;};
 inline const StPhysicalHelixD& StEStructTrack::Helix() const{ return mHelix;}; 
 
 inline Float_t  StEStructTrack::Xt() const { return mXt;};
 inline Float_t  StEStructTrack::Yt() const { return mYt;};
+inline Float_t  StEStructTrack::Curvature() const { return mCurvature;};
 inline int      StEStructTrack::getYtBin() const { return mytbin; };
 
 #endif
@@ -232,6 +239,9 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.7  2008/12/02 23:45:49  prindle
+ * Added curvature and calculation of OuterMidTpcPoint.
+ *
  * Revision 1.6  2006/02/22 22:06:09  prindle
  * Removed all references to multRef (?)
  *
