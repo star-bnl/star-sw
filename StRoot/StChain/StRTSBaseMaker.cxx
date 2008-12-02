@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.3 2008/12/02 22:55:14 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.4 2008/12/02 23:40:08 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.4  2008/12/02 23:40:08  fine
+ * GetNext should  not virtual
+ *
  * Revision 1.3  2008/12/02 22:55:14  fine
  * Add a few access  methods
  *
@@ -29,7 +32,7 @@
  * Add the static dara-member impl
  *
  * Revision 1.1  2008/01/25 22:30:23  fine
- * Add the base makr for all RTS-based makers and template for the TofEventMaker
+ * Add the base maker for all RTS-based makers and template for the TofEventMaker
  *
  * Revision 1.4  2008/01/12 00:22:01  fine
  * Update the test macro
