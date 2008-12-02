@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.6 2006/02/22 22:06:07 prindle Exp $
+ * $Id: StEStructTrack.cxx,v 1.7 2008/12/02 23:45:48 prindle Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -83,6 +83,7 @@ void StEStructTrack::FillTransientData(){
   evalPtot();
   evalYt();
   evalXt();
+  evalCurvature();
   evalFourMomentum();
   
 };
@@ -117,6 +118,16 @@ void StEStructTrack::evalXt(){
 
 
 //----------------------------------------------------------
+void StEStructTrack::evalCurvature(){
+    // store helix curvature.
+    // Seems that curvature from helix is _not_ signed.
+    // Sign of curvature is -helicity. (When magnetic field along +Z direction
+    // helicity of a positive particle is negative.)
+    mCurvature = -mHelix.h()*fabs(mHelix.curvature());
+};
+
+
+//----------------------------------------------------------
 void StEStructTrack::evalFourMomentum(const float mass){
 
   float lMass=mass;
@@ -142,7 +153,7 @@ void StEStructTrack::FillTpcReferencePoints(){
   // If the first is <0 it is unphysical, so we would use the second.
 
   // The exit point is a special case, we need to find if the track exited the side or endcaps of TPC
-  pairD candidates = mHelix.pathLength(200.0);  
+  pairD candidates = mHelix.pathLength(200.0);
   double sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   double endLength = mHelix.pathLength(WestEnd,EndCapNormal);
   if (endLength < 0.0) endLength = mHelix.pathLength(EastEnd,EndCapNormal);
@@ -153,10 +164,19 @@ void StEStructTrack::FillTpcReferencePoints(){
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   mNominalTpcEntrancePoint = mHelix.at(sideLength);
 
-  candidates = mHelix.pathLength(127.0);  
+  candidates = mHelix.pathLength(127.0);
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   mMidTpcPoint = mHelix.at(sideLength);
 
+  // Add OuterMid point at 163.5. This is to help with my crossing cut for LS tracks
+  // that have different pt.
+  candidates = mHelix.pathLength(163.5);
+  sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
+  endLength = mHelix.pathLength(WestEnd,EndCapNormal);
+  if (endLength < 0.0) endLength = mHelix.pathLength(EastEnd,EndCapNormal);
+  firstExitLength = (endLength < sideLength) ? endLength : sideLength;
+  mOuterMidTpcPoint = mHelix.at(firstExitLength);
+  
   mIsComplete=true;  // finished with calculations
 
 }
@@ -222,6 +242,9 @@ Float_t StEStructTrack::PIDpiMinus() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.7  2008/12/02 23:45:48  prindle
+ * Added curvature and calculation of OuterMidTpcPoint.
+ *
  * Revision 1.6  2006/02/22 22:06:07  prindle
  * Removed all references to multRef (?)
  *
