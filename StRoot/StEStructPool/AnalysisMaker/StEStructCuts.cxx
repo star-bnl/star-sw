@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.6 2007/07/12 19:31:37 fisyak Exp $
+ * $Id: StEStructCuts.cxx,v 1.7 2008/12/02 23:35:32 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -54,8 +54,8 @@ void StEStructCuts::initVars(){
   mvalues  = new float[mMaxStore];
   mminVal  = new float[mMaxStore];
   mmaxVal  = new float[mMaxStore];
-  mvarHistsNoCut = new TH1*[mMaxStore];
-  mvarHistsCut   = new TH1*[mMaxStore];
+  mvarHistsNoCut  = new TH1*[mMaxStore];
+  mvarHistsCut    = new TH1*[mMaxStore];
   mnumVars=0;
 }
 
@@ -134,6 +134,7 @@ bool StEStructCuts::loadCutDB() {
     loadBaseCuts("NFitPerNMax","0.52","1.0");             // fitpoints per possible cut
     loadBaseCuts("GlobalDCA","0.","3.0");                 // global DCA cut
     loadBaseCuts("Chi2","0.","3.0");                      // chi square cut
+    loadBaseCuts("dPtByPt","0.","3.0");                   // sigma for determination of charge sign
     loadBaseCuts("Pt","0.15","15.45");                    // pt cut
     loadBaseCuts("Yt","0.1","2.");                        // yt cut
     loadBaseCuts("Phi","-1","1");                         // phi cut
@@ -363,8 +364,7 @@ void StEStructCuts::writeCutHists(TFile* tf){
 
   tf->cd();
   for(int i=0; i<mnumVars; i++)mvarHistsCut[i]->Write();
-  for(int i=0; i<mnumVars; i++)mvarHistsNoCut[i]->Write();
-  
+  for(int i=0; i<mnumVars; i++)mvarHistsNoCut[i]->Write(); 
 }
 
 void StEStructCuts::resize(){
@@ -409,6 +409,10 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.7  2008/12/02 23:35:32  prindle
+ * Added code for pileup rejection in EventCuts and MuDstReader.
+ * Modified trigger selections for some data sets in EventCuts.
+ *
  * Revision 1.6  2007/07/12 19:31:37  fisyak
  * use StString instead of sstream
  *

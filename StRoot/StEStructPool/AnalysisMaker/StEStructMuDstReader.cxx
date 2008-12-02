@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.14 2008/05/01 23:35:57 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.15 2008/12/02 23:35:34 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -34,6 +34,7 @@ StEStructMuDstReader::StEStructMuDstReader() {
     mInChain      = false;
     mAmDone       = false;
     mUseGlobalTracks=false;
+    mPileup = new Pileup();
 };
 StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
                                            StEStructEventCuts* ecuts,
@@ -45,10 +46,13 @@ StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
     mInChain      = false;
     mAmDone       = false;
     mUseGlobalTracks=false;
+    mPileup = new Pileup();
 };
 
 //-------------------------------------------------------------------------
-StEStructMuDstReader::~StEStructMuDstReader(){};
+StEStructMuDstReader::~StEStructMuDstReader() {
+    delete mPileup;
+};
 
 void StEStructMuDstReader::setMuDstMaker(StMuDstMaker* maker, bool inChain){ 
   mInChain=inChain;
@@ -166,9 +170,17 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
         
     }
 
+    double zPile;
+    int    nPile;
+    double zVertSep = mPileup->nearest(muDst,z,&zPile,&nPile);
+    if (zVertSep > 0 && !mECuts->goodZVertSep(zPile)) {
+        useEvent=false;
+    }
+
     mECuts->fillHistogram(mECuts->triggerWordName(),(float)tword,useEvent);
     mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
     mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,useEvent);
+    mECuts->fillHistogram(mECuts->zVertSepName(),zPile,useEvent);
 
     if (!useEvent) {
         delete retVal;
@@ -237,6 +249,8 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
 
     bool useTrack=true;
 
+    // Do eta cut first so my ThisCut can use the eta value.
+    useTrack = (mTCuts->goodEta(track->eta()) && useTrack);
     useTrack = (mTCuts->goodFlag(track->flag()) && useTrack);
     useTrack = (mTCuts->goodCharge(track->charge()) && useTrack);
     useTrack = (mTCuts->goodNFitPoints(track->nHitsFit()) && useTrack);
@@ -246,10 +260,21 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
     } else {
         useTrack = (mTCuts->goodGlobalDCA(track->dcaGlobal().magnitude()) && useTrack);
     }
-    useTrack = (mTCuts->goodEta(track->eta()) && useTrack);
     useTrack = (mTCuts->goodChi2(track->chi2()) && useTrack);
     useTrack = (mTCuts->goodPhi(track->phi()) && useTrack);
     if(track->pt() < 0.15) useTrack = false;  // basic pt cut, ranges checked in isTrackGoodToUse
+
+//>>>>> delta p_t / p_t cut. Make sure charge sign is well defined.
+// Need P08 or later for this code.
+//    StMuDst* muDst=mMaker->muDst();
+//    int ic = track->index2Cov();
+//    if (ic > 0) {
+//        static StDcaGeometry *cov = muDst->covGlobTracks(ic);
+//        const float *err =  cov->errMatrix();
+//        float dpTOverpT = sqrt(err[9])/track->pt(); //dpT/pT
+//        useTrack = (mTCuts->gooddPtByPt(dpTOverpT) && useTrack);
+//    }
+//>>>>>
 
     //--> But add a quick electron removal... for selected p ranges
     //    Note I only want to do this if I am defining an electron dEdx cut.
@@ -388,8 +413,12 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.15  2008/12/02 23:35:34  prindle
+ * Added code for pileup rejection in EventCuts and MuDstReader.
+ * Modified trigger selections for some data sets in EventCuts.
+ *
  * Revision 1.14  2008/05/01 23:35:57  prindle
- * Found that for global tracks we sometimes have global dca = (0,0,0)
+ *   Found that for global tracks we sometimes have global dca = (0,0,0)
  * Now use dca() when we are using global tracks.
  *
  * Revision 1.13  2008/03/19 22:01:59  prindle

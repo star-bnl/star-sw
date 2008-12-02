@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.h,v 1.4 2006/04/04 22:05:07 porter Exp $
+ * $Id: StEStructTrackCuts.h,v 1.5 2008/12/02 23:35:36 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,6 +28,7 @@ public:
    CutName mnfitnmaxName;
    CutName mglobalDCAName;
    CutName mchi2Name;
+   CutName mdPtByPtName;
    CutName mptName;
    CutName mxtName;
    CutName mytName;
@@ -44,6 +45,7 @@ public:
   float mnfitnmax[2];
   float mglobalDCA[2];
   float mchi2[2];
+  float mdPtByPt[2];
   float mpt[2];
   float myt[2];
   float mxt[2];
@@ -72,6 +74,7 @@ public:
   bool goodNFitNMax(float r);
   bool goodGlobalDCA(float g);
   bool goodChi2(float x);
+  bool gooddPtByPt(float x);
   bool goodPt(float p);
   bool goodXt(float p);
   bool goodYt(float p);
@@ -213,6 +216,10 @@ inline bool StEStructTrackCuts::goodProton(float c){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.h,v $
+ * Revision 1.5  2008/12/02 23:35:36  prindle
+ * Added code for pileup rejection in EventCuts and MuDstReader.
+ * Modified trigger selections for some data sets in EventCuts.
+ *
  * Revision 1.4  2006/04/04 22:05:07  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers

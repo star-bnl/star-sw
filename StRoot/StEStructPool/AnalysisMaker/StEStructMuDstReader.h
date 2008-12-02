@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.8 2008/05/01 23:35:57 prindle Exp $
+ * $Id: StEStructMuDstReader.h,v 1.9 2008/12/02 23:35:35 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,6 +15,7 @@
 
 #include "TH2F.h"
 #include "StEStructEventReader.h"
+#include "StEStructPool/Pileup/Pileup.h"
 
 class StMuDstMaker;
 class StMuTrack;
@@ -38,6 +39,8 @@ public:
   int  mhasdEdxCuts;
   TH2F*  dEdxBefore;
   TH2F*  dEdxAfter;
+
+  Pileup      *mPileup;
 
   StEStructMuDstReader();
   StEStructMuDstReader(StMuDstMaker* maker,
@@ -76,8 +79,12 @@ inline bool StEStructMuDstReader::done(){ return mAmDone; };
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.9  2008/12/02 23:35:35  prindle
+ * Added code for pileup rejection in EventCuts and MuDstReader.
+ * Modified trigger selections for some data sets in EventCuts.
+ *
  * Revision 1.8  2008/05/01 23:35:57  prindle
- * Found that for global tracks we sometimes have global dca = (0,0,0)
+ *   Found that for global tracks we sometimes have global dca = (0,0,0)
  * Now use dca() when we are using global tracks.
  *
  * Revision 1.7  2006/04/11 17:50:48  prindle
