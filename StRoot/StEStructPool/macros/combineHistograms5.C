@@ -22,8 +22,10 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
     TH2F **ptdedpC;
     TH2F **dedp;
     TH2F **dedpC;
-    TH2F **ytyt;
-    TH2F **ytytC;
+    TH2F **ptsedp;
+    TH2F **ptsedpC;
+    TH2F **sedp;
+    TH2F **sedpC;
     TH2F **ptetaeta;
     TH2F **ptetaetaC;
     TH2F **etaeta;
@@ -59,20 +61,22 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
             }
             int subtract = 1;
             ptdedpC   = (TH2F**) ehelp->buildPtCommon("DEtaDPhi",2,subtract);
+            ptsedpC   = (TH2F**) ehelp->buildPtCommon("SEtaDPhi",2,subtract);
             ptetaetaC = (TH2F**) ehelp->buildPtCommon("EtaEta",2,subtract);
             ptphiphiC = (TH2F**) ehelp->buildPtCommon("PhiPhi",2,subtract);
 
             ptdedp   = (TH2F**) ehelp->buildPtChargeTypes("DEtaDPhi",2,subtract);
+            ptsedp   = (TH2F**) ehelp->buildPtChargeTypes("SEtaDPhi",2,subtract);
             ptetaeta = (TH2F**) ehelp->buildPtChargeTypes("EtaEta",2,subtract);
             ptphiphi = (TH2F**) ehelp->buildPtChargeTypes("PhiPhi",2,subtract);
 
             dedpC     = (TH2F**) ehelp->buildCommon("DEtaDPhi",2);
-            ytytC     = (TH2F**) ehelp->buildCommon("YtYt",3);
+            sedpC     = (TH2F**) ehelp->buildCommon("SEtaDPhi",2);
             etaetaC   = (TH2F**) ehelp->buildCommon("EtaEta",2);
             phiphiC   = (TH2F**) ehelp->buildCommon("PhiPhi",2);
 
             dedp     = (TH2F**) ehelp->buildChargeTypes("DEtaDPhi",2);
-            ytyt     = (TH2F**) ehelp->buildChargeTypes("YtYt",3);
+            sedp     = (TH2F**) ehelp->buildChargeTypes("SEtaDPhi",2);
             etaeta   = (TH2F**) ehelp->buildChargeTypes("EtaEta",2);
             phiphi   = (TH2F**) ehelp->buildChargeTypes("PhiPhi",2);
 
@@ -89,10 +93,15 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
                 ptdedp[icharge]->SetTitle(name.Data());
                 ptdedp[icharge]->Write();
                 TString name(pidName[ipid]);
-                name += "_YtYt"; name += chargeName[icharge];  name += ic;
-                ytyt[icharge]->SetName(name.Data());
-                ytyt[icharge]->SetTitle(name.Data());
-                ytyt[icharge]->Write();
+                name += "_NSEtaDPhi"; name += chargeName[icharge];  name += ic;
+                sedp[icharge]->SetName(name.Data());
+                sedp[icharge]->SetTitle(name.Data());
+                sedp[icharge]->Write();
+                TString name(pidName[ipid]);
+                name += "_PtSEtaDPhi"; name += chargeName[icharge];  name += ic;
+                ptsedp[icharge]->SetName(name.Data());
+                ptsedp[icharge]->SetTitle(name.Data());
+                ptsedp[icharge]->Write();
 
                 TString name(pidName[ipid]);
                 name += "_NDEtaDPhi"; name += chargeType[icharge];  name += ic;
@@ -105,10 +114,15 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
                 ptdedpC[icharge]->SetTitle(name.Data());
                 ptdedpC[icharge]->Write();
                 TString name(pidName[ipid]);
-                name += "_YtYt"; name += chargeType[icharge];  name += ic;
-                ytytC[icharge]->SetName(name.Data());
-                ytytC[icharge]->SetTitle(name.Data());
-                ytytC[icharge]->Write();
+                name += "_NSEtaDPhi"; name += chargeType[icharge];  name += ic;
+                sedpC[icharge]->SetName(name.Data());
+                sedpC[icharge]->SetTitle(name.Data());
+                sedpC[icharge]->Write();
+                TString name(pidName[ipid]);
+                name += "_PtSEtaDPhi"; name += chargeType[icharge];  name += ic;
+                ptsedpC[icharge]->SetName(name.Data());
+                ptsedpC[icharge]->SetTitle(name.Data());
+                ptsedpC[icharge]->Write();
 
 
                 TString name(pidName[ipid]);
@@ -157,8 +171,95 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
                 ptphiphiC[icharge]->Write();
             }
             delete tf;
+            delete ehelp;
+        }
+    }
+
+    TH2D **ytyt;
+    TH2D **ytytC;
+    gROOT->LoadMacro("minimizeNegative.C");
+//    double sFactor[nCent][1][2], eSFactor[nCent][1][2];
+    double sFactor[2], eSFactor[2];
+    float  sf[2];
+    double argList[10];
+    double start = 0.95;
+    double step  = 0.001;
+    double bmin  = 0.9;
+    double bmax  = 1.1;
+    int errFlag = 0;
+    minData.mCorrType = 1;
+    minData.mLambda   = 10;
+
+    // For ytyt space pid is not yet useful because of limited range due to dE/dx.
+    int ytytBins[] = {0};
+    for (int ic=0;ic<nCent;ic++) {
+        for (int ibin=0;ibin<1;ibin++) {
+            sprintf(inFileName,"%s/%s%s.root",dirName,inNames[ic],binName[ytytBins[ibin]]);
+            tf        = new TFile(inFileName);
+            tf->cd();
+            ehelp     = new StEStructSupport(tf,0);
+            ehelp->msilent            = true;
+            ehelp->mapplyDEtaFix      = false;
+            ehelp->mPairNormalization = true;
+            ehelp->mIdenticalPair     = true;
+            ehelp->setBGMode(1);
+
+            // A lot of stuff so we can find a scaling factor for \rho_{ref}
+            // such that \Delta\rho is almost always positive.
+            minData.mSupport    = ehelp;
+            minData.mChargeType = 0;
+
+            minuit = new TMinuit(1);
+            minuit->SetFCN(minimizeNegative);
+            minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
+            minuit->SetErrorDef(1);
+            argList[0] = 1;
+            minuit->mnexcm("SET STR",argList,1,errFlag);
+            argList[0] = 500;
+            cout << ">>>>>Starting scale factor 0 fit for centrality " << ic << " yt bin " << ibin << endl;
+            minuit->mnexcm("MIGRAD",argList,1,errFlag);
+            minuit->GetParameter(0,sFactor[0],eSFactor[0]);
+            delete minuit;
+
+            // Seems like I should be able to reset the TMinuit object to do a
+            // different fit. Didn't work on my first attempts, so I just create
+            // a new one.
+            minData.mChargeType = 1;
+            minuit = new TMinuit(1);
+            minuit->SetFCN(minimizeNegative);
+            int errFlag = 0;
+            minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
+            minuit->SetErrorDef(1);
+            argList[0] = 1;
+            minuit->mnexcm("SET STR",argList,1,errFlag);
+            argList[0] = 500;
+            cout << ">>>>>Starting scale factor 1 fit for centrality " << ic << " yt bin " << ibin << endl;
+            minuit->mnexcm("MIGRAD",argList,1,errFlag);
+            minuit->GetParameter(0,sFactor[1],eSFactor[1]);
+            delete minuit;
+
+            sf[0] = sFactor[0];
+            sf[1] = sFactor[1];
+            ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
+            ytytC = ehelp->buildCommon("YtYt",5,sf);
+
+            out->cd();
+            for (int icharge=0;icharge<4;icharge++) {
+                TString name(binName[ytytBins[ibin]]);
+                name += "_YtYt"; name += chargeName[icharge];  name += ic;
+                ytyt[icharge]->SetName(name.Data());
+                ytyt[icharge]->SetTitle(name.Data());
+                ytyt[icharge]->Write();
+                TString name(binName[ytytBins[ibin]]);
+                name += "_YtYt"; name += chargeType[icharge];  name += ic;
+                ytytC[icharge]->SetName(name.Data());
+                ytytC[icharge]->SetTitle(name.Data());
+                ytytC[icharge]->Write();
+            }
+            delete tf;
+            delete ehelp;
         }
     }
     out->Close();
-    delete out;
+//    delete out;
 }

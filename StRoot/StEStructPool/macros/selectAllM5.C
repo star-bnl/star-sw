@@ -21,6 +21,8 @@ void selectAllM5(const char* dirName, const char* inFile){
     cout<<"error opening file "<<endl;
     return ;
   };
+  StEStructCutBin* cb = StEStructCutBin::Instance();
+  cb->setMode(5);
 
   //--> do all of the following
   const char* oname[]={"pi_o", "pi_pi", "pi_K", "pi_p",

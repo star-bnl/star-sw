@@ -22,6 +22,7 @@ void load2ptLibs(){
     gSystem->Load("StEStructPoolCorrelations");
     gSystem->Load("StEStructPoolFluctuations");
     gSystem->Load("StEStructPoolPhiWeight");
+    gSystem->Load("StEStructPoolPileup");
 
 
 };
