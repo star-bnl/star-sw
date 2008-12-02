@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.10 2008/03/19 22:06:01 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.11 2008/12/02 23:45:06 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -31,9 +31,6 @@ class StEStructCutBin : public TObject {
   char* mcutModeName;
   int mcutBinHistMode;
 
-  int mPtBins[100]; // returned list of indexes terminated by -1
-  float mPtBinMax[100];
-  float mPtBinMin[100];
   TH1D** mHCutBinHists[8];
 
   static StEStructCutBin* mInstance;
@@ -47,19 +44,19 @@ class StEStructCutBin : public TObject {
   int getCutBinMode5(StEStructPairCuts *pc, int pairCase);
   int getCutBinMode6(StEStructPairCuts *pc, int zbin);
   int getCutBinMode7(StEStructPairCuts *pc, int zbin);
+  int getCutBinMode8(StEStructPairCuts *pc);
   int ignorePair5(StEStructPairCuts *pc);
-  int symmetrizeYt5(StEStructPairCuts *pc);
-  int switchYt5(StEStructPairCuts *pc);
+  int symmetrizeXX3(StEStructPairCuts *pc);
+  int symmetrizeXX5(StEStructPairCuts *pc);
+  int symmetrizeXX8(StEStructPairCuts *pc);
+  int switchXX3(StEStructPairCuts *pc);
+  int switchXX5(StEStructPairCuts *pc);
+  int switchXX8(StEStructPairCuts *pc);
+  int notSymmetrizedXX3(int cutBin, int pairCharge);
+  int notSymmetrizedXX5(int cutBin, int pairCharge);
+  int notSymmetrizedXX8(int cutBin, int pairCharge);
 
-  void initPtBinMode0();
-  void initPtBinMode1();
-  void initPtBinMode2();
-  void initPtBinMode3();
-  void initPtBinMode4();
-  void initPtBinMode5();
-  void initPtBinMode6();
-  void initPtBinMode7();
-
+  void initCutBinHists5();
   void writeCutBinHists5();
 
  public:
@@ -74,6 +71,7 @@ class StEStructCutBin : public TObject {
   // Save histograms (mHCutBinHists) to currently opened file.
   void setCutBinHistMode(int mode); // Non-zero means fill histograms.
   int  getCutBinHistMode();
+  void initCutBinHists();
   void writeCutBinHists();
   int  getNumBins();
   int  getNumPairDensityBins();
@@ -83,9 +81,9 @@ class StEStructCutBin : public TObject {
   int  getCutBin(StEStructPairCuts *p, int pairCase=0);
   int  getPairDensityBin(int ibin);
   int  ignorePair(StEStructPairCuts *pc);
-  int  symmetrizeYt(StEStructPairCuts *pc);
-  int  switchYt(StEStructPairCuts *pc);
-  int*  getPtBins(float pt);
+  int  symmetrizeXX(StEStructPairCuts *pc);
+  int  switchXX(StEStructPairCuts *pc);
+  int  notSymmetrizedXX(int cutBin, int pairCharge);
   char* printCutBinName();
 
   ClassDef(StEStructCutBin,1)
@@ -103,15 +101,7 @@ inline int StEStructCutBin::getNumPairDensityBins() {
     }
 }
 inline int StEStructCutBin::getNumParentBins(){ return mnumParentBins; }
-inline int StEStructCutBin::getNumQABins(){
-    if (5 == mcutMode) {
-        return 4;
-    } else if (mcutMode == 7) {
-      return 10;
-    } else {
-        return mnumBins;
-    }
-}
+inline int StEStructCutBin::getNumQABins() { return mnumParentBins; }
 
 inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int pairCase){
   int retVal=0;
@@ -157,6 +147,11 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int pairCase){
      retVal=getCutBinMode7(pc,pairCase);
      break;
    }
+ case 8:
+   {
+     retVal=getCutBinMode8(pc);
+     break;
+   }
  }
  return retVal;
 }
@@ -172,6 +167,7 @@ inline int StEStructCutBin::getPairDensityBin(int ibin){
     }
 }
 inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* trkPtr) {
+    // This is for calculating mean pt of parent population.
     if (3 == mcutMode) {
         float yt = trkPtr->Yt();
         // These numbers are also used in StEStructCutBin::getCutBinMode3 (change both)
@@ -179,16 +175,36 @@ inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* 
             return 0;
         } else if ((1.8<yt) && (yt<2.2)) {   // neck
             return 1;
-        } else if (2.2<yt) {                 // hard
+        } else {                             // hard
             return 2;
-        } else {                             // everything not in soft, neck or hard.
-            return 3;
         }
     } else if (5 == mcutMode) {
         return pc->getdEdxPID(trkPtr);
+    } else if (8 == mcutMode) {
+        float yt = trkPtr->Yt();
+        // These numbers are also used in StEStructCutBin::getCutBinMode3 (change both)
+        if (yt<1.8) {                        // soft
+            return 0;
+        } else if ((1.8<yt) && (yt<2.2)) {   // neck
+            return 1;
+        } else {                             // hard
+            return 2;
+        }
     } else {
         return 0;
     }
+}
+inline void StEStructCutBin::initCutBinHists() {
+    switch (mcutMode) {
+        case 5: {
+            initCutBinHists5();
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    return;
 }
 inline void StEStructCutBin::writeCutBinHists() {
     switch (mcutMode) {
@@ -213,37 +229,66 @@ inline int StEStructCutBin::ignorePair(StEStructPairCuts *pc) {
     }
     return ignorePair5(pc);
 }
-inline int StEStructCutBin::symmetrizeYt(StEStructPairCuts *pc) {
-    if (mcutMode != 5) {
-        return 1;
-    } else {
-        return symmetrizeYt5(pc);
+// Normally we want to enter pair at (x1,x2) _and_ (x2,x1) for phi-phi, eta-eta etc. histograms.
+// When Particles are distinguishable in some way we can postpone the symmetrization and
+// perhaps get some useful information. Maybe this will work for ytyt, but eta and phi
+// seem to be dominated by detector artifacts.
+inline int StEStructCutBin::symmetrizeXX(StEStructPairCuts *pc) {
+    switch (mcutMode) {
+        case 3: {
+            return symmetrizeXX3(pc);
+        }
+        case 5: {
+            return symmetrizeXX5(pc);
+        }
+        case 8: {
+            return symmetrizeXX8(pc);
+        }
+        default: {
+            return 1;
+        }
     }
 }
-inline int StEStructCutBin::switchYt(StEStructPairCuts *pc) {
-    if (mcutMode != 5) {
-        return 0;
-    } else {
-        return switchYt5(pc);
+// When we are not symmetrizing we want to order the pair. For example we may want the lower pt
+// track to be the first of the pair.
+inline int StEStructCutBin::switchXX(StEStructPairCuts *pc) {
+    switch (mcutMode) {
+        case 3: {
+            return switchXX3(pc);
+        }
+        case 5: {
+            return switchXX5(pc);
+        }
+        case 8: {
+            return switchXX8(pc);
+        }
+        default: {
+            return 0;
+        }
     }
+    return 0;
+}
+// When adding cut bins together some of them may have been symmetrized during analysis.
+// If one hasn't it needs to be symmetrized before the addition.
+// This method is called from StEStructHAdd in Support.
+inline int StEStructCutBin::notSymmetrizedXX(int cutBin, int pairCharge) {
+    switch (mcutMode) {
+        case 3: {
+            return notSymmetrizedXX3(cutBin,pairCharge);
+        }
+        case 5: {
+            return notSymmetrizedXX5(cutBin,pairCharge);
+        }
+        case 8: {
+            return notSymmetrizedXX8(cutBin,pairCharge);
+        }
+        default: {
+            return 0;
+        }
+    }
+    return 0;
 }
 
-//-----------------------------------------------------------
-inline int* StEStructCutBin::getPtBins(float pt){
-
-  if(mcutMode>0){  
-   int j=0;
-   for(int i=0;i<mnumBins;i++){
-    if(pt>=mPtBinMin[i] && pt<mPtBinMax[i]){
-      mPtBins[j]=i;
-      j++;
-    }
-   } 
-   mPtBins[j]=-1;
-  }
- 
-  return mPtBins;
-}
 
 
 #endif
@@ -252,6 +297,16 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.11  2008/12/02 23:45:06  prindle
+ * Changed switchYt to switchXX (etc.) to better reflect function.
+ * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)
+ * In CutBin: remove initPtBin
+ *            add mode 8
+ *            add notSymmetrized (used in Support)
+ * Added LUT (Look Up Table) for pair cuts. Experimental for now.
+ * Modified cutMerging2 (to look at track separation at a few radii)
+ * and cutCrossing2 so it doesn't accidentally reject almost back to back tracks.
+ *
  * Revision 1.10  2008/03/19 22:06:01  prindle
  * Added doInvariantMass flag.
  * Added some plots in pairDensityHistograms.

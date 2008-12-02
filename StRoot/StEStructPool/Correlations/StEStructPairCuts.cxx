@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.9 2008/03/19 22:06:01 prindle Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.10 2008/12/02 23:45:06 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -19,13 +19,16 @@ ClassImp(StEStructPairCuts)
 StEStructPairCuts::StEStructPairCuts(): StEStructCuts(){ init(); };
 StEStructPairCuts::StEStructPairCuts(const char* cutfileName): StEStructCuts(cutfileName) { init(); };
 
-StEStructPairCuts::~StEStructPairCuts() {};
+StEStructPairCuts::~StEStructPairCuts() {
+    delete mLUT;
+};
 
 void StEStructPairCuts::init(){ 
 
   strcpy(mcutTypeName,"Pair");
   initCuts();
   initNames();
+  mLUT = new StEStructPairLUT();
   if(isLoaded())loadCuts();
 
 }
@@ -48,8 +51,11 @@ void StEStructPairCuts::initCuts(){
     mMerging2[0]=mMerging2[1]=0;
     mCrossing[0]=mCrossing[1]=0;
     mCrossing2[0]=mCrossing2[1]=0;
+    mLUTParams[0]=mLUTParams[1]=0;
 
     // Would be nice to have some way to change these without recompiling.
+    // Normally upper pt cuts are 999, 1.0, 1.0, 1.5 for all, pi, K, p
+    // Want to run Pythia without upper cut (I think we actually use 20 in cuts file.)
     mdEdxMomentumCut[0][0] =   0.0;
     mdEdxMomentumCut[0][1] = 999.0;
     mdEdxMomentumCut[1][0] =   0.1;  // pi
@@ -60,7 +66,7 @@ void StEStructPairCuts::initCuts(){
     mdEdxMomentumCut[3][1] =   1.5;
     
     mdeltaPhiCut=mdeltaEtaCut=mGooddeltaZdeltaXYCut=mdeltaMtCut=mqInvCut=mEntSepCut=mExitSepCut=mQualityCut=mMidTpcSepLSCut=mMidTpcSepUSCut=false;
-    mHBTCut=mCoulombCut=mMergingCut=mCrossingCut=mMergingCut2=mCrossingCut2 = false;
+    mHBTCut=mCoulombCut=mMergingCut=mCrossingCut=mMergingCut2=mCrossingCut2=mLUTCut = false;
     mpionMomentumCut=mKaonMomentumCut=mprotonMomentumCut = false;
     mpionOtherMassCut=mpionpionMassCut=mpionKaonMassCut=mpionprotonMassCut = false;
     mKaonOtherMassCut=mKaonKaonMassCut=mKaonprotonMassCut=mprotonOtherMassCut = false;
@@ -70,7 +76,7 @@ void StEStructPairCuts::initCuts(){
     for(int i=0;i<4;i++) {
         mdphiCounter[i]=mdetaCounter[i]=mgooddzdxyCounter[i]=mdmtCounter[i]=mqInvCounter[i]=mEntSepCounter[i]=0;
         mExitSepCounter[i]=mQualityCounter[i]=msplitLSCounter[i]=msplitUSCounter[i]=0;
-        mHBTCounter[i]=mCoulombCounter[i]=mMergingCounter[i]=mCrossingCounter[i]=mMergingCounter2[i]=mCrossingCounter2[i]=0;
+        mHBTCounter[i]=mCoulombCounter[i]=mMergingCounter[i]=mCrossingCounter[i]=mMergingCounter2[i]=mCrossingCounter2[i]=mLUTCounter[i]=0;
         mpionMomentumCounter[i]=mKaonMomentumCounter[i]=mprotonMomentumCounter[i]=0;
         mpionOtherMassCounter[i]=mpionpionMassCounter[i]=mpionKaonMassCounter[i]=mpionprotonMassCounter[i]=0;
         mKaonOtherMassCounter[i]=mKaonKaonMassCounter[i]=mKaonprotonMassCounter[i]=mprotonOtherMassCounter[i]=0;
@@ -104,6 +110,7 @@ void StEStructPairCuts::initNames(){
   strcpy(mMergingName2.name,"Merging2");
   strcpy(mCrossingName.name,"Crossing");
   strcpy(mCrossingName2.name,"Crossing2");
+  strcpy(mLUTName.name,"LUT");
   strcpy(mpionMomentumName.name,"pionMomentumRange");
   strcpy(mKaonMomentumName.name,"KaonMomentumRange");
   strcpy(mprotonMomentumName.name,"protonMomentumRange");
@@ -242,6 +249,17 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
     //mCrossingName2.idx=createCutHists(name,mCrossing2,2);  // not making cut histograms
     mCrossingCut2=true;
     cout << " Loading Crossing2 cut with range of cuts = "<<mCrossing2[0]<<","<<mCrossing2[1]<<endl;
+    return true;
+  }
+  if(!strcmp(name,mLUTName.name)){
+    mLUTParams[0]=atof(vals[0]); mLUTParams[1]=atof(vals[1]);
+    mLUTCut=true;
+    cout << " Calculating Look Up Table with dXY cut = "<<mLUTParams[0]<<" and dZ cut = "<<mLUTParams[1]<< " (takes a little while)" <<endl;
+    mLUT->mDelXYCut = mLUTParams[0];
+    mLUT->mDelZCut  = mLUTParams[1];
+    mLUT->reAllocHists();
+    mLUT->fillLUTs();
+    cout << " LUT has been calculated " <<endl;
     return true;
   }
 
@@ -424,6 +442,11 @@ void StEStructPairCuts::printCutStats(ostream& ofs){
     printCutCounts(ofs,cutTypes[0],mCrossingCounter2[0],mCrossingCounter2[1]);
     printCutCounts(ofs,cutTypes[1],mCrossingCounter2[2],mCrossingCounter2[3]);
   }
+  if(mLUTCut){
+    ofs<<mLUTName.name<<","<<mLUTParams[0]<<","<<mLUTParams[1]<<"\t\t"<<" # pair LUT cut"<<endl;
+    printCutCounts(ofs,cutTypes[0],mLUTCounter[0],mLUTCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mLUTCounter[2],mLUTCounter[3]);
+  }
   if(mpionMomentumCut){
     ofs<<mpionMomentumName.name<<","<<mdEdxMomentumCut[1][0]<<","<<mdEdxMomentumCut[1][1]<<"\t\t"<<" # pion momentum range cut"<<endl;
     printCutCounts(ofs,cutTypes[0],mpionMomentumCounter[0],mpionMomentumCounter[1]);
@@ -534,6 +557,9 @@ int StEStructPairCuts::cutPair(){
     if(cutMerging2() || cutCrossing2()) {
         return 1;
     }
+    if(cutLUT()) {
+        return 1;
+    }
     if(cutCoulomb() || cutHBT()) {
         return 1;
     }
@@ -564,6 +590,9 @@ int StEStructPairCuts::cutPair(){
 
 //------------------------------------------------------------
 int StEStructPairCuts::cutPairHistograms(){
+
+  //>>>>> djp  I haven't been updating this code with to include my attempts at pair cuts.
+  //>>>>>      Should do this sometime.
 
   // much much slower cut code - should be run on a small sub-sample to view 
   // results of histograms.  Tricky piece here is the connection between pair
@@ -743,6 +772,23 @@ StEStructPairCuts::NominalTpcAvgZSeparation() const {
   if (x3==-1) return (x1+x2)/2.;  // if particle exited the endcap, exlude from average
   else return (x1+x2+x3)/3.;
 }
+bool StEStructPairCuts::TracksCrossInPhi() const {
+    // Note: Tracks that are nearly back-to-back can have the sign of their
+    //       opening angles change from inner to outer radius and we don't want
+    //       to discard those. Rely on goodDeltaXY to keep those pairs from
+    //       getting here.
+    StThreeVectorF ent1 = mTrack1->NominalTpcEntrancePoint();
+    StThreeVectorF ent2 = mTrack2->NominalTpcEntrancePoint();
+    float sinEnt = (ent1.x()*ent2.y() - ent1.y()*ent2.x());
+    StThreeVectorF exit1 = mTrack1->NominalTpcExitPoint();
+    StThreeVectorF exit2 = mTrack2->NominalTpcExitPoint();
+    float sinExit = (exit1.x()*exit2.y() - exit1.y()*exit2.x());
+    if (sinEnt*sinExit < 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 //--------------------------------------------------------
 double 
@@ -765,6 +811,22 @@ StEStructPairCuts::MidTpcZSeparation() const {
   StThreeVectorF diff = mTrack1->MidTpcPoint() - mTrack2->MidTpcPoint();
   //cout << "Mid Z Sep" << fabs(diff.z()) << endl;
   return (double)(fabs(diff.z()+mZoffset));
+}
+//--------------------------------------------------------
+double StEStructPairCuts::OuterMidTpcXYSeparation() const {
+    StThreeVectorF diff = mTrack1->OuterMidTpcPoint() - mTrack2->OuterMidTpcPoint();
+    return (double)(diff.perp());
+}
+
+double StEStructPairCuts::OuterMidTpcSeparation() const {
+    StThreeVectorF off(0,0,mZoffset);
+    StThreeVectorF diff = mTrack1->OuterMidTpcPoint() - mTrack2->OuterMidTpcPoint() + off;
+    return (double)(diff.mag());
+}
+
+double StEStructPairCuts::OuterMidTpcZSeparation() const {
+    StThreeVectorF diff = mTrack1->OuterMidTpcPoint() - mTrack2->OuterMidTpcPoint();
+    return (double)(fabs(diff.z()+mZoffset));
 }
 
 // >>>>> Choose second version of getdEdxPID for an attempt
@@ -826,6 +888,16 @@ int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.10  2008/12/02 23:45:06  prindle
+ * Changed switchYt to switchXX (etc.) to better reflect function.
+ * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)
+ * In CutBin: remove initPtBin
+ *            add mode 8
+ *            add notSymmetrized (used in Support)
+ * Added LUT (Look Up Table) for pair cuts. Experimental for now.
+ * Modified cutMerging2 (to look at track separation at a few radii)
+ * and cutCrossing2 so it doesn't accidentally reject almost back to back tracks.
+ *
  * Revision 1.9  2008/03/19 22:06:01  prindle
  * Added doInvariantMass flag.
  * Added some plots in pairDensityHistograms.
