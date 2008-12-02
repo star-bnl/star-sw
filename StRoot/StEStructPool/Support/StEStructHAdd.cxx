@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.11 2008/05/01 23:46:39 prindle Exp $
+ * $Id: StEStructHAdd.cxx,v 1.12 2008/12/02 23:52:51 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -14,6 +14,7 @@
 #include "StEStructHAdd.h"
 
 #include "StEStructPool/Correlations/StEStructBinning.h"  
+#include "StEStructPool/Correlations/StEStructCutBin.h"  
 
 #include "Stiostream.h"
 #include "TH1.h"
@@ -23,6 +24,12 @@
 
 ClassImp(StEStructHAdd)
 
+  /*
+   * 06/05/08 djp Looking at SEtaDPhi histograms I was confused that they were not symmetric
+   *              around SEta=0. I guess this was intentional with the idea that forward and
+   *              backward could be different. Should re-think this as it may make more
+   *              sense to symmetrize.
+   */
   //------------------------------------------------------------------------
 void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                             int* nlist, int ntot, int parentDist[][2], int nParentDist, int symmXX) {
@@ -44,14 +51,13 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                     0,   0,   0,   0,   0,
                     0,   0,
                     0,   0};
-    int unSymmed[7][4] = {{0, 1, 1, 0},   {1, 1, 1, 1},   {1, 1, 1, 1},
-                          {0, 1, 1, 0},   {1, 1, 1, 1},   {0, 1, 1, 0},   {0, 1, 1, 0}};
     const char* symEtaPhi[]={"DEtaDPhi", "NDEtaDPhi", "PrDEtaDPhi", "PaDEtaDPhi", "PbDEtaDPhi"};
     const char* symPhi[]={"SEtaDPhi", "NSEtaDPhi", "PrSEtaDPhi", "PaSEtaDPhi", "PbSEtaDPhi"};
     char* Title[]={"Sibling","Mixed"};
     char* Species[]={"A","B"};
     char* Type[]={" : +.+"," : +.-"," : -.+"," : -.-"};
     StEStructBinning* b=StEStructBinning::Instance();
+    StEStructCutBin* cb = StEStructCutBin::Instance();
 
     TFile* outFile = new TFile(outfile,"RECREATE");
 
@@ -80,9 +86,14 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                             // No z-binning here.
                             if (0==n) {
                                 outhist=(TH2D *)tmp->Clone();
-                                // This part is only intended to be used with mode 5 (pid)
+                                // This part was only intended to be used with mode 5 (pid)
+                                // (With recognition that mode3 (and now mode 8) have assymetric yt space
+                                // we have extended the XX symmetry thing.)
                                 if (symmXX && isXXHist[k]) {
-                                    if (unSymmed[nlist[n]][j]) {
+                                    // In cases where we have off-diagonal yt-yt bin or different pid
+                                    // we left XX histograms un-symmetrized. We need to symmetrize these
+                                    // before adding to other bins that have been symmetrized.
+                                    if (cb->notSymmetrizedXX(nlist[n],j)) {
                                         symmetrizeXX(outhist);
                                     }
                                 }
@@ -90,9 +101,9 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                                 outhist->SetTitle(tmp->GetTitle());
                             } else {
                                 cpy = (TH2D *)tmp->Clone();
-                                // This part is only intended to be used with mode 5 (pid)
+                                // This part was only intended to be used with mode 5 (pid)
                                 if (symmXX && isXXHist[k]) {
-                                    if (unSymmed[nlist[n]][j]) {
+                                    if (cb->notSymmetrizedXX(nlist[n],j)) {
                                         symmetrizeXX(cpy);
                                     }
                                 }
@@ -110,9 +121,9 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                             }
                             if (0==n) {
                                 outhist=(TH2D *)tmp->Clone();
-                                // This part is only intended to be used with mode 5 (pid)
+                                // This part is (was) only intended to be used with mode 5 (pid)
                                 if (symmXX && isXXHist[k]) {
-                                    if (unSymmed[nlist[n]][j]) {
+                                    if (cb->notSymmetrizedXX(nlist[n],j)) {
                                         symmetrizeXX(outhist);
                                     }
                                 }
@@ -120,9 +131,9 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                                 outhist->SetTitle(tmp->GetTitle());
                             } else {
                                 cpy = (TH2D *)tmp->Clone();
-                                // This part is only intended to be used with mode 5 (pid)
+                                // This part is (was) only intended to be used with mode 5 (pid)
                                 if (symmXX && isXXHist[k]) {
-                                    if (unSymmed[nlist[n]][j]) {
+                                    if (cb->notSymmetrizedXX(nlist[n],j)) {
                                         symmetrizeXX(cpy);
                                     }
                                 }
@@ -581,8 +592,15 @@ void StEStructHAdd::combineUS(TFile * modFile) {
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.12  2008/12/02 23:52:51  prindle
+ * Get information about histogram XX being symmetrized from CutBin.
+ * Changed TH1* to TH2D* in many places hoping to be able to plot DEtaDPhi
+ * as colz (doesn't work yet).
+ * Added direct calculation of \Delta\rho/\rho_{ref} (and  similar) which is
+ * needed for YtYt correlations.
+ *
  * Revision 1.11  2008/05/01 23:46:39  prindle
- * Changed to use TH1D and TH2D (instead of TH1 and TH2) in some places so
+ *   Changed to use TH1D and TH2D (instead of TH1 and TH2) in some places so
  * we can use GetObject method to enforce type checking. Found I had missed
  * duplicating a \phi_\Delta row in one case. Also added a method to include
  * sum of pairdensity histograms in output file.

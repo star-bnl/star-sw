@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.12 2008/03/19 22:08:39 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.13 2008/12/02 23:52:53 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -19,8 +19,7 @@
 class TH1;
 class TH2;
 class TH1D;
-class TH2F;
-class TH1F;
+class TH2D;
 class TFile;
 
 class StEStructSupport : public TObject {
@@ -45,11 +44,11 @@ public:
   const char* getChargeSignName(int ics);
   char* prepend(const char* name, const char* s1);
   char* swapIn(const char* name, const char* s1, const char* s2);
-  void rescale(TH1** hists, int zBin);
-  void rescalePt(TH1** hists, int zBin);
+  void rescale(TH2D** hists, int zBin);
+  void rescalePt(TH2D** hists, int zBin);
   void setSymmetrizeUS(bool symm);
-  void symmetrizeUS(const char *name, TH1** histos);
-  void symmetrizePtUS(const char *name, TH1** histos);
+  void symmetrizeUS(const char *name, TH2D** histos);
+  void symmetrizePtUS(const char *name, TH2D** histos);
 
   StEStructSupport() {};   
 
@@ -72,46 +71,50 @@ public:
 
   double *getd2NdEtadPhi(int zBin);
   double *getptHat(int zBin);
-  TH1** getHists(const char* name, int zBin);
-  TH1** getLocalClones(const char* name, int zBin);
-  TH1** getPtHists(const char* name, int zBin);
-  TH1** getPtClones(const char* name, int zBin);
-  float* getNorms(TH1** histArray);
+  TH2D** getHists(const char* name, int zBin);
+  TH2D** getLocalClones(const char* name, int zBin);
+  TH2D** getNHists(const char* name, int zBin);
+  TH2D** getLocalNClones(const char* name, int zBin);
+  TH2D** getPtHists(const char* name, int zBin);
+  TH2D** getPtClones(const char* name, int zBin);
+  float* getNorms(TH2D** histArray);
   double getRatio(int iCombo, int zBin);
 
   // ++, +-, -+, --
-  TH1** buildCommonRatios(const char* name);
-  TH1** buildCommonRatios(const char* name, int zBin);
-  TH1** buildCommonCFunctions(const char* name);
-  TH1** buildCommonCFunctions(const char* name, int zBin);
-  TH1** buildCommonRFunctions(const char* name);
-  TH1** buildCommonRFunctions(const char* name, int zBin);
-  TH1** buildCommon(const char* name, int opt=0);
-  TH1** buildCommon(const char* name, int opt, int zBin);
-  TH1** buildPtCommon(const char* name, int opt=0, int subtract=0);
-  TH1** buildPtCommon(const char* name, int opt, int subtract, int zBin);
+  TH2D** buildCommonRatios(const char* name, float* sf=0);
+  TH2D** buildCommonRatios(const char* name, float* sf, int zBin);
+  TH2D** buildCommonCFunctions(const char* name, float* sf=0);
+  TH2D** buildCommonCFunctions(const char* name, float* sf, int zBin);
+  TH2D** buildCommonRFunctions(const char* name, float* sf=0);
+  TH2D** buildCommonRFunctions(const char* name, float* sf, int zBin);
+  TH2D** buildCommon(const char* name, int opt=2, float* sf=0);
+  TH2D** buildCommon(const char* name, int opt, float* sf, int zBin);
+  void  adjustCommonErrors(const char* name, TH2D **hist, int opt);
+  TH2D** buildPtCommon(const char* name, int opt=2, int subtract=1);
+  TH2D** buildPtCommon(const char* name, int opt, int subtract, int zBin);
 
   // LS, US, CD, CI
-  TH1** buildChargeTypeRatios(const char* name);
-  TH1** buildChargeTypeRatios(const char* name, int zBin);
-  TH1** buildChargeTypeCFunctions(const char* name);
-  TH1** buildChargeTypeCFunctions(const char* name, int zBin);
-  TH1** buildChargeTypeRFunctions(const char* name);
-  TH1** buildChargeTypeRFunctions(const char* name, int zBin);
-  TH1** buildChargeTypes(const char* name, int opt, float* sf=0);
-  TH1** buildChargeTypes(const char* name, int opt, float* sf, int zBin);
-  TH1** buildPtChargeTypes(const char* name, int opt=0, int subtract=0);
-  TH1** buildPtChargeTypes(const char* name, int opt, int subtract, int zBin);
+  TH2D** buildChargeTypeRatios(const char* name, float* sf=0);
+  TH2D** buildChargeTypeRatios(const char* name, float* sf, int zBin);
+  TH2D** buildChargeTypeCFunctions(const char* name, float* sf=0);
+  TH2D** buildChargeTypeCFunctions(const char* name, float* sf, int zBin);
+  TH2D** buildChargeTypeRFunctions(const char* name, float* sf=0);
+  TH2D** buildChargeTypeRFunctions(const char* name, float* sf, int zBin);
+  TH2D** buildChargeTypes(const char* name, int opt=2, float* sf=0);
+  TH2D** buildChargeTypes(const char* name, int opt, float* sf, int zBin);
+  void  adjustChargeTypeErrors(const char* name, TH2D **hist, int opt);
+  TH2D** buildPtChargeTypes(const char* name, int opt=2, int subtract=1);
+  TH2D** buildPtChargeTypes(const char* name, int opt, int subtract, int zBin);
 
-  TH1** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf=0);
-  TH1** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf, int zBin);
+  TH2D** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf=0);
+  TH2D** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf, int zBin);
   
-  void scaleBackGround(TH1* sib, TH1* mix, float sf=0);
-  TH1* getSqrt(TH1* h);
+  void scaleBackGround(TH2D* sib, TH2D* mix, float sf=0);
+  TH2D* getSqrt(TH2D* h);
   void fixDEta(TH2** h, int numHists); // correct triangle in hists with DEta
 
   // helper for writing ascii dump of set a of histograms to file=fname
-  void writeAscii(TH1** h, int numHists, const char* fname, int optErrors);
+  void writeAscii(TH2D** h, int numHists, const char* fname, int optErrors);
 
   ClassDef(StEStructSupport,1)
 };
@@ -133,6 +136,13 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.13  2008/12/02 23:52:53  prindle
+ * Get information about histogram XX being symmetrized from CutBin.
+ * Changed TH1* to TH2D* in many places hoping to be able to plot DEtaDPhi
+ * as colz (doesn't work yet).
+ * Added direct calculation of \Delta\rho/\rho_{ref} (and  similar) which is
+ * needed for YtYt correlations.
+ *
  * Revision 1.12  2008/03/19 22:08:39  prindle
  * Use GetObject instead of Get for type safety. Stop deleting objects we didn't create.
  * Treat \Delta\rho = d^2n/dEtadphi (rho - rho_ref)/rho_ref as basic unit when combining
