@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.2 2008/11/21 18:16:46 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.3 2008/12/02 22:55:14 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.3  2008/12/02 22:55:14  fine
+ * Add a few access  methods
+ *
  * Revision 1.2  2008/11/21 18:16:46  fine
  * Change the return type of the GetNextDaqElement method to be StRtsTable *
  *
@@ -39,7 +42,9 @@
 const char *StRTSBaseMaker::fRTSRootDataset="RTS/"; // The name of the Root dataset
 
 ClassImp(StRTSBaseMaker);
-
+//
+// The maker name must mutch the detectot DAQ name
+//
 //_____________________________________________________________
 StRTSBaseMaker::StRTSBaseMaker(const char *name):StMaker(name)
       , fDaq_Dta(0)
@@ -64,6 +69,43 @@ StRtsTable *StRTSBaseMaker::GetNextDaqElement(const char *elementPath)
      fDaq_Dta =  dynamic_cast<StRtsTable *>(GetDataSet((const char*)path));
   }
   return fDaq_Dta;
+}
+//_____________________________________________________________
+StRtsTable *StRTSBaseMaker::GetNext(const char* bank) 
+{
+   // Get the next "bank" element
+   StRtsTable *daqData = 0;
+   if (bank && bank[0]) {
+     TString query = GetName();
+     query += "/"; query += bank;
+     daqData =  GetNextDaqElement(query);
+   } else {
+      LOG_ERROR << "No bank name was provided tp query DAQ data from "
+           << GetName() << " detectort" << endm;
+   }
+   return daqData;
+}
+
+//_____________________________________________________________
+StRtsTable *StRTSBaseMaker::GetNextRaw()
+{
+   // Get "raw" DAQ data assuming the maker name 
+   // matches the "detector name"
+   return GetNext("raw");
+}
+//_____________________________________________________________
+StRtsTable *StRTSBaseMaker::GetNextAdc()
+{
+   // Get "adc" DAQ data assuming the maker name 
+   // matches the "detector name"
+   return GetNext("adc");
+}
+//_____________________________________________________________
+StRtsTable *StRTSBaseMaker::GetNextLegacy()
+{
+   // Get "legacy" DAQ data assuming the maker name 
+   // matches the "detector name"
+   return GetNext("legacy");
 }
 
 //_____________________________________________________________
