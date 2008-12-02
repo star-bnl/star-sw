@@ -26,9 +26,9 @@
 #include <DAQ_SC/daq_sc.h>
 #include <DAQ_SSD/daq_ssd.h>
 #include <DAQ_SVT/daq_svt.h>
-#include <DAQ_TOF_t/daq_tof.h>
+#include <DAQ_TOF/daq_tof.h>
 #include <DAQ_TPC/daq_tpc.h>
-#include <DAQ_TPX_t/daq_tpx.h>
+#include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TRG/daq_trg.h>
 
 // I wrapped more complicated detectors inside their own functions
