@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHitMaker.cxx,v 1.1 2008/03/11 19:16:26 dongx Exp $
+ * $Id: StTofHitMaker.cxx,v 1.2 2008/12/02 23:58:44 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  * Revision 1.7, 02/09/2008, Jing liu
  *
  * $Log: StTofHitMaker.cxx,v $
+ * Revision 1.2  2008/12/02 23:58:44  fine
+ * Adjust the inteface to accnt the new base class
+ *
  * Revision 1.1  2008/03/11 19:16:26  dongx
  * first release. TOF offline reader for Run8+
  *
@@ -113,13 +116,13 @@ evpReader *StTofHitMaker::InitReader()
    return fDaqReader;
 }
 //_____________________________________________________________
-Int_t StTofHitMaker::GetNextRaw() 
+StRtsTable *StTofHitMaker::GetNextRaw() 
 {
   /// Query  RTS/tof/raw cluster data from DAQ system
   LOG_INFO  << " StTofHitMaker::GetNextRaw()" << endm;
 
   evpReader *evp = InitReader();
-  return  evp ? tofReader((char *)evp) : 0;
+  return  (StRtsTable *)(evp ? tofReader((char *)evp) : 0);
 
 }
 //_____________________________________________________________
