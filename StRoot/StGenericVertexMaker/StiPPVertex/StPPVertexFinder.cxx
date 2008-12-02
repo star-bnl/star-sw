@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.31 2008/12/01 22:57:39 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.32 2008/12/02 14:35:05 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -688,7 +688,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
     t->vertexID=V.id;
     V.gPtSum+=t->gPt;
 
-    if( t->gPt>mCut_oneTrackPT) nHiPt++;
+    if( t->gPt>mCut_oneTrackPT && ( t->mBemc>0|| t->mEemc>0) ) nHiPt++;
 
     if(  t->mTpc>0)       V.nTpc++;
     else if (  t->mTpc<0) V.nTpcV++;
@@ -1171,6 +1171,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.32  2008/12/02 14:35:05  balewski
+ * I forgot to require EMC hit for highPT track, now it is in
+ *
  * Revision 1.31  2008/12/01 22:57:39  balewski
  * Added capability to reco 1 high pT track vertices with positive rank. 2+ match vertices will have rank above 1e6. Sub-prime vertices (for Akio) have negative rank. More details is given at:
  * http://drupal.star.bnl.gov/STAR/comp/reco/vf/ppv-vertex/2009-algo-upgrade-1
