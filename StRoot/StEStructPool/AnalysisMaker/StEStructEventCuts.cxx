@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.12 2008/03/19 22:01:59 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.13 2008/12/02 23:35:33 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -21,14 +21,15 @@ StEStructEventCuts::StEStructEventCuts(const char* cutfileName): StEStructCuts(c
 
 StEStructEventCuts::~StEStructEventCuts() {};
 
-void StEStructEventCuts::init(){ 
-
-  mtrgByRunPeriod=false;
-  strcpy(mcutTypeName,"Event");
-  initCuts();
-  initNames();
-  if(isLoaded())loadCuts();
-
+void StEStructEventCuts::init() { 
+    mtrgByRunPeriod=false;
+    strcpy(mcutTypeName,"Event");
+    initCuts();
+    initNames();
+    if (isLoaded()) {
+        loadCuts();
+    }
+    badTrigger = 0;
 }
 
 void StEStructEventCuts::initCuts(){
@@ -36,6 +37,7 @@ void StEStructEventCuts::initCuts(){
   mtWord[0]=mtWord[1]=0;
   mpVertexZ[0]=mpVertexZ[1]=0;
   mcentrality[0]=mcentrality[1]=0;
+  mZVertSep[0]=mZVertSep[1]=0;
 
 }
 
@@ -44,6 +46,7 @@ void StEStructEventCuts::initNames(){
   strcpy(mtWordName.name,"triggerWord");
   strcpy(mpVertexZName.name,"primaryVertexZ");
   strcpy(mcentralityName.name,"centrality");  
+  strcpy(mZVertSepName.name,"pileup");  
 }
 
 bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int nvals){
@@ -71,6 +74,12 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	//mtWord[0] = 15000;  mtWord[1] = 15010;  
 	mtWord[0] = 0;  
 	mtWord[1] = 15;  //for some reason, the l0triggerWord in the MuDST is not the trigger ID       
+	validRun = 1;
+      }
+      else if (!strcmp("2007ProductionMinBias",mRunPeriod)) {
+	// For use with trgsetupname=2007ProductionMinBias; productions P07id; recommended |Vz|<10 (maybe 5)
+	mtWord[0] = 200003;
+	mtWord[1] = 200020;
 	validRun = 1;
       }
       else if (!strcmp("2007LowLuminosity",mRunPeriod)) {
@@ -182,6 +191,14 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
     return true;
   }    
   
+  if(!strcmp(name,mZVertSepName.name)){
+    mZVertSep[0]=atoi(vals[0]); 
+    mZVertSep[1]=atoi(vals[1]);
+    mZVertSepName.idx=createCutHists(name,mZVertSep);
+    setRange(mZVertSepName.name,mZVertSep[0],mZVertSep[1]);
+    return true;
+  }    
+  
   
   return false;
   
@@ -198,6 +215,7 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
   ofs<<mtWordName.name<<","<<mtWord[0]<<","<<mtWord[1]<<"\t\t\t"<<" # triggerWord cut"<<endl;
   ofs<<mpVertexZName.name<<","<<mpVertexZ[0]<<","<<mpVertexZ[1]<<"\t\t"<<" # primary vertex cut"<<endl;
   ofs<<mcentralityName.name<<","<<mcentrality[0]<<","<<mcentrality[1]<<"\t\t\t"<<" # number events passing centrality cuts"<<endl;
+  ofs<<mZVertSepName.name<<","<<mZVertSep[0]<<","<<mZVertSep[1]<<"\t\t\t"<<" # number events passing vertex separation pileup cuts"<<endl;
   //  ofs<<"# ******************************************** "<<endl<<endl;
 
 }
@@ -205,6 +223,10 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.13  2008/12/02 23:35:33  prindle
+ * Added code for pileup rejection in EventCuts and MuDstReader.
+ * Modified trigger selections for some data sets in EventCuts.
+ *
  * Revision 1.12  2008/03/19 22:01:59  prindle
  * Updated some dataset definitions.
  *

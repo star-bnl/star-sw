@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.cxx,v 1.3 2006/04/04 22:05:07 porter Exp $
+ * $Id: StEStructTrackCuts.cxx,v 1.4 2008/12/02 23:35:35 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -38,6 +38,7 @@ void StEStructTrackCuts::initCuts(){
    mnfitnmax[0]=mnfitnmax[1]=0;
    mglobalDCA[0]=mglobalDCA[1]=0;
    mchi2[0]=mchi2[1]=0;
+   mdPtByPt[0]=mdPtByPt[1]=0;
    mpt[0]=mpt[1]=0;
    myt[0]=myt[1]=0;
    mxt[0]=mxt[1]=0;
@@ -58,6 +59,7 @@ void StEStructTrackCuts::initNames(){
   strcpy(mnfitnmaxName.name,"NFitPerNMax");
   strcpy(mglobalDCAName.name,"GlobalDCA");
   strcpy(mchi2Name.name,"Chi2");
+  strcpy(mdPtByPtName.name,"dPtByPt");
   strcpy(mptName.name,"Pt");
   strcpy(mytName.name,"Yt"); 
   strcpy(mxtName.name,"Xt") ;
@@ -106,6 +108,12 @@ bool StEStructTrackCuts::loadBaseCuts(const char* name, const char** vals, int n
   if(!strcmp(name,mchi2Name.name)){ 
     mchi2[0]=atof(vals[0]); mchi2[1]=atof(vals[1]);
     mchi2Name.idx = createCutHists(name,mchi2);
+    return true;
+  }
+
+  if(!strcmp(name,mdPtByPtName.name)){ 
+    mdPtByPt[0]=atof(vals[0]); mdPtByPt[1]=atof(vals[1]);
+    mdPtByPtName.idx = createCutHists(name,mdPtByPt);
     return true;
   }
 
@@ -187,6 +195,7 @@ void StEStructTrackCuts::printCutStats(ostream& ofs){
   ofs<<mnfitnmaxName.name<<","<<mnfitnmax[0]<<","<<mnfitnmax[1]<<"\t\t"<<" # fitpoints per possible cut"<<endl;
   ofs<<mglobalDCAName.name<<","<<mglobalDCA[0]<<","<<mglobalDCA[1]<<"\t\t\t"<<" # global DCA cut"<<endl;
   ofs<<mchi2Name.name<<","<<mchi2[0]<<","<<mchi2[1]<<"\t\t\t"<<" # chi square cut"<<endl;
+  ofs<<mdPtByPtName.name<<","<<mdPtByPt[0]<<","<<mdPtByPt[1]<<"\t\t\t"<<" # sigma for determination of sign of charge"<<endl;
   ofs<<mptName.name<<","<<mpt[0]<<","<<mpt[1]<<"\t\t\t"<<" # pt cut"<<endl;
   ofs<<mytName.name<<","<<myt[0]<<","<<myt[1]<<"\t\t\t"<<" # yt cut"<<endl;
   ofs<<mphiName.name<<","<<mphi[0]/M_PI<<","<<mphi[1]/M_PI<<"\t\t\t"<<" # phi cut in factor of pi"<<endl;
@@ -203,6 +212,10 @@ void StEStructTrackCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.cxx,v $
+ * Revision 1.4  2008/12/02 23:35:35  prindle
+ * Added code for pileup rejection in EventCuts and MuDstReader.
+ * Modified trigger selections for some data sets in EventCuts.
+ *
  * Revision 1.3  2006/04/04 22:05:07  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
