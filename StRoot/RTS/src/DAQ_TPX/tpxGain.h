@@ -41,7 +41,7 @@ public:
 		short low_pulse ;	// count of low gain
 		short noise ;		// count of noisy
 		short high_pulse ;	// count of pulse to high
-		short wrong_peak ;	// hm?
+		//short wrong_peak ;	// hm?
 		short cou ;		// count of good events
 		short need ;		// count of expected events!
 	} *aux	;	// [24][46][182]
@@ -62,7 +62,16 @@ public:
 		return (means + (s-1)*46 + r) ;
 	} ;
 	
-	
+
+	struct fee_found_t {
+		u_int got_one ;
+		int ch_count[256][16] ;
+	} *fee_found ;
+
+	struct fee_found_t *get_fee_found(int s, int rdo) {
+		return (fee_found + (s-1)*7 + rdo) ;
+	}
+
 	int from_file(char *fname, int sector = 0) ;
 
 	// below used only during calculation
@@ -84,11 +93,12 @@ private:
 
 	time_t	load_time ;
 
+	int tpx_pulser_peak[25][46] ;
 
 	int sector ;
 	int events ;
 	int tb_start, tb_stop ;	// timebin window
-	int charge_peak ;	// peak of the charge
+	//int charge_peak ;	// peak of the charge
 } ;
 
 #endif

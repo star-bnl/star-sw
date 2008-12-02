@@ -6,22 +6,39 @@
 #include <rtsSystems.h>
 
 #include <SFS/sfs_index.h>
-#include <RTS_READER/rts_reader.h>
-#include <RTS_READER/daq_dta.h>
+#include <DAQ_READER/daqReader.h>
+#include <DAQ_READER/daq_dta.h>
 
 
 #include "daq_tpx.h"
 
+#include <DAQ_TPC/daq_tpc.h>	// solely for the "legacy" use!
 
 
-
-#include <DAQ_TPX/tpxCore.h>
-#include <DAQ_TPX/tpxGain.h>
-#include <DAQ_TPX/tpxPed.h>
-#include <DAQ_TPX/tpxFCF.h>
-#include <DAQ_TPX/tpxStat.h>
+#include "tpxCore.h"
+#include "tpxGain.h"
+#include "tpxPed.h"
+#include "tpxFCF.h"
+#include "tpxStat.h"
 
 #include <DAQ1000/ddl_struct.h>
+
+
+class daq_det_tpx_factory : public daq_det_factory
+{
+public:
+        daq_det_tpx_factory() {
+                daq_det_factory::det_factories[TPX_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_tpx ;
+        }
+} ;
+
+static daq_det_tpx_factory tpx_factory ;
+
+
 
 const char *daq_tpx::help_string = "\
 \n\
@@ -57,15 +74,19 @@ void daq_tpx::help() const
 	printf("%s\n%s\n",GetCVS(),help_string) ; 
 } ;
 
-daq_tpx::daq_tpx(const char *dname, rts_reader *rts_caller) 
+daq_tpx::daq_tpx(daqReader *rts_caller) 
 {
 	// override mother...
 
 	rts_id = TPX_ID ;
 	name = rts2name(rts_id) ;
+	sfs_name = "tpx" ;
 	caller = rts_caller ;
 
+	if(caller) caller->insert(this, rts_id) ;
+
 	// create now!
+	legacy = new daq_dta ;
 
 	raw = new daq_dta ;	// in file, compressed
 	cld_raw = new daq_dta ;	// in file, compressed
@@ -119,6 +140,8 @@ daq_tpx::~daq_tpx()
 	delete ped_c ;
 	delete gain_c ;
 
+	delete legacy ;
+
 	// algorithms and associated storage...
 	if(gain_algo) delete gain_algo ;
 	if(ped_algo) delete ped_algo ;
@@ -133,6 +156,7 @@ daq_tpx::~daq_tpx()
 }
 
 
+#if 0
 /*
 	For online: in_buffer, in_bytes, out_buffer, out_bytes MUST be set!
 */
@@ -142,11 +166,14 @@ int daq_tpx::Make()
 	int mode ;
 
 
+	present = 0 ;
+
 	mode = GetMode() ;
 
 	pres = presence() ;
 	if(pres) {
 		evt_num++ ;
+		present |= 2 ;
 		LOG(NOTE,"%s: Make(): presence %d, evt %d: m_Mode 0x%08X, event_mode 0x%08X",name,pres,evt_num,mode,event_mode) ;
 	}
 	else {
@@ -154,7 +181,7 @@ int daq_tpx::Make()
 		return 0 ;
 	}
 
-#if 0
+
 	if(mode & m_Mode_DAQ_RT) {
 		// Online! DO NOT TOUCH THIS!
 		// it works _ONLY_ for one RDO of one sector!
@@ -255,9 +282,11 @@ int daq_tpx::Make()
 	// FCF needs cld
 	// 
 
-#endif
+
 	return 0 ;
 }
+
+#endif
 
 int daq_tpx::InitRun(int run)
 {
@@ -311,7 +340,7 @@ int daq_tpx::InitRun(int run)
 	}
 	
 	if(mode & m_Mode_DAQ_GAIN) {
-//		gain_algo->init(def_sector) ;	// ALL sectors!
+		gain_algo->init(def_sector) ;	// ALL sectors!
 	}
 
 
@@ -389,12 +418,12 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 
 	// list created banks first...
 	if(strcasecmp(bank,"adc_sim")==0) {
-		if(adc_sim->store == 0) return 0 ;
+		if(adc_sim->is_empty()) return 0 ;
 		adc_sim->rewind() ;
 		return adc_sim ;
 	}
 	else if(strcasecmp(bank,"gain")==0) {
-		if(gain->store == 0) return 0 ;	// not created!
+		if(gain->is_empty()) return 0 ;	// not created!
 		gain->rewind() ;	// we want to use the bank...
 		return gain ;
 	}
@@ -404,7 +433,8 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 
 
 	// after this all the banks need to be in the file...
-	if(!presence()) return 0 ;	// this det is not in this event...
+	Make() ;
+	if(!present) return 0 ;	// this det is not in this event...
 
 
 	if(strcasecmp(bank,"raw")==0) {
@@ -418,6 +448,12 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 	}
 	else if(strcasecmp(bank,"cld")==0) {
 		return handle_cld(sec,row) ;	// actually sec, rdo:
+	}
+	else if(strcasecmp(bank,"pedrms")==0) {
+		return handle_ped(sec,row) ;	// actually sec, rdo:
+	}
+	else if(strcasecmp(bank,"legacy")==0) {
+		return handle_legacy(sec,row) ;	// actually sec, rdo:
 	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
@@ -443,6 +479,216 @@ daq_dta *daq_tpx::put(const char *in_bank, int sec, int row, int pad, void *p1, 
 
 	LOG(ERR,"%s: unknown bank type \"%s\"",name,in_bank) ;
 	return 0 ;
+
+}
+
+daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
+{
+	int max_s, min_s ;
+	daq_dta *dd ;
+	int found_something = 0 ;
+
+	if(sec <= 0) {
+		min_s = 1 ;
+		max_s = 24 ;
+	}
+	else {
+		min_s = max_s = sec ;
+	}
+
+	legacy->create(1,"tpx_legacy",rts_id,DAQ_DTA_STRUCT(tpc_t)) ;
+
+	for(int s=min_s;s<=max_s;s++) {
+		struct tpc_t *tpc_p = 0 ;
+
+		// check for pedestal data first!
+		dd = handle_ped(s,-1) ;
+		if(dd) {
+			tpc_p = (struct tpc_t *) legacy->request(1) ;
+			memset(tpc_p,0,sizeof(tpc_t)) ;
+
+			
+
+			tpc_p->mode = 1 ;	// pedestal mode!
+			
+			while(dd->iterate()) {
+
+				found_something = 1 ;
+			}
+
+			legacy->finalize(1,s,0,0) ;
+
+
+			continue ;	// do NOT allow other ADC checks!
+		}
+
+		// grab the ADC data first...
+		dd = handle_adc(s,-1) ;
+		if(dd) {
+			tpc_p = (struct tpc_t *) legacy->request(1) ;
+			memset(tpc_p,0,sizeof(tpc_t)) ;			
+			
+			while(dd->iterate()) {
+				int r = dd->row - 1 ;
+				int p = dd->pad - 1 ;
+
+				for(u_int i=0;i<dd->ncontent;i++) {
+					//tpc_p->adc[r][p][pr_cou[r][p]] = dd->adc[i].adc ;
+					//tpc_p->adc[r][p][pr_cou[r][p]] = dd->adc[i].tb ;
+
+					tpc_p->channels_sector++ ;
+
+				}
+				found_something = 1 ;
+			}
+		}
+
+		// grab CLD data next
+		dd = handle_cld(s,-1) ;
+		if(dd) {
+			if(tpc_p == 0) {
+				tpc_p = (struct tpc_t *) legacy->request(1) ;
+				memset(tpc_p,0,sizeof(tpc_t)) ;
+			}
+
+			while(dd->iterate()) {
+
+
+				found_something = 1 ;
+			}
+
+			tpc_p->has_clusters = 1 ;
+
+		}
+
+		if(tpc_p) {
+			tpc_p->mode = 0 ;
+			//...
+
+			legacy->finalize(1,s,0,0) ;
+		}
+
+	}
+
+	if(found_something) return legacy ;
+	else return 0 ;
+
+}
+
+daq_dta *daq_tpx::handle_ped(int sec, int rdo)
+{
+	char str[128] ;
+	int tot_bytes ;
+	int min_sec, max_sec, min_rdo, max_rdo ;
+
+	// sanity
+	if(sec <= 0) {		// ALL sectors
+		min_sec = 1 ;
+		max_sec = 24 ;
+	}
+	else if((sec<1) || (sec>24)) return 0 ;
+	else {
+		min_sec = max_sec = sec ;
+	}
+
+	if(rdo <= 0) {		// ALL RDOs in this sector
+		min_rdo = 1 ;
+		max_rdo = 6 ;
+	}
+	else if((rdo<1) || (rdo>6)) return 0 ;
+	else {
+		min_rdo = max_rdo = rdo ;
+	}
+
+	assert(caller) ;
+
+
+	// calc total bytes
+	tot_bytes = 0 ;
+
+	for(int s=min_sec;s<=max_sec;s++) {
+	for(int r=min_rdo;r<=max_rdo;r++) {
+
+		sprintf(str,"%s/sec%02d/rb%02d/pedrms",sfs_name, s, r) ;
+	
+		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
+
+		char *full_name = caller->get_sfs_name(str) ;
+		if(full_name == 0) continue ;	// not in this event...
+
+		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(DBG,"%s: sector %d, rdo %d : ped size %d",name,s,r,size) ;
+
+		if(size <= 0) {
+			assert(!"can't be 0") ;
+		}
+
+		// allocate temporary storage
+		char *tmp_cache = (char *) valloc(size) ;
+		assert(tmp_cache) ;
+
+		// read in the data into temp storage...
+		int ret = caller->sfs->read(full_name, tmp_cache, size) ;
+
+		if(ret != (int)size) {
+			LOG(ERR,"%s: %s: read failed, expect %d, got %d [%s]",name,str,
+				size,ret,strerror(errno)) ;
+			free(tmp_cache) ;
+			continue ;
+		}
+
+
+		if(tot_bytes == 0) {	// nothing done so far so we will create the first guess...
+			ped->create(size,"ped",rts_id,DAQ_DTA_STRUCT(daq_det_pedrms)) ;
+		}
+		tot_bytes += size ;
+
+
+		// do the actual decoding...
+		u_short *d16 = (u_short *) tmp_cache ;
+
+		while(size > 0) {
+			u_int r_id = l2h32(*(u_int *)d16) ;
+
+			size -= 4 ;	// 1 int == 4 bytes
+			d16 += 2 ;	// 1 int == 2 shorts
+
+			int row = (r_id & 0xFF000000) >> 24 ;
+			int pad = (r_id & 0x00FF0000) >> 16 ;
+			int cou = (r_id & 0x0000FFFF) ;
+
+			size -= cou * 2 ;	// data is shorts
+
+			daq_det_pedrms *d = (daq_det_pedrms *) ped->request(cou*10) ;	// force more allocation
+			
+			for(int i=0;i<cou;i++) {
+				u_short tmp = l2h16(*d16++) ;
+
+				int i_rms = (tmp & 0xFC00) >> 10 ;
+				int i_ped = tmp & 0x3FF ;
+
+				d[i].rms = (float)i_rms / 16.0 ;
+				d[i].ped = i_ped ;
+
+			}
+
+			ped->finalize(cou,s,row,pad) ;
+		}
+
+		free(tmp_cache) ;	// release temporary storage...
+
+		
+	}
+	}
+
+	
+	LOG(DBG,"Returning from ped_handler") ;
+
+	if(tot_bytes == 0) return 0 ;	// nothing found...
+
+	ped->rewind() ;
+	return ped ;
 
 }
 
@@ -499,7 +745,7 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 		struct tpx_altro_struct a ;
 		int rdo_words ;
 
-		LOG(DBG,"Calling handle_raw for %d:%d",s,r) ;		
+		LOG(NOTE,"Calling handle_raw for %d:%d",s,r) ;		
 		rdo_dta = handle_raw(s, r) ;	// 	bring the raw data in, RDO-by_RDO!
 
 
@@ -531,32 +777,24 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 		a.rdo = rdo.rdo -1 ;
 		a.t = token ;
 		a.what = TPX_ALTRO_DO_ADC ;
-	
+		a.log_err = 0 ;
 
 		do {
 			data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;		
 
 			if(a.count == 0) continue ;	// no data for this guy...
-
-
-			daq_store *st = adc->get() ;
-		
+	
+			daq_adc_tb *at = (daq_adc_tb *) adc->request(a.count) ;
+	
 			//LOG(DBG,"%d: %d:%d %d",adc->obj_cou,a.row,a.pad,a.count) ;
 
-			st->sec = s ;
-			st->row = a.row ;
-			st->pad = a.pad ;
-			st->nitems = a.count ;
-
-			struct daq_adc_tb *at = (struct daq_adc_tb *)(st + 1) ;	// move to storage
-			for(u_int i=0 ; i < st->nitems; i++) {
+			for(u_int i=0 ; i < a.count ; i++) {
 				at[i].adc = a.adc[i] ;
 				at[i].tb = a.tb[i] ;
 
 			}
 
-			adc->commit() ;
-
+			adc->finalize(a.count, s, a.row, a.pad) ;
 
 		} while(data_end && (data_end > rdo.data_start)) ;	
 
@@ -613,21 +851,26 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 	// calc total bytes
 	tot_bytes = 0 ;
 	int o_cou = 0 ;
+
 	for(int s=min_sec;s<=max_sec;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
 
 
-		sprintf(str,"%s/%s/sec%02d/rb%02d/adc",caller->fs_cur_evt, "tpx", s, r) ;
+		//sprintf(str,"%s/%s/sec%02d/rb%02d/adc",caller->fs_cur_evt, "tpx", s, r) ;
+		sprintf(str,"%s/sec%02d/rb%02d/adc",sfs_name, s, r) ;
 	
-		LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
+		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
-		int size = caller->sfs->fileSize(str) ;	// this is bytes
+		char *full_name = caller->get_sfs_name(str) ;
+		if(full_name == 0) continue ;
 
-		LOG(DBG,"Got %d",size) ;
+		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(DBG,"%s: sector %d, rdo %d : raw size %d",name,s,r,size) ;
 
 		if(size <= 0) {
 			if(size < 0) {
-				LOG(NOTE,"%s: %s: not found in this event",name,str) ;
+				LOG(DBG,"%s: %s: not found in this event",name,str) ;
 			}
 			continue ;
 		}
@@ -650,27 +893,25 @@ daq_dta *daq_tpx::handle_raw(int sec, int rdo)
 	// bring in the bacon from the SFS file....
 	for(int i=0;i<o_cou;i++) {
 		
-		sprintf(str,"%s/%s/sec%02d/rb%02d/adc",caller->fs_cur_evt, "tpx", 
-			obj[i].sec, obj[i].rb) ;
+		sprintf(str,"%s/sec%02d/rb%02d/adc",sfs_name,obj[i].sec, obj[i].rb) ;
+		char *full_name = caller->get_sfs_name(str) ;
+		if(!full_name) continue ;
 
-		struct daq_store *st = raw->get() ;
+		LOG(NOTE,"%s: request %d bytes",name,obj[i].bytes) ;
+		
+		char *mem = (char *) raw->request(obj[i].bytes) ;
 
-		st->sec = obj[i].sec ;
-		st->row = obj[i].rb ;
-		st->nitems = obj[i].bytes ;
+		int ret = caller->sfs->read(full_name, mem, obj[i].bytes) ;
 
-		char *mem = (char *)(st + 1) ;
-	
-		int ret = caller->sfs->read(str, mem, st->nitems) ;
-
-		if(ret != (int)st->nitems) {
+		if(ret != (int)obj[i].bytes) {
 			LOG(ERR,"%s: %s: read failed, expect %d, got %d [%s]",name,str,
-				st->nitems,ret,strerror(errno)) ;
+				obj[i].bytes,ret,strerror(errno)) ;
 		}
 		else {
 			LOG(NOTE,"%s: %s read %d bytes",name,str,ret) ;
-			raw->commit() ;
 		}
+		
+		raw->finalize(obj[i].bytes, obj[i].sec, obj[i].rb, 0) ;
 	}
 
 	
@@ -720,17 +961,21 @@ daq_dta *daq_tpx::handle_cld_raw(int sec, int rdo)
 	for(int r=min_rdo;r<=max_rdo;r++) {
 
 
-		sprintf(str,"%s/%s/sec%02d/cld%02d",caller->fs_cur_evt, "tpx", s, r) ;
+		sprintf(str,"%s/sec%02d/cld%02d",sfs_name, s, r) ;
 	
 		LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
 
-		int size = caller->sfs->fileSize(str) ;	// this is bytes
+		char *full_name = caller->get_sfs_name(str) ;
+		if(full_name == 0) continue ;
 
-		LOG(DBG,"Got %d",size) ;
+		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+		LOG(DBG,"%s: sector %d, rdo %d : cld size %d",name,s,r,size) ;
+
 
 		if(size <= 0) {
 			if(size < 0) {
-				LOG(NOTE,"%s: %s: not found in this event",name,str) ;
+				LOG(DBG,"%s: %s: not found in this event",name,str) ;
 			}
 			continue ;
 		}
@@ -753,27 +998,23 @@ daq_dta *daq_tpx::handle_cld_raw(int sec, int rdo)
 	// bring in the bacon from the SFS file....
 	for(int i=0;i<o_cou;i++) {
 		
-		sprintf(str,"%s/%s/sec%02d/cld%02d",caller->fs_cur_evt, "tpx", 
-			obj[i].sec, obj[i].rb) ;
+		sprintf(str,"%s/sec%02d/cld%02d",sfs_name,obj[i].sec, obj[i].rb) ;
+		char *full_name = caller->get_sfs_name(str) ;
+		if(full_name==0) continue ;
 
-		struct daq_store *st = cld_raw->get() ;
+		char *mem = (char *) cld_raw->request(obj[i].bytes) ;
+		
+		int ret = caller->sfs->read(full_name, mem, obj[i].bytes) ;
 
-		st->sec = obj[i].sec ;
-		st->row = obj[i].rb ;
-		st->nitems = obj[i].bytes ;
-
-		char *mem = (char *)(st + 1) ;
-	
-		int ret = caller->sfs->read(str, mem, st->nitems) ;
-
-		if(ret != (int)st->nitems) {
+		if(ret != (int)obj[i].bytes) {
 			LOG(ERR,"%s: %s: read failed, expect %d, got %d [%s]",name,str,
-				st->nitems,ret,strerror(errno)) ;
+				obj[i].bytes,ret,strerror(errno)) ;
 		}
 		else {
 			LOG(NOTE,"%s: %s read %d bytes",name,str,ret) ;
-			cld_raw->commit() ;
 		}
+
+		cld_raw->finalize(obj[i].bytes, obj[i].sec, obj[i].rb, 0) ;
 	}
 
 	

@@ -14,7 +14,7 @@
 
 
 
-#include <DAQ_TPX/tpxCore.h>
+#include "tpxCore.h"
 
 // globally visible
 struct tpx_rdo tpx_rdo[6] ;
@@ -247,10 +247,10 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	rdo->trg_cou = *l ;		// get the trigger count
 
 	if(rdo->trg_cou > 120) {
-		LOG(ERR,"Bad trg count %d",rdo->trg_cou) ;
-		rdo->trg_cou = 0 ;
-		rdo->token = -ENOTSUP ;
-		return rdo->token ;
+		LOG(ERR,"Bad trg count %d, token %d",rdo->trg_cou, rdo->token) ;
+//		rdo->trg_cou = 0 ;
+//		rdo->token = -ENOTSUP ;
+//		return rdo->token ;
 	}
 	
 	// move to the start of trigger data
@@ -372,45 +372,44 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 {
 	u_int *next_altro ;
 	u_int *store = now ;
+	int log_yes ;
 
-	int log_yes = 1 ;
+
+	// I will log only if I'm told to
+	log_yes = a_struct->log_err ;
+
+	a_struct->err = 0 ;	// clear error flag
+
 
 
 	do {
 		next_altro = data_test(now,a_struct,log_yes) ;	// returns pointer to next altro!
 
-
 		// logic to print out on first error only....
 		if(next_altro==0) {	// error in the bank!
-			log_yes = 0 ;	// switch of further logging
-			if(now > first) {
-				now-- ;		// decrement data buffer and try again...
-			}
-			else {
-				return 0 ;
-			}
+			a_struct->err =  1 ;
+
+			log_yes = 0 ;	// switch off further logging
+
+			now-- ;		// decrement data buffer and try again...
 	
 		}
 		else {		// data is OK
 	
 			if(log_yes==0) {	// we lost something before, turn on WARN
-				LOG(WARN,"    ...but found A%03d:%02d %d words earlier",a_struct->id,a_struct->ch,store-now) ;
+				LOG(NOTE,"    ...but found A%03d:%02d %d words earlier",a_struct->id,a_struct->ch,store-now) ;
 	
 			}
-			else {
-				//LOG(DBG,"Found %03d:%02d : %3d adcs",a_struct->id,a_struct->ch,a_struct->count) ;
-			}
-
-		
-			//if(log_yes==0) {	// had error
-			//	LOG(WARN,"\t... now 0x%08X, next_altro 0x%08X, now-first 0x%08X, next-first 0x%08X",
-			//	    now,next_altro,now-first,next_altro-first) ;
-			//}
 
 			if(((next_altro-first)<-1) || ((next_altro-first)>1000000)) {
 				// I wan't to see this...
 				LOG(ERR,"next_altro-first %d",next_altro-first) ;
 			}
+
+
+			//if(got_log && a_struct->log_err) {
+			//	LOG(WARN,"Got it and now is: %d",a_struct->log_err) ;
+			//}
 
 			return next_altro ;	// pointer to next altro
 
@@ -420,8 +419,8 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 	} while((now-first)>=1) ;	// there must be at least 2 words!
 
 	// can't be -- I wan't to see this
-	//LOG(ERR,"At end: now 0x%08X, next_altro 0x%08X, now-first 0x%08X, next-first 0x%08X",
-	//    now,next_altro,now-first,next_altro-first) ;
+	LOG(ERR,"At end: now 0x%08X, next_altro 0x%08X, now-first 0x%08X, next-first 0x%08X",
+	    now,next_altro,now-first,next_altro-first) ;
 
 	return 0 ;	// nothing found!
 
@@ -452,11 +451,13 @@ int tpx_use_rdo(char *rdobuff, int bytes, int (userfunc)(struct tpx_altro_struct
 	a.rdo = rdo.rdo - 1;
 	a.sector = rdo.sector ;
 	a.t = t ;
+	a.log_err = 0 ;
 
 	LOG(DBG,"token %d, rdo %d: running through %d bytes...",t,rdo.rdo,bytes) ;
 
 	data_end = rdo.data_end ;
 	do {
+		
 		data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;
 
 		ret |= userfunc(&a, arg) ;
@@ -479,12 +480,13 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   int wc ;
   int ret ;
 
-
   ret = 0 ;
 
+//  LOG(WARN,"here A: %d %d",a->log_err,log) ;
+
   a->count = 0 ;
-  a->wc = 0 ;
-  a->row = 100 ;	// unknown...
+  a->row = 0 ;	// unknown...
+  a->pad = 0 ;
 
   lo = *h-- ;
   hi = *h-- ;
@@ -493,7 +495,6 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
 
   if((lo & 0xCFF00000) || (hi & 0xCFF00000)) {
-    // this should _not_ happen, so I wan't to see it
     if(log) LOG(WARN,"  Header words have junk: HI 0x%08X, LO 0x%08X",hi,lo) ;
     ret = -1 ;
   }
@@ -505,6 +506,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
     ret = -1 ;
 
   }
+
   if((lo & 0x0F000) != 0x0A000) {
     if(log) LOG(WARN,"  Error LO in last ALTRO word: 0x%08X 0x%08X",hi,lo) ;
     ret = -1 ;
@@ -514,10 +516,26 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   wc = ((hi&0x3F)<<4) | ((lo&0xF0000)>>16) ;	// altro's word count
 
 
+//  LOG(WARN,"here B: %d %d",a->log_err,log) ;
+
   a->id = (lo & 0xFF0)>>4 ;	// altro ID 0..255
   a->ch = lo & 0xF ;		// channel 0..15
 
-//  tpx_altro_to_fee(a);
+
+  if((wc > 529) || (wc<0)) {	// for 512 tb + 15 pre + 2
+    if(log) LOG(WARN,"  Error in last ALTRO word: 0x%08X 0x%08X; bad WC %d",hi,lo,wc) ;
+    ret = -1 ;
+  }
+
+  // we bomb out here if there was any error
+  if(ret) {
+	if(log) LOG(ERR,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [1]",a->rdo+1,a->t,a->id,a->ch) ;
+	return 0 ;	// already error...
+  }
+
+//  LOG(WARN,"here C: %d %d",a->log_err,log) ;
+
+
 
   for(int i=0;i<tpx_fee_override_cou;i++) {
 	//LOG(TERR,"Checking sector %d:%d, rdo %d:%d, id %d:%d",a->sector,tpx_fee_override[i].sector,a->rdo,tpx_fee_override[i].rdo,a->id,tpx_fee_override[i].curr_altro) ;
@@ -535,7 +553,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 		}
 
 		if(log) {
-			LOG(NOTE,"Sector %2d, RDO %d override: altro in data %3d but should be %3d!",a->sector,a->rdo+1,a->id,should) ;
+			//LOG(NOTE,"Sector %2d, RDO %d override: altro in data %3d but should be %3d!",a->sector,a->rdo+1,a->id,should) ;
 		}
 
 
@@ -545,32 +563,25 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 	}
   }
 
+//  LOG(WARN,"here D: %d %d",a->log_err,log) ;
+
+  int rrow, ppad ;
   // get the row and pad; this is why we needed the rdo...
-  tpx_from_altro(a->rdo, a->id, a->ch, (int &) a->row, (int &) a->pad) ;
+  tpx_from_altro(a->rdo, a->id, a->ch, rrow, ppad) ;
 
-  a->where = h ;
+  a->row = rrow ;
+  a->pad = ppad ;
 
-  if((wc > 529) || (wc<0)) {	// for 512 tb + 15 pre + 2
-    if(log) LOG(WARN,"  Error in last ALTRO word: 0x%08X 0x%08X; bad WC %d",hi,lo,wc) ;
-    ret = -1 ;
+//  LOG(WARN,"here Da: %d %d",a->log_err,log) ;
+
+  if((a->row > 45) || (a->pad > 182)) {
+	if(log) LOG(ERR,"row:pad %d:%d illegal for altro %d:%d",a->row,a->pad,a->id,a->ch) ;
+	return 0 ;
   }
-
-  // we bomb out here if there was any error
-  if(ret) {
-	if(log) LOG(ERR,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [1]",a->rdo+1,a->t,a->id,a->ch) ;
-	return 0 ;	// already error...
-  }
-  else {
-	//LOG(DBG,"Token %d (rdo %d): Altro %03d:%02d wc %d",a->t,a->rdo,a->id,a->ch,wc) ;
-  }
-
-
 
   if(wc == 0) return h ;	// empty channel...
 
-
-  a->wc = wc ;
-
+//  LOG(WARN,"here E: %d %d",a->log_err,log) ;
 
   int p10 = 0 ;		// backward counter of the 10bit contributions
 
@@ -625,7 +636,10 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
     break ;
   }
 
+//  LOG(WARN,"here F: %d %d",a->log_err,log) ;
+
   int l10 = wc ;
+
 
   while(l10 % 4) l10++ ;	// move until divisible by 4
 
@@ -650,7 +664,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   }
 
 
-
+//  LOG(WARN,"here G: %d %d",a->log_err,log) ;
 
   // data check; we are in the data mode now...
   int tb_prev = 512 ;
@@ -712,7 +726,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 	
   }
 
-
+//  LOG(WARN,"here H: %d %d",a->log_err,log) ;
 
 
 
@@ -728,6 +742,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 			
   h -= l10 ;	// point now to the start of next altro...
 
+//  LOG(WARN,"here Z: %d %d",a->log_err,log) ;
 
   //LOG(DBG,"AID %d:%d, %d ADCs...",a->id,a->ch,a->count) ;
   return h ;	// return pointer to the start of the next altro!
@@ -799,6 +814,7 @@ void tpx_analyze_log(int sector,int rdo, char *buff)
 	char *start_ptr ;
 	int len ;
 
+	LOG(WARN,"tpx_analyze_log: deprecated!") ;
 
 	len = strlen(buff) ;
 	start_ptr = buff ;
@@ -834,21 +850,22 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	err = 0 ;
 
 	for(rb=0;rb<6;rb++) {
+
 	if((1<<rb) & rb_mask) ;
 	else continue ;
 
 	rdo = &(tpx_rdo[rb]) ;
 
 	if(rdo->sector != sector || (rb+1) != rdo->rdo) {
-		LOG(ERR,"Config for RDO %d: sector %d, rdo %d failed",rb+1,rdo->sector,rdo->rdo) ;
+		LOG(ERR,"msc: config for RDO %d: sector %d, rdo %d claims error",rb+1,rdo->sector & 0x7F,rdo->rdo) ;
 		err |= 1 ;
 	}
 	else {
-		LOG(NOTE,"Config for RDO %d: sector %d, rdo %d",rb+1,rdo->sector,rdo->rdo) ;
+		LOG(NOTE,"msc: config for RDO %d: sector %d, rdo %d",rb+1,rdo->sector,rdo->rdo) ;
 	}
 
-	LOG(NOTE,"Remote %d, temp rdo %d, temp stratix %d",rdo->remote,rdo->temp_rdo,rdo->temp_stratix) ;
-	LOG(NOTE,"Compiled on %s",rdo->compilation_date) ;
+	LOG(NOTE,"msc: Remote %d, temp rdo %d, temp stratix %d",rdo->remote,rdo->temp_rdo,rdo->temp_stratix) ;
+	LOG(NOTE,"msc: Compiled on %s",rdo->compilation_date) ;
 
 	LOG(NOTE,"\t FPGAs: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",
 	    rdo->fpga_usercode[0],
@@ -860,19 +877,19 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 
 	for(int i=0;i<5;i++) {
 		if(expected_usercode[i] != rdo->fpga_usercode[i]) {
-			LOG(WARN,"RDO %d: FPGA %d usercode is 0x%08X, expect 0x%08X!?",rdo->rdo,i,rdo->fpga_usercode[i],expected_usercode[i]) ;
+			LOG(WARN,"msc: RDO %d: FPGA %d usercode is 0x%08X, expect 0x%08X!?",rdo->rdo,i,rdo->fpga_usercode[i],expected_usercode[i]) ;
 		}
 	}
 
 	if(rdo->status_xilinx) {
-		LOG(ERR,"RDO %d: xilinx status: 0x%02X",rdo->rdo,rdo->status_xilinx) ;
+		LOG(ERR,"msc: RDO %d: xilinx status: 0x%02X",rdo->rdo,rdo->status_xilinx) ;
 		err |= 1 ;
 	}
 	else {
 		LOG(NOTE,"RDO %d: xilinx status: 0x%02X",rdo->rdo,rdo->status_xilinx) ;
 	}
 	if(rdo->status_cpld) {
-		LOG(ERR,"RDO %d: CPLD status: 0x%02X",rdo->rdo,rdo->status_cpld) ;
+		LOG(ERR,"msc: RDO %d: CPLD status: 0x%02X",rdo->rdo,rdo->status_cpld) ;
 		err |= 1 ;
 	}
 	else {
@@ -901,6 +918,28 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 		}
 	}
 
+	// get list of potentially overriden altros for this sector & rdo
+	LOG(NOTE,"Checking override map [%d]",tpx_fee_override_cou) ;
+	int over = 0 ;
+	int in_fee[32], should_be[32] ;
+
+	for(int i=0;i<tpx_fee_override_cou;i++) {
+		LOG(NOTE,"Checking sector %d:%d, rdo %d:%d, id %d:%d",sector,tpx_fee_override[i].sector,rb+1,tpx_fee_override[i].rdo,
+			tpx_fee_override[i].orig_altro,tpx_fee_override[i].curr_altro) ;
+
+		if(sector == tpx_fee_override[i].sector) {
+		if((rb+1) == tpx_fee_override[i].rdo) {
+			in_fee[over] = tpx_fee_override[i].curr_altro ;
+			should_be[over] = tpx_fee_override[i].orig_altro ;
+			over++ ;
+			LOG(WARN,"Expect to override wrong altro %3d with correct altro %3d!",tpx_fee_override[i].curr_altro,tpx_fee_override[i].orig_altro) ;
+
+
+		}
+		}
+
+	}
+
 
 	int fcou = 1 ;
 	for(int b=0;b<3;b++) {
@@ -927,9 +966,28 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 				}
 
 				if(altro[ix] != 3) {
-					err |= 2 ;
-
-					LOG(ERR,"Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X",sector,rdo->rdo,fcou,
+					int overriden = 0 ;
+					for(int i=0;i<over;i++) {
+						if((in_fee[i] == ix) || ((in_fee[i]+1)==ix)) {
+							LOG(WARN,"Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X, should be A%3d",sector,rdo->rdo,fcou,
+							    rdo->fee[b][c].pad_id,
+							    rdo->fee[b][c].id,
+							    rdo->fee[b][c].jumpers,
+							    b,
+							    rdo->fee[b][c].x_s>>4,
+							    rdo->fee[b][c].x_s&1,
+							    rdo->fee[b][c].fee_status,
+							    altro[ix],
+							    should_be[i]
+					   		) ;
+							overriden = 1 ;
+							break ;
+						}
+					}
+					
+					if(overriden) ;
+					else {
+					LOG(ERR,"msc: Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X",sector,rdo->rdo,fcou,
 					    rdo->fee[b][c].pad_id,
 					    rdo->fee[b][c].id,
 					    rdo->fee[b][c].jumpers,
@@ -939,6 +997,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 					    rdo->fee[b][c].fee_status,
 					    altro[ix]
 					   ) ;
+					}
 				}
 
 
@@ -953,17 +1012,33 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 		if(altro[a] == 0) continue ;	// skip unneeded and not found...
 
 		if(altro[a] == 1) {	// needed but missing
-			LOG(ERR,"Sector %2d, RDO %d: ALTRO %3d missing: status 0x%X",sector,rb+1,a,altro[a]) ;
+			int overriden = 0 ;
+
+			for(int i=0;i<over;i++) {
+				if((a == should_be[i]) || (a == (should_be[i]+1))) {
+					LOG(WARN,"Sector %2d, RDO %d: ALTRO %3d missing: status 0x%X",sector,rb+1,a,altro[a]) ;
+					overriden = 1 ;
+					break ;
+				}
+			}
+
+			if(overriden) continue ;
+
+			LOG(ERR,"msc: Sector %2d, RDO %d: ALTRO %3d missing: status 0x%X",sector,rb+1,a,altro[a]) ;
+			
 			err |= 2 ;
 		}	
 	}
 
 
 	}
+
+/*
 	if(err == 2) {
 		LOG(ERR,"Overriding FEE ID errors return until I fix this!!!") ;
 		return 0 ;
 	}
+*/
 	return err ;
 }
 

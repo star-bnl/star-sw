@@ -6,8 +6,9 @@
 #include <daqModes.h>
 
 #include <TPX/tpx_altro_to_pad.h>
-#include <DAQ_TPX/tpxCore.h>
-#include <DAQ_TPX/tpxStat.h>
+
+#include "tpxCore.h"
+#include "tpxStat.h"
 
 tpxStat::tpx_stat_struct tpxStat::r[6] ;
 
@@ -121,6 +122,10 @@ for(int i=0;i<6;i++) {
 	else should = 0 ;
 
 
+	if(r[i].errs) {
+		LOG(ERR,"[RDO %d] had %d ALTRO errors",i+1,r[i].errs) ;
+	}
+
 	if(r[i].should != should) {
 		err++ ;
 		fprintf(ofile,"%sERROR: [RDO %d] in_RC %d, in_data %d -- MISMATCH\n%s",ANSI_RED,i+1,should,r[i].should,ANSI_RESET) ;
@@ -132,7 +137,7 @@ for(int i=0;i<6;i++) {
 		if(r[i].should) {
 			err++ ;
 			fprintf(ofile,"%sERROR: [RDO %d] expect data, found none!\n%s",ANSI_RED,i+1,ANSI_RESET) ;
-			LOG(ERR,"[RDO %d] expect data, found none!",i+1) ;
+			LOG(WARN,"[RDO %d] expect data, found none!",i+1) ;
 		}
 		continue ;
 	}
@@ -171,7 +176,7 @@ for(int i=0;i<6;i++) {
 				warn = 1 ;
 				a_err = 1 ;
 				fprintf(ofile,"\t%sERROR: ",ANSI_RED) ;
-				LOG(ERR,"AID %3d:%2d: expect %d counts, have %d",a,c,expect,have) ;
+				LOG(ERR,"RDO %d: AID %3d:%2d: expect %d counts, have %d",i+1,a,c,expect,have) ;
 			}
 			else {	
 				if(have) {
@@ -305,7 +310,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 	u_int *data_end ;
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
-
+	int errors = 0 ;
 
 	t = tpx_get_start(rdobuff, bytes/4, &rdo, 0) ;
 
@@ -318,13 +323,30 @@ void tpxStat::accum(char *rdobuff, int bytes)
 	a.t = t ;
 	a.sector = rdo.sector ;
 
+
+	if(a.rdo > 5) {
+		LOG(ERR,"rdo error: %d",rdo.rdo) ;
+		return ;
+	}
+
+	if(r[a.rdo].errs > 100) {
+		a.log_err = 0 ;
+	}
+	else {
+		a.log_err = 1 ;
+	}
+
 	r[a.rdo].count++ ;
 
 	data_end = rdo.data_end ;
 
+
 	do {
 		data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;
-
+		if(a.err) {
+			//LOG(ERR,"Got err %d:%d, log error = %d: data_end %p",a.id,a.ch,a.log_err,data_end) ;
+			errors = 1 ;
+		}
 
 		r[a.rdo].a[a.id].c[a.ch].count++ ;
 
@@ -411,6 +433,13 @@ void tpxStat::accum(char *rdobuff, int bytes)
 
 	} while(data_end && (data_end > rdo.data_start)) ;
 
+
+	if(errors) {
+		r[a.rdo].errs++ ;
+		if(r[a.rdo].errs == 100) {	
+			LOG(ERR,"RDO %d has %d errors -- stopping logging",a.rdo+1,r[a.rdo].errs) ;
+		}
+	} ;
 
 	return ;
 

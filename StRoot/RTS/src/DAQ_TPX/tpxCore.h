@@ -42,8 +42,11 @@ struct tpx_altro_struct {
 	u_char row ;
 	u_char pad ;
 
-	u_int wc ;	// full altro word count, used in FCF
-	u_int *where ;	// pointer to this altro's data...
+	u_short wc_dummy ;	// full altro word count, used in FCF
+	u_char log_err ;	// input!
+	u_char err ;	// output
+
+//	u_int *where ;	// pointer to this altro's data...
 
 	u_short t ;	// token; incoming, for debugging
 	u_short count ;		// length of data

@@ -2,7 +2,7 @@
 #define _DAQ_TPX_H_
 
 
-#include <RTS_READER/daq_det.h>
+#include <DAQ_READER/daq_det.h>
 
 
 // forward decls
@@ -14,21 +14,26 @@ class tpxStat ;
 class daq_tpx : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
+	class daq_dta *handle_legacy(int sec, int rdo) ;
 	class daq_dta *handle_adc(int sec, int rdo) ;
 	class daq_dta *handle_cld(int sec, int rdo) ;
 	class daq_dta *handle_cld_raw(int sec, int rdo) ;
 	class daq_dta *handle_cld_sim(int sec, int row) ;
+	class daq_dta *handle_ped(int sec, int row) ;
 
 	// direct maps to file content:
-	class daq_dta *raw ;
+	class daq_dta *raw ;	
 	class daq_dta *cld_raw ;
 	class daq_dta *ped_raw ;	// token 0
 
-	// calculated from "raw"
+	// calculated from "raw" (sfs "adc")
 	class daq_dta *adc ;
 
-	// calculated from "cld_raw"
+	// calculated from "cld_raw"	(sfs adc)
 	class daq_dta *cld ;
+
+	// made to look like TPC!
+	class daq_dta *legacy ;
 
 	// input classes by the user
 	class daq_dta *adc_sim ;
@@ -61,13 +66,9 @@ private:
 protected:
 
 public:
-	daq_tpx(const char *dname="TPX", rts_reader *rts_caller=0) ;
+	daq_tpx(daqReader *rts_caller=0) ;
 	~daq_tpx() ;
 
-
-
-
-	int Make() ;			// equivalent to analyze
 	int InitRun(int run_num) ;	// used in send_config
 	int FinishRun(int old_run) ;	// used in inject_token0
 

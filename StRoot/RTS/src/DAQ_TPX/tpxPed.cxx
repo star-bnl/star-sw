@@ -10,10 +10,10 @@
 #include <rtsLog.h>
 #include <TPC/rowlen.h>
 
-#include <DAQ_TPX/tpxCore.h>
-#include <DAQ_TPX/tpxPed.h>
 #include <TPX/tpx_altro_to_pad.h>
 
+#include "tpxCore.h"
+#include "tpxPed.h"
 
 	
 tpxPed::tpxPed()
@@ -82,6 +82,7 @@ void tpxPed::accum(char *evbuff, int bytes)
 	a.rdo = rdo.rdo - 1 ;	// a.rdo counts from 0
 	a.t = t ;
 	a.sector = rdo.sector ;
+	a.log_err = 0 ;
 
 	evts[a.rdo]++ ;
 
@@ -219,7 +220,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		LOG(ERR,"ped::to_evb peds are bad: valid %d, smoothed %d",valid,smoothed) ;
 	}
 
-	LOG(TERR,"Preparing pedestals for RDO %d...",rb) ;
+	LOG(NOTE,"Preparing pedestals for RDO %d...",rb) ;
 
 	for(a=0;a<256;a++) {
 	for(ch=0;ch<16;ch++) {
@@ -304,7 +305,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 
 	if(fff) fclose(fff) ;
 
-	LOG(TERR,"Pedestals prepared for RDO %d, bytes %d",rb+1,rbuff-buff) ;
+	LOG(NOTE,"Pedestals prepared for RDO %d, bytes %d",rb+1,rbuff-buff) ;
 	return rbuff - buff ;	// bytes!
 }
 
@@ -312,9 +313,7 @@ int tpxPed::to_evb(char *buff)
 {
 	int r, p, t ;
 
-	u_int *addr ;
-	u_short *ptr ;
-	char *rbuff = buff ;
+	char *rbuff = buff ;	// remember
 
 	if(!valid || !smoothed) {
 		LOG(ERR,"ped::to_evb peds are bad: valid %d, smoothed %d",valid,smoothed) ;
@@ -322,11 +321,13 @@ int tpxPed::to_evb(char *buff)
 
 	LOG(TERR,"Preparing pedestals for later EVB...") ;
 	for(r=0;r<=45;r++) {
-		for(p=1;p<tpc_rowlen[r];p++) {
+		for(p=1;p<=tpc_rowlen[r];p++) {
 			struct peds *ped = get(r, p) ;
 
-			addr = (u_int *) rbuff ;	// remember address
-			ptr = (u_short *) (addr + 1) ;	// advance 4 bytes
+			u_short *addr = (u_short *) rbuff ;	// remember address
+			*addr++ = (r<<8)|p ;	// row/pad
+			
+			u_short *ptr = addr ;	// read to store
 
 			for(t=0;t<512;t++) {
 				double rms = (ped->rms[t] * 16.0) ;
@@ -338,12 +339,14 @@ int tpxPed::to_evb(char *buff)
 				*ptr++ = (val << 10) | (u_short)ped->ped[t] ;
 			}
 
-			*addr = (r << 24) | (p << 16) | t ;
+			*addr = t ;	// unsert count at the first short
 			rbuff = (char *) ptr ;
 		}
 	}
+	// int: row,pad,cou
+	// short: 6bit RMS, 10bit ped
 
-	LOG(TERR,"Pedestals prepared for later EVB.") ;
+	LOG(TERR,"Pedestals prepared for later EVB: %d bytes",rbuff-buff) ;
 	return (rbuff-buff) ;
 }
 

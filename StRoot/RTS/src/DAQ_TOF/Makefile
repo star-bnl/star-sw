@@ -12,7 +12,7 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 
-OBJS := daq_tof.o
+OBJS := daq_tof.o tof_reader.o
 
 LIBS = libtof.a
 BINS = 
@@ -31,10 +31,19 @@ daq_tof.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_tof.o: ../SFS/sfs_index.h
 daq_tof.o: ../SFS/fs_index.h
 daq_tof.o: ../SFS/sfs_base.h
-daq_tof.o: ../RTS_READER/rts_reader.h
-daq_tof.o: ../RTS_READER/daq_dta.h
+daq_tof.o: ../DAQ_READER/daqReader.h
+daq_tof.o: ../DAQ_READER/daq_dta.h
 daq_tof.o: ../../../../StRoot/RTS/include/rts.h
-daq_tof.o: ../RTS_READER/daq_dta_structs.h
+daq_tof.o: ../DAQ_READER/daq_dta_structs.h
 daq_tof.o: daq_tof.h
-daq_tof.o: ../RTS_READER/daq_det.h
-daq_tof.o: ../RTS_READER/daq_det.h
+daq_tof.o: ../DAQ_READER/daq_det.h
+tof_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
+tof_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
+tof_reader.o: ../../../../StRoot/RTS/include/rts.h
+tof_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
+tof_reader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
+tof_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+tof_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
+tof_reader.o: daq_tof.h
+tof_reader.o: ../DAQ_READER/daq_det.h
+daq_tof.o: ../DAQ_READER/daq_det.h
