@@ -900,6 +900,7 @@ proc ::jobMonitor::qacctJob {} {
 proc ::jobMonitor::submitSelected {} {
     global env
 
+    set dontWarn false
     foreach job $::jobMonitor::actionList {
         set fName [file join $::jobMonitor::scriptDir sched$job.csh]
         set f [open $fName]
@@ -952,7 +953,18 @@ proc ::jobMonitor::submitSelected {} {
                 }
                 set start [expr $end+1]
             }
-            eval exec [string range $runCmd $start end]
+            # Condor is warning about log file on NFS possibly causing corruption.
+            # Warn user one time.
+            if {[catch {eval exec [string range $runCmd $start end]} err] && !$dontWarn} {
+                if {"ok" eq [tk_messageBox -icon warning \
+                                   -title "condor warning" \
+                                   -type okcancel \
+                                   -message "Warning message $err. Click ok to ignore all job submission warnings, cancel to halt job submission"]} {
+                    set dontWarn true
+                } else {
+                    return
+                }
+            }
             set ::jobMonitor::var$job "SUBM"
             $::jobMonitor::bWindow.f2.text.stat$job configure -fg orange
         }
