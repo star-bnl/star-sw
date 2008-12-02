@@ -7,12 +7,12 @@
 
 #include <SFS/sfs_index.h>
 
-#include <RTS_READER/rts_reader.h>
-#include <RTS_READER/daq_dta.h>
+#include <DAQ_READER/daqReader.h>
+#include <DAQ_READER/daq_dta.h>
 
 #include "daq_tof.h"
 
-
+extern int tof_reader(char *mem, struct tof_t *tof, u_int driver) ;
 
 
 
@@ -22,20 +22,39 @@ const char *daq_tof::help_string = "\
 TOF Help: \n\
 Supported Banks: \n\
 	raw	returns=ptr of start of DDL data; c1=sector[1..1]; c2=rdo[1..4]; \n\
+	legacy	returns=ptr to struct tof_t; \n\
 \n\
 \n\
 " ;
 
+class daq_det_tof_factory : public daq_det_factory
+{
+public:
+        daq_det_tof_factory() {
+                daq_det_factory::det_factories[TOF_ID] = this ;
+        }
+
+        daq_det *create() {
+                return new daq_tof ;
+        }
+} ;
+
+static daq_det_tof_factory tof_factory ;
 
 
-daq_tof::daq_tof(const char *dname, rts_reader *rts_caller) 
+
+daq_tof::daq_tof(daqReader *rts_caller) 
 {
 	rts_id = TOF_ID ;
 	name = rts2name(rts_id) ;
+	sfs_name = "tof" ;
+	caller = rts_caller ;
+	if(caller) caller->insert(this, rts_id) ;
 
 	raw = new daq_dta ;
+	legacy = new daq_dta ;
 
-	caller = rts_caller ;
+
 	
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -44,7 +63,9 @@ daq_tof::daq_tof(const char *dname, rts_reader *rts_caller)
 daq_tof::~daq_tof() 
 {
 	LOG(DBG,"%s: DEstructor",name) ;
+
 	delete raw ;
+	delete legacy ;
 
 	return ;
 }
@@ -53,13 +74,23 @@ daq_tof::~daq_tof()
 
 daq_dta *daq_tof::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
 {
-	if(!presence()) return 0 ;	// this det is not in this event...
+	Make() ;
 
+	if(present==0) return 0 ;
 
 	LOG(DBG,"%s: looking for bank %s",name,bank) ;
 
+	if(strcmp(bank,"*")==0) bank = "legacy" ;
+		
+
+
 	if(strcasecmp(bank,"raw")==0) {
+		if((present & 2)==0) return 0 ;		// no DDL
 		return handle_raw(sec,row) ;		// actually sec, rdo; r1 is the number of bytes
+	}
+	else if(strcasecmp(bank,"legacy")==0) {
+//		if((present & 1)==0) return 0 ;	// no legacy
+		return handle_legacy() ;
 	}
 	else {
 		LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
@@ -68,6 +99,53 @@ daq_dta *daq_tof::get(const char *bank, int sec, int row, int pad, void *p1, voi
 	return 0 ;
 }
 
+
+daq_dta *daq_tof::handle_legacy()
+{
+	assert(caller) ;
+
+	legacy->create(1,"tof_t",rts_id,DAQ_DTA_STRUCT(tof_t)) ;
+	
+
+	tof_t *tof_p = (tof_t *) legacy->request(1) ;	// need ONE tof_t object
+
+	
+	memset(tof_p->ddl_words,0,sizeof(tof_p->ddl_words)) ;	// zap it!
+	
+	if(present & 1) {	// datap 	
+		tof_reader(caller->mem, tof_p, m_Debug) ;
+	}
+	else {
+		tof_p->mode = 1 ;	// old...
+		tof_p->channels = 0 ;	// signal that we have NO old data...
+		tof_p->max_channels = 48+48+32+12 ;	// stale but compatible with old tofReadaer...
+
+		
+		for(int r=1;r<=4;r++) {
+			daq_dta *dd = handle_raw(0,r) ;
+			if(dd && dd->iterate()) {
+				u_int *tmp = (u_int *)dd->Void ;
+
+				u_int words = dd->ncontent/4 ;	// tof wants words...
+
+				tof_p->ddl_words[r-1] = words ;
+
+				
+				for(u_int i=0;i<words;i++) {	//words!
+					tof_p->ddl[r-1][i] = l2h32(*tmp) ;
+					tmp++ ;
+				}
+
+			}
+
+		}
+
+	}
+	legacy->finalize(1,1,0,0) ;	// 1 entry; sector 1, row 0, pad 0
+	legacy->rewind() ;
+
+	return legacy ;
+}
 
 
 daq_dta *daq_tof::handle_raw(int sec, int rdo)
@@ -104,11 +182,13 @@ daq_dta *daq_tof::handle_raw(int sec, int rdo)
 	for(int s=min_sec;s<=max_sec;s++) {
 	for(int r=min_rdo;r<=max_rdo;r++) {
 	
-		sprintf(str,"%s/%s/sec%02d/rb%02d/raw",caller->fs_cur_evt, "tof", s, r) ;
+		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, s, r) ;
+		char *full_name = caller->get_sfs_name(str) ;
 	
 		LOG(DBG,"%s: trying sfs on \"%s\"",name,str) ;
+		if(full_name == 0) continue ;
 
-		int size = caller->sfs->fileSize(str) ;	// this is bytes
+		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
 		LOG(DBG,"Got %d",size) ;
 
@@ -124,36 +204,34 @@ daq_dta *daq_tof::handle_raw(int sec, int rdo)
 			o_cou++ ;
 	
 			tot_bytes += size ;
-			LOG(NOTE,"%s: %s: reading in \"%s\": bytes %d",name,str,"raw", size) ;
+			LOG(DBG,"%s: %s: reading in \"%s\": bytes %d",name,str,"raw", size) ;
 		}
 	}
 	}
 
-	raw->create(tot_bytes,(char *)name,rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(tot_bytes,"tof_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
 	for(int i=0;i<o_cou;i++) {
 
-		sprintf(str,"%s/%s/sec%02d/rb%02d/raw",caller->fs_cur_evt, "tof", obj[i].sec, obj[i].rb) ;
+		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, obj[i].sec, obj[i].rb) ;
+		char *full_name = caller->get_sfs_name(str) ;
+		if(full_name == 0) continue ;
 
-		daq_store *st = raw->get() ;
+		char *st = (char *) raw->request(obj[i].bytes) ;
 
-		st->sec = obj[i].sec ;
-		st->row = obj[i].rb ;
-		st->nitems = obj[i].bytes ;
+		int ret = caller->sfs->read(full_name, st, obj[i].bytes) ;
 
-		char *mem = (char *)(st + 1) ;
-
-		int ret = caller->sfs->read(str, mem, st->nitems) ;
-
-                if(ret != (int)st->nitems) {
+                if(ret != (int)obj[i].bytes) {
                         LOG(ERR,"%s: %s: read failed, expect %d, got %d [%s]",name,str,
-                                st->nitems,ret,strerror(errno)) ;
+                                obj[i].bytes,ret,strerror(errno)) ;
                 }
+
                 else {
                         LOG(NOTE,"%s: %s read %d bytes",name,str,ret) ;
-                        raw->commit() ;
+
                 }
 
+                raw->finalize(obj[i].bytes,obj[i].sec,obj[i].rb,0) ;
 
 	}
 

@@ -37,6 +37,7 @@ public:
 	static struct tpx_stat_struct {
 		u_char should ;
 		u_int count ;
+		u_int errs ;
 		struct {
 			u_char should ;
 			struct {

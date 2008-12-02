@@ -17,10 +17,10 @@
 
 #include <TPC/rowlen.h>
 
-#include <DAQ_TPX/tpxGain.h>
-#include <DAQ_TPX/tpxFCF.h>
+#include <tpxGain.h>
+#include <tpxFCF.h>
 
-#include <RTS_READER/daq_dta_structs.h>
+#include <DAQ_READER/daq_dta_structs.h>
 
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)

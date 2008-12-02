@@ -12,20 +12,21 @@
 
 #include <TPX/tpx_altro_to_pad.h>
 
-#include <DAQ_TPX/tpxCore.h>
-#include <DAQ_TPX/tpxGain.h>
+#include "tpxCore.h"
+#include "tpxGain.h"
 
-#define TPX_NEG_TB	1
-#define TPX_POS_TB	3
+#define TPX_NEG_TB	2
+#define TPX_POS_TB	5
 
 
 
+#if 0
 // counts sector & rdo from 1!
 static struct fee_found {
 	u_int got_one ;
 	int ch_count[256][16] ;	// ALtro ID & CH is the index...
 } fee_found[25][7] ;
-
+#endif
 
 
 tpxGain::tpxGain()
@@ -37,6 +38,7 @@ tpxGain::tpxGain()
 	// mark memory as cleared
 	aux = 0 ;
 	means = 0 ;
+	fee_found = 0 ;
 	memset(gains,0,sizeof(gains)) ;
 
 	// bad_fee's are sticky and can only be entered via a file!
@@ -62,6 +64,11 @@ void tpxGain::free_store()
 	if(means) {
 		free(means) ;
 		means = 0 ;
+	}
+
+	if(fee_found) {
+		free(fee_found) ;
+		fee_found = 0 ;
 	}
 
 	for(int i=0;i<24;i++) {
@@ -99,6 +106,12 @@ void tpxGain::init(int sec)
 	}
 	memset(aux,0,bytes) ;
 
+	bytes = sizeof(struct fee_found_t) * 25 * 7 ;
+	if(fee_found == 0) {
+		fee_found = (struct fee_found_t *) malloc(bytes) ;
+		
+	}
+	memset(fee_found,0,bytes) ;
 
 	for(int i=0;i<24;i++) {
 		bytes = sizeof(struct gains) * 46 * 182 ;
@@ -108,7 +121,9 @@ void tpxGain::init(int sec)
 		memset(gains[i],0,bytes) ;
 	}
 
-	memset(fee_found,0,sizeof(fee_found)) ;
+
+	memset(tpx_pulser_peak,0,sizeof(tpx_pulser_peak))  ;
+
 
 	return ;
 }
@@ -120,16 +135,9 @@ void tpxGain::init(int sec)
 void tpxGain::ev_done() 
 {
 	if(events==0) {	// this is called after the first, special, event...
+		int tpx_pulser_tb[25][46] ;
 
 		int s, r, p ;
-
-		double mean_tb ;
-		double mean_peak ;
-		int mean_cou ;
-		
-		mean_tb = 0.0 ;
-		mean_peak = 0.0 ;
-		mean_cou = 0 ;
 
 		int s_start, s_stop ;
 		if(sector) {
@@ -140,42 +148,113 @@ void tpxGain::ev_done()
 			s_stop = 24 ;
 		}
 
+		// for the whole TPX!
+		int histo_tb[512] ;
+		memset(histo_tb,0,sizeof(histo_tb)) ;
+
+		memset(tpx_pulser_tb,0,sizeof(tpx_pulser_tb))  ;
+
+		char fname[64] ;
+		sprintf(fname,"/RTS/log/tpx/tb_distrib_%02d.txt",sector) ;
+		FILE *tf = fopen(fname,"w") ;
+
+
 		for(s=s_start;s<=s_stop;s++) {
 		for(r=1;r<=45;r++) {			// skip non-connected pads
-		for(p=3;p<=(tpc_rowlen[r]-2);p++) {	// skip first 2, last 2 pads in a row...
-			float tb = get_gains(s,r,p)->t0 ;
-			float g = get_gains(s,r,p)->g ;
 
-			// calc only for sane values... typical peak is 300 so we go 3 times less/more...
-			//if(tb && (g>300.0) && (g<900.0)) {
-			if(tb && (g>50.0) && (g<900.0)) {
-				mean_tb += tb ;
-				mean_peak += g ;
-				mean_cou++ ;
+		// for this particular row!
+		int histo_charge[1024] ;
+		int histo_tb_a[512] ;
+
+		memset(histo_charge,0,sizeof(histo_charge)) ;
+		memset(histo_tb_a,0,sizeof(histo_tb_a)) ;
+
+		for(p=4;p<=(tpc_rowlen[r]-3);p++) {	// skip first 3, last 3 pads in a row...
+			int tb = (int) get_gains(s,r,p)->t0 ;	// tb of the maximum peak
+			int g = (int) get_gains(s,r,p)->g ;	// charge of the maximum peak
+
+			if(g) {
+				histo_tb_a[tb]++ ;
+			
+				if(tf) fprintf(tf,"S %2d, ROW %2d, PAD %3d: tb %4d, peak %4d\n",s,r,p,tb,g) ;
+
+				histo_tb[tb]++ ;	// histogram the timebins...
+				histo_charge[g]++ ;	// histogram the max peak...
 			}
 		}
-		}
+
+		// get the most probable peak charge for this row
+		int prob_peak = 0 ;
+		int prob_max = 0 ;
+
+		for(int i=0;i<1024;i++) {
+			if(histo_charge[i] > prob_max) {
+				prob_max = histo_charge[i] ;
+				prob_peak = i ;
+			}
 		}
 
-		if(mean_cou) {
-			mean_tb /= mean_cou ;
-			mean_peak /= mean_cou ;
+		tpx_pulser_peak[s][r] = prob_peak ;
+
+		prob_peak = 0 ;
+		prob_max = 0 ;
+
+		for(int i=0;i<512;i++) {
+			if(histo_tb_a[i] > prob_max) {
+				prob_max = histo_tb_a[i] ;
+				prob_peak = i ;
+			}
 		}
-		else {
-			mean_tb = 200.0 ;
-			mean_peak = 300.0 ;
+
+		tpx_pulser_tb[s][r] = prob_peak ;
+
+
+
+
+		}	// row
+		}	// sector...
+
+
+		// find the maximum of the timebin peak
+		int mean_tb = 0 ;
+		int max_val = 0 ;
+
+
+		for(int i=0;i<512;i++) {
+			if(tf) fprintf(tf,"TB %4d %d\n",i,histo_tb[i]) ;
+
+			if(histo_tb[i] > max_val) {
+				max_val = histo_tb[i] ;
+				mean_tb = i ;
+			}
 		}
+
 
 		tb_start = (int) (mean_tb - TPX_NEG_TB) ;
 		tb_stop = (int) (mean_tb + TPX_POS_TB) ;
-		charge_peak = (int) (mean_peak + 0.5);
 
-		if(mean_cou) {
-			LOG(INFO,"Peak found at timebin %f window is [%d..%d], mean peak charge %f [%d]",mean_tb,tb_start,tb_stop,mean_peak,charge_peak) ;
+		// get the ranges of the peaks...
+		int min_charge = 0x7FFFFFFF ;
+		int max_charge = 0 ;
+
+		for(s=s_start;s<=s_stop;s++) {
+			for(r=1;r<=45;r++) {
+				if(tf) fprintf(tf,"CHA %2d %2d %d: tb %d\n",s,r,tpx_pulser_peak[s][r],tpx_pulser_tb[s][r]) ;
+
+				if(tpx_pulser_peak[s][r] > max_charge) {
+					max_charge = tpx_pulser_peak[s][r] ;
+				}
+				if(tpx_pulser_peak[s][r] < min_charge) {
+					min_charge = tpx_pulser_peak[s][r] ;
+				}		
+			}
 		}
-		else {
-			LOG(ERR,"Can;t fine mean peak!") ;
-		}
+
+		LOG(INFO,"Peak found at timebin %d [%d..%d], peak charge range [%d..%d]",mean_tb,tb_start,tb_stop,
+			min_charge, max_charge) ;
+
+		if(tf) fclose(tf) ;
+
 		
 		// re-clear!
 		for(int i=0;i<24;i++) {
@@ -223,21 +302,24 @@ void tpxGain::accum(char *evbuff, int bytes)
 	a.what = TPX_ALTRO_DO_ADC ;
 	a.t = rdo.token ;
 	a.sector = rdo.sector ;
+	a.log_err = 0 ;
 
 	// got an rdo
-	fee_found[sec][rdo.rdo].got_one++ ;
+	struct fee_found_t *fee_f = get_fee_found(sec,rdo.rdo) ;
+	fee_f->got_one++ ;
 
 
 
-	LOG(DBG,"gain: evt %d (got_one %d), sector %d, rdo %d",events, fee_found[sec][rdo.rdo].got_one,rdo.sector, rdo.rdo) ;
+	LOG(DBG,"gain: evt %d (got_one %d), sector %d, rdo %d",events, fee_f->got_one,rdo.sector, rdo.rdo) ;
 
 	do {
-		double charge, cou, mtb ;
+		double charge, mtb ;
 
 		data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;
 
-		fee_found[sec][rdo.rdo].ch_count[a.id][a.ch]++ ;
-	
+		//fee_found[sec][rdo.rdo].ch_count[a.id][a.ch]++ ;
+		fee_f->ch_count[a.id][a.ch]++ ;
+
 		if((a.row>45) || (a.pad>182)) {	// the FEE is not supposed to be in this RDO!
 			LOG(NOTE,"Should not be here! row %d, pad %d, aid %3d:%02d",a.row,a.pad, a.id, a.ch) ;
 			continue ;
@@ -247,57 +329,72 @@ void tpxGain::accum(char *evbuff, int bytes)
 		as = get_aux(sec,a.row,a.pad) ;
 
 
-		//if(a.row==0) {
-		//	LOG(DBG,"Not connected to pad: AID %d:%d, rp %d:%d",a.id,a.ch,a.row,a.pad) ;
-		//}
-
 		if((events==0)) {	// special processing for 1st event for connected pads...
-						// find the timebin of the peak charge...
+			// find the timebin of the peak charge...
 			for(i=0;i<a.count;i++) {
-				// use some sanity...
-				if((a.tb[i]>100) && (a.tb[i]<300)) {
-					if(a.adc[i] > gs->g) {
-						gs->t0 = a.tb[i] ;
-						gs->g = a.adc[i] ;
-					}
+				if(a.adc[i] > gs->g) {
+					gs->t0 = a.tb[i] ;	// the timebin of the maximum charge
+					gs->g = a.adc[i] ;	// the maximum charge
 				}
 			}
 		}
 		else {
-
+			double cou, noise ;
+			
 			charge = 0.0 ;
 			cou = 0.0 ;
 			mtb = 0.0 ;
+			noise = 0.0 ;
+
 			int peak = 0 ;
 
 
 			for(i=0;i<a.count;i++) {
+				if(a.adc[i] == 0) continue ;	// this is possible due to altro packing style...
+				
+				// sum up the main pulser peak...
 				if((a.tb[i]>=tb_start) && (a.tb[i]<=tb_stop)) {
 
-					//printf("... %d %d\n",a.tb[i],a.adc[i]) ;
+
+
 					if(a.adc[i] > peak) {
 						peak = a.adc[i] ;
 					}
 
 					charge += a.adc[i] ;
 					mtb += a.adc[i] * a.tb[i] ;
+
+				}
+				else if(a.tb[i]<(tb_start-1)) {	// sum up stuff before the peak
+					noise += a.adc[i] ;
 					cou++ ;
+
 				}
 			}
+
+			if(cou) noise /= cou ;
+	
+
 
 			if(charge) {
 				mtb /= charge ;
 
-				//printf("... %d:%d -- %f %f, cou %f\n",a.row,a.pad,charge,mtb,cou) ;
+
+				as->cou++ ;
+				gs->g += charge ;
+				gs->t0 += mtb ;
+
 			}
 			else {
-				mtb = tb_stop ;	// MUST put some sane value!
+				as->low_pulse++ ;
 			}
 
-			as->cou++ ;
-			gs->g += charge ;
-			gs->t0 += mtb ;
-		
+			if((noise > 7.0) || (cou>10)) {
+				LOG(NOTE,"%d: row %d, pad %d, charge %f, noise %f, cou %f",events,a.row,a.pad,charge,noise,cou) ;
+				as->noise++ ;
+			}
+			
+#if 0		
 			// NEEDS MORE WORK!
 			// since charge_peak is a TPX constant we must allow for
 			// row-to-row gain differences so the window should stay open...
@@ -314,7 +411,7 @@ void tpxGain::accum(char *evbuff, int bytes)
 			}
 			else {	// just right!
 			}
-			
+#endif			
 
 			
 		}
@@ -340,7 +437,7 @@ void tpxGain::calc()
 	// HACK! due to my f**** way of doing this I will need to add one to the events here...
 //?	events++ ;
 
-	LOG(INFO,"gain_calc: doing calculation with %d events",events) ;
+	LOG(DBG,"gain_calc: doing calculation with %d events",events) ;
 
 
 
@@ -358,22 +455,21 @@ void tpxGain::calc()
 	}
 
 	for(s=s_start;s<=s_stop;s++) {
-	for(r=0;r<=45;r++) {
+	for(r=1;r<=45;r++) {	// I changed this so it skips row 0, i.e. diconnected pads...
 
 
 	// calc the mean, where appropriate...
 	for(p=1;p<=tpc_rowlen[r];p++) {
-		c = get_aux(s,r,p)->cou ;
+		c = get_aux(s,r,p)->cou ;	// get count of events for this pad...
 
-
-
-		if(!c) {
+		if(!c) {	// nothing ever fell in the timing acceptance window
 			get_gains(s,r,p)->g = 0.0 ;
-			get_gains(s,r,p)->t0 = 0.0 ;	// never seen in the data...
+			get_gains(s,r,p)->t0 = 9.999 ;	
 		}
 		else {
 			//if(c != (events-1)) LOG(WARN,"Events %d, cou %d",events,c) ;
-
+			
+			
 			get_gains(s,r,p)->g /= c ;
 			get_gains(s,r,p)->t0 /= c ;
 
@@ -384,7 +480,7 @@ void tpxGain::calc()
 	/*
 		Now we need to calculate the mean CHARGE and T0 of a ROW
 	
-		We will skip first and last 2 pads because the gain 
+		We will skip first and last 3 pads because the gain 
 		(calculated with the pulser) is usually wrong.
 
 
@@ -393,22 +489,39 @@ void tpxGain::calc()
 	*/
 								     
 	c = 0 ;
+	int accepted_pads_cou = 0 ;
+
 	double row_means = 0.0 ;
-	for(p=3;p<=(tpc_rowlen[r]-2);p++) {
-		if(get_gains(s,r,p)->g) {
-			// for the row mean, skip low & high pulse guys!
-			if(get_aux(s,r,p)->low_pulse || get_aux(s,r,p)->high_pulse) {
-				LOG(WARN,"ROW %d, pad %d: lo %d, hi %d -- skipping",r,p,get_aux(s,r,p)->low_pulse,get_aux(s,r,p)->high_pulse) ;
-				continue ;
-			}
-
-			row_means += get_gains(s,r,p)->g ;
-
-			c++ ;
+	for(p=4;p<=(tpc_rowlen[r]-3);p++) {	// skip first and last 3 pads!
+		struct aux *aux = get_aux(s,r,p) ;
+		int fired = aux->cou ;
+		
+		if(fired) {
+			aux->low_pulse = (100 * aux->low_pulse) / fired ;
+			aux->high_pulse = (100 * aux->high_pulse) / fired ;
+			aux->noise = (100 * aux->noise) / fired ;
 		}
+		else aux->low_pulse = 100 ;	// obviously
+
+		if(get_gains(s,r,p)->g == 0.0) aux->low_pulse = 100 ;
+
+		if((aux->low_pulse > 10) || (aux->noise > 10) || (aux->high_pulse > 10)) {
+			if(r != 0) LOG(WARN,"ROW %d, pad %d: lo %d, noise %d, hi %d -- skipping",r,p,
+					aux->low_pulse, aux->noise, aux->high_pulse) ;
+			continue ;
+		}
+		row_means += get_gains(s,r,p)->g ;
+		c++ ;
+
 	}
 
-	if(c==0) row_means = 0.0 ;
+	accepted_pads_cou = c ;
+
+	// calculate the rough mean charge of the row...
+	if(c==0) {
+		row_means = 0.0 ;
+//		LOG(WARN,"ROW %d: no good pads???",r) ;
+	}
 	else row_means /= c ;
 
 
@@ -418,9 +531,15 @@ void tpxGain::calc()
 	*/
 
 	c = 0 ;
-	for(p=3;p<=(tpc_rowlen[r]-2);p++) {
+	int tot_pads_cou ;
+	int good_pads_cou ;
+
+	tot_pads_cou = good_pads_cou = 0 ;
+
+	for(p=4;p<=(tpc_rowlen[r]-3);p++) {
 		double g = get_gains(s,r,p)->g ;
 
+		// skip pads which are outside of the narrow window...
 		if( (g>(row_means*0.9)) && (g<(row_means*1.1))) {
 
 			get_means(s,r)->g += g ;
@@ -430,10 +549,13 @@ void tpxGain::calc()
 			get_means(s,r)->t0_rms += get_gains(s,r,p)->t0 * get_gains(s,r,p)->t0 ;
 			c++ ;
 		}
+
+		tot_pads_cou++ ;
 	}
 
-	
+	good_pads_cou = c ;	// remember	
 
+	// now calculate the nicer means...
 	if(c==0) {
 		// no row in the data...
 		get_means(s,r)->t0 = tb_stop ;
@@ -462,28 +584,34 @@ void tpxGain::calc()
 			get_gains(s,r,p)->g = get_means(s,r)->g / get_gains(s,r,p)->g ;
 			get_gains(s,r,p)->t0 = get_means(s,r)->t0 - get_gains(s,r,p)->t0;
 			
-			if(get_gains(s,r,p)->g > 9.9) get_gains(s,r,p)->g = 9.9 ;
+			if(get_gains(s,r,p)->g > 9.9) {
+				get_gains(s,r,p)->g = 0.0 ;	// kill!
+				get_gains(s,r,p)->t0 = -9.9 ;
+			}
 
 			//printf("...%d %d: %.3f %.3f\n",r,p,get_gains(s,r,p)->g, get_gains(s,r,p)->t0) ;
 		}
-		else {
-			get_gains(s,r,p)->t0 = 9.9 ;
-		}
-
 	}
 	
 
 	if(get_means(s,r)->g != 0.0) {
-		LOG(INFO,"Sector %2d, row %2d: charge %f +- %f; t0 %f +- %f",
+		LOG(INFO,"Sector %2d, row %2d: charge %.3f +- %.3f; t0 %.3f +- %.3f; rough mean %.3f; good/acc/all pads %d/%d/%d",
 		    s,r,
 		    get_means(s,r)->g, get_means(s,r)->g_rms,
-		    get_means(s,r)->t0, get_means(s,r)->t0_rms) ;
+		    get_means(s,r)->t0, get_means(s,r)->t0_rms,
+		    row_means,good_pads_cou, accepted_pads_cou, tot_pads_cou) ;
+	}
+	else {
+		LOG(WARN,"Sector %2d, row %2d: charge %f +- %f; t0 %f +- %f; rough_mean %.1f; good/acc/all pads %d/%d/%d",
+		    s,r,
+		    get_means(s,r)->g, get_means(s,r)->g_rms,
+		    get_means(s,r)->t0, get_means(s,r)->t0_rms,
+		    row_means,good_pads_cou, accepted_pads_cou, tot_pads_cou) ;
 	}
 
 
-
 	// for logging reasons we calc the RMS of the whole TPC but we skip unconnected pads
-	if(r && get_means(s,r)->g) {
+	if(get_means(s,r)->g) {
 		
 		//printf("Sector %d, row %d: %f +- %f charge, %f += %f t0 [%d cou]\n",s,r,
 		//       get_means(s,r)->g, get_means(s,r)->g_rms,
@@ -504,7 +632,7 @@ void tpxGain::calc()
 	g_rms /= c_rms ;
 	t0_rms /= c_rms ;
 
-	LOG(TERR,"gain_calc: done. Mean RMS: %.3f gain, %.3f T0",g_rms,t0_rms) ;
+	LOG(INFO,"gain_calc: %d events used: Mean RMS: %.3f gain, %.3f T0",events,g_rms,t0_rms) ;
 
 
 	return ;
@@ -769,10 +897,16 @@ int tpxGain::summarize(char *fname, FILE *log)
 
 	for(s=s_start;s<=s_stop;s++) {
 	for(r=1;r<=6;r++) {	// RB
-		if(fee_found[s][r].got_one == 0) continue ;
-	
-		LOG(TERR,"Run had sector %d, RB %d: expect %u events, got %u",s,r,events,fee_found[s][r].got_one) ;
+		struct fee_found_t *fee_f = get_fee_found(s,r) ;
 
+		if(fee_f->got_one == 0) continue ;
+	
+		if(events != (int)fee_f->got_one) {
+			LOG(WARN,"Run had sector %d, RB %d: expect %u events, got %u",s,r,events,fee_f->got_one) ;
+		}
+		else {
+			LOG(NOTE,"Run had sector %d, RB %d: expect %u events, got %u",s,r,events,fee_f->got_one) ;
+		}
 
 		for(int i=0;i<36;i++) {
 			int fee = tpx_rdo_fees(r,i) ;
@@ -792,10 +926,11 @@ int tpxGain::summarize(char *fname, FILE *log)
 
 				int  err = 0 ;
 
-				int seen = fee_found[s][r].ch_count[a][ch] ;
+				int seen = fee_f->ch_count[a][ch] ;
 
 				int row = tpx_altro_to_pad[r-1][a][ch].row ;
 				int pad = tpx_altro_to_pad[r-1][a][ch].pad ;
+
 
 				double g = get_gains(s,row,pad)->g ;
 				double t0 = get_gains(s,row,pad)->t0 ;
@@ -806,22 +941,27 @@ int tpxGain::summarize(char *fname, FILE *log)
 
 					if(seen == 0) {
 						err = 3 ;
-						sprintf(reason+strlen(reason),"[Missing]") ;
+						sprintf(reason+strlen(reason),"[Bad - Missing]") ;
 					}
 					else {
 						if(seen>events) {
 							err = 3 ;
-							sprintf(reason+strlen(reason),"[Flaky readout: seen %d times in %d events]",seen,events) ;
+							sprintf(reason+strlen(reason),"[Bad - Flaky readout: seen %d times in %d events]",seen,events) ;
 						}
 					}
 
 				}
 
+				int bad_t0, bad_gain ;
+				bad_t0 = bad_gain = 0 ;
+
 				if(row != 0) {	// only for physically connected rows!
 						
 
-					if((g<0.9) || (g>1.1)) {							
-						sprintf(reason+strlen(reason),"[Bad gain %.1f]",g) ;
+					if((g<0.9) || (g>1.1)) {				
+						bad_gain = 1 ;
+			
+						//sprintf(reason+strlen(reason),"[Bad gain %.1f]",g) ;
 
 						// first & last pads are usually bad
 						if((pad<=2) || (pad>=(tpc_rowlen[row]-1))) {
@@ -832,7 +972,9 @@ int tpxGain::summarize(char *fname, FILE *log)
 						}
 					}
 					if((t0<-0.1) || (t0>0.1)) {
-						sprintf(reason+strlen(reason),"[Bad t0 %.1f]",t0) ;
+						bad_t0 = 1 ;
+
+						//sprintf(reason+strlen(reason),"[Bad t0 %.1f]",t0) ;
 
 						// first and last are usually bad...
 						if((pad<=2) || (pad>=(tpc_rowlen[row]-1))) {
@@ -843,18 +985,23 @@ int tpxGain::summarize(char *fname, FILE *log)
 						}
 					}
 
-					if((g==0.0) && (t0>=9.0)) {	// regardless of position, there is NOTHING there
+					if((g==0.0) && (t0>=9.0)) {	// regardless of position, it was never seen by readout!
 						if(err<2) err = 2 ;
+						sprintf(reason+strlen(reason),"[Bad - no peak]") ;
 					}
 
 					
 				}
+				
 
 				// new as of Jun 11, 08:
 				// override fch to be J1 pin number as given to Tonko by Bob!
 				u_char j1 = tpx_altro_to_j1[a&1][ch] ;
 
 				if(err > 1) {
+					if(row && bad_gain) sprintf(reason+strlen(reason),"[Bad gain %.1f]",g) ;					
+					if(row && bad_t0) sprintf(reason+strlen(reason),"[Bad t0 %.1f]",t0) ;
+
 					notes++ ;
 					if(log) {
 						fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
@@ -863,26 +1010,26 @@ int tpxGain::summarize(char *fname, FILE *log)
 				}
 
 
-				fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
+				if(ofile) fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
 				       g,t0,err,reason) ;
 
-				fee_found[s][r].ch_count[a][ch] *= -1 ;	// mark as seen and done!
+				fee_f->ch_count[a][ch] *= -1 ;	// mark as seen and done!
 			}
 		}
 
 		for(a=0;a<256;a++) {
 			for(int ch=0;ch<16;ch++) {
 				u_char j1 = tpx_altro_to_j1[a&1][ch] ;
-				if(fee_found[s][r].ch_count[a][ch] > 0) {
+				if(fee_f->ch_count[a][ch] > 0) {
 					int fee = tpx_altro_to_fee(r,a) ;
 					notes++ ;
 					if(log) {
 						fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,-1,-1,
-							0.0,0.0,3,"[Spurious channel]") ;
+							0.0,0.0,3,"[Bad - Spurious channel]") ;
 
 					}
-					fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,-1,-1,
-					       0.0,0.0,3,"[Spurious channel]") ;
+					if(ofile) fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,-1,-1,
+					       0.0,0.0,3,"[Bad - Spurious channel]") ;
 				}
 			}
 		}
