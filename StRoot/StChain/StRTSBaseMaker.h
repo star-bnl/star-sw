@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.2 2008/11/21 18:16:47 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.3 2008/12/02 22:55:15 fine Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -22,18 +22,22 @@ class StRTSBaseMaker : public StMaker
    protected:
       StRtsTable *GetNextDaqElement(const char *elementPath);
       StRtsTable *DaqDta() {return fDaq_Dta;}
+      virtual StRtsTable *GetNext(const char* bank);
+      virtual StRtsTable *GetNextRaw();
+      virtual StRtsTable *GetNextAdc();
+      virtual StRtsTable *GetNextLegacy();
 
    public:
 
      StRTSBaseMaker(const char *name);
-    ~StRTSBaseMaker() ;
-    
+     virtual ~StRTSBaseMaker() ;
+ 
      Int_t Sector () const;
      Int_t Pad () const;
      Int_t Rdo () const;
      Int_t Row () const;
 
-     Int_t Make() = 0;
+     virtual Int_t Make() = 0;
 
   // cvs
   virtual const char *GetCVS() const
