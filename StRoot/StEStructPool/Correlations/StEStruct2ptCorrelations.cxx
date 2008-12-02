@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.23 2008/03/19 22:06:00 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.24 2008/12/02 23:45:04 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -421,12 +421,14 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
          }
          mQAHists->fillTrackHistograms(*iter,parentClass);
 
+if (0) {
         // Choose mass according to dEdx (in which case transverse and longitudinal
         // rapidities will be calculated as actual rapidities) or set mass to 0
         // in which case we will use the quantity Jeff was using for transverse rapidity
         // (a mid-rapidity approximation for pions) and eta for logitudinal rapidity.
         // Sould really have a switch accessible from macro level instead of
         // using cutMode.
+
         if (cb->getMode() == 5) {
             // Try using real rapidity calculation.
             (*iter)->SetMassAssignment(Mass[parentClass]);
@@ -438,6 +440,9 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
         // Always use psuedo-rapidity for now.
         // We are used to looking at the eta-phi plots (more or less.)
         //     (*iter)->SetMassAssignment(0);
+} else {
+            (*iter)->SetMassAssignment(0);
+}
     }
   }
 
@@ -531,7 +536,7 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
  *   -+ ignore pair.
  *   This is because we have an "extra" loop and the same pair will
  *   turn up with opposite sign \delta\eta.
- *   Alwyas put pair into y1-y2 and y2-y1.
+ *   Always put pair into y1-y2 and y2-y1.
  *
  *   For pid case we don't want to symmetrize yt-yt and we want to
  *   distinguish +- from -+ in the case of non-identical particles.
@@ -699,11 +704,8 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
 // Why did we require mdoPairDensityHistograms to set the ZOffset????
 //  if(j>=4 && mdoPairDensityHistograms) mPair.SetZoffset(e2->VertexZ() - e1->VertexZ());
 //  else mPair.SetZoffset(0);
-    if (j>=4) {
-        mPair.SetZoffset(e2->VertexZ() - e1->VertexZ());
-    } else {
-        mPair.SetZoffset(0);
-    }
+    // Note that for j < 4 e1 = e2 (so Vz2-Vz1 = 0)
+    mPair.SetZoffset(e2->VertexZ() - e1->VertexZ());
 
   StEStructTrackIterator Iter1;
   StEStructTrackIterator Iter2;
@@ -728,8 +730,6 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   // For now use mass=0 so we can compare eta with non-pid analysis.
   //>>>>>>>>>>>>
   float mass1 = 0, mass2 = 0;
-  int ntracks;
-  t1->getEntries()>t2->getEntries() ? ntracks=t1->getEntries() : ntracks=t2->getEntries();
 
   int it1 = -1;
   for(Iter1=t1->begin();Iter1!=t1->end();++Iter1){
@@ -802,11 +802,11 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           }
 
          /*
-          * Makes no sense for switchYt _and_ symmetrizeYt to be true at same time.
+          * Makes no sense for switchXX _and_ symmetrizeXX to be true at same time.
           */
-          int symmetrizeYt = cb->symmetrizeYt(&mPair);
-          int switchYt     = cb->switchYt(&mPair);
-          if (switchYt) {
+          int symmetrizeXX = cb->symmetrizeXX(&mPair);
+          int switchXX     = cb->switchXX(&mPair);
+          if (switchXX) {
               ytyt[icb][iyt2].yt[iyt1]+=nwgt;
               nytyt[icb][iyt2].yt[iyt1]+=1;
               ptpt[icb][ipt2].pt[ipt1]+=nwgt;
@@ -836,7 +836,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
               prphiphi[icb][iphi1].phi[iphi2]+=pwgt;
               paphiphi[icb][iphi1].phi[iphi2]+=spta;
               pbphiphi[icb][iphi1].phi[iphi2]+=sptb;
-              if (symmetrizeYt) {
+              if (symmetrizeXX) {
                   ytyt[icb][iyt2].yt[iyt1]+=nwgt;
                   nytyt[icb][iyt2].yt[iyt1]+=1;
                   ptpt[icb][ipt2].pt[ipt1]+=nwgt;
@@ -845,7 +845,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
                   etaeta[icb][ieta2].eta[ieta1]+=1; // nwgt;
                   pretaeta[icb][ieta2].eta[ieta1]+=pwgt/nwgt;
 // Note: Previously I filled paetaeta(phiphi) with sptb and pbetaeta(phiphi) with spta.
-//       I think that is the role of switchYt, not symmetrizeYt.
+//       I think that is the role of switchXX, not symmetrizeXX.
                   paetaeta[icb][ieta2].eta[ieta1]+=spta/nwgt;
                   pbetaeta[icb][ieta2].eta[ieta1]+=sptb/nwgt;
 
@@ -869,7 +869,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           jtdetadphi[icb][ideta].dphi[idphi] +=nwgt;
           jtndetadphi[icb][ideta].dphi[idphi] +=1;
           prjtdetadphi[icb][ideta].dphi[idphi] += pwgt;
-          if (switchYt) {
+          if (switchXX) {
               pajtdetadphi[icb][ideta].dphi[idphi] += sptb;
               pbjtdetadphi[icb][ideta].dphi[idphi] += spta;
           } else {
@@ -886,7 +886,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           jtsetadphi[icb][iseta].dphi[idphi]+=nwgt;
           jtnsetadphi[icb][iseta].dphi[idphi]+=1;
           prjtsetadphi[icb][iseta].dphi[idphi] += pwgt;
-          if (switchYt) {
+          if (switchXX) {
               pajtsetadphi[icb][iseta].dphi[idphi] += sptb;
               pbjtsetadphi[icb][iseta].dphi[idphi] += spta;
           } else {
@@ -2004,6 +2004,16 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.24  2008/12/02 23:45:04  prindle
+ * Changed switchYt to switchXX (etc.) to better reflect function.
+ * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)
+ * In CutBin: remove initPtBin
+ *            add mode 8
+ *            add notSymmetrized (used in Support)
+ * Added LUT (Look Up Table) for pair cuts. Experimental for now.
+ * Modified cutMerging2 (to look at track separation at a few radii)
+ * and cutCrossing2 so it doesn't accidentally reject almost back to back tracks.
+ *
  * Revision 1.23  2008/03/19 22:06:00  prindle
  * Added doInvariantMass flag.
  * Added some plots in pairDensityHistograms.

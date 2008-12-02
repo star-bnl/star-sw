@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.15 2008/05/01 23:39:14 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.16 2008/12/02 23:45:07 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -13,9 +13,10 @@
 #ifndef __STEBYEPAIRCUTS_H
 #define __STEBYEPAIRCUTS_H
 
+#include "StEStructPairLUT.h"
 #include "StEStructPool/AnalysisMaker/StEStructCuts.h"
-
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+
 #include "Stiostream.h"
 
 
@@ -40,6 +41,7 @@ protected:
   CutName mMergingName2;
   CutName mCrossingName;
   CutName mCrossingName2;
+  CutName mLUTName;
   CutName mpionMomentumName;
   CutName mKaonMomentumName;
   CutName mprotonMomentumName;
@@ -71,6 +73,7 @@ protected:
   float mMerging2[2];
   float mCrossing[2];
   float mCrossing2[2];
+  float mLUTParams[2];
   float mdEdxMomentumCut[4][2];
   float mpionOtherMass[2];
   float mpionpionMass[2];
@@ -86,7 +89,7 @@ protected:
   bool  mdeltaPhiCut,    mdeltaEtaCut,    mGooddeltaZdeltaXYCut, mdeltaMtCut;
   bool  mqInvCut,        mEntSepCut,      mExitSepCut,   mQualityCut;
   bool  mMidTpcSepLSCut, mMidTpcSepUSCut;
-  bool  mHBTCut,         mCoulombCut,     mMergingCut,   mCrossingCut,     mMergingCut2,   mCrossingCut2;
+  bool  mHBTCut,         mCoulombCut,     mMergingCut,   mCrossingCut,     mMergingCut2,   mCrossingCut2,   mLUTCut;
   bool  mpionMomentumCut, mKaonMomentumCut, mprotonMomentumCut;
   bool  mpionOtherMassCut, mpionpionMassCut, mpionKaonMassCut, mpionprotonMassCut;
   bool  mKaonOtherMassCut, mKaonKaonMassCut, mKaonprotonMassCut, mprotonOtherMassCut;
@@ -95,14 +98,14 @@ protected:
   int  mdphiCounter[4], mdetaCounter[4], mgooddzdxyCounter[4], mdmtCounter[4];
   int  mqInvCounter[4],   mEntSepCounter[4],  mExitSepCounter[4],  mQualityCounter[4];
   int  msplitLSCounter[4],  msplitUSCounter[4];
-  int  mHBTCounter[4],  mCoulombCounter[4], mMergingCounter[4], mCrossingCounter[4], mMergingCounter2[4], mCrossingCounter2[4];
+  int  mHBTCounter[4],  mCoulombCounter[4], mMergingCounter[4], mCrossingCounter[4], mMergingCounter2[4], mCrossingCounter2[4], mLUTCounter[4];
   int  mpionMomentumCounter[4], mKaonMomentumCounter[4], mprotonMomentumCounter[4];
   int  mpionOtherMassCounter[4], mpionpionMassCounter[4], mpionKaonMassCounter[4], mpionprotonMassCounter[4];
   int  mKaonOtherMassCounter[4], mKaonKaonMassCounter[4], mKaonprotonMassCounter[4], mprotonOtherMassCounter[4];
   int  mprotonprotonMassCounter[4], mOtherOtherMassCounter[4];
 
   // if data stored for subsequent use.... e.g. next cut, histogramming
-  float  mdeltaPhi, mdeltaEta, mdeltaZ, mdeltaXY, mdeltaMt;
+  float  mdeltaPhi, mdeltaEta, mdeltaMt;
   float  mqInvariant,  mEntranceSeparation, mExitSeparation, mQualityVal;
   float  mMidTpcSeparationLS, mMidTpcSeparationUS;
   float  mBField;                   // magnetic field (kilogauss as MuDst)
@@ -131,6 +134,9 @@ public:
   StEStructPairCuts(const char* cutFileName);
   virtual ~StEStructPairCuts();
 
+  // Look Up Table object.
+  StEStructPairLUT *mLUT;
+
   virtual bool loadBaseCuts(const char* name, const char** vals, int nvals);
   virtual void loadUserCuts(const char* name, const char** vals, int nvals);
   virtual void printCutStats(ostream& ofs);
@@ -142,8 +148,8 @@ public:
 
   // StEStructPairCuts stuff
 
-const  StEStructTrack*      Track1() const;
-const  StEStructTrack*      Track2() const;
+  const  StEStructTrack*      Track1() const;
+  const  StEStructTrack*      Track2() const;
        void                 SetTrack1(const StEStructTrack* trkPtr);
        void                 SetTrack2(const StEStructTrack* trkPtr);
 
@@ -186,11 +192,15 @@ const  StEStructTrack*      Track2() const;
        double                  MidTpcXYSeparation()             const;
        double                  MidTpcZSeparation()              const;
        double                  MidTpcSeparation()               const;
+       double                  OuterMidTpcXYSeparation()        const;
+       double                  OuterMidTpcZSeparation()         const;
+       double                  OuterMidTpcSeparation()          const;
        double                  NominalTpcExitSeparation()       const;
        double                  NominalTpcXYExitSeparation()     const;
        double                  NominalTpcZExitSeparation()      const;    
        double                  NominalTpcAvgXYSeparation()      const;
        double                  NominalTpcAvgZSeparation()       const;
+       bool                    TracksCrossInPhi()               const;
 
        void                    SetZoffset(float Zoffset) { mZoffset = Zoffset; };
        float                   GetZoffset() { return mZoffset; };
@@ -227,6 +237,7 @@ const  StEStructTrack*      Track2() const;
        int  cutCrossing();
        int  cutMerging2();
        int  cutCrossing2();
+       int  cutLUT();
        int  cutMass();
        
        // calls above set but fills histogramming variables
@@ -350,15 +361,18 @@ inline bool StEStructPairCuts::sameSide() {
 // on difference in Z and XY directions. If either of these are too big we don't
 // want to bother trying rest of pair cuts that we know won't reject pair.
 inline int StEStructPairCuts::goodDeltaXY() {
-    // I suspect the fabs is unecessary. Not positive.
-    if (mGooddeltaZdeltaXYCut && ((mdeltaXY=fabs(MidTpcXYSeparation())) > mgooddzdxy[1])) {
+    if ( mGooddeltaZdeltaXYCut &&
+        MidTpcXYSeparation() > mgooddzdxy[1] &&
+        OuterMidTpcXYSeparation() > mgooddzdxy[1] ) {
         return 1;
     }
     return 0;
 }
 
 inline int StEStructPairCuts::goodDeltaZ() {
-    if (mGooddeltaZdeltaXYCut && ((mdeltaZ=fabs(MidTpcZSeparation())) > mgooddzdxy[0])) {
+    if ( mGooddeltaZdeltaXYCut &&
+         MidTpcZSeparation() > mgooddzdxy[0] &&
+         OuterMidTpcZSeparation() > mgooddzdxy[0] ) {
         return 1;
     }
     return 0;
@@ -543,43 +557,82 @@ inline int StEStructPairCuts::cutCrossing(){
 }
 
 inline int StEStructPairCuts::cutMerging2() {
+    // If tracks ever get close we cut them. Ignore TPC entrance.
+    //  Doesn't seem to take care of crossing cut.
     if (!mMergingCut2) {
         return 0;
     }
-    float xy = MidTpcXYSeparation();
-    float z  = MidTpcZSeparation();
-    // This cuts a triangular region extending to mMerging2[0] on the Z separation axis
-    // and mMerging2[1] on the XY separation axis.
-    //if (xy*mMerging2[0]+z*mMerging2[1] < mMerging2[0]*mMerging2[1]) {
-    //    return ++(mMergingCounter2[mType]);
-    //}
-    // Here is a rectangular cut.
-    if (z<mMerging2[0] && xy<mMerging2[1]) {
+    if ( (MidTpcZSeparation()<mMerging2[0]) && (MidTpcXYSeparation()<mMerging2[1]) ) {
         return ++(mMergingCounter2[mType]);
     }
+    if ( (OuterMidTpcZSeparation()<mMerging2[0]) && (OuterMidTpcXYSeparation()<mMerging2[1]) ) {
+        return ++(mMergingCounter2[mType]);
+    }
+    if ( NominalTpcZExitSeparation()>0) {
+        if ( (NominalTpcZExitSeparation()<mMerging2[0]) && (NominalTpcXYExitSeparation()<mMerging2[1]) ) {
+            return ++(mMergingCounter2[mType]);
+        }
+    } else {
+        if (NominalTpcXYExitSeparation()<mMerging2[1]) {
+            return ++(mMergingCounter2[mType]);
+        }
+    }
     return 0;
+    // This removes rectangular region in separation distance at midpoint of TPC
+    // Expect tracks to come from common vertex, so cutting at any radius should
+    // be effective for merging.
+/*
+    if (MidTpcZSeparation()>mMerging2[0]) {
+        return 0;
+    }
+    if (MidTpcXYSeparation() > mMerging2[1]) {
+        return 0;
+    }
+    return ++(mMergingCounter2[mType]);
+ */
 }
 inline int StEStructPairCuts::cutCrossing2() {
-  // If phi1-phi2 has a different sign at entrance and exit of TPC
-  // the tracks crossed. Discard pair only if within a \delta\eta window.
+    // Only for tracks that _do_ cross.
+    // This removes a slot in Z separation at midplane of TPC
+    // I find that low-y_t, high-y_t pairs can be far apart at the middle of the
+    // tpc but close together near the outer radius. Require large z separation
+    // at both radii. Turns out when one of the tracks leaves via the endcap the nominal
+    // Z separation is -1. I guess we try using the XY separation
 
     if (!mCrossingCut2) {
         return 0;
     }
-    if (MidTpcZSeparation() > mCrossing2[0]) {
+    // Need to protect against opening angle changing from 180+eps to 180-eps.
+    // Already done by GoodDeltaZDeltaZY cut, but if that wasn't turned on...
+    if (!mGooddeltaZdeltaXYCut) {
+        if (MidTpcZSeparation()>8) {
+            return 0;
+        }
+        if ( (MidTpcXYSeparation()>50) && (OuterMidTpcXYSeparation()>50) ) {
+            return 0;
+        }
+    }
+    if ( (MidTpcZSeparation()>mCrossing2[0]) && (OuterMidTpcZSeparation()>mCrossing2[1]) ) {
         return 0;
     }
-
-    StThreeVectorF ent1 = mTrack1->NominalTpcEntrancePoint();
-    StThreeVectorF ent2 = mTrack2->NominalTpcEntrancePoint();
-    float sinEnt = (ent1.x()*ent2.y() - ent1.y()*ent2.x());
-    StThreeVectorF exit1 = mTrack1->NominalTpcExitPoint();
-    StThreeVectorF exit2 = mTrack2->NominalTpcExitPoint();
-    float sinExit = (exit1.x()*exit2.y() - exit1.y()*exit2.x());
-    if (sinEnt*sinExit > 0) {
+    if (!TracksCrossInPhi()) {
         return 0;
     }
     return ++(mCrossingCounter2[mType]);
+}
+inline int StEStructPairCuts::cutLUT() {
+    // Use a Look Up Table to determine which pairs get close enough
+    // to affect each other.
+
+    if (!mLUTCut) {
+        return 0;
+    }
+    double delPhi = mTrack1->Phi() - mTrack2->Phi();
+    double delEta = mTrack1->Eta() - mTrack2->Eta();
+    if (mLUT->cut(mTrack1->Curvature(),mTrack2->Curvature(),delPhi,delEta)) {
+        return ++(mLUTCounter[mType]);
+    }
+    return 0;
 }
 
 inline int StEStructPairCuts::cutMass() {
@@ -885,8 +938,18 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.16  2008/12/02 23:45:07  prindle
+ * Changed switchYt to switchXX (etc.) to better reflect function.
+ * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)
+ * In CutBin: remove initPtBin
+ *            add mode 8
+ *            add notSymmetrized (used in Support)
+ * Added LUT (Look Up Table) for pair cuts. Experimental for now.
+ * Modified cutMerging2 (to look at track separation at a few radii)
+ * and cutCrossing2 so it doesn't accidentally reject almost back to back tracks.
+ *
  * Revision 1.15  2008/05/01 23:39:14  prindle
- * I was using a triangular region for the merging cut. Decided a rectangular
+ *   I was using a triangular region for the merging cut. Decided a rectangular
  * region was safer.
  *
  * Revision 1.14  2008/03/19 22:06:01  prindle

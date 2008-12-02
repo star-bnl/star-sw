@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.11 2008/03/19 22:06:00 prindle Exp $
+ * $Id: StEStructBinning.cxx,v 1.12 2008/12/02 23:45:05 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -51,8 +51,9 @@ StEStructBinning::StEStructBinning(){
   setEtaRange(-1.0,1.0);
 
   //--> yt ranges <--
+  // With ptMin = 0.15 find YtMin = 0.933. Close to 1.0
 
-  minYt=0.5; //0.9; //0.15;
+  minYt=1.0; //0.9; //0.15;
   maxYt=5.0; //5.0;//4.5; // 0.925;
   nYt = ESTRUCT_YT_BINS-1;
   dYt = (maxYt-minYt)/(float)nYt;
@@ -187,6 +188,16 @@ void StEStructBinning::calculateDEtaWeights() {
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.12  2008/12/02 23:45:05  prindle
+ * Changed switchYt to switchXX (etc.) to better reflect function.
+ * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)
+ * In CutBin: remove initPtBin
+ *            add mode 8
+ *            add notSymmetrized (used in Support)
+ * Added LUT (Look Up Table) for pair cuts. Experimental for now.
+ * Modified cutMerging2 (to look at track separation at a few radii)
+ * and cutCrossing2 so it doesn't accidentally reject almost back to back tracks.
+ *
  * Revision 1.11  2008/03/19 22:06:00  prindle
  * Added doInvariantMass flag.
  * Added some plots in pairDensityHistograms.

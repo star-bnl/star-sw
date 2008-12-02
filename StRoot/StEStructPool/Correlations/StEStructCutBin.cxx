@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.11 2008/03/19 22:06:01 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.12 2008/12/02 23:45:06 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -47,7 +47,6 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=1;
       mnumParentBins=1;
       strcpy(mcutModeName," No Cut Binning ");
-      initPtBinMode0();
       break;
     }
   case 1:
@@ -55,7 +54,6 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=27;
       mnumParentBins=1;
       strcpy(mcutModeName," yt1 x yt2 Cut Binning, 27 bins ");
-      initPtBinMode1();
       break;
     }
   case 2:
@@ -63,15 +61,13 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=6;
       mnumParentBins=1;
       strcpy(mcutModeName,"Simple soft/hard same-side/away-side, 6 bins");   // *** new change
-      initPtBinMode2();
       break;
     }
   case 3:
     {
       mnumBins=16;
-      mnumParentBins=4;
+      mnumParentBins=3;
       strcpy(mcutModeName," yt_sum, yt_delta, same-side, away-side Cut Binning, 16 bins");
-      initPtBinMode3();
       break;
     }
   case 4:
@@ -79,7 +75,6 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=32;
       mnumParentBins=1;
       strcpy(mcutModeName," yt_sum, yt_delta, same-side, away-side, minijet fine binning, 16 bins");
-      initPtBinMode4();
       break;
     }
   case 5:
@@ -89,7 +84,6 @@ void StEStructCutBin::setMode(int mode){
       mnumParentBins=4;
       // strcpy(mcutModeName," same-side, away-side, identified particles, 14 bins");
       strcpy(mcutModeName," identified particles, 10 bins");
-      initPtBinMode5();
       break;
     }
   case 6:
@@ -97,7 +91,6 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=10;
       mnumParentBins=1;
       strcpy(mcutModeName," event-wise z-vertex binning, 10 bins");
-      initPtBinMode6();
       break;
     }
   case 7:
@@ -105,7 +98,13 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=60;
       mnumParentBins=1;
       strcpy(mcutModeName," event-wise z-vertex binning & soft/hard SS/AS, 60 bins");
-      initPtBinMode7();
+      break;
+    }
+  case 8:
+    {
+      mnumBins=6;
+      mnumParentBins=3;
+      strcpy(mcutModeName," Checking LS pair cuts for soft-hard combinations, 6 bins");
       break;
     }
   default:
@@ -130,13 +129,6 @@ int StEStructCutBin::getCutBinHistMode() {
 //------------------------- Mode=0 ----------------------------------------
 // no cut
 
-void StEStructCutBin::initPtBinMode0(){
-  mPtBins[0]=0;
-  mPtBins[1]=-1;
-  mPtBinMin[0]=0.;
-  mPtBinMax[0]=9999.;
-}
-
 //------------------------ Mode=1 -------------------------------------------
 
 //  ytyt space in even bins: 
@@ -158,31 +150,6 @@ int StEStructCutBin::getCutBinMode1(StEStructPairCuts* pc){
     imax=istore;
   }
   return __yt1_x_yt2_bin[imin]+imax-imin;
-}
-void StEStructCutBin::initPtBinMode1(){
-  // everyone is 0-6
-
-  for(int i=0;i<7;i++){
-    mPtBinMin[i]=0.;
-    mPtBinMax[i]=999.;
-  }
-  mPtBinMin[7]=0.139*sinh(1.5);
-  mPtBinMax[7]=0.139*sinh(2.0);
-  mPtBinMin[8]=mPtBinMin[13]=mPtBinMax[7];
-  mPtBinMax[8]=mPtBinMax[13]=0.139*sinh(2.5);
-
-  mPtBinMin[9]=mPtBinMin[14]=mPtBinMin[18]=mPtBinMax[8];
-  mPtBinMax[9]=mPtBinMax[14]=mPtBinMax[18]=0.139*sinh(3.0);
-
-  mPtBinMin[10]=mPtBinMin[15]=mPtBinMin[19]=mPtBinMin[22]=mPtBinMax[9];
-  mPtBinMax[10]=mPtBinMax[15]=mPtBinMax[19]=mPtBinMax[22]=0.139*sinh(3.5);
-
-  mPtBinMin[11]=mPtBinMin[16]=mPtBinMin[20]=mPtBinMin[23]=mPtBinMin[25]=mPtBinMax[10];
-  mPtBinMax[11]=mPtBinMax[16]=mPtBinMax[20]=mPtBinMax[23]=mPtBinMax[25]=0.139*sinh(4.0);
-
-  mPtBinMin[12]=mPtBinMin[17]=mPtBinMin[21]=mPtBinMin[24]=mPtBinMin[26]=mPtBinMin[27]=mPtBinMax[11];
-  mPtBinMax[12]=mPtBinMax[17]=mPtBinMax[21]=mPtBinMax[24]=mPtBinMax[26]=mPtBinMax[27]=999.;
-
 }
 
 //------------------------ Mode=2 -------------------------------------------
@@ -213,20 +180,6 @@ int StEStructCutBin::getCutBinMode2(StEStructPairCuts* pc){
 
 }
 
-void StEStructCutBin::initPtBinMode2(){ 
-  // check these in qa spectra
-
-  mPtBinMin[0]=mPtBinMin[3]=0;  // soft: min = 0; max = 3.3
-  mPtBinMax[0]=mPtBinMax[3]=0.139*sinh(3.3);  
-
-  mPtBinMin[1]=mPtBinMin[4]=0.139*sinh(3.3);  // hard: min = 3.3; max = 999.
-  mPtBinMax[1]=mPtBinMax[4]=999.;
-
-  mPtBinMin[2]=mPtBinMin[5]=0;  // other:  min = 0; max = 999.
-  mPtBinMax[2]=mPtBinMax[5]=999.;
-
-} 
-
 
 
 //------------------------ Mode=3 -------------------------------------------
@@ -253,7 +206,7 @@ static int __yt_deta_dphi_bin[4][4]={ {0,1,2,3}, {4,5,6,7}, {8,9,10,11}, {12,13,
 int StEStructCutBin::getCutBinMode3(StEStructPairCuts* pc){
 
   int iyt;
-  
+
   float yt1=pc->Track1()->Yt();
   float yt2=pc->Track2()->Yt();
 
@@ -292,22 +245,39 @@ int StEStructCutBin::getCutBinMode3(StEStructPairCuts* pc){
 
   return  __yt_deta_dphi_bin[iyt][idedp];
 }
-void StEStructCutBin::initPtBinMode3(){
+int StEStructCutBin::symmetrizeXX3(StEStructPairCuts* pc) {
 
-    mPtBinMin[0]=mPtBinMin[1]=mPtBinMin[2]=mPtBinMin[3]=0.;
-    mPtBinMax[0]=mPtBinMax[1]=mPtBinMax[2]=mPtBinMax[3]=0.139*sinh(1.8);
-
-    mPtBinMin[4]=mPtBinMin[5]=mPtBinMin[6]=mPtBinMin[7]=mPtBinMax[0];
-    mPtBinMax[4]=mPtBinMax[5]=mPtBinMax[6]=mPtBinMax[7]=0.139*sinh(2.2);
-
-    mPtBinMin[8]=mPtBinMin[9]=mPtBinMin[10]=mPtBinMin[11]=mPtBinMax[4];
-    mPtBinMax[8]=mPtBinMax[9]=mPtBinMax[10]=mPtBinMax[11]=999.;
-
-    mPtBinMin[12]=mPtBinMin[13]=mPtBinMin[14]=mPtBinMin[15]=0.;
-    mPtBinMax[12]=mPtBinMax[13]=mPtBinMax[14]=mPtBinMax[15]=999.;
-
+ /*
+  * Off diagonal yt-yt bins are not symmetrized.
+  */
+    if (getCutBinMode3(pc) < 12) {
+        return 1;
+    }
+    return 0;
 }
+int StEStructCutBin::switchXX3(StEStructPairCuts* pc) {
 
+ /*
+  * For soft-neck and soft-hard want soft first.
+  * For neck-hard want neck first.
+  */
+    if (getCutBinMode3(pc) < 12) {
+        return 0;
+    }
+    if (pc->Track1()->Yt() > pc->Track2()->Yt()) {
+        return 1;
+    }
+    return 0;
+}
+int StEStructCutBin::notSymmetrizedXX3(int cutBin, int pairCharge) {
+    // Used in HAdd.
+    // Return true if XX histogram was not symmetrized (i.e. phi,phi).
+    // This is case for off-diagonal Yt-Yt.
+    if (cutBin < 12) {
+        return 0;
+    }
+    return 1;
+}
 //------------------------ Mode=4 -------------------------------------------
 
 /*
@@ -352,72 +322,6 @@ int StEStructCutBin::getCutBinMode4(StEStructPairCuts* pc){
   ival+=iside;
   return ival;
 }
-void StEStructCutBin::initPtBinMode4(){
-
-  /***********************************************
-      
-  I don't recomment this cut-selecction for pt-correlations ...
-  but for completeness I define the pt-binning here  
-
-  *************************************************/
-
-    mPtBinMin[0]=mPtBinMin[16]=0.;
-    mPtBinMax[0]=mPtBinMax[16]=0.139*sinh(1.8);
-
-    mPtBinMin[1]=mPtBinMin[17]=0.139*sinh(1.1); // min for yt+yt=4
-    mPtBinMax[1]=mPtBinMax[17]=0.139*sinh(3.025); // max for yt+yt=4.25
-
-    mPtBinMin[2]=mPtBinMin[18]=0.139*sinh(1.125); // min for yt+yt=4.25
-    mPtBinMax[2]=mPtBinMax[18]=0.139*sinh(3.15); // max for yt+yt=4.5
-
-    mPtBinMin[3]=mPtBinMin[19]=0.139*sinh(1.25); // min for yt+yt=4.5
-    mPtBinMax[3]=mPtBinMax[19]=0.139*sinh(3.275); // max for yt+yt=4.75
-
-    //
-
-    mPtBinMin[4]=mPtBinMin[20]=0.139*sinh(1.275); // min for yt+yt=4.75
-    mPtBinMax[4]=mPtBinMax[20]=0.139*sinh(3.4); // max for yt+yt=5.
-
-    mPtBinMin[5]=mPtBinMin[21]=0.139*sinh(1.4); // min for yt+yt=5.
-    mPtBinMax[5]=mPtBinMax[21]=0.139*sinh(3.525); // max for yt+yt=5.25
-
-    mPtBinMin[6]=mPtBinMin[22]=0.139*sinh(1.525); // min for yt+yt=5.25
-    mPtBinMax[6]=mPtBinMax[22]=0.139*sinh(3.65); // max for yt+yt=5.5
-
-    //
-
-    mPtBinMin[7]=mPtBinMin[23]=0.139*sinh(1.65); // min for yt+yt=5.5
-    mPtBinMax[7]=mPtBinMax[23]=0.139*sinh(3.775); // max for yt+yt=5.75
-
-    mPtBinMin[8]=mPtBinMin[24]=0.139*sinh(1.775); // min for yt+yt=5.75
-    mPtBinMax[8]=mPtBinMax[24]=0.139*sinh(3.9); // max for yt+yt=6.
-
-    mPtBinMin[9]=mPtBinMin[25]=0.139*sinh(1.9); // min for yt+yt=6.
-    mPtBinMax[9]=mPtBinMax[25]=0.139*sinh(4.025); // max for yt+yt=6.25
-
-    //
-
-    mPtBinMin[10]=mPtBinMin[26]=0.139*sinh(2.025); // min for yt+yt=6.25
-    mPtBinMax[10]=mPtBinMax[26]=0.139*sinh(4.15); // max for yt+yt=6.5
-
-    mPtBinMin[11]=mPtBinMin[27]=0.139*sinh(2.15); // min for yt+yt=6.5
-    mPtBinMax[11]=mPtBinMax[27]=0.139*sinh(4.275); // max for yt+yt=6.75
-
-    mPtBinMin[12]=mPtBinMin[28]=0.139*sinh(2.275); // min for yt+yt=6.75
-    mPtBinMax[12]=mPtBinMax[28]=0.139*sinh(4.525); // max for yt+yt=7.25
-
-    mPtBinMin[13]=mPtBinMin[29]=0.139*sinh(2.525); // min for yt+yt=7.25
-    mPtBinMax[13]=mPtBinMax[29]=999.;              // max for yt+yt=...
-
-
-    // -- never use these odd regions for pt-correlations in this cut-selection
-    mPtBinMin[14]=mPtBinMin[30]=mPtBinMin[15]=mPtBinMin[31]=9999.;
-    mPtBinMax[14]=mPtBinMax[30]=mPtBinMax[15]=mPtBinMax[31]=-1.;
-
-    
-
-};
-
 
 //------------------------ Mode=5 -------------------------------------------
 //
@@ -482,51 +386,7 @@ int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc, int pairCase) {
     }
     e = e1 + e2;
     m = sqrt(e*e - p[0]*p[0] - p[1]*p[1] - p[2]*p[2]);
-/*
- * Moved the invariant mass cuts to StEStructPairCuts code.
- *
-    // Cut on invariant mass to keep or exclude resonances.
-    // (Not sure how to bring these in through a cuts file.)
-    int resType = 0;
-    switch(iBin) {
-        case 1: {  // K_short in pi^+ pi^-
-            if ((0.47 < m) && (m < 0.51)) {
-                resType = 1;
-            }
-            break;
-        }
-        case 2: {  // K^* in pi^- K^+
-            if ((0.85 < m) && (m < 0.93)) {
-                resType = 2;
-            }
-            break;
-        }
-        case 3: {  // Lambda in pi^- p
-            if ((1.10 < m) && (m < 1.125)) {
-                resType = 3;
-            }
-            break;
-        }
-        case 5: {  // phi in K^+K^-
-            if ((1.01 < m) && (m < 1.04)) {
-                resType = 4;
-            }
-            break;
-        }
-        case 6: {  // Lambda^* in K^- p
-            if ((1.49 < m) && (m < 1.55)) {
-                resType = 5;
-            }
-            break;
-        }
-        case 8: {  // Unknown threshold thing in pp (NOT in \bar p\bar p
-            if ((1.87 < m) && (m < 1.92)) {
-                resType = 6;
-            }
-            break;
-        }
-    }
- */
+
     mHCutBinHists[pairCase][iBin]->Fill(m - m1 - m2 + 0.1);
 
     e1 = sqrt(p1*p1 + Mass2[1]);
@@ -575,7 +435,7 @@ int StEStructCutBin::ignorePair5(StEStructPairCuts* pc) {
     }
     return 1;
 }
-int StEStructCutBin::symmetrizeYt5(StEStructPairCuts* pc) {
+int StEStructCutBin::symmetrizeXX5(StEStructPairCuts* pc) {
 
  /*
   * If particle types and charges are the same we symmetrize.
@@ -592,7 +452,7 @@ int StEStructCutBin::symmetrizeYt5(StEStructPairCuts* pc) {
     }
     return 1;
 }
-int StEStructCutBin::switchYt5(StEStructPairCuts* pc) {
+int StEStructCutBin::switchXX5(StEStructPairCuts* pc) {
 
  /*
   * For different pid order as 0 < pi < K < p.
@@ -612,37 +472,17 @@ int StEStructCutBin::switchYt5(StEStructPairCuts* pc) {
     }
     return 0;
 }
-
-/*
-  Use mPtMin and mPtMax as limits of where we trust pid.
-  Index 1 for pi
-        2 for K
-        3 for p
-  Would be nice to initialize these in some way we didn't have to
-  recompile to change them.
- */
-void StEStructCutBin::initPtBinMode5(){
-  // For Hijing we have perfect pid at all pts.
-  mPtBinMin[0]=0.;
-  mPtBinMax[0]=9999.;
-  mPtBinMin[1]=0.;
-  mPtBinMax[1]=9999.;
-  mPtBinMin[2]=0.;
-  mPtBinMax[2]=9999.;
-  mPtBinMin[3]=0.;
-  mPtBinMax[3]=9999.;
-  // For data we want to exclude relativistic rise region which
-  // might possibly give us a few tracks.
-  mPtBinMin[0] =    0.0;
-  mPtBinMax[0] = 9999.0;
-  mPtBinMin[1] =    0.0;
-  mPtBinMax[1] =    1.0;
-  mPtBinMin[2] =    0.0;
-  mPtBinMax[2] =    1.0;
-  mPtBinMin[3] =    0.0;
-  mPtBinMax[3] =    1.5;
-
-
+int StEStructCutBin::notSymmetrizedXX5(int cutBin, int pairCharge) {
+    // Used in HAdd.
+    // Return true if XX histogram was not symmetrized (i.e. phi,phi).
+    if (1==cutBin || 5==cutBin || 8==cutBin || 9==cutBin) {
+        if (0==pairCharge || 3==pairCharge) {
+            return 0;
+        }
+    }
+    return 1;
+}
+void StEStructCutBin::initCutBinHists5(){
     if (mcutBinHistMode) {
         TString hname;
         char *types[] = {"Sibpp", "Sibpm", "Sibmp", "Sibmm",
@@ -693,12 +533,6 @@ int StEStructCutBin::getCutBinMode6(StEStructPairCuts*, int zbin){
   // This function should never be used, can't access z-vertex position from here...
   return zbin;
 }
-void StEStructCutBin::initPtBinMode6(){
-  for(int i=0;i<10;i++){
-    mPtBinMin[i]=0.;
-    mPtBinMax[i]=999.;
-  }
-}
   
 //------------------------ Mode=7 -------------------------------------------     
 //  Combines modes 2 and 6:
@@ -726,23 +560,99 @@ int StEStructCutBin::getCutBinMode7(StEStructPairCuts* pc, int zbin){
   return retVal;
 
 }
-void StEStructCutBin::initPtBinMode7(){
-  // check these in qa spectra 
-
-  for(int i=0; i<10; i++) {
-    mPtBinMin[i*6 + 0]=mPtBinMin[i*6 + 3]=0;  // soft: min = 0; max = 3.3
-    mPtBinMax[i*6 + 0]=mPtBinMax[i*6 + 3]=0.139*sinh(3.3);
-    mPtBinMin[i*6 + 1]=mPtBinMin[i*6 + 4]=0.139*sinh(3.3);  // hard: min = 3.3; max = 999. 
-    mPtBinMax[i*6 + 1]=mPtBinMax[i*6 + 4]=999.;
-    mPtBinMin[i*6 + 2]=mPtBinMin[i*6 + 5]=0;  // other:  min = 0; max = 999.
-    mPtBinMax[i*6 + 2]=mPtBinMax[i*6 + 5]=999.;
-  }
-}
   
+//------------------------ Mode=8 -------------------------------------------
+//
+// --> Having problem with soft-hard pair cuts.
+//     When tracks have quite different yt then LS has split peak at 0,0
+
+// ytyt plot deta,dphi
+// 0   = soft
+// 1   = 'neck'
+// 2   = hard
+// 3   = soft-neck
+// 4   = soft-hard
+// 5   = neck-hard
+
+
+int StEStructCutBin::getCutBinMode8(StEStructPairCuts* pc){
+
+  int iyt;
+  
+  float yt1=pc->Track1()->Yt();
+  float yt2=pc->Track2()->Yt();
+
+  // These numbers are also used in StEStructCutBin::getParentBin (change both)
+  if(yt1<1.8 && yt2<1.8){
+    iyt=0;
+//>>>>> Test moving soft-hard pairs. Am having trouble with pair cuts for LS in this region
+  } else if(yt1<1.8 && yt2<2.2){
+    iyt=3;
+  } else if(yt1<2.2 && yt2<1.8){
+    iyt=3;
+  } else if(yt1<2.2 && yt2<2.2){
+    iyt=1;
+  } else if(yt1<1.8){
+    iyt=4;
+  } else if(yt2<1.8){
+    iyt=4;
+  } else if(yt1<2.2){
+    iyt=5;
+  } else if(yt2<2.2){
+    iyt=5;
+  } else {
+    iyt=2;
+  }
+  return  iyt;
+}
+int StEStructCutBin::symmetrizeXX8(StEStructPairCuts* pc) {
+
+ /*
+  * softNeck, softHard and neckHard are not symmetrized.
+  */
+    if (getCutBinMode8(pc) < 3) {
+        return 1;
+    }
+    return 0;
+}
+int StEStructCutBin::switchXX8(StEStructPairCuts* pc) {
+
+ /*
+  * For soft-neck and soft-hard want soft first.
+  * For neck-hard want neck first.
+  */
+    if (getCutBinMode8(pc) < 3) {
+        return 0;
+    }
+    if (pc->Track1()->Yt() > pc->Track2()->Yt()) {
+        return 1;
+    }
+    return 0;
+}
+int StEStructCutBin::notSymmetrizedXX8(int cutBin, int pairCharge) {
+    // Used in HAdd.
+    // Return true if XX histogram was not symmetrized (i.e. phi,phi).
+    if (cutBin < 3) {
+        return 0;
+    }
+    return 1;
+}
+
+
 
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.12  2008/12/02 23:45:06  prindle
+ * Changed switchYt to switchXX (etc.) to better reflect function.
+ * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)
+ * In CutBin: remove initPtBin
+ *            add mode 8
+ *            add notSymmetrized (used in Support)
+ * Added LUT (Look Up Table) for pair cuts. Experimental for now.
+ * Modified cutMerging2 (to look at track separation at a few radii)
+ * and cutCrossing2 so it doesn't accidentally reject almost back to back tracks.
+ *
  * Revision 1.11  2008/03/19 22:06:01  prindle
  * Added doInvariantMass flag.
  * Added some plots in pairDensityHistograms.
