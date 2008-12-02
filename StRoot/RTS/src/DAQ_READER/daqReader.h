@@ -2,7 +2,7 @@
 #define _DAQ_READERCLASS_HH_
 
 #include <ctype.h>
-#include "RTS/src/DAQ_READER/daqConfig.h"
+#include "daqConfig.h"
 // Define the old EVP_READER-based interface:
 
 #define DAQ_LEGACY_DEF(xxx)         \
