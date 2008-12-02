@@ -21,23 +21,26 @@ void selectAllM3(const char* dirname, const char *fileBase ){
     cout<<"error opening file "<<endl;
     return ;
   };
+  StEStructCutBin* cb = StEStructCutBin::Instance();
+  cb->setMode(3);
 
   //--> do all of the following
   const char* oname[]={"all","awayside","nearside","soft","softAS","softNS","neck","neckAS","neckNS","hard","hardAS","hardNS"};
 
-  const int _map[12][16]={ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,
-      0, 1, 4, 5, 8, 9,12,13, 0, 0, 0, 0, 0, 0, 0, 0,
-      2, 3, 6, 7,10,11,14,15, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      8, 9,10,11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  const int _map[12][16]={
+      0,  1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,
+      0,  1, 4, 5, 8, 9,12,13, 0, 0, 0, 0, 0, 0, 0, 0,
+      2,  3, 6, 7,10,11,14,15, 0, 0, 0, 0, 0, 0, 0, 0,
+      0,  1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0,  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      2,  3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      4,  5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      4,  5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      6,  7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      8,  9,10,11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      8,  9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       10,11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  
+
   int num[12]={16,8,8,4,2,2,4,2,2,4,2,2};
 
 
@@ -61,8 +64,8 @@ void selectAllM3(const char* dirname, const char *fileBase ){
         parentSum[0][0] = k/3 - 1;
         parentSum[0][1] = k/3 - 1;
     }
-    adder.addCuts(fname.Data(),tf,ndata,nin,parentSum,nParentDist);
-  } 
+    adder.addCuts(fname.Data(),tf,ndata,nin,parentSum,nParentDist,1);
+  }
 
   TString fname(dirname);
   fname+="/";
