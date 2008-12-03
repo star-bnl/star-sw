@@ -1,98 +1,118 @@
-#ifndef __StGammaRawMaker_h__
-#define __StGammaRawMaker_h__
+////////////////////////////////////////////////////////////
+//                                                        //
+//    StGammaRawMaker                                     //
+//                                                        //
+//    Process and store raw detector information          //
+//                                                        //
+//    Original concept and implementation by Jason        //
+//    Webb (Valpo) and Pibero Djawatho (IUCF)             //
+//                                                        //
+////////////////////////////////////////////////////////////
+
+#ifndef STAR_StGammaRawMaker
+#define STAR_StGammaRawMaker
 
 #include "StMaker.h"
 
 #include "StGammaTrack.h"
 #include "StGammaTower.h"
 #include "StGammaStrip.h"
+#include "StGammaEvent.h"
+#include "StGammaEventMaker.h"
 
 #include "StEmcUtil/database/StBemcTables.h"
-
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 class EEmcGeomSimple;
 class StBemcTables;
 class StMuTrack;
 
-class StGammaRawMaker : public StMaker {
+class StGammaRawMaker: public StMaker 
+{
 
- public:
-  StGammaRawMaker( const Char_t *name="grawmaker" );
-  ~StGammaRawMaker(){ /* nada */ };
+    public:
 
-  const StGammaTrackVec_t &tracks(){ return mTracks; }
-  const StGammaTowerVec_t &towers(){ return mTowers; }
-  const StGammaTowerVec_t &preshower1(){ return mPreshower1; }
-  const StGammaTowerVec_t &preshower2(){ return mPreshower2; }
-  const StGammaTowerVec_t &postshower(){ return mPostshower; }
-  const StGammaStripVec_t &strips(){ return mStrips; }
+        StGammaRawMaker(const char *name = "gammaRawMaker");
+        ~StGammaRawMaker();
+        
+        virtual const char* GetCVS() const
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.4 2008/12/03 15:36:01 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        
+        // Required Maker Methods
+        Int_t Init();
+        Int_t Make();
+        Int_t Finish() { return kStOK; }
+        void  Clear(Option_t *opts="");
 
-  /// Sets minimum ET for a tower to be stored
-  void SetTowerCutoff( Float_t t );
-  /// Sets minimum ET for a track to be stored
-  void SetTrackCutoff( Float_t t );
+        // Accessors
+        const StGammaTrackVec_t &tracks(){ return mTracks; }
+        const StGammaTowerVec_t &towers(){ return mTowers; }
+        const StGammaTowerVec_t &preshower1(){ return mPreshower1; }
+        const StGammaTowerVec_t &preshower2(){ return mPreshower2; }
+        const StGammaTowerVec_t &postshower(){ return mPostshower; }
+        const StGammaStripVec_t &strips(){ return mStrips; }
 
-  /// given a tower id and a layer (as defined in StGammaTower.h), returns
-  /// a pointer to the corresponding StGammaTower stored in StGammaEvent
-  StGammaTower *tower( Int_t id, Int_t layer );
+        StGammaTower *tower(Int_t id, Int_t layer);
+        StGammaStrip *strip(Int_t sector, Int_t plane, Int_t index);
+        
+        // Mutators
+        void SetTowerCutoff( Float_t t );        
+        void SetTrackCutoff( Float_t t );
+        
+        void useBemc() { mUseBemc = true; }
+        void useEemc() { mUseEemc = true; }
 
-  /// given the sector (module), plane (as defined in StGammaStrip.h)
-  /// and index of the strip, returns a pointer to the corresponding
-  /// StGammaStrip stored in the StGammaEvent.
-  StGammaStrip *strip( Int_t sector, Int_t plane, Int_t index );
+    protected:
 
- protected:
+        Float_t mTowerCutoff;
+        Float_t mTrackCutoff;
+        
+        StGammaTrackVec_t mTracks; // stores all tracks which pass QA
+        StGammaTowerVec_t mTowers; // stores all towers which pass QA
+        StGammaStripVec_t mStrips; // stores all strips which pass QA
+        
+        StGammaTowerVec_t mPreshower1;
+        StGammaTowerVec_t mPreshower2;
+        StGammaTowerVec_t mPostshower;
+        
+        void GetTracks();
+        void GetBarrel();
+        void GetEndcap();
+        
+        Bool_t Accept( StGammaTrack &track );
+        Bool_t Accept( StGammaTower &tower );
+        Bool_t Accept( StGammaStrip &strip );
+        Bool_t Accept( StMuTrack *track );
+        
+        EEmcGeomSimple *mEEmcGeometry;
+        
+        StBemcTables *mTables;
+        Bool_t mCorrupt;
 
-  Float_t mTowerCutoff;// ET
-  Float_t mTrackCutoff;// ET
+        // store pointers to towers and strips for easier matching to clusters
+        StGammaTower *mEEtowers[ kEEmcNumSectors * kEEmcNumSubSectors * kEEmcNumEtas ][ 4 ];
+        StGammaStrip *mEEstrips[ kEEmcNumSectors ][ kEEmcNumSmdUVs     ][ kEEmcNumStrips ];
+        
+        StGammaTower* mBarrelEmcTower[4801];
+        StGammaTower* mBarrelEmcPreshower[4801];
+        
+        map<int, StGammaStrip*> mBarrelSmdEtaStrip;
+        map<int, StGammaStrip*> mBarrelSmdPhiStrip;
+        
+    private:
+    
+        bool mUseBemc;
+        bool mUseEemc;
+    
+        StMuDstMaker *mMuDstMaker;
+        StGammaEventMaker *mGammaMaker;
+        StGammaEvent *mGammaEvent;
   
-  StGammaTrackVec_t mTracks; // stores all tracks which pass QA
-  StGammaTowerVec_t mTowers; // stores all towers which pass QA
-  StGammaStripVec_t mStrips; // stores all strips which pass QA
-
-  StGammaTowerVec_t mPreshower1;
-  StGammaTowerVec_t mPreshower2;
-  StGammaTowerVec_t mPostshower;
-
-  void GetEndcap();
-  void GetBarrel();
-  void GetTracks();
-
-  Bool_t Accept( StGammaTrack &track );
-  Bool_t Accept( StGammaTower &tower );
-  Bool_t Accept( StGammaStrip &strip );
-  Bool_t Accept( StMuTrack *track );
-
-  EEmcGeomSimple *mEEmcGeometry;
-
-  StBemcTables *tables;
-  Bool_t mCorrupt;
-
-  
-  // store pointers to towers and strips for easier matching to clusters
-
-  StGammaTower *mEEtowers[ kEEmcNumSectors * kEEmcNumSubSectors * kEEmcNumEtas ][ 4 ];
-  StGammaStrip *mEEstrips[ kEEmcNumSectors ][ kEEmcNumSmdUVs     ][ kEEmcNumStrips ];
-
-  StGammaTower* mBarrelEmcTower[4801];
-  StGammaTower* mBarrelEmcPreshower[4801];
-
-  map<int, StGammaStrip*> mBarrelSmdEtaStrip;
-  map<int, StGammaStrip*> mBarrelSmdPhiStrip;
-  
- public:
-
-  Int_t Init();
-  Int_t Make();
-  void  Clear(Option_t *opts="");
-
-  virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.3 2008/06/30 14:58:43 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
-
-  
-  ClassDef(StGammaRawMaker,1);
+    ClassDef(StGammaRawMaker, 2);
 
 };
+
+inline void StGammaRawMaker::SetTowerCutoff(Float_t t){ mTowerCutoff = t; }
+inline void StGammaRawMaker::SetTrackCutoff(Float_t t){ mTrackCutoff = t; }
 
 #endif
