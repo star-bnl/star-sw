@@ -1,5 +1,16 @@
-#ifndef __StGammaSpinMaker_h__
-#define __StGammaSpinMaker_h__
+////////////////////////////////////////////////////////////
+//                                                        //
+//    StGammaSpinMaker                                    //
+//                                                        //
+//    Retrieve event spin information                     //
+//                                                        //
+//    Original concept and implementation by              //
+//    Jason Webb (Valpo)                                  //
+//                                                        //
+////////////////////////////////////////////////////////////
+
+#ifndef STAR_StGammaSpinMaker_h
+#define STAR_StGammaSpinMaker_h
 
 #include "StMaker.h"
 #include "TString.h"
@@ -8,30 +19,29 @@ class TFile;
 class StGammaEvent;
 class StSpinDbMaker;
 
-#include <map>
-
-class StGammaSpinMaker : public StMaker
+class StGammaSpinMaker: public StMaker
 {
 
- public:
-  StGammaSpinMaker( const Char_t *name="gspmaker" );
-  ~StGammaSpinMaker(){ /* nada */ };
+    public:
+    
+        StGammaSpinMaker(const char *name="mGammaSpinMaker");
+        ~StGammaSpinMaker();
+        
+        virtual const char* GetCVS() const
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaSpinMaker.h,v 1.3 2008/12/03 15:36:16 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        
+        // Required Maker Methods
+        Int_t Init() { return StMaker::Init(); }
+        Int_t Make();
+        void  Clear(Option_t *opts="") { return StMaker::Clear(opts); }
+        Int_t Finish() { return kStOK; }
 
-  Int_t Init();
-  Int_t Make();
-  void  Clear(Option_t *opts="");
-  Int_t Finish();
+    private:
+    protected:
 
-  virtual const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StGammaSpinMaker.h,v 1.2 2008/06/30 14:58:43 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+        StSpinDbMaker *mSpinDb;
 
-
- private:
- protected:
-
-  StSpinDbMaker *mSpinDb;
-
-  ClassDef(StGammaSpinMaker,1);
+  ClassDef(StGammaSpinMaker, 1);
 
 };
 

@@ -1,5 +1,3 @@
-#include "StGammaSpinMaker.h"
-
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -7,117 +5,102 @@
 #include "StEvent/StTriggerId.h"
 
 #include "StGammaEventMaker.h"
-#include   "StGammaEvent.h"
+#include "StGammaEvent.h"
 
 #include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
 
+#include "StGammaSpinMaker.h"
+
 ClassImp(StGammaSpinMaker);
 
-// ---------------------------------------------------------------------
-StGammaSpinMaker::StGammaSpinMaker(const Char_t *name):StMaker(name)
-{
-  mSpinDb=0;
-}
+//////////////////////////////////////////////////
+//                 Constructor                  //
+//////////////////////////////////////////////////
+StGammaSpinMaker::StGammaSpinMaker(const Char_t *name): StMaker(name), mSpinDb(0)
+{}
 
-// ---------------------------------------------------------------------
-Int_t StGammaSpinMaker::Init()
-{
-  return StMaker::Init();
-}
+//////////////////////////////////////////////////
+//                  Destructor                  //
+//////////////////////////////////////////////////
+StGammaSpinMaker::~StGammaSpinMaker()
+{}
 
-Int_t StGammaSpinMaker::Finish()
-{
-  return kStOK;
-}
-
-// ---------------------------------------------------------------------
-
+//////////////////////////////////////////////////
+//                  Maker Make                  //
+//////////////////////////////////////////////////
 Int_t StGammaSpinMaker::Make()
 {
 
-  StMuDst *mudst = (StMuDst*)GetDataSet("MuDst");
-  if ( !mudst )
+    StMuDst *mudst = (StMuDst*)GetDataSet("MuDst");
+    if(!mudst)
     {
-      LOG_DEBUG<<" +++++ MuDst is missing from the chain +++++" << endm;
-      return kStFatal;
+        LOG_DEBUG << "Make() - No MuDst found!" << endm;
+        return kStFatal;
     }
 
-  StGammaEventMaker *gemaker = (StGammaEventMaker*)GetMakerInheritsFrom("StGammaEventMaker");
-  if ( !gemaker ) 
+    StGammaEventMaker *mGammaEventMaker = dynamic_cast<StGammaEventMaker*>(GetMakerInheritsFrom("StGammaEventMaker"));
+    if(!mGammaEventMaker) 
     {
-      LOG_DEBUG<<" +++++ gamme event maker is missing from the chain +++++" << endm;
-      return kStFatal;
+        LOG_DEBUG << "Make() - No StGammaEventMaker found!" << endm;
+        return kStFatal;
     }
 
-  StGammaEvent *gevent = gemaker->event();
-  if ( !gevent )
+    StGammaEvent *mGammaEvent = mGammaEventMaker->event();
+    if(!mGammaEvent)
     {
-      LOG_DEBUG<<" ++++ something is screwy, gamma event maker but no gamma event? ++++" << endm;
-      return kStFatal;
+        LOG_DEBUG << "Make() - StGammaEventMaker contains no StGammaEvent!" << endm;
+        return kStFatal;
     }
-
-  //
-  // BBC timebin information
-  //
-  gevent->SetDsmVertex(  mudst -> event() -> bbcTriggerDetector().onlineTimeDifference() );
-
-  mSpinDb = (StSpinDbMaker *)GetMakerInheritsFrom("StSpinDbMaker");
-  if ( !mSpinDb )
+    
+    // Retrieve BBC timebin information
+    mGammaEvent->SetDsmVertex( mudst->event()->bbcTriggerDetector().onlineTimeDifference() );
+    
+    mSpinDb = dynamic_cast<StSpinDbMaker*>(GetMakerInheritsFrom("StSpinDbMaker"));
+    if (!mSpinDb)
     {
-      LOG_WARN<<" +++++ spindb maker not in the chain, so why am I in the chain? +++++" << endm;
+      LOG_WARN << "Make() - No StSpinDbMaker found!  No spin information will be stored." << endm;
       return kStOK;
     }
-
-  Bool_t valid = mSpinDb->isValid();
-  if ( !valid )
+    
+    if(!mSpinDb->isValid())
     {
-      LOG_WARN<<Form(" ++++ spindb reports invalid for run=%i event=%i",GetRunNumber(),GetEventNumber())<<endm;
+        LOG_WARN << Form("++++ spindb reports invalid for run=%i event=%i", GetRunNumber(), GetEventNumber()) << endm;
     }
 
 
-  //
-  // Obtain spin information and populate gamma tree w/ it
-  //
-  
-  StMuEvent   *event = mudst -> event();
-  StL0Trigger *trig  =&(event->l0Trigger());
+    // Populate StGammaTree with spin information
+    StMuEvent   *event = mudst -> event();
+    StL0Trigger *trig  =&(event->l0Trigger());
+    
+    StMuTriggerIdCollection tic = event -> triggerIdCollection();
+    StTriggerId l1trig = tic.l1();
+    
+    UShort_t bx48   = (UShort_t)trig->bunchCrossingId();
+    UShort_t bx7    = (UShort_t)trig->bunchCrossingId7bit( event->runNumber() );
+    UShort_t bxStar = (UShort_t)mSpinDb->BXyellowUsingBX48(bx48);
 
-  StMuTriggerIdCollection tic = event -> triggerIdCollection();
-  StTriggerId l1trig = tic.l1();
+    // If bunch crossing is masked out skip event
+    if( mSpinDb->isMaskedUsingBX48(bx48) ) return kStOK;
 
-  UShort_t bx48   = (UShort_t)trig->bunchCrossingId();
-  UShort_t bx7    = (UShort_t)trig->bunchCrossingId7bit( event->runNumber() );
-  UShort_t bxStar = (UShort_t)mSpinDb->BXyellowUsingBX48(bx48);
+    if( mSpinDb->offsetBX48minusBX7(bx48,bx7) != 0 ) 
+    {
+        LOG_WARN << " ++++ spindb indicates 7bit and 48bit bunch crossings are inconsistent... event invalid ++++" << endm;
+        return kStOK; // returns and leaves spin info in an "invalidated" state
+    }
 
-  if ( mSpinDb -> isMaskedUsingBX48(bx48) ) // bunch crossing is masked out this event/run
+    Int_t spin4 = mSpinDb->spin4usingBX48(bx48);
+
+    // Finanlly, store the spin information
+    mGammaEvent->SetValidDb(true);
+    mGammaEvent->SetSpin4( (UShort_t)spin4 );
+    mGammaEvent->SetBunchCrossing7bit( (UShort_t)bx7 );
+    mGammaEvent->SetBunchCrossing48bit( (UShort_t)bx48 );
+    mGammaEvent->SetBunchCrossingStar( (UShort_t)bxStar );
+    
+    if( mSpinDb->isPolDirLong() )  mGammaEvent->SetPolarizationType( StGammaEvent::kLongLong );
+    if( mSpinDb->isPolDirTrans() ) mGammaEvent->SetPolarizationType( StGammaEvent::kTransTrans );
+    
     return kStOK;
 
-  if ( mSpinDb->offsetBX48minusBX7(bx48,bx7)!=0 ) {
-    LOG_WARN<<" ++++ spindb indicates 7bit and 48bit bunch crossings are inconsistent... event invalid ++++" <<endm;
-    return kStOK; // returns and leaves spin info in an "invalidated" state
-  }
-
-  Int_t spin4 = mSpinDb->spin4usingBX48(bx48);
-
-  //
-  // If we got here, set the spin information
-  //
-  gevent -> SetValidDb(true);
-  gevent -> SetSpin4( (UShort_t)spin4 );
-  gevent -> SetBunchCrossing7bit( (UShort_t)bx7 );
-  gevent -> SetBunchCrossing48bit( (UShort_t)bx48 );
-  gevent -> SetBunchCrossingStar( (UShort_t)bxStar );
-
-  if ( mSpinDb->isPolDirLong() ) 
-    gevent -> SetPolarizationType( StGammaEvent::kLongLong );
-  if ( mSpinDb->isPolDirTrans() )
-    gevent -> SetPolarizationType( StGammaEvent::kTransTrans );
-
-  return kStOK;
-
 }
 
-// ---------------------------------------------------------------------
-void StGammaSpinMaker::Clear(Option_t *opts)
-{
-}
