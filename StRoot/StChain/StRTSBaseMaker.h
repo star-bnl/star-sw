@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.4 2008/12/02 23:40:08 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.5 2008/12/03 20:41:00 fine Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -18,6 +18,7 @@ class StRTSBaseMaker : public StMaker
    private:
      static const char *fRTSRootDataset; // The name of the Root dataset
      StRtsTable   *fDaq_Dta;
+     TString        fDetectorName;     // name of the detector
 
    protected:
       StRtsTable *GetNextDaqElement(const char *elementPath);
@@ -30,13 +31,14 @@ class StRTSBaseMaker : public StMaker
 
    public:
 
-     StRTSBaseMaker(const char *name);
+     StRTSBaseMaker(const char *detectorName,const char *makerName="");
      virtual ~StRTSBaseMaker() ;
  
      Int_t Sector () const;
      Int_t Pad () const;
      Int_t Rdo () const;
      Int_t Row () const;
+     const TString &DetectorName() const { return fDetectorName; }
 
      virtual Int_t Make() = 0;
 
