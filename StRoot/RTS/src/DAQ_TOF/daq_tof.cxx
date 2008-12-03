@@ -255,7 +255,7 @@ int daq_tof::get_token(char *addr, int words)
 }
 
 // knows how to get a/the L2 command out of the event...
-int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int prompt)
+int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int do_log)
 {
 	u_int *w ;
 	int cou = 0 ;
@@ -265,11 +265,15 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int prompt)
 	w = (u_int *)addr ;
 	words-- ;	// point to last datum now...
 
+	// this will be DBG...
 	LOG(NOTE,"First words 0x%08X 0x%08X 0x%08X, last words 0x%08X 0x%08X 0x%08X [+0x%08X], %u",
 	    w[0],w[1],w[2],w[words-2],w[words-1],w[words],w[words+1],words+1) ;
 
 
 	// prompt token is in word 0!
+	// unless it just reads 0xA0000000, in which case this is purely trigger data -- no
+	//    content!
+
 	trg[t_cou].t = w[0] & 0xFFF ;
 	trg[t_cou].daq = (w[0]>>12) & 0xF ;
 	trg[t_cou].trg = (w[0]>>16) & 0xF ;
@@ -278,9 +282,13 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int prompt)
 	t_cou++ ;
 
 
-	if(prompt) LOG(NOTE,"[%d] prompt: T %4d, trg %d, daq %d",prompt,trg[0].t,trg[0].trg,trg[0].daq) ;
-	if(trg[0].t == 0) {
-		LOG(ERR,"[%d] prompt: T %4d, trg %d, daq %d",prompt,trg[0].t,trg[0].trg,trg[0].daq) ;
+	if(do_log) LOG(NOTE,"prompt: T %4d, trg %d, daq %d [0x%08X]: words %d",trg[0].t,trg[0].trg,trg[0].daq,w[0],words+1) ;
+
+	if(w[0] == 0xA0000000) {
+		trg[0].t = 4097;	// trigger only contrib...
+	}
+	else if(trg[0].t == 0) {
+		LOG(ERR,"prompt: T %4d, trg %d, daq %d",trg[0].t,trg[0].trg,trg[0].daq) ;
 		trg[0].t = 4097 ;
 	}
 
@@ -297,7 +305,7 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int prompt)
 			int cmd = (w[words]>>16) & 0xF ;
 			int t = (w[words]) & 0xFFF ;
 			
-			if(prompt) LOG(NOTE,"   [%d] FIFO %d: T %4d, trg %d, daq %d",prompt,cou,t,cmd,daq);
+			if(do_log) LOG(NOTE,"   FIFO %d: T %4d, trg %d, daq %d: word %d",cou,t,cmd,daq,words);
 
 			words-- ;
 			cou++ ;
@@ -322,7 +330,7 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int prompt)
 		trg[t_cou].rhic_delta = i+1 ;
 
 		if(trg[t_cou].t == 0) {
-			LOG(ERR,"   [%d] FIFO %d: T %4d, trg %d, daq %d",prompt,i,trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq);
+			LOG(ERR,"  FIFO %d: T %4d, trg %d, daq %d",i,trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq);
 			continue ;
 		}
 
@@ -336,6 +344,10 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int prompt)
 		}
 
 		t_cou++ ;
+		if(t_cou >=128) {
+			LOG(ERR,"Too many trigger contributions!") ;
+			break ;
+		}
 	}
 
 
