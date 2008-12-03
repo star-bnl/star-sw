@@ -106,8 +106,20 @@ int main(int argc, char *argv[])
 		if(dd) LOG(INFO,"PMD found") ;
 
 		dd = evp->det("tof")->get("legacy") ;
-		if(dd) LOG(INFO,"TOF found") ;
-
+		if(dd) {
+			LOG(INFO,"TOF found") ;
+			if(strcasecmp(print_det,"tof")==0) {
+				while(dd->iterate()) {
+					tof_t *tof = (tof_t *)dd->Void ;
+					for(int r=0;r<4;r++) {
+						printf("RDO %d: words %d:\n",r+1,tof->ddl_words[r]) ;
+						for(u_int i=0;i<tof->ddl_words[r];i++) {
+							printf("\t%d: 0x%08X [%u dec]\n",i,tof->ddl[r][i],tof->ddl[r][i]) ;
+						}
+					}
+				}
+			}
+		}
 		
 		/***************** EMCs ************************/
 
