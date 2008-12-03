@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.4 2008/12/02 23:40:08 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.5 2008/12/03 20:41:00 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.5  2008/12/03 20:41:00  fine
+ * add the DetectorName method to make DAQ_READER happy
+ *
  * Revision 1.4  2008/12/02 23:40:08  fine
  * GetNext should  not virtual
  *
@@ -36,7 +39,7 @@
  *
  * Revision 1.4  2008/01/12 00:22:01  fine
  * Update the test macro
-  *
+ *
  **************************************************************************/
 #include "StRTSBaseMaker.h"
 
@@ -49,9 +52,10 @@ ClassImp(StRTSBaseMaker);
 // The maker name must mutch the detectot DAQ name
 //
 //_____________________________________________________________
-StRTSBaseMaker::StRTSBaseMaker(const char *name):StMaker(name)
-      , fDaq_Dta(0)
+StRTSBaseMaker::StRTSBaseMaker(const char *detectorName,const char *makerName)
+      :StMaker(detectorName), fDaq_Dta(0), fDetectorName(detectorName)
 {
+  if (makerName && makerName[0]) SetName(makerName);
   LOG_INFO << "StRTSBaseMaker::ctor"  << endm;
 }
 
@@ -79,12 +83,12 @@ StRtsTable *StRTSBaseMaker::GetNext(const char* bank)
    // Get the next "bank" element
    StRtsTable *daqData = 0;
    if (bank && bank[0]) {
-     TString query = GetName();
+     TString query = DetectorName();
      query += "/"; query += bank;
      daqData =  GetNextDaqElement(query);
    } else {
       LOG_ERROR << "No bank name was provided tp query DAQ data from "
-           << GetName() << " detectort" << endm;
+           << DetectorName() << " detector" << endm;
    }
    return daqData;
 }
