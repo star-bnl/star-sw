@@ -1,13 +1,19 @@
-// -*- C++ -*-
+////////////////////////////////////////////////////////////
+//                                                        //
+//    StBarrelEmcClusterMaker                             //
+//                                                        //
+//    Michael Betancourt                                  //
+//    Massachusetts Institute of Technology               //
+//                                                        //
+//    Find 3x3 tower cluster in the BEMC                  //
+//                                                        //
+//    Original concept and implementation by              //
+//    Pibero Djawatho (Indiana University)                //
+//                                                        //
+////////////////////////////////////////////////////////////
 
-//
-// Pibero Djawotho <pibero@indiana.edu>
-// Indiana University
-// 30 May 2007
-//
-
-#ifndef ST_BARREL_EMC_CLUSTER_MAKER_H
-#define ST_BARREL_EMC_CLUSTER_MAKER_H
+#ifndef STAR_StBarrelEmcClusterMaker
+#define STAR_StBarrelEmcClusterMaker
 
 class StBarrelEmcCluster;
 class StGammaEventMaker;
@@ -15,44 +21,50 @@ class StGammaRawMaker;
 class StGammaTower;
 
 #include "StMaker.h"
-#include "StEmcUtil/geometry/StEmcGeom.h"
 
-class StBarrelEmcClusterMaker : public StMaker {
-public:
-  StBarrelEmcClusterMaker(const Char_t* name = "bemc_cluster" ) : StMaker(name) {}
-  ~StBarrelEmcClusterMaker() {}
+class StBarrelEmcClusterMaker: public StMaker 
+{
 
-  virtual const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBarrelEmcClusterMaker.h,v 1.4 2008/06/30 14:58:36 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+    public:
+    
+        StBarrelEmcClusterMaker(const char* name = "mBemcClusterMaker");
+        ~StBarrelEmcClusterMaker() {};
+        
+        virtual const char* GetCVS() const
+        {static const char cvs[] = "Tag $Name:  $ $Id: StBarrelEmcClusterMaker.h,v 1.5 2008/12/03 15:32:47 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        
+        // Required Maker Methods
+        int  Init();
+        void Clear(Option_t* option = "");
+        int  Make();
+        int  Finish() { return kStOK; }
+                
+        // Accessors
+        vector<StBarrelEmcCluster*>& clusters();
+        
+        // Mutators
+        void setSeedThreshold(double threshold);
+        void setClusterThreshold(double threshold);
 
-  void Clear(Option_t* option = "");
-  int  Init();
-  int  Make();
+    private:
+    
+        float mHighTowerThreshold;
+        float mClusterThreshold;
+        
+        StGammaEventMaker* mGammaEventMaker;
+        StGammaRawMaker* mGammaRawMaker;
+        TVector3 mVertex;
+        vector<StBarrelEmcCluster*> mClusters;
+        
+        StBarrelEmcCluster* makeCluster(StGammaTower* tower) const;
+        void getTowerPosition(int id, TVector3& position) const;
 
-  vector<StBarrelEmcCluster*>& clusters();
-
-private:
-  static const float mHighTowerThreshold;
-  static const float mClusterThreshold;
-
-  StGammaEventMaker* mGammaEventMaker;
-  StGammaRawMaker* mGammaRawMaker;
-  TVector3 mVertex;
-  vector<StBarrelEmcCluster*> mClusters;
-
-  StBarrelEmcCluster* makeCluster(StGammaTower* tower) const;
-  void getTowerPosition(int id, TVector3& position) const;
-
-  ClassDef(StBarrelEmcClusterMaker, 1)
+  ClassDef(StBarrelEmcClusterMaker, 2)
+  
 };
 
 inline vector<StBarrelEmcCluster*>& StBarrelEmcClusterMaker::clusters()  { return mClusters; }
-
-inline void StBarrelEmcClusterMaker::getTowerPosition(int id, TVector3& position) const
-{
-  float x, y, z;
-  StEmcGeom::instance("bemc")->getXYZ(id, x, y, z);
-  position.SetXYZ(x, y, z);
-}
+inline void StBarrelEmcClusterMaker::setSeedThreshold(double threshold) { mHighTowerThreshold = threshold; }
+inline void StBarrelEmcClusterMaker::setClusterThreshold(double threshold) { mClusterThreshold = threshold; }
 
 #endif
