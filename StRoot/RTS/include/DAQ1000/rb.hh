@@ -46,6 +46,7 @@ public:
 
 	virtual int inject(int token) { return -1 ; } ;	// for emulation
 
+	virtual int link_check() { return 0 ; } ;
 	
 	u_int alloced_bytes ;
 	int configd ;

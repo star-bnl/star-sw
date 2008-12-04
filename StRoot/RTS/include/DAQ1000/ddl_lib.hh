@@ -22,6 +22,8 @@ public:
 
 	int write(char *inbuff, int bytes, int no_delay=0) ;	// write something to the device
 
+	int link_check() ;
+
 	int busy() ;
 
 	int mark(char *addr, u_int how) ;
