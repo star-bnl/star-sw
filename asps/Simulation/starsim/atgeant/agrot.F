@@ -19,7 +19,7 @@
 
       call GVMXGA(RMX,gang)
 *      write(*,*)'GANG=',gang
-      call GVROT (xax, 111., RMX)
+      call GYROT (xax, 111., RMX)
       write(*,*) 'RMX2',rmx(1,1),rmx(2,1),rmx(3,1)
       write(*,*) 'RMX2',rmx(1,2),rmx(2,2),rmx(3,2)
       write(*,*) 'RMX2',rmx(1,3),rmx(2,3),rmx(3,3)
@@ -127,7 +127,7 @@
       enddo
       end
 
-      SUBROUTINE GVROT (DIRC, ANGP, RMX)
+      SUBROUTINE GYROT (DIRC, ANGP, RMX)
 ************************************************************************
 *                                                                      *
 *   CALL GYROT(DIRC,ANGP,TRANS)                              VP 880722 *
@@ -204,7 +204,7 @@
       AX(1)= Xax
       AX(2)= Yax
       AX(3)= Zax
-      call gvrot(AX,angp,RotM)
+      call GYROT(AX,angp,RotM)
       call gvmxga(RotM,gang)
      
       end  
@@ -236,7 +236,7 @@
         if (k.le.3) then
           call vzero(ax,3)
 	  ax(iAx(i)) = 1
- 	  call GVROT (ax, ang(i), RMX)
+ 	  call GYROT (ax, ang(i), RMX)
         else 
           call GVMXGA(RMX,gangI)
           call OLEG(k,gangI,gang)
