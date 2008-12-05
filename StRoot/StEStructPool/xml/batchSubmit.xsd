@@ -635,7 +635,7 @@ hell is in this directory.
         <xs:attribute name='id' type='xs:string' use='required'/>
         <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='entry'/>
-        <xs:attribute name='Comment' type='xs:string'>Used by 2pt correlation code as flag for switching options</xs:attribute>
+        <xs:attribute name='Comment' type='xs:string'>Used by 2pt correlation code as flag for switching options. Look in init method of StEStruct2ptCorrelations for bit meanings.</xs:attribute>
     </xs:complexType>
 </xs:element>
 <xs:element name='useGlobalTracks'>

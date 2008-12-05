@@ -800,8 +800,17 @@ proc ::jobMonitor::checkPopup {} {
     } else {
         catch {$::jobMonitor::viewMenu delete "bpeek"}
     }
+    set cLog [file join $::jobMonitor::scriptDir sched$job.condor.log]
+    if {[file exists $cLog]} {
+        if {[catch {$::jobMonitor::viewMenu index condorLog} err]} {
+            $::jobMonitor::viewMenu add command -label "condorLog" -command [namespace code condorJobLog]
+        }
+    } else {
+        catch {$::jobMonitor::viewMenu delete "condorLog"}
+    }
     set f [file join $::jobMonitor::logDir $job.log]
     if {[file exists $f] &&
+        [info exists env(SGE_ROOT)] &&
        (($status eq "") || ($status eq "DONE"))} {
         if {[catch {$::jobMonitor::viewMenu index qacct} err]} {
             $::jobMonitor::viewMenu add command -label "qacct" -command [namespace code qacctJob]
@@ -837,6 +846,22 @@ proc ::jobMonitor::peekAtJob {} {
         catch {[eval exec bpeek $jobID]} text
     }
     displayText $text "bpeek $job: $jobID"
+}
+
+# condorJobLog --
+#    Invoked via a popup menu
+#
+# Arguments:
+# Result:
+# Side effects:
+#    Put contents of condor.log file into tk text widget.
+#
+proc ::jobMonitor::condorJobLog {} {
+    set job $::jobMonitor::selectedJob
+    set cLog [file join $::jobMonitor::scriptDir sched$job.condor.log]
+    set f [open $cLog]
+    displayText [read $f] "contents of condor.log file for $job"
+    close $f
 }
 
 # qacctJob --
@@ -959,7 +984,9 @@ proc ::jobMonitor::submitSelected {} {
                 if {"ok" eq [tk_messageBox -icon warning \
                                    -title "condor warning" \
                                    -type okcancel \
-                                   -message "Warning message $err. Click ok to ignore all job submission warnings, cancel to halt job submission"]} {
+                                   -message "Warning message $err.\
+                                             \
+                                             Click ok to ignore all job submission warnings, cancel to halt job submission"]} {
                     set dontWarn true
                 } else {
                     return
@@ -1010,9 +1037,28 @@ proc ::jobMonitor::killSelected {} {
             foreach {clusterId procId cmd} $condClustList {
                 set f [file tail $cmd]
                 if {$f eq $jName} {
-                    #>>>>> condor_rm only works on node job was submitted from!!!!!
-                    # Seems that condClustList may include jobs that are no longer running.
-                    catch {exec condor_rm $clusterId.$procId}
+                    # By default condor_rm only works on node job was submitted from.
+                    # Can parse *.condor.log file to find submission node.
+                    # Log file has ip address but the < and > required by condor_rm are being
+                    # grabbed by tcl's exec (I guess). Kludge around this using nslookup to
+                    # find hostname
+                    set condorLogName [string map {csh condor.log} $cmd]
+                    set f [open $condorLogName]
+                    while { [gets $f line] >= 0 } {
+                        if {[string first "submitted from host:" $line] >= 0 &&
+                            [regexp {<(.*):} $line m1 ip] } {
+                            # dig seems to be able to find the hostname.
+                            set hostName [exec dig +short -x $ip]
+                            set hostName [string trim $hostName .]
+                            if {[catch {exec condor_rm -name $hostName $clusterId} mess]} {
+                                puts $mess
+                            } else {
+                                puts "Success: $mess"
+                            }
+                            break
+                        }
+                    }
+                    close $f
                 }
             }
             set f [file tail $jobName]
@@ -1492,6 +1538,11 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end " o qacct\n" bullet
     $w insert end "When the job ran under SGE and is no longer running. \n" n
     $w insert end "This displays the accounting information in the file viewing window.\n\n" n
+    $w insert end " o condorLog\n" bullet
+    $w insert end "When the job is scheduled under condor. \n" n
+    $w insert end "Displays this job's condor.log file in the file viewing window. " n
+    $w insert end "One reason to look at this is that jobs may be evicted and re-scheduled, " n
+    $w insert end "causing an endless loop, wasting CPU and your priority.\n\n" n
 
     $w insert end "Selections\n\n" header
 
