@@ -29,50 +29,10 @@ The current id's definitions are:<br>
 #define StEmcDecoder_HH
 
 #include "TObject.h"
+#include "StEmcMappingDb.h"
 
 class StEmcDecoder : public TObject
 {
-protected:
-
-    int       Init_Crate[30];
-    int       TDC_Crate[30];
-    int       Crate_TDC[30];
-    int       ReverseOrder[4800];
-    int       TriggerPatch[30];
-    int       TriggerSequence[10];
-    int       TowerBugFixIndex[4800];
-    int       PreshowerBugFixIndex[4800];
-    bool      fixTowerMap;
-    bool      fixPreshowerMap;
-
-    int       JetPatchFromTriggerPatch[300];
-    int       JetPatchSeqFromTriggerPatch[300];
-    int       TriggerPatchFromJetPatchAndSeq[300];
-
-
-    int       SmdModules[8][15];
-    int       FEE1[4],FEE2[4],FEE3[4];
-    int       connector1[20],connector2[20],connector3[20];
-    int       SmdeRDO[120][150],SmdpRDO[120][10][15];
-    int       SmdeIndex[120][150],SmdpIndex[120][10][15];
-
-    int       PsdModules[4][15];
-    int       PsdOffset[40];
-    int       PsdStart[60];
-    int       PsdRDO[4800];
-    int       PsdIndex[4800];
-
-    int       Getjose_towerWest(int,int) const;///<Get Software Id for West size for towers
-    int       Getjose_towerEast(int,int) const;///<Get Software Id for East side for towers
-    int       getSmdModule(int,int,int&) const;///<Get SMD module in a given position in RDO
-    int       checkDummy(int) const;///<Check dummy positions on SMD crate
-    int       getSmdPin(int,int,int,int&) const;///<Get SMD pin number
-    int       getSmdpStrip(int,int&,int&) const;///<Get SMDP strip
-    void      fixTowerBugIndexes();///<fixes the array in order to correct the tower bug
-    void      fixPreshowerBugIndexes(int);///<fixes the array in order to correct the preshower mapping
-
-    void      Init(unsigned int,unsigned int);///< Init method
-
 public:
     StEmcDecoder(unsigned int date=20300101,unsigned int time=000000, bool TowerMapBug = false);///< StEmcDecoder constructor
     virtual   ~StEmcDecoder();///< StEmcDecoder destructor
@@ -130,13 +90,22 @@ public:
     void      PrintSmdMap(ofstream *out) const;///<Print SMD MAP
     void      PrintPsdMap(ofstream *out) const;///<Print SMD MAP
 
+private:
+    bool mTowerMapBug;
+    int TowerBugFixIndex[4800];
+    int PreshowerBugFixIndex[4800];
+    StEmcMappingDb mapping;
+    
     ClassDef(StEmcDecoder,1)
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 2.18 2008/11/14 23:25:36 mattheww Exp $
+// $Id: StEmcDecoder.h,v 2.19 2008/12/05 19:05:32 kocolosk Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 2.19  2008/12/05 19:05:32  kocolosk
+// new DB-backed implementation of StEmcDecoder
+//
 // Revision 2.18  2008/11/14 23:25:36  mattheww
 // Fixed a lot of BPRS swaps
 //
