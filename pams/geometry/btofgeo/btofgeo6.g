@@ -1,7 +1,10 @@
-* $Id: btofgeo6.g,v 1.4 2008/10/16 02:47:27 perev Exp $
+* $Id: btofgeo6.g,v 1.5 2008/12/05 23:45:40 perev Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo6.g,v $
+* Revision 1.5  2008/12/05 23:45:40  perev
+* BRMD is seen now
+*
 * Revision 1.4  2008/10/16 02:47:27  perev
 * change the tray selection to be the final tray design. Xin
 *
@@ -1244,7 +1247,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 Block BRMD  is a six channel module for TOFr
-      Attribute  BRMD     seen=0   colo=6
+      Attribute  BRMD     seen=1   colo=6
       Material   RPCgas
       Shape      BOX      dx=mod7_Height/2,
                           dy=mod7_Width/2,
