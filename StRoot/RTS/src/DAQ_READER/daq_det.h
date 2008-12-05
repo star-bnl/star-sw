@@ -20,6 +20,11 @@
 #define m_Debug_DAQ_PRINT	(1<<0)
 #define m_Debug_DAQ_CHECK	(1<<1) 
 
+
+#define DET_PRESENT_SFS		(1<<0)
+#define DET_PRESENT_DATAP	(1<<1)
+
+
 // forward declarations
 class daq_dta ;
 class daqReader ;
@@ -118,7 +123,7 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.3 2008/11/21 18:34:43 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.4 2008/12/05 19:39:40 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 

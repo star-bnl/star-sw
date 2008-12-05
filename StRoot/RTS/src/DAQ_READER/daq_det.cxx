@@ -148,10 +148,10 @@ int daq_det::Make()
 
 
 	if(presence()) {
-		present |= 2 ;	// in sfs
+		present |= DET_PRESENT_SFS ;	// in sfs: 1
 	}
 	else if(legacyDetp(rts_id, caller->mem)) {
-		present |= 1 ;
+		present |= DET_PRESENT_DATAP ;	// in datap: 2
 	}
 
 	if(present) {
