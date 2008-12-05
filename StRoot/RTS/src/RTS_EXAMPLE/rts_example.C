@@ -39,6 +39,7 @@ static int btow_doer(daqReader *rdr, char  *do_print) ;
 static int etow_doer(daqReader *rdr, char  *do_print) ;
 static int tpc_doer(daqReader *rdr, char *do_print) ;
 static int tpx_doer(daqReader *rdr, char *do_print) ;
+static int trg_doer(daqReader *rdr, char *do_print) ;
 
 int main(int argc, char *argv[])
 {
@@ -75,8 +76,6 @@ int main(int argc, char *argv[])
 		LOG(INFO,"File name \"%s\": sequence %d",evp->file_name, evp->seq) ;
 
 		/***************** let's do simple detectors; the ones which only have legacy *****/
-		dd = evp->det("trg")->get("legacy") ;
-		if(dd) LOG(INFO,"TRG found") ;
 
 		dd = evp->det("sc")->get() ;
 		if(dd) LOG(INFO,"SC found") ;
@@ -120,6 +119,8 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+
+		if(trg_doer(evp, print_det)) LOG(INFO,"TRG found") ;
 		
 		/***************** EMCs ************************/
 
@@ -151,6 +152,61 @@ int main(int argc, char *argv[])
 }
 
 
+static int trg_doer(daqReader *rdr, char  *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"trg")) ;
+	else do_print = 0 ;
+
+	// If i want decoded data ala old evpReader I call "legacy" ;
+
+	dd = rdr->det("trg")->get("legacy") ;
+	if(dd) {
+		if(dd->iterate()) {
+			trg_t *trg_p = (trg_t *) dd->Void ;
+			
+			// print if you care...
+		}
+	}
+
+
+	// if you need the void black box of untouched trigger data:
+	dd = rdr->det("trg")->get("raw") ;
+	if(dd) {
+		if(dd->iterate()) {
+			u_char *trg_raw = dd->Byte;
+			found = 1 ;
+
+			
+			if(do_print) {	// I have no clue but let me print first few words...
+
+
+				// simple start of trig desc
+				struct simple_desc {
+					short len ;
+					char evt_desc ;
+					char ver ;
+				} *desc ;
+
+				desc = (simple_desc *) trg_raw ;
+
+
+				printf("Trigger: raw bank has %d bytes: ver 0x%02X, desc %d, len %d\n",dd->ncontent,desc->ver, desc->evt_desc, desc->len) ;
+
+				// dump first 10 ints...
+				u_int *i32 = (u_int *) trg_raw ;
+				for(int i=0;i<10;i++) {
+					printf("Trigger: word %d: 0x%08X\n",i,i32[i]) ;
+				}
+			}
+		}
+	}
+
+	return found ;
+}
+
 
 static int tpx_doer(daqReader *rdr, char  *do_print)
 {
@@ -164,31 +220,46 @@ static int tpx_doer(daqReader *rdr, char  *do_print)
 	// it is better, more memory efficient, to call stuff sector by sector
 	for(int s=1;s<=24;s++) {
 		/// TPX legacy not done yet!
-		dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t! but not done YET!
-		if(dd) found = 1 ;
+		//dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t! but not done YET!
+		//if(dd) found = 1 ;
 
+		int pixel_count[46] ;	// as an example we'll count pixels per row
+		memset(pixel_count,0,sizeof(pixel_count)) ;
+		int sec_found = 0 ;
 
 		dd = rdr->det("tpx")->get("adc",s) ;
 		if(dd) 	{
-			found = 1 ;
-	
+
 			while(dd->iterate()) {
+				found = 1 ;
+				sec_found = 1 ;
 				if(do_print) {
 					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
 				}
 
+				pixel_count[dd->row] += dd->ncontent ;
+
 				for(u_int i=0;i<dd->ncontent;i++) {
 					if(do_print) {
-
 						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
 					}
 				}
 			}
+		
+
+			if(sec_found && do_print) {
+				for(int row=0;row<=45;row++) {
+					printf("+sector %2d, row %2d: pixels %d\n",s,row,pixel_count[row]) ;
+				}
+			}
 		}
+
+		found = sec_found ;
 
 		dd = rdr->det("tpx")->get("cld",s) ;
 		if(dd) 	found = 1 ;
 	
+		// will only exist in token 0 of a pedestal run!
 		dd = rdr->det("tpx")->get("pedrms",s) ;
 		if(dd) found = 1 ;
 
