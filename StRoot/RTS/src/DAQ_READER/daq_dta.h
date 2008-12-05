@@ -140,7 +140,7 @@ public:
 	int iterate() ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.3 2008/11/13 00:18:45 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.4 2008/12/05 23:02:56 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
@@ -173,6 +173,8 @@ public:
 		// TPC/TPX gain
 		daq_det_gain *gain ;
 		
+
+		/* commented: to be deleted
 		// older EVP_READER structures...
 		struct svt_t *svt ;
 		struct trg_t *trg ;
@@ -191,7 +193,9 @@ public:
 		unsigned short (*btow_pre)[4] ;
 
 		unsigned short (*bsmd)[4800] ;		// X 12 i.e. bsmd[12][4800]
-		unsigned char *bsmd_cap ;		
+		unsigned char *bsmd_cap ;
+
+		*/
 	} ;
 
 	
