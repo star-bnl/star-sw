@@ -57,15 +57,15 @@ struct trg_t {
         u_int   QQTdata[1600];
 } ;
 
-extern int trg_reader(char *datap, struct trg_t *trg, u_int driver) ;
-
 
 
 class daq_trg : public daq_det {
 private:
 	class daq_dta *handle_legacy() ;
+	class daq_dta *handle_raw() ;
 
 	class daq_dta *legacy ;	// "legacy" bank
+	class daq_dta *raw ;	// full content of Trigger's banks, any version...
 
 	static const char *help_string ;
 protected:
