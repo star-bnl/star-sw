@@ -17,9 +17,9 @@ int _NAME2_(xxx,Reader)(char *m)  {  \
   memcpy(&_NAME1_(xxx),dd->Void,dd->ncontent); \
   return dd->ncontent; }
 
-#define DAQ_LEGACY_DECL(xxx)               \
-extern struct  _NAME1_(xxx)_t _NAME1_(xxx);\
-extern int   _NAME1_(xxx)Reader(char *mem)
+#define DAQ_LEGACY_DECL(xxx)                \
+extern struct  _NAME2_(xxx,_t) _NAME1_(xxx);\
+extern int   _NAME2_(xxx,Reader)(char *mem)
 struct DATAP;
 struct rccnf ;
 struct gbPayload ;

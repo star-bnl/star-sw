@@ -6,7 +6,7 @@
 #  define ANSICPP
 #endif
 
-#ifndef _NAME1_ 
+#ifndef _NAME1_
 #ifdef ANSICPP
     /* symbol concatenation operator */
 #   define _NAME1_(name) name
