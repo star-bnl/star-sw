@@ -28,6 +28,8 @@ public:
 static daq_det_trg_factory trg_factory ;
 
 
+extern int trg_reader(char *m, struct trg_t *trg, u_int driver) ;
+extern char *trg_find_raw(char *m, int *bytes); 
 
 daq_trg::daq_trg(daqReader *rts_caller) : daq_det(rts_caller)
 {
@@ -42,6 +44,7 @@ daq_trg::daq_trg(daqReader *rts_caller) : daq_det(rts_caller)
 	if(caller) caller->insert(this, rts_id) ;
 
 	legacy = new daq_dta ;
+	raw = new daq_dta ;
 
 	LOG(DBG,"%s: constructor: caller %p",name,caller) ;
 }
@@ -51,6 +54,7 @@ daq_trg::~daq_trg()
 	LOG(DBG,"%s: destructor",name) ;
 
 	delete legacy ;
+	delete raw ;
 
 	return ;
 }
@@ -63,12 +67,17 @@ daq_dta *daq_trg::get(const char *bank, int c1, int c2, int c3, void *p1, void *
 
 	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *
 
-	if(strcasecmp(bank,"legacy") != 0) {
+	if(strcasecmp(bank,"legacy") == 0) {
+		return handle_legacy() ;
+	}
+	else if(strcasecmp(bank,"raw") == 0) {
+		return handle_raw() ;
+	}
+	else {
 		LOG(ERR,"%s: unknown bank %s",name,bank) ;
-		return 0 ;
 	}
 
-	return handle_legacy() ;
+	return 0 ;
 
 }
 
@@ -88,4 +97,35 @@ daq_dta *daq_trg::handle_legacy()
 	legacy->rewind() ;
 
 	return legacy ;
+}
+
+daq_dta *daq_trg::handle_raw()
+{
+	if(present & DET_PRESENT_DATAP) {	// old DATAP based
+		int bytes = 0 ;
+		char *ptr = trg_find_raw(caller->mem, &bytes) ;
+
+		LOG(NOTE,"%s: raw from DATAP: %d bytes",bytes) ;
+
+		if((ptr == 0) || (bytes == 0)) return 0 ;
+
+
+
+		raw->create(bytes,"trg_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+
+		char *where = (char *) raw->request(bytes) ;
+		memcpy(where, ptr, bytes) ;
+		
+		raw->finalize(bytes,0,0,0) ;
+
+	}
+	else if(present & DET_PRESENT_SFS) {	// new SFS based
+		LOG(CAUTION,"SFS Trigger banks not coded yet!") ;
+		return 0 ;
+	}
+	else return 0 ;
+
+
+	raw->rewind() ;
+	return raw ;
 }

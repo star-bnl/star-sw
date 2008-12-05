@@ -19,6 +19,70 @@ extern int trgReader30(char *trgd, struct trg_t *trg);
 extern int trgReader32(char *trgd, struct trg_t *trg);     // called by trgReader10   2007 updates....
 extern int trgReader10(char *trgd, struct trg_t *trg);
 
+// navigates to the start of the raw trigger data i.e. DATAP->TRGP->TRGD->data
+
+char *trg_find_raw(char *m, int *bytes)
+{
+	struct TRGP *trgp ;
+	struct TRGD *trgd ;
+	struct DATAP *datap ;
+	int len, off ;
+	int swapit ;
+
+	*bytes = 0 ;
+
+	if(m == 0) return 0 ;
+	datap = (struct DATAP *) m ;
+
+	swapit = 0 ;
+	if(datap->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapit = 1 ;
+
+
+	len = qswap32(swapit, datap->det[TRG_ID].len);
+	if(len == 0) return 0 ;
+	len *= 4 ;
+
+	off = qswap32(swapit, datap->det[TRG_ID].off);
+	if(off == 0) return 0 ;
+
+	LOG(DBG,"Trg raw len %d (0x%x), off %d(0x%x)",len,len,off,off,0) ;
+
+	trgp = (struct TRGP *)((u_int *) m + off) ;
+	if(checkBank(trgp->bh.bank_type,"TRGP") < 0) {	// wrong bank!
+		return 0 ;				
+	}
+
+	swapit = 0 ;
+	if(trgp->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapit = 1 ;
+
+
+	if(trgp->trgData.len == 0) return 0 ;	// no raw data but so far OK, I guess
+	if(trgp->trgData.off == 0) return 0 ;
+
+	off = qswap32(swapit, trgp->trgData.off);
+	
+	trgd = (struct TRGD *) ((u_int *)trgp + off) ;
+
+
+	swapit = 0 ;
+	if(trgd->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapit = 1;
+	
+	// check misc. things
+	if(checkBank(trgd->bh.bank_type,"TRGD") < 0) {
+	  return 0 ;
+	}
+	
+	len = qswap32(swapit, trgd->bh.length) ;
+
+	len -= 10 ;	// skip the DAQ bank header ;
+
+	*bytes = len*4 ;	// we want bytes
+
+	LOG(DBG,"Returning pointer to raw trigger data of %d bytes", *bytes) ;
+
+	return (char *) &(trgd->desc) ;	// points to the start of trigger descriptor
+
+}	
 
 // read the Trigger RAW data
 int trg_reader(char *m, struct trg_t *trg, u_int driver)
