@@ -791,7 +791,7 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
 
   double xg = node->x_g();
   double yg = node->y_g();
-  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
+//VP??  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
 
 }
 //______________________________________________________________________________
