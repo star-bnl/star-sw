@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.176 2008/12/08 19:28:29 didenko Exp $
+* $Id: geometry.g,v 1.177 2008/12/08 23:02:20 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.177  2008/12/08 23:02:20  perev
+* C++ style comment removed
+*
 * Revision 1.176  2008/12/08 19:28:29  didenko
 * fixed typo
 *
@@ -2827,7 +2830,6 @@ If LL>1
 * NEW CONFIG!
                      tofX0= 0.00;
                      tofZ0=-0.50;
-                     BtofConfig=6;
 
 * Full barrel in 2007
                   "CALB" 
