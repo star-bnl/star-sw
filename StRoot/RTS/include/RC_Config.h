@@ -213,8 +213,14 @@ struct TwCondition
 struct PwCondition
 {
   UINT32 used;       // set to zero for invalid record  
-  UINT32 onbits;
-  UINT32 offbits;
+  union {
+    UINT32 onbits;
+    UINT32 onbits_ex[4];
+  };
+  union {
+    UINT32 offbits;
+    UINT32 offbits_ex[4];
+  };
 };
 
 struct AwCondition
