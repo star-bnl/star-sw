@@ -607,7 +607,7 @@ static  const double ref1a  = 110.*degToRad;
        if (shapeCode >= kCylindrical) {
 	 OpenAngle = ((StiCylindricalShape *) detector->getShape())->getOpeningAngle();
        } else {
-	 if (radius <= 50 && radius>4.2)  OpenAngle = ref1a;
+	 if (radius <= 50 )  OpenAngle = ref1a;
        }
        diff = projAngle-angle;
        if (diff >  M_PI) diff -= 2*M_PI;
