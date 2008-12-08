@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.175 2008/12/05 23:46:25 perev Exp $
+* $Id: geometry.g,v 1.176 2008/12/08 19:28:29 didenko Exp $
 * $Log: geometry.g,v $
+* Revision 1.176  2008/12/08 19:28:29  didenko
+* fixed typo
+*
 * Revision 1.175  2008/12/05 23:46:25  perev
 * y2008 bTofConfig=6 now(jan)
 *
@@ -2824,7 +2827,7 @@ If LL>1
 * NEW CONFIG!
                      tofX0= 0.00;
                      tofZ0=-0.50;
-                     BtofConfig=6;//jan request
+                     BtofConfig=6;
 
 * Full barrel in 2007
                   "CALB" 
