@@ -275,7 +275,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       $CXXFLAGS.= " " . $env1->{Packages}->{QT}->{FLAGS};
       #	    $LIBS .= " " . $env1->{Packages}->{QT}->{LIBS};
     }
-  } elsif ( $pkg =~ m/^St.*Db/ or $pkg =~ m/^StStarLogger/) {
+  } elsif ( $pkg =~ m/^St.*Db/ or $pkg =~ m/^StStarLogger/ or $pkg =~ m/^StUCMApi/) {
     $CPPPATH .= $main::PATH_SEPARATOR .  $env1->{Packages}->{MYSQL}->{INCDIR};
     if ($pkg eq 'StDbLib') {
       $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{XML}->{INCDIR};
@@ -483,6 +483,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $EXTRA_CPPFLAGS .= " -DDEBUGMESSAGE\\\(x\\\)=\"\"  -DDEBUGMESSAGE1\\\(x\\\)=\"\"  -DDEBUGMESSAGE2\\\(x\\\)=\"\"  -DDEBUGMESSAGE3\\\(x\\\)=\"\"  -DFORCEDDEBUGMESSAGE\\\(x\\\)=\"\"";
   }
   #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
+  if ($pkg =~ /^StUCMApi$/ or $pkg =~ /^StStarLogger$/) {
+    # $EXTRA_CPPFLAGS .=" -D_UCMLOGGER_";
+    $CPPPATH .= $main::PATH_SEPARATOR . "StRoot/StUCMApi/data/base"
+              . $main::PATH_SEPARATOR . "StRoot/StUCMApi"
+              . $main::PATH_SEPARATOR . "StRoot/StUCMApi/data"
+              . $main::PATH_SEPARATOR . "StRoot/StUCMApi/data/modules";
+  }
   if ($pkg =~ /^StStarLogger$/) {
     $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{Logger}->{INCDIR};
     $LIBPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{Logger}->{LIBDIR};
