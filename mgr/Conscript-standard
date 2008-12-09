@@ -484,7 +484,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   }
   #print "_+_+_+_+_+ $CPPPATH $CXXFLAGS $LIBS $CPPPATH $LIBPATH _+_+_+_+_+\n";
   if ($pkg =~ /^StUCMApi$/ or $pkg =~ /^StStarLogger$/) {
-    # $EXTRA_CPPFLAGS .=" -D_UCMLOGGER_";
+    $EXTRA_CPPFLAGS .=" -D_UCMLOGGER_";
     $CPPPATH .= $main::PATH_SEPARATOR . "StRoot/StUCMApi/data/base"
               . $main::PATH_SEPARATOR . "StRoot/StUCMApi"
               . $main::PATH_SEPARATOR . "StRoot/StUCMApi/data"
