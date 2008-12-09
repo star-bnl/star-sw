@@ -4,6 +4,7 @@
 #include <rtsLog.h>
 #include <rtsSystems.h>
 
+#include <SFS/sfs_index.h>
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
@@ -85,6 +86,11 @@ daq_dta *daq_trg::get(const char *bank, int c1, int c2, int c3, void *p1, void *
 daq_dta *daq_trg::handle_legacy()
 {
 
+	if(!(present & DET_PRESENT_DATAP)) {
+		LOG(WARN,"%s: can't have legacy without DATAP, yet...",name) ;
+		return 0 ;
+	}
+
 	// I need one object of trg_t type but let the create decide on the necessary size
 	legacy->create(1,"trg_t",rts_id,DAQ_DTA_STRUCT(trg_t)) ;
 	
@@ -101,14 +107,22 @@ daq_dta *daq_trg::handle_legacy()
 
 daq_dta *daq_trg::handle_raw()
 {
+	int err = 0 ;
+	int bytes = 0 ;
+	char *ptr = 0 ;
+	char str[256] ;
+	char *full_name ;
+	int ret ;
+
 	if(present & DET_PRESENT_DATAP) {	// old DATAP based
-		int bytes = 0 ;
-		char *ptr = trg_find_raw(caller->mem, &bytes) ;
+		ptr = trg_find_raw(caller->mem, &bytes) ;
 
-		LOG(NOTE,"%s: raw from DATAP: %d bytes",bytes) ;
+		LOG(DBG,"%s: raw from DATAP: %d bytes",name,bytes) ;
 
-		if((ptr == 0) || (bytes == 0)) return 0 ;
-
+		if((ptr == 0) || (bytes == 0)) {
+			err = 1 ;
+			goto ret_error ;
+		}
 
 
 		raw->create(bytes,"trg_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
@@ -116,16 +130,45 @@ daq_dta *daq_trg::handle_raw()
 		char *where = (char *) raw->request(bytes) ;
 		memcpy(where, ptr, bytes) ;
 		
-		raw->finalize(bytes,0,0,0) ;
+
 
 	}
-	else if(present & DET_PRESENT_SFS) {	// new SFS based
-		LOG(CAUTION,"SFS Trigger banks not coded yet!") ;
-		return 0 ;
+	else {	// new SFS based
+		sprintf(str,"%s",sfs_name) ;
+		full_name = caller->get_sfs_name(str) ;
+
+		if(!full_name) {
+			err = 2 ;
+			goto ret_error ;
+		}
+
+		bytes = caller->sfs->fileSize(full_name) ;
+		if(bytes <= 0) {
+			err = 3 ;
+			goto ret_error ;
+		}
+
+		LOG(DBG,"%s(%s): full_name %s, bytes %d",name,sfs_name,full_name,bytes) ;
+
+		raw->create(bytes,"trg_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+
+		ptr = (char *) raw->request(bytes) ;
+
+		ret = caller->sfs->read(full_name, ptr, bytes) ;
+		if(ret != bytes) {
+			err = 3 ;
+			goto ret_error ;
+		}
+
 	}
-	else return 0 ;
 
 
+	raw->finalize(bytes,0,0,0) ;
 	raw->rewind() ;
 	return raw ;
+
+	ret_error:;
+
+	LOG(ERR,"%s: handle_raw: error %d",name,err) ;
+	return 0 ;
 }
