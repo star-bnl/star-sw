@@ -10,6 +10,7 @@
 #define EMU_TASK	      3 /* any kind of emulator task */
 
 #define EVB_TASK             20
+#define EVB_STAT_TASK        25
 #define EVB_DATA_TASK(x)     (60+x)
 #define EVB_SUPERMON_TASK    65
 
