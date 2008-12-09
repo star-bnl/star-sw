@@ -8,10 +8,10 @@ int total=0;
 class StChain *chain=0; 
 char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
 
-void rdMu2TrigSimu(char *file="/star/institutions/mit/common/mudst/7136033/st_physics_7136033_raw_*.MuDst.root"){
+void rdMu2TrigSimu(char *file="/star/data47/reco/pp200/pythia6_410/9_11gev/cdf_a/y2006c/gheisha_on/p07ic/rcf1309_*_2000evts.MuDst.root"){
   
   int nevents = 200;
-  int flagMC=0;  // 0/1 == Using Real/Simulation data files 
+  int flagMC=1;  // 0/1 == Using Real/Simulation data files 
   int useEemc=1; // 0/1 == Exclude/Include EEMC in Trigger Decisions 
   int useBemc=1; // 0/1 == Exclude/Include BEMC in Trigger Decisions 
   int useL2=1;   // 0/1 == Exclude/Include L2 in Trigger Decisions 
@@ -38,6 +38,7 @@ void rdMu2TrigSimu(char *file="/star/institutions/mit/common/mudst/7136033/st_ph
     assert( !gSystem->Load("StMcEvent"));
     assert( !gSystem->Load("StMcEventMaker"));
     assert( !gSystem->Load("StEmcSimulatorMaker"));
+    assert( !gSystem->Load("StEEmcSimulatorMaker"));
     assert( !gSystem->Load("StEpcMaker"));
   }
   assert( !gSystem->Load("StTriggerUtilities"));
@@ -70,6 +71,7 @@ void rdMu2TrigSimu(char *file="/star/institutions/mit/common/mudst/7136033/st_ph
     dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
   else // only Barrel is uploaded, is faster 
     dbMk  = new St_db_Maker("Calibrations","MySQL:Calibrations_emc");
+
     
   //If MC then must set database time and date
   //If Endcap fast simu is used tower gains in DB do not matter,JB
@@ -81,6 +83,7 @@ void rdMu2TrigSimu(char *file="/star/institutions/mit/common/mudst/7136033/st_ph
   //Endcap DB
   if(useEemc || useL2) new StEEmcDbMaker("eemcDb");
   
+
   //Get BEMC adc values
   if (flagMC && useBemc) {
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
@@ -94,6 +97,14 @@ void rdMu2TrigSimu(char *file="/star/institutions/mit/common/mudst/7136033/st_ph
     if (bemcConfig == 1) {
         bemcAdc->setCheckStatus(kBarrelEmcTowerId,false);
     }
+  }
+
+  //must use slow simulator to get pedestals correct for L2
+  if (flagMC==1 && useEemc){
+    StEEmcSlowMaker *slowSim = new StEEmcSlowMaker("slowSim");
+    slowSim->setSamplingFraction(0.0384); // effectively scales all Tower energies with a factor of 1.3 (added by: Ilya Selyuzhenkov; April 11, 2008)
+    slowSim->setAddPed(true);
+    slowSim->setSmearPed(true);
   }
  
   //Get TriggerMaker
