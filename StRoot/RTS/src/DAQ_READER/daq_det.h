@@ -23,7 +23,7 @@
 
 #define DET_PRESENT_SFS		(1<<0)
 #define DET_PRESENT_DATAP	(1<<1)
-
+#define DET_PRESENT_TRG		(1<<2)
 
 // forward declarations
 class daq_dta ;
@@ -123,7 +123,7 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.4 2008/12/05 19:39:40 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.5 2008/12/09 09:58:49 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
