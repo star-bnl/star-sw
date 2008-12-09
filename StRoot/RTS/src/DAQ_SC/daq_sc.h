@@ -19,8 +19,10 @@ struct sc_t {
 class daq_sc : public daq_det {
 private:
 	class daq_dta *handle_legacy() ;
+	class daq_dta *handle_raw() ;
 
 	class daq_dta *legacy ;	// "legacy" bank
+	class daq_dta *raw ;
 
 	static const char *help_string ;
 protected:
