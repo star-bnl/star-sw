@@ -156,7 +156,7 @@ struct TcdSetup
 #define L1_DSM_OBJECT    1
 #define BC1_DSM_OBJECT   2
 #define MXQ_QT_OBJECT    3
-#define TOF_DSM_OBJECT   4
+#define MIX_DSM_OBJECT   4
 #define BCW_DSM_OBJECT   5
 #define BCE_DSM_OBJECT   6
 #define FEQ_QT_OBJECT    7
