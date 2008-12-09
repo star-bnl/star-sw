@@ -299,7 +299,7 @@ so we keep it here for source compatibility
 #define TRG_TCD_INSTANCE     4
 #define TRG_RCC_INSTANCE     5
 #define TRG_CTB_INSTANCE     6
-#define TRG_TOF_INSTANCE     6
+#define TRG_MIX_INSTANCE     6
 // #define TRG_EEC_INSTANCE     7    jml Aug 21,03
 #define TRG_SCALER48_INSTANCE 7
 //#define TRG_MIX_INSTANCE     8     jml Nov 20, 2008
@@ -451,7 +451,7 @@ so we keep it here for source compatibility
 #define TRG_TCD_NODE        ((TRG_SYSTEM<<12) | TRG_TCD_INSTANCE)
 #define TRG_RCC_NODE        ((TRG_SYSTEM<<12) | TRG_RCC_INSTANCE)
 #define TRG_CTB_NODE        ((TRG_SYSTEM<<12) | TRG_CTB_INSTANCE)
-#define TRG_TOF_NODE       ((TRG_SYSTEM<<12) | TRG_TOF_INSTANCE)
+#define TRG_MIX_NODE       ((TRG_SYSTEM<<12) | TRG_MIX_INSTANCE)
 #define TRG_L1_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L1_SUBSYS<<8) | (x))
 #define TRG_L2_NODES(x)     ((TRG_SYSTEM<<12) | (TRG_L2_SUBSYS<<8) | (x))
 // #define TRG_MIX_NODE	((TRG_SYSTEM<<12) | TRG_MIX_INSTANCE)     jml 
