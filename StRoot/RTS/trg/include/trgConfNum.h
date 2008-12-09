@@ -12,7 +12,7 @@
 #define   L1_CONF_NUM       1
 #define  BC1_CONF_NUM       2
 #define  MXQ_CONF_NUM       3
-#define  TOF_CONF_NUM       4
+#define  MIX_CONF_NUM       4
 #define  BCW_CONF_NUM       5
 #define  BCE_CONF_NUM       6
 #define  FEQ_CONF_NUM       7
