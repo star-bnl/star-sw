@@ -146,20 +146,20 @@ int daq_det::Make()
 	present = 0 ;	// assume not...
 	
 
-
-	if(presence()) {
+	if(presence()) {	// this is SFS presence...
 		present |= DET_PRESENT_SFS ;	// in sfs: 1
+		LOG(NOTE,"%s(SFS %s): present via SFS",name,sfs_name) ;
 	}
 	else if(legacyDetp(rts_id, caller->mem)) {
 		present |= DET_PRESENT_DATAP ;	// in datap: 2
+		LOG(NOTE,"%s(SFS %s): present via DATAP",name,sfs_name) ;
 	}
 
 	if(present) {
-		evt_num++ ;
-		LOG(NOTE,"%s: %d: has DATAP: %s; has SFS(%s): %s",name,evt_num,(present&1)?"YES":"NO",sfs_name,(present&2)?"YES":"NO") ;
+		evt_num++ ;	// nah, this is not really event number but let it stay...
 	}
 	else {
-		LOG(NOTE, "%s: not found",name) ;
+		LOG(DBG, "%s: not found",name) ;
 	}
 
 	return present ;
@@ -168,8 +168,10 @@ int daq_det::Make()
 int daq_det::Init() 
 {
 	present = 0 ;
+	evt_num = 0 ;
+	run_num = 0 ;
 
-	LOG(DBG,"Init: %s [%d]",name,rts_id) ;
+	LOG(DBG,"Init: %s[%d], sfs_name %s",name,rts_id,sfs_name) ;
 
 	return 0 ;
 }
@@ -199,7 +201,9 @@ void daq_det::help() const
 
 }
 
-
+/*
+	This checks SFS presence!
+*/
 int daq_det::presence() 
 { 
 
@@ -215,9 +219,9 @@ int daq_det::presence()
 	pres = 1 ;
 	goto ret_here ;
 #else
-	if(caller->sfs == 0) goto ret_here ;
+	if(caller->sfs == 0) goto ret_here ;	// no sfs?
 
-	if(caller->sfs->opendirent((char *)sfs_name)) {
+	if(caller->sfs->opendirent((char *)sfs_name)) {	// gotcha!
 		pres = 1 ;
 	}
 	else {
