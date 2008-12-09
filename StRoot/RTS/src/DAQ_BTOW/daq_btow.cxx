@@ -77,28 +77,19 @@ int daq_btow::Make()
 	LOG(DBG,"%s: Make()",name) ;
 
 	if(presence()) {	// in SFS
-		present |= 2;
+		present |= DET_PRESENT_SFS;
+		LOG(NOTE,"%s: %d: has SFS(%s)",name,evt_num,sfs_name) ;
 	}
 	else if(legacyDetp(rts_id, caller->mem)) {	// directly in DATAP
-		present |= 1 ;
+		present |= DET_PRESENT_DATAP ;
+		LOG(NOTE,"%s: %d: has DATAP",name,evt_num) ;
 	}
 	else if(getEmcTrgData(caller->mem,1,&dummy)) {	// perhaps in the old TRG bank (FY08); BTOW has index 1!
-		present |= 4 ;
-	}
-
-	switch(present) {
-	case 1 :
-		LOG(NOTE,"%s: %d: has DATAP",name,evt_num) ;
-		break ;
-	case 2 :
-		LOG(NOTE,"%s: %d: has SFS(%s)",name,evt_num,sfs_name) ;
-		break ;
-	case 4 :
+		present |= DET_PRESENT_TRG ;
 		LOG(NOTE,"%s: %d: has DATAP within Trigger",name,present) ;
-		break ;
-	default:
-		LOG(NOTE,"%s: not present",name) ;
-		break ;
+	}
+	else {
+		LOG(DBG,"%s: not present",name) ;
 	}
 
 
