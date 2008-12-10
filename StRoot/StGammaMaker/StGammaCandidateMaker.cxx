@@ -28,6 +28,8 @@ StGammaCandidateMaker::StGammaCandidateMaker(const char *name): StMaker(name)
     
     mStrictBemcStatus = true;
     
+    mCompressLevel = 2;
+
     mMinimumEt = 0.0;
     mRadius = 0.7; 
     mSmdRange = 20.0;   
