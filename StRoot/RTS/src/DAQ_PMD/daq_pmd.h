@@ -2,6 +2,7 @@
 #define _DAQ_PMD_H_
 
 
+#include <stdio.h>
 #include <DAQ_READER/daq_det.h>
 
 #include <daqFormats.h>

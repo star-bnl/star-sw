@@ -1,7 +1,7 @@
 #ifndef _DAQ_L3_H_
 #define _DAQ_L3_H_
 
-
+#include <stdio.h>
 #include <DAQ_READER/daq_det.h>
 #include <daqFormats.h>
 

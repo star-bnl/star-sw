@@ -3,6 +3,7 @@
 
 
 #include <DAQ_READER/daq_det.h>
+#include <stdio.h>
 
 
 //BARREL TOWER constants

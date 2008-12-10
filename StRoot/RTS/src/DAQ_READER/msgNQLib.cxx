@@ -18,7 +18,7 @@
 #include <rtsLog.h>
 
 
-#include <msgNQLib.h>
+#include "msgNQLib.h"
 
 
 

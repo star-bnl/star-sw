@@ -1,10 +1,10 @@
 #include <string.h>
 #include <sys/types.h>
 #include <assert.h>
-#include "RTS/src/DAQ_READER/daqReader.h"
+#include "DAQ_READER/daqReader.h"
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_READER/daq_det.h>
-#include <tpcReader.h>
+#include "tpcReader.h"
 
 struct tpc_t tpc;
                           
