@@ -2,8 +2,8 @@
 #define _DAQ_FTP_H_
 
 
+#include <stdio.h>
 #include <DAQ_READER/daq_det.h>
-
 
 
 struct ftp_t {

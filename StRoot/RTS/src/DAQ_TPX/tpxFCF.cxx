@@ -17,8 +17,8 @@
 
 #include <TPC/rowlen.h>
 
-#include <tpxGain.h>
-#include <tpxFCF.h>
+#include "tpxGain.h"
+#include "tpxFCF.h"
 
 #include <DAQ_READER/daq_dta_structs.h>
 

@@ -1,6 +1,7 @@
 #ifndef _DAQ_RIC_H_
 #define _DAQ_RIC_H_
 
+#include <stdio.h>
 
 #include <DAQ_READER/daq_det.h>
 
