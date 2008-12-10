@@ -49,8 +49,8 @@ StMaker(name)
     // Instantiate the entire gamma family
     if(mSimu) 
     {
-        mPythiaMaker   = new StGammaPythiaEventMaker("mGammaPythiaMaker");
         mAsymMaker     = new StMCAsymMaker("mAsymMaker");
+        mPythiaMaker   = new StGammaPythiaEventMaker("mGammaPythiaMaker");
         mScheduleMaker = new StGammaScheduleMaker("mGammaScheduleMaker");
         mScheduleMaker->rearrange();
     }
