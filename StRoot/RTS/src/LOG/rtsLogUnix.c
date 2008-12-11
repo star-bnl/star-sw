@@ -109,8 +109,7 @@ int rtsLogUnix_v(const char *str, ...)
 
 	if((output_flag & RTS_LOG_NET) && (odesc<0)) {	/* set the socket up */
 		char *rts_host ;
-
-		int bufsize = 30*1500 ;
+		int bufsize ;
 
 //		if(port==0) port = RTS_LOG_PORT ;
 
@@ -138,7 +137,7 @@ int rtsLogUnix_v(const char *str, ...)
 			return -1 ;
 		}
 
-		bufsize = 128*1024 ;
+		bufsize = 8*1024*1024 ;
 		for(;;) {
 			ret = setsockopt(odesc,SOL_SOCKET,SO_SNDBUF,(char *)&bufsize,sizeof(bufsize)) ;
 			if(ret == 0) break ;
