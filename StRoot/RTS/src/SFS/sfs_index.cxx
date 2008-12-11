@@ -288,7 +288,7 @@ int SFS_ittr::next()
 
     int xxx = wfile->lseek(0,SEEK_CUR);
     buff[5] = 0;
-    LOG(DBG, "fileoffset=%d xxx=%d buff=%s",fileoffset,xxx,buff);
+    LOG(DBG, "fileoffset=%d xxx=%d buff=%s seek: %d",fileoffset,xxx,buff);
 
 
     if(memcmp(buff, "SFS V", 5) == 0) {
@@ -311,9 +311,17 @@ int SFS_ittr::next()
 	return 0;
       }
       
+      //LOG(DBG, "Seek: %d",wfile->lseek(0,SEEK_CUR));
+
       wfile->lseek(60, SEEK_CUR);
+
+      //LOG(DBG, "Seek2: %d",wfile->lseek(0,SEEK_CUR));
+
       fileoffset += 60;
       skipped_bytes += 60;
+      LOG(DBG, "Not a DATA LRHD  fileoffset=%d skipped_bytes=%d seek=%d",
+	  fileoffset,skipped_bytes,wfile->lseek(0,SEEK_CUR));
+
       continue;
     }
 

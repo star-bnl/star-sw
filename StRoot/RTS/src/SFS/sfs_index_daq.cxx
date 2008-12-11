@@ -152,7 +152,7 @@ int SFS_ittr::nextLRHD()
     LOG(ERR, "nextLRHD() not LRHD %c%c%c%c",
 	lrhd.lh.bank_type[0],lrhd.lh.bank_type[1],
 	lrhd.lh.bank_type[2],lrhd.lh.bank_type[3]);
-    wfile->lseek(-sizeof(lrhd), SEEK_CUR);  // put it back...
+    //wfile->lseek(-sizeof(lrhd), SEEK_CUR);  // put it back...
     return -1;
   }
 
@@ -160,7 +160,7 @@ int SFS_ittr::nextLRHD()
     LOG(DBG, "nextLRHD() not DATA %c%c%c%c",
 	lrhd.record_type[0],lrhd.record_type[1],
 	lrhd.record_type[2],lrhd.record_type[3]);
-    wfile->lseek(-sizeof(lrhd), SEEK_CUR);  // put it back...
+    //wfile->lseek(-sizeof(lrhd), SEEK_CUR);  // put it back...
     return -1;
   }
 
