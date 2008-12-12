@@ -126,7 +126,13 @@ else
 
 	IS_STROOT=
 endif
+
+# jml 12/08 : stupid event tracker is in wrong location,
+# need an override for base path
+
+ifndef RTS_DIR_PATH
 RTS_DIR_PATH=../../../../StRoot/RTS
+endif
 
 INCLUDES =  -I. -I.. -I$(RTS_DIR_PATH)/include -I$(RTS_DIR_PATH)/trg/include -I$(RTS_DIR_PATH)/src
 
