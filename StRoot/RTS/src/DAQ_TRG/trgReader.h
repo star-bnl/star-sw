@@ -3,3 +3,4 @@
 
 #include "daq_trg.h"
 DAQ_LEGACY_DECL(trg);
+#endif
