@@ -47,16 +47,23 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
 //     if(evp->seq == 235) break;
 //   }
     
+  LOG(DBG, "Reader from EVP Reader: evt=%d token=%d",rdr->seq,rdr->token);
+
   // Clear this event...
   resetEvent();
   nHits = 0;
 
-  //LOG("JEFF", "AA");
+  LOG(DBG, "Check magnetic field");
+
 
   if(bField == 1000) {  // try to read from file
     bField = defaultbField;       // use default
 
-    dd = rdr->det("sc")->get("legacy",0);
+
+    LOG(DBG, "About to crash... evt=%d token=%d",rdr->seq, rdr->token);
+
+    dd = rdr->det("sc")->get("legacy");
+    LOG(DBG, "dd=0x%x",dd);
     if(dd) {
       dd->iterate();
       sc_t *sc = (sc_t *)dd->Void;
@@ -64,7 +71,7 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
     }
   }       
 
-  //LOG("JEFF", "BB");
+
 
   if(fabs(bField) < .1) bField = .1;
 
@@ -98,7 +105,7 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
   ///////////////////////////////////
  
 
-  //LOG("JEFF", "CC");
+  LOG(DBG, "Reset tracker");
   tracker->reset();
  
   ///LOG("JEFF", "AAA");
@@ -122,13 +129,11 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
       }
     }
 
-    //LOG("JEFF", "CCC: %d",i);
-    //    LOG(NOTE, "Tpc reader...");
+    LOG(DBG, "READ TPC data for sector %d  (0x%x)",i+1,rdr);
     // Read the data....
     dd = rdr->det("tpx")->get("legacy",i+1);
-
-    //LOG("JEFF", "DDD: %d 0x%x",i,pTPC);
     if(dd) {
+      LOG(DBG, "There is tpx data...");
       dd->iterate();
       pTPC = (tpc_t *)dd->Void;
     }
@@ -146,7 +151,7 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
 
 
 	int cl_found = 0;
-	cl_found = tpc_class->fcfReader(i+1,0,0,pTPC);
+	cl_found = tpc_class->fcfReader(i+1,NULL,NULL,pTPC);
 
 
 	LOG(NOTE, "Found tpc data for sector %d... %d clusters found",i,cl_found);

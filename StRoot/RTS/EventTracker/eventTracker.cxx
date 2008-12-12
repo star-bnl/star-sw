@@ -132,11 +132,12 @@ int main(int argc, char *argv[])
   l3_t l3_legacy;
 
   rtsLogOutput(RTS_LOG_STDERR);
-  rtsLogLevel(NOTE);
-
-  parseArgs(argc, argv);
  
 
+  parseArgs(argc, argv);
+  
+  rtsLogLevel(DBG);
+ 
   // printf("sizeof tpc %d\n",sizeof(tpc));
  
   daqReader *rdr = new daqReader(g_fn);
@@ -211,6 +212,7 @@ int main(int argc, char *argv[])
  	//printf("No L3 banks in data file %d\n",ret);
       }
       else {
+	dd->iterate();
 	l3_t *pL3 = (l3_t *)dd->Void;
  	printf("This comes from the datafile L3 banks...------ len=%d\n",ret);
  	printL3Info(*pL3);
@@ -223,13 +225,11 @@ int main(int argc, char *argv[])
 
     // Now, track the event into a new buffer l3p (this was allocated above)
     //
-    //LOG("JEFF", "A");
     ret = evtTracker->trackEvent(rdr, mem, l3p, szL3_max);
     if(ret < 0) {
       printf("Error tracking event %d\n",rdr->seq);
       continue;
     }
-    //LOG("JEFF", "B");
 
     //    continue;
 
