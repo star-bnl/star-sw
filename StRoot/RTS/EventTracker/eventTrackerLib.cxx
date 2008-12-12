@@ -5,13 +5,14 @@
 #include <setjmp.h>
 #include <daqFormats.h>
 #include "l3CoordinateTransformer.h"
+#include <rts.h>
 #include "rtsLog.h"
 #include "FtfSl3.h"
-#include <evpReader.hh>
+#include <DAQ_READER/daqReader.h>
 #include "gl3Event.h"
 #include "eventTrackerLib.hh"
 
-int EventTracker::trackEvent(evpReader *evp, char *mem, L3_P *l3p, int max_size)
+int EventTracker::trackEvent(daqReader *rdr, char *mem, L3_P *l3p, int max_size)
 {
   DATAP *datap = (DATAP *)mem;
   // Build L3_p
@@ -20,9 +21,9 @@ int EventTracker::trackEvent(evpReader *evp, char *mem, L3_P *l3p, int max_size)
 
   // First do tracking...
   L3_GTD *gtd = (L3_GTD *)(buff + sizeof(L3_P));
-  ret = trackTPC(evp, mem, gtd, max_size - sizeof(L3_P));
+  ret = trackTPC(rdr, mem, gtd, max_size - sizeof(L3_P));
  
-  // Now build the L3_P bank...
+   // Now build the L3_P bank...
   memset(l3p, 0, sizeof(L3_P));  
 
   memcpy(l3p->bh.bank_type, CHAR_L3_P, 8);
@@ -54,10 +55,10 @@ int EventTracker::trackEvent(evpReader *evp, char *mem, L3_P *l3p, int max_size)
   return ret;
 }
 
-int EventTracker::trackTPC(evpReader *evp, char *mem, L3_GTD *gtd, int max_size)
+int EventTracker::trackTPC(daqReader *rdr, char *mem, L3_GTD *gtd, int max_size)
 {
   // bField != 1000 means use it, 1000 means take from file...
-  gl3->readFromEvpReader(evp, mem, defaultBField, bField, GL3_READ_TPC_TRACKS);
+  gl3->readFromEvpReader(rdr, mem, defaultBField, bField, GL3_READ_TPC_TRACKS);
   return gl3Event_to_GTD(gtd, max_size);
 }
 

@@ -87,8 +87,8 @@ public:
   // suggested max_size = 0x800000
   //
 
-  int trackEvent(evpReader *evp, char *mem, L3_P *l3p, int max_size);
-  int trackTPC(evpReader *evp, char *mem, L3_GTD *gtd, int max_size);
+  int trackEvent(daqReader *daq, char *mem, L3_P *l3p, int max_size);
+  int trackTPC(daqReader *daq, char *mem, L3_GTD *gtd, int max_size);
     
 #ifdef OBSOLETE
   int trackEvent(DATAP *datap, L3_P *l3p, int max_size);

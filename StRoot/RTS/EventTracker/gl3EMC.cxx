@@ -9,11 +9,14 @@
 #include <errno.h>
 #include <stdio.h>
 #include <math.h>
+#include <DAQ_READER/daq_dta.h>
 
 #include "daqFormats.h"
 #include "l3BankUtils.h"
 #include "l3Swap.h"
 #include <rtsLog.h>
+#include <DAQ_EMC/daq_emc.h>
+
 
 gl3EMC::gl3EMC(l3EmcCalibration *BarrelCalib, l3EmcCalibration *EndcapCalib)
 {
@@ -52,15 +55,19 @@ gl3EMC::~gl3EMC() {
 }
 
 
-int gl3EMC::readFromEvpReader(evpReader *evp, char *mem)
+int gl3EMC::readFromEvpReader(daqReader *rdr, char *mem)
 {
   int i,j;
-  int ret = emcReader(mem);
 
-  if(ret <= 0) {
+  daq_dta *dd  = rdr->det("emc_pseudo")->get("legacy");
+  
+  if(!dd) {
     LOG(NOTE, "No EMC data present...",0,0,0,0,0);
     return 0;
   }
+
+  dd->iterate();
+  emc_t *pEMC = (emc_t *)dd->Void;
 
   // First zero out whatever we have...
   for(i=0;i<nBarrelTowers;i++) {
@@ -88,19 +95,19 @@ int gl3EMC::readFromEvpReader(evpReader *evp, char *mem)
 
   // Read the btow, if its there...
   if(barrelCalib) {
-    if(emc.btow_in) { 
+    if(pEMC->btow_in) { 
       LOG(DBG, "Reading BTOW data",0,0,0,0,0);
       for(i=0;i<BTOW_MAXFEE*BTOW_DATSIZE;i++) {
 	
 	int daqid = i;                          // linearized
 	int id = barrelCalib->daqToId(daqid);   // emc uses different linearization
 	
-	if(emc.btow[i] != 0)
-	  LOG(DBG, "i=%d id=%d adc=%d",daqid,id,emc.btow[i]);
+	if(pEMC->btow[i] != 0)
+	  LOG(DBG, "i=%d id=%d adc=%d",daqid,id,pEMC->btow[i]);
 	
 	if(id >= nBarrelTowers) continue;
 	
-	barrelTower[id].setADC(emc.btow[i]);
+	barrelTower[id].setADC(pEMC->btow[i]);
 	barrelTower[id].setNTracks(0);
       }
     }
@@ -108,7 +115,7 @@ int gl3EMC::readFromEvpReader(evpReader *evp, char *mem)
 
   // Read the etow, if its there...
   if(endcapCalib) {
-    if(emc.etow_in) {
+    if(pEMC->etow_in) {
       LOG(DBG, "Reading etow data",0,0,0,0,0);
       for(i=0;i<ETOW_MAXFEE;i++) {
 	for(j=0;j<ETOW_DATSIZE;j++) {
@@ -118,10 +125,10 @@ int gl3EMC::readFromEvpReader(evpReader *evp, char *mem)
 
 	  if(id >= nEndcapTowers) continue;
 
-	  if(emc.etow[i][j] != 0)
-	    LOG(DBG, "etow: i=%d j=%d daqid=%d id=%d adc=%d",i,j,daqid,id, emc.etow[i][j]);
+	  if(pEMC->etow[i][j] != 0)
+	    LOG(DBG, "etow: i=%d j=%d daqid=%d id=%d adc=%d",i,j,daqid,id, pEMC->etow[i][j]);
 
-	  endcapTower[id].setADC(emc.etow[i][j]);
+	  endcapTower[id].setADC(pEMC->etow[i][j]);
 	  endcapTower[id].setNTracks(0);
 	}
       }

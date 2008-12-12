@@ -35,7 +35,7 @@
 #include "gl3Histo.h"
 
 #include "gl3EMC.h"
-#include <evpReader.hh>
+#include <DAQ_READER/daqReader.h>
 #include "sizes.h"
 
 #define GL3_READ_TPC_TRACKS   0x01
@@ -62,7 +62,7 @@ class gl3Event {
     // if bField is set != 1000 
     // then it overrides the value in the datafile
     //
-    int readFromEvpReader(evpReader *evp, 
+    int readFromEvpReader(daqReader *rdr, 
 			  char *mem, 
 			  float defaultbField=.5,
 			  float bField=1000,
@@ -97,9 +97,9 @@ class gl3Event {
     int getToken() { return trgData.token; };
     void setToken(int tk) {trgData.token = tk;};
 
-    unsigned int gl3Event::getBXingLo();
-    unsigned int gl3Event::getBXingHi();
-    unsigned long long gl3Event::getBXing();
+    unsigned int getBXingLo();
+    unsigned int getBXingHi();
+    unsigned long long getBXing();
 
     void setHitProcessing ( int hitPro ) { hitProcessing = hitPro; };
     void setVertexFinderMethod ( int _in )   { vertexFinder = _in; };
