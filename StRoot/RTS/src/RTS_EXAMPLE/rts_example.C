@@ -277,7 +277,6 @@ static int tpc_doer(daqReader *rdr, char  *do_print)
 	if(strcasestr(do_print,"tpc")) ;	// leave as is...
 	else do_print = 0 ;
 
-
 	// although it is possible to have all sectors of the TPC
 	// present in memory, it is better to do this sector-by-sector
 	// ala the old evpReader, due to the memory footprint
@@ -286,11 +285,13 @@ static int tpc_doer(daqReader *rdr, char  *do_print)
 		if(dd) {
 			
 			found++ ;	// mark as found...
+
+			dd->iterate();  // need to iterate even for legacy...
+       
 			tpc_t *tpc = (tpc_t *) dd->Void ;
 			
 			// one can rerun the afterburner as well with:
 			//daq_tpc *tpc_class = (daq_tpc *)rdr->det("tpc") ;
-
 
 			int cl_found = 0 ;
 			//cl_found = tpc_class->fcfReader(s,0,0,tpc) ;
