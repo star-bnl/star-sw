@@ -13,18 +13,28 @@
 #include "gl3Event.h"
 #include <rtsLog.h>
 #include "gl3Histo.h"
-#include <evpReader.hh>
+#include <DAQ_READER/daqReader.h>
 #include "FtfSl3.h"
+
+#include <DAQ_READER/daq_dta.h>
+#include <DAQ_TPC/daq_tpc.h>
+#include <DAQ_TPX/daq_tpx.h>
+#include <DAQ_SC/daq_sc.h>
+
+tpc_t *pTPC=NULL;
+
 //
 // evp should already contain the event that we want to read
 // 
 //
-int gl3Event::readFromEvpReader(evpReader *evp, 
+int gl3Event::readFromEvpReader(daqReader *rdr, 
 				char *mem, 
 				float defaultbField,
 				float bField,
 				int what)
 {
+  daq_dta *dd;
+
 //   // Read the file...
 //   char *mem;
 //   for(;;) {
@@ -41,15 +51,20 @@ int gl3Event::readFromEvpReader(evpReader *evp,
   resetEvent();
   nHits = 0;
 
+  //LOG("JEFF", "AA");
 
   if(bField == 1000) {  // try to read from file
     bField = defaultbField;       // use default
 
-    int ret = scReader(mem);
-    if(ret >= 0) {                // but try file first!
-      if(sc.valid) bField = sc.mag_field;
+    dd = rdr->det("sc")->get("legacy",0);
+    if(dd) {
+      dd->iterate();
+      sc_t *sc = (sc_t *)dd->Void;
+      if(sc->valid) bField = sc->mag_field;
     }
   }       
+
+  //LOG("JEFF", "BB");
 
   if(fabs(bField) < .1) bField = .1;
 
@@ -83,8 +98,11 @@ int gl3Event::readFromEvpReader(evpReader *evp,
   ///////////////////////////////////
  
 
+  //LOG("JEFF", "CC");
   tracker->reset();
  
+  ///LOG("JEFF", "AAA");
+
   // need temporary track memory...
   L3_SECTP *sectp = NULL;
 
@@ -92,6 +110,7 @@ int gl3Event::readFromEvpReader(evpReader *evp,
     sectp = (L3_SECTP *)malloc(szSECP_max);
   }
 
+  //LOG("JEFF", "BBB");
   int i;
   int ret;
   for(i=0;i<24;i++) {
@@ -103,24 +122,55 @@ int gl3Event::readFromEvpReader(evpReader *evp,
       }
     }
 
-
+    //LOG("JEFF", "CCC: %d",i);
     //    LOG(NOTE, "Tpc reader...");
     // Read the data....
-    ret = tpcReader(mem, i);
-    if(ret < 0) { 
-      LOG(WARN, "No data for sector %d",i+1,0,0,0,0);
+    dd = rdr->det("tpx")->get("legacy",i+1);
+
+    //LOG("JEFF", "DDD: %d 0x%x",i,pTPC);
+    if(dd) {
+      dd->iterate();
+      pTPC = (tpc_t *)dd->Void;
+    }
+    else {
+      LOG(NOTE, "No tpx data for sector %d check for TPC",i);
+  
+      dd = rdr->det("tpc")->get("legacy",i+1);
+      if(dd) {
+	dd->iterate();
+	pTPC = (tpc_t *)dd->Void;
+	//LOG("JEFF", "EEE: i=%d 0x%x",i,pTPC);
+	// afterburner...
+	daq_tpc *tpc_class = (daq_tpc *)rdr->det("tpc");
+	///LOG("JEFF", "EFEF 0x%x",tpc_class);
+
+
+	int cl_found = 0;
+	cl_found = tpc_class->fcfReader(i+1,0,0,pTPC);
+
+
+	LOG(NOTE, "Found tpc data for sector %d... %d clusters found",i,cl_found);
+      }
+      else {
+	pTPC = NULL;
+      }
+
+      //LOG("JEFF", "FFF");
+    }
+
+
+    
+    //LOG("JEFF", "DD");
+
+    if(!pTPC) {
+      LOG(WARN, "No data for TPC sector %d",i+1,0,0,0,0);
       continue;
     }
     
     //LOG(NOTE, "Tpc reader done");
-    if(!tpc.has_clusters) {
-      // Construct the clusters...
-      // no calibration info, so pretty junky...
-      //LOG("JEFF", "calling fcf reader", 0,0,0,0);
-      int ncl_recount = fcfReader(i);
-      if (ncl_recount) {
-      //LOG("JEFF", "fcf[%d] has %d clusters", i, ncl_recount);
-      }
+    if(!pTPC->has_clusters) {
+      LOG(WARN, "TPC sector %d has no clusters",i);
+      continue;
     }
 
     // read in clusters...
@@ -131,7 +181,7 @@ int gl3Event::readFromEvpReader(evpReader *evp,
 
       int nnn=0;
       for(int i=0;i<45;i++) {
-	nnn += tpc.cl_counts[i];
+	nnn += pTPC->cl_counts[i];
       }
       //LOG(NOTE, "clusters done %d",nnn);
     }
@@ -167,7 +217,7 @@ int gl3Event::readFromEvpReader(evpReader *evp,
   // LOG(NOTE, "FINAL2");
 
   // If calibrations not loaded nothing should happen here...
-  emc.readFromEvpReader(evp, mem);
+  emc.readFromEvpReader(rdr, mem);
 
   delete tracker;
   return 0;
@@ -178,11 +228,11 @@ int gl3Event::readFromEvpReader(evpReader *evp,
 //
 void gl3Event::readClustersFromEvpReader(int sector)
 {
-  if(!tpc.has_clusters) return;
+  if(pTPC->has_clusters) return;
 
   for(int r=0;r<45;r++) {
-    for(int j=0;j<tpc.cl_counts[r];j++) {
-      tpc_cl *c = &tpc.cl[r][j];
+    for(int j=0;j<pTPC->cl_counts[r];j++) {
+      tpc_cl *c = &pTPC->cl[r][j];
 	
       gl3Hit *gl3c = &hit[nHits];
       nHits++;
