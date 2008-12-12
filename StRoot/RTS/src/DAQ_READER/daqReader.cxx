@@ -77,7 +77,7 @@ daqReader::daqReader(char *name)
   if(name == NULL) {	// EVP
     input_type = live;
     isevp = 1;
-    reconnect() ;	// will loop until success or Cntrl-C I guess...
+    if(reconnect() < 0) status = EVP_STAT_CRIT;	// will loop until success or Cntrl-C I guess...
     return ;	// that's it....
   }
 
@@ -1467,9 +1467,8 @@ int daqReader::reconnect(void)
 	  (u_int)strerror(errno),0,0) ;
       fprintf(stderr,"CRITICAL: Can't create connection to %s:%d [%s] - will retry...\n",EVP_HOSTNAME,EVP_PORT,
 	      strerror(errno)) ;
-      sleep(10) ;
-      retries++ ;
-      continue ;
+      sleep(1) ;
+      return -1;
     }
 
 
