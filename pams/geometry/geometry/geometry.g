@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.177 2008/12/08 23:02:20 perev Exp $
+* $Id: geometry.g,v 1.178 2008/12/12 20:45:13 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.178  2008/12/12 20:45:13  perev
+* upgr16/17 btofConfig=6
+*
 * Revision 1.177  2008/12/08 23:02:20  perev
 * C++ style comment removed
 *
@@ -3796,7 +3799,7 @@ If LL>1
 * NEW CONFIG!
                      tofX0= 0.00;
                      tofZ0=-0.50;
-                     BtofConfig=11;
+                     BtofConfig=6;
 
                   "CALB" 
                      ems=on
@@ -3859,7 +3862,7 @@ If LL>1
 
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
-                     BtofConfig=5;
+                     BtofConfig=6;
                   "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
