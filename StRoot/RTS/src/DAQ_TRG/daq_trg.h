@@ -1,7 +1,7 @@
 #ifndef _DAQ_TRG_H_
 #define _DAQ_TRG_H_
 
-
+#include <stdio.h>
 #include <DAQ_READER/daq_det.h>
 
 
