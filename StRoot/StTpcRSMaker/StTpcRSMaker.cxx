@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.10 2008/10/06 19:10:23 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.11 2008/12/12 21:41:41 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.11  2008/12/12 21:41:41  fisyak
+// Freeze
+//
 // Revision 1.10  2008/10/06 19:10:23  fisyak
 // BichlePPMIP3
 //
@@ -40,7 +43,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.10 2008/10/06 19:10:23 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.11 2008/12/12 21:41:41 fisyak Exp $";
 static  Gccuts_t *ccuts = 0;
 
 #define Laserino 170
@@ -874,7 +877,7 @@ Double_t StTpcRSMaker::Gatti(Double_t *x, Double_t *par) {
   Double_t w = par[0]; // w = width of pad       
   Double_t h = par[1]; // h = Anode-Cathode gap  
   Double_t K3  = par[3];
-  Double_t lambda = TMath::Abs(y/h);
+  Double_t lambda = y/h;
   Double_t K2 = TMath::PiOver2()*(1. - 0.5*TMath::Sqrt(K3));  
   //  Double_t K1 = K2*TMath::Sqrt(K3)/(2*TMath::ATan(TMath::Sqrt(K3)));
   Double_t sqK3 = TMath::Sqrt(K3);
@@ -1388,6 +1391,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.11  2008/12/12 21:41:41  fisyak
+// Freeze
+//
 // Revision 1.10  2008/10/06 19:10:23  fisyak
 // BichlePPMIP3
 //

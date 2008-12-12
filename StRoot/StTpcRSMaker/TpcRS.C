@@ -164,6 +164,9 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
   }
   if (FileIn == "") {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
+    geant->Do("debug on");
+    geant->Do("swit 1 2");
+    geant->Do("swit 2 2");
     //    geant->SetDebug(0);
     //            NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
@@ -199,23 +202,20 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
       geant->Do("gkine 1 170   1   1  0   0   0  0    180.00    180.00;");
       geant->Do("gprint kine");
       geant->Do("gvert 0  54   0");
-      geant->Do("debug on");
-      geant->Do("swit 1 2");
-      geant->Do("swit 2 2");
       geant->Do("mode TRAC prin 15");
     } else 
       if (Opt.Contains("pion",TString::kIgnoreCase)) 
-	geant->Do("gkine 100  8   0.4     1.  -1     1      0    6.28    -20.    20.;");
+	geant->Do("gkine 100  8   0.4     1.  -1     1      0    6.28    -50.    50.;");
       else if (Opt.Contains("1muon",TString::kIgnoreCase)) 
-	geant->Do("gkine   1  6   0.4     1.  -.1     .1      0    0     -20.    20.;");
+	geant->Do("gkine   1  6   0.4     1.  -.1     .1      0    0     -50.    50.;");
       else if (Opt.Contains("50muons1GeV",TString::kIgnoreCase)) 
-	geant->Do("gkine  50  6   1.     1.  -1     1      0    6.28    -20.    20.;");
+	geant->Do("gkine  50  6   1.     1.  -1     1      0    6.28    -50.    50.;");
       else if (Opt.Contains("50muons0.5GeV",TString::kIgnoreCase)) 
-	geant->Do("gkine  50  6  0.5  0.5  -1     1      0    6.28    -20.    20.;");
+	geant->Do("gkine  50  6  0.5  0.5  -1     1      0    6.28    -50.    50.;");
       else if (Opt.Contains("deuteron",TString::kIgnoreCase)) 
-	geant->Do("gkine 100 45   0.05  100.  -1     1      0    6.28    -20.    20.;");
+	geant->Do("gkine 100 45   0.05  100.  -1     1      0    6.28    -50.    50.;");
       else // proton
-	geant->Do("gkine 100 14   0.05   50.  -1     1      0    6.28    -20.    20.;");
+	geant->Do("gkine 100 14   0.05   50.  -1     1      0    6.28    -50.    50.;");
   }
   if (NEvents > 0)  chain->EventLoop(First,First+NEvents);
 }
