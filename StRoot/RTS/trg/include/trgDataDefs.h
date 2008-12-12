@@ -19,7 +19,7 @@
 *     Note:  PrePost data will only be available on local trigger disks and
 *     will not be present in event files.
 ******************************************************************************/
-#define FORMAT_VERSION        0x08111340      /* 13 Nov 2008; Version 4.0 Format: yymmddvv */
+#define FORMAT_VERSION        0x08121140      /* 11 Dec 2008; Version 4.0 Format: yymmddvv */
 #define MAX_TRG_BLK_SIZE          100000      /* Estimated at 100k bytes including pre/post */
 #define MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
@@ -86,28 +86,23 @@ typedef struct {
 } DataBlock;
 
 typedef struct {
-  char name[4];
+  char name[4];                               /* Contains BBC */
   int length;                                 /* Byte count of data that follows */
-  unsigned short     CPA[16];                 /* Contents of 2 CTB DSM Input Buffers (IB's) - coarse pixel array */
-  unsigned short     MTD[8];                  /* TAC values for MTD's MRPCs and overlapping CTB trays */
-  unsigned short     VPD[8];                  /* ADC & TAC values for VPD detectors*/
-  unsigned short     CTB[8];                  /* CTB ADC sums and topology for East & West combined */ 
-  unsigned short     lastDSM[8];              /* Contents of last DSM IB - results of all DSM trees */
-  unsigned short     VTX[8];                  /* Separate ZDC and BBC DSMs have been replaced with this one */
-  unsigned short     EMC[8];                  /* Contents of 1 EMC IB - results of separate BEMC and EEMC DSMs */
-  unsigned short     BCdata[16];              /* Contents of 2 Bunch Crossing DSMs IB's */       
-  unsigned short     specialTriggers[8];      /* Contents of 1 Special Trigger DSM - all the special trigger requests */
-  unsigned short     FPD[8];                  /* Contents of 1 FPD IB - we are installing this DSM this year but it */
-} L0DataBlk;
-
-typedef struct {
-  char name[4];
-  int length;                                 /* Byte count of data that follows */
-  unsigned char  BBC[96];                     /* increased from 80 to 96 for the addition of a DSM after layer 0 DSMs */
-  unsigned short BBClayer1[16];               /* this is the layer1 DSM that feeds the VTX DSM  */
+  unsigned short BBClayer1[16];               /* This is the layer1 DSM that feeds the VTX DSM */
+  unsigned short ZDClayer1[8];                /* This is the new layer1 ZDC DSM that also feeds the VTX DSM */
+  unsigned short VPDlayer1[8];                /* ADC & TAC values for VPD detectors from QT boards */
 } BBCBlock;
 
 typedef struct {
+  char name[4];                               /* Contains MIX */
+  int length;                                 /* Byte count of data that follows */
+  unsigned short FPDEastNSlayer1[8];          /* FPD east north/south layer 1  */  
+  char           MTD_P2Player1[16];           /* Data from MTD and PP2PP QT Boards */
+  unsigned short TOFlayer1[8];                /* This is TOF layer 1 formerly the course pixel array CPA */
+  unsigned short TOF[48];                     /* TOF data hit multiplicity */
+} MIXBlock;
+
+typedef struct  {
   char name[4];
   int length;                                 /* Byte count of data that follows */
   int dataLoss;                               /* Byte count of data truncated due to buffer limitations */
