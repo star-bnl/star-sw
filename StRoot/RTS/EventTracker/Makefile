@@ -48,6 +48,7 @@ BINS = eventTracker
 
 all: $(LIBS) $(BINS)
 
+libs: $(LIBS)
 
 libEventTracker.a: $(EVENT_TRACKER_OBJS) $(DAQREADER_OBJS)
 	$(RTS_AR)
