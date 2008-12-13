@@ -90,8 +90,8 @@ double        joinVtx(const double      *Y,const StiHitErrs  &B
                      ,const StiNodePars &X,const StiNodeErrs &A
 	             ,      StiNodePars *M=0,    StiNodeErrs *C=0);
 static int getHitErrors(const StiHit *hit,const StiNodePars *pars, StiHitErrs *hrr);
- Int_t  debug() const 				{return _debug;}
- void   setDebug(Int_t m) {_debug = m;}
+static Int_t  debug() 		{return _debug;}
+static void   setDebug(Int_t m) {_debug = m;}
 
 private:
 double mChi2Max;

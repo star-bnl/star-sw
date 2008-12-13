@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.h,v 1.7 2008/06/17 17:49:19 dongx Exp $
+ * $Id: StTofCalibMaker.h,v 1.8 2008/09/03 22:30:43 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.h,v $
+ * Revision 1.8  2008/09/03 22:30:43  dongx
+ * mTStart added, applicable for Run8
+ *
  * Revision 1.7  2008/06/17 17:49:19  dongx
  * Update for Run 8 - first release
  *
@@ -271,6 +274,7 @@ private:
     Double_t   mVPDVtxZ;          //! vertex z from VPD
     Double_t   mProjVtxZ;          //! vertex z from track projection, track cloest to beam line
     Double_t   mTDiff;            //! time difference between east and west
+    Double_t   mTStart;           //! start time
 
     Double_t   mPhaseOffset8;     //! phase difference between e/w in run 8
     StPhysicalHelixD* mBeamHelix;  //! beamline helix used for Run 8
@@ -282,7 +286,7 @@ private:
     Bool_t            mSlewingCorr;  //! switch for slewing correction since run 8
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.7 2008/06/17 17:49:19 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.8 2008/09/03 22:30:43 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofCalibMaker,5)
 };
