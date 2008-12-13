@@ -1,12 +1,10 @@
-// $Id: StjTrgWriter.cxx,v 1.3 2008/09/21 19:11:40 tai Exp $
+// $Id: StjTrgWriter.cxx,v 1.1 2008/08/11 04:48:31 tai Exp $
 #include "StjTrgWriter.h"
 
 #include "StjTrg.h"
 
 #include <TDirectory.h>
 #include <TTree.h>
-
-ClassImp(StjTrgWriter)
 
 void StjTrgWriter::Init()
 {
@@ -54,7 +52,7 @@ void StjTrgWriter::fillBranch_general()
 
   _soft = _trg->soft();
 
-  _passed = _trg->passed();
+  _passed = _trg->pass();
 
   _runNumber = _trg->runNumber();
 

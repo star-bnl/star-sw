@@ -1,7 +1,25 @@
-* $Id: geometry.g,v 1.172 2008/11/19 04:08:25 perev Exp $
+* $Id: geometry.g,v 1.178 2008/12/12 20:45:13 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.178  2008/12/12 20:45:13  perev
+* upgr16/17 btofConfig=6
+*
+* Revision 1.177  2008/12/08 23:02:20  perev
+* C++ style comment removed
+*
+* Revision 1.176  2008/12/08 19:28:29  didenko
+* fixed typo
+*
+* Revision 1.175  2008/12/05 23:46:25  perev
+* y2008 bTofConfig=6 now(jan)
+*
+* Revision 1.174  2008/12/01 23:45:10  perev
+* ubgr16 last vers BTOF
+*
+* Revision 1.173  2008/11/30 01:30:53  perev
+* modifs for extending alpha,theta,phi,ort commandas
+*
 * Revision 1.172  2008/11/19 04:08:25  perev
-* updates to the corrected(vp) starsim
+*  updates to the corrected(vp) starsim
 *
 * Revision 1.171  2008/10/13 03:21:35  perev
 * upgr17 added Wei(MingZhang)
@@ -2815,7 +2833,6 @@ If LL>1
 * NEW CONFIG!
                      tofX0= 0.00;
                      tofZ0=-0.50;
-                     BtofConfig=11;
 
 * Full barrel in 2007
                   "CALB" 
@@ -3776,12 +3793,18 @@ If LL>1
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
 
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     BtofConfig=5;
+* X.Dong
+                 "ctb: central trigger barrer             ";
+                     Itof=6 " call btofgeo6 ";
+* NEW CONFIG!
+                     tofX0= 0.00;
+                     tofZ0=-0.50;
+                     BtofConfig=6;
+
                   "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                     CalbConfig = 2
                   "ECAL"
                      ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
@@ -3839,7 +3862,7 @@ If LL>1
 
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
-                     BtofConfig=5;
+                     BtofConfig=6;
                   "CALB" 
                      ems=on
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
@@ -4488,8 +4511,8 @@ If LL>1
    If (LL>1 & VPDD) then
      call AgDETP new ('VPDD')
      call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
-     if(VpddConfig<7) call vpddgeo
-     if(VpddConfig=7) call vpddgeo2
+     if(VpddConfig <7) call vpddgeo
+     if(VpddConfig==7) call vpddgeo2
    endif
 
 ********************** BARREL CALORIMETER ************************

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.38 2008/11/07 20:42:06 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.39 2008/12/13 01:12:57 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.39  2008/12/13 01:12:57  caines
+ * Check that ladder index not out of range in translation routine
+ *
  * Revision 1.38  2008/11/07 20:42:06  caines
  * Fix some mistakes in new way of initializing variables. lifetime was missing
  *
@@ -591,6 +594,7 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
     int iladder;
     for( iladder = ladder-1; iladder <= ladder+1; iladder++){
       if( iladder==0) continue;
+      if( iladder > mConfig->getNumberOfLadders(barrel)) break;
       for( int iwaf = 1;  iwaf <= mConfig->getNumberOfWafers(barrel); iwaf++){
 	//wafId = 1000*layer+ 100*iwaf + iladder;
 	index = mSvtGeom->getWaferIndex(barrel, iladder, iwaf);
@@ -657,7 +661,7 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
 	  mtm->setZ(x.z());
 	  return kStOk;
 	}
-      }   
+      }  
     }
     //cout << " Coming out " << *pos << endl;
     return kStSkip;

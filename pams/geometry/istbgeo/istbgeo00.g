@@ -43,7 +43,7 @@ Module ISTBGEO00 is the SIMPLIFIED geometry of the Inner Silicon Tracker
       nLadder     =  24        ! Number of ladders in this layer
       nUnit       =  12        ! Number of sensors per ladder in this layer
       Radius      =  14.0      ! Radius centers of active silicon sensors
-      Tilt        =  90.0      ! Tilt angle of the ladders
+      Tilt        =  -90.0      ! Tilt angle of the ladders
       Gap         =  0.0000    ! Gaps between the sensors
    EndFill
 *--------------------------------------------------------
@@ -157,11 +157,11 @@ Block IBLM is the mother of the sensor assembly
 * --  Silicon Sensors
       Create   IBSS
       Position IBSS x =  0.0  _
-                    y =  Module_Thk/2.0-ISSS_ActiveThk/2.0  _
-                    z =  0.0
+                    y =  -1.0*Module_Thk/2.0+ISSS_ActiveThk/2.0  _
+                    z =  0.0 
       Create   IBSP
       Position IBSP x =  0.0  _
-                    y =  -1.0*Module_Thk/2.0+ISSS_PassiveThk/2.0  _
+                    y =  +1.0*Module_Thk/2.0-ISSS_PassiveThk/2.0  _
                     z =  0.0
 
 endblock
