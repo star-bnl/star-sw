@@ -57,6 +57,7 @@ daq_l3::~daq_l3()
 	
 daq_dta *daq_l3::get(const char *bank, int c1, int c2, int c3, void *p1, void *p2)
 {
+	Make() ;
 	if(!present) return 0 ;
 
 	if(strcmp(bank,"*")==0) bank = "legacy" ;	// set default, if called with *
