@@ -85,7 +85,7 @@ int tpc_reader(char *m, struct tpc_t *tpc, int sector, int flags)
 	tpc_cached->mode = 0 ;
 	tpc_cached->max_channels_sector = 512*5692 ;
 	tpc_cached->max_channels_all = tpc_cached->max_channels_sector * 24 ;
-
+	tpc_cached->channels_sector = 0 ;
 	tpc_cached->has_clusters = 0 ;
 
 	if(m == NULL) return 0 ;	// error
