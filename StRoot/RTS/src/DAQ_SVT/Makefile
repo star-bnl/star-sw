@@ -46,4 +46,12 @@ svt_reader.o: ../../../../StRoot/RTS/include/rts.h
 svt_reader.o: ../DAQ_READER/daq_det.h
 svt_reader.o: ../../../../StRoot/RTS/include/SVT/key_map.h
 svt_reader.o: daq_svt.h
+svtReader.o: ../DAQ_READER/daq_dta.h
+svtReader.o: ../../../../StRoot/RTS/include/rts.h
+svtReader.o: ../DAQ_READER/daq_dta_structs.h
+svtReader.o: ../DAQ_READER/daq_det.h
+svtReader.o: ./svtReader.h
+svtReader.o: daq_svt.h
 daq_svt.o: ../DAQ_READER/daq_det.h
+svtReader.o: daq_svt.h
+svtReader.o: ../DAQ_READER/daq_det.h
