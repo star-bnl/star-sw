@@ -83,7 +83,7 @@ public:
 
 	void calc() ;				// calculates gains and bad pads
 
-	void compare(char *fname) ;			// compares in memory image with a given file
+	void compare(char *fname, int mysec=0) ;			// compares in memory image with a given file
 	int summarize(char *fname, FILE *log_file=0) ;			// prints a summary of bad channels to stdout
 
 	void free_store() ;

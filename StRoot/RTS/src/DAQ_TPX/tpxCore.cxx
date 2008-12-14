@@ -373,10 +373,10 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 	u_int *next_altro ;
 	u_int *store = now ;
 	int log_yes ;
-
+	int was_log_yes ;
 
 	// I will log only if I'm told to
-	log_yes = a_struct->log_err ;
+	was_log_yes = a_struct->log_err ;
 
 	a_struct->err = 0 ;	// clear error flag
 
@@ -396,7 +396,7 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 		}
 		else {		// data is OK
 	
-			if(log_yes==0) {	// we lost something before, turn on WARN
+			if(was_log_yes && !log_yes) {	// we lost something before, turn on WARN
 				LOG(NOTE,"    ...but found A%03d:%02d %d words earlier",a_struct->id,a_struct->ch,store-now) ;
 	
 			}
