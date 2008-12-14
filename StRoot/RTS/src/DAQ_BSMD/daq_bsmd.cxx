@@ -67,8 +67,9 @@ daq_bsmd::~daq_bsmd()
 daq_dta *daq_bsmd::get(const char *bank, int sec, int row, int pad, void *p1, void *p2) 
 {
 	Make() ;
-	if(present == 0) return 0 ;
+	if(!present) return 0 ;
 
+	LOG(DBG,"got something") ;
 
 	if(strcasecmp(bank,"adc")==0) {
 		return handle_adc(row) ;
@@ -109,7 +110,7 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 
 	bytes = 0 ;
 
-	if(present & 1) {	// in datap!
+	if(present & DET_PRESENT_DATAP) {	// in datap!
 		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
 		//LOG(NOTE,"EMCP %p?",emcp) ;
 		if(bsmd_reader(emcp, &bsmd_d)==0) return 0 ;
@@ -119,6 +120,8 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 	for(int r=start_r;r<=stop_r;r++) {	
 		bytes += bsmd_d.bytes[r-1][1] ;
 	}
+
+	LOG(DBG,"rdo %d: bytes %d",rdo,bytes) ;
 
 	if(bytes==0) return 0 ;
 
@@ -183,17 +186,17 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 
 	bytes = 0 ;
 
-	if(present & 1) {	// in datap!
+	if(present & DET_PRESENT_DATAP) {	// in datap!
 		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
 
 		if(bsmd_reader(emcp, &bsmd_d)==0) return 0 ;
 	}
 	else return 0 ;	// SFS does not exist yet!
 
-//	LOG(NOTE,"BSMD: rdo %d: start %d, stop %d",rdo,start_r, stop_r) ;
+	//LOG(NOTE,"BSMD: rdo %d: start %d, stop %d",rdo,start_r, stop_r) ;
 
 	for(int r=start_r;r<=stop_r;r++) {	
-//		LOG(NOTE,"BSMD: adc_non_zs: fiber %d, bytes %d",r,bsmd_d.bytes[r-1][0]) ;
+		//LOG(NOTE,"BSMD: adc_non_zs: fiber %d, bytes %d",r,bsmd_d.bytes[r-1][0]) ;
 		bytes += bsmd_d.bytes[r-1][0] ;
 	}
 
