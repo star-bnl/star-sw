@@ -79,23 +79,23 @@ int daq_etow::Make()
 	LOG(DBG,"%s: Make()",name) ;
 
 	if(presence()) {	// in SFS
-		present |= 2;
+		present |= DET_PRESENT_SFS ;
 	}
 	else if(legacyDetp(rts_id, caller->mem)) {	// directly in DATAP
-		present |= 1 ;
+		present |= DET_PRESENT_DATAP ;
 	}
 	else if(getEmcTrgData(caller->mem,2,&dummy)) {	// perhaps in the old TRG bank (FY08); ETOW has index 1!
-		present |= 4 ;
+		present |= DET_PRESENT_TRG ;
 	}
 
 	switch(present) {
-	case 1 :
+	case DET_PRESENT_DATAP :
 		LOG(NOTE,"%s: %d: has DATAP",name,evt_num) ;
 		break ;
-	case 2 :
+	case DET_PRESENT_SFS :
 		LOG(NOTE,"%s: %d: has SFS(%s)",name,present,evt_num) ;
 		break ;
-	case 4 :
+	case DET_PRESENT_TRG :
 		LOG(NOTE,"%s: %d: has DATAP within Trigger",name,evt_num) ;
 		break ;
 	}
@@ -133,13 +133,13 @@ daq_dta *daq_etow::handle_raw()
 
 
 
-	if(present & 1) {	// datap...		
+	if(present & DET_PRESENT_DATAP) {	// datap...		
 		char *mem = (char *)legacyDetp(rts_id, caller->mem) ;
 		from = emc_single_reader(mem, &bytes, rts_id) ;	
 		if(from == 0) return 0 ;
 
 	}
-	else if(present & 4) {
+	else if(present & DET_PRESENT_TRG) {
 		from = getEmcTrgData(caller->mem,2,&bytes) ;	// etow is index "0"
 		if(from == 0) return 0 ;
 	}

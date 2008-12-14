@@ -113,7 +113,7 @@ daq_dta *daq_esmd::handle_raw()
 		LOG(DBG,"%s: present %d",name,present) ;
 	}
 
-	if(present & 1) {	// in datap!
+	if(present & DET_PRESENT_DATAP) {	// in datap!
 		char *mem = (char *)legacyDetp(rts_id, caller->mem) ;
 		from = emc_single_reader(mem, &bytes, rts_id) ;
 		if(from == 0) return 0 ;

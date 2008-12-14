@@ -85,11 +85,11 @@ daq_dta *daq_tof::get(const char *bank, int sec, int row, int pad, void *p1, voi
 
 
 	if(strcasecmp(bank,"raw")==0) {
-		if((present & 2)==0) return 0 ;		// no DDL
+		if((present & DET_PRESENT_SFS)==0) return 0 ;		// no DDL
 		return handle_raw(sec,row) ;		// actually sec, rdo; r1 is the number of bytes
 	}
 	else if(strcasecmp(bank,"legacy")==0) {
-//		if((present & 1)==0) return 0 ;	// no legacy
+//		if((present & DET_PRESENT_DATAP)==0) return 0 ;	// no legacy
 		return handle_legacy() ;
 	}
 	else {
@@ -112,7 +112,7 @@ daq_dta *daq_tof::handle_legacy()
 	
 	memset(tof_p->ddl_words,0,sizeof(tof_p->ddl_words)) ;	// zap it!
 	
-	if(present & 1) {	// datap 	
+	if(present & DET_PRESENT_DATAP) {	// datap 	
 		tof_reader(caller->mem, tof_p, m_Debug) ;
 	}
 	else {
