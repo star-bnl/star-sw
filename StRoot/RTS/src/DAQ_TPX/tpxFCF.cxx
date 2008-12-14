@@ -658,6 +658,13 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 					else if(unlikely((cur->t1 - old->t2) > 1)) {
 						// don't use the new guy ever again...
 
+						//if(cur->t1 < 15) {
+						//	cur->p2 = p+1 ;
+						//	cur->p1 = 200 ;
+						//	//LOG(INFO,"dump here %d:%d!",cur->t1,cur->t2) ;
+						//	dump(cur) ;
+						//}
+
 						cur++ ;
 						continue ;
 					}
@@ -849,6 +856,10 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 						if(merge==3) {
 							LOG(ERR,"Can;t be!") ;
 						}
+						// will dump for onepad
+						old->p2 = p ;
+						old->p1 = 201 ;
+						dump(old) ;
 					}
 					else {
 						// dump OLD!
@@ -911,6 +922,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	u_int p1, p2 ;
 	int div_fact ;
 
+#if 0
 	// integerize charge
 	if(cl->flags & FCF_IN_DOUBLE) ;
 	else {
@@ -918,12 +930,47 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 		LOG(ERR,"Not in double?") ;
 		return ;
 	}
+#endif
+
+	// first set of cuts
+	if(likely(do_cuts)) {
+		if(unlikely(fla & FCF_BROKEN_EDGE)) ;	// pass!
+		else if(fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE)) return ;	// kill clusters touching the edge or a dead pad
+	}
+
+//	if(fla & FCF_ONEPAD) {
+//		LOG(INFO,"onepad: flags 0x%X: charge %d: row %d: pads %d:%d, tb %d:%d",fla,cl->charge,cur_row,cl->p1,cl->p2,cl->t1,cl->t2) ;
+//	}
 
 	//LOG(DBG,"dump: row %d: %d %d %d %d %f 0x%X",cur_row,cl->p1,cl->p2,cl->t_min,cl->t_max,cl->f_charge,cl->flags) ;
 
 
+#if 0
 	// cuts go here
 	if(likely(do_cuts)) {
+
+		if(fla & FCF_BROKEN_EDGE) {	// always pass!
+			;
+		}
+		else if(fla & FCF_ONEPAD) return ;
+		//else if(fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE | FCF_ONEPAD)) return ;	// kill!
+		//else if(cl->tmin == 0) return ;		// kill if they touch timebin 0
+		else if((cl->t_max - cl->t_min) <= 2) return ;	// kill if the cluster length in time is small
+
+	}
+#endif
+	// we first calc the timebin so that we can skip any cuts for hits
+	// before the trigger -- MWPC studies...
+
+	dt = cl->f_t_ave / cl->f_charge ;
+
+	if((fla & FCF_ONEPAD) && (cl->t1 < 15)) {	// for any hit below the trigger, we pass -- for MWPC studies!
+		if((cl->t2 - cl->t1)<=1) return ;
+		if(cl->t2 > 30) return ;
+		//LOG(INFO,"dt %.1f: row %d: %d %d %d %d : %d %f 0x%X",dt,cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->charge,cl->f_charge,cl->flags) ;
+		return ;	// still
+	}
+	else if(likely(do_cuts)) {
 
 		if(fla & FCF_BROKEN_EDGE) {	// always pass!
 			;
@@ -941,7 +988,6 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	fla &= (~FCF_FALLING) ;
 
 	dp = cl->p_ave / cl->f_charge ;
-	dt = cl->f_t_ave / cl->f_charge ;
 
 
 	if(do_version == FCF_V_FY08) {

@@ -311,6 +311,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
 	int errors = 0 ;
+	const int MAX_ERRORS = 20 ;
 
 	t = tpx_get_start(rdobuff, bytes/4, &rdo, 0) ;
 
@@ -329,7 +330,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 		return ;
 	}
 
-	if(r[a.rdo].errs > 100) {
+	if(r[a.rdo].errs > MAX_ERRORS) {
 		a.log_err = 0 ;
 	}
 	else {
@@ -436,7 +437,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 
 	if(errors) {
 		r[a.rdo].errs++ ;
-		if(r[a.rdo].errs == 100) {	
+		if(r[a.rdo].errs == MAX_ERRORS) {	
 			LOG(ERR,"RDO %d has %d errors -- stopping logging",a.rdo+1,r[a.rdo].errs) ;
 		}
 	} ;

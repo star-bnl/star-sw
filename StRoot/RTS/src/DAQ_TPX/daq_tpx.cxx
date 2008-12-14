@@ -1382,14 +1382,14 @@ int daq_tpx::get_token(char *addr, int words)
 // dumps the known accept/abort trigger decisions from
 // the FIFO part of the event.
 // returns the count
-int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt)
+int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log)
 {
 	struct tpx_rdo_event rdo ;
 	int cou = 0 ;
 	u_int collision = 0 ;
+	int err = 0 ;
 
-
-	tpx_get_start(addr, words, &rdo, prompt) ;
+	tpx_get_start(addr, words, &rdo, do_log) ;
 
 	LOG(DBG,"rdo %d, rdo token %d, trg cou %d",rdo.rdo,rdo.token,rdo.trg_cou) ;
 
@@ -1409,11 +1409,13 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt
 
 			if(trgs[cou].t==0) {
 				LOG(ERR,"RDO %d: token 0 -- ignoring",rdo.rdo) ;
+				err = 1 ;
 				continue ;
 			}
 			// check for overrun
 			if((dta & 0x3000000) != 0x2000000) {
 				LOG(ERR,"RDO %d: T %d: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+				err = 1 ;
 			}
 
 			cou++ ;
@@ -1443,6 +1445,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt
 	}
 	else if (cou > 1) {
 		LOG(ERR,"RDO %d: token %d? -- too many prompt contributions!",rdo.rdo,trgs[0].t) ;
+		err = 1 ;
 	}
 
 	// at this point at least one contribution exists (i.e. cou>=1):
@@ -1452,6 +1455,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt
 
 	if(trgs[0].t == 0) {
 		LOG(ERR,"Token 0 in RDO %d: making it 4097",rdo.rdo) ;
+		err = 1 ;
 		trgs[0].t = 4097 ;
 	}
 
@@ -1476,6 +1480,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt
 				// check for overrun
 				if((dta & 0x3000000) != 0x2000000) {
 					LOG(ERR,"RDO %d: T %d: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+					err = 1 ;
 				}
 				continue ;
 			}
@@ -1491,6 +1496,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt
 
 			if(trgs[cou].t == 0) {
 				LOG(ERR,"RDO %d: token 0 in L2 contribution 0x%08X -- skipping",rdo.rdo,dta) ;
+				err = 1 ;
 				continue ;
 			}
 
@@ -1499,19 +1505,18 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prompt
 
 	}
 
-#if 0
-// older NIOS code...
-	if((trgs[0].t<4096) && (rdo.trg_cou == 1) && (tcd_in_use == 0)) {	// no TCD, badly emulated
-		trgs[cou].t = trgs[0].t ;
-		trgs[cou].daq = 0 ;
-		trgs[cou].trg = 15 ;	// accept!
-		trgs[cou].rhic = (trgs[0].rhic) + 1 ;
-		trgs[cou].rhic_delta = 1 ;
-
-
-		cou++ ;
+	if(err) {	// dump out everyhign
+		for(u_int i=0;i<rdo.trg_cou;i++) {
+			LOG(ERR,"RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
+		}
 	}
-#endif
+	else if((rdo.rdo==1) && (rdo.sector==13)) {
+		for(u_int i=0;i<rdo.trg_cou;i++) {
+			LOG(TERR,"RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
+		}
+	}
+	
+
 
 
 	return cou ;
