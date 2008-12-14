@@ -282,22 +282,19 @@ static int tpc_doer(daqReader *rdr, char  *do_print)
 	// ala the old evpReader, due to the memory footprint
 	for(int s=1;s<=24;s++) {
 		dd = rdr->det("tpc")->get("legacy",s) ;
-		if(dd) {
-			
-			found++ ;	// mark as found...
-
-			dd->iterate();  // need to iterate even for legacy...
-       
+		while(dd && dd->iterate()) {	
+			found++ ;	// mark as found..
 			tpc_t *tpc = (tpc_t *) dd->Void ;
+
+			if(do_print) {
+				printf("TPC sector %d: pixels %d\n",dd->sec,tpc->channels_sector) ;
+			}
 			
 			// one can rerun the afterburner as well with:
+
 			//daq_tpc *tpc_class = (daq_tpc *)rdr->det("tpc") ;
-
-			int cl_found = 0 ;
-			//cl_found = tpc_class->fcfReader(s,0,0,tpc) ;
-
-
-			LOG(NOTE,"TPC: rerun cluster finder: sector %d: found %d clusters",s,cl_found) ;
+			//int cl_found = tpc_class->fcfReader(dd->sec,0,0,tpc) ;
+			//LOG(NOTE,"TPC: rerun cluster finder: sector %d: found %d clusters",dd->sec,cl_found) ;
 		}
 	}
 
