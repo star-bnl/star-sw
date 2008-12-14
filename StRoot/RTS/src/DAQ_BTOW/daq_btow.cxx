@@ -131,13 +131,13 @@ daq_dta *daq_btow::handle_raw()
 	assert(caller) ;
 
 
-	if(present & 1) {	// datap...		
+	if(present & DET_PRESENT_DATAP) {	// datap...		
 		char *mem = (char *) legacyDetp(rts_id, caller->mem) ;
 		from = emc_single_reader(mem, &bytes, rts_id) ;	
 		if(from == 0) return 0 ;
 
 	}
-	else if(present & 4) {
+	else if(present & DET_PRESENT_TRG) {
 		from = getEmcTrgData(caller->mem,1,&bytes) ;
 		if(from == 0) return 0 ;
 
@@ -154,7 +154,7 @@ daq_dta *daq_btow::handle_raw()
 	raw->create(bytes,"btow_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
 	st = (char *) raw->request(bytes) ;
 
-	if(present & 2) {	// from SFS...
+	if(present & DET_PRESENT_SFS) {	// from SFS...
 		int ret = caller->sfs->read(full_name, st, bytes) ;
 		if(ret != bytes) {
 			LOG(ERR,"ret is %d") ;

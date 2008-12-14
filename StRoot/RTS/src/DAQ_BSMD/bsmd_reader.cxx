@@ -82,6 +82,8 @@ char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d)
 		}
 	}
 
+	LOG(DBG,"bsmd_reader: found some %d",found_some) ;
+
 	if(found_some) return (char *)bsmd_d ;
 	else return 0 ;
 }
