@@ -16,13 +16,16 @@ VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ..
 	../DAQ_READER  ../SFS ../LOG 
 
 
-BINS =  rts_example
+BINS =  rts_example tpc_rerun
 
 
 all:   $(BINS)
 
 
 rts_example: rts_example.o $(VOBJS)
+	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+
+tpc_rerun: tpc_rerun.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 sfs_stuff: sfs_stuff.o $(VOBJS)
@@ -61,3 +64,10 @@ rts_example.o: ../DAQ_TPX/daq_tpx.h
 rts_example.o: ../DAQ_TRG/daq_trg.h
 sfs_stuff.o: ../../../../StRoot/RTS/include/rtsLog.h
 sfs_stuff.o: ../DAQ_READER/daqReader.h
+tpc_rerun.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpc_rerun.o: ../DAQ_READER/daqReader.h
+tpc_rerun.o: ../DAQ_READER/daq_dta.h
+tpc_rerun.o: ../../../../StRoot/RTS/include/rts.h
+tpc_rerun.o: ../DAQ_READER/daq_dta_structs.h
+tpc_rerun.o: ../DAQ_TPX/daq_tpx.h
+tpc_rerun.o: ../DAQ_READER/daq_det.h
