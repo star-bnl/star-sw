@@ -375,7 +375,7 @@ int *legacyDetp(int rts_id, char *m)
 		}
 
 		// navigate to DETP
-		//LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
+		LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
 		ret_p = ((int *)datap + off) ;
 	}	
 	else {	// DATAPX
@@ -415,7 +415,7 @@ int *legacyDetp(int rts_id, char *m)
 		}
 	
 		// navigate to DETP
-		//LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
+		LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
 		ret_p = ((int *)datapx + off) ;
 
 	}
@@ -426,15 +426,20 @@ int *legacyDetp(int rts_id, char *m)
 	// special case for EMCs: we need to discern the SMDs....
 	EMCP *emcp = (EMCP *) ret_p ;
 
+	
 	switch(rts_id) {
 	case BTOW_ID :
 	case ETOW_ID :
+		LOG(DBG,"[BE]TOW: %p: %d, %d",emcp,emcp->sec[0].len, emcp->sec[1].len) ;
 		if(emcp->sec[0].len) ; // do nothing...
 		else ret_p = 0 ;	// however, it is still possible that they are in trigger's bank
+		break ;
 	case BSMD_ID :
 	case ESMD_ID :
+		LOG(DBG,"[BE]SMD: %p: %d, %d",emcp,emcp->sec[0].len, emcp->sec[1].len) ;
 		if(emcp->sec[1].len) ; // do nothing ...
 		else ret_p = 0 ;
+		break ;
 	}
 
 	if(ret_p) LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
