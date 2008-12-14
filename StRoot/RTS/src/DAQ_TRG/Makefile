@@ -30,6 +30,9 @@ libtrg.a : $(OBJS)
 
 daq_trg.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_trg.o: ../../../../StRoot/RTS/include/rtsSystems.h
+daq_trg.o: ../SFS/sfs_index.h
+daq_trg.o: ../SFS/fs_index.h
+daq_trg.o: ../SFS/sfs_base.h
 daq_trg.o: ../DAQ_READER/daqReader.h
 daq_trg.o: ../DAQ_READER/daq_dta.h
 daq_trg.o: ../../../../StRoot/RTS/include/rts.h

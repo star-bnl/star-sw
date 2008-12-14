@@ -30,6 +30,13 @@ libsc.a : $(OBJS)
 
 daq_sc.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_sc.o: ../../../../StRoot/RTS/include/rtsSystems.h
+daq_sc.o: ../../../../StRoot/RTS/include/daqFormats.h
+daq_sc.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
+daq_sc.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
+daq_sc.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
+daq_sc.o: ../SFS/sfs_index.h
+daq_sc.o: ../SFS/fs_index.h
+daq_sc.o: ../SFS/sfs_base.h
 daq_sc.o: ../DAQ_READER/daqReader.h
 daq_sc.o: ../DAQ_READER/daq_dta.h
 daq_sc.o: ../../../../StRoot/RTS/include/rts.h
