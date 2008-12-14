@@ -375,7 +375,7 @@ int *legacyDetp(int rts_id, char *m)
 		}
 
 		// navigate to DETP
-		LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
+		//LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
 		ret_p = ((int *)datap + off) ;
 	}	
 	else {	// DATAPX
@@ -415,7 +415,7 @@ int *legacyDetp(int rts_id, char *m)
 		}
 	
 		// navigate to DETP
-		LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
+		//LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
 		ret_p = ((int *)datapx + off) ;
 
 	}
@@ -429,13 +429,15 @@ int *legacyDetp(int rts_id, char *m)
 	switch(rts_id) {
 	case BTOW_ID :
 	case ETOW_ID :
-		if(emcp->sec[0].len) return ret_p ;
-		else return 0 ;	// however, it is still possible that they are in trigger's bank
+		if(emcp->sec[0].len) ; // do nothing...
+		else ret_p = 0 ;	// however, it is still possible that they are in trigger's bank
 	case BSMD_ID :
 	case ESMD_ID :
-		if(emcp->sec[1].len) return ret_p ;
-		else return 0 ;
+		if(emcp->sec[1].len) ; // do nothing ...
+		else ret_p = 0 ;
 	}
+
+	if(ret_p) LOG(DBG,"%s [%d] found in this event",rts2name(rts_id),rts_id) ;
 
 	return ret_p ;		
 }
