@@ -1,5 +1,8 @@
-// $Id: StEVPTpcCluser.cxx,v 1.1.1.1 2008/05/27 14:22:40 fisyak Exp $
+// $Id: StEVPTpcCluser.cxx,v 1.2 2008/12/15 21:04:01 fine Exp $
 // $Log: StEVPTpcCluser.cxx,v $
+// Revision 1.2  2008/12/15 21:04:01  fine
+// For for the NEW_DAQ_READER
+//
 // Revision 1.1.1.1  2008/05/27 14:22:40  fisyak
 // Maker to access TPC DAQ information via EVP_READER
 //
@@ -20,7 +23,11 @@
 #  define NULL 0
 #endif
 
-#include "RTS/src/EVP_READER/tpcReader.h"
+#ifndef NEW_DAQ_READER
+#  include "RTS/src/EVP_READER/tpcReader.h"
+#else
+#  include "DAQ_TPC/tpcReader.h"
+#endif
 
 //___________________________________
 float StEVPTpcCluser::pad() const 

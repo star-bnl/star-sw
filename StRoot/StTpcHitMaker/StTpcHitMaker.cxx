@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.3 2008/07/31 20:45:26 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.4 2008/12/15 21:04:01 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.4  2008/12/15 21:04:01  fine
+ * For for the NEW_DAQ_READER
+ *
  * Revision 1.3  2008/07/31 20:45:26  fisyak
  * Add TpcMixer
  *
@@ -80,28 +83,46 @@
 #include "StThreeVectorF.hh"
 
 #include "StDaqLib/TPC/trans_table.hh"
-#include "RTS/src/EVP_READER/tpcReader.h"
-#include "RTS/src/RTS_READER/daq_dta.h"
-#include "RTS/src/EVP_READER/evpReaderClass.h"
-#include "RTS/src/RTS_READER/rts_reader.h"
-#include "RTS/src/RTS_READER/daq_det.h"
+#ifndef NEW_DAQ_READER
+#  include "RTS/src/EVP_READER/tpcReader.h"
+#  include "RTS/src/RTS_READER/daq_dta.h"
+#  include "RTS/src/EVP_READER/evpReaderClass.h"
+#  include "RTS/src/RTS_READER/rts_reader.h"
+#  include "RTS/src/RTS_READER/daq_det.h"
+#else /* NEW_DAQ_READER */
+#  include "StRtsTable.h"
+#  include "DAQ_TPC/daq_tpc.h"
+#endif /* NEW_DAQ_READER */
+
 #if 0
-#include "RTS/src/EVP_READER/evpReader.hh"
-#include "RTS/include/rtsLog.h"
-#include "RTS/src/DAQ_TPX/daq_tpx.h"
+#  include "RTS/src/EVP_READER/evpReader.hh"
+#  include "RTS/include/rtsLog.h"
+#  include "RTS/src/DAQ_TPX/daq_tpx.h"
 #endif
+
 #include "StDbUtilities/StCoordinates.hh"
 #include "StEVPTpcCluser.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "TFile.h"
 #include "TNtuple.h"
 #include "TH2.h"
+
+#ifdef NEW_DAQ_READER
+#  ifdef tpc
+#    error TPC if defined elsewhere
+#  else
+#    define tpc (*fTpc)
+#  endif
+#endif /* NEW_DAQ_READER */
+
 static TNtuple *pulserP = 0;
 Float_t StTpcHitMaker::fgDp    = .1;             // hardcoded errors
 Float_t StTpcHitMaker::fgDt    = .2;
 Float_t StTpcHitMaker::fgDperp = .1;
+#ifndef NEW_DAQ_READER
 evpReader  *StTpcHitMaker::fDaqReader = 0;
 rts_reader *StTpcHitMaker::fRtsReader = 0;
+#endif /* ! NEW_DAQ_READER */
 ClassImp(StTpcHitMaker);
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
@@ -114,6 +135,7 @@ Int_t StTpcHitMaker::Init() {
   assert(kMode);
   return kStOK ;
 }
+#ifndef NEW_DAQ_READER
 //_____________________________________________________________
 evpReader *StTpcHitMaker::InitReader() {
   // Init EVP_READER 
@@ -137,11 +159,25 @@ evpReader *StTpcHitMaker::InitReader() {
   }
   return fDaqReader;
 }
+#else /* NEW_DAQ_READER */
+
+#endif /* NEW_DAQ_READER */
 //_____________________________________________________________
 Int_t StTpcHitMaker::MakeSector(Int_t sector) {
   // invoke tpcReader to fill the TPC DAQ sector structure
+#ifndef NEW_DAQ_READER
   evpReader *evp = InitReader();
   return  evp ? tpcReader((char *)evp,sector) : 0;
+#else /* NEW_DAQ_READER */
+  TString sec = "legacy[";
+  sec += TString(sector); sec += "]";
+  StRtsTable *daqTpcTable = GetNext(sec);
+  if (daqTpcTable) {
+     fTpc = (tpc_t*)*DaqDta()->begin();
+     assert(Sector() == sector);
+  }
+  return (Int_t)daqTpcTable;
+#endif /* NEW_DAQ_READER */
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Make() {
@@ -510,12 +546,24 @@ void StTpcHitMaker::RawData(Int_t sector) {
   Int_t r_old = -1;
   Int_t p_old = -1;
   Int_t Total_data = 0;
+#ifndef NEW_DAQ_READER
   daq_dta *dta = fRtsReader->det("tpx")->get("adc",sector) ;
   while(dta->iterate()) {
     int r = dta->row ;	// I count from 1
+#else /* NEW_DAQ_READER */
+  TString sec = sector;
+  TString query = "tpx/adc["; query += sec; query += "]";
+  while (GetNextDaqElement(query))
+  {
+    int r=Row() ;	// I count from 1
+#endif /* NEW_DAQ_READER */
     if(r==0) continue ;	// TPC does not support unphy. rows so we skip em
     r-- ;			// TPC wants from 0
+#ifndef NEW_DAQ_READER
     int p = dta->pad - 1 ;	// ibid.
+#else /* NEW_DAQ_READER */
+    int p = Pad() - 1 ;	// ibid.
+#endif /* NEW_DAQ_READER */
     if (p < 0 || p >= StTpcDigitalSector::numberOfPadsAtRow(r+1)) continue;
     if (r_old != r || p_old != p) {
       if (some_data) {
@@ -534,6 +582,7 @@ void StTpcHitMaker::RawData(Int_t sector) {
       r_old = r;
       p_old = p;
     }
+#ifndef NEW_DAQ_READER
     for(u_int i=0;i<dta->ncontent;i++) {
       int tb = dta->adc[i].tb ;
       int adc = dta->adc[i].adc ;
@@ -541,6 +590,8 @@ void StTpcHitMaker::RawData(Int_t sector) {
       IDTs[tb] = 65535;
       some_data++ ;	// I don't know the bytecount but I'll return something...
     }
+#else
+#endif /* NEW_DAQ_READER */
   }
   if (some_data) {
     Total_data += some_data;

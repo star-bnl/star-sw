@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.1.1.1 2008/05/27 14:22:41 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.2 2008/12/15 21:04:01 fine Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.2  2008/12/15 21:04:01  fine
+ * For for the NEW_DAQ_READER
+ *
  * Revision 1.1.1.1  2008/05/27 14:22:41  fisyak
  * Maker to access TPC DAQ information via EVP_READER
  *
@@ -21,7 +24,11 @@
 
 #include "StMaker.h"
 class StTpcDigitalSector;
-class rts_reader;
+#ifndef NEW_DAQ_READER
+  class rts_reader;
+#else  
+#  include "StDAQMaker/StRtsReaderMaker.h"
+#endif  
 class StTpcRTSHitMaker : public StMaker {
  public:
   StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), m_Rts_Reader(0) {}
