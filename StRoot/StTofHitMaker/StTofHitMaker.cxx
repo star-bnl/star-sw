@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHitMaker.cxx,v 1.2 2008/12/02 23:58:44 fine Exp $
+ * $Id: StTofHitMaker.cxx,v 1.3 2008/12/15 21:27:31 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  * Revision 1.7, 02/09/2008, Jing liu
  *
  * $Log: StTofHitMaker.cxx,v $
+ * Revision 1.3  2008/12/15 21:27:31  fine
+ * Prepare the code for the new DAQ_READER from Tonko
+ *
  * Revision 1.2  2008/12/02 23:58:44  fine
  * Adjust the inteface to accnt the new base class
  *
@@ -54,14 +57,32 @@
 #include "StEvent/StTofRawData.h"
 #include "StEvent/StEvent.h"
 #include "StDAQMaker/StDAQReader.h"
-#include "RTS/src/EVP_READER/tofReader.h"
 
+#ifdef NEW_DAQ_READER
+#  include "StRtsTable.h"
+#  include "DAQ_TOF/daq_tof.h"
+#else /* NEW_DAQ_READER */
+#  include "RTS/src/EVP_READER/tofReader.h"
+#endif /* NEW_DAQ_READER */
+
+#ifdef NEW_DAQ_READER
+#ifdef tof
+# error TOF if defined elsewhere
+#else
+# define tof (*fTof)
+#endif
+#endif /* NEW_DAQ_READER */
 
 ClassImp(StTofHitMaker);
 
 //_____________________________________________________________
+#ifndef NEW_DAQ_READER
 StTofHitMaker::StTofHitMaker(const char *name):StRTSBaseMaker(name)
 , mStEvent(0),fDaqReader(0)
+#else /* NEW_DAQ_READER */
+StTofHitMaker::StTofHitMaker(const char *name):StRTSBaseMaker("tof",name)
+, mStEvent(0),fTof(0)
+#endif /* NEW_DAQ_READER */
 {
   LOG_INFO << "StTofHitMaker::ctor"  << endm;
 }
@@ -91,6 +112,7 @@ StTofCollection *StTofHitMaker::GetTofCollection()
   }
   return tofCollection;
 }
+#ifndef NEW_DAQ_READER
 //_____________________________________________________________
 evpReader *StTofHitMaker::InitReader()
 {
@@ -112,18 +134,26 @@ evpReader *StTofHitMaker::InitReader()
        }
      }
    }
-
    return fDaqReader;
 }
+#endif /* ! NEW_DAQ_READER */
 //_____________________________________________________________
 StRtsTable *StTofHitMaker::GetNextRaw() 
 {
   /// Query  RTS/tof/raw cluster data from DAQ system
   LOG_INFO  << " StTofHitMaker::GetNextRaw()" << endm;
+#ifndef NEW_DAQ_READER
 
   evpReader *evp = InitReader();
   return  (StRtsTable *)(evp ? tofReader((char *)evp) : 0);
 
+#else /* NEW_DAQ_READER */
+  StRtsTable *daqTofTable = GetNextLegacy();
+  if (daqTofTable) {
+     fTof = (tof_t*)*DaqDta()->begin();
+  }
+  return daqTofTable;
+#endif /* NEW_DAQ_READER */
 }
 //_____________________________________________________________
 Int_t StTofHitMaker::Make()
@@ -277,4 +307,3 @@ void StTofHitMaker::fillStEvent() {
     LOG_INFO << " - StEvent tofRawDataCollection does not Exist" << endm;
   }
 }
-

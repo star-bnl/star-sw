@@ -3,22 +3,26 @@
 
 /***************************************************************************
  *
- * $Id: StTofHitMaker.h,v 1.2 2008/12/02 23:58:45 fine Exp $
+ * $Id: StTofHitMaker.h,v 1.3 2008/12/15 21:27:32 fine Exp $
  * StTofHitMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
  ***************************************************************************/
 #include "StRTSBaseMaker.h"
-#include "StMaker.h"
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
 
+#ifndef NEW_DAQ_READER
+  class evpReader;
+#else
+  struct tof_t;
+#endif /* ! NEW_DAQ_READER */
+
 class StEvent;
 class StTofCollection;
-class evpReader;
 class StTofData;
 class StTofRawData; 
 class StTofCollection;
@@ -29,7 +33,13 @@ class StTofHitMaker:public StRTSBaseMaker
 {
    private: 
       StEvent *mStEvent;
+#ifndef __CINT__
+#ifndef NEW_DAQ_READER
       evpReader  *fDaqReader;
+#else /* NEW_DAQ_READER */
+      tof_t   *fTof;
+#endif /* NEW_DAQ_READER */
+#endif
       Int_t UnpackTofRawData();
       void fillTofDataCollection();
       void fillStEvent();     //! ship collection to StEvent
@@ -55,7 +65,9 @@ class StTofHitMaker:public StRTSBaseMaker
       StRtsTable *GetNextRaw();
       
       StTofCollection *GetTofCollection();
+#ifndef NEW_DAQ_READER
       evpReader *InitReader();
+#endif /* ! NEW_DAQ_READER */
 
    public:
 
