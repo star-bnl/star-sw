@@ -22,31 +22,37 @@ int main(int argc, char *argv[])
 	daqReader *r ;
 	tpxGain *tpx_gains[25] ;
 
-	char do_print ;
-	char do_check ;
+
 	char do_usage ;
 	char do_summary ;
-	char do_help ;
+	char do_compare ;
 	int do_sector = -1 ;
+	int do_output ;
 
-	u_int num_evts = 0xFFFFFFFF ;	// a lot...
+	int num_evts = 0x7FFFFFFF ;	// a lot...
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel(WARN) ;
 
-	do_help = do_print = do_check = do_usage = do_summary = 0 ;
+	do_output = do_compare = do_usage = do_summary = 0 ;
 
 
 	daq_dta *dta ;	// daq_dta class grabs the data out of a DET bank...
 
 
-	while((c = getopt(argc, argv,"S:d:sn:")) != EOF) {
+	while((c = getopt(argc, argv,"S:d:scon:")) != EOF) {
 		switch(c) {
 		case 'd' :
 			rtsLogLevel(optarg) ;
 			break ;
 		case 's' :
 			do_summary = 1 ;
+			break ;
+		case 'c' :
+			do_compare = 1 ;
+			break ;
+		case 'o' :
+			do_output = 1 ;
 			break ;
 		case 'n' :
 			num_evts = atoi(optarg) ;
@@ -59,18 +65,9 @@ int main(int argc, char *argv[])
 			break ;
 		}
 	}
-
-
-	if(do_usage) {
-		fprintf(stderr,"Usage: %s [-d loglevel] [-p (to print on stdout)] [-c (to do checking)] files...\n",argv[0]) ;
-		return -1 ;
-	}
-
 	
-
-	// we need a filename here:
-	if(optind >= argc) {
-		fprintf(stderr,"Usage: %s [-d loglevel] [-p (to print on stdout)] [-c (to do checking)] files...\n",argv[0]) ;
+	if(do_usage || (optind >= argc)) {
+		fprintf(stderr,"Usage: %s [-d loglevel] [-c] [-n evts] [-S sector] [-s] file\n",argv[0]) ;
 		return -1 ;
 	}
 
@@ -87,7 +84,6 @@ int main(int argc, char *argv[])
 	// pick up the filenames
 	r = new daqReader(argv[optind]) ;
 
-	new daq_tpx(r) ;
 
 	memset(tpx_gains,0,sizeof(tpx_gains)) ;
 
@@ -97,13 +93,11 @@ int main(int argc, char *argv[])
 
 			while(dta && dta->iterate()) {
 
-				if((tpx_gains[s] == 0)) {
+				if((tpx_gains[s] == 0)) {	// create if it didn't exist already...
 					tpx_gains[s] = new tpxGain ;
 					tpx_gains[s]->init(s) ;
 				}
 
-
-				//printf("sec %d, rdo %d: %d bytes\n",dta->sec,dta->rdo,dta->ncontent) ;
 
 				tpx_gains[s]->accum((char *)dta->Void, dta->ncontent) ;
 
@@ -112,17 +106,38 @@ int main(int argc, char *argv[])
 
 			if(tpx_gains[s]) tpx_gains[s]->ev_done() ;
 		}
+
+		num_evts-- ;
+		if(num_evts <= 0) break ;
 	}
 
 	for(int s=s_start;s<=s_stop;s++) {
-		char fname[80] ;
+
 
 		if(!tpx_gains[s]) continue ;
 
-		tpx_gains[s]->calc() ;
+		tpx_gains[s]->calc() ;	// do the calculation of the means, gains etc.
 
-		sprintf(fname,"/tmp/tpx_gains_%02d.sum",s) ;
-		tpx_gains[s]->summarize(fname, 0) ;
+		if(do_summary) {	// dump extended summary
+			char fname[80] ;
+			sprintf(fname,"/tmp/tpx_gains_%02d.sum",s) ;
+			int really_bad = tpx_gains[s]->summarize(fname, 0) ;		// dump the extended results to this file
+			LOG(INFO,"Sector %d: really bad pads %d",s,really_bad) ;	// not counting the edge pads...
+		}
+
+		if(do_compare) {	// compare to canonical
+			// summarize MUST happen before!
+			tpx_gains[s]->summarize(0, 0) ;		
+			tpx_gains[s]->compare("/RTS/conf/tpx/tpx_gains.txt",s) ;
+		}
+
+
+		if(do_output) {		// dump the calculated gains in the canonical form to stdout
+			// summarize MUST happen before!
+			tpx_gains[s]->summarize(0, 0) ;
+			tpx_gains[s]->to_file("stdout") ;
+
+		}
 	}
 
 
