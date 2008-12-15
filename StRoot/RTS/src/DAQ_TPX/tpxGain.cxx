@@ -820,8 +820,11 @@ int tpxGain::to_file(char *fname)
 
 	FILE *f ;
 	int s, r, p ;
-	
-	f = fopen(fname,"w") ;
+
+	if(strcmp(fname,"stdout")==0) f = stdout ;
+	else {
+		f = fopen(fname,"w") ;
+	}
 
 	if(f==0) {
 		LOG(ERR,"gains: fopen \"%s\" [%s]",fname,strerror(errno)) ;
@@ -831,7 +834,7 @@ int tpxGain::to_file(char *fname)
 
 
 	int s_start, s_stop ;
-	if(sector) {
+	if(sector>0) {
 		s_start = sector ;
 		s_stop = sector ;
 	}
@@ -843,15 +846,8 @@ int tpxGain::to_file(char *fname)
 	LOG(TERR,"gains: writing to file \"%s\" for sectors %d..%d...",fname,s_start,s_stop) ;
 
 	for(s=s_start;s<=s_stop;s++) {
-	for(r=0;r<=45;r++) {
+	for(r=1;r<=45;r++) {
 	for(p=1;p<=tpc_rowlen[r];p++) {
-		struct aux *as ;
-		// HACK!
-//		if(get_gains(s,r,p)->t0) 
-
-		as = get_aux(s,r,p) ;
-
-		if(as->cou || as->low_pulse || as->high_pulse)
 		fprintf(f,"%d %d %d %.5f %.5f\n",s,r,p,
 			get_gains(s,r,p)->g,
 			get_gains(s,r,p)->t0) ;
@@ -859,7 +855,8 @@ int tpxGain::to_file(char *fname)
 	}
 	}
 
-	fclose(f) ;
+	if(f != stdout)	fclose(f) ;
+
 	LOG(TERR,"gains: written.") ;
 
 	return 0 ;
@@ -923,7 +920,8 @@ int tpxGain::summarize(char *fname, FILE *log)
 	good = bad = 0 ;
 	reason[0] = 0 ;	// empty string...
 
-	if(fname==0) ofile = stdout ;
+	if(fname==0) ofile = 0 ;
+	else if(strcmp(fname,"stdout")==0) ofile = stdout ;
 	else {
 		ofile = fopen(fname,"w") ;
 		if(ofile==0) {
@@ -932,6 +930,7 @@ int tpxGain::summarize(char *fname, FILE *log)
 		}
 	}
 		
+
 
 	int s_start, s_stop ;
 	if(sector) {
@@ -1002,6 +1001,7 @@ int tpxGain::summarize(char *fname, FILE *log)
 					}
 
 				}
+
 
 				int bad_t0, bad_gain, bad_noise, bad_low ;
 				bad_t0 = bad_gain = bad_noise = bad_low = 0 ;
@@ -1082,7 +1082,7 @@ int tpxGain::summarize(char *fname, FILE *log)
 				}
 
 
-				if(bad_gain || bad_t0 || bad_noise || bad_low) {	// this includes edge pads!
+				if((err>1) || bad_gain || bad_t0 || bad_noise || bad_low) {	// this now includes edge pads!
 					g = 0.0 ;	// mark real bad
 					get_gains(s,row,pad)->g = 0.0 ;	// need it later for comparison...
 				}
