@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.178 2008/12/12 20:45:13 perev Exp $
+* $Id: geometry.g,v 1.179 2008/12/15 01:03:56 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.179  2008/12/15 01:03:56  perev
+* CleanUp
+*
 * Revision 1.178  2008/12/12 20:45:13  perev
 * upgr16/17 btofConfig=6
 *
@@ -823,8 +826,9 @@
 
    real       Par(1000),field,dcay(5),shift(2),Wdm
 
-   Integer    LENOCC,LL,IPRIN,nSi,nSiMin,i,j,l,kgeom,nmod(2),nonf(3),
-              ecal_config, ecal_fill,
+   Integer    LENOCC,ICFNBL,JL,JR,LL,
+              IPRIN,nSi,nSiMin,i,j,l,
+              kgeom,nmod(2),nonf(3),ecal_config, ecal_fill,
               sisd_level,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf
 
@@ -872,7 +876,7 @@
 * been a correction which resulted in new code.. We check the value
 * and divide by 10 if necessary.
 
-   character  Commands*4000,Geom*8
+   character  Commands*4000
 
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -882,16 +886,15 @@
 * - - - - - - - - - - - - - - - - -
 
 replace[;ON#{#;] with [
-  IF Index(Commands,'#1')>0 
-  { j=Index(Commands,'#1');  l=j+Lenocc('#1')-1; 
-    if (Commands(j:j+3)=='YEAR') Geom=Commands(j:l); 
-    if (Commands(j:j)  =='Y')    Geom=Commands(j:l); 
-    Commands(j:l)=' ';  <W>; (' #1: #2');
+  IF (Commands(JL:JR) .eq. '#1') {
+    JL = ICFNBL(Commands,JR+1,LL);
+    JR = Lenocc(Commands(JL:LL)) + JL -1;
+    <W>; (' #1: #2');
 ]
 
 * If geometry was already built, the local DB will be dropped completely now
 * but the request for the next geometry should be saved in a temp. par arrray
-   call ASLGETBA ('GEOM','DETP',1000,LL,Par)
+   call ASLGETBA ('GEOM','DETP',1000,LL,Par); LL = (LL-1)*4;
    If (JVOLUM>0) call AGDROP ('*')
 
 * -------------------- set GSTAR absolute default ------------------------
@@ -955,9 +958,6 @@ replace[;ON#{#;] with [
    mf=2                  " default field - symmetrical, as fitted by Bill "
    Commands=' ';
 
-   do kgeom=1,8
-      Geom(kgeom:kgeom)='\0'; ! Initialize the string with NULLs for strcpy safety
-   enddo;
 
 * -------------------- select USERS configuration ------------------------
 * On a non-empty DETP GEOM every keyword results in an action and is erased.
@@ -967,10 +967,13 @@ replace[;ON#{#;] with [
 * to communicate DETP commands with parameters to them.
 * 
 
-If LL>1   
+If LL>0   
 { Call AGSFLAG  ('GEOM',1)
 * convert input line into a string of upprecase characters
-  CALL UHTOC(PAR(2),4,Commands,LL*4-4);  Call CLTOU(Commands);
+  CALL UHTOC(PAR(2),4,Commands,LL);  Call CLTOU(Commands);
+  JL = ICFNBL(Commands,1,LL);
+  JR = LENOCC(Commands(JL:LL))+JL-1;
+
 
 
 * set geant processes and cuts only if any detp geometry was issued:
@@ -4273,8 +4276,8 @@ If LL>1
   }
 
 * sanity check - if something left in commands (unknown keyword), we stop!
-  l=LENOCC(commands); if l>0
-  {  print *,' Unknown command left => ', commands(1:l), ' <= ',l
+  if (JL .le. JR) {
+     print *,' Unknown command left => ', commands(JL:JR), ' ',JL,JR
      if (IPRIN==0) stop 'You better stop here to avoid problems'     
   }
 }
@@ -4286,7 +4289,7 @@ If LL>1
 *
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
    dcay={210,210,0.1,0.01}
-   If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
+   If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
 
    write(*,*) '****** ATTENTION ACHTUNG ATTENZIONE VNIMANIE UVAGA WEI ******'
@@ -4326,7 +4329,7 @@ If LL>1
    endif
 
 * Pipe:
-   If (LL>1)        call AgDETP new ('PIPE')
+   If (LL>0)        call AgDETP new ('PIPE')
    call AgDETP add ('pipv.PipeConfig=',PipeConfig,1);
    call AgDETP add ('pipv.PipeFlag=',PipeFlag,1);
    if (PIPE)        then
@@ -4347,7 +4350,7 @@ If LL>1
 
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
 
-   If (LL>1 & SVTT) then
+   If (LL>0 & SVTT) then
      call AgDETP new ('SVTT')
      if (nSi < 7)           call AgDETP add ('svtg.nlayer=',   nSi,1)
      if (nSiMin > 1)        call AgDETP add ('svtg.nmin=',  nSiMin,1)
@@ -4445,20 +4448,6 @@ If LL>1
   endif
 
 
-* - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
-*   CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
-* - for year_1 X in mwc hits was limited, keep this (mwx=1)
-
-   If (LL>1 & TPCE) then
-     call AgDETP new ('TPCE')
-* Attention -- this line below was effectively moved into individual year 1 declarations:
-*     If (Geom(1:2)='_1') mwx=1
-* Since we don't need the GEOM variable anymore in this context, we use it differently:
-* to simply contains the whole geometry tag such as year_1S or y2003a
-     If (  .not. mwc   ) mwx=0
-     If ( mwx <2 )  call AgDETP add ('tpcg(1).MWCread=',mwx,1)
-     If (.not.pse)  call AgDETP add ('tprs(1).super='  , 1, 1) 
-   endif 
 
 * Back in July 2003 Yuri has discovered the discrepancy
 * in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
@@ -4484,7 +4473,7 @@ If LL>1
 
    write(*,*) 'BTOF'
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
-   If (LL>1 & BTOF) then
+   If (LL>0 & BTOF) then
      call AgDETP new ('BTOF')
      call AgDETP add ('btog.choice=',BtofConfig,1)
 * X.Dong
@@ -4508,7 +4497,7 @@ If LL>1
 
 
 ********************* Vertex Position Detector *******************
-   If (LL>1 & VPDD) then
+   If (LL>0 & VPDD) then
      call AgDETP new ('VPDD')
      call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
      if(VpddConfig <7) call vpddgeo
@@ -4517,7 +4506,7 @@ If LL>1
 
 ********************** BARREL CALORIMETER ************************
 *  - Set up the parameters for the barrel calorimeter
-   If (LL>1 & CALB) then
+   If (LL>0 & CALB) then
      call AgDETP new ('CALB')
      if (ems)  call AgDETP add ('calg.nmodule=',Nmod, 2)
      if (ems)  call AgDETP add ('calg.shift=',  shift,2)
@@ -4544,7 +4533,7 @@ If LL>1
   endif
 ******************************************************************
 *  - Set up the parameters for the RICH counter
-   if (LL>1 & RICH) then
+   if (LL>0 & RICH) then
       call AgDETP new ('Rich')
       if (Rv>0) call AgDETP add ('Rich.Version=', Rv,1) 
       if (Rp>0) call AgDETP add ('Rich.Position=',Rp,1)
@@ -4554,7 +4543,7 @@ If LL>1
 
 ******************************************************************
 *  - Set up the parameters for the endcap calorimeter
-   If (LL>1 & ECAL) then
+   If (LL>0 & ECAL) then
       call AgDETP new ('ECAL')
       call AgDETP add ('emcg.OnOff='   ,ecal_config,1)
       call AgDETP add ('emcg.FillMode=',ecal_fill,1)
@@ -4645,7 +4634,7 @@ If LL>1
 ****************  Magnetic Field  ********************************
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
-   If (LL>1) then
+   If (LL>0) then
       call AgDETP new ('MFLD')
       if (MFLD & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
       if (MFLD & mf!=0)    call AgDETP add ('MFLG(1).version=',mf,1)
@@ -4670,13 +4659,5 @@ If LL>1
      NtrSubEv = MLEFT*(NLEFT/MLEFT)
      Prin1 NtrSubEv; (' Ntrack per subevent = ',i6)
    } 
-*
-* -------------------- persist certain global parameters -------------------
-
-   Fill GDAT                     ! GEANT run data
-      mfscale=field/5.0          ! magnetic field scale (nominal)
-      gtag={geom(1:4),geom(5:8)} ! geometry tag 
-   EndFill
-*
    end
 
