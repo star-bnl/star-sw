@@ -150,6 +150,7 @@ void daqReader::init()
   memset(runconfig,0,sizeof(rccnf));
 
   memset(dets,0,sizeof(dets)) ;
+  memset(pseudo_dets,0,sizeof(pseudo_dets));
 
   // setup...
   do_open = 1 ;
@@ -1197,11 +1198,9 @@ daq_det *daqReader::det(const char *which)
 	assert(which) ;
 
 
-
-
-
 	// for speed, first we try what we already created...
 	for(int i=0;i<DAQ_READER_MAX_DETS;i++) {
+
 		if(dets[i]) {
 			if(strcasecmp(which, dets[i]->name)==0) return dets[i] ;
 		}
