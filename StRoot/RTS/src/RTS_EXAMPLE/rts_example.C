@@ -166,8 +166,11 @@ static int trg_doer(daqReader *rdr, char  *do_print)
 	if(dd) {
 		if(dd->iterate()) {
 			trg_t *trg_p = (trg_t *) dd->Void ;
-			
-			// print if you care...
+
+			if(do_print) {	// print something...
+				printf("Trigger: daqbits 0x%08X, trg_word 0x%04X\n",trg_p->daqbits,trg_p->trg_word) ;
+			}
+
 		}
 	}
 
@@ -176,14 +179,15 @@ static int trg_doer(daqReader *rdr, char  *do_print)
 	dd = rdr->det("trg")->get("raw") ;
 	if(dd) {
 		if(dd->iterate()) {
-			u_char *trg_raw = dd->Byte;
 			found = 1 ;
 
+
+			u_char *trg_raw = dd->Byte;
 			
 			if(do_print) {	// I have no clue but let me print first few words...
 
 
-				// simple start of trig desc
+				// simple start of trig desc; the way it should be...
 				struct simple_desc {
 					short len ;
 					char evt_desc ;
