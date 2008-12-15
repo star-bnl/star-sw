@@ -123,7 +123,7 @@ tpxFCF::tpxFCF()
 	gains = 0 ;
 	cl_marker = 0 ;
 
-	do_cuts = 1 ;
+	do_cuts = 2 ;	// 1 means always, 2 means don't cut edges (for i.e. pulser run), 0 means don't...
 	ch_min = 10 ;
 
 	memset(row_ix,0xFF,sizeof(row_ix)) ;
@@ -922,20 +922,11 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	u_int p1, p2 ;
 	int div_fact ;
 
-#if 0
-	// integerize charge
-	if(cl->flags & FCF_IN_DOUBLE) ;
-	else {
-		if(cl->flags & FCF_ONEPAD) return ;
-		LOG(ERR,"Not in double?") ;
-		return ;
-	}
-#endif
 
 	// first set of cuts
 	if(likely(do_cuts)) {
 		if(unlikely(fla & FCF_BROKEN_EDGE)) ;	// pass!
-		else if(fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE)) return ;	// kill clusters touching the edge or a dead pad
+		else if((do_cuts == 1) && (fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE))) return ;	// kill clusters touching the edge or a dead pad
 	}
 
 //	if(fla & FCF_ONEPAD) {
@@ -945,24 +936,12 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	//LOG(DBG,"dump: row %d: %d %d %d %d %f 0x%X",cur_row,cl->p1,cl->p2,cl->t_min,cl->t_max,cl->f_charge,cl->flags) ;
 
 
-#if 0
-	// cuts go here
-	if(likely(do_cuts)) {
 
-		if(fla & FCF_BROKEN_EDGE) {	// always pass!
-			;
-		}
-		else if(fla & FCF_ONEPAD) return ;
-		//else if(fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE | FCF_ONEPAD)) return ;	// kill!
-		//else if(cl->tmin == 0) return ;		// kill if they touch timebin 0
-		else if((cl->t_max - cl->t_min) <= 2) return ;	// kill if the cluster length in time is small
 
-	}
-#endif
 	// we first calc the timebin so that we can skip any cuts for hits
 	// before the trigger -- MWPC studies...
 
-	dt = cl->f_t_ave / cl->f_charge ;
+
 
 	if((fla & FCF_ONEPAD) && (cl->t1 < 15)) {	// for any hit below the trigger, we pass -- for MWPC studies!
 		if((cl->t2 - cl->t1)<=1) return ;
@@ -976,17 +955,22 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 			;
 		}
 		else if(fla & FCF_ONEPAD) return ;
-		//else if(fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE | FCF_ONEPAD)) return ;	// kill!
-		//else if(cl->tmin == 0) return ;		// kill if they touch timebin 0
 		else if((cl->t_max - cl->t_min) <= 2) return ;	// kill if the cluster length in time is small
 
 	}
+
+	if(cl->f_charge < 1.0) {
+		if(!(fla & FCF_DEAD_EDGE)) LOG(WARN,"WTF? row %d: %d-%d, %d-%d (%d-%d): charge %d (%.3f): 0x%X",cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->t_min,cl->t_max,cl->charge,cl->f_charge,cl->flags) ;
+		return ;
+	}
+
 
 	int cha = (int) (cl->f_charge + 0.5) ;	// integerized version; 0.5 is for correct roundoff
 
 	// clear the FALLING flag 
 	fla &= (~FCF_FALLING) ;
 
+	dt = cl->f_t_ave / cl->f_charge ;
 	dp = cl->p_ave / cl->f_charge ;
 
 
@@ -1036,6 +1020,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	if(fla & FCF_BROKEN_EDGE) tmp_fl |= 0x4000 ;
 
 	if(cha > 0x7FFF) cha = 0x8000 | (cha/1024) ;
+
 
 	// watchout for ordering!
 	*loc_buff++ = (time_c << 16) | pad_c ;
