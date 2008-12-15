@@ -7,6 +7,8 @@
 // ADC data for most
 // CLD data for TPX/TPC
 
+#include <sys/types.h> // for u_int
+
 #define m_Mode_DAQ_PED          (1<<0)          // calculate pedestals in Make
 #define m_Mode_DAQ_GAIN         (1<<1)          // calculate gains in Make
 #define m_Mode_DAQ_FCF_RAW      (1<<2)          // run cluster finder
@@ -123,7 +125,7 @@ public:
 	} ;
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.5 2008/12/09 09:58:49 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_det.h,v 1.6 2008/12/15 20:32:29 fine Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
