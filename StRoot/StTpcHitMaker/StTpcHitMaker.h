@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.3 2008/07/31 20:45:27 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.4 2008/12/15 21:04:01 fine Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.4  2008/12/15 21:04:01  fine
+ * For for the NEW_DAQ_READER
+ *
  * Revision 1.3  2008/07/31 20:45:27  fisyak
  * Add TpcMixer
  *
@@ -37,16 +40,25 @@ class StTpcHit;
 class StDaqTpcClusterInterface;
 class StTpcDigitalSector;
 
+#ifndef NEW_DAQ_READER
 class evpReader; 
 class rts_reader;
 
 struct tpc_cl;
+#else /* NEW_DAQ_READER */
+struct tpc_t;
+#endif /* NEW_DAQ_READER */
 class StTpcHitCollection;
 
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
   enum EMode {kUndefined, kTpx, kTpxPulser, kTpxPadMonitor, kTpxDumpPxls2Nt, kTpxRaw, kAll};
+#ifndef NEW_DAQ_READER
   StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker(name), mStEvent(0), kMode(kUndefined) {}
+#else /* NEW_DAQ_READER */
+  StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpx",name), mStEvent(0), kMode(kUndefined)
+        ,fTpc(0) {}
+#endif /* NEW_DAQ_READER */
   virtual ~StTpcHitMaker() {}
 
   Int_t   Init();
@@ -59,13 +71,20 @@ class StTpcHitMaker : public StRTSBaseMaker {
   void    RawData(Int_t sector);
   StTpcDigitalSector *GetDigitalSector(Int_t sector);
  private:
+#ifndef NEW_DAQ_READER
   static evpReader  *fDaqReader;
   static rts_reader *fRtsReader;
+#endif /* ! NEW_DAQ_READER */
 
   StEvent *mStEvent;
   EMode   kMode;
+#ifdef NEW_DAQ_READER
+  tpc_t   *fTpc;
+#endif /* NEW_DAQ_READER */
  protected:
+#ifndef NEW_DAQ_READER
     evpReader *InitReader();
+#endif /* ! NEW_DAQ_READER */
     Int_t MakeSector(Int_t sector);
     StTpcHitCollection *GetHitCollection();
     static StTpcHit *StTpcHitMaker::CreateTpcHit(const StDaqTpcClusterInterface &cluster, Int_t sector, Int_t row);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.4 2008/08/07 19:54:37 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.5 2008/12/15 21:04:01 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -25,10 +25,19 @@
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StMessMgr.h" 
 
-#include "RTS/include/rtsLog.h"
-#include "RTS/src/RTS_READER/rts_reader.h"
-#include "RTS/src/RTS_READER/daq_dta.h"
-#include "RTS/src/DAQ_TPX/daq_tpx.h"
+#ifndef NEW_DAQ_READER
+#  include "RTS/include/rtsLog.h"
+#  include "RTS/src/RTS_READER/rts_reader.h"
+#  include "RTS/src/RTS_READER/daq_dta.h"
+#  include "RTS/src/DAQ_TPX/daq_tpx.h"
+#else /* NEW_DAQ_READER */
+#  include "StDAQMaker/StDAQReader.h"
+#  include "StRtsTable.h"
+#  include "DAQ_TPX/daq_tpx.h"
+#  include "DAQ_READER/daq_dta.h"
+#  include "DAQ_READER/daqReader.h"
+#endif /* NEW_DAQ_READER */
+
 
 ClassImp(StTpcRTSHitMaker); 
 //________________________________________________________________________________
@@ -38,11 +47,17 @@ StTpcRTSHitMaker::~StTpcRTSHitMaker() {
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SafeDelete(m_Rts_Reader);
+#ifndef NEW_DAQ_READER
   rtsLogOutput(RTS_LOG_STDERR);
   rtsLogLevel(WARN);
+#endif
   m_Rts_Reader = new rts_reader("r_sim");
   rts_reader &r = *m_Rts_Reader;
+#ifndef NEW_DAQ_READER
   r.enable("*");
+#else
+  LOG_FATAL << " new reader has no r.enable(\"*\"); method " << endm;
+#endif  
   // do gains example; one loads them from database but I don't know how...
   daq_dta *dta  = r.det("tpx")->put("gain");
   for(int sec=1;sec<=24;sec++) {
@@ -72,7 +87,11 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     been previously loaded as shown in the example above they
     will be set to 1.0!
   */
+#ifndef NEW_DAQ_READER
   r.InitRun(runnumber);
+#else
+  LOG_FATAL << " new reader has no r.InitRun(runnumber); method. Ask Tonko. " << endm;
+#endif  
   return kStOK;
 }
 //________________________________________________________________________________
