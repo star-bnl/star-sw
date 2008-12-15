@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	while(dr->get(0,0)) {			// zip through the input files...
 
 
-
+	int got_adc_data = 0 ;
 	daq_dta *dd, *sim_dta ;
 
 #define DUMP_CLD_IN_FILE
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	while(dd && dd->iterate()) {
 		for(u_int i=0;i<dd->ncontent;i++) {
 //			if(dd->cld[i].tb < 15.0)
-			printf("cld: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X\n",dd->row,
+			printf("in file: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X\n",dd->row,
 			       dd->cld[i].pad,
 			       dd->cld[i].p1,
 			       dd->cld[i].p2,
@@ -59,8 +59,10 @@ int main(int argc, char *argv[])
 #endif
 
 	dd = dr->det("tpx")->get("adc") ;	// get the ADC data
-	if(dd == 0) continue ;			// not there, skip...
-	
+	if(dd == 0) {
+		LOG(WARN,"No adc data in this event...") ;
+		continue ;			// not there, skip...
+	}
 
 
 	sim_dta = dr->det("tpx")->put("adc_sim") ;	// create the ADC data for simulation
@@ -68,6 +70,7 @@ int main(int argc, char *argv[])
 
 	// read input data and fill in the adc_sim
 	while(dd->iterate()) {
+		got_adc_data = 1 ;
 		daq_sim_adc_tb *sim_d = (daq_sim_adc_tb *) sim_dta->request(512) ;	// ask for space
 		
 		// copy over
@@ -81,6 +84,12 @@ int main(int argc, char *argv[])
 		sim_dta->finalize(dd->ncontent,dd->sec,dd->row,dd->pad) ;
 
 	}
+
+	if(!got_adc_data) {
+		LOG(WARN,"No ADC data in this event...") ;
+		continue ;
+	}
+	LOG(NOTE,"Doing adc data...") ;
 
 	// OK, now we have the ADC data ready for re-clusterfinding so let's do it
 
@@ -113,7 +122,7 @@ int main(int argc, char *argv[])
 
 #if 1
 //			if(dd->sim_cld[i].cld.tb < 15.0) 
-			printf("row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X: track %d, Q %d\n",dd->row,
+			printf("rerun: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X: track %d, Q %d\n",dd->row,
 			       dd->sim_cld[i].cld.pad,
 			       dd->sim_cld[i].cld.p1,
 			       dd->sim_cld[i].cld.p2,

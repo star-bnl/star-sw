@@ -59,7 +59,12 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 	p_buff++ ;	// advance to next word
 	cha = *p_buff >> 16 ;
 
-	if(cha >= 0x8000) fla |= FCF_BIG_CHARGE ;
+	if(cha >= 0x8000) {	// special case of very large charge...
+		fla |= FCF_BIG_CHARGE ;
+		cha = (cha & 0x7FFF) * 1024 ;
+		if(cha == 0) cha = 0x8000;	// exaclty
+	}
+
 	ptmp = *p_buff & 0xFFFF ;
 
 	if(ptmp & 0x8000) fla |= FCF_ROW_EDGE ;
@@ -164,6 +169,8 @@ void tpxFCF::config(u_int mask, int mode)
 	} 
 
 
+	LOG(TERR,"calling config: mask 0x%X, mode %d",mask,mode) ;
+
 	// There is some amount of acrobatics involved so
 	// bear with me...
 
@@ -253,8 +260,10 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 	int row, pad ;
 
+	LOG(WARN,"Applying gains to sector %d",sec) ;
+
 	// clear all flags but the existing ones
-	for(row=0;row<=45;row++) {
+	for(row=1;row<=45;row++) {
 		if(row_ix[row] < 0) continue ;
 
 		for(pad=1;pad <= tpc_rowlen[row]; pad++) {
@@ -265,7 +274,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 
 	// put gains & flags
-	for(row=0;row<=45;row++) {
+	for(row=1;row<=45;row++) {
 		if(row_ix[row] < 0) continue ;
 
 		for(pad=1;pad<=tpc_rowlen[row];pad++) {	
@@ -277,6 +286,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 			u_int fl = 0 ;
 
 			if(!(s->f & 0x8000)) {	// not really here
+				LOG(WARN,"Applying brohen edge to row:pad %d:%d",row,pad) ;
 				fl |= FCF_BROKEN_EDGE ;
 			}
 
@@ -318,7 +328,7 @@ void tpxFCF::start_evt()
 {
 	cl_marker = 10000 ;	// used to mark unique clusters sector...
 
-	for(int r=0;r<=45;r++) {
+	for(int r=1;r<=45;r++) {
 		if(row_ix[r] < 0) continue ;
 
 // BUG IN FY08 run:		for(int p=1;p<tpc_rowlen[r];p++) {
