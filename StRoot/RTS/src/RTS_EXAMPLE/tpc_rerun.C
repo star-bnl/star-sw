@@ -23,17 +23,18 @@ int main(int argc, char *argv[])
 
 
 	// need this specific construct so that the cluster finder can initialize!
-	daq_tpx *tpx = new daq_tpx(dr) ;
-	tpx->InitRun(123) ;
+	daq_tpx *tpx = new daq_tpx(dr) ;	// insert the TPX detector explicitly in the DAQ_READER
+	tpx->InitRun(123) ;			// initialize the run with some dummy run number...
 
 
-	while(dr->get(0,0)) {
+	while(dr->get(0,0)) {			// zip through the input files...
 
 
 
 	daq_dta *dd, *sim_dta ;
 
-#if 0
+//#define DUMP_CLD_IN_FILE
+#ifdef DUMP_CLD_IN_FILE
 	// if you care, you can dump the in-file clusters here
 	dd = dr->det("tpx")->get("cld") ;
 	while(dd && dd->iterate()) {
@@ -82,14 +83,14 @@ int main(int argc, char *argv[])
 	}
 
 	// OK, now we have the ADC data ready for re-clusterfinding so let's do it
-	dd = dr->det("tpx")->get("cld_sim") ;
+
+
+	dd = dr->det("tpx")->get("cld_sim") ;	// this will rerun the cluster finder on the "adc_sim" data
 	if(dd == 0) continue ;	// error
 
 	// dump the newly found data out...
 	while(dd->iterate()) {
 		//printf("sec %2d, row %3d: %d clusters\n",dd->sec,dd->row,dd->ncontent) ;
-
-
 
 		for(u_int i=0;i<dd->ncontent;i++) {
 
