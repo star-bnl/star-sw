@@ -708,7 +708,7 @@ int tpxGain::from_file(char *fname, int sec)
 	f = fopen(fname,"r") ;
 
 	if(f==0) {
-		LOG(ERR,"from_file: error in fopen \"%s\" [%s]",fname,strerror(errno)) ;
+		LOG(WARN,"from_file: error in fopen \"%s\" [%s]",fname,strerror(errno)) ;
 		do_default(sector) ;
 		return 1 ;	// assume hange...
 	}

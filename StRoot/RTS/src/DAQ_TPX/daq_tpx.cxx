@@ -5,23 +5,27 @@
 #include <rtsLog.h>
 #include <rtsSystems.h>
 
+
 #include <SFS/sfs_index.h>
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
 
-#include "daq_tpx.h"
+
 
 #include <DAQ_TPC/daq_tpc.h>	// solely for the "legacy" use!
+#include <TPC/trans_table.hh>	// same...
 
+#include <DAQ1000/ddl_struct.h>	// for the misc DDL hardware constructs
 
+#include "daq_tpx.h"
 #include "tpxCore.h"
 #include "tpxGain.h"
 #include "tpxPed.h"
 #include "tpxFCF.h"
 #include "tpxStat.h"
 
-#include <DAQ1000/ddl_struct.h>
+
 
 
 class daq_det_tpx_factory : public daq_det_factory
@@ -484,6 +488,7 @@ daq_dta *daq_tpx::put(const char *in_bank, int sec, int row, int pad, void *p1, 
 
 daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 {
+	const int tpx_tpc_tb_delta = 22 ;
 	int max_s, min_s ;
 	daq_dta *dd ;
 	int found_something = 0 ;
@@ -507,8 +512,9 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 			tpc_p = (struct tpc_t *) legacy->request(1) ;
 			memset(tpc_p,0,sizeof(tpc_t)) ;
 
-			
 
+			LOG(WARN,"Found TPX peds -- translating into TPC peds not done yet!") ;			
+			
 			tpc_p->mode = 1 ;	// pedestal mode!
 			
 			while(dd->iterate()) {
@@ -522,42 +528,99 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 			continue ;	// do NOT allow other ADC checks!
 		}
 
+
+
 		// grab the ADC data first...
 		dd = handle_adc(s,-1) ;
 		if(dd) {
-			tpc_p = (struct tpc_t *) legacy->request(1) ;
+			//LOG(NOTE,"legacy ADC") ;
+			tpc_p = (struct tpc_t *) legacy->request(1) ;	// gimme 1 tpc_t
 			memset(tpc_p,0,sizeof(tpc_t)) ;			
-			
+
+
+			//LOG(NOTE,"legacy ADC 2") ;
 			while(dd->iterate()) {
-				int r = dd->row - 1 ;
-				int p = dd->pad - 1 ;
+				int r = dd->row - 1 ;	// tpc_t counts from 0
+				int p = dd->pad - 1 ;	// tpc_t counts from 0 ;
+		
+				if((r<0) || (p<0)) continue ;	// altro can have row or pad == 0
+
+				found_something = 1 ;
+
+				//LOG(NOTE,"rp %d:%d, ncontent %d",r,p,dd->ncontent) ;
 
 				for(u_int i=0;i<dd->ncontent;i++) {
-					//tpc_p->adc[r][p][pr_cou[r][p]] = dd->adc[i].adc ;
-					//tpc_p->adc[r][p][pr_cou[r][p]] = dd->adc[i].tb ;
+					int tpc_tb, tpc_adc ;
 
+					// adjust timebin
+					tpc_tb = dd->adc[i].tb - tpx_tpc_tb_delta ;	// 22 is the current best estimate
+					if(tpc_tb < 0) continue ;
+
+					// adjust logarithmic response
+					tpc_adc = log10to8_table[dd->adc[i].adc] ;
+
+					if(tpc_adc == 0) continue ;	// 0 is possible with the altro but not TPC ZS
+
+					int c = tpc_p->counts[r][p] ;	// shorthand
+					tpc_p->adc[r][p][c] = dd->adc[i].adc ;
+					tpc_p->timebin[r][p][c] = dd->adc[i].tb ;
+			
+					(tpc_p->counts[r][p])++ ;
 					tpc_p->channels_sector++ ;
 
 				}
-				found_something = 1 ;
+
 			}
 		}
 
+		//LOG(NOTE,"legacy ADC done.") ;
 		// grab CLD data next
 		dd = handle_cld(s,-1) ;
 		if(dd) {
-			if(tpc_p == 0) {
+			if(tpc_p == 0) {	// create if it didn't exist already
 				tpc_p = (struct tpc_t *) legacy->request(1) ;
 				memset(tpc_p,0,sizeof(tpc_t)) ;
 			}
 
 			while(dd->iterate()) {
+				int r = dd->row - 1 ;	// tpc_t counts from 0
 
+				if(r < 0) continue ;	// possible with ALTRO
 
+				tpc_p->has_clusters = 1 ;
 				found_something = 1 ;
+
+				for(u_int i=0;i<dd->ncontent;i++) {
+					int c = tpc_p->cl_counts[r] ;
+					if(c >= TPC_READER_MAX_CLUSTERS) break ;
+
+					// adjust and reject the timebin if necessary...
+					int tpc_t1, tpc_t2 ;
+					double tpc_t ;
+
+					tpc_t1 = (int)dd->cld[i].t1 - tpx_tpc_tb_delta ;
+					tpc_t2 = (int)dd->cld[i].t2 - tpx_tpc_tb_delta ;
+					tpc_t = (double)dd->cld[i].tb - tpx_tpc_tb_delta ;
+
+					// reject clusters which would not be seen by the TPC
+					if((tpc_t1<0) || (tpc_t2<0) || (tpc_t<0.0)) continue ;
+
+					tpc_p->cl[r][c].t1 = tpc_t1 ;
+					tpc_p->cl[r][c].t2 = tpc_t2 ;
+					tpc_p->cl[r][c].t = tpc_t ;
+				
+					tpc_p->cl[r][c].p1 = dd->cld[i].p1 ;
+					tpc_p->cl[r][c].p2 = dd->cld[i].p2 ;
+					tpc_p->cl[r][c].p = dd->cld[i].pad ;
+				
+					tpc_p->cl[r][c].charge = dd->cld[i].charge ;
+					tpc_p->cl[r][c].flags = dd->cld[i].flags ;
+
+					(tpc_p->cl_counts[r])++ ;
+				}
+
 			}
 
-			tpc_p->has_clusters = 1 ;
 
 		}
 
@@ -569,6 +632,8 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 		}
 
 	}
+
+	legacy->rewind() ;
 
 	if(found_something) return legacy ;
 	else return 0 ;
@@ -1267,7 +1332,8 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 	daq_dta *sim = get("adc_sim") ;
 
 	if(sim==0) {
-		LOG(ERR,"%s: you need to add simulated data first!",name) ;
+		LOG(ERR,"%s: sector %d, row %d: you need to add simulated data first!",name,sec,row) ;
+		return 0 ;
 		return cld_sim ;
 	}
 

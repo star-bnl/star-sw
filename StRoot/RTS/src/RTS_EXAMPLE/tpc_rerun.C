@@ -33,14 +33,14 @@ int main(int argc, char *argv[])
 
 	daq_dta *dd, *sim_dta ;
 
-//#define DUMP_CLD_IN_FILE
+#define DUMP_CLD_IN_FILE
 #ifdef DUMP_CLD_IN_FILE
 	// if you care, you can dump the in-file clusters here
 	dd = dr->det("tpx")->get("cld") ;
 	while(dd && dd->iterate()) {
 		for(u_int i=0;i<dd->ncontent;i++) {
-			if(dd->cld[i].tb < 15.0) {
-			printf("cld: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X\n",
+//			if(dd->cld[i].tb < 15.0)
+			printf("cld: row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X\n",dd->row,
 			       dd->cld[i].pad,
 			       dd->cld[i].p1,
 			       dd->cld[i].p2,
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 			       dd->cld[i].t2,
 			       dd->cld[i].charge,
 			       dd->cld[i].flags) ;
-			}
+
 		}
 
 
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 		//printf("sec %2d, row %3d: %d clusters\n",dd->sec,dd->row,dd->ncontent) ;
 
 		for(u_int i=0;i<dd->ncontent;i++) {
-
+#if 0
 			if(dd->sim_cld[i].cld.flags != 0) continue ;
 			if((dd->sim_cld[i].cld.p2 - dd->sim_cld[i].cld.p1) != 2) continue ;
 
@@ -109,10 +109,11 @@ int main(int argc, char *argv[])
 					}
 				}
 			}
+#endif
 
-#if 0
-			if(dd->sim_cld[i].cld.tb < 15.0) {
-			printf("pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X: track %d, Q %d\n",
+#if 1
+//			if(dd->sim_cld[i].cld.tb < 15.0) 
+			printf("row %2d: pad %f [%d:%d], tb %f [%d:%d], charge %d, flags 0x%X: track %d, Q %d\n",dd->row,
 			       dd->sim_cld[i].cld.pad,
 			       dd->sim_cld[i].cld.p1,
 			       dd->sim_cld[i].cld.p2,
@@ -123,7 +124,6 @@ int main(int argc, char *argv[])
 			       dd->sim_cld[i].cld.flags,
 			       dd->sim_cld[i].track_id,
 			       dd->sim_cld[i].quality) ;
-			}
 #endif
 		}
 	}

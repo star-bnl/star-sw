@@ -221,15 +221,31 @@ static int tpx_doer(daqReader *rdr, char  *do_print)
 	else do_print = 0 ;
 
 	// TPX
-	// it is better, more memory efficient, to call stuff sector by sector
+	// it is better, more memory efficient, to call stuff sector by sector (if possible)
+
 	for(int s=1;s<=24;s++) {
-		/// TPX legacy not done yet!
-		//dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t! but not done YET!
-		//if(dd) found = 1 ;
+
+		dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t
+		while(dd && dd->iterate()) {
+			found = 1 ;
+				
+			struct tpc_t *tpc = (tpc_t *) dd->Void ;
+			if(do_print) {
+				int cls = 0 ;
+				for(int r=0;r<45;r++) {
+					cls += tpc->cl_counts[r] ;
+				}
+
+				printf("TPX: sec %02d (as legacy): %d pixels, %d clusters\n",dd->sec,tpc->channels_sector,cls) ;
+			}
+
+		}
+
 
 		int pixel_count[46] ;	// as an example we'll count pixels per row
 		memset(pixel_count,0,sizeof(pixel_count)) ;
 		int sec_found = 0 ;
+
 
 		dd = rdr->det("tpx")->get("adc",s) ;
 		if(dd) 	{
@@ -258,10 +274,24 @@ static int tpx_doer(daqReader *rdr, char  *do_print)
 			}
 		}
 
-		found = sec_found ;
 
 		dd = rdr->det("tpx")->get("cld",s) ;
-		if(dd) 	found = 1 ;
+		while(dd && dd->iterate()) {
+
+			found = 1 ;
+
+
+			if(do_print) {
+				printf("TPX: sec %02d, row %2d: %3d clusters\n",dd->sec,dd->row,dd->ncontent) ;
+			}
+			
+			for(u_int i=0;i<dd->ncontent;i++) {
+				if(do_print) {
+					printf("\tpad %7.3f, time %7.3f, charge %5d, flags 0x%02X\n",dd->cld[i].pad,dd->cld[i].tb,dd->cld[i].charge,dd->cld[i].flags) ;
+				}
+			}
+		}
+
 	
 		// will only exist in token 0 of a pedestal run!
 		dd = rdr->det("tpx")->get("pedrms",s) ;
