@@ -313,8 +313,10 @@ int daq_tpx::InitRun(int run)
 	}
 
 
+
 	// offline setup: try our canonical location first
 	gain_algo->from_file("/RTS/conf/tpx/tpx_gains.txt",0) ;	// all sectors!
+
 
 	// if we have externally applied gains we will use them,
 	// otherwise we'll try to use them from the canonical location...
@@ -343,7 +345,7 @@ int daq_tpx::InitRun(int run)
 
 	}
 	
-	if(mode & m_Mode_DAQ_GAIN) {
+	if(mode & m_Mode_DAQ_GAIN) {	// pulser run so we zap the gains!!!
 		gain_algo->init(def_sector) ;	// ALL sectors!
 	}
 
