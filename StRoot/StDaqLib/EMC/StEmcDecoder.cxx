@@ -249,7 +249,7 @@ GetCrateAndSequenceFromTriggerPatch(int PATCH,int& CRATE,int& crate_seq) const {
     for(int id=1; id<=4800; id++) {
         if(mapping.bemc(id).triggerPatch == PATCH) {
             CRATE = mapping.bemc(id).crate;
-            crate_seq = (PATCH%16)*16;
+            crate_seq = (PATCH%10)*16;
         }
     }
     return 1;
@@ -565,9 +565,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const {
     return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.57 2008/12/05 19:05:32 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.58 2008/12/15 20:25:18 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.58  2008/12/15 20:25:18  kocolosk
+// GetCrateAndSequenceFromTriggerPatch calculated the sequence incorrectly
+//
 // Revision 2.57  2008/12/05 19:05:32  kocolosk
 // new DB-backed implementation of StEmcDecoder
 //
