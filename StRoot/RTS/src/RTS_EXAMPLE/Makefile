@@ -16,7 +16,7 @@ VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ..
 	../DAQ_READER  ../SFS ../LOG 
 
 
-BINS =  rts_example tpc_rerun
+BINS =  rts_example tpc_rerun tpx_gains
 
 
 all:   $(BINS)
@@ -26,6 +26,9 @@ rts_example: rts_example.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 tpc_rerun: tpc_rerun.o $(VOBJS)
+	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+
+tpx_gains: tpx_gains.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 sfs_stuff: sfs_stuff.o $(VOBJS)
@@ -71,3 +74,13 @@ tpc_rerun.o: ../../../../StRoot/RTS/include/rts.h
 tpc_rerun.o: ../DAQ_READER/daq_dta_structs.h
 tpc_rerun.o: ../DAQ_TPX/daq_tpx.h
 tpc_rerun.o: ../DAQ_READER/daq_det.h
+tpx_gains.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpx_gains.o: ../DAQ_READER/daqReader.h
+tpx_gains.o: ../DAQ_READER/daq_dta.h
+tpx_gains.o: ../../../../StRoot/RTS/include/rts.h
+tpx_gains.o: ../DAQ_READER/daq_dta_structs.h
+tpx_gains.o: ../DAQ_TPX/daq_tpx.h
+tpx_gains.o: ../DAQ_READER/daq_det.h
+tpx_gains.o: ../DAQ_TPX/tpxGain.h
+tpx_gains.o: ../DAQ_TPX/tpxCore.h
+tpx_gains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
