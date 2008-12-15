@@ -59,11 +59,8 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
   if(bField == 1000) {  // try to read from file
     bField = defaultbField;       // use default
 
-
-    LOG(DBG, "About to crash... evt=%d token=%d",rdr->seq, rdr->token);
-
     dd = rdr->det("sc")->get("legacy");
-    LOG(DBG, "dd=0x%x",dd);
+
     if(dd) {
       dd->iterate();
       sc_t *sc = (sc_t *)dd->Void;

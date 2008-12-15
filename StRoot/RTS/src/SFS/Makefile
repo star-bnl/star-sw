@@ -15,7 +15,7 @@ libs:	$(LIBS)
 
 blastSFS: libsfs.a blastSFS.o
 
-fs: libsfs.a fs.o
+fs: libsfs.a fs.o $(VOBJS)
 
 fs_ex: libsfs.a fs_ex.o 
 
