@@ -169,7 +169,7 @@ void tpxFCF::config(u_int mask, int mode)
 	} 
 
 
-	LOG(TERR,"calling config: mask 0x%X, mode %d",mask,mode) ;
+	LOG(NOTE,"calling config: mask 0x%X, mode %d",mask,mode) ;
 
 	// There is some amount of acrobatics involved so
 	// bear with me...
@@ -182,7 +182,7 @@ void tpxFCF::config(u_int mask, int mode)
 				tpx_from_altro(r,a,ch,row,pad) ;
 
 				if(row > 45) continue ;	// not in this RDO...
-
+				if(row == 0) continue ;	// will nix row 0 as well...
 				row_ix[row] = 1  ;	// mark as needed...
 			}
 			}
@@ -238,6 +238,7 @@ void tpxFCF::config(u_int mask, int mode)
 				tpx_from_altro(r,a,ch,row,pad) ;
 
 				if(row > 45) continue ;
+				if(row == 0) continue ;
 
 				get_stage1(row, pad)->f = 0x8000 ;
 
@@ -260,7 +261,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 	int row, pad ;
 
-	LOG(WARN,"Applying gains to sector %d",sec) ;
+	LOG(NOTE,"Applying gains to sector %d",sec) ;
 
 	// clear all flags but the existing ones
 	for(row=1;row<=45;row++) {
@@ -286,7 +287,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 			u_int fl = 0 ;
 
 			if(!(s->f & 0x8000)) {	// not really here
-				LOG(WARN,"Applying brohen edge to row:pad %d:%d",row,pad) ;
+				//LOG(WARN,"Applying brohen edge to row:pad %d:%d",row,pad) ;
 				fl |= FCF_BROKEN_EDGE ;
 			}
 
@@ -354,8 +355,12 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 {
 	struct stage1 *s ;
 
+	if(unlikely(a->row > 45)) return 0 ;
+	if(unlikely(a->row == 0)) return 0 ;
+
 
 	s = get_stage1(a->row, a->pad) ;
+
 	if(unlikely(s==0)) {
 		LOG(ERR,"Whoa -- no row:pad %d:%d???",a->row,a->pad) ;
 		return 0 ;
@@ -363,10 +368,6 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 
 	s->count = 0 ;
-
-
-
-	if(unlikely(a->row > 45)) return 0 ;
 	if(unlikely(a->count==0)) return 0 ;
 
 	u_int t_ave, charge ;
@@ -608,10 +609,20 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 
 		cur_row = r ;
+		if(cur_row == 0) {
+			LOG(WARN,"Can;t be -- row 0; row_ix %d",row_ix[r]) ;
+		}
+
+		int bytes_so_far = (loc_buff - outbuff)*4 ;
+		if(bytes_so_far > (max_bytes-1024)) {
+			LOG(WARN,"row %d: approaching limit: is %d, max %d",cur_row,bytes_so_far,max_bytes) ;
+		}
+
 
 		u_int *row_cache = loc_buff++ ;	// remember where the row goes...
 		u_int *clust_count_cache = loc_buff++ ;	// remember where the cluster count goes...
 
+		
 		cur_row_clusters = 0 ;
 
 		//LOG(DBG,"going into row %d",r) ;
@@ -933,29 +944,19 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	int div_fact ;
 
 
-	// first set of cuts
+	// first set of pre-cuts
 	if(likely(do_cuts)) {
-		if(unlikely(fla & FCF_BROKEN_EDGE)) ;	// pass!
+		if(unlikely(fla & FCF_BROKEN_EDGE)) ;	// pass hits on row 8...
 		else if((do_cuts == 1) && (fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE))) return ;	// kill clusters touching the edge or a dead pad
 	}
 
-//	if(fla & FCF_ONEPAD) {
-//		LOG(INFO,"onepad: flags 0x%X: charge %d: row %d: pads %d:%d, tb %d:%d",fla,cl->charge,cur_row,cl->p1,cl->p2,cl->t1,cl->t2) ;
-//	}
 
-	//LOG(DBG,"dump: row %d: %d %d %d %d %f 0x%X",cur_row,cl->p1,cl->p2,cl->t_min,cl->t_max,cl->f_charge,cl->flags) ;
-
-
-
-
-	// we first calc the timebin so that we can skip any cuts for hits
-	// before the trigger -- MWPC studies...
-
-
-
+	// next we will kill one pad wide clusters but not the ones close to the padplane (MWPC studies)!
 	if((fla & FCF_ONEPAD) && (cl->t1 < 15)) {	// for any hit below the trigger, we pass -- for MWPC studies!
-		if((cl->t2 - cl->t1)<=1) return ;
-		if(cl->t2 > 30) return ;
+		if((cl->t2 - cl->t1)<=1) return ;	// I won't pass hits with less than 2 timebins
+		if(cl->t2 > 30) return ;		// too long, noise
+
+
 		//LOG(INFO,"dt %.1f: row %d: %d %d %d %d : %d %f 0x%X",dt,cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->charge,cl->f_charge,cl->flags) ;
 		return ;	// still
 	}
@@ -969,8 +970,25 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 
 	}
 
+	//now, I can have ONEPAD hits here:
+	//	1) because of the low timebin, MWPC studies
+	//	2) because of row 8 aka BROKEN_EDGE
+
+	if(!(fla & FCF_IN_DOUBLE)) {	// the values were not turned to double
+		if(fla & FCF_ONEPAD) {	// this is the only valid case
+			cl->p1 = cl->p2 ;
+			cl->f_charge = (float)cl->charge * 1.0 ;
+			cl->p_ave = cl->p1 * cl->f_charge ;
+			cl->f_t_ave = (float)cl->t_ave * 1.0 ;
+		}
+		else {
+			LOG(WARN,"WTF? not double: row %d: %d-%d, %d-%d (%d-%d): charge %d (%.3f): 0x%X",cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->t_min,cl->t_max,cl->charge,cl->f_charge,cl->flags) ;
+			return ;
+		}
+	}
+
 	if(cl->f_charge < 1.0) {
-		if(!(fla & FCF_DEAD_EDGE)) LOG(WARN,"WTF? row %d: %d-%d, %d-%d (%d-%d): charge %d (%.3f): 0x%X",cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->t_min,cl->t_max,cl->charge,cl->f_charge,cl->flags) ;
+		if(!(fla & FCF_DEAD_EDGE)) LOG(WARN,"WTF? no charge: row %d: %d-%d, %d-%d (%d-%d): charge %d (%.3f): 0x%X",cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->t_min,cl->t_max,cl->charge,cl->f_charge,cl->flags) ;
 		return ;
 	}
 

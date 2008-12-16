@@ -34,6 +34,7 @@ daq_trg.o: ../SFS/sfs_index.h
 daq_trg.o: ../SFS/fs_index.h
 daq_trg.o: ../SFS/sfs_base.h
 daq_trg.o: ../DAQ_READER/daqReader.h
+daq_trg.o: ../DAQ_READER/daqConfig.h
 daq_trg.o: ../DAQ_READER/daq_dta.h
 daq_trg.o: ../../../../StRoot/RTS/include/rts.h
 daq_trg.o: ../DAQ_READER/daq_dta_structs.h
@@ -110,4 +111,14 @@ trg_reader.o: ../../../../StRoot/RTS/include/rts.h
 trg_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 trg_reader.o: daq_trg.h
 trg_reader.o: ../DAQ_READER/daq_det.h
+trgReader.o: ../DAQ_READER/daqReader.h
+trgReader.o: ../DAQ_READER/daqConfig.h
+trgReader.o: ../DAQ_READER/daq_dta.h
+trgReader.o: ../../../../StRoot/RTS/include/rts.h
+trgReader.o: ../DAQ_READER/daq_dta_structs.h
+trgReader.o: ../DAQ_READER/daq_det.h
+trgReader.o: trgReader.h
+trgReader.o: daq_trg.h
 daq_trg.o: ../DAQ_READER/daq_det.h
+trgReader.o: daq_trg.h
+trgReader.o: ../DAQ_READER/daq_det.h

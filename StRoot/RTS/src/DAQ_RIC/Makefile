@@ -31,6 +31,7 @@ libric.a : $(OBJS)
 daq_ric.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_ric.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_ric.o: ../DAQ_READER/daqReader.h
+daq_ric.o: ../DAQ_READER/daqConfig.h
 daq_ric.o: ../DAQ_READER/daq_dta.h
 daq_ric.o: ../../../../StRoot/RTS/include/rts.h
 daq_ric.o: ../DAQ_READER/daq_dta_structs.h
@@ -45,4 +46,14 @@ ric_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 ric_reader.o: ../../../../StRoot/RTS/include/rts.h
 ric_reader.o: daq_ric.h
 ric_reader.o: ../DAQ_READER/daq_det.h
+ricReader.o: ../DAQ_READER/daqReader.h
+ricReader.o: ../DAQ_READER/daqConfig.h
+ricReader.o: ../DAQ_READER/daq_dta.h
+ricReader.o: ../../../../StRoot/RTS/include/rts.h
+ricReader.o: ../DAQ_READER/daq_dta_structs.h
+ricReader.o: ../DAQ_READER/daq_det.h
+ricReader.o: ricReader.h
+ricReader.o: daq_ric.h
 daq_ric.o: ../DAQ_READER/daq_det.h
+ricReader.o: daq_ric.h
+ricReader.o: ../DAQ_READER/daq_det.h

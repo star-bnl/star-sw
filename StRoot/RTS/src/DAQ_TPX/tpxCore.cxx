@@ -376,7 +376,7 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 	int was_log_yes ;
 
 	// I will log only if I'm told to
-	was_log_yes = a_struct->log_err ;
+	log_yes = was_log_yes = a_struct->log_err ;
 
 	a_struct->err = 0 ;	// clear error flag
 

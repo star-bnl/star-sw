@@ -311,7 +311,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
 	int errors = 0 ;
-	const int MAX_ERRORS = 20 ;
+	const u_int MAX_ERRORS = 20 ;
 
 	t = tpx_get_start(rdobuff, bytes/4, &rdo, 0) ;
 

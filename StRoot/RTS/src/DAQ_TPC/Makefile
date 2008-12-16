@@ -34,6 +34,7 @@ daq_tpc.o: ../SFS/sfs_index.h
 daq_tpc.o: ../SFS/fs_index.h
 daq_tpc.o: ../SFS/sfs_base.h
 daq_tpc.o: ../DAQ_READER/daqReader.h
+daq_tpc.o: ../DAQ_READER/daqConfig.h
 daq_tpc.o: ../DAQ_READER/daq_dta.h
 daq_tpc.o: ../../../../StRoot/RTS/include/rts.h
 daq_tpc.o: ../DAQ_READER/daq_dta_structs.h
@@ -63,4 +64,14 @@ tpc_reader.o: ../../../../StRoot/RTS/include/TPC/trans_table.hh
 tpc_reader.o: daq_tpc.h
 tpc_reader.o: ../DAQ_READER/daq_det.h
 tpc_reader.o: ../../../../StRoot/RTS/include/fcfClass.hh
+tpcReader.o: ../DAQ_READER/daqReader.h
+tpcReader.o: ../DAQ_READER/daqConfig.h
+tpcReader.o: ../DAQ_READER/daq_dta.h
+tpcReader.o: ../../../../StRoot/RTS/include/rts.h
+tpcReader.o: ../DAQ_READER/daq_dta_structs.h
+tpcReader.o: ../DAQ_READER/daq_det.h
+tpcReader.o: tpcReader.h
+tpcReader.o: daq_tpc.h
 daq_tpc.o: ../DAQ_READER/daq_det.h
+tpcReader.o: daq_tpc.h
+tpcReader.o: ../DAQ_READER/daq_det.h

@@ -1578,9 +1578,9 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			LOG(ERR,"RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
 	}
-	else if((rdo.rdo==1) && (rdo.sector==13)) {
+	else if((rdo.rdo==1) && ((rdo.sector==13) || (rdo.sector==1))) {
 		for(u_int i=0;i<rdo.trg_cou;i++) {
-			LOG(TERR,"RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
+			LOG(NOTE,"RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
 	}
 	

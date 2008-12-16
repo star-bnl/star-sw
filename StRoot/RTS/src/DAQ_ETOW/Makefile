@@ -34,6 +34,7 @@ daq_etow.o: ../SFS/sfs_index.h
 daq_etow.o: ../SFS/fs_index.h
 daq_etow.o: ../SFS/sfs_base.h
 daq_etow.o: ../DAQ_READER/daqReader.h
+daq_etow.o: ../DAQ_READER/daqConfig.h
 daq_etow.o: ../DAQ_READER/daq_dta.h
 daq_etow.o: ../../../../StRoot/RTS/include/rts.h
 daq_etow.o: ../DAQ_READER/daq_dta_structs.h
