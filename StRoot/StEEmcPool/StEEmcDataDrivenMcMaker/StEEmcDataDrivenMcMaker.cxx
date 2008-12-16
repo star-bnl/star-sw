@@ -1,10 +1,12 @@
 //
-// Pibero Djawotho <pibero@indiana.edu>
-// Indiana University Cyclotron Facility
-// and
 // Hal Spinka <hms@anl.gov>
 // Argonne National Laboratory
-// Feb-Mar 2008
+//
+// Pibero Djawotho <pibero@indiana.edu>
+// Indiana University Cyclotron Facility
+//
+// Ilya Selyuzhenkov <ilya.selyuzhenkov@gmail.com>
+// Indiana University Cyclotron Facility
 //
 
 // ROOT
@@ -14,6 +16,7 @@
 #include "TClonesArray.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TChain.h"
 
 // STAR
 #include "StEventTypes.h"
@@ -24,28 +27,35 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StEEmcUtil/StEEmcSmd/EEmcSmdGeom.h"
 #include "StEEmcSimulatorMaker/StEEmcFastMaker.h"
+#include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
 
 // Local
+#include "StEEmcPool/StEEmcDataDrivenMcEventInfo/StEEmcDataDrivenMcEventInfo.h"
 #include "StEEmcShowerShape.h"
 #include "StEEmcDataDrivenMcMaker.h"
 
 ClassImp(StEEmcDataDrivenMcMaker);
 
+StEEmcDataDrivenMcMaker::StEEmcDataDrivenMcMaker(const char* name) : StMaker(name)
+{
+  mUsePed = true;
+  mEEmcDb = 0;
+}
+
 void StEEmcDataDrivenMcMaker::Clear(Option_t* option)
 {
   memset(mStrips, 0, sizeof(mStrips));
+  mDataDrivenMcEventInfo->Clear(option);
   StMaker::Clear(option);
 }
 
 int StEEmcDataDrivenMcMaker::Init()
 {
-  // Get pointer to EEMC database
-  mEEmcDb = dynamic_cast<StEEmcDbMaker*>(GetMakerInheritsFrom("StEEmcDbMaker"));
-  assert(mEEmcDb);
-
   // Initialize pointer to Monte Carlo event
-  mcEvent = 0;
+  mMcEvent = 0;
 
+  //mNumberOfStripsReplaced = 12; // default number of strips replaced
+  //mShowerShapeScalingMethod = 1; // default scaling method
   // Load shower shape library
   TFile* file = new TFile(mLibraryFile);
   LOG_INFO << "Shower Shape Library = " << mLibraryFile << endm;
@@ -55,8 +65,8 @@ int StEEmcDataDrivenMcMaker::Init()
   StEEmcShowerShape* showerShape = 0;
   tree->SetBranchAddress("StEEmcSmdResponse", &showerShape);
 
-  for (int i = 0; i < 2; ++i) {
-    for (int j = 0; j < 4; ++j) {
+  for (int i = 0; i < NUMBER_OF_ENERGY_BINS; ++i) {
+    for (int j = 0; j < NUMBER_OF_PRESHOWER_BINS; ++j) {
       mShowerShapes[i][j] = new TClonesArray("StEEmcShowerShape");
     }
   }
@@ -65,20 +75,21 @@ int StEEmcDataDrivenMcMaker::Init()
     int uid = showerShape->highUstripId();
     int vid = showerShape->highVstripId();
     // Drop shapes that are at the edges of the SMD
-    if (uid < 12 || uid > 275 || vid < 12 || vid > 275) continue;
+//    if (uid < 12 || uid > 275 || vid < 12 || vid > 275) continue;
+    if (uid < mNumberOfStripsReplaced || uid > 288 - mNumberOfStripsReplaced-1 || vid < mNumberOfStripsReplaced || vid > 288-mNumberOfStripsReplaced-1) continue; // Added  by Ilya Selyuzhenkov
     assert(0 <= showerShape->sector() && showerShape->sector() < 12);
     int i = getEnergyBin(showerShape);
     int j = getPreshowerBin(showerShape);
-    assert(i >= 0 && i < 2);
-    assert(j >= 0 && j < 4);
+    assert(i >= 0 && i < NUMBER_OF_ENERGY_BINS);
+    assert(j >= 0 && j < NUMBER_OF_PRESHOWER_BINS);
     TClonesArray& tca = *mShowerShapes[i][j];
-    new (tca[tca.GetEntriesFast()]) StEEmcShowerShape(*showerShape);
+    mLibraryMap[new (tca[tca.GetEntriesFast()]) StEEmcShowerShape(*showerShape)] = iEntry;
   }
 
   LOG_INFO << "Number of shower shapes in library = " << tree->GetEntriesFast() << endm;
 
-  for (int i = 0; i < 2; ++i) {
-    for (int j = 0; j < 4; ++j) {
+  for (int i = 0; i < NUMBER_OF_ENERGY_BINS; ++i) {
+    for (int j = 0; j < NUMBER_OF_PRESHOWER_BINS; ++j) {
       LOG_INFO << "Energy bin ="   << i
 	       << ", preshower bin=" << j
 	       << ", number of shower shapes=" << mShowerShapes[i][j]->GetEntriesFast()
@@ -99,27 +110,44 @@ int StEEmcDataDrivenMcMaker::Init()
     assert(mLogFile);
   }
 
-  // Create QA histograms
-  hLibEntry = new TH1F("hLibEntry", "Shower shape library index", 100, 0, 3400); // WWJ library has 3334 entries
-  hNumberOfPhotons = new TH1F("hNumberOfPhotons", "Number of photons/event", 20, 0, 20);
-  hMcPhotonEnergyEta = new TH2F("hMcPhotonEnergyEta", "MC photon eta vs. energy;E [GeV];#eta_{detector}", 100, 0, 40, 100, 1, 2);
-  hMcPhotonEnergyPt = new TH2F("hMcPhotonEnergyPt", "MC photon p_{T} vs. energy;E [GeV];p_{T} [GeV/c]", 100, 0, 50, 100, 0, 15);
-  hMcPhotonParent = new TH1F("hMcPhotonParent", "MC photon parent particle", 5, 0, 5);
-  hMcPhotonXY = new TH2F("hPhotonXY", "MC photon position in SMD plane;x [cm];y [cm]", 100, -250, 250, 100, -250, 250);
-  hResidualSmdu = new TH1F("hResidualSmdu", "u-strip energy residual=before-after;#deltaE [GeV]", 100, -0.1, 0.1);
-  hResidualSmdv = new TH1F("hResidualSmdv", "v-strip energy residual=before-after;#deltaE [GeV]", 100, -0.1, 0.1);
-  hCorrSmdu = new TH2F("hCorrSmdu", "u-strip energy;E_{before} [GeV];E_{after} [GeV]", 100, 0, 0.1, 100, 0, 0.1);
-  hCorrSmdv = new TH2F("hCorrSmdv", "v-strip energy;E_{before} [GeV];E_{after} [GeV]", 100, 0, 0.1, 100, 0, 0.1);
-  hDiffStripSmdu = new TH2F("hDiffStripSmdu", "Residual of u-strip;u-strip;#deltaE=before-after", 25, -12, 13, 100, -0.1, 0.1);
-  hDiffStripSmdv = new TH2F("hDiffStripSmdv", "Residual of v-strip;v-strip;#deltaE=before-after", 25, -12, 13, 100, -0.1, 0.1);
-  hAsymStripSmdu = new TH2F("hAsymStripSmdu", "Asymmetry of u-strip;u-strip;#deltaE=before-after", 25, -12, 13, 100, -1, 1);
-  hAsymStripSmdv = new TH2F("hAsymStripSmdv", "Asymmetry of v-strip;v-strip;#deltaE=before-after", 25, -12, 13, 100, -1, 1);
-  hHighStripsUVid = new TH2F("hHighStripsUVid", ";u-strip id;v-strip id", 288, 0, 288, 288, 0, 288);
-  hHighStripsUVenergy = new TH2F("hHighStripsUVenergy", ";E_{u} [GeV];E_{v} [GeV]", 100, 0, 0.2, 100, 0, 0.2);
+  // Data-driven MC event info
+  mDataDrivenMcEventInfo = new StEEmcDataDrivenMcEventInfo;
 
-  if (mLogFile) gROOT->cd();
+  // Create tree
+  mTree = new TTree("DataDrivenMcEventInfo", "Data-driven Monte Carlo event info");
+  mTree->Branch("DataDrivenMcEventInfo", &mDataDrivenMcEventInfo);
+
+  // Get Energy to ADC maker
+  mA2E = (StEEmcA2EMaker*)GetMakerInheritsFrom("StEEmcA2EMaker");
+  assert(mA2E);
+
+  // Load pedestals from database
+  mEEmcDb = (StEEmcDbMaker*)GetMakerInheritsFrom("StEEmcDbMaker");
+  assert(mEEmcDb);
+
+  // Clear ped & gain arrays
+  memset(mPed, 0, sizeof(mPed));
+  memset(mGain, 0, sizeof(mGain));
 
   return StMaker::Init();
+}
+
+int StEEmcDataDrivenMcMaker::InitRun(int runNumber)
+{
+  for (int sector = 0; sector < 12; ++sector) {
+    for (int plane = 0; plane < 2; ++plane) {
+      char uv = plane+'U';
+      for (int strip = 0; strip < 288; ++strip) {
+	//Database ranges: sector=1-12, plane=U-V, strip=1-288
+	const EEmcDbItem* x = mEEmcDb->getByStrip(sector+1, uv, strip+1);
+	assert(x);
+	mPed[sector][plane][strip] = mUsePed ? x->ped : 0;
+	mGain[sector][plane][strip] = mUsePed ? x->gain : StEEmcFastMaker::getSmdGain();
+      }
+    }
+  }
+  
+  return StMaker::InitRun(runNumber);
 }
 
 int StEEmcDataDrivenMcMaker::Make()
@@ -143,23 +171,34 @@ int StEEmcDataDrivenMcMaker::Make()
     for (int i = 0; i < emc->getNEndcapSmdHits(uv); ++i) {
       int sector, strip;
       StMuEmcHit* hit = emc->getEndcapSmdHit(uv, i, sector, strip);
+      hit->setAdc(int(hit->getAdc() + mPed[sector-1][plane-1][strip-1]));
       mStrips[sector-1][plane-1][strip-1] = hit;
     }
   }
 
   // Get StMcEvent
-  mcEvent = (StMcEvent*)GetDataSet("StMcEvent");
+  mMcEvent = (StMcEvent*)GetDataSet("StMcEvent");
 
-  if (!mcEvent) {
+  if (!mMcEvent) {
     LOG_WARN << "No StMcEvent" << endm;
     return kStWarn;
   }
 
+  // Fill MC event info
+  mDataDrivenMcEventInfo->SetRunId(mMcEvent->runNumber());
+  mDataDrivenMcEventInfo->SetEventId(mMcEvent->eventNumber());
+
+  // Get MuDst file name
+  if (StMuDstMaker* mudst = dynamic_cast<StMuDstMaker*>(GetMakerInheritsFrom("StMuDstMaker"))) {
+    mDataDrivenMcEventInfo->SetFileName(mudst->chain()->GetFile()->GetName());
+  }
+
   // Start with primary particles and look for final states
   // photons recursively.
-  mNumberOfPhotons = 0;
-  processVertex(mcEvent->primaryVertex());
-  hNumberOfPhotons->Fill(mNumberOfPhotons);
+  processVertex(mMcEvent->primaryVertex());
+
+  // Fill tree
+  if (mDataDrivenMcEventInfo->NumberOfReplacements()) mTree->Fill();
 
   return kStOk;
 }
@@ -182,7 +221,7 @@ void StEEmcDataDrivenMcMaker::processTrack(StMcTrack* mcTrack)
     if (mcTrack->geantId() < 1 || mcTrack->geantId() > 3) return;
 
     // We must have hits in both SMD planes
-    if (mcTrack->esmduHits().empty() || mcTrack->esmdvHits().empty()) return;
+    if (mcTrack->esmduHits().empty() && mcTrack->esmdvHits().empty()) return;
 
     // SMD hits must be contained in a single sector
     if (multiSector(mcTrack->esmduHits()) || multiSector(mcTrack->esmdvHits())) return;
@@ -214,40 +253,58 @@ void StEEmcDataDrivenMcMaker::processTrack(StMcTrack* mcTrack)
     int etabin    = -1;
     if (!EEmcGeomSimple::Instance().getTower(position, sector, subsector, etabin)) return;
 
-    // Get U and V strips closest to the position of the photon in
-    // the SMD plane.
-    float dca;
+    // Save replace information
+    StEEmcDataDrivenMcReplaceInfo* replaceInfo = mDataDrivenMcEventInfo->newReplaceInfo();
+
     int sectors[2];
     int strips[2];
+    StMcCalorimeterHit* maxHits[2];
 
     for (int plane = 0; plane < 2; ++plane) {
-      const StructEEmcStrip* strip = EEmcSmdGeom::instance()->getDca2Strip(plane, position, &dca);
-      sectors[plane] = strip->stripStructId.sectorId - 1; // sector=0-11
-      strips [plane] = strip->stripStructId. stripId - 1; // strip=0-287
+      // Get U and V strips closest to the extrapolated position of the photon in
+      // the SMD plane.
+      float dca;
+      const StructEEmcStrip* eemcStrip = EEmcSmdGeom::instance()->getDca2Strip(plane, position, &dca);
+      sectors[plane] = eemcStrip->stripStructId.sectorId - 1; // sector=0-11
+      strips [plane] = eemcStrip->stripStructId. stripId - 1; // strip=0-287
 
-      // Find maximum strip within +/-20 strips of the intersection
-      int xmin = max(0  , strips[plane] - 20);
-      int xmax = min(287, strips[plane] + 20);
+      // Get MC shower max hits
+      StPtrVecMcCalorimeterHit& hits = (plane == 0) ? mcTrack->esmduHits() : mcTrack->esmdvHits();
 
-      StMuEmcHit* maxHit = mStrips[sectors[plane]][plane][strips[plane]];
+      // Loop over hits and determine max hit
+      StMcCalorimeterHit* maxHit = 0;
 
-      for (int strip = xmin; strip <= xmax; ++strip) {
-	StMuEmcHit* hit = mStrips[sectors[plane]][plane][strip];
-	if (hit) {
-	  if (!maxHit || hit->getEnergy() > maxHit->getEnergy()) {
-	    maxHit = hit;
-	    strips[plane] = strip;
-	  }
+      for (size_t k = 0; k < hits.size(); ++k) {
+	StMcCalorimeterHit* hit = hits[k];
+	if (plane == 0)
+	  replaceInfo->addMcHitEsmdU(hit);
+	else
+	  replaceInfo->addMcHitEsmdV(hit);
+	if (!maxHit || hit->dE() > maxHit->dE()) maxHit = hit;
+      }	// End hit loop
+
+      // Save max hits for later
+      maxHits[plane] = maxHit;	// Can be 0
+
+      if (maxHit) {
+	int maxId = maxHit->eta() - 1; // 0-287
+	if (plane == 0) {
+	  replaceInfo->highStripShiftU = maxId - strips[plane];
+	}
+	else {
+	  replaceInfo->highStripShiftV = maxId - strips[plane];
 	}
       }
-    }
+    } // End plane loop
+
+    getEnergies(mcTrack, replaceInfo);
 
     // Pick a random shower shape from the library. The shower shape and the Monte Carlo
     // photon must be in the same sector configuration, same energy bin, and same preshower bin.
     int iEnergyBin = !(mcTrack->energy() < 8);
 
     // Check range
-    assert(iEnergyBin >= 0 && iEnergyBin < 2);
+    assert(iEnergyBin >= 0 && iEnergyBin < NUMBER_OF_ENERGY_BINS);
 
     // Get preshower hit from MuDst
     float pre1 = 0;
@@ -287,26 +344,42 @@ void StEEmcDataDrivenMcMaker::processTrack(StMcTrack* mcTrack)
     }
 
     // Check range
-    assert(iPreshowerBin >= 0 && iPreshowerBin < 4);
+    assert(iPreshowerBin >= 0 && iPreshowerBin < NUMBER_OF_PRESHOWER_BINS);
 
     int iEntry = gRandom->Integer(mShowerShapes[iEnergyBin][iPreshowerBin]->GetEntriesFast());
     StEEmcShowerShape* showerShape = (StEEmcShowerShape*)mShowerShapes[iEnergyBin][iPreshowerBin]->At(iEntry);
     assert(showerShape);
-    hLibEntry->Fill(iEntry);
+
+    // Save replacement info
+    replaceInfo->pid = mcTrack->geantId();
+    replaceInfo->parentPid = mcTrack->parent()->geantId();
+    replaceInfo->libraryShapeId = mLibraryMap[showerShape];
+    replaceInfo->libraryBinId = iEnergyBin * NUMBER_OF_PRESHOWER_BINS + iPreshowerBin;
+    replaceInfo->energy = mcTrack->energy();
+    replaceInfo->momentum = mcTrack->momentum().xyz();
+
+    // Determine the first hadron PID from the Pythia record
+    // (PDG code of grand parent for now)
+    if (mcTrack->parent()->parent())
+      replaceInfo->firstHadronPid = mcTrack->parent()->parent()->pdgId();
 
     // Match the Monte Carlo energy of the photon to the energy
     // of the shower shape from the library computed by the
     // cluster finder.
     assert(showerShape->energy());
-    float scale = mcTrack->energy() / showerShape->energy();
+//    float scale = mcTrack->energy() / showerShape->energy();
 
     // Replace simulation strips with strips from the shower shape
-    // in the library out to +/-12 strips of the max strip.
+    // in the library out to +mNumberOfStripsReplaced/-mNumberOfStripsReplaced
+    // strips of the max strip.
     for (int plane = 0; plane < 2; ++plane) {
       int& sector = sectors[plane];
-      int& strip = strips[plane];
+      int& strip  = strips [plane];
 
-      for (int dx = -12; dx <= 12; ++dx) {
+      float scale = GetShowerShapeScale(mcTrack, showerShape, sector, plane, strip);
+      if (plane == 0){ replaceInfo->energyScaleU = scale; }else{ replaceInfo->energyScaleV = scale; }
+
+      for (int dx = -mNumberOfStripsReplaced; dx <= mNumberOfStripsReplaced; ++dx) {
 	int id = strip + dx;
 	if (id < 0 || id >= 288) continue;
 	int highStrip = (plane == 0) ? showerShape->highUstripId() : showerShape->highVstripId();
@@ -338,16 +411,13 @@ void StEEmcDataDrivenMcMaker::processTrack(StMcTrack* mcTrack)
 	  int id3;
 	  assert(mMuEmcUtil->getEndcapId(det, sector+1, id+1, 1, id3) == 0);
 	  hit->setId(id3);
-	  hit->setAdc(0);
+	  hit->setAdc((int)mPed[sector][plane][id]);
 	  hit->setEnergy(0);
 
 	  // Insert the newly created hit into
 	  // the local strip table.
 	  mStrips[sector][plane][id] = hit;
 	}
-
-	// Save value of energy before making hit substitution
-	float energyBefore = hit->getEnergy();
 
 	// Find the corresponing Monte Carlo hit (identified by sector & strip id)
 	// and subtract its energy contribution to the SMD strip in the MuDst.
@@ -363,9 +433,6 @@ void StEEmcDataDrivenMcMaker::processTrack(StMcTrack* mcTrack)
 	  }
 	}
 
-	int adc = int(dE * StEEmcFastMaker::getSmdGain());
-
-	hit->setAdc(hit->getAdc() - adc);
 	hit->setEnergy(hit->getEnergy() - dE);
 
 	// Replace the energy contribution of the Monte Carlo hit with the
@@ -378,58 +445,19 @@ void StEEmcDataDrivenMcMaker::processTrack(StMcTrack* mcTrack)
 	// however the ADC were not saved for hits in the shower shape
 	// library!
 	//hit->setAdc(int(hit->getAdc() + scale * hit2->getAdc()));
-	adc = int(hit->getEnergy() * StEEmcFastMaker::getSmdGain());
+	
+	int adc = int(hit->getEnergy() * mGain[sector][plane][id] + mPed[sector][plane][id]);
+//	cout <<"sec " << sector<< " plane " << plane << " strip " << id << " gain " << mGain[sector][plane][strip] << " ped " << mPed[sector][plane][strip]<< endl;
 	if (adc < 0) adc = 0;
 	if (adc > StEEmcFastMaker::getMaxAdc()) adc = StEEmcFastMaker::getMaxAdc();
 	hit->setAdc(adc);
-
-	// The residual is defined as the energy of the SMD hit before
-	// replacement minus the energy of the SMD hit after replacement.
-	float energyAfter = hit->getEnergy();
-	float residual = energyBefore - energyAfter;
-	float sum = energyBefore + energyAfter;
-	float asym = 0;
-
-	if (sum) asym = residual / sum;
-
-	switch (plane) {
-	case 0:
-	  hResidualSmdu->Fill(residual);
-	  hCorrSmdu->Fill(energyBefore, energyAfter);
-	  hDiffStripSmdu->Fill(dx, residual);
-	  hAsymStripSmdu->Fill(dx, asym);
-	  break;
-	case 1:
-	  hResidualSmdv->Fill(residual);
-	  hCorrSmdv->Fill(energyBefore, energyAfter);
-	  hDiffStripSmdv->Fill(dx, residual);
-	  hAsymStripSmdv->Fill(dx, asym);
-	  break;
-	default:
-	  break;
-	}
-
-	//hHighStripsUVid->Fill(strips[0], strips[1]);
-	//hHighStripsUVenergy->Fill(mStrips[sectors[0]][0][strips[0]]->getEnergy(), mStrips[sectors[1]][1][strips[1]]->getEnergy());
       }	// Loop over strips
     } // Loop over planes
-
-    // Increment photon counter
-    ++mNumberOfPhotons;
-
-    hMcPhotonEnergyEta->Fill(mcTrack->energy(), position.Eta());
-    hMcPhotonEnergyPt->Fill(mcTrack->energy(), mcTrack->pt());
-    StParticleDefinition* def = mcTrack->parent()->particleDefinition();
-    TString name = def ? def->name().c_str() : Form("pdgId=%d", mcTrack->parent()->pdgId());
-    hMcPhotonParent->Fill(name, 1);
-    hMcPhotonXY->Fill(position.x(), position.y());
   }
 }
 
 int StEEmcDataDrivenMcMaker::Finish()
 {
-  hMcPhotonParent->LabelsDeflate();
-
   if (mLogFile) {
     mLogFile->Write();
     mLogFile->Close();
@@ -463,3 +491,111 @@ int StEEmcDataDrivenMcMaker::getPreshowerBin(StEEmcShowerShape* showerShape) con
 
   return -1;
 }
+
+void StEEmcDataDrivenMcMaker::getEnergies(StMcTrack *mcTrack, StEEmcDataDrivenMcReplaceInfo *replaceInfo)
+{
+  // Loop over towers
+  const int NUMBER_OF_EEMC_LAYERS = 6;
+
+  StPtrVecMcCalorimeterHit* hits[NUMBER_OF_EEMC_LAYERS];
+  StMcEmcHitCollection* emc[NUMBER_OF_EEMC_LAYERS];
+
+  hits[0] = &mcTrack->eemcHits();
+  hits[1] = &mcTrack->eprsHits();
+  hits[4] = &mcTrack->esmduHits();
+  hits[5] = &mcTrack->esmdvHits();
+
+  emc[0] = mMcEvent->eemcHitCollection();
+  emc[1] = mMcEvent->eprsHitCollection();
+  emc[4] = mMcEvent->esmduHitCollection();
+  emc[5] = mMcEvent->esmdvHitCollection();
+
+ for (int layer = 0; layer < NUMBER_OF_EEMC_LAYERS; ++layer) {
+    if (layer == 2 || layer == 3) continue; // not implemented in StMcEvent
+    replaceInfo->nTowerFired[layer] = hits[layer]->size();
+
+    vector<int> ids;
+
+    replaceInfo->dEnergy[layer] = 0;
+    replaceInfo->totalEnergyScaled[layer] = 0;
+ 
+    for (size_t i = 0; i < hits[layer]->size(); ++i) {
+      StMcCalorimeterHit* hit = hits[layer]->at(i);
+      replaceInfo->dEnergy[layer] += hit->dE();
+      int id = hit->sub() + 100 * hit->module() + 100000 * hit->eta();
+      ids.push_back(id);
+
+      if (layer < 4) {
+	StEEmcTower tower = mA2E->tower(hit->module()-1, hit->sub()-1, hit->eta()-1);
+	replaceInfo->totalEnergyScaled[layer] += tower.energy();
+      }
+      else {
+	StEEmcStrip strip = mA2E->strip(hit->module()-1, hit->sub()-1, hit->eta()-1);
+	replaceInfo->totalEnergyScaled[layer] += strip.energy();
+      }
+    }
+
+    replaceInfo->totalEnergy[layer] = 0;  
+
+    for (size_t m = 1; m <= emc[layer]->numberOfModules(); ++m) {
+      for (size_t k = 0; k < emc[layer]->module(m)->numberOfHits(); ++k) {
+	StMcCalorimeterHit* hit = emc[layer]->module(m)->hits().at(k);
+	int id = hit->sub() + 100 * hit->module() + 100000 * hit->eta();
+	if (find(ids.begin(), ids.end(), id) != ids.end()) {
+	  replaceInfo->totalEnergy[layer] += hit->dE();
+	}
+      }
+    }
+  }
+}
+
+float StEEmcDataDrivenMcMaker::GetShowerShapeScale
+(
+	StMcTrack *mcTrack,
+	StEEmcShowerShape* showerShape,
+	int sector,
+	int plane,
+	int geantPhotonCentralStrip
+)
+{
+	float scale = 0;
+	switch (mShowerShapeScalingMethod)
+	{
+	case 1: // method 1: scale = E_smd^geant / E_smd^library
+	{
+		float smdEnergyGeant  = 0; // SMD energy sum from Geant photon from +/- mNumberOfStripsReplaced strips
+		float smdEnergyLibrary  = 0; // SMD energy sum from data-driven library photon in +/- mNumberOfStripsReplaced strips
+		for (int dx = -mNumberOfStripsReplaced; dx <= mNumberOfStripsReplaced; ++dx)
+		{
+			int id = geantPhotonCentralStrip + dx;
+			if (id < 0 || id >= 288) continue;
+			int highStrip = (plane == 0) ? showerShape->highUstripId() : showerShape->highVstripId();
+			int id2 = highStrip + dx;
+			assert(0 <= id2 && id2 < 288);
+			StMuEmcHit* hit2 = (plane == 0) ? showerShape->uStrip(id2) : showerShape->vStrip(id2);
+
+			StPtrVecMcCalorimeterHit& mcHits = (plane == 0) ? mcTrack->esmduHits() : mcTrack->esmdvHits();
+			for (size_t i = 0; i < mcHits.size(); ++i)
+			{
+				StMcCalorimeterHit* mcHit = mcHits[i];
+				if (mcHit->module() == sector+1 && mcHit->eta() == id+1)
+				{
+					smdEnergyGeant += mcHit->dE();
+					break;
+				}
+			}
+			smdEnergyLibrary += hit2->getEnergy();
+		}
+		scale = smdEnergyGeant/smdEnergyLibrary;
+		break;
+	}
+	case 2: // method 2: scale = E_gamma^geant / E_gamma^library
+	{
+		scale = mcTrack->energy() / showerShape->energy();
+		break;
+	}
+	default: break;
+	}
+	return scale;
+}
+
