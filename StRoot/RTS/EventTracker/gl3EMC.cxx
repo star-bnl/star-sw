@@ -9,14 +9,18 @@
 #include <errno.h>
 #include <stdio.h>
 #include <math.h>
+#ifdef NEW_DAQ_READER
 #include <DAQ_READER/daq_dta.h>
+#endif /* NEW_DAQ_READER */
 
 #include "daqFormats.h"
 #include "l3BankUtils.h"
 #include "l3Swap.h"
 #include <rtsLog.h>
+#ifdef NEW_DAQ_READER
 #include <DAQ_EMC/daq_emc.h>
 
+#endif /* NEW_DAQ_READER */
 
 gl3EMC::gl3EMC(l3EmcCalibration *BarrelCalib, l3EmcCalibration *EndcapCalib)
 {
@@ -55,20 +59,33 @@ gl3EMC::~gl3EMC() {
 }
 
 
+#ifndef NEW_DAQ_READER
+int gl3EMC::readFromEvpReader(evpReader *evp, char *mem)
+#else /* NEW_DAQ_READER */
 int gl3EMC::readFromEvpReader(daqReader *rdr, char *mem)
+#endif /* NEW_DAQ_READER */
 {
   int i,j;
+#ifndef NEW_DAQ_READER
+  int ret = emcReader(mem);
+#endif /* ! NEW_DAQ_READER */
 
+#ifndef NEW_DAQ_READER
+  if(ret <= 0) {
+#else /* NEW_DAQ_READER */
   daq_dta *dd  = rdr->det("emc_pseudo")->get("legacy");
   
   if(!dd) {
+#endif /* NEW_DAQ_READER */
     LOG(NOTE, "No EMC data present...",0,0,0,0,0);
     return 0;
   }
 
+#ifdef NEW_DAQ_READER
   dd->iterate();
   emc_t *pEMC = (emc_t *)dd->Void;
 
+#endif /* NEW_DAQ_READER */
   // First zero out whatever we have...
   for(i=0;i<nBarrelTowers;i++) {
     barrelTower[i].setADC(0);
@@ -95,19 +112,32 @@ int gl3EMC::readFromEvpReader(daqReader *rdr, char *mem)
 
   // Read the btow, if its there...
   if(barrelCalib) {
+#ifndef NEW_DAQ_READER
+    if(emc.btow_in) { 
+#else /* NEW_DAQ_READER */
     if(pEMC->btow_in) { 
+#endif /* NEW_DAQ_READER */
       LOG(DBG, "Reading BTOW data",0,0,0,0,0);
       for(i=0;i<BTOW_MAXFEE*BTOW_DATSIZE;i++) {
 	
 	int daqid = i;                          // linearized
 	int id = barrelCalib->daqToId(daqid);   // emc uses different linearization
 	
+#ifndef NEW_DAQ_READER
+	if(emc.btow[i] != 0)
+	  LOG(DBG, "i=%d id=%d adc=%d",daqid,id,emc.btow[i]);
+#else /* NEW_DAQ_READER */
 	if(pEMC->btow[i] != 0)
 	  LOG(DBG, "i=%d id=%d adc=%d",daqid,id,pEMC->btow[i]);
+#endif /* NEW_DAQ_READER */
 	
 	if(id >= nBarrelTowers) continue;
 	
+#ifndef NEW_DAQ_READER
+	barrelTower[id].setADC(emc.btow[i]);
+#else /* NEW_DAQ_READER */
 	barrelTower[id].setADC(pEMC->btow[i]);
+#endif /* NEW_DAQ_READER */
 	barrelTower[id].setNTracks(0);
       }
     }
@@ -115,7 +145,11 @@ int gl3EMC::readFromEvpReader(daqReader *rdr, char *mem)
 
   // Read the etow, if its there...
   if(endcapCalib) {
+#ifndef NEW_DAQ_READER
+    if(emc.etow_in) {
+#else /* NEW_DAQ_READER */
     if(pEMC->etow_in) {
+#endif /* NEW_DAQ_READER */
       LOG(DBG, "Reading etow data",0,0,0,0,0);
       for(i=0;i<ETOW_MAXFEE;i++) {
 	for(j=0;j<ETOW_DATSIZE;j++) {
@@ -125,10 +159,19 @@ int gl3EMC::readFromEvpReader(daqReader *rdr, char *mem)
 
 	  if(id >= nEndcapTowers) continue;
 
+#ifndef NEW_DAQ_READER
+	  if(emc.etow[i][j] != 0)
+	    LOG(DBG, "etow: i=%d j=%d daqid=%d id=%d adc=%d",i,j,daqid,id, emc.etow[i][j]);
+#else /* NEW_DAQ_READER */
 	  if(pEMC->etow[i][j] != 0)
 	    LOG(DBG, "etow: i=%d j=%d daqid=%d id=%d adc=%d",i,j,daqid,id, pEMC->etow[i][j]);
+#endif /* NEW_DAQ_READER */
 
+#ifndef NEW_DAQ_READER
+	  endcapTower[id].setADC(emc.etow[i][j]);
+#else /* NEW_DAQ_READER */
 	  endcapTower[id].setADC(pEMC->etow[i][j]);
+#endif /* NEW_DAQ_READER */
 	  endcapTower[id].setNTracks(0);
 	}
       }
