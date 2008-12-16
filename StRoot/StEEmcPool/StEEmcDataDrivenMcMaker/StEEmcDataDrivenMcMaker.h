@@ -2,7 +2,12 @@
 //
 // Hal Spinka <hms@anl.gov>
 // Argonne National Laboratory
-// Feb. 12, 2008
+//
+// Pibero Djawotho <pibero@indiana.edu>
+// Indiana University Cyclotron Facility
+//
+// Ilya Selyuzhenkov <ilya.selyuzhenkov@gmail.com>
+// Indiana University Cyclotron Facility
 //
 
 #ifndef ST_EEMC_DATA_DRIVEN_MC_MAKER_H
@@ -11,6 +16,7 @@
 // ROOT
 class TClonesArray;
 class TH2F;
+class TTree;
 
 // STAR
 class StEEmcDbMaker;
@@ -21,6 +27,10 @@ class StMcEvent;
 class StMcVertex;
 class StMcTrack;
 class StMcCalorimeterHit;
+class StMcEmcHitCollection;
+class StEEmcDataDrivenMcEventInfo;
+class StEEmcDataDrivenMcReplaceInfo;
+class StEEmcA2EMaker;
 
 // Local
 class StEEmcShowerShape;
@@ -30,31 +40,50 @@ class StEEmcShowerShape;
 
 class StEEmcDataDrivenMcMaker : public StMaker {
 public:
-  StEEmcDataDrivenMcMaker(const char* name = "StEEmcDataDrivenMcMaker") : StMaker(name) {}
+  StEEmcDataDrivenMcMaker(const char* name = "StEEmcDataDrivenMcMaker");
   ~StEEmcDataDrivenMcMaker() {}
 
   void Clear(Option_t* option = "");
   int  Init();
+  int  InitRun(int runNumber);
   int  Make();
   int  Finish();
+
+  StEEmcDataDrivenMcEventInfo* GetDataDrivenMcEventInfo();
   void SetLibraryFile(const char* filename);
   void SetLogFileName(const char* filename);
+  void SetNumberOfStripsReplaced(int n);
+
+  void SetShowerShapeScalingMethod(int id);
+	// defaul is method 1
+	// method 1: preserve SMD integrated energy for the replaced strips within +/- mNumberOfStripsReplaced:
+	// method 1: scale = E_smd^geant / E_smd^library
+	// method 2: use photon energies ratio from geant and library records:
+	// method 2: scale = E_gamma^geant / E_gamma^library
+
+  void UsePed(bool value = true) { mUsePed = value; }
 
 private:
+  enum { NUMBER_OF_ENERGY_BINS = 2, NUMBER_OF_PRESHOWER_BINS = 4 };
+
   void processVertex(StMcVertex* mcVertex);
   void processTrack(StMcTrack* mcTrack);
   bool multiSector(const vector<StMcCalorimeterHit*>& hits) const;
   int  getEnergyBin(StEEmcShowerShape* showerShape) const;
   int  getPreshowerBin(StEEmcShowerShape* showerShape) const;
+  void getEnergies(StMcTrack* mcTrack, StEEmcDataDrivenMcReplaceInfo* replaceInfo);
+  float GetShowerShapeScale(StMcTrack *mcTrack, StEEmcShowerShape* showerShape, int sector, int plane, int geantPhotonCentralStrip);
 
+  bool mUsePed;
+  float mPed[12][2][288]; // [sector][plane][strip]
+  float mGain[12][2][288]; // [sector][plane][strip]
   TString mLibraryFile;
   TString mLogFileName;
   TFile* mLogFile;
   StEEmcDbMaker* mEEmcDb;
-  StMuEmcHit* mStrips[12][2][288];
-  StMcEvent* mcEvent;
+  StMuEmcHit* mStrips[12][2][288]; // [sector][plane][strip]
+  StMcEvent* mMcEvent;
   StMuEmcUtil* mMuEmcUtil;
-  int mNumberOfPhotons;
 
   // Each SMD sector follows one of 3 SMD order
   //   S=Spacer, U=U-plane, V=V-plane
@@ -66,26 +95,21 @@ private:
   // and in preshower energies (preshower1 == 0 && preshower2 == 0, or otherwise).
   TClonesArray* mShowerShapes[2][4]; // [energy][preshower]
 
-  // QA histograms
-  TH1F* hLibEntry;
-  TH1F* hNumberOfPhotons;
-  TH2F* hMcPhotonEnergyEta;
-  TH2F* hMcPhotonEnergyPt;
-  TH1F* hMcPhotonParent;
-  TH2F* hMcPhotonXY;
-  TH1F* hResidualSmdu;
-  TH1F* hResidualSmdv;
-  TH2F* hCorrSmdu;
-  TH2F* hCorrSmdv;
-  TH2F* hDiffStripSmdu;
-  TH2F* hDiffStripSmdv;
-  TH2F* hAsymStripSmdu;
-  TH2F* hAsymStripSmdv;
-  TH2F* hHighStripsUVid;
-  TH2F* hHighStripsUVenergy;
+  // QA tree
+  TTree* mTree;
+  StEEmcDataDrivenMcEventInfo* mDataDrivenMcEventInfo;
+  int mNumberOfStripsReplaced;
+  int mShowerShapeScalingMethod;
+  map<StEEmcShowerShape*, int> mLibraryMap;
+  StEEmcA2EMaker* mA2E;
 
   ClassDef(StEEmcDataDrivenMcMaker, 1);
 };
+
+inline StEEmcDataDrivenMcEventInfo* StEEmcDataDrivenMcMaker::GetDataDrivenMcEventInfo()
+{
+  return mDataDrivenMcEventInfo;
+}
 
 inline void StEEmcDataDrivenMcMaker::SetLibraryFile(const char* filename)
 {
@@ -95,6 +119,16 @@ inline void StEEmcDataDrivenMcMaker::SetLibraryFile(const char* filename)
 inline void StEEmcDataDrivenMcMaker::SetLogFileName(const char* filename)
 {
   mLogFileName = filename;
+}
+
+inline void StEEmcDataDrivenMcMaker::SetNumberOfStripsReplaced(int n)
+{
+  mNumberOfStripsReplaced = n;
+}
+
+inline void StEEmcDataDrivenMcMaker::SetShowerShapeScalingMethod(int id)
+{
+  mShowerShapeScalingMethod = id;
 }
 
 #endif // ST_EEMC_DATA_DRIVEN_MC_MAKER_H
