@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.4 2008/12/15 21:04:01 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.5 2008/12/16 20:43:25 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.5  2008/12/16 20:43:25  fine
+ * add the DAQ_READER compliant access to the tpx sector
+ *
  * Revision 1.4  2008/12/15 21:04:01  fine
  * For for the NEW_DAQ_READER
  *
@@ -92,6 +95,7 @@
 #else /* NEW_DAQ_READER */
 #  include "StRtsTable.h"
 #  include "DAQ_TPC/daq_tpc.h"
+#  include "DAQ_READER/daq_dta_structs.h"
 #endif /* NEW_DAQ_READER */
 
 #if 0
@@ -591,6 +595,15 @@ void StTpcHitMaker::RawData(Int_t sector) {
       some_data++ ;	// I don't know the bytecount but I'll return something...
     }
 #else
+    TGenericTable::iterator iword = DaqDta()->begin();
+    for (;iword != DaqDta()->end();++iword) {
+        daq_adc_tb &daqadc = (*(daq_adc_tb *)*iword);
+        int tb = daqadc .tb ;
+        int adc = daqadc .adc ;
+        ADCs[tb] = adc;
+        IDTs[tb] = 65535;
+        some_data++ ;	// I don't know the bytecount but I'll return something...
+    }
 #endif /* NEW_DAQ_READER */
   }
   if (some_data) {
