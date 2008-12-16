@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.10 2008/11/26 18:01:30 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.11 2008/12/16 19:39:19 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.11  2008/12/16 19:39:19  fine
+ * replace daq_dta_dict with get_size_t()
+ *
  * Revision 1.10  2008/11/26 18:01:30  fine
  * prepare StRtsReaderMaker for DAQ_READER transition
  *
@@ -221,7 +224,11 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
                 << fLastQuery << " has not been used yet" << endm;
        delete fRtsTable; fRtsTable = 0;
    }
+#ifndef NEW_DAQ_READER
    size_t dtBankSize = daq_dta_dict(detName,bankName);
+#else
+   size_t dtBankSize = fBank->get_size_t();
+#endif
    if ( dtBankSize )  {
        // we will reallocate it within FillTable() method
       fRtsTable = new StRtsTable(dtBankSize,2);
