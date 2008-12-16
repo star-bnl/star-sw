@@ -139,8 +139,12 @@ public:
 
 	int iterate() ;
 
+	inline size_t get_size_t() {
+		return hdr->obj_bytes ;
+	}
+
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.4 2008/12/05 23:02:56 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.5 2008/12/16 12:05:24 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
