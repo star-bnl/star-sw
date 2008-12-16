@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.11 2008/12/16 19:39:19 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.12 2008/12/16 22:33:00 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.12  2008/12/16 22:33:00  fine
+ * Improve the diagnostic message
+ *
  * Revision 1.11  2008/12/16 19:39:19  fine
  * replace daq_dta_dict with get_size_t()
  *
@@ -219,9 +222,9 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
 {
    // Create the new instance of the StRtsTable
    if (fRtsTable) {
-       LOG_INFO << " You are going to use " << bankName << " RTS bank" << endm;
-       LOG_INFO << " even though the previous ordered RTS  bank: "
-                << fLastQuery << " has not been used yet" << endm;
+       LOG_INFO << " You are going to use \"" << detName << "/" << bankName << "\" RTS bank" << endm;
+       LOG_INFO << " eventhough the previous ordered RTS  bank: \""
+                << fLastQuery << "\" has not been used yet" << endm;
        delete fRtsTable; fRtsTable = 0;
    }
 #ifndef NEW_DAQ_READER
