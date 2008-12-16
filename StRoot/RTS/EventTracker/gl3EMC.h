@@ -4,7 +4,11 @@
 #include "daqFormats.h"
 #include "gl3Track.h"
 #include "l3EmcCalibration.h"
+#ifndef NEW_DAQ_READER
+#include <evpReader.hh>
+#else /* NEW_DAQ_READER */
 #include <DAQ_READER/daqReader.h>
+#endif /* NEW_DAQ_READER */
 
 class gl3Event;
 
@@ -48,7 +52,11 @@ public:
     ~gl3EMC();
 
 
+#ifndef NEW_DAQ_READER
+    int readFromEvpReader(evpReader *evp, char *mem);
+#else /* NEW_DAQ_READER */
     int readFromEvpReader(daqReader *rdr, char *mem);
+#endif /* NEW_DAQ_READER */
 
     int readEMCSECP(EMCSECP* secp);
     int readRawData(L3_P *l3p);

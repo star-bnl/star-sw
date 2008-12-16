@@ -13,8 +13,13 @@
 #include "gl3Event.h"
 #include <rtsLog.h>
 #include "gl3Histo.h"
+#ifndef NEW_DAQ_READER
+#include <evpReader.hh>
+#else /* NEW_DAQ_READER */
 #include <DAQ_READER/daqReader.h>
+#endif /* NEW_DAQ_READER */
 #include "FtfSl3.h"
+#ifdef NEW_DAQ_READER
 
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_TPC/daq_tpc.h>
@@ -23,18 +28,25 @@
 
 tpc_t *pTPC=NULL;
 
+#endif /* NEW_DAQ_READER */
 //
 // evp should already contain the event that we want to read
 // 
 //
+#ifndef NEW_DAQ_READER
+int gl3Event::readFromEvpReader(evpReader *evp, 
+#else /* NEW_DAQ_READER */
 int gl3Event::readFromEvpReader(daqReader *rdr, 
+#endif /* NEW_DAQ_READER */
 				char *mem, 
 				float defaultbField,
 				float bField,
 				int what)
 {
+#ifdef NEW_DAQ_READER
   daq_dta *dd;
 
+#endif /* NEW_DAQ_READER */
 //   // Read the file...
 //   char *mem;
 //   for(;;) {
@@ -47,29 +59,41 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
 //     if(evp->seq == 235) break;
 //   }
     
+#ifdef NEW_DAQ_READER
   LOG(DBG, "Reader from EVP Reader: evt=%d token=%d",rdr->seq,rdr->token);
 
+#endif /* NEW_DAQ_READER */
   // Clear this event...
   resetEvent();
   nHits = 0;
 
+#ifdef NEW_DAQ_READER
   LOG(DBG, "Check magnetic field");
 
+#endif /* NEW_DAQ_READER */
 
   if(bField == 1000) {  // try to read from file
     bField = defaultbField;       // use default
 
+#ifndef NEW_DAQ_READER
+    int ret = scReader(mem);
+    if(ret >= 0) {                // but try file first!
+      if(sc.valid) bField = sc.mag_field;
+#else /* NEW_DAQ_READER */
     dd = rdr->det("sc")->get("legacy");
 
     if(dd) {
       dd->iterate();
       sc_t *sc = (sc_t *)dd->Void;
       if(sc->valid) bField = sc->mag_field;
+#endif /* NEW_DAQ_READER */
     }
   }       
 
+#ifdef NEW_DAQ_READER
 
 
+#endif /* NEW_DAQ_READER */
   if(fabs(bField) < .1) bField = .1;
 
   LOG(NOTE, "bField set to %f",bField,0,0,0,0);
@@ -102,11 +126,15 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
   ///////////////////////////////////
  
 
+#ifdef NEW_DAQ_READER
   LOG(DBG, "Reset tracker");
+#endif /* NEW_DAQ_READER */
   tracker->reset();
  
+#ifdef NEW_DAQ_READER
   ///LOG("JEFF", "AAA");
 
+#endif /* NEW_DAQ_READER */
   // need temporary track memory...
   L3_SECTP *sectp = NULL;
 
@@ -114,7 +142,9 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
     sectp = (L3_SECTP *)malloc(szSECP_max);
   }
 
+#ifdef NEW_DAQ_READER
   //LOG("JEFF", "BBB");
+#endif /* NEW_DAQ_READER */
   int i;
   int ret;
   for(i=0;i<24;i++) {
@@ -126,8 +156,18 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
       }
     }
 
+#ifndef NEW_DAQ_READER
+
+    //    LOG(NOTE, "Tpc reader...");
+#else /* NEW_DAQ_READER */
     LOG(DBG, "READ TPC data for sector %d  (0x%x)",i+1,rdr);
+#endif /* NEW_DAQ_READER */
     // Read the data....
+#ifndef NEW_DAQ_READER
+    ret = tpcReader(mem, i);
+    if(ret < 0) { 
+      LOG(WARN, "No data for sector %d",i+1,0,0,0,0);
+#else /* NEW_DAQ_READER */
     dd = rdr->det("tpx")->get("legacy",i+1);
     if(dd) {
       LOG(DBG, "There is tpx data...");
@@ -166,13 +206,25 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
 
     if(!pTPC) {
       LOG(WARN, "No data for TPC sector %d",i+1,0,0,0,0);
+#endif /* NEW_DAQ_READER */
       continue;
     }
     
     //LOG(NOTE, "Tpc reader done");
+#ifndef NEW_DAQ_READER
+    if(!tpc.has_clusters) {
+      // Construct the clusters...
+      // no calibration info, so pretty junky...
+      //LOG("JEFF", "calling fcf reader", 0,0,0,0);
+      int ncl_recount = fcfReader(i);
+      if (ncl_recount) {
+      //LOG("JEFF", "fcf[%d] has %d clusters", i, ncl_recount);
+      }
+#else /* NEW_DAQ_READER */
     if(!pTPC->has_clusters) {
       LOG(WARN, "TPC sector %d has no clusters",i);
       continue;
+#endif /* NEW_DAQ_READER */
     }
 
     // read in clusters...
@@ -183,7 +235,11 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
 
       int nnn=0;
       for(int i=0;i<45;i++) {
+#ifndef NEW_DAQ_READER
+	nnn += tpc.cl_counts[i];
+#else /* NEW_DAQ_READER */
 	nnn += pTPC->cl_counts[i];
+#endif /* NEW_DAQ_READER */
       }
       //LOG(NOTE, "clusters done %d",nnn);
     }
@@ -219,7 +275,11 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
   // LOG(NOTE, "FINAL2");
 
   // If calibrations not loaded nothing should happen here...
+#ifndef NEW_DAQ_READER
+  emc.readFromEvpReader(evp, mem);
+#else /* NEW_DAQ_READER */
   emc.readFromEvpReader(rdr, mem);
+#endif /* NEW_DAQ_READER */
 
   delete tracker;
   return 0;
@@ -230,11 +290,20 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
 //
 void gl3Event::readClustersFromEvpReader(int sector)
 {
+#ifndef NEW_DAQ_READER
+  if(!tpc.has_clusters) return;
+#else /* NEW_DAQ_READER */
   if(pTPC->has_clusters) return;
+#endif /* NEW_DAQ_READER */
 
   for(int r=0;r<45;r++) {
+#ifndef NEW_DAQ_READER
+    for(int j=0;j<tpc.cl_counts[r];j++) {
+      tpc_cl *c = &tpc.cl[r][j];
+#else /* NEW_DAQ_READER */
     for(int j=0;j<pTPC->cl_counts[r];j++) {
       tpc_cl *c = &pTPC->cl[r][j];
+#endif /* NEW_DAQ_READER */
 	
       gl3Hit *gl3c = &hit[nHits];
       nHits++;

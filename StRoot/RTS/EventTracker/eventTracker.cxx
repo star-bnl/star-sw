@@ -1,18 +1,29 @@
+#ifdef NEW_DAQ_READER
 #include <stdio.h>
+#endif /* NEW_DAQ_READER */
 #include <unistd.h>
+#ifdef NEW_DAQ_READER
 #include <sys/types.h>
+#endif /* NEW_DAQ_READER */
 #include <string.h>
 #include <daqFormats.h>
+#ifdef NEW_DAQ_READER
 #include <rts.h>
+#endif /* NEW_DAQ_READER */
 #include "rtsLog.h"
+#ifndef NEW_DAQ_READER
+#include <evpReader.hh>
+#else /* NEW_DAQ_READER */
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_det.h>
 #include <DAQ_READER/daq_dta.h>
 #include <DAQ_L3/daq_l3.h>
 #include <DAQ_TRG/daq_trg.h>
+#endif /* NEW_DAQ_READER */
 #include "eventTrackerLib.hh"
 
 
+#ifdef NEW_DAQ_READER
 inline float fswap(float swapped)
 {
         unsigned int* uintptr = (unsigned int*) &swapped;
@@ -31,6 +42,7 @@ inline float fswap(float swapped)
 #endif
 
 
+#endif /* NEW_DAQ_READER */
 // control....
 char g_fn[255];    // filename
 uint g_seq = 0;        // only write this event if != 0
@@ -41,9 +53,13 @@ uint g_nctracks = 0;
 uint g_pause = 0;
 uint g_vertex = 0;
 
+#ifndef NEW_DAQ_READER
+void printL3Info()
+#else /* NEW_DAQ_READER */
 int copyl3_t(l3_t &l3, L3_P *l3p);
 
 void printL3Info(l3_t& l3)
+#endif /* NEW_DAQ_READER */
 {
   printf("%d tracks, %d clusters: Vertex = (%f, %f %f)\n",l3.tracks_num, l3.cluster_num, l3.xVertex,l3.yVertex,l3.zVertex);
 
@@ -66,7 +82,9 @@ void printL3Info(l3_t& l3)
 void parseArgs(int argc, char *argv[])
 {
   g_fn[0] = 0;
+#ifdef NEW_DAQ_READER
   rtsLogLevel(ERR);
+#endif /* NEW_DAQ_READER */
 
   for(int i=1;i<argc;i++) {
     if(argv[i][0] != '-') {   // should be filename...
@@ -124,25 +142,44 @@ void parseArgs(int argc, char *argv[])
 // Dumps tracks....
 int main(int argc, char *argv[])
 {
+#ifdef NEW_DAQ_READER
   daq_dta *dd;
 
+#endif /* NEW_DAQ_READER */
   int ret = 0;
+#ifdef NEW_DAQ_READER
   
   l3_t *l3_datafile;
   l3_t l3_legacy;
+#endif /* NEW_DAQ_READER */
 
   rtsLogOutput(RTS_LOG_STDERR);
+#ifndef NEW_DAQ_READER
+  rtsLogLevel(NOTE);
+#else /* NEW_DAQ_READER */
  
+#endif /* NEW_DAQ_READER */
 
   parseArgs(argc, argv);
+#ifdef NEW_DAQ_READER
   
   rtsLogLevel(DBG);
+#endif /* NEW_DAQ_READER */
  
+#ifndef NEW_DAQ_READER
+
+#endif /* ! NEW_DAQ_READER */
   // printf("sizeof tpc %d\n",sizeof(tpc));
  
+#ifndef NEW_DAQ_READER
+  evpReader *evp = new evpReader(g_fn);
+  if(!evp) {
+    printf("Error getting evpReader\n");
+#else /* NEW_DAQ_READER */
   daqReader *rdr = new daqReader(g_fn);
   if(!rdr) {
     printf("Error getting daqReader\n");
+#endif /* NEW_DAQ_READER */
     return 0;
   }
 
@@ -156,6 +193,9 @@ int main(int argc, char *argv[])
   else
     evtTracker = new EventTracker(g_bfield);
 
+#ifndef NEW_DAQ_READER
+
+#endif /* ! NEW_DAQ_READER */
   char tmp[200];
   
   if(g_pause) {
@@ -165,10 +205,18 @@ int main(int argc, char *argv[])
 
   for(;;) {
 
+#ifndef NEW_DAQ_READER
+    char *mem = evp->get(0,EVP_TYPE_PHYS);
+#else /* NEW_DAQ_READER */
     char *mem = rdr->get(0,EVP_TYPE_PHYS);
+#endif /* NEW_DAQ_READER */
  
     if(!mem) {
+#ifndef NEW_DAQ_READER
+      if(evp->status == EVP_STAT_EOR) {
+#else /* NEW_DAQ_READER */
       if(rdr->status == EVP_STAT_EOR) {
+#endif /* NEW_DAQ_READER */
 	if(!g_vertex) {
 	  printf("End of run...\n");
 	}
@@ -186,14 +234,26 @@ int main(int argc, char *argv[])
     // do filtering...
     //
     if(g_seq != 0) {                // event number
+#ifndef NEW_DAQ_READER
+      if(evp->seq != g_seq) continue;
+#else /* NEW_DAQ_READER */
       if(rdr->seq != g_seq) continue;
+#endif /* NEW_DAQ_READER */
     }
 
+#ifndef NEW_DAQ_READER
+    if(evp->token == 0) continue;
+#else /* NEW_DAQ_READER */
     if(rdr->token == 0) continue;
+#endif /* NEW_DAQ_READER */
 
     if(!g_vertex) { 
       printf("**** Event %d (seq = %d): %d bytes, token %d, triggers = 0x%x\n",
+#ifndef NEW_DAQ_READER
+	     evp->event_number, evp->seq, evp->bytes, evp->token, evp->daqbits);
+#else /* NEW_DAQ_READER */
 	     rdr->event_number, rdr->seq, rdr->bytes, rdr->token, rdr->daqbits);
+#endif /* NEW_DAQ_READER */
     }
     
     DATAP *datap = (DATAP *)mem;
@@ -205,18 +265,30 @@ int main(int argc, char *argv[])
     // First Use old L3 reader to read L3 from datafile if its there...
 
     if(!g_nftracks) {
+#ifndef NEW_DAQ_READER
+      ret = l3Reader(mem);
+      if(ret <= 0) {
+	//printf("No L3 banks in data file %d\n",ret);
+#else /* NEW_DAQ_READER */
       //LOG("JEFF", "blah");
       dd = rdr->det("l3")->get("legacy");
       //LOG("JEFF", "blih");
       if(!dd) {
  	//printf("No L3 banks in data file %d\n",ret);
+#endif /* NEW_DAQ_READER */
       }
       else {
+#ifndef NEW_DAQ_READER
+	printf("This comes from the datafile L3 banks...------ len=%d\n",ret);
+	printL3Info();
+	printf("End Datafile L3 banks-------------------------\n");
+#else /* NEW_DAQ_READER */
 	dd->iterate();
 	l3_t *pL3 = (l3_t *)dd->Void;
  	printf("This comes from the datafile L3 banks...------ len=%d\n",ret);
  	printL3Info(*pL3);
  	printf("End Datafile L3 banks-------------------------\n");
+#endif /* NEW_DAQ_READER */
       }
     }
       
@@ -225,16 +297,28 @@ int main(int argc, char *argv[])
 
     // Now, track the event into a new buffer l3p (this was allocated above)
     //
+#ifndef NEW_DAQ_READER
+    ret = evtTracker->trackEvent(evp, mem, l3p, szL3_max);
+#else /* NEW_DAQ_READER */
     ret = evtTracker->trackEvent(rdr, mem, l3p, szL3_max);
+#endif /* NEW_DAQ_READER */
     if(ret < 0) {
+#ifndef NEW_DAQ_READER
+      printf("Error tracking event %d\n",evp->seq);
+#else /* NEW_DAQ_READER */
       printf("Error tracking event %d\n",rdr->seq);
+#endif /* NEW_DAQ_READER */
       continue;
     }
 
     //    continue;
 
     if(l3p->tracks.off == 0) {
+#ifndef NEW_DAQ_READER
+      LOG(NOTE, "No tracks produced for event %d\n",evp->seq);
+#else /* NEW_DAQ_READER */
       LOG(NOTE, "No tracks produced for event %d\n",rdr->seq);
+#endif /* NEW_DAQ_READER */
       continue;
     }
    
@@ -253,10 +337,26 @@ int main(int argc, char *argv[])
     int zdc0 = 0;
     int zdc4 = 0;
     if(g_vertex) {
+#ifndef NEW_DAQ_READER
+      ret = trgReader(mem);
+      if(ret < 0) {
+#else /* NEW_DAQ_READER */
       dd = rdr->det("trg")->get("legacy");
       if(!dd) {
+#endif /* NEW_DAQ_READER */
 	printf("Invalid trigger reader\n");
       }
+#ifndef NEW_DAQ_READER
+
+      zdc8 = (double)trg.ZDC[8];
+      zdc9 = (double)trg.ZDC[9];
+      zdc_vertex = (zdc9 - zdc8)*0.16*30.0/2.0;
+      zdc0 = trg.ZDC[0];
+      zdc4 = trg.ZDC[4];
+      
+      TrgSumData *sum =(TrgSumData *)trg.trg_sum;
+      bbc_vertex = sum->DSMdata.VTX[3]%512;
+#else /* NEW_DAQ_READER */
       else {
 	dd->iterate();
 	trg_t *pTRG = (trg_t *)dd->Void;
@@ -269,20 +369,33 @@ int main(int argc, char *argv[])
 	TrgSumData *sum =(TrgSumData *)pTRG->trg_sum;
 	bbc_vertex = sum->DSMdata.VTX[3]%512;
       }
+#endif /* NEW_DAQ_READER */
     }
 
     if(!g_nctracks) {
+#ifndef NEW_DAQ_READER
+      ret = l3Reader(l3p);
+#else /* NEW_DAQ_READER */
       ret = copyl3_t(l3_legacy, l3p);
+#endif /* NEW_DAQ_READER */
       if(ret <= 0) {
 	// printf("No retracked L3 banks valid %d\n",ret);
       }
       else {
 	if(g_vertex) {
+#ifndef NEW_DAQ_READER
+	  printf("%d %d %lf %lf %lf %lf %lf %lf %lf %d %d\n", evp->daqbits, l3.tracks_num, zdc8, zdc9, zdc_vertex, l3.xVertex, l3.yVertex,l3.zVertex, bbc_vertex, zdc0, zdc4);
+#else /* NEW_DAQ_READER */
 	  printf("%d %d %lf %lf %lf %lf %lf %lf %lf %d %d\n", rdr->daqbits, l3_legacy.tracks_num, zdc8, zdc9, zdc_vertex, l3_legacy.xVertex, l3_legacy.yVertex,l3_legacy.zVertex, bbc_vertex, zdc0, zdc4);
+#endif /* NEW_DAQ_READER */
 	}
 	else {
 	  printf("This comes from retracking---------------- len=%d\n",ret);
+#ifndef NEW_DAQ_READER
+	  printL3Info();
+#else /* NEW_DAQ_READER */
 	  printL3Info(l3_legacy);
+#endif /* NEW_DAQ_READER */
 	  printf("End of retracking-------------------------\n");
 	}
       }
@@ -304,6 +417,7 @@ int main(int argc, char *argv[])
   
   free(l3p);
 }
+#ifdef NEW_DAQ_READER
 
 
 
@@ -428,3 +542,4 @@ int copyl3_t(l3_t &l3, L3_P *l3p)
   return len ;
 
 }
+#endif /* NEW_DAQ_READER */
