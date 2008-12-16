@@ -31,6 +31,7 @@ libssd.a : $(OBJS)
 daq_ssd.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_ssd.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_ssd.o: ../DAQ_READER/daqReader.h
+daq_ssd.o: ../DAQ_READER/daqConfig.h
 daq_ssd.o: ../DAQ_READER/daq_dta.h
 daq_ssd.o: ../../../../StRoot/RTS/include/rts.h
 daq_ssd.o: ../DAQ_READER/daq_dta_structs.h
@@ -45,4 +46,12 @@ ssd_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 ssd_reader.o: ../../../../StRoot/RTS/include/rts.h
 ssd_reader.o: daq_ssd.h
 ssd_reader.o: ../DAQ_READER/daq_det.h
+ssdReader.o: ../DAQ_READER/daq_dta.h
+ssdReader.o: ../../../../StRoot/RTS/include/rts.h
+ssdReader.o: ../DAQ_READER/daq_dta_structs.h
+ssdReader.o: ../DAQ_READER/daq_det.h
+ssdReader.o: ssdReader.h
+ssdReader.o: daq_ssd.h
 daq_ssd.o: ../DAQ_READER/daq_det.h
+ssdReader.o: daq_ssd.h
+ssdReader.o: ../DAQ_READER/daq_det.h

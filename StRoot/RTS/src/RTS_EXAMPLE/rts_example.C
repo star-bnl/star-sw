@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 		daq_dta *dd ;	// generic data pointer; reused all the time
 
 
-		LOG(INFO,"File name \"%s\": sequence %d",evp->file_name, evp->seq) ;
+		LOG(INFO,"File name \"%s\": sequence %d: token %4d, trgcmd 0x%X, daqcmd 0x%X",evp->file_name, evp->seq, evp->token, evp->trgcmd, evp->daqcmd) ;
 
 		/***************** let's do simple detectors; the ones which only have legacy *****/
 

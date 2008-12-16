@@ -39,6 +39,7 @@ sfs_stuff: sfs_stuff.o $(VOBJS)
 
 rts_example.o: ../../../../StRoot/RTS/include/rtsLog.h
 rts_example.o: ../DAQ_READER/daqReader.h
+rts_example.o: ../DAQ_READER/daqConfig.h
 rts_example.o: ../DAQ_READER/daq_dta.h
 rts_example.o: ../../../../StRoot/RTS/include/rts.h
 rts_example.o: ../DAQ_READER/daq_dta_structs.h
@@ -67,8 +68,10 @@ rts_example.o: ../DAQ_TPX/daq_tpx.h
 rts_example.o: ../DAQ_TRG/daq_trg.h
 sfs_stuff.o: ../../../../StRoot/RTS/include/rtsLog.h
 sfs_stuff.o: ../DAQ_READER/daqReader.h
+sfs_stuff.o: ../DAQ_READER/daqConfig.h
 tpc_rerun.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpc_rerun.o: ../DAQ_READER/daqReader.h
+tpc_rerun.o: ../DAQ_READER/daqConfig.h
 tpc_rerun.o: ../DAQ_READER/daq_dta.h
 tpc_rerun.o: ../../../../StRoot/RTS/include/rts.h
 tpc_rerun.o: ../DAQ_READER/daq_dta_structs.h
@@ -76,6 +79,7 @@ tpc_rerun.o: ../DAQ_TPX/daq_tpx.h
 tpc_rerun.o: ../DAQ_READER/daq_det.h
 tpx_gains.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpx_gains.o: ../DAQ_READER/daqReader.h
+tpx_gains.o: ../DAQ_READER/daqConfig.h
 tpx_gains.o: ../DAQ_READER/daq_dta.h
 tpx_gains.o: ../../../../StRoot/RTS/include/rts.h
 tpx_gains.o: ../DAQ_READER/daq_dta_structs.h

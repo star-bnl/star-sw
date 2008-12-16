@@ -615,7 +615,7 @@ void tpxGain::calc()
 	
 
 	if(get_means(s,r)->g != 0.0) {
-		LOG(TERR,"Sector %2d, row %2d: charge %.3f +- %.3f; t0 %.3f +- %.3f; rough mean %.3f; good/acc/all pads %d/%d/%d",
+		LOG(NOTE,"Sector %2d, row %2d: charge %.3f +- %.3f; t0 %.3f +- %.3f; rough mean %.3f; good/acc/all pads %d/%d/%d",
 		    s,r,
 		    get_means(s,r)->g, get_means(s,r)->g_rms,
 		    get_means(s,r)->t0, get_means(s,r)->t0_rms,
@@ -901,7 +901,7 @@ void tpxGain::compare(char *fname, int mysec)
 	fclose(f) ;
 
 	if(new_only>10) {
-		LOG(ERR,"gain_compare, sector %d: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
+		LOG(CAUTION,"TPX sector %d: seems to have new bad pads: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
 	}
 	else {
 		LOG(INFO,"gain_compare, sector %d: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;

@@ -42,6 +42,7 @@ daq_bsmd.o: ../SFS/sfs_index.h
 daq_bsmd.o: ../SFS/fs_index.h
 daq_bsmd.o: ../SFS/sfs_base.h
 daq_bsmd.o: ../DAQ_READER/daqReader.h
+daq_bsmd.o: ../DAQ_READER/daqConfig.h
 daq_bsmd.o: ../DAQ_READER/daq_dta.h
 daq_bsmd.o: ../../../../StRoot/RTS/include/rts.h
 daq_bsmd.o: ../DAQ_READER/daq_dta_structs.h

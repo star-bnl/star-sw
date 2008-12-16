@@ -31,6 +31,7 @@ libfpd.a : $(OBJS)
 daq_fpd.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_fpd.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_fpd.o: ../DAQ_READER/daqReader.h
+daq_fpd.o: ../DAQ_READER/daqConfig.h
 daq_fpd.o: ../DAQ_READER/daq_dta.h
 daq_fpd.o: ../../../../StRoot/RTS/include/rts.h
 daq_fpd.o: ../DAQ_READER/daq_dta_structs.h
@@ -45,4 +46,14 @@ fpd_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 fpd_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 fpd_reader.o: daq_fpd.h
 fpd_reader.o: ../DAQ_READER/daq_det.h
+fpdReader.o: ../DAQ_READER/daqReader.h
+fpdReader.o: ../DAQ_READER/daqConfig.h
+fpdReader.o: ../DAQ_READER/daq_dta.h
+fpdReader.o: ../../../../StRoot/RTS/include/rts.h
+fpdReader.o: ../DAQ_READER/daq_dta_structs.h
+fpdReader.o: ../DAQ_READER/daq_det.h
+fpdReader.o: fpdReader.h
+fpdReader.o: daq_fpd.h
 daq_fpd.o: ../DAQ_READER/daq_det.h
+fpdReader.o: daq_fpd.h
+fpdReader.o: ../DAQ_READER/daq_det.h

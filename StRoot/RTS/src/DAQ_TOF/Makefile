@@ -32,6 +32,7 @@ daq_tof.o: ../SFS/sfs_index.h
 daq_tof.o: ../SFS/fs_index.h
 daq_tof.o: ../SFS/sfs_base.h
 daq_tof.o: ../DAQ_READER/daqReader.h
+daq_tof.o: ../DAQ_READER/daqConfig.h
 daq_tof.o: ../DAQ_READER/daq_dta.h
 daq_tof.o: ../../../../StRoot/RTS/include/rts.h
 daq_tof.o: ../DAQ_READER/daq_dta_structs.h
@@ -46,4 +47,11 @@ tof_reader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 tof_reader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
 tof_reader.o: daq_tof.h
 tof_reader.o: ../DAQ_READER/daq_det.h
+tofReader.o: ../DAQ_READER/daqReader.h
+tofReader.o: ../DAQ_READER/daqConfig.h
+tofReader.o: ../DAQ_READER/daq_dta.h
+tofReader.o: ../../../../StRoot/RTS/include/rts.h
+tofReader.o: ../DAQ_READER/daq_dta_structs.h
+tofReader.o: ../DAQ_READER/daq_det.h
+tofReader.o: tofReader.h
 daq_tof.o: ../DAQ_READER/daq_det.h

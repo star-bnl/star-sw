@@ -40,6 +40,17 @@ daq_pp2pp.o: ../DAQ_READER/daq_dta.h
 daq_pp2pp.o: ../../../../StRoot/RTS/include/rts.h
 daq_pp2pp.o: ../DAQ_READER/daq_dta_structs.h
 daq_pp2pp.o: ../DAQ_READER/daqReader.h
+daq_pp2pp.o: ../DAQ_READER/daqConfig.h
 daq_pp2pp.o: daq_pp2pp.h
 daq_pp2pp.o: ../DAQ_READER/daq_det.h
+pp2ppReader.o: ../DAQ_READER/daqReader.h
+pp2ppReader.o: ../DAQ_READER/daqConfig.h
+pp2ppReader.o: ../DAQ_READER/daq_dta.h
+pp2ppReader.o: ../../../../StRoot/RTS/include/rts.h
+pp2ppReader.o: ../DAQ_READER/daq_dta_structs.h
+pp2ppReader.o: ../DAQ_READER/daq_det.h
+pp2ppReader.o: pp2ppReader.h
+pp2ppReader.o: daq_pp2pp.h
 daq_pp2pp.o: ../DAQ_READER/daq_det.h
+pp2ppReader.o: daq_pp2pp.h
+pp2ppReader.o: ../DAQ_READER/daq_det.h

@@ -50,6 +50,7 @@ daq_det.o: ../SFS/sfs_index.h
 daq_det.o: ../SFS/fs_index.h
 daq_det.o: ../SFS/sfs_base.h
 daq_det.o: daqReader.h
+daq_det.o: daqConfig.h
 daq_det.o: daq_det.h
 daq_det.o: daq_dta.h
 daq_det.o: daq_dta_structs.h
@@ -75,6 +76,7 @@ daqReader.o: ../SFS/fs_index.h
 daqReader.o: ../SFS/sfs_base.h
 daqReader.o: ../../../../StRoot/RTS/include/rts.h
 daqReader.o: daqReader.h
+daqReader.o: daqConfig.h
 daqReader.o: msgNQLib.h
 daqReader.o: cfgutil.h
 daqReader.o: daq_det.h
@@ -82,5 +84,7 @@ msgNQLib.o: ../../../../StRoot/RTS/include/rtsLog.h
 msgNQLib.o: msgNQLib.h
 readEvents.o: ../../../../StRoot/RTS/include/rtsLog.h
 readEvents.o: daqReader.h
+readEvents.o: daqConfig.h
 daq_dta.o: ../../../../StRoot/RTS/include/rts.h
 daq_dta.o: daq_dta_structs.h
+daqReader.o: daqConfig.h

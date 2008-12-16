@@ -291,7 +291,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 					aid = tpx_fee_override[i].curr_altro ;
 				}
 
-				LOG(WARN,"Sector %2d, RDO %d: overriding ALTRO from %3d to %3d",sector,rb+1,a,aid) ;
+				LOG(NOTE,"Sector %2d, RDO %d: overriding ALTRO from %3d to %3d",sector,rb+1,a,aid) ;
 			}
 			}
 			}

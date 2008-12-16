@@ -38,6 +38,7 @@ daq_sc.o: ../SFS/sfs_index.h
 daq_sc.o: ../SFS/fs_index.h
 daq_sc.o: ../SFS/sfs_base.h
 daq_sc.o: ../DAQ_READER/daqReader.h
+daq_sc.o: ../DAQ_READER/daqConfig.h
 daq_sc.o: ../DAQ_READER/daq_dta.h
 daq_sc.o: ../../../../StRoot/RTS/include/rts.h
 daq_sc.o: ../DAQ_READER/daq_dta_structs.h
@@ -52,4 +53,14 @@ sc_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 sc_reader.o: ../../../../StRoot/RTS/include/rts.h
 sc_reader.o: daq_sc.h
 sc_reader.o: ../DAQ_READER/daq_det.h
+scReader.o: ../DAQ_READER/daqReader.h
+scReader.o: ../DAQ_READER/daqConfig.h
+scReader.o: ../DAQ_READER/daq_dta.h
+scReader.o: ../../../../StRoot/RTS/include/rts.h
+scReader.o: ../DAQ_READER/daq_dta_structs.h
+scReader.o: ../DAQ_READER/daq_det.h
+scReader.o: scReader.h
+scReader.o: daq_sc.h
 daq_sc.o: ../DAQ_READER/daq_det.h
+scReader.o: daq_sc.h
+scReader.o: ../DAQ_READER/daq_det.h

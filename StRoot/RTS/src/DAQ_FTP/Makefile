@@ -31,6 +31,7 @@ libftp.a : $(OBJS)
 daq_ftp.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_ftp.o: ../../../../StRoot/RTS/include/rtsSystems.h
 daq_ftp.o: ../DAQ_READER/daqReader.h
+daq_ftp.o: ../DAQ_READER/daqConfig.h
 daq_ftp.o: ../DAQ_READER/daq_dta.h
 daq_ftp.o: ../../../../StRoot/RTS/include/rts.h
 daq_ftp.o: ../DAQ_READER/daq_dta_structs.h
@@ -45,4 +46,14 @@ ftp_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 ftp_reader.o: ../../../../StRoot/RTS/include/rts.h
 ftp_reader.o: daq_ftp.h
 ftp_reader.o: ../DAQ_READER/daq_det.h
+ftpReader.o: ../DAQ_READER/daqReader.h
+ftpReader.o: ../DAQ_READER/daqConfig.h
+ftpReader.o: ../DAQ_READER/daq_dta.h
+ftpReader.o: ../../../../StRoot/RTS/include/rts.h
+ftpReader.o: ../DAQ_READER/daq_dta_structs.h
+ftpReader.o: ../DAQ_READER/daq_det.h
+ftpReader.o: ftpReader.h
+ftpReader.o: daq_ftp.h
 daq_ftp.o: ../DAQ_READER/daq_det.h
+ftpReader.o: daq_ftp.h
+ftpReader.o: ../DAQ_READER/daq_det.h
