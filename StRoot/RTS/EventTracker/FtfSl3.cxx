@@ -54,18 +54,18 @@
 #include "rts.h"
 #include "l3Swap.h"
 #include "fcfClass.hh"
-#ifndef NEW_DAQ_READER
+#ifdef OLD_DAQ_READER
 #include <evpReader.hh>
-#else /* NEW_DAQ_READER */
+#else /* OLD_DAQ_READER */
 #include <DAQ_READER/daqReader.h>
-#endif /* NEW_DAQ_READER */
+#endif /* OLD_DAQ_READER */
 #include <rtsSystems.h>
 #include <daqFormats.h>
-#ifdef NEW_DAQ_READER
+#ifndef OLD_DAQ_READER
 #include <DAQ_TPC/daq_tpc.h>
 
 extern tpc_t *pTPC;
-#endif /* NEW_DAQ_READER */
+#endif /* OLD_DAQ_READER */
 
 //******************************************************************
 //   Check whether tracs are mergable
@@ -895,13 +895,13 @@ int FtfSl3::readSectorFromEvpReader(int sector) {
     
   // read data...
   for(int r=0;r<45;r++) {
-#ifndef NEW_DAQ_READER
+#ifdef OLD_DAQ_READER
     for(int j=0;j<tpc.cl_counts[r];j++) {
       tpc_cl *c = &tpc.cl[r][j];
-#else /* NEW_DAQ_READER */
+#else /* OLD_DAQ_READER */
     for(int j=0;j<pTPC->cl_counts[r];j++) {
       tpc_cl *c = &pTPC->cl[r][j];
-#endif /* NEW_DAQ_READER */
+#endif /* OLD_DAQ_READER */
       
       FtfHit *hitP = &hit[nHits];
    
