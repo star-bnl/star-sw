@@ -5,24 +5,22 @@
 #include <setjmp.h>
 #include <daqFormats.h>
 #include "l3CoordinateTransformer.h"
-#ifdef NEW_DAQ_READER
 #include <rts.h>
-#endif /* NEW_DAQ_READER */
 #include "rtsLog.h"
 #include "FtfSl3.h"
-#ifndef NEW_DAQ_READER
+#ifdef OLD_DAQ_READER
 #include <evpReader.hh>
-#else /* NEW_DAQ_READER */
+#else /* OLD_DAQ_READER */
 #include <DAQ_READER/daqReader.h>
-#endif /* NEW_DAQ_READER */
+#endif /* OLD_DAQ_READER */
 #include "gl3Event.h"
 #include "eventTrackerLib.hh"
 
-#ifndef NEW_DAQ_READER
+#ifdef OLD_DAQ_READER
 int EventTracker::trackEvent(evpReader *evp, char *mem, L3_P *l3p, int max_size)
-#else /* NEW_DAQ_READER */
+#else /* OLD_DAQ_READER */
 int EventTracker::trackEvent(daqReader *rdr, char *mem, L3_P *l3p, int max_size)
-#endif /* NEW_DAQ_READER */
+#endif /* OLD_DAQ_READER */
 {
   DATAP *datap = (DATAP *)mem;
   // Build L3_p
@@ -31,17 +29,15 @@ int EventTracker::trackEvent(daqReader *rdr, char *mem, L3_P *l3p, int max_size)
 
   // First do tracking...
   L3_GTD *gtd = (L3_GTD *)(buff + sizeof(L3_P));
-#ifndef NEW_DAQ_READER
+#ifdef OLD_DAQ_READER
   ret = trackTPC(evp, mem, gtd, max_size - sizeof(L3_P));
-#else /* NEW_DAQ_READER */
+#else /* OLD_DAQ_READER */
   ret = trackTPC(rdr, mem, gtd, max_size - sizeof(L3_P));
-#endif /* NEW_DAQ_READER */
+#endif /* OLD_DAQ_READER */
  
-#ifndef NEW_DAQ_READER
-  // Now build the L3_P bank...
-#else /* NEW_DAQ_READER */
+  LOG(DBG, "gtd: nHits=%d", gtd->nHits);
+
    // Now build the L3_P bank...
-#endif /* NEW_DAQ_READER */
   memset(l3p, 0, sizeof(L3_P));  
 
   memcpy(l3p->bh.bank_type, CHAR_L3_P, 8);
@@ -73,18 +69,15 @@ int EventTracker::trackEvent(daqReader *rdr, char *mem, L3_P *l3p, int max_size)
   return ret;
 }
 
-#ifndef NEW_DAQ_READER
-int EventTracker::trackTPC(evpReader *evp, char *mem, L3_GTD *gtd, int max_size)
-#else /* NEW_DAQ_READER */
+#ifdef OLD_DAQ_READER
+int EventTracker::trackTPC(evpReader *rdr, char *mem, L3_GTD *gtd, int max_size)
+#else /* OLD_DAQ_READER */
 int EventTracker::trackTPC(daqReader *rdr, char *mem, L3_GTD *gtd, int max_size)
-#endif /* NEW_DAQ_READER */
+#endif /* OLD_DAQ_READER */
 {
   // bField != 1000 means use it, 1000 means take from file...
-#ifndef NEW_DAQ_READER
-  gl3->readFromEvpReader(evp, mem, defaultBField, bField, GL3_READ_TPC_TRACKS);
-#else /* NEW_DAQ_READER */
   gl3->readFromEvpReader(rdr, mem, defaultBField, bField, GL3_READ_TPC_TRACKS);
-#endif /* NEW_DAQ_READER */
+
   return gl3Event_to_GTD(gtd, max_size);
 }
 
@@ -128,7 +121,10 @@ int EventTracker::gl3Event_to_GTD(L3_GTD *gtd,  u_int max_size)
     gtrack.flag = gl3track->flag;                                // Primaries flag=1, Secondaries flag=0
     gtrack.innerMostRow = gl3track->innerMostRow;
     gtrack.outerMostRow = gl3track->outerMostRow;
+
     gtrack.nHits = gl3track->nHits;                  // Number of points assigned to that track
+    gtd->nHits += gtrack.nHits;
+
     //gtrack->reserved ; 
     gtrack.ndedx = gl3track->nDedx;                  // nr of clusters contributing to the dedx value
     gtrack.q = gl3track->q;              // charge

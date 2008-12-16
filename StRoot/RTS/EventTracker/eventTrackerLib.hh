@@ -87,13 +87,13 @@ public:
   // suggested max_size = 0x800000
   //
 
-#ifndef NEW_DAQ_READER
+#ifdef OLD_DAQ_READER
   int trackEvent(evpReader *evp, char *mem, L3_P *l3p, int max_size);
   int trackTPC(evpReader *evp, char *mem, L3_GTD *gtd, int max_size);
-#else /* NEW_DAQ_READER */
+#else /* OLD_DAQ_READER */
   int trackEvent(daqReader *daq, char *mem, L3_P *l3p, int max_size);
   int trackTPC(daqReader *daq, char *mem, L3_GTD *gtd, int max_size);
-#endif /* NEW_DAQ_READER */
+#endif /* OLD_DAQ_READER */
     
 #ifdef OBSOLETE
   int trackEvent(DATAP *datap, L3_P *l3p, int max_size);
