@@ -325,9 +325,9 @@ int tpxPed::to_evb(char *buff)
 			struct peds *ped = get(r, p) ;
 
 			u_short *addr = (u_short *) rbuff ;	// remember address
-			*addr++ = (r<<8)|p ;	// row/pad
+			*(addr+1) = (r<<8)|p ;	// row/pad
 			
-			u_short *ptr = addr ;	// read to store
+			u_short *ptr = addr + 2;	// read to store
 
 			for(t=0;t<512;t++) {
 				double rms = (ped->rms[t] * 16.0) ;
@@ -335,6 +335,11 @@ int tpxPed::to_evb(char *buff)
 
 				if((u_short)rms > 0x3F) val = 0x3F ;
 				else val = (u_short) rms ;
+				
+				// sanity check!
+				if(ped->ped[t] == 0) {
+					LOG(WARN,"WTF? ped 0 in rp %d:%d, tb %d",r,p,t) ;
+				}
 
 				*ptr++ = (val << 10) | (u_short)ped->ped[t] ;
 			}
@@ -343,7 +348,8 @@ int tpxPed::to_evb(char *buff)
 			rbuff = (char *) ptr ;
 		}
 	}
-	// int: row,pad,cou
+	// short cou
+	// short row|pad
 	// short: 6bit RMS, 10bit ped
 
 	LOG(TERR,"Pedestals prepared for later EVB: %d bytes",rbuff-buff) ;

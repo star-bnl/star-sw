@@ -456,7 +456,7 @@ daq_dta *daq_tpx::get(const char *in_bank, int sec, int row, int pad, void *p1, 
 		return handle_cld(sec,row) ;	// actually sec, rdo:
 	}
 	else if(strcasecmp(bank,"pedrms")==0) {
-		return handle_ped(sec,row) ;	// actually sec, rdo:
+		return handle_ped(sec) ;	// just sec
 	}
 	else if(strcasecmp(bank,"legacy")==0) {
 		return handle_legacy(sec,row) ;	// actually sec, rdo:
@@ -509,13 +509,13 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 		struct tpc_t *tpc_p = 0 ;
 
 		// check for pedestal data first!
-		dd = handle_ped(s,-1) ;
+		dd = handle_ped(s) ;
 		if(dd) {
 			tpc_p = (struct tpc_t *) legacy->request(1) ;
 			memset(tpc_p,0,sizeof(tpc_t)) ;
 
 
-			LOG(WARN,"Found TPX peds -- translating into TPC peds not done yet!") ;			
+			LOG(WARN,"Found TPX peds sec %02d -- translating into TPC legacy peds not done yet!",s) ;			
 			
 			tpc_p->mode = 1 ;	// pedestal mode!
 			
@@ -642,11 +642,11 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 
 }
 
-daq_dta *daq_tpx::handle_ped(int sec, int rdo)
+daq_dta *daq_tpx::handle_ped(int sec)
 {
 	char str[128] ;
 	int tot_bytes ;
-	int min_sec, max_sec, min_rdo, max_rdo ;
+	int min_sec, max_sec ;
 
 	// sanity
 	if(sec <= 0) {		// ALL sectors
@@ -658,14 +658,6 @@ daq_dta *daq_tpx::handle_ped(int sec, int rdo)
 		min_sec = max_sec = sec ;
 	}
 
-	if(rdo <= 0) {		// ALL RDOs in this sector
-		min_rdo = 1 ;
-		max_rdo = 6 ;
-	}
-	else if((rdo<1) || (rdo>6)) return 0 ;
-	else {
-		min_rdo = max_rdo = rdo ;
-	}
 
 	assert(caller) ;
 
@@ -674,9 +666,8 @@ daq_dta *daq_tpx::handle_ped(int sec, int rdo)
 	tot_bytes = 0 ;
 
 	for(int s=min_sec;s<=max_sec;s++) {
-	for(int r=min_rdo;r<=max_rdo;r++) {
 
-		sprintf(str,"%s/sec%02d/rb%02d/pedrms",sfs_name, s, r) ;
+		sprintf(str,"%s/sec%02d/pedrms",sfs_name, s) ;
 	
 		LOG(NOTE,"%s: trying sfs on \"%s\"",name,str) ;
 
@@ -685,7 +676,7 @@ daq_dta *daq_tpx::handle_ped(int sec, int rdo)
 
 		int size = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-		LOG(DBG,"%s: sector %d, rdo %d : ped size %d",name,s,r,size) ;
+		LOG(NOTE,"%s: sector %d: ped size %d",name,s,size) ;
 
 		if(size <= 0) {
 			assert(!"can't be 0") ;
@@ -709,13 +700,16 @@ daq_dta *daq_tpx::handle_ped(int sec, int rdo)
 		if(tot_bytes == 0) {	// nothing done so far so we will create the first guess...
 			ped->create(size,"ped",rts_id,DAQ_DTA_STRUCT(daq_det_pedrms)) ;
 		}
+
 		tot_bytes += size ;
 
 
 		// do the actual decoding...
 		u_short *d16 = (u_short *) tmp_cache ;
 
+		// data format must be the same as in tpxPed::to_evb()!
 		while(size > 0) {
+/* old, wrong!
 			u_int r_id = l2h32(*(u_int *)d16) ;
 
 			size -= 4 ;	// 1 int == 4 bytes
@@ -725,6 +719,16 @@ daq_dta *daq_tpx::handle_ped(int sec, int rdo)
 			int pad = (r_id & 0x00FF0000) >> 16 ;
 			int cou = (r_id & 0x0000FFFF) ;
 
+*/
+			int cou = l2h16(*d16++) ;
+			//int cou = 512 ;
+			int row = l2h16(*d16++) ;
+			int pad = row & 0xFF ;
+			row >>= 8 ;
+
+			LOG(DBG,"sector %d: row %d, pad %d, cou %d",s,row,pad,cou) ;
+
+			size -= 2 * 2 ;		// to account for the 2 shorts in the header
 			size -= cou * 2 ;	// data is shorts
 
 			daq_det_pedrms *d = (daq_det_pedrms *) ped->request(cou*10) ;	// force more allocation
@@ -745,8 +749,6 @@ daq_dta *daq_tpx::handle_ped(int sec, int rdo)
 
 		free(tmp_cache) ;	// release temporary storage...
 
-		
-	}
 	}
 
 	
