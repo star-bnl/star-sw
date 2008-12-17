@@ -218,12 +218,32 @@ daq_dta *daq_esmd::handle_adc()
 }
 
 
-int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt)
+int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int do_log)
 {
 	u_short *us = (u_short *)buff ;
 
+	u_short t_hi = l2h16(us[2]) ;
+	u_short t_lo = l2h16(us[3]) ;
+
+	int err = 0 ;
+
+	if((t_lo & 0xFF00) || (t_hi & 0xFFF0)) {	//error
+		err = 1 ;
+		if(do_log) {
+			LOG(ERR,"Corrupt token: t_hi 0x%04X, t_lo 0x%04X",t_hi,t_lo) ;
+		}
+	}
+
+	if(err) {
+		trg[0].t = 4097 ;
+		trg[0].trg = 0 ;
+		trg[0].daq = 0 ;
+		
+		return 1 ;
+	}
+
 	// L0 part
-	trg[0].t = l2h16(us[2])*256 + l2h16(us[3]) ;
+	trg[0].t = t_hi*256 + t_lo ;
 	trg[0].daq = 0 ;
 	trg[0].trg = 4 ;	// ESMD does not give the correct L0, only L2 so we invent 4
 	trg[0].rhic = l2h16(us[4]) ;
