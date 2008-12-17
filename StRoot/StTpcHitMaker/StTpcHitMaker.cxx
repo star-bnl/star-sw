@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.7 2008/12/17 23:26:00 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.8 2008/12/17 23:27:04 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.8  2008/12/17 23:27:04  fine
+ * Clean up
+ *
  * Revision 1.7  2008/12/17 23:26:00  fine
  * Adjust the sector number
  *
@@ -603,8 +606,8 @@ void StTpcHitMaker::RawData(Int_t sector) {
     TGenericTable::iterator iword = DaqDta()->begin();
     for (;iword != DaqDta()->end();++iword) {
         daq_adc_tb &daqadc = (*(daq_adc_tb *)*iword);
-        int tb = daqadc .tb ;
-        int adc = daqadc .adc ;
+        int tb   = daqadc.tb;
+        int adc  = daqadc.adc;
         ADCs[tb] = adc;
         IDTs[tb] = 65535;
         some_data++ ;	// I don't know the bytecount but I'll return something...
