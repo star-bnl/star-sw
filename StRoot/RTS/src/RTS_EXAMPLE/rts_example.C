@@ -295,7 +295,16 @@ static int tpx_doer(daqReader *rdr, char  *do_print)
 	
 		// will only exist in token 0 of a pedestal run!
 		dd = rdr->det("tpx")->get("pedrms",s) ;
-		if(dd) found = 1 ;
+		while(dd && dd->iterate()) {
+			found = 1 ;
+			if(do_print) {
+				printf("TPX: sec %02d, row %2d, pad %3d (%d pix)\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
+				for(u_int tb=0;tb<dd->ncontent;tb++) {
+					printf("  tb %3d: ped %3d, rms %.2f\n",tb,ped[tb].ped,ped[tb].rms) ;
+				}
+			}
+		}
 
 	}
 
@@ -316,6 +325,7 @@ static int tpc_doer(daqReader *rdr, char  *do_print)
 	// ala the old evpReader, due to the memory footprint
 	for(int s=1;s<=24;s++) {
 		dd = rdr->det("tpc")->get("legacy",s) ;
+		if(dd) LOG(INFO,"sizeof tpc_t %d, get_size_t %d",sizeof(struct tpc_t),dd->get_size_t()) ;
 		while(dd && dd->iterate()) {	
 			found++ ;	// mark as found..
 			tpc_t *tpc = (tpc_t *) dd->Void ;
