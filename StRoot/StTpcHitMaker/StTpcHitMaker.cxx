@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.6 2008/12/17 02:04:28 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.7 2008/12/17 23:26:00 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.7  2008/12/17 23:26:00  fine
+ * Adjust the sector number
+ *
  * Revision 1.6  2008/12/17 02:04:28  fine
  * fix the sector number to make the new interface happy
  *
@@ -176,7 +179,8 @@ Int_t StTpcHitMaker::MakeSector(Int_t sector) {
   evpReader *evp = InitReader();
   return  evp ? tpcReader((char *)evp,sector) : 0;
 #else /* NEW_DAQ_READER */
-  TString sec = Form("legacy[%i]",sector+1); // with this verskon the first sector ==1 !!!
+  sector++; // with this version the first sector ==1 !!!
+  TString sec = Form("legacy[%i]",sector); 
   StRtsTable *daqTpcTable = GetNext(sec);
   if (daqTpcTable) {
      fTpc = (tpc_t*)*DaqDta()->begin();
