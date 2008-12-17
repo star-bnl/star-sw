@@ -34,7 +34,7 @@ inline int sfs_putfileheader(char *ptr, char *fn, int filesz, int flags)
   SFS_File *file = (SFS_File *)ptr;
 
   int n = sizeof(SFS_File) - 4;
-  n += strlen(fn);
+  n += strlen(fn) + 1;
   n = (n+3)&0xfffffffc;
 
   memcpy(file->type, "FILE", 4);
@@ -43,7 +43,13 @@ inline int sfs_putfileheader(char *ptr, char *fn, int filesz, int flags)
   file->head_sz = n;
   file->attr = flags;
   file->reserved = 0;
-  memcpy(file->name + n - 4, "\0\0\0\0", 4);
+
+  // u_int nm = (u_int)file->name;
+  // u_int fl = (u_int)file;
+  // u_int ct = (u_int)(((u_int)file->name) + n - 4);
+  // printf("offset of file: %d.   offset to write to: %d\n",nm-fl, n-4);
+
+  memcpy(((char *)file) + n - 4, "\0\0\0\0", 4);
   strcpy(file->name, fn);
   return n;
 }
