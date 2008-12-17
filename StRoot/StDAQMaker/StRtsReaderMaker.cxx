@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.12 2008/12/16 22:33:00 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.13 2008/12/17 00:55:15 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.13  2008/12/17 00:55:15  fine
+ * improve the diagnostic messages
+ *
  * Revision 1.12  2008/12/16 22:33:00  fine
  * Improve the diagnostic message
  *
@@ -222,9 +225,13 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
 {
    // Create the new instance of the StRtsTable
    if (fRtsTable) {
-       LOG_INFO << " You are going to use \"" << detName << "/" << bankName << "\" RTS bank" << endm;
-       LOG_INFO << " eventhough the previous ordered RTS  bank: \""
-                << fLastQuery << "\" has not been used yet" << endm;
+       // make sure there was no data anymore
+ //      if (fBank && fBank->iterate()) 
+       {
+          LOG_INFO << " You are going to use \"" << detName << "/" << bankName << "\" RTS bank" << endm;
+          LOG_INFO << " even though you did not use all information from the previous RTS  bank: \""
+                << fLastQuery << "\" yet" << endm;
+       }
        delete fRtsTable; fRtsTable = 0;
    }
 #ifndef NEW_DAQ_READER
@@ -255,8 +262,11 @@ TDataSet *StRtsReaderMaker::FillTable()
       fRtsTable->AppendRows(fBank->Byte,fBank->ncontent);
       fRtsTable->SetNRows(fBank->ncontent);
    } else {
-      LOG_INFO <<" StRtsReaderMaker::FillTable(): No data has been found to fill the table"
-               << endm;
+      if (!fLastQuery.IsNull()) {
+         LOG_INFO <<" StRtsReaderMaker::FillTable(): No data has been found for \"" 
+                  << fLastQuery << "\" to fill the table"
+                  << endm;
+      }
       if (fRtsTable) fRtsTable->Print(0,5);
       delete fRtsTable; fRtsTable = 0;
       fLastQuery = ""; 
@@ -275,7 +285,12 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
    //                                 16th sector of tpx
    // Return the RTS bank  decorated as TGenericTable
    //--------------------------------------------------------------
-  
+   
+  // Do not process the empty request:
+
+  if ( !(logInput && logInput[0]) )
+     return StMaker::FindDataSet(logInput,uppMk,dowMk);
+
   TString rtsRequest = logInput;
   Bool_t rtsSystem   = false;
   TDataSet *ds       = 0;
