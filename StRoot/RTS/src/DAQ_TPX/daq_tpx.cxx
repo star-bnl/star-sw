@@ -515,11 +515,40 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 			memset(tpc_p,0,sizeof(tpc_t)) ;
 
 
-			LOG(WARN,"Found TPX peds sec %02d -- translating into TPC legacy peds not done yet!",s) ;			
+			//LOG(WARN,"Found TPX peds sec %02d -- translating into TPC legacy peds not done yet!",dd->sec) ;			
 			
 			tpc_p->mode = 1 ;	// pedestal mode!
 			
 			while(dd->iterate()) {
+				int r = dd->row - 1 ;	// tpc_t counts from 0
+				int p = dd->pad - 1 ;	// tpc_t counts from 0 ;
+		
+				if((r<0) || (p<0)) continue ;	// altro can have row or pad == 0
+
+				found_something = 1 ;
+
+				//LOG(NOTE,"rp %d:%d, ncontent %d",r,p,dd->ncontent) ;
+				daq_det_pedrms *ped = (daq_det_pedrms *)dd->Void ;
+
+				for(int i=0;i<(int)dd->ncontent;i++) {
+					int tpc_tb, tpc_adc ;
+
+
+					// adjust timebin
+					tpc_tb = i - tpx_tpc_tb_delta ;
+					if(tpc_tb <0) continue ;
+
+					tpc_adc = ped[i].ped ;
+					if(tpc_adc > 255) tpc_adc = 255 ;	// plato
+
+					int c = tpc_p->counts[r][p] ;	// shorthand
+					tpc_p->adc[r][p][c] = tpc_adc ;
+					tpc_p->timebin[r][p][c] = (u_char)(ped[i].rms*16.0) ;
+			
+					(tpc_p->counts[r][p])++ ;
+					tpc_p->channels_sector++ ;
+
+				}
 
 				found_something = 1 ;
 			}
@@ -564,8 +593,8 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 					if(tpc_adc == 0) continue ;	// 0 is possible with the altro but not TPC ZS
 
 					int c = tpc_p->counts[r][p] ;	// shorthand
-					tpc_p->adc[r][p][c] = dd->adc[i].adc ;
-					tpc_p->timebin[r][p][c] = dd->adc[i].tb ;
+					tpc_p->adc[r][p][c] = tpc_adc ;
+					tpc_p->timebin[r][p][c] = tpc_tb ;
 			
 					(tpc_p->counts[r][p])++ ;
 					tpc_p->channels_sector++ ;
