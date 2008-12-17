@@ -19,7 +19,7 @@ private:
 	class daq_dta *handle_cld(int sec, int rdo) ;
 	class daq_dta *handle_cld_raw(int sec, int rdo) ;
 	class daq_dta *handle_cld_sim(int sec, int row) ;
-	class daq_dta *handle_ped(int sec, int row) ;
+	class daq_dta *handle_ped(int sec) ;
 
 	// direct maps to file content:
 	class daq_dta *raw ;	
