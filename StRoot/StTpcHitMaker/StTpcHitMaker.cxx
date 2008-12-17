@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.5 2008/12/16 20:43:25 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.6 2008/12/17 02:04:28 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.6  2008/12/17 02:04:28  fine
+ * fix the sector number to make the new interface happy
+ *
  * Revision 1.5  2008/12/16 20:43:25  fine
  * add the DAQ_READER compliant access to the tpx sector
  *
@@ -173,8 +176,7 @@ Int_t StTpcHitMaker::MakeSector(Int_t sector) {
   evpReader *evp = InitReader();
   return  evp ? tpcReader((char *)evp,sector) : 0;
 #else /* NEW_DAQ_READER */
-  TString sec = "legacy[";
-  sec += TString(sector); sec += "]";
+  TString sec = Form("legacy[%i]",sector+1); // with this verskon the first sector ==1 !!!
   StRtsTable *daqTpcTable = GetNext(sec);
   if (daqTpcTable) {
      fTpc = (tpc_t*)*DaqDta()->begin();
@@ -555,8 +557,7 @@ void StTpcHitMaker::RawData(Int_t sector) {
   while(dta->iterate()) {
     int r = dta->row ;	// I count from 1
 #else /* NEW_DAQ_READER */
-  TString sec = sector;
-  TString query = "tpx/adc["; query += sec; query += "]";
+  TString query = Form("tpx/adc[%i]",sector);
   while (GetNextDaqElement(query))
   {
     int r=Row() ;	// I count from 1
