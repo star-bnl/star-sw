@@ -82,6 +82,27 @@ struct gbPayload {
 
 ////////////// Historic gbPayload Versions ////////////////
 
+// 2008 run, before adding format but after TrgDataFmtVer-->0x40
+struct gbPayload_0x01a {         
+  // big endian
+  union {
+    EventDescriptor2008a EventDescriptor ;   // take from data! 
+    u_int eventDesc[sizeof(EventDescriptor2008a)/4];
+  };
+
+  // The rest is all little endian...
+  u_int L3summary[4] ;
+  u_int L2summary[2];
+  u_int L1summary[2];
+  u_int rtsDetMask;
+  u_int eventNumber;
+  u_int sec;
+  u_int usec;
+  u_int flags;            // bit 0 set, tpc raw data inside
+  u_int evp;
+  u_int token;
+};
+
 // TrgDataFmtVer<0x40
 struct gbPayload_0x01 {         // for 2007 run
   // big endian

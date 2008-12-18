@@ -929,40 +929,24 @@ int daqReader::fillSummaryInfo(gbPayload *pay)
 
   u_int version = pay->gbPayloadVersion;
 
-  if((version & 0xff000000) != 0xda000000) {   // Version 0x01
+  if(((version & 0xff000000) != 0xda000000) && ((b2h32(version) & 0x000000ff ) != 0x40)) {   // Version 0x01
     gbPayload_0x01 *pv = (gbPayload_0x01 *)pay;
-    LOG(NOTE, "gbPayload 0x01:  gpPayloadVersion=0x%x, trgVersion=0x%x",
-	version, pv->EventDescriptor.TrgDataFmtVer);
-
+    LOG(NOTE, "gbPayload 0x01:  v#=0x%x",b2h32(version));    // picked up from big endian evtdes
     return fillSummaryInfo_v01(pv);
   }
 
+  if(((version & 0xff000000) != 0xda000000) && ((b2h32(version) & 0x000000ff ) == 0x40)) {   // Version 0x01a
+    gbPayload_0x01a *pv = (gbPayload_0x01a *)pay;
+    LOG(NOTE, "gbPayload 0x01a:  v#=0x%x", b2h32(version));  // picked up from big endian evtdesc
+    return fillSummaryInfo_v01a(pv);
+  }
 
   if(version == GB_PAYLOAD_VERSION) {
     return fillSummaryInfo_v02(pay);
   }
 
-  // gbPayload is mostly little endian...
-  token = l2h32(pay->token);
-  evt_time = l2h32(pay->sec);
-  detectors = l2h32(pay->rtsDetMask);
-  daqbits_l1 = l2h32(pay->L1summary[0]);
-  daqbits_l2 = l2h32(pay->L2summary[0]);
-  evpgroups = l2h32(pay->L3summary[2]);
-  daqbits = l2h32(pay->L3summary[0]);
-  evp_daqbits = daqbits;
-
-  // event descriptor is big endian...
-  EvtDescData *evtdes = (EvtDescData *)pay->eventDesc;
-  trgword = b2h16(evtdes->TriggerWord);
-  trgcmd = evtdes->actionWdTrgCommand;
-  daqcmd = evtdes->actionWdDaqCommand;
-
   LOG(ERR, "gbPayload Version: 0x%x not known", version);
   return -1;
-
-
-  return 0;
 }
 
 
@@ -981,10 +965,31 @@ int daqReader::fillSummaryInfo_v02(gbPayload *pay) {
   evp_daqbits = daqbits;
 
   // event descriptor is big endian...
-  EvtDescData *evtdes = (EvtDescData *)pay->eventDesc;
-  trgword = b2h16(evtdes->TriggerWord);
-  trgcmd = evtdes->actionWdTrgCommand;
-  daqcmd = evtdes->actionWdDaqCommand;
+  trgword = b2h16(pay->EventDescriptor.TriggerWord);
+  trgcmd = pay->EventDescriptor.actionWdTrgCommand;
+  daqcmd = pay->EventDescriptor.actionWdDaqCommand;
+
+  return 0;
+}
+
+int daqReader::fillSummaryInfo_v01a(gbPayload_0x01a *pay)
+{  
+  LOG(NOTE, "gbPayloadVersion=0xda000001, trgVersion=0x%x", pay->EventDescriptor.TrgDataFmtVer);
+
+  // gbPayload is mostly little endian...
+  token = l2h32(pay->token);
+  evt_time = l2h32(pay->sec);
+  detectors = l2h32(pay->rtsDetMask);
+  daqbits_l1 = l2h32(pay->L1summary[0]);
+  daqbits_l2 = l2h32(pay->L2summary[0]);
+  evpgroups = l2h32(pay->L3summary[2]);
+  daqbits = l2h32(pay->L3summary[0]);
+  evp_daqbits = daqbits;
+  
+  // event descriptor is big endian...
+  trgword = b2h16(pay->EventDescriptor.TriggerWord);
+  trgcmd = pay->EventDescriptor.actionWdTrgCommand;
+  daqcmd = pay->EventDescriptor.actionWdDaqCommand;
 
   return 0;
 }
@@ -1004,10 +1009,9 @@ int daqReader::fillSummaryInfo_v01(gbPayload_0x01 *pay)
   evp_daqbits = daqbits;
   
   // event descriptor is big endian...
-  EvtDescData *evtdes = (EvtDescData *)pay->eventDesc;
-  trgword = b2h16(evtdes->TriggerWord);
-  trgcmd = evtdes->actionWdTrgCommand;
-  daqcmd = evtdes->actionWdDaqCommand;
+  trgword = b2h16(pay->EventDescriptor.TriggerWord);
+  trgcmd = pay->EventDescriptor.actionWdTrgCommand;
+  daqcmd = pay->EventDescriptor.actionWdDaqCommand;
 
   return 0;
 }
