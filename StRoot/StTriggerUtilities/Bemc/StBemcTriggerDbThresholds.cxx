@@ -91,6 +91,10 @@ void StBemcTriggerDbThresholds::LoadTimeStamps(){
   start_2008[1].Set(2007,12,10,19,42,37);
   end_2008[1].Set(2008,1,28,0,56,7);
 
+  //settings for 2008 production_pp
+  start_2008[2].Set(2008,3,4,0,0,0);
+  end_2008[2].Set(2008,3,4,23,59,59);
+
 }
 
 //==================================================
@@ -146,6 +150,27 @@ Int_t  StBemcTriggerDbThresholds::GetTP_DSM0_threshold(Int_t DSMmodule, UInt_t t
 
   //There were no TP thresholds in 2007 
   
+  //2008 TP thresholds
+  const Int_t TP0_TH_2008[6]  = {  24,  24,  24,  24,  24,  24};
+  for (int i=0; i<6;i++)
+    {
+      if (DSMmodule<15)
+	{//WEST
+	  if ((timestamp>=start_2008[i].Get())&&(timestamp<=end_2008[i].Get()))
+	    {
+	      if (layer==0) threshold=TP0_TH_2008[i];
+	    } 
+	}
+      
+      if (DSMmodule>=15)
+	{//EAST 
+	  if ((timestamp>=start_2008[i].Get())&&(timestamp<=end_2008[i].Get()))
+	    {	      
+	      if (layer==0) threshold=TP0_TH_2008[i];
+	    }
+	}
+    }
+
   return threshold;
 }
 
@@ -211,15 +236,13 @@ Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t t
 	    if (layer==1) threshold=HTW1_TH_2006[i];
 	    if (layer==2) threshold=HTW2_TH_2006[i];
 	  }
-	
       }
     
     
     if (DSMmodule>=15)
       {//EAST 
 	if ((timestamp>=start_2006[i].Get())&&(timestamp<=end_2006[i].Get()))
-	  {
-	    
+	  { 
 	    if (layer==0) threshold=HTE0_TH_2006[i];
 	    if (layer==1) threshold=HTE1_TH_2006[i];
 	    if (layer==2) threshold=HTE2_TH_2006[i];
@@ -244,16 +267,14 @@ Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t t
 	    if (layer==0) threshold=HTW0_TH_2007[i];
 	    if (layer==1) threshold=HTW1_TH_2007[i];
 	    if (layer==2) threshold=HTW2_TH_2007[i];
-	  }
-	
+	  }	
       }
     
     
     if (DSMmodule>=15)
       {//EAST 
 	if ((timestamp>=start_2007[i].Get())&&(timestamp<=end_2007[i].Get()))
-	  {
-	    
+	  { 
 	    if (layer==0) threshold=HTE0_TH_2007[i];
 	    if (layer==1) threshold=HTE1_TH_2007[i];
 	    if (layer==2) threshold=HTE2_TH_2007[i];
@@ -262,20 +283,20 @@ Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t t
   }
 
 
-  //2008 HT East and West Thresholds (no separation of east or west in 2007)
-  const Int_t HTW0_TH_2008[2]   = { 11, 11};
-  const Int_t HTW1_TH_2008[2]   = { 15, 15};
-  const Int_t HTW2_TH_2008[2]   = { 18, 18};
-  const Int_t HTW3_TH_2008[2]   = { 35, 35};
-  const Int_t HTW4_TH_2008[2]   = { 35, 35};
+  //2008 HT East and West Thresholds
+  const Int_t HTW0_TH_2008[6]   = { 11, 11, 11};
+  const Int_t HTW1_TH_2008[6]   = { 15, 15, 15};
+  const Int_t HTW2_TH_2008[6]   = { 18, 18, 18};
+  const Int_t HTW3_TH_2008[6]   = { 35, 35, 16};
+  const Int_t HTW4_TH_2008[6]   = { 35, 35, 63};
 
-  const Int_t HTE0_TH_2008[2]   = { 11, 11};
-  const Int_t HTE1_TH_2008[2]   = { 15, 15};
-  const Int_t HTE2_TH_2008[2]   = { 18, 18};
-  const Int_t HTE3_TH_2008[2]   = { 35, 35};
-  const Int_t HTE4_TH_2008[2]   = { 35, 35};
+  const Int_t HTE0_TH_2008[6]   = { 11, 11, 11};
+  const Int_t HTE1_TH_2008[6]   = { 15, 15, 15};
+  const Int_t HTE2_TH_2008[6]   = { 18, 18, 18};
+  const Int_t HTE3_TH_2008[6]   = { 35, 35, 16};
+  const Int_t HTE4_TH_2008[6]   = { 35, 35, 63};
 
- for (int i=0;i<2;i++){
+ for (int i=0;i<3;i++){
     
     if (DSMmodule<15)
       {//WEST
@@ -304,14 +325,6 @@ Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t t
       }
   }
 
-
-
-  
   return threshold;
   
 }
-
-
-
-
-

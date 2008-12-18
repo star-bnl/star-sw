@@ -103,6 +103,7 @@ private:
 
   //Intermediate bits for each trigger patch input to DSMLayer0
   Int_t DSM0_HT_tp_Bit[kL0DsmInputs], DSM0_TP_tp_Bit[kL0DsmInputs], DSM0_HTTP_tp_Bit[kL0DsmInputs];
+  Int_t DSM0_HT_Thr3_tp_Bit[kL0DsmModule], DSM0_HT_Thr3_tp_Bit_J1[kL0DsmModule], DSM0_HT_Thr3_tp_Bit_J3[kL0DsmModule];
   Int_t DSM0_HT_tp_Bit_J3[kL0DsmInputs], DSM0_TP_tp_Bit_J3[kL0DsmInputs],DSM0_HTTP_tp_Bit_J3[kL0DsmInputs];
   Int_t DSM0_HT_tp_Bit_J1[kL0DsmInputs], DSM0_TP_tp_Bit_J1[kL0DsmInputs],DSM0_HTTP_tp_Bit_J1[kL0DsmInputs];
   Int_t L0_16bit_Out[kNLayer0out];
@@ -133,8 +134,13 @@ private:
   void get2008dAu_DSMLayer0();
   void get2008dAu_DSMLayer1();
   void get2008dAu_DSMLayer2();
+  void get2008pp_DSMLayer0();
+  void get2008pp_DSMLayer1();
+  void get2008pp_DSMLayer2();
 
-  //#define DEBUG			// Comment out to switch off debugging
+
+
+#define DEBUG			// Comment out to switch off debugging
 
 #ifdef DEBUG
   
