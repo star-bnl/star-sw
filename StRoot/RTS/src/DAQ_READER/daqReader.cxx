@@ -925,6 +925,23 @@ int daqReader::hackSummaryInfo()
 
 int daqReader::fillSummaryInfo(gbPayload *pay)
 {
+  // First, determine which gbPayload:
+
+  u_int version = pay->gbPayloadVersion;
+
+  if((version & 0xff000000) != 0xda000000) {   // Version 0x01
+    gbPayload_0x01 *pv = (gbPayload_0x01 *)pay;
+    LOG(NOTE, "gbPayload 0x01:  gpPayloadVersion=0x%x, trgVersion=0x%x",
+	version, pv->EventDescriptor.TrgDataFmtVer);
+
+    return fillSummaryInfo_v01(pv);
+  }
+
+
+  if(version == GB_PAYLOAD_VERSION) {
+    return fillSummaryInfo_v02(pay);
+  }
+
   // gbPayload is mostly little endian...
   token = l2h32(pay->token);
   evt_time = l2h32(pay->sec);
@@ -940,8 +957,61 @@ int daqReader::fillSummaryInfo(gbPayload *pay)
   trgword = b2h16(evtdes->TriggerWord);
   trgcmd = evtdes->actionWdTrgCommand;
   daqcmd = evtdes->actionWdDaqCommand;
+
+  LOG(ERR, "gbPayload Version: 0x%x not known", version);
+  return -1;
+
+
   return 0;
 }
+
+
+int daqReader::fillSummaryInfo_v02(gbPayload *pay) {
+  // gbPayload is mostly little endian...
+
+  LOG(NOTE, "gbPayloadVersion=0x%x, trgVersion=0x%x", pay->gbPayloadVersion, pay->EventDescriptor.TrgDataFmtVer);
+
+  token = l2h32(pay->token);
+  evt_time = l2h32(pay->sec);
+  detectors = l2h32(pay->rtsDetMask);
+  daqbits_l1 = l2h32(pay->L1summary[0]);
+  daqbits_l2 = l2h32(pay->L2summary[0]);
+  evpgroups = l2h32(pay->L3summary[2]);
+  daqbits = l2h32(pay->L3summary[0]);
+  evp_daqbits = daqbits;
+
+  // event descriptor is big endian...
+  EvtDescData *evtdes = (EvtDescData *)pay->eventDesc;
+  trgword = b2h16(evtdes->TriggerWord);
+  trgcmd = evtdes->actionWdTrgCommand;
+  daqcmd = evtdes->actionWdDaqCommand;
+
+  return 0;
+}
+
+int daqReader::fillSummaryInfo_v01(gbPayload_0x01 *pay)
+{  
+  LOG(NOTE, "gbPayloadVersion=0xda000001, trgVersion=0x%x", pay->EventDescriptor.TrgDataFmtVer);
+
+  // gbPayload is mostly little endian...
+  token = l2h32(pay->token);
+  evt_time = l2h32(pay->sec);
+  detectors = l2h32(pay->rtsDetMask);
+  daqbits_l1 = l2h32(pay->L1summary[0]);
+  daqbits_l2 = l2h32(pay->L2summary[0]);
+  evpgroups = l2h32(pay->L3summary[2]);
+  daqbits = l2h32(pay->L3summary[0]);
+  evp_daqbits = daqbits;
+  
+  // event descriptor is big endian...
+  EvtDescData *evtdes = (EvtDescData *)pay->eventDesc;
+  trgword = b2h16(evtdes->TriggerWord);
+  trgcmd = evtdes->actionWdTrgCommand;
+  daqcmd = evtdes->actionWdDaqCommand;
+
+  return 0;
+}
+
 
 int daqReader::fillSummaryInfo(DATAP *datap)
 {

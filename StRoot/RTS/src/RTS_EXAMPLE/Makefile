@@ -16,8 +16,7 @@ VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ..
 	../DAQ_READER  ../SFS ../LOG 
 
 
-BINS =  rts_example tpc_rerun tpx_gains
-
+BINS = rts_example tpc_rerun tpx_gains
 
 all:   $(BINS)
 
