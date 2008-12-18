@@ -2,6 +2,7 @@
 #define _ICCP2K_H_
 
 #include <sys/types.h>
+#include <daqFormats.h>
 
 // Event Flag Definition
 
@@ -46,8 +47,24 @@ struct iccp2k {
 /* #endif */
 
 
+// Versioning for gbPayload:
+//    
+// if (GB_PAYLOAD_VERSION & 0xff000000) != 0xDA000000
+//    then version = gbPayload_0x01
+// else 
+//    version = gbPayloadVersion...
+
+#define GB_PAYLOAD_VERSION 0xDA000002
+
+
+// 2008 run, pre-new TCU:   gbPayloadVersion=0xDA000002, TrgDataFmtVer=0x40
 struct gbPayload {
-  u_int eventDesc[10] ;   // take from data!  // big endian
+  u_int gbPayloadVersion;
+
+  union {
+    EventDescriptor2008a EventDescriptor ;   // take from data!  // big endian
+    u_int eventDesc[sizeof(EventDescriptor2008a)/4];
+  };
 
   // The rest is all little endian...
   u_int L3summary[4] ;
@@ -61,6 +78,34 @@ struct gbPayload {
   u_int evp;
   u_int token;
 };
+
+
+////////////// Historic gbPayload Versions ////////////////
+
+// TrgDataFmtVer<0x40
+struct gbPayload_0x01 {         // for 2007 run
+  // big endian
+  union {
+    EventDescriptor2007 EventDescriptor ;   // take from data! 
+    u_int eventDesc[sizeof(EventDescriptor2007)/4];
+  };
+
+  // The rest is all little endian...
+  u_int L3summary[4] ;
+  u_int L2summary[2];
+  u_int L1summary[2];
+  u_int rtsDetMask;
+  u_int eventNumber;
+  u_int sec;
+  u_int usec;
+  u_int flags;            // bit 0 set, tpc raw data inside
+  u_int evp;
+  u_int token;
+};
+
+/////////////////////////////////////////////////////////
+
+
 
 struct evpPayload {
   u_int run;

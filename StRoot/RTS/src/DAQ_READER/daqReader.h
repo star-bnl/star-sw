@@ -3,6 +3,7 @@
 
 #include <ctype.h>
 #include "daqConfig.h"
+#include <iccp2k.h>
 // Define the old EVP_READER-based interface:
 
 #define DAQ_LEGACY_DEF(xxx)         \
@@ -195,6 +196,10 @@ class daqReader {
   int hackSummaryInfo();
   int fillSummaryInfo(DATAP *datap);
   int fillSummaryInfo(gbPayload *gbPayload);
+
+  // history...
+  int fillSummaryInfo_v02(gbPayload *gbPayload);
+  int fillSummaryInfo_v01(gbPayload_0x01 *gbPayload);
 
   MemMap *memmap;
 

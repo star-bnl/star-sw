@@ -400,29 +400,50 @@ struct EventDescriptor2001 {
 #endif
 
 typedef struct {
-unsigned short TCUdataBytes;
-char           TCUEvtDesc;
-unsigned char  TrgDataFmtVer;
-unsigned int   bunchXing_hi;
-unsigned int   bunchXing_lo;                /* Two parts of RHIC bunch crossing number */
-unsigned short actionWdDetectorBitMask;     /* from Fifo 1 */
-unsigned char  actionWdTrgCommand;          /* from Fifo 1 */
-unsigned char  actionWdDaqCommand;          /* from Fifo 1 */  
-unsigned short TrgToken;                    /* from Fifo 2 */
-unsigned short addBits;                     /* from Fifo 2 - bit 0=Contamination; bit 6=L2.5 abort; bit 7=1 is fake data */
-unsigned short DSMInput;                    /* from Fifo 3 */
-unsigned short externalBusy;                /* from Fifo 3 */
-unsigned short modifiedBusyStatus;          /* from Fifo 4 */
-unsigned short physicsWord;                 /* from Fifo 4 */
-unsigned short TriggerWord;                 /* from Fifo 5 */
-unsigned short DSMAddress;                  /* from Fifo 6 */
-unsigned short contaminationBusyStatus;     /* from Fifo 6 */
-unsigned short npre;                        /* pre value for detector raw data */
-unsigned short npost;                       /* post value for detector raw data */
-unsigned short dummy;                       /* dummy - filler */
+  unsigned short TCUdataBytes;
+  char           TCUEvtDesc;
+  unsigned char  TrgDataFmtVer;
+  unsigned int   bunchXing_hi;
+  unsigned int   bunchXing_lo;                /* Two parts of RHIC bunch crossing number */
+  unsigned short actionWdDetectorBitMask;     /* from Fifo 1 */
+  unsigned char  actionWdTrgCommand;          /* from Fifo 1 */
+  unsigned char  actionWdDaqCommand;          /* from Fifo 1 */  
+  unsigned short TrgToken;                    /* from Fifo 2 */
+  unsigned short addBits;                     /* from Fifo 2 - bit 0=Contamination; bit 6=L2.5 abort; bit 7=1 is fake data */
+  unsigned short DSMInput;                    /* from Fifo 3 */
+  unsigned short externalBusy;                /* from Fifo 3 */
+  unsigned short modifiedBusyStatus;          /* from Fifo 4 */
+  unsigned short physicsWord;                 /* from Fifo 4 */
+  unsigned short TriggerWord;                 /* from Fifo 5 */
+  unsigned short DSMAddress;                  /* from Fifo 6 */
+  unsigned short contaminationBusyStatus;     /* from Fifo 6 */
+  unsigned short npre;                        /* pre value for detector raw data */
+  unsigned short npost;                       /* post value for detector raw data */
+  unsigned short dummy;                       /* dummy - filler */
 } EventDescriptor2007;        /* 40 bytes total */ 
 
-
+typedef struct {
+  char           name[3];                     /* Contains  EVD */
+  char           TrgDataFmtVer;               /* Exception for use by DAQ */
+  int            length;                      /* Byte count of data that follows */
+  unsigned int   bunchXing_hi;
+  unsigned int   bunchXing_lo;                /* Two parts of RHIC bunch crossing number */
+  unsigned short actionWdDetectorBitMask;     /* from Fifo 1 */
+  unsigned char  actionWdTrgCommand;          /* from Fifo 1 */
+  unsigned char  actionWdDaqCommand;          /* from Fifo 1 */  
+  unsigned short TrgToken;                    /* from Fifo 2 */
+  unsigned short addBits;                     /* from Fifo 2 - bit 0=Contamination; bit 6=L2.5 abort; bit 7=1 is fake data */
+  unsigned short DSMInput;                    /* from Fifo 3 */
+  unsigned short externalBusy;                /* from Fifo 3 */
+  unsigned short modifiedBusyStatus;          /* from Fifo 4 */
+  unsigned short physicsWord;                 /* from Fifo 4 */
+  unsigned short TriggerWord;                 /* from Fifo 5 */
+  unsigned short DSMAddress;                  /* from Fifo 6 */
+  unsigned short contaminationBusyStatus;     /* from Fifo 6 */
+  unsigned short npre;                        /* pre value for detector raw data */
+  unsigned short npost;                       /* post value for detector raw data */
+  unsigned short dummy;                       /* dummy - filler since this structures must be zero (mod 4) */
+} EventDescriptor2008a;    // pre-new TCU
 
 struct DATAP {
 	struct bankHeader bh ;
