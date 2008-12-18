@@ -154,6 +154,10 @@ public:
     EvtDescData *paydesc = (EvtDescData *)pay->eventDesc;
     memcpy(paydesc, evt, sizeof(EvtDescData));
 
+    // 
+
+    pay->gbPayloadVersion = l2h32(GB_PAYLOAD_VERSION);
+
     pay->eventNumber = l2h32(eventNumber);
     pay->token = l2h32(token);
 
@@ -175,6 +179,12 @@ public:
     pay->sec = tm.tv_sec;
     pay->usec = tm.tv_usec;
 #endif
+
+    LOG(DBG, "Payload: ver=0x%x token=%d trgcmd=%d daqcmd=0x%x",
+	pay->gbPayloadVersion,
+	pay->EventDescriptor.TrgToken,
+	pay->EventDescriptor.actionWdTrgCommand,
+	pay->EventDescriptor.actionWdDaqCommand,0);
 
     pay->flags = daq100Decision(l2h32(pay->token), evt->actionWdDaqCommand, run_type, cl_run, raw_write);
     

@@ -199,6 +199,7 @@ class daqReader {
 
   // history...
   int fillSummaryInfo_v02(gbPayload *gbPayload);
+  int fillSummaryInfo_v01a(gbPayload_0x01a *gbPayload);
   int fillSummaryInfo_v01(gbPayload_0x01 *gbPayload);
 
   MemMap *memmap;
