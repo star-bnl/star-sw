@@ -665,8 +665,8 @@ extern inline int tcd2rts(int tcd)
 //#define LEGACY_DETS ((1<<TPC_ID) | (1<<FTP_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ETOW_ID) | (1<<ESMD_ID) | (1<<BTOW_ID) | (1<<BSMD_ID))
 
 // BTOW, ETOW now part of trigger:   jan 2008
-#define LEGACY_DETS ((1<<FTP_ID) | (1<<ESMD_ID) | (1<<PMD_ID) | (1<<BSMD_ID))
-#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<HFT_ID) | (1<<SSD_ID) | (1<<PMD_ID))
+#define LEGACY_DETS ((1<<FTP_ID) | (1<<PMD_ID) | (1<<BSMD_ID))
+#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<HFT_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID))
 
 extern inline u_int grp2rts_mask(int grp)
 {
