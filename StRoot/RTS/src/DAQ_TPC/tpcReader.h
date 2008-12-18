@@ -5,5 +5,6 @@
 // DAQ_LEGACY_DECL(tpc);
 extern struct tpc_t tpc;
 extern int tpcReader(char *mem);
+extern int tpcReader(char *mem,int sector);
 
 #endif
