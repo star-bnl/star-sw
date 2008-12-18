@@ -3,7 +3,6 @@
 
 #include <ctype.h>
 #include "daqConfig.h"
-#include <iccp2k.h>
 // Define the old EVP_READER-based interface:
 
 #define DAQ_LEGACY_DEF(xxx)         \
@@ -23,7 +22,9 @@ extern struct  _NAME2_(xxx,_t) _NAME1_(xxx);\
 extern int   _NAME2_(xxx,Reader)(char *mem)
 struct DATAP;
 struct rccnf ;
-struct gbPayload ;
+struct gbPayload;
+struct gbPayload_0x01a;
+struct gbPayload_0x01;
 
 class sfs_index;
 //class rts_reader;
