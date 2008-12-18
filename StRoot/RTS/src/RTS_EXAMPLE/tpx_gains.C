@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
 	tpxGain *tpx_gains[25] ;
 
 
+	memset(tpx_gains,0,sizeof(tpx_gains)) ;
+
 	char do_usage ;
 	char do_summary ;
 	char do_compare ;
@@ -85,14 +87,15 @@ int main(int argc, char *argv[])
 	r = new daqReader(argv[optind]) ;
 
 
-	memset(tpx_gains,0,sizeof(tpx_gains)) ;
 
+	int evt = 1 ;
 	while(r->get(0,0)) {
 		for(int s=s_start;s<=s_stop;s++) {
 			dta = r->det("tpx")->get("raw",s) ;
 
+			int gotit = 0 ;
 			while(dta && dta->iterate()) {
-
+				gotit = 1 ;
 				if((tpx_gains[s] == 0)) {	// create if it didn't exist already...
 					tpx_gains[s] = new tpxGain ;
 					tpx_gains[s]->init(s) ;
@@ -104,7 +107,7 @@ int main(int argc, char *argv[])
 
 			}
 
-			if(tpx_gains[s]) tpx_gains[s]->ev_done() ;
+			if(gotit && tpx_gains[s]) tpx_gains[s]->ev_done() ;
 		}
 
 		num_evts-- ;
