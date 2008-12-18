@@ -759,9 +759,14 @@ class EvbChooser
   EvbChooser() {};
   void configure(STAR_CFG *cfg, int legacy);
 
+  // These return error if no evbs in run, but otherwise
+  // return a valid EVB even if the token is invalid
   EthServer *choose(int token); // returns ptr (NULL on error)
   int chooseIdx(int token);     // returns idx (-1 on error)
-  
+
+  // This returns an error if the token is invalid.
+  int chooseIdx_proper(int token);
+
   EthServer servers[50];        // linearized servers
   int nservers;
 
@@ -770,7 +775,6 @@ class EvbChooser
   int nevbserv[10];             // nservers by evb
   int nevbs;
   int evb4token[4096];         
-
 };
 
 #endif
