@@ -19,7 +19,6 @@ using namespace units;
 #include "TH1.h"
 #include "TTree.h"
 #include "PAI.h"
-#include "TGiant3.h"
 // g2t tables
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
@@ -94,7 +93,6 @@ class StTpcRSMaker : public StMaker {
   void SettauIntegration (Double_t p = 2.5* 74.6e-9) {mtauIntegration  = p;}
  private:
   TTree   *fTree;                     //!
-  TGiant3 *mGeant;                    //!
   SignalSum_t     *m_SignalSum;       //!
   TH1D*    mdNdx;                     //!
   TH1D*    mdNdE;                     //!
@@ -188,14 +186,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.5 2008/08/18 15:54:26 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.6 2008/12/18 23:06:38 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.5 2008/08/18 15:54:26 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.6 2008/12/18 23:06:38 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.6  2008/12/18 23:06:38  fisyak
+// Take care about references to TGiant
+//
 // Revision 1.5  2008/08/18 15:54:26  fisyak
 // Version 20
 //

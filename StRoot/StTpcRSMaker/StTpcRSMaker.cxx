@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.11 2008/12/12 21:41:41 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.12 2008/12/18 23:06:37 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.12  2008/12/18 23:06:37  fisyak
+// Take care about references to TGiant
+//
 // Revision 1.11  2008/12/12 21:41:41  fisyak
 // Freeze
 //
@@ -42,8 +45,9 @@
 #include "StTpcRawData.h"
 #include "Altro.h"
 #include "TRVector.h"
+#include "TGeant3.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.11 2008/12/12 21:41:41 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.12 2008/12/18 23:06:37 fisyak Exp $";
 static  Gccuts_t *ccuts = 0;
 
 #define Laserino 170
@@ -80,7 +84,7 @@ static TProfile2D *hist[4][2];
 ClassImp(StTpcRSMaker);
 //________________________________________________________________________________
 StTpcRSMaker::StTpcRSMaker(const char *name): 
-  StMaker(name), fTree(0), mGeant(0), 
+  StMaker(name), fTree(0),
   m_SignalSum(0),
   mdNdx(0), mdNdE(0),
   mChargeFractionInner(0), mPadResponseFunctionInner(0), 
@@ -172,8 +176,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
     cout << "TGiant3 has not been instantiated" << endl;
     return kStFatal;
   }
-  mGeant = (TGiant3 *) gMC;
-  ccuts  = (Gccuts_t *) mGeant->Gccuts();
+  ccuts  = (Gccuts_t *) ((TGeant3 *) gMC)->Gccuts();
   if (TESTBIT(m_Mode, kPAI)) {
     mPAI = PAI::Instance(); 
     gMessMgr->Warning() << "StTpcRSMaker:: use PAI model for dE/dx simulation" << endm;
@@ -1391,6 +1394,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.12  2008/12/18 23:06:37  fisyak
+// Take care about references to TGiant
+//
 // Revision 1.11  2008/12/12 21:41:41  fisyak
 // Freeze
 //
