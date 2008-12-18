@@ -162,7 +162,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
     cout << "Chain initiation has failed" << endl;
     chain->Fatal(initStat, "during Init()");
   }
-  if (FileIn == "") {
+  if (FileIn == "" && gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
     geant->Do("debug on");
     geant->Do("swit 1 2");
