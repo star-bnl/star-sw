@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.8 2008/12/17 23:27:04 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.9 2008/12/18 20:20:25 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.9  2008/12/18 20:20:25  fine
+ * access two different detectors tpx/tpc
+ *
  * Revision 1.8  2008/12/17 23:27:04  fine
  * Clean up
  *
@@ -184,7 +187,14 @@ Int_t StTpcHitMaker::MakeSector(Int_t sector) {
 #else /* NEW_DAQ_READER */
   sector++; // with this version the first sector ==1 !!!
   TString sec = Form("legacy[%i]",sector); 
-  StRtsTable *daqTpcTable = GetNext(sec);
+  TString query = "tpc/";
+//  StRtsTable *daqTpcTable = GetNext(sec);
+  StRtsTable *daqTpcTable = GetNextDaqElement(query+sec);
+  if (!daqTpcTable) {
+     // Try another detector 
+     query = "tpx/";
+     daqTpcTable = GetNextDaqElement(query+sec);
+  }
   if (daqTpcTable) {
      fTpc = (tpc_t*)*DaqDta()->begin();
      assert(Sector() == sector);

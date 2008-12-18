@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.4 2008/12/15 21:04:01 fine Exp $
+ * $Id: StTpcHitMaker.h,v 1.5 2008/12/18 20:20:26 fine Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.5  2008/12/18 20:20:26  fine
+ * access two different detectors tpx/tpc
+ *
  * Revision 1.4  2008/12/15 21:04:01  fine
  * For for the NEW_DAQ_READER
  *
@@ -56,7 +59,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
 #ifndef NEW_DAQ_READER
   StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker(name), mStEvent(0), kMode(kUndefined) {}
 #else /* NEW_DAQ_READER */
-  StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpx",name), mStEvent(0), kMode(kUndefined)
+  StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpc",name), mStEvent(0), kMode(kUndefined)
         ,fTpc(0) {}
 #endif /* NEW_DAQ_READER */
   virtual ~StTpcHitMaker() {}
