@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <pwd.h>
 #include <assert.h>
+#include <iccp2k.h>
 
 #ifdef __linux__
 #include <sched.h>
