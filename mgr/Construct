@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.159 2008/06/24 23:31:02 jeromel Exp $
+# $Id: Construct,v 1.160 2008/12/19 15:28:51 starlib Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -194,15 +194,18 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
 my @excludeDirList = qw(\. \.\. macros CVS html doc inc idl local run wrk example include kumac.*);
 #my  $excludeDirList = "^(\.|\.\.|macros|CVS|html|doc|inc|idl|local|run|wrk|example|include|kumac.*)\$";
 my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
+
 #print "$excludeDirList\n";
 my  $items = "(";
+
 if ( defined($SKIP_DIRS) ){ $items .= join("|",split(" ",$SKIP_DIRS));}
-if ($STAR_LEVEL =~ /\.dev/ or $STAR_LEVEL =~ /\.DEV/) {
-  if ($items ne "(") { $items .= "|";}
+
+#if ($STAR_LEVEL =~ /\.dev/ or $STAR_LEVEL =~ /\.DEV/) {
+#    if ($items ne "(") { $items .= "|";}
 #  $items .= "SpinPool|StEStructPool|StEmcPool|StL2Emulator|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp";
-  $items .= "SpinPool|StEStructPool|StEmcPool|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp|QM2006";#|StTriggerUtilities";
-#  
-}
+#    $items .= "SpinPool|StEStructPool|StEmcPool|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp|QM2006";#|StTriggerUtilities";
+#}
+
 if ($items ne '(') {$items .= ')';}
 else               {$items  = "";}
 # print "$items\n"; die; 
@@ -219,18 +222,18 @@ foreach my $dir( "pams", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
   my @subdirS = readdir DIR;
   closedir DIR;
   foreach my $sub_dir (@subdirS) {# print "sub_dir = $sub_dir\n";
-    next if $sub_dir eq '.' || $sub_dir eq '..';
-    #  if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $SKIP_DIRS\n"; next;}
-    if ($sub_dir =~ $items and ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
-      #		  print "param::include = $param::include $subsub_dir \n";
-      if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
-	print  "skip ";
-	printf("%40s","$sub_dir");
-	printf("\tto build it you need to add %25s","+$sub_dir");
-	print  " in cons command line\n";
+      next if $sub_dir eq '.' || $sub_dir eq '..';
+      #  if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $SKIP_DIRS\n"; next;}
+      if ($sub_dir =~ $items and ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
+	  #   print "param::include = $param::include $subsub_dir \n";
+	  if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
+	      print  "skip ";
+	      printf("%40s","$sub_dir");
+	      printf("\tto build it you need to add %25s","+$sub_dir");
+	      print  " in cons command line\n";
+	  }
+	  next;
       }
-      next;
-  }
 
 #	# The above pattern survived for some time but is 
 #	# COMPLETELY wrong.
@@ -271,22 +274,21 @@ my $sub_DIR = $dir . "/" . $sub_dir;
         foreach my $subsub_dir(@subsubdirS) {
             my $subsub_DIR = $sub_DIR . "/" . $subsub_dir;
             if ( -d $subsub_DIR ) {
-	      if ( $subsub_dir =~ $excludeDirList) {
-		#print "=== Skipping $subsub_dir in $subsub_DIR\n";
-		print "-1- $subsub_dir is in excludeDirList\n"  if ($param::debug);
-		next;
-	      }
-	      if (($STAR =~ /\.dev/ or $STAR =~ /\.DEV/) and
+		if ( $subsub_dir =~ $excludeDirList) {
+		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
+		    print "-1- $subsub_dir is in excludeDirList\n"  if ($param::debug);
+		    next;
+		}
+		if (($STAR =~ /\.dev/ or $STAR =~ /\.DEV/) and
 		    $items and $subsub_dir =~ /$items/ and
 		    ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
-#		  print "param::include = $param::include $subsub_dir \n";
-		if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
-		  print  "skip ";
-		  printf("%40s","$sub_dir/$subsub_dir");
-		  printf("\tto build it you need to add %25s","+$sub_dir/$subsub_dir");
-		  print  " in cons command line\n";
-		}
-		  next;
+		    if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
+			print  "skip ";
+			printf("%40s","$sub_dir/$subsub_dir");
+			printf("\tto build it you need to add %25s","+$sub_dir/$subsub_dir");
+			print  " in cons command line\n";
+		    }
+		    next;
                 }
 		
                 if ( ( $sub_dir =~ /^sim$/    ||
