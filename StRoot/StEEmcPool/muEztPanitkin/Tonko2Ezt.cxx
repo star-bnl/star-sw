@@ -1,4 +1,4 @@
-// $Id: Tonko2Ezt.cxx,v 1.1 2005/04/28 20:54:47 balewski Exp $
+// $Id: Tonko2Ezt.cxx,v 1.2 2008/12/19 17:59:27 fine Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -10,7 +10,13 @@
 
 #ifdef IN_PANITKIN
 // this class is implemented only in online-mode
-#include "emcReader.h"
+#ifndef NEW_DAQ_READER
+#  include <evpReader.hh>
+#  include "emcReader.h"
+#else
+#  include "DAQ_READER/daqReader.h"
+#  include "DAQ_EMC/emcReader.h"
+#endif
 
 //-------------------------------------------
 //-------------------------------------------
@@ -48,6 +54,9 @@
 } // end of ESMD
 #endif
 // $Log: Tonko2Ezt.cxx,v $
+// Revision 1.2  2008/12/19 17:59:27  fine
+// Add NEW_DAQ_READER flag
+//
 // Revision 1.1  2005/04/28 20:54:47  balewski
 // start
 //
