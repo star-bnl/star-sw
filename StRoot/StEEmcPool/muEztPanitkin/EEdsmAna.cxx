@@ -5,6 +5,7 @@
 #include <TH2.h>
 #include <TFile.h>
 
+#include "EEdsmAna.h"
 #if 0 // disable whole code, needs re-work to match with new EEdsm.so after Xin added  detailed Endcap triger simu code 
 
 #ifdef IN_PANITKIN
@@ -13,7 +14,6 @@
 #endif 
 
   
-#include "EEdsmAna.h"
 
 #define EEmapTP_USE // trick instattiates data only in the cxx
 #include "StEEmcUtil/EEdsm/EEmapTP.h" 
@@ -22,7 +22,8 @@
 #include "StEEmcUtil/EEdsm/EEdsm0.h"
 #include "StEEmcUtil/EEdsm/EEdsm1.h"
 #include "StEEmcUtil/EEdsm/EEdsm2.h"
-#include "StEEmcUtil/EEdsm/EEdsm3.h"
+#include "StEEmcUtil/EE
+dsm/EEdsm3.h"
 
 
 #ifndef IN_PANITKIN
@@ -866,5 +867,30 @@ void EEdsmAna ::usePed( TString fName){
     }
   } 
 }
- 
+#else 
+  void EEdsmAna::readDsm0( const unsigned char *){}
+  void EEdsmAna::readDsm1( const unsigned short *){}
+  void EEdsmAna::readDsm2( const unsigned short *){}
+  void EEdsmAna::readDsm3( const unsigned short *){}
+  void EEdsmAna::emulDsm0(){}
+  void EEdsmAna::emulDsm1(){}
+  void EEdsmAna::emulDsm2(){}
+  void EEdsmAna::histoDsm0(){}
+  void EEdsmAna::histoDsm1(){}
+  void EEdsmAna::histoDsm2(){}
+  void EEdsmAna::histoDsm3(){}
+ EEdsmAna::EEdsmAna( TObjArray *L,TString n){}
+ void  EEdsmAna::printDsm0map(){}
+
+ EEdsmAna::~EEdsmAna(){}
+ void  EEdsmAna::printAllEndcap(int k){}
+ void  EEdsmAna::printAllBarrel(int k){}
+ void  EEdsmAna::initHisto(){}
+ void  EEdsmAna::clear(){}
+ void  EEdsmAna::sort(const unsigned char * dsm0inp, 
+	    const unsigned short int  * dsm1inp ,
+	    const unsigned short int  * dsm2inp, 
+	    const unsigned short int  * dsm3inp){}
+       void  usePed( TString n){}
+
 #endif
