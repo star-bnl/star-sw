@@ -1,6 +1,6 @@
 // *-- Author :Jan Balewski
 // 
-// $Id: StTrigOnlyPanitkinMaker.cxx,v 1.2 2006/09/15 01:45:36 balewski Exp $
+// $Id: StTrigOnlyPanitkinMaker.cxx,v 1.3 2008/12/19 17:54:35 fine Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -46,8 +46,8 @@ void StTrigOnlyPanitkinMaker::saveHisto(TString fname){
 Int_t StTrigOnlyPanitkinMaker::Init(){
 
   assert(HList);
-  dsm=new EEdsmAna(HList,"allTrig");
-  dsm->initHisto();
+  dsm= 0; new EEdsmAna(HList,"allTrig");
+  if (dsm) dsm->initHisto();
   return StMaker::Init();
 }
 
@@ -62,7 +62,7 @@ Int_t StTrigOnlyPanitkinMaker::Finish(){
 //________________________________________________
 //________________________________________________
 void StTrigOnlyPanitkinMaker::Clear(const Option_t*){
-  dsm->clear();
+  if (dsm) dsm->clear();
 }
 
 
@@ -89,13 +89,16 @@ Int_t StTrigOnlyPanitkinMaker::Make(){
   unsigned short int  * dsm2inp= trgAkio5.getDsm2_EMC();
   unsigned short int  * dsm3inp= trgAkio5.getDsm3();
   //  trgAkio5->dump();
-  dsm->sort( dsm0inp, dsm1inp, dsm2inp, dsm3inp);
+  if (dsm) dsm->sort( dsm0inp, dsm1inp, dsm2inp, dsm3inp);
 
   return kStOK;
 } 
 
 //---------------------------------------------------
 // $Log: StTrigOnlyPanitkinMaker.cxx,v $
+// Revision 1.3  2008/12/19 17:54:35  fine
+// Disable the dummy class
+//
 // Revision 1.2  2006/09/15 01:45:36  balewski
 // add run# to trg-data unpaker
 //

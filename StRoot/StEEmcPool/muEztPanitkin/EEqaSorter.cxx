@@ -1,4 +1,4 @@
-// $Id: EEqaSorter.cxx,v 1.2 2005/05/05 22:22:08 balewski Exp $
+// $Id: EEqaSorter.cxx,v 1.3 2008/12/19 17:54:34 fine Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -35,8 +35,9 @@
   eeDb=dbx;
   sortA=new EEqaSorterA( HList);
   sortC=new EEqaSorterC( HList,eeDb);
-  
-  dsm=new EEdsmAna(HList,"allTrig");
+
+  dsm=0; // new EEdsmAna(HList,"allTrig");
+  printf(" Check me later please %s\n", __FILE__ );
   memset(hCorT,0,sizeof(hCorT));
   memset(hCorS,0,sizeof(hCorS));
 
@@ -55,7 +56,7 @@ void EEqaSorter::initHisto(int nBin, int mxADC){
 
   sortC->initHisto();
 
-  dsm->initHisto();
+  if (dsm) dsm->initHisto();
   
   //out  if(ret) sortA->usePed4("/home_local/operator/balewski/eemcPanitkinSetup/eemcPed4.dat");
   
@@ -106,7 +107,7 @@ void  EEqaSorter::clear() {
   eETow=0;
   eESmd=0;  
   timeStamp=0;
-  dsm->clear();
+  if (dsm) dsm->clear();
 }
 
 //-------------------------------------------
@@ -136,7 +137,7 @@ EEqaSorter::sort(
   // eESmd->print(0);
   sortA->sort(eETow,eESmd,daqVer);
   sortC->sort(eETow,eESmd,daqVer);
-  dsm->sort( dsm0inp, dsm1inp, dsm2inp, dsm3inp);
+  if (dsm) dsm->sort( dsm0inp, dsm1inp, dsm2inp, dsm3inp);
   return;
 
 }
@@ -447,6 +448,9 @@ EEqaSorter::spy( int runNo, int eveId){
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.3  2008/12/19 17:54:34  fine
+// Disable the dummy class
+//
 // Revision 1.2  2005/05/05 22:22:08  balewski
 // added spy for JP
 //
