@@ -111,8 +111,8 @@ my $CPPPATH = $env1->{CPPPATH};
 #  }
 #}
 if ($pkg eq "RTS") {
-  $CPPFLAGS .= ' -DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
-#  $CPPFLAGS .= ' -DNEW_DAQ_READER -DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
+#  $CPPFLAGS .= ' -DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
+  $CPPFLAGS .= ' -DNEW_DAQ_READER -DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN -DEVP_VERSION="\"EVP_VERSION=2.0\""';
   $CPPFLAGS =~ s/-D__ROOT__//;# print " ------------  CPPFLAGS ==== " .  $CPPFLAGS . "\n";
   $CFLAGS =~   s/-D__ROOT__//;# print " ------------  CFLAGS WHERE \"__ROOT__\" coming from ??? ==== " .  $CFLAGS . "\n";
   $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" .
@@ -131,7 +131,7 @@ foreach my $p (@VF_daq_pkgs) {
     last;
   }
 }
-# $CPPFLAGS .= " -DNEW_DAQ_READER"; 
+ $CPPFLAGS .= " -DNEW_DAQ_READER"; 
 if ($pkg eq "StDAQMaker") {
    $CPPFLAGS .= " -DNEW_EVP_READER"; # we should uncomment that later
    $LIBS = "-lStDaqLib -lRTS";
