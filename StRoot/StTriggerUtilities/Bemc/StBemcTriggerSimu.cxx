@@ -196,6 +196,8 @@ void StBemcTriggerSimu::Init(){
   mBEMCLayer1HTthr3Diff = new TH2F("BEMCLayer1HTthr3Diff", "BEMC Layer1 HT Thr3 Diff", 36, 0, 36, 8, -4, 4);
   mBEMCLayer2PatchSum = new TH2F("BEMCLayer2PatchSum", "BEMC Layer2 Patch Sum", 6, 0, 6, 100, 0, 100);
   mBEMCLayer2PatchSumDiff = new TH2F("BEMCLayer2PatchSumDiff", "BEMC Layer2   Patch Sum Diff", 6, 0, 6, 200, -100, 100);
+  mBEMCLayer2HT3Bits = new TH2F("BEMCLayer2HT3Bits", "BEMC Layer2 HT3 Bits", 6, 0, 6, 4, 0, 4);
+  mBEMCLayer2HT3BitsDiff = new TH2F("BEMCLayer2HT3BitsDiff", "BEMC Layer2 HT3 Bits", 6, 0, 6, 8, -4, 4);
   mBEMCLayer2HTTPBits = new TH2F("BEMCLayer2HTTPBits", "BEMC Layer2  HTTP Bits", 6, 0, 6, 4, 0, 4);
   mBEMCLayer2HTTPBitsDiff = new TH2F("BEMCLayer2HTTPBitsDiff", "BEMC Layer2   HTTP Bits", 6, 0, 6, 8, -4, 4);
   mBEMCLayer2TPBits = new TH2F("BEMCLayer2TPBits", "BEMC Layer2  TP Bits", 6, 0, 6, 4, 0, 4);
@@ -221,6 +223,7 @@ void StBemcTriggerSimu::Init(){
   mHList->Add(mBEMCLayer2PatchSum);
   mHList->Add(mBEMCLayer2HTTPBits);
   mHList->Add(mBEMCLayer2TPBits);
+  mHList->Add(mBEMCLayer2HT3Bits);
   mHList->Add(mBEMCLayer2JPBits);
   mHList->Add(mBEMCLayer2HTj0Bits);
   mHList->Add(mBEMCLayer2HTj1Bits);
@@ -232,6 +235,7 @@ void StBemcTriggerSimu::Init(){
   mHList->Add(mBEMCLayer2PatchSumDiff);
   mHList->Add(mBEMCLayer2HTTPBitsDiff);
   mHList->Add(mBEMCLayer2TPBitsDiff);
+  mHList->Add(mBEMCLayer2HT3BitsDiff);
   mHList->Add(mBEMCLayer2JPBitsDiff);
   mHList->Add(mBEMCLayer2HTj0BitsDiff);
   mHList->Add(mBEMCLayer2HTj1BitsDiff);
@@ -438,6 +442,13 @@ void StBemcTriggerSimu::getPed() {
 //==================================================
 void StBemcTriggerSimu::getLUT(){
 
+  /*formula param
+    Is the trigger mask used for LUT calculation (to account for masked towers in TP)
+    0 = no, the LUT does not depend on which towers in a patch are masked out
+    1 = yes, the trigger mask is used for LUT scale modification
+    2 = yes, the trigger mask is used for LUT pedestal modificationLUTUseMask 2
+  */
+
   Int_t f,param[6];
   for (int cr=1;cr<=kNCrates;cr++){
     for (int seq=0; seq<kNSeq; seq++){
@@ -634,11 +645,7 @@ void StBemcTriggerSimu::FEEout() {
     
     if (mConfig==kOnline)
       {
-	/*cout<<" L0_TP_ADC="<<L0_TP_ADC[tpid]<<
-	  " LUTped="<<LUTped[cr-1][chan]+2<<" formula="<<formula[cr-1][chan]<<
-	  " LUTscale="<<LUTscale[cr-1][chan]<<" LUTpow="<<LUTpow[cr-1][chan]<<
-	  " LUTsig="<<LUTsig[cr-1][chan]<<" pedTargetValue="<<pedTargetValue<<endl;
-	*/
+
 	if ( ((L0_TP_ADC[tpid]+LUTped[cr-1][chan]+2)>=0) && (formula[cr-1][chan]==2) && (LUTscale[cr-1][chan]==1) && 
 	     (LUTpow[cr-1][chan]!=0) && (LUTsig[cr-1][chan]==0) && (pedTargetValue==24))
 	  {
@@ -647,11 +654,12 @@ void StBemcTriggerSimu::FEEout() {
 	  }  
 	else
 	  {
-	    /* cout<<"Someting NOT right with LUT!"<<
+	    /*    cout<<"Someting NOT right with LUT!"<<
 	      " LUTped="<<LUTped[cr-1][chan]+2<<" formula="<<formula[cr-1][chan]<<
 	      " LUTscale="<<LUTscale[cr-1][chan]<<" LUTpow="<<LUTpow[cr-1][chan]<<
-	      " LUTsig="<<LUTsig[cr-1][chan]<<" pedTargetValue="<<pedTargetValue<<endl;*/
-	    assert(1);
+	      " LUTsig="<<LUTsig[cr-1][chan]<<" pedTargetValue="<<pedTargetValue<<endl;
+	      assert(1);
+	    */
 	  }
 	L0_TP_ADC[tpid]=LUT[tpid];    
 	TP6bit_adc_holder[tpid]=LUT[tpid]; 
@@ -2261,15 +2269,12 @@ void StBemcTriggerSimu::get2008pp_DSMLayer0() {
       {
 	L0_16bit_Out[k]=0;
 	L0_16bit_Out[k++]=DSM0_TP_SUM[i]+(DSM0_HT_Bit[i]<<10)+(DSM0_HT_Thr3_Bit[i]<<12)+(DSM0_TP_Bit[i]<<13)+(DSM0_HTTP_Bit[i]<<14);
-	//cout<<" i="<<i<<" k="<<k<<" 16bit="<<L0_16bit_Out[k]<<" TPsum="<<DSM0_TP_SUM[i]<<" HT="<<DSM0_HT_Bit[i]<<" THr3="<<DSM0_HT_Thr3_Bit[i]<<" TP="<<DSM0_TP_Bit[i]<<" HTTP="<<DSM0_HTTP_Bit[i]<<endl;
       }
     if (i%5==2)
       {
 	L0_16bit_Out[k]=0;
 	L0_16bit_Out[k++]=DSM0_TP_SUM_J3[i]+(DSM0_HT_Bit_J3[i]<<10)+(DSM0_HT_Thr3_Bit_J3[i]<<12)+(DSM0_TP_Bit_J3[i]<<13)+(DSM0_HTTP_Bit_J3[i]<<14);
-	//cout<<" i="<<i<<" k="<<k<<"J3 16bit="<<L0_16bit_Out[k]<<" TPsum="<<DSM0_TP_SUM_J3[i]<<" HT="<<DSM0_HT_Bit_J3[i]<<" THr3="<<DSM0_HT_Thr3_Bit_J3[i]<<" TP="<<DSM0_TP_Bit_J3[i]<<" HTTP="<<DSM0_HTTP_Bit_J3[i]<<endl;
 	L0_16bit_Out[k++]=DSM0_TP_SUM_J1[i]+(DSM0_HT_Bit_J1[i]<<10)+(DSM0_HT_Thr3_Bit_J1[i]<<12)+(DSM0_TP_Bit_J1[i]<<13)+(DSM0_HTTP_Bit_J1[i]<<14);
-	//cout<<" i="<<i<<" k="<<k<<"J1 16bit="<<L0_16bit_Out[k]<<" TPsum="<<DSM0_TP_SUM_J1[i]<<" HT="<<DSM0_HT_Bit_J1[i]<<" THr3="<<DSM0_HT_Thr3_Bit_J1[i]<<" TP="<<DSM0_TP_Bit_J1[i]<<" HTTP="<<DSM0_HTTP_Bit_J1[i]<<endl;
       }
   }
 
@@ -2345,6 +2350,7 @@ void StBemcTriggerSimu::get2008pp_DSMLayer1(){
     DSM1_JP_Bit[i]=0;
     DSM1_HTj0_Bit[i]=0;
     DSM1_HTj1_Bit[i]=0;
+    DSM1_HT3_Bit[i]=0;
     DSM1_TP_Bit[i]=0;
     DSM1_HTTP_Bit[i]=0;
     DSM1_ETOT_ADC[i]=0;
@@ -2399,7 +2405,7 @@ void StBemcTriggerSimu::get2008pp_DSMLayer1(){
       if ( DSM1_JP_ADC[i] > mDbThres->GetJP_DSM1_threshold(i,timestamp,2)) DSM1_JP_jp_Bit[i]=3;
     }  
 
-
+  
   int mod;
   //Translate JP's into 2 bits to pass to DSMLayer2
   for (int i=0;i<kNJet;i++){
@@ -2410,24 +2416,25 @@ void StBemcTriggerSimu::get2008pp_DSMLayer1(){
   }
 
 
-  //HTTP and TP bits
+  //COMBINE HT3,TP0 and HTTP bits from all channels
   for (int i=0; i<kL1DsmModule; i++){
     for (int j=0; j<5; j++){
       int k= i*5 + j;
       int kk=i*5 + 2;
+
       if ( DSM1_HTTP_Bit[i] < DSM0_HTTP_Bit[k]) DSM1_HTTP_Bit[i]=DSM0_HTTP_Bit[k];   
       if ( DSM1_HTTP_Bit[i] < DSM0_HTTP_Bit_J3[kk]) DSM1_HTTP_Bit[i]=DSM0_HTTP_Bit_J3[kk];   
       if ( DSM1_HTTP_Bit[i] < DSM0_HTTP_Bit_J1[kk]) DSM1_HTTP_Bit[i]=DSM0_HTTP_Bit_J1[kk];
+
       if ( DSM1_TP_Bit[i] < DSM0_TP_Bit[k]) DSM1_TP_Bit[i]=DSM0_TP_Bit[k];      
       if ( DSM1_TP_Bit[i] < DSM0_TP_Bit_J3[kk]) DSM1_TP_Bit[i]=DSM0_TP_Bit_J3[kk];   
       if ( DSM1_TP_Bit[i] < DSM0_TP_Bit_J1[kk]) DSM1_TP_Bit[i]=DSM0_TP_Bit_J1[kk];         
+
+      if ( DSM1_HT3_Bit[i] < DSM0_HT_Thr3_Bit[k]) DSM1_HT3_Bit[i]=DSM0_HT_Thr3_Bit[k];      
+      if ( DSM1_HT3_Bit[i] < DSM0_HT_Thr3_Bit_J3[kk]) DSM1_HT3_Bit[i]=DSM0_HT_Thr3_Bit_J3[kk];   
+      if ( DSM1_HT3_Bit[i] < DSM0_HT_Thr3_Bit_J1[kk]) DSM1_HT3_Bit[i]=DSM0_HT_Thr3_Bit_J1[kk];         
+
     }
-
-    if (DSM1_HTTP_Bit[i]>=2) DSM1_HTTP_Bit[i]=1;
-    else if (DSM1_HTTP_Bit[i]<2) DSM1_HTTP_Bit[i]=0;
-
-    if (DSM1_TP_Bit[i]>=2) DSM1_TP_Bit[i]=1;
-    else if (DSM1_TP_Bit[i]<2) DSM1_TP_Bit[i]=0;
   }
 
 
@@ -2475,9 +2482,6 @@ void StBemcTriggerSimu::get2008pp_DSMLayer1(){
   if (DSM1_HTj1_Bit[5]<DSM0_HT_Bit[28]) DSM1_HTj1_Bit[5]=DSM0_HT_Bit[28];
   if (DSM1_HTj1_Bit[5]<DSM0_HT_Bit[29]) DSM1_HTj1_Bit[5]=DSM0_HT_Bit[29];
   
-
-
-  
   
   //Drop two lowest bits for ETOT and OR Bits>6 with 6
   for (int i=0;i<kL1DsmModule;i++) {
@@ -2502,12 +2506,15 @@ void StBemcTriggerSimu::get2008pp_DSMLayer1(){
 	int diff = (TrigBankOut & 0x1f) - (sum & 0x1f);
 	mBEMCLayer2PatchSum->Fill(ch, TrigBankOut & 0x1f);
 	mBEMCLayer2PatchSumDiff->Fill(ch, diff);
-	diff = (TrigBankOut >> 7 & 0x1) - (DSM1_HTTP_Bit[TriggerBankToSimuMap[ch]]);
-	mBEMCLayer2HTTPBits->Fill(ch, TrigBankOut >> 7 & 0x1);
-	mBEMCLayer2HTTPBitsDiff->Fill(ch,diff);
-	diff = (TrigBankOut >> 9 & 0x1) - (DSM1_TP_Bit[TriggerBankToSimuMap[ch]]);
-	mBEMCLayer2TPBits->Fill(ch, TrigBankOut >> 9 & 0x1);
+	diff = (TrigBankOut >> 7 & 0x1) - (DSM1_HT3_Bit[TriggerBankToSimuMap[ch]]);
+	mBEMCLayer2HT3Bits->Fill(ch, TrigBankOut >> 7 & 0x1);
+	mBEMCLayer2HT3BitsDiff->Fill(ch,diff);
+	diff = (TrigBankOut >> 8 & 0x1) - (DSM1_TP_Bit[TriggerBankToSimuMap[ch]]);
+	mBEMCLayer2TPBits->Fill(ch, TrigBankOut >> 8 & 0x1);
 	mBEMCLayer2TPBitsDiff->Fill(ch,diff);
+	diff = (TrigBankOut >> 9 & 0x1) - (DSM1_HTTP_Bit[TriggerBankToSimuMap[ch]]);
+	mBEMCLayer2HTTPBits->Fill(ch, TrigBankOut >> 9 & 0x1);
+	mBEMCLayer2HTTPBitsDiff->Fill(ch,diff);
 	diff = (TrigBankOut >> 10 & 0x3) - (DSM1_JP_Bit[TriggerBankToSimuMap[ch]]);
 	mBEMCLayer2JPBits->Fill(ch, TrigBankOut >> 10 & 0x3);
 	mBEMCLayer2JPBitsDiff->Fill(ch, diff);

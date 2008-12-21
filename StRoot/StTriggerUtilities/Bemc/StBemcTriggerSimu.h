@@ -109,7 +109,7 @@ private:
   Int_t L0_16bit_Out[kNLayer0out];
   //DSM1 Bits for JP, HT, TP and HTTP
   Int_t DSM1_JP_Bit[kL1DsmModule], DSM1_HT_Bit[kL1DsmModule], DSM1_TP_Bit[kL1DsmModule], DSM1_HTTP_Bit[kL1DsmModule];
-  Int_t DSM1_HTj1_Bit[kL1DsmModule], DSM1_HTj0_Bit[kL1DsmModule];
+  Int_t DSM1_HTj1_Bit[kL1DsmModule], DSM1_HTj0_Bit[kL1DsmModule], DSM1_HT3_Bit[kL1DsmModule];
   Int_t DSM1_ETOT_ADC[kL1DsmModule];
   //Intermediate bits for each jet patch constructed in DSMLayer1
   Int_t DSM1_JP_jp_Bit[kNJet];
@@ -162,6 +162,8 @@ private:
   TH2 *mBEMCLayer1HTthr3Diff;
   TH2 *mBEMCLayer2PatchSum;
   TH2 *mBEMCLayer2PatchSumDiff;
+  TH2 *mBEMCLayer2HT3Bits;
+  TH2 *mBEMCLayer2HT3BitsDiff;
   TH2 *mBEMCLayer2HTTPBits;
   TH2 *mBEMCLayer2HTTPBitsDiff;
   TH2 *mBEMCLayer2TPBits;
