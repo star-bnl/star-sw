@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.210 2008/07/26 01:54:37 perev Exp $
+// $Id: StMaker.cxx,v 1.211 2008/12/21 18:59:33 perev Exp $
 //
 //
 /*!
@@ -616,7 +616,7 @@ TDataSet *StMaker::GetDataBase(const Char_t *logInput,const TDatime *td)
   return ds;
 }
 //______________________________________________________________________________
-StMaker *StMaker::GetMakerInheritsFrom (const Char_t *mktype)
+StMaker *StMaker::GetMakerInheritsFrom (const Char_t *mktype) const
 {
   TURN_LOGGER(this);
   StMaker  *mk = 0;
@@ -1101,6 +1101,15 @@ TDatime  StMaker::GetDateTime() const
    StEvtHddr *hd = GetEvtHddr();
    return hd->GetDateTime();
 }
+//_____________________________________________________________________________
+TDatime  StMaker::GetDBTime() const 
+{    
+  StMaker  *mk = GetMakerInheritsFrom("St_db_Maker");
+  assert(mk);
+  return mk->GetDateTime();
+}
+
+
 //_____________________________________________________________________________
 Int_t    StMaker::GetDate()  const {return GetDateTime().GetDate();}
 //_____________________________________________________________________________
@@ -1685,7 +1694,7 @@ static const Char_t *retCodes[] = {
 }
 
 //_____________________________________________________________________________
-StMakerIter::StMakerIter(StMaker *mk,Int_t secondary)
+StMakerIter::StMakerIter(const StMaker *mk,Int_t secondary)
 {
   fState = 0;
   fMaker = mk;
@@ -1728,7 +1737,7 @@ AGAIN: switch (fState) {
       delete fMakerIter; fMakerIter=0;
       delete fIter; 	 fIter = 0;
       fState = 3;
-      return fMaker;
+      return (StMaker*)fMaker;
 
     case 3:					// go upper when started
       if (fSecond) return 0;
@@ -1853,6 +1862,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.211  2008/12/21 18:59:33  perev
+// GetDBTim() added
+//
 // Revision 1.210  2008/07/26 01:54:37  perev
 // add y2007a
 //
