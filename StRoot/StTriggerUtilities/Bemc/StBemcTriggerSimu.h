@@ -140,7 +140,7 @@ private:
 
 
 
-#define DEBUG			// Comment out to switch off debugging
+  //#define DEBUG			// Comment out to switch off debugging
 
 #ifdef DEBUG
   
