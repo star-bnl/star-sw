@@ -210,6 +210,38 @@ Int_t  StBemcTriggerDbThresholds::GetJP_DSM1_threshold(Int_t DSMmodule,UInt_t ti
   
   //There were no JP thresholds in 2007
 
+  //2008 JP thresholds
+  const Int_t JP0_TH_2008[6]    = { 50, 50, 50, 50, 50, 50};
+  const Int_t JP1_TH_2008[6]    = { 87, 87, 87, 87, 87, 87};
+  const Int_t JP2_TH_2008[6]    = {100,100,100,100,100,100};
+  for (int i=0;i<6;i++)
+    {
+      if (DSMmodule<15)
+	{//WEST
+	  if ((timestamp>=start_2008[i].Get())&&(timestamp<=end_2008[i].Get()))
+	    {
+	      if (layer==0) threshold=JP0_TH_2008[i];
+	      if (layer==1) threshold=JP1_TH_2008[i];
+	      if (layer==2) threshold=JP2_TH_2008[i];
+	    }	  
+	}
+      
+      
+      if (DSMmodule>=15)
+	{//EAST 
+	  if ((timestamp>=start_2008[i].Get())&&(timestamp<=end_2008[i].Get()))
+	    {      
+	      if (layer==0) threshold=JP0_TH_2008[i];
+	      if (layer==1) threshold=JP1_TH_2008[i];
+	      if (layer==2) threshold=JP2_TH_2008[i];
+	    }
+	}
+    }
+  
+  
+  
+  
+
   return threshold;
 }
 
