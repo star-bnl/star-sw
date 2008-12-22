@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.21 2006/01/19 21:50:40 ullrich Exp $
+ * $Id: StContainers.h,v 2.22 2008/12/22 20:36:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.22  2008/12/22 20:36:52  ullrich
+ * Added hooks for new ToF (BTof)
+ *
  * Revision 2.21  2006/01/19 21:50:40  ullrich
  * Added RnD containers.
  *
@@ -78,6 +81,8 @@
 #include "StArray.h"
 
 class StObject;
+class StBTofHit;
+class StBTofRawHit;
 class StCalibrationVertex;
 class StDetectorState;
 class StHit;
@@ -117,6 +122,8 @@ class StPhmdCluster;
 class StRnDHit;
 
 StCollectionDef(Object)
+StCollectionDef(BTofHit)
+StCollectionDef(BTofRawHit)
 StCollectionDef(CalibrationVertex)
 StCollectionDef(DetectorState)
 StCollectionDef(Hit)

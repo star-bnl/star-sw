@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.39 2006/04/25 23:21:25 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.40 2008/12/22 20:36:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.40  2008/12/22 20:36:53  ullrich
+ * Added hooks for new ToF (BTof)
+ *
  * Revision 2.39  2006/04/25 23:21:25  ullrich
  * Modified addPrimaryVertex(). New 2nd arg: StPrimaryVertexOrder.
  *
@@ -156,6 +159,7 @@
 #include "StRichCollection.h"
 #include "StRunInfo.h"
 #include "StTofCollection.h"
+#include "StBTofCollection.h"
 #include "StFpdCollection.h"
 #include "StPhmdCollection.h"
 #include "StTrackDetectorInfo.h"
@@ -177,8 +181,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.39 2006/04/25 23:21:25 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.39 2006/04/25 23:21:25 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.40 2008/12/22 20:36:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.40 2008/12/22 20:36:53 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -521,6 +525,22 @@ StEvent::tofCollection() const
     StTofCollection *tof = 0;
     _lookup(tof, mContent);
     return tof;
+}
+
+StBTofCollection*
+StEvent::btofCollection()
+{
+    StBTofCollection *btof = 0;
+    _lookup(btof, mContent);
+    return btof;
+}
+
+const StBTofCollection*
+StEvent::btofCollection() const
+{
+    StBTofCollection *btof = 0;
+    _lookup(btof, mContent);
+    return btof;
 }
 
 StFpdCollection*
@@ -1000,6 +1020,12 @@ StEvent::setTofCollection(StTofCollection* val)
 }
 
 void
+StEvent::setBTofCollection(StBTofCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setFpdCollection(StFpdCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1158,6 +1184,7 @@ void StEvent::statistics()
     cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
     cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
     cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
+    cout << "\tStBTofCollection:            " << static_cast<void*>(btofCollection());
     cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection());
     cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection());
     cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger());
