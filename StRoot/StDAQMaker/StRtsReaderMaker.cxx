@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.15 2008/12/22 16:58:23 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.16 2008/12/22 19:39:35 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.16  2008/12/22 19:39:35  fine
+ * improve the diagnostic
+ *
  * Revision 1.15  2008/12/22 16:58:23  fine
  * eliminate the redundant  messages
  *
@@ -266,7 +269,7 @@ TDataSet *StRtsReaderMaker::FillTable()
 
       fRtsTable->SetNRows(0);
       LOG_DEBUG <<" StRtsReaderMaker::FillTable(): the bank size is  " 
-            << fBank->ncontent << "rows " 
+            << fBank->ncontent << " row" << ((fBank->ncontent>1)?"s ":" ")
             << fRtsTable->GetRowSize() << " bytes each" << endm;
       fRtsTable->AppendRows(fBank->Byte,fBank->ncontent);
       fRtsTable->SetNRows(fBank->ncontent);
