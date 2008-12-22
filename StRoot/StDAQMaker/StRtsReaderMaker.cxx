@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.14 2008/12/17 02:04:59 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.15 2008/12/22 16:58:23 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.15  2008/12/22 16:58:23  fine
+ * eliminate the redundant  messages
+ *
  * Revision 1.14  2008/12/17 02:04:59  fine
  * improve the diagnostic messages
  *
@@ -229,7 +232,7 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
    // Create the new instance of the StRtsTable
    if (fRtsTable) {
        // make sure there was no data anymore
- //      if (fBank && fBank->iterate()) 
+       if (fBank && !fBank->is_empty()) 
        {
           LOG_INFO << " You are going to use \"" << detName << "/" << bankName << "\" RTS bank" << endm;
           LOG_INFO << " even though you did not use all information from the previous RTS  bank: \""
