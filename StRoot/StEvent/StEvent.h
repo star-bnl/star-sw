@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.32 2006/04/25 23:21:25 ullrich Exp $
+ * $Id: StEvent.h,v 2.33 2008/12/22 20:36:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.33  2008/12/22 20:36:53  ullrich
+ * Added hooks for new ToF (BTof)
+ *
  * Revision 2.32  2006/04/25 23:21:25  ullrich
  * Modified addPrimaryVertex(). New 2nd arg: StPrimaryVertexOrder.
  *
@@ -143,6 +146,7 @@ class StSsdHitCollection;
 class StEmcCollection;
 class StRichCollection;
 class StTofCollection;
+class StBTofCollection;
 class StTriggerDetectorCollection;
 class StTriggerIdCollection;
 class StTriggerData;
@@ -201,6 +205,8 @@ public:
     const StRichCollection*             richCollection() const;
     StTofCollection*                    tofCollection();
     const StTofCollection*              tofCollection() const;
+    StBTofCollection*                   btofCollection();
+    const StBTofCollection*             btofCollection() const;
     StFpdCollection*                    fpdCollection();
     const StFpdCollection*              fpdCollection() const;
     StPhmdCollection*                   phmdCollection();
@@ -275,6 +281,7 @@ public:
     void setEmcCollection(StEmcCollection*);
     void setRichCollection(StRichCollection*);
     void setTofCollection(StTofCollection*);
+    void setBTofCollection(StBTofCollection*);
     void setFpdCollection(StFpdCollection*);
     void setPhmdCollection(StPhmdCollection*);
     void setTriggerDetectorCollection(StTriggerDetectorCollection*);
