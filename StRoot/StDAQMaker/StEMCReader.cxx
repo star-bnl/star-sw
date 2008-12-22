@@ -17,8 +17,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#ifndef NEW_DAQ_READER
-
 #include "StDAQReader.h"
 #include "StEMCReader.h"
 #include "StDaqLib/EMC/EMC_Reader.hh"
@@ -126,4 +124,4 @@ EMC_Reader* StEMCReader::getBemcReader()
 {
   return fEMCImpReader;
 }
-#endif
+
