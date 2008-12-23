@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.31 2008/06/04 19:18:11 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.32 2008/12/23 17:27:57 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.32  2008/12/23 17:27:57  fisyak
+ * Use tpcT0 chair, use sector/row in global => local transformation
+ *
  * Revision 1.31  2008/06/04 19:18:11  fisyak
  * Account sector t0 shift only once
  *
@@ -321,7 +324,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
   Double_t zoffset=(row>13) ?
     mOuterSectorzOffset
     :mInnerSectorzOffset;
-  Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? gTpcDbPtr->T0(sector)->getT0(row, TMath::Nint (probablePad)) : 0;
+  Double_t t0offset = (useT0 && sector>=1&&sector<=24) ? gTpcDbPtr->tpcT0()->T0(sector, row, TMath::Nint (probablePad)) : 0;
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
@@ -334,7 +337,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
 { // useT0 = kTRUE for pad and kFALSE for cluster, useTau = kTRUE for data cluster and = kFALSE for MC
   StThreeVector<double>  tmp=xyFromRaw(a);
   Double_t zoffset= (a.row()>13) ? mOuterSectorzOffset : mInnerSectorzOffset;
-  Double_t t0offset = useT0 ? gTpcDbPtr->T0(a.sector())->getT0(a.row(),TMath::Nint(a.pad())) : 0;
+  Double_t t0offset = useT0 ? gTpcDbPtr->tpcT0()->T0(a.sector(),a.row(),TMath::Nint(a.pad())) : 0;
   t0offset *= mTimeBinWidth;
   if (! useT0 && useTau) // for cluster
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
@@ -652,7 +655,7 @@ Float_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector) const
 		     + ( z / (gTpcDbPtr->DriftVelocity(sector)*1e-6))
 		     ); // tZero + (z/v_drift); the z already has the proper offset
     
-    return((Float_t)(time/(mTimeBinWidth - St_tpcSectorT0offsetC::instance()->t0offset(sector))));
+    return ( (Float_t)(time/mTimeBinWidth) - St_tpcSectorT0offsetC::instance()->t0offset(sector) );
 }
 
 //
@@ -831,6 +834,6 @@ void StTpcCoordinateTransform::operator()(const StGlobalDirection& a, StTpcLocal
     Double_t dirG[3] = {a.position().x(),a.position().y(),a.position().z()};
     Double_t dirL[3];
     gTpcDbPtr->Tpc2GlobalMatrix().MasterToLocalVect(dirG,dirL);
-    b = StTpcLocalDirection(dirL[0],dirL[1],dirL[2]);
+    b = StTpcLocalDirection(dirL[0],dirL[1],dirL[2],sector,row);
 }
 //________________________________________________________________________________
