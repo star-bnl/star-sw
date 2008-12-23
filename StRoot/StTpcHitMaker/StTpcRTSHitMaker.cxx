@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.5 2008/12/15 21:04:01 fine Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.6 2008/12/23 17:20:28 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -56,7 +56,9 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 #ifndef NEW_DAQ_READER
   r.enable("*");
 #else
-  LOG_FATAL << " new reader has no r.enable(\"*\"); method " << endm;
+  daq_tpx *tpx = new daq_tpx(m_Rts_Reader) ; 
+  //?  tpx.enable("tpx");
+  //  LOG_FATAL << " new reader has no r.enable(\"*\"); method " << endm;
 #endif  
   // do gains example; one loads them from database but I don't know how...
   daq_dta *dta  = r.det("tpx")->put("gain");
@@ -90,7 +92,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 #ifndef NEW_DAQ_READER
   r.InitRun(runnumber);
 #else
-  LOG_FATAL << " new reader has no r.InitRun(runnumber); method. Ask Tonko. " << endm;
+  //  LOG_FATAL << " new reader has no r.InitRun(runnumber); method. Ask Tonko. " << endm;
+  tpx->InitRun(runnumber);
 #endif  
   return kStOK;
 }
@@ -131,7 +134,7 @@ Int_t StTpcRTSHitMaker::Make() {
       if (! Npads) continue;
       daq_dta *dta = r.det("tpx")->put("adc_sim"); // used for any kind of data; transparent pointer
       Int_t nup = 0;
-      for(UInt_t pad = 1; pad <= Npads; pad++) {
+      for(Int_t pad = 1; pad <= Npads; pad++) {
 	UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	if (! ntimebins) continue;
 	// allocate space for at least 512 pixels (timebins)
@@ -154,7 +157,7 @@ Int_t StTpcRTSHitMaker::Make() {
       if (Debug() > 1) {
 	// verify data!
 	dta = r.det("tpx")->get("adc_sim");
-	while(dta->iterate()) {
+	while(dta && dta->iterate()) {
 	  LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
 	  for(UInt_t i=0;i<dta->ncontent;i++) {
 	    LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
@@ -174,7 +177,7 @@ Int_t StTpcRTSHitMaker::Make() {
       //      r.det("tpx")->put("cld_sim");       // clean up clusters
       dta = r.det("tpx")->get("cld_sim"); // rerun the cluster finder on the simulated data...
       
-      while(dta->iterate()) {
+      while(dta && dta->iterate()) {
 	if (Debug() > 1) {
 	  LOG_INFO << Form("CLD sec %2d: row %2d: %d clusters",dta->sec, dta->row, dta->ncontent) << endm;
 	}
