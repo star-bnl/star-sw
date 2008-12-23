@@ -52,6 +52,10 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   mAdc2GeV[kTpcOuter] = tsspar->ave_ion_pot() * tsspar->scale() /(tsspar->gain_out()*tsspar->wire_coupling_out());
   mAdc2GeV[kTpcInner] = tsspar->ave_ion_pot() * tsspar->scale() /(tsspar->gain_in() *tsspar->wire_coupling_in() );
   // 
+  ReSetCorrections();
+}
+//________________________________________________________________________________
+void StTpcdEdxCorrection::ReSetCorrections() {
   TDataSet *tpc_calib  = StMaker::GetChain()->GetDataBase("Calibrations/tpc"); assert(tpc_calib);
   if (Debug() > 1) tpc_calib->ls(3);
   St_tpcGas *k_tpcGas = (St_tpcGas *) tpc_calib->Find("tpcGas");
@@ -60,7 +64,6 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
     assert(k_tpcGas);
   }
   SettpcGas(k_tpcGas);
-
   St_TpcSecRowCor *TpcSecRow = 0;
   St_tpcCorrection *table = 0;
   tpcCorrection_st *cor = 0;
@@ -69,6 +72,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   Int_t i = 0;
   Int_t npar = 0;
   for (k = kUncorrected+1; k < kTpcAllCorrections; k++) {
+    SafeDelete(m_Corrections[k].Chair);
     if (! m_Corrections[k].Name ) {CLRBIT(m_Mask,k); continue;}
     if (! TESTBIT(m_Mask,k)) continue;
     //    gMessMgr->Warning() << "StTpcdEdxCorrection: " <<  m_Corrections[k].Name << " is ON" << endm;
