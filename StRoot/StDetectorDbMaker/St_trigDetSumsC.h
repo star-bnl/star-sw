@@ -2,6 +2,7 @@
 #define St_trigDetSumsC_h
 
 #include "TChair.h"
+#include <math.h>
 #include "tables/St_trigDetSums_Table.h"
 
 class St_trigDetSumsC : public TChair {
