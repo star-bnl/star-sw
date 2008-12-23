@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.14 2008/08/01 14:28:54 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.15 2008/12/23 17:23:01 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -87,6 +87,7 @@ class StTpcdEdxCorrection : public TObject {
   
   void SetDebug(Int_t m=0) {m_Debug = m;}
   void SetMask (Int_t m=0) {m_Mask = m;}
+  void ReSetCorrections();
 
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
