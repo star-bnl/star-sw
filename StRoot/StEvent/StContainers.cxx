@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.18 2006/01/19 21:50:40 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.19 2008/12/24 22:15:53 fisyak Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.19  2008/12/24 22:15:53  fisyak
+ * Add implementation for BTof containers
+ *
  * Revision 2.18  2006/01/19 21:50:40  ullrich
  * Added RnD containers.
  *
@@ -127,6 +130,8 @@ StCollectionImp(TofSlat)
 StCollectionImp(TofCell)
 StCollectionImp(TofData)
 StCollectionImp(TofRawData)
+StCollectionImp(BTofHit)
+StCollectionImp(BTofRawHit)
 StCollectionImp(Track)
 StCollectionImp(TrackNode)
 StCollectionImp(TrackPidTraits)
