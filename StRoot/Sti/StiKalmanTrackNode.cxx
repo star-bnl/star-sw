@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.119 2008/06/11 22:04:37 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.120 2008/12/26 15:18:00 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.120  2008/12/26 15:18:00  fisyak
+ * Enlarge fitting volume from 200 => 250 cm
+ *
  * Revision 2.119  2008/06/11 22:04:37  fisyak
  * Add dead material
  *
@@ -390,6 +393,8 @@ static const double kMaxEta = 1.25; // 72 degrees for laser tracks
 static const double kMaxSinEta = sin(kMaxEta);
 static const double kMaxCur = 0.2;
 static const double kFarFromBeam = 10.;
+static const Double_t kMaxZ = 250;
+static const Double_t kMaxR = 250;
 StiNodeStat StiKalmanTrackNode::mgP; 
 
 
@@ -404,7 +409,7 @@ static const int    idx66[6][6] =
   ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};
 
 bool StiKalmanTrackNode::useCalculatedHitError = true;
-TString StiKalmanTrackNode::comment("");
+TString StiKalmanTrackNode::comment("Legend: \tE - extapolation\tM Multiple scattering\tV at Vertex\tB at beam\tR at Radius\tU Updated\n");
 TString StiKalmanTrackNode::commentdEdx(""); 
 //debug vars
 //#define STI_ERROR_TEST
@@ -843,7 +848,8 @@ Break(nCall);
   if (debug() & 8) { PrintpT("E");}
 
   // Multiple scattering
-  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated() && fabs(getHz())>1e-5 )  propagateMCS(pNode,tDet);
+  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated() && fabs(getHz())>1e-5 )  
+    propagateMCS(pNode,tDet);
   if (debug() & 8) { PrintpT("M");}
   return position;
 }
@@ -1506,13 +1512,13 @@ static int nCall=0; nCall++;
   // update Kalman state
    double p0 = mFP._y + k00*dyt + k01*dzt;
 //VP  mFP._y += k00*dy + k01*dz;
-  if (fabs(p0)>200.) 
+  if (fabs(p0)>kMaxR) 
     {
       LOG_DEBUG << "updateNode()[1] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endm;
       return -12;
     }
   double p1 = mFP._z + k10*dyt + k11*dzt;
-  if (fabs(p1)>200.) 
+  if (fabs(p1)>kMaxZ) 
     {
       LOG_DEBUG << "updateNode()[2] -W- _y:"<<mFP._y<<" _z:"<<mFP._z<<endm;
       return -13;
@@ -1727,7 +1733,7 @@ int StiKalmanTrackNode::locate()
   const StiPlacement *place = tDet->getPlacement();
   const StiShape     *sh    = tDet->getShape();
 
-  if (fabs(mFP._z)>200. || fabs(mFP._y)>200. ) return -1;
+  if (fabs(mFP._z)>kMaxZ || fabs(mFP._y)> kMaxR) return -1;
   edge  = 2.;
   if (mFP._x<50.)      edge  = 0.3;  
   //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear

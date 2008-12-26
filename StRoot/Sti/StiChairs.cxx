@@ -1,3 +1,4 @@
+#include "TMath.h"
 #include "StarChairDefs.h"
 #include "St_db_Maker/St_db_Maker.h"
 //________________________________________________________________________________
@@ -9,9 +10,10 @@ void StiHitErrorCalculator::calculateError(Double_t _z,  Double_t _eta, Double_t
   static const Double_t min2Err = tenMicrons*tenMicrons;
   static const Double_t max2Err = 1.;
   const Double_t *Coeff = ((StiHitErrorCalculator *) this)->coeff();
-  Double_t dz = (200.-fabs(_z))/100.;
-  Double_t cosCA = cos(_eta);
-  Double_t sinCA = sin(_eta);
+  Double_t dz = (200.-TMath::Abs(_z))/100.;
+  if (dz < 0) dz = 0;
+  Double_t cosCA = TMath::Cos(_eta);
+  Double_t sinCA = TMath::Sin(_eta);
   if (cosCA<0.01) cosCA=0.01;
   Double_t tanCA = sinCA/cosCA;
   ecross=Coeff[0]+Coeff[1]*dz/(cosCA*cosCA) +Coeff[2]*tanCA*tanCA;
