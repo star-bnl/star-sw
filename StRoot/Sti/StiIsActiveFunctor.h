@@ -13,22 +13,22 @@
 
 #ifndef STI_IS_ACTIVE_FUNCTOR
 #define STI_IS_ACTIVE_FUNCTOR
-
+#include "Rtypes.h"
 class StiIsActiveFunctor
 {
  public:
   
-  StiIsActiveFunctor(bool active=true,bool editable=true);
+  StiIsActiveFunctor(Bool_t active=kTRUE,Bool_t editable=kTRUE);
   virtual ~StiIsActiveFunctor();
-  virtual bool isActive() const;
-  virtual void setIsActive(bool value);
-  virtual bool isEditable() const;
-  virtual void setIsEditable(bool value);
-  virtual bool operator()(double dYlocal, double dZlocal) const;
+  virtual Bool_t isActive() const;
+  virtual void setIsActive(Bool_t value);
+  virtual Bool_t isEditable() const;
+  virtual void setIsEditable(Bool_t value);
+  virtual Bool_t operator()(Double_t dYlocal, Double_t dZlocal) const;
 
  protected: 
-  bool _active;
-  bool _editable;
+  Bool_t _active;
+  Bool_t _editable;
 };
 
 #endif // ifndef STI_IS_ACTIVE_FUNCTOR
