@@ -18,46 +18,20 @@
 class StiTpcIsActiveFunctor : public StiIsActiveFunctor
 {
  public:
-  StiTpcIsActiveFunctor(bool active=true, bool west=true, bool east=true);
-  virtual ~StiTpcIsActiveFunctor();
-  virtual bool operator()(double dYlocal, double dZlocal) const;
-  virtual bool isActive() const;
-  virtual bool isEastActive() const;
-  virtual bool isWestActive() const;
-  void setEastActive(bool value);
-  void setWestActive(bool value);
+  StiTpcIsActiveFunctor(Bool_t active=kTRUE, Bool_t west=kTRUE, Bool_t east=kTRUE) :
+    StiIsActiveFunctor(active,kTRUE),  _eastActive(east), _westActive(west) {}
+  virtual ~StiTpcIsActiveFunctor() {}
+  virtual Bool_t operator()(Double_t /* dYlocal */, Double_t /* dZlocal */) const {return isActive();}
+  virtual Bool_t isActive() const {return _active && (_eastActive || _westActive);}
+  virtual Bool_t isEastActive() const {return _eastActive;}
+  virtual Bool_t isWestActive() const {return _westActive;}
+  void setEastActive(Bool_t value) {_eastActive = value;}
+  void setWestActive(Bool_t value) {_westActive = value;}
 
  protected:
   /// is the east half of the padrow on?
-  bool _eastActive;
+  Bool_t _eastActive;
   /// is the west half of the padrow on?
-  bool _westActive;
+  Bool_t _westActive;
 };
-
-inline bool StiTpcIsActiveFunctor::isActive() const
-{
-  return _active && (_eastActive || _westActive);
-}
-
-inline bool StiTpcIsActiveFunctor::isEastActive() const
-{
-  return _eastActive;
-}
-
-inline bool StiTpcIsActiveFunctor::isWestActive() const
-{
-  return _westActive;
-}
-
-inline void StiTpcIsActiveFunctor::setEastActive(bool value)
-{
-  _eastActive = value;
-}
-
-inline void StiTpcIsActiveFunctor::setWestActive(bool value)
-{
-  _westActive = value;
-}
-
-
 #endif // ifndef STI_TPC_IS_ACTIVE_FUNCTOR

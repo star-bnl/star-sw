@@ -97,7 +97,9 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 #endif
   for (row = 0; row < nRows - 1; row++) setNSectors(row,NoStiSectors);
   // Get Materials
-  TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); assert (volT);
+  TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); 
+  if (! volT) volT = gGeoManager->GetVolume("tpad"); 
+  assert (volT);
   TGeoMaterial *mat = volT->GetMaterial(); assert(mat); if (debug>1) mat->Print();
   Double_t PotI = StiVMCToolKit::GetPotI(mat); if (debug>1) cout << "PotI " << PotI << endl;
   _gasMat = add(new StiMaterial(mat->GetName(),

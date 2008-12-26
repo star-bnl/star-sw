@@ -29,6 +29,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
                                Filter<StiTrack> * trackFilter,
                                Filter<StiHit> * hitFilter)
 {
+  Int_t debug = 0;
   cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Started" << endl;
   if (!_detector)
     throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
@@ -77,6 +78,9 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 	else                     stiHit->setVz(-driftvel);
         _hitContainer->add( stiHit );
 	noHitsLoaded++;
+	if (debug) {
+	  cout << "add hit S/R =" << sector << "/" << row << " to detector " << *detector << endl;
+	}
       }
       if (hitTest.width()>0.1) {
 	printf("**** TPC hits too wide (%g) sector=%d row%d\n"
