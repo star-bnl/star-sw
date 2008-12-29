@@ -1,3 +1,11 @@
+// $Id: ExampleReader.C,v 1.2 2008/12/29 16:12:48 kocolosk Exp $
+
+/*****************************************************************************
+ * @author Adam Kocoloski
+ *
+ * Quick example showing how to read StChargedPionEvent trees.
+ *****************************************************************************/
+
 void ExampleReader(const char *path = "/star/institutions/mit/common/run6-trans/chargedPions/chargedPions_7097009.tree.root") {
     gROOT->Macro("StRoot/StSpinPool/StChargedPionAnalysisMaker/macros/LoadLibs.C");
     
@@ -31,3 +39,11 @@ void ExampleReader(const char *path = "/star/institutions/mit/common/run6-trans/
         }
     }
 }
+
+/*****************************************************************************
+ * $Log: ExampleReader.C,v $
+ * Revision 1.2  2008/12/29 16:12:48  kocolosk
+ * added $Id$/$Log$ as needed
+ *
+ *****************************************************************************/
+
