@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.9 2008/12/18 20:20:25 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.10 2008/12/29 18:23:48 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.10  2008/12/29 18:23:48  fine
+ * avoid using the dummy data
+ *
  * Revision 1.9  2008/12/18 20:20:25  fine
  * access two different detectors tpx/tpc
  *
@@ -589,17 +592,17 @@ void StTpcHitMaker::RawData(Int_t sector) {
     if (p < 0 || p >= StTpcDigitalSector::numberOfPadsAtRow(r+1)) continue;
     if (r_old != r || p_old != p) {
       if (some_data) {
-	Total_data += some_data;
-	some_data = 0;
-	if (! digitalSector) digitalSector = GetDigitalSector(sector);
-	Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
-	if (ntbold) {
-	  LOG_INFO << "digitalSector " << sector 
-		   << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
-	}
-	digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
-	memset(ADCs, 0, sizeof(ADCs));
-	memset(IDTs, 0, sizeof(IDTs));
+        Total_data += some_data;
+        some_data = 0;
+        if (! digitalSector) digitalSector = GetDigitalSector(sector);
+        Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
+        if (ntbold) {
+          LOG_INFO << "digitalSector " << sector 
+                   << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+        }
+        digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
+        memset(ADCs, 0, sizeof(ADCs));
+        memset(IDTs, 0, sizeof(IDTs));
       }
       r_old = r;
       p_old = p;
@@ -631,7 +634,7 @@ void StTpcHitMaker::RawData(Int_t sector) {
     Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
     if (ntbold) {
       LOG_INFO << "digitalSector " << sector 
-	       << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+               << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
     }
     digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
     memset(ADCs, 0, sizeof(ADCs));
@@ -639,33 +642,32 @@ void StTpcHitMaker::RawData(Int_t sector) {
   }
   if (Total_data) {
     LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
-  }
-  if (Total_data) return;
-  for (Int_t row = 1;  row <= __NumberOfRows__; row++) {
-    Int_t r = row - 1;
-    for (Int_t pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
-      Int_t p = pad - 1;
-      memset(ADCs, 0, sizeof(ADCs));
-      memset(IDTs, 0, sizeof(IDTs));
-      Int_t ncounts = tpc.counts[r][p];
-      if (! ncounts) continue;
-      for (Int_t i = 0; i < ncounts; i++) {
-	Int_t tb = tpc.timebin[r][p][i];
-	ADCs[tb] = log8to10_table[tpc.adc[r][p][i]]; 
-	IDTs[tb] = 65535;
-	Total_data++;
+    for (Int_t row = 1;  row <= __NumberOfRows__; row++) {
+      Int_t r = row - 1;
+      for (Int_t pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
+         Int_t p = pad - 1;
+         memset(ADCs, 0, sizeof(ADCs));
+         memset(IDTs, 0, sizeof(IDTs));
+         Int_t ncounts = tpc.counts[r][p];
+         if (! ncounts) continue;
+         for (Int_t i = 0; i < ncounts; i++) {
+            Int_t tb = tpc.timebin[r][p][i];
+            ADCs[tb] = log8to10_table[tpc.adc[r][p][i]]; 
+            IDTs[tb] = 65535;
+            Total_data++;
+         }
+         if (! digitalSector) digitalSector = GetDigitalSector(sector);
+         Int_t ntbold = digitalSector->numberOfTimeBins(row,pad);
+         if (ntbold) {
+            LOG_INFO << "digitalSector " << sector 
+                     << " already has " << ntbold << " at row/pad " << row <<  "/" << pad << endm;
+         }
+         digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
       }
-      if (! digitalSector) digitalSector = GetDigitalSector(sector);
-      Int_t ntbold = digitalSector->numberOfTimeBins(row,pad);
-      if (ntbold) {
-	LOG_INFO << "digitalSector " << sector 
-		 << " already has " << ntbold << " at row/pad " << row <<  "/" << pad << endm;
-      }
-      digitalSector->putTimeAdc(row,pad,ADCs,IDTs);
+    }									
+    if (Total_data) {
+      LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
     }
-  }									
-  if (Total_data) {
-    LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
   }
 }
 //________________________________________________________________________________
