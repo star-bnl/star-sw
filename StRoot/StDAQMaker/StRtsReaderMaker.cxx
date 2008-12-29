@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.17 2008/12/29 21:16:47 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.18 2008/12/29 23:57:40 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.18  2008/12/29 23:57:40  fine
+ * restore the economic mode
+ *
  * Revision 1.17  2008/12/29 21:16:47  fine
  * Preserve / accumulate the copy the DAQ table to avoid the dead data access
  *
@@ -244,7 +247,7 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
           LOG_INFO << " even though you did not use all information from the previous RTS  bank: \""
                 << fLastQuery << "\" yet" << endm;
        }
-       // delete fRtsTable; 
+       delete fRtsTable; 
        fRtsTable = 0; // forget this table. It will be deleted by Clear method anyway
    }
 #ifndef NEW_DAQ_READER
@@ -284,7 +287,7 @@ TDataSet *StRtsReaderMaker::FillTable()
                   << endm;
       }
       if (fRtsTable) fRtsTable->Print(0,5);
-      // delete fRtsTable; 
+      delete fRtsTable; 
       fRtsTable = 0; // forget this table. It will be deleted by Clear method anyway
       fLastQuery = ""; 
 
