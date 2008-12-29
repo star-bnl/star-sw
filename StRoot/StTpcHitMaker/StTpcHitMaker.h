@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.5 2008/12/18 20:20:26 fine Exp $
+ * $Id: StTpcHitMaker.h,v 1.6 2008/12/29 23:58:07 fine Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.6  2008/12/29 23:58:07  fine
+ * Optimize the DAQ data access
+ *
  * Revision 1.5  2008/12/18 20:20:26  fine
  * access two different detectors tpx/tpc
  *
@@ -71,7 +74,8 @@ class StTpcHitMaker : public StRTSBaseMaker {
   void    UpdateHitCollection(Int_t sector);
   void    DumpPixels2Ntuple(Int_t sector);
   void    PrintSpecial(Int_t sector);
-  void    RawData(Int_t sector);
+  Int_t   RawTpcData(Int_t sector);
+  Int_t   RawTpxData(Int_t sector);
   StTpcDigitalSector *GetDigitalSector(Int_t sector);
  private:
 #ifndef NEW_DAQ_READER
@@ -84,6 +88,9 @@ class StTpcHitMaker : public StRTSBaseMaker {
 #ifdef NEW_DAQ_READER
   tpc_t   *fTpc;
 #endif /* NEW_DAQ_READER */
+  Short_t  ADCs[512];
+  UShort_t IDTs[512];
+
  protected:
 #ifndef NEW_DAQ_READER
     evpReader *InitReader();

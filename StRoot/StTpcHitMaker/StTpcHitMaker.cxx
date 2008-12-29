@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.11 2008/12/29 21:14:41 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.12 2008/12/29 23:58:06 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.12  2008/12/29 23:58:06  fine
+ * Optimize the DAQ data access
+ *
  * Revision 1.11  2008/12/29 21:14:41  fine
  * Sort out  the tps/tpc data handling
  *
@@ -196,11 +199,6 @@ Int_t StTpcHitMaker::MakeSector(Int_t sector) {
   TString query = "tpc/";
 //  StRtsTable *daqTpcTable = GetNext(sec);
   StRtsTable *daqTpcTable = GetNextDaqElement(query+sec);
-  if (!daqTpcTable) {
-     // Try another detector 
-     query = "tpx/";
-     daqTpcTable = GetNextDaqElement(query+sec);
-  }
   if (daqTpcTable) {
      fTpc = (tpc_t*)*DaqDta()->begin();
      assert(Sector() == sector);
@@ -220,13 +218,14 @@ Int_t StTpcHitMaker::Make() {
   mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
   LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<mStEvent<< endm;
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
+    if ( kMode==kTpxRaw && RawTpxData(sector) ) continue;
     if ( ! MakeSector(sector-1) ) continue;
     switch (kMode) {
     case kTpx:             UpdateHitCollection(sector); break;
     case kTpxPulser:       DoPulser(sector);            break;
     case kTpxPadMonitor:   PadMonitor(sector);          break;
     case kTpxDumpPxls2Nt:  DumpPixels2Ntuple(sector);   break;
-    case kTpxRaw:          RawData(sector);             break;
+    case kTpxRaw:          RawTpcData(sector);          break;
     default:
       break;
     }
@@ -244,11 +243,11 @@ void StTpcHitMaker::UpdateHitCollection(Int_t sector) {
       tpc_cl *c = &tpc.cl[row][0];
       Int_t ncounts = tpc.cl_counts[row];
       for(Int_t j=0;j<ncounts;j++,c++) {
-	static StEVPTpcCluser daqCluster;
-	if( (c->t < 0.1) || (c->p < 0.1)) continue;
-	daqCluster.setTpcCl(c);
-	Int_t iok = hitCollection->addHit(CreateTpcHit(daqCluster,sector,row+1));
-	assert(iok);
+        static StEVPTpcCluser daqCluster;
+        if( (c->t < 0.1) || (c->p < 0.1)) continue;
+        daqCluster.setTpcCl(c);
+        Int_t iok = hitCollection->addHit(CreateTpcHit(daqCluster,sector,row+1));
+        assert(iok);
       }
     }
     Int_t nhits = hitCollection->numberOfHits();
@@ -565,9 +564,7 @@ StTpcDigitalSector *StTpcHitMaker::GetDigitalSector(Int_t sector) {
   return digitalSector;
 }
 //________________________________________________________________________________
-void StTpcHitMaker::RawData(Int_t sector) {
-  static Short_t ADCs[512];
-  static UShort_t IDTs[512];
+Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   memset(ADCs, 0, sizeof(ADCs));
   memset(IDTs, 0, sizeof(IDTs));
   StTpcDigitalSector *digitalSector = 0;
@@ -644,9 +641,15 @@ void StTpcHitMaker::RawData(Int_t sector) {
       memset(IDTs, 0, sizeof(IDTs));
     }
   }
-  if (!Total_data) {
-   //  LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
-    for (Int_t row = 1;  row <= __NumberOfRows__; row++) {
+  return Total_data;
+}
+//________________________________________________________________________________
+Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
+  memset(ADCs, 0, sizeof(ADCs));
+  memset(IDTs, 0, sizeof(IDTs));
+  StTpcDigitalSector *digitalSector = 0;
+  Int_t Total_data = 0;
+  for (Int_t row = 1;  row <= __NumberOfRows__; row++) {
       Int_t r = row - 1;
       for (Int_t pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
          Int_t p = pad - 1;
@@ -672,7 +675,7 @@ void StTpcHitMaker::RawData(Int_t sector) {
     if (Total_data) {
       LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
     }
-  }
+    return Total_data;
 }
 //________________________________________________________________________________
 StTpcHitCollection *StTpcHitMaker::GetHitCollection() {
