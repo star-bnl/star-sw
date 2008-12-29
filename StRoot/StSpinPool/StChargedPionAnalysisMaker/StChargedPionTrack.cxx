@@ -1,3 +1,5 @@
+// $Id: StChargedPionTrack.cxx,v 1.5 2008/12/29 15:58:31 kocolosk Exp $
+
 #include "StChargedPionTrack.h"
 #include "StPionPlus.hh"
 
@@ -122,3 +124,11 @@ double StChargedPionTrack::lengthMeasured() const
     double end      = mGlobalHelix.pathLength(StThreeVectorD(mGlobalLastPoint));
     return fabs(end); 
 }
+
+/*****************************************************************************
+ * $Log: StChargedPionTrack.cxx,v $
+ * Revision 1.5  2008/12/29 15:58:31  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
+ *****************************************************************************/
+

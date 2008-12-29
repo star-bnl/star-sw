@@ -1,6 +1,8 @@
 #ifndef ST_CHARGED_PION_EVENT_HH
 #define ST_CHARGED_PION_EVENT_HH
 
+// $Id: StChargedPionEvent.h,v 1.6 2008/12/29 15:58:28 kocolosk Exp $
+
 #include <string>
 using std::string;
 
@@ -216,3 +218,10 @@ inline void StChargedPionEvent::
 addJetPatch(short patchId, int ADC) { mJetPatches[patchId] = ADC; }
 
 #endif
+
+/*****************************************************************************
+ * $Log: StChargedPionEvent.h,v $
+ * Revision 1.6  2008/12/29 15:58:28  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
+ *****************************************************************************/

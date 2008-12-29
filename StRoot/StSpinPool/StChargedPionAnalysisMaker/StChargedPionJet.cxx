@@ -1,3 +1,5 @@
+// $Id: StChargedPionJet.cxx,v 1.5 2008/12/29 15:58:29 kocolosk Exp $
+
 #include "StChargedPionJet.h"
 
 #include "TMath.h"
@@ -70,3 +72,10 @@ const StChargedPionJetParticle& StChargedPionJet::leadingParticle() const {
     }
     return *p;
 }
+
+/*****************************************************************************
+ * $Log: StChargedPionJet.cxx,v $
+ * Revision 1.5  2008/12/29 15:58:29  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
+ *****************************************************************************/

@@ -1,6 +1,8 @@
 #ifndef ST_CHARGED_PION_TRACK_HH
 #define ST_CHARGED_PION_TRACK_HH
 
+// $Id: StChargedPionTrack.h,v 1.5 2008/12/29 15:58:31 kocolosk Exp $
+
 #include "StPhysicalHelixD.hh"
 #include "StThreeVectorF.hh"
 
@@ -161,3 +163,10 @@ inline StPhysicalHelixD StChargedPionTrack::globalHelix() const {return mGlobalH
 inline StThreeVector<double> StChargedPionTrack::globalFirstPoint() const {return mGlobalHelix.origin();}
 
 #endif
+
+/*****************************************************************************
+ * $Log: StChargedPionTrack.h,v $
+ * Revision 1.5  2008/12/29 15:58:31  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
+ *****************************************************************************/

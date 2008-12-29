@@ -1,3 +1,5 @@
+// $Id: StChargedPionEvent.cxx,v 1.9 2008/12/29 15:58:28 kocolosk Exp $
+
 #include "StChargedPionEvent.h"
 
 #include "StMessMgr.h"
@@ -5,8 +7,6 @@
 #include "StChargedPionVertex.h"
 #include "StChargedPionTrack.h"
 #include "StChargedPionJet.h"
-
-#include "StTriggerUtilities/StTriggerSimuResult.h"
 
 ClassImp(StChargedPionEvent)
 
@@ -203,3 +203,11 @@ void StChargedPionEvent::addTrack(const StChargedPionTrack* t) {
 void StChargedPionEvent::addJet(const StChargedPionJet* j) {
     new ( (*mJets)[mJets->GetEntriesFast()] ) StChargedPionJet(*j);
 }
+
+/*****************************************************************************
+ * $Log: StChargedPionEvent.cxx,v $
+ * Revision 1.9  2008/12/29 15:58:28  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
+ *****************************************************************************/
+

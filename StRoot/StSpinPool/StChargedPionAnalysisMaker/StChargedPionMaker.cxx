@@ -1,4 +1,4 @@
-// $Id: StChargedPionMaker.cxx,v 1.17 2008/08/25 20:55:35 kocolosk Exp $
+// $Id: StChargedPionMaker.cxx,v 1.18 2008/12/29 15:58:30 kocolosk Exp $
 
 #include "StChargedPionMaker.h"
 
@@ -29,7 +29,6 @@
 #include "StChargedPionJet.h"
 #include "StChargedPionJetParticle.h"
 #include "StChargedPionMcEvent.h"
-// #include "StChargedPionTrackPair.h"
 #include "StChargedPionHelpers.h"
 #include "StChargedPionTypes.h"
 
@@ -51,10 +50,6 @@
 //StTriggerUtilities
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
-
-//StMCAsymMaker
-// #include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
-// #include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"
 
 //StMiniMcEvent
 #include "StMiniMcEvent/StMiniMcEvent.h"
@@ -125,8 +120,6 @@ StChargedPionMaker::~StChargedPionMaker() {
     LOG_DEBUG << "calling destructor" << endm;
     
     if(mEvent) delete mEvent;
-    // mTree->Delete();
-    // mFile->Delete();
     
     if(mJetFile) mJetFile->Close();
     delete mJets;
@@ -139,7 +132,6 @@ StChargedPionMaker::~StChargedPionMaker() {
 }
 
 void StChargedPionMaker::Clear(const char*) {
-    // if(mEvent) mEvent->Clear();
     StChargedPionEvent   *data = dynamic_cast<StChargedPionEvent*>(mEvent);
     StChargedPionMcEvent *simu = dynamic_cast<StChargedPionMcEvent*>(mEvent);
     if(data) data->Clear();
@@ -274,8 +266,6 @@ Int_t StChargedPionMaker::Make()
         StChargedPionHelpers::translateMuDst(simu);
         
         makeTriggerSimu(simu);
-        
-        //StChargedPionHelpers::translatePythia(mAsymMk->pythiaEvent(), simu);
         
         StMcEvent *mcEvent = static_cast<StMcEvent*>( GetDataSet("StMcEvent") );
         simu->setProcessId( mcEvent->subProcessId() );
@@ -458,6 +448,9 @@ void StChargedPionMaker::makeTriggerSimu(StChargedPionBaseEv *ev) {
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.cxx,v $
+ * Revision 1.18  2008/12/29 15:58:30  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
  * Revision 1.17  2008/08/25 20:55:35  kocolosk
  * get correct ConeJets/ConeJets12 branch w/o using runnumber
  *

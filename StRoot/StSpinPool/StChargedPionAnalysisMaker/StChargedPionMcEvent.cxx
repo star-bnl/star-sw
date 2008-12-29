@@ -1,4 +1,4 @@
-// $Id: StChargedPionMcEvent.cxx,v 1.1 2008/07/17 17:06:31 kocolosk Exp $
+// $Id: StChargedPionMcEvent.cxx,v 1.2 2008/12/29 15:58:30 kocolosk Exp $
 
 #include "StChargedPionMcEvent.h"
 
@@ -12,7 +12,6 @@ using std::make_pair;
 #include "StChargedPionTrack.h"
 #include "StChargedPionJet.h"
 #include "StChargedPionVertex.h"
-// #include "StChargedPionTrackPair.h"
 
 ClassImp(StChargedPionMcEvent)
 
@@ -122,14 +121,10 @@ double StChargedPionMcEvent::Q2() const {
 
 double StChargedPionMcEvent::x1() const {
     return mX1;
-    // return ( mParton1.Pt()*TMath::Exp(mParton1.Eta()) + 
-    //     mParton2.Pt()*TMath::Exp(mParton2.Eta()) ) / 200;
 }
 
 double StChargedPionMcEvent::x2() const {
     return tau()/x1();
-    // return (mParton1.Pt() * TMath::Exp(-1 * mParton1.Eta()) + 
-    //     mParton2.Pt() * TMath::Exp(-1 * mParton2.Eta())) / 200;
 }
 
 double StChargedPionMcEvent::tau() const {
@@ -167,24 +162,6 @@ double StChargedPionMcEvent::Q2_alternative2() const {
     return ::pow((parton(3, StChargedPionMcEvent::CM).Et() + 
         parton(4, StChargedPionMcEvent::CM).Et()) / 2, 2);
 }
-
-// double StChargedPionMcEvent::x1b() const {
-//     StChargedPionLorentzVector v;
-//     v = parton(1, StChargedPionMcEvent::CM);
-//     TVector3 a = (preISR1+preISR2).BoostVector();
-//     BoostZ b( a.Mag() );
-//     b.Invert();
-//     return b(v).E() / 100;
-// }
-// 
-// double StChargedPionMcEvent::x2b() const {
-//     StChargedPionLorentzVector v;
-//     v = parton(2, StChargedPionMcEvent::CM);
-//     TVector3 a = (preISR1+preISR2).BoostVector();
-//     BoostZ b( a.Mag() );
-//     // b.Invert();
-//     return b(v).E() / 100;
-// }
 
 bool StChargedPionMcEvent::isSimuTrigger(unsigned int trigId) const {
     map<unsigned int, unsigned int>::const_iterator it = mTriggerLookup.find(trigId);
@@ -263,6 +240,9 @@ void StChargedPionMcEvent::addJet(const StChargedPionJet* j) {
 
 /*****************************************************************************
  * $Log: StChargedPionMcEvent.cxx,v $
+ * Revision 1.2  2008/12/29 15:58:30  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
  * Revision 1.1  2008/07/17 17:06:31  kocolosk
  * big-bang integration StChargedPionMcEvent framework
  *

@@ -1,4 +1,4 @@
-// $Id: StChargedPionHelpers.cxx,v 1.1 2008/07/17 17:06:30 kocolosk Exp $
+// $Id: StChargedPionHelpers.cxx,v 1.2 2008/12/29 15:58:28 kocolosk Exp $
 
 #include "StChargedPionHelpers.h"
 
@@ -7,7 +7,6 @@
 #include "StChargedPionJet.h"
 #include "StChargedPionMcEvent.h"
 #include "StChargedPionTrack.h"
-// #include "StChargedPionTrackPair.h"
 #include "StChargedPionVertex.h"
 
 #include "StJetMaker/StJet.h"
@@ -187,23 +186,6 @@ translatePythia(const StPythiaEvent *py, StChargedPionMcEvent *ev) {
                                                pythia->particle(3)->Energy());
     ev->setProcessId(pythia->processId());
     ev->setX1(pythia->x1());
-
-    // ev->setPartonALL(pythia->partonALL());
-    // 
-    // ev->mDF1[0] = pythia->dF1(StPythiaEvent::LO);
-    // ev->mDF1[1] = pythia->dF1(StPythiaEvent::NLO);
-    // ev->mDF1[2] = pythia->dF1(StPythiaEvent::MAX);
-    // ev->mDF1[3] = pythia->dF1(StPythiaEvent::M015);
-    // ev->mDF1[4] = pythia->dF1(StPythiaEvent::GS_NLOA);
-    // ev->mDF1[5] = pythia->dF1(StPythiaEvent::DSSV);
-    // ev->mDF1[6] = pythia->dF1(StPythiaEvent::LSS1);
-    // ev->mDF1[7] = pythia->dF1(StPythiaEvent::AAC1);
-    // ev->mDF1[8] = pythia->dF1(StPythiaEvent::BB1);
-    // ev->mDF1[9] = pythia->dF1(StPythiaEvent::DNS1);
-    // 
-    // ev->mF1[0]  = pythia->f1(StPythiaEvent::LO);
-    // ev->mF1[1]  = pythia->f1(StPythiaEvent::NLO);
-    
 }
 
 void StChargedPionHelpers::
@@ -221,7 +203,6 @@ translateMinimc(const StMiniMcEvent *mini, StChargedPionMcEvent *ev) {
 
     StTinyMcTrack *t;
     StMiniMcPair *p;
-    // StChargedPionTrack *reco;
     for(int i=0; i<mcTracks->GetEntriesFast(); i++) {
         t = static_cast<StTinyMcTrack*>(mcTracks->At(i));
         if(t->ptMc() > 1.7) ev->mcTracks().push_back(*t);
@@ -342,7 +323,6 @@ translateMuDst(StChargedPionBaseEv *ev) {
             if(track->pt() < 2.)                continue;
             if(TMath::Abs(track->eta()) > 2.1)  continue;
             
-            //StChargedPionTrack cpTrack(StChargedPionHelpers::chargedPionTrack(track));
             StChargedPionTrack cpTrack;
             translateTrack(track, &cpTrack);
             cpTrack.setB(StMuDst::event()->eventSummary().magneticField()*kilogauss);
@@ -384,6 +364,9 @@ translateTrack(const StMuTrack *mu, StChargedPionTrack *cp) {
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.cxx,v $
+ * Revision 1.2  2008/12/29 15:58:28  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
  * Revision 1.1  2008/07/17 17:06:30  kocolosk
  * big-bang integration StChargedPionMcEvent framework
  *

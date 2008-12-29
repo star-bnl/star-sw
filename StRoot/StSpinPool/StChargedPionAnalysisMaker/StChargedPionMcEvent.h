@@ -1,7 +1,7 @@
 #ifndef STAR_StChargedPionMcEvent
 #define STAR_StChargedPionMcEvent
 
-// $Id: StChargedPionMcEvent.h,v 1.1 2008/07/17 17:06:31 kocolosk Exp $
+// $Id: StChargedPionMcEvent.h,v 1.2 2008/12/29 15:58:31 kocolosk Exp $
 
 /*****************************************************************************
  * @class StChargedPionMcEvent
@@ -27,21 +27,14 @@ using std::map;
 #include "StChargedPionBaseEv.h"
 
 class StChargedPionJet;
-// class StChargedPionMcJet;
-//class StChargedPionMcTrack;
 class StChargedPionTrack;
-// class StChargedPionTrackPair;
 class StChargedPionVertex;
 
 class StChargedPionMcEvent : public StChargedPionBaseEv
 {
 public:
     StChargedPionMcEvent();
-    //StChargedPionMcEvent(const StChargedPionMcEvent&);
     virtual ~StChargedPionMcEvent();
-    
-    //StChargedPionMcEvent& operator=(const StChargedPionMcEvent&);
-    //void copy(const StChargedPionMcEvent&);
     
     virtual void Clear(Option_t* = "");
     
@@ -98,9 +91,6 @@ public:
     double y() const;
     double xF() const;
     double beta34() const;
-    
-    // double x1b() const;
-    // double x2b() const;
     
     int processId() const;
     
@@ -374,6 +364,9 @@ StChargedPionMcEvent::addJetPatch(short patchId, int ADC) {
 
 /*****************************************************************************
  * $Log: StChargedPionMcEvent.h,v $
+ * Revision 1.2  2008/12/29 15:58:31  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
  * Revision 1.1  2008/07/17 17:06:31  kocolosk
  * big-bang integration StChargedPionMcEvent framework
  *
