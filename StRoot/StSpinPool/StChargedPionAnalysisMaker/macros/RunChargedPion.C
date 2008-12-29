@@ -1,4 +1,10 @@
-// $Id: RunChargedPion.C,v 1.1 2008/07/17 17:07:02 kocolosk Exp $
+// $Id: RunChargedPion.C,v 1.2 2008/12/29 16:12:49 kocolosk Exp $
+
+/*****************************************************************************
+ * @author Adam Kocoloski
+ *
+ * main macro to generate StChargedPionEvent trees, both data and simu
+ *****************************************************************************/
 
 void RunChargedPion(const char *muPath, 
                     const char *outName,
@@ -278,6 +284,9 @@ void RunChargedPion(const char *muPath,
 
 /*****************************************************************************
  * $Log: RunChargedPion.C,v $
+ * Revision 1.2  2008/12/29 16:12:49  kocolosk
+ * added $Id$/$Log$ as needed
+ *
  * Revision 1.1  2008/07/17 17:07:02  kocolosk
  * cleanup all those old macros and XML files
  *

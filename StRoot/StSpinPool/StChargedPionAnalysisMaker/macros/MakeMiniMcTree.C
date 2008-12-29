@@ -1,4 +1,10 @@
-// $Id: MakeMiniMcTree.C,v 1.1 2008/07/18 16:57:41 kocolosk Exp $
+// $Id: MakeMiniMcTree.C,v 1.2 2008/12/29 16:12:49 kocolosk Exp $
+
+/*****************************************************************************
+ * @author Adam Kocoloski
+ *
+ * macro to regenerate MiniMc tree, since it gets removed from disk sometimes
+ *****************************************************************************/
 
 void MakeMiniMcTree(Int_t nevents=3,
                     const char* MainFile="hijing_b0_3/rcf0147_01*geant.root",
@@ -83,6 +89,9 @@ void MakeMiniMcTree(Int_t nevents=3,
 
 /*****************************************************************************
  * $Log: MakeMiniMcTree.C,v $
+ * Revision 1.2  2008/12/29 16:12:49  kocolosk
+ * added $Id$/$Log$ as needed
+ *
  * Revision 1.1  2008/07/18 16:57:41  kocolosk
  * macro to regenerate MiniMc tree, since it gets removed from disk sometimes
  *

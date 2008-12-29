@@ -1,3 +1,11 @@
+// $Id: LoadLibs.C,v 1.3 2008/12/29 16:12:49 kocolosk Exp $
+
+/*****************************************************************************
+ * @author Adam Kocoloski
+ *
+ * Libraries needed to run a chain containing StChargedPionMaker
+ *****************************************************************************/
+
 void LoadLibs() { 
     gSystem->Load("libPhysics");
     gSystem->Load("libTable");
@@ -36,7 +44,6 @@ void LoadLibs() {
     gSystem->Load("StEmcSimulatorMaker");
     gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StDbBroker");
-//    gSystem->Load("libMySQL");
     gSystem->Load("StTriggerFilterMaker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
@@ -44,3 +51,10 @@ void LoadLibs() {
     gSystem->Load("StMiniMcEvent");
     gSystem->Load("StChargedPionAnalysisMaker");
 }
+
+/*****************************************************************************
+ * $Log: LoadLibs.C,v $
+ * Revision 1.3  2008/12/29 16:12:49  kocolosk
+ * added $Id$/$Log$ as needed
+ *
+ *****************************************************************************/
