@@ -1,6 +1,8 @@
 #ifndef ST_CHARGED_PION_JET_HH
 #define ST_CHARGED_PION_JET_HH
 
+// $Id: StChargedPionJet.h,v 1.6 2008/12/29 15:58:29 kocolosk Exp $
+
 #include <vector>
 using std::vector;
 
@@ -92,3 +94,10 @@ inline void StChargedPionJet::setEndcapEtSum(float a) { mEtowEtSum = a; }
 inline void StChargedPionJet::setVertexZ(float a) { mVertexZ = a; }
 
 #endif
+
+/*****************************************************************************
+ * $Log: StChargedPionJet.h,v $
+ * Revision 1.6  2008/12/29 15:58:29  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
+ *****************************************************************************/

@@ -1,6 +1,8 @@
 #ifndef ST_CHARGED_PION_JET_PARTICLE_HH
 #define ST_CHARGED_PION_JET_PARTICLE_HH
 
+// $Id: StChargedPionJetParticle.h,v 1.3 2008/12/29 15:58:30 kocolosk Exp $
+
 #include "Math/PtEtaPhiE4D.h"
 #include "Math/LorentzVector.h"
 using namespace ROOT::Math;
@@ -78,3 +80,10 @@ inline void StChargedPionJetParticle::setNSigmaPion(float a) { mNSigmaPion = a; 
 inline void StChargedPionJetParticle::setGlobalDca(StThreeVectorF & a) { mGlobalDca = a; }
 
 #endif
+
+/*****************************************************************************
+ * $Log: StChargedPionJetParticle.h,v $
+ * Revision 1.3  2008/12/29 15:58:30  kocolosk
+ * removed commented code and added Id and Log as needed
+ *
+ *****************************************************************************/
