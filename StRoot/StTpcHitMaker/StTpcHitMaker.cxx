@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.10 2008/12/29 18:23:48 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.11 2008/12/29 21:14:41 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.11  2008/12/29 21:14:41  fine
+ * Sort out  the tps/tpc data handling
+ *
  * Revision 1.10  2008/12/29 18:23:48  fine
  * avoid using the dummy data
  *
@@ -217,7 +220,7 @@ Int_t StTpcHitMaker::Make() {
   mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
   LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<mStEvent<< endm;
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
-    if ( MakeSector(sector-1) <= 0) continue;
+    if ( ! MakeSector(sector-1) ) continue;
     switch (kMode) {
     case kTpx:             UpdateHitCollection(sector); break;
     case kTpxPulser:       DoPulser(sector);            break;
@@ -626,22 +629,23 @@ void StTpcHitMaker::RawData(Int_t sector) {
         some_data++ ;	// I don't know the bytecount but I'll return something...
     }
 #endif /* NEW_DAQ_READER */
-  }
-  if (some_data) {
-    Total_data += some_data;
-    some_data = 0;
-    if (! digitalSector) digitalSector = GetDigitalSector(sector);
-    Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
-    if (ntbold) {
-      LOG_INFO << "digitalSector " << sector 
-               << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+  
+    if (some_data) {
+      Total_data += some_data;
+      some_data = 0;
+      if (! digitalSector) digitalSector = GetDigitalSector(sector);
+      Int_t ntbold = digitalSector->numberOfTimeBins(r_old+1,p_old+1);
+      if (ntbold) {
+        LOG_INFO << "digitalSector " << sector 
+                 << " already has " << ntbold << " at row/pad " << r_old+1 <<  "/" << p_old+1 << endm;
+      }
+      digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
+      memset(ADCs, 0, sizeof(ADCs));
+      memset(IDTs, 0, sizeof(IDTs));
     }
-    digitalSector->putTimeAdc(r_old+1,p_old+1,ADCs,IDTs);
-    memset(ADCs, 0, sizeof(ADCs));
-    memset(IDTs, 0, sizeof(IDTs));
   }
-  if (Total_data) {
-    LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
+  if (!Total_data) {
+   //  LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
     for (Int_t row = 1;  row <= __NumberOfRows__; row++) {
       Int_t r = row - 1;
       for (Int_t pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
