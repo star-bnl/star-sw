@@ -74,9 +74,10 @@ class StTpcRSMaker : public StMaker {
   virtual void Print(Option_t *option="") const;
   void DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
-  void SetClusterLength(Double_t m=0) {mClusterLength = m;}
-  void SetSigmaJitterI(Double_t p) {mSigmaJitterI = p;}
-  void SetSigmaJitterO(Double_t p) {mSigmaJitterO = p;}
+  void SetSigmaJitterTI(Double_t p) {mSigmaJitterTI = p;}
+  void SetSigmaJitterTO(Double_t p) {mSigmaJitterTO = p;}
+  void SetSigmaJitterXI(Double_t p) {mSigmaJitterXI = p;}
+  void SetSigmaJitterXO(Double_t p) {mSigmaJitterXO = p;}
   static Int_t    AsicThresholds(Short_t ADCs[512]);
   static Int_t    SearchT(const void *elem1, const void **elem2);
   static Int_t    CompareT(const void **elem1, const void **elem2);
@@ -88,9 +89,9 @@ class StTpcRSMaker : public StMaker {
   static Double_t ei(Double_t x); // Exponential Integral Ei
   SignalSum_t  *GetSignalSum();
   SignalSum_t  *ResetSignalSum();
-  void SetTauC(Double_t p = 0) {mTauC = p;}
   void SettauIntegrationX(Double_t p =      74.6e-9) {mtauIntegrationX = p;}
   void SettauIntegration (Double_t p = 2.5* 74.6e-9) {mtauIntegration  = p;}
+  void SetCutEle(Double_t p = 1e-3)                  {mCutEle = p;}
  private:
   TTree   *fTree;                     //!
   SignalSum_t     *m_SignalSum;       //!
@@ -113,7 +114,6 @@ class StTpcRSMaker : public StMaker {
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   PAI  *mPAI;                        //!
   Double_t             mLaserScale;  //!
-  Double_t             mClusterLength;//!
   Double_t             mTau;         //!
   Double_t             mTimeBinWidth;//!
   // local variables
@@ -169,7 +169,6 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangePower; //!
   const Double_t CrossTalkInner; //!
   const Double_t CrossTalkOuter; //!
-  Double_t      mTauC; //! for TPX
   Double_t      mtauIntegrationX; //! for TPX
   Double_t      mtauIntegration;  //! for TPC
   const Int_t NoOfSectors;//!
@@ -180,20 +179,26 @@ class StTpcRSMaker : public StMaker {
   const Double_t tauF;//!
   const Double_t tauFx;//!
   const Double_t tauP;//!
-  Double_t   mSigmaJitterI;
-  Double_t   mSigmaJitterO;
+  Double_t   mSigmaJitterTI;
+  Double_t   mSigmaJitterTO;
+  Double_t   mSigmaJitterXI;
+  Double_t   mSigmaJitterXO;
   Altro *mAltro;//!
+  Double_t   mCutEle; //! cut for delta electrons
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.6 2008/12/18 23:06:38 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.7 2008/12/29 15:24:55 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.6 2008/12/18 23:06:38 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.7 2008/12/29 15:24:55 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.7  2008/12/29 15:24:55  fisyak
+// Freeze ~/WWW/star/Tpc/TpcRS/ComparisonMIP31
+//
 // Revision 1.6  2008/12/18 23:06:38  fisyak
 // Take care about references to TGiant
 //
