@@ -12,7 +12,7 @@
  * This file is part of the UCM project funded under an SBIR
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: TxMySQLModule.cpp,v 1.1 2008/12/08 21:10:32 fine Exp $
+ * @(#)cpp/api:$Id: TxMySQLModule.cpp,v 1.2 2008/12/30 22:01:07 fine Exp $
  *
  *
  *
@@ -37,6 +37,7 @@
 #include <sstream>
 #include <sys/time.h>
 #include <iostream>
+#include <unistd.h>
 
 #include "mysql.h"
 #include "TxField.h"

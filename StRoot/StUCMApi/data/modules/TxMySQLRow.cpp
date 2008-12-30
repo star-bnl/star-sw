@@ -12,7 +12,7 @@
  * This file is part of the UCM project funded under an SBIR
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: TxMySQLRow.cpp,v 1.1 2008/12/08 21:10:33 fine Exp $
+ * @(#)cpp/api:$Id: TxMySQLRow.cpp,v 1.2 2008/12/30 22:01:07 fine Exp $
  *
  *
  *
@@ -34,6 +34,108 @@
 #include "TxMySQLRow.h"
 #include "TxModuleException.h"
 
+#ifndef FIELD_TYPE_TINY
+#define MYSQL_TYPE_TINY FIELD_TYPE_TINY
+#endif
+#ifndef FIELD_TYPE_SHORT
+#define MYSQL_TYPE_SHORT FIELD_TYPE_SHORT
+#endif
+#ifndef FIELD_TYPE_LONG
+#define MYSQL_TYPE_LONG FIELD_TYPE_LONG
+#endif
+#ifndef FIELD_TYPE_INT24
+#define MYSQL_TYPE_INT24 FIELD_TYPE_INT24
+#endif
+#ifndef FIELD_TYPE_FLOAT
+#define MYSQL_TYPE_FLOAT FIELD_TYPE_FLOAT
+#endif
+#ifndef FIELD_TYPE_DOUBLE
+#define MYSQL_TYPE_DOUBLE FIELD_TYPE_DOUBLE
+#endif
+#ifndef FIELD_TYPE_DECIMAL
+#define MYSQL_TYPE_DECIMAL FIELD_TYPE_DECIMAL
+#endif
+#ifndef FIELD_TYPE_TIMESTAMP
+#define MYSQL_TYPE_TIMESTAMP FIELD_TYPE_TIMESTAMP
+#endif
+#ifndef FIELD_TYPE_DATE
+#define MYSQL_TYPE_DATE FIELD_TYPE_DATE
+#endif
+#ifndef FIELD_TYPE_TIME
+#define MYSQL_TYPE_TIME FIELD_TYPE_TIME
+#endif
+#ifndef FIELD_TYPE_DATETIME
+#define MYSQL_TYPE_DATETIME FIELD_TYPE_DATETIME
+#endif
+#ifndef FIELD_TYPE_YEAR
+#define MYSQL_TYPE_YEAR FIELD_TYPE_YEAR
+#endif
+#ifndef FIELD_TYPE_VAR_STRING
+#define MYSQL_TYPE_VAR_STRING FIELD_TYPE_VAR_STRING
+#endif
+#ifndef FIELD_TYPE_STRING
+#define MYSQL_TYPE_STRING FIELD_TYPE_STRING
+#endif
+#ifndef FIELD_TYPE_BLOB
+#define MYSQL_TYPE_BLOB FIELD_TYPE_BLOB
+#endif
+#ifndef FIELD_TYPE_TINY
+#define MYSQL_TYPE_TINY FIELD_TYPE_TINY
+#endif
+#ifndef FIELD_TYPE_SHORT
+#define MYSQL_TYPE_SHORT FIELD_TYPE_SHORT
+#endif
+#ifndef FIELD_TYPE_LONG
+#define MYSQL_TYPE_LONG FIELD_TYPE_LONG
+#endif
+#ifndef FIELD_TYPE_INT24
+#define MYSQL_TYPE_INT24 FIELD_TYPE_INT24
+#endif
+#ifndef FIELD_TYPE_LONGLONG
+#define MYSQL_TYPE_LONGLONG FIELD_TYPE_LONGLONG
+#endif
+#ifndef FIELD_TYPE_DECIMAL
+#define MYSQL_TYPE_DECIMAL FIELD_TYPE_DECIMAL
+#endif
+#ifndef FIELD_TYPE_FLOAT
+#define MYSQL_TYPE_FLOAT FIELD_TYPE_FLOAT
+#endif
+#ifndef FIELD_TYPE_DOUBLE
+#define MYSQL_TYPE_DOUBLE FIELD_TYPE_DOUBLE
+#endif
+#ifndef FIELD_TYPE_TIMESTAMP
+#define MYSQL_TYPE_TIMESTAMP FIELD_TYPE_TIMESTAMP
+#endif
+#ifndef FIELD_TYPE_DATE
+#define MYSQL_TYPE_DATE FIELD_TYPE_DATE
+#endif
+#ifndef FIELD_TYPE_TIME
+#define MYSQL_TYPE_TIME  FIELD_TYPE_TIME
+#endif
+#ifndef FIELD_TYPE_DATETIME
+#define MYSQL_TYPE_DATETIME FIELD_TYPE_DATETIME
+#endif
+#ifndef FIELD_TYPE_YEAR
+#define MYSQL_TYPE_YEAR FIELD_TYPE_YEAR
+#endif
+#ifndef FIELD_TYPE_STRING
+#define MYSQL_TYPE_STRING FIELD_TYPE_STRING
+#endif
+#ifndef FIELD_TYPE_BLOB
+#define MYSQL_TYPE_BLOB FIELD_TYPE_BLOB
+#endif
+#ifndef FIELD_TYPE_SET
+#define MYSQL_TYPE_SET FIELD_TYPE_SET
+#endif
+#ifndef FIELD_TYPE_ENUM
+#define MYSQL_TYPE_ENUM FIELD_TYPE_ENUM
+#endif
+#ifndef FIELD_TYPE_GEOMETRY
+#define MYSQL_TYPE_GEOMETRY FIELD_TYPE_GEOMETRY
+#endif
+#ifndef FIELD_TYPE_NULL
+#define MYSQL_TYPE_NULL FIELD_TYPE_NULL
+#endif
 
 TxMySQLRow::TxMySQLRow(MYSQL_RES* res, MYSQL_ROW row) {
   mFields = row;
@@ -115,46 +217,52 @@ bool TxMySQLRow::isClosed() {
 }
 
 
-TxField::DataType TxMySQLRow::mysqlTypeToDataType(MYSQL_FIELD field) const {
+TxField::DataType TxMySQLRow::mysqlTypeToDataType(MYSQL_FIELD field) const 
+{
+   // Convert the MySQL type to the UCM types
+  TxField::DataType ucmType = TxField::INVALID;
   switch (field.type) {
      case MYSQL_TYPE_TINY:
      case MYSQL_TYPE_SHORT:
      case MYSQL_TYPE_LONG:
      case MYSQL_TYPE_INT24:
-       if (field.flags & UNSIGNED_FLAG) {
-	 return TxField::ULONG;
-       }
-       else {
-	 return TxField::LONG;
-       }
+       ucmType = (field.flags & UNSIGNED_FLAG) ? TxField::ULONG 
+                                               : TxField::LONG;
        break;
     case MYSQL_TYPE_FLOAT:
     case MYSQL_TYPE_DOUBLE:
     case MYSQL_TYPE_DECIMAL:
-      return TxField::DOUBLE;
+      ucmType = TxField::DOUBLE;
       break;
     case MYSQL_TYPE_TIMESTAMP:
     case MYSQL_TYPE_DATE:
     case MYSQL_TYPE_TIME:
     case MYSQL_TYPE_DATETIME:
     case MYSQL_TYPE_YEAR:
-      return TxField::STRING;
+      ucmType = TxField::STRING;
       break;
     // These cases need special handling to determine if they are binary or character data
     case MYSQL_TYPE_STRING:
     case MYSQL_TYPE_VAR_STRING:
-    case MYSQL_TYPE_BLOB:
-      if (field.charsetnr != 63) { // Indicates non-binary data
-	return TxField::STRING;
-      }
+    case MYSQL_TYPE_BLOB: 
+       ucmType = TxField::STRING;
+#ifndef MYSQL_TYPE_SET
+       if  (field.charsetnr != 63)
+#endif       
+       break;
     default: {
-      std::string binary;
-      if (field.charsetnr == 63) { // Indicates binary data
-	binary = "(BINARY)";
-      }
-      throw TxModuleException("SQL: No internal representation for type "
+        ucmType = TxField::INVALID;
+        std::string binary;
+#ifndef MYSQL_TYPE_SET
+        if (field.charsetnr == 63) { 
+           // Indicates binary data
+           binary = "(BINARY)";
+        }
+#endif        
+        throw TxModuleException("SQL: No internal representation for type "
 			       + mysqlTypeToString(field.type) + binary,
 			      TxModuleException::MISC);
+        break;
     }
   }
   return TxField::INVALID;
