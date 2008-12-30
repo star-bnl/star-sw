@@ -86,7 +86,12 @@ if ( -e .sl44_gcc346) then
     	/bin/ln -s .sl44_gcc346 .sl45_gcc346
     endif
     if ( ! -e .rh4_gcc346) then
+	echo "Backward compatibility assumed between RH4 -> SL404"
     	/bin/ln -s .sl44_gcc346 .rh4_gcc346
+    endif
+    if ( ! -e .i386_sl4) then
+	echo "Assuming standard SL4 is compatible with default SL44 GCC-346"
+    	/bin/ln -s .sl44_gcc346 .i386_sl4
     endif
 endif
 
