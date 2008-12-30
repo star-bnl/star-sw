@@ -22,8 +22,7 @@
 #include "StEEmcUtil/EEdsm/EEdsm0.h"
 #include "StEEmcUtil/EEdsm/EEdsm1.h"
 #include "StEEmcUtil/EEdsm/EEdsm2.h"
-#include "StEEmcUtil/EE
-dsm/EEdsm3.h"
+#include "StEEmcUtil/EEdsm/EEdsm3.h"
 
 
 #ifndef IN_PANITKIN
