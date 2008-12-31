@@ -24,7 +24,7 @@
 #define EVP_STAT_CRIT	(-3)
 
 // file systems and related sizes
-#define EVP_FS		"/EVP/evpTask_fs.txt"
+#define EVP_FS		"/RTS/conf/evp/evpTask_fs.txt"
 #define EVP_FS_MAX	10
 #define EVP_MAX_FS_NAME	16
 #define EVP_FS_MIN_BLOCKS	30000000
