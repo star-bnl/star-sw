@@ -1,4 +1,5 @@
 include ../rtsmakefile.def
+LDLIBS := 
 
 VPATH = ../LOG
 VOBJS = librtslog.a
@@ -17,17 +18,17 @@ blastSFS: libsfs.a blastSFS.o
 
 fs: libsfs.a fs.o $(VOBJS)
 
-fs_ex: libsfs.a fs_ex.o 
+fs_ex: libsfs.a fs_ex.o $(VOBJS)
 
-readPed: libsfs.a readPed.o
+readPed: libsfs.a readPed.o $(VOBJS)
 
-sfsTest: libsfs.a sfsTest.o
+sfsTest: libsfs.a sfsTest.o $(VOBJS)
 
-sfs_experiment: libsfs.a sfs_experiment.o
+sfs_experiment: libsfs.a sfs_experiment.o $(VOBJS)
 
-example: libsfs.a example.o
+example: libsfs.a example.o $(VOBJS)
 
-sfs_single: libsfs.a sfs_single.o
+sfs_single: libsfs.a sfs_single.o $(VOBJS)
 
 libsfs.a: fs_index.o sfs_index.o sfs_index_daq.o get_line.o
 	ar -rucvs libsfs.a $?

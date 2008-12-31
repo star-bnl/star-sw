@@ -1,6 +1,10 @@
 
 RTS_DIR_PATH = ../
 include ../src/rtsmakefile.def
+
+# disable the loading of obsolete daqlibs from /RTS
+LDLIBS := 
+
 include ../src/rtsplus.def
 
 DEFINES += -DRTS_LOG_COLORED
