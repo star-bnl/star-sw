@@ -5,7 +5,6 @@ include ../rtsplus.def
 
 #override or addition to predefined variables
 
-
 DEFINES += -DRTS_LOG_COLORED
 
 ifeq ($(TARGET_SYSTEM),SUN)

@@ -284,7 +284,7 @@ char *daqReader::get(int num, int type)
       exit(0);
     }
 
-    LOG(NOTE, "Delay of %d usec because of previous event status %d",delay, status);
+    LOG(DBG, "Delay of %d usec because of previous event status %d",delay, status);
     usleep(delay);
   }
 	  
@@ -296,7 +296,10 @@ char *daqReader::get(int num, int type)
   if((input_type == dir) ||
      (input_type == live)) {
     
-    if(getNextEventFilename(num, type) < 0) return NULL;
+    if(getNextEventFilename(num, type) < 0) {
+      event_number--;
+      return NULL;
+    }
 
     if(openEventFile() < 0) return NULL;
   }
@@ -413,7 +416,7 @@ char *daqReader::get(int num, int type)
   // Neccessary?
   if(input_type == pointer) {
     if(run == 0) {
-      LOG("JEFF", "Does this ever get called?");
+      LOG(DBG, "Does this ever get called?");
       run = readall_run;
     }
   }
@@ -634,7 +637,7 @@ int daqReader::addToEventSize(int sz)
     return 0;
   }
 
-  LOG("JEFF", "buff = %c%c%c  off=%d",buff[0],buff[1],buff[2], orig_offset);
+  LOG(DBG, "buff = %c%c%c  off=%d",buff[0],buff[1],buff[2], orig_offset);
 
   lseek(desc, orig_offset, SEEK_SET);
 
@@ -1079,6 +1082,9 @@ int daqReader::getNextEventFilenameFromLive(int type)
   if(!issued) {
 
     m.ld.dword[0] = htonl(type) ;	// event type...
+
+    LOG(DBG, "dword[0] is type=%d",type);
+
     ret = ask(evpDesc,&m) ;
     if(ret != STAT_OK) {	// some error...
 
@@ -1119,7 +1125,7 @@ int daqReader::getNextEventFilenameFromLive(int type)
 #endif
       
       LOG(DBG, "Waiting 1 second, no event yet...");
-      usleep(1000) ;		// 1 ms?
+      usleep(100000) ;		// .1 ms?
       status = EVP_STAT_OK ;	// no error...
       return -1;		// but also noevent - only on wait!	    
     }
@@ -1454,15 +1460,20 @@ static int evtwait(int desc, ic_msg *m)
   LOG(DBG,"msgNQReceive returned %d",ret,0,0,0,0) ;
 
   if(ret == MSG_Q_TIMEOUT) {
+    LOG(DBG, "read a timeout count=%d",counter);
     counter++ ;
     if(counter >= 100) {
       counter = 0 ;
-      if(msgNQCheck(desc)) return STAT_TIMED_OUT ;
+      if(msgNQCheck(desc)) {
+	LOG(NOTE, "check returned ok...");
+	return STAT_TIMED_OUT ;
+      }
       else {
-	LOG(DBG,"EVP_TASK died",0,0,0,0,0) ;
+	LOG(NOTE,"EVP_TASK died",0,0,0,0,0) ;
 	return STAT_ERROR ;
       }
     }
+    
     return STAT_TIMED_OUT ;
   }
 
@@ -1481,7 +1492,6 @@ static int evtwait(int desc, ic_msg *m)
   }
 
   return STAT_ERROR ;	// critical - please reboot
-
 }
 
 // Fixes the summary fields for a randomly supplied datap
@@ -1775,11 +1785,11 @@ static int ask(int desc, ic_msg *m)
     switch(status) {
     case EVP_STAT_EVT :	// something wrong with last event...
       delay = 500000;
-      LOG(ERR, "Delaying for %d usec because of error on last event",delay);
+      LOG(DBG, "Delaying for %d usec because of error on last event",delay);
       break ;
     case EVP_STAT_EOR :	// EndOfRun was the last status and yet we are asked again...
       delay = 500000;
-      LOG(ERR, "Delaying for %d usec because last event was end of run",delay);
+      LOG(DBG, "Delaying for %d usec because last event was end of run",delay);
       break ;
     case EVP_STAT_CRIT :
       delay = 1000000;
@@ -1818,8 +1828,6 @@ int daqReader::writeCurrentEventToDisk(char *ofilename)
     LOG(ERR, "Error  opening output file %s (%s)", ofilename, strerror(errno));
     return -1;
   }
-
-  //LOG("JEFF", "fdo=%d",fdo);
 
   ret = write(fdo, memmap->mem, event_size);
   if(ret != event_size) {
