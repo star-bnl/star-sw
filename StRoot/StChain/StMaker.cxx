@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.211 2008/12/21 18:59:33 perev Exp $
+// $Id: StMaker.cxx,v 1.212 2008/12/31 02:11:27 perev Exp $
 //
 //
 /*!
@@ -173,7 +173,10 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2007g",      20061105,     4, "y2007g",   "y2007b + SVT dead material"},
 
   // SVT/SSD is out
-  {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone in separate SCON"},
+  {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone is lost"},
+  {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
+  // 
+  {"y2009",       20081215,     0, "y2008",    "Practically place holder yet(VP)"},
 
   // development tags
   {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1862,6 +1865,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.212  2008/12/31 02:11:27  perev
+// y2009
+//
 // Revision 1.211  2008/12/21 18:59:33  perev
 // GetDBTim() added
 //
