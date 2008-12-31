@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <getopt.h>
 #include <sys/types.h>
 #include <stdlib.h>
@@ -68,8 +69,37 @@ int main(int argc, char *argv[])
 	class daqReader *evp ;			// tha main guy
 	evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
 
+	int good=0;
+	int bad=0;
+	
+	for(;;) {
+	        char *ret = evp->get(0,EVP_TYPE_ANY);
+       
+		if(ret) {
+		  good++;
+		}
+		else {    // something other than an event, check what.
+		  switch(evp->status) {
+		  case EVP_STAT_OK:   // just a burp!
+		    continue;
+		  case EVP_STAT_EOR:
+		    LOG(DBG, "End of run");
+		    if(evp->IsEvp()) {   // but event pool, keep trying...
+		      LOG(DBG, "Wait a second...");
+		      sleep(1);
+		      continue;
+		    }
+		    break;        // file, we're done...
+		  case EVP_STAT_EVT:
+		    bad++;
+		    LOG(WARN, "Problem getting event - skipping [good %d, bad %d]",good,bad);
+		    sleep(1);
+		    continue;
+		  case EVP_STAT_CRIT:
+		    return -1;
+		  }
+		}
 
-	while(evp->get(0,0)) {	// keep getting new events
 		daq_dta *dd ;	// generic data pointer; reused all the time
 
 
