@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcMappingDb
 #define STAR_StEmcMappingDb
 
-// $Id: StEmcMappingDb.h,v 2.1 2008/12/05 19:05:32 kocolosk Exp $
+// $Id: StEmcMappingDb.h,v 2.2 2009/01/02 03:34:34 kocolosk Exp $
 
 /*****************************************************************************
  * @class StEmcMappingDb
@@ -30,7 +30,7 @@ class St_db_Maker;
 class StEmcMappingDb : public TObject 
 {
 public:
-    StEmcMappingDb(int date=20370101, int time=0);
+    StEmcMappingDb(int date=20330101, int time=0);
     virtual ~StEmcMappingDb();
     
     /// St_db_Maker-compatible interface
@@ -81,6 +81,9 @@ private:
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.h,v $
+ * Revision 2.2  2009/01/02 03:34:34  kocolosk
+ * use default date==20330101 like St_db_Maker to suppress spurious error msgs
+ *
  * Revision 2.1  2008/12/05 19:05:32  kocolosk
  * new DB-backed implementation of StEmcDecoder
  *

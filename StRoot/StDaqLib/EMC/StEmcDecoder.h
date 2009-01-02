@@ -34,7 +34,7 @@ The current id's definitions are:<br>
 class StEmcDecoder : public TObject
 {
 public:
-    StEmcDecoder(unsigned int date=20300101,unsigned int time=000000, bool TowerMapBug = false);///< StEmcDecoder constructor
+    StEmcDecoder(unsigned int date=20330101,unsigned int time=000000, bool TowerMapBug = false);///< StEmcDecoder constructor
     virtual   ~StEmcDecoder();///< StEmcDecoder destructor
 
     void      SetDateTime(unsigned int date, unsigned int time);///< Sets the timestamp to be used
@@ -100,9 +100,12 @@ private:
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 2.19 2008/12/05 19:05:32 kocolosk Exp $
+// $Id: StEmcDecoder.h,v 2.20 2009/01/02 03:34:33 kocolosk Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 2.20  2009/01/02 03:34:33  kocolosk
+// use default date==20330101 like St_db_Maker to suppress spurious error msgs
+//
 // Revision 2.19  2008/12/05 19:05:32  kocolosk
 // new DB-backed implementation of StEmcDecoder
 //
