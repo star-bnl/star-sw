@@ -37,6 +37,7 @@ public:
     StEmcDecoder(unsigned int date=20330101,unsigned int time=000000, bool TowerMapBug = false);///< StEmcDecoder constructor
     virtual   ~StEmcDecoder();///< StEmcDecoder destructor
 
+    void      SetDateTime(const TDatime& dt) { SetDateTime(dt.GetDate(), dt.GetTime()); }
     void      SetDateTime(unsigned int date, unsigned int time);///< Sets the timestamp to be used
     bool      GetFixTowerMapBug(void) const;///< Shows if the tower map bug is being fixed on the fly
     void      SetFixTowerMapBug(bool fix);///< Sets the tower map bug fix
@@ -100,9 +101,12 @@ private:
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 2.20 2009/01/02 03:34:33 kocolosk Exp $
+// $Id: StEmcDecoder.h,v 2.21 2009/01/02 03:52:46 kocolosk Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 2.21  2009/01/02 03:52:46  kocolosk
+// allow setting timestamp using a TDatime directly
+//
 // Revision 2.20  2009/01/02 03:34:33  kocolosk
 // use default date==20330101 like St_db_Maker to suppress spurious error msgs
 //
