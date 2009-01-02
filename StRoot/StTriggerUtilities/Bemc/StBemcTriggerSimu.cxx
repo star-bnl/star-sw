@@ -1,4 +1,3 @@
-
 #include "StBemcTriggerSimu.h"
 
 //General
@@ -248,7 +247,8 @@ void StBemcTriggerSimu::Init(){
 void StBemcTriggerSimu::InitRun(int runnumber){
   LOG_DEBUG<<"StBemcTriggerSimu::InitRun() -- " << runnumber << '\t' << mHeadMaker->GetDate() << '\t' << mHeadMaker->GetTime() << endm;
   
-  mDecoder->SetDateTime(mHeadMaker->GetDate(), mHeadMaker->GetTime());
+  //mDecoder->SetDateTime(mHeadMaker->GetDate(), mHeadMaker->GetTime());
+  mDecoder->SetDateTime(mHeadMaker->GetDBTime());
  
   assert(starDb);
   getTowerStatus();
@@ -257,11 +257,15 @@ void StBemcTriggerSimu::InitRun(int runnumber){
   getLUT();
   getPed();
 
-  timestamp=starDb->GetDateTime().Get();
-  year=starDb->GetDateTime().GetYear(); 
-  yyyymmdd=starDb->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
-  hhmmss=starDb->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
 
+  //timestamp=starDb->GetDateTime().Get();
+  //year=starDb->GetDateTime().GetYear(); 
+  //yyyymmdd=starDb->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
+  //hhmmss=starDb->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23) 
+  timestamp=starDb->GetDBTime().Get();
+  year=starDb->GetDBTime().GetYear(); 
+  yyyymmdd=starDb->GetDBTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
+  hhmmss=starDb->GetDBTime().GetTime(); //form of 123623 (i.e. 12:36:23)
 
 
  //Get FEE window for HT from support class for offline operation
@@ -2191,6 +2195,8 @@ void StBemcTriggerSimu::get2008pp_DSMLayer0() {
 
 	// AND HT#3 with TP bit
         DSM0_HTTP_tp_Bit[j]=(DSM0_TP_tp_Bit[j]&&DSM0_HT_Thr3_tp_Bit[j]);
+	// Set HT#3 bit
+	if (DSM0_HT_Thr3_Bit[i]<DSM0_HT_Thr3_tp_Bit[j]) DSM0_HT_Thr3_Bit[i]=DSM0_HT_Thr3_tp_Bit[j];
 	// OR bits for HT thresholds #0,#1,#2
 	if (DSM0_HT_Bit[i]<DSM0_HT_tp_Bit[j]) DSM0_HT_Bit[i]=DSM0_HT_tp_Bit[j];
 	// OR bits for TP for all trigger patches						     
@@ -2256,10 +2262,12 @@ void StBemcTriggerSimu::get2008pp_DSMLayer0() {
 	if (DSM0_HT_Bit_J3[i]<DSM0_HT_tp_Bit_J3[j]) DSM0_HT_Bit_J3[i]=DSM0_HT_tp_Bit_J3[j];
 	if (DSM0_TP_Bit_J3[i]<DSM0_TP_tp_Bit_J3[j]) DSM0_TP_Bit_J3[i]=DSM0_TP_tp_Bit_J3[j];
 	if (DSM0_HTTP_Bit_J3[i]<DSM0_HTTP_tp_Bit_J3[j]) DSM0_HTTP_Bit_J3[i]=DSM0_HTTP_tp_Bit_J3[j];
+	if (DSM0_HT_Thr3_Bit_J3[i]<DSM0_HT_Thr3_tp_Bit_J3[j]) DSM0_HT_Thr3_Bit_J3[i]=DSM0_HT_Thr3_tp_Bit_J3[j];
 
 	if (DSM0_HT_Bit_J1[i]<DSM0_HT_tp_Bit_J1[j]) DSM0_HT_Bit_J1[i]=DSM0_HT_tp_Bit_J1[j];
 	if (DSM0_TP_Bit_J1[i]<DSM0_TP_tp_Bit_J1[j]) DSM0_TP_Bit_J1[i]=DSM0_TP_tp_Bit_J1[j];
 	if (DSM0_HTTP_Bit_J1[i]<DSM0_HTTP_tp_Bit_J1[j]) DSM0_HTTP_Bit_J1[i]=DSM0_HTTP_tp_Bit_J1[j];
+	if (DSM0_HT_Thr3_Bit_J1[i]<DSM0_HT_Thr3_tp_Bit_J1[j]) DSM0_HT_Thr3_Bit_J1[i]=DSM0_HT_Thr3_tp_Bit_J1[j];
 
       } 
     }
