@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.cxx,v 1.11 2007/11/08 11:12:39 kocolosk Exp $
+ * $Id: StBemcTables.cxx,v 1.12 2009/01/02 02:56:18 kocolosk Exp $
  * Author: Alexandre A. P. Suaide
  * Maintainer: Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -88,8 +88,8 @@ void StBemcTables::loadTables(StMaker* maker) {
     if(mSmdpC) mSmdpC = NULL;
     if(mSmdpG) mSmdpG = NULL;
     
-    int date = maker->GetDate();
-    int time = maker->GetTime();
+    int date = (maker->GetDBTime()).GetDate();
+    int time = (maker->GetDBTime()).GetTime();
     mDecoder->SetDateTime(date, time);
     
     // the BTOW map fix should be used *ONLY* for runs before 2006
@@ -622,6 +622,9 @@ int* StBemcTables::triggerFormulaParametersByID(int softId) const {
 /***************************************************************************
  *
  * $Log: StBemcTables.cxx,v $
+ * Revision 1.12  2009/01/02 02:56:18  kocolosk
+ * use StMaker::GetDBTime() instead of GetDateTime()
+ *
  * Revision 1.11  2007/11/08 11:12:39  kocolosk
  * remove debugging statements
  *
