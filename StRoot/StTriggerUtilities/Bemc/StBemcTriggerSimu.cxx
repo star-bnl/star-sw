@@ -88,58 +88,46 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(96233);   //bemc-jp2-mb-b
 
   //2006
-  mAllTriggers.insert(117201);  //bemc-http-mb
-  
+  mAllTriggers.insert(117201);  //bemc-http-mb  
   mAllTriggers.insert(117211);  //bemc-ht2-mb
   mAllTriggers.insert(117212);  //bemc-ht2-mb-emul
   mAllTriggers.insert(127212);  //bemc-ht2-mb-emul
   mAllTriggers.insert(127213);  //bemc-ht2-mb-emul
   mAllTriggers.insert(137213);  //bemc-ht2-mb-emul
-  
   mAllTriggers.insert(117221);  //bemc-jp1-mb
   mAllTriggers.insert(127221);  //bemc-jp1-mb
   mAllTriggers.insert(137221);  //bemc-jp1-mb
   mAllTriggers.insert(137222);  //bemc-jp1-mb
-  
   mAllTriggers.insert(117501);  //bemc-jp0-mb
   mAllTriggers.insert(127501);  //bemc-jp0-mb
   mAllTriggers.insert(137501);  //bemc-jp0-mb
-  
   mAllTriggers.insert(117571);  //bemc-jp1
   mAllTriggers.insert(127571);  //bemc-jp1
   mAllTriggers.insert(137571);  //bemc-jp1
-  
   mAllTriggers.insert(117575);  //bemc-jp0-etot
   mAllTriggers.insert(127575);  //bemc-jp0-etot
   mAllTriggers.insert(137575);  //bemc-jp0-etot
-  
   mAllTriggers.insert(117585);  //bemc-jp2
   mAllTriggers.insert(127585);  //bemc-jp2
   mAllTriggers.insert(137585);  //bemc-jp2
-    
   mAllTriggers.insert(117601);  //Upsilon
   mAllTriggers.insert(117602);  //Upsilon
   mAllTriggers.insert(137602);  //Upsilon
   mAllTriggers.insert(137603);  //Upsilon
-  
   mAllTriggers.insert(117611);  //bemc-http-mb-l2gamma
   mAllTriggers.insert(127611);  //bemc-http-mb-l2gamma
   mAllTriggers.insert(5);       //bemc-http-mb-l2gamma
   mAllTriggers.insert(137611);  //bemc-http-mb-l2gamma
-  
   mAllTriggers.insert(117621);  //bemc-jp0-etot-mb-l2jet
   mAllTriggers.insert(117622);  //bemc-jp0-etot-mb-l2jet
   mAllTriggers.insert(127622);  //bemc-jp0-etot-mb-l2jet
   mAllTriggers.insert(137622);  //bemc-jp0-etot-mb-l2jet
-  
   mAllTriggers.insert(117705);  //jpsi-mb
   mAllTriggers.insert(137705);  //jpsi-mb
-  
   mAllTriggers.insert(117821);  //bemc-http-mb-fast
   mAllTriggers.insert(127821);  //bemc-http-mb-fast
   mAllTriggers.insert(137821);  //bemc-http-mb-fast
   mAllTriggers.insert(137822);  //bemc-http-mb-fast
-
   mAllTriggers.insert(147570);  //bemc-jp0
   mAllTriggers.insert(147585);  //bemc-http
   mAllTriggers.insert(147611);  //bemc-http-mb-l2gamma
@@ -152,18 +140,21 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(200220);  //bht2-mb
   mAllTriggers.insert(200221);  //bht2-mb
   mAllTriggers.insert(200222);  //bht2-mb
-  
   mAllTriggers.insert(200213);  //btag
   mAllTriggers.insert(200214);  //btag
-  
   mAllTriggers.insert(200585);  //bht2
   mAllTriggers.insert(200586);  //bht2
-  
   mAllTriggers.insert(200601);  //L2-upsilon
-  mAllTriggers.insert(200602);  //L2-upsilon
-  
+  mAllTriggers.insert(200602);  //L2-upsilon  
   mAllTriggers.insert(200620);  //L2-gamma
   mAllTriggers.insert(200621);  //L2-gamma
+  //not implemented
+  mAllTriggers.insert(200400); //upc
+  mAllTriggers.insert(200401); //upc
+  mAllTriggers.insert(200402); //upc
+  mAllTriggers.insert(200410); //upc-jpsi
+  mAllTriggers.insert(200411); //upc-jpsi
+
 
   //2008dAu
   mAllTriggers.insert(210500);//BEMC-HT0
@@ -173,6 +164,16 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(210511);//BEMC-HT1
   mAllTriggers.insert(210521);//BEMC-HT2
   mAllTriggers.insert(210541);//BEMC-HT4
+  //not implemented
+  mAllTriggers.insert(210601);//upsilon 
+  mAllTriggers.insert(210710);//UPCjpsi
+  mAllTriggers.insert(210800);//BEMC-HT4-fast
+
+  //2008pp
+  //not implemented
+  mAllTriggers.insert(220500);//BEMC-HT0-mb
+  mAllTriggers.insert(220510);//BEMC-HT1-mb
+  mAllTriggers.insert(220520);//BEMC-HT2-mb-slow
 
   Clear();
 
@@ -2165,7 +2166,7 @@ void StBemcTriggerSimu::get2008pp_DSMLayer0() {
     }
 #endif
     
-
+    
     //Loop over 10 inputs to each module 
     for (int j=0;j<kL0DsmInputs;j++){
       
@@ -2548,53 +2549,22 @@ void StBemcTriggerSimu::get2008pp_DSMLayer2()
   // so all final trigger decisions for the BEMC are made at Layer2 
   // in this code
 
-  Int_t DSM2_JP_Bit=0;
   Int_t DSM2_HT_Bit=0;
-  //Int_t DSM2_Esum_Bit=0;
-  //Int_t DSM2_Topo_Bit=0;
-  Int_t DSM2_HTTP_Bit=0;
-  Int_t DSM2_TP_Bit=0;
-
     
   for (int dsm = 0; dsm < kL1DsmModule; ++dsm) {
 
-    if (DSM2_JP_Bit<DSM1_JP_Bit[dsm]) DSM2_JP_Bit=DSM1_JP_Bit[dsm];
-    if (DSM2_HTTP_Bit<DSM1_HTTP_Bit[dsm]) DSM2_HTTP_Bit=DSM1_HTTP_Bit[dsm];
     if (DSM2_HT_Bit<DSM1_HTj0_Bit[dsm]) DSM2_HT_Bit=DSM1_HTj0_Bit[dsm];
     if (DSM2_HT_Bit<DSM1_HTj1_Bit[dsm]) DSM2_HT_Bit=DSM1_HTj1_Bit[dsm];
-    if (DSM2_TP_Bit<DSM1_TP_Bit[dsm]) DSM2_TP_Bit=DSM1_TP_Bit[dsm];
-  }
-  
-  //HT
-  if (DSM2_HT_Bit > 2){
-    mFiredTriggers.push_back(127212);
-    mFiredTriggers.push_back(137213);
-  }
-  
-  //HTTP trigger
-  if (DSM2_HTTP_Bit==1) {
-      mFiredTriggers.push_back(127611);
-      mFiredTriggers.push_back(127821);
-      mFiredTriggers.push_back(137821);
-      mFiredTriggers.push_back(137822);
-      mFiredTriggers.push_back(137611);
-      mFiredTriggers.push_back(5);
-    } 
 
-
-  //JP Trigger
-  if (DSM2_JP_Bit >= 1) {  
-    mFiredTriggers.push_back(127501);
-    mFiredTriggers.push_back(137501);
-    mFiredTriggers.push_back(127622);
-    mFiredTriggers.push_back(137622);
   }
   
-  if (DSM2_JP_Bit >= 2) {
-    mFiredTriggers.push_back(127221);
-    mFiredTriggers.push_back(137221);
-    mFiredTriggers.push_back(137222);
-  }
+  //HT0
+  if (DSM2_HT_Bit > 0) mFiredTriggers.push_back(220500);
+  //HT1
+  if (DSM2_HT_Bit > 1) mFiredTriggers.push_back(220510);
+  //HT2
+  if (DSM2_HT_Bit > 2) mFiredTriggers.push_back(220520);
+
   
 }
 
