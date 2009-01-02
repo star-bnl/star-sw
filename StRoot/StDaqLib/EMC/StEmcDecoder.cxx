@@ -10,7 +10,8 @@
 
 ClassImp(StEmcDecoder)
 
-StEmcDecoder::StEmcDecoder(unsigned date, unsigned time, bool TowerMapBug) {
+StEmcDecoder::StEmcDecoder(unsigned date, unsigned time, bool TowerMapBug) : 
+  mapping(date, time) {
     mTowerMapBug = TowerMapBug; // unused
     
     // tower swap fixes applied only at analysis level
@@ -41,8 +42,6 @@ StEmcDecoder::StEmcDecoder(unsigned date, unsigned time, bool TowerMapBug) {
             PreshowerBugFixIndex[newId-1] = id;
         }
     }
-    
-    SetDateTime(date, time);
 }
 
 StEmcDecoder::~StEmcDecoder() { }
@@ -565,9 +564,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const {
     return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.58 2008/12/15 20:25:18 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.59 2009/01/02 03:34:33 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.59  2009/01/02 03:34:33  kocolosk
+// use default date==20330101 like St_db_Maker to suppress spurious error msgs
+//
 // Revision 2.58  2008/12/15 20:25:18  kocolosk
 // GetCrateAndSequenceFromTriggerPatch calculated the sequence incorrectly
 //
