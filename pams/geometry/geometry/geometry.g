@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.180 2008/12/30 19:41:09 perev Exp $
+* $Id: geometry.g,v 1.181 2009/01/03 23:03:36 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.181  2009/01/03 23:03:36  perev
+* BtofConfig=6 in 2008a,2009
+*
 * Revision 1.180  2008/12/30 19:41:09  perev
 * 1st version of y2009
 *
@@ -907,6 +910,9 @@ replace [exe BTOF84;] with [;BTOF=on; BtofConfig=8;Itof=4 " call btofgeo4 ";]
 replace [exe BTOF16;] with [;" X.Dong";BTOF=on;
                             BtofConfig=1; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
+replace [exe BTOF66;] with [;" X.Dong";BTOF=on;
+                            BtofConfig=6; Itof=6 " call btofgeo6 ";
+                            tofX0= 0.00; tofZ0=-0.50;]
 
 replace [exe TPCE00;] with [;"New version of the TPC backplane "; TpceConfig = 1;]
 replace [exe TPCE01;] with [;"New version of the TPC backplane "; TpceConfig = 1;
@@ -1064,14 +1070,14 @@ replace [exe y2008;] with [;
 };]
 
 *********   y2008a   ***
-replace [exe y2008a;] with [;exe y2008; exe SCON12;]
+replace [exe y2008a;] with [;exe y2008; exe SCON12;exe BTOF66;]
 
 *********   y2009   ***
 replace [exe y2009;] with [;
 { "Year 2009 baseline: now(12.29.08) only place holder. No difference with y2008a"
     exe SCON12;
     exe TPCE03;
-    exe BTOF16;
+    exe BTOF66;
     exe CALB02;
     exe ECAL31;
     exe BBCMon;
@@ -3738,25 +3744,22 @@ If LL>0
 
    write(*,*) 'BTOF'
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
-   If (LL>0 & BTOF) then
+   If (BTOF) { 
      call AgDETP new ('BTOF')
      call AgDETP add ('btog.choice=',BtofConfig,1)
 * X.Dong
-     if(Itof>5) then
+     if(Itof>5) {
          call AgDETP add ('btog.X0=',tofX0,1)
          call AgDETP add ('btog.Z0=',tofZ0,1)
-     endif
+     }
 * X.Dong.end
 
-   endif
-
-   if(BTOF) then
       if(Itof.eq.1) write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
       if(Itof.eq.2) call btofgeo2
       if(Itof.eq.4) call btofgeo4
       if(Itof.eq.5) call btofgeo5
       if(Itof.eq.6) call btofgeo6       !X.Dong
-   endif
+   }
 
    Call AGSFLAG('SIMU',1)
 
