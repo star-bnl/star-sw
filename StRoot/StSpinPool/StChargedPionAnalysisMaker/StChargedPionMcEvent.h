@@ -1,7 +1,7 @@
 #ifndef STAR_StChargedPionMcEvent
 #define STAR_StChargedPionMcEvent
 
-// $Id: StChargedPionMcEvent.h,v 1.2 2008/12/29 15:58:31 kocolosk Exp $
+// $Id: StChargedPionMcEvent.h,v 1.3 2009/01/04 16:47:25 kocolosk Exp $
 
 /*****************************************************************************
  * @class StChargedPionMcEvent
@@ -198,7 +198,7 @@ private:
     
     vector<StChargedPionPythiaRow> mPythiaRecord;
     
-    ClassDef(StChargedPionMcEvent, 1)
+    ClassDef(StChargedPionMcEvent, 2)
 };
 
 inline unsigned int 
@@ -364,8 +364,14 @@ StChargedPionMcEvent::addJetPatch(short patchId, int ADC) {
 
 /*****************************************************************************
  * $Log: StChargedPionMcEvent.h,v $
+ * Revision 1.3  2009/01/04 16:47:25  kocolosk
+ * increment ClassDef, not even sure why
+ *
  * Revision 1.2  2008/12/29 15:58:31  kocolosk
- * removed commented code and added Id and Log as needed
+ * removed commented code and added $Id: StChargedPionMcEvent.h,v 1.3 2009/01/04 16:47:25 kocolosk Exp $/$Log: StChargedPionMcEvent.h,v $
+ * removed commented code and added $Id$/Revision 1.3  2009/01/04 16:47:25  kocolosk
+ * removed commented code and added $Id$/increment ClassDef, not even sure why
+ * removed commented code and added $Id$/ as needed
  *
  * Revision 1.1  2008/07/17 17:06:31  kocolosk
  * big-bang integration StChargedPionMcEvent framework
