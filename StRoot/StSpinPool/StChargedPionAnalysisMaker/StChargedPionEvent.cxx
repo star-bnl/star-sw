@@ -1,6 +1,8 @@
-// $Id: StChargedPionEvent.cxx,v 1.9 2008/12/29 15:58:28 kocolosk Exp $
+// $Id: StChargedPionEvent.cxx,v 1.10 2009/01/04 17:42:58 kocolosk Exp $
 
 #include "StChargedPionEvent.h"
+
+#include "TClass.h"
 
 #include "StMessMgr.h"
 
@@ -206,6 +208,9 @@ void StChargedPionEvent::addJet(const StChargedPionJet* j) {
 
 /*****************************************************************************
  * $Log: StChargedPionEvent.cxx,v $
+ * Revision 1.10  2009/01/04 17:42:58  kocolosk
+ * extra includes for standalone builds against ROOT 5.16+
+ *
  * Revision 1.9  2008/12/29 15:58:28  kocolosk
  * removed commented code and added Id and Log as needed
  *
