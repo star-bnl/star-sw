@@ -12,27 +12,36 @@
 # 
 #
 
+# All the below files will have a local copy instead of a link
+@LOCAL = ("config/Makefile.config","Makefile","configure");
+
+
 $CERNL = $ENV{CERN_LEVEL};
 $CERN  = $ENV{CERN};
 
+# Default values - this is no longer needed started from ROOT 5.22.00
 if ( ! defined($CERNL) ){
-    die "No CERN_LEVEL defined. Cannot proceed.\n";
+    print "CERN_LEVEL defined as 'pro'.\n";
+    $CERNL = "pro";
 }
 if ( ! defined($CERN) ){
     print "CERN defined as /cern\n";
     $CERN = "/cern";
 }
 
-if ( ! -e "config/Makefile.config"){
+# Now do the work
+if ( ! -e $LOCAL[0] ){
     die "You are probably not in the proper directory\n";
 } else {
     # if -l, copy local otherwise it will be share by debug / no-debug
     # version and create confusions.
-    if ( -l "config/Makefile.config"){
-	$link = readlink("config/Makefile.config");
-	unlink("config/Makefile.config");
-	system("/bin/cp -fp $link config/Makefile.config");
-	print "Made local config/Makefile.config\n";
+    foreach $f (@LOCAL){
+	if ( -l $f ){
+	    $link = readlink($f);
+	    unlink($f);
+	    system("/bin/cp -fp $link $f");
+	    print "Made local $f\n";
+	}
     }
 }
 
@@ -41,7 +50,7 @@ if ( ! -e "config/Makefile.config"){
 # Now parse arguments
 $ULINK = $FIXIT = 0;
 while ( defined($arg = shift(@ARGV))) {
-    #print "$arg\n";
+    # print "$arg\n";
     if ($arg eq "-fix"){      $FIXIT = 1;}
     if ($arg eq "-unlink"){   $ULINK = 1;}
 }
@@ -94,12 +103,8 @@ if ( ! -e "$CERN/$CERNL/lib/libpacklib_noshift.a"){
     die "$CERN/$CERNL/lib/libpacklib_noshift.a does not exist. Would not know what to do...\n";
 }
 
-$ERR = 0;
-
-
 if ( ! open(FI, "config/Makefile.config") || ! open(FO,">config/Makefile.config.new") ){
-    print " * ERROR cannot open file - trying to proceed\n";
-    $ERR = 1;
+    print " Did not find config/Makefile.config - trying to proceed\n";
 }
 
 $done = 0;
@@ -229,7 +234,7 @@ if ( -e "bin/root-config"){
 	    }
 	    close(FO);
 	} else {
-	    print " * ERROR could not open file for write (token issue?)\n";
+	    print " * ERROR could not open file bin/root-config.new for write (token issue?)\n";
 	    $ERR = 1;
 	}
 	close(FI);
