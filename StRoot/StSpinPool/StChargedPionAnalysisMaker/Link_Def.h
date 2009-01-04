@@ -1,4 +1,4 @@
-// $Id: Link_Def.h,v 1.1 2008/12/29 16:01:38 kocolosk Exp $
+// $Id: Link_Def.h,v 1.2 2009/01/04 17:46:14 kocolosk Exp $
 
 /*****************************************************************************
  * @author Adam Kocoloski
@@ -53,6 +53,7 @@
 
 // StEvent
 #pragma link C++ class StRunInfo+;
+#pragma link C++ enum StDetectorId;
 
 // StMiniMcEvent
 #pragma link C++ class StMiniMcPair+;
@@ -76,6 +77,9 @@
 
 /*****************************************************************************
  * $Log: Link_Def.h,v $
+ * Revision 1.2  2009/01/04 17:46:14  kocolosk
+ * add StDetectorId enumeration to standalone lib
+ *
  * Revision 1.1  2008/12/29 16:01:38  kocolosk
  * support for a standalone StChargedPionEvent library. Requires checked-out
  * copies of St_base, StarClassLibrary, StEvent, StMiniMcEvent, and of course
