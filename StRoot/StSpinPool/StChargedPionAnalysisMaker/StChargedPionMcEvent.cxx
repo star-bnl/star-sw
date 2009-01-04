@@ -1,4 +1,4 @@
-// $Id: StChargedPionMcEvent.cxx,v 1.2 2008/12/29 15:58:30 kocolosk Exp $
+// $Id: StChargedPionMcEvent.cxx,v 1.3 2009/01/04 17:42:58 kocolosk Exp $
 
 #include "StChargedPionMcEvent.h"
 
@@ -7,6 +7,7 @@ using std::make_pair;
 
 #include "TMath.h"
 #include "TLorentzVector.h"
+#include "TClass.h"
 
 #include "StChargedPionTypes.h"
 #include "StChargedPionTrack.h"
@@ -240,6 +241,9 @@ void StChargedPionMcEvent::addJet(const StChargedPionJet* j) {
 
 /*****************************************************************************
  * $Log: StChargedPionMcEvent.cxx,v $
+ * Revision 1.3  2009/01/04 17:42:58  kocolosk
+ * extra includes for standalone builds against ROOT 5.16+
+ *
  * Revision 1.2  2008/12/29 15:58:30  kocolosk
  * removed commented code and added Id and Log as needed
  *
