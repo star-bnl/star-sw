@@ -1,14 +1,14 @@
 #ifndef ST_CHARGED_PION_JET_PARTICLE_HH
 #define ST_CHARGED_PION_JET_PARTICLE_HH
 
-// $Id: StChargedPionJetParticle.h,v 1.3 2008/12/29 15:58:30 kocolosk Exp $
+// $Id: StChargedPionJetParticle.h,v 1.4 2009/01/04 17:48:10 kocolosk Exp $
 
 #include "Math/PtEtaPhiE4D.h"
 #include "Math/LorentzVector.h"
 using namespace ROOT::Math;
 
 #include "StarClassLibrary/StThreeVectorF.hh"
-#include "StEvent/StDetectorId.h"
+#include "StEvent/StEnumerations.h"
 
 #include "TLorentzVector.h"
 
@@ -83,6 +83,9 @@ inline void StChargedPionJetParticle::setGlobalDca(StThreeVectorF & a) { mGlobal
 
 /*****************************************************************************
  * $Log: StChargedPionJetParticle.h,v $
+ * Revision 1.4  2009/01/04 17:48:10  kocolosk
+ * include StEnumerations.h instead of deprecated StDetectorId.h
+ *
  * Revision 1.3  2008/12/29 15:58:30  kocolosk
  * removed commented code and added Id and Log as needed
  *
