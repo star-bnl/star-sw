@@ -48,12 +48,14 @@ int main(int argc, char *argv[])
 	extern int optind ;
 	int c ;
 	char *print_det = "" ;
+	char _mountpoint[256];
+	char *mountpoint = NULL;
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel(WARN) ;
 
 
-	while((c = getopt(argc, argv, "D:d:h")) != EOF) {
+	while((c = getopt(argc, argv, "D:d:m:h")) != EOF) {
 		switch(c) {
 		case 'd' :
 			rtsLogLevel(optarg) ;
@@ -61,6 +63,11 @@ int main(int argc, char *argv[])
 		case 'D' :
 			print_det = optarg ;
 			break ;
+		case 'm' :
+		  mountpoint = _mountpoint;
+		  strcpy(mountpoint, optarg);
+		  break;
+		  
 		default :
 			break ;
 		}
@@ -68,6 +75,9 @@ int main(int argc, char *argv[])
 
 	class daqReader *evp ;			// tha main guy
 	evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
+	if(mountpoint) {
+	  evp->setEvpDisk(mountpoint);
+	}
 
 	int good=0;
 	int bad=0;
