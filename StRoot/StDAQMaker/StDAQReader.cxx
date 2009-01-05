@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.68 2008/11/26 18:01:29 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.69 2009/01/05 17:55:36 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.69  2009/01/05 17:55:36  fine
+ * Fix datap issue with the newest DAQ files
+ *
  * Revision 1.68  2008/11/26 18:01:29  fine
  * prepare StRtsReaderMaker for DAQ_READER transition
  *
@@ -423,22 +426,27 @@ int StDAQReader::readEvent()
      // the current STAR StDaqLib relies on.
      // To fix the issue we have to create the memory resided copy of the buffer
      // vf 26.12.2007
-#if 1
+#  if 1
      fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes);
      memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes);
      // Fix the DATAP Summary data
      fDaqFileReader->fixDatapSummary((DATAP*)fDATAP);
-#else
+#  else
      fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes_mapped);
      memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes_mapped);
-#endif
+#  endif
      fEventReader->InitEventReader(fDATAP);
- } else {
+ }
+#  ifndef NEW_DAQ_READER 
+ // if the the new DAQ file (2008 Edition) lacks of the DATAP structure
+ // it is the normal and it should not be treated as a fatal error anymore ;
+ else {
     delete fEventReader;
     fEventReader = 0;
     assert(0);
  }
-#endif
+#  endif
+#endif  /* OLD_EVP_READER */
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0){
      LOG_INFO << 
@@ -469,13 +477,14 @@ int StDAQReader::readEvent()
 
 //	Trigger Summary, code provided by Herb
   Bank_DATAP *datap = (Bank_DATAP*)(fEventReader->getDATAP());
-   assert(datap->header.BankType[0]=='D'); // first letter of DATAP
-   { int i;
-     for(i=0;i<2;i++) fTrigSummary->L1summary[i]=datap->reserved[i+0];
-     for(i=0;i<2;i++) fTrigSummary->L2summary[i]=datap->reserved[i+2];
-     for(i=0;i<4;i++) fTrigSummary->L3summary[i]=datap->reserved[i+4];
-   }
-
+  if (datap ) {
+     assert(datap->header.BankType[0]=='D'); // first letter of DATAP
+     { int i;
+       for(i=0;i<2;i++) fTrigSummary->L1summary[i]=datap->reserved[i+0];
+       for(i=0;i<2;i++) fTrigSummary->L2summary[i]=datap->reserved[i+2];
+       for(i=0;i<4;i++) fTrigSummary->L3summary[i]=datap->reserved[i+4];
+     }
+  }
   return 0;
 }
 //_____________________________________________________________________________
