@@ -184,6 +184,11 @@ class daqReader {
   u_int detsinrun ;
   u_int evpgroupsinrun;
 
+  // copies from the trigger data format...
+  // the meanings potentially change year to year...
+  u_int L1summary[2];
+  u_int L2summary[2];
+  u_int L3summary[4];
 
   int fixDatapSummary(DATAP *datap);
   char *getInputType();

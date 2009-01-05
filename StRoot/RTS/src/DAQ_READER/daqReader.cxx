@@ -925,6 +925,11 @@ int daqReader::hackSummaryInfo()
   trgword = 0;
   trgcmd = 0;
   daqcmd = 0;
+  
+  memset(L1summary, 0, sizeof(L1summary));
+  memset(L2summary, 0, sizeof(L2summary));
+  memset(L3summary, 0, sizeof(L3summary));
+
   return 0;
 }
 
@@ -974,6 +979,10 @@ int daqReader::fillSummaryInfo_v02(gbPayload *pay) {
   trgcmd = pay->EventDescriptor.actionWdTrgCommand;
   daqcmd = pay->EventDescriptor.actionWdDaqCommand;
 
+  for(int i=0;i<2;i++) L1summary[i] = l2h32(pay->L1summary[i]);
+  for(int i=0;i<2;i++) L2summary[i] = l2h32(pay->L2summary[i]);
+  for(int i=0;i<4;i++) L3summary[i] = l2h32(pay->L3summary[i]);
+
   return 0;
 }
 
@@ -996,6 +1005,10 @@ int daqReader::fillSummaryInfo_v01a(gbPayload_0x01a *pay)
   trgcmd = pay->EventDescriptor.actionWdTrgCommand;
   daqcmd = pay->EventDescriptor.actionWdDaqCommand;
 
+  for(int i=0;i<2;i++) L1summary[i] = l2h32(pay->L1summary[i]);
+  for(int i=0;i<2;i++) L2summary[i] = l2h32(pay->L2summary[i]);
+  for(int i=0;i<4;i++) L3summary[i] = l2h32(pay->L3summary[i]);
+  
   return 0;
 }
 
@@ -1017,6 +1030,10 @@ int daqReader::fillSummaryInfo_v01(gbPayload_0x01 *pay)
   trgword = b2h16(pay->EventDescriptor.TriggerWord);
   trgcmd = pay->EventDescriptor.actionWdTrgCommand;
   daqcmd = pay->EventDescriptor.actionWdDaqCommand;
+
+  for(int i=0;i<2;i++) L1summary[i] = l2h32(pay->L1summary[i]);
+  for(int i=0;i<2;i++) L2summary[i] = l2h32(pay->L2summary[i]);
+  for(int i=0;i<4;i++) L3summary[i] = l2h32(pay->L3summary[i]);
 
   return 0;
 }
@@ -1044,6 +1061,11 @@ int daqReader::fillSummaryInfo(DATAP *datap)
 
   daqbits = qswap32(swap, datap->L3_Summary[0]);
   evp_daqbits = daqbits;
+
+  for(int i=0;i<2;i++) L1summary[i] = qswap32(swap, datap->TRG_L1_summary[i]);
+  for(int i=0;i<2;i++) L2summary[i] = qswap32(swap, datap->TRG_L2_summary[i]);
+  for(int i=0;i<4;i++) L3summary[i] = qswap32(swap, datap->L3_Summary[i]);
+
   return 0;
 }
 
