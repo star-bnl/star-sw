@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.181 2009/01/03 23:03:36 perev Exp $
+* $Id: geometry.g,v 1.182 2009/01/06 04:05:48 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.182  2009/01/06 04:05:48  perev
+* For y2008a,y2009 elliptic rods
+*
 * Revision 1.181  2009/01/03 23:03:36  perev
 * BtofConfig=6 in 2008a,2009
 *
@@ -865,6 +868,7 @@ replace [exe RICH02;] with [;RICH=on; richPos=2; richConfig=2;]
 replace [exe SCON02;] with [;SCON = off; ConeConfig=2 " new cable weight estimate ";]
 
 replace [exe SCON12;] with [;SCON = on ; ConeConfig=2 " new cable weight estimate ";]
+replace [exe SCON13;] with [;SCON = on ; ConeConfig=3 " new cable weight estimate ";]
 
 replace [exe SISDof;] with ["Silicon Strip Detector off "; SISD=off;]
 replace [exe SISD02;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig= 2;]
@@ -912,6 +916,9 @@ replace [exe BTOF16;] with [;" X.Dong";BTOF=on;
                             tofX0= 0.00; tofZ0=-0.50;]
 replace [exe BTOF66;] with [;" X.Dong";BTOF=on;
                             BtofConfig=6; Itof=6 " call btofgeo6 ";
+                            tofX0= 0.00; tofZ0=-0.50;]
+replace [exe BTOFb6;] with [;" X.Dong";BTOF=on;
+                            BtofConfig=11; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
 
 replace [exe TPCE00;] with [;"New version of the TPC backplane "; TpceConfig = 1;]
@@ -1070,12 +1077,12 @@ replace [exe y2008;] with [;
 };]
 
 *********   y2008a   ***
-replace [exe y2008a;] with [;exe y2008; exe SCON12;exe BTOF66;]
+replace [exe y2008a;] with [;exe y2008; exe SCON13;exe BTOF66;]
 
 *********   y2009   ***
 replace [exe y2009;] with [;
 { "Year 2009 baseline: now(12.29.08) only place holder. No difference with y2008a"
-    exe SCON12;
+    exe SCON13;
     exe TPCE03;
     exe BTOF66;
     exe CALB02;
