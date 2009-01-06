@@ -10,6 +10,7 @@ class tpxPed ;
 class tpxGain ;
 class tpxFCF ;
 class tpxStat ;
+class daqReader;
 
 class daq_tpx : public daq_det {
 private:
