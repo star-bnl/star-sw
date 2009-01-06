@@ -1,6 +1,9 @@
-* $Id: scongeo.g,v 1.2 2008/12/30 19:40:26 perev Exp $
+* $Id: scongeo.g,v 1.3 2009/01/06 04:06:35 perev Exp $
 *
 * $Log: scongeo.g,v $
+* Revision 1.3  2009/01/06 04:06:35  perev
+* coneVer=3 for elliptic rods
+*
 * Revision 1.2  2008/12/30 19:40:26  perev
 * Rods added
 *
@@ -28,7 +31,7 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
 +cde,AGECOM,GCONST,GCUNIT.
 *
       Content          SCON,SCMY,SGRA,SBSP,SAKM,SCKM,SBMM,SBMI,SBMO,SMRD,
-                       SBRL,SBRX,SBSR,SBCR,SROD
+                       SBRL,SBRX,SBSR,SBCR,SROD,SROH
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
                        ZsizeMax,  Angoff, SupportVer,   ConeVer,
@@ -37,8 +40,9 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
       structure SSUP { Version,   CabThk,    HosRmn,
                        HosRmx,    Nhoses,    WrpMyThk,  WrpAlThk,
                        GrphThk,   Cone1Zmn,  RodLen,    RodDist,
-                       RodID,     RodOD,     Con1IdMn, Con3IdMn,
-                       Con4IdMn, Con4IdMx, Cone3zmx,  Cone4zmx,
+                       RodID,     RodOD,     RodIDx,    RodODx,
+		       Con1IdMn, Con3IdMn,
+                       Con4IdMn, Con4IdMx,   Cone3zmx,  Cone4zmx,
                        BraThk,    ERJThk,    ERJWid,
                        ERJLen,    ERJzdis,   ERJ1x,     ERJ2x,
                        ERJ2y,     ERJrad,    ERJdia}
@@ -154,6 +158,18 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
       ERJ2y     = 0.72       ! ERJ screw 2 y position
       ERJrad    = 10.80      ! distance of ERJ center from beam axis
       ERJdia    = 0.17       ! ERJ screw diameter
+*------------------------------------------------------------
+* This is a copy of the above 2nd version with one difference which is
+* elliptic rodes instead of tubes
+
+   Fill SSUP ! Support structures
+      Version   = 3          ! geometry version
+      RodLen    = 110.8      ! Length of support rods
+      RodDist   = 17.5       ! Distance of support rod od from beam axis
+      RodID     = 3.64       ! ID of Carbon support rods 
+      RodOD     = 4.50       ! OD of Carbon support rods 
+      RodIDx    = 8.72       ! ID of Carbon support rods 
+      RodODx    = 9.58       ! OD of Carbon support rods 
 *------------------------------------------------------------
    Fill SSUB ! beampipe support
       Version   = 1          ! geometry version
@@ -500,10 +516,21 @@ EndBlock
 Block SROD is the SVT Carbon composite support rod
       Material  Carbon
       Attribute SROD  Seen=1  Colo=2
-      Shape     TUBE   rmin=ssup_RodID/2,
-                       rmax=ssup_RodOD/2,
+      Shape     ELTU   p1=ssup_RodODx/2,
+                       p2=ssup_RodOD/2,
                        dz=ssup_RodLen/2
+      Create and Position SROH;
 endblock
 
+*
+* ****************************************************************************
+*
+Block SROH is the hole in SROD
+      Material  Air
+      Attribute SROH  Seen=1  Colo=3
+      Shape     ELTU   p1=ssup_RodIDx/2,
+                       p2=ssup_RodID/2,
+                       dz=ssup_RodLen/2
+endblock
       End
 
