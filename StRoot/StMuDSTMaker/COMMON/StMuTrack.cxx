@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.35 2008/05/01 20:53:59 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.36 2009/01/07 20:50:59 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -312,7 +312,9 @@ StThreeVectorF StMuTrack::dca(Int_t vtx_id) const {
     return mDCA;
   else if (mVertexIndex == -1)  // should not happen
     return StThreeVectorF(-999,-999,-999);
-    return dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
+    if(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))) 
+		return dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
+	else return StThreeVectorF(-999,-999,-999);
 }
 
 StThreeVectorF StMuTrack::dcaGlobal(Int_t vtx_id) const {
@@ -324,14 +326,15 @@ StThreeVectorF StMuTrack::dcaGlobal(Int_t vtx_id) const {
   else if (mVertexIndex == -1)  { // should not happen
     return StThreeVectorF(-999,-999,-999);
   }
-  const StMuTrack *gTrack = 0;
+	const StMuTrack *gTrack = 0;
   if (mType == global)
      gTrack = this;
   else
      gTrack = globalTrack();
-  if (gTrack)
-    return gTrack->dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
-  else {
+	if (gTrack && ((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))){
+		return gTrack->dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
+	}
+	else {
     return StThreeVectorF(-999,-999,-999);
   }
 }
@@ -460,6 +463,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.36  2009/01/07 20:50:59  tone421
+ * Added more pointer protection in dcaGlobal(int) and dca(int)
+ *
  * Revision 1.35  2008/05/01 20:53:59  mvl
  * Changed/fixed handling of DCA for global tracks without StDcaGeometry: now calculate DCA based on helix (previous behaviour was to default to (0,0,0); only affected globals without primaries).
  * Changed globalDca() function to also work for globals that are attached to a different primary vertex. Used to return -999, now use helix to calculate.
