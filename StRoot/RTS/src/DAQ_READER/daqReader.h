@@ -2,6 +2,7 @@
 #define _DAQ_READERCLASS_HH_
 
 #include <ctype.h>
+#include <sys/types.h>
 #include "daqConfig.h"
 // Define the old EVP_READER-based interface:
 
