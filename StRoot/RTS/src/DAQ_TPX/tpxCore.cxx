@@ -24,8 +24,8 @@ int tpx_fee_check ;
 // statics...
 u_int expected_usercode[5] = {
 	0x1a830000,
-	0x0283c6b3,
-	0x02b9ab26,
+	0x0283c6b3,	// FEE, 30Jan08
+	0x02b9ab26,	// Bob, 02Jan08
 	0x18a9352d,
 //	0x00acf6c3	//06Sep08
 	0x00ad0581	//07Sep08
