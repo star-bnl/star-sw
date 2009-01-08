@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.70 2009/01/08 22:14:46 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.71 2009/01/08 23:41:25 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.71  2009/01/08 23:41:25  fine
+ * Fill the Event Header from the new daqReader if available
+ *
  * Revision 1.70  2009/01/08 22:14:46  fine
  * teach EventReader tp provide the new daqReader pointer
  *
@@ -528,19 +531,32 @@ int StDAQReader::getRunNumber()   const
 {
      // return the run number from the DAQ file header
    return
-#ifndef OLD_EVP_READER
            fDaqFileReader  ?
              fDaqFileReader->run 
           :
-#endif
              fEventReader->runno();
 }
 //_____________________________________________________________________________
-  int StDAQReader::getEventNumber() const {return fEventInfo->EventSeqNo;}
+int StDAQReader::getEventNumber() const {
+     return fDaqFileReader  ? 
+           fDaqFileReader->event_number
+                     :
+           fEventInfo->EventSeqNo;
+}
 //_____________________________________________________________________________
-  unsigned int StDAQReader::getUnixTime() const {return fEventInfo->UnixTime;}
+unsigned int StDAQReader::getUnixTime() const {
+     return  fDaqFileReader  ?
+           fDaqFileReader->evt_time
+                     :
+           fEventInfo->UnixTime;
+     }
 //_____________________________________________________________________________
-  unsigned int StDAQReader::getTrigWord() const {return fEventInfo->TrigWord;}
+unsigned int StDAQReader::getTrigWord() const {
+     return fDaqFileReader  ?  
+           fDaqFileReader->trgword
+                      :
+           fEventInfo->TrigWord;
+}
 //_____________________________________________________________________________
   unsigned int StDAQReader::getTrigInputWord() const {return fEventInfo->TrigInputWord;}
 //_____________________________________________________________________________
