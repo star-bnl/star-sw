@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcMappingDb
 #define STAR_StEmcMappingDb
 
-// $Id: StEmcMappingDb.h,v 2.2 2009/01/02 03:34:34 kocolosk Exp $
+// $Id: StEmcMappingDb.h,v 1.1 2009/01/08 02:16:19 kocolosk Exp $
 
 /*****************************************************************************
  * @class StEmcMappingDb
@@ -81,6 +81,9 @@ private:
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.h,v $
+ * Revision 1.1  2009/01/08 02:16:19  kocolosk
+ * move StEmcMappingDb/StEmcDecoder to StEmcUtil/database
+ *
  * Revision 2.2  2009/01/02 03:34:34  kocolosk
  * use default date==20330101 like St_db_Maker to suppress spurious error msgs
  *
