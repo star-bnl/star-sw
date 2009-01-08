@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.21 2004/02/18 20:31:14 ward Exp $
+ * $Id: EventReader.hh,v 1.22 2009/01/08 22:14:49 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.22  2009/01/08 22:14:49  fine
+ * teach EventReader tp provide the new daqReader pointer
+ *
  * Revision 1.21  2004/02/18 20:31:14  ward
  * There was a big mess.  I am trying to fix it.
  *
@@ -426,6 +429,7 @@ private:
   EventReader *er;
 };
 
+class daqReader;
 // Event Reader Class
 class EventReader
 {
@@ -453,6 +457,8 @@ public:
   ~EventReader();
 
   char *getDATAP() { return DATAP; };
+  daqReader *getDaqReader() { return fDaqReader; };
+  void setDaqReader(daqReader *rdr) { fDaqReader = rdr; }
   struct EventInfo getEventInfo();
   void printEventInfo(FILE *fd=stdout);
   void fprintError(int err, char *file, int line, char *userstring);
@@ -469,7 +475,7 @@ public:
 protected:
   char *DATAP;             // Pointer to the memory mapped buffer
   int event_size;
-
+  daqReader *fDaqReader;   // the new reader instance
   // Detector Buffering Functions
   int InformBuffers(DetectorReader *) { return FALSE; };
         // returns false.  

@@ -1,6 +1,6 @@
 #ifndef _SC_READER_H_
 #define _SC_READER_H_
-
+#include "sys/types.h"
 // returns EVP_DATA_ERR if no bank
 // >0 if OK
 //
