@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.182 2009/01/06 04:05:48 perev Exp $
+* $Id: geometry.g,v 1.183 2009/01/08 20:16:46 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.183  2009/01/08 20:16:46  perev
+* Fix y2008a and y2009 btof
+*
 * Revision 1.182  2009/01/06 04:05:48  perev
 * For y2008a,y2009 elliptic rods
 *
@@ -916,7 +919,7 @@ replace [exe BTOF16;] with [;" X.Dong";BTOF=on;
                             tofX0= 0.00; tofZ0=-0.50;]
 replace [exe BTOF66;] with [;" X.Dong";BTOF=on;
                             BtofConfig=6; Itof=6 " call btofgeo6 ";
-                            tofX0= 0.00; tofZ0=-0.50;]
+                            tofX0= 0.00; tofZ0=0;]
 replace [exe BTOFb6;] with [;" X.Dong";BTOF=on;
                             BtofConfig=11; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
@@ -1077,7 +1080,7 @@ replace [exe y2008;] with [;
 };]
 
 *********   y2008a   ***
-replace [exe y2008a;] with [;exe y2008; exe SCON13;exe BTOF66;]
+replace [exe y2008a;] with [;exe y2008; exe SCON13;exe BTOFb6;]
 
 *********   y2009   ***
 replace [exe y2009;] with [;
