@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.69 2009/01/05 17:55:36 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.70 2009/01/08 22:14:46 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.70  2009/01/08 22:14:46  fine
+ * teach EventReader tp provide the new daqReader pointer
+ *
  * Revision 1.69  2009/01/05 17:55:36  fine
  * Fix datap issue with the newest DAQ files
  *
@@ -419,6 +422,7 @@ int StDAQReader::readEvent()
   if(fEventReader->eventIsCorrupted(fFd,oldOffset)) return kStErr; // Herb, Aug 28 2000
   if(fEventReader->errorNo()) return kStErr;  
 #else
+  fEventReader->setDaqReader(fDaqFileReader);
   if (fDaqFileReader->mem) {
      //
      // the buffer of the new EVP_READER is mmap read-only file.

@@ -1,4 +1,12 @@
+#ifndef NEW_DAQ_READER_DAQLIB
+#  include "StDaqLib/EVP/scReader.h"
+#else
+#  include "RTS/src/DAQ_READER/daqReader.h"
+#  include "RTS/src/DAQ_SC/scReader.h"
+#endif /* NEW_DAQ_READER */
 #include "SC_Reader.hh"
+#include "StDaqLib/GENERIC/EventReader.hh"
+
 #include <assert.h>
 #include <math.h>
 
@@ -76,16 +84,19 @@ SC_Reader::SC_Reader(EventReader *er) {
 
   //static int call=0;
 
-  char *datap; // ,ew;
-
-  datap=er->getDATAP();  assert(datap); 
 
   //unsigned int UTime = er->getEventInfo().UnixTime;
   //struct tm *time=gmtime((time_t*) &UTime);
 
   //  LDate = (((1900+time->tm_year)*100 + 1 + time->tm_mon)*100 + time->tm_mday)*100;
   //  LTime = (time->tm_hour*100 + time->tm_min)*100 + time->tm_sec;
-
-  scReader(datap); // call the "event pool" code
+#ifndef NEW_DAQ_READER_DAQLIB
+  char *datap; // ,ew;
+  datap=er->getDATAP(); 
+  if (datap) scReader(datap); // call the "event pool" code
+#else 
+   daqReader *rdr=er->getDaqReader(); assert(rdr);
+  ::scReader((char*)rdr); // call the "event pool" code
+#endif
 
 }

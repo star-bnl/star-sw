@@ -1,9 +1,6 @@
-
 #ifndef SC_READER_HH
 #define SC_READER_HH
-
-#include "StDaqLib/GENERIC/EventReader.hh"
-#include "StDaqLib/EVP/scReader.h"
+class EventReader; 
 
 class SC_Reader {
 

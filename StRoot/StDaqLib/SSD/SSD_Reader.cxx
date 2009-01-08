@@ -113,7 +113,8 @@ SSD_Reader::SSD_Reader(EventReader *er) {
 
   char *datap; // ,ew;
 
-  datap=er->getDATAP();  assert(datap); 
+  datap=er->getDATAP(); 
+  if (datap) {
 
   unsigned int UTime = er->getEventInfo().UnixTime;
   struct tm *time=gmtime((time_t*) &UTime);
@@ -126,7 +127,7 @@ SSD_Reader::SSD_Reader(EventReader *er) {
   LTime = (time->tm_hour*100 + time->tm_min)*100 + time->tm_sec;
   //cout << "year=" << time->tm_year << " month = " << time->tm_mon << " day=" << time->tm_mday << endl;
   ssdReader(datap); // call the "event pool" code
-
+  }
 }
 
 int SSD_Reader::SSDDaqLadder(char eastWest, int ladder)
