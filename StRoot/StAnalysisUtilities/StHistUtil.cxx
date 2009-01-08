@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.47 2008/07/10 21:25:08 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.48 2009/01/08 23:40:13 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.48  2009/01/08 23:40:13  genevb
+// Introduce analyses with reference histograms
+//
 // Revision 2.47  2008/07/10 21:25:08  genevb
 // Add canvas-to-code output with .CC suffix
 //
@@ -212,6 +215,7 @@ StHistUtil::StHistUtil(){
   m_ListOfLogX = 0;
   m_ListOfPrint = 0;
   m_HistCanvas = 0;
+  m_HistCanvasR = 0;
   debug = kFALSE;
   m_CurPrefix = -1;
   m_OutType = "ps"; // postscript output by default
@@ -224,6 +228,12 @@ StHistUtil::StHistUtil(){
   m_dirName[0] = 0;
 
   ignorePrefixes = kFALSE;
+
+  m_analMode = kFALSE;
+  m_refResultsFile[0] = 0;
+  m_refOutFile[0] = 0;
+  m_refCuts = 0;
+  m_refInFile = 0;
 }
 //_____________________________________________________________________________
 
@@ -231,6 +241,7 @@ StHistUtil::StHistUtil(){
 
 StHistUtil::~StHistUtil(){
   SafeDelete(m_HistCanvas);
+  SafeDelete(m_HistCanvasR);
   if (m_ListOfLogY) {
     m_ListOfLogY->Delete();
     SafeDelete(m_ListOfLogY);
@@ -288,11 +299,18 @@ void StHistUtil::CloseOutFile() {
   m_HistCanvas->Modified();
   m_HistCanvas->Update();
   if (!m_CurFileName.IsNull()) {
-    if (m_OutMultiPage) m_CurFileName.Append(")");
+    if (m_OutMultiPage) m_CurFileName.ReplaceAll("(",")");
     if (m_OutType.CompareTo("CC"))
       m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
     else
       m_HistCanvas->SaveSource(m_CurFileName.Data());
+    if (m_refInFile) {
+      m_HistCanvasR->Modified();
+      m_HistCanvasR->Update();
+      m_CurFileNameR.ReplaceAll("(",")");
+      m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
+      // anal mode doesn't support single page output
+    }
   } else {
     LOG_INFO << "StHistUtil::CloseOutFile(): No output file" << endm;
   }
@@ -338,6 +356,7 @@ Bool_t StHistUtil::CheckOutFile(const Char_t *histName) {
     else m_CurFileName.Insert(insertPos,"_");
     m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
   }
+  (m_CurFileNameR = "Ref_") += m_CurFileName;
 
   Ldesc->Clear();
   Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
@@ -364,11 +383,15 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   
   //setup canvas
   SafeDelete(m_HistCanvas);
+  SafeDelete(m_HistCanvasR);
 
   // TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
   //                                        (600 x 780                US      )
   //  TCanvas *m_HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
-  m_HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",600,780);
+  if (m_refInFile) {
+    m_HistCanvasR = new TCanvas("CanvasNameR"," STAR Reference Histogram Canvas",20,20,600,780);
+  }
+  m_HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",0,0,600,780);
 
   // write title at top of canvas - first page
   Ltitle = new TPaveLabel(0.08,0.96,0.88,1.0,m_GlobalTitle.Data(),"br");
@@ -376,12 +399,26 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   Ltitle->SetTextFont(32);
   Ltitle->SetTextSize(0.5);
   Ltitle->Draw();
+  if (m_refInFile) {
+    m_HistCanvasR->cd();
+    TPaveLabel* LtitleR = new TPaveLabel(0.08,0.96,0.88,1.0,m_refInFile->GetName(),"br");
+    LtitleR->SetFillColor(18);
+    LtitleR->SetTextFont(32);
+    LtitleR->SetTextSize(0.5);
+    LtitleR->Draw();
+    m_HistCanvas->cd();
+  }
 
   // write descriptor at top of canvas - first page
   Ldesc = new TPaveText(0.90,0.96,0.99,1.0,"br");
   Ldesc->SetFillColor(18);
   Ldesc->SetTextFont(32);
   Ldesc->Draw();
+  if (m_refInFile) {
+    m_HistCanvasR->cd();
+    Ldesc->Draw();
+    m_HistCanvas->cd();
+  }
 
   // now put in date & time at bottom right of canvas - first page
   TDatime HistTime;
@@ -389,16 +426,23 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   TPaveLabel *Ldatetime = new TPaveLabel(0.7,0.01,0.95,0.03,myTime,"br");
   Ldatetime->SetTextSize(0.6);
   Ldatetime->Draw();
+  if (m_refInFile) {
+    m_HistCanvasR->cd();
+    Ldatetime->Draw();
+    m_HistCanvas->cd();
+  }
 
 
   // now put in page # at bottom left of canvas - first page
   Int_t Ipagenum=1;
-  char Ctmp[100];
-  //convert to character
-  sprintf(Ctmp,"%d",Ipagenum);
-  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.16,0.03,Ctmp,"br");
+  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.16,0.03,Form("%d",Ipagenum),"br");
   Lpage->SetTextSize(0.6);
   Lpage->Draw();
+  if (m_refInFile) {
+    m_HistCanvasR->cd();
+    Lpage->Draw();
+    m_HistCanvas->cd();
+  }
 
   // Make 1 big pad on the canvas - make it a little bit inside the  canvas 
   //    - must cd to get to this pad! 
@@ -407,6 +451,15 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   graphPad->Draw();
   graphPad->cd();
   graphPad->Divide(m_PadColumns,m_PadRows);
+  TPad *graphPadR = 0;
+  if (m_refInFile) {
+    m_HistCanvasR->cd();
+    graphPadR = new TPad("PadNameR","Pad TitleR",0.0,0.05,1.00,0.95);
+    graphPadR->Draw();
+    graphPadR->cd();
+    graphPadR->Divide(m_PadColumns,m_PadRows);
+    graphPad->cd();
+  }
 
   Int_t padCount = 0;
   Bool_t padAdvance = kTRUE;
@@ -425,7 +478,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
 
   TObject *obj = 0;
-  Int_t chkdim=0;
   TLine ruler;
   TLatex latex;
 
@@ -435,8 +487,18 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
     C_ostr = new ofstream(m_OutFileName);
     (*C_ostr) << "   gSystem->Load(\"St_base\");" << endl;
     (*C_ostr) << "   gSystem->Load(\"StUtilities\");" << endl;
+    // not supporting ref output
   } else if (!m_OutType.CompareTo("root"))
      root_ofile = new TFile(m_OutFileName,"RECREATE");
+
+  // Reference analyses:
+  TList* dirListR = 0;
+  ofstream* R_ostr = 0;
+  if (m_analMode) {
+    dirListR = FindHists(m_refInFile);
+    // By default, save histograms to a ROOT file as future reference
+    if (!root_ofile) root_ofile = new TFile(m_refOutFile,"RECREATE");
+  }
 
   // function to fit FTPC radial step
   static TF1* fitFRS = 0;
@@ -467,13 +529,14 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
         // If there is a print list, then only print if hist name is on list
 	if (!m_ListOfPrint || (m_ListOfPrint->FindObject(oname))) {
 
-          if (C_ostr) {
-            hobj->SavePrimitive(*C_ostr);
-            continue;
-          }
+          // Some ROOT output options
           if (root_ofile) {
             root_ofile->cd();
             hobj->Write();
+          }
+          if (C_ostr) {
+            hobj->SavePrimitive(*C_ostr);
+            continue;
           }
 
           // this histogram will actually be printed/drawn!!
@@ -501,10 +564,19 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
 	    while (padCount > 0) graphPad->GetPad(padCount--)->Clear();
 
+            if (m_refInFile) {
+              m_HistCanvasR->Modified();
+              m_HistCanvasR->Update();
+	      if (Ipagenum>0 && !m_CurFileName.IsNull())
+	        m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
+	      else m_HistCanvasR->Draw();
+              padCount = numPads;
+	      while (padCount > 0) graphPadR->GetPad(padCount--)->Clear();
+            }
+
             // update the page number
             Ipagenum++;
-            sprintf(Ctmp,"%d",Ipagenum);
-            Lpage->SetLabel(Ctmp);
+            Lpage->SetLabel(Form("%d",Ipagenum));
 
 	    if (!m_OutMultiPage && !m_CurFileName.IsNull()) {
               Ssiz_t last_us = m_CurFileName.Last('_') + 1;
@@ -513,13 +585,20 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	    }
           }
 
+          // check dimension of histogram
+          Int_t chkdim = hobj->GetDimension();
+
           // go to next pad 
-	  graphPad->cd(++padCount);
+          int curPad = (++padCount);
+
+          // Will need to display both histograms if doing reference analysis...
+          TH1* hobjR = (TH1*) (dirListR ? dirListR->FindObject(oname) : 0);
+          TH1* hobjO = hobj;
+          for (int analRepeat = 0;analRepeat < (hobjR ? 2 : 1); analRepeat++) {
+
 	  padAdvance = kTRUE;
-//NOTE! (13jan00,kt) -->  this cd is really acting on gPad!!!
-//   --> gPad is a global variable & one uses it to set attributes of current pad
-//  --> you can see the full list of global variables by starting ROOT and entering .g
-//  --> to find the full list of commands, type ? in ROOT 
+          if (analRepeat) {graphPadR->cd(curPad); hobj=hobjR;}
+	  else graphPad->cd(curPad);
 
           // set x & y grid off by default
 	  gPad->SetGridy(0);
@@ -532,7 +611,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           if (m_ListOfLogY && m_ListOfLogY->FindObject(oname) &&
 	     hobj->GetEntries() && hobj->GetMaximum() ) {
 	    gPad->SetLogy(1);
-            LOG_INFO << "       -- Will draw in logY scale: " << oname <<endm;
+            if (!analRepeat) {LOG_INFO << "       -- Will draw in logY scale: " << oname <<endm;}
 	  } else gPad->SetLogy(0);
 
 
@@ -590,10 +669,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             hobj->GetXaxis()->SetRangeUser(-2.0,2.0);
             hobj->GetYaxis()->SetRangeUser(-2.0,2.0);
           }
-
-
-          // check dimension of histogram
-          chkdim = hobj->GetDimension();
 
           // actually draw,print
           if ((chkdim == 3) && (obj->InheritsFrom("StMultiH2F"))) {
@@ -659,8 +734,43 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
               (int) (hobj->GetBinContent(hobj->FindBin(-1.)))));
           }
 
-	  if (!padAdvance) padCount--;
-	  else if (gPad) gPad->Update();
+          if (padAdvance) {if (gPad) gPad->Update();}
+          else {if (!analRepeat) padCount--;}
+
+          } // analRepeat for loop
+
+          // Run reference analysis...(on first loop, before we forgot hobj)
+          if (hobjR) {
+            StHistUtilRef* huR =
+             (StHistUtilRef*) (m_refCuts ? m_refCuts->FindObject(oname) : 0);
+            double result = 0;
+
+            // default to Kolm. for 1-d hists, Chi2 for others
+            int mode = ( huR ? huR->Mode : (chkdim > 1 ? 0 : 1) );
+            double cut = ( huR ? huR->Cut : 0);
+
+            // modes:
+            switch (mode) {
+              case (0) : // Chi2
+                result = hobjO->Chi2Test(hobjR,(huR ? huR->Options() : "WW"));
+                break;
+              case (1) : // Kolmogorov
+                // Note that Sumw2() seems to affect the way histograms are drawn,
+                // but Kolmogorov test complains in current ROOT version (won't in
+                // future versions). Don't know what to do for now.
+                //if (hobjO->GetSumw2N() == 0) hobjO->Sumw2();
+                //if (hobjR->GetSumw2N() == 0) hobjR->Sumw2();
+                result = hobjO->KolmogorovTest(hobjR,(huR ? huR->Options() : ""));
+                break;
+            }
+
+            LOG_INFO << Form("  -   %d. Reference Test (mode=%d) Score: %f (vs. cut = %f => %s)",
+                        histReadCounter,mode,result,cut,
+                        (result < cut ? "FAIL" : "PASS")) << endm;
+            if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
+            (*R_ostr) << Ipagenum << " " << curPad << " " << oname << " " << result << endl;
+          }
+
         }
       }
 
@@ -675,6 +785,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   }
 
   if (C_ostr) delete C_ostr;
+  if (R_ostr) delete R_ostr;
   if (root_ofile) delete root_ofile;
 
   CloseOutFile();
@@ -776,33 +887,54 @@ TList* StHistUtil::FindHists(Char_t *dirName, Char_t *withPrefix)
 
   }
 
-  if (dList && (withPrefix || m_ListOfPrint)) {
-    TList* dList2 = new TList;
-
-    //Now want to loop over all histograms
-    // Create an iterator
-    TIter nextObj(dList);
-    TObject *obj = 0;
-    int withPrefixNumber = -1;
-    int prefixNumber = -1;
-    if (withPrefix) StripPrefixes(withPrefix,withPrefixNumber);
-    while ((obj = nextObj())) {
-      Bool_t addIt = kTRUE;
-      if (withPrefix) {
-        StripPrefixes(obj->GetName(),prefixNumber);
-        if (prefixNumber != withPrefixNumber) addIt = kFALSE;
-      }
-      if (addIt && ((!m_ListOfPrint) ||
-                    (obj->InheritsFrom("TH1") &&
-                     m_ListOfPrint->FindObject(obj->GetName())))) dList2->AddLast(obj);
-    }
-    dList = dList2;
-  }
+  if (dList && (withPrefix || m_ListOfPrint)) dList = TrimListByPrefix(dList,withPrefix);
 
   LOG_INFO << " FindHists, dList pointer = " << dList << endm;
   
  
  return dList;
+}
+//_____________________________________________________________________________
+ 
+TList* StHistUtil::FindHists(TFile* histFile, Char_t* withPrefix) {
+  if (!histFile) return 0;
+  TList* dList = histFile->GetList();
+  if (dList->GetSize() == 0) {
+    histFile->ReadAll();
+    dList = histFile->GetList();
+  }
+
+  TObject* test = (dList ? dList->First() : 0);
+  LOG_INFO << " Mid5: FindHists, dList pointer = " << dList << endm;
+  LOG_INFO << " Mid5: FindHists, test pointer =  " << test << endm;
+  if (!test) dList = 0;
+
+  if (dList && (withPrefix || m_ListOfPrint)) dList = TrimListByPrefix(dList,withPrefix);
+  return dList;
+}
+//_____________________________________________________________________________
+ 
+TList* StHistUtil::TrimListByPrefix(TList* dList, Char_t* withPrefix) {
+  TList* dList2 = new TList;
+
+  //Now want to loop over all histograms
+  // Create an iterator
+  TIter nextObj(dList);
+  TObject *obj = 0;
+  int withPrefixNumber = -1;
+  int prefixNumber = -1;
+  if (withPrefix) StripPrefixes(withPrefix,withPrefixNumber);
+  while ((obj = nextObj())) {
+    Bool_t addIt = kTRUE;
+    if (withPrefix) {
+      StripPrefixes(obj->GetName(),prefixNumber);
+      if (prefixNumber != withPrefixNumber) addIt = kFALSE;
+    }
+    if (addIt && ((!m_ListOfPrint) ||
+                  (obj->InheritsFrom("TH1") &&
+                   m_ListOfPrint->FindObject(obj->GetName())))) dList2->AddLast(obj);
+  }
+  return dList2;
 }
 //_____________________________________________________________________________
 
@@ -1835,5 +1967,49 @@ Int_t StHistUtil::GetRunYear(const Char_t *filename) {
 
 //_____________________________________________________________________________
 
+// Method SetRefAnalysis
+//    - Properly set input and output files for reference histogram analysis
+
+void StHistUtil::SetRefAnalysis(const Char_t* refOutFile, const Char_t* refResultsFile,
+              const Char_t* refCutsFile, const Char_t* refInFile) {
+
+  LOG_INFO << "StHistUtil: Will run in reference histogram analysis mode." << endm;
+  m_analMode = kTRUE;
+
+  if (refInFile && strlen(refInFile)) {
+    LOG_INFO << "StHistUtil: Using reference histogram file " << refInFile << endm;
+    m_refInFile = ( refInFile ? new TFile(refInFile) : 0 );
+    if (!m_refInFile) {LOG_ERROR << "file not found: " << refInFile << endm;}
+  }
+  if (refCutsFile && strlen(refCutsFile)) {
+    LOG_INFO << "StHistUtil: Using reference cuts file " << refCutsFile << endm;
+    m_refCuts = new TList;
+    ifstream refCuts(refCutsFile);
+    char buf_name[256];
+    char buf_opts[64];
+    while (!refCuts.eof()) {
+      refCuts >> buf_name;
+      if (refCuts.eof()) break;
+      int mode;
+      double cut;
+      refCuts >> mode >> cut >> buf_opts;
+      if (buf_opts[0] == '!') buf_opts[0] = 0; // no options
+      m_refCuts->AddLast(new StHistUtilRef(buf_name,buf_opts,mode,cut));
+    }
+  }
+
+  // refOutFile will not be used if no reference histograms are found
+  strcpy(m_refResultsFile,refResultsFile);
+  // refOutFile will not be used if already writing hists to a ROOT file
+  strcpy(m_refOutFile,refOutFile);
+}
+
 //_____________________________________________________________________________
 
+//_____________________________________________________________________________
+
+
+ClassImp(StHistUtilRef)
+StHistUtilRef::StHistUtilRef(const char* name, const char* opts,
+                             const int mode, const double cut):
+  TNamed(name,opts),Mode(mode),Cut(cut) {}
