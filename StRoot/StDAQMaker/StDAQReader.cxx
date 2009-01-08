@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.71 2009/01/08 23:41:25 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.72 2009/01/08 23:58:07 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.72  2009/01/08 23:58:07  fine
+ * Pick the token info from the new reader
+ *
  * Revision 1.71  2009/01/08 23:41:25  fine
  * Fill the Event Header from the new daqReader if available
  *
@@ -443,7 +446,13 @@ int StDAQReader::readEvent()
      memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes_mapped);
 #  endif
      fEventReader->InitEventReader(fDATAP);
- }
+     if(fEventInfo->Token==0){
+        LOG_INFO << 
+           Form("StDAQReader::readEvent: found event with token==0") << endm;
+        m_ZeroTokens++;
+    // return kStErr;  // Herb, July 5 2000
+  }
+}
 #  ifndef NEW_DAQ_READER 
  // if the the new DAQ file (2008 Edition) lacks of the DATAP structure
  // it is the normal and it should not be treated as a fatal error anymore ;
@@ -452,15 +461,14 @@ int StDAQReader::readEvent()
     fEventReader = 0;
     assert(0);
  }
+#  else
+ else if(fDaqFileReader->token==0){
+    LOG_INFO << 
+           Form("StDAQReader::readEvent: found event with token==0") << endm;
+    m_ZeroTokens++;
+ }
 #  endif
 #endif  /* OLD_EVP_READER */
-  *fEventInfo = fEventReader->getEventInfo();
-  if(fEventInfo->Token==0){
-     LOG_INFO << 
-         Form("StDAQReader::readEvent: found event with token==0") << endm;
-     m_ZeroTokens++;
-    // return kStErr;  // Herb, July 5 2000
-  }
 
   if (fTPCReader  && TPCPresent() ) fTPCReader ->Update();
   if (fFTPCReader && FTPCPresent()) fFTPCReader->Update();
