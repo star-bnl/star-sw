@@ -11,12 +11,12 @@ say:
 	@echo '******' $(SAY) and building: $(LIBS) $(BINS)
 
 update:
-	@cvs -n $@ .
+	@cvs -n $@ . 2>/dev/null
 	@for dir in $(VPATH); do \
-		@cvs -n $@ $$dir ; \
+		cvs -n $@ $$dir 2>/dev/null ; \
 	done
 	@for dir in $(EXTERNAL_BINS); do \
-		@cvs -n $@  $$dir ; \
+		cvs -n $@  $$dir 2>/dev/null ; \
 	done
 
 clean:
