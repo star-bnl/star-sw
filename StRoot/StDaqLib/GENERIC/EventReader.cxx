@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.55 2009/01/06 02:55:50 fine Exp $
+ * $Id: EventReader.cxx,v 1.56 2009/01/08 23:49:23 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.56  2009/01/08 23:49:23  fine
+ * Adjust the EventInfo error message
+ *
  * Revision 1.55  2009/01/06 02:55:50  fine
  * Protection against of crash for the new DAQ files withno DATAP  structure
  *
@@ -761,7 +764,7 @@ enum {
     for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
       *p = !!(detpre&1); detpre>>=1;                                }
     ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
-  } else {
+  } else if (!getDaqReader()) {
      LOG_ERROR << "EventReader::getEventInfo: No EventInfo is available with the new DAQ" << endm;
   }
   return ei;
