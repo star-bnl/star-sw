@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.7 2008/05/28 05:16:06 genevb Exp $
+// $Id: StHistUtil.h,v 2.8 2009/01/08 23:40:14 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.8  2009/01/08 23:40:14  genevb
+// Introduce analyses with reference histograms
+//
 // Revision 2.7  2008/05/28 05:16:06  genevb
 // Allow summing over (ignoring) histogram prefixes
 //
@@ -58,6 +61,7 @@ class StHistUtil {
  private:
   // Data-members to make up the output Canvases and Postscript files
   TCanvas* m_HistCanvas; //!
+  TCanvas* m_HistCanvasR; //!
   Int_t   m_PadColumns;  // Number of the columns (TPad's) on the single Canvas
   Int_t   m_PadRows;     // Number of the columns (TPad's) on the single Canvas
   Int_t   m_PaperWidth;  // Paper size in cm
@@ -66,6 +70,7 @@ class StHistUtil {
   TString m_LastHistName;
   TString m_OutFileName; // Base name of the output file to plot hists out
   TString m_CurFileName; // Name of the current output file
+  TString m_CurFileNameR; // Name of the current ref output file
   TString m_OutType;    // Output file type
   Bool_t  m_OutMultiPage; // Output file is multipage
   Int_t   m_CurPrefix;
@@ -86,11 +91,18 @@ class StHistUtil {
   Char_t** possiblePrefixes; //!
   Char_t** possibleSuffixes; //!
 
+  // For reference analyses:
+  Bool_t m_analMode;
+  Char_t m_refResultsFile[1024];
+  Char_t m_refOutFile[1024];
+  TList* m_refCuts;
+  TFile* m_refInFile;
 
  protected:
   virtual void    CloseOutFile();
   virtual TString StripPrefixes(const Char_t* histName, Int_t& prenum);
   virtual Bool_t  CheckOutFile(const Char_t* histName);
+  virtual TList*  TrimListByPrefix(TList* dList, Char_t* withPrefix);
 
 
  public: 
@@ -101,10 +113,15 @@ class StHistUtil {
   virtual Int_t   DrawHists(Char_t *dirName="EventQA");
   virtual Int_t   ListHists(Char_t *dirName="EventQA");
   virtual TList*  FindHists(Char_t *dirName="EventQA", Char_t *withPrefix=0);
+  virtual TList*  FindHists(TFile* histFile, Char_t* withPrefix=0);
   virtual Int_t   CopyHists(TList  *dirList);
   virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=-1);
   virtual void    IgnorePrefixes(Bool_t ignore=kTRUE) {ignorePrefixes = ignore;}
   virtual Int_t   PrintInfoHists(TList  *dirList,  const Char_t *fname="printinfo.out");
+
+  // Reference analyses:
+  virtual void    SetRefAnalysis(const Char_t* refOutFile, const Char_t* refResultsFile,
+                    const Char_t* refCutsFile=0, const Char_t* refInFile=0);
 
   virtual void    SetDefaultLogYList(Char_t *dirName="EventQA");
   virtual Int_t   AddToLogYList(const Char_t *HistName="");
@@ -148,7 +165,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.7 2008/05/28 05:16:06 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.8 2009/01/08 23:40:14 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
@@ -181,4 +198,13 @@ inline Int_t StHistUtil::getNewHistSize()
   {return maxHistCopy; }
 
 
+class StHistUtilRef : public TNamed {
+  public:
+    StHistUtilRef(const char* name, const char* opts, const int mode, const double cut);
+    int Mode;
+    double Cut;
+    virtual const char* Options() { return GetTitle(); }
+  ClassDef(StHistUtilRef,1)   //needed for all code that will be used in CINT
+};
+  
 #endif
