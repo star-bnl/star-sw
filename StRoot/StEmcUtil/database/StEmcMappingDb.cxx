@@ -1,4 +1,4 @@
-// $Id: StEmcMappingDb.cxx,v 2.1 2008/12/05 19:05:32 kocolosk Exp $
+// $Id: StEmcMappingDb.cxx,v 1.1 2009/01/08 02:16:18 kocolosk Exp $
 
 #include "StEmcMappingDb.h"
 
@@ -286,6 +286,9 @@ bool StEmcMappingDb::isDirty(StDbTable *table) {
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.cxx,v $
+ * Revision 1.1  2009/01/08 02:16:18  kocolosk
+ * move StEmcMappingDb/StEmcDecoder to StEmcUtil/database
+ *
  * Revision 2.1  2008/12/05 19:05:32  kocolosk
  * new DB-backed implementation of StEmcDecoder
  *

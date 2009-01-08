@@ -564,9 +564,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const {
     return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.59 2009/01/02 03:34:33 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 1.1 2009/01/08 02:16:18 kocolosk Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 1.1  2009/01/08 02:16:18  kocolosk
+// move StEmcMappingDb/StEmcDecoder to StEmcUtil/database
+//
 // Revision 2.59  2009/01/02 03:34:33  kocolosk
 // use default date==20330101 like St_db_Maker to suppress spurious error msgs
 //
