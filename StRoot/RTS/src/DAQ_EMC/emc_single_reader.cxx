@@ -17,7 +17,11 @@ const struct hdrs {
 	{ CHAR_EECP, CHAR_EECSECP, CHAR_EECRBP, CHAR_EECADCR }
 } ;
 
+/*
+	Returns the pointer to the raw data start.
+	This will include the aux 4 bytes of VME RB stuff.
 
+*/
 char *emc_single_reader(char *e, int *bytes, int rts_id)
 {
 	struct EMCP *emcp = (struct EMCP *)e ;
@@ -77,8 +81,8 @@ char *emc_single_reader(char *e, int *bytes, int rts_id)
 	if(checkBank(emcadc->bh.bank_type, hdrs[hdr_ix].adc)<0) return 0 ;
 
 	
-	*bytes = l2h32(emcadc->bh.length)*4 - 40 ;	// length is in words but includes the bankHeader
-	return ((char *)emcadc + 40 + 4) ;			// skip the 40 bytes bankHeader + 4 bytes dummy word due to DAQ's RBs
+	*bytes = l2h32(emcadc->bh.length)*4 - 40 ;		// length is in words but includes the bankHeader of 40 bytes
+	return ((char *)emcadc + 40) ;			// skip the 40 bytes bankHeader
 }
 
 
