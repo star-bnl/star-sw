@@ -365,7 +365,7 @@ static int tpc_doer(daqReader *rdr, char  *do_print)
 	// ala the old evpReader, due to the memory footprint
 	for(int s=1;s<=24;s++) {
 		dd = rdr->det("tpc")->get("legacy",s) ;
-		if(dd) LOG(INFO,"sizeof tpc_t %d, get_size_t %d",sizeof(struct tpc_t),dd->get_size_t()) ;
+
 		while(dd && dd->iterate()) {	
 			found++ ;	// mark as found..
 			tpc_t *tpc = (tpc_t *) dd->Void ;
