@@ -19,5 +19,5 @@ int tpcReader(char *m, int sector ) {
   if (dd && (size = dd->iterate())) {
      memcpy(&tpc,dd->Void,dd->ncontent);
   }
-  return dd->ncontent; 
+  return dd ? dd->ncontent : 0; 
 }
