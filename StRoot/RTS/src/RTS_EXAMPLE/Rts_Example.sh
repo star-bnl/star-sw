@@ -1,10 +1,10 @@
 #!/bin/bash
 #######################################################
-# $Id: Rts_Example.sh,v 1.1 2009/01/09 18:25:07 fine Exp $
+# $Id: Rts_Example.sh,v 1.2 2009/01/09 18:28:41 fine Exp $
 # Author: v.Fine [ fine@bnl.gov ]
 #######################################################
-# The simple script is to compile and build the main applcation
-# against of the RTS system from the STAR offline sofwtare release
+# The simple script to compile and build the main RTS application
+# against of the RTS system from the STAR offline software release
 #######################################################
 
 # stop at the first error.
