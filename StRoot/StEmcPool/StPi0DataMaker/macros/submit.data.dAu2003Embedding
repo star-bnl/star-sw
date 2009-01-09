@@ -1,8 +1,0 @@
-#!/bin/bash
-
-export DATA_NAME='Embedded dAu2003 dataset'
-export DATA_TAG='dAu2003Embedding'
-export DATA_QUERY='filelist://embed_dAu2003.list'
-# Please check if the filelist is still correct, last time I used it somewhere in 2005
-export DATA_CONFIG='config_dAu2003_embedding.C'
-export DATA_DIR=$DATA_PATH'/embedding_dAu2003'

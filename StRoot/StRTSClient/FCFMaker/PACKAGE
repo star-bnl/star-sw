@@ -1,5 +1,0 @@
-# $Id $
-# package FCFMaker
-# author: 
-Library:libStRTSClientFCFMaker.so:LIBS +=   -lStRTSClientFCF -lStChain  -lStDAQMaker  -lStDb_Tables  -lStDbUtilities  -lStDetectorDbMaker  -l_StEvent  -l_StTpcDb  -ltpc_Tables
-#Library:libStRTSClientFCFMaker.so:LIBS +=   -lStChain  -lStDAQMaker  -lStDb_Tables  -lStDbUtilities  -lStDetectorDbMaker  -lStEvent  -lStRTSClientFCF  -lStTpcDb  -ltpc_Tables

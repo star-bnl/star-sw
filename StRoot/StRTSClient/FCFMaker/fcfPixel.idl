@@ -1,7 +1,0 @@
-struct fcfPixel {
-  unsigned short pad;
-  unsigned short tbin;
-  unsigned short adc;
-  unsigned short cl_id ;	
-  unsigned short id_simtrk;
-} ;

@@ -1,9 +1,0 @@
-#!/bin/bash
-
-export SIMU_NAME='Pure MC antineutron simulation using 2003 geometry and BFC chain'
-export SIMU_TAG='starsim_nbar_dAu2003'
-export SIMU_DIR=$DATA_PATH/$SIMU_TAG
-export SIMU_SCRIPT='run_simulation_nbar_halfBEMC.kumac'
-export SIMU_STARLEVEL='SL04f'
-export SIMU_GEOMETRY='y2003a'
-export SIMU_BFCHAIN='dAuMDC FieldOn -tpc -rich -Kalman -svt tree geantout evout -dstout -Cdst -Cmudst -tags fzin -in -xin DbV20040520 Y2003b'
