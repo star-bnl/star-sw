@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.19 2008/11/18 15:34:32 tone421 Exp $
+ * $Id: StMuEvent.cxx,v 1.20 2009/01/09 19:43:47 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -208,9 +208,39 @@ StThreeVectorF StMuEvent::primaryVertexErrors(int vtx_id) {
   return vz;
 }
 
+unsigned short StMuEvent::grefmult(int vtx_id){
+    unsigned short grefmult = 0;
+	StMuTrack *glob;
+	//For old MuDsts where there was one vertex per event
+	if (StMuDst::numberOfPrimaryVertices()==0 && (vtx_id == 0 || vtx_id == -1)){
+		if(!(fabs(mEventSummary.primaryVertexPosition().x()) < 1.e-5 && fabs(mEventSummary.primaryVertexPosition().y()) < 1.e-5 && fabs(mEventSummary.primaryVertexPosition().z()) < 1.e-5)){	
+			for (int i=0;i<StMuDst::globalTracks()->GetEntries();i++){
+				glob = StMuDst::globalTracks(i);
+				if (fabs(glob->eta()) <  0.5 && fabs(glob->dcaGlobal().mag()) < 3 && glob->nHitsFit(kTpcId) >= 10) grefmult++;            
+			}
+			return grefmult;
+		}	
+		else return 0;
+	}	
+
+	if (vtx_id == -1)
+		vtx_id = StMuDst::currentVertexIndex();
+
+	if (StMuDst::primaryVertex(vtx_id)){
+        for (int i=0;i<StMuDst::globalTracks()->GetEntries();i++){
+			glob = StMuDst::globalTracks(i);
+			if (fabs(glob->eta()) <  0.5 && fabs(glob->dcaGlobal(vtx_id).mag()) < 3 && glob->nHitsFit(kTpcId) >= 10) grefmult++;            
+        }
+        return grefmult;
+    }
+	else return 0;
+}
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.20  2009/01/09 19:43:47  tone421
+ * OAdded gremult in StMuEvent (globals tracks with DCA < 3cm, >= 10 TPC fit hits and |eta| < 0.5)
+ *
  * Revision 1.19  2008/11/18 15:34:32  tone421
  * 2 changes. The first ensures StMuEvent::primaryVertexPosition() returns the position of current vertex (set by StMuDst::setVertexIndex(Int_t vtx_id)): previously it returned the position of best ranked vertex. The second insures events with no vertex have a PVx=PYy=PYz=-999 rather than 0.
  *
