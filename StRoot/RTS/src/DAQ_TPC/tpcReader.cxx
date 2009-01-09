@@ -14,7 +14,8 @@ int tpcReader(char *m, int sector ) {
   if(!m) return -1;       
   daqReader *rrr = (daqReader *)m; 
   daq_dta *dd= rrr->det("tpx")->get("legacy",sector); 
-  int size = 0;                     
+  int size = 0;
+  if (!dd) dd= rrr->det("tpc")->get("legacy",sector);                     
   if (dd && (size = dd->iterate())) {
      memcpy(&tpc,dd->Void,dd->ncontent);
   }
