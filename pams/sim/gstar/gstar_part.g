@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.19 2007/05/18 16:37:39 potekhin Exp $
+* $Id: gstar_part.g,v 1.20 2009/01/10 02:45:04 perev Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.20  2009/01/10 02:45:04  perev
+* Hypertriton added
+*
 * Revision 1.19  2007/05/18 16:37:39  potekhin
 * a) shifted the PDG code for the Dalitz particle by adding a large
 * integer, thus hoping to resolve the previous clash
@@ -206,6 +209,11 @@
 
   Particle Monopole      code=800       TrkTyp=9 mass=1.0    charge=0 tlife=big
 
+***2009***************************************************************************** 
+*  requested by Jinhui
+*  Hypertriton decay into helium 3 and minus pion
+  Particle H3_Lambda     code = 52  TrkTyp=8, mass = 2.991, charge=1, tlife=2.6320e-10, 
+                         pdg=0      bratio = {1,}        mode={4909,}
 
  End
 *
