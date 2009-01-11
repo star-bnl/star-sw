@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.39 2008/12/02 00:36:35 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.40 2009/01/11 03:53:26 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -367,7 +367,7 @@ void GeomBrowser::listView1_contextMenuRequested( QListViewItem *item, const QPo
       } else {
          int response = -1; //QMessageBox::question(listView1,"Change the volume visibility","Visible","Both","Child","none");
          static QPopupMenu *contextMenu = 0;
-         static int menus[3];
+         static int menus[5];
          if (!contextMenu) {
             contextMenu = new QPopupMenu(listView1);
             int itemPosition = -1;
