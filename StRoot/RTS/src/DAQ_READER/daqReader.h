@@ -16,7 +16,7 @@ int _NAME2_(xxx,Reader)(char *m)  {  \
   int size = 0;                     \
   if (dd && (size = dd->iterate())) \
   memcpy(&_NAME1_(xxx),dd->Void,dd->ncontent); \
-  return dd->ncontent; }
+  return (dd && size) ? dd->ncontent: 0; }
 
 #define DAQ_LEGACY_DECL(xxx)                \
 extern struct  _NAME2_(xxx,_t) _NAME1_(xxx);\
