@@ -14,8 +14,8 @@ int _NAME2_(xxx,Reader)(char *m)  {  \
   daqReader *rrr = (daqReader *)m;  \
   daq_dta *dd= rrr->det( _QUOTE_(xxx))->get("legacy"); \
   int size = 0;                     \
-  if (dd && (size = dd->iterate())) \
-  memcpy(&_NAME1_(xxx),dd->Void,dd->ncontent); \
+  if (dd && (size = dd->iterate())) { \
+  memcpy(&_NAME1_(xxx),dd->Void,dd->ncontent);} \
   return (dd && size) ? dd->ncontent: 0; }
 
 #define DAQ_LEGACY_DECL(xxx)                \
