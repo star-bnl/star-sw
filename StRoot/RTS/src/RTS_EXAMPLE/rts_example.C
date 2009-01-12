@@ -86,6 +86,10 @@ int main(int argc, char *argv[])
 	        char *ret = evp->get(0,EVP_TYPE_ANY);
        
 		if(ret) {
+		  if(evp->status) {
+			LOG(ERR,"evp status is non-null [0x08X, %d dec]",evp->status,evp->status) ;
+			continue ;
+		  }
 		  good++;
 		}
 		else {    // something other than an event, check what.
@@ -93,7 +97,7 @@ int main(int argc, char *argv[])
 		  case EVP_STAT_OK:   // just a burp!
 		    continue;
 		  case EVP_STAT_EOR:
-		    LOG(DBG, "End of run");
+		    LOG(DBG, "End of Run/File");
 		    if(evp->IsEvp()) {   // but event pool, keep trying...
 		      LOG(DBG, "Wait a second...");
 		      sleep(1);
@@ -106,14 +110,21 @@ int main(int argc, char *argv[])
 		    sleep(1);
 		    continue;
 		  case EVP_STAT_CRIT:
+		    LOG(CRIT,"evp->status CRITICAL (?)") ;
 		    return -1;
 		  }
+		}
+
+		
+		if(evp->status == EVP_STAT_EOR) {
+			LOG(INFO,"End of File reached...") ;
+			break ;	// of the for() loop...
 		}
 
 		daq_dta *dd ;	// generic data pointer; reused all the time
 
 
-		LOG(INFO,"File name \"%s\": sequence %d: token %4d, trgcmd 0x%X, daqcmd 0x%X",evp->file_name, evp->seq, evp->token, evp->trgcmd, evp->daqcmd) ;
+		LOG(INFO,"File name \"%s\": sequence %d: token %4d, trgcmd 0x%X, daqcmd 0x%X (evp status 0x%X)",evp->file_name, evp->seq, evp->token, evp->trgcmd, evp->daqcmd,evp->status) ;
 
 		/***************** let's do simple detectors; the ones which only have legacy *****/
 
