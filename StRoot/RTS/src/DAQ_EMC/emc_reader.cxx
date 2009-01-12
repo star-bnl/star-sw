@@ -668,7 +668,8 @@ char *getEmcTrgData(char *input, int idx, int *bytes)
   UINT32 *ptr;
 
   int len, off ;
-
+  
+  *bytes = 0 ;
   if(idx < 0) return 0 ;
   if(datap == 0) return 0 ;
 
@@ -742,6 +743,7 @@ char *getEmcTrgData(char *input, int idx, int *bytes)
     off = qswap32(swaptrgd, trgtowertrnfer->OffsetBlock[idx].offset);
     len = qswap32(swaptrgd, trgtowertrnfer->OffsetBlock[idx].length);
 
+    // Tonko: "len" is _already_ in bytes!!! Arghhhhh...
 
     LOG(NOTE, "IDX = %d  offset = %d length = %d",
 	idx, off, len);
@@ -769,7 +771,7 @@ char *getEmcTrgData(char *input, int idx, int *bytes)
       }
 
       cptr += off;	// move to data
-      *bytes = len * 4 ;	// length
+      *bytes = len  ;	// length: was already in bytes! Contrary to the usual practices....
       return cptr;
     }
     break;
