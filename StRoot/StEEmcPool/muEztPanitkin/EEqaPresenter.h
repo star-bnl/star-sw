@@ -1,15 +1,11 @@
 #include <TGraph.h>
 #include <TGraphErrors.h>
 #include <TPaveText.h>
- 
+#include "GenericFile.h"
+
+typedef GenericFile FileType;
+
 class TPad ;
-#ifdef IN_PANITKIN 
-  class GenericFile;
-  typedef GenericFile  FileType;
-#else
-  class TFile;
- typedef TFile  FileType;
-#endif
 
 class EemcTwMask {
  public:
@@ -34,30 +30,30 @@ class EemcTwMask {
 
 void plNone(TPad *c);
 
-void eePlot(int page, int panel,FileType *fd, TPad *c);
+void eePlot(int page, int panel,FileType fd, TPad *c);
 
-void eeJpQa(FileType *fd, TPad *c,EemcTwMask *m);
-void eeDaqCorr(FileType *fd, TPad *c, int es);
-void eeFreq(FileType *fd, TPad *c,EemcTwMask *m);
-void eeDaqTwCr(FileType *fd, TPad *c, EemcTwMask *m); 
-void eeDaqTwHot(FileType *fd, TPad *c, EemcTwMask *m);
-void eeDaqTwHit(FileType *fd, TPad *c);
-void eeDaqMapmtCr(FileType *fd, TPad *c, int);
-void eeDaqMapmtStat(FileType *fd, TPad *c);
+void eeJpQa(FileType fd, TPad *c,EemcTwMask *m);
+void eeDaqCorr(FileType fd, TPad *c, int es);
+void eeFreq(FileType fd, TPad *c,EemcTwMask *m);
+void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m); 
+void eeDaqTwHot(FileType fd, TPad *c, EemcTwMask *m);
+void eeDaqTwHit(FileType fd, TPad *c);
+void eeDaqMapmtCr(FileType fd, TPad *c, int);
+void eeDaqMapmtStat(FileType fd, TPad *c);
 
-void eeMany1D(FileType *fd, TPad *c, char *core, int nh, int nx, int ny);
-void eeDaqSmdA(FileType *fd, TPad *cc,char *, char uv);
+void eeMany1D(FileType fd, TPad *c, char *core, int nh, int nx, int ny);
+void eeDaqSmdA(FileType fd, TPad *cc,char *, char uv);
 
-void eeTrigHanks(FileType *fd, TPad *c);
-void eeTrigDsm0(FileType *fd, TPad *c,char *);
-void eeTrigDsm1(FileType *fd, TPad *c, char *);
-void eeTrigDsm2HT(FileType *fd, TPad *c);
+void eeTrigHanks(FileType fd, TPad *c);
+void eeTrigDsm0(FileType fd, TPad *c,char *);
+void eeTrigDsm1(FileType fd, TPad *c, char *);
+void eeTrigDsm2HT(FileType fd, TPad *c);
 
-void eeTrigJPsum(FileType *fd, TPad *c, char *);
-void eeTrigJPfreq(FileType *fd, TPad *c);
-void eeTrigAdjJPsum(FileType *fd, TPad *c, char *);
-void eeTrigAdjJPcor(FileType *fd, TPad *c, char *);
-void eeTrigEtot(FileType *fd, TPad *c);
+void eeTrigJPsum(FileType fd, TPad *c, char *);
+void eeTrigJPfreq(FileType fd, TPad *c);
+void eeTrigAdjJPsum(FileType fd, TPad *c, char *);
+void eeTrigAdjJPcor(FileType fd, TPad *c, char *);
+void eeTrigEtot(FileType fd, TPad *c);
 
 bool useTwMask(const char *fname, EemcTwMask *m);
 
