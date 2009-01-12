@@ -284,6 +284,7 @@ void StBemcTriggerSimu::Clear(){
     adc08[did-1]=0;
     adc10[did-1]=0;
     adc12[did-1]=0;
+    HT6bit_adc_holder[did-1]=0;
   }
   
   for (int tpid=0;tpid<kNPatches; tpid++){
@@ -292,7 +293,6 @@ void StBemcTriggerSimu::Clear(){
     L0_TP_PED[tpid]=0;
     HTadc06[tpid]=0;
     TP6bit_adc_holder[tpid]=0;
-    HT6bit_adc_holder[tpid]=0;
   }
   
   mFiredTriggers.clear();
