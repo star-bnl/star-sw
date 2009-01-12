@@ -59,7 +59,7 @@ void eeTrigAdjJPsum(FileType *fd, TPad *c, char *);
 void eeTrigAdjJPcor(FileType *fd, TPad *c, char *);
 void eeTrigEtot(FileType *fd, TPad *c);
 
-bool useTwMask(char *fname, EemcTwMask *m);
+bool useTwMask(const char *fname, EemcTwMask *m);
 
 //utility
 void addJPphiLimits(TH1 *h);

@@ -4,6 +4,7 @@
 #include <TPad.h>
 #include <TH2.h>
 #include <TF1.h>
+#include "TEnv.h"
 
 #include <TPaveStats.h>
 #include <TStyle.h> // for gPad
@@ -64,12 +65,9 @@ eePlot(int page, int panel,FileType *fd, TPad *cc){
   bool twMaskFound=false;
   twMask =new EemcTwMask;
   eePlotInit(); 
-#ifdef IN_PANITKIN 
-  twMaskFound=useTwMask("/home_local/eemc/defaultPanitkinSetup/eemcTwMask.dat", twMask); 
-#else
-  twMaskFound=useTwMask("eemcTwMask.dat", twMask);
-#endif
-  
+  const char *maskFile = gEnv->GetValue("OnLine.eemcMask","eemcTwMask.dat");
+  twMaskFound=useTwMask(maskFile, twMask); 
+
   first=0;
   if(!twMaskFound) { delete twMask; twMask=0;}
   }  
@@ -748,7 +746,7 @@ void  eeTrigAdjJPcor(FileType *fd, TPad *c, char *mode ) {
 
 //--------------------------------------
 //--------------------------------------
-bool  useTwMask(char *fname, EemcTwMask *m) {
+bool  useTwMask(const char *fname, EemcTwMask *m) {
   const int mx=1000;
   char buf[mx];
   
