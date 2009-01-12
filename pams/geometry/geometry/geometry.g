@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.183 2009/01/08 20:16:46 perev Exp $
+* $Id: geometry.g,v 1.184 2009/01/12 00:31:44 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.184  2009/01/12 00:31:44  perev
+* Bug fix in ON logic(VP)
+*
 * Revision 1.183  2009/01/08 20:16:46  perev
 * Fix y2008a and y2009 btof
 *
@@ -1147,10 +1150,10 @@ replace [exe y2009;] with [;
 * X.Dong - global parameters for TOF trays
    real       tofX0, tofZ0
 
-   real       Par(1000),magField,dcay(5),shift(2),svtWaferDim
+   real       Par(1000),myArg,magField,dcay(5),shift(2),svtWaferDim
 
-   Integer    LENOCC,ICFNBL,JL,JR,LL,
-              IPRIN,nSvtLayer,nSvt1stLayer,i,j,l,
+   Integer    LENOCC,ICFNBL,ICFMUL,JL,JR,LL,
+              IPRIN,nSvtLayer,nSvt1stLayer,i,jGotCom,l,
               kgeom,nmod(2),nonf(3),ecalFill,
               sisd_level,
               Nleft,Mleft,richConfig,richPos,nSvtVafer,Itof,mwx
@@ -1209,9 +1212,16 @@ replace [exe y2009;] with [;
 * - - - - - - - - - - - - - - - - -
 
 replace[;ON#{#;] with [
-  IF (Commands(JL:JR) .eq. '#1') {
+  IF ((JL.LT.JR) .and. (Commands(JL:JR) .eq. '#1')) {;
+    myArg=0; jGotCom=2009;
+    if (Commands(JR+1:JR+1).eq.'=') then;
+      write(*,*) 'UUUUUUUUUUU ',JL,JR,Commands(1:LL);
+      write(*,*) 'UUUUUUUUUUU ',par(6);
+      i = ((JR+1+3+4)/4); myArg = par(i+1);
+      Commands(JR+1:i*4)=' ';
+    endif
     JL = ICFNBL(Commands,JR+1,LL);
-    JR = Lenocc(Commands(JL:LL)) + JL -1;
+    JR = ICFMUL(' =',Commands,JL,LL)-1;
     <W>; (' #1: #2');
 ;]
 
@@ -1294,8 +1304,9 @@ If LL>0
 { Call AGSFLAG  ('GEOM',1)
 * convert input line into a string of upprecase characters
   CALL UHTOC(PAR(2),4,Commands,LL);  Call CLTOU(Commands);
-  JL = ICFNBL(Commands,1,LL);
-  JR = LENOCC(Commands(JL:LL))+JL-1;
+  do JL=1,LL {if (ichar(Commands(JL:JL)).lt.ichar(' ')) Commands(JL:JL)=' ';}
+  JL = ICFNBL(Commands, 1,LL);
+  JR = ICFMUL(' =',Commands,JL,LL)-1;
 
 
 
@@ -1305,7 +1316,7 @@ If LL>0
   {IRAYL,ISTRA} = 0;
   TOFMAX        = 1.e-4
 *
-  for(j=1;j>0;) { j=0;
+  for(jGotCom=1;jGotCom>0;) { jGotCom=0;
   on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
@@ -3549,12 +3560,13 @@ If LL>0
 
   on FIELD_ONLY { No geometry - only magnetic field;              NtrSubEv=0;
       {CAVE,PIPE,SVTT,TPCE,ftpc,BTOF,VPDD,MAGP,CALB,ECAL,RICH,UPST,ZCAL}=off; }
-  on FIELD_OFF  { no magnetic field;                magField=0;                  }
-  on FIELD_ON   { Standard (5 KGs) field on;        magField=5;                  }
+  on FIELD_OFF  { no magnetic field;                
+                  magField=0;                  }
+  on FIELD_ON   { Standard (5 KGs) field on;        
+                  magField=5;                  }
+  on FIELD      { defined mag field;
+                  magField=myArg; }
 
-  i=Index(Commands,'FIELD=')
-  if i>0        { j=i/4+3; magField=Par(1+j);  Commands(i:j*4)=' ';
-                  <W> magField; (' Modified field value =',F6.2,' KGS');         }
   on 4TH_OFF    { SVT fourth layer off;             nSvtLayer=min(nSvtLayer,6);           }
   on SPLIT_OFF  { events will not be split into subevents;     NtrSubEv=0;    }
   on SPLIT_ON   { events will be split into subevents;         NtrSubEv=1000; }
