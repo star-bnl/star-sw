@@ -11,12 +11,6 @@
 #include <TROOT.h> // for gROOT
 #include <TSystem.h>
 #include "TMath.h"
-#ifdef IN_PANITKIN 
-  #include <TMapFile.h>
-  #include <Infrastructure/GenericFile.h>
-#else
-  #include <TFile.h>
-#endif
 
 const int mxh=64;
 static TH1 *hr[mxh];
@@ -42,13 +36,10 @@ void eePlotInit() {
 
 //--------------------------------------
 //--------------------------------------
-void GetHisto(FileType *fd,char *name, int i) {
+void GetHisto(FileType &fd,char *name, int i) {
   // this is very silly trick to avoid memory leak in the online version
-#ifdef IN_PANITKIN 
-    hr[i]=(TH1 *)fd->Get(name,hr[i]);
-#else
-    hr[i]=(TH1 *)fd->Get(name);
-#endif
+
+    hr[i]=(TH1 *)fd.Get(name,hr[i]);
 
     if(hr[i]==0) return;
     h[i]=(TH1*) hr[i]->Clone();
@@ -58,7 +49,7 @@ void GetHisto(FileType *fd,char *name, int i) {
 //--------------------------------------
 //--------------------------------------
 void 
-eePlot(int page, int panel,FileType *fd, TPad *cc){
+eePlot(int page, int panel,FileType fd, TPad *cc){
   static int first=1;
   static EemcTwMask *twMask=0;
   if(first) { 
@@ -137,7 +128,7 @@ void plNone( TPad *c){
   
 //--------------------------------------
 //--------------------------------------
-void eeJpQa(FileType *fd, TPad *c0, EemcTwMask *m) { // out
+void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
   c0->Clear();
   c0->cd(0);
 
@@ -209,7 +200,7 @@ void eeJpQa(FileType *fd, TPad *c0, EemcTwMask *m) { // out
 
 //--------------------------------------
 //--------------------------------------
-void eeDaqCorr(FileType *fd, TPad *c, int es) { // out
+void eeDaqCorr(FileType fd, TPad *c, int es) { // out
 
   static  TPad *c2 =0;
   static  TPad *c3 =0;
@@ -276,7 +267,7 @@ void eeDaqCorr(FileType *fd, TPad *c, int es) { // out
 //--------------------------------------
 //--------------------------------------
 
-void eeDaqTwCr(FileType *fd, TPad *c, EemcTwMask *m) { 
+void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m) { 
   // raw tower crates 1-6
   //  ee2Style->cd(); 
 
@@ -300,7 +291,7 @@ void eeDaqTwCr(FileType *fd, TPad *c, EemcTwMask *m) {
 //--------------------------------------
 //--------------------------------------
 
-void eeFreq(FileType *fd, TPad *c, EemcTwMask *m) {
+void eeFreq(FileType fd, TPad *c, EemcTwMask *m) {
   const int nh=4;
   char *name[nh]={"TowHits","Pre1Hits","Pre2Hits","PostHits"};
   int i;
@@ -325,7 +316,7 @@ void eeFreq(FileType *fd, TPad *c, EemcTwMask *m) {
 
 //--------------------------------------
 //--------------------------------------
-void eeDaqTwHit(FileType *fd, TPad *c) {
+void eeDaqTwHit(FileType fd, TPad *c) {
   const int nh=4;
 
   char *name[nh]={"HTow","HPre1","HPre2","HPost"};
@@ -346,7 +337,7 @@ void eeDaqTwHit(FileType *fd, TPad *c) {
 
 //--------------------------------------
 //--------------------------------------
-void eeMany1D(FileType *fd, TPad *c, char *core, int nh, int nx, int ny) {
+void eeMany1D(FileType fd, TPad *c, char *core, int nh, int nx, int ny) {
   int linLog=1; 
   char tit[100];
   c->Divide(nx,ny);
@@ -369,7 +360,7 @@ void eeMany1D(FileType *fd, TPad *c, char *core, int nh, int nx, int ny) {
 //--------------------------------------
 //--------------------------------------
 
-void eeDaqTwHot(FileType *fd, TPad *c, EemcTwMask *m) { 
+void eeDaqTwHot(FileType fd, TPad *c, EemcTwMask *m) { 
   const int ncr=6; // raw tower crates 1-6
   int i;
   float ymax=2;
@@ -409,7 +400,7 @@ void eeDaqTwHot(FileType *fd, TPad *c, EemcTwMask *m) {
 //--------------------------------------
 //--------------------------------------
 
-void eeDaqMapmtCr(FileType *fd, TPad *c,int cr1) {
+void eeDaqMapmtCr(FileType fd, TPad *c,int cr1) {
   //raw  mapmt crates 84-91 or 92-99 
   int cr;
   char tit[100];
@@ -431,7 +422,7 @@ void eeDaqMapmtCr(FileType *fd, TPad *c,int cr1) {
 //--------------------------------------
 //--------------------------------------
 
-void eeDaqSmdA(FileType *fd, TPad *c, char *core,char uv){
+void eeDaqSmdA(FileType fd, TPad *c, char *core,char uv){
  
   char tit[100];
   if( strstr(core,"SmdA")) 
@@ -457,7 +448,7 @@ void eeDaqSmdA(FileType *fd, TPad *c, char *core,char uv){
 
 //--------------------------------------
 //--------------------------------------
-void eeDaqMapmtStat(FileType *fd, TPad *c) {
+void eeDaqMapmtStat(FileType fd, TPad *c) {
   static TH2F *h2=0;
   int i=0;
   c->Divide(1,2);
@@ -489,7 +480,7 @@ void eeDaqMapmtStat(FileType *fd, TPad *c) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigHanks(FileType *fd, TPad *c ) {
+void eeTrigHanks(FileType fd, TPad *c ) {
 
   char *name[2]={"dsm0inJPall_HT","dsm0inJPall_TP"};
   c->Divide(1,2);
@@ -510,7 +501,7 @@ void eeTrigHanks(FileType *fd, TPad *c ) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigDsm0(FileType *fd, TPad *c, char *mode ) {
+void eeTrigDsm0(FileType fd, TPad *c, char *mode ) {
   char tit[100];
   c->Divide(2,3);
   
@@ -536,7 +527,7 @@ void eeTrigDsm0(FileType *fd, TPad *c, char *mode ) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigDsm1(FileType *fd, TPad *c, char *mode ) {
+void eeTrigDsm1(FileType fd, TPad *c, char *mode ) {
   char tit[100];
   char *core="dsm1HJP";
   int j;
@@ -570,7 +561,7 @@ void eeTrigDsm1(FileType *fd, TPad *c, char *mode ) {
 }
 //--------------------------------------
 //--------------------------------------
-void eeTrigDsm2HT(FileType *fd, TPad *c ) {
+void eeTrigDsm2HT(FileType fd, TPad *c ) {
 
   char *name[3]={"dsm2Half1_HTTP","dsm2Half2_HTTP","dsm3_HTTP"};
   c->Divide(2,2);
@@ -591,7 +582,7 @@ void eeTrigDsm2HT(FileType *fd, TPad *c ) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigJPsum(FileType *fd, TPad *c, char *mode ) {
+void eeTrigJPsum(FileType fd, TPad *c, char *mode ) {
 
   char tit[100];
   char newtitle[500];
@@ -622,7 +613,7 @@ void eeTrigJPsum(FileType *fd, TPad *c, char *mode ) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigJPfreq(FileType *fd, TPad *c) {
+void eeTrigJPfreq(FileType fd, TPad *c) {
 
   char tit[100];
  
@@ -657,7 +648,7 @@ void eeTrigJPfreq(FileType *fd, TPad *c) {
 
 //--------------------------------------
 //--------------------------------------
-void  eeTrigAdjJPsum(FileType *fd, TPad *c, char *mode ) {
+void  eeTrigAdjJPsum(FileType fd, TPad *c, char *mode ) {
 
   char tit[100];
  
@@ -681,7 +672,7 @@ void  eeTrigAdjJPsum(FileType *fd, TPad *c, char *mode ) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigEtot(FileType *fd, TPad *c ) {
+void eeTrigEtot(FileType fd, TPad *c ) {
 
   char *nameA[3]={"dsm2E_etot","dsm2B_etot","dsm2BE_etot"};
   c->Divide(1,3);
@@ -724,7 +715,7 @@ void eeTrigEtot(FileType *fd, TPad *c ) {
   
 //--------------------------------------
 //--------------------------------------
-void  eeTrigAdjJPcor(FileType *fd, TPad *c, char *mode ) {
+void  eeTrigAdjJPcor(FileType fd, TPad *c, char *mode ) {
 
   char tit[100];
  
