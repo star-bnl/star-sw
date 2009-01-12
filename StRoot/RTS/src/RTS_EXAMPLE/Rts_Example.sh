@@ -1,6 +1,6 @@
 #!/bin/bash
 #######################################################
-# $Id: Rts_Example.sh,v 1.2 2009/01/09 18:28:41 fine Exp $
+# $Id: Rts_Example.sh,v 1.3 2009/01/12 11:07:56 tonko Exp $
 # Author: v.Fine [ fine@bnl.gov ]
 #######################################################
 # The simple script to compile and build the main RTS application
@@ -16,14 +16,14 @@ if [ "$1" == "" ]; then
    echo  Usage:  Rts_Example.sh [source_file_name]
    echo  ------
    echo No source file name has been provided.
-   echo The default application is to built.
+   echo The default application \"rts_example\" will be built.
    echo ""
    source_application=$STAR/StRoot/RTS/src/RTS_EXAMPLE/rts_example.C
 fi
 base_name=$(basename $source_application)
 executable_name=${base_name%%.*}
-echo This script is to build \"$executable_name\" from the \"$(basename $source_application)\" against 
-echo of the \"libRTS.so\" from the STAR offline release
+echo This script will build \"$executable_name\" from \"$(basename $source_application)\" against 
+echo \"libRTS.so\" from the STAR offline release.
  g++ -g -o $executable_name         \
      -IStRoot/RTS/trg/include       \
      -IStRoot/RTS/include           \
@@ -40,7 +40,7 @@ if [ -f rts_example  ] ; then
   echo ""
 else
   echo ""
-  echo Sorry, the was compilation problem. 
-  echo Please, review the error messages and try again
+  echo Sorry, there was a compilation problem. 
+  echo Please  review the error messages and try again
   echo ""
 fi
