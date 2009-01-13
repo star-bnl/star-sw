@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.10 2007/09/21 21:07:08 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.11 2009/01/13 03:19:43 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.11  2009/01/13 03:19:43  perev
+ * Mag field nou controlled from starsim. BugFix
+ *
  * Revision 1.10  2007/09/21 21:07:08  fisyak
  * Remove ClassDef and ClassImp
  *
@@ -107,11 +110,15 @@ To do:  <br>
 #define mySign(A,B) (((B)>=0)? fabs(A):-fabs(A))
 
 StarMagField *StarMagField::fgInstance = 0;
-//________________________________________
+//________________________________________________________________________________
 
 #define agufld           F77_NAME(agufld,AGUFLD)
+#define  gufld           F77_NAME( gufld, GUFLD)
 #define mfldgeo          F77_NAME(mfldgeo,MFLDGEO)
+//________________________________________________________________________________
 R__EXTERN  "C" {
+  Float_t type_of_call  gufld(Float_t *x, Float_t *bf);
+
   Float_t type_of_call agufld(Float_t *x, Float_t *bf) {
     bf[0] = bf[1] = bf[2] = 0;
 #if 1
@@ -127,20 +134,25 @@ R__EXTERN  "C" {
 #endif
     return 0;
   }
-//________________________________________
-  void type_of_call mfldgeo() {
-#if 1
+//________________________________________________________________________________
+  void type_of_call mfldgeo(float &factor) {
+#if 0
     printf("Ignore request for StarMagField from mfldgeo\n");
 #else
     if (StarMagField::Instance()) {
-      printf("StarMagField  mfldgeo: The field has been already instantiated. Keep it.\n");
+      printf("StarMagField  mfldgeo: The field has been already instantiated.\n");
+      StarMagField::Instance()->SetFactor(factor/5.);
     } else {
-      printf("StarMagField  instantiate default field\n");
-      new StarMagField();
+      printf("StarMagField  instantiate starsim field=%g\n",factor);
+      new StarMagField(StarMagField::kMapped,factor/5.);
     }
 #endif
+    float x[3]={0},b[3];
+    gufld(x,b);
+    printf("StarMagField:mfldgeo(,%g,) Bz=%g\n",factor,b[2]);
   }
 }
+//________________________________________________________________________________
 //ClassImp(StarMagField);
 struct BFLD_t { 
   Int_t version; 
@@ -164,10 +176,12 @@ static const BFLD_t BFLD = {// real field
   200      , // nrp:     number of R nodes in the map
   800        // nzp:     number of Z nodes in the map
 };
+
 struct BDAT_t { 
   Int_t N;
   Float_t Zi, Ri[20], Bzi[20], Bri[20]; 
 };
+
 static const Int_t nZext = 23;
 static const BDAT_t BDAT[nZext] = { // calculated STAR field
   { 15   , // Number of field points 
