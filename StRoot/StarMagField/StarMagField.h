@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.h,v 1.4 2007/09/21 21:07:08 fisyak Exp $
+ * $Id: StarMagField.h,v 1.5 2009/01/13 03:19:44 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.h,v $
+ * Revision 1.5  2009/01/13 03:19:44  perev
+ * Mag field nou controlled from starsim. BugFix
+ *
  * Revision 1.4  2007/09/21 21:07:08  fisyak
  * Remove ClassDef and ClassImp
  *
@@ -63,7 +66,8 @@
 #define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
 #endif
 
-class StarMagField {
+class StarMagField 
+{
  public:
   enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
  private:
@@ -76,7 +80,7 @@ class StarMagField {
 					Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    Interpolate2ExtDBfield ( const Float_t r, const Float_t z, 
 					Float_t &Br_value, Float_t &Bz_value ) ;
-   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi,
+  virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi,
   				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
 
   //added by Lijuan

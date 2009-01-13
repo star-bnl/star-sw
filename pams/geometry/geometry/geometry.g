@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.184 2009/01/12 00:31:44 perev Exp $
+* $Id: geometry.g,v 1.185 2009/01/13 03:19:12 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.185  2009/01/13 03:19:12  perev
+* Mag field nou controlled from starsim. BugFix
+*
 * Revision 1.184  2009/01/12 00:31:44  perev
 * Bug fix in ON logic(VP)
 *
@@ -1158,6 +1161,7 @@ replace [exe y2009;] with [;
               sisd_level,
               Nleft,Mleft,richConfig,richPos,nSvtVafer,Itof,mwx
 
+   Real       magX(3) /0,0,0/,magB(3)
 ***************** historical note: *********************8
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner -- ! Obsoleted 20050324 maxim! --
@@ -3558,7 +3562,8 @@ If LL>0
   on PIXL_ON    { Optional PIXL added on top of the minimal geo;
                      PIXL=on; }
 
-  on FIELD_ONLY { No geometry - only magnetic field;              NtrSubEv=0;
+  on FIELD_ONLY { No geometry - only magnetic field;
+      NtrSubEv=0;
       {CAVE,PIPE,SVTT,TPCE,ftpc,BTOF,VPDD,MAGP,CALB,ECAL,RICH,UPST,ZCAL}=off; }
   on FIELD_OFF  { no magnetic field;                
                   magField=0;                  }
@@ -3567,12 +3572,17 @@ If LL>0
   on FIELD      { defined mag field;
                   magField=myArg; }
 
-  on 4TH_OFF    { SVT fourth layer off;             nSvtLayer=min(nSvtLayer,6);           }
-  on SPLIT_OFF  { events will not be split into subevents;     NtrSubEv=0;    }
-  on SPLIT_ON   { events will be split into subevents;         NtrSubEv=1000; }
-  on DEBUG_ON   { verbose mode, some graphics; Idebug=max(Idebug,1); Itest=1; }
-  on DEBUG_OFF  { standard debug mode;         {Idebug,Itest}=0;              }
-  }
+  on 4TH_OFF    { SVT fourth layer off;
+		nSvtLayer=min(nSvtLayer,6);           }
+  on SPLIT_OFF  { events will not be split into subevents;
+		NtrSubEv=0;    }
+  on SPLIT_ON   { events will be split into subevents;
+           	NtrSubEv=1000; }
+  on DEBUG_ON   { verbose mode, some graphics;
+		Idebug=max(Idebug,1); Itest=1; }
+  on DEBUG_OFF  { standard debug mode;
+           	{Idebug,Itest}=0;              }
+  } !// end of main moop
 
 * sanity check - if something left in commands (unknown keyword), we stop!
   if (JL .le. JR) {
@@ -3921,10 +3931,14 @@ If LL>0
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
    If (MFLD) {
-      call AgDETP new ('MFLD')
-      if (MFLD & magField!=5)   call AgDETP add ('MFLG(1).Bfield=' ,magField  ,1)
-      if (MFLD & MfldConfig!=0) call AgDETP add ('MFLG(1).version=',MfldConfig,1)
-      Call mfldgeo
+!//       call AgDETP new ('MFLD')
+!//       if (MFLD & magField!=5)   call AgDETP add ('MFLG(1).Bfield=' ,magField  ,1)
+!//       if (MFLD & MfldConfig!=0) call AgDETP add ('MFLG(1).version=',MfldConfig,1)
+!//       Call mfldgeo;
+      Call mfldgeo(magField);
+      call gufld(magX,magB);
+      write(*,*) 'MFLD magField,Bz = ',magField,magB(3)
+
    }
 *
    if JVOLUM>0
