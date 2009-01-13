@@ -122,7 +122,7 @@ if ($pkg eq "RTS") {
 	  $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
 	    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
 }
-my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker );
+my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker StEEmcPool );
 foreach my $p (@VF_daq_pkgs) {
   #  print "compare $p with pkg = $pkg\n";
   if ($pkg eq $p) {
