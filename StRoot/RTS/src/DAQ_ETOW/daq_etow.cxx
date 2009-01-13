@@ -93,7 +93,7 @@ int daq_etow::Make()
 		LOG(NOTE,"%s: %d: has DATAP",name,evt_num) ;
 		break ;
 	case DET_PRESENT_SFS :
-		LOG(NOTE,"%s: %d: has SFS(%s)",name,present,evt_num) ;
+		LOG(NOTE,"%s: %d: has SFS(%s)",name,evt_num,sfs_name) ;
 		break ;
 	case DET_PRESENT_TRG :
 		LOG(NOTE,"%s: %d: has DATAP within Trigger",name,evt_num) ;
@@ -148,10 +148,17 @@ daq_dta *daq_etow::handle_raw()
 		char *full_name ;
 
 		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name,1,1) ;
+		// first iteration had this wrong name!
+		// sprintf(str,"%s/sec%d/rb%02d/raw",sfs_name,0,1) ;
 		full_name = caller->get_sfs_name(str) ;
+
+		LOG(DBG,"%s: %s: %p",name,str,full_name) ;
+
 		if(!full_name) return 0 ;
 
 		bytes = caller->sfs->fileSize(full_name) ;
+
+		LOG(DBG,"ETOW sfs bytes %d",bytes) ;
 
 		raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
