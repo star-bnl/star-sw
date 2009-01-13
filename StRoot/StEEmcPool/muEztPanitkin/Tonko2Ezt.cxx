@@ -1,4 +1,4 @@
-// $Id: Tonko2Ezt.cxx,v 1.2 2008/12/19 17:59:27 fine Exp $
+// $Id: Tonko2Ezt.cxx,v 1.3 2009/01/13 16:31:05 fine Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -8,7 +8,6 @@
 
 #include "Tonko2Ezt.h"
 
-#ifdef IN_PANITKIN
 // this class is implemented only in online-mode
 #ifndef NEW_DAQ_READER
 #  include <evpReader.hh>
@@ -52,8 +51,11 @@
    } 
    //  exit(1);
 } // end of ESMD
-#endif
+
 // $Log: Tonko2Ezt.cxx,v $
+// Revision 1.3  2009/01/13 16:31:05  fine
+// Add StEEmcPool package to the daqReader dependants
+//
 // Revision 1.2  2008/12/19 17:59:27  fine
 // Add NEW_DAQ_READER flag
 //
