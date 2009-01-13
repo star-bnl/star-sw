@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.160 2008/12/19 15:28:51 starlib Exp $
+# $Id: Construct,v 1.161 2009/01/13 19:16:54 fine Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -166,7 +166,7 @@ my @packages = ();
 my @subdirs = ();
 
 # install includes
-my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/*/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg  StRoot/RTS/src/RTS_READER/.includes_for_export.flg";
+my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg StOnline/*/.includes_for_export.flg StOnline/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/*/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg  StRoot/RTS/src/RTS_READER/.includes_for_export.flg";
 @DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
 
 my @DirsIdlInc = glob "pams/*/idl pams/*/inc";
@@ -216,7 +216,7 @@ else               {$items  = "";}
 # list of targets
 #
 
-foreach my $dir( "pams", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
+foreach my $dir( "pams", "StOnline", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
   next if !-d $dir;
   opendir( DIR, $dir ) or die "Can't open $dir\n";
   my @subdirS = readdir DIR;
