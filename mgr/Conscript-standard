@@ -122,16 +122,35 @@ if ($pkg eq "RTS") {
 	  $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
 	    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
 }
-my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker StEEmcPool );
+my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker  StEEmcPoolmuEztPanitkin );
+my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
+                     . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
+                     . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
+                     ;
 foreach my $p (@VF_daq_pkgs) {
-  #  print "compare $p with pkg = $pkg\n";
+  # print "compare $p with pkg = $pkg\n";
   if ($pkg eq $p) {
-    $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/src" .$main::PATH_SEPARATOR . "#StRoot/RTS/include" . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" . $main::PATH_SEPARATOR . $CPPPATH;
-    #    print "new CPPPATH = $CPPPATH\n";
+    $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
+    #    print "new CPPPATH = $CPPPATH\nfor $p\n";
     last;
   }
 }
- $CPPFLAGS .= " -DNEW_DAQ_READER"; 
+if ( $pkg eq "OnlinePlots") {
+    $ONLINEPLOTPATH  =  $RTS_READER_PATH;
+    $CPPPATH  .=  $ONLINEPLOTPATH
+              .   $main::PATH_SEPARATOR . "#StOnline/OnlinePlots/Infrastructure" 
+              .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/Infrastructure" 
+              .   $main::PATH_SEPARATOR . "#StOnline/OnlinePlots/HistogramGroups"
+              .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/HistogramGroups"
+              .   $main::PATH_SEPARATOR . "#StOnline/OnlinePlots/Infrastructure/EEmcDb"
+              .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/Infrastructure/EEmcDb"
+              .   $main::PATH_SEPARATOR . "#StOnline/OnlinePlots/QEvpClient"
+              .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/QEvpClient"
+              .   $main::PATH_SEPARATOR . "#StRoot/RTS/EventTracker"
+              .   $main::PATH_SEPARATOR .  $CPPPATH;
+    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG -DIN_PANITKIN=yes -DIN_FRANK=yes ";
+}
+$CPPFLAGS .= " -DNEW_DAQ_READER"; 
 if ($pkg eq "StDAQMaker") {
    $CPPFLAGS .= " -DNEW_EVP_READER"; # we should uncomment that later
    $LIBS = "-lStDaqLib -lRTS";
@@ -735,7 +754,7 @@ if ( $#idlL > -1 ) {
     print "SO_PKGT = $SO_PKGT\n" if $param::debug;
     my $LIBPKGT = $PKGT . "." . $env1->{SUFLIB};
     
-    if ( $Dir =~ /StRoot\// ) {
+    if ( $Dir =~ /StRoot\//  ||  $Dir =~ /StOnline\//) {
       $SO_PKGT = $SO_PKG; 
       $SO_MAPT = $SO_MAP;
       $LIBPKGT = $LIBPKG;
