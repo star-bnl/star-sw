@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.73 2009/01/14 17:04:05 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.74 2009/01/14 18:20:49 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.74  2009/01/14 18:20:49  fine
+ * Remove the redundant devReader type
+ *
  * Revision 1.73  2009/01/14 17:04:05  fine
  * Fix bug 1357
  *
@@ -318,8 +321,8 @@ int StDAQReader::open(const char *file)
   }
 #else
   if (fDaqFileReader) close();
-  fDaqFileReader = new evpReader((char *)file);
-  LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via evpReader " << endm;
+  fDaqFileReader = new daqReader((char *)file);
+  LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via daqReader " << endm;
 #endif
   fOffset =0;
   return 0;  
