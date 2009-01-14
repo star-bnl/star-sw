@@ -30,7 +30,7 @@ TH1 *GetHisto(FileType &fd, const char *name) {
     TH1 *hist = 0;
     // this is very silly trick to avoid memory leak in the online version
     hist = fd.file() ? (TH1 *)fd.Get(name, 0) : 0;
-    if (getenv("ONLINBEPLOTDIR")&&
+    if (getenv("ONLINEPLOTSDIR")&&
        BEMCPlotsCleanUpHistoList && hist) {
        BEMCPlotsCleanUpHistoList->Add(hist);
     }
