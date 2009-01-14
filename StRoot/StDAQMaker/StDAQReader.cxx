@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.72 2009/01/08 23:58:07 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.73 2009/01/14 17:04:05 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.73  2009/01/14 17:04:05  fine
+ * Fix bug 1357
+ *
  * Revision 1.72  2009/01/08 23:58:07  fine
  * Pick the token info from the new reader
  *
@@ -547,7 +550,7 @@ int StDAQReader::getRunNumber()   const
 //_____________________________________________________________________________
 int StDAQReader::getEventNumber() const {
      return fDaqFileReader  ? 
-           fDaqFileReader->event_number
+           fDaqFileReader->seq
                      :
            fEventInfo->EventSeqNo;
 }
