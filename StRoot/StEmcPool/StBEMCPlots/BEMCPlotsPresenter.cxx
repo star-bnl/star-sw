@@ -10,11 +10,7 @@ using namespace std;
 #include <TString.h>
 #include <TBox.h>
 
-#ifdef IN_PANITKIN
 #include <GenericFile.h>
-#else
-#include <TFile.h>
-#endif
 
 #include <StDaqLib/EMC/StEmcDecoder.h>
 
@@ -29,22 +25,19 @@ Bool_t useDecoderForBoundaries = false; // Use StEmcDecoder for showing ranges (
 
 //-------------------------------------------------------------------
 // Taken from EEMC EEqaPresenter
-TH1 *GetHisto(FileType *fd, const char *name) {
+TH1 *GetHisto(FileType &fd, const char *name) {
     if (!BEMCPlotsCleanUpHistoList) BEMCPlotsCleanUpHistoList = new TList();
     TH1 *hist = 0;
     // this is very silly trick to avoid memory leak in the online version
-#ifdef IN_PANITKIN
-    hist = fd ? (TH1 *)fd->Get(name, 0) : 0;
-    if (BEMCPlotsCleanUpHistoList && hist) {
-	BEMCPlotsCleanUpHistoList->Add(hist);
+    hist = fd.file() ? (TH1 *)fd.Get(name, 0) : 0;
+    if (getenv("ONLINBEPLOTDIR")&&
+       BEMCPlotsCleanUpHistoList && hist) {
+       BEMCPlotsCleanUpHistoList->Add(hist);
     }
-#else
-    hist = fd ? (TH1 *)fd->Get(name) : 0;
-#endif
     return hist;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, Int_t mDebug) {
+void BEMCPlotsPresenter::displayRawAdc(FileType file, TPad *pad, bool psd, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistRawAdc1 = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd1Name : HistRawAdc1Name);
@@ -236,7 +229,7 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, Int_
     }
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayJetPatchHT(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayJetPatchHT(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistHighTowerSpectrum[12];
@@ -265,7 +258,7 @@ void BEMCPlotsPresenter::displayJetPatchHT(FileType *file, TPad *pad, Int_t mDeb
     }
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayJetPatchSum(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayJetPatchSum(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistPatchSumSpectrum[12];
@@ -294,7 +287,7 @@ void BEMCPlotsPresenter::displayJetPatchSum(FileType *file, TPad *pad, Int_t mDe
     }
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayL0Input(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistDsmL0InputHighTower = (TH2F*)GetHisto(file, HistDsmL0InputHighTowerName);
@@ -403,7 +396,7 @@ void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, Int_t mDebug)
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayL1Input(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistDsmL1InputHighTowerBits = (TH2F*)GetHisto(file, HistDsmL1InputHighTowerBitsName);
@@ -597,7 +590,7 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, Int_t mDebug)
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayL2Input(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistDsmL2InputHighTowerBits = (TH2F*)GetHisto(file, HistDsmL2InputHighTowerBitsName);
@@ -736,7 +729,7 @@ void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, Int_t mDebug)
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayL3Input(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayL3Input(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistDsmL3InputHighTowerBits = (TH1F*)GetHisto(file, HistDsmL3InputHighTowerBitsName);
@@ -775,7 +768,7 @@ void BEMCPlotsPresenter::displayL3Input(FileType *file, TPad *pad, Int_t mDebug)
 	
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displaySmdFeeSum(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displaySmdFeeSum(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistSmdFeeSum = (TH2F*)GetHisto(file, HistSmdFeeSumName);
@@ -846,7 +839,7 @@ void BEMCPlotsPresenter::displaySmdFeeSum(FileType *file, TPad *pad, Int_t mDebu
     }
 }	
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayPsdFeeSum(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayPsdFeeSum(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistPsdFeeSum = (TH2F*)GetHisto(file, HistPsdFeeSumName);
@@ -920,7 +913,7 @@ void BEMCPlotsPresenter::displayPsdFeeSum(FileType *file, TPad *pad, Int_t mDebu
     }
 }	
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayTriggerCorruption(FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayTriggerCorruption(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistTriggerCorruptionHighTower = (TH1F*)GetHisto(file, HistTriggerCorruptionHighTowerName);
@@ -965,7 +958,7 @@ void BEMCPlotsPresenter::displayTriggerCorruption(FileType *file, TPad *pad, Int
     }
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType *file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType file, TPad *pad, Int_t mDebug) {
 //mDebug = 10;
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
     if (BEMCPlotsCleanUpHistoList) {
@@ -974,7 +967,7 @@ void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType *file, TPad
     if (!BEMCDecoderPresenter) BEMCDecoderPresenter = new StEmcDecoder();
     if (mDebug >= 2) cout << "tab = " << tab << endl;
     if (mDebug >= 2) cout << "panel = " << panel << endl;
-    if (!file || (mDebug >= 2)) cout << "file = " << file << endl;
+    if (!file.file() || (mDebug >= 2)) cout << "file = " << file.file() << endl;
     if (!pad || (mDebug >= 2)) cout << "pad = " << pad << endl;
     if (!BEMCDecoderPresenter || (mDebug >= 2)) cout << "BEMCDecoderPresenter = " << BEMCDecoderPresenter << endl;
 
