@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.36 2008/11/26 15:53:12 fine Exp $
+ * $Id: StDAQReader.h,v 1.37 2009/01/14 18:20:49 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.37  2009/01/14 18:20:49  fine
+ * Remove the redundant devReader type
+ *
  * Revision 1.36  2008/11/26 15:53:12  fine
  * fix the CPP flags for StDAQReader.h
  *
@@ -228,7 +231,7 @@ public:
   virtual void printEventInfo();
   virtual int  getEventSize() const;
   virtual EventReader *getEventReader() const {return fEventReader;}  
-  virtual evpReader   *getFileReader() const  {return  fDaqFileReader;}
+  virtual daqReader   *getFileReader() const  {return  fDaqFileReader;}
 
 protected:
   void nextEvent();
@@ -258,7 +261,7 @@ protected:
   char fTPCVersion[12];
   char fFTPCVersion[12];
   StTrigSummary *fTrigSummary; //!
-  evpReader     *fDaqFileReader;
+  daqReader     *fDaqFileReader;
   char *fDATAP;
 };
 #ifndef __CINT__
