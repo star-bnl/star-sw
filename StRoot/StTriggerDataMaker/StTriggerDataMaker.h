@@ -1,13 +1,15 @@
 #ifndef STAR_StTriggerDataMaker
 #define STAR_StTriggerDataMaker
-#include "StMaker.h"
+//#include "StMaker.h"
+#include "StRtsTable.h"
+#include "StRTSBaseMaker.h"
 
 class TH1F;
 class StTriggerData;
 class StDAQReader;
 
 // class definition
-class StTriggerDataMaker : public StMaker {
+class StTriggerDataMaker : public StRTSBaseMaker {
 public: 
   StTriggerDataMaker(const char *name="trgd");
   virtual ~StTriggerDataMaker(){};
