@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.20 2008/03/12 15:56:41 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.21 2009/01/14 17:54:45 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.21  2009/01/14 17:54:45  ullrich
+ * Modified to cope with necessary changes for 2009.
+ *
  * Revision 2.20  2008/03/12 15:56:41  ullrich
  * Add new methods tofAtAddress() and tofMultiplicity().
  *
@@ -207,23 +210,35 @@ public:
     // Experts only!
     virtual char* getTriggerStructure() = 0;
     virtual int getRawSize() const = 0;
-    virtual unsigned      char * getDsm0_EEMC(int prepost=0) const =0;
-    virtual unsigned short int * getDsm1_EEMC(int prepost=0) const =0;
-    virtual unsigned short int * getDsm2_EMC()  const =0;
-    virtual unsigned short int * getDsm3()      const =0;
-    virtual unsigned      char*  getDsm_FMS(int prepost=0) const;
-    virtual unsigned      char*  getDsm01_FMS(int prepost=0) const;
-    virtual unsigned      char*  getDsm02_FMS(int prepost=0) const;
-    virtual unsigned short int*  getDsm1_FMS(int prepost=0) const;
-    virtual unsigned short int*  getDsm2_FMS() const;
-    virtual unsigned int         l2ResultLength() const = 0;  // Length of raw info
-    virtual const unsigned int*  l2Result() const = 0;  // Pointer to raw info
+    virtual unsigned      char* getDsm0_EEMC(int prepost=0) const =0;
+    virtual unsigned short int* getDsm1_EEMC(int prepost=0) const =0;
+    virtual unsigned short int* getDsm2_EMC()  const =0;
+    virtual unsigned short int* getDsm3()      const =0;
+    virtual unsigned      char* getDsm_FMS(int prepost=0) const;
+    virtual unsigned      char* getDsm01_FMS(int prepost=0) const;
+    virtual unsigned      char* getDsm02_FMS(int prepost=0) const;
+    virtual unsigned short int* getDsm1_FMS(int prepost=0) const;
+    virtual unsigned short int* getDsm2_FMS() const;
+    virtual unsigned int        l2ResultLength() const = 0;  // Length of raw info
+    virtual const unsigned int* l2Result() const = 0;  // Pointer to raw info
 
 protected:
     int prepostAddress(int prepost) const; //get pre&post xsing addess, return negative if bad.
         
     // Service routine to decode EMC layer0 DSM info into 12bit input values
     unsigned short decodeEmc12bit(const int dsm, const int channel, const unsigned char *raw) const;
+  
+    // Byte swapping functions
+    void swapI(unsigned int *);
+    void swapSCC(unsigned int *);
+    void swapSS(unsigned int *);
+    void swapIn(unsigned int *, unsigned int);
+    void swapSSn(unsigned int *, unsigned int);
+    void swapSCCn(unsigned int *, unsigned int);
+
+    // QT data decoding
+    enum {MaxQTData = 529}; //!
+    void decodeQT(unsigned int ndata, unsigned int *data, unsigned short adc[16][32], unsigned char tac[16][32]);
 
 protected:
     int   mYear;
@@ -316,6 +331,33 @@ inline unsigned short int*  StTriggerData::getDsm2_FMS() const {return 0;}
 
 inline int StTriggerData::L2ResultsOffset(StL2AlgorithmId id) const {return -1;}  
 inline bool StTriggerData::isL2Triggered(StL2TriggerResultType id) const {return false;}  
+
+inline void StTriggerData::swapI(unsigned int *var){
+    *var = 
+        (*var & 0xff000000) >> 24 |
+        (*var & 0x00ff0000) >> 8  |
+        (*var & 0x0000ff00) << 8  |
+        (*var & 0x000000ff) << 24 ;
+}
+
+inline void StTriggerData::swapSCC(unsigned int *var){
+    *var =
+        (*var & 0x0000ff00) >> 8 |
+        (*var & 0x000000ff) << 8 |
+        (*var & 0xffff0000);
+}
+
+inline void StTriggerData::swapSS(unsigned int *var){
+    *var = 
+        (*var & 0xff000000) >> 8 |
+        (*var & 0x00ff0000) << 8 |
+        (*var & 0x0000ff00) >> 8 |
+        (*var & 0x000000ff) << 8;
+}
+
+inline void StTriggerData::swapIn(unsigned int *var, unsigned int n)  {for(unsigned int i=0; i<n; i++)   {swapI(var++);} }
+inline void StTriggerData::swapSSn(unsigned int *var, unsigned int n) {for(unsigned int i=0; i<n/2; i++) {swapSS(var++);} }
+inline void StTriggerData::swapSCCn(unsigned int *var, unsigned int n){for(unsigned int i=0; i<n; i++)   {swapSCC(var++);} }
 
 #endif
   
