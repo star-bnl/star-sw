@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHeader.cxx,v 2.1 2008/12/22 20:30:56 ullrich Exp $
+ * $Id: StBTofHeader.cxx,v 2.2 2009/01/15 00:45:19 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.cxx,v $
+ * Revision 2.2  2009/01/15 00:45:19  ullrich
+ * mTriggerTime becomes array, setVpdVz() gets default argument.
+ *
  * Revision 2.1  2008/12/22 20:30:56  ullrich
  * Initial Revision.
  *
@@ -24,8 +27,8 @@ StBTofHeader::StBTofHeader()
     for(int i=0; i<MAXFIBER; i++) {
         mFiberHeader[i] = -1;
         mFiberTriggerWord[i] = 0;
+        mTriggerTime[i] = 0;
     }
-    mTriggerTime = 0;
     for(int i=0; i<2; i++) mVpdHitPattern[i] = 0;
     for(int i=0; i<MAXVPDVZ; i++) mVpdVz[i] = -999.;
     mTStart = 0.;
@@ -89,7 +92,7 @@ StBTofHeader::vpdTime(StBeamDirection eastwest, int tubeId) const
 }
 
 unsigned int
-StBTofHeader::triggerTime() const { return mTriggerTime; }
+StBTofHeader::triggerTime(int fiberId) const { return mTriggerTime[fiberId]; }
 
 void
 StBTofHeader::setFiberHeader(int fiberId, short val)
@@ -143,4 +146,4 @@ StBTofHeader::setVpdTime(StBeamDirection eastwest, int tubeId, double t)
 }
 
 void
-StBTofHeader::setTriggerTime(unsigned int tdc) { mTriggerTime = tdc; }
+StBTofHeader::setTriggerTime(unsigned int tdc, int fiberId) { mTriggerTime[fiberId] = tdc; }
