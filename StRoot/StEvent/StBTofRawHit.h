@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofRawHit.h,v 2.1 2008/12/22 20:31:01 ullrich Exp $
+ * $Id: StBTofRawHit.h,v 2.2 2009/01/15 00:48:10 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBTofRawHit.h,v $
+ * Revision 2.2  2009/01/15 00:48:10  ullrich
+ * mLeTeFlag changed to mFlag, tray(), module(), cell() now return int.
+ *
  * Revision 2.1  2008/12/22 20:31:01  ullrich
  * Initial Revision.
  *
@@ -29,24 +32,27 @@ class StBTofRawHit : public StObject {
 public:
     StBTofRawHit();
 
-    StBTofRawHit(unsigned char, unsigned char, unsigned char, unsigned int);
+    StBTofRawHit(char, unsigned char, unsigned char, unsigned int);
     ~StBTofRawHit();    
 
     int operator==(const StBTofRawHit&) const;
     int operator!=(const StBTofRawHit&) const;
 
-    unsigned char  leteFlag() const; //! 1 - leading; 2 - trailing
-    unsigned char  tray() const;
-    unsigned char  channel() const;
+    bool      leadingEdge() const;
+    bool      trailingEdge() const;
+    int       fiberId() const;
+    int       flag() const;
+    int       tray() const;
+    int       channel() const;
     unsigned int   tdc() const;
 
-    void      setLeTeFlag(unsigned char);
+    void      setFlag(char);
     void      setTray(unsigned char);
     void      setChannel(unsigned char);
     void      setTdc(unsigned int);
     
 protected:
-    UChar_t  mLeTeFlag;
+    Char_t   mFlag;
     UChar_t  mTray;
     UChar_t  mChannel;
     UInt_t   mTdc;
@@ -57,9 +63,9 @@ protected:
 ostream& operator<<(ostream&, const StBTofRawHit&); // Printing operator
 
 inline void
-StBTofRawHit::setLeTeFlag(unsigned char iflag)
+StBTofRawHit::setFlag(char iflag)
 {
-    mLeTeFlag = iflag;
+    mFlag = iflag;
 }
 
 inline void
@@ -80,19 +86,37 @@ StBTofRawHit::setTdc(unsigned int rawTdc)
     mTdc = rawTdc;
 }
 
-inline unsigned char
-StBTofRawHit::leteFlag() const
+inline bool
+StBTofRawHit::leadingEdge() const
 {
-    return mLeTeFlag;
+    return (mFlag>0);
 }
 
-inline unsigned char
+inline bool
+StBTofRawHit::trailingEdge() const
+{
+    return (mFlag<0);
+}
+
+inline int
+StBTofRawHit::fiberId() const
+{
+    return abs(mFlag) - 1;   //! fiber Id = 0, 1, 2, 3
+}
+
+inline int
+StBTofRawHit::flag() const
+{
+    return mFlag;
+}
+
+inline int
 StBTofRawHit::tray()  const
 {
     return mTray;
 }
 
-inline unsigned char
+inline int
 StBTofRawHit::channel()  const
 {
     return mChannel;
