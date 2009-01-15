@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHit.cxx,v 2.1 2008/12/22 20:30:57 ullrich Exp $
+ * $Id: StBTofHit.cxx,v 2.2 2009/01/15 00:46:25 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHit.cxx,v $
+ * Revision 2.2  2009/01/15 00:46:25  ullrich
+ * tray() now returns int.
+ *
  * Revision 2.1  2008/12/22 20:30:57  ullrich
  * Initial Revision.
  *
@@ -35,13 +38,13 @@ StBTofHit::StBTofHit()
 
 StBTofHit::~StBTofHit() {/* noop */}
 
-unsigned char
+int
 StBTofHit::tray() const { return mTray; }
 
-unsigned char
+int
 StBTofHit::module() const { return mModule; }
 
-unsigned char
+int
 StBTofHit::cell() const { return mCell; }
 
 double
@@ -59,10 +62,10 @@ StBTofHit::associatedTrack() { return mAssociatedTrack; }
 const StTrack*
 StBTofHit::associatedTrack() const { return mAssociatedTrack; }
 
-unsigned short
+int
 StBTofHit::idTruth() const { return mIdTruth; }
 
-unsigned short
+int
 StBTofHit::qaTruth() const { return mQuality; }
 
 void
