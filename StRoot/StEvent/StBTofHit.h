@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofHit.h,v 2.1 2008/12/22 20:30:58 ullrich Exp $
+ * $Id: StBTofHit.h,v 2.2 2009/01/15 00:46:26 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHit.h,v $
+ * Revision 2.2  2009/01/15 00:46:26  ullrich
+ * tray() now returns int.
+ *
  * Revision 2.1  2008/12/22 20:30:58  ullrich
  * Initial Revision.
  *
@@ -33,9 +36,9 @@ public:
     StBTofHit();
     ~StBTofHit();
 
-    unsigned char   tray() const;
-    unsigned char   module() const;
-    unsigned char   cell() const;
+    int             tray() const;
+    int             module() const;
+    int             cell() const;
     double          leadingEdgeTime() const;
     double          trailingEdgeTime() const;
     double          tot() const;
@@ -43,8 +46,8 @@ public:
     StTrack*        associatedTrack();
     const StTrack*  associatedTrack() const;
     
-    unsigned short  idTruth() const;
-    unsigned short  qaTruth() const;
+    int             idTruth() const;
+    int             qaTruth() const;
 
     void setTray(unsigned char);
     void setModule(unsigned char);
