@@ -13,16 +13,17 @@ using namespace std;
 #include <TBox.h>
 #include <TObjArray.h>
 
-#ifdef IN_PANITKIN
-#include <TMapFile.h>
-#else
-#include <TFile.h>
-#endif
+// this needs to be always included
+#include <RTS/src/DAQ_READER/daqReader.h>
+#include <RTS/src/DAQ_READER/daq_dta.h>
 
-#ifdef IN_PANITKIN
-#include <evpReader.hh>
-#endif
-    
+// only the detectors we will use need to be included
+// for their structure definitions...
+#include <RTS/src/DAQ_BSMD/daq_bsmd.h>
+#include <RTS/src/DAQ_BTOW/daq_btow.h>
+#include <RTS/src/DAQ_EMC/daq_emc.h>
+#include <RTS/src/DAQ_TRG/daq_trg.h>
+
 #include "StDaqLib/EMC/StEmcDecoder.h"
 
 #include "BEMC_DSM_decoder.h"
@@ -113,7 +114,6 @@ BEMCPlots::BEMCPlots(TObjArray *list)
       this->mHistSmdFeeSum = new TH2F(HistSmdFeeSumName, "SMD FEE Sum;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
       this->mHistPsdFeeSum = new TH2F(HistPsdFeeSumName, "PSD FEE Sum;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
 
-#ifdef IN_PANITKIN
       ADDHIST(mHistRawAdc1)
       ADDHIST(mHistRawAdc2)
       ADDHIST(mHistRawAdc3)
@@ -124,7 +124,6 @@ BEMCPlots::BEMCPlots(TObjArray *list)
       ADDHIST(mHistRawAdcPsd4)
       ADDHIST(mHistSmdFeeSum)
       ADDHIST(mHistPsdFeeSum)
-#endif
     
     for (int i = 0;i < 12;i++) {
 	TString name;
@@ -143,12 +142,11 @@ BEMCPlots::BEMCPlots(TObjArray *list)
     this->mHistTriggerCorruptionPatchSum = new TH1F(HistTriggerCorruptionPatchSumName, "PatchSum trigger corruption;triggerPatch;events", 300, -0.5, 300-0.5);
     this->mHistTriggerCorruptionHighTowerCorr = new TH2F(HistTriggerCorruptionHighTowerCorrName, "HighTower trigger corruption;DSM HighTower;Simulated HighTower", 64, 0, 64, 64, 0, 64);
     this->mHistTriggerCorruptionPatchSumCorr = new TH2F(HistTriggerCorruptionPatchSumCorrName, "PatchSum trigger corruption;DSM PatchSum;Simulated PatchSum", 64, 0, 64, 64, 0, 64);
-#ifdef IN_PANITKIN
+
       ADDHIST(mHistTriggerCorruptionHighTower)
       ADDHIST(mHistTriggerCorruptionPatchSum)
       ADDHIST(mHistTriggerCorruptionHighTowerCorr)
       ADDHIST(mHistTriggerCorruptionPatchSumCorr)
-#endif
 
     for (int i = 0;i < 4800;i++) {
 	this->mTowerData[i][0] = 1; // unmask
@@ -485,28 +483,29 @@ void BEMCPlots::processEvent( char *datap
     	    if (this->mHistDsmL3InputJPsiTopoBit) this->mHistDsmL3InputJPsiTopoBit->Fill(this->mDsmL3InputJPsiTopoBit[0]);
     	    if (this->mHistDsmL3InputJetPatchTopoBit) this->mHistDsmL3InputJetPatchTopoBit->Fill(this->mDsmL3InputJetPatchTopoBit[0]);    
     }
-#ifdef IN_PANITKIN
-    int ret = emcReader(datap);
-    if(ret >= 0) {
-	if(emc.btow_in) {
-    	    unsigned short *header = emc.btow_raw; // BTOW event header
-	    if (header) {
+
+    daqReader *rdr = (daqReader*)(datap);
+    daq_dta *dd_btow = rdr ? (rdr->det("btow")->get("adc")) : 0;
+    if (dd_btow) while (dd_btow->iterate()) {
+	btow_t *d = (btow_t *) dd_btow->Void;
+	if (d) {
 		if (DSM_L0_present) {
 		    for (int i = 0;i < 300;i++) {
 			this->mDsmSimuHighTower[i] = 0;
 			this->mDsmSimuPatchSum[i] = 0;
 		    }
 		}
-		for(int i = 0;i < 4800;i++) {
-		    int tdc = i % 30;
-	    	    int count = (*(header + tdc));
-		    int error = (*(header + tdc + 30));
-		    if(error==0 && count==164) {
+		for(int i = 0;i < (BTOW_MAXFEE * BTOW_DATSIZE);i++) {
+		    int tdc = i % BTOW_MAXFEE;
+		    int tdc_channel = i / BTOW_MAXFEE;
+	    	    int count = d->preamble[tdc][0];
+		    int error = 0;//(*(header + tdc + 30));
+		    if((error==0 && count==164) || true) {
 			// OK
 			int softId;
 			if (BEMCDecoder && BEMCDecoder->GetTowerIdFromDaqId(i, softId)) {
 			    if ((softId >= 1) && (softId <= 4800)) {
-				int adc = emc.btow[i];
+				int adc = d->adc[tdc][tdc_channel];
 				if ((softId >= 1) && (softId <= 1220)) {
 				    if (this->mHistRawAdc1) this->mHistRawAdc1->Fill(softId, adc);
 				} else if ((softId >= 1221) && (softId <= 2400)) {
@@ -541,7 +540,7 @@ void BEMCPlots::processEvent( char *datap
 			this->mDsmSimuPatchSum[i] = 0;
 		    } else {
 			int lut;
-			simulateFEELUT(this->mDsmSimuPatchSum[i], this->mPatchData[i][3], this->mPatchData[i][4], this->mPatchData[i][5], this->mPatchData[i][6], this->mPatchData[i][7], this->mPatchData[i][8], this->mPatchData[i][9], this->mPatchData[i][10], this->mTriggerPedestalShift / 100.0, lut, (i == 27300));
+			simulateFEELUT(this->mDsmSimuPatchSum[i], this->mPatchData[i][3], this->mPatchData[i][4], this->mPatchData[i][5], this->mPatchData[i][6], this->mPatchData[i][7], this->mPatchData[i][8], this->mPatchData[i][9], this->mPatchData[i][10], (int)(this->mTriggerPedestalShift / 100.0), lut, (i == 27300));
 			this->mDsmSimuPatchSum[i] = lut;
 		    }
 		    //cout << "Trigger patch " << i;
@@ -561,49 +560,31 @@ void BEMCPlots::processEvent( char *datap
 		    }
 		    //cout << endl;
 		}
-	    }
 	}
-	if(emc.bsmd_in && BEMCDecoder) {
-	    int RDO, index;
+    }
+    for (int bsmd_fiber = 0;bsmd_fiber < BSMD_FIBERS;bsmd_fiber++) {
+	int bprs_fiber = bsmd_fiber - 8;
+	daq_dta *dd_bsmd = rdr ? (rdr->det("bsmd")->get("adc", 0, bsmd_fiber)) : 0;
+	if (dd_bsmd) while (dd_bsmd->iterate()) {
+	    bsmd_t *d = (bsmd_t *) dd_bsmd->Void;
+	    if (d && BEMCDecoder) {
+
+	    int det, m, e, s;
 	    int feeSum[120];
-	    for (int i = 0;i < 120;i++) feeSum[i] = 0;
-	    for (int module = 1;module <= 120;module++) {
-	        for (int eta = 1;eta <= 150;eta++) {
-	    	    for (int sub = 1;sub <= 1;sub++) {
-			if (BEMCDecoder->GetSmdRDO(3, module, eta, sub, RDO, index)) {
-			    if ((RDO >= 0) && (RDO < 12) && (index >= 0) && (index < 4800)) {
-				int adc = emc.bsmd[RDO][index];
-			        feeSum[module - 1] += adc;
-			    }
-			}
-		    }
-		}
-	    }
-	    for (int module = 1;module <= 120;module++) {
-	        for (int eta = 1;eta <= 10;eta++) {
-	    	    for (int sub = 1;sub <= 15;sub++) {
-			if (BEMCDecoder->GetSmdRDO(4, module, eta, sub, RDO, index)) {
-			    if ((RDO >= 0) && (RDO < 12) && (index >= 0) && (index < 4800)) {
-				int adc = emc.bsmd[RDO][index];
-			        feeSum[module - 1] += adc;
-			    }
-			}
-		    }
-		}
-	    }
-	    for (int i = 0;i < 120;i++) {
-		if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Fill(i + 1, feeSum[i]);
-	    }
-	    
+	    int softId, box, wire, Avalue;
 	    int pmtSum[60];
+	    for (int i = 0;i < 120;i++) feeSum[i] = 0;
 	    for (int i = 0;i < 60;i++) pmtSum[i] = 0;
-	    for (int rdo = 0;rdo < 4;rdo++) {
-		for (int index = 0;index < 4800;index++) {
-		    int softId, box, wire, Avalue;
-		    if (BEMCDecoder->GetPsdId(rdo, index, softId, box, wire, Avalue)) {
-			RDO = rdo + 8;
-			if ((RDO >= 0) && (RDO < 12) && (box >= 1) && (box <= 60)) {
-    			    int adc = emc.bsmd[RDO][index];
+	    for (int fiber_channel = 0;fiber_channel < BSMD_DATSIZE;fiber_channel++) {
+		    if (BEMCDecoder->GetSmdCoord(bsmd_fiber, fiber_channel, det, m, e, s)) {
+			if ((m >= 1) && (m <= 120)) {
+			    int adc = d->adc[fiber_channel];
+			    feeSum[m - 1] += adc;
+			}
+		    }
+		    if (BEMCDecoder->GetPsdId(bprs_fiber, fiber_channel, softId, box, wire, Avalue)) {
+			if ((box >= 1) && (box <= 60)) {
+    			    int adc = d->adc[fiber_channel];
 			    pmtSum[box - 1] += adc;
 			    if ((softId >= 1) && (softId <= 1220)) {
 			        if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Fill(softId, adc);
@@ -616,14 +597,18 @@ void BEMCPlots::processEvent( char *datap
 			    }
 			}
 		    }
-		}
-	    }	    
+	    }
+	    for (int i = 0;i < 120;i++) {
+		if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Fill(i + 1, feeSum[i]);
+	    }
 	    for (int i = 0;i < 60;i++) {
 		if (this->mHistPsdFeeSum) this->mHistPsdFeeSum->Fill(i + 1, pmtSum[i]);
 	    }
+
+	    }
 	}
     }
-#endif
+
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
 //-------------------------------------------------------------------

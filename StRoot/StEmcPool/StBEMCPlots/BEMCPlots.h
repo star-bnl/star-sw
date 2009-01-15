@@ -7,16 +7,6 @@ class TFile;
 class TPad;
 class TObjArray;
 
-#ifdef IN_PANITKIN
-// This is called from PPlots
-class TMapFile;
-typedef TMapFile  FileType;
-#else
-// This is called from Jan's online QA
-class TFile;
-typedef TFile  FileType;
-#endif
-
 class BEMCPlots {
 
 public:
