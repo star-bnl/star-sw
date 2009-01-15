@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofHeader.h,v 2.1 2008/12/22 20:30:57 ullrich Exp $
+ * $Id: StBTofHeader.h,v 2.2 2009/01/15 00:45:27 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.h,v $
+ * Revision 2.2  2009/01/15 00:45:27  ullrich
+ * mTriggerTime becomes array, setVpdVz() gets default argument.
+ *
  * Revision 2.1  2008/12/22 20:30:57  ullrich
  * Initial Revision.
  *
@@ -35,29 +38,29 @@ public:
     StBTofHeader();
     ~StBTofHeader();
 
-    short             fiberHeader(int fiberId) const;
-    unsigned int      fiberTriggerWord(int fiberId) const;
-    unsigned int      vpdHitPattern(StBeamDirection eastwest) const;
-    unsigned short    numberOfVpdHits(StBeamDirection eastwest) const;
-    bool              isVpdHit(StBeamDirection eastwest, int tubeId) const;
-    float             vpdVz(int rank=0) const;
-    double            tStart() const;
-    double            tStartError() const;
-    double            tDiff() const;
-    double            vpdTime(StBeamDirection eastwest, int tubeId) const;
-    unsigned int      triggerTime() const;
+    short          fiberHeader(int fiberId) const;
+    unsigned int   fiberTriggerWord(int fiberId) const;
+    unsigned int   vpdHitPattern(StBeamDirection eastwest) const;
+    unsigned short numberOfVpdHits(StBeamDirection eastwest) const;
+    bool           isVpdHit(StBeamDirection eastwest, int tubeId) const;
+    float          vpdVz(int rank=0) const;
+    double         tStart() const;
+    double         tStartError() const;
+    double         tDiff() const;
+    double         vpdTime(StBeamDirection eastwest, int tubeId) const;
+    unsigned int   triggerTime(int fiberId) const;
     
     void         setFiberHeader(int fiberId, short val);
     void         setFiberTriggerWord(int fiberId, unsigned int val);
     void         setVpdHit(StBeamDirection eastwest, int tubeId);
     void         removeVpdHit(StBeamDirection eastwest, int tubeId);
     void         setVpdHitPattern(StBeamDirection eastwest, unsigned int val);
-    void         setVpdVz(float vz, int rank);
+    void         setVpdVz(float vz, int rank=0);
     void         setTStart(double t);
     void         setTStartError(double t_err);
     void         setTDiff(double tdiff);
     void         setVpdTime(StBeamDirection eastwest, int tubeId, double t);
-    void         setTriggerTime(unsigned int tdc);
+    void         setTriggerTime(unsigned int tdc, int fiberId);
 
 protected:
     Short_t      mFiberHeader[MAXFIBER];
@@ -68,7 +71,7 @@ protected:
     Double_t     mTStartErr;
     Double_t     mTDiff;
     Double_t     mVpdTime[2][MAXVPD];
-    UInt_t       mTriggerTime;
+    UInt_t       mTriggerTime[MAXFIBER];
 
     ClassDef(StBTofHeader,1)
 };
