@@ -20,7 +20,7 @@ int _NAME2_(xxx,Reader)(char *m)  {  \
   daq_dta *dd= rrr->det("emc_pseudo")->get("legacy"); \
   int size = 0;                     \
   if (dd && (size = dd->iterate())) { \
-  memcpy(&_NAME1_(xxx),dd->Void,dd->ncontent);} \
+  memcpy(&_NAME1_(xxx),dd->Void,dd->get_size_t());} \
   return (dd && size) ? dd->ncontent: 0; }
       
 DAQ_LEGACY_EMC_DEF(emc);

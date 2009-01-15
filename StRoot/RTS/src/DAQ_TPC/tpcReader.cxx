@@ -17,7 +17,7 @@ int tpcReader(char *m, int sector ) {
   int size = 0;
   if (!dd) dd= rrr->det("tpc")->get("legacy",sector);                     
   if (dd && (size = dd->iterate())) {
-     memcpy(&tpc,dd->Void,dd->ncontent);
+     memcpy(&tpc,dd->Void,dd->get_size_t());
   }
   return dd ? dd->ncontent : 0; 
 }
