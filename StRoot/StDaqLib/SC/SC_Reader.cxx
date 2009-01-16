@@ -93,7 +93,7 @@ SC_Reader::SC_Reader(EventReader *er) {
 #ifndef NEW_DAQ_READER_DAQLIB
   char *datap; // ,ew;
   datap=er->getDATAP(); 
-  if (datap) scReader(datap); // call the "event pool" code
+  if (datap) OLDEVP::scReader(datap); // call the "event pool" code
 #else 
    daqReader *rdr=er->getDaqReader(); assert(rdr);
   ::scReader((char*)rdr); // call the "event pool" code

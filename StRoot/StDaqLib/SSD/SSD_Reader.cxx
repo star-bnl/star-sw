@@ -1,4 +1,6 @@
 #include "SSD_Reader.hh"
+#include "StDaqLib/EVP/ssdReader.h"
+
 #include <assert.h>
 #include <math.h>
 
@@ -126,8 +128,15 @@ SSD_Reader::SSD_Reader(EventReader *er) {
   LDate = (1900+time->tm_year)*10000 + (1 + time->tm_mon)*100 + time->tm_mday;
   LTime = (time->tm_hour*100 + time->tm_min)*100 + time->tm_sec;
   //cout << "year=" << time->tm_year << " month = " << time->tm_mon << " day=" << time->tm_mday << endl;
-  ssdReader(datap); // call the "event pool" code
+#ifndef NEW_DAQ_READER_DAQLIB
+     OLDEVP::ssdReader(datap); // call the "event pool" code
   }
+#else
+  else {
+     daqReader *rdr=er->getDaqReader(); assert(rdr);
+     ::ssdReader((char*)rdr); // call the "event pool" code
+  }
+#endif
 }
 
 int SSD_Reader::SSDDaqLadder(char eastWest, int ladder)

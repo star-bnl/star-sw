@@ -101,9 +101,15 @@ u_short EEMC_Reader::getEemcData(int fiber,int channel, char type) {
 EEMC_Reader::EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP)
 {
   Bank_DATAP *datap = (Bank_DATAP*) er->getDATAP();
-  ::emcReader((char*)datap); // ::emcReader saves data in a static global, and gives it
-                             // out via ::getEemcTower (see above)
 
+#ifndef NEW_DAQ_READER_DAQLIB
+  OLDEVP::emcReader((char*)datap); // ::emcReader saves data in a static global, and gives it
+                             // out via ::getEemcTower (see above)
+  //  LTime = (time->tm_hour*100 + time->tm_min)*100 + time->tm_sec;
+#else 
+   daqReader *rdr=er->getDaqReader(); assert(rdr);
+  ::emcReader((char*)rdr); // call the "event pool" code
+#endif
   pBankEEMCP = pEEMCP; //copy into class data member for use by other methods
   ercpy = er; // squirrel away pointer eventreader for our friends
 
