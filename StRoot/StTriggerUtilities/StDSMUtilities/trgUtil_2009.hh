@@ -172,7 +172,10 @@ inline void swapDataBlockAtCrate(DataBlock& data, int crate)
   case QT4_CONF_NUM:
     {
       QTBlock* qt = (QTBlock*)&data;
-      assert(strncmp(qt->name, "QT", 2) == 0);
+      assert(strncmp(qt->name, "QT1", 3) == 0 ||
+	     strncmp(qt->name, "QT2", 3) == 0 ||
+	     strncmp(qt->name, "QT3", 3) == 0 ||
+	     strncmp(qt->name, "QT4", 3) == 0);
       swapQTBlock(*qt);
       break;
     }
@@ -197,7 +200,7 @@ inline void swapTriggerDataBlk(TriggerDataBlk& trgData)
 
   swapTrgOfflen(trgData.EventDesc_ofl);
   EvtDescData* evtDesc = (EvtDescData*)((int)&trgData+trgData.EventDesc_ofl.offset);
-  assert(strncmp(evtDesc->name, "EVT", 3) == 0);
+  assert(strncmp(evtDesc->name, "EVT", 3) == 0 || strncmp(evtDesc->name, "EVD", 3) == 0);
   swapEvtDescData(*evtDesc);
 
   // Swap L1 DSM data
