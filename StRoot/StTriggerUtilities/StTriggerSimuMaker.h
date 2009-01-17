@@ -27,6 +27,7 @@ class StVirtualTriggerSimu;
 class StBbcTriggerSimu;
 class StBemcTriggerSimu;
 class StEemcTriggerSimu;
+class StEmcTriggerSimu;
 class StL2TriggerSimu;
 class StGenericL2Emulator;
 class StTriggerSimuResult;
@@ -72,6 +73,7 @@ public:
   StBbcTriggerSimu  *bbc;
   StBemcTriggerSimu *bemc;
   StEemcTriggerSimu *eemc;
+  StEmcTriggerSimu  *emc;
   StL2TriggerSimu   *lTwo;
   
   ClassDef(StTriggerSimuMaker,0)
@@ -79,9 +81,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.15 2008/01/17 01:58:25 kocolosk Exp $
+// $Id: StTriggerSimuMaker.h,v 1.16 2009/01/17 13:08:44 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.16  2009/01/17 13:08:44  pibero
+// Initial version of EMC DSM algorithms for 2009
+//
 // Revision 1.15  2008/01/17 01:58:25  kocolosk
 // StTriggerSimuResult makes detailed emulation results persistent
 //
