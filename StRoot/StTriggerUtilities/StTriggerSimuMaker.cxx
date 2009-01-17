@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.22 2008/01/22 18:06:26 kocolosk Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.23 2009/01/17 13:09:02 pibero Exp $
 
 
 #include <Stiostream.h>
@@ -39,6 +39,9 @@
 #include "StEmcRawMaker/StBemcTables.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
+//get EMC
+#include "StTriggerUtilities/Emc/StEmcTriggerSimu.h"
+
 //get BBC
 #include "Bbc/StBbcTriggerSimu.h"
 
@@ -60,6 +63,7 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
     bbc=0;
     bemc=0;
     lTwo=0;
+    emc = new StEmcTriggerSimu;
 }
 
 StTriggerSimuMaker::~StTriggerSimuMaker() { /* no-op */ }
@@ -134,6 +138,7 @@ Int_t StTriggerSimuMaker::Make() {
     for(unsigned i=0; i<mSimulators.size(); i++) {
         mSimulators[i]->Make();
     }
+    if ((mYear >= 2009) && (bemc || eemc)) emc->Make();
     return kStOK;
 }
 
@@ -194,6 +199,9 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.23  2009/01/17 13:09:02  pibero
+ * Initial Version of EMC DSM algorithms for 2009
+ *
  * Revision 1.22  2008/01/22 18:06:26  kocolosk
  * added detailedResult code for BEMC L0, courtesy Dave Staszak
  * fixed two bugs in vector accessors in result class (also thanks to Dave)
