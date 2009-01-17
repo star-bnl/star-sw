@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.48 2009/01/08 23:40:13 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.49 2009/01/17 01:48:54 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.49  2009/01/17 01:48:54  genevb
+// Fixed broken multi-page output introduced in previous commit
+//
 // Revision 2.48  2009/01/08 23:40:13  genevb
 // Introduce analyses with reference histograms
 //
@@ -299,7 +302,7 @@ void StHistUtil::CloseOutFile() {
   m_HistCanvas->Modified();
   m_HistCanvas->Update();
   if (!m_CurFileName.IsNull()) {
-    if (m_OutMultiPage) m_CurFileName.ReplaceAll("(",")");
+    if (m_OutMultiPage) m_CurFileName.Append(")");
     if (m_OutType.CompareTo("CC"))
       m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
     else
@@ -307,7 +310,7 @@ void StHistUtil::CloseOutFile() {
     if (m_refInFile) {
       m_HistCanvasR->Modified();
       m_HistCanvasR->Update();
-      m_CurFileNameR.ReplaceAll("(",")");
+      m_CurFileNameR.Append(")");
       m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
       // anal mode doesn't support single page output
     }
@@ -567,9 +570,10 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             if (m_refInFile) {
               m_HistCanvasR->Modified();
               m_HistCanvasR->Update();
-	      if (Ipagenum>0 && !m_CurFileName.IsNull())
+	      if (Ipagenum>0 && !m_CurFileName.IsNull()) {
 	        m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
-	      else m_HistCanvasR->Draw();
+	        m_CurFileNameR.ReplaceAll("(",0); // doesn't hurt to do > once
+	      } else m_HistCanvasR->Draw();
               padCount = numPads;
 	      while (padCount > 0) graphPadR->GetPad(padCount--)->Clear();
             }
