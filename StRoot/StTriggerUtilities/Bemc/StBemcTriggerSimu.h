@@ -40,6 +40,9 @@ class St_db_Maker;
 class TList;
 class TH2;
 
+class DSMLayer_B001_2009;
+class DSMLayer_B101_2009;
+
 class StBemcTriggerSimu : public StVirtualTriggerSimu {
 private:
   std::vector<int>  mFiredTriggers;
@@ -118,6 +121,10 @@ private:
   Int_t HT6bit_adc_holder[kNTowers];
   Int_t TP6bit_adc_holder[kNPatches];
   Int_t JP_adc_holder[kNJet];
+
+  // DSM layers for 2009
+  DSMLayer_B001_2009* mB001;
+  DSMLayer_B101_2009* mB101;
   
   void getTowerStatus();
   void getDSM_TPStatus();
@@ -137,8 +144,8 @@ private:
   void get2008pp_DSMLayer0();
   void get2008pp_DSMLayer1();
   void get2008pp_DSMLayer2();
-
-
+  void get2009_DSMLayer0();
+  void get2009_DSMLayer1();
 
   //#define DEBUG			// Comment out to switch off debugging
 
@@ -235,6 +242,10 @@ public:
   int getTowerThreshold(int trigId, int dsmid) const;
   int getTriggerPatchThreshold(int trigId, int dsmid) const;
   int getJetPatchThreshold(int trigId, int dsmid) const;
+
+  // Access to 2009 BEMC layer 0 and 1 results
+  DSMLayer_B001_2009* get2009_DSMLayer0_Result() { return mB001; }
+  DSMLayer_B101_2009* get2009_DSMLayer1_Result() { return mB101; }
 
   ClassDef(StBemcTriggerSimu, 1);
 };
