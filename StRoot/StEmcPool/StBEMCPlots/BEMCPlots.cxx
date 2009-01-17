@@ -14,17 +14,17 @@ using namespace std;
 #include <TObjArray.h>
 
 // this needs to be always included
-#include <RTS/src/DAQ_READER/daqReader.h>
-#include <RTS/src/DAQ_READER/daq_dta.h>
+#include <DAQ_READER/daqReader.h>
+#include <DAQ_READER/daq_dta.h>
 
 // only the detectors we will use need to be included
 // for their structure definitions...
-#include <RTS/src/DAQ_BSMD/daq_bsmd.h>
-#include <RTS/src/DAQ_BTOW/daq_btow.h>
-#include <RTS/src/DAQ_EMC/daq_emc.h>
-#include <RTS/src/DAQ_TRG/daq_trg.h>
+#include <DAQ_BSMD/daq_bsmd.h>
+#include <DAQ_BTOW/daq_btow.h>
+#include <DAQ_EMC/daq_emc.h>
+#include <DAQ_TRG/daq_trg.h>
 
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include <StDaqLib/EMC/StEmcDecoder.h>
 
 #include "BEMC_DSM_decoder.h"
 #include "BEMCPlotsNames.h"
