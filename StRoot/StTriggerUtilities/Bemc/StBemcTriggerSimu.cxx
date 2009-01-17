@@ -25,10 +25,14 @@
 // MuDst
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
+// DSM 2009 Utilities
+#include "StTriggerUtilities/StDSMUtilities/StDSM2009Utilities.hh"
+
 ClassImp(StBemcTriggerSimu)
 //==================================================
 //==================================================
-StBemcTriggerSimu::StBemcTriggerSimu() {
+StBemcTriggerSimu::StBemcTriggerSimu()
+{
 
   mEvent    = NULL;
   mDecoder  = new StEmcDecoder();
@@ -37,7 +41,9 @@ StBemcTriggerSimu::StBemcTriggerSimu() {
   starDb    = NULL;
   mTables   = NULL;
   mHList    = NULL;
-  mConfig =0;
+  mConfig   = 0;
+  mB001     = new DSMLayer_B001_2009;
+  mB101     = new DSMLayer_B101_2009;
 
 }
 //==================================================
@@ -496,8 +502,11 @@ void StBemcTriggerSimu::Make(){
     get2008pp_DSMLayer1();
     get2008pp_DSMLayer2();
   }
-  
 
+  if ((year==2009)&&(yyyymmdd>20090101)) {
+    get2009_DSMLayer0();
+    get2009_DSMLayer1();
+  }
 
 }
 //==================================================
@@ -2568,8 +2577,67 @@ void StBemcTriggerSimu::get2008pp_DSMLayer2()
   
 }
 
+//==================================================
 
+void StBemcTriggerSimu::get2009_DSMLayer0()
+{
+  // Switch mismatched trigger patch IDs here for 2006 and beyond
+  swap(L0_HT_ADC[291], L0_HT_ADC[294]);
+  swap(L0_HT_ADC[250], L0_HT_ADC[251]);
+  swap(L0_HT_ADC[263], L0_HT_ADC[267]);
 
+  swap(L0_TP_ADC[291], L0_TP_ADC[294]);
+  swap(L0_TP_ADC[250], L0_TP_ADC[251]);
+  swap(L0_TP_ADC[263], L0_TP_ADC[267]);
+
+  // Loop over modules
+  for (int dsm = 0; dsm < kL0DsmModule; ++dsm) {
+    // Set DSM registers (thresholds)
+    // R0: BEMC-High-Tower-th0 (6-bit)
+    // R1: BEMC-High-Tower-th1 (6)
+    // R2: BEMC-High-Tower-th2 (6)
+    // R3: BEMC-High-Tower-th3 (6)
+    // R4: BEMC-Trigger-Patch-th0 (6)
+    (*mB001)[dsm].registers[0] = mDbThres->GetHT_DSM0_threshold(dsm,timestamp,0);
+    (*mB001)[dsm].registers[1] = mDbThres->GetHT_DSM0_threshold(dsm,timestamp,1);
+    (*mB001)[dsm].registers[2] = mDbThres->GetHT_DSM0_threshold(dsm,timestamp,2);
+    (*mB001)[dsm].registers[3] = mDbThres->GetHT_DSM0_threshold(dsm,timestamp,3);
+    (*mB001)[dsm].registers[4] = mDbThres->GetTP_DSM0_threshold(dsm,timestamp,0);
+
+    //Loop over 10 input channels to each module 
+    for (int ch = 0 ; ch < kL0DsmInputs; ++ch) {
+      int tpid = dsm*10+ch;
+      (*mB001)[dsm].channels[ch] = L0_HT_ADC[tpid] | L0_TP_ADC[tpid] << 6;
+    } // End loop over channels
+  } // End loop over modules
+
+  // Emulate BEMC layer 0
+  mB001->run();
+}
+
+//==================================================
+
+void StBemcTriggerSimu::get2009_DSMLayer1()
+{
+  // Get input from BEMC layer 0
+  mB001->write(*mB101);
+
+  // Loop over modules
+  for (int dsm = 0; dsm < kL1DsmModule; ++dsm) {
+    // Set DSM registers (thresholds)
+    // R0: BEMC-Jet-Patch-th0 (12)
+    // R1: BEMC-Jet-Patch-th1 (12)
+    // R2: BEMC-Jet-Patch-th2 (12)
+    (*mB101)[dsm].registers[0] = mDbThres->GetJP_DSM1_threshold(dsm,timestamp,0);
+    (*mB101)[dsm].registers[1] = mDbThres->GetJP_DSM1_threshold(dsm,timestamp,1);
+    (*mB101)[dsm].registers[2] = mDbThres->GetJP_DSM1_threshold(dsm,timestamp,2);
+  } // End loop over modules
+
+  // Emulate BEMC layer 1
+  mB101->run();
+}
+
+//==================================================
 
 const vector< pair<int,int> > StBemcTriggerSimu::getTowersAboveThreshold(int trigId) const {  
   vector< pair<int,int> > towers;
