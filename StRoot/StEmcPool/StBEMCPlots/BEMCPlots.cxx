@@ -1,4 +1,3 @@
-#include "BEMCPlots.h"
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -26,6 +25,8 @@ using namespace std;
 
 #include <StDaqLib/EMC/StEmcDecoder.h>
 
+#include "BEMCPlots.h"
+#include "bemc.h"
 #include "BEMC_DSM_decoder.h"
 #include "BEMCPlotsNames.h"
 
@@ -34,6 +35,7 @@ StEmcDecoder *BEMCDecoder = 0;
 
 //-------------------------------------------------------------------
 void BEMCPlots::initHisto(TObjArray *list, const char *bemcStatus) {
+    bemcMakeHisto();
     if (BEMCPlotsInstance) delete BEMCPlotsInstance; BEMCPlotsInstance = 0;
     BEMCPlotsInstance = new BEMCPlots(list);
     if (BEMCPlotsInstance) {
@@ -43,12 +45,14 @@ void BEMCPlots::initHisto(TObjArray *list, const char *bemcStatus) {
 }
 //-------------------------------------------------------------------
 void BEMCPlots::resetHisto(const char *bemcStatus) {
+    bemcReset();
     if (BEMCPlotsInstance) {
 	BEMCPlotsInstance->clear(bemcStatus);
     }
 }
 //-------------------------------------------------------------------
 void BEMCPlots::saveHisto(TFile *hfile) {
+    bemcSave(hfile);
     if (BEMCPlotsInstance) {
 	BEMCPlotsInstance->saveHistograms(hfile);
     }
@@ -61,6 +65,7 @@ void BEMCPlots::fillHisto(    char *datap
                 	    , const unsigned short *dsmL2Input
                 	    , const unsigned short *dsmL3Input
                 	    ) {
+    bemcFillHisto(datap);
     if (BEMCPlotsInstance) {
 	BEMCPlotsInstance->processEvent(datap, dsmL0WestInput, dsmL0EastInput, dsmL1Input, dsmL2Input, dsmL3Input);
     }

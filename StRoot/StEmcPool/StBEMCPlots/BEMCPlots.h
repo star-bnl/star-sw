@@ -4,7 +4,6 @@
 class TH1F;
 class TH2F;
 class TFile;
-class TPad;
 class TObjArray;
 
 class BEMCPlots {
@@ -16,7 +15,7 @@ public:
     void init(unsigned int date, unsigned int time, const char *bemcStatus);
     void clear(const char *bemcStatus);
     void saveHistograms(TFile *hfile);    
-    void processEvent(	  char *datap
+    void processEvent(	  char *rdr
 			, const unsigned char *dsmL0WestInput
 			, const unsigned char *dsmL0EastInput
 			, const unsigned short *dsmL1Input
@@ -31,7 +30,7 @@ public:
     static void initHisto(TObjArray *list = 0, const char *bemcStatus = 0);
     static void resetHisto(const char *bemcStatus = 0);
     static void saveHisto(TFile *hfile);    
-    static void fillHisto(char *datap
+    static void fillHisto(char *rdr
 			, const unsigned char *dsmL0WestInput
 			, const unsigned char *dsmL0EastInput
 			, const unsigned short *dsmL1Input

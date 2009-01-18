@@ -4,13 +4,13 @@
 #include <TPad.h>
 #include <TH2.h>
 #include <TF1.h>
-#include "TEnv.h"
+#include <TEnv.h>
 
 #include <TPaveStats.h>
 #include <TStyle.h> // for gPad
 #include <TROOT.h> // for gROOT
 #include <TSystem.h>
-#include "TMath.h"
+#include <TMath.h>
 
 const int mxh=64;
 static TH1 *hr[mxh];
@@ -49,15 +49,15 @@ void GetHisto(FileType &fd,char *name, int i) {
 //--------------------------------------
 //--------------------------------------
 void 
-eePlot(int page, int panel,FileType fd, TPad *cc){
+eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskFilename){
   static int first=1;
   static EemcTwMask *twMask=0;
   if(first) { 
   bool twMaskFound=false;
   twMask =new EemcTwMask;
   eePlotInit(); 
-  const char *maskFile = gEnv->GetValue("OnLine.eemcMask","eemcTwMask.dat");
-  twMaskFound=useTwMask(maskFile, twMask); 
+//  const char *maskFile = gEnv->GetValue("OnLine.eemcMask","eemcTwMask.dat");
+  twMaskFound=useTwMask(eemcTwMaskFilename, twMask); 
 
   first=0;
   if(!twMaskFound) { delete twMask; twMask=0;}
