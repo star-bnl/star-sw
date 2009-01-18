@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.7 2008/04/28 18:44:53 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.10 2008/11/26 18:01:30 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,15 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.10  2008/11/26 18:01:30  fine
+ * prepare StRtsReaderMaker for DAQ_READER transition
+ *
+ * Revision 1.9  2008/11/25 21:33:22  fine
+ * preparing  DAQ maker for DAQ_READER
+ *
+ * Revision 1.8  2008/11/25 21:28:03  fine
+ * preprae DAQ maker for DAQ_READER
+ *
  * Revision 1.7  2008/04/28 18:44:53  fine
  * Add the third numeric parameter for get method
  *
@@ -87,14 +96,26 @@
 
 #include "TDataSetIter.h"
 
-#include "RTS/src/RTS_READER/rts_reader.h"
-#include "RTS/src/RTS_READER/daq_det.h"
-#include "RTS/src/RTS_READER/daq_dta.h"
-#include "RTS/src/RTS_READER/daq_dta_structs.h"
+#if !defined(OLD_EVP_READER) && !defined(NEW_DAQ_READER)
+#  include "RTS/src/RTS_READER/daq_det.h"
+#  include "RTS/src/RTS_READER/daq_dta.h"
+#  include "RTS/src/RTS_READER/daq_dta_structs.h"
     typedef unsigned int UINT32;
-#   include "RTS/include/evp.h"
-#   include "RTS/src/EVP_READER/cfgutil.h"
-#include "RTS/src/EVP_READER/evpReaderClass.h"
+#  include "RTS/include/evp.h"
+#  include "RTS/src/EVP_READER/cfgutil.h"
+#  include "RTS/src/EVP_READER/evpReaderClass.h"
+#  include "RTS/src/RTS_READER/rts_reader.h"
+#elif defined(NEW_DAQ_READER)
+#  include "RTS/src/DAQ_READER/daq_det.h"
+#  include "RTS/src/DAQ_READER/daq_dta.h"
+#  include "RTS/src/DAQ_READER/daq_dta_structs.h"
+    typedef unsigned int UINT32;
+#  include "RTS/include/evp.h"
+#  include "RTS/src/DAQ_READER/cfgutil.h"
+#  include "RTS/src/DAQ_READER/daqReader.h"
+#endif
+
+
 
 ClassImp(StRtsReaderMaker);
 
@@ -114,13 +135,14 @@ StRtsReaderMaker::~StRtsReaderMaker()
 }
 //_____________________________________________________________
 Int_t StRtsReaderMaker::Init() {
-
+#if 0
    if (!fFileName.IsNull() ) {
      fRtsReader = new rts_reader("R") ;  // call myself "R"; used for debugging prints...
      fRtsReader->enable("*") ;           // enable the selected det or dets
      fRtsReader->add_input(fFileName);   // add all files to the list...
      fSlaveMode = false;
    }
+#endif
    return 0;
 }
 
@@ -142,7 +164,7 @@ rts_reader *StRtsReaderMaker::InitReader()
             LOG_INFO << "StRtsReaderMaker::InitReader No evpReader available..." << endm;
          } else {
             LOG_INFO << "StRtsReaderMaker::InitReader: evpReader was found: "  << daqEvp << endm;
-            fRtsReader = daqEvp->rts_rr;
+            fRtsReader = daqEvp->rts();
             if (!fRtsReader) {
               LOG_ERROR << "StRtsReaderMaker::InitReader: no rts_reader was found!" << endm;
             }
@@ -312,11 +334,13 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
 Int_t StRtsReaderMaker::InitRun(int run)
 {
   Int_t res = kStOK;
+#ifndef NEW_EVP_READER
   if (!fSlaveMode && fRtsReader) {
      LOG_INFO << "StRtsReaderMaker::InitRun"  << endm;
      fRtsReader->InitRun(run);               // some dummy for now
      fRtsReader->det("tpx")->SetMode(3);     // make TPX do all!  
   }
+#endif
   return res;
 }
 
@@ -326,8 +350,8 @@ Int_t StRtsReaderMaker::Make()
    // Force  RTS_READER to get the next event if it is not slave
    int res = kStOk;
    InitReader();
+#ifndef NEW_EVP_READER
    if (fSlaveMode)  return kStOk;
-   
    //-------------------------------------
    int rtsReturn = fRtsReader->Make();  //
    //-------------------------------------
@@ -349,4 +373,8 @@ Int_t StRtsReaderMaker::Make()
                 << kStOk << endm;
    }
    return res;
+#else
+   // with NEW_EVP_READER we are always in "slave" mode
+   return res;
+#endif
 }

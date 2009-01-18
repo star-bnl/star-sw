@@ -160,6 +160,7 @@ public:
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
    virtual TDatime      GetDateTime() const;
+   virtual TDatime      GetDBTime() const;
    virtual void         SetDateTime(Int_t idat,Int_t itim);// 
    virtual StEvtHddr   *GetEvtHddr() const; //
    virtual Int_t        GetDate()  const ;
@@ -191,7 +192,7 @@ public:
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
    virtual StMaker     *GetMaker (const Char_t *mkname);
-   virtual StMaker     *GetMakerInheritsFrom (const Char_t *mktype);
+   virtual StMaker     *GetMakerInheritsFrom (const Char_t *mktype) const;
    virtual Bool_t       IsActive() {return TestBIT(kActive);}
    virtual StMaker     *Maker (const Char_t *mkname){return GetMaker (mkname);};
 
@@ -244,7 +245,7 @@ public:
 TObject        *GetDirObj(const Char_t *dir) const;
 void            SetDirObj(TObject *obj,const Char_t *dir);
   virtual const Char_t *GetCVS() const
-  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.87 2008/06/03 22:33:15 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.88 2008/12/21 18:59:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const Char_t *logInput,
                                     const StMaker *uppMk=0,
@@ -278,16 +279,16 @@ void        PrintAttr() const;
 class StMakerIter 
 {
 public:
-  StMakerIter(StMaker *mk, Int_t second = 0);
+  StMakerIter(const StMaker *mk, Int_t second = 0);
  ~StMakerIter();
   StMaker *NextMaker();
-  StMaker *GetMaker () const {return fMaker;}
+  StMaker *GetMaker () const {return (StMaker *)fMaker;}
 private:
   Int_t fState;                 //!
   Int_t fSecond;                //!
-  StMaker *fMaker;              //!
+  const StMaker *fMaker;              //!
   StMakerIter *fMakerIter;      //!
-  TDataSet *fItWas;             //!
+  const TDataSet *fItWas;             //!
   TDataSetIter *fIter;          //!
 };  
 class StTestMaker : public StMaker {
@@ -308,8 +309,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.87 2008/06/03 22:33:15 fisyak Exp $
+// $Id: StMaker.h,v 1.88 2008/12/21 18:59:43 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.88  2008/12/21 18:59:43  perev
+// GetDBTim() added
+//
 // Revision 1.87  2008/06/03 22:33:15  fisyak
 // Add geometries for y2005g, y2006g and y2007g; use ROOT convention for variable definitions
 //

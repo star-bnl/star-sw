@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.10 2008/10/23 20:37:32 genevb Exp $
+ * $Id: StPPVertexFinder.h,v 1.11 2008/12/01 22:57:46 balewski Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -41,7 +41,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void saveHisto(TString fname);
   int  mTotEve;
   int  eveID;
-  int  mTestMode; // internal  param to play with cuts
+  uint  mAlgoSwitches; //binary, assign 1bit per change, use enum below
+  enum {kSwitchOneHighPT=1}; 
 
   // params
   double mMinTrkPt;       //~ pT=0.16(GeV/c) == R=2 (m )in 2001
@@ -56,6 +57,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool   mUseCtb;         // disable CTB from matching/vetoing of tracks
   bool   mDropPostCrossingTrack;  // enable/disable post crossing tarck rejection
   int    mStoreUnqualifiedVertex; // set the max # of vertices, sorted by rank
+  float  mCut_oneTrackPT; // threshold for storing one track vertices
 
   // beam line
   double          mX0  ;     // starting point of beam parameterization
@@ -105,6 +107,10 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.11  2008/12/01 22:57:46  balewski
+ * Added capability to reco 1 high pT track vertices with positive rank. 2+ match vertices will have rank above 1e6. Sub-prime vertices (for Akio) have negative rank. More details is given at:
+ * http://drupal.star.bnl.gov/STAR/comp/reco/vf/ppv-vertex/2009-algo-upgrade-1
+ *
  * Revision 1.10  2008/10/23 20:37:32  genevb
  * Add switches for turning on/off use of Post-Crossing Tracks [default:off]
  *

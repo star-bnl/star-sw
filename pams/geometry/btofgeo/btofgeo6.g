@@ -1,7 +1,13 @@
-* $Id: btofgeo6.g,v 1.4 2008/10/16 02:47:27 perev Exp $
+* $Id: btofgeo6.g,v 1.6 2009/01/03 23:03:33 perev Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo6.g,v $
+* Revision 1.6  2009/01/03 23:03:33  perev
+* BtofConfig=6 in 2008a,2009
+*
+* Revision 1.5  2008/12/05 23:45:40  perev
+* BRMD is seen now
+*
 * Revision 1.4  2008/10/16 02:47:27  perev
 * change the tray selection to be the final tray design. Xin
 *
@@ -551,19 +557,19 @@ Block BTOF is the whole CTF system envelope
       Shape     Tube      rmin=btog_Rmin+btog_X0  Rmax=btog_Rmax+btog_X0  dz=btog_dz+btog_Z0
 
       print *,'BTOF choice = ',btog_choice
-	  if (btog_choice == 7) print *,' TOF: btog_choice=7: This is the Run-IV geometry...'
-	  if (btog_choice == 8) print *,' TOF: btog_choice=8: This is the Run-V geometry...'
-	  if (btog_choice == 9) print *,' TOF: btog_choice=9: This is the Run-VI geometry...'
+	  if (btog_choice ==  7) print *,' TOF: btog_choice=7: This is the Run-IV geometry...'
+	  if (btog_choice ==  8) print *,' TOF: btog_choice=8: This is the Run-V geometry...'
+	  if (btog_choice ==  9) print *,' TOF: btog_choice=9: This is the Run-VI geometry...'
 	  if (btog_choice == 10) print *,' TOF: btog_choice=10: This is the Run-VII geometry...'
 	  if (btog_choice == 11) print *,' TOF: btog_choice=11: This is the Run-VIII geometry...'
 
       choice = 1                                     ! ctb
       if (btog_choice == 2) choice=btog_choice       ! full tofp
       if (btog_choice == 6) choice=btog_choice       ! full tofr
-!      print *,' Positioning West Barrel, choice=',choice
+      print *,' Positioning West Barrel, choice=',choice
       Create and Position BTOH  z=+btog_dz/2+btog_Z0   alphay=180   ! West barrel
       choice=btog_choice                   
-!      print *,' Positioning East Barrel, choice=',choice
+      print *,' Positioning East Barrel, choice=',choice
       Create and Position BTOH  z=-btog_dz/2-btog_Z0                 ! East barrel
 EndBlock
 *
@@ -1244,7 +1250,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 Block BRMD  is a six channel module for TOFr
-      Attribute  BRMD     seen=0   colo=6
+      Attribute  BRMD     seen=1   colo=6
       Material   RPCgas
       Shape      BOX      dx=mod7_Height/2,
                           dy=mod7_Width/2,

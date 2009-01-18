@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.210 2008/07/26 01:54:37 perev Exp $
+// $Id: StMaker.cxx,v 1.213 2009/01/04 20:41:26 perev Exp $
 //
 //
 /*!
@@ -173,7 +173,10 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2007g",      20061105,     4, "y2007g",   "y2007b + SVT dead material"},
 
   // SVT/SSD is out
-  {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone in separate SCON"},
+  {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone is lost"},
+  {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
+  // 
+  {"y2009",       20081215,     0, "y2009",    "Practically place holder yet(VP)"},
 
   // development tags
   {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -616,7 +619,7 @@ TDataSet *StMaker::GetDataBase(const Char_t *logInput,const TDatime *td)
   return ds;
 }
 //______________________________________________________________________________
-StMaker *StMaker::GetMakerInheritsFrom (const Char_t *mktype)
+StMaker *StMaker::GetMakerInheritsFrom (const Char_t *mktype) const
 {
   TURN_LOGGER(this);
   StMaker  *mk = 0;
@@ -1101,6 +1104,15 @@ TDatime  StMaker::GetDateTime() const
    StEvtHddr *hd = GetEvtHddr();
    return hd->GetDateTime();
 }
+//_____________________________________________________________________________
+TDatime  StMaker::GetDBTime() const 
+{    
+  StMaker  *mk = GetMakerInheritsFrom("St_db_Maker");
+  assert(mk);
+  return mk->GetDateTime();
+}
+
+
 //_____________________________________________________________________________
 Int_t    StMaker::GetDate()  const {return GetDateTime().GetDate();}
 //_____________________________________________________________________________
@@ -1685,7 +1697,7 @@ static const Char_t *retCodes[] = {
 }
 
 //_____________________________________________________________________________
-StMakerIter::StMakerIter(StMaker *mk,Int_t secondary)
+StMakerIter::StMakerIter(const StMaker *mk,Int_t secondary)
 {
   fState = 0;
   fMaker = mk;
@@ -1728,7 +1740,7 @@ AGAIN: switch (fState) {
       delete fMakerIter; fMakerIter=0;
       delete fIter; 	 fIter = 0;
       fState = 3;
-      return fMaker;
+      return (StMaker*)fMaker;
 
     case 3:					// go upper when started
       if (fSecond) return 0;
@@ -1853,6 +1865,15 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.213  2009/01/04 20:41:26  perev
+// fix , alias must be y2009, not 8
+//
+// Revision 1.212  2008/12/31 02:11:27  perev
+// y2009
+//
+// Revision 1.211  2008/12/21 18:59:33  perev
+// GetDBTim() added
+//
 // Revision 1.210  2008/07/26 01:54:37  perev
 // add y2007a
 //

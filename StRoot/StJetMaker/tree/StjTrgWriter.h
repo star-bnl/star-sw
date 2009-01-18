@@ -1,9 +1,7 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgWriter.h,v 1.3 2008/09/21 19:11:41 tai Exp $
+// $Id: StjTrgWriter.h,v 1.2 2008/08/13 19:37:29 tai Exp $
 #ifndef STJTRGWRITER_H
 #define STJTRGWRITER_H
-
-#include <TObject.h>
 
 #include "StjTrgPassCondition.h"
 
@@ -16,7 +14,7 @@ class TTree;
 
 class StjTrg;
 
-class StjTrgWriter : public TObject {
+class StjTrgWriter {
 
 public:
 
@@ -61,8 +59,6 @@ private:
   Int_t    _soft;
 
   StjTrgPassCondition* _fillCondition;
-
-  ClassDef(StjTrgWriter, 1)
 
 };
 

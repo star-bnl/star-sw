@@ -1,14 +1,17 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
-#include <rtsLog.h>
+#include <rtsLog.h>	// for my LOG() call
+
 
 // this needs to be always included
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
 // only the detectors we will use need to be included
+// for their structure definitions...
 #include <DAQ_BSMD/daq_bsmd.h>
 #include <DAQ_BTOW/daq_btow.h>
 #include <DAQ_EMC/daq_emc.h>
@@ -28,25 +31,33 @@
 #include <DAQ_TPX_t/daq_tpx.h>
 #include <DAQ_TRG/daq_trg.h>
 
-// more complicated detectors I wrapped inside their own functions...
-static int bsmd_doer(daqReader *rdr, int do_print) ;
-static int tpc_doer(daqReader *rdr, int do_print) ;
-static int tpx_doer(daqReader *rdr, int do_print) ;
+// I wrapped more complicated detectors inside their own functions
+// for this example
+static int bsmd_doer(daqReader *rdr, char  *do_print) ;
+static int esmd_doer(daqReader *rdr, char  *do_print) ;
+static int btow_doer(daqReader *rdr, char  *do_print) ;
+static int etow_doer(daqReader *rdr, char  *do_print) ;
+static int tpc_doer(daqReader *rdr, char *do_print) ;
+static int tpx_doer(daqReader *rdr, char *do_print) ;
 
 int main(int argc, char *argv[])
 {
 	extern char *optarg ;
 	extern int optind ;
 	int c ;
+	char *print_det = "" ;
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
 	rtsLogLevel(WARN) ;
 
 
-	while((c = getopt(argc, argv, "d:h")) != EOF) {
+	while((c = getopt(argc, argv, "D:d:h")) != EOF) {
 		switch(c) {
 		case 'd' :
 			rtsLogLevel(optarg) ;
+			break ;
+		case 'D' :
+			print_det = optarg ;
 			break ;
 		default :
 			break ;
@@ -56,26 +67,6 @@ int main(int argc, char *argv[])
 	class daqReader *evp ;			// tha main guy
 	evp = new daqReader(argv[optind]) ;	// create it with the filename argument..
 
-	// create all the detectors we need 
-	// and assign them to our "driver" class daqReader
-	new daq_bsmd(evp) ;
-	new daq_btow(evp) ;
-	new daq_emc(evp) ;
-	new daq_esmd(evp) ;
-	new daq_etow(evp) ;
-	new daq_fpd(evp) ;
-	new daq_ftp(evp) ;
-	new daq_l3(evp) ;
-	new daq_pmd(evp) ;
-	new daq_pp2pp(evp) ;
-	new daq_ric(evp) ;
-	new daq_sc(evp) ;
-	new daq_ssd(evp) ;
-	new daq_svt(evp) ;
-	new daq_tof(evp) ;
-	new daq_tpc(evp) ;
-	new daq_tpx(evp) ;
-	new daq_trg(evp) ;
 
 	while(evp->get(0,0)) {	// keep getting new events
 		daq_dta *dd ;	// generic data pointer; reused all the time
@@ -87,7 +78,7 @@ int main(int argc, char *argv[])
 		dd = evp->det("trg")->get("legacy") ;
 		if(dd) LOG(INFO,"TRG found") ;
 
-		dd = evp->det("sc")->get("legacy") ;
+		dd = evp->det("sc")->get() ;
 		if(dd) LOG(INFO,"SC found") ;
 
 		dd = evp->det("fpd")->get("legacy") ;
@@ -114,39 +105,31 @@ int main(int argc, char *argv[])
 		dd = evp->det("pmd")->get("legacy") ;
 		if(dd) LOG(INFO,"PMD found") ;
 
-		/************* now come dets which have legacy and non-legacy banks... */
-
-		// TOF has 
 		dd = evp->det("tof")->get("legacy") ;
-		if(dd) LOG(INFO,"TOF LEGACY found") ;
-
-		dd = evp->det("tof")->get("raw") ;
-		if(dd) LOG(INFO,"TOF RAW(sfs) found") ;
+		if(dd) LOG(INFO,"TOF found") ;
 
 		
 		/***************** EMCs ************************/
-		// PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY!
+
+		if(btow_doer(evp, print_det)) LOG(INFO,"BTOW found") ;
+
+		if(bsmd_doer(evp,print_det)) LOG(INFO,"BSMD found (any bank)") ;
+
+		if(etow_doer(evp, print_det)) LOG(INFO,"ETOW found") ;
+
+		if(esmd_doer(evp, print_det)) LOG(INFO,"ESMD found") ;
+
+		/******************** TPC & TPX ***********************/
+
+		if(tpc_doer(evp,print_det)) LOG(INFO,"TPC found (legacy)") ;
+
+		if(tpx_doer(evp,print_det)) LOG(INFO,"TPX found (any bank)") ;
+
+
+
+		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
 		dd = evp->det("emc_pseudo")->get("legacy") ;
 		if(dd) LOG(INFO,"EMC_PSEUDO LEGACY found") ;
-
-		// simple...
-		dd = evp->det("btow")->get("adc") ;
-		if(dd) LOG(INFO,"BTOW found") ;
-
-		dd = evp->det("etow")->get("adc") ;
-		if(dd) LOG(INFO,"ETOW found") ;
-
-		dd = evp->det("esmd")->get("adc") ;
-		if(dd) LOG(INFO,"ESMD found") ;
-
-		// BSMD
-		if(bsmd_doer(evp,0)) LOG(INFO,"BSMD found (any bank)") ;
-
-		// TPC
-		if(tpc_doer(evp,0)) LOG(INFO,"TPC found (legacy)") ;
-
-		// TPX
-		if(tpx_doer(evp,0)) LOG(INFO,"TPX found (any bank)") ;
 
 		
 
@@ -155,20 +138,42 @@ int main(int argc, char *argv[])
 	return 0 ;
 }
 
-static int tpx_doer(daqReader *rdr, int do_print)
+
+
+static int tpx_doer(daqReader *rdr, char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
 
+	if(strcasestr(do_print,"tpx")) ;	// leave as is...
+	else do_print = 0 ;
+
 	// TPX
 	// it is better, more memory efficient, to call stuff sector by sector
 	for(int s=1;s<=24;s++) {
-		dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t!
+		/// TPX legacy not done yet!
+		dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t! but not done YET!
 		if(dd) found = 1 ;
 
+
 		dd = rdr->det("tpx")->get("adc",s) ;
-		if(dd) 	found = 1 ;
+		if(dd) 	{
+			found = 1 ;
 	
+			while(dd->iterate()) {
+				if(do_print) {
+					printf("TPX: sec %02d, row %2d, pad %3d: %3d pixels\n",dd->sec,dd->row,dd->pad,dd->ncontent) ;
+				}
+
+				for(u_int i=0;i<dd->ncontent;i++) {
+					if(do_print) {
+
+						printf("\ttb %3d = %4d ADC\n",dd->adc[i].tb, dd->adc[i].adc) ;
+					}
+				}
+			}
+		}
+
 		dd = rdr->det("tpx")->get("cld",s) ;
 		if(dd) 	found = 1 ;
 	
@@ -181,10 +186,14 @@ static int tpx_doer(daqReader *rdr, int do_print)
 
 }
 
-static int tpc_doer(daqReader *rdr, int do_print)
+static int tpc_doer(daqReader *rdr, char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
+
+	if(strcasestr(do_print,"tpc")) ;	// leave as is...
+	else do_print = 0 ;
+
 
 	// although it is possible to have all sectors of the TPC
 	// present in memory, it is better to do this sector-by-sector
@@ -192,12 +201,18 @@ static int tpc_doer(daqReader *rdr, int do_print)
 	for(int s=1;s<=24;s++) {
 		dd = rdr->det("tpc")->get("legacy",s) ;
 		if(dd) {
+			
 			found++ ;	// mark as found...
 			tpc_t *tpc = (tpc_t *) dd->Void ;
 			
 			// one can rerun the afterburner as well with:
-			daq_tpc *tpc_class = (daq_tpc *)rdr->det("tpc") ;
-			int cl_found = tpc_class->fcfReader(s,0,0,tpc) ;
+			//daq_tpc *tpc_class = (daq_tpc *)rdr->det("tpc") ;
+
+
+			int cl_found = 0 ;
+			//cl_found = tpc_class->fcfReader(s,0,0,tpc) ;
+
+
 			LOG(NOTE,"TPC: rerun cluster finder: sector %d: found %d clusters",s,cl_found) ;
 		}
 	}
@@ -207,14 +222,18 @@ static int tpc_doer(daqReader *rdr, int do_print)
 	
 }
 	
-static int bsmd_doer(daqReader *rdr, int do_print)
+static int bsmd_doer(daqReader *rdr, char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
 
+	if(strcasestr(do_print,"bsmd")) ;	// leave as is...
+	else do_print = 0 ;
+
+
 	// do I see the non-zero-suppressed bank? let's do this by fiber...
 	for(int f=1;f<=12;f++) {
-		dd = rdr->det("bsmd")->get("adc_non_zs",0,f) ;
+		dd = rdr->det("bsmd")->get("adc_non_zs",0,f) ;	// sector is ignored (=0)
 		if(dd) {
 			while(dd->iterate()) {
 				found = 1 ;
@@ -253,3 +272,97 @@ static int bsmd_doer(daqReader *rdr, int do_print)
 
 	return found ;
 }
+
+static int esmd_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"esmd")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("esmd")->get("adc") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			esmd_t *d = (esmd_t *) dd->Void ;
+
+			for(int i=0;i<ESMD_MAXFEE;i++) {
+				for(int j=0;j<ESMD_PRESIZE;j++) {
+					if(do_print) printf("ESMD: fee %2d: preamble %d: 0x%04X [%d dec]\n",i,j,d->preamble[i][j], d->preamble[i][j]) ;
+				}
+				for(int j=0;j<ESMD_DATSIZE;j++) {
+					if(do_print) printf("ESMD: fee %2d: data %d: 0x%04X [%d dec]\n",i,j,d->adc[i][j], d->adc[i][j]) ;
+				}
+
+			}
+		}
+	}
+
+	return found ;
+}
+
+static int etow_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"etow")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("etow")->get("adc") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			etow_t *d = (etow_t *) dd->Void ;
+
+			for(int i=0;i<ETOW_MAXFEE;i++) {
+				for(int j=0;j<ETOW_PRESIZE;j++) {
+					if(do_print) printf("ETOW: fee %2d: preamble %d: 0x%04X [%d dec]\n",i,j,d->preamble[i][j], d->preamble[i][j]) ;
+				}
+				for(int j=0;j<ETOW_DATSIZE;j++) {
+					if(do_print) printf("ETOW: fee %2d: data %d: 0x%04X [%d dec]\n",i,j,d->adc[i][j], d->adc[i][j]) ;
+				}
+
+			}
+		}
+	}
+
+	return found ;
+}
+
+static int btow_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"btow")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("btow")->get("adc") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			btow_t *d = (btow_t *) dd->Void ;
+
+			for(int i=0;i<BTOW_MAXFEE;i++) {
+				for(int j=0;j<BTOW_PRESIZE;j++) {
+					if(do_print) printf("BTOW: fee %2d: preamble %d: 0x%04X [%d dec]\n",i,j,d->preamble[i][j], d->preamble[i][j]) ;
+				}
+				for(int j=0;j<BTOW_DATSIZE;j++) {
+					if(do_print) printf("BTOW: fee %2d: data %d: 0x%04X [%d dec]\n",i,j,d->adc[i][j], d->adc[i][j]) ;
+				}
+
+			}
+		}
+	}
+
+	return found ;
+}
+

@@ -1,6 +1,12 @@
-* $Id: scongeo.g,v 1.1 2007/11/06 01:19:38 perev Exp $
+* $Id: scongeo.g,v 1.3 2009/01/06 04:06:35 perev Exp $
 *
 * $Log: scongeo.g,v $
+* Revision 1.3  2009/01/06 04:06:35  perev
+* coneVer=3 for elliptic rods
+*
+* Revision 1.2  2008/12/30 19:40:26  perev
+* Rods added
+*
 * Revision 1.1  2007/11/06 01:19:38  perev
 * y2008 geo
 *
@@ -25,7 +31,7 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
 +cde,AGECOM,GCONST,GCUNIT.
 *
       Content          SCON,SCMY,SGRA,SBSP,SAKM,SCKM,SBMM,SBMI,SBMO,SMRD,
-                       SBRL,SBRX,SBSR,SBCR
+                       SBRL,SBRX,SBSR,SBCR,SROD,SROH
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
                        ZsizeMax,  Angoff, SupportVer,   ConeVer,
@@ -34,8 +40,9 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
       structure SSUP { Version,   CabThk,    HosRmn,
                        HosRmx,    Nhoses,    WrpMyThk,  WrpAlThk,
                        GrphThk,   Cone1Zmn,  RodLen,    RodDist,
-                       RodID,     RodOD,     Con1IdMn, Con3IdMn,
-                       Con4IdMn, Con4IdMx, Cone3zmx,  Cone4zmx,
+                       RodID,     RodOD,     RodIDx,    RodODx,
+		       Con1IdMn, Con3IdMn,
+                       Con4IdMn, Con4IdMx,   Cone3zmx,  Cone4zmx,
                        BraThk,    ERJThk,    ERJWid,
                        ERJLen,    ERJzdis,   ERJ1x,     ERJ2x,
                        ERJ2y,     ERJrad,    ERJdia}
@@ -69,6 +76,18 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
       shield_phi(3)=45.0
       shield_phi(4)=63.0
 ***************************
+   Fill SVTG ! Basic SVT dimensions 
+      Version   = 2          ! geometry version
+      Nlayer    = 7          ! number of svt layers (was 7)
+      RsizeMin  = 4.100      ! STV innermost radius
+      RsizeMax  = 46.107     ! STV outermost radius
+      ZsizeMax  = 270        ! SVT+FTPC length
+      Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
+      SupportVer= 1          ! versioning of the shield
+      ConeVer=    1          ! versioning of the support cone
+      ifMany    = 0          ! whether we use the geant MANY option
+      Nmin      = 1          ! the index of the innermost layer
+*
    Fill SSUP ! Support structures
       Version   = 1          ! geometry version
       CabThk    = 0.05       ! thickness of layer of cables on support cone
@@ -140,6 +159,18 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
       ERJrad    = 10.80      ! distance of ERJ center from beam axis
       ERJdia    = 0.17       ! ERJ screw diameter
 *------------------------------------------------------------
+* This is a copy of the above 2nd version with one difference which is
+* elliptic rodes instead of tubes
+
+   Fill SSUP ! Support structures
+      Version   = 3          ! geometry version
+      RodLen    = 110.8      ! Length of support rods
+      RodDist   = 17.5       ! Distance of support rod od from beam axis
+      RodID     = 3.64       ! ID of Carbon support rods 
+      RodOD     = 4.50       ! OD of Carbon support rods 
+      RodIDx    = 8.72       ! ID of Carbon support rods 
+      RodODx    = 9.58       ! OD of Carbon support rods 
+*------------------------------------------------------------
    Fill SSUB ! beampipe support
       Version   = 1          ! geometry version
 *
@@ -200,6 +231,12 @@ Module  SCONGEO is Support structures from SVTT moved into CAVE:
 
       Create and Position SCON in Cave
       Create and Position SCON in Cave ThetaZ=180
+* 
+* SVT support rods -- previously incorrectly described as Be,
+* carbon compound in reality
+      Create    SROD  "Support rod"
+      Position  SROD  y = ssup_rodDist+ssup_rodOD/2
+      Position  SROD  y =-ssup_rodDist-ssup_rodOD/2
 *
 * The beampipe support
       Create and Position SBSP  in CAVE z = (ssup_RodLen/2- ssub_KMntThk/2)
@@ -473,6 +510,27 @@ Block SCMY is a mylar wrap around the support cone
            ssup_Con4IdMn+roffset,
            ssup_Con4IdMx+roffset}
 EndBlock
+*
+* ****************************************************************************
+*
+Block SROD is the SVT Carbon composite support rod
+      Material  Carbon
+      Attribute SROD  Seen=1  Colo=2
+      Shape     ELTU   p1=ssup_RodODx/2,
+                       p2=ssup_RodOD/2,
+                       dz=ssup_RodLen/2
+      Create and Position SROH;
+endblock
 
+*
+* ****************************************************************************
+*
+Block SROH is the hole in SROD
+      Material  Air
+      Attribute SROH  Seen=1  Colo=3
+      Shape     ELTU   p1=ssup_RodIDx/2,
+                       p2=ssup_RodID/2,
+                       dz=ssup_RodLen/2
+endblock
       End
 
