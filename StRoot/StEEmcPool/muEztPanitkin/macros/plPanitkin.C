@@ -3,6 +3,7 @@ TCanvas *cc;
 TPad *pd1=0;
 class   EemcTwMask;
 EemcTwMask *mm; 
+const Char_t *eemcTwMaskFile = 0;
 
 //==========================
 //==========================
@@ -12,6 +13,8 @@ void plPanitkin(TString fname="./wrk/hist/run7067154.1.hist.root", int flag=0) {
  
 
   gStyle->SetPalette(1,0);
+
+  eemcTwMaskFile = gEnv->GetValue("OnLine.eemcMask","eemcTwMask.dat");
 
   printf("input Histo=%s=\n",fname.Data());  
   fd=new TFile(fname);
@@ -59,21 +62,21 @@ void plPanitkin(TString fname="./wrk/hist/run7067154.1.hist.root", int flag=0) {
 //==========================
 void plTw(int panel=1) {
   pd1->Clear();
-  eePlot(10,panel,fd,pd1);
+  eePlot(10,panel,fd,pd1,eemcTwMaskFile);
 }
 
 //==========================
 //==========================
 void plSmd(int panel=1) {
   pd1->Clear();
-  eePlot(11,panel,fd,pd1);
+  eePlot(11,panel,fd,pd1,eemcTwMaskFile);
 }
 
 //==========================
 //==========================
 void plDSM(int panel=1) {
   pd1->Clear();
-  eePlot(12,panel,fd,pd1);
+  eePlot(12,panel,fd,pd1,eemcTwMaskFile);
 }
 
 
@@ -135,7 +138,7 @@ void plAllps() {
   for(k=0;k<3;k++) {
     int tab=10+k;
     for(i=1;i<=nPan[k];i++) {
-      eePlot(tab,i,fd,pd1);
+      eePlot(tab,i,fd,pd1,eemcTwMaskFile);
       char tit[100];
       sprintf(tit,"out/pani-%d-%02d.ps",tab,i);
       cc->Print(tit);

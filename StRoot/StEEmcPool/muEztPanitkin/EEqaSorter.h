@@ -1,17 +1,20 @@
 // \class  EEqaSorter
 // \author Jan Balewski, Hal Spinka
-// $Id: EEqaSorter.h,v 1.1 2005/04/28 20:54:46 balewski Exp $
+// $Id: EEqaSorter.h,v 1.2 2009/01/18 01:01:28 ogrebeny Exp $
 
 #ifndef EEqaSorter_h
 #define EEqaSorter_h
 
-#include "TObject.h"
+#include <TObject.h>
+#include <TString.h>
 
 class TObjArray;
+class TH1F;
+class TFile;
+
 class EEqaSorterA;
 class EEqaSorterC;
 class EEdsmAna;
-class TH1F;
 class StEEmcDbMaker;
 
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
@@ -55,7 +58,7 @@ class EEqaSorter :public TObject{
 
  public:
   EEqaSorter( TObjArray*L,StEEmcDbMaker*dbx);
-  void setPath( char *x1 , char *x2) { pathInp=x1; pathOut=x2; }
+  void setPath(const char *x1, const char *x2) { pathInp=x1; pathOut=x2; }
   void initHisto(int nb=150, int mx=600);
   void initRun();
   void sort(EztEmcRawData  *t,  EztEmcRawData  *s, 
@@ -71,7 +74,7 @@ class EEqaSorter :public TObject{
   void Finish();
   void resetHisto();
   void saveHisto(char *n="out/eemcQA");
-  void saveHistoAdd();
+  void saveHistoAdd(TFile *f = 0);
 #ifndef IN_PANITKIN
    ClassDef(EEqaSorter,1) 
 #endif
@@ -80,6 +83,9 @@ class EEqaSorter :public TObject{
 #endif
 
 // $Log: EEqaSorter.h,v $
+// Revision 1.2  2009/01/18 01:01:28  ogrebeny
+// Better separate EMC histogramming from OnlinePlots infrastructure
+//
 // Revision 1.1  2005/04/28 20:54:46  balewski
 // start
 //

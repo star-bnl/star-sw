@@ -30,7 +30,7 @@ class EemcTwMask {
 
 void plNone(TPad *c);
 
-void eePlot(int page, int panel,FileType fd, TPad *c);
+void eePlot(int page, int panel,FileType fd, TPad *c, const Char_t *eemcTwMaskFilename);
 
 void eeJpQa(FileType fd, TPad *c,EemcTwMask *m);
 void eeDaqCorr(FileType fd, TPad *c, int es);

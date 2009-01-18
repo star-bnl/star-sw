@@ -1,4 +1,4 @@
-// $Id: EEqaSorter.cxx,v 1.3 2008/12/19 17:54:34 fine Exp $
+// $Id: EEqaSorter.cxx,v 1.4 2009/01/18 01:01:28 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -112,7 +112,8 @@ void  EEqaSorter::clear() {
 
 //-------------------------------------------
 //-------------------------------------------
-void  EEqaSorter::saveHistoAdd(){ 
+void  EEqaSorter::saveHistoAdd(TFile *f){ 
+  if (f) f->cd();
   HList->Write();
 }
  
@@ -309,7 +310,7 @@ void  EEqaSorter::saveHisto(char * name) {
   TFile f(fname.Data(),"recreate");
   assert(f.IsOpen());
   printf("%d histos are written  to '%s' ...\n",HList->GetEntries(),fname.Data());
-  HList->Write();
+  saveHistoAdd(&f);
   f.Close();
   assert(!f.IsOpen());
   
@@ -448,6 +449,9 @@ EEqaSorter::spy( int runNo, int eveId){
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.4  2009/01/18 01:01:28  ogrebeny
+// Better separate EMC histogramming from OnlinePlots infrastructure
+//
 // Revision 1.3  2008/12/19 17:54:34  fine
 // Disable the dummy class
 //
