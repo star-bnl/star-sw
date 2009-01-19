@@ -2581,15 +2581,6 @@ void StBemcTriggerSimu::get2008pp_DSMLayer2()
 
 void StBemcTriggerSimu::get2009_DSMLayer0()
 {
-  // Switch mismatched trigger patch IDs here for 2006 and beyond
-  swap(L0_HT_ADC[291], L0_HT_ADC[294]);
-  swap(L0_HT_ADC[250], L0_HT_ADC[251]);
-  swap(L0_HT_ADC[263], L0_HT_ADC[267]);
-
-  swap(L0_TP_ADC[291], L0_TP_ADC[294]);
-  swap(L0_TP_ADC[250], L0_TP_ADC[251]);
-  swap(L0_TP_ADC[263], L0_TP_ADC[267]);
-
   // Loop over modules
   for (int dsm = 0; dsm < kL0DsmModule; ++dsm) {
     // Set DSM registers (thresholds)
