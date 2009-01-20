@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.37 2009/01/14 18:20:49 fine Exp $
+ * $Id: StDAQReader.h,v 1.38 2009/01/20 22:56:32 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.38  2009/01/20 22:56:32  fine
+ * remove the redundant CPP flag
+ *
  * Revision 1.37  2009/01/14 18:20:49  fine
  * Remove the redundant devReader type
  *
@@ -139,12 +142,8 @@ class StSVTReader ;
 class StSCReader  ;
 class TDataSet    ;
 
-#ifdef NEW_DAQ_READER
-  class daqReader;
-  typedef daqReader evpReader;
-#else
-  class evpReader   ; // new  2007 DAQ file reader
-#endif
+class daqReader;
+typedef daqReader evpReader;
 
 #ifndef __CINT__
 
