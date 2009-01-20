@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.1 2009/01/14 17:56:14 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.2 2009/01/20 18:10:15 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.2  2009/01/20 18:10:15  ullrich
+ * Bug fix and new ZDC access functions.
+ *
  * Revision 2.1  2009/01/14 17:56:14  ullrich
  * Initial Revision.
  *
@@ -104,6 +107,7 @@ public:
     unsigned short zdcAttenuated(StBeamDirection eastwest, int prepost=0) const;
     unsigned short zdcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short zdcHardwareSum(int prepost=0) const;
     
     //ZDCSMD
@@ -168,8 +172,8 @@ protected:
     QTBlock2009*      mQT2[11];	//!
     QTBlock2009*      mQT3[11];	//!
     QTBlock2009*      mQT4[11];	//!
-    unsigned short mxq[16][32],feq[16][32],bbq[16][32],qt1[16][32],qt2[16][32],qt3[16][32],qt4[16][32]; //!
-    unsigned char tmxq[16][32],tfeq[16][32],tbbq[16][32],tqt1[16][32],tqt2[16][32],tqt3[16][32],tqt4[16][32]; //!
+    unsigned short mxq[11][16][32],feq[11][16][32],bbq[11][16][32],qt1[11][16][32],qt2[11][16][32],qt3[11][16][32],qt4[11][16][32];       //!
+    unsigned char tmxq[11][16][32],tfeq[11][16][32],tbbq[11][16][32],tqt1[11][16][32],tqt2[11][16][32],tqt3[11][16][32],tqt4[11][16][32]; //!
 
     void swapOfflen(TrgOfflen2009* offlen);
     void swapDataBlk(TriggerDataBlk2009* TrgData);

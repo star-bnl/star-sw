@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.21 2009/01/14 17:54:45 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.22 2009/01/20 18:10:14 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.22  2009/01/20 18:10:14  ullrich
+ * Bug fix and new ZDC access functions.
+ *
  * Revision 2.21  2009/01/14 17:54:45  ullrich
  * Modified to cope with necessary changes for 2009.
  *
@@ -159,6 +162,7 @@ public:
     virtual unsigned short zdcAttenuated(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short zdcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short zdcHardwareSum(int prepost=0) const;
 
     //ZDCSMD
@@ -296,6 +300,7 @@ inline unsigned short StTriggerData::zdcUnAttenuated(StBeamDirection eastwest, i
 inline unsigned short StTriggerData::zdcAttenuated(StBeamDirection eastwest, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcTDC(StBeamDirection eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcHardwareSum(int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const {return 0;}
 inline unsigned char  StTriggerData::bemcHighTower(int patch_id, int prepost) const {return 0;}
@@ -312,8 +317,8 @@ inline unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, in
 inline unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
 inline unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
 inline unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
-inline unsigned short StTriggerData::nQTdata(int prepost) const {return 0;};
-inline unsigned int*  StTriggerData::QTdata(int prepost) const {return 0;};
+inline unsigned short StTriggerData::nQTdata(int prepost) const {return 0;}
+inline unsigned int*  StTriggerData::QTdata(int prepost) const {return 0;}
 inline unsigned short StTriggerData::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest) const {return 0;}

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.1 2009/01/14 17:56:14 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.2 2009/01/20 18:10:15 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.2  2009/01/20 18:10:15  ullrich
+ * Bug fix and new ZDC access functions.
+ *
  * Revision 2.1  2009/01/14 17:56:14  ullrich
  * Initial Revision.
  *
@@ -125,13 +128,13 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
         if (offlen[y9QT2_CONF_NUM].length>0) {mQT2[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT2_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT2[i],y9QT2_CONF_NUM); }
         if (offlen[y9QT3_CONF_NUM].length>0) {mQT3[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT3_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT3[i],y9QT3_CONF_NUM); }
         if (offlen[y9QT4_CONF_NUM].length>0) {mQT4[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT4_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT4[i],y9QT4_CONF_NUM); }
-        if (mMXQ[i]) decodeQT(mMXQ[i]->length/4, mMXQ[i]->data, mxq, tmxq); 
-        if (mFEQ[i]) decodeQT(mFEQ[i]->length/4, mFEQ[i]->data, feq, tfeq); 
-        if (mBBQ[i]) decodeQT(mBBQ[i]->length/4, mBBQ[i]->data, bbq, tbbq); 
-        if (mQT1[i]) decodeQT(mQT1[i]->length/4, mQT1[i]->data, qt1, tqt1); 
-        if (mQT2[i]) decodeQT(mQT2[i]->length/4, mQT2[i]->data, qt2, tqt2); 
-        if (mQT3[i]) decodeQT(mQT3[i]->length/4, mQT3[i]->data, qt3, tqt3); 
-        if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4, tqt4); 
+        if (mMXQ[i]) decodeQT(mMXQ[i]->length/4, mMXQ[i]->data, mxq[i], tmxq[i]); 
+        if (mFEQ[i]) decodeQT(mFEQ[i]->length/4, mFEQ[i]->data, feq[i], tfeq[i]); 
+        if (mBBQ[i]) decodeQT(mBBQ[i]->length/4, mBBQ[i]->data, bbq[i], tbbq[i]); 
+        if (mQT1[i]) decodeQT(mQT1[i]->length/4, mQT1[i]->data, qt1[i], tqt1[i]); 
+        if (mQT2[i]) decodeQT(mQT2[i]->length/4, mQT2[i]->data, qt2[i], tqt2[i]); 
+        if (mQT3[i]) decodeQT(mQT3[i]->length/4, mQT3[i]->data, qt3[i], tqt3[i]); 
+        if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4[i], tqt4[i]); 
     }
     dump();
 }
@@ -341,36 +344,86 @@ unsigned short StTriggerData2009::fpdLayer2DSMRaw(int channel) const{
 
 unsigned short StTriggerData2009::zdcAtChannel(int channel, int prepost) const
 {
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && channel>=0 && channel<32) return bbq[buffer][15][channel];
     return 0;
 }
 
 unsigned short StTriggerData2009::zdcAtAddress(int address, int prepost) const
 {
-    return 0;
+    return zdcAtChannel(address,prepost);
 }
 
 unsigned short StTriggerData2009::zdcUnAttenuated(StBeamDirection eastwest, int prepost) const
 {
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) {
+        if(eastwest == east) return bbq[buffer][15][2];
+        else                 return bbq[buffer][15][18];
+    }
     return 0;
 }
 
 unsigned short StTriggerData2009::zdcAttenuated(StBeamDirection eastwest, int prepost) const
 {
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) {
+        if(eastwest == east) return bbq[buffer][15][3];
+        else                 return bbq[buffer][15][19];
+    }
     return 0;
 }
 
 unsigned short StTriggerData2009::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const
 {
-    return 0;    
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && pmt>=1 && pmt<=3) {
+        if(eastwest == east) {
+            if(pmt == 1) return bbq[buffer][15][0];
+            if(pmt == 2) return bbq[buffer][15][8];
+            if(pmt == 3) return bbq[buffer][15][9];
+        }
+        else{
+            if(pmt == 1) return bbq[buffer][15][16];
+            if(pmt == 2) return bbq[buffer][15][24];
+            if(pmt == 3) return bbq[buffer][15][25];
+        }
+    }
+    return 0;
 }
 
 unsigned short StTriggerData2009::zdcTDC(StBeamDirection eastwest, int prepost) const
 {
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) {
+        if(eastwest == east) return bbq[buffer][15][6];
+        else                 return bbq[buffer][15][22];
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2009::zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && pmt>=1 && pmt<=3) {
+        if(eastwest == east) {
+            if(pmt == 1) return bbq[buffer][15][4];
+            if(pmt == 2) return bbq[buffer][15][12];
+            if(pmt == 3) return bbq[buffer][15][13];
+        }
+        else{
+            if(pmt == 1) return bbq[buffer][15][20];
+            if(pmt == 2) return bbq[buffer][15][28];
+            if(pmt == 3) return bbq[buffer][15][29];
+        }
+    }
     return 0;
 }
 
 unsigned short StTriggerData2009::zdcHardwareSum(int prepost) const
 {
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return bbq[buffer][15][11];
     return 0;
 }
 
