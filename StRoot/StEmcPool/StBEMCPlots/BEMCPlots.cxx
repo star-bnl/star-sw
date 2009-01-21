@@ -12,16 +12,23 @@ using namespace std;
 #include <TBox.h>
 #include <TObjArray.h>
 
-// this needs to be always included
-#include "DAQ_READER/daqReader.h"
-#include "DAQ_READER/daq_dta.h"
+#ifndef NEW_DAQ_READER
+#	include "evpReader.hh"
+#	include "emcReader.h"
+#define BSMD_FIBERS     12
+#define BSMD_DATSIZE    4800
+#else
+//	this needs to be always included
+#	include "DAQ_READER/daqReader.h"
+#	include "DAQ_READER/daq_dta.h"
 
-// only the detectors we will use need to be included
-// for their structure definitions...
-#include "DAQ_BSMD/daq_bsmd.h"
-#include "DAQ_BTOW/daq_btow.h"
-#include "DAQ_EMC/daq_emc.h"
-#include "DAQ_TRG/daq_trg.h"
+//	only the detectors we will use need to be included
+//	for their structure definitions...
+#	include "DAQ_BSMD/daq_bsmd.h"
+#	include "DAQ_BTOW/daq_btow.h"
+#	include "DAQ_EMC/daq_emc.h"
+//#	include "DAQ_TRG/daq_trg.h"
+#endif
 
 #include <StDaqLib/EMC/StEmcDecoder.h>
 
@@ -65,7 +72,7 @@ void BEMCPlots::fillHisto(    char *datap
                 	    , const unsigned short *dsmL2Input
                 	    , const unsigned short *dsmL3Input
                 	    ) {
-    bemcFillHisto(datap);
+    bemcFillHisto(datap, dsmL0WestInput, dsmL0EastInput);
     if (BEMCPlotsInstance) {
 	BEMCPlotsInstance->processEvent(datap, dsmL0WestInput, dsmL0EastInput, dsmL1Input, dsmL2Input, dsmL3Input);
     }
@@ -489,11 +496,18 @@ void BEMCPlots::processEvent( char *datap
     	    if (this->mHistDsmL3InputJetPatchTopoBit) this->mHistDsmL3InputJetPatchTopoBit->Fill(this->mDsmL3InputJetPatchTopoBit[0]);    
     }
 
+#ifdef NEW_DAQ_READER
     daqReader *rdr = (daqReader*)(datap);
     daq_dta *dd_btow = rdr ? (rdr->det("btow")->get("adc")) : 0;
     if (dd_btow) while (dd_btow->iterate()) {
 	btow_t *d = (btow_t *) dd_btow->Void;
 	if (d) {
+#else
+    int ret = emcReader(datap);
+    if ((ret >= 0) && emc.btow_in) {
+	unsigned short *header = emc.btow_raw; // BTOW event header
+	if (header) {
+#endif
 		if (DSM_L0_present) {
 		    for (int i = 0;i < 300;i++) {
 			this->mDsmSimuHighTower[i] = 0;
@@ -502,15 +516,24 @@ void BEMCPlots::processEvent( char *datap
 		}
 		for(int i = 0;i < (BTOW_MAXFEE * BTOW_DATSIZE);i++) {
 		    int tdc = i % BTOW_MAXFEE;
+#ifdef NEW_DAQ_READER
 		    int tdc_channel = i / BTOW_MAXFEE;
 	    	    int count = d->preamble[tdc][0];
-		    int error = 0;//(*(header + tdc + 30));
-		    if((error==0 && count==164) || true) {
+		    int error = d->preamble[tdc][1];
+#else
+		    int count = (*(header + tdc));
+		    int error = (*(header + tdc + 30));
+#endif
+		    if((error==0) && (count == (BTOW_PRESIZE + BTOW_DATSIZE))) {
 			// OK
 			int softId;
 			if (BEMCDecoder && BEMCDecoder->GetTowerIdFromDaqId(i, softId)) {
 			    if ((softId >= 1) && (softId <= 4800)) {
+#ifdef NEW_DAQ_READER
 				int adc = d->adc[tdc][tdc_channel];
+#else
+				int adc = emc.btow[i];
+#endif
 				if ((softId >= 1) && (softId <= 1220)) {
 				    if (this->mHistRawAdc1) this->mHistRawAdc1->Fill(softId, adc);
 				} else if ((softId >= 1221) && (softId <= 2400)) {
@@ -569,11 +592,15 @@ void BEMCPlots::processEvent( char *datap
     }
     for (int bsmd_fiber = 0;bsmd_fiber < BSMD_FIBERS;bsmd_fiber++) {
 	int bprs_fiber = bsmd_fiber - 8;
+#ifdef NEW_DAQ_READER
 	daq_dta *dd_bsmd = rdr ? (rdr->det("bsmd")->get("adc", 0, bsmd_fiber)) : 0;
 	if (dd_bsmd) while (dd_bsmd->iterate()) {
 	    bsmd_t *d = (bsmd_t *) dd_bsmd->Void;
 	    if (d && BEMCDecoder) {
-
+#else
+	if (emc.bsmd_in && BEMCDecoder) {
+	    {
+#endif
 	    int det, m, e, s;
 	    int feeSum[120];
 	    int softId, box, wire, Avalue;
@@ -583,13 +610,21 @@ void BEMCPlots::processEvent( char *datap
 	    for (int fiber_channel = 0;fiber_channel < BSMD_DATSIZE;fiber_channel++) {
 		    if (BEMCDecoder->GetSmdCoord(bsmd_fiber, fiber_channel, det, m, e, s)) {
 			if ((m >= 1) && (m <= 120)) {
+#ifdef NEW_DAQ_READER
 			    int adc = d->adc[fiber_channel];
+#else
+			    int adc = emc.bsmd[bsmd_fiber][fiber_channel];
+#endif
 			    feeSum[m - 1] += adc;
 			}
 		    }
 		    if (BEMCDecoder->GetPsdId(bprs_fiber, fiber_channel, softId, box, wire, Avalue)) {
 			if ((box >= 1) && (box <= 60)) {
+#ifdef NEW_DAQ_READER
     			    int adc = d->adc[fiber_channel];
+#else
+			    int adc = emc.bsmd[bsmd_fiber][fiber_channel];
+#endif
 			    pmtSum[box - 1] += adc;
 			    if ((softId >= 1) && (softId <= 1220)) {
 			        if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Fill(softId, adc);

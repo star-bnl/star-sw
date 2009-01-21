@@ -1,10 +1,8 @@
 #ifndef BEMCPlotsPresenter_H
 #define BEMCPlotsPresenter_H
 
-#include <GenericFile.h>
-
 class TPad;
-
+class GenericFile;
 typedef GenericFile FileType;
 
 class BEMCPlotsPresenter {
