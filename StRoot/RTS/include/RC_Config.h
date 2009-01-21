@@ -322,7 +322,7 @@ struct TRG_RUN
   int res8;
 
   int res9;
-  int res10;
+  int disableTOFmask;    // 4 bit mask to disable individual TOF fibers
 
   int l2Disable750;      // Flag for experts to disable 750Hz limit
   int l2MyriAcc;         // L2 will use MyriNet for Accept/abort and not STP
