@@ -44,7 +44,8 @@ daq_bsmd::daq_bsmd(daqReader *rts_caller)
 
 	adc = new daq_dta ;
 	adc_non_zs = new daq_dta ;
-	ped_rms = new daq_dta ;
+	ped = new daq_dta ;
+	rms = new daq_dta ;
 	
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -56,7 +57,8 @@ daq_bsmd::~daq_bsmd()
 
 
 	delete adc ;
-	delete ped_rms ;
+	delete ped ;
+	delete rms ;
 	delete adc_non_zs ;
 
 	return ;
@@ -77,9 +79,11 @@ daq_dta *daq_bsmd::get(const char *bank, int sec, int row, int pad, void *p1, vo
 	else if(strcasecmp(bank,"adc_non_zs")==0) {
 		return handle_adc_non_zs(row) ;
 	}
-	else if(strcasecmp(bank,"ped_rms")==0) {
-		LOG(WARN,"%s: %s - code not written yet",name,bank) ;
-		return handle_ped_rms(row) ;
+	else if(strcasecmp(bank,"ped")==0) {
+		return handle_ped_rms(row,1) ;
+	}
+	else if(strcasecmp(bank,"rms")==0) {
+		return handle_ped_rms(row,0) ;
 	}
 
 
@@ -128,7 +132,8 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 	adc->create(bytes,"adc",rts_id,DAQ_DTA_STRUCT(bsmd_t)) ;
 
 	for(int r=start_r;r<=stop_r;r++) {
-		
+		int count ;
+
 		if(bsmd_d.bytes[r-1][1] == 0) continue ;
 
 		bsmd_t *bsmd  = (bsmd_t *) adc->request(1) ;
@@ -137,21 +142,40 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 
 		u_short *data = (u_short *)((u_int)bsmd_d.dta[r-1][1]) ;	// move to data start
 
-		int count = b2h16(data[1]) ;
-		bsmd->cap = b2h16(data[0]) ;
+		if(bsmd_d.endian[r-1][1]) {	// big!
+			count = b2h16(data[1]) ;
+			bsmd->cap = b2h16(data[0]) ;
 
-		LOG(NOTE,"%s: fiber %d: count %d, cap %d",r,count,bsmd->cap) ;
+			LOG(NOTE,"%s: fiber %d: count %d, cap %d",r,count,bsmd->cap) ;
 		
-		data += 2 ;
+			data += 2 ;
 		
-		for(int c=0;c<count;c++) {
-			int ch = b2h16(*data++) ;
-			int adc = b2h16(*data++) ;
+			for(int c=0;c<count;c++) {
+				int ch = b2h16(*data++) ;
+				int adc = b2h16(*data++) ;
 
-			bsmd->adc[ch] = adc ;
-		} 
+				bsmd->adc[ch] = adc ;
+			}
+		}
+		else {
+			count = l2h16(data[1]) ;
+			bsmd->cap = l2h16(data[0]) ;
 
-		adc->finalize(1,0,r,0) ;
+			LOG(NOTE,"%s: fiber %d: count %d, cap %d",r,count,bsmd->cap) ;
+		
+			data += 2 ;
+		
+			for(int c=0;c<count;c++) {
+				int ch = l2h16(*data++) ;
+				int adc = l2h16(*data++) ;
+
+				bsmd->adc[ch] = adc ;
+			}
+		}
+
+
+
+		adc->finalize(1,0,r,bsmd->cap) ;
 	}
 		
 	adc->rewind() ;
@@ -160,9 +184,94 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 	
 }
 
-daq_dta *daq_bsmd::handle_ped_rms(int rdo)
+daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 {
-	return 0 ;
+	int start_r, stop_r ;
+	int bytes ;
+	struct bsmd_desc bsmd_d ;
+	daq_dta *dta_use ;
+
+	if(rdo <= 0) {
+		start_r = 1 ;
+		stop_r = BSMD_FIBERS ;
+	}
+	else {
+		start_r = stop_r = rdo ;
+	}
+
+	bytes = 0 ;
+
+	if(present & DET_PRESENT_DATAP) {	// in datap!
+		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
+		//LOG(NOTE,"EMCP %p?",emcp) ;
+		if(bsmd_reader(emcp, &bsmd_d)==0) return 0 ;
+	}
+	else return 0 ;	// SFS does not exist yet!
+
+	for(int r=start_r;r<=stop_r;r++) {	
+		bytes += bsmd_d.bytes[r-1][2] ;
+	}
+
+	LOG(DBG,"rdo %d: bytes %d",rdo,bytes) ;
+
+	if(bytes==0) return 0 ;
+
+
+	if(is_ped) {
+		dta_use = ped ;
+		dta_use->create(1,"bsmd_ped",rts_id,DAQ_DTA_STRUCT(bsmd_t)) ;
+	}
+	else {
+		dta_use = rms ;
+		dta_use->create(1,"bsmd_rms",rts_id,DAQ_DTA_STRUCT(bsmd_t)) ;
+	}
+
+
+
+
+	LOG(DBG,"doing rdos: %d-%d",start_r,stop_r) ;
+
+	for(int r=start_r;r<=stop_r;r++) {
+			
+		if(bsmd_d.bytes[r-1][2] == 0) continue ;
+
+		u_short *data = (u_short *)((u_int)bsmd_d.dta[r-1][2]) ;	// move to data start
+
+		LOG(DBG,"BSMD PEDR: rdo %d: 0x%04X 0x%04X 0x%04X 0x%04X",r,data[0],data[1],data[2],data[3]) ;
+
+		
+		data += 4 ;	// skip 4 shorts...
+
+		
+		for(int c=0;c<128;c++) {
+			bsmd_t *bsmd  = (bsmd_t *) dta_use->request(1) ;
+			bsmd->cap = c ;
+			for(int ch=0;ch<4800;ch++) {
+				int adc ;
+				if(bsmd_d.endian[r-1][2]) {	
+					adc = b2h16(*data++) ;
+				}
+				else {
+					adc = l2h16(*data++) ;
+				}
+
+				if(is_ped) adc &= 0x3FF ;	// ped is lower 10 bits
+				else {
+					adc >>= 10 ;		// rms is upper 6
+				}
+
+				bsmd->adc[ch] = adc ;
+			}
+			dta_use->finalize(1,0,r,c) ;
+		} 
+
+
+	}
+		
+	dta_use->rewind() ;
+
+	return dta_use ;
+
 }
 
 
@@ -223,7 +332,7 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 			bsmd->adc[c] = l2h16(*data++) ;
 		} 
 
-		adc_non_zs->finalize(1,0,r,0) ;
+		adc_non_zs->finalize(1,0,r,bsmd->cap) ;
 	}
 		
 	adc_non_zs->rewind() ;

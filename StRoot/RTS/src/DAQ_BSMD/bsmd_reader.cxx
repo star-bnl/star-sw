@@ -75,7 +75,15 @@ char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d)
 			// mark the fact that we found at least one good bank
 			found_some = 1 ;
 
-			bsmd_d->bytes[f][b] = l2h32(emcadc->bh.length)*4 - 40 ;	// length is in words but includes the bankHeader
+			if(b==2) {	// big endian for pedrms!
+				bsmd_d->bytes[f][b] = b2h32(emcadc->bh.length)*4 - 40 ;	// length is in words but includes the bankHeader
+				bsmd_d->endian[f][b] = 1 ;	// big!
+			}
+			else {
+				bsmd_d->bytes[f][b] = l2h32(emcadc->bh.length)*4 - 40 ;	// length is in words but includes the bankHeader
+				bsmd_d->endian[f][b] = 0 ;	// little!
+			}
+
 			bsmd_d->dta[f][b] = ((char *)emcadc + 40) ;			// skip the 40 bytes bankHeader
 
 			LOG(DBG,"BSMD: fiber %d: bank %d: bytes %d",f,b,bsmd_d->bytes[f][b]) ;
