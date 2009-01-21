@@ -3,7 +3,7 @@
 
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: QExGeoDrawHelper.h,v 1.1 2006/12/06 15:18:47 fine Exp $
+** $Id: QExGeoDrawHelper.h,v 1.2 2009/01/21 18:58:59 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -38,6 +38,7 @@ class TGeoTrd2;
 class TGeoGtra;
 class TGeoSphere;
 class TGeoArb8;
+class TGeoCompositeShape;
 
 
 class TGeoDrawHelper : public TObject {
@@ -61,6 +62,7 @@ public:
    static TVolume* MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVolume *> *volumeMap = 0);
 #endif
 //   static TVolume* MakeVolume( TGeoVolume *top, TMap *volumeMap = 0);
+   static TVolume* MakeCompositeShape(const TGeoCompositeShape *shape);
    static TShape* MakeShape(const TGeoShape *shape);
    static TShape* MakeShape(const TGeoBBox  &shp);
    static TShape* MakeShape(const TGeoPara  &shp);

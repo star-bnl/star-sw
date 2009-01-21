@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: QExGeoDrawHelper.cxx,v 1.2 2008/08/08 18:31:30 fine Exp $
+** $Id: QExGeoDrawHelper.cxx,v 1.3 2009/01/21 18:58:59 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -36,6 +36,8 @@
 #include "TGeoTrd1.h"
 #include "TGeoTrd2.h"
 #include "TGeoSphere.h"
+#include "TGeoCompositeShape.h"
+#include "TGeoBoolNode.h"
 
 #include "TBRIK.h"
 #include "TPARA.h"
@@ -192,7 +194,46 @@ void  TGeoDrawHelper::Paint(Option_t *option)
 { 
   if (fVolume) fVolume->Paint(option);
 }
+//______________________________________________________________________________
+TVolume *TGeoDrawHelper::MakeCompositeShape(const TGeoCompositeShape *top)
+{
+   // Create the composite shape as a trivial superposition of two shapes
+   // No bool opeation is provided yet.
 
+   TVolume *topCompositeVolume = 0;   
+   if (top) {
+   // fprintf(stderr,"1. TObject3DView::MakeCompositeShape %s \"%s\"\n",  top->GetName(),top->GetTitle());
+   //   top->ls();
+
+      // if (!top->IsVolumeMulti())    
+      TString title = top->GetTitle();
+      if (title.IsNull() ) title = top->GetName();
+
+      TGeoBoolNode *shapeNode = top->GetBoolNode();
+      if (shapeNode) { 
+         topCompositeVolume = new TVolume(top->GetName(),title,(TShape *)0);
+
+         TGeoMatrix *geoMatrice[2] =  { shapeNode->GetLeftMatrix(), shapeNode->GetRightMatrix()};
+         TGeoShape  *geoShape[2]   =  { shapeNode->GetLeftShape(),  shapeNode->GetRightShape() };
+
+         for (Int_t i = 0;  i < 2  ; i++) {
+            if (!geoShape[i]) continue;
+            //  Add transformation
+            TGeoMatrix *geoMatrix       = geoMatrice[i];
+            const Double_t   *trans     = geoMatrix->GetTranslation();
+            const Double_t   *rotation  = geoMatrix->GetRotationMatrix();
+            TRotMatrix *matrix          = geoMatrix->IsIdentity() ? 0 : GetMatrix(rotation);
+            TVolume *nextVolume = 0;
+            if ( geoShape[i]->IsComposite() )  
+                nextVolume = MakeCompositeShape((TGeoCompositeShape *)geoShape[i]);
+            else 
+                nextVolume = new TVolume(top->GetName(),title,MakeShape(geoShape[i]));
+            topCompositeVolume->Add(nextVolume, trans[0],trans[1],trans[2],matrix, 999);
+         }  
+      } 
+   }
+   return topCompositeVolume;
+}
 //______________________________________________________________________________
 TVolume *TGeoDrawHelper::MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVolume *> *volumeMap) {
    static int depth = 0;
@@ -202,13 +243,26 @@ TVolume *TGeoDrawHelper::MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVol
    TObjArray *nodes = 0;
    if (top )  {
        // if (!top->IsVolumeMulti()) 
-      TShape *thisShape = MakeShape(top->GetShape());
+      TGeoShape *geoShape = top->GetShape();
+      TShape *thisShape = 0;
+      TVolume *compositeVolume = 0;
+      if (geoShape) {
+         if (geoShape->IsComposite()) {
+            compositeVolume = MakeCompositeShape((TGeoCompositeShape *)geoShape);
+         } else {
+            thisShape=MakeShape(geoShape);
+         }
+      }
       TString title = top->GetTitle();
       if (title.IsNull() ) title = top->GetName();
       topVolume = new TVolume(top->GetName(),title,thisShape); 
       topVolume->SetLineColor(top->GetLineColor()); topVolume->SetLineStyle(top->GetLineStyle());
       topVolume->SetLineWidth(top->GetLineWidth()); topVolume->SetFillColor(top->GetLineColor());
-
+      if (compositeVolume) {
+         topVolume->Add(compositeVolume);
+         compositeVolume->SetLineColor(top->GetLineColor()); compositeVolume->SetLineStyle(top->GetLineStyle());
+         compositeVolume->SetLineWidth(top->GetLineWidth()); compositeVolume->SetFillColor(top->GetLineColor());
+      }
       if (!top->IsVisible()) topVolume->SetVisibility(TVolume::kThisUnvisible);
       if ( (nodes = top->GetNodes()) ) {
          TIter next(nodes);

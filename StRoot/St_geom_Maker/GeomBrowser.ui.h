@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.40 2009/01/11 03:53:26 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.41 2009/01/21 18:58:59 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -852,9 +852,12 @@ void GeomBrowser::listView1_doubleClicked( QListViewItem *item )
         if ( fCurrentDrawn ) {
            obj = ((TQtObjectListItem *)fCurrentDrawn)->Object();
            if (obj) {
-              if (obj->InheritsFrom(TVolume::Class()) )
-                 set =   TQtIconBrowserImp::Shape2GeoShapeIcon(((TVolume *)obj)->GetShape()->ClassName());
-              else if (obj->InheritsFrom(TVolumeView::Class()) )
+              if (obj->InheritsFrom(TVolume::Class()) ) {
+                 TShape *sh = ((TVolume *)obj)->GetShape();
+                 // expect Composite shape
+                 if (sh) 
+                    set = TQtIconBrowserImp::Shape2GeoShapeIcon(sh->ClassName());
+              } else if (obj->InheritsFrom(TVolumeView::Class()) )
                  set =  TQtIconBrowserImp::Shape2GeoShapeIcon(((TVolumeView *)obj)->GetShape()->ClassName());
               else if (obj->InheritsFrom(TShape::Class()) ) 
                 set =  TQtIconBrowserImp::Shape2GeoShapeIcon(((TShape *)obj)->ClassName());
@@ -868,9 +871,12 @@ void GeomBrowser::listView1_doubleClicked( QListViewItem *item )
          fCurrentDrawn = item;
          obj = ((TQtObjectListItem *)fCurrentDrawn)->Object();
          if (obj) {
-            if (obj->InheritsFrom(TVolume::Class()) )
-              set =   TQtIconBrowserImp::Shape2GeoShapeIcon(((TVolume *)obj)->GetShape()->ClassName());
-            else if (obj->InheritsFrom(TVolumeView::Class()) )
+            if (obj->InheritsFrom(TVolume::Class()) )  {
+               TShape *sh = ((TVolume *)obj)->GetShape();
+               // expect Composite shape
+               if (sh) 
+                  set =   TQtIconBrowserImp::Shape2GeoShapeIcon(sh->ClassName());
+            } else if (obj->InheritsFrom(TVolumeView::Class()) )
                set =  TQtIconBrowserImp::Shape2GeoShapeIcon(((TVolumeView *)obj)->GetShape()->ClassName());
             else if (obj->InheritsFrom(TShape::Class()) )
                set =  TQtIconBrowserImp::Shape2GeoShapeIcon(((TShape *)obj)->ClassName());

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.12 2007/04/19 23:27:58 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.13 2009/01/21 18:58:59 fine Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.13  2009/01/21 18:58:59  fine
+// Draw the TGeoCompoisteShapes
+//
 // Revision 1.12  2007/04/19 23:27:58  fine
 // replace printf with LOG macro
 //
@@ -99,7 +102,7 @@ St_geom_Maker::St_geom_Maker(const char *name):StMaker(name){
 }
 //_____________________________________________________________________________
 St_geom_Maker::~St_geom_Maker(){
-  if (m_ConstSet) m_ConstSet->Delete();
+  //yf  if (m_ConstSet) m_ConstSet->Delete();
 }
 //_____________________________________________________________________________
 St_DataSet  *St_geom_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
