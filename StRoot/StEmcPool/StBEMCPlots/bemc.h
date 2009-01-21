@@ -22,7 +22,10 @@ int bemcSave(TFile*);
 int bemcReset();
 int bemcMakeHisto();
 int bemcInit();
-int bemcFillHisto(char* rdr);
+int bemcFillHisto(char* rdr
+                , const unsigned char *dsmL0WestInput
+                , const unsigned char *dsmL0EastInput
+		);
 
 #endif
 
@@ -32,7 +35,7 @@ int bemcFillHisto(char* rdr);
 
 /***************************************************************************
  *
- * $Id: bemc.h,v 1.1 2009/01/18 00:58:31 ogrebeny Exp $
+ * $Id: bemc.h,v 1.2 2009/01/21 03:22:38 ogrebeny Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -42,6 +45,9 @@ int bemcFillHisto(char* rdr);
  ***************************************************************************
  *
  * $Log: bemc.h,v $
+ * Revision 1.2  2009/01/21 03:22:38  ogrebeny
+ * Made it compilable with the old EVP_READER
+ *
  * Revision 1.1  2009/01/18 00:58:31  ogrebeny
  * Better separate EMC histogramming from OnlinePlots infrastructure
  *

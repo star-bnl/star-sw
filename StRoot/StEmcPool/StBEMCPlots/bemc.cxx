@@ -2,11 +2,11 @@
 #include <TH2.h>
 #include <TFile.h>
 #ifndef NEW_DAQ_READER
-#  include <evpReader.hh>
+#       include "StDaqLib/EVP/emcReader.h"
+using namespace OLDEVP;
 #else
 #  include <DAQ_READER/daqReader.h>
 #  include <DAQ_READER/daq_dta.h>
-#  include <DAQ_TRG/trgReader.h>
 #  include <DAQ_EMC/emcReader.h>
 #  include <DAQ_BTOW/daq_btow.h>
 #  include <DAQ_BSMD/daq_bsmd.h>
@@ -93,7 +93,10 @@ int bemcInit()
 	return 0;
 }
 
-int bemcFillHisto(char* rdr)
+int bemcFillHisto(char* rdr
+                , const unsigned char *dsmL0WestInput
+                , const unsigned char *dsmL0EastInput
+)
 { 
   int ret =  -1;
   if(BEMCHISTOINIT==0) bemcInit();
@@ -253,7 +256,6 @@ int bemcFillHisto(char* rdr)
   ////////////////////////////////////////////////////////////////
   // BTOW TRIGGER
   //
-  ret = trgReader(rdr);
   int HT[300],PA[300];
   int JP[BEMCNJET];
   
@@ -282,8 +284,8 @@ int bemcFillHisto(char* rdr)
     for(int i=0;i<BEMCNJET;i++) JP[i] = 0;
     for(int i=0;i<240;i++)
     {
-      raw[i]=(unsigned char)trg.BEMC[1][i];
-      raw[i+240]=(unsigned char)trg.BEMC[0][i];
+      raw[i]=(unsigned char)dsmL0EastInput[i];
+      raw[i+240]=(unsigned char)dsmL0WestInput[i];
     }
     for(int i=0;i<nDSMs*10;i++)
     {
@@ -301,7 +303,6 @@ int bemcFillHisto(char* rdr)
       {
         int k = 16*i + j;
         dsmby[i][j] = raw[k];
-				//fprintf(stderr,"raw[k] = %d  ctb = %d\n",(int)raw[k],(int)trg.CTB[k]);
       }
     for(int i=0;i<nDSMs;i++)
     {
@@ -395,7 +396,7 @@ int bemcFillHisto(char* rdr)
 
 /***************************************************************************
  *
- * $Id: bemc.cxx,v 1.1 2009/01/18 00:58:31 ogrebeny Exp $
+ * $Id: bemc.cxx,v 1.2 2009/01/21 03:22:38 ogrebeny Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -405,6 +406,9 @@ int bemcFillHisto(char* rdr)
  ***************************************************************************
  *
  * $Log: bemc.cxx,v $
+ * Revision 1.2  2009/01/21 03:22:38  ogrebeny
+ * Made it compilable with the old EVP_READER
+ *
  * Revision 1.1  2009/01/18 00:58:31  ogrebeny
  * Better separate EMC histogramming from OnlinePlots infrastructure
  *

@@ -1,6 +1,6 @@
 #ifndef NEW_DAQ_READER
-#  include <evpReader.hh>
-#  include "emcReader.h"
+#include "evpReader.hh"
+#include "emcReader.h"
 #else
 #  include "DAQ_READER/daqReader.h"
 #  include "DAQ_READER/evpReaderClass.h"
@@ -86,9 +86,9 @@ void EEMCPlots::processEvent( char *datap
                     	    , const unsigned short int  * dsm3inp
                  	    ) {
     if (eeqa) {
-#ifdef NEW_DAQ_READER
+//#ifdef NEW_DAQ_READER
     evpReader *evp = (evpReader*)(datap);
-#endif
+//#endif
 	Tonko2Ezt ezt;
 	eeqa->clear();
 	eeqa->sort(&ezt.eETow, &ezt.eESmd,
