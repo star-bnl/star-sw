@@ -75,7 +75,7 @@ char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d)
 			// mark the fact that we found at least one good bank
 			found_some = 1 ;
 
-			if(b==2) {	// big endian for pedrms!
+			if(b!=0) {	// big endian for pedrms and ZS data!
 				bsmd_d->bytes[f][b] = b2h32(emcadc->bh.length)*4 - 40 ;	// length is in words but includes the bankHeader
 				bsmd_d->endian[f][b] = 1 ;	// big!
 			}
