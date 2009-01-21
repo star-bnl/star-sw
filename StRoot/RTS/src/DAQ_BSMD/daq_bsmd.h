@@ -17,13 +17,13 @@ class daq_bsmd : public daq_det {
 private:
 	class daq_dta *handle_adc(int rdo) ;
 	class daq_dta *handle_adc_non_zs(int rdo) ;
-	class daq_dta *handle_ped_rms(int rdo) ;
+	class daq_dta *handle_ped_rms(int rdo, int is_ped) ;
 
 
 	class daq_dta *adc ;	// "adc"
 	class daq_dta *adc_non_zs ;
-	class daq_dta *ped_rms ;	
-
+	class daq_dta *ped ;	
+	class daq_dta *rms ;	
 
 	static const char *help_string ;
 
@@ -49,6 +49,7 @@ public:
 struct bsmd_desc {
 	char *dta[BSMD_FIBERS][3] ;	//0 is non-ZS, 1 is ZS, 2 is PED
 	int   bytes[BSMD_FIBERS][3] ;
+	int   endian[BSMD_FIBERS][3] ;	// 1-BIG, 0-LITTLE
 } ;
 
 extern char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d) ;
