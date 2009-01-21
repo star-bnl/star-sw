@@ -406,7 +406,6 @@ static int bsmd_doer(daqReader *rdr, char *do_print)
 	if(strcasestr(do_print,"bsmd")) ;	// leave as is...
 	else do_print = 0 ;
 
-
 	// do I see the non-zero-suppressed bank? let's do this by fiber...
 	for(int f=1;f<=12;f++) {
 		dd = rdr->det("bsmd")->get("adc_non_zs",0,f) ;	// sector is ignored (=0)
@@ -440,6 +439,42 @@ static int bsmd_doer(daqReader *rdr, char *do_print)
 				for(int i=0;i<BSMD_DATSIZE;i++) {
 					// since this is zero-suppressed, I'll skip zeros...
 					if(do_print) if(d->adc[i]) printf("   %4d = %4d\n",i,d->adc[i]) ;
+				}
+			}
+		}
+	}
+
+	// do I see the pedestal bank?
+	for(int f=1;f<=12;f++) {
+		dd = rdr->det("bsmd")->get("ped",0,f) ;
+		if(dd) {
+			while(dd->iterate()) {
+				found = 1 ;
+
+				bsmd_t *d = (bsmd_t *) dd->Void ;
+
+				if(do_print) printf("BSMD PED: fiber %2d, capacitor %d:\n",dd->rdo,d->cap) ;
+
+				for(int i=0;i<BSMD_DATSIZE;i++) {
+					if(do_print) printf("   %4d = %4d\n",i,d->adc[i]) ;
+				}
+			}
+		}
+	}
+
+	// do I see the rms bank?
+	for(int f=1;f<=12;f++) {
+		dd = rdr->det("bsmd")->get("rms",0,f) ;
+		if(dd) {
+			while(dd->iterate()) {
+				found = 1 ;
+
+				bsmd_t *d = (bsmd_t *) dd->Void ;
+
+				if(do_print) printf("BSMD RMS: fiber %2d, capacitor %d:\n",dd->rdo,d->cap) ;
+
+				for(int i=0;i<BSMD_DATSIZE;i++) {
+					if(do_print) printf("   %4d = %.2f\n",i,(double)d->adc[i]/8.0) ;
 				}
 			}
 		}
