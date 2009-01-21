@@ -351,8 +351,18 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 				LOG(TERR,"T %4d (FIFO): daq %d, trg %d",trgs[t_cou].t,trgs[t_cou].daq,trgs[t_cou].trg) ;
 			}
 
+
+			// keep only L2 commands!
+			switch(trgs[t_cou].trg) {
+			case 13 :
+			case 15 :
+				break ;
+			default :
+				continue ;
+			}
+
 			if(trgs[t_cou].t == 0) {
-				LOG(ERR,"T %4d (FIFO): daq %d, trg %d -- token 0, skipping",trgs[t_cou].t,trgs[t_cou].daq,trgs[t_cou].trg) ;
+				LOG(ERR,"T %4d (FIFO): daq %d, trg %d -- token 0, skipping",trgs[t_cou].t,trgs[t_cou].daq,trgs[t_cou].trg) ;				
 			}
 			else {
 				t_cou++ ;
