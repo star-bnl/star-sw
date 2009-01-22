@@ -646,15 +646,23 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 
   if(ret != len) {
    for(int i=0;i<vec;i++) {
-      LOG(ERR, "socket error iovec[%d].base=%d,  len=%d",
+      LOG(DBG, "socket error iovec[%d].base=%d,  len=%d",
 	  i,iovec[i].iov_base,iovec[i].iov_len);
     }
 
-   LOG(ERR, "writev failed: ret=%d of %d, err=%s",ret, len, strerror(errno));
+   LOG(NOTE, "writev failed: ret=%d of %d, err=%s.  will retry",ret, len, strerror(errno));
   }
 
   // keep retrying!
-  if(ret < 0) ret = 0;
+  if(ret < 0) {
+    if((errno != EINTR) &&
+       (errno != EAGAIN)) {
+      
+      LOG(ERR, "Error on writev (%s)",strerror(errno));
+    }
+  
+    ret = 0;
+  }
 
   if(ret != len) {  // Need to retry...
     int nstart = ret;
