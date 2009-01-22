@@ -644,16 +644,17 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 
   int ret = ::writev(fd, iovec, vec);
 
-  if(ret <= 0) {
-    for(int i=0;i<vec;i++) {
+  if(ret != len) {
+   for(int i=0;i<vec;i++) {
       LOG(ERR, "socket error iovec[%d].base=%d,  len=%d",
 	  i,iovec[i].iov_base,iovec[i].iov_len);
     }
 
-    LOG(ERR, "Socket on writev call (%s)", strerror(errno));
-    
-    return ret;
+   LOG(ERR, "writev failed: ret=%d of %d, err=%s",ret, len, strerror(errno));
   }
+
+  // keep retrying!
+  if(ret < 0) ret = 0;
 
   if(ret != len) {  // Need to retry...
     int nstart = ret;
