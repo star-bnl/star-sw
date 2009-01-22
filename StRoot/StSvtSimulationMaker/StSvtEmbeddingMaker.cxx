@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.13 2007/12/24 17:38:59 fisyak Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.14 2009/01/22 22:45:45 fine Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
+ * Revision 1.14  2009/01/22 22:45:45  fine
+ * Add the fatal message to stop the chain
+ *
  * Revision 1.13  2007/12/24 17:38:59  fisyak
  * spelling error StSvtRmsPedestal => StSvtRMSPedestal
  *
@@ -197,7 +200,7 @@ Int_t StSvtEmbeddingMaker::GetSvtData()
     
   St_DataSet* dataSet = GetDataSet("StSvtPixelData");
   if (dataSet==NULL){
-    gMessMgr->Error()<<"BIG TROUBLE:No data from simulator to work with!!!!"<<endm;
+    LOG_FATAL <<"BIG TROUBLE:No data from simulator to work with!!!!"<<endm;
     return kStErr;
   }
 
