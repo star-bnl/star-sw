@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.39 2008/12/13 01:12:57 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.40 2009/01/22 23:19:21 fine Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.40  2009/01/22 23:19:21  fine
+ * Prptection against fo the crash
+ *
  * Revision 1.39  2008/12/13 01:12:57  caines
  * Check that ladder index not out of range in translation routine
  *
@@ -319,12 +322,13 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   mSvtSimulation->setAnodeTimeBinSizes(mTimeBinSize , mAnodeSize);
   mSvtSimulation->setDriftVelocity(mDefaultDriftVelocity);
   mSvtSimulation->setElCloud(mElectronCloud);
-  cout<<"StSvtSimulationMaker::InitRun info:"<<endl;
-  cout<<"  Anode size="<<mAnodeSize<<" ,time bin size="<<mTimeBinSize<<endl;
-  cout<<"  default drift velocity="<<mDefaultDriftVelocity<<endl;
-  cout<<"  pedestal offset(from database)="<<mPedOffset<<endl;
-  cout<<"  T0(from database)= "<<mT0->getT0(1)<<endl;
-  
+
+  LOG_INFO <<"StSvtSimulationMaker::InitRun info:"<<endm;
+  LOG_INFO <<"  Anode size="<<mAnodeSize<<" ,time bin size="<<mTimeBinSize<<endm;
+  LOG_INFO <<"  default drift velocity="<<mDefaultDriftVelocity<<endm;
+  LOG_INFO <<"  pedestal offset(from database)="<<mPedOffset<<endm;
+  LOG_INFO <<"  T0(from database)= "<<mT0->getT0(1)<<endm;
+
   // Get BField;
   Float_t x[3] = {0,0,0};
   Float_t b[3];
