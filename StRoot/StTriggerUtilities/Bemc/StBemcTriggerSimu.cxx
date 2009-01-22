@@ -480,29 +480,36 @@ void StBemcTriggerSimu::Make(){
   mEvent = static_cast<StEvent*> ( mHeadMaker->GetDataSet("StEvent") );
   
   FEEout();
+
+  //pp
   if (year==2006){
     get2006_DSMLayer0();
     get2006_DSMLayer1();
     get2006_DSMLayer2();
   }
-  if (year==2007){
+
+  //AuAu
+  if ((year==2007)&&(yyyymmdd<20071205)){
     get2007_DSMLayer0();
     get2007_DSMLayer1();
     get2007_DSMLayer2();
   }
   
+  //dAu
   if ((yyyymmdd>20071205)&&(yyyymmdd<20080129)){
     get2008dAu_DSMLayer0();
     get2008dAu_DSMLayer1();
     get2008dAu_DSMLayer2();
   }
 
+  //pp
   if ((year==2008)&&(yyyymmdd>20080129)){
     get2008pp_DSMLayer0();
     get2008pp_DSMLayer1();
     get2008pp_DSMLayer2();
   }
 
+  //pp
   if ((year==2009)&&(yyyymmdd>20090101)) {
     get2009_DSMLayer0();
     get2009_DSMLayer1();
@@ -599,9 +606,11 @@ void StBemcTriggerSimu::FEEout() {
               }
 
               //adjust pedestal of tower adc to 24(6) in 12(10) bit
-              if(operation==1) adc10[did-1] -= ped10DiffI;
-              if(operation==0) adc10[did-1] += ped10DiffI;
-	      //if (adc10[did-1] < 0) adc10[did-1]=0;
+              if (operation==1) adc10[did-1] -= ped10DiffI;
+              if (operation==0) adc10[did-1] += ped10DiffI;
+	      // if in offline mode and pedestal is not matched well to adc spectrum so
+	      // adc -ped < 0 then set adc = 0 so it cannot cause a trigger.
+	      if ((mConfig==kOffline)&&(adc10[did-1] < 0)) adc10[did-1]=0;
 
               //now adc10 and adc08 are the 10 and 8 bit pedestal shift adcs
               adc08[did-1]=adc10[did-1] >> 2;
@@ -1223,28 +1232,6 @@ void StBemcTriggerSimu::get2007_DSMLayer0() {
   //12-13  TP threshold bits
   //14-15  HT&&TP threshold bits
 
-  //SWITCH MISMATCHED tpid HERE for 2007
-  int placeholder;
-  placeholder=L0_HT_ADC[291];
-  L0_HT_ADC[291]=L0_HT_ADC[294];
-  L0_HT_ADC[294]=placeholder;
-  placeholder=L0_HT_ADC[250];
-  L0_HT_ADC[250]=L0_HT_ADC[251];
-  L0_HT_ADC[251]=placeholder;
-  placeholder=L0_HT_ADC[263];
-  L0_HT_ADC[263]=L0_HT_ADC[267];
-  L0_HT_ADC[267]=placeholder;
-
-  placeholder=L0_TP_ADC[291];
-  L0_TP_ADC[291]=L0_TP_ADC[294];
-  L0_TP_ADC[294]=placeholder;
-  placeholder=L0_TP_ADC[250];
-  L0_TP_ADC[250]=L0_TP_ADC[251];
-  L0_TP_ADC[251]=placeholder;
-  placeholder=L0_TP_ADC[263];
-  L0_TP_ADC[263]=L0_TP_ADC[267];
-  L0_TP_ADC[267]=placeholder;
-
   //Loop over modules
   int k=0;
   int DSM_TP[kL0DsmInputs];
@@ -1719,28 +1706,6 @@ void StBemcTriggerSimu::get2008dAu_DSMLayer0() {
   //13     Masked high tower bit for threshold 4
   //14-15  Unused
  
- //SWITCH MISMATCHED tpid HERE for 2008dAu
-  int placeholder;
-  placeholder=L0_HT_ADC[291];
-  L0_HT_ADC[291]=L0_HT_ADC[294];
-  L0_HT_ADC[294]=placeholder;
-  placeholder=L0_HT_ADC[250];
-  L0_HT_ADC[250]=L0_HT_ADC[251];
-  L0_HT_ADC[251]=placeholder;
-  placeholder=L0_HT_ADC[263];
-  L0_HT_ADC[263]=L0_HT_ADC[267];
-  L0_HT_ADC[267]=placeholder;
-
-  placeholder=L0_TP_ADC[291];
-  L0_TP_ADC[291]=L0_TP_ADC[294];
-  L0_TP_ADC[294]=placeholder;
-  placeholder=L0_TP_ADC[250];
-  L0_TP_ADC[250]=L0_TP_ADC[251];
-  L0_TP_ADC[251]=placeholder;
-  placeholder=L0_TP_ADC[263];
-  L0_TP_ADC[263]=L0_TP_ADC[267];
-  L0_TP_ADC[267]=placeholder;
-
   //Loop over modules
   int k=0;
   int DSM_TP[kL0DsmInputs];
@@ -2089,30 +2054,6 @@ void StBemcTriggerSimu::get2008pp_DSMLayer0() {
   //10-11  HT threshold bits
   //12-13  TP threshold bits
   //14-15  HT&&TP threshold bits
-
-  //SWITCH MISMATCHED tpid HERE for 2006
-  int placeholder;
-  
-  placeholder=L0_HT_ADC[291];
-  L0_HT_ADC[291]=L0_HT_ADC[294];
-  L0_HT_ADC[294]=placeholder;
-  placeholder=L0_HT_ADC[250];
-  L0_HT_ADC[250]=L0_HT_ADC[251];
-  L0_HT_ADC[251]=placeholder;
-  placeholder=L0_HT_ADC[263];
-  L0_HT_ADC[263]=L0_HT_ADC[267];
-  L0_HT_ADC[267]=placeholder;
-  
-  placeholder=L0_TP_ADC[291];
-  L0_TP_ADC[291]=L0_TP_ADC[294];
-  L0_TP_ADC[294]=placeholder;
-  placeholder=L0_TP_ADC[250];
-  L0_TP_ADC[250]=L0_TP_ADC[251];
-  L0_TP_ADC[251]=placeholder;
-  placeholder=L0_TP_ADC[263];
-  L0_TP_ADC[263]=L0_TP_ADC[267];
-  L0_TP_ADC[267]=placeholder;
-  
 
   //Loop over modules
   int k=0;
