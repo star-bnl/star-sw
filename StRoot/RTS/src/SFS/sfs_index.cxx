@@ -629,9 +629,57 @@ int sfs_index::writev(fs_iovec *fsiovec, int n)
   return writev_sticky(fsiovec, n, NULL);
 }
 
+
+// Non-interruptable writev
+int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
+{
+  
+  struct iovec iovec_new[20];
+  int vec_new=0;
+
+  int len=0;
+  for(int i=0;i<vec;i++) {
+    len += iovec[i].iov_len;
+  }
+
+  int ret = ::writev(fd, iovec, vec);
+
+  if(ret <= 0) return ret;
+
+  if(ret != len) {  // Need to retry...
+    int nstart = ret;
+    LOG(WARN, "writev only wrote %d of %d... Retry", ret, len);
+    
+
+    for(int i=0;i<vec;i++) {
+      if(nstart < (int)iovec[i].iov_len) {
+	char *base = (char *)iovec[i].iov_base;
+	base += nstart;
+	
+	iovec_new[vec_new].iov_base = (void *)base;
+	iovec_new[vec_new].iov_len = iovec[i].iov_len - nstart;
+	vec_new++;
+      }
+      
+      nstart -= iovec[i].iov_len;
+      if(nstart<0) nstart = 0;
+    }
+
+    int ret2 = writev_call_retry(fd, iovec_new, vec_new);
+
+    ret += ret2;
+    LOG(WARN, "writev retry returned %d (retry was %d)",ret,ret2);
+  }
+  return ret;
+}
+
+
+
 // Header is an optional, non-fs file header
 // of course in stardaq, it is the iccp2k ethernet header...
 // this is now threadsafe!
+
+
 int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
 {
   iovec iovec[20];
@@ -700,7 +748,8 @@ int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
 	all_size += iovec[i].iov_len ;
   }
 
-  int ret = ::writev(wfile.fd, iovec, vec);
+  // int ret = ::writev(wfile.fd, iovec, vec);     // This can be interrupted
+  int ret = writev_call_retry(wfile.fd, iovec, vec);
   if(ret != all_size) {
 	LOG(ERR,"writev expects %d, sent %d",all_size,ret) ;
   
