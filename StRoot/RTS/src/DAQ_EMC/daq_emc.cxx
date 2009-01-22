@@ -34,6 +34,8 @@ static daq_det_emc_factory emc_factory ;
 
 daq_emc::daq_emc(daqReader *rts_caller)
 {
+	LOG(WARN,"Using EMC_LEGACY is deprecated! Rather use the specific readers: BTOW, BSMD, ETOW, ESMD") ;
+
 	LOG(DBG,"EMC: rts_id %d, name %s",rts_id,name) ;
 
 	// dname is ignored 
@@ -87,23 +89,53 @@ daq_dta *daq_emc::handle_legacy()
 
 	emc_t *emc_p = (emc_t *) legacy->request(1) ;	// need ONE emc_t object
  
-	memset(emc_p,0,sizeof(struct emc_t)) ;	// just in case...
+	memset(emc_p,0,sizeof(struct emc_t)) ;	// must clear all
+
+	emc_p->etow_max_ch = ETOW_MAXFEE * ETOW_DATSIZE ;
+	emc_p->btow_max_ch = BTOW_MAXFEE * BTOW_DATSIZE ;
+	emc_p->esmd_max_ch = ESMD_MAXFEE * ESMD_DATSIZE ;
+	emc_p->bsmd_max_ch = BSMD_FIBERS * BSMD_DATSIZE ;
 
 	dd = caller->det("btow")->get("adc") ;
-	if(dd && dd->iterate()) {
+	while(dd && dd->iterate()) {
 		found_some = 1 ;
 
-		btow_t *btow_p = (btow_t *)dd->Void ;
 
+		emc_p->btow_in = 1;
 
+		btow_t *d = (btow_t *) dd->Void ;
+
+		for(int i=0;i<BTOW_MAXFEE;i++) {
+			for(int j=0;j<BTOW_PRESIZE;j++) {
+				emc_p->btow_pre[i][j] = d->preamble[i][j] ;
+			}
+			for(int j=0;j<BTOW_DATSIZE;j++) {
+				if(d->adc[i][j] > 0) emc_p->btow_ch++ ;
+				emc_p->btow_new[i][j] = d->adc[i][j] ;
+			}
+
+		}
+				
 	}
 
 	dd = caller->det("etow")->get("adc") ;
 	while(dd && dd->iterate()) {
 		found_some = 1 ;
 
-		etow_t *etow_p = (etow_t *) dd->Void ;
+		emc_p->etow_in = 1;
 
+		etow_t *d = (etow_t *) dd->Void ;
+
+		for(int i=0;i<ETOW_MAXFEE;i++) {
+			for(int j=0;j<ETOW_PRESIZE;j++) {
+				emc_p->etow_pre[i][j] = d->preamble[i][j] ;
+			}
+			for(int j=0;j<ETOW_DATSIZE;j++) {
+				if(d->adc[i][j] > 0) emc_p->etow_ch++ ;
+				emc_p->etow[i][j] = d->adc[i][j] ;
+			}
+
+		}
 		
 
 	}
@@ -112,25 +144,64 @@ daq_dta *daq_emc::handle_legacy()
 	while(dd && dd->iterate()) {
 		found_some = 1 ;
 
-		esmd_t *esmd_p = (esmd_t *) dd->Void ;
+		emc_p->esmd_in = 1;
+		emc_p->esmd_max_fee = ESMD_MAXFEE ;	// NOTE that this is the max value, always!
 
+		esmd_t *d = (esmd_t *) dd->Void ;
+
+		for(int i=0;i<ESMD_MAXFEE;i++) {
+			for(int j=0;j<ESMD_PRESIZE;j++) {
+				emc_p->esmd_pre[i][j] = d->preamble[i][j] ;
+			}
+			for(int j=0;j<ESMD_DATSIZE;j++) {
+				if(d->adc[i][j] > 0) emc_p->esmd_ch++ ;
+				emc_p->esmd[i][j] = d->adc[i][j] ;
+			}
+
+		}		
 	}
 
+
+
 	// BSMD is slightly more complex
-	if((dd=caller->det("bsmd")->get("adc"))) {
+	if((dd=caller->det("bsmd")->get("adc_non_zs"))) {	// try the non-ZS banks first..
 		while(dd->iterate()) {
 			found_some = 1 ;
 
-			bsmd_t *bsmd_p = (bsmd_t *) dd->Void ;
+			emc_p->bsmd_in = 1 ;
+			emc_p->bsmd_raw_in = 1 ;
 
+			bsmd_t *d = (bsmd_t *) dd->Void ;
 
+			int rdo_ix = dd->rdo - 1 ;	// rdo from 1; but ix from 0
+			for(int i=0;i<BSMD_DATSIZE;i++) {
+				if(d->adc[i] > 0) emc_p->bsmd_ch++ ;	// count >0
+
+				emc_p->bsmd[rdo_ix][i] = d->adc[i] ;
+			}
+
+			emc_p->bsmd_cap[rdo_ix] = d->cap ;
 		}
 	}
-	else if((dd=caller->det("bsmd")->get("adc_non_zs"))) {
+	else if((dd=caller->det("bsmd")->get("adc"))) {
 		while(dd->iterate()) {
 			found_some = 1 ;
 	
-			bsmd_t *bsmd_p = (bsmd_t *) dd->Void ;
+			emc_p->bsmd_in = 1 ;
+			emc_p->bsmd_raw_in = 0 ;	// make sure!
+
+			bsmd_t *d = (bsmd_t *) dd->Void ;
+
+			int rdo_ix = dd->rdo - 1 ;	// rdo from 1; but ix from 0
+
+			for(int i=0;i<BSMD_DATSIZE;i++) {
+				if(d->adc[i] > 0) emc_p->bsmd_ch++ ;	// count >0
+
+				emc_p->bsmd[rdo_ix][i] = d->adc[i] ;
+			}
+
+			emc_p->bsmd_cap[rdo_ix] = d->cap ;
+
 		}
 	}
 
