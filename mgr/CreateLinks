@@ -81,15 +81,23 @@ endif
 #
 if ( -e .sl44_gcc346) then
     # support through SL44
+    if ( ! -e .sl46_gcc346 ) then
+	# requested Janet Seyboth 2009
+	echo "Backward compatibility assumed between SL406 -> SL404"
+    	/bin/ln -s .sl44_gcc346 .sl46_gcc346
+    endif
     if ( ! -e .sl45_gcc346 ) then
+	# Some online node support 2008
 	echo "Backward compatibility assumed between SL405 -> SL404"
     	/bin/ln -s .sl44_gcc346 .sl45_gcc346
     endif
     if ( ! -e .rh4_gcc346) then
+	# Legacy RH4 
 	echo "Backward compatibility assumed between RH4 -> SL404"
     	/bin/ln -s .sl44_gcc346 .rh4_gcc346
     endif
     if ( ! -e .i386_sl4) then
+	# Generic RH4 
 	echo "Assuming standard SL4 is compatible with default SL44 GCC-346"
     	/bin/ln -s .sl44_gcc346 .i386_sl4
     endif
