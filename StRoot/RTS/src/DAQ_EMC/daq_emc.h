@@ -30,7 +30,7 @@ struct emc_t {
 	u_char btow_in ;
 	u_short btow_max_ch ;
 	u_short btow_ch ;
-	u_short btow[4800] ;
+	u_short btow[4800] ;	
 	u_short *btow_raw ;
 	// added later
 	u_short btow_new[BTOW_MAXFEE][BTOW_DATSIZE] ;
@@ -40,8 +40,14 @@ struct emc_t {
 	u_short bsmd_max_ch ;
 	u_short bsmd_ch ;
 	u_short bsmd[12][4800] ;	// Nov 2, 2004 - extended from 8 to 12 to encompass the BPRE
+#if 0
+	// Both raw and zs banks will _not_ be present in the legacy. This is to observe backwards compatibility.
+	// However, variable bsmd_raw_in will tell you what data it came from.
+	// Use the non-legacy for BSMD readers in case you need this.
+	
 	u_short bsmd_raw[12][4800] ;	// Sep 2008 -- this bank is filled from the raw,non-zerosuppressed data
 					// if the event contained both the ZS & NZS bank!
+#endif
 	u_char bsmd_raw_in ;		// flag for above!
 	u_char  bsmd_cap[12] ;	// capacitor value...
 	
