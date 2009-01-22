@@ -42,6 +42,7 @@ static int tpc_doer(daqReader *rdr, char *do_print) ;
 static int tpx_doer(daqReader *rdr, char *do_print) ;
 static int trg_doer(daqReader *rdr, char *do_print) ;
 static int emc_pseudo_doer(daqReader *rdr, char *do_print) ;
+static int pp2pp_doer(daqReader *rdr, char *do_print) ;
 
 int main(int argc, char *argv[])
 {
@@ -150,9 +151,6 @@ int main(int argc, char *argv[])
 		dd = evp->det("svt")->get("legacy") ;
 		if(dd) LOG(INFO,"SVT found") ;
 
-		dd = evp->det("pp2pp")->get("legacy") ;
-		if(dd) LOG(INFO,"PP2PP found") ;
-
 		dd = evp->det("pmd")->get("legacy") ;
 		if(dd) LOG(INFO,"PMD found") ;
 
@@ -190,7 +188,8 @@ int main(int argc, char *argv[])
 
 		if(tpx_doer(evp,print_det)) LOG(INFO,"TPX found (any bank)") ;
 
-
+		/*************************** PP2PP **********************/
+		if(pp2pp_doer(evp,print_det)) LOG(INFO,"PP2PP found") ;
 
 		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
 		if(emc_pseudo_doer(evp,print_det)) LOG(INFO,"EMC found (any detector)") ;
@@ -602,4 +601,33 @@ static int emc_pseudo_doer(daqReader *rdr, char *do_print)
 
 
 
+}
+
+static int pp2pp_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"pp2pp")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("pp2pp")->get("adc") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			pp2pp_t *d = (pp2pp_t *) dd->Void ;
+
+			if(do_print) {
+				printf("PP2PP: sector %d, seq %d, chain %d, SVX %d:\n",dd->sec,d->seq_id,d->chain_id,d->svx_id) ;
+				for(int c=0;c<PP2PP_SVX_CH;c++) {
+					printf("   %3d: %3d [0x%02X]\n",c,d->adc[c],d->adc[c]) ;
+				}
+			}
+
+		}
+	}
+
+	return found ;
 }
