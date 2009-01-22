@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.102 2008/09/03 18:14:08 fine Exp $
+# $Id: ConsDefs.pm,v 1.103 2009/01/22 20:09:14 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -795,8 +795,6 @@
 		      'CERN_ROOT'       => $CERN_ROOT,
 		      'STAF'            => $STAF,
 		      'STAR_BIN'        => $STAR_BIN,
-		      'TEMP'            => $TEMP,
-		      'TMP'             => $TMP,
 		      'STAR_SYS'        => $STAR_HOST_SYS,
 		      'STAR_VERSION'    => $STAR_VERSION,
 		      'PERL5LIB'        => $PERL5LIB,
