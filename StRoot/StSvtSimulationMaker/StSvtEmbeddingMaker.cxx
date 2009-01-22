@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.14 2009/01/22 22:45:45 fine Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.15 2009/01/22 23:19:21 fine Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
+ * Revision 1.15  2009/01/22 23:19:21  fine
+ * Prptection against fo the crash
+ *
  * Revision 1.14  2009/01/22 22:45:45  fine
  * Add the fatal message to stop the chain
  *
@@ -403,13 +406,12 @@ Int_t StSvtEmbeddingMaker::NoSvt()
   return kFALSE;
 }
 
-
 //_____________________________________________________________
 //this resets mSvtSimPixelColl
 void StSvtEmbeddingMaker::ClearOutputData()
 {
   StSvtHybridPixelsD* tmpPixels;
- 
+ if (mSimPixelColl) {
   for(int Barrel = 1;Barrel <= mSimPixelColl->getNumberOfBarrels();Barrel++) {
      for (int Ladder = 1;Ladder <= mSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
        for (int Wafer = 1;Wafer <= mSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {
@@ -424,13 +426,13 @@ void StSvtEmbeddingMaker::ClearOutputData()
              tmpPixels = new StSvtHybridPixelsD(Barrel, Ladder, Wafer, Hybrid);
              mSimPixelColl->put_at(tmpPixels,index);
            }
-	   
-	   tmpPixels->setPedOffset(0);
+           tmpPixels->setPedOffset(0);
            tmpPixels->reset();
-	   
          }
        }
      }
+   }
+  } else {
+     LOG_ERROR << "StSvtEmbeddingMaker::ClearOutputData(): There is no SVT data to clear" << endm;
   }
-  
 }
