@@ -20,6 +20,7 @@ BINS = rts_example tpc_rerun tpx_gains
 
 all:   $(BINS)
 
+//$(VOBJS):
 
 rts_example: rts_example.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive

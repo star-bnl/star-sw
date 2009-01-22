@@ -41,6 +41,7 @@ static int etow_doer(daqReader *rdr, char  *do_print) ;
 static int tpc_doer(daqReader *rdr, char *do_print) ;
 static int tpx_doer(daqReader *rdr, char *do_print) ;
 static int trg_doer(daqReader *rdr, char *do_print) ;
+static int emc_pseudo_doer(daqReader *rdr, char *do_print) ;
 
 int main(int argc, char *argv[])
 {
@@ -192,9 +193,7 @@ int main(int argc, char *argv[])
 
 
 		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
-		dd = evp->det("emc_pseudo")->get("legacy") ;
-		if(dd) LOG(INFO,"EMC_PSEUDO LEGACY found") ;
-
+		if(emc_pseudo_doer(evp,print_det)) LOG(INFO,"EMC found (any detector)") ;
 		
 
 	}
@@ -577,3 +576,30 @@ static int btow_doer(daqReader *rdr, char *do_print)
 	return found ;
 }
 
+static int emc_pseudo_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"emc_pseudo")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("emc_pseudo")->get("legacy") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			emc_t *d = (emc_t *) dd->Void ;
+
+			if(do_print) printf("BTOW found %d (%d ch), BSMD found %d (%d ch), ETOW found %d (%d ch), ESMD found %d (%d ch)\n",
+					    d->btow_in, d->btow_ch, d->bsmd_in, d->bsmd_ch, d->etow_in, d->etow_ch, d->esmd_in, d->esmd_ch) ;
+		}
+	}
+
+	return found ;
+
+
+
+
+}
