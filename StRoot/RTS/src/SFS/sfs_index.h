@@ -3,7 +3,7 @@
 
 #include <string.h>
 #include "fs_index.h"
-//#include <sys/uio.h>
+#include <sys/uio.h>
 
 typedef unsigned int UINT32;
 typedef unsigned short UINT16;
@@ -122,6 +122,7 @@ class sfs_index : public fs_index {
   void dump(int) { dump("/",root); };
  
   int getwritevsz(fs_iovec *fsiovec, int n);
+  int writev_call_retry(int fd, iovec *iovec, int vec);
   int writev(fs_iovec *fsiovec, int n);
   int writev_sticky(fs_iovec *iovec, int n, char *sticky);
   int write(char *fn, char *buff, int sz);
