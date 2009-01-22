@@ -4,6 +4,16 @@
 
 #include <DAQ_READER/daq_det.h>
 
+#define PP2PP_SVX_CH	128
+
+struct pp2pp_t {
+	u_char seq_id ;		// 1..4 ;
+	u_char chain_id ;	// 1..4 ;
+	u_char svx_id ;		// 1..8 ;
+	u_char reserved ;	// for padding...
+
+	u_char adc[PP2PP_SVX_CH] ;	
+} ;
 
 class daq_pp2pp : public daq_det {
 private:
@@ -14,7 +24,7 @@ private:
 	class daq_dta *adc ;
 
 	static const int MAX_SEC = 2 ;
-	static const int MAX_RDO = 11 ;	// can be 0 for all RDOs; sequencers, typically 4
+	static const int MAX_RDO = 4 ;	// can be 0 for all RDOs; sequencers, typically 4
 
 	static const char *help_string ;
 protected:

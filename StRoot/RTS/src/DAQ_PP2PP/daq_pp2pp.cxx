@@ -11,7 +11,7 @@
 
 #include "daq_pp2pp.h"
 
-
+static int pp2pp_decode(struct pp2pp_t *d, char *raw, int bytes) ;
 
 class daq_det_pp2pp_factory : public daq_det_factory
 {
@@ -93,6 +93,7 @@ daq_dta *daq_pp2pp::get(const char *bank, int sec, int row, int pad, void *p1, v
 daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
 {
 	int min_sec, max_sec ;
+	int found_some = 0 ;
 
 	// sanity
 	if(sec==-1) {
@@ -104,7 +105,7 @@ daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
 		min_sec = max_sec = sec ;
 	}
 
-//	adc->create(8192,"adc",rts_id,DAQ_DTA_STRUCT(daq_adc_rb)) ;
+	adc->create(1,"pp2pp_t",rts_id,DAQ_DTA_STRUCT(pp2pp_t)) ;
 
 	for(int i=min_sec;i<=max_sec;i++) {
 		daq_dta *sec_dta ;
@@ -115,22 +116,30 @@ daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
 		int ret = sec_dta->iterate() ;
 		if(ret == 0) continue ;
 
-		if(sec_dta->ncontent == 0) continue ;
+
+		found_some = 1 ;
+		LOG(TERR,"pp2pp adc: sector %d, words %d",i,sec_dta->ncontent) ;
+
+		// extract modules
+		struct pp2pp_t *d = (pp2pp_t *) adc->request(1) ;
 
 
-		//u_int *dta = (u_int *) sec_dta->Byte ;
-		int words = sec_dta->ncontent / 4 ;
-
-		LOG(TERR,"pp2pp adc: sector %d, words %d",i,words) ;
-
-		// extract module
+		memset(d,0,sizeof(pp2pp_t)) ;
+		
+		ret = pp2pp_decode(d,(char *)sec_dta->Void, sec_dta->ncontent) ;
+		if(ret < 0) {
+			LOG(ERR,"pp2pp_decode failed for sector %d",i) ;
+			continue ;
+		}
+		adc->finalize(1,i,d->seq_id,d->chain_id) ;
 		
 
 	}
 
 	adc->rewind() ;
 
-	return adc ;
+	if(found_some) return adc ;
+	else return 0 ;
 }
 
 
@@ -138,6 +147,7 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 {
 	char str[128] ;
 	char *full_name ;
+	int found_some = 0 ;
 
 	int tot_bytes ;
 	int min_rdo, max_rdo ;
@@ -201,12 +211,13 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 			o_cou++ ;
 	
 			tot_bytes += size ;
+			found_some = 1 ;
 			LOG(INFO,"%s: %s: reading in \"%s\": bytes %d",name,str,"raw", size) ;
 		}
 	}
 	}
 
-	raw->create(tot_bytes,(char *)name,rts_id,DAQ_DTA_STRUCT(u_char)) ;
+	raw->create(tot_bytes,"pp2pp_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
 	for(int i=0;i<o_cou;i++) {
 
@@ -231,8 +242,11 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 
 	}
 
+
 	raw->rewind() ;
-	return raw ;
+
+	if(found_some) return raw ;
+	else return 0 ;
 #endif
 }
 
@@ -374,4 +388,22 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 
 
 	return t_cou ;	
+}
+
+
+
+
+static int pp2pp_decode(struct pp2pp_t *d, char *raw, int bytes) 
+{
+	u_int *d32 ;
+
+	d32 = (u_int *) raw ;	// data is BIG ENDIAN!
+
+	// we are still debugging!
+	
+	for(int i=0;i<10;i++) {
+		LOG(TERR,"pp2pp data: %2d: 0x%08X",i,b2h32(d32[i])) ;
+	}
+
+	return 0 ;	// call it OK for now...
 }
