@@ -151,9 +151,14 @@ export CXX := g++
 INSTALL_SUFFIX :=
 
 ifeq (${TARGET_SYSTEM},LINUX) 
-HOSTFLAGS = -march=$(TARGET_CPU)
+#linux for pp2pp is a 604 but has older compiler
+	ifeq (${TARGET_CPU},604) 
+		HOSTFLAGS = -mcpu=$(TARGET_CPU)
+	else
+		HOSTFLAGS = -march=$(TARGET_CPU)
+	endif
 else
-HOSTFLAGS = -mcpu=$(TARGET_CPU)
+	HOSTFLAGS = -mcpu=$(TARGET_CPU)
 endif
 
 # any library used on the host i.e. -lsocket or such
@@ -278,7 +283,6 @@ ifeq (${TARGET_CPU}, i960)
 else
 ifeq (${TARGET_CPU}, 604)
 	HOSTDEFINES += -DRTS_BIG_ENDIAN
-#	HOSTFLAGS := -mcpu=$(TARGET_CPU)
 else
 ifeq (${TARGET_CPU}, ultrasparc)
 	HOSTDEFINES += -DRTS_BIG_ENDIAN
