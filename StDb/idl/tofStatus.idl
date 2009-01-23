@@ -5,6 +5,6 @@
  * description: // tof status table
  */
 
-struct tofINLCorr {
+struct tofStatus {
   unsigned short status[24000];    /*  status code */
 };
