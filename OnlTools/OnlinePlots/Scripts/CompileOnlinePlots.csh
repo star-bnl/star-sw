@@ -23,7 +23,7 @@ Online.eemcPathOut:  /onlineweb/www/eemc2005pplot
 Online.bemcStatus:  /home_local/bemc/bemcStatus.txt
 Online.InputPath:    /a
 Online.OutputPath:   /a/pplot/histos/
-Online.ProjectPath:  .
+Online.ProjectPath:  OnlTools/OnlinePlots/
 
 Plugin.TVirtualPadEditor: Ged TQtGedEditor    QtGed          "TQtGedEditor(TCanvas*)"
 
