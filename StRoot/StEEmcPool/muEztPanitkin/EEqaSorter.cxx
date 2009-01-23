@@ -1,4 +1,4 @@
-// $Id: EEqaSorter.cxx,v 1.4 2009/01/18 01:01:28 ogrebeny Exp $
+// $Id: EEqaSorter.cxx,v 1.5 2009/01/23 00:14:50 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -21,11 +21,7 @@
 #include "SpyJPped.h"
 #include "SpyJPfreq.h"
 
-#ifndef IN_PANITKIN
-  #include "StMuDSTMaker/EZTREE/StTriggerDataMother.h"
-  ClassImp(EEqaSorter)
-#endif
-
+ClassImp(EEqaSorter)
 
 //-------------------------------------------
 //-------------------------------------------
@@ -449,6 +445,9 @@ EEqaSorter::spy( int runNo, int eveId){
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.5  2009/01/23 00:14:50  ogrebeny
+// Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
+//
 // Revision 1.4  2009/01/18 01:01:28  ogrebeny
 // Better separate EMC histogramming from OnlinePlots infrastructure
 //

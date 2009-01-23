@@ -1,7 +1,7 @@
 #ifndef EEdsmAna_h
 #define EEdsmAna_h
 /**************************************************************
- * $Id: EEdsmAna.h,v 1.2 2006/04/05 18:33:02 balewski Exp $
+ * $Id: EEdsmAna.h,v 1.3 2009/01/23 00:14:50 ogrebeny Exp $
  **************************************************************/
 #include <TObject.h>
 #include <TString.h>
@@ -160,15 +160,16 @@ class EEdsmAna  {
  void  usePed( TString n="dsm0inp.ped");
  int getNtot(){ return nTot;}
 
-#ifndef IN_PANITKIN
  ClassDef(EEdsmAna,1) 
-#endif
 };
 #endif
 
 
 /*
  * $Log: EEdsmAna.h,v $
+ * Revision 1.3  2009/01/23 00:14:50  ogrebeny
+ * Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
+ *
  * Revision 1.2  2006/04/05 18:33:02  balewski
  * new DSM bits allocation in 2006, possibly lost backward compatibility
  * use tagged 2005 version if needed

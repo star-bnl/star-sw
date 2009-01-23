@@ -1,6 +1,6 @@
 // *-- Author :Jan Balewski
 // 
-// $Id: StTrigOnlyPanitkinMaker.cxx,v 1.3 2008/12/19 17:54:35 fine Exp $
+// $Id: StTrigOnlyPanitkinMaker.cxx,v 1.4 2009/01/23 00:14:51 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -46,7 +46,7 @@ void StTrigOnlyPanitkinMaker::saveHisto(TString fname){
 Int_t StTrigOnlyPanitkinMaker::Init(){
 
   assert(HList);
-  dsm= 0; new EEdsmAna(HList,"allTrig");
+  dsm= 0; //new EEdsmAna(HList,"allTrig");
   if (dsm) dsm->initHisto();
   return StMaker::Init();
 }
@@ -96,6 +96,9 @@ Int_t StTrigOnlyPanitkinMaker::Make(){
 
 //---------------------------------------------------
 // $Log: StTrigOnlyPanitkinMaker.cxx,v $
+// Revision 1.4  2009/01/23 00:14:51  ogrebeny
+// Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
+//
 // Revision 1.3  2008/12/19 17:54:35  fine
 // Disable the dummy class
 //

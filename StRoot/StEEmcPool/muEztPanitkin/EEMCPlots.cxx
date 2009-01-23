@@ -52,11 +52,11 @@ void EEMCPlots::fillHisto(    char *rdr
 EEMCPlots::EEMCPlots(TObjArray *list, const char *eemcDbDump, const char *eemcPathIn, const char *eemcPathOut)
     : eeqa(0), eeDb(0)
 {
-  eeDb=new EEmcDb; // use ASCII dump as input
+  eeDb=new EEmcDb(); // use ASCII dump as input
   eeDb->readAsciiDataBase(eemcDbDump,1,12);
 
   if (!list) list = new TObjArray(0);
-  eeqa=new EEqaSorter(list,(StEEmcDbMaker*) eeDb); // creates EEMC related histos
+  eeqa=new EEqaSorter(list, eeDb); // creates EEMC related histos
   eeqa->setPath(eemcPathIn, eemcPathOut);
   eeqa->initHisto(200,1000); // nBins, maxAdc
 

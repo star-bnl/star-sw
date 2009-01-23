@@ -1,4 +1,4 @@
-// $Id: EEqaSorterC.cxx,v 1.2 2007/06/01 17:47:05 jml Exp $
+// $Id: EEqaSorterC.cxx,v 1.3 2009/01/23 00:14:50 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -21,21 +21,16 @@
 #include "EEqaPresenter.h"
 // tmp end
 
-#ifdef IN_PANITKIN
-#include "Infrastructure/EEmcDb/EEmcDb.h"
-#else
-  #include "StEEmcDbMaker/StEEmcDbMaker.h"
-#endif
+#include "StEEmcDbMaker/StEEmcDbMaker.h"
+
+ClassImp(EEqaSorterC)
+
 //-------------------------------------------
 //-------------------------------------------
 EEqaSorterC:: EEqaSorterC( TObjArray*L,StEEmcDbMaker*dbx) {
   // printf("\n\n  EEqaSorterC:: EEqaSorterC() \n\n");
   HList=L; 
-#ifdef IN_PANITKIN
-  eeDb=(EEmcDb*)dbx;
-#else
   eeDb=dbx;
-#endif
 
   adcThrTw=40;
   adcThrPrs=200;
@@ -225,6 +220,9 @@ void  EEqaSorterC::initRun() {
 
 
 // $Log: EEqaSorterC.cxx,v $
+// Revision 1.3  2009/01/23 00:14:50  ogrebeny
+// Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
+//
 // Revision 1.2  2007/06/01 17:47:05  jml
 // attempt to fix panitkin plot compile
 //
