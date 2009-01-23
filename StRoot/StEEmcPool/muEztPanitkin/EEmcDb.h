@@ -1,32 +1,19 @@
 #ifndef EEMCDB_h
 #define EEMCDB_h
 
-// $Id: EEmcDb.h,v 1.1 2009/01/18 01:01:28 ogrebeny Exp $
+// $Id: EEmcDb.h,v 1.2 2009/01/23 00:14:50 ogrebeny Exp $
 
 #include <TObject.h>
 
+#include "StEEmcDbMaker/StEEmcDbMaker.h"
 
-class DbFlavor {
- public:
-  static const int mx=100;
-  char flavor[mx];
-  char nameMask[mx];
-  DbFlavor(){flavor[0]=0; nameMask[0]=0;}
-};
-
-
-
-class StDbManager;
-class StDbConfigNode;
 class EEmcDbItem;
 
-class EEmcDb {
+class EEmcDb : public StEEmcDbMaker {
+ protected:
   unsigned int timeStamp;
   DbFlavor dbFlavor;
   int mfirstSecID, mlastSecID, mNSector;
-
-  StDbManager* mgr;
-  StDbConfigNode* nodeHead;
 
   int dbg; // dbg level
 
@@ -37,9 +24,6 @@ class EEmcDb {
   int nFound;
   float KsigOverPed; // defines threshold
 
-
-
-
   virtual void reloadDbConfig(int secID){;}
   virtual void reloadDbOthers(int secID){;}
   virtual void * getDbTable(int secID, const char *nameT){ return 0;} // pull a table out of DB
@@ -47,7 +31,7 @@ class EEmcDb {
   void clearItemArray();
 
  public:
-  EEmcDb();
+  EEmcDb(const char *name="EEmcDb");
   virtual ~EEmcDb(){;}
   void setDbg(int i){ dbg=i; }
   void setThreshold(float x);// defines threshold for ADCsold
@@ -71,6 +55,9 @@ class EEmcDb {
 #endif
 
 // $Log: EEmcDb.h,v $
+// Revision 1.2  2009/01/23 00:14:50  ogrebeny
+// Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
+//
 // Revision 1.1  2009/01/18 01:01:28  ogrebeny
 // Better separate EMC histogramming from OnlinePlots infrastructure
 //

@@ -110,9 +110,6 @@ eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskFilena
     }
     
   }
-#ifdef IN_PANITKIN 
-//Sergey does not like it  gSystem->Sleep(5000);   
-#endif
   //  defStyle->cd(); // retun to default style
  printf("JB panel=%d page=%d done\n",panel,page);
  

@@ -8,10 +8,8 @@
 #include "EEdsmAna.h"
 #if 0 // disable whole code, needs re-work to match with new EEdsm.so after Xin added  detailed Endcap triger simu code 
 
-#ifdef IN_PANITKIN
-  #include "daqFormats.h"
-  #include "trgReader.h"
-#endif 
+#include "daqFormats.h"
+#include "trgReader.h"
 
   
 
@@ -25,9 +23,7 @@
 #include "StEEmcUtil/EEdsm/EEdsm3.h"
 
 
-#ifndef IN_PANITKIN
 ClassImp(EEdsmAna)
-#endif
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -358,24 +354,11 @@ void EEdsmAna ::sort( const unsigned char * dsm0inp,
   nTot++;
   // printf("EEdsmAna:: sort()  ,nTot=%d\n",nTot);
 
-#ifndef IN_PANITKIN 
   readDsm0(dsm0inp);
   // print();
   readDsm1(dsm1inp);
   if(dsm2inp) readDsm2(dsm2inp);
   if(dsm3inp) readDsm3(dsm3inp);
-#else
-  readDsm0(trg.EEMC);
-  readDsm1(trg.EEMC_l1);
-  if(trg.trg_sum) {
-    /* actual structures depend on the version
-       of trgStructures.h, can be NULL!
-    */
-    TrgSumData *trg_sum=( TrgSumData *)trg.trg_sum; 
-    readDsm2(trg_sum->DSMdata.EMC);
-    readDsm3(trg_sum->DSMdata.lastDSM);
-  }
-#endif
 
   emulDsm0();    
   emulDsm1();    

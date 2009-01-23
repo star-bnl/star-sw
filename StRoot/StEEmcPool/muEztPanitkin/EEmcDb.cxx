@@ -1,4 +1,4 @@
-// $Id: EEmcDb.cxx,v 1.1 2009/01/18 01:01:28 ogrebeny Exp $
+// $Id: EEmcDb.cxx,v 1.2 2009/01/23 00:14:50 ogrebeny Exp $
 
 #include <iostream>
 #include <assert.h>
@@ -23,7 +23,7 @@
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.cxx"  
 //--------------------------------------------------
 //--------------------------------------------------
-EEmcDb::EEmcDb(){
+EEmcDb::EEmcDb(const char *name) : StEEmcDbMaker(name){
   // printf("CCC EEmcDb\n");
   mfirstSecID=mlastSecID=mNSector=0;
   timeStamp=0;
@@ -210,6 +210,9 @@ void EEmcDb::clearItemArray(){
 }  
 
 // $Log: EEmcDb.cxx,v $
+// Revision 1.2  2009/01/23 00:14:50  ogrebeny
+// Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
+//
 // Revision 1.1  2009/01/18 01:01:28  ogrebeny
 // Better separate EMC histogramming from OnlinePlots infrastructure
 //

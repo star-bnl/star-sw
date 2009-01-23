@@ -1,6 +1,6 @@
 // \class  EEqaSorter
 // \author Jan Balewski, Hal Spinka
-// $Id: EEqaSorter.h,v 1.2 2009/01/18 01:01:28 ogrebeny Exp $
+// $Id: EEqaSorter.h,v 1.3 2009/01/23 00:14:50 ogrebeny Exp $
 
 #ifndef EEqaSorter_h
 #define EEqaSorter_h
@@ -75,14 +75,16 @@ class EEqaSorter :public TObject{
   void resetHisto();
   void saveHisto(char *n="out/eemcQA");
   void saveHistoAdd(TFile *f = 0);
-#ifndef IN_PANITKIN
+
    ClassDef(EEqaSorter,1) 
-#endif
 };
      
 #endif
 
 // $Log: EEqaSorter.h,v $
+// Revision 1.3  2009/01/23 00:14:50  ogrebeny
+// Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
+//
 // Revision 1.2  2009/01/18 01:01:28  ogrebeny
 // Better separate EMC histogramming from OnlinePlots infrastructure
 //

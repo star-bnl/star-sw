@@ -1,4 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.1 2005/04/28 20:54:46 balewski Exp $
+// $Id: EEqaSorterA.cxx,v 1.2 2009/01/23 00:14:50 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -12,6 +12,8 @@
 
 #include "EEqaSorterA.h"
 #include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
+
+ClassImp(EEqaSorterA)
 
 //-------------------------------------------
 //-------------------------------------------
@@ -228,6 +230,9 @@ int EEqaSorterA::usePed4( TString fName){
 
 
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.2  2009/01/23 00:14:50  ogrebeny
+// Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
+//
 // Revision 1.1  2005/04/28 20:54:46  balewski
 // start
 //
