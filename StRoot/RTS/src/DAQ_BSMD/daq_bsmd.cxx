@@ -133,6 +133,7 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 
 	for(int r=start_r;r<=stop_r;r++) {
 		int count ;
+		int version, fiber ;
 
 		if(bsmd_d.bytes[r-1][1] == 0) continue ;
 
@@ -143,12 +144,14 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 		u_short *data = (u_short *)((u_int)bsmd_d.dta[r-1][1]) ;	// move to data start
 
 		if(bsmd_d.endian[r-1][1]) {	// big!
+			version = b2h16(data[0]) ;
 			count = b2h16(data[1]) ;
-			bsmd->cap = b2h16(data[0]) ;
+			bsmd->cap = b2h16(data[2]) ;
+			fiber = b2h16(data[3]) ;
 
-			LOG(NOTE,"%s: fiber %d: count %d, cap %d",r,count,bsmd->cap) ;
+			LOG(NOTE,"%s: fiber %d[%d]: count %d, cap %d, version 0x%04X",name,r,fiber,count,bsmd->cap,version) ;
 		
-			data += 2 ;
+			data += 4 ;
 		
 			for(int c=0;c<count;c++) {
 				int ch = b2h16(*data++) ;
@@ -158,12 +161,14 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 			}
 		}
 		else {
+			version = l2h16(data[0]) ;
 			count = l2h16(data[1]) ;
-			bsmd->cap = l2h16(data[0]) ;
+			bsmd->cap = l2h16(data[2]) ;
+			fiber = l2h16(data[3]) ;
 
-			LOG(NOTE,"%s: fiber %d: count %d, cap %d",r,count,bsmd->cap) ;
-		
-			data += 2 ;
+			LOG(NOTE,"%s: fiber %d[%d]: count %d, cap %d, version 0x%04X",name,r,fiber,count,bsmd->cap,version) ;
+
+			data += 4 ;
 		
 			for(int c=0;c<count;c++) {
 				int ch = l2h16(*data++) ;
