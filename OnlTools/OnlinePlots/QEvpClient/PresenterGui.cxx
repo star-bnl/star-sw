@@ -44,20 +44,20 @@ char* mystrcat(const char* a, const char* b) {
 static TQtBrowserMenuItem_t gMenu_Data[] = {
   // { filename,      tooltip,            staydown,  id,              button}
 /* File Menu */
-  { "&Save",      kFileSave,     Qt::CTRL+Qt::Key_S, "Save histograms in root file",        mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/save.xpm")    },
-  { "Save &As",   kFileSaveAs,   0,                  "Save histograms in root file as ... ",mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/hdisk_t.xpm") },
-  { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/printer.xpm") },
-  { "&Print All", kFilePrintAll, 0,                  "Print the TCanvas image ",            mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/printer.xpm") },
-  { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/printer.xpm") },
-  { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/quit.xpm")    },
+  { "&Save",      kFileSave,     Qt::CTRL+Qt::Key_S, "Save histograms in root file",        mystrcat( getenv("ONLINEPLOTSDIR"),"/images/save.xpm")    },
+  { "Save &As",   kFileSaveAs,   0,                  "Save histograms in root file as ... ",mystrcat( getenv("ONLINEPLOTSDIR"),"/images/hdisk_t.xpm") },
+  { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            mystrcat( getenv("ONLINEPLOTSDIR"),"/images/printer.xpm") },
+  { "&Print All", kFilePrintAll, 0,                  "Print the TCanvas image ",            mystrcat( getenv("ONLINEPLOTSDIR"),"/images/printer.xpm") },
+  { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       mystrcat( getenv("ONLINEPLOTSDIR"),"/images/printer.xpm") },
+  { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           mystrcat( getenv("ONLINEPLOTSDIR"),"/images/quit.xpm")    },
 
   { "About",      kHelpAbout,      0, "", ""},
 
-  { "&Live",      kLive,         Qt::CTRL+Qt::Key_L, "Connect to current run ... ",          mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/connect.xpm")  },
-  { "&File",      kFile,         Qt::CTRL+Qt::Key_F, "Open datafile or directory ... ",      mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/fileopen.xpm") },
-  { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/update.xpm")   },
-  { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/update.xpm")   },  
-  { "&bits",kBits,   Qt::CTRL+Qt::Key_B, "Show Trigger and Detector bits",                   mystrcat( getenv("ONLINEPLOTSDIR"),"/Resources/bits.xpm")   },
+  { "&Live",      kLive,         Qt::CTRL+Qt::Key_L, "Connect to current run ... ",          mystrcat( getenv("ONLINEPLOTSDIR"),"/images/connect.xpm")  },
+  { "&File",      kFile,         Qt::CTRL+Qt::Key_F, "Open datafile or directory ... ",      mystrcat( getenv("ONLINEPLOTSDIR"),"/images/fileopen.xpm") },
+  { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      mystrcat( getenv("ONLINEPLOTSDIR"),"/images/update.xpm")   },
+  { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   mystrcat( getenv("ONLINEPLOTSDIR"),"/images/update.xpm")   },  
+  { "&bits",kBits,   Qt::CTRL+Qt::Key_B, "Show Trigger and Detector bits",                   mystrcat( getenv("ONLINEPLOTSDIR"),"/images/bits.xpm")   },
   { "View Toolbar",     kToolBar,        0, "show toolbar ",                            "" },
 
   {0,0,0,"",""}
@@ -517,7 +517,7 @@ void PresenterGui::MakeConnectionFrame()
 
 
 
-  //fStarLogo = new  QPushButton(QIconSet(QPixmap("../Resources/starlogo_1.xpm")),"",leftPane);
+  //fStarLogo = new  QPushButton(QIconSet(QPixmap("../images/starlogo_1.xpm")),"",leftPane);
   //connect(fStarLogo, SIGNAL(clicked()) ,this, SLOT(DoUpdateButton()) );
   QToolTip::add(fStarLogo,"Experiment shutdown. Don't push this button!");
   fProgressBar = new QProgressBar(leftPane,"Progress");
