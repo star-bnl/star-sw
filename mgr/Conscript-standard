@@ -138,13 +138,13 @@ foreach my $p (@VF_daq_pkgs) {
 if ( $pkg eq "OnlinePlots") {
     $ONLINEPLOTPATH  =  $RTS_READER_PATH;
     $CPPPATH  .=  $ONLINEPLOTPATH
-              .   $main::PATH_SEPARATOR . "#StOnline/OnlinePlots/Infrastructure" 
+              .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure" 
               .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/Infrastructure" 
-              .   $main::PATH_SEPARATOR . "#StOnline/OnlinePlots/HistogramGroups"
+              .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/HistogramGroups"
               .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/HistogramGroups"
-              .   $main::PATH_SEPARATOR . "#StOnline/OnlinePlots/Infrastructure/EEmcDb"
+              .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure/EEmcDb"
               .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/Infrastructure/EEmcDb"
-              .   $main::PATH_SEPARATOR . "#StOnline/OnlinePlots/QEvpClient"
+              .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/QEvpClient"
               .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/QEvpClient"
               .   $main::PATH_SEPARATOR . "#StRoot/RTS/EventTracker"
               .   $main::PATH_SEPARATOR .  $CPPPATH;
@@ -240,14 +240,15 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my $out = $PKG . "_image_collection.cxx";
     my @xpm = map (File::Basename::basename( $_), @xpmQT);
     if ($qt4) {
-       # create qt4 resource file
-       my  $qrc = $out.".qrc";
-       #Command $env [$qrc], @xpm, qq(cat >%>; );
-       #Command $env [$out], $qrc, qq($uic -embed %< -o %> );
+	# create qt4 resource file
+	my  $qrc = $out.".qrc";
+	#Command $env [$qrc], @xpm, qq(cat >%>; );
+	#Command $env [$out], $qrc, qq($uic -embed %< -o %> );
 
     } else {
-       Command $env [$out], @xpm, qq($uic -embed %< -o %> );
-       push @src, $out
+	print "Command $uic -embed ".join(" ",@xpm)." -o $out \n";
+	Command $env [$out], @xpm, qq($uic -embed %< -o %> );
+	push @src, $out
     }
   }
   if ($qt4) {
@@ -754,7 +755,7 @@ if ( $#idlL > -1 ) {
     print "SO_PKGT = $SO_PKGT\n" if $param::debug;
     my $LIBPKGT = $PKGT . "." . $env1->{SUFLIB};
     
-    if ( $Dir =~ /StRoot\//  ||  $Dir =~ /StOnline\//) {
+    if ( $Dir =~ /StRoot\//  ||  $Dir =~ /OnlTools\//) {
       $SO_PKGT = $SO_PKG; 
       $SO_MAPT = $SO_MAP;
       $LIBPKGT = $LIBPKG;
