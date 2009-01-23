@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.162 2009/01/23 18:47:26 jeromel Exp $
+# $Id: Construct,v 1.163 2009/01/23 19:10:54 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -445,6 +445,7 @@ sub wanted_PACKAGE {
 	/^doc$/ ||
 	/^run$/ ||
 	/^examples$/ ||
+	/^images$/ ||
 	/^local$/ ||
 	/^hold$/ ||
 	/^wrk$/)
