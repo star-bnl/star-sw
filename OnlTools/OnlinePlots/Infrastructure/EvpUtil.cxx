@@ -45,7 +45,7 @@ int EvpUtil::mSharedMemorySize = 140*1000*1000;
 const char* EvpUtil::mInputPath = gEnv->GetValue("Online.InputPath","/a");
 const char* EvpUtil::mOutputPath =  gEnv->GetValue("Online.OutputPath","/a/pplot/histos/");
 char* EvpUtil::mMapFilePath = EvpUtil::cat(EvpUtil::mOutputPath,"/evpEventServer.map");
-char* EvpUtil::mCanvasDescriptionFile = EvpUtil::cat(EvpUtil::mProjectPath,"/Resources/CanvasDescriptions.txt");
+char* EvpUtil::mCanvasDescriptionFile = EvpUtil::cat(EvpUtil::mProjectPath,"/local/CanvasDescriptions.txt");
 int EvpUtil::mNumberOfTabs = 0;
 int EvpUtil::mNumberOfSubTabs[MAX_TABS];
 int EvpUtil::nx[MAX_TABS][MAX_SUBTABS];
@@ -937,7 +937,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.1 2009/01/23 16:11:04 jeromel Exp $
+ * $Id: EvpUtil.cxx,v 1.2 2009/01/23 22:26:35 jeromel Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -947,6 +947,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.2  2009/01/23 22:26:35  jeromel
+ * Change config file location
+ *
  * Revision 1.1  2009/01/23 16:11:04  jeromel
  * Import from online/RTS/src/
  *
