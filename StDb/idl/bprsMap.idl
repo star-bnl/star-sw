@@ -23,6 +23,5 @@ struct bprsMap {
   octet powerSupplyChannel;    /* 0-14 */
   float eta;                  /* physical pseudorapidity of tower center */
   float phi;                  /* physical azimuth of tower center */
-  char comment[255];
 };
 
