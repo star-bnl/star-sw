@@ -23,7 +23,7 @@ BemcGeometry::BemcGeometry() {
   unsigned int id;
   float eta;
   float phi;
-  sprintf(filename,"%s%s",getenv("ONLINEPLOTSDIR"),"/Resources/bemcGeom.dat");
+  sprintf(filename,"%s%s",getenv("ONLINEPLOTSDIR"),"/local/bemcGeom.dat");
 
   ifstream in(filename);
   while ( in.good() ) {
