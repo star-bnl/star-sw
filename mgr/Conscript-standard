@@ -148,7 +148,7 @@ if ( $pkg eq "OnlinePlots") {
               .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/QEvpClient"
               .   $main::PATH_SEPARATOR . "#StRoot/RTS/EventTracker"
               .   $main::PATH_SEPARATOR .  $CPPPATH;
-    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG -DIN_PANITKIN=yes -DIN_FRANK=yes ";
+    $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
 }
 $CPPFLAGS .= " -DNEW_DAQ_READER"; 
 if ($pkg eq "StDAQMaker") {
