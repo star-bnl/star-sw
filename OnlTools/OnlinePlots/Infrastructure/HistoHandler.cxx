@@ -54,7 +54,7 @@ static EventTracker *evtTracker = new EventTracker();
 
 
 using namespace std;
-char*  HistoHandler::mListOfHistograms = EvpUtil::cat(getenv("ONLINEPLOTSDIR"),"/Resources/ListOfHistograms.txt");
+char*  HistoHandler::mListOfHistograms = EvpUtil::cat(getenv("ONLINEPLOTSDIR"),"/local/ListOfHistograms.txt");
 
 
 char* HistoHandler::mL3Buffer = 0;
@@ -2827,7 +2827,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.1 2009/01/23 16:11:04 jeromel Exp $
+   * $Id: HistoHandler.cxx,v 1.2 2009/01/23 22:26:35 jeromel Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2837,6 +2837,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.2  2009/01/23 22:26:35  jeromel
+   * Change config file location
+   *
    * Revision 1.1  2009/01/23 16:11:04  jeromel
    * Import from online/RTS/src/
    *
