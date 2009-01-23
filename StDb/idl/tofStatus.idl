@@ -1,0 +1,10 @@
+/* tofStatus
+ *
+ * Tables: tofStatus
+ *
+ * description: // tof status table
+ */
+
+struct tofINLCorr {
+  unsigned short status[24000];    /*  status code */
+};
