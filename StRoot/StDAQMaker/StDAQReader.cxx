@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.74 2009/01/14 18:20:49 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.75 2009/01/23 00:09:54 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.75  2009/01/23 00:09:54  fine
+ * restore the missed EventInfo. Should fix bug 1376, 1377
+ *
  * Revision 1.74  2009/01/14 18:20:49  fine
  * Remove the redundant devReader type
  *
@@ -452,6 +455,7 @@ int StDAQReader::readEvent()
      memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes_mapped);
 #  endif
      fEventReader->InitEventReader(fDATAP);
+    *fEventInfo = fEventReader->getEventInfo();
      if(fEventInfo->Token==0){
         LOG_INFO << 
            Form("StDAQReader::readEvent: found event with token==0") << endm;
