@@ -14,5 +14,4 @@ struct bsmdpMap {
   octet feeA;                  /* A value for FEE 1-4 */
   float eta;                  /* physical pseudorapidity of strip center */
   float phi;                  /* physical azimuth of strip center */
-  char comment[255];
 };

@@ -18,6 +18,5 @@ struct bemcMap {
   unsigned short DSM;          /* just integer div TP/10 0-29 */
   float eta;                  /* physical pseudorapidity of tower center */
   float phi;                  /* physical azimuth of tower center */
-  char comment[255];
 };
 
