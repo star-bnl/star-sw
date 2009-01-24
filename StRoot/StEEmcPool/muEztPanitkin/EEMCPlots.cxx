@@ -128,7 +128,7 @@ void EEMCPlots::processEvent( char *datap
 //#ifdef NEW_DAQ_READER
     evpReader *evp = (evpReader*)(datap);
 //#endif
-	Tonko2Ezt ezt;
+	Tonko2Ezt ezt(datap);
 	eeqa->clear();
 	eeqa->sort(&ezt.eETow, &ezt.eESmd,
             evp->run, evp->token, TRG_VERSION,

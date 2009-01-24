@@ -1,8 +1,10 @@
-// $Id: EEqaSorter.cxx,v 1.5 2009/01/23 00:14:50 ogrebeny Exp $
+// $Id: EEqaSorter.cxx,v 1.6 2009/01/24 03:47:43 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <iostream>
+using namespace std;
 
 #include <TObjArray.h>
 
@@ -445,6 +447,9 @@ EEqaSorter::spy( int runNo, int eveId){
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.6  2009/01/24 03:47:43  ogrebeny
+// Fuxed bug - can see ETOW data now
+//
 // Revision 1.5  2009/01/23 00:14:50  ogrebeny
 // Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
 //
