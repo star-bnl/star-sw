@@ -105,6 +105,7 @@ int bemcFillHisto(char* rdr, const unsigned char *, const unsigned char *) {
 
 #ifdef NEW_DAQ_READER
   daqReader *daqrdr = (daqReader *)rdr;
+  if (daqrdr) ret = 1;
 #else
   ret = emcReader(rdr);
   trgReader(rdr);
@@ -117,22 +118,6 @@ int bemcFillHisto(char* rdr, const unsigned char *, const unsigned char *) {
   //////////////////////////////////////////////////////////////////
   // BTOW
   //
-#if 0
-  daq_dta *ddbtow = daqrdr->det("btow")->get("adc") ; 
-  if(ddbtow){
-    while(ddbtow->iterate()){
-      btow_t* btowdata = (btow_t*)ddbtow->Void;
-      for(int i = 0; i < BTOW_MAXFEE; i++){
-	for(int j = 0; j < BTOW_PRESIZE; j++){
-	  cout<<btowdata->preamble[i][j]<<endl; //This is the header
-	}   
-	for(int j = 0; j < BTOW_DATSIZE; j++){
-	  cout<<btowdata->adc[i][j]<<endl;//This are the adcs      
-	}   
-      }
-    }
-  } 
-#endif
 
 #ifdef NEW_DAQ_READER
     daq_dta *dd_btow = daqrdr ? (daqrdr->det("btow")->get("adc")) : 0;
@@ -203,22 +188,6 @@ int bemcFillHisto(char* rdr, const unsigned char *, const unsigned char *) {
   ////////////////////////////////////////////////////////////////
   // BSMD
   //
-#if 0
-  daq_dta* ddbsmd;
-  for(int f=1;f<=12;f++) {
-    ddbsmd =  daqrdr->det("bsmd")->get("adc",0,f) ;    
-    if(ddbsmd) {
-      while(ddbsmd->iterate()) {
-
-	bsmd_t *bsmddata = (bsmd_t *) ddbsmd->Void ;
-	printf("BSMD : fiber %2d, capacitor %d:\n",ddbsmd->rdo,bsmddata->cap); 
-	for(int i=0;i<BSMD_DATSIZE;i++) {
-	  printf("   %4d = %4d\n",i,bsmddata->adc[i]);
-	}
-      }
-    }
-  }
-#endif
   
     int totalSumSMD = 0;
     int totalSumPSD = 0;
@@ -433,7 +402,7 @@ int bemcFillHisto(char* rdr, const unsigned char *, const unsigned char *) {
 
 /***************************************************************************
  *
- * $Id: bemc.cxx,v 1.4 2009/01/24 01:13:49 ogrebeny Exp $
+ * $Id: bemc.cxx,v 1.5 2009/01/24 02:23:41 ogrebeny Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -443,6 +412,9 @@ int bemcFillHisto(char* rdr, const unsigned char *, const unsigned char *) {
  ***************************************************************************
  *
  * $Log: bemc.cxx,v $
+ * Revision 1.5  2009/01/24 02:23:41  ogrebeny
+ * Fuxed bug
+ *
  * Revision 1.4  2009/01/24 01:13:49  ogrebeny
  * Now uses the new DAQ reader
  *
