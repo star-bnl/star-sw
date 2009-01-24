@@ -44,12 +44,16 @@ __ROOTRC__
 
 echo "--- Creating the ROOT macro"
 cat >EvpPlotServer.C<<__ROOTMACRO__
+
 {
   gROOT->Macro("Load.C");
   gSystem->Load("RTS");
-  gSystem->Load("StDaqLib");
+  gSystem->Load("libqt-mt.so");
+  gSystem->Load("libGui.so");
+  gSystem->Load("libGQt.so");
+  gSystem->Load("StDaqLib"); 
   gSystem->Load("OnlinePlots");
-  gSystem->Load("StDbLib");
+  //gSystem->Load("StDbLib");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StStrangeMuDstMaker");
@@ -57,20 +61,38 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
   gSystem->Load("StEEmcPoolmuEztPanitkin");
   gSystem->Load("StBEMCPlots");
   gSystem->Load("StEvent");
+
   const char *homedir = gSystem->Getenv("ONLINEPLOTSDIR");
-  if (!homedir) printf(" Attention: The environment variable \"ONLINEPLOTSDIR\" has not been set yet !!!\n");
-  char* args[] = {
-                "-path"
-                ,"/a/9057008/"
-                , "-map"
-                , "test.map"
-                , "-nocheck"
-                , "-nogui"
-                , "-start" 
-                };
-//  evpServerMain::main(sizeof(args)/sizeof(char*), args);
-//  evpServerMain::main(int argc, const char* argv[]);
-//  evpMainPresenter::main();
+  if (!homedir){
+    printf(" Attention: The environment variable \"ONLINEPLOTSDIR\" has not been set yet !!!\n");
+    TString P= gSystem->pwd(); P.Append("/OnlTools/OnlinePlots/");
+    gSystem->Setenv("ONLINEPLOTSDIR",P.Data());
+    printf(" Setting it as %s\n",gSystem->Getenv("ONLINEPLOTSDIR"));
+  }
+
+  char* argsS[] = {
+                 "-path",
+                 //"st_physics_adc_10022038_raw_1330001.daq",
+		 "/a/9057008/",
+                 "-map",
+                 "./test.map",
+                 "-nocheck",
+                 "-nogui",
+                 "-start" 
+                 };
+
+
+  char* argsP[] = {
+                 "-path",
+                 "./test.map"
+                 };
+
+  printf("Server=%d / Presenter=%d arguments\n",sizeof(argsS)/sizeof(char*),sizeof(argsP)/sizeof(char*));
+  printf("  Start the server     [] evpServerMain::main(%d, argsS);\n",sizeof(argsS)/sizeof(char*));
+  printf("  Start the presenter  [] evpMainPresenter::main(%d,argsP);\n",sizeof(argsP)/sizeof(char*));
+
+//  evpServerMain::main(sizeof(argsS)/sizeof(char*), argsS);    // starts server
+//  evpMainPresenter::main(sizeof(argsP)/sizeof(char*),argsP);  // start presenter
 }
 __ROOTMACRO__
 
