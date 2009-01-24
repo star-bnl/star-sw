@@ -15,19 +15,16 @@ using namespace std;
 #ifndef NEW_DAQ_READER
 #	include "evpReader.hh"
 #	include "emcReader.h"
+#	include "trgReader.h"
 #define BSMD_FIBERS     12
 #define BSMD_DATSIZE    4800
 #else
-//	this needs to be always included
 #	include "DAQ_READER/daqReader.h"
 #	include "DAQ_READER/daq_dta.h"
-
-//	only the detectors we will use need to be included
-//	for their structure definitions...
 #	include "DAQ_BSMD/daq_bsmd.h"
 #	include "DAQ_BTOW/daq_btow.h"
 #	include "DAQ_EMC/daq_emc.h"
-//#	include "DAQ_TRG/daq_trg.h"
+#	include "DAQ_TRG/daq_trg.h"
 #endif
 
 #include <StDaqLib/EMC/StEmcDecoder.h>
@@ -66,15 +63,15 @@ void BEMCPlots::saveHisto(TFile *hfile) {
 }
 //-------------------------------------------------------------------
 void BEMCPlots::fillHisto(    char *datap
-			    , const unsigned char *dsmL0WestInput
-                	    , const unsigned char *dsmL0EastInput
-                	    , const unsigned short *dsmL1Input
-                	    , const unsigned short *dsmL2Input
-                	    , const unsigned short *dsmL3Input
+			    , const unsigned char *
+                	    , const unsigned char *
+                	    , const unsigned short *
+                	    , const unsigned short *
+                	    , const unsigned short *
                 	    ) {
-    bemcFillHisto(datap, dsmL0WestInput, dsmL0EastInput);
+    bemcFillHisto(datap);
     if (BEMCPlotsInstance) {
-	BEMCPlotsInstance->processEvent(datap, dsmL0WestInput, dsmL0EastInput, dsmL1Input, dsmL2Input, dsmL3Input);
+	BEMCPlotsInstance->processEvent(datap);
     }
 }
 //-------------------------------------------------------------------
@@ -412,14 +409,48 @@ void BEMCPlots::saveHistograms(TFile *hfile) {
 }
 //-------------------------------------------------------------------
 void BEMCPlots::processEvent( char *datap
-			    , const unsigned char *dsmL0WestInput
-                	    , const unsigned char *dsmL0EastInput
-                	    , const unsigned short *dsmL1Input
-                	    , const unsigned short *dsmL2Input
-                	    , const unsigned short *dsmL3Input
+			    , const unsigned char *
+                	    , const unsigned char *
+                	    , const unsigned short *
+                	    , const unsigned short *
+                	    , const unsigned short *
                 	    ) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
     if (!BEMCDecoder) BEMCDecoder = new StEmcDecoder();
+#ifdef NEW_DAQ_READER
+    daqReader *rdr = (daqReader*)(datap);
+#else
+    int ret = emcReader(datap);
+    trgReader(datap);
+#endif
+
+const unsigned char *dsmL0WestInput = 0;
+const unsigned char *dsmL0EastInput = 0;
+const unsigned short *dsmL1Input = 0;
+const unsigned short *dsmL2Input = 0;
+const unsigned short *dsmL3Input = 0;
+#ifdef NEW_DAQ_READER
+    daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
+    if (dd_trg) while (dd_trg->iterate()) {
+        trg_t *d = (trg_t *) dd_trg->Void;
+        if (d) {
+            dsmL0WestInput = &(d->BEMC[0][0]);
+            dsmL0EastInput = &(d->BEMC[1][0]);
+	    dsmL1Input = &(d->BEMC_l1[0]);
+	    //dsmL2Input = ???;
+	    //dsmL3Input = ???;
+	}
+    }
+#else
+    dsmL0WestInput = &(trg.BEMC[0][0]);
+    dsmL0EastInput = &(trg.BEMC[1][0]);
+    dsmL1Input = trg.BEMC_l1;
+    dsmL2Input = ((unsigned short*) trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0);
+    dsmL3Input = ((unsigned short*) trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
+ 
+#endif
+
+
     //if (!datap || (mDebug >= 2)) cout << "datap = " << (int*)datap << endl;
     if (!dsmL0WestInput || (mDebug >= 2)) cout << "dsmL0WestInput = " << (int*)dsmL0WestInput << endl;
     if (!dsmL0EastInput || (mDebug >= 2)) cout << "dsmL0EastInput = " << (int*)dsmL0EastInput << endl;
@@ -495,15 +526,12 @@ void BEMCPlots::processEvent( char *datap
     	    if (this->mHistDsmL3InputJPsiTopoBit) this->mHistDsmL3InputJPsiTopoBit->Fill(this->mDsmL3InputJPsiTopoBit[0]);
     	    if (this->mHistDsmL3InputJetPatchTopoBit) this->mHistDsmL3InputJetPatchTopoBit->Fill(this->mDsmL3InputJetPatchTopoBit[0]);    
     }
-
 #ifdef NEW_DAQ_READER
-    daqReader *rdr = (daqReader*)(datap);
     daq_dta *dd_btow = rdr ? (rdr->det("btow")->get("adc")) : 0;
     if (dd_btow) while (dd_btow->iterate()) {
 	btow_t *d = (btow_t *) dd_btow->Void;
 	if (d) {
 #else
-    int ret = emcReader(datap);
     if ((ret >= 0) && emc.btow_in) {
 	unsigned short *header = emc.btow_raw; // BTOW event header
 	if (header) {
