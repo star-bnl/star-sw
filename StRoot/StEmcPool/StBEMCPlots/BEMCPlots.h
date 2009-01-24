@@ -16,11 +16,11 @@ public:
     void clear(const char *bemcStatus);
     void saveHistograms(TFile *hfile);    
     void processEvent(	  char *rdr
-			, const unsigned char *dsmL0WestInput
-			, const unsigned char *dsmL0EastInput
-			, const unsigned short *dsmL1Input
-			, const unsigned short *dsmL2Input
-			, const unsigned short *dsmL3Input
+			, const unsigned char *dsmL0WestInput = 0
+			, const unsigned char *dsmL0EastInput = 0
+			, const unsigned short *dsmL1Input = 0
+			, const unsigned short *dsmL2Input = 0
+			, const unsigned short *dsmL3Input = 0
 			);
 
     int getDebug() {return mDebug;}
@@ -31,11 +31,11 @@ public:
     static void resetHisto(const char *bemcStatus = 0);
     static void saveHisto(TFile *hfile);    
     static void fillHisto(char *rdr
-			, const unsigned char *dsmL0WestInput
-			, const unsigned char *dsmL0EastInput
-			, const unsigned short *dsmL1Input
-			, const unsigned short *dsmL2Input
-			, const unsigned short *dsmL3Input
+			, const unsigned char *dsmL0WestInput = 0
+			, const unsigned char *dsmL0EastInput = 0
+			, const unsigned short *dsmL1Input = 0
+			, const unsigned short *dsmL2Input = 0
+			, const unsigned short *dsmL3Input = 0
 			);
 
 private:
