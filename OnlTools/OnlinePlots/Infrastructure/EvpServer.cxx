@@ -28,6 +28,7 @@
 #endif
 #include "Lock.h"
 
+#include <TEnv.h>
 
 //#include "EEmcQA2/EEqaSorter.h"
 #include "SsdAdcLogTable.h"               // Bo from Renaud 03/03
@@ -460,7 +461,7 @@ void EvpServer::LaunchEndOfRunAction(long run) {
   Save(filename);
   sprintf(cmd,"pwd = %s %s ",gSystem->WorkingDirectory(),filename);
   cout << cmd << endl;
-  sprintf(cmd,"cd %s; unset DISPLAY; /RTS/bin/LINUX/i686/pplotEndOfRun %s & ",gSystem->WorkingDirectory(),filename);
+  sprintf(cmd,"cd %s; unset DISPLAY; %s %s & ",gSystem->WorkingDirectory(),gEnv->GetValue("Online.endOfRun", "/RTS/bin/LINUX/i686/pplotEndOfRun"),filename);
   system(cmd);
   mRS->setEndOfRunActionPerformed(1);
 }
@@ -619,7 +620,7 @@ void EvpServer::SetStopFlag(void)
 
 /***************************************************************************
  *
- * $Id: EvpServer.cxx,v 1.1 2009/01/23 16:11:03 jeromel Exp $
+ * $Id: EvpServer.cxx,v 1.2 2009/01/24 01:07:30 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -629,6 +630,9 @@ void EvpServer::SetStopFlag(void)
  ***************************************************************************
  *
  * $Log: EvpServer.cxx,v $
+ * Revision 1.2  2009/01/24 01:07:30  dkettler
+ * Added runtime endOfRunAction config
+ *
  * Revision 1.1  2009/01/23 16:11:03  jeromel
  * Import from online/RTS/src/
  *
