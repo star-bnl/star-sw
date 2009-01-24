@@ -18,10 +18,10 @@ public:
     void clear();
     void saveHistograms(TFile *hfile);    
     void processEvent(	  char *rdr
-        		, const unsigned char * dsm0inp
-        		, const unsigned short int  * dsm1inp
-        		, const unsigned short int  * dsm2inp
-        		, const unsigned short int  * dsm3inp
+        		, const unsigned char * dsm0inp = 0
+        		, const unsigned short int  * dsm1inp = 0
+        		, const unsigned short int  * dsm2inp = 0
+        		, const unsigned short int  * dsm3inp = 0
 			);
 
     // These are called from Pplots
@@ -29,10 +29,10 @@ public:
     static void resetHisto();
     static void saveHisto(TFile *hfile);    
     static void fillHisto(char *rdr
-        		, const unsigned char * dsm0inp
-        		, const unsigned short int  * dsm1inp
-        		, const unsigned short int  * dsm2inp
-        		, const unsigned short int  * dsm3inp
+        		, const unsigned char * dsm0inp = 0
+        		, const unsigned short int  * dsm1inp = 0
+        		, const unsigned short int  * dsm2inp = 0
+        		, const unsigned short int  * dsm3inp = 0
 			);
 
 private:
