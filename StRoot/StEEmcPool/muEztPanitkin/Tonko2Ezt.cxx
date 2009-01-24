@@ -1,8 +1,10 @@
-// $Id: Tonko2Ezt.cxx,v 1.4 2009/01/24 01:14:35 ogrebeny Exp $
+// $Id: Tonko2Ezt.cxx,v 1.5 2009/01/24 03:47:43 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include  <iostream>
+using namespace std;
 
 #include <TObjArray.h>
 
@@ -73,6 +75,9 @@ Tonko2Ezt::Tonko2Ezt(char *rdrc) {
 }
 
 // $Log: Tonko2Ezt.cxx,v $
+// Revision 1.5  2009/01/24 03:47:43  ogrebeny
+// Fuxed bug - can see ETOW data now
+//
 // Revision 1.4  2009/01/24 01:14:35  ogrebeny
 // Now uses new DAQ reader
 //
