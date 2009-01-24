@@ -159,8 +159,10 @@ int bemcFillHisto(char* rdr
 	      else if(error==4095 && count==4095) TDCStatus[i] = BEMCNOTINSTALLED; // NOT INSTALLED
 	      else TDCStatus[i] = BEMCCORRUPTED; //CORRUPTED    
 	      if(TDCStatus[i] == BEMCCORRUPTED) STATUS = BEMCCORRUPTED;
-	      BEMCHIST2[0]->Fill(0.0,(float)i);    
-	      BEMCHIST2[0]->Fill(TDCStatus[i],(float)i);    
+	      if(BEMCHIST2[0]){
+		BEMCHIST2[0]->Fill(0.0,(float)i);    
+		BEMCHIST2[0]->Fill(TDCStatus[i],(float)i);    
+	      }
 	    }
 	  
 	  for(int i=0;i<NBTOWADC;i++)
@@ -170,14 +172,18 @@ int bemcFillHisto(char* rdr
 	      float id = (float)(tdc*160+crate_sequency);
 	      TDCSum[tdc]+=(float)emc.btow[i];
 	      TDCTotal+=(float)emc.btow[i];
-	      if(tdc>=0  && tdc<10 && TDCStatus[tdc]!=BEMCNOTINSTALLED) BEMCHIST2[2]->Fill(id,(float)emc.btow[i]);
-	      if(tdc>=10 && tdc<20 && TDCStatus[tdc]!=BEMCNOTINSTALLED) BEMCHIST2[3]->Fill(id,(float)emc.btow[i]);
-	      if(tdc>=20 && tdc<30 && TDCStatus[tdc]!=BEMCNOTINSTALLED) BEMCHIST2[4]->Fill(id,(float)emc.btow[i]);
+	      if( BEMCHIST2[2] && BEMCHIST2[3] && BEMCHIST2[4] ){
+		if(tdc>=0  && tdc<10 && TDCStatus[tdc]!=BEMCNOTINSTALLED) BEMCHIST2[2]->Fill(id,(float)emc.btow[i]);
+		if(tdc>=10 && tdc<20 && TDCStatus[tdc]!=BEMCNOTINSTALLED) BEMCHIST2[3]->Fill(id,(float)emc.btow[i]);
+		if(tdc>=20 && tdc<30 && TDCStatus[tdc]!=BEMCNOTINSTALLED) BEMCHIST2[4]->Fill(id,(float)emc.btow[i]);
+	      }
 	    }
 	}
     }
-  BEMCHIST1[0]->Fill(0.0);
-  BEMCHIST1[0]->Fill(STATUS);
+  if (  BEMCHIST1[0] ){
+    BEMCHIST1[0]->Fill(0.0);
+    BEMCHIST1[0]->Fill(STATUS);
+  }
   //
   //
   ////////////////////////////////////////////////////////////////
@@ -220,36 +226,43 @@ int bemcFillHisto(char* rdr
         else totalSumPSD+=(float)emc.bsmd[RDO][index];
       }
     }
-    BEMCHIST1[1]->Fill(totalSumSMD);
-    BEMCHIST1[2]->Fill(totalSumPSD);
+    if ( BEMCHIST1[1] && BEMCHIST1[2]){
+      BEMCHIST1[1]->Fill(totalSumSMD);
+      BEMCHIST1[2]->Fill(totalSumPSD);
+    }
   }
-	for(int i=0;i<12;i++)
-	{
+
+  for(int i=0;i<12;i++) {
     float STATUS = BEMCOK;
     if(fiberSum[i]==0) STATUS = BEMCNOTINSTALLED;
-		//fprintf(stderr,"Sum for fiber %d = %f\n",i,fiberSum[i]);
+    //fprintf(stderr,"Sum for fiber %d = %f\n",i,fiberSum[i]);
     if(i<8)
-		{
-		  BEMCHIST2[1]->Fill(0.0,(float)i);
-      BEMCHIST2[1]->Fill(STATUS,float(i));
-			if(STATUS==BEMCOK)
-			{
-        BEMCHIST2[5]->Fill((float)cap[i],(float)i);
-        BEMCHIST2[6]->Fill(fiberSum[i],(float)i);
-			}
-		}
-		else
-		{
-      BEMCHIST2[13]->Fill(0.0,(float)i-8);
-      BEMCHIST2[13]->Fill(STATUS,float(i-8));
-      if(STATUS==BEMCOK)
-			{
-			  BEMCHIST2[7]->Fill((float)cap[i],(float)i);
-        BEMCHIST2[8]->Fill(fiberSum[i],(float)i);
-			}
-		}
-		
+      {
+	if(BEMCHIST2[1]){
+	  BEMCHIST2[1]->Fill(0.0,(float)i);
+	  BEMCHIST2[1]->Fill(STATUS,float(i));
+
+	  if(STATUS==BEMCOK)
+	    {
+	      BEMCHIST2[5]->Fill((float)cap[i],(float)i);
+	      BEMCHIST2[6]->Fill(fiberSum[i],(float)i);
+	    }
 	}
+      }
+    else
+      {
+	if ( BEMCHIST2[13]) {
+	  BEMCHIST2[13]->Fill(0.0,(float)i-8);
+	  BEMCHIST2[13]->Fill(STATUS,float(i-8));
+	  if(STATUS==BEMCOK)
+	    {
+	      BEMCHIST2[7]->Fill((float)cap[i],(float)i);
+	      BEMCHIST2[8]->Fill(fiberSum[i],(float)i);
+	    }
+	}
+      }
+    
+  }
 
   //
   //
@@ -340,20 +353,20 @@ int bemcFillHisto(char* rdr
     int PATH = 0;
     for(int i=0; i<300; i++)
     {
-      if(HT[i]> HTTH) BEMCHIST2[9]->Fill((float)i,(float)HT[i]);
-      if(PA[i]> PATH) BEMCHIST2[10]->Fill((float)i,(float)PA[i]);
+      if(HT[i]> HTTH && BEMCHIST2[9] ) BEMCHIST2[9]->Fill((float)i,(float)HT[i]);
+      if(PA[i]> PATH && BEMCHIST2[10]) BEMCHIST2[10]->Fill((float)i,(float)PA[i]);
     }  
     
     HTTH = 0;
     PATH = 0;
-    if(MAXHT>HTTH) BEMCHIST2[11]->Fill((float)MAXHTID,(float)MAXHT);
-    if(MAXPA>PATH) BEMCHIST2[12]->Fill((float)MAXPAID,(float)MAXPA);
+    if(MAXHT>HTTH && BEMCHIST2[11]) BEMCHIST2[11]->Fill((float)MAXHTID,(float)MAXHT);
+    if(MAXPA>PATH && BEMCHIST2[12]) BEMCHIST2[12]->Fill((float)MAXPAID,(float)MAXPA);
     
     
     HTTH = 12;
     PATH = 12;
-    if(MAXHT>HTTH) BEMCHIST1[3]->Fill((float)MAXHTID);
-    if(MAXPA>PATH) BEMCHIST1[4]->Fill((float)MAXPAID);
+    if(MAXHT>HTTH && BEMCHIST1[3] ) BEMCHIST1[3]->Fill((float)MAXHTID);
+    if(MAXPA>PATH && BEMCHIST1[4] ) BEMCHIST1[4]->Fill((float)MAXPAID);
     
     // making JET patch
     int MAXJETID =0;
@@ -364,9 +377,9 @@ int bemcFillHisto(char* rdr
       for(int j = 0;j<20;j++) JP[i]+=PA[j+JPSTART[i]];
       for(int j = 0;j<5;j++)  JP[i]+=PA[JPEXTRA[i][j]];  
       if(JP[i]>MAXJETVALUE) { MAXJETVALUE = JP[i]; MAXJETID=i;}  
-      BEMCHIST2[14]->Fill(i,JP[i]);  
+      if (BEMCHIST2[14]) BEMCHIST2[14]->Fill(i,JP[i]);  
     }
-    BEMCHIST2[15]->Fill(MAXJETID,MAXJETVALUE);
+    if (BEMCHIST2[15]) BEMCHIST2[15]->Fill(MAXJETID,MAXJETVALUE);
     
     PATH = 35;
     if(MAXJETVALUE>PATH) BEMCHIST1[5]->Fill(MAXJETID);
@@ -377,7 +390,7 @@ int bemcFillHisto(char* rdr
        BEMCNJPPED[i]++;
        if(BEMCNJPPED[i]==10)
        {
-         BEMCHIST2[16]->Fill(i,(float)BEMCJPPED[i]/(float)BEMCNJPPED[i]);
+         if (BEMCHIST2[16] ) BEMCHIST2[16]->Fill(i,(float)BEMCJPPED[i]/(float)BEMCNJPPED[i]);
 	 BEMCJPPED[i] = 0;
 	 BEMCNJPPED[i] = 0;
        } 
@@ -396,7 +409,7 @@ int bemcFillHisto(char* rdr
 
 /***************************************************************************
  *
- * $Id: bemc.cxx,v 1.2 2009/01/21 03:22:38 ogrebeny Exp $
+ * $Id: bemc.cxx,v 1.3 2009/01/24 00:49:44 jeromel Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -406,6 +419,9 @@ int bemcFillHisto(char* rdr
  ***************************************************************************
  *
  * $Log: bemc.cxx,v $
+ * Revision 1.3  2009/01/24 00:49:44  jeromel
+ * Protect against undefined historgram (OnlinePlot would otherwise crash)
+ *
  * Revision 1.2  2009/01/21 03:22:38  ogrebeny
  * Made it compilable with the old EVP_READER
  *
