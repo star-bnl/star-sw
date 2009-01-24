@@ -1,11 +1,19 @@
 #ifndef NEW_DAQ_READER
-#include "evpReader.hh"
-#include "emcReader.h"
+#	include "evpReader.hh"
+#	include "emcReader.h"
+#	include "trgReader.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_READER/evpReaderClass.h"
-#  include "DAQ_EMC/emcReader.h"
-#  include <RTS/include/daqFormats.h>
+#	include "DAQ_READER/daqReader.h"
+#	include "DAQ_READER/daq_dta.h"
+#	include "DAQ_EMC/daq_emc.h"
+#	include "DAQ_ETOW/daq_etow.h"
+#	include "DAQ_ESMD/daq_esmd.h"
+
+#	include "DAQ_TRG/daq_trg.h"
+
+#	include "DAQ_READER/evpReaderClass.h"
+#	include "DAQ_EMC/emcReader.h"
+#	include <RTS/include/daqFormats.h>
 #endif
 
 #include <TObjArray.h>
@@ -39,13 +47,13 @@ void EEMCPlots::saveHisto(TFile *hfile) {
 }
 //-------------------------------------------------------------------
 void EEMCPlots::fillHisto(    char *rdr
-                    	    , const unsigned char * dsm0inp
-                    	    , const unsigned short int  * dsm1inp
-                    	    , const unsigned short int  * dsm2inp
-                    	    , const unsigned short int  * dsm3inp
+                    	    , const unsigned char *
+                    	    , const unsigned short int  *
+                    	    , const unsigned short int  *
+                    	    , const unsigned short int  *
                 	    ) {
     if (EEMCPlotsInstance) {
-	EEMCPlotsInstance->processEvent(rdr, dsm0inp, dsm1inp, dsm2inp, dsm3inp);
+	EEMCPlotsInstance->processEvent(rdr);
     }
 }
 //-------------------------------------------------------------------
@@ -80,12 +88,43 @@ void EEMCPlots::saveHistograms(TFile *hfile) {
 }
 //-------------------------------------------------------------------
 void EEMCPlots::processEvent( char *datap
-                    	    , const unsigned char * dsm0inp
-                    	    , const unsigned short int  * dsm1inp
-                    	    , const unsigned short int  * dsm2inp
-                    	    , const unsigned short int  * dsm3inp
+                    	    , const unsigned char *
+                    	    , const unsigned short int  *
+                    	    , const unsigned short int  *
+                    	    , const unsigned short int  *
                  	    ) {
     if (eeqa) {
+	const unsigned char * dsm0inp = 0;
+        const unsigned short int  * dsm1inp = 0;
+        const unsigned short int  * dsm2inp = 0;
+        const unsigned short int  * dsm3inp = 0;
+#ifdef NEW_DAQ_READER
+    daqReader *rdr = (daqReader*)(datap);
+#else
+    int ret = emcReader(datap);
+    trgReader(datap);
+#endif
+#ifdef NEW_DAQ_READER
+    daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
+    if (dd_trg) while (dd_trg->iterate()) {
+        trg_t *d = (trg_t *) dd_trg->Void;
+        if (d) {
+            dsm0inp = &(d->EEMC[0]);
+            dsm1inp = &(d->EEMC_l1[0]);
+            //dsm2inp = ???;
+            //dsm3inp = ???;
+        }
+    }
+#else
+    dsm0inp = ((unsigned char*)&trg.EEMC);
+    dsm1inp = ((unsigned short*)trg.EEMC_l1);
+    dsm2inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0);
+    dsm3inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
+#endif
+
+
+
+
 //#ifdef NEW_DAQ_READER
     evpReader *evp = (evpReader*)(datap);
 //#endif

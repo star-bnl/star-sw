@@ -1,4 +1,4 @@
-// $Id: Tonko2Ezt.cxx,v 1.3 2009/01/13 16:31:05 fine Exp $
+// $Id: Tonko2Ezt.cxx,v 1.4 2009/01/24 01:14:35 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -8,51 +8,74 @@
 
 #include "Tonko2Ezt.h"
 
-// this class is implemented only in online-mode
 #ifndef NEW_DAQ_READER
-#  include <evpReader.hh>
-#  include "emcReader.h"
+#       include "evpReader.hh"
+#       include "emcReader.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_EMC/emcReader.h"
+#       include "DAQ_READER/daqReader.h"
+#       include "DAQ_READER/daq_dta.h"
+#       include "DAQ_EMC/daq_emc.h"
+#       include "DAQ_ETOW/daq_etow.h"
+#       include "DAQ_ESMD/daq_esmd.h"
 #endif
 
 //-------------------------------------------
 //-------------------------------------------
- Tonko2Ezt:: Tonko2Ezt() {
-   // printf("\n\n  Tonko2Ezt:: Tonko2Ezt() \n\n");
-   //   printf("ETOW data in %d \n",emc.etow_in);
-   // printf("ESMD data in %d \n",emc.esmd_in);  
+Tonko2Ezt::Tonko2Ezt(char *rdrc) {
+#ifdef NEW_DAQ_READER
+    daqReader *rdr = (daqReader*)(rdrc);
+#endif
 
-   if(emc.etow_in) {     // ETOW data
-     int ib;
-     for(ib=0;ib<ETOW_MAXFEE;ib++) {
-       eETow.createBank(ib,ETOW_PRESIZE,128);
-       eETow.setHeader(ib,emc.etow_pre[ib]);
-       eETow.setData(ib,emc.etow[ib]);
-     }
-     // printf("TTTTTTTTTTTTTTTTTTTT\n\n\n");
-     // eETow.print(0);
-   }// end of ETOW 
-
-   if(emc.esmd_in) {   // ESMD data
-    
-     int ib;
-     for(ib=0;ib<ESMD_MAXFEE;ib++) {
-       eESmd.createBank(ib,ESMD_PRESIZE,ESMD_DATSIZE);
-       eESmd.setHeader(ib,emc.esmd_pre[ib]);
-       eESmd.setData(ib,emc.esmd[ib]);
-       //eESmd.print(ib,0);
-#if 0
-       printf("%x %x %x %x \n", emc.esmd_pre[ib][0], emc.esmd_pre[ib][1], emc.esmd_pre[ib][2], emc.esmd_pre[ib][3]);
-#endif    
-     }
-     // printf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\n\n\n");
-   } 
-   //  exit(1);
-} // end of ESMD
+#ifdef NEW_DAQ_READER
+    daq_dta *dd_etow = rdr ? (rdr->det("etow")->get("adc")) : 0;
+    if (dd_etow) while (dd_etow->iterate()) {
+        etow_t *d = (etow_t *) dd_etow->Void;
+        if (d) {
+#else
+    if (emc.etow_in) {
+	{
+#endif
+	    for(int ib = 0;ib < ETOW_MAXFEE;ib++) {
+    		eETow.createBank(ib,ETOW_PRESIZE,ETOW_DATSIZE);
+#ifdef NEW_DAQ_READER
+    		eETow.setHeader(ib,(unsigned short*)&(d->preamble[ib][0]));
+    		eETow.setData(ib,(unsigned short*)&(d->adc[ib][0]));
+#else
+    		eETow.setHeader(ib,emc.etow_pre[ib]);
+    		eETow.setData(ib,emc.etow[ib]);
+#endif
+	    }
+    	}
+    }
+#ifdef NEW_DAQ_READER
+    daq_dta *dd_esmd = rdr ? (rdr->det("esmd")->get("adc")) : 0;
+    if (dd_esmd) while (dd_esmd->iterate()) {
+        esmd_t *d = (esmd_t *) dd_esmd->Void;
+        if (d) {
+#else
+    if (emc.esmd_in) {
+	{
+#endif
+	    for(int ib = 0;ib < ESMD_MAXFEE;ib++) {
+    		eESmd.createBank(ib,ESMD_PRESIZE,ESMD_DATSIZE);
+#ifdef NEW_DAQ_READER
+    		eESmd.setHeader(ib,(unsigned short*)&(d->preamble[ib][0]));
+    		eESmd.setData(ib,(unsigned short*)&(d->adc[ib][0]));
+#else
+    		eESmd.setHeader(ib,emc.esmd_pre[ib]);
+    		eESmd.setData(ib,emc.esmd[ib]);
+#endif
+    		//eESmd.print(ib,0);
+    		//printf("%x %x %x %x \n", emc.esmd_pre[ib][0], emc.esmd_pre[ib][1], emc.esmd_pre[ib][2], emc.esmd_pre[ib][3]);
+	    }
+	}
+    }
+}
 
 // $Log: Tonko2Ezt.cxx,v $
+// Revision 1.4  2009/01/24 01:14:35  ogrebeny
+// Now uses new DAQ reader
+//
 // Revision 1.3  2009/01/13 16:31:05  fine
 // Add StEEmcPool package to the daqReader dependants
 //
