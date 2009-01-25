@@ -111,9 +111,9 @@ void EEMCPlots::processEvent( char *datap
         if (d) {
             dsm0inp = &(d->EEMC[0]);
             dsm1inp = &(d->EEMC_l1[0]);
-            //dsm2inp = ???;
-            //dsm3inp = ???;
-        }
+            dsm2inp = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.EMC) : 0);
+            dsm3inp = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.lastDSM) : 0);
+         }
     }
 #else
     dsm0inp = ((unsigned char*)&trg.EEMC);
