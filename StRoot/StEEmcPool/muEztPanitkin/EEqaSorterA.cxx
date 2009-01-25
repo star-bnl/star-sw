@@ -1,4 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.2 2009/01/23 00:14:50 ogrebeny Exp $
+// $Id: EEqaSorterA.cxx,v 1.3 2009/01/25 01:36:54 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -101,7 +101,6 @@ void  EEqaSorterA::sortDaqMapmt0( int ver){
   /* Goal of this method:
      make histos of adc vs channel for each MAPMT crate
   */
-
   if(eESmd==0) return;
   int icr;
   for(icr=0;icr<eESmd->getNBlocks();icr++) {
@@ -230,6 +229,9 @@ int EEqaSorterA::usePed4( TString fName){
 
 
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.3  2009/01/25 01:36:54  ogrebeny
+// *** empty log message ***
+//
 // Revision 1.2  2009/01/23 00:14:50  ogrebeny
 // Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
 //

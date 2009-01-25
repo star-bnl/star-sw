@@ -25,6 +25,7 @@ using namespace std;
 #	include "DAQ_BTOW/daq_btow.h"
 #	include "DAQ_EMC/daq_emc.h"
 #	include "DAQ_TRG/daq_trg.h"
+#       include <RTS/include/daqFormats.h>
 #endif
 
 #include <StDaqLib/EMC/StEmcDecoder.h>
@@ -437,8 +438,8 @@ const unsigned short *dsmL3Input = 0;
             dsmL0WestInput = &(d->BEMC[0][0]);
             dsmL0EastInput = &(d->BEMC[1][0]);
 	    dsmL1Input = &(d->BEMC_l1[0]);
-	    //dsmL2Input = ???;
-	    //dsmL3Input = ???;
+            dsmL2Input = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.EMC) : 0);
+            dsmL3Input = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.lastDSM) : 0);
 	}
     }
 #else

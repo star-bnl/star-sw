@@ -1,4 +1,4 @@
-// $Id: EEqaSorterC.cxx,v 1.3 2009/01/23 00:14:50 ogrebeny Exp $
+// $Id: EEqaSorterC.cxx,v 1.4 2009/01/25 01:36:54 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -68,7 +68,7 @@ void  EEqaSorterC::sortTower(){
     for(i=0;i<eETow->sizeData(icr);i++) {
       int chan=i;
       const  EEmcDbItem  *x=eeDb->getByCrate(crateID,chan);
-      if(x==0) continue; // noDB info
+      if(!x) continue; // noDB info
       if(x->fail ) continue;  // drop broken channels
       float adc=data[i]-x->ped; // ped subtracted ADC
       if(adc<adcThrTw) continue;
@@ -104,8 +104,8 @@ void  EEqaSorterC::sortMapmt( int ver){
     for(i=0;i<eESmd->sizeData(icr);i++) {
       int chan=i;
       const  EEmcDbItem  *x=eeDb->getByCrate(crateID,chan);
-      if(x==0) continue; // noDB info
-      if(x->fail ) continue;  // drop broken channels
+      if(!x) continue; // noDB info
+      if(x->fail) continue;  // drop broken channels
      
       float thr=0;
       char cD=x->name[2];
@@ -123,18 +123,17 @@ void  EEqaSorterC::sortMapmt( int ver){
       // printf("%d %f =%c= p=%p i=%d ",data[i],adc,cPQR,h,1-cPQR-'P'); x->print();
       
       if(x->isSMD()) {
-	int strip=x->strip;
-	int iplane =x->plane-'U';
-	int isec=x->sec-1;
-	hSmd[isec][iplane]->Fill(strip);
-	nSmdH[isec][iplane]++;
+	    int strip=x->strip;
+	    int iplane =x->plane-'U';
+	    int isec=x->sec-1;
+	    hSmd[isec][iplane]->Fill(strip);
+	    nSmdH[isec][iplane]++;
       } else {
-	int ik=1+cD-'P';
-	nHit[ik]++;
-	int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
-	h2D[ik]->Fill(iphi,x->eta);
+	    int ik=1+cD-'P';
+	    nHit[ik]++;
+	    int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
+	    h2D[ik]->Fill(iphi,x->eta);
       }
-
       hMAPMT->Fill(crateID,x->mapmtId());
     }
   }// end of loop over crates
@@ -220,6 +219,9 @@ void  EEqaSorterC::initRun() {
 
 
 // $Log: EEqaSorterC.cxx,v $
+// Revision 1.4  2009/01/25 01:36:54  ogrebeny
+// *** empty log message ***
+//
 // Revision 1.3  2009/01/23 00:14:50  ogrebeny
 // Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
 //
