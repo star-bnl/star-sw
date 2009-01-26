@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.213 2009/01/04 20:41:26 perev Exp $
+// $Id: StMaker.cxx,v 1.214 2009/01/26 14:32:49 fisyak Exp $
 //
 //
 /*!
@@ -43,7 +43,7 @@
 #include "StChain.h"
 #include "TTable.h"
 
-#include "TMemStat.h"
+#include "StMemStat.h"
 #include "TAttr.h"
 #include "StMkDeb.h"
 #include "StMessMgr.h"
@@ -107,7 +107,29 @@ old version of db tags
 {"y2005",       20041030,     0},
 {"y2005b",      20041101,     0},
 {"y2005c",      20041201,     0},
+  Production
+=============
+  MC:
 
+  2000: y1a,y1b,y1h,y2000,year_1a,year_1b
+  2001: y2001,y2001n
+  2002: y2a,y2b,y2x,y2y,year_2a
+  2003: y2003,y2003x 
+  2004: y2004a, y2004c,y2004,y2004y 
+  2005: y2005,y2005x
+  2006: y2006c,y2006  
+  2007: y2007g,y2007  
+  upgr: upgr01, upgr05, upgr06, upgr07, upgr08, upgr09, upgr10, upgr11, upgr13 
+=============
+  rawData:
+  2000: y1h,     y2000a (?), y2000 
+  y2001 
+  y2003 
+  y2004 
+  y2005b,y2005f
+  y2006g,y2006 
+  y2007g,y2007 
+  y2008  
 
 */
 static const DbAlias_t fDbAlias[] = {// geometry  Comment            old 
@@ -179,8 +201,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2009",       20081215,     0, "y2009",    "Practically place holder yet(VP)"},
 
   // development tags
-  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
-  {"complete",    20190101,     1, "complete", "non-production"},
+  //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
+  //  {"complete",    20190101,     1, "complete", "non-production"},
   //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
   {"upgr01",      20190101,     4, "upgr01",   ""},
@@ -198,6 +220,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr13",      20190101,    16, "upgr13",   ""},
   {"upgr14",      20190101,    17, "upgr14",   ""},
   {"upgr15",      20190101,    18, "upgr15",   ""},
+  {"upgr16",      20190101,    19, "upgr16",   ""},
+  {"upgr17",      20190101,    20, "upgr17",   ""},
   // Future development:
   {"simpletpc",   20200102,    16, "simpletpc",""},
   {"upgr20",      20200102,    17, "upgr20",    "y2007 +  one TOF"}, // advertized simu 20061101
@@ -713,9 +737,9 @@ Int_t StMaker::Init()
      }
       TString ts1(maker->ClassName()); ts1+="("; ts1+=maker->GetName(); ts1+=")::";
       TString ts2 = ts1; ts2+="Make ";
-      maker->fMemStatMake  = new TMemStat(ts2);
+      maker->fMemStatMake  = new StMemStat(ts2);
       ts2 = ts1; ts2+="Clear";
-      maker->fMemStatClear = new TMemStat(ts2);
+      maker->fMemStatClear = new StMemStat(ts2);
       
       if ( maker->Init()) {
 #ifdef STAR_LOGGER 
@@ -763,10 +787,10 @@ void StMaker::StartMaker()
   else              
     if (GetDebug()) {
 #ifdef STAR_LOGGER 
-        LOG_DEBUG << "StMaker::StartMaker : cannot use TMemStat (no Init()) in [" << 
+        LOG_DEBUG << "StMaker::StartMaker : cannot use StMemStat (no Init()) in [" << 
               GetName() << "]" << endm;
 #else        
-        printf("StMaker::StartMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
+        printf("StMaker::StartMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
 #endif        
      }
 
@@ -789,12 +813,12 @@ void StMaker::EndMaker(Int_t ierr)
   else               
     if (GetDebug()) {
 #ifdef STAR_LOGGER     
-     LOG_DEBUG << "StMaker::EndMaker : cannot use TMemStat (no Init()) in [" 
+     LOG_DEBUG << "StMaker::EndMaker : cannot use StMemStat (no Init()) in [" 
                <<   GetName() 
                << "]" 
                << endm ;    
 #else     
-        printf("StMaker::EndMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
+        printf("StMaker::EndMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
 #endif
      }
 
@@ -916,7 +940,7 @@ Int_t StMaker::Finish()
    }  
 //VP   Printf("=================================================================================\n");
    
-   if (GetParent()==0) TMemStat::Summary();
+   if (GetParent()==0) StMemStat::Summary();
    return nerr;
 }
 
@@ -1452,7 +1476,7 @@ static void doPs(const Char_t *who, const Char_t *where)
 #else
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
 #endif    
-  TMemStat::PrintMem(0);
+  StMemStat::PrintMem(0);
 #if 0
 #ifdef STAR_LOGGER_BUG  
   LOG_QA << endm;
@@ -1865,6 +1889,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.214  2009/01/26 14:32:49  fisyak
+// rename TMemStat => StMemStat due clash with ROOT class
+//
 // Revision 1.213  2009/01/04 20:41:26  perev
 // fix , alias must be y2009, not 8
 //
