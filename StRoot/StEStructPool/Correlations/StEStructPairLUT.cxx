@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairLUT.cxx,v 1.1 2008/12/02 23:45:08 prindle Exp $
+ * $Id: StEStructPairLUT.cxx,v 1.2 2009/01/26 14:40:44 fisyak Exp $
  *
  * Author: Duncan Prindle
  *
@@ -15,6 +15,7 @@
  *
  *
  ***********************************************************************/
+#include "TMath.h"[
 #include "StEStructPairLUT.h"
 
 
@@ -35,7 +36,7 @@ StEStructPairLUT::StEStructPairLUT() {
     nDelPhi = 50;
     mDelXYCut = 5;
     mDelZCut  = 5;
-    mPi = acos(-1);
+    mPi = TMath::ACos(-1);
     mRRefMin = 50;
     mRRefMax = 200;
 
@@ -68,15 +69,15 @@ StEStructPairLUT::~StEStructPairLUT() {
 }
 double StEStructPairLUT::s (double Ref, double Rad, double eta) {
     double l = lambda(eta);
-    return Rad*acos(1-0.5*pow(Ref/Rad,2))/cos(l);
+    return Rad*TMath::ACos(1-0.5*TMath::Power(Ref/Rad,2))/TMath::Cos(l);
 }
 double StEStructPairLUT::alpha (double Ref, double Rad, double eta, double sign) {
     double l = lambda(eta);
     double arc = s(Ref,Rad,eta);
-    return sign*arc*cos(l)/Rad;
+    return sign*arc*TMath::Cos(l)/Rad;
 }
 double StEStructPairLUT::lambda (double eta) {
-    double theta = 2*atan(exp(-eta));
+    double theta = 2*atan(TMath::Exp(-eta));
     return 0.5*3.1415926 - theta;
 }
 double StEStructPairLUT::delZ  (double Ref) {
@@ -84,7 +85,7 @@ double StEStructPairLUT::delZ  (double Ref) {
     double l2 = lambda(mEta2);
     double s1 = s(Ref,mR1,mEta1);
     double s2 = s(Ref,mR2,mEta2);
-    return s1*sin(l1) - s2*sin(l2);
+    return s1*TMath::Sin(l1) - s2*TMath::Sin(l2);
 }
 double StEStructPairLUT::delXY (double Ref) {
     // Compared to tracks.i of Dsv, phi is direction of track (pi/2 different than in tracks.i)
@@ -92,19 +93,19 @@ double StEStructPairLUT::delXY (double Ref) {
     // (v x B points in -Y direction if v is in X and B is in Z directions)
     double alpha1 = alpha(Ref,mR1,mEta1,mSign1);
     double alpha2 = alpha(Ref,mR2,mEta2,mSign2);
-    double x1 = +mSign1*mR1*(sin(mPhi1)-sin(mPhi1-alpha1));
-    double y1 = -mSign1*mR1*(cos(mPhi1)-cos(mPhi1-alpha1));
-    double x2 = +mSign2*mR2*(sin(mPhi2)-sin(mPhi2-alpha2));
-    double y2 = -mSign2*mR2*(cos(mPhi2)-cos(mPhi2-alpha2));
-    double d = sqrt(pow(x1-x2,2)+pow(y1-y2,2));
+    double x1 = +mSign1*mR1*(TMath::Sin(mPhi1)-TMath::Sin(mPhi1-alpha1));
+    double y1 = -mSign1*mR1*(TMath::Cos(mPhi1)-TMath::Cos(mPhi1-alpha1));
+    double x2 = +mSign2*mR2*(TMath::Sin(mPhi2)-TMath::Sin(mPhi2-alpha2));
+    double y2 = -mSign2*mR2*(TMath::Cos(mPhi2)-TMath::Cos(mPhi2-alpha2));
+    double d = TMath::Sqrt(TMath::Power(x1-x2,2)+TMath::Power(y1-y2,2));
     mDPhi_Ref = x1*y2-x2*y1;
 
     alpha1 = alpha(50,mR1,mEta1,mSign1);
     alpha2 = alpha(50,mR2,mEta2,mSign2);
-    mX1_50 = +mSign1*mR1*(sin(mPhi1)-sin(mPhi1-alpha1));
-    mY1_50 = -mSign1*mR1*(cos(mPhi1)-cos(mPhi1-alpha1));
-    mX2_50 = +mSign2*mR2*(sin(mPhi2)-sin(mPhi2-alpha2));
-    mY2_50 = -mSign2*mR2*(cos(mPhi2)-cos(mPhi2-alpha2));
+    mX1_50 = +mSign1*mR1*(TMath::Sin(mPhi1)-TMath::Sin(mPhi1-alpha1));
+    mY1_50 = -mSign1*mR1*(TMath::Cos(mPhi1)-TMath::Cos(mPhi1-alpha1));
+    mX2_50 = +mSign2*mR2*(TMath::Sin(mPhi2)-TMath::Sin(mPhi2-alpha2));
+    mY2_50 = -mSign2*mR2*(TMath::Cos(mPhi2)-TMath::Cos(mPhi2-alpha2));
     mDPhi_50 = mX1_50*mY2_50-mX2_50*mY1_50;
     if (mDPhi_50*mDPhi_Ref < 0) {
         return -d;
@@ -196,11 +197,11 @@ void StEStructPairLUT::fillDists() {
         int iy = 11;
         for (double rRef=65;rRef<200;rRef+=150/100.0) {
             dXY = mDists[0]->GetBinContent(ix,iy);
-            if (fabs(dXY) < 5) {
+            if (TMath::Abs(dXY) < 5) {
                 int iz = 1;
                 for (mEta1=mEta2-mDelEta;mEta1<mEta2+mDelEta;mEta1+=2*mDelEta/nDelEta) {
                     dZ  = mDists[1]->GetBinContent(iz,iy);
-                    if (fabs(dZ) < 5) {
+                    if (TMath::Abs(dZ) < 5) {
                         mDists[2]->Fill(mPhi1-mPhi2,mEta1-mEta2,1.0);
                     }
                     iz++;
@@ -211,7 +212,7 @@ void StEStructPairLUT::fillDists() {
                 int iz = 1;
                 for (mEta1=mEta2-mDelEta;mEta1<mEta2+mDelEta;mEta1+=2*mDelEta/nDelEta) {
                     dZ  = mDists[1]->GetBinContent(iz,iy);
-                    if (fabs(dZ) < 5) {
+                    if (TMath::Abs(dZ) < 5) {
                         mDists[3]->Fill(mPhi1-mPhi2,mEta1-mEta2,1);
                     }
                     iz++;
@@ -230,11 +231,11 @@ void StEStructPairLUT::integrateEta(TH2F *h) {
 
     // Can only depend on \delta\phi. Choose \phi_1 = 0, scan over \phi_2.
     // For each \phi_2 bin scan over R_ref for dXY.
-    // If |dXY| < mDelXYCut and fabs(dZ) < mDelZCut we think of this as a merged pair.
-    // If dXY   < 0 and fabs(dZ) < mDelZCut we think of this a a crossing pair.
+    // If |dXY| < mDelXYCut and TMath::Abs(dZ) < mDelZCut we think of this as a merged pair.
+    // If dXY   < 0 and TMath::Abs(dZ) < mDelZCut we think of this a a crosTMath::Sing pair.
     // Approximately only depends on \delta\eta.
     // Scan over \eta_2 and for each value scan over \eta_1 within some range.
-    // Need to scan over \eta_1 for R_ref where dXY < mDelXYCut to see if fabs(dZ) is ever < mDelZCut.
+    // Need to scan over \eta_1 for R_ref where dXY < mDelXYCut to see if TMath::Abs(dZ) is ever < mDelZCut.
     // Note: 
 
     double savePhi1 = mPhi1;
@@ -252,9 +253,9 @@ void StEStructPairLUT::integrateEta(TH2F *h) {
                 for (mEta2=0;mEta2<1.0;mEta2+=0.1) {
                     int iz1 = 1;
                     for (mEta1=mEta2-mDelEta;mEta1<mEta2+mDelEta;mEta1+=mDelEta/nDelEta) {
-                        if (fabs(mEta1) <= 1) {
+                        if (TMath::Abs(mEta1) <= 1) {
                             double dZ  = delZ(rRef);
-                            if (fabs(dZ) < mDelZCut) {
+                            if (TMath::Abs(dZ) < mDelZCut) {
                                 h->Fill(mPhi2,mEta1-mEta2,1.0);
                             }
                         }
@@ -308,19 +309,19 @@ int StEStructPairLUT::cut(double curvature1, double curvature2, double delPhi, d
     while (delPhi < -2*mPi) delPhi += 2*mPi;
 
     // Calculate indices into Look Up Table.
-    if (fabs(delEta) > mDelEta) return 0;
-    if (fabs(delPhi) > mDelPhi) return 0;
+    if (TMath::Abs(delEta) > mDelEta) return 0;
+    if (TMath::Abs(delPhi) > mDelPhi) return 0;
     int idEta = int( delEta / (mDelEta/nDelEta) );
     int idPhi = int( delPhi / (mDelPhi/nDelPhi) );
-    int ir1 = int(750*fabs(curvature1) -0.5);
+    int ir1 = int(750*TMath::Abs(curvature1) -0.5);
     if (ir1  > 9) ir1 = 9;
-    int ir2 = int(750*fabs(curvature2) -0.5);
+    int ir2 = int(750*TMath::Abs(curvature2) -0.5);
     if (ir2  > 9) ir2 = 9;
 
     // LUT has R1 >= R2.
     // Calculate iR  and adjust idEta and idPhi appropriately
     int iR, is1, is2;
-    if (fabs(curvature1) < fabs(curvature2)) {
+    if (TMath::Abs(curvature1) < TMath::Abs(curvature2)) {
         iR = ir2*(ir2+1)/2 + ir1;
         idEta = nDelEta + idEta;
         is1 = (curvature1 < 0) ? -1 : 1;
