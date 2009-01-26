@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.11 2007/11/06 16:20:07 wleight Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.12 2009/01/26 14:50:46 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.12  2009/01/26 14:50:46  fisyak
+ * Clean up
+ *
  * Revision 1.11  2007/11/06 16:20:07  wleight
  * Digitized Pixel, removed all hit smearing, and implemented idTruth
  *
@@ -106,11 +109,6 @@ class StPixelFastSimMaker : public StMaker {
  /* \brief InitRun method is not currently used. */
   virtual int InitRun( int);
 
-  /* \brief Clear method is not currently used. */
-  virtual void Clear(Option_t *option="");
-
-  /* \brief Finish method is not currently used. */
-  virtual int Finish();
   
   /* \brief Accept method for reconstructed event. */
   virtual Bool_t accept(StEvent* event);
@@ -135,7 +133,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.11 2007/11/06 16:20:07 wleight Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.12 2009/01/26 14:50:46 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
