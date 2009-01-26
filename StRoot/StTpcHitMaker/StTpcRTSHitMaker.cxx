@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.6 2008/12/23 17:20:28 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.7 2009/01/26 15:07:26 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -240,7 +240,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	// Update pixels if any
 	dta = r.det("tpx")->get("adc_sim",sec);
 	Int_t Updated = 0;
-	while(dta->iterate()) {
+	while(dta && dta->iterate()) {
 	  Int_t secC  = dta->sec;
 	  Int_t rowC  = dta->row;
 	  Int_t padC  = dta->pad;
