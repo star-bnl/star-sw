@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.188 2008/06/11 22:04:38 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.189 2009/01/26 22:00:47 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.189  2009/01/26 22:00:47  fisyak
+// rename TMemStat => StMemStat
+//
 // Revision 1.188  2008/06/11 22:04:38  fisyak
 // Add dead material
 //
@@ -351,7 +354,7 @@ More detailed: 				<br>
 #include "StMessMgr.h"
 #include "StChainOpt.h"
 #include "SystemOfUnits.h"
-#include "TMemStat.h"
+#include "StMemStat.h"
 #include "PhysicalConstants.h"
 #include "StDetectorId.h"
 #include "StEventTypes.h"
@@ -722,13 +725,13 @@ Int_t StiMaker::Make()
 void StiMaker::MyClear()
 {
 //    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
-//      TMemStat::PrintMem("Before StiFactory clear()");
+//      StMemStat::PrintMem("Before StiFactory clear()");
       _toolkit->getHitFactory()->clear();
       _toolkit->getTrackNodeFactory()->clear();
       _toolkit->getTrackNodeExtFactory()->clear();
       _toolkit->getTrackNodeInfFactory()->clear();
       _toolkit->getTrackFactory()->clear();
-//      TMemStat::PrintMem("After  StiFactory clear()");
+//      StMemStat::PrintMem("After  StiFactory clear()");
 }
 //_____________________________________________________________________________
 Int_t StiMaker::InitPulls()
