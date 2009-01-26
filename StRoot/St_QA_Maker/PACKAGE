@@ -1,0 +1,5 @@
+# $Id $
+# package St_QA_Maker
+# author: 
+Library:libSt_QA_Maker.so:LIBS +=   -lglobal  -lglobal_Tables  -lsim_Tables  -lStChain  -lStDbUtilities    -l_StEvent  -l_St_global  -lStMcEventMaker  -lStMcEvent  -lStPmdUtil  -l_StTpcDb  
+#Library:libSt_QA_Maker.so:LIBS +=   -lglobal  -lglobal_Tables  -lsim_Tables  -lStChain  -lStDbUtilities  -lStEmcUtil  -lStEvent  -lSt_global  -lStMcEventMaker  -lStMcEvent  -lStPmdUtil  -lStTpcDb  
