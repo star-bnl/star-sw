@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.cxx,v 1.8 2007/04/28 17:57:28 perev Exp $
+ * $Id: StZdcVertexMaker.cxx,v 1.9 2009/01/26 15:11:05 fisyak Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.cxx,v $
+ * Revision 1.9  2009/01/26 15:11:05  fisyak
+ * Clean up access to Calibrations/trg/ZdcCalPars table
+ *
  * Revision 1.8  2007/04/28 17:57:28  perev
  * Redundant StChain.h removed
  *
@@ -53,7 +56,7 @@
 
 //#include "StEventMaker/StEventMaker.h"
 
-static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.8 2007/04/28 17:57:28 perev Exp $";
+static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.9 2009/01/26 15:11:05 fisyak Exp $";
 
 ClassImp(StZdcVertexMaker)
 
@@ -101,16 +104,7 @@ Int_t StZdcVertexMaker::InitRun(int runumber)
 { 
 
     // Getting Database info
-
-    TDataSet* p = GetDataBase("Calibrations/trg");
-    if (!p)
-    {
-        gMessMgr->Error() << "StZdcVertexMaker::Init():  GetDataBase() in ZdcVertexMaker did not find DB ." << endm;
-        return kStErr;
-    }
-    
-    St_DataSetIter       dblocal_calibrations(p);
-    St_ZdcCalPars * t  = (St_ZdcCalPars *)dblocal_calibrations("ZdcCalPars");
+    St_ZdcCalPars * t  = (St_ZdcCalPars *)GetDataBase("Calibrations/trg/ZdcCalPars");
     if (! t) {
       gMessMgr->Error() << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm;
       return kStErr;
