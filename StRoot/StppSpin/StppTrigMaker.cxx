@@ -1,8 +1,11 @@
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.cxx,v 1.11 2007/04/28 17:56:43 perev Exp $
+// $Id: StppTrigMaker.cxx,v 1.12 2009/01/26 15:18:34 fisyak Exp $
 // $Log: StppTrigMaker.cxx,v $
+// Revision 1.12  2009/01/26 15:18:34  fisyak
+// Remove mwc
+//
 // Revision 1.11  2007/04/28 17:56:43  perev
 // Redundant StChain.h removed
 //
@@ -59,8 +62,9 @@
 
 //JB+GG
 #include "tables/St_g2t_ctf_hit_Table.h"
+#if 0
 #include "tables/St_mwc_raw_Table.h"
-
+#endif
 void cts_get_ctb_indexes ( long volume, long &i_phi, long &i_eta ) ;
 
 ClassImp(StppTrigMaker)
@@ -340,6 +344,7 @@ void StppTrigMaker::trigOnCtb(  int &nSlat, int &nDiPatch, int &n1Patch )
 //------------------------------------------------------------------------
 void StppTrigMaker::trigOnMwc(  int &iforw , int &iback)
 {
+#if 0
   int i=0, ntrr=0;
 
   // Read in MWC Tables
@@ -378,6 +383,7 @@ void StppTrigMaker::trigOnMwc(  int &iforw , int &iback)
   h7->Fill(float(iforw));
   h25->Fill(float(iforw),float(iback),1.) ;
   return;
+#endif
 }
 
 
