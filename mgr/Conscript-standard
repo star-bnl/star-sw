@@ -42,7 +42,8 @@ my @LinkDefs = ();
 my @LinkDefsT = (); # for tables if any
 my @PlainObj = ();
 if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
-     ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/)  ){
+     ($Dir =~ m/StRoot.*Client\// && $Dir !~ /StRoot.*Client\/St/) ||
+     ($Dir =~ m/StarVMC\/minicern/ )) {
     # Added 2003. In Construct, the logic is such
     # that the Pool directories have their sub-directories
     # set as targets (n sub-dir => n libraries). That's
@@ -52,6 +53,7 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
     $pkg =~ s/StRoot\///;
     $pkg =~ s/Pool\//Pool/      if ($pkg =~ m/Pool/);
     $pkg =~ s/Client\//Client/  if ($pkg =~ m/Client/);
+    $pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
     $PKG = $pkg;
     print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
 
@@ -74,7 +76,7 @@ my $LIBPATH = $env1->{LIBPATH};
 my $STIC    = $env1->{STIC};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
-
+#my $ROOTCINT_CPPFLAGS = "";
 my @idlL    = script::find_idl($Dir);
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
 foreach my $Rep(@Repo) {
@@ -121,17 +123,28 @@ if ($pkg eq "RTS") {
 	$main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" .
 	  $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
 	    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
+  my @src = ();
+#  print "srcL : @srcL\n";
+#  print "skip /^src\/(DAQ_LEGACY|EVP_READER|RTS_READER)/\n";
+  foreach my $s (@srcL) {
+    next if $s =~ /^src\/(DAQ_LEGACY|EVP_READER|RTS_READER)/;
+    push @src, $s;
+  }
+#  print "@src : @src\n";
+  @srcL = @src;
+  @src = ();
 }
-my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker  StEEmcPoolmuEztPanitkin  StBEMCPlots  );
+my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker  StEEmcPoolmuEztPanitkin  StBEMCPlots Stl3RawReaderMaker );
 my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
                      ;
 foreach my $p (@VF_daq_pkgs) {
-  # print "compare $p with pkg = $pkg\n";
+#  print "compare $p with pkg = $pkg\n";
   if ($pkg eq $p) {
     $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
-    #    print "new CPPPATH = $CPPPATH\nfor $p\n";
+#    $ROOTCINT_CPPFLAGS = " -DNEW_DAQ_READER"; 
+#    print "new CPPPATH = $CPPPATH\nfor $p\n";
     last;
   }
 }
@@ -157,17 +170,16 @@ if ($pkg eq "StDAQMaker") {
 }
 my ($i, $obj);
 my $LIBPKG = ""; 
-my @g77pkgs = qw(geometry gen sim tls); 
+my @g77pkgs = qw(geometry gen sim tls minicern geant3); 
 my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
 if($FC eq 'pgf77' and ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/)) {
   $FC       = $env1->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env1->{G77FLAGS}; 
   $FEXTEND  = $env1->{G77EXTEND};
 }
-if ($FC eq 'g77' and $DirPath =~ /pams/) {
+if(($FC eq 'g77' or $FC eq 'gfortran') and $DirPath =~ /pams/ and ($DirPath !~ /$g77pkgs/ or $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/)) {
   $FCCOM    = $env1->{FCviaAGETOFCOM};
 }
-
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
   
@@ -185,7 +197,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my $RepDir = $Rep . "/" . $Dir;
     print "RepDir = $RepDir\n" if $param::debug;
     
-    if ( -d $RepDir ) {
+    if ( -d $RepDir and $pkg ne "RTS") {
       my @srcR =
 	script::find_sources($RepDir);
       foreach my $i(@srcR) { push @srcL, $i; }
@@ -322,7 +334,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       if (-f $file) {$LIBS .= " -l" . $py; last;}
     }
     $LIBS  .= " " . $env->{LDNONE};
-  } elsif ( $pkg =~ m/^StTrsMaker$/ ){
+  } elsif ( $pkg =~ m/^StTrsMaker$/ or $pkg =~ m/^pythia8/ ){
     $CPPPATH =
       "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
     if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
@@ -406,13 +418,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
     $FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
     $FCPATH .= $main::PATH_SEPARATOR . $env1->{ENV}->{CERN_ROOT} . "/include";
-  } elsif ($pkg =~ m/StGeant321|StTGeant3/) {
-    $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
-    $FCPATH = 
-      "#StarVMC/StGeant321" .
-	$main::PATH_SEPARATOR . "#StarVMC/minicern" .
-	  $main::PATH_SEPARATOR .  $INCLUDE; #print "FCPATH: $FCPATH\n";
-    $CPPPATH .= $main::PATH_SEPARATOR .$FCPATH; #print "CPPPATH: $CPPPATH\n";
   } elsif ($pkg =~ m/TGeant3|StarVMCApplication|StVMCMaker/) {
     $CPPPATH =  $env1->{ENV}->{ROOT} . "/" .$env1->{ENV}->{ROOT_LEVEL} . "/geant3/TGeant3"
       . $main::PATH_SEPARATOR . $CPPPATH;
@@ -422,7 +427,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     #	  $main::PATH_SEPARATOR . "#StarVMC/minicern" .
     #	  $main::PATH_SEPARATOR .  $INCLUDE; #print "FCPATH: $FCPATH\n";
     
-  } elsif ($pkg eq 'minicern') {
+  } elsif ($pkg eq 'StarMiniCern') {
     $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
     $CPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{CPPFLAGS};
     $FCPATH = "#StarVMC/minicern" . $main::PATH_SEPARATOR . $INCLUDE;
@@ -447,6 +452,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     @src = @srcC;
     push @src, "lnxgs/rdmin.F"  if $STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/;
 #    push @src, "lnxgs/ishftr.c" if $STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /_icc/;
+    if ($FC eq 'g77') {
+      $LIBS .= " -lg2c";
+    }
   } elsif ($pkg eq 'geant3') { 
     $SO_PKG = "lib" . $SO_PKG; $SO_PKG_lib = $SO_PKG;
     $FPPFLAGS .= " " . $env1->{Packages}->{CERNLIB}->{FPPFLAGS};
@@ -522,6 +530,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   #    print "pkg = $pkg FPPFLAGS = $FPPFLAGS\n";
   my $libpath = $LIBPATH;
   if (! $LIBS) {$libpath = "";}
+#  print "CPPPATH => $CPPPATH\n";
   $env2 = $env1->clone('Package'  => $pkg,
 		       'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
 		       'CPPPATH'  => $CPPPATH,
@@ -541,8 +550,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   #    bless $env2, "cons"; #?
   #    if ($CC eq 'icc') {$EXTRA_CPPFLAGS .= " " . "-DR__NO_CLASS_TEMPLATE_SPECIALIZATION";}
   my $Cint_CPPPATH = $CPPPATH . $main::PATH_SEPARATOR . "#";
+#  print "Cint_CPPPATH => $Cint_CPPPATH\n";
   $envCint = $env2->clone('DEBUG' => $env2->{NOOPT},
 			  'CPPPATH'  => $Cint_CPPPATH,
+			  'CPPFLAGS' => $CPPFLAGS,
 			  'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS);
   
   print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS},
@@ -551,10 +562,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   print "LINKMODULECOM |", $env2->{LINKMODULECOM}, "|\n" if $param::debug;
   my $cscanner = find scan::cpp( $env2->{_cwd}, $env2->{CPPPATH} );
   my @cpps = split /$main::PATH_SEPARATOR/, $env2->{CPPPATH};
-  print "@cpps\n" if $param::debug;
+#  print "cpps => @cpps\n";# if $param::debug;
   my $ROOTCINT_CPP = "";
   my $STIC_CPP     = "";
 					   
+#  print "ROOTCINT_CPP => $ROOTCINT_CPP\n";
   foreach my $cpp( $Dir, @cpps ) {
     if ( $cpp =~ /cern/ || $cpp eq "/usr/include" || $cpp =~ /ospace/
 	 || $cpp =~ /openwin/ )
@@ -567,6 +579,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     if ($STIC_CPP) { $STIC_CPP .= $main::PATH_SEPARATOR . $cpp; }
     else { $STIC_CPP = $cpp; }
   }
+#  print "ROOTCINT_CPP => $ROOTCINT_CPP\n";
   $cscanner = find scan::cpp( $env2->{_cwd}, $ROOTCINT_CPP );
   print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
   my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);
@@ -707,6 +720,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     }
 	Command $env2 [@CintFiles], @defs,
 	qq($RCINTPL "%>" "%<" "$ROOTCINT_CPPPATH" );
+#	qq($RCINTPL "%>" "%<" "$ROOTCINT_CPPFLAGS $ROOTCINT_CPPPATH" );
 
       
 #    if ($#LinkDefs < 0) { push @LinkDefs, "LinkDef.h";}
