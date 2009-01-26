@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.61 2008/07/10 20:26:17 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.62 2009/01/26 15:30:56 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -86,8 +86,8 @@ static  Int_t NoPads;
 const static Double_t pMomin = 0.4; // range for dE/dx calibration
 const static Double_t pMomax = 0.5;
 #include "dEdxTrackY2.h"
-#include "TMemStat.h"
-void pmem() { TMemStat::PM();}
+#include "StMemStat.h"
+void pmem() { StMemStat::PM();}
 
 
 //______________________________________________________________________________
