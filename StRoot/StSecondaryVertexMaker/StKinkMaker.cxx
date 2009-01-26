@@ -10,7 +10,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-#include "TMemStat.h"
+#include "StMemStat.h"
 #include "StKinkMaker.h"
 #include "StKinkLocalTrack.hh"
 #include "StTrackGeometry.h"
@@ -172,7 +172,7 @@ Int_t StKinkMaker::Make(){//called for each event
   // cout<<" magnetic field="<<mBfield<<endl;
   //******* erase existing kinks; because everything runs in chain, the tkf makes its own kinks
   StSPtrVecKinkVertex& kinkVertices = event->kinkVertices();
-  /* TMemStat memStat("kinkVertices");
+  /* StMemStat memStat("kinkVertices");
   kinkVertices.getEntries();
   cout<<"memory used"<<  memStat.Used();
   */
