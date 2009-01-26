@@ -32,13 +32,17 @@ void St_trg_Maker::SWITCH(CtbMwcDaq)(St_dst_TrgDet *dst1) { // For sim data, use
         tt->timeCtb[tray][slat][pp]=0;  // May be settable in some events from the LS bit, consult Hank.
       }
     }
+#if 0
     for(sector=0;sector<24;sector++) {
       for(subsector=0;subsector<4;subsector++) {
         tt->nMwc[sector][subsector][pp]=SWITCH(gs)->RAW[pp].MWC[mwcmap[sector][subsector]];
       }
     }
+#endif
     for(i=0;i<16;i++) tt->ctbaux[i][pp]=SWITCH(gs)->RAW[pp].CTB[auxctbmap[i]];
+#if 0
     for(i=0;i<32;i++) tt->mwcaux[i][pp]=SWITCH(gs)->RAW[pp].MWC[auxmwcmap[i]];
+#endif
   }
 }
 Int_t St_trg_Maker::SWITCH(SanityCheck)() {
@@ -49,8 +53,10 @@ Int_t St_trg_Maker::SWITCH(SanityCheck)() {
     SANITYCheck(SWITCH(gs)->RAW[pp].RawDetHeader[1] ,'D')
     SANITYCheck(SWITCH(gs)->RAW[pp].CTBdataHeader[0],'C')
     SANITYCheck(SWITCH(gs)->RAW[pp].CTBdataHeader[1],'T')
+#if 0
     SANITYCheck(SWITCH(gs)->RAW[pp].MWCdataHeader[0],'M')
     SANITYCheck(SWITCH(gs)->RAW[pp].MWCdataHeader[1],'W')
+#endif
     SANITYCheck(SWITCH(gs)->RAW[pp].EMCdataHeader[0],'E')
     SANITYCheck(SWITCH(gs)->RAW[pp].EMCdataHeader[1],'M')  
   }
@@ -289,10 +295,12 @@ void St_trg_Maker::SWITCH(dumpDataToScreenAndExit)() {
   for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","RawDetHeader",i,SWITCH(gs)->RAW[0].RawDetHeader[i]);
                      printf("%15s      = %d\n","CTBdataBytes",SWITCH(gs)->RAW[0].CTBdataBytes);
   for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","CTBdataHeader",i,SWITCH(gs)->RAW[0].CTBdataHeader[i]);
+#if 0
   for(i=0;i<256;i++) printf("%15s[%3d] = %d\n","CTB",i,SWITCH(gs)->RAW[0].CTB[i]);
                      printf("%15s      = %d\n","MWCdataBytes",SWITCH(gs)->RAW[0].MWCdataBytes);
   for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","MWCdataHeader",i,SWITCH(gs)->RAW[0].MWCdataHeader[i]);
   for(i=0;i<128;i++) printf("%15s[%3d] = %d\n","MWC",i,SWITCH(gs)->RAW[0].MWC[i]);
+#endif
                      printf("%15s      = %d\n","EMCdataBytes",SWITCH(gs)->RAW[0].EMCdataBytes);
   for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","EMCdataHeader",i,SWITCH(gs)->RAW[0].EMCdataHeader[i]);
   exit(2);

@@ -16,7 +16,9 @@
 #include "tables/St_dst_L2_Trigger_Table.h" // 02feb00
 #include "tables/St_dst_TrgDet_Table.h"     // 24dec99
 #include "tables/St_ctu_raw_Table.h"
+#if 0
 #include "tables/St_mwc_raw_Table.h"
+#endif
 #include "tables/St_dst_TrgDet_Table.h"
 #define PREPOST 11 // CAUTION:  this number is also in dst_TrgDet.idl
 
@@ -57,7 +59,9 @@ St_trg_Maker::~St_trg_Maker(){
 Int_t St_trg_Maker::Init(){
 // Create tables
 // Create Histograms    
+#if 0
   InitMwcArrays();
+#endif
   return StMaker::Init();
 }
 
@@ -350,6 +354,7 @@ void St_trg_Maker::Vladimir2Herbert(int input,int *sector,int *subsector) {
   *subsector = 4 + input - 4 * (*sector) ;
   *sector = flip*(offset - *sector);
 }
+#if 0
 int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
   int prePost,sector,subsector,index,irow;
   if(!mwc_raw) { LOG_INFO << "Did not find the mwc_raw table mwc."<< endm; return 7; }
@@ -368,20 +373,29 @@ int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
   }
   return 7;
 }
+#endif
 int St_trg_Maker::Sim(St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
   int rv=kStOK;
 
   St_DataSet *ctf = GetInputDS(".make/ctf/.data");
+#if 0
   St_DataSet *mwc = GetInputDS(".make/mwc/.data");
   if (!ctf || !mwc) return kStWarn;
+#else
+  if (!ctf ) return kStWarn;
+#endif
   St_ctu_raw   *ctu_raw  = (St_ctu_raw   *) ctf->Find("ctb_raw");
+#if 0
   St_mwc_raw   *mwc_raw  = (St_mwc_raw   *) mwc->Find("raw");
+#endif
 //
   VpdSim(dst1); 
   ZdcSim(dst1);
 
 
+#if 0
   if(!HandleMwc(mwc_raw,dst1)) rv=kStWarn;
+#endif
   if(!HandleCtu(ctu_raw,dst1)) rv=kStWarn;
   SecondDstSim(dst2);
   TakeCareOfL1andL2Sim(dst3,dst4);
@@ -932,6 +946,7 @@ void St_trg_Maker::InitCtbArrays(void) { // from ctb_dsm.map, see also ::InitCtb
   ctbmap[120-1][0] = 233;
   ctbmap[120-1][1] = 249;
 }
+#if 0
 void St_trg_Maker::InitMwcArrays(void) {
   static int call=0;
   call++;
@@ -1065,12 +1080,15 @@ void St_trg_Maker::InitMwcArrays(void) {
   auxmwcmap[30] =  57;
   auxmwcmap[31] =  56;
 }
+#endif
 
 
 
-
-// $Id: St_trg_Maker.cxx,v 1.56 2007/06/06 12:26:53 fine Exp $
+// $Id: St_trg_Maker.cxx,v 1.57 2009/01/26 15:14:13 fisyak Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.57  2009/01/26 15:14:13  fisyak
+// Comment out mwc
+//
 // Revision 1.56  2007/06/06 12:26:53  fine
 // Switch to STAR Logger
 //
