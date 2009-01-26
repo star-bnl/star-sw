@@ -35,7 +35,7 @@ class TBrowser;
 class TChain;
 class TTree;
 class TTable;
-class TMemStat;
+class StMemStat;
 class StEvtHddr;
 class TAttr;
 class TFile;
@@ -84,8 +84,8 @@ protected:
    Int_t           m_DebugLevel;        //!Debug level
    Int_t           m_MakeReturn;        //!Make() return flag
    TStopwatch      m_Timer;             //!Timer object
-   TMemStat       *fMemStatMake;        //!TMemStat for Make
-   TMemStat       *fMemStatClear;       //!TMemStat for Clear
+   StMemStat       *fMemStatMake;        //!StMemStat for Make
+   StMemStat       *fMemStatClear;       //!StMemStat for Clear
    Int_t           fStatus;             //!Maker status
    mutable StMessMgr      *fLogger;             // This object logger instance
    mutable StTurnLogger   *fLoggerHold;         // hold the pointer to the previous StMessMgr
@@ -245,7 +245,7 @@ public:
 TObject        *GetDirObj(const Char_t *dir) const;
 void            SetDirObj(TObject *obj,const Char_t *dir);
   virtual const Char_t *GetCVS() const
-  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.88 2008/12/21 18:59:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.89 2009/01/26 14:33:30 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const Char_t *logInput,
                                     const StMaker *uppMk=0,
@@ -309,8 +309,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.88 2008/12/21 18:59:43 perev Exp $
+// $Id: StMaker.h,v 1.89 2009/01/26 14:33:30 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.89  2009/01/26 14:33:30  fisyak
+// rename TMemStat => StMemStat due clash with ROOT class
+//
 // Revision 1.88  2008/12/21 18:59:43  perev
 // GetDBTim() added
 //
