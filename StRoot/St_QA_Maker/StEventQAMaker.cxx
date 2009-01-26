@@ -147,7 +147,7 @@ Int_t StEventQAMaker::Make() {
     gMessMgr->Error("StEventQAMaker::Make(): no event found!");
     return kStErr;
   }
-  Bool_t realData = (event->info()->type() == "NONE");
+  Bool_t realData = event->info() && (event->info()->type() == "NONE");
   if (eventCount==0) {
     if (histsSet == StQA_Undef) {
       if (realData) {
@@ -2301,8 +2301,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.87 2008/01/14 17:57:29 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.88 2009/01/26 15:11:50 fisyak Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.88  2009/01/26 15:11:50  fisyak
+// Add protection for missing event->info()
+//
 // Revision 2.87  2008/01/14 17:57:29  genevb
 // Get OtherPhysics triggers working
 //
