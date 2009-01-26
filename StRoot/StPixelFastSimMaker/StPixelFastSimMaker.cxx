@@ -1,11 +1,14 @@
  /*
- * $Id: StPixelFastSimMaker.cxx,v 1.40 2007/12/03 20:42:43 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.41 2009/01/26 14:50:46 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.41  2009/01/26 14:50:46  fisyak
+ * Clean up
+ *
  * Revision 1.40  2007/12/03 20:42:43  wleight
  * Replaced couts with LOG_DEBUGs
  *
@@ -290,11 +293,6 @@ void StPixelFastSimMaker::AddPixPileUpHit(StMcPixelHitCollection* pixHitCol)
         pixHitCol->addHit(pixhit);
     }
 }
-//____________________________________________________________
-
-void StPixelFastSimMaker::Clear(Option_t *option){ /*noop*/}
-//____________________________________________________________
-int StPixelFastSimMaker::Finish(){return kStOk;}
 //____________________________________________________________
 Int_t StPixelFastSimMaker::Make()
 {
