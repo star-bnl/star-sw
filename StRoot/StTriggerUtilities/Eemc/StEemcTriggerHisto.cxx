@@ -1,6 +1,6 @@
 #include <TH2.h>
 #include "StEemcTriggerSimu.h"
-
+#include "TObjArray.h"
 
 //==================================================
 //==================================================
@@ -172,6 +172,9 @@ StEemcTriggerSimu::initHisto() {
 
 //
 // $Log: StEemcTriggerHisto.cxx,v $
+// Revision 1.4  2009/01/26 15:09:07  fisyak
+// Add missing (in ROOT 5.22) includes
+//
 // Revision 1.3  2007/07/23 02:59:59  balewski
 // cleanup, bbc for M-C still not working
 //

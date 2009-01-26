@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.11 2008/01/17 01:56:52 kocolosk Exp $
+// $Id: StGenericL2Emulator.h,v 1.12 2009/01/26 15:09:07 fisyak Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -10,6 +10,7 @@ Interfaces L2 algos to the STAR ofl software
 
 #ifndef STAR_StGenericL2Emulator
 #define STAR_StGenericL2Emulator
+#include <vector>
 
 class  StTriggerSimuMaker;
 class  StEEmcDbMaker;
@@ -94,6 +95,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.12  2009/01/26 15:09:07  fisyak
+// Add missing (in ROOT 5.22) includes
+//
 // Revision 1.11  2008/01/17 01:56:52  kocolosk
 // export 128-byte emulated L2Result
 //
