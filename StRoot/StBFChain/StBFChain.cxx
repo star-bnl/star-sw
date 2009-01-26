@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.543 2008/10/23 20:52:12 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.544 2009/01/26 16:21:36 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -7,7 +7,7 @@
 #include "TSystem.h"
 #include "TInterpreter.h"
 #include "TClassTable.h"
-#include "TMemStat.h"
+#include "StMemStat.h"
 #include "StBFChain.h"
 #include "StBFChainOpt.h"
 #include "St_db_Maker/St_db_Maker.h"
@@ -161,7 +161,7 @@ Int_t StBFChain::Load()
 	      assert(iok >= 0);
 	      break;
 	    } else {
-	      if (Debug() > 1) {  TString ts("load "); ts += libL; TMemStat::PrintMem(ts.Data());}
+	      if (Debug() > 1) {  TString ts("load "); ts += libL; StMemStat::PrintMem(ts.Data());}
 
          LOG_QA  << "Library " << Form("%-20s\t(%s)\tis loaded",libL.Data(),path) << endm;
 
@@ -587,10 +587,13 @@ Int_t StBFChain::Instantiate()
       }
       if (kopts) ProcessLine(cmd);
     }
-    if (maker == "StTpcRSMaker" && ! GetOption("TrsToF")) {
-      Int_t mode = mk->GetMode();
-      mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
-      mk->SetMode(mode);
+    if (maker == "StTpcRSMaker") {
+      if (! GetOption("TrsToF")) {
+	Int_t mode = mk->GetMode();
+	mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
+	mk->SetMode(mode);
+      }
+      
     }
     if (maker == "StTrsMaker") {
       Int_t mode = 0;
@@ -815,7 +818,9 @@ Int_t StBFChain::Instantiate()
   PrintInfo();
   // START the chain (may the force be with you)
   // Create HTML docs of all Maker's inv
+#if 0
   if (GetOption("MakeDoc"))  MakeDoc();
+#endif
   if (GetOption("Debug"))    SetDEBUG(1);
   if (GetOption("Debug1"))   SetDEBUG(1);
   if (GetOption("Debug2"))   SetDEBUG(2);
@@ -923,7 +928,7 @@ Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Op
 Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort) {
   Opt.Clear();
   TObjArray *obj = tChain.Tokenize("[^ ;,]+");
-  Int_t nParsed = obj->GetSize();
+  Int_t nParsed = obj->GetEntries();
   Int_t k, N = 0;
   if (GetChain() && GetChain()->Debug() > 2) {
     gMessMgr->QAInfo() << "ParseString " << tChain.Data() << endm;
