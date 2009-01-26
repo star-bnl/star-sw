@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.13 2007/05/29 22:27:35 fine Exp $
+// $Id: StTpcT0Maker.cxx,v 1.14 2009/01/26 14:49:53 fisyak Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.14  2009/01/26 14:49:53  fisyak
+// Account the fact that drift velocities are different for East and West part of TPC
+//
 // Revision 1.13  2007/05/29 22:27:35  fine
 // Introduce logger-based output
 //
@@ -195,8 +198,8 @@ void StTpcT0Maker::Clear(Option_t *option){
 Int_t StTpcT0Maker::Make(){
   if (date==0) {date = GetDate();cout << "date = " << date << endl;}
   if (time==0) {time = GetTime();cout << "time = " << time << endl;}
-  if (dvel_assumed==0.0) {dvel_assumed = 1e-6*theDb->DriftVelocity();
-  gMessMgr->Info() << "StTpcT0Maker::Drift Velocity = " << dvel_assumed << endm;} 
+  if (dvel_assumed==0.0) {dvel_assumed = 1e-6*theDb->DriftVelocity(13);
+  gMessMgr->Info() << "StTpcT0Maker::Drift Velocity (East) = " << dvel_assumed << endm;} 
   if (trigger_assumed==0.0){ trigger_assumed = theDb->triggerTimeOffset()*1e6;
   gMessMgr->Info() << "StTpcT0Maker::Trig Offset  = " << trigger_assumed << endm;} 
   if (length_assumed==0.0){ length_assumed =  theDb->Dimensions()->outerEffectiveDriftDistance();
@@ -411,7 +414,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   LOG_INFO << "**************************************************************"<< endm;
-  LOG_INFO << "* $Id: StTpcT0Maker.cxx,v 1.13 2007/05/29 22:27:35 fine Exp $"<< endm;
+  LOG_INFO << "* $Id: StTpcT0Maker.cxx,v 1.14 2009/01/26 14:49:53 fisyak Exp $"<< endm;
   LOG_INFO << "**************************************************************"<< endm;
 
   if (Debug()) StMaker::PrintInfo();
