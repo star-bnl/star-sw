@@ -19,7 +19,9 @@
 #include "StMaker.h"
 #endif
 class St_ctu_raw;
+#if 0
 class St_mwc_raw;
+#endif
 class St_dst_L0_Trigger;
 class St_dst_L1_Trigger;
 class St_dst_L2_Trigger;
@@ -39,7 +41,9 @@ class St_trg_Maker : public StMaker {
    void dumpDataToScreenAndExit    ();
    void dumpDataToScreenAndExit2000();
    void dumpDataToScreenAndExit2003();
+#if 0
    void InitMwcArrays();
+#endif
    void InitCtbArrays();
    int  YearOfData(St_DataSet *herb);
    void InitCtbArrays2001();             // For data taken 2001 and (?) after. 
@@ -47,19 +51,22 @@ class St_trg_Maker : public StMaker {
    Int_t SanityCheck2000();
    Int_t SanityCheck2003();
    int auxctbmap[16],ctbmap[120][2];     // Hardcoded from ctb_dsm.map.
+#if 0
    int auxmwcmap[32],mwcmap[24][4];      // Hardcoded from mwc_dsm.map.
- 
+#endif 
  protected:
 
  public: 
    int getTrayCtb ( float phi, float z ) ;
    int HandleCtu(St_ctu_raw *ctu_raw,St_dst_TrgDet *dst1);
+#if 0
    int HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1);
-
+#endif
    void Vladimir2Herbert(int,int*,int*);
    void Emc    (St_dst_TrgDet *dst1);
    void Emc2000(St_dst_TrgDet *dst1);
    void Emc2003(St_dst_TrgDet *dst1);
+
    void CtbMwcDaq    (St_dst_TrgDet *dst1);
    void CtbMwcDaq2000(St_dst_TrgDet *dst1);
    void CtbMwcDaq2003(St_dst_TrgDet *dst1);
@@ -93,7 +100,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t Make();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.22 2003/09/11 05:49:25 perev Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.23 2009/01/26 15:14:13 fisyak Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
@@ -103,8 +110,11 @@ class St_trg_Maker : public StMaker {
 #endif
 
 
-// $Id: St_trg_Maker.h,v 1.22 2003/09/11 05:49:25 perev Exp $
+// $Id: St_trg_Maker.h,v 1.23 2009/01/26 15:14:13 fisyak Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.23  2009/01/26 15:14:13  fisyak
+// Comment out mwc
+//
 // Revision 1.22  2003/09/11 05:49:25  perev
 // ansi corrs
 //

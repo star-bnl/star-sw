@@ -8,7 +8,9 @@
 #include "tables/St_dst_L2_Trigger_Table.h"
 #include "tables/St_dst_TrgDet_Table.h"
 #include "tables/St_ctu_raw_Table.h"
+#if 0
 #include "tables/St_mwc_raw_Table.h"
+#endif
 #include "tables/St_dst_TrgDet_Table.h"
 #define PREPOST 11
 
@@ -32,7 +34,7 @@ void St_trg_Maker::SecondDstDaq2003(St_dst_L0_Trigger *dst2) {
 
 /// This method copies Ctb and Mwc trigger data to the dst_TrgDet_st table
 void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
-  int npre,npost,pp,i,tray,slat,subsector,sector;
+  int npre,npost,pp,tray,slat;
   dst_TrgDet_st *tt = dst1->GetTable();
 
   tt->bunchXing_lo=mS2003->EvtDesc.bunchXing_lo;
@@ -50,7 +52,9 @@ void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
         tt->timeCtb[tray][slat][pp]=0;
       }
     }
+#if 0
     // MWC information 
+    int i,subsector,sector;
     for(sector=0;sector<24;sector++) {
       for(subsector=0;subsector<4;subsector++) {
         tt->nMwc[sector][subsector][pp]=mS2003->rawTriggerDet[pp].MWC[mwcmap[sector][subsector]];
@@ -58,6 +62,7 @@ void St_trg_Maker::CtbMwcDaq2003(St_dst_TrgDet *dst1) {
     }
     for(i=0;i<16;i++) tt->ctbaux[i][pp]=mS2003->rawTriggerDet[pp].CTB[auxctbmap[i]];
     for(i=0;i<32;i++) tt->mwcaux[i][pp]=mS2003->rawTriggerDet[pp].MWC[auxmwcmap[i]];
+#endif
   }
 }
 
