@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.11 2009/01/13 03:19:43 perev Exp $
+ * $Id: StarMagField.cxx,v 1.12 2009/01/26 15:15:56 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.12  2009/01/26 15:15:56  fisyak
+ * Add missing (ROOT Version >= 5.22)include
+ *
  * Revision 1.11  2009/01/13 03:19:43  perev
  * Mag field nou controlled from starsim. BugFix
  *
@@ -104,7 +107,7 @@ To do:  <br>
 #include "StarMagField.h"
 #include "StarCallf77.h"
 #include <string>
-
+#include "TMath.h"
 #define myMax(A,B)  (((A)>(B))? (A):(B))
 #define myMin(A,B)  (((A)<(B))? (A):(B))
 #define mySign(A,B) (((B)>=0)? fabs(A):-fabs(A))
@@ -1056,7 +1059,7 @@ Float_t StarMagField::Interpolate( const Float_t Xarray[], const Float_t Yarray[
 void StarMagField::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 
 {
-
+  assert(! TMath::IsNaN(x));
   Long_t middle, high ;
   Int_t  ascend = 0, increment = 1 ;
 
