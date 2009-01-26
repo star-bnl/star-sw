@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.9 2007/08/21 13:10:04 balewski Exp $
+// $Id: SmdGains.cxx,v 1.10 2009/01/26 14:37:42 fisyak Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@
 #include <TH1.h> 
 #include <TH2.h> 
 #include <TFile.h> 
-
+#include "TMath.h"
 #include "SmdGains.h"
 
 
@@ -314,7 +314,7 @@ void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
 
     s->sl=par[1];
     s->esl=epar[1];
-    if(epar[1]>maxRelEr *fabs(par[1])) {
+    if(epar[1]>maxRelEr *TMath::Abs(par[1])) {
       s->flag+=2;
     } 
   }
@@ -409,7 +409,7 @@ void SmdGains:: doSlopesOnly(float fac){
     StripG *s=str+i;
     if(s->sl<0){ // calculate is possible
       s->gc=-fac/s->sl;
-      s->egc=s->esl*s->gc/fabs(s->sl);
+      s->egc=s->esl*s->gc/TMath::Abs(s->sl);
     }
     if(s->egc>maxRelEr *s->gc) {
       s->flag+=4;
@@ -499,6 +499,9 @@ void StripG::print(){
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
+ * Revision 1.10  2009/01/26 14:37:42  fisyak
+ * Add missing (in ROOT 5.22) includes
+ *
  * Revision 1.9  2007/08/21 13:10:04  balewski
  * final, used in 2006 offline calibration by soScott
  *

@@ -1,5 +1,5 @@
 #include "SpinIUHistos.h"
-
+#include "TMath.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TString.h" 
@@ -62,12 +62,12 @@ void SpinIUHistos::Fill( StEEmcIUPair &pair )
   hEta   -> Fill( mass, pair.momentum().Eta() );
   hEpi->Fill(mass,pair.energy());
   //calculate detector Eta
-  float Rxy=sqrt(pair.vertex().x()*pair.vertex().x()+pair.vertex().y()*pair.vertex().y());
+  float Rxy=TMath::Sqrt(pair.vertex().x()*pair.vertex().x()+pair.vertex().y()*pair.vertex().y());
   float hHeight=pair.pt()*(270.0-pair.vertex().Z())/pair.pz()+Rxy;
-  float etatheta=atan(hHeight/270.0);
+  float etatheta=TMath::ATan(hHeight/270.0);
   //printf("accept pz=%f\n",pair.pz());
-  float mideta=tan(etatheta/2.0);
-  float eemceta=-log(mideta);
+  float mideta=TMath::Tan(etatheta/2.0);
+  float eemceta=-TMath::Log(mideta);
   hEEmcEta->Fill(mass,eemceta);
   hPhi->Fill(mass,pair.momentum().Phi()*180./3.14159265);
   hRGeo->Fill(pair.momentum().Phi()*180./3.14159265,eemceta);

@@ -16,7 +16,7 @@
  * \author Weihong He
  *
  */
-
+#include "TMath.h"
 #include "StEEmcIUPair.h"
 #include <iostream>
 ClassImp(StEEmcIUPair);

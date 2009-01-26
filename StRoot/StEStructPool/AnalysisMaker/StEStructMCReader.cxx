@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.8 2006/04/06 00:53:59 prindle Exp $
+ * $Id: StEStructMCReader.cxx,v 1.9 2009/01/26 14:40:43 fisyak Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,8 +13,11 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.9  2009/01/26 14:40:43  fisyak
+ * Add missing (in ROOT 5.22) includes
+ *
  * Revision 1.8  2006/04/06 00:53:59  prindle
- * Tried to rationalize the way centrality is defined.
+ *   Tried to rationalize the way centrality is defined.
  *   Now the reader gives a float to StEStructEvent and this float is
  * what is being used to define centrality. When we need a centrality
  * bin index we pass this number into the centrality singleton object.
@@ -54,6 +57,7 @@
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
 #include "StMessMgr.h"
+#include "TMath.h"
 #include "TH2.h"
 #include "TStyle.h"
 #include "TCanvas.h"

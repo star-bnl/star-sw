@@ -37,7 +37,7 @@ class StEEmcShowerShape;
 
 // STAR
 #include "StMaker.h"
-
+#include <vector>
 class StEEmcDataDrivenMcMaker : public StMaker {
 public:
   StEEmcDataDrivenMcMaker(const char* name = "StEEmcDataDrivenMcMaker");

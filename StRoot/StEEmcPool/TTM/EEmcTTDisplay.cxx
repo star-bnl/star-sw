@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.12 2007/07/12 19:27:22 fisyak Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.13 2009/01/26 14:37:43 fisyak Exp $
 // doxygen info here
 /**
  * \class   EEmcTTDisplay
@@ -12,8 +12,8 @@
  *
  * \author  Piotr A. Zolnierczuk
  * 
- * $Date: 2007/07/12 19:27:22 $ 
- * $Revision: 1.12 $
+ * $Date: 2009/01/26 14:37:43 $ 
+ * $Revision: 1.13 $
  * 
  * \section displayexample  Short example how to use EEmcTTDisplay
  * for details consult  StRoot/StEEmcPool/macros/TTM/show.C
@@ -37,6 +37,7 @@
 #include "TGeoCone.h"
 #include "TGeoManager.h"
 #include "TGeoMedium.h"
+#include "TGeoMatrix.h"
 #include "THelix.h"
 
 #include "StarClassLibrary/StPhysicalHelixD.hh"
@@ -335,6 +336,9 @@ EEmcTTDisplay::volumeName(const EEmcTower& tower)
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.13  2009/01/26 14:37:43  fisyak
+// Add missing (in ROOT 5.22) includes
+//
 // Revision 1.12  2007/07/12 19:27:22  fisyak
 // Add includes for TMath for ROOT 5.16
 //
