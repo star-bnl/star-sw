@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.17 2008/08/12 22:48:39 bouchet Exp $
+ * $Id: St_spa_Maker.cxx,v 1.18 2009/01/26 15:00:34 fisyak Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.18  2009/01/26 15:00:34  fisyak
+ * Take care about sector number packed in volume Id
+ *
  * Revision 1.17  2008/08/12 22:48:39  bouchet
  * retrieve positions and dimensions tables using Get methods
  *
@@ -87,15 +90,8 @@ Int_t St_spa_Maker::Init(){
 }
 //_____________________________________________________________________________
 Int_t St_spa_Maker::InitRun(Int_t runnumber){
-  TDataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
-  if (!CalibDbConnector) {
-    LOG_ERROR<<"InitRun: Can not found the calibration db.."<<endm;
-    return kStFATAL;
-  }
-  else{
-    m_noise = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
-    if (! m_noise) return kStFATAL;
-  }
+  m_noise = (St_ssdStripCalib*) GetDataBase("Calibrations/ssd/ssdStripCalib");
+  if (! m_noise) return kStFATAL;
   m_ctrl = gStSsdDbMaker->GetSlsCtrl();
   if (!m_ctrl) {
     LOG_ERROR << "No  access to control parameters" << endm;
@@ -125,12 +121,24 @@ Int_t St_spa_Maker::Make()
   mySsd->readStripFromTable(sls_strip);
   LOG_INFO<<"####        NUMBER OF SLS STRIPS "<<sls_strip->GetNRows()<<"       ####"<<endm;
   Int_t numberOfNoise = 0;
-  numberOfNoise = mySsd->readNoiseFromTable(m_noise);
-  LOG_INFO<<"####       NUMBER OF DB ENTRIES "<<numberOfNoise<<"       ####"<<endm;
-  mySsd->readConditionDbFromTable(m_condition);
-  LOG_INFO<<"####             ADD SPA NOISE               ####"<<endm;
-  mySsd->addNoiseToStrip(m_ctrl);
-  LOG_INFO<<"####           DO DAQ SIMULATION             ####"<<endm;
+  if (m_noise) {
+    numberOfNoise = mySsd->readNoiseFromTable(m_noise);
+    LOG_INFO<<"####       NUMBER OF DB ENTRIES "<<numberOfNoise<<"       ####"<<endm;
+  } else {
+    LOG_ERROR<<"m_noise is missing" <<endm;
+  }
+  if (m_condition) {
+    mySsd->readConditionDbFromTable(m_condition);
+    LOG_INFO<<"####             ADD SPA NOISE               ####"<<endm;
+  } else {
+    LOG_ERROR<<"m_condition is missing" <<endm;
+  }
+  if (m_ctrl) {
+    mySsd->addNoiseToStrip(m_ctrl);
+    LOG_INFO<<"####           DO DAQ SIMULATION             ####"<<endm;
+  } else {
+    LOG_ERROR<<"m_ctrl is missing" <<endm;
+  }
   mySsd->doDaqSimulation(m_ctrl);
   Int_t nSsdStrips = mySsd->writeStripToTable(spa_strip,sls_strip);
   //Int_t nSsdStrips = mySsd->writeStripToTable(spa_strip);
