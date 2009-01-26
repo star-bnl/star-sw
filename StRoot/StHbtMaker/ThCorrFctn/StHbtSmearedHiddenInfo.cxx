@@ -3,7 +3,7 @@
  * Author: Adam Kisiel
  *******************************************************************/
 #include "StHbtMaker/ThCorrFctn/StHbtSmearedHiddenInfo.h"
-
+#include "TMath.h"
 #define DEGTORAD 0.017453293
 
 StHbtSmearedHiddenInfo::StHbtSmearedHiddenInfo() 
