@@ -7,7 +7,7 @@ VOBJS = librtslog.a
 INCLUDES = -g -I. -I../ -I../../include -I../../trg/include
 DEFINES += -DRTS_LOG_COLORED
 
-BINS =  fs fs_ex  sfsTest sfs_single example
+BINS =  fs fs_ex  sfsTest sfs_single example sfs_header
 LIBS = libsfs.a
 
 all:  libs $(BINS) 
@@ -29,6 +29,8 @@ sfs_experiment: libsfs.a sfs_experiment.o $(VOBJS)
 example: libsfs.a example.o $(VOBJS)
 
 sfs_single: libsfs.a sfs_single.o $(VOBJS)
+
+sfs_header: libsfs.a sfs_header.o $(VOBJS)
 
 libsfs.a: fs_index.o sfs_index.o sfs_index_daq.o get_line.o
 	ar -rucvs libsfs.a $?

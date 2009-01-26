@@ -115,6 +115,10 @@ int SFS_ittr::get(wrapfile *wrap)
 
   wfile = wrap;
 
+  stickypath[0] = '\0';
+  ppath[0] = '\0';
+  fullpath[0]='\0';
+  
   //  legacy = checkIfLegacy();
   // LOG(DBG, "Legacy = %d",legacy);
 
