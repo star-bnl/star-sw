@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.47 2007/10/29 22:50:55 deph Exp $
+ * $Id: MysqlDb.cc,v 1.48 2009/01/26 18:55:45 genevb Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.48  2009/01/26 18:55:45  genevb
+ * Fixed reporting of port numbers to what is actually used
+ *
  * Revision 1.47  2007/10/29 22:50:55  deph
  * Abstracted load balancer call from connect to own function called from reconnect
  * removed extraneuos methods from header
@@ -367,7 +370,7 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
     //  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
        cs<< "Server Connecting:"; if(mdbName)cs<<" DB=" << mdbName ;
-       cs<< "  Host=" << mdbhost <<":"<<aPort <<stendl;
+       cs<< "  Host=" << mdbhost <<":"<<mdbPort <<stendl;
        cs<< " --> Connection Time="<<t0<<" sec   ";
        if(mdbServerVersion)cs<<" MysqlVersion="<<mdbServerVersion;
       
@@ -375,7 +378,7 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
       tRetVal=true;
   } else {
       cs << "Making Connection to DataBase = " << aDb;
-      cs << " On Host = " << mdbhost <<":"<<aPort;
+      cs << " On Host = " << mdbhost <<":"<<mdbPort;
       cs << " MySQL returned error " << mysql_error(&mData);
       StDbManager::Instance()->printInfo((cs.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
   }
@@ -419,7 +422,7 @@ bool MysqlDb::loadBalance()
 
   finish = clock();
   lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
-  cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
+  cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<":"<<mdbPort<<" \n";
 
 #endif
 
