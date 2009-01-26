@@ -187,7 +187,7 @@ Int_t StSsdFastSimMaker::Make()
     Int_t iok         = 0;
     Int_t in          = 0;
     for (i = 0; i < g2t_ssd_hit->GetNRows() ; i++)    {
-      currWafId=g2t[i].volume_id;
+      currWafId=g2t[i].volume_id%10000;
       if (currWafId > minWaf)   {
 	currLadder  = StSsdBarrel::Instance()->idWaferToLadderNumb(currWafId);
 	currWafNumb = StSsdBarrel::Instance()->idWaferToWafer(currWafId);

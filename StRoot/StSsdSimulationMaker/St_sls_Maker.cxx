@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.20 2008/08/12 22:48:38 bouchet Exp $
+ * $Id: St_sls_Maker.cxx,v 1.21 2009/01/26 15:00:34 fisyak Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.21  2009/01/26 15:00:34  fisyak
+ * Take care about sector number packed in volume Id
+ *
  * Revision 1.20  2008/08/12 22:48:38  bouchet
  * retrieve positions and dimensions tables using Get methods
  *
@@ -93,14 +96,12 @@
 #include "StSsdDbMaker/StSsdDbMaker.h"
 
 ClassImp(St_sls_Maker)
-  St_sls_Maker::St_sls_Maker(const char *name):StMaker(name){
-  mHit  = new StMcSsdHit();
+St_sls_Maker::St_sls_Maker(const char *name):StMaker(name){
+  mHit  = 0;
   m_ctrl = 0;
 };
 //____________________________________________________________________________
-St_sls_Maker::~St_sls_Maker(){ 
-  delete mHit;
-}
+St_sls_Maker::~St_sls_Maker(){ }
 //_____________________________________________________________________________
 Int_t St_sls_Maker::Init(){
   if (IAttr(".histos")) {
@@ -249,7 +250,7 @@ Int_t St_sls_Maker::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit) {
   //  Float_t *p        = new float[3];
   Float_t p[3]      = {0,0,0};
   for (i = 0; i < g2t_ssd_hit->GetNRows() ; i++)    {
-      currWafId=g2t[i].volume_id;
+      currWafId=g2t[i].volume_id%10000;
       if (currWafId > minWaf)	{
 	counter++;
 	currLadder=StSsdBarrel::Instance()->idWaferToLadderNumb(currWafId);
@@ -271,7 +272,7 @@ Int_t St_sls_Maker::removeInactiveHitInTable(St_g2t_ssd_hit *g2t_ssd_hit) {
     {
       Int_t firstSsdPoint=0;
       Int_t iP1 = 0;
-      for (iP1 = 0; ((iP1 < g2t_ssd_hit->GetNRows())&&(g2t[iP1].volume_id < StSsdBarrel::Instance()->getSsdLayer()*1000)) ; iP1++) 
+      for (iP1 = 0; ((iP1 < g2t_ssd_hit->GetNRows())&&(g2t[iP1].volume_id%10000 < StSsdBarrel::Instance()->getSsdLayer()*1000)) ; iP1++) 
 	                                                                                  firstSsdPoint=iP1;
       firstSsdPoint++;
       Int_t isG2tSorted = 1;
@@ -377,7 +378,9 @@ Int_t St_sls_Maker::writeStripToTable(St_sls_strip *sls_strip) {
 	  strip.id_hit[i]     = pStripP->getIdHit(i);
 	  strip.id_mchit[i]   = pStripP->getIdMcHit(i);
 	  strip.id_mctrack[i] = pStripP->getIdMcTrack(i);
-	  LOG_DEBUG<<Form("idwafer=%d strip_id=%d side P i=%d IdMcHit=%d IdMcTrack=%d signal(adc)=%d signal(GeV)=%f\n",idCurrentWaf,pStripP->getNStrip(),i,pStripP->getIdMcHit(i),pStripP->getIdMcTrack(i),pStripP->getDigitSig(),pStripP->getAnalogSig())<<endm;
+	  LOG_DEBUG<<Form("idwafer=%d strip_id=%d side P i=%d IdMcHit=%d IdMcTrack=%d signal(adc)=%d signal(GeV)=%f",
+			  idCurrentWaf,pStripP->getNStrip(),i,pStripP->getIdMcHit(i),pStripP->getIdMcTrack(i),pStripP->getDigitSig(),pStripP->getAnalogSig())
+		   <<endm;
 	}
 	sls_strip->AddAt(&strip);
 	currRecord++;
@@ -398,7 +401,9 @@ Int_t St_sls_Maker::writeStripToTable(St_sls_strip *sls_strip) {
 	  strip.id_hit[i]     = pStripN->getIdHit(i);
 	  strip.id_mchit[i]   = pStripN->getIdMcHit(i);
 	  strip.id_mctrack[i] = pStripN->getIdMcTrack(i);
-	  LOG_DEBUG <<Form("idwafer=%d strip_id=%d side N i=%d IdMcHit=%d IdMcTrack=%d signal(adc)=%d signal(GeV)=%f\n",idCurrentWaf,pStripN->getNStrip(),i,pStripN->getIdMcHit(i),pStripN->getIdMcTrack(i),pStripN->getDigitSig(),pStripN->getAnalogSig())<<endm;
+	  LOG_DEBUG <<Form("idwafer=%d strip_id=%d side N i=%d IdMcHit=%d IdMcTrack=%d signal(adc)=%d signal(GeV)=%f",
+			   idCurrentWaf,pStripN->getNStrip(),i,pStripN->getIdMcHit(i),pStripN->getIdMcTrack(i),pStripN->getDigitSig(),pStripN->getAnalogSig())
+		    <<endm;
 	}
 	sls_strip->AddAt(&strip);
 	currRecord++;
@@ -472,7 +477,7 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
     for (int j=0;j<NumOfHits ;j++)
       {
 	Flag_Energy =1.0;
-	currWafId = g2t[j].volume_id;
+	currWafId = g2t[j].volume_id%10000;
 	trackId   = g2t[j].track_p;
 	if( currWafId < mSsdLayer*1000) continue; // ssd hit
 	currLadder  = StSsdBarrel::Instance()->idWaferToLadderNumb(currWafId); 
@@ -509,8 +514,8 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 	      //StMcSsdHit *mHit =0;
 	      //mHit = new StMcSsdHit(&g2t[j]);
 	      Int_t finalVolumeId = 7000+(FinalLadder+1)+(FinalWafer+1)*100;
-	      LOG_DEBUG<<Form("New ladder=%d New Wafer=%d New volume id =%d\n",FinalLadder,FinalWafer,finalVolumeId);
-	      g2t[j].volume_id = (long)finalVolumeId;
+	      LOG_DEBUG<<Form("New ladder=%d New Wafer=%d New volume id =%d",FinalLadder,FinalWafer,finalVolumeId) << endm;
+	      g2t[j].volume_id = 10000*(g2t[j].volume_id/10000) + (long)finalVolumeId; // miss sector 
 	      StMcTrack *t = 0;
 	      t = new StMcTrack(&(g2tTrack[trackId-1]));
 	      //mHit = new StMcSsdHit(g2t[j].x,g2t[j].p,g2t[j].de,0,0,0,finalVolumeId,t);
@@ -520,7 +525,7 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 	      //mHit->setVolumeId(finalVolumeId);
 	      t->addSsdHit(mHit);
 	      mcEvent->ssdHitCollection()->addHit(mHit);
-	      LOG_DEBUG<<Form("check :finalVolumeid =%d fromhit ladder=%d wafer=%d ParentTrack=%ld\n",finalVolumeId,mHit->ladder(),mHit->wafer(),mHit->parentTrack()->key())<<endm;
+	      LOG_DEBUG<<Form("check :finalVolumeid =%d fromhit ladder=%d wafer=%d ParentTrack=%ld",finalVolumeId,mHit->ladder(),mHit->wafer(),mHit->parentTrack()->key())<<endm;
 	      if (iok != kStOK) continue;
 	      foundGoodHits++;
 	      //dump the 3-vector to Double_t[3] for MasterToLocal
@@ -536,7 +541,7 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 	      Float_t p[3],tempo[3];
 	      for (Int_t jj = 0; jj<3; jj++) {p[jj] = g2t[j].p[jj];tempo[jj] = myVectG[jj];}
 	      trackId   = g2t[j].track_p;
-	      LOG_DEBUG<<Form("Final Ladder=%d FinalWafer=%d geantId=%d xg=%f yg=%f zg=%f energy=%f trackId=%d\n",FinalLadder,FinalWafer,g2t[j].id,myVectG[0],myVectG[1],myVectG[2],g2t[j].de,trackId)<<endm;
+	      LOG_DEBUG<<Form("Final Ladder=%d FinalWafer=%d geantId=%d xg=%f yg=%f zg=%f energy=%f trackId=%d",FinalLadder,FinalWafer,g2t[j].id,myVectG[0],myVectG[1],myVectG[2],g2t[j].de,trackId)<<endm;
 	      StSsdBarrel::Instance()->mLadders[FinalLadder]->mWafers[FinalWafer]->addHit(g2t[j].id, g2t[j].id, trackId, tempo, g2t[j].de, p);
 	    }
 	  }
