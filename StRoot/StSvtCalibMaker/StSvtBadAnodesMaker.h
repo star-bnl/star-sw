@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtBadAnodesMaker.h,v 1.1 2004/02/03 20:06:28 munhoz Exp $
+ * $Id: StSvtBadAnodesMaker.h,v 1.2 2009/01/26 15:01:51 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtBadAnodesMaker.h,v $
+ * Revision 1.2  2009/01/26 15:01:51  fisyak
+ * Add missing (in ROOT 5.22) forward declaration
+ *
  * Revision 1.1  2004/02/03 20:06:28  munhoz
  * first version of bad anode maker
  *
@@ -22,7 +25,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-
+class TFile;
 class TH2F;
 class TString;
 
