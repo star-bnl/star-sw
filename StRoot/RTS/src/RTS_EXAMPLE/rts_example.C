@@ -128,6 +128,8 @@ int main(int argc, char *argv[])
 
 		LOG(INFO,"File name \"%s\": sequence %d: token %4d, trgcmd 0x%X, daqcmd 0x%X (evp status 0x%X)",evp->file_name, evp->seq, evp->token, evp->trgcmd, evp->daqcmd,evp->status) ;
 
+
+		if(print_det[0]) printf("***** Seq #%d, token %d\n",evp->seq,evp->token) ;
 		/***************** let's do simple detectors; the ones which only have legacy *****/
 
 		dd = evp->det("sc")->get() ;
@@ -161,6 +163,7 @@ int main(int argc, char *argv[])
 				while(dd->iterate()) {
 					tof_t *tof = (tof_t *)dd->Void ;
 					for(int r=0;r<4;r++) {
+
 						printf("RDO %d: words %d:\n",r+1,tof->ddl_words[r]) ;
 						for(u_int i=0;i<tof->ddl_words[r];i++) {
 							printf("\t%d: 0x%08X [%u dec]\n",i,tof->ddl[r][i],tof->ddl[r][i]) ;
