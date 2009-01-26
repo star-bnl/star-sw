@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.5 2008/05/11 18:49:21 balewski Exp $
+// $Id: bfc.C,v 1.6 2009/01/26 14:35:21 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -64,26 +64,26 @@ void Load(const Char_t *options){
       }
     }
   }
-  //  if (gClassTable->GetID("TMatrix") < 0) gSystem->Load("StarRoot");// moved to rootlogon.C  TMemStat::PrintMem("load StarRoot");
+  //  if (gClassTable->GetID("TMatrix") < 0) gSystem->Load("StarRoot");// moved to rootlogon.C  StMemStat::PrintMem("load StarRoot");
 #ifdef UseLogger
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
   if (!TString(options).Contains("-logger",TString::kIgnoreCase)) {
-    needLogger = gSystem->Load("liblog4cxx.so") <= 0;              //  TMemStat::PrintMem("load log4cxx");
+    needLogger = gSystem->Load("liblog4cxx.so") <= 0;              //  StMemStat::PrintMem("load log4cxx");
   }
 #endif
-  gSystem->Load("libSt_base");                                        //  TMemStat::PrintMem("load St_base");
+  gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
 #ifdef UseLogger
   if (needLogger) {
     gSystem->Load("libStStarLogger.so");
-    gROOT->ProcessLine("StLoggerManager::StarLoggerInit();");      //  TMemStat::PrintMem("load StStarLogger");
+    gROOT->ProcessLine("StLoggerManager::StarLoggerInit();");      //  StMemStat::PrintMem("load StStarLogger");
   }
 #endif
   gSystem->Load("libHtml");
-  gSystem->Load("libStChain");                                        //  TMemStat::PrintMem("load StChain");
-  gSystem->Load("libStUtilities");                                    //  TMemStat::PrintMem("load StUtilities");
-  gSystem->Load("libStBFChain");                                      //  TMemStat::PrintMem("load StBFChain");
-  gSystem->Load("libStChallenger");                                   //  TMemStat::PrintMem("load StChallenger");
+  gSystem->Load("libStChain");                                        //  StMemStat::PrintMem("load StChain");
+  gSystem->Load("libStUtilities");                                    //  StMemStat::PrintMem("load StUtilities");
+  gSystem->Load("libStBFChain");                                      //  StMemStat::PrintMem("load StBFChain");
+  gSystem->Load("libStChallenger");                                   //  StMemStat::PrintMem("load StChallenger");
 }
 //_____________________________________________________________________
 void bfc(Int_t First, Int_t Last,
@@ -171,7 +171,7 @@ void bfc(Int_t First, Int_t Last,
   // Insert your maker before "tpc_hits"
   Char_t *myMaker = "St_TLA_Maker";
   if (gClassTable->GetID(myMaker) < 0) {
-	  gSystem->Load(myMaker);//  TString ts("load "; ts+=myMaker; TMemStat::PrintMem(ts.Data());
+	  gSystem->Load(myMaker);//  TString ts("load "; ts+=myMaker; StMemStat::PrintMem(ts.Data());
   }
   StMaker *myMk = chain->GetMaker(myMaker);
   if (myMk) delete myMk;
