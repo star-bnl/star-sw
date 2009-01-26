@@ -22,7 +22,7 @@
 #include <log4cxx/helpers/stringhelper.h>
 #include <log4cxx/patternlayout.h>
 #include <data/TxUCMException.h>
-
+#include "TObjArray.h"
 using namespace log4cxx;
 using namespace log4cxx::helpers;
 using namespace log4cxx::db;
