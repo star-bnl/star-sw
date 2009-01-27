@@ -11,6 +11,7 @@ using namespace std;
 #include <TString.h>
 #include <TBox.h>
 #include <TObjArray.h>
+#include <TDatime.h>
 
 #ifndef NEW_DAQ_READER
 #	include "evpReader.hh"
@@ -295,6 +296,9 @@ void BEMCPlots::clear(const char *bemcStatus) {
 	this->mPatchData[i][9] = 0; // formula parameter 5
 	this->mPatchData[i][10] = 0; // number of masked towers
     }
+
+    if (!BEMCDecoder) BEMCDecoder = new StEmcDecoder();
+
     if (bemcStatus) {
 	ifstream ifstr(bemcStatus);
 	if (ifstr.good()) {
@@ -417,13 +421,22 @@ void BEMCPlots::processEvent( char *datap
                 	    , const unsigned short *
                 	    ) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
-    if (!BEMCDecoder) BEMCDecoder = new StEmcDecoder();
 #ifdef NEW_DAQ_READER
     daqReader *rdr = (daqReader*)(datap);
 #else
+    evpReader *evp_reader = (evpReader*)(datap);
     int ret = emcReader(datap);
     trgReader(datap);
 #endif
+
+    {
+#ifdef NEW_DAQ_READER
+	TDatime evt_time(rdr->evt_time); // time in unix seconds
+#else
+	TDatime evt_time(evp_reader->evt_time);
+#endif
+	if (BEMCDecoder) BEMCDecoder->SetDateTime(evt_time);
+    }
 
 const unsigned char *dsmL0WestInput = 0;
 const unsigned char *dsmL0EastInput = 0;
