@@ -8,9 +8,7 @@
 #	include "DAQ_EMC/daq_emc.h"
 #	include "DAQ_ETOW/daq_etow.h"
 #	include "DAQ_ESMD/daq_esmd.h"
-
 #	include "DAQ_TRG/daq_trg.h"
-
 #	include "DAQ_READER/evpReaderClass.h"
 #	include "DAQ_EMC/emcReader.h"
 #	include <RTS/include/daqFormats.h>
@@ -104,6 +102,7 @@ void EEMCPlots::processEvent( char *datap
     int ret = emcReader(datap);
     trgReader(datap);
 #endif
+
 #ifdef NEW_DAQ_READER
     daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
     if (dd_trg) while (dd_trg->iterate()) {
@@ -122,20 +121,23 @@ void EEMCPlots::processEvent( char *datap
     dsm3inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
 #endif
 
-
-
-
-//#ifdef NEW_DAQ_READER
+#ifdef NEW_DAQ_READER
+    unsigned int runId = rdr->run;
+    unsigned int token = rdr->token;
+    unsigned int eventId = rdr->seq;
+    int isEvp = rdr->IsEvp();
+#else
     evpReader *evp = (evpReader*)(datap);
-//#endif
+    unsigned int runId = evp->run;
+    unsigned int token = evp->token;
+    unsigned int eventId = evp->seq;
+    int isEvp = evp->isevp;
+#endif
+
 	Tonko2Ezt ezt(datap);
 	eeqa->clear();
-	eeqa->sort(&ezt.eETow, &ezt.eESmd,
-            evp->run, evp->token, TRG_VERSION,
-            dsm0inp, dsm1inp, dsm2inp, dsm3inp);
-        if(emc.etow_in && evp->isevp ) {
-            eeqa->spy(evp->run,evp->event_number);
-        }
+	eeqa->sort(&ezt.eETow, &ezt.eESmd, runId, token, TRG_VERSION, dsm0inp, dsm1inp, dsm2inp, dsm3inp);
+        if (isEvp) eeqa->spy(runId, eventId);
     }
 }
 //-------------------------------------------------------------------
