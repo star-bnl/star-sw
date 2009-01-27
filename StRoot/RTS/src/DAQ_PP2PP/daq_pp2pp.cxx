@@ -11,7 +11,7 @@
 
 #include "daq_pp2pp.h"
 
-static int pp2pp_decode(struct pp2pp_t *d, char *raw, int bytes) ;
+
 
 class daq_det_pp2pp_factory : public daq_det_factory
 {
@@ -44,7 +44,8 @@ Supported Banks: \n\
 daq_pp2pp::daq_pp2pp(daqReader *rts_caller) 
 {
 	rts_id = PP_ID ;
-	sfs_name = name = rts2name(rts_id) ;
+	name = rts2name(rts_id) ;
+	sfs_name = "pp2pp" ;
 	caller = rts_caller ;
 #ifndef PP_MVME
 	if(caller) caller->insert(this, rts_id) ;
@@ -110,7 +111,7 @@ daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
 	for(int i=min_sec;i<=max_sec;i++) {
 		daq_dta *sec_dta ;
 
-		sec_dta = handle_raw(sec, -1) ;	// rdo is ignored...
+		sec_dta = handle_raw(i, -1) ;	// rdo is ignored...
 		if(sec_dta == 0) continue ;
 
 		int ret = sec_dta->iterate() ;
@@ -118,22 +119,14 @@ daq_dta *daq_pp2pp::handle_adc(int sec, int rdo)
 
 
 		found_some = 1 ;
-		LOG(TERR,"pp2pp adc: sector %d, words %d",i,sec_dta->ncontent) ;
+		LOG(NOTE,"pp2pp adc: sector %d, words %d",i,sec_dta->ncontent) ;
 
 		// extract modules
-		struct pp2pp_t *d = (pp2pp_t *) adc->request(1) ;
-
-
-		memset(d,0,sizeof(pp2pp_t)) ;
-		
-		ret = pp2pp_decode(d,(char *)sec_dta->Void, sec_dta->ncontent) ;
+		ret = decode(i,(char *)sec_dta->Void, sec_dta->ncontent) ;
 		if(ret < 0) {
 			LOG(ERR,"pp2pp_decode failed for sector %d",i) ;
 			continue ;
-		}
-		adc->finalize(1,i,d->seq_id,d->chain_id) ;
-		
-
+		}		
 	}
 
 	adc->rewind() ;
@@ -212,10 +205,12 @@ daq_dta *daq_pp2pp::handle_raw(int sec, int rdo)
 	
 			tot_bytes += size ;
 			found_some = 1 ;
-			LOG(INFO,"%s: %s: reading in \"%s\": bytes %d",name,str,"raw", size) ;
+			LOG(NOTE,"%s: %s: reading in \"%s\": bytes %d",name,str,"raw", size) ;
 		}
 	}
 	}
+
+	if(o_cou == 0) return 0 ;
 
 	raw->create(tot_bytes,"pp2pp_raw",rts_id,DAQ_DTA_STRUCT(u_char)) ;
 
@@ -393,17 +388,172 @@ int daq_pp2pp::get_l2(char *addr, int words, struct daq_trg_word *trgs, int prom
 
 
 
-static int pp2pp_decode(struct pp2pp_t *d, char *raw, int bytes) 
+int daq_pp2pp::decode(int sec_id, char *raw, int bytes) 
 {
 	u_int *d32 ;
+	u_short *d16 ;
+	u_short seq[2], trg[2] ;
+	u_char *d8 ;
+	int ret = 0  ;
 
-	d32 = (u_int *) raw ;	// data is BIG ENDIAN!
+	int seq_id, chain_id, svx_id ;
+
+	int words = bytes/4 ;
 
 	// we are still debugging!
-	
-	for(int i=0;i<10;i++) {
-		LOG(TERR,"pp2pp data: %2d: 0x%08X",i,b2h32(d32[i])) ;
+	d32 = (u_int *) raw ;	// data is BIG ENDIAN!
+	d16 = (u_short *) raw ;
+
+	for(int i=0;i<bytes/4;i++) {
+		LOG(DBG,"pp2pp data: %2d: 0x%08X",i,b2h32(d32[i])) ;
 	}
 
-	return 0 ;	// call it OK for now...
+	int trg_cou = b2h32(d32[words-1]) ;
+	int trg_ix = words - 1 - trg_cou ;
+
+	for(int i=0;i<trg_cou;i++) {
+		LOG(NOTE,"pp2pp: trg %d/%d: 0x%08X",i+1,trg_cou,b2h32(d32[trg_ix+i])) ;
+	}
+
+
+	int w16 = 2 * (words - trg_cou - 1) ;	// 16 bit words left
+
+	LOG(DBG,"16bit words left: %d",w16) ;
+
+	int cur_ix = 0 ;
+
+
+	int bunch_xing = -1 ;
+	u_int trigger = 0xFFFFFFFF ;
+
+	while(cur_ix < w16) {
+		struct pp2pp_t *d = 0 ;	// to provoke a core dump
+		int requested = 0 ;
+
+		int i ;
+
+		// grab sequencer descriptor
+		seq[0] = b2h16(d16[cur_ix]) ;
+		cur_ix++ ;
+		seq[1] = b2h16(d16[cur_ix]) ;
+		cur_ix++ ;
+
+		// grab trigger data, although I will ignore it...
+		trg[0] = b2h16(d16[cur_ix]) ;
+		cur_ix++ ;
+		trg[1] = b2h16(d16[cur_ix]) ;
+		cur_ix++ ;
+
+		seq_id = (seq[0] >> 8) >> 2 ;
+		chain_id = (seq[0] >> 8) & 3 ;
+
+
+
+
+
+		if(trigger == 0xFFFFFFFF) {
+			trigger = (trg[1] << 16) | trg[0] ;
+		}
+		else {
+			u_int tmp = (trg[1] << 16) | trg[0] ;
+
+			if(tmp != trigger) {
+				ret |= 1 ;
+				LOG(ERR,"pp2pp: seq %d:%d: expect trigger 0x%08X, read 0x%08X",seq_id,chain_id,trigger,tmp) ;
+			}
+			else {
+				LOG(DBG,"pp2pp: seq %d:%d: expect trigger 0x%08X, read 0x%08X",seq_id,chain_id,trigger,tmp) ;
+			}
+		}
+
+		if(bunch_xing < 0) {
+			bunch_xing = seq[0] & 0xFF ;
+		}
+		else {
+			int tmp = seq[0] & 0xFF ;
+
+			if(tmp != bunch_xing) {
+				ret |= 2 ;
+				LOG(ERR,"pp2pp: seq %d:%d: expect xing 0x%02X, read 0x%02X",seq_id,chain_id,bunch_xing,tmp) ;
+			}
+			else {
+				LOG(DBG,"pp2pp: seq %d:%d: expect xing 0x%02X, read 0x%02X",seq_id,chain_id,bunch_xing,tmp) ;
+			}
+		}
+
+
+
+
+
+		int fifo_w16 = (seq[1] >>8) | ((seq[1] & 0xF)<<8) ;
+		
+		LOG(DBG,"seq 0x%04X, 0x%04X; trg 0x%04X, 0x%04X; len %d",seq[0],seq[1],trg[0],trg[1],fifo_w16) ;
+		LOG(NOTE,"pp2pp: seq_id %d:%d; words %d",seq_id,chain_id,fifo_w16) ;
+
+		// subtract 2 because of the trigger word
+		fifo_w16 -= 2 ;
+
+		d8 = (u_char *) &(d16[cur_ix]) ;
+
+		for(i=0;i<fifo_w16;i++) {
+			int ch, c_adc ;
+
+			ch = *d8++ ;
+			c_adc = *d8++ ;
+
+			if(ch & 0x80) {
+				if(c_adc != 0) {
+					ret |= 4 ;
+					LOG(ERR,"Bad channel in seq %d:%d: %d %d",seq_id,chain_id,ch,c_adc) ;
+				}
+				else {
+					LOG(NOTE,"SVX break: seq %d:%d: SVX 0x%02X",seq_id, chain_id,ch) ;
+			 	}
+
+				if(requested) {
+					adc->finalize(1, sec_id, d->seq_id, d->chain_id) ;
+					requested = 0 ;
+				}
+
+				svx_id = ch & 0x7F ;	
+				d = (struct pp2pp_t *) adc->request(1) ;
+
+				requested = 1 ;
+
+				d->seq_id = seq_id + 1 ;
+				d->svx_id = svx_id + 1 ;
+				d->chain_id = chain_id + 1 ;
+				d->error = ret ;
+				memset(d->adc,0,sizeof(d->adc)) ;		
+
+			}
+			else {				
+				LOG(DBG,"datum %d/%d: %3d = 0x%02X",i,fifo_w16,ch,c_adc) ;
+				d->adc[ch] = c_adc ;
+			}
+
+			cur_ix++ ;
+		}
+
+		if(fifo_w16 & 1) {
+			int ch, c_adc ;
+
+			ch = *d8++ ;
+			c_adc = *d8++ ;
+
+			LOG(DBG,"Padding %d/%d: %3d = 0x%02X",i,fifo_w16,ch,c_adc) ;
+
+			cur_ix++ ;
+		}
+
+		if(requested) {
+			adc->finalize(1, sec_id, d->seq_id, d->chain_id) ;
+			requested = 0 ;
+		}
+		
+
+
+	}
+
+	return ret ;
 }
