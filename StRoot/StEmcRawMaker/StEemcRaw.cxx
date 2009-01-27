@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.14 2008/01/10 20:49:58 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.15 2009/01/27 19:58:36 mattheww Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -18,6 +18,12 @@
 #include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
 
 #include "StEemcRaw.h"
+#include "StEmcRawMaker.h"
+#include "DAQ_READER/daq_det.h"
+#include "DAQ_ETOW/daq_etow.h"
+#include "DAQ_ESMD/daq_esmd.h"
+#include "DAQ_EMC/daq_emc.h"
+#include "StChain/StRtsTable.h"
 
 ClassImp(StEemcRaw)
 
@@ -36,6 +42,198 @@ StEemcRaw::~StEemcRaw()
 //____________________________________________________
 //____________________________________________________
 //____________________________________________________
+Bool_t StEemcRaw::make(StEmcRawMaker* maker, StEvent* mEvent){
+    if (hs[0])
+        hs[0]->Fill(0);
+
+    StEmcRawData *eemcRaw = mEvent->emcCollection()->eemcRawData();
+
+    if(!maker || !mDb || ! eemcRaw )
+    {
+        gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , some pointers are ZERO, code is sick, chain should be aborted, no EEMC data processed,JB :" <<maker << mDb << eemcRaw <<endm;
+        return false;
+    }
+
+    if (hs[0])
+        hs[0]->Fill(1);
+    //::::::::::::::::: copy raw data to StEvent :::::::::::::
+    if(! copyRawData(maker,  eemcRaw) )
+        return false;
+
+    if(hs[0])
+        hs[0]->Fill(2);
+
+    //::::::::::::::: assure raw data are sane  ::::::::::::::::
+    StL0Trigger* trg=mEvent->l0Trigger();
+    if (! trg)
+    {
+        gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , l0Trigger data, EEMC not verified, abort all EEMC hits in StEvent EmcCollection, but raw data are saved" << endm;
+        return false;
+    }
+
+
+    int token=trg->triggerToken();
+    // printf("\nStL0Trigger::token=%d\n",token);
+    int runId=mEvent->runId();
+
+    if( headersAreSick(maker, eemcRaw, token,  runId) )
+        return false;
+    if (hs[0])
+        hs[0]->Fill(3);
+
+    if( towerDataAreSick( eemcRaw))
+        return false;
+    if (hs[0])
+        hs[0]->Fill(3);
+
+    raw2pixels(mEvent);
+    return true;
+
+}
+
+Bool_t StEemcRaw::copyRawData(StEmcRawMaker* maker, StEmcRawData *raw)
+{
+    StRtsTable* etow = maker->GetDaqElement("etow/adc");
+    int nb=0;
+    if(etow){
+      etow_t* etowdata = (etow_t*)*etow->begin();
+      for(int icr = 0; icr < ETOW_MAXFEE; icr++){
+	nb++;
+	const EEmcDbCrate *fiber = mDb->getFiber(icr);
+
+	raw->createBank(icr,fiber->nHead,fiber->nCh);
+	for(int i = 0; i < fiber->nCh; i++){
+	  raw->setData(icr,i,etowdata->adc[icr][i]);
+	  //printf("agrdl: ETOW ADC %d %d %d\n",icr,i,etowdata->adc[icr][i]);
+	}
+	for(int i = 0; i < fiber->nHead; i++){
+	  raw->setHeader(icr,i,etowdata->preamble[icr][i]);
+	  //printf("agrdl: ETOW HEAD %d %d %d\n",icr,i,etowdata->preamble[icr][i]);
+	}
+      }
+    }else{
+      LOG_ERROR<<"ETOW Structure not found"<<endm;
+      return false;
+    }
+    StRtsTable* esmd = maker->GetDaqElement("esmd/adc");
+    if(esmd){
+      esmd_t* esmddata = (esmd_t*)*esmd->begin();
+      for(int icr = 0; icr < ESMD_MAXFEE;icr++){
+	nb++;
+	int id = icr + ETOW_MAXFEE;
+	const EEmcDbCrate *fiber = mDb->getFiber(id);
+
+	raw->createBank(id,fiber->nHead,fiber->nCh);
+	for(int i = 0; i < fiber->nCh; i++){
+	  raw->setData(id,i,esmddata->adc[icr][i]);
+	  //printf("agrdl: ETOW ADC %d %d %d\n",id,i,esmddata->adc[icr][i]);
+	}
+	for(int i = 0; i < fiber->nHead; i++){
+	  raw->setHeader(id,i,esmddata->preamble[icr][i]);
+	  //printf("agrdl: ETOW HEAD %d %d %d\n",id,i,esmddata->preamble[icr][i]);
+	}
+      }
+    }else{
+      LOG_ERROR<<"ESMD Structure not found"<<endm;
+      return false;
+    }
+
+    LOG_INFO << "StEemcRaw::copyRawData() "<<nb<<" data bloks copied" << endm;
+    return true;
+}
+
+Bool_t StEemcRaw::headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int token, int runId)
+{
+    if (! raw)
+    {
+        gMessMgr->Message("","W") << "StEemcRaw::headersAreSick() no EEMC raw data" << endm;
+        return true;
+    }
+
+
+    EEfeeDataBlock block; // use utility class as the work horse
+
+    int icr;
+    int totErrBit=0;
+    int nOn=0;
+
+    LOG_INFO << "StEemcRaw::headersAreSick() --> Nfibers=" << mDb->getNFiber() << endm;
+    //LOG_INFO << "StEemcRaw::headersAreSick() --> isEemcBankIn('T')=" << etow << endm;
+    //LOG_INFO << "StEemcRaw::headersAreSick() --> isEemcBankIn('S')=" << esmd << endm;
+
+    for(icr=0;icr<mDb->getNFiber();icr++)
+    {
+        const EEmcDbCrate *fiber=mDb-> getFiber(icr);
+        if(!fiber->useIt)
+            continue; // drop masked out crates
+
+	//if (fiber->type == 'T' && !etow) continue;
+	//if (fiber->type == 'S' && !esmd) continue;
+
+        if(raw->sizeHeader(icr)<=0) {
+	 LOG_WARN <<Form("StEemcRaw::headersAreSick() sizeHeader(icr=%d)<=0,  crID=%d, skip it\n",icr,fiber->crID)<<endm;
+	  continue;  //drop cartes not present in data blocks
+	}
+	// printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
+
+        int isOff=EztEmcRawData::isCrateOFF(raw->header(icr));
+        // printf("AAA icr=%d isOff=%d\n",icr,isOff);
+        if(isOff)
+        { // kill this fiber for the rest of this job
+            mDb->setFiberOff(icr);
+            LOG_WARN << "StEemcRaw::headersAreSick() detected icr="<<icr<< ", name="<<fiber->name<<" is OFF,\n this fiber will ignored till the end of this job" << endm;
+            continue;
+        }
+        nOn++;
+        block.clear();
+        block.setHead(raw->header(icr));
+
+        int lenCount=fiber->nCh+fiber->nHead;
+        int errFlag=0;
+
+        if(fiber->type=='T')
+            lenCount+=32; // one more board exist in harware
+
+        if(fiber->type=='S' && runId<6000000)
+            errFlag=0x28;  // bug in box firmawer prior to 2005
+
+	//HACK^2 - disable token check, March 22, 2007
+	//token=block.getToken();
+	// end of hack, Jan B.
+
+        int trigCommand=4; // physics, 9=laser/LED, 8=??
+        int sanity=block.isHeadValid(token,fiber->crIDswitch,lenCount,trigCommand,errFlag);
+	if(0){
+	  block.print(1);
+	  cout<<(short)block.getCrateID()<<" "<<fiber->crIDswitch<<" :::: "<<block.getLenCount()<<" "<<lenCount<<" :::: "<<block.getTrigComm()<<" "<<trigCommand<<" :::: "<<block.getErrFlag()<<" "<<errFlag<<endl;
+	}
+	//printf("Endcap crate=%d token=%d\n",fiber->crID,block.getToken());
+        int i;
+        for(i=0;i<8;i++)
+        {// examin & histo all sanity bits
+            if(!(sanity&(1<<i)))
+                continue;
+            totErrBit++;
+            int k=icr*10+i;
+            //      printf("ic=%d on bit=%d k=%d   %d %d  \n",ic,i,k,1<<i,sn&(1<<i) );
+            if (hs[3])
+                hs[3]->Fill(k);
+        }
+       LOG_DEBUG  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
+       if(sanity) LOG_WARN  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
+    }
+
+    if (hs[4])
+        hs[4]->Fill(totErrBit);
+
+    LOG_INFO<< GetName()<<"::checkHeader --> totErrBit "<<totErrBit<<" in "<<nOn<<" crates"<<endm;
+    return totErrBit;
+}
+
+///////////
+//////////
+/////////
+
 Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){
     //  printf("JB make()  EEMC\n");
 
@@ -394,6 +592,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.15  2009/01/27 19:58:36  mattheww
+// Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
+//
 // Revision 1.14  2008/01/10 20:49:58  balewski
 // now more warnings if ESMD is not in the run, thanks Pibero
 //

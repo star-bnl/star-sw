@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.17 2008/03/27 19:54:16 genevb Exp $
+// $Id: StEmcRawMaker.cxx,v 1.18 2009/01/27 19:58:36 mattheww Exp $
 
 #include <math.h>
 
@@ -31,7 +31,7 @@ ClassImp(StEmcRawMaker)
 /*
    Default constructor. Set Initial values for some variables
 */
-StEmcRawMaker::StEmcRawMaker(const char *name):StMaker(name)
+StEmcRawMaker::StEmcRawMaker(const char *name):StRTSBaseMaker(name)
 {
     m_Mode = 0;
     mEvent = 0;
@@ -88,14 +88,14 @@ Int_t StEmcRawMaker::Init()
     }
     //................EEMC stuff ..............
     eeStDb= (StEEmcDbMaker*) GetMaker("eeDb");
-
+    
     if(eeStDb==0)
     {
         LOG_ERROR << "FATAL !!! \n   did not found \"eeDb-maker\", all EEMC data will be ignored\n fix it, JB\n" <<endm;
     }
 
     mEemcRaw->initHisto(); // EEMC histos to monitor corruption
-
+ 
     if (IAttr(".histos"))
     {
         /* EEMC and BEMC  has no unneeded histos to skip during production,
@@ -104,6 +104,17 @@ Int_t StEmcRawMaker::Init()
         */
     }
 
+
+    //never change control table after here
+    assert(mBemcRaw->getControlTable()->CutOffType[2]==mBemcRaw->getControlTable()->CutOffType[3]);
+
+    if(mBemcRaw->getControlTable()->CutOffType[2]){
+      mBemcRaw->getControlTable()->DeductPedestal[2] = 0;
+      mBemcRaw->getControlTable()->DeductPedestal[3] = 0;
+    }
+    if(mBemcRaw->getControlTable()->CutOffType[1]){
+      mBemcRaw->getControlTable()->DeductPedestal[1] = 0;
+    }
     return StMaker::Init();
 }
 
@@ -122,6 +133,7 @@ Int_t StEmcRawMaker::InitRun(Int_t runNumber)
     //................EEMC stuff ..............
 
     LOG_INFO << "(" << runNumber << ")" << endm;
+
     if(eeStDb==0)
     {
         LOG_ERROR << "did not found \"eeDb-maker\", all EEMC data will be ignored\n\n"<<endm;
@@ -136,7 +148,7 @@ Int_t StEmcRawMaker::InitRun(Int_t runNumber)
         //eeStDb->exportAscii();
     }
     mEemcRaw->setDb(eeStDb);
-
+    cout<<"agrdl: emcrawmaker initrun completed"<<endl;
     return StMaker::InitRun(runNumber);
 }
 
@@ -254,15 +266,17 @@ Bool_t StEmcRawMaker::prepareEnvironment()
 Bool_t StEmcRawMaker::makeBemc()
 {
     LOG_DEBUG <<"Copying BEMC information from DAQ structure "<<endm;
+    /*
     TDataSet* TheData   = GetDataSet("StDAQReader");
     if(!TheData)
     {
         LOG_ERROR <<"Could not find DAQ Reader "<<endm;
         return kFALSE;
     }
+    */
     mBemcRaw->setDate(GetDate());
     mBemcRaw->getTables()->loadTables((StMaker*)this);
-    return mBemcRaw->make(TheData,mEvent);
+    return mBemcRaw->make((StEmcRawMaker*)this,mEvent);
 }
 
 //_____________________________________________________________________________
@@ -272,6 +286,7 @@ Bool_t StEmcRawMaker::makeBemc()
 Bool_t StEmcRawMaker::makeEemc()
 {
     LOG_DEBUG <<"Copying EEMC information from daqReader->StEvent "<<endm;
+    /*
     St_DataSet *daq = GetDataSet("StDAQReader");
 
     if (! daq)
@@ -297,8 +312,8 @@ Bool_t StEmcRawMaker::makeEemc()
         LOG_ERROR << "::makeEemc() , fromVictor->getEEMCReader() failed" << endm;
         return false;
     }
-
-    return mEemcRaw->make( eeReader,mEvent ); //eeReader,eemcRaw, token);
+    */
+    return mEemcRaw->make( (StEmcRawMaker*)this,mEvent ); //eeReader,eemcRaw, token);
 }
 
 //_____________________________________________________________________________
@@ -312,6 +327,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.18  2009/01/27 19:58:36  mattheww
+// Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
+//
 // Revision 1.17  2008/03/27 19:54:16  genevb
 // Utilize new BFC option for GoptEMC for controlADCtoE table
 //
