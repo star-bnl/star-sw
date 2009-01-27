@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.29 2008/12/02 19:31:46 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.30 2009/01/27 19:58:36 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.30  2009/01/27 19:58:36  mattheww
+// Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
+//
 // Revision 1.29  2008/12/02 19:31:46  mattheww
 // fixed bug in BPRS swap logic for run 8+
 //
@@ -105,8 +108,18 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/EMC/EMC_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
+#include "DAQ_READER/daq_det.h"
+#include "DAQ_BTOW/daq_btow.h"
+#include "DAQ_BSMD/daq_bsmd.h"
+#include "DAQ_ETOW/daq_etow.h"
+#include "DAQ_ESMD/daq_esmd.h"
+#include "DAQ_EMC/daq_emc.h"
 #include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcRawMaker.h"
 #include "StMessMgr.h"
+#include "TGenericTable.h"
+//#include "StChain/StRTSBaseMaker.h"
+#include "StChain/StRtsTable.h"
 
 ClassImp(StBemcRaw)
 
@@ -126,9 +139,11 @@ StBemcRaw::StBemcRaw():TObject()
     mTables = new StBemcTables();
     mControlADCtoE = new controlADCtoE_st();
     Int_t   calib[]      = {1, 1, 1, 1, 0, 0, 0, 0};
-    Int_t   pedSub[]     = {1, 2, 2, 2, 0, 0, 0, 0};
+    Int_t   pedSub[]     = {1, 1, 0, 0, 0, 0, 0, 0};//default no bsmd pedsub
     Float_t cut[]        = {-1, -1, 1.5, 1.5, -1, -1, -1, -1};
-    Int_t   cutType[]    = {0, 0, 1, 1, 0, 0, 0, 0};
+    //cutType will now specify which daq data block to use
+    //cut will now do nothing
+    Int_t   cutType[]    = {0, 0, 1, 1, 0, 0, 0, 0};//default zs bsmd
     Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
     Int_t   status[]     = {0, 0, 0, 0, 0, 0, 0, 0};
     Int_t   crate[]      = {1, 1, 1, 1, 0, 0, 0, 0};
@@ -150,6 +165,7 @@ StBemcRaw::StBemcRaw():TObject()
 	  mCheckStatus[i][j]=0;
 	}
     }
+    assert(mControlADCtoE->CutOffType[2]==mControlADCtoE->CutOffType[3]);
 
 }
 //_____________________________________________________________________________
@@ -221,7 +237,7 @@ void StBemcRaw::fillHisto()
         mBarrelCrateStatusHist->Fill(getCrateStatus(BTOW,crate),crate);
     }
 }
-Bool_t StBemcRaw::make(TDataSet* TheData, StEvent* event)
+Bool_t StBemcRaw::make(StEmcRawMaker * TheData, StEvent* event)
 {
     if(!TheData)
         return kFALSE;
@@ -237,6 +253,84 @@ Bool_t StBemcRaw::make(TDataSet* TheData, StEvent* event)
         return kFALSE;
     return make(bemcRaw,event);
 }
+Bool_t StBemcRaw::convertFromDaq(StEmcRawMaker * DAQ, StEmcRawData* RAW)
+{
+    if(!DAQ)
+    {
+      LOG_ERROR <<"Could not find DAQ DataSet "<<endm;
+      return kFALSE;
+    }
+    if(!RAW)
+    {
+      LOG_ERROR <<"Could not find StEmcRawData pointer for BEMC"<<endm;
+      return kFALSE;
+    }
+
+    StRtsTable* btow = DAQ->GetDaqElement("btow/adc");
+    if(btow){
+      btow_t* btowdata = (btow_t*)*btow->begin();
+      if(RAW->header(BTOWBANK))
+	RAW->deleteBank(BTOWBANK);
+      RAW->createBank(0,BTOWHEADER,BTOWSIZE);
+
+      for(int i = 0; i < BTOW_MAXFEE; i++){
+	for(int j = 0; j < BTOW_DATSIZE; j++){
+	  int id = -1;
+	  int daqid = -1;
+	  mDecoder->GetTowerIdFromTDC(i,j,id);
+	  mDecoder->GetDaqIdFromTowerId(id,daqid);
+	  //printf("agrdl: BTOW ADC %d %d %d %d\n",i,j,id,btowdata->adc[i][j]);
+	  RAW->setData(BTOWBANK,daqid,btowdata->adc[i][j]);
+	}
+	for(int j = 0; j < BTOW_PRESIZE; j++){
+	  RAW->setHeader(BTOWBANK,i+j*30,btowdata->preamble[i][j]);
+	  //printf("agrdl: BTOW HEAD %d %d\n",i+j*30,btowdata->preamble[i][j]);
+	}
+      }
+    }else{
+      LOG_ERROR<<"BTOW Structure not found"<<endm;
+    }
+
+    while(DAQ->GetDaqElement("bsmd/adc")){
+      if(mDate < 20081101)continue;//Old daq files do not have this block
+      int rdo = DAQ->Rdo();
+      int use = 0;
+      if(rdo < 9 && mControlADCtoE->CutOffType[2])use=1;
+      if(rdo >=9 && mControlADCtoE->CutOffType[1])use=1;
+      bsmd_t* bsmddata = (bsmd_t*)*DAQ->Dta()->begin();
+      if(use){
+	if(RAW->header(rdo))
+	  RAW->deleteBank(rdo);
+	RAW->createBank(rdo,1,BSMD_DATSIZE);
+	RAW->setHeader(rdo,0,(unsigned short)bsmddata->cap);
+	for(int j = 0; j < BSMD_DATSIZE; j++){
+	  RAW->setData(rdo,j,bsmddata->adc[j]);
+	}
+      }
+    }
+
+    while(DAQ->GetDaqElement("bsmd/adc_non_zs")){
+      int rdo = DAQ->Rdo();
+      int use = 0;
+      if((rdo < 9 && !mControlADCtoE->CutOffType[2]) || mDate < 20081101)use=1;
+      if((rdo >= 9 && !mControlADCtoE->CutOffType[1]) || mDate < 20081101)use=1;
+      if(use){
+	//printf("agrdl: entered smd rdo: %d\n",rdo);
+	bsmd_t* bsmddata = (bsmd_t*)*DAQ->Dta()->begin();
+	if(RAW->header(rdo))
+	  RAW->deleteBank(rdo);
+	RAW->createBank(rdo,1,BSMD_DATSIZE);
+	RAW->setHeader(rdo,0,(unsigned short)bsmddata->cap);
+	//printf("agrdl: BSMD %d CAP %d\n",rdo,(unsigned short)bsmddata->cap);
+	for(int j = 0; j < BSMD_DATSIZE; j++){
+	  RAW->setData(rdo,j,bsmddata->adc[j]);
+	  //printf("agrdl: BSMD ADC %d %d %d\n",rdo,j,bsmddata->adc[j]);
+	}
+      }
+    }
+    return kTRUE;
+}
+//-------------------------------------------------------
 Bool_t StBemcRaw::make(StEmcRawData* bemcRaw, StEvent* event)
 {
     if(!bemcRaw)
@@ -280,114 +374,6 @@ Bool_t StBemcRaw::make(StEmcRawData* bemcRaw, StEvent* event)
     return kTRUE;
 }
 //_____________________________________________________________________________
-/*!
-  Read EMC from DAQ structure
-*/
-Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
-{
-    if(!DAQ)
-    {
-        LOG_ERROR <<"Could not find DAQ DataSet "<<endm;
-        return kFALSE;
-    }
-    if(!RAW)
-    {
-		LOG_ERROR <<"Could not find StEmcRawData pointer for BEMC"<<endm;
-        return kFALSE;
-    }
-
-    StDAQReader* TheDataReader=(StDAQReader*)(DAQ->GetObject());
-    if(!TheDataReader || !TheDataReader->EMCPresent())
-    {
-        LOG_ERROR <<"Data Reader is not present "<<endm;
-        return kFALSE;
-    }
-
-    StEMCReader* TheEmcReader=TheDataReader->getEMCReader();
-    if(!TheEmcReader)
-    {
-        LOG_ERROR <<"Could not find BEMC Reader "<<endm;
-        return kFALSE;
-    }
-
-    EMC_Reader* reader = TheEmcReader->getBemcReader();
-    if(!reader)
-    {
-        LOG_ERROR <<"Could not find Barrel Reader "<<endm;
-        return kFALSE;
-    }
-
-    if(reader->isTowerPresent())
-    {
-        Bank_BTOWERADCR& tower = reader->getBTOWERADCR();
-        if(RAW->header(BTOWBANK))
-            RAW->deleteBank(BTOWBANK);
-        RAW->createBank(0,BTOWHEADER,BTOWSIZE);
-        for(Int_t i = 0; i<BTOWHEADER  ;i++)
-            RAW->setHeader(BTOWBANK,i,tower.TDCHeader[i]);
-        for(Int_t i = 0; i<BTOWSIZE ;i++)
-            RAW->setData(BTOWBANK,i,tower.TowerADCArray[i]);
-    }
-    // smd data
-    if(reader->isSmdPresent())
-    {
-        Bank_BSMDADCR& smd =  reader->getSMD_ADCR();
-        Int_t NSMD = MAXSMDCRATES;
-        // there is only 4 SMD Crates before that data and some
-        // of them are PSD crates. For Y2004 AuAu runs PSD do
-        // not have its own data format and it is being read as
-        // SMD
-        if(mDate<20040701)
-            NSMD = 4;
-
-        for(Int_t i = 0; i<NSMD; i++)
-        {
-            if(smd.HasData[i]==1)
-            {
-                Int_t bank = i+BSMDOFFSET;
-                if(RAW->header(bank))
-                    RAW->deleteBank(bank);
-                RAW->createBank(bank,BSMDHEADER,BSMDSIZE);
-                for(Int_t j=0; j<BSMDHEADER;  j++)
-                    RAW->setHeader(bank,j,smd.SmdHeader[i][j]);
-                for(Int_t j=0; j<BSMDSIZE; j++)
-                    RAW->setData(bank,j,smd.SMDADCArray[i][j]);
-            }
-        }
-        /////////////////////////////////////////////////////////////////////
-        // read Pre Shower data for Y2004 AuAu data. This year, the PSD data
-        // is read as SMD data for fibers 4 and 5.
-        //
-        // For y2005 data, PSD data is on SMD banks 8 to 12
-        //
-        // This is a temporary solution while the PSD data format is not
-        // decided by Tonko. He needs to have a decision on some
-        // hardware issues before the data format is decided
-        //
-        // AAPSUAIDE 20040318
-        //
-        if(mDate>20040101)
-        {
-            for(Int_t RDO = 0; RDO<4; RDO++)
-            {
-                Int_t SMDRDO = RDO+NSMD;
-                if(smd.HasData[SMDRDO]==1)
-                {
-                    Int_t bank = RDO+BPRSOFFSET;
-                    if(RAW->header(bank))
-                        RAW->deleteBank(bank);
-                    RAW->createBank(bank,BPRSHEADER,BPRSSIZE);
-                    for(Int_t i = 0; i<BPRSHEADER;  i++)
-                        RAW->setHeader(bank,i,smd.SmdHeader[SMDRDO][i]);
-                    for(Int_t i = 0; i<BPRSSIZE; i++)
-                        RAW->setData(bank,i,smd.SMDADCArray[SMDRDO][i]);
-                }
-            }
-        }
-        /////////////////////////////////////////////////////////////////////
-    }
-    return kTRUE;
-}
 void StBemcRaw::checkHeaders(StEmcRawData* RAW)
 {
     for(Int_t det=1;det<=MAXDETBARREL; det++)
@@ -601,7 +587,7 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
         CRATE = RDO+1;
         if(S==1 && RAW->header(RDO+BSMDOFFSET) && RDO>=0 && RDO<MAXSMDCRATES)
         {
-            CAP = RAW->header(RDO+BSMDOFFSET,SMDCAPACITOR);
+            CAP = RAW->header(RDO+BSMDOFFSET,0);
             while(CAP>127)
                 CAP-=128;
             return RAW->data(RDO+BSMDOFFSET,index);

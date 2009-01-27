@@ -18,6 +18,7 @@ class StEEmcDbMaker;
 class StEEMCReader ;
 class TH1F;
 class StEvent;
+class StEmcRawMaker;
 
 class StEemcRaw :  public TObject
 {
@@ -26,6 +27,8 @@ private:
     StEEmcDbMaker *mDb;
     TH1F *hs[8];
     Bool_t   copyRawData(StEEMCReader *eeReader, StEmcRawData *raw);
+    Bool_t copyRawData(StEmcRawMaker* maker, StEmcRawData *raw);
+    Bool_t headersAreSick(StEmcRawMaker* maker, StEmcRawData *raw, int token, int runId);
     Bool_t   headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, int token, int runId);
     Bool_t   towerDataAreSick(StEmcRawData* raw);
     void     raw2pixels(StEvent* mEvent);
@@ -35,6 +38,7 @@ public:
     StEemcRaw();
     ~StEemcRaw();
     Bool_t make(StEEMCReader *eeReader,StEvent* mEvent);
+    Bool_t make(StEmcRawMaker* maker, StEvent* mEvent);
     void initHisto();
 
     void setDb(StEEmcDbMaker *aa)
@@ -47,10 +51,13 @@ public:
 
 #endif
 
-// $Id: StEemcRaw.h,v 1.5 2008/01/10 20:49:59 balewski Exp $
+// $Id: StEemcRaw.h,v 1.6 2009/01/27 19:58:36 mattheww Exp $
 
 /*
  * $Log: StEemcRaw.h,v $
+ * Revision 1.6  2009/01/27 19:58:36  mattheww
+ * Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
+ *
  * Revision 1.5  2008/01/10 20:49:59  balewski
  * now more warnings if ESMD is not in the run, thanks Pibero
  *

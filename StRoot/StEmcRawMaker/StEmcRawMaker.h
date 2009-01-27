@@ -1,4 +1,4 @@
-// $Id: StEmcRawMaker.h,v 1.7 2008/03/27 19:54:16 genevb Exp $
+// $Id: StEmcRawMaker.h,v 1.8 2009/01/27 19:58:36 mattheww Exp $
 
 /*!\class StEmcRawMaker
 \author Alexandre A. P. Suaide
@@ -44,6 +44,7 @@ would set CheckStatus to 0 for BTOW+BSMD+BPSD, and CutOffType to
 #define STAR_StEmcRawMaker
 
 #include "StMaker.h"
+#include "StRTSBaseMaker.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "tables/St_controlADCtoE_Table.h"
@@ -59,7 +60,7 @@ class StEvent;
 class StEEmcDbMaker;
 class StEemcRaw;
 
-class StEmcRawMaker : public StMaker
+class StEmcRawMaker : public StRTSBaseMaker
 {
 protected:
     StEvent*                 mEvent;
@@ -80,6 +81,17 @@ public:
     virtual Int_t             Make(); ///< Process each event
     virtual Int_t             Finish(); ///< Finish function.
 
+    StRtsTable* Dta()
+      {
+	return DaqDta();
+      }
+
+    StRtsTable* GetDaqElement(const char *elementPath)
+      {
+	return GetNextDaqElement(elementPath);
+      }
+
+
     StBemcRaw*                getBemcRaw()
     {
         return mBemcRaw;
@@ -88,7 +100,7 @@ public:
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.7 2008/03/27 19:54:16 genevb Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.8 2009/01/27 19:58:36 mattheww Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -98,6 +110,9 @@ public:
 #endif
 
 // $Log: StEmcRawMaker.h,v $
+// Revision 1.8  2009/01/27 19:58:36  mattheww
+// Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
+//
 // Revision 1.7  2008/03/27 19:54:16  genevb
 // Utilize new BFC option for GoptEMC for controlADCtoE table
 //

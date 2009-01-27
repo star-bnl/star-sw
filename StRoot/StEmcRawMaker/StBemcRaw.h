@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.12 2008/10/24 18:19:07 mattheww Exp $
+// $Id: StBemcRaw.h,v 1.13 2009/01/27 19:58:36 mattheww Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.13  2009/01/27 19:58:36  mattheww
+// Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
+//
 // Revision 1.12  2008/10/24 18:19:07  mattheww
 // Added option to throw out all hits in an event if any crates are corrupted
 //
@@ -63,9 +66,11 @@ bemcRawData is also filled in the StEmcCollection.
 #include "tables/St_controlADCtoE_Table.h"
 #include "defines.h"
 #include "TH2.h"
+#include "StChain/StRTSBaseMaker.h"
 class StEvent;
 class StEmcRawData;
 class StEmcCollection;
+class StEmcRawMaker;
 
 class StBemcRaw : public TObject
 {
@@ -115,9 +120,13 @@ public:
     void                      initQAHisto();
     void                      fillHisto();
 
-    Bool_t                    make(TDataSet*,StEvent*); ///< Make the BEMC detector from DAQ
+    Bool_t make(StEmcRawMaker * TheData, StEvent* event);
+    Bool_t convertFromDaq(StEmcRawMaker * DAQ, StEmcRawData* RAW);
+    //make(TDataSet*,StEvent*)made obsolete in 2009 with new DAQ format
+    //Bool_t                    make(TDataSet*,StEvent*); ///< Make the BEMC detector from DAQ
     Bool_t                    make(StEmcRawData*,StEvent*); ///< Make the BEMC detector from StEmcRaw
-    Bool_t                    convertFromDaq(TDataSet*, StEmcRawData*); ///< Convert DAQ format into StEmcRawData format
+    //convertFromDaq(TDataSet*,StEmcRawData*)made obsolete in 2009 with new DAQ format
+    //Bool_t                    convertFromDaq(TDataSet*, StEmcRawData*); ///< Convert DAQ format into StEmcRawData format
     Int_t                     getBemcADCRaw(Int_t, Int_t, StEmcRawData*, Int_t&, Int_t&); ///< get ADC from StEmcRawData structure
     void                      checkHeaders(StEmcRawData*);///<Check all BEMC detector headers
     void                      checkBtowCrates(StEmcRawData*); ///< check tower crates
