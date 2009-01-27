@@ -601,7 +601,7 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   // EEMC
   if(i>=10 && i<=12 ) {
     //    printf("\n\n EEMC display i=%d j=%d\n\n",i,j);
-        eePlot(i,j,gFile, gcc, gEnv->GetValue("OnLine.eemcMask","eemcTwMask.dat"));
+        eePlot(i,j,gFile, gcc, gEnv->GetValue("Online.eemcMask","eemcTwMask.dat"));
 	goto ret;
   }
   
@@ -937,7 +937,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.2 2009/01/23 22:26:35 jeromel Exp $
+ * $Id: EvpUtil.cxx,v 1.3 2009/01/27 20:40:27 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -947,6 +947,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.3  2009/01/27 20:40:27  genevb
+ * Unified environment variable Online.*
+ *
  * Revision 1.2  2009/01/23 22:26:35  jeromel
  * Change config file location
  *
