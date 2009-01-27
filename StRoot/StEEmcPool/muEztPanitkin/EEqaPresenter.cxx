@@ -13,8 +13,8 @@
 #include <TMath.h>
 
 const int mxh=64;
-static TH1 *hr[mxh];
-static TH1 *h[mxh];
+static TH1 *hr[mxh] = {0};
+static TH1 *h[mxh] = {0};
 static  TList *hCleanUp=new TList;
 
 
@@ -38,9 +38,9 @@ void eePlotInit() {
 //--------------------------------------
 void GetHisto(FileType &fd,char *name, int i) {
   // this is very silly trick to avoid memory leak in the online version
-
+    hr[i] = 0;
+    h[i] = 0;
     hr[i]=(TH1 *)fd.Get(name,hr[i]);
-
     if(hr[i]==0) return;
     h[i]=(TH1*) hr[i]->Clone();
     hCleanUp->Add(h[i]);
@@ -168,6 +168,7 @@ void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
       sprintf(tit,"cr%dHot",cr);
       GetHisto(fd,tit,4+cr);
       TH1F * hx=( TH1F *)h[4+cr];    
+      if (!hx) continue;
       if(hx->Integral()<=50 ) continue;
       if(hx->GetRMS()<=2.)    continue;
       hx->Fit("pol0","0Q");
@@ -241,9 +242,10 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
     c2->Draw();  c2->cd();
     i=4;
     GetHisto(fd,name[i],i);
-    h[i]->Draw(); 
-    if(h[i]->Integral()>0 ) gPad->SetLogy();
- 
+    if (h[i]) {
+	h[i]->Draw(); 
+	if(h[i]->Integral()>0 ) gPad->SetLogy();
+    }
   }
 
 
@@ -256,8 +258,10 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
   c3->cd();
   i=6;
   GetHisto(fd,name[i],i);
-  h[i]->Draw(); gPad->SetGridx();
-
+  if (h[i]) {
+    h[i]->Draw();
+    gPad->SetGridx();
+  }
 }
 
 
@@ -274,13 +278,15 @@ void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m) {
   for(i=0;i<6;i++) {
     sprintf(tit,"cr%d",i+1);
     GetHisto(fd,tit,i);
-    c->cd(i+1);
-    gPad->SetLogz(0);
-    h[i]->Draw("colz"); 
-    h[i]->SetAxisRange(0,500);
-    if(h[i]->Integral()>0 )gPad->SetLogz();
-    TGraphErrors *gr=  m->crG2+i;
-    if(gr->GetN()>0) gr->Draw("P");
+    if (h[i]) {
+	c->cd(i+1);
+	gPad->SetLogz(0);
+	h[i]->Draw("colz"); 
+	h[i]->SetAxisRange(0,500);
+	if(h[i]->Integral()>0 )gPad->SetLogz();
+	TGraphErrors *gr=  m->crG2+i;
+	if(gr->GetN()>0) gr->Draw("P");
+    }
   }
 
 }
@@ -324,10 +330,12 @@ void eeDaqTwHit(FileType fd, TPad *c) {
   
   for(i=0;i<nh;i++) {
     GetHisto(fd,name[i],i);
-    c->cd(1+i);
-    gPad->SetLogy(0);
-    h[i]->Draw();
-    if(h[i]->Integral()>0 ) gPad->SetLogy();
+    if (h[i]) {
+	c->cd(1+i);
+	gPad->SetLogy(0);
+	h[i]->Draw();
+	if(h[i]->Integral()>0 ) gPad->SetLogy();
+    }
   }
 }
 
@@ -344,11 +352,12 @@ void eeMany1D(FileType fd, TPad *c, char *core, int nh, int nx, int ny) {
   for(i=0;i<nh;i++) {
     sprintf(tit,"%s%d",core,i+1);
     GetHisto(fd,tit,i);
-
-    c->cd(i+1);
-    h[i]->Draw();
-    gPad->SetLogy(0);    
-    if (h[i]->Integral()>0 && linLog==1) gPad->SetLogy();
+    if (h[i]) {
+        c->cd(i+1);
+	h[i]->Draw();
+        gPad->SetLogy(0);    
+	if (h[i]->Integral()>0 && linLog==1) gPad->SetLogy();
+    }
   }
 }
 
@@ -367,23 +376,22 @@ void eeDaqTwHot(FileType fd, TPad *c, EemcTwMask *m) {
   for(i=0;i<ncr;i++) {
     sprintf(tit,"cr%dHot",i+1);
     GetHisto(fd,tit,i);
-
-    c->cd(i+1);
-    gPad->SetLogy(0);
-    gPad->SetGridx();
-    h[i]->Draw("b");
-    
-    TH1F * hx=( TH1F *)h[i];    
-    if(hx->Integral()<=10 ) continue;
-    if(hx->GetRMS()<=2.)    continue;
-    if(hx->Integral()>1) gPad->SetLogy();
-    hx->Fit("pol0");
-    TF1 * ff=hx->GetFunction("pol0");
-    float yM=ff->GetParameter(0);
-    if(ymax<yM) ymax=yM;
-
-    TGraph *gr=  m->crG+i;
-    if(gr->GetN()>0) gr->Draw("P");
+    if (h[i]) {
+	c->cd(i+1);
+	gPad->SetLogy(0);
+	gPad->SetGridx();
+	h[i]->Draw("b");
+	TH1F * hx=( TH1F *)h[i];    
+	if(hx->Integral()<=10 ) continue;
+	if(hx->GetRMS()<=2.)    continue;
+	if(hx->Integral()>1) gPad->SetLogy();
+	hx->Fit("pol0");
+	TF1 * ff=hx->GetFunction("pol0");
+	float yM=ff->GetParameter(0);
+	if(ymax<yM) ymax=yM;
+	TGraph *gr=  m->crG+i;
+	if(gr->GetN()>0) gr->Draw("P");
+    }
  }
 
   int j;
@@ -406,12 +414,13 @@ void eeDaqMapmtCr(FileType fd, TPad *c,int cr1) {
     int i=cr-cr1;
     sprintf(tit,"cr%d",cr);
     GetHisto(fd,tit,i);
-    c->cd(cr-cr1+1);
-    gPad->SetLogz(0);
-
-    h[i]->Draw("colz"); 
-    h[i]->SetAxisRange(0,1000);
-    if(h[i]->Integral()>0 ) gPad->SetLogz();
+    if (h[i]) {
+	c->cd(cr-cr1+1);
+	gPad->SetLogz(0);
+	h[i]->Draw("colz"); 
+	h[i]->SetAxisRange(0,1000);
+	if(h[i]->Integral()>0 ) gPad->SetLogz();
+    }
   }
 
 }
@@ -486,11 +495,12 @@ void eeTrigHanks(FileType fd, TPad *c ) {
   for(i=0;i<2;i++) {
     GetHisto(fd,name[i],i);
     // printf("aaa%d %s %p\n",i,name[i],h[i]);
-    c->cd(1+i);
-    gPad->SetLogz(0);
-
-    h[i]->Draw("colz");
-    if( h[i]->Integral()>0 ) gPad->SetLogz();
+    if (h[i]) {
+	c->cd(1+i);
+	gPad->SetLogz(0);
+	h[i]->Draw("colz");
+	if( h[i]->Integral()>0 ) gPad->SetLogz();
+    }
   }
 
 }
@@ -509,11 +519,13 @@ void eeTrigDsm0(FileType fd, TPad *c, char *mode ) {
     sprintf(tit,"dsm0inJP%d_%s",j+1,mode);
     c->cd(j+1);
     GetHisto(fd,tit,j);
-    gPad->SetLogz(0);
-    h[j]->Draw("colz");
-    if(ymax<h[j]->GetMaximum()) ymax=h[j]->GetMaximum();
+    if (h[j]) {
+	gPad->SetLogz(0);
+	h[j]->Draw("colz");
+	if(ymax<h[j]->GetMaximum()) ymax=h[j]->GetMaximum();
 
-    if ( h[j]->Integral()>0 ) gPad->SetLogz();
+	if ( h[j]->Integral()>0 ) gPad->SetLogz();
+    }
   }
   
   for(j=0;j<6;j++) {
@@ -540,13 +552,15 @@ void eeTrigDsm1(FileType fd, TPad *c, char *mode ) {
 
     sprintf(tit,"%s%d_%s",core,j+1,mode);
     GetHisto(fd,tit,j);
-    c->cd(j+1);
-    h[j]->Draw("colz");
-    gPad->SetLogz(0);
-    if(ymax<h[j]->GetMaximum()) ymax=h[j]->GetMaximum();
+    if (h[j]) {
+	c->cd(j+1);
+	h[j]->Draw("colz");
+	gPad->SetLogz(0);
+	if(ymax<h[j]->GetMaximum()) ymax=h[j]->GetMaximum();
 
-    if ( h[j]->Integral()>0 ) gPad->SetLogz();
-    if(mode[0]=='H') gPad->SetGridx();
+	if ( h[j]->Integral()>0 ) gPad->SetLogz();
+	if(mode[0]=='H') gPad->SetGridx();
+    }
  }
 
 
@@ -566,11 +580,13 @@ void eeTrigDsm2HT(FileType fd, TPad *c ) {
   int i;
   for(i=0;i<3;i++) {
     GetHisto(fd,name[i],i);
-    c->cd(1+i);
-    gPad->SetLogz(0);
+    if (h[i]) {
+	c->cd(1+i);
+	gPad->SetLogz(0);
 
-    h[i]->Draw("colz");
-    if( h[i]->Integral()>0 ) gPad->SetLogz();
+	h[i]->Draw("colz");
+	if( h[i]->Integral()>0 ) gPad->SetLogz();
+    }
   }
 
 }
@@ -592,17 +608,19 @@ void eeTrigJPsum(FileType fd, TPad *c, char *mode ) {
     sprintf(tit,"%s%d%s",core,j+1,mode);
     //printf("%s %d\n",tit,j);
     GetHisto(fd,tit,j); 
-    c->cd(j+1);
-    int maxbin=h[j]->GetMaximumBin()-1;
-    //printf("max bin = %d\n",maxbin);
-    const char *title=h[j]->GetTitle();
-    sprintf(newtitle,"%s    ped= %d\n",title,maxbin);
-    //printf("%s",newtitle);
-    h[j]->SetTitle(newtitle);
-    gPad->SetLogy(0);
-    h[j]->GetXaxis()->SetRange(1,200); //for p-p commnet out and use full range for Au-Au
-    h[j]->Draw();
-    if(h[j]->Integral()>0 ) gPad->SetLogy();
+    if (h[j]) {
+	c->cd(j+1);
+	int maxbin=h[j]->GetMaximumBin()-1;
+	//printf("max bin = %d\n",maxbin);
+	const char *title=h[j]->GetTitle();
+	sprintf(newtitle,"%s    ped= %d\n",title,maxbin);
+	//printf("%s",newtitle);
+	h[j]->SetTitle(newtitle);
+        gPad->SetLogy(0);
+	h[j]->GetXaxis()->SetRange(1,200); //for p-p commnet out and use full range for Au-Au
+	h[j]->Draw();
+	if(h[j]->Integral()>0 ) gPad->SetLogy();
+    }
   }
   
 }
@@ -621,24 +639,28 @@ void eeTrigJPfreq(FileType fd, TPad *c) {
     sprintf(tit,"%s%d",core,j);
     //printf("%s %d\n",tit,j);
     GetHisto(fd,tit,j); 
-    //printf("h=%p\n",h[j]);
-    c->cd(j+1);
-    h[j]->Draw();
-    h[j]->SetMinimum(0.);
+    if (h[j]) {
+	//printf("h=%p\n",h[j]);
+	c->cd(j+1);
+        h[j]->Draw();
+	h[j]->SetMinimum(0.);
+    }
   }
 
 
   for(j=0;j<2;j++) { 
     sprintf(tit,"dsm2Half%d_Etot",j+1);
     GetHisto(fd,tit,j); 
-    c->cd(j+5);
-    h[j]->Draw();
+    if (h[j]) {
+	c->cd(j+5);
+	h[j]->Draw();
+    }
   }
 
 #if 0 // out 2006+
   GetHisto(fd,"JPadjTh",5); 
   c->cd(5);
-  h[5]->Draw();
+  if (h[5]) h[5]->Draw();
 #endif
   
 }
@@ -657,11 +679,13 @@ void  eeTrigAdjJPsum(FileType fd, TPad *c, char *mode ) {
     sprintf(tit,"%s%d%d%s",core,j+1,((j+1)%6)+1,mode);
     //printf("%s %d\n",tit,j);
     GetHisto(fd,tit,j); 
-    c->cd(j+1);
-    gPad->SetLogy(0);
-    // h[j]->GetXaxis()->SetRange(19,69); //for p-p commnet out and use full range for Au-Au
-    h[j]->Draw();
-    if(h[j]->Integral()>0 ) gPad->SetLogy();
+    if (h[j]) {
+	c->cd(j+1);
+	gPad->SetLogy(0);
+	// h[j]->GetXaxis()->SetRange(19,69); //for p-p commnet out and use full range for Au-Au
+	h[j]->Draw();
+	if(h[j]->Integral()>0 ) gPad->SetLogy();
+    }
   }
   
 }
@@ -684,13 +708,15 @@ void eeTrigEtot(FileType fd, TPad *c ) {
     for(ii=0;ii<=1;ii++) {  
       sprintf(name,"%s%d",nameA[i],ii);
       GetHisto(fd,name,k);
-      if(ii==0 ) {
-	h[k]->Draw();
-	TString tt=h[k]->GetTitle();
-	tt+="  COLORS:   bit=0 BLUE , bit=1 RED";
-	h[k]->SetTitle(tt);
-      } else h[k]->Draw("same");
-      if( ii==0&&h[k]->Integral()>0 ) gPad->SetLogy();
+      if (h[k]) {
+	if(ii==0 ) {
+	    h[k]->Draw();
+	    TString tt=h[k]->GetTitle();
+	    tt+="  COLORS:   bit=0 BLUE , bit=1 RED";
+	    h[k]->SetTitle(tt);
+        } else h[k]->Draw("same");
+        if( ii==0&&h[k]->Integral()>0 ) gPad->SetLogy();
+      }
       k++;
     }
   }
@@ -724,10 +750,12 @@ void  eeTrigAdjJPcor(FileType fd, TPad *c, char *mode ) {
     sprintf(tit,"%s%d%d%s",core,j+1,((j+1)%6)+1,mode);
     //printf("%s %d\n",tit,j);
     GetHisto(fd,tit,j); 
-    c->cd(j+1);
-    gPad->SetLogz(0);
-    h[j]->Draw("colz");
-    if ( h[j]->Integral()>0) gPad->SetLogz();
+    if (h[j]) {
+	c->cd(j+1);
+	gPad->SetLogz(0);
+	h[j]->Draw("colz");
+	if ( h[j]->Integral()>0) gPad->SetLogz();
+    }
   }
   
 }
