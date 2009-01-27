@@ -10,7 +10,7 @@ struct pp2pp_t {
 	u_char seq_id ;		// 1..4 ;
 	u_char chain_id ;	// 1..4 ;
 	u_char svx_id ;		// 1..8 ;
-	u_char reserved ;	// for padding...
+	u_char error ;		// error occured!
 
 	u_char adc[PP2PP_SVX_CH] ;	
 } ;
@@ -27,6 +27,8 @@ private:
 	static const int MAX_RDO = 4 ;	// can be 0 for all RDOs; sequencers, typically 4
 
 	static const char *help_string ;
+
+	int decode(int sec_id, char *raw, int bytes) ;
 protected:
 
 
