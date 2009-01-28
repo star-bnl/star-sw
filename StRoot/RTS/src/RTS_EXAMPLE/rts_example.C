@@ -195,8 +195,9 @@ int main(int argc, char *argv[])
 		if(pp2pp_doer(evp,print_det)) LOG(INFO,"PP2PP found") ;
 
 		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
+#ifdef INSIST_ON_EMC_PSEUDO
 		if(emc_pseudo_doer(evp,print_det)) LOG(INFO,"EMC found (any detector)") ;
-		
+#endif
 
 	}
 
