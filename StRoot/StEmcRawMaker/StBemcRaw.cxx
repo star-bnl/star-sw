@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.30 2009/01/27 19:58:36 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.31 2009/01/28 15:42:44 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.31  2009/01/28 15:42:44  mattheww
+// Put back some obsolete methods to satisfy StBemcData
+//
 // Revision 1.30  2009/01/27 19:58:36  mattheww
 // Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
 //
@@ -795,4 +798,152 @@ void StBemcRaw::setCrateVeto(Int_t flag)
     return;
   }
   mCrateVeto = flag;
+}
+Bool_t StBemcRaw::make(TDataSet* TheData, StEvent* event)
+{
+  LOG_WARN<<"StBemcRaw::make(TDataSet*,StEvent*) is OBSOLETE for data in Run 9 or later"<<endm;
+    if(!TheData)
+        return kFALSE;
+    if(!event)
+        return kFALSE;
+    StEmcCollection* emc = event->emcCollection();
+    if(!emc)
+        return kFALSE;
+    StEmcRawData *bemcRaw = emc->bemcRawData();
+    if(!bemcRaw)
+        return kFALSE;
+    if(!convertFromDaq(TheData,bemcRaw))
+        return kFALSE;
+    return make(bemcRaw,event);
+}
+Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
+{
+  LOG_WARN<<"StBemcRaw::convertFromDaq(TDataSet*,StEmcRawData*) is OBSOLETE for data in Run 9 or later"<<endm; 
+    if(!DAQ)
+    {
+        LOG_ERROR <<"Could not find DAQ DataSet "<<endm;
+        return kFALSE;
+    }
+    if(!RAW)
+    {
+                LOG_ERROR <<"Could not find StEmcRawData pointer for BEMC"<<endm;
+        return kFALSE;
+    }
+
+    StDAQReader* TheDataReader=(StDAQReader*)(DAQ->GetObject());
+    if(!TheDataReader || !TheDataReader->EMCPresent())
+    {
+        LOG_ERROR <<"Data Reader is not present "<<endm;
+        return kFALSE;
+    }
+
+    StEMCReader* TheEmcReader=TheDataReader->getEMCReader();
+    if(!TheEmcReader)
+    {
+        LOG_ERROR <<"Could not find BEMC Reader "<<endm;
+        return kFALSE;
+    }
+
+    EMC_Reader* reader = TheEmcReader->getBemcReader();
+    if(!reader)
+    {
+        LOG_ERROR <<"Could not find Barrel Reader "<<endm;
+        return kFALSE;
+    }
+
+  for(int i = 1; i <= 4800; i++){
+    int daqid,tdc,crate,seq;
+    mDecoder->GetDaqIdFromTowerId(i,daqid);
+    mDecoder->GetTDCFromTowerId(i,tdc);
+    mDecoder->GetCrateFromTowerId(i,crate,seq);
+    cout<<"bgrdl "<<i<<" "<<daqid<<" "<<tdc<<" "<<crate<<" "<<seq<<endl;
+  }
+
+    if(reader->isTowerPresent())
+    {
+        Bank_BTOWERADCR& tower = reader->getBTOWERADCR();
+        if(RAW->header(BTOWBANK))
+            RAW->deleteBank(BTOWBANK);
+        RAW->createBank(0,BTOWHEADER,BTOWSIZE);
+        for(Int_t i = 0; i<BTOWSIZE ;i++){
+          int crate,sequence,tdc;
+          int id;
+          mDecoder->GetTowerIdFromDaqId(i,id);
+          mDecoder->GetCrateFromTowerId(id,crate,sequence);
+          mDecoder->GetTDCFromTowerId(id,tdc);
+            RAW->setData(BTOWBANK,i,tower.TowerADCArray[i]);
+            printf("agrdl: BTOW ADC %d %d %d %d\n",tdc,sequence,id,tower.TowerADCArray[i]);
+        }
+        for(Int_t i = 0; i<BTOWHEADER  ;i++){
+            RAW->setHeader(BTOWBANK,i,tower.TDCHeader[i]);
+            printf("agrdl: BTOW HEAD %d %d\n",i,tower.TDCHeader[i]);
+        }
+    }
+    // smd data
+    if(reader->isSmdPresent())
+    {
+        Bank_BSMDADCR& smd =  reader->getSMD_ADCR();
+        Int_t NSMD = MAXSMDCRATES;
+        // there is only 4 SMD Crates before that data and some
+        // of them are PSD crates. For Y2004 AuAu runs PSD do
+        // not have its own data format and it is being read as
+        // SMD
+        if(mDate<20040701)
+            NSMD = 4;
+
+        for(Int_t i = 0; i<NSMD; i++)
+        {
+            if(smd.HasData[i]==1)
+            {
+                Int_t bank = i+BSMDOFFSET;
+                if(RAW->header(bank))
+                    RAW->deleteBank(bank);
+                RAW->createBank(bank,BSMDHEADER,BSMDSIZE);
+                for(Int_t j=0; j<BSMDHEADER;  j++)
+                    RAW->setHeader(bank,j,smd.SmdHeader[i][j]);
+                    int CAP = RAW->header(bank,SMDCAPACITOR);
+                    printf("agrdl: BSMD %d CAP %d\n",bank,CAP);
+                for(Int_t j=0; j<BSMDSIZE; j++){
+                    RAW->setData(bank,j,smd.SMDADCArray[i][j]);
+                    printf("agrdl: BSMD ADC %d %d %d\n",bank,j,smd.SMDADCArray[i][j]);
+                }
+            }
+        }
+        /////////////////////////////////////////////////////////////////////
+        // read Pre Shower data for Y2004 AuAu data. This year, the PSD data
+        // is read as SMD data for fibers 4 and 5.
+        //
+        // For y2005 data, PSD data is on SMD banks 8 to 12
+        //
+        // This is a temporary solution while the PSD data format is not
+        // decided by Tonko. He needs to have a decision on some
+        // hardware issues before the data format is decided
+        //
+        // AAPSUAIDE 20040318
+        //
+        if(mDate>20040101)
+        {
+            for(Int_t RDO = 0; RDO<4; RDO++)
+            {
+                Int_t SMDRDO = RDO+NSMD;
+                if(smd.HasData[SMDRDO]==1)
+                {
+                    Int_t bank = RDO+BPRSOFFSET;
+                    if(RAW->header(bank))
+                        RAW->deleteBank(bank);
+                    RAW->createBank(bank,BPRSHEADER,BPRSSIZE);
+                    for(Int_t i = 0; i<BPRSHEADER;  i++)
+                        RAW->setHeader(bank,i,smd.SmdHeader[SMDRDO][i]);
+                    int CAP = RAW->header(bank,SMDCAPACITOR);
+                    printf("agrdl: BSMD %d CAP %d\n",bank,CAP);
+                    for(Int_t i = 0; i<BPRSSIZE; i++){
+                        RAW->setData(bank,i,smd.SMDADCArray[SMDRDO][i]);
+                        printf("agrdl: BSMD ADC %d %d %d\n",bank,i,smd.SMDADCArray[SMDRDO][i]);
+                    }
+                }
+            }
+        }
+        /////////////////////////////////////////////////////////////////////
+    }
+    return kTRUE;
 }
