@@ -84,7 +84,11 @@ daq_dta *daq_emc::handle_legacy()
 	daq_dta *dd ;
 	int found_some = 0 ;
 
-	// I need one object of emc_t type but let the create decide on the necessary size
+	// I need one object of emc_t type.
+	// It's ugly that I need to allocate memory before I know
+	// if the detectors are present but it would just get too
+	// ugly otherwise
+
 	legacy->create(1,"emc_t",rts_id,DAQ_DTA_STRUCT(emc_t)) ;
 
 	emc_t *emc_p = (emc_t *) legacy->request(1) ;	// need ONE emc_t object
