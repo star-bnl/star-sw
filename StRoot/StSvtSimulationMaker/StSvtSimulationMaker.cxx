@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.40 2009/01/22 23:19:21 fine Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.41 2009/01/28 23:03:42 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.41  2009/01/28 23:03:42  fisyak
+ * Fix wafId
+ *
  * Revision 1.40  2009/01/22 23:19:21  fine
  * Prptection against fo the crash
  *
@@ -560,6 +563,10 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
   StThreeVector<double> x;
   // Find wafer geometry of wafer track passed through in Ideal Geom
   int index = mSvtGeom->getWaferIndex(*wafId);
+  if (index < 0) {
+    LOG_DEBUG << "StSvtSimulationMaker::ideal2RealTranslation: illegal wafId = " << *wafId << endl;
+    return kStSkip;
+  }
   //cout << "pos going in : " << *pos << endl;
 
   // Get normal and center position of the REAL wafer geom
@@ -620,7 +627,7 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
 	pos->setY(x.y());
 	pos->setZ(x.z());
 	globalCor.setPosition(*pos);  
-	*wafId = 1000*mConfig->getLayer(index) + 100*iladder + iwaf;
+	*wafId = 1000*mConfig->getLayer(index) + 100*iwaf + iladder;
 	if( mCoordTransform->IsOnWaferZ(*pos,*wafId) && mCoordTransform->IsOnWaferR(*pos,*wafId)){
 	  //cout << " Coming out " << *pos << endl;
 	  x = tHelix.momentumAt(s,mBField);
@@ -655,7 +662,7 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
 	pos->setY(x.y());
 	pos->setZ(x.z());
 	globalCor.setPosition(*pos);  
-	*wafId = 1000*mConfig->getLayer(index) + 100*iladder + iwaf;
+	*wafId = 1000*mConfig->getLayer(index) + 100*iwaf + iladder;
 	if( mCoordTransform->IsOnWaferZ(*pos,*wafId) && 
 	    mCoordTransform->IsOnWaferR(*pos,*wafId)){
 	  //cout << " Coming out " << *pos << endl;
