@@ -18,7 +18,7 @@ cat >.rootrc <<__ROOTRC__
 
 Online.eemcMask:  /home_local/eemc/defaultPanitkinSetup/eemcTwMask.dat
 Online.eemcDbDump:  /home_local/eemc/defaultPanitkinSetup/eemcDbDump.dat
-Online.eemcPathIn:  /home_local/eemc/defaultPanitkinSetup
+Online.eemcPathIn:  /home_local/eemc/defaultPanitkinSetup/
 Online.eemcPathOut:  /onlineweb/www/eemc2005pplot
 Online.bemcStatus:  /home_local/bemc/bemcStatus.txt
 Online.InputPath:    /a
@@ -54,7 +54,7 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
   gSystem->Load("libGQt.so");
   gSystem->Load("StDaqLib"); 
   gSystem->Load("OnlinePlots");
-  //gSystem->Load("StDbLib");
+  gSystem->Load("StDbLib");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StStrangeMuDstMaker");
@@ -105,7 +105,7 @@ echo "Do not forget to check/set the ONLINEPLOTSDIR environment variable properl
 echo "For example:"
 echo "setenv ONLINEPLOTSDIR `pwd`/OnlTools/OnlinePlots/"
 echo "-----------------------"
-echo "Use: rootn.exe EvpPlotServer.C"
+echo "Use: root4starN -q EvpPlotServer.C"
 echo "-------------------------------"
 
 setenv ONLINEPLOTSDIR `pwd`/OnlTools/OnlinePlots/
