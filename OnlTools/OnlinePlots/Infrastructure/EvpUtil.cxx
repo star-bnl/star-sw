@@ -606,8 +606,8 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   }
   
   // BEMC
-  if (i == 16) {
-    BEMCPlotsPresenter::displayTab(0, j - 1, gFile, gcc, 0);
+  if (i == 5) {
+    BEMCPlotsPresenter::displayTab(i - 5, j - 1, gFile, gcc, 0);
     goto ret;
     
   }
@@ -937,7 +937,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.3 2009/01/27 20:40:27 genevb Exp $
+ * $Id: EvpUtil.cxx,v 1.4 2009/01/29 20:32:28 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -947,6 +947,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.4  2009/01/29 20:32:28  dkettler
+ * BEMC changes
+ *
  * Revision 1.3  2009/01/27 20:40:27  genevb
  * Unified environment variable Online.*
  *
