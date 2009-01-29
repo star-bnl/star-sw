@@ -4,6 +4,7 @@
 #include "PresenterGui.h"
 #include "EvpUtil.h"
 #include "ServerStatus.h"
+#include "TQtRootSlot.h"
 
 //#include "StRoot/StEEmcPool/muEztPanitkin/EEqaPresenter.h"
 #include "EvpPresenter.h"
@@ -76,7 +77,8 @@ PresenterGui::PresenterGui() :
 
   // Create test main frame. A QMainFrame is a top level window.
 
-  connect(qApp,SIGNAL(lastWindowClosed () ), qApp, SLOT(quit ()) );
+//  connect(qApp,SIGNAL(lastWindowClosed () ), qApp, SLOT(quit ()) );
+  connect(qApp,SIGNAL(lastWindowClosed()),TQtRootSlot::CintSlot(),SLOT(TerminateAndQuit()));
 
   setUsesTextLabel(true); // use the text labels for the tool bar buttons
   
@@ -401,8 +403,8 @@ void PresenterGui::SetDefaults()
 //----------------------------------------------------------------
 void PresenterGui::CloseWindow()
 {
-
-  gApplication->Terminate(0);
+    qApp->closeAllWindows();
+//  gApplication->Terminate(0);
 }
 //----------------------------------------------------------------
 void PresenterGui::DefineLayouts()
@@ -744,7 +746,7 @@ void  PresenterGui::onlPrinter2()
 //______________________________________________________________________________
 void  PresenterGui::QuitCB()
 {
-  qApp->quit();
+   qApp->closeAllWindows();
 }
 //______________________________________________________________________________
 void  PresenterGui::AboutCB()
