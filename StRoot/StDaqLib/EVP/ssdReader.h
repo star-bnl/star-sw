@@ -16,7 +16,7 @@
 
 
 */
-
+namespace  OLDEVP {
 struct ssd_t {
         ssd_t();
  void   reset();
@@ -45,8 +45,8 @@ struct ssd_t {
 	u_char *raw[4][2] ;
         int fenceZ;
 
-} ;
-namespace  OLDEVP {
+};
+
 extern struct ssd_t ssd ;
 
 extern int ssdReader(char *mem) ;
