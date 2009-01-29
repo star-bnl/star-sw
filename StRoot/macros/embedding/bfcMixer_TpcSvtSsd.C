@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.2 2008/07/30 15:02:21 lbarnby Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.3 2009/01/29 21:12:38 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -21,15 +21,16 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsdIn=1
 		    const Double_t eta_low=-1.0,
 		    const Double_t eta_high=1.0,
 		    const Int_t pid=9,
-		    const Double_t mult = 0.1) {
+		    const Double_t mult = 100.) {
   // production chain for P07ib
   TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF ToF spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 ssd_daq");// KeepSvtHit hitfilt skip1row");
-  TString geomP07ib("ry2005f");
+  TString prodP08if("B2007g DbV20080418 MakeEvent ITTF ToF spt SsdIt SvtIt pmdRaw SCEbyE  OShortR trgd Corr5 OSpaceZ2 ssd_daq KeepSvtHit hitfilt VFMCE");// KeepSvtHit hitfilt skip1row");
+  TString geomP07ib("ry2007g");
   TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput");
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geomP07ib;
-  TString chain3Opt = prodP07ib;
-  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker"; 
+  TString chain3Opt = prodP08if;
+  chain3Opt += " Embedding onlraw GeantOut McAna IdTruth -in NoInput,useInTracker"; 
   if (isSvtIn) chain3Opt += " SvtEmbed";
   if (isSsdIn) {
     chain1Opt += ",ssddat";
@@ -58,7 +59,7 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsdIn=1
       cout << "Cannot find Trs in chain2" << endl;
       return;
     }
-    trsMk->setNormalFactor(2.67);
+    trsMk->setNormalFactor(1.35);
   }
   //________________________________________________________________________________
   gSystem->Load("StMixerMaker");
