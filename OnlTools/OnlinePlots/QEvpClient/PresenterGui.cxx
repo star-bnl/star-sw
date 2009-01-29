@@ -203,7 +203,6 @@ void PresenterGui::SetDefaults()
   TabNames[13][0]="SSD";
   TabNames[14][0]="ZDC SMD";
   TabNames[15][0]="PMD";
-  TabNames[16][0]="BEMC trg";
   //
   // Second Level Tab Names ( Differen for different subsystems)
   // Note that second index starts from 1. Index 0 is taken by
@@ -267,12 +266,22 @@ void PresenterGui::SetDefaults()
   TabNames[4][5]="SVT Anode vs Hybrid";
 
   //BEMC and BSMD
-  nSubTabs[5]=5;
+  nSubTabs[5]=15;
   TabNames[5][1]="Status";
   TabNames[5][2]="Towers";
   TabNames[5][3]="SMD/PSD";
   TabNames[5][4]="Trigger";
   TabNames[5][5]="Jet";
+  TabNames[5][6]="BTOW ADC";
+  TabNames[5][7]="JetPatch HighTower Spectra";
+  TabNames[5][8]="JetPatch PatchSum Spectra";
+  TabNames[5][9]="DSM Level-0 Input";
+  TabNames[5][10]="DSM Level-1 Input";
+  TabNames[5][11]="DSM Level-2 Input";
+  TabNames[5][12]="SMD FEE Sum";
+  TabNames[5][13]="Trigger corruption";
+  TabNames[5][14]="PSD FEE Sum";
+  TabNames[5][15]="BPRS ADC";
   //FTPC
   nSubTabs[6]=3;
   TabNames[6][1]="FTPC Global";
@@ -375,18 +384,6 @@ void PresenterGui::SetDefaults()
   TabNames[15][7]="37-42";
   TabNames[15][8]="43-48";
   TabNames[15][9]="Chain vs Channel";
-  // BTOW
-  nSubTabs[16]=10;
-  TabNames[16][1]="BTOW ADC";
-  TabNames[16][2]="JetPatch HighTower Spectra";
-  TabNames[16][3]="JetPatch PatchSum Spectra";
-  TabNames[16][4]="DSM Level-0 Input";
-  TabNames[16][5]="DSM Level-1 Input";
-  TabNames[16][6]="DSM Level-2 Input";
-  TabNames[16][7]="SMD FEE Sum";
-  TabNames[16][8]="Trigger corruption";
-  TabNames[16][9]="PSD FEE Sum";
-  TabNames[16][10]="BPRS ADC";
   
   
   // define embedded canvas

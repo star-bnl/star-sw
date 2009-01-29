@@ -39,11 +39,21 @@
 
 
 //BEMC
-5,1,2,2,4,[any|any],bemc_TDC_status,bemc_BTOW_Corruption,bemc_SMD_status,bemc_PSD_status
-5,2,1,3,3,[any|any],bemc_btow_spectra_1,bemc_btow_spectra_2,bemc_btow_spectra_3
-5,3,2,3,6,[any|any],bsmd_smd_spectra,bsmd_psd_spectra,bsmd_smd_capacitor,bsmd_psd_capacitor,bsmd_smd_sum,bsmd_psd_sum
-5,4,2,3,6,[any|any],bemc_HT_spectra,bemc_PA_spectra,bemc_HTMAX_spectra,bemc_PAMAX_spectra,bemc_HTMAX_dist,bemc_PAMAX_dist
-5,5,2,2,4,[any|any],bemc_JET_ped,bemc_JET_spectra,bemc_JETMAX_spectra,bemc_JETMAX_dist
+5,1,1,1,1,[any|any],bemc_Tot
+5,2,1,1,1,[any|any],bemc_Tot
+5,3,1,1,1,[any|any],bemc_Tot
+5,4,1,1,1,[any|any],bemc_Tot
+5,5,1,1,1,[any|any],bemc_Tot
+5,6,1,1,1,[any|any],bemc_Tot
+5,7,1,1,1,[any|any],bemc_Tot
+5,8,1,1,1,[any|any],bemc_Tot
+5,9,1,1,1,[any|any],bemc_Tot
+5,10,1,1,1,[any|any],bemc_Tot
+5,11,1,1,1,[any|any],bemc_Tot
+5,12,1,1,1,[any|any],bemc_Tot
+5,13,1,1,1,[any|any],bemc_Tot
+5,14,1,1,1,[any|any],bemc_Tot
+5,15,1,1,1,[any|any],bemc_Tot
 //END OF BEMC
 
 6,1,2,3,6,[any|any],h0_evt_size,h49_ftp,h11_ftp_evsize,h51_ftp_OccLaser,h48_ftp,h50_ftp_OccPulser
@@ -142,15 +152,3 @@
 15,8,2,3,6,[any|any],h424_pmd_Chain_43,h425_pmd_Chain_44,h426_pmd_Chain_45,h427_pmd_Chain_46,h428_pmd_Chain_47,h429_pmd_Chain_48
 
 15,9,1,2,2,[any|any],h430_pmd_Chain_vs_channel,h431_pmd_Chain_vs_channel_adc
-
-// BEMC trig
-16,1,1,1,1,[any|any],bemc_Tot
-16,2,1,1,1,[any|any],bemc_Tot
-16,3,1,1,1,[any|any],bemc_Tot
-16,4,1,1,1,[any|any],bemc_Tot
-16,5,1,1,1,[any|any],bemc_Tot
-16,6,1,1,1,[any|any],bemc_Tot
-16,7,1,1,1,[any|any],bemc_Tot
-16,8,1,1,1,[any|any],bemc_Tot
-16,9,1,1,1,[any|any],bemc_Tot
-16,10,1,1,1,[any|any],bemc_Tot
