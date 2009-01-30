@@ -22,6 +22,8 @@
 /*  Utilities                   */
 /********************************/
 
+#define MAX_SEND_IOVECS 100
+
 int mstrcmp(char *s1, char *s2)
 {
   if((s1[0] == '#') && (s2[0] == '#')) {
@@ -565,8 +567,12 @@ int sfs_index::writev(fs_iovec *fsiovec, int n)
 int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 {
   
-  struct iovec iovec_new[20];
+  struct iovec iovec_new[MAX_SEND_IOVECS];
   int vec_new=0;
+
+  if(vec > MAX_SEND_IOVECS) {
+    LOG(CRIT, "writev with too %d iovecs... max=%d",vec,MAX_SEND_IOVECS);
+  }
 
   int len=0;
   for(int i=0;i<vec;i++) {
@@ -631,12 +637,16 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 
 int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
 {
-  iovec iovec[20];
+  iovec iovec[MAX_SEND_IOVECS];
   char _buff[(sizeof(SFS_File) + 40)*50];
   char *b = _buff;
 
   int i;
   int vec=0;
+
+  if(n > MAX_SEND_IOVECS) {
+    LOG(CRIT, "sending %d iovecs > than max=%d",n,MAX_SEND_IOVECS);
+  }
 
 //   if(!writevbuff) {
 //     writevbuff = (char *)malloc(64*100);
