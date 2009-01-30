@@ -37,11 +37,8 @@ PresenterConnect::PresenterConnect(PresenterGui* gui, EvpPresenter* pre) :
   // Gui --> Presenter
   connect(mGui,SIGNAL(printAll(const char*)), mPresenter, SLOT(printAll(const char*)) );
   connect(mGui,SIGNAL(nextEvent()), mPresenter, SLOT(NextEvent()) );
-
-  connect(this, SIGNAL(letsgo()), mPresenter, SLOT(Connect()) );
-
+//  connect(qApp,SIGNAL(lastWindowClosed()),mPresenter,ClosePresenter()));
   mCanvas = 0;
-  emit letsgo();
 }
 
 
