@@ -6,6 +6,8 @@ class TH2F;
 class TFile;
 class TObjArray;
 
+#define BEMCNJET 12
+
 class BEMCPlots {
 
 public:
@@ -87,8 +89,8 @@ private:
     TH2F *mHistSmdFeeSum;
     TH2F *mHistPsdFeeSum;
     
-    TH1F *mHistHighTowerSpectrum[12];
-    TH1F *mHistPatchSumSpectrum[12];
+    TH1F *mHistHighTowerSpectrum[BEMCNJET];
+    TH1F *mHistPatchSumSpectrum[BEMCNJET];
     
     int mTowerData[4800][3];
     int mPatchData[300][11];
@@ -99,6 +101,37 @@ private:
     int mDsmSimuPatchSum[300];
     TH2F *mHistTriggerCorruptionHighTowerCorr;
     TH2F *mHistTriggerCorruptionPatchSumCorr;
+
+    TH2F *mHist_TDC_status;
+    TH2F *mHist_SMD_status;
+    TH2F *mHist_PSD_status;
+    TH1F *mHist_BTOW_Corruption;
+
+    TH2F *mHist_btow_spectra_1;
+    TH2F *mHist_btow_spectra_2;
+    TH2F *mHist_btow_spectra_3;
+
+    TH1F *mHist_smd_spectra;
+    TH2F *mHist_smd_capacitor;
+    TH2F *mHist_smd_sum;
+    TH1F *mHist_psd_spectra;
+    TH2F *mHist_psd_capacitor;
+    TH2F *mHist_psd_sum;
+
+    TH2F *mHist_HTMAX_spectra;
+    TH2F *mHist_PAMAX_spectra;
+    TH1F *mHist_HTMAX_dist;
+    TH1F *mHist_PAMAX_dist;
+
+    TH2F *mHist_JET_ped;
+    TH2F *mHist_JET_spectra;
+    TH2F *mHist_JETMAX_spectra;
+    TH1F *mHist_JETMAX_dist;
+
+
+    int BEMCNJPPED[BEMCNJET];
+    int BEMCJPPED[BEMCNJET];
+
 };
 
 #endif

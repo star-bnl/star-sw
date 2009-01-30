@@ -32,16 +32,18 @@ using namespace std;
 #include <StDaqLib/EMC/StEmcDecoder.h>
 
 #include "BEMCPlots.h"
-#include "bemc.h"
 #include "BEMC_DSM_decoder.h"
 #include "BEMCPlotsNames.h"
 
 BEMCPlots *BEMCPlotsInstance = 0;
 StEmcDecoder *BEMCDecoder = 0;
 
+#define BEMCOK 1
+#define BEMCNOTINSTALLED 2
+#define BEMCCORRUPTED 3
+
 //-------------------------------------------------------------------
 void BEMCPlots::initHisto(TObjArray *list, const char *bemcStatus) {
-    bemcMakeHisto();
     if (BEMCPlotsInstance) delete BEMCPlotsInstance; BEMCPlotsInstance = 0;
     BEMCPlotsInstance = new BEMCPlots(list);
     if (BEMCPlotsInstance) {
@@ -51,66 +53,65 @@ void BEMCPlots::initHisto(TObjArray *list, const char *bemcStatus) {
 }
 //-------------------------------------------------------------------
 void BEMCPlots::resetHisto(const char *bemcStatus) {
-    bemcReset();
     if (BEMCPlotsInstance) {
 	BEMCPlotsInstance->clear(bemcStatus);
     }
 }
 //-------------------------------------------------------------------
 void BEMCPlots::saveHisto(TFile *hfile) {
-    bemcSave(hfile);
     if (BEMCPlotsInstance) {
 	BEMCPlotsInstance->saveHistograms(hfile);
     }
 }
 //-------------------------------------------------------------------
 void BEMCPlots::fillHisto(    char *datap
-			    , const unsigned char *
-                	    , const unsigned char *
-                	    , const unsigned short *
-                	    , const unsigned short *
-                	    , const unsigned short *
+                    	    , const unsigned char *dsmL0WestInput
+                    	    , const unsigned char *dsmL0EastInput
+                    	    , const unsigned short *dsmL1Input
+                    	    , const unsigned short *dsmL2Input
+                    	    , const unsigned short *dsmL3Input
                 	    ) {
-    bemcFillHisto(datap);
     if (BEMCPlotsInstance) {
-	BEMCPlotsInstance->processEvent(datap);
+	BEMCPlotsInstance->processEvent(datap, dsmL0WestInput, dsmL0EastInput, dsmL1Input, dsmL2Input, dsmL3Input);
     }
 }
 //-------------------------------------------------------------------
 BEMCPlots::BEMCPlots(TObjArray *list)
     : mDebug(0)
 {
+
 #define ADDHIST(hist) if (list && (hist)) list->Add(hist);
+
     this->mHistTot = new TH1F(HistTotName, "Total number of events processed;;Number of events", 1, 0, 1);
-    ADDHIST(mHistTot)
+    ADDHIST(this->mHistTot)
 
     this->mHistDsmL0InputHighTower = new TH2F(HistDsmL0InputHighTowerName, "BEMC DSM L0 Input - HighTower;triggerPatch;HighTower", 300, -0.5, 300 - 0.5, 64, 0, 64);
-    ADDHIST(mHistDsmL0InputHighTower)
+    ADDHIST(this->mHistDsmL0InputHighTower)
     this->mHistDsmL0InputPatchSum = new TH2F(HistDsmL0InputPatchSumName, "BEMC DSM L0 Input - PatchSum;triggerPatch;PatchSum", 300, -0.5, 300 - 0.5, 64, 0, 64);
-    ADDHIST(mHistDsmL0InputPatchSum)
+    ADDHIST(this->mHistDsmL0InputPatchSum)
 
     this->mHistDsmL1InputHighTowerBits = new TH2F(HistDsmL1InputHighTowerBitsName, "BEMC DSM L1 Input - HighTower bits;DSM Level-1 channels;HighTower bits", 36, -0.5, 36-0.5, 5, 0, 5);
-    ADDHIST(mHistDsmL1InputHighTowerBits)
+    ADDHIST(this->mHistDsmL1InputHighTowerBits)
     this->mHistDsmL1InputPatchSum = new TH2F(HistDsmL1InputPatchSumName, "BEMC DSM L1 Input - PatchSum;Channel;PatchSum", 36, -0.5, 36-0.5, 128, 0, 256/*1024*/);
-    ADDHIST(mHistDsmL1InputPatchSum)
+    ADDHIST(this->mHistDsmL1InputPatchSum)
 
-    this->mHistDsmL2InputHighTowerBits = new TH2F(HistDsmL2InputHighTowerBitsName, "BEMC DSM L2 Input - HighTower bits;JetPatch;HighTower bits", 12, -0.5, 12-0.5, 5, 0, 5);
-    ADDHIST(mHistDsmL2InputHighTowerBits)
-    this->mHistDsmL2InputPatchSumBits = new TH2F(HistDsmL2InputPatchSumBitsName, "BEMC DSM L2 Input - PatchSum bits;JetPatch;PatchSum bits", 12, -0.5, 12-0.5, 4, 0, 4);
-    ADDHIST(mHistDsmL2InputPatchSumBits)
+    this->mHistDsmL2InputHighTowerBits = new TH2F(HistDsmL2InputHighTowerBitsName, "BEMC DSM L2 Input - HighTower bits;JetPatch;HighTower bits", BEMCNJET, -0.5, BEMCNJET-0.5, 5, 0, 5);
+    ADDHIST(this->mHistDsmL2InputHighTowerBits)
+    this->mHistDsmL2InputPatchSumBits = new TH2F(HistDsmL2InputPatchSumBitsName, "BEMC DSM L2 Input - PatchSum bits;JetPatch;PatchSum bits", BEMCNJET, -0.5, BEMCNJET-0.5, 4, 0, 4);
+    ADDHIST(this->mHistDsmL2InputPatchSumBits)
     this->mHistDsmL2InputPatchSum = new TH2F(HistDsmL2InputPatchSumName, "BEMC DSM L2 Input - PatchSum;JetPatch pair;PatchSum", 6, -0.5, 6-0.5, 256, 0, 256);
-    ADDHIST(mHistDsmL2InputPatchSum)
+    ADDHIST(this->mHistDsmL2InputPatchSum)
 
     this->mHistDsmL3InputHighTowerBits = new TH1F(HistDsmL3InputHighTowerBitsName, "BEMC DSM L3 Input - HighTower bits;HighTower bits", 4, -0.5, 4-0.5);
-    ADDHIST(mHistDsmL3InputHighTowerBits)
+    ADDHIST(this->mHistDsmL3InputHighTowerBits)
     this->mHistDsmL3InputPatchSumBits = new TH1F(HistDsmL3InputPatchSumBitsName, "BEMC DSM L3 Input - PatchSum bits;PatchSum bits", 4, -0.5, 4-0.5);
-    ADDHIST(mHistDsmL3InputPatchSumBits)
+    ADDHIST(this->mHistDsmL3InputPatchSumBits)
     this->mHistDsmL3InputBackToBackBit = new TH1F(HistDsmL3InputBackToBackBitName, "BEMC DSM L3 Input - Back-to-Back bit;Back-to-Back bit", 2, -0.5, 2-0.5);
-    ADDHIST(mHistDsmL3InputBackToBackBit)
+    ADDHIST(this->mHistDsmL3InputBackToBackBit)
     this->mHistDsmL3InputJPsiTopoBit = new TH1F(HistDsmL3InputJPsiTopoBitName, "BEMC DSM L3 Input - J/Psi topology bit;J/Psi bit", 2, -0.5, 2-0.5);
-    ADDHIST(mHistDsmL3InputJPsiTopoBit)
+    ADDHIST(this->mHistDsmL3InputJPsiTopoBit)
     this->mHistDsmL3InputJetPatchTopoBit = new TH1F(HistDsmL3InputJetPatchTopoBitName, "BEMC DSM L3 Input - JetPatch topology bit;JetPatch bit", 2, -0.5, 2-0.5);
-    ADDHIST(mHistDsmL3InputJetPatchTopoBit)
+    ADDHIST(this->mHistDsmL3InputJetPatchTopoBit)
 
       this->mHistRawAdc1 = new TH2F(HistRawAdc1Name, "BTOW ADC, 1 <= SoftId <= 1220;SoftId;ADC",    1220, 0000.5, 1220.5, 300, -0.5, 1000-0.5);
       this->mHistRawAdc2 = new TH2F(HistRawAdc2Name, "BTOW ADC, 1221 <= SoftId <= 2400;SoftId;ADC", 1180, 1220.5, 2400.5, 300, -0.5, 1000-0.5);
@@ -125,28 +126,28 @@ BEMCPlots::BEMCPlots(TObjArray *list)
       this->mHistSmdFeeSum = new TH2F(HistSmdFeeSumName, "SMD FEE Sum;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
       this->mHistPsdFeeSum = new TH2F(HistPsdFeeSumName, "PSD FEE Sum;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
 
-      ADDHIST(mHistRawAdc1)
-      ADDHIST(mHistRawAdc2)
-      ADDHIST(mHistRawAdc3)
-      ADDHIST(mHistRawAdc4)
-      ADDHIST(mHistRawAdcPsd1)
-      ADDHIST(mHistRawAdcPsd2)
-      ADDHIST(mHistRawAdcPsd3)
-      ADDHIST(mHistRawAdcPsd4)
-      ADDHIST(mHistSmdFeeSum)
-      ADDHIST(mHistPsdFeeSum)
+      ADDHIST(this->mHistRawAdc1)
+      ADDHIST(this->mHistRawAdc2)
+      ADDHIST(this->mHistRawAdc3)
+      ADDHIST(this->mHistRawAdc4)
+      ADDHIST(this->mHistRawAdcPsd1)
+      ADDHIST(this->mHistRawAdcPsd2)
+      ADDHIST(this->mHistRawAdcPsd3)
+      ADDHIST(this->mHistRawAdcPsd4)
+      ADDHIST(this->mHistSmdFeeSum)
+      ADDHIST(this->mHistPsdFeeSum)
     
-    for (int i = 0;i < 12;i++) {
+    for (int i = 0;i < BEMCNJET;i++) {
 	TString name;
 	TString title;
 	name = Form("%s_%u", HistHighTowerSpectrumName, i);
 	title = Form("JetPatch %u - HighTower spectrum;HighTower", i);	
 	this->mHistHighTowerSpectrum[i] = new TH1F(name.Data(), title.Data(), 64, -0.5, 64-0.5);
-	ADDHIST(mHistHighTowerSpectrum[i])
+	ADDHIST(this->mHistHighTowerSpectrum[i])
 	name = Form("%s_%u", HistPatchSumSpectrumName, i);
 	title = Form("JetPatch %u - PatchSum spectrum;PatchSum", i);	
 	this->mHistPatchSumSpectrum[i] = new TH1F(name.Data(), title.Data(), 200, -0.5, 200-0.5);    	
-	ADDHIST(mHistPatchSumSpectrum[i])
+	ADDHIST(this->mHistPatchSumSpectrum[i])
     }
     
     this->mHistTriggerCorruptionHighTower = new TH1F(HistTriggerCorruptionHighTowerName, "HighTower trigger corruption;triggerPatch;events", 300, -0.5, 300-0.5);
@@ -154,10 +155,58 @@ BEMCPlots::BEMCPlots(TObjArray *list)
     this->mHistTriggerCorruptionHighTowerCorr = new TH2F(HistTriggerCorruptionHighTowerCorrName, "HighTower trigger corruption;DSM HighTower;Simulated HighTower", 64, 0, 64, 64, 0, 64);
     this->mHistTriggerCorruptionPatchSumCorr = new TH2F(HistTriggerCorruptionPatchSumCorrName, "PatchSum trigger corruption;DSM PatchSum;Simulated PatchSum", 64, 0, 64, 64, 0, 64);
 
-      ADDHIST(mHistTriggerCorruptionHighTower)
-      ADDHIST(mHistTriggerCorruptionPatchSum)
-      ADDHIST(mHistTriggerCorruptionHighTowerCorr)
-      ADDHIST(mHistTriggerCorruptionPatchSumCorr)
+      ADDHIST(this->mHistTriggerCorruptionHighTower)
+      ADDHIST(this->mHistTriggerCorruptionPatchSum)
+      ADDHIST(this->mHistTriggerCorruptionHighTowerCorr)
+      ADDHIST(this->mHistTriggerCorruptionPatchSumCorr)
+
+    this->mHist_TDC_status      = new TH2F(Hist_TDC_statusName, "BEMC TDC Status (0=total 1=OK 2=Not Installed3=Corrupted)",5,-0.5,4.5,30,-0.5,29.5);
+    this->mHist_SMD_status      = new TH2F(Hist_SMD_statusName, "BEMC SMD Status (0=total 1=OK 2=Not Installed3=Corrupted)",5,-0.5,4.5,8,-0.5,7.5);
+    this->mHist_btow_spectra_1  = new TH2F(Hist_btow_spectra_1Name, "BEMC tower spectrum  0 < TDC < 10 (X = 160*TDC + index)", 1600,  -0.5,1599.5,100,0,1000);
+    this->mHist_btow_spectra_2  = new TH2F(Hist_btow_spectra_2Name, "BEMC tower spectrum 10 < TDC < 20 (X = 160*TDC + index)", 1600,1599.5,3199.5,100,0,1000);
+    this->mHist_btow_spectra_3  = new TH2F(Hist_btow_spectra_3Name, "BEMC tower spectrum 20 < TDC < 30 (X = 160*TDC + index)", 1600,3199.5,4799.5,100,0,1000);
+    this->mHist_smd_capacitor   = new TH2F(Hist_smd_capacitorName, "BEMC SMD capacitor distribution",128,-0.5,127.5,8,-0.5,7.5);
+    this->mHist_smd_sum         = new TH2F(Hist_smd_sumName, "BEMC SMD total ADC per fiber",250,100000.,1000000.,8,-0.5,7.5);
+    this->mHist_psd_capacitor   = new TH2F(Hist_psd_capacitorName, "BEMC PSD capacitor distribution",128,-0.5,127.5,4,-0.5,3.5);
+    this->mHist_psd_sum         = new TH2F(Hist_psd_sumName, "BEMC PSD total ADC per fiber",250,100000.,1000000.,4,-0.5,3.5);
+    this->mHist_HTMAX_spectra   = new TH2F(Hist_HTMAX_spectraName, "BEMC Maximum High Tower spectrum", 300,-0.5,299.5,64,-0.5,63.5);
+    this->mHist_PAMAX_spectra   = new TH2F(Hist_PAMAX_spectraName, "BEMC Maximum Patch Sum spectrum", 300,-0.5,299.5,64,-0.5,63.5);
+    this->mHist_PSD_status      = new TH2F(Hist_PSD_statusName, "BEMC PSD Status (0=total 1=OK 2=Not Installed 3=Corrupted)",5,-0.5,4.5,4,-0.5,3.5);
+    this->mHist_JET_spectra     = new TH2F(Hist_JET_spectraName, "BEMC Jet sum spectrum", BEMCNJET,-0.5,BEMCNJET-0.5,80,-0.5,79.5);
+    this->mHist_JETMAX_spectra  = new TH2F(Hist_JETMAX_spectraName, "BEMC Maximum Jet sum spectrum", BEMCNJET,-0.5,BEMCNJET-0.5,80,-0.5,79.5);
+    this->mHist_JET_ped         = new TH2F(Hist_JET_pedName, "BEMC Jet sum pedestal", BEMCNJET,-0.5,BEMCNJET-0.5,30,15,45);
+
+    this->mHist_BTOW_Corruption = new TH1F(Hist_BTOW_CorruptionName, "BEMC TDC corruption frequency (0=total 1=OK 2=Not Installed 3=Corrupted)",5,-0.5,4.5);
+    this->mHist_smd_spectra     = new TH1F(Hist_smd_spectraName, "BEMC SMD total ADC",250,100000.,6000000.);
+    this->mHist_psd_spectra     = new TH1F(Hist_psd_spectraName, "BEMC PSD total ADC",250,100000.,4000000.);
+    this->mHist_HTMAX_dist      = new TH1F(Hist_HTMAX_distName, "BEMC Maximum High Tower distribution", 300,-0.5,299.5);
+    this->mHist_PAMAX_dist      = new TH1F(Hist_PAMAX_distName, "BEMC Maximum Patch Sum distribution", 300,-0.5,299.5);
+    this->mHist_JETMAX_dist     = new TH1F(Hist_JETMAX_distName, "BEMC Maximum Jet sum distribution", BEMCNJET,-0.5,BEMCNJET-0.5);
+
+    ADDHIST(this->mHist_TDC_status)
+    ADDHIST(this->mHist_SMD_status)
+    ADDHIST(this->mHist_btow_spectra_1)
+    ADDHIST(this->mHist_btow_spectra_2)
+    ADDHIST(this->mHist_btow_spectra_3)
+    ADDHIST(this->mHist_smd_capacitor)
+    ADDHIST(this->mHist_smd_sum)
+    ADDHIST(this->mHist_psd_capacitor)
+    ADDHIST(this->mHist_psd_sum)
+    ADDHIST(this->mHist_HTMAX_spectra)
+    ADDHIST(this->mHist_PAMAX_spectra)
+    ADDHIST(this->mHist_PSD_status)
+    ADDHIST(this->mHist_JET_spectra)
+    ADDHIST(this->mHist_JETMAX_spectra)
+    ADDHIST(this->mHist_JET_ped)
+
+    ADDHIST(this->mHist_BTOW_Corruption)
+    ADDHIST(this->mHist_smd_spectra)
+    ADDHIST(this->mHist_psd_spectra)
+    ADDHIST(this->mHist_HTMAX_dist)
+    ADDHIST(this->mHist_PAMAX_dist)
+    ADDHIST(this->mHist_JETMAX_dist)
+
+#undef ADDHIST
 
     for (int i = 0;i < 4800;i++) {
 	this->mTowerData[i][0] = 1; // unmask
@@ -178,51 +227,84 @@ BEMCPlots::BEMCPlots(TObjArray *list)
 	this->mPatchData[i][9] = 0; // formula parameter 5
 	this->mPatchData[i][10] = 0; // number of masked towers
     }
+    for (int i = 0;i < BEMCNJET;i++) {
+	this->BEMCJPPED[i] = 0;
+        this->BEMCNJPPED[i] = 0;
+    } 
+
 }
 //-------------------------------------------------------------------
 BEMCPlots::~BEMCPlots() {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
-    if (this->mHistTot) delete this->mHistTot; this->mHistTot = 0;
 
-    if (this->mHistDsmL0InputHighTower) delete this->mHistDsmL0InputHighTower; this->mHistDsmL0InputHighTower = 0;
-    if (this->mHistDsmL0InputPatchSum) delete this->mHistDsmL0InputPatchSum; this->mHistDsmL0InputPatchSum = 0;
+#define DELETEHIST(HIST) if (HIST) delete (HIST); (HIST) = 0;
 
-    if (this->mHistDsmL1InputHighTowerBits) delete this->mHistDsmL1InputHighTowerBits; this->mHistDsmL1InputHighTowerBits = 0;
-    if (this->mHistDsmL1InputPatchSum) delete this->mHistDsmL1InputPatchSum; this->mHistDsmL1InputPatchSum = 0;
+    DELETEHIST(this->mHistTot)
 
-    if (this->mHistDsmL2InputHighTowerBits) delete this->mHistDsmL2InputHighTowerBits; this->mHistDsmL2InputHighTowerBits = 0;
-    if (this->mHistDsmL2InputPatchSumBits) delete this->mHistDsmL2InputPatchSumBits; this->mHistDsmL2InputPatchSumBits = 0;
-    if (this->mHistDsmL2InputPatchSum) delete this->mHistDsmL2InputPatchSum; this->mHistDsmL2InputPatchSum = 0;
+    DELETEHIST(this->mHistDsmL0InputHighTower)
+    DELETEHIST(this->mHistDsmL0InputPatchSum)
 
-    if (this->mHistDsmL3InputHighTowerBits) delete this->mHistDsmL3InputHighTowerBits; this->mHistDsmL3InputHighTowerBits = 0;
-    if (this->mHistDsmL3InputPatchSumBits) delete this->mHistDsmL3InputPatchSumBits; this->mHistDsmL3InputPatchSumBits = 0;
-    if (this->mHistDsmL3InputBackToBackBit) delete this->mHistDsmL3InputBackToBackBit; this->mHistDsmL3InputBackToBackBit = 0;
-    if (this->mHistDsmL3InputJPsiTopoBit) delete this->mHistDsmL3InputJPsiTopoBit; this->mHistDsmL3InputJPsiTopoBit = 0;
-    if (this->mHistDsmL3InputJetPatchTopoBit) delete this->mHistDsmL3InputJetPatchTopoBit; this->mHistDsmL3InputJetPatchTopoBit = 0;
+    DELETEHIST(this->mHistDsmL1InputHighTowerBits)
+    DELETEHIST(this->mHistDsmL1InputPatchSum)
 
-    if (this->mHistRawAdc1) delete this->mHistRawAdc1; this->mHistRawAdc1 = 0;
-    if (this->mHistRawAdc2) delete this->mHistRawAdc2; this->mHistRawAdc2 = 0;
-    if (this->mHistRawAdc3) delete this->mHistRawAdc3; this->mHistRawAdc3 = 0;
-    if (this->mHistRawAdc4) delete this->mHistRawAdc4; this->mHistRawAdc4 = 0;
+    DELETEHIST(this->mHistDsmL2InputHighTowerBits)
+    DELETEHIST(this->mHistDsmL2InputPatchSumBits)
+    DELETEHIST(this->mHistDsmL2InputPatchSum)
 
-    if (this->mHistRawAdcPsd1) delete this->mHistRawAdcPsd1; this->mHistRawAdcPsd1 = 0;
-    if (this->mHistRawAdcPsd2) delete this->mHistRawAdcPsd2; this->mHistRawAdcPsd2 = 0;
-    if (this->mHistRawAdcPsd3) delete this->mHistRawAdcPsd3; this->mHistRawAdcPsd3 = 0;
-    if (this->mHistRawAdcPsd4) delete this->mHistRawAdcPsd4; this->mHistRawAdcPsd4 = 0;
+    DELETEHIST(this->mHistDsmL3InputHighTowerBits)
+    DELETEHIST(this->mHistDsmL3InputPatchSumBits)
+    DELETEHIST(this->mHistDsmL3InputBackToBackBit)
+    DELETEHIST(this->mHistDsmL3InputJPsiTopoBit)
+    DELETEHIST(this->mHistDsmL3InputJetPatchTopoBit)
 
-    if (this->mHistSmdFeeSum) delete this->mHistSmdFeeSum; this->mHistSmdFeeSum = 0;
-    if (this->mHistPsdFeeSum) delete this->mHistPsdFeeSum; this->mHistPsdFeeSum = 0;
+    DELETEHIST(this->mHistRawAdc1)
+    DELETEHIST(this->mHistRawAdc2)
+    DELETEHIST(this->mHistRawAdc3)
+    DELETEHIST(this->mHistRawAdc4)
 
-    for (int i = 0;i < 12;i++) {
-    	if (this->mHistHighTowerSpectrum[i]) delete this->mHistHighTowerSpectrum[i]; this->mHistHighTowerSpectrum[i] = 0;
-    	if (this->mHistPatchSumSpectrum[i]) delete this->mHistPatchSumSpectrum[i]; this->mHistPatchSumSpectrum[i] = 0;
+    DELETEHIST(this->mHistRawAdcPsd1)
+    DELETEHIST(this->mHistRawAdcPsd2)
+    DELETEHIST(this->mHistRawAdcPsd3)
+    DELETEHIST(this->mHistRawAdcPsd4)
+
+    DELETEHIST(this->mHistSmdFeeSum)
+    DELETEHIST(this->mHistPsdFeeSum)
+
+    for (int i = 0;i < BEMCNJET;i++) {
+	DELETEHIST(this->mHistHighTowerSpectrum[i])
+    	DELETEHIST(this->mHistPatchSumSpectrum[i])
     }
 
-    if (this->mHistTriggerCorruptionHighTower) delete this->mHistTriggerCorruptionHighTower; this->mHistTriggerCorruptionHighTower = 0;
-    if (this->mHistTriggerCorruptionPatchSum) delete this->mHistTriggerCorruptionPatchSum; this->mHistTriggerCorruptionPatchSum = 0;
-    if (this->mHistTriggerCorruptionHighTowerCorr) delete this->mHistTriggerCorruptionHighTowerCorr; this->mHistTriggerCorruptionHighTowerCorr = 0;
-    if (this->mHistTriggerCorruptionPatchSumCorr) delete this->mHistTriggerCorruptionPatchSumCorr; this->mHistTriggerCorruptionPatchSumCorr = 0;
+    DELETEHIST(this->mHistTriggerCorruptionHighTower)
+    DELETEHIST(this->mHistTriggerCorruptionPatchSum)
+    DELETEHIST(this->mHistTriggerCorruptionHighTowerCorr)
+    DELETEHIST(this->mHistTriggerCorruptionPatchSumCorr)
+
+    DELETEHIST(this->mHist_TDC_status)
+    DELETEHIST(this->mHist_SMD_status)
+    DELETEHIST(this->mHist_btow_spectra_1)
+    DELETEHIST(this->mHist_btow_spectra_2)
+    DELETEHIST(this->mHist_btow_spectra_3)
+    DELETEHIST(this->mHist_smd_capacitor)
+    DELETEHIST(this->mHist_smd_sum)
+    DELETEHIST(this->mHist_psd_capacitor)
+    DELETEHIST(this->mHist_psd_sum)
+    DELETEHIST(this->mHist_HTMAX_spectra)
+    DELETEHIST(this->mHist_PAMAX_spectra)
+    DELETEHIST(this->mHist_PSD_status)
+    DELETEHIST(this->mHist_JET_spectra)
+    DELETEHIST(this->mHist_JETMAX_spectra)
+    DELETEHIST(this->mHist_JET_ped)
+
+    DELETEHIST(this->mHist_BTOW_Corruption)
+    DELETEHIST(this->mHist_smd_spectra)
+    DELETEHIST(this->mHist_psd_spectra)
+    DELETEHIST(this->mHist_HTMAX_dist)
+    DELETEHIST(this->mHist_PAMAX_dist)
+    DELETEHIST(this->mHist_JETMAX_dist)
     
+#undef DELETEHIST
+
     this->clear(0);
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
@@ -236,46 +318,74 @@ void BEMCPlots::init(unsigned int date, unsigned int time, const char *bemcStatu
 void BEMCPlots::clear(const char *bemcStatus) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
     if (mDebug >= 2) cout << "bemcStatus = " << bemcStatus << endl;
-    if (this->mHistTot) this->mHistTot->Reset();
 
-    if (this->mHistDsmL0InputHighTower) this->mHistDsmL0InputHighTower->Reset();
-    if (this->mHistDsmL0InputPatchSum) this->mHistDsmL0InputPatchSum->Reset();
+#define RESETHIST(HIST) if (HIST) (HIST)->Reset();
 
-    if (this->mHistDsmL1InputHighTowerBits) this->mHistDsmL1InputHighTowerBits->Reset();
-    if (this->mHistDsmL1InputPatchSum) this->mHistDsmL1InputPatchSum->Reset();
+    RESETHIST(this->mHistTot)
 
-    if (this->mHistDsmL2InputHighTowerBits) this->mHistDsmL2InputHighTowerBits->Reset();
-    if (this->mHistDsmL2InputPatchSumBits) this->mHistDsmL2InputPatchSumBits->Reset();
-    if (this->mHistDsmL2InputPatchSum) this->mHistDsmL2InputPatchSum->Reset();
+    RESETHIST(this->mHistDsmL0InputHighTower)
+    RESETHIST(this->mHistDsmL0InputPatchSum)
 
-    if (this->mHistDsmL3InputHighTowerBits) this->mHistDsmL3InputHighTowerBits->Reset();
-    if (this->mHistDsmL3InputPatchSumBits) this->mHistDsmL3InputPatchSumBits->Reset();
-    if (this->mHistDsmL3InputBackToBackBit) this->mHistDsmL3InputBackToBackBit->Reset();
-    if (this->mHistDsmL3InputJPsiTopoBit) this->mHistDsmL3InputJPsiTopoBit->Reset();
-    if (this->mHistDsmL3InputJetPatchTopoBit) this->mHistDsmL3InputJetPatchTopoBit->Reset();
+    RESETHIST(this->mHistDsmL1InputHighTowerBits)
+    RESETHIST(this->mHistDsmL1InputPatchSum)
 
-    if (this->mHistRawAdc1) this->mHistRawAdc1->Reset();
-    if (this->mHistRawAdc2) this->mHistRawAdc2->Reset();
-    if (this->mHistRawAdc3) this->mHistRawAdc3->Reset();
-    if (this->mHistRawAdc4) this->mHistRawAdc4->Reset();
+    RESETHIST(this->mHistDsmL2InputHighTowerBits)
+    RESETHIST(this->mHistDsmL2InputPatchSumBits)
+    RESETHIST(this->mHistDsmL2InputPatchSum)
 
-    if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Reset();
-    if (this->mHistRawAdcPsd2) this->mHistRawAdcPsd2->Reset();
-    if (this->mHistRawAdcPsd3) this->mHistRawAdcPsd3->Reset();
-    if (this->mHistRawAdcPsd4) this->mHistRawAdcPsd4->Reset();
+    RESETHIST(this->mHistDsmL3InputHighTowerBits)
+    RESETHIST(this->mHistDsmL3InputPatchSumBits)
+    RESETHIST(this->mHistDsmL3InputBackToBackBit)
+    RESETHIST(this->mHistDsmL3InputJPsiTopoBit)
+    RESETHIST(this->mHistDsmL3InputJetPatchTopoBit)
 
-    if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Reset();
-    if (this->mHistPsdFeeSum) this->mHistPsdFeeSum->Reset();
+    RESETHIST(this->mHistRawAdc1)
+    RESETHIST(this->mHistRawAdc2)
+    RESETHIST(this->mHistRawAdc3)
+    RESETHIST(this->mHistRawAdc4)
 
-    for (int i = 0;i < 12;i++) {
-    	if (this->mHistHighTowerSpectrum[i]) this->mHistHighTowerSpectrum[i]->Reset();
-    	if (this->mHistPatchSumSpectrum[i]) this->mHistPatchSumSpectrum[i]->Reset();
+    RESETHIST(this->mHistRawAdcPsd1)
+    RESETHIST(this->mHistRawAdcPsd2)
+    RESETHIST(this->mHistRawAdcPsd3)
+    RESETHIST(this->mHistRawAdcPsd4)
+
+    RESETHIST(this->mHistSmdFeeSum)
+    RESETHIST(this->mHistPsdFeeSum)
+
+    for (int i = 0;i < BEMCNJET;i++) {
+    	RESETHIST(this->mHistHighTowerSpectrum[i])
+    	RESETHIST(this->mHistPatchSumSpectrum[i])
     }
 
-    if (this->mHistTriggerCorruptionHighTower) this->mHistTriggerCorruptionHighTower->Reset();
-    if (this->mHistTriggerCorruptionPatchSum) this->mHistTriggerCorruptionPatchSum->Reset();
-    if (this->mHistTriggerCorruptionHighTowerCorr) this->mHistTriggerCorruptionHighTowerCorr->Reset();
-    if (this->mHistTriggerCorruptionPatchSumCorr) this->mHistTriggerCorruptionPatchSumCorr->Reset();
+    RESETHIST(this->mHistTriggerCorruptionHighTower)
+    RESETHIST(this->mHistTriggerCorruptionPatchSum)
+    RESETHIST(this->mHistTriggerCorruptionHighTowerCorr)
+    RESETHIST(this->mHistTriggerCorruptionPatchSumCorr)
+
+    RESETHIST(this->mHist_TDC_status)
+    RESETHIST(this->mHist_SMD_status)
+    RESETHIST(this->mHist_btow_spectra_1)
+    RESETHIST(this->mHist_btow_spectra_2)
+    RESETHIST(this->mHist_btow_spectra_3)
+    RESETHIST(this->mHist_smd_capacitor)
+    RESETHIST(this->mHist_smd_sum)
+    RESETHIST(this->mHist_psd_capacitor)
+    RESETHIST(this->mHist_psd_sum)
+    RESETHIST(this->mHist_HTMAX_spectra)
+    RESETHIST(this->mHist_PAMAX_spectra)
+    RESETHIST(this->mHist_PSD_status)
+    RESETHIST(this->mHist_JET_spectra)
+    RESETHIST(this->mHist_JETMAX_spectra)
+    RESETHIST(this->mHist_JET_ped)
+
+    RESETHIST(this->mHist_BTOW_Corruption)
+    RESETHIST(this->mHist_smd_spectra)
+    RESETHIST(this->mHist_psd_spectra)
+    RESETHIST(this->mHist_HTMAX_dist)
+    RESETHIST(this->mHist_PAMAX_dist)
+    RESETHIST(this->mHist_JETMAX_dist)
+
+#undef RESETHIST
 
     for (int i = 0;i < 4800;i++) {
 	this->mTowerData[i][0] = 1; // unmask
@@ -296,6 +406,10 @@ void BEMCPlots::clear(const char *bemcStatus) {
 	this->mPatchData[i][9] = 0; // formula parameter 5
 	this->mPatchData[i][10] = 0; // number of masked towers
     }
+    for (int i = 0;i < BEMCNJET;i++) {
+	this->BEMCJPPED[i] = 0;
+        this->BEMCNJPPED[i] = 0;
+    } 
 
     if (!BEMCDecoder) BEMCDecoder = new StEmcDecoder();
 
@@ -368,57 +482,85 @@ void BEMCPlots::saveHistograms(TFile *hfile) {
     if (!hfile || (mDebug >= 2)) cout << "hfile = " << hfile << endl;
     if (hfile) {
 	hfile->cd();
-        if (this->mHistTot) this->mHistTot->Write();
 
-        if (this->mHistDsmL0InputHighTower) this->mHistDsmL0InputHighTower->Write();
-        if (this->mHistDsmL0InputPatchSum) this->mHistDsmL0InputPatchSum->Write();
+#define SAVEHIST(HIST) if (HIST) (HIST)->Write();
 
-        if (this->mHistDsmL1InputHighTowerBits) this->mHistDsmL1InputHighTowerBits->Write();
-        if (this->mHistDsmL1InputPatchSum) this->mHistDsmL1InputPatchSum->Write();
+        SAVEHIST(this->mHistTot)
 
-        if (this->mHistDsmL2InputHighTowerBits) this->mHistDsmL2InputHighTowerBits->Write();
-        if (this->mHistDsmL2InputPatchSumBits) this->mHistDsmL2InputPatchSumBits->Write();
-        if (this->mHistDsmL2InputPatchSum) this->mHistDsmL2InputPatchSum->Write();
+        SAVEHIST(this->mHistDsmL0InputHighTower)
+        SAVEHIST(this->mHistDsmL0InputPatchSum)
 
-        if (this->mHistDsmL3InputHighTowerBits) this->mHistDsmL3InputHighTowerBits->Write();
-        if (this->mHistDsmL3InputPatchSumBits) this->mHistDsmL3InputPatchSumBits->Write();
-        if (this->mHistDsmL3InputBackToBackBit) this->mHistDsmL3InputBackToBackBit->Write();
-        if (this->mHistDsmL3InputJPsiTopoBit) this->mHistDsmL3InputJPsiTopoBit->Write();
-        if (this->mHistDsmL3InputJetPatchTopoBit) this->mHistDsmL3InputJetPatchTopoBit->Write();
+        SAVEHIST(this->mHistDsmL1InputHighTowerBits)
+        SAVEHIST(this->mHistDsmL1InputPatchSum)
 
-        if (this->mHistRawAdc1) this->mHistRawAdc1->Write();
-        if (this->mHistRawAdc2) this->mHistRawAdc2->Write();
-        if (this->mHistRawAdc3) this->mHistRawAdc3->Write();
-        if (this->mHistRawAdc4) this->mHistRawAdc4->Write();
+        SAVEHIST(this->mHistDsmL2InputHighTowerBits)
+        SAVEHIST(this->mHistDsmL2InputPatchSumBits)
+        SAVEHIST(this->mHistDsmL2InputPatchSum)
 
-        if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Write();
-        if (this->mHistRawAdcPsd2) this->mHistRawAdcPsd2->Write();
-        if (this->mHistRawAdcPsd3) this->mHistRawAdcPsd3->Write();
-        if (this->mHistRawAdcPsd4) this->mHistRawAdcPsd4->Write();
+	SAVEHIST(this->mHistDsmL3InputHighTowerBits)
+        SAVEHIST(this->mHistDsmL3InputPatchSumBits)
+        SAVEHIST(this->mHistDsmL3InputBackToBackBit)
+        SAVEHIST(this->mHistDsmL3InputJPsiTopoBit)
+        SAVEHIST(this->mHistDsmL3InputJetPatchTopoBit)
 
-        if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Write();
-        if (this->mHistPsdFeeSum) this->mHistPsdFeeSum->Write();
+        SAVEHIST(this->mHistRawAdc1)
+        SAVEHIST(this->mHistRawAdc2)
+        SAVEHIST(this->mHistRawAdc3)
+        SAVEHIST(this->mHistRawAdc4)
 
-        for (int i = 0;i < 12;i++) {
-    	    if (this->mHistHighTowerSpectrum[i]) this->mHistHighTowerSpectrum[i]->Write();
-    	    if (this->mHistPatchSumSpectrum[i]) this->mHistPatchSumSpectrum[i]->Write();
+        SAVEHIST(this->mHistRawAdcPsd1)
+        SAVEHIST(this->mHistRawAdcPsd2)
+        SAVEHIST(this->mHistRawAdcPsd3)
+        SAVEHIST(this->mHistRawAdcPsd4)
+
+        SAVEHIST(this->mHistSmdFeeSum)
+        SAVEHIST(this->mHistPsdFeeSum)
+
+        for (int i = 0;i < BEMCNJET;i++) {
+    	    SAVEHIST(this->mHistHighTowerSpectrum[i])
+    	    SAVEHIST(this->mHistPatchSumSpectrum[i])
 	}
 
-        if (this->mHistTriggerCorruptionHighTower) this->mHistTriggerCorruptionHighTower->Write();
-        if (this->mHistTriggerCorruptionPatchSum) this->mHistTriggerCorruptionPatchSum->Write();
-        if (this->mHistTriggerCorruptionHighTowerCorr) this->mHistTriggerCorruptionHighTowerCorr->Write();
-        if (this->mHistTriggerCorruptionPatchSumCorr) this->mHistTriggerCorruptionPatchSumCorr->Write();
+        SAVEHIST(this->mHistTriggerCorruptionHighTower)
+        SAVEHIST(this->mHistTriggerCorruptionPatchSum)
+        SAVEHIST(this->mHistTriggerCorruptionHighTowerCorr)
+        SAVEHIST(this->mHistTriggerCorruptionPatchSumCorr)
+
+	SAVEHIST(this->mHist_TDC_status)
+	SAVEHIST(this->mHist_SMD_status)
+	SAVEHIST(this->mHist_btow_spectra_1)
+	SAVEHIST(this->mHist_btow_spectra_2)
+	SAVEHIST(this->mHist_btow_spectra_3)
+	SAVEHIST(this->mHist_smd_capacitor)
+	SAVEHIST(this->mHist_smd_sum)
+	SAVEHIST(this->mHist_psd_capacitor)
+	SAVEHIST(this->mHist_psd_sum)
+	SAVEHIST(this->mHist_HTMAX_spectra)
+	SAVEHIST(this->mHist_PAMAX_spectra)
+	SAVEHIST(this->mHist_PSD_status)
+	SAVEHIST(this->mHist_JET_spectra)
+	SAVEHIST(this->mHist_JETMAX_spectra)
+	SAVEHIST(this->mHist_JET_ped)
+
+	SAVEHIST(this->mHist_BTOW_Corruption)
+	SAVEHIST(this->mHist_smd_spectra)
+	SAVEHIST(this->mHist_psd_spectra)
+	SAVEHIST(this->mHist_HTMAX_dist)
+	SAVEHIST(this->mHist_PAMAX_dist)
+	SAVEHIST(this->mHist_JETMAX_dist)
+
+#undef SAVEHIST
 
     }
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
 //-------------------------------------------------------------------
 void BEMCPlots::processEvent( char *datap
-			    , const unsigned char *
-                	    , const unsigned char *
-                	    , const unsigned short *
-                	    , const unsigned short *
-                	    , const unsigned short *
+                    	    , const unsigned char *dsmL0WestInput
+                    	    , const unsigned char *dsmL0EastInput
+                    	    , const unsigned short *dsmL1Input
+                    	    , const unsigned short *dsmL2Input
+                    	    , const unsigned short *dsmL3Input
                 	    ) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 #ifdef NEW_DAQ_READER
@@ -426,7 +568,6 @@ void BEMCPlots::processEvent( char *datap
 #else
     evpReader *evp_reader = (evpReader*)(datap);
     int ret = emcReader(datap);
-    trgReader(datap);
 #endif
 
     {
@@ -438,32 +579,28 @@ void BEMCPlots::processEvent( char *datap
 	if (BEMCDecoder) BEMCDecoder->SetDateTime(evt_time);
     }
 
-const unsigned char *dsmL0WestInput = 0;
-const unsigned char *dsmL0EastInput = 0;
-const unsigned short *dsmL1Input = 0;
-const unsigned short *dsmL2Input = 0;
-const unsigned short *dsmL3Input = 0;
+    if (!dsmL0WestInput || !dsmL0EastInput || !dsmL1Input || !dsmL2Input || !dsmL3Input) {
 #ifdef NEW_DAQ_READER
-    daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
-    if (dd_trg) while (dd_trg->iterate()) {
-        trg_t *d = (trg_t *) dd_trg->Void;
-        if (d) {
-            dsmL0WestInput = &(d->BEMC[0][0]);
-            dsmL0EastInput = &(d->BEMC[1][0]);
-	    dsmL1Input = &(d->BEMC_l1[0]);
-            dsmL2Input = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.EMC) : 0);
-            dsmL3Input = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.lastDSM) : 0);
+	daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
+	if (dd_trg) while (dd_trg->iterate()) {
+    	    trg_t *d = (trg_t *) dd_trg->Void;
+    	    if (d) {
+        	dsmL0WestInput = &(d->BEMC[0][0]);
+    		dsmL0EastInput = &(d->BEMC[1][0]);
+		dsmL1Input = &(d->BEMC_l1[0]);
+        	dsmL2Input = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.EMC) : 0);
+        	dsmL3Input = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.lastDSM) : 0);
+	    }
 	}
-    }
 #else
-    dsmL0WestInput = &(trg.BEMC[0][0]);
-    dsmL0EastInput = &(trg.BEMC[1][0]);
-    dsmL1Input = trg.BEMC_l1;
-    dsmL2Input = ((unsigned short*) trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0);
-    dsmL3Input = ((unsigned short*) trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
- 
+	trgReader(datap);
+	dsmL0WestInput = &(trg.BEMC[0][0]);
+	dsmL0EastInput = &(trg.BEMC[1][0]);
+	dsmL1Input = trg.BEMC_l1;
+	dsmL2Input = ((unsigned short*) trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0);
+	dsmL3Input = ((unsigned short*) trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
 #endif
-
+    }
 
     //if (!datap || (mDebug >= 2)) cout << "datap = " << (int*)datap << endl;
     if (!dsmL0WestInput || (mDebug >= 2)) cout << "dsmL0WestInput = " << (int*)dsmL0WestInput << endl;
@@ -484,29 +621,65 @@ const unsigned short *dsmL3Input = 0;
     if (this->mHistTot) this->mHistTot->Fill(0.5);
 
     if (DSM_L0_present) {
-	int jetPatchSum[12];
-	int jetPatchHT[12];
-	for (int i = 0;i < 12;i++) {
+	int jetPatchSum[BEMCNJET];
+	int jetPatchHT[BEMCNJET];
+	for (int i = 0;i < BEMCNJET;i++) {
 	    jetPatchSum[i] = 0;
 	    jetPatchHT[i] = 0;
 	}
+	int MAXHT = 0;
+	int MAXPA = 0;
+	int MAXHTID = 0;
+	int MAXPAID = 0;
 	for (int i = 0;i < 300;i++) {
     	    if (this->mHistDsmL0InputHighTower) this->mHistDsmL0InputHighTower->Fill(i, this->mDsmL0InputHighTower[i]);
     	    if (this->mHistDsmL0InputPatchSum) this->mHistDsmL0InputPatchSum->Fill(i, this->mDsmL0InputPatchSum[i]);
 
+    	    if((this->mDsmL0InputHighTower[i] > MAXHT) && (this->mDsmL0InputHighTower[i] < 63)) {MAXHT = this->mDsmL0InputHighTower[i]; MAXHTID = i;}
+    	    if((this->mDsmL0InputPatchSum[i] > MAXPA) && (this->mDsmL0InputPatchSum[i] < 63)) {MAXPA = this->mDsmL0InputPatchSum[i]; MAXPAID = i;}
+
 	    if (BEMCDecoder) {
 		int jetPatch, jetPatchSeq;
 		if (BEMCDecoder->GetJetPatchAndSequenceFromTriggerPatch(i, jetPatch, jetPatchSeq)) {
-    		    if (jetPatchHT[jetPatch] < this->mDsmL0InputHighTower[i]) jetPatchHT[jetPatch] = this->mDsmL0InputHighTower[i];
-    		    jetPatchSum[jetPatch] += this->mDsmL0InputPatchSum[i];
+		    if ((jetPatch >= 0) && (jetPatch < BEMCNJET)) {
+    			if (jetPatchHT[jetPatch] < this->mDsmL0InputHighTower[i]) jetPatchHT[jetPatch] = this->mDsmL0InputHighTower[i];
+    		        jetPatchSum[jetPatch] += this->mDsmL0InputPatchSum[i];
+		    }
 		}
 	    }
 
 	    if (mDebug >= 3) cout << "TriggerPatch " << i << ": HighTower = " << this->mDsmL0InputHighTower[i] << ", PatchSum = " << this->mDsmL0InputPatchSum[i] << endl;
 	}
-	for (int i = 0;i < 12;i++) {
+	if(this->mHist_HTMAX_spectra) this->mHist_HTMAX_spectra->Fill((float)MAXHTID,(float)MAXHT);
+	if(this->mHist_PAMAX_spectra) this->mHist_PAMAX_spectra->Fill((float)MAXPAID,(float)MAXPA);
+    
+	int HTTH = 12;
+	int PATH = 12;
+	if((MAXHT > HTTH) && this->mHist_HTMAX_dist) this->mHist_HTMAX_dist->Fill((float)MAXHTID);
+	if((MAXPA > PATH) && this->mHist_PAMAX_dist) this->mHist_PAMAX_dist->Fill((float)MAXPAID);
+
+	int MAXJETID =0;
+	int MAXJETVALUE =-9999;
+	for (int i = 0;i < BEMCNJET;i++) {
     	    if (this->mHistHighTowerSpectrum[i]) this->mHistHighTowerSpectrum[i]->Fill(jetPatchHT[i]);
     	    if (this->mHistPatchSumSpectrum[i]) this->mHistPatchSumSpectrum[i]->Fill(jetPatchSum[i]);
+    	    if (jetPatchSum[i] > MAXJETVALUE) { MAXJETVALUE = jetPatchSum[i]; MAXJETID = i;}  
+	    if (this->mHist_JET_spectra) this->mHist_JET_spectra->Fill(i, jetPatchSum[i]);  
+	}
+	if (this->mHist_JETMAX_spectra) this->mHist_JETMAX_spectra->Fill(MAXJETID,MAXJETVALUE);
+	int JETPATH = 35;
+	if ((MAXJETVALUE > JETPATH) && this->mHist_JETMAX_dist) this->mHist_JETMAX_dist->Fill(MAXJETID);
+    
+	for (int i=0;i<BEMCNJET;i++) {
+	    if (i != MAXJETID) {
+    		BEMCJPPED[i] += jetPatchSum[i];
+    		BEMCNJPPED[i]++;
+    		if(BEMCNJPPED[i]==10) {
+        	    if (this->mHist_JET_ped) this->mHist_JET_ped->Fill(i,(float)BEMCJPPED[i]/(float)BEMCNJPPED[i]);
+		    BEMCJPPED[i] = 0;
+		    BEMCNJPPED[i] = 0;
+    		} 
+	    }
 	}
     }
 
@@ -523,7 +696,7 @@ const unsigned short *dsmL3Input = 0;
     }
 
     if (DSM_L2_present) {
-	for (int ijp = 0;ijp < 12;ijp++) {
+	for (int ijp = 0;ijp < BEMCNJET;ijp++) {
     	    if (this->mHistDsmL2InputHighTowerBits) this->mHistDsmL2InputHighTowerBits->Fill(ijp, this->mDsmL2InputHighTowerBits[ijp]);
     	    if (this->mHistDsmL2InputPatchSumBits) this->mHistDsmL2InputPatchSumBits->Fill(ijp, this->mDsmL2InputPatchSumBits[ijp]);
 	}
@@ -540,6 +713,8 @@ const unsigned short *dsmL3Input = 0;
     	    if (this->mHistDsmL3InputJPsiTopoBit) this->mHistDsmL3InputJPsiTopoBit->Fill(this->mDsmL3InputJPsiTopoBit[0]);
     	    if (this->mHistDsmL3InputJetPatchTopoBit) this->mHistDsmL3InputJetPatchTopoBit->Fill(this->mDsmL3InputJetPatchTopoBit[0]);    
     }
+
+    int STATUS = BEMCNOTINSTALLED; //NOT PRESENT
 #ifdef NEW_DAQ_READER
     daq_dta *dd_btow = rdr ? (rdr->det("btow")->get("adc")) : 0;
     if (dd_btow) while (dd_btow->iterate()) {
@@ -556,6 +731,25 @@ const unsigned short *dsmL3Input = 0;
 			this->mDsmSimuPatchSum[i] = 0;
 		    }
 		}
+		int TDCStatus[BTOW_MAXFEE];
+		int TDCTotal = 0;
+		STATUS = BEMCOK; //OK
+		for (int tdc = 0; tdc < BTOW_MAXFEE;tdc++) {
+		    TDCStatus[tdc] = BEMCNOTINSTALLED; // NOT INSTALLED
+#ifdef NEW_DAQ_READER
+            	    int count = d->preamble[tdc][0];
+            	    int error = d->preamble[tdc][1];
+#else
+	    	    int count = (*(header + tdc));
+	    	    int error = (*(header + tdc + 30));
+#endif
+		    if ((error == 0) && (count == (BTOW_PRESIZE + BTOW_DATSIZE))) TDCStatus[tdc] = BEMCOK; // OK
+	    	    else if ((error == 4095) && (count == 4095)) TDCStatus[tdc] = BEMCNOTINSTALLED; // NOT INSTALLED
+	    	    else TDCStatus[tdc] = BEMCCORRUPTED; //CORRUPTED    
+	    	    if (TDCStatus[tdc] == BEMCCORRUPTED) STATUS = BEMCCORRUPTED; // if any crate is corrupted, mark event as corrupted
+	    	    if (this->mHist_TDC_status) this->mHist_TDC_status->Fill(0.0, tdc);
+	    	    if (this->mHist_TDC_status) this->mHist_TDC_status->Fill((float)TDCStatus[tdc], tdc);
+		}
 		for(int i = 0;i < (BTOW_MAXFEE * BTOW_DATSIZE);i++) {
 		    int tdc = i % BTOW_MAXFEE;
 #ifdef NEW_DAQ_READER
@@ -568,14 +762,19 @@ const unsigned short *dsmL3Input = 0;
 #endif
 		    if((error==0) && (count == (BTOW_PRESIZE + BTOW_DATSIZE))) {
 			// OK
+#ifdef NEW_DAQ_READER
+			int adc = d->adc[tdc][tdc_channel];
+#else
+			int adc = emc.btow[i];
+#endif
+	    		TDCTotal += adc;
+	    		int daqid = ((tdc * BTOW_DATSIZE) + tdc_channel);
+	    		if ((tdc >= 0)  && (tdc < 10) && (TDCStatus[tdc]!=BEMCNOTINSTALLED) && this->mHist_btow_spectra_1) this->mHist_btow_spectra_1->Fill(daqid, adc);
+	    		if ((tdc >= 10) && (tdc < 20) && (TDCStatus[tdc]!=BEMCNOTINSTALLED) && this->mHist_btow_spectra_2) this->mHist_btow_spectra_2->Fill(daqid, adc);
+	    		if ((tdc >= 20) && (tdc < 30) && (TDCStatus[tdc]!=BEMCNOTINSTALLED) && this->mHist_btow_spectra_3) this->mHist_btow_spectra_3->Fill(daqid, adc);
 			int softId;
 			if (BEMCDecoder && BEMCDecoder->GetTowerIdFromDaqId(i, softId)) {
 			    if ((softId >= 1) && (softId <= 4800)) {
-#ifdef NEW_DAQ_READER
-				int adc = d->adc[tdc][tdc_channel];
-#else
-				int adc = emc.btow[i];
-#endif
 				if ((softId >= 1) && (softId <= 1220)) {
 				    if (this->mHistRawAdc1) this->mHistRawAdc1->Fill(softId, adc);
 				} else if ((softId >= 1221) && (softId <= 2400)) {
@@ -632,6 +831,15 @@ const unsigned short *dsmL3Input = 0;
 		}
 	}
     }
+    if (this->mHist_BTOW_Corruption) this->mHist_BTOW_Corruption->Fill(0.0);
+    if (this->mHist_BTOW_Corruption) this->mHist_BTOW_Corruption->Fill(STATUS);
+
+    int totalSumSMD = 0;
+    int totalSumPSD = 0;
+    int feeSum[120];
+    int pmtSum[60];
+    for (int i = 0;i < 120;i++) feeSum[i] = 0;
+    for (int i = 0;i < 60;i++) pmtSum[i] = 0;
     for (int bsmd_fiber = 0;bsmd_fiber < BSMD_FIBERS;bsmd_fiber++) {
 	int bprs_fiber = bsmd_fiber - 8;
 #ifdef NEW_DAQ_READER
@@ -641,56 +849,77 @@ const unsigned short *dsmL3Input = 0;
 	    if (d && BEMCDecoder) {
 #else
 	if (emc.bsmd_in && BEMCDecoder) {
-	    {
+		{
 #endif
-	    int det, m, e, s;
-	    int feeSum[120];
-	    int softId, box, wire, Avalue;
-	    int pmtSum[60];
-	    for (int i = 0;i < 120;i++) feeSum[i] = 0;
-	    for (int i = 0;i < 60;i++) pmtSum[i] = 0;
-	    for (int fiber_channel = 0;fiber_channel < BSMD_DATSIZE;fiber_channel++) {
-		    if (BEMCDecoder->GetSmdCoord(bsmd_fiber, fiber_channel, det, m, e, s)) {
-			if ((m >= 1) && (m <= 120)) {
+		int fiberSum = 0;
+		int det, m, e, s;
+		int softId, box, wire, Avalue;
 #ifdef NEW_DAQ_READER
-			    int adc = d->adc[fiber_channel];
+    		int cap = d->cap;
 #else
-			    int adc = emc.bsmd[bsmd_fiber][fiber_channel];
+    		int cap = emc.bsmd_cap[bsmd_fiber];
 #endif
-			    feeSum[m - 1] += adc;
-			}
-		    }
-		    if (BEMCDecoder->GetPsdId(bprs_fiber, fiber_channel, softId, box, wire, Avalue)) {
-			if ((box >= 1) && (box <= 60)) {
+		for (int fiber_channel = 0;fiber_channel < BSMD_DATSIZE;fiber_channel++) {
 #ifdef NEW_DAQ_READER
-    			    int adc = d->adc[fiber_channel];
+		    int adc = d->adc[fiber_channel];
 #else
-			    int adc = emc.bsmd[bsmd_fiber][fiber_channel];
+		    int adc = emc.bsmd[bsmd_fiber][fiber_channel];
 #endif
-			    pmtSum[box - 1] += adc;
-			    if ((softId >= 1) && (softId <= 1220)) {
-			        if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Fill(softId, adc);
-			    } else if ((softId >= 1221) && (softId <= 2400)) {
-			        if (this->mHistRawAdcPsd2) this->mHistRawAdcPsd2->Fill(softId, adc);
-			    } else if ((softId >= 2401) && (softId <= 3540)) {
-			        if (this->mHistRawAdcPsd3) this->mHistRawAdcPsd3->Fill(softId, adc);
-			    } else if ((softId >= 3541) && (softId <= 4800)) {
-			        if (this->mHistRawAdcPsd4) this->mHistRawAdcPsd4->Fill(softId, adc);
+		    fiberSum += adc;
+		    if ((bsmd_fiber >= 0) && (bsmd_fiber < 8)) {
+			totalSumSMD += adc;
+			if (BEMCDecoder->GetSmdCoord(bsmd_fiber, fiber_channel, det, m, e, s)) {
+			    if ((m >= 1) && (m <= 120)) {
+				feeSum[m - 1] += adc;
 			    }
 			}
+		    } else {
+			totalSumPSD += adc;
+			if (BEMCDecoder->GetPsdId(bprs_fiber, fiber_channel, softId, box, wire, Avalue)) {
+			    if ((box >= 1) && (box <= 60)) {
+				pmtSum[box - 1] += adc;
+				if ((softId >= 1) && (softId <= 1220)) {
+			    	    if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Fill(softId, adc);
+				} else if ((softId >= 1221) && (softId <= 2400)) {
+			    	    if (this->mHistRawAdcPsd2) this->mHistRawAdcPsd2->Fill(softId, adc);
+				} else if ((softId >= 2401) && (softId <= 3540)) {
+			    	    if (this->mHistRawAdcPsd3) this->mHistRawAdcPsd3->Fill(softId, adc);
+				} else if ((softId >= 3541) && (softId <= 4800)) {
+			    	    if (this->mHistRawAdcPsd4) this->mHistRawAdcPsd4->Fill(softId, adc);
+				}
+			    }
+		        }
 		    }
-	    }
-	    for (int i = 0;i < 120;i++) {
-		if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Fill(i + 1, feeSum[i]);
-	    }
-	    for (int i = 0;i < 60;i++) {
-		if (this->mHistPsdFeeSum) this->mHistPsdFeeSum->Fill(i + 1, pmtSum[i]);
-	    }
-
+		}
+		int BSMD_STATUS = BEMCOK;
+		if (fiberSum == 0) BSMD_STATUS = BEMCNOTINSTALLED;
+		//fprintf(stderr,"Sum for fiber %d = %f\n",bsmd_fiber,fiberSum);
+		if((bsmd_fiber >= 0) && (bsmd_fiber < 8)) {
+		    if (this->mHist_SMD_status) this->mHist_SMD_status->Fill(0.0, bsmd_fiber);
+    		    if (this->mHist_SMD_status) this->mHist_SMD_status->Fill(BSMD_STATUS, bsmd_fiber);
+		    if(BSMD_STATUS==BEMCOK) {
+    			if (this->mHist_smd_capacitor) this->mHist_smd_capacitor->Fill(cap, bsmd_fiber);
+    			if (this->mHist_smd_sum) this->mHist_smd_sum->Fill(fiberSum, bsmd_fiber);
+		    }
+		} else {
+    		    if (this->mHist_PSD_status) this->mHist_PSD_status->Fill(0.0, bprs_fiber);
+    		    if (this->mHist_PSD_status) this->mHist_PSD_status->Fill(BSMD_STATUS, bprs_fiber);
+		    if(BSMD_STATUS==BEMCOK) {
+			if (this->mHist_psd_capacitor) this->mHist_psd_capacitor->Fill(cap, bprs_fiber);
+    			if (this->mHist_psd_sum) this->mHist_psd_sum->Fill(fiberSum, bprs_fiber);
+    		    }
+		}
 	    }
 	}
     }
+    for (int i = 0;i < 120;i++) {
+	if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Fill(i + 1, feeSum[i]);
+    }
+    for (int i = 0;i < 60;i++) {
+	if (this->mHistPsdFeeSum) this->mHistPsdFeeSum->Fill(i + 1, pmtSum[i]);
+    }
+    if (this->mHist_smd_spectra) this->mHist_smd_spectra->Fill(totalSumSMD);
+    if (this->mHist_psd_spectra) this->mHist_psd_spectra->Fill(totalSumPSD);
 
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
-//-------------------------------------------------------------------
