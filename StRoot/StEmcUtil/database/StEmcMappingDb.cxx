@@ -1,4 +1,4 @@
-// $Id: StEmcMappingDb.cxx,v 1.1 2009/01/08 02:16:18 kocolosk Exp $
+// $Id: StEmcMappingDb.cxx,v 1.2 2009/01/30 16:46:46 kocolosk Exp $
 
 #include "StEmcMappingDb.h"
 
@@ -19,11 +19,11 @@
 ClassImp(StEmcMappingDb)
 
 StEmcMappingDb::StEmcMappingDb(int date, int time) : mBemcMap(NULL), 
-    mBprsMap(NULL), mSmdeMap(NULL), mSmdpMap(NULL), mGlobalDirty(true)
+    mBprsMap(NULL), mSmdeMap(NULL), mSmdpMap(NULL), mDBI(NULL), 
+    mDbMk(NULL), mGlobalDirty(true)
 {
-    StMaker *test = new StMaker();
-    mDbMk = static_cast<St_db_Maker*>(test->GetMakerInheritsFrom("St_db_Maker"));
-    delete test;
+    StMaker *chain = StMaker::GetChain();
+    if(chain) mDbMk = (St_db_Maker*)(chain->GetMakerInheritsFrom("St_db_Maker"));
     
     if(!mDbMk || !mDbMk->TestBIT(StMaker::kInitEnd)) {
         StDbManager *mgr = StDbManager::Instance();
@@ -286,6 +286,9 @@ bool StEmcMappingDb::isDirty(StDbTable *table) {
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.cxx,v $
+ * Revision 1.2  2009/01/30 16:46:46  kocolosk
+ * use StMaker::GetChain() instead of the hucker approach
+ *
  * Revision 1.1  2009/01/08 02:16:18  kocolosk
  * move StEmcMappingDb/StEmcDecoder to StEmcUtil/database
  *
