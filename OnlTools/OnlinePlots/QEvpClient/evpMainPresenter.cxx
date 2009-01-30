@@ -28,6 +28,7 @@ int evpMainPresenter::main(int argc, char **argv )
 
     PresenterGui* gui = new PresenterGui();
 
+#if 0
     TSeqCollection* col = gSystem->GetListOfFileHandlers();
     TIter next(col);
     TFileHandler* o=0;
@@ -38,7 +39,8 @@ int evpMainPresenter::main(int argc, char **argv )
 	break;
       }
     }
-    
+#endif
+
     gui->resize(500,500);
     gui->show();
 
@@ -49,7 +51,7 @@ int evpMainPresenter::main(int argc, char **argv )
 
     EvpPresenter* presenter = new EvpPresenter();
     PresenterConnect* con = new PresenterConnect(gui,presenter);
-    
+    presenter->Connect();
     //presenter->run();
 
 //    delete presenter;

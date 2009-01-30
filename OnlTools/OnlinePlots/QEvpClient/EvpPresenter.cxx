@@ -89,7 +89,7 @@ void EvpPresenter::Connect() {
     EvpUtil::CheckCanvasDefinitions(mfile);
     mGroups.read(mfile);
   }
-  
+
   ReconfigureTabs();
   
     
@@ -420,14 +420,20 @@ void EvpPresenter::addGroupTabs() {
       }
     }
 }
-
-  
+#if 0
+//______________________________________________________________________________ 
+void EvpPresenter::ClosePresenter() 
+{
+     // Qt [slot] to terminate the application
+   Stop();
+}
+#endif
 
 
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.cxx,v 1.1 2009/01/23 16:16:03 jeromel Exp $
+ * $Id: EvpPresenter.cxx,v 1.2 2009/01/30 20:35:32 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -437,6 +443,9 @@ void EvpPresenter::addGroupTabs() {
  ***************************************************************************
  *
  * $Log: EvpPresenter.cxx,v $
+ * Revision 1.2  2009/01/30 20:35:32  fine
+ * remove the redundant letsgo slot
+ *
  * Revision 1.1  2009/01/23 16:16:03  jeromel
  * Import from online/RTS/src/
  *

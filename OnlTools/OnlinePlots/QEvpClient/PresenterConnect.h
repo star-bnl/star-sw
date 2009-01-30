@@ -46,7 +46,6 @@ class PresenterConnect : public QObject {
  void signalEventInfo(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int);
  void signalServerInfo(ServerStatus*);
  void updateRequest();
- void letsgo();
 };
 
 
