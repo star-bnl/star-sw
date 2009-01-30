@@ -188,7 +188,6 @@ int  EvpServer::NextEvent() {
  
   //printf("Got an event\n");
   //fflush(stdout);
-#ifndef NEW_DAQ_READER
   if(mem == NULL) {
     mRS->setEmpty(1);
     switch(evp->status) {
@@ -212,7 +211,6 @@ int  EvpServer::NextEvent() {
       break;
     }    
   }
-#endif
 
   int status = evp->status;
 
@@ -620,7 +618,7 @@ void EvpServer::SetStopFlag(void)
 
 /***************************************************************************
  *
- * $Id: EvpServer.cxx,v 1.2 2009/01/24 01:07:30 dkettler Exp $
+ * $Id: EvpServer.cxx,v 1.3 2009/01/30 01:15:46 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -630,6 +628,9 @@ void EvpServer::SetStopFlag(void)
  ***************************************************************************
  *
  * $Log: EvpServer.cxx,v $
+ * Revision 1.3  2009/01/30 01:15:46  dkettler
+ * Restored status check
+ *
  * Revision 1.2  2009/01/24 01:07:30  dkettler
  * Added runtime endOfRunAction config
  *
