@@ -45,13 +45,13 @@ void EEMCPlots::saveHisto(TFile *hfile) {
 }
 //-------------------------------------------------------------------
 void EEMCPlots::fillHisto(    char *rdr
-                    	    , const unsigned char *
-                    	    , const unsigned short int  *
-                    	    , const unsigned short int  *
-                    	    , const unsigned short int  *
+                    	    , const unsigned char * dsm0inp
+                    	    , const unsigned short int  * dsm1inp
+                    	    , const unsigned short int  * dsm2inp
+                    	    , const unsigned short int  * dsm3inp
                 	    ) {
     if (EEMCPlotsInstance) {
-	EEMCPlotsInstance->processEvent(rdr);
+	EEMCPlotsInstance->processEvent(rdr, dsm0inp, dsm1inp, dsm2inp, dsm3inp);
     }
 }
 //-------------------------------------------------------------------
@@ -86,40 +86,38 @@ void EEMCPlots::saveHistograms(TFile *hfile) {
 }
 //-------------------------------------------------------------------
 void EEMCPlots::processEvent( char *datap
-                    	    , const unsigned char *
-                    	    , const unsigned short int  *
-                    	    , const unsigned short int  *
-                    	    , const unsigned short int  *
+                    	    , const unsigned char * dsm0inp
+                    	    , const unsigned short int  * dsm1inp
+                    	    , const unsigned short int  * dsm2inp
+                    	    , const unsigned short int  * dsm3inp
                  	    ) {
     if (eeqa) {
-	const unsigned char * dsm0inp = 0;
-        const unsigned short int  * dsm1inp = 0;
-        const unsigned short int  * dsm2inp = 0;
-        const unsigned short int  * dsm3inp = 0;
 #ifdef NEW_DAQ_READER
     daqReader *rdr = (daqReader*)(datap);
 #else
     int ret = emcReader(datap);
-    trgReader(datap);
 #endif
 
+    if (!dsm0inp || !dsm1inp || !dsm2inp || !dsm3inp) {
 #ifdef NEW_DAQ_READER
-    daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
-    if (dd_trg) while (dd_trg->iterate()) {
-        trg_t *d = (trg_t *) dd_trg->Void;
-        if (d) {
-            dsm0inp = &(d->EEMC[0]);
-            dsm1inp = &(d->EEMC_l1[0]);
-            dsm2inp = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.EMC) : 0);
-            dsm3inp = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.lastDSM) : 0);
-         }
-    }
+	daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
+        if (dd_trg) while (dd_trg->iterate()) {
+    	    trg_t *d = (trg_t *) dd_trg->Void;
+    	    if (d) {
+        	dsm0inp = &(d->EEMC[0]);
+    		dsm1inp = &(d->EEMC_l1[0]);
+        	dsm2inp = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.EMC) : 0);
+        	dsm3inp = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.lastDSM) : 0);
+            }
+	}
 #else
-    dsm0inp = ((unsigned char*)&trg.EEMC);
-    dsm1inp = ((unsigned short*)trg.EEMC_l1);
-    dsm2inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0);
-    dsm3inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
+	trgReader(datap);
+	dsm0inp = ((unsigned char*)&trg.EEMC);
+	dsm1inp = ((unsigned short*)trg.EEMC_l1);
+	dsm2inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0);
+	dsm3inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
 #endif
+    }
 
 #ifdef NEW_DAQ_READER
     unsigned int runId = rdr->run;
