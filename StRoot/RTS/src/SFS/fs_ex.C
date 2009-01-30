@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
   int i=0;
   while((entry = idx->readdir(dir))) {
     
-    printf("%7d %7d (%s)(%s)%c\n",entry->offset, entry->sz, idx->cwd,entry->d_name,entry->has_child ? '/' : ' ');
+    printf("%lld %lld (%s)(%s)%c\n",entry->offset, entry->sz, idx->cwd,entry->d_name,entry->has_child ? '/' : ' ');
 
     
     if(i++ > 10) break;
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     i--;
   }
 
-  printf("%d %d %s\n",entry->offset, entry->sz, entry->full_name);
+  printf("%lld %d %s\n",entry->offset, entry->sz, entry->full_name);
 
   /*
   int ret = lseek(fd, entry->offset, SEEK_SET);

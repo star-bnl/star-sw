@@ -70,7 +70,7 @@ daqReader::daqReader(char *mem, int size)
 
 daqReader::daqReader(char *name) 
 {
-  struct stat stat_buf ;
+  struct stat64 stat_buf ;
 
   init();
 
@@ -87,7 +87,7 @@ daqReader::daqReader(char *name)
 
   // This code is reached only if the argument was non-NULL
   // file or directory?
-  if(stat(fname, &stat_buf) < 0) {	// error
+  if(stat64(fname, &stat_buf) < 0) {	// error
     LOG(CRIT,"Can't stat \"%s\" [%s]",(int)fname,(int)strerror(errno),0,0,0);
     status = EVP_STAT_CRIT;
     sleep(1);
@@ -122,7 +122,7 @@ daqReader::daqReader(char *name)
   // descriptor for ".daq" view of file...
   LOG(DBG,"Running through a file %s of %d bytes",(int)fname,file_size,0,0,0) ;
 	
-  desc = open(fname,O_RDONLY,0444) ;
+  desc = open64(fname,O_RDONLY,0444) ;
   if(desc < 0) {	// error
     LOG(ERR,"Can't open %s [%s]",(int)fname,(int)strerror(errno),0,0,0) ;
     sleep(1) ;
@@ -338,7 +338,7 @@ char *daqReader::get(int num, int type)
 
     LOG(DBG, "Skipping a non-event SFS file...");
 
-    lseek(desc, event_size, SEEK_CUR);
+    lseek64(desc, event_size, SEEK_CUR);
     evt_offset_in_file += event_size;
     event_size = 0;
     goto repeat;
@@ -528,11 +528,11 @@ char *daqReader::get(int num, int type)
 
 
   // move to next event although it may make no sense...
-  int endpos = lseek(desc, 0, SEEK_CUR);
+  long long int endpos = lseek64(desc, 0, SEEK_CUR);
 
-  int nexteventpos = lseek(desc, event_size, SEEK_CUR) ;
+  long long int nexteventpos = lseek64(desc, event_size, SEEK_CUR) ;
 	
-  LOG(DBG,"End of event:  start_offset=%d  end_offset=%d, file size %d",endpos,nexteventpos,file_size) ;
+  LOG(DBG,"End of event:  start_offset=%d  end_offset=%lld, file size %lld",endpos,nexteventpos,file_size) ;
 
   evt_offset_in_file = nexteventpos;
 
@@ -603,42 +603,42 @@ int daqReader::addToEventSize(int sz)
 {
   if(input_type == pointer) return 0;
 
-  int orig_offset = lseek(desc, 0, SEEK_CUR);
+  long long int orig_offset = lseek64(desc, 0, SEEK_CUR);
 
-  LOG(DBG, "orig_offset = %d sz=%d",orig_offset,sz);
+  LOG(DBG, "orig_offset = %lld sz=%d",orig_offset,sz);
 
-  lseek(desc, sz, SEEK_CUR);
+  lseek64(desc, sz, SEEK_CUR);
 
   char buff[10];
   int ret = read(desc, buff, 8);
   if(ret == 0) {
-    lseek(desc, orig_offset, SEEK_SET);
+    lseek64(desc, orig_offset, SEEK_SET);
     return 0;
   }
   
   if(memcmp(buff, "LRHD",4) == 0) {
-    lseek(desc, orig_offset, SEEK_SET); 
+    lseek64(desc, orig_offset, SEEK_SET); 
     return 0;
   }
 
   if(memcmp(buff, "DATAP",4) == 0) {
-    lseek(desc, orig_offset, SEEK_SET);
+    lseek64(desc, orig_offset, SEEK_SET);
     return 0;
   }
 
   if(memcmp(buff, "SFS", 3) == 0) {
-    lseek(desc, orig_offset, SEEK_SET);
+    lseek64(desc, orig_offset, SEEK_SET);
     return 0;
   }
 
   if(memcmp(buff, "FILE", 4) == 0) {
-    lseek(desc, orig_offset, SEEK_SET);
+    lseek64(desc, orig_offset, SEEK_SET);
     return 0;
   }
 
-  LOG(DBG, "buff = %c%c%c  off=%d",buff[0],buff[1],buff[2], orig_offset);
+  LOG(DBG, "buff = %c%c%c  off=%lld",buff[0],buff[1],buff[2], orig_offset);
 
-  lseek(desc, orig_offset, SEEK_SET);
+  lseek64(desc, orig_offset, SEEK_SET);
 
   
   return 8192;
@@ -652,8 +652,8 @@ int daqReader::getEventSize()
   int padding_check;
 
   int ret = -1;    // lets be a pessimist and assume failure...
-  int offset = 0;
-  int space_left;
+  long long int offset = 0;
+  long long int space_left;
 
   status = EVP_STAT_OK;
   event_size = 0;
@@ -663,7 +663,7 @@ int daqReader::getEventSize()
     space_left = data_size - (m - data_memory);
   }
   else {
-    offset = lseek(desc, 0, SEEK_CUR);
+    offset = lseek64(desc, 0, SEEK_CUR);
     space_left = file_size - offset;
 
     if(space_left > 1024) space_left = 1024;
@@ -682,13 +682,13 @@ int daqReader::getEventSize()
 
   
   if(space_left == 0) return 0;
-  if(space_left < (int)sizeof(LOGREC)) {
-    LOG(NOTE, "File truncated: only %d bytes left",space_left);
+  if(space_left < (long long int)sizeof(LOGREC)) {
+    LOG(NOTE, "File truncated: only %lld bytes left",space_left);
     status = EVP_STAT_EOR;
     goto done;
   }
   
-  LOG(DBG, "OFFSET = %d", offset);
+  LOG(DBG, "OFFSET = %lld", offset);
 
   // Wait, we might not have a LRHD or DATAP...
   padding_check=0;
@@ -801,8 +801,8 @@ int daqReader::getEventSize()
       m += sizeof(LOGREC);  
       event_size += sizeof(LOGREC);
 
-      if(space_left < (int)sizeof(LOGREC)) {
-	LOG(NOTE, "File truncated: only %d bytes left",space_left);
+      if(space_left < (long long int)sizeof(LOGREC)) {
+	LOG(NOTE, "File truncated: only %lld bytes left",space_left);
 	status = EVP_STAT_EOR;
 	goto done;
       }
@@ -854,7 +854,7 @@ char *daqReader::getInputType()
 
 int daqReader::openEventFile()
 {
-  struct stat stat_buf ;
+  struct stat64 stat_buf ;
 
   // First close file if any...
   if(desc > 0) {
@@ -864,7 +864,7 @@ int daqReader::openEventFile()
 
   errno = 0 ;
 
-  desc = open(file_name,O_RDONLY,0666) ;
+  desc = open64(file_name,O_RDONLY,0666) ;
   if(desc < 0) {	
     LOG(ERR,"Error opening file %s [%s] - skipping...",(int)file_name,(int)strerror(errno),0,0,0) ;
     status = EVP_STAT_EVT ;
@@ -872,7 +872,7 @@ int daqReader::openEventFile()
   }
 
   // get the file_size ;
-  int ret = stat(file_name,&stat_buf) ;
+  int ret = stat64(file_name,&stat_buf) ;
   if(ret < 0) {	
     LOG(ERR,"Can't stat %s",(int)file_name,0,0,0,0) ;
     status = EVP_STAT_EVT ;
@@ -1225,8 +1225,8 @@ int daqReader::getNextEventFilenameFromLive(int type)
   // Now we've got the event number...
   sprintf(file_name,"%s/%d",_last_evp_dir_, event_number) ;
   
-  struct stat s;
-  if(stat(file_name, &s) < 0) {
+  struct stat64 s;
+  if(stat64(file_name, &s) < 0) {
     LOG(DBG, "No file %s, try _DELETE",file_name);
     sprintf(file_name,"%s_DELETE/%d",_last_evp_dir_,event_number);
   }
@@ -1878,7 +1878,7 @@ MemMap::~MemMap()
 }
 
 
-char *MemMap::map(int _fd, int _offset, int _size)
+char *MemMap::map(int _fd, long long int _offset, int _size)
 {
   offset = _offset;
   size = _size;
@@ -1894,7 +1894,7 @@ char *MemMap::map(int _fd, int _offset, int _size)
   LOG(DBG, "       mmap excess=%d      aoffset=%d asize=%d",
       excess, actual_offset, actual_size);
 
-  actual_mem_start = (char *) mmap(NULL, actual_size, PROT_READ,MAP_SHARED|MAP_NORESERVE, fd, actual_offset) ;
+  actual_mem_start = (char *) mmap64(NULL, actual_size, PROT_READ,MAP_SHARED|MAP_NORESERVE, fd, actual_offset) ;
   madvise(actual_mem_start, actual_size, MADV_SEQUENTIAL);
   
   if(((void *)actual_mem_start) == MAP_FAILED) {

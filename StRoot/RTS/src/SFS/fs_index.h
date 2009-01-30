@@ -14,7 +14,7 @@ struct fs_inode {
   fs_inode *prev;
   fs_inode *fchild;
   fs_inode *lchild;
-  UINT32 offset;
+  long long int offset;
   int sz;
   char *name;               // local name only
 
@@ -25,7 +25,7 @@ struct fs_dirent {
   char full_name[256];
   char d_name[256];
   int sz;
-  int offset;
+  long long int offset;
   int has_child;
   int swap;
 };
@@ -57,8 +57,8 @@ class wrapfile {
   
   // If mem
   char *wbuff;
-  int wfpos;
-  int wsize;
+  long long int wfpos;
+  long long int wsize;
   
 
  
@@ -68,8 +68,8 @@ class wrapfile {
   int openfd(int fd);
   int read(void *buff, int sz);
   int write(void *buff, int sz);
-  int lseek(int offset, int whence);
-  int fstat(struct stat *stat);
+  long long int lseek(long long int offset, int whence);
+  int fstat(struct stat64 *stat);
   int close();
 };
 
@@ -109,7 +109,7 @@ class fs_index {
   int mount(int ip, int port) ;			// opens and mounts a socket
 
   void umount();
-  int mountsz();
+  long long int mountsz();
 
   static void hexdump(char *buff, int sz);
 
@@ -150,7 +150,7 @@ class fs_index {
 
   fs_inode *find_child(fs_inode *parent, char *name);
   void free_inode(fs_inode *inode);
-  fs_inode *alloc_inode(char *name, int off, int sz);
+  fs_inode *alloc_inode(char *name, long long int off, int sz);
 
   virtual int _create()=0;    // create index for reading...
   int index_created;
