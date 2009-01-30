@@ -36,6 +36,223 @@ TH1 *GetHisto(FileType &fd, const char *name) {
     }
     return hist;
 }
+
+//-------------------------------------------------------------------
+void BEMCPlotsPresenter::displayStatus(FileType file, TPad *pad, int mDebug) {
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+
+    if (!pad) return;
+    pad->Clear();
+    pad->cd(0);
+
+    TH2F *Hist_TDC_status = (TH2F*)GetHisto(file, Hist_TDC_statusName);
+    if (!Hist_TDC_status || (mDebug >= 2)) cout << "Hist_TDC_status = " << Hist_TDC_status << endl;
+    TH2F *Hist_SMD_status = (TH2F*)GetHisto(file, Hist_SMD_statusName);
+    if (!Hist_SMD_status || (mDebug >= 2)) cout << "Hist_SMD_status = " << Hist_SMD_status << endl;
+    TH2F *Hist_PSD_status = (TH2F*)GetHisto(file, Hist_PSD_statusName);
+    if (!Hist_PSD_status || (mDebug >= 2)) cout << "Hist_PSD_status = " << Hist_PSD_status << endl;
+    TH1F *Hist_BTOW_Corruption = (TH1F*)GetHisto(file, Hist_BTOW_CorruptionName);
+    if (!Hist_BTOW_Corruption || (mDebug >= 2)) cout << "Hist_BTOW_Corruption = " << Hist_BTOW_Corruption << endl;
+    
+    TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
+    c->Draw();
+    c->cd(0);
+    c->Divide(2, 2, 0.001, 0.001);
+
+    c->cd(1);
+    if (Hist_TDC_status) {
+        Hist_TDC_status->Draw("H COLZ");
+    }
+    c->cd(2);
+    if (Hist_SMD_status) {
+        Hist_SMD_status->Draw("H COLZ");
+    }
+    c->cd(3);
+    if (Hist_PSD_status) {
+        Hist_PSD_status->Draw("H COLZ");
+    }
+    c->cd(4);
+    if (Hist_BTOW_Corruption) {
+        Hist_BTOW_Corruption->Draw("H COLZ");
+    }
+    
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+}
+
+//-------------------------------------------------------------------
+void BEMCPlotsPresenter::displayTowers(FileType file, TPad *pad, int mDebug) {
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+
+    if (!pad) return;
+    pad->Clear();
+    pad->cd(0);
+
+    TH2F *Hist_btow_spectra_1 = (TH2F*)GetHisto(file, Hist_btow_spectra_1Name);
+    if (!Hist_btow_spectra_1 || (mDebug >= 2)) cout << "Hist_btow_spectra_1 = " << Hist_btow_spectra_1 << endl;
+    TH2F *Hist_btow_spectra_2 = (TH2F*)GetHisto(file, Hist_btow_spectra_2Name);
+    if (!Hist_btow_spectra_2 || (mDebug >= 2)) cout << "Hist_btow_spectra_2 = " << Hist_btow_spectra_2 << endl;
+    TH2F *Hist_btow_spectra_3 = (TH2F*)GetHisto(file, Hist_btow_spectra_3Name);
+    if (!Hist_btow_spectra_3 || (mDebug >= 2)) cout << "Hist_btow_spectra_3 = " << Hist_btow_spectra_3 << endl;
+    
+    TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
+    c->Draw();
+    c->cd(0);
+    c->Divide(1, 3, 0.001, 0.001);
+
+    c->cd(1);
+    if (Hist_btow_spectra_1) {
+        Hist_btow_spectra_1->Draw("H COLZ");
+    }
+    c->cd(2);
+    if (Hist_btow_spectra_2) {
+        Hist_btow_spectra_2->Draw("H COLZ");
+    }
+    c->cd(3);
+    if (Hist_btow_spectra_3) {
+        Hist_btow_spectra_3->Draw("H COLZ");
+    }
+    
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+}
+
+//-------------------------------------------------------------------
+void BEMCPlotsPresenter::displaySMDPSD(FileType file, TPad *pad, int mDebug) {
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+
+    if (!pad) return;
+    pad->Clear();
+    pad->cd(0);
+
+    TH1F *Hist_smd_spectra = (TH1F*)GetHisto(file, Hist_smd_spectraName);
+    if (!Hist_smd_spectra || (mDebug >= 2)) cout << "Hist_smd_spectra = " << Hist_smd_spectra << endl;
+    TH2F *Hist_smd_capacitor = (TH2F*)GetHisto(file, Hist_smd_capacitorName);
+    if (!Hist_smd_capacitor || (mDebug >= 2)) cout << "Hist_smd_capacitor = " << Hist_smd_capacitor << endl;
+    TH2F *Hist_smd_sum = (TH2F*)GetHisto(file, Hist_smd_sumName);
+    if (!Hist_smd_sum || (mDebug >= 2)) cout << "Hist_smd_sum = " << Hist_smd_sum << endl;
+    TH1F *Hist_psd_spectra = (TH1F*)GetHisto(file, Hist_psd_spectraName);
+    if (!Hist_psd_spectra || (mDebug >= 2)) cout << "Hist_psd_spectra = " << Hist_psd_spectra << endl;
+    TH2F *Hist_psd_capacitor = (TH2F*)GetHisto(file, Hist_psd_capacitorName);
+    if (!Hist_psd_capacitor || (mDebug >= 2)) cout << "Hist_psd_capacitor = " << Hist_psd_capacitor << endl;
+    TH2F *Hist_psd_sum = (TH2F*)GetHisto(file, Hist_psd_sumName);
+    if (!Hist_psd_sum || (mDebug >= 2)) cout << "Hist_psd_sum = " << Hist_psd_sum << endl;
+    
+    TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
+    c->Draw();
+    c->cd(0);
+    c->Divide(2, 3, 0.001, 0.001);
+
+    c->cd(1);
+    if (Hist_smd_spectra) {
+        Hist_smd_spectra->Draw("H COLZ");
+    }
+    c->cd(2);
+    if (Hist_psd_spectra) {
+        Hist_psd_spectra->Draw("H COLZ");
+    }
+    c->cd(3);
+    if (Hist_smd_capacitor) {
+        Hist_smd_capacitor->Draw("H COLZ");
+    }
+    c->cd(4);
+    if (Hist_psd_capacitor) {
+        Hist_psd_capacitor->Draw("H COLZ");
+    }
+    c->cd(5);
+    if (Hist_smd_sum) {
+	Hist_smd_sum->Draw("H COLZ");
+    }
+    c->cd(6);
+    if (Hist_psd_sum) {
+        Hist_psd_sum->Draw("H COLZ");
+    }
+    
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+}
+
+//-------------------------------------------------------------------
+void BEMCPlotsPresenter::displayTrigger(FileType file, TPad *pad, int mDebug) {
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+
+    if (!pad) return;
+    pad->Clear();
+    pad->cd(0);
+
+    TH2F *Hist_HTMAX_spectra = (TH2F*)GetHisto(file, Hist_HTMAX_spectraName);
+    if (!Hist_HTMAX_spectra || (mDebug >= 2)) cout << "Hist_HTMAX_spectra = " << Hist_HTMAX_spectra << endl;
+    TH2F *Hist_PAMAX_spectra = (TH2F*)GetHisto(file, Hist_PAMAX_spectraName);
+    if (!Hist_PAMAX_spectra || (mDebug >= 2)) cout << "Hist_PAMAX_spectra = " << Hist_PAMAX_spectra << endl;
+    TH1F *Hist_HTMAX_dist = (TH1F*)GetHisto(file, Hist_HTMAX_distName);
+    if (!Hist_HTMAX_dist || (mDebug >= 2)) cout << "Hist_HTMAX_dist = " << Hist_HTMAX_dist << endl;
+    TH1F *Hist_PAMAX_dist = (TH1F*)GetHisto(file, Hist_PAMAX_distName);
+    if (!Hist_PAMAX_dist || (mDebug >= 2)) cout << "Hist_PAMAX_dist = " << Hist_PAMAX_dist << endl;
+    
+    TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
+    c->Draw();
+    c->cd(0);
+    c->Divide(2, 2, 0.001, 0.001);
+
+    c->cd(1);
+    if (Hist_HTMAX_spectra) {
+        Hist_HTMAX_spectra->Draw("H COLZ");
+    }
+    c->cd(2);
+    if (Hist_PAMAX_spectra) {
+        Hist_PAMAX_spectra->Draw("H COLZ");
+    }
+    c->cd(3);
+    if (Hist_HTMAX_dist) {
+        Hist_HTMAX_dist->Draw("H COLZ");
+    }
+    c->cd(4);
+    if (Hist_PAMAX_dist) {
+        Hist_PAMAX_dist->Draw("H COLZ");
+    }
+    
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+}
+
+//-------------------------------------------------------------------
+void BEMCPlotsPresenter::displayJet(FileType file, TPad *pad, int mDebug) {
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+
+    if (!pad) return;
+    pad->Clear();
+    pad->cd(0);
+
+    TH2F *Hist_JET_ped = (TH2F*)GetHisto(file, Hist_JET_pedName);
+    if (!Hist_JET_ped || (mDebug >= 2)) cout << "Hist_JET_ped = " << Hist_JET_ped << endl;
+    TH2F *Hist_JET_spectra = (TH2F*)GetHisto(file, Hist_JET_spectraName);
+    if (!Hist_JET_spectra || (mDebug >= 2)) cout << "Hist_JET_spectra = " << Hist_JET_spectra << endl;
+    TH2F *Hist_JETMAX_spectra = (TH2F*)GetHisto(file, Hist_JETMAX_spectraName);
+    if (!Hist_JETMAX_spectra || (mDebug >= 2)) cout << "Hist_JETMAX_spectra = " << Hist_JETMAX_spectra << endl;
+    TH1F *Hist_JETMAX_dist = (TH1F*)GetHisto(file, Hist_JETMAX_distName);
+    if (!Hist_JETMAX_dist || (mDebug >= 2)) cout << "Hist_JETMAX_dist = " << Hist_JETMAX_dist << endl;
+    
+    TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
+    c->Draw();
+    c->cd(0);
+    c->Divide(2, 2, 0.001, 0.001);
+
+    c->cd(1);
+    if (Hist_JET_ped) {
+        Hist_JET_ped->Draw("H COLZ");
+    }
+    c->cd(2);
+    if (Hist_JET_spectra) {
+        Hist_JET_spectra->Draw("H COLZ");
+    }
+    c->cd(3);
+    if (Hist_JETMAX_spectra) {
+        Hist_JETMAX_spectra->Draw("H COLZ");
+    }
+    c->cd(4);
+    if (Hist_JETMAX_dist) {
+        Hist_JETMAX_dist->Draw("H COLZ");
+    }
+    
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+}
+
 //-------------------------------------------------------------------
 void BEMCPlotsPresenter::displayRawAdc(FileType file, TPad *pad, bool psd, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
@@ -973,24 +1190,34 @@ void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType file, TPad 
 
     if (tab == 0) {
 	if (panel == 0) {
-	    displayRawAdc(file, pad, false, mDebug);
+	    displayStatus(file, pad, mDebug);
 	} else if (panel == 1) {
-	    displayJetPatchHT(file, pad, mDebug);
+	    displayTowers(file, pad, mDebug);
 	} else if (panel == 2) {
-	    displayJetPatchSum(file, pad, mDebug);
+	    displaySMDPSD(file, pad, mDebug);
 	} else if (panel == 3) {
-	    displayL0Input(file, pad, mDebug);
+	    displayTrigger(file, pad, mDebug);
 	} else if (panel == 4) {
-	    displayL1Input(file, pad, mDebug);
+	    displayJet(file, pad, mDebug);
 	} else if (panel == 5) {
-	    displayL2Input(file, pad, mDebug);
+	    displayRawAdc(file, pad, false, mDebug);
 	} else if (panel == 6) {
-	    displaySmdFeeSum(file, pad, mDebug);
+	    displayJetPatchHT(file, pad, mDebug);
 	} else if (panel == 7) {
-	    displayTriggerCorruption(file, pad, mDebug);
+	    displayJetPatchSum(file, pad, mDebug);
 	} else if (panel == 8) {
-	    displayPsdFeeSum(file, pad, mDebug);
+	    displayL0Input(file, pad, mDebug);
 	} else if (panel == 9) {
+	    displayL1Input(file, pad, mDebug);
+	} else if (panel == 10) {
+	    displayL2Input(file, pad, mDebug);
+	} else if (panel == 11) {
+	    displaySmdFeeSum(file, pad, mDebug);
+	} else if (panel == 12) {
+	    displayTriggerCorruption(file, pad, mDebug);
+	} else if (panel == 13) {
+	    displayPsdFeeSum(file, pad, mDebug);
+	} else if (panel == 14) {
 	    displayRawAdc(file, pad, true, mDebug);
 	}
     }

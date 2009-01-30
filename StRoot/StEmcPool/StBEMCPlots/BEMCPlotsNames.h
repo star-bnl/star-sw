@@ -40,4 +40,30 @@
 #define HistTriggerCorruptionPatchSumName "bemc_TriggerCorruptionPatchSum"
 #define HistTriggerCorruptionPatchSumCorrName "bemc_TriggerCorruptionPatchSumCorr"
 
+#define Hist_TDC_statusName "bemc_TDC_status"
+#define Hist_SMD_statusName "bemc_SMD_status"
+#define Hist_PSD_statusName "bemc_PSD_status"
+#define Hist_BTOW_CorruptionName "bemc_BTOW_corruption"
+
+#define Hist_btow_spectra_1Name "bemc_btow_spectra_1"
+#define Hist_btow_spectra_2Name "bemc_btow_spectra_2"
+#define Hist_btow_spectra_3Name "bemc_btow_spectra_3"
+
+#define Hist_smd_spectraName "bemc_smd_spectra"
+#define Hist_smd_capacitorName "bemc_smd_capacitor"
+#define Hist_smd_sumName "bemc_smd_sum"
+#define Hist_psd_spectraName "bemc_psd_spectra"
+#define Hist_psd_capacitorName "bemc_psd_capacitor"
+#define Hist_psd_sumName "bemc_psd_sum"
+
+#define Hist_HTMAX_spectraName "bemc_HTMAX_spectra"
+#define Hist_PAMAX_spectraName "bemc_PAMAX_spectra"
+#define Hist_HTMAX_distName "bemc_HTMAX_distr"
+#define Hist_PAMAX_distName "bemc_PAMAX_distr"
+
+#define Hist_JET_pedName "bemc_JET_ped"
+#define Hist_JET_spectraName "bemc_JET_status"
+#define Hist_JETMAX_spectraName "bemc_JETMAX_status"
+#define Hist_JETMAX_distName "bemc_JETMAX_distr"
+
 #endif
