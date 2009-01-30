@@ -28,7 +28,7 @@ int wrapfile::openmem(char *buff, int size) {
 
 int wrapfile::opendisk(char *fn, int flags, int perms)
 {
-  fd = open(fn, flags, perms);
+  fd = open64(fn, flags, perms);
   if(fd > 0) {
     type = WRAP_DISK;
   }
@@ -50,7 +50,7 @@ int wrapfile::read(void *buff, int sz)
   switch(type) {
   case WRAP_MEM:
 
-    LOG(DBG, "read: wfpos=%d wsize=%d sz=%d",wfpos,wsize,sz);
+    LOG(DBG, "read: wfpos=%lld wsize=%lld sz=%d",wfpos,wsize,sz);
 
     if((wfpos + sz) > wsize) {   // max read is filesize...
       sz = wsize - wfpos;
@@ -89,7 +89,7 @@ int wrapfile::write(void *buff, int sz)
   return -1;
 }
 
-int wrapfile::lseek(int offset, int whence)
+long long int wrapfile::lseek(long long int offset, int whence)
 {
   switch(type) {
     
@@ -110,13 +110,13 @@ int wrapfile::lseek(int offset, int whence)
     }
     
   case WRAP_DISK:
-    return ::lseek(fd, offset, whence);  
+    return ::lseek64(fd, offset, whence);  
   }
 
   return -1;
 }
 
-int wrapfile::fstat(struct stat *stat)
+int wrapfile::fstat(struct stat64 *stat)
 {
   stat->st_size = 0;
 
@@ -126,7 +126,7 @@ int wrapfile::fstat(struct stat *stat)
     return -1;
   
   case WRAP_DISK:
-    return ::fstat(fd, stat);
+    return ::fstat64(fd, stat);
   }
   return 0;
 }
@@ -282,7 +282,7 @@ int fs_index::mount(int ip, int port)
 int fs_index::initmount()
 {
   int ret;
-  struct stat stat;
+  struct stat64 stat;
 
   strcpy(cwd, "/");
   root = NULL;
@@ -503,7 +503,7 @@ fs_dirent *fs_index::readdir(fs_dir *dir)
   return &ent;
 }
 
-fs_inode *fs_index::alloc_inode(char *name, int off, int sz)
+fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz)
 {
   n_inodes++;
   fs_inode *n = (fs_inode *)malloc(sizeof(fs_inode));
@@ -567,7 +567,7 @@ int fs_index::read(char *fn, char *buff, int maxsize)
   return ret;
 }
 
-int fs_index::mountsz()
+long long int fs_index::mountsz()
 {
   
   if(oflags & O_WRONLY) {
@@ -576,7 +576,7 @@ int fs_index::mountsz()
     }
   }
 
-  struct stat stat;
+  struct stat64 stat;
   wfile.fstat(&stat);
   return stat.st_size;
 }

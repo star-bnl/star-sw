@@ -97,7 +97,7 @@ class daqReader {
   char evp_disk[256]; 
   char fname[256] ;     // This is the name argument of the evpReader
   char file_name[256] ;	// fully qualified file name containing evt data
-  int file_size ;	// size of the file in bytes
+  long long int file_size ;	// size of the file in bytes
   int desc ;		// file descriptor
 
   int isevp;   // backward compatability...
@@ -114,7 +114,7 @@ class daqReader {
   int event_size;   // size of the current event measured from beginning of memmap
   u_int bytes ;	    // size of the current event measured from beginning of datap
 
-  int evt_offset_in_file;
+  long long int evt_offset_in_file;
 
   char *mem;            // a datap pointer if applicable...
   sfs_index *sfs;       // the sfs reader object... (if no sfs only contains "/");
@@ -254,14 +254,14 @@ class MemMap {
   ~MemMap();
 
   char *mem;
-  char *map(int fd, int _offset, int _size);
+  char *map(int fd, long long int _offset, int _size);
   void unmap();
 
-  int offset;
+  long long int offset;
   int size;
  private:
   int page_size;
-  int actual_offset;
+  long long int actual_offset;
   char *actual_mem_start;
   int actual_size;
   int fd;

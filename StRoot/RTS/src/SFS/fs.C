@@ -133,13 +133,13 @@ int fs_mount(int argc, char *argv[])
     sprintf(fn,"%s/%s",pwd,argv[1]);
   }
 
-  struct stat filestat;
-  if(stat(fn,&filestat) < 0) {
+  struct stat64 filestat;
+  if(stat64(fn,&filestat) < 0) {
     printf("Error reading file %s: %s\n",fn,strerror(errno));
     return 1;
   }
   
-  idx_fd = open(fn, O_RDONLY);
+  idx_fd = open64(fn, O_RDONLY);
   if(idx_fd < 0) {
     printf("Error reading file %s\n",fn);
     strcpy(g_filename, "NONE");
@@ -171,7 +171,7 @@ int fs_mount(int argc, char *argv[])
 
   idx->mount(fn, O_RDONLY);
   t = record_time();
-  printf("Mounted file %s: %d bytes in %5.2f sec\n",fn,(int)filestat.st_size,t);
+  printf("Mounted file %s: %lld bytes in %5.2f sec\n",fn,filestat.st_size,t);
   //write_env("MOUNT", fn);
   //write_env("PWD", "/");
 
@@ -252,15 +252,15 @@ int fs_cat(int argc, char *argv[])
     return -1;
   }
 
-  int ret = lseek(idx_fd, entry->offset, SEEK_SET);
+  long long int ret = lseek(idx_fd, entry->offset, SEEK_SET);
   if(ret != entry->offset) {
-    printf("Invalid seek %d vs %d  (%s)\n",ret,entry->offset,strerror(errno));
+    printf("Invalid seek %lld vs %lld  (%s)\n",ret,entry->offset,strerror(errno));
     return -1;
   }
 
   ret = read(idx_fd, buff, entry->sz);
   if(ret != entry->sz) {
-    printf("Error reading file %d vs %d\n", ret, entry->sz);
+    printf("Error reading file %lld vs %d\n", ret, entry->sz);
     return -1;
   }
 
@@ -270,7 +270,7 @@ int fs_cat(int argc, char *argv[])
       free(buff);
       return -1;
     }
-    int fd = open(argv[2], O_WRONLY | O_CREAT,0777);
+    int fd = open64(argv[2], O_WRONLY | O_CREAT,0777);
     if(fd < 0) {
       free(buff);
       printf("error opening file %s\n",argv[2]);
@@ -405,9 +405,9 @@ int main(int argc, char *argv[])
 
   if(argc > 1) {
     // Try mounting...
-    struct stat sstat;
+    struct stat64 sstat;
     
-    int ret = stat(argv[1], &sstat);
+    int ret = stat64(argv[1], &sstat);
     if(ret == 0) {
       av[0] = "mount";
       av[1] = argv[1];

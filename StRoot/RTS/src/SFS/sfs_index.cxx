@@ -119,79 +119,6 @@ int SFS_ittr::get(wrapfile *wrap)
   ppath[0] = '\0';
   fullpath[0]='\0';
   
-  //  legacy = checkIfLegacy();
-  // LOG(DBG, "Legacy = %d",legacy);
-
-  // if(legacy) return legacy_get(wrap);
-
-
-  //fileoffset = 0;   // set by constructor...
-  
-
-#ifdef DONTNEEDTHIS   // work is done in next()
-  for(;;) {
-    int ret = wfile->read(buff, 8);
-    if(ret != 8) {
-      LOG(ERR,"Error reading headers...");
-      return -1;
-    }
-    wfile->lseek(-8, SEEK_CUR);
-
-    if(memcmp(buff, "SFS V", 5) == 0) {
-      LOG(DBG,"Found SFS version");
-
-      wfile->lseek(12, SEEK_CUR);
-      fileoffset += 12;
-      skipped_bytes += 12;
-      continue;
-    }
-
-    if(memcmp(buff, "LRHD", 4) == 0) {
-      LOG(DBG,"Found LRHD");
-
-      wfile->lseek(48, SEEK_CUR) {
-	char buff2[12];
-	memset(buff2, 0, sizeof(buff2));
-	wfile->read(buff2, 8);
-	wfile->lseek(-54, SEEK_CUR);
-	if(memcmp(buff2, "DATA", 4) == 0) {
-	  break;
-	}
-      }
-
-      wfile->lseek(60, SEEK_CUR);
-      fileoffset += 60;
-      skipped_bytes += 60;
-      continue;
-    }
-
-    if(memcmp(buff, "DATAP ", 6) == 0) {
-      LOG(DBG,"Found DATAP");
-      //wfile->lseek(204, SEEK_CUR);
-      //fileoffset += 204;
-      break;
-    }
-
-    if(memcmp(buff, "HEAD", 4) == 0) {
-      LOG(DBG,"Found HEAD");
-      wfile->lseek(12, SEEK_CUR);
-      fileoffset += 12;
-      skipped_bytes += 12;
-      continue;
-    }
-
-    if(memcmp(buff, "FILE", 4) == 0) {  // finally!
-      LOG(DBG, "Found FILE");
-      break;
-    }
-
-    else {
-      LOG(DBG, "(%s) is not a valid specifier",buff);
-      return -1;
-    }
-  }
-#endif
-
   //printf("fileoffset %d\n",fileoffset);
   filepos = 0;
   strcpy(ppath,"/");
@@ -220,8 +147,8 @@ int SFS_ittr::next()
   //if(legacy) return legacy_next();
   skipped_bytes = 0;
 
-  LOG(DBG, "Calling next:  fileoffset=%d filepos=%d",fileoffset,filepos);
-  int ret;
+  LOG(DBG, "Calling next:  fileoffset=%lld filepos=%d",fileoffset,filepos);
+  long long int ret;
 
   //printf("ittr next\n");
 
@@ -287,12 +214,12 @@ int SFS_ittr::next()
       return -1;
     }
 
-    wfile->lseek(-8, SEEK_CUR);
+    wfile->lseek(-((long long int)8), SEEK_CUR);
 
 
-    int xxx = wfile->lseek(0,SEEK_CUR);
+    long long int xxx = wfile->lseek(0,SEEK_CUR);
     buff[5] = 0;
-    LOG(DBG, "fileoffset=%d xxx=%d buff=%s seek: %d",fileoffset,xxx,buff);
+    LOG(DBG, "fileoffset=%lld xxx=%lld buff=%s",fileoffset,xxx,buff);
 
 
     if(memcmp(buff, "SFS V", 5) == 0) {
@@ -306,10 +233,10 @@ int SFS_ittr::next()
     if(memcmp(buff, "LRHD", 4) == 0) {
       //if(debug) LOG(DBG,"Found LRHD");
 
-      LOG(DBG, "BFR LRHD %d %d",wfile->lseek(0,SEEK_CUR),fileoffset);
+      LOG(DBG, "BFR LRHD %lld %lld",wfile->lseek(0,SEEK_CUR),fileoffset);
 
       if(nextLRHD() >= 0) {  // good data LRHD... got entry...
-	LOG(DBG, "AFTR LRHD %d %d",wfile->lseek(0,SEEK_CUR), fileoffset);
+	LOG(DBG, "AFTR LRHD %lld %lld",wfile->lseek(0,SEEK_CUR), fileoffset);
      
 	LOG(DBG, "lrhd entry.sz = %d",entry.sz);
 	return 0;
@@ -436,8 +363,8 @@ int SFS_ittr::next()
     strcat(fullpath, entry.name);
   }
 
-  LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %d/%d, sz %d  head_sz %d",
-	 fullpath, entry.name, fileoffset, filepos, entry.sz, entry.head_sz);
+  LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %lld/%d, sz %d  head_sz %d",
+      fullpath, entry.name, fileoffset, filepos, entry.sz, entry.head_sz);
 
   filepos = 1;
   return 0;
@@ -812,7 +739,7 @@ int sfs_index::mountSingleDirMem(char *buffer, int size)
 // returns -1 on error
 // returns 0 on eof
 // returns 1 on valid dir
-int sfs_index::mountSingleDir(char *fn, int offset)
+int sfs_index::mountSingleDir(char *fn, long long int offset)
 {
   LOG(DBG,"the spec is: " __DATE__ ":" __TIME__);
 
@@ -825,13 +752,13 @@ int sfs_index::mountSingleDir(char *fn, int offset)
   return mountSingleDir();
 }
 
-int sfs_index::getSingleDirSize(char *fn, int offset)
+int sfs_index::getSingleDirSize(char *fn, long long int offset)
 {
   char topdir[40];
   int topdirlen=0;
   topdir[0] = '\0';
 
-  LOG(DBG, "singledirdize file=%s, offset=%d",fn,offset);
+  LOG(DBG, "singledirdize file=%s, offset=%lld",fn,offset);
 
   wfile.close();
   wfile.opendisk(fn, O_RDONLY);
@@ -892,7 +819,7 @@ int sfs_index::mountSingleDir()   // mounts from current position of wfile...
 {
   if(singleDirIttr) delete singleDirIttr;
   
-  int offset = wfile.lseek(0,SEEK_CUR);
+  long long int offset = wfile.lseek(0,SEEK_CUR);
 
   singleDirMount = 1;
   singleDirIttr = new SFS_ittr(offset);
@@ -1041,7 +968,7 @@ void sfs_index::addnode(SFS_ittr *ittr)
   char thispathonly[256];
   char *next[20];
 
-  LOG(DBG, "addnode: %s %d %d",ittr->fullpath, ittr->fileoffset, ittr->filepos);
+  LOG(DBG, "addnode: %s %lld %d",ittr->fullpath, ittr->fileoffset, ittr->filepos);
 
   if(ittr->entry.attr == SFS_ATTR_INVALID) return;
   
@@ -1082,7 +1009,7 @@ void sfs_index::dump(char *path, fs_inode *inode) {
     curr = curr->next;
   }
 }
-fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int sz)
+fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, long long int offset, int sz)
 {
   int eq=0;
 
@@ -1104,7 +1031,7 @@ fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int 
   return newn;
 }
 
-fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, int offset, int sz)
+fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, long long int offset, int sz)
 {
   int eq=0;
   int first=0;
