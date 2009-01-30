@@ -1,4 +1,4 @@
-// $Id: StEmcMappingDb.cxx,v 1.2 2009/01/30 16:46:46 kocolosk Exp $
+// $Id: StEmcMappingDb.cxx,v 1.3 2009/01/30 18:09:04 kocolosk Exp $
 
 #include "StEmcMappingDb.h"
 
@@ -18,8 +18,10 @@
 
 ClassImp(StEmcMappingDb)
 
-StEmcMappingDb::StEmcMappingDb(int date, int time) : mBemcMap(NULL), 
-    mBprsMap(NULL), mSmdeMap(NULL), mSmdpMap(NULL), mDBI(NULL), 
+StEmcMappingDb::StEmcMappingDb(int date, int time) : mBemcTTable(NULL),
+    mBprsTTable(NULL), mSmdeTTable(NULL), mSmdpTTable(NULL), mBemcValidity(-2),
+    mBprsValidity(-2), mSmdeValidity(-2), mSmdpValidity(-2), mBemcTable(NULL),
+    mBprsTable(NULL), mSmdeTable(NULL), mSmdpTable(NULL), mDBI(NULL), 
     mDbMk(NULL), mGlobalDirty(true)
 {
     StMaker *chain = StMaker::GetChain();
@@ -118,50 +120,54 @@ void StEmcMappingDb::SetMaxEntryTime(int date, int time) {
 
 // struct declaration auto-generated at $STAR/include/bemcMap.h
 const bemcMap_st & StEmcMappingDb::bemc(int softId) const {
-    return mBemcMap[softId-1];
+    if(mBemcTTable) return (*mBemcTTable)[softId-1];
+    return ((bemcMap_st*)mBemcTable->GetTable())[softId-1];
 }
 
 // struct declaration auto-generated at $STAR/include/bprsMap.h
 const bprsMap_st & StEmcMappingDb::bprs(int softId) const {
-    return mBprsMap[softId-1];
+    if(mBprsTTable) return (*mBprsTTable)[softId-1];
+    return ((bprsMap_st*)mBprsTable->GetTable())[softId-1];
 }
 
 // struct declaration auto-generated at $STAR/include/bsmdeMap.h
 const bsmdeMap_st & StEmcMappingDb::bsmde(int softId) const {
-    return mSmdeMap[softId-1];
+    if(mSmdeTTable) return (*mSmdeTTable)[softId-1];
+    return ((bsmdeMap_st*)mSmdeTable->GetTable())[softId-1];
 }
 
 // struct declaration auto-generated at $STAR/include/bsmdpMap.h
 const bsmdpMap_st & StEmcMappingDb::bsmdp(int softId) const {
-    return mSmdpMap[softId-1];
+    if(mSmdpTTable) return (*mSmdpTTable)[softId-1];
+    return ((bsmdpMap_st*)mSmdpTable->GetTable())[softId-1];
 }
 
 int StEmcMappingDb::softIdFromMES(StDetectorId det, int m, int e, int s) const {
     switch(det) {
         case kBarrelEmcTowerId:
         for(int i=0; i<4800; i++) {
-            if(mBemcMap[i].m == m && mBemcMap[i].e == e && mBemcMap[i].s == s) {
+            if(bemc(i+1).m == m && bemc(i+1).e == e && bemc(i+1).s == s) {
                 return i+1;
             }
         }
         break;
         case kBarrelEmcPreShowerId:
         for(int i=0; i<4800; i++) {
-            if(mBprsMap[i].m == m && mBprsMap[i].e == e && mBprsMap[i].s == s) {
+            if(bprs(i+1).m == m && bprs(i+1).e == e && bprs(i+1).s == s) {
                 return i+1;
             }
         }
         break;
         case kBarrelSmdEtaStripId:
         for(int i=0; i<18000; i++) {
-            if(mSmdeMap[i].m == m && mSmdeMap[i].e == e && mSmdeMap[i].s == s) {
+            if(bsmde(i+1).m == m && bsmde(i+1).e == e && bsmde(i+1).s == s) {
                 return i+1;
             }
         }
         break;
         case kBarrelSmdPhiStripId:
         for(int i=0; i<18000; i++) {
-            if(mSmdpMap[i].m == m && mSmdpMap[i].e == e && mSmdpMap[i].s == s) {
+            if(bsmdp(i+1).m == m && bsmdp(i+1).e == e && bsmdp(i+1).s == s) {
                 return i+1;
             }
         }
@@ -174,8 +180,8 @@ int StEmcMappingDb::
 softIdFromCrate(StDetectorId det, int crate, int channel) const {
     if(det == kBarrelEmcTowerId) {
         for(int i=0; i<4800; i++) {
-            if(mBemcMap[i].crate == crate) {
-                if(mBemcMap[i].crateChannel == channel) return i+1;
+            if(bemc(i+1).crate == crate) {
+                if(bemc(i+1).crateChannel == channel) return i+1;
             }
         }
     }
@@ -185,7 +191,7 @@ softIdFromCrate(StDetectorId det, int crate, int channel) const {
 int StEmcMappingDb::softIdFromDaqId(StDetectorId det, int daqId) const {
     if(det == kBarrelEmcTowerId) {
         for(int i=0; i<4800; i++) {
-            if(mBemcMap[i].daqID == daqId) return i+1;
+            if(bemc(i+1).daqID == daqId) return i+1;
         }
     }
     return 0;
@@ -195,8 +201,8 @@ int StEmcMappingDb::
 softIdFromTDC(StDetectorId det, int TDC, int channel) const {
     if(det == kBarrelEmcTowerId) {
         for(int i=0; i<4800; i++) {
-            if(mBemcMap[i].TDC == TDC) {
-                if(mBemcMap[i].crateChannel == channel) return i+1;
+            if(bemc(i+1).TDC == TDC) {
+                if(bemc(i+1).crateChannel == channel) return i+1;
             }
         }
     }
@@ -208,21 +214,21 @@ softIdFromRDO(StDetectorId det, int rdo, int channel) const {
     switch(det) {
         case kBarrelEmcPreShowerId:
         for(int i=0; i<4800; i++) {
-            if(mBprsMap[i].rdo == rdo && mBprsMap[i].rdoChannel == channel) {
+            if(bprs(i+1).rdo == rdo && bprs(i+1).rdoChannel == channel) {
                 return i+1;
             }
         }
         break;
         case kBarrelSmdEtaStripId:
         for(int i=0; i<18000; i++) {
-            if(mSmdeMap[i].rdo == rdo && mSmdeMap[i].rdoChannel == channel) {
+            if(bsmde(i+1).rdo == rdo && bsmde(i+1).rdoChannel == channel) {
                 return i+1;
             }
         }
         break;
         case kBarrelSmdPhiStripId:
         for(int i=0; i<18000; i++) {
-            if(mSmdpMap[i].rdo == rdo && mSmdpMap[i].rdoChannel == channel) {
+            if(bsmdp(i+1).rdo == rdo && bsmdp(i+1).rdoChannel == channel) {
                 return i+1;
             }
         }
@@ -238,17 +244,24 @@ void StEmcMappingDb::reload() {
         LOG_DEBUG << "(re)loading StEmcMappingDb using St_db_Maker" << endm;
         TDataSet *DB = mDbMk->GetInputDB("Calibrations/emc/map");
         
-        St_bemcMap *a = (St_bemcMap*)DB->Find("bemcMap");
-        mBemcMap = (bemcMap_st*)a->GetTable();
-        
-        St_bprsMap *b = (St_bprsMap*)DB->Find("bprsMap");
-        mBprsMap = (bprsMap_st*)b->GetTable();
-        
-        St_bsmdeMap *c = (St_bsmdeMap*)DB->Find("bsmdeMap");
-        mSmdeMap = (bsmdeMap_st*)c->GetTable();
-        
-        St_bsmdpMap *d = (St_bsmdpMap*)DB->Find("bsmdpMap");
-        mSmdpMap = (bsmdpMap_st*)d->GetTable();
+        Int_t version;
+
+        if((version = mDbMk->GetValidity(mBemcTTable,NULL)) != mBemcValidity) {
+            mBemcValidity = version;
+            mBemcTTable = static_cast<St_bemcMap*>(DB->Find("bemcMap"));
+        }
+        if((version = mDbMk->GetValidity(mBprsTTable,NULL)) != mBprsValidity) {
+            mBprsValidity = version;
+            mBprsTTable = static_cast<St_bprsMap*>(DB->Find("bprsMap"));
+        }
+        if((version = mDbMk->GetValidity(mSmdeTTable,NULL)) != mSmdeValidity) {
+            mSmdeValidity = version;
+            mSmdeTTable = static_cast<St_bsmdeMap*>(DB->Find("bsmdeMap"));
+        }
+        if((version = mDbMk->GetValidity(mSmdpTTable,NULL)) != mSmdpValidity) {
+            mSmdpValidity = version;
+            mSmdpTTable = static_cast<St_bsmdpMap*>(DB->Find("bsmdpMap"));
+        }
     }
     else {
         LOG_DEBUG << "(re)loading StEmcMappingDb using StDbManager" << endm;
@@ -258,19 +271,15 @@ void StEmcMappingDb::reload() {
         
         if(isDirty(mBemcTable)) {
             mgr->fetchDbTable(mBemcTable);
-            mBemcMap = (bemcMap_st*)(mBemcTable->GetTable());
         }
         if(isDirty(mBprsTable)) {
             mgr->fetchDbTable(mBprsTable);
-            mBprsMap = (bprsMap_st*)(mBprsTable->GetTable());
         }
         if(isDirty(mSmdeTable)) {
             mgr->fetchDbTable(mSmdeTable);
-            mSmdeMap = (bsmdeMap_st*)(mSmdeTable->GetTable());
         }
         if(isDirty(mSmdpTable)) {
             mgr->fetchDbTable(mSmdpTable);
-            mSmdpMap = (bsmdpMap_st*)(mSmdpTable->GetTable());
         }
         
         mGlobalDirty = false;
@@ -286,8 +295,8 @@ bool StEmcMappingDb::isDirty(StDbTable *table) {
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.cxx,v $
- * Revision 1.2  2009/01/30 16:46:46  kocolosk
- * use StMaker::GetChain() instead of the hucker approach
+ * Revision 1.3  2009/01/30 18:09:04  kocolosk
+ * use version returned by StMaker::GetValidity to skip table reload if possible
  *
  * Revision 1.1  2009/01/08 02:16:18  kocolosk
  * move StEmcMappingDb/StEmcDecoder to StEmcUtil/database

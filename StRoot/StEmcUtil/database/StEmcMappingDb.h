@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcMappingDb
 #define STAR_StEmcMappingDb
 
-// $Id: StEmcMappingDb.h,v 1.1 2009/01/08 02:16:19 kocolosk Exp $
+// $Id: StEmcMappingDb.h,v 1.2 2009/01/30 18:09:04 kocolosk Exp $
 
 /*****************************************************************************
  * @class StEmcMappingDb
@@ -23,6 +23,11 @@
 #include "bsmdeMap.h"
 #include "bsmdpMap.h"
 
+class St_bemcMap;
+class St_bsmdeMap;
+class St_bsmdpMap;
+class St_bprsMap;
+ 
 class StDbTable;
 class StDataBaseI;
 class St_db_Maker;
@@ -55,15 +60,20 @@ public:
     int softIdFromRDO(StDetectorId det, int rdo, int channel) const;
 
 private:
+    St_bemcMap      *mBemcTTable;
+    St_bprsMap      *mBprsTTable;
+    St_bsmdeMap     *mSmdeTTable;
+    St_bsmdpMap     *mSmdpTTable;
+    
+    Int_t           mBemcValidity;
+    Int_t           mBprsValidity;
+    Int_t           mSmdeValidity;
+    Int_t           mSmdpValidity;
+    
     StDbTable       *mBemcTable;
+    StDbTable       *mBprsTable;
     StDbTable       *mSmdeTable;
     StDbTable       *mSmdpTable;
-    StDbTable       *mBprsTable;
-    
-    bemcMap_st      *mBemcMap;
-    bprsMap_st      *mBprsMap;
-    bsmdeMap_st     *mSmdeMap;
-    bsmdpMap_st     *mSmdpMap;
     
     StDataBaseI     *mDBI;
     
@@ -81,6 +91,9 @@ private:
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.h,v $
+ * Revision 1.2  2009/01/30 18:09:04  kocolosk
+ * use version returned by StMaker::GetValidity to skip table reload if possible
+ *
  * Revision 1.1  2009/01/08 02:16:19  kocolosk
  * move StEmcMappingDb/StEmcDecoder to StEmcUtil/database
  *
