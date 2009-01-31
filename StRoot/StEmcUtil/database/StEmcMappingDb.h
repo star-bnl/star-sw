@@ -1,7 +1,7 @@
 #ifndef STAR_StEmcMappingDb
 #define STAR_StEmcMappingDb
 
-// $Id: StEmcMappingDb.h,v 1.2 2009/01/30 18:09:04 kocolosk Exp $
+// $Id: StEmcMappingDb.h,v 1.3 2009/01/31 20:15:23 kocolosk Exp $
 
 /*****************************************************************************
  * @class StEmcMappingDb
@@ -9,10 +9,12 @@
  *
  * Wrapper around b*Map tables in Calibrations_emc. Relies on St_db_Maker to 
  * choose the correct tables if the Maker is present, otherwise it calls 
- * StDbManager directly. The date and time MUST match St_db_Maker's responses
- * for GetDate() and GetTime().
+ * StDbManager directly.
  *****************************************************************************/
 
+#include <map>
+using std::map;
+ 
 #include "TObject.h"
 #include "TDatime.h"
 
@@ -29,8 +31,7 @@ class St_bsmdpMap;
 class St_bprsMap;
  
 class StDbTable;
-class StDataBaseI;
-class St_db_Maker;
+class StMaker;
 
 class StEmcMappingDb : public TObject 
 {
@@ -43,11 +44,17 @@ public:
     void SetFlavor(const char *flavor, const char *tablename=NULL);
     void SetMaxEntryTime(int date, int time);
     
-    const bemcMap_st & bemc(int softId) const;
-    const bemcMap_st & btow(int softId) const { return bemc(softId); }
-    const bprsMap_st & bprs(int softId) const;
-    const bsmdeMap_st & bsmde(int softId) const;
-    const bsmdpMap_st & bsmdp(int softId) const;
+    const bemcMap_st* bemc() const;
+    const bemcMap_st& bemc(int softId) const;
+    
+    const bprsMap_st* bprs() const;
+    const bprsMap_st& bprs(int softId) const;
+    
+    const bsmdeMap_st* bsmde() const;
+    const bsmdeMap_st& bsmde(int softId) const;
+
+    const bsmdpMap_st* bsmdp() const;
+    const bsmdpMap_st& bsmdp(int softId) const;
     
     int softIdFromMES(StDetectorId det, int m, int e, int s) const;
     
@@ -60,39 +67,50 @@ public:
     int softIdFromRDO(StDetectorId det, int rdo, int channel) const;
 
 private:
-    St_bemcMap      *mBemcTTable;
-    St_bprsMap      *mBprsTTable;
-    St_bsmdeMap     *mSmdeTTable;
-    St_bsmdpMap     *mSmdpTTable;
+    mutable St_bemcMap      *mBemcTTable;
+    mutable St_bprsMap      *mBprsTTable;
+    mutable St_bsmdeMap     *mSmdeTTable;
+    mutable St_bsmdpMap     *mSmdpTTable;
     
-    Int_t           mBemcValidity;
-    Int_t           mBprsValidity;
-    Int_t           mSmdeValidity;
-    Int_t           mSmdpValidity;
-    
+    // use these to pull data from DB if we're not in a chain
     StDbTable       *mBemcTable;
     StDbTable       *mBprsTable;
     StDbTable       *mSmdeTable;
     StDbTable       *mSmdpTable;
     
-    StDataBaseI     *mDBI;
+    // ensure caches expire if beginTime, flavor, or maxEntryTime changes
+    mutable bool    mBemcDirty;
+    mutable bool    mBprsDirty;
+    mutable bool    mSmdeDirty;
+    mutable bool    mSmdpDirty;
     
-    St_db_Maker     *mDbMk;
+    StMaker         *mChain;
     
     TDatime         mBeginTime;
-    void            reload();
-    bool            mGlobalDirty;
-    bool            isDirty(StDbTable*);
+    void            maybe_reload(StDetectorId) const;
+    void            reload_dbtable(StDbTable*) const;
     
-    ClassDef(StEmcMappingDb, 1)
+    ClassDef(StEmcMappingDb, 2)
 };
+
+inline const bemcMap_st& 
+StEmcMappingDb::bemc(int softId) const { return bemc()[softId-1]; }
+
+inline const bprsMap_st& 
+StEmcMappingDb::bprs(int softId) const { return bprs()[softId-1]; }
+
+inline const bsmdeMap_st& 
+StEmcMappingDb::bsmde(int softId) const { return bsmde()[softId-1]; }
+
+inline const bsmdpMap_st& 
+StEmcMappingDb::bsmdp(int softId) const { return bsmdp()[softId-1]; }
 
 #endif
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.h,v $
- * Revision 1.2  2009/01/30 18:09:04  kocolosk
- * use version returned by StMaker::GetValidity to skip table reload if possible
+ * Revision 1.3  2009/01/31 20:15:23  kocolosk
+ * be much lazier about pulling data from DB
  *
  * Revision 1.1  2009/01/08 02:16:19  kocolosk
  * move StEmcMappingDb/StEmcDecoder to StEmcUtil/database
