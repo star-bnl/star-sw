@@ -63,7 +63,7 @@ template<class T> struct isFinished : public unary_function<T,bool> {
 void* evpPresenterThreadFunction(void*);
 
 
-//************************************************************************
+// ************************************************************************
 class EvpPresenter : public QObject {
 
   Q_OBJECT
@@ -144,8 +144,6 @@ class EvpPresenter : public QObject {
  bool Status() { return mGo; }
  void Start() { mGo = true; }
  void Stop() { mGo = false; }
- void EventLoop();
- void Run();
  void Print(TCanvas* cc, int tab, int tab);
  void Draw(TCanvas*, int  tab, int subTab);
  void Draw(TCanvas*, const char* group);
@@ -172,7 +170,7 @@ class EvpPresenter : public QObject {
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.h,v 1.1 2009/01/23 16:16:05 jeromel Exp $
+ * $Id: EvpPresenter.h,v 1.2 2009/01/31 00:30:33 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -182,6 +180,9 @@ class EvpPresenter : public QObject {
  ***************************************************************************
  *
  * $Log: EvpPresenter.h,v $
+ * Revision 1.2  2009/01/31 00:30:33  fine
+ * Major clean up: Remove the redundant time thread, redundant methods, add protection agaist of crashes, introdcue the new rootrc paramater: Online.GuiRefreshRate, load some shared in batch mode only
+ *
  * Revision 1.1  2009/01/23 16:16:05  jeromel
  * Import from online/RTS/src/
  *

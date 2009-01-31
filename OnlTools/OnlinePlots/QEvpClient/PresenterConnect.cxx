@@ -51,7 +51,9 @@ void PresenterConnect::saveAs() {
   QString filter("*.root");
   QFileDialog dialog( dir, filter, mGui, "", true );
   dialog.exec();
-  mPresenter->Save( dialog.selectedFile().ascii() );
+  if (!dialog.selectedFile().isEmpty()) {
+    mPresenter->Save( dialog.selectedFile().ascii() );
+  }
 }
 
 

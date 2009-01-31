@@ -16,6 +16,8 @@ cat >.rootrc <<__ROOTRC__
 # Author: Valeri Fine 10/10/2003
 # Online parameters
 
+Online.GuiRefreshRate:  50
+
 Online.eemcMask:  /home_local/eemc/defaultPanitkinSetup/eemcTwMask.dat
 Online.eemcDbDump:  /home_local/eemc/defaultPanitkinSetup/eemcDbDump.dat
 Online.eemcPathIn:  /home_local/eemc/defaultPanitkinSetup/
@@ -49,9 +51,12 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
 {
   gROOT->Macro("Load.C");
   gSystem->Load("RTS");
-  gSystem->Load("libqt-mt.so");
-  gSystem->Load("libGui.so");
-  gSystem->Load("libGQt.so");
+  if (gROOT->IsBatch()) {
+     // too foolish the loaded
+     gSystem->Load("libqt-mt.so");
+     gSystem->Load("libGui.so");
+     gSystem->Load("libGQt.so");
+  }
   gSystem->Load("StDaqLib"); 
   gSystem->Load("OnlinePlots");
   gSystem->Load("StDbLib");

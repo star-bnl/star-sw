@@ -5,6 +5,8 @@
 #include "EvpUtil.h"
 #include "ServerStatus.h"
 #include "TQtRootSlot.h"
+#include "TROOT.h"
+#include "TEnv.h"
 
 //#include "StRoot/StEEmcPool/muEztPanitkin/EEqaPresenter.h"
 #include "EvpPresenter.h"
@@ -29,11 +31,11 @@
 #include "qlabel.h"
 #include "qcursor.h"
 #include "qprogressbar.h"
+#include "qtimer.h"
 
 #include "EventInfo.h"
 #include "ServerInfo.h"
 #include "TriggerDetectorBitsInfo.h"
-#include "Updater.h"
 
 
 char* mystrcat(const char* a, const char* b) {
@@ -68,7 +70,8 @@ static TQtBrowserMenuItem_t gMenu_Data[] = {
 PresenterGui::PresenterGui() : 
   QMainWindow( 0, "example application main window", WDestructiveClose | WGroupLeader ), 
   mWidth(400), mHight(500), mStrLive(" Live  "), mStrFile(" File  "), mStrRun("Running"), mStrStop("Stopped")
- {
+  , mUpdater(0),fGuiRefreshRate(10)
+{
  
   // Some preparations here
   // Here is starting directory name
@@ -160,19 +163,19 @@ PresenterGui::PresenterGui() :
   ///first->currentChanged( first->currentPage() );
   //emit currentChanged(first);
   
-  mUpdater = new Updater(this);
-
 
   fActions[kLive]->setOn(true);
   emit live();
+  // Adjust the GUI refresh rate msec.
+  fGuiRefreshRate = gEnv->GetValue("Online.GuiRefreshRate",100);
   fActions[kAutoUpdate]->setOn(true);
-  DoAutoUpdateButton();
+  QTimer::singleShot (0,this,SLOT(GetNextEvent()));
 }
 
 
 //----------------------------------------------------------------
 PresenterGui::~PresenterGui()
-{ }
+{}
 
 //----------------------------------------------------------------
 void PresenterGui::SetDefaults()
@@ -400,8 +403,7 @@ void PresenterGui::SetDefaults()
 //----------------------------------------------------------------
 void PresenterGui::CloseWindow()
 {
-    qApp->closeAllWindows();
-//  gApplication->Terminate(0);
+     qApp->closeAllWindows();
 }
 //----------------------------------------------------------------
 void PresenterGui::DefineLayouts()
@@ -642,7 +644,7 @@ void PresenterGui::DoAutoUpdateButton()
   if(mDebugLevel) {
     cout<<"AutoUpdate Button Pressed"<<endl;
   }
-  mUpdater->autoUpdate();
+  GetNextEvent();
 }
 //---------------------------------------------------------------
 void PresenterGui::DoBitsButton() {
@@ -743,7 +745,7 @@ void  PresenterGui::onlPrinter2()
 //______________________________________________________________________________
 void  PresenterGui::QuitCB()
 {
-   qApp->closeAllWindows();
+   CloseWindow();
 }
 //______________________________________________________________________________
 void  PresenterGui::AboutCB()
@@ -845,6 +847,17 @@ void PresenterGui::updateRequest() {
   emit update(); 
 }
 //______________________________________________________________________________
+void PresenterGui::GetNextEvent() 
+{
+   // Event loop via singleShot timer
+   if (fActions[kAutoUpdate]->isOn()) {
+      emit nextEvent();
+      updateRequest();
+      QTimer::singleShot (fGuiRefreshRate,this,SLOT(GetNextEvent()));
+   }
+}
+
+//______________________________________________________________________________
 void PresenterGui::customEvent( QCustomEvent * e ){
   if ( e->type() == 1000 ) {  // update event
     emit nextEvent();
@@ -922,3 +935,4 @@ TCanvas* PresenterGui::GetGroupCanvas() {
   if ( !sub ) return 0;
   return sub->GetCanvas();
 }
+
