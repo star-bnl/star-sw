@@ -16,15 +16,6 @@
 # define PR(x) { cout << __PRETTY_FUNCTION__ << " ### " << #x << " ### " << x << endl;}
 #endif
 
-//--------------------------------------------------------------
-void EvpPresenter::Run() {
-  while ( true) {
-    //gSystem->ProcessEvents();
-    gSystem->Sleep(10);
-    EventLoop();
-  }
-}
-
 //------------------------------------------------------------------------
 EvpPresenter::EvpPresenter() : mfile(0), mLastDrawnCanvas(0) {
   sprintf(mMapFile,"%s",EvpUtil::mMapFilePath);
@@ -102,23 +93,9 @@ void EvpPresenter::ReconfigureTabs() {
   cout << __PRETTY_FUNCTION__ << endl;
   emit removeGroupTabs();
   addGroupTabs();  //tmp->remove();
- }
-
+}
 
 //--------------------------------------------------------------
-void EvpPresenter::EventLoop() {
-  Connect();
-  mGo = true;
-  // Loop displaying the histograms.
-  while ( mGo ) {
-    gSystem->Sleep(100);
-    NextEvent();
-  }
-  //gSystem->ProcessEvents();
-  Disconnect();
-  //gSystem->ProcessEvents();
-};
-
 void EvpPresenter::NextEvent() {
   needsUpdate = false;
   bool runStatusChanged = false;
@@ -433,7 +410,7 @@ void EvpPresenter::ClosePresenter()
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.cxx,v 1.2 2009/01/30 20:35:32 fine Exp $
+ * $Id: EvpPresenter.cxx,v 1.3 2009/01/31 00:30:33 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -443,6 +420,9 @@ void EvpPresenter::ClosePresenter()
  ***************************************************************************
  *
  * $Log: EvpPresenter.cxx,v $
+ * Revision 1.3  2009/01/31 00:30:33  fine
+ * Major clean up: Remove the redundant time thread, redundant methods, add protection agaist of crashes, introdcue the new rootrc paramater: Online.GuiRefreshRate, load some shared in batch mode only
+ *
  * Revision 1.2  2009/01/30 20:35:32  fine
  * remove the redundant letsgo slot
  *

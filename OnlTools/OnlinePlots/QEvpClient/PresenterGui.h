@@ -117,6 +117,9 @@ private:
     QMenuBar *fMenuBar;
     
     Updater* mUpdater;
+    Int_t   fGuiRefreshRate; // msec.
+ protected:
+    void StopEventLoop();
  public:
 
     PresenterGui();
@@ -174,6 +177,7 @@ public slots:
     void removeGroupTabs(); // removed recursively all group tabs
     void addGroupTab(const char*); // adds a new QTabWidget to the dynamic tabs;
     void addGroup(const char*);    // adds a new QWidget to that last QTabWidget in the dynamic tabs
+    void GetNextEvent();
 
     signals:
       void save();
