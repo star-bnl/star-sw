@@ -1,7 +1,13 @@
 *
-* $Id: erbctr.F,v 1.1.1.1 2005/05/25 22:37:23 fisyak Exp $
+* $Id: erbctr.F,v 1.1.1.2 2009/02/01 17:10:15 fisyak Exp $
 *
 * $Log: erbctr.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:15  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:28  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:23  fisyak
 * Alice version of geant3 (-minicern)
 *

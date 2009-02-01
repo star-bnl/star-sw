@@ -1,6 +1,6 @@
 #ifndef ROOT_TGeant3f77
 #define ROOT_TGeant3f77 
-/* $Id: TGeant3f77.h,v 1.1.1.2 2005/10/27 15:58:00 fisyak Exp $ */
+/* $Id: TGeant3f77.h,v 1.1.1.3 2009/02/01 17:10:04 fisyak Exp $ */
 
 //////////////////////////////////////////////////// 
 //  C++/f77 interface to Geant3 basic routines    // 

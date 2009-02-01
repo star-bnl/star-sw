@@ -1,9 +1,16 @@
 *
-* $Id: gvaviv.F,v 1.1.1.2 2005/10/27 16:01:12 fisyak Exp $
+* $Id: gvaviv.F,v 1.1.1.3 2009/02/01 17:10:32 fisyak Exp $
 *
 * $Log: gvaviv.F,v $
-* Revision 1.1.1.2  2005/10/27 16:01:12  fisyak
-* *** empty log message ***
+* Revision 1.1.1.3  2009/02/01 17:10:32  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:46  fisyak
+* Merge with macos version
+*
+* Revision 1.4  2007/05/31 15:56:06  brun
+* From Peter Hristov:
+* a small modification in gphys/gvaviv.F to avoid using non-initialized data.
 *
 * Revision 1.3  2005/08/10 20:02:58  brun
 * From Peter Hristov:
@@ -216,6 +223,10 @@ C.
  
       G3VAVIV=0
       IF(RKAPPA .LT. 0.01 .OR. RKAPPA .GT. 12) RETURN
+       HC(0)=LOG(RKAPPA)+BETA2+0.42278434
+       DSIGM(1)=SQRT(RKAPPA/(1-0.5*BETA2))
+       HC(1)=DSIGM(1)
+       HC(8)=0.39894228*HC(1)
       IF(RKAPPA .GE. 0.29) THEN
        ITYPE=1
        NPT=100
@@ -225,14 +236,11 @@ C.
        AC(8)=(-0.013483*BETA2-0.048801)*RKAPPA+
      1   (-1.6921*BETA2+8.3656)*WK+(-0.73275*BETA2-3.5226)
        DRK(1)=WK**2
-       DSIGM(1)=SQRT(RKAPPA/(1-0.5*BETA2))
        DO 1 J = 1,4
        DRK(J+1)=DRK(1)*DRK(J)
        DSIGM(J+1)=DSIGM(1)*DSIGM(J)
     1  ALFA(J+1)=(FNINV(J)-BETA2*FNINV(J+1))*DRK(J)
  
-       HC(0)=LOG(RKAPPA)+BETA2+0.42278434
-       HC(1)=DSIGM(1)
        HC(2)=ALFA(3)*DSIGM(3)
        HC(3)=(3*ALFA(2)**2+ALFA(4))*DSIGM(4)-3
        HC(4)=(10*ALFA(2)*ALFA(3)+ALFA(5))*DSIGM(5)-10*HC(2)
@@ -241,7 +249,6 @@ C.
        HC(7)=HC(2)*HC(5)
        DO 2 J = 2,7
     2  HC(J)=EDGEC(J)*HC(J)
-       HC(8)=0.39894228*HC(1)
       ELSEIF(RKAPPA .GE. 0.22) THEN
        ITYPE=2
        NPT=150

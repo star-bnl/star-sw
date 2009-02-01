@@ -1,9 +1,16 @@
 *
-* $Id: grkuta.F,v 1.1.1.1 2005/05/25 22:37:56 fisyak Exp $
+* $Id: grkuta.F,v 1.1.1.2 2009/02/01 17:10:33 fisyak Exp $
 *
 * $Log: grkuta.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:56  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:33  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:52  fisyak
+* Merge with macos version
+*
+* Revision 1.3  2006/11/28 09:10:12  brun
+* Change speed of light to agree with the current PDG value,
+* ie change from 299,792,510 to 299,792,458
 *
 * Revision 1.2  2003/11/28 11:23:56  brun
 * New version of geant321 with all geant3 routines renamed from G to G3
@@ -58,7 +65,7 @@ C.
      +            (XT,XYZT(1)),(YT,XYZT(2)),(ZT,XYZT(3))
 *
       PARAMETER (MAXIT = 1992, MAXCUT = 11)
-      PARAMETER (EC=2.9979251D-4,DLT=1D-4,DLT32=DLT/32)
+      PARAMETER (EC=2.99792458D-4,DLT=1D-4,DLT32=DLT/32)
       PARAMETER (ZERO=0, ONE=1, TWO=2, THREE=3)
       PARAMETER (THIRD=ONE/THREE, HALF=ONE/TWO)
       PARAMETER (PISQUA=.986960440109D+01)

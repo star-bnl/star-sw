@@ -1,4 +1,4 @@
-// $Id: E01_g3Config.C,v 1.1.1.1 2005/05/25 22:37:58 fisyak Exp $
+// $Id: E01_g3Config.C,v 1.1.1.2 2009/02/01 17:10:15 fisyak Exp $
 //
 // Configuration macro for Geant3 VMC for Example01 
 

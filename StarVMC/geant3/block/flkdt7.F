@@ -1,7 +1,13 @@
 *
-* $Id: flkdt7.F,v 1.1.1.1 2005/05/25 22:36:38 fisyak Exp $
+* $Id: flkdt7.F,v 1.1.1.2 2009/02/01 17:10:05 fisyak Exp $
 *
 * $Log: flkdt7.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:05  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:45:59  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:36:38  fisyak
 * Alice version of geant3 (-minicern)
 *

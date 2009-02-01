@@ -1,7 +1,13 @@
 *
-* $Id: gtrset.F,v 1.1.1.1 2005/05/25 22:37:35 fisyak Exp $
+* $Id: gtrset.F,v 1.1.1.2 2009/02/01 17:10:24 fisyak Exp $
 *
 * $Log: gtrset.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:24  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:47:39  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:35  fisyak
 * Alice version of geant3 (-minicern)
 *

@@ -1,9 +1,17 @@
 *
-* $Id: gccuts.inc,v 1.1.1.1 2005/05/25 22:37:29 fisyak Exp $
+* $Id: gccuts.inc,v 1.1.1.2 2009/02/01 17:10:20 fisyak Exp $
 *
 * $Log: gccuts.inc,v $
-* Revision 1.1.1.1  2005/05/25 22:37:29  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:20  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:47:11  fisyak
+* Merge with macos version
+*
+* Revision 1.2  2007/03/31 13:48:01  brun
+*  From Andrea Fontana and Alberto Rotondi
+* Added one extra parameter (GCALPHA) to the COMMON GCCUTS to drive the
+* Urban/Landau models in the ERLAND routine.
 *
 * Revision 1.1.1.1  2002/07/24 15:56:26  rdm
 * initial import into CVS
@@ -24,12 +32,16 @@
 *
 * gccuts.inc
 *
+* modified by A.Rotondi & A.Fontana 
+* march 2007
+* (reintroduced GCUTS(5))
 #if !defined(CERNLIB_INCLUDE)
       COMMON/GCCUTS/CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM
      +             ,DCUTE ,DCUTM ,PPCUTM,TOFMAX,GCUTS(5)
 C
 #if defined(CERNLIB_TYPE)
 #include "geant321/gtcuts.inc"
+
 #endif
 #endif
 *

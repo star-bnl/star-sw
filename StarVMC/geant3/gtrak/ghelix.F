@@ -1,9 +1,16 @@
 *
-* $Id: ghelix.F,v 1.1.1.1 2005/05/25 22:37:56 fisyak Exp $
+* $Id: ghelix.F,v 1.1.1.2 2009/02/01 17:10:33 fisyak Exp $
 *
 * $Log: ghelix.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:56  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:33  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:51  fisyak
+* Merge with macos version
+*
+* Revision 1.3  2006/11/28 09:10:12  brun
+* Change speed of light to agree with the current PDG value,
+* ie change from 299,792,510 to 299,792,458
 *
 * Revision 1.2  2003/11/28 11:23:56  brun
 * New version of geant321 with all geant3 routines renamed from G to G3
@@ -50,7 +57,7 @@ C.
       DIMENSION      XYZ(3),H(4),HXP(3)
       PARAMETER      (IX=1,IY=2,IZ=3,IPX=4,IPY=5,IPZ=6,IPP=7)
       PARAMETER      (SIXTH = 1./6.)
-      PARAMETER      (EC=2.9979251E-4)
+      PARAMETER      (EC=2.99792458E-4)
 C.
 C.    ------------------------------------------------------------------
 C.

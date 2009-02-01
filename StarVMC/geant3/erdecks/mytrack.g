@@ -16,7 +16,7 @@
        Character *3 VoptB /'VO'/
        Real inputError(15)/15*0/
        Integer idParticle
-
+       external resetNlevel
        idParticle = id
        ns = 0      
        p1(1)  = px
@@ -94,4 +94,8 @@ C	 write (*,*) 'p1(1) =', p1(1), ' p1(2) =', p1(2), ' p1(3) = ',p1(3)
 	print *,'step,sleng,radl,cvol:',step,sleng,radl,' ',cvol
 #endif
          go to 100       
+      end
+      subroutine resetNlevel
++CDE, GCVOLU.
+      nlevel = 0
       end

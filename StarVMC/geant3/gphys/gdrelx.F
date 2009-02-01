@@ -1,7 +1,16 @@
 *
-* $Id: gdrelx.F,v 1.1.1.1 2005/05/25 22:37:54 fisyak Exp $
+* $Id: gdrelx.F,v 1.1.1.2 2009/02/01 17:10:31 fisyak Exp $
 *
 * $Log: gdrelx.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:31  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:35  fisyak
+* Merge with macos version
+*
+* Revision 1.2  2005/06/09 00:08:31  fisyak
+* Add GDRELX entry
+*
 * Revision 1.1.1.1  2005/05/25 22:37:54  fisyak
 * Alice version of geant3 (-minicern)
 *
@@ -24,6 +33,9 @@
 #include "geant321/pilot.h"
 *CMZ :  3.21/03 06/10/94  18.22.43  by  S.Giani
 *-- Author :
+      SUBROUTINE GDRELX(A,Z,DENS,T,HMASS,DEDX)
+      call G3DRELX(A,Z,DENS,T,HMASS,DEDX)
+      end
       SUBROUTINE G3DRELX(A,Z,DENS,T,HMASS,DEDX)
 C.
 C.    ******************************************************************

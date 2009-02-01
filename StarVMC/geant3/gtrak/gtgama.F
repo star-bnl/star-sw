@@ -52,6 +52,7 @@ C.    ------------------------------------------------------------------
          JPFIS = LQ(JMA-12)
          JRAYL = LQ(JMA-13)
       ENDIF
+      IABAN = NINT(DPHYS1)
 *
 * *** Compute current step size
 *
@@ -220,6 +221,10 @@ C.    ------------------------------------------------------------------
 *  ** Photo-electric effect ?
 *
       ELSE IF (IPROC.EQ.8) THEN
+        IF (IABAN.LE.0) GOTO 40
+*
+*  ** If IABAN=1,2 see whether we have to abandon the electron right away
+*
 *       Calculate range of the photoelectron ( with kin. energy Ephot)
 *
         IF(GEKIN.LE.0.001)  THEN
@@ -243,10 +248,11 @@ C.    ------------------------------------------------------------------
 *        DO NOT call G3PHOT if this (overestimated) range is smaller
 *                than SAFETY
 *
-         IF (STOPMX.LE.SAFETY) GOTO 998
+         IF ((STOPMX.LE.SAFETY).AND.
+     +         (IABAN.NE.2.OR.ISVOL.LE.0)) GOTO 998
         ENDIF
  
-         CALL G3PHOT
+  40     CALL G3PHOT
 *
 *  ** Rayleigh effect ?
 *
@@ -266,6 +272,6 @@ C.    ------------------------------------------------------------------
          GETOT  = 0.
          VECT(7)= 0.
          ISTOP  = 2
-         NMEC   = 1
-         LMEC(1)= 30
+         NMEC   = NMEC+1
+         LMEC(NMEC)= 30
   999 END

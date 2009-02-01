@@ -1,7 +1,13 @@
 *
-* $Id: blank.doc,v 1.1.1.1 2005/05/25 22:37:22 fisyak Exp $
+* $Id: blank.doc,v 1.1.1.2 2009/02/01 17:10:14 fisyak Exp $
 *
 * $Log: blank.doc,v $
+* Revision 1.1.1.2  2009/02/01 17:10:14  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:26  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:22  fisyak
 * Alice version of geant3 (-minicern)
 *

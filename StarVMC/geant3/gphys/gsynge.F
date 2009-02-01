@@ -1,7 +1,13 @@
 *
-* $Id: gsynge.F,v 1.1.1.1 2005/05/25 22:37:55 fisyak Exp $
+* $Id: gsynge.F,v 1.1.1.2 2009/02/01 17:10:32 fisyak Exp $
 *
 * $Log: gsynge.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:32  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:46  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:55  fisyak
 * Alice version of geant3 (-minicern)
 *

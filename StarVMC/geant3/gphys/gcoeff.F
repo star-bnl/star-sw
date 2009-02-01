@@ -1,7 +1,13 @@
 *
-* $Id: gcoeff.F,v 1.1.1.1 2005/05/25 22:37:54 fisyak Exp $
+* $Id: gcoeff.F,v 1.1.1.2 2009/02/01 17:10:31 fisyak Exp $
 *
 * $Log: gcoeff.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:31  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:35  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:54  fisyak
 * Alice version of geant3 (-minicern)
 *

@@ -1,3 +1,4 @@
+#include "Riostream.h"
 #include "TGeant3.h"
 #include "TCallf77.h" 
 #include "TLorentzVector.h"
@@ -31,6 +32,9 @@
 #  define gufld  gufld_
 #  define gustep gustep_
 #  define gukine gukine_
+
+#  define calsig calsig_
+#  define gcalor gcalor_
 
 #  define gheish gheish_
 #  define flufin flufin_
@@ -79,6 +83,9 @@
 #  define gustep GUSTEP
 #  define gukine GUKINE
 
+#  define calsig CALSIG
+#  define gcalor GCALOR
+
 #  define gheish GHEISH
 #  define flufin FLUFIN
 #  define gfmfin GFMFIN
@@ -104,6 +111,10 @@ extern TGeant3* geant3;
 #if defined(COLLECT_TRACKS)
 extern TGeoManager *gGeoManager;
 #endif
+
+
+extern "C" type_of_call void calsig();
+extern "C" type_of_call void gcalor();
 
 extern "C" type_of_call void gheish();
 extern "C" type_of_call void flufin();
@@ -163,9 +174,13 @@ void guhadr()
 //    ------------------------------------------------------------------
 //
       Int_t ihadr = geant3->Gcphys()->ihadr;
-      if (ihadr<4)       gheish();
-      else if (ihadr==4) flufin();
-      else               gfmfin();
+
+      //    printf(" iHadr 1 :%i \n ",ihadr);
+      if (ihadr<4)      { gheish();}
+      else if (ihadr==4){ flufin();}
+      else if (ihadr==5){ gcalor();}
+      else              { gfmfin();}
+      
 }
 
 //______________________________________________________________________
@@ -205,9 +220,12 @@ void guphad()
 //    ------------------------------------------------------------------
 //
       Int_t ihadr = geant3->Gcphys()->ihadr;
-      if (ihadr<4)       gpghei();
-      else if (ihadr==4) fldist();
-      else               gfmdis();
+      // printf(" iHadr 2 :%i \n ",ihadr);
+      if (ihadr<4){ gpghei();}
+      else if ( ihadr==4 ){ fldist();}
+      else if ( ihadr==5 ){ calsig();}
+      else    { gfmdis();}
+
 }
 
 //______________________________________________________________________
@@ -564,9 +582,23 @@ void gufld(Float_t *x, Float_t *b)
   Double_t xdouble[3];
   Double_t bdouble[3];
   for (Int_t i=0; i<3; i++) xdouble[i] = x[i]; 
-
+#if  ROOT_VERSION_CODE < ROOT_VERSION(5,23,1)
   TVirtualMCApplication::Instance()->Field(xdouble,bdouble);
+#else
+  if ( gMC->GetMagField() ) {
+    gMC->GetMagField()->Field(xdouble,bdouble);
+  }
+  else {  
+    static Bool_t warn = true;   
+    if (warn) { 
+      Warning("gufld", "Using deprecated function TVirtualMCApplication::Field().");
+      Warning("gufld", "New TVirtualMagField interface should be used instead.");
+      warn = false;
+    }        
 
+    TVirtualMCApplication::Instance()->Field(xdouble,bdouble);
+  }  
+#endif
   for (Int_t j=0; j<3; j++) b[j] = bdouble[j]; 
 }
 

@@ -40,8 +40,11 @@ C.
       DOUBLE PRECISION GKR,DEMEAN,STOPP1,STOPP2,STOPMX,STOPRG,STOPC
       DOUBLE PRECISION EKIPR
 #endif
-      REAL VNEXT(6)
-      SAVE CFLD,CHARG2,RMASS,CUTPRO,IKCUT,STOPC
+* modified by A.Rotondi & A.Fontana 
+* march 2007
+* (added and saved previous step PRSTEP for use with Urban model)
+      REAL VNEXT(6),PRSTEP
+      SAVE CFLD,CHARG2,RMASS,CUTPRO,IKCUT,STOPC,PRSTEP
 C.
 C.    ------------------------------------------------------------------
 *
@@ -266,7 +269,11 @@ C.    ------------------------------------------------------------------
       IF (ILOSS*DEEMAX.GT.0) THEN
          NMEC = NMEC +1
          LMEC(NMEC) = 3
-         CALL ERLAND (STEP,Z,A,DENS,VECT(7),GETOT,AMASS,DEDX2)
+* modified by A.Rotondi & A.Fontana 
+* march 2007
+* (added DESTEP in the calling string for calculation with Urban model 
+* using the previous step PRSTEP)
+         CALL ERLAND (STEP,Z,A,DENS,VECT(7),GETOT,AMASS,PRSTEP,DEDX2)
          DEDX2  = DEDX2*CHARG2*CHARG2
          STOPRG = STOPP1 - BACKTR*STEP*RMASS*CHARG2
          IKF = IEKBIN
@@ -300,6 +307,7 @@ C.    ------------------------------------------------------------------
             NMEC = NMEC + 1
             LMEC(NMEC) = 30
          ENDIF
+	 PRSTEP = DESTEP
       ENDIF
 *
 * *** Propagate error matrix

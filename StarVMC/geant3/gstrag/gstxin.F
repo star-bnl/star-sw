@@ -1,9 +1,24 @@
 *
-* $Id: gstxin.F,v 1.1.1.1 2005/05/25 22:37:56 fisyak Exp $
+* $Id: gstxin.F,v 1.1.1.2 2009/02/01 17:10:33 fisyak Exp $
 *
 * $Log: gstxin.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:56  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:33  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:50  fisyak
+* Merge with macos version
+*
+* Revision 1.3  2006/07/10 09:11:26  brun
+* From Andreas Morsch and Alexandru Bercuci:
+* Corrections in the PAI implementation:
+* (1) The upper energy limit for integrating over the photo-absorption
+* cross-section is set to infinity.
+* In the original code the upper limit is the cut-off for delta-ray
+* production from electrons and <de/dx> depends on this cut,
+*
+* (2) Number of collisions is allowed to be 0.
+* In the original code the minimum number of collisions is forced to be 1
+* and <de/dx> depends strongly on the step-size.
 *
 * Revision 1.2  2003/11/28 11:23:56  brun
 * New version of geant321 with all geant3 routines renamed from G to G3
@@ -59,7 +74,8 @@
 *   -----    physic constants
       EPPS=0.01
       EMIN=EM(1)-EPPS
-      EMAX=LOG(DCUTE*1.E9)
+      EMAX=LOG(1.E13)
+*     Integration up to infinity
 *
       NAV = AVO*1.E24
 *
@@ -102,6 +118,7 @@
          SFINT = SFINT+ G3OSCIN(EXP(E1),EXP(E2))
          FINT(IE)=SFINT
    10 CONTINUE
+
 *
 *   Normalization of the integrated cross-section
       DO 20  IE=1,NTAB
@@ -114,6 +131,6 @@
          E=EXP(EMM(IE))
          EPSI(IE)=LOG(WP2*PIBY2*G3PHSG2(E*1E-9)/(SFINT*E))
 *      scaled by
-         EPSR(IE)=WP2*G3KOKRI(E,EXP(EMIN),DCUTE*1E9)*E/SFINT
+         EPSR(IE)=WP2*G3KOKRI(E,EXP(EMIN),EXP(EMAX))*E/SFINT
    30 CONTINUE
       END
