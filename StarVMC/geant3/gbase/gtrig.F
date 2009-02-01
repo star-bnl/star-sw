@@ -1,7 +1,13 @@
 *
-* $Id: gtrig.F,v 1.2 2006/08/17 13:38:52 fisyak Exp $
+* $Id: gtrig.F,v 1.3 2009/02/01 17:29:50 fisyak Exp $
 *
 * $Log: gtrig.F,v $
+* Revision 1.3  2009/02/01 17:29:50  fisyak
+* Resolve conflicts
+*
+* Revision 1.1.1.1  2008/12/10 20:47:00  fisyak
+* Merge with macos version
+*
 * Revision 1.2  2006/08/17 13:38:52  fisyak
 * Clean up
 *

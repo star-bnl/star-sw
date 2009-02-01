@@ -1,7 +1,13 @@
 *
-* $Id: gckmax.inc,v 1.2 2005/06/09 00:09:25 fisyak Exp $
+* $Id: gckmax.inc,v 1.3 2009/02/01 17:29:51 fisyak Exp $
 *
 * $Log: gckmax.inc,v $
+* Revision 1.3  2009/02/01 17:29:51  fisyak
+* Resolve conflicts
+*
+* Revision 1.1.1.1  2008/12/10 20:47:13  fisyak
+* Merge with macos version
+*
 * Revision 1.2  2005/06/09 00:09:25  fisyak
 * comply with STAR
 *
