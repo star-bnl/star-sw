@@ -29,7 +29,9 @@ The current id's definitions are:<br>
 #define StEmcDecoder_HH
 
 #include "TObject.h"
-#include "StEmcMappingDb.h"
+#include "TDatime.h"
+
+class StEmcMappingDb;
 
 class StEmcDecoder : public TObject
 {
@@ -95,15 +97,21 @@ private:
     bool mTowerMapBug;
     int TowerBugFixIndex[4800];
     int PreshowerBugFixIndex[4800];
-    StEmcMappingDb mapping;
+    StEmcMappingDb* mapping;
     
     ClassDef(StEmcDecoder,1)
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 1.1 2009/01/08 02:16:18 kocolosk Exp $
+// $Id: StEmcDecoder.h,v 1.2 2009/02/01 17:34:52 kocolosk Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 1.2  2009/02/01 17:34:52  kocolosk
+// more caching and optimization.
+//
+// Last StEmcMapping commit was bad and left header, implementation
+// inconsistent.  This commit fixes the AutoBuild.
+//
 // Revision 1.1  2009/01/08 02:16:18  kocolosk
 // move StEmcMappingDb/StEmcDecoder to StEmcUtil/database
 //
