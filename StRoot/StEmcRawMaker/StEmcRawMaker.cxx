@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.18 2009/01/27 19:58:36 mattheww Exp $
+// $Id: StEmcRawMaker.cxx,v 1.19 2009/02/01 02:27:55 mattheww Exp $
 
 #include <math.h>
 
@@ -266,14 +266,17 @@ Bool_t StEmcRawMaker::prepareEnvironment()
 Bool_t StEmcRawMaker::makeBemc()
 {
     LOG_DEBUG <<"Copying BEMC information from DAQ structure "<<endm;
-    /*
-    TDataSet* TheData   = GetDataSet("StDAQReader");
-    if(!TheData)
-    {
+
+    if(GetDate() < 20081101){
+      TDataSet* TheData   = GetDataSet("StDAQReader");
+      if(!TheData){
         LOG_ERROR <<"Could not find DAQ Reader "<<endm;
         return kFALSE;
-    }
-    */
+      }
+      mBemcRaw->setDate(GetDate());
+      mBemcRaw->getTables()->loadTables((StMaker*)this);
+      return mBemcRaw->make(TheData,mEvent);
+   }
     mBemcRaw->setDate(GetDate());
     mBemcRaw->getTables()->loadTables((StMaker*)this);
     return mBemcRaw->make((StEmcRawMaker*)this,mEvent);
@@ -286,33 +289,32 @@ Bool_t StEmcRawMaker::makeBemc()
 Bool_t StEmcRawMaker::makeEemc()
 {
     LOG_DEBUG <<"Copying EEMC information from daqReader->StEvent "<<endm;
-    /*
-    St_DataSet *daq = GetDataSet("StDAQReader");
 
-    if (! daq)
-    {
+    if(GetDate() < 20081101){
+      St_DataSet *daq = GetDataSet("StDAQReader");
+
+      if (! daq){
         LOG_ERROR << "::makeEemc() , StDAQReader not  available" << endm;
         return false;
-    }
+      }
 
-    StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject());
+      StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject());
 
-    if (!fromVictor )
-    {
+      if (!fromVictor ){
         LOG_ERROR << "::makeEemc() , daq->GetObject() failed" << endm;
         return false;
-    }
+      }
 
-    StEEMCReader *eeReader  = fromVictor->getEEMCReader();
-    if(!eeReader)
+      StEEMCReader *eeReader  = fromVictor->getEEMCReader();
+      if(!eeReader)
         return false ;
 
-    if (! eeReader)
-    {
+      if (! eeReader){
         LOG_ERROR << "::makeEemc() , fromVictor->getEEMCReader() failed" << endm;
         return false;
+      }
+      return mEemcRaw->make(eeReader,mEvent);
     }
-    */
     return mEemcRaw->make( (StEmcRawMaker*)this,mEvent ); //eeReader,eemcRaw, token);
 }
 
@@ -327,6 +329,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.19  2009/02/01 02:27:55  mattheww
+// fixed behavior for older data
+//
 // Revision 1.18  2009/01/27 19:58:36  mattheww
 // Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
 //
