@@ -1,7 +1,13 @@
 *
-* $Id: corinc.inc,v 1.1.1.1 2005/05/25 22:37:28 fisyak Exp $
+* $Id: corinc.inc,v 1.1.1.2 2009/02/01 17:10:20 fisyak Exp $
 *
 * $Log: corinc.inc,v $
+* Revision 1.1.1.2  2009/02/01 17:10:20  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:47:08  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:28  fisyak
 * Alice version of geant3 (-minicern)
 *

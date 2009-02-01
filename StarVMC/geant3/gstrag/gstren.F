@@ -1,9 +1,24 @@
 *
-* $Id: gstren.F,v 1.1.1.1 2005/05/25 22:37:56 fisyak Exp $
+* $Id: gstren.F,v 1.1.1.2 2009/02/01 17:10:33 fisyak Exp $
 *
 * $Log: gstren.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:56  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:33  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:50  fisyak
+* Merge with macos version
+*
+* Revision 1.3  2006/07/10 09:11:26  brun
+* From Andreas Morsch and Alexandru Bercuci:
+* Corrections in the PAI implementation:
+* (1) The upper energy limit for integrating over the photo-absorption
+* cross-section is set to infinity.
+* In the original code the upper limit is the cut-off for delta-ray
+* production from electrons and <de/dx> depends on this cut,
+*
+* (2) Number of collisions is allowed to be 0.
+* In the original code the minimum number of collisions is forced to be 1
+* and <de/dx> depends strongly on the step-size.
 *
 * Revision 1.2  2003/11/28 11:23:56  brun
 * New version of geant321 with all geant3 routines renamed from G to G3
@@ -79,7 +94,8 @@ C...
       DAN      = ANMAX-ANMIN
       AMU      = DAN*STEP
       CALL G3POISS(AMU,N,1)
-      NICOLL   = MAX(N,1)
+*      NICOLL   = MAX(N,1)
+      NICOLL = N
       DO 80  I  = 1,NICOLL
    50    K1 = 1
          K2 = NP

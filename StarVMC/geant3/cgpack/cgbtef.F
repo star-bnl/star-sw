@@ -1,7 +1,13 @@
 *
-* $Id: cgbtef.F,v 1.1.1.1 2005/05/25 22:36:38 fisyak Exp $
+* $Id: cgbtef.F,v 1.1.1.2 2009/02/01 17:10:06 fisyak Exp $
 *
 * $Log: cgbtef.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:06  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:00  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:36:38  fisyak
 * Alice version of geant3 (-minicern)
 *

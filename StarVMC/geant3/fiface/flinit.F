@@ -1,7 +1,13 @@
 *
-* $Id: flinit.F,v 1.1.1.1 2005/05/25 22:37:23 fisyak Exp $
+* $Id: flinit.F,v 1.1.1.2 2009/02/01 17:10:16 fisyak Exp $
 *
 * $Log: flinit.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:16  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:39  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:23  fisyak
 * Alice version of geant3 (-minicern)
 *

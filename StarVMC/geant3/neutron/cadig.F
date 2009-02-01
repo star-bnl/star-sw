@@ -1,7 +1,13 @@
 *
-* $Id: cadig.F,v 1.1.1.1 2005/05/25 22:37:57 fisyak Exp $
+* $Id: cadig.F,v 1.1.1.2 2009/02/01 17:10:34 fisyak Exp $
 *
 * $Log: cadig.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:34  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:59  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:57  fisyak
 * Alice version of geant3 (-minicern)
 *
