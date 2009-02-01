@@ -1,7 +1,13 @@
 *
-* $Id: erstor.F,v 1.2 2005/06/09 00:10:03 fisyak Exp $
+* $Id: erstor.F,v 1.3 2009/02/01 17:29:50 fisyak Exp $
 *
 * $Log: erstor.F,v $
+* Revision 1.3  2009/02/01 17:29:50  fisyak
+* Resolve conflicts
+*
+* Revision 1.1.1.1  2008/12/10 20:46:28  fisyak
+* Merge with macos version
+*
 * Revision 1.2  2005/06/09 00:10:03  fisyak
 * comply with STAR
 *

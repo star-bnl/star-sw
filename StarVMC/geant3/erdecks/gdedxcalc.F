@@ -1,7 +1,13 @@
 *
-* $Id: gdedxcalc.F,v 1.1 2005/09/22 22:49:26 fisyak Exp $
+* $Id: gdedxcalc.F,v 1.2 2009/02/01 17:29:50 fisyak Exp $
 *
 * $Log: gdedxcalc.F,v $
+* Revision 1.2  2009/02/01 17:29:50  fisyak
+* Resolve conflicts
+*
+* Revision 1.1.1.1  2008/12/10 20:46:30  fisyak
+* Merge with macos version
+*
 * Revision 1.1  2005/09/22 22:49:26  fisyak
 * move to erdecks
 *

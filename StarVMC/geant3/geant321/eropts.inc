@@ -1,7 +1,13 @@
 *
-* $Id: eropts.inc,v 1.2 2005/06/09 00:09:25 fisyak Exp $
+* $Id: eropts.inc,v 1.3 2009/02/01 17:29:51 fisyak Exp $
 *
 * $Log: eropts.inc,v $
+* Revision 1.3  2009/02/01 17:29:51  fisyak
+* Resolve conflicts
+*
+* Revision 1.1.1.1  2008/12/10 20:47:09  fisyak
+* Merge with macos version
+*
 * Revision 1.2  2005/06/09 00:09:25  fisyak
 * comply with STAR
 *

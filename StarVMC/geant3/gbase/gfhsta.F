@@ -1,7 +1,13 @@
 *
-* $Id: gfhsta.F,v 1.2 2006/08/17 13:38:52 fisyak Exp $
+* $Id: gfhsta.F,v 1.3 2009/02/01 17:29:50 fisyak Exp $
 *
 * $Log: gfhsta.F,v $
+* Revision 1.3  2009/02/01 17:29:50  fisyak
+* Resolve conflicts
+*
+* Revision 1.1.1.1  2008/12/10 20:46:58  fisyak
+* Merge with macos version
+*
 * Revision 1.2  2006/08/17 13:38:52  fisyak
 * Clean up
 *

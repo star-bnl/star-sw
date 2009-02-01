@@ -16,11 +16,66 @@
 
 /*
 $Log: TGeant3TGeo.cxx,v $
-Revision 1.3  2006/08/28 21:59:00  fisyak
-Force to complain with ROOT 4.04
+Revision 1.4  2009/02/01 17:29:50  fisyak
+Resolve conflicts
 
-Revision 1.2  2006/08/17 13:38:51  fisyak
-Clean up
+Revision 1.1.1.1  2008/12/10 20:45:56  fisyak
+Merge with macos version
+
+Revision 1.17  2006/12/19 13:16:19  brun
+from Mohammad Al-Turany & Denis Bertini
+
+Changes in  TGeant3/TGeant3.cxx and TGeant3.h
+------------------------------------
+1. Geane interface functions are added:
+    void  eufill(Int_t n, Float_t *ein, Float_t *xlf);
+    void  eufilp(const int n,Float_t *ein,Float_t *pli,Float_t *plf);
+    void  eufilv(Int_t n, Float_t *ein,	Char_t *namv, Int_t *numv,Int_t *iovl);
+    void  trscsd(Float_t *pc,Float_t *rc,Float_t *pd,Float_t *rd,
+		 Float_t *h,Float_t *ch,Int_t *ierr,Float_t *spu,Float_t *dj,Float_t *dk);
+    void  trsdsc(Float_t *pd,Float_t *rd,Float_t *pc,Float_t *rc,
+                           Float_t *h,Float_t *ch,Int_t *ierr,Float_t *spu,Float_t *dj,Float_t *dk);
+    void  trscsp(Float_t *ps,Float_t *rs,Float_t *pc,Float_t *rc,Float_t *h,
+  			Float_t *ch,Int_t *ierr,Float_t *spx);
+    void  trspsc(Float_t *ps,Float_t *rs,Float_t *pc,Float_t *rc,Float_t *h,
+  			Float_t *ch,Int_t *ierr,Float_t *spx);
+
+2. The Gfang function wrapper is added
+    void  g3fang( Float_t *, Float_t &,Float_t &, Float_t &, Float_t &,Int_t & );
+
+
+
+
+changes in TGeant3/TGeant3gu.cxx
+--------------------------
+Adding GCalor interface
+	1. function calsig() and gcalor() are added
+	2. setting ihadr=5 will call the GCalor routine
+
+
+
+
+changes in TGeant3/TGeant3.h
+-----------------------
+1. Structures for Geane output are setted as public so that the user can access them
+
+    Ertrio_t *fErtrio
+    Eropts_t *fEropts
+    Eroptc_t *fEroptc
+    Erwork_t *fErwork
+    Trcom3_t *fTrcom3
+
+2. The size of the error matrix errin is corrected to 15
+
+Revision 1.15  2006/05/30 13:39:07  brun
+From Andrei Gheata:
+a patch cleaning-up the usage of TGeant3::Vname method inside TGeant3TGeo.cxx. The truncation of names is not needed when working with TGeo. In most of the cases the names were truncated to 4 chars but the result was not used in the subsequent call to TGeoMCGeometry (this is why it still worked) but a cleanup is good anyway...
+
+Revision 1.14  2006/05/23 15:53:11  brun
+From Ivana:
+ Adding CurrentVolPath() overloading TGeant3 implementation
+ which does not work correctly with longer volume names
+ (Oleg Yushchenko)
 
 Revision 1.13  2005/11/18 21:25:22  brun
 From Bjorn, Andrei:
@@ -346,6 +401,7 @@ Cleanup of code
 #include "TGeant3TGeo.h"
 
 #include "TGeoManager.h"
+#include "TGeoMatrix.h"
 #include "TGeoMCGeometry.h"
 
 #include "TCallf77.h"
@@ -626,6 +682,15 @@ const char* TGeant3TGeo::CurrentVolOffName(Int_t off) const
   TGeoNode *node = gGeoManager->GetMother(off);
   if (!node) return 0;
   return node->GetVolume()->GetName();
+}
+
+//______________________________________________________________________
+const char* TGeant3TGeo::CurrentVolPath()
+{
+// Return the path in geometry tree for the current volume
+// ---
+
+  return GetPath();
 }
 
 //_____________________________________________________________________________
@@ -925,7 +990,7 @@ const char *TGeant3TGeo::GetNodeName()
    if (gGeoManager->IsOutside()) return "";
    return gGeoManager->GetCurrentNode()->GetName();
 }
-#if ROOT_VERSION_CODE >= 328192   
+
 //______________________________________________________________________
 Bool_t TGeant3TGeo::GetTransformation(const TString &volumePath,TGeoHMatrix &mat)
 {
@@ -951,7 +1016,7 @@ Bool_t TGeant3TGeo::GetTransformation(const TString &volumePath,TGeoHMatrix &mat
    // We have to preserve the modeler state
    return fMCGeo->GetTransformation(volumePath, mat);
 }   
-
+   
 //______________________________________________________________________
 Bool_t TGeant3TGeo::GetShape(const TString &volumePath,TString &shapeType,
                          TArrayD &par)
@@ -969,7 +1034,7 @@ Bool_t TGeant3TGeo::GetShape(const TString &volumePath,TString &shapeType,
     //   information
    return fMCGeo->GetShape(volumePath, shapeType, par);
 }
-#endif   
+   
 //______________________________________________________________________
 Bool_t TGeant3TGeo::GetMaterial(const TString &volumeName,
                             TString &name,Int_t &imat,
@@ -1366,11 +1431,6 @@ void  TGeant3TGeo::Gsdvn(const char *name, const char *mother, Int_t ndiv,
   //  X,Y,Z of CAXIS will be translated to 1,2,3 for IAXIS.
   //  It divides a previously defined volume.
   //
-  char vname[5];
-  Vname(name,vname);
-  char vmother[5];
-  Vname(mother,vmother);
-
   fMCGeo->Gsdvn(name, mother, ndiv, iaxis);
 }
 
@@ -1385,11 +1445,6 @@ void  TGeant3TGeo::Gsdvn2(const char *name, const char *mother, Int_t ndiv,
   // along axis iaxis starting at coordinate value c0.
   // the new volume created will be medium number numed.
   //
-  char vname[5];
-  Vname(name,vname);
-  char vmother[5];
-  Vname(mother,vmother);
-
   fMCGeo->Gsdvn2(name, mother, ndiv, iaxis, c0i, numed);
 }
 
@@ -1400,12 +1455,7 @@ void  TGeant3TGeo::Gsdvs(const char *name, const char *mother, Float_t step,
   //
   // Create a new volume by dividing an existing one
   //
-  char vname[5];
-  Vname(name,vname);
-  char vmother[5];
-  Vname(mother,vmother);
-
-  gGeoManager->Division(vname,vmother,iaxis,0,0,step,numed,"s");
+  gGeoManager->Division(name,mother,iaxis,0,0,step,numed,"s");
 }
 
 //_____________________________________________________________________________
@@ -1415,12 +1465,7 @@ void  TGeant3TGeo::Gsdvs2(const char *name, const char *mother, Float_t step,
   //
   // Create a new volume by dividing an existing one
   //
-  char vname[5];
-  Vname(name,vname);
-  char vmother[5];
-  Vname(mother,vmother);
-
-  gGeoManager->Division(vname,vmother,iaxis,0,c0,step,numed,"sx");
+  gGeoManager->Division(name,mother,iaxis,0,c0,step,numed,"sx");
 }
 
 //_____________________________________________________________________________
@@ -1438,11 +1483,6 @@ void  TGeant3TGeo::Gsdvt(const char *name, const char *mother, Double_t step,
   //       NDVMX is the expected maximum number of divisions
   //          (If 0, no protection tests are performed)
   //
-  char vname[5];
-  Vname(name,vname);
-  char vmother[5];
-  Vname(mother,vmother);
-
   fMCGeo->Gsdvt(name, mother, step, iaxis, numed, ndvmx);
 }
 
@@ -1461,11 +1501,6 @@ void  TGeant3TGeo::Gsdvt2(const char *name, const char *mother, Double_t step,
   //           NDVMX is the expected maximum number of divisions
   //             (If 0, no protection tests are performed)
   //
-  char vname[5];
-  Vname(name,vname);
-  char vmother[5];
-  Vname(mother,vmother);
-
   fMCGeo->Gsdvt2(name, mother, step, iaxis, c0, numed, ndvmx);
 }
 
@@ -1506,16 +1541,6 @@ void  TGeant3TGeo::Gspos(const char *name, Int_t nr, const char *mother, Double_
   //
   //  It positions a previously defined volume in the mother.
   //
-
-  TString only = konly;
-  only.ToLower();
-  Bool_t isOnly = kFALSE;
-  if (only.Contains("only")) isOnly = kTRUE;
-  char vname[5];
-  Vname(name,vname);
-  char vmother[5];
-  Vname(mother,vmother);
-
   fMCGeo->Gspos(name, nr, mother, x, y, z, irot, konly);
 }
 
@@ -1760,11 +1785,7 @@ void TGeant3TGeo::Gsatt(const char *name, const char *att, Int_t val)
   //     DTYP  detector type (1,2)
   //
 //  InitHIGZ();
-  char vname[5];
-  Vname(name,vname);
-  char vatt[5];
-  Vname(att,vatt);
-  gGeoManager->SetVolumeAttribute(vname, vatt, val);
+  gGeoManager->SetVolumeAttribute(name, att, val);
 }
 
 //_____________________________________________________________________________
@@ -2079,6 +2100,8 @@ void TGeant3TGeo::FinishGeometry()
     gGeoManager->CloseGeometry();
   }
 
+  if (gDebug > 0) printf("FinishGeometry, calling MisalignGeometry()\n");
+  TVirtualMCApplication::Instance()->MisalignGeometry();
   //  gROOT->GetListOfBrowsables()->Add(gGeoManager);
   if (gDebug > 0) printf("FinishGeometry, calling SetColors\n");
 

@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3TGeo.h,v 1.3 2006/08/28 21:59:00 fisyak Exp $ */
+/* $Id: TGeant3TGeo.h,v 1.4 2009/02/01 17:29:50 fisyak Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
@@ -56,6 +56,7 @@ public:
   Int_t CurrentVolOffID(Int_t off, Int_t &copy) const;
   const char* CurrentVolName() const;
   const char *CurrentVolOffName(Int_t off) const;
+  const char *CurrentVolPath();
   Int_t VolId(const Text_t *name) const;
   const char* VolName(Int_t id) const;
   Int_t NofVolumes() const;
@@ -154,7 +155,6 @@ public:
    virtual  Int_t  Glvolu(Int_t nlev, Int_t *lnam,Int_t *lnum);
 
     // functions for access to geometry
-#if ROOT_VERSION_CODE >= 328192
     //
     // Return the Transformation matrix between the volume specified by
     // the path volumePath and the top or master volume.
@@ -165,7 +165,7 @@ public:
     // specified by the volume name.
     virtual Bool_t GetShape(const TString& volumePath, 
                          TString& shapeType, TArrayD& par);
-#endif
+
     // Returns the material parameters for the volume specified by
     // the volume name.
     virtual Bool_t GetMaterial(const TString& volumeName,
