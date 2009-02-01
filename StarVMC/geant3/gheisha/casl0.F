@@ -1,7 +1,13 @@
 *
-* $Id: casl0.F,v 1.1.1.1 2005/05/25 22:37:36 fisyak Exp $
+* $Id: casl0.F,v 1.1.1.2 2009/02/01 17:10:27 fisyak Exp $
 *
 * $Log: casl0.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:27  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:02  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:36  fisyak
 * Alice version of geant3 (-minicern)
 *

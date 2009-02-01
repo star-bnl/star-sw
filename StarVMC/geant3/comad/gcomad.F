@@ -18,6 +18,7 @@ C
 #include "geant321/gcbank.inc"
 #include "geant321/gccurs.inc"
 #include "geant321/gccuts.inc"
+#include "geant321/gcmore.inc"
 #include "geant321/gcdraw.inc"
 #include "geant321/gcfdim.inc"
 #include "geant321/gcflag.inc"
@@ -118,6 +119,8 @@ C
          IADD=GCADDI(INTFLA)
       ELSE IF(CHCOMM.EQ.'GCCUTS') THEN
          IADD=GCADDF(CUTGAM)
+      ELSE IF(CHCOMM.EQ.'GCMORE') THEN
+         IADD=GCADDF(GCALPHA)
       ELSE IF(CHCOMM.EQ.'GCDRAW') THEN
          IADD=GCADDI(NUMNOD)
       ELSE IF(CHCOMM.EQ.'GCFDIM') THEN

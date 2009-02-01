@@ -1,7 +1,13 @@
 *
-* $Id: cgshif.F,v 1.1.1.1 2005/05/25 22:36:40 fisyak Exp $
+* $Id: cgshif.F,v 1.1.1.2 2009/02/01 17:10:07 fisyak Exp $
 *
 * $Log: cgshif.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:07  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:02  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:36:40  fisyak
 * Alice version of geant3 (-minicern)
 *

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1.1.1 2005/05/25 22:37:58 fisyak Exp $
+# $Id: Makefile,v 1.1.1.2 2009/02/01 17:10:15 fisyak Exp $
 #
 # Makefile for building Geant3 examples
 # 

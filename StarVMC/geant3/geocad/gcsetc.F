@@ -1,7 +1,13 @@
 *
-* $Id: gcsetc.F,v 1.1.1.1 2005/05/25 22:37:35 fisyak Exp $
+* $Id: gcsetc.F,v 1.1.1.2 2009/02/01 17:10:23 fisyak Exp $
 *
 * $Log: gcsetc.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:23  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:47:37  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:35  fisyak
 * Alice version of geant3 (-minicern)
 *

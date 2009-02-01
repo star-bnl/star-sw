@@ -1,9 +1,20 @@
 *
-* $Id: ermcsc.F,v 1.1.1.1 2005/05/25 22:37:23 fisyak Exp $
+* $Id: ermcsc.F,v 1.1.1.2 2009/02/01 17:10:15 fisyak Exp $
 *
 * $Log: ermcsc.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:23  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:15  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:28  fisyak
+* Merge with macos version
+*
+* Revision 1.2  2007/03/31 13:45:49  brun
+*  From Andrea Fontana and Alberto Rotondi
+* New expression for the variance of the Coulomb multiple scattering
+* according to Fruhwirth and Regler, NIM A 456 (2001) 369
+*
+* CVS-- -- ------------------------------------------------------------------
+* : ----------------------------------------------------------------------
 *
 * Revision 1.1.1.1  2002/07/24 15:56:26  rdm
 * initial import into CVS
@@ -43,14 +54,28 @@ C.    ******************************************************************
 #include "geant321/gctrak.inc"
 *
       DOUBLE PRECISION E(15)
+      REAL*4 RADLOCAL
 *
       PBETA = VECT(7)*VECT(7)/GETOT
-      RI    = STEP/RADL
-*
+      
       CRLOG = 1.
 CC      CRLOG = 1. + 0.201*LOG(RI)
 CC      IF (CRLOG.LE.0.) CRLOG = 0.
-      D     = 1.8496E-4*RI*((CHARGE*CRLOG/PBETA)**2)
+CC      D     = 1.8496E-4*RI*((CHARGE*CRLOG/PBETA)**2)
+*
+* modified by Andrea Fontana and Alberto Rotondi to include 
+* the correct variance for Coulomb multiple scattering
+* (see Fruhwirth and Regler, NIM A 456 (2001) 369)
+* march 2007
+*
+* begin of change
+*
+      RADLOCAL = (Z+1)*LOG(287.*Z**(-0.5))/(Z*LOG(159.*Z**(-0.333333)))
+      RI    = STEP/(RADL*RADLOCAL)
+      D     = 2.25E-4*RI*((CHARGE*CRLOG/PBETA)**2)
+*
+* end of change
+*
       S1    = D*STEP**2/3.
       S2    = D
       S3    = D*STEP/2.
