@@ -1,9 +1,12 @@
 *
-* $Id: ertrak.F,v 1.1.1.1 2005/05/25 22:37:23 fisyak Exp $
+* $Id: ertrak.F,v 1.1.1.2 2009/02/01 17:10:15 fisyak Exp $
 *
 * $Log: ertrak.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:23  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:15  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:28  fisyak
+* Merge with macos version
 *
 * Revision 1.2  2003/11/28 11:23:55  brun
 * New version of geant321 with all geant3 routines renamed from G to G3

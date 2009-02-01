@@ -1,9 +1,18 @@
 *
-* $Id: gdebug.F,v 1.1.1.1 2005/05/25 22:37:56 fisyak Exp $
+* $Id: gdebug.F,v 1.1.1.2 2009/02/01 17:10:33 fisyak Exp $
 *
 * $Log: gdebug.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:56  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:33  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:51  fisyak
+* Merge with macos version
+*
+* Revision 1.2  2006/08/17 13:38:59  fisyak
+* Clean up
+*
+* Revision 1.3  2006/03/17 21:45:00  brun
+* Add all HIGZ routines as dummy
 *
 * Revision 1.2  2003/11/28 11:23:56  brun
 * New version of geant321 with all geant3 routines renamed from G to G3
@@ -46,7 +55,7 @@
         IF (ISWIT(2).EQ.3) THEN
            IF(ISWIT(4).EQ.3.AND.CHARGE.EQ.0.)RETURN
            CALL GDCXYZ
-           CALL IGSA(0)
+*           CALL IGSA(0)
         ELSEIF(ISWIT(2).EQ.4) THEN
            IF(ISTOP.NE.0) CALL GDTRAK(' ')
         ENDIF

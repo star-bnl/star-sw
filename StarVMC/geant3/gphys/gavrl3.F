@@ -1,7 +1,13 @@
 *
-* $Id: gavrl3.F,v 1.1.1.1 2005/05/25 22:37:54 fisyak Exp $
+* $Id: gavrl3.F,v 1.1.1.2 2009/02/01 17:10:30 fisyak Exp $
 *
 * $Log: gavrl3.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:30  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:32  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:54  fisyak
 * Alice version of geant3 (-minicern)
 *

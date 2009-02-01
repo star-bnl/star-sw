@@ -1,7 +1,13 @@
 *
-* $Id: giasho.F,v 1.1.1.1 2005/05/25 22:37:56 fisyak Exp $
+* $Id: giasho.F,v 1.1.1.2 2009/02/01 17:10:32 fisyak Exp $
 *
 * $Log: giasho.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:32  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:49  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:56  fisyak
 * Alice version of geant3 (-minicern)
 *

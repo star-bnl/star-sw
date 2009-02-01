@@ -1,7 +1,16 @@
 *
-* $Id: gevkev.F,v 1.1.1.1 2005/05/25 22:37:26 fisyak Exp $
+* $Id: gevkev.F,v 1.1.1.2 2009/02/01 17:10:19 fisyak Exp $
 *
 * $Log: gevkev.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:19  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:47:00  fisyak
+* Merge with macos version
+*
+* Revision 1.2  2005/05/26 22:41:35  fisyak
+* recover gevkev from g3evkev (used in egr)
+*
 * Revision 1.1.1.1  2005/05/25 22:37:26  fisyak
 * Alice version of geant3 (-minicern)
 *
@@ -24,7 +33,7 @@
 #include "geant321/pilot.h"
 *CMZ :  3.21/02 29/03/94  15.41.19  by  S.Giani
 *-- Author :
-      SUBROUTINE G3EVKEV(EGEV,ENERU,KUNIT)
+      SUBROUTINE GEVKEV(EGEV,ENERU,KUNIT)
 C.
 C.    ******************************************************************
 C.    *                                                                *
@@ -55,3 +64,7 @@ C.
       ENDIF
 *
       END
+      SUBROUTINE G3EVKEV(EGEV,ENERU,KUNIT)
+      CHARACTER*4 KUNIT
+      call GEVKEV(EGEV,ENERU,KUNIT)
+      end

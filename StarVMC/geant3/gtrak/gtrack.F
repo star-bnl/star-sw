@@ -1,12 +1,12 @@
 *
-* $Id: gtrack.F,v 1.1.1.1 2005/05/25 22:37:56 fisyak Exp $
+* $Id: gtrack.F,v 1.1.1.2 2009/02/01 17:10:33 fisyak Exp $
 *
 * $Log: gtrack.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:56  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:33  fisyak
+* Merge with .DEV2
 *
-* Revision 1.2  2003/11/28 11:23:56  brun
-* New version of geant321 with all geant3 routines renamed from G to G3
+* Revision 1.1.1.1  2008/12/10 20:48:55  fisyak
+* Merge with macos version
 *
 * Revision 1.1.1.1  2002/07/24 15:56:26  rdm
 * initial import into CVS
@@ -272,20 +272,23 @@ C.    ------------------------------------------------------------------
 *     Check for possible endless loop
 *
    90 NSTEP = NSTEP +1
-      IF (NSTEP.GT.MAXNST) THEN
+      IF (NSTEP.GT.ABS(MAXNST)) THEN
          IF (ISTOP.EQ.0) THEN
             ISTOP = 99
             NMEC  = NMEC +1
             LMEC(NMEC) = 30
-            WRITE(CHMAIL,10200) MAXNST
-            CALL GMAIL(1,0)
-            CALL G3PCXYZ
-            WRITE(CHMAIL,10250) IEVENT,IDEVT,(NRNDM(I),I=1,2),TOFG*1.E9
-            CALL GMAIL(0,1)
-10200       FORMAT(' *** GTRACK *** More than ',I6,
-     +             ' steps, tracking abandoned!')
-10250       FORMAT(' IEVENT ',I7,' IDEVT ',I7,' Random Seeds ',I10,2X
-     $           ,I10,' Time of flight ',F10.3,' ns')
+            IF(MAXNST.GT.0) THEN
+               WRITE(CHMAIL,10200) MAXNST
+               CALL GMAIL(1,0)
+               CALL G3PCXYZ
+               WRITE(CHMAIL,10250) IEVENT,IDEVT,
+     +              (NRNDM(I),I=1,2),TOFG*1.E9
+               CALL GMAIL(0,1)
+10200          FORMAT(' *** GTRACK *** More than ',I6,
+     +              ' steps, tracking abandoned!')
+10250          FORMAT(' IEVENT ',I7,' IDEVT ',I7,' Random Seeds ',I10,2X
+     $              ,I10,' Time of flight ',F10.3,' ns')
+            ENDIF
          ENDIF
       ENDIF
 *

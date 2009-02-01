@@ -1,7 +1,13 @@
 *
-* $Id: cgcaan.inc,v 1.1.1.1 2005/05/25 22:37:28 fisyak Exp $
+* $Id: cgcaan.inc,v 1.1.1.2 2009/02/01 17:10:19 fisyak Exp $
 *
 * $Log: cgcaan.inc,v $
+* Revision 1.1.1.2  2009/02/01 17:10:19  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:47:06  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:28  fisyak
 * Alice version of geant3 (-minicern)
 *

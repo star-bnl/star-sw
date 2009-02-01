@@ -1,7 +1,13 @@
 *
-* $Id: gfmfin.F,v 1.1.1.1 2005/05/25 22:37:57 fisyak Exp $
+* $Id: gfmfin.F,v 1.1.1.2 2009/02/01 17:10:34 fisyak Exp $
 *
 * $Log: gfmfin.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:34  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:57  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:57  fisyak
 * Alice version of geant3 (-minicern)
 *

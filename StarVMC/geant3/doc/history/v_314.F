@@ -1,7 +1,13 @@
 *
-* $Id: v_314.F,v 1.1.1.1 2005/05/25 22:37:23 fisyak Exp $
+* $Id: v_314.F,v 1.1.1.2 2009/02/01 17:10:14 fisyak Exp $
 *
 * $Log: v_314.F,v $
+* Revision 1.1.1.2  2009/02/01 17:10:14  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:27  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.1  2005/05/25 22:37:23  fisyak
 * Alice version of geant3 (-minicern)
 *

@@ -1,7 +1,13 @@
 *
-* $Id: svgam7.F,v 1.1.1.2 2005/10/27 16:00:51 fisyak Exp $
+* $Id: svgam7.F,v 1.1.1.3 2009/02/01 17:10:29 fisyak Exp $
 *
 * $Log: svgam7.F,v $
+* Revision 1.1.1.3  2009/02/01 17:10:29  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:48:23  fisyak
+* Merge with macos version
+*
 * Revision 1.1.1.2  2005/10/27 16:00:51  fisyak
 * *** empty log message ***
 *

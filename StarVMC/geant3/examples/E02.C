@@ -1,4 +1,4 @@
-// $Id: E02.C,v 1.1.1.1 2005/05/25 22:37:58 fisyak Exp $
+// $Id: E02.C,v 1.1.1.2 2009/02/01 17:10:15 fisyak Exp $
 //
 // Macro for running Example02 with Geant3 
 // Before running this macro, the libexampl02.so library

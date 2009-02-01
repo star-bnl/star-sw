@@ -1,9 +1,18 @@
 *
-* $Id: gfhsta.F,v 1.1.1.1 2005/05/25 22:37:25 fisyak Exp $
+* $Id: gfhsta.F,v 1.1.1.2 2009/02/01 17:10:18 fisyak Exp $
 *
 * $Log: gfhsta.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:25  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:18  fisyak
+* Merge with .DEV2
+*
+* Revision 1.1.1.1  2008/12/10 20:46:58  fisyak
+* Merge with macos version
+*
+* Revision 1.2  2006/08/17 13:38:52  fisyak
+* Clean up
+*
+* Revision 1.3  2006/03/17 14:41:53  brun
+* Remove references to hbook
 *
 * Revision 1.2  2003/11/28 11:23:55  brun
 * New version of geant321 with all geant3 routines renamed from G to G3
@@ -38,6 +47,7 @@ C.    *       Author    R.Brun  *********                              *
 C.    *                                                                *
 C.    ******************************************************************
 C.
+#ifdef NEVER
 #include "geant321/gcbank.inc"
 #include "geant321/gcnum.inc"
 #include "geant321/gclist.inc"
@@ -74,4 +84,5 @@ C.
          ENDIF
 *
       ENDIF
+#endif
       END

@@ -1,12 +1,12 @@
 *
-* $Id: gfluct.F,v 1.1.1.1 2005/05/25 22:37:54 fisyak Exp $
+* $Id: gfluct.F,v 1.1.1.2 2009/02/01 17:10:31 fisyak Exp $
 *
 * $Log: gfluct.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:54  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:31  fisyak
+* Merge with .DEV2
 *
-* Revision 1.2  2003/11/28 11:23:56  brun
-* New version of geant321 with all geant3 routines renamed from G to G3
+* Revision 1.1.1.1  2008/12/10 20:48:36  fisyak
+* Merge with macos version
 *
 * Revision 1.1.1.1  2002/07/24 15:56:25  rdm
 * initial import into CVS
@@ -25,7 +25,6 @@
 *
 *
 #include "geant321/pilot.h"
-*CMZ :  3.21/02 29/03/94  15.41.21  by  S.Giani
 *-- Author :
       SUBROUTINE G3FLUCT(DEMEAN,DE)
 C.
@@ -77,12 +76,14 @@ C.
       PARAMETER (ASHMIN=1,ASHMAX=30)
 #endif
 * These parameters are needed by M.Kowalski's fluctuation algorithm
-      PARAMETER (FPOT=20.77E-9, EEND=10E-6, EEXPO=2.2)
+      PARAMETER (FPOT=20.77E-9, EEND=10E-6, EEXPO=2.2, EEND1=1E-6)
       PARAMETER (XEXPO=-EEXPO+1, YEXPO=1/XEXPO)
 * These parameters are needed by M.Kowalski's fluctuation algorithm
       DIMENSION RNDM(2)
       DE2(DPOT,RAN)=(DPOT**XEXPO*(1-RAN)+EEND**XEXPO*RAN)**YEXPO
       FLAND(X) = P1+P6*X+(P2+P3*X)*EXP(P4*X+P5)
+*
+      DE21(DPOT,RAN)=(DPOT**XEXPO*(1-RAN)+EEND1**XEXPO*RAN)**YEXPO
 *
       IF(STEP.LE.0) THEN
          DE=DEMEAN
@@ -97,6 +98,11 @@ C.
             CALL GRNDM(RNDM,1)
             DE=DE2(FPOT,RNDM(1))
 *
+         ELSEIF (ILOSS.EQ.6) THEN
+* This is Marek Kowalski's fluctuation algorithm, it works only when
+* the step size has been limited to one ionisation on average and for Kr only
+            CALL GRNDM(RNDM,1)
+            DE=DE21(FPOT,RNDM(1))
          ELSE
 *
 * *** mean ionization potential (GeV)

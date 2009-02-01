@@ -1,18 +1,21 @@
 *
-* $Id: eropts.inc,v 1.1.1.1 2005/05/25 22:37:28 fisyak Exp $
+* $Id: eropts.inc,v 1.1.1.2 2009/02/01 17:10:20 fisyak Exp $
 *
 * $Log: eropts.inc,v $
-* Revision 1.1.1.1  2005/05/25 22:37:28  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2009/02/01 17:10:20  fisyak
+* Merge with .DEV2
 *
-* Revision 1.1.1.1  2002/07/24 15:56:26  rdm
-* initial import into CVS
+* Revision 1.1.1.1  2008/12/10 20:47:09  fisyak
+* Merge with macos version
 *
-* Revision 1.1.1.1  2002/06/16 15:18:38  hristov
-* Separate distribution  of Geant3
+* Revision 1.2  2005/06/09 00:09:25  fisyak
+* comply with STAR
 *
-* Revision 1.1.1.1  1999/05/18 15:55:16  fca
-* AliRoot sources
+* Revision 1.2  2004/03/01 17:26:25  fisyak
+* Get rid of staf
+*
+* Revision 1.1  1999/12/07 15:44:29  fisyak
+* Add geane, new TGeant3 from Alice
 *
 * Revision 1.2  1996/07/25 15:01:02  ravndal
 * CMZ to CVS conversion artefact removed
@@ -29,12 +32,12 @@
 * eropts.inc
 *
       CHARACTER*8     CHOPTI
-      LOGICAL         LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU
+      LOGICAL         LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU, LEVMIX
       REAL            ERPLI, ERPLO, ERLENG
       INTEGER         NAMEER, NUMVER, IOVLER
       COMMON /EROPTS/ ERPLI(3,2), ERPLO(3,4,MXPRED), ERLENG(MXPRED),
      +                NAMEER(MXPRED), NUMVER(MXPRED), IOVLER(MXPRED),
-     +                LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU
+     +                LEEXAC, LELENG, LEONLY, LEPLAN, LEPOIN, LEVOLU, LEVMIX
       COMMON /EROPTC/CHOPTI
 *
 * eropts.inc

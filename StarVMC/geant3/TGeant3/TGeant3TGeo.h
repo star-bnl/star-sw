@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3TGeo.h,v 1.1.1.1 2005/05/25 22:36:37 fisyak Exp $ */
+/* $Id: TGeant3TGeo.h,v 1.1.1.2 2009/02/01 17:10:04 fisyak Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
@@ -56,6 +56,7 @@ public:
   Int_t CurrentVolOffID(Int_t off, Int_t &copy) const;
   const char* CurrentVolName() const;
   const char *CurrentVolOffName(Int_t off) const;
+  const char *CurrentVolPath();
   Int_t VolId(const Text_t *name) const;
   const char* VolName(Int_t id) const;
   Int_t NofVolumes() const;
@@ -153,6 +154,38 @@ public:
    virtual  void  Gsatt(const char *name, const char *att, Int_t val);
    virtual  Int_t  Glvolu(Int_t nlev, Int_t *lnam,Int_t *lnum);
 
+    // functions for access to geometry
+    //
+    // Return the Transformation matrix between the volume specified by
+    // the path volumePath and the top or master volume.
+    virtual Bool_t GetTransformation(const TString& volumePath, 
+                         TGeoHMatrix& matrix);
+   
+    // Return the name of the shape and its parameters for the volume
+    // specified by the volume name.
+    virtual Bool_t GetShape(const TString& volumePath, 
+                         TString& shapeType, TArrayD& par);
+
+    // Returns the material parameters for the volume specified by
+    // the volume name.
+    virtual Bool_t GetMaterial(const TString& volumeName,
+	 	         TString& name, Int_t& imat,
+		         Double_t& a, Double_t& z, Double_t& density,
+		         Double_t& radl, Double_t& inter, TArrayD& par);
+		     
+    // Returns the medium parameters for the volume specified by the
+    // volume name.
+    virtual Bool_t GetMedium(const TString& volumeName,
+                         TString& name, Int_t& imed,
+		         Int_t& nmat, Int_t& isvol, Int_t& ifield,
+		         Double_t& fieldm, Double_t& tmaxfd, Double_t& stemax,
+		         Double_t& deemax, Double_t& epsil, Double_t& stmin,
+		         TArrayD& par);
+    
+   // Returns the current medium (implemented in TGeant3)
+   virtual Int_t   GetMedium() const;
+    
+    
       // functions from GDRAW
    virtual  void  Gdshow(Int_t view);
    virtual  void  Gdopt(const char *name,const char *value);

@@ -459,14 +459,14 @@ void gfpart(Int_t &ipart, char *name, Int_t &itrtyp,
 void gftmed(Int_t &numed, char *name, Int_t &nmat, Int_t &isvol,  
 		   Int_t &ifield, Float_t &fieldm, Float_t &tmaxfd, 
 		    Float_t &stemax, Float_t &deemax, Float_t &epsil, 
-		    Float_t &stmin, Float_t * /*ubuf*/, Int_t * /*nbuf*/, const Int_t lname) 
+		    Float_t &stmin, Float_t * ubuf, Int_t * nbuf, const Int_t lname) 
 { 
   //
   // Return parameters for tracking medium NUMED
   //
   char vname[24]; strncpy(vname,name,lname); vname[lname] = 0;
   geant3->Gftmed(numed, vname, nmat, isvol, ifield, fieldm, tmaxfd, stemax,  
-         deemax, epsil, stmin);
+		 deemax, epsil, stmin, ubuf, nbuf);
 }
 
  
@@ -491,7 +491,7 @@ void gsdk(Int_t &ipart, Float_t *bratio, Int_t *mode)
  
 //_____________________________________________________________________________
 void gsmate(Int_t &imat, const char *name, Float_t &a, Float_t &z,  
-		   Float_t &dens, Float_t &radl, Float_t &absl, Float_t */*ubuf*/, Int_t &/*nbuf*/, const Int_t lname) 
+		   Float_t &dens, Float_t &radl, Float_t &absl, Float_t *ubuf, Int_t &nbuf, const Int_t lname) 
 { 
   //
   // Defines a Material
@@ -536,7 +536,7 @@ void gsmixt(Int_t &imat, const char *name, Float_t *a, Float_t *z,
  
 //_____________________________________________________________________________
 void gspart(Int_t &ipart, const char *name, Int_t &itrtyp,  
-		   Float_t &amass, Float_t &charge, Float_t &tlife, Float_t * /*ubuf*/, Int_t & /*nbuf*/, const Int_t lname) 
+	    Float_t &amass, Float_t &charge, Float_t &tlife, Float_t *ubuf, Int_t &nbuf, const Int_t lname) 
 { 
   //
   // Store particle parameters
@@ -557,7 +557,7 @@ void gspart(Int_t &ipart, const char *name, Int_t &itrtyp,
 void gstmed(Int_t &numed, const char *name, Int_t &nmat, Int_t &isvol,  
 		      Int_t &ifield, Float_t &fieldm, Float_t &tmaxfd,
 		      Float_t &stemax, Float_t &deemax, Float_t &epsil,
-		      Float_t &stmin, Float_t * /*ubuf*/, Int_t & /*nbuf*/, const Int_t lname) 
+		      Float_t &stmin, Float_t *ubuf, Int_t &nbuf, const Int_t lname) 
 { 
   //
   //  NTMED  Tracking medium number
