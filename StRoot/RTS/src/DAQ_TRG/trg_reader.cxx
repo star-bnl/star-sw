@@ -85,7 +85,7 @@ char *trg_find_raw(char *m, int *bytes)
 }	
 
 // read the Trigger RAW data
-int trg_reader(char *m, struct trg_t *trg, u_int driver)
+int trg_reader(char *m, struct trg_t *trg, u_int driver, u_int evp_daqbits)
 {
 	struct TRGP *trgp  ;
 	struct TRGD *trgd ;
@@ -106,9 +106,8 @@ int trg_reader(char *m, struct trg_t *trg, u_int driver)
 	trg->channels = 0 ;
 	trg->trgc = NULL ;
 
-	// Tonko: FY09... no clue what this is... I will zap it to 0000
-	//trg->daqbits = evp_daqbits;   // ugly hack...
-	trg->daqbits = 0 ;
+	// Tonko: FY09... this is very ugly...
+	trg->daqbits = evp_daqbits;   // ugly hack...
 
 	if(m == NULL) return 0 ;
 
@@ -163,12 +162,12 @@ int trg_reader(char *m, struct trg_t *trg, u_int driver)
 	      int i ;
 	  
 	      for(i=0;i<32;i++) {
-//		if(evp_daqbits & (1 << i)) {
+		if(evp_daqbits & (1 << i)) {
 		  LOG(DBG,"TRGID %d: bit %2d is 0x%02X [%u dec]",i,i,
 		      qswap32(swaptrgid, trgid->triggerId[i]),
 		      qswap32(swaptrgid, trgid->triggerId[i]), 0);  
 		  trg->offline_id[i] = qswap32(swaptrgid, trgid->triggerId[i]);
-//		 }
+		 }
 		
 	      }
 	    }
