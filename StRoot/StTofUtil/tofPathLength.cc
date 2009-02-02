@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: tofPathLength.cc,v 1.6 2005/07/06 19:20:01 fisyak Exp $
+ * $Id: tofPathLength.cc,v 1.7 2009/02/02 21:55:47 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -9,25 +9,6 @@
  *              requires begin and end point StThreeVectors and helix curvature
  *
  ***************************************************************************
- *
- * $Log: tofPathLength.cc,v $
- * Revision 1.6  2005/07/06 19:20:01  fisyak
- * StThreeVectorD == StThreeVector<double>
- *
- * Revision 1.5  2004/03/17 01:49:56  dongx
- * add tofPathLength(StThreeVectorD*, StThreeVectorF*, double)
- *
- * Revision 1.4  2003/09/02 17:59:10  perev
- * gcc 3.2 updates + WarnOff
- *
- * Revision 1.3  2003/08/06 23:42:56  geurts
- * function definitions in seperate header file
- *
- * Revision 1.2  2003/07/11 05:08:49  geurts
- * added extra overloaded function.
- *
- * Revision 1.1  2003/04/15 01:45:16  geurts
- * Introduction of standalone function for TOF path length calculation
  *
  **************************************************/
 #include "StThreeVectorD.hh"
