@@ -221,7 +221,7 @@ static int trg_doer(daqReader *rdr, char  *do_print)
 			trg_t *trg_p = (trg_t *) dd->Void ;
 
 			if(do_print) {	// print something...
-				printf("Trigger: daqbits 0x%08X, trg_word 0x%04X\n",trg_p->daqbits,trg_p->trg_word) ;
+				printf("Trigger: tcubits 0x%08X, trg_word 0x%04X\n",trg_p->tcubits,trg_p->trg_word) ;
 			}
 
 		}
