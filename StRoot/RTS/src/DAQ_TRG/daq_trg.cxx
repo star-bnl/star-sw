@@ -29,7 +29,7 @@ public:
 static daq_det_trg_factory trg_factory ;
 
 
-extern int trg_reader(char *m, struct trg_t *trg, u_int driver) ;
+extern int trg_reader(char *m, struct trg_t *trg, u_int driver, u_int daqbits) ;
 extern char *trg_find_raw(char *m, int *bytes); 
 
 daq_trg::daq_trg(daqReader *rts_caller) : daq_det(rts_caller)
@@ -96,11 +96,11 @@ daq_dta *daq_trg::handle_legacy()
 	
 
 	trg_t *trg_p = (trg_t *) legacy->request(1) ;	// need ONE trg_t object
- 
-	trg_reader(caller->mem, trg_p, m_Debug) ;
+
+	// dabits hack...
+	trg_reader(caller->mem, trg_p, m_Debug,caller->daqbits) ;
 
 
-	// hack for some historical reason...
 	trg_p->daqbits = caller->daqbits ;
 
 	legacy->finalize(1,0,0,0) ;	// 1 entry; sector 0, row 0, pad 0
