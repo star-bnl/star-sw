@@ -16,6 +16,9 @@
 
 /*
 $Log: TGeant3TGeo.cxx,v $
+Revision 1.5  2009/02/02 14:28:21  fisyak
+Add protection wrt new method introduced in ROOT 5.22.0
+
 Revision 1.4  2009/02/01 17:29:50  fisyak
 Resolve conflicts
 
@@ -2099,9 +2102,10 @@ void TGeant3TGeo::FinishGeometry()
     if (gDebug > 0) printf("FinishGeometry, calling CloseGeometry\n");
     gGeoManager->CloseGeometry();
   }
-
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,22,0)
   if (gDebug > 0) printf("FinishGeometry, calling MisalignGeometry()\n");
   TVirtualMCApplication::Instance()->MisalignGeometry();
+#endif
   //  gROOT->GetListOfBrowsables()->Add(gGeoManager);
   if (gDebug > 0) printf("FinishGeometry, calling SetColors\n");
 
