@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.31 2009/01/28 15:42:44 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.32 2009/02/02 15:55:23 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.32  2009/02/02 15:55:23  mattheww
+// removed some debugging prints not taken out from last commit
+//
 // Revision 1.31  2009/01/28 15:42:44  mattheww
 // Put back some obsolete methods to satisfy StBemcData
 //
@@ -851,14 +854,6 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
         return kFALSE;
     }
 
-  for(int i = 1; i <= 4800; i++){
-    int daqid,tdc,crate,seq;
-    mDecoder->GetDaqIdFromTowerId(i,daqid);
-    mDecoder->GetTDCFromTowerId(i,tdc);
-    mDecoder->GetCrateFromTowerId(i,crate,seq);
-    cout<<"bgrdl "<<i<<" "<<daqid<<" "<<tdc<<" "<<crate<<" "<<seq<<endl;
-  }
-
     if(reader->isTowerPresent())
     {
         Bank_BTOWERADCR& tower = reader->getBTOWERADCR();
@@ -872,11 +867,11 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
           mDecoder->GetCrateFromTowerId(id,crate,sequence);
           mDecoder->GetTDCFromTowerId(id,tdc);
             RAW->setData(BTOWBANK,i,tower.TowerADCArray[i]);
-            printf("agrdl: BTOW ADC %d %d %d %d\n",tdc,sequence,id,tower.TowerADCArray[i]);
+            //printf("agrdl: BTOW ADC %d %d %d %d\n",tdc,sequence,id,tower.TowerADCArray[i]);
         }
         for(Int_t i = 0; i<BTOWHEADER  ;i++){
             RAW->setHeader(BTOWBANK,i,tower.TDCHeader[i]);
-            printf("agrdl: BTOW HEAD %d %d\n",i,tower.TDCHeader[i]);
+            //printf("agrdl: BTOW HEAD %d %d\n",i,tower.TDCHeader[i]);
         }
     }
     // smd data
@@ -902,10 +897,10 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
                 for(Int_t j=0; j<BSMDHEADER;  j++)
                     RAW->setHeader(bank,j,smd.SmdHeader[i][j]);
                     int CAP = RAW->header(bank,SMDCAPACITOR);
-                    printf("agrdl: BSMD %d CAP %d\n",bank,CAP);
+                    //printf("agrdl: BSMD %d CAP %d\n",bank,CAP);
                 for(Int_t j=0; j<BSMDSIZE; j++){
                     RAW->setData(bank,j,smd.SMDADCArray[i][j]);
-                    printf("agrdl: BSMD ADC %d %d %d\n",bank,j,smd.SMDADCArray[i][j]);
+                    //printf("agrdl: BSMD ADC %d %d %d\n",bank,j,smd.SMDADCArray[i][j]);
                 }
             }
         }
@@ -935,10 +930,10 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
                     for(Int_t i = 0; i<BPRSHEADER;  i++)
                         RAW->setHeader(bank,i,smd.SmdHeader[SMDRDO][i]);
                     int CAP = RAW->header(bank,SMDCAPACITOR);
-                    printf("agrdl: BSMD %d CAP %d\n",bank,CAP);
+                    //printf("agrdl: BSMD %d CAP %d\n",bank,CAP);
                     for(Int_t i = 0; i<BPRSSIZE; i++){
                         RAW->setData(bank,i,smd.SMDADCArray[SMDRDO][i]);
-                        printf("agrdl: BSMD ADC %d %d %d\n",bank,i,smd.SMDADCArray[SMDRDO][i]);
+                        //printf("agrdl: BSMD ADC %d %d %d\n",bank,i,smd.SMDADCArray[SMDRDO][i]);
                     }
                 }
             }
