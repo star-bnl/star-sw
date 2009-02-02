@@ -128,6 +128,16 @@ daq_dta *daq_tof::handle_legacy()
 
 				u_int words = dd->ncontent/4 ;	// tof wants words...
 
+				LOG(DBG,"TOF: RDO %d: bytes %d (max %d)",r,dd->ncontent,sizeof(tof_p->ddl[0])) ;
+
+				if(words > (sizeof(tof_p->ddl[0])/4)) {
+					LOG(ERR,"TOF: Huge event in RDO %d: %d words -- clipping to %d words",
+					    r,words,sizeof(tof_p->ddl[0])/4) ;
+
+					words = sizeof(tof_p->ddl[0]) ;
+				}
+				   
+				   
 				tof_p->ddl_words[r-1] = words ;
 
 				
