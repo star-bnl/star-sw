@@ -99,6 +99,10 @@ daq_dta *daq_trg::handle_legacy()
  
 	trg_reader(caller->mem, trg_p, m_Debug) ;
 
+
+	// hack for some historical reason...
+	trg_p->daqbits = caller->daqbits ;
+
 	legacy->finalize(1,0,0,0) ;	// 1 entry; sector 0, row 0, pad 0
 	legacy->rewind() ;
 
