@@ -98,6 +98,15 @@ void StBemcTriggerDbThresholds::LoadTimeStamps(){
   start_2008[2].Set(2008,2,14,7,3,42);
   end_2008[2].Set(2008,3,10,11,1,55);
 
+  //settings for 2009 production 500 GeV
+  start_2009[0].Set(2009,2,17,0,0,0);
+  end_2009[0].Set(2009,4,15,0,0,0);
+
+  //settings for 2009 production 200 GeV
+  start_2009[1].Set(2009,4,15,0,0,1);
+  end_2009[1].Set(2009,5,15,0,0,0);
+
+
 }
 
 //==================================================
@@ -243,6 +252,35 @@ Int_t  StBemcTriggerDbThresholds::GetJP_DSM1_threshold(Int_t DSMmodule,UInt_t ti
   
   
   
+
+
+  //2009 JP thresholds
+  const Int_t JP0_TH_2009[2]    = { 28, 20};
+  const Int_t JP1_TH_2009[2]    = { 35, 28};
+  const Int_t JP2_TH_2009[2]    = { 52, 35};
+  for (int i=0;i<2;i++)
+    {
+      if (DSMmodule<15)
+	{//WEST
+	  if ((timestamp>=start_2009[i].Get())&&(timestamp<=end_2009[i].Get()))
+	    {
+	      if (layer==0) threshold=JP0_TH_2009[i];
+	      if (layer==1) threshold=JP1_TH_2009[i];
+	      if (layer==2) threshold=JP2_TH_2009[i];
+	    }	  
+	}
+      
+      
+      if (DSMmodule>=15)
+	{//EAST 
+	  if ((timestamp>=start_2009[i].Get())&&(timestamp<=end_2009[i].Get()))
+	    {      
+	      if (layer==0) threshold=JP0_TH_2009[i];
+	      if (layer==1) threshold=JP1_TH_2009[i];
+	      if (layer==2) threshold=JP2_TH_2009[i];
+	    }
+	}
+    }  
   
 
   return threshold;
@@ -356,6 +394,42 @@ Int_t  StBemcTriggerDbThresholds::GetHT_DSM0_threshold(Int_t DSMmodule, UInt_t t
 	    if (layer==2) threshold=HTE2_TH_2008[i];
 	    if (layer==3) threshold=HTE3_TH_2008[i];
 	    if (layer==4) threshold=HTE4_TH_2008[i]; 
+	  }
+      }
+  }
+
+
+
+
+  //2009 HT East and West Thresholds
+  const Int_t HT0_TH_2009[2]   = { 11, 11};
+  const Int_t HT1_TH_2009[2]   = { 15, 15};
+  const Int_t HT2_TH_2009[2]   = { 19, 17};
+  const Int_t HT3_TH_2009[2]   = { 25, 23};
+
+ for (int i=0;i<2;i++){
+    
+    if (DSMmodule<15)
+      {//WEST
+	if ((timestamp>=start_2009[i].Get())&&(timestamp<=end_2009[i].Get()))
+	  {
+	    if (layer==0) threshold=HT0_TH_2009[i];
+	    if (layer==1) threshold=HT1_TH_2009[i];
+	    if (layer==2) threshold=HT2_TH_2009[i];
+	    if (layer==3) threshold=HT3_TH_2009[i];
+	  }
+	
+      }
+    
+    
+    if (DSMmodule>=15)
+      {//EAST 
+	if ((timestamp>=start_2009[i].Get())&&(timestamp<=end_2009[i].Get()))
+	  {
+	    if (layer==0) threshold=HT0_TH_2009[i];
+	    if (layer==1) threshold=HT1_TH_2009[i];
+	    if (layer==2) threshold=HT2_TH_2009[i];
+	    if (layer==3) threshold=HT3_TH_2009[i];
 	  }
       }
   }
