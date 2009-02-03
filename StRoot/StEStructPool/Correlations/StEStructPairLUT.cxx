@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairLUT.cxx,v 1.2 2009/01/26 14:40:44 fisyak Exp $
+ * $Id: StEStructPairLUT.cxx,v 1.3 2009/02/03 14:30:22 fisyak Exp $
  *
  * Author: Duncan Prindle
  *
@@ -15,7 +15,7 @@
  *
  *
  ***********************************************************************/
-#include "TMath.h"[
+#include "TMath.h"
 #include "StEStructPairLUT.h"
 
 

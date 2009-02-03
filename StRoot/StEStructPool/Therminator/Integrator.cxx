@@ -28,6 +28,7 @@
 #include "Integrator.h"
 #include "ParticleType.h"
 #include "Particle.h"
+#include <TMath.h>
 #include <TFile.h>
 
 extern ReadPar *sRPInstance;

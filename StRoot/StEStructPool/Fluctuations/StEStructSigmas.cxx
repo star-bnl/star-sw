@@ -1,6 +1,7 @@
 
 #include "StEStructSigmas.h"
 
+#include "TMath.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TFile.h"

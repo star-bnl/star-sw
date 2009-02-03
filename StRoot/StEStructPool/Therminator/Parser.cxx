@@ -24,6 +24,7 @@
  * available.                                                                 *
  *                                                                            *
  *****************************************************************************/
+#include "TMath.h"
 #include "THGlobal.h"
 #include "ReadPar.h"
 #include "Parser.h"
