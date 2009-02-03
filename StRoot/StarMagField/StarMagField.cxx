@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.12 2009/01/26 15:15:56 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.13 2009/02/03 15:53:30 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.13  2009/02/03 15:53:30  fisyak
+ * Clean up
+ *
  * Revision 1.12  2009/01/26 15:15:56  fisyak
  * Add missing (ROOT Version >= 5.22)include
  *
@@ -152,7 +155,7 @@ R__EXTERN  "C" {
 #endif
     float x[3]={0},b[3];
     gufld(x,b);
-    printf("StarMagField:mfldgeo(,%g,) Bz=%g\n",factor,b[2]);
+    printf("StarMagField:mfldgeo(%g) Bz=%g\n",factor,b[2]);
   }
 }
 //________________________________________________________________________________
