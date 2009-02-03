@@ -1,7 +1,16 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.8 2008/03/05 13:15:56 fisyak Exp $
+// $Id: StVMCMaker.cxx,v 1.9 2009/02/03 15:55:44 fisyak Exp $
 // $Log: StVMCMaker.cxx,v $
+// Revision 1.9  2009/02/03 15:55:44  fisyak
+// synchronize with .DEV2
+//
+// Revision 1.2  2009/01/24 00:21:43  fisyak
+// Fix debug flag
+//
+// Revision 1.1.1.1  2008/12/10 20:45:49  fisyak
+// Merge with macos version
+//
 // Revision 1.8  2008/03/05 13:15:56  fisyak
 // comply Skip signuture with base class
 //
@@ -76,6 +85,7 @@ StVMCMaker::Make
 */
 
 #include <assert.h>
+#include "TSystem.h"
 #include "TGeometry.h"
 #include "TGeoManager.h"
 #include "TObjectSet.h"
@@ -86,7 +96,6 @@ StVMCMaker::Make
 #include "StarMCHits.h"
 #include "StarMCSimplePrimaryGenerator.h"
 #include "StarMCHBPrimaryGenerator.h"
-#include "StarMCRootPrimaryGenerator.h"
 #include "TGeoDrawHelper.h"
 #include "StMessMgr.h"
 
@@ -95,9 +104,62 @@ ClassImp(StVMCMaker);
 StarVMCApplication* StVMCMaker::fgStarVMCApplication = 0;
 TGeant3TGeo*        StVMCMaker::fgGeant3 = 0;
 //_____________________________________________________________________________
+Int_t StVMCMaker::Init() {
+  fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application");
+  fgGeant3 = new TGeant3TGeo("C++ Interface to Geant3");//, 1, 200000); 
+  gMessMgr->Info() << "StVMCMaker::Init Geant3 has been created." << endm;
+  if ((m_Mode/10)%10 != 1) {
+    gMessMgr->Info() << "StVMCMaker::InitRun Active mode" << endm; 
+    StarMCPrimaryGenerator *generator = fgStarVMCApplication->GetPrimaryGenerator();
+    if (! generator) {
+      if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
+      //                                                             Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax
+      //  else              generator = new StarMCSimplePrimaryGenerator( 1, 5,    1.,   1.,0.1, 0.1, 0.57,  0.57,  0.,   0., "G");
+      else                  generator = new StarMCSimplePrimaryGenerator(80, 6,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
+      fgStarVMCApplication->SetPrimaryGenerator(generator);
+    }
+    assert(generator);
+    StarMCHits *hits = StarMCHits::instance();
+    hits->SetHitHolder(m_DataSet);
+    fgStarVMCApplication->SetStepping(hits);
+    if ((m_Mode/100)%10 == 1) {// switch off physics 
+      gMessMgr->Info() << "StVMCMaker::InitRun switch off physics" << endm;
+      gMC->SetProcess("DCAY", 0);
+      gMC->SetProcess("ANNI", 0);
+      gMC->SetProcess("BREM", 0);
+      gMC->SetProcess("COMP", 0);
+      gMC->SetProcess("HADR", 0);
+      gMC->SetProcess("MUNU", 0);
+      gMC->SetProcess("PAIR", 0);
+      gMC->SetProcess("PFIS", 0);
+      gMC->SetProcess("PHOT", 0);
+      gMC->SetProcess("RAYL", 0);
+      gMC->SetProcess("LOSS", 4); // no fluctuations 
+      //  gMC->SetProcess("LOSS 1"); // with delta electron above dcute
+      gMC->SetProcess("DRAY", 0);
+      gMC->SetProcess("MULS", 0);
+      gMC->SetProcess("STRA", 0);
+      gMC->SetCut("CUTGAM",	1e-3  );
+      gMC->SetCut("CUTELE", 	1e-3  );
+      gMC->SetCut("CUTHAD", 	.001  );
+      gMC->SetCut("CUTNEU", 	.001  );
+      gMC->SetCut("CUTMUO", 	.001  );
+      gMC->SetCut("BCUTE", 	.001  );
+      gMC->SetCut("BCUTM", 	.001  );
+      gMC->SetCut("DCUTE", 	1e-3  );
+      gMC->SetCut("DCUTM", 	.001  );
+      gMC->SetCut("PPCUTM", 	.001  );
+      gMC->SetCut("TOFMAX", 	50.e-6);
+    }
+  }
+  return StMaker::Init();
+}
+//_____________________________________________________________________________
 Int_t StVMCMaker::InitRun  (Int_t runumber){
-  TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry");
-  assert(geom);
+  if (! gGeoManager) {
+    TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry");
+    assert(geom);
+  }
   if (!fVolume) {
     TGeoDrawHelper Helper;
     fVolume = (TDataSet *) Helper.GetVolume();
@@ -112,15 +174,8 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
      }
      // Add "hall" into ".const" area of this maker
      ((StVMCMaker *)this)->AddConst(fVolume);
-     if (Debug()) fVolume->ls(3);
+     if (Debug() > 1) fVolume->ls(3);
   }
-  
-  if (fgStarVMCApplication) return kStOK;
-  fgStarVMCApplication = new StarVMCApplication("StarVMC", "The STAR VMC application");
-  if ( fgGeant3) return kStOK;
-  fgGeant3 = new TGeant3TGeo("C++ Interface to Geant3");//, 1, 200000); 
-  gMessMgr->Info() << "StVMCMaker::InitRun Geant3 has been created." << endm;
-  
   gMessMgr->Info() << "StVMCMaker::InitRun SetMagField set as StarMagField" 
 		   << " with Map: " << StarMagField::Instance()->GetMap()
 		   << ",Factor: " << StarMagField::Instance()->GetFactor() 
@@ -131,6 +186,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   else                     {gMessMgr->Info() << "StVMCMaker::InitRun Active  mode" << endm;
     if ( m_Mode%10 == 1)   {gMessMgr->Info() << "StVMCMaker::InitRun Mixer   mode" << endm;}
     else {
+      gMessMgr->Info() << "StVMCMaker::InitRun Standalone run" << endm;
       fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
       if (!fEvtHddr) {                            // Standalone run
 	fEvtHddr = new StEvtHddr(m_ConstSet);
@@ -141,91 +197,21 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
       fEvtHddr->SetEventType("VMC");
       fEvtHddr->SetProdDateTime();
     }
-    StarMCPrimaryGenerator *generator = 0;
-    if (fInputFile != "") {
-      if(fInputMode=="rootInput") {
-	//	cout<<"ROOT -------------------------------- INPUT"<<endl;
-	generator = new StarMCRootPrimaryGenerator(fInputFile,m_DataSet);
-      }
-
-      if(fInputMode=="hbookInput") {
-	//	cout<<"HBOOK-------------------------------- INPUT"<<endl;
-	generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
-      }
-
-      if(fInputMode=="phaseSpace") {
-	//	cout<<"PHASESPACE-------------------------------- INPUT"<<endl;
-	generator = new StarMCSimplePrimaryGenerator(fInputFile);
-	generator->SetDebug(1);
-      }
-    }
-    //                                            Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax OptionForParticleID(GEANT)
-    else
-      generator = new StarMCSimplePrimaryGenerator(1,    6,    1.,   1., -1.,  1.,   0,  6.28,   0.,   0., "G");
-
-    assert(generator);
-
-    if (Debug()) generator->SetDebug(1);
-    fgStarVMCApplication->SetPrimaryGenerator(generator);
-
-    // Create the important HITS object:
-    StarMCHits *hits = StarMCHits::instance();
-    hits->SetLegacy(1);
-
-    if(fInputMode=="phaseSpace") hits->SetLegacy(0);
-
-    hits->SetHitHolder(m_DataSet);
-    fgStarVMCApplication->SetStepping(hits);
   }
   //  fgStarVMCApplication->SetStepping(new StMCSteppingHist("tgeom"));
   //  fgStarVMCApplication->SetStepping(new StMCStepping);
   // The "Init" method in the gMC object causes the geometry to be cosntructed
-  if ((m_Mode/100)%10 == 1) {// switch off physics 
-    gMessMgr->Info() << "StVMCMaker::InitRun switch off physics" << endm;
-    gMC->SetProcess("DCAY", 0);
-    gMC->SetProcess("ANNI", 0);
-    gMC->SetProcess("BREM", 0);
-    gMC->SetProcess("COMP", 0);
-    gMC->SetProcess("HADR", 0);
-    gMC->SetProcess("MUNU", 0);
-    gMC->SetProcess("PAIR", 0);
-    gMC->SetProcess("PFIS", 0);
-    gMC->SetProcess("PHOT", 0);
-    gMC->SetProcess("RAYL", 0);
-    gMC->SetProcess("LOSS", 4); // no fluctuations 
-    //  gMC->SetProcess("LOSS 1"); // with delta electron above dcute
-    gMC->SetProcess("DRAY", 0);
-    gMC->SetProcess("MULS", 0);
-    gMC->SetProcess("STRA", 0);
-    gMC->SetCut("CUTGAM",	1e-3  );
-    gMC->SetCut("CUTELE", 	1e-3  );
-    gMC->SetCut("CUTHAD", 	.001  );
-    gMC->SetCut("CUTNEU", 	.001  );
-    gMC->SetCut("CUTMUO", 	.001  );
-    gMC->SetCut("BCUTE", 	.001  );
-    gMC->SetCut("BCUTM", 	.001  );
-    gMC->SetCut("DCUTE", 	1e-3  );
-    gMC->SetCut("DCUTM", 	.001  );
-    gMC->SetCut("PPCUTM", 	.001  );
-    gMC->SetCut("TOFMAX", 	50.e-6);
+  if (! fInitRun) {
+    fgStarVMCApplication->InitMC();
+    fInitRun = 1;
   }
-  
-  fgStarVMCApplication->InitMC();
-  if (Debug() > 1) {
-    fgGeant3->SetDEBU(1,1,100);
-    fgGeant3->SetSWIT(1,2);
-    fgGeant3->SetSWIT(2,2);
-  } else {
-    fgGeant3->SetSWIT(4,0);
-  }
-  fInitRun = 1;
+  if (Debug()) SetDebug(Debug());
   return kStOK;
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::Make(){
   if (! fInitRun) InitRun(fRunNo);
   fEventNo++;
-  cout<<"StVMCMaker::Make()"<<endl;
   if (fEvtHddr) {
     fEvtHddr->SetRunNumber(fRunNo);
     fEvtHddr->SetEventNumber(fEventNo);
@@ -235,9 +221,7 @@ Int_t StVMCMaker::Make(){
   }  
   if ((m_Mode/10)%10 != 1) {// Active  mode 
     TStopwatch sw;
-    cout<<"++++++++++++++  VMC trig ++++++++++++++++++++++++++++"<<endl;
     fgStarVMCApplication->RunMC(1);
-    cout<<"->RunMC(1)"<<endl;
     if (Debug())   sw.Print();
   }
   return kStOK;
@@ -284,4 +268,23 @@ int StVMCMaker::SetInputFile(const Char_t *fileName)
     return 2;
   }
   return 0;
+}
+//________________________________________________________________________________
+void StVMCMaker::SetDebug(Int_t l) {
+  m_DebugLevel = l;
+  if (fgGeant3) {
+    fgGeant3->Gcflag()->idebug = Debug();
+    if (Debug() > 1) {
+      fgGeant3->SetDEBU(1,1,100);
+      fgGeant3->SetSWIT(1,2);
+      fgGeant3->SetSWIT(2,2);
+    } else {
+      fgGeant3->SetSWIT(4,0);
+    }
+  }
+  StarMCPrimaryGenerator *generator = fgStarVMCApplication->GetPrimaryGenerator();
+  if (generator) generator->SetDebug(Debug());
+  StarMCHits *hits = StarMCHits::instance();
+  if (hits) hits->SetDebug(Debug());
+  if (fgStarVMCApplication) fgStarVMCApplication->SetDebug(Debug());
 }

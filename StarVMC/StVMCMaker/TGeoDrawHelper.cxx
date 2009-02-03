@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: TGeoDrawHelper.cxx,v 1.2 2005/10/06 18:39:48 fisyak Exp $
+** $Id: TGeoDrawHelper.cxx,v 1.3 2009/02/03 15:55:44 fisyak Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -22,6 +22,7 @@
 
 #include "TGeoNode.h"
 #include "TGeoManager.h"
+#include "TGeoMatrix.h"
 
 #include "TGeoShape.h"
 #include "TGeoBBox.h"
