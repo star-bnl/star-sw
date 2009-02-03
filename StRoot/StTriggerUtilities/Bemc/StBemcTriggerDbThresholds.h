@@ -15,10 +15,11 @@ class StBemcTriggerDbThresholds {
   TDatime start_2006[6];
   TDatime start_2007[4];
   TDatime start_2008[6];
+  TDatime start_2009[2];	
   TDatime end_2006[6];
   TDatime end_2007[4];
   TDatime end_2008[6];
-
+  TDatime end_2009[2];
 
  public:
 
