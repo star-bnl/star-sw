@@ -1,4 +1,142 @@
+
+#undef StPi0DataStructures_STRUCTS_INCL
+#ifndef StPi0DataStructures_StPi0DataStructures_H
+#define StPi0DataStructures_STRUCTS_INCL
+#endif
 #ifdef DEFINE_DATA_STRUCTURES
+#define StPi0DataStructures_STRUCTS_INCL
+#endif
+
+#ifdef StPi0DataStructures_STRUCTS_INCL
+
+#ifndef DEFINE_DATA_STRUCTURES
+#define StPi0DataStructures_StPi0DataStructures_H
+
+#include <TObject.h>
+#include <TBits.h>
+class TFile;
+class TTree;
+class TH1F;
+
+// Save BPRS information?
+//#define SAVE_BPRS
+
+// Save the second most energetic hit in the cluster?
+//#define SAVE_CLUSTERHIT2
+
+// Save the jet found by my jet cone algorithm, separately from the one found by the full jet maker?
+//#define SAVE_JETMY
+
+#define STPI0DATASTRUCTURES_VERSION 19
+
+class CL {public: Int_t i;}; // To make RootCint happy
+class StPi0DataStructures {public: Int_t i;}; // To make RootCint happy
+
+typedef UChar_t triggered_type;
+
+extern const Char_t *mcGammaTreeName;
+extern const Char_t *mcGammaTreePlainName;
+extern const Char_t *mcGammaBranchName;
+extern const Char_t *mcGammaDatasetName;
+
+extern const Char_t *mcPionTreeName;
+extern const Char_t *mcPionTreePlainName;
+extern const Char_t *mcPionBranchName;
+extern const Char_t *mcPionDatasetName;
+
+extern const Char_t *mcEtaTreeName;
+extern const Char_t *mcEtaTreePlainName;
+extern const Char_t *mcEtaBranchName;
+extern const Char_t *mcEtaDatasetName;
+
+extern const Char_t *mcNbarTreeName;
+extern const Char_t *mcNbarTreePlainName;
+extern const Char_t *mcNbarBranchName;
+extern const Char_t *mcNbarDatasetName;
+
+extern const Char_t *candidateTreeName;
+extern const Char_t *candidateTreePlainName;
+extern const Char_t *candidateDatasetName;
+
+extern const Char_t *candidateTreeMixName;
+extern const Char_t *candidateTreeMixPlainName;
+extern const Char_t *candidateMixDatasetName;
+
+extern const Char_t *candidateTreeSubmixName;
+extern const Char_t *candidateTreeSubmixPlainName;
+extern const Char_t *candidateBranchName;
+extern const Char_t *candidateSubmixDatasetName;
+
+extern const Char_t *eventTreeName;
+extern const Char_t *eventTreePlainName;
+extern const Char_t *eventBranchName;
+extern const Char_t *eventDatasetName;
+
+extern const Char_t *pointTreeName;
+extern const Char_t *pointTreePlainName;
+extern const Char_t *pointBranchName;
+extern const Char_t *pointDatasetName;
+
+extern const Char_t *clusterTreeName;
+extern const Char_t *clusterTreePlainName;
+extern const Char_t *clusterBranchName;
+extern const Char_t *clusterDatasetName;
+
+extern const Char_t *hitTreeName;
+extern const Char_t *hitTreePlainName;
+extern const Char_t *hitBranchName;
+extern const Char_t *hitDatasetName;
+
+extern const Char_t *smdThresholdTreeName;
+extern const Char_t *smdThresholdTreePlainName;
+extern const Char_t *smdThresholdBranchName;
+extern const Char_t *smdThresholdDatasetName;
+
+extern const Char_t *triggerSummaryName;
+extern const Int_t triggerSummaryNbins;
+extern const Float_t triggerSummaryMin;
+extern const Float_t triggerSummaryMax;
+extern const Char_t *eventSummaryName;
+extern const Int_t eventSummaryNbins;
+extern const Float_t eventSummaryMin;
+extern const Float_t eventSummaryMax;
+
+const Char_t *getBranchType(const Char_t *name);
+
+TTree *createTree(TFile *file, const Char_t *name, const Char_t *title, const Char_t *branch, const Char_t *type, void *address, const Int_t maxVirtualSize = 5*1024*1024, const Int_t basketSize = 32000, const Int_t splitLevel = 99);
+TH1F *createH1F(TFile *file, const Char_t *name, const Char_t *title, Int_t nbins, Float_t min, Float_t max);
+
+#define DATASTRUCTURE_BEGIN(CL) \
+class CL { \
+public: \
+    typedef CL this_type;
+#define DATASTRUCTURE_TREE_BEGIN(CL) \
+class CL : public TObject { \
+public: \
+    typedef TObject inherited; \
+    typedef CL this_type;
+#define DATA_DEF(TYPE, NAME, TITLE) \
+    TYPE NAME;
+#define DATASTRUCTURE_END(CL, VALID_CONDITION) \
+    CL(Int_t i = 0); \
+    CL(const this_type &data); \
+    virtual ~CL(); \
+    void Copy(void *objTo) const; \
+    this_type &operator=(const this_type &data); \
+    Bool_t isValid() const; \
+    ClassDef(CL, STPI0DATASTRUCTURES_VERSION); \
+};
+#define DATASTRUCTURE_TREE_END(CL, VALID_CONDITION) \
+    CL(Int_t i = 0); \
+    CL(const this_type &data); \
+    virtual ~CL(); \
+    virtual void Copy(TObject &objTo) const; \
+    this_type &operator=(const this_type &data); \
+    Bool_t isValid() const; \
+    ClassDef(CL, STPI0DATASTRUCTURES_VERSION); \
+};
+
+#endif
 
 DATASTRUCTURE_BEGIN(TMyTriggerData)
 DATA_DEF(triggered_type, triggered, "Satisfied triggers bit mask, (up to sizeof(triggered_type)*8 satisfied triggers))")
@@ -199,144 +337,15 @@ DATA_DEF(TMyEventData, event, "Event data structure")
 DATA_DEF(TMyHitData, hit, "BEMC hit structure")
 DATASTRUCTURE_TREE_END(TMyHitTreeData, event.isValid() && hit.isValid())
 
-#else
+#ifndef DEFINE_DATA_STRUCTURES
 
-#ifndef StPi0DataStructures_StPi0DataStructures_H
-#define StPi0DataStructures_StPi0DataStructures_H
-
-#include <TObject.h>
-#include <TBits.h>
-class TFile;
-class TTree;
-class TH1F;
-
-// Save BPRS information?
-//#define SAVE_BPRS
-
-// Save the second most energetic hit in the cluster?
-//#define SAVE_CLUSTERHIT2
-
-// Save the jet found by my jet cone algorithm, separately from the one found by the full jet maker?
-//#define SAVE_JETMY
-
-#define STPI0DATASTRUCTURES_VERSION 19
-
-class CL {public: Int_t i;}; // To make RootCint happy
-class StPi0DataStructures {public: Int_t i;}; // To make RootCint happy
-
-typedef UChar_t triggered_type;
-
-#define DEFINE_DATA_STRUCTURES
-#define DATASTRUCTURE_BEGIN(CL) \
-class CL { \
-public: \
-    typedef CL this_type;
-#define DATASTRUCTURE_TREE_BEGIN(CL) \
-class CL : public TObject { \
-public: \
-    typedef TObject inherited; \
-    typedef CL this_type;
-#define DATA_DEF(TYPE, NAME, TITLE) \
-    TYPE NAME;
-#define DATASTRUCTURE_END(CL, VALID_CONDITION) \
-    CL(Int_t i = 0); \
-    CL(const this_type &data); \
-    virtual ~CL(); \
-    void Copy(void *objTo) const; \
-    this_type &operator=(const this_type &data); \
-    Bool_t isValid() const; \
-    ClassDef(CL, STPI0DATASTRUCTURES_VERSION); \
-};
-#define DATASTRUCTURE_TREE_END(CL, VALID_CONDITION) \
-    CL(Int_t i = 0); \
-    CL(const this_type &data); \
-    virtual ~CL(); \
-    virtual void Copy(TObject &objTo) const; \
-    this_type &operator=(const this_type &data); \
-    Bool_t isValid() const; \
-    ClassDef(CL, STPI0DATASTRUCTURES_VERSION); \
-};
-#include "StPi0DataStructures.h"
-#undef DEFINE_DATA_STRUCTURES
 #undef DATASTRUCTURE_BEGIN
 #undef DATASTRUCTURE_TREE_BEGIN
 #undef DATA_DEF
 #undef DATASTRUCTURE_END
 #undef DATASTRUCTURE_TREE_END
 
-extern const Char_t *mcGammaTreeName;
-extern const Char_t *mcGammaTreePlainName;
-extern const Char_t *mcGammaBranchName;
-extern const Char_t *mcGammaDatasetName;
-
-extern const Char_t *mcPionTreeName;
-extern const Char_t *mcPionTreePlainName;
-extern const Char_t *mcPionBranchName;
-extern const Char_t *mcPionDatasetName;
-
-extern const Char_t *mcEtaTreeName;
-extern const Char_t *mcEtaTreePlainName;
-extern const Char_t *mcEtaBranchName;
-extern const Char_t *mcEtaDatasetName;
-
-extern const Char_t *mcNbarTreeName;
-extern const Char_t *mcNbarTreePlainName;
-extern const Char_t *mcNbarBranchName;
-extern const Char_t *mcNbarDatasetName;
-
-extern const Char_t *candidateTreeName;
-extern const Char_t *candidateTreePlainName;
-extern const Char_t *candidateDatasetName;
-
-extern const Char_t *candidateTreeMixName;
-extern const Char_t *candidateTreeMixPlainName;
-extern const Char_t *candidateMixDatasetName;
-
-extern const Char_t *candidateTreeSubmixName;
-extern const Char_t *candidateTreeSubmixPlainName;
-extern const Char_t *candidateBranchName;
-extern const Char_t *candidateSubmixDatasetName;
-
-extern const Char_t *eventTreeName;
-extern const Char_t *eventTreePlainName;
-extern const Char_t *eventBranchName;
-extern const Char_t *eventDatasetName;
-
-extern const Char_t *pointTreeName;
-extern const Char_t *pointTreePlainName;
-extern const Char_t *pointBranchName;
-extern const Char_t *pointDatasetName;
-
-extern const Char_t *clusterTreeName;
-extern const Char_t *clusterTreePlainName;
-extern const Char_t *clusterBranchName;
-extern const Char_t *clusterDatasetName;
-
-extern const Char_t *hitTreeName;
-extern const Char_t *hitTreePlainName;
-extern const Char_t *hitBranchName;
-extern const Char_t *hitDatasetName;
-
-extern const Char_t *smdThresholdTreeName;
-extern const Char_t *smdThresholdTreePlainName;
-extern const Char_t *smdThresholdBranchName;
-extern const Char_t *smdThresholdDatasetName;
-
-extern const Char_t *triggerSummaryName;
-extern const Int_t triggerSummaryNbins;
-extern const Float_t triggerSummaryMin;
-extern const Float_t triggerSummaryMax;
-extern const Char_t *eventSummaryName;
-extern const Int_t eventSummaryNbins;
-extern const Float_t eventSummaryMin;
-extern const Float_t eventSummaryMax;
-
-const Char_t *getBranchType(const Char_t *name);
-
-TTree *createTree(TFile *file, const Char_t *name, const Char_t *title, const Char_t *branch, const Char_t *type, void *address, const Int_t maxVirtualSize = 5*1024*1024, const Int_t basketSize = 32000, const Int_t splitLevel = 99);
-TH1F *createH1F(TFile *file, const Char_t *name, const Char_t *title, Int_t nbins, Float_t min, Float_t max);
-
 #endif
 
 #endif
-#undef DEFINE_DATA_STRUCTURES
+#undef StPi0DataStructures_STRUCTS_INCL
