@@ -1,5 +1,8 @@
-// $Id: StarMCHits.cxx,v 1.9 2007/01/09 04:51:43 potekhin Exp $
+// $Id: StarMCHits.cxx,v 1.10 2009/02/03 16:01:05 fisyak Exp $
 // $Log: StarMCHits.cxx,v $
+// Revision 1.10  2009/02/03 16:01:05  fisyak
+// Add includes
+//
 // Revision 1.9  2007/01/09 04:51:43  potekhin
 // Added legacy mode
 //
@@ -16,7 +19,11 @@
 #include "StarMCHit.h"
 
 #include "TGeoManager.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "TDataSetIter.h"
 #include "TPDGCode.h"
 #include "TVirtualMC.h"
