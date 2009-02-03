@@ -134,7 +134,7 @@ if ($pkg eq "RTS") {
   @srcL = @src;
   @src = ();
 }
-my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker  StEEmcPoolmuEztPanitkin  StBEMCPlots Stl3RawReaderMaker );
+my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker  StEEmcPoolmuEztPanitkin  StBEMCPlots Stl3RawReaderMaker StBTofHitMaker );
 my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
