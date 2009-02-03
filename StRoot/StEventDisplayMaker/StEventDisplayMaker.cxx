@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.132 2008/08/28 21:50:59 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.133 2009/02/03 23:07:48 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -108,7 +108,7 @@
 #include "StEventDisplayInfo.h"
 #include "StObject.h"
 
-#ifdef R__QT
+#ifdef R__QT4
 #  include <qfont.h>
 #  include <qapplication.h>
 #  include <qpixmap.h>
@@ -131,7 +131,7 @@ StEventDisplayInfo *StEventDisplayMaker::fgInfo      = 0;
 
 //_____________________________________________________________________________
 StEventDisplayInfo::StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w, UInt_t h)
-#ifdef R__QT
+#ifdef R__QT4
   :QTextEdit(title)
   {  
     setCaption("Event Info");
@@ -144,19 +144,19 @@ StEventDisplayInfo::StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* t
   }
 //_____________________________________________________________________________
 void StEventDisplayInfo::AddText(const char *info){ 
-#ifdef R__QT
+#ifdef R__QT4
   append(info);
 #endif
 }
 //_____________________________________________________________________________
 void StEventDisplayInfo::SetText(const char *info){ 
-#ifdef R__QT
+#ifdef R__QT4
   setText(info);
 #endif
 }
 //_____________________________________________________________________________
 inline void StEventDisplayInfo::Popup(){ 
-#ifdef R__QT
+#ifdef R__QT4
   show();
   raise();
 #endif
@@ -225,7 +225,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 //       const char *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"};
   const Int_t lvolumeNames = sizeof(volumeNames)/sizeof(char *);
   for (i=0;i<lvolumeNames;i++) AddVolume(volumeNames[i]);
-#ifdef R__QT
+#ifdef R__QT4
   // redefine the default application font
   QFont  myFont = QApplication::font();
   // int myFontSize = myFont. pointSize ();
@@ -417,7 +417,7 @@ void StEventDisplayMaker::AddName(const char *name,Bool_t refresh)
   if (!m_ListDataSetNames->FindObject(name)) 
         m_ListDataSetNames->Add(new TObjString(name));
   if (strncmp(name,"StEvent",7)==0) {
-#ifdef R__QT
+#ifdef R__QT4
      if (refresh && fEventControlPanel)
            fEventControlPanel->Refresh();
 #else
@@ -431,7 +431,7 @@ void StEventDisplayMaker::AddFilter(StFilterABC* filt)
     if (!mFilterList) mFilterList = new TList;
     if (mFilterList->FindObject(filt->GetName())) return;
     mFilterList->Add(filt);
-#ifdef R__QT
+#ifdef R__QT4
     if (fEventControlPanel) fEventControlPanel->AddFilter((TObject*)filt); 
 #endif
 }
@@ -560,7 +560,7 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
       m_PadBrowserCanvas->ResetView3D(0);
       m_PadBrowserCanvas->SetFillColor(kBlack);
       // Add three TPad's for GetRunNumber/GetEventNumber()/GetDateTime/
-#ifdef R__QT      
+#ifdef R__QT4      
 #ifdef CAN_RENDER_PAD_DIRECTLY    
       if (f3DViewer) 
          ((TQtRootViewer3D*)f3DViewer)->DisconnectPad();    
@@ -1504,6 +1504,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.133  2009/02/03 23:07:48  fine
+// Prepare EventDisplay for  Qt3 to Qt4 transition
+//
 // Revision 1.132  2008/08/28 21:50:59  fine
 // Add the extra header file to define TQtRootViewer3D class
 //

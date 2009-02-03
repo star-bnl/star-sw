@@ -2,13 +2,13 @@
 ** Form implementation generated from reading ui file 'Panel.ui'
 **
 ** Created: Wed Jan 8 14:32:54 2003
-**      by: The User Interface Compiler ($Id: StSimplePanel.cxx,v 1.4 2007/02/21 19:16:14 fine Exp $)
+**      by: The User Interface Compiler ($Id: StSimplePanel.cxx,v 1.5 2009/02/03 23:07:48 fine Exp $)
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
 
 #include "StSimplePanel.h"
-#ifdef R__QT
+#ifdef R__QT4
 #include <qvariant.h>
 #include <qbuttongroup.h>
 #include <qvbuttongroup.h>
@@ -45,8 +45,8 @@ void StSimplePanel::Add(QWidget *q, int pRow, int pCol, unsigned int aligment)
 {
    // Qt::AlignAuto    - Aligns according to the language. Left for most, right for Arabic and Hebrew. 
    // Qt::AlignLeft    - Aligns with the left edge. 
-   // Qt::AlignRight   - Aligns with the right edge. 
-   // Qt::AlignHCenter - Centers horizontally in the available space. 
+   // Qt::AlignRight   - Aligns with the right edge.
+   // Qt::AlignHCenter - Centers horizontally in the available space.
    // Qt::AlignJustify - Justifies the text in the available space
 
    if (pRow == -1) pRow = fLayout->numRows();

@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StPadControlPanel.cxx,v 1.3 2007/02/20 22:20:31 fine Exp $
+// $Id: StPadControlPanel.cxx,v 1.4 2009/02/03 23:07:48 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "StPadControlPanel.h"
-#ifdef R__QT
+#ifdef R__QT4
 #include "TVirtualPad.h"
 #include "TROOT.h"
 #include "TSystem.h"
@@ -65,25 +65,28 @@
 #include "TAxis3D.h" 
 #include "StEventDisplayMaker.h"
 
-#include <qbuttongroup.h>
-#include <qvbuttongroup.h>
-#include <qpushbutton.h>
-#include <qtooltip.h> 
-
-QButtonGroup *mainBar=0;
+#include <QGroupBox>
+#include <QVBoxLayout>
+#include <QPushButton>
 
 
 //_______________________________________________________________________________________
-StPadControlPanel::StPadControlPanel(QWidget *parent) { Build(parent);}
-//_______________________________________________________________________________________
-void StPadControlPanel::AddButt(const Char_t *buttonName, const Char_t *command,const Char_t *tip)
-{   
-   QPushButton *button = new QPushButton(buttonName,fBar,command);
-   if (tip && tip[0])  QToolTip::add( button, tip);
-}
+StPadControlPanel::StPadControlPanel(QWidget *parent):fMyWidget(0) { Build(parent);}
+
 //_______________________________________________________________________________________
 void  StPadControlPanel::Build(QWidget *parent)
 {
+#ifndef ADDBUTTONMACRO
+#  define AddButt(indx,title) {                               \
+       QPushButton *button = new QPushButton(title[0],fMyBox);\
+       QString qtip(title[1]);                                \
+       if (!qtip.isEmpty() button->setToolTip(tr(qtip));      \
+       group->addButton (button,indx);                        \
+       bar->addWidget(button);                                \
+     }
+#else
+#  error  Macro redefintion
+#endif
    const char *fills[] = {
     "Black background",	"StPadControlPanel::SetBackround(kBlack);","Change the current gPad background color"
    ,"White background",	"StPadControlPanel::SetBackround    (19);","Change the current gPad background color"
@@ -98,16 +101,13 @@ void  StPadControlPanel::Build(QWidget *parent)
    ,"Add Axes",		"StPadControlPanel::AddAxes     ();", "Add 3 small arror like axes: Red - for Ox, Green for Oy, Blue for Oz"
    ,"Rulers",		"StPadControlPanel::ToggleRulers();", "Add / remove 3 axes to the view"
    ,"Zoom",		"StPadControlPanel::ToggleZoom  ();","move / zoom view. <em>It doesn't preserver an aspect ratio!.</em>"
-  // ,"End of Chain",	"StEventDisplayMaker::MakeLoop(3);"
-   ,0};
-
-
-   fBar = new QVButtonGroup("Pad Control Panel",parent,"Pad");
-   fBar->setCaption("Pad Control Panel");
-   mainBar=fBar;
-   for (int i=0;fills[i];i+=3) {AddButt(fills[i],fills[i+1],fills[i+2]);}
-   connect(fBar,SIGNAL(clicked(int)),this,SLOT(Clicked(int)));
-   fBar->show();
+   QGroupBox myBox = new QGroupBox("Pad Control Panel",parent);
+   fMyWidget = myBox;
+   QVBoxLayout *bar = new QVBoxLayout(myBox);
+   QButtonGroup group = new QButtonGroup (myBox);
+   for (int i=0;fills[i];i+=3) {AddButt(i,(&fills[i]));}
+   connect(group,SIGNAL(buttonClicked(int)),this,SLOT(Clicked(int)));
+   myBox->show();
 }
 //_______________________________________________________________________________________
 StPadControlPanel::~StPadControlPanel(){ delete fBar; }
@@ -117,30 +117,27 @@ QButtonGroup *StPadControlPanel::Bar() const { return fBar;}
 //_______________________________________________________________________________________
 /* public slot: */ 
 void StPadControlPanel::Clicked(int id) { 
-  QButton *b = fBar->find(id);
-  if (b) {
-     switch(id) {
-        case 0: StPadControlPanel::SetBackround(kBlack); break;
-        case 1: StPadControlPanel::SetBackround    (19); break;
-        case 2: StPadControlPanel::AdjustScales    (); break;
-        case 3: StPadControlPanel::Centered3DImages(); break;
-        case 4: StPadControlPanel::Inscrease3DScale(); break;
-        case 5: StPadControlPanel::Decrease3DScale (); break;
-        case 6: StPadControlPanel::TopView     (); break;
-        case 7: StPadControlPanel::SideView    (); break;
-        case 8: StPadControlPanel::FrontView   (); break;
-        case 9: StPadControlPanel::MakeFourView(); break;
-        case 10: StPadControlPanel::AddAxes     (); break;
-        case 11: StPadControlPanel::ToggleRulers(); break;
-        case 12: StPadControlPanel::ToggleZoom  (); break;
+   switch(id) {
+      case 0: StPadControlPanel::SetBackround(kBlack); break;
+      case 1: StPadControlPanel::SetBackround    (19); break;
+      case 2: StPadControlPanel::AdjustScales    (); break;
+      case 3: StPadControlPanel::Centered3DImages(); break;
+      case 4: StPadControlPanel::Inscrease3DScale(); break;
+      case 5: StPadControlPanel::Decrease3DScale (); break;
+      case 6: StPadControlPanel::TopView     (); break;
+      case 7: StPadControlPanel::SideView    (); break;
+      case 8: StPadControlPanel::FrontView   (); break;
+      case 9: StPadControlPanel::MakeFourView(); break;
+      case 10: StPadControlPanel::AddAxes     (); break;
+      case 11: StPadControlPanel::ToggleRulers(); break;
+      case 12: StPadControlPanel::ToggleZoom  (); break;
       //  case 13: StEventDisplayMaker::MakeLoop(3); break;
       //  case 13: StEventDisplayMaker::MakeLoop(1); break;
       //  case 14: StEventDisplayMaker::MakeLoop(2); break;
-        default:  break;
-     }
+      default:  break;
+   }
 //     gROOT->ProcessLine(b->name());   // CDictionary doesn't contain any StPadControlPanel ???
-  }
-}  
+}
 //_______________________________________________________________________________________
 void StPadControlPanel::SetBackround(Color_t color, TVirtualPad *pad)
 {

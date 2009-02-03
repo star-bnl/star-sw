@@ -1,8 +1,8 @@
-//-- Author :    Valery Fine   14/08/01  (E-mail: fine@bnl.gov)
+//*-- Author :    Valery Fine   14/08/01  (E-mail: fine@bnl.gov)
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.h,v 1.4 2009/02/03 23:07:48 fine Exp $
+// $Id: StEventControlPanel.h.qt3,v 1.1 2009/02/03 23:07:48 fine Exp $
 //
 
 
@@ -13,8 +13,7 @@
 //  operation:
 //
 ///////////////////////////////////////////////////////////////////////
-#ifdef R__QT4
-//MOC_SKIP_BEGIN
+#ifdef R__QT
 #ifndef STAR_StEventControlPanel
 #define STAR_StEventControlPanel
 
@@ -95,5 +94,4 @@ public:
 // StEventControlPanel __StEventControlPanel__;
 
 #endif
-//MOC_SKIP_END
 #endif
