@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.12 2008/08/15 17:33:04 ullrich Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.13 2009/02/03 15:52:12 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.13  2009/02/03 15:52:12  fisyak
+ * Add include
+ *
  * Revision 2.12  2008/08/15 17:33:04  ullrich
  * Modified zVertex(). Implemented calibrated BBC vertex z position code.
  *
@@ -47,12 +50,13 @@
  * Initial Revision.
  *
  **************************************************************************/
+#include <math.h>
 #include "StBbcTriggerDetector.h"
 #include "Stiostream.h"
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.12 2008/08/15 17:33:04 ullrich Exp $";
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.13 2009/02/03 15:52:12 fisyak Exp $";
 
 ClassImp(StBbcTriggerDetector)
     

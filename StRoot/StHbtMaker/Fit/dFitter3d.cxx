@@ -12,6 +12,7 @@
 
 #include "dFitter3d.h"
 #include "Stiostream.h"
+#include "TMath.h"
 #include "TH3.h"
 #include "TH1.h"
 #include "TMinuit.h"
