@@ -576,7 +576,7 @@ void BEMCPlots::processEvent( char *datap
 #else
 	TDatime evt_time(evp_reader->evt_time);
 #endif
-	if (BEMCDecoder) BEMCDecoder->SetDateTime(evt_time);
+	if (BEMCDecoder) BEMCDecoder->SetDateTime(evt_time.GetDate(),evt_time.GetTime());
     }
 
     if (!dsmL0WestInput || !dsmL0EastInput || !dsmL1Input || !dsmL2Input || !dsmL3Input) {
