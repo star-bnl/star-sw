@@ -870,18 +870,28 @@ daq_dta *daq_tpx::handle_adc(int sec, int rdo)
 			continue ;
 		}
 
+		if(rdo.rdo != r) {
+			LOG(ERR,"RDO mismatch: in data %d, expect %d",rdo.rdo,r) ;
+		}
 
 		u_int *data_end = rdo.data_end ;
+
 		a.rdo = rdo.rdo -1 ;
 		a.t = token ;
 		a.what = TPX_ALTRO_DO_ADC ;
 		a.log_err = 0 ;
+		a.sector = s ;
 
 		do {
 			data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;		
 
 			if(a.count == 0) continue ;	// no data for this guy...
-	
+
+			// unallowed rows, pads...
+			if((a.row>45) || (a.pad==0) || (a.pad>182)) {
+				LOG(ERR,"TPX: S%02d:RDO%d: row %d, pad %d",a.sector,rdo.rdo,a.row,a.pad) ;
+			}
+
 			daq_adc_tb *at = (daq_adc_tb *) adc->request(a.count) ;
 	
 			//LOG(DBG,"%d: %d:%d %d",adc->obj_cou,a.row,a.pad,a.count) ;
