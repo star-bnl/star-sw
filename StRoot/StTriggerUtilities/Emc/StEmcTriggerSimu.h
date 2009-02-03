@@ -21,17 +21,26 @@ public:
   virtual ~StEmcTriggerSimu();
 
   StTriggerSimuDecision triggerDecision(int trigId);
+
+  void setHeadMaker(StTriggerSimuMaker *maker) {mHeadMaker=maker;};
+
   void InitRun(int runNumber);
   void Make();
 
   void setBemc(StBemcTriggerSimu* bemc);
   void setEemc(StEemcTriggerSimu* eemc);
+  
 
 private:
   int mYear;
+  StTriggerSimuMaker *mHeadMaker;
   StBemcTriggerSimu* mBemc;
   StEemcTriggerSimu* mEemc;
   DSMLayer_EM201_2009* mEM201;
+
+  std::vector<int>  mFiredTriggers;
+  std::set<int>     mAllTriggers;
+  
 
   ClassDef(StEmcTriggerSimu,1);
 };
