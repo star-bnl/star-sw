@@ -31,6 +31,7 @@ class StEmcTriggerSimu;
 class StL2TriggerSimu;
 class StGenericL2Emulator;
 class StTriggerSimuResult;
+const int numSimulators=5;
 
 class StTriggerSimuMaker : public StMaker {
 private:
@@ -41,7 +42,9 @@ private:
   St_db_Maker *mDbMk;
     
   /// collection of subdetector trigger simulators, individual pointers also available publicly below
-  std::vector<StVirtualTriggerSimu*> mSimulators;
+  //std::vector<StVirtualTriggerSimu*> mSimulators;
+  StVirtualTriggerSimu* mSimulators[numSimulators];
+
   
   /// detailed results for individual trigger simulations
   std::vector<StTriggerSimuResult> mResults;
@@ -53,6 +56,7 @@ public:
   void    useEemc(int flag=0);  //0:just process ADC, 1:compare w/ trigData, see enum in Eemc class
   void    useBbc();
   void    useBemc();
+  void    useEmc();
   void    useL2(StGenericL2Emulator* );
   void    setMC(int x) {mMCflag=x;}
   
@@ -81,9 +85,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.16 2009/01/17 13:08:44 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.17 2009/02/03 15:40:55 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.17  2009/02/03 15:40:55  rfatemi
+// Update mSimulators structure for 2009 EMC simulator update
+//
 // Revision 1.16  2009/01/17 13:08:44  pibero
 // Initial version of EMC DSM algorithms for 2009
 //
