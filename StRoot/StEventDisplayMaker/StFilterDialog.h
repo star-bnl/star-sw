@@ -1,7 +1,8 @@
 #ifndef STAR_StFilterDialog
 #define STAR_StFilterDialog
 
-#ifdef R__QT
+#ifdef R__QT4
+//MOC_SKIP_BEGIN
 #  include <qwidget.h>
 
 class QTable;
@@ -36,4 +37,5 @@ public slots:
 
 };
 #endif // R__QT
+//MOC_SKIP_END
 #endif // STAR_StFilterDialog

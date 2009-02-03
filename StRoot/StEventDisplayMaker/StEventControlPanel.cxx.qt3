@@ -1,9 +1,9 @@
-#if R__QT4
+#if R__QT
 //*-- Author :    Valery Fine   14/08/01  (E-mail: fine@bnl.gov)
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.20 2009/02/03 23:07:48 fine Exp $
+// $Id: StEventControlPanel.cxx.qt3,v 1.1 2009/02/03 23:07:48 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -74,35 +74,18 @@
 // #include "StFilterABC.h"
 
 #include <qapplication.h>
-#if (QT_VERSION < 0x040000)
-#  include <qbuttongroup.h>
-#  include <qcheckbox.h>
-#  include <qvbuttongroup.h>
-#  include <qhbuttongroup.h> 
-#  include <qpushbutton.h>
-#  include <qobjectlist.h>
-#  include <qvbox.h>
-#  include <qhbox.h>
-#  include <qlayout.h>
-#  include <qlabel.h>
-#  include <qtabwidget.h> 
-#  include <qmessagebox.h>
-#else
-//#  include <qbuttongroup.h>
-//#  include <qcheckbox.h>
-//#  include <qvbuttongroup.h>
-//#  include <qhbuttongroup.h> 
-#  include <QtGui/QPushButton>
-#  include <QtGui/QFrame>
-#  include <QtGui/QCheckBox>
-//#  include <qobjectlist.h>
-//#  include <qvbox.h>
-//#  include <qhbox.h>
-#  include <QLayout>
-#  include <QLabel>
-//#  include <qtabwidget.h> 
-#  include <QMessageBox>
-#endif
+#include <qbuttongroup.h>
+#include <qcheckbox.h>
+#include <qvbuttongroup.h>
+#include <qhbuttongroup.h> 
+#include <qpushbutton.h>
+#include <qobjectlist.h>
+#include <qvbox.h>
+#include <qhbox.h>
+#include <qlayout.h>
+#include <qlabel.h>
+#include <qtabwidget.h> 
+#include <qmessagebox.h>
 
 StChain             *StEventControlPanel::fgChain  = 0;
 StEventDisplayInfo  *StEventControlPanel::fgHlp    = 0;
@@ -124,14 +107,8 @@ StEventControlPanel::~StEventControlPanel()
 {   delete fBar; }
 //_______________________________________________________________________________________
 void StEventControlPanel::AddButt(const Char_t *buttonName, const Char_t *command)
-{  
-   QPushButton *b = new QPushButton(buttonName,fBar);
-   b->setName(command);
-#if (QT_VERSION < 0x040000)
-   b->setToggleButton(true);
-#else
-   b->setCheckable(true);
-#endif
+{   
+   (new QPushButton(buttonName,fBar,command))->setToggleButton(true);
 }
 //_______________________________________________________________________________________
 void StEventControlPanel::Build()
@@ -175,29 +152,23 @@ void StEventControlPanel::Build()
          0};      
       int i = 0;
       int n = 0;
-      fBar = new QFrame;
+      fBar = new QVBox(0,"Event Control Panel");
       fBar->setCaption("Event Control Panel");
-      QVBoxLayout *layout = new QVBoxLayout(fBar);
-      QHBoxLayout *controlBox = new QHBoxLayout(fBar); // "Event Control Panel"
-      layout->addLayout(controlBox);
-
-      QGroupBox *eventGroup = new QGroupBox(QString("Event Control Panel"),fBar);
-      controlBox->addWidget(eventGroup);
-#if (QT_VERSION < 0x040000)
+      QHBox *fControlBox = new QHBox(fBar,"Event Control Panel");
+      QGroupBox *eventGroup = new QGroupBox("Event Control Panel",fControlBox);
       eventGroup->setColumnLayout(1,Qt::Vertical);
-#endif
-      QVBoxLayout *padControl = new QVBoxLayout(eventGroup); //"Event Control Panel");      
-      StPadControlPanel *ctrlpanel = new StPadControlPanel(fBar);
-      controlBox->addWidget(ctrlpanel->Widget());
+      QVBox *fPadControl = new QVBox(eventGroup,"Event Control Panel");
+      new StPadControlPanel(fControlBox);
+
+
+
       //----------------------------
       // Table data
       int nButtons = 4;
-      StSimplePanel *panel = new StSimplePanel(0,"dstPanel",2);
-      padControl->addWidget(panel);
+      StSimplePanel *panel = new StSimplePanel(fPadControl,"dstPanel",2);
       panel->setTitle("dst");
       for (n=0;n<nButtons;n++) {
-        QCheckBox *box = new QCheckBox(listEvents[i],panel);
-        box->setName(listEvents[i+1]);
+        QCheckBox *box = new QCheckBox(listEvents[i],panel,listEvents[i+1]);
         panel->Add(box,n>>1,n&1,Qt::AlignLeft);
         connect(box,SIGNAL(clicked()),this,SLOT(Clicked()));
         i += 2;
@@ -206,17 +177,16 @@ void StEventControlPanel::Build()
       // StEvent hits
       //----------------------------
       nButtons = 16;
-      panel = new StSimplePanel(0,"hitsPanel",4);
-      padControl->addWidget(panel);
+      panel = new StSimplePanel(fPadControl,"hitsPanel",4);
       panel->setTitle("Hits (StEvent) Detectors");
 
       QPushButton *all[3];
-      all[0] = new QPushButton("",panel);
+      all[0] = new QPushButton("",panel,"");
       all[0]->setText("All");
-      all[1] = new QPushButton("",panel);
+      all[1] = new QPushButton("",panel,"");
       all[1]->setText("All");
       
-      all[2] = new QPushButton("",panel);
+      all[2] = new QPushButton("",panel,"");
       all[2]->setText("All");
 
       QLabel *label = new QLabel("Used",panel);
@@ -268,7 +238,7 @@ void StEventControlPanel::Build()
          }
          i += 2;
       }
-      // Add all buttons
+      // Add all butoons
       panel->Add(all[0],n,0); panel->Add(all[1],n,1); panel->Add(all[2],n,3);
 #ifndef STAR_BUTTON
 #include "starIconTrans.xpm"
@@ -285,9 +255,9 @@ void StEventControlPanel::Build()
       panel = new StSimplePanel(fPadControl,"trackPanel");
       panel->setTitle("Track (StEvent)");
 
-      all[0] = new QPushButton("",panel);
+      all[0] = new QPushButton("",panel,"");
       all[0]->setText("All");
-      all[1] = new QPushButton("",panel);
+      all[1] = new QPushButton("",panel,"");
       all[1]->setText("All");
 
       label = new QLabel("tracks",panel);
@@ -324,19 +294,19 @@ void StEventControlPanel::Build()
          QBoxLayout * l = new QHBoxLayout( buttons );
          l->addItem(new QSpacerItem(10,1));
 
-         fRedrawButton = new QPushButton("ReDraw",buttons);
+         fRedrawButton = new QPushButton("ReDraw",buttons,"redraw");
          connect(fRedrawButton,SIGNAL(clicked()),this,SLOT(Redraw()));
          l->addWidget( fRedrawButton );
 
          l->addItem(new QSpacerItem(10,1));
 
-         fNextEventButton = new QPushButton("Next",buttons);
+         fNextEventButton = new QPushButton("Next",buttons,"next");
          connect(fNextEventButton,SIGNAL(clicked()),this,SLOT(NextEvent()));
          l->addWidget( fNextEventButton );
 
          l->addItem(new QSpacerItem(10,1));
 
-         QPushButton *button = new QPushButton("Filter",buttons);
+         QPushButton *button = new QPushButton("Filter",buttons,"filter");
          // if (!fFilter) button->setDisabled(true);
          connect(button,SIGNAL(clicked()),this,SLOT(ShowFilter()));
          l->addWidget( button );
@@ -344,7 +314,7 @@ void StEventControlPanel::Build()
          l->addItem(new QSpacerItem(10,1));
 
 #ifdef  SELECTION_BUTTON
-         button = new QPushButton("Selection",buttons);
+         button = new QPushButton("Selection",buttons,"print");
          // if (!fFilter) button->setDisabled(true);
          connect(button,SIGNAL(clicked()),this,SLOT(PrntNames()));
          l->addWidget( button );

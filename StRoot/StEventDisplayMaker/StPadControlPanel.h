@@ -4,7 +4,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StPadControlPanel.h,v 1.2 2003/01/24 21:14:43 fine Exp $
+// $Id: StPadControlPanel.h,v 1.3 2009/02/03 23:07:48 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@
 
 class QButtonGroup;
 class TVirtualPad;
+class QLayout;
 //
 class StPadControlPanel
 #if !defined(__CINT__)
@@ -39,12 +40,8 @@ class StPadControlPanel
 #if !defined(__CINT__)
 Q_OBJECT
 #endif
-  private:
-     QButtonGroup *fBar;  
-
-protected:
-  void AddButt(const Char_t *buttonName, const Char_t *command,const Char_t *tip=0);
-
+private:
+      QWidget *fMyWidget;
 public slots:
      void Clicked(int id);
 
@@ -54,6 +51,7 @@ public:
   void  Build(QWidget *parent=0);
   virtual ~StPadControlPanel();
   QButtonGroup *Bar() const;
+  QWidget *Widget() const { return fMyWidget;}
 
 
   static void SetBackround(Color_t color, TVirtualPad *pad=0);

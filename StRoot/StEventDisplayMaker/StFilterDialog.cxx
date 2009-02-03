@@ -1,9 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   08/01/03  
-// $Id: StFilterDialog.cxx,v 1.5 2008/08/28 23:34:19 fine Exp $
+// $Id: StFilterDialog.cxx,v 1.6 2009/02/03 23:07:48 fine Exp $
 
 #include "StFilterDialog.h"
 #include <assert.h>
-#ifdef R__QT
+#ifdef R__QT4
 #include <qlayout.h>
 #if (QT_VERSION < 0x040000)
 #  include <qpushbutton.h>
