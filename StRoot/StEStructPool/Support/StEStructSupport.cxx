@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.19 2008/12/02 23:52:53 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.20 2009/02/03 14:30:23 fisyak Exp $
  *
  * Author: Jeff Porter 
  *
@@ -16,6 +16,7 @@
 #include "Stiostream.h"
 #include <sstream>
 #include "Stsstream.h"
+#include "TMath.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2D.h"
@@ -1664,6 +1665,9 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.20  2009/02/03 14:30:23  fisyak
+ * Add missing includes for ROOT 5.22
+ *
  * Revision 1.19  2008/12/02 23:52:53  prindle
  * Get information about histogram XX being symmetrized from CutBin.
  * Changed TH1* to TH2D* in many places hoping to be able to plot DEtaDPhi

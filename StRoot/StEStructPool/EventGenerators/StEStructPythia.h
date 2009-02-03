@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.h,v 1.8 2006/04/11 17:51:41 prindle Exp $
+ * $Id: StEStructPythia.h,v 1.9 2009/02/03 14:30:23 fisyak Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,6 +15,7 @@
 #include "StEStructPool/AnalysisMaker/StEStructEventReader.h"
 
 #include "TROOT.h"
+#include "TMath.h"
 #include "TPythia6.h"
 
 class StEStructEventCuts;
@@ -188,8 +189,11 @@ inline float* StEStructPythia::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructPythia.h,v $
+ * Revision 1.9  2009/02/03 14:30:23  fisyak
+ * Add missing includes for ROOT 5.22
+ *
  * Revision 1.8  2006/04/11 17:51:41  prindle
- * Remove inChain from constructor arguments (no longer used in macro)
+ *   Remove inChain from constructor arguments (no longer used in macro)
  *
  * Revision 1.7  2006/04/04 22:11:27  porter
  * StEStructPythia now uses StEtructCentrality for selection

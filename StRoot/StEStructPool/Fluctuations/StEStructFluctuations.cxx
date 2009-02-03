@@ -1,4 +1,5 @@
 
+#include <math.h>
 #include "StEStructFluctuations.h"
 
 #include "TH1F.h"

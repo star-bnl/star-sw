@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.h,v 1.6 2006/04/11 17:51:58 prindle Exp $
+ * $Id: StEStructHijing.h,v 1.7 2009/02/03 14:30:23 fisyak Exp $
  *
  * Author: Chunhui Han
  *
@@ -15,6 +15,7 @@
 #include "StEStructPool/AnalysisMaker/StEStructEventReader.h"
 
 #include "TROOT.h"
+#include "TMath.h"
 #include "../THijing/THijing.h"
 
 class StEStructEventCuts;

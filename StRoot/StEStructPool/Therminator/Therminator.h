@@ -15,6 +15,7 @@
 #ifndef __THERMINATOR__H
 #define __THERMINATOR__H
 
+#include "TMath.h"
 #include "Event.h"
 
 
