@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.23 2009/01/17 13:09:02 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.24 2009/02/03 15:40:38 rfatemi Exp $
 
 
 #include <Stiostream.h>
@@ -64,35 +64,39 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
     bemc=0;
     lTwo=0;
     emc = new StEmcTriggerSimu;
+    for (int a=0; a<numSimulators; a++){
+      mSimulators[a]=0;
+    }
 }
 
 StTriggerSimuMaker::~StTriggerSimuMaker() { /* no-op */ }
 
+
 void StTriggerSimuMaker::useEemc(int flag){
     eemc=new StEemcTriggerSimu();
     eemc->setConfig(flag);
-    mSimulators.push_back(eemc);
+    mSimulators[0]=eemc;
 }
 
 void StTriggerSimuMaker::useBbc(){
     bbc=new StBbcTriggerSimu;
-    mSimulators.push_back(bbc);
+    mSimulators[1]=bbc;
 }
 
 void StTriggerSimuMaker::useBemc(){
     bemc=new StBemcTriggerSimu;
     bemc->setHeadMaker(this);
-    mSimulators.push_back(bemc);
+    mSimulators[2]=bemc;
 }
 
 void StTriggerSimuMaker::useL2(StGenericL2Emulator* L2Mk){
     lTwo=new StL2TriggerSimu(L2Mk);
-    mSimulators.push_back(lTwo);
+    mSimulators[4]=lTwo;
+
 }
 
 Int_t StTriggerSimuMaker::Init() {
     LOG_INFO <<Form("StTriggerSimuMaker::Init(), MCflag=%d",mMCflag)<<endm;
-    
     if(eemc) {
         eemc->setHList(mHList);
     }
@@ -100,11 +104,15 @@ Int_t StTriggerSimuMaker::Init() {
     if(bemc) {
         bemc->setHList(mHList);
     }
-  
-    for(unsigned i=0; i<mSimulators.size(); i++) {
+
+    for(Int_t i=0; i<numSimulators; i++) {
+      if(mSimulators[i]){  
         mSimulators[i]->setMC(mMCflag);
         mSimulators[i]->Init();
+      }
+
     }
+
 
     return StMaker::Init();
 }
@@ -112,16 +120,20 @@ Int_t StTriggerSimuMaker::Init() {
 void StTriggerSimuMaker::Clear(const Option_t*){
     LOG_DEBUG<<"StTriggerSimuMaker::Clear()"<<endm;
     
-    for(unsigned i=0; i<mSimulators.size(); i++) {
+    for(Int_t i=0; i<numSimulators; i++) {
+      if (mSimulators[i]){
         mSimulators[i]->Clear();
+      }
     }
     
     mResults.clear();
 }
 
 Int_t StTriggerSimuMaker::InitRun(int runNumber) {
-    for(unsigned i=0; i<mSimulators.size(); i++) {
+    for(Int_t i=0; i<numSimulators; i++) {
+      if (mSimulators[i]){
         mSimulators[i]->InitRun(runNumber);
+      }
     }
 
     assert(mDbMk);
@@ -129,25 +141,41 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
     int yyyymmdd=mDbMk->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
     int hhmmss=mDbMk->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
 
+    if (mYear>=2009 && (mSimulators[0] || mSimulators[2])){ 
+      emc=new StEmcTriggerSimu;
+      emc->setHeadMaker(this);
+      mSimulators[3]=emc;
+    }//Use unified EMC trigger for EEMC/BEMC triggers in y=2009 or later
+     //This loop formerly useEmc() function
+
+
     LOG_INFO<<Form("InitRun() run=%d yyyymmdd=%d  hhmmss=%06d\n",runNumber, yyyymmdd, hhmmss )<<endm;
 
     return kStOK;
 }
 
 Int_t StTriggerSimuMaker::Make() {
-    for(unsigned i=0; i<mSimulators.size(); i++) {
-        mSimulators[i]->Make();
+   
+  for(Int_t i=0; i<numSimulators; i++) {
+    if (mSimulators[i]){
+      mSimulators[i]->Make();
     }
-    if ((mYear >= 2009) && (bemc || eemc)) emc->Make();
-    return kStOK;
+  }
+  return kStOK;
 }
 
 bool StTriggerSimuMaker::isTrigger(int trigId) {
-    for(unsigned i=0; i<mSimulators.size(); i++) {
-        if(mSimulators[i]->triggerDecision(trigId) == kNo) return false;
+
+  for(Int_t i=0; i<numSimulators; i++) {
+    if (mSimulators[i]){  
+      
+      if(mSimulators[i]->triggerDecision(trigId) == kNo) return false;
     }
-    return true;
+  }
+  
+  return true;
 }
+
 
 const StTriggerSimuResult& StTriggerSimuMaker::detailedResult(unsigned int trigId) {
     // first check if we already filled this result
@@ -199,6 +227,9 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.24  2009/02/03 15:40:38  rfatemi
+ * Changed structure of mSimulators to accomodate 2009 EMC simulator update
+ *
  * Revision 1.23  2009/01/17 13:09:02  pibero
  * Initial Version of EMC DSM algorithms for 2009
  *
