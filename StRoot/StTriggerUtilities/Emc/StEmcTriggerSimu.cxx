@@ -40,19 +40,27 @@ void StEmcTriggerSimu::InitRun(int runNumber)
   St_db_Maker* starDb = (St_db_Maker*) StMaker::GetChain()->GetMakerInheritsFrom("St_db_Maker");
   assert(starDb);
   mYear = starDb->GetDateTime().GetYear();
+
+  mAllTriggers.insert(2009500); //test trigger for 2009 500 GeV
 }
 
 void StEmcTriggerSimu::Make()
 {
+
+
+
+  if (mYear < 2009) return;
+
   switch (mYear) {
   case 2009:
     if (mBemc) mBemc->get2009_DSMLayer1_Result()->write(*mEM201);
     //if (mEemc) mEemc->get2009_DSMLayer1_Result()->write(*mEM201);
     break;
-  }
+    }
 
   mEM201->run();
 }
+
 
 StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
 {
@@ -73,6 +81,8 @@ StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
     BAJP = 13,
     EAJP = 14
   };
+
+
 
   int out = (*mEM201)[0].output;
   int decision = 0;
@@ -95,5 +105,27 @@ StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
   case EAJP: decision = out >> 14 & 0x1; break;
   }
 
-  return decision ? kYes : kNo;
+
+  //first check if it fired
+
+  mFiredTriggers.push_back(2009500); 
+
+  for(unsigned i=0; i<mFiredTriggers.size(); i++) {
+    if(trigId == mFiredTriggers[i]) return kYes;
+  }
+  
+  //now check if we care
+  if(mAllTriggers.find(trigId) == mAllTriggers.end()) {
+    return kDoNotCare;
+  }
+  else {
+    return kNo;
+  }
+
 }
+
+
+
+
+
+
