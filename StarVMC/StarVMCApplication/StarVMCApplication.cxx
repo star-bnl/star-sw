@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.cxx,v 1.7 2006/08/17 13:37:12 fisyak Exp $
+// $Id: StarVMCApplication.cxx,v 1.8 2009/02/03 16:01:05 fisyak Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -7,6 +7,7 @@
 #include "StarMCHits.h"
 #include "TGeoManager.h"
 #include "TROOT.h"
+#include "TClass.h"
 #include "TSystem.h"
 #include "TInterpreter.h"
 #include "TVirtualMC.h"
