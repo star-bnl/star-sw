@@ -1,4 +1,5 @@
 #include "TRandom.h"
+#include "TMath.h"
 extern "C" {
   //  if (! gRandom) new TRandom();
   Float_t rndm_(Int_t i = 0) {    return gRandom->Rndm(i);  }
@@ -20,7 +21,9 @@ extern "C" {
   Float_t tand_(Float_t degree) {return TMath::Tan (C_RAD_PER_DEG*degree);}
   Float_t asind_(Float_t arg)   {return C_DEG_PER_RAD*TMath::ASin (arg);}
   Float_t acosd_(Float_t arg)   {return C_DEG_PER_RAD*TMath::ACos (arg);}
+#if ! defined( __ICC ) ||  __ICC < 910
   Float_t atand(Float_t arg)    {return C_DEG_PER_RAD*TMath::ATan (arg);}
+#endif
   Float_t atan2d_(Float_t arg1,Float_t arg2) {return  C_DEG_PER_RAD*TMath::ATan2 (arg1,arg2);}
 #undef C_RAD_PER_DEG
 #undef C_DEG_PER_RAD
