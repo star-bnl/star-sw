@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.32 2009/02/02 15:55:23 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.33 2009/02/04 21:05:42 kocolosk Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.33  2009/02/04 21:05:42  kocolosk
+// Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
+//
 // Revision 1.32  2009/02/02 15:55:23  mattheww
 // removed some debugging prints not taken out from last commit
 //
@@ -120,7 +123,7 @@
 #include "DAQ_ETOW/daq_etow.h"
 #include "DAQ_ESMD/daq_esmd.h"
 #include "DAQ_EMC/daq_emc.h"
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 #include "StEmcRawMaker.h"
 #include "StMessMgr.h"
 #include "TGenericTable.h"

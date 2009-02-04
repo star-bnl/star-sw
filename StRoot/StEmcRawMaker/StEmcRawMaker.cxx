@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.19 2009/02/01 02:27:55 mattheww Exp $
+// $Id: StEmcRawMaker.cxx,v 1.20 2009/02/04 21:05:42 kocolosk Exp $
 
 #include <math.h>
 
@@ -15,12 +15,12 @@
 #include <StDaqLib/GENERIC/EventReader.hh>
 #include <StDaqLib/EMC/EMC_Reader.hh>
 #include <StDAQMaker/StDAQReader.h>
-#include <StDaqLib/EMC/StEmcDecoder.h>
+#include <StEmcUtil/database/StEmcDecoder.h>
 #include <StMessMgr.h>
 
 //EEMC ........
-#include <StEEmcDbMaker/StEEmcDbMaker.h>
-#include <StEEmcDbMaker/EEmcDbCrate.h> // for print outs
+#include <StEEmcUtil/database/StEEmcDb.h>
+#include <StEEmcUtil/database/EEmcDbCrate.h> // for print outs
 
 #include "StEmcRawMaker.h"
 #include "StEemcRaw.h"
@@ -87,8 +87,7 @@ Int_t StEmcRawMaker::Init()
         mBemcRaw->initQAHisto();
     }
     //................EEMC stuff ..............
-    eeStDb= (StEEmcDbMaker*) GetMaker("eeDb");
-    
+    eeStDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
     if(eeStDb==0)
     {
         LOG_ERROR << "FATAL !!! \n   did not found \"eeDb-maker\", all EEMC data will be ignored\n fix it, JB\n" <<endm;
@@ -329,6 +328,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.20  2009/02/04 21:05:42  kocolosk
+// Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
+//
 // Revision 1.19  2009/02/01 02:27:55  mattheww
 // fixed behavior for older data
 //
