@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.15 2009/01/27 19:58:36 mattheww Exp $
+// $Id: StEemcRaw.cxx,v 1.16 2009/02/04 21:05:42 kocolosk Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -10,9 +10,9 @@
 
 #include <StDAQMaker/StEEMCReader.h>
 
-#include <StEEmcDbMaker/StEEmcDbMaker.h>
-#include <StEEmcDbMaker/EEmcDbItem.h>
-#include <StEEmcDbMaker/EEmcDbCrate.h>
+#include <StEEmcUtil/database/StEEmcDb.h>
+#include <StEEmcUtil/database/EEmcDbItem.h>
+#include <StEEmcUtil/database/EEmcDbCrate.h>
 
 #include <StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h>  // for corruption tests
 #include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
@@ -592,6 +592,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.16  2009/02/04 21:05:42  kocolosk
+// Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
+//
 // Revision 1.15  2009/01/27 19:58:36  mattheww
 // Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
 //

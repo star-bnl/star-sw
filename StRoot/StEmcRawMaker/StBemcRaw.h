@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.14 2009/01/28 15:42:44 mattheww Exp $
+// $Id: StBemcRaw.h,v 1.15 2009/02/04 21:05:42 kocolosk Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.15  2009/02/04 21:05:42  kocolosk
+// Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
+//
 // Revision 1.14  2009/01/28 15:42:44  mattheww
 // Put back some obsolete methods to satisfy StBemcData
 //
@@ -64,7 +67,6 @@ bemcRawData is also filled in the StEmcCollection.
 #include "TObject.h"
 #include "TDataSet.h"
 #include "StEmcUtil/database/StBemcTables.h"
-#include "StDaqLib/EMC/StEmcDecoder.h"
 
 #include "tables/St_controlADCtoE_Table.h"
 #include "defines.h"
@@ -74,6 +76,7 @@ class StEvent;
 class StEmcRawData;
 class StEmcCollection;
 class StEmcRawMaker;
+class StEmcDecoder;
 
 class StBemcRaw : public TObject
 {

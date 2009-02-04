@@ -1,4 +1,4 @@
-// $Id: StEmcRawMaker.h,v 1.8 2009/01/27 19:58:36 mattheww Exp $
+// $Id: StEmcRawMaker.h,v 1.9 2009/02/04 21:05:42 kocolosk Exp $
 
 /*!\class StEmcRawMaker
 \author Alexandre A. P. Suaide
@@ -57,7 +57,7 @@ class StEmcGeom;
 class StEmcRawData;
 class StEvent;
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class StEemcRaw;
 
 class StEmcRawMaker : public StRTSBaseMaker
@@ -66,7 +66,7 @@ protected:
     StEvent*                 mEvent;
     StBemcRaw*               mBemcRaw;
     StEemcRaw*               mEemcRaw;
-    StEEmcDbMaker*           eeStDb; ///< to assess EEMC DB
+    StEEmcDb*                eeStDb; ///< to assess EEMC DB
 
     void                     fillHistograms();///<Fill QA histograms
     Bool_t                   prepareEnvironment();///< Prepare the StEvent environment to fill the EMC data
@@ -100,7 +100,7 @@ public:
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.8 2009/01/27 19:58:36 mattheww Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.9 2009/02/04 21:05:42 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -110,6 +110,9 @@ public:
 #endif
 
 // $Log: StEmcRawMaker.h,v $
+// Revision 1.9  2009/02/04 21:05:42  kocolosk
+// Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
+//
 // Revision 1.8  2009/01/27 19:58:36  mattheww
 // Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
 //

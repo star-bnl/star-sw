@@ -14,7 +14,7 @@
 
 #include "TObject.h"
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class StEEMCReader ;
 class TH1F;
 class StEvent;
@@ -24,7 +24,7 @@ class StEemcRaw :  public TObject
 {
 private:
 
-    StEEmcDbMaker *mDb;
+    StEEmcDb *mDb;
     TH1F *hs[8];
     Bool_t   copyRawData(StEEMCReader *eeReader, StEmcRawData *raw);
     Bool_t copyRawData(StEmcRawMaker* maker, StEmcRawData *raw);
@@ -41,7 +41,7 @@ public:
     Bool_t make(StEmcRawMaker* maker, StEvent* mEvent);
     void initHisto();
 
-    void setDb(StEEmcDbMaker *aa)
+    void setDb(StEEmcDb *aa)
     {
         mDb=aa;
     } ///< DB-reader must exist
@@ -51,10 +51,13 @@ public:
 
 #endif
 
-// $Id: StEemcRaw.h,v 1.6 2009/01/27 19:58:36 mattheww Exp $
+// $Id: StEemcRaw.h,v 1.7 2009/02/04 21:05:42 kocolosk Exp $
 
 /*
  * $Log: StEemcRaw.h,v $
+ * Revision 1.7  2009/02/04 21:05:42  kocolosk
+ * Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
+ *
  * Revision 1.6  2009/01/27 19:58:36  mattheww
  * Updates to StEmcRawMaker to be compatible with 2009 DAQ Format
  *
