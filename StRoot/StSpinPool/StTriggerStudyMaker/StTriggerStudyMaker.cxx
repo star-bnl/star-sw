@@ -18,6 +18,7 @@
 
 //StEmc
 #include "StEmcUtil/database/StBemcTables.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StEmcADCtoEMaker/StBemcData.h"
