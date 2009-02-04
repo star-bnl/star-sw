@@ -577,7 +577,7 @@ int fs_index::read(char *fn, char *buff, int maxsize)
   }
 
   if(entry->sz == 0) {
-    LOG(ERR,"%s has no data...",fn);
+    LOG(NOTE,"%s has no data...",fn);
     return 0;
   }
 
