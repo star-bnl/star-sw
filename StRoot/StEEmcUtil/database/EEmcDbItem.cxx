@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.16 2007/05/30 02:38:34 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.1 2009/02/04 20:33:28 ogrebeny Exp $
  
 #include <stdio.h>
 #include <string.h>
@@ -228,6 +228,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.1  2009/02/04 20:33:28  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.16  2007/05/30 02:38:34  balewski
 // replace printf -->LOG_XXX
 //

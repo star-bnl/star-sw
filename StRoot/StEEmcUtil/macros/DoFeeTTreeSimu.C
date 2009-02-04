@@ -75,7 +75,7 @@ if (0){
 
   // My Makers  2 
   St2eemcFeeRawMaker * myMk3=new St2eemcFeeRawMaker("St2feeTTree");
-  myMk3->setDb(myMk1);
+//  myMk3->setDb(myMk1);
   
   // Output TTree
   TFile f(fileT,"RECREATE");

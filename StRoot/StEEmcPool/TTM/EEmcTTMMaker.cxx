@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.29 2007/07/12 19:27:23 fisyak Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.30 2009/02/04 20:33:24 ogrebeny Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -10,8 +10,8 @@
  * of towers with associated tracks (list of EEmcTTMatch objects)
  *
  * \author Piotr A. Zolnierczuk
- * $Date: 2007/07/12 19:27:23 $
- * $Revision: 1.29 $
+ * $Date: 2009/02/04 20:33:24 $
+ * $Revision: 1.30 $
  *
  * \section ttmakerremarks Remarks
  *
@@ -59,8 +59,8 @@
 
 #include "StEEmcUtil/StEEmcSmd/StEEmcSmdGeom.h"
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
 #include "EEmcTower.h"
@@ -93,16 +93,13 @@ const Double_t EEmcTTMMaker::kDefDeltaEtaCut    =  0.7;
 //_____________________________________________________________________________
 EEmcTTMMaker::EEmcTTMMaker(
 			   const char* self      , // this maker name
-			   StMuDstMaker  *mumaker,
-			   StEEmcDbMaker *dbmaker
+			   StMuDstMaker  *mumaker
 			   ) 
-  : StMaker(self),mMuDstMaker(mumaker),mEEmcDb(dbmaker),mGeom(EEmcGeomSimple::Instance()) {
+  : StMaker(self),mMuDstMaker(mumaker),mEEmcDb(0),mGeom(EEmcGeomSimple::Instance()) {
 
   if( mMuDstMaker == NULL )  
     Fatal("EEmcTTMMaker","invalid StMuDstMaker");
   
-  if( mEEmcDb == NULL ) 
-    Fatal("EEmcTTMMaker","invalid StEEmcDbMaker");
   
   // simple EEMC geometry description
   //if( (mGeom = new EEmcGeomSimple()) == NULL) 
@@ -167,6 +164,9 @@ EEmcTTMMaker::~EEmcTTMMaker() {
 /// Init()
 Int_t 
 EEmcTTMMaker::Init() {
+  mEEmcDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
+  if(!mEEmcDb) 
+    Fatal("EEmcTTMMaker","invalid StEEmcDbMaker");
 
   ResetStats();
   //
@@ -477,6 +477,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.30  2009/02/04 20:33:24  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.29  2007/07/12 19:27:23  fisyak
 // Add includes for TMath for ROOT 5.16
 //

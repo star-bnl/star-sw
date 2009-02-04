@@ -1,4 +1,4 @@
-// $Id: EEqaSorterC.cxx,v 1.4 2009/01/25 01:36:54 ogrebeny Exp $
+// $Id: EEqaSorterC.cxx,v 1.5 2009/02/04 20:33:26 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -13,21 +13,22 @@
 #include <TText.h>
 
 #include "EEqaSorterC.h"
+
 #include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 //tmp until I find better solution
 #include "EEqaPresenter.h"
 // tmp end
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
 
 ClassImp(EEqaSorterC)
 
 //-------------------------------------------
 //-------------------------------------------
-EEqaSorterC:: EEqaSorterC( TObjArray*L,StEEmcDbMaker*dbx) {
+EEqaSorterC:: EEqaSorterC(TObjArray *L, StEEmcDb *dbx) {
   // printf("\n\n  EEqaSorterC:: EEqaSorterC() \n\n");
   HList=L; 
   eeDb=dbx;
@@ -219,6 +220,9 @@ void  EEqaSorterC::initRun() {
 
 
 // $Log: EEqaSorterC.cxx,v $
+// Revision 1.5  2009/02/04 20:33:26  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.4  2009/01/25 01:36:54  ogrebeny
 // *** empty log message ***
 //

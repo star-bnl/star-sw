@@ -44,7 +44,7 @@ int rdEztMuSmdCal( int run,
   printf("in=%s%s=\n",inDir,file);
   //  return;
   St_db_Maker   *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
-  StEEmcDbMaker *myDb = new StEEmcDbMaker("eemcDb");
+  new StEEmcDbMaker("eemcDb");
 
   // stDb->SetFlavor("onlPed","eemcPMTped");
   stDb->SetFlavor("slope2006","eemcPIXcal"); //get 1st pass gains for strips from db
@@ -67,10 +67,6 @@ int rdEztMuSmdCal( int run,
 #endif
 #endif 
 
-  // Two lines below added 1/9/07 to mask / set gains for smd
-  myDb->changeMask("iter4-pp/smdAllMaskDay89v1.dat");
-  // myDb->changeGains("iter1-pp/smdAllSect-slopes.dat");
-  // myDb->setSectors(sectID,sectID);
 
   // MIP cut .........
   float thrMipSmdE=0.4/1000.; // was 0.5 MeV for data
@@ -111,6 +107,12 @@ int rdEztMuSmdCal( int run,
   chain->ls(3);
   // muMk->printArrays();
 
+  StEEmcDbMaker *myDb = (StEEmcDb*)chain->GetDataSet("StEEmcDb");
+  // Two lines below added 1/9/07 to mask / set gains for smd
+  if (myDb) myDb->changeMask("iter4-pp/smdAllMaskDay89v1.dat");
+  // if (myDb) myDb->changeGains("iter1-pp/smdAllSect-slopes.dat");
+  // if (myDb) myDb->setSectors(sectID,sectID);
+
   printf("All Ezt-branches set\n");
   int eventCounter=0;
   int stat=0;
@@ -131,7 +133,7 @@ int rdEztMuSmdCal( int run,
     printf("====================%5d  processing  ==============\n", eventCounter);
     
   }
-  myDb->print(); //EEmcDb::exportAscii
+  if (myDb) myDb->print(); //EEmcDb::exportAscii
 
   printf("sorting done, nEve=%d of %d\n",eventCounter, nEntries);
   int t2=time(0);

@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.10 2007/10/19 23:18:40 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.11 2009/02/04 20:33:21 ogrebeny Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -19,13 +19,13 @@
 #include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 
 #ifdef StRootFREE
   #include "EEmcDb/EEmcDb.h"
 #else
-  #include "StEEmcDbMaker/StEEmcDbMaker.h"
+  #include "StEEmcUtil/database/StEEmcDb.h"
 #endif
 
 
@@ -538,6 +538,9 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
 
 /*****************************************************************
  * $Log: EEsoloPi0.cxx,v $
+ * Revision 1.11  2009/02/04 20:33:21  ogrebeny
+ * Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+ *
  * Revision 1.10  2007/10/19 23:18:40  balewski
  * 2008 cleanup, now works only w/ regular muDst
  *

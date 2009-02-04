@@ -12,7 +12,7 @@ using namespace std;
 
 #include <GenericFile.h>
 
-#include <StDaqLib/EMC/StEmcDecoder.h>
+#include <StEmcUtil/database/StEmcDecoder.h>
 
 #include "BEMCPlotsNames.h"
 

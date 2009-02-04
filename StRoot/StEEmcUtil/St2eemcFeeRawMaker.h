@@ -1,5 +1,8 @@
-// $Id: St2eemcFeeRawMaker.h,v 1.3 2003/11/17 15:47:04 balewski Exp $
+// $Id: St2eemcFeeRawMaker.h,v 1.4 2009/02/04 20:33:28 ogrebeny Exp $
 // $Log: St2eemcFeeRawMaker.h,v $
+// Revision 1.4  2009/02/04 20:33:28  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.3  2003/11/17 15:47:04  balewski
 // fix of bug
 //
@@ -11,7 +14,7 @@
 //
 // Revision 1.1  2002/12/17 19:41:35  balewski
 
-/* \class StEEmcDbMaker 
+/* \class St2eemcFeeRawMaker 
 \author Jan Balewski
 
 Reads EEMC hits from StEvent and converts them back to the DAQ raw data format using  inverse crate/channel mapping from DB.
@@ -31,16 +34,16 @@ www.star.bnl.gov/STAR/eemc -->How To
 #endif
 
 class TTree;
-class StEEmcDbMaker;
+class StEEmcDb;
 class EEfeeDataBlock;
 class EEfeeRawEvent;
 class EEmcEventHeader;
 
 class St2eemcFeeRawMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: St2eemcFeeRawMaker.h,v 1.3 2003/11/17 15:47:04 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: St2eemcFeeRawMaker.h,v 1.4 2009/02/04 20:33:28 ogrebeny Exp $";
   TTree *moutTTree; ///< output TTree
-  StEEmcDbMaker * meeDb; ///< to assess DB
+  StEEmcDb *meeDb; ///< to assess DB
   EEfeeRawEvent *meveTT; ///< output event
   EEmcEventHeader *mrunTT; ///< header of the output event
   int mNFeeCrate; ///<  numbers of FEE Data blocks
@@ -51,12 +54,12 @@ class St2eemcFeeRawMaker : public StMaker {
   St2eemcFeeRawMaker(const char *name="St2eemcFeeRaw");
   virtual       ~St2eemcFeeRawMaker();
   void setOutTTree(TTree *t ) {moutTTree=t;} ///< TTree must be initialized externaly
-  void setDb(StEEmcDbMaker *aa){meeDb=aa;} ///< DB-reader must exist
+//  void setDb(StEEmcDb *aa){meeDb=aa;} ///< DB-reader must exist
   virtual Int_t Init();
   virtual Int_t InitRun  (int runumber);///< to change time stamp in TTree
   virtual Int_t  Make();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2eemcFeeRawMaker.h,v 1.3 2003/11/17 15:47:04 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2eemcFeeRawMaker.h,v 1.4 2009/02/04 20:33:28 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

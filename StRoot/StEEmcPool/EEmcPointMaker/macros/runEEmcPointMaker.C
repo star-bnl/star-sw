@@ -4,7 +4,7 @@ class StChain;
 class StMuEmcCollection;
 
 class St_db_Maker;
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 
 class EEmcAnalysisMaker;
@@ -16,7 +16,6 @@ class EEmcClusterMaker2;
 
 StChain        *mChain        = 0;
 St_db_Maker    *mStarDatabase = 0;
-StEEmcDbMaker  *mEEmcDatabase = 0;
 StMuDstMaker   *mMuDstMaker   = 0;
 
 EEmcAnalysisMaker *mEEanalysis = 0;
@@ -73,7 +72,7 @@ void runEEmcPointMaker( Int_t nevents = 500,
 #endif
 
   //-- Initialize EEMC database --
-  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
+  StEEmcDbMaker *eemcDbMaker = new StEEmcDbMaker("eemcDb");
   gMessMgr -> SwitchOff("D");
   gMessMgr -> SwitchOn("I");
 
@@ -89,7 +88,6 @@ void runEEmcPointMaker( Int_t nevents = 500,
   //-- The EEMC analysis maker --  
   mEEanalysis = new EEmcAnalysisMaker("eemcAnalysisMaker");
   mEEanalysis -> setMuDstMaker("MuDst");
-  mEEanalysis -> setDb(mEEmcDatabase);
   mEEanalysis -> setSeedEnergy(0.5);
    
   //-- Tower cluster maker --
@@ -168,8 +166,8 @@ void LoadLibs()
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
 
   gSystem->Load("StEEmcPoolEEmcAnalysisMaker");
   gSystem->Load("StEEmcPoolEEmcClusterMaker");

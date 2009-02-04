@@ -11,7 +11,7 @@
 #include "StEEmcTower.h"
 #include "StEEmcStrip.h"
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 class StEventMaker;
 
@@ -130,7 +130,7 @@ class StEEmcA2EMaker : public StMaker {
   void scale(Float_t s){ mScale=s; }
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.3 2008/06/30 21:15:09 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.4 2009/02/04 20:33:16 ogrebeny Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   
   private:
@@ -142,7 +142,7 @@ class StEEmcA2EMaker : public StMaker {
   TString mInputName;     /**<- Name of the input maker     */
   Int_t mInputType;       /**<- Type of input maker         */
 
-  StEEmcDbMaker *mDbMaker;      /**<- Pointer to DB maker   */
+  StEEmcDb      *mDbMaker;      /**<- Pointer to DB maker   */
   StMuDstMaker  *mMuDstMaker;   /**<- Pointer to MuDst      */
   StEventMaker  *mEventMaker;   /**<- Pointer to StEvent    */
 

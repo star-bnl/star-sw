@@ -13,7 +13,7 @@ class StIOMaker;
 class StMuDstMaker;
 class StMuEEmcPreAnalysisMaker;
 class StMuDbReader;
-class StEEmcDbMaker;
+class StEEmcDb;
 class St_db_Maker;
 
 StChain                  *chain;
@@ -21,7 +21,7 @@ StIOMaker                *ioMaker;
 StMuDstMaker             *muDstMaker;
 StMuEEmcPreAnalysisMaker *muEEmcAnal;
 StMuDbReader             *muDb;
-StEEmcDbMaker            *eemdDb;
+StEEmcDb                 *eemdDb;
 St_db_Maker              *starDb;
 
 #include <iomanip>
@@ -56,12 +56,12 @@ void runEEmcPreAnalysis ( Int_t nevents, Int_t smdhist, Char_t *muDst, Char_t *o
   //
   gROOT -> LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
-  gSystem -> Load("StEEmcUtil.so");
-  gSystem -> Load("StMuEEmcPreAnalysisMaker.so");
+  gSystem->Load("StEEmcUtil.so");
+  gSystem->Load("StMuEEmcPreAnalysisMaker.so");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem -> Load("StEEmcDbMaker.so");
+  gSystem->Load("StEEmcDbMaker");
 
   ////////////////////////////////////////////
   //
@@ -71,13 +71,8 @@ void runEEmcPreAnalysis ( Int_t nevents, Int_t smdhist, Char_t *muDst, Char_t *o
   muDstMaker = new StMuDstMaker(0,0,"",muDst,"MuDst.root",1);
   muDb       = StMuDbReader::instance();
 
-  eemcDb = new StEEmcDbMaker("eemcDb");
   starDb = new St_db_Maker("StarDb", "MySQL:StarDb");
-
-  assert(eemcDb);
-  //  eemcDb -> setTimeStampDay(20030516);
-  eemcDb -> setTimeStampDay(20040101);
-  eemcDb -> setPreferedFlavor( "set492", "eemcPMTcal" );
+  new StEEmcDbMaker("eemcDb");
 
   muEEmcAnal = new StMuEEmcPreAnalysisMaker();
 
@@ -87,6 +82,11 @@ void runEEmcPreAnalysis ( Int_t nevents, Int_t smdhist, Char_t *muDst, Char_t *o
   //
   chain -> Init();
   chain -> ls(3);
+  eemcDb = (StEEmcDb*)chain->GetDataSet("StEEmcDb");
+  assert(eemcDb);
+  //  starDb -> setTimeStampDay(20030516);
+  eemcDb -> setTimeStampDay(20040101);
+  eemcDb -> setPreferedFlavor( "set492", "eemcPMTcal" );
 
   ////////////////////////////////////////////
   // 

@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.31 2005/08/17 20:51:14 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.32 2009/02/04 20:33:06 ogrebeny Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -12,20 +12,11 @@ calculated by EEname2index() utility.
 <pre>
 ----------------------------------------
 Usage:
-
-
-// My Makers  1
-  StEEmcDbMaker  *myMk1=new StEEmcDbMaker("EEmcDB");
-  myMk1->setTimeStampDay(20031215);  // format: yyyymmdd
-
   St_db_Maker *dbMk = new St_db_Maker("StarDb","MySQL:StarDb");
-  // My Makers  2 
+  dbMk->setTimeStampDay(20031215);  // format: yyyymmdd
+  StEEmcDbMaker *myDbMk = new StEEmcDbMaker("EEmcDB");
   StEEfast2slowMaker *myMk= new StEEfast2slowMaker("EE-fast2slow");
-  myMk->setDb(myMk1);
- 
-Example how to use this maker:
-www.star.bnl.gov/STAR/eemc -->How To
-
+  myMk->setDb(myDbMk);
 </pre>
 */  
 
@@ -36,159 +27,31 @@ www.star.bnl.gov/STAR/eemc -->How To
 #include "StMaker.h"
 #endif
 
-// needed DB c-structs  
-class eemcDbADCconf_st;
-class eemcDbPMTcal_st;
-class eemcDbPMTname_st;
-class eemcDbPIXcal_st;
-class eemcDbPMTped_st;
-class eemcDbPMTstat_st;
-class kretDbBlobS_st;
-
-
-class  EEmcDbItem;
-class  EEmcDbCrate;
-#include "StEEmcUtil/EEfeeRaw/EEdims.h"
-
-
-
-class DbFlavor {
- public:
-  static const int mx=100;
-  char flavor[mx];
-  char nameMask[mx];
-  DbFlavor(){flavor[0]=0; nameMask[0]=0;}
-};
-
+class StEEmcDb;
 
 class StEEmcDbMaker : public StMaker {
-  // private:
- public:
-
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.31 2005/08/17 20:51:14 balewski Exp $";
-
-  int mfirstSecID, mlastSecID;
-  int mNSector;
-  int myTimeStampDay;
-  unsigned int myTimeStampUnix;
-  void  clearItemArray();
-  void mRequestDataBase(); ///< reads tables from STAR-DB
-  int mOptimizeMapping(int isec);
-  void mOptimizeOthers(int isec);
-  void mOptimizeFibers(); ///< decodes crates -->fiber map
-
+private:
+    StEEmcDb *mEEmcDb; //!
+public:
+    StEEmcDbMaker(const char *name="EEmcDbMaker");
+    virtual ~StEEmcDbMaker();
+    virtual Int_t Init();
+    virtual Int_t InitRun (int runumber); ///< to access STAR-DB
   
-  // pointers to Db tables for each sector
-  int *mDbsectorID; //!
-  eemcDbADCconf_st  **mDbADCconf; //!
-  eemcDbPMTcal_st   **mDbPMTcal ; //!
-  eemcDbPMTname_st   **mDbPMTname ; //!
-  eemcDbPIXcal_st   **mDbPIXcal ; //!
-  eemcDbPMTped_st   **mDbPMTped ; //!
-  eemcDbPMTstat_st  **mDbPMTstat ; //!
-  kretDbBlobS_st  *mDbFiberConfBlob; //!
+    virtual const char *GetCVS() const {
+	static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.32 2009/02/04 20:33:06 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+        return cvs;
+    }
   
-  // local fast look-up tables
-  EEmcDbItem   *byIndex; //!  assess via  index
-  EEmcDbItem   ***byCrate; //! access via crate/chan
-  const EEmcDbItem   *byStrip[MaxSectors][MaxSmdPlains][MaxSmdStrips]; //! access via sec/UV/strip
-
-  EEmcDbCrate *mDbFiber; // maps tw & mapmt crates to DAQ fibers
-  int nFiber; // # of existing crates(Tw+Mapmt)
-  
-  float KsigOverPed; // defines threshold
-  int nFound;
-  TString dbName; //name of the DB used 
-  DbFlavor dbFlavor; // used if flavor is requested
-  
-  template <class St_T, class T_st> void getTable(TDataSet *eedb, int secID, TString tabName, TString mask, T_st **outTab);
-
-  const EEmcDbItem* getStrip(int sec, char uv, int strip);  //ranges: sec=1-12, uv=U,V ,strip=1-288; slow method
-
-  TString mAsciiDbase; // Ascii database filename (default NONE)
-
-  // tmp solution to hold list of strings
-  TString *chGainL;
-  int nChGain, mxChGain;
-  void changeGainsAction(const char *fname);
-
-  TString *chMaskL;
-  int nChMask, mxChMask;
-  void changeMaskAction(const char *fname);
-
- protected:
- public:  
-  
-  void setSectors(int ,int); ///< limit the range of sectors for speed
-  void setThreshold(float x);// defines threshold for ADCs
-
-
-  void setAsciiDatabase ( const Char_t *dbfile );
-  void changeGains(char *fname);// Replace gains for  initialized channels
-  void changeMask(char *fname);// Replace stat/fail mask for initialized channels 
-  const EEmcDbCrate * getFiber(int icr);
-  void  setFiberOff(int icr);
-  const  int getNFiber(){return nFiber;}
-  const  EEmcDbItem* getByIndex(int ikey); ///< returns full DB info for one pixel
-  void exportAscii(char *fname="eemcDbDump.dat") const; 
-  void print() {exportAscii();}
-
-  const  EEmcDbItem*  getByCrate(int crateID, int channel); // full DB info, crateID counts from 1, channel from 0  
-
-  const  EEmcDbItem*  getByStrip0(int isec, int iuv, int istrip);  //ranges: isec=0-11, iuv=0,1 ,istrip=0-287; fast method
-
-  const  EEmcDbItem*  getByStrip(int sec, char uv, int strip) //ranges: sec=1-12, uv=U,V ,strip=1-288; fast method
-    {return getByStrip0(sec-1,uv-'U',strip-1);}
-
-  const EEmcDbItem* getTile(int sec,char sub, int eta, char type); //ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
-
-  const EEmcDbItem* getT(int sec, char sub, int eta){return getTile(sec,sub,eta,'T');}
-
-  const EEmcDbItem* getP(int sec, char sub, int eta){return getTile(sec,sub,eta,'P');}
-  const EEmcDbItem* getQ(int sec, char sub, int eta){return getTile(sec,sub,eta,'Q');}
-  const EEmcDbItem* getR(int sec, char sub, int eta){return getTile(sec,sub,eta,'R');}
-  const EEmcDbItem* getU(int sec, int strip){return getStrip(sec,'U',strip);}
-  const EEmcDbItem* getV(int sec, int strip){return getStrip(sec,'V',strip);}
-  const EEmcDbItem* StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub);
-
-  //
-  // Methods to acces DB info for T=tower, P=preshower-1, Q=preshower-2,
-  // R=postshower, U=SMD-U strip, V=SMD-V strip
-  //
-
-  void setTimeStampDay( int ); ///< to fix  time stamp for all events, default =not fixed 
-
-  void setPreferredFlavor(const char *flavor, const char *tableNameMask); 
-  void setPreferedFlavor(const char *flavor, const char *tableNameMask){    
-     setPreferredFlavor( flavor, tableNameMask); // typo...
-  }
-
-  int getFirstSecID(){ return mfirstSecID;}
-  int getLastSecID(){ return mlastSecID;}
-  void setDBname(TString name){ dbName=name;}
-
-  int valid(){ return nFound;} // return # of valid BD records
-  unsigned int getTimeStampUnix(){return myTimeStampUnix;} ///< if zero then not fixed 
-
-  StEEmcDbMaker(const char *name="EEmcDbMaker");
-
-  virtual       ~StEEmcDbMaker();
-  virtual Int_t Init();
-  virtual Int_t  Make();
-  virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
-  
-  virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.31 2005/08/17 20:51:14 balewski Exp $ built "__DATE__" "__TIME__ ; 
-    return cvs;
-  }
-  
-  ClassDef(StEEmcDbMaker,0)   
-
- };
+    ClassDef(StEEmcDbMaker, 1)
+};
 
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.32  2009/02/04 20:33:06  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.31  2005/08/17 20:51:14  balewski
 // allow to mask fibers based on event content
 //

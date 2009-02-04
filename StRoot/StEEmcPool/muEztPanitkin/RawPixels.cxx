@@ -15,14 +15,14 @@
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
 
 #include "RawPixels.h"
 
 //-------------------------------------------
 //-------------------------------------------
-RawPixels::RawPixels(TObjArray*L,StEEmcDbMaker*dbx) {
+RawPixels::RawPixels(TObjArray*L,StEEmcDb*dbx) {
 
   // clear histo pointers and all other stuff 
   HList=L; assert(HList);

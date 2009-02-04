@@ -26,7 +26,7 @@ I explicitly write them this way.
 #include "TStyle.h"
 #include "tables/St_emcStatus_Table.h" 
 #include "tables/St_emcPed_Table.h" 
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 
 #include <iostream>
 #include <fstream>

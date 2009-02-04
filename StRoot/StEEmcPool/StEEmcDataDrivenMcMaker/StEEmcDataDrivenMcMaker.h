@@ -19,7 +19,7 @@ class TH2F;
 class TTree;
 
 // STAR
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuEmcHit;
 class StEEmcSmdResponse;
 class StMuEmcUtil;
@@ -80,7 +80,7 @@ private:
   TString mLibraryFile;
   TString mLogFileName;
   TFile* mLogFile;
-  StEEmcDbMaker* mEEmcDb;
+  StEEmcDb* mEEmcDb;
   StMuEmcHit* mStrips[12][2][288]; // [sector][plane][strip]
   StMcEvent* mMcEvent;
   StMuEmcUtil* mMuEmcUtil;

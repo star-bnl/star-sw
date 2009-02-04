@@ -16,10 +16,11 @@
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 #include "StMuDSTMaker/COMMON/StMuTriggerIdCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEmcTowerData.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 #include "StDbManager.hh" // D.Staszak
 #include "StDbConfigNode.hh"
@@ -30,7 +31,7 @@ StBemcStatusMaker::StBemcStatusMaker(StMuDstMaker* maker)
   mOutputDirectory = "/tmp";
   mOutputFilePrefix = "junk";
   mOutputFile = NULL;
-  eeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
+  eeDb = 0;
   if(eeDb==0) {
     cout << "EEmcDbMaker not in chain.  Add it." << endl;
 //    assert(eeDb);
@@ -38,6 +39,7 @@ StBemcStatusMaker::StBemcStatusMaker(StMuDstMaker* maker)
 }
 
 Int_t StBemcStatusMaker::Init() {
+  eeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   // create the output file
   string s = mOutputDirectory + "/" + mOutputFilePrefix + "cal.minirun.root";
   mOutputFile = new TFile(s.c_str(),"RECREATE");

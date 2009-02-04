@@ -16,8 +16,8 @@
 
 #include "StEEmcSimulatorMaker/StEEmcSimulatorMaker.h"
 #include "StEEmcMixerMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h" 
 
 static const TString eemcDetname[] = { "etow", "eprs", "esmdu", "esmdv" };
@@ -55,7 +55,7 @@ StEEmcMixerMaker::~StEEmcMixerMaker() { }
 //_____________________________________________________________________________
 Int_t StEEmcMixerMaker::Init()
 {
-  mEEDb=(StEEmcDbMaker*)GetMaker("eemcDb");
+  mEEdb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert( mEEDb);
 
   m_hit_1 =  new TH1F("old_hit","old_hit",100,0.,30.);
@@ -712,8 +712,11 @@ void StEEmcMixerMaker::printHits(StEvent *event)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.2 2005/06/04 23:40:39 balewski Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.3 2009/02/04 20:33:18 ogrebeny Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.3  2009/02/04 20:33:18  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.2  2005/06/04 23:40:39  balewski
 // temporary disabled - it is Saturde evening - Jan
 //

@@ -1,11 +1,11 @@
 class StChain;
 class StMuEmcCollection;
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 class TChain;
 
-StEEmcDbMaker  *myDb;
+StEEmcDb  *myDb;
 StMuDstMaker* muMk;
 StChain *chain=0;
 
@@ -23,8 +23,8 @@ int rdMu2soloPi0(
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");  
+  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEsoloPi0");  
 
   gROOT->Macro("LoadLogger.C");
@@ -41,8 +41,8 @@ int rdMu2soloPi0(
 
   St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
 
-  myDb=new StEEmcDbMaker("eemcDb");
-  // myDb->setSectors(5,8);
+  new StEEmcDbMaker("eemcDb");
+  // ->setSectors(5,8);
 
   myMk3=new StEEsoloPi0Maker("soloPi0","MuDst");
   TObjArray  HList;

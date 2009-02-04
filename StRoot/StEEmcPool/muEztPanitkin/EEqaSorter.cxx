@@ -1,4 +1,4 @@
-// $Id: EEqaSorter.cxx,v 1.6 2009/01/24 03:47:43 ogrebeny Exp $
+// $Id: EEqaSorter.cxx,v 1.7 2009/02/04 20:33:26 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -27,7 +27,7 @@ ClassImp(EEqaSorter)
 
 //-------------------------------------------
 //-------------------------------------------
- EEqaSorter:: EEqaSorter(TObjArray*L,StEEmcDbMaker*dbx) {
+ EEqaSorter:: EEqaSorter(TObjArray*L,StEEmcDb*dbx) {
   // printf("\n\n  EEqaSorter:: EEqaSorter() \n\n");
   HList=L; assert(HList);
   eeDb=dbx;
@@ -447,6 +447,9 @@ EEqaSorter::spy( int runNo, int eveId){
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.7  2009/02/04 20:33:26  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.6  2009/01/24 03:47:43  ogrebeny
 // Fuxed bug - can see ETOW data now
 //

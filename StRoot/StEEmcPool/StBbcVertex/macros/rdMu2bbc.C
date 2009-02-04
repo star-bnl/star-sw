@@ -2,11 +2,9 @@
 class StChain;
 class StMuEmcCollection;
 
-class StEEmcDbMaker;
 class StMuDstMaker;
 class TChain;
 
-StEEmcDbMaker  *myDb;
 StMuDstMaker* muMk;
 StChain *chain=0;
 

@@ -1,4 +1,4 @@
-// $Id: StECalEnergyIter.h,v 1.6 2005/06/08 18:53:18 balewski Exp $
+// $Id: StECalEnergyIter.h,v 1.7 2009/02/04 20:33:16 ogrebeny Exp $
 
 #ifndef STAR_StECalEnergyIter
 #define STAR_StECalEnergyIter
@@ -16,12 +16,12 @@
 
 
 class StMuEmcCollection;
-class StEEmcDbMaker;
+class StEEmcDb;
 
 class StECalEnergyIter {
  private:
   StMuEmcCollection *mEmCol;
-  StEEmcDbMaker *mEEdb;
+  StEEmcDb *mEEdb;
   int mdetector;
   int mNhits;
   int mIhits;
@@ -33,7 +33,7 @@ class StECalEnergyIter {
   // Protected method if any
 
  public: 
-  StECalEnergyIter(StMuEmcCollection *, int, StEEmcDbMaker *, bool=true);
+  StECalEnergyIter(StMuEmcCollection *, int, StEEmcDb *db, bool=true);
   bool next(float &e, int &adc, int &adclessped, int &sec, int &eta, 
 	    int &phi, char &cdet);
   inline bool operator()(float &e, int &adc, int &adclessped, int &sec, 
@@ -43,7 +43,7 @@ class StECalEnergyIter {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StECalEnergyIter.h,v 1.6 2005/06/08 18:53:18 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StECalEnergyIter.h,v 1.7 2009/02/04 20:33:16 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 

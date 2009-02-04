@@ -4,7 +4,7 @@ class StChain;
 class StMuEmcCollection;
 
 class St_db_Maker;
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 class StEventMaker; 
 
@@ -13,7 +13,7 @@ class StEEmcClusterMaker;
 
 StChain        *mChain        = 0;
 St_db_Maker    *mStarDatabase = 0;
-StEEmcDbMaker  *mEEmcDatabase = 0;
+StEEmcDb       *mEEmcDatabase = 0;
 StMuDstMaker   *mMuDstMaker   = 0;
 StEventMaker   *mStEventMaker = 0; 
 
@@ -72,7 +72,7 @@ void runStEEmcPointTreeMaker( Int_t nevents = 500,
 #endif
 
   //-- Initialize EEMC database --
-  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
+  new StEEmcDbMaker("eemcDb");
   std::cout <<  "mEEmcDatabase=" << mEEmcDatabase << std::endl;
   gMessMgr -> SwitchOff("D");
   gMessMgr -> SwitchOn("I");

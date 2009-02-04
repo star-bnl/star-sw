@@ -11,7 +11,7 @@
 #include "StEEmcTower.h"
 #include "StEEmcStrip.h"
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 class StEventMaker;
 
@@ -129,7 +129,7 @@ class StEEmcA2EMaker : public StMaker {
   TString mInputName;
   Int_t mInputType;
 
-  StEEmcDbMaker *mDbMaker;
+  StEEmcDb      *mDbMaker;
   StMuDstMaker  *mMuDstMaker;
   StEventMaker  *mEventMaker;
 

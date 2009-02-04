@@ -1,4 +1,4 @@
-// $Id: EzEEsmdCal.cxx,v 1.10 2004/10/08 14:34:47 balewski Exp $
+// $Id: EzEEsmdCal.cxx,v 1.11 2009/02/04 20:33:22 ogrebeny Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -16,14 +16,14 @@
 #include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 #ifdef StRootFREE
   #include "EEmcDb/EEmcDb.h"
 #else
-  #include "StEEmcDbMaker/StEEmcDbMaker.h"
+  #include "StEEmcUtil/database/StEEmcDb.h"
 #endif
 
 

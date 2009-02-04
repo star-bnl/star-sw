@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEtowerExampleMaker.cxx,v 1.2 2004/10/21 13:31:28 balewski Exp $
+// $Id: StEEtowerExampleMaker.cxx,v 1.3 2009/02/04 20:33:22 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -13,8 +13,8 @@
 
 #include <StMessMgr.h>
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
 
 
 ClassImp(StEEtowerExampleMaker)
@@ -36,7 +36,7 @@ StEEtowerExampleMaker::~StEEtowerExampleMaker(){
 //________________________________________________
 //________________________________________________
 Int_t StEEtowerExampleMaker::Init(){
-  eeDb=(EEDB*)GetMaker("eemcDb");
+  eeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   EEtower::init();
   return StMaker::Init();
 }
@@ -109,6 +109,9 @@ Int_t StEEtowerExampleMaker::unpackMuDst(){
 
 
 // $Log: StEEtowerExampleMaker.cxx,v $
+// Revision 1.3  2009/02/04 20:33:22  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.2  2004/10/21 13:31:28  balewski
 // to match new name of emcCollection in muDst
 //

@@ -13,7 +13,7 @@
 
 class StChain;
 class St_db_Maker;
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 class StEEmcA2EMaker;
 class StEEmcClusterMaker;
@@ -28,7 +28,7 @@ class StSpinDbMaker;
 //--
 StChain            *mChain        = 0;
 St_db_Maker        *mStarDatabase = 0;
-StEEmcDbMaker      *mEEmcDatabase = 0;
+StEEmcDb           *mEEmcDatabase = 0;
 StMuDstMaker       *mMuDstMaker   = 0;
 StEEmcA2EMaker     *mEEanalysis   = 0;
 StEEmcClusterMaker *mEEclusters   = 0;
@@ -99,8 +99,8 @@ void runEEmcPi0Analysis( Int_t nevents = -1,
   //--
   //-- Initialize EEMC database
   //--
-  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
-  //mEEmcDatabase -> setSectors(1,7); 
+  new StEEmcDbMaker("eemcDb");
+  // -> setSectors(1,7); 
   gMessMgr -> SwitchOff("D");
   gMessMgr -> SwitchOn("I");
 
@@ -348,7 +348,8 @@ void runEEmcPi0Analysis( Int_t nevents = -1,
   //-- For debugging purposes, it's often useful to print out the 
   //-- database 
   //--
-  mEEmcDatabase->exportAscii("dbdump.dat"); 
+  mEEmcDatabase = (StEEmcDb*)mChain->GetDataSet("StEEmcDb");
+  if (mEEmcDatabase) mEEmcDatabase->exportAscii("dbdump.dat"); 
 
   //--
   //-- Calls the ::Finish() method on all makers
@@ -397,8 +398,8 @@ void LoadLibs()
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcSimulatorMaker");
   
 #ifdef NEW

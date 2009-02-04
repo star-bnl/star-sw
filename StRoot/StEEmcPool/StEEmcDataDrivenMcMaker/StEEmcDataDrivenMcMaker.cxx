@@ -22,8 +22,8 @@
 #include "StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 #include "StMcEvent/StMcEventTypes.hh"
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StEEmcUtil/StEEmcSmd/EEmcSmdGeom.h"
 #include "StEEmcSimulatorMaker/StEEmcFastMaker.h"
@@ -122,7 +122,7 @@ int StEEmcDataDrivenMcMaker::Init()
   assert(mA2E);
 
   // Load pedestals from database
-  mEEmcDb = (StEEmcDbMaker*)GetMakerInheritsFrom("StEEmcDbMaker");
+  mEEmcDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(mEEmcDb);
 
   // Clear ped & gain arrays

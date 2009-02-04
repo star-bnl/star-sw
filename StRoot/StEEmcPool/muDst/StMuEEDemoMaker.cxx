@@ -1,6 +1,6 @@
 // *-- Author : Victor Perevoztchikov
 // 
-// $Id: StMuEEDemoMaker.cxx,v 1.8 2004/10/21 13:31:40 balewski Exp $
+// $Id: StMuEEDemoMaker.cxx,v 1.9 2009/02/04 20:33:26 ogrebeny Exp $
 
 #include "StMuEEDemoMaker.h"
 
@@ -15,8 +15,8 @@
 #include "StEEmcUtil/StEEmcSmd/StEEmcSmdGeom.h"
 
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
 ClassImp(StMuEEDemoMaker)
@@ -27,12 +27,6 @@ StMuEEDemoMaker::StMuEEDemoMaker(const char* self ,const char* muDstMakerName) :
   geomTw= new EEmcGeomSimple(); // tower geomtry
   geomSmd =  StEEmcSmdGeom::instance(); //strip geometry, do NOT call new StEEmcSmdGeom()
 
-  // connect to eemcDB
-  eeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
-  if(eeDb==0) {
-    printf("eemcDB must be in the chain, fix it or drop %s-maker, JB\n",GetName());
-    assert(eeDb); // eemcDB must be in the chain, fix it
-  }
 }
 
 
@@ -44,6 +38,13 @@ StMuEEDemoMaker::~StMuEEDemoMaker(){
 //_____________________________________________________________________________
 /// Init - is a first method the top level StChain calls to initialize all its makers 
 Int_t StMuEEDemoMaker::Init(){
+  // connect to eemcDB
+  eeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
+  if(eeDb==0) {
+    printf("eemcDB must be in the chain, fix it or drop %s-maker, JB\n",GetName());
+    assert(eeDb); // eemcDB must be in the chain, fix it
+  }
+
   // Create tables
   // Create Histograms    
    return StMaker::Init();
@@ -184,6 +185,9 @@ Int_t StMuEEDemoMaker::Make(){
 
 
 // $Log: StMuEEDemoMaker.cxx,v $
+// Revision 1.9  2009/02/04 20:33:26  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.8  2004/10/21 13:31:40  balewski
 // to match new name of emcCollection in muDst
 //

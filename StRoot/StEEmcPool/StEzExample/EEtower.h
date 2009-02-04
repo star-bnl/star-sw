@@ -3,7 +3,7 @@
 #ifndef EEtower_h
 #define EEtower_h
 /*********************************************************************
- * $Id: EEtower.h,v 1.2 2007/07/12 19:27:19 fisyak Exp $
+ * $Id: EEtower.h,v 1.3 2009/02/04 20:33:21 ogrebeny Exp $
  *********************************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
@@ -23,8 +23,8 @@ class EEmcDbItem;
   class EEmcDb;
   typedef EEmcDb EEDB;
 #else
-  class StEEmcDbMaker;
-  typedef StEEmcDbMaker EEDB;
+  class StEEmcDb;
+  typedef StEEmcDb EEDB;
 #endif
 
 
@@ -73,6 +73,9 @@ class EEtower {
 
 /*****************************************************************
  * $Log: EEtower.h,v $
+ * Revision 1.3  2009/02/04 20:33:21  ogrebeny
+ * Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+ *
  * Revision 1.2  2007/07/12 19:27:19  fisyak
  * Add includes for TMath for ROOT 5.16
  *

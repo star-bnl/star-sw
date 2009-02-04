@@ -7,7 +7,7 @@ of two StEvent objects (The second is converted from a MuDst) and merges
 the EEMC hits of the second event into the first one. Before doing that, 
 it erases all the clusters and points if they exisit, so cluster finder and 
 point maker should be run again. 
-  The maker has full conectivity to the EEMC database through StEEmcDbMaker, 
+  The maker has full conectivity to the EEMC database through StEEmcDb, 
 so it will embed hits only if the corresponding channel is active in the real 
 data. It also has the feature of embed the global and primary tracks 
 of the second StEvent into the first but THIS IS NOT A TPC EMBED. This feature
@@ -32,7 +32,7 @@ can be turned off if desired.
 class StEvent;
 class StEmcRawHit;
 class StMuEmcUtil;
-class StEEmcDbMaker;
+class StEEmcDb;
                                                       
 class StEEmcMixerMaker : public StMaker 
 {
@@ -41,7 +41,7 @@ class StEEmcMixerMaker : public StMaker
     StEvent       *mEvent2;
 
     StMuEmcUtil   *mMuUtil;
-    StEEmcDbMaker *mEEDb;
+    StEEmcDb      *mEEDb;
 
     Int_t         mStatus[NEEMCDETS][MAXCHANNELS];
     Float_t       mPed[NEEMCDETS][MAXCHANNELS];
@@ -103,7 +103,7 @@ class StEEmcMixerMaker : public StMaker
     void          setAllMinusPed(Bool_t a)   { 
                   for(Int_t i=0; i<NEEMCDETS; i++) mMinusPed[i] = a; } 
     
-    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcMixerMaker.h,v 1.1.1.1 2005/05/31 18:53:25 wzhang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcMixerMaker.h,v 1.2 2009/02/04 20:33:18 ogrebeny Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEEmcMixerMaker,0) 
 };
@@ -111,8 +111,11 @@ class StEEmcMixerMaker : public StMaker
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.h,v 1.1.1.1 2005/05/31 18:53:25 wzhang Exp $
+// $Id: StEEmcMixerMaker.h,v 1.2 2009/02/04 20:33:18 ogrebeny Exp $
 // $Log: StEEmcMixerMaker.h,v $
+// Revision 1.2  2009/02/04 20:33:18  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.1.1.1  2005/05/31 18:53:25  wzhang
 // First version
 //

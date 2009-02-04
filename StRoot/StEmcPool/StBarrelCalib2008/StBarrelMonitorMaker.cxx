@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StBarrelMonitorMaker.cxx,v 1.1 2008/11/24 23:06:35 balewski Exp $
+// $Id: StBarrelMonitorMaker.cxx,v 1.2 2009/02/04 20:33:32 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -23,7 +23,7 @@
 
 #include "StDetectorDbMaker/St_tpcGasC.h"
 #include "St_db_Maker/St_db_Maker.h"
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 
 
 #include "StEventTypes.h"
@@ -381,6 +381,9 @@ StBarrelMonitorMaker::populateBprsEveA(){
 
 //---------------------------------------------------
 // $Log: StBarrelMonitorMaker.cxx,v $
+// Revision 1.2  2009/02/04 20:33:32  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.1  2008/11/24 23:06:35  balewski
 // start
 //

@@ -43,14 +43,14 @@
 
 //Endcap
 
-#include "StEEmcDbMaker/cstructs/eemcConstDB.hh"
+#include "StEEmcUtil/database/cstructs/eemcConstDB.hh"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #endif
 
 //new 
 #include "StAdcPedHistoMaker.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -88,7 +88,7 @@ StAdcPedHistoMaker::~StAdcPedHistoMaker()
 
 Int_t 
 StAdcPedHistoMaker::Init() {
-  mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
+  mEeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(mEeDb); // eemcDB must be in the chain, fix it
   return kStOk;
 }

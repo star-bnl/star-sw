@@ -50,14 +50,10 @@ void minesweeper( int    nEve     = 10,
        dbFlavor != "none" ) {
 
     // Database Makers
-    StEEmcDbMaker  *myMk = new StEEmcDbMaker("eemcDb");  
     St_db_Maker    *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
+    StEEmcDbMaker  *myMk = new StEEmcDbMaker("eemcDb");  
     // Force a timestamp here, so as not to run afoul of an assert
-    myMk -> setTimeStampDay(20030516);
-    // Only look at the bottom (aka "first") 1/3 of the endcap
-    myMk -> setSectors(5,8); 
-    // Setup default flavor
-    myMk -> setPreferedFlavor( dbFlavor, "eemcPMTcal" ); 
+    dbMk -> setTimeStampDay(20030516);
  
   }
 
@@ -74,6 +70,11 @@ void minesweeper( int    nEve     = 10,
 
   // Initialize the chain
   chain->Init();
+  eemcDb = (StEEmcDb*)chain->GetDataSet("StEEmcDb");
+    // Only look at the bottom (aka "first") 1/3 of the endcap
+    eemcDb -> setSectors(5,8); 
+    // Setup default flavor
+    eemcDb -> setPreferedFlavor( dbFlavor, "eemcPMTcal" ); 
   chain->ls(3);
 
   int eventCounter=0;

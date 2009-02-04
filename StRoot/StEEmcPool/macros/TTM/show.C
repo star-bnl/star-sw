@@ -101,13 +101,11 @@ show
   // now we add Makers to the chain...  some of that is black magic :) 
   muDstMk  = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles);       // muDST main chain
   StMuDbReader  *db       = StMuDbReader::instance();              // need the database
-  StEEmcDbMaker *eemcDbMk =new StEEmcDbMaker("eemcDb");                     // need EEMC database  
   St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb");   // need another db(?) 
+  new StEEmcDbMaker("eemcDb");                     // need EEMC database  
 
   // now comment in/out/change the below if you want it your way
-  eemcDbMk->setSectors(1,12);            // request EEMC DB for sectors you need (dafault:1-12)
-  eemcDbMk->setTimeStampDay(20040331);   // format: yyyymmdd
-  eemcDbMk->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor
+  dbMk->setTimeStampDay(20040331);   // format: yyyymmdd
 
   // finally after so many lines we arrive at the good stuff
 
@@ -117,6 +115,11 @@ show
   StMuDebug::setLevel(0);
 
   chain->Init();
+
+  StEEmcDb *eemcDb = (StEEmcDb*)chain->GetDataSet("StEEmcDb");
+  eemcDb->setSectors(1,12);            // request EEMC DB for sectors you need (dafault:1-12)
+  eemcDb->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor
+
   chain->ls(3);
 
   //---------------------------------------------------

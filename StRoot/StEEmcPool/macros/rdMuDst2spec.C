@@ -1,9 +1,9 @@
-#include <StRoot/StEEmcDbMaker/EEmcDbItem.h>
+#include <StEEmcUtil/database/EEmcDbItem.h>
 class StChain;
 class StMuEmcCollection;
 class   EEmcDbItem;
-class StEEmcDbMaker;
-StEEmcDbMaker  *myDb;
+class StEEmcDb;
+StEEmcDb  *myDb;
 StChain *chain=0;
 TH1F * hx[8];
 TH1F * hr[8];
@@ -27,8 +27,8 @@ int rdMuDst2spec(
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");  
+  gSystem->Load("StEEmcDbMaker");
 
 
 
@@ -39,7 +39,7 @@ int rdMuDst2spec(
   muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
   
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
-  myDb=new StEEmcDbMaker("eemcDb");
+  new StEEmcDbMaker("eemcDb");
 
   // myMk1->setSectors(1,8);
   //  myDb->setTimeStampDay(20040320);  // format: yyyymmdd
@@ -48,6 +48,8 @@ int rdMuDst2spec(
 
   chain->Init();
   chain->ls(3);
+  myDb = (StEEmcDb*)chain->GetDataSet("StEEmcDb");
+
   exit;
   int eventCounter=0;
   int stat=0;

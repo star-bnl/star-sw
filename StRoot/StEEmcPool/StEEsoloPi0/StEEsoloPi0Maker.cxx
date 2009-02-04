@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.12 2007/10/19 23:18:42 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.13 2009/02/04 20:33:21 ogrebeny Exp $
 
 #include <TFile.h>
 
@@ -19,8 +19,8 @@
 #include "StEvent/StTriggerId.h"
 
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
 
 #include <StMessMgr.h>
 
@@ -59,7 +59,7 @@ Int_t StEEsoloPi0Maker::InitRun(int runNo){
 //________________________________________________
 //________________________________________________
 Int_t StEEsoloPi0Maker::Init(){
-  eeDb=(EEDB*)GetMaker("eemcDb");
+  eeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   EEsoloPi0::init();
   LOG_INFO << "has MCflag="<< MCflag<<endm;
   return StMaker::Init();
@@ -173,7 +173,7 @@ bool StEEsoloPi0Maker::unpackMuEemc(){
     assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
 
     //tmp, for fasted analysis use only hits from sectors init in DB
-    if(sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+    if(sec<eeDb->getFirstSector() || sec>eeDb->getLastSector()) continue;
  
     const EEmcDbItem *x=eeDb->getTile(sec,'A'+sub-1,eta,'T');
     assert(x); // it should never happened for muDst
@@ -247,6 +247,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.13  2009/02/04 20:33:21  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.12  2007/10/19 23:18:42  balewski
 // 2008 cleanup, now works only w/ regular muDst
 //

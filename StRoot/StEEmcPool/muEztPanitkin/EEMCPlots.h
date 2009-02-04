@@ -6,7 +6,7 @@ class TPad;
 class TObjArray;
 
 class EEqaSorter;
-class EEmcDb;
+class StEEmcDb;
 
 class EEMCPlots {
 
@@ -37,7 +37,7 @@ public:
 
 private:
     EEqaSorter *eeqa;
-    EEmcDb *eeDb;
+    StEEmcDb *eeDb;
 };
 
 #endif
