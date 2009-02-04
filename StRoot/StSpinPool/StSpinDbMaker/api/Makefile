@@ -12,7 +12,8 @@ CC:=gcc
 CXX:=g++
 
 CXXFLAGS=-g  -fPIC -Wall -I$(STDB_API) -I$(CSTRUCTS) $(MYSQLINC) -DLINUX -D__STDB_STANDALONE__
-LDLIBS  = $(STDB_API)/StDbLib.a  $(MYSQLLIB)
+CXXFLAGS += $(shell xml2-config --cflags)
+LDLIBS  = $(STDB_API)/StDbLib.a  $(MYSQLLIB) $(shell xml2-config --libs)
 
 # use *.C extension for cons to ignore
 SRCS =$(wildcard spin*.C Spin*.C )
