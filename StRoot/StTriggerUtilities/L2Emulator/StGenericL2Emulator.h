@@ -1,4 +1,4 @@
-// $Id: StGenericL2Emulator.h,v 1.12 2009/01/26 15:09:07 fisyak Exp $
+// $Id: StGenericL2Emulator.h,v 1.13 2009/02/04 20:25:38 rfatemi Exp $
 
 /* \class  StGenericL2Emulator
 \author Jan Balewski
@@ -13,7 +13,7 @@ Interfaces L2 algos to the STAR ofl software
 #include <vector>
 
 class  StTriggerSimuMaker;
-class  StEEmcDbMaker;
+class  StEEmcDb;
 class  StEmcGeom;
 class  StEmcDecoder;
 class  L2EmcDb;
@@ -32,7 +32,7 @@ class StGenericL2Emulator  {
   void doBanksFromMuDst();
 
   // needed to regenerate raw data banks
-  StEEmcDbMaker *mDbE;
+  StEEmcDb      *mDbE;
   StEmcGeom     *mGeomB;
   StEmcDecoder  *mMappB; 
   // StTriggerSimuMaker *mHeadMaker;
@@ -95,6 +95,9 @@ class StGenericL2Emulator  {
 #endif
 
 // $Log: StGenericL2Emulator.h,v $
+// Revision 1.13  2009/02/04 20:25:38  rfatemi
+// Update class StEemcDb
+//
 // Revision 1.12  2009/01/26 15:09:07  fisyak
 // Add missing (in ROOT 5.22) includes
 //
