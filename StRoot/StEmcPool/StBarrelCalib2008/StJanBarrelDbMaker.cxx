@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StJanBarrelDbMaker.cxx,v 1.1 2008/11/24 23:06:37 balewski Exp $
+// $Id: StJanBarrelDbMaker.cxx,v 1.2 2009/02/04 20:33:32 ogrebeny Exp $
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
@@ -10,7 +10,7 @@
 #include "StEmcRawMaker/defines.h"
 #include "StEmcUtil/database/StBemcTables.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 
 ClassImp(StJanBarrelDbMaker)
 
@@ -321,6 +321,9 @@ void  StJanBarrelDbMaker::initBprsGeometry(){
 }
 
 // $Log: StJanBarrelDbMaker.cxx,v $
+// Revision 1.2  2009/02/04 20:33:32  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.1  2008/11/24 23:06:37  balewski
 // start
 //

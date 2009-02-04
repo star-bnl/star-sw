@@ -17,7 +17,7 @@
 
 class StChain;
 class St_db_Maker;
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 class StEEmcA2EMaker; 
 class StEEmcTimingMaker;
@@ -27,7 +27,7 @@ class StEEmcTimingMaker;
 //--
 StChain        *mChain        = 0;
 St_db_Maker    *mStarDatabase = 0;
-StEEmcDbMaker  *mEEmcDatabase = 0;
+StEEmcDb       *mEEmcDatabase = 0;
 StMuDstMaker   *mMuDstMaker   = 0;
 StEEmcA2EMaker *mEEanalysis   = 0;
 
@@ -92,8 +92,8 @@ void LoadLibs()
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcSimulatorMaker");
   
   gSystem->Load("StEEmcA2EMaker");

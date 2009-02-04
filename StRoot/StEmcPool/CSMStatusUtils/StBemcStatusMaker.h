@@ -3,7 +3,7 @@
 
 #include "StMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+class StEEmcDb;
 
 #include "TFile.h"
 #include "TTree.h"
@@ -42,7 +42,7 @@ class StBemcStatusMaker : public StMaker {
   Int_t mTheTime;
   Bool_t mFirstEvent;
   StMuDstMaker* mMuDstMaker;//!
-  StEEmcDbMaker* eeDb;
+  StEEmcDb* eeDb;
 
   ClassDef(StBemcStatusMaker,0)
 };

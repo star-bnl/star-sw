@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.18 2004/06/03 21:02:29 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.19 2009/02/04 20:33:24 ogrebeny Exp $
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
 
@@ -32,7 +32,7 @@ class StEventSummary;
 class StMuTriggerIdCollection; 
 
 class StMuDstMaker;
-class StEEmcDbMaker;
+class StEEmcDb;
 
 class EEmcTower;
 
@@ -59,10 +59,8 @@ public:
   /// the TTM constructor
   /// \param self     this maker name (const char*)
   /// \param mumaker a pointer to a StMuDstMaker 
-  /// \param dbmaker a pointer to a StEEmcDbMaker 
   EEmcTTMMaker(const char          *self    = "ttmmk", 
-	       class StMuDstMaker  *mumaker =  NULL,
-	       class StEEmcDbMaker *dbmaker =  NULL);
+	       class StMuDstMaker  *mumaker =  NULL);
 
   /// the destructor
   virtual       ~EEmcTTMMaker();
@@ -180,7 +178,7 @@ private:
   TH1F  *hVertex[3]  ;/**<- vertex               */
 
   StMuDstMaker   *mMuDstMaker; // toplevel muDST maker
-  StEEmcDbMaker  *mEEmcDb;     // EEMC database maker
+  StEEmcDb  *mEEmcDb;     // EEMC database maker
   //
   EEmcGeomSimple& mGeom;       // tower geometry
 
@@ -210,7 +208,7 @@ private:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.18 2004/06/03 21:02:29 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.19 2009/02/04 20:33:24 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -222,6 +220,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm);
 #endif
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.19  2009/02/04 20:33:24  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.18  2004/06/03 21:02:29  zolnie
 // fixed subtle bug: when e.g. dphi = +180.(tower center) - -180.0(track)
 //  the match would be rejected - in practice it never happen

@@ -4,15 +4,14 @@
 #include "StECalEnergyIter.h"
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEmcHit.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 #include "TMath.h"
 
 bool StECalEnergyIter::mIsSimu = false;
 
-StECalEnergyIter::StECalEnergyIter(StMuEmcCollection *emCol, int det,
-				   StEEmcDbMaker *eedb, bool flag) 
-  : mEmCol(emCol), mEEdb(eedb), mdetector(det), mIhits(0), mSuppBad(flag) {
+StECalEnergyIter::StECalEnergyIter(StMuEmcCollection *emCol, int det, StEEmcDb *db, bool flag) 
+  : mEmCol(emCol), mdetector(det), mIhits(0), mEEdb(db), mSuppBad(flag) {
 
   char cuv = 'U';
   switch (mdetector)

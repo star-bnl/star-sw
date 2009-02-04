@@ -51,8 +51,8 @@ ttmexample
   // now we add Makers to the chain...  some of that is black magic to me :) 
   muDstMaker = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles);  // muDST main chain
   StMuDbReader  *db          = StMuDbReader::instance();        // need the database
-  StEEmcDbMaker *eemcDbMaker = new StEEmcDbMaker("eemcDb");     // need EEMC database  
   St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb"); // need more db?
+  StEEmcDbMaker *eemcDbMaker = new StEEmcDbMaker("eemcDb");     // need EEMC database  
 
   // now comment in/out/change the below if you want it your way
   eemcDbMaker->setSectors(1,12);           // request sectors you need (default:1-12)

@@ -38,7 +38,6 @@ int rdMu2Ped(
   stDb->SetFlavor("sim","eemcPMTstat");
 
   myDb=new StEEmcDbMaker("eemcDb");
-  //myDb->setSectors(11,12);
   
   HList=new  TObjArray;
   StAdcPedHistoMaker* myMk3=new StAdcPedHistoMaker("myPanitkin",muMk);

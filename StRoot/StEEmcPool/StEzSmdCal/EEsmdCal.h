@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*******************************************************
- * $Id: EEsmdCal.h,v 1.13 2007/07/12 19:27:19 fisyak Exp $
+ * $Id: EEsmdCal.h,v 1.14 2009/02/04 20:33:22 ogrebeny Exp $
  *******************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -25,8 +25,8 @@ class EEmcSmdMap;
   class EEmcDb;
   typedef EEmcDb EEDB;
 #else
-  class StEEmcDbMaker;
-  typedef StEEmcDbMaker EEDB;
+  class StEEmcDb;
+  typedef StEEmcDb EEDB;
 #endif
 
 class EEsmdCal {
@@ -139,6 +139,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.14  2009/02/04 20:33:22  ogrebeny
+ * Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+ *
  * Revision 1.13  2007/07/12 19:27:19  fisyak
  * Add includes for TMath for ROOT 5.16
  *

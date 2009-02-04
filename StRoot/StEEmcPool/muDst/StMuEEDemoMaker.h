@@ -1,4 +1,4 @@
-// $Id: StMuEEDemoMaker.h,v 1.1 2003/08/27 22:56:30 balewski Exp $
+// $Id: StMuEEDemoMaker.h,v 1.2 2009/02/04 20:33:26 ogrebeny Exp $
 
 #ifndef STAR_StMuEEDemoMaker
 #define STAR_StMuEEDemoMaker
@@ -27,14 +27,14 @@
 class StMuDstMaker;
 class EEmcGeomSimple;
 class StEEmcSmdGeom;
-class StEEmcDbMaker;
+class StEEmcDb;
 
 class StMuEEDemoMaker : public StMaker {
  private:
   StMuDstMaker* mMuDstMaker;
   EEmcGeomSimple *geomTw;
   StEEmcSmdGeom  *geomSmd;
-  StEEmcDbMaker *eeDb;
+  StEEmcDb *eeDb;
 
  public: 
   StMuEEDemoMaker(const char *self="MuEEDemo", const char* muDstMakerName="muDstMaker");
@@ -44,7 +44,7 @@ class StMuEEDemoMaker : public StMaker {
   
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuEEDemoMaker.h,v 1.1 2003/08/27 22:56:30 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuEEDemoMaker.h,v 1.2 2009/02/04 20:33:26 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -55,6 +55,9 @@ class StMuEEDemoMaker : public StMaker {
 
 
 // $Log: StMuEEDemoMaker.h,v $
+// Revision 1.2  2009/02/04 20:33:26  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.1  2003/08/27 22:56:30  balewski
 // example of access to EEMC data+DB+geom from muDst
 //

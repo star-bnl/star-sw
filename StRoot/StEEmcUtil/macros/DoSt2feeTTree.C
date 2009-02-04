@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: DoSt2feeTTree.C,v 1.7 2006/08/15 21:41:39 jeromel Exp $
+// $Id: DoSt2feeTTree.C,v 1.8 2009/02/04 20:33:30 ogrebeny Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -229,7 +229,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
 
   // My Makers  2 
   St2eemcFeeRawMaker * myMk3=new St2eemcFeeRawMaker("St2feeTTree");
-  myMk3->setDb(myMk1);
+//  myMk3->setDb(myMk1);
   char *fileT="myOut.eeTree.root"; // output TTree
 
   // Output TTree

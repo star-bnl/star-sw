@@ -19,7 +19,7 @@ using namespace std;
 #include "tables/St_emcTriggerPed_Table.h"
 #include "tables/St_emcTriggerLUT_Table.h"
 
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 
 #include "StEmcUtil/database/StBemcTablesWriter.h"
 

@@ -1,6 +1,6 @@
 // \class  EEqaSorter
 // \author Jan Balewski, Hal Spinka
-// $Id: EEqaSorter.h,v 1.3 2009/01/23 00:14:50 ogrebeny Exp $
+// $Id: EEqaSorter.h,v 1.4 2009/02/04 20:33:26 ogrebeny Exp $
 
 #ifndef EEqaSorter_h
 #define EEqaSorter_h
@@ -15,7 +15,7 @@ class TFile;
 class EEqaSorterA;
 class EEqaSorterC;
 class EEdsmAna;
-class StEEmcDbMaker;
+class StEEmcDb;
 
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 class EztEmcRawData;
@@ -38,7 +38,7 @@ class EEqaSorter :public TObject{
   EEqaSorterA *sortA;
   EEqaSorterC *sortC;
   EEdsmAna *dsm;
-  StEEmcDbMaker *eeDb;
+  StEEmcDb *eeDb;
 
   TH1F * H1tot;
   TString pathInp, pathOut; 
@@ -57,7 +57,7 @@ class EEqaSorter :public TObject{
   int lastSpyRun;
 
  public:
-  EEqaSorter( TObjArray*L,StEEmcDbMaker*dbx);
+  EEqaSorter( TObjArray*L,StEEmcDb*dbx);
   void setPath(const char *x1, const char *x2) { pathInp=x1; pathOut=x2; }
   void initHisto(int nb=150, int mx=600);
   void initRun();
@@ -82,6 +82,9 @@ class EEqaSorter :public TObject{
 #endif
 
 // $Log: EEqaSorter.h,v $
+// Revision 1.4  2009/02/04 20:33:26  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.3  2009/01/23 00:14:50  ogrebeny
 // Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
 //

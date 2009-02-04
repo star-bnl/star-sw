@@ -4,12 +4,12 @@ class StChain;
 class StMuEmcCollection;
 
 class St_db_Maker;
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 
 StChain        *mChain        = 0;
 St_db_Maker    *mStarDatabase = 0;
-StEEmcDbMaker  *mEEmcDatabase = 0;
+StEEmcDb       *mEEmcDatabase = 0;
 StMuDstMaker   *mMuDstMaker   = 0;
 
 class StEEmcA2EMaker; 
@@ -68,7 +68,7 @@ void runEEmcPi0Maker( Int_t nevents = 5000,
 #endif
 
   //-- Initialize EEMC database --
-  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
+  new StEEmcDbMaker("eemcDb");
   gMessMgr -> SwitchOff("D");
   gMessMgr -> SwitchOn("I");
 
@@ -199,8 +199,8 @@ void LoadLibs()
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
 
   gSystem->Load("StEEmcBFC2005");
 

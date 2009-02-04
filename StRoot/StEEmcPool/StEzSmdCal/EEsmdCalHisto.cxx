@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.16 2005/08/09 18:46:31 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.17 2009/02/04 20:33:22 ogrebeny Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -11,12 +11,12 @@
 #include <TFile.h> 
 
 #include "EEsmdCal.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 #ifdef StRootFREE
   #include "EEmcDb/EEmcDb.h"
 #else
-  #include "StEEmcDbMaker/StEEmcDbMaker.h"
+  #include "StEEmcUtil/database/StEEmcDb.h"
 #endif
 
 //--------------------------------------------------

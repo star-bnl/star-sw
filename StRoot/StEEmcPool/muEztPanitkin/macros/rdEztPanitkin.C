@@ -42,8 +42,7 @@ int rdEztPanitkin( int trigID=0,//96294,
   St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
   stDb->SetFlavor("onlPed","eemcPMTped");
   
-  myDb=new StEEmcDbMaker("eemcDb");
-  //myDb->setSectors(11,12);
+  new StEEmcDbMaker("EEmcDbMaker");
   
   HList=new  TObjArray;
   myMk3=new MuEzPanitkinMaker("myPanitkin","MuDst");
@@ -101,7 +100,6 @@ int rdEztPanitkin( int trigID=0,//96294,
     printf("\n\n ====================%d  processing  ==============\n", eventCounter);
     
   }
-    myDb->print();
   printf("sorting done, nEve=%d of %d\n",nEve, nEntries);
   int t2=time(0);
   if(t1==t2) t2++;

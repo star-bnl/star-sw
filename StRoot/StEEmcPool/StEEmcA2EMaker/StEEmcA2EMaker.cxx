@@ -7,8 +7,8 @@
  * as input. 
  *
  * \author Jason C. Webb
- * $Date: 2007/03/30 20:06:44 $
- * $Revision: 1.3 $
+ * $Date: 2009/02/04 20:33:16 $
+ * $Revision: 1.4 $
  *
  */
 
@@ -21,8 +21,8 @@
 
 #include "StEventMaker/StEventMaker.h"
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 
 /// stevent stiff
@@ -166,7 +166,7 @@ Int_t StEEmcA2EMaker::Init()
 {
 
   /// Get pointer to our database maker
-  mDbMaker = (StEEmcDbMaker *)GetMaker(mDbName);
+  mDbMaker = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(mDbMaker);
 
   /// Get pointer to one of the three input makers

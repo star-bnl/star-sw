@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.19 2005/09/29 13:57:57 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.20 2009/02/04 20:33:22 ogrebeny Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -15,13 +15,13 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StEEmcUtil/StEEmcSmd/EEmcSmdGeom.h"
 #include "StEEmcUtil/EEmcSmdMap/EEmcSmdMap.h"
-#include "StEEmcDbMaker/cstructs/eemcConstDB.hh"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/cstructs/eemcConstDB.hh"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 #ifdef StRootFREE
   #include "EEmcDb/EEmcDb.h"
 #else
-  #include "StEEmcDbMaker/StEEmcDbMaker.h"
+  #include "StEEmcUtil/database/StEEmcDb.h"
 #endif
 
  

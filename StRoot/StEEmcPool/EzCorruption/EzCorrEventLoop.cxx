@@ -1,4 +1,4 @@
-// $Id: EzCorrEventLoop.cxx,v 1.3 2004/07/26 23:02:29 rfatemi Exp $
+// $Id: EzCorrEventLoop.cxx,v 1.4 2009/02/04 20:33:15 ogrebeny Exp $
 // modified by rfatemi 6-22-04 added barrel loop
  
 #include <assert.h>
@@ -576,7 +576,7 @@ void EzCorrEventLoop::printCorrupt(){
   } 
 
    /*!This is barrel Decoder Data
-      look at StRoot/StDaqLib/EMC/StEmcDecoder.h
+      look at StRoot/StEmcUtil/database/StEmcDecoder.h
       \param crate is the crate number(1-30)
       \param crate_sequency is the position of the tower inside the crate(0-159)
       \param TowerId is the software id for towers
@@ -628,6 +628,9 @@ void EzCorrEventLoop::printCorrupt(){
 
 /*****************************************************************
  * $Log: EzCorrEventLoop.cxx,v $
+ * Revision 1.4  2009/02/04 20:33:15  ogrebeny
+ * Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+ *
  * Revision 1.3  2004/07/26 23:02:29  rfatemi
  * Corruption update without comments
  *

@@ -1,4 +1,4 @@
-// $Id: EzEEtowerExample.cxx,v 1.1 2004/06/06 04:54:08 balewski Exp $
+// $Id: EzEEtowerExample.cxx,v 1.2 2009/02/04 20:33:21 ogrebeny Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -17,13 +17,13 @@
 #include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 
 #ifdef StRootFREE
   #include "EEmcDb/EEmcDb.h"
 #else
-  #include "StEEmcDbMaker/StEEmcDbMaker.h"
+  #include "StEEmcUtil/database/StEEmcDb.h"
 #endif
 
 

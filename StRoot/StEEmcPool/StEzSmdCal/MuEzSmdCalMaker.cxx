@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: MuEzSmdCalMaker.cxx,v 1.6 2007/08/21 13:10:04 balewski Exp $
+// $Id: MuEzSmdCalMaker.cxx,v 1.7 2009/02/04 20:33:22 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -20,8 +20,8 @@
 //tmp
 #include "StTriggerData2005.h" // tmp
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 
 ClassImp(MuEzSmdCalMaker)
 
@@ -76,7 +76,7 @@ Int_t
 MuEzSmdCalMaker::Init(){
 
   assert(HList);
-  eeDb=(StEEmcDbMaker*)GetMaker("eemcDb");
+  eeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(eeDb);  
   EEsmdCal::init();
   
@@ -523,6 +523,9 @@ MuEzSmdCalMaker::killTail( const  EEmcDbItem  *x, int iT) {
 
 //---------------------------------------------------
 // $Log: MuEzSmdCalMaker.cxx,v $
+// Revision 1.7  2009/02/04 20:33:22  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.6  2007/08/21 13:10:04  balewski
 // final, used in 2006 offline calibration by soScott
 //

@@ -1,6 +1,6 @@
 // *-- Author : Rene Fatemi
 // 
-// $Id: MuEzPanitkinMaker.cxx,v 1.4 2006/09/15 01:45:36 balewski Exp $
+// $Id: MuEzPanitkinMaker.cxx,v 1.5 2009/02/04 20:33:27 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -22,7 +22,7 @@
 #include "StTriggerData2005.h" // tmp
 
 #include "EEqaSorter.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
 
 #include "RawPixels.h"
 ClassImp(MuEzPanitkinMaker)
@@ -69,7 +69,7 @@ void MuEzPanitkinMaker::saveHisto(TString fname){
 Int_t MuEzPanitkinMaker::Init(){
 
   assert(HList);
-  StEEmcDbMaker * eeDb=(StEEmcDbMaker*)GetMaker("eemcDb");
+  StEEmcDb *eeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(eeDb);
 
   qaSort=new EEqaSorter(HList,eeDb);
@@ -188,6 +188,9 @@ Int_t MuEzPanitkinMaker::Make(){
 
 //---------------------------------------------------
 // $Log: MuEzPanitkinMaker.cxx,v $
+// Revision 1.5  2009/02/04 20:33:27  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.4  2006/09/15 01:45:36  balewski
 // add run# to trg-data unpaker
 //

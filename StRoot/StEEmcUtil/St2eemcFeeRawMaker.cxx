@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.14 2007/05/30 02:38:43 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.15 2009/02/04 20:33:28 ogrebeny Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -11,8 +11,8 @@
 
 #include "St2eemcFeeRawMaker.h"
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 #include "EEfeeRaw/EEfeeDataBlock.h"
 #include "EEfeeRaw/EEfeeRawEvent.h"
 #include "EEfeeRaw/EEmcEventHeader.h"
@@ -45,6 +45,7 @@ St2eemcFeeRawMaker::~St2eemcFeeRawMaker(){
 //__________________________________________________
 
 Int_t St2eemcFeeRawMaker::Init(){
+  meeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(moutTTree); // all should be initialized prior to use
   assert(meeDb);  // --||--
   assert(meveTT); // --||--
@@ -77,7 +78,7 @@ Int_t St2eemcFeeRawMaker::InitRun  (int runNumber){
   LOG_INFO<<Form("\n%s  accessing StEvent ID=%d\n",GetName(),mEvent->id())<<endm;
    LOG_INFO<<Form("StEvent time=%d, ID=%d, runID=%d\n",(int)mEvent->time(),(int)mEvent->id(),(int)mEvent->runId())<<endm;
 
-  mrunTT->setTimeStamp(meeDb->getTimeStampUnix());
+  mrunTT->setTimeStamp(this->GetDBTime().Convert());
   mrunTT->setProcessingTime(time(0));
   char text[200];
   sprintf(text," M-C event file, run=%d , created by %s",mEvent->runId(),GetName());
@@ -111,7 +112,7 @@ Int_t St2eemcFeeRawMaker::Make(){
 
   // ....... Access  DB lookup table
 
-  //  const  StEEmcDbMaker::NameXchanItem* index2chan=meeDb->getIndex2chan();
+  //  const  StEEmcDb::NameXchanItem* index2chan=meeDb->getIndex2chan();
 
   // ....... Initialize header of new TTree record ..........
   int  nDrop=0; //counts MC hits not assigned to crate/chan
@@ -199,6 +200,9 @@ Int_t St2eemcFeeRawMaker::Make(){
 
 
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.15  2009/02/04 20:33:28  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.14  2007/05/30 02:38:43  balewski
 // replace printf -->LOG_XXX
 //

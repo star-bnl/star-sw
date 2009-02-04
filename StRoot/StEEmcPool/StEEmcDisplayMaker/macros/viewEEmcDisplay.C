@@ -218,8 +218,8 @@ void Load()
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcSimulatorMaker");
 
   gSystem->Load("StEEmcA2EMaker");

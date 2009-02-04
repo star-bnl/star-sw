@@ -5,7 +5,7 @@
 
 #include "StMaker.h"
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 #if 0
@@ -40,7 +40,7 @@ class StAdcPedHistoMaker : public StMaker {
   void SetHList(TObjArray * x){HList=x;}
 
  private:
-  StEEmcDbMaker* mEeDb;
+  StEEmcDb* mEeDb;
   StMuDstMaker* mDstMaker;
   TH1F*  hPix[EEindexMax];
   bool pedSub;

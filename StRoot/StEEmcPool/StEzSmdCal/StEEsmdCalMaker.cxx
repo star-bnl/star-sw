@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsmdCalMaker.cxx,v 1.6 2005/03/11 15:44:25 balewski Exp $
+// $Id: StEEsmdCalMaker.cxx,v 1.7 2009/02/04 20:33:23 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -13,8 +13,8 @@
 
 #include <StMessMgr.h>
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
 
 
 ClassImp(StEEsmdCalMaker)
@@ -67,7 +67,7 @@ void StEEsmdCalMaker::SetSector(int sec){
 //________________________________________________
 //________________________________________________
 Int_t StEEsmdCalMaker::Init(){
-  eeDb=(EEDB*)GetMaker("eemcDb");
+  eeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   //printf("%s got eeDb=%p\n",GetName(),eeDb);
   EEsmdCal::init();
   printf("%s has MCflag=%d\n",GetName(),MCflag);
@@ -133,7 +133,7 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
     assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
 
     //tmp, for fasted analysis use only hits from sectors init in DB
-    if(sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+    if(sec<eeDb->getFirstSector() || sec>eeDb->getLastSector()) continue;
  
     const EEmcDbItem *x=eeDb->getTile(sec,'A'+sub-1,eta,'T');
     assert(x); // it should never happened for muDst
@@ -178,7 +178,7 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
     StMuEmcHit *hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
 
     //tmp, for fasted analysis use only hits from sectors init in DB
-    if(sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+    if(sec<eeDb->getFirstSector() || sec>eeDb->getLastSector()) continue;
  
     
     //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
@@ -230,7 +230,7 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
       assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
       
       //tmp, for fasted analysis use only hits from sectors init in DB
-      if(sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+      if(sec<eeDb->getFirstSector() || sec>eeDb->getLastSector()) continue;
       
       const EEmcDbItem *x=eeDb->getByStrip(sec,uv,strip);
       assert(x); // it should never happened for muDst
@@ -264,6 +264,9 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 
 
 // $Log: StEEsmdCalMaker.cxx,v $
+// Revision 1.7  2009/02/04 20:33:23  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.6  2005/03/11 15:44:25  balewski
 // works with muEzt, cucu200
 //

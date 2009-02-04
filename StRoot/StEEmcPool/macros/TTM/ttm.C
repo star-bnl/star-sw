@@ -32,6 +32,7 @@ ttm
   // * StEEmcDbMaker works _only_ for single run , so make sure that
   //   your *.lis containf files for one run only, otherwise it will crash 
   //   like Windoza
+// not true anymore - OG
   // 2. EEmcTTMMaker main "product" is a list of EEmcTTMatch'es which in turn 
   //   are EEmcTower plus a list of StMuTrack's that fullfill certain criteria. 
 { 
@@ -59,11 +60,9 @@ ttm
   // now we add Makers to the chain...  some of that is black magic to me :) 
   muDstMk = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles); // main chain
   StMuDbReader  *db       = StMuDbReader::instance();       // the database
-  StEEmcDbMaker *eemcDbMk = new StEEmcDbMaker("eemcDb");    // EEMC database 
   St_db_Maker   *dbMk     = new St_db_Maker("StarDb", "MySQL:StarDb"); // more?
+  StEEmcDbMaker *eemcDbMk = new StEEmcDbMaker("eemcDb");    // EEMC database 
 
-  // now comment in/out/change the below if you want it your way
-  eemcDbMk->setPreferedFlavor("onlped","eemcPMTped"); // alternative flavor 
 
   // finally after so many lines we arrive at the good stuff
   ttmMk = new  EEmcTTMMaker ("TTM",muDstMk,eemcDbMk);
@@ -82,6 +81,10 @@ ttm
   StMuDebug::setLevel(0);
   chain->Init();
   chain->ls(3);
+
+  // now comment in/out/change the below if you want it your way
+  StEEmcDb *eemcDb = (StEEmcDb*)chain->GetDataSet("StEEmcDb");
+  eemcDb->setPreferedFlavor("onlped","eemcPMTped"); // alternative flavor 
 
   //---------------------------------------------------
   int  stat = 0;

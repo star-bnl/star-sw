@@ -1,4 +1,4 @@
-//  $Id: StEmcAsciiDbMaker.h,v 1.1 2008/07/29 14:43:11 balewski Exp $ 
+//  $Id: StEmcAsciiDbMaker.h,v 1.2 2009/02/04 20:33:06 ogrebeny Exp $ 
 // export snapshot of E+B-EMC STAR DB in ASCII format
 //  \author Jan Balewski, IUCF, 2006 
 // Interface to online/L2jetAlgo/
@@ -9,7 +9,7 @@
 
 #include "StMaker.h"
 
-class  StEEmcDbMaker;
+class  StEEmcDb;
 class  StEmcGeom;
 class  StEmcDecoder;
 
@@ -30,7 +30,7 @@ class StEmcAsciiDbMaker : public StMaker {
  
  private:
 
-  StEEmcDbMaker *mEeDb;
+  StEEmcDb      *mEeDb;
   StEmcGeom     *mGeomB;
   StEmcDecoder  *mMappB; 
   bool mgain60Et;
@@ -49,6 +49,9 @@ class StEmcAsciiDbMaker : public StMaker {
 #endif
 
 // $Log: StEmcAsciiDbMaker.h,v $
+// Revision 1.2  2009/02/04 20:33:06  ogrebeny
+// Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+//
 // Revision 1.1  2008/07/29 14:43:11  balewski
 // start
 //

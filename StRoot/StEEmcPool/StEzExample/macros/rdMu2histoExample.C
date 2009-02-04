@@ -1,11 +1,11 @@
 class StChain;
 class StMuEmcCollection;
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 class TChain;
 
-StEEmcDbMaker  *myDb;
+StEEmcDb *myDb;
 StMuDstMaker* muMk;
 StChain *chain=0;
 
@@ -22,8 +22,8 @@ int rdMu2histoExample( int nEve=100 ){
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");  
+  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEzExample");
 
   // create chain    
@@ -38,7 +38,7 @@ int rdMu2histoExample( int nEve=100 ){
   printf("total eve in chain =%d\n",nEntries);
 
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
-  myDb=new StEEmcDbMaker("eemcDb");
+  new StEEmcDbMaker("eemcDb");
   gMessMgr->SwitchOff("D");
   //gMessMgr->SwitchOff("I");
 

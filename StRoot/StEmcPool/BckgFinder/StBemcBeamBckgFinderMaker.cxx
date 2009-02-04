@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.11 2007/08/22 14:03:50 kocolosk Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.12 2009/02/04 20:33:30 ogrebeny Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -20,7 +20,7 @@
 #include <StEmcUtil/geometry/StEmcGeom.h>
 #include <StEmcUtil/database/StBemcTables.h>
 
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 #include "StEmcRawMaker/defines.h"
 
 //MuDst
@@ -562,6 +562,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.12  2009/02/04 20:33:30  ogrebeny
+  Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+
   Revision 1.11  2007/08/22 14:03:50  kocolosk
   #included some additional headers that used to be included implicitly from StBemcTables
 

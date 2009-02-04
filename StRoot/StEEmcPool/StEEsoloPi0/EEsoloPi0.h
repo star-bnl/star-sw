@@ -3,7 +3,7 @@
 #ifndef EEsoloPi0_h
 #define EEsoloPi0_h
 /******************************************************
- * $Id: EEsoloPi0.h,v 1.6 2004/09/03 04:50:52 balewski Exp $
+ * $Id: EEsoloPi0.h,v 1.7 2009/02/04 20:33:21 ogrebeny Exp $
  ******************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
@@ -26,8 +26,8 @@ class EEmcDbItem;
   class EEmcDb;
   typedef EEmcDb EEDB;
 #else
-  class StEEmcDbMaker;
-  typedef StEEmcDbMaker EEDB;
+  class StEEmcDb;
+  typedef StEEmcDb EEDB;
 #endif
 
 
@@ -94,6 +94,9 @@ class EEsoloPi0 {
 
 /*****************************************************************
  * $Log: EEsoloPi0.h,v $
+ * Revision 1.7  2009/02/04 20:33:21  ogrebeny
+ * Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+ *
  * Revision 1.6  2004/09/03 04:50:52  balewski
  * big clenup
  *

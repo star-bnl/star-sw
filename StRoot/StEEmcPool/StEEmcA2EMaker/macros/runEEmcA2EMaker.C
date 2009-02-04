@@ -12,8 +12,8 @@
 
 class StChain;
 class St_db_Maker;
-class StEEmcDbMaker;
 class StMuDstMaker;
+class StEEmcDb;
 class StEEmcA2EMaker; 
 
 //--
@@ -21,7 +21,7 @@ class StEEmcA2EMaker;
 //--
 StChain        *mChain        = 0;
 St_db_Maker    *mStarDatabase = 0;
-StEEmcDbMaker  *mEEmcDatabase = 0;
+StEEmcDb       *mEEmcDatabase = 0;
 StMuDstMaker   *mMuDstMaker   = 0;
 StEEmcA2EMaker *mEEanalysis   = 0;
 
@@ -82,7 +82,7 @@ void runEEmcA2EMaker( Int_t nevents = 50,
   //--
   //-- Initialize EEMC database
   //--
-  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
+  new StEEmcDbMaker("eemcDb");
   gMessMgr -> SwitchOff("D");
   gMessMgr -> SwitchOn("I");
 
@@ -185,7 +185,8 @@ void runEEmcA2EMaker( Int_t nevents = 50,
   //-- For debugging purposes, it's often useful to print out the 
   //-- database 
   //--
-  mEEmcDatabase->exportAscii("dbdump.dat"); 
+  mEEmcDatabase = (StEEmcDb*)mChain->GetDataSet("StEEmcDb");
+  if (mEEmcDatabase) mEEmcDatabase->exportAscii("dbdump.dat"); 
 
   //--
   //-- Calls the ::Finish() method on all makers
@@ -217,8 +218,8 @@ void LoadLibs()
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcSimulatorMaker");
   
   gSystem->Load("StEEmcA2EMaker");

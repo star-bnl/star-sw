@@ -9,8 +9,8 @@ rdEz2histoExample(int mxEve=5000,
   
   char *libL[]={
     "StRoot/StDbLib/StDbLib.so",  
-    "StRoot/StEEmcDbMaker/libEEmcDbMaker.so", 
     "StRoot/StEEmcUtil/EEfeeRaw/libEEfeeRaw.so",
+    "StRoot/StEEmcDbMaker/libEEmcDbMaker.so", 
     "StRoot/StEEmcPool/StEzExample/libEzEEtower.so",
     "EEmcDb/libEEmcDb.so"
  };

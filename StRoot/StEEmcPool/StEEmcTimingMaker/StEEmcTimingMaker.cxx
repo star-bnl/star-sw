@@ -17,8 +17,8 @@
 
 #include "StMessMgr.h"
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
@@ -99,7 +99,7 @@ Int_t StEEmcTimingMaker::InitRun(Int_t run){
     return kStWarn;
   }
 
-  StEEmcDbMaker *dbmk=(StEEmcDbMaker*)GetMaker("eemcdb");
+  StEEmcDb *dbmk = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   if ( !dbmk ) {
     std::cout << "No database maker" << std::endl;
     return kStFatal;
@@ -241,7 +241,7 @@ Int_t StEEmcTimingMaker::Make()
 
   hCounter->Fill("Nadc2e",1.0);
 
-  StEEmcDbMaker *dbmk=(StEEmcDbMaker*)GetMaker("eemcdb");
+  StEEmcDb *dbmk = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   if ( !dbmk ) {
     std::cout << "No database maker" << std::endl;
     return kStWarn;

@@ -1,4 +1,4 @@
-//  $Id: StEmcAsciiDbMaker.cxx,v 1.3 2008/12/06 13:20:42 balewski Exp $ 
+//  $Id: StEmcAsciiDbMaker.cxx,v 1.4 2009/02/04 20:33:06 ogrebeny Exp $ 
 // Emulates  L2 in offline for algorithm testing
 // Interface to online/L2jetAlgo/
 // Jan Balewski, Fall 2005
@@ -12,15 +12,15 @@
 #include "StEmcAsciiDbMaker.h"
 #include "StEmcRawMaker/defines.h"
 
-#include <StEEmcDbMaker/StEEmcDbMaker.h>
-#include <StEEmcDbMaker/EEmcDbItem.h>
-#include <StEEmcDbMaker/EEmcDbCrate.h>
-#include <St_db_Maker/St_db_Maker.h>
+#include <StEEmcUtil/database/StEEmcDb.h>
+#include <StEEmcUtil/database/EEmcDbItem.h>
+#include <StEEmcUtil/database/EEmcDbCrate.h>
+//#include <St_db_Maker/St_db_Maker.h>
 
 // BTOW stuff
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/database/StBemcTables.h"
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 
 
 ClassImp(StEmcAsciiDbMaker)
@@ -54,7 +54,7 @@ StEmcAsciiDbMaker::~StEmcAsciiDbMaker() {
 Int_t StEmcAsciiDbMaker::Init() {
 
   //................EEMC stuff ..............
-  mEeDb= (StEEmcDbMaker*) GetMaker("eemcDb");
+  mEeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(mEeDb);
   mGeomB = StEmcGeom::instance("bemc");
   initAuxHisto();
@@ -67,10 +67,8 @@ Int_t StEmcAsciiDbMaker::Init() {
 //========================================
 //========================================
 Int_t StEmcAsciiDbMaker::InitRun(int runNo){
-  St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("StarDb");
-  assert(mydb);
-  int yyyymmdd=mydb->GetDateTime().GetDate();
-  int hhmmss=mydb->GetDateTime().GetTime();
+  int yyyymmdd = this->GetDBTime().GetDate();
+  int hhmmss = this->GetDBTime().GetTime();
 
 
   TString outPath="L2setup-"; outPath+=yyyymmdd; //<--- +yyyymmdd
@@ -198,7 +196,7 @@ void StEmcAsciiDbMaker::exportBtowDb(TString fname, int runNo, int yyyymmdd,int 
       ((TH2F*) hA[0])->Fill(etaF,ph,myGain);
      }
 
-     float thr=ped+mEeDb-> KsigOverPed*sig;
+     float thr=ped+mEeDb->getKsigOverPed()*sig;
      sprintf(pname,"id%04d-%03d-%d-%02d",softID,m,s,e);
      fprintf(fd,"%6s   0x%02x 0x%02x   %2d %c %2d   %8.2f   %5.2f %5.2f  0x%02x 0x%02x  %8s %4d\n",
 	    name,CR,CHAN,sec,sub,kEta,myGain,ped,thr,stat,fail,pname,RDO);
@@ -306,6 +304,9 @@ void StEmcAsciiDbMaker::initAuxHisto() {
 
 /* *******************************
  $Log: StEmcAsciiDbMaker.cxx,v $
+ Revision 1.4  2009/02/04 20:33:06  ogrebeny
+ Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
+
  Revision 1.3  2008/12/06 13:20:42  balewski
  fix of histo code, was non-fatal
 

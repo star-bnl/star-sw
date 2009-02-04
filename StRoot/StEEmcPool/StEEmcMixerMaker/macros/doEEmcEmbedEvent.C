@@ -38,8 +38,8 @@ Bool_t print = true )
   gSystem->Load("St_db_Maker");
   gSystem->Load("libgeometry_Tables");
   gSystem->Load("StEmcRawMaker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
     
   gSystem->Load("StEEmcSimulatorMaker");
   gSystem->Load("StMaxStripPi0");
@@ -64,9 +64,9 @@ Bool_t print = true )
   St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
   StEEmcDbMaker* myDb=new StEEmcDbMaker("eemcDb");
 
-  int firstSec=1;
-  int lastSec=12;
-  myDb->setSectors(firstSec, lastSec);
+  //int firstSec=1;
+  //int lastSec=12;
+  //myDb->setSectors(firstSec, lastSec);
 
 #if 0  // Set this flag equal to 1 if you're mixing two Monte Carlo files... though why would you want to?
   stDb->SetDateTime(20031120,0);

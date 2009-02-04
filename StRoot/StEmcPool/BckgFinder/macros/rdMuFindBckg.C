@@ -30,8 +30,8 @@ void rdMuFindBckg(int nevents=200000, char* outDir="./") {
   char *libL[]={
     "StEmcRawMaker","StEmcADCtoEMaker",
     "StDbBroker","St_db_Maker","StDaqLib",
-    "StEEmcDbMaker",
     "StEEmcUtil",
+    "StEEmcDbMaker",
     "libStEmcPoolBckgFinder"
   };
   printf(".C Load :");

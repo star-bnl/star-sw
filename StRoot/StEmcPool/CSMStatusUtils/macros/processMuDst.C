@@ -54,6 +54,8 @@ void processMuDst( //Char_t *jobId= "7121003.",
   StEmcADCtoEMaker *adc2EMaker = new StEmcADCtoEMaker();
   adc2EMaker->setPrint(kFALSE);
   adc2EMaker->saveAllStEvent(kTRUE);
+
+  StEEmcDbMaker *eemcDbMaker = new StEEmcDbMaker("eemcDbMaker");
   
   StBemcStatusMaker* myBemcStatusMaker = new StBemcStatusMaker(muDstMaker);
   myBemcStatusMaker->setOutputDirectory(scratchDir);

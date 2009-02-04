@@ -29,7 +29,7 @@ using namespace std;
 #       include <RTS/include/daqFormats.h>
 #endif
 
-#include <StDaqLib/EMC/StEmcDecoder.h>
+#include <StEmcUtil/database/StEmcDecoder.h>
 
 #include "BEMCPlots.h"
 #include "BEMC_DSM_decoder.h"
@@ -431,19 +431,19 @@ void BEMCPlots::clear(const char *bemcStatus) {
 	    } while (ifstr.good() && (token != "SoftId") && (token != "triggerPatch") && (token != "TriggerPedestalShift"));
 	    if (ifstr.good()) {
 		if (token == "SoftId") {
-		    int softId, crate, crateSeq, unmaskTower, unmaskHT, unmaskPA;
+		    int softId, crate, crateSeq, unmaskTower, unmaskHT, unmaskPA, triggerPatch;
 		    float ped;
-		    ifstr >> softId >> crate >> crateSeq >> unmaskTower >> unmaskHT >> unmaskPA >> ped;
-		    if (mDebug >= 2) cout << "Read: " << token << " " << softId << "\t" << crate << "\t" << crateSeq << "\t" << unmaskTower << "\t" << unmaskHT << "\t" << unmaskPA << "\t" << ped << endl;
+		    ifstr >> softId >> crate >> crateSeq >> unmaskTower >> unmaskHT >> unmaskPA >> ped >> triggerPatch;
+		    if (mDebug >= 2) cout << "Read: " << token << " " << softId << "\t" << crate << "\t" << crateSeq << "\t" << unmaskTower << "\t" << unmaskHT << "\t" << unmaskPA << "\t" << ped << "\t" << triggerPatch << endl;
 		    if ((softId >= 1) && (softId <= 4800)) {
 			this->mTowerData[softId - 1][0] = unmaskTower;
 			this->mTowerData[softId - 1][1] = int(ped * 100.0);
-			int triggerPatch;
-			if ((unmaskTower == 0) && BEMCDecoder && BEMCDecoder->GetTriggerPatchFromCrate(crate, crateSeq, triggerPatch)) {
+			//int triggerPatch;
+			//if ((unmaskTower == 0) && BEMCDecoder && BEMCDecoder->GetTriggerPatchFromCrate(crate, crateSeq, triggerPatch)) {
 			    if ((triggerPatch >= 0) && (triggerPatch < 300)) {
 				this->mPatchData[triggerPatch][10] += 1;
 			    }
-			}
+			//}
 		    }
 		} else if (token == "triggerPatch") {
 		    int triggerPatch, crate, crateSeq, unmaskHT, unmaskPA, bitConv, formula, formulaParam0, formulaParam1, formulaParam2, formulaParam3, formulaParam4, formulaParam5;
@@ -617,6 +617,7 @@ void BEMCPlots::processEvent( char *datap
     bool DSM_L2_present = BEMC_DSM_L2_decoder(dsmL2Input, &(this->mDsmL2InputHighTowerBits[0]), &(this->mDsmL2InputPatchSumBits[0]), &(this->mDsmL2InputPatchSum[0]));
 
     bool DSM_L3_present = BEMC_DSM_L3_decoder(dsmL3Input, &(this->mDsmL3InputHighTowerBits[0]), &(this->mDsmL3InputPatchSumBits[0]), &(this->mDsmL3InputBackToBackBit[0]), &(this->mDsmL3InputJPsiTopoBit[0]), &(this->mDsmL3InputJetPatchTopoBit[0]));
+
 
     if (this->mHistTot) this->mHistTot->Fill(0.5);
 
