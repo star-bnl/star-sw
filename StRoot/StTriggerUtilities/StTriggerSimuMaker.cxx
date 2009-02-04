@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.24 2009/02/03 15:40:38 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.25 2009/02/04 20:00:48 rfatemi Exp $
 
 
 #include <Stiostream.h>
@@ -20,7 +20,7 @@
 #include <math.h>
 
 #include <fstream>
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 
 #include "St_db_Maker/St_db_Maker.h" // just for time stamp
 #include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"// to access Etot
@@ -227,6 +227,9 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.25  2009/02/04 20:00:48  rfatemi
+ * change includes for StEmcDecoder
+ *
  * Revision 1.24  2009/02/03 15:40:38  rfatemi
  * Changed structure of mSimulators to accomodate 2009 EMC simulator update
  *
