@@ -603,7 +603,7 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 
   if(ret != len) {  // Need to retry...
     int nstart = ret;
-    LOG(WARN, "writev only wrote %d of %d... Retry", ret, len);
+    LOG(NOTE, "writev only wrote %d of %d... Retry", ret, len);
     
 
     for(int i=0;i<vec;i++) {
@@ -623,7 +623,7 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
     int ret2 = writev_call_retry(fd, iovec_new, vec_new);
 
     ret += ret2;
-    LOG(WARN, "writev retry returned %d (retry was %d)",ret,ret2);
+    LOG(NOTE, "writev retry returned %d (retry was %d)",ret,ret2);
   }
   return ret;
 }
