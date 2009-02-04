@@ -18,16 +18,16 @@ cat >.rootrc <<__ROOTRC__
 
 Online.GuiRefreshRate:  50
 
-Online.eemcMask:    ~dkettler/home_local/eemc/defaultPanitkinSetup/eemcTwMask.dat
-Online.eemcDbDump:  ~dkettler/home_local/eemc/defaultPanitkinSetup/eemcDbDump.dat
-Online.eemcPathIn:  ~dkettler/home_local/eemc/defaultPanitkinSetup/
+Online.eemcMask:     /a/pplot/files/eemc/defaultPanitkinSetup/eemcTwMask.dat
+Online.eemcDbDump:   /a/pplot/files/eemc/defaultPanitkinSetup/eemcDbDump.dat
+Online.eemcPathIn:   /a/pplot/files/eemc/defaultPanitkinSetup/
 Online.eemcPathOut:  /onlineweb/www/eemc2005pplot
-Online.bemcStatus:  ~dkettler/home_local/bemc/bemcStatus.txt
+Online.bemcStatus:   /a/pplot/files/bemc/bemcStatus.txt
 Online.InputPath:    /a
 Online.OutputPath:   /a/pplot/histos/
 Online.ProjectPath:  OnlTools/OnlinePlots/
 Online.endOfRun:     /home/operator/EndOfRunScript
-Online.plotsDir:    `pwd`/OnlTools/OnlinePlots/
+Online.plotsDir:     `pwd`/OnlTools/OnlinePlots/
 Online.Reference:    /a/pplot/histos/run10029077.root
 
 Plugin.TVirtualPadEditor: Ged TQtGedEditor    QtGed          "TQtGedEditor(TCanvas*)"
@@ -70,14 +70,6 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
   gSystem->Load("StBEMCPlots");
   gSystem->Load("StEvent");
 
-  const char *homedir = gSystem->Getenv("ONLINEPLOTSDIR");
-  if (!homedir){
-    printf(" Attention: The environment variable \"ONLINEPLOTSDIR\" has not been set yet !!!\n");
-    TString P= gSystem->pwd(); P.Append("/OnlTools/OnlinePlots/");
-    gSystem->Setenv("ONLINEPLOTSDIR",P.Data());
-    printf(" Setting it as %s\n",gSystem->Getenv("ONLINEPLOTSDIR"));
-  }
-
   char* argsS[] = {
                  "-path",
                  //"st_physics_adc_10022038_raw_1330001.daq",
@@ -106,13 +98,3 @@ __ROOTMACRO__
 
 
 cat  EvpPlotServer.C
-
-echo ""
-echo "Do not forget to check/set the ONLINEPLOTSDIR environment variable properly"
-echo "For example:"
-echo "setenv ONLINEPLOTSDIR `pwd`/OnlTools/OnlinePlots/"
-echo "-----------------------"
-echo "Use: root4starN -q EvpPlotServer.C"
-echo "-------------------------------"
-
-setenv ONLINEPLOTSDIR `pwd`/OnlTools/OnlinePlots/
