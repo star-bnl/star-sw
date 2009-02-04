@@ -28,10 +28,10 @@ changes to be done in bbc-code, Jan
 #include "St_db_Maker/St_db_Maker.h"
   
 // ETOW stuff
-#include <StEEmcDbMaker/StEEmcDbMaker.h>
-#include <StEEmcDbMaker/EEmcDbCrate.h>
-#include <StEEmcDbMaker/EEmcDbItem.h>
-#include <StEEmcDbMaker/cstructs/eemcConstDB.hh>
+#include <StEEmcUtil/database/StEEmcDb.h>
+#include <StEEmcUtil/database/EEmcDbCrate.h>
+#include <StEEmcUtil/database/EEmcDbItem.h>
+#include <StEEmcUtil/database/cstructs/eemcConstDB.hh>
 
 
 #include "StEEmcUtil/EEdsm/EEfeeTPTree.h" 
@@ -103,7 +103,7 @@ StEemcTriggerSimu::Init(){
 
   mYear=-888;
   //................EEMC stuff ..............
-  mDbE= (StEEmcDbMaker*) StMaker::GetChain()->GetMaker("eemcDb");
+  mDbE = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb");
   assert(mDbE);
   //  assert( mBemcEsum5bit);
   LOG_INFO <<Form("Eemc::Init() MC_flag=%d, config: flag=%d, path=%s=",mMCflag, mConfig,mSetupPath.Data())<<endm;
@@ -495,6 +495,9 @@ StEemcTriggerSimu::getEemcFeeMask(){
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.11  2009/02/04 20:01:28  rfatemi
+// Change includes for StEmcDecoder
+//
 // Revision 1.10  2007/11/08 20:59:52  kocolosk
 // subdet isTrigger returns a bool
 // triggerDecision returns enumerator including kDoNotCare

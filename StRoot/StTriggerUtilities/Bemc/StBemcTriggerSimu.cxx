@@ -7,7 +7,7 @@
 #include "StTriggerSimuMaker.h"
 
 //Bemc
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/database/StBemcTables.h"
 #include "StEmcRawMaker/defines.h"
