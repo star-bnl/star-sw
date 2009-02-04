@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.9 2008/09/04 00:07:27 fisyak Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.10 2009/02/04 21:40:42 andrewar Exp $
  *
  */
 
@@ -63,8 +63,8 @@ StPrepEmbedMaker::~StPrepEmbedMaker() {
 Int_t StPrepEmbedMaker::Init() {
 
 	srand((unsigned)time(0));
-        mSettings->rnd1 = int(rand()*10000)+getpid();
-        mSettings->rnd2 = int(rand()*10000)+getpid();
+        mSettings->rnd1 = abs(int(rand()*10000)+getpid());
+        mSettings->rnd2 = abs(int(rand()*10000)+getpid());
 
 
     return StMaker::Init();
@@ -103,6 +103,12 @@ Int_t StPrepEmbedMaker::InitRun(int runnum)
     
     
     Do("detp  hadr_on");
+    cout <<"Setting up Jpsi particle"<<endl;
+    Do("vec/cr JBUF(1)");
+    Do("vec/cr BR(6) R 100. 0. 0. 0. 0. 0.");
+    Do("vec/cr MODE(6) I 302 0 0 0 0 0");
+    Do("spart 160 'JPSI' 3 3.09688 0 8.E-21 JBUF 0 BR MODE");
+
     TString cmd("rndm ");
     cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
     Do(cmd.Data());
@@ -238,6 +244,9 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.10  2009/02/04 21:40:42  andrewar
+ * Update w/ declaration of Jpsi particle.
+ *
  * Revision 1.9  2008/09/04 00:07:27  fisyak
  * Change default from gkine to phasespace
  *
