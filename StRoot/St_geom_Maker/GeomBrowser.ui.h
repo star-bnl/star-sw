@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.42 2009/02/02 21:11:27 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.43 2009/02/04 16:41:41 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -596,7 +596,7 @@ void GeomBrowser::listView1_onItem( QListViewItem *item )
 void GeomBrowser::init()
 {
 #ifndef WIN32
-   if (gSystem->Load("libTable")>0)
+   if (gSystem->Load("libTable")<0)
    {
       QString errorMsg = "Can not load the ROOT shared library: ";
       errorMsg += "libTable.so";
@@ -604,7 +604,7 @@ void GeomBrowser::init()
          , QMessageBox::Ok,QMessageBox::NoButton );
 
    }
-   if (gSystem->Load("libGeom")>0)
+   if (gSystem->Load("libGeom")<0)
    {
       QString errorMsg = "Can not load the ROOT shared library: ";
       errorMsg += "libGeom.so";
