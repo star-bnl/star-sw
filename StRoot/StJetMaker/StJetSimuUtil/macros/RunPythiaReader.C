@@ -35,8 +35,8 @@ void RunPythiaReader(int nevents=10,
     gSystem->Load("StDbLib");
     gSystem->Load("StDbBroker");  
     gSystem->Load("St_db_Maker");
-    gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StEEmcUtil");// needed by EEMC-Db
+    gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
 

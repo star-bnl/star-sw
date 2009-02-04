@@ -1,12 +1,12 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMCMuDst.h,v 1.4 2008/08/03 00:29:03 tai Exp $
+// $Id: StjEEMCMuDst.h,v 1.5 2009/02/04 22:14:43 kocolosk Exp $
 #ifndef STJEEMCMUDST_H
 #define STJEEMCMUDST_H
 
 #include "StjEEMC.h"
 
 class StMuDstMaker;
-class StEEmcDbMaker;
+class StEEmcDb;
 
 class StjEEMCMuDst : public StjEEMC {
 
@@ -22,7 +22,7 @@ public:
 private:
 
   StMuDstMaker* _uDstMaker;
-  StEEmcDbMaker* mEeDb;
+  StEEmcDb* mEeDb;
 
 };
 

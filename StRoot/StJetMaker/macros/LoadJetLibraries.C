@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.13 2008/11/05 05:48:16 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.14 2009/02/04 22:14:39 kocolosk Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -38,9 +38,9 @@ void LoadJetLibraries_DEV()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
@@ -73,9 +73,9 @@ void LoadJetLibraries_SL08c()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
@@ -108,9 +108,9 @@ void LoadJetLibraries_SL08b()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
@@ -142,9 +142,9 @@ void LoadJetLibraries_SL08a()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
@@ -174,9 +174,9 @@ void LoadJetLibraries_SL07e()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
@@ -206,9 +206,9 @@ void LoadJetLibraries_SL07d()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
@@ -238,9 +238,9 @@ void LoadJetLibraries_SL07c()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StMCAsymMaker");
   gSystem->Load("StJetFinder");
@@ -270,9 +270,9 @@ void LoadJetLibraries_SL07b()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetMaker");
@@ -300,9 +300,9 @@ void LoadJetLibraries_SL07a()
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StSpinDbMaker");
-  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetMaker");

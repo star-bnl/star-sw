@@ -35,8 +35,6 @@
 #include <StTriggerUtilities/L2Emulator/StGenericL2Emulator.h>
 #include <StTriggerUtilities/L2Emulator/StL2_2006EmulatorMaker.h>
 
-#include <StEEmcDbMaker/StEEmcDbMaker.h>
-
 #include <StMuTrackFourVec.h>
 
 #include <Rtypes.h>

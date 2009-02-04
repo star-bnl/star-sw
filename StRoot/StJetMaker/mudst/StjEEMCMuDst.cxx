@@ -1,4 +1,4 @@
-// $Id: StjEEMCMuDst.cxx,v 1.3 2008/08/03 00:29:02 tai Exp $
+// $Id: StjEEMCMuDst.cxx,v 1.4 2009/02/04 22:14:43 kocolosk Exp $
 #include "StjEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -6,8 +6,8 @@
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 
@@ -20,8 +20,8 @@ StjEEMCMuDst::StjEEMCMuDst(StMuDstMaker* uDstMaker)
 
 void StjEEMCMuDst::Init()
 {
-  if(_uDstMaker) mEeDb = (StEEmcDbMaker*)_uDstMaker->GetMaker("eemcDb");
-  if(mEeDb) mEeDb->setThreshold(3);
+    if (_uDstMaker) mEeDb = (StEEmcDb*)_uDstMaker->GetDataSet("StEEmcDb");
+    if(mEeDb) mEeDb->setThreshold(3);
 }
 
 StjTowerEnergyList StjEEMCMuDst::getEnergyList()
