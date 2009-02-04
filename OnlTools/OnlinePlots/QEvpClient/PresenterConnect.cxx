@@ -93,7 +93,7 @@ void PresenterConnect::file() {
 
 void PresenterConnect::openReference() {
   cout << "Opening reference" << endl;
-  PresenterGui* gui2 = new PresenterGui();
+  PresenterGui* gui2 = new PresenterGui(true);
   gui2->resize(500,500);
   gui2->show();
 //  EvpUtil::ReadCanvasDefinitions();
