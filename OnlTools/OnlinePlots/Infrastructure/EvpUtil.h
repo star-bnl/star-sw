@@ -40,6 +40,7 @@ class EvpUtil {
   static const char* mInputPath;
   static const char* mOutputPath;
   static const char* mProjectPath;
+  static const char* mReference;
   static char* mCanvasDescriptionFile;
   static char* mListOfHistogamsFile;
 
@@ -100,7 +101,7 @@ class EvpUtil {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.h,v 1.2 2009/01/29 19:04:35 dkettler Exp $
+ * $Id: EvpUtil.h,v 1.3 2009/02/04 01:25:51 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -110,6 +111,9 @@ class EvpUtil {
  ***************************************************************************
  *
  * $Log: EvpUtil.h,v $
+ * Revision 1.3  2009/02/04 01:25:51  dkettler
+ * Remove ONLINEPLOTSDIR reference
+ *
  * Revision 1.2  2009/01/29 19:04:35  dkettler
  * BEMC changes
  *

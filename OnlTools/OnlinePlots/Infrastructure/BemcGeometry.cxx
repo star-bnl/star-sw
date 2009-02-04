@@ -6,6 +6,8 @@
 #include <fstream>
 #include <stdlib.h>
 
+#include "TEnv.h"
+
 using namespace std;
 
 BemcGeometry* BemcGeometry::_instance=0;
@@ -23,7 +25,7 @@ BemcGeometry::BemcGeometry() {
   unsigned int id;
   float eta;
   float phi;
-  sprintf(filename,"%s%s",getenv("ONLINEPLOTSDIR"),"/local/bemcGeom.dat");
+  sprintf(filename,"%s%s",gEnv->GetValue("Online.plotsDir","."),"/local/bemcGeom.dat");
 
   ifstream in(filename);
   while ( in.good() ) {
