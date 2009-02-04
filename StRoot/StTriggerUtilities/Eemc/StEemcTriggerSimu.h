@@ -9,7 +9,7 @@
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class EEfeeTPTree;
 class EEdsm0Tree;
 class EEdsm1Tree;
@@ -23,7 +23,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   enum {kOnlyAdc=0,kAdcAndTrig, kAdcCompareTrig};
   void setConfig(int x) {mConfig=x;}
  private:
-  StEEmcDbMaker    *mDbE;
+  StEEmcDb *mDbE;
   int * mBemcEsum5bit; // output from Bemc emulation, not working
   int * mExternDsmSetup;
   TString  mSetupPath;
@@ -102,6 +102,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.11  2009/02/04 20:27:10  rfatemi
+// Update StEemcDbMaker
+//
 // Revision 1.10  2007/11/08 20:59:53  kocolosk
 // subdet isTrigger returns a bool
 // triggerDecision returns enumerator including kDoNotCare
