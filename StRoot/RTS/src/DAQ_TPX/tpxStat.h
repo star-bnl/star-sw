@@ -22,6 +22,7 @@ public:
 		int aid ;
 	} fee_check_data[72][16];	// max 72 altros, 16 ch each...
 
+	int sector ;	// from 1
 
 	// run in the thread!
 	void run_start(u_int rb_mask, int run_type) ;

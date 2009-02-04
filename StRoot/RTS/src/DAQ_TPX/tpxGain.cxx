@@ -29,6 +29,9 @@ static struct fee_found {
 #endif
 
 
+struct tpx_odd_fee_t tpx_odd_fee[256] ;
+int tpx_odd_fee_count = 0 ;
+
 tpxGain::tpxGain()
 {
 	events = 0 ;
@@ -43,6 +46,7 @@ tpxGain::tpxGain()
 	
 	// bad_fee's are sticky and can only be entered via a file!
 	memset(bad_fee,0,sizeof(bad_fee)) ;
+	tpx_odd_fee_count = 0 ;
 
 	return ;
 }
@@ -690,6 +694,7 @@ void tpxGain::do_default(int sector)
 
 	// zap and create defaults in case the file is missing!
 	memset(bad_fee,0,sizeof(bad_fee)) ;
+	tpx_odd_fee_count = 0 ;
 
 	if(sector) {
 		if(gains[sector-1] == 0) {
@@ -780,13 +785,25 @@ int tpxGain::from_file(char *fname, int sec)
 			// counter is in location 0!
 			int c = bad_fee[s][r][0] ;
 
-
+			// the TPC_FEE is in the file as "pad"
+			
+			// move to ALTRO_ID
 			altro = (p<<1) & 0xFF ;
 			bad_fee[s][r][c+1] = altro ;
 
-			bad_fee[s][r][0]++ ;
+			bad_fee[s][r][0]++ ;	// increment count of bad FEEs...
 
-			LOG(INFO,"Bad FEE %d: sector %2d, RB %d, TPX-FEE %3d, TPC-FEE %3d",bad_fee[s][r][0],s,r,altro,p) ;
+			// do the same for the global
+			c = tpx_odd_fee_count ;
+			tpx_odd_fee[c].sector = s ;
+			tpx_odd_fee[c].rdo = r ;
+			tpx_odd_fee[c].status = 2 ;	// mark bad
+			tpx_odd_fee[c].tpc_fee_padplane = p ;
+			tpx_odd_fee[c].altro_id_padplane = altro ;
+
+			tpx_odd_fee_count++ ;
+
+			LOG(INFO,"Bad FEE %d: sector %2d, RB %d, ALTRO %3d (TPC-FEE %3d)",bad_fee[s][r][0],s,r,altro,p) ;
 
 			continue ;
 		}
