@@ -99,6 +99,8 @@ void EvpPresenter::ReconfigureTabs() {
 void EvpPresenter::NextEvent() {
   needsUpdate = false;
   bool runStatusChanged = false;
+  
+  mfile->Print();
 
   mRS = (RunStatus*) mfile->Get("RunStatus",mRS);
   if ( !mRS ) {
@@ -410,7 +412,7 @@ void EvpPresenter::ClosePresenter()
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.cxx,v 1.3 2009/01/31 00:30:33 fine Exp $
+ * $Id: EvpPresenter.cxx,v 1.4 2009/02/04 01:26:15 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -420,6 +422,11 @@ void EvpPresenter::ClosePresenter()
  ***************************************************************************
  *
  * $Log: EvpPresenter.cxx,v $
+ * Revision 1.4  2009/02/04 01:26:15  dkettler
+ * Remove ONLINEPLOTSDIR reference
+ *
+ * Reference histograms
+ *
  * Revision 1.3  2009/01/31 00:30:33  fine
  * Major clean up: Remove the redundant time thread, redundant methods, add protection agaist of crashes, introdcue the new rootrc paramater: Online.GuiRefreshRate, load some shared in batch mode only
  *

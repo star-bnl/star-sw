@@ -41,6 +41,7 @@ class PresenterConnect : public QObject {
  void setTab(int);
  void setSubTab(int);
  void setCanvas(TCanvas*);
+ void openReference();
  
  signals:
  void signalEventInfo(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int);
