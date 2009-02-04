@@ -14,6 +14,15 @@
 
 #include <TPX/tpx_rdo.h>
 
+struct tpx_odd_fee_t {
+	u_char tpc_fee_padplane ;	// fee id from padplane
+	u_char status ;	// 1=overriden; 2=marked bad
+	u_char sector ;	// from 1
+	u_char rdo ;	// from 1
+
+	u_char altro_id_padplane ;
+} ;
+
 struct tpx_rdo_event {
 	u_int *data_start ;
 	u_int *data_end ;
@@ -79,5 +88,8 @@ extern int tpx_show_status(int sector, int rb_mask, int *altro_list=0) ;
 extern struct tpx_rdo tpx_rdo[6] ;
 extern struct tpx_rdo_dbg tpx_rdo_dbg[6] ;
 extern int tpx_fee_check ;
+
+extern struct tpx_odd_fee_t tpx_odd_fee[256] ;
+extern int tpx_odd_fee_count ;
 
 #endif

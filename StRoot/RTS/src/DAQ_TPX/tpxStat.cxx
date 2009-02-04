@@ -45,7 +45,7 @@ void tpxStat::run_start(u_int rb_mask, int run_type)
 {
 
 	memset(r,0,sizeof(r)) ;
-
+	sector = 0 ;	// will get this from the data!
 
 	if((run_type == RUN_TYPE_DAQCHECK) && (rb_mask==4)) {	// RDO #3
 		fee_check_on = 1 ;
@@ -168,10 +168,21 @@ for(int i=0;i<6;i++) {
 				expect = 0 ;
 			}
 
-			//if(have || expect) {
-			//	LOG(TERR,"%d %d %d %d",i,a,c,have) ;
-			//}
-			
+
+			for(int j=0;j<tpx_odd_fee_count;j++) {
+				if((tpx_odd_fee[j].sector != sector) || (tpx_odd_fee[j].rdo != (i+1))) continue ;
+				for(int k=0;k<2;k++) {
+					int aid = tpx_odd_fee[j].altro_id_padplane ;
+					
+					if(a == (aid+k)) {
+						expect = 0 ;
+						if(c==0) {
+							LOG(WARN,"sec %2d, rdo %2d: altro %3d was marked bad in the gain file...",sector,i+1,a) ;
+						}
+					}
+				}
+			}
+
 			if(have != expect) {
 				warn = 1 ;
 				a_err = 1 ;
@@ -318,6 +329,11 @@ void tpxStat::accum(char *rdobuff, int bytes)
 	if(t <= 0) return ;	// non data event...
 
 
+	if(sector && (rdo.sector != sector)) {
+		LOG(ERR,"sector mismatch: expect %d, in data %d",sector,rdo.sector) ;
+	}
+
+	sector = rdo.sector ;
 
 	a.what = TPX_ALTRO_DO_ADC ;
 	a.rdo = rdo.rdo - 1 ;	// a.rdo counts from 0

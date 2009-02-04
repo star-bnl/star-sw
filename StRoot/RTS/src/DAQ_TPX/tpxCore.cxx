@@ -857,8 +857,8 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	rdo = &(tpx_rdo[rb]) ;
 
 	if(rdo->sector != sector || (rb+1) != rdo->rdo) {
-		LOG(ERR,"msc: config for RDO %d: sector %d, rdo %d claims error",rb+1,rdo->sector & 0x7F,rdo->rdo) ;
-		err |= 1 ;
+		LOG(WARN,"msc: config for RDO %d: sector %d, rdo %d claims error",rb+1,rdo->sector & 0x7F,rdo->rdo) ;
+		//err |= 1 ;
 	}
 	else {
 		LOG(NOTE,"msc: config for RDO %d: sector %d, rdo %d",rb+1,rdo->sector,rdo->rdo) ;
@@ -918,6 +918,23 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 		}
 	}
 
+	// get list of bad FEEs and clear the "need" flag
+	for(int i=0;i<tpx_odd_fee_count;i++) {
+		if((tpx_odd_fee[i].sector != sector) || (tpx_odd_fee[i].rdo != (rb+1))) continue ;
+		for(int j=0;j<2;j++) {
+			for(int a=0;a<256;a++) {
+				if(!altro[a]) continue ;
+
+				if((tpx_odd_fee[i].altro_id_padplane + j) == a) {
+					altro[a] = 0 ;
+					LOG(WARN,"Marking ALTRO %3d (FEE %03d) as unneeded because it is marked bad in the gain file...",
+					    a,tpx_odd_fee[i].tpc_fee_padplane) ;
+				}
+			}
+		}
+
+	}
+
 	// get list of potentially overriden altros for this sector & rdo
 	LOG(NOTE,"Checking override map [%d]",tpx_fee_override_cou) ;
 	int over = 0 ;
@@ -944,7 +961,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	int fcou = 1 ;
 	for(int b=0;b<3;b++) {
 		for(int c=0;c<12;c++) {
-			int ix = rdo->fee[b][c].id ;
+			int ix = rdo->fee[b][c].id ;	// altro id!
 
 			if(rdo->fee[b][c].fee_status) {	// found in the scan..
 
@@ -965,11 +982,14 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 
 				}
 
-				if(altro[ix] != 3) {
+				if(altro[ix] != 3) {	// somehing is not right so let's look at the possibilites...
+
+					// is it overriden (jumpers should be non-3
+
 					int overriden = 0 ;
 					for(int i=0;i<over;i++) {
 						if((in_fee[i] == ix) || ((in_fee[i]+1)==ix)) {
-							LOG(WARN,"Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X, should be A%3d",sector,rdo->rdo,fcou,
+							LOG(WARN,"Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X -- should be A%3d",sector,rdo->rdo,fcou,
 							    rdo->fee[b][c].pad_id,
 							    rdo->fee[b][c].id,
 							    rdo->fee[b][c].jumpers,
@@ -980,11 +1000,31 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 							    altro[ix],
 							    should_be[i]
 					   		) ;
-							overriden = 1 ;
+							overriden = 1 ;	// override error
 							break ;
 						}
 					}
 					
+					// was it marked bad in the gain file?
+					for(int i=0;i<tpx_odd_fee_count;i++) {
+						if((tpx_odd_fee[i].altro_id_padplane == ix) || ((tpx_odd_fee[i].altro_id_padplane+1) == ix)) {
+							
+							LOG(WARN,"msc: Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X -- marked bad",sector,rdo->rdo,fcou,
+							    rdo->fee[b][c].pad_id,
+							    rdo->fee[b][c].id,
+							    rdo->fee[b][c].jumpers,
+							    b,
+							    rdo->fee[b][c].x_s>>4,
+							    rdo->fee[b][c].x_s&1,
+							    rdo->fee[b][c].fee_status,
+							    altro[ix]
+							   ) ;
+
+							overriden =  1 ;
+							break ;
+						}
+					}
+
 					if(overriden) ;
 					else {
 					LOG(ERR,"msc: Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X",sector,rdo->rdo,fcou,
