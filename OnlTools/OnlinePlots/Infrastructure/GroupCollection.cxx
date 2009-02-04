@@ -283,6 +283,15 @@ HistogramGroup* GroupCollection::get(const char* name) {
   return 0;
 }
 
+HistogramGroup* GroupCollection::read(GenericFile* genfile, const char* name) {
+  if ( genfile->mapFile() ) {
+    return read( genfile->mapFile() , name );
+  }
+  if ( genfile->hisFile() ) {
+    return read( genfile->hisFile() , name );
+  }
+}
+
 HistogramGroup* GroupCollection::read(TMapFile* mapfile, const char* name) {
   //cout << __PRETTY_FUNCTION__ << " " << name <<  endl;
   for( GroupIterator iter = begin(); iter != end(); iter++) {
@@ -290,6 +299,21 @@ HistogramGroup* GroupCollection::read(TMapFile* mapfile, const char* name) {
       HistogramGroup* hg = (*iter);
       erase(*iter);
       hg = (HistogramGroup*) mapfile->Get( name , hg);
+      insert(hg);
+      return hg;
+    }
+  }
+  cout << __PRETTY_FUNCTION__ << " " << name << " not found " << endl;
+  return 0;
+}
+
+HistogramGroup* GroupCollection::read(TFile* file, const char* name) {
+  //cout << __PRETTY_FUNCTION__ << " " << name <<  endl;
+  for( GroupIterator iter = begin(); iter != end(); iter++) {
+    if ( strcmp((*iter)->id(),name)==0 ) {
+      HistogramGroup* hg = (*iter);
+      erase(*iter);
+      hg = (HistogramGroup*) file->Get( name );
       insert(hg);
       return hg;
     }

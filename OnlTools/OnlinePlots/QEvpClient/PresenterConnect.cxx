@@ -77,10 +77,10 @@ void PresenterConnect::file() {
   QString file = dialog.selectedFile();
   QString mapFile = file;
   int iret = 0;
-  if ( file.find(".map") < 0 ) {   // must be root file, only *.root and *.map are allowed
-    mapFile.replace(".root",".map");
-    iret = EvpUtil::Root2Map(file,mapFile);
-  } 
+//  if ( file.find(".map") < 0 ) {   // must be root file, only *.root and *.map are allowed
+//    mapFile.replace(".root",".map");
+//    iret = EvpUtil::Root2Map(file,mapFile);
+//  } 
 
   if (iret) {
     cerr << "### error ### Can not open file : " << mapFile << endl;
@@ -96,8 +96,8 @@ void PresenterConnect::openReference() {
   PresenterGui* gui2 = new PresenterGui();
   gui2->resize(500,500);
   gui2->show();
-  EvpUtil::ReadCanvasDefinitions();
-  EvpPresenter* presenter2 = new EvpPresenter();
+//  EvpUtil::ReadCanvasDefinitions();
+  EvpPresenter* presenter2 = new EvpPresenter(EvpUtil::mReference);
   PresenterConnect* con2 = new PresenterConnect(gui2,presenter2);
 
 //  QString file = "/home/dkettler/test/run10029077.root";
@@ -111,7 +111,7 @@ void PresenterConnect::openReference() {
 //  }
 
 //  QString mapFile = "/a/pplot/histos/run10031084.map";
-  presenter2->SetSource( EvpUtil::mReference );
+//  presenter2->SetSource( EvpUtil::mReference );
 }
    
 void PresenterConnect::update() {

@@ -28,7 +28,7 @@ Online.OutputPath:   /a/pplot/histos/
 Online.ProjectPath:  OnlTools/OnlinePlots/
 Online.endOfRun:     /home/operator/EndOfRunScript
 Online.plotsDir:    `pwd`/OnlTools/OnlinePlots/
-Online.Reference:    /a/pplot/histos/run10029077.map
+Online.Reference:    /a/pplot/histos/run10029077.root
 
 Plugin.TVirtualPadEditor: Ged TQtGedEditor    QtGed          "TQtGedEditor(TCanvas*)"
 
