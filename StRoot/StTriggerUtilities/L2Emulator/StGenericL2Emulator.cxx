@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.16 2008/10/14 00:53:12 balewski Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.17 2009/02/04 20:26:22 rfatemi Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -15,15 +15,15 @@
 
 
 // ETOW stuff
-#include <StEEmcDbMaker/StEEmcDbMaker.h>
-#include <StEEmcDbMaker/EEmcDbItem.h>
-#include <StEEmcDbMaker/EEmcDbCrate.h>
+#include <StEEmcUtil/database/StEEmcDb.h>
+#include <StEEmcUtil/database/EEmcDbItem.h>
+#include <StEEmcUtil/database/EEmcDbCrate.h>
 
 
 // BTOW stuff
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEmcUtil/database/StBemcTables.h"
-#include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 
 // StEvent
 #include "StEventTypes.h"
@@ -96,7 +96,7 @@ StGenericL2Emulator::~StGenericL2Emulator(){
 void StGenericL2Emulator::init(){
   mTotInpEve=0;   
   //................EEMC stuff ..............
-  mDbE= (StEEmcDbMaker*) StMaker::GetChain()-> GetMaker("eemcDb");
+  mDbE = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb");
   assert(mDbE);
   mGeomB = StEmcGeom::instance("bemc");
   //....
@@ -532,6 +532,9 @@ const unsigned int * StGenericL2Emulator::result() const {
 }
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.17  2009/02/04 20:26:22  rfatemi
+// Update include for StEmcDecoder as well as access to StEEmc
+//
 // Revision 1.16  2008/10/14 00:53:12  balewski
 // allow production of bin.eve files from 2008 pp data to be used by L2-algos
 //
