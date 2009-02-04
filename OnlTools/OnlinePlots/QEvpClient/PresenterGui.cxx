@@ -68,7 +68,7 @@ static TQtBrowserMenuItem_t gMenu_Data[] = {
 };
 
 //------------------------------------------------------------------------
-PresenterGui::PresenterGui() : 
+PresenterGui::PresenterGui(bool isRefWindow) : 
   QMainWindow( 0, "example application main window", WDestructiveClose | WGroupLeader ), 
   mWidth(400), mHight(500), mStrLive(" Live  "), mStrFile(" File  "), mStrRun("Running"), mStrStop("Stopped")
   , mUpdater(0),fGuiRefreshRate(10)
@@ -93,6 +93,10 @@ PresenterGui::PresenterGui() :
 
   MakeActions();
   MakeMenuBar();
+
+  if(isRefWindow) {
+    ShowToolBar(false);
+  }
   //
   // Mother Frame for canvas tabs is defined here
   //
@@ -153,9 +157,17 @@ PresenterGui::PresenterGui() :
 
  fTab->showPage(fStaticTab);
 
-  setCaption("STAR Histogram Presenter");
+  if(isRefWindow)
+    setCaption("Histogram Reference");
+  else {
+    setCaption("STAR Histogram Presenter");
 
-
+    fActions[kLive]->setOn(true);
+    emit live();
+    // Adjust the GUI refresh rate msec.
+    fGuiRefreshRate = gEnv->GetValue("Online.GuiRefreshRate",100);
+    fActions[kAutoUpdate]->setOn(true);
+  }
   
   
   //emit update(GetCanvas(), GetTabId(), GetSubTabId() );
@@ -165,11 +177,6 @@ PresenterGui::PresenterGui() :
   //emit currentChanged(first);
   
 
-  fActions[kLive]->setOn(true);
-  emit live();
-  // Adjust the GUI refresh rate msec.
-  fGuiRefreshRate = gEnv->GetValue("Online.GuiRefreshRate",100);
-  fActions[kAutoUpdate]->setOn(true);
   QTimer::singleShot (0,this,SLOT(GetNextEvent()));
 }
 

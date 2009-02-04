@@ -122,7 +122,7 @@ private:
     void StopEventLoop();
  public:
 
-    PresenterGui();
+    PresenterGui(bool isRefWindow = false);
     virtual ~PresenterGui();
 
     // getters for static tabs
