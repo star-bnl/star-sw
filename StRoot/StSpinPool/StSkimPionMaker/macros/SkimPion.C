@@ -25,8 +25,8 @@ void SkimPion(const char* fileList, const char* fileId="Skim.root") {
     gSystem->Load("StDbUtilities");
     gSystem->Load("StDbBroker");
     gSystem->Load("St_db_Maker");
-    gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StEEmcUtil");
+    gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StarMagField");
     gSystem->Load("geometry");
     gSystem->Load("St_g2t");
