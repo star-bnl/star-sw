@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: QExGeoDrawHelper.cxx,v 1.3 2009/01/21 18:58:59 fine Exp $
+** $Id: QExGeoDrawHelper.cxx,v 1.4 2009/02/04 20:10:13 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -207,7 +207,7 @@ TVolume *TGeoDrawHelper::MakeCompositeShape(const TGeoCompositeShape *top)
 
       // if (!top->IsVolumeMulti())    
       TString title = top->GetTitle();
-      if (title.IsNull() ) title = top->GetName();
+      if (title.IsNull() ) title = top->ClassName();
 
       TGeoBoolNode *shapeNode = top->GetBoolNode();
       if (shapeNode) { 
@@ -224,10 +224,13 @@ TVolume *TGeoDrawHelper::MakeCompositeShape(const TGeoCompositeShape *top)
             const Double_t   *rotation  = geoMatrix->GetRotationMatrix();
             TRotMatrix *matrix          = geoMatrix->IsIdentity() ? 0 : GetMatrix(rotation);
             TVolume *nextVolume = 0;
-            if ( geoShape[i]->IsComposite() )  
+            if ( geoShape[i]->IsComposite() )  {
                 nextVolume = MakeCompositeShape((TGeoCompositeShape *)geoShape[i]);
-            else 
-                nextVolume = new TVolume(top->GetName(),title,MakeShape(geoShape[i]));
+            } else  {
+  	        title = geoShape[i]->GetTitle();
+	        if (title.IsNull() ) title = geoShape[i]->ClassName();
+                nextVolume = new TVolume(geoShape[i]->GetName(),title,MakeShape(geoShape[i]));
+            }
             topCompositeVolume->Add(nextVolume, trans[0],trans[1],trans[2],matrix, 999);
          }  
       } 
@@ -254,7 +257,7 @@ TVolume *TGeoDrawHelper::MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVol
          }
       }
       TString title = top->GetTitle();
-      if (title.IsNull() ) title = top->GetName();
+      if (title.IsNull() ) title = top->ClassName();
       topVolume = new TVolume(top->GetName(),title,thisShape); 
       topVolume->SetLineColor(top->GetLineColor()); topVolume->SetLineStyle(top->GetLineStyle());
       topVolume->SetLineWidth(top->GetLineWidth()); topVolume->SetFillColor(top->GetLineColor());
