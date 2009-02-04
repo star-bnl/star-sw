@@ -27,8 +27,8 @@ void rdMu2binL2eve( int nevents = 100,
   assert( !gSystem->Load("StDbUtilities"));
   assert( !gSystem->Load("StDbBroker"));
   assert( !gSystem->Load("St_db_Maker"));
-  assert( !gSystem->Load("StEEmcDbMaker"));
   assert( !gSystem->Load("StEEmcUtil")); // needed by eemcDb
+  assert( !gSystem->Load("StEEmcDbMaker"));
   assert( !gSystem->Load("StDaqLib")); // needed by bemcDb
   assert( !gSystem->Load("StEmcRawMaker"));
   assert( !gSystem->Load("StEmcADCtoEMaker"));

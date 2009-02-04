@@ -29,8 +29,8 @@ void rdMu2TrigSimu(char *file="/star/data47/reco/pp200/pythia6_410/9_11gev/cdf_a
   assert( !gSystem->Load("StDbUtilities"));
   assert( !gSystem->Load("StDbBroker"));
   assert( !gSystem->Load("St_db_Maker"));
-  assert( !gSystem->Load("StEEmcDbMaker"));
   assert( !gSystem->Load("StEEmcUtil")); // needed by eemcDb
+  assert( !gSystem->Load("StEEmcDbMaker"));
   assert( !gSystem->Load("StDaqLib")); // needed by bemcDb
   assert( !gSystem->Load("StEmcRawMaker"));
   assert( !gSystem->Load("StEmcADCtoEMaker"));
