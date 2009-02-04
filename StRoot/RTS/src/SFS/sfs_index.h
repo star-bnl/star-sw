@@ -50,7 +50,12 @@ class SFS_ittr {
   char ppath[256];
   char fullpath[256];
 
+#ifdef __USE_LARGEFILE64
   long long int fileoffset;  // from start of file.
+#else
+  int fileoffset
+#endif
+
   int filepos;  // 0 start of header, 1 end of header, 2 end of file record, -1 at end of file system
   int skipped_bytes;   // bytes skipped due to ignored info...
 
@@ -60,7 +65,12 @@ class SFS_ittr {
     skipped_bytes = 0;
   };
 
-  SFS_ittr(long long int offset) {
+#ifdef __USE_LARGEFILE64
+  SFS_ittr(long long int offset) 
+#else
+  SFS_ittr(int offset);
+#endif
+  {
     fileoffset = offset;
   };
 
@@ -111,11 +121,19 @@ class sfs_index : public fs_index {
 
   int singleDirMount;
   SFS_ittr *singleDirIttr;
+
+#ifdef __USE_LARGEFILE64
   int mountSingleDir(char *fn, long long int offset=0);
+  int getSingleDirSize(char *fn, long long int offset);
+#else
+  int mountSingleDir(char *fn, int offset=0);
+  int getSingleDirSize(char *fn, int offset);
+#endif
+
   int mountSingleDirMem(char *buff, int size);
   int mountSingleDir();
   int mountNextDir();
-  int getSingleDirSize(char *fn, long long int offset);
+
 
   sfs_index();
   int _create();
@@ -134,8 +152,14 @@ class sfs_index : public fs_index {
 
   void addnode(SFS_ittr *ittr);
  
+#ifdef __USE_LARGEFILE64
   fs_inode *add_inode(fs_inode *parent, char *name, long long int offset, int sz);
   fs_inode *add_inode_from(fs_inode *neighbor, char *name, long long int offset, int sz);
+#else 
+  fs_inode *add_inode(fs_inode *parent, char *name, int offset, int sz);
+  fs_inode *add_inode_from(fs_inode *neighbor, char *name, int offset, int sz);
+#endif
+
   fs_inode *find_last_lesser_child(fs_inode *parent, char *name, int &first, int &eq);
   fs_inode *find_last_lesser_neighbor(fs_inode *neighbor, char *name, int &eq);
   void dump(char *path, fs_inode *inode);

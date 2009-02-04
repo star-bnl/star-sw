@@ -22,17 +22,25 @@
 int SFS_ittr::findEventNumber()
 {
   int ret;
+#ifdef __USE_LARGEFILE64
   long long int orig_pos = wfile->lseek(0, SEEK_CUR);
-
   LOG(DBG, "findEventNumber: pos=%lld",orig_pos);
+#else
+  int orig_pos = wfile->lseek(0, SEEK_CUR);
+  LOG(DBG, "findEventNumber: pos=%d",orig_pos);
+#endif
 
   char buff[12];
   for(;;) {
     ret = wfile->read(buff, 8);
     if(ret == 0) { ret = 0; break; }
     if(ret != 8) { ret = -1; break; }
-    
+
+#ifdef __USE_LARGEFILE64    
     wfile->lseek(-((long long int)8), SEEK_CUR);
+#else
+    wfile->lseek(-8, SEEK_CUR);
+#endif
     
     if(memcmp(buff, "SFS V", 5) == 0) {
       wfile->lseek(12, SEEK_CUR);
@@ -116,7 +124,12 @@ int SFS_ittr::findFullLength()
   LOGREC lrhd;
   //  int orig_pos = wfile->lseek(0, SEEK_CUR);
   
+#ifdef __USE_LARGEFILE64
   wfile->lseek(-((long long int)sizeof(lrhd)),SEEK_CUR);
+#else 
+  wfile->lseek(-(sizeof(lrhd)),SEEK_CUR);
+#endif
+
   int ret = wfile->read(&lrhd, sizeof(lrhd));
   
   if(ret != sizeof(lrhd)) {
@@ -144,11 +157,19 @@ int SFS_ittr::nextLRHD()
     return -1;
   }
 
+#ifdef __USE_LARGEFILE64
   long long int xxx = wfile->lseek(-((long long int)sizeof(lrhd)),SEEK_CUR);  // go back to start...
-
   LOG(DBG, "nextLRHD():  (%c%c%c%c) off=%lld",
       lrhd.lh.bank_type[0],lrhd.lh.bank_type[1],
       lrhd.lh.bank_type[2],lrhd.lh.bank_type[3], xxx);
+#else 
+  int xxx = wfile->lseek(-(sizeof(lrhd)),SEEK_CUR);  // go back to start...
+  LOG(DBG, "nextLRHD():  (%c%c%c%c) off=%d",
+      lrhd.lh.bank_type[0],lrhd.lh.bank_type[1],
+      lrhd.lh.bank_type[2],lrhd.lh.bank_type[3], xxx);
+#endif
+
+
 
   if(memcmp(lrhd.lh.bank_type, "LRHD", 4) != 0) {
     LOG(ERR, "nextLRHD() not LRHD %c%c%c%c",
@@ -186,8 +207,14 @@ int SFS_ittr::nextLRHD()
   int ccc = wfile->lseek(0,SEEK_CUR);
 
   filepos = 1;
+
+#ifdef __USE_LARGEFILE64
   LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %lld (%d)/%d, sz %d  head_sz %d",
       fullpath, entry.name, fileoffset, ccc, filepos, entry.sz, entry.head_sz);
+#else  
+  LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %d (%d)/%d, sz %d  head_sz %d",
+      fullpath, entry.name, fileoffset, ccc, filepos, entry.sz, entry.head_sz);
+#endif
 
   return 0;
 }
@@ -216,9 +243,13 @@ int SFS_ittr::nextDatap()
     return -1;
   }
 
+#ifdef __USE_LARGEFILE64
   wfile->lseek(-((long long int)8),SEEK_CUR);
-
   wfile->lseek(-((long long int)sizeof(DATAP)), SEEK_CUR);
+#else
+  wfile->lseek(-8,SEEK_CUR);
+  wfile->lseek(-sizeof(DATAP), SEEK_CUR);
+#endif
   
   if(memcmp(buff, "FILE", 4) == 0) {  // SFS follows, so no legacy...
     LOG(DBG, "No legacy because SFS follows");

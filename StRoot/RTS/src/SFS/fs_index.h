@@ -68,8 +68,16 @@ class wrapfile {
   int openfd(int fd);
   int read(void *buff, int sz);
   int write(void *buff, int sz);
+
+
+#ifdef __USE_LARGEFILE64
   long long int lseek(long long int offset, int whence);
   int fstat(struct stat64 *stat);
+#else
+  int lseek(int offset, int whence);
+  int fstat(struct stat *stat);
+#endif
+
   int close();
 };
 
@@ -109,7 +117,12 @@ class fs_index {
   int mount(int ip, int port) ;			// opens and mounts a socket
 
   void umount();
+
+#ifdef __USE_LARGEFILE64
   long long int mountsz();
+#else
+  int mountsz();
+#endif
 
   static void hexdump(char *buff, int sz);
 
@@ -150,7 +163,11 @@ class fs_index {
 
   fs_inode *find_child(fs_inode *parent, char *name);
   void free_inode(fs_inode *inode);
+#ifdef __USE_LARGEFILE64
   fs_inode *alloc_inode(char *name, long long int off, int sz);
+#else
+  fs_inode *alloc_inode(char *name, int off, int sz);
+#endif
 
   virtual int _create()=0;    // create index for reading...
   int index_created;
