@@ -54,6 +54,8 @@ class GroupCollection : public set<HistogramGroup*,Alpha > {
   unsigned int numberOfActiveGroups();
   HistogramGroup* get(const char* group);   // find the group in group vector
   HistogramGroup* read(TMapFile*, const char* group);   // read that group from memory mapped file
+  HistogramGroup* read(GenericFile*, const char* group);
+  HistogramGroup* read(TFile*, const char* group); 
   void serverCreate();
  private:
   void printName(TCanvas* cc, HistogramGroup* gr);

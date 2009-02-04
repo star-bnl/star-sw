@@ -72,7 +72,8 @@ class EvpPresenter : public QObject {
 
  private:
 
- TMapFile *mfile;
+// TMapFile *mfile;
+ GenericFile* mfile;
  RunStatus* mRS;
  ServerStatus* mSS;
  GroupCollection mGroups;
@@ -113,6 +114,7 @@ class EvpPresenter : public QObject {
  public:
 
  EvpPresenter();
+ EvpPresenter(const char*);
  virtual ~EvpPresenter();
 
  int file_uploaded; // flag if pdf file was uploaded into database; yes=1, no=0, error=-1
@@ -170,7 +172,7 @@ class EvpPresenter : public QObject {
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.h,v 1.2 2009/01/31 00:30:33 fine Exp $
+ * $Id: EvpPresenter.h,v 1.3 2009/02/04 03:43:10 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -180,6 +182,9 @@ class EvpPresenter : public QObject {
  ***************************************************************************
  *
  * $Log: EvpPresenter.h,v $
+ * Revision 1.3  2009/02/04 03:43:10  dkettler
+ * Addes Reference Plot Option
+ *
  * Revision 1.2  2009/01/31 00:30:33  fine
  * Major clean up: Remove the redundant time thread, redundant methods, add protection agaist of crashes, introdcue the new rootrc paramater: Online.GuiRefreshRate, load some shared in batch mode only
  *

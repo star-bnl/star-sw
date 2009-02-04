@@ -27,6 +27,16 @@ EvpPresenter::EvpPresenter() : mfile(0), mLastDrawnCanvas(0) {
   SetDefaults();
 
 }
+//------------------------------------------------------------------------
+EvpPresenter::EvpPresenter(const char* file) :  mfile(0), mLastDrawnCanvas(0) {
+  sprintf(mMapFile,"%s",EvpUtil::mMapFilePath);
+  mRS = new RunStatus();
+  mSS = new ServerStatus();
+  // Some preparations here
+  // Here is starting directory name
+  SetDefaults();
+  SetSource(file);
+}
 
 //----------------------------------------------------------------
 EvpPresenter::~EvpPresenter() {
@@ -51,13 +61,20 @@ void EvpPresenter::SetSource(const char* file)  {
 //--------------------------------------------------------------
 void EvpPresenter::Disconnect() {
   cout << __PRETTY_FUNCTION__ << endl;
-  mfile->RemoveAll();
-  mfile->Close();
-  mGroups.remove();
-  //delete mfile;
+
+  if(mfile) {
+    if(mfile->mapFile()) {
+      TMapFile* mapfile = (TMapFile* ) mfile->file();
+      mapfile->RemoveAll();
+      mapfile->Close();
+    }
+    mGroups.remove();
   
-  mfile = 0;
-  *mRS  = RunStatus();
+    delete mfile;
+    
+    mfile = 0;
+    *mRS  = RunStatus();
+  }
   cout << __PRETTY_FUNCTION__ << endl;
 }
 //--------------------------------------------------------------
@@ -71,13 +88,22 @@ void EvpPresenter::Connect() {
   if ( !mfile) {
     cout << mMapFile << endl;
     //mfile = TMapFile::Create("evpEventServer.map");
-    mfile = TMapFile::Create(mMapFile,"READ",EvpUtil::mSharedMemorySize);
-    if (!mfile || mfile->IsZombie() ) {
-      cerr << " ### error ### Can not map file: evpEventServer.map" << endl;
-      exit(-1);
+
+    // Determine file type
+    QString file = mMapFile;
+    if ( file.find(".map") < 0 ) {
+      TFile* rfile = new TFile(mMapFile);
+      mfile = new GenericFile(rfile);
+    } else {
+      TMapFile* mapfile = TMapFile::Create(mMapFile,"READ",EvpUtil::mSharedMemorySize);
+      if (!mapfile || mapfile->IsZombie() ) {
+        cerr << " ### error ### Can not map file: evpEventServer.map" << endl;
+        exit(-1);
+      }
+      mapfile->Print();
+      EvpUtil::CheckCanvasDefinitions(mapfile);
+      mfile = new GenericFile(mapfile);
     }
-    mfile->Print();
-    EvpUtil::CheckCanvasDefinitions(mfile);
     mGroups.read(mfile);
   }
 
@@ -100,8 +126,6 @@ void EvpPresenter::NextEvent() {
   needsUpdate = false;
   bool runStatusChanged = false;
   
-  mfile->Print();
-
   mRS = (RunStatus*) mfile->Get("RunStatus",mRS);
   if ( !mRS ) {
     cerr << " ### error ### can not find RunStatus " << endl;
@@ -181,9 +205,10 @@ void EvpPresenter::Draw(TCanvas* gcc, int  tab, int subTab) {
   if ( mLastDrawnCanvas != gcc ) needsUpdate = true;
   if ( !needsUpdate ) return;
   
-  GenericFile* gen = new GenericFile(mfile);
-  EvpUtil::DisplayOneCanvas(gen,gcc,tab,subTab);
-  delete gen;
+//  GenericFile* gen = new GenericFile(mfile);
+//  EvpUtil::DisplayOneCanvas(gen,gcc,tab,subTab);
+//  delete gen;
+  EvpUtil::DisplayOneCanvas(mfile,gcc,tab,subTab);
   mLastDrawnCanvas = gcc;
 }
 
@@ -222,7 +247,13 @@ void EvpPresenter::Save(const char* file){
     }
   }
   cout << " filename " << filename << endl;
-  EvpUtil::Map2Root(mfile,filename);
+  if(mfile->mapFile()) {
+    TMapFile* mapfile = (TMapFile*) mfile->file();
+    EvpUtil::Map2Root(mapfile,filename);
+  } else {
+    TFile* rfile = (TFile*) mfile->file();
+    rfile->Write(filename);
+  }
 }
 
 void EvpPresenter::SaveAll(){
@@ -412,7 +443,7 @@ void EvpPresenter::ClosePresenter()
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.cxx,v 1.4 2009/02/04 01:26:15 dkettler Exp $
+ * $Id: EvpPresenter.cxx,v 1.5 2009/02/04 03:43:10 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -422,6 +453,9 @@ void EvpPresenter::ClosePresenter()
  ***************************************************************************
  *
  * $Log: EvpPresenter.cxx,v $
+ * Revision 1.5  2009/02/04 03:43:10  dkettler
+ * Addes Reference Plot Option
+ *
  * Revision 1.4  2009/02/04 01:26:15  dkettler
  * Remove ONLINEPLOTSDIR reference
  *
