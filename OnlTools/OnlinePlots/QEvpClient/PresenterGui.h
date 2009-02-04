@@ -43,7 +43,7 @@ class TQtZoomPadWidget;
 
 using namespace std;
 
-enum { kFileSave, kFileSaveAs, kFilePrint, kFilePrintAll, kFileExit, kHelpAbout, kLive, kFile, kUpdate, kAutoUpdate, kToolBar, kOnlPrinter2, kBits}; 
+enum { kFileSave, kFileSaveAs, kFilePrint, kFilePrintAll, kFileExit, kHelpAbout, kLive, kFile, kUpdate, kAutoUpdate, kToolBar, kOnlPrinter2, kBits, kReference}; 
 
 // ************************************************************************
 class PresenterGui : public QMainWindow
@@ -156,6 +156,7 @@ public slots:
      void setEventInfo(int run, int event, int count, int token,  unsigned int triggerBits,  unsigned int detectorBits, unsigned int triggerBitsRun , unsigned int detectorBitsRun );
      void setServerInfo(ServerStatus*);
      void onlPrinter2();
+     void OpenReference();
      void updateRequest();
     void CloseWindow(void);
     void DefineLayouts(void);
@@ -194,6 +195,7 @@ public slots:
       void subTab(int);
       void canvas(TCanvas*);
       void nextEvent();
+      void openReference();
 };
 //************************************************************************
 

@@ -47,20 +47,21 @@ char* mystrcat(const char* a, const char* b) {
 static TQtBrowserMenuItem_t gMenu_Data[] = {
   // { filename,      tooltip,            staydown,  id,              button}
 /* File Menu */
-  { "&Save",      kFileSave,     Qt::CTRL+Qt::Key_S, "Save histograms in root file",        mystrcat( getenv("ONLINEPLOTSDIR"),"/images/save.xpm")    },
-  { "Save &As",   kFileSaveAs,   0,                  "Save histograms in root file as ... ",mystrcat( getenv("ONLINEPLOTSDIR"),"/images/hdisk_t.xpm") },
-  { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            mystrcat( getenv("ONLINEPLOTSDIR"),"/images/printer.xpm") },
-  { "&Print All", kFilePrintAll, 0,                  "Print the TCanvas image ",            mystrcat( getenv("ONLINEPLOTSDIR"),"/images/printer.xpm") },
-  { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       mystrcat( getenv("ONLINEPLOTSDIR"),"/images/printer.xpm") },
-  { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           mystrcat( getenv("ONLINEPLOTSDIR"),"/images/quit.xpm")    },
+  { "&Save",      kFileSave,     Qt::CTRL+Qt::Key_S, "Save histograms in root file",        mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/save.xpm")    },
+  { "Save &As",   kFileSaveAs,   0,                  "Save histograms in root file as ... ",mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/hdisk_t.xpm") },
+  { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
+  { "&Print All", kFilePrintAll, 0,                  "Print the TCanvas image ",            mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
+  { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
+  { "&Reference", kReference,    Qt::CTRL+Qt::Key_R, "Open reference plots ... ",           mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
+  { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/quit.xpm")    },
 
   { "About",      kHelpAbout,      0, "", ""},
 
-  { "&Live",      kLive,         Qt::CTRL+Qt::Key_L, "Connect to current run ... ",          mystrcat( getenv("ONLINEPLOTSDIR"),"/images/connect.xpm")  },
-  { "&File",      kFile,         Qt::CTRL+Qt::Key_F, "Open datafile or directory ... ",      mystrcat( getenv("ONLINEPLOTSDIR"),"/images/fileopen.xpm") },
-  { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      mystrcat( getenv("ONLINEPLOTSDIR"),"/images/update.xpm")   },
-  { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   mystrcat( getenv("ONLINEPLOTSDIR"),"/images/update.xpm")   },  
-  { "&bits",kBits,   Qt::CTRL+Qt::Key_B, "Show Trigger and Detector bits",                   mystrcat( getenv("ONLINEPLOTSDIR"),"/images/bits.xpm")   },
+  { "&Live",      kLive,         Qt::CTRL+Qt::Key_L, "Connect to current run ... ",          mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/connect.xpm")  },
+  { "&File",      kFile,         Qt::CTRL+Qt::Key_F, "Open datafile or directory ... ",      mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
+  { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/update.xpm")   },
+  { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/update.xpm")   },  
+  { "&bits",kBits,   Qt::CTRL+Qt::Key_B, "Show Trigger and Detector bits",                   mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/bits.xpm")   },
   { "View Toolbar",     kToolBar,        0, "show toolbar ",                            "" },
 
   {0,0,0,"",""}
@@ -434,6 +435,7 @@ void PresenterGui::MakeMenuBar()
    fActions[kFilePrint]->addTo(fileMenu); 
    fActions[kFilePrintAll]->addTo(fileMenu); 
    fActions[kOnlPrinter2]->addTo(fileMenu); 
+   fActions[kReference]->addTo(fileMenu);
    fileMenu->insertSeparator();
    fActions[kFileExit]->addTo(fileMenu); 
 
@@ -473,6 +475,7 @@ void PresenterGui::MakeMenuBar()
    fActions[kFilePrint]->setText("Print");
    fActions[kFilePrintAll]->setText("Print all");
    fActions[kOnlPrinter2]->setText("onlPrinter2");
+   //fActions[kReference]->setText("Reference");
    fActions[kFileExit]->setText("Exit");
    fActions[kLive]->setText("Live");
    fActions[kUpdate]->setText("Update");
@@ -694,6 +697,7 @@ void  PresenterGui::ProcessMessage()
    case kFileExit:         QuitCB();         break;
    case kHelpAbout:        AboutCB();        break;
    case kOnlPrinter2:      onlPrinter2();    break;
+   case kReference:        OpenReference();  break;
  
    default:                                  break;
 
@@ -741,6 +745,11 @@ void  PresenterGui::onlPrinter2()
     cout << "print command: " << cmd << endl;
     gSystem->Exec(cmd);
   }
+}
+//______________________________________________________________________________
+void  PresenterGui::OpenReference()
+{
+  emit openReference();
 }
 //______________________________________________________________________________
 void  PresenterGui::QuitCB()

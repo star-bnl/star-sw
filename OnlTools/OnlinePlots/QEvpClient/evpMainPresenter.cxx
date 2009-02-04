@@ -24,7 +24,7 @@ int evpMainPresenter::main(int argc, char **argv )
     cout << " shared memory file set to " << EvpUtil::mMapFilePath << endl;
   }
 
-     TMapFile* mfile = TMapFile::Create(EvpUtil::mMapFilePath,"READ",EvpUtil::mSharedMemorySize);
+//     TMapFile* mfile = TMapFile::Create(EvpUtil::mMapFilePath,"READ",EvpUtil::mSharedMemorySize);
 
     PresenterGui* gui = new PresenterGui();
 

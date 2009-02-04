@@ -19,6 +19,7 @@ PresenterConnect::PresenterConnect(PresenterGui* gui, EvpPresenter* pre) :
   connect(mGui,SIGNAL(save()), this, SLOT(save()) ); 
   connect(mGui,SIGNAL(saveAs()), this, SLOT(saveAs()) ); 
   connect(mGui,SIGNAL(print()), this, SLOT(print()) ); 
+  connect(mGui,SIGNAL(openReference()), this, SLOT(openReference()) ); 
 
   connect(mGui,SIGNAL( tab(int) ),         this, SLOT( setTab(int)) ); 
   connect(mGui,SIGNAL( subTab(int) ),      this, SLOT( setSubTab(int)) ); 
@@ -88,6 +89,29 @@ void PresenterConnect::file() {
 
   mPresenter->SetSource( mapFile.ascii() );
   emit updateRequest();
+}
+
+void PresenterConnect::openReference() {
+  cout << "Opening reference" << endl;
+  PresenterGui* gui2 = new PresenterGui();
+  gui2->resize(500,500);
+  gui2->show();
+  EvpUtil::ReadCanvasDefinitions();
+  EvpPresenter* presenter2 = new EvpPresenter();
+  PresenterConnect* con2 = new PresenterConnect(gui2,presenter2);
+
+//  QString file = "/home/dkettler/test/run10029077.root";
+//  QString mapFile = file;
+//  mapFile.replace(".root",".map");
+//  int iret = EvpUtil::Root2Map(file,mapFile);
+//  
+//  if (iret) {
+//    cerr << "### error ### Can not open file : " << mapFile << endl;
+//    return;
+//  }
+
+//  QString mapFile = "/a/pplot/histos/run10031084.map";
+  presenter2->SetSource( EvpUtil::mReference );
 }
    
 void PresenterConnect::update() {
