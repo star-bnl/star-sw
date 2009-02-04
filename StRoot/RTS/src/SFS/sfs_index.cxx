@@ -149,8 +149,13 @@ int SFS_ittr::next()
   //if(legacy) return legacy_next();
   skipped_bytes = 0;
 
+#ifdef __USE_LARGEFILE64
   LOG(DBG, "Calling next:  fileoffset=%lld filepos=%d",fileoffset,filepos);
   long long int ret;
+#else
+  LOG(DBG, "Calling next:  fileoffset=%d filepos=%d",fileoffset,filepos);
+  int ret;
+#endif
 
   //printf("ittr next\n");
 
@@ -216,13 +221,17 @@ int SFS_ittr::next()
       return -1;
     }
 
-    wfile->lseek(-((long long int)8), SEEK_CUR);
-
-
-    long long int xxx = wfile->lseek(0,SEEK_CUR);
     buff[5] = 0;
-    LOG(DBG, "fileoffset=%lld xxx=%lld buff=%s",fileoffset,xxx,buff);
 
+#ifdef __USE_LARGEFILE64
+    wfile->lseek(-((long long int)8), SEEK_CUR);
+    long long int xxx = wfile->lseek(0,SEEK_CUR);
+    LOG(DBG, "fileoffset=%lld xxx=%lld buff=%s",fileoffset,xxx,buff);
+#else
+    wfile->lseek(-8, SEEK_CUR);
+    int xxx = wfile->lseek(0,SEEK_CUR);
+    LOG(DBG, "fileoffset=%d xxx=%d buff=%s",fileoffset,xxx,buff);
+#endif
 
     if(memcmp(buff, "SFS V", 5) == 0) {
       //if(debug) LOG(DBG,"Found SFS version");
@@ -235,11 +244,7 @@ int SFS_ittr::next()
     if(memcmp(buff, "LRHD", 4) == 0) {
       //if(debug) LOG(DBG,"Found LRHD");
 
-      LOG(DBG, "BFR LRHD %lld %lld",wfile->lseek(0,SEEK_CUR),fileoffset);
-
       if(nextLRHD() >= 0) {  // good data LRHD... got entry...
-	LOG(DBG, "AFTR LRHD %lld %lld",wfile->lseek(0,SEEK_CUR), fileoffset);
-     
 	LOG(DBG, "lrhd entry.sz = %d",entry.sz);
 	return 0;
       }
@@ -365,8 +370,13 @@ int SFS_ittr::next()
     strcat(fullpath, entry.name);
   }
 
+#ifdef __USE_LARGEFILE64
   LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %lld/%d, sz %d  head_sz %d",
       fullpath, entry.name, fileoffset, filepos, entry.sz, entry.head_sz);
+#else
+  LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %d/%d, sz %d  head_sz %d",
+      fullpath, entry.name, fileoffset, filepos, entry.sz, entry.head_sz);
+#endif
 
   filepos = 1;
   return 0;
@@ -596,6 +606,7 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
        (errno != EAGAIN)) {
       
       LOG(ERR, "Error on writev (%s)",strerror(errno));
+      return -1;
     }
   
     ret = 0;
@@ -620,7 +631,13 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
       if(nstart<0) nstart = 0;
     }
 
+    // only returns < 0 on hard error...,  
+    // return of 0 is valid, but results in retry
     int ret2 = writev_call_retry(fd, iovec_new, vec_new);
+
+    // errno should still be set to the real failure reason, 
+    // the error has already been logged in the previous call
+    if(ret2 < 0) return -1;
 
     ret += ret2;
     LOG(NOTE, "writev retry returned %d (retry was %d)",ret,ret2);
@@ -707,23 +724,8 @@ int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
 	all_size += iovec[i].iov_len ;
   }
 
-  // int ret = ::writev(wfile.fd, iovec, vec);     // This can be interrupted
+  // This can not be interrupted, except by hard error!
   int ret = writev_call_retry(wfile.fd, iovec, vec);
-  if(ret != all_size) {
-	LOG(ERR,"writev expects %d, sent %d",all_size,ret) ;
-  
-  	// supposedly write always writes at least full buffers so let's see if this is tru...
-  	int so_far = 0 ;
-  	for(int i=0;i<vec;i++) {
-		so_far += iovec[i].iov_len ;
-		if(so_far == ret) {
-			LOG(TERR,"Managed to write %th buffer fully! Need to repeat!",i) ;
-		}
-		else {
-			LOG(TERR,"Trying after buffer %d: have %d, need %d",i,so_far,ret) ;
-		}
-  	}
-  }
 
   return ret;
 }
@@ -749,7 +751,11 @@ int sfs_index::mountSingleDirMem(char *buffer, int size)
 // returns -1 on error
 // returns 0 on eof
 // returns 1 on valid dir
+#ifdef __USE_LARGEFILE64
 int sfs_index::mountSingleDir(char *fn, long long int offset)
+#else
+int sfs_index::mountSingleDir(char *fn, int offset)
+#endif
 {
   LOG(DBG,"the spec is: " __DATE__ ":" __TIME__);
 
@@ -762,13 +768,21 @@ int sfs_index::mountSingleDir(char *fn, long long int offset)
   return mountSingleDir();
 }
 
+#ifdef __USE_LARGEFILE64
 int sfs_index::getSingleDirSize(char *fn, long long int offset)
+#else
+int sfs_index::getSingleDirSize(char *fn, int offset)
+#endif
 {
   char topdir[40];
   int topdirlen=0;
   topdir[0] = '\0';
 
+#ifdef __USE_LARGEFILE64
   LOG(DBG, "singledirdize file=%s, offset=%lld",fn,offset);
+#else 
+  LOG(DBG, "singledirdize file=%s, offset=%d",fn,offset);
+#endif
 
   wfile.close();
   wfile.opendisk(fn, O_RDONLY);
@@ -829,7 +843,11 @@ int sfs_index::mountSingleDir()   // mounts from current position of wfile...
 {
   if(singleDirIttr) delete singleDirIttr;
   
+#ifdef __USE_LARGEFILE64
   long long int offset = wfile.lseek(0,SEEK_CUR);
+#else
+  int offset = wfile.lseek(0,SEEK_CUR);
+#endif
 
   singleDirMount = 1;
   singleDirIttr = new SFS_ittr(offset);
@@ -978,7 +996,11 @@ void sfs_index::addnode(SFS_ittr *ittr)
   char thispathonly[256];
   char *next[20];
 
+#ifdef __USE_LARGEFILE64
   LOG(DBG, "addnode: %s %lld %d",ittr->fullpath, ittr->fileoffset, ittr->filepos);
+#else
+  LOG(DBG, "addnode: %s %d %d",ittr->fullpath, ittr->fileoffset, ittr->filepos);
+#endif
 
   if(ittr->entry.attr == SFS_ATTR_INVALID) return;
   
@@ -1019,7 +1041,12 @@ void sfs_index::dump(char *path, fs_inode *inode) {
     curr = curr->next;
   }
 }
+
+#ifdef __USE_LARGEFILE64
 fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, long long int offset, int sz)
+#else
+fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int sz)
+#endif
 {
   int eq=0;
 
@@ -1041,7 +1068,11 @@ fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, long long int of
   return newn;
 }
 
+#ifdef __USE_LARGEFILE64
 fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, long long int offset, int sz)
+#else
+fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, int offset, int sz)
+#endif
 {
   int eq=0;
   int first=0;

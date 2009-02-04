@@ -133,13 +133,24 @@ int fs_mount(int argc, char *argv[])
     sprintf(fn,"%s/%s",pwd,argv[1]);
   }
 
+#ifdef __USE_LARGEFILE64
   struct stat64 filestat;
-  if(stat64(fn,&filestat) < 0) {
+  if(stat64(fn,&filestat) < 0) 
+#else
+  struct stat filestat;
+  if(stat(fn,&filestat) < 0) 
+#endif
+  {
     printf("Error reading file %s: %s\n",fn,strerror(errno));
     return 1;
   }
   
+#ifdef __USE_LARGEFILE64
   idx_fd = open64(fn, O_RDONLY);
+#else
+  idx_fd = open(fn, O_RDONLY);
+#endif
+ 
   if(idx_fd < 0) {
     printf("Error reading file %s\n",fn);
     strcpy(g_filename, "NONE");
@@ -171,7 +182,13 @@ int fs_mount(int argc, char *argv[])
 
   idx->mount(fn, O_RDONLY);
   t = record_time();
+
+#ifdef __USE_LARGEFILE64
   printf("Mounted file %s: %lld bytes in %5.2f sec\n",fn,filestat.st_size,t);
+#else
+  printf("Mounted file %s: %d bytes in %5.2f sec\n",fn,filestat.st_size,t);
+#endif
+
   //write_env("MOUNT", fn);
   //write_env("PWD", "/");
 
@@ -252,15 +269,29 @@ int fs_cat(int argc, char *argv[])
     return -1;
   }
 
+#ifdef __USE_LARGEFILE64
   long long int ret = lseek(idx_fd, entry->offset, SEEK_SET);
+#else
+  int ret = lseek(idx_fd, entry->offset, SEEK_SET);
+#endif
+
   if(ret != entry->offset) {
+#ifdef __USE_LARGEFILE64
     printf("Invalid seek %lld vs %lld  (%s)\n",ret,entry->offset,strerror(errno));
+#else
+    printf("Invalid seek %d vs %d  (%s)\n",ret,entry->offset,strerror(errno));
+#endif
+
     return -1;
   }
 
   ret = read(idx_fd, buff, entry->sz);
   if(ret != entry->sz) {
+#ifdef __USE_LARGEFILE64
     printf("Error reading file %lld vs %d\n", ret, entry->sz);
+#else
+    printf("Error reading file %d vs %d\n", ret, entry->sz);
+#endif
     return -1;
   }
 
@@ -270,7 +301,12 @@ int fs_cat(int argc, char *argv[])
       free(buff);
       return -1;
     }
+#ifdef __USE_LARGEFILE64
     int fd = open64(argv[2], O_WRONLY | O_CREAT,0777);
+#else
+    int fd = open(argv[2], O_WRONLY | O_CREAT, 0777);
+#endif
+
     if(fd < 0) {
       free(buff);
       printf("error opening file %s\n",argv[2]);
@@ -405,9 +441,14 @@ int main(int argc, char *argv[])
 
   if(argc > 1) {
     // Try mounting...
-    struct stat64 sstat;
-    
+#ifdef __USE_LARGEFILE64
+    struct stat64 sstat;    
     int ret = stat64(argv[1], &sstat);
+#else
+    struct stat sstat;    
+    int ret = stat(argv[1], &sstat);
+#endif
+
     if(ret == 0) {
       av[0] = "mount";
       av[1] = argv[1];

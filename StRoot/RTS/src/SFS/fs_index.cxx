@@ -28,7 +28,11 @@ int wrapfile::openmem(char *buff, int size) {
 
 int wrapfile::opendisk(char *fn, int flags, int perms)
 {
+#ifdef __USE_LARGEFILE64
   fd = open64(fn, flags, perms);
+#else
+  fd = open(fn, flags, perms);
+#endif
   if(fd > 0) {
     type = WRAP_DISK;
   }
@@ -50,7 +54,11 @@ int wrapfile::read(void *buff, int sz)
   switch(type) {
   case WRAP_MEM:
 
+#ifdef __USE_LARGEFILE64
     LOG(DBG, "read: wfpos=%lld wsize=%lld sz=%d",wfpos,wsize,sz);
+#else
+    LOG(DBG, "read: wfpos=%d wsize=%d sz=%d",wfpos,wsize,sz);
+#endif
 
     if((wfpos + sz) > wsize) {   // max read is filesize...
       sz = wsize - wfpos;
@@ -89,7 +97,11 @@ int wrapfile::write(void *buff, int sz)
   return -1;
 }
 
+#ifdef __USE_LARGEFILE64
 long long int wrapfile::lseek(long long int offset, int whence)
+#else
+int wrapfile::lseek(int offset, int whence)
+#endif
 {
   switch(type) {
     
@@ -110,13 +122,21 @@ long long int wrapfile::lseek(long long int offset, int whence)
     }
     
   case WRAP_DISK:
+#ifdef __USE_LARGEFILE64
     return ::lseek64(fd, offset, whence);  
+#else
+    return ::lseek(fd, offset,whence);
+#endif
   }
 
   return -1;
 }
 
+#ifdef __USE_LARGEFILE64
 int wrapfile::fstat(struct stat64 *stat)
+#else
+int wrapfile::fstat(struct stat *stat)
+#endif
 {
   stat->st_size = 0;
 
@@ -126,7 +146,11 @@ int wrapfile::fstat(struct stat64 *stat)
     return -1;
   
   case WRAP_DISK:
+#ifdef __USE_LARGEFILE64
     return ::fstat64(fd, stat);
+#else
+    return ::fstat(fd, stat);
+#endif
   }
   return 0;
 }
@@ -282,7 +306,11 @@ int fs_index::mount(int ip, int port)
 int fs_index::initmount()
 {
   int ret;
+#ifdef __USE_LARGEFILE64
   struct stat64 stat;
+#else
+  struct stat stat;
+#endif
 
   strcpy(cwd, "/");
   root = NULL;
@@ -503,7 +531,11 @@ fs_dirent *fs_index::readdir(fs_dir *dir)
   return &ent;
 }
 
+#ifdef __USE_LARGEFILE64
 fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz)
+#else
+fs_inode *fs_index::alloc_inode(char *name, int off, int sz)
+#endif
 {
   n_inodes++;
   fs_inode *n = (fs_inode *)malloc(sizeof(fs_inode));
@@ -567,7 +599,11 @@ int fs_index::read(char *fn, char *buff, int maxsize)
   return ret;
 }
 
+#ifdef __USE_LARGEFILE64
 long long int fs_index::mountsz()
+#else
+int fs_index::mountsz();
+#endif
 {
   
   if(oflags & O_WRONLY) {
@@ -576,7 +612,12 @@ long long int fs_index::mountsz()
     }
   }
 
+#ifdef __USE_LARGEFILE64
   struct stat64 stat;
+#else
+  struct stat stat;
+#endif
+
   wfile.fstat(&stat);
   return stat.st_size;
 }
