@@ -18,15 +18,17 @@ cat >.rootrc <<__ROOTRC__
 
 Online.GuiRefreshRate:  50
 
-Online.eemcMask:  /home_local/eemc/defaultPanitkinSetup/eemcTwMask.dat
-Online.eemcDbDump:  /home_local/eemc/defaultPanitkinSetup/eemcDbDump.dat
-Online.eemcPathIn:  /home_local/eemc/defaultPanitkinSetup/
+Online.eemcMask:    ~dkettler/home_local/eemc/defaultPanitkinSetup/eemcTwMask.dat
+Online.eemcDbDump:  ~dkettler/home_local/eemc/defaultPanitkinSetup/eemcDbDump.dat
+Online.eemcPathIn:  ~dkettler/home_local/eemc/defaultPanitkinSetup/
 Online.eemcPathOut:  /onlineweb/www/eemc2005pplot
-Online.bemcStatus:  /home_local/bemc/bemcStatus.txt
+Online.bemcStatus:  ~dkettler/home_local/bemc/bemcStatus.txt
 Online.InputPath:    /a
 Online.OutputPath:   /a/pplot/histos/
 Online.ProjectPath:  OnlTools/OnlinePlots/
 Online.endOfRun:     /home/operator/EndOfRunScript
+Online.plotsDir:    `pwd`/OnlTools/OnlinePlots/
+Online.Reference:    /a/pplot/histos/run10029077.map
 
 Plugin.TVirtualPadEditor: Ged TQtGedEditor    QtGed          "TQtGedEditor(TCanvas*)"
 

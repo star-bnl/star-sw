@@ -35,15 +35,17 @@
 using namespace std;
 
 
-const char* EvpUtil::mProjectPath =  
-      getenv("ONLINEPLOTSDIR")?  getenv("ONLINEPLOTSDIR") :
-       gEnv->GetValue("Online.ProjectPath",".");
+//const char* EvpUtil::mProjectPath =  
+//      getenv("ONLINEPLOTSDIR")?  getenv("ONLINEPLOTSDIR") :
+//       gEnv->GetValue("Online.ProjectPath",".");
+const char* EvpUtil::mProjectPath = gEnv->GetValue("Online.plotsDir",".");
 int EvpUtil::mCanvasWidth = 400;
 int EvpUtil::mCanvasHeight = 400*4/3;
 int EvpUtil::mDebugLevel = 0;
 int EvpUtil::mSharedMemorySize = 140*1000*1000;
 const char* EvpUtil::mInputPath = gEnv->GetValue("Online.InputPath","/a");
 const char* EvpUtil::mOutputPath =  gEnv->GetValue("Online.OutputPath","/a/pplot/histos/");
+const char* EvpUtil::mReference = gEnv->GetValue("Online.Reference","/a/pplot/histos/run10029077.map");
 char* EvpUtil::mMapFilePath = EvpUtil::cat(EvpUtil::mOutputPath,"/evpEventServer.map");
 char* EvpUtil::mCanvasDescriptionFile = EvpUtil::cat(EvpUtil::mProjectPath,"/local/CanvasDescriptions.txt");
 int EvpUtil::mNumberOfTabs = 0;
@@ -937,7 +939,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.4 2009/01/29 20:32:28 dkettler Exp $
+ * $Id: EvpUtil.cxx,v 1.5 2009/02/04 01:25:51 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -947,6 +949,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.5  2009/02/04 01:25:51  dkettler
+ * Remove ONLINEPLOTSDIR reference
+ *
  * Revision 1.4  2009/01/29 20:32:28  dkettler
  * BEMC changes
  *
