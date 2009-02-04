@@ -65,9 +65,9 @@ void loadSharedObjects() {
    gSystem->Load("libStDbLib.so");
    gSystem->Load("libStDbBroker.so");
    gSystem->Load("libSt_db_Maker.so");
+   gSystem->Load("libStEEmcUtil.so");
    gSystem->Load("libStEEmcDbMaker.so");
    gSystem->Load("libStSpinDbMaker.so");
-   gSystem->Load("libStEEmcUtil.so");
    gSystem->Load("libStEmcTriggerMaker.so");
    gSystem->Load("libStTriggerUtilities.so");
    gSystem->Load("libStMCAsymMaker.so");

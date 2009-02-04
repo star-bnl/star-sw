@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.7 2008/08/11 02:22:10 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.8 2009/02/04 22:14:28 kocolosk Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -10,7 +10,6 @@
 #include "StjeBemcEnergySumCalculatorBuilder.h"
 
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
 
 #include <iostream>
 

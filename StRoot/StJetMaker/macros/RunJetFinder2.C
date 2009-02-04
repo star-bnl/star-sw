@@ -26,9 +26,9 @@ void RunJetFinder2(
      gSystem->Load("StEmcSimulatorMaker");
      gSystem->Load("StDbBroker");
      gSystem->Load("St_db_Maker");
+     gSystem->Load("StEEmcUtil");
      gSystem->Load("StEEmcDbMaker");
      gSystem->Load("StSpinDbMaker");
-     gSystem->Load("StEEmcUtil");
      gSystem->Load("StEmcTriggerMaker");
      gSystem->Load("StTriggerUtilities");
      gSystem->Load("StMCAsymMaker");

@@ -57,9 +57,9 @@ using namespace std;
 #include "StEmcRawMaker/defines.h"
 
 //Endcap
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/cstructs/eemcConstDB.hh"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/cstructs/eemcConstDB.hh"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
