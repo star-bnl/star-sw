@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.32 2008/12/02 14:35:05 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.33 2009/02/05 21:43:59 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -44,9 +44,9 @@
 #define zG(t)   (t->z_g())
 #define rxyG(t) sqrt(xG(t)*xG(t) + yG(t)*yG(t)) 
 
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/cstructs/eemcConstDB.hh"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/cstructs/eemcConstDB.hh"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h" 
 
 #include "CtbHitList.h"
@@ -118,7 +118,7 @@ StPPVertexFinder::Init() {
   bemcList =new BemcHitList;
   
   // access EEMC-DB
-  eeDb = (StEEmcDbMaker*)StMaker::GetChain()->GetMaker("eeDb"); 
+  eeDb = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb"); 
   assert(eeDb); // eemcDB must be in the chain, fix it,JB
   geomE= new EEmcGeomSimple();
   // choose which 'stat' bits are fatal for mip detection
@@ -1171,6 +1171,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.33  2009/02/05 21:43:59  balewski
+ * Oleksandr renamed StEEmcDbMaker to StEEmcDb and requested this set of code corrections
+ *
  * Revision 1.32  2008/12/02 14:35:05  balewski
  * I forgot to require EMC hit for highPT track, now it is in
  *

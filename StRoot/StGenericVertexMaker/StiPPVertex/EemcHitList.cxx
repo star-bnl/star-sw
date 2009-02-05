@@ -10,8 +10,8 @@
 #include "EemcHitList.h" 
 
 #include "StMaker.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 
@@ -25,7 +25,7 @@
 
 //==========================================================
 //==========================================================
-EemcHitList::EemcHitList(StEEmcDbMaker* x, uint y, EEmcGeomSimple *z) :
+EemcHitList::EemcHitList(StEEmcDb* x, uint y, EEmcGeomSimple *z) :
   ScintHitList(-C_PI/60.,C_PI/30,60, 999,999,8,"Eemc",4,0.75) {
   eeDb=x; 
   killStatEEmc=y ;
