@@ -53,7 +53,7 @@ class SFS_ittr {
 #ifdef __USE_LARGEFILE64
   long long int fileoffset;  // from start of file.
 #else
-  int fileoffset
+  int fileoffset ;
 #endif
 
   int filepos;  // 0 start of header, 1 end of header, 2 end of file record, -1 at end of file system
@@ -68,7 +68,7 @@ class SFS_ittr {
 #ifdef __USE_LARGEFILE64
   SFS_ittr(long long int offset) 
 #else
-  SFS_ittr(int offset);
+  SFS_ittr(int offset)
 #endif
   {
     fileoffset = offset;

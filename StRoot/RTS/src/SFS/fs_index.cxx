@@ -602,7 +602,7 @@ int fs_index::read(char *fn, char *buff, int maxsize)
 #ifdef __USE_LARGEFILE64
 long long int fs_index::mountsz()
 #else
-int fs_index::mountsz();
+int fs_index::mountsz()
 #endif
 {
   
