@@ -95,12 +95,22 @@
 // Trigger Detector groupings...
 //	Names don't necessarily mean anything! Check grp2rts() AND rts2grp() for the
 //	membership!
-#define TPC_GRP		0
-#define FPD_GRP		1
-#define ETOW_GRP	2	// this used to be TOF but somethings wrong with the hardware...
+//#define TPC_GRP		0
+//#define FPD_GRP		1
+//#define ETOW_GRP	2	// this used to be TOF but somethings wrong with the hardware...
+//#define BTOW_GRP	3
+//#define BSMD_GRP	4
+//#define UNUSED_GRP	5
+//#define ESMD_GRP	6
+//#define TPX_GRP		7
+
+// 2009 Group definitions...
+#define FTP_GRP		0
+#define PP_GRP	        1
+#define ETOW_GRP	2   
 #define BTOW_GRP	3
 #define BSMD_GRP	4
-#define UNUSED_GRP	5
+#define TOF_GRP	        5
 #define ESMD_GRP	6
 #define TPX_GRP		7
 
@@ -668,34 +678,37 @@ extern inline int tcd2rts(int tcd)
 #define LEGACY_DETS ((1<<FTP_ID) | (1<<PMD_ID) | (1<<BSMD_ID))
 #define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<HFT_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID))
 
+// 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
 {
 	u_int ret ;
 
 	ret = 0 ;
 
-	if(grp & (1<<TPC_GRP)) {
-		ret  = (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM);
+	if(grp & (1<<FTP_GRP)) {
+	  ret  |= (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM) | (1<<SSD_SYSTEM);
 	}
-	if(grp & (1<<TPX_GRP)) {
-		ret |= (1<<TPX_SYSTEM) | (1<<TOF_SYSTEM) | (1<<SSD_SYSTEM) | (1 << PP_SYSTEM) ;
+	if(grp & (1 << PP_GRP)) {
+	  ret |= (1 << PP_SYSTEM);
 	}
-	if(grp & (1<<ETOW_GRP)) {
-		ret |= (1<<ETOW_SYSTEM) ;
+	if(grp & (1 << ETOW_GRP)) {
+	  ret |= (1 << ETOW_SYSTEM) ;
 	}
-	if(grp & (1<<ESMD_GRP)) {
-		ret |= (1<<ESMD_SYSTEM) ;
+	if(grp & (1 << BTOW_GRP)) {
+	  ret |= (1 << BTOW_SYSTEM) ;
 	}
-	if(grp & (1<<BTOW_GRP)) {
-		ret |= (1<<BTOW_SYSTEM) ;
+	if(grp & (1 << BSMD_GRP)) {
+	  ret |= (1 << BSMD_SYSTEM) ;
 	}
-	if(grp & (1<<BSMD_GRP)) {
-		ret |= (1<<BSMD_SYSTEM) ;
+	if(grp & (1 << TOF_GRP)) {
+	  ret |= (1 << TOF_SYSTEM);
 	}
-	if(grp & (1<<FPD_GRP)) {
-		ret |= (1<<FPD_SYSTEM) ;
+	if(grp & (1 << ESMD_GRP)) {
+	  ret |= (1 << ESMD_SYSTEM) ;
 	}
-
+	if(grp & (1 << TPX_GRP)) {
+	  ret |= (1 << TPX_SYSTEM);
+	}
 	return ret ;
 }
 
@@ -710,18 +723,17 @@ extern inline int rts2grp(int rts)
     case FTP_ID:
     case PMD_ID:
     case HFT_ID:
-	return TPC_GRP ;
-    case TOF_ID :
-    case TPX_ID :
-    case SSD_ID :
-    case PP_ID : 
-	return TPX_GRP ;
-    case FPD_ID: return FPD_GRP;
-    case FP2_ID: return FPD_GRP;
-    case BTOW_ID: return BTOW_GRP;
-    case BSMD_ID: return BSMD_GRP;
-    case ETOW_ID: return ETOW_GRP;
-    case ESMD_ID: return ESMD_GRP;
+    case SSD_ID:
+    case FPD_ID: 
+    case FP2_ID:
+      return FTP_GRP;
+    case PP_ID:      return PP_GRP;
+    case BTOW_ID:    return BTOW_GRP;
+    case BSMD_ID:    return BSMD_GRP;
+    case ETOW_ID:    return ETOW_GRP;
+    case ESMD_ID:    return ESMD_GRP;
+    case TPX_ID:     return TPX_GRP;
+    case TOF_ID:     return TOF_GRP;
     default:
 	return 15 ;	// this is an ERROR!
     }
