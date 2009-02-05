@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: QExGeoDrawHelper.cxx,v 1.4 2009/02/04 20:10:13 fine Exp $
+** $Id: QExGeoDrawHelper.cxx,v 1.5 2009/02/05 02:08:58 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -244,7 +244,7 @@ TVolume *TGeoDrawHelper::MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVol
    if (!toFlag) depth = 0;
    TVolume *topVolume = 0; 
    TObjArray *nodes = 0;
-   if (top )  {
+   if (top && !top->IsAssembly())  {
        // if (!top->IsVolumeMulti()) 
       TGeoShape *geoShape = top->GetShape();
       TShape *thisShape = 0;
