@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.4 2008/04/15 00:15:52 jwebb Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.5 2009/02/05 20:06:53 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -10,8 +10,8 @@
 #include "StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
 
 #include "StEEmcFastMaker.h"
 #include "StEEmcSlowMaker.h"
@@ -125,8 +125,7 @@ Int_t StEEmcSlowMaker::Init(){
   }
 
 
-  eeDb=(StEEmcDbMaker*)GetMaker("eemcDb");
-  if(eeDb==0) eeDb=(StEEmcDbMaker*)GetMaker("eeDb"); // try another name
+  eeDb=(StEEmcDb*)GetDataSet("StEEmcDb");
   assert( eeDb);
   if ( mHList ) InitHisto();
   if ( mSmearPed && !mAddPed) {
@@ -213,7 +212,7 @@ Int_t StEEmcSlowMaker::Make(){
   nInpEve++;
   LOG_DEBUG << GetName() << "::Make() is called , iEve " << nInpEve << " mSource="<<mSource<<endm;
   
-  mKSigma = eeDb -> KsigOverPed;
+  mKSigma = eeDb->getKsigOverPed();
 
   switch (mSource) {
   case kMuDst:
@@ -439,7 +438,7 @@ void StEEmcSlowMaker::MakePrePost( StMuEmcCollection *emc ){
     StMuEmcHit *hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
     
     /// tmp, for fasted analysis use only hits from sectors init in DB
-    if (sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+    if (sec<eeDb->getFirstSector() || sec>eeDb->getLastSector()) continue;
      
     /// Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
     const EEmcDbItem *x=eeDb-> getTile(sec,sub-1+'A', eta, pre-1+'P'); 
@@ -504,7 +503,7 @@ void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc ) {
       assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
       
       // tmp, for fasted analysis use only hits from sectors init in DB
-      if(sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+      if(sec<eeDb->getFirstSector() || sec>eeDb->getLastSector()) continue;
       
       const EEmcDbItem *x=eeDb->getByStrip(sec,uv,strip);
       assert(x); // it should never happened for muDst
@@ -930,6 +929,9 @@ void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t sec, Int_t uv, Int_t st
 
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.5  2009/02/05 20:06:53  ogrebeny
+// Changed StEEmcDbMaker -> StEEmcDb
+//
 // Revision 2.4  2008/04/15 00:15:52  jwebb
 // Fixed bug in sector 12V.
 //

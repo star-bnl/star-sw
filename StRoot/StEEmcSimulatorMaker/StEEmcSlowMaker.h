@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 2.2 2008/04/11 14:37:17 jwebb Exp $
+// $Id: StEEmcSlowMaker.h,v 2.3 2009/02/05 20:06:53 ogrebeny Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -135,7 +135,7 @@
 
 class TObjArray;
 class StMuDstMaker;
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuEmcCollection;
 class StEmcCollection;
 
@@ -150,7 +150,7 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
   enum {mxH=32};
   StMuDstMaker* mMuDstMaker;  
-  StEEmcDbMaker *eeDb;
+  StEEmcDb *eeDb;
   TObjArray  *mHList; /// output histo access point
 
   int   nInpEve; // private event counter
@@ -308,7 +308,7 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.2 2008/04/11 14:37:17 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.3 2009/02/05 20:06:53 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -320,6 +320,9 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 2.3  2009/02/05 20:06:53  ogrebeny
+// Changed StEEmcDbMaker -> StEEmcDb
+//
 // Revision 2.2  2008/04/11 14:37:17  jwebb
 // Added options to disable operation of individual slow simulaor subsystems.
 //
