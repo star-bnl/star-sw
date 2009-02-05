@@ -84,9 +84,13 @@ fs_ex.o: fs_index.h
 fs_ex.o: sfs_base.h
 fs_ex.o: ../../include/SUNRT/clock.h
 fs_ex.o: ../../include/I386/i386Lib.h
+sfs_header.o: sfs_index.h
+sfs_header.o: fs_index.h
+sfs_header.o: sfs_base.h
 sfs_single.o: sfs_index.h
 sfs_single.o: fs_index.h
 sfs_single.o: sfs_base.h
+sfs_single.o: ../../include/rtsLog.h
 sfsTest.o: sfs_index.h
 sfsTest.o: fs_index.h
 sfsTest.o: sfs_base.h
