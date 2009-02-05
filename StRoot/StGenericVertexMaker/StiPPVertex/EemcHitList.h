@@ -4,13 +4,13 @@
 #include "ScintHitList.h"
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 class StEmcDetector;
-class StEEmcDbMaker;
+class StEEmcDb;
 class EEmcGeomSimple;
 
 class EemcHitList : public ScintHitList {
  private:
 
-  StEEmcDbMaker* eeDb; 
+  StEEmcDb* eeDb; 
   EEmcGeomSimple *geomE;
   int name2bin[MaxSectors][MaxSubSec][MaxEtaBins]; // map --> my bin
   const Float_t *etaHL; // limits of eta bins
@@ -19,7 +19,7 @@ class EemcHitList : public ScintHitList {
   uint killStatEEmc;
  
  public:
- EemcHitList(StEEmcDbMaker* x, uint y, EEmcGeomSimple *z);
+ EemcHitList(StEEmcDb* x, uint y, EEmcGeomSimple *z);
   virtual  ~EemcHitList();
   void clear();
   void initRun();

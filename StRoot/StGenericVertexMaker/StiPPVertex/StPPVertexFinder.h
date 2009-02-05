@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.11 2008/12/01 22:57:46 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.12 2009/02/05 21:43:59 balewski Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -14,7 +14,7 @@ class VertexData;
 class TGraphErrors;
 class StEvent; 
 class StiToolkit;
-class StEEmcDbMaker;
+class StEEmcDb;
 
 class EEmcGeomSimple;
 
@@ -70,7 +70,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   CtbHitList     *ctbList;
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
-  StEEmcDbMaker  *eeDb;
+  StEEmcDb       *eeDb;
   EEmcGeomSimple *geomE;
 
   
@@ -107,6 +107,9 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.12  2009/02/05 21:43:59  balewski
+ * Oleksandr renamed StEEmcDbMaker to StEEmcDb and requested this set of code corrections
+ *
  * Revision 1.11  2008/12/01 22:57:46  balewski
  * Added capability to reco 1 high pT track vertices with positive rank. 2+ match vertices will have rank above 1e6. Sub-prime vertices (for Akio) have negative rank. More details is given at:
  * http://drupal.star.bnl.gov/STAR/comp/reco/vf/ppv-vertex/2009-algo-upgrade-1
