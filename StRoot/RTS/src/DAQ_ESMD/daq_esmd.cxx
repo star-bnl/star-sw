@@ -254,7 +254,7 @@ int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int d
 	
 	// L2 part
 	trg[1].t = trg[0].t ;	// copy over token
-	trg[1].trg = us[0] ;	// this is where the trg cmd ought to be
+	trg[1].trg = 15 ;	// for now! us[0] ;	// this is where the trg cmd ought to be
 	trg[1].daq = us[1] ;
 	trg[1].rhic = trg[0].rhic + 1 ;
 
