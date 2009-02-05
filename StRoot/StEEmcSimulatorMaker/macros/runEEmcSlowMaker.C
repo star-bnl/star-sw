@@ -1,7 +1,7 @@
 class StChain;
 class StMuEmcCollection;
 
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuDstMaker;
 class TChain;
 class TObjArray;
@@ -9,7 +9,7 @@ class TObjArray;
 class StEEmcA2EMaker;
 
 
-StEEmcDbMaker *myDb;
+StEEmcDb *myDb;
 StMuDstMaker* muMk;
 StChain *chain=0;
 TObjArray *HList;
@@ -48,8 +48,8 @@ int runEEmcSlowMaker( int nEve=2800 ){
   //gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
   gSystem->Load("StEEmcSimulatorMaker");
   gSystem->Load("StEEmcA2EMaker");
 
@@ -82,15 +82,8 @@ int runEEmcSlowMaker( int nEve=2800 ){
   stDb->SetFlavor("sim","eemcPMTname");
   stDb->SetFlavor("sim","eemcADCconf");
 
-  StEEmcDbMaker* myDb=new StEEmcDbMaker("eemcDb");
-  myDb->setSectors(firstSec, lastSec);
-
-
-
+  new StEEmcDbMaker("eemcDb");
   HList=new TObjArray;
-
-
-
 
   // ADC 2 energy before slow simulator
   mEEbefore = new StEEmcA2EMaker("before");
@@ -158,6 +151,9 @@ int runEEmcSlowMaker( int nEve=2800 ){
 
   chain->ls(3);
   chain->Init();
+
+  StEEmcDb* myDb = (StEEmcDb*)chain->GetDataSet("StEEmcDb");
+  myDb->setSectors(firstSec, lastSec);
 
   int eventCounter=0;
   int stat=0;

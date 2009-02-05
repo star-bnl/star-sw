@@ -22,12 +22,12 @@
 //    MuDst replaced with hist.
 
 class StChain;
-class StEEmcDbMaker;
+class StEEmcDb;
 class StMuEmcCollection;
 class St_db_Maker;
 
 StChain       *chain=0;
-StEEmcDbMaker *eemcDb=0;
+StEEmcDb      *eemcDb=0;
 St_db_Maker   *starDb=0;
 
 // eemc5090009.lis
@@ -52,24 +52,15 @@ void ezMuDstMc( Int_t nevents = 10,
 
   //-- EEMC database goes here
   starDb = new St_db_Maker("StarDb","MySQL:StarDb");
-  eemcDb = new StEEmcDbMaker("eemcDb");
+  new StEEmcDbMaker("eemcDb");
 
   //-- override timestamp just so something happens...
-  eemcDb -> setTimeStampDay(20040320);  // format: yyyymmdd 
-  //starDb -> SetDateTime(20040320,0);    // verify format....
-
-  //$$$cDb -> setThreshold(5.0);
-  eemcDb -> setPreferredFlavor( "onlped", "eemcPMTped" );
-  eemcDb -> setPreferredFlavor( "highStrip1", "eemcPIXcal" );
-  //$$$eemcDb -> requestDataBase(20040320,1,12);
-
-
+  starDb -> setTimeStampDay(20040320);  // format: yyyymmdd 
 
   //-- Create an instance of the EEMC "slow" muDst simulator,
   StMuEEmcSimuReMaker *muSim = new StMuEEmcSimuReMaker("muSim");
   muSim -> setDbName( "eemcDb" );
  
-
   //-- Add the EEMC cluster maker
   TString myname = file;
   myname.ReplaceAll("MuDst","clusters");
@@ -84,7 +75,11 @@ void ezMuDstMc( Int_t nevents = 10,
   chain -> Init();
   chain -> ls(3);
 
-
+  eemcDb = (StEEmcDb*)chain->GetDataSet("StEEmcDb");
+  //$$$cDb -> setThreshold(5.0);
+  eemcDb -> setPreferredFlavor( "onlped", "eemcPMTped" );
+  eemcDb -> setPreferredFlavor( "highStrip1", "eemcPIXcal" );
+  //$$$eemcDb -> requestDataBase(20040320,1,12);
   //--
   //-- At this point, one could override the database
   //-- values by reading in an ascii file.

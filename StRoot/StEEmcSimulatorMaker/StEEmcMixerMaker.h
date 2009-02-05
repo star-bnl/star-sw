@@ -13,7 +13,7 @@ of two StEmcCollections objects:
 and merges ONLY ADC hits for all EEMC pixels. 
 Hits of the second event are added to the first one.
 
-  The maker has full conectivity to the EEMC database through StEEmcDbMaker, 
+  The maker has full conectivity to the EEMC database through StEEmcDb, 
   so it will calculate ADC from geant DE using actual gains for hits from secondary event.
   If a gain does not exist this pixel from secondary file is dropped.  
   
@@ -25,13 +25,13 @@ by StEmcRawMaker to build embedded data of event.root and MuDst.root.
 
 class StEmcCollection;
 class StEmcRawHit;
-class StEEmcDbMaker;
+class StEEmcDb;
 class EEmcDbItem;
                                                
 class StEEmcMixerMaker : public  StMaker {
  private:
   Bool_t        panicOff; // once activated disables Endcap embedding
-  StEEmcDbMaker *mEEDb;
+  StEEmcDb *mEEDb;
   
   //  Embedded object which can be used by other makers.  
   StEmcCollection *mMixerEmcCollection;
@@ -48,7 +48,7 @@ class StEEmcMixerMaker : public  StMaker {
   StEmcCollection *getMixerEmcCollection() { return mMixerEmcCollection; }
   
   
-  virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcMixerMaker.h,v 1.2 2007/01/24 21:07:03 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcMixerMaker.h,v 1.3 2009/02/05 20:06:52 ogrebeny Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StEEmcMixerMaker,0) 
  };
@@ -56,8 +56,11 @@ class StEEmcMixerMaker : public  StMaker {
     
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.h,v 1.2 2007/01/24 21:07:03 balewski Exp $
+// $Id: StEEmcMixerMaker.h,v 1.3 2009/02/05 20:06:52 ogrebeny Exp $
 // $Log: StEEmcMixerMaker.h,v $
+// Revision 1.3  2009/02/05 20:06:52  ogrebeny
+// Changed StEEmcDbMaker -> StEEmcDb
+//
 // Revision 1.2  2007/01/24 21:07:03  balewski
 // 1) no cout or printf, only new Logger
 // 2) EndcapMixer:

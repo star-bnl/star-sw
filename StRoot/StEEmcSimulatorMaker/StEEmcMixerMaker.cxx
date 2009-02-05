@@ -10,9 +10,9 @@
 #include "StEEmcSimulatorMaker/StEEmcFastMaker.h"
 #include "StEEmcSimulatorMaker/StEEmcSlowMaker.h"
 #include "StEEmcMixerMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/cstructs/eemcConstDB.hh" // def of status bits 
+#include "StEEmcUtil/database/EEmcDbItem.h"
+#include "StEEmcUtil/database/StEEmcDb.h"
+#include "StEEmcUtil/database/cstructs/eemcConstDB.hh" // def of status bits 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 #include "StDAQMaker/StDAQReader.h"
@@ -46,14 +46,13 @@ Int_t StEEmcMixerMaker::Finish() {
 //-------------------------------------------------------------------
 Int_t 
 StEEmcMixerMaker::Init(){
-  mEEDb=(StEEmcDbMaker*)GetMaker("eemcDb");
-  if(mEEDb==0) mEEDb=(StEEmcDbMaker*)GetMaker("eeDb"); // try another name
+  mEEDb=(StEEmcDb*)GetDataSet("StEEmcDb");
   if( mEEDb==0){
     panicOff=true;
     LOG_FATAL<< "::Init()\n\n Fatal Error - Eemc_DbMaker is not in the chain,\n  panicOff="<<panicOff<<endm;
     return  kStErr;
   }
-  assert(!strcmp(mEEDb->ClassName(),"StEEmcDbMaker"));
+  assert(!strcmp(mEEDb->ClassName(),"StEEmcDb"));
   return StMaker::Init();
 }  
 
@@ -254,8 +253,11 @@ into the first StEmcCollection in event for all EEMC subdetectors
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.7 2007/04/28 17:56:02 perev Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.8 2009/02/05 20:06:52 ogrebeny Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.8  2009/02/05 20:06:52  ogrebeny
+// Changed StEEmcDbMaker -> StEEmcDb
+//
 // Revision 1.7  2007/04/28 17:56:02  perev
 // Redundant StChain.h removed
 //
