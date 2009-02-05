@@ -1,4 +1,5 @@
 #include "StBemcData.h"
+#include "StEmcUtil/database/StEmcDecoder.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
