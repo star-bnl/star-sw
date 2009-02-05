@@ -176,7 +176,6 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(210800);//BEMC-HT4-fast
 
   //2008pp
-  //not implemented
   mAllTriggers.insert(220500);//BEMC-HT0-mb
   mAllTriggers.insert(220510);//BEMC-HT1-mb
   mAllTriggers.insert(220520);//BEMC-HT2-mb-slow
@@ -2582,19 +2581,20 @@ const vector< pair<int,int> > StBemcTriggerSimu::getTowersAboveThreshold(int tri
       mDecoder->GetTriggerPatchFromTowerId(i,tpid);
       mDecoder->GetDSMFromTriggerPatch(tpid,dsmid);
 
-      if (trigId==210500 || trigId==210501) {
+      if (trigId==210500 || trigId==210501 || trigId==220500) {
 	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,0)) {
 	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
 	}
       }
       if (trigId==127611 || trigId==127821 || trigId==137821 || trigId==137822 || trigId==137611 || trigId==5 ||
-	  trigId==200601 || trigId==200602 || trigId==200213 || trigId==200214 || trigId==210510 || trigId==210511) {
+	  trigId==200601 || trigId==200602 || trigId==200213 || trigId==200214 || trigId==210510 || trigId==210511 ||
+	  trigId==220510) {
 	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,1)) {
 	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
 	}
       }
       if (trigId==127212 || trigId==137213 || trigId==200211 || trigId==200212 || trigId==200220 || trigId==200221 || 
-	  trigId==200222 || trigId==200620 || trigId==200621 || trigId==210520 || trigId==210521) {
+	  trigId==200222 || trigId==200620 || trigId==200621 || trigId==210520 || trigId==210521 || trigId==220520) {
 	if (HT6bit_adc_holder[i] > mDbThres->GetHT_DSM0_threshold(dsmid,timestamp,2)) {
 	  towers.push_back( make_pair(i+1,HT6bit_adc_holder[i]) );
 	}
