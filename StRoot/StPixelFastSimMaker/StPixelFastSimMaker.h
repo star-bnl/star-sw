@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.12 2009/01/26 14:50:46 fisyak Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.13 2009/02/06 20:48:48 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.13  2009/02/06 20:48:48  wleight
+ * UPGR15 Update
+ *
  * Revision 1.12  2009/01/26 14:50:46  fisyak
  * Clean up
  *
@@ -108,7 +111,6 @@ class StPixelFastSimMaker : public StMaker {
 
  /* \brief InitRun method is not currently used. */
   virtual int InitRun( int);
-
   
   /* \brief Accept method for reconstructed event. */
   virtual Bool_t accept(StEvent* event);
@@ -133,7 +135,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.12 2009/01/26 14:50:46 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.13 2009/02/06 20:48:48 wleight Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
