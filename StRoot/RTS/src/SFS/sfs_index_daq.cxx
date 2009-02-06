@@ -22,7 +22,7 @@
 int SFS_ittr::findEventNumber()
 {
   int ret;
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   long long int orig_pos = wfile->lseek(0, SEEK_CUR);
   LOG(DBG, "findEventNumber: pos=%lld",orig_pos);
 #else
@@ -36,7 +36,7 @@ int SFS_ittr::findEventNumber()
     if(ret == 0) { ret = 0; break; }
     if(ret != 8) { ret = -1; break; }
 
-#ifdef __USE_LARGEFILE64    
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
     wfile->lseek(-((long long int)8), SEEK_CUR);
 #else
     wfile->lseek(-8, SEEK_CUR);
@@ -124,7 +124,7 @@ int SFS_ittr::findFullLength()
   LOGREC lrhd;
   //  int orig_pos = wfile->lseek(0, SEEK_CUR);
   
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   wfile->lseek(-((long long int)sizeof(lrhd)),SEEK_CUR);
 #else 
   wfile->lseek(-(sizeof(lrhd)),SEEK_CUR);
@@ -157,7 +157,7 @@ int SFS_ittr::nextLRHD()
     return -1;
   }
 
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   long long int xxx = wfile->lseek(-((long long int)sizeof(lrhd)),SEEK_CUR);  // go back to start...
   LOG(DBG, "nextLRHD():  (%c%c%c%c) off=%lld",
       lrhd.lh.bank_type[0],lrhd.lh.bank_type[1],
@@ -208,7 +208,7 @@ int SFS_ittr::nextLRHD()
 
   filepos = 1;
 
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %lld (%d)/%d, sz %d  head_sz %d",
       fullpath, entry.name, fileoffset, ccc, filepos, entry.sz, entry.head_sz);
 #else  
@@ -243,7 +243,7 @@ int SFS_ittr::nextDatap()
     return -1;
   }
 
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   wfile->lseek(-((long long int)8),SEEK_CUR);
   wfile->lseek(-((long long int)sizeof(DATAP)), SEEK_CUR);
 #else
