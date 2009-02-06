@@ -156,9 +156,9 @@ class fs_index {
   void getFullPath(char *fullname, char *name);
   virtual void dump(int fd)=0;
  
+  wrapfile wfile;
  protected:
   int cdchanged;
-  wrapfile wfile;
   int oflags;
 
   fs_inode *find_child(fs_inode *parent, char *name);
