@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.h,v 1.6 2008/04/03 20:04:21 fisyak Exp $
+// $Id: StiIstDetectorBuilder.h,v 1.7 2009/02/06 21:26:49 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.h,v $
+// Revision 1.7  2009/02/06 21:26:49  wleight
+// UPGR15 Update
+//
 // Revision 1.6  2008/04/03 20:04:21  fisyak
 // Straighten out DB access via chairs
 //
@@ -34,7 +37,7 @@ This class is the description of the StiIstDetectorBuilder
 //#include "StSsdUtil/StSsdGeometry.hh"
 //#include "StSsdUtil/StSsdConfig.hh"
 #include "Sti/StiDetectorBuilder.h"
-#include "Sti/StiHitErrorCalculator.h"
+//#include "Sti/StiHitErrorCalculator.h"
 #include "StThreeVector.hh"
 
 class StiIstDetectorBuilder : public StiDetectorBuilder
@@ -48,6 +51,8 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 	virtual ~StiIstDetectorBuilder(); 
 	virtual void buildDetectors(StMaker& source);
 	virtual void AverageVolume(TGeoPhysicalNode *nodeP);
+	virtual void loadDS(TDataSet&);
+	//virtual void setDefaults();
 	virtual void useVMCGeometry();		
 	void    setSiMat(StiMaterial     *m) {_siMat = m;}
 	void    setHybridMat(StiMaterial *m) {_hybridMat = m;}
@@ -61,5 +66,11 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 	StiMaterial *_hybridMat;
 	StiPlanarShape * _waferShape[1];
 	StiPlanarShape * _hybridShape[1];
+	//StSsdConfig   * _config;
+	//StSsdGeometry * _geometry;
+	//StSsdGeometry * _dimensions;
+	//StiDefaultHitErrorCalculator _hitCalculator1;
+	//StiDefaultHitErrorCalculator _hitCalculator2;
+	//StiDefaultHitErrorCalculator _hitCalculator3;
 };
 #endif 
