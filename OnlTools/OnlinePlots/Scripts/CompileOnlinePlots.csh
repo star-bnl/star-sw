@@ -4,7 +4,7 @@
 # 
         
 echo "--- Compiling PPlots libraries"
-cons 
+cons
 
 echo "--- Cleaning up"
 test -e EvpPlotServer.C && /bin/rm -f EvpPlotServer.C
@@ -69,6 +69,7 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
   gSystem->Load("StEEmcPoolmuEztPanitkin");
   gSystem->Load("StBEMCPlots");
   gSystem->Load("StEvent");
+  gSystem->Load("StEEmcUtil");
 
   char* argsS[] = {
                  "-path",
