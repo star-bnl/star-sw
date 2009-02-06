@@ -70,7 +70,7 @@ class wrapfile {
   int write(void *buff, int sz);
 
 
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   long long int lseek(long long int offset, int whence);
   int fstat(struct stat64 *stat);
 #else
@@ -118,7 +118,7 @@ class fs_index {
 
   void umount();
 
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   long long int mountsz();
 #else
   int mountsz();
@@ -163,7 +163,7 @@ class fs_index {
 
   fs_inode *find_child(fs_inode *parent, char *name);
   void free_inode(fs_inode *inode);
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   fs_inode *alloc_inode(char *name, long long int off, int sz);
 #else
   fs_inode *alloc_inode(char *name, int off, int sz);
