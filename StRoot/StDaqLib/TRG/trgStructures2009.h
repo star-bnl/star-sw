@@ -19,8 +19,8 @@
 *     Note:  PrePost data will only be available on local trigger disks and
 *     will not be present in event files.
 ******************************************************************************/
-#define y9FORMAT_VERSION        0x08121140      /* 11 Dec 2008; Version 4.0 Format: yymmddvv */
-#define y9MAX_TRG_BLK_SIZE          100000      /* Estimated at 100k bytes including pre/post */
+#define y9FORMAT_VERSION        0x09013040      /* 11 Dec 2008; Version 4.0 Format: yymmddvv */
+#define y9MAX_TRG_BLK_SIZE          122880      /* Estimated at 100k bytes including pre/post */
 #define y9MAX_OFFLEN                    20      /* Depends on the number of crates in the system */
 
 #define   y9L1_CONF_NUM       1
@@ -55,17 +55,17 @@ typedef struct {
   unsigned char  actionWdTrgCommand;          /* from Fifo 1 */
   unsigned char  actionWdDaqCommand;          /* from Fifo 1 */  
   unsigned short TrgToken;                    /* from Fifo 2 */
-  unsigned short addBits;                     /* from Fifo 2 - bit 0=Contamination; bit 6=L2.5 abort; bit 7=1 is fake data */
-  unsigned short DSMInput;                    /* from Fifo 3 */
-  unsigned short externalBusy;                /* from Fifo 3 */
-  unsigned short modifiedBusyStatus;          /* from Fifo 4 */
-  unsigned short physicsWord;                 /* from Fifo 4 */
-  unsigned short TriggerWord;                 /* from Fifo 5 */
-  unsigned short DSMAddress;                  /* from Fifo 6 */
-  unsigned short contaminationBusyStatus;     /* from Fifo 6 */
+  unsigned short addBits;                     /* used by trigger/daq: bit 5=Force store; bit 6=L2.5 abort; bit 7=1 is fake data */
+  unsigned short DSMInput;                    /* only for use with Mk1 TCU.  0 if Mk2 TCU is used */
+  unsigned short externalBusy;                /* from Fifo 9 (Fifo 3 Mk1 TCU) */
+  unsigned short internalBusy;                /* from Fifo 9 (Mk2 TCU) */
+  unsigned short physicsWord;                 /* Fifo 4 Mk1 TCU. 0 if Mk2 TCU is used */
+  unsigned short TriggerWord;                 /* Fifo 5 Mk1 TCU. 0 if Mk2 TCU is used */
+  unsigned short DSMAddress;                  /* from Fifo 10 (Fifo 6 Mk1 TCU) */
+  unsigned short TCU_Mark;                    /* TCU_Mark Mk1=1 Mk2=2 */
   unsigned short npre;                        /* pre value for detector raw data */
   unsigned short npost;                       /* post value for detector raw data */
-  unsigned short dummy;                       /* dummy - filler since this structures must be zero (mod 4) */
+  unsigned short res1;                        /* Reserved for future use */
 } EvtDescData2009;
 
       /* L1 DSM data structures */
@@ -112,7 +112,7 @@ typedef struct {
   char name[4];                               /* Contains MIX */
   int length;                                 /* Byte count of data that follows */
   unsigned short FPDEastNSLayer1[8];          /* FPD east north/south layer 1  */  
-  char           MTD_P2PLayer1[16];           /* Data from MTD and PP2PP */
+  unsigned char  MTD_P2PLayer1[16];           /* Data from MTD and PP2PP */
   unsigned short TOFLayer1[8];                /* This is TOF Layer 1 */
   unsigned short TOF[48];                     /* TOF data */
 } MIXBlock2009;
