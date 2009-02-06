@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -575,7 +576,7 @@ void StReadLaserEvent::resetAll()
 
 /***************************************************************************
  *
- * $Id: StReadLaserEvent.cxx,v 1.1 2009/01/23 16:11:08 jeromel Exp $
+ * $Id: StReadLaserEvent.cxx,v 1.2 2009/02/06 16:22:32 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -585,6 +586,9 @@ void StReadLaserEvent::resetAll()
  ***************************************************************************
  *
  * $Log: StReadLaserEvent.cxx,v $
+ * Revision 1.2  2009/02/06 16:22:32  fine
+ * Add a few include files to compile OnlinePlots against of the ROOT 5.22
+ *
  * Revision 1.1  2009/01/23 16:11:08  jeromel
  * Import from online/RTS/src/
  *
