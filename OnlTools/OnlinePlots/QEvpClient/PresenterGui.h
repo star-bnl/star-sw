@@ -135,10 +135,6 @@ private:
 
     void  MakeActions();
 
-    void customEvent( QCustomEvent * e );
-
-
-    
 public slots:
      void  ProcessMessage();
      void SaveCB();
