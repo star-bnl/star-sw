@@ -3,6 +3,7 @@
 
 
 #include <time.h>
+#include <math.h>
 
 class ServerStatus : public TObject {
  private:
@@ -37,7 +38,7 @@ class ServerStatus : public TObject {
 
 /***************************************************************************
  *
- * $Id: ServerStatus.h,v 1.1 2009/01/23 16:10:59 jeromel Exp $
+ * $Id: ServerStatus.h,v 1.2 2009/02/06 16:22:32 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -47,6 +48,9 @@ class ServerStatus : public TObject {
  ***************************************************************************
  *
  * $Log: ServerStatus.h,v $
+ * Revision 1.2  2009/02/06 16:22:32  fine
+ * Add a few include files to compile OnlinePlots against of the ROOT 5.22
+ *
  * Revision 1.1  2009/01/23 16:10:59  jeromel
  * Import from online/RTS/src/
  *
