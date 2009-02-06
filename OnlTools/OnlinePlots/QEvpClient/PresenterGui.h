@@ -33,7 +33,6 @@ class QProgressBar;
 class EventInfo;
 class ServerInfo;
 class ServerStatus;
-class Updater;
 class TriggerDetectorBitsInfo;
 class TCanvas;
 class TObject;
@@ -116,7 +115,6 @@ private:
     QIntDict<TQtRootAction> fActions;
     QMenuBar *fMenuBar;
     
-    Updater* mUpdater;
     Int_t   fGuiRefreshRate; // msec.
  protected:
     void StopEventLoop();

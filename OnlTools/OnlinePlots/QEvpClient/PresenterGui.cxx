@@ -71,7 +71,7 @@ static TQtBrowserMenuItem_t gMenu_Data[] = {
 PresenterGui::PresenterGui(bool isRefWindow) : 
   QMainWindow( 0, "example application main window", WDestructiveClose | WGroupLeader ), 
   mWidth(400), mHight(500), mStrLive(" Live  "), mStrFile(" File  "), mStrRun("Running"), mStrStop("Stopped")
-  , mUpdater(0),fGuiRefreshRate(10)
+  ,fGuiRefreshRate(10)
 {
  
   // Some preparations here
