@@ -877,7 +877,8 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   if (dd && dd->iterate()) {        
     char* td = (char*)dd->Void;
     printf("TRG RAW: version = _%02x_%02x_%02x_%02x_\n",td[0],td[1],td[2],td[3]);
-    if(td[3]!=0x40){
+    //if(td[3]!=0x40){
+    if(1){
       fprintf(stderr,"TRG RAW: version missmatch, skipping trigger data\n");
     }else{      
       TriggerDataBlk2009* trgdata2009 = (TriggerDataBlk2009*)td;    
@@ -2827,7 +2828,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.3 2009/02/04 01:25:51 dkettler Exp $
+   * $Id: HistoHandler.cxx,v 1.4 2009/02/06 16:55:13 genevb Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2837,6 +2838,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.4  2009/02/06 16:55:13  genevb
+   * Trigger version problem temporary patch
+   *
    * Revision 1.3  2009/02/04 01:25:51  dkettler
    * Remove ONLINEPLOTSDIR reference
    *
