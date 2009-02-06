@@ -1454,7 +1454,7 @@ Bfc_st BFC2[] = { // ITTF Chains
    "","","/star/rcf/simu/rcf1237_01_500evts.fzd"                                                   ,kFALSE},
 #else
   {"Test.ITTF","","","svtIT,ssdIT,ITTF,genvtx,event,analysis,EventQA,tags,Tree,EvOut,StarMagField,FieldOn"
-   ",CMuDst,Tree,analysis"                                                                ,"","","",kFALSE},
+   ",IDST,CMuDst,Tree,analysis"                                                           ,"","","",kFALSE},
   {"Test.reco.ITTF","","","MakeEvent,tpcI,fcf,ftpc,SvtCL,Test.ITTF"                       ,"","","",kFALSE},
   {"Test.fast.ITTF","","","gstar,tfs,Simu,srs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,SvtCL,"
    "tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,"
