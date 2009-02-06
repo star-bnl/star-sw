@@ -133,7 +133,7 @@ int fs_mount(int argc, char *argv[])
     sprintf(fn,"%s/%s",pwd,argv[1]);
   }
 
-#ifdef __USE_LARGEFILE64
+#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
   struct stat64 filestat;
   if(stat64(fn,&filestat) < 0) 
 #else
