@@ -874,13 +874,6 @@ void PresenterGui::GetNextEvent()
 }
 
 //______________________________________________________________________________
-void PresenterGui::customEvent( QCustomEvent * e ){
-  if ( e->type() == 1000 ) {  // update event
-    emit nextEvent();
-    updateRequest();
-  }
-}
-//______________________________________________________________________________
 void PresenterGui::setServerInfo(ServerStatus* ss) {
   mServerInfo->setRequestTime( ss->getRequestTime() );
   mServerInfo->setReceiveTime( ss->getReceiveTime() );
