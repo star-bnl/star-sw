@@ -1,14 +1,7 @@
 #ifndef TriggerDetectorBitsInfo_h
 #define TriggerDetectorBitsInfo_h
 
-
 #include "TriggerDetectorBitsInfoUi.h"
-#include "qfont.h"
-#include <bitset>
-#include <sstream>
-
-using namespace std;
-
 
 class TriggerDetectorBitsInfo : public TriggerDetectorBitsInfoUi {
  public:
@@ -22,17 +15,17 @@ class TriggerDetectorBitsInfo : public TriggerDetectorBitsInfoUi {
   virtual void setDetectorBits(unsigned int v) { EventDet->setText( utoa(v) );}
 
  private:
-    string utoa(unsigned int t) {
-      ostringstream os;
-      bitset<8> bit;
-      unsigned char*  p = (unsigned char*)&t;
-      for (int i=sizeof(t)-1; i>=0; i--) {
-	bit = *(p+i); 
-	os << bit << " ";
-      } 
-      return os.str();
+    QString utoa(unsigned int t) {
+      QString  bitstring;
+      int i = sizeof(t)-1;
+      for (;i>=0;i--) {
+         bitstring += QString::number((t&0xFF),2);
+         bitstring +=  " ";
+         t>>=8;
+      }
+      return bitstring;
     }
 };
-    
+
 
 #endif
