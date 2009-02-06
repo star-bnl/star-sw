@@ -1,5 +1,5 @@
 /****************************************************************************
-** $Id: TextEdit.h,v 1.3 2007/03/06 00:28:17 fine Exp $
+** $Id: TextEdit.h,v 1.4 2009/02/06 00:05:00 fine Exp $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -11,13 +11,14 @@
 #ifndef TEXTEDIT_H
 #define TEXTEDIT_H
 
-#include <qmainwindow.h>
-#include <qmap.h>
+#include <QMainWindow>
+#include <QString>
+#include <QTextEdit>
+#include <map>
 
 class QAction;
 class QComboBox;
 class QTabWidget;
-class QTextEdit;
 
 class TextEdit : public QMainWindow
 {
@@ -79,11 +80,9 @@ private:
 	*actionAlignCenter,
 	*actionAlignRight,
 	*actionAlignJustify;
-    QComboBox
-	*comboFont,
-	*comboSize;
+    QComboBox 	*comboFont,	*comboSize;
     QTabWidget *tabWidget;
-    QMap<QTextEdit*, QString> filenames;
+    std::map<QTextEdit*, QString> filenames;
 
 };
 

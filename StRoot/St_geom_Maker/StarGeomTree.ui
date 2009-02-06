@@ -1,0 +1,72 @@
+<ui version="4.0" >
+ <class>StarGeomTree</class>
+ <widget class="QWidget" name="StarGeomTree" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>522</width>
+    <height>598</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Geometry Tree</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2" >
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout" >
+     <item>
+      <widget class="StarGeomTreeWidget" name="treeWidget" >
+       <property name="selectionMode" >
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <column>
+        <property name="text" >
+         <string>Name</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Title</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Total</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Class</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout" >
+       <item>
+        <widget class="QSpinBox" name="spinBox" />
+       </item>
+       <item>
+        <widget class="QSlider" name="horizontalSlider" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StarGeomTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>StarGeomTreeWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -44,6 +44,11 @@ void StGeomBrowser::SetFile(const char *fileName)
 }
 
 //______________________________________________________________
+void StGeomBrowser::SetSize(Int_t w,Int_t h) {
+   fBrowser->resize(w,h);
+}
+
+//______________________________________________________________
 void StGeomBrowser::Show() {
    if (!fBrowser) fBrowser = new GeomBrowser();
    fBrowser->show();
