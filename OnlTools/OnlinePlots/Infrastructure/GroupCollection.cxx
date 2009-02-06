@@ -290,6 +290,8 @@ HistogramGroup* GroupCollection::read(GenericFile* genfile, const char* name) {
   if ( genfile->hisFile() ) {
     return read( genfile->hisFile() , name );
   }
+  cout << __PRETTY_FUNCTION__ << "no source for " << name << " was found " << endl;
+  return 0;
 }
 
 HistogramGroup* GroupCollection::read(TMapFile* mapfile, const char* name) {
