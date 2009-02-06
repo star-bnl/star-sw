@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHitCollection.hh,v 2.2 2005/05/11 20:54:29 calderon Exp $
+ * $Id: StMcIstHitCollection.hh,v 2.3 2009/02/06 15:38:12 fisyak Exp $
  * $Log: StMcIstHitCollection.hh,v $
+ * Revision 2.3  2009/02/06 15:38:12  fisyak
+ * Jonathan: decoding for upgr15 geometry
+ *
  * Revision 2.2  2005/05/11 20:54:29  calderon
  * Added persistency: ClassImp, ClassDef and inheritance from StObject.
  *
@@ -34,7 +37,7 @@ public:
     StMcIstLayerHitCollection*       layer(unsigned int);
     const StMcIstLayerHitCollection* layer(unsigned int) const;
 private:
-    enum { mNumberOfLayers = 3 };
+    enum { mNumberOfLayers = 1 };
     StMcIstLayerHitCollection mLayers[mNumberOfLayers];
     ClassDef(StMcIstHitCollection,1)
 };
