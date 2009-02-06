@@ -9,7 +9,6 @@
 #include <qobject.h>
 #include <qthread.h>
 #include <qmutex.h>
-#include "Updater.h"
 
 class ServerStatus;
 
