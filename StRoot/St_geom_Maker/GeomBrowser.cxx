@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.1 2009/02/06 00:04:59 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.2 2009/02/06 21:45:54 perev Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -320,7 +320,7 @@ void GeomBrowser::Init()
    fRootCommand->addItem(".qqqqqq");
    fRootCommand->addItem(".q");
 //   spinBox1->setValue(3);
-   fSingleVolumeCanvas->GetCanvas()->SetFillColor(kBlack); 
+   fComplexVolumeCanvas->GetCanvas()->SetFillColor(kBlack); 
    // do we have the QGLViewer?
    char *libRQTGL = 0;
    libRQTGL = gSystem->DynamicPathName("libRQTGL",kTRUE);
