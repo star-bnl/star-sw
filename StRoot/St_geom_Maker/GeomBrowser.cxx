@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.2 2009/02/06 21:45:54 perev Exp $
+// ** $Id: GeomBrowser.cxx,v 1.3 2009/02/07 00:38:42 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -108,18 +108,18 @@ void GeomBrowser::Connect()
 //_____________________________________________________________________________
 void GeomBrowser::CreateActions()
 {
-   fFile_New    = new QAction( "&New",   this);
-   fFile_Open   = new QAction( "&Open",  this);
-   fFile_Reload = new QAction( "Reload", this);
-   fFile_Save   = new QAction( "&Save",  this);
-   fFile_SaveAs = new QAction( "Save As",this);
-   fFile_Print  = new QAction( "&Print", this);
-   fFile_Exit   = new QAction( "E&xit",  this);
+   fFile_New    = new QAction( QIcon(":/FileNew.xpm"),"&New",    this);
+   fFile_Open   = new QAction( QIcon(":/fileopen.xpm"),"&Open",  this);
+   fFile_Reload = new QAction( QIcon(":/reload.xpm")  ,"Reload", this);
+   fFile_Save   = new QAction( QIcon(":/FileSave.xpm"),"&Save",  this);
+   fFile_SaveAs = new QAction(                       "Save As",this);
+   fFile_Print  = new QAction( QIcon(":/printer.xpm"),"&Print",  this);
+   fFile_Exit   = new QAction( QIcon(":/quit.xpm")    ,"E&xit",  this);
    
-   fView_Coin3DAction  = new QAction("Open&Inventor", this);
-   fView_GLAction      = new QAction("Open&GL"      , this);
+   fView_Coin3DAction  = new QAction( QIcon(":/snapshot.xpm"),"Open&Inventor", this);
+   fView_GLAction      = new QAction( QIcon(":/view3d.xpm") , "Open&GL"      , this);
 
-   fEditGeoSrc         = new QAction(  "Edit Geant Geometrt", this);
+   fEditGeoSrc         = new QAction(  "Edit Geant Geometry", this);
    fEditGeoSrc->setCheckable(true);
    
 #if 0
