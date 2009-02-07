@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: QExGeoDrawHelper.cxx,v 1.6 2009/02/05 15:29:46 fine Exp $
+** $Id: QExGeoDrawHelper.cxx,v 1.7 2009/02/07 20:44:12 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -200,18 +200,19 @@ TVolume *TGeoDrawHelper::MakeCompositeShape(const TGeoCompositeShape *top)
    // Create the composite shape as a trivial superposition of two shapes
    // No bool opeation is provided yet.
 
-   TVolume *topCompositeVolume = 0;   
+   TVolume *topCompositeVolume = 0;
    if (top) {
    // fprintf(stderr,"1. TObject3DView::MakeCompositeShape %s \"%s\"\n",  top->GetName(),top->GetTitle());
    //   top->ls();
 
-      // if (!top->IsVolumeMulti())    
+      // if (!top->IsVolumeMulti())
       TString title = top->GetTitle();
       if (title.IsNull() ) title = top->ClassName();
 
       TGeoBoolNode *shapeNode = top->GetBoolNode();
-      if (shapeNode) { 
-         topCompositeVolume = new TVolume(top->GetName(),title,(TShape *)0);
+      if (shapeNode) {
+         TString compositeName = Form("{%s}",top->GetName());
+         topCompositeVolume = new TVolume((const char *)compositeName,title,(TShape *)0);
 
          TGeoMatrix *geoMatrice[2] =  { shapeNode->GetLeftMatrix(), shapeNode->GetRightMatrix()};
          TGeoShape  *geoShape[2]   =  { shapeNode->GetLeftShape(),  shapeNode->GetRightShape() };
@@ -227,13 +228,13 @@ TVolume *TGeoDrawHelper::MakeCompositeShape(const TGeoCompositeShape *top)
             if ( geoShape[i]->IsComposite() )  {
                 nextVolume = MakeCompositeShape((TGeoCompositeShape *)geoShape[i]);
             } else  {
-  	        title = geoShape[i]->GetTitle();
-	        if (title.IsNull() ) title = geoShape[i]->ClassName();
-                nextVolume = new TVolume(geoShape[i]->GetName(),title,MakeShape(geoShape[i]));
+               title = geoShape[i]->GetTitle();
+               if (title.IsNull() ) title = geoShape[i]->ClassName();
+               nextVolume = new TVolume(geoShape[i]->GetName(),title,MakeShape(geoShape[i]));
             }
             topCompositeVolume->Add(nextVolume, trans[0],trans[1],trans[2],matrix, 999);
-         }  
-      } 
+         }
+      }
    }
    return topCompositeVolume;
 }
