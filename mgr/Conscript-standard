@@ -250,17 +250,19 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   }
   if ($#xpmQT >= 0) {
     my $out = $PKG . "_image_collection.cxx";
-    my @xpm = map (File::Basename::basename( $_), @xpmQT);
-    if ($qt4) {
-	# create qt4 resource file
-	my  $qrc = $out.".qrc";
-	#Command $env [$qrc], @xpm, qq(cat >%>; );
-	#Command $env [$out], $qrc, qq($uic -embed %< -o %> );
-
-    } else {
-	print "Command $uic -embed ".join(" ",@xpm)." -o $out \n";
-	Command $env [$out], @xpm, qq($uic -embed %< -o %> );
-	push @src, $out
+#    my @xpm = @xpmQT;
+    if (!$qt4) {
+       my $dir     = File::Basename::dirname( $xpmQT[0] );
+       my $dirbase = $dir;
+       $dirbase =~ s/$Dir//;
+       if ($dirbase) {
+         $dirbase =~ s|^/||;
+         $dirbase .= "/";
+       }
+       my @xpm = map ($dirbase . File::Basename::basename( $_), @xpmQT);
+       print "Command $uic -embed ".join(" ",@xpm)." -o $out \n";
+       Command $env [$out], @xpm, qq($uic -embed %< -o %> );
+       push @src, $out
     }
   }
   if ($qt4) {
@@ -271,7 +273,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       my $stem    = File::Basename::basename( $qrc);
       if ($dirbase) {
         $dirbase =~ s|^/||;
-       $dirbase .= "/";
+        $dirbase .= "/";
       }
       my $qrclocal = $dirbase . File::Basename::basename( $qrc );
       my @xpm = map ($dirbase . File::Basename::basename( $_), @xpmQT);
