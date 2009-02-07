@@ -82,7 +82,7 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   // Create test main frame. A QMainFrame is a top level window.
 
 //  connect(qApp,SIGNAL(lastWindowClosed () ), qApp, SLOT(quit ()) );
-  connect(qApp,SIGNAL(lastWindowClosed()),TQtRootSlot::CintSlot(),SLOT(TerminateAndQuit()));
+  // connect(qApp,SIGNAL(lastWindowClosed()),TQtRootSlot::CintSlot(),SLOT(TerminateAndQuit()));
 
   setUsesTextLabel(true); // use the text labels for the tool bar buttons
   
@@ -412,6 +412,8 @@ void PresenterGui::SetDefaults()
 void PresenterGui::CloseWindow()
 {
      qApp->closeAllWindows();
+     gROOT->ProcessLine(".q");
+     
 }
 //----------------------------------------------------------------
 void PresenterGui::DefineLayouts()
