@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.3 2009/02/07 00:38:42 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.4 2009/02/07 00:39:07 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -112,7 +112,7 @@ void GeomBrowser::CreateActions()
    fFile_Open   = new QAction( QIcon(":/fileopen.xpm"),"&Open",  this);
    fFile_Reload = new QAction( QIcon(":/reload.xpm")  ,"Reload", this);
    fFile_Save   = new QAction( QIcon(":/FileSave.xpm"),"&Save",  this);
-   fFile_SaveAs = new QAction(                       "Save As",this);
+   fFile_SaveAs = new QAction(                       "Save As",  this);
    fFile_Print  = new QAction( QIcon(":/printer.xpm"),"&Print",  this);
    fFile_Exit   = new QAction( QIcon(":/quit.xpm")    ,"E&xit",  this);
    
