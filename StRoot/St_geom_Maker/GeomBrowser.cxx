@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.4 2009/02/07 00:39:07 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.5 2009/02/07 19:02:05 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -521,11 +521,10 @@ void GeomBrowser::SelectGeometry( const QString &geomTag )
    // Select the standard geometry from the combobox if any
    // Find the geometry
    // printf(" GeomBrowser::SelectGeometry <%s> staring from %d\n", (const char *)geomTag,fGeometrySelector->currentItem());
-   int indx = fGeometrySelector->findText(geomTag,Qt::MatchExactly);
+   int indx = fGeometrySelector->findText(geomTag,Qt::MatchFixedString | Qt::MatchWrap);
    if (indx > 0) {
        fGeometrySelector->setCurrentIndex(indx);
-       // and load that geometry if found
-       STAR_geometry_activated(fGeometrySelector-> currentText ());
+       // selection should end up with "STAR_geometry_activated" slot after all
    } else  {
        QMessageBox::warning (fGeometrySelector,"STAR Geometry Tag",QString("STAR GEANT Geometry Tag <b>\"%1\"</b> was not found").arg(geomTag));
    }
