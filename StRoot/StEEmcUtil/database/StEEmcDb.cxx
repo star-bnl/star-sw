@@ -111,25 +111,29 @@ void StEEmcDb::setPreferredFlavor(const char *flavor, const char *nameMask){
 //________________________________________________________
 //________________________________________________________
 //________________________________________________________
-void StEEmcDb::setSectors(int sec1,int sec2){
-  assert(mNSector==0) ; //you can do it just once, no memory realocation implemented
+void StEEmcDb::setSectors(int sec1,int sec2)
+{
+  // you can do it just once, no memory realocation implemented
+  if ( mNSector==0 ){
+    LOG_ERROR <<  ":: Problem mNSector==0" <<endm;
+  } else {
+    
+    mfirstSecID=sec1;
+    mlastSecID=sec2;
+    mNSector=mlastSecID - mfirstSecID+1;
 
-  mfirstSecID=sec1;
-  mlastSecID=sec2;
-  mNSector=mlastSecID - mfirstSecID+1;
+    mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
+    mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
+    mDbPMTname=(eemcDbPMTname_st **) new void *[mNSector];
+    mDbPIXcal= (eemcDbPIXcal_st  **) new void *[mNSector];
+    mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
+    mDbPMTstat=(eemcDbPMTstat_st **) new void *[mNSector];
+    mDbsectorID=  new int [mNSector];
 
-  mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
-  mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
-  mDbPMTname=(eemcDbPMTname_st **) new void *[mNSector];
-  mDbPIXcal= (eemcDbPIXcal_st  **) new void *[mNSector];
-  mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
-  mDbPMTstat=(eemcDbPMTstat_st **) new void *[mNSector];
-  mDbsectorID=  new int [mNSector];
+    clearItemArray();
 
-
-  clearItemArray();
-
- LOG_INFO <<  ":: Use sectors from "<< mfirstSecID<<" to "<< mlastSecID<<endm;
+    LOG_INFO <<  ":: Use sectors from "<< mfirstSecID<<" to "<< mlastSecID<<endm;
+  }
 
 }
 
@@ -184,15 +188,20 @@ void StEEmcDb::clearItemArray(){
 
 
   nFound=0;
-  mDbADCconf[0]=0;
-  for(i=0; i<mNSector; i++) {// clear pointers old DB tables
-     mDbADCconf [i]=0;
-     mDbPMTcal  [i]=0;
-     mDbPMTname [i]=0;
-     mDbPIXcal  [i]=0;
-     mDbPMTped  [i]=0;
-     mDbPMTstat [i]=0;
-    mDbsectorID[i]=-1;
+
+  if ( ! mDbADCconf ){
+    LOG_FATAL << ":: Cannot initialize arrays in clearItemArray()" << endm;
+  } else {
+    mDbADCconf[0]=0;
+    for(i=0; i<mNSector; i++) {// clear pointers old DB tables
+      mDbADCconf [i]=0;
+      mDbPMTcal  [i]=0;
+      mDbPMTname [i]=0;
+      mDbPIXcal  [i]=0;
+      mDbPMTped  [i]=0;
+      mDbPMTstat [i]=0;
+      mDbsectorID[i]=-1;
+    }
   }
 
 }
@@ -802,10 +811,10 @@ void StEEmcDb::setAsciiDatabase( const Char_t *ascii )
   return;
 
  crashIt:// any failure of reading of the data
-
-  clearItemArray();
+  LOG_FATAL<<Form("EEmcDb - no/corrupted input file, continue\n")<<endm;
+  //clearItemArray();
   //  assert(2==3);
-  LOG_FATAL<<Form("EEmcDb - no/corrupted input file, all cleared, continue\n")<<endm;
+
 
 }
 
