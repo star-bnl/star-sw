@@ -316,6 +316,7 @@ void StarGeomTreeWidget::itemExpandedCB ( QTreeWidgetItem * item )
       TVolume *volume = dynamic_cast<TVolume *>(obj);
 
       TQtLockUpdateWidget listLock(this);
+      this->setSortingEnabled(false);
 
       TDataSetIter next(volume);
       TVolume *child = 0;
@@ -334,6 +335,8 @@ void StarGeomTreeWidget::itemExpandedCB ( QTreeWidgetItem * item )
                                     : QTreeWidgetItem::DontShowIndicatorWhenChildless );
          SetVisibility(itemChild, child->GetVisibility());
       }
+      this->setSortingEnabled(true);
+
    }
 }
 //_____________________________________________________________________________
@@ -525,6 +528,7 @@ QTreeWidgetItem* StarGeomTreeWidget::AddModel2ListView( TObject *obj, const QStr
 {
    TVolume *volume = 0;
    TQtLockUpdateWidget listLock(this);
+   this->setSortingEnabled(false);
    QTreeWidgetItem* item = 0;
    if (       obj->IsA() == TGeometry::Class()) {
       volume = new TVolume(*((TGeometry*)obj)->GetCurrentNode());
@@ -538,8 +542,8 @@ QTreeWidgetItem* StarGeomTreeWidget::AddModel2ListView( TObject *obj, const QStr
    }
    if(volume) {
          QStringList strings;
-           strings.append(volume->GetName()); 
-           strings.append(volume->GetTitle()); 
+           strings.append(volume->GetName());
+           strings.append(volume->GetTitle());
            strings.append(QString());
            strings.append(volume->ClassName());
 
@@ -553,6 +557,7 @@ QTreeWidgetItem* StarGeomTreeWidget::AddModel2ListView( TObject *obj, const QStr
       this->addTopLevelItem(item);
    }
    if (!title.isEmpty() && item)  item->setText(0,title);
+   this->setSortingEnabled(true);
    return item;
 }
 
