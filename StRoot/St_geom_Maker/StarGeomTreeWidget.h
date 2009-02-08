@@ -50,6 +50,7 @@ private:
    TContextMenu *fContextMenu;
    TGeoManager  *fGeoManager2Delete;
    QTreeWidgetItem *fCurrentDrawn;
+   bool             fNewItemCreating;
 
    protected:
       friend class GeomBrowser;
@@ -59,7 +60,7 @@ private:
       void drawItem( QTreeWidgetItem *item, bool expanded=false);
       void SetVisibility( QTreeWidgetItem * item, TVolume::ENodeSEEN vis );
 	   QTreeWidgetItem* AddModel2ListView( TObject *obj, const QString &title);
-      
+      QTreeWidgetItem *CreateTreeWidgetItem(TVolume  *obj, QTreeWidgetItem *parent=0 );
 
    public:
       StarGeomTreeWidget(QWidget *parent = 0);
