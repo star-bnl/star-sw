@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.5 2009/02/07 19:02:05 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.6 2009/02/08 02:30:26 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -199,10 +199,12 @@ void GeomBrowser::CreateGuiLayout()
    fSingleVolumeCanvas       = new TQtWidget(this);
    fComplexVolumeCanvas      = new TQtWidget(this);
    QSplitter *hsplitter = new QSplitter(Qt::Vertical,this);
+   hsplitter->setOpaqueResize(false);
    hsplitter->addWidget(fSingleVolumeCanvas);
    hsplitter->addWidget(fComplexVolumeCanvas);
 
    QSplitter *vsplitter = new QSplitter(Qt::Horizontal,this);
+   vsplitter->setOpaqueResize(false);
    fTreeWidget  = new StarGeomTreeWidget(this);
    vsplitter->addWidget(fTreeWidget);
    vsplitter->addWidget(hsplitter);   
