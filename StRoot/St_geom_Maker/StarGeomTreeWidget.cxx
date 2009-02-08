@@ -304,9 +304,9 @@ void StarGeomTreeWidget::itemDoubleClickedCB ( QTreeWidgetItem * item, int colum
                set = TQtIconBrowserImp::IconList()->GetIcon(((TGeoVolume *)(obj))->GetShape()->GetName());
          }
         // highlight the new item
-        //vf  --  fCurrentDrawn->setIcon(0,fIconSet.pixmap(QIconSet::Small,true,QIconSet::On)); 
+         fCurrentDrawn->setIcon(0,QIcon(":/wirebox.xpm")); 
 //       fCurrentDrawn->setPixmap(0,QPixmap::fromMimeSource("arrow_right.xpm")); 
-         fCurrentDrawn->setIcon(1,set ? *set : QPixmap("arrow_left.xpm")); 
+         fCurrentDrawn->setIcon(1,set ? *set : QIcon(":/arrow_left.xpm")); 
       }
       drawItem(fCurrentDrawn, true); 
    }
