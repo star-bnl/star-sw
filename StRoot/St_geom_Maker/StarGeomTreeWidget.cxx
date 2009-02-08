@@ -29,6 +29,10 @@ using namespace std;
 #include <QMenu>
 #include <QDebug>
 
+//________________________________________________________________
+//
+//
+//________________________________________________________________
 
 static QTreeWidgetItem *Find(QTreeWidgetItem *from, TObject *topObject)
 {
@@ -99,7 +103,7 @@ static const QString  &GetVolumeDescriptor(const QString &volumeName,bool richTe
 
 //_____________________________________________________________________________
 StarGeomTreeWidget::StarGeomTreeWidget(QWidget *parent) : QTreeWidget(parent)
-,fContextMenu(0),fGeoManager2Delete(0),fCurrentDrawn(0)
+,fContextMenu(0),fGeoManager2Delete(0),fCurrentDrawn(0),fNewItemCreating(false)
 {
    Init();
 }
@@ -135,6 +139,31 @@ void StarGeomTreeWidget::ConnectTreeSlots()
 
 //_____________________________________________________________________________
 StarGeomTreeWidget::~StarGeomTreeWidget() {}
+
+//_____________________________________________________________________________
+QTreeWidgetItem *StarGeomTreeWidget::CreateTreeWidgetItem(TVolume  *volume, QTreeWidgetItem *parent)
+{
+   // Create the tree item filled with the ROOT object
+   // parent = 0 ; parent is the item is to be toplevel item
+   QStringList strings;
+       strings.append(volume->GetName());
+       strings.append(volume->GetTitle());
+       strings.append(QString());
+       strings.append(volume->ClassName());
+   fNewItemCreating = true;
+   QTreeWidgetItem* item = parent ?
+                      new QTreeWidgetItem(parent,strings)
+                      :
+                      new QTreeWidgetItem(this,strings);
+   item->setData(0,Qt::UserRole,qVariantFromValue((void *)volume));
+   item->setChildIndicatorPolicy(
+            volume->GetListSize() >0 ? QTreeWidgetItem::ShowIndicator
+                                    : QTreeWidgetItem::DontShowIndicatorWhenChildless );
+   SetVisibility(item, volume->GetVisibility());
+   fNewItemCreating = false;
+   return item;
+}
+
 //_____________________________________________________________________________
 void StarGeomTreeWidget::currentItemChangedCB ( QTreeWidgetItem * current, QTreeWidgetItem * previous ) {}
 //_____________________________________________________________________________
@@ -144,22 +173,23 @@ void StarGeomTreeWidget::itemActivatedCB ( QTreeWidgetItem * item, int column )
 void StarGeomTreeWidget::itemChangedCB ( QTreeWidgetItem * item, int) 
 {
    if (item) {
-#if 0   
-     //  Rotate the visibility flag
-      qDebug() << " StarGeomTreeWidget::itemChangedCB  state:" << item->text(0) << item->checkState(0);
-      TObject *obj = CurrentObject(item);
-      TVolume *volume = dynamic_cast<TVolume *>(obj);
-      TVolume::ENodeSEEN vis = volume->GetVisibility();
-      if (vis == TVolume::kNoneVisible) 
-        vis = TVolume::kThisUnvisible;
-      else if (vis == TVolume::kThisUnvisible)
-         vis = TVolume::kBothVisible;
-      else 
-         vis = TVolume::kNoneVisible;
-      SetVisibility(item, vis);
-#endif
+      //  Rotate the visibility flag
+      //qDebug() << " StarGeomTreeWidget::itemChangedCB  state:" << item->text(0) << item->checkState(0) << fNewItemCreating;
+      if (!fNewItemCreating) {
+         TObject *obj = CurrentObject(item);
+         TVolume *volume = dynamic_cast<TVolume *>(obj);
+         TVolume::ENodeSEEN vis = volume->GetVisibility();
+         if (vis == TVolume::kNoneVisible) 
+            vis = TVolume::kThisUnvisible;
+         else if (vis == TVolume::kThisUnvisible)
+            vis = TVolume::kBothVisible;
+         else 
+            vis = TVolume::kNoneVisible;
+         SetVisibility(item, vis);
+      }
    }
 }
+
 //_____________________________________________________________________________
 void StarGeomTreeWidget::itemClickedCB ( QTreeWidgetItem * item, int column )
 {
@@ -192,7 +222,17 @@ void StarGeomTreeWidget::itemClickedCB ( QTreeWidgetItem * item, int column )
             if (item == this->currentItem() ) drawItem(item, false);
 
             // adjust multi-level  view
-           //  if (fCurrentDrawn) RefreshCanvas(tQtWidget1);
+            if (fCurrentDrawn == item) drawItem(item, true);
+            else {
+               // check whether the item parent was drawn
+               QTreeWidgetItem *lookup = item;
+               int depth = 3;
+               while( lookup && depth && (lookup != fCurrentDrawn))  {
+                  lookup = lookup->parent(); 
+                  depth--;
+               }
+               if (lookup && depth) drawItem(fCurrentDrawn, true);
+            }
          }
 #if 0
          QString dsc = GetVolumeDescriptor(volume->GetName(),true);
@@ -311,7 +351,7 @@ inline static Int_t CountInstances(TVolume *parent,  TVolume *child)
 void StarGeomTreeWidget::itemExpandedCB ( QTreeWidgetItem * item ) 
 {
    if (item) {
-      // fprintf(stderr,"listView1_expanded %s\n", (const char *) item->text(0));
+      // qDebug() << "  StarGeomTreeWidget::itemExpandedCB  state:" << item->text(0) << item->checkState(0);
       TObject *obj = CurrentObject(item);
       TVolume *volume = dynamic_cast<TVolume *>(obj);
 
@@ -320,21 +360,8 @@ void StarGeomTreeWidget::itemExpandedCB ( QTreeWidgetItem * item )
 
       TDataSetIter next(volume);
       TVolume *child = 0;
-      while ( (child = (TVolume *)next()) ) {
-         Int_t nVolume = CountInstances(volume,child);
-         QStringList strings;
-           strings.append(child->GetName()); 
-           strings.append(child->GetTitle()); 
-           strings.append((nVolume >1) ? QString("> #%1").arg(nVolume) : QString());
-           strings.append(child->ClassName());
-
-         QTreeWidgetItem* itemChild = new QTreeWidgetItem(item,strings);     
-         itemChild->setData(0,Qt::UserRole,qVariantFromValue((void *)child));
-         itemChild->setChildIndicatorPolicy(
-            child->GetListSize() >0 ? QTreeWidgetItem::ShowIndicator
-                                    : QTreeWidgetItem::DontShowIndicatorWhenChildless );
-         SetVisibility(itemChild, child->GetVisibility());
-      }
+      while ( (child = (TVolume *)next()) )
+      {   CreateTreeWidgetItem(child,item);  }
       this->setSortingEnabled(true);
 
    }
@@ -515,12 +542,14 @@ void StarGeomTreeWidget::SetVisibility( QTreeWidgetItem * item, TVolume::ENodeSE
 {
    // Convert the the visbility status to the checkmark  
    if (item) {
+      blockSignals(true);
       switch (vis) {
           case TVolume::kBothVisible:   item->setCheckState(0,Qt::Checked);         break;
           case TVolume::kSonUnvisible:  item->setCheckState(0,Qt::Checked);         break;
           case TVolume::kThisUnvisible: item->setCheckState(0,Qt::PartiallyChecked);break;
           case TVolume::kNoneVisible:   item->setCheckState(0,Qt::Unchecked);       break;
       };
+      blockSignals(false);
    }
 }
 //_____________________________________________________________________________
@@ -541,19 +570,7 @@ QTreeWidgetItem* StarGeomTreeWidget::AddModel2ListView( TObject *obj, const QStr
       volume = (TVolume *)obj;
    }
    if(volume) {
-         QStringList strings;
-           strings.append(volume->GetName());
-           strings.append(volume->GetTitle());
-           strings.append(QString());
-           strings.append(volume->ClassName());
-
-      item = new QTreeWidgetItem(this, strings);
-      item->setData(0,Qt::UserRole,qVariantFromValue((void *)volume));
-      item->setChildIndicatorPolicy(
-            volume->GetListSize() >0 ? QTreeWidgetItem::ShowIndicator
-                                    : QTreeWidgetItem::DontShowIndicatorWhenChildless );
-      //     item->setPixmap(0 , QPixmap::fromMimeSource( "h2_t.png"));
-      SetVisibility(item, volume->GetVisibility());
+      item = CreateTreeWidgetItem(volume);
       this->addTopLevelItem(item);
    }
    if (!title.isEmpty() && item)  item->setText(0,title);
