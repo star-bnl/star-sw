@@ -141,14 +141,14 @@ void StarGeomTreeWidget::ConnectTreeSlots()
 StarGeomTreeWidget::~StarGeomTreeWidget() {}
 
 //_____________________________________________________________________________
-QTreeWidgetItem *StarGeomTreeWidget::CreateTreeWidgetItem(TVolume  *volume, QTreeWidgetItem *parent)
+QTreeWidgetItem *StarGeomTreeWidget::CreateTreeWidgetItem(TVolume  *volume, QTreeWidgetItem *parent,const QString &nConter)
 {
    // Create the tree item filled with the ROOT object
    // parent = 0 ; parent is the item is to be toplevel item
    QStringList strings;
        strings.append(volume->GetName());
        strings.append(volume->GetTitle());
-       strings.append(QString());
+       strings.append(nConter);
        strings.append(volume->ClassName());
    fNewItemCreating = true;
    QTreeWidgetItem* item = parent ?
@@ -360,8 +360,10 @@ void StarGeomTreeWidget::itemExpandedCB ( QTreeWidgetItem * item )
 
       TDataSetIter next(volume);
       TVolume *child = 0;
-      while ( (child = (TVolume *)next()) )
-      {   CreateTreeWidgetItem(child,item);  }
+      while ( (child = (TVolume *)next()) ) {
+         Int_t nVolume = CountInstances(volume,child);
+         CreateTreeWidgetItem(child,item, (nVolume >1) ? QString("> #%1").arg(nVolume) : QString());  
+      }
       this->setSortingEnabled(true);
 
    }

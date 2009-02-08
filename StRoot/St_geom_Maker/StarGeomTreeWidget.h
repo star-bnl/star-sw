@@ -2,6 +2,7 @@
 #define STAR_STARGEOMTREE
 // Author: Valeri Fine   11/01/2009
 #include <QTreeWidget>
+#include <QString>
 #include "TVolume.h"
 
 class TObject;
@@ -60,7 +61,7 @@ private:
       void drawItem( QTreeWidgetItem *item, bool expanded=false);
       void SetVisibility( QTreeWidgetItem * item, TVolume::ENodeSEEN vis );
 	   QTreeWidgetItem* AddModel2ListView( TObject *obj, const QString &title);
-      QTreeWidgetItem *CreateTreeWidgetItem(TVolume  *obj, QTreeWidgetItem *parent=0 );
+      QTreeWidgetItem *CreateTreeWidgetItem(TVolume  *obj, QTreeWidgetItem *parent=0, const QString &cnt=QString() );
 
    public:
       StarGeomTreeWidget(QWidget *parent = 0);
