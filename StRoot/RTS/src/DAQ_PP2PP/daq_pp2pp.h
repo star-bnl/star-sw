@@ -7,9 +7,9 @@
 #define PP2PP_SVX_CH	128
 
 struct pp2pp_t {
-	u_char seq_id ;		// 1..4 ;
-	u_char chain_id ;	// 1..4 ;
-	u_char svx_id ;		// 1..8 ;
+	u_char seq_id ;		// 1..whatever is coded with sequencer jumpers
+	u_char chain_id ;	// 0..3 ;
+	u_char svx_id ;		// 0..7 ;
 	u_char error ;		// error occured!
 
 	u_char adc[PP2PP_SVX_CH] ;	
