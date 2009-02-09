@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.2 2009/01/20 18:10:15 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.3 2009/02/09 19:31:17 jeromel Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.3  2009/02/09 19:31:17  jeromel
+ * not y9 and not early y9 version + returns internalBusy
+ *
  * Revision 2.2  2009/01/20 18:10:15  ullrich
  * Bug fix and new ZDC access functions.
  *
@@ -40,7 +43,8 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     
     unsigned int ver = data->FormatVersion; 
     swapI(&ver);
-    if (ver != y9FORMAT_VERSION) {
+
+    if (ver != y9FORMAT_VERSION  && ver != 0x08121140) {
         gMessMgr->Warning() << "StTriggerData2009: Data format version = " << data->FormatVersion
                             << " is different from program format version = " << y9FORMAT_VERSION
                             << endm;
@@ -175,7 +179,7 @@ unsigned int StTriggerData2009::numberOfPostXing() const
 }
 
 unsigned short StTriggerData2009::busyStatus() const{
-    return EvtDesc->modifiedBusyStatus;
+    return EvtDesc->internalBusy;
 }
 
 unsigned short StTriggerData2009::dsmInput() const{
