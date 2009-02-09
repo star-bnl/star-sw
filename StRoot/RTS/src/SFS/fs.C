@@ -133,7 +133,7 @@ int fs_mount(int argc, char *argv[])
     sprintf(fn,"%s/%s",pwd,argv[1]);
   }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   struct stat64 filestat;
   if(stat64(fn,&filestat) < 0) 
 #else
@@ -145,7 +145,7 @@ int fs_mount(int argc, char *argv[])
     return 1;
   }
   
-#ifdef __USE_LARGEFILE64
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   idx_fd = open64(fn, O_RDONLY);
 #else
   idx_fd = open(fn, O_RDONLY);
@@ -183,7 +183,7 @@ int fs_mount(int argc, char *argv[])
   idx->mount(fn, O_RDONLY);
   t = record_time();
 
-#ifdef __USE_LARGEFILE64
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   printf("Mounted file %s: %lld bytes in %5.2f sec\n",fn,filestat.st_size,t);
 #else
   printf("Mounted file %s: %d bytes in %5.2f sec\n",fn,filestat.st_size,t);
@@ -269,14 +269,14 @@ int fs_cat(int argc, char *argv[])
     return -1;
   }
 
-#ifdef __USE_LARGEFILE64
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   long long int ret = lseek(idx_fd, entry->offset, SEEK_SET);
 #else
   int ret = lseek(idx_fd, entry->offset, SEEK_SET);
 #endif
 
   if(ret != entry->offset) {
-#ifdef __USE_LARGEFILE64
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     printf("Invalid seek %lld vs %lld  (%s)\n",ret,entry->offset,strerror(errno));
 #else
     printf("Invalid seek %d vs %d  (%s)\n",ret,entry->offset,strerror(errno));
@@ -287,7 +287,7 @@ int fs_cat(int argc, char *argv[])
 
   ret = read(idx_fd, buff, entry->sz);
   if(ret != entry->sz) {
-#ifdef __USE_LARGEFILE64
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     printf("Error reading file %lld vs %d\n", ret, entry->sz);
 #else
     printf("Error reading file %d vs %d\n", ret, entry->sz);
@@ -301,7 +301,7 @@ int fs_cat(int argc, char *argv[])
       free(buff);
       return -1;
     }
-#ifdef __USE_LARGEFILE64
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     int fd = open64(argv[2], O_WRONLY | O_CREAT,0777);
 #else
     int fd = open(argv[2], O_WRONLY | O_CREAT, 0777);
@@ -441,7 +441,7 @@ int main(int argc, char *argv[])
 
   if(argc > 1) {
     // Try mounting...
-#ifdef __USE_LARGEFILE64
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     struct stat64 sstat;    
     int ret = stat64(argv[1], &sstat);
 #else

@@ -149,7 +149,7 @@ int SFS_ittr::next()
   //if(legacy) return legacy_next();
   skipped_bytes = 0;
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   LOG(DBG, "Calling next:  fileoffset=%lld filepos=%d",fileoffset,filepos);
   long long int ret;
 #else
@@ -223,7 +223,7 @@ int SFS_ittr::next()
 
     buff[5] = 0;
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     wfile->lseek(-((long long int)8), SEEK_CUR);
     long long int xxx = wfile->lseek(0,SEEK_CUR);
     LOG(DBG, "fileoffset=%lld xxx=%lld buff=%s",fileoffset,xxx,buff);
@@ -370,7 +370,7 @@ int SFS_ittr::next()
     strcat(fullpath, entry.name);
   }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   LOG(DBG,"fullpath %s, entry.name: %s, fileoffset %lld/%d, sz %d  head_sz %d",
       fullpath, entry.name, fileoffset, filepos, entry.sz, entry.head_sz);
 #else
@@ -751,7 +751,7 @@ int sfs_index::mountSingleDirMem(char *buffer, int size)
 // returns -1 on error
 // returns 0 on eof
 // returns 1 on valid dir
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
 int sfs_index::mountSingleDir(char *fn, long long int offset)
 #else
 int sfs_index::mountSingleDir(char *fn, int offset)
@@ -768,7 +768,7 @@ int sfs_index::mountSingleDir(char *fn, int offset)
   return mountSingleDir();
 }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
 int sfs_index::getSingleDirSize(char *fn, long long int offset)
 #else
 int sfs_index::getSingleDirSize(char *fn, int offset)
@@ -778,7 +778,7 @@ int sfs_index::getSingleDirSize(char *fn, int offset)
   int topdirlen=0;
   topdir[0] = '\0';
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   LOG(DBG, "singledirdize file=%s, offset=%lld",fn,offset);
 #else 
   LOG(DBG, "singledirdize file=%s, offset=%d",fn,offset);
@@ -843,7 +843,7 @@ int sfs_index::mountSingleDir()   // mounts from current position of wfile...
 {
   if(singleDirIttr) delete singleDirIttr;
   
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   long long int offset = wfile.lseek(0,SEEK_CUR);
 #else
   int offset = wfile.lseek(0,SEEK_CUR);
@@ -996,7 +996,7 @@ void sfs_index::addnode(SFS_ittr *ittr)
   char thispathonly[256];
   char *next[20];
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   LOG(DBG, "addnode: %s %lld %d",ittr->fullpath, ittr->fileoffset, ittr->filepos);
 #else
   LOG(DBG, "addnode: %s %d %d",ittr->fullpath, ittr->fileoffset, ittr->filepos);
@@ -1042,7 +1042,7 @@ void sfs_index::dump(char *path, fs_inode *inode) {
   }
 }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
 fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, long long int offset, int sz)
 #else
 fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int sz)
@@ -1068,7 +1068,7 @@ fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int 
   return newn;
 }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
 fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, long long int offset, int sz)
 #else
 fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, int offset, int sz)
