@@ -28,7 +28,7 @@ int wrapfile::openmem(char *buff, int size) {
 
 int wrapfile::opendisk(char *fn, int flags, int perms)
 {
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   fd = open64(fn, flags, perms);
 #else
   fd = open(fn, flags, perms);
@@ -54,7 +54,7 @@ int wrapfile::read(void *buff, int sz)
   switch(type) {
   case WRAP_MEM:
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     LOG(DBG, "read: wfpos=%lld wsize=%lld sz=%d",wfpos,wsize,sz);
 #else
     LOG(DBG, "read: wfpos=%d wsize=%d sz=%d",wfpos,wsize,sz);
@@ -97,7 +97,7 @@ int wrapfile::write(void *buff, int sz)
   return -1;
 }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
 long long int wrapfile::lseek(long long int offset, int whence)
 #else
 int wrapfile::lseek(int offset, int whence)
@@ -122,7 +122,7 @@ int wrapfile::lseek(int offset, int whence)
     }
     
   case WRAP_DISK:
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     return ::lseek64(fd, offset, whence);  
 #else
     return ::lseek(fd, offset,whence);
@@ -132,7 +132,7 @@ int wrapfile::lseek(int offset, int whence)
   return -1;
 }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
 int wrapfile::fstat(struct stat64 *stat)
 #else
 int wrapfile::fstat(struct stat *stat)
@@ -146,7 +146,7 @@ int wrapfile::fstat(struct stat *stat)
     return -1;
   
   case WRAP_DISK:
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     return ::fstat64(fd, stat);
 #else
     return ::fstat(fd, stat);
@@ -306,7 +306,7 @@ int fs_index::mount(int ip, int port)
 int fs_index::initmount()
 {
   int ret;
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   struct stat64 stat;
 #else
   struct stat stat;
@@ -531,7 +531,7 @@ fs_dirent *fs_index::readdir(fs_dir *dir)
   return &ent;
 }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
 fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz)
 #else
 fs_inode *fs_index::alloc_inode(char *name, int off, int sz)
@@ -599,7 +599,7 @@ int fs_index::read(char *fn, char *buff, int maxsize)
   return ret;
 }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
 long long int fs_index::mountsz()
 #else
 int fs_index::mountsz()
@@ -612,7 +612,7 @@ int fs_index::mountsz()
     }
   }
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   struct stat64 stat;
 #else
   struct stat stat;

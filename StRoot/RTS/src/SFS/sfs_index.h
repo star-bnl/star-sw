@@ -50,7 +50,7 @@ class SFS_ittr {
   char ppath[256];
   char fullpath[256];
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   long long int fileoffset;  // from start of file.
 #else
   int fileoffset ;
@@ -65,7 +65,7 @@ class SFS_ittr {
     skipped_bytes = 0;
   };
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   SFS_ittr(long long int offset) 
 #else
   SFS_ittr(int offset)
@@ -122,7 +122,7 @@ class sfs_index : public fs_index {
   int singleDirMount;
   SFS_ittr *singleDirIttr;
 
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   int mountSingleDir(char *fn, long long int offset=0);
   int getSingleDirSize(char *fn, long long int offset);
 #else
@@ -152,7 +152,7 @@ class sfs_index : public fs_index {
 
   void addnode(SFS_ittr *ittr);
  
-#if  defined(__USE_LARGEFILE64) || defined(__LARGEFILE64_SOURCE_)
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   fs_inode *add_inode(fs_inode *parent, char *name, long long int offset, int sz);
   fs_inode *add_inode_from(fs_inode *neighbor, char *name, long long int offset, int sz);
 #else 
