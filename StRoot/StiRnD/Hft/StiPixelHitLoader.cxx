@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.21 2008/03/25 20:02:28 andrewar Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.22 2009/02/09 02:47:19 andrewar Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.22  2009/02/09 02:47:19  andrewar
+ * UPGR15 update. Will break backward compatibility with older geometries.
+ *
  * Revision 1.21  2008/03/25 20:02:28  andrewar
  * Removed hit smearing.
  *
@@ -83,48 +86,69 @@ void StiPixelHitLoader::loadHits(StEvent* source,
     StiDetector *detector=0;
     int nHit=0;
     for(unsigned int j=0; j<vec.size(); j++)	{
-	StRnDHit *pxlH = vec[j];
-	if(!pxlH)
-	  throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL hit in container");
-
-	if (pxlH->detector()!=kPxlId) continue;
-	
-	// Because of a screw up with the layout in the pixlgeo3.g file, the detectors are not 
-	// sequential in phi. List (geant,ittf): (1,2),(2,1),(3,0),(4,5),(5,4),(6,3),(7,8),(8,7),(9,6)
-	// This works to: 
-	//    ittfL = 3*n - geantL
-	//    n = 1,3,5 (or 2k+1, k=0,1,2)
-	//    k= int[( geantL -1 )/3]
-	//Resolve the layer and ladder ids.
-
-	//detector= _detector->getDetector(pxlH->layer()-1, pxlH->ladder()-1);
-	int ittfLadder;
-	//MLM printf("hit layer: %i ladder: %i\n",pxlH->layer(), pxlH->ladder());
+      StRnDHit *pxlH = vec[j];
+      if(!pxlH)
+	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL hit in container");
+      
+      if (pxlH->detector()!=kPxlId) continue;
+      
+      // Because of a screw up with the layout in the pixlgeo3.g file, the detectors are not 
+      // sequential in phi. List (geant,ittf): (1,2),(2,1),(3,0),(4,5),(5,4),(6,3),(7,8),(8,7),(9,6)
+      // This works to: 
+      //    ittfL = 3*n - geantL
+      //    n = 1,3,5 (or 2k+1, k=0,1,2)
+      //    k= int[( geantL -1 )/3]
+      //Resolve the layer and ladder ids.
+      
+      //detector= _detector->getDetector(pxlH->layer()-1, pxlH->ladder()-1);
+      int ittfLadder;
+      //assert(row<_detectors.size());
+      //assert(sector<_detectors[row].size());
+      //MLM 
+      LOG_DEBUG <<Form("hit layer: %i ladder: %i\n",pxlH->layer(), pxlH->ladder()) << endm;
+      /*
 	if(pxlH->layer()==1)
-	  ittfLadder= ( 2* int( (pxlH->ladder()-1.) /3. ) +1)*3 - pxlH->ladder();
+	ittfLadder= ( 2* int( (pxlH->ladder()-1.) /3. ) +1)*3 - pxlH->ladder();
 	else
-	  ittfLadder=( 2* int( (pxlH->ladder()-1.) /8. ) +1)*8 - pxlH->ladder();
-	//MLM printf("ittfLadder: %i\n",ittfLadder);
-	detector= _detector->getDetector(pxlH->layer()-1, ittfLadder);
+	ittfLadder=( 2* int( (pxlH->ladder()-1.) /8. ) +1)*8 - pxlH->ladder();
+      */
+      //MLM 
+      //printf("row<==> pxlH()-1:%i sector<==>ittfLadder: %i\n",pxlH->layer()-1,ittfLadder);
+      //detector= _detector->getDetector(pxlH->layer(), ittfLadder);
 
-
-
-	if(!detector)
-	  throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
-	//cout <<"add hit to detector:\t"<<detector->getName()<<endl;
-	
-	StiHit *stiHit=_hitFactory->getInstance();
+      detector= _detector->getDetector(pxlH->layer(), pxlH->ladder());
+      
+      if(!detector)
+	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- NULL detector pointer");
+      LOG_DEBUG <<"add hit to detector:\t"<<detector->getName()<<endm;
+      //double angle   = detector->getPlacement()->getNormalRefAngle();
+      //double radius  = detector->getPlacement()->getNormalRadius();
+      //double zcenter = detector->getPlacement()->getZcenter();
+      //LOG_DEBUG << " radius = "<< radius << " angle = " << angle << " zCenter = " << zcenter << endm;
+      double angle    = detector->getPlacement()->getNormalRefAngle();
+      double radius   = detector->getPlacement()->getNormalRadius();
+      double zcenter  = detector->getPlacement()->getZcenter();
+      double halfDepth = detector->getShape()->getHalfDepth();
+      double halfWidth = detector->getShape()->getHalfWidth();
+      double thick     = detector->getShape()->getThickness();
+      LOG_DEBUG << " detector info " << *detector << endm;
+      LOG_DEBUG << " radius = "<< radius << " angle = " << angle << " zCenter = " << zcenter << endm;
+      LOG_DEBUG << " depth = " << halfDepth << " Width = " << halfWidth << " thickness= " << thick << endm; 
+      LOG_DEBUG << " key 1 : " << detector->getKey(1) <<" key 2 : " << detector->getKey(2) << endm; 
+      
+      StiHit *stiHit=_hitFactory->getInstance();
 	if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
 	stiHit->reset();
-
-
+	
+	
 	
 	stiHit->setGlobal(detector, pxlH,
                           pxlH->position().x(), pxlH->position().y(),
 			  pxlH->position().z(), pxlH->charge());
-		
+	
 	_hitContainer->add(stiHit);
-
+	LOG_DEBUG <<" nHit = "<<nHit<<" Layer = "<<pxlH->layer()<<" Ladder = "<<pxlH->ladder()<<" x = "<<pxlH->position().x()<<" y = "<<pxlH->position().y()<<" z = "<<pxlH->position().z()<<endm;
+	
 	//done loop over hits
 	nHit++;
       }
