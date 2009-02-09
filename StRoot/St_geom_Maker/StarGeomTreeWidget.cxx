@@ -160,6 +160,14 @@ QTreeWidgetItem *StarGeomTreeWidget::CreateTreeWidgetItem(TVolume  *volume, QTre
             volume->GetListSize() >0 ? QTreeWidgetItem::ShowIndicator
                                     : QTreeWidgetItem::DontShowIndicatorWhenChildless );
    SetVisibility(item, volume->GetVisibility());
+   if (QString(volume->GetName()).startsWith("{")) {
+      // make  it blue
+      item->setData(0,Qt::ForegroundRole,Qt::blue);
+      item->setData(1,Qt::ForegroundRole,Qt::blue);
+      item->setData(2,Qt::ForegroundRole,Qt::blue);
+      item->setData(3,Qt::ForegroundRole,Qt::blue);
+   }
+
    fNewItemCreating = false;
    return item;
 }
