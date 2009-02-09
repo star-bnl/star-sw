@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.6 2009/02/08 02:30:26 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.7 2009/02/09 20:54:49 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -65,6 +65,7 @@ static void RefreshCanvas(TQtWidget *w)
  , fView_Coin3DAction(0), fView_GLAction(0)
  , fEditGeoSrc(0), fStatusBar(0)
  { 
+   this->setCaption("STAR Geometry Browser");
    CreateActions();
 	CreateMenu();
 	CreateToolBar();
@@ -117,7 +118,7 @@ void GeomBrowser::CreateActions()
    fFile_Exit   = new QAction( QIcon(":/quit.xpm")    ,"E&xit",  this);
    
    fView_Coin3DAction  = new QAction( QIcon(":/snapshot.xpm"),"Open&Inventor", this);
-   fView_GLAction      = new QAction( QIcon(":/view3d.xpm") , "Open&GL"      , this);
+   fView_GLAction      = new QAction( QIcon(":/qglviewer.icon.xpm") , "Open&GL"      , this);
 
    fEditGeoSrc         = new QAction(  "Edit Geant Geometry", this);
    fEditGeoSrc->setCheckable(true);

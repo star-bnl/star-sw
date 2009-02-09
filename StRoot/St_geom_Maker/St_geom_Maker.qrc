@@ -20,5 +20,6 @@
      <file>save.xpm</file>
      <file>starlogo_1.xpm</file>
      <file>update.xpm</file>
+     <file>qglviewer.icon.xpm</file>
   </qresource>
  </RCC>

@@ -262,6 +262,21 @@ void StarGeomTreeWidget::itemCollapsedCB ( QTreeWidgetItem * item )
    }
 }
 //_____________________________________________________________________________
+static QIcon GetGeoIcon(const char *className) {
+   QString cN = QString(className).toLower();
+   cN.remove(0,1);
+   cN+="_t.xpm";
+   TString iconsPath = "$ROOTSYS/icons";
+   gSystem->ExpandPathName(iconsPath);
+   QString fullPath = iconsPath.Data();
+   fullPath += "/"; fullPath += cN;
+   if (!gSystem->AccessPathName(fullPath.toAscii().data())) {
+      return QIcon(fullPath);
+   }
+   return QIcon();
+}
+
+//_____________________________________________________________________________
 void StarGeomTreeWidget::itemDoubleClickedCB ( QTreeWidgetItem * item, int column )
 {
    if (item && fCurrentDrawn != item) {
@@ -271,21 +286,30 @@ void StarGeomTreeWidget::itemDoubleClickedCB ( QTreeWidgetItem * item, int colum
         
          TObject  *obj = 0;
          const QIcon  *set = 0;
+         QIcon geoIcon;
+         const char *shapeClassName = 0;
          if ( fCurrentDrawn ) {
             obj = CurrentObject();
             if (obj) {
                if (obj->InheritsFrom(TVolume::Class()) ) {
                   TShape *sh = ((TVolume *)obj)->GetShape(); 
-                  if (sh)  
-                     set = TQtIconBrowserImp::Shape2GeoShapeIcon(sh->ClassName()); 
-               } else if (obj->InheritsFrom(TVolumeView::Class()) )
-                  set =  TQtIconBrowserImp::Shape2GeoShapeIcon(((TVolumeView *)obj)->GetShape()->ClassName());
-               else if (obj->InheritsFrom(TShape::Class()) ) 
+                  if (sh)  {
+                     shapeClassName = sh->ClassName();
+                     set = TQtIconBrowserImp::Shape2GeoShapeIcon(shapeClassName);
+                  }
+               } else if (obj->InheritsFrom(TVolumeView::Class()) ) {
+                  shapeClassName = ((TVolumeView *)obj)->GetShape()->ClassName();
+                  set =  TQtIconBrowserImp::Shape2GeoShapeIcon(shapeClassName);
+               } else if (obj->InheritsFrom(TShape::Class()) ) {
                   set =  TQtIconBrowserImp::Shape2GeoShapeIcon(((TShape *)obj)->ClassName());
-               else if (obj->InheritsFrom(TGeoVolume::Class()) ) 
+               } else if (obj->InheritsFrom(TGeoVolume::Class()) ) 
                   set = TQtIconBrowserImp::IconList()->GetIcon(((TGeoVolume *)(obj))->GetShape()->GetName());
             }
-            fCurrentDrawn->setIcon(0,*set);
+            if (!set) {
+              geoIcon = GetGeoIcon(shapeClassName);
+              set = &geoIcon;
+            }
+            fCurrentDrawn->setIcon(0,set ? *set: QIcon());
             fCurrentDrawn->setIcon(1,QIcon());
          }
 
@@ -294,8 +318,10 @@ void StarGeomTreeWidget::itemDoubleClickedCB ( QTreeWidgetItem * item, int colum
          if (obj) {
             if (obj->InheritsFrom(TVolume::Class()) ) {
                TShape *sh = ((TVolume *)obj)->GetShape(); 
-               if (sh)  
-                  set = TQtIconBrowserImp::Shape2GeoShapeIcon(sh->ClassName()); 
+                  if (sh)  {
+                     shapeClassName = sh->ClassName();
+                     set = TQtIconBrowserImp::Shape2GeoShapeIcon(shapeClassName);
+                  }
             } else if (obj->InheritsFrom(TVolumeView::Class()) )
                set =  TQtIconBrowserImp::Shape2GeoShapeIcon(((TVolumeView *)obj)->GetShape()->ClassName());
             else if (obj->InheritsFrom(TShape::Class()) )
@@ -303,7 +329,11 @@ void StarGeomTreeWidget::itemDoubleClickedCB ( QTreeWidgetItem * item, int colum
             else if (obj->InheritsFrom(TGeoVolume::Class()) )
                set = TQtIconBrowserImp::IconList()->GetIcon(((TGeoVolume *)(obj))->GetShape()->GetName());
          }
-        // highlight the new item
+         // highlight the new item
+         if (!set) {
+            geoIcon = GetGeoIcon(shapeClassName);
+            set = &geoIcon;
+         }
          fCurrentDrawn->setIcon(0,QIcon(":/wirebox.xpm")); 
 //       fCurrentDrawn->setPixmap(0,QPixmap::fromMimeSource("arrow_right.xpm")); 
          fCurrentDrawn->setIcon(1,set ? *set : QIcon(":/arrow_left.xpm")); 
