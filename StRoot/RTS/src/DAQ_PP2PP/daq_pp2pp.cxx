@@ -490,9 +490,10 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 
 				requested = 1 ;
 
-				d->seq_id = seq_id + 1 ;
-				d->svx_id = svx_id + 1 ;
-				d->chain_id = chain_id + 1 ;
+				d->seq_id = seq_id  ;
+				d->chain_id = chain_id ;
+				d->svx_id = svx_id  ;
+
 				d->error = ret ;
 				memset(d->adc,0,sizeof(d->adc)) ;		
 
