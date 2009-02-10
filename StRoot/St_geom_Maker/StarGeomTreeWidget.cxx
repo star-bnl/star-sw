@@ -28,11 +28,95 @@ using namespace std;
 #include <QColorDialog>
 #include <QMenu>
 #include <QDebug>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QStyledItemDelegate>
+#include <QApplication>
+
+class GeomBrowseItemDeledate  : public  QStyledItemDelegate {
+public:
+
+/*!
+    Constructs an item delegate with the given \a parent.
+*/
+    GeomBrowseItemDeledate(QObject *parent): QStyledItemDelegate(parent) {}
+   ~GeomBrowseItemDeledate(){}
+/*!
+  \reimp
+*/
+bool editorEvent(QEvent *event,
+                 QAbstractItemModel *model,
+                 const QStyleOptionViewItem &option,
+                 const QModelIndex &index)
+{
+    Q_ASSERT(event);
+    Q_ASSERT(model);
+
+    // make sure that the item is checkable
+    Qt::ItemFlags flags = model->flags(index);
+    if (!(flags & Qt::ItemIsUserCheckable) || !(option.state & QStyle::State_Enabled)
+        || !(flags & Qt::ItemIsEnabled))
+        return false;
+
+    // make sure that we have a check state
+    QVariant value = index.data(Qt::CheckStateRole);
+    if (!value.isValid())
+        return false;
+      const QWidget *widget = 0;
+//    const QWidget *widget = QStyledItemDelegatePrivate::widget(option);
+      QStyle *style = widget ? widget->style() : QApplication::style();
+
+    // make sure that we have the right event type
+    if ((event->type() == QEvent::MouseButtonRelease)
+        || (event->type() == QEvent::MouseButtonDblClick)) {
+        QStyleOptionViewItemV4 viewOpt(option);
+        initStyleOption(&viewOpt, index);
+        QRect checkRect = style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, &viewOpt, widget);
+        QMouseEvent *me = static_cast<QMouseEvent*>(event);
+        if (me->button() != Qt::LeftButton || !checkRect.contains(me->pos()))
+            return false;
+
+        // eat the double click events inside the check rect
+        if (event->type() == QEvent::MouseButtonDblClick)
+            return true;
+
+    } else if (event->type() == QEvent::KeyPress) {
+        if (static_cast<QKeyEvent*>(event)->key() != Qt::Key_Space
+         && static_cast<QKeyEvent*>(event)->key() != Qt::Key_Select)
+            return false;
+    } else {
+        return false;
+    }
+
+    Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
+    switch (state) {
+        case Qt::Checked:         state = Qt::Unchecked;        break;
+        case Qt::Unchecked:       state = Qt::PartiallyChecked; break;
+        case Qt::PartiallyChecked:state = Qt::Checked; break;
+     };
+    return model->setData(index, state, Qt::CheckStateRole);
+}
+};
 
 //________________________________________________________________
 //
 //
 //________________________________________________________________
+
+//_____________________________________________________________________________
+static QIcon GetGeoIcon(const char *className) {
+   QString cN = QString(className).toLower();
+   cN.remove(0,1);
+   cN+="_t.xpm";
+   TString iconsPath = "$ROOTSYS/icons";
+   gSystem->ExpandPathName(iconsPath);
+   QString fullPath = iconsPath.Data();
+   fullPath += "/"; fullPath += cN;
+   if (!gSystem->AccessPathName(fullPath.toAscii().data())) {
+      return QIcon(fullPath);
+   }
+   return QIcon();
+}
 
 static QTreeWidgetItem *Find(QTreeWidgetItem *from, TObject *topObject)
 {
@@ -117,6 +201,7 @@ void StarGeomTreeWidget::Init()
    this->setHeaderLabels(labels);
    this->setColumnCount(4);
    this->setSelectionMode(QAbstractItemView::ExtendedSelection);
+   this->setItemDelegate(new GeomBrowseItemDeledate(this));
    ConnectTreeSlots();
    setMouseTracking(true);
 }
@@ -138,7 +223,11 @@ void StarGeomTreeWidget::ConnectTreeSlots()
 }
 
 //_____________________________________________________________________________
-StarGeomTreeWidget::~StarGeomTreeWidget() {}
+StarGeomTreeWidget::~StarGeomTreeWidget() 
+{
+   // delete the custom delegate
+   delete itemDelegate();
+}
 
 //_____________________________________________________________________________
 QTreeWidgetItem *StarGeomTreeWidget::CreateTreeWidgetItem(TVolume  *volume, QTreeWidgetItem *parent,const QString &nConter)
@@ -167,7 +256,20 @@ QTreeWidgetItem *StarGeomTreeWidget::CreateTreeWidgetItem(TVolume  *volume, QTre
       item->setData(2,Qt::ForegroundRole,Qt::blue);
       item->setData(3,Qt::ForegroundRole,Qt::blue);
    }
-
+   // Set the icon if any
+   TShape *sh = volume->GetShape(); 
+   if (sh)  {
+       const QIcon  *set = 0;
+       QIcon geoIcon;
+       const char *shapeClassName = sh->ClassName();
+       set = TQtIconBrowserImp::Shape2GeoShapeIcon(shapeClassName);
+       if (!set) {
+          geoIcon = GetGeoIcon(shapeClassName);
+          set = &geoIcon;
+       }
+       item->setIcon(0,*set);
+       item->setIcon(2,*set);
+   }
    fNewItemCreating = false;
    return item;
 }
@@ -181,6 +283,7 @@ void StarGeomTreeWidget::itemActivatedCB ( QTreeWidgetItem * item, int column )
 void StarGeomTreeWidget::itemChangedCB ( QTreeWidgetItem * item, int) 
 {
    if (item) {
+#if 0
       //  Rotate the visibility flag
       //qDebug() << " StarGeomTreeWidget::itemChangedCB  state:" << item->text(0) << item->checkState(0) << fNewItemCreating;
       if (!fNewItemCreating) {
@@ -195,6 +298,7 @@ void StarGeomTreeWidget::itemChangedCB ( QTreeWidgetItem * item, int)
             vis = TVolume::kNoneVisible;
          SetVisibility(item, vis);
       }
+#endif
    }
 }
 
@@ -268,20 +372,6 @@ void StarGeomTreeWidget::itemCollapsedCB ( QTreeWidgetItem * item )
       // clean the collapsed branch
       while(!children.isEmpty()) delete(children.takeLast());
    }
-}
-//_____________________________________________________________________________
-static QIcon GetGeoIcon(const char *className) {
-   QString cN = QString(className).toLower();
-   cN.remove(0,1);
-   cN+="_t.xpm";
-   TString iconsPath = "$ROOTSYS/icons";
-   gSystem->ExpandPathName(iconsPath);
-   QString fullPath = iconsPath.Data();
-   fullPath += "/"; fullPath += cN;
-   if (!gSystem->AccessPathName(fullPath.toAscii().data())) {
-      return QIcon(fullPath);
-   }
-   return QIcon();
 }
 
 //_____________________________________________________________________________
