@@ -251,10 +251,7 @@ QTreeWidgetItem *StarGeomTreeWidget::CreateTreeWidgetItem(TVolume  *volume, QTre
    SetVisibility(item, volume->GetVisibility());
    if (QString(volume->GetName()).startsWith("{")) {
       // make  it blue
-      item->setData(0,Qt::ForegroundRole,Qt::blue);
-      item->setData(1,Qt::ForegroundRole,Qt::blue);
-      item->setData(2,Qt::ForegroundRole,Qt::blue);
-      item->setData(3,Qt::ForegroundRole,Qt::blue);
+      for (int i=0;i<4;i++)item->setData(i,Qt::ForegroundRole,Qt::blue);
    }
    // Set the icon if any
    TShape *sh = volume->GetShape(); 
@@ -409,6 +406,7 @@ void StarGeomTreeWidget::itemDoubleClickedCB ( QTreeWidgetItem * item, int colum
             }
             fCurrentDrawn->setIcon(0,set ? *set: QIcon());
             fCurrentDrawn->setIcon(1,QIcon());
+            for (int i=0;i<4;i++) fCurrentDrawn->setData(i,Qt::ForegroundRole,Qt::black);
          }
 
          fCurrentDrawn = item;
@@ -435,6 +433,7 @@ void StarGeomTreeWidget::itemDoubleClickedCB ( QTreeWidgetItem * item, int colum
          fCurrentDrawn->setIcon(0,QIcon(":/wirebox.xpm")); 
 //       fCurrentDrawn->setPixmap(0,QPixmap::fromMimeSource("arrow_right.xpm")); 
          fCurrentDrawn->setIcon(1,set ? *set : QIcon(":/arrow_left.xpm")); 
+         for (int i=0;i<4;i++) fCurrentDrawn->setData(i,Qt::ForegroundRole,Qt::red);
       }
       drawItem(fCurrentDrawn, true); 
    }
