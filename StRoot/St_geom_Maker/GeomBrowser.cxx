@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.7 2009/02/09 20:54:49 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.8 2009/02/10 00:06:37 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -105,45 +105,38 @@ void GeomBrowser::Connect()
    connect(fTreeWidget, SIGNAL(ObjectInfo(QString ))
          , fStatusBar,  SLOT( showMessage(const QString & ))); 
 }
-
+/// Create QAction for the menu and tool bars
 //_____________________________________________________________________________
 void GeomBrowser::CreateActions()
 {
+   /// Create QAction for the menu and tool bars
    fFile_New    = new QAction( QIcon(":/FileNew.xpm"),"&New",    this);
    fFile_Open   = new QAction( QIcon(":/fileopen.xpm"),"&Open",  this);
+   fFile_Open   ->setToolTip(tr("Open an existing geometry file"));
+
    fFile_Reload = new QAction( QIcon(":/reload.xpm")  ,"Reload", this);
    fFile_Save   = new QAction( QIcon(":/FileSave.xpm"),"&Save",  this);
    fFile_SaveAs = new QAction(                       "Save As",  this);
    fFile_Print  = new QAction( QIcon(":/printer.xpm"),"&Print",  this);
+
    fFile_Exit   = new QAction( QIcon(":/quit.xpm")    ,"E&xit",  this);
-   
+   fFile_Exit   ->setToolTip(tr("Close all windows and terminate the applciation"));
+
    fView_Coin3DAction  = new QAction( QIcon(":/snapshot.xpm"),"Open&Inventor", this);
+   fView_Coin3DAction  ->setToolTip(tr("Open the Coin3D-based 3D geometry viewer"));
    fView_GLAction      = new QAction( QIcon(":/qglviewer.icon.xpm") , "Open&GL"      , this);
+   fView_GLAction      ->setToolTip(tr("Open the QGLViewer-based 3D geometry viewer"));
 
    fEditGeoSrc         = new QAction(  "Edit Geant Geometry", this);
+   fEditGeoSrc         ->setToolTip(tr("Find the MORTRAN file defining the picked volume to edit"));
    fEditGeoSrc->setCheckable(true);
-   
-#if 0
-   fFile_New    = new QAction( const QIcon & icon,"&New",   this);
-   fFile_Open   = new QAction( const QIcon & icon,"&Open",  this);
-   fFile_Reload = new QAction( const QIcon & icon,"Reload", this);
-   fFile_Save   = new QAction( const QIcon & icon,"&Save",  this);
-   fFile_SaveAs = new QAction( const QIcon & icon,"Save As",this);
-   fFile_Print  = new QAction( const QIcon & icon,"&Print", this);
-   fFile_Exit   = new QAction( const QIcon & icon,"E&xit",  this);
-   
-   fView_Coin3DAction  = new QAction( const QIcon & icon, "Open&GL", this);
-   fView_GLAction      = new QAction( const QIcon & icon, "Open&Inventor", this);
-   
-   fActions[kFileNewCanvas]->addTo(fileMenu);                    fActions[kFileNewCanvas]->addTo(fFileToolBar);
-   fActions[kFileOpen]     ->addTo(fileMenu);                    fActions[kFileOpen]     ->addTo(fFileToolBar);
-   fileMenu->                                 insertSeparator();
-#endif 
 }
 
+/// Create menu
 //_____________________________________________________________________________
 void GeomBrowser::CreateMenu()
 {
+   /// Create menu
    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
    fileMenu->addAction(fFile_New);
    fileMenu->addAction(fFile_Open);
@@ -161,9 +154,11 @@ void GeomBrowser::CreateMenu()
    viewMenu->addAction(fView_GLAction);
 }
 
+/// Create tool bars 
 //_____________________________________________________________________________
 void GeomBrowser::CreateToolBar()
 {
+   /// Create tool bars 
    QToolBar *fileMenu = new QToolBar(this);
    fileMenu->addAction(fFile_Open);
    fileMenu->addAction(fFile_Exit);
