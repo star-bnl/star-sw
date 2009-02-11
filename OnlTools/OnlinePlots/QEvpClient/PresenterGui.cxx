@@ -221,16 +221,17 @@ void PresenterGui::SetDefaults()
   //
 
   // Trigger
-  nSubTabs[0]=4;// Number of subTabs for this tab
-
+  nSubTabs[0]=3;// Number of subTabs for this tab
+  TabNames[0][1]="ZDC";    // SubTab name
+  TabNames[0][2]="ZDC Seg";// SubTab name
+  TabNames[0][3]="Bunch Crossing Counter";
 
   //New For 2005 from Misha Kopytine
-  TabNames[0][1]="CTB slats and Killer Bits";// SubTab name
-  TabNames[0][2]="CTB Algorithm";// SubTab name
-  TabNames[0][3]="ZDC Vertex";// SubTab name
-  TabNames[0][4]="ZDC Charge";// SubTab name
-  //TabNames[0][5]="TriggerId";// Akio said it's defunct
-
+  //TabNames[0][1]="CTB slats and Killer Bits";// SubTab name
+  //TabNames[0][2]="CTB Algorithm";// SubTab name
+  //TabNames[0][3]="ZDC Vertex";// SubTab name
+  //TabNames[0][4]="ZDC Charge";// SubTab name
+  //
   //TabNames[0][1]="Trigger Detectors 1";// SubTab name
   //  TabNames[0][3]="ZDC Timing 1";// SubTab name
   //TabNames[0][4]="ZDC Timing 2";// SubTab name
@@ -242,11 +243,10 @@ void PresenterGui::SetDefaults()
   //TabNames[0][7]="Study";
 
   //DAQ
-  nSubTabs[1]=4;// Number of subTabs for this tab
+  nSubTabs[1]=3;// Number of subTabs for this tab
   TabNames[1][1]="Buffer Sizes";
   TabNames[1][2]="Buffer Fractions";
   TabNames[1][3]="Time Series";
-  TabNames[1][4]="Bunch Crossing Counter";
 
   //L3
   nSubTabs[2]=3;
