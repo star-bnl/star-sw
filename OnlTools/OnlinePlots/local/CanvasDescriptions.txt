@@ -3,22 +3,24 @@
 //   2)  [triggerConditions|detectorConditions] can appear anywhere on the line
 //       // see file /RTS/conf/handler/evpGroups.txt for available trigger groups
 //       // see file /RTS/include/rtsSystems.h for available detectors  /RTS/src/EVP_READER/cfgutil.h
-0,1,2,3,6,[any|any],h111_ctb_hits,h7_ctb,h6_ctb_hits_topo,h9_ctb_topo,h151_lastDSM_slash_ctbch,h152_lastDSM_slash_ctbch_vs_ctbch
-0,2,2,2,4,[any|any],h4_ctb_charge_low,h115_ctb_charge_high,h114_ctb_hits_per_event,h55_ctb_charge_upc
-0,3,2,2,4,[any|any],h147_zdc_time_east,h148_zdc_time_west,h78_zdc_timediff_east_west,h146_zdc_Vertex_cm
-0,4,1,3,3,[any|any],h93_zdc_unatt_west,h92_zdc_unatt_east,h117_zdc_analog_minus_sum
+//
+//0,1,2,3,6,[any|any],h111_ctb_hits,h7_ctb,h6_ctb_hits_topo,h9_ctb_topo,h151_lastDSM_slash_ctbch,h152_lastDSM_slash_ctbch_vs_ctbch
+//0,2,2,2,4,[any|any],h4_ctb_charge_low,h115_ctb_charge_high,h114_ctb_hits_per_event,h55_ctb_charge_upc
+//0,3,2,2,4,[any|any],h147_zdc_time_east,h148_zdc_time_west,h78_zdc_timediff_east_west,h146_zdc_Vertex_cm
+//0,4,1,3,3,[any|any],h93_zdc_unatt_west,h92_zdc_unatt_east,h117_zdc_analog_minus_sum
 //0,5,1,2,2,[any|any],h297_trgwd,h308_trgwdname
+0,1,2,3,6,[any|any],h76_zdc_time_east,h77_zdc_time_west,h78_zdc_timediff_east_west,h146_zdc_Vertex_cm,h480_zdc_unatt_eastsum,h481_zdc_unatt_westsum
+0,2,2,3,6,[any|any],h474_zdc_unatt_east1,h475_zdc_unatt_west1,h476_zdc_unatt_east2,h477_zdc_unatt_west2,h478_zdc_unatt_east3,h479_zdc_unatt_west3
+0,3,1,2,2,[any|any],h266_bbc_bunchid,h266_bbc_bunchid
 
 //
 1,1,2,3,6,[any|any],h2_tpc,h10_bemc_evsize,h11_ftp_evsize,h12_l3_evsize,h13_svt_evsize,h14_tof_evsize
 1,2,2,3,6,[any|any],h103_tpc_frac,h106_bemc_frac,h105_ftp_frac,h108_l3_frac,h104_svt_frac,h107_tof_frac
 1,3,1,4,4,[any|any],h155_time_size_2min,h156_time_size_10min,h157_time_size_2hour,h337_ftp_time_size_2hour
-1,4,1,2,2,[any|any],h266_bbc_bunchid,h266_bbc_bunchid
 
 2,1,2,2,4,[any|any],h88_l3_tracks,h89_l3_Xvertex,h90_l3_Yvertex,h91_l3_Zvertex
 2,2,2,2,4,[any|any],h100_l3_zdc_zvertex,h230_l3_bbc_zvertex,h101_l3_x_y,h112_l3_vertex_zdctimediff
 2,3,2,2,4,[any|any],h62_l3_pt,h63_l3_phi0,h64_l3_psi,h65_l3_trk_vertex
-
 
 3,1,2,3,6,[any|any],h0_evt_size,h3_tpc,h2_tpc,h44_tpc_OccLaser,h1_tpc,h43_tpc_OccPulser
 3,2,3,4,12,[any|any],h15_tpc_sec1,h16_tpc_sec2,h17_tpc_sec3,h18_tpc_sec4,h19_tpc_sec5,h20_tpc_sec6,h21_tpc_sec7,h22_tpc_sec8,h23_tpc_sec9,h24_tpc_sec10,h25_tpc_sec11,h26_tpc_sec12
