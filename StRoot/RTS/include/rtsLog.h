@@ -60,7 +60,7 @@ extern "C" {
 /* Bit pattern: log over network and/or stderr. Default is both. */
 #define RTS_LOG_NET	1
 #define RTS_LOG_STDERR	2
-
+#define RTS_LOG_FILE	4
 
 /* strings used */
 #define CRIT	"CRITICAL"	/* unmasked (5) */
@@ -206,6 +206,8 @@ INLINE_HACK void rtsLogLevel(char *level)
 	extern int rtsLogOutput(int flag) ;
 
 	extern void rtsLogAddCmd(const char *cmd) ;
+
+	extern int rtsLogAddFile(char *fname) ;
 
 #ifdef RTS_LOG_COLORED
 

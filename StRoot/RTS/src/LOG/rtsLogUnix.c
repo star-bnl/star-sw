@@ -11,6 +11,7 @@
 #include <string.h>
 #include <syslog.h>
 #include <stdlib.h>
+#include <time.h>
 
 #ifdef __linux__	
 #else	/* Solaris */
@@ -31,6 +32,7 @@ volatile int tonkoLogLevel = 2 ;
 static char *getCmd(void) ;
 static int  odesc = -1 ;
 static int handchange ;
+static FILE *fdesc = 0 ;
 
 /* defaults */
 #ifdef RTS_PROJECT_PP
@@ -87,6 +89,20 @@ int rtsLogAddDest(char *host, int newport)
 	return 0 ;
 }
 
+int rtsLogAddFile(char *fname)
+{
+	if(fdesc) fclose(fdesc) ;
+	fdesc = 0 ;
+
+	if(fname) {
+		fdesc = fopen(fname,"w") ;
+	}
+
+	if(fdesc) return 0 ;
+	
+	return -1 ;
+
+}
 
 
 int rtsLogUnix_v(const char *str, ...) 
@@ -104,6 +120,7 @@ int rtsLogUnix_v(const char *str, ...)
 	int err = 0 ;
 	va_list ap ;
 	int colored ;
+	int to_file = 0 ;
 
 	retry_connect: ;
 
@@ -168,26 +185,31 @@ int rtsLogUnix_v(const char *str, ...)
 		}
 		else if(strncmp(str,CRIT,strlen(CRIT))==0) {
 			colored = 1 ;
+			to_file = 1 ;
 			sprintf(string+len,"%s%s%s",ANSI_RED,ANSI_BOLD,ANSI_REVERSE) ;
 			len += strlen(string+len) ;
 		}
 		else if(strncmp(str,ERR,strlen(ERR))==0) {
 			colored = 1 ;
+			to_file = 1 ;
 			sprintf(string+len,"%s",ANSI_RED) ;
 			len += strlen(string+len) ;
 		}
 		else if(strncmp(str,CAUTION,strlen(CAUTION))==0) {
 			colored = 1 ;
+			to_file = 1 ;
 			sprintf(string+len,"%s%s",ANSI_MAGENTA,ANSI_REVERSE) ;
 			len += strlen(string+len) ;
 		}
 		else if(strncmp(str,TERR,strlen(TERR))==0) {
 			colored = 1 ;
+			to_file = 1 ;
 			sprintf(string+len,"%s",ANSI_GREEN) ;
 			len += strlen(string+len) ;
 		}
 		else if(strncmp(str,OPER,strlen(OPER))==0) {
 			colored = 1 ;
+			to_file = 1 ;
 			sprintf(string+len,"%s%s",ANSI_BLUE,ANSI_REVERSE) ;
 			len += strlen(string+len) ;
 		}
@@ -243,7 +265,7 @@ int rtsLogUnix_v(const char *str, ...)
 
 	/* send it to the right place via UDP */
 
-	if(output_flag & RTS_LOG_NET) {
+	if((odesc >= 0) && (output_flag & RTS_LOG_NET)) {
 		ret = sendto(odesc,(char *)buffer,len,0,
 			     (struct sockaddr *)&serverAddr,sockAddrSize) ;
 		//fprintf(stderr,"**** sendto returns %d, should %d\n",ret,len) ;
@@ -264,6 +286,13 @@ int rtsLogUnix_v(const char *str, ...)
 		fprintf(stderr,"%s",(char *)buffer+4) ;
 	}
 
+
+	if(fdesc && to_file && (output_flag & RTS_LOG_FILE)) {
+		time_t t = time(0) ;
+		struct tm *tm = localtime(&t) ;
+
+		if(fdesc) fprintf(fdesc,"%02d:%02d:%02d: %s",tm->tm_hour,tm->tm_min,tm->tm_sec,(char*)buffer+4) ;
+	}
 
 	return 0 ;
 }
