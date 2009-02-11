@@ -11,7 +11,6 @@
 //       // see file /RTS/conf/handler/evpGroups.txt for available trigger groups
 //       // see file /RTS/include/rtsSystems.h for available detectors  /RTS/src/EVP_READER/cfgutil.h
 
-
 // 
 1,h0_evt_size,Log of Event Size,50,1.,10.,0xffffffff,0xffffffff
 1,h1_tpc,Log of Total TPC Charge,50,0.,10.,0xffffffff,0xffffffff
@@ -103,10 +102,10 @@
 1,h74_ric_occ14,Rich Channel Block 14 Occupancy,1,0.5,959.5,0xffffffff,0xffffffff
 1,h75_ric_occ15,Rich Channel Block 15 Occupancy,1,0.5,959.5,0xffffffff,0xffffffff
 //end
-1,h76_zdc_time_east,ZDC Time East,256,0.,256.,0xffffffff,0xffffffff
-1,h77_zdc_time_west,ZDC Time West,256,0.,256.,0xffffffff,0xffffffff
-1,h78_zdc_timediff_east_west,ZDC Time (West - East),100,-100.,100.,0xffffffff,0xffffffff
-2,h79_zdc_time_east_vs_west,ZDC Time East vs West,256,0.,256.,256,0.,256,0xffffffff,0xffffffff
+1,h76_zdc_time_east,ZDC Time East,200,0.,4000.,0xffffffff,0xffffffff
+1,h77_zdc_time_west,ZDC Time West,200,0.,4000.,0xffffffff,0xffffffff
+1,h78_zdc_timediff_east_west,ZDC Time (West -East),200,-2000.,2000.,0xffffffff,0xffffffff
+1,h79_zdc_unatt_east1,ZDC Unattenuated East1,200,0.,4000.,0xffffffff,0xffffffff
 2,h80_ric_occ_vs_ctb,RICH Occupancy (in %) vs CTB charge,100,0.,1000.,20,0.,10.,0xffffffff,0xffffffff
 1,h81_ric_occ_total,Total RICH Occupancy (in %),20,0.,10.,0xffffffff,0xffffffff
 //
@@ -585,3 +584,14 @@
 2,h472_tof_tray51_60_ToT_vs_Chan_west,h472_tof_tray51_60_ToT_vs_Chan_west,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
 //
 1,h473_upvpd_ToT,h473_upvpd_ToT,100,0.,50.,0xffffffff,0xffffffff     // ns
+//
+//ZDC
+//
+1,h474_zdc_unatt_east1,ZDC Unattenuated East1,200,0.,4000.,0xffffffff,0xffffffff
+1,h475_zdc_unatt_west1,ZDC Unattenuated West1,200,0.,4000.,0xffffffff,0xffffffff
+1,h476_zdc_unatt_east2,ZDC Unattenuated East2,200,0.,4000.,0xffffffff,0xffffffff
+1,h477_zdc_unatt_west2,ZDC Unattenuated West2,200,0.,4000.,0xffffffff,0xffffffff
+1,h478_zdc_unatt_east3,ZDC Unattenuated East3,200,0.,4000.,0xffffffff,0xffffffff
+1,h479_zdc_unatt_west3,ZDC Unattenuated West3,200,0.,4000.,0xffffffff,0xffffffff
+1,h480_zdc_unatt_eastsum,ZDC Unattenuated East Sum,200,0.,4000.,0xffffffff,0xffffffff
+1,h481_zdc_unatt_westsum,ZDC Unattenuated West Sum,200,0.,4000.,0xffffffff,0xffffffff
