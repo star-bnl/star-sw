@@ -1,4 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.14 2007/07/12 19:30:14 fisyak Exp $
+// $Id: EEmcMCData.cxx,v 1.15 2009/02/11 20:35:58 ogrebeny Exp $
 
 #include "StEventTypes.h"
 
@@ -12,16 +12,13 @@
 //
 #include "StBFChain.h"
 //
-#include "EEmcException.h"
 #include "EEmcMCData.h"
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 #include "StEEmcUtil/EEevent/EEeventDst.h"
 #include "StEEmcUtil/EEevent/EEsectorDst.h"
 
-#include "Stiostream.h"
-using namespace std;
-
+#include "StMessMgr.h"
 
 ClassImp(EEmcMCData)
 
@@ -70,12 +67,14 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
   g2t_event_st   *event_head = NULL; // g2t event header
     
   // get info from event header
-  if( (g2t_event=(St_g2t_event *) myMk->GetDataSet("g2t_event")) == NULL ) 
-    throw EEmcException1(kEEmcMCMissingEventHeader,"missing MC event header");
-
-  if( (event_head= g2t_event->GetTable()) == NULL )
-    throw EEmcException1(kEEmcMCMissingEventHeader,"missing MC event header table");
-
+  if( (g2t_event=(St_g2t_event *) myMk->GetDataSet("g2t_event")) == NULL ) {
+    LOG_ERROR << "missing MC event header" << endm;
+    return 0;
+  }
+  if( (event_head= g2t_event->GetTable()) == NULL ) {
+    LOG_ERROR << "missing MC event header table" << endm;
+    return 0;
+  }
   mEventID=event_head->n_event;
   emc_hit = (St_g2t_emc_hit *) myMk->GetDataSet("g2t_eem_hit");
   smd_hit = (St_g2t_emc_hit *) myMk->GetDataSet("g2t_esm_hit");
@@ -142,7 +141,7 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
 	break;
       default:
 	Warning("readEventFromChain","unknown depth %d",depth);
-	throw EEmcException1(kEEmcMCErr1,"invalid depth for tower tails");
+	goto crash;
 	break;
       }
       
@@ -155,8 +154,8 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
       // printf("depth=%d nH=%d\n",depth,mLastHit);
 
       if(mLastHit>=mSize && !expandMemory() ) 
-	throw EEmcException1(kEEmcMCErr1,"failed expandMemory() for tower tails");
-
+	LOG_ERROR << "failed expandMemory() for tower tails" << endm;
+	goto crash;
     } // end of tower hits
   } 
 
@@ -222,7 +221,7 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
       }
       if(det!=kEEmcMCSmdVStripId && det!=kEEmcMCSmdUStripId ) { 
 	Warning("readEventFromChain","unknown smd layer %d %d-%d-%d-%d",det,half,phi,plane,strip);
-	throw EEmcException1(kEEmcMCErr1,"invalid depth for SMD");
+	goto crash;
       }
 
       sec = phi;
@@ -240,7 +239,8 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
 
       mLastHit++;
       if(mLastHit>=mSize && !expandMemory() ) 
-	throw EEmcException1(kEEmcMCErr1,"failed expandMemory() for SMD strips");
+	LOG_ERROR << "failed expandMemory() for SMD strips" << endm;
+	goto crash;
     }
   }
 
@@ -262,11 +262,10 @@ Int_t
 EEmcMCData::getHitArray(EEmcMCHit *h, Int_t size)
 {
   if(size<=0) {
-    cerr << "invalid size: " << size << endl;
+    LOG_ERROR << "invalid size: " << size << endm;
     return 0;
   }
-  if(size<mSize) 
-    cerr << "truncating to " << size << " hits  (out of " << mSize << ")" << endl;
+  if(size<mSize) {LOG_WARN << "truncating to " << size << " hits  (out of " << mSize << ")" << endm;}
   int n = size; if (n > mSize) n = mSize;
   memcpy(h,mHit,size*sizeof(EEmcMCHit));
   return size;
@@ -276,11 +275,10 @@ Int_t
 EEmcMCData::setHitArray(EEmcMCHit *h, Int_t size)
 {
   if(size<=0) {
-    cerr << "invalid size: " << size << endl;
+    LOG_ERROR << "invalid size: " << size << endm;
     return 0;
   }
-  if(size>mSize) 
-    cerr << "truncating to " << mSize << " hits  (out of " << size << ")" << endl;
+  if(size>mSize) {LOG_WARN << "truncating to " << mSize << " hits  (out of " << size << ")" << endm;}
   int n = size; if (n > mSize) n = mSize;
   memcpy(h,mHit,n*sizeof(EEmcMCHit));
   return mSize;
@@ -320,8 +318,7 @@ EEmcMCData::print()
       printf("%s sec=%2d strip=%d de=%g tr_p=%d\n",detName.Data(), h->sector,h->strip,h->de, h->track_p); 
       break;
     default:
-      cout << "**** WARNING **** detectorId=" << detId << " is unknown";
-      assert(1==2);
+      LOG_WARN << "detectorId=" << detId << " is unknown" << endm;
       break;
     }
 
@@ -336,10 +333,9 @@ EEmcMCData::expandMemory()
 {
   Int_t      newSize =  mSize + kEEmcDefaultMCHitSize;
   EEmcMCHit* newHit  =  new EEmcMCHit[newSize];
-  assert(newHit);
 
   if(mHit) {
-    memcpy(newHit,mHit,mSize*sizeof(EEmcMCHit));
+    if (newHit) memcpy(newHit,mHit,mSize*sizeof(EEmcMCHit));
     delete [] mHit;
     mHit = 0;
   }
@@ -393,12 +389,11 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 
     int secID=h->sector;
     EEsectorDst *EEsec= (EEsectorDst *)EEeve->getSec(secID,1);
-    assert(EEsec);
 
     // temporary projection,  JB
 
     int subSec='A'+h->tower.ssec-1;
-    switch( h->detector) {
+    if (EEsec) switch( h->detector) {
     case kEEmcMCTowerId:
       EEsec->addTwHit(subSec,h->tower.eta,h->de);    break;
     case kEEmcMCPreShower1Id:
@@ -412,7 +407,7 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
     case kEEmcMCSmdVStripId:
       EEsec->addSmdVHit(h->strip,h->de);  break;
     default:
-      throw EEmcException1(kEEmcMCInvalidDepth,"invalid MC depth");
+      LOG_ERROR << "invalid MC depth" << endm;
       break;
     }
       
@@ -422,6 +417,9 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 }
 
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.15  2009/02/11 20:35:58  ogrebeny
+// No asserts, no exceptions.
+//
 // Revision 1.14  2007/07/12 19:30:14  fisyak
 // Add includes for ROOT 5.16
 //
