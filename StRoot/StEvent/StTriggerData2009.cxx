@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.3 2009/02/09 19:31:17 jeromel Exp $
+ * $Id: StTriggerData2009.cxx,v 2.4 2009/02/11 23:33:55 jeromel Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.4  2009/02/11 23:33:55  jeromel
+ * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
+ * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
+ * in years < 2009). Added methods with return 0.
+ *
  * Revision 2.3  2009/02/09 19:31:17  jeromel
  * not y9 and not early y9 version + returns internalBusy
  *
@@ -294,27 +299,60 @@ unsigned int StTriggerData2009::spinBitBlueUnpol() const
 
 unsigned short StTriggerData2009::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const
 {
-    return 0;
+  const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				 4, 4, 4, 4, 4, 4, 4, 4},
+			       { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+				 4, 4, 4, 4, 4, 4, 4, 4} };
+  const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+				 0, 1, 2, 3, 8, 9,10,11},
+			       { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+				 16,17,18,19,24,25,26,27} };
+  int buffer = prepostAddress(prepost);
+  if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
+  return 0;
 }
 
 unsigned short StTriggerData2009::bbcTDC(StBeamDirection eastwest, int pmt, int prepost) const
 {
-    return 0;
+  const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				 4, 4, 4, 4, 4, 4, 4, 4},
+			       { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+				 4, 4, 4, 4, 4, 4, 4, 4} };
+  const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+				 0, 1, 2, 3, 8, 9,10,11},
+			       { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+				 16,17,18,19,24,25,26,27} };
+  int buffer = prepostAddress(prepost);
+  if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt+3]][chmap[eastwest][pmt+3]];
+  return 0;
 }
 
 unsigned short StTriggerData2009::bbcADCSum(StBeamDirection eastwest, int prepost) const
 {
-    return 0;
+  unsigned short sum=0;
+  int buffer = prepostAddress(prepost);
+  if (buffer >= 0) for(int i=1; i<=16; i++) {sum+=bbcADC(eastwest,i,prepost);}
+  return sum;
 }
 
 unsigned short StTriggerData2009::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const
 {
-    return 0;
+  unsigned short sum=0;
+  int buffer = prepostAddress(prepost);
+  if (buffer >= 0) for(int i=17; i<=24; i++) {sum+=bbcADC(eastwest,i,prepost);}
+  return sum;
 }
 
 unsigned short StTriggerData2009::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
-    return 0;
+  int buffer = prepostAddress(prepost);
+  if(buffer >=0){
+    if(mBBC[buffer]){
+      if(eastwest==east) {return mBBC[buffer]->BBClayer1[3]%4096;}
+      else               {return mBBC[buffer]->BBClayer1[7]%4096;}
+    }
+  }
+  return 0;
 }
 
 unsigned short StTriggerData2009::bbcTimeDifference() const
@@ -349,7 +387,7 @@ unsigned short StTriggerData2009::fpdLayer2DSMRaw(int channel) const{
 unsigned short StTriggerData2009::zdcAtChannel(int channel, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && channel>=0 && channel<32) return bbq[buffer][15][channel];
+    if (buffer >= 0 && channel>=0 && channel<32) return bbq[buffer][14][channel];
     return 0;
 }
 
@@ -362,8 +400,8 @@ unsigned short StTriggerData2009::zdcUnAttenuated(StBeamDirection eastwest, int 
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
-        if(eastwest == east) return bbq[buffer][15][2];
-        else                 return bbq[buffer][15][18];
+        if(eastwest == east) return bbq[buffer][14][2];
+        else                 return bbq[buffer][14][18];
     }
     return 0;
 }
@@ -372,8 +410,8 @@ unsigned short StTriggerData2009::zdcAttenuated(StBeamDirection eastwest, int pr
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
-        if(eastwest == east) return bbq[buffer][15][3];
-        else                 return bbq[buffer][15][19];
+        if(eastwest == east) return bbq[buffer][14][3];
+        else                 return bbq[buffer][14][19];
     }
     return 0;
 }
@@ -383,14 +421,14 @@ unsigned short StTriggerData2009::zdcADC(StBeamDirection eastwest, int pmt, int 
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt>=1 && pmt<=3) {
         if(eastwest == east) {
-            if(pmt == 1) return bbq[buffer][15][0];
-            if(pmt == 2) return bbq[buffer][15][8];
-            if(pmt == 3) return bbq[buffer][15][9];
+            if(pmt == 1) return bbq[buffer][14][0];
+            if(pmt == 2) return bbq[buffer][14][8];
+            if(pmt == 3) return bbq[buffer][14][9];
         }
         else{
-            if(pmt == 1) return bbq[buffer][15][16];
-            if(pmt == 2) return bbq[buffer][15][24];
-            if(pmt == 3) return bbq[buffer][15][25];
+            if(pmt == 1) return bbq[buffer][14][16];
+            if(pmt == 2) return bbq[buffer][14][24];
+            if(pmt == 3) return bbq[buffer][14][25];
         }
     }
     return 0;
@@ -400,8 +438,8 @@ unsigned short StTriggerData2009::zdcTDC(StBeamDirection eastwest, int prepost) 
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
-        if(eastwest == east) return bbq[buffer][15][6];
-        else                 return bbq[buffer][15][22];
+        if(eastwest == east) return bbq[buffer][14][6];
+        else                 return bbq[buffer][14][22];
     }
     return 0;
 }
@@ -411,14 +449,14 @@ unsigned short StTriggerData2009::zdcPmtTDC(StBeamDirection eastwest, int pmt, i
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt>=1 && pmt<=3) {
         if(eastwest == east) {
-            if(pmt == 1) return bbq[buffer][15][4];
-            if(pmt == 2) return bbq[buffer][15][12];
-            if(pmt == 3) return bbq[buffer][15][13];
+            if(pmt == 1) return bbq[buffer][14][4];
+            if(pmt == 2) return bbq[buffer][14][12];
+            if(pmt == 3) return bbq[buffer][14][13];
         }
         else{
-            if(pmt == 1) return bbq[buffer][15][20];
-            if(pmt == 2) return bbq[buffer][15][28];
-            if(pmt == 3) return bbq[buffer][15][29];
+            if(pmt == 1) return bbq[buffer][14][20];
+            if(pmt == 2) return bbq[buffer][14][28];
+            if(pmt == 3) return bbq[buffer][14][29];
         }
     }
     return 0;
@@ -427,7 +465,7 @@ unsigned short StTriggerData2009::zdcPmtTDC(StBeamDirection eastwest, int pmt, i
 unsigned short StTriggerData2009::zdcHardwareSum(int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) return bbq[buffer][15][11];
+    if (buffer >= 0) return bbq[buffer][14][11];
     return 0;
 }
 
@@ -600,6 +638,24 @@ int StTriggerData2009::getRawSize() const
     return  mData->totalTriggerLength;
 }
 
+unsigned char* StTriggerData2009::getDsm0_BEMCE(int prepost) const {  
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) if (mBCE[buffer]) return mBCE[buffer]->BEMCEast;
+    return 0;
+}
+
+unsigned char* StTriggerData2009::getDsm0_BEMCW(int prepost) const {  
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) if (mBCW[buffer]) return mBCW[buffer]->BEMCWest;
+    return 0;
+}
+
+unsigned short* StTriggerData2009::getDsm1_BEMC(int prepost) const {  
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) if (mBC1[buffer]) return mBC1[buffer]->BEMClayer1;
+    return 0;
+}
+
 unsigned char* StTriggerData2009::getDsm0_EEMC(int prepost) const {  
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mBC1[buffer]) return mBC1[buffer]->EEMC;
@@ -725,18 +781,18 @@ void StTriggerData2009::dump() const
     printf(" Spin Bits=%d  : ",spinBit());
     for (int i=0; i<8; i++) {printf(" %d",(spinBit()>>(7-i))%2);}; printf("\n");
     //    printf(" CTB ADC : ");       for (int i=0; i<240;i++){ printf("%d ",ctb(i,0));      }; printf("\n");
-    //printf(" BBC East ADC : ");  for (int i=1; i<=24;i++){ printf("%d ",bbcADC(east,i,0)); }; printf("\n");
-    //printf(" BBC West ADC : ");  for (int i=1; i<=24;i++){ printf("%d ",bbcADC(west,i,0)); }; printf("\n");
-    //printf(" BBC East TAC : ");  for (int i=1; i<=16;i++){ printf("%d ",bbcTDC(east,i,0)); }; printf("\n");
-    //printf(" BBC West TAC : ");  for (int i=1; i<=16;i++){ printf("%d ",bbcTDC(west,i,0)); }; printf("\n");
-    //for (int i=-numberOfPreXing(); i<=static_cast<int>(numberOfPostXing()); i++){
-    //    printf(" BBC Sums %d xing : ",i);  
-    //    printf("East=%d  West=%d   Large tile East=%d  West=%d\n",
-    //	     bbcADCSum(east,i),bbcADCSum(west,i),
-    //	     bbcADCSumLargeTile(east,i),bbcADCSumLargeTile(west,i));
-    //}
-    //printf(" BBC Earilest : ");  printf("East=%d  West=%d  Difference+256=%d\n",
-    //				bbcEarliestTDC(east,0),bbcEarliestTDC(west,0),bbcTimeDifference());
+    printf(" BBC East ADC : ");  for (int i=1; i<=24;i++){ printf("%d ",bbcADC(east,i,0)); }; printf("\n");
+    printf(" BBC West ADC : ");  for (int i=1; i<=24;i++){ printf("%d ",bbcADC(west,i,0)); }; printf("\n");
+    printf(" BBC East TAC : ");  for (int i=1; i<=16;i++){ printf("%d ",bbcTDC(east,i,0)); }; printf("\n");
+    printf(" BBC West TAC : ");  for (int i=1; i<=16;i++){ printf("%d ",bbcTDC(west,i,0)); }; printf("\n");
+    for (int i=-numberOfPreXing(); i<=static_cast<int>(numberOfPostXing()); i++){
+        printf(" BBC Sums %d xing : ",i);  
+        printf("East=%d  West=%d   Large tile East=%d  West=%d\n",
+    	     bbcADCSum(east,i),bbcADCSum(west,i),
+    	     bbcADCSumLargeTile(east,i),bbcADCSumLargeTile(west,i));
+    }
+    printf(" BBC Earilest : ");  printf("East=%d  West=%d  Difference+256=%d\n",
+    				bbcEarliestTDC(east,0),bbcEarliestTDC(west,0),bbcTimeDifference());
     //printf(" FPD East North   : ");for (int i=1; i<=49;i++){ printf("%d ",fpd(east,0,i,0));  }; printf("\n");
     //printf(" FPD East South   : ");for (int i=1; i<=49;i++){ printf("%d ",fpd(east,1,i,0));  }; printf("\n");
     //printf(" FPD East Top     : ");for (int i=1; i<=25;i++){ printf("%d ",fpd(east,2,i,0));  }; printf("\n");
@@ -748,13 +804,13 @@ void StTriggerData2009::dump() const
     //printf(" FPD West South PS: ");for (int i=1; i<= 7;i++){ printf("%d ",fpd(west,5,i,0));  }; printf("\n");
     //printf(" FPD Sums East    : ");for (int j=0; j<4 ;j++) printf("%d ",fpdSum(east,j));        printf("\n");
     //printf(" FPD Sums West    : ");for (int j=0; j<4 ;j++) printf("%d ",fpdSum(west,j));        printf("\n");
-    //printf(" ZDC Sum(A) East  : ");printf("%d ",zdcAttenuated(east));        printf("\n");
-    //printf(" ZDC Sum(A) West  : ");printf("%d ",zdcAttenuated(west));        printf("\n");
-    //printf(" ZDC Sum(UA) East : ");printf("%d ",zdcUnAttenuated(east));      printf("\n");
-    //printf(" ZDC Sum(UA) West : ");printf("%d ",zdcUnAttenuated(west));      printf("\n");
-    //printf(" VPD E Earliest TAC : %d\n", vpdEarliestTDC(east));
-    //printf(" VPD W Earliest TAC : %d\n", vpdEarliestTDC(west));
-    //printf(" VPD TimeDifference : %d\n", vpdTimeDifference());
+    printf(" ZDC Sum(A) East  : ");printf("%d ",zdcAttenuated(east));        printf("\n");
+    printf(" ZDC Sum(A) West  : ");printf("%d ",zdcAttenuated(west));        printf("\n");
+    printf(" ZDC Sum(UA) East : ");printf("%d ",zdcUnAttenuated(east));      printf("\n");
+    printf(" ZDC Sum(UA) West : ");printf("%d ",zdcUnAttenuated(west));      printf("\n");
+    printf(" VPD E Earliest TAC : %d\n", vpdEarliestTDC(east));
+    printf(" VPD W Earliest TAC : %d\n", vpdEarliestTDC(west));
+    printf(" VPD TimeDifference : %d\n", vpdTimeDifference());
     printf(" L2 result : \n"); 
     for (int j=0; j<4 ;j++) { for (int k=0; k<16; k++) {printf("%u ",*(l2Result()+j*16+k)); } printf("\n");}
     printf("\n");
