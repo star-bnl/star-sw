@@ -60,6 +60,7 @@ EEMCPlots::EEMCPlots(TObjArray *list, const char *eemcDbDump, const char *eemcPa
     : eeqa(0), eeDb(0)
 {
   eeDb = new StEEmcDb(); 
+  eeDb->setSectors(1, 12);
   eeDb->setAsciiDatabase(eemcDbDump); // use ASCII dump as input
 
   if (!list) list = new TObjArray(0);
