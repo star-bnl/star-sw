@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.56 2009/02/04 20:33:06 ogrebeny Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.57 2009/02/11 20:03:40 ogrebeny Exp $
  
 
 #include <time.h>
@@ -24,7 +24,7 @@ ClassImp(StEEmcDbMaker)
 StEEmcDbMaker::StEEmcDbMaker(const char *name)
     : StMaker(name), mEEmcDb(new StEEmcDb())
 {
-
+    if (mEEmcDb) mEEmcDb->setSectors(1, 12);
 }
 
 
@@ -58,6 +58,9 @@ Int_t  StEEmcDbMaker::InitRun(int runNumber) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.57  2009/02/11 20:03:40  ogrebeny
+// Initialize all 12 sectors
+//
 // Revision 1.56  2009/02/04 20:33:06  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //
