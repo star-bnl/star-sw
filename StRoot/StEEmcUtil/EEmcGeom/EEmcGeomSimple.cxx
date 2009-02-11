@@ -1,4 +1,4 @@
-// $Id: EEmcGeomSimple.cxx,v 1.24 2009/02/11 20:04:23 ogrebeny Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.25 2009/02/11 20:37:36 ogrebeny Exp $
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   Jan 14, 2003
 /// doxygen info here
@@ -26,8 +26,6 @@
 
 #include "EEmcGeomDefs.h"
 #include "EEmcGeomSimple.h"
-
-#include <assert.h>
 
 // ######################################################################
 //         *** WARNING NOT TESTED FOR mClock==1 (clock-wise) ***
@@ -321,6 +319,9 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
 
 
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.25  2009/02/11 20:37:36  ogrebeny
+// *** empty log message ***
+//
 // Revision 1.24  2009/02/11 20:04:23  ogrebeny
 // 1. Fix the sectors initialization.
 // 2. Remove exceptions from the geom code.

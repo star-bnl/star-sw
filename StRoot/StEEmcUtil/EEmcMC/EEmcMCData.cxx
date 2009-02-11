@@ -1,11 +1,11 @@
-// $Id: EEmcMCData.cxx,v 1.15 2009/02/11 20:35:58 ogrebeny Exp $
+// $Id: EEmcMCData.cxx,v 1.16 2009/02/11 20:37:37 ogrebeny Exp $
 
 #include "StEventTypes.h"
 
 //#include "emc_def.h"          /* FIXME - move it to pams */
 
 
-#include "TError.h"
+//#include "TError.h"
 //
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "tables/St_g2t_event_Table.h"
@@ -417,6 +417,9 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 }
 
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.16  2009/02/11 20:37:37  ogrebeny
+// *** empty log message ***
+//
 // Revision 1.15  2009/02/11 20:35:58  ogrebeny
 // No asserts, no exceptions.
 //
