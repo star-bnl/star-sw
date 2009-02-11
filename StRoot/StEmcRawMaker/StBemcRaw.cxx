@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.34 2009/02/11 22:38:56 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.35 2009/02/11 22:50:44 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.35  2009/02/11 22:50:44  mattheww
+// fixed a bug in getting CAP
+//
 // Revision 1.34  2009/02/11 22:38:56  mattheww
 // fixed a bug in getting CAP
 //
@@ -582,7 +585,7 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
         if(S==1 && RAW->header(RDO+BPRSOFFSET))
         {
             if(mDate < 20081101)CAP = RAW->header(RDO+BPRSOFFSET,SMDCAPACITOR);
-	    else CAP = RAW->header(RDO+BPRSOFFSET,SMDCAPACITOR);
+	    else CAP = RAW->header(RDO+BPRSOFFSET,0);
             while(CAP>127)
                 CAP-=128;
             return RAW->data(RDO+BPRSOFFSET,index);
