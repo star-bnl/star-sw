@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.h,v 2.4 2007/07/02 17:04:32 ullrich Exp $
+ * $Id: StTriggerData2007.h,v 2.5 2009/02/11 23:33:55 jeromel Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.h,v $
+ * Revision 2.5  2009/02/11 23:33:55  jeromel
+ * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
+ * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
+ * in years < 2009). Added methods with return 0.
+ *
  * Revision 2.4  2007/07/02 17:04:32  ullrich
  * Add two new members mtdAdc() and mtdTdc() (Akio).
  *
@@ -141,7 +146,12 @@ public:
     char*                getTriggerStructure();
     TrgDataType2007*     getTriggerStructure2007();  
     int                  getRawSize() const;
-    unsigned      char*  getDsm0_EEMC(int prepost=0) const;
+
+    unsigned      char* getDsm0_BEMCE(int prepost=0) const { return 0;}
+    unsigned      char* getDsm0_BEMCW(int prepost=0) const { return 0;}
+    unsigned      char*  getDsm0_EEMC(int prepost=0) const;  
+    unsigned short int*  getDsm1_BEMC(int prepost=0) const { return 0;}
+
     unsigned short int*  getDsm1_EEMC(int prepost=0) const;
     unsigned short int*  getDsm2_EMC()  const;
     unsigned short int*  getDsm3()      const;

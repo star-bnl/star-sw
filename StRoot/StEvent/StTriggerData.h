@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.22 2009/01/20 18:10:14 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.23 2009/02/11 23:33:55 jeromel Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.23  2009/02/11 23:33:55  jeromel
+ * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
+ * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
+ * in years < 2009). Added methods with return 0.
+ *
  * Revision 2.22  2009/01/20 18:10:14  ullrich
  * Bug fix and new ZDC access functions.
  *
@@ -214,14 +219,17 @@ public:
     // Experts only!
     virtual char* getTriggerStructure() = 0;
     virtual int getRawSize() const = 0;
-    virtual unsigned      char* getDsm0_EEMC(int prepost=0) const =0;
-    virtual unsigned short int* getDsm1_EEMC(int prepost=0) const =0;
-    virtual unsigned short int* getDsm2_EMC()  const =0;
-    virtual unsigned short int* getDsm3()      const =0;
-    virtual unsigned      char* getDsm_FMS(int prepost=0) const;
-    virtual unsigned      char* getDsm01_FMS(int prepost=0) const;
-    virtual unsigned      char* getDsm02_FMS(int prepost=0) const;
-    virtual unsigned short int* getDsm1_FMS(int prepost=0) const;
+    virtual unsigned      char* getDsm0_BEMCE(int prepost=0) const =0;
+    virtual unsigned      char* getDsm0_BEMCW(int prepost=0) const =0;
+    virtual unsigned short int* getDsm1_BEMC(int prepost=0)  const =0;
+    virtual unsigned      char* getDsm0_EEMC(int prepost=0)  const =0;
+    virtual unsigned short int* getDsm1_EEMC(int prepost=0)  const =0;
+    virtual unsigned short int* getDsm2_EMC()                const =0;
+    virtual unsigned short int* getDsm3()                    const =0;
+    virtual unsigned      char* getDsm_FMS(int prepost=0)    const;
+    virtual unsigned      char* getDsm01_FMS(int prepost=0)  const;
+    virtual unsigned      char* getDsm02_FMS(int prepost=0)  const;
+    virtual unsigned short int* getDsm1_FMS(int prepost=0)   const;
     virtual unsigned short int* getDsm2_FMS() const;
     virtual unsigned int        l2ResultLength() const = 0;  // Length of raw info
     virtual const unsigned int* l2Result() const = 0;  // Pointer to raw info

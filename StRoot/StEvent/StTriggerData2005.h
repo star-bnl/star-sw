@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.h,v 2.8 2006/09/20 00:44:56 ullrich Exp $
+ * $Id: StTriggerData2005.h,v 2.9 2009/02/11 23:33:55 jeromel Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.h,v $
+ * Revision 2.9  2009/02/11 23:33:55  jeromel
+ * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
+ * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
+ * in years < 2009). Added methods with return 0.
+ *
  * Revision 2.8  2006/09/20 00:44:56  ullrich
  * Modified method to return length of L2 results.
  *
@@ -142,7 +147,11 @@ public:
     char* getTriggerStructure();
     TrgDataType2005* getTriggerStructure2005();  
     int getRawSize() const;
+
+    unsigned      char* getDsm0_BEMCE(int prepost=0) const { return 0;}
+    unsigned      char* getDsm0_BEMCW(int prepost=0) const { return 0;}
     unsigned      char * getDsm0_EEMC(int prepost=0) const;
+    unsigned short int*  getDsm1_BEMC(int prepost=0) const { return 0;}
     unsigned short int * getDsm1_EEMC(int prepost=0) const;
     unsigned short int * getDsm2_EMC()  const;
     unsigned short int * getDsm3()      const;

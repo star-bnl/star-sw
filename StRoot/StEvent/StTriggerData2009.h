@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.2 2009/01/20 18:10:15 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.3 2009/02/11 23:33:55 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.3  2009/02/11 23:33:55  jeromel
+ * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
+ * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
+ * in years < 2009). Added methods with return 0.
+ *
  * Revision 2.2  2009/01/20 18:10:15  ullrich
  * Bug fix and new ZDC access functions.
  *
@@ -140,9 +145,14 @@ public:
     char*                getTriggerStructure();
     TriggerDataBlk2009*  getTriggerStructure2009();  
     int                  getRawSize() const;
+
+    unsigned      char*  getDsm0_BEMCE(int prepost=0) const;
+    unsigned      char*  getDsm0_BEMCW(int prepost=0) const;
+    unsigned short int*  getDsm1_BEMC(int prepost=0)  const;
     unsigned      char*  getDsm0_EEMC(int prepost=0) const;
     unsigned short int*  getDsm1_EEMC(int prepost=0) const;
     unsigned short int*  getDsm2_EMC()  const;
+
     unsigned short int*  getDsm3()      const;
     unsigned      char*  getDsm_FMS(int prepost=0) const;
   //    unsigned      char*  getDsm01_FMS(int prepost=0) const;
