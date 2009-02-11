@@ -1,4 +1,4 @@
-// $Id: EEmcGeomSimple.cxx,v 1.23 2005/04/29 03:06:03 balewski Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.24 2009/02/11 20:04:23 ogrebeny Exp $
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   Jan 14, 2003
 /// doxygen info here
@@ -28,23 +28,6 @@
 #include "EEmcGeomSimple.h"
 
 #include <assert.h>
-
-
-ClassImp(EEmcGeomException)
-
-EEmcGeomException::EEmcGeomException(const char *msg)
-{
-  // this is ugly but root does not handle exceptions quite well
-  Warning("exception thrown","%s",msg);
-}
-
-// 
-EEmcGeomException::~EEmcGeomException()
-{
-}
-
-
-
 
 // ######################################################################
 //         *** WARNING NOT TESTED FOR mClock==1 (clock-wise) ***
@@ -128,12 +111,15 @@ EEmcGeomSimple::getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t 
 
   phi  = getPhiMean(sec,sub);
   eta  = getEtaMean(etabin);
-  if(eta<0.0) throw EEmcGeomException("invalid eta");
-  z     = getZMean();
-  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
-  // create vector pointing toward the center of the tower
-  return TVector3(rho*cos(phi),rho*sin(phi),z);
-
+  if(eta<0.0) {
+    LOG_ERROR << "invalid eta " << eta << endm;
+    return TVector3(0, 0, 0);
+  } else {
+    z     = getZMean();
+    rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
+    // create vector pointing toward the center of the tower
+    return TVector3(rho*cos(phi),rho*sin(phi),z);
+  }
 }
 
 TVector3 
@@ -149,12 +135,16 @@ EEmcGeomSimple::getDirection(const Float_t xetaBin, const Float_t xphiBin) const
   //      the larger sec/sub the smaller phi-angle
   Double_t  phi   = getPhiMean(isec,isub) - (xphiBin-iphiBin)*2*getPhiHalfWidth(isec,isub) ;
   Double_t  eta   = getEtaMean(ietaBin)   - (xetaBin-ietaBin)*2*getEtaHalfWidth(ietaBin);
-  if(eta<0.0) throw EEmcGeomException("invalid eta");
-  Double_t  z     = getZMean();
-  Double_t  rho   = z/sinh(eta);  
+  if(eta<0.0) {
+    LOG_ERROR << "invalid eta " << eta << endm;
+    return TVector3(0, 0, 0);
+  } else {
+    Double_t  z     = getZMean();
+    Double_t  rho   = z/sinh(eta);  
 
-  // create vector pointing toward's the point in the tower
-  return TVector3(rho*cos(phi),rho*sin(phi),z);
+    // create vector pointing toward's the point in the tower
+    return TVector3(rho*cos(phi),rho*sin(phi),z);
+  }
 }
 
 
@@ -331,6 +321,10 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
 
 
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.24  2009/02/11 20:04:23  ogrebeny
+// 1. Fix the sectors initialization.
+// 2. Remove exceptions from the geom code.
+//
 // Revision 1.23  2005/04/29 03:06:03  balewski
 // *** empty log message ***
 //

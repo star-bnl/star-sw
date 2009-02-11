@@ -114,27 +114,24 @@ void StEEmcDb::setPreferredFlavor(const char *flavor, const char *nameMask){
 void StEEmcDb::setSectors(int sec1,int sec2)
 {
   // you can do it just once, no memory realocation implemented
-  if ( mNSector==0 ){
-    LOG_ERROR <<  ":: Problem mNSector==0" <<endm;
-  } else {
-    
     mfirstSecID=sec1;
     mlastSecID=sec2;
     mNSector=mlastSecID - mfirstSecID+1;
+    if ( mNSector==0 ) {
+	LOG_ERROR <<  ":: Problem mNSector==0" <<endm;
+    } else {
+	mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
+	mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
+	mDbPMTname=(eemcDbPMTname_st **) new void *[mNSector];
+	mDbPIXcal= (eemcDbPIXcal_st  **) new void *[mNSector];
+	mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
+	mDbPMTstat=(eemcDbPMTstat_st **) new void *[mNSector];
+	mDbsectorID=  new int [mNSector];
 
-    mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
-    mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
-    mDbPMTname=(eemcDbPMTname_st **) new void *[mNSector];
-    mDbPIXcal= (eemcDbPIXcal_st  **) new void *[mNSector];
-    mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
-    mDbPMTstat=(eemcDbPMTstat_st **) new void *[mNSector];
-    mDbsectorID=  new int [mNSector];
+	clearItemArray();
 
-    clearItemArray();
-
-    LOG_INFO <<  ":: Use sectors from "<< mfirstSecID<<" to "<< mlastSecID<<endm;
-  }
-
+	LOG_INFO <<  ":: Use sectors from "<< mfirstSecID<<" to "<< mlastSecID<<endm;
+    }
 }
 
 //__________________________________________________
