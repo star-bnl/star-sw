@@ -770,7 +770,7 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   //     }
   
   // Special footwork for bunch counter
-  if(i==1 && j==4)
+  if(i==0 && j==3)
     {
       gStyle->SetOptStat(0);
       
@@ -939,7 +939,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.5 2009/02/04 01:25:51 dkettler Exp $
+ * $Id: EvpUtil.cxx,v 1.6 2009/02/11 22:18:57 jeromel Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -949,6 +949,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.6  2009/02/11 22:18:57  jeromel
+ * Change logY
+ *
  * Revision 1.5  2009/02/04 01:25:51  dkettler
  * Remove ONLINEPLOTSDIR reference
  *
