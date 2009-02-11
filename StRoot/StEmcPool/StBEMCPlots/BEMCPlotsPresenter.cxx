@@ -125,12 +125,16 @@ void BEMCPlotsPresenter::displaySMDPSD(FileType file, TPad *pad, int mDebug) {
 
     TH1F *Hist_smd_spectra = (TH1F*)GetHisto(file, Hist_smd_spectraName);
     if (!Hist_smd_spectra || (mDebug >= 2)) cout << "Hist_smd_spectra = " << Hist_smd_spectra << endl;
+    TH1F *Hist_smd_spectraNonZS = (TH1F*)GetHisto(file, Hist_smd_spectraNonZSName);
+    if (!Hist_smd_spectraNonZS || (mDebug >= 2)) cout << "Hist_smd_spectraNonZS = " << Hist_smd_spectraNonZS << endl;
     TH2F *Hist_smd_capacitor = (TH2F*)GetHisto(file, Hist_smd_capacitorName);
     if (!Hist_smd_capacitor || (mDebug >= 2)) cout << "Hist_smd_capacitor = " << Hist_smd_capacitor << endl;
     TH2F *Hist_smd_sum = (TH2F*)GetHisto(file, Hist_smd_sumName);
     if (!Hist_smd_sum || (mDebug >= 2)) cout << "Hist_smd_sum = " << Hist_smd_sum << endl;
     TH1F *Hist_psd_spectra = (TH1F*)GetHisto(file, Hist_psd_spectraName);
     if (!Hist_psd_spectra || (mDebug >= 2)) cout << "Hist_psd_spectra = " << Hist_psd_spectra << endl;
+    TH1F *Hist_psd_spectraNonZS = (TH1F*)GetHisto(file, Hist_psd_spectraNonZSName);
+    if (!Hist_psd_spectraNonZS || (mDebug >= 2)) cout << "Hist_psd_spectraNonZS = " << Hist_psd_spectraNonZS << endl;
     TH2F *Hist_psd_capacitor = (TH2F*)GetHisto(file, Hist_psd_capacitorName);
     if (!Hist_psd_capacitor || (mDebug >= 2)) cout << "Hist_psd_capacitor = " << Hist_psd_capacitor << endl;
     TH2F *Hist_psd_sum = (TH2F*)GetHisto(file, Hist_psd_sumName);
@@ -145,9 +149,17 @@ void BEMCPlotsPresenter::displaySMDPSD(FileType file, TPad *pad, int mDebug) {
     if (Hist_smd_spectra) {
         Hist_smd_spectra->Draw("H COLZ");
     }
+    if (Hist_smd_spectraNonZS) {
+        Hist_smd_spectraNonZS->SetLineColor(kRed);
+        Hist_smd_spectraNonZS->Draw("SAME H COLZ");
+    }
     c->cd(2);
     if (Hist_psd_spectra) {
         Hist_psd_spectra->Draw("H COLZ");
+    }
+    if (Hist_psd_spectraNonZS) {
+        Hist_psd_spectraNonZS->SetLineColor(kRed);
+        Hist_psd_spectraNonZS->Draw("SAME H COLZ");
     }
     c->cd(3);
     if (Hist_smd_capacitor) {
@@ -990,6 +1002,8 @@ void BEMCPlotsPresenter::displaySmdFeeSum(FileType file, TPad *pad, Int_t mDebug
 
     TH2F *HistSmdFeeSum = (TH2F*)GetHisto(file, HistSmdFeeSumName);
     if (!HistSmdFeeSum || (mDebug >= 2)) cout << "HistSmdFeeSum = " << HistSmdFeeSum << endl;
+    TH2F *HistSmdFeeSumNonZS = (TH2F*)GetHisto(file, HistSmdFeeSumNonZSName);
+    if (!HistSmdFeeSumNonZS || (mDebug >= 2)) cout << "HistSmdFeeSumNonZS = " << HistSmdFeeSumNonZS << endl;
     if (!pad) return;
     pad->Clear();
     pad->cd(0);
@@ -998,7 +1012,10 @@ void BEMCPlotsPresenter::displaySmdFeeSum(FileType file, TPad *pad, Int_t mDebug
     Int_t linesColor = 16;
     TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
     c->Draw();
-    c->cd();
+
+    c->Divide(1, 2, 0.001, 0.001);
+
+    c->cd(1);
     if (HistSmdFeeSum) {
 	HistSmdFeeSum->SetStats(0);
 	HistSmdFeeSum->Draw("COLZ");
@@ -1054,6 +1071,61 @@ void BEMCPlotsPresenter::displaySmdFeeSum(FileType file, TPad *pad, Int_t mDebug
 	    }
 	}
     }
+
+    c->cd(2);
+    if (HistSmdFeeSumNonZS) {
+	HistSmdFeeSumNonZS->SetStats(0);
+	HistSmdFeeSumNonZS->Draw("COLZ");
+	Int_t moduleRdo[120];
+        if(BEMCDecoderPresenter) {
+	    Int_t RDO, index;
+            for (Int_t module = 1;module <= 120;module++) {
+		moduleRdo[module - 1] = -1;
+	        if (BEMCDecoderPresenter->GetSmdRDO(3, module, 1, 1, RDO, index)) {
+		    moduleRdo[module - 1] = RDO;
+	        }
+	    }
+	}
+	Int_t curmod = 1;
+	Int_t currdo = -1;
+	Int_t beginrdo = -1;
+	Int_t endrdo = -1;
+	while (curmod <= 121) {
+	    if (((curmod <= 120) && (moduleRdo[curmod - 1] != currdo)) || (curmod == 121)) {
+		if ((currdo == -1) && (curmod <= 120)) {
+		    beginrdo = curmod;
+		    currdo = moduleRdo[curmod - 1];
+		    curmod++;
+		} else {
+		    endrdo = curmod - 1;
+    		    TLine *lRdoBegin = new TLine(beginrdo - 0.5, HistSmdFeeSumNonZS->GetYaxis()->GetBinLowEdge(1), beginrdo - 0.5, HistSmdFeeSumNonZS->GetYaxis()->GetBinUpEdge(HistSmdFeeSumNonZS->GetYaxis()->GetNbins()));
+    		    if (lRdoBegin) {
+	    		lRdoBegin->SetLineColor(linesColor);
+    		        lRdoBegin->SetLineWidth(1);
+			lRdoBegin->Draw();
+		    }
+    		    TLine *lRdoEnd = new TLine(endrdo + 0.5, HistSmdFeeSumNonZS->GetYaxis()->GetBinLowEdge(1), endrdo + 0.5, HistSmdFeeSumNonZS->GetYaxis()->GetBinUpEdge(HistSmdFeeSumNonZS->GetYaxis()->GetNbins()));
+    		    if (lRdoEnd) {
+	    		lRdoEnd->SetLineColor(linesColor);
+    		        lRdoEnd->SetLineWidth(1);
+			lRdoEnd->Draw();
+		    }
+    		    TString label;
+    		    label = Form("RDO %i", currdo);
+		    TLatex *text = new TLatex(beginrdo + 1 -0.5, 0.8 * HistSmdFeeSumNonZS->GetYaxis()->GetBinUpEdge(HistSmdFeeSumNonZS->GetYaxis()->GetNbins()), label.Data());
+		    if (text) {
+			text->SetTextColor(linesColor);
+    			text->SetTextSize(0.03);
+			text->Draw();
+		    }
+		    currdo = -1;
+		    if (curmod > 120) curmod++;
+		}
+	    } else {
+		curmod++;
+	    }
+	}
+    }
 }	
 //-------------------------------------------------------------------
 void BEMCPlotsPresenter::displayPsdFeeSum(FileType file, TPad *pad, Int_t mDebug) {
@@ -1061,6 +1133,8 @@ void BEMCPlotsPresenter::displayPsdFeeSum(FileType file, TPad *pad, Int_t mDebug
 
     TH2F *HistPsdFeeSum = (TH2F*)GetHisto(file, HistPsdFeeSumName);
     if (!HistPsdFeeSum || (mDebug >= 2)) cout << "HistPsdFeeSum = " << HistPsdFeeSum << endl;
+    TH2F *HistPsdFeeSumNonZS = (TH2F*)GetHisto(file, HistPsdFeeSumNonZSName);
+    if (!HistPsdFeeSumNonZS || (mDebug >= 2)) cout << "HistPsdFeeSumNonZS = " << HistPsdFeeSumNonZS << endl;
     if (!pad) return;
     pad->Clear();
     pad->cd(0);
@@ -1069,7 +1143,10 @@ void BEMCPlotsPresenter::displayPsdFeeSum(FileType file, TPad *pad, Int_t mDebug
     Int_t linesColor = 16;
     TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
     c->Draw();
-    c->cd();
+
+    c->Divide(1, 2, 0.001, 0.001);
+
+    c->cd(1);
     if (HistPsdFeeSum) {
 	HistPsdFeeSum->SetStats(0);
 	HistPsdFeeSum->Draw("COLZ");
@@ -1115,6 +1192,66 @@ void BEMCPlotsPresenter::displayPsdFeeSum(FileType file, TPad *pad, Int_t mDebug
     		    TString label;
     		    label = Form("RDO %i", currdo);
 		    TLatex *text = new TLatex(beginrdo + 0.5 -0.5, 0.8 * HistPsdFeeSum->GetYaxis()->GetBinUpEdge(HistPsdFeeSum->GetYaxis()->GetNbins()), label.Data());
+		    if (text) {
+			text->SetTextColor(linesColor);
+    			text->SetTextSize(0.03);
+			text->Draw();
+		    }
+		    currdo = -1;
+		    if (curmod > 60) curmod++;
+		}
+	    } else {
+		curmod++;
+	    }
+	}
+    }
+
+    c->cd(2);
+    if (HistPsdFeeSumNonZS) {
+	HistPsdFeeSumNonZS->SetStats(0);
+	HistPsdFeeSumNonZS->Draw("COLZ");
+	Int_t pmtRdo[60];
+	for (Int_t box = 0;box < 60;box++) pmtRdo[box] = -1;
+        if(BEMCDecoderPresenter) {
+            for (Int_t rdo = 0;rdo < 4;rdo++) {
+        	for (Int_t index = 0;index < 4800;index++) {
+	    	    Int_t id, box, wire, Avalue;
+		    if (BEMCDecoderPresenter->GetPsdId(rdo, index, id, box, wire, Avalue)) {
+			if ((box >= 1) && (box <= 60)) {
+			    pmtRdo[box - 1] = rdo + 8;
+			}
+		    }
+	        }
+	    }
+	}
+	Int_t curmod = 1;
+	Int_t currdo = -1;
+	Int_t beginrdo = -1;
+	Int_t endrdo = -1;
+	while (curmod <= 61) {
+//cout << "curmod = " << curmod << ", currdo = " << currdo << ", beginrdo = " << beginrdo << ", endrdo = " << endrdo << endl;
+	    if (((curmod <= 60) && (pmtRdo[curmod - 1] != currdo)) || (curmod == 61)) {
+		if ((currdo == -1) && (curmod <= 60)) {
+		    beginrdo = curmod;
+		    currdo = pmtRdo[curmod - 1];
+		    curmod++;
+		} else {
+		    endrdo = curmod - 1;
+    		    TLine *lRdoBegin = new TLine(beginrdo - 0.5, HistPsdFeeSumNonZS->GetYaxis()->GetBinLowEdge(1), beginrdo - 0.5, HistPsdFeeSumNonZS->GetYaxis()->GetBinUpEdge(HistPsdFeeSumNonZS->GetYaxis()->GetNbins()));
+    		    if (lRdoBegin) {
+	    		lRdoBegin->SetLineColor(linesColor);
+    		        lRdoBegin->SetLineWidth(1);
+			lRdoBegin->Draw();
+		    }
+    		    TLine *lRdoEnd = new TLine(endrdo + 0.5, HistPsdFeeSumNonZS->GetYaxis()->GetBinLowEdge(1), endrdo + 0.5, HistPsdFeeSumNonZS->GetYaxis()->GetBinUpEdge(HistPsdFeeSumNonZS->GetYaxis()->GetNbins()));
+    		    if (lRdoEnd) {
+	    		lRdoEnd->SetLineColor(linesColor);
+    		        lRdoEnd->SetLineWidth(1);
+			lRdoEnd->Draw();
+		    }
+    		    TString label;
+    		    label = Form("RDO %i", currdo);
+		    TLatex *text = new TLatex(beginrdo + 0.5 -0.5, 0.8 * HistPsdFeeSumNonZS->GetYaxis()->GetBinUpEdge(HistPsdFeeSumNonZS->GetYaxis()->GetNbins()), label.Data());
 		    if (text) {
 			text->SetTextColor(linesColor);
     			text->SetTextSize(0.03);
