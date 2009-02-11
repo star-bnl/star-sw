@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.25 2007/07/12 19:30:14 fisyak Exp $
+ * $Id: EEmcGeomSimple.h,v 1.26 2009/02/11 20:04:24 ogrebeny Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -17,21 +17,8 @@
 #include "TVector3.h"
 #include "TMath.h"
 #include <math.h>
+#include <StMessMgr.h>
 
-class EEmcGeomException : public TObject  {
-public:
-  EEmcGeomException(const char* message);
-  ~EEmcGeomException();
-private:
-
-public:
-  ClassDef(EEmcGeomException,1)
-
-};
-
-
-
-/// class EEmcGeomSimple
 class  EEmcGeomSimple : public TObject { 
 public:
 
@@ -96,15 +83,23 @@ public:
   /// returns the "mean" value of a tile (eta bin)
   /// \param eta tile index (eta bin) [0,mNumEta)
   inline Float_t getEtaMean(UInt_t eta) const {
-    if(mNumEta<=eta) throw EEmcGeomException("getEtaHalfWidth: invalid eta index"); 
-    return 0.5 * ( mEtaBin[eta] + mEtaBin[eta+1] );
+    if (mNumEta<=eta) {
+	LOG_ERROR << "getEtaHalfWidth: invalid eta index " << eta << endm;
+	return 0;
+    } else {
+        return 0.5 * ( mEtaBin[eta] + mEtaBin[eta+1] );
+    }
   }
 
   /// returns the "half-width" of a tile (eta bin)
   /// \param eta tile index (eta bin) [0,mNumEta)
   inline Float_t getEtaHalfWidth(UInt_t eta) const { 
-    if(mNumEta<=eta) throw EEmcGeomException("getEtaHalfWidth: invalid eta index");
-    return 0.5 * fabs( mEtaBin[eta] - mEtaBin[eta+1] );
+    if(mNumEta<=eta) {
+	LOG_ERROR << "getEtaHalfWidth: invalid eta index" << eta << endm;
+	return 0;
+    } else {
+	return 0.5 * fabs( mEtaBin[eta] - mEtaBin[eta+1] );
+    }
   }
 
   /// returns the center value of phi for a given sector
@@ -112,8 +107,12 @@ public:
   inline Float_t getPhiMean(UInt_t sec) const {
     //const  double dPhi=2.0*M_PI/mNumSec;
     const  double dPhi= TMath::TwoPi()/mNumSec;
-    if(mNumSec<=sec) throw EEmcGeomException("getPhiMean: invalid sector index");
-    return AdjustAngle(mClock*(sec+0.5L)*dPhi+mPhi0);
+    if(mNumSec<=sec) {
+	LOG_ERROR << "getPhiMean: invalid sector index" << sec << endm;
+	return 0;
+    } else {
+        return AdjustAngle(mClock*(sec+0.5L)*dPhi+mPhi0);
+    }
   }
   
   /// returns the center value of phi for a subsector
@@ -122,9 +121,15 @@ public:
   inline Float_t getPhiMean(UInt_t sec, UInt_t ssec) const {
     //const double dPhi=2.0*M_PI/mNumSec;
     const double dPhi=TMath::TwoPi()/mNumSec;
-    if(mNumSec <=sec ) throw EEmcGeomException("getPhiMean: invalid sector index");
-    if(mNumSSec<=ssec) throw EEmcGeomException("getPhiMean: invalid subsector index");
-    return AdjustAngle(mClock*(Double_t(sec)+(ssec+0.5L)/mNumSSec)*dPhi+mPhi0);
+    if(mNumSec <=sec ) {
+	LOG_ERROR << "getPhiMean: invalid sector index " << sec << endm;
+	return 0;
+    } else if(mNumSSec<=ssec) {
+	LOG_ERROR << "getPhiMean: invalid subsector index " << ssec << endm;
+	return 0;
+    } else {
+	return AdjustAngle(mClock*(Double_t(sec)+(ssec+0.5L)/mNumSSec)*dPhi+mPhi0);
+    }
   }
   
   /// returns the half-width (in phi) of a subsector
@@ -133,9 +138,15 @@ public:
   inline Float_t getPhiHalfWidth(UInt_t sec=0, UInt_t ssec=0) const {
     //const double dPhi=2.0*M_PI/mNumSec;
     const double dPhi=TMath::TwoPi()/mNumSec;
-    if(mNumSec <=sec ) throw EEmcGeomException("getPhiMean: invalid sector index");
-    if(mNumSSec<=ssec) throw EEmcGeomException("getPhiMean: invalid subsector index");
-    return (Float_t)(0.5L/mNumSSec*dPhi);
+    if(mNumSec <=sec ) {
+	LOG_ERROR << "getPhiMean: invalid sector index " << sec << endm;
+	return 0;
+    } else if(mNumSSec<=ssec) {
+	LOG_ERROR << "getPhiMean: invalid subsector index " << ssec << endm;
+	return 0;
+    } else {
+        return (Float_t)(0.5L/mNumSSec*dPhi);
+    }
   }
 
   /// returns the center of EEMC in z direction 
@@ -202,6 +213,10 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.26  2009/02/11 20:04:24  ogrebeny
+ * 1. Fix the sectors initialization.
+ * 2. Remove exceptions from the geom code.
+ *
  * Revision 1.25  2007/07/12 19:30:14  fisyak
  * Add includes for ROOT 5.16
  *
