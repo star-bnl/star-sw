@@ -32,6 +32,9 @@
 #define HistSmdFeeSumName "bemc_SmdFeeSum"
 #define HistPsdFeeSumName "bemc_PsdFeeSum"
 
+#define HistSmdFeeSumNonZSName "bemc_SmdFeeSum_NonZS"
+#define HistPsdFeeSumNonZSName "bemc_PsdFeeSum_NonZS"
+
 #define HistHighTowerSpectrumName "bemc_HighTowerSpectrum"
 #define HistPatchSumSpectrumName "bemc_PatchSumSpectrum"
 
@@ -50,9 +53,11 @@
 #define Hist_btow_spectra_3Name "bemc_btow_spectra_3"
 
 #define Hist_smd_spectraName "bemc_smd_spectra"
+#define Hist_smd_spectraNonZSName "bemc_smd_spectra_NonZS"
 #define Hist_smd_capacitorName "bemc_smd_capacitor"
 #define Hist_smd_sumName "bemc_smd_sum"
 #define Hist_psd_spectraName "bemc_psd_spectra"
+#define Hist_psd_spectraNonZSName "bemc_psd_spectra_NonZS"
 #define Hist_psd_capacitorName "bemc_psd_capacitor"
 #define Hist_psd_sumName "bemc_psd_sum"
 

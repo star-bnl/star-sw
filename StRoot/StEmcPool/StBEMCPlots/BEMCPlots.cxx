@@ -126,16 +126,24 @@ BEMCPlots::BEMCPlots(TObjArray *list)
       this->mHistSmdFeeSum = new TH2F(HistSmdFeeSumName, "SMD FEE Sum;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
       this->mHistPsdFeeSum = new TH2F(HistPsdFeeSumName, "PSD FEE Sum;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
 
+      this->mHistSmdFeeSumNonZS = new TH2F(HistSmdFeeSumNonZSName, "SMD FEE Sum, Non-ZS;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
+      this->mHistPsdFeeSumNonZS = new TH2F(HistPsdFeeSumNonZSName, "PSD FEE Sum, Non-ZS;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
+
       ADDHIST(this->mHistRawAdc1)
       ADDHIST(this->mHistRawAdc2)
       ADDHIST(this->mHistRawAdc3)
       ADDHIST(this->mHistRawAdc4)
+
       ADDHIST(this->mHistRawAdcPsd1)
       ADDHIST(this->mHistRawAdcPsd2)
       ADDHIST(this->mHistRawAdcPsd3)
       ADDHIST(this->mHistRawAdcPsd4)
+
       ADDHIST(this->mHistSmdFeeSum)
       ADDHIST(this->mHistPsdFeeSum)
+
+      ADDHIST(this->mHistSmdFeeSumNonZS)
+      ADDHIST(this->mHistPsdFeeSumNonZS)
     
     for (int i = 0;i < BEMCNJET;i++) {
 	TString name;
@@ -162,48 +170,58 @@ BEMCPlots::BEMCPlots(TObjArray *list)
 
     this->mHist_TDC_status      = new TH2F(Hist_TDC_statusName, "BEMC TDC Status (0=total 1=OK 2=Not Installed3=Corrupted)",5,-0.5,4.5,30,-0.5,29.5);
     this->mHist_SMD_status      = new TH2F(Hist_SMD_statusName, "BEMC SMD Status (0=total 1=OK 2=Not Installed3=Corrupted)",5,-0.5,4.5,8,-0.5,7.5);
+    this->mHist_PSD_status      = new TH2F(Hist_PSD_statusName, "BEMC PSD Status (0=total 1=OK 2=Not Installed 3=Corrupted)",5,-0.5,4.5,4,-0.5,3.5);
+    this->mHist_BTOW_Corruption = new TH1F(Hist_BTOW_CorruptionName, "BEMC TDC corruption frequency (0=total 1=OK 2=Not Installed 3=Corrupted)",5,-0.5,4.5);
+
     this->mHist_btow_spectra_1  = new TH2F(Hist_btow_spectra_1Name, "BEMC tower spectrum  0 < TDC < 10 (X = 160*TDC + index)", 1600,  -0.5,1599.5,100,0,1000);
     this->mHist_btow_spectra_2  = new TH2F(Hist_btow_spectra_2Name, "BEMC tower spectrum 10 < TDC < 20 (X = 160*TDC + index)", 1600,1599.5,3199.5,100,0,1000);
     this->mHist_btow_spectra_3  = new TH2F(Hist_btow_spectra_3Name, "BEMC tower spectrum 20 < TDC < 30 (X = 160*TDC + index)", 1600,3199.5,4799.5,100,0,1000);
+
+    this->mHist_smd_spectra     = new TH1F(Hist_smd_spectraName, "BEMC SMD total ADC",250,100000.,6000000.);
+    this->mHist_smd_spectraNonZS= new TH1F(Hist_smd_spectraNonZSName, "BEMC SMD total ADC, Non-ZS",250,100000.,6000000.);
     this->mHist_smd_capacitor   = new TH2F(Hist_smd_capacitorName, "BEMC SMD capacitor distribution",128,-0.5,127.5,8,-0.5,7.5);
     this->mHist_smd_sum         = new TH2F(Hist_smd_sumName, "BEMC SMD total ADC per fiber",250,100000.,1000000.,8,-0.5,7.5);
+    this->mHist_psd_spectra     = new TH1F(Hist_psd_spectraName, "BEMC PSD total ADC",250,100000.,4000000.);
+    this->mHist_psd_spectraNonZS= new TH1F(Hist_psd_spectraNonZSName, "BEMC PSD total ADC, Non-ZS",250,100000.,4000000.);
     this->mHist_psd_capacitor   = new TH2F(Hist_psd_capacitorName, "BEMC PSD capacitor distribution",128,-0.5,127.5,4,-0.5,3.5);
     this->mHist_psd_sum         = new TH2F(Hist_psd_sumName, "BEMC PSD total ADC per fiber",250,100000.,1000000.,4,-0.5,3.5);
+
     this->mHist_HTMAX_spectra   = new TH2F(Hist_HTMAX_spectraName, "BEMC Maximum High Tower spectrum", 300,-0.5,299.5,64,-0.5,63.5);
     this->mHist_PAMAX_spectra   = new TH2F(Hist_PAMAX_spectraName, "BEMC Maximum Patch Sum spectrum", 300,-0.5,299.5,64,-0.5,63.5);
-    this->mHist_PSD_status      = new TH2F(Hist_PSD_statusName, "BEMC PSD Status (0=total 1=OK 2=Not Installed 3=Corrupted)",5,-0.5,4.5,4,-0.5,3.5);
+    this->mHist_HTMAX_dist      = new TH1F(Hist_HTMAX_distName, "BEMC Maximum High Tower distribution", 300,-0.5,299.5);
+    this->mHist_PAMAX_dist      = new TH1F(Hist_PAMAX_distName, "BEMC Maximum Patch Sum distribution", 300,-0.5,299.5);
+
     this->mHist_JET_spectra     = new TH2F(Hist_JET_spectraName, "BEMC Jet sum spectrum", BEMCNJET,-0.5,BEMCNJET-0.5,80,-0.5,79.5);
     this->mHist_JETMAX_spectra  = new TH2F(Hist_JETMAX_spectraName, "BEMC Maximum Jet sum spectrum", BEMCNJET,-0.5,BEMCNJET-0.5,80,-0.5,79.5);
     this->mHist_JET_ped         = new TH2F(Hist_JET_pedName, "BEMC Jet sum pedestal", BEMCNJET,-0.5,BEMCNJET-0.5,30,15,45);
-
-    this->mHist_BTOW_Corruption = new TH1F(Hist_BTOW_CorruptionName, "BEMC TDC corruption frequency (0=total 1=OK 2=Not Installed 3=Corrupted)",5,-0.5,4.5);
-    this->mHist_smd_spectra     = new TH1F(Hist_smd_spectraName, "BEMC SMD total ADC",250,100000.,6000000.);
-    this->mHist_psd_spectra     = new TH1F(Hist_psd_spectraName, "BEMC PSD total ADC",250,100000.,4000000.);
-    this->mHist_HTMAX_dist      = new TH1F(Hist_HTMAX_distName, "BEMC Maximum High Tower distribution", 300,-0.5,299.5);
-    this->mHist_PAMAX_dist      = new TH1F(Hist_PAMAX_distName, "BEMC Maximum Patch Sum distribution", 300,-0.5,299.5);
     this->mHist_JETMAX_dist     = new TH1F(Hist_JETMAX_distName, "BEMC Maximum Jet sum distribution", BEMCNJET,-0.5,BEMCNJET-0.5);
 
     ADDHIST(this->mHist_TDC_status)
     ADDHIST(this->mHist_SMD_status)
+    ADDHIST(this->mHist_PSD_status)
+    ADDHIST(this->mHist_BTOW_Corruption)
+
     ADDHIST(this->mHist_btow_spectra_1)
     ADDHIST(this->mHist_btow_spectra_2)
     ADDHIST(this->mHist_btow_spectra_3)
+
+    ADDHIST(this->mHist_smd_spectra)
+    ADDHIST(this->mHist_smd_spectraNonZS)
     ADDHIST(this->mHist_smd_capacitor)
     ADDHIST(this->mHist_smd_sum)
+    ADDHIST(this->mHist_psd_spectra)
+    ADDHIST(this->mHist_psd_spectraNonZS)
     ADDHIST(this->mHist_psd_capacitor)
     ADDHIST(this->mHist_psd_sum)
+
     ADDHIST(this->mHist_HTMAX_spectra)
     ADDHIST(this->mHist_PAMAX_spectra)
-    ADDHIST(this->mHist_PSD_status)
+    ADDHIST(this->mHist_HTMAX_dist)
+    ADDHIST(this->mHist_PAMAX_dist)
+
     ADDHIST(this->mHist_JET_spectra)
     ADDHIST(this->mHist_JETMAX_spectra)
     ADDHIST(this->mHist_JET_ped)
-
-    ADDHIST(this->mHist_BTOW_Corruption)
-    ADDHIST(this->mHist_smd_spectra)
-    ADDHIST(this->mHist_psd_spectra)
-    ADDHIST(this->mHist_HTMAX_dist)
-    ADDHIST(this->mHist_PAMAX_dist)
     ADDHIST(this->mHist_JETMAX_dist)
 
 #undef ADDHIST
@@ -270,6 +288,9 @@ BEMCPlots::~BEMCPlots() {
     DELETEHIST(this->mHistSmdFeeSum)
     DELETEHIST(this->mHistPsdFeeSum)
 
+    DELETEHIST(this->mHistSmdFeeSumNonZS)
+    DELETEHIST(this->mHistPsdFeeSumNonZS)
+
     for (int i = 0;i < BEMCNJET;i++) {
 	DELETEHIST(this->mHistHighTowerSpectrum[i])
     	DELETEHIST(this->mHistPatchSumSpectrum[i])
@@ -282,25 +303,31 @@ BEMCPlots::~BEMCPlots() {
 
     DELETEHIST(this->mHist_TDC_status)
     DELETEHIST(this->mHist_SMD_status)
+    DELETEHIST(this->mHist_PSD_status)
+    DELETEHIST(this->mHist_BTOW_Corruption)
+
     DELETEHIST(this->mHist_btow_spectra_1)
     DELETEHIST(this->mHist_btow_spectra_2)
     DELETEHIST(this->mHist_btow_spectra_3)
+
+    DELETEHIST(this->mHist_smd_spectra)
+    DELETEHIST(this->mHist_smd_spectraNonZS)
     DELETEHIST(this->mHist_smd_capacitor)
     DELETEHIST(this->mHist_smd_sum)
+    DELETEHIST(this->mHist_psd_spectra)
+    DELETEHIST(this->mHist_psd_spectraNonZS)
     DELETEHIST(this->mHist_psd_capacitor)
     DELETEHIST(this->mHist_psd_sum)
+
     DELETEHIST(this->mHist_HTMAX_spectra)
     DELETEHIST(this->mHist_PAMAX_spectra)
-    DELETEHIST(this->mHist_PSD_status)
+    DELETEHIST(this->mHist_HTMAX_dist)
+    DELETEHIST(this->mHist_PAMAX_dist)
+
     DELETEHIST(this->mHist_JET_spectra)
     DELETEHIST(this->mHist_JETMAX_spectra)
     DELETEHIST(this->mHist_JET_ped)
 
-    DELETEHIST(this->mHist_BTOW_Corruption)
-    DELETEHIST(this->mHist_smd_spectra)
-    DELETEHIST(this->mHist_psd_spectra)
-    DELETEHIST(this->mHist_HTMAX_dist)
-    DELETEHIST(this->mHist_PAMAX_dist)
     DELETEHIST(this->mHist_JETMAX_dist)
     
 #undef DELETEHIST
@@ -352,6 +379,9 @@ void BEMCPlots::clear(const char *bemcStatus) {
     RESETHIST(this->mHistSmdFeeSum)
     RESETHIST(this->mHistPsdFeeSum)
 
+    RESETHIST(this->mHistSmdFeeSumNonZS)
+    RESETHIST(this->mHistPsdFeeSumNonZS)
+
     for (int i = 0;i < BEMCNJET;i++) {
     	RESETHIST(this->mHistHighTowerSpectrum[i])
     	RESETHIST(this->mHistPatchSumSpectrum[i])
@@ -364,25 +394,30 @@ void BEMCPlots::clear(const char *bemcStatus) {
 
     RESETHIST(this->mHist_TDC_status)
     RESETHIST(this->mHist_SMD_status)
+    RESETHIST(this->mHist_PSD_status)
+    RESETHIST(this->mHist_BTOW_Corruption)
+
     RESETHIST(this->mHist_btow_spectra_1)
     RESETHIST(this->mHist_btow_spectra_2)
     RESETHIST(this->mHist_btow_spectra_3)
+
+    RESETHIST(this->mHist_smd_spectra)
+    RESETHIST(this->mHist_smd_spectraNonZS)
     RESETHIST(this->mHist_smd_capacitor)
     RESETHIST(this->mHist_smd_sum)
+    RESETHIST(this->mHist_psd_spectra)
+    RESETHIST(this->mHist_psd_spectraNonZS)
     RESETHIST(this->mHist_psd_capacitor)
     RESETHIST(this->mHist_psd_sum)
+
     RESETHIST(this->mHist_HTMAX_spectra)
     RESETHIST(this->mHist_PAMAX_spectra)
-    RESETHIST(this->mHist_PSD_status)
+    RESETHIST(this->mHist_HTMAX_dist)
+    RESETHIST(this->mHist_PAMAX_dist)
+
     RESETHIST(this->mHist_JET_spectra)
     RESETHIST(this->mHist_JETMAX_spectra)
     RESETHIST(this->mHist_JET_ped)
-
-    RESETHIST(this->mHist_BTOW_Corruption)
-    RESETHIST(this->mHist_smd_spectra)
-    RESETHIST(this->mHist_psd_spectra)
-    RESETHIST(this->mHist_HTMAX_dist)
-    RESETHIST(this->mHist_PAMAX_dist)
     RESETHIST(this->mHist_JETMAX_dist)
 
 #undef RESETHIST
@@ -516,6 +551,9 @@ void BEMCPlots::saveHistograms(TFile *hfile) {
         SAVEHIST(this->mHistSmdFeeSum)
         SAVEHIST(this->mHistPsdFeeSum)
 
+        SAVEHIST(this->mHistSmdFeeSumNonZS)
+        SAVEHIST(this->mHistPsdFeeSumNonZS)
+
         for (int i = 0;i < BEMCNJET;i++) {
     	    SAVEHIST(this->mHistHighTowerSpectrum[i])
     	    SAVEHIST(this->mHistPatchSumSpectrum[i])
@@ -528,25 +566,31 @@ void BEMCPlots::saveHistograms(TFile *hfile) {
 
 	SAVEHIST(this->mHist_TDC_status)
 	SAVEHIST(this->mHist_SMD_status)
+	SAVEHIST(this->mHist_PSD_status)
+	SAVEHIST(this->mHist_BTOW_Corruption)
+
 	SAVEHIST(this->mHist_btow_spectra_1)
 	SAVEHIST(this->mHist_btow_spectra_2)
 	SAVEHIST(this->mHist_btow_spectra_3)
+
+	SAVEHIST(this->mHist_smd_spectra)
+	SAVEHIST(this->mHist_smd_spectraNonZS)
 	SAVEHIST(this->mHist_smd_capacitor)
 	SAVEHIST(this->mHist_smd_sum)
+	SAVEHIST(this->mHist_psd_spectra)
+	SAVEHIST(this->mHist_psd_spectraNonZS)
 	SAVEHIST(this->mHist_psd_capacitor)
 	SAVEHIST(this->mHist_psd_sum)
+
 	SAVEHIST(this->mHist_HTMAX_spectra)
 	SAVEHIST(this->mHist_PAMAX_spectra)
-	SAVEHIST(this->mHist_PSD_status)
+	SAVEHIST(this->mHist_HTMAX_dist)
+	SAVEHIST(this->mHist_PAMAX_dist)
+
 	SAVEHIST(this->mHist_JET_spectra)
 	SAVEHIST(this->mHist_JETMAX_spectra)
 	SAVEHIST(this->mHist_JET_ped)
 
-	SAVEHIST(this->mHist_BTOW_Corruption)
-	SAVEHIST(this->mHist_smd_spectra)
-	SAVEHIST(this->mHist_psd_spectra)
-	SAVEHIST(this->mHist_HTMAX_dist)
-	SAVEHIST(this->mHist_PAMAX_dist)
 	SAVEHIST(this->mHist_JETMAX_dist)
 
 #undef SAVEHIST
@@ -835,6 +879,7 @@ void BEMCPlots::processEvent( char *datap
     if (this->mHist_BTOW_Corruption) this->mHist_BTOW_Corruption->Fill(0.0);
     if (this->mHist_BTOW_Corruption) this->mHist_BTOW_Corruption->Fill(STATUS);
 
+    {
     int totalSumSMD = 0;
     int totalSumPSD = 0;
     int feeSum[120];
@@ -868,15 +913,15 @@ void BEMCPlots::processEvent( char *datap
 #endif
 		    fiberSum += adc;
 		    if ((bsmd_fiber >= 0) && (bsmd_fiber < 8)) {
-			totalSumSMD += adc;
 			if (BEMCDecoder->GetSmdCoord(bsmd_fiber, fiber_channel, det, m, e, s)) {
+			    totalSumSMD += adc;
 			    if ((m >= 1) && (m <= 120)) {
 				feeSum[m - 1] += adc;
 			    }
 			}
 		    } else {
-			totalSumPSD += adc;
 			if (BEMCDecoder->GetPsdId(bprs_fiber, fiber_channel, softId, box, wire, Avalue)) {
+			    totalSumPSD += adc;
 			    if ((box >= 1) && (box <= 60)) {
 				pmtSum[box - 1] += adc;
 				if ((softId >= 1) && (softId <= 1220)) {
@@ -921,6 +966,69 @@ void BEMCPlots::processEvent( char *datap
     }
     if (this->mHist_smd_spectra) this->mHist_smd_spectra->Fill(totalSumSMD);
     if (this->mHist_psd_spectra) this->mHist_psd_spectra->Fill(totalSumPSD);
+    }
+
+    {
+    int totalSumSMDNonZS = 0;
+    int totalSumPSDNonZS = 0;
+    int feeSumNonZS[120];
+    int pmtSumNonZS[60];
+    for (int i = 0;i < 120;i++) feeSumNonZS[i] = 0;
+    for (int i = 0;i < 60;i++) pmtSumNonZS[i] = 0;
+    for (int bsmd_fiber = 0;bsmd_fiber < BSMD_FIBERS;bsmd_fiber++) {
+	int bprs_fiber = bsmd_fiber - 8;
+#ifdef NEW_DAQ_READER
+	daq_dta *dd_bsmd = rdr ? (rdr->det("bsmd")->get("adc_non_zs", 0, bsmd_fiber)) : 0;
+	if (dd_bsmd) while (dd_bsmd->iterate()) {
+	    bsmd_t *d = (bsmd_t *) dd_bsmd->Void;
+	    if (d && BEMCDecoder) {
+#else
+	if (emc.bsmd_in && BEMCDecoder) {
+		{
+#endif
+		int fiberSum = 0;
+		int det, m, e, s;
+		int softId, box, wire, Avalue;
+#ifdef NEW_DAQ_READER
+    		int cap = d->cap;
+#else
+    		int cap = emc.bsmd_cap[bsmd_fiber];
+#endif
+		for (int fiber_channel = 0;fiber_channel < BSMD_DATSIZE;fiber_channel++) {
+#ifdef NEW_DAQ_READER
+		    int adc = d->adc[fiber_channel];
+#else
+		    int adc = emc.bsmd[bsmd_fiber][fiber_channel];
+#endif
+		    fiberSum += adc;
+		    if ((bsmd_fiber >= 0) && (bsmd_fiber < 8)) {
+			if (BEMCDecoder->GetSmdCoord(bsmd_fiber, fiber_channel, det, m, e, s)) {
+			    totalSumSMDNonZS += adc;
+			    if ((m >= 1) && (m <= 120)) {
+				feeSumNonZS[m - 1] += adc;
+			    }
+			}
+		    } else {
+			if (BEMCDecoder->GetPsdId(bprs_fiber, fiber_channel, softId, box, wire, Avalue)) {
+			    totalSumPSDNonZS += adc;
+			    if ((box >= 1) && (box <= 60)) {
+				pmtSumNonZS[box - 1] += adc;
+			    }
+		        }
+		    }
+		}
+	    }
+	}
+    }
+    for (int i = 0;i < 120;i++) {
+	if (this->mHistSmdFeeSumNonZS) this->mHistSmdFeeSumNonZS->Fill(i + 1, feeSumNonZS[i]);
+    }
+    for (int i = 0;i < 60;i++) {
+	if (this->mHistPsdFeeSumNonZS) this->mHistPsdFeeSumNonZS->Fill(i + 1, pmtSumNonZS[i]);
+    }
+    if (this->mHist_smd_spectraNonZS) this->mHist_smd_spectraNonZS->Fill(totalSumSMDNonZS);
+    if (this->mHist_psd_spectraNonZS) this->mHist_psd_spectraNonZS->Fill(totalSumPSDNonZS);
+    }
 
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }

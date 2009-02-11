@@ -89,6 +89,9 @@ private:
     TH2F *mHistSmdFeeSum;
     TH2F *mHistPsdFeeSum;
     
+    TH2F *mHistSmdFeeSumNonZS;
+    TH2F *mHistPsdFeeSumNonZS;
+    
     TH1F *mHistHighTowerSpectrum[BEMCNJET];
     TH1F *mHistPatchSumSpectrum[BEMCNJET];
     
@@ -112,9 +115,11 @@ private:
     TH2F *mHist_btow_spectra_3;
 
     TH1F *mHist_smd_spectra;
+    TH1F *mHist_smd_spectraNonZS;
     TH2F *mHist_smd_capacitor;
     TH2F *mHist_smd_sum;
     TH1F *mHist_psd_spectra;
+    TH1F *mHist_psd_spectraNonZS;
     TH2F *mHist_psd_capacitor;
     TH2F *mHist_psd_sum;
 
