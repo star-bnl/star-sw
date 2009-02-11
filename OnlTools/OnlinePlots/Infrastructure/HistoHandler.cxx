@@ -25,8 +25,8 @@
 #   include "DAQ_SSD/ssdReader.h"
 #   include "DAQ_READER/daqReader.h"
 #   include "DAQ_READER/daq_dta.h"
-#   include "StDaqLib/TRG/trgStructures2009.h"
-#   include "StEvent/StTriggerData2009.h"
+#   include "StEvent/StTriggerData.h"
+#   include "TriggerData.h"
 #endif
 
 
@@ -55,7 +55,6 @@ static EventTracker *evtTracker = new EventTracker();
 
 using namespace std;
 char*  HistoHandler::mListOfHistograms = EvpUtil::cat(gEnv->GetValue("Online.plotsDir","."),"/local/ListOfHistograms.txt");
-
 
 char* HistoHandler::mL3Buffer = 0;
 
@@ -600,117 +599,8 @@ static const int BLOCK=2; 			// Max no of blocks in each cram
 static const int CHANNEL=1728; 		//Max no of channels in eack block
 static const int pmd_hist_begin=381;  // PMD hist starts after 381 no.
 
-int fpdNPMT[6] = {49,49,25,25,7,7};
-int fpdmap[2][6][49] = {
-  //East
-  {
-    //East North
-    {  39, 38, 37, 36, 35, 34, 33,
-       7,  6,  5, 23, 22, 21, 55,
-       4,  3,  2, 20, 19, 18, 54,
-       1,  0, 15, 17, 16, 31, 53,
-       14, 13, 12, 30, 29, 28, 52,
-       11, 10,  9, 27, 26, 25, 51,
-       32, 47, 46, 45, 44, 43, 42},
-    //East South
-    { 103,101,100, 99,  98,  97, 96,
-      71, 70, 69, 87,  86,  85, 48,
-      68, 67, 66, 84,  83,  82, 63,
-      65, 64, 79, 81,  80,  95, 61,
-      78, 77 ,76, 94,  93,  92, 60,
-      75, 74, 73, 91,  90,  89, 59,
-      111,110,109,108, 107, 106,105},
-    //East Top
-    { 135, 134, 133, 132, 131, 130, 129, 128, 143, 142,
-      119, 118, 117, 116, 115, 114, 113, 112,
-      127, 126, 125, 124, 123, 122, 121,
-      -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1},
-    //East Bottom
-    { 151, 150, 149, 148, 147, 146, 145, 144,
-      159, 158, 157, 156, 155, 154, 153,
-      167, 166, 165, 164, 163, 162, 161, 160, 175, 174,
-      -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1},
-    //East North PreShower
-    {  50, 49, 141, 140, 139, 138, 137,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1},
-    //East South PreShower
-    { 58, 57, 173, 172, 171, 170, 169,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1},
-  },
-  //West
-  {
-    //West North
-    { -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1},
-    //West South
-    { 7,  6, 25, 22, 39, 38, 48,
-      5,  4, 21, 20, 37, 36, 54,
-      3,  2, 19, 18, 35, 34, 53,
-      1,  0, 17, 16, 33, 32, 52,
-      15, 14, 31, 30, 47, 46, 51,
-      13, 12, 29, 28, 45, 44, 50,
-      9, 10, 27, 26, 43, 42, 49 },
-    //West Top
-    { -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1,
-      -1, -1, -1, -1,  -1,  -1, -1},
-    //West Bottom
-    {  77, 70, 69, 68, 67,
-       66, 65, 64, 79, 78,
-       87, 86, 85, 84, 83,
-       82, 81, 80, 95, 94,
-       93, 76, 91, 90, 89,
-       -1,  -1,  -1,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1,
-       -1,  -1,  -1,  -1,  -1,  -1,  -1},
-    //West North PreShower
-    { -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1},
-    //West South PreShower
-    { 63,62,61,60,59,58,-1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1,
-      -1,  -1,  -1,  -1,  -1,  -1,  -1},
-  }
-};
-
 //-----------------------------------
 //Buffer for event storage
-
 
 
 int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182]) {
@@ -860,8 +750,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     h1[337]->Reset();     //JCS
   }
   // 60 Second histograms
-  d_t_02 = event_time - t_02;
-  if(d_t_02 > 7200){
+  d_t_02 = event_time - t_02;  if(d_t_02 > 7200){
     t_02 = event_time;
     h1[157]->Reset();
   }
@@ -873,87 +762,73 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   //-----------------------------------------------------------------------
   // TRIGGER!
-  daq_dta *dd= daqr->det("trg")->get("raw");
-  if (dd && dd->iterate()) {        
-    char* td = (char*)dd->Void;
-    printf("TRG RAW: version = _%02x_%02x_%02x_%02x_\n",td[0],td[1],td[2],td[3]);
-    //if(td[3]!=0x40){
-    if(1){
-      fprintf(stderr,"TRG RAW: version missmatch, skipping trigger data\n");
-    }else{      
-      TriggerDataBlk2009* trgdata2009 = (TriggerDataBlk2009*)td;    
-      StTriggerData2009* trgd = new StTriggerData2009(trgdata2009,daqr->run);      
-      if(mDebugLevel) fprintf(stderr,"TRG RAW: %d bytes",trgd->getRawSize()) ;
-      
-      //Bunch Counters
-      unsigned int bunch7bit = trgd->bunchId7Bit();
-      oth->fill(h1[266],bunch7bit);
-      
-      //Spin Bits    
-      int ispinb = trgd->spinBit();
-      if(ispinb &   1) oth->fill(h1[442],bunch7bit);  
-      if(ispinb &   2) oth->fill(h1[443],bunch7bit);  
-      if(ispinb &   4) oth->fill(h1[444],bunch7bit);  
-      if(ispinb &   8) oth->fill(h1[445],bunch7bit);  
-      if(ispinb &  16) oth->fill(h1[446],bunch7bit);  
-      if(ispinb &  32) oth->fill(h1[447],bunch7bit);  
-      if(ispinb &  64) oth->fill(h1[448],bunch7bit);  
-      if(ispinb & 128) oth->fill(h1[449],bunch7bit);  
-      
-      //ZDC
-      oth->fill(h1[76],float(trgd->zdcTDC(east)));    
-      oth->fill(h1[77],float(trgd->zdcTDC(west)));          
-    }
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(trgd){
+    //Bunch Counters
+    unsigned int bunch7bit = trgd->bunchId7Bit();
+    oth->fill(h1[266],bunch7bit);
+    
+    //Spin Bits    
+    int ispinb = trgd->spinBit();
+    if(ispinb &   1) oth->fill(h1[442],bunch7bit);  
+    if(ispinb &   2) oth->fill(h1[443],bunch7bit);  
+    if(ispinb &   4) oth->fill(h1[444],bunch7bit);  
+    if(ispinb &   8) oth->fill(h1[445],bunch7bit);  
+    if(ispinb &  16) oth->fill(h1[446],bunch7bit);  
+    if(ispinb &  32) oth->fill(h1[447],bunch7bit);  
+    if(ispinb &  64) oth->fill(h1[448],bunch7bit);  
+    if(ispinb & 128) oth->fill(h1[449],bunch7bit);  
+    
+    //ZDC
+    int te = trgd->zdcPmtTDC(east,1);
+    int tw = trgd->zdcPmtTDC(west,1);
+    if(te>20 && te<4000) oth->fill(h1[76], float(te));    
+    if(tw>20 && tw<4000) oth->fill(h1[77], float(tw));    
+    if(te>20 && te<4000 && tw>20 && tw<4000){
+      oth->fill(h1[78], float(tw-te));          
+      oth->fill(h1[146],float(tw-te)/2*40.0/0.03);
+    }          
+    oth->fill(h1[474],float(trgd->zdcADC(east,1)));
+    oth->fill(h1[475],float(trgd->zdcADC(west,1)));
+    oth->fill(h1[476],float(trgd->zdcADC(east,2)));
+    oth->fill(h1[477],float(trgd->zdcADC(west,2)));
+    oth->fill(h1[478],float(trgd->zdcADC(east,3)));
+    oth->fill(h1[479],float(trgd->zdcADC(west,3)));
+    oth->fill(h1[480],float(trgd->zdcUnAttenuated(east)));
+    oth->fill(h1[481],float(trgd->zdcUnAttenuated(west)));
 
+    //BBC
+    int nhit[2]={0,0},nhitl[2]={0,0};
+    for(int i=0; i<2; i++){
+      for(int j=1; j<=24; j++){
+	float adc = (float)trgd->bbcADC((StBeamDirection)i,j);
+	if(adc>5) {
+	  if(j<=16) nhit[i]++;
+	  else      nhitl[i]++;
+	  oth->fill(h1[190+i],float(j));
+	  oth->fill(h1[192+i],float(j),adc);
+	}
+      }
+      for(int j=1; j<=16; j++){
+	float tac=(float)trgd->bbcTDC((StBeamDirection)i,j);
+	oth->fill(h1[157+i*16+j],tac);
+      }
+    }
+    oth->fill(	  h1[194],float(nhit[0]));
+    oth->fill(	  h1[195],float(nhit[1]));
+    oth->fill(	  h1[196],float(nhitl[0]));
+    oth->fill(	  h1[197],float(nhitl[1]));
+    oth->fill(	  h1[198],float(trgd->bbcADCSum(east)));
+    oth->fill(	  h1[199],float(trgd->bbcADCSum(west)));
+    oth->fill(	  h1[200],float(trgd->bbcADCSumLargeTile(east)));
+    oth->fill(	  h1[201],float(trgd->bbcADCSumLargeTile(west)));
+    oth->fill(	  h1[202],float(trgd->bbcEarliestTDC(east)));
+    oth->fill(	  h1[203],float(trgd->bbcEarliestTDC(west)));
+    oth->fill(	  h1[204],float(trgd->bbcTimeDifference()));
+    oth->fill(	  h1[205],float(trgd->bbcEarliestTDC(east)),float(trgd->bbcEarliestTDC(west)));
+    oth->fill(	  h1[452],float(trgd->bbcTimeDifference()));
+    
     /*
-    //Secial conditions requested by ZBX 02/05/03
-    oth->fill(h1[147],float(trgd->zdcTDC(east)));    
-    if(trgd->ZDC[0]>5 && trg.ZDC[9]>20 && trg.ZDC[9]<225){
-      oth->fill(h1[148],float(trgd->zdcTDC(east)));
-    }
-		oth->fill(	      h1[149],mZdcTimeDiff);
-		// Run3 definition	      oth->fill(	      			      h1[150],3.3*(float(zdcTime_west)-float(zdcTime_east)+21.3));
-		oth->fill(	      h1[150],mZdcVertex);
-		//} 0x3011
-	      
-		//csp 08 Oct 2001 Suppress UPC for a while
-		if(zdcch_east != 0 && zdcch_west != 0)
-		  {
-
-		    u_int zdc_analog = trg.ZDC[14];
-
-
-		    oth->fill(		  h1[5],float(zdcch_east+zdcch_west));
-		    oth->fill(		  h1[52],float(zdcch_east));
-		    oth->fill(		  h1[53],float(zdcch_west));
-		    oth->fill(		  h1[54],float(ctbch),float((zdcch_east+zdcch_west)));
-		    oth->fill(		  h1[76],float(zdcTime_east));
-		    oth->fill(		  h1[77],float(zdcTime_west));
-		    //CSP Shift of 5.14 introduced to center the plot at 0 . Feb 3 2004.
-		    //Run 5 shift 1.39 is introduced to center distribution
-		    oth->fill(		  h1[78],float(zdcTime_west)-float(zdcTime_east)+1.39);
-		    //		oth->fill(		                      h1[78],float(zdcTime_west)-float(zdcTime_east)+5.14);
-		    oth->fill(		  h1[79],float(zdcTime_east),float(zdcTime_west));
-		    oth->fill(		  h1[92],float(zdc_unatt_east));
-		    //Special conditions requested by ZBX 02/05/03
-		    // Removed Jan 5, 2004 SP
-		    //if(trg.ZDC[9]>20 && trg.ZDC[9]<225){
-
-		    oth->fill(		  h1[93],float(zdc_unatt_west));
-		    //}
-		    TH2 *hhw =  (TH2 *)h1[116];
-		    //oth->fill(		  hhw,float(zdcch_we_east),float(zdc_unatt_west));
-		    oth->fill(		  hhw,float(zdc_analog),float(zdcch_east+zdcch_west));
-		    //TH2 *hhe =  (TH2 *)h1[117];
-		    oth->fill(		  h1[117],float(zdc_analog)-0.6*float(zdcch_east+zdcch_west));
-		    oth->fill(		  h1[118],zdcch_east+zdcch_west);
-		    oth->fill(		  h1[119],zdc_analog);
-		    // cout<<"ZDCA"<<zdc_analog<<" ZDC_sum"<< float(zdcch_east+zdcch_west)<<endl;
-		    //CSP Shift of 16.5 introduced to center the plot at 0 . Feb 3 2004.
-		    oth->fill(		  h1[146],mZdcVertex);
-		  }
-	      }
-	    // ZDC_SMD Stuff here 02/25/2004
 	    for(int i=0;i<8;i++)
 	      {
 		smd_temp=(trg.ZDCSMD[zdc_smd_e_v[i]]-zdc_smd_ped[zdc_smd_e_v[i]])/zdc_smd_gain[zdc_smd_e_v[i]];
@@ -999,275 +874,8 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 		  }
 	      }// i loop zdc smd
 
-	    //BBC
-	    int s,c,k,cc;
-	    int ne=0,nw=0,nle=0,nlw=0,te=-1,tw=-1;
-	    int bbcmap[2][8]={{1,7,8,2,3,9,10,11},{4,12,13,5,6,14,15,16}};
-	    for(s=0; s<6; s++)
-	      {
-		//printf("\n %d : ",s);
-		for(c=0; c<8; c++)
-		  {
-		    k=s*16+c;
-		    if(s>=4)
-		      {cc=c+17;}
-		    else
-		      {cc=bbcmap[s/2][7-c];}
-		    //printf("s=%d c=%d cc=%d\n",s,c,cc);
-		    if(s==0 || s==2)
-		      {
-			bbce += trg.BBC[k];
-			if(trg.BBC[k]>5)
-			  {
-			    ne++;
-			    oth->fill(			  h1[190],float(cc));
-			    oth->fill(			  h1[192],float(cc),float(trg.BBC[k]));
-			  }
-		      }
-		    if(s==1 || s==3)
-		      {
-			bbcw  += trg.BBC[k];
-			if(trg.BBC[k]>5)
-			  {
-			    nw++;
-			    oth->fill(			  h1[191],float(cc));
-			    oth->fill(			  h1[193],float(cc),float(trg.BBC[k]));
-			  }
-		      }
-		    if(s==4)
-		      {
-			bbcle += trg.BBC[k];
-			if(trg.BBC[k]>5)
-			  {
-			    nle++;
-			    oth->fill(			  h1[190],float(cc));
-			    oth->fill(			  h1[192],float(cc),float(trg.BBC[k]));
-			  }
-		      }
-		    if(s==5)
-		      {
-			bbclw += trg.BBC[k];
-			if(trg.BBC[k]>5)
-			  {
-			    nlw++;
-			    oth->fill(			  h1[191],float(cc));
-			    oth->fill(			  h1[193],float(cc),float(trg.BBC[k]));
-			  }
-		      }
-		    if(mDebugLevel)
-		      printf("BBC: %d ",trg.BBC[k]);
-		  }
-		//printf(" / ");
-		for(c=0; c<8; c++)
-		  {
-		    k=s*16+c+8;
-		    if(s>=4)
-		      {cc=c+17;}
-		    else
-		      {cc=bbcmap[s/2][7-c];}
-		    //printf("s/2=%d 15-c=%d cc=%d\n",s/2,15-c,cc);
-		    if(s==0 || s==2)
-		      {
-			if(! (s==0 && cc==0))
-			  {
-			    if(trg.BBC[k]>te)
-			      te=trg.BBC[k];
-			  }
-			oth->fill(		      h1[157+cc],trg.BBC[k]);
-		      }
-		    if(s==1 || s==3)
-		      {
-			if(trg.BBC[k]>tw)
-			  tw=trg.BBC[k];
-			oth->fill(		      h1[173+cc],trg.BBC[k]);
-		      }
-		    if(mDebugLevel)
-		      printf("%d ",trg.BBC[k]);
-		  }
-	      }
-	    oth->fill(	  h1[194],float(ne));
-	    oth->fill(	  h1[195],float(nw));
-	    oth->fill(	  h1[196],float(nle));
-	    oth->fill(	  h1[197],float(nlw));
-	    oth->fill(	  h1[198],float(bbce));
-	    oth->fill(	  h1[199],float(bbcw));
-	    oth->fill(	  h1[200],float(bbcle));
-	    oth->fill(	  h1[201],float(bbclw));
-	    oth->fill(	  h1[202],float(te));
-	    oth->fill(	  h1[203],float(tw));
-	    printf("vertex position calulated from BBC\n");
-	    // vertex position calulated from BBC
-	    if(te>15 && tw>15 && te<245 && tw<245)
-	      {
-		oth->fill(	      h1[204],float(te-tw));
-		TH2 *hbbcdiff = (TH2 *)h1[205];
-		oth->fill(	      hbbcdiff,float(te),float(tw));
-		bbctdiff = te-tw;
-	      }
-	    //int l1maxtace=0;
-	    //int l1maxtacw=0;
-	    int l2tacdiff=tsd->DSMdata.VTX[3]%512 - 256;
-	    //for (int i=0; i<4; i++){
-	    //  itac=8-i*2;
-	    //  l1tac=BBCLayer1(itac)%256;
-	    //  if (l1maxtac<l1tac && l1tac<250){
-	    //		if(i==0 || i==2) l1maxtace=l1tac;
-	    //	if(i==1 || i==3) l1maxtacw=l1tac;
-	    //  }
-	    //}	    
-	    //oth->fill(	  h1[450],float(l1maxtace));
-	    //oth->fill(	  h1[451],float(l1maxtacw));
-	    oth->fill(	  h1[452],float(l2tacdiff));
-
-	    //FPD new FPD by Akio April 10th
-	    oth->fill(	  h1[206],float(tsd->DSMdata.FPD[3] % 16384));
-	    oth->fill(	  h1[207],float(tsd->DSMdata.FPD[2] % 16384));
-	    oth->fill(	  h1[208],float(tsd->DSMdata.FPD[1] % 8192));
-	    oth->fill(	  h1[209],float(tsd->DSMdata.FPD[0] % 8192));
-	    oth->fill(	  h1[210],float(tsd->DSMdata.FPD[7] % 16384));
-	    oth->fill(	  h1[211],float(tsd->DSMdata.FPD[6] % 16384));
-	    oth->fill(	  h1[212],float(tsd->DSMdata.FPD[5] % 8192));
-	    oth->fill(	  h1[213],float(tsd->DSMdata.FPD[4] % 8192));
-	    /-* Akio asked for removal on April 10th and done on April 13th
-	       16 histograms are now unused
-	       int q, add
-	       ;
-	       for(int ew=0; ew<2; ew++)
-	       {
-	       for(int mod=0; mod<6; mod++)
-	       {
-	       for(int pmt=0; pmt<fpdNPMT[mod]; pmt++)
-	       {
-	       add
-	       = fpdmap[ew][mod][pmt];
-	       if(add
-	       >0)
-	       {
-	       if (add
-	       < 112){ q = trg.FPD[ew][0][add
-	       ]; }
-	       else
-	       { q = trg.FPD[ew][1][add
-	       ]; }
-	       if(q>0 && mod<4 && q<255)
-	       {
-	       //printf("FPD: %d  %d  %d  %d\n",ew,mod,pmt,add);
-	       fpdsum[ew][mod]+=q;
-	       oth->fill(			      h1[214 + ew*4 + mod],float(pmt+1));
-	       oth->fill(			      h1[222 + ew*4 + mod],float(pmt+1),float(q));
-	       }
-	       }
-	       }
-	       if(mod<4)
-	       oth->fill(		    h1[206+ew*4+mod],float(fpdsum[ew][mod]));
-	       }
-	       }*-/
-
-	    //Bunch Counter
-	    unsigned long long hi,lo1,lo2,bxlo,bx,bxmod;
-
-	    hi  = tsd->DSMdata.BCdata[3];
-	    lo1 = tsd->DSMdata.BCdata[10];
-	    lo2 = tsd->DSMdata.BCdata[11];
-	    bxlo= (lo1 << 16) + lo2;
-	    bx  = (hi << 32) + bxlo;
-	    bxmod = bx%120;
-	    //cout<< "bxmod :"<<bxmod<<endl;
-	    //oth->fill(	  h1[266],bxmod);
-	    int sec = int(bx/9383400);
-	    float min = float(sec)/60.0;
-
-	    //7bit bunch id and spin bits
-	    int bc2 = tsd->DSMdata.BCdata[2];
-	    //cout<< "BC2 :"<<bc2<<endl;
-	    int bunch7bit = bc2 & 0x7f;
-
-	    //trigger wd
-	    int daqb = daqbits;
-	    float minl = min;
-	    if(minl>29.0)
-	      minl=29.0;
-	    //printf("\n trgwd= 0x%x daqbits=%d sec=%d  min=%f\n",trgword,daqb,sec,min);
-	    for(int i=0; i<nMaxTrgWd; i++)
-	      {
-		int bit = (daqb>>i) % 2;
-		if(bit == 1)
-		  {
-		    oth->fill(		  h1[297],float(i));
-		    oth->fill(		  h1[298+i],minl);
-		    double cont = h1[308]->GetBinContent(i);
-		    //cout<<"i("<<i<<")->"<<trg.offline_id[i]<<endl;
-		    if(cont==0.0)
-		      {
-			int trgid = trg.offline_id[i];
-			h1[308]->SetBinContent(i,float(trgid));
-		      }
-		  }
-	      }
-	  }   // tsd ==0
-	}
-      //
-
-      printf("HistoHandler.cxx line 1328\n");
-      if(mDebugLevel)
-	fprintf(stderr,"TRG RAW: CTB charge %d, ZDC charge %d, BBC charge %d ",ctbch,zdcch,bbce+bbcw+bbcle+bbclw) ;
-
-      //High Tower Trigger
-      // REMOVED BY AAPSUAIDE 11/2004
-      /*unsigned char raw[480];
-	for(int i=0;i<240;i++)
-	{
-	raw[i]=trg.BEMC[1][i];
-	raw[i+240]=trg.BEMC[0][i];
-	}
-
-	int patch;
-	int dsm_read_map[16]={7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8};
-	int tower_map[10]={0,1,2,3,4,5,6,7,8,9};  // map into DSM board
-	unsigned char dsmby[30][16];
-	unsigned char ch[16];
-
-	const int nDSMs = 30;
-	for (int i=0; i<30; i++)
-	for (int j=0; j<16; j++)
-	{
-	int k = 16*i + j;
-	dsmby[i][j] = raw[k];
-	}
-	for(int i=0;i<nDSMs;i++)
-	{
-	patch = i;
-	for(int j=0;j<16;j++)
-	{
-	int k = dsm_read_map[j];
-	ch[k]= dsmby[i][j];
-	}
-	int nt=0;
-	for(int k=0;k<5;k++)
-	{
-	int nby=3*k;
-	int hi_tower = (ch[nby]) & 0x3f;
-	int sum_tower = ((ch[nby]>>6) & 0x3) + (((ch[nby+1]) & 0xf) << 2);
-	int it =  tower_map[nt] + 10*(patch);
-	oth->fill(	h1[325],it,hi_tower);//HT
-	oth->fill(	h1[326],it,sum_tower);//PA
-	oth->fill(	h1[327],hi_tower);//HTDistr
-	oth->fill(	h1[328],sum_tower);//PADistr
-	nt++;
-
-	hi_tower = ((ch[nby+1]>>4) & 0xf) + (((ch[nby+2]) & 0x3) << 4);
-	sum_tower = ((ch[nby+2]>>2) & 0x3f);
-	it = tower_map[nt] + 10*(patch);
-	oth->fill(	h1[325],it,hi_tower);
-	oth->fill(	h1[326],it,sum_tower);
-	oth->fill(	h1[327],hi_tower);
-	oth->fill(	h1[328],sum_tower);
-	nt++;
-	}
-	} //nDSM
       */
-      // END OF REMOVAL AAPSUAIDE 11/2004
-	
+
     }//end of good triggers
     
   //-----------------------------------------------------------------------
@@ -2413,55 +2021,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   //==============================================================================
 
 
-  //Apr 14 2003 Temporarily commented out by A. Ogava
-  //  //---------------------------------------------------------------------
-  //  		ret = fpdReader(datap) ;
-  //  		if(ret <= 0) {
-  //  			fprintf(stderr,"FPD: problems in data (%d) - continuing...",ret) ;
-  //  		}
-  //  		else {
-  //  			if(mDebugLevel)fprintf(stderr,"FPD: %d bytes",ret) ;
-  //  			//BBC ADC analysis
-
-  //  			int first_bbc_adc_hist = 158; // index of the first adc histo
-  //  			int first_bbc_tdc_hist = 190; // index of the first tdc histo
-  //  			int last_channel = 32; // how many channels
-
-  //  			int bbc_hits_east = 0;
-  //  			int bbc_hits_west = 0;
-  //  			for(int i=0;i<last_channel;i++){
-
-  //  			  //cout <<"fpd.bbc.pulse["<<i<<"]="<<fpd.bbc.pulse[i]<<endl;
-  //  			  //cout <<"fpd.bbc.time["<<i<<"]="<<fpd.bbc.time[i]<<endl;
-  //oth->fill(    			  h1[first_bbc_adc_hist+i],float(fpd.bbc.pulse[i]));
-
-  //oth->fill(    			  h1[first_bbc_tdc_hist+i],float(fpd.bbc.time[i]));
-  //  			  if((fpd.bbc.time[i] > 10) && (fpd.bbc.time[i] <1600)){
-  //  			    //EAST BBC Hit pattern
-  //  			    if(i<16){
-  //oth->fill(    			      h1[223],float(i+1));
-  //oth->fill(    			      h1[225],float(i+1),float(fpd.bbc.pulse[i]));
-  //  			      bbc_hits_east++;
-
-  //  			    }
-  //  			    if(i>15){
-  //  			    //West BBC Hit pattern
-  //oth->fill(    			      h1[224],float(i-15));
-  //oth->fill(    			      h1[226],float(i-15),float(fpd.bbc.pulse[i]));
-  //  			      bbc_hits_west++;
-  //  			    }
-  //  			  }
-  //  			}
-  //  			// Filling BBC multiplicity
-  //oth->fill(    			h1[227],float(bbc_hits_east));
-  //oth->fill(    			h1[228],float(bbc_hits_west));
-  //oth->fill(    			h1[229],float(bbc_hits_east+bbc_hits_west));
-  //  			if((fpd.bbc.time[1] > 10 && fpd.bbc.time[1]<1600)&&(fpd.bbc.time[17] > 10 && fpd.bbc.time[17]<1600)){
-  //oth->fill(    			h1[222],float(fpd.bbc.time[1]-fpd.bbc.time[17]));
-  //  			}
-  //  		}
-  //---------------------------------------------------------------------
-
   //printf("PMD\n");
   //fflush(stdout);
 
@@ -2540,20 +2099,21 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   //      EMC histograms
   //==============================
   if(evp->token!=0){ // skip event summary
-	BEMCPlots::fillHisto( ((char*)datap)
-			    , ((unsigned char*)&trg.BEMC[0][0])
-			    , ((unsigned char*)&trg.BEMC[1][0])
-			    , ((unsigned short*)trg.BEMC_l1)
-			    , ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0)
-			    , ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0)
-			    );
-	EEMCPlots::fillHisto( ((char*)datap)
-			    , ((unsigned char*)&trg.EEMC)
-			    , ((unsigned short*)trg.EEMC_l1)
-			    , ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0)
-			    , ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0)
-			    );
-    }
+
+    BEMCPlots::fillHisto( (char*)datap
+			  , trgd->getDsm0_BEMCE()
+			  , trgd->getDsm0_BEMCW()
+			  , trgd->getDsm1_BEMC()
+			  , trgd->getDsm2_EMC()
+			  , trgd->getDsm3()
+			  );
+    EEMCPlots::fillHisto( (char*)datap
+			  , trgd->getDsm0_EEMC()
+			  , trgd->getDsm1_EEMC()
+			  , trgd->getDsm2_EMC() 
+			  , trgd->getDsm3()
+			  );			      
+  }
     // EMC end
 
       
@@ -2828,7 +2388,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.4 2009/02/06 16:55:13 genevb Exp $
+   * $Id: HistoHandler.cxx,v 1.5 2009/02/11 22:15:50 jeromel Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2838,6 +2398,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.5  2009/02/11 22:15:50  jeromel
+   * Akio's implementation of a generic class, FPD, ZDC, DSM, ...
+   *
    * Revision 1.4  2009/02/06 16:55:13  genevb
    * Trigger version problem temporary patch
    *
