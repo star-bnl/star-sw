@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.20 2009/02/04 21:05:42 kocolosk Exp $
+// $Id: StEmcRawMaker.cxx,v 1.21 2009/02/11 22:38:56 mattheww Exp $
 
 #include <math.h>
 
@@ -147,7 +147,6 @@ Int_t StEmcRawMaker::InitRun(Int_t runNumber)
         //eeStDb->exportAscii();
     }
     mEemcRaw->setDb(eeStDb);
-    cout<<"agrdl: emcrawmaker initrun completed"<<endl;
     return StMaker::InitRun(runNumber);
 }
 
@@ -328,6 +327,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.21  2009/02/11 22:38:56  mattheww
+// fixed a bug in getting CAP
+//
 // Revision 1.20  2009/02/04 21:05:42  kocolosk
 // Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
 //
