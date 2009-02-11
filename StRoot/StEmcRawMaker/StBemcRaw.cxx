@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.33 2009/02/04 21:05:42 kocolosk Exp $
+// $Id: StBemcRaw.cxx,v 1.34 2009/02/11 22:38:56 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.34  2009/02/11 22:38:56  mattheww
+// fixed a bug in getting CAP
+//
 // Revision 1.33  2009/02/04 21:05:42  kocolosk
 // Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
 //
@@ -578,7 +581,8 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
             return 0;
         if(S==1 && RAW->header(RDO+BPRSOFFSET))
         {
-            CAP = RAW->header(RDO+BPRSOFFSET,SMDCAPACITOR);
+            if(mDate < 20081101)CAP = RAW->header(RDO+BPRSOFFSET,SMDCAPACITOR);
+	    else CAP = RAW->header(RDO+BPRSOFFSET,SMDCAPACITOR);
             while(CAP>127)
                 CAP-=128;
             return RAW->data(RDO+BPRSOFFSET,index);
@@ -596,7 +600,8 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
         CRATE = RDO+1;
         if(S==1 && RAW->header(RDO+BSMDOFFSET) && RDO>=0 && RDO<MAXSMDCRATES)
         {
-            CAP = RAW->header(RDO+BSMDOFFSET,0);
+	  if(mDate < 20081101)CAP = RAW->header(RDO+BSMDOFFSET,SMDCAPACITOR);
+	  else CAP = RAW->header(RDO+BSMDOFFSET,0);
             while(CAP>127)
                 CAP-=128;
             return RAW->data(RDO+BSMDOFFSET,index);
@@ -614,8 +619,9 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
         CRATE = RDO+1;
         if(S==1 && RAW->header(RDO+BSMDOFFSET) && RDO>=0 && RDO<MAXSMDCRATES)
         {
-            CAP = RAW->header(RDO+BSMDOFFSET,SMDCAPACITOR);
-            while(CAP>127)
+ 	  if(mDate < 20081101)CAP = RAW->header(RDO+BSMDOFFSET,SMDCAPACITOR);
+	  else CAP = RAW->header(RDO+BSMDOFFSET,0);
+             while(CAP>127)
                 CAP-=128;
             return RAW->data(RDO+BSMDOFFSET,index);
         }
