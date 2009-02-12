@@ -684,7 +684,7 @@ void BEMCPlots::processEvent( char *datap
     	    if((this->mDsmL0InputPatchSum[i] > MAXPA) && (this->mDsmL0InputPatchSum[i] < 63)) {MAXPA = this->mDsmL0InputPatchSum[i]; MAXPAID = i;}
 
 	    if (BEMCDecoder) {
-		int jetPatch, jetPatchSeq;
+		int jetPatch = -1, jetPatchSeq = -1;
 		if (BEMCDecoder->GetJetPatchAndSequenceFromTriggerPatch(i, jetPatch, jetPatchSeq)) {
 		    if ((jetPatch >= 0) && (jetPatch < BEMCNJET)) {
     			if (jetPatchHT[jetPatch] < this->mDsmL0InputHighTower[i]) jetPatchHT[jetPatch] = this->mDsmL0InputHighTower[i];
@@ -817,7 +817,7 @@ void BEMCPlots::processEvent( char *datap
 	    		if ((tdc >= 0)  && (tdc < 10) && (TDCStatus[tdc]!=BEMCNOTINSTALLED) && this->mHist_btow_spectra_1) this->mHist_btow_spectra_1->Fill(daqid, adc);
 	    		if ((tdc >= 10) && (tdc < 20) && (TDCStatus[tdc]!=BEMCNOTINSTALLED) && this->mHist_btow_spectra_2) this->mHist_btow_spectra_2->Fill(daqid, adc);
 	    		if ((tdc >= 20) && (tdc < 30) && (TDCStatus[tdc]!=BEMCNOTINSTALLED) && this->mHist_btow_spectra_3) this->mHist_btow_spectra_3->Fill(daqid, adc);
-			int softId;
+			int softId = -1;
 			if (BEMCDecoder && BEMCDecoder->GetTowerIdFromDaqId(i, softId)) {
 			    if ((softId >= 1) && (softId <= 4800)) {
 				if ((softId >= 1) && (softId <= 1220)) {
@@ -830,12 +830,12 @@ void BEMCPlots::processEvent( char *datap
 				    if (this->mHistRawAdc4) this->mHistRawAdc4->Fill(softId, adc);
 				}
 				if (DSM_L0_present && (this->mTowerData[softId - 1][0] != 0)) {
-				    int crate, crateSeq;
+				    int crate = -1, crateSeq = -1;
 				    if (BEMCDecoder->GetTowerCrateFromDaqId(i, crate, crateSeq)) {
-					int triggerPatch;
+					int triggerPatch = -1;
 					if (BEMCDecoder->GetTriggerPatchFromCrate(crate, crateSeq, triggerPatch)) {
 					    if ((triggerPatch >= 0) && (triggerPatch < 300)) {
-						int ht, pa;
+						int ht = -1, pa = -1;
 						if (triggerPatch == 27300) cout << "SoftId " << softId << " ";
 						simulateFEEaction(adc, this->mTowerData[softId - 1][2], this->mPatchData[triggerPatch][2], ht, pa, (triggerPatch == 27300));
 						if (ht > this->mDsmSimuHighTower[triggerPatch]) this->mDsmSimuHighTower[triggerPatch] = ht;
@@ -853,7 +853,7 @@ void BEMCPlots::processEvent( char *datap
 		    if (this->mPatchData[i][1] == 0) {
 			this->mDsmSimuPatchSum[i] = 0;
 		    } else {
-			int lut;
+			int lut = -1;
 			simulateFEELUT(this->mDsmSimuPatchSum[i], this->mPatchData[i][3], this->mPatchData[i][4], this->mPatchData[i][5], this->mPatchData[i][6], this->mPatchData[i][7], this->mPatchData[i][8], this->mPatchData[i][9], this->mPatchData[i][10], (int)(this->mTriggerPedestalShift / 100.0), lut, (i == 27300));
 			this->mDsmSimuPatchSum[i] = lut;
 		    }
@@ -889,7 +889,7 @@ void BEMCPlots::processEvent( char *datap
     for (int bsmd_fiber = 0;bsmd_fiber < BSMD_FIBERS;bsmd_fiber++) {
 	int bprs_fiber = bsmd_fiber - 8;
 #ifdef NEW_DAQ_READER
-	daq_dta *dd_bsmd = rdr ? (rdr->det("bsmd")->get("adc", 0, bsmd_fiber)) : 0;
+	daq_dta *dd_bsmd = rdr ? (rdr->det("bsmd")->get("adc", 0, bsmd_fiber + 1)) : 0; // RTS_READER counts everything from 1, not from 0
 	if (dd_bsmd) while (dd_bsmd->iterate()) {
 	    bsmd_t *d = (bsmd_t *) dd_bsmd->Void;
 	    if (d && BEMCDecoder) {
@@ -898,8 +898,8 @@ void BEMCPlots::processEvent( char *datap
 		{
 #endif
 		int fiberSum = 0;
-		int det, m, e, s;
-		int softId, box, wire, Avalue;
+		int det = -1, m = -1, e = -1, s = -1;
+		int softId = -1, box = -1, wire = -1, Avalue = -1;
 #ifdef NEW_DAQ_READER
     		int cap = d->cap;
 #else
@@ -978,7 +978,7 @@ void BEMCPlots::processEvent( char *datap
     for (int bsmd_fiber = 0;bsmd_fiber < BSMD_FIBERS;bsmd_fiber++) {
 	int bprs_fiber = bsmd_fiber - 8;
 #ifdef NEW_DAQ_READER
-	daq_dta *dd_bsmd = rdr ? (rdr->det("bsmd")->get("adc_non_zs", 0, bsmd_fiber)) : 0;
+	daq_dta *dd_bsmd = rdr ? (rdr->det("bsmd")->get("adc_non_zs", 0, bsmd_fiber + 1)) : 0;
 	if (dd_bsmd) while (dd_bsmd->iterate()) {
 	    bsmd_t *d = (bsmd_t *) dd_bsmd->Void;
 	    if (d && BEMCDecoder) {
@@ -987,8 +987,8 @@ void BEMCPlots::processEvent( char *datap
 		{
 #endif
 		int fiberSum = 0;
-		int det, m, e, s;
-		int softId, box, wire, Avalue;
+		int det = -1, m = -1, e = -1, s = -1;
+		int softId = -1, box = -1, wire = -1, Avalue = -1;
 #ifdef NEW_DAQ_READER
     		int cap = d->cap;
 #else
