@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.8 2009/02/10 00:06:37 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.9 2009/02/12 01:32:06 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -18,6 +18,7 @@
 #include "TGQt.h"
 #include "TQtWidget.h"
 #include "TQtRootCommandCombo.h"
+#include "TQtRangeControl.h"
 #include "TextEdit.h"
 
 #include <QApplication>
@@ -63,7 +64,7 @@ static void RefreshCanvas(TQtWidget *w)
  , fFile_New(0),  fFile_Open(0),  fFile_Reload(0), fFile_Save(0), fFile_SaveAs(0)
  , fFile_Print(0), fFile_Exit(0)  
  , fView_Coin3DAction(0), fView_GLAction(0)
- , fEditGeoSrc(0), fStatusBar(0)
+ , fEditGeoSrc(0), fStatusBar(0),fDepthControl(0)
  { 
    this->setCaption("STAR Geometry Browser");
    CreateActions();
@@ -176,6 +177,11 @@ void GeomBrowser::CreateToolBar()
    viewMenu->addAction(fView_Coin3DAction);
    viewMenu->addAction(fView_GLAction);
    addToolBar(viewMenu);
+   
+   QToolBar *depthTool = new QToolBar(this);
+   fDepthControl = new TQtRangeControl(depthTool);
+   depthTool->addWidget(fDepthControl);
+   addToolBar(depthTool);
    
    QToolBar *editTool = new QToolBar(this);
    editTool->addAction(fEditGeoSrc);
