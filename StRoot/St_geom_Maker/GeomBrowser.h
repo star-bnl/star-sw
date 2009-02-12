@@ -14,6 +14,7 @@ class StarGeomTreeWidget;
 class TQtWidget;
 class StarGeomTreeWidget;
 class TQtRootCommandCombo;
+class TQtRangeControl;
 class TextEdit;
 class QAction;
 class QStatusBar;
@@ -43,9 +44,11 @@ class GeomBrowser : public QMainWindow {
    QAction   *fView_Coin3DAction, *fView_GLAction;
    QAction   *fEditGeoSrc;
    QStatusBar *fStatusBar;
+   TQtRangeControl *fDepthControl;
 
    protected:
-	 static int Geant3Init;
+     static int Geant3Init;
+
   protected:
 	 void CleanGeoManager();
 	 St_geant_Maker &Geant();
