@@ -622,7 +622,7 @@ void BEMCPlots::processEvent( char *datap
 #endif
 	if (BEMCDecoder) BEMCDecoder->SetDateTime(evt_time.GetDate(),evt_time.GetTime());
     }
-
+/*
     if (!dsmL0WestInput || !dsmL0EastInput || !dsmL1Input || !dsmL2Input || !dsmL3Input) {
 #ifdef NEW_DAQ_READER
 	daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
@@ -645,8 +645,8 @@ void BEMCPlots::processEvent( char *datap
 	dsmL3Input = ((unsigned short*) trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
 #endif
     }
-
-    //if (!datap || (mDebug >= 2)) cout << "datap = " << (int*)datap << endl;
+*/
+    if (!datap || (mDebug >= 2)) cout << "datap = " << (int*)datap << endl;
     if (!dsmL0WestInput || (mDebug >= 2)) cout << "dsmL0WestInput = " << (int*)dsmL0WestInput << endl;
     if (!dsmL0EastInput || (mDebug >= 2)) cout << "dsmL0EastInput = " << (int*)dsmL0EastInput << endl;
     if (!dsmL1Input || (mDebug >= 2)) cout << "dsmL1Input = " << (int*)dsmL1Input << endl;
