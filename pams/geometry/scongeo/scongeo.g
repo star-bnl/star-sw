@@ -1,6 +1,9 @@
-* $Id: scongeo.g,v 1.3 2009/01/06 04:06:35 perev Exp $
+* $Id: scongeo.g,v 1.4 2009/02/12 00:07:32 perev Exp $
 *
 * $Log: scongeo.g,v $
+* Revision 1.4  2009/02/12 00:07:32  perev
+* BugFix wrong array size for PCON
+*
 * Revision 1.3  2009/01/06 04:06:35  perev
 * coneVer=3 for elliptic rods
 *
@@ -301,21 +304,18 @@ EndBlock
 Block SGRA is the graphite/epoxy support cone
       Material   Carbon
       Attribute SGRA   Seen=1   Colo=6
-      SHAPE     PCON   Phi1=0   Dphi=360   Nz=7,
+      SHAPE     PCON   Phi1=0   Dphi=360   Nz=5,
       zi ={ssup_Rodlen/2,
-           ssup_Rodlen/2,
            ssup_Rodlen/2+ssup_GrphThk,
            ssup_Rodlen/2+ssup_GrphThk,
            ssup_Cone3zmx,
            ssup_Cone4zmx},
-      Rmx={ssup_Con1IdMn+ssup_GrphThk,
-           ssup_Con3IdMn+ssup_GrphThk,
+      Rmx={ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con4IdMn+ssup_GrphThk,
            ssup_Con4IdMx+ssup_GrphThk},
       Rmn={ssup_Con1IdMn,
-           ssup_Con1IdMn,
            ssup_Con1IdMn,
            ssup_Con3IdMn,
            ssup_Con4IdMn,
