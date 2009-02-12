@@ -62,9 +62,11 @@ bool editorEvent(QEvent *event,
     QVariant value = index.data(Qt::CheckStateRole);
     if (!value.isValid())
         return false;
-      const QWidget *widget = 0;
+    const QWidget *widget = 0;
 //    const QWidget *widget = QStyledItemDelegatePrivate::widget(option);
-      QStyle *style = widget ? widget->style() : QApplication::style();
+    if (const QStyleOptionViewItemV3 *v3 = qstyleoption_cast<const QStyleOptionViewItemV3 *>(&option))
+    widget = v3->widget;
+    QStyle *style = widget ? widget->style() : QApplication::style();
 
     // make sure that we have the right event type
     if ((event->type() == QEvent::MouseButtonRelease)

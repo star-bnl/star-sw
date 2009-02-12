@@ -78,4 +78,10 @@ void  TQtRangeControl::SetMaxValue( int v)
 {
    horizontalSlider->setValue(v);
 }
+/// Value() returns the current value of the control
+//______________________________________________________________
+int TQtRangeControl::Value() const
+{
+   return horizontalSlider->value();
+}
 

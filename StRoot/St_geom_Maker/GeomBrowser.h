@@ -72,7 +72,7 @@ class GeomBrowser : public QMainWindow {
    void fileOpenInventor( const QString &fileName );
    void SelectGeometry(const QString &geomTag);
    void STAR_geometry_activated( const QString &geoVersion );
-   void DrawObject(TObject *rootObject,bool expanded);
+   void DrawObject(TObject *rootObject=0,bool expanded=true);
    void ObjectSelected( TObject *obj, const QPoint &);
    void ViewerDestroyed();
    

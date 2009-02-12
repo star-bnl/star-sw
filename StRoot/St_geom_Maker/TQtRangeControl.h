@@ -12,6 +12,7 @@ class TQtRangeControl : public QWidget, private Ui::DepthControl
    public:
       TQtRangeControl(QWidget *parent=0);
       virtual ~TQtRangeControl();
+      int Value() const;
 
    protected slots:
       void AdjustSlider(int);
