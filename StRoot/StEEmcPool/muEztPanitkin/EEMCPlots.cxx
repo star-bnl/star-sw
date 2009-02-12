@@ -99,7 +99,7 @@ void EEMCPlots::processEvent( char *datap
 #else
     int ret = emcReader(datap);
 #endif
-
+/*
     if (!dsm0inp || !dsm1inp || !dsm2inp || !dsm3inp) {
 #ifdef NEW_DAQ_READER
 	daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
@@ -120,7 +120,7 @@ void EEMCPlots::processEvent( char *datap
 	dsm3inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
 #endif
     }
-
+*/
 #ifdef NEW_DAQ_READER
     unsigned int runId = rdr->run;
     unsigned int token = rdr->token;
