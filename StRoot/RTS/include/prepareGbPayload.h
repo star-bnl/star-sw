@@ -196,16 +196,16 @@ public:
     
     UINT32 detmask = b2h16(evt->actionWdDetectorBitMask);
 
-    LOG("JEFF", "grp_mask = 0x%x",detmask);
+    LOG(NOTE, "grp_mask = 0x%x",detmask);
 
     detmask = grp2rts_mask(detmask);
 
-    LOG("JEFF", "potential det_mask = 0x%x",detmask);
+    LOG(NOTE, "potential det_mask = 0x%x",detmask);
 
     detmask &= dets_in_run_mask;
     detmask |= (1<<TRG_SYSTEM);
 
-    LOG("JEFF", "final det_mask = 0x%x",detmask);
+    LOG(NOTE, "final det_mask = 0x%x",detmask);
 
     pay->rtsDetMask = l2h32(detmask);
     
