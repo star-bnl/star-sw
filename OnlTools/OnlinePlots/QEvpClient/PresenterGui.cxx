@@ -175,9 +175,7 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   //first->setCurrentPage(2);
   ///first->currentChanged( first->currentPage() );
   //emit currentChanged(first);
-  
 
-  QTimer::singleShot (0,this,SLOT(GetNextEvent()));
 }
 
 

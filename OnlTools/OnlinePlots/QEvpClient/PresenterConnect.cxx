@@ -5,8 +5,8 @@
 #include "TH1.h"
 #include "TCanvas.h"
 
-//class TCanvas;
-class QWidget;
+#include "EvpPresenter.h"
+#include "PresenterGui.h"
 
 PresenterConnect::PresenterConnect(PresenterGui* gui, EvpPresenter* pre) :
   mGui(gui), mPresenter(pre) {
