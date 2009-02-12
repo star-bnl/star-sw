@@ -410,11 +410,16 @@ Bfc_st BFC2[] = { // ITTF Chains
   //
   // Chains for 2009 run p+p essentially
   //
-  {"B2009","","","ry2009,in,tpcX,ToFx,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
+  {"B2009.1","","","ry2009,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
+                                                                   "Base chain for 2009 ITTF (tpc)",kFALSE},
+  {"B2009.2","","","ry2009,in,tpcX,ToFx,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
                                                                "Base chain for 2009 ITTF (tpc+tof)",kFALSE},
   {"pp2009a"      ,"" ,"",   
-   "B2009,IAna,hitfilt,ppOpt,VFPPV,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
-         "","","Production chain for 2008 data - no Corr (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+   "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+              "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+  {"pp2009b"      ,"" ,"",   
+   "B2009.1,IAna,hitfilt,ppOpt,VFPPV,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+              "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
 
