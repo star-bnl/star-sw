@@ -1,16 +1,12 @@
 #ifndef PresenterConnect_h
 #define PresenterConnect_h
 
-#include "EvpPresenter.h"
-#include "PresenterGui.h"
-
-
 #include <qwidget.h>
-#include <qobject.h>
-#include <qthread.h>
-#include <qmutex.h>
 
 class ServerStatus;
+class PresenterGui;
+class EvpPresenter;
+class TCanvas;
 
 class PresenterConnect : public QObject {
 
