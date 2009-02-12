@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.1 2009/02/02 21:56:54 dongx Exp $
+ * $Id: StBTofGeometry.h,v 1.2 2009/02/12 01:45:57 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.2  2009/02/12 01:45:57  dongx
+ * Clean up
+ *
  * Revision 1.1  2009/02/02 21:56:54  dongx
  * first release - Barrel geometry
  *
@@ -63,75 +66,6 @@ class StBTofGeomTray;
 class StBTofGeomSensor;
 class StBTofGeometry;
 
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// StBTofGeomNode
-// ==============
-//
-//////////////////////////////////////////////////////////////////////////////
-
-#if 0
-class StBTofGeomNode : public TNode {
- protected:
-   Double_t  mTransMRS[3];   //Translate vector in MRS
-   Double_t  mRotMRS[9];     //RotateMatrix from MRS to this
-   Bool_t    mTransFlag;     //Flag, kTRUE=if translation/matrix updated
-   // Double_t  mCenterRxy;     //center position R(xy) in MRS
-   // Double_t  mCenterEta;     //center position Eta in MRS
-   // Double_t  mCenterPhi;     //center position Phi in MRS
-   Double_t  mEtaMin;        //minimum covered Eta in MRS
-   Double_t  mEtaMax;        //maximum covered Eta in MRS
-   Double_t  mPhiMin;        //minimum covered Phi in MRS
-   Double_t  mPhiMax;        //maximum covered Phi in MRS
-   // Bool_t    mMatrixUpdated; //is TNode::fRotMatrix updated
-
-   static Bool_t   mDebug;   //!Control message printing of this class
-
- protected:
-   StBTofGeomNode(const char* name, const char* title, TBRIK* brik,
-                  const Double_t x, const Double_t y, const Double_t z,
-                  TRotMatrix* matrix=0);
-   void      UpdateMatrix();
-   void      BuildMembers();
-
- public:
-   StBTofGeomNode() {}
-   ~StBTofGeomNode();
-
-   static void     DebugOn()   { mDebug = kTRUE; }     
-   static void     DebugOff()  { mDebug = kFALSE; }
-   static Bool_t   IsDebugOn() { return mDebug; }
-
-   static void     CalcMatrix(TNode* son, Double_t* trans, Double_t* rot,
-                              StBTofGeomNode* mother=0);
-   static void     ConvertPos(         TNode* from, const Double_t* pos_from,
-                              StBTofGeomNode* to,         Double_t* pos_to);
-   void            Local2Master(const Double_t* local, Double_t* master);
-   void            Master2Local(const Double_t* master, Double_t* local);
-
-   StThreeVectorD  YZPlaneNormal();
-   StThreeVectorD  GetCenterPosition() const;
-   // Double_t        GetCenterRxy() const { return mCenterRxy; }
-   // Double_t        GetCenterEta() const { return mCenterEta; }
-   // Double_t        GetCenterPhi() const { return mCenterPhi; }
-   Double_t        GetEtaMin() const { return mEtaMin; }
-   Double_t        GetEtaMax() const { return mEtaMax; }
-   Double_t        GetPhiMin() const { return mPhiMin; }
-   Double_t        GetPhiMax() const { return mPhiMax; }
-   Bool_t          IsLocalPointIn(const Double_t x, const Double_t y,
-                                  const Double_t z) const;
-   Bool_t          IsGlobalPointIn(const StThreeVectorD &global);
-   Bool_t          HelixCross(const StHelixD &helix,
-                              Double_t &pathLen, StThreeVectorD &cross);
-   virtual void    Print() const;
-
-#ifdef __ROOT__
- C_l_assDef(StBTofGeomNode,1)  //Virutal TNode for TOF geometry
-#endif
-};
-#endif
-
 class TVolumeView;
 
 /**
@@ -159,7 +93,6 @@ class StBTofNode : public TObject {
    static Bool_t   mDebug;   //!Control message printing of this class
 
  protected:
-   //   StBTofNode(const StBTofNode& tofnode);
     StBTofNode(TVolumeView *element, TVolumeView *top);
 
     StBTofNode& operator=(const StBTofNode&);
@@ -226,20 +159,6 @@ class StBTofGeomTray : public StBTofNode {
  protected:
    static Bool_t   mDebug;      //!Control message printing of this class
 
- protected:
-   /*
-   StBTofGeomTray(const char* name, const char* title, const TBRIK* brik,
-         const Double_t x, const Double_t y, const Double_t z,
-         const TRotMatrix* matrix, const Int_t itray);*/
-   /*   StBTofGeomTray(const char* name, const char* title, TBRIK* brik,
-         const  Double_t x, const Double_t y, const Double_t z,
-         TRotMatrix* matrix, const Int_t itray);
-   static void  PrepareCopyNode(TNode* node, StBTofGeomNode* top,
-                    TShape*& shape, Double_t* pos, TRotMatrix*& newrot);
-   static StBTofGeomTray* CopyNode(TNode* node, const Int_t itray);
-   StBTofGeomSensor*      AddNode(TNode* node, const Int_t imodule);
-   */
-
  public:
    StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top);
    StBTofGeomTray() {}
@@ -281,13 +200,6 @@ class StBTofGeomSensor : public StBTofNode {
    static Bool_t       mDebug;           //!Control message printing of this class
 
  protected:
-   /*
-   StBTofGeomSensor(const char* name, const char* title, const TBRIK* brik,
-         const Double_t x, const Double_t y, const Double_t z,
-         const TRotMatrix* matrix, const Int_t imodule);*/
-   /*   StBTofGeomSensor(const char* name, const char* title, TBRIK* brik,
-         const Double_t x, const Double_t y, const Double_t z,
-         TRotMatrix* matrix, const Int_t imodule);*/
    void CreateGeomCells();
 
  public:
@@ -351,8 +263,6 @@ class StBTofGeometry : public TNamed {
    static Int_t const mNModules = 32;
 
  protected:
-   //structure of btof_modr, btof_tray, etc, containing info in btofgeo.g
-   //St_XDFFile* mXdf            //!pointer to the xdf file of tables
    TVolumeView*      mTopNode;       //top TNode as MRS
    const char* mRootFile;      //!the root file of geometry
    Int_t       mSectorsInBTOH; //number of sectors in one half TOF
@@ -376,19 +286,10 @@ class StBTofGeometry : public TNamed {
    static char* const trayPref   ;//= "BTRA";
    static char* const senPref    ;//= "BRMD";
 
- protected:
-   //void        InitFromXdf(const char* xdffile);
-   //void        Xdf2Geometry();
-   //   Bool_t      InitFromRoot(const char* rootfile);
-   //   Bool_t      CopyTopNode(TNode* top);
-
  public:
    StBTofGeometry(const char* name="tofrGeo",
                   const char* title="Simplified BTof Geometry");
    ~StBTofGeometry();
-
-   //   static TRotMatrix* CreateMatrix(const Double_t theta);
-   //   static void        GetPrefixNodes(const TNode* topNode, const char* key, TList &list);
 
    Bool_t IsBSEC(const TVolume* element) const
      { return !(strcmp(element->GetName(), sectorPref)); }
@@ -405,12 +306,8 @@ class StBTofGeometry : public TNamed {
    static void   DebugOff()  { mDebug = kFALSE; }
    static Bool_t IsDebugOn() { return mDebug; }
 
-   //   void          Init(const char* file, Option_t* option="root");
-   //   void          Init(TVolume *starHall, const Int_t BTofConf=0);
-   //   void          InitFromStar(TVolume *starHall, const Int_t BTofConf=0);
    void          Init(TVolume *starHall);
    void          InitFromStar(TVolume *starHall);
-   //   void          InitDaqMap();
 
    Bool_t  IsInitDone() const { return mInitFlag; }
    Bool_t  IsCellValid(const Int_t icell)     const;
@@ -422,8 +319,6 @@ class StBTofGeometry : public TNamed {
    Int_t   CalcSensorId(const Int_t imodule, const Int_t itray=0)  const;
    Int_t   PrevCellId(const Int_t cellId) const;
    Int_t   NextCellId(const Int_t cellId)  const;
-   // Int_t   CalcCellId(const Int_t icell,
-   //                   const StBTofGeomSensor* sensor)              const;
    Int_t   CalcCellId(const Int_t icell, const Int_t imodule,
                                          const Int_t itray=0)      const;
    void    DecodeVolumeId(const Int_t volumeId,
