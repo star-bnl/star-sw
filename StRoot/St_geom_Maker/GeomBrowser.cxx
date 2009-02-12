@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.9 2009/02/12 01:32:06 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.10 2009/02/12 17:15:23 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -104,7 +104,10 @@ void GeomBrowser::Connect()
                        ,this,SLOT(DrawObject(TObject *, bool)));
                        
    connect(fTreeWidget, SIGNAL(ObjectInfo(QString ))
-         , fStatusBar,  SLOT( showMessage(const QString & ))); 
+         , fStatusBar,  SLOT( showMessage(const QString & )));
+   
+   connect(fDepthControl, SIGNAL(ValueChanged(int))
+         , this,  SLOT( DrawObject())); 
 }
 /// Create QAction for the menu and tool bars
 //_____________________________________________________________________________
@@ -586,13 +589,13 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
 //_____________________________________________________________________________
 void GeomBrowser::DrawObject(TObject *obj,bool expanded)
 {
+   if (!obj && fTreeWidget) obj = fTreeWidget->CurrentObject();
    if (obj) {
       TVolume *volume = dynamic_cast<TVolume *>(obj);
       TQtWidget *view = expanded ? fComplexVolumeCanvas:fSingleVolumeCanvas;
       if(volume && view) {
          QCursor currentCursor = cursor();
-          // if (!depth) 
-            int depth = expanded ? 3 : 1;
+         int depth = expanded ? fDepthControl->Value() : 1;
           // Check the item deep visibility
          TVolume::ENodeSEEN s = volume->GetVisibility();
          TDataSet  *set = volume;
@@ -613,7 +616,7 @@ void GeomBrowser::DrawObject(TObject *obj,bool expanded)
             view->GetCanvas()->Clear();
          RefreshCanvas(view);
          setEnabled(true);
-      } 
+      }
    }
 }
 
