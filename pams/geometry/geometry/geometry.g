@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.185 2009/01/13 03:19:12 perev Exp $
+* $Id: geometry.g,v 1.186 2009/02/13 19:20:34 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.186  2009/02/13 19:20:34  perev
+* back BTOF for 2008. Again itof=6 bTofConfig=11
+*
 * Revision 1.185  2009/01/13 03:19:12  perev
 * Mag field nou controlled from starsim. BugFix
 *
@@ -1069,7 +1072,7 @@ replace [exe y2008;] with [;
 { "Year 2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now"
     exe SCON02;
     exe TPCE03;
-    exe BTOF16;
+    exe BTOFb6;
     exe CALB02;
     exe ECAL31;
     exe BBCMon;
@@ -1086,7 +1089,7 @@ replace [exe y2008;] with [;
 };]
 
 *********   y2008a   ***
-replace [exe y2008a;] with [;exe y2008; exe SCON13;exe BTOFb6;]
+replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 
 *********   y2009   ***
 replace [exe y2009;] with [;
