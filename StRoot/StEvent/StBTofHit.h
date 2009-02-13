@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofHit.h,v 2.2 2009/01/15 00:46:26 ullrich Exp $
+ * $Id: StBTofHit.h,v 2.3 2009/02/13 22:29:03 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHit.h,v $
+ * Revision 2.3  2009/02/13 22:29:03  ullrich
+ * Fixed typo in ostream<< operator.
+ *
  * Revision 2.2  2009/01/15 00:46:26  ullrich
  * tray() now returns int.
  *
@@ -75,6 +78,6 @@ public:
     ClassDef(StBTofHit,1)
 };
 
-ostream& operator<<(ostream&, const StTofHit&); // Printing operator
+ostream& operator<<(ostream&, const StBTofHit&); // Printing operator
 
 #endif
