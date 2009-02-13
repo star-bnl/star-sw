@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.2 2009/02/12 01:45:57 dongx Exp $
+ * $Id: StBTofGeometry.h,v 1.3 2009/02/13 00:00:56 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.3  2009/02/13 00:00:56  dongx
+ * Tray geometry alignment implemented.
+ *
  * Revision 1.2  2009/02/12 01:45:57  dongx
  * Clean up
  *
@@ -44,6 +47,7 @@
 #include "TVolumePosition.h"
 #include "TVolumeView.h"
 #include "TVolumeViewIter.h"
+#include "StMaker.h"
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
@@ -81,20 +85,22 @@ class StBTofNode : public TObject {
    Double_t  mTransMRS[3];   //Translate vector in MRS
    Double_t  mRotMRS[9];     //RotateMatrix from MRS to this
    Bool_t    mTransFlag;     //Flag, kTRUE=if translation/matrix updated
-   // Double_t  mCenterRxy;     //center position R(xy) in MRS
-   // Double_t  mCenterEta;     //center position Eta in MRS
-   // Double_t  mCenterPhi;     //center position Phi in MRS
+//   Double_t  mCenterRxy;     //center position R(xy) in MRS
+//   Double_t  mCenterEta;     //center position Eta in MRS
+//   Double_t  mCenterPhi;     //center position Phi in MRS
    Double_t  mEtaMin;        //minimum covered Eta in MRS
    Double_t  mEtaMax;        //maximum covered Eta in MRS
    Double_t  mPhiMin;        //minimum covered Phi in MRS
    Double_t  mPhiMax;        //maximum covered Phi in MRS
    // Bool_t    mMatrixUpdated; //is TNode::fRotMatrix updated
+   Double_t  mAlign[3];      //! Alignment parameters
 
    static Bool_t   mDebug;   //!Control message printing of this class
 
  protected:
-    StBTofNode(TVolumeView *element, TVolumeView *top);
-
+//    StBTofNode(TVolumeView *element, TVolumeView *top);
+    StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0);
+    
     StBTofNode& operator=(const StBTofNode&);
 
     void      UpdateMatrix();
@@ -111,7 +117,7 @@ class StBTofNode : public TObject {
    static void     DebugOff()  { mDebug = kFALSE; }
    static Bool_t   IsDebugOn() { return mDebug; }
 
-   static void     CalcMatrix(StBTofNode* son, Double_t* trans, Double_t* rot,
+   static void     CalcMatrix(StBTofNode* son, Double_t* align, Double_t* trans, Double_t* rot,
                               StBTofNode* mother=0);
    static void     ConvertPos(StBTofNode* from, const Double_t* pos_from,
                               StBTofNode* to,         Double_t* pos_to);
@@ -121,9 +127,9 @@ class StBTofNode : public TObject {
    
    StThreeVectorD  YZPlaneNormal();
    StThreeVectorD  GetCenterPosition() const;
-   // Double_t        GetCenterRxy() const { return mCenterRxy; }
-   // Double_t        GetCenterEta() const { return mCenterEta; }
-   // Double_t        GetCenterPhi() const { return mCenterPhi; }
+//   Double_t        GetCenterRxy() const { return mCenterRxy; }
+//   Double_t        GetCenterEta() const { return mCenterEta; }
+//   Double_t        GetCenterPhi() const { return mCenterPhi; }
    Double_t        GetEtaMin() const { return mEtaMin; }
    Double_t        GetEtaMax() const { return mEtaMax; }
    Double_t        GetPhiMin() const { return mPhiMin; }
@@ -133,10 +139,11 @@ class StBTofNode : public TObject {
    Bool_t          IsGlobalPointIn(const StThreeVectorD &global);
    Bool_t          HelixCross(const StHelixD &helix,
                               Double_t &pathLen, StThreeVectorD &cross);
+   StThreeVectorD* Align() const {return new StThreeVectorD(mAlign[0], mAlign[1], mAlign[2]); }
    virtual void    Print(const Option_t *opt="") const;
 
 #ifdef __ROOT__
-  ClassDef(StBTofNode,1)  //Virutal TNode for TOF geometry
+  ClassDef(StBTofNode,2)  //Virutal TNode for TOF geometry
 #endif
 };
 
@@ -160,7 +167,8 @@ class StBTofGeomTray : public StBTofNode {
    static Bool_t   mDebug;      //!Control message printing of this class
 
  public:
-   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top);
+//   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top);
+   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align=0);
    StBTofGeomTray() {}
    ~StBTofGeomTray();
 
@@ -171,7 +179,6 @@ class StBTofGeomTray : public StBTofNode {
 
    Int_t             BTOHIndex() const { return mBTOHIndex; }
    Int_t             Index() const { return mTrayIndex; }
-   StBTofGeomSensor* GetSensor(const Int_t imodule) const;
    virtual void      Print(const Option_t *opt="") const;
 
 #ifdef __ROOT__      
@@ -203,7 +210,8 @@ class StBTofGeomSensor : public StBTofNode {
    void CreateGeomCells();
 
  public:
-   StBTofGeomSensor(TVolumeView *element, TVolumeView *top);
+//   StBTofGeomSensor(TVolumeView *element, TVolumeView *top);
+   StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0);
 
    StBTofGeomSensor() {}
    ~StBTofGeomSensor();
@@ -271,23 +279,26 @@ class StBTofGeometry : public TNamed {
    Int_t       mCellsInModule; //number of cell in a module
    Bool_t      mInitFlag;      //flag of initialization, kTRUE if done
    TVolume*    mStarHall;
-   Int_t       mBTofConf;      //configuration for tray/full (0/1) tofr
+   Int_t       mBTofConf;      //configuration for tray/full (0/1) tof
 
    StBTofGeomTray* mBTofTray[mNTrays];
    StBTofGeomSensor* mBTofSensor[mNTrays][mNModules];
    Int_t       mNValidTrays;
    Int_t       mNValidModules;
 
-   static Int_t const mY03TrayIndex = 83;  //year03 run tray index
-
    static Bool_t   mDebug;     //!Control message printing of this class
 
    static char* const sectorPref ;//= "BSEC";
    static char* const trayPref   ;//= "BTRA";
    static char* const senPref    ;//= "BRMD";
+   
+   /// Alignment parameters
+   Double_t    mTrayX0[mNTrays];
+   Double_t    mTrayY0[mNTrays];
+   Double_t    mTrayZ0[mNTrays];
 
  public:
-   StBTofGeometry(const char* name="tofrGeo",
+   StBTofGeometry(const char* name="btofGeo",
                   const char* title="Simplified BTof Geometry");
    ~StBTofGeometry();
 
@@ -306,7 +317,7 @@ class StBTofGeometry : public TNamed {
    static void   DebugOff()  { mDebug = kFALSE; }
    static Bool_t IsDebugOn() { return mDebug; }
 
-   void          Init(TVolume *starHall);
+   void          Init(StMaker *maker, TVolume *starHall);
    void          InitFromStar(TVolume *starHall);
 
    Bool_t  IsInitDone() const { return mInitFlag; }
@@ -344,6 +355,7 @@ class StBTofGeometry : public TNamed {
                                    const Int_t itray=0) const;
    StBTofGeomTray*   GetGeomTray(const Int_t itray=0)   const;
    StBTofGeomTray*   GetGeomTrayAt(const Int_t idx=0)   const;
+   Int_t             GetTrayIndexAt(const Int_t idx=0)  const;
    Int_t             GetAtOfTray(const Int_t itray=0)   const;
 
    Int_t             CellIdPointIn(const StThreeVectorD& point) const;

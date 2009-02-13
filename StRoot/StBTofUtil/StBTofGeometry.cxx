@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.2 2009/02/12 01:45:57 dongx Exp $
+ * $Id: StBTofGeometry.cxx,v 1.3 2009/02/13 00:00:56 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.3  2009/02/13 00:00:56  dongx
+ * Tray geometry alignment implemented.
+ *
  * Revision 1.2  2009/02/12 01:45:57  dongx
  * Clean up
  *
@@ -22,6 +25,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
+#include "tables/St_tofGeomAlign_Table.h"
 
 #include "StBTofGeometry.h"
 #include "TFile.h"
@@ -63,9 +67,15 @@ char* const StBTofGeometry::trayPref   = "BTRA";
 char* const StBTofGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
-StBTofNode::StBTofNode(TVolumeView *element, TVolumeView *top)
+StBTofNode::StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align)
   : fView(element), pView(element->GetPosition()), mMasterNode(top), mTransFlag(kFALSE)
 {
+   if(align) {
+     mAlign[0] = align->x();  mAlign[1] = align->y();  mAlign[2] = align->z();
+   } else {
+     mAlign[0] = 0.0;   mAlign[1] = 0.0;   mAlign[2] = 0.0;
+   }
+
    UpdateMatrix();
    BuildMembers();
 }
@@ -90,13 +100,13 @@ void  StBTofNode::UpdateMatrix()
    //
 
    mTransFlag = kFALSE;
-   CalcMatrix(this, mTransMRS, mRotMRS);
+   CalcMatrix(this, mAlign, mTransMRS, mRotMRS);
    mTransFlag = kTRUE;
 
 }
 
 //_____________________________________________________________________________
-void StBTofNode::CalcMatrix(StBTofNode* son,
+void StBTofNode::CalcMatrix(StBTofNode* son, Double_t* align,
               Double_t* trans, Double_t* rot, StBTofNode* mother)
 {
    //
@@ -160,6 +170,11 @@ void StBTofNode::CalcMatrix(StBTofNode* son,
    rot[7] = xm[1]-trans[1];
    rot[8] = xm[2]-trans[2];
 
+   // Alignment parameters;
+   trans[0] += align[0];
+   trans[1] += align[1];
+   trans[2] += align[2];   
+
    return;
 }
 
@@ -195,7 +210,7 @@ void  StBTofNode::BuildMembers()
    Double_t dz = brik->GetDz();
 
    //   LOG_INFO << " size = " <<dx << " " << dy << " " << dz << endm;
-   /*
+/*
    //center point
    Double_t xc[3];
    xc[0] = 0;  xc[1] = 0;  xc[2] = 0;
@@ -204,7 +219,7 @@ void  StBTofNode::BuildMembers()
    mCenterRxy = center.perp();
    mCenterEta = center.pseudoRapidity();
    mCenterPhi = center.phi();
-   */
+*/
 
    // -dz
    xl[0] = 0;  xl[1] = 0;  xl[2] = -dz;
@@ -429,8 +444,8 @@ ClassImp(StBTofGeomTray)
 Bool_t StBTofGeomTray::mDebug = kFALSE;
 
 //_____________________________________________________________________________
-StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top) 
-  : StBTofNode((TVolumeView *)sector->First(), top)
+StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align) 
+  : StBTofNode((TVolumeView *)sector->First(), top, align)
 {
   mSectorsInBTOH = top->GetListSize()/2;
   mBTOHIndex = ibtoh + 1;
@@ -443,34 +458,6 @@ StBTofGeomTray::~StBTofGeomTray()
   mBTOHIndex = 0;
   mTrayIndex = 0;
 }
-//_____________________________________________________________________________
-StBTofGeomSensor* StBTofGeomTray::GetSensor(const Int_t imodule) const
-{
-
-   StBTofGeomSensor* sensor = 0;
-
-   TVolumeView *volume = GetfView();
-   //   TList *list = fView->Nodes();
-   if ( !(volume->GetListSize()) ) {
-     LOG_INFO << " No Modules in this tray " << endm;
-     return sensor;
-   }
-   //   list->Delete();
-
-   TDataSetIter nextSensor(volume);
-   TVolumeView *sensorVolume = 0;
-   TVolumeView *top = GetTopNode();
-
-   while ( (sensorVolume = (TVolumeView *)nextSensor()) )
-     {
-       if ( sensorVolume && (int)(sensorVolume->GetPosition()->GetId()) == imodule ) {
-	 sensor = new StBTofGeomSensor(sensorVolume, top);
-       }
-     }
-
-   return sensor;
-}
-
 //_____________________________________________________________________________
 void StBTofGeomTray::Print(const Option_t *opt) const
 {
@@ -493,8 +480,8 @@ ClassImp(StBTofGeomSensor)
 Bool_t StBTofGeomSensor::mDebug = kFALSE;
 
 //_____________________________________________________________________________
-StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top) 
-  : StBTofNode(element, top)
+StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align) 
+  : StBTofNode(element, top, align)
 {
    mModuleIndex = element->GetPosition()->GetId();
    CreateGeomCells();
@@ -683,11 +670,46 @@ StBTofGeometry::~StBTofGeometry()
 }
 
 //_____________________________________________________________________________
-void StBTofGeometry::Init(TVolume *starHall)
+void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
 {
    //
    //Define geometry parameters and establish the geometry
    //  
+   if(maker->Debug()) DebugOn();
+
+   // retrieve align parameters  -- need to use db
+   for(int i=0;i<mNTrays;i++) {
+     mTrayX0[i] = 0.0;
+     mTrayY0[i] = 0.0;
+     mTrayZ0[i] = 0.0;
+   }
+
+   LOG_INFO << "StBTofGeometry -- retrieving the geometry alignment parameters" << endm;
+   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+   if(!mDbTOFDataSet) {
+     LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
+     //    assert(mDbTOFDataSet);
+     return; // kStErr;
+   }
+  
+   St_tofGeomAlign* tofGeomAlign = static_cast<St_tofGeomAlign*>(mDbTOFDataSet->Find("tofGeomAlign"));
+   if(!tofGeomAlign) {
+     LOG_WARN << "Unable to get tof geometry align parameter! Use ideal geometry!" << endm;
+   }
+   tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
+
+//   Int_t numRows = tofGeomAlign->GetNRows();
+//   LOG_INFO << "number of rows = " << numRows << endm;
+   for (Int_t i=0;i<mNTrays;i++) {
+     mTrayX0[i] = geomAlign[i].x0;
+     mTrayY0[i] = geomAlign[i].phi0;
+     mTrayZ0[i] = geomAlign[i].z0;
+
+     if(maker->Debug()) {
+       LOG_INFO << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+     }
+   }
+
    InitFromStar(starHall);
    mStarHall = starHall;
 }
@@ -748,6 +770,14 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
   /////////////////////////////
   // save the sensors and trays
   /////////////////////////////
+  if(!mTopNode) {
+    LOG_WARN << " No Top Node for Tof Geometry! " << endm;
+    return;
+  }
+  if(mDebug) {
+//    mTopNode->ls(9);
+    LOG_INFO << " # of trays = " << mTopNode->GetListSize() << endm;
+  }
   LOG_INFO << " # of trays = " << mTopNode->GetListSize() << endm;
   TList *list = mTopNode->Nodes();
   Int_t ibtoh =0;
@@ -757,24 +787,38 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
   for(Int_t i=0;i<list->GetSize();i++) {
     sectorVolume = dynamic_cast<TVolumeView*> (list->At(i));
     TVolumeView *trayVolume = (TVolumeView *)sectorVolume->First();
-    if( !trayVolume->GetListSize() ) continue;
+    if( !trayVolume->GetListSize() ) continue;  /// Tray should not be empty
     if ( i>=60 ) ibtoh = 1;
-    //    gMessMgr->Info("","OS") << " test sector size = " << trayVolume->GetListSize() << endm;
-    mBTofTray[mNValidTrays] = new StBTofGeomTray(ibtoh, sectorVolume, mTopNode);
+
+    int sectorsInBTOH = mTopNode->GetListSize()/2;
+    int trayIndex = ibtoh * sectorsInBTOH + sectorVolume->GetPosition()->GetId();
+    int itray = trayIndex - 1;
+    StThreeVectorD *align;
+    if(trayIndex<=60) align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], mTrayZ0[itray]);
+    else align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], -mTrayZ0[itray]);  // thus z0 will be the distance between the tray end to the TPC central membrane
+    mBTofTray[mNValidTrays] = new StBTofGeomTray(ibtoh, sectorVolume, mTopNode, align);
+
+    if(mDebug) {
+      LOG_INFO << "   # of modules in tray " << mBTofTray[mNValidTrays]->Index() << " = " << trayVolume->GetListSize() << endm;
+      LOG_INFO << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
+      mBTofTray[mNValidTrays]->Print();
+    }
+
     TList *list1 = trayVolume->Nodes();
-    //    gMessMgr->Info("","OS") << "   # of modules in tray " << mBTofTray[mNValidTrays]->Index() << " = " << trayVolume->GetListSize() << endm;
     if (!list1 ) continue;
     TVolumeView *sensorVolume = 0;
     if(list1->GetSize()>mNValidModules) mNValidModules=list1->GetSize(); 
     for(Int_t j=0;j<list1->GetSize();j++) {
       sensorVolume = dynamic_cast<TVolumeView*> (list1->At(j));
-      mBTofSensor[mNValidTrays][j] = new StBTofGeomSensor(sensorVolume, mTopNode);
+      mBTofSensor[mNValidTrays][j] = new StBTofGeomSensor(sensorVolume, mTopNode, align);
+      if(mDebug) mBTofSensor[mNValidTrays][j]->Print();
     }
     mNValidTrays++;
   }
   LOG_INFO << "\n-------------------------------------------\n"
            << " Summary of initialization: "
            << "    NValidTrays = " << mNValidTrays << "   NValidModules = " << mNValidModules << endm;
+  if(mDebug) Print();
 
   return;
 
@@ -864,20 +908,6 @@ const
    //
 
    Bool_t ret = kFALSE;
-/*
-   TDataSetIter nextSector(mTopNode);
-   TVolumeView* sectorVolume = 0;
-   Int_t ibtoh = 0, i = 0;
-   while ( (sectorVolume = (TVolumeView *)nextSector()) ) {
-     i++;
-     if ( i>mSectorsInBTOH ) ibtoh = 1;
-     int trayIndex = ibtoh * mSectorsInBTOH + sectorVolume->GetPosition()->GetId();
-     if (trayIndex == itray) {
-       ret = kTRUE;
-       break;
-     }
-   }
-*/
    for(int i=0;i<mNValidTrays;i++) {
      if(!mBTofTray[i]) continue;
      if(mBTofTray[i]->Index() == itray) {
@@ -982,10 +1012,13 @@ const
    if (!IsSensorValid(imodule)) return kFALSE;
 
    Int_t idx = sensorId/mModulesInTray;
+
+   itray = GetTrayIndexAt(idx);
+
    StBTofGeomTray *tray = GetGeomTrayAt(idx);
    if (!tray) return kFALSE;
    itray   = tray->Index();
-   delete tray;
+//   delete tray;
    return kTRUE;
 }
 
@@ -1069,11 +1102,17 @@ const
    //itray is dummy if itray==0 and it is the current single tray
    //
 
-   StBTofGeomTray *tray = GetGeomTray(itray);
-   StBTofGeomSensor* sensor = NULL;
-   if (tray) sensor = tray->GetSensor(imodule);
-   delete tray;
-   return sensor;
+   for(int i=0;i<mNValidTrays;i++) {
+     if(!mBTofTray[i]) continue;
+     if(mBTofTray[i]->Index()==itray) {
+       for(int j=0;j<mNModules;j++) {
+         if(!mBTofSensor[i][j]) continue;
+         if(mBTofSensor[i][j]->Index()==imodule) return mBTofSensor[i][j];
+       }
+     }
+   }
+
+   return 0;
 }
 
 //_____________________________________________________________________________
@@ -1084,26 +1123,36 @@ const
    //itray is dummy if itray==0 and it is the current single tray
    //
 
-   StBTofGeomTray* found = 0;
-   //   StBTofGeomTray* tray = 0;
+   for(int i=0;i<mNValidTrays;i++) {
+     if(!mBTofTray[i]) continue;
+     if(mBTofTray[i]->Index()==itray) return mBTofTray[i];
+   }
+   return 0;
+}
+
+//_____________________________________________________________________________
+Int_t StBTofGeometry::GetTrayIndexAt(const Int_t idx)
+const
+{
+   //
+   //Get the tray index at index of the list
+   //
+
    TDataSetIter nextSector(mTopNode);
    TVolumeView *sectorVolume = 0;
    Int_t ibtoh = 0, i = 0;
+   Int_t itray = -1;
    while ( (sectorVolume = (TVolumeView *)nextSector()) ) {
      i++;
-     if (i>mSectorsInBTOH ) ibtoh = 1;
+     if ( i>mSectorsInBTOH ) ibtoh = 1;
      int trayIndex = ibtoh * mSectorsInBTOH + sectorVolume->GetPosition()->GetId();
-     //     tray = new StBTofGeomTray(ibtoh, sectorVolume, mTopNode);
-     //     if  (tray->Index() == itray) {
-     if (trayIndex == itray) {
-       //         found = tray;
-       found = new StBTofGeomTray(ibtoh, sectorVolume, mTopNode);
+     if (i==idx) {
+       itray = trayIndex;
        break;
      }
-     //     delete tray;
    }
 
-   return found;
+   return itray;
 }
 
 //_____________________________________________________________________________
@@ -1114,20 +1163,14 @@ const
    //Get the StBTofGeomTray at index of the list
    //
 
-   StBTofGeomTray* found = 0;
+   Int_t itray = GetTrayIndexAt(idx);
+   if(itray<=0||itray>mNTrays) return 0;
 
-   TDataSetIter nextSector(mTopNode);
-   TVolumeView *sectorVolume = 0;
-   Int_t ibtoh = 0, i = 0;
-   while ( (sectorVolume = (TVolumeView *)nextSector()) ) {
-     i++;
-     if ( i>mSectorsInBTOH ) ibtoh = 1;
-     if (i==idx) {
-       found = new StBTofGeomTray(ibtoh, sectorVolume, mTopNode);
-     }
+   for(int i=0;i<mNValidTrays; i++) {
+     if(mBTofTray[i] && mBTofTray[i]->Index()==itray) return mBTofTray[i];
    }
 
-   return found;
+   return 0;
 }
 
 //_____________________________________________________________________________
@@ -1141,23 +1184,17 @@ const
 
    Int_t at = -1;
 
-   //   TList *list = mTopNode->GetListOfNodes();
-   
    TDataSetIter nextSector(mTopNode);
    TVolumeView *sectorVolume = 0;
-   //   StBTofGeomTray *tray = 0;
    Int_t ibtoh = 0, i = 0;
    while ( (sectorVolume = (TVolumeView *)nextSector())  ) {
      i++;
      if ( i>mSectorsInBTOH ) ibtoh = 1;
      int trayIndex = ibtoh * mSectorsInBTOH + sectorVolume->GetPosition()->GetId();
-     //     tray = new StBTofGeomTray(ibtoh, sectorVolume, mTopNode);
-     //     if (tray->Index() == itray) {
      if (trayIndex == itray) {
        at = i;
        break;
      }
-     //     delete tray;
    }
 
    return at;
