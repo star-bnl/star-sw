@@ -14,9 +14,10 @@
 
 class pp2ppHistogramGroup : public HistogramGroup {
 
-public:
+protected:
   pp2ppHistogramGroup();
 
+public:
   pp2ppHistogramGroup(unsigned int iswitch, const char* group="P2P", const char* subGroup="pp2pp", const char* trigger="any", const char* detector="pp2pp");
   ~pp2ppHistogramGroup();
 

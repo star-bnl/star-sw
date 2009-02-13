@@ -10,8 +10,11 @@
 
 
 class SsdPedestalHistogramGroup : public HistogramGroup {
+protected:
+   SsdPedestalHistogramGroup():HistogramGroup(),h1SsdMeanPedestal(0),h1SsdMeanNoise(0)
+                              ,good_ssd(19562009){}
 public:
-  SsdPedestalHistogramGroup(const char* group="Ssd", const char* subGroup="Pedestal", const char* trigger="pedestal", const char* detector="ssd");
+  SsdPedestalHistogramGroup(const char* group, const char* subGroup="Pedestal", const char* trigger="pedestal", const char* detector="ssd");
   ~SsdPedestalHistogramGroup();
   virtual void reset();
   virtual bool fill(evpReader* evp, char* datap);
