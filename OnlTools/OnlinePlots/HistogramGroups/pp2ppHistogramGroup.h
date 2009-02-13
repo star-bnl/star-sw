@@ -15,8 +15,9 @@
 class pp2ppHistogramGroup : public HistogramGroup {
 
 public:
+  pp2ppHistogramGroup();
 
-  pp2ppHistogramGroup(unsigned int iswitch = 0, const char* group="P2P", const char* subGroup="pp2pp", const char* trigger="any", const char* detector="pp2pp");
+  pp2ppHistogramGroup(unsigned int iswitch, const char* group="P2P", const char* subGroup="pp2pp", const char* trigger="any", const char* detector="pp2pp");
   ~pp2ppHistogramGroup();
 
   virtual void reset();

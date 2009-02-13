@@ -17,6 +17,9 @@
 
 ClassImp(HistogramGroup) ;
 
+HistogramGroup::HistogramGroup()
+{ }
+
 HistogramGroup::HistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)  {
 
     mGroupName = TString(group);
