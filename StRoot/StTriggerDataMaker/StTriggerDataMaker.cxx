@@ -24,7 +24,7 @@ ClassImp(StTriggerDataMaker)
 
 StTriggerDataMaker::StTriggerDataMaker(const char *name):StRTSBaseMaker("trg",name)
 {
-  cout << "Constructing StTriggerDataMaker with name=" << name << endl;
+  LOG_INFO << "Constructing StTriggerDataMaker with name=" << name << endm;
 }
 
 //_____________________________________________________________________________
@@ -79,30 +79,39 @@ Int_t StTriggerDataMaker::Make(){
       break;
     }	      
   }else{
-    cout << "StTriggerDataMaker Make() found no old format data, trying to get new data format" << endl;  
-    char* data = GetNextRaw()->GetTable();
-    if(data){
-      char version = data[3];
-      printf("StTriggerDataMaker Make() found new data formt with version = %02x%02x%02x%02x\n",data[0],data[1],data[2],data[3]);
-      switch(version){
-      case 0x40:
-	year=2009;
-	trgdata2009 = (TriggerDataBlk2009*)data;
-	AddData(new TObjectSet("StTriggerData",new StTriggerData2009(trgdata2009,run),kTRUE));	
-	break;	
-      default:
-	cout << "StTriggerDataMaker Make() found new data but with unknown version = " << version << endl;  	
-      }
-    }else{
-      cout << "StTriggerDataMaker Make() found no new data format neither" << endl;  
-    }      
+    LOG_INFO << "StTriggerDataMaker Make() found no old format data, trying to get new data format" << endm;
+
+    StRtsTable *daqData = GetNextRaw();
+    if ( daqData ){
+      char* data = daqData->GetTable();
+      if(data){
+	char version = data[3];
+	{ 
+	  LOG_INFO << Form("StTriggerDataMaker Make() found new data formt with version = %02x%02x%02x%02x\n",
+			   data[0],data[1],data[2],data[3]);
+	}
+	switch(version){
+	case 0x40:
+	  year=2009;
+	  trgdata2009 = (TriggerDataBlk2009*)data;
+	  AddData(new TObjectSet("StTriggerData",new StTriggerData2009(trgdata2009,run),kTRUE));	
+	  break;	
+	default:
+	  LOG_INFO << "StTriggerDataMaker Make() found new data but with unknown version = " << version << endm;
+	}
+      } else {
+	LOG_INFO << "StTriggerDataMaker Make() found no new data format neither" << endm;  
+      }      
+    } else {
+      LOG_WARN << "StTriggerDataMaker Make() - GetNextRaw() returned nothing" << endm;
+    }
   }
 
   if(year==0){
-    cout << "StTriggerDataMaker Make() finished. Found no trigger data" << endl;  
+    LOG_INFO << "StTriggerDataMaker Make() finished. Found no trigger data" << endm;  
     return kStWarn;
   }else{
-    cout << "StTriggerDataMaker Make() finished. Found trigger data for year "<<year<< endl;  
+    LOG_INFO << "StTriggerDataMaker Make() finished. Found trigger data for year "<< year << endm;  
     return kStOK;
   }
 }
