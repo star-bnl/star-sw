@@ -441,7 +441,7 @@ void BEMCPlots::clear(const char *bemcStatus) {
     }
     memset(this->BEMCJPPED, 0, sizeof(this->BEMCJPPED));
     memset(this->BEMCNJPPED, 0, sizeof(this->BEMCNJPPED));
-
+ 
     if (!BEMCDecoder) BEMCDecoder = new StEmcDecoder();
 
     if (bemcStatus) {
