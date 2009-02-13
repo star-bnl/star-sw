@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofDaqMap.cxx,v 1.1 2009/02/02 21:56:34 dongx Exp $
+ * $Id: StBTofDaqMap.cxx,v 1.2 2009/02/13 19:47:32 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofDaqMap.cxx,v $
+ * Revision 1.2  2009/02/13 19:47:32  dongx
+ * mNValidTrays set by the tofTrayConfig in db now
+ *
  * Revision 1.1  2009/02/02 21:56:34  dongx
  * first release - Barrel TOF daq mapping
  *
@@ -92,6 +95,7 @@ void StBTofDaqMap::Init(StMaker *maker) {
   }
   tofTrayConfig_st* trayconf = static_cast<tofTrayConfig_st*>(trayConfig->GetArray());
   if(maker->Debug()) { LOG_DEBUG << " Valid Trays: " << endm; }
+  mNValidTrays = (Int_t)(trayconf[0].entries);
   for (Int_t i=0;i<mNValidTrays;i++) {
     mValidTrayId[i] = (Int_t)(trayconf[0].iTray[i]);
     if(maker->Debug()) {

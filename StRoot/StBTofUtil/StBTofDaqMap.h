@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofDaqMap.h,v 1.1 2009/02/02 21:56:34 dongx Exp $
+ * $Id: StBTofDaqMap.h,v 1.2 2009/02/13 19:47:33 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofDaqMap.h,v $
+ * Revision 1.2  2009/02/13 19:47:33  dongx
+ * mNValidTrays set by the tofTrayConfig in db now
+ *
  * Revision 1.1  2009/02/02 21:56:34  dongx
  * first release - Barrel TOF daq mapping
  *
@@ -102,8 +105,10 @@ class StBTofDaqMap{
 
   /// Returns the list of valid tray Ids
   IntVec ValidTrays();
+  /// Returns the number of valid trays
+  Int_t  numberOfValidTrays();
 };
 
 inline void StBTofDaqMap::setNValidTrays(int ntrays) { mNValidTrays = ntrays; }
-
+inline Int_t StBTofDaqMap::numberOfValidTrays() { return mNValidTrays; }
 #endif
