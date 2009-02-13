@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.h,v 1.1 2009/02/02 21:57:51 dongx Exp $
+ * $Id: StBTofINLCorr.h,v 1.2 2009/02/13 23:32:52 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.h,v $
+ * Revision 1.2  2009/02/13 23:32:52  dongx
+ * fixed the crash when no INL table for some board is available
+ *
  * Revision 1.1  2009/02/02 21:57:51  dongx
  * first release - Barrel TOF INL correction functions
  *
@@ -55,6 +58,8 @@ class StBTofINLCorr{
   Float_t mINLCorr[mNTDIGMAX][mNChanOnTDIG][mNChanMAX];
 
   Int_t mNValidTrays;
+
+  static const Int_t mNValidBoards = 1023;
   
  public:
   StBTofINLCorr();
