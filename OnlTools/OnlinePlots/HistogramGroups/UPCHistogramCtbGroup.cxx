@@ -5,9 +5,8 @@
 #  include "daqFormats.h"
 #  include "cfgutil.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_TRG/trgReader.h"
-#  include "DAQ_READER/cfgutil.h"
+#  include "StEvent/StTriggerData.h"
+#  include "TriggerData.h"
 #endif
 #include <iostream>
 #include <sstream>
@@ -137,7 +136,14 @@ bool UPCHistogramCtbGroup::fill(evpReader* evp, char* datap) {
   //     array offset | 0 1 2 3 4 5 6 7
   //     DSM channel  | 3 2 1 0 7 6 5 4  
   unsigned int ctbAdcSum = dsmData->lastDSM[3];  // ch 0 of last DSM
+#else
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(!trgd) return false;
+  unsigned int ctbAdcSum = trgd->lastDSM(3);
+#endif
   h_ctb_adc_sum->Fill(ctbAdcSum);
+
+#ifndef NEW_DAQ_READER
   //TRGD* trgData = static_cast<struct TRGD*>(trg.trgd);
   //if(trgData==0)return true;//not compatible in 2008
   for (int tray = 0; tray < 120; ++tray)
@@ -153,8 +159,9 @@ bool UPCHistogramCtbGroup::fill(evpReader* evp, char* datap) {
       h_ctb_cdb->Fill     (i * 16 + channel, adcValue);
       h_ctb_cdb_zoom->Fill(i * 16 + channel, adcValue);
     }
-  return true;
 #else
-  return false;
+  //no more CTB after run8
 #endif
+
+  return true;
 }

@@ -4,9 +4,8 @@
 #  include "daqFormats.h"
 #  include "cfgutil.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_TRG/trgReader.h"
-#  include "DAQ_READER/cfgutil.h"
+#  include "StEvent/StTriggerData.h"
+#  include "TriggerData.h"
 #endif
 #include <iostream>
 #include "TMapFile.h"
@@ -69,20 +68,28 @@ void L2UpsilonTowersHistogramGroup::draw(TCanvas* cc) {
 #include "L2UpsilonResult.h"
 #include "BemcGeometry.h"
 bool L2UpsilonTowersHistogramGroup::fill(evpReader* evp, char* datap) { 
+  L2UpsilonResult L2;
+  L2UpsilonResult* mL2 = &L2;
+  if  (!mL2) return false;
+
+#ifndef NEW_DAQ_READER
   int ret = trgReader(datap) ;
   if(ret <= 0) {
     fprintf(stderr,"TRG RAW: problems in data (%d) - continuing...",ret) ;
     return false;
   }  
-#ifndef NEW_DAQ_READER
   TRGD *trgd = (TRGD *)trg.trgd;
   if ( !trgd ) return false;
   
-  L2UpsilonResult L2;
-  L2UpsilonResult* mL2 = &L2;
-  if  (!mL2) return false;
   memcpy(mL2,trgd->sum.L2Result+L2RESULTS_2008_OFFSET_UPS,sizeof(L2UpsilonResult) );
   mL2->swap();
+#else
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(!trgd) return false;
+  const unsigned int* l2result = trgd->l2Result();
+  //here we got l2result array... but there is no L2RESULTS_2009_OFFSET defined anywhere.
+  //please contact akio@bnl.gov
+#endif
 
   hTriggerTowerIdL0->Fill( mL2->triggerTowerL0 );
   hTriggerTowerIdL2->Fill( mL2->triggerTowerL2 );
@@ -93,18 +100,17 @@ bool L2UpsilonTowersHistogramGroup::fill(evpReader* evp, char* datap) {
   
   hEtaPhiL0->Fill( geom->eta(mL2->triggerTowerL0), geom->phi(mL2->triggerTowerL0) );
   hEtaPhiL2->Fill( geom->eta(mL2->triggerTowerL2), geom->phi(mL2->triggerTowerL2) );
-  
-  
+    
   return true;
-#else
-  return false;
-#endif
 }
 
 /*************************************************************************************
- $Id: L2UpsilonTowersHistogramGroup.cxx,v 1.1 2009/01/23 16:07:56 jeromel Exp $
+ $Id: L2UpsilonTowersHistogramGroup.cxx,v 1.2 2009/02/13 22:23:04 dkettler Exp $
  *************************************************************************************
  $Log: L2UpsilonTowersHistogramGroup.cxx,v $
+ Revision 1.2  2009/02/13 22:23:04  dkettler
+ Trigger data changes
+
  Revision 1.1  2009/01/23 16:07:56  jeromel
  Import from online/RTS/src/
 

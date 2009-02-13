@@ -5,9 +5,8 @@
 #  include "daqFormats.h"
 #  include "cfgutil.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_TRG/trgReader.h"
-#  include "DAQ_READER/cfgutil.h"
+#  include "StEvent/StTriggerData.h"
+#  include "TriggerData.h"
 #endif
 #include <iostream>
 #include <stdlib.h>
@@ -82,8 +81,6 @@ bool UPCHistogramZdcGroup::fill(evpReader* evp, char* datap) {
   }  
   unsigned int zdcEastUnattSum = trg.ZDC[4];
   unsigned int zdcWestUnattSum = trg.ZDC[0];
-  h_zdce_sum->Fill(zdcEastUnattSum);
-  h_zdcw_sum->Fill(zdcWestUnattSum);
   TrgSumData* sumData = static_cast<TrgSumData*>(trg.trg_sum);
   if(!sumData) {
     fprintf(stderr, "TRG RAW: cannot get TrgSumData data - continuing...");
@@ -94,10 +91,16 @@ bool UPCHistogramZdcGroup::fill(evpReader* evp, char* datap) {
   //     array offset | 0 1 2 3 4 5 6 7
   //     DSM channel  | 3 2 1 0 7 6 5 4  
   unsigned int ctbAdcSum = dsmData->lastDSM[3];  // ch 0 of last DSM
+#else
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(!trgd) return false;
+  unsigned int zdcEastUnattSum = trgd->zdcUnAttenuated(east);
+  unsigned int zdcWestUnattSum = trgd->zdcUnAttenuated(west);
+  unsigned int ctbAdcSum       = trgd->lastDSM(3);
+#endif
+  h_zdce_sum->Fill(zdcEastUnattSum);
+  h_zdcw_sum->Fill(zdcWestUnattSum);
   h_zdce_sum_vs_ctb_sum->Fill(ctbAdcSum, zdcEastUnattSum);
   h_zdcw_sum_vs_ctb_sum->Fill(ctbAdcSum, zdcWestUnattSum);
   return true;
-#else
-  return false;
-#endif
 }

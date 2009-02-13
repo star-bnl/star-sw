@@ -4,9 +4,6 @@
 /////////////////////////////////////////////////////////////////
 //  HistoHandler for the STAR EVP GUI
 /////////////////////////////////////////////////////////////////
-//
-//
-//
 
 #include "HistoHandler.h"
 
@@ -828,55 +825,20 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     oth->fill(	  h1[205],float(trgd->bbcEarliestTDC(east)),float(trgd->bbcEarliestTDC(west)));
     oth->fill(	  h1[452],float(trgd->bbcTimeDifference()));
     
-    /*
-	    for(int i=0;i<8;i++)
-	      {
-		smd_temp=(trg.ZDCSMD[zdc_smd_e_v[i]]-zdc_smd_ped[zdc_smd_e_v[i]])/zdc_smd_gain[zdc_smd_e_v[i]];
+    //ZDCSMD
+    for(int i=0; i<2; i++){
+      for(int j=0; j<2; j++){
+	for(int k=1; k<=8; k++){
+	  int adc = trgd->zdcSMD((StBeamDirection)i,j,k);
+	  if(adc>0){
+	    oth->fill(h1[331 +j -i*2],float(k));	    
+	    oth->fill(h1[335 +j -i*2],float(k),float(adc));
+	  }
+	}
+      }
+    }
 
-		if(smd_temp>0)
-		  {
-		    //oth->fill(		  h311_zdcsmd_e_v_N,i+1.);
-		    oth->fill(		  h1[331],float(i+1));
-		    //oth->fill(		  h315_zdcsmd_e_v_A,i+1.,smd_temp);
-		    oth->fill(		  h1[335],float(i+1),smd_temp);
-		  }
-		smd_temp=(trg.ZDCSMD[zdc_smd_w_v[i]]-zdc_smd_ped[zdc_smd_w_v[i]])/zdc_smd_gain[zdc_smd_w_v[i]];
-
-		if(smd_temp>0)
-		  {
-		    //oth->fill(		                             h309_zdcsmd_w_v_N,i+1.);
-		    oth->fill(		  h1[329],float(i+1));
-		    //oth->fill(		                              h313_zdcsmd_w_v_A,i+1.,smd_temp);
-		    oth->fill(		  h1[333],float(i+1),smd_temp);
-		  }
-	      }
-	    for(int i=0;i<8;i++)
-	      {
-
-		smd_temp=(trg.ZDCSMD[zdc_smd_e_h[i]]-zdc_smd_ped[zdc_smd_e_h[i]])/zdc_smd_gain[zdc_smd_e_h[i]];
-
-		if(smd_temp>0)
-		  {
-		    //oth->fill(		  h312_zdcsmd_e_h_N,i+1.);
-		    oth->fill(		  h1[332],float(i+1));
-		    //oth->fill(		  h316_zdcsmd_e_h_A,i+1.,smd_temp);
-		    oth->fill(		  h1[336],float(i+1),smd_temp);
-		  }
-
-		smd_temp=(trg.ZDCSMD[zdc_smd_w_h[i]]-zdc_smd_ped[zdc_smd_w_h[i]])/zdc_smd_gain[zdc_smd_w_h[i]];
-
-		if(smd_temp>0)
-		  {
-		    //oth->fill(		    			      h310_zdcsmd_w_h_N,i+1.);
-		    oth->fill(		  h1[330],float(i+1));
-		    //oth->fill(		    			      h314_zdcsmd_w_h_A,i+1.,smd_temp);
-		    oth->fill(		  h1[334],float(i+1),smd_temp);
-		  }
-	      }// i loop zdc smd
-
-      */
-
-    }//end of good triggers
+  }//end of good triggers
     
   //-----------------------------------------------------------------------
   // TPC!
@@ -2098,7 +2060,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   //==============================
   //      EMC histograms
   //==============================
-  if(evp->token!=0){ // skip event summary
+  if(evp->token!=0 && trgd){ // skip event summary
 
     BEMCPlots::fillHisto( (char*)datap
 			  , trgd->getDsm0_BEMCE()
@@ -2388,7 +2350,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.5 2009/02/11 22:15:50 jeromel Exp $
+   * $Id: HistoHandler.cxx,v 1.6 2009/02/13 22:23:06 dkettler Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2398,6 +2360,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.6  2009/02/13 22:23:06  dkettler
+   * Trigger data changes
+   *
    * Revision 1.5  2009/02/11 22:15:50  jeromel
    * Akio's implementation of a generic class, FPD, ZDC, DSM, ...
    *

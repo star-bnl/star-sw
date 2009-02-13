@@ -16,6 +16,8 @@
 #  include "DAQ_READER/daqReader.h"
 #  include "DAQ_TRG/trgReader.h"
 #  include "DAQ_READER/cfgutil.h"
+#  include "StEvent/StTriggerData.h"
+#  include "TriggerData.h"
 #endif
 #include "TMapFile.h"
 #include "EvpUtil.h"
@@ -92,12 +94,14 @@ void VPDHistogramGroup::draw(TCanvas* cc) {
 
 
 bool VPDHistogramGroup::fill(evpReader* evp, char* datap) { 
+
 #ifndef NEW_DAQ_READER
   int ret = trgReader(datap);
   if(ret <= 0) {
     fprintf(stderr, "TRG RAW: problems in data (%d) - continuing...", ret);
     return false;
   }
+
   for (int i = 0; i < 4; ++i)       // loop over CDBs
     for (int j = 0; j < 16; ++j) {  // loop over CDB bytes
       unsigned int adcValue = trg.VPD[i * 16 + j];
@@ -153,8 +157,13 @@ bool VPDHistogramGroup::fill(evpReader* evp, char* datap) {
 //   TrgSumData *tsd = (TrgSumData *)trg.trg_sum;
 //   int l2tacdiff=tsd->DSMdata.VTX[3]%512 - 256;
   h_vpd_vertex_vs_l3_vertex->Fill(l3.zVertex, tacDiff);
-  return true;
+
 #else
-  return false;
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(!trgd) return false;  
+  //Need to implement vpd QT maps in StTriggerData2009 first.
+  //Please contact akio@bnl.gov
 #endif
+  return true;
+
 }

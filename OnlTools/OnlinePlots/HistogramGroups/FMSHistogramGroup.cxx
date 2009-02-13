@@ -15,9 +15,8 @@
 #  include "daqFormats.h"
 #  include "cfgutil.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_TRG/trgReader.h"
-#  include "DAQ_READER/cfgutil.h"
+#  include "StEvent/StTriggerData.h"
+#  include "TriggerData.h"
 #endif
 #include "TMapFile.h"
 #include "EvpUtil.h"
@@ -96,12 +95,12 @@ void FMSHistogramGroup::draw(TCanvas* cc) {
 } 
 
 bool FMSHistogramGroup::fill(evpReader* evp, char* datap) { 
+#ifndef NEW_DAQ_READER
   int ret = trgReader(datap);
   if(ret <= 0) {
     fprintf(stderr, "TRG RAW: problems in data (%d) - continuing...", ret);
     return false;
   }
-#ifndef NEW_DAQ_READER
   TrgSumData* sumData = static_cast<TrgSumData*>(trg.trg_sum);
   if(!sumData) {
     fprintf(stderr, "TRG RAW: cannot get TrgSumData data - continuing...");
@@ -121,11 +120,16 @@ bool FMSHistogramGroup::fill(evpReader* evp, char* datap) {
     }
     //printf("NQTDATA=%d NHeader=%d\n",mNumQTdata,mNumHeader);
   }
+#else
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(trgd){
+  }
 #endif
   return true;
 }
 
 bool FMSHistogramGroup::decodeQT(){
+#ifndef NEW_DAQ_READER
   mNumHeader=0;
   mNumQTdata=trg.QQTdataBytes/4;  
   if(mNumQTdata==0) return true;
@@ -173,10 +177,12 @@ bool FMSHistogramGroup::decodeQT(){
       if(nline==iline) header=1;
     }
   }
+#endif
   return true;
 }
 
 void FMSHistogramGroup::readParams() {
+#ifndef NEW_DAQ_READER
   FILE *fp;
   char buf[100];
   if ( ( fp = fopen("/home/operator/akio/fms_params.txt","r")) ){
@@ -200,4 +206,5 @@ void FMSHistogramGroup::readParams() {
       mbin[i]=100; mmin[i]=0; mmax[i]=500; mthr[i]=5;
     }
   }
+#endif
 }
