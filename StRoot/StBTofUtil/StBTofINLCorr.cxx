@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.2 2009/02/13 22:59:02 dongx Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.3 2009/02/13 23:32:52 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.3  2009/02/13 23:32:52  dongx
+ * fixed the crash when no INL table for some board is available
+ *
  * Revision 1.2  2009/02/13 22:59:02  dongx
  * new tofINLSCorr table for full barrel system for Run 9++
  *
@@ -67,7 +70,7 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   tofTDIGOnTray_st* tdigOnTray = static_cast<tofTDIGOnTray_st*>(tofTDIGOnTray->GetArray());
 
   Int_t numRows = tofTDIGOnTray->GetNRows();
-  LOG_INFO << "number of rows = " << numRows << endm;
+//  LOG_INFO << "number of rows = " << numRows << endm;
   for (Int_t i=0;i<mNValidTrays+2;i++) {
     Int_t trayId = (Int_t)tdigOnTray[i].trayId;
 
@@ -106,7 +109,7 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
   }
   Int_t NTdig = 0;
   Int_t tdigId_old = 0;
-  for (Int_t i=0;i<numRows;i++) {
+  for (Int_t i=0;i<mNValidBoards*mNChanOnTDIG;i++) {
     if(NTdig>mNTDIGMAX) {
       { LOG_INFO << " !!! # of boards read-in exceeds the array limit in this function !!! Trancated !!! " << endm; }
       NTdig = mNTDIGMAX;
@@ -187,7 +190,12 @@ float StBTofINLCorr::getTrayINLCorr(int trayId, int globalTdcChan, int bin) {
 
   int index = mBoardId2Index[boardId];          // index in the inl array
   int tdcChan = globalTdcChan % mNChanOnTDIG;   // 0-23
-  return mINLCorr[index][tdcChan][bin];
+  if(index<0||index>=mNValidBoards) {
+    LOG_WARN << " Missing INL table for boardId = " << boardId << " on tray " << trayId << endm;
+    return 0.0;
+  } else {
+    return mINLCorr[index][tdcChan][bin];
+  }
 }
 
 float StBTofINLCorr::getVpdINLCorr(StBeamDirection eastwest, int globalTdcChan, int bin) {
@@ -206,5 +214,10 @@ float StBTofINLCorr::getVpdINLCorr(StBeamDirection eastwest, int globalTdcChan, 
 
   int index = mBoardId2Index[boardId];          // index in the inl array
   int tdcChan = globalTdcChan % mNChanOnTDIG;   // 0-23
-  return mINLCorr[index][tdcChan][bin];
+  if(index<0||index>=mNValidBoards) {
+    LOG_WARN << " Missing INL table for boardId = " << boardId << " on vpd " << eastwest << endm;
+    return 0.0;
+  } else {
+    return mINLCorr[index][tdcChan][bin];
+  }
 }
