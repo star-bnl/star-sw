@@ -30,6 +30,7 @@ using namespace std;
 
 class HistogramGroup : public TNamed {
  public:
+  HistogramGroup();
   HistogramGroup(const char* group, const char* subGroup, const char* trigger="any", const char* detector="any");
   //  HistogramGroup(const HistogramGroup&);
   virtual ~HistogramGroup() {  }
