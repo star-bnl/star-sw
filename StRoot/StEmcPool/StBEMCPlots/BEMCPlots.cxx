@@ -245,10 +245,8 @@ BEMCPlots::BEMCPlots(TObjArray *list)
 	this->mPatchData[i][9] = 0; // formula parameter 5
 	this->mPatchData[i][10] = 0; // number of masked towers
     }
-    for (int i = 0;i < BEMCNJET;i++) {
-	this->BEMCJPPED[i] = 0;
-        this->BEMCNJPPED[i] = 0;
-    } 
+    memset(this->BEMCJPPED, 0, sizeof(this->BEMCJPPED));
+    memset(this->BEMCNJPPED, 0, sizeof(this->BEMCNJPPED));
 
 }
 //-------------------------------------------------------------------
@@ -441,10 +439,8 @@ void BEMCPlots::clear(const char *bemcStatus) {
 	this->mPatchData[i][9] = 0; // formula parameter 5
 	this->mPatchData[i][10] = 0; // number of masked towers
     }
-    for (int i = 0;i < BEMCNJET;i++) {
-	this->BEMCJPPED[i] = 0;
-        this->BEMCNJPPED[i] = 0;
-    } 
+    memset(this->BEMCJPPED, 0, sizeof(this->BEMCJPPED));
+    memset(this->BEMCNJPPED, 0, sizeof(this->BEMCNJPPED));
 
     if (!BEMCDecoder) BEMCDecoder = new StEmcDecoder();
 
@@ -668,10 +664,8 @@ void BEMCPlots::processEvent( char *datap
     if (DSM_L0_present) {
 	int jetPatchSum[BEMCNJET];
 	int jetPatchHT[BEMCNJET];
-	for (int i = 0;i < BEMCNJET;i++) {
-	    jetPatchSum[i] = 0;
-	    jetPatchHT[i] = 0;
-	}
+	memset(jetPatchSum, 0, sizeof(jetPatchSum));
+	memset(jetPatchHT, 0, sizeof(jetPatchHT));
 	int MAXHT = 0;
 	int MAXPA = 0;
 	int MAXHTID = 0;
@@ -771,16 +765,14 @@ void BEMCPlots::processEvent( char *datap
 	if (header) {
 #endif
 		if (DSM_L0_present) {
-		    for (int i = 0;i < 300;i++) {
-			this->mDsmSimuHighTower[i] = 0;
-			this->mDsmSimuPatchSum[i] = 0;
-		    }
+		    memset(this->mDsmSimuHighTower, 0, sizeof(this->mDsmSimuHighTower));
+		    memset(this->mDsmSimuPatchSum, 0, sizeof(this->mDsmSimuPatchSum));
 		}
 		int TDCStatus[BTOW_MAXFEE];
+		memset(TDCStatus, BEMCNOTINSTALLED, sizeof(TDCStatus));
 		int TDCTotal = 0;
 		STATUS = BEMCOK; //OK
 		for (int tdc = 0; tdc < BTOW_MAXFEE;tdc++) {
-		    TDCStatus[tdc] = BEMCNOTINSTALLED; // NOT INSTALLED
 #ifdef NEW_DAQ_READER
             	    int count = d->preamble[tdc][0];
             	    int error = d->preamble[tdc][1];
@@ -884,8 +876,10 @@ void BEMCPlots::processEvent( char *datap
     int totalSumPSD = 0;
     int feeSum[120];
     int pmtSum[60];
-    for (int i = 0;i < 120;i++) feeSum[i] = 0;
-    for (int i = 0;i < 60;i++) pmtSum[i] = 0;
+    memset(feeSum, 0, sizeof(feeSum));
+    memset(pmtSum, 0, sizeof(pmtSum));
+    bool smdPresent = false;
+    bool psdPresent = false;
     for (int bsmd_fiber = 0;bsmd_fiber < BSMD_FIBERS;bsmd_fiber++) {
 	int bprs_fiber = bsmd_fiber - 8;
 #ifdef NEW_DAQ_READER
@@ -914,6 +908,7 @@ void BEMCPlots::processEvent( char *datap
 		    fiberSum += adc;
 		    if ((bsmd_fiber >= 0) && (bsmd_fiber < 8)) {
 			if (BEMCDecoder->GetSmdCoord(bsmd_fiber, fiber_channel, det, m, e, s)) {
+			    smdPresent = true;
 			    totalSumSMD += adc;
 			    if ((m >= 1) && (m <= 120)) {
 				feeSum[m - 1] += adc;
@@ -921,6 +916,7 @@ void BEMCPlots::processEvent( char *datap
 			}
 		    } else {
 			if (BEMCDecoder->GetPsdId(bprs_fiber, fiber_channel, softId, box, wire, Avalue)) {
+			    psdPresent = true;
 			    totalSumPSD += adc;
 			    if ((box >= 1) && (box <= 60)) {
 				pmtSum[box - 1] += adc;
@@ -958,14 +954,14 @@ void BEMCPlots::processEvent( char *datap
 	    }
 	}
     }
-    for (int i = 0;i < 120;i++) {
+    if (smdPresent) for (int i = 0;i < 120;i++) {
 	if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Fill(i + 1, feeSum[i]);
     }
-    for (int i = 0;i < 60;i++) {
+    if (psdPresent) for (int i = 0;i < 60;i++) {
 	if (this->mHistPsdFeeSum) this->mHistPsdFeeSum->Fill(i + 1, pmtSum[i]);
     }
-    if (this->mHist_smd_spectra) this->mHist_smd_spectra->Fill(totalSumSMD);
-    if (this->mHist_psd_spectra) this->mHist_psd_spectra->Fill(totalSumPSD);
+    if (smdPresent && this->mHist_smd_spectra) this->mHist_smd_spectra->Fill(totalSumSMD);
+    if (psdPresent && this->mHist_psd_spectra) this->mHist_psd_spectra->Fill(totalSumPSD);
     }
 
     {
@@ -973,8 +969,10 @@ void BEMCPlots::processEvent( char *datap
     int totalSumPSDNonZS = 0;
     int feeSumNonZS[120];
     int pmtSumNonZS[60];
-    for (int i = 0;i < 120;i++) feeSumNonZS[i] = 0;
-    for (int i = 0;i < 60;i++) pmtSumNonZS[i] = 0;
+    memset(feeSumNonZS, 0, sizeof(feeSumNonZS));
+    memset(pmtSumNonZS, 0, sizeof(pmtSumNonZS));
+    bool smdPresentNonZS = false;
+    bool psdPresentNonZS = false;
     for (int bsmd_fiber = 0;bsmd_fiber < BSMD_FIBERS;bsmd_fiber++) {
 	int bprs_fiber = bsmd_fiber - 8;
 #ifdef NEW_DAQ_READER
@@ -1003,6 +1001,7 @@ void BEMCPlots::processEvent( char *datap
 		    fiberSum += adc;
 		    if ((bsmd_fiber >= 0) && (bsmd_fiber < 8)) {
 			if (BEMCDecoder->GetSmdCoord(bsmd_fiber, fiber_channel, det, m, e, s)) {
+			    smdPresentNonZS = true;
 			    totalSumSMDNonZS += adc;
 			    if ((m >= 1) && (m <= 120)) {
 				feeSumNonZS[m - 1] += adc;
@@ -1010,6 +1009,7 @@ void BEMCPlots::processEvent( char *datap
 			}
 		    } else {
 			if (BEMCDecoder->GetPsdId(bprs_fiber, fiber_channel, softId, box, wire, Avalue)) {
+			    psdPresentNonZS = true;
 			    totalSumPSDNonZS += adc;
 			    if ((box >= 1) && (box <= 60)) {
 				pmtSumNonZS[box - 1] += adc;
@@ -1020,14 +1020,14 @@ void BEMCPlots::processEvent( char *datap
 	    }
 	}
     }
-    for (int i = 0;i < 120;i++) {
+    if (smdPresentNonZS) for (int i = 0;i < 120;i++) {
 	if (this->mHistSmdFeeSumNonZS) this->mHistSmdFeeSumNonZS->Fill(i + 1, feeSumNonZS[i]);
     }
-    for (int i = 0;i < 60;i++) {
+    if (psdPresentNonZS) for (int i = 0;i < 60;i++) {
 	if (this->mHistPsdFeeSumNonZS) this->mHistPsdFeeSumNonZS->Fill(i + 1, pmtSumNonZS[i]);
     }
-    if (this->mHist_smd_spectraNonZS) this->mHist_smd_spectraNonZS->Fill(totalSumSMDNonZS);
-    if (this->mHist_psd_spectraNonZS) this->mHist_psd_spectraNonZS->Fill(totalSumPSDNonZS);
+    if (smdPresentNonZS && this->mHist_smd_spectraNonZS) this->mHist_smd_spectraNonZS->Fill(totalSumSMDNonZS);
+    if (psdPresentNonZS && this->mHist_psd_spectraNonZS) this->mHist_psd_spectraNonZS->Fill(totalSumPSDNonZS);
     }
 
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
