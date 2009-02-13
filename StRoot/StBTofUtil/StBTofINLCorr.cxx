@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.1 2009/02/02 21:57:51 dongx Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.2 2009/02/13 22:59:02 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.2  2009/02/13 22:59:02  dongx
+ * new tofINLSCorr table for full barrel system for Run 9++
+ *
  * Revision 1.1  2009/02/02 21:57:51  dongx
  * first release - Barrel TOF INL correction functions
  *
@@ -17,7 +20,7 @@
  *******************************************************************/
 #include <iostream>
 #include "tables/St_tofTDIGOnTray_Table.h"
-#include "tables/St_tofINLCorr_Table.h"
+#include "tables/St_tofINLSCorr_Table.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StBTofINLCorr.h"
@@ -89,13 +92,13 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
 
   }
 
-  St_tofINLCorr* tofINLCorr = static_cast<St_tofINLCorr*>(mDbTOFDataSet->Find("tofINLCorr"));
+  St_tofINLSCorr* tofINLCorr = static_cast<St_tofINLSCorr*>(mDbTOFDataSet->Find("tofINLSCorr"));
   if(!tofINLCorr) {
     LOG_ERROR << "unable to get tof INL correction parameters" << endm;
     //    assert(tofINLCorr);
     return; // kStErr;
   }
-  tofINLCorr_st* inlcorr = static_cast<tofINLCorr_st*>(tofINLCorr->GetArray());
+  tofINLSCorr_st* inlcorr = static_cast<tofINLSCorr_st*>(tofINLCorr->GetArray());
 
   numRows = tofINLCorr->GetNRows();
   if(numRows>mNTDIGMAX*mNChanOnTDIG) {
@@ -121,7 +124,7 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
 
     if(maker->Debug()) { LOG_DEBUG << " tdigId=" << tdigId << "  tdcChanId=" << tdcChanId << endm; }
     for(Int_t j=0;j<mNChanMAX;j++) {
-      float corr = (Float_t)(inlcorr[i].INLCorr[j]);
+      float corr = (Float_t)(inlcorr[i].INLCorr[j])/100.;
       mINLCorr[NTdig-1][tdcChanId][j] = corr;
       
       if(maker->Debug()&&(j%200==0)) {
