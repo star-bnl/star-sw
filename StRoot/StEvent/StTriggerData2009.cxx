@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.4 2009/02/11 23:33:55 jeromel Exp $
+ * $Id: StTriggerData2009.cxx,v 2.5 2009/02/13 23:04:50 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.5  2009/02/13 23:04:50  ullrich
+ * Updates necessary for use in Online QA (P) plots.
+ *
  * Revision 2.4  2009/02/11 23:33:55  jeromel
  * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
  * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
@@ -299,60 +302,60 @@ unsigned int StTriggerData2009::spinBitBlueUnpol() const
 
 unsigned short StTriggerData2009::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const
 {
-  const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				 4, 4, 4, 4, 4, 4, 4, 4},
-			       { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-				 4, 4, 4, 4, 4, 4, 4, 4} };
-  const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
-				 0, 1, 2, 3, 8, 9,10,11},
-			       { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
-				 16,17,18,19,24,25,26,27} };
-  int buffer = prepostAddress(prepost);
-  if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
-  return 0;
+    const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                   4, 4, 4, 4, 4, 4, 4, 4},
+                                 { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+                                   4, 4, 4, 4, 4, 4, 4, 4} };
+    const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+                                   0, 1, 2, 3, 8, 9,10,11},
+                                 { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+                                   16,17,18,19,24,25,26,27} };
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]];
+    return 0;
 }
 
 unsigned short StTriggerData2009::bbcTDC(StBeamDirection eastwest, int pmt, int prepost) const
 {
-  const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				 4, 4, 4, 4, 4, 4, 4, 4},
-			       { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-				 4, 4, 4, 4, 4, 4, 4, 4} };
-  const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
-				 0, 1, 2, 3, 8, 9,10,11},
-			       { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
-				 16,17,18,19,24,25,26,27} };
-  int buffer = prepostAddress(prepost);
-  if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt+3]][chmap[eastwest][pmt+3]];
-  return 0;
+    const int addrmap[2][24] = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                   4, 4, 4, 4, 4, 4, 4, 4},
+                                 { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+                                   4, 4, 4, 4, 4, 4, 4, 4} };
+    const int chmap[2][24]   = { { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+                                   0, 1, 2, 3, 8, 9,10,11},
+                                 { 0, 3, 8,16,19,24, 1, 2, 9,10,11,17,18,25,26,27,
+                                   16,17,18,19,24,25,26,27} };
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && pmt>=1 && pmt<=24) return bbq[buffer][addrmap[eastwest][pmt-1]][chmap[eastwest][pmt-1]+4];
+    return 0;
 }
 
 unsigned short StTriggerData2009::bbcADCSum(StBeamDirection eastwest, int prepost) const
 {
-  unsigned short sum=0;
-  int buffer = prepostAddress(prepost);
-  if (buffer >= 0) for(int i=1; i<=16; i++) {sum+=bbcADC(eastwest,i,prepost);}
-  return sum;
+    unsigned short sum=0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) for(int i=1; i<=16; i++) {sum+=bbcADC(eastwest,i,prepost);}
+    return sum;
 }
 
 unsigned short StTriggerData2009::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const
 {
-  unsigned short sum=0;
-  int buffer = prepostAddress(prepost);
-  if (buffer >= 0) for(int i=17; i<=24; i++) {sum+=bbcADC(eastwest,i,prepost);}
-  return sum;
+    unsigned short sum=0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) for(int i=17; i<=24; i++) {sum+=bbcADC(eastwest,i,prepost);}
+    return sum;
 }
 
 unsigned short StTriggerData2009::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
-  int buffer = prepostAddress(prepost);
-  if(buffer >=0){
-    if(mBBC[buffer]){
-      if(eastwest==east) {return mBBC[buffer]->BBClayer1[3]%4096;}
-      else               {return mBBC[buffer]->BBClayer1[7]%4096;}
+    int buffer = prepostAddress(prepost);
+    if(buffer >=0){
+        if(mBBC[buffer]){
+            if(eastwest==east) {return mBBC[buffer]->BBClayer1[3]%4096;}
+            else               {return mBBC[buffer]->BBClayer1[7]%4096;}
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 unsigned short StTriggerData2009::bbcTimeDifference() const
@@ -471,7 +474,41 @@ unsigned short StTriggerData2009::zdcHardwareSum(int prepost) const
 
 unsigned short StTriggerData2009::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const
 {
+    static const int zdcsmd_map[2][2][8] ={
+        { { 31, 30, 29, 28, 27, 26, 25, 19} ,
+          { 24, 23, 22, 21, 20, 16, 18, 17} } ,
+        { { 15, 14, 13, 12, 11, 10,  9,  2} , 
+          {  8,  7,  6,  5,  4,  3,  0,  1} }
+    };
+    if (verthori<0 || verthori>1) return 0;
+    if (strip<1 || strip>8) return 0;  
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return mxq[buffer][4][zdcsmd_map[eastwest][verthori][strip-1]];
     return 0;
+}
+
+unsigned short StTriggerData2009::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const
+{
+    static const int map[2][2][2][2] ={ { { { 0, 1}, { 2, 3} } , { {16,17}, {18,19} } , } ,
+                                        { { { 8, 9}, {10,11} } , { {24,25}, {26,27} } , } };
+    if(vh<0   || vh>1)   return 0;
+    if(udio<0 || udio>1) return 0;
+    if(ch<0   || ch>1)   return 0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return mxq[buffer][2][map[eastwest][vh][udio][ch]];
+    return 0;  
+}
+
+unsigned short StTriggerData2009::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const
+{
+    static const int map[2][2][2][2] ={ { { { 0, 1}, { 2, 3} } , { {16,17}, {18,19} } , } ,
+                                        { { { 8, 9}, {10,11} } , { {24,25}, {26,27} } , } };
+    if(vh<0   || vh>1)   return 0;
+    if(udio<0 || udio>1) return 0;
+    if(ch<0   || ch>1)   return 0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return mxq[buffer][2][map[eastwest][vh][udio][ch]+4];
+    return 0;  
 }
 
 unsigned short StTriggerData2009::bemcLayer1DSM(int channel, int prepost) const {

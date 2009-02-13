@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.3 2009/02/11 23:33:55 jeromel Exp $
+ * $Id: StTriggerData2009.h,v 2.4 2009/02/13 23:04:50 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.4  2009/02/13 23:04:50  ullrich
+ * Updates necessary for use in Online QA (P) plots.
+ *
  * Revision 2.3  2009/02/11 23:33:55  jeromel
  * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
  * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
@@ -141,6 +144,10 @@ public:
     unsigned short tofAtAddress(int address, int prepost=0) const;
     unsigned short tofMultiplicity(int prepost=0) const;
 
+    //PP2PP
+    unsigned short pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
+    unsigned short pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
+
     // Experts only
     char*                getTriggerStructure();
     TriggerDataBlk2009*  getTriggerStructure2009();  
@@ -148,7 +155,7 @@ public:
 
     unsigned      char*  getDsm0_BEMCE(int prepost=0) const;
     unsigned      char*  getDsm0_BEMCW(int prepost=0) const;
-    unsigned short int*  getDsm1_BEMC(int prepost=0)  const;
+    unsigned short int*  getDsm1_BEMC(int prepost=0) const;
     unsigned      char*  getDsm0_EEMC(int prepost=0) const;
     unsigned short int*  getDsm1_EEMC(int prepost=0) const;
     unsigned short int*  getDsm2_EMC()  const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.23 2009/02/11 23:33:55 jeromel Exp $
+ * $Id: StTriggerData.h,v 2.24 2009/02/13 23:04:50 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.24  2009/02/13 23:04:50  ullrich
+ * Updates necessary for use in Online QA (P) plots.
+ *
  * Revision 2.23  2009/02/11 23:33:55  jeromel
  * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
  * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
@@ -212,6 +215,10 @@ public:
     virtual unsigned short tofAtAddress(int address, int prepost=0) const;
     virtual unsigned short tofMultiplicity(int prepost=0) const;
 
+    //PP2PP
+    virtual unsigned short pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
+    virtual unsigned short pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
+
     // auxiliary information
     float zdcVertexZ() const;
     void  setZdcVertexZ(float);
@@ -336,6 +343,8 @@ inline unsigned short StTriggerData::mtdAdc(StBeamDirection eastwest, int pmt, i
 inline unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::tofAtAddress(int address, int prepost) const {return 0;}
 inline unsigned short StTriggerData::tofMultiplicity(int prepost) const {return 0;}
+inline unsigned short StTriggerData::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
+inline unsigned short StTriggerData::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
 inline unsigned      char*  StTriggerData::getDsm_FMS(int prepost) const {return 0;}
 inline unsigned      char*  StTriggerData::getDsm01_FMS(int prepost) const {return 0;}
 inline unsigned      char*  StTriggerData::getDsm02_FMS(int prepost) const {return 0;}
