@@ -16,9 +16,8 @@
 #  include "cfgutil.h"
 #  include "trgReader.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_TRG/trgReader.h"
-#  include "DAQ_READER/cfgutil.h"
+#  include "StEvent/StTriggerData.h"
+#  include "TriggerData.h"
 #endif
 #include "TMapFile.h"
 #include "EvpUtil.h"
@@ -97,6 +96,7 @@ void pp2ppHistogramGroup::draw(TCanvas* cc) {
 
 
 bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) { 
+
 #ifndef NEW_DAQ_READER
   int ret = trgReader(datap);
   if(ret <= 0) {
@@ -117,10 +117,26 @@ bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) {
 
   }
 
-  return true;
 #else
-  return false;
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(trgd){
+    int i=0;
+    for(int vh=0; vh<2; vh++){
+      for(int ew=0; ew<2; ew++){
+        for(int udio=0; udio<2; udio++){
+          for(int ch=0; ch<2; ch++){
+            unsigned short adc = trgd->pp2ppADC((StBeamDirection)ew,vh,udio,ch);
+            unsigned short tac = trgd->pp2ppTAC((StBeamDirection)ew,vh,udio,ch);
+            h_P2P[i   ]->Fill( double(adc) );
+            h_P2P[i+16]->Fill( double(tac) );
+            i++;
+          }
+        }
+      }
+    }
+  }
 #endif
 
+  return true;
 }
 

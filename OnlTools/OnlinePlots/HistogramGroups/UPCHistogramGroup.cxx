@@ -5,9 +5,8 @@
 #  include "daqFormats.h"
 #  include "cfgutil.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_TRG/trgReader.h"
-#  include "DAQ_READER/cfgutil.h"
+#  include "StEvent/StTriggerData.h"
+#  include "TriggerData.h"
 #endif
 #include <iostream>
 #include "TMapFile.h"
@@ -70,6 +69,7 @@ void UPCHistogramGroup::draw(TCanvas* cc) {
 } 
 
 #include <stdlib.h>
+
 bool UPCHistogramGroup::fill(evpReader* evp, char* datap) { 
 #ifndef NEW_DAQ_READER
   int ret = trgReader(datap) ;
@@ -80,19 +80,24 @@ bool UPCHistogramGroup::fill(evpReader* evp, char* datap) {
   // ZDC Timing information
   unsigned int zdcTime_east = trg.ZDC[8];
   unsigned int zdcTime_west = trg.ZDC[9];
+  unsigned int zdcAdc_east  = trg.ZDC[4];
+  unsigned int zdcAdc_west  = trg.ZDC[0];
+#else
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(!trgd) return false;
+  unsigned int zdcTime_east = trgd->zdcTDC(east);
+  unsigned int zdcTime_west = trgd->zdcTDC(west);
+  unsigned int zdcAdc_east  = trgd->zdcUnAttenuated(east);
+  unsigned int zdcAdc_west  = trgd->zdcUnAttenuated(west);
+#endif
   int zdcTime_difference = zdcTime_west - zdcTime_east;
   h_zdc_time_east->Fill( zdcTime_east );
   h_zdc_time_west->Fill( zdcTime_west );
   h_zdc_timediff_east_west->Fill( zdcTime_difference );
   h_zdc_time_east_vs_west->Fill( zdcTime_east, zdcTime_west );  
-  h_zdc_unatt_east->Fill( trg.ZDC[4] );
-  h_zdc_unatt_west->Fill( trg.ZDC[0] );
-
-
+  h_zdc_unatt_east->Fill( zdcAdc_east );
+  h_zdc_unatt_west->Fill( zdcAdc_west );
   return true;
-#else
-  return false;
-#endif
 }
 
 

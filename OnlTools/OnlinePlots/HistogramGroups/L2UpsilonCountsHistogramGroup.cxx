@@ -6,9 +6,8 @@
 #  include "daqFormats.h"
 #  include "cfgutil.h"
 #else
-#  include "DAQ_READER/daqReader.h"
-#  include "DAQ_TRG/trgReader.h"
-#  include "DAQ_READER/cfgutil.h"
+#  include "StEvent/StTriggerData.h"
+#  include "TriggerData.h"
 #endif
 #include "TMapFile.h"
 #include "EvpUtil.h"
@@ -81,24 +80,34 @@ void L2UpsilonCountsHistogramGroup::draw(TCanvas* cc) {
 
 #include <stdlib.h>
 #include "L2UpsilonResult.h"
+
 bool L2UpsilonCountsHistogramGroup::fill(evpReader* evp, char* datap) { 
   static list<double> seen;
   static list<double> acce;
+  L2UpsilonResult L2;
+  L2UpsilonResult* mL2 = &L2;
+  if  (!mL2) return false;
+
+#ifndef NEW_DAQ_READER
   int ret = trgReader(datap) ;
   if(ret <= 0) {
     fprintf(stderr,"TRG RAW: problems in data (%d) - continuing...",ret) ;
     return false;
   }  
-#ifndef NEW_DAQ_READER
   TRGD *trgd = (TRGD *)trg.trgd;
 
   if ( !trgd ) return false;
 
-  L2UpsilonResult L2;
-  L2UpsilonResult* mL2 = &L2;
-  if  (!mL2) return false;
   memcpy(mL2,trgd->sum.L2Result+L2RESULTS_2008_OFFSET_UPS,sizeof(L2UpsilonResult) );
   mL2->swap();
+#else
+  StTriggerData* trgd = TriggerData::Instance(datap);
+  if(!trgd) return false;
+  const unsigned int* l2result = trgd->l2Result();
+  //here we got l2result array... but there is no L2RESULTS_2009_OFFSET defined anywhere.
+  //please contact akio@bnl.gov
+  return true;
+#endif
 
   hTag->Fill( (double)mL2->tag );
   hTime->Fill( (double)mL2->time );
@@ -118,15 +127,15 @@ bool L2UpsilonCountsHistogramGroup::fill(evpReader* evp, char* datap) {
   hEvent->SetBinContent( 1, mL2->eventsSeen );
   hEvent->SetBinContent( 2, mL2->eventsAccepted );
   return true;
-#else
-  return false;
-#endif
 }
 
 /*************************************************************************************
- $Id: L2UpsilonCountsHistogramGroup.cxx,v 1.1 2009/01/23 16:07:55 jeromel Exp $
+ $Id: L2UpsilonCountsHistogramGroup.cxx,v 1.2 2009/02/13 22:23:04 dkettler Exp $
  *************************************************************************************
  $Log: L2UpsilonCountsHistogramGroup.cxx,v $
+ Revision 1.2  2009/02/13 22:23:04  dkettler
+ Trigger data changes
+
  Revision 1.1  2009/01/23 16:07:55  jeromel
  Import from online/RTS/src/
 
