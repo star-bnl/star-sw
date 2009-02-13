@@ -10,8 +10,10 @@
 
 
 class SVTAnodeSumHistogramGroup : public HistogramGroup {
+protected:
+   SVTAnodeSumHistogramGroup(){}
 public:
-  SVTAnodeSumHistogramGroup(const char* group="SVT", const char* subGroup="Anode Sum", const char* trigger="any", const char* detector="svt");
+  SVTAnodeSumHistogramGroup(const char* group, const char* subGroup="Anode Sum", const char* trigger="any", const char* detector="svt");
   ~SVTAnodeSumHistogramGroup();
   virtual void reset();
   virtual bool fill(evpReader* evp, char* datap);

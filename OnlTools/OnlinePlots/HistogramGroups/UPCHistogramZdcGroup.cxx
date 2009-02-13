@@ -17,6 +17,10 @@
 
 ClassImp(UPCHistogramZdcGroup) ;
 
+UPCHistogramZdcGroup::UPCHistogramZdcGroup()
+{
+   // For ROOT I/O 
+}
 
 UPCHistogramZdcGroup::UPCHistogramZdcGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {

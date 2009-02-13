@@ -24,6 +24,10 @@
 
 ClassImp(VPDHistogramGroup) ;
 
+VPDHistogramGroup::VPDHistogramGroup() : HistogramGroup() 
+{
+ // For ROOT I/O
+}
 
 VPDHistogramGroup::VPDHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {
