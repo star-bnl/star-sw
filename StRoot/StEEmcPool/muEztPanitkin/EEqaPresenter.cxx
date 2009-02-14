@@ -15,7 +15,7 @@
 const int mxh=64;
 static TH1 *hr[mxh] = {0};
 static TH1 *h[mxh] = {0};
-static  TList *hCleanUp=new TList;
+//static  TList *hCleanUp=new TList;
 
 
 #include "EEqaPresenter.h"
@@ -40,10 +40,12 @@ void GetHisto(FileType &fd,char *name, int i) {
   // this is very silly trick to avoid memory leak in the online version
     hr[i] = 0;
     h[i] = 0;
-    hr[i]=(TH1 *)fd.Get(name,hr[i]);
-    if(hr[i]==0) return;
-    h[i]=(TH1*) hr[i]->Clone();
-    hCleanUp->Add(h[i]);
+    hr[i] = (TH1*)fd.Get(name, hr[i]);
+    if (!hr[i]) return;
+    hr[i]->SetDirectory(0);
+    h[i] = hr[i];
+//    h[i]=(TH1*) hr[i]->Clone();
+//    hCleanUp->Add(h[i]);
 }
 
 //--------------------------------------
@@ -64,7 +66,7 @@ eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskFilena
   }  
   
   ee1Style->cd(); // use my default style
-  hCleanUp->Delete();
+//  hCleanUp->Delete();
   cc->Clear();
   
   if(page==10) {
@@ -455,12 +457,13 @@ void eeDaqSmdA(FileType fd, TPad *c, char *core,char uv){
 //--------------------------------------
 //--------------------------------------
 void eeDaqMapmtStat(FileType fd, TPad *c) {
-  static TH2F *h2=0;
+//  static TH2F *h2=0;
   int i=0;
   c->Divide(1,2);
   GetHisto(fd,"MAPMHits",i);
   if(h[i]==0) return;
-  h2=(TH2F *) h[i]->Clone();
+  TH2F *h2 = (TH2F*)h[i];
+  //h2=(TH2F *) h[i]->Clone();
 
   c->cd(1);
   h2->Draw("colz");

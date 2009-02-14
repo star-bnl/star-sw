@@ -82,7 +82,7 @@ BEMCPlots::BEMCPlots(TObjArray *list)
 
 #define ADDHIST(hist) if (list && (hist)) list->Add(hist);
 
-    this->mHistTot = new TH1F(HistTotName, "Total number of events processed;;Number of events", 1, 0, 1);
+    this->mHistTot = new TH1F(HistTotName, "BEMC, Total number of events processed;;Number of events", 1, 0, 1);
     ADDHIST(this->mHistTot)
 
     this->mHistDsmL0InputHighTower = new TH2F(HistDsmL0InputHighTowerName, "BEMC DSM L0 Input - HighTower;triggerPatch;HighTower", 300, -0.5, 300 - 0.5, 64, 0, 64);
@@ -123,11 +123,11 @@ BEMCPlots::BEMCPlots(TObjArray *list)
       this->mHistRawAdcPsd3 = new TH2F(HistRawAdcPsd3Name, "BPRS ADC, 2401 <= SoftId <= 3540;SoftId;ADC", 1140, 2400.5, 3540.5, 300, -0.5, 1000-0.5);
       this->mHistRawAdcPsd4 = new TH2F(HistRawAdcPsd4Name, "BPRS ADC, 3541 <= SoftId <= 4800;SoftId;ADC", 1260, 3540.5, 4800.5, 300, -0.5, 1000-0.5);
 
-      this->mHistSmdFeeSum = new TH2F(HistSmdFeeSumName, "SMD FEE Sum;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
-      this->mHistPsdFeeSum = new TH2F(HistPsdFeeSumName, "PSD FEE Sum;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
+      this->mHistSmdFeeSum = new TH2F(HistSmdFeeSumName, "BSMD FEE Sum;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
+      this->mHistPsdFeeSum = new TH2F(HistPsdFeeSumName, "BPRS FEE Sum;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
 
-      this->mHistSmdFeeSumNonZS = new TH2F(HistSmdFeeSumNonZSName, "SMD FEE Sum, Non-ZS;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
-      this->mHistPsdFeeSumNonZS = new TH2F(HistPsdFeeSumNonZSName, "PSD FEE Sum, Non-ZS;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
+      this->mHistSmdFeeSumNonZS = new TH2F(HistSmdFeeSumNonZSName, "BSMD FEE Sum, Non-ZS;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
+      this->mHistPsdFeeSumNonZS = new TH2F(HistPsdFeeSumNonZSName, "BPRS FEE Sum, Non-ZS;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
 
       ADDHIST(this->mHistRawAdc1)
       ADDHIST(this->mHistRawAdc2)
