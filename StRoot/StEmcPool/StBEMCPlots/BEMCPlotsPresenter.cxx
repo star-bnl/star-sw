@@ -19,21 +19,22 @@ using namespace std;
 #define min(A, B) (((A) < (B)) ? (A) : (B))
 #define max(A, B) (((A) > (B)) ? (A) : (B))
 
-TList *BEMCPlotsCleanUpHistoList = 0;
+//TList *BEMCPlotsCleanUpHistoList = 0;
 StEmcDecoder *BEMCDecoderPresenter = 0;
 Bool_t useDecoderForBoundaries = false; // Use StEmcDecoder for showing ranges (the tower map bug fix mixes softIds between crates)
 
 //-------------------------------------------------------------------
 // Taken from EEMC EEqaPresenter
 TH1 *GetHisto(FileType &fd, const char *name) {
-    if (!BEMCPlotsCleanUpHistoList) BEMCPlotsCleanUpHistoList = new TList();
+//    if (!BEMCPlotsCleanUpHistoList) BEMCPlotsCleanUpHistoList = new TList();
     TH1 *hist = 0;
     // this is very silly trick to avoid memory leak in the online version
     hist = fd.file() ? (TH1 *)fd.Get(name, 0) : 0;
-    if (getenv("ONLINEPLOTSDIR")&&
-       BEMCPlotsCleanUpHistoList && hist) {
-       BEMCPlotsCleanUpHistoList->Add(hist);
-    }
+    if (hist) hist->SetDirectory(0);
+//    if (getenv("ONLINEPLOTSDIR")&&
+//       BEMCPlotsCleanUpHistoList && hist) {
+//       BEMCPlotsCleanUpHistoList->Add(hist);
+//    }
     return hist;
 }
 
@@ -1315,9 +1316,9 @@ void BEMCPlotsPresenter::displayTriggerCorruption(FileType file, TPad *pad, Int_
 void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType file, TPad *pad, Int_t mDebug) {
 //mDebug = 10;
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
-    if (BEMCPlotsCleanUpHistoList) {
-	BEMCPlotsCleanUpHistoList->Delete();
-    }
+//    if (BEMCPlotsCleanUpHistoList) {
+//	BEMCPlotsCleanUpHistoList->Delete();
+//    }
     if (!BEMCDecoderPresenter) BEMCDecoderPresenter = new StEmcDecoder();
     if (mDebug >= 2) cout << "tab = " << tab << endl;
     if (mDebug >= 2) cout << "panel = " << panel << endl;

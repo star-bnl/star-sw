@@ -1,4 +1,4 @@
-// $Id: EEqaSorterC.cxx,v 1.5 2009/02/04 20:33:26 ogrebeny Exp $
+// $Id: EEqaSorterC.cxx,v 1.6 2009/02/14 03:16:52 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -155,29 +155,29 @@ void  EEqaSorterC::sortMapmt( int ver){
 void EEqaSorterC::initHisto(){
   int i;
   char tit[500];
-  sprintf (tit, "Tower hits>ped+%d; phibin : 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrTw);
+  sprintf (tit, "EEMC Tower hits>ped+%d; phibin : 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrTw);
   h2D[0] = new TH2F("TowHits",tit, 60, -0.5, 59.5, 12, 0.5, 12.5);
 
    addJPphiLimits( h2D[0]);
    //TList *Lx= h2D[0]->GetListOfFunctions(); 
 
-  sprintf (tit, "pres-1 hits>ped+%d; phi bin : 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrPrs);
+  sprintf (tit, "EEMC pres-1 hits>ped+%d; phi bin : 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrPrs);
   h2D[1] = new TH2F("Pre1Hits",tit , 60, -0.5, 59.5, 12, 0.5, 12.5);
- sprintf (tit, "pres-2 hits>ped+%d; phi bin: 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrPrs);
+ sprintf (tit, "EEMC pres-2 hits>ped+%d; phi bin: 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrPrs);
   h2D[2] =new TH2F("Pre2Hits",tit , 60, -0.5, 59.5, 12, 0.5, 12.5);
 
-  sprintf (tit, "post hits>ped+%d; phi bin : 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrPost);
+  sprintf (tit, "EEMC post hits>ped+%d; phi bin : 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrPost);
   h2D[3] = new TH2F("PostHits",tit , 60, -0.5, 59.5, 12, 0.5, 12.5);
 
 
-  sprintf (tit, "# Tower w/ adc>ped+%d; # Towers",adcThrTw);
+  sprintf (tit, "EEMC # Tower w/ adc>ped+%d; # Towers",adcThrTw);
   hMult[0] = new TH1F("HTow", tit, 100, -0.5, 99.5);
 
-  sprintf (tit, "# Pre-1 w/ adc>ped+%d; # Tiles",adcThrPrs);
+  sprintf (tit, "EEMC # Pre-1 w/ adc>ped+%d; # Tiles",adcThrPrs);
   hMult[1] = new TH1F("HPre1", tit, 100, -0.5, 199.5);
-  sprintf (tit, "# Pre-2 w/ adc>ped+%d; # Tiles",adcThrPrs);
+  sprintf (tit, "EEMC # Pre-2 w/ adc>ped+%d; # Tiles",adcThrPrs);
   hMult[2] = new TH1F("HPre2", tit, 100, -0.5, 199.5);
-  sprintf (tit, "# Post w/ adc>ped+%d; # Tiles",adcThrPrs);
+  sprintf (tit, "EEMC # Post w/ adc>ped+%d; # Tiles",adcThrPrs);
   hMult[3] = new TH1F("HPost", tit, 100, -0.5, 199.5);
 
 
@@ -196,13 +196,13 @@ void EEqaSorterC::initHisto(){
     for(pl=0;pl<MaxSmdPlains;pl++) {
       char uv='U'+pl;
       sprintf (cid, "SmdA%d%c",iSec+1,uv);
-      sprintf (ctitl, "SMD %02d%c adc>ped+%02d;"
+      sprintf (ctitl, "ESMD %02d%c adc>ped+%02d;"
 	       "Strip no.", iSec+1,uv, adcThrSmd);
       hSmd[iSec][pl] = new TH1F(cid, ctitl, 290, -0.5, 289.5);
       HList->Add(hSmd[iSec][pl]);
     
       sprintf (cid, "HSmd%d%c",iSec+1,uv);
-      sprintf (ctitl, "SMD %02d%c Hits/eve  adc>ped+%d; No. Hits", iSec+1, uv,adcThrSmd);
+      sprintf (ctitl, "ESMD %02d%c Hits/eve  adc>ped+%d; No. Hits", iSec+1, uv,adcThrSmd);
       hnHSmd[iSec][pl] = new TH1F(cid, ctitl, 100, -0.5, 99.5);
       HList->Add(hnHSmd[iSec][pl]);
     }
@@ -220,6 +220,9 @@ void  EEqaSorterC::initRun() {
 
 
 // $Log: EEqaSorterC.cxx,v $
+// Revision 1.6  2009/02/14 03:16:52  ogrebeny
+// Updated some histo titles. Removed unnecessary histo Clone() and Delete().
+//
 // Revision 1.5  2009/02/04 20:33:26  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //

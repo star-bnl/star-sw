@@ -1,4 +1,4 @@
-// $Id: EEqaSorter.cxx,v 1.7 2009/02/04 20:33:26 ogrebeny Exp $
+// $Id: EEqaSorter.cxx,v 1.8 2009/02/14 03:16:52 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -80,7 +80,7 @@ void EEqaSorter::initHisto(int nBin, int mxADC){
   hCorT[6]=new TH1F("ETowOFFid","ETOW OFF ID; crate ID",6,.5,6.5);
   hCorS[6]=new TH1F("ESmdOFFid","ESMD OFF ID; crate ID",48,63.5,111.5);
 
-  H4jpCor =new TH1F("JPtotCor","Corruption  per JP; JP ID",EEnJetPatch,0.5,EEnJetPatch+0.5);   H4jpCor->SetFillColor(kRed);
+  H4jpCor =new TH1F("JPtotCor","ETOW Corruption  per JP; JP ID",EEnJetPatch,0.5,EEnJetPatch+0.5);   H4jpCor->SetFillColor(kRed);
   HList->Add(H4jpCor);
  
   int i;
@@ -447,6 +447,9 @@ EEqaSorter::spy( int runNo, int eveId){
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.8  2009/02/14 03:16:52  ogrebeny
+// Updated some histo titles. Removed unnecessary histo Clone() and Delete().
+//
 // Revision 1.7  2009/02/04 20:33:26  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //
