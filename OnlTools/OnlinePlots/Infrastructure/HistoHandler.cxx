@@ -2060,20 +2060,20 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   //==============================
   //      EMC histograms
   //==============================
-  if(evp->token!=0 && trgd){ // skip event summary
+  if(evp->token!=0){ // skip event summary
 
     BEMCPlots::fillHisto( (char*)datap
-			  , trgd->getDsm0_BEMCE()
-			  , trgd->getDsm0_BEMCW()
-			  , trgd->getDsm1_BEMC()
-			  , trgd->getDsm2_EMC()
-			  , trgd->getDsm3()
+			  , trgd ? trgd->getDsm0_BEMCE() : 0
+			  , trgd ? trgd->getDsm0_BEMCW() : 0
+			  , trgd ? trgd->getDsm1_BEMC() : 0
+			  , trgd ? trgd->getDsm2_EMC() : 0
+			  , trgd ? trgd->getDsm3() : 0
 			  );
     EEMCPlots::fillHisto( (char*)datap
-			  , trgd->getDsm0_EEMC()
-			  , trgd->getDsm1_EEMC()
-			  , trgd->getDsm2_EMC() 
-			  , trgd->getDsm3()
+			  , trgd ? trgd->getDsm0_EEMC() : 0
+			  , trgd ? trgd->getDsm1_EEMC() : 0
+			  , trgd ? trgd->getDsm2_EMC() : 0
+			  , trgd ? trgd->getDsm3() : 0
 			  );			      
   }
     // EMC end
@@ -2350,7 +2350,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.6 2009/02/13 22:23:06 dkettler Exp $
+   * $Id: HistoHandler.cxx,v 1.7 2009/02/14 00:11:00 dkettler Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2360,6 +2360,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.7  2009/02/14 00:11:00  dkettler
+   * BEMC trigger data check
+   *
    * Revision 1.6  2009/02/13 22:23:06  dkettler
    * Trigger data changes
    *
