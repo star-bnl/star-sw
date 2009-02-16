@@ -483,9 +483,9 @@ int StDbServiceBroker::updateLocalLbPolicy()
 	  struct stat file_status;
 	  if (stat(dbLoadBalancerWorldAFS.c_str(), &file_status) == 0) 
 	    {
-	      system(("cp "+dbLoadBalancerConfig+" "+dbLoadBalancerConfig+".old").c_str());
-	      system(("cp "+dbLoadBalancerWorldAFS+" "+dbLoadBalancerConfig).c_str());
-	      system(("chmod u+w "+dbLoadBalancerConfig).c_str());
+	      system(("/bin/cp "+dbLoadBalancerConfig+" "+dbLoadBalancerConfig+".old").c_str());
+	      system(("/bin/cp "+dbLoadBalancerWorldAFS+" "+dbLoadBalancerConfig).c_str());
+	      system(("/bin/chmod u+w "+dbLoadBalancerConfig).c_str());
 	      return lb_error::NO_ERROR;
 	    }
 	  else
