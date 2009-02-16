@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.1 2009/02/02 21:52:36 dongx Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.2 2009/02/16 20:57:29 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -20,6 +20,9 @@
 #include "StEvent/StBTofHeader.h"
 #include "StEvent/StBTofRawHit.h"
 #include "StBTofUtil/StBTofRawHitCollection.h"  
+#include "StBTofUtil/StBTofHitCollection.h"
+#include "StBTofUtil/StBTofDaqMap.h"
+#include "StBTofUtil/StBTofINLCorr.h"
 #include "StEvent/StEvent.h"
 #include "StDAQMaker/StDAQReader.h"
 
@@ -38,6 +41,61 @@ StBTofHitMaker::StBTofHitMaker(const char *name):StRTSBaseMaker("tof",name)
 //_____________________________________________________________
 StBTofHitMaker::~StBTofHitMaker() 
 { }
+
+//_____________________________________________________________
+void StBTofHitMaker::Clear(Option_t* option) 
+{ 
+  TofLeadingHits.clear();
+  TofTrailingHits.clear();
+
+  for(int i=0;i<4;i++) mTriggerTimeStamp[i] = 0;
+}
+
+//_____________________________________________________________
+Int_t StBTofHitMaker::Init()
+{
+  Clear("");
+  return kStOK;
+}
+
+//_____________________________________________________________
+Int_t StBTofHitMaker::InitRun(Int_t runnumber)
+{
+  ///////////////////////////////////////////////////////////////
+  // TOF Daq map and INL initialization -- load from StBTofUtil
+  ///////////////////////////////////////////////////////////////
+  mBTofDaqMap = new StBTofDaqMap();
+  mBTofDaqMap->Init(this);
+  LOG_INFO << " Initialize Daq map ... " << endm;
+
+  mNValidTrays = mBTofDaqMap->numberOfValidTrays();
+
+  mBTofINLCorr = new StBTofINLCorr();
+  mBTofINLCorr->setNValidTrays(mNValidTrays);
+  mBTofINLCorr->initFromDbase(this);
+  LOG_INFO << " Initialize INL table ... " << endm;
+
+  return kStOK;
+}
+
+//_____________________________________________________________
+Int_t StBTofHitMaker::FinishRun(Int_t runnumber)
+{
+  if(mBTofDaqMap) delete mBTofDaqMap;
+  mBTofDaqMap = 0;
+
+  if(mBTofINLCorr) delete mBTofINLCorr;
+  mBTofINLCorr = 0;
+
+  return kStOK;
+}
+
+//-------------------------------------------------------------
+Int_t StBTofHitMaker::Finish()
+{
+  Clear("");
+  return kStOK;
+}
 
 //_____________________________________________________________
 /*!
@@ -91,8 +149,8 @@ Int_t StBTofHitMaker::Make()
           LOG_WARN<<"TOF_READER::UnPack TOF Data ERROR!"<<endm;
         }
         fillBTofRawHitCollection();
+        fillBTofHitCollection();
         fillStEvent();
-
       }
    }
    return kStOk;
@@ -193,6 +251,105 @@ void StBTofHitMaker::fillBTofRawHitCollection()
   }
   
 }
+//____________________________________________
+/*!
+ * Fill the data from BTofRawHit into BTofHit Collection in StEvent
+ */
+void StBTofHitMaker::fillBTofHitCollection()
+{
+  mBTofSortRawHit = new StBTofSortRawHit();
+  mBTofSortRawHit->Init(this, mBTofCollection, mBTofDaqMap);
+
+  // multi-tray system
+  IntVec validtray = mBTofDaqMap->ValidTrays();
+  for(size_t i=0;i<validtray.size();i++) {
+    int trayId = validtray[i];
+    IntVec validchannel = mBTofSortRawHit->GetValidChannel(trayId);
+    if(Debug()) {
+      LOG_INFO << " Number of fired hits on tray " << trayId << " = " << validchannel.size() << endm;
+    }
+
+    for(size_t iv=0;iv<validchannel.size();iv++) {
+      UIntVec leTdc = mBTofSortRawHit->GetLeadingTdc(trayId, validchannel[iv], kTRUE);
+      UIntVec teTdc = mBTofSortRawHit->GetTrailingTdc(trayId, validchannel[iv], kTRUE);
+
+      if(!leTdc.size() || !teTdc.size()) continue;
+
+      int chan = validchannel[iv];
+      IntVec map = mBTofDaqMap->TDIGChan2Cell(chan);
+      int moduleId = map[0];
+      int cellId = map[1];  
+
+      // store raw hit from trays and vpds into StBTofHit
+      //
+      // correct for INL
+      unsigned int tmptdc = leTdc[0];    // select the first hit
+      int bin = tmptdc&0x3ff;
+      double tmptdc_f = tmptdc + mBTofINLCorr->getTrayINLCorr(trayId, chan, bin);
+      double letime = tmptdc_f*VHRBIN2PS / 1000.;
+
+      tmptdc = teTdc[0];
+      bin = tmptdc&0x3ff;
+      tmptdc_f = tmptdc + mBTofINLCorr->getTrayINLCorr(trayId, chan, bin);
+      double tetime = tmptdc_f*VHRBIN2PS / 1000.;
+
+      StBTofHit *aHit = new StBTofHit();
+      aHit->setTray((UChar_t)trayId);   
+      aHit->setModule((UChar_t)moduleId);
+      aHit->setCell((UChar_t)cellId);
+      aHit->setLeadingEdgeTime(letime);
+      aHit->setTrailingEdgeTime(tetime);
+      mBTofCollection->addHit(aHit);
+
+    } // end channel
+  }  // end tray
+
+  // vpd -> StBTofHit
+  for(int ivpd=0;ivpd<2;ivpd++) { // west and east sides
+    StBeamDirection eastwest = (ivpd==0) ? west : east; 
+    int trayId = (ivpd==0) ? mWestVpdTrayId : mEastVpdTrayId;
+    IntVec validtube = mBTofSortRawHit->GetValidChannel(trayId);
+    if(Debug()) {
+      LOG_INFO << " Number of fired hits on tray(vpd) " << trayId << " = " << validtube.size() << endm;
+    }
+
+    if(!validtube.size()) continue;
+    for(int i=0;i<mNVPD;i++) {
+      int tubeId = i+1;
+      int lechan = (ivpd==0) ? mBTofDaqMap->WestPMT2TDIGLeChan(tubeId) : mBTofDaqMap->EastPMT2TDIGLeChan(tubeId);
+      int techan = (ivpd==0) ? mBTofDaqMap->WestPMT2TDIGTeChan(tubeId) : mBTofDaqMap->EastPMT2TDIGTeChan(tubeId);
+      UIntVec leTdc = mBTofSortRawHit->GetLeadingTdc(trayId, lechan, kTRUE);
+      UIntVec teTdc = mBTofSortRawHit->GetTrailingTdc(trayId, lechan, kTRUE);  // channel number should be le, sorted in StBTofSortRawHit
+
+      if(leTdc.size() && teTdc.size()) {
+
+        // correct for INL
+        unsigned int tmptdc = leTdc[0];    // select the first hit
+        int bin = tmptdc&0x3ff;
+        double tmptdc_f = tmptdc + mBTofINLCorr->getVpdINLCorr(eastwest, lechan, bin);
+        double letime = tmptdc_f*VHRBIN2PS / 1000.;
+
+        tmptdc = teTdc[0];
+        bin = tmptdc&0x3ff;
+        tmptdc_f = tmptdc + mBTofINLCorr->getVpdINLCorr(eastwest, techan, bin);
+        double tetime = tmptdc_f*VHRBIN2PS / 1000.;
+
+        StBTofHit *aHit = new StBTofHit();
+        aHit->setTray((UChar_t)trayId);   
+        aHit->setModule(0);
+        aHit->setCell((UChar_t)tubeId);
+        aHit->setLeadingEdgeTime(letime);
+        aHit->setTrailingEdgeTime(tetime);
+        mBTofCollection->addHit(aHit);
+      }
+    }  
+  }    
+  //   
+
+  delete mBTofSortRawHit;
+  mBTofSortRawHit = 0;
+
+}
   
 //_________________________________________________________________________
 /*!
@@ -232,9 +389,25 @@ void StBTofHitMaker::fillStEvent() {
     else {
       LOG_INFO << " - StEvent BTofRawHitCollection does not Exist" << endm;
     }
+
+    if(btofCollection->hitsPresent()) {
+      ///LOG_INFO << " + StEvent BTofHitCollection Exists" << endm;
+      StSPtrVecBTofHit& tofVec = btofCollection->tofHits();  
+      LOG_INFO << "   StEvent BTofHitCollection has " << tofVec.size() << " entries..." << endm;
+      if(Debug()) {
+        for(size_t i=0;i<tofVec.size();i++) {
+          LOG_DEBUG << (*tofVec[i]) << endm; 
+        }
+      }  
+    }    
+    else {
+      LOG_INFO << " - StEvent BTofHitCollection does not Exist" << endm;
+    }
+
   }
   else {
     LOG_INFO << " - StEvent BTofCollection does not Exist" << endm;
     LOG_INFO << " - StEvent BTofRawHitCollection does not Exist" << endm;
+    LOG_INFO << " - StEvent BTofHitCollection does not Exist" << endm;
   }
 }
