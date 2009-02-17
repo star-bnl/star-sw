@@ -199,7 +199,7 @@ int StEmcDecoder::
 GetTowerIdFromTDC(int TDC,int tdc_sequency, int& TowerId) const {
     if(TDC < 0 || TDC > 29) return 0;
     if(tdc_sequency < 0 || tdc_sequency > 159) return 0;
-    TowerId = mapping->softIdFromCrate(kBarrelEmcTowerId, TDC, tdc_sequency);
+    TowerId = mapping->softIdFromTDC(kBarrelEmcTowerId, TDC, tdc_sequency);
     return 1;
 }
 
@@ -534,9 +534,12 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const {
     return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 1.2 2009/02/01 17:34:52 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 1.3 2009/02/17 22:00:52 mattheww Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 1.3  2009/02/17 22:00:52  mattheww
+// fix bug in GetTowerIdFromTDC
+//
 // Revision 1.2  2009/02/01 17:34:52  kocolosk
 // more caching and optimization.
 //
