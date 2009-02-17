@@ -777,13 +777,17 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     if(ispinb & 128) oth->fill(h1[449],bunch7bit);  
     
     //ZDC
+    mZdcTimeDiff = -9999;
+    mZdcVertex   = -9999;
     int te = trgd->zdcPmtTDC(east,1);
     int tw = trgd->zdcPmtTDC(west,1);
     if(te>20 && te<4000) oth->fill(h1[76], float(te));    
     if(tw>20 && tw<4000) oth->fill(h1[77], float(tw));    
     if(te>20 && te<4000 && tw>20 && tw<4000){
-      oth->fill(h1[78], float(tw-te));          
-      oth->fill(h1[146],float(tw-te)/2*40.0/0.03);
+      mZdcTimeDiff = float(tw-te);
+      mZdcVertex   = mZdcTimeDiff/2*40.0/0.03;
+      oth->fill(h1[78], mZdcTimeDiff);          
+      oth->fill(h1[146],mZdcVertex);
     }          
     oth->fill(h1[474],float(trgd->zdcADC(east,1)));
     oth->fill(h1[475],float(trgd->zdcADC(west,1)));
@@ -795,6 +799,8 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     oth->fill(h1[481],float(trgd->zdcUnAttenuated(west)));
 
     //BBC
+    mBbcTimeDiff = -9999;
+    mBbcVertex   = -9999;
     int nhit[2]={0,0},nhitl[2]={0,0};
     for(int i=0; i<2; i++){
       for(int j=1; j<=24; j++){
@@ -821,9 +827,14 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     oth->fill(	  h1[201],float(trgd->bbcADCSumLargeTile(west)));
     oth->fill(	  h1[202],float(trgd->bbcEarliestTDC(east)));
     oth->fill(	  h1[203],float(trgd->bbcEarliestTDC(west)));
-    oth->fill(	  h1[204],float(trgd->bbcTimeDifference()));
     oth->fill(	  h1[205],float(trgd->bbcEarliestTDC(east)),float(trgd->bbcEarliestTDC(west)));
-    oth->fill(	  h1[452],float(trgd->bbcTimeDifference()));
+    if( trgd->bbcEarliestTDC(east)>10 && trgd->bbcEarliestTDC(east)<3000 &&
+	trgd->bbcEarliestTDC(west)>10 && trgd->bbcEarliestTDC(west)<3000 ) {
+      mBbcTimeDiff = trgd->bbcTimeDifference();
+      mBbcVertex   = mBbcTimeDiff/3/10.0;      
+      oth->fill(h1[204],mBbcTimeDiff);
+      oth->fill(h1[452],mBbcVertex);
+    }
     
     //ZDCSMD
     for(int i=0; i<2; i++){
@@ -2134,12 +2145,14 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 	  oth->fill(	  h1[89],l3.xVertex);
 	  oth->fill(	  h1[90],l3.yVertex);
 	  oth->fill(	  h1[91],l3.zVertex);
-	  // ZDC vs L3 vertex
+
+	  // ZDC/BBC vs L3 vertex
 	  TH2* hh1_l3_zdc = (TH2*)h1[100];
 	  oth->fill( hh1_l3_zdc,l3.zVertex, mZdcVertex);
 	  TH2* hh1_l3_bbc = (TH2*)h1[230];
-	  oth->fill( hh1_l3_bbc,l3.zVertex, float(-bbctdiff)*3.0);
+	  oth->fill( hh1_l3_bbc,l3.zVertex, mBbcVertex);
 	  oth->fill(h1[112],l3.zVertex, mZdcTimeDiff);
+
 	  // L3 Y vs X
 	  TH2* hh1_l3_x_y = (TH2*)h1[101];
 	  oth->fill( hh1_l3_x_y,l3.xVertex, l3.yVertex);
@@ -2350,7 +2363,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.7 2009/02/14 00:11:00 dkettler Exp $
+   * $Id: HistoHandler.cxx,v 1.8 2009/02/17 19:24:56 dkettler Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2360,6 +2373,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.8  2009/02/17 19:24:56  dkettler
+   * Fixed ZDC/BBC-l3 vertex plots
+   *
    * Revision 1.7  2009/02/14 00:11:00  dkettler
    * BEMC trigger data check
    *

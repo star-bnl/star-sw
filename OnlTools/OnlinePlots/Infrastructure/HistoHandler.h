@@ -101,6 +101,8 @@ class HistoHandler
  private:
   double mZdcVertex;
   double mZdcTimeDiff;
+  double mBbcVertex;
+  double mBbcTimeDiff;
   static char* mL3Buffer;
 };
 //************************************************************************
@@ -118,7 +120,7 @@ class HistoHandler
 
 /***************************************************************************
  *
- * $Id: HistoHandler.h,v 1.1 2009/01/23 16:10:55 jeromel Exp $
+ * $Id: HistoHandler.h,v 1.2 2009/02/17 19:24:56 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -128,6 +130,9 @@ class HistoHandler
  ***************************************************************************
  *
  * $Log: HistoHandler.h,v $
+ * Revision 1.2  2009/02/17 19:24:56  dkettler
+ * Fixed ZDC/BBC-l3 vertex plots
+ *
  * Revision 1.1  2009/01/23 16:10:55  jeromel
  * Import from online/RTS/src/
  *
