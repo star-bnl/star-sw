@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.1 2009/02/02 21:58:06 dongx Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.2 2009/02/18 22:43:47 dongx Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -18,8 +18,11 @@
 #include "StBTofCollection.h"
 #include "StBTofRawHit.h"
 #include "StBTofDaqMap.h"
+#include "tables/St_tofTrgWindow_Table.h"
 
 StBTofSortRawHit::StBTofSortRawHit() {
+  mDaqMap = 0;
+  mDebug  = kFALSE;
 }
 
 StBTofSortRawHit::~StBTofSortRawHit() {
@@ -27,40 +30,64 @@ StBTofSortRawHit::~StBTofSortRawHit() {
 }
 
 void StBTofSortRawHit::Reset() {
-  for(unsigned int i=0;i<mNTRAY;i++) mRawHitVec[i].clear();
+  for(int i=0;i<mNTRAY;i++) mRawHitVec[i].clear();
+  for(int i=0;i<4;i++) mTriggerTime[i] = 0;
 }
 
 void StBTofSortRawHit::Init() {
   Reset();
+  for(int i=0;i<mNTRAY;i++) {
+    mTriggerTimeWindow[i][0] = 0.0;
+    mTriggerTimeWindow[i][1] = 0.0;
+  }
 }
 
-void StBTofSortRawHit::Init(StMaker *maker, StBTofCollection *tofColl, StBTofDaqMap *daqMap) {
+void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
   // initial time windows from dbase
   Init();
 
   // for test set by hand now
   ///initial time windows
-  for(unsigned int i=0;i<mNTRAY;i++){
-    for(int j=0;j<2;j++) mTriggerTimeWindow[i][j] = 0.;
-    if(i>=75&&i<80){
-      mTriggerTimeWindow[i][0] = 3270;
-      mTriggerTimeWindow[i][1] = 3390;
+  LOG_INFO << "StBTofSortRawHit -- retrieving the tof trigger time window cuts" << endm;
+
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+  if(!mDbTOFDataSet) {
+    LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
+    //    assert(mDbTOFDataSet);
+    return; // kStErr;
+  }
+ 
+  St_tofTrgWindow* tofTrgWindow = static_cast<St_tofTrgWindow*>(mDbTOFDataSet->Find("tofTrgWindow"));
+  if(!tofTrgWindow) {
+    LOG_ERROR << "unable to get tof Module map table" << endm;
+    return; // kStErr;
+  }
+  tofTrgWindow_st* trgWin = static_cast<tofTrgWindow_st*>(tofTrgWindow->GetArray());
+  for (Int_t i=0;i<mNTRAY;i++) {
+    mTriggerTimeWindow[i][0] = (Float_t)trgWin[i].trgWindow_Min;
+    mTriggerTimeWindow[i][1] = (Float_t)trgWin[i].trgWindow_Max;
+    if(maker->Debug()) {
+      LOG_INFO << " Tray = " << i+1 << " Trigger Window = " << mTriggerTimeWindow[i][0] << " " << mTriggerTimeWindow[i][1] << endm;
     }
-    if(i==120){
-      mTriggerTimeWindow[i][0] = 3230;
-      mTriggerTimeWindow[i][1] = 3340;
-    }
-    if(i==121){
-      mTriggerTimeWindow[i][0] = 3290;
-      mTriggerTimeWindow[i][1] = 3400;
-    }
-  }  
+  }
+
+  mDaqMap = daqMap;
+
+  if(maker->Debug()) mDebug = kTRUE;
+
+  return;
+}
+
+void StBTofSortRawHit::setBTofCollection(StBTofCollection* tofColl) {
+
+  /// clean up the pool
+  Reset();
 
   if(tofColl && tofColl->tofHeader()) {
     for(int i=0;i<4;i++) {
       mTriggerTime[i] = tofColl->tofHeader()->triggerTime(i);
     }
-    if(maker->Debug()) {
+    if(mDebug) {
       LOG_INFO << " Trigger Time Stamps " << endm;
       LOG_INFO << mTriggerTime[0] << " " << mTriggerTime[1] << " " <<
                   mTriggerTime[2] << " " << mTriggerTime[3] << endm;
@@ -72,7 +99,7 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofCollection *tofColl, StBTofDaq
     StSPtrVecBTofRawHit &tofRawHits = tofColl->tofRawHits();
 
     // test 
-    if(maker->Debug()) {
+    if(mDebug) {
       LOG_INFO << " INPUT ...... " << endm;
       for(size_t i=0; i<tofRawHits.size(); i++) {
         LOG_INFO << " flag=" << tofRawHits[i]->flag()
@@ -117,15 +144,15 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofCollection *tofColl, StBTofDaq
 	  }
         }
       } else {
-        if(!daqMap) {
+        if(!mDaqMap) {
           LOG_INFO << " No Daq Map for VPD, continue!" << endm;
           continue;
         }
-        int iTube = (itray==121) ? daqMap->TDIGLeChan2WestPMT(ichan) : daqMap->TDIGLeChan2EastPMT(ichan);
+        int iTube = (itray==121) ? mDaqMap->TDIGLeChan2WestPMT(ichan) : mDaqMap->TDIGLeChan2EastPMT(ichan);
         for(size_t j=0;j<tofRawHits.size();j++) {
           if(tofRawHits[j]->trailingEdge() && itray==tofRawHits[j]->tray()) {
             int techan = (int)(tofRawHits[j]->channel());
-	    int jTube = (itray==121) ? daqMap->TDIGTeChan2WestPMT(techan) : daqMap->TDIGTeChan2EastPMT(techan);
+	    int jTube = (itray==121) ? mDaqMap->TDIGTeChan2WestPMT(techan) : mDaqMap->TDIGTeChan2EastPMT(techan);
 	    if(iTube==jTube) {
 	      aRawHit.trailingTdc.push_back(tofRawHits[j]->tdc());
 	    }
@@ -138,7 +165,7 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofCollection *tofColl, StBTofDaq
     LOG_WARN << " No Tof Collection !!! " << endm;
   }
 
-  if(maker->Debug()) {
+  if(mDebug) {
     for(int i=0;i<122;i++) {
       for(size_t m=0;m<mRawHitVec[i].size();m++) {
         LOG_DEBUG << " tray = " << i+1 << " " << mRawHitVec[i][m].tray << " channel = " << mRawHitVec[i][m].channel << endm;
@@ -175,7 +202,7 @@ UIntVec StBTofSortRawHit::GetLeadingTdc(int tray, int channel, bool triggerevent
     int fiberId = mRawHitVec[tray-1][i].fiberId;
     double ftime = -1e5;
     for(size_t j=0; j<mRawHitVec[tray-1][i].leadingTdc.size(); j++) {
-      float trgTime = 25.*(mTriggerTime[fiberId] & 0xfff) - 2775.;
+      float trgTime = 25.*(mTriggerTime[fiberId] & 0xfff);
       float timeDiff = mRawHitVec[tray-1][i].leadingTdc[j]*25./1024 - trgTime;
       while(timeDiff<0) timeDiff += 51200;
       if(tray<=120){  //trays, keep all hits
@@ -214,7 +241,7 @@ UIntVec StBTofSortRawHit::GetTrailingTdc(int tray, int channel, bool triggereven
     int fiberId = mRawHitVec[tray-1][i].fiberId;
     double ftime = -1e5;
     for(size_t j=0; j<mRawHitVec[tray-1][i].trailingTdc.size(); j++) {
-      float trgTime = 25.*(mTriggerTime[fiberId] & 0xfff) - 2775.;
+      float trgTime = 25.*(mTriggerTime[fiberId] & 0xfff);
       float timeDiff = mRawHitVec[tray-1][i].trailingTdc[j]*25./1024 - trgTime;
       while(timeDiff<0) timeDiff += 51200;
       if(tray<=120){  //trays, keep all hits
