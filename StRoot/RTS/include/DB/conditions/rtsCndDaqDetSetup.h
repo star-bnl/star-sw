@@ -24,6 +24,18 @@ struct rtsCndDaqDetSetup
   int raw_write;
   int cl_write;
   int cl_done;
+
+  // New as of 2/18/09
+  int res1;
+  int res2;
+  int res3;
+  int res4;
+  int res5;
+  int res6;
+  int res7;
+  int res8;
+  int res9;
+  int res10;
 };
 
 #endif

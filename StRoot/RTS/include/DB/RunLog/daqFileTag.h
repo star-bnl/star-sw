@@ -19,5 +19,9 @@ struct daqFileTag {
   unsigned int  hpss;            /* is the data at hpss? */  
   
   unsigned int  fileStream;      /* new for version 10.0, stream part of filename */
+
+  // New 2/18/09
+  int   isCombo;                 /* is this file combined in another */
+  char  comboFile[256];          /* filename for comboFile */
 };  
 #endif 
