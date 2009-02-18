@@ -8,8 +8,11 @@
  * TPC distortion corrections.
  *
  *
- * $Id: StMuScalerCutter.cxx,v 1.1 2009/02/04 21:37:45 genevb Exp $
+ * $Id: StMuScalerCutter.cxx,v 1.2 2009/02/18 19:50:57 genevb Exp $
  * $Log: StMuScalerCutter.cxx,v $
+ * Revision 1.2  2009/02/18 19:50:57  genevb
+ * Minor error in defining Run 8 dAu data
+ *
  * Revision 1.1  2009/02/04 21:37:45  genevb
  * Introduction of class to determine events with bad RICH scalers
  *
@@ -58,7 +61,7 @@ bool StMuScalerCutter::accept(StMuEvent* event)
     //double bbcyb = runInfo.bbcYellowBackgroundRate();
 
     // only for Run 8 dAu
-    if (run > 8330000 || run < 9029000) {
+    if (run > 8330000 && run < 9029000) {
 
       // zdcx check
       if (zdcx/bbcx > 0.42 ||
