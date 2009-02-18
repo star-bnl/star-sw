@@ -52,7 +52,7 @@ int evpMainPresenter::main(int argc, char **argv )
     EvpPresenter* presenter = new EvpPresenter();
     PresenterConnect* con = new PresenterConnect(gui,presenter);
     presenter->Connect();
-    // Every thing is ready. Is is safe to fire the event loop now !
+    // Everything is ready. It is safe to fire the event loop now !
     QTimer::singleShot (0,gui,SLOT(GetNextEvent()));
     //presenter->run();
 
