@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.2 2009/02/16 20:57:29 dongx Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.3 2009/02/18 22:44:44 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -74,6 +74,10 @@ Int_t StBTofHitMaker::InitRun(Int_t runnumber)
   mBTofINLCorr->setNValidTrays(mNValidTrays);
   mBTofINLCorr->initFromDbase(this);
   LOG_INFO << " Initialize INL table ... " << endm;
+
+  mBTofSortRawHit = new StBTofSortRawHit();
+  mBTofSortRawHit->Init(this, mBTofDaqMap);
+  LOG_INFO << " Initialize StBTofSortRawHit() ... " << endm;
 
   return kStOK;
 }
@@ -257,8 +261,7 @@ void StBTofHitMaker::fillBTofRawHitCollection()
  */
 void StBTofHitMaker::fillBTofHitCollection()
 {
-  mBTofSortRawHit = new StBTofSortRawHit();
-  mBTofSortRawHit->Init(this, mBTofCollection, mBTofDaqMap);
+  mBTofSortRawHit->setBTofCollection(mBTofCollection);
 
   // multi-tray system
   IntVec validtray = mBTofDaqMap->ValidTrays();
@@ -345,9 +348,6 @@ void StBTofHitMaker::fillBTofHitCollection()
     }  
   }    
   //   
-
-  delete mBTofSortRawHit;
-  mBTofSortRawHit = 0;
 
 }
   
