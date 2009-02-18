@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.h,v 1.1 2009/02/02 21:58:06 dongx Exp $
+ * $Id: StBTofSortRawHit.h,v 1.2 2009/02/18 22:43:47 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -63,12 +63,15 @@ struct TOFRawHit {
  */ 
 class StBTofSortRawHit : public StObject {
  private:
-  static const UInt_t mNTRAY = 122;
+  static const Int_t mNTRAY = 122;
   tofRawHitVector mRawHitVec[mNTRAY];
   
-  Float_t mTriggerTimeWindow[mNTRAY][2];    // need to be moved to db
-  Float_t mTriggerOffset;                   // need to be moved to db
+  Float_t mTriggerTimeWindow[mNTRAY][2];    //
+  Float_t mTriggerOffset;                   //
   UInt_t  mTriggerTime[4];                  //
+
+  Bool_t  mDebug;                           //! switch for debugging 
+  StBTofDaqMap     *mDaqMap;
 
  public:
   StBTofSortRawHit();
@@ -77,8 +80,10 @@ class StBTofSortRawHit : public StObject {
   void Init();
   /// Initial function from StBTofCollection
   /// Need Daq Map for VPD Le/Te mapping
-  void Init(StMaker *maker, StBTofCollection *tofColl, StBTofDaqMap *daqMap);
+  void Init(StMaker *maker, StBTofDaqMap *daqMap);
   void Reset();
+  
+  void setBTofCollection(StBTofCollection* tofColl);
 
   /// Returns the valid channel Ids for a tray
   IntVec GetValidChannel(int tray);
