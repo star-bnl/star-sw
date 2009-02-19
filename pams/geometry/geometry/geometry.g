@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.186 2009/02/13 19:20:34 perev Exp $
+* $Id: geometry.g,v 1.187 2009/02/19 00:27:22 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.187  2009/02/19 00:27:22  perev
+* Upgr15==>macros
+*
 * Revision 1.186  2009/02/13 19:20:34  perev
 * back BTOF for 2008. Again itof=6 bTofConfig=11
 *
@@ -868,11 +871,13 @@ replace [exe MUTD03;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 3;]
 replace [exe PHMD01;] with ["Photon Multiplicity Detector Version ";PHMD=on; PhmdConfig = 1;]
 replace [exe PHMD02;] with ["Photon Multiplicity Detector Version ";PHMD=on; PhmdConfig = 2;]
 
+replace [exe PIPE00;] with [ "Simplest.Gerrit"; PipeConfig = -1;PipeFlag   = -1;]
 replace [exe PIPE04;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 0;]
 replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 1;]
 
+replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
 replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
 replace [exe RICHof;] with [;RICH=off;]
 replace [exe RICH02;] with [;RICH=on; richPos=2; richConfig=2;]
@@ -888,6 +893,7 @@ replace [exe SISD12;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=
 replace [exe SISD22;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=22;]
 replace [exe SISD23;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=23;]
 replace [exe SISD24;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=24;]
+replace [exe SISD65;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=65;]
 
 replace [exe SVTTof;] with ["SVTT version"; SVTT=off; SvttConfig = -1;]
 replace [exe SVTT00;] with ["SVTT version"; SVTT=on;
@@ -941,6 +947,7 @@ replace [exe TPCE02;] with [;"New version of the TPC backplane "; TpceConfig = 2
 replace [exe TPCE03;] with [;"New version of the TPC backplane "; TpceConfig = 3;
                              "gas density correction";            DensConfig = 1;]
 
+replace [exe ISTB00;] with [;ISTB=on;IstbConfig=-1;]
 
 replace [exe VPDDof;] with [;VPDD=off;]
 replace [exe VPDD02;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=2;]
@@ -949,8 +956,10 @@ replace [exe VPDD04;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConfig=7;]
 
 
+replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
 
-
+replace [exe FSTDof;] with  [;FSTD=off;]
+replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport structure"
 ********* Geometry definitions *******************************************************
 *********   y2000   ***
 replace [exe y2000;] with [;"corrected: MWC readout, RICH reconstructed position, no TOF ";
@@ -1111,6 +1120,15 @@ replace [exe y2009;] with [;
     exe CAVE04;
     exe PIPE14;
 };]
+replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
+                            exe SVTTof; exe FTPCof; exe BTOF52; exe CALBc0; exe ECAL31;
+                            exe BBCMon; exe FPDM00; exe MFLD54;
+                            DensConfig = 1; "gas density correction"
+                            SupoConfig = 1; "FTPC Support"
+                            exe PHMD01; exe SISD65; exe PIPE00; exe PIXL00; exe ISTB00;
+                            exe FSTDof; exe FGTD02; 
+"* On Gerrit request, we disable the cone:"
+                            exe ITSPof; "prototype of the Inner Tracker SuPport structure"]
 
 
 *********HELP***HELP***HELP***HELP***HELP***HELP***HELP***HELP***HELP***
@@ -3068,53 +3086,7 @@ If LL>0
 *designs are just for testing purposes. Gerrit
 
   on UPGR15   { New Tracking: HFT+IST+TPC+SSD-SVT
-                     SVTT=off; "no SVT  at all in this configuration"
-                     ftpc=off; "no FTPC at all in this configuration"
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     BtofConfig=5;
-                  "CALB"
-                     emsEdit=on
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ECAL"
-                     EcalConfig=1   " west wheel "
-                     ecalFill=3     " all sectors filled "
-                  "beam-beam counter "
-                     BBCM=on
-                  "forward pion detector "
-                     FPDM=on
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-                     SvshConfig = 0; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 0;
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 1;
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 65;
-* careful! Achtung!
-                   PipeConfig=-1;   " Simplest.Gerrit"
-                   pipeFlag=-1; !   " Simplest.Gerrit"
-                   PIXL=on;        " put the pixel detector in"
-                   PixlConfig=-1;   " Simplest.Gerrit"
-
-                   ISTB=on;  "IST barrel"
-                   IstbConfig=-1;
-
-                   FSTD=off;  "no pixel based forward tracker in this tag"
-                   FstdConfig=0;
-
-* Forward STAR tracker disk
-                   FGTD=on;  "GEM forward tracker"
-                   FgtdConfig=2;
-* On Gerrit request, we disable the cone:
-                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
-                }
+                exe UPGR15; }
 ****************************************************************************************
   on UPGR16   { New Tracking: HFT+IST+TPC+SSD-SVT
                      SVTT=off; "no SVT  at all in this configuration"
