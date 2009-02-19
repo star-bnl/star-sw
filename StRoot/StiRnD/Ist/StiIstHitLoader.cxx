@@ -43,7 +43,7 @@ void StiIstHitLoader::loadHits(StEvent* source,
 {
     n=0;
     //cout << "  n = " << n << endl;
-    cout << "StiIstHitLoader::loadHits(StEvent*) -I- Started" << endl;
+    LOG_INFO << "StiIstHitLoader::loadHits(StEvent*) -I- Started" << endm;
     if (!_detector)
 	throw runtime_error("StiIstHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
     if(!_hitContainer)
@@ -52,14 +52,14 @@ void StiIstHitLoader::loadHits(StEvent* source,
     //StSPtrVecHit* istHits = source->hitCollection("Ist");
     StRnDHitCollection *col = source->rndHitCollection();
     if (!col) {
-	cout <<"StiIstHitLoader::loadHits\tERROR:\tcol==0"<<endl;
-	cout <<"You must not have pixelFastSim in your chain"<<endl;
-	cout <<"will return with no action taken"<<endl;
+	LOG_INFO <<"StiIstHitLoader::loadHits\tERROR:\tcol==0"<<endm;
+	LOG_INFO <<"You must not have pixelFastSim in your chain"<<endm;
+	LOG_INFO <<"will return with no action taken"<<endm;
 	return;
     }
     StSPtrVecRnDHit& vec = col->hits();
 
-    //cout <<"StiIstHitLoader: Ist Hits: "<<vec.size()<<endl;
+    LOG_DEBUG <<"StiIstHitLoader: RnD Hits: "<<vec.size()<<endm;
     
     for(unsigned int j=0; j<vec.size(); j++) {
 
@@ -72,33 +72,29 @@ void StiIstHitLoader::loadHits(StEvent* source,
 	//                             ladder    module           side    
 	//        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 	//MLM cout <<"retrieve detector"<<endl;
-	/*int ladder=hit->volumeId()/1000000;
-	  int layer = 1;
-	  if (ladder > 11) layer = 2;
-	  if (ladder > 30) layer = 3;*/
 	int layer=hit->layer();
 	int ladder=hit->ladder();
 	int wafer=hit->wafer();
-	int side=hit->extraByte0();
-	//MLM cout<<"hit vol id: "<<hit->volumeId()<<endl;
-	//MLM cout<<"hit layer/ladder/wafer/side: "<< layer << "/" << ladder<<"/"<<wafer<<"/"<<side<<endl;
-	//MLM cout<<"passed: "<<2*(layer-1)+side-1<<" and "<<ladder<<endl;
+	LOG_DEBUG<<"StiIstHitLoader: hit has ladder: "<<ladder<<"; wafer: "<<wafer<<endm;
+	LOG_DEBUG<<"StiIstHitLoader: hit volume id: "<<hit->volumeId()<<endm;
 	StiDetector* detector=0;
-	if(((StBFChain *)StMaker::GetChain())->GetOption("UPGR09",kFALSE)) detector=_detector->getDetector(side-1,ladder);
-	else detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
+	//detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
+	//detector=_detector->getDetector(ladder,wafer);
+	detector=_detector->getDetector(layer,ladder);
 	if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
 	assert(detector);
-	//MLM cout <<"add hit to detector:\t"<<detector->getName()<<endl;
+	cout <<"StiIstHitLoader: add hit to detector:\t"<<detector->getName()<<endl;
 	
 	StiHit * stiHit = _hitFactory->getInstance();
 	if(!stiHit) throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- stiHit==0");
 	stiHit->reset();
+	LOG_DEBUG<<"StiIstHitLoader: hit has position ("<<hit->position().x()<<","<<hit->position().y()<<","<<hit->position().z()<<")"<<endm;
 	stiHit->setGlobal(detector, hit, hit->position().x(),hit->position().y(),hit->position().z(),hit->charge());
 	_hitContainer->add( stiHit );
 	//}
     }
     
-    cout << "StiIstHitLoader::loadHits(StEvent*) -I- Done" << endl;
+    LOG_INFO << "StiIstHitLoader::loadHits(StEvent*) -I- Done" << endm;
 }
 
 /// Load the MC hits of the Ist detector associated with the given source, and StMcTrack

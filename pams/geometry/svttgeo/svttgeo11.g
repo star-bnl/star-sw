@@ -1,8 +1,11 @@
-* $Id: svttgeo11.g,v 1.2 2008/11/19 04:08:31 perev Exp $
+* $Id: svttgeo11.g,v 1.3 2008/11/30 01:30:55 perev Exp $
 *
 * $Log: svttgeo11.g,v $
+* Revision 1.3  2008/11/30 01:30:55  perev
+* modifs for extending alpha,theta,phi,ort commandas
+*
 * Revision 1.2  2008/11/19 04:08:31  perev
-* updates to the corrected(vp) starsim
+*  updates to the corrected(vp) starsim
 *
 * Revision 1.1  2008/06/03 22:27:17  fisyak
 * Add y2005g and y2007g geometries for SVT with latest Rene's corrections
@@ -1037,7 +1040,7 @@ Block SVTD is an active wafer volume
 *
       trapY=swca_SensWid/2.0-(swca_SensWid-swca_SensGir)/2.0
 
-      Create STRA; Position STRA y=+trapY Ort=YZX AlphaZ=90; Position STRA  y=-trapY Ort=YZX AlphaZ=-90
+      Create STRA; Position STRA y=+trapY  AlphaZ=90 Ort=YZX ; Position STRA  y=-trapY AlphaZ=-90 Ort=YZX
 
 *
       ssidX=swca_WaferLen/2.0-(swca_WaferLen-swca_SensLen)/4.0

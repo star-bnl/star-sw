@@ -1,8 +1,11 @@
-* $Id: svttgeo6.g,v 1.5 2008/11/19 04:08:34 perev Exp $
+* $Id: svttgeo6.g,v 1.6 2008/11/30 01:30:56 perev Exp $
 *
 * $Log: svttgeo6.g,v $
+* Revision 1.6  2008/11/30 01:30:56  perev
+* modifs for extending alpha,theta,phi,ort commandas
+*
 * Revision 1.5  2008/11/19 04:08:34  perev
-* updates to the corrected(vp) starsim
+*  updates to the corrected(vp) starsim
 *
 * Revision 1.4  2007/11/13 21:33:45  perev
 * ALKAP fixed and innermost radius increased
@@ -978,7 +981,7 @@ Block SVTD is an active wafer volume
 *
       trapY=swca_SensWid/2.0-(swca_SensWid-swca_SensGir)/2.0
 
-      Create STRA; Position STRA y=+trapY Ort=YZX AlphaZ=90; Position STRA  y=-trapY Ort=YZX AlphaZ=-90
+      Create STRA; Position STRA y=+trapY AlphaZ=90 Ort=YZX ; Position STRA  y=-trapY AlphaZ=-90 Ort=YZX 
 
 *
       ssidX=swca_WaferLen/2.0-(swca_WaferLen-swca_SensLen)/4.0

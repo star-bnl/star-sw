@@ -5,17 +5,14 @@ Mikhail Kopytine </a> on Aug 20, 2002.
 Here are
 <A HREF="http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/St_TLA_Maker/README"> Victor Perevoztchikov's instructions on how to write an St***Maker </A>
  */
-#include "TError.h"
 #include "StBbcSimulationMaker.h"
 #include "g2t/St_g2t_bbc_Module.h"
-#include "St_DataSetIter.h"
-#include "StDAQMaker/StDAQReader.h"
+#include "TDataSetIter.h"
 #include "TRandom.h"
 #include <vector>
 #include "StEvent.h"
 #include "StTriggerDetectorCollection.h"
 #include "StBbcTriggerDetector.h"
-#include "StMessMgr.h"
 
 TRandom BbcRndm = TRandom(0);
 

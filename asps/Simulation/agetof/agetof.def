@@ -555,7 +555,7 @@ Replace [^+([NUMBER][OPR][NUMBER]]   with  [^+([COMPUTE  #1#2#3]]
              {IF}[EXIST 3]{ %FhMax = #3; } {ELSE} { %FhMax = %Magic;}     ]
 ;
 " use %Orti instead if %ORT variable "
-  REPLACE [;%ORT=#;] with [;%Orti=IGOR('#1');]
+  REPLACE [;%ORT=#;] with [;%AlphaN+=1; %AlphaK(%AlphaN)=IGOR('#1');]
   REPLACE [;%Alphax=#;] with [;%AlphaN+=1; %AlphaK(%AlphaN)=1; %AlphaL(%AlphaN)=#1;]
   REPLACE [;%Alphay=#;] with [;%AlphaN+=1; %AlphaK(%AlphaN)=2; %AlphaL(%AlphaN)=#1;]
   REPLACE [;%Alphaz=#;] with [;%AlphaN+=1; %AlphaK(%AlphaN)=3; %AlphaL(%AlphaN)=#1;]
