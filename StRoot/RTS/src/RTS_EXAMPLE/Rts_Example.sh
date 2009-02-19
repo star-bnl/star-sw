@@ -1,6 +1,6 @@
 #!/bin/bash
 #######################################################
-# $Id: Rts_Example.sh,v 1.3 2009/01/12 11:07:56 tonko Exp $
+# $Id: Rts_Example.sh,v 1.4 2009/02/19 16:25:44 fine Exp $
 # Author: v.Fine [ fine@bnl.gov ]
 #######################################################
 # The simple script to compile and build the main RTS application
@@ -18,7 +18,7 @@ if [ "$1" == "" ]; then
    echo No source file name has been provided.
    echo The default application \"rts_example\" will be built.
    echo ""
-   source_application=$STAR/StRoot/RTS/src/RTS_EXAMPLE/rts_example.C
+   source_application=StRoot/RTS/src/RTS_EXAMPLE/rts_example.C
 fi
 base_name=$(basename $source_application)
 executable_name=${base_name%%.*}
@@ -31,6 +31,7 @@ echo \"libRTS.so\" from the STAR offline release.
      -I$STAR/StRoot/RTS/trg/include \
      -I$STAR/StRoot/RTS/include     \
      -I$STAR/StRoot/RTS/src         \
+     -DINSIST_ON_EMC_PSEUDO         \
       $source_application -L.$STAR_HOST_SYS/lib -L$STAR_LIB -lRTS
 if [ -f rts_example  ] ; then
   echo ""
