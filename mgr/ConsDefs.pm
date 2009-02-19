@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.103 2009/01/22 20:09:14 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.104 2009/02/19 23:23:50 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -30,11 +30,7 @@
     $DEBUG        = "-g";
     $FDEBUG       = $DEBUG;
     $NOOPT        = "";
-    if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
-      $DEBUG = "-O -g";
-      $FDEBUG = $DEBUG;
-      print "set DEBUG = $DEBUG\n" unless ($param::quiet);
-    }
+
     $O      = "o";
     $A      = "a";
     $Cxx    = "cxx";
@@ -49,8 +45,6 @@
     $CXXinp   = "";
 
     $EXTRA_CPPFLAGS = "";
-    #$EXTRA_CPPFLAGS = "-Iinclude" if( ! -d "include");
-          #-I-";
 
     $AFSFLAGS = "";
     $AFSDIR   = "/usr/afsws";
@@ -69,8 +63,10 @@
       next if $f !~ /^-l/ or $f eq '-lm' or $f eq '-ldl';
       push @List, $f;
     }
+
     my $ROOTLIBS = join ' ', @List;
-#    print "ROOTLIBS = $ROOTLIBS   threadlib = $threadlib\n";
+    # print "ROOTLIBS = $ROOTLIBS   threadlib = $threadlib\n";
+
     my $rootcflags = `root-config --cflags`; chomp($rootcflags);
     my $ROOTCFLAGS = "";
     @List = ();
@@ -81,8 +77,9 @@
     if ($#List >= 0) {
       $ROOTCFLAGS = " " . join ' ', @List;
     }
-# print "ROOTCFLAGS = $ROOTCFLAGS\n";
-# die;
+
+    # print "ROOTCFLAGS = $ROOTCFLAGS\n";
+    # die;
     $SRPDIR   = $ROOTSYS . "/lib";
     $SRPFLAGS = "";                  # -DR__SRP -I" . $SRPDIR . "/include";
     $SRPLIBS  = "";                  # -L" . $SRPDIR . "/lib -lsrp -lgmp";
@@ -91,9 +88,12 @@
     $CPPPATH       = "";
     $CPPFLAGS      = "";
     $EXTRA_CPPPATH = "";
-# simulation
+
+    # simulation
     $CERNLIB_FPPFLAGS = "";
     $CERNLIB_CPPFLAGS = "";
+
+
     # We make the assumption that STAR_HOST_SYS will contain the string 64_
     # 64 bits test does not suffice. It comes in two flavors with lib and lib64
     # depending of backward 32 support or not. We can extend here later
@@ -108,29 +108,28 @@
     $G77           = "g77";
     $G77FLAGS      = "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
     if ($STAR_HOST_SYS =~ /gcc3/) {
-      $G77FLAGS      = "-pipe " . $G77FLAGS;
+      $G77FLAGS    = "-pipe " . $G77FLAGS;
     }
     $G77EXTEND     = "-ffixed-line-length-132";
 
     $CXX           = "g++";
     $CXXFLAGS      = "-fpic -w";
-    $EXTRA_CXXFLAGS = "";
-    $CXXOPT         = "";
+    $EXTRA_CXXFLAGS= "";
+    $CXXOPT        = "";
 
     $CC            = "gcc";
     $CFLAGS        = "-fpic -w";
     $EXTRA_CFLAGS  = "";
 
     $FC            = $G77;
-    $FCPATH       = "";
-    $EXTRA_FCPATH = "";
+    $FCPATH        = "";
+    $EXTRA_FCPATH  = "";
     $FFLAGS        = $G77FLAGS;
     $FEXTEND       = $G77EXTEND;
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
     $EXTRA_FPPFLAGS= "";
     $CXXFLAGS     .= $CPPCERN;
-    $EXTRA_FFLAGS  = "";
 
     $CPP           = $CC . " -E -P";
 
@@ -158,13 +157,40 @@
     if ( !$ROOT )       { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOT_LEVEL ) { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOTSYS )    { print "ROOT_SYS   has to be defined\n"; exit 1;}
- $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
- my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
- # if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
- if ($RLIBMAP) {
-   my ($M,$S,$V) = split('.',$ROOT_LEVEL);
-   if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
- }
+
+    $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
+    my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
+    # if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
+    if ($RLIBMAP) {
+	my ($M,$S,$V) = split('.',$ROOT_LEVEL);
+	if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
+    }
+
+
+    #+
+    # now treat NODEBUG and GPROF - kind of assume generic gcc
+    # and flag will need to be reset otherwise
+    #-
+    if ( defined( $ARG{GPROF} ) or defined($ENV{GPROF}) ){
+	print "Using GPROF\n" unless ($param::quiet);
+	$EXTRA_CXXFLAGS= " -pg ";
+	$EXTRA_CFLAGS  = " -pg ";
+	$EXTRA_FPPFLAGS= " -pg ";
+	$EXTRA_LDFLAGS = " -pg ";
+	$GPROF         = "yes";
+    } else {
+	# GPROF will imply that we do not allow optimized
+	$GPROF= undef;
+	if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
+	    $DEBUG = "-O -g";
+	    $FDEBUG= $DEBUG;
+	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	}
+    }
+
+
+
+
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $LIBS          = "";
     $Libraries     = "";
@@ -179,8 +205,7 @@
     $OSFCFID       = "";
     $date   = `date +\%d\%b-%T`;
     $ARCOM  = "%AR %ARFLAGS %> %< ; %RANLIB %>"; # "%AR %ARFLAGS %> %<;%RANLIB %>",
-# $ARCOM  = '[perl] \&script::alpha_arcom("%>", "%<")';
-#      $ARCOM  = '[perl] open(F,">input.list"); print F "%<\\n"; close(F); my $cmd = "%AR %ARFLAGS %> -input input.list; ranlib %>"; print "$cmd\\n"; my $flag = `$cmd`; if ($?) {0;} 1';
+
     $CXXCOM =
  "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
     $CCCOM = "%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS %EXTRA_CPPPATH -c %Cinp%< %Cout%>";
@@ -189,20 +214,17 @@
       "%LD %DEBUG %LDFLAGS %EXTRA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
  my $FCCOM = "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
  my $FCviaAGETOFCOM
- = " test -f %>:b.g && rm %>:b.g; %CPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
- . " test -f %>:b.f && rm %>:b.f; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.f;";
-# $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then grep -v '^#' %>:b.f > %>:b.for && %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.for %Fout%>;";
- $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.f %Fout%>;";
- $FCviaAGETOFCOM .= " else ". $FCCOM . " fi";
+ = " test -f %>:b.g && /bin/rm %>:b.g; %CPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
+ . " test -f %>:b.f && /bin/rm %>:b.f; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.f;";
 
- my $AGETOFCOM  = "test -f %>:b.F && rm %>:b.F;";
+    $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.f %Fout%>;";
+    $FCviaAGETOFCOM .= " else ". $FCCOM . " fi";
+
+ my $AGETOFCOM  = "test -f %>:b.F && /bin/rm %>:b.F;";
     $AGETOFCOM .= "%AGETOF %AGETOFLAGS %< -o %>:b.F &&";
     $AGETOFCOM .= "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %_IFLAGS %EXTRA_FCPATH -c";
     $AGETOFCOM .= " %>:b.F %Fout%>";
-# my $AGETOFCOM  = "test -f %>:b.F && rm %>:b.F; ln -s %<:f %<:b.F;";
-#    $AGETOFCOM .= "test -f %>:b.G && rm %>:b.G; %CPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F > %>:b.G;";
-#    $AGETOFCOM .= "test -f %>:b.f && rm %>:b.f; %AGETOF %AGETOFLAGS %<:b.G -o %>:b.f &&";
-#    $AGETOFCOM .= "%FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.f %Fout%>";
+
     $INCLUDE_PATH = $INCLUDE;
     $Salt = undef;
     $NoKeep = undef;
@@ -211,6 +233,13 @@
 
 
 
+
+    # ============================================================
+    # Platform support should be concentrated here
+    # Above was a generic gcc support
+    # ============================================================
+
+    # cernlib if not intel WNT
     if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
 	my($packl,$cernl,$kernl,$strip);
 
@@ -255,12 +284,15 @@
 	print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
     }
 
-    #  ============================================================
-    # Platform support should be concentrated here
-    #  ============================================================
     print "DEBUG >>> We will select architecture/compiler based on $STAR_HOST_SYS\n" if ($param::debug);
+
+    
     if ( ($STAR_HOST_SYS =~ m/^rh/ && $STAR_HOST_SYS =~ /_icc/) ||
 	 ($STAR_HOST_SYS =~ m/^sl/ && $STAR_HOST_SYS =~ /_icc/) ) {
+	#
+	# Intel ICC
+	#
+
 	#print "DEBUG >>> Switching ot ICC compiler\n" if ($param::debug);
 	$PLATFORM      = "linux";
 	$ARCH          = "linuxicc";
@@ -271,28 +303,26 @@
 	$CPP           = $CC . " -EP";
 	$CXXFLAGS      = "-w -ansi -fPIC -wd1476"; #-fpstkchk";
 	$CFLAGS        = "-restrict -w -fPIC";# -fpstkchk";# -restrict";# -Wall
-	$ICC_MAJOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f1; rm  /tmp/icc_version;`;
-        $ICC_MINOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f2; rm  /tmp/icc_version;`;
+	$ICC_MAJOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f1; /bin/rm  /tmp/icc_version;`;
+        $ICC_MINOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f2; /bin/rm  /tmp/icc_version;`;
 	chomp($ICC_MAJOR); chomp($ICC_MINOR);
 	$LIBFRTBEGIN   = `gcc -print-file-name=libfrtbegin.a | awk '{ if (\$1 != "libfrtbegin.a") print \$1}'`;
 	chomp($LIBFRTBEGIN);
 	$NOOPT         = "-O0";
-#	$LIBFRTBEGIN = `gcc -print-file-name=libfrtbegin.a | sed 's|/|-L/|`;
-	$CXXFLAGS      .= " -wd1476";
+	$CXXFLAGS     .= " -wd1476";
 	if ($ICC_MAJOR eq 8 and $ICC_MINOR ne 0 or $ICC_MAJOR eq 9) {
-	  $CXXFLAGS     .= " -wd1572";
-	  $CFLAGS       .= " -wd1572";
+	  $CXXFLAGS   .= " -wd1572";
+	  $CFLAGS     .= " -wd1572";
 	}
 	if ($ICC_MAJOR ge '8') {
-	  $FC            = "ifort";
-	  $LIBIFCPATH    = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
-	  $F77LIBS       =  $LIBFRTBEGIN ." -L". $LIBIFCPATH ." -lifcore ";# . $LIBG2C;
+	  $FC          = "ifort";
+	  $LIBIFCPATH  = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
+	  $F77LIBS     =  $LIBFRTBEGIN ." -L". $LIBIFCPATH ." -lifcore ";# . $LIBG2C;
 	}
 	else                   {
-	  $FC            = "ifc";
-	  $LIBIFCPATH    = `which ifc | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
-#	  $F77LIBS       = $LIBFRTBEGIN ." -L". $LIBIFCPATH ." -lF90 -lCEPCF90 -lintrins";
-	  $F77LIBS       = $LIBG2C ." -L". $LIBIFCPATH ." -lF90 -lCEPCF90 -lintrins";
+	  $FC          = "ifc";
+	  $LIBIFCPATH  = `which ifc | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
+	  $F77LIBS     = $LIBG2C ." -L". $LIBIFCPATH ." -lF90 -lCEPCF90 -lintrins";
 	}
 	$F77LIBS      .= " -lg2c";
 	$FLIBS         = $F77LIBS;
@@ -310,22 +340,15 @@
         $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
         $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
 
+	$EXTRA_CXXFLAGS= "";
+	$EXTRA_CFLAGS  = "";
+	$EXTRA_CPPFLAGS= "";
+	$EXTRA_LDFLAGS = "";
 
     } elsif (/^alpha_dux/) {
 	#
 	# Trying True64
 	#
-#      $ARCOM  = "sub {  my ($env, $lib, @src) = @_;
-#  my $input = \"input\" . File::Basename::dirname($lib);
-#  open (OUTPUT, \">$input\") or die \"Cannot open $input\n\";
-#  foreach my $s (@src) {print OUTPUT \"$s\n\";}
-#  close(OUTPUT);
-#  my $cmd = \"ar $lib -input $input; ranlib $lib\"; print \"$cmd\n\";
-#  my $flag = `$cmd`; if ($?) {exit 2;}
-#}";
-
-#
-#        $ARCOM  = "test -f input.list && rm input.list; for $file in %< do; echo $file > input.list;done;%AR %ARFLAGS %> -input input.list', '%RANLIB %>"; # "%AR %ARFLAGS %> %<;%RANLIB %>",
         $ARCOM  = "%AR %ARFLAGS %>  -input %< ; %RANLIB %>";
 	$PLATFORM      = "alpha";
 	$ARCH          = "alphaxxx6";
@@ -334,7 +357,6 @@
 	$CPP           = $CC . " -EP";
 	$CXXFLAGS      = "tlocal";
 	$CFLAGS        = "";
-	$EXTRA_CXXFLAGS= "-Iinclude -long_double_size 64";
 	$FC            = "f77";
 	$F77LIBS       = "/usr/shlib/libFutil.so /usr/shlib/libUfor.so /usr/shlib/libfor.so /usr/shlib/libots.so";
 	$FLIBS         = $F77LIBS;
@@ -353,6 +375,12 @@
 	$SO            = $CXX;
 	$SOFLAGS       = "-shared -nocxxstd -Wl,-expect_unresolved,*,-msym,-soname,";
 	$OSFID        .= " ST_NO_NAMESPACES";
+
+	$EXTRA_CXXFLAGS= "-Iinclude -long_double_size 64";
+	$EXTRA_CFLAGS  = "";
+	$EXTRA_CPPFLAGS= "";
+	$EXTRA_LDFLAGS = "";
+
     } elsif (/^sun4x_/) {
 	#
 	# Solaris
@@ -378,8 +406,6 @@
 "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";
         $FC             = "$SUNOPT/$SUNWS/bin/f77";
         $CXXFLAGS       = "-KPIC";
-        $EXTRA_CXXFLAGS = " -D__CC5__";
-        $EXTRA_CFLAGS   = " -D__CC5__";
         $CLIBS        =
           "-lm -ltermcap -ldl -lnsl -lsocket -lgen $SUNOPT/$SUNWS/lib/libCrun.so -L. -lCstd -lmalloc";
           # Brute force required for CC WS6.0 (?). Links all others but that one
@@ -399,18 +425,14 @@
         $SO         = $CXX;
         $SOFLAGS    = "-G -ptr%ObjDir";
 
-        if ( defined( $ARG{INSURE} ) ) {
-            print "***Use INSURE++***\n" unless ($param::quiet);
-            $CC  = "insure -g -Zoi \"compiler_c cc\"";
-            $CPP = "insure -g -Zoi \"compiler_c CC\"";
-            $CXX = "insure -g -Zoi \"compiler_cpp CC\"";
-            $LD  = $CXX;
-            $SO  = $CXX;
-	    $F77LD         = $LD;
-        }
+        $EXTRA_CXXFLAGS = " -D__CC5__";
+        $EXTRA_CFLAGS   = " -D__CC5__";
+	$EXTRA_CPPFLAGS = "";
+	$EXTRA_LDFLAGS  = "";
+
 
 	# ATTENTION
-	# - Below is a generic gcc support
+	# - Below is a generic gcc support tweaks
 	# - Any platform specific support needs to appear prior to this
     } elsif ($STAR_HOST_SYS =~ /^i386_/ ||
 	     $STAR_HOST_SYS =~ /^rh/    ||
@@ -421,10 +443,13 @@
         #
 	$CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
 	$CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-#       print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
+
+        #print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);
-	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;#  print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
+	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
+
+        # print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
         $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";
 	my $optflags = "";
 
@@ -441,28 +466,26 @@
 	#	}
 
 	$CXXFLAGS    .= " -Wno-long-long";
+
+	# Additional optimization flags if NODEBUG
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
-	  $DEBUG = "-O -g";
-	  $FDEBUG = "-O -g";
-	  if ($CXX_VERSION < 3){
-	    $optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
-	  } else {
-	    # this na1ming convention starts at gcc 3.2 which happens to
-	    # have a change in the options
-	    $optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
-	  }
-	  print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	    if ($CXX_VERSION < 3){
+		$optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
+	    } else {
+		# this na1ming convention starts at gcc 3.2 which happens to
+		# have a change in the options
+		$optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
+	    }
+	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	}
+
 	if ($optflags) {
-	  $CFLAGS   .= " " . $optflags;
-	  $CXXFLAGS .= " " . $optflags;
-	  $G77FLAGS .= " " . $optflags;
+	    $CFLAGS   .= " " . $optflags;
+	    $CXXFLAGS .= " " . $optflags;
+	    $G77FLAGS .= " " . $optflags;
 	}
         $CFLAGS    = "-pipe -fPIC -Wall -Wshadow";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
-#        $SOFLAGS   = "-shared -Wl,-Bdynamic -rdynamic -Wl,--export-dynamic";#-Wl,--export-dynamic
-#        $SOFLAGS   = "-shared -Wl,-Bdynamic -rdynamic -Wl,--export-dynamic";#-Wl,--export-dynamic
-#        $SOFLAGS   = "-shared -Wl,--no-define-common";
 
 	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
 
@@ -479,25 +502,14 @@
 	}
 	# print "*** $CXX_VERSION $SYSLIBS\n";
 
-        if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
-            print "Use INSURE++\n" unless ($param::quiet);
-            $CC  = "insure -g -Zoi \"compiler_c gcc\"";
-            $CPP = "gcc -E -P";
-            $CXX = "insure -g -Zoi \"compiler_cpp g++\"";
-            $LD  = $CXX;
-            $SO  = $CXX;
-	    $F77LD         = $LD;
-        }
-
         if ($PGI) {
-	  $FC    = "pgf77";
-	  $FFLAGS = "";
-	  $FEXTEND = "-Mextend";
-
+	    $FC    = "pgf77";
+	    $FFLAGS = "";
+	    $FEXTEND = "-Mextend";
 	} else {
-	  $FC      = $G77;
-	  $FFLAGS  = $G77FLAGS;
-	  $FEXTEND = $G77EXTEND;
+	    $FC      = $G77;
+	    $FFLAGS  = $G77FLAGS;
+	    $FEXTEND = $G77EXTEND;
 	}
 	if ($CXX_VERSION >= 4){
 	    # Same coment, not sure if V4 or a Mac issue
@@ -509,8 +521,14 @@
 
 
     } else {
-      die "Unsupported platform $STAR_HOST_SYS\n";
+	die "Unsupported platform $STAR_HOST_SYS\n";
     }
+    # ============================================================
+    # End of platform specific reshape of options and tweaks
+    # ============================================================
+
+
+
     $SYSLIBS   .= $threadlib;
     $CLIBS     .= $threadlib;
     $CFLAGS    .= $ROOTCFLAGS;
@@ -686,6 +704,7 @@
 		  'CERNLIB_CPPFLAGS' => $CERNLIB_CPPFLAGS,
 		  'ROOTLIBS'      => $ROOTLIBS,
 		  'DEBUG'         => $DEBUG,
+		  'GPROF'         => $GPROF,
 		  'FDEBUG'        => $FDEBUG,
 		  'NOOPT'         => $NOOPT,
 		  'G77'           => $G77,
@@ -730,14 +749,14 @@
 		  'THREAD'         => $THREAD,
 		  'CRYPTLIBS'      => $CRYPTLIBS,
 		  'SYSLIBS'        => $SYSLIBS,
-		  'CERNLIBS'         => $CERNLIBS,
+		  'CERNLIBS'       => $CERNLIBS,
 		  'Libraries'      => $Libraries,
 		  'LIBS'           => $LIBS,
 		  'LD'             => $LD,
 		  'LDFLAGS'        => $LDFLAGS,
 		  'LDEXPORT'       => $LDEXPORT,
-		  'LDALL'	       => $LDALL,
-		  'LDNONE'	       => $LDNONE,
+		  'LDALL'	   => $LDALL,
+		  'LDNONE'	   => $LDNONE,
 		  'EXTRA_LDFLAGS'  => $EXTRA_LDFLAGS,
 		  'F77LD'          => $F77LD,
 		  'F77LDFLAGS'     => $F77LDFLAGS,
