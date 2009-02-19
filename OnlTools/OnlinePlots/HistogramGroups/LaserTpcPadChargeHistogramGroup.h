@@ -8,7 +8,8 @@
 
 class LaserTpcPadChargeHistogramGroup : public HistogramGroup {
  public:
-  LaserTpcPadChargeHistogramGroup(const char* group="laser", const char* subGroup="pad charge", const char* trigger="laser", const char* detector="tpc");
+  LaserTpcPadChargeHistogramGroup();
+  LaserTpcPadChargeHistogramGroup(const char* group, const char* subGroup="pad charge", const char* trigger="laser", const char* detector="tpc");
   ~LaserTpcPadChargeHistogramGroup();
   virtual void reset();
   virtual bool fill(evpReader* evp, char* datap);

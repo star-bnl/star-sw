@@ -7,9 +7,8 @@
 
 
 class UPCHistogramGroup : public HistogramGroup {
- protected:
-   UPCHistogramGroup(){}
  public:
+  UPCHistogramGroup();
   UPCHistogramGroup(const char* group, const char* subGroup="first", const char* trigger="upc", const char* detector="any");
   ~UPCHistogramGroup();
   virtual void reset();

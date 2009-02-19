@@ -16,6 +16,18 @@
 
 ClassImp(L2UpsilonCountsHistogramGroup) ;
 
+L2UpsilonCountsHistogramGroup::L2UpsilonCountsHistogramGroup() {
+  // For ROOT I/O
+  hTag  = 0;
+  hTime = 0;
+  hEvent = 0;
+  hNumberOfHotTowers = 0;
+  hAbordRate = 0;
+  hAbordRateCurrent = 0;
+  mNumberOfHotTowers = -1;
+  mHotTowerChanges = -1;
+}
+
 L2UpsilonCountsHistogramGroup::L2UpsilonCountsHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector) : HistogramGroup(group,subGroup,trigger,detector) {
 
   hTag  = new TH1D( pre("hTag"), "Tag",5,-0.5,4.5);
@@ -130,9 +142,12 @@ bool L2UpsilonCountsHistogramGroup::fill(evpReader* evp, char* datap) {
 }
 
 /*************************************************************************************
- $Id: L2UpsilonCountsHistogramGroup.cxx,v 1.2 2009/02/13 22:23:04 dkettler Exp $
+ $Id: L2UpsilonCountsHistogramGroup.cxx,v 1.3 2009/02/19 22:32:05 genevb Exp $
  *************************************************************************************
  $Log: L2UpsilonCountsHistogramGroup.cxx,v $
+ Revision 1.3  2009/02/19 22:32:05  genevb
+ More thorough default constructor implementations
+
  Revision 1.2  2009/02/13 22:23:04  dkettler
  Trigger data changes
 

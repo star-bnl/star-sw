@@ -16,9 +16,12 @@
 
 ClassImp(UPCHistogramZdcGroup) ;
 
-UPCHistogramZdcGroup::UPCHistogramZdcGroup()
-{
-   // For ROOT I/O 
+UPCHistogramZdcGroup::UPCHistogramZdcGroup() {
+  // For ROOT I/O 
+  h_zdce_sum = 0;
+  h_zdcw_sum = 0;
+  h_zdce_sum_vs_ctb_sum = 0;
+  h_zdcw_sum_vs_ctb_sum = 0;
 }
 
 UPCHistogramZdcGroup::UPCHistogramZdcGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)

@@ -10,9 +10,8 @@
 
 
 class SVTAnodeHybridHistogramGroup : public HistogramGroup {
-protected:
-   SVTAnodeHybridHistogramGroup();
 public:
+  SVTAnodeHybridHistogramGroup();
   SVTAnodeHybridHistogramGroup(unsigned int board, const char* group="SVT", const char* subGroup="Anode vs Hybrid", const char* trigger="any", const char* detector="svt");
   ~SVTAnodeHybridHistogramGroup();
   virtual void reset();

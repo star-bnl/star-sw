@@ -9,7 +9,8 @@
 
 class L2UpsilonTowersHistogramGroup : public HistogramGroup {
  public:
-  L2UpsilonTowersHistogramGroup(const char* group="L2 upsilon", const char* subGroup="mass", const char* trigger="ups", const char* detector="any");
+  L2UpsilonTowersHistogramGroup();
+  L2UpsilonTowersHistogramGroup(const char* group, const char* subGroup="mass", const char* trigger="ups", const char* detector="any");
   ~L2UpsilonTowersHistogramGroup();
   virtual void reset();
   virtual bool fill(evpReader* evp, char* datap);

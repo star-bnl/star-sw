@@ -8,10 +8,8 @@
 
 class VPDHistogramGroup : public HistogramGroup {
 
-protected:
-   VPDHistogramGroup();
 public:
-
+  VPDHistogramGroup();
   VPDHistogramGroup(const char* group, const char* subGroup="vpd", const char* trigger="any", const char* detector="vpd");
   ~VPDHistogramGroup();
 

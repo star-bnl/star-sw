@@ -67,10 +67,19 @@ void SsdPedestalHistogramGroup::SsdTH1Setup(TH1 *rHisto,const char *rTitleX, con
 }
 
 
+SsdPedestalHistogramGroup::SsdPedestalHistogramGroup() {
+  // For ROOT I/O
+  h1SsdMeanPedestal = 0;
+  h1SsdMeanNoise = 0;
+  good_ssd = 0;
+  // mRunNumber = 0;
+  // mEvents = 0;
+}
+
 SsdPedestalHistogramGroup::SsdPedestalHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {
-  //  mRunNumber = 0;
-  //mEvents = 0;
+  // mRunNumber = 0;
+  // mEvents = 0;
   h1SsdMeanPedestal = new TH1F( pre("h1SsdMeanPedestal"), "Mean Pedestal per ladder",40,1,41);
   SsdTH1Setup(h1SsdMeanPedestal,"Real Ladder #","Pedestal (ADC Counts)",0,15);
   h1SsdMeanNoise= new TH1F( pre("h1SsdMeanNoise"), "Mean Noise per ladder",40,1,41);

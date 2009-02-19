@@ -9,7 +9,8 @@ class StReadLaserEvent;
 
 class LaserDriftTimeHistogramGroup : public HistogramGroup {
  public:
-  LaserDriftTimeHistogramGroup(const char* group="laser", const char* subGroup="drift time", const char* trigger="laser", const char* detector="tpc");
+  LaserDriftTimeHistogramGroup();
+  LaserDriftTimeHistogramGroup(const char* group, const char* subGroup="drift time", const char* trigger="laser", const char* detector="tpc");
   ~LaserDriftTimeHistogramGroup();
   virtual void reset();
   virtual bool fill(evpReader* evp, char* datap);

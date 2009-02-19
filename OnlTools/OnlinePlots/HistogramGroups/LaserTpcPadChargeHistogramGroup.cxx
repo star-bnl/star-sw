@@ -21,6 +21,11 @@ ClassImp(LaserTpcPadChargeHistogramGroup) ;
 
 unsigned int LaserTpcPadChargeHistogramGroup::mSec[6] = { 1, 6, 11, 13, 19, 23};   // sector indices start at 0
 
+LaserTpcPadChargeHistogramGroup::LaserTpcPadChargeHistogramGroup() {
+  // For ROOT I/O
+  memset( hTpcSec,0,sizeof(hTpcSec));
+}
+
 LaserTpcPadChargeHistogramGroup::LaserTpcPadChargeHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector) : HistogramGroup(group,subGroup,trigger,detector) {  
   char name[1024];
   char title[1024];

@@ -16,13 +16,20 @@
 
 ClassImp(L2UpsilonMassHistogramGroup) ;
 
+L2UpsilonMassHistogramGroup::L2UpsilonMassHistogramGroup() {
+  // For ROOT I/O
+  hEnergyL0 = 0;
+  hEnergyL2 = 0;
+  hMass     = 0;
+  hCosTheta = 0;
+}
+
 L2UpsilonMassHistogramGroup::L2UpsilonMassHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector) : HistogramGroup(group,subGroup,trigger,detector) {
 
- hEnergyL0 = new TH1D( pre("hEnergyL0"), "energy L0",100,0.,25.);
- hEnergyL2 = new TH1D( pre("hEnergyL2"), "energy L2",100,0.,25.);
- hMass     = new TH1D( pre("hMass"), "inv. mass",100,0.,20.);
- hCosTheta = new TH1D( pre("hCosTheta"), "cos(theta)",100,-1.,1.);
-
+  hEnergyL0 = new TH1D( pre("hEnergyL0"), "energy L0",100,0.,25.);
+  hEnergyL2 = new TH1D( pre("hEnergyL2"), "energy L2",100,0.,25.);
+  hMass     = new TH1D( pre("hMass"), "inv. mass",100,0.,20.);
+  hCosTheta = new TH1D( pre("hCosTheta"), "cos(theta)",100,-1.,1.);
 
 }
 
@@ -99,9 +106,12 @@ bool L2UpsilonMassHistogramGroup::fill(evpReader* evp, char* datap) {
 }
 
 /*************************************************************************************
- $Id: L2UpsilonMassHistogramGroup.cxx,v 1.2 2009/02/13 22:23:04 dkettler Exp $
+ $Id: L2UpsilonMassHistogramGroup.cxx,v 1.3 2009/02/19 22:32:05 genevb Exp $
  *************************************************************************************
  $Log: L2UpsilonMassHistogramGroup.cxx,v $
+ Revision 1.3  2009/02/19 22:32:05  genevb
+ More thorough default constructor implementations
+
  Revision 1.2  2009/02/13 22:23:04  dkettler
  Trigger data changes
 

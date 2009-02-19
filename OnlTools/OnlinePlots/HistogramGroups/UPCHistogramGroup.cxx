@@ -16,6 +16,16 @@
 
 ClassImp(UPCHistogramGroup) ;
 
+UPCHistogramGroup::UPCHistogramGroup() {
+  // For ROOT I/O
+  h_zdc_time_east = 0;
+  h_zdc_time_west = 0;
+  h_zdc_timediff_east_west = 0;
+  h_zdc_time_east_vs_west = 0;
+  h_zdc_unatt_east = 0;
+  h_zdc_unatt_west = 0;
+}
+
 UPCHistogramGroup::UPCHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector) : HistogramGroup(group,subGroup,trigger,detector) {
 
   h_zdc_time_east = new TH1D( pre("h_zdc_time_east"), "ZDC Time East",256,0.,256.);

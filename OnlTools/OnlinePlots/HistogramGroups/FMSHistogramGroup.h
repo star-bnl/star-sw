@@ -9,7 +9,8 @@ class FMSHistogramGroup : public HistogramGroup {
 
 public:
 
-  FMSHistogramGroup(const char* group="trigger", const char* subGroup="fms", const char* trigger="any", const char* detector="fms");
+  FMSHistogramGroup();
+  FMSHistogramGroup(const char* group, const char* subGroup="fms", const char* trigger="any", const char* detector="fms");
   ~FMSHistogramGroup();
 
   virtual void reset();

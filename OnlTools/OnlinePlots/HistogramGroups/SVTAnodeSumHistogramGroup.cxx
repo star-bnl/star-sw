@@ -27,6 +27,13 @@
 ClassImp(SVTAnodeSumHistogramGroup) ;
 
 
+SVTAnodeSumHistogramGroup::SVTAnodeSumHistogramGroup() {
+  // For ROOT I/O
+  mRunNumber = 0;
+  mEvents = 0;
+  memset( hSVT, 0, sizeof(hSVT));
+}
+
 SVTAnodeSumHistogramGroup::SVTAnodeSumHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {
   mRunNumber = 0;

@@ -8,7 +8,8 @@
 
 class GroupStatisticsHistogramGroup : public HistogramGroup {
  public:
-  GroupStatisticsHistogramGroup(const char* group="trigger", const char* subGroup="event and trigger groups", const char* trigger="any", const char* detector="any");
+  GroupStatisticsHistogramGroup();
+  GroupStatisticsHistogramGroup(const char* group, const char* subGroup="event and trigger groups", const char* trigger="any", const char* detector="any");
   ~GroupStatisticsHistogramGroup();
   virtual void reset();
   virtual bool fill(evpReader* evp, char* datap);
