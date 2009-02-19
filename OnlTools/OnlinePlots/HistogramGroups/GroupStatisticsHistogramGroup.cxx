@@ -17,6 +17,12 @@
 
 ClassImp(GroupStatisticsHistogramGroup) ;
 
+GroupStatisticsHistogramGroup::GroupStatisticsHistogramGroup() {
+  // For ROOT I/O
+  hEventGroups = 0;
+  hDetectorGroups = 0;
+}
+
 GroupStatisticsHistogramGroup::GroupStatisticsHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector) : HistogramGroup(group,subGroup,trigger,detector) {
   hEventGroups = new TH1D( pre("hEventGroups"), "event groups",32,-0.5,31.5);
   hDetectorGroups = new TH1D( pre("hDetectorGroups"), "detector groups",32,-0.5,31.5);

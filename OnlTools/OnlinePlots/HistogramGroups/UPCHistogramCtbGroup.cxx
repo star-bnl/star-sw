@@ -49,6 +49,14 @@ const unsigned char UPCHistogramCtbGroup::mCtbMap[2][120] = {
 };
 
 
+UPCHistogramCtbGroup::UPCHistogramCtbGroup() {
+  // For ROOT I/O
+  h_ctb_adc_sum = 0;
+  h_ctb_count_vs_tray = 0;
+  h_ctb_cdb = 0;
+  h_ctb_cdb_zoom = 0;
+}
+
 UPCHistogramCtbGroup::UPCHistogramCtbGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {
   h_ctb_adc_sum = new TH1D( pre("h_ctb_adc_sum"), "CTB ADC Sum", 210, -0.5, 209.5);

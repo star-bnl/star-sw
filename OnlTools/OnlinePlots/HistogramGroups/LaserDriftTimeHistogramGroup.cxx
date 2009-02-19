@@ -20,7 +20,10 @@
 
 ClassImp(LaserDriftTimeHistogramGroup) ;
 
-LaserDriftTimeHistogramGroup::LaserDriftTimeHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector) : HistogramGroup(group,subGroup,trigger,detector), mLaser(0), hDriftTime(0) {
+// For ROOT I/O
+LaserDriftTimeHistogramGroup::LaserDriftTimeHistogramGroup() : hDriftTime(0), mLaser(0) {}
+
+LaserDriftTimeHistogramGroup::LaserDriftTimeHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector) : HistogramGroup(group,subGroup,trigger,detector), hDriftTime(0), mLaser(0) {
   hDriftTime = new TH1D( pre("hDriftTime"), "TPC Drift Velocity (cm/us)",400,5.4,5.8);
   rtsLogLevel(NOTE);
   rtsLogAddDest("172.16.0.1",8002);

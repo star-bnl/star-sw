@@ -24,6 +24,15 @@
 
 ClassImp(FMSHistogramGroup) ;
 
+FMSHistogramGroup::FMSHistogramGroup() {
+  // For ROOT I/O
+  h_fms_nqtdata = 0;
+  h_fms_nqtheader = 0;
+  h_fms_nqtheader = 0;
+  memset( h_fms_quad_sum,0,sizeof(h_fms_quad_sum));
+  memset( h_fms_quad_mult,0,sizeof(h_fms_quad_mult));
+}
+
 FMSHistogramGroup::FMSHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {
   createHistos();

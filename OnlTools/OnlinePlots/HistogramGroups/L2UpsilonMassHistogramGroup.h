@@ -7,7 +7,8 @@
 
 class L2UpsilonMassHistogramGroup : public HistogramGroup {
  public:
-  L2UpsilonMassHistogramGroup(const char* group="L2 upsilon", const char* subGroup="mass", const char* trigger="ups", const char* detector="any");
+  L2UpsilonMassHistogramGroup();
+  L2UpsilonMassHistogramGroup(const char* group, const char* subGroup="mass", const char* trigger="ups", const char* detector="any");
   ~L2UpsilonMassHistogramGroup();
   virtual void reset();
   virtual bool fill(evpReader* evp, char* datap);

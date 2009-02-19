@@ -7,10 +7,8 @@
 
 
 class UPCHistogramCtbGroup : public HistogramGroup {
-protected:
-  UPCHistogramCtbGroup(){}
 public:
-
+  UPCHistogramCtbGroup();
   UPCHistogramCtbGroup(const char* group, const char* subGroup="ctb", const char* trigger="upc", const char* detector="ctb");
   ~UPCHistogramCtbGroup();
 

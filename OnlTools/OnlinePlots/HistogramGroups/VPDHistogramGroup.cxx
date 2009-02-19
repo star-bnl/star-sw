@@ -26,9 +26,11 @@
 
 ClassImp(VPDHistogramGroup) ;
 
-VPDHistogramGroup::VPDHistogramGroup() : HistogramGroup() 
-{
- // For ROOT I/O
+VPDHistogramGroup::VPDHistogramGroup() {
+  // For ROOT I/O
+  memset( h_vpd_cdb, 0, sizeof(h_vpd_cdb));
+  h_vpd_tac_east_vs_tac_west = 0;
+  h_vpd_vertex_vs_l3_vertex = 0;
 }
 
 VPDHistogramGroup::VPDHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)

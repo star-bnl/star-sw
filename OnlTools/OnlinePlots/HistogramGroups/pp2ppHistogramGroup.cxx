@@ -28,14 +28,13 @@
 
 ClassImp(pp2ppHistogramGroup) ;
 
-pp2ppHistogramGroup::pp2ppHistogramGroup()
-  : HistogramGroup(), mswitch(9999) 
-{
-   // prepare objt for ROOT I/O
-   memset( h_P2P,0,sizeof(h_P2P));
+pp2ppHistogramGroup::pp2ppHistogramGroup() {
+  // For ROOT I/O
+  memset( h_P2P,0,sizeof(h_P2P));
+  mswitch = 0;
 }
 
-pp2ppHistogramGroup::pp2ppHistogramGroup(unsigned int iswitch=0, const char* group, const char* subGroup, const char* trigger, const char* detector)
+pp2ppHistogramGroup::pp2ppHistogramGroup(unsigned int iswitch, const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector), mswitch(iswitch) {
 
   ostringstream so ;

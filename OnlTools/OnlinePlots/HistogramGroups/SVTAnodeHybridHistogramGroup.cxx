@@ -28,9 +28,11 @@ ClassImp(SVTAnodeHybridHistogramGroup) ;
 
 unsigned int SVTAnodeHybridHistogramGroup::mFirstHybrid[__MAXBOARDS__+1] = { 0, 32, 64, 100, 136, 172, 208, 236, 264, 292, 320, 348, 376, 404, 432};
 const char* SVTAnodeHybridHistogramGroup::mNames[4] = { "AdcSum", "AdcSumCount", "Hit", "HitCount" };
-SVTAnodeHybridHistogramGroup::SVTAnodeHybridHistogramGroup():HistogramGroup()
-, mEvents(19562009),mBoard(19562009)
-{
+
+SVTAnodeHybridHistogramGroup::SVTAnodeHybridHistogramGroup() {
+  // For ROOT I/O
+  mEvents = 0;
+  mBoard = 0;
   memset(hSVT,0,sizeof(hSVT));
 }
 

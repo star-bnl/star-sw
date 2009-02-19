@@ -8,10 +8,8 @@
 
 class UPCHistogramZdcGroup : public HistogramGroup {
 
-protected:
-    UPCHistogramZdcGroup();
 public:
-
+  UPCHistogramZdcGroup();
   UPCHistogramZdcGroup(const char* group, const char* subGroup="zdc", const char* trigger="upc", const char* detector="zdc");
   ~UPCHistogramZdcGroup();
 
