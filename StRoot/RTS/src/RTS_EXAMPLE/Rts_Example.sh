@@ -1,6 +1,6 @@
 #!/bin/bash
 #######################################################
-# $Id: Rts_Example.sh,v 1.4 2009/02/19 16:25:44 fine Exp $
+# $Id: Rts_Example.sh,v 1.5 2009/02/19 16:26:31 fine Exp $
 # Author: v.Fine [ fine@bnl.gov ]
 #######################################################
 # The simple script to compile and build the main RTS application
@@ -18,7 +18,7 @@ if [ "$1" == "" ]; then
    echo No source file name has been provided.
    echo The default application \"rts_example\" will be built.
    echo ""
-   source_application=StRoot/RTS/src/RTS_EXAMPLE/rts_example.C
+   source_application=$STAR/StRoot/RTS/src/RTS_EXAMPLE/rts_example.C
 fi
 base_name=$(basename $source_application)
 executable_name=${base_name%%.*}
