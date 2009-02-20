@@ -18,6 +18,13 @@ class EEdsm3;
 class EemcHttpInfo;
 class TH1;
 
+// #### modified by Liaoyuan ####
+
+class DSMLayer_E001_2009;
+class DSMLayer_E101_2009;
+
+// #### modified end ####
+
 class StEemcTriggerSimu : public StVirtualTriggerSimu {
  public:
   enum {kOnlyAdc=0,kAdcAndTrig, kAdcCompareTrig};
@@ -57,6 +64,24 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   EEdsm1Tree  * dsm1TreeADC; 
  public:
   EMCdsm2Tree * dsm2TreeADC;
+  
+  // #### modified by Liaoyuan ####
+  // 2009 Endcap DSM Layer 0 + 1
+ private:
+  DSMLayer_E001_2009* mE001;
+  DSMLayer_E101_2009* mE101;
+
+  void get2009_DSMLayer0();	// Reads output from feeTPTreeADC & process
+  void get2009_DSMLayer1();     // Reads output from mE101 & process
+
+  // Access to 2009 EEMC Layer 0 + 1
+ public:
+  DSMLayer_E001_2009* get2009_DSMLayer0_Result() { return mE001; };
+  DSMLayer_E101_2009* get2009_DSMLayer1_Result() { return mE101; };
+
+  // #### modified end ####
+  
+  
 
  private:
   // Endcap DSM0...3 Tree only unpacking TRG data, for QA
@@ -102,6 +127,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.12  2009/02/20 23:40:04  pibero
+// Updates for Run 9 by Liaoyuan
+//
 // Revision 1.11  2009/02/04 20:27:10  rfatemi
 // Update StEemcDbMaker
 //
