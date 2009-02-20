@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.104 2009/02/19 23:23:50 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.105 2009/02/20 01:47:01 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -586,82 +586,81 @@
 	$MYSQLLIB .= " -lz";
     }
     print "Use MYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
- if $MYSQLLIBDIR && ! $param::quiet;
+	if $MYSQLLIBDIR && ! $param::quiet;
+
     # QT
     if ( defined($QTDIR) && -d $QTDIR) {
-    $QT_VERSION = 3;
+	$QT_VERSION = 3;
 
-      if (-e $QTDIR . "/bin/moc") {
-        $QTLIBDIR = $QTDIR . "/lib";
-        $QTBINDIR = $QTDIR . "/bin";
-      }
-      if ($QTBINDIR) {
-         $QTINCDIR = $QTDIR . "/include";
-         $QTFLAGS  = "-DR__QT";#-DQT_THREAD_SUPPORT";
-         if ( -d $QTINCDIR . "/QtCore" ) { $QT_VERSION = 4;}
-         if ($QT_VERSION==4) {
-             my $QtIncBase = $QTINCDIR;
-             if( opendir(QT4INCLUDE,$QtIncBase)) {
-                my $Qt4Header;
-                while($Qt4Header = readdir(QT4INCLUDE)) 
-                {
-                   if ($Qt4Header =~ /^Qt\D*/ && -d $QtIncBase . "/" . $Qt4Header ) {
-                      $QTINCDIR .= $main::PATH_SEPARATOR . "$QtIncBase/" . $Qt4Header;
-                   }
-                }
-                $QTFLAGS .=  " -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED ";
-                closedir(QT4INCLUDE);
-             
-                if( opendir(QT4LIBS,$QTLIBDIR)) {
-                   my $Qt4Lib;
-                   while($Qt4Lib = readdir(QT4LIBS)) {
-                      if ($Qt4Lib =~ /^libQt.+\.so$/ && -f $QTLIBDIR  . "/" . $Qt4Lib ) {
-                         $Qt4Lib=~ s/^lib//;  $Qt4Lib=~ s/\.so$//;
-                         $QTLIBS .= " -l" . $Qt4Lib;
-                      }
-                 }
-                 closedir(QT4LIBS);
-               }
-             }
-          } else {
-             $QTLIBS   = "-lqt-mt";
-             if ($main::_WIN32) {
-                $QTLIBS  .= " " . $QTDIR . "/lib/qt-mt*.lib " .
-                $ROOTSYS . "/lib/libGraf.lib " .
-                $ROOTSYS . "/lib/libGpad.lib shell32.lib Ws2_32.lib Imm32.lib Winmm.lib";
-             }
-        }
-        print "Use QTLIBDIR = $QTLIBDIR \tQTINCDIR = $QTINCDIR \tQTFLAGS = $QTFLAGS \tQTLIBS = $QTLIBS\n"
-                 if $QTLIBDIR && ! $param::quiet;
-     }
+	if (-e $QTDIR . "/bin/moc") {
+	    $QTLIBDIR = $QTDIR . "/lib";
+	    $QTBINDIR = $QTDIR . "/bin";
+	}
+	if ($QTBINDIR) {
+	    $QTINCDIR = $QTDIR . "/include";
+	    $QTFLAGS  = "-DR__QT";#-DQT_THREAD_SUPPORT";
+	    if ( -d $QTINCDIR . "/QtCore" ) { $QT_VERSION = 4;}
+	    if ($QT_VERSION==4) {
+		my $QtIncBase = $QTINCDIR;
+		if( opendir(QT4INCLUDE,$QtIncBase)) {
+		    my $Qt4Header;
+		    while($Qt4Header = readdir(QT4INCLUDE)) 
+		    {
+			if ($Qt4Header =~ /^Qt\D*/ && -d $QtIncBase . "/" . $Qt4Header ) {
+			    $QTINCDIR .= $main::PATH_SEPARATOR . "$QtIncBase/" . $Qt4Header;
+			}
+		    }
+		    $QTFLAGS .=  " -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED ";
+		    closedir(QT4INCLUDE);
+		    
+		    if( opendir(QT4LIBS,$QTLIBDIR)) {
+			my $Qt4Lib;
+			while($Qt4Lib = readdir(QT4LIBS)) {
+			    if ($Qt4Lib =~ /^libQt.+\.so$/ && -f $QTLIBDIR  . "/" . $Qt4Lib ) {
+				$Qt4Lib=~ s/^lib//;  $Qt4Lib=~ s/\.so$//;
+				$QTLIBS .= " -l" . $Qt4Lib;
+			    }
+			}
+			closedir(QT4LIBS);
+		    }
+		}
+	    } else {
+		$QTLIBS   = "-lqt-mt";
+		if ($main::_WIN32) {
+		    $QTLIBS  .= " " . $QTDIR . "/lib/qt-mt*.lib " .
+			$ROOTSYS . "/lib/libGraf.lib " .
+			$ROOTSYS . "/lib/libGpad.lib shell32.lib Ws2_32.lib Imm32.lib Winmm.lib";
+		}
+	    }
+	    print "Use QTLIBDIR = $QTLIBDIR \tQTINCDIR = $QTINCDIR \tQTFLAGS = $QTFLAGS \tQTLIBS = $QTLIBS\n"
+		if $QTLIBDIR && ! $param::quiet;
+	}
 
-    # Coin3D
-    if ( !defined($IVROOT)) {
-       if ($QT_VERSION==4) {
-          $IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package 
-       } else {
-          $IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
-        }
+	# Coin3D - WHAT??! JL 2009 
+	if ( !defined($IVROOT)) {
+	    if ($QT_VERSION==4) {
+		$IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package 
+	    } else {
+		$IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
+	    }
+	    print "*** ATTENTION *** IVROOT $IVROOT\n";
+	}
+	if ( defined($IVROOT) &&  -d $IVROOT) {
+	    if (-e $IVROOT . "/bin/coin-config") {
+		$COIN3DIR     = $IVROOT;
+		$COIN3DBINDIR = $COIN3DIR . "/lib";
+		$COIN3DLIBDIR = $COIN3DIR . "/bin";
+	    }
+	    if ($COIN3DBINDIR) {
+		$COIN3DINCDIR = $COIN3DIR . "/include";
+		$COIN3DFLAGS  = ""; # "-DR__QT";#-DQT_THREAD_SUPPORT";
+		$COIN3DLIBS   = "-lCoin -lSmallChange -lSoQt -lsimage";
+		
+		print "Use COIN3DLIBDIR = $COIN3DLIBDIR \tCOIN3DINCDIR = $COIN3DINCDIR \tCOIN3DFLAGS = $COIN3DFLAGS \tCOIN3DLIBS = $COIN3DLIBS\n"
+		    if $COIN3DLIBDIR ;//&& ! $param::quiet;
+	    }
+	}
     }
-    if ( defined($IVROOT) &&  -d $IVROOT) {
-      if (-e $IVROOT . "/bin/coin-config") {
-         $COIN3DIR     = $IVROOT;
-	      $COIN3DBINDIR = $COIN3DIR . "/lib";
-	      $COIN3DLIBDIR = $COIN3DIR . "/bin";
-      }
-	   if ($COIN3DBINDIR) {
-	     $COIN3DINCDIR = $COIN3DIR . "/include";
-	     $COIN3DFLAGS  = ""; # "-DR__QT";#-DQT_THREAD_SUPPORT";
-	     $COIN3DLIBS   = "-lCoin -lSmallChange -lSoQt -lsimage";
-#	    if ($main::_WIN32) {
-#     		$QTLIBS  .= " " . $QTDIR . "/lib/qt-mt*.lib " .
-#		    $ROOTSYS . "/lib/libGraf.lib " .
-#		    $ROOTSYS . "/lib/libGpad.lib shell32.lib Ws2_32.lib Imm32.lib Winmm.lib";}
-	    print "Use COIN3DLIBDIR = $COIN3DLIBDIR \tCOIN3DINCDIR = $COIN3DINCDIR \tCOIN3DFLAGS = $COIN3DFLAGS \tCOIN3DLIBS = $COIN3DLIBS\n"
-		  if $COIN3DLIBDIR ;//&& ! $param::quiet;
-	   }
-   }
-   }
 
     # Logger
     $LoggerDir = $OPTSTAR . "/include/log4cxx";
