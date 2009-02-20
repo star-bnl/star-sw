@@ -15,6 +15,26 @@
 # All the below files will have a local copy instead of a link
 @LOCAL = ("config/Makefile.config","Makefile","configure");
 
+# for Gprof support, we will tewak Makefile.linux
+if ( $ENV{ROOTSYS} =~ m/Groot/ ){
+    print "Detecting GPROF version\n";
+    push(@LOCAL,"config/Makefile.linux");
+    $GP = 1;
+
+    # TODO
+    #
+    print 
+	"Please alter config/Makefile.linux and use\n",
+	"  EXTRA_CXXFLAGS = -pg\n",
+	"  EXTRA_CFLAGS   = -pg\n",
+	"  EXTRA_LDFLAGS  = -pg\n",
+	"plus add -pg to F77FLAGS\n\n";
+    #
+} else {
+    $GP = 0;
+}
+
+
 
 $CERNL = $ENV{CERN_LEVEL};
 $CERN  = $ENV{CERN};
