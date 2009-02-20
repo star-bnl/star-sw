@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.16 2008/03/19 14:51:03 fisyak Exp $
+ * $Id: StMuArrays.h,v 1.17 2009/02/20 02:40:20 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -30,6 +30,9 @@ enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster};
 // run 5 - dongx
 enum tofTypes {muTofHit=0, muTofData, muTofRawData};
 
+/// dongx
+enum btofTypes {muBTofHit=0, muBTofRawHit, muBTofHeader};
+
 /// @enum eztTypes enumeration to to index the eztArrays (IUCF-ezTree)
 enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
 
@@ -40,8 +43,10 @@ __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArray
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
+__NBTOFARRAYS__    =3 ,  /// dongx
 __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NEZTARRAYS__
+/// dongx
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__
 };
 class StMuArrays {
  public:
@@ -52,6 +57,7 @@ class StMuArrays {
     static const char**      emcArrayNames;//[__NEMCARRAYS__    ]
     static const char**      pmdArrayNames;//[__NPMDARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
+    static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
     static const char**      eztArrayNames;//[__NEZARRAYS__    ]
 
 ///< names of the classes, the TClonesArrays are arrays of this type
@@ -60,6 +66,7 @@ class StMuArrays {
     static const char**  emcArrayTypes;//    [__NEMCARRAYS__    ]
     static const char**  pmdArrayTypes;//    [__NPMDARRAYS__    ]
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
+    static const char**  btofArrayTypes;//   [__NBTOFARRAYS__   ]  // dongx
     static const char**  eztArrayTypes;//    [__NEZARRAYS__    ]
 
 ///< maximum sizes of the TClonesArrays
@@ -68,6 +75,7 @@ class StMuArrays {
     static int*       emcArraySizes;// [__NEMCARRAYS__    ]
     static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
+    static int*      btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
     static int*       eztArraySizes;// [__NEZARRAYS__    ]
 
 ///< number of entries in current event, currently not used
@@ -76,6 +84,7 @@ class StMuArrays {
     static int*    emcArrayCounters;// [__NEMCARRAYS__    ]
     static int*    pmdArrayCounters;// [__NPMDARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
+    static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
     static int*    eztArrayCounters;// [__NEZARRAYS__    ]
 };
 
@@ -84,6 +93,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.17  2009/02/20 02:40:20  tone421
+ * Added classes from Xin Dong to accommodate Barrel TOF hits
+ *
  * Revision 1.16  2008/03/19 14:51:03  fisyak
  * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
  *

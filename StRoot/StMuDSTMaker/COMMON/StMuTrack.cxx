@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.36 2009/01/07 20:50:59 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.37 2009/02/20 02:40:20 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -12,6 +12,9 @@
 #include "StEvent/StTrackGeometry.h"
 #include "StEvent/StPrimaryVertex.h"
 #include "StEvent/StDcaGeometry.h"
+///dongx
+#include "StEvent/StBTofHit.h"
+#include "StEvent/StBTofPidTraits.h"
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "StEvent/StTpcDedxPidAlgorithm.h"
 #include "StarClassLibrary/StThreeVectorD.hh"
@@ -193,6 +196,9 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   }
 
   fillMuProbPidTraits(event,track);
+ /// dongx
+  mIndex2BTofHit = -1;   // filled later
+  fillMuBTofPidTraits(track);
 
   if ( track->outerGeometry() ) 
     mOuterHelix = StMuHelix(track->outerGeometry()->helix(),event->runInfo()->magneticField());
@@ -414,6 +420,17 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   
 }
 
+void StMuTrack::fillMuBTofPidTraits(const StTrack* t) {
+  StBTofPidTraits* btofPidTraits = 0;
+  StPtrVecTrackPidTraits traits = t->pidTraits(kTofId);
+  unsigned int size = traits.size();
+  for (unsigned int i = 0; i < size; i++) {
+    if ( (btofPidTraits=dynamic_cast<StBTofPidTraits*>(traits[i])) ) {   
+      mBTofPidTraits.setBTofPidTraits(btofPidTraits);
+    }    
+  }
+}
+
 void StMuTrack::Print(Option_t *option) const {
   //
   // Print out some of the essential track info. 
@@ -463,6 +480,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.37  2009/02/20 02:40:20  tone421
+ * Added classes from Xin Dong to accommodate Barrel TOF hits
+ *
  * Revision 1.36  2009/01/07 20:50:59  tone421
  * Added more pointer protection in dcaGlobal(int) and dca(int)
  *
