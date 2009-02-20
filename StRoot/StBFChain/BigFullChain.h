@@ -409,6 +409,7 @@ Bfc_st BFC2[] = { // ITTF Chains
    
   //
   // Chains for 2009 run p+p essentially
+  // Note that we always need to start with VFMinuit as VFPPV is full of asserts
   //
   {"B2009.1","","","ry2009,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
                                                                    "Base chain for 2009 ITTF (tpc)",kFALSE},
@@ -418,8 +419,9 @@ Bfc_st BFC2[] = { // ITTF Chains
    "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
               "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2009b"      ,"" ,"",   
-   "B2009.1,IAna,hitfilt,ppOpt,VFPPV,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
-              "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+   "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
+        "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger)",kFALSE},
+
 
 
 
