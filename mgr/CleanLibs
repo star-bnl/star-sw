@@ -37,6 +37,7 @@ if ($#ARGV > -1) {
     push(@dirs,$SYSNM."obj");
     push(@dirs,$SYSNM."OBJ");
     push(@dirs,$SYSNM."IOBJ");
+    push(@dirs,$SYSNM."GOBJ");
 }
 
 my $KEEP;
