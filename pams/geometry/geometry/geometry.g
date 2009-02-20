@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.187 2009/02/19 00:27:22 perev Exp $
+* $Id: geometry.g,v 1.188 2009/02/20 21:35:05 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.188  2009/02/20 21:35:05  perev
+* upgr15 full tof. Jonathan/Spiros
+*
 * Revision 1.187  2009/02/19 00:27:22  perev
 * Upgr15==>macros
 *
@@ -1121,7 +1124,7 @@ replace [exe y2009;] with [;
     exe PIPE14;
 };]
 replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
-                            exe SVTTof; exe FTPCof; exe BTOF52; exe CALBc0; exe ECAL31;
+                            exe SVTTof; exe FTPCof; exe BTOF66; exe CALBc0; exe ECAL31;
                             exe BBCMon; exe FPDM00; exe MFLD54;
                             DensConfig = 1; "gas density correction"
                             SupoConfig = 1; "FTPC Support"
