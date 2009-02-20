@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.3 2009/02/18 22:44:44 dongx Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.4 2009/02/20 18:23:23 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -153,6 +153,7 @@ Int_t StBTofHitMaker::Make()
           LOG_WARN<<"TOF_READER::UnPack TOF Data ERROR!"<<endm;
         }
         fillBTofRawHitCollection();
+        fillBTofHeader();           /// BTofHeader should be filled before making BTofHits (trigger selection)
         fillBTofHitCollection();
         fillStEvent();
       }
@@ -254,6 +255,19 @@ void StBTofHitMaker::fillBTofRawHitCollection()
     mBTofCollection->addRawHit(new StBTofRawHit(flag,trayid,chn,tdc));
   }
   
+}
+//____________________________________________
+/*!
+ * Fill the data into BTofHeader in StEvent
+ */
+void StBTofHitMaker::fillBTofHeader()
+{
+  /// fill the Tof header
+  StBTofHeader *tofHeader = new StBTofHeader();
+  for(int i=0;i<4;i++)
+    tofHeader->setTriggerTime(mTriggerTimeStamp[i], i);
+  // others
+  mBTofCollection->setHeader(tofHeader);
 }
 //____________________________________________
 /*!
@@ -364,13 +378,6 @@ void StBTofHitMaker::fillStEvent() {
     mBTofCollection = new StBTofCollection();
     mStEvent->setBTofCollection(mBTofCollection);
   }
-
-  /// fill the Tof header
-  StBTofHeader *tofHeader = new StBTofHeader();
-  for(int i=0;i<4;i++)
-    tofHeader->setTriggerTime(mTriggerTimeStamp[i], i);
-  // others
-  mBTofCollection->setHeader(tofHeader);
 
   ///
   StBTofCollection* btofCollection = mStEvent->btofCollection();
