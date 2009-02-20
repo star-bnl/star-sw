@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.43 2008/06/26 15:48:04 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.44 2009/02/20 02:40:20 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -20,6 +20,12 @@
 #include "StMuDebug.h"
 #include "StMuEmcUtil.h"
 #include "StMuPmdUtil.h"
+///dongx
+#include "StBTofCollection.h"
+#include "StBTofRawHit.h"
+#include "StBTofHeader.h"
+#include "StBTofPidTraits.h"
+#include "StMuBTofHit.h"
 #include "TClonesArray.h"
 #include "TTree.h"
 
@@ -32,6 +38,7 @@ TClonesArray** StMuDst::strangeArrays= 0;
 TClonesArray** StMuDst::emcArrays    = 0;
 TClonesArray** StMuDst::pmdArrays    = 0;
 TClonesArray** StMuDst::tofArrays    = 0;
+TClonesArray** StMuDst::btofArrays    = 0;   /// dongx
 TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
 StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
 TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
@@ -56,6 +63,7 @@ void StMuDst::unset() {
     emcArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
+    btofArrays    = 0;   // dongx
     mMuEmcCollectionArray = 0;
     mMuEmcCollection = 0;
     mMuPmdCollectionArray = 0;
@@ -74,6 +82,7 @@ void StMuDst::set(StMuDstMaker* maker) {
   emcArrays     = maker->mEmcArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
+  btofArrays    = maker->mBTofArrays;   // dongx
   mMuEmcCollectionArray = maker->mEmcCollectionArray;
   mMuEmcCollection      = maker->mEmcCollection;
   mMuPmdCollectionArray = maker->mPmdCollectionArray;
@@ -94,6 +103,7 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** thePmdArrays,
                   TClonesArray** theTofArrays,
+                  TClonesArray** theBTofArrays,    // dongx
                   TClonesArray* emc_arr,
 		  StMuEmcCollection *emc,
                   TClonesArray* pmd_arr,
@@ -108,6 +118,7 @@ void StMuDst::set(TClonesArray** theArrays,
   emcArrays     = theEmcArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
+  btofArrays    = theBTofArrays;    // dongx
   mMuEmcCollectionArray = emc_arr;  
   mMuEmcCollection = emc;  
   mMuPmdCollectionArray = pmd_arr;
@@ -192,6 +203,82 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
         p->setIndex2Global(-1);
     }
   }
+  DEBUGVALUE2(timer.elapsedTime());
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDst::fixTofTrackIndices() {
+  /// global and primary tracks share the same id, so we can fix the 
+  /// index2Global up in case they got out of order (e.g. by removing 
+  /// a track from the TClonesArrays
+    fixTofTrackIndices( btofArrays[muBTofHit], arrays[muPrimary], arrays[muGlobal] );  
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global) {
+
+  if ( !(primary&&global&&btofHit) ) return;
+  DEBUGMESSAGE1("");  
+
+StTimer timer;
+  timer.start();
+
+  int nPrimarys = primary->GetEntries();
+  int nGlobals = global->GetEntries();
+  int nBTofHits = btofHit->GetEntries();
+  // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
+  map<short,unsigned short> tofIndex;
+  map<short,unsigned short> globalIndex;
+  map<short,unsigned short> primaryIndex;
+
+  for (int i=0; i<nBTofHits; i++) {
+    StMuBTofHit *t = (StMuBTofHit*) btofHit->UncheckedAt(i);
+    if (t) {
+      tofIndex[t->associatedTrackId()] = i;
+    }
+  }
+
+  for (int i=0; i<nGlobals; i++) {
+    StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
+    if (g) {
+      globalIndex[g->id()] = i;
+
+      if(tofIndex[g->id()])
+        g->setIndex2BTofHit( tofIndex[g->id()] );
+      else
+        g->setIndex2BTofHit(-1);
+    }
+  }
+  for (int i=0; i<nPrimarys; i++) {
+    StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
+    if (p) {
+      primaryIndex[p->id()] = i;
+
+      if(tofIndex[p->id()])
+        p->setIndex2BTofHit( tofIndex[p->id()] );
+      else
+        p->setIndex2BTofHit(-1);
+    }
+  }
+
+  /// set the indices for BTofHits
+  for (int i=0; i<nBTofHits; i++) {
+    StMuBTofHit *t = (StMuBTofHit*) btofHit->UncheckedAt(i);
+    if (t) {
+      if(globalIndex[t->associatedTrackId()])
+        t->setIndex2Global( globalIndex[t->associatedTrackId()] );
+      else
+        t->setIndex2Global(-1);
+
+      if(primaryIndex[t->associatedTrackId()])
+        t->setIndex2Primary( primaryIndex[t->associatedTrackId()] );
+      else
+        t->setIndex2Primary(-1);
+    }
+  }
+
   DEBUGVALUE2(timer.elapsedTime());
 }
 
@@ -354,6 +441,21 @@ StEvent* StMuDst::createStEvent() {
     tofcoll->addRawData(aRawData);
   }
 
+  // now create, fill the StBTofCollection - dongx
+  StBTofCollection *btofcoll = new StBTofCollection();
+  ev->setBTofCollection(btofcoll);
+  int nBTofRawHits = btofArrays[muBTofRawHit]->GetEntries();
+  for(int i=0;i<nBTofRawHits;i++) {
+    StBTofRawHit *aRawHit;
+    if(btofRawHit(i)) {
+      aRawHit = new StBTofRawHit(*(btofRawHit(i)));
+    } else {
+      aRawHit = new StBTofRawHit();
+    }
+    btofcoll->addRawHit(aRawHit);
+  }
+  btofcoll->setHeader(new StBTofHeader(*(btofHeader())));
+
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
   StTriggerId triggerId;
@@ -435,7 +537,10 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
 
   // set the topology map
   t->setTopologyMap( track->topologyMap() );
-  
+
+  // set the btofPidTraits - dongx
+  t->addPidTraits(track->btofPidTraits().createBTofPidTraits());
+
   return t;
 }
 
@@ -523,7 +628,11 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.44  2009/02/20 02:40:20  tone421
+ * Added classes from Xin Dong to accommodate Barrel TOF hits
+ *
  * Revision 1.43  2008/06/26 15:48:04  tone421
+ *
  * Get info from StEvent so vpd z vertex infomation is available in StMuEvent
  *
  * Revision 1.42  2007/09/18 02:29:57  mvl

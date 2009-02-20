@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.27 2008/03/19 17:22:39 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.28 2009/02/20 02:40:20 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -21,6 +21,7 @@
 #include "StMuHelix.h"
 #include "StMuUtilities.h"
 #include "StMuProbPidTraits.h"
+#include "StMuBTofPidTraits.h" /// dongx
 #include "StMuPrimaryTrackCovariance.h"
 
 
@@ -59,9 +60,11 @@ class StMuTrack : public TObject {
     int index2Global() const;
     int index2Cov() const;
     int index2RichSpectra() const; ///< Returns index of associated rich spectra.
+    int index2BTofHit() const; /// dongx
     int vertexIndex() const; ///< Returns index of associated primary vertex.
     StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
     StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
+    StMuBTofHit* tofHit() const;  /// dongx
     unsigned short nHits() const;     ///< Return total number of hits on track.
     unsigned short nHitsPoss() const; ///< Return number of possible hits on track.
     unsigned short nHitsPoss(StDetectorId) const; ///< Return number of possible hits on track.
@@ -99,9 +102,11 @@ class StMuTrack : public TObject {
     StPhysicalHelixD helix() const; ///< Returns inner helix (first measured point)
     StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
     StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
+    StMuBTofPidTraits btofPidTraits() const; /// dongx
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
     virtual void Print(Option_t* option = "") const;  ///< Print track info
+    void setIndex2BTofHit(int i) {mIndex2BTofHit=i;} /// dongx
   void setIndex2Cov(int i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
 protected:
   Short_t mId;
@@ -109,6 +114,7 @@ protected:
   Short_t mFlag;
   Int_t mIndex2Global;
   Int_t mIndex2RichSpectra;
+  Int_t mIndex2BTofHit;     // dongx
   Int_t mVertexIndex;       // Primary vertex id for this track's dca
   UChar_t mNHits;           // Total number of points (was (F)tpc only)
   UChar_t mNHitsPoss;       // Total possible points (was (F)tpc only)
@@ -141,6 +147,7 @@ protected:
   StMuHelix mHelix;
   StMuHelix mOuterHelix;
   StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyak pid probabilities.
+  StMuBTofPidTraits mBTofPidTraits; /// dongx
   Int_t mIndex2Cov;
   void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
@@ -149,6 +156,7 @@ protected:
   StThreeVectorD dca(const StTrack*, const StVertex *vertex); ///< Helper function: Calculates dca from a given StTrack and the primary vertex taken from StEvent
   StThreeVectorD momentumAtPrimaryVertex(const StEvent *event, const StTrack* track, const StVertex *vertex); ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
   void fillMuProbPidTraits(const StEvent*, const StTrack*); ///< Helper function to fill all the different pid values 
+  void fillMuBTofPidTraits(const StTrack*); /// dongx
   static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm; ///< StuProbabilityPidAlgorithm, we will use the same algorithm for all tracks
   static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
 
@@ -164,6 +172,7 @@ inline short StMuTrack::flag() const {return mFlag;}
 inline int StMuTrack::index2Global() const {return mIndex2Global;}
 inline int StMuTrack::index2Cov() const {return mIndex2Cov;}
 inline int StMuTrack::index2RichSpectra() const {return mIndex2RichSpectra;}
+inline int StMuTrack::index2BTofHit() const {return mIndex2BTofHit;}  /// dongx
 inline int StMuTrack::vertexIndex() const {return mVertexIndex;}
 inline unsigned short StMuTrack::nHits() const {return mNHits;}
 inline unsigned short  StMuTrack::nHitsDedx() const {return mNHitsDedx;}
@@ -193,18 +202,22 @@ inline StThreeVectorF StMuTrack::lastPoint() const {return mLastPoint;}
 //!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
 //!inline StPhysicalHelixD StMuTrack::outerHelix() const {return mOuterHelix;}
 inline StMuProbPidTraits StMuTrack::probPidTraits() const { return mProbPidTraits;} ///< Returns Yuri Fisyak new pid probabilities. 
+inline StMuBTofPidTraits StMuTrack::btofPidTraits() const { return mBTofPidTraits;} /// dongx
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
 inline void StMuTrack::setProbabilityPidCentrality(double cent) { mProbabilityPidCentrality = cent;}
 
 inline StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
 inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
-
+inline StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (StMuBTofHit*)StMuDst::array(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;} /// dongx
 
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.28  2009/02/20 02:40:20  tone421
+ * Added classes from Xin Dong to accommodate Barrel TOF hits
+ *
  * Revision 1.27  2008/03/19 17:22:39  fisyak
  * Increase Version number
  *

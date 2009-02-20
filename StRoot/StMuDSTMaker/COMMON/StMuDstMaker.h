@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.46 2008/03/19 14:51:04 fisyak Exp $
+ * $Id: StMuDstMaker.h,v 1.47 2009/02/20 02:40:20 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -68,6 +68,12 @@ class StTofDataCollection;
 // run 5 - dongx
 class StTofRawDataCollection;
 class StMuTofUtil;
+// new btof
+class StBTofCollection;
+class StBTofRawHitCollection;
+class StMuBTofHit;
+class StMuBTofHitCollection;
+class StMuBTofUtil;
 
 // ezTree stuff
 class StMuEzTree;
@@ -152,7 +158,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.46 2008/03/19 14:51:04 fisyak Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.47 2009/02/20 02:40:20 tone421 Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -181,6 +187,8 @@ protected:
   StMuEmcUtil* mEmcUtil;
   StMuPmdUtil* mPmdUtil;
   StMuTofUtil* mTofUtil;
+  /// dongx
+  StMuBTofUtil* mBTofUtil;
   StMuEzTree* mEzTree; 
 
   int mIoMode;
@@ -253,6 +261,8 @@ virtual   void closeRead();
   void fillDetectorStates(StEvent* ev);
   void fillL3AlgorithmInfo(StEvent* ev);
   void fillTof(StEvent* ev);
+  /// dongx
+  void fillBTof(StEvent* ev);
   void fillEzt(StEvent* ev);
 
   void fillHddr();
@@ -299,6 +309,8 @@ virtual   void closeRead();
   TClonesArray** mEmcArrays;    //[__NEMCARRAYS__    ];
   TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
   TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
+  /// dongx
+  TClonesArray** mBTofArrays;   //[__NBTOFARRAYS__    ];
   TClonesArray** mEztArrays;    //[__NEZTARRAYS__    ];
   char           mStatusArrays    [__NALLARRAYS__    ];
   TClonesArray*  mEmcCollectionArray; // Needed to hold old format
@@ -340,6 +352,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.47  2009/02/20 02:40:20  tone421
+ * Added classes from Xin Dong to accommodate Barrel TOF hits
+ *
  * Revision 1.46  2008/03/19 14:51:04  fisyak
  * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.32 2008/03/19 14:51:03 fisyak Exp $
+ * $Id: StMuDst.h,v 1.33 2009/02/20 02:40:20 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -41,6 +41,11 @@ class StMuTofHit;
 class StTofData;
 // run 5 - dongx
 class StTofRawData;
+// dongx
+class StBTofCollection;
+class StMuBTofHit;
+class StBTofRawHit;
+class StBTofHeader;
 
 class EztEventHeader;
 class EztTrigBlob;
@@ -81,7 +86,8 @@ public:
   /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
-  void set(TClonesArray**, TClonesArray**, TClonesArray** emc_ptca=0, TClonesArray** pmd_ptca=0, TClonesArray** tof_ptca=0, TClonesArray *emc_tca=0, StMuEmcCollection *emc_col=0, TClonesArray *pmd_tca=0, StMuPmdCollection *pmd_col=0, TClonesArray** ezt_ptca=0);
+  /// dongx
+  void set(TClonesArray**, TClonesArray**, TClonesArray** emc_ptca=0, TClonesArray** pmd_ptca=0, TClonesArray** tof_ptca=0, TClonesArray** btof_ptca=0, TClonesArray *emc_tca=0, StMuEmcCollection *emc_col=0, TClonesArray *pmd_tca=0, StMuPmdCollection *pmd_col=0, TClonesArray** ezt_ptca=0);
   /// set pointer to current StEmcCollection
   static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
@@ -97,6 +103,10 @@ public:
   StTrackGeometry* trackGeometry(int q, StPhysicalHelixD* h);
   /// creates a StTrack from an StMuTrack and return pointer to it
   StTrack* createStTrack(StMuTrack*);
+  /// dongx
+  static void fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global);
+  ///
+  void fixTofTrackIndices();
 
  protected:
   /// array of TClonesArrays
@@ -109,6 +119,8 @@ public:
   static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
   static TClonesArray** tofArrays;
+  /// array of TClonesArrays for the stuff inherited from the BTOF // dongx
+  static TClonesArray** btofArrays;  
   // pointer to array with MuEmcCollection (for backward compatible mode)
   static TClonesArray *mMuEmcCollectionArray;
   /// pointer to EmcCollection (manages the EmcArrays)
@@ -144,6 +156,8 @@ public:
   static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays
   static TClonesArray* tofArray(int type) { return tofArrays[type]; }
+  /// returns pointer to the n-th TClonesArray from the btof arrays // dongx
+  static TClonesArray* btofArray(int type) { return btofArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the ezt arrays
   static TClonesArray* eztArray(int type) { return eztArrays[type]; }
 
@@ -246,6 +260,12 @@ public:
   // run 5 - dongx
   /// returns pointer to the i-th tofRawData
   static StTofRawData* tofRawData(int i) { return (StTofRawData*)tofArrays[muTofRawData]->UncheckedAt(i); }
+  /// returns pointer to the i-th muBTofHit
+  static StMuBTofHit* btofHit(int i) { return (StMuBTofHit*)btofArrays[muBTofHit]->UncheckedAt(i); }
+  /// returns pointer to the i-th btofRawHit - dongx
+  static StBTofRawHit* btofRawHit(int i) { return (StBTofRawHit*)btofArrays[muBTofRawHit]->UncheckedAt(i); }
+  /// returns pointer to the btofHeader - dongx
+  static StBTofHeader* btofHeader() { return (StBTofHeader*)btofArrays[muBTofHeader]->UncheckedAt(0); }
 
   /// returns pointer to eztHeader 
   static  EztEventHeader* eztHeader() { return (EztEventHeader*)eztArrays[muEztHead]->UncheckedAt(0); }
@@ -291,7 +311,10 @@ public:
   static unsigned int numberOfTofHit()        { return tofArrays[muTofHit]->GetEntries(); }
   static unsigned int numberOfTofData()       { return tofArrays[muTofData]->GetEntries(); }
   // run 5 - dongx
-  static unsigned int numberOfTofRawData()       { return tofArrays[muTofRawData]->GetEntries(); }
+  static unsigned int numberOfTofRawData()    { return tofArrays[muTofRawData]->GetEntries(); }
+  // dongx
+  static unsigned int numberOfBTofHit()       { return tofArrays[muBTofHit]->GetEntries(); }
+  static unsigned int numberOfBTofRawHit()    { return tofArrays[muBTofRawHit]->GetEntries(); }
 
   static unsigned int GetNPrimaryVertex()    { return numberOfPrimaryVertices(); }  
   static unsigned int GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
@@ -316,7 +339,10 @@ public:
   static unsigned int GetNTofHit()          { return numberOfTofHit(); }
   static unsigned int GetNTofData()         { return numberOfTofData(); }
   // run 5 - dongx
-  static unsigned int GetNTofRawData()         { return numberOfTofRawData(); }
+  static unsigned int GetNTofRawData()      { return numberOfTofRawData(); }
+  // dongx
+  static unsigned int GetNBTofHit()         { return numberOfBTofHit(); }
+  static unsigned int GetNBTofRawHit()      { return numberOfBTofRawHit(); }
 
   virtual void Print(Option_t *option = "") const; ///< Print basic event info
   void printPrimaryTracks() const;
@@ -333,6 +359,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.33  2009/02/20 02:40:20  tone421
+ * Added classes from Xin Dong to accommodate Barrel TOF hits
+ *
  * Revision 1.32  2008/03/19 14:51:03  fisyak
  * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
  *

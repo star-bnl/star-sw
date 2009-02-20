@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.87 2008/10/03 17:50:42 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.88 2009/02/20 02:40:20 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -56,6 +56,13 @@
 #include "StMuTofHit.h"
 #include "StMuTofHitCollection.h"
 #include "StMuTofUtil.h"
+/// dongx
+#include "StEvent/StBTofCollection.h"
+#include "StEvent/StBTofRawHit.h"
+#include "StEvent/StBTofHeader.h"
+#include "StMuBTofHit.h"
+#include "StMuBTofHitCollection.h"
+#include "StMuBTofUtil.h"
 #include "StMuPrimaryTrackCovariance.h"
 #include "StMuEzTree.h"
 #include "EztEventHeader.h"
@@ -121,8 +128,9 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
+  mBTofUtil = new StMuBTofUtil();   /// dongx
   mEzTree  = new StMuEzTree();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil || ! mEzTree )
+  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil || ! mBTofUtil || ! mEzTree ) /// dongx
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
 
@@ -152,13 +160,14 @@ void StMuDstMaker::assignArrays()
   mEmcArrays      = mStrangeArrays + __NSTRANGEARRAYS__;    
   mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;    
   mTofArrays      = mPmdArrays     + __NPMDARRAYS__;    
-  mEztArrays      = mTofArrays     + __NTOFARRAYS__;    
+  mBTofArrays     = mTofArrays     + __NTOFARRAYS__;  /// dongx
+  mEztArrays      = mBTofArrays    + __NBTOFARRAYS__; /// dongx
 }
 
 void StMuDstMaker::clearArrays()
 {
   const int ezIndex=__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
-    __NPMDARRAYS__+__NTOFARRAYS__;
+    __NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__;  /// dongx
   for ( int i=0; i<ezIndex; i++) {
     mAArrays[i]->Clear();
     StMuArrays::arrayCounters[i]=0;
@@ -176,7 +185,7 @@ void StMuDstMaker::zeroArrays()
   memset(mStatusArrays,(char)1,sizeof(mStatusArrays) ); //default all ON
   // ezt arrays switched off
   memset(&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
-			__NPMDARRAYS__+__NTOFARRAYS__],(char)0,__NEZTARRAYS__);
+			__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
   
 }
 //-----------------------------------------------------------------------
@@ -190,6 +199,7 @@ void StMuDstMaker::zeroArrays()
    EmcAll     - all branches related to Emc
    PmdAll     - all branches related to Pmd
    TofAll     - all branches related to Tof
+   BTofAll    - all branches related to BTof  /// dongx
 
   By default all branches of MuDst are read. If user wants to read only some of
   them, then:
@@ -199,6 +209,7 @@ void StMuDstMaker::zeroArrays()
    SetStatus("EmcAll"    ,1)  // all standard Emc     branches ON
    SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
    SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
+   SetStatus("BTofAll"   ,1)  // all standard BTof    branches ON  /// dongx
  
    SetStatus("XiAssoc"    ,1) // Strange branch "XiAssoc" is ON  
 
@@ -206,7 +217,7 @@ void StMuDstMaker::zeroArrays()
 */
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
-  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll","EztAll",0};
+  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll","BTofAll","EztAll",0};  /// dongx
   static const int   specIndex[]={
     0, 
     __NARRAYS__,
@@ -214,7 +225,8 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
     __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NEZTARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
     -1};
 
   if (strncmp(arrType,"St",2)==0) arrType+=2;  //Ignore first "St"
@@ -269,6 +281,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
+  mBTofUtil= new StMuBTofUtil();  /// dongx
   mEzTree  = new StMuEzTree();
 }
 //-----------------------------------------------------------------------
@@ -279,6 +292,7 @@ StMuDstMaker::~StMuDstMaker() {
   //clear(999);
   delete mStMuDst;
   delete mTofUtil;
+  delete mBTofUtil;   /// dongx
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -733,6 +747,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillEmc(ev);
     fillPmd(ev);
     fillTof(ev);
+    fillBTof(ev);  /// dongx
     fillEzt(ev);
   }
   catch(StMuException e) {
@@ -770,7 +785,9 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   catch(StMuException e) {
     e.print();
     throw e;
-  }
+  }  
+  mStMuDst->set(this);
+  mStMuDst->fixTofTrackIndices();
 }
 
 
@@ -873,12 +890,45 @@ void StMuDstMaker::fillTof(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/// dongx
+void StMuDstMaker::fillBTof(StEvent* ev) {
+  DEBUGMESSAGE2("");
+  StBTofCollection *btofcol = ev->btofCollection();
+  if( !ev || !btofcol || !btofcol->rawHitsPresent() )
+    return;  //throw StMuExceptionNullPointer("no StBTofRawHitCollection",__PRETTYF__);
+  StTimer timer;
+  timer.start();
+
+  // fill btofHit
+  StMuBTofHitCollection muBTofHitColl;
+  mBTofUtil->fillMuBTofHit(&muBTofHitColl, btofcol);
+  for(size_t i=0; i < muBTofHitColl.size(); i++) {
+    StMuBTofHit* btofMuHit = (StMuBTofHit *)muBTofHitColl.getHit(i);
+    addType( mBTofArrays[muBTofHit], *btofMuHit );
+  }
+
+  // fill btofRawHit
+  StSPtrVecBTofRawHit &btofRawHits = btofcol->tofRawHits();
+  for(size_t i=0; i < btofRawHits.size(); i++) {
+    addType( mBTofArrays[muBTofRawHit], *btofRawHits[i] );
+  }
+
+  // fill btofHeader
+  StBTofHeader *btofHeader = btofcol->tofHeader();
+  addType( mBTofArrays[muBTofHeader], *btofHeader);
+
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 void StMuDstMaker::fillEzt(StEvent* ev) {
   if (ev==0)
     return;
   char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+
 				      __NEMCARRAYS__+__NPMDARRAYS__+
-				      __NTOFARRAYS__];
+				      __NTOFARRAYS__+__NBTOFARRAYS__]; /// dongx
   if(eztArrayStatus[muEztHead]){
     EztEventHeader* header = mEzTree->copyHeader(ev);
     addType(mEztArrays[muEztHead], *header);
@@ -1327,6 +1377,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.88  2009/02/20 02:40:20  tone421
+ * Added classes from Xin Dong to accommodate Barrel TOF hits
+ *
  * Revision 1.87  2008/10/03 17:50:42  tone421
  * Added mVtxList(100); see http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/7529.html
  *
