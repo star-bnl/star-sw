@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.47 2009/02/20 02:40:20 tone421 Exp $
+ * $Id: StMuDstMaker.h,v 1.48 2009/02/20 16:37:44 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -158,7 +158,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.47 2009/02/20 02:40:20 tone421 Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.48 2009/02/20 16:37:44 tone421 Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -352,8 +352,8 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
- * Revision 1.47  2009/02/20 02:40:20  tone421
- * Added classes from Xin Dong to accommodate Barrel TOF hits
+ * Revision 1.48  2009/02/20 16:37:44  tone421
+ * *** empty log message ***
  *
  * Revision 1.46  2008/03/19 14:51:04  fisyak
  * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ

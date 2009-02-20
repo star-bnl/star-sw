@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.44 2009/02/20 02:40:20 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.45 2009/02/20 16:37:44 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -220,9 +220,8 @@ void StMuDst::fixTofTrackIndices() {
 void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, TClonesArray* global) {
 
   if ( !(primary&&global&&btofHit) ) return;
-  DEBUGMESSAGE1("");  
-
-StTimer timer;
+  DEBUGMESSAGE1("");
+  StTimer timer;
   timer.start();
 
   int nPrimarys = primary->GetEntries();
@@ -628,8 +627,8 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
- * Revision 1.44  2009/02/20 02:40:20  tone421
- * Added classes from Xin Dong to accommodate Barrel TOF hits
+ * Revision 1.45  2009/02/20 16:37:44  tone421
+ * *** empty log message ***
  *
  * Revision 1.43  2008/06/26 15:48:04  tone421
  *

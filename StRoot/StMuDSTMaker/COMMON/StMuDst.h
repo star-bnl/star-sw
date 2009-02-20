@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.33 2009/02/20 02:40:20 tone421 Exp $
+ * $Id: StMuDst.h,v 1.34 2009/02/20 16:37:44 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -359,8 +359,8 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
- * Revision 1.33  2009/02/20 02:40:20  tone421
- * Added classes from Xin Dong to accommodate Barrel TOF hits
+ * Revision 1.34  2009/02/20 16:37:44  tone421
+ * *** empty log message ***
  *
  * Revision 1.32  2008/03/19 14:51:03  fisyak
  * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
