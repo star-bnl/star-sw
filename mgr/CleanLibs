@@ -1,4 +1,9 @@
 #!/usr/bin/env perl
+
+#
+# 2009 - J.Lauret - added detection of dead links
+#
+
 use Env;
 # if (defined($AFS)) {$File::Find::dont_use_nlink;}
 require "find.pl";
@@ -23,10 +28,13 @@ if($SYSNM ne ""){
     }
 }
 
-my $debug = $ENV{CleanLibs_DEBUG} || 0;
+my $debug = $ENV{CleanLibs_DEBUG}  || 0;
+my $clink = $ENV{CleanLibs_CLEANL} || 0;
+
 my @dirs  = ();
 my $pwd   = undef;
 my $pdir  = "";
+
 
 if ($#ARGV > -1) {
     my ($dir);
@@ -48,13 +56,40 @@ if( $^O eq "linux"){
 }
 if ($#ARGV > 0) {$KEEP = $ARGV[1];}
 
-foreach my $dir (@dirs) {
-    if (-l $dir) {
-	$dir = readlink $dir;
+if ( $clink){
+    # remove dead files
+    print "NOTE: Beta version of link cleaner enabled\n";
+    foreach my $dir (@dirs) {
+	open(PP,"/usr/bin/find $dir -type l -print |");
+	while ( defined($f = <PP>)) {
+	    chomp($f);
+	    $l = readlink($f);
+	    if ( $l =~ m/^\.+/){
+		$f =~ m/(.*\/)(.*)/;
+		$c = $1.$l;
+		if ( ! -e $c){
+		    print "$f $c\n";
+		    unlink($f);
+		}
+	    } else {
+		if ( $l !~ m/.*\.\d+/){ #<-- exclude those, there are versions from cons
+		    print "Not relative $l\n";
+		}
+	    }
+	}
+	close(PP);
     }
-    if (-r $dir) {
-	print "Run $0 in $dir keep = $KEEP\n";
-	&File::Find::find (\&wanted_S,$dir);
+    print "Please,, unsetenv CleanLibs_CLEANL to disable this mode\n";
+} else {
+    # clean multiple revision
+    foreach my $dir (@dirs) {
+	if (-l $dir) {
+	    $dir = readlink($dir);
+	}
+	if (-r $dir) {
+	    print "Run $0 in $dir keep = $KEEP\n";
+	    &File::Find::find (\&wanted_S,$dir);
+	}
     }
 }
 
