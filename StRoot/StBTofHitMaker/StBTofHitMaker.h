@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.h,v 1.2 2009/02/16 20:57:29 dongx Exp $
+ * $Id: StBTofHitMaker.h,v 1.3 2009/02/20 18:23:24 dongx Exp $
  * StBTofHitMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -61,6 +61,7 @@ class StBTofHitMaker:public StRTSBaseMaker
       tof_t   *fTof;
 
       Int_t UnpackTofRawData();
+      void fillBTofHeader();
       void fillBTofRawHitCollection();
       void fillBTofHitCollection();
       void fillStEvent();     //! ship collection to StEvent and check
