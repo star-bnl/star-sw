@@ -14,6 +14,11 @@
 # the case on non-linux system only (usefull for
 # cross Linux platform)
 #
+# Usage:
+#   % MakeRootDir.pl 
+#   % MakeRootDir.pl  1
+#   % MakeRootDir.pl  Grootdeb 
+#
 
 chomp($PWD = `pwd`);
 $SYS  = $ENV{STAR_HOST_SYS};
@@ -50,7 +55,22 @@ my $root = "rootdeb";
 my $lib  = "lib";
 my $bin  = "bin";
 
-my $COMPAT=0; # weill remove soon
+my $COMPAT=0; # will remove soon
+
+
+if ( defined($ARGV[0]) ){
+    my($tmp)=$ARGV[0];
+
+    if ( $tmp !~ m/\d+/ ){
+	# if string, assume version
+	$root = $ARGV[0];
+	print "Would create .$SYS/$root - please confirm: ";
+	chomp($ans = <STDIN>);
+	exit if ($ans !~ m/y/i);
+    #} else {
+	# Assume syntax $0 1 for one version
+    }
+}
 
 
 # Loop over 2 possibilities
