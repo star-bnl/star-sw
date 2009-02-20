@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.4 2009/02/20 18:23:23 dongx Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.5 2009/02/20 22:54:19 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -187,6 +187,7 @@ Int_t StBTofHitMaker::UnpackTofRawData()
       if( (dataword&0xF0000000)>>28 == 0xE) continue;  /// TDIG separator word
       if( (dataword&0xF0000000)>>28 == 0xA) {  /// header trigger data flag
         ///  do nothing at this moment.
+        continue;
       }            
       if( (dataword&0xF0000000)>>28 == 0x2) {   /// trigger time here.
         mTriggerTimeStamp[ifib] = dataword;
@@ -195,12 +196,13 @@ Int_t StBTofHitMaker::UnpackTofRawData()
       if( (dataword&0xF0000000)>>28 == 0xC) {   /// geographical data
         halftrayid = dataword&0x01;    
         trayid     = (dataword&0x0FE)>>1;
-        if(trayid==121 && ifib==0) trayid=121;  /// west
-        if(trayid==121 && ifib==2) trayid=122;  /// east
         continue;
       }
-      if(halftrayid<0 || trayid<0) continue;
-
+      if(halftrayid<0) continue;
+      if(trayid<1 || trayid >122) {
+        LOG_ERROR<<"StBTofHitMaker::DATA ERROR!! unexpected trayID ! "<<endm;
+        continue;
+      }
       int edgeid =int( (dataword & 0xf0000000)>>28 );
       if((edgeid !=4) && (edgeid!=5)) continue;   /// not leading or trailing
 
