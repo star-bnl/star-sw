@@ -1,3 +1,4 @@
+// K. Yip : Feb. 20, 2009 --- correction of Akio's stuff and preparation of making pp2pp detector plots ...
 // K. Yip : Feb. 15, 2008 
 
 #include "pp2ppHistogramGroup.h"
@@ -16,12 +17,22 @@
 #  include "cfgutil.h"
 #  include "trgReader.h"
 #else
+
 #  include "StEvent/StTriggerData.h"
 #  include "TriggerData.h"
+
+// this needs to be always included
+#include <DAQ_READER/daqReader.h>
+#include <DAQ_READER/daq_dta.h>
+#include <DAQ_PP2PP/daq_pp2pp.h>
+
+
 #endif
 #include "TMapFile.h"
 #include "EvpUtil.h"
 #include "HistoHandler.h"
+
+
 
 
 #include "TStyle.h"
@@ -124,18 +135,53 @@ bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) {
       for(int ew=0; ew<2; ew++){
         for(int udio=0; udio<2; udio++){
           for(int ch=0; ch<2; ch++){
-            unsigned short adc = trgd->pp2ppADC((StBeamDirection)ew,vh,udio,ch);
-            unsigned short tac = trgd->pp2ppTAC((StBeamDirection)ew,vh,udio,ch);
-            h_P2P[i   ]->Fill( double(adc) );
-            h_P2P[i+16]->Fill( double(tac) );
+	    if ( mswitch == 0 ) {
+	      unsigned short adc = trgd->pp2ppADC((StBeamDirection)ew,vh,udio,ch);
+	      h_P2P[i   ]->Fill( double(adc) );
+	    }
+	    else {
+	      unsigned short tac = trgd->pp2ppTAC((StBeamDirection)ew,vh,udio,ch);
+	      h_P2P[i+16]->Fill( double(tac) );
+	    }
             i++;
           }
         }
       }
     }
   }
+
+  // Detector stuff 
+  daq_dta *dd ;
+  dd = evp->det("pp2pp")->get("adc") ;
+
+  if(dd) {
+
+    while(dd->iterate()) {
+
+      pp2pp_t *d = (pp2pp_t *) dd->Void ;
+
+      //      printf(" sector : %d; sequencer : %d; svx : %d\n", dd->sec,  d->seq_id , d->svx_id);
+
+      /*
+      sec[nstrips] = dd->sec ;
+      seq_id[nstrips] = d->seq_id;
+      chain_id[nstrips] = d->chain_id;
+      svx_id[nstrips] = d->svx_id;
+      for(int c=0;c<PP2PP_SVX_CH;c++) {
+	adc[nstrips][c] = d->adc[c];
+      }
+      */
+
+      //      nstrips++ ;
+
+    }
+
+  }
+
 #endif
 
+
   return true;
+
 }
 
