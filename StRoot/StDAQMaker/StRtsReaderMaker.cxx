@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.18 2008/12/29 23:57:40 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.19 2009/02/20 23:32:43 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.19  2009/02/20 23:32:43  fine
+ * avoid the fRtsTable double destruction. It causes the chain crash. Thanks Fisyak
+ *
  * Revision 1.18  2008/12/29 23:57:40  fine
  * restore the economic mode
  *
@@ -155,7 +158,8 @@ StRtsReaderMaker::~StRtsReaderMaker()
 {
    if (!fSlaveMode) delete fRtsReader; 
    fRtsReader = 0;
-   delete fRtsTable;  fRtsTable  = 0;
+   // fRtsTable will be deleted by the base StMaker dtor.
+   fRtsTable = 0;
 }
 //_____________________________________________________________
 Int_t StRtsReaderMaker::Init() {
