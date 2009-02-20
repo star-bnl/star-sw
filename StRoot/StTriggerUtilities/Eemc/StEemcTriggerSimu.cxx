@@ -2,9 +2,9 @@
 //  StEemcTriggerSimu.cxx,v 0.01
 //
 /*
-changes to be done in bbc-code, Jan
-- add TDC limits for real data
-- add histos for all PMTs
+  changes to be done in bbc-code, Jan
+  - add TDC limits for real data
+  - add histos for all PMTs
 */
 
 #include <TH2.h>
@@ -41,6 +41,11 @@ changes to be done in bbc-code, Jan
 #include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"
 #include "StEEmcUtil/EEdsm/EEdsm3.h"
 #include "StEEmcUtil/EEdsm/EemcTrigUtil.h"
+
+// #### modified by Liaoyuan ####
+// DSM 2009 Utilities
+#include "StTriggerUtilities/StDSMUtilities/StDSM2009Utilities.hh"
+// #### modified end ####
 
 
 ClassImp(StEemcTriggerSimu);
@@ -128,6 +133,11 @@ StEemcTriggerSimu::addTriggerList( void * adr){
       trgList->push_back(127611);
     }
   }
+  // #### modified by Liaoyuan ####
+  else if( mYear == 2009 ){
+    ; // Triggers-Ids are Generated in StEmcTriggerSimu Instead
+  }
+  // #### modified end ####
 
 }
 
@@ -135,12 +145,12 @@ StEemcTriggerSimu::addTriggerList( void * adr){
 //==================================================
 StTriggerSimuDecision
 StEemcTriggerSimu::triggerDecision(int trigId) {
-    vector<int> tmpTrigList;
-    addTriggerList(&tmpTrigList);
-    for(unsigned i=0; i<tmpTrigList.size(); i++) {
-        if(trigId == tmpTrigList[i]) return kYes;
-    }
-    return kDoNotCare;
+  vector<int> tmpTrigList;
+  addTriggerList(&tmpTrigList);
+  for(unsigned i=0; i<tmpTrigList.size(); i++) {
+    if(trigId == tmpTrigList[i]) return kYes;
+  }
+  return kDoNotCare;
 }
  
 //==================================================
@@ -165,47 +175,62 @@ StEemcTriggerSimu::InitRun(int runnumber){
   sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
   EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
 
+  if( mYear == 2006 ){ // #### modified line by Liaoyuan 
+    int JPthr[nThr];
+    int TPthrSelc, JPSIthrSelc, BarreSide;
+    int BEsumthr, EEsumthr, EtotThr;
+
+    if(!mExternDsmSetup) {
+      EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, mHTthr, mTPthr, JPthr, TPthrSelc, mHTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr); // home-made DB
+    }  else {
+      LOG_INFO<<Form("Eemc::InitRun() use externalDSM setup")<<endm;
+      int i;
+      for(i=0;i<nThr;i++) mHTthr[i]=mExternDsmSetup[0+i];
+      for(i=0;i<nThr;i++) mTPthr[i]=mExternDsmSetup[3+i];
+      for(i=0;i<nThr;i++) JPthr[i] =mExternDsmSetup[6+i];
+      TPthrSelc   =mExternDsmSetup[9];
+      mHTTPthrSelc=mExternDsmSetup[10];
+      JPSIthrSelc =mExternDsmSetup[11];
+      BarreSide   =mExternDsmSetup[12];
+      BEsumthr    =mExternDsmSetup[13];
+      EEsumthr    =mExternDsmSetup[14];
+      EtotThr     =mExternDsmSetup[15];
+    }
+
+    LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",mHTthr[0],mHTthr[1],mHTthr[2])<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup TPthr: %d, %d, %d",mTPthr[0],mTPthr[1],mTPthr[2])<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",JPthr[0],JPthr[1],JPthr[2])<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup  BEsumthr=%d, EEsumthr=%d, EtotThr=%d", BEsumthr, EEsumthr, EtotThr)<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup TPthrSelc=%d, HTTPthrSelc=%d, JPSIthrSelc=%d, BarreSide=%d", TPthrSelc, mHTTPthrSelc, JPSIthrSelc, BarreSide)<<endm;
+
+    dsm0TreeADC->setYear(mYear,mHTthr,mTPthr); 
+    dsm0TreeTRG->setYear(mYear,mHTthr,mTPthr); 
+
+    dsm1TreeADC->setYear(mYear, JPthr, TPthrSelc, mHTTPthrSelc);
+    dsm1TreeTRG->setYear(mYear, JPthr, TPthrSelc, mHTTPthrSelc);
  
-  int JPthr[nThr];
-  int TPthrSelc, JPSIthrSelc, BarreSide;
-  int BEsumthr, EEsumthr, EtotThr;
-
-  if(!mExternDsmSetup) {
-    EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, mHTthr, mTPthr, JPthr, TPthrSelc, mHTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr); // home-made DB
-  }  else {
-    LOG_INFO<<Form("Eemc::InitRun() use externalDSM setup")<<endm;
-    int i;
-    for(i=0;i<nThr;i++) mHTthr[i]=mExternDsmSetup[0+i];
-    for(i=0;i<nThr;i++) mTPthr[i]=mExternDsmSetup[3+i];
-    for(i=0;i<nThr;i++) JPthr[i] =mExternDsmSetup[6+i];
-    TPthrSelc   =mExternDsmSetup[9];
-    mHTTPthrSelc=mExternDsmSetup[10];
-    JPSIthrSelc =mExternDsmSetup[11];
-    BarreSide   =mExternDsmSetup[12];
-    BEsumthr    =mExternDsmSetup[13];
-    EEsumthr    =mExternDsmSetup[14];
-    EtotThr     =mExternDsmSetup[15];
-  }
-
-  LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",mHTthr[0],mHTthr[1],mHTthr[2])<<endm;
-  LOG_INFO<<Form("Eemc::DSM setup TPthr: %d, %d, %d",mTPthr[0],mTPthr[1],mTPthr[2])<<endm;
-  LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",JPthr[0],JPthr[1],JPthr[2])<<endm;
-  LOG_INFO<<Form("Eemc::DSM setup  BEsumthr=%d, EEsumthr=%d, EtotThr=%d", BEsumthr, EEsumthr, EtotThr)<<endm;
-  LOG_INFO<<Form("Eemc::DSM setup TPthrSelc=%d, HTTPthrSelc=%d, JPSIthrSelc=%d, BarreSide=%d", TPthrSelc, mHTTPthrSelc, JPSIthrSelc, BarreSide)<<endm;
-
-
-  dsm0TreeADC->setYear(mYear,mHTthr,mTPthr); 
-  dsm0TreeTRG->setYear(mYear,mHTthr,mTPthr); 
-
-  dsm1TreeADC->setYear(mYear, JPthr, TPthrSelc, mHTTPthrSelc);
-  dsm1TreeTRG->setYear(mYear, JPthr, TPthrSelc, mHTTPthrSelc);
- 
-  dsm2TreeTRG->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
-  dsm2TreeADC->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
+    dsm2TreeTRG->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
+    dsm2TreeADC->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
   
-  dsm3TRG->setYear(mYear);
+    dsm3TRG->setYear(mYear);
 
-  initHisto();
+    initHisto();
+  } // #### modified line by Liaoyuan 
+  // #### modified by Liaoyuan ####
+  else if( mYear == 2009 ){
+    int HTthr[2];
+    int JPthr[3];
+    int TPthrSelc, JPSIthrSelc, BarreSide, BEsumthr, EEsumthr, EtotThr;	// Not used in Run 9
+    EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, HTthr, mTPthr, JPthr, TPthrSelc, mHTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr );
+
+    LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",HTthr[0],HTthr[1])<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",JPthr[0],JPthr[1],JPthr[2])<<endm;
+
+    for (int i = 0; i < 2; ++i) mE001->setRegister(i,HTthr[i]);
+    for (int i = 0; i < 3; ++i) mE101->setRegister(i,JPthr[i]);
+
+  }
+  // #### modified end ####
 }
 
      
@@ -237,81 +262,91 @@ StEemcTriggerSimu::Make(){
   getEemcAdc();   //  processed raw ADC
   feeTPTreeADC->compute(rawAdc,feePed,feeMask); 
 
-  int i;
-  //  for(i=0;i<90;i++) feeTPTreeADC->TP(i)->print(3); // prints FEE output for 720 towers
+  if( mYear == 2006 ){ // #### modified line by Liaoyuan 
+
+
+    int i;
+    //  for(i=0;i<90;i++) feeTPTreeADC->TP(i)->print(3); // prints FEE output for 720 towers
   
-  // printf("...... populate inputs of dsm0TreeADC...\n");
-  for(i=0;i<EEfeeTPTree::mxTP;i++) {
-    dsm0TreeADC->setInp12bit(i,feeTPTreeADC->TP(i)->getOut12bit());
-  }
-  dsm0TreeADC->compute();
-  // if(mDumpEve) dsm0TreeADC->print();
+    // printf("...... populate inputs of dsm0TreeADC...\n");
+    for(i=0;i<EEfeeTPTree::mxTP;i++) {
+      dsm0TreeADC->setInp12bit(i,feeTPTreeADC->TP(i)->getOut12bit());
+    }
+    dsm0TreeADC->compute();
+    // if(mDumpEve) dsm0TreeADC->print();
 
-  int j;
-  for(j=0;j<EEdsm0Tree::Nee0out;j++) {
-    int k = EEdsm1Tree::Nee1BoardInpCha;
-    int brd = j/k+1;
-    int cha = j%k;
-    dsm1TreeADC->setInp16bit(brd, cha, dsm0TreeADC->getOut16bit(j));
-  }
-  dsm1TreeADC->compute();
+    int j;
+    for(j=0;j<EEdsm0Tree::Nee0out;j++) {
+      int k = EEdsm1Tree::Nee1BoardInpCha;
+      int brd = j/k+1;
+      int cha = j%k;
+      dsm1TreeADC->setInp16bit(brd, cha, dsm0TreeADC->getOut16bit(j));
+    }
+    dsm1TreeADC->compute();
 
-  // Endcap DSM2 (1 board), all information
-  dsm2TreeADC->setInput16bit(0, 0, dsm1TreeADC->getOut16bit(0));
-  dsm2TreeADC->setInput16bit(0, 1, dsm1TreeADC->getOut16bit(1));
+    // Endcap DSM2 (1 board), all information
+    dsm2TreeADC->setInput16bit(0, 0, dsm1TreeADC->getOut16bit(0));
+    dsm2TreeADC->setInput16bit(0, 1, dsm1TreeADC->getOut16bit(1));
 
 #if 0 // waits for Renee's Etot from DSM
-  // Barrel DSM2 (3 boards), only 5bit Esum for 6 remaining inputs
-  static const  int kA[6]={3,4,5,0,1,2}; // mapping between Renee & Hank  
-  for(j=0;j<6;j++) {
-    ushort fakeInput=mBemcEsum5bit[kA[j]]; //DSM 5bit ADC
-    // higher bits ar not provided for the Barrel
-    int ibr=j/2;
-    int ich=j%2;
-    dsm2TreeADC->setInput16bit(ibr+1, ich, fakeInput);    
-  }
+    // Barrel DSM2 (3 boards), only 5bit Esum for 6 remaining inputs
+    static const  int kA[6]={3,4,5,0,1,2}; // mapping between Renee & Hank  
+    for(j=0;j<6;j++) {
+      ushort fakeInput=mBemcEsum5bit[kA[j]]; //DSM 5bit ADC
+      // higher bits ar not provided for the Barrel
+      int ibr=j/2;
+      int ich=j%2;
+      dsm2TreeADC->setInput16bit(ibr+1, ich, fakeInput);    
+    }
 #endif
-  dsm2TreeADC->compute();
+    dsm2TreeADC->compute();
 
   
     
-  // *********** END of Emulation of trigger based on ADC ************ 
+    // *********** END of Emulation of trigger based on ADC ************ 
 
-  if(mMCflag==0 && mConfig>=kAdcAndTrig){ 
-    // acquire true DSM values  only for real events
-    //........... QA of online trigger data ...............
-    getDsm0123inputs(); // this tree contains trigger data
-    dsm0TreeTRG->compute();
-    dsm1TreeTRG->compute(); 
-    dsm2TreeTRG->compute(); 
+    if(mMCflag==0 && mConfig>=kAdcAndTrig){ 
+      // acquire true DSM values  only for real events
+      //........... QA of online trigger data ...............
+      getDsm0123inputs(); // this tree contains trigger data
+      dsm0TreeTRG->compute();
+      dsm1TreeTRG->compute(); 
+      dsm2TreeTRG->compute(); 
 
 
-    //if(mDumpEve)   dsm0TreeTRG->print();
-    //if(mDumpEve)   dsm1TreeTRG->print();
-    //if(mDumpEve)   dsm2TreeTRG->print();  
-    //if(mDumpEve)   dsm3TRG->print();  
+      //if(mDumpEve)   dsm0TreeTRG->print();
+      //if(mDumpEve)   dsm1TreeTRG->print();
+      //if(mDumpEve)   dsm2TreeTRG->print();  
+      //if(mDumpEve)   dsm3TRG->print();  
     
-    //dsm2TreeADC->print(); 
-    //dsm2TreeTRG->print(); 
-    if(mConfig>=  kAdcCompareTrig) {
-      compareADCfee_TRG0(); 
-      compareADC0_TRG1();
-      compareADC1_TRG2();
-      compareADC2_TRG3();
+      //dsm2TreeADC->print(); 
+      //dsm2TreeTRG->print(); 
+      if(mConfig>=  kAdcCompareTrig) {
+	compareADCfee_TRG0(); 
+	compareADC0_TRG1();
+	compareADC1_TRG2();
+	compareADC2_TRG3();
       
-      compareTRG0_TRG1(); 
-      compareTRG1_TRG2(); 
-      compareTRG2_TRG3();
-    }  
-  }
+	compareTRG0_TRG1(); 
+	compareTRG1_TRG2(); 
+	compareTRG2_TRG3();
+      }  
+    }
 
-  DSM2EsumSpectra();
+    DSM2EsumSpectra();
+
 
 
   // dsm2TreeADC->print(0); 
   
   //if(mDumpEve) printf("\nzzzzz===================================================\n\n");
-  
+  } // #### modified line by Liaoyuan 
+  // #### modified by Liaoyuan ####
+  else if( mYear == 2009 ){
+    get2009_DSMLayer0();
+    get2009_DSMLayer1();
+  }
+  // #### modified end ####  
 }
 
 
@@ -493,8 +528,36 @@ StEemcTriggerSimu::getEemcFeeMask(){
   }// end of crate loop
 }
 
+//==================================================
+//==================================================
+
+// #### modified by Liaoyuan ####
+
+void
+StEemcTriggerSimu::get2009_DSMLayer0(){
+  for( size_t dsm = 0; dsm < mE001->size(); dsm++ ){
+    for( int ch = 0; ch < 10; ch++ ){
+      Int_t tpid = dsm * 10 + ch;
+      (*mE001)[dsm].channels[ch] = feeTPTreeADC->TP(tpid)->getOut12bit();
+    }
+  }
+  
+  mE001->run();
+}
+
+void
+StEemcTriggerSimu::get2009_DSMLayer1(){
+  mE001->write(*mE101);
+  mE101->run();
+}
+
+// #### modified end ####
+
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.12  2009/02/20 23:40:17  pibero
+// Updates for Run 9 by Liaoyuan
+//
 // Revision 1.11  2009/02/04 20:01:28  rfatemi
 // Change includes for StEmcDecoder
 //
