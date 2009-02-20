@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.88 2009/02/20 02:40:20 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.89 2009/02/20 16:37:44 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -785,7 +785,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   catch(StMuException e) {
     e.print();
     throw e;
-  }  
+  }
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
 }
@@ -1377,8 +1377,8 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.88  2009/02/20 02:40:20  tone421
- * Added classes from Xin Dong to accommodate Barrel TOF hits
+ * Revision 1.89  2009/02/20 16:37:44  tone421
+ * *** empty log message ***
  *
  * Revision 1.87  2008/10/03 17:50:42  tone421
  * Added mVtxList(100); see http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/7529.html

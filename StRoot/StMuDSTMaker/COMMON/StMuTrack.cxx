@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.37 2009/02/20 02:40:20 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.38 2009/02/20 16:37:44 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -480,8 +480,8 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
- * Revision 1.37  2009/02/20 02:40:20  tone421
- * Added classes from Xin Dong to accommodate Barrel TOF hits
+ * Revision 1.38  2009/02/20 16:37:44  tone421
+ * *** empty log message ***
  *
  * Revision 1.36  2009/01/07 20:50:59  tone421
  * Added more pointer protection in dcaGlobal(int) and dca(int)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.28 2009/02/20 02:40:20 tone421 Exp $
+ * $Id: StMuTrack.h,v 1.29 2009/02/20 16:37:44 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -215,8 +215,8 @@ inline StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (St
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
- * Revision 1.28  2009/02/20 02:40:20  tone421
- * Added classes from Xin Dong to accommodate Barrel TOF hits
+ * Revision 1.29  2009/02/20 16:37:44  tone421
+ * *** empty log message ***
  *
  * Revision 1.27  2008/03/19 17:22:39  fisyak
  * Increase Version number
