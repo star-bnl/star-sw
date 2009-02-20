@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.12 2008/12/29 23:58:06 fine Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.13 2009/02/20 22:06:15 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.13  2009/02/20 22:06:15  fisyak
+ * Restore access to TPX
+ *
  * Revision 1.12  2008/12/29 23:58:06  fine
  * Optimize the DAQ data access
  *
@@ -199,6 +202,10 @@ Int_t StTpcHitMaker::MakeSector(Int_t sector) {
   TString query = "tpc/";
 //  StRtsTable *daqTpcTable = GetNext(sec);
   StRtsTable *daqTpcTable = GetNextDaqElement(query+sec);
+  if (! daqTpcTable) {
+    query = "tpx/";
+    daqTpcTable = GetNextDaqElement(query+sec);
+  }
   if (daqTpcTable) {
      fTpc = (tpc_t*)*DaqDta()->begin();
      assert(Sector() == sector);
