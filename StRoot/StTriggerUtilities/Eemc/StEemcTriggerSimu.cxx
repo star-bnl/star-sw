@@ -176,41 +176,38 @@ StEemcTriggerSimu::InitRun(int runnumber){
   EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
 
   if( mYear == 2006 ){ // #### modified line by Liaoyuan 
-    int JPthr[nThr];
-    int TPthrSelc, JPSIthrSelc, BarreSide;
-    int BEsumthr, EEsumthr, EtotThr;
-
+    DsmThreshold thresholds;
     if(!mExternDsmSetup) {
-      EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, mHTthr, mTPthr, JPthr, TPthrSelc, mHTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr); // home-made DB
+      EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, thresholds );
     }  else {
       LOG_INFO<<Form("Eemc::InitRun() use externalDSM setup")<<endm;
       int i;
-      for(i=0;i<nThr;i++) mHTthr[i]=mExternDsmSetup[0+i];
-      for(i=0;i<nThr;i++) mTPthr[i]=mExternDsmSetup[3+i];
-      for(i=0;i<nThr;i++) JPthr[i] =mExternDsmSetup[6+i];
-      TPthrSelc   =mExternDsmSetup[9];
-      mHTTPthrSelc=mExternDsmSetup[10];
-      JPSIthrSelc =mExternDsmSetup[11];
-      BarreSide   =mExternDsmSetup[12];
-      BEsumthr    =mExternDsmSetup[13];
-      EEsumthr    =mExternDsmSetup[14];
-      EtotThr     =mExternDsmSetup[15];
+      for(i=0;i<nThr;i++) thresholds.HT[i]=mExternDsmSetup[0+i];
+      for(i=0;i<nThr;i++) thresholds.TP[i]=mExternDsmSetup[3+i];
+      for(i=0;i<nThr;i++) thresholds.JP[i]=mExternDsmSetup[6+i];
+      thresholds.TPthrSelc   =mExternDsmSetup[9];
+      thresholds.HTTPselect  =mExternDsmSetup[10];
+      thresholds.JPSIthrSelc =mExternDsmSetup[11];
+      thresholds.BarreSide   =mExternDsmSetup[12];
+      thresholds.BEsumthr    =mExternDsmSetup[13];
+      thresholds.EEsumthr    =mExternDsmSetup[14];
+      thresholds.EtotThr     =mExternDsmSetup[15];
     }
 
-    LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",mHTthr[0],mHTthr[1],mHTthr[2])<<endm;
-    LOG_INFO<<Form("Eemc::DSM setup TPthr: %d, %d, %d",mTPthr[0],mTPthr[1],mTPthr[2])<<endm;
-    LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",JPthr[0],JPthr[1],JPthr[2])<<endm;
-    LOG_INFO<<Form("Eemc::DSM setup  BEsumthr=%d, EEsumthr=%d, EtotThr=%d", BEsumthr, EEsumthr, EtotThr)<<endm;
-    LOG_INFO<<Form("Eemc::DSM setup TPthrSelc=%d, HTTPthrSelc=%d, JPSIthrSelc=%d, BarreSide=%d", TPthrSelc, mHTTPthrSelc, JPSIthrSelc, BarreSide)<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",thresholds.HT[0],thresholds.HT[1],thresholds.HT[2])<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup TPthr: %d, %d, %d",thresholds.TP[0],thresholds.TP[1],thresholds.TP[2])<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",thresholds.JP[0],thresholds.JP[1],thresholds.JP[2])<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup  BEsumthr=%d, EEsumthr=%d, EtotThr=%d",thresholds.BEsumthr,thresholds.EEsumthr,thresholds.EtotThr)<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup TPthrSelc=%d, HTTPthrSelc=%d, JPSIthrSelc=%d, BarreSide=%d",thresholds.TPthrSelc,thresholds.HTTPselect,thresholds.JPSIthrSelc,thresholds.BarreSide)<<endm;
 
-    dsm0TreeADC->setYear(mYear,mHTthr,mTPthr); 
-    dsm0TreeTRG->setYear(mYear,mHTthr,mTPthr); 
+    dsm0TreeADC->setYear(mYear,thresholds.HT,thresholds.TP); 
+    dsm0TreeTRG->setYear(mYear,thresholds.HT,thresholds.TP); 
 
-    dsm1TreeADC->setYear(mYear, JPthr, TPthrSelc, mHTTPthrSelc);
-    dsm1TreeTRG->setYear(mYear, JPthr, TPthrSelc, mHTTPthrSelc);
+    dsm1TreeADC->setYear(mYear,thresholds.JP,thresholds.TPthrSelc,thresholds.HTTPselect);
+    dsm1TreeTRG->setYear(mYear,thresholds.JP,thresholds.TPthrSelc,thresholds.HTTPselect);
  
-    dsm2TreeTRG->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
-    dsm2TreeADC->setYear(mYear, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr);
+    dsm2TreeTRG->setYear(mYear,thresholds.BEsumthr,thresholds.EEsumthr,thresholds.JPSIthrSelc,thresholds.BarreSide,thresholds.EtotThr);
+    dsm2TreeADC->setYear(mYear,thresholds.BEsumthr,thresholds.EEsumthr,thresholds.JPSIthrSelc,thresholds.BarreSide,thresholds.EtotThr);
   
     dsm3TRG->setYear(mYear);
 
@@ -218,16 +215,15 @@ StEemcTriggerSimu::InitRun(int runnumber){
   } // #### modified line by Liaoyuan 
   // #### modified by Liaoyuan ####
   else if( mYear == 2009 ){
-    int HTthr[2];
-    int JPthr[3];
-    int TPthrSelc, JPSIthrSelc, BarreSide, BEsumthr, EEsumthr, EtotThr;	// Not used in Run 9
-    EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, HTthr, mTPthr, JPthr, TPthrSelc, mHTTPthrSelc, BEsumthr, EEsumthr, JPSIthrSelc, BarreSide, EtotThr );
 
-    LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",HTthr[0],HTthr[1])<<endm;
-    LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",JPthr[0],JPthr[1],JPthr[2])<<endm;
+    DsmThreshold thresholds;
+    EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, thresholds );
 
-    for (int i = 0; i < 2; ++i) mE001->setRegister(i,HTthr[i]);
-    for (int i = 0; i < 3; ++i) mE101->setRegister(i,JPthr[i]);
+    LOG_INFO<<Form("Eemc::DSM setup HTthr: %d, %d, %d",thresholds.HT[0],thresholds.HT[1])<<endm;
+    LOG_INFO<<Form("Eemc::DSM setup JPthr: %d, %d, %d",thresholds.JP[0],thresholds.JP[1],thresholds.JP[2])<<endm;
+
+    for (int i = 0; i < 2; ++i) mE001->setRegister(i,thresholds.HT[i]);
+    for (int i = 0; i < 3; ++i) mE101->setRegister(i,thresholds.JP[i]);
 
   }
   // #### modified end ####
@@ -555,6 +551,9 @@ StEemcTriggerSimu::get2009_DSMLayer1(){
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.13  2009/02/21 19:21:02  pibero
+// Updates to match changes in EemcTrigUtil
+//
 // Revision 1.12  2009/02/20 23:40:17  pibero
 // Updates for Run 9 by Liaoyuan
 //
