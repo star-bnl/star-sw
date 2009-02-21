@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.10 2008/09/22 16:03:55 caines Exp $
+ * $Id: StSvtSignal.cc,v 1.11 2009/02/21 14:19:12 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.11  2009/02/21 14:19:12  caines
+ * change gain to better reproduce data
+ *
  * Revision 1.10  2008/09/22 16:03:55  caines
  * Changed gain as needed for tuning CuCu data
  *
@@ -69,7 +72,7 @@ StSvtSignal::StSvtSignal()
  memset(mSignal,0,sizeof(mSignal[0])*128);
 
  // mPasaGain = 7.2;      // uV/e Original number
- mPasaGain = 14.4; // Tune to CuCu data
+ mPasaGain = 9.5; // Continuing tuning
  
  for(int i = 0; i < 4; i++)
     mPasa[i] = 0.0;
@@ -136,7 +139,8 @@ void StSvtSignal::pasaRelatedStuff()
  mPeakTimeS = 0.04308;
  mPasaMaxS = 2.74619e-09;
  mFwhmS = 0.0494;
- mPasaNorm = 2.62181e+09; // [micro volts]/[micro seconds**4]-e
+ // mPasaNorm = 2.62181e+09; // [micro volts]/[micro seconds**4]-e
+ mPasaNorm = 2*2.62181e+09; // [micro volts]/[micro seconds**4]-e
  /*
  peakingTimeS();
  cout<<"\nmPeakTimeS = "<<mPeakTimeS<<endl;
@@ -150,7 +154,6 @@ void StSvtSignal::pasaRelatedStuff()
 
 //_______________________________________________
 void StSvtSignal::doPasaOnly(int option){
-
  double t = 0.0;  
  // double tStep = 0.04;
  double tStep = mTimeBinSize*0.001;     //microseconds
@@ -377,11 +380,13 @@ void StSvtSignal::calcConvSignal(double chargeOnAnode)
     if(mTimeWidth > 0.02 && mTimeWidth< 0.14)
      {
        //cout<<"now using Rykove's version"<<endl;
+       cout << "Rykov" << mTCenter << endl;
       rykovSignal(nMin,nMax, tStep);
      }
     else
      {
        //cout<<"now using selemons version"<<endl;
+       cout << "Selemon" << mTCenter << endl;
       selemonSignal(nMin,nMax,tStep,chargeOnAnode);
      }
    }
