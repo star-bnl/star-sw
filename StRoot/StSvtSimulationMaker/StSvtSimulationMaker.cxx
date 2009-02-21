@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.41 2009/01/28 23:03:42 fisyak Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.42 2009/02/21 14:18:45 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.42  2009/02/21 14:18:45  caines
+ * change trapping const to better reproduce data
+ *
  * Revision 1.41  2009/01/28 23:03:42  fisyak
  * Fix wafId
  *
@@ -186,7 +189,8 @@ ClassImp(StSvtSimulationMaker)
 #define cDefaultDriftVelocity 1.E-5*675000
 #define cDiffusionConst 0.0035
 #define cLifeTime 1000000.0
-#define cTrapConst 4.0e-5
+//#define cTrapConst 4.0e-5
+#define cTrapConst 15.0e-5 // Stephens tuning to real data
 //___________________________________________________________________________
 /// the only place where electron cloud expansioin constants are set
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
