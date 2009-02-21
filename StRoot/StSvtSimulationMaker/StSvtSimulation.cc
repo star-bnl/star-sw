@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.12 2005/07/23 03:37:34 perev Exp $
+ * $Id: StSvtSimulation.cc,v 1.13 2009/02/21 14:22:03 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.13  2009/02/21 14:22:03  caines
+ * Comment out debugging statements
+ *
  * Revision 1.12  2005/07/23 03:37:34  perev
  * IdTruth + Cleanup
  *
@@ -125,8 +128,8 @@ void StSvtSimulation::setPasaSigAttributes(int pasaSigAttributes, int numOfAnode
 
      mLowerAn = -mUpperAn;
    }
-  cout<<"upperAn = "<<mUpperAn<<endl;
-  cout<<"lowerAn = "<<mLowerAn<<endl;
+   //cout<<"upperAn = "<<mUpperAn<<endl;
+   //cout<<"lowerAn = "<<mLowerAn<<endl;
 
  }
 
@@ -138,7 +141,7 @@ void StSvtSimulation::doCloud(double time, double Energy,double mTheta,double mP
   mElectronCloud->setPar(Energy,mTheta,mPhi,mTimeBinSize,trackId);  //this has to be done for each hit
   mElectronCloud->setDriftVelocity(mDriftVelocity);
   mElectronCloud->CalcExpansion(time);
-  //cout<<"sigAn="<<mElectronCloud->getSigmaAnode()<<" sigT="<<mElectronCloud->getSigmaDrift()<<endl;
+  //cout<<"Time " << time<<" sigAn= "<<mElectronCloud->getSigmaAnode()<<" sigT= "<<mElectronCloud->getSigmaDrift()<<endl;
   mSvtSignal->setCloud(mElectronCloud);
 }
 
@@ -164,7 +167,6 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 
       //cout<<"****** an = "<<anode<<" *******"<<endl;
       double chargeOnAnode = mSvtSignal->chargeFraction(anode,mAnHit); //mAnHit in fraction of anodes
-      //cout<<"   chargeOnAnode  "<<anode<<" = "<<chargeOnAnode<<endl;
       //cout<<"\n";
       
       if(mPasaDebug)mPasaSignals.mCharge[counter] = chargeOnAnode;
@@ -176,7 +178,7 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
       
       int lowBin = mSvtSignal->getLowTBin();
       int hiBin = mSvtSignal->getHiTBin();
-      
+      // cout<<"   chargeOnAnode  "<<anode<<" = "<<chargeOnAnode<<  " for timebin " <<lowBin << " to " << hiBin << endl;
       mPeakSignal = -1.0e-20;
       for(int n = lowBin; n <= hiBin; n++)
 	{
@@ -184,8 +186,10 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 	  double adc = mSvtSignal->getSignal(n-1); //this is in mV
 	  if(adc==0.0) continue;
 	  adc = adc/3.90625;   // in counts with 1 count <-> 4mV*1000/1024
+	  //cout<< "n = " << n << " Setting adc to " << adc << endl;
 	  if(adc > mPeakSignal) mPeakSignal = adc;
           int trackId = mSvtSignal->getTrackId();
+
 	  	  
 	  if(mPasaDebug) mPasaSignals.mTempBuffer[counter][n-1] = adc;
 	  	  
