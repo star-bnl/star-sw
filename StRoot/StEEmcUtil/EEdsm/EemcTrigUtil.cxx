@@ -25,8 +25,8 @@ DsmThreshold _pp2006Long2c  = {20060513,215249,20060607,234011,{6,16,22},{1,20,3
 // http://www.star.bnl.gov/HyperNews-star/get/startrig/3753.html & 
 // StRoot/StTriggerUtilities/Bemc/StBemcTriggerDbThresholds.cxx
 //                             date0    time0  dateF    timeF  HT[]      TP[]      JP[]       HTTP-select   // run number
-DsmThreshold _pp2009_500GeV = {20090217,     0,20090415,     0,{20,40},{-1,-1,-1},{28,35,52},-1,2,71,21,0,3,109};
-DsmThreshold _pp2009_200GeV = {20090415,     1,20090515,     0,{17,23},{-1,-1,-1},{20,28,35},-1,2,71,21,0,3,109};
+DsmThreshold _pp2009_500GeV = {20090217,     0,20090415,     0,{20,40,-1},{-1,-1,-1},{28,35,52},-1,2,71,21,0,3,109};
+DsmThreshold _pp2009_200GeV = {20090415,     1,20090515,     0,{17,23,-1},{-1,-1,-1},{20,28,35},-1,2,71,21,0,3,109};
 
 //
 // end pp2009
@@ -47,15 +47,15 @@ EemcTrigUtil::getDsmThresholds(int yyyymmdd, int hhmmss, DsmThreshold &threshold
     thresholds.time_start = 0;
     thresholds.date_finish = 0;
     thresholds.time_finish = 0;
-    thresholds.HT[0] = 6;
-    thresholds.HT[1] = 12;
-    thresholds.HT[2] = 22;
-    thresholds.TP[0] = 1;
-    thresholds.TP[1] = 17;
-    thresholds.TP[2] = 31;
-    thresholds.JP[0] = 32;
-    thresholds.JP[1] = 49;
-    thresholds.JP[2] = 69;
+    thresholds.HT[0] = -1;
+    thresholds.HT[1] = -1;
+    thresholds.HT[2] = -1;
+    thresholds.TP[0] = -1;
+    thresholds.TP[1] = -1;
+    thresholds.TP[2] = -1;
+    thresholds.JP[0] = -1;
+    thresholds.JP[1] = -1;
+    thresholds.JP[2] = -1;
     thresholds.HTTPselect = 2;
 
     double wallTime= yyyymmdd+ hhmmss/1e6;
