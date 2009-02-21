@@ -12,6 +12,7 @@
 #include "StQAMakerBase.h"
 
 class StEvent;
+class StPrimaryVertex;
 class HitHistograms;
 class StPmdGeom;
 class StPmdMapUtil;
@@ -22,6 +23,7 @@ class StEventQAMaker : public StQAMakerBase {
  private:
  
   StEvent *event;          //! pointer to current event
+  StPrimaryVertex *primVtx;//! pointer to the first primary vertex
   HitHistograms *mHitHist; //!
   Int_t n_prim_good;
   Int_t n_glob_good;
@@ -69,15 +71,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.11 2007/11/30 05:38:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.12 2009/02/21 00:42:52 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.11 2007/11/30 05:38:50 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.12 2009/02/21 00:42:52 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.12  2009/02/21 00:42:52  genevb
+// TOF updates (BTOF classes), and single primVtx pointer
+//
 // Revision 2.11  2007/11/30 05:38:50  genevb
 // Changes for Run8: mostly silicon removal, TOF addition
 //
