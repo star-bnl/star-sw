@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.10 2007/08/02 01:10:02 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.11 2009/02/21 14:19:50 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -374,8 +374,8 @@ void StSvtOnlineSeqAdjSimMaker::WriteSequence(int anode,int begins, int ends, in
 {
   //check the proper size
   //cout<<"anode:"<<anode<<"start:"<<begins<<"ends:"<<ends<<"hi:"<<NumOfHigh<<endl;
-  if (NumOfHigh<=m_n_seq_hi) return;
-  if ((ends-begins+1)<=m_n_seq_lo) return;
+  //if (NumOfHigh<=m_n_seq_hi) return;
+  //if ((ends-begins+1)<=m_n_seq_lo) return;
   
   //extra anodes
   begins= begins-mExtraBefore;
