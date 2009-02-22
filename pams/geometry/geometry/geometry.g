@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.188 2009/02/20 21:35:05 perev Exp $
+* $Id: geometry.g,v 1.189 2009/02/22 21:36:23 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.189  2009/02/22 21:36:23  perev
+* Y2009 born
+*
 * Revision 1.188  2009/02/20 21:35:05  perev
 * upgr15 full tof. Jonathan/Spiros
 *
@@ -949,6 +952,8 @@ replace [exe TPCE02;] with [;"New version of the TPC backplane "; TpceConfig = 2
                              "gas density correction";            DensConfig = 1;]
 replace [exe TPCE03;] with [;"New version of the TPC backplane "; TpceConfig = 3;
                              "gas density correction";            DensConfig = 1;]
+replace [exe TPCE04;] with [;"New version of the TPC backplane "; TpceConfig = 4;
+                             "gas density correction";            DensConfig = 1;]
 
 replace [exe ISTB00;] with [;ISTB=on;IstbConfig=-1;]
 
@@ -1107,7 +1112,7 @@ replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 replace [exe y2009;] with [;
 { "Year 2009 baseline: now(12.29.08) only place holder. No difference with y2008a"
     exe SCON13;
-    exe TPCE03;
+    exe TPCE04;
     exe BTOF66;
     exe CALB02;
     exe ECAL31;
@@ -3739,6 +3744,7 @@ If LL>0
      if (TpceConfig==1) Call tpcegeo
      if (TpceConfig==2) Call tpcegeo1
      if (TpceConfig==3) Call tpcegeo2
+     if (TpceConfig==4) Call tpcegeo3
    }
    write(*,*) 'FTPC'
    if (ftpc) then
