@@ -1,5 +1,8 @@
-* $Id: sisdgeo5.g,v 1.2 2009/02/23 19:00:01 perev Exp $
+* $Id: sisdgeo5.g,v 1.3 2009/02/23 20:38:02 perev Exp $
 * $Log: sisdgeo5.g,v $
+* Revision 1.3  2009/02/23 20:38:02  perev
+* SSD hit max energy 10 times more.(Jonathan)
+*
 * Revision 1.2  2009/02/23 19:00:01  perev
 * SSD hit energy 32bit now. (Jonathan)
 *
@@ -854,7 +857,7 @@ Block SFSD is the strip detector
 *     The following is the corrected hits definition: 25-apr-99 (PN)
       HITS    SFSD   X:.001:S   Y:.001:   Z:.001:   cx:10:   cy:10:   cz:10:,
                      Step:.01:   Sleng:16:(0,500)   ToF:16:(0,1.e-6),  
-                     Ptot:16:(0,100)      Eloss:32:(0,0.001) 
+                     Ptot:16:(0,100)      Eloss:32:(0,0.01) 
 Endblock
 *
 *------------------------------------------------------------------------------
