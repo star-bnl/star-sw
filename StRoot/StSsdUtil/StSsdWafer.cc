@@ -1,8 +1,11 @@
 
 
-// $Id: StSsdWafer.cc,v 1.11 2008/07/16 21:00:38 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.12 2009/02/23 21:10:40 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.12  2009/02/23 21:10:40  bouchet
+// increase NSaturationSignal to reflect the energy increase of the GEANT hit
+//
 // Revision 1.11  2008/07/16 21:00:38  bouchet
 // default writePointToContainer : no quality hits calculation
 //
@@ -2945,10 +2948,10 @@ void StSsdWafer::sortNoise()
   mNoiseN->sortStrip();
 }
 //________________________________________________________________________________
-void StSsdWafer::addNoiseToStripSignal(long nElectronInAMip,long a128Dynamic)
+void StSsdWafer::addNoiseToStripSignal(long nElectronInAMip,long adcDynamic)
 {
-  mNoiseP->addSignal(mStripP, nElectronInAMip, a128Dynamic);
-  mNoiseN->addSignal(mStripN, nElectronInAMip, a128Dynamic);
+  mNoiseP->addSignal(mStripP, nElectronInAMip, adcDynamic);
+  mNoiseN->addSignal(mStripN, nElectronInAMip, adcDynamic);
 }
 //________________________________________________________________________________
 void StSsdWafer::pedestalSubstraction()

@@ -1,6 +1,9 @@
-// $Id: StSpaListNoise.cc,v 1.2 2006/12/01 22:04:12 bouchet Exp $
+// $Id: StSpaListNoise.cc,v 1.3 2009/02/23 21:10:40 bouchet Exp $
 //
 // $Log: StSpaListNoise.cc,v $
+// Revision 1.3  2009/02/23 21:10:40  bouchet
+// increase NSaturationSignal to reflect the energy increase of the GEANT hit
+//
 // Revision 1.2  2006/12/01 22:04:12  bouchet
 // get back to previous daqCutValue
 //
@@ -204,9 +207,9 @@ void StSpaListNoise::sortStrip()
 }
 
 void StSpaListNoise::addSignal(StSsdStripList *ptr,
-			       long nElectronInAMip,long a128Dynamic)
+			       long nElectronInAMip,long adcDynamic)
 {
-  const Int_t NSaturationSignal = (int)a128Dynamic*nElectronInAMip;
+  const Int_t NSaturationSignal = (int)adcDynamic*nElectronInAMip;
   Int_t size1                     = this->getSize();
   
   if (!size1) return;

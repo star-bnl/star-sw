@@ -1,6 +1,9 @@
-// $Id: StSpaListNoise.hh,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSpaListNoise.hh,v 1.2 2009/02/23 21:10:40 bouchet Exp $
 //
 // $Log: StSpaListNoise.hh,v $
+// Revision 1.2  2009/02/23 21:10:40  bouchet
+// increase NSaturationSignal to reflect the energy increase of the GEANT hit
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -35,7 +38,7 @@ class StSpaListNoise
   void            sortStrip();
   Int_t           removeNoise(StSpaNoise *ptr);
   Int_t           getSize();
-  void            addSignal(StSsdStripList *ptr, Long_t nElectronInAMip,Long_t a128Dynamic);
+  void            addSignal(StSsdStripList *ptr, Long_t nElectronInAMip,Long_t adcDynamic);
   void            substractPedestal();
   void            convertAnalogToDigit(Long_t nElectronInAMip,Long_t adcDynamic,
 				       Long_t nbitEncoding,Float_t daqCutValue);
