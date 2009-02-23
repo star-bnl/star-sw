@@ -13,7 +13,7 @@
 #
 
 # All the below files will have a local copy instead of a link
-@LOCAL = ("config/Makefile.config","Makefile","configure");
+@LOCAL = ("Makefile","config/Makefile.config","configure");
 
 # for Gprof support, we will tewak Makefile.linux
 if ( $ENV{ROOTSYS} =~ m/Groot/ ){
