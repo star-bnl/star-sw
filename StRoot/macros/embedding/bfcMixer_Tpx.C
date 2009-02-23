@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.3 2008/08/01 14:26:10 lbarnby Exp $
+// $Id: bfcMixer_Tpx.C,v 1.4 2009/02/23 20:58:03 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -24,9 +24,9 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
 		  const Double_t mult=0.05,
                   const Char_t *prodName = "P08icpp") {
   // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
-  TString prodP08icpp("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine");
+  TString prodP08icpp("DbV20080712,pp2008,ITTF,Iana,OSpaceZ2,OGridLeak3D,beamLine");
   TString prodP08icAuAu9("DbV20080709 P2008 ITTF");
-  TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine");
+  TString prodP08icdAu("DbV20080712 P2008 ITTF Iana OSpaceZ2 OGridLeak3D beamLine");
   TString geomP08ic("ry2008");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
@@ -38,7 +38,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
     cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",Embedding,TpcMixer,TpxClu,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
+  chain3Opt += ",TpcMixer,TpxClu,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
   chain3Opt += ","; chain3Opt += geomP08ic;
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");

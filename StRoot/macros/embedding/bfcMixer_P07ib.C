@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_P07ib.C,v 1.5 2007/12/18 20:30:17 didenko Exp $
+// $Id: bfcMixer_P07ib.C,v 1.6 2009/02/23 20:58:03 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -21,13 +21,13 @@ void bfcMixer_P07ib(const Int_t Nevents=1,
 	      const Char_t *mode="strange",
 	      const Char_t *acc_mode="off" ) {
   // production chain for P07ib
-  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2");// KeepSvtHit hitfilt skip1row");
+  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2");// KeepSvtHit hitfilt skip1row");
   TString geomP07ib("ry2005f");
   TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput");
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geomP07ib;
   TString chain3Opt = prodP07ib;
-  chain3Opt += " Embedding onlraw GeantOut MiniMcMk -in NoInput,useInTracker"; 
+  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna -in NoInput,useInTracker"; 
   chain3Opt += " "; chain3Opt += geomP07ib;
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
