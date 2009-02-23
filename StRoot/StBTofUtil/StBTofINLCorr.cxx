@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.3 2009/02/13 23:32:52 dongx Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.4 2009/02/23 23:52:07 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.4  2009/02/23 23:52:07  dongx
+ * In case of missing INL tables in db, return the INL corr from the first element in db
+ *
  * Revision 1.3  2009/02/13 23:32:52  dongx
  * fixed the crash when no INL table for some board is available
  *
@@ -192,7 +195,9 @@ float StBTofINLCorr::getTrayINLCorr(int trayId, int globalTdcChan, int bin) {
   int tdcChan = globalTdcChan % mNChanOnTDIG;   // 0-23
   if(index<0||index>=mNValidBoards) {
     LOG_WARN << " Missing INL table for boardId = " << boardId << " on tray " << trayId << endm;
-    return 0.0;
+    LOG_WARN << " Using the table from boardId # " << mBoardId[0] << " tdcchan # 0 " << endm;
+//    return 0.0;
+    return mINLCorr[0][0][bin];
   } else {
     return mINLCorr[index][tdcChan][bin];
   }
@@ -204,7 +209,7 @@ float StBTofINLCorr::getVpdINLCorr(StBeamDirection eastwest, int globalTdcChan, 
   if(bin<0 || bin>=mNChanMAX) return 0.0;
   int iTdig = globalTdcChan/mNChanOnTDIG;  // 0-7
 
-  int boardId;
+  int boardId = -1;
   if(eastwest==east) { // east pvpd
     boardId = mTdigOnEastVpd[iTdig];
   } else if(eastwest==west) {  // west pvpd
@@ -216,7 +221,9 @@ float StBTofINLCorr::getVpdINLCorr(StBeamDirection eastwest, int globalTdcChan, 
   int tdcChan = globalTdcChan % mNChanOnTDIG;   // 0-23
   if(index<0||index>=mNValidBoards) {
     LOG_WARN << " Missing INL table for boardId = " << boardId << " on vpd " << eastwest << endm;
-    return 0.0;
+    LOG_WARN << " Using the table from boardId # " << mBoardId[0] << " tdcchan # 0 " << endm;
+//    return 0.0;
+    return mINLCorr[0][0][bin];
   } else {
     return mINLCorr[index][tdcChan][bin];
   }
