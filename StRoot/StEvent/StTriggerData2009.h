@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.4 2009/02/13 23:04:50 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.5 2009/02/23 22:31:09 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.5  2009/02/23 22:31:09  ullrich
+ * Fixed problem when running over 2009 data (solution by Pibero) and new VPD access functions.
+ *
  * Revision 2.4  2009/02/13 23:04:50  ullrich
  * Updates necessary for use in Online QA (P) plots.
  *
@@ -132,6 +135,8 @@ public:
     // VPD
     unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short vpdTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short vpdEarliestTDC(StBeamDirection eastwest) const;
     unsigned short vpdTimeDifference() const;
 

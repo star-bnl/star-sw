@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.5 2009/02/13 23:04:50 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.6 2009/02/23 22:31:09 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.6  2009/02/23 22:31:09  ullrich
+ * Fixed problem when running over 2009 data (solution by Pibero) and new VPD access functions.
+ *
  * Revision 2.5  2009/02/13 23:04:50  ullrich
  * Updates necessary for use in Online QA (P) plots.
  *
@@ -737,11 +740,37 @@ const unsigned int* StTriggerData2009::l2Result() const
 
 unsigned short StTriggerData2009::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const
 {
+    static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
+    if (pmt<1 || pmt>16) return 0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return bbq[buffer][10+(int)eastwest*2][map[pmt-1]];
     return 0;
 }
 
 unsigned short StTriggerData2009::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const
 {
+    static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
+    if (pmt<1 || pmt>16) return 0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return bbq[buffer][10+(int)eastwest*2][map[pmt-1]+4];
+    return 0;
+}
+
+unsigned short StTriggerData2009::vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost) const
+{
+    static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
+    if (pmt<1 || pmt>16) return 0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return bbq[buffer][6+(int)eastwest*2][map[pmt-1]];
+    return 0;
+}
+
+unsigned short StTriggerData2009::vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost) const
+{
+    static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
+    if (pmt<1 || pmt>16) return 0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return bbq[buffer][6+(int)eastwest*2][map[pmt-1]+4];
     return 0;
 }
 
@@ -768,13 +797,15 @@ unsigned int* StTriggerData2009::QTdata(int prepost) const
 
 unsigned char* StTriggerData2009::getDsm_FMS(int prepost) const
 {
-    if (int buffer = prepostAddress(prepost) >= 0) return mFMS[buffer]->FMS;
-    return 0;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) if(mFMS[buffer]) return mFMS[buffer]->FMS;
+    return 0;  
 }
 
 unsigned short int* StTriggerData2009::getDsm1_FMS(int prepost) const
 {
-    if (int buffer = prepostAddress(prepost) >= 0) return mMIX[buffer]->FPDEastNSLayer1;
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) if(mMIX[buffer]) return mMIX[buffer]->FPDEastNSLayer1;
     return 0;
 }
 
