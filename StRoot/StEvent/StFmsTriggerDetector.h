@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.h,v 2.3 2007/12/11 18:11:13 ullrich Exp $
+ * $Id: StFmsTriggerDetector.h,v 2.4 2009/02/23 22:29:57 ullrich Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.h,v $
+ * Revision 2.4  2009/02/23 22:29:57  ullrich
+ * Fixed problem when running over 2009 data (solution by Pibero)
+ *
  * Revision 2.3  2007/12/11 18:11:13  ullrich
  * Fix bugs in QT decoding (Akio).
  *
@@ -80,12 +83,12 @@ protected:
     UShort_t mDSM1[mMaxDSM1];
     UShort_t mDSM2[mMaxDSM2];
 
-    int  mNumHeader; //!
+    int  mNumHeader;
     unsigned short mADC[mMaxCrate][mMaxAddr][mMaxDCard][mMaxChan]; //!
     unsigned short mTDC[mMaxCrate][mMaxAddr][mMaxDCard][mMaxChan]; //!
     char mEnd[1];//!
 
-    ClassDef(StFmsTriggerDetector,2)      
+    ClassDef(StFmsTriggerDetector,3)      
 };
 
 inline unsigned int   StFmsTriggerDetector::nHit() const {return mNumQTdata;} 
