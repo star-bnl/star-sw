@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.1 2009/02/22 21:39:58 perev Exp $
+!// $Id: tpcegeo3.g,v 1.2 2009/02/23 00:05:35 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.2  2009/02/23 00:05:35  perev
+!// remove qfatal call
+!//
 !// Revision 1.1  2009/02/22 21:39:58  perev
 !// Y2009 born
 !//
@@ -39,7 +42,7 @@
 !// Revision 1.4  2008/08/27 21:48:17  fisyak
 !//
 !// TPC 
-!// Replace [;ASSERT(#);] with [;call assert((#1),__LINE__,__FILE__);];
+ Replace [;ASSERT(#);] with [;call assert((#1),__LINE__,'TPCE');];
  module   TPCEGEO3  is the updated TPC
    Author   David Underwood corrected by  Maxim Potekhin
    Created  Dec 7, 2005
@@ -832,6 +835,7 @@ Block TSAW  TpcSectorAndWheel
 !// Drawing 24A3685B height =  27.373
   	dX2 = 1.470;
         dX  = 0;
+write(*,*) '************** USE TECW sec=1 ************';
         USE TECW sec=1;
   	RIBI =  {    dX                 ,dX2				, 0.,0.		!// r for upper edge
      		  4.261           	,0.375				, 0.,0.
@@ -906,6 +910,7 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
 !//    tpcPadPlane[inOut] = new TGeoVolumeAssembly("TpcPadPlane");
 !//    tpcPadPlane[inOut]->SetTitle(Form("Tpc%sPadPlane",InnerOuter[inOut]));
     
+write(*,*) '************ use TECW sec=(inOut+1)=',(inOut+1),' ********';
     use TECW sec=(inOut+1)
     z2 = zWheel1;
     z1 = z2 - TECW_Thick;
@@ -1095,7 +1100,7 @@ Block TSAS  TpcInnerSectorAssembly &  TpcOuterSectorAssembly TSAS and TSA1
       y  = RIB(kYYrib,iRib,inOut)*INCH;
       dy = RIB(kDYrib,iRib,inOut)*INCH;
       
-  write(*,*)  '##RIBS## rib iRib = ' ,iRib , '  r = ',r,'  dr = ',dr, '  y = ',y,' dy = ',dy;
+!//  write(*,*)  '##RIBS## rib iRib = ' ,iRib , '  r = ',r,'  dr = ',dr, '  y = ',y,' dy = ',dy;
       if (dy < 1.e-7) {
 	dx2 =  r      *dYdX - TECW_widthRib - 2*dxW; !//TECW_widthLip;
 	dx1 = (r - dr)*dYdX - TECW_widthRib - 2*dxW; !//TECW_widthLip;
@@ -1482,7 +1487,7 @@ block TCOO 	CoolingTube
 
 Attribute TCOO seen=1  colo=kRed
 Material Water_Pipe
- if ( mySha .ne. 'PARA'  .and. mySha .ne. 'TRD1') call qfatal
+!// assert( mySha .eq. 'PARA'  .or. mySha .eq. 'TRD1');
  if (mySha .eq. 'PARA') then
    SHAPE PARA dX=myPar(1) dY=myPar(2) dz=myPar(3) Alph=myPar(4)
  endif
@@ -1520,7 +1525,7 @@ block TRIB	Tpc Ribs
 	Attribute TRib seen=1  colo=kRed
 	Material ALUMINIUM
 
-!//     do jTRIB=1,3;
+!//        do jTRIB=1,3;
 !//	  assert(myPar(jTRIB).gt.0);
 !//	enddo;  
 
@@ -1550,7 +1555,7 @@ endBlock	"end TWIR"
 block THOL the Sector holes for FEE
 !//    TGeoVolume *thole = gGeoManager->MakeBox("THOLE", GetMed("TPCE_STANDARD"), dx, dy, dz);
 	Attribute THOL seen=1  colo=kGreen
-	Material STANDARD;
+	Material Air;
 !//        assert(myPar(1).gt.0);
 !//        assert(myPar(2).gt.0);
 !//        assert(myPar(3).gt.0);
