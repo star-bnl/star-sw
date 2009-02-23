@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Unified.C,v 1.3 2008/01/22 14:52:26 lbarnby Exp $
+// $Id: bfcMixer_Unified.C,v 1.4 2009/02/23 20:58:03 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ void bfcMixer_Unified(const Int_t Nevents=1,
 	      const Char_t *mode="strange",
 	      const Char_t *acc_mode="off" ) {
   // production chain and geometry for P07ib
-  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2");// KeepSvtHit hitfilt skip1row");
+  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2");// KeepSvtHit hitfilt skip1row");
   TString geomP07ib("ry2005f");
 
   // production chain and geometry for P07id 20 GeV AuAu (2001) reproduction
@@ -125,6 +125,9 @@ void bfcMixer_Unified(const Int_t Nevents=1,
 }
   
 // $Log: bfcMixer_Unified.C,v $
+// Revision 1.4  2009/02/23 20:58:03  fisyak
+// Add to production chain Iana option to turn on dE/dx. V0, Xi, ...
+//
 // Revision 1.3  2008/01/22 14:52:26  lbarnby
 // Add adcOnly option. Enables efficient processing of st_gamma daq files
 //

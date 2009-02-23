@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcOnly.C,v 1.1 2007/12/26 23:26:55 fisyak Exp $
+// $Id: bfcMixer_TpcOnly.C,v 1.2 2009/02/23 20:58:03 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -21,7 +21,7 @@ void bfcMixer_TpcOnly(const Int_t Nevents=100,
 	      const Char_t *mode="strange",
 	      const Char_t *acc_mode="off" ) {
   // production chain for P07ib
-  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2");// KeepSvtHit hitfilt skip1row");
+  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2");// KeepSvtHit hitfilt skip1row");
   TString geomP07ib("ry2005f");
   TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput");
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
