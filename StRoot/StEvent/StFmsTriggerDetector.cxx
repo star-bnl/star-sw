@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.cxx,v 2.5 2007/12/11 18:11:13 ullrich Exp $
+ * $Id: StFmsTriggerDetector.cxx,v 2.6 2009/02/23 22:29:49 ullrich Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.cxx,v $
+ * Revision 2.6  2009/02/23 22:29:49  ullrich
+ * Fixed problem when running over 2009 data (solution by Pibero)
+ *
  * Revision 2.5  2007/12/11 18:11:13  ullrich
  * Fix bugs in QT decoding (Akio).
  *
@@ -31,7 +34,7 @@
 #include "Stiostream.h"
 #include <stdio.h>
 
-static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.5 2007/12/11 18:11:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.6 2009/02/23 22:29:49 ullrich Exp $";
 
 ClassImp(StFmsTriggerDetector)
     
@@ -56,7 +59,7 @@ StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
         {LOG_ERROR << "StFmsTriggerDetector::StFmsTriggerDetector() mMaxLine < mNumQTdata" << endm;}
     }
     else {
-        i = t.QTdata();       if (i) memcpy(mQTdata,i, mNumQTdata*sizeof(int ));  
+        i = t.QTdata(); if (i && mNumQTdata>0) memcpy(mQTdata,i, mNumQTdata*sizeof(int ));  
     }      
     c = t.getDsm_FMS()  ; if (c) memcpy(mDSM   ,c, sizeof(mDSM  ));
     c = t.getDsm02_FMS(); if (c) memcpy(mDSM01 ,c, sizeof(mDSM01));
