@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.4 2007/07/01 15:47:38 bouchet Exp $
+// $Id: StSsdWafer.hh,v 1.5 2009/02/23 21:10:40 bouchet Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.5  2009/02/23 21:10:40  bouchet
+// increase NSaturationSignal to reflect the energy increase of the GEANT hit
+//
 // Revision 1.4  2007/07/01 15:47:38  bouchet
 // add method to remove strips which signal < 3*rms
 //
@@ -102,7 +105,7 @@ class StSsdWafer: public TGeoHMatrix {
   void              addCluster(StSsdCluster *ptr, Int_t iSide); //!< Attaches the ptr cluster on the iSide of the wafer
   void              addHit(Int_t rNId , Int_t rMcHit, Int_t rMcTrack, Float_t *rXg , Float_t rDe, Float_t *p);
   void              addNoiseToStripSignal(StSpaNoise *ptr, Int_t iSide);
-  void              addNoiseToStripSignal(long nElectronInAMip,long a128Dynamic);
+  void              addNoiseToStripSignal(long nElectronInAMip,long adcDynamic);
   void              addPackage(StSsdPackage *ptr);            //!< Attaches the ptr package on that wafer
   void              addPoint(StSsdPoint *ptr);                //!< Attaches the ptr point on that wafer
   void              addStrip(StSsdStrip *ptr, Int_t iSide);     //!< Attaches the ptr strip on the iSide of the wafer

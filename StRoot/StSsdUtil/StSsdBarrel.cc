@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.11 2008/10/20 19:30:32 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.12 2009/02/23 21:10:40 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.12  2009/02/23 21:10:40  bouchet
+// increase NSaturationSignal to reflect the energy increase of the GEANT hit
+//
 // Revision 1.11  2008/10/20 19:30:32  bouchet
 // add methods for the calculation of quality
 //
@@ -1495,7 +1498,8 @@ void  StSsdBarrel::addNoiseToStrip(slsCtrl_st *ctrl)
       StSsdWafer *wafer = mLadders[iLad]->mWafers[iWaf];
       wafer->sortNoise();
       wafer->sortStrip();
-      wafer->addNoiseToStripSignal(ctrl[0].nElectronInAMip,ctrl[0].a128Dynamic);
+      //wafer->addNoiseToStripSignal(ctrl[0].nElectronInAMip,ctrl[0].a128Dynamic);
+      wafer->addNoiseToStripSignal(ctrl[0].nElectronInAMip,ctrl[0].adcDynamic);
     }
 }
 //________________________________________________________________________________
