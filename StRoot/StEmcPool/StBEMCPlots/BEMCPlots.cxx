@@ -113,10 +113,10 @@ BEMCPlots::BEMCPlots(TObjArray *list)
     this->mHistDsmL3InputJetPatchTopoBit = new TH1F(HistDsmL3InputJetPatchTopoBitName, "BEMC DSM L3 Input - JetPatch topology bit;JetPatch bit", 2, -0.5, 2-0.5);
     ADDHIST(this->mHistDsmL3InputJetPatchTopoBit)
 
-      this->mHistRawAdc1 = new TH2F(HistRawAdc1Name, "BTOW ADC, 1 <= SoftId <= 1220;SoftId;ADC",    1220, 0000.5, 1220.5, 300, -0.5, 1000-0.5);
-      this->mHistRawAdc2 = new TH2F(HistRawAdc2Name, "BTOW ADC, 1221 <= SoftId <= 2400;SoftId;ADC", 1180, 1220.5, 2400.5, 300, -0.5, 1000-0.5);
-      this->mHistRawAdc3 = new TH2F(HistRawAdc3Name, "BTOW ADC, 2401 <= SoftId <= 3540;SoftId;ADC", 1140, 2400.5, 3540.5, 300, -0.5, 1000-0.5);
-      this->mHistRawAdc4 = new TH2F(HistRawAdc4Name, "BTOW ADC, 3541 <= SoftId <= 4800;SoftId;ADC", 1260, 3540.5, 4800.5, 300, -0.5, 1000-0.5);
+      this->mHistRawAdc1 = new TH2F(HistRawAdc1Name, "BTOW ADC, 1 <= SoftId <= 1220;SoftId;ADC",    1220, 0000.5, 1220.5, 300, -0.5, 500-0.5);
+      this->mHistRawAdc2 = new TH2F(HistRawAdc2Name, "BTOW ADC, 1221 <= SoftId <= 2400;SoftId;ADC", 1180, 1220.5, 2400.5, 300, -0.5, 500-0.5);
+      this->mHistRawAdc3 = new TH2F(HistRawAdc3Name, "BTOW ADC, 2401 <= SoftId <= 3540;SoftId;ADC", 1140, 2400.5, 3540.5, 300, -0.5, 500-0.5);
+      this->mHistRawAdc4 = new TH2F(HistRawAdc4Name, "BTOW ADC, 3541 <= SoftId <= 4800;SoftId;ADC", 1260, 3540.5, 4800.5, 300, -0.5, 500-0.5);
 
       this->mHistRawAdcPsd1 = new TH2F(HistRawAdcPsd1Name, "BPRS ADC, 1 <= SoftId <= 1220;SoftId;ADC",    1220, 0000.5, 1220.5, 300, -0.5, 1000-0.5);
       this->mHistRawAdcPsd2 = new TH2F(HistRawAdcPsd2Name, "BPRS ADC, 1221 <= SoftId <= 2400;SoftId;ADC", 1180, 1220.5, 2400.5, 300, -0.5, 1000-0.5);
@@ -154,7 +154,7 @@ BEMCPlots::BEMCPlots(TObjArray *list)
 	ADDHIST(this->mHistHighTowerSpectrum[i])
 	name = Form("%s_%u", HistPatchSumSpectrumName, i);
 	title = Form("JetPatch %u - PatchSum spectrum;PatchSum", i);	
-	this->mHistPatchSumSpectrum[i] = new TH1F(name.Data(), title.Data(), 200, -0.5, 200-0.5);    	
+	this->mHistPatchSumSpectrum[i] = new TH1F(name.Data(), title.Data(), 200, -0.5, 300-0.5);
 	ADDHIST(this->mHistPatchSumSpectrum[i])
     }
     
@@ -168,14 +168,14 @@ BEMCPlots::BEMCPlots(TObjArray *list)
       ADDHIST(this->mHistTriggerCorruptionHighTowerCorr)
       ADDHIST(this->mHistTriggerCorruptionPatchSumCorr)
 
-    this->mHist_TDC_status      = new TH2F(Hist_TDC_statusName, "BEMC TDC Status (0=total 1=OK 2=Not Installed3=Corrupted)",5,-0.5,4.5,30,-0.5,29.5);
-    this->mHist_SMD_status      = new TH2F(Hist_SMD_statusName, "BEMC SMD Status (0=total 1=OK 2=Not Installed3=Corrupted)",5,-0.5,4.5,8,-0.5,7.5);
-    this->mHist_PSD_status      = new TH2F(Hist_PSD_statusName, "BEMC PSD Status (0=total 1=OK 2=Not Installed 3=Corrupted)",5,-0.5,4.5,4,-0.5,3.5);
-    this->mHist_BTOW_Corruption = new TH1F(Hist_BTOW_CorruptionName, "BEMC TDC corruption frequency (0=total 1=OK 2=Not Installed 3=Corrupted)",5,-0.5,4.5);
+    this->mHist_TDC_status      = new TH2F(Hist_TDC_statusName, "BEMC TDC Status;0=total 1=OK 2=Not Installed3=Corrupted",5,-0.5,4.5,30,-0.5,29.5);
+    this->mHist_SMD_status      = new TH2F(Hist_SMD_statusName, "BEMC SMD Status;0=total 1=OK 2=Not Installed3=Corrupted",5,-0.5,4.5,8,-0.5,7.5);
+    this->mHist_PSD_status      = new TH2F(Hist_PSD_statusName, "BEMC PSD Status;0=total 1=OK 2=Not Installed 3=Corrupted",5,-0.5,4.5,4,-0.5,3.5);
+    this->mHist_BTOW_Corruption = new TH1F(Hist_BTOW_CorruptionName, "BEMC TDC corruption frequency;0=total 1=OK 2=Not Installed 3=Corrupted",5,-0.5,4.5);
 
-    this->mHist_btow_spectra_1  = new TH2F(Hist_btow_spectra_1Name, "BEMC tower spectrum  0 < TDC < 10 (X = 160*TDC + index)", 1600,  -0.5,1599.5,100,0,1000);
-    this->mHist_btow_spectra_2  = new TH2F(Hist_btow_spectra_2Name, "BEMC tower spectrum 10 < TDC < 20 (X = 160*TDC + index)", 1600,1599.5,3199.5,100,0,1000);
-    this->mHist_btow_spectra_3  = new TH2F(Hist_btow_spectra_3Name, "BEMC tower spectrum 20 < TDC < 30 (X = 160*TDC + index)", 1600,3199.5,4799.5,100,0,1000);
+    this->mHist_btow_spectra_1  = new TH2F(Hist_btow_spectra_1Name, "BEMC tower spectrum  0 < TDC < 10;X = 160*TDC + index", 1600,  -0.5,1599.5,100,0,500);
+    this->mHist_btow_spectra_2  = new TH2F(Hist_btow_spectra_2Name, "BEMC tower spectrum 10 < TDC < 20;X = 160*TDC + index", 1600,1599.5,3199.5,100,0,500);
+    this->mHist_btow_spectra_3  = new TH2F(Hist_btow_spectra_3Name, "BEMC tower spectrum 20 < TDC < 30;X = 160*TDC + index", 1600,3199.5,4799.5,100,0,500);
 
     this->mHist_smd_spectra     = new TH1F(Hist_smd_spectraName, "BEMC SMD total ADC",250,100000.,6000000.);
     this->mHist_smd_spectraNonZS= new TH1F(Hist_smd_spectraNonZSName, "BEMC SMD total ADC, Non-ZS",250,100000.,6000000.);

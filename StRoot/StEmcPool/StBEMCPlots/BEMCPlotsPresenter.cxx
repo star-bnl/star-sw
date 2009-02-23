@@ -483,8 +483,8 @@ void BEMCPlotsPresenter::displayJetPatchHT(FileType file, TPad *pad, Int_t mDebu
 	if (HistHighTowerSpectrum[jetPatch]) {
 	    HistHighTowerSpectrum[jetPatch]->SetStats(0);
 	    HistHighTowerSpectrum[jetPatch]->Draw();
+	    if (HistHighTowerSpectrum[jetPatch]->GetEntries()) gPad->SetLogy();
 	}
-	gPad->SetLogy();
     }
 }
 //-------------------------------------------------------------------
@@ -512,8 +512,8 @@ void BEMCPlotsPresenter::displayJetPatchSum(FileType file, TPad *pad, Int_t mDeb
 	if (HistPatchSumSpectrum[jetPatch]) {
 	    HistPatchSumSpectrum[jetPatch]->SetStats(0);
 	    HistPatchSumSpectrum[jetPatch]->Draw();
+	    if (HistPatchSumSpectrum[jetPatch]->GetEntries()) gPad->SetLogy();
 	}
-	gPad->SetLogy();
     }
 }
 //-------------------------------------------------------------------
