@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.24 2009/02/13 23:04:50 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.25 2009/02/23 22:31:09 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.25  2009/02/23 22:31:09  ullrich
+ * Fixed problem when running over 2009 data (solution by Pibero) and new VPD access functions.
+ *
  * Revision 2.24  2009/02/13 23:04:50  ullrich
  * Updates necessary for use in Online QA (P) plots.
  *
@@ -203,6 +206,8 @@ public:
     // VPD
     virtual unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short vpdTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned short vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned short vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short vpdEarliestTDC(StBeamDirection eastwest) const;
     virtual unsigned short vpdTimeDifference() const;
 
@@ -336,6 +341,8 @@ inline unsigned short StTriggerData::nQTdata(int prepost) const {return 0;}
 inline unsigned int*  StTriggerData::QTdata(int prepost) const {return 0;}
 inline unsigned short StTriggerData::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest) const {return 0;}
 inline unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
 inline unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
