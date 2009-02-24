@@ -1,6 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.3 2009/01/25 01:36:54 ogrebeny Exp $
-#include <stdio.h>
-#include <assert.h>
+// $Id: EEqaSorterA.cxx,v 1.4 2009/02/24 04:07:45 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 
@@ -10,140 +8,124 @@
 #include <TH2.h>
 #include <TFile.h>
 
+#include <StMessMgr.h>
+
 #include "EEqaSorterA.h"
 #include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
 
 ClassImp(EEqaSorterA)
 
 //-------------------------------------------
-//-------------------------------------------
- EEqaSorterA:: EEqaSorterA( TObjArray*L) {
-   // printf("\n\n  EEqaSorterA:: EEqaSorterA() \n\n");
-  HList=L; 
-
-  hotTwThres=40;// used to count hot towers
+EEqaSorterA::EEqaSorterA() 
+    : TObject()
+    , hCrate(0)
+    , hCrateHot(0)
+    , hotTwThres(40)// used to count hot towers
+{
   memset(feePed,0,sizeof(feePed)); // clear ped values
 } 
  
-
-
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorterA::sort( EztEmcRawData  *t,  EztEmcRawData  *s, int ver ) {
-  eETow=t;
-  eESmd=s;
-  // eESmd->print(1);
-  sortDaqTower1();
-  sortDaqMapmt0(ver);
-  sortDaqTowerHot();
+EEqaSorterA::~EEqaSorterA() {
+    for(int icr = 0;icr < MaxAnyCrate;icr++) { 
+	if (hCrate && hCrate[icr]) delete hCrate[icr];
+    }
+    if (hCrate) delete hCrate;
+    for(int icr = 0;icr < MaxTwCrateID;icr++) { 
+	if (hCrateHot && hCrateHot[icr]) delete hCrateHot[icr];
+    }
+    if (hCrateHot) delete hCrateHot;
 }
 
-
 //-------------------------------------------
+void EEqaSorterA::sort(const EztEmcRawData *t, const EztEmcRawData *s, int ver) {
+  sortDaqTower1(t);
+  sortDaqMapmt0(t, ver);
+  sortDaqTowerHot(s);
+}
+
 //-------------------------------------------
 void  EEqaSorterA::Finish(){
 }
 
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorterA::sortDaqTower1(){
+void  EEqaSorterA::sortDaqTower1(const EztEmcRawData *t){
   /* Goals of this method:
      make histos of adc vs channel for each tower crate
      and count ADC values = n*256 in all data blocks 
   */
-  if(eETow==0) return;
-  int icr;
-  for(icr=0;icr<eETow->getNBlocks();icr++) {
-    if(eETow->isCrateVoid(icr)) continue;
+  if(!t) return;
+  for(int icr=0;icr<t->getNBlocks();icr++) {
+    if(t->isCrateVoid(icr)) continue;
     int crateID=icr+1;
-    int i;
-    const UShort_t* data=eETow->data(icr);
-    for(i=0;i<eETow->sizeData(icr);i++) {
+    const UShort_t* data=t->data(icr);
+    for(int i=0;i<t->sizeData(icr);i++) {
       int chan=i;
       float adc=data[i];
-      hCrate[crateID-1]->Fill(adc,chan);
+      if (hCrate && hCrate[crateID - 1]) hCrate[crateID - 1]->Fill(adc, chan);
     }
   }// end of loop over crates
- }
-
+}
 
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorterA::sortDaqTowerHot(){
+void  EEqaSorterA::sortDaqTowerHot(const EztEmcRawData *t){
   /* Goals of this method:
      increment (hot) towers above some threshold 
   */
 
-  if(eETow==0) return;
-  int icr;
-
-  for(icr=0;icr<eETow->getNBlocks();icr++) {
-    if(eETow->isCrateVoid(icr)) continue;
+  if(!t) return;
+  for(int icr=0;icr<t->getNBlocks() && icr<MaxTwCrateID;icr++) {
+    if(t->isCrateVoid(icr)) continue;
     int crateID=icr+1;
-    int i;
-    const UShort_t* data=eETow->data(icr);
-    int *pedA= feePed +(crateID-1)*MaxTwCrateCh;
-    for(i=0;i<eETow->sizeData(icr);i++) {
+    const UShort_t* data=t->data(icr);
+    int *pedA= &feePed[(crateID-1)*MaxTwCrateCh];
+    if (data) for(int i=0;i<t->sizeData(icr);i++) {
       int chan=i;
       float adc=data[i]-24+ pedA[i];
-      // printf("cr=%d, ch=%d  ped=%d\n",icr,i,ped[i]);
       if(adc<hotTwThres) continue;
-      hCrateHot[crateID-1]->Fill(chan);
+//cout << "hCrateHot=" << hCrateHot << ", crateID=" << crateID << ", hCrateHot[crateID-1]=" << hCrateHot[crateID-1] << endl;
+      if (hCrateHot && hCrateHot[crateID-1]) hCrateHot[crateID-1]->Fill(chan);
     }
   }// end of loop over crates
-
 }
 
-
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorterA::sortDaqMapmt0( int ver){
+void  EEqaSorterA::sortDaqMapmt0(const EztEmcRawData *s, int ver){
   /* Goal of this method:
      make histos of adc vs channel for each MAPMT crate
   */
-  if(eESmd==0) return;
-  int icr;
-  for(icr=0;icr<eESmd->getNBlocks();icr++) {
-    if(eESmd->isCrateVoid(icr)) continue;
+  if(!s) return;
+  for(int icr=0;icr<s->getNBlocks();icr++) {
+    if(s->isCrateVoid(icr)) continue;
     int crateID=icr+64;
     // in 2004 there was only 16 MAPMT crates for sectors 5-8
     if(ver<0x22) {
       if(icr>=16) break;
       crateID=icr+84;
     }
-    //printf("ddd %d %d\n",icr,crateID);
-    int i;
-    const UShort_t* data=eESmd->data(icr);
-    for(i=0;i<eESmd->sizeData(icr);i++) {
+    const UShort_t* data=s->data(icr);
+    for(int i=0;i<s->sizeData(icr);i++) {
       int chan=i; 
       float adc=data[i];
-      hCrate[crateID-1]->Fill(adc,chan);
+      if (hCrate && hCrate[crateID-1]) hCrate[crateID-1]->Fill(adc,chan);
     }
   }// end of loop over crates
   
 }
 
-
 //--------------------------------------------------
-//--------------------------------------------------
-void EEqaSorterA::initCrateHisto(int nBin, int mxADC){
-  char *sectL[]={"11TD-1TC", "1TD-3TC", "3TD-5TC", "5TD-7TC", "7TD-9TC", "9TD-11TC"};
-  
-  printf(" EEqaSorterA::initCrateHisto(nb=%d, max=%d)\n", nBin,mxADC);
+void EEqaSorterA::initCrateHisto(TObjArray *HList, int nBin, int mxADC) {
+  const char *sectL[]={"11TD-1TC", "1TD-3TC", "3TD-5TC", "5TD-7TC", "7TD-9TC", "9TD-11TC"};
+  LOG_DEBUG << Form(" EEqaSorterA::initCrateHisto(nb=%d, max=%d)\n", nBin,mxADC) << endm;
   // init histo
-  assert(HList);
   int nOK=0;
-  
   hCrate = new TH2F *[MaxAnyCrate];
-
-  int icr;
-  for(icr=0;icr<MaxAnyCrate;icr++) { 
+  for(int icr=0;icr<MaxAnyCrate;icr++) { 
     //if(icr!=63) continue;
     int crateID=icr+1;
     hCrate[icr]=0;
     int mxChan=0;
-    char text[100];
-    char *physDet=0;
+    TString physDet;
     if(crateID>=MinTwCrateID && crateID<=MaxTwCrateID) {
       // Towers
       mxChan=MaxTwCrateCh;
@@ -153,82 +135,81 @@ void EEqaSorterA::initCrateHisto(int nBin, int mxADC){
       mxChan=MaxMapmtCrateCh;
       int sec=1+(7+crateID/4)%MaxSectors;
       int box=1+crateID%4;
-      sprintf(text,"%dS%d",sec,box);
-      if(box==4) sprintf(text,"%dP1",sec);
-      physDet=text;
+      physDet = (box==4) ? Form("%dP1",sec) : Form("%dS%d",sec,box);
     }
     
     if(mxChan==0) continue; // skip nonexisting crates
     nOK++;
-    char tt1[100], tt2[100];
-    sprintf(tt1,"cr%d",crateID);
-    sprintf(tt2," %s",physDet);//Chan vs. ADC
-    TH2F* h=new TH2F(tt1,tt2,nBin,-0.5, mxADC-0.5, mxChan, -0.5, mxChan-0.5);
-    HList->Add(h);
+    hCrate[icr] = new TH2F(Form("cr%d",crateID),Form(" %s",physDet.Data()),nBin,-0.5, mxADC-0.5, mxChan, -0.5, mxChan-0.5);
+    if (HList) HList->Add(hCrate[icr]);
     // printf("Histo Init: icr=%d crID=%d %s \n",icr,crateID,h->GetTitle());
-    hCrate[icr]=h;
   }
-  
-
   hCrateHot = new TH1F *[MaxTwCrateID];
-  for(icr=0;icr<MaxTwCrateID;icr++) { 
+  for(int icr=0;icr<MaxTwCrateID;icr++) { 
     int crateID=icr+1; 
     hCrateHot[icr]=0;
     int mxChan=MaxTwCrateCh;
-    char tt1[100], tt2[100];
-    sprintf(tt1,"cr%dHot",crateID);
-    sprintf(tt2,"%s thr=feePed+%d",sectL[crateID-1],hotTwThres);
-    TH1F* h=new TH1F(tt1,tt2, mxChan, -0.5, mxChan-0.5);
-    h->SetFillColor(kBlue);
-    HList->Add(h);
-    // printf("cr=%d %s \n",crateID,h->GetTitle());
-    hCrateHot[icr]=h;
+    hCrateHot[icr] = new TH1F(Form("cr%dHot",crateID),Form("%s thr=feePed+%d",sectL[crateID-1],hotTwThres), mxChan, -0.5, mxChan-0.5);
+    hCrateHot[icr]->SetFillColor(kBlue);
+    if (HList) HList->Add(hCrateHot[icr]);
   }
-
-
-  printf("Initialized %d 2D carte-histos\n",nOK);
+  LOG_DEBUG << "Initialized " << nOK << " 2D carte-histos" << endm;
 }  
 
-
-//--------------------------------------------------
-//--------------------------------------------------
-int EEqaSorterA::usePed4( TString fName){
-  //......................... load ped for L-0
-  printf(" EEqaSorterA::usePed4('%s') ...\n",fName.Data());
-  
-  FILE *fd=fopen(fName.Data(),"r");
-  if(fd==0) goto abandon;
-  assert(fd);
-  int cr,ch;
-  for(cr=0;cr<MaxTwCrateID;cr++) 
-    for(ch=0;ch<MaxTwCrateCh; ch++) {
-      int xcr,xch, ped4;
-      float xped;
-      int ret=fscanf(fd,"%d %d %f %d",&xcr,&xch,&xped,&ped4);
-#if 0
-      printf("ret=%d %d %d %f %d\n",ret,xcr,xch,xped,ped4);
-      assert(ret==4);
-      assert(xcr==cr+1);
-      assert(xch==ch);
-#endif
-      if(ret!=4) goto abandon;
-      if(xcr!=cr+1) goto abandon;
-      if(xch!=ch) goto abandon;
-      feePed[cr*MaxTwCrateCh + ch]=4*ped4;
+void EEqaSorterA::saveHisto(TFile *f) const {
+    if (f) f->cd();
+    for(int icr = 0;icr < MaxAnyCrate;icr++) { 
+	if (hCrate && hCrate[icr]) hCrate[icr]->Write();
     }
-  fclose(fd);
-  printf(" EEqaSorterA::usePed4(...) Loaded\n");
+    for(int icr = 0;icr < MaxTwCrateID;icr++) { 
+	if (hCrateHot && hCrateHot[icr]) hCrateHot[icr]->Write();
+    }
+}  
 
-  return 0;
- abandon: // any error has happened (this is a new approach for me, JB)
-  memset(feePed,0,sizeof(feePed)); // clear FeePed values
-  printf(" EEqaSorterA::usePed4('%s') FAILED\n",fName.Data());
-  return 1;
+void EEqaSorterA::resetHisto() {
+    for(int icr = 0;icr < MaxAnyCrate;icr++) { 
+	if (hCrate && hCrate[icr]) hCrate[icr]->Reset();
+    }
+    for(int icr = 0;icr < MaxTwCrateID;icr++) { 
+	if (hCrateHot && hCrateHot[icr]) hCrateHot[icr]->Reset();
+    }
+}  
+
+//--------------------------------------------------
+int EEqaSorterA::usePed4(const Char_t *filename) {
+    int ok = 0;
+    //......................... load ped for L-0
+    LOG_DEBUG << " EEqaSorterA::usePed4(\"" << filename << "\") ..." << endm;
+    FILE *fd=fopen(filename,"r");
+    if (fd) {
+	ok = 1;
+	for(int cr=0;cr<MaxTwCrateID;cr++) {
+	    for(int ch=0;ch<MaxTwCrateCh; ch++) {
+    		int xcr, xch, ped4;
+    		float xped;
+    		int ret=fscanf(fd,"%d %d %f %d",&xcr,&xch,&xped,&ped4);
+    		if ((ret == 4) && (xcr == cr + 1) && (xch == ch)) {
+	    	    feePed[cr*MaxTwCrateCh + ch]=4*ped4;
+		} else {
+		    LOG_ERROR << "Bad format in " << filename << ": read xcr=" << xcr << ", xch=" << xch << ", xped=" << xped << ", ped4=" << ped4 << endm;
+		    ok = 0;
+		}
+	    }
+	}
+	fclose(fd);
+	fd = 0;
+	LOG_DEBUG << " EEqaSorterA::usePed4(...) Loaded" << endm;
+    } else {
+	LOG_ERROR << "Cannot read file " << filename << endm;
+    }
+    return ok;
 }
 
 
-
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.4  2009/02/24 04:07:45  ogrebeny
+// Fixed part of the trigger histograms
+//
 // Revision 1.3  2009/01/25 01:36:54  ogrebeny
 // *** empty log message ***
 //

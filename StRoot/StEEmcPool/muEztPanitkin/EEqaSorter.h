@@ -1,6 +1,6 @@
 // \class  EEqaSorter
 // \author Jan Balewski, Hal Spinka
-// $Id: EEqaSorter.h,v 1.4 2009/02/04 20:33:26 ogrebeny Exp $
+// $Id: EEqaSorter.h,v 1.5 2009/02/24 04:07:45 ogrebeny Exp $
 
 #ifndef EEqaSorter_h
 #define EEqaSorter_h
@@ -31,21 +31,18 @@ class EEqaSorter :public TObject{
   TH1F *H4jpCor; // added in 2005 to help shift crew assess ETOW
   TH1F *hCorS[mxH]; // corruption histos ESMD
 
-  TObjArray *HList;
-  EztEmcRawData  *eETow;
-  EztEmcRawData  *eESmd;
-
   EEqaSorterA *sortA;
   EEqaSorterC *sortC;
   EEdsmAna *dsm;
-  StEEmcDb *eeDb;
+  StEEmcDb *eeDb; //!
 
   TH1F * H1tot;
-  TString pathInp, pathOut; 
+  const Char_t *pathInp;
+  const Char_t *pathOut; 
   int timeStamp; // for event
-  void crateHealth(EztEmcRawData  *eRaw, TH1F **, int es,  int ver);
-  void xRayETOW( int token); 
-  void xRayESMD( int token, int ver, int runNo); 
+  void crateHealth(EztEmcRawData *eRaw, TH1F **, int es,  int ver) const;
+  void xRayETOW(EztEmcRawData *t, int token) const;
+  void xRayESMD(EztEmcRawData *s, int token, int ver, int runNo) const;
 
   // spy tool
   SpyGeneric **mySpy;
@@ -57,24 +54,25 @@ class EEqaSorter :public TObject{
   int lastSpyRun;
 
  public:
-  EEqaSorter( TObjArray*L,StEEmcDb*dbx);
-  void setPath(const char *x1, const char *x2) { pathInp=x1; pathOut=x2; }
-  void initHisto(int nb=150, int mx=600);
+  EEqaSorter(StEEmcDb *dbx = 0);
+  virtual ~EEqaSorter();
+  void setPath(const char *path_in, const char *path_out) {pathInp = path_in; pathOut = path_out;}
+  void initHisto(TObjArray *HList = 0, int nb=150, int mx=600);
   void initRun();
-  void sort(EztEmcRawData  *t,  EztEmcRawData  *s, 
+  void sort(EztEmcRawData *t, EztEmcRawData *s, 
 	    int runNo,  int token, int ver, 
 	    const unsigned char * dsm0inp, 
 	    const unsigned short int  * dsm1inp ,
 	    const unsigned short int  * dsm2inp,   
 	    const unsigned short int  * dsm3inp);
-  void initSpy(int minSec, int mode); // must be called after histos initialized
+  void initSpy(const TObjArray *HList, int minSec, int mode); // must be called after histos initialized
   //mode: 1=balewski@rcf, 2=eemc@evp,3=operator@evp 
-  void spy(int runNo=888999, int eventId=777);
+  void spy(EztEmcRawData *t, EztEmcRawData *s, int runNo=888999, int eventId=777);
   void clear(); 
   void Finish();
   void resetHisto();
-  void saveHisto(char *n="out/eemcQA");
-  void saveHistoAdd(TFile *f = 0);
+  void saveHisto(const Char_t *filename = "out/eemcQA.hist.root") const;
+  void saveHisto(TFile *f) const;
 
    ClassDef(EEqaSorter,1) 
 };
@@ -82,6 +80,9 @@ class EEqaSorter :public TObject{
 #endif
 
 // $Log: EEqaSorter.h,v $
+// Revision 1.5  2009/02/24 04:07:45  ogrebeny
+// Fixed part of the trigger histograms
+//
 // Revision 1.4  2009/02/04 20:33:26  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //

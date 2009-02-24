@@ -1,6 +1,6 @@
 // \class  EEqaSorterA
 // \author Jan Balewski, Hal Spinka
-// $Id: EEqaSorterA.h,v 1.2 2009/01/23 00:14:50 ogrebeny Exp $
+// $Id: EEqaSorterA.h,v 1.3 2009/02/24 04:07:45 ogrebeny Exp $
 
 #ifndef EEqaSorterA_h
 #define EEqaSorterA_h
@@ -16,27 +16,26 @@ class EztEmcRawData;
 
 class EEqaSorterA :public TObject{ 
 
- private:
+private:
   TH2F **hCrate;     // chan vs. ADC per crate
   TH1F **hCrateHot;   // counts/chan for  ADC>4*ped4+thr1
-  void sortDaqTower1();
-  void sortDaqTowerHot();
-  void sortDaqMapmt0(int ver);
   int hotTwThres; // used to count hot towers
   int feePed[MaxTwCrateID*MaxTwCrateCh]; // pedestals loaded to FEE, note DAQ ped=4*ped4  
-  TObjArray *HList;
-  EztEmcRawData  *eETow;
-  EztEmcRawData  *eESmd;
 
- public:
-  EEqaSorterA( TObjArray*L);
-  void initCrateHisto(int nb=150, int mx=600);
-  int  usePed4( TString name="eemcPed4.dat");
-  void sort(EztEmcRawData  *t,  EztEmcRawData  *s, int ver );
+  void sortDaqTower1(const EztEmcRawData *t);
+  void sortDaqTowerHot(const EztEmcRawData *t);
+  void sortDaqMapmt0(const EztEmcRawData *s, int ver);
+
+public:
+  EEqaSorterA();
+  virtual ~EEqaSorterA();
+  void initCrateHisto(TObjArray *HList, int nb = 150, int mx = 600);
+  int  usePed4(const Char_t *filename = "eemcPed4.dat");
+  void sort(const EztEmcRawData *t, const EztEmcRawData *s, int ver );
   void Finish();
-  //  void resetHisto();
+  void resetHisto();
 
-  // void saveHistoAdd();
+  void saveHisto(TFile *f) const;
 
    ClassDef(EEqaSorterA,1) 
 };
@@ -44,6 +43,9 @@ class EEqaSorterA :public TObject{
 #endif
 
 // $Log: EEqaSorterA.h,v $
+// Revision 1.3  2009/02/24 04:07:45  ogrebeny
+// Fixed part of the trigger histograms
+//
 // Revision 1.2  2009/01/23 00:14:50  ogrebeny
 // Inherited EEmcDb from StEEmcDbMaker to fix run-time bug http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1378
 //

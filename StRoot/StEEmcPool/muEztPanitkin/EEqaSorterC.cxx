@@ -1,4 +1,4 @@
-// $Id: EEqaSorterC.cxx,v 1.6 2009/02/14 03:16:52 ogrebeny Exp $
+// $Id: EEqaSorterC.cxx,v 1.7 2009/02/24 04:07:46 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -27,48 +27,58 @@
 ClassImp(EEqaSorterC)
 
 //-------------------------------------------
-//-------------------------------------------
-EEqaSorterC:: EEqaSorterC(TObjArray *L, StEEmcDb *dbx) {
-  // printf("\n\n  EEqaSorterC:: EEqaSorterC() \n\n");
-  HList=L; 
-  eeDb=dbx;
-
-  adcThrTw=40;
-  adcThrPrs=200;
-  adcThrPost=50;
-  adcThrSmd=100;
-  memset(h2D,0,sizeof(h2D));
-  memset(hMult,0,sizeof(hMult));
+EEqaSorterC::EEqaSorterC(StEEmcDb *dbx)
+    : TObject()
+    , hMAPMT(0)
+    , adcThrTw(40)
+    , adcThrPrs(200)
+    , adcThrPost(50)
+    , adcThrSmd(100)
+    , eeDb(dbx)
+{
+    memset(h2D,0,sizeof(h2D));
+    memset(hMult,0,sizeof(hMult));
+    memset(hSmd,0,sizeof(hSmd));
+    memset(hnHSmd,0,sizeof(hnHSmd));
 } 
  
-
-
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorterC::sort( EztEmcRawData  *t,  EztEmcRawData  *s, int ver ) {
-  eETow=t;
-  eESmd=s;
-  sortTower();
-  sortMapmt(ver);
-
+EEqaSorterC::~EEqaSorterC() {
+    for(int i = 0;i < mxh;i++) {
+	if (hMult[i]) delete hMult[i];
+	if (h2D[i]) delete h2D[i];
+    }
+    memset(h2D,0,sizeof(h2D));
+    memset(hMult,0,sizeof(hMult));
+    if (hMAPMT) delete hMAPMT;
+    hMAPMT = 0;
+    for(int iSec = 0;iSec < MaxSectors;iSec++) {
+	for(int pl = 0;pl < MaxSmdPlains;pl++) {
+	    if (hSmd[iSec][pl]) delete hSmd[iSec][pl];
+    	    if (hnHSmd[iSec][pl]) delete hnHSmd[iSec][pl];
+	}
+    }
+    memset(hSmd,0,sizeof(hSmd));
+    memset(hnHSmd,0,sizeof(hnHSmd));
 }
 
+//-------------------------------------------
+void  EEqaSorterC::sort(const EztEmcRawData *t, const EztEmcRawData *s, int ver ) {
+  sortTower(t);
+  sortMapmt(s, ver);
+}
 
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorterC::sortTower(){
-  if(eETow==0) return;
+void EEqaSorterC::sortTower(const EztEmcRawData *t){
+  if(!t) return;
   int nTw=0;
-  int icr;
-  for(icr=0;icr<eETow->getNBlocks();icr++) {
-    if(eETow->isCrateVoid(icr)) continue;
+  for(int icr=0;icr<t->getNBlocks();icr++) {
+    if(t->isCrateVoid(icr)) continue;
     int crateID=icr+1;
-    int i;
-    //printf("cr=%d\n",crateID);
-    const UShort_t* data=eETow->data(icr);
-    for(i=0;i<eETow->sizeData(icr);i++) {
+    const UShort_t* data=t->data(icr);
+    for(int i=0;i<t->sizeData(icr);i++) {
       int chan=i;
-      const  EEmcDbItem  *x=eeDb->getByCrate(crateID,chan);
+      const  EEmcDbItem *x = eeDb ? eeDb->getByCrate(crateID,chan) : 0;
       if(!x) continue; // noDB info
       if(x->fail ) continue;  // drop broken channels
       float adc=data[i]-x->ped; // ped subtracted ADC
@@ -81,18 +91,15 @@ void  EEqaSorterC::sortTower(){
   hMult[0] ->Fill(nTw);
 }
 
-
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorterC::sortMapmt( int ver){
-  if(eESmd==0) return;
-  int nHit[mxh],nSmdH[MaxSectors][MaxSmdPlains];
+void  EEqaSorterC::sortMapmt(const EztEmcRawData *s, int ver){
+  if(s==0) return;
+  int nHit[mxh], nSmdH[MaxSectors][MaxSmdPlains];
   memset(nHit,0,sizeof(nHit));
   memset(nSmdH,0,sizeof(nSmdH));
 
-  int icr;
-  for(icr=0;icr<eESmd->getNBlocks();icr++) {
-    if(eESmd->isCrateVoid(icr)) continue;
+  for(int icr=0;icr<s->getNBlocks();icr++) {
+    if(s->isCrateVoid(icr)) continue;
     int crateID=icr+64;
     // in 2004 there was only 16 MAPMT crates for sectors 5-8
     if(ver<0x22) {
@@ -100,11 +107,10 @@ void  EEqaSorterC::sortMapmt( int ver){
       crateID=icr+84;
     }
     //printf("ddd %d %d\n",icr,crateID);
-    int i;
-    const UShort_t* data=eESmd->data(icr);
-    for(i=0;i<eESmd->sizeData(icr);i++) {
+    const UShort_t* data=s->data(icr);
+    for(int i=0;i<s->sizeData(icr);i++) {
       int chan=i;
-      const  EEmcDbItem  *x=eeDb->getByCrate(crateID,chan);
+      const EEmcDbItem *x = eeDb ? eeDb->getByCrate(crateID,chan) : 0;
       if(!x) continue; // noDB info
       if(x->fail) continue;  // drop broken channels
      
@@ -139,20 +145,17 @@ void  EEqaSorterC::sortMapmt( int ver){
     }
   }// end of loop over crates
 
-  int j,pl;
-  for(j=1;j<=3;j++) hMult[j]->Fill(nHit[j]);
+  for(int j=1;j<=3;j++) hMult[j]->Fill(nHit[j]);
 
-  for (j=0; j<MaxSectors; j++) {
-    for (pl=0; pl<MaxSmdPlains; pl++) {
+  for (int j=0; j<MaxSectors; j++) {
+    for (int pl=0; pl<MaxSmdPlains; pl++) {
       hnHSmd[j][pl]->Fill(nSmdH[j][pl]);
     }
   } 
 }
 
-
 //--------------------------------------------------
-//--------------------------------------------------
-void EEqaSorterC::initHisto(){
+void EEqaSorterC::initHisto(TObjArray *HList){
   int i;
   char tit[500];
   sprintf (tit, "EEMC Tower hits>ped+%d; phibin : 1TA=0  3TA=10  5TA=20  7TA=30  9TA=40  11TA=50 ; #eta bin ",adcThrTw);
@@ -182,12 +185,12 @@ void EEqaSorterC::initHisto(){
 
 
   for(i=0;i<mxh;i++) {
-    if(hMult[i]) HList->Add(hMult[i]);  
-    if(h2D[i]) HList->Add(h2D[i]);  
+    if(HList && hMult[i]) HList->Add(hMult[i]);  
+    if(HList && h2D[i]) HList->Add(h2D[i]);  
   }
 
   hMAPMT= new TH2F("MAPMHits","MAPMT Hits adc>ped+thr; crateID ; tube no.", 48, 63.5, 111.5, 12, 0.5, 12.5);
-  HList->Add(hMAPMT);
+  if (HList && hMAPMT) HList->Add(hMAPMT);
 
   int iSec;
   for(iSec=0; iSec<MaxSectors; iSec++) {
@@ -199,27 +202,58 @@ void EEqaSorterC::initHisto(){
       sprintf (ctitl, "ESMD %02d%c adc>ped+%02d;"
 	       "Strip no.", iSec+1,uv, adcThrSmd);
       hSmd[iSec][pl] = new TH1F(cid, ctitl, 290, -0.5, 289.5);
-      HList->Add(hSmd[iSec][pl]);
+      if (HList && hSmd[iSec][pl]) HList->Add(hSmd[iSec][pl]);
     
       sprintf (cid, "HSmd%d%c",iSec+1,uv);
       sprintf (ctitl, "ESMD %02d%c Hits/eve  adc>ped+%d; No. Hits", iSec+1, uv,adcThrSmd);
       hnHSmd[iSec][pl] = new TH1F(cid, ctitl, 100, -0.5, 99.5);
-      HList->Add(hnHSmd[iSec][pl]);
+      if (HList && hnHSmd[iSec][pl]) HList->Add(hnHSmd[iSec][pl]);
     }
   }
 
 }
-  
-//-------------------------------------------
-//-------------------------------------------
-void  EEqaSorterC::initRun() {
 
+//-------------------------------------------
+void EEqaSorterC::saveHisto(TFile *f) const {
+    if (f) f->cd();
+    for(int i = 0;i < mxh;i++) {
+	if (hMult[i]) hMult[i]->Write();
+	if (h2D[i]) h2D[i]->Write();
+    }
+    if (hMAPMT) hMAPMT->Write();
+    for(int iSec = 0;iSec < MaxSectors;iSec++) {
+	for(int pl = 0;pl < MaxSmdPlains;pl++) {
+	    if (hSmd[iSec][pl]) hSmd[iSec][pl]->Write();
+    	    if (hnHSmd[iSec][pl]) hnHSmd[iSec][pl]->Write();
+	}
+    }
+}
 
+//-------------------------------------------
+void EEqaSorterC::resetHisto() {
+    for(int i = 0;i < mxh;i++) {
+	if (hMult[i]) hMult[i]->Reset();
+	if (h2D[i]) h2D[i]->Reset();
+    }
+    if (hMAPMT) hMAPMT->Reset();
+    for(int iSec = 0;iSec < MaxSectors;iSec++) {
+	for(int pl = 0;pl < MaxSmdPlains;pl++) {
+	    if (hSmd[iSec][pl]) hSmd[iSec][pl]->Reset();
+    	    if (hnHSmd[iSec][pl]) hnHSmd[iSec][pl]->Reset();
+	}
+    }
+}
+
+//-------------------------------------------
+void EEqaSorterC::initRun() {
 }
 
 
 
 // $Log: EEqaSorterC.cxx,v $
+// Revision 1.7  2009/02/24 04:07:46  ogrebeny
+// Fixed part of the trigger histograms
+//
 // Revision 1.6  2009/02/14 03:16:52  ogrebeny
 // Updated some histo titles. Removed unnecessary histo Clone() and Delete().
 //

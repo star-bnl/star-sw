@@ -10,7 +10,7 @@ class TPad ;
 class EemcTwMask {
  public:
     enum {nCr=6, nCh=120, nPhi=60,nEta=12};
-    char crCh[nCr][nCh];
+    Char_t crCh[nCr][nCh];
     TGraph crG[nCr], phiG;
     TGraphErrors crG2[nCr];
     TPaveText *txtH;// 1=knownHot
@@ -41,21 +41,21 @@ void eeDaqTwHit(FileType fd, TPad *c);
 void eeDaqMapmtCr(FileType fd, TPad *c, int);
 void eeDaqMapmtStat(FileType fd, TPad *c);
 
-void eeMany1D(FileType fd, TPad *c, char *core, int nh, int nx, int ny);
-void eeDaqSmdA(FileType fd, TPad *cc,char *, char uv);
+void eeMany1D(FileType fd, TPad *c, const Char_t *core, int nh, int nx, int ny);
+void eeDaqSmdA(FileType fd, TPad *cc,const Char_t *, Char_t uv);
 
 void eeTrigHanks(FileType fd, TPad *c);
-void eeTrigDsm0(FileType fd, TPad *c,char *);
-void eeTrigDsm1(FileType fd, TPad *c, char *);
+void eeTrigDsm0(FileType fd, TPad *c,const Char_t *);
+void eeTrigDsm1(FileType fd, TPad *c, const Char_t *);
 void eeTrigDsm2HT(FileType fd, TPad *c);
 
-void eeTrigJPsum(FileType fd, TPad *c, char *);
+void eeTrigJPsum(FileType fd, TPad *c, const Char_t *);
 void eeTrigJPfreq(FileType fd, TPad *c);
-void eeTrigAdjJPsum(FileType fd, TPad *c, char *);
-void eeTrigAdjJPcor(FileType fd, TPad *c, char *);
+void eeTrigAdjJPsum(FileType fd, TPad *c, const Char_t *);
+void eeTrigAdjJPcor(FileType fd, TPad *c, const Char_t *);
 void eeTrigEtot(FileType fd, TPad *c);
 
-bool useTwMask(const char *fname, EemcTwMask *m);
+bool useTwMask(const Char_t *fname, EemcTwMask *m);
 
 //utility
 void addJPphiLimits(TH1 *h);
