@@ -1,4 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.4 2009/02/24 04:07:45 ogrebeny Exp $
+// $Id: EEqaSorterA.cxx,v 1.5 2009/02/24 18:19:47 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 
@@ -55,8 +55,9 @@ void  EEqaSorterA::sortDaqTower1(const EztEmcRawData *t){
      and count ADC values = n*256 in all data blocks 
   */
   if(!t) return;
+  EztEmcRawData *tv = const_cast<EztEmcRawData*>(t); if (!tv) return;
   for(int icr=0;icr<t->getNBlocks();icr++) {
-    if(t->isCrateVoid(icr)) continue;
+    if(tv->isCrateVoid(icr)) continue;
     int crateID=icr+1;
     const UShort_t* data=t->data(icr);
     for(int i=0;i<t->sizeData(icr);i++) {
@@ -74,8 +75,9 @@ void  EEqaSorterA::sortDaqTowerHot(const EztEmcRawData *t){
   */
 
   if(!t) return;
+  EztEmcRawData *tv = const_cast<EztEmcRawData*>(t); if (!tv) return;
   for(int icr=0;icr<t->getNBlocks() && icr<MaxTwCrateID;icr++) {
-    if(t->isCrateVoid(icr)) continue;
+    if(tv->isCrateVoid(icr)) continue;
     int crateID=icr+1;
     const UShort_t* data=t->data(icr);
     int *pedA= &feePed[(crateID-1)*MaxTwCrateCh];
@@ -83,7 +85,6 @@ void  EEqaSorterA::sortDaqTowerHot(const EztEmcRawData *t){
       int chan=i;
       float adc=data[i]-24+ pedA[i];
       if(adc<hotTwThres) continue;
-//cout << "hCrateHot=" << hCrateHot << ", crateID=" << crateID << ", hCrateHot[crateID-1]=" << hCrateHot[crateID-1] << endl;
       if (hCrateHot && hCrateHot[crateID-1]) hCrateHot[crateID-1]->Fill(chan);
     }
   }// end of loop over crates
@@ -95,8 +96,9 @@ void  EEqaSorterA::sortDaqMapmt0(const EztEmcRawData *s, int ver){
      make histos of adc vs channel for each MAPMT crate
   */
   if(!s) return;
+  EztEmcRawData *sv = const_cast<EztEmcRawData*>(s); if (!sv) return;
   for(int icr=0;icr<s->getNBlocks();icr++) {
-    if(s->isCrateVoid(icr)) continue;
+    if(sv->isCrateVoid(icr)) continue;
     int crateID=icr+64;
     // in 2004 there was only 16 MAPMT crates for sectors 5-8
     if(ver<0x22) {
@@ -207,6 +209,9 @@ int EEqaSorterA::usePed4(const Char_t *filename) {
 
 
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.5  2009/02/24 18:19:47  ogrebeny
+// Small workaround until ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1457 is resolved
+//
 // Revision 1.4  2009/02/24 04:07:45  ogrebeny
 // Fixed part of the trigger histograms
 //
