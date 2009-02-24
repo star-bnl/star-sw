@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.3 2009/02/24 19:38:06 perev Exp $
+!// $Id: tpcegeo3.g,v 1.4 2009/02/24 19:50:08 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.4  2009/02/24 19:50:08  perev
+!// TSWH MANY temporary
+!//
 !// Revision 1.3  2009/02/24 19:38:06  perev
 !// gstar bug workaround
 !//
@@ -579,8 +582,8 @@ Block TPCE is the TPC envelope
       Create and position TOFC        "   outer cage   "                 
 
      do iSecAng = -15,360-15-30,30   
-       Create and Position TSWH            alphaz=iSecAng
-       Create and Position TSWH ort = XY-Z alphaz=iSecAng
+       Create and Position TSWH            alphaz=iSecAng kOnly='MANY'
+       Create and Position TSWH ort = XY-Z alphaz=iSecAng kOnly='MANY'
      endDo
 
 endBlock !// end TPCE
