@@ -2,6 +2,10 @@
 
 #
 # 2009 - J.Lauret - added detection of dead links
+#        Also added -debug, -clink, -h, --help, -nov
+#
+# Use -h or --help for help on options
+#
 #
 
 use Env;
@@ -28,38 +32,82 @@ if($SYSNM ne ""){
     }
 }
 
-my $debug = $ENV{CleanLibs_DEBUG}  || 0;
-my $clink = $ENV{CleanLibs_CLEANL} || 0;
+my $debug = 0;
+my $clink = 0;
+my $cleanl= 1; 
 
 my @dirs  = ();
 my $pwd   = undef;
 my $pdir  = "";
 
+my $SELF = $0; 
+my $KEEP;
 
-if ($#ARGV > -1) {
-    my ($dir);
-    if ( ! -d $ARGV[0]){ $dir = $SYSNM.$ARGV[0];}
-    else {               $dir = $ARGV[0];}
-    push(@dirs, $dir);
+
+$SELF =~ s/.*\///; 
+
+# default value for keep - could be overwritten by numerical argument
+if( $^O eq "linux"){
+    $KEEP = 2;
 } else {
+    $KEEP = 1;
+}
+
+
+#
+# parse arguments
+#
+foreach $arg (@ARGV){
+    if ( $arg eq "-clink"){
+	# enable link cleaning
+	$clink = 1;
+    } elsif ( $arg eq "-debug" ){
+	$debug = 1;
+    } elsif ( $arg eq "-nov" ){
+	$cleanl= 0;
+    } elsif ( $arg eq "-h" || $arg eq "--help"){
+	print qq~
+ Usage: % $SELF {-debug|-h|--help|-clink|-nov} [subdirectory]
+
+ -debug          enables debug printouts
+ -h or --help	 print this help and exit 
+ -nov            do not perform versioning cleanup (default is to clean)
+ -clink          clean dead links in STAR OS dependent sub-directories
+          	
+ subdirectory: default values will include $SYSNM/{obj,OBJ,IOBJ,GOBJ}
+	
+~;
+	exit;
+	
+    } else {
+	# assumes as before this is a specific directory to be cleaned
+	if ( $arg =~ m/^\d+$/){
+	    $KEEP = $arg;
+	} else {
+	    my ($dir);
+	    if ( ! -d $arg ){ $dir = $SYSNM.$arg;}
+	    else {            $dir = $arg;}
+	    push(@dirs, $dir);
+	}
+    }	
+}
+
+# to enable the same default as before, check @dirs if empty
+if ( $#dirs == -1){
     push(@dirs,$SYSNM."obj");
     push(@dirs,$SYSNM."OBJ");
     push(@dirs,$SYSNM."IOBJ");
     push(@dirs,$SYSNM."GOBJ");
 }
 
-my $KEEP;
-if( $^O eq "linux"){
-    $KEEP = 1;
-} else {
-    $KEEP = 1;
-}
-if ($#ARGV > 0) {$KEEP = $ARGV[1];}
+
+
 
 if ( $clink){
     # remove dead files
-    print "NOTE: Beta version of link cleaner enabled\n";
     foreach my $dir (@dirs) {
+	next if ( ! -e $dir);
+	print "Run $SELF in $dir - dead link detection\n";
 	open(PP,"/usr/bin/find $dir -type l -print |");
 	while ( defined($f = <PP>)) {
 	    chomp($f);
@@ -79,15 +127,15 @@ if ( $clink){
 	}
 	close(PP);
     }
-    print "Please,, unsetenv CleanLibs_CLEANL to disable this mode\n";
-} else {
+}    
+if ( $cleanl ){
     # clean multiple revision
     foreach my $dir (@dirs) {
 	if (-l $dir) {
 	    $dir = readlink($dir);
 	}
 	if (-r $dir) {
-	    print "Run $0 in $dir keep = $KEEP\n";
+	    print "Run $SELF in $dir keep = $KEEP\n";
 	    &File::Find::find (\&wanted_S,$dir);
 	}
     }
