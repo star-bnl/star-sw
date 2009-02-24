@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEfeeTP.cxx,v 1.1 2007/08/17 01:15:37 balewski Exp $
+ * $Id: EEfeeTP.cxx,v 1.2 2009/02/24 03:56:19 ogrebeny Exp $
  **************************************************************/
 
 #include <iostream>
@@ -104,7 +104,7 @@ EEfeeTP::compute(int *adcA, int *ped4A, int *maskA){
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEfeeTP::print( int k) {
+EEfeeTP::print( int k) const {
   printf("EEfeeTP: name=%s nT=%d\n",name,nT);
   int i;
   printf(" channel: "); for(i=0;i<nT;i++) printf(" %4d",chanID[i]); printf("\n");
@@ -122,6 +122,9 @@ EEfeeTP::print( int k) {
 
 /*
  * $Log: EEfeeTP.cxx,v $
+ * Revision 1.2  2009/02/24 03:56:19  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.1  2007/08/17 01:15:37  balewski
  * full blown Endcap trigger simu, by Xin
  *

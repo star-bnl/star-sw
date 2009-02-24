@@ -1,7 +1,7 @@
 #ifndef EEdsm1_h
 #define EEdsm1_h
 /**************************************************************
- * $Id: EEdsm1.h,v 1.4 2007/08/17 01:15:36 balewski Exp $
+ * $Id: EEdsm1.h,v 1.5 2009/02/24 03:56:18 ogrebeny Exp $
  **************************************************************/
 #include <stdlib.h>
 
@@ -25,35 +25,38 @@ class EEdsm1  {
   
   EEdsm1();
   virtual ~EEdsm1();
-  void  print(int k=0);
+  void  print(int k=0) const;
   void  clear();
   void  compute();  
   void  setWord(int ch, ushort val);
   void  setYear(int y, int *JPth, int TPthrSelc, int HTTPthrSelc);
   void  setType(int t) {type=t;}
 
-  int   getNc(){return nc;}
+  int   getNc() const {return nc;}
 
   //.... input.....
-  int getInpTPsum(int ch);
-  int getInpHT2bit(int ch);
-  int getInpHTTP2bit(int ch);// year2006+
-  int getInpTP2bit(int ch);  // year2006+ 
-  int getInp16bit(int ch);
+  int getInpTPsum(int ch) const;
+  int getInpHT2bit(int ch) const;
+  int getInpHTTP2bit(int ch) const;// year2006+
+  int getInpTP2bit(int ch) const;  // year2006+ 
+  int getInp16bit(int ch) const;
 
   //..... output
-  int getOutEsum5bit(){ return outJPsum5bit;}
-  int getOutHTTP1bit(){ return outHTTP1bit;}
-  int getOutTP1bit(){ return outTP1bit;}
-  int getOutJP2bit(){ return outJP2bit;}
-  int getOutHT2bit(){ return outHT2bit;}  
-  int getOut16bit(){ return out16bit;}
+  int getOutEsum5bit() const{ return outJPsum5bit;}
+  int getOutHTTP1bit() const{ return outHTTP1bit;}
+  int getOutTP1bit() const{ return outTP1bit;}
+  int getOutJP2bit() const{ return outJP2bit;}
+  int getOutHT2bit() const{ return outHT2bit;}  
+  int getOut16bit() const{ return out16bit;}
 };
 #endif
 
 
 /* container for STAR trigger data
  * $Log: EEdsm1.h,v $
+ * Revision 1.5  2009/02/24 03:56:18  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.4  2007/08/17 01:15:36  balewski
  * full blown Endcap trigger simu, by Xin
  *

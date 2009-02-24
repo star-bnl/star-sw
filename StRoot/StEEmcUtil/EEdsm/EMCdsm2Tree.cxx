@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EMCdsm2Tree.cxx,v 1.1 2007/08/17 01:15:38 balewski Exp $
+ * $Id: EMCdsm2Tree.cxx,v 1.2 2009/02/24 03:56:19 ogrebeny Exp $
  **************************************************************/
 
 #include <iostream>
@@ -176,7 +176,7 @@ EMCdsm2Tree::compute() {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EMCdsm2Tree::getInpHT2bit(int ibr, int ch) {
+EMCdsm2Tree::getInpHT2bit(int ibr, int ch) const {
    assert(ibr>=0 && ibr<Nbe2);
    return  be2[ibr].getInpHT2bit(ch); 
 }
@@ -184,7 +184,7 @@ EMCdsm2Tree::getInpHT2bit(int ibr, int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EMCdsm2Tree::getInpHT2bit_2(int ibr, int ch) {
+EMCdsm2Tree::getInpHT2bit_2(int ibr, int ch) const {
    assert(ibr>=0 && ibr<Nbe2);
    return  be2[ibr].getInpHT2bit_2(ch); 
 }
@@ -192,7 +192,7 @@ EMCdsm2Tree::getInpHT2bit_2(int ibr, int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EMCdsm2Tree::getInpJP2bit(int ibr, int ch) {
+EMCdsm2Tree::getInpJP2bit(int ibr, int ch) const {
    assert(ibr>=0 && ibr<Nbe2);
    return  be2[ibr].getInpJP2bit(ch); 
 }
@@ -201,7 +201,7 @@ EMCdsm2Tree::getInpJP2bit(int ibr, int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EMCdsm2Tree::getInpTP1bit(int ibr, int ch) {
+EMCdsm2Tree::getInpTP1bit(int ibr, int ch) const {
    assert(ibr>=0 && ibr<Nbe2);
    return  be2[ibr].getInpTP1bit(ch); 
 }
@@ -209,7 +209,7 @@ EMCdsm2Tree::getInpTP1bit(int ibr, int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EMCdsm2Tree::getInpHTTP1bit(int ibr, int ch) {
+EMCdsm2Tree::getInpHTTP1bit(int ibr, int ch) const {
    assert(ibr>=0 && ibr<Nbe2);
    return  be2[ibr].getInpHTTP1bit(ch); 
 }
@@ -217,7 +217,7 @@ EMCdsm2Tree::getInpHTTP1bit(int ibr, int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EMCdsm2Tree::getInpEsum5bit(int ibr, int ch) {
+EMCdsm2Tree::getInpEsum5bit(int ibr, int ch) const {
    assert(ibr>=0 && ibr<Nbe2);
    return  be2[ibr].getInpEsum5bit(ch); 
 }
@@ -227,7 +227,7 @@ EMCdsm2Tree::getInpEsum5bit(int ibr, int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EMCdsm2Tree::print( int k) {
+EMCdsm2Tree::print( int k) const {
   printf("EMCdsm2Tree(%s) , year=%d  \n",name,mYear);
   
   printf("\n\n----------- level-2 -----------------\n ");
@@ -245,6 +245,9 @@ EMCdsm2Tree::print( int k) {
 
 /*
  * $Log: EMCdsm2Tree.cxx,v $
+ * Revision 1.2  2009/02/24 03:56:19  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.1  2007/08/17 01:15:38  balewski
  * full blown Endcap trigger simu, by Xin
  *

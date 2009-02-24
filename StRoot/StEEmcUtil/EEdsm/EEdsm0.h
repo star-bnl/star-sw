@@ -1,7 +1,7 @@
 #ifndef EEdsm0_h
 #define EEdsm0_h
 /**************************************************************
- * $Id: EEdsm0.h,v 1.3 2007/08/17 01:15:35 balewski Exp $
+ * $Id: EEdsm0.h,v 1.4 2009/02/24 03:56:18 ogrebeny Exp $
  **************************************************************/
 #include <stdlib.h> 
 #include <stdio.h> 
@@ -28,7 +28,7 @@ class EEdsm0  {
   virtual ~EEdsm0();  
   void  setYear(int y, int*HTth, int*TPth);
   void  setType(int t) {type=t;}
-  void  print(int k=0);
+  void  print(int k=0) const;
   void  clear();
   void  compute(); // for 2006+
   void  unpack(); // 16 inputs --> 10 values
@@ -36,22 +36,25 @@ class EEdsm0  {
   //.... input
   void  setBite(int b, uchar val); // from trigger data block
   void  setInp12bit(int ch, short val); // HT+TPsum from one FEE TP  
-  int   getInp12bit(int ch); // HT+TPsum from one FEE TP  
-  int   getInpHT6bit(int ch){ return  getInp12bit(ch) & 0x3f;} 
-  int   getInpTP6bit(int ch){ return getInp12bit(ch)>>6; }
-  int   getNc(){return nc;} 
+  int   getInp12bit(int ch) const; // HT+TPsum from one FEE TP  
+  int   getInpHT6bit(int ch) const { return  getInp12bit(ch) & 0x3f;} 
+  int   getInpTP6bit(int ch) const { return getInp12bit(ch)>>6; }
+  int   getNc() const {return nc;} 
 
   //....... output
-  int  getOutTPsum(int k=0){ return outTPsum[k];} // default type 1
-  int  getOutHT2bit(int k=0){ return outHT2bit[k];} // default type 1
-  int  getOutTP2bit(int k=0){ return outTP2bit[k];} // default type 1 
-  int  getOutHTTP2bit(int k=0){ return outHTTP2bit[k];} // default type 1
-  int  getOut16bit(int k=0) { return out16bit[k];} // default type 1
+  int  getOutTPsum(int k=0) const { return outTPsum[k];} // default type 1
+  int  getOutHT2bit(int k=0) const { return outHT2bit[k];} // default type 1
+  int  getOutTP2bit(int k=0) const { return outTP2bit[k];} // default type 1 
+  int  getOutHTTP2bit(int k=0) const { return outHTTP2bit[k];} // default type 1
+  int  getOut16bit(int k=0) const { return out16bit[k];} // default type 1
 };
 #endif
 
 /*
  * $Log: EEdsm0.h,v $
+ * Revision 1.4  2009/02/24 03:56:18  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.3  2007/08/17 01:15:35  balewski
  * full blown Endcap trigger simu, by Xin
  *

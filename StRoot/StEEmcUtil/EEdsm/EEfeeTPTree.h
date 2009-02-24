@@ -1,7 +1,7 @@
 #ifndef EEfeeTPTree_h
 #define EEfeeTPTree_h
 /**************************************************************
- * $Id: EEfeeTPTree.h,v 1.1 2007/08/17 01:15:37 balewski Exp $
+ * $Id: EEfeeTPTree.h,v 1.2 2009/02/24 03:56:19 ogrebeny Exp $
  * Emulates functionality of  Endcap FEE TP-tree
  **************************************************************/
 #include <stdlib.h> 
@@ -26,6 +26,7 @@ class EEfeeTPTree  {  // DSM0 tree emulators
   void  clear();
   void  compute(int *rawAdc, int *feePed,int *feeMask);
   EEfeeTP * TP(int i) { return feeTP[i]; }
+  const EEfeeTP * TP(int i) const { return feeTP[i]; }
   
 };
 
@@ -33,6 +34,9 @@ class EEfeeTPTree  {  // DSM0 tree emulators
 
 /*
  * $Log: EEfeeTPTree.h,v $
+ * Revision 1.2  2009/02/24 03:56:19  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.1  2007/08/17 01:15:37  balewski
  * full blown Endcap trigger simu, by Xin
  *

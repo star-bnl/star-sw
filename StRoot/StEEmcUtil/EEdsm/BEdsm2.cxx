@@ -52,7 +52,7 @@ BEdsm2::setWord(int ch, ushort val){
 //--------------------------------------------------
 //--------------------------------------------------
 int 
-BEdsm2::getInpHT2bit(int i3p) { // year 2006
+BEdsm2::getInpHT2bit(int i3p) const { // year 2006
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   ushort val=data[ch] >> 12;
@@ -63,7 +63,7 @@ BEdsm2::getInpHT2bit(int i3p) { // year 2006
 //--------------------------------------------------
 //--------------------------------------------------
 int 
-BEdsm2::getInpHT2bit_2(int i3p) { // year 2006
+BEdsm2::getInpHT2bit_2(int i3p) const { // year 2006
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   ushort val=data[ch] >> 14;
@@ -75,7 +75,7 @@ BEdsm2::getInpHT2bit_2(int i3p) { // year 2006
 //--------------------------------------------------
 //--------------------------------------------------
 int 
-BEdsm2::getInpJP2bit(int i3p) { // year 2006
+BEdsm2::getInpJP2bit(int i3p) const { // year 2006
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   ushort val=data[ch] >> 10;
@@ -86,7 +86,7 @@ BEdsm2::getInpJP2bit(int i3p) { // year 2006
 //--------------------------------------------------
 //--------------------------------------------------
 int 
-BEdsm2::getInpHTTP1bit(int i3p) { //selected HT x TP threshold passed?Y/N
+BEdsm2::getInpHTTP1bit(int i3p) const { //selected HT x TP threshold passed?Y/N
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
@@ -98,7 +98,7 @@ BEdsm2::getInpHTTP1bit(int i3p) { //selected HT x TP threshold passed?Y/N
 //--------------------------------------------------
 //--------------------------------------------------
 int
-BEdsm2::getInpTP1bit(int i3p) { //selected TP threshold passed?Y/N
+BEdsm2::getInpTP1bit(int i3p) const { //selected TP threshold passed?Y/N
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
@@ -111,7 +111,7 @@ BEdsm2::getInpTP1bit(int i3p) { //selected TP threshold passed?Y/N
 //--------------------------------------------------
 //--------------------------------------------------
 ushort  
-BEdsm2::getJPthr(int jp) { //used for adjacent jet patch
+BEdsm2::getJPthr(int jp) const { //used for adjacent jet patch
   assert(jp>=0 && jp<6);
   assert(mYear<2006);
   int ch= jp/3;
@@ -127,7 +127,7 @@ BEdsm2::getJPthr(int jp) { //used for adjacent jet patch
 //--------------------------------------------------
 //--------------------------------------------------
 int
-BEdsm2::getInpEsum5bit(int i3p) {// Etot out of each layer 1 DSM 
+BEdsm2::getInpEsum5bit(int i3p) const {// Etot out of each layer 1 DSM 
 
   int ch= i3p;
   assert(ch>=0 && ch<nc);
@@ -140,7 +140,7 @@ BEdsm2::getInpEsum5bit(int i3p) {// Etot out of each layer 1 DSM
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-BEdsm2::print( int k) {
+BEdsm2::print( int k) const {
   printf("BEdsm2:: INPUTS,  year=%d  \n",mYear); 
   int i;
 
@@ -179,6 +179,9 @@ BEdsm2::print( int k) {
 }
  
 // $Log: BEdsm2.cxx,v $
+// Revision 1.2  2009/02/24 03:56:18  ogrebeny
+// Corrected const-ness
+//
 // Revision 1.1  2007/08/17 01:15:34  balewski
 // full blown Endcap trigger simu, by Xin
 //
