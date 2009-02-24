@@ -195,38 +195,38 @@
 2,h155_time_size_2min,Event Size (Log10) vs time (sec), 120,0.,120.,160,0.,8.,0xffffffff,0xffffffff
 2,h156_time_size_10min,Event Size (Log10) vs time (sec), 600,0.,600.,80,0.,8.,0xffffffff,0xffffffff
 2,h157_time_size_2hour,Event Size (Log10) vs time(sec),3600,0.,7200.,80,0.,8.,0xffffffff,0xffffffff
-1,h158_bbce_tdc_1,BBCE TDC 1, 128, 0.,256.,0xffffffff,0xffffffff
-1,h159_bbce_tdc_2,BBCE TDC 2, 128, 0.,256.,0xffffffff,0xffffffff
-1,h160_bbce_tdc_3,BBCE TDC 3, 128, 0.,256.,0xffffffff,0xffffffff
-1,h161_bbce_tdc_4,BBCE TDC 4, 128, 0.,256.,0xffffffff,0xffffffff
-1,h162_bbce_tdc_5,BBCE TDC 5, 128, 0.,256.,0xffffffff,0xffffffff
-1,h163_bbce_tdc_6,BBCE TDC 6, 128, 0.,256.,0xffffffff,0xffffffff
-1,h164_bbce_tdc_7,BBCE TDC 7, 128, 0.,256.,0xffffffff,0xffffffff
-1,h165_bbce_tdc_8,BBCE TDC 8, 128, 0.,256.,0xffffffff,0xffffffff
-1,h166_bbce_tdc_9,BBCE TDC 9, 128, 0.,256.,0xffffffff,0xffffffff
-1,h167_bbce_tdc_10,BBCE TDC 10, 128, 0.,256.,0xffffffff,0xffffffff
-1,h168_bbce_tdc_11,BBCE TDC 11, 128, 0.,256.,0xffffffff,0xffffffff
-1,h169_bbce_tdc_12,BBCE TDC 12, 128, 0.,256.,0xffffffff,0xffffffff
-1,h170_bbce_tdc_13,BBCE TDC 13, 128, 0.,256.,0xffffffff,0xffffffff
-1,h171_bbce_tdc_14,BBCE TDC 14, 128, 0.,256.,0xffffffff,0xffffffff
-1,h172_bbce_tdc_15,BBCE TDC 15, 128, 0.,256.,0xffffffff,0xffffffff
-1,h173_bbce_tdc_16,BBCE TDC 16, 128, 0.,256.,0xffffffff,0xffffffff
-1,h174_bbcw_tdc_1,BBCW TDC 1, 128, 0.,256.,0xffffffff,0xffffffff
-1,h175_bbcw_tdc_2,BBCW TDC 2, 128, 0.,256.,0xffffffff,0xffffffff
-1,h176_bbcw_tdc_3,BBCW TDC 3, 128, 0.,256.,0xffffffff,0xffffffff
-1,h177_bbcw_tdc_4,BBCW TDC 4, 128, 0.,256.,0xffffffff,0xffffffff
-1,h178_bbcw_tdc_5,BBCW TDC 5, 128, 0.,256.,0xffffffff,0xffffffff
-1,h179_bbcw_tdc_6,BBCW TDC 6, 128, 0.,256.,0xffffffff,0xffffffff
-1,h180_bbcw_tdc_7,BBCW TDC 7, 128, 0.,256.,0xffffffff,0xffffffff
-1,h181_bbcw_tdc_8,BBCW TDC 8, 128, 0.,256.,0xffffffff,0xffffffff
-1,h182_bbcw_tdc_9,BBCW TDC 9, 128, 0.,256.,0xffffffff,0xffffffff
-1,h183_bbcw_tdc_10,BBCW TDC 10, 128, 0.,256.,0xffffffff,0xffffffff
-1,h184_bbcw_tdc_11,BBCW TDC 11, 128, 0.,256.,0xffffffff,0xffffffff
-1,h185_bbcw_tdc_12,BBCW TDC 12, 128, 0.,256.,0xffffffff,0xffffffff
-1,h186_bbcw_tdc_13,BBCW TDC 13, 128, 0.,256.,0xffffffff,0xffffffff
-1,h187_bbcw_tdc_14,BBCW TDC 14, 128, 0.,256.,0xffffffff,0xffffffff
-1,h188_bbcw_tdc_15,BBCW TDC 15, 128, 0.,256.,0xffffffff,0xffffffff
-1,h189_bbcw_tdc_16,BBCW TDC 16, 128, 0.,256.,0xffffffff,0xffffffff
+1,h158_bbce_tdc_1,BBCE TDC 1, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h159_bbce_tdc_2,BBCE TDC 2, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h160_bbce_tdc_3,BBCE TDC 3, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h161_bbce_tdc_4,BBCE TDC 4, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h162_bbce_tdc_5,BBCE TDC 5, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h163_bbce_tdc_6,BBCE TDC 6, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h164_bbce_tdc_7,BBCE TDC 7, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h165_bbce_tdc_8,BBCE TDC 8, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h166_bbce_tdc_9,BBCE TDC 9, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h167_bbce_tdc_10,BBCE TDC 10, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h168_bbce_tdc_11,BBCE TDC 11, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h169_bbce_tdc_12,BBCE TDC 12, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h170_bbce_tdc_13,BBCE TDC 13, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h171_bbce_tdc_14,BBCE TDC 14, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h172_bbce_tdc_15,BBCE TDC 15, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h173_bbce_tdc_16,BBCE TDC 16, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h174_bbcw_tdc_1,BBCW TDC 1, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h175_bbcw_tdc_2,BBCW TDC 2, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h176_bbcw_tdc_3,BBCW TDC 3, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h177_bbcw_tdc_4,BBCW TDC 4, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h178_bbcw_tdc_5,BBCW TDC 5, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h179_bbcw_tdc_6,BBCW TDC 6, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h180_bbcw_tdc_7,BBCW TDC 7, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h181_bbcw_tdc_8,BBCW TDC 8, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h182_bbcw_tdc_9,BBCW TDC 9, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h183_bbcw_tdc_10,BBCW TDC 10, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h184_bbcw_tdc_11,BBCW TDC 11, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h185_bbcw_tdc_12,BBCW TDC 12, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h186_bbcw_tdc_13,BBCW TDC 13, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h187_bbcw_tdc_14,BBCW TDC 14, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h188_bbcw_tdc_15,BBCW TDC 15, 128, 0.,4096.,0xffffffff,0xffffffff
+1,h189_bbcw_tdc_16,BBCW TDC 16, 128, 0.,4096.,0xffffffff,0xffffffff
 1,h190_bbc_hitmap_EAST,Hit Pattern BBC EAST,24,0.5,24.5,0xffffffff,0xffffffff
 1,h191_bbc_hitmap_WEST,Hit Pattern BBC WEST,24,0.5,24.5,0xffffffff,0xffffffff
 1,h192_bbc_weight_hitmap_EAST,Weighted Hit Pattern BBC EAST,24,0.5,24.5,0xffffffff,0xffffffff
@@ -235,14 +235,14 @@
 1,h195_bbc_hits_west,BBC Small-tile Hits West,17,-0.5,16.5,0xffffffff,0xffffffff
 1,h196_bbcl_hits_east,BBC Large-tile Hits East,9,-0.5,8.5,0xffffffff,0xffffffff
 1,h197_bbcl_hits_west,BBC Large-tile Hits West,9,-0.5,8.5,0xffffffff,0xffffffff
-1,h198_bbc_AdcSum_east,BBC Small-tile AdcSum East,128,0,2048,0xffffffff,0xffffffff
-1,h199_bbc_AdcSum_west,BBC Small-tile AdcSum West,128,0,512,0xffffffff,0xffffffff
-1,h200_bbcl_AdcSum_east,BBC Large-tile AdcSum East,128,0,2048,0xffffffff,0xffffffff
-1,h201_bbcl_AdcSum_west,BBC Large-tile AdcSum West,128,0,2048,0xffffffff,0xffffffff
-1,h202_bbc_earliest_tac_east,BBC East Earliest TAC,256,0.,256.,0xffffffff,0xffffffff
-1,h203_bbc_earliest_tac_west,BBC West Earliest TAC,256,0.,256.,0xffffffff,0xffffffff
-1,h204_bbc_tac_difference_e-w,BBC TAC Difference(widecut),256,-256.,256.,0xffffffff,0xffffffff
-2,h205_bbc_tac_e_w,BBC TAC East vs West,64,0.,256.,64, 0.,256.,0xffffffff,0xffffffff
+1,h198_bbc_AdcSum_east,BBC Small-tile AdcSum East,128,0,4096,0xffffffff,0xffffffff
+1,h199_bbc_AdcSum_west,BBC Small-tile AdcSum West,128,0,4096,0xffffffff,0xffffffff
+1,h200_bbcl_AdcSum_east,BBC Large-tile AdcSum East,128,0,4096,0xffffffff,0xffffffff
+1,h201_bbcl_AdcSum_west,BBC Large-tile AdcSum West,128,0,4096,0xffffffff,0xffffffff
+1,h202_bbc_earliest_tac_east,BBC East Earliest TAC,256,0.,4096.,0xffffffff,0xffffffff
+1,h203_bbc_earliest_tac_west,BBC West Earliest TAC,256,0.,4096.,0xffffffff,0xffffffff
+1,h204_bbc_tac_difference_e-w,BBC TAC Difference(widecut),4096,-4096.,256.,0xffffffff,0xffffffff
+2,h205_bbc_tac_e_w,BBC TAC East vs West,64,0.,4096.,64, 0.,4096.,0xffffffff,0xffffffff
 1,h206_fpd_EN_adcsum,FPD EN AdcSum,128, 0.,256.,0xffffffff,0xffffffff
 1,h207_fpd_ES_adcsum,FPD ES AdcSum,128, 0.,256.,0xffffffff,0xffffffff
 1,h208_fpd_ET_adcsum,FPD ET AdcSum,128, 0.,256.,0xffffffff,0xffffffff
@@ -543,9 +543,9 @@
 1,h448_bunch_blue_down,h448_bunch_blue_down,120,-0.5,119.5,0xffffffff,0xffffffff
 1,h449_bunch_blue_unpol,h449_bunch_blue_unpol,120,-0.5,119.5,0xffffffff,0xffffffff
 
-1,h450_bbc_earliest_tac_east,BBC East Earliest TAC(trg),256,0.,256.,0xffffffff,0xffffffff
-1,h451_bbc_earliest_tac_west,BBC West Earliest TAC(trg),256,0.,256.,0xffffffff,0xffffffff
-1,h452_bbc_tac_difference_e-w,BBC TAC Difference(trg),256,-256.,256.,0xffffffff,0xffffffff
+1,h450_bbc_earliest_tac_east,BBC East Earliest TAC(trg),256,0.,4096.,0xffffffff,0xffffffff
+1,h451_bbc_earliest_tac_west,BBC West Earliest TAC(trg),256,0.,4096.,0xffffffff,0xffffffff
+1,h452_bbc_tac_difference_e-w,BBC TAC Difference(trg),256,-4096.,4096.,0xffffffff,0xffffffff
 
 //Jing Liu, add TOFr5 histograms. 06-13-2005.
 //1,h453_tofr_leading_ToF,h453_tofr_leading_ToF, 200,-200.,800.,0xffffffff,0xffffffff     // ns
