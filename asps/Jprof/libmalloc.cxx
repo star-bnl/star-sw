@@ -222,6 +222,11 @@ void *mystry)
     // it's really ((ucontext_t *)mystry)->uc_mcontext.gregs[14] which is
     // the EIP register when the handler was called
     Wptr = ((char**)mystry)[19];
+
+    // JL debug 2009
+    // context->uc_mcontext.gregs [REG_EIP]
+    //if (Wptr) printf("%08x [%s]\n",((ucontext_t *)mystry)->uc_mcontext.gregs [REG_EIP],Wptr);
+
     if ( Wptr ){
       Log(milisec, Wptr);
     } else {
@@ -264,9 +269,18 @@ void setupProfilingStuff(void)
 	    char *delay = strstr(tst,"JP_PERIOD=");
 	    if(delay) {
 	        double tmp = strtod(delay+10, NULL);
-		if(tmp>1e-3) {
-		    timerMiliSec = static_cast<unsigned long>(1000 * tmp);
-		}
+		char buffer[1024];
+
+		(void) sprintf(buffer,"Jprof: You provided %lf sec - ",tmp);
+		writeStrStdout(buffer);
+		//if(tmp>1e-3) {
+		    timerMiliSec = (unsigned long) (1000 * tmp);
+		    if ( timerMiliSec == 0) timerMiliSec = 1;
+		    //timerMiliSec = static_cast<unsigned long>(1000 * tmp);
+		    (void) sprintf(buffer,"Setting timer to %ld ms\n",
+				   timerMiliSec);
+		    writeStrStdout(buffer);
+		//}
 	    }
 
 	    char *first = strstr(tst, "JP_FIRST=");
