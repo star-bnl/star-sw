@@ -22,13 +22,17 @@ my $SOFLAGS  = $env->{SOFLAGS};
 $CXXFLAGS =~ s/-ansi//;
 $CPPFLAGS =~ s/-ansi//;
 
+
+# This is a Linux stack oriented on package
 if($^O eq "solaris"){
     # Package made for Linux. Give up man !!
     print "---> $pkg package cannot be assembled on $^O\n";
     return;
-} elsif ($STAR_SYS =~ /64_/) {
+
+} elsif ($STAR_SYS =~ /64_/ || $STAR_HOST_SYS =~ /alpha/ ) {
     print "---> $pkg package will be skipped for now ... \n";
     return;
+
 } else {
     print "---> build $pkg with cons $Dir\n";
 }
