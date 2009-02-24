@@ -5,7 +5,7 @@
 # Get around by fixing ROOT make file + some special actions
 # we need to perform due to an AFS based installation.
 #
-# (c) J. Lauret 2003 - 2008
+# (c) J. Lauret 2003 - 2009
 #
 # -fix  re-establish the link for system.rootrc and also fixes
 #       bin/root-config
@@ -13,12 +13,21 @@
 #
 
 # All the below files will have a local copy instead of a link
-@LOCAL = ("Makefile","config/Makefile.config","configure");
+%LOCAL = ("configure",1,
+          "config/Makefile.config",1,
+          "Makefile",1);
+
+# one of those files will be touch-ed during build 
+foreach $f (glob("cint/iosenum/iosenum.*")){
+    $LOCAL{$f} = 0 if ($f !~ m/\.c/i);
+}
+
+
 
 # for Gprof support, we will tewak Makefile.linux
 if ( $ENV{ROOTSYS} =~ m/Groot/ ){
     print "Detecting GPROF version\n";
-    push(@LOCAL,"config/Makefile.linux");
+    $LOCAL{"config/Makefile.linux"} = 1;
     $GP = 1;
 
     # TODO
@@ -50,17 +59,17 @@ if ( ! defined($CERN) ){
 }
 
 # Now do the work
-if ( ! -e $LOCAL[0] ){
+if ( ! -e "Makefile" ){
     die "You are probably not in the proper directory\n";
 } else {
     # if -l, copy local otherwise it will be share by debug / no-debug
     # version and create confusions.
-    foreach $f (@LOCAL){
+    foreach $f (keys %LOCAL){
 	if ( -l $f ){
 	    $link = readlink($f);
 	    unlink($f);
 	    system("/bin/cp -fp $link $f");
-	    print "Made local $f\n";
+	    print "Made local $f\n" if ($LOCAL{$f});
 	}
     }
 }
