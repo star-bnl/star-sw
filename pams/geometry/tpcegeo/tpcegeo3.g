@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.2 2009/02/23 00:05:35 perev Exp $
+!// $Id: tpcegeo3.g,v 1.3 2009/02/24 19:38:06 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.3  2009/02/24 19:38:06  perev
+!// gstar bug workaround
+!//
 !// Revision 1.2  2009/02/23 00:05:35  perev
 !// remove qfatal call
 !//
@@ -263,40 +266,8 @@ Structure TPCR { RdoVthk,Rdothk,Rdolen,NRdobrd,Rdoht(9) }
 	RDOCoolingdZ = 2.50			!// 
         tpeaTHK    = 9.7      ! endcap MWC + sector thickness(from tpcegeo2)
 	endFill
+        USE TPCG
 
-!//YF  Fill TPRS  !//  sector of padrows
-!//YF sec 	=	1            !// sec    =	sector number: 1 for inner 2 for outer
-!//YF nRow 	=	13           !// nRow   =	number of padrows in the sector
-!//YF pitch 	=	0.335        !// pitch  =	tpc padrow pitch width
-!//YF width 	=	1.15         !// width  =	tpc padrow thickness
-!//YF dAnode 	=	0.2          !// dAnode =	distance to anode wire from pad plane
-!//YF Npads	=	{ 88,  96, 104, 112, 118, 126, 134, 142, 150, 158,
-!//YF     		  166, 174, 182}      		!// Npads  =	number of pads in row
-!//YF Rpads 	=	{ 60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8, 104.0,
-!//YF     		 109.2,114.4,119.6}  		!// Rpads  =	tpc padrow radii
-!//YF   endFill			    
-!//YF 
-!//YF 
-!//YF   Fill TPRS   !//  sector of padrows
-!//YF sec 	=	2            !// sec    =	sector number: 1 for inner 2 for outer
-!//YF nRow 	=	32           !// nRow   =	number of padrows in outer sector
-!//YF pitch 	=	0.67         !// pitch  =	outer tpc padrow pitch width
-!//YF width 	=	1.95         !// width  =	outer tpc padrow thickness
-!//YF dAnode 	=	0.4          !// dAnode =	distance to anode wire from pad plane
-!//YF Npads	=	{   98, 100, 102, 104, 106, 106, 108, 110, 112, 
-!//YF     		   112, 114, 116, 118, 120, 122, 122, 124, 126, 
-!//YF     		   128, 128, 130, 132, 134, 136, 138, 138, 140, 
-!//YF     		   142, 144, 144, 144, 144 }	!// Npads  =	number of pads in row
-!//YF 
-!//YF Rpads 	=	{127.195, 129.195, 131.195, 133.195, 135.195, 
-!//YF     		 137.195, 139.195, 141.195, 143.195, 145.195, 
-!//YF     		 147.195, 149.195, 151.195, 153.195, 155.195, 
-!//YF     		 157.195, 159.195, 161.195, 163.195, 165.195, 
-!//YF     		 167.195, 169.195, 171.195, 173.195, 175.195, 
-!//YF     		 177.195, 179.195, 181.195, 183.195, 185.195, 
-!//YF     		 187.195, 189.195 }           	!// Rpads  =	tpc padrow radii
-!//YF endFill			    
-!//YF 
    Fill TPRS              ! sector of padrows
       sec    = 1            ! sector number: 1 for inner, 2 for outer
       nRow   = 13           ! number of padrows in the sector
@@ -328,6 +299,7 @@ Structure TPCR { RdoVthk,Rdothk,Rdolen,NRdobrd,Rdoht(9) }
                 187.195, 189.195 }        ! tpc padrow radii
    EndFill
 *
+  USE TPRS
 
 
 !//  TECW_t TECW[2] = !// EC trapezoid and support Wheel
@@ -353,7 +325,7 @@ Fill TECW	!// EC trapezoid and support Wheel
    holeDy       =         2.625/2*inch  !// = 3.33375 cm
    endFill			 
 
-   Fill TECW	!// EC trapezoid and support Wheel
+Fill TECW	!// EC trapezoid and support Wheel
    sec		=    	  2 		!// sec	   => sector number: 1 for inner, 2 for outer
    GapWidI	=    	  2.* 28.92 	!// GapWidI  => air in support wheel - inner width
    GapWidO	=    	  2.* 46.74 	!// GapWidO  => air in support wheel - outer width
@@ -373,16 +345,16 @@ Fill TECW	!// EC trapezoid and support Wheel
    holeDx       =         0.750/2*INCH	!//
    holeDy       =         2.500/2*INCH	!//
 endFill			 
-
+USE TECW
 *
-  Fill TPCR              ! volume for tpc readout boards
-      RdoVthk   =30.      ! length of RDO volume
-      Rdothk    =.25      ! thickness of rdo card
-      Rdolen    =27       ! card length along beam direction
-      NRdobrd   = 9       ! number of RDO boards
-      Rdoht = {60.0, 74.0, 84.0, 101.0,106.0,
-               126.0,146.0,166.0,186.0} ! radial pos of rdo boards
-  EndFill
+Fill TPCR              ! volume for tpc readout boards
+   RdoVthk   = 30.     ! length of RDO volume
+   Rdothk    =.25      ! thickness of rdo card
+   Rdolen    = 27      ! card length along beam direction
+   NRdobrd   = 9       ! number of RDO boards
+   Rdoht = {60.0, 74.0, 84.0, 101.0,106.0,
+            126.0,146.0,166.0,186.0} ! radial pos of rdo boards
+EndFill
 
 
       Use TPCR
@@ -835,7 +807,7 @@ Block TSAW  TpcSectorAndWheel
 !// Drawing 24A3685B height =  27.373
   	dX2 = 1.470;
         dX  = 0;
-write(*,*) '************** USE TECW sec=1 ************';
+!//write(*,*) '************** USE TECW sec=1 ************';
         USE TECW sec=1;
   	RIBI =  {    dX                 ,dX2				, 0.,0.		!// r for upper edge
      		  4.261           	,0.375				, 0.,0.
@@ -910,7 +882,7 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
 !//    tpcPadPlane[inOut] = new TGeoVolumeAssembly("TpcPadPlane");
 !//    tpcPadPlane[inOut]->SetTitle(Form("Tpc%sPadPlane",InnerOuter[inOut]));
     
-write(*,*) '************ use TECW sec=(inOut+1)=',(inOut+1),' ********';
+!//write(*,*) '************ use TECW sec=(inOut+1)=',(inOut+1),' ********';
     use TECW sec=(inOut+1)
     z2 = zWheel1;
     z1 = z2 - TECW_Thick;
