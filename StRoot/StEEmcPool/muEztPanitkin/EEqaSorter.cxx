@@ -1,15 +1,15 @@
-// $Id: EEqaSorter.cxx,v 1.8 2009/02/14 03:16:52 ogrebeny Exp $
-#include <stdio.h>
-#include <assert.h>
+// $Id: EEqaSorter.cxx,v 1.9 2009/02/24 04:07:45 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
-#include <iostream>
-using namespace std;
+//#include <iostream>
+//using namespace std;
 
 #include <TObjArray.h>
 
 #include <TFile.h>
 #include <TH1.h>
+
+#include "StMessMgr.h"
 
 #include "EEqaSorter.h"
 
@@ -26,37 +26,81 @@ using namespace std;
 ClassImp(EEqaSorter)
 
 //-------------------------------------------
-//-------------------------------------------
- EEqaSorter:: EEqaSorter(TObjArray*L,StEEmcDb*dbx) {
-  // printf("\n\n  EEqaSorter:: EEqaSorter() \n\n");
-  HList=L; assert(HList);
-  eeDb=dbx;
-  sortA=new EEqaSorterA( HList);
-  sortC=new EEqaSorterC( HList,eeDb);
-
-  dsm=0; // new EEdsmAna(HList,"allTrig");
-  printf(" Check me later please %s\n", __FILE__ );
-  memset(hCorT,0,sizeof(hCorT));
-  memset(hCorS,0,sizeof(hCorS));
-
-  nSpy=nSpyCC=0;
+EEqaSorter::EEqaSorter(StEEmcDb *dbx)
+    : TObject()
+    , H4jpCor(0)
+    , sortA(0)
+    , sortC(0)
+    , dsm(0)
+    , eeDb(dbx)
+    , H1tot(0)
+    , pathInp(0)
+    , pathOut(0)
+    , timeStamp(0)
+    , mySpy(0)
+    , mySpyCC(0)
+    , nSpy(0)
+    , nSpyCC(0)
+    , minSecSpy(0)
+    , nEveSpy(0)
+    , spyMode(0)
+    , lastSpyRun(0)
+{
+    memset(hCorT, 0, sizeof(hCorT));
+    memset(hCorS, 0, sizeof(hCorS));
 } 
 
 //--------------------------------------------------
+EEqaSorter::~EEqaSorter() {
+    for (int i = 0;i <= 6;i++) {
+	if(hCorT[i]) delete hCorT[i];
+	if(hCorS[i]) delete hCorS[i];
+    }
+    memset(hCorT, 0, sizeof(hCorT));
+    memset(hCorS, 0, sizeof(hCorS));
+    if (H4jpCor) delete H4jpCor;
+    if (sortA) delete sortA;
+    sortA = 0;
+    if (sortC) delete sortC;
+    sortC = 0;
+    if (dsm) delete dsm;
+    dsm = 0;
+    eeDb = 0;
+    if (H1tot) delete H1tot;
+    H1tot = 0;
+    pathInp = 0;
+    pathOut = 0;
+    timeStamp = 0;
+    for (int i = 0;i < nSpy;i++) if (mySpy && mySpy[i]) delete mySpy[i];
+    if (mySpy) delete mySpy;
+    mySpy = 0;
+    for (int i = 0;i < nSpyCC;i++) if (mySpyCC && mySpyCC[i]) delete mySpyCC[i];
+    if (mySpyCC) delete mySpyCC;
+    mySpyCC = 0;
+    nSpy = 0;
+    nSpyCC = 0;
+    minSecSpy = 0;
+    nEveSpy = 0;
+    spyMode = 0;
+    lastSpyRun = 0;
+}
+
 //--------------------------------------------------
-void EEqaSorter::initHisto(int nBin, int mxADC){
-  assert(HList);
-  printf(" EEqaSorter::initHisto(nb=%d, max=%d), pathInp=%s=\n", nBin,mxADC, pathInp.Data());
+void EEqaSorter::initHisto(TObjArray *HList, int nBin, int mxADC) {
+  sortA=new EEqaSorterA();
+  sortC=new EEqaSorterC(eeDb);
+
+  dsm = new EEdsmAna("allTrig");
+
+  LOG_DEBUG << Form(" EEqaSorter::initHisto(nb=%d, max=%d), pathInp=%s=\n", nBin,mxADC, pathInp) << endm;
   H1tot=new TH1F("eeTot","EEMC total counter",10,0,10);
-  HList->Add( H1tot);
-  sortA->initCrateHisto(nBin,mxADC);
-  sortA->usePed4(pathInp+"eemcPed4.dat");
+  if (HList) HList->Add(H1tot);
+  sortA->initCrateHisto(HList, nBin,mxADC);
+  sortA->usePed4(Form("%s/eemcPed4.dat", pathInp));
 
-  sortC->initHisto();
+  sortC->initHisto(HList);
 
-  if (dsm) dsm->initHisto();
-  
-  //out  if(ret) sortA->usePed4("/home_local/operator/balewski/eemcPanitkinSetup/eemcPed4.dat");
+  if (dsm) dsm->initHisto(HList);
   
   //.................. my histo .............
   hCorT[0]= new TH1F("ETowHealth","ETOW HEALTH; X=corr. type; events",9,-0.5,8.5);
@@ -81,74 +125,64 @@ void EEqaSorter::initHisto(int nBin, int mxADC){
   hCorS[6]=new TH1F("ESmdOFFid","ESMD OFF ID; crate ID",48,63.5,111.5);
 
   H4jpCor =new TH1F("JPtotCor","ETOW Corruption  per JP; JP ID",EEnJetPatch,0.5,EEnJetPatch+0.5);   H4jpCor->SetFillColor(kRed);
-  HList->Add(H4jpCor);
+  if (HList) HList->Add(H4jpCor);
  
-  int i;
-  for(i=0;i<=6;i++) {
-    if(hCorT[i])HList->Add(hCorT[i]);
-    if(hCorS[i])HList->Add(hCorS[i]);
+  for(int i=0;i<=6;i++) {
+    if(hCorT[i] && HList) HList->Add(hCorT[i]);
+    if(hCorS[i] && HList) HList->Add(hCorS[i]);
   }
-  
-  printf(" EEqaSorter::initHisto() total %d histos created\n",HList->GetEntries());
-  
+
+  LOG_DEBUG << Form(" EEqaSorter::initHisto() total %d histos created\n", HList ? HList->GetEntries() : 0) << endl;  
 }  
  
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorter::initRun() {
+void EEqaSorter::initRun() {
   sortC->initRun();
 }
 
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorter::clear() {
-  eETow=0;
-  eESmd=0;  
+void EEqaSorter::clear() {
   timeStamp=0;
   if (dsm) dsm->clear();
 }
 
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorter::saveHistoAdd(TFile *f){ 
+void  EEqaSorter::saveHisto(TFile *f) const { 
   if (f) f->cd();
-  HList->Write();
+  if (H1tot) H1tot->Write();
+  if (sortA) sortA->saveHisto(f);
+  if (sortC) sortC->saveHisto(f);
+  if (dsm) dsm->saveHisto(f);
+  if (H4jpCor) H4jpCor->Write();
+  for(int i=0;i<=6;i++) {
+    if(hCorT[i]) hCorT[i]->Write();
+    if(hCorS[i]) hCorS[i]->Write();
+  }
 }
  
-
 //-------------------------------------------
-//-------------------------------------------
-void  
-EEqaSorter::sort(
-		 EztEmcRawData  *t,  EztEmcRawData  *s, int runNo,
+void EEqaSorter::sort(EztEmcRawData *t, EztEmcRawData *s, int runNo,
 		 int token, int daqVer,
-		 const unsigned char * dsm0inp,  const unsigned short int  * dsm1inp ,
-		 const unsigned short int  * dsm2inp, const  unsigned short int  * dsm3inp) {
-  eETow=t;
-  eESmd=s;
+		 const unsigned char *dsm0inp, const unsigned short int *dsm1inp,
+		 const unsigned short int *dsm2inp, const unsigned short int *dsm3inp)
+{
   H1tot->Fill(0.5);  
-  xRayETOW(token);  // detect corruption
-  xRayESMD(token,daqVer,runNo);  // detect corruption
+  xRayETOW(t, token);  // detect corruption
+  xRayESMD(s, token,daqVer,runNo);  // detect corruption
 
-  if(eETow) crateHealth(eETow, hCorT, 1, daqVer); // histogram corruption
-  if(eESmd) crateHealth(eESmd, hCorS, 2, daqVer); // histogram corruption
-  //eETow->print(1);
-  // eESmd->print(0);
-  sortA->sort(eETow,eESmd,daqVer);
-  sortC->sort(eETow,eESmd,daqVer);
-  if (dsm) dsm->sort( dsm0inp, dsm1inp, dsm2inp, dsm3inp);
-  return;
+  crateHealth(t, hCorT, 1, daqVer); // histogram corruption
+  crateHealth(s, hCorS, 2, daqVer); // histogram corruption
 
+  if (sortA) sortA->sort(t, s, daqVer);
+  if (sortC) sortC->sort(t, s, daqVer);
+  if (dsm) dsm->sort(dsm0inp, dsm1inp, dsm2inp, dsm3inp);
 }
 
-
 //-------------------------------------------
-//-------------------------------------------
-void  
-EEqaSorter::xRayETOW( int token) { 
+void EEqaSorter::xRayETOW(EztEmcRawData *t, int token) const {
   // Goal:verify content of each header + tower data  
 
-  if(eETow==0) return; // no ETOW data 
+  if (!t) return; // no ETOW data 
   int lenCount=0xa4;
   int errFlag=0;
   int trigComm=0x4; // physics, 9=laser/LED, 8=??
@@ -158,19 +192,19 @@ EEqaSorter::xRayETOW( int token) {
   int totN256=0, totGhost=0;
   
   int icr;
-  for(icr=0;icr<eETow->getNBlocks();icr++) {
-    if(eETow->isCrateVoid(icr)) continue;
-    if(eETow->purgeCrateOFF(icr)) continue;
+  for(icr=0;icr<t->getNBlocks();icr++) {
+    if(t->isCrateVoid(icr)) continue;
+    if(t->purgeCrateOFF(icr)) continue;
 
     //    eETow->print(icr,0);
     int crID=icr+1;
     //........... hader..........
-    eETow->tagHeadValid(icr,token, crID,lenCount,trigComm,errFlag);
+    t->tagHeadValid(icr,token, crID,lenCount,trigComm,errFlag);
     //............. ghost, N256 ...............
     int i;
     int nGhost=0, n256=0;
-    const UShort_t* data=eETow->data(icr);
-    for(i=0;i<eETow->sizeData(icr);i++) {
+    const UShort_t* data=t->data(icr);
+    for(i=0;i<t->sizeData(icr);i++) {
       if(data[i]>0 && (data[i] &0xff)==0 ) n256++;
       if(i>=121 && data[i]>50) nGhost++;
     }
@@ -178,24 +212,21 @@ EEqaSorter::xRayETOW( int token) {
     totN256+=n256;
 
     // .....  replace sanity bits
-    UShort_t sanity=eETow->getCorruption(icr);
+    UShort_t sanity=t->getCorruption(icr);
     if(nGhost>mxGhost) sanity |=EztEmcRawData::bitGhost; 
     if(n256>mxN256) sanity |=EztEmcRawData::bitN256; 
-    eETow->setCorruption(icr,sanity);
-    //  eETow->print(icr,0);
+    t->setCorruption(icr,sanity);
+    //t->print(icr,0);
   } 
   hCorT[2]->Fill(totN256);
   hCorT[4]->Fill(totGhost);
 }
 
-
 //-------------------------------------------
-//-------------------------------------------
-void  
-EEqaSorter::xRayESMD( int token, int ver, int runNo) { 
+void EEqaSorter::xRayESMD(EztEmcRawData *s, int token, int ver, int runNo) const { 
   // Goal:verify content of each header 
   
-  if(eESmd==0) return; // no ESMD data
+  if (!s) return; // no ESMD data
   int icr;
   int lenCount=0xc4;
   int errFlag=0x28;
@@ -204,11 +235,10 @@ EEqaSorter::xRayESMD( int token, int ver, int runNo) {
   const int mxN256=10; //per crate
   int totN256=0;
  
-  for(icr=0;icr<eESmd->getNBlocks();icr++) {
-    if(eESmd->isCrateVoid(icr)) continue;
-    if(eESmd->purgeCrateOFF(icr)) continue;
+  for(icr=0;icr<s->getNBlocks();icr++) {
+    if(s->isCrateVoid(icr)) continue;
+    if(s->purgeCrateOFF(icr)) continue;
     //  eESmd->print(icr,0);
-    // assert(EztEmcRawData::isCrateOFF( eESmd->header(icr))==0);
 
     int crateID=icr+64;
     // in 2004 there was only 16 MAPMT crates for sectors 5-8
@@ -217,31 +247,27 @@ EEqaSorter::xRayESMD( int token, int ver, int runNo) {
       crateID=icr+84;
     }
     //........... hader..........
-    eESmd->tagHeadValid(icr,token, crateID,lenCount,trigComm,errFlag);
+    s->tagHeadValid(icr,token, crateID,lenCount,trigComm,errFlag);
     //.............  N256 ...............
     int i;
     int n256=0;
-    const UShort_t* data=eESmd->data(icr);
-    for(i=0;i<eESmd->sizeData(icr);i++) {
+    const UShort_t* data=s->data(icr);
+    for(i=0;i<s->sizeData(icr);i++) {
       if(data[i]>0 && (data[i] &0xff)==0 ) n256++;
     }
     totN256+=n256;
 
-    UShort_t sanity=eESmd->getCorruption(icr);
+    UShort_t sanity=s->getCorruption(icr);
     if(n256>mxN256) sanity|= EztEmcRawData::bitN256; 
-    eESmd->setCorruption(icr,sanity); // replace sanity bits
-    // eESmd->print(icr,0);
+    s->setCorruption(icr,sanity); // replace sanity bits
+    //s->print(icr,0);
   }
   hCorS[2]->Fill(totN256);
 }
 
-
 //-------------------------------------------
-//-------------------------------------------
-void  
-EEqaSorter::crateHealth( EztEmcRawData  *eRaw, TH1F **h, int es,  int ver) {
-  assert(eRaw);
-  assert(es==1 || es==2); // ETOW  or ESMD
+void EEqaSorter::crateHealth(EztEmcRawData *eRaw, TH1F **h, int es, int ver) const {
+  if (!eRaw || !(es==1 || es==2)) return; // ETOW  or ESMD
 
   int nN256=0, nGhost=0,nHeadCorr=0, nOFF=0;
   int icr;
@@ -290,63 +316,56 @@ EEqaSorter::crateHealth( EztEmcRawData  *eRaw, TH1F **h, int es,  int ver) {
   
 }
 
-
 //-------------------------------------------
-//-------------------------------------------
-void  EEqaSorter::Finish(){
-  sortA->Finish();
-  // sortC->Finish();
-}
-
- 
-//-------------------------------------------
-//-------------------------------------------
-void  EEqaSorter::saveHisto(char * name) {
-  TString fname=name;
-  fname+=".hist.root";
-  
-  TFile f(fname.Data(),"recreate");
-  assert(f.IsOpen());
-  printf("%d histos are written  to '%s' ...\n",HList->GetEntries(),fname.Data());
-  saveHistoAdd(&f);
-  f.Close();
-  assert(!f.IsOpen());
-  
-  printf("                      , save Ok \n");
+void EEqaSorter::Finish() {
+    if (sortA) sortA->Finish();
+    //if (sortC) sortC->Finish();
 }
 
 //-------------------------------------------
+void EEqaSorter::saveHisto(const Char_t *filename) const {
+    TFile f(filename,"recreate");
+    if (f.IsOpen()) {
+	LOG_DEBUG << "Saving histograms to " << filename<< endm;
+	saveHisto(&f);
+	f.Close();
+	LOG_DEBUG << "                      , save Ok" << endm;
+    } else {
+	LOG_ERROR << "Cannot write to file " << filename << endm;
+    }
+}
+
 //-------------------------------------------
-void  EEqaSorter::resetHisto(){
-  int j;
-  for(j=0;j<HList->GetEntries();j++) {
-    TH1* h=(TH1*)HList->UncheckedAt(j);
-    h->Reset();
+void EEqaSorter::resetHisto() {
+  if (H1tot) H1tot->Reset();
+  if (sortA) sortA->resetHisto();
+  if (sortC) sortC->resetHisto();
+  if (dsm) dsm->resetHisto();
+  if (H4jpCor) H4jpCor->Reset();
+  for(int i=0;i<=6;i++) {
+    if(hCorT[i]) hCorT[i]->Reset();
+    if(hCorS[i]) hCorS[i]->Reset();
   }
- 
-  // printf("                      , reset Ok \n");
 }
 
-
-
 //-------------------------------------------
-//-------------------------------------------
-void  
-EEqaSorter::initSpy(int minSec, int mode) { // must be called after histos initialized
+void EEqaSorter::initSpy(const TObjArray *HList, int minSec, int mode) { // must be called after histos initialized
   minSecSpy=minSec;
   spyMode=mode;
   int mxSpy=100;
   mySpy=new SpyGeneric*[mxSpy];
   mySpyCC=new SpyCopyCat*[mxSpy];
+  memset(mySpy, 0, sizeof(mySpy[0])*mxSpy);
+  memset(mySpyCC, 0, sizeof(mySpyCC[0])*mxSpy);
   nSpy=nSpyCC=0;
   int i;
   char txt[100];
   for(i=1;i<=6;i++) {
     sprintf(txt,"JP%d_sum",i);
-    mySpy[nSpy++]=(new SpyJPped)->set((TH1*)HList->FindObject(txt));
+    if (HList) mySpy[nSpy++]=(new SpyJPped)->set((TH1*)HList->FindObject(txt));
   }
   
-  mySpy[nSpy++]=(new SpyJPfreq)->set((TH1*)HList->FindObject("JPtotFreq"));
+  if (HList) mySpy[nSpy++]=(new SpyJPfreq)->set((TH1*)HList->FindObject("JPtotFreq"));
 
   mySpy[nSpy++]=(new SpyCorruption)->set (hCorT[0],"ETOW corruption ");
   mySpy[nSpy++]=(new SpyCorruption)->set (hCorS[0],"ESMD corruption ");
@@ -357,24 +376,15 @@ EEqaSorter::initSpy(int minSec, int mode) { // must be called after histos initi
   for(i=0;i<nSpyCC;i++) {
     mySpy[nSpy++]= mySpyCC[i];
   }
-  
-  //  HList->ls();
 
   nEveSpy=0;
   lastSpyRun=0;
-  printf("EEqaSorter::initSpy() nSpy=%d nSpyCC=%d, timeDelay=%d mode=%d\n",nSpy,nSpyCC,minSecSpy,spyMode);
-  assert(nSpy<mxSpy); 
-  assert(nSpyCC<mxSpy); 
-  lastSpyRun=6025056; // for testing
+  LOG_DEBUG << Form("EEqaSorter::initSpy() nSpy=%d nSpyCC=%d, timeDelay=%d mode=%d\n",nSpy,nSpyCC,minSecSpy,spyMode) << endm;
 }
 
- 
 //-------------------------------------------
-//-------------------------------------------
-void  
-EEqaSorter::spy( int runNo, int eveId){
+void EEqaSorter::spy(EztEmcRawData *t, EztEmcRawData *s, int runNo, int eveId) {
   nEveSpy++;
-  // printf("SSS nEve=%d, runNo=%d\n",nEveSpy,runNo);
   static int lastTm=0;
   static int lastNbad=0;
   static int nMail=0; // # if mails per run
@@ -383,7 +393,7 @@ EEqaSorter::spy( int runNo, int eveId){
 
   int i;
   for(i=0;i<nSpyCC;i++) {
-    mySpyCC[i]->accumulate(eETow, eESmd);
+    mySpyCC[i]->accumulate(t, s);
   }
   
   //test   hCorT[0]->Fill( 1+(nEveSpy%5));
@@ -398,12 +408,11 @@ EEqaSorter::spy( int runNo, int eveId){
   char fname[200];
   sprintf(fname,"eeSpy.%d-%d",runNo,uTm);
   printf("EEqaSorter::spy() spyLog=%s=\n",fname);
-  TString fullName=pathOut+fname;
+  TString fullName=TString(pathOut)+fname;
   printf("fullName=%s=\n",fullName.Data());
   FILE *flog=fopen(fullName.Data(),"w"); 
 
   if(flog==0)return;
-  assert(flog) ; 
   //  flog=stdout; //test
   if(spyMode!=3)fprintf(flog,"\n\n THIS IS TEST - IGNORE \n\n      Jan\n\n");
   fprintf(flog,"BNL=%s" ,ctime((const time_t *)&uTm));
@@ -436,7 +445,7 @@ EEqaSorter::spy( int runNo, int eveId){
 
   if(nBad>0) printf(" EE-SPY  ALARMING , logFile=%s-%d nBad=%d\n",fname,nBad,nBad);
   if(nBad>0 &&spyMode!=3 ) printf("\7\7n"); 
-  sprintf(txt,"%s/macros/eeSpy.sh  %s-%d %d %d&",pathInp.Data(),fname,nBad,nBad,spyMode);
+  sprintf(txt,"%s/macros/eeSpy.sh  %s-%d %d %d&",pathInp,fname,nBad,nBad,spyMode);
   if(nBad>0 && nMail<3 && lastNbad!=nBad ) {
     nMail++;
     system(txt);
@@ -447,6 +456,9 @@ EEqaSorter::spy( int runNo, int eveId){
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.9  2009/02/24 04:07:45  ogrebeny
+// Fixed part of the trigger histograms
+//
 // Revision 1.8  2009/02/14 03:16:52  ogrebeny
 // Updated some histo titles. Removed unnecessary histo Clone() and Delete().
 //

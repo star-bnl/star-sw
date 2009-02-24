@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <assert.h>
-
 #include <TPad.h>
 #include <TH2.h>
 #include <TF1.h>
@@ -11,6 +8,8 @@
 #include <TROOT.h> // for gROOT
 #include <TSystem.h>
 #include <TMath.h>
+
+#include <StMessMgr.h>
 
 const int mxh=64;
 static TH1 *hr[mxh] = {0};
@@ -36,7 +35,7 @@ void eePlotInit() {
 
 //--------------------------------------
 //--------------------------------------
-void GetHisto(FileType &fd,char *name, int i) {
+void GetHisto(FileType &fd,const Char_t *name, int i) {
   // this is very silly trick to avoid memory leak in the online version
     hr[i] = 0;
     h[i] = 0;
@@ -46,19 +45,20 @@ void GetHisto(FileType &fd,char *name, int i) {
     h[i] = hr[i];
 //    h[i]=(TH1*) hr[i]->Clone();
 //    hCleanUp->Add(h[i]);
+    if (!h[i]) {
+	LOG_ERROR << "Histogram not found: " << name << endm;
+    }
 }
 
 //--------------------------------------
 //--------------------------------------
-void 
-eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskFilename){
+void eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskFilename){
   static int first=1;
   static EemcTwMask *twMask=0;
   if(first) { 
   bool twMaskFound=false;
   twMask =new EemcTwMask;
   eePlotInit(); 
-//  const char *maskFile = gEnv->GetValue("OnLine.eemcMask","eemcTwMask.dat");
   twMaskFound=useTwMask(eemcTwMaskFilename, twMask); 
 
   first=0;
@@ -113,7 +113,7 @@ eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskFilena
     
   }
   //  defStyle->cd(); // retun to default style
- printf("JB panel=%d page=%d done\n",panel,page);
+ LOG_DEBUG << "JB panel=" << panel << " page=" << page << " done" << endm;
  
 }
 
@@ -134,14 +134,12 @@ void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
   TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);  
   c->Draw();  c->cd();
   c->Divide(2,2);
-  char *name1[]={"JPpedZoom","JPtotCor","JPtotFreq","JPpedHot"};
-  char *name2[]={"JPpedZoom","JPsumTh3","JPtotFreq","xx"}; 
-  //printf("m=%p\n",m);
-  char **name=name1;
+  Char_t *name1[]={"JPpedZoom","JPtotCor","JPtotFreq","JPpedHot"};
+  Char_t *name2[]={"JPpedZoom","JPsumTh3","JPtotFreq","xx"}; 
+  Char_t **name=name1;
   if(m==0) name=name2; // dirty trick, JB
   int i;
   for(i=0;i<4;i++) {
-    // printf("%d %s\n",i,name[i]);
     GetHisto(fd,name[i],i);
     if( h[i]==0) continue;
     c->cd(1+i);
@@ -165,26 +163,24 @@ void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
     H4jpHot->Reset(); // should be here, but online works w/o it 
     
     int cr;
-    char tit[100];
+    TString tit;
     for(cr=1;cr<6;cr++) {
-      sprintf(tit,"cr%dHot",cr);
-      GetHisto(fd,tit,4+cr);
+      tit = Form("cr%dHot",cr);
+      GetHisto(fd,tit.Data(),4+cr);
       TH1F * hx=( TH1F *)h[4+cr];    
       if (!hx) continue;
       if(hx->Integral()<=50 ) continue;
       if(hx->GetRMS()<=2.)    continue;
       hx->Fit("pol0","0Q");
       TF1 * ff=hx->GetFunction("pol0");
-      // assert(ff);
       float yM=ff->GetParameter(0);
-      //  printf("fit(%s) yM=%f\n",hx->GetName(),yM);
       
       int nb=hx->GetNbinsX();
       int k;
       for(k=1;k<=nb;k++){
 	if(hx->GetBinContent(k)<10*yM) continue;
 	if(m->crCh[cr-1][k-1]) continue; // ignore masked channels
-	printf(" hot cr=%d ch=%d val=%f\n",cr,k-1,hx->GetBinContent(k));
+	LOG_DEBUG << " hot cr=" << cr << " ch=" << (k - 1) << " val=" << hx->GetBinContent(k) << endm;
 	H4jpHot->Fill(cr);
       }
     }
@@ -207,10 +203,10 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
 
   //  if(c2) delete c2; // to avoid memory leak, breaks in online
 
-  char *nameT[]={"ETowHealth","ETowHeadCorr","ETowOFF","ETowN256","ETowOFFid","ETowGhost","ETowCorrBit"};
-  char *nameE[]={"ESmdHealth","ESmdHeadCorr","ESmdOFF","ESmdN256","ESmdOFFid","ESmdGhost","ESmdCorrBit"};
+  Char_t *nameT[]={"ETowHealth","ETowHeadCorr","ETowOFF","ETowN256","ETowOFFid","ETowGhost","ETowCorrBit"};
+  Char_t *nameE[]={"ESmdHealth","ESmdHeadCorr","ESmdOFF","ESmdN256","ESmdOFFid","ESmdGhost","ESmdCorrBit"};
 
-  char **name=nameT;
+  Char_t **name=nameT;
   float y1=0.3;
   int n1=6;  
   if(es==2) {
@@ -226,7 +222,6 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
   c2->Divide(2,n1/2);
   
   for(i=0;i<n1;i++) {
-    // printf("%d %s\n",i,name[i]);
     GetHisto(fd,name[i],i);
     if( h[i]==0) continue;
     c2->cd(1+i);
@@ -274,11 +269,11 @@ void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m) {
   // raw tower crates 1-6
   //  ee2Style->cd(); 
 
-  char tit[100];
+  TString tit;
   c->Divide(3,2);
   int i;
   for(i=0;i<6;i++) {
-    sprintf(tit,"cr%d",i+1);
+    tit = Form("cr%d",i+1);
     GetHisto(fd,tit,i);
     if (h[i]) {
 	c->cd(i+1);
@@ -298,14 +293,12 @@ void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m) {
 
 void eeFreq(FileType fd, TPad *c, EemcTwMask *m) {
   const int nh=4;
-  char *name[nh]={"TowHits","Pre1Hits","Pre2Hits","PostHits"};
+  Char_t *name[nh]={"TowHits","Pre1Hits","Pre2Hits","PostHits"};
   int i;
   c->Divide(1,4);
   for(i=0;i<nh;i++) {
     GetHisto(fd,name[i],i);
-    //printf("i=%d =%s= p=%p\n",i,name[i],h[i]);
     if(h[i]==0) continue;
-    // printf("name=%s=\n",h[i]->GetName());
     c->cd(1+i);
     gPad->SetLogz(0);
     h[i]->Draw("colz");
@@ -324,7 +317,7 @@ void eeFreq(FileType fd, TPad *c, EemcTwMask *m) {
 void eeDaqTwHit(FileType fd, TPad *c) {
   const int nh=4;
 
-  char *name[nh]={"HTow","HPre1","HPre2","HPost"};
+  Char_t *name[nh]={"HTow","HPre1","HPre2","HPost"};
 
   int i;
 
@@ -344,15 +337,15 @@ void eeDaqTwHit(FileType fd, TPad *c) {
 
 //--------------------------------------
 //--------------------------------------
-void eeMany1D(FileType fd, TPad *c, char *core, int nh, int nx, int ny) {
+void eeMany1D(FileType fd, TPad *c, const Char_t *core, int nh, int nx, int ny) {
   int linLog=1; 
-  char tit[100];
+  TString tit;
   c->Divide(nx,ny);
   
   int i;
 
   for(i=0;i<nh;i++) {
-    sprintf(tit,"%s%d",core,i+1);
+    tit = Form("%s%d",core,i+1);
     GetHisto(fd,tit,i);
     if (h[i]) {
         c->cd(i+1);
@@ -373,10 +366,10 @@ void eeDaqTwHot(FileType fd, TPad *c, EemcTwMask *m) {
   int i;
   float ymax=2;
   
-  char tit[100];
+  TString tit;
   c->Divide(1,ncr);
   for(i=0;i<ncr;i++) {
-    sprintf(tit,"cr%dHot",i+1);
+    tit = Form("cr%dHot",i+1);
     GetHisto(fd,tit,i);
     if (h[i]) {
 	c->cd(i+1);
@@ -410,11 +403,11 @@ void eeDaqTwHot(FileType fd, TPad *c, EemcTwMask *m) {
 void eeDaqMapmtCr(FileType fd, TPad *c,int cr1) {
   //raw  mapmt crates 84-91 or 92-99 
   int cr;
-  char tit[100];
+  TString tit;
   c->Divide(4,2);
   for(cr=cr1;cr<=cr1+7;cr++) {
     int i=cr-cr1;
-    sprintf(tit,"cr%d",cr);
+    tit = Form("cr%d",cr);
     GetHisto(fd,tit,i);
     if (h[i]) {
 	c->cd(cr-cr1+1);
@@ -430,9 +423,9 @@ void eeDaqMapmtCr(FileType fd, TPad *c,int cr1) {
 //--------------------------------------
 //--------------------------------------
 
-void eeDaqSmdA(FileType fd, TPad *c, char *core,char uv){
+void eeDaqSmdA(FileType fd, TPad *c, const Char_t *core,Char_t uv){
  
-  char tit[100];
+  TString tit;
   if( strstr(core,"SmdA")) 
     c->Divide(2,6);
   else
@@ -441,9 +434,8 @@ void eeDaqSmdA(FileType fd, TPad *c, char *core,char uv){
   int sec;
   int i=0;
   for(sec=1;sec<=12;sec++) {
-    sprintf(tit,"%s%d%c",core,sec,uv);
+    tit = Form("%s%d%c",core,sec,uv);
     GetHisto(fd,tit,i);
-    // printf("i=%d =%s= p=%p\n",i,tit,h[i]);
     if( h[i]==0) continue;    
     c->cd(i+1);
     h[i]->Draw();
@@ -491,13 +483,12 @@ void eeDaqMapmtStat(FileType fd, TPad *c) {
 //--------------------------------------
 void eeTrigHanks(FileType fd, TPad *c ) {
 
-  char *name[2]={"dsm0inJPall_HT","dsm0inJPall_TP"};
+  Char_t *name[2]={"dsm0inJPall_HT","dsm0inJPall_TP"};
   c->Divide(1,2);
  
   int i;
   for(i=0;i<2;i++) {
     GetHisto(fd,name[i],i);
-    // printf("aaa%d %s %p\n",i,name[i],h[i]);
     if (h[i]) {
 	c->cd(1+i);
 	gPad->SetLogz(0);
@@ -511,15 +502,15 @@ void eeTrigHanks(FileType fd, TPad *c ) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigDsm0(FileType fd, TPad *c, char *mode ) {
-  char tit[100];
+void eeTrigDsm0(FileType fd, TPad *c, const Char_t *mode ) {
+  TString tit;
   c->Divide(2,3);
   
   float ymax=0;
   int j;
 
   for(j=0;j<6;j++) {
-    sprintf(tit,"dsm0inJP%d_%s",j+1,mode);
+    tit = Form("dsm0inJP%d_%s",j+1,mode);
     c->cd(j+1);
     GetHisto(fd,tit,j);
     if (h[j]) {
@@ -539,9 +530,9 @@ void eeTrigDsm0(FileType fd, TPad *c, char *mode ) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigDsm1(FileType fd, TPad *c, char *mode ) {
-  char tit[100];
-  char *core="dsm1HJP";
+void eeTrigDsm1(FileType fd, TPad *c, const Char_t *mode ) {
+  TString tit;
+  Char_t *core="dsm1HJP";
   int j;
    
   if(mode[0]=='H') 
@@ -553,7 +544,7 @@ void eeTrigDsm1(FileType fd, TPad *c, char *mode ) {
 
   for(j=0;j<12;j++) { 
 
-    sprintf(tit,"%s%d_%s",core,j+1,mode);
+    tit = Form("%s%d_%s",core,j+1,mode);
     GetHisto(fd,tit,j);
     if (h[j]) {
 	c->cd(j+1);
@@ -577,7 +568,7 @@ void eeTrigDsm1(FileType fd, TPad *c, char *mode ) {
 //--------------------------------------
 void eeTrigDsm2HT(FileType fd, TPad *c ) {
 
-  char *name[3]={"dsm2Half1_HTTP","dsm2Half2_HTTP","dsm3_HTTP"};
+  Char_t *name[3]={"dsm2Half1_HTTP","dsm2Half2_HTTP","dsm3_HTTP"};
   c->Divide(2,2);
  
   int i;
@@ -598,26 +589,23 @@ void eeTrigDsm2HT(FileType fd, TPad *c ) {
 
 //--------------------------------------
 //--------------------------------------
-void eeTrigJPsum(FileType fd, TPad *c, char *mode ) {
+void eeTrigJPsum(FileType fd, TPad *c, const Char_t *mode ) {
 
-  char tit[100];
-  char newtitle[500];
+  TString tit;
+  TString newtitle;
  
   c->Divide(2,3);
 
-  char *core="JP";
+  Char_t *core="JP";
   int j;
   for(j=0;j<6;j++) { 
-    sprintf(tit,"%s%d%s",core,j+1,mode);
-    //printf("%s %d\n",tit,j);
+    tit = Form("%s%d%s",core,j+1,mode);
     GetHisto(fd,tit,j); 
     if (h[j]) {
 	c->cd(j+1);
 	int maxbin=h[j]->GetMaximumBin()-1;
-	//printf("max bin = %d\n",maxbin);
-	const char *title=h[j]->GetTitle();
-	sprintf(newtitle,"%s    ped= %d\n",title,maxbin);
-	//printf("%s",newtitle);
+	const Char_t *title=h[j]->GetTitle();
+	newtitle = Form("%s    ped= %d\n",title,maxbin);
 	h[j]->SetTitle(newtitle);
         gPad->SetLogy(0);
 	h[j]->GetXaxis()->SetRange(1,200); //for p-p commnet out and use full range for Au-Au
@@ -633,17 +621,15 @@ void eeTrigJPsum(FileType fd, TPad *c, char *mode ) {
 //--------------------------------------
 void eeTrigJPfreq(FileType fd, TPad *c) {
 
-  char tit[100];
+  TString tit;
  
   c->Divide(2,3);
-  char *core="JPsumTh";
+  Char_t *core="JPsumTh";
   int j;
   for(j=0;j<4;j++) { 
-    sprintf(tit,"%s%d",core,j);
-    //printf("%s %d\n",tit,j);
+    tit = Form("%s%d",core,j);
     GetHisto(fd,tit,j); 
     if (h[j]) {
-	//printf("h=%p\n",h[j]);
 	c->cd(j+1);
         h[j]->Draw();
 	h[j]->SetMinimum(0.);
@@ -652,7 +638,7 @@ void eeTrigJPfreq(FileType fd, TPad *c) {
 
 
   for(j=0;j<2;j++) { 
-    sprintf(tit,"dsm2Half%d_Etot",j+1);
+    tit = Form("dsm2Half%d_Etot",j+1);
     GetHisto(fd,tit,j); 
     if (h[j]) {
 	c->cd(j+5);
@@ -670,17 +656,16 @@ void eeTrigJPfreq(FileType fd, TPad *c) {
 
 //--------------------------------------
 //--------------------------------------
-void  eeTrigAdjJPsum(FileType fd, TPad *c, char *mode ) {
+void  eeTrigAdjJPsum(FileType fd, TPad *c, const Char_t *mode ) {
 
-  char tit[100];
+  TString tit;
  
   c->Divide(2,3);
 
-  char *core="JP";
+  Char_t *core="JP";
   int j;
   for(j=0;j<6;j++) { 
-    sprintf(tit,"%s%d%d%s",core,j+1,((j+1)%6)+1,mode);
-    //printf("%s %d\n",tit,j);
+    tit = Form("%s%d%d%s",core,j+1,((j+1)%6)+1,mode);
     GetHisto(fd,tit,j); 
     if (h[j]) {
 	c->cd(j+1);
@@ -698,18 +683,18 @@ void  eeTrigAdjJPsum(FileType fd, TPad *c, char *mode ) {
 //--------------------------------------
 void eeTrigEtot(FileType fd, TPad *c ) {
 
-  char *nameA[3]={"dsm2E_etot","dsm2B_etot","dsm2BE_etot"};
+  Char_t *nameA[3]={"dsm2E_etot","dsm2B_etot","dsm2BE_etot"};
   c->Divide(1,3);
  
   int i;
   int k=0;
-  char name[20];
+  TString name;
   for(i=0;i<3;i++) {
     c->cd(1+i);
     gPad->SetLogy(0);
     int ii;
     for(ii=0;ii<=1;ii++) {  
-      sprintf(name,"%s%d",nameA[i],ii);
+      name = Form("%s%d",nameA[i],ii);
       GetHisto(fd,name,k);
       if (h[k]) {
 	if(ii==0 ) {
@@ -741,17 +726,16 @@ void eeTrigEtot(FileType fd, TPad *c ) {
   
 //--------------------------------------
 //--------------------------------------
-void  eeTrigAdjJPcor(FileType fd, TPad *c, char *mode ) {
+void  eeTrigAdjJPcor(FileType fd, TPad *c, const Char_t *mode ) {
 
-  char tit[100];
+  TString tit;
  
   c->Divide(3,2);
 
-  char *core="JP";
+  Char_t *core="JP";
   int j;
   for(j=0;j<6;j++) { 
-    sprintf(tit,"%s%d%d%s",core,j+1,((j+1)%6)+1,mode);
-    //printf("%s %d\n",tit,j);
+    tit = Form("%s%d%d%s",core,j+1,((j+1)%6)+1,mode);
     GetHisto(fd,tit,j); 
     if (h[j]) {
 	c->cd(j+1);
@@ -765,11 +749,11 @@ void  eeTrigAdjJPcor(FileType fd, TPad *c, char *mode ) {
 
 //--------------------------------------
 //--------------------------------------
-bool  useTwMask(const char *fname, EemcTwMask *m) {
+bool  useTwMask(const Char_t *fname, EemcTwMask *m) {
   const int mx=1000;
-  char buf[mx];
+  Char_t buf[mx];
   
-  printf("EEqaPresenter::useTwMask(\'%s') ...\n",fname);
+  LOG_INFO << "EEqaPresenter::useTwMask(\"" << fname << "\") ..." << endm;
   
   FILE * fd=fopen(fname,"r");
   int nok=0;
@@ -778,12 +762,11 @@ bool  useTwMask(const char *fname, EemcTwMask *m) {
   TString myTxt="ETOW masked (cr-ch-name): ";
   if(fd==0) goto abandon;
   while (1) {
-    char * ret=fgets(buf,mx,fd);
+    Char_t * ret=fgets(buf,mx,fd);
     if(ret==0) break ; //EOF 
     if(buf[0]=='#') continue; // skip comment
     if(buf[0]=='\n') continue; // skip empty lines
-    // printf("uu=%s=%d\n",buf,ret);
-    char name[100]; 
+    Char_t name[100]; 
     int cr,ch;
     int sec,isub,jeta,jphi;
     int  n=sscanf(buf,"%d %d %s",&cr, &ch, name);
@@ -794,7 +777,7 @@ bool  useTwMask(const char *fname, EemcTwMask *m) {
     isub=name[3]-'A';
     jeta=atoi(name+4);
     jphi=(sec-1)*5+isub;
-    // printf("%s sec=%d isub=%d jeta=%d, jphi=%d\n",name, sec,isub,jeta,jphi);
+    // LOG_DEBUG << Form("%s sec=%d isub=%d jeta=%d, jphi=%d\n",name, sec,isub,jeta,jphi) << endm;
 
     m->crCh[cr-1][ch]=1;
     int jj=m->crG[cr-1].GetN();
@@ -804,12 +787,11 @@ bool  useTwMask(const char *fname, EemcTwMask *m) {
 
     jj=m->phiG.GetN();
     m->phiG.SetPoint(jj,jphi,jeta);
-    char tt[100];
-    sprintf(tt,"%d-%d-%s,  ",cr,ch,name);  
+    TString tt = Form("%d-%d-%s,  ",cr,ch,name);  
     myTxt+=tt;
     nok++;
     nM++;
-    printf("mask ETOW cr=%d ch=%d =%s=\n",cr,ch,name);
+    LOG_DEBUG << Form("mask ETOW cr=%d ch=%d =%s=\n",cr,ch,name) << endm;
     if(nM%4==0) {
        m->txtH->AddText(myTxt);
        myTxt=" ";
@@ -817,7 +799,7 @@ bool  useTwMask(const char *fname, EemcTwMask *m) {
   }
   m->nMask=nok;
   m->txtH->AddText(myTxt);  m->txtH->AddText("--");
-  printf(" got %d masked towers\n",nok); 
+  LOG_INFO << " got " << nok << " masked towers" << endm; 
 
   int i;
   for(i=0;i<6;i++){
@@ -833,7 +815,7 @@ bool  useTwMask(const char *fname, EemcTwMask *m) {
  abandon: // any error has happened (this is a new approach for me, JB)
   m->clear();
   m->txtH->AddText("List of ETOW hot towers not found");  m->txtH->AddText("--");
-  printf(" EEqaPresenter::useTwMask() FAILED\n");
+  LOG_ERROR << " EEqaPresenter::useTwMask() FAILED" << endm;
   return 0;
 }
 
@@ -872,6 +854,6 @@ void eeJpQaMinMax(TH1 *hh) {
     if(yMax<=0) yMax=1;    
     r=yMin/yMax;
     er=r*TMath::Sqrt(1/yMax + 1/yMin);
-    printf("JP min/max=%.2f +/- %.2f  (min=%.0f max=%.0f) \"%s\"\n",r,er,yMin, yMax,hh->GetTitle());
-    printf("#JP %.2f %.2f %.0f %.0f :%s\n",r,er,yMin, yMax,hh->GetTitle());
+    LOG_DEBUG << Form("JP min/max=%.2f +/- %.2f  (min=%.0f max=%.0f) \"%s\"\n",r,er,yMin, yMax,hh->GetTitle()) << endm;
+    LOG_DEBUG << Form("#JP %.2f %.2f %.0f %.0f :%s\n",r,er,yMin, yMax,hh->GetTitle()) << endm;
 }

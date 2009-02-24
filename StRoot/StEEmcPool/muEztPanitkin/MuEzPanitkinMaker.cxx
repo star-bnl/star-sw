@@ -1,6 +1,6 @@
 // *-- Author : Rene Fatemi
 // 
-// $Id: MuEzPanitkinMaker.cxx,v 1.5 2009/02/04 20:33:27 ogrebeny Exp $
+// $Id: MuEzPanitkinMaker.cxx,v 1.6 2009/02/24 04:07:46 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -72,9 +72,9 @@ Int_t MuEzPanitkinMaker::Init(){
   StEEmcDb *eeDb = (StEEmcDb*)this->GetDataSet("StEEmcDb");
   assert(eeDb);
 
-  qaSort=new EEqaSorter(HList,eeDb);
-  qaSort->initHisto(1000,1000); // nBins, maxAdc
-  qaSort->initSpy(5,1); // time constant/sec & mode,   //mode: 1=balewski@rcf, 2=eemc@evp,3=operator@evp 
+  qaSort=new EEqaSorter(eeDb);
+  qaSort->initHisto(HList, 1000, 1000); // nBins, maxAdc
+  qaSort->initSpy(HList, 5, 1); // time constant/sec & mode,   //mode: 1=balewski@rcf, 2=eemc@evp,3=operator@evp 
   qaSort->setPath("StRoot/StEEmcPool/muEztPanitkin/","/star/u/balewski/0x/defaultPanitkinOut/");
 
   if(pixlesOn) {
@@ -180,7 +180,7 @@ Int_t MuEzPanitkinMaker::Make(){
     rawPixels->sort(eESmd);
   }
   
-  if(eeSpyOn) qaSort->spy(eHead->getRunNumber(), eHead->getEventNumber());
+  if(eeSpyOn) qaSort->spy(eETow, eESmd, eHead->getRunNumber(), eHead->getEventNumber());
 
 
   return kStOK;
@@ -188,6 +188,9 @@ Int_t MuEzPanitkinMaker::Make(){
 
 //---------------------------------------------------
 // $Log: MuEzPanitkinMaker.cxx,v $
+// Revision 1.6  2009/02/24 04:07:46  ogrebeny
+// Fixed part of the trigger histograms
+//
 // Revision 1.5  2009/02/04 20:33:27  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //

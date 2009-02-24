@@ -63,13 +63,12 @@ EEMCPlots::EEMCPlots(TObjArray *list, const char *eemcDbDump, const char *eemcPa
   eeDb->setSectors(1, 12);
   eeDb->setAsciiDatabase(eemcDbDump); // use ASCII dump as input
 
-  if (!list) list = new TObjArray(0);
-  eeqa = new EEqaSorter(list, eeDb); // creates EEMC related histos
+  eeqa = new EEqaSorter(eeDb); // creates EEMC related histos
   eeqa->setPath(eemcPathIn, eemcPathOut);
-  eeqa->initHisto(200,1000); // nBins, maxAdc
+  eeqa->initHisto(list, 200,1000); // nBins, maxAdc
 
   //Akio said it is not Ok for Run 9
-  //eeqa->initSpy(60,3); // time constant/sec & mode,   //mode: 1=balewski@rcf,3=operator@evp
+  //eeqa->initSpy(list, 60, 3); // time constant/sec & mode,   //mode: 1=balewski@rcf,3=operator@evp
 }
 //-------------------------------------------------------------------
 EEMCPlots::~EEMCPlots() {
@@ -84,7 +83,7 @@ void EEMCPlots::clear() {
 }
 //-------------------------------------------------------------------
 void EEMCPlots::saveHistograms(TFile *hfile) {
-    if (eeqa) eeqa->saveHistoAdd(hfile);
+    if (eeqa) eeqa->saveHisto(hfile);
 }
 //-------------------------------------------------------------------
 void EEMCPlots::processEvent( char *datap
@@ -99,28 +98,7 @@ void EEMCPlots::processEvent( char *datap
 #else
     int ret = emcReader(datap);
 #endif
-/*
-    if (!dsm0inp || !dsm1inp || !dsm2inp || !dsm3inp) {
-#ifdef NEW_DAQ_READER
-	daq_dta *dd_trg = rdr ? (rdr->det("trg")->get("legacy")) : 0;
-        if (dd_trg) while (dd_trg->iterate()) {
-    	    trg_t *d = (trg_t *) dd_trg->Void;
-    	    if (d) {
-        	dsm0inp = &(d->EEMC[0]);
-    		dsm1inp = &(d->EEMC_l1[0]);
-        	dsm2inp = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.EMC) : 0);
-        	dsm3inp = ((unsigned short*)d->trg_sum ? (((TrgSumData*)d->trg_sum)->DSMdata.lastDSM) : 0);
-            }
-	}
-#else
-	trgReader(datap);
-	dsm0inp = ((unsigned char*)&trg.EEMC);
-	dsm1inp = ((unsigned short*)trg.EEMC_l1);
-	dsm2inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.EMC) : 0);
-	dsm3inp = ((unsigned short*)trg.trg_sum ? (((TrgSumData*)trg.trg_sum)->DSMdata.lastDSM) : 0);
-#endif
-    }
-*/
+
 #ifdef NEW_DAQ_READER
     unsigned int runId = rdr->run;
     unsigned int token = rdr->token;
@@ -137,7 +115,7 @@ void EEMCPlots::processEvent( char *datap
 	Tonko2Ezt ezt(datap);
 	eeqa->clear();
 	eeqa->sort(&ezt.eETow, &ezt.eESmd, runId, token, TRG_VERSION, dsm0inp, dsm1inp, dsm2inp, dsm3inp);
-        if (isEvp) eeqa->spy(runId, eventId);
+        //if (isEvp) eeqa->spy(&ezt.eETow, &ezt.eESmd, runId, eventId);
     }
 }
 //-------------------------------------------------------------------

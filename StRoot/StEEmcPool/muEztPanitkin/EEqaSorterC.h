@@ -1,6 +1,6 @@
 // \class  EEqaSorterC
 // \author Jan Balewski, Hal Spinka
-// $Id: EEqaSorterC.h,v 1.3 2009/02/04 20:33:27 ogrebeny Exp $
+// $Id: EEqaSorterC.h,v 1.4 2009/02/24 04:07:46 ogrebeny Exp $
 
 #ifndef EEqaSorterC_h
 #define EEqaSorterC_h
@@ -17,29 +17,31 @@ class StEEmcDb;
 
 class EEqaSorterC :public TObject{ 
 
- private:
+private:
   enum {mxh=4};
   TH2F *h2D[mxh];
-  TH1F * hMult[mxh];
+  TH1F *hMult[mxh];
   TH2F *hMAPMT;
   TH1F *hSmd[MaxSectors][MaxSmdPlains];   // SMD hits by plane
   TH1F *hnHSmd[MaxSectors][MaxSmdPlains];  // frequency distr. of smd hits
 
   int adcThrTw,adcThrPrs,adcThrPost,adcThrSmd; // tresholds for frequency plots
 
-  TObjArray *HList;
-  EztEmcRawData  *eETow;
-  EztEmcRawData  *eESmd;
-  StEEmcDb  *eeDb;
+  StEEmcDb  *eeDb; //!
 
- public:
-  EEqaSorterC( TObjArray*L,StEEmcDb*dbx);
-  void initHisto();
+public:
+  EEqaSorterC(StEEmcDb*dbx);
+  virtual ~EEqaSorterC();
+
+  void initHisto(TObjArray *HList);
   void initRun();
-  void sort(EztEmcRawData  *t,  EztEmcRawData  *s, int ver );
+  void sort(const EztEmcRawData *t, const EztEmcRawData *s, int ver);
 
-  void sortTower();
-  void sortMapmt(int ver);
+  void sortTower(const EztEmcRawData *t);
+  void sortMapmt(const EztEmcRawData *s, int ver);
+
+    void saveHisto(TFile *f) const;
+    void resetHisto();
 
    ClassDef(EEqaSorterC,1) 
 };
@@ -47,6 +49,9 @@ class EEqaSorterC :public TObject{
 #endif
 
 // $Log: EEqaSorterC.h,v $
+// Revision 1.4  2009/02/24 04:07:46  ogrebeny
+// Fixed part of the trigger histograms
+//
 // Revision 1.3  2009/02/04 20:33:27  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //
