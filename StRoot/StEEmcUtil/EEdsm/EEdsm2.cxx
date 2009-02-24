@@ -52,7 +52,7 @@ EEdsm2::setWord(int ch, ushort val){
 //--------------------------------------------------
 //--------------------------------------------------
 ushort  
-EEdsm2::getJPthr(int jp) { //used for adjacent jet patch
+EEdsm2::getJPthr(int jp) const { //used for adjacent jet patch
   assert(jp>=0 && jp<6);
   assert(mYear<2006);
   int ch= jp/3;
@@ -67,7 +67,7 @@ EEdsm2::getJPthr(int jp) { //used for adjacent jet patch
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm2::get3JPHTthr(int i3p) { // ??2006
+EEdsm2::get3JPHTthr(int i3p) const { // ??2006
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   ushort val=data[ch]>>14;
@@ -78,7 +78,7 @@ EEdsm2::get3JPHTthr(int i3p) { // ??2006
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm2::getHTTPthr(int i3p) { //selected HT x TP threshold passed?Y/N
+EEdsm2::getHTTPthr(int i3p) const { //selected HT x TP threshold passed?Y/N
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
@@ -89,7 +89,7 @@ EEdsm2::getHTTPthr(int i3p) { //selected HT x TP threshold passed?Y/N
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm2::getTPthr(int i3p) { //selected TP threshold passed?Y/N
+EEdsm2::getTPthr(int i3p) const { //selected TP threshold passed?Y/N
   int ch=i3p;
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
@@ -100,7 +100,7 @@ EEdsm2::getTPthr(int i3p) { //selected TP threshold passed?Y/N
 //--------------------------------------------------
 //--------------------------------------------------
 ushort 
-EEdsm2::get3JPsum(int i3p) {// Etot out of each layer 1 DSM 
+EEdsm2::get3JPsum(int i3p) const {// Etot out of each layer 1 DSM 
 
   int ch= i3p;
   assert(ch>=0 && ch<nc);
@@ -113,7 +113,7 @@ EEdsm2::get3JPsum(int i3p) {// Etot out of each layer 1 DSM
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm2::print( int k) {
+EEdsm2::print( int k) const {
   printf("EEdsm2:: INPUTS,  year=%d  \n",mYear); 
   int i;
 
@@ -147,6 +147,9 @@ EEdsm2::print( int k) {
 }
  
 // $Log: EEdsm2.cxx,v $
+// Revision 1.4  2009/02/24 03:56:19  ogrebeny
+// Corrected const-ness
+//
 // Revision 1.3  2006/04/05 18:34:10  balewski
 // new DSM bit assignment in 2006,
 // possibly lost backward compatibility

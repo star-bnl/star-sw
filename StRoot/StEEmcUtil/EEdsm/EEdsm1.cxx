@@ -58,7 +58,7 @@ void EEdsm1::setWord(int ch, ushort val){
 //--------------------------------------------------
 //--------------------------------------------------
 int 
-EEdsm1::getInp16bit(int ch) { 
+EEdsm1::getInp16bit(int ch) const { 
   assert(ch>=0 && ch<nc);
   ushort val=data[ch];
   return val;
@@ -67,7 +67,7 @@ EEdsm1::getInp16bit(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int 
-EEdsm1::getInpHT2bit(int ch) { 
+EEdsm1::getInpHT2bit(int ch) const { 
   assert(ch>=0 && ch<nc);
   ushort val=(data[ch]& 0xfff) >>10;
   return val;
@@ -81,7 +81,7 @@ b) HTxTP bits for highest threshold passed:  repeat (a), but now for bits 14-15
 //--------------------------------------------------
 //--------------------------------------------------
 int 
-EEdsm1::getInpTP2bit(int ch) { 
+EEdsm1::getInpTP2bit(int ch) const { 
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
   ushort val=data[ch] >>12;
@@ -91,7 +91,7 @@ EEdsm1::getInpTP2bit(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1::getInpHTTP2bit(int ch) { 
+EEdsm1::getInpHTTP2bit(int ch) const { 
   assert(ch>=0 && ch<nc);
   assert(mYear>=2006);
   ushort val=data[ch] >>14;
@@ -101,7 +101,7 @@ EEdsm1::getInpHTTP2bit(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1::getInpTPsum(int ch) { 
+EEdsm1::getInpTPsum(int ch) const { 
   assert(ch>=0 && ch<nc);
 
   /* The first board
@@ -212,7 +212,7 @@ EEdsm1::compute() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm1::print( int k ) {
+EEdsm1::print( int k ) const {
   printf("EEdsm1:: print() INPUTS,  year=%d  \n",mYear);
   int i;
 
@@ -243,6 +243,9 @@ EEdsm1::print( int k ) {
 }
  
 // $Log: EEdsm1.cxx,v $
+// Revision 1.5  2009/02/24 03:56:18  ogrebeny
+// Corrected const-ness
+//
 // Revision 1.4  2007/08/17 01:15:36  balewski
 // full blown Endcap trigger simu, by Xin
 //

@@ -1,7 +1,7 @@
 #ifndef EEdsm3_h
 #define EEdsm3_h
 /**************************************************************
- * $Id: EEdsm3.h,v 1.4 2007/08/17 01:15:36 balewski Exp $
+ * $Id: EEdsm3.h,v 1.5 2009/02/24 03:56:19 ogrebeny Exp $
  **************************************************************/
 typedef unsigned short ushort;
 
@@ -15,24 +15,24 @@ class EEdsm3  {
   
   EEdsm3();
   virtual ~EEdsm3();
-  void  print(int k=0);
+  void  print(int k=0) const;
   void  clear();
   void  setWord(int ch, ushort val);
   void  setYear(int y) { mYear=y;}
   int   getNc(){return nc;}
   
-  ushort getBarreJPthr2bit();                
-  ushort getBarreHTthr2bit();                                     
-  ushort getBarreEsumThr1bit();                         
-  ushort getJpsi1bit();                       
-  ushort getBarreHTTPthr1bit(); 
-  ushort getBarreTPthr1bit(); 
-  ushort getEndcapJPthr2bit();                    
-  ushort getEndcapHTthr2bit();
-  ushort getEndcapEsumthr1bit();
-  ushort getEndcapHTTPthr1bit();
-  ushort getEndcapTPthr1bit();
-  ushort getEtotThr1bit();
+  ushort getBarreJPthr2bit() const;                
+  ushort getBarreHTthr2bit() const;                                     
+  ushort getBarreEsumThr1bit() const;                         
+  ushort getJpsi1bit() const;                       
+  ushort getBarreHTTPthr1bit() const; 
+  ushort getBarreTPthr1bit() const; 
+  ushort getEndcapJPthr2bit() const;                    
+  ushort getEndcapHTthr2bit() const;
+  ushort getEndcapEsumthr1bit() const;
+  ushort getEndcapHTTPthr1bit() const;
+  ushort getEndcapTPthr1bit() const;
+  ushort getEtotThr1bit() const;
   
 };
 #endif
@@ -40,6 +40,9 @@ class EEdsm3  {
 
 /* container for STAR trigger data
  * $Log: EEdsm3.h,v $
+ * Revision 1.5  2009/02/24 03:56:19  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.4  2007/08/17 01:15:36  balewski
  * full blown Endcap trigger simu, by Xin
  *

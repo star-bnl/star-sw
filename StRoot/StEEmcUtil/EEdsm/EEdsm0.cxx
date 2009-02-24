@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEdsm0.cxx,v 1.2 2007/08/17 01:15:35 balewski Exp $
+ * $Id: EEdsm0.cxx,v 1.3 2009/02/24 03:56:18 ogrebeny Exp $
  **************************************************************/
 
 #include <iostream>
@@ -65,7 +65,7 @@ EEdsm0::setInp12bit(int ch, short val){
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm0::getInp12bit(int ch){
+EEdsm0::getInp12bit(int ch) const {
   assert(ch>=0 && ch<nc);
   return  value[ch];
 }
@@ -102,7 +102,7 @@ EEdsm0::unpack() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm0::print( int k) {
+EEdsm0::print( int k) const {
   printf("EEdsm0 type=%d  year=%d \n",type,mYear);
 
   int i;
@@ -237,6 +237,9 @@ int EEdsm0 :: maxTP() {
 
 /*
  * $Log: EEdsm0.cxx,v $
+ * Revision 1.3  2009/02/24 03:56:18  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.2  2007/08/17 01:15:35  balewski
  * full blown Endcap trigger simu, by Xin
  *

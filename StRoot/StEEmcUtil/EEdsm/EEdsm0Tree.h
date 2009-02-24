@@ -1,7 +1,7 @@
 #ifndef EEdsm0Tree_h
 #define EEdsm0Tree_h
 /**************************************************************
- * $Id: EEdsm0Tree.h,v 1.1 2007/08/17 01:15:36 balewski Exp $
+ * $Id: EEdsm0Tree.h,v 1.2 2009/02/24 03:56:18 ogrebeny Exp $
  * Emulates functionality of  Endcap DSM0-tree
  **************************************************************/
 #include <stdlib.h> 
@@ -29,21 +29,21 @@ class EEdsm0Tree  {  // DSM0 tree emulators
   EEdsm0Tree(char *);
   ~EEdsm0Tree();
   void  setYear(int y, int*HTth, int*TPth);
-  void  print(int k=0);
+  void  print(int k=0) const;
   void  clear();
   //... input
   void setInp12bit(int HankCh, short val); // HT+TPsum from one FEE TP  
-  int  getInp12bit(int HankCh);// HT+TPsum from one FEE TP  
-  int  getInpHT6bit(int HankCh){ return getInp12bit(HankCh) & 0x3f; }
-  int  getInpTP6bit(int HankCh){ return getInp12bit(HankCh) >>6; }
+  int  getInp12bit(int HankCh) const;// HT+TPsum from one FEE TP  
+  int  getInpHT6bit(int HankCh) const { return getInp12bit(HankCh) & 0x3f; }
+  int  getInpTP6bit(int HankCh) const { return getInp12bit(HankCh) >>6; }
   void compute();
 
   //... output
-  int getOutTPsum(int ch /*0...11*/) { return ee0outTPsum[ch];} // halfPatches, for both DSM1 boards
-  int getOutHT2bit(int ch /*0...11*/) { return ee0outHT2bit[ch];} // halfPatches, for both DSM1 boards
-  int getOutTP2bit(int ch /*0...11*/) { return ee0outTP2bit[ch];} // halfPatches, for both DSM1 boards
-  int getOutHTTP2bit(int ch /*0...11*/) { return ee0outHTTP2bit[ch];} // halfPatches, for both DSM1 boards
-  int getOut16bit(int ch /*0...11*/) { return ee0out16bit[ch];} // halfPatches, for both DSM1 boards
+  int getOutTPsum(int ch /*0...11*/) const { return ee0outTPsum[ch];} // halfPatches, for both DSM1 boards
+  int getOutHT2bit(int ch /*0...11*/) const { return ee0outHT2bit[ch];} // halfPatches, for both DSM1 boards
+  int getOutTP2bit(int ch /*0...11*/) const { return ee0outTP2bit[ch];} // halfPatches, for both DSM1 boards
+  int getOutHTTP2bit(int ch /*0...11*/) const { return ee0outHTTP2bit[ch];} // halfPatches, for both DSM1 boards
+  int getOut16bit(int ch /*0...11*/) const { return ee0out16bit[ch];} // halfPatches, for both DSM1 boards
 
 };
 
@@ -51,6 +51,9 @@ class EEdsm0Tree  {  // DSM0 tree emulators
 
 /*
  * $Log: EEdsm0Tree.h,v $
+ * Revision 1.2  2009/02/24 03:56:18  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.1  2007/08/17 01:15:36  balewski
  * full blown Endcap trigger simu, by Xin
  *

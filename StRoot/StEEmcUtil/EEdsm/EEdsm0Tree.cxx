@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEdsm0Tree.cxx,v 1.1 2007/08/17 01:15:35 balewski Exp $
+ * $Id: EEdsm0Tree.cxx,v 1.2 2009/02/24 03:56:18 ogrebeny Exp $
  **************************************************************/
 
 #include <iostream>
@@ -57,7 +57,7 @@ EEdsm0Tree::setInp12bit(int HankCh, short val){
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm0Tree::getInp12bit(int HankCh){
+EEdsm0Tree::getInp12bit(int HankCh) const {
   int ibr=HankCh/10; // board #
   assert(ibr>=0 && ibr<Nee0);
   int ch=HankCh%10;  
@@ -108,7 +108,7 @@ EEdsm0Tree::compute() {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm0Tree::print( int k) {
+EEdsm0Tree::print( int k) const {
   printf("EEdsm0Tree(%s) \n",name);
 
   int i;
@@ -133,6 +133,9 @@ EEdsm0Tree::print( int k) {
  
 /*
  * $Log: EEdsm0Tree.cxx,v $
+ * Revision 1.2  2009/02/24 03:56:18  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.1  2007/08/17 01:15:35  balewski
  * full blown Endcap trigger simu, by Xin
  *

@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEdsm1Tree.cxx,v 1.1 2007/08/17 01:15:36 balewski Exp $
+ * $Id: EEdsm1Tree.cxx,v 1.2 2009/02/24 03:56:18 ogrebeny Exp $
  **************************************************************/
 
 #include <iostream>
@@ -102,7 +102,7 @@ EEdsm1Tree::compute() {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree:: getInpTPsum(int ch) {
+EEdsm1Tree:: getInpTPsum(int ch) const {
   // ch=halfPatches 0...11, for both DSM1 boards
   return ee1[ch/6].getInpTPsum(ch%6);
 }
@@ -111,7 +111,7 @@ EEdsm1Tree:: getInpTPsum(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getInpHT2bit(int ch) {
+EEdsm1Tree::getInpHT2bit(int ch) const {
   // ch=halfPatches 0...11, for both DSM1 boards
  return  ee1[ch/6].getInpHT2bit(ch%6);
 }
@@ -120,7 +120,7 @@ EEdsm1Tree::getInpHT2bit(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getInpTP2bit(int ch) {
+EEdsm1Tree::getInpTP2bit(int ch) const {
   // ch=halfPatches 0...11, for both DSM1 boards
  return  ee1[ch/6].getInpTP2bit(ch%6);
 }
@@ -129,7 +129,7 @@ EEdsm1Tree::getInpTP2bit(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getInpHTTP2bit(int ch) {
+EEdsm1Tree::getInpHTTP2bit(int ch) const {
   // ch=halfPatches 0...11, for both DSM1 boards
  return  ee1[ch/6].getInpHTTP2bit(ch%6);
 }
@@ -137,7 +137,7 @@ EEdsm1Tree::getInpHTTP2bit(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getInp16bit(int ch) {
+EEdsm1Tree::getInp16bit(int ch) const {
   // ch=halfPatches 0...11, for both DSM1 boards
  return  ee1[ch/6].getInp16bit(ch%6);
 }
@@ -145,7 +145,7 @@ EEdsm1Tree::getInp16bit(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getOutHT2bit(int ibr) { 
+EEdsm1Tree::getOutHT2bit(int ibr) const { 
   return  ee1[ibr].getOutHT2bit();
 }
 
@@ -153,7 +153,7 @@ EEdsm1Tree::getOutHT2bit(int ibr) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getOutJP2bit(int ibr) { 
+EEdsm1Tree::getOutJP2bit(int ibr) const { 
   return  ee1[ibr].getOutJP2bit();
 }
 
@@ -161,7 +161,7 @@ EEdsm1Tree::getOutJP2bit(int ibr) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getOutTP1bit(int ibr) { 
+EEdsm1Tree::getOutTP1bit(int ibr) const { 
  return  ee1[ibr].getOutTP1bit();
 }
 
@@ -169,21 +169,21 @@ EEdsm1Tree::getOutTP1bit(int ibr) {
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getOutHTTP1bit(int ibr) { 
+EEdsm1Tree::getOutHTTP1bit(int ibr) const { 
  return  ee1[ibr].getOutHTTP1bit();
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getOutEsum5bit(int ibr) { 
+EEdsm1Tree::getOutEsum5bit(int ibr) const { 
  return  ee1[ibr].getOutEsum5bit();
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
 int
-EEdsm1Tree::getOut16bit(int ibr) { 
+EEdsm1Tree::getOut16bit(int ibr) const { 
  return  ee1[ibr].getOut16bit();
 }
 
@@ -191,7 +191,7 @@ EEdsm1Tree::getOut16bit(int ibr) {
 //--------------------------------------------------
 //--------------------------------------------------
 void 
-EEdsm1Tree::print( int k) {
+EEdsm1Tree::print( int k) const {
   printf("EEdsm1Tree(%s) , year=%d  \n",name,mYear);
   
   printf("\n\n----------- level-1 -----------------\n ");
@@ -226,6 +226,9 @@ EEdsm1Tree::print( int k) {
 
 /*
  * $Log: EEdsm1Tree.cxx,v $
+ * Revision 1.2  2009/02/24 03:56:18  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.1  2007/08/17 01:15:36  balewski
  * full blown Endcap trigger simu, by Xin
  *

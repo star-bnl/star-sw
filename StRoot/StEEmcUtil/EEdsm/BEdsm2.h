@@ -1,7 +1,7 @@
 #ifndef BEdsm2_h
 #define BEdsm2_h
 /**************************************************************
- * $Id: BEdsm2.h,v 1.1 2007/08/17 01:15:35 balewski Exp $
+ * $Id: BEdsm2.h,v 1.2 2009/02/24 03:56:18 ogrebeny Exp $
  **************************************************************/
 typedef unsigned short ushort;
 
@@ -17,25 +17,28 @@ class BEdsm2  {
   
   BEdsm2();
   virtual ~BEdsm2();
-  void  print(int k=0);
+  void  print(int k=0) const;
   void  clear();
   void  setWord(int ch, ushort val); 
   void  setYear(int y){mYear=y;}
-  int   getNc(){return nc;} 
-  ushort getJPthr(int jp); // JP # Falk[0-5], out in 2006+
+  int   getNc() const {return nc;} 
+  ushort getJPthr(int jp) const; // JP # Falk[0-5], out in 2006+
   //..... input
-  int getInpHT2bit(int i3p); // i3p #[0,1]
-  int getInpHT2bit_2(int i3p); // i3p #[0,1]
-  int getInpTP1bit(int i3p);  // i3p #[0,1], year2006+, selected TP threshold passing sign
-  int getInpHTTP1bit(int i3p); // i3p #[0,1]
-  int getInpEsum5bit(int i3p); // i3p #[0,1]
-  int getInpJP2bit(int i3p); // i3p #[0,1] 
+  int getInpHT2bit(int i3p) const; // i3p #[0,1]
+  int getInpHT2bit_2(int i3p) const; // i3p #[0,1]
+  int getInpTP1bit(int i3p) const;  // i3p #[0,1], year2006+, selected TP threshold passing sign
+  int getInpHTTP1bit(int i3p) const; // i3p #[0,1]
+  int getInpEsum5bit(int i3p) const; // i3p #[0,1]
+  int getInpJP2bit(int i3p) const; // i3p #[0,1] 
 };
 #endif
 
 
 /* container for STAR trigger data
  * $Log: BEdsm2.h,v $
+ * Revision 1.2  2009/02/24 03:56:18  ogrebeny
+ * Corrected const-ness
+ *
  * Revision 1.1  2007/08/17 01:15:35  balewski
  * full blown Endcap trigger simu, by Xin
  *
