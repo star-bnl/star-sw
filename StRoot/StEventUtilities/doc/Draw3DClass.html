@@ -92,8 +92,21 @@ void Draw3D()
    gROOT->Macro("Load.C");
    gEventDisplay->Draw3DTest();
 }
+</pre></bold></code>Another ROOT session:
+<code><bold><pre>	
+root[0] gROOT->Macro("Load.C");
+root[1] gEventDisplay->ShowTest();
 </pre></bold></code>
-
+is to produce two separate windows;
+<table>
+<tr>
+<th>Event over detector geometry
+<th>Event with no detector geometry
+</tr>
+<tr>
+<td><img src="examples/EventDisplayWGeom.png">
+<td><img src="examples/EventDisplayWOGeom.png">
+</tr></table>
 <p>
 The  StDraw3D::Draw3DTest should give you a clue how the class can be used
 <hr>
