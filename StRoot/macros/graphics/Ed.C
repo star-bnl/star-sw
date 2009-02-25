@@ -1,6 +1,36 @@
-// $Id: Ed.C,v 1.4 2009/02/25 21:13:43 fine Exp $
+// $Id: Ed.C,v 1.5 2009/02/25 21:36:10 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
+//! Ed.C macro is the simple script to draw the StEvent from ROOT file
+
+/*! Ed.C macro demonstrates how the StuDraw3DEvent class can be use
+    to loop over event read from the ROOT file and draw the event comonents
+    like "tracks" and hits" in 3D space over the the detector geometry
+    
+    Macro defines two functions:
+    
+     void Ed() - is an entry points
+     void ae() - advance event function
+     Macro creates two global pointers 
+    /a StEvent *event is a pointer to the StEvent object read by /a ae() function
+    /a gEventDisplay is a pointer to the instance of StuDraw3DEvent
+    
+    These two pouner are to allow the user to play with the image 
+    from ROOT commnad prompt:
+      gEventDisplay->Clear(); - to clear the displya
+      gEventDisplay->Hits(event): to add the "used" hits to display
+      gEventDisplay->Tacks(event): to add the all tracks of the cuurent
+      /a event to display
+      gEventDisplay->Hits(event,kUnusedHitsOnly);  to add the "unused" hits to display
+      
+      To start the display invoke:
+      
+          root.exe Ed.C
+          
+       to draw the next event invoke from the ROOT command promot:
+          root[] ae()
+          
+*/
 class StEvent;
 StEvent* event = 0;
 
@@ -43,4 +73,16 @@ void ae(bool hits=false)
    new StuDraw3DEvent(0); // create our own one (with no detector geometry)
 //   new StuDraw3DEvent("TPC"); // create our own one (with TPC detector)
    gEventDisplay->SetBkColor(kBlack);
+   printf("\n The display is ready!\n");
+   printf(" call:\n");   
+   printf("\t---\n");
+   printf("\tae()\n");
+   printf("\t---\n");
+   printf("method to see the next event\n");
+   ae();
+   printf(" call:\n");   
+   printf("\t---\n");
+   printf("\tae()\n");
+   printf("\t---\n");
+   printf("method to see the next event\n");
  }
