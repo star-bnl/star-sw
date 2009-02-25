@@ -1,5 +1,5 @@
-// $Id: Ed.C,v 1.3 2009/02/25 21:13:06 fine Exp $
-// *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
+// $Id: Ed.C,v 1.4 2009/02/25 21:13:43 fine Exp $
+// *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 class StEvent;
 StEvent* event = 0;
