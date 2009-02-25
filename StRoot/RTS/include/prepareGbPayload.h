@@ -129,9 +129,9 @@ public:
     if(evpCfg.policy == 1)  // all events
       firemask |= 1;
     
-    if(evpCfg.policy == 2) { // 1 hz
+    if(evpCfg.policy == 2) { // 10 hz
       float r = ((float)evpCtrs.cnt[0]/et);
-      if(r < 1) 
+      if(r < 10.0) 
 	firemask |= 1;
       else 
 	firemask = 0;
