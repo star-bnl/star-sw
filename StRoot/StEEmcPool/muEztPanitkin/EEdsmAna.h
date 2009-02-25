@@ -1,7 +1,7 @@
 #ifndef EEdsmAna_h
 #define EEdsmAna_h
 /**************************************************************
- * $Id: EEdsmAna.h,v 1.4 2009/02/24 04:07:45 ogrebeny Exp $
+ * $Id: EEdsmAna.h,v 1.5 2009/02/25 20:48:42 fisyak Exp $
  **************************************************************/
 #include <TObject.h>
 #include <TString.h>
@@ -14,7 +14,7 @@ class EEdsm3;
 
 class TH1F;
 class TH2F;
-
+class TFile;
 
 class EEdsmAna  {
 public:
@@ -168,6 +168,9 @@ private:
 
 /*
  * $Log: EEdsmAna.h,v $
+ * Revision 1.5  2009/02/25 20:48:42  fisyak
+ * Add forward declaration of TFile for ROOT >= 5.22
+ *
  * Revision 1.4  2009/02/24 04:07:45  ogrebeny
  * Fixed part of the trigger histograms
  *
