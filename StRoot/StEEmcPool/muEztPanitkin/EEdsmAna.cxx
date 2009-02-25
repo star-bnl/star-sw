@@ -712,6 +712,99 @@ void EEdsmAna::usePed(const Char_t *fName){
 	LOG_ERROR << "Cannot read file " << fName << endm;
     }
 }
+
+void EEdsmAna::saveHisto(TFile *f) const {
+    if (f) f->cd();
+
+
+    // .................level-0 input, 2D, HT ..............
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H0inHT[iJ]) H0inHT[iJ]->Write();
+    }
+
+    if (H0inHTall) H0inHTall->Write();
+
+    // ........level-0 input, 2D, TP sum
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H0inTP[iJ]) H0inTP[iJ]->Write();
+    }
+
+    if (H0inTPall) H0inTPall->Write();
+
+    // .................level-1 input, 2D
+    //================================ TP 
+
+    for(int iJ = 0;iJ < EEnHalfJetPatch;iJ++) {
+	if (H1inTPvEmu[iJ]) H1inTPvEmu[iJ]->Write();
+    }
+
+    //================================ HT 
+    for(int iJ = 0;iJ < EEnHalfJetPatch;iJ++) {
+	if (H1inHTvEmu[iJ]) H1inHTvEmu[iJ]->Write();
+    }
+
+    // .................level-2 input
+
+    //================================ HT 
+    for(int iJ = 0;iJ < EEnHalf;iJ++) {
+	if (H2inHTTP[iJ]) H2inHTTP[iJ]->Write();
+    }
+
+    //================================ half Etot sum
+    for(int iJ = 0;iJ < EEnHalf;iJ++) {
+	if (H1inEtot[iJ]) H1inEtot[iJ]->Write();
+    }
+
+    // Total energy histos
+    for(int iJ = 0;iJ < mxEtotBit;iJ++) {
+        if (HEetot[iJ]) HEetot[iJ]->Write();
+    
+        if (HBetot[iJ]) HBetot[iJ]->Write();
+
+        if (HBEetot[iJ]) HBEetot[iJ]->Write();
+    }
+
+    // .................level-3 input
+    //================================ HT 
+    if (H3inHTTP) H3inHTTP->Write(); 
+
+    //..................Jet Patch sums
+    //=================================summed patch spectra
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H4jpSums[iJ]) H4jpSums[iJ]->Write();
+    }
+
+    //=================================Jet patch over threshold
+    for (int iJ = 0;iJ < EEnThresh;iJ++) {
+	if (H4jpFreq[iJ]) H4jpFreq[iJ]->Write();
+    }
+
+    //=================================summed adjacent patch spectra
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H4adjpSums[iJ]) H4adjpSums[iJ]->Write();
+    }
+
+    //=================================adjacent patch correlation
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H4adjPcor[iJ]) H4adjPcor[iJ]->Write();
+    }
+
+    { //====================freq summed adjacent patch spectra over thresh
+	if (H4adjpFreq) H4adjpFreq->Write();
+    }
+
+    {
+	// added in 2005 
+	if (H5jpPed) H5jpPed->Write(); 
+    }
+    
+    {
+	if (H5jpFreq) H5jpFreq->Write();
+
+	if (H5jpHot) H5jpHot->Write(); // is _not_ filled by sorter
+    }
+}
+
 #else 
   void EEdsmAna::readDsm0( const unsigned char *){}
   void EEdsmAna::readDsm1( const unsigned short *){}
