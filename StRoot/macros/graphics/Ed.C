@@ -1,4 +1,4 @@
-// $Id: Ed.C,v 1.2 2009/02/25 21:08:42 fine Exp $
+// $Id: Ed.C,v 1.3 2009/02/25 21:13:06 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 class StEvent;
@@ -34,7 +34,7 @@ void ae(bool hits=false)
  }
 //__________________________________________
  void Ed(const char* file =
-   "/star/"data07/calib/fisyak/TpcRS/daq_2008_AuAu9_7/st_physics_9071073_raw_1010001.event.root"
+ "/star/data07/calib/fisyak/TpcRS/daq_2008_AuAu9_7/st_physics_9071073_raw_1010001.event.root")
  {
    // Start application open the file provided. 
    gROOT->Macro("Load.C");
