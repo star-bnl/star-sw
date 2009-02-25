@@ -114,7 +114,7 @@ UINT32 str2detmask(char *str)
       mask |= (1<<id);
     }
     else {
-      LOG(ERR, "Invalid detector: %s",t,0,0,0,0);
+      LOG(DBG, "Invalid detector: %s",t,0,0,0,0);
     }
    
     t = strtok(NULL,",");
