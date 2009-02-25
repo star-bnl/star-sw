@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.6 2009/02/23 22:31:09 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.7 2009/02/25 15:22:55 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.7  2009/02/25 15:22:55  ullrich
+ * DSM codes for BBC earliest TAC and TAC-differences and changes to VPD part.
+ *
  * Revision 2.6  2009/02/23 22:31:09  ullrich
  * Fixed problem when running over 2009 data (solution by Pibero) and new VPD access functions.
  *
@@ -353,9 +356,9 @@ unsigned short StTriggerData2009::bbcEarliestTDC(StBeamDirection eastwest, int p
 {
     int buffer = prepostAddress(prepost);
     if(buffer >=0){
-        if(mBBC[buffer]){
-            if(eastwest==east) {return mBBC[buffer]->BBClayer1[3]%4096;}
-            else               {return mBBC[buffer]->BBClayer1[7]%4096;}
+      if(mBBC[buffer]){
+            if(eastwest==east) {return mBBC[buffer]->BBClayer1[2]%4096;}
+            else               {return mBBC[buffer]->BBClayer1[0]%4096;}
         }
     }
     return 0;
@@ -363,7 +366,7 @@ unsigned short StTriggerData2009::bbcEarliestTDC(StBeamDirection eastwest, int p
 
 unsigned short StTriggerData2009::bbcTimeDifference() const
 {
-    return L1_DSM->VTX[3]%512;
+    return L1_DSM->VTX[3]%8192;
 }
 
 unsigned short StTriggerData2009::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const
@@ -776,13 +779,17 @@ unsigned short StTriggerData2009::vpdTDCHighThr(StBeamDirection eastwest, int pm
 
 unsigned short StTriggerData2009::vpdEarliestTDC(StBeamDirection eastwest) const
 {
-    return 0;
+  int buffer = 0;
+  if(mBBC[buffer]){
+    if(eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+    else               {return mBBC[buffer]->VPD[4]%4096;}
+  }
+  return 0;
 }
 
 unsigned short StTriggerData2009::vpdTimeDifference() const
 {
-    return 0;
-    //return L1_DSM->CTB[4] & 0x1FF;
+  return L1_DSM->VTX[6]%8192;
 }
 
 unsigned short StTriggerData2009::nQTdata(int prepost) const
