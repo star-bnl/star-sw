@@ -1,4 +1,4 @@
-// $Id: Ed.C,v 1.5 2009/02/25 21:36:10 fine Exp $
+// $Id: Ed.C,v 1.6 2009/02/25 21:37:43 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! Ed.C macro is the simple script to draw the StEvent from ROOT file
@@ -82,7 +82,8 @@ void ae(bool hits=false)
    ae();
    printf(" call:\n");   
    printf("\t---\n");
-   printf("\tae()\n");
+   printf("\tae() - to draw the tracks\n");
+   printf("\tae(1) - to draw the tracksand its hits\n");
    printf("\t---\n");
    printf("method to see the next event\n");
  }
