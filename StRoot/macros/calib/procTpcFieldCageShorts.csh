@@ -71,8 +71,8 @@ set tlimited = "between from_unixtime($lasttime) and from_unixtime($thistime)"
 set daqtables = "daqSummary as ds left join detectorSet as de on ds.runNumber=de.runNumber"
 
 # determine TPC detectorID
-set query = "select detectorID from detectorTypes where name='tpc'"
-set tpcid = `echo $query | $MYSQL $daq_db -C RunLog | /bin/grep -v det`
+set query = "select detectorID from detectorTypes where name in ('tpc','tpx');"
+set tpcxid = `echo $query | $MYSQL $daq_db -C RunLog | /bin/grep -v det`
 
 # query for runs
 /bin/cat >! $qq <<EOF
@@ -80,7 +80,7 @@ select ds.runNumber,from_unixtime(ds.firstEventTime),
 ds.firstEventTime-$yearstart,ds.lastEventTime-$yearstart
 from $daqtables
 where ds.beginTime $tlimited
-and de.detectorID=$tpcid
+and de.detectorID in ($tpcxid[1],$tpcxid[2])
 and ds.firstEventTime>0 and ds.lastEventTime>ds.firstEventTime
 order by ds.firstEventTime asc;
 EOF
@@ -98,7 +98,7 @@ set latestrun = $runs[$#runs]
 # determine if we're in the middle of a tpc run now
 /bin/cat >! $qq <<EOF
 select run.idx_rn from run left join dets on run.idx_rn=dets.idx_rn
-where dets.idx_det=$tpcid and run.run_number>$latestrun;
+where dets.idx_det in ($tpcxid[1],$tpcxid[2]) and run.run_number>$latestrun;
 EOF
 /bin/cat $qq >> log; echo "" >> log
 set running_now = `/bin/cat $qq | $MYSQL $daq_db -C Conditions_rts | /usr/bin/wc -l`
@@ -166,8 +166,11 @@ cd $cdir
 /bin/rm -rf $logdir
 
 #####################################
-# $Id: procTpcFieldCageShorts.csh,v 1.1 2009/02/20 18:50:58 genevb Exp $
+# $Id: procTpcFieldCageShorts.csh,v 1.2 2009/02/26 23:01:15 genevb Exp $
 # $Log: procTpcFieldCageShorts.csh,v $
+# Revision 1.2  2009/02/26 23:01:15  genevb
+# Updated for tpx detector
+#
 # Revision 1.1  2009/02/20 18:50:58  genevb
 # Placement in CVS of automatic TpcFieldCageShort calib codes
 #
