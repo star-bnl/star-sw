@@ -1,4 +1,4 @@
-//  $Id: StEmcAsciiDbMaker.cxx,v 1.4 2009/02/04 20:33:06 ogrebeny Exp $ 
+//  $Id: StEmcAsciiDbMaker.cxx,v 1.5 2009/02/26 20:30:54 balewski Exp $ 
 // Emulates  L2 in offline for algorithm testing
 // Interface to online/L2jetAlgo/
 // Jan Balewski, Fall 2005
@@ -187,9 +187,7 @@ void StEmcAsciiDbMaker::exportBtowDb(TString fname, int runNo, int yyyymmdd,int 
      // printf("%s %f %d\n",name,myGain,nC);    assert(2==3);
      ushort stat=0;
      ushort fail=0;
-     if(status!=1) { 
-       fail=status>0 ? status : 0xff;
-     } else {
+     if(status==1) {
        nB++;
        float ph=phiF/C_PI*180.;
        while(ph<0) ph+=360.;
@@ -265,7 +263,7 @@ void StEmcAsciiDbMaker::exportEtowDb(TString fname, int runNo, int yyyymmdd,int 
 
 
       fprintf(fd,"%6s   0x%02x 0x%02x   %2d %c %2d   %8.2f   %5.2f %5.2f  0x%02x 0x%02x  %8s %4d\n",
-	      x->name,fiber->crID,x->chan,x->sec,x->sub,x->eta,myGain,x->ped,x->thr,x->stat,x->fail,x->tube,rdo);
+	      x->name,fiber->crID,x->chan,x->sec,x->sub,x->eta,myGain,x->ped,x->thr,0,0,x->tube,rdo);
       if( !x->fail) { 
 	nB++;
 	float ph=5*(x->sec-1)+x->sub-'A';
@@ -304,6 +302,9 @@ void StEmcAsciiDbMaker::initAuxHisto() {
 
 /* *******************************
  $Log: StEmcAsciiDbMaker.cxx,v $
+ Revision 1.5  2009/02/26 20:30:54  balewski
+ now mask from DB s NOT written to asscii files
+
  Revision 1.4  2009/02/04 20:33:06  ogrebeny
  Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 
