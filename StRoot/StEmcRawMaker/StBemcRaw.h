@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.15 2009/02/04 21:05:42 kocolosk Exp $
+// $Id: StBemcRaw.h,v 1.16 2009/02/26 12:00:40 mattheww Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.16  2009/02/26 12:00:40  mattheww
+// added token check to BTOW header check
+//
 // Revision 1.15  2009/02/04 21:05:42  kocolosk
 // Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
 //
@@ -134,8 +137,8 @@ public:
     //convertFromDaq(TDataSet*,StEmcRawData*)made obsolete in 2009 with new DAQ format
     Bool_t                    convertFromDaq(TDataSet*, StEmcRawData*); ///< Convert DAQ format into StEmcRawData format
     Int_t                     getBemcADCRaw(Int_t, Int_t, StEmcRawData*, Int_t&, Int_t&); ///< get ADC from StEmcRawData structure
-    void                      checkHeaders(StEmcRawData*);///<Check all BEMC detector headers
-    void                      checkBtowCrates(StEmcRawData*); ///< check tower crates
+    void                      checkHeaders(StEmcRawData*,StEvent*);///<Check all BEMC detector headers
+    void                      checkBtowCrates(StEmcRawData*,StEvent*); ///< check tower crates
     void                      emptyEmcCollection(StEmcCollection*); ///< empty current emcCollection
     Int_t                     makeHit(StEmcCollection*, Int_t, Int_t, Int_t, Int_t, Int_t, Float_t&); ///< make StEmcRawHit
     void                      createDecoder(Int_t,Int_t); ///< Create new StEmcDecoder
