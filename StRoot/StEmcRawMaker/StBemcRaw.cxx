@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.35 2009/02/11 22:50:44 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.36 2009/02/26 12:00:40 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.36  2009/02/26 12:00:40  mattheww
+// added token check to BTOW header check
+//
 // Revision 1.35  2009/02/11 22:50:44  mattheww
 // fixed a bug in getting CAP
 //
@@ -299,7 +302,9 @@ Bool_t StBemcRaw::convertFromDaq(StEmcRawMaker * DAQ, StEmcRawData* RAW)
 	}
 	for(int j = 0; j < BTOW_PRESIZE; j++){
 	  RAW->setHeader(BTOWBANK,i+j*30,btowdata->preamble[i][j]);
-	  //printf("agrdl: BTOW HEAD %d %d\n",i+j*30,btowdata->preamble[i][j]);
+	  int crate;
+	  mDecoder->GetTowerCrateFromTDC(i,crate);
+	  //printf("agrdl: BTOW HEAD %d %d %d\n",crate,j,btowdata->preamble[i][j]);
 	}
       }
     }else{
@@ -356,7 +361,7 @@ Bool_t StBemcRaw::make(StEmcRawData* bemcRaw, StEvent* event)
     if(!emc)
         return kFALSE;
 
-    checkHeaders(bemcRaw);
+    checkHeaders(bemcRaw, event);
     emptyEmcCollection(emc);
 
     Int_t cap=0,crate=0;
@@ -389,7 +394,7 @@ Bool_t StBemcRaw::make(StEmcRawData* bemcRaw, StEvent* event)
     return kTRUE;
 }
 //_____________________________________________________________________________
-void StBemcRaw::checkHeaders(StEmcRawData* RAW)
+void StBemcRaw::checkHeaders(StEmcRawData* RAW, StEvent* event)
 {
     for(Int_t det=1;det<=MAXDETBARREL; det++)
     {
@@ -397,7 +402,7 @@ void StBemcRaw::checkHeaders(StEmcRawData* RAW)
             mCrateStatus[det-1][crate-1] = crateUnknown;
         mIsCorrupted[det-1] = kFALSE;
     }
-    checkBtowCrates(RAW);
+    checkBtowCrates(RAW,event);
 
     mNCRATESOK[BPRS-1]=mNCRATESOK[BSMDE-1]=mNCRATESOK[BSMDP-1]=0;
     // smd data
@@ -463,7 +468,7 @@ void StBemcRaw::emptyEmcCollection(StEmcCollection *emc)
 /*!
   Check tower crates header
 */
-void StBemcRaw::checkBtowCrates(StEmcRawData* RAW)
+void StBemcRaw::checkBtowCrates(StEmcRawData* RAW, StEvent* event)
 {
     if(!RAW)
         return;
@@ -473,15 +478,17 @@ void StBemcRaw::checkBtowCrates(StEmcRawData* RAW)
     if(!header)
         return;
     mNCRATESOK[0] = 0;
+    int trgtoken = event->l0Trigger()->triggerToken();
     for(Int_t crate = 1;crate<=MAXCRATES;crate++)
     {
         Int_t TDC;
         mDecoder->GetTowerTDCFromCrate(crate,TDC);
         Int_t sum = header[TDC];
+	Int_t token = header[TDC+BTOWTOKENOFFSET];
         Int_t err = header[TDC+BTOWTDCERROFFSET];
         Int_t crateFromHeader = header[TDC+BTOWCRATEOFFSET]& 0x0FF;
         mCrateStatus[BTOW-1][crate-1] = crateUnknown;
-        if(sum==BTOWBYTESUM && err == BTOWERRFLAG && crate==crateFromHeader)
+        if(sum==BTOWBYTESUM && err == BTOWERRFLAG && crate==crateFromHeader && token == trgtoken)
             mCrateStatus[BTOW-1][crate-1] = crateOK;
         else
             mCrateStatus[BTOW-1][crate-1] = crateHeaderCorrupt;
