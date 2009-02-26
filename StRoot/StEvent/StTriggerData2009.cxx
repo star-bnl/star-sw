@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.7 2009/02/25 15:22:55 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.8 2009/02/26 17:33:20 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.8  2009/02/26 17:33:20  ullrich
+ * Fixes to prevent crashes in ppplot.
+ *
  * Revision 2.7  2009/02/25 15:22:55  ullrich
  * DSM codes for BBC earliest TAC and TAC-differences and changes to VPD part.
  *
@@ -127,11 +130,16 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     memset(qt1,0,sizeof(qt3)); memset(tqt1,0,sizeof(tqt3));
     memset(qt1,0,sizeof(qt4)); memset(tqt1,0,sizeof(tqt4));
     TrgOfflen2009* offlen;
+
     for (int i=0; i<1+npre+npost; i++){
+        //printf("Doing prepost = %d\n",i);
         if (i==0)
-            {offlen = mData->MainX;}
-        else
-            {offlen = (TrgOfflen2009*) ((char*)mData + mData->PrePostList[i-1]);}
+	  {offlen = mData->MainX;}
+        else {
+          //printf("Prepost list offset = %d\n",mData->PrePostList[i-1]);
+	  if(mData->PrePostList[i-1]==0) continue;
+	  offlen = (TrgOfflen2009*) ((char*)mData + mData->PrePostList[i-1]);
+	}
         swapRawDetOfflen(offlen);
         if (offlen[y9BC1_CONF_NUM].length>0) {mBC1[i] = (BELayerBlock2009*)((char*)mData + offlen[y9BC1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBC1[i],y9BC1_CONF_NUM); }
         if (offlen[y9MXQ_CONF_NUM].length>0) {mMXQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9MXQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMXQ[i],y9MXQ_CONF_NUM); }
