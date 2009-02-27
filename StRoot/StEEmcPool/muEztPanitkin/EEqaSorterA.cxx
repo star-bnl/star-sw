@@ -1,4 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.5 2009/02/24 18:19:47 ogrebeny Exp $
+// $Id: EEqaSorterA.cxx,v 1.6 2009/02/27 18:34:13 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 
@@ -40,8 +40,8 @@ EEqaSorterA::~EEqaSorterA() {
 //-------------------------------------------
 void EEqaSorterA::sort(const EztEmcRawData *t, const EztEmcRawData *s, int ver) {
   sortDaqTower1(t);
-  sortDaqMapmt0(t, ver);
-  sortDaqTowerHot(s);
+  sortDaqMapmt0(s, ver);
+  sortDaqTowerHot(t);
 }
 
 //-------------------------------------------
@@ -209,6 +209,9 @@ int EEqaSorterA::usePed4(const Char_t *filename) {
 
 
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.6  2009/02/27 18:34:13  ogrebeny
+// Small bug fixed
+//
 // Revision 1.5  2009/02/24 18:19:47  ogrebeny
 // Small workaround until ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1457 is resolved
 //
