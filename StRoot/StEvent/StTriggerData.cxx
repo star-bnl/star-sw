@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.5 2009/01/14 17:54:45 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.6 2009/02/27 02:56:52 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.6  2009/02/27 02:56:52  ullrich
+ * Fixed bug in reading pre/post data.
+ *
  * Revision 2.5  2009/01/14 17:54:45  ullrich
  * Modified to cope with necessary changes for 2009.
  *
@@ -28,7 +31,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.5 2009/01/14 17:54:45 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.6 2009/02/27 02:56:52 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -39,9 +42,9 @@ StTriggerData::~StTriggerData() { /* noop */}
 int StTriggerData::prepostAddress(int prepost) const
 { 
     if (prepost == 0) return 0;
-    int npre = -numberOfPreXing();
+    int npre = numberOfPreXing();
     if (prepost < 0 && -prepost <= npre) return 1+npre+prepost;
-    int npost = -numberOfPostXing();
+    int npost = numberOfPostXing();
     if (prepost > 0 &&  prepost <= npost) return npre+prepost;
     return -1;
 }
