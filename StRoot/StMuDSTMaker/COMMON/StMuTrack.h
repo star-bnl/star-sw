@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.29 2009/02/20 16:37:44 tone421 Exp $
+ * $Id: StMuTrack.h,v 1.30 2009/02/27 19:54:25 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -163,7 +163,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,10)
+  ClassDef(StMuTrack,11)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -215,6 +215,9 @@ inline StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (St
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.30  2009/02/27 19:54:25  tone421
+ * Iterated Class Def by 1 to accommodate new BTOF data member
+ *
  * Revision 1.29  2009/02/20 16:37:44  tone421
  * *** empty log message ***
  *
