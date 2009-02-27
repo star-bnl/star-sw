@@ -321,7 +321,7 @@ struct TRG_RUN
   int res7;
   int res8;
 
-  int res9;
+  int tcuType;           // TCU: 1 (or 0) for Mk1; 2 for Mk2
   int disableTOFmask;    // 4 bit mask to disable individual TOF fibers
 
   int l2Disable750;      // Flag for experts to disable 750Hz limit
