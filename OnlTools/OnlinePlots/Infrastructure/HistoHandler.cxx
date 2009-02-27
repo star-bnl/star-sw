@@ -601,6 +601,7 @@ static const int pmd_hist_begin=381;  // PMD hist starts after 381 no.
 
 
 int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182]) {
+
 #include "zdc_smd.h"
 
   //printf("Histohandler fill\n");
@@ -1724,8 +1725,8 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     for(int ifib=0;ifib<4;ifib++) {  // fiber 0, east, fiber 2, west 
  
       int ndataword = tof.ddl_words[ifib];    // 
-      if(ndataword<=0) continue;
       //cout<<"TOF:: ifib="<<ifib<<" ndataword="<< ndataword<<endl;
+      if(ndataword<=0) continue;
       for(int iword=0;iword<ndataword;iword++){
 	int dataword=tof.ddl[ifib][iword];
         //cout<<"TOF :: dataword=0x"<<hex<<dataword<<dec<<" "<<iword<<"/"<<dec<<ndataword<<" ifiber="<<ifib<<endl;
@@ -1734,16 +1735,28 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 	if( (dataword&0xF0000000)>>28 == 0xE) continue;  
         if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
 	 // do nothing at this moment.
+	  continue;
+        }   
+	// liujing new .....         
+        if( (dataword&0xF0000000)>>28 == 0x6) {
+          //cout<<"StBTofHitMaker::DATA ERROR!! packid=0x6"<<endl;
+	  continue;
         }            
         if( (dataword&0xF0000000)>>28 == 0xC) {
           halftrayid = dataword&0x01;    
           trayid     = (dataword&0x0FE)>>1;
-          if(trayid==121 && ifib==0) trayid=121;  // east
-          if(trayid==121 && ifib==2) trayid=122;  // west
           //cout<<"TOF:: dataword/ndataword=0x"<<hex<<dataword<<"/"<<dec<<ndataword<<" halftrayid="<<halftrayid<<" trayid="<<trayid<<" fiber="<<ifib<<endl;
           continue;
         }
-        if(halftrayid<0 || trayid<0) continue;
+
+        if(halftrayid<0) continue;
+        //cout<<"TOFaa:: dataword/ndataword=0x"<<hex<<dataword<<"/"<<dec<<ndataword<<" halftrayid="<<halftrayid<<" trayid="<<trayid<<" fiber="<<ifib<<endl;
+        if(trayid<1 || trayid >122) {
+          cout<<"StBTofHitMaker::DATA ERROR!! unexpected trayID ! "<<endl;
+          continue;
+        }
+
+        //cout<<"TOFbb:: dataword/ndataword=0x"<<hex<<dataword<<"/"<<dec<<ndataword<<" halftrayid="<<halftrayid<<" trayid="<<trayid<<" fiber="<<ifib<<endl;
 
        // now get tdc chan, time from trailing and leading edge.
        // some triger words will be skipped.
@@ -1796,7 +1809,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 	 leadinghits.push_back(temphit);
        } else if(edgeid==TRAILING){
 	 trailinghits.push_back(temphit); 
-       }
+       } 
        //
        //cout<<"dataword=0x"<<hex<<dataword<<dec<<" edgeid="<<edgeid<<" tdcid="<<tdcid<<" tdigboardid="<<tdigboardid<<" hptdcid="<<tdcid%4<<" tdcchan="<<tdcchan<<" timeinbin="<<timeinbin<<" time="<<time;
        //cout<<" globaltdcchan="<<temphit.globaltdcchan<<" halftrayid="<<halftrayid<<" trayid="<<trayid<<" ifib="<<ifib<<endl;
@@ -1876,15 +1889,14 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     // jing liu, 12/10/2007
     // T0 from trailing edge , 
     // similar to above, we can add later if necessary.
-
  
     // fill histograms.
     // leading edge
     for(unsigned int i=0;i<leadinghits.size();i++){
       if(leadinghits[i].time>0&& leadinghits[i].trayid>0 && leadinghits[i].trayid<61) {
-	oth->fill(h1[458],leadinghits[i].trayid,leadinghits[i].globalmodulechan);
+	oth->fill(h1[458],leadinghits[i].trayid,leadinghits[i].globaltdcchan/8);
       } else if(leadinghits[i].time>0&& leadinghits[i].trayid>60 && leadinghits[i].trayid<121){
-	oth->fill(h1[457],leadinghits[i].trayid,leadinghits[i].globalmodulechan);
+	oth->fill(h1[457],leadinghits[i].trayid,leadinghits[i].globaltdcchan/8);
       } else if (leadinghits[i].time>0&& leadinghits[i].trayid==121){  //west start
 	oth->fill(h1[454],leadinghits[i].modulechan);
       } else if (leadinghits[i].time>0&&leadinghits[i].trayid==122){  //east start
@@ -1894,9 +1906,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     // trailing edge.
     for(unsigned int i=0;i<trailinghits.size();i++){
       if(trailinghits[i].time>0&& trailinghits[i].trayid>0 && trailinghits[i].trayid<61) {
-	oth->fill(h1[460],trailinghits[i].trayid,trailinghits[i].globalmodulechan);
+	oth->fill(h1[460],trailinghits[i].trayid,trailinghits[i].globaltdcchan/8);
       } else if(trailinghits[i].time>0&& trailinghits[i].trayid>60 && trailinghits[i].trayid<121){
-	oth->fill(h1[459],trailinghits[i].trayid,trailinghits[i].globalmodulechan);
+	oth->fill(h1[459],trailinghits[i].trayid,trailinghits[i].globaltdcchan/8);
       } else if (trailinghits[i].time>0&& trailinghits[i].trayid==121){  //west start
 	oth->fill(h1[455],trailinghits[i].modulechan);
       } else if (trailinghits[i].time>0&&trailinghits[i].trayid==122){  //east start
@@ -2363,7 +2375,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.8 2009/02/17 19:24:56 dkettler Exp $
+   * $Id: HistoHandler.cxx,v 1.9 2009/02/27 22:30:17 dkettler Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2373,6 +2385,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.9  2009/02/27 22:30:17  dkettler
+   * TOF Updates
+   *
    * Revision 1.8  2009/02/17 19:24:56  dkettler
    * Fixed ZDC/BBC-l3 vertex plots
    *

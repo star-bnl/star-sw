@@ -86,32 +86,42 @@ int tdcchan2mrpcchan(int globaltdcchan)
  
 int tdcchan2upvpdPMTchan(int globaltdcchan, int edgeid,int trayid)
 {
+
   if(globaltdcchan<0 || globaltdcchan>191) {cout<<"Wrong global tdc chan: "<<globaltdcchan<<endl; return -1;}
 
-  int pmtchan=-1;
-  int upvpdLEchan[38]={142,122,118,98,46,26,22,2,120,96,24,136,123,112,99,40,27,16,3,   //west
-                       142,122,118,98,46,26,22,2,112,101,24,136,123,120,99,40,27,16,3};  //east
-  int upvpdTEchan[38]={129,131,105,107,33,35,9,11,135,111,39,133,132,109,108,37,36,13,12,  //west
-                       129,131,105,107,33,35,9,11,109,110,39,133,132,135,108,37,36,13,12}; //east
-  
+//                      1   2   3  4  5  6  7  8  9  10  11 12  13  14  15 16 17 18 19
+  int upvpdLEchan[54]={142,122,118,98,46,26,22,2,112,101,24,136,123,120,99,40,27,16,3,  //west
+                       142,122,118,98,46,26,22,2,112,101,24,136,123,120,99,40,27,16,3,  //east
+		       48,64,50,70,0,29,5,96,   48,64,50,70,0,29,5,96};                //pp2pp 
+  int upvpdTEchan[54]={129,131,105,107,33,35,9,11,109,110,39,133,132,135,108,37,36,13,12,  //west
+                       129,131,105,107,33,35,9,11,109,110,39,133,132,135,108,37,36,13,12,  //east
+		       63,61,59,57,15,38,14,111,    63,61,59,57,15,38,14,111};             //pp2pp 
   int inputglobalchan=globaltdcchan;
+  int pmtchan=-1;
   int pmtLEchan =-1;
   int startpoint=-1;
   if(trayid==121) startpoint=0;   // west
   if(trayid==122) startpoint=19;  // east
-  //cout<<" inside map:: trayid="<<trayid<<" globaltdcchan="<<globaltdcchan<<" edgeid="<<edgeid<<endl;
 
   for(int i=startpoint;i<startpoint+19;i++){
     if(upvpdLEchan[i]==inputglobalchan) {pmtLEchan=i;break;}
   }
+  for(int i=38;i<46;i++){
+    if(upvpdLEchan[i]==inputglobalchan) {pmtLEchan=i;if(trayid==122)pmtLEchan=pmtLEchan+8;break;}
+  }
+  //
   int pmtTEchan=-1;
   for(int i=startpoint;i<startpoint+19;i++){
     if(upvpdTEchan[i]==inputglobalchan) {pmtTEchan=i;break;}
   }
-  
+  for(int i=38;i<46;i++){
+    if(upvpdTEchan[i]==inputglobalchan) {pmtTEchan=i;if(trayid==122)pmtTEchan=pmtTEchan+8;break;}
+  }
+
   if(edgeid==4) pmtchan = pmtLEchan;
   if(edgeid==5) pmtchan = pmtTEchan;
 
+  //cout<<" inside map:: trayid="<<trayid<<" globaltdcchan="<<globaltdcchan<<" edgeid="<<edgeid<<" return="<<pmtchan<<endl;
 
   return pmtchan;
 }
@@ -120,7 +130,7 @@ int tdcchan2upvpdPMTchan(int globaltdcchan, int edgeid,int trayid)
 
 /***************************************************************************
  *
- * $Id: tofr.h,v 1.1 2009/01/23 16:11:00 jeromel Exp $
+ * $Id: tofr.h,v 1.2 2009/02/27 22:30:17 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -130,6 +140,9 @@ int tdcchan2upvpdPMTchan(int globaltdcchan, int edgeid,int trayid)
  ***************************************************************************
  *
  * $Log: tofr.h,v $
+ * Revision 1.2  2009/02/27 22:30:17  dkettler
+ * TOF Updates
+ *
  * Revision 1.1  2009/01/23 16:11:00  jeromel
  * Import from online/RTS/src/
  *
