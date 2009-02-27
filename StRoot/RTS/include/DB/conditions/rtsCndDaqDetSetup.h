@@ -26,6 +26,7 @@ struct rtsCndDaqDetSetup
   int cl_done;
 
   // New as of 2/18/09
+/*
   int res1;
   int res2;
   int res3;
@@ -36,6 +37,7 @@ struct rtsCndDaqDetSetup
   int res8;
   int res9;
   int res10;
+*/
 };
 
 #endif
