@@ -25,6 +25,7 @@ class TH2;
 
 #include "GenericFile.h"
 
+typedef GenericFile FileType;
 
 class EvpUtil {
  public:
@@ -101,7 +102,7 @@ class EvpUtil {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.h,v 1.3 2009/02/04 01:25:51 dkettler Exp $
+ * $Id: EvpUtil.h,v 1.4 2009/02/27 22:30:17 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -111,6 +112,9 @@ class EvpUtil {
  ***************************************************************************
  *
  * $Log: EvpUtil.h,v $
+ * Revision 1.4  2009/02/27 22:30:17  dkettler
+ * TOF Updates
+ *
  * Revision 1.3  2009/02/04 01:25:51  dkettler
  * Remove ONLINEPLOTSDIR reference
  *
