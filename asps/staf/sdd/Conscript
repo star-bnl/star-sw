@@ -38,6 +38,7 @@ if ($LD eq 'gcc' and $CXX_VERSION < 4) {
 $env2 = $env->clone('CPPPATH'      => $CPPPATH, 
 		    'LD'           => $LD,
 		    'LDFLAGS'      => $LDFLAGS,
+		    'EXTRA_LDFLAGS'=> "",
 		    'Libraries'    => "",
 		    'LIBPATH'      => "",
 		    'LIBS'         => $LEXLIB);
