@@ -85,6 +85,7 @@ $env1 = $env->clone('Libraries' => $Libraries,
 		    'LIBPATH'   => $LIBPATH,
 		    'CXXFLAGS'  => $CXXFLAGS,
 		    'CPPFLAGS'  => $CPPFLAGS,
+		    'EXTRA_SOFLAGS' => undef,
 		    'CPPPATH'   => $CPPPATH);
 
 
