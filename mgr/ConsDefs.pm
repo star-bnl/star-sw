@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.106 2009/02/28 01:39:22 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.107 2009/02/28 02:02:21 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -432,7 +432,7 @@
         $EXTRA_CFLAGS   = " -D__CC5__";
 	$EXTRA_CPPFLAGS = "";
 	$EXTRA_LDFLAGS  = "";
-	$EXTRA_SOFLAGS = "";
+	$EXTRA_SOFLAGS  = "";
 
 	# ATTENTION
 	# - Below is a generic gcc support tweaks
@@ -767,6 +767,7 @@
 		  'LINKCOM'        => $LINKCOM,
 		  'SO'             => $SO,
 		  'SOFLAGS'        => $SOFLAGS,
+		  'EXTRA_SOFLAGS'  => $EXTRA_SOFLAGS,
 		  'SoOUT'          => $SoOUT,
 		  'STIC'           => $STIC,
 		  'LINKMODULECOM'  => $MAKELIB,
