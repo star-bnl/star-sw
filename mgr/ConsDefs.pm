@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.105 2009/02/20 01:47:01 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.106 2009/02/28 01:39:22 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -177,6 +177,7 @@
 	$EXTRA_CFLAGS  = " -pg ";
 	$EXTRA_FPPFLAGS= " -pg ";
 	$EXTRA_LDFLAGS = " -pg ";
+	$EXTRA_SOFLAGS = " -pg ";
 	$GPROF         = "yes";
     } else {
 	# GPROF will imply that we do not allow optimized
@@ -344,6 +345,7 @@
 	$EXTRA_CFLAGS  = "";
 	$EXTRA_CPPFLAGS= "";
 	$EXTRA_LDFLAGS = "";
+	$EXTRA_SOFLAGS = "";
 
     } elsif (/^alpha_dux/) {
 	#
@@ -380,6 +382,7 @@
 	$EXTRA_CFLAGS  = "";
 	$EXTRA_CPPFLAGS= "";
 	$EXTRA_LDFLAGS = "";
+	$EXTRA_SOFLAGS = "";
 
     } elsif (/^sun4x_/) {
 	#
@@ -429,7 +432,7 @@
         $EXTRA_CFLAGS   = " -D__CC5__";
 	$EXTRA_CPPFLAGS = "";
 	$EXTRA_LDFLAGS  = "";
-
+	$EXTRA_SOFLAGS = "";
 
 	# ATTENTION
 	# - Below is a generic gcc support tweaks
