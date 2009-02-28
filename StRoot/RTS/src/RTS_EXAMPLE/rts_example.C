@@ -201,9 +201,10 @@ int main(int argc, char *argv[])
 
 	}
 
+	delete evp ;	// cleanup i.e. if running through a set of files.
+
 	return 0 ;
 }
-
 
 static int trg_doer(daqReader *rdr, char  *do_print)
 {
