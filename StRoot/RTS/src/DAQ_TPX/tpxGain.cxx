@@ -20,14 +20,6 @@
 
 
 
-#if 0
-// counts sector & rdo from 1!
-static struct fee_found {
-	u_int got_one ;
-	int ch_count[256][16] ;	// ALtro ID & CH is the index...
-} fee_found[25][7] ;
-#endif
-
 
 struct tpx_odd_fee_t tpx_odd_fee[256] ;
 int tpx_odd_fee_count = 0 ;
@@ -48,6 +40,7 @@ tpxGain::tpxGain()
 	memset(bad_fee,0,sizeof(bad_fee)) ;
 	tpx_odd_fee_count = 0 ;
 
+	memset(bad_rdo_mask,0,sizeof(bad_rdo_mask)) ;
 	return ;
 }
 
@@ -130,6 +123,8 @@ void tpxGain::init(int sec)
 
 	tb_start = 181 ;
 	tb_stop = 190 ;
+
+	memset(bad_rdo_mask,0,sizeof(bad_rdo_mask)) ;
 
 	return ;
 }
@@ -502,6 +497,33 @@ void tpxGain::calc()
 		if(!c) {	// nothing ever fell in the timing acceptance window
 			get_gains(s,r,p)->g = 0.0 ;
 			get_gains(s,r,p)->t0 = 9.999 ;	
+
+			int aa,cc,rdo ;
+			tpx_to_altro(r,p,rdo,aa,cc) ;
+			rdo-- ;	// we want from 0
+			if(bad_rdo_mask[s] & (1<<rdo)) {
+				// kill all the rows & pads in this RDO
+				//LOG(WARN,"Masked Sector %d, RDO %d, row %d, pad %d",s,rdo+1,r,p) ;
+				get_gains(s,r,p)->t0 = -5.0 ;
+
+			}
+
+			// back to indexing from 1!
+			rdo++ ;
+			int c = bad_fee[s][rdo][0] ;
+			
+			for(int i=0;i<c;i++) {
+				int al=bad_fee[s][rdo][i+1];
+				for(int j=0;j<2;j++) {
+					//LOG(WARN,"Checking ALTRO %3d against %3d, RDO %d, row %d, pad %d",aa,al,rdo,r,p) ;
+					if(aa == (int)al) {
+						//LOG(WARN,"Masked ALTRO %3d, RDO %d, row %d, pad %d",aa,rdo,r,p) ;
+						get_gains(s,r,p)->t0 = -5.0 ;
+					}
+					al++ ;
+				}
+			}
+			
 		}
 		else {
 			//if(c != (events-1)) LOG(WARN,"Events %d, cou %d",events,c) ;
@@ -776,9 +798,12 @@ int tpxGain::from_file(char *fname, int sec)
 		int ret = sscanf(str,"%d %d %d %f %f\n",&s,&r,&p,&g,&t0) ;
 
 		if(ret != 5) continue ;
+
 	
 		if(s < 0) {	// special case! the whole TPC-FEE in "pad" is bad
 			s *= -1 ;
+
+			if(sector && (s != sector)) continue ;
 
 			int altro ;
 
@@ -808,8 +833,8 @@ int tpxGain::from_file(char *fname, int sec)
 			continue ;
 		}
 
-		if(sector && (s != sector)) continue ;
 
+		if(sector && (s != sector)) continue ;
 
 		set_gains(s,r,p,g,t0) ;
 
@@ -925,23 +950,32 @@ void tpxGain::compare(char *fname, int mysec)
 		if(ret != 5) continue ;
 		if(s < 0) continue ;
 
-		if(mysec && (s != mysec)) continue ;
+		if(mysec && (s != mysec)) continue ;	// only look at my sectors
 
-		if(r==0) continue ;
+		if(r==0) continue ;	// skip unphysical channels
 
-		if(g==0.0) {
+		if(g==0.0) {	// bad in old file
 			if(get_gains(s,r,p)->g == 0.0) both++ ;
 			else old_only++ ;
 		}
-		else {
-			if(get_gains(s,r,p)->g == 0.0) new_only++ ;
+		else {		// good in old file
+
+			// here I need to differentiate between bad FEEs and masked RDOs!
+			if(get_gains(s,r,p)->g == 0.0) {
+				if(get_gains(s,r,p)->t0 == -5.0) {
+					LOG(DBG,"FEE was marked as bad (%d,%d,%d) -- skipping",s,r,p) ;
+				}
+				else {
+					new_only++ ;
+				}
+			}
 		}
 	}
 	
 	fclose(f) ;
 
 	if(new_only>10) {
-		LOG(ERR,"TPX sector %d: seems to have new bad pads: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
+		LOG(ERR, "gain_compare, sector %d: seems to have new bad pads: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
 	}
 	else {
 		LOG(INFO,"gain_compare, sector %d: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
