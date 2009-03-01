@@ -36,6 +36,9 @@ public:
 	// [sector 1-24][RDO 1-6][fee-index 0-35]
 	u_int bad_fee[25][7][37] ;	// [x][y][36] contains the count!
 
+	// sector 1..24
+	u_int bad_rdo_mask[25] ;	// bad if set to 1
+
 	// below used while calculating only
 	struct aux {
 		short low_pulse ;	// count of low gain

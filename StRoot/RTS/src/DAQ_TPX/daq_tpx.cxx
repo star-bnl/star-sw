@@ -1512,18 +1512,29 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			trgs[cou].t = dta & 0xFFF ;
 			trgs[cou].daq = (dta >> 12) & 0xF ;
 			trgs[cou].trg = (dta >> 16) & 0xF ;
-			//trgs[cou].trg = 4 ;	// need to force this for old code...
 			trgs[cou].rhic_delta = 0 ;
 			trgs[cou].rhic = rhic ;
 
+			switch(trgs[cou].trg) {
+			case 4 :
+			case 9 :
+			case 10 :
+				break ;
+			default :
+				LOG(ERR,"RDO %d: T %d: prompt: bad trg: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+				err = 1 ;
+				break ;
+			}
+
 			if(trgs[cou].t==0) {
-				LOG(ERR,"RDO %d: token 0 -- ignoring",rdo.rdo) ;
+				LOG(ERR,"RDO %d: token 0 (prompt) -- ignoring: 0x%08X",rdo.rdo,dta) ;
 				err = 1 ;
 				continue ;
 			}
-			// check for overrun
+
+			// check for busy overrun
 			if((dta & 0x3000000) != 0x2000000) {
-				LOG(ERR,"RDO %d: T %d: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+				LOG(ERR,"RDO %d: T %d: prompt: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
 				err = 1 ;
 			}
 
@@ -1544,7 +1555,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 
 		trgs[cou].t = rdo.token ;
 		trgs[cou].daq = 0 ;
-		trgs[cou].trg = 5 ;	// dummy
+		trgs[cou].trg = 4 ;	// dummy
 		trgs[cou].rhic_delta = 0 ;
 		trgs[cou].rhic = 0 ;
 		
@@ -1582,15 +1593,38 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 
 
 			switch(trgs[cou].trg) {
-			case 13 :
-			case 15 :
+			case 13 :	// L2 ABORT
+			case 15 :	// L2 ACCEPT
 				break ;
 			default :
-				// check for overrun
+				// check for overrun UNLESS the actual command
 				if((dta & 0x3000000) != 0x2000000) {
-					LOG(ERR,"RDO %d: T %d: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
-					err = 1 ;
+					if(trgs[0].trg == 9) { // laser!	
+						LOG(NOTE,"RDO %d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+					}
+					else {
+						LOG(ERR,"RDO %d: T %d: FIFO: BUSY overrun: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+						err = 1 ;
+					}
 				}
+
+				switch(trgs[cou].trg) {
+				case 4 :	// physics
+				case 9 :	// laser
+				case 10 :	// pulser
+					break ;
+				default:
+					if(trgs[0].trg == 9) { //laser!	
+						LOG(NOTE,"RDO %d: T %d: FIFO: bad trg_cmd: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+					}
+					else {
+						LOG(ERR,"RDO %d: T %d: FIFO: bad trg_cmd: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+						err = 1 ;
+					}
+					break ;
+				}
+
+					
 				continue ;
 			}
 
@@ -1601,6 +1635,13 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			}
 			else {
 				trgs[cou].rhic_delta = -(collision - rhic) ;
+			}
+
+			if(trgs[cou].rhic_delta == 1) {
+				LOG(NOTE,"RDO %d: T %d: FIFO: delta == 1: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;
+				if(trgs[0].trg == 9) {		// a laser...
+					continue ;
+				}
 			}
 
 			if(trgs[cou].t == 0) {
@@ -1616,7 +1657,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 
 	if(err) {	// dump out everyhign
 		for(u_int i=0;i<rdo.trg_cou;i++) {
-			LOG(ERR,"RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
+			LOG(ERR,"  RDO %d: T %4d: %d/%d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg_cou, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
 	}
 	else if((rdo.rdo==1) && ((rdo.sector==13) || (rdo.sector==1))) {
