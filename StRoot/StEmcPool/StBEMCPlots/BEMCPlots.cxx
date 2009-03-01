@@ -126,7 +126,7 @@ BEMCPlots::BEMCPlots(TObjArray *list)
       this->mHistSmdFeeSum = new TH2F(HistSmdFeeSumName, "BSMD FEE Sum;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 20000-0.5);
       this->mHistPsdFeeSum = new TH2F(HistPsdFeeSumName, "BPRS FEE Sum;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
 
-      this->mHistSmdFeeSumNonZS = new TH2F(HistSmdFeeSumNonZSName, "BSMD FEE Sum, Non-ZS;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 20000-0.5);
+      this->mHistSmdFeeSumNonZS = new TH2F(HistSmdFeeSumNonZSName, "BSMD FEE Sum, Non-ZS;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
       this->mHistPsdFeeSumNonZS = new TH2F(HistPsdFeeSumNonZSName, "BPRS FEE Sum, Non-ZS;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
 
       ADDHIST(this->mHistRawAdc1)
