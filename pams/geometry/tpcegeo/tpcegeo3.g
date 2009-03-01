@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.4 2009/02/24 19:50:08 perev Exp $
+!// $Id: tpcegeo3.g,v 1.5 2009/03/01 18:46:36 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.5  2009/03/01 18:46:36  perev
+!// double shift -15 fixed
+!//
 !// Revision 1.4  2009/02/24 19:50:08  perev
 !// TSWH MANY temporary
 !//
@@ -581,7 +584,7 @@ Block TPCE is the TPC envelope
       Create and position TIFC        "   inner cage   "
       Create and position TOFC        "   outer cage   "                 
 
-     do iSecAng = -15,360-15-30,30   
+     do iSecAng = 0,360-30,30   
        Create and Position TSWH            alphaz=iSecAng kOnly='MANY'
        Create and Position TSWH ort = XY-Z alphaz=iSecAng kOnly='MANY'
      endDo
@@ -1555,15 +1558,16 @@ endBlock	"end FEES"
 *                       section one - sensitive gas                          *
 ******************************************************************************
 *
-Block  TPGV is the Gas Volume placed in TPC
+Block TPGV is the Gas Volume placed in TPC
 *
+      Attribute TPGV      seen=1  colo=kRed
       Material P10
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
       Create    TPSS
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block  TPSS is a division of gas volume corresponding to a supersectors 
-      attribute TPSS  seen=0
+      attribute TPSS  seen=1  colo=kBlue
       shape Division  NDIV=12  IAXIS=2
 *
       do i_sec=1,2
