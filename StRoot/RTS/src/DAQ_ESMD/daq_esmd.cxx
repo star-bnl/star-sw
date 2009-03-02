@@ -258,6 +258,9 @@ int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int d
 	trg[1].daq = us[1] ;
 	trg[1].rhic = trg[0].rhic + 1 ;
 
-	
+	if(us[0] != 0xF) {
+		LOG(ERR,"trg cmd not 15? 0x%04X 0x%04X 0x%04X 0x%04X 0x04X",us[0],us[1],us[2],us[3],us[4]) ;
+	}
+
 	return 2 ;
 }
