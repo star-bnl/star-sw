@@ -295,7 +295,12 @@ int fs_index::mount(int ip, int port)
 		optval /= 2 ;
 	}
 
-
+	// check
+	int new_val ;
+	socklen_t new_val_len  = sizeof(new_val) ;
+	ret = getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &new_val, &new_val_len) ;
+	
+	LOG(NOTE,"mount: IP 0x%08X:%d  claims %d buffer bytes, reports %d (%d)",ip,port,optval,new_val,ret) ;
 
 
 	return mount(fd) ;
