@@ -42,7 +42,6 @@
 #define TRG_EMC_BIT     TRG_BTOW_BIT    // use "BTOW"
 
 #define TRG_FPD_BIT     7
-#define TRG_FP2_BIT	TRG_FPD_BIT	// same bit as for older FPD
 
 #define TRG_ETOW_BIT    8
 #define TRG_EEC_BIT     TRG_ETOW_BIT    // use "ETOW"
@@ -88,8 +87,6 @@
 #define TCD_PMD         19      //
 #define TCD_TPC         20      // empty, Nov, 2008
 #define TCD_VPD		21      // Tonko,March07,instead of: TPC's cable driver slot
-
-#define TCD_HFT         TCD_TPC  // for now HFT uses TPC TCD
 
 
 // Trigger Detector groupings...
@@ -233,9 +230,9 @@ so we keep it here for source compatibility
 #define DAQ_ID          DAQ_SYSTEM
 #define RTS_SYSTEM	DAQ_SYSTEM	/* global */
 
-// the "new" (2002-03) FPD
-#define FP2_SYSTEM	16
-#define FP2_ID		FP2_SYSTEM
+// the "new" (2002-03) FPD; Tonko: FP2 was NEVER used -- changing it to FGT in Feb 09!
+#define FGT_SYSTEM	16
+#define FGT_ID		FGT_SYSTEM
 
 #define PP_SYSTEM       17              /* pp2pp */
 #define PP_ID           PP_SYSTEM
@@ -436,8 +433,8 @@ so we keep it here for source compatibility
 #define SSD_NODE	SSD01_NODE
 
 
-#define FP201_NODE	((EXT_SYSTEM<<12)|(FP2_SYSTEM<<4) | 1)
-#define FP2_NODE	FP201_NODE
+#define FGT01_NODE	((EXT_SYSTEM<<12)|(FGT_SYSTEM<<4) | 1)
+#define FGT_NODE	FGT01_NODE
 
 /* Endcap */
 
@@ -531,8 +528,8 @@ extern inline char *rts2name(int rts_id)
 		return "SSD" ;
 	case ETOW_SYSTEM :
 		return "ETOW" ;
-	case FP2_SYSTEM :	// watch it!
-		return "FP2" ;
+	case FGT_SYSTEM :	// watch it!
+		return "FGT" ;
 	case BSMD_SYSTEM :
 		return "BSMD" ;
 	case ESMD_SYSTEM :
@@ -588,6 +585,7 @@ extern inline int rts2det(int ix)
 	case TPX_ID :
 	case HFT_ID :
 	case PP_ID :
+	case FGT_ID :
 		return ix ;
 	default :
 		return -1 ;
@@ -619,7 +617,7 @@ extern inline int rts2tcd(int rts)
 		TCD_BSMD,
 		TCD_ESMD,
 		TCD_TPX,       /* TPX */
-		TCD_HFT,       
+		-1,
 		-1,
 		-1,
 		-1,
@@ -672,11 +670,10 @@ extern inline int tcd2rts(int tcd)
 	return map[tcd] ;
 } ;
 
-//#define LEGACY_DETS ((1<<TPC_ID) | (1<<FTP_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ETOW_ID) | (1<<ESMD_ID) | (1<<BTOW_ID) | (1<<BSMD_ID))
 
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS ((1<<FTP_ID) | (1<<PMD_ID) | (1<<BSMD_ID))
-#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<HFT_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID))
+#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<HFT_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID))
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
@@ -686,7 +683,7 @@ extern inline u_int grp2rts_mask(int grp)
 	ret = 0 ;
 
 	if(grp & (1<<FTP_GRP)) {
-	  ret  |= (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM) | (1<<SSD_SYSTEM);
+	  ret  |= (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM) | (1<<SSD_SYSTEM) | (1<<FGT_SYSTEM);
 	}
 	if(grp & (1 << PP_GRP)) {
 	  ret |= (1 << PP_SYSTEM);
@@ -725,7 +722,7 @@ extern inline int rts2grp(int rts)
     case HFT_ID:
     case SSD_ID:
     case FPD_ID: 
-    case FP2_ID:
+    case FGT_ID:	// no idea which group it will belong...
       return FTP_GRP;
     case PP_ID:      return PP_GRP;
     case BTOW_ID:    return BTOW_GRP;
