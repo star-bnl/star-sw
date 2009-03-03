@@ -5,7 +5,7 @@
 #include "gl3LMVertexFinder.h"
 #include "FtfSl3.h"
 #include "sizes.h"
-
+#include "DAQ_L3/daq_l3.h"
 
 // bField is a pain in the neck.
 //
@@ -102,6 +102,8 @@ public:
 
   void dumpGTD(L3_GTD *gtd);
   gl3Event *getL3Event() const { return gl3;}
+
+  int copyl3_t(l3_t &l3, L3_P *l3p);
 
 private:
 
