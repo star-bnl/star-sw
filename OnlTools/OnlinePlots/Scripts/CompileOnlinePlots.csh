@@ -43,6 +43,9 @@ Plugin.TVirtualX:        qt     TGQt             GQt       "TGQt(const char*,con
 Plugin.TGuiFactory:      qtgui  TQtGUIFactory    QtRootGui "TQtGUIFactory()"
 Plugin.TVirtualViewer3D: ogl    TQtRootViewer3D  RQTGL    "TQtRootViewer3D(TVirtualPad*)"
 +Plugin.TVirtualViewer3D: oiv   TQtRootCoinViewer3D  RQIVTGL    "TQtRootCoinViewer3D(TVirtualPad*)"
+
+#Local codes on evp:
++Unix.*.Root.MacroPath:	:/home/operator/LOCAL_CODES/macros
 __ROOTRC__
 
 
