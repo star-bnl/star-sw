@@ -162,11 +162,13 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   else {
     setCaption("STAR Histogram Presenter");
 
-    fActions[kLive]->setOn(true);
-    emit live();
+ //   fActions[kLive]->setOn(true);
+//    emit live();
     // Adjust the GUI refresh rate msec.
     fGuiRefreshRate = gEnv->GetValue("Online.GuiRefreshRate",100);
+    fActions[kAutoUpdate]->blockSignals(true);
     fActions[kAutoUpdate]->setOn(true);
+    fActions[kAutoUpdate]->blockSignals(false);
   }
   
   
@@ -619,7 +621,11 @@ int PresenterGui::ParseString (const TString &tChain, TObjArray &Opt)
     }
   return nParsed;
 }
-
+//--------------------------------------------------------------
+void  PresenterGui::TurnLive(bool on)
+{
+   fActions[kLive]->setOn(on);
+}
 
 //--------------------------------------------------------------
 void PresenterGui::DoLiveButton()
@@ -628,10 +634,11 @@ void PresenterGui::DoLiveButton()
   // Connect to mmap file
   if(mDebugLevel) {
     cout<<"Live Button Pressed  "<< this << endl;
-   } 
-  emit live();
-  fActions[kLive]->setOn(true);
-  emit update(GetCanvas(), GetTabId(), GetSubTabId() );
+  } 
+  if (fActions[kLive]->isOn()) { 
+      emit live();
+      emit update(GetCanvas(), GetTabId(), GetSubTabId() );
+  }
 
 //mEvpClient->Stop();   // will restart automatically
   //mEvpClient->SetSource();

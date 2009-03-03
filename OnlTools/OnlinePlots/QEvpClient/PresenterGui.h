@@ -137,6 +137,7 @@ private:
 
 public slots:
      void  ProcessMessage();
+     void  TurnLive(bool on=true);
      void SaveCB();
      void SaveAsCB();
      void PrintCB();

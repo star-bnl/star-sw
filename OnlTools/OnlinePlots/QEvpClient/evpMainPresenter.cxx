@@ -41,10 +41,6 @@ int evpMainPresenter::main(int argc, char **argv )
     }
 #endif
 
-    gui->resize(500,500);
-    gui->show();
-
-    
 
     EvpUtil::ReadCanvasDefinitions();
     
@@ -52,6 +48,9 @@ int evpMainPresenter::main(int argc, char **argv )
     EvpPresenter* presenter = new EvpPresenter();
     PresenterConnect* con = new PresenterConnect(gui,presenter);
     presenter->Connect();
+    gui->resize(500,500);
+    gui->show();
+    gui->TurnLive();
     // Everything is ready. It is safe to fire the event loop now !
     QTimer::singleShot (0,gui,SLOT(GetNextEvent()));
     //presenter->run();
