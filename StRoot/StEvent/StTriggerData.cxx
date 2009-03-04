@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.6 2009/02/27 02:56:52 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.7 2009/03/04 02:01:30 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.7  2009/03/04 02:01:30  ullrich
+ * New access functions for ZDC DSM layer-1 and layer-2 data.
+ *
  * Revision 2.6  2009/02/27 02:56:52  ullrich
  * Fixed bug in reading pre/post data.
  *
@@ -31,7 +34,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.6 2009/02/27 02:56:52 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.7 2009/03/04 02:01:30 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -46,6 +49,7 @@ int StTriggerData::prepostAddress(int prepost) const
     if (prepost < 0 && -prepost <= npre) return 1+npre+prepost;
     int npost = numberOfPostXing();
     if (prepost > 0 &&  prepost <= npost) return npre+prepost;
+    gMessMgr->Warning() << "Wrong prepost " << prepost << " (pre=" << numberOfPreXing() << ", post=" << numberOfPostXing() << ")" << endm;
     return -1;
 }
 

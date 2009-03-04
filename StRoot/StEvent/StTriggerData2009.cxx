@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.8 2009/02/26 17:33:20 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.9 2009/03/04 02:01:30 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.9  2009/03/04 02:01:30  ullrich
+ * New access functions for ZDC DSM layer-1 and layer-2 data.
+ *
  * Revision 2.8  2009/02/26 17:33:20  ullrich
  * Fixes to prevent crashes in ppplot.
  *
@@ -162,7 +165,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
         if (mQT3[i]) decodeQT(mQT3[i]->length/4, mQT3[i]->data, qt3[i], tqt3[i]); 
         if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4[i], tqt4[i]); 
     }
-    dump();
+    if (debug>0) dump();
 }
 
 StTriggerData2009::~StTriggerData2009() {delete mData;}
@@ -401,6 +404,13 @@ unsigned short StTriggerData2009::fpdLayer2DSMRaw(int channel) const{
     return 0;
 }
 
+bool StTriggerData2009::zdcPresent(int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return mBBQ[buffer];
+    return false;
+}
+
 unsigned short StTriggerData2009::zdcAtChannel(int channel, int prepost) const
 {
     int buffer = prepostAddress(prepost);
@@ -486,6 +496,13 @@ unsigned short StTriggerData2009::zdcHardwareSum(int prepost) const
     return 0;
 }
 
+bool StTriggerData2009::zdcSMDPresent(int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0) return mMXQ[buffer];
+    return false;
+}
+
 unsigned short StTriggerData2009::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const
 {
     static const int zdcsmd_map[2][2][8] ={
@@ -499,6 +516,85 @@ unsigned short StTriggerData2009::zdcSMD(StBeamDirection eastwest, int verthori,
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) return mxq[buffer][4][zdcsmd_map[eastwest][verthori][strip-1]];
     return 0;
+}
+
+unsigned short StTriggerData2009::zdcEarliestTDC(StBeamDirection eastwest, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if(buffer >=0){
+        if(mBBC[buffer]){
+            if(eastwest==east) {return ((mBBC[buffer]->ZDClayer1[3] >> 12) % 16) | ((mBBC[buffer]->ZDClayer1[2] % 256) << 4);}
+            else               {return (mBBC[buffer]->ZDClayer1[3]) % 4096;}
+        }
+    }
+    return 0;
+}
+
+bool StTriggerData2009::zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
+    int buffer = prepostAddress(prepost);
+    if(buffer >=0){
+        if(mBBC[buffer]){
+            if(eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (27-16));}
+            else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (24-16));}
+        }
+    }
+    return 0;
+}
+
+bool StTriggerData2009::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
+    int buffer = prepostAddress(prepost);
+    if(buffer >=0){
+        if(mBBC[buffer]){
+            if(eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (29-16));}
+            else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (26-16));}
+        }
+    }
+    return 0;
+}
+
+bool StTriggerData2009::zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
+    int buffer = prepostAddress(prepost);
+    if(buffer >=0){
+        if(mBBC[buffer]){
+            if(eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (28-16));}
+            else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (25-16));}
+        }
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2009::zdcTimeDifference() const
+{
+    return L1_DSM->VTX[1]%1024;
+}
+
+bool StTriggerData2009::zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const {
+    return L1_DSM->VTX[1] & (1 << ((eastwest==east) ? 10 : 11));
+}
+
+bool StTriggerData2009::zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const {
+    return L1_DSM->VTX[1] & (1 << ((eastwest==east) ? 12 : 14));
+}
+
+bool StTriggerData2009::zdcBackADCaboveThresholdL2(StBeamDirection eastwest) const {
+    return L1_DSM->VTX[1] & (1 << ((eastwest==east) ? 13 : 15));
+}
+
+bool StTriggerData2009::zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const {
+    return lastDSM(2) & (1 << ((eastwest==east) ? 7 : 8));
+}
+
+bool StTriggerData2009::zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const {
+    return lastDSM(2) & (1 << ((eastwest==east) ? 9 : 11));
+}
+
+bool StTriggerData2009::zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const {
+    return lastDSM(2) & (1 << ((eastwest==east) ? 10 : 12));
+}
+
+bool StTriggerData2009::zdcTimeDifferenceInWindow() const
+{
+    return lastDSM(2) & (1 << 6);
 }
 
 unsigned short StTriggerData2009::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const
@@ -876,6 +972,8 @@ void StTriggerData2009::dump() const
     }
     printf(" BBC Earilest : ");  printf("East=%d  West=%d  Difference+256=%d\n",
     				bbcEarliestTDC(east,0),bbcEarliestTDC(west,0),bbcTimeDifference());
+    printf(" ZDC Earilest : ");  printf("East=%d  West=%d  Difference=%d\n",
+    				zdcEarliestTDC(east,0),zdcEarliestTDC(west,0),zdcTimeDifference());
     //printf(" FPD East North   : ");for (int i=1; i<=49;i++){ printf("%d ",fpd(east,0,i,0));  }; printf("\n");
     //printf(" FPD East South   : ");for (int i=1; i<=49;i++){ printf("%d ",fpd(east,1,i,0));  }; printf("\n");
     //printf(" FPD East Top     : ");for (int i=1; i<=25;i++){ printf("%d ",fpd(east,2,i,0));  }; printf("\n");
@@ -896,6 +994,38 @@ void StTriggerData2009::dump() const
     printf(" VPD TimeDifference : %d\n", vpdTimeDifference());
     printf(" L2 result : \n"); 
     for (int j=0; j<4 ;j++) { for (int k=0; k<16; k++) {printf("%u ",*(l2Result()+j*16+k)); } printf("\n");}
+    printf("\n");
+    printf("BBClayer1:");
+    int buffer = prepostAddress(0);
+    if(buffer >=0){
+        if(mBBC[buffer]){
+            for (int i = 0;i < 16;i++) printf(" %1x %04X", i, mBBC[buffer]->BBClayer1[i]);
+	}
+    }
+    printf("\n");
+    printf("ZDClayer1:");
+    if(buffer >=0){
+        if(mBBC[buffer]){
+            for (int i = 0;i < 8;i++) printf(" %1x %04X", i, mBBC[buffer]->ZDClayer1[i]);
+	}
+    }
+    printf("\n");
+    printf("VPDlayer1:");
+    if(buffer >=0){
+        if(mBBC[buffer]){
+            for (int i = 0;i < 8;i++) printf(" %1x %04X", i, mBBC[buffer]->VPD[i]);
+	}
+    }
+    printf("\n");
+    printf("VTX:");
+    if(L1_DSM){
+        for (int i = 0;i < 8;i++) printf(" %1x %04X", i, L1_DSM->VTX[i]);
+    }
+    printf("\n");
+    printf("Last DSM:");
+    if(L1_DSM){
+        for (int i = 0;i < 8;i++) printf(" %1x %04X", i, L1_DSM->lastDSM[i]);
+    }
     printf("\n");
     printf("***** StTriggerData Dump *****\n");
 }
