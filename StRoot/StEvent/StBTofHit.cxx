@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHit.cxx,v 2.2 2009/01/15 00:46:25 ullrich Exp $
+ * $Id: StBTofHit.cxx,v 2.3 2009/03/04 04:36:58 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHit.cxx,v $
+ * Revision 2.3  2009/03/04 04:36:58  ullrich
+ * Added missing check for valid pointer to operator<<
+ *
  * Revision 2.2  2009/01/15 00:46:25  ullrich
  * tray() now returns int.
  *
@@ -98,11 +101,11 @@ StBTofHit::setIdTruth(int idtru,int qatru)
 ostream&
 operator<<(ostream &os, const StBTofHit& hit)
 {
-    os << " Tray:" << hit.tray() << " Module:" << hit.module()
+    os << " Tray:" << hit.tray() << "  Module:" << hit.module()
        << " Cell:" << hit.cell() << endl
        << " LeTime " << hit.leadingEdgeTime() 
        << " TeTime " << hit.trailingEdgeTime() << endl
-       << " Track " << hit.associatedTrack()->key() << endl
+       << " Track " << (hit.associatedTrack() ? hit.associatedTrack()->key() : 0) << endl
        << " IdTruth " << hit.idTruth() << " Quality " << hit.qaTruth() << endl;
     return os;
 }
