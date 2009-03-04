@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.h,v 1.2 2009/02/13 23:32:52 dongx Exp $
+ * $Id: StBTofINLCorr.h,v 1.3 2009/03/04 04:57:36 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.h,v $
+ * Revision 1.3  2009/03/04 04:57:36  dongx
+ * INL arrays changed from float to short - memory occupied reduced by a factor of 2
+ *
  * Revision 1.2  2009/02/13 23:32:52  dongx
  * fixed the crash when no INL table for some board is available
  *
@@ -55,7 +58,7 @@ class StBTofINLCorr{
 
   Int_t mBoardId[mNTDIGMAX];
   Int_t mBoardId2Index[mNBoardIdMAX];   // index in mNTDIGMAX for board #Id
-  Float_t mINLCorr[mNTDIGMAX][mNChanOnTDIG][mNChanMAX];
+  Short_t mINLCorr[mNTDIGMAX][mNChanOnTDIG][mNChanMAX];
 
   Int_t mNValidTrays;
 

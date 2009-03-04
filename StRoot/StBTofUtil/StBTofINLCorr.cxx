@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.4 2009/02/23 23:52:07 dongx Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.5 2009/03/04 04:57:36 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.5  2009/03/04 04:57:36  dongx
+ * INL arrays changed from float to short - memory occupied reduced by a factor of 2
+ *
  * Revision 1.4  2009/02/23 23:52:07  dongx
  * In case of missing INL tables in db, return the INL corr from the first element in db
  *
@@ -130,7 +133,7 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
 
     if(maker->Debug()) { LOG_DEBUG << " tdigId=" << tdigId << "  tdcChanId=" << tdcChanId << endm; }
     for(Int_t j=0;j<mNChanMAX;j++) {
-      float corr = (Float_t)(inlcorr[i].INLCorr[j])/100.;
+      Short_t corr = (Short_t)(inlcorr[i].INLCorr[j]);
       mINLCorr[NTdig-1][tdcChanId][j] = corr;
       
       if(maker->Debug()&&(j%200==0)) {
@@ -171,7 +174,7 @@ void StBTofINLCorr::Reset() {
     mBoardId[i] = 0;
     for(int j=0;j<mNChanOnTDIG;j++) {
       for(int k=0;k<mNChanMAX;k++) {
-	mINLCorr[i][j][k] = 0.0;
+	mINLCorr[i][j][k] = 0;
       }
     }
   }
@@ -197,9 +200,9 @@ float StBTofINLCorr::getTrayINLCorr(int trayId, int globalTdcChan, int bin) {
     LOG_WARN << " Missing INL table for boardId = " << boardId << " on tray " << trayId << endm;
     LOG_WARN << " Using the table from boardId # " << mBoardId[0] << " tdcchan # 0 " << endm;
 //    return 0.0;
-    return mINLCorr[0][0][bin];
+    return mINLCorr[0][0][bin]/100.;
   } else {
-    return mINLCorr[index][tdcChan][bin];
+    return mINLCorr[index][tdcChan][bin]/100.;
   }
 }
 
@@ -223,8 +226,8 @@ float StBTofINLCorr::getVpdINLCorr(StBeamDirection eastwest, int globalTdcChan, 
     LOG_WARN << " Missing INL table for boardId = " << boardId << " on vpd " << eastwest << endm;
     LOG_WARN << " Using the table from boardId # " << mBoardId[0] << " tdcchan # 0 " << endm;
 //    return 0.0;
-    return mINLCorr[0][0][bin];
+    return mINLCorr[0][0][bin]/100.;
   } else {
-    return mINLCorr[index][tdcChan][bin];
+    return mINLCorr[index][tdcChan][bin]/100.;
   }
 }
