@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.5 2009/02/23 22:31:09 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.6 2009/03/04 02:01:30 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.6  2009/03/04 02:01:30  ullrich
+ * New access functions for ZDC DSM layer-1 and layer-2 data.
+ *
  * Revision 2.5  2009/02/23 22:31:09  ullrich
  * Fixed problem when running over 2009 data (solution by Pibero) and new VPD access functions.
  *
@@ -112,6 +115,7 @@ public:
     unsigned int*  QTdata(int prepost=0) const;    
 
     //ZDC
+    bool zdcPresent(int prepost=0) const;
     unsigned short zdcAtChannel(int channel, int prepost=0) const;
     unsigned short zdcAtAddress(int address, int prepost=0) const;
     unsigned short zdcUnAttenuated(StBeamDirection eastwest, int prepost=0) const;
@@ -120,8 +124,24 @@ public:
     unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short zdcHardwareSum(int prepost=0) const;
+    //ZDC DSM L1
+    unsigned short zdcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
+    bool zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
+    bool zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
+    bool zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
+     //ZDC DSM L2
+    bool zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const;
+    bool zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const;
+    bool zdcBackADCaboveThresholdL2(StBeamDirection eastwest) const;
+    unsigned short zdcTimeDifference() const;
+     //ZDC Last DSM
+    bool zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const;
+    bool zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const;
+    bool zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const;
+    bool zdcTimeDifferenceInWindow() const;
     
     //ZDCSMD
+    bool zdcSMDPresent(int prepost=0) const;
     unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
     
     // EMC

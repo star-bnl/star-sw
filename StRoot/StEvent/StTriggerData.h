@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.25 2009/02/23 22:31:09 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.26 2009/03/04 02:01:30 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.26  2009/03/04 02:01:30  ullrich
+ * New access functions for ZDC DSM layer-1 and layer-2 data.
+ *
  * Revision 2.25  2009/02/23 22:31:09  ullrich
  * Fixed problem when running over 2009 data (solution by Pibero) and new VPD access functions.
  *
@@ -167,6 +170,7 @@ public:
     virtual unsigned short mwc(int sector, int prepost=0) const;
 
     // ZDC 
+    virtual bool zdcPresent(int prepost=0) const;
     virtual unsigned short zdcAtChannel(int channel, int prepost=0) const;
     virtual unsigned short zdcAtAddress(int address, int prepost=0) const;
     virtual unsigned short zdcUnAttenuated(StBeamDirection eastwest, int prepost=0) const;
@@ -175,8 +179,24 @@ public:
     virtual unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short zdcHardwareSum(int prepost=0) const;
+    // ZDC DSM L1
+    virtual unsigned short zdcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
+    virtual bool zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
+    virtual bool zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
+    virtual bool zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
+    // ZDC DSM L2
+    virtual bool zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const;
+    virtual bool zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const;
+    virtual bool zdcBackADCaboveThresholdL2(StBeamDirection eastwest) const;
+    virtual unsigned short zdcTimeDifference() const;
+    // ZDC DSM L3
+    virtual bool zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const;
+    virtual bool zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const;
+    virtual bool zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const;
+    virtual bool zdcTimeDifferenceInWindow() const;
 
     //ZDCSMD
+    virtual bool zdcSMDPresent(int prepost=0) const;
     virtual unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
   
     // EMC
@@ -314,6 +334,7 @@ inline unsigned short StTriggerData::ctb(int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::ctbTraySlat(int tray, int slat, int prepost) const {return 0;}
 inline unsigned short StTriggerData::ctbSum(int prepost) const {return 0;}
 inline unsigned short StTriggerData::mwc(int sector, int prepost) const {return 0;}
+inline bool StTriggerData::zdcPresent(int prepost) const {return 1;}
 inline unsigned short StTriggerData::zdcAtChannel(int channel, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAtAddress(int address, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcUnAttenuated(StBeamDirection eastwest, int prepost) const {return 0;}
@@ -322,6 +343,19 @@ inline unsigned short StTriggerData::zdcADC(StBeamDirection eastwest, int pmt, i
 inline unsigned short StTriggerData::zdcTDC(StBeamDirection eastwest, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcHardwareSum(int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
+inline bool StTriggerData::zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost) const {return 0;}
+inline bool StTriggerData::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost) const {return 0;}
+inline bool StTriggerData::zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost) const {return 0;}
+inline bool StTriggerData::zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const {return 0;}
+inline bool StTriggerData::zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const {return 0;}
+inline bool StTriggerData::zdcBackADCaboveThresholdL2(StBeamDirection eastwest) const {return 0;}
+inline unsigned short StTriggerData::zdcTimeDifference() const {return 0;}
+inline bool StTriggerData::zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const {return 0;}
+inline bool StTriggerData::zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const {return 0;}
+inline bool StTriggerData::zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const {return 0;}
+inline bool StTriggerData::zdcTimeDifferenceInWindow() const {return 0;}
+inline bool StTriggerData::zdcSMDPresent(int prepost) const {return 1;}
 inline unsigned short StTriggerData::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const {return 0;}
 inline unsigned char  StTriggerData::bemcHighTower(int patch_id, int prepost) const {return 0;}
 inline unsigned char  StTriggerData::bemcJetPatch (int patch_id, int prepost) const {return 0;}
