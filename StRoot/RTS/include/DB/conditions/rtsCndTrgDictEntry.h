@@ -19,6 +19,9 @@ struct rtsCndTrgDictEntry
   int reg;                 /* added as of version 10.0 */
   char label[DB_MAX_STR_LEN];
   int value;                    /* -1 for non-register values... */
+
+  // 3/3/09
+  int defaultvalue;
 };
 
 #endif
