@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.45 2009/02/20 16:37:44 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.46 2009/03/05 04:39:25 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -453,8 +453,7 @@ StEvent* StMuDst::createStEvent() {
     }
     btofcoll->addRawHit(aRawHit);
   }
-  btofcoll->setHeader(new StBTofHeader(*(btofHeader())));
-
+  if(btofHeader()) btofcoll->setHeader(new StBTofHeader(*(btofHeader())));
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
   StTriggerId triggerId;
@@ -627,6 +626,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.46  2009/03/05 04:39:25  tone421
+ * Added safety check for btofcoll->setHeader(new StBTofHeader(*(btofHeader()))) on line 456
+ *
  * Revision 1.45  2009/02/20 16:37:44  tone421
  * *** empty log message ***
  *
