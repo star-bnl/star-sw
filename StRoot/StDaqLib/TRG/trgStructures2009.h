@@ -43,6 +43,18 @@
 #define y9ADD_BIT_L2_5           6              /* Level 2.5 abort */
 #define y9ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
 
+#define L2RESULTS_2009_OFFSET_EMC_CHECK   1
+#define L2RESULTS_2009_OFFSET_EMC_PED     2
+#define L2RESULTS_2009_OFFSET_BGAMMA      3
+#define L2RESULTS_2009_OFFSET_EGAMMA      6
+#define L2RESULTS_2009_OFFSET_DIJET       9 
+#define L2RESULTS_2009_OFFSET_UPSILON     17
+#define L2RESULTS_2009_OFFSET_BEMCW       20
+#define L2RESULTS_2009_OFFSET_BHIEN       42
+#define L2RESULTS_2009_OFFSET_EHIEN       0
+#define L2RESULTS_2009_OFFSET_BTOW_CAL    0
+#define L2RESULTS_2009_OFFSET_ETOW_CAL    0
+
     /* Event Descriptor Data Structures */
     
 typedef struct {
