@@ -7,8 +7,8 @@
 #define __PROJECTPATH__  PROJECTDIR
 #endif
 
-#define MAX_TABS 16
-#define MAX_SUBTABS 16
+#define MAX_TABS 18
+#define MAX_SUBTABS 18
 #define MAX_PADS 64
 #define MAX_NAME 32
 #define MAX_GARBAGE 256
@@ -102,7 +102,7 @@ class EvpUtil {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.h,v 1.4 2009/02/27 22:30:17 dkettler Exp $
+ * $Id: EvpUtil.h,v 1.5 2009/03/05 00:03:16 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -112,6 +112,9 @@ class EvpUtil {
  ***************************************************************************
  *
  * $Log: EvpUtil.h,v $
+ * Revision 1.5  2009/03/05 00:03:16  dkettler
+ * EMC Updates
+ *
  * Revision 1.4  2009/02/27 22:30:17  dkettler
  * TOF Updates
  *

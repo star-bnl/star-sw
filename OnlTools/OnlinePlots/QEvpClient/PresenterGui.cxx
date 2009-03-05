@@ -203,17 +203,19 @@ void PresenterGui::SetDefaults()
   TabNames[2][0]="L3";
   TabNames[3][0]="TPC";
   TabNames[4][0]="SVT";
-  TabNames[5][0]="BEMC";
-  TabNames[6][0]="FTPC";
-  TabNames[7][0]="TOF";
-  TabNames[8][0]="BBC";
-  TabNames[9][0]="FPD";
-  TabNames[10][0]="ETOW";
-  TabNames[11][0]="ESMD";
-  TabNames[12][0]="EEMC trig";
-  TabNames[13][0]="SSD";
-  TabNames[14][0]="ZDC SMD";
-  TabNames[15][0]="PMD";
+  TabNames[5][0]="BEMC Expert";
+  TabNames[6][0]="BEMC Shift";
+  TabNames[7][0]="FTPC";
+  TabNames[8][0]="TOF";
+  TabNames[9][0]="BBC";
+  TabNames[10][0]="FPD";
+  TabNames[11][0]="ETOW";
+  TabNames[12][0]="ESMD";
+  TabNames[13][0]="EEMC trig";
+  TabNames[14][0]="EEMC Shift";
+  TabNames[15][0]="SSD";
+  TabNames[16][0]="ZDC SMD";
+  TabNames[17][0]="PMD";
   //
   // Second Level Tab Names ( Differen for different subsystems)
   // Note that second index starts from 1. Index 0 is taken by
@@ -293,108 +295,135 @@ void PresenterGui::SetDefaults()
   TabNames[5][13]="Trigger corruption";
   TabNames[5][14]="PSD FEE Sum";
   TabNames[5][15]="BPRS ADC";
+  
+  //BEMC Shift
+  nSubTabs[6]=9;
+  TabNames[6][1]="Tower ADC";
+  TabNames[6][2]="ADC Eta Vs Phi";
+  TabNames[6][3]="SMD FEE Sum";
+  TabNames[6][4]="SMD Ave ADC- PED Eta";
+  TabNames[6][5]="SMD Ave ADC- PED Phi";
+  TabNames[6][6]="PSD FEE SUM";
+  TabNames[6][7]="BPRS ADC";
+  TabNames[6][8]="HT/TP FEE Out";
+  TabNames[6][9]="EMU Vs FEE Out";
+
+
   //FTPC
-  nSubTabs[6]=3;
-  TabNames[6][1]="FTPC Global";
-  TabNames[6][2]="FTPC Timebins";
-  TabNames[6][3]="FTPC Charge";
+  nSubTabs[7]=3;
+  TabNames[7][1]="FTPC Global";
+  TabNames[7][2]="FTPC Timebins";
+  TabNames[7][3]="FTPC Charge";
   //TOF
   // Jing Liu comments the following:
   //nSubTabs[7]=2;
   //TabNames[7][1]="TOFp Global";
   //TabNames[7][2]="TOFp Test";
   // Jing Liu changes the following, for run8 and future runs, 02/25/2008:
-  nSubTabs[7]=7;
-  TabNames[7][1]="upvpd";
-  TabNames[7][2]="TrayHitmap-west";  
-  TabNames[7][3]="TrayHitmap-east";  
-  TabNames[7][4]="ToT Tray01_30";
-  TabNames[7][5]="ToT Tray31_60";
-  TabNames[7][6]="ToT Tray61_90";
-  TabNames[7][7]="ToT Tray91_120";
+  nSubTabs[8]=7;
+  TabNames[8][1]="upvpd";
+  TabNames[8][2]="TrayHitmap-west";  
+  TabNames[8][3]="TrayHitmap-east";  
+  TabNames[8][4]="ToT Tray01_30";
+  TabNames[8][5]="ToT Tray31_60";
+  TabNames[8][6]="ToT Tray61_90";
+  TabNames[8][7]="ToT Tray91_120";
 
   //BBC
-  nSubTabs[8]=6;
-  TabNames[8][1]="BBC Hitmap";
-  TabNames[8][2]="BBC Multiplicity";
-  TabNames[8][3]="BBC ADCsum";
-  TabNames[8][4]="BBC TDC East";
-  TabNames[8][5]="BBC TDC West";
-  TabNames[8][6]="BBC Vertex";
+  nSubTabs[9]=6;
+  TabNames[9][1]="BBC Hitmap";
+  TabNames[9][2]="BBC Multiplicity";
+  TabNames[9][3]="BBC ADCsum";
+  TabNames[9][4]="BBC TDC East";
+  TabNames[9][5]="BBC TDC West";
+  TabNames[9][6]="BBC Vertex";
 
   //FPD
-  nSubTabs[9]=6;
-  TabNames[9][1]="East AdcSum";
-  TabNames[9][2]="West AdcSum";
-  TabNames[9][3]="East Hitmap";
-  TabNames[9][4]="West Hitmap";
-  TabNames[9][5]="East weighted Hitmap";
-  TabNames[9][6]="West weighted Hitmap";
+  nSubTabs[10]=6;
+  TabNames[10][1]="East AdcSum";
+  TabNames[10][2]="West AdcSum";
+  TabNames[10][3]="East Hitmap";
+  TabNames[10][4]="West Hitmap";
+  TabNames[10][5]="East weighted Hitmap";
+  TabNames[10][6]="West weighted Hitmap";
 
 
   //ETOW   <===== DAQ
-  nSubTabs[10]=6;
-  TabNames[10][1]="Jet Patch QA";
-  TabNames[10][2]="Corrupt";
-  TabNames[10][3]="Frequency";
-  TabNames[10][4]="Crates";
-  TabNames[10][5]="Hot Tw";
-  TabNames[10][6]="Mult >thr";
+  nSubTabs[11]=6;
+  TabNames[11][1]="Jet Patch QA";
+  TabNames[11][2]="Corrupt";
+  TabNames[11][3]="Frequency";
+  TabNames[11][4]="Crates";
+  TabNames[11][5]="Hot Tw";
+  TabNames[11][6]="Mult >thr";
     
   //ESMD  <===== DAQ
-  nSubTabs[11]=12;
-  TabNames[11][1]="corrupt";
-  TabNames[11][2]="pmt freq";
-  TabNames[11][3]="sect 12+1";
-  TabNames[11][4]="sect 2+3";
-  TabNames[11][5]="sect 4+5";
-  TabNames[11][6]="sect 6+7";
-  TabNames[11][7]="sect 8+9";
-  TabNames[11][8]="sect 10+11";
-  TabNames[11][9]="U freq";
-  TabNames[11][10]="V freq";
-  TabNames[11][11]="U mult>thr";
-  TabNames[11][12]="V mult>thr";
-    
+  nSubTabs[12]=12;
+  TabNames[12][1]="corrupt";
+  TabNames[12][2]="pmt freq";
+  TabNames[12][3]="sect 12+1";
+  TabNames[12][4]="sect 2+3";
+  TabNames[12][5]="sect 4+5";
+  TabNames[12][6]="sect 6+7";
+  TabNames[12][7]="sect 8+9";
+  TabNames[12][8]="sect 10+11";
+  TabNames[12][9]="U freq";
+  TabNames[12][10]="V freq";
+  TabNames[12][11]="U mult>thr";
+  TabNames[12][12]="V mult>thr";
+   
   //ETOW   <===== trig
-  nSubTabs[12]=11;
-  TabNames[12][1]="DSM-0 Hank's";
-  TabNames[12][2]="DSM-0 HT";
-  TabNames[12][3]="DSM-0 TP";
-  TabNames[12][4]="DSM-1 HT";
-  TabNames[12][5]="DSM-1 TP";
-  TabNames[12][6]="DSM 2+3 HT";
-  TabNames[12][7]="DSM-2 JP";
-  TabNames[12][8]="JP sum";
-  TabNames[12][9]="JP freq";
-  TabNames[12][10]="JP Adj";
-  TabNames[12][11]="Et Tot";
+  nSubTabs[13]=11;
+  TabNames[13][1]="DSM-0 Hank's";
+  TabNames[13][2]="DSM-0 HT";
+  TabNames[13][3]="DSM-0 TP";
+  TabNames[13][4]="DSM-1 HT";
+  TabNames[13][5]="DSM-1 TP";
+  TabNames[13][6]="DSM 2+3 HT";
+  TabNames[13][7]="DSM-2 JP";
+  TabNames[13][8]="JP sum";
+  TabNames[13][9]="JP freq";
+  TabNames[13][10]="JP Adj";
+  TabNames[13][11]="Et Tot";
     
+  //EEMC SHIFT
+  nSubTabs[14]=10;
+  TabNames[14][1]="Tower ADC";
+  TabNames[14][2]="ADC Eta Vs Phi";
+  TabNames[14][3]="SMD-ADC 12S1-1P1";
+  TabNames[14][4]="SMD-ADC 2S1-3P1";
+  TabNames[14][5]="SMD-ADC 4S1-5P1";
+  TabNames[14][6]="SMD-ADC 6S1-7P1";
+  TabNames[14][7]="SMD-ADC 8S1-9P1";
+  TabNames[14][8]="SMD-ADC 10S1-11P1";
+  TabNames[14][9]="HT/TP FEE Out";
+  TabNames[14][10]="EMU Vs FEE Out";
+  
 
   //SSD
-  nSubTabs[13]=8;
-  TabNames[13][1]="Event Size and Pulse";
-  TabNames[13][2]="Mean Occupancy";
-  TabNames[13][3]="Charge Matching";
-  TabNames[13][4]="Ladder Occupancy 1";
-  TabNames[13][5]="Ladder Occupancy 2";
-  TabNames[13][6]="Ladder Occupancy 3";
-  TabNames[13][7]="Ladder Occupancy 4";
-  TabNames[13][8]="Ladder Occupancy 5";
+  nSubTabs[15]=8;
+  TabNames[15][1]="Event Size and Pulse";
+  TabNames[15][2]="Mean Occupancy";
+  TabNames[15][3]="Charge Matching";
+  TabNames[15][4]="Ladder Occupancy 1";
+  TabNames[15][5]="Ladder Occupancy 2";
+  TabNames[15][6]="Ladder Occupancy 3";
+  TabNames[15][7]="Ladder Occupancy 4";
+  TabNames[15][8]="Ladder Occupancy 5";
   //ZDCSMD
-  nSubTabs[14]=1;
-  TabNames[14][1]="ZDC SMD";
+  nSubTabs[16]=1;
+  TabNames[16][1]="ZDC SMD";
   //PMD
-  nSubTabs[15]=9;
-  TabNames[15][1]="1-6";
-  TabNames[15][2]="7-12";
-  TabNames[15][3]="13-18";
-  TabNames[15][4]="19-24";
-  TabNames[15][5]="25-30";
-  TabNames[15][6]="31-36";
-  TabNames[15][7]="37-42";
-  TabNames[15][8]="43-48";
-  TabNames[15][9]="Chain vs Channel";
+  nSubTabs[17]=9;
+  TabNames[17][1]="1-6";
+  TabNames[17][2]="7-12";
+  TabNames[17][3]="13-18";
+  TabNames[17][4]="19-24";
+  TabNames[17][5]="25-30";
+  TabNames[17][6]="31-36";
+  TabNames[17][7]="37-42";
+  TabNames[17][8]="43-48";
+  TabNames[17][9]="Chain vs Channel";
   
   
   // define embedded canvas

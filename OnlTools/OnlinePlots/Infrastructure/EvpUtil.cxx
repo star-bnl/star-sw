@@ -601,14 +601,14 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   //==============================
 
   // EEMC
-  if(i>=10 && i<=12 ) {
+  if(i>=11 && i<=14 ) {
     //    printf("\n\n EEMC display i=%d j=%d\n\n",i,j);
         eePlot(i,j,gFile, gcc, gEnv->GetValue("Online.eemcMask","eemcTwMask.dat"));
 	goto ret;
   }
   
   // BEMC
-  if (i == 5) {
+  if (i == 5 || i ==6) {
     BEMCPlotsPresenter::displayTab(i - 5, j - 1, gFile, gcc, 0);
     goto ret;
     
@@ -621,7 +621,7 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   //CanvasDescription
   //02/26/2004 SP
   //
-  if(i==6 && j==3) {
+  if(i==7 && j==3) {
     gcc->SetLogz(0);
     gStyle->SetOptStat(0);
     //h11_ftp_evsize
@@ -939,7 +939,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.6 2009/02/11 22:18:57 jeromel Exp $
+ * $Id: EvpUtil.cxx,v 1.7 2009/03/05 00:03:15 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -949,6 +949,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.7  2009/03/05 00:03:15  dkettler
+ * EMC Updates
+ *
  * Revision 1.6  2009/02/11 22:18:57  jeromel
  * Change logY
  *
