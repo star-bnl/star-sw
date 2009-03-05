@@ -283,9 +283,8 @@ void EEdsmAna::sort( const unsigned char * dsm0inp,
 		      const unsigned short int  * dsm3inp) {
     nTot++;
 
-    readDsm0(dsm0inp);
-    // print();
-    readDsm1(dsm1inp);
+    if (dsm0inp) readDsm0(dsm0inp);
+    if (dsm1inp) readDsm1(dsm1inp);
     if(dsm2inp) readDsm2(dsm2inp);
     if(dsm3inp) readDsm3(dsm3inp);
     
@@ -390,6 +389,7 @@ void EEdsmAna::readDsm0(const unsigned char *EEMC) {
 	    for(int i = 0;i < 8;i++) ee0[ibr].setBite(7 - i, EEMC[k + i]);
 	    // fill in higher 8 words [8,9,....,15]
 	    for(int i = 8;i < 16;i++) ee0[ibr].setBite(23 - i, EEMC[k + i]);
+	    ee0[ibr].unpack();
 	}
     }
 }
