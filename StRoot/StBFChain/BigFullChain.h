@@ -625,10 +625,12 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Geometry+Mag","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"pgf77"    ,"" ,"","",""                                                   ,"pgf77VMC","Fortran",kFALSE},
-  {"minicern"    ,"" ,"","",""                                           ,"StarMiniCern","minicern",kFALSE},
-  {"mysql"    ,"" ,"","",""                                                  ,"mysqlclient","MySQL",kFALSE},
-  {"libPhysics"    ,"" ,"","",""                                            ,"libPhysics","TVector",kFALSE},
+  {"pgf77"       ,"" ,"","",""                                                ,"pgf77VMC","Fortran",kFALSE},
+  {"rootcern"    ,"" ,"","geant3",""                                   ,"","ROOT minicern OBSOLETE",kFALSE},
+  {"minicern"    ,"" ,"","geant3",""                       ,"","STAR addition to minicern OBSOLETE",kFALSE},
+  {"mysql"       ,"" ,"","",""                                               ,"mysqlclient","MySQL",kFALSE},
+  {"libPhysics"  ,"" ,"","",""                                              ,"libPhysics","TVector",kFALSE},
+  {"geant3"      ,"" ,"","",""   ,"Geom,EG,Pythia6,EGPythia6,VMC,geant3","TGeo version of geant321",kFALSE},
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                              ,"","StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
@@ -695,8 +697,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                 ,"Prepare kinematics for embedding",kFALSE},
   {"geant"       ,"geant","","geantL"                          ,"St_geant_Maker","","passive GEANT",kFALSE},
   {"geantEmb"    ,"geant","","geantL"                   ,"St_geant_Maker","","GEANT embedding mode",kFALSE},
-  {"RootVMC","","" ,"-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,minicern","",
-                                                          "Geom,VMC,EG,Pythia6,EGPythia6,geant3","",kFALSE},
+  {"RootVMC","","","-geant,-fzin,-ntin,StarMagField,-geantL,-geometry,-geomNoField,geant3","","","",kFALSE},
   {"VMCAppl"  ,"","","geomT,gen_t,sim_T,RootVMC",""                  ,"StarVMCApplication","VMC G3",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl"    ,"StVMCMaker",   "StVMCMaker","VMC Maker in Passive Mode",kFALSE},
@@ -724,7 +725,6 @@ Bfc_st BFC2[] = { // ITTF Chains
 #else
   {"ppMCTrig"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
-    
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"tpcI" ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,TpcHitMover","StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
@@ -1067,15 +1067,16 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"ITTF"        ,""  ,"","",                               "","","Just to keep option ITTF==false",kFALSE},
 #endif /* ! __BFC2__ */
   {"NoSimuDb"    ,""  ,"",""                                 ,"","","Switch off Simu Option for DB",kFALSE},
+  {"SimuDb"      ,""  ,"","-NoSimuDb"                         ,"","","Switch on Simu Option for DB",kFALSE},
   {"NoOutput"    ,""  ,"","-Tree,-EvOut,noTags"                 ,"","","Suppress Output root files",kFALSE},
   {"EvOutOnly"   ,""  ,"","EvOut,Tree,noTags"                        ,"","","Only event.root files",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE},
   {"Notpc_daq"   ,""  ,"","-tpc_daq"                                            ,"","","No tpc_daq",kFALSE},
 
   {"Calibration chains","------------","-----------","-----------------------------------","","","",kFALSE},
-  {"LanaDV"      ,"","","MakeEvent,trgd,in,tpc_daq,tpcI,fcf,LaserIT,VFMinuit,Lana,Analysis,Corr4",
+  {"LanaDV","","","MakeEvent,trgd,in,tpc_daq,tpcI,fcf,LaserIT,VFMinuit,Lana,Analysis,Corr4,NosvtIT,NossdIT",
    "",""                                                                                 ,"get LDV",kFALSE},
-  {"LanaDVtpx"   ,"","","MakeEvent,trgd,in,tpx,TpcHitMover,LaserIT,VFMinuit,Lana,Analysis,Corr4",
+  {"LanaDVtpx","","","MakeEvent,trgd,in,tpx,TpcHitMover,LaserIT,VFMinuit,Lana,Analysis,Corr4,NosvtIT,NossdIT",
    "",""                                                                        ,"get LDV with TPX",kFALSE},
   {"LaserDV.Chain","","","in,LaserCal,fcf,TpcHitMover,OGridLeak3D,OShortR,OSpaceZ2","","","get LDV",kFALSE},
 
@@ -1463,15 +1464,19 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Test.ITTF","","","svtIT,ssdIT,ITTF,genvtx,event,analysis,EventQA,tags,Tree,EvOut,StarMagField,FieldOn"
    ",IDST,CMuDst,Tree,analysis"                                                           ,"","","",kFALSE},
   {"Test.reco.ITTF","","","MakeEvent,tpcI,fcf,ftpc,SvtCL,Test.ITTF"                       ,"","","",kFALSE},
-  {"Test.fast.ITTF","","","gstar,tfs,Simu,srs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,SvtCL,"
+  {"Test.fast.ITTF","","","gstar,tfs,Simu,sfs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,SvtCL,"
    "tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,"
    "StarMagField,FieldOn,IAna,y2007,CMuDst"                                               ,"","","",kFALSE},
 #if 0
   {"Test.default.ITTF","","","gstar,trs,Simu,sss,svt,ssd,fss,bbcSim,emcY2,McEvOut,GeantOut,IdTruth,MakeEvent,"
    "miniMcMk,McAna,Test.ITTF"                                                             ,"","","",kFALSE},
 #else
-  {"Test.default.ITTF","","","gstar,trs,Simu,sss,svt,ssd,fss,bbcSim,emcY2,GeantOut,IdTruth,MakeEvent,"
+  {"Test.default.ITTF","","","gstar,trs,Simu,sss,svt,ssd,fss,bbcSim,IdTruth,MakeEvent,"
    "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
+  {"Test.default.y2005g.ITTF","","","Test.default.ITTF,sdt20050322,noSimuDb"              ,"","","",kFALSE},
+  {"Test.default.y2007g.ITTF","","","Test.default.ITTF,sdt20070322,noSimuDb"              ,"","","",kFALSE},
+  {"Test.fast.y2005g.ITTF","","","Test.fast.ITTF,sdt20050322,noSimuDb"                    ,"","","",kFALSE},
+  {"Test.fast.y2007g.ITTF","","","Test.fast.ITTF,sdt20070322,noSimuDb"                    ,"","","",kFALSE},
 #endif
   {"Test.default.Fast.ITTF","","","gstar,tfs,sfs,ssdFast,IdTruth,MakeEvent,miniMcMk,McAna,Test.ITTF",
    ""                                                                                        ,"","",kFALSE},
