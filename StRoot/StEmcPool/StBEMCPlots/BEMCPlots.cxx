@@ -30,17 +30,25 @@ using namespace std;
 #endif
 
 #include <StEmcUtil/database/StEmcDecoder.h>
+#include <StEmcUtil/geometry/StEmcGeom.h>
 
 #include "BEMCPlots.h"
 #include "BEMC_DSM_decoder.h"
 #include "BEMCPlotsNames.h"
 
+
 BEMCPlots *BEMCPlotsInstance = 0;
 StEmcDecoder *BEMCDecoder = 0;
+
 
 #define BEMCOK 1
 #define BEMCNOTINSTALLED 2
 #define BEMCCORRUPTED 3
+
+
+//--------------------------------------
+
+
 
 //-------------------------------------------------------------------
 void BEMCPlots::initHisto(TObjArray *list, const char *bemcStatus) {
@@ -224,6 +232,13 @@ BEMCPlots::BEMCPlots(TObjArray *list)
     ADDHIST(this->mHist_JET_ped)
     ADDHIST(this->mHist_JETMAX_dist)
 
+    this->mHist_ADCEtaPhi_TowHits = new TH2F(Hist_ADCEtaPhi_TowHitsName, "Tower hits>pes+40; Phi Bin; Eta Bin",60 ,-3.15 ,3.15, 40, -1, 1); 
+    this->mHist_ADCEtaPhi_Pre1Hits = new TH2F(Hist_ADCEtaPhi_Pre1HitsName, "BPSD hits>pes+40;Phi Bin; Eta Bin", 60, -3.15, 3.15, 40, -1, 1);     
+     
+    ADDHIST(this->mHist_ADCEtaPhi_TowHits)
+    ADDHIST(this->mHist_ADCEtaPhi_Pre1Hits)
+      
+
 #undef ADDHIST
 
     for (int i = 0;i < 4800;i++) {
@@ -327,6 +342,10 @@ BEMCPlots::~BEMCPlots() {
     DELETEHIST(this->mHist_JET_ped)
 
     DELETEHIST(this->mHist_JETMAX_dist)
+      
+    DELETEHIST(this->mHist_ADCEtaPhi_TowHits)
+    DELETEHIST(this->mHist_ADCEtaPhi_Pre1Hits)
+    
     
 #undef DELETEHIST
 
@@ -335,9 +354,11 @@ BEMCPlots::~BEMCPlots() {
 }
 //-------------------------------------------------------------------
 void BEMCPlots::init(unsigned int date, unsigned int time, const char *bemcStatus) {
-    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
-    this->clear(bemcStatus);
-    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+  
+  if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+  this->clear(bemcStatus);
+  if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+
 }
 //-------------------------------------------------------------------
 void BEMCPlots::clear(const char *bemcStatus) {
@@ -417,6 +438,10 @@ void BEMCPlots::clear(const char *bemcStatus) {
     RESETHIST(this->mHist_JETMAX_spectra)
     RESETHIST(this->mHist_JET_ped)
     RESETHIST(this->mHist_JETMAX_dist)
+
+    RESETHIST(this->mHist_ADCEtaPhi_TowHits)
+    RESETHIST(this->mHist_ADCEtaPhi_Pre1Hits)
+
 
 #undef RESETHIST
 
@@ -589,6 +614,11 @@ void BEMCPlots::saveHistograms(TFile *hfile) {
 
 	SAVEHIST(this->mHist_JETMAX_dist)
 
+        SAVEHIST(this->mHist_ADCEtaPhi_TowHits)
+        SAVEHIST(this->mHist_ADCEtaPhi_Pre1Hits)
+       
+
+	  
 #undef SAVEHIST
 
     }
@@ -744,43 +774,43 @@ void BEMCPlots::processEvent( char *datap
     	    if (this->mHistDsmL2InputPatchSum) this->mHistDsmL2InputPatchSum->Fill(ijppWestFirst, this->mDsmL2InputPatchSum[ijpp]);
 	}
     }
-
+    
     if (DSM_L3_present) {
-    	    if (this->mHistDsmL3InputHighTowerBits) this->mHistDsmL3InputHighTowerBits->Fill(this->mDsmL3InputHighTowerBits[0]);
-    	    if (this->mHistDsmL3InputPatchSumBits) this->mHistDsmL3InputPatchSumBits->Fill(this->mDsmL3InputPatchSumBits[0]);
-    	    if (this->mHistDsmL3InputBackToBackBit) this->mHistDsmL3InputBackToBackBit->Fill(this->mDsmL3InputBackToBackBit[0]);
-    	    if (this->mHistDsmL3InputJPsiTopoBit) this->mHistDsmL3InputJPsiTopoBit->Fill(this->mDsmL3InputJPsiTopoBit[0]);
-    	    if (this->mHistDsmL3InputJetPatchTopoBit) this->mHistDsmL3InputJetPatchTopoBit->Fill(this->mDsmL3InputJetPatchTopoBit[0]);    
+      if (this->mHistDsmL3InputHighTowerBits) this->mHistDsmL3InputHighTowerBits->Fill(this->mDsmL3InputHighTowerBits[0]);
+      if (this->mHistDsmL3InputPatchSumBits) this->mHistDsmL3InputPatchSumBits->Fill(this->mDsmL3InputPatchSumBits[0]);
+      if (this->mHistDsmL3InputBackToBackBit) this->mHistDsmL3InputBackToBackBit->Fill(this->mDsmL3InputBackToBackBit[0]);
+      if (this->mHistDsmL3InputJPsiTopoBit) this->mHistDsmL3InputJPsiTopoBit->Fill(this->mDsmL3InputJPsiTopoBit[0]);
+      if (this->mHistDsmL3InputJetPatchTopoBit) this->mHistDsmL3InputJetPatchTopoBit->Fill(this->mDsmL3InputJetPatchTopoBit[0]);    
     }
-
+    
     int STATUS = BEMCNOTINSTALLED; //NOT PRESENT
 #ifdef NEW_DAQ_READER
     daq_dta *dd_btow = rdr ? (rdr->det("btow")->get("adc")) : 0;
     if (dd_btow) while (dd_btow->iterate()) {
-	btow_t *d = (btow_t *) dd_btow->Void;
-	if (d) {
+      btow_t *d = (btow_t *) dd_btow->Void;
+      if (d) {
 #else
-    if ((ret >= 0) && emc.btow_in) {
-	unsigned short *header = emc.btow_raw; // BTOW event header
-	if (header) {
+	if ((ret >= 0) && emc.btow_in) {
+	  unsigned short *header = emc.btow_raw; // BTOW event header
+	  if (header) {
 #endif
-		if (DSM_L0_present) {
-		    memset(this->mDsmSimuHighTower, 0, sizeof(this->mDsmSimuHighTower));
-		    memset(this->mDsmSimuPatchSum, 0, sizeof(this->mDsmSimuPatchSum));
-		}
-		int TDCStatus[BTOW_MAXFEE];
-		memset(TDCStatus, BEMCNOTINSTALLED, sizeof(TDCStatus));
-		int TDCTotal = 0;
-		STATUS = BEMCOK; //OK
-		for (int tdc = 0; tdc < BTOW_MAXFEE;tdc++) {
+	    if (DSM_L0_present) {
+	      memset(this->mDsmSimuHighTower, 0, sizeof(this->mDsmSimuHighTower));
+	      memset(this->mDsmSimuPatchSum, 0, sizeof(this->mDsmSimuPatchSum));
+	    }
+	    int TDCStatus[BTOW_MAXFEE];
+	    memset(TDCStatus, BEMCNOTINSTALLED, sizeof(TDCStatus));
+	    int TDCTotal = 0;
+	    STATUS = BEMCOK; //OK
+	    for (int tdc = 0; tdc < BTOW_MAXFEE;tdc++) {
 #ifdef NEW_DAQ_READER
-            	    int count = d->preamble[tdc][0];
-            	    int error = d->preamble[tdc][1];
+	      int count = d->preamble[tdc][0];
+	      int error = d->preamble[tdc][1];
 #else
-	    	    int count = (*(header + tdc));
-	    	    int error = (*(header + tdc + 30));
+	      int count = (*(header + tdc));
+	      int error = (*(header + tdc + 30));
 #endif
-		    if ((error == 0) && (count == (BTOW_PRESIZE + BTOW_DATSIZE))) TDCStatus[tdc] = BEMCOK; // OK
+	      if ((error == 0) && (count == (BTOW_PRESIZE + BTOW_DATSIZE))) TDCStatus[tdc] = BEMCOK; // OK
 	    	    else if ((error == 4095) && (count == 4095)) TDCStatus[tdc] = BEMCNOTINSTALLED; // NOT INSTALLED
 	    	    else TDCStatus[tdc] = BEMCCORRUPTED; //CORRUPTED    
 	    	    if (TDCStatus[tdc] == BEMCCORRUPTED) STATUS = BEMCCORRUPTED; // if any crate is corrupted, mark event as corrupted
@@ -800,9 +830,9 @@ void BEMCPlots::processEvent( char *datap
 		    if((error==0) && (count == (BTOW_PRESIZE + BTOW_DATSIZE))) {
 			// OK
 #ifdef NEW_DAQ_READER
-			int adc = d->adc[tdc][tdc_channel];
+		    int adc = d->adc[tdc][tdc_channel];
 #else
-			int adc = emc.btow[i];
+		    int adc = emc.btow[i];
 #endif
 	    		TDCTotal += adc;
 	    		int daqid = ((tdc * BTOW_DATSIZE) + tdc_channel);
@@ -810,7 +840,15 @@ void BEMCPlots::processEvent( char *datap
 	    		if ((tdc >= 10) && (tdc < 20) && (TDCStatus[tdc]!=BEMCNOTINSTALLED) && this->mHist_btow_spectra_2) this->mHist_btow_spectra_2->Fill(daqid, adc);
 	    		if ((tdc >= 20) && (tdc < 30) && (TDCStatus[tdc]!=BEMCNOTINSTALLED) && this->mHist_btow_spectra_3) this->mHist_btow_spectra_3->Fill(daqid, adc);
 			int softId = -1;
+			float iphi, eta;
 			if (BEMCDecoder && BEMCDecoder->GetTowerIdFromDaqId(i, softId)) {
+			  StEmcGeom *BEMCGeom = StEmcGeom::instance("bemc");
+			  if(adc>40){
+			     BEMCGeom->getEta(softId, eta);
+			     BEMCGeom->getPhi(softId, iphi);
+			     if (this->mHist_ADCEtaPhi_TowHits) this->mHist_ADCEtaPhi_TowHits->Fill(iphi, eta);
+			   }
+			  
 			    if ((softId >= 1) && (softId <= 4800)) {
 				if ((softId >= 1) && (softId <= 1220)) {
 				    if (this->mHistRawAdc1) this->mHistRawAdc1->Fill(softId, adc);
@@ -920,6 +958,13 @@ void BEMCPlots::processEvent( char *datap
 			    totalSumPSD += adc;
 			    if ((box >= 1) && (box <= 60)) {
 				pmtSum[box - 1] += adc;
+				float iphi, eta;
+			        StEmcGeom *BEMCGeom = StEmcGeom::instance("bemc");
+				if(adc>40){
+				  BEMCGeom->getEta(softId, eta);
+				  BEMCGeom->getPhi(softId, iphi);
+				  if (this->mHist_ADCEtaPhi_Pre1Hits) this->mHist_ADCEtaPhi_Pre1Hits->Fill(iphi, eta);
+				}
 				if ((softId >= 1) && (softId <= 1220)) {
 			    	    if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Fill(softId, adc);
 				} else if ((softId >= 1221) && (softId <= 2400)) {
@@ -1028,7 +1073,10 @@ void BEMCPlots::processEvent( char *datap
     }
     if (smdPresentNonZS && this->mHist_smd_spectraNonZS) this->mHist_smd_spectraNonZS->Fill(totalSumSMDNonZS);
     if (psdPresentNonZS && this->mHist_psd_spectraNonZS) this->mHist_psd_spectraNonZS->Fill(totalSumPSDNonZS);
-    }
-
+    } 
+	
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
+
+
+

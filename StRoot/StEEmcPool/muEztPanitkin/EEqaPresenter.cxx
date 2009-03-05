@@ -69,7 +69,7 @@ void eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskF
 //  hCleanUp->Delete();
   cc->Clear();
   
-  if(page==10) {
+  if(page==11) {
     switch(panel) {
     case 1: eeJpQa(fd, cc, twMask); break;
     case 2: eeDaqCorr(fd, cc,1); break;
@@ -79,7 +79,7 @@ void eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskF
     case 6: eeDaqTwHit(fd, cc); break;
     default:  plNone(cc); break;
     } 
-  } else if (page==11) {
+  } else if (page==12) {
     switch(panel) {
     case 1: eeDaqCorr(fd, cc,2); break;
     case 2: eeDaqMapmtStat(fd, cc); break;
@@ -95,7 +95,7 @@ void eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskF
     case 12: eeDaqSmdA(fd, cc,"HSmd",'V'); break;
     default:  plNone(cc); break;
       }
-  } else if (page==12) {
+  } else if (page==13) {
     switch(panel) {
     case 1: eeTrigHanks(fd, cc); break;  
     case 2: eeTrigDsm0(fd, cc,"HT"); break;
@@ -110,8 +110,25 @@ void eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskF
     case 11: eeTrigEtot(fd, cc); break;
     default:  plNone(cc); break;
     }
+    }  else if (page==14) {
+    switch(panel) {
+    case 1: eeDaqTwCr(fd, cc, twMask); break;
+    case 2: eeFreq(fd, cc, twMask); break;
+    case 3: eeDaqMapmtCr(fd, cc,64); break;
+    case 4: eeDaqMapmtCr(fd, cc,72); break;
+    case 5: eeDaqMapmtCr(fd, cc,80); break;
+    case 6: eeDaqMapmtCr(fd, cc,88); break;
+    case 7: eeDaqMapmtCr(fd, cc,96); break;
+    case 8: eeDaqMapmtCr(fd, cc,104); break;
+    case 9: eeTrigHanks(fd, cc); break;  
+    case 10:eeEmuVsSimu(fd, cc); break;
+
+    default:  plNone(cc); break;
+    }
+    }
+
     
-  }
+  
   //  defStyle->cd(); // retun to default style
  LOG_DEBUG << "JB panel=" << panel << " page=" << page << " done" << endm;
  
@@ -263,6 +280,25 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
 
 
 //--------------------------------------
+void eeEmuVsSimu(FileType fd, TPad *c ) {
+
+   char *name[2]={"HighTowerTriggerCorruption","PatchSumTriggerCorruption"};
+   c->Divide(1,2);
+   
+   int i;
+   for(i=0;i<2;i++) {
+     GetHisto(fd,name[i],i);
+     // printf("aaa%d %s %p\n",i,name[i],h[i]);
+     if (h[i]) {
+       c->cd(1+i);
+       gPad->SetLogz(0);
+       h[i]->Draw("colz");
+       if( h[i]->Integral()>0 ) gPad->SetLogz();
+     }
+   }
+   
+}
+
 //--------------------------------------
 
 void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m) { 
