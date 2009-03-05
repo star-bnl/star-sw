@@ -323,8 +323,10 @@ void HistoHandler::Book() {
   //==============================
 
   EEMCPlots::initHisto(0, gEnv->GetValue("Online.eemcDbDump", "eemcDbDump.dat"), gEnv->GetValue("Online.eemcPathIn", "."), gEnv->GetValue("Online.eemcPathOut", "."));
+  //EEMCPlots::initHisto(0, "/star/u/rfatemi/TestPPlots/home_local/eemc/defaultPanitkinSetup/eemcDbDump.dat", gEnv->GetValue("Online.eemcPathIn", "."), gEnv->GetValue("Online.eemcPathOut", "."));
   BEMCPlots::initHisto(0, gEnv->GetValue("Online.bemcStatus", "bemcStatus.txt"));
-
+  //BEMCPlots::initHisto(0,"/star/u/rfatemi/TestPPlots/home_local/bemc/bemcStatus.txt");
+   
   // EMC histograms end
 
   NHIST_1 = i1; // Set Current Number of 1d Histogram
@@ -362,7 +364,8 @@ void HistoHandler::Reset() {
   //      EMC histograms
   //==============================
   EEMCPlots::resetHisto();
-  BEMCPlots::resetHisto(gEnv->GetValue("Online.bemcStatus", "bemcStatus.txt"));
+  //BEMCPlots::resetHisto(gEnv->GetValue("Online.bemcStatus", "bemcStatus.txt"));
+  BEMCPlots::resetHisto("/star/u/rfatemi/TestPPlots/home_local/bemc/bemcStatus.txt");
 
   if(mDebugLevel) {
     cout<<"HistoHandler: Exiting Reset..."<<endl;
@@ -657,7 +660,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   zdcch_east = zdcch_west = 0;
   u_int zdcTime_east, zdcTime_west;
   zdcTime_east = zdcTime_west = 0;
-  int bbctdiff = -999; // strange number from Akio
+  //int bbctdiff = -999; // strange number from Akio
   
   //time stamp of the first recieved event in unix seconds
   static u_int t_00;
@@ -2274,7 +2277,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     static int Entries_old_y = 0;
     static int Entries_old_z = 0;
   
-    int interval = 0;   // how many events to wait
+    //int interval = 0;   // how many events to wait
     int Nentries;
 
     int nbinx; 
@@ -2340,9 +2343,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     
     //Loop over bins
     float w;
-    for (unsigned int i=1; i<nbinx+1; i++) {
+    for (Int_t i=1; i<nbinx+1; i++) {
       w = (int) h1[histoNum]->GetBinContent(i);
-      fout<<w<<endl;
+      // fout<<w<<endl;
     }
     fout.close();
     return;
@@ -2375,7 +2378,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.9 2009/02/27 22:30:17 dkettler Exp $
+   * $Id: HistoHandler.cxx,v 1.10 2009/03/05 00:03:16 dkettler Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2385,6 +2388,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.10  2009/03/05 00:03:16  dkettler
+   * EMC Updates
+   *
    * Revision 1.9  2009/02/27 22:30:17  dkettler
    * TOF Updates
    *

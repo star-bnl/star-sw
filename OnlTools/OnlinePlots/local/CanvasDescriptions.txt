@@ -56,43 +56,51 @@
 5,13,1,1,1,[any|any],bemc_Tot
 5,14,1,1,1,[any|any],bemc_Tot
 5,15,1,1,1,[any|any],bemc_Tot
+
+//BEMC Shift
+6,1,1,1,1,[any|any],bemc_Tot
+6,2,1,1,1,[any|any],bemc_Tot
+6,3,1,1,1,[any|any],bemc_Tot
+6,4,1,1,1,[any|any],bemc_Tot
+6,5,1,1,1,[any|any],bemc_Tot
+6,6,1,1,1,[any|any],bemc_Tot
+6,7,1,1,1,[any|any],bemc_Tot
+6,8,1,1,1,[any|any],bemc_Tot
+6,9,1,1,1,[any|any],bemc_Tot
+
+
 //END OF BEMC
 
-6,1,2,3,6,[any|any],h0_evt_size,h49_ftp,h11_ftp_evsize,h51_ftp_OccLaser,h48_ftp,h50_ftp_OccPulser
-6,2,1,2,2,[any|any],h109_ftp_west_time,h110_ftp_east_time
-6,3,1,2,2,[any|any],h338_ftp_west,h339_ftp_east
+
+
+7,1,2,3,6,[any|any],h0_evt_size,h49_ftp,h11_ftp_evsize,h51_ftp_OccLaser,h48_ftp,h50_ftp_OccPulser
+7,2,1,2,2,[any|any],h109_ftp_west_time,h110_ftp_east_time
+7,3,1,2,2,[any|any],h338_ftp_west,h339_ftp_east
 
 //Jing Liu, start tof display here, 02/25/2008
-7,1,2,2,4,[any|any],h454_upvpd_le_hitmap,h455_upvpd_te_hitmap,h456_upvpd_ToT_vs_Chan,h453_upvpd_eastT_vs_westT
-7,2,1,2,2,[any|any],h458_tof_leHitChan_vs_traynum_west,h460_tof_teHitChan_vs_traynum_west
-7,3,1,2,2,[any|any],h457_tof_leHitChan_vs_traynum_east,h459_tof_teHitChan_vs_traynum_east
-7,4,1,3,3,[any|any],h467_tof_tray01_10_ToT_vs_Chan_west,h468_tof_tray11_20_ToT_vs_Chan_west,h469_tof_tray21_30_ToT_vs_Chan_west
-7,5,1,3,3,[any|any],h470_tof_tray31_40_ToT_vs_Chan_west,h471_tof_tray41_50_ToT_vs_Chan_west,h472_tof_tray51_60_ToT_vs_Chan_west
-7,6,1,3,3,[any|any],h461_tof_tray01_10_ToT_vs_Chan_east,h462_tof_tray11_20_ToT_vs_Chan_east,h463_tof_tray21_30_ToT_vs_Chan_east
-7,7,1,3,3,[any|any],h464_tof_tray31_40_ToT_vs_Chan_east,h465_tof_tray41_50_ToT_vs_Chan_east,h466_tof_tray51_60_ToT_vs_Chan_east
+8,1,2,2,4,[any|any],h454_upvpd_le_hitmap,h455_upvpd_te_hitmap,h456_upvpd_ToT_vs_Chan,h453_upvpd_eastT_vs_westT
+8,2,1,2,2,[any|any],h458_tof_leHitChan_vs_traynum_west,h460_tof_teHitChan_vs_traynum_west
+8,3,1,2,2,[any|any],h457_tof_leHitChan_vs_traynum_east,h459_tof_teHitChan_vs_traynum_east
+8,4,1,3,3,[any|any],h467_tof_tray01_10_ToT_vs_Chan_west,h468_tof_tray11_20_ToT_vs_Chan_west,h469_tof_tray21_30_ToT_vs_Chan_west
+8,5,1,3,3,[any|any],h470_tof_tray31_40_ToT_vs_Chan_west,h471_tof_tray41_50_ToT_vs_Chan_west,h472_tof_tray51_60_ToT_vs_Chan_west
+8,6,1,3,3,[any|any],h461_tof_tray01_10_ToT_vs_Chan_east,h462_tof_tray11_20_ToT_vs_Chan_east,h463_tof_tray21_30_ToT_vs_Chan_east
+8,7,1,3,3,[any|any],h464_tof_tray31_40_ToT_vs_Chan_east,h465_tof_tray41_50_ToT_vs_Chan_east,h466_tof_tray51_60_ToT_vs_Chan_east
 //
 // end of tof display
 
-8,1,2,2,4,[any|any],h190_bbc_hitmap_EAST,h191_bbc_hitmap_WEST,h192_bbc_weight_hitmap_EAST,h193_bbc_weight_hitmap_WEST
-8,2,2,2,4,[any|any],h194_bbc_hits_east,h195_bbc_hits_west,h196_bbcl_hits_east,h197_bbcl_hits_west
-8,3,2,2,4,[any|any],h198_bbc_AdcSum_east,h199_bbc_AdcSum_west,h200_bbcl_AdcSum_east,h201_bbcl_AdcSum_west
-8,4,4,4,16,[any|any],h158_bbce_tdc_1,h159_bbce_tdc_2,h160_bbce_tdc_3,h161_bbce_tdc_4,h162_bbce_tdc_5,h163_bbce_tdc_6,h164_bbce_tdc_7,h165_bbce_tdc_8,h166_bbce_tdc_9,h167_bbce_tdc_10,h168_bbce_tdc_11,h169_bbce_tdc_12,h170_bbce_tdc_13,h171_bbce_tdc_14,h172_bbce_tdc_15,h173_bbce_tdc_16
-8,5,4,4,16,[any|any],h174_bbcw_tdc_1,h175_bbcw_tdc_2,h176_bbcw_tdc_3,h177_bbcw_tdc_4,h178_bbcw_tdc_5,h179_bbcw_tdc_6,h180_bbcw_tdc_7,h181_bbcw_tdc_8,h182_bbcw_tdc_9,h183_bbcw_tdc_10,h184_bbcw_tdc_11,h185_bbcw_tdc_12,h186_bbcw_tdc_13,h187_bbcw_tdc_14,h188_bbcw_tdc_15,h189_bbcw_tdc_16
-8,6,2,3,5,[any|any],h202_bbc_earliest_tac_east,h203_bbc_earliest_tac_west,h204_bbc_tac_difference_e-w,h452_bbc_tac_difference_e-w,h205_bbc_tac_e_w
+9,1,2,2,4,[any|any],h190_bbc_hitmap_EAST,h191_bbc_hitmap_WEST,h192_bbc_weight_hitmap_EAST,h193_bbc_weight_hitmap_WEST
+9,2,2,2,4,[any|any],h194_bbc_hits_east,h195_bbc_hits_west,h196_bbcl_hits_east,h197_bbcl_hits_west
+9,3,2,2,4,[any|any],h198_bbc_AdcSum_east,h199_bbc_AdcSum_west,h200_bbcl_AdcSum_east,h201_bbcl_AdcSum_west
+9,4,4,4,16,[any|any],h158_bbce_tdc_1,h159_bbce_tdc_2,h160_bbce_tdc_3,h161_bbce_tdc_4,h162_bbce_tdc_5,h163_bbce_tdc_6,h164_bbce_tdc_7,h165_bbce_tdc_8,h166_bbce_tdc_9,h167_bbce_tdc_10,h168_bbce_tdc_11,h169_bbce_tdc_12,h170_bbce_tdc_13,h171_bbce_tdc_14,h172_bbce_tdc_15,h173_bbce_tdc_16
+9,5,4,4,16,[any|any],h174_bbcw_tdc_1,h175_bbcw_tdc_2,h176_bbcw_tdc_3,h177_bbcw_tdc_4,h178_bbcw_tdc_5,h179_bbcw_tdc_6,h180_bbcw_tdc_7,h181_bbcw_tdc_8,h182_bbcw_tdc_9,h183_bbcw_tdc_10,h184_bbcw_tdc_11,h185_bbcw_tdc_12,h186_bbcw_tdc_13,h187_bbcw_tdc_14,h188_bbcw_tdc_15,h189_bbcw_tdc_16
+9,6,2,3,5,[any|any],h202_bbc_earliest_tac_east,h203_bbc_earliest_tac_west,h204_bbc_tac_difference_e-w,h452_bbc_tac_difference_e-w,h205_bbc_tac_e_w
 
-9,1,2,2,4,[any|any],h206_fpd_EN_adcsum,h207_fpd_ES_adcsum,h208_fpd_ET_adcsum,h209_fpd_EB_adcsum
-9,2,2,2,4,[any|any],h210_fpd_WN_adcsum,h211_fpd_WS_adcsum,h212_fpd_WT_adcsum,h213_fpd_WB_adcsum
-9,3,2,2,4,[any|any],h214_fpd_EN_hitmap,h215_fpd_ES_hitmap,h216_fpd_ET_hitmap,h217_fpd_EB_hitmap
-9,4,2,2,4,[any|any],h218_fpd_WN_hitmap,h219_fpd_WS_hitmap,h220_fpd_WT_hitmap,h221_fpd_WB_hitmap
-9,5,2,2,4,[any|any],h222_fpd_EN_weighted_hitmap,h223_fpd_ES_weighted_hitmap,h224_fpd_ET_weighted_hitmap,h225_fpd_EB_weighted_hitmap
-9,6,2,2,4,[any|any],h226_fpd_WN_weighted_hitmap,h227_fpd_WS_weighted_hitmap,h228_fpd_WT_weighted_hitmap,h229_fpd_WB_weighted_hitmap
-
-10,1,1,1,1,[any|any],eeTot
-10,2,1,1,1,[any|any],eeTot
-10,3,1,1,1,[any|any],eeTot
-10,4,1,1,1,[any|any],eeTot
-10,5,1,1,1,[any|any],eeTot
-10,6,1,1,1,[any|any],eeTot
+10,1,2,2,4,[any|any],h206_fpd_EN_adcsum,h207_fpd_ES_adcsum,h208_fpd_ET_adcsum,h209_fpd_EB_adcsum
+10,2,2,2,4,[any|any],h210_fpd_WN_adcsum,h211_fpd_WS_adcsum,h212_fpd_WT_adcsum,h213_fpd_WB_adcsum
+10,3,2,2,4,[any|any],h214_fpd_EN_hitmap,h215_fpd_ES_hitmap,h216_fpd_ET_hitmap,h217_fpd_EB_hitmap
+10,4,2,2,4,[any|any],h218_fpd_WN_hitmap,h219_fpd_WS_hitmap,h220_fpd_WT_hitmap,h221_fpd_WB_hitmap
+10,5,2,2,4,[any|any],h222_fpd_EN_weighted_hitmap,h223_fpd_ES_weighted_hitmap,h224_fpd_ET_weighted_hitmap,h225_fpd_EB_weighted_hitmap
+10,6,2,2,4,[any|any],h226_fpd_WN_weighted_hitmap,h227_fpd_WS_weighted_hitmap,h228_fpd_WT_weighted_hitmap,h229_fpd_WB_weighted_hitmap
 
 11,1,1,1,1,[any|any],eeTot
 11,2,1,1,1,[any|any],eeTot
@@ -100,12 +108,6 @@
 11,4,1,1,1,[any|any],eeTot
 11,5,1,1,1,[any|any],eeTot
 11,6,1,1,1,[any|any],eeTot
-11,7,1,1,1,[any|any],eeTot
-11,8,1,1,1,[any|any],eeTot
-11,9,1,1,1,[any|any],eeTot
-11,10,1,1,1,[any|any],eeTot
-11,11,1,1,1,[any|any],eeTot
-11,12,1,1,1,[any|any],eeTot
 
 12,1,1,1,1,[any|any],eeTot
 12,2,1,1,1,[any|any],eeTot
@@ -118,39 +120,64 @@
 12,9,1,1,1,[any|any],eeTot
 12,10,1,1,1,[any|any],eeTot
 12,11,1,1,1,[any|any],eeTot
+12,12,1,1,1,[any|any],eeTot
+
+13,1,1,1,1,[any|any],eeTot
+13,2,1,1,1,[any|any],eeTot
+13,3,1,1,1,[any|any],eeTot
+13,4,1,1,1,[any|any],eeTot
+13,5,1,1,1,[any|any],eeTot
+13,6,1,1,1,[any|any],eeTot
+13,7,1,1,1,[any|any],eeTot
+13,8,1,1,1,[any|any],eeTot
+13,9,1,1,1,[any|any],eeTot
+13,10,1,1,1,[any|any],eeTot
+13,11,1,1,1,[any|any],eeTot
+
+// EEM Shift
+14,1,1,1,1,[any|any],eeTot
+14,2,1,1,1,[any|any],eeTot
+14,3,1,1,1,[any|any],eeTot
+14,4,1,1,1,[any|any],eeTot
+14,5,1,1,1,[any|any],eeTot
+14,6,1,1,1,[any|any],eeTot
+14,7,1,1,1,[any|any],eeTot
+14,8,1,1,1,[any|any],eeTot
+14,9,1,1,1,[any|any],eeTot
+14,10,1,1,1,[any|any],eeTot
 
 
 // SSD
-//13,1,2,2,4,[any|any],h250_ssd_evsize,h251_ssd_frac,h256_ssd_lad_pulse,h257_ssd_mod_pulse
+//15,1,2,2,4,[any|any],h250_ssd_evsize,h251_ssd_frac,h256_ssd_lad_pulse,h257_ssd_mod_pulse
 //
-//13,2,2,2,4,[any|any],h252_ssd_lad_occ,h253_ssd_mod_occ,h254_ssd_lad_sig_occ,h255_ssd_mod_sig_occ
+//15,2,2,2,4,[any|any],h252_ssd_lad_occ,h253_ssd_mod_occ,h254_ssd_lad_sig_occ,h255_ssd_mod_sig_occ
 //
-//13,3,4,5,20,[any|any],h309_ssd_lad01_chm,h310_ssd_lad02_chm,h311_ssd_lad03_chm,h312_ssd_lad04_chm,h313_ssd_lad05_chm,h314_ssd_lad06_chm,h315_ssd_lad07_chm,h316_ssd_lad08_chm,h317_ssd_lad09_chm,h318_ssd_lad10_chm,h319_ssd_lad11_chm,h320_ssd_lad12_chm,h321_ssd_lad13_chm,h322_ssd_lad14_chm,h323_ssd_lad15_chm,h324_ssd_lad16_chm,h325_ssd_lad17_chm,h326_ssd_lad18_chm,h327_ssd_lad19_chm,h328_ssd_lad20_chm
+//15,3,4,5,20,[any|any],h309_ssd_lad01_chm,h310_ssd_lad02_chm,h311_ssd_lad03_chm,h312_ssd_lad04_chm,h313_ssd_lad05_chm,h314_ssd_lad06_chm,h315_ssd_lad07_chm,h316_ssd_lad08_chm,h317_ssd_lad09_chm,h318_ssd_lad10_chm,h319_ssd_lad11_chm,h320_ssd_lad12_chm,h321_ssd_lad13_chm,h322_ssd_lad14_chm,h323_ssd_lad15_chm,h324_ssd_lad16_chm,h325_ssd_lad17_chm,h326_ssd_lad18_chm,h327_ssd_lad19_chm,h328_ssd_lad20_chm
 //
-//13,4,2,4,8,[any|any],h340_ssd_lad01_occ,h341_ssd_lad02_occ,h342_ssd_lad03_occ,h343_ssd_lad04_occ,h344_ssd_lad05_occ,h345_ssd_lad06_occ,h346_ssd_lad07_occ,h347_ssd_lad08_occ
-//13,5,2,4,8,[any|any],h348_ssd_lad09_occ,h349_ssd_lad10_occ,h350_ssd_lad11_occ,h351_ssd_lad12_occ,h352_ssd_lad13_occ,h353_ssd_lad14_occ,h354_ssd_lad15_occ,h355_ssd_lad16_occ
-//13,6,2,4,8,[any|any],h356_ssd_lad17_occ,h357_ssd_lad18_occ,h358_ssd_lad19_occ,h359_ssd_lad20_occ,h360_ssd_lad21_occ,h361_ssd_lad22_occ,h362_ssd_lad23_occ,h363_ssd_lad24_occ
-//13,7,2,4,8,[any|any],h364_ssd_lad25_occ,h365_ssd_lad26_occ,h366_ssd_lad27_occ,h367_ssd_lad28_occ,h368_ssd_lad29_occ,h369_ssd_lad30_occ,h370_ssd_lad31_occ,h371_ssd_lad32_occ
-//13,8,2,4,8,[any|any],h372_ssd_lad33_occ,h373_ssd_lad34_occ,h374_ssd_lad35_occ,h375_ssd_lad36_occ,h376_ssd_lad37_occ,h377_ssd_lad38_occ,h378_ssd_lad39_occ,h379_ssd_lad40_occ
+//15,4,2,4,8,[any|any],h340_ssd_lad01_occ,h341_ssd_lad02_occ,h342_ssd_lad03_occ,h343_ssd_lad04_occ,h344_ssd_lad05_occ,h345_ssd_lad06_occ,h346_ssd_lad07_occ,h347_ssd_lad08_occ
+//15,5,2,4,8,[any|any],h348_ssd_lad09_occ,h349_ssd_lad10_occ,h350_ssd_lad11_occ,h351_ssd_lad12_occ,h352_ssd_lad13_occ,h353_ssd_lad14_occ,h354_ssd_lad15_occ,h355_ssd_lad16_occ
+//15,6,2,4,8,[any|any],h356_ssd_lad17_occ,h357_ssd_lad18_occ,h358_ssd_lad19_occ,h359_ssd_lad20_occ,h360_ssd_lad21_occ,h361_ssd_lad22_occ,h362_ssd_lad23_occ,h363_ssd_lad24_occ
+//15,7,2,4,8,[any|any],h364_ssd_lad25_occ,h365_ssd_lad26_occ,h366_ssd_lad27_occ,h367_ssd_lad28_occ,h368_ssd_lad29_occ,h369_ssd_lad30_occ,h370_ssd_lad31_occ,h371_ssd_lad32_occ
+//15,8,2,4,8,[any|any],h372_ssd_lad33_occ,h373_ssd_lad34_occ,h374_ssd_lad35_occ,h375_ssd_lad36_occ,h376_ssd_lad37_occ,h377_ssd_lad38_occ,h378_ssd_lad39_occ,h379_ssd_lad40_occ
 
 // ZDC
-14,1,2,4,8,[any|any],h329_zdcsmd_w_v_N,h330_zdcsmd_w_h_N,h331_zdcsmd_e_v_N,h332_zdcsmd_e_h_N,h333_zdcsmd_w_v_A,h334_zdcsmd_w_h_A,h335_zdcsmd_e_v_A,h336_zdcsmd_e_h_A
+16,1,2,4,8,[any|any],h329_zdcsmd_w_v_N,h330_zdcsmd_w_h_N,h331_zdcsmd_e_v_N,h332_zdcsmd_e_h_N,h333_zdcsmd_w_v_A,h334_zdcsmd_w_h_A,h335_zdcsmd_e_v_A,h336_zdcsmd_e_h_A
 
 // PMD
-15,1,2,3,6,[any|any],h382_pmd_Chain_1,h383_pmd_Chain_2,h384_pmd_Chain_3,h385_pmd_Chain_4,h386_pmd_Chain_5,h387_pmd_Chain_6
+17,1,2,3,6,[any|any],h382_pmd_Chain_1,h383_pmd_Chain_2,h384_pmd_Chain_3,h385_pmd_Chain_4,h386_pmd_Chain_5,h387_pmd_Chain_6
 
-15,2,2,3,6,[any|any],h388_pmd_Chain_7,h389_pmd_Chain_8,h390_pmd_Chain_9,h391_pmd_Chain_10,h392_pmd_Chain_11,h393_pmd_Chain_12
+17,2,2,3,6,[any|any],h388_pmd_Chain_7,h389_pmd_Chain_8,h390_pmd_Chain_9,h391_pmd_Chain_10,h392_pmd_Chain_11,h393_pmd_Chain_12
 
-15,3,2,3,6,[any|any],h394_pmd_Chain_13,h395_pmd_Chain_14,h396_pmd_Chain_15,h397_pmd_Chain_16,h398_pmd_Chain_17,h399_pmd_Chain_18
+17,3,2,3,6,[any|any],h394_pmd_Chain_13,h395_pmd_Chain_14,h396_pmd_Chain_15,h397_pmd_Chain_16,h398_pmd_Chain_17,h399_pmd_Chain_18
 
-15,4,2,3,6,[any|any],h400_pmd_Chain_19,h401_pmd_Chain_20,h402_pmd_Chain_21,h403_pmd_Chain_22,h404_pmd_Chain_23,h405_pmd_Chain_24
+17,4,2,3,6,[any|any],h400_pmd_Chain_19,h401_pmd_Chain_20,h402_pmd_Chain_21,h403_pmd_Chain_22,h404_pmd_Chain_23,h405_pmd_Chain_24
 
-15,5,2,3,6,[any|any],h406_pmd_Chain_25,h407_pmd_Chain_26,h408_pmd_Chain_27,h409_pmd_Chain_28,h410_pmd_Chain_29,h411_pmd_Chain_30
+17,5,2,3,6,[any|any],h406_pmd_Chain_25,h407_pmd_Chain_26,h408_pmd_Chain_27,h409_pmd_Chain_28,h410_pmd_Chain_29,h411_pmd_Chain_30
 
-15,6,2,3,6,[any|any],h412_pmd_Chain_31,h413_pmd_Chain_32,h414_pmd_Chain_33,h415_pmd_Chain_34,h416_pmd_Chain_35,h417_pmd_Chain_36
+17,6,2,3,6,[any|any],h412_pmd_Chain_31,h413_pmd_Chain_32,h414_pmd_Chain_33,h415_pmd_Chain_34,h416_pmd_Chain_35,h417_pmd_Chain_36
 
-15,7,2,3,6,[any|any],h418_pmd_Chain_37,h419_pmd_Chain_38,h420_pmd_Chain_39,h421_pmd_Chain_40,h422_pmd_Chain_41,h423_pmd_Chain_42
+17,7,2,3,6,[any|any],h418_pmd_Chain_37,h419_pmd_Chain_38,h420_pmd_Chain_39,h421_pmd_Chain_40,h422_pmd_Chain_41,h423_pmd_Chain_42
 
-15,8,2,3,6,[any|any],h424_pmd_Chain_43,h425_pmd_Chain_44,h426_pmd_Chain_45,h427_pmd_Chain_46,h428_pmd_Chain_47,h429_pmd_Chain_48
+17,8,2,3,6,[any|any],h424_pmd_Chain_43,h425_pmd_Chain_44,h426_pmd_Chain_45,h427_pmd_Chain_46,h428_pmd_Chain_47,h429_pmd_Chain_48
 
-15,9,1,2,2,[any|any],h430_pmd_Chain_vs_channel,h431_pmd_Chain_vs_channel_adc
+17,9,1,2,2,[any|any],h430_pmd_Chain_vs_channel,h431_pmd_Chain_vs_channel_adc
