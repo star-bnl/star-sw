@@ -43,6 +43,7 @@ void eeDaqMapmtStat(FileType fd, TPad *c);
 
 void eeMany1D(FileType fd, TPad *c, const Char_t *core, int nh, int nx, int ny);
 void eeDaqSmdA(FileType fd, TPad *cc,const Char_t *, Char_t uv);
+void eeEmuVsSimu(FileType fd, TPad *c);
 
 void eeTrigHanks(FileType fd, TPad *c);
 void eeTrigDsm0(FileType fd, TPad *c,const Char_t *);

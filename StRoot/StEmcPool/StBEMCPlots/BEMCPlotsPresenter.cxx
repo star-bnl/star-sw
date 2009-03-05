@@ -9,12 +9,14 @@ using namespace std;
 #include <TLatex.h>
 #include <TString.h>
 #include <TBox.h>
+#include <TEnv.h>
 
 #include <GenericFile.h>
 
 #include <StEmcUtil/database/StEmcDecoder.h>
 
 #include "BEMCPlotsNames.h"
+#include "StRoot/StEmcPool/StBEMCPlots/BemcTwMask.h"
 
 #define min(A, B) (((A) < (B)) ? (A) : (B))
 #define max(A, B) (((A) > (B)) ? (A) : (B))
@@ -270,6 +272,13 @@ void BEMCPlotsPresenter::displayJet(FileType file, TPad *pad, int mDebug) {
 void BEMCPlotsPresenter::displayRawAdc(FileType file, TPad *pad, bool psd, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
+
+    bool twMaskFound=false;
+    BemcTwMask *twMask =new BemcTwMask();
+    const Char_t *bemcTwMaskFilename=(gEnv->GetValue("Online.bemcStatus", "bemcStatus.txt"));
+    //const Char_t *bemcTwMaskFilename="/star/u/rfatemi/TestPPlots/home_local/bemc/bemcStatus.txt";
+    twMaskFound=useBtowMask(bemcTwMaskFilename, twMask);
+
     TH2F *HistRawAdc1 = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd1Name : HistRawAdc1Name);
     if (!HistRawAdc1 || (mDebug >= 2)) cout << "HistRawAdc1 = " << HistRawAdc1 << endl;
     TH2F *HistRawAdc2 = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd2Name : HistRawAdc2Name);
@@ -329,6 +338,16 @@ void BEMCPlotsPresenter::displayRawAdc(FileType file, TPad *pad, bool psd, Int_t
     if (HistRawAdc1) {
 	HistRawAdc1->SetStats(0);
 	HistRawAdc1->Draw("COLZ");
+	if (twMaskFound) {
+	  TGraph *g1=twMask->crG;
+	  g1->Draw("L");
+	  g1->SetLineWidth(1);
+	  g1->SetLineColor(2);
+	  TLine *testline1=new TLine(0,0,0,10000);
+	  testline1->SetLineColor(1);
+	  testline1->SetLineWidth(2);
+	  testline1->Draw();
+	}
 	for (Int_t crate = 0;crate < numBoxes;crate++) {
 	    if (!((boxMaxSoftId[crate] < HistRawAdc1->GetXaxis()->GetBinLowEdge(1))
 		|| (boxMinSoftId[crate] > HistRawAdc1->GetXaxis()->GetBinUpEdge(HistRawAdc1->GetXaxis()->GetNbins())))
@@ -362,39 +381,50 @@ void BEMCPlotsPresenter::displayRawAdc(FileType file, TPad *pad, bool psd, Int_t
     if (HistRawAdc2) {
 	HistRawAdc2->SetStats(0);
 	HistRawAdc2->Draw("COLZ");
+	if (twMaskFound) {
+	  TGraph *g2=twMask->crG+1;
+	  g2->Draw("L");
+	  g2->SetLineColor(2);
+	}
 	for (Int_t crate = 0;crate < numBoxes;crate++) {
-	    if (!((boxMaxSoftId[crate] < HistRawAdc2->GetXaxis()->GetBinLowEdge(1))
+	  if (!((boxMaxSoftId[crate] < HistRawAdc2->GetXaxis()->GetBinLowEdge(1))
 		|| (boxMinSoftId[crate] > HistRawAdc2->GetXaxis()->GetBinUpEdge(HistRawAdc2->GetXaxis()->GetNbins())))
-		) {
-		Float_t left = max(boxMinSoftId[crate], HistRawAdc2->GetXaxis()->GetBinCenter(1)) - 0.5;
-		Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc2->GetXaxis()->GetBinCenter(HistRawAdc2->GetXaxis()->GetNbins()));
-		TLine *lCrates = new TLine(left, HistRawAdc2->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc2->GetYaxis()->GetBinUpEdge(HistRawAdc2->GetYaxis()->GetNbins()));
-		if (lCrates) {
-    		    lCrates->SetLineColor(linesColor); 
-		    lCrates->SetLineWidth(1);
-		    lCrates->Draw();
-		}
-		TLine *rCrates = new TLine(right, HistRawAdc2->GetYaxis()->GetBinLowEdge(1), right, HistRawAdc2->GetYaxis()->GetBinUpEdge(HistRawAdc2->GetYaxis()->GetNbins()));
-		if (rCrates) {
-    		    rCrates->SetLineColor(linesColor); 
-		    rCrates->SetLineWidth(1);
-		    rCrates->Draw();
-		}
-    		TString crateLabel;
-    		crateLabel = Form(boxLabelFormat, crate + 1);
-		TLatex *textCrate = new TLatex(left + 10, HistRawAdc2->GetYaxis()->GetBinUpEdge(HistRawAdc2->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
-		if (textCrate) {
-		    textCrate->SetTextColor(linesColor);
-    		    textCrate->SetTextSize(0.14);
-		    textCrate->Draw();
-		}
+	      ) {
+	    Float_t left = max(boxMinSoftId[crate], HistRawAdc2->GetXaxis()->GetBinCenter(1)) - 0.5;
+	    Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc2->GetXaxis()->GetBinCenter(HistRawAdc2->GetXaxis()->GetNbins()));
+	    TLine *lCrates = new TLine(left, HistRawAdc2->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc2->GetYaxis()->GetBinUpEdge(HistRawAdc2->GetYaxis()->GetNbins()));
+	    if (lCrates) {
+	      lCrates->SetLineColor(linesColor); 
+	      lCrates->SetLineWidth(1);
+	      lCrates->Draw();
 	    }
+	    TLine *rCrates = new TLine(right, HistRawAdc2->GetYaxis()->GetBinLowEdge(1), right, HistRawAdc2->GetYaxis()->GetBinUpEdge(HistRawAdc2->GetYaxis()->GetNbins()));
+	    if (rCrates) {
+	      rCrates->SetLineColor(linesColor); 
+	      rCrates->SetLineWidth(1);
+	      rCrates->Draw();
+	    }
+	    TString crateLabel;
+	    crateLabel = Form(boxLabelFormat, crate + 1);
+	    TLatex *textCrate = new TLatex(left + 10, HistRawAdc2->GetYaxis()->GetBinUpEdge(HistRawAdc2->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
+	    if (textCrate) {
+	      textCrate->SetTextColor(linesColor);
+	      textCrate->SetTextSize(0.14);
+	      textCrate->Draw();
+	    }
+	  }
 	}
     }
+    
     c->cd(3);
     if (HistRawAdc3) {
 	HistRawAdc3->SetStats(0);
 	HistRawAdc3->Draw("COLZ");
+	if (twMaskFound) {
+	  TGraph *g3=twMask->crG+2;
+	  g3->Draw("L");
+	  g3->SetLineColor(2);
+	}
 	for (Int_t crate = 0;crate < numBoxes;crate++) {
 	    if (!((boxMaxSoftId[crate] < HistRawAdc3->GetXaxis()->GetBinLowEdge(1))
 		|| (boxMinSoftId[crate] > HistRawAdc3->GetXaxis()->GetBinUpEdge(HistRawAdc3->GetXaxis()->GetNbins())))
@@ -424,10 +454,18 @@ void BEMCPlotsPresenter::displayRawAdc(FileType file, TPad *pad, bool psd, Int_t
 	    }
 	}
     }
+
     c->cd(4);
     if (HistRawAdc4) {
 	HistRawAdc4->SetStats(0);
 	HistRawAdc4->Draw("COLZ");
+	if (twMaskFound) {
+	  TGraph *g4=twMask->crG+3;
+	  g4->Draw("L");
+	  g4->SetLineWidth(2);
+	  g4->SetLineColor(2);
+	}
+
 	for (Int_t crate = 0;crate < numBoxes;crate++) {
 	    if (!((boxMaxSoftId[crate] < HistRawAdc4->GetXaxis()->GetBinLowEdge(1))
 		|| (boxMinSoftId[crate] > HistRawAdc4->GetXaxis()->GetBinUpEdge(HistRawAdc4->GetXaxis()->GetNbins())))
@@ -1268,7 +1306,7 @@ void BEMCPlotsPresenter::displayPsdFeeSum(FileType file, TPad *pad, Int_t mDebug
     }
 }	
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayTriggerCorruption(FileType file, TPad *pad, Int_t mDebug) {
+void BEMCPlotsPresenter::displayTriggerCorruption(FileType file, TPad *pad, bool hold, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistTriggerCorruptionHighTower = (TH1F*)GetHisto(file, HistTriggerCorruptionHighTowerName);
@@ -1289,29 +1327,81 @@ void BEMCPlotsPresenter::displayTriggerCorruption(FileType file, TPad *pad, Int_
     TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
     c->Draw();
     c->cd(0);
-    c->Divide(2, 2, 0.001, 0.001);
-    
-    c->cd(1);
-    if (HistTriggerCorruptionHighTower) {
+
+    if (hold==true){
+
+      c->Divide(2, 2, 0.001, 0.001);
+      
+      c->cd(1);
+      if (HistTriggerCorruptionHighTower) {
 	HistTriggerCorruptionHighTower->SetStats(0);
 	HistTriggerCorruptionHighTower->Draw();
-    }
-    c->cd(2);
-    if (HistTriggerCorruptionHighTowerCorr) {
+      }
+      c->cd(2);
+      if (HistTriggerCorruptionHighTowerCorr) {
 	HistTriggerCorruptionHighTowerCorr->SetStats(0);
 	HistTriggerCorruptionHighTowerCorr->Draw("COLZ");
-    }
-    c->cd(3);
-    if (HistTriggerCorruptionPatchSum) {
+      }
+      c->cd(3);
+      if (HistTriggerCorruptionPatchSum) {
 	HistTriggerCorruptionPatchSum->SetStats(0);
 	HistTriggerCorruptionPatchSum->Draw();
-    }
-    c->cd(4);
-    if (HistTriggerCorruptionPatchSumCorr) {
+      }
+      c->cd(4);
+      if (HistTriggerCorruptionPatchSumCorr) {
 	HistTriggerCorruptionPatchSumCorr->SetStats(0);
 	HistTriggerCorruptionPatchSumCorr->Draw("COLZ");
+      }
+    }
+
+    else if (hold== false) {
+      c->Divide(1, 2, 0.001, 0.001);
+      c->cd(1);
+      if (HistTriggerCorruptionHighTowerCorr) {
+	HistTriggerCorruptionHighTowerCorr->SetStats(0);
+	HistTriggerCorruptionHighTowerCorr->Draw();
+      }
+      c->cd(2);
+      if (HistTriggerCorruptionPatchSumCorr) {
+	HistTriggerCorruptionPatchSumCorr->SetStats(0);
+	HistTriggerCorruptionPatchSumCorr->Draw("COLZ");
+      }
     }
 }
+
+//-------------------------------------------------------------------
+void BEMCPlotsPresenter::displayAdcEtaPhi( FileType file, TPad *pad, Int_t mDebug)
+{
+   if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+   
+   TH2F *Hist_ADCEtaPhi_TowHits= (TH2F*)GetHisto(file, Hist_ADCEtaPhi_TowHitsName);
+   if (!Hist_ADCEtaPhi_TowHits || (mDebug >= 2)) cout << "HistADCEtaPhi_TowHits = " << Hist_ADCEtaPhi_TowHits << endl;
+   TH2F *Hist_ADCEtaPhi_Pre1Hits = (TH2F*)GetHisto(file, Hist_ADCEtaPhi_Pre1HitsName);
+   if (!Hist_ADCEtaPhi_Pre1Hits || (mDebug >= 2)) cout << "Hist_ADCEtaPhi_Pre1Hits = " << Hist_ADCEtaPhi_Pre1Hits << endl;
+   
+   if (!pad) return;
+   pad->Clear();
+   pad->cd(0);
+   
+   TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
+   c->Draw();
+   c->cd(0);
+   c->Divide(1, 2);
+   
+   c->cd(1);
+   if (Hist_ADCEtaPhi_TowHits) {
+     Hist_ADCEtaPhi_TowHits->SetStats(0);
+     Hist_ADCEtaPhi_TowHits->Draw("H COLZ");
+    }
+   c->cd(2);
+   if (Hist_ADCEtaPhi_Pre1Hits) {
+     Hist_ADCEtaPhi_Pre1Hits->SetStats(0);
+     Hist_ADCEtaPhi_Pre1Hits->Draw("H COLZ");
+   }
+   
+}
+//-------------------------------------------------------------------
+
 //-------------------------------------------------------------------
 void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType file, TPad *pad, Int_t mDebug) {
 //mDebug = 10;
@@ -1352,12 +1442,33 @@ void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType file, TPad 
 	} else if (panel == 11) {
 	    displaySmdFeeSum(file, pad, mDebug);
 	} else if (panel == 12) {
-	    displayTriggerCorruption(file, pad, mDebug);
+	    displayTriggerCorruption(file, pad, true, mDebug);
 	} else if (panel == 13) {
 	    displayPsdFeeSum(file, pad, mDebug);
 	} else if (panel == 14) {
 	    displayRawAdc(file, pad, true, mDebug);
 	}
+    }
+ if (tab == 1) {
+        if (panel == 0) {
+            displayRawAdc(file, pad, false, mDebug);
+        } else if (panel == 1) {
+	    displayAdcEtaPhi(file, pad, mDebug);
+        } else if (panel == 2) {
+            displaySmdFeeSum(file, pad, mDebug);
+        } else if (panel == 3) {
+	  // displaySmdPed(file, pad, true, mDebug);
+        } else if (panel == 4) {
+          //  displaySmdPed(file, pad, false, mDebug);
+        } else if (panel == 5) {
+            displayPsdFeeSum(file, pad, mDebug);
+        } else if (panel == 6) {
+            displayRawAdc(file, pad, true, mDebug);
+        } else if (panel == 7) {
+            displayL0Input(file, pad, mDebug);
+        } else if (panel == 8) {
+            displayTriggerCorruption(file, pad, true, mDebug);
+        } 
     }
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }

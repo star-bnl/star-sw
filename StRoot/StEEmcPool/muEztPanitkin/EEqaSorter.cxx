@@ -1,4 +1,4 @@
-// $Id: EEqaSorter.cxx,v 1.9 2009/02/24 04:07:45 ogrebeny Exp $
+// $Id: EEqaSorter.cxx,v 1.10 2009/03/05 02:37:53 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 //#include <iostream>
@@ -96,6 +96,7 @@ void EEqaSorter::initHisto(TObjArray *HList, int nBin, int mxADC) {
   H1tot=new TH1F("eeTot","EEMC total counter",10,0,10);
   if (HList) HList->Add(H1tot);
   sortA->initCrateHisto(HList, nBin,mxADC);
+  //sortA->usePed4(Form("%s/eemcPed4.dat","/star/u/rfatemi/TestPPlots/home_local/eemc/defaultPanitkinSetup"));
   sortA->usePed4(Form("%s/eemcPed4.dat", pathInp));
 
   sortC->initHisto(HList);
@@ -456,6 +457,9 @@ void EEqaSorter::spy(EztEmcRawData *t, EztEmcRawData *s, int runNo, int eveId) {
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.10  2009/03/05 02:37:53  ogrebeny
+// Updates from Renee and Grant
+//
 // Revision 1.9  2009/02/24 04:07:45  ogrebeny
 // Fixed part of the trigger histograms
 //

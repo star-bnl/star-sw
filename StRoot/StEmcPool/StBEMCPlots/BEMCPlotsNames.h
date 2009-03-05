@@ -71,4 +71,8 @@
 #define Hist_JETMAX_spectraName "bemc_JETMAX_status"
 #define Hist_JETMAX_distName "bemc_JETMAX_distr"
 
+#define Hist_ADCEtaPhi_TowHitsName "bemc_TowHits"
+#define Hist_ADCEtaPhi_Pre1HitsName "bemc_Pre1Hits"
+
+
 #endif
