@@ -2106,7 +2106,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
       
 
-#ifndef NEW_DAQ_READER
   // printf("event tracker\n");
   //fflush(stdout);
 
@@ -2114,10 +2113,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   // Event tracking is done here
   //
   ret = evtTracker->trackEvent(evp, mem, l3p, sizL3_max);
-
-  //Old call to L3 databanks
-  //  ret = l3Reader(datap) ;
-  ret = l3Reader(l3p) ;
+  if (!(ret<0)) ret = evtTracker->copyl3_t(l3,l3p);
 
   if(ret < 0)
     {
@@ -2125,9 +2121,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
       cout<<"Error tracking event: "<<evp->seq<<endl;
       goto END;
     }
-#else
-      printf("Ask Jeff for the new event tracker implementation\n");
-#endif
      
   // if(l3p->tracks.off == 0){
   //       cout<<"No tracks produced for event: "<<evp->seq<<endl;
@@ -2378,7 +2371,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.10 2009/03/05 00:03:16 dkettler Exp $
+   * $Id: HistoHandler.cxx,v 1.11 2009/03/05 01:31:43 genevb Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2388,6 +2381,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.11  2009/03/05 01:31:43  genevb
+   * Update L3 tracking for new DAQ reader
+   *
    * Revision 1.10  2009/03/05 00:03:16  dkettler
    * EMC Updates
    *
