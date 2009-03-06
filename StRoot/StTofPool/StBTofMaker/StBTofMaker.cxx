@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofMaker.cxx,v 1.1 2009/02/26 18:27:23 dongx Exp $
+ * $Id: StBTofMaker.cxx,v 1.2 2009/03/06 19:25:40 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -31,6 +31,13 @@ ClassImp(StBTofMaker);
 StBTofMaker::StBTofMaker(const char *name):StMaker("tof",name)
 , mStEvent(0)
 {
+  mDoINLCorr = kTRUE;     // default
+  mDoTriggerCut = kTRUE;  // default
+
+  mBTofDaqMap = 0;
+  mBTofSortRawHit = 0;
+  mBTofINLCorr = 0;
+
   LOG_INFO << "StBTofMaker::ctor"  << endm;
 }
 
@@ -57,20 +64,23 @@ Int_t StBTofMaker::InitRun(Int_t runnumber)
   ///////////////////////////////////////////////////////////////
   // TOF Daq map and INL initialization -- load from StBTofUtil
   ///////////////////////////////////////////////////////////////
+  LOG_INFO << " Initialize Daq map ... " << endm;
   mBTofDaqMap = new StBTofDaqMap();
   mBTofDaqMap->Init(this);
-  LOG_INFO << " Initialize Daq map ... " << endm;
 
   mNValidTrays = mBTofDaqMap->numberOfValidTrays();
 
-  mBTofINLCorr = new StBTofINLCorr();
-  mBTofINLCorr->setNValidTrays(mNValidTrays);
-  mBTofINLCorr->initFromDbase(this);
-  LOG_INFO << " Initialize INL table ... " << endm;
-
+  LOG_INFO << " Initialize StBTofSortRawHit() ... " << endm;
   mBTofSortRawHit = new StBTofSortRawHit();
   mBTofSortRawHit->Init(this, mBTofDaqMap);
-  LOG_INFO << " Initialize StBTofSortRawHit() ... " << endm;
+
+  if(mDoINLCorr) {
+    LOG_INFO << " Initialize INL table ... " << endm;
+    mBTofINLCorr = new StBTofINLCorr();
+    mBTofINLCorr->setNValidTrays(mNValidTrays);
+    mBTofINLCorr->initFromDbase(this);
+  }
+
 
   return kStOK;
 }
@@ -81,8 +91,13 @@ Int_t StBTofMaker::FinishRun(Int_t runnumber)
   if(mBTofDaqMap) delete mBTofDaqMap;
   mBTofDaqMap = 0;
 
-  if(mBTofINLCorr) delete mBTofINLCorr;
-  mBTofINLCorr = 0;
+  if(mDoINLCorr) {
+    if(mBTofINLCorr) delete mBTofINLCorr;
+    mBTofINLCorr = 0;
+  }
+
+  if(mBTofSortRawHit) delete mBTofSortRawHit;
+  mBTofSortRawHit = 0;
 
   return kStOK;
 }
@@ -149,8 +164,12 @@ void StBTofMaker::fillBTofHitCollection()
     }
 
     for(size_t iv=0;iv<validchannel.size();iv++) {
-      UIntVec leTdc = mBTofSortRawHit->GetLeadingTdc(trayId, validchannel[iv], kTRUE);
-      UIntVec teTdc = mBTofSortRawHit->GetTrailingTdc(trayId, validchannel[iv], kTRUE);
+      UIntVec leTdc = mBTofSortRawHit->GetLeadingTdc(trayId, validchannel[iv], mDoTriggerCut);
+      UIntVec teTdc = mBTofSortRawHit->GetTrailingTdc(trayId, validchannel[iv], mDoTriggerCut);
+
+      if(Debug()) {
+        LOG_INFO << " Number of fired hits on channel " << validchannel[iv] << " = " <<  leTdc.size() << " / " << teTdc.size() << endm;
+      }
 
       if(!leTdc.size() || !teTdc.size()) continue;
 
@@ -164,12 +183,14 @@ void StBTofMaker::fillBTofHitCollection()
       // correct for INL
       unsigned int tmptdc = leTdc[0];    // select the first hit
       int bin = tmptdc&0x3ff;
-      double tmptdc_f = tmptdc + mBTofINLCorr->getTrayINLCorr(trayId, chan, bin);
+      double corr = mDoINLCorr ? mBTofINLCorr->getTrayINLCorr(trayId, chan, bin) : 0.0;
+      double tmptdc_f = tmptdc + corr;
       double letime = tmptdc_f*VHRBIN2PS / 1000.;
 
       tmptdc = teTdc[0];
       bin = tmptdc&0x3ff;
-      tmptdc_f = tmptdc + mBTofINLCorr->getTrayINLCorr(trayId, chan, bin);
+      corr = mDoINLCorr ? mBTofINLCorr->getTrayINLCorr(trayId, chan, bin) : 0.0;
+      tmptdc_f = tmptdc + corr;
       double tetime = tmptdc_f*VHRBIN2PS / 1000.;
 
       StBTofHit *aHit = new StBTofHit();
@@ -197,20 +218,26 @@ void StBTofMaker::fillBTofHitCollection()
       int tubeId = i+1;
       int lechan = (ivpd==0) ? mBTofDaqMap->WestPMT2TDIGLeChan(tubeId) : mBTofDaqMap->EastPMT2TDIGLeChan(tubeId);
       int techan = (ivpd==0) ? mBTofDaqMap->WestPMT2TDIGTeChan(tubeId) : mBTofDaqMap->EastPMT2TDIGTeChan(tubeId);
-      UIntVec leTdc = mBTofSortRawHit->GetLeadingTdc(trayId, lechan, kTRUE);
-      UIntVec teTdc = mBTofSortRawHit->GetTrailingTdc(trayId, lechan, kTRUE);  // channel number should be le, sorted in StBTofSortRawHit
+      UIntVec leTdc = mBTofSortRawHit->GetLeadingTdc(trayId, lechan, mDoTriggerCut);
+      UIntVec teTdc = mBTofSortRawHit->GetTrailingTdc(trayId, lechan, mDoTriggerCut);  // channel number should be le, sorted in StBTofSortRawHit
+
+      if(Debug()) {
+        LOG_INFO << " Number of fired hits on tube " << tubeId << " = " <<  leTdc.size() << " / " << teTdc.size() << endm;
+      }
 
       if(leTdc.size() && teTdc.size()) {
 
         // correct for INL
         unsigned int tmptdc = leTdc[0];    // select the first hit
         int bin = tmptdc&0x3ff;
-        double tmptdc_f = tmptdc + mBTofINLCorr->getVpdINLCorr(eastwest, lechan, bin);
+        double corr = mDoINLCorr ? mBTofINLCorr->getVpdINLCorr(eastwest, lechan, bin) : 0.0;
+        double tmptdc_f = tmptdc + corr;
         double letime = tmptdc_f*VHRBIN2PS / 1000.;
 
         tmptdc = teTdc[0];
         bin = tmptdc&0x3ff;
-        tmptdc_f = tmptdc + mBTofINLCorr->getVpdINLCorr(eastwest, techan, bin);
+        corr = mDoINLCorr ? mBTofINLCorr->getVpdINLCorr(eastwest, techan, bin) : 0.0;
+        tmptdc_f = tmptdc + corr;
         double tetime = tmptdc_f*VHRBIN2PS / 1000.;
 
         StBTofHit *aHit = new StBTofHit();
