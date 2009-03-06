@@ -370,6 +370,11 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 	s->count = 0 ;
 	if(unlikely(a->count==0)) return 0 ;
 
+	// HACK put in on Mar 6th, 2009 to suppress those
+	// long strips of unknown nature (to that date).
+	// Tonko.
+	if(a->count >= 415) return 0 ;
+
 	u_int t_ave, charge ;
 	u_int tb_start ;
 	u_int last_falling, last_adc ;
@@ -392,7 +397,6 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 	tb_prev = tb_start = a->tb[0] ;
 	flags =  s->f & 0xFF ;
 	new_cluster = 0 ;
-
 
 
 	// start the loop over raw pixels in this pad...
