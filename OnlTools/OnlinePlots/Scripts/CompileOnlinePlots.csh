@@ -29,6 +29,7 @@ Online.ProjectPath:  OnlTools/OnlinePlots/
 Online.endOfRun:     /home/operator/EndOfRunScript
 Online.plotsDir:     `pwd`/OnlTools/OnlinePlots/
 Online.Reference:    /a/pplot/histos/run10029077.root
+Online.testProc:     /a/pplot/bin/test_proc.csh
 
 Plugin.TVirtualPadEditor: Ged TQtGedEditor    QtGed          "TQtGedEditor(TCanvas*)"
 
