@@ -3,6 +3,8 @@
 #include "EvpServer.h"
 #include "TGWindow.h"
 #include "EvpUtil.h"
+#include <fstream>
+#include <TEnv.h>
 
 EvpServer *evpServerMain::mEvpServer=0;
 
@@ -10,37 +12,65 @@ EvpServer *evpServerMain::mEvpServer=0;
 //_______________________________________________________
 static void guitest(const char* name ) {
 
- char cmd[1024];
- sprintf(cmd,"/RTS/bin/LINUX/i686/find_proc.csh %s",name);
+  cout << "Process id: " << getpid() << endl;
 
- int j = system(cmd);
+  ifstream testfile("/tmp/serverLock");
+  if(testfile.is_open()) { // File may exist, but is content current?
+    int procnum;
+    testfile >> procnum;
+    testfile.close();
+    
+    char cmd[1024];
+    sprintf(cmd,"%s root4starN %d",gEnv->GetValue("Online.testProc","/a/pplot/bin/test_proc.csh"),procnum);
+    int j = system(cmd);
+    //cout << j << endl;
+    if(j==256) {
+      cout << "Server is already running!  Aborting.  " << j << endl;
+      exit(-1);
+    } else {
+      cout << "Old lock file found, deleting." << endl;
+      sprintf(cmd,"rm -f /tmp/serverLock");
+      system(cmd);
+    }
+  }
 
-   //Normal return should be 256 if there is only one process(itself) running
-   if(j==256){
-     cout<<"Good going no duplicate copy is found. Proceed "<< j<<endl;
-        }
-   else {
-     //Yell when something is wrong
-     cout<<"Program evpServer is already running! "<<j<<endl;
-     printf("(%s) returns %d\n",cmd,j);
-     fflush(stdout);
+  cout << "Creating lock file" << endl;
 
-     new DGHelp( strcat( getenv("ONLINEPLOTSDIR"),"/Infrastructure/messages/duplicate_copy.message"),true,0xff0000);
-     
+  char cmd[1024];
+  sprintf(cmd,"umask 222; echo %d > /tmp/serverLock",getpid());
+  system(cmd);
 
-     // Introduce delay here to allow pop-up window to show up on the screen 
-     //for 10 sec
-     cout << " Waiting ";
-     for(int i=10;i>0;i--){
-       //     gSystem->Sleep(20000); // do not use root sleep function
-       cout << " " << i;
-       cout.flush();
-       sleep(1);
-       gSystem->ProcessEvents();
-     }
-
-       exit(-1);
-   }
+// char cmd[1024];
+// sprintf(cmd,"/RTS/bin/LINUX/i686/find_proc.csh %s",name);
+//
+// int j = system(cmd);
+//
+//   //Normal return should be 256 if there is only one process(itself) running
+//   if(j==256){
+//     cout<<"Good going no duplicate copy is found. Proceed "<< j<<endl;
+//        }
+//   else {
+//     //Yell when something is wrong
+//     cout<<"Program evpServer is already running! "<<j<<endl;
+//     printf("(%s) returns %d\n",cmd,j);
+//     fflush(stdout);
+//
+//     new DGHelp( strcat( getenv("ONLINEPLOTSDIR"),"/Infrastructure/messages/duplicate_copy.message"),true,0xff0000);
+//     
+//
+//     // Introduce delay here to allow pop-up window to show up on the screen 
+//     //for 10 sec
+//     cout << " Waiting ";
+//     for(int i=10;i>0;i--){
+//       //     gSystem->Sleep(20000); // do not use root sleep function
+//       cout << " " << i;
+//       cout.flush();
+//       sleep(1);
+//       gSystem->ProcessEvents();
+//     }
+//
+//       exit(-1);
+//   }
 
 
     
@@ -127,7 +157,7 @@ int evpServerMain::main(int argc, const char* argv[]) {
 
 /***************************************************************************
  *
- * $Id: evpServerMain.cxx,v 1.1 2009/01/23 16:11:03 jeromel Exp $
+ * $Id: evpServerMain.cxx,v 1.2 2009/03/06 23:44:12 dkettler Exp $
  *
  * Author: Valeri Fine Laue, fine@bnl.gov
  ***************************************************************************
@@ -137,6 +167,9 @@ int evpServerMain::main(int argc, const char* argv[]) {
  ***************************************************************************
  *
  * $Log: evpServerMain.cxx,v $
+ * Revision 1.2  2009/03/06 23:44:12  dkettler
+ * Lock file added
+ *
  * Revision 1.1  2009/01/23 16:11:03  jeromel
  * Import from online/RTS/src/
  *
