@@ -25,6 +25,7 @@ public:
   int PVPDEast();
 
 private:
+  short flipBBCBkg;
 };
 
 SC_Reader *getSCReader(EventReader *er);
