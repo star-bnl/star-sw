@@ -25,11 +25,11 @@ int SC_Reader::BBCX() {
 } 
 
 int SC_Reader::BBCBlueBkg() {
-  return sc.rich_scalers[3];
+  return sc.rich_scalers[4 - flipBBCBkg];
 } 
 
 int SC_Reader::BBCYellowBkg() {
-  return sc.rich_scalers[4];
+  return sc.rich_scalers[3 + flipBBCBkg];
 } 
 
 int SC_Reader::ZDCEast() {
@@ -82,11 +82,12 @@ int SC_Reader::BBCXCTB() {
 
 SC_Reader::SC_Reader(EventReader *er) {
 
-  //static int call=0;
-
-
-  //unsigned int UTime = er->getEventInfo().UnixTime;
-  //struct tm *time=gmtime((time_t*) &UTime);
+  //Keep BBCBkg scalers flipped as they were historically before 2009
+  //Note that new DAQ reader leads to UTime = 0, or tm_year=70 (1970)
+  //but new DAQ reader only gets used for 2009+ anyhow
+  unsigned int UTime = er->getEventInfo().UnixTime;
+  struct tm *time=gmtime((time_t*) &UTime);
+  flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0) ;
 
   //  LDate = (((1900+time->tm_year)*100 + 1 + time->tm_mon)*100 + time->tm_mday)*100;
   //  LTime = (time->tm_hour*100 + time->tm_min)*100 + time->tm_sec;
