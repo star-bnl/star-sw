@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofMaker.h,v 1.1 2009/02/26 18:27:23 dongx Exp $
+ * $Id: StBTofMaker.h,v 1.2 2009/03/06 19:25:40 dongx Exp $
  * StBTofMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -62,6 +62,9 @@ class StBTofMaker : public StMaker
      static const Int_t  mNVPD          = 19;
      static const Int_t  mWestVpdTrayId = 121;
      static const Int_t  mEastVpdTrayId = 122;
+     
+     Bool_t       mDoINLCorr;     //! Switch to turn on INL Corr or not
+     Bool_t       mDoTriggerCut;  //! Switch to turn on trigger cut
           
    protected:
      StBTofCollection *GetBTofCollection();
@@ -80,6 +83,9 @@ class StBTofMaker : public StMaker
      Int_t  Finish();
      Int_t  Make();
 
+     void   doINLCorr(const Bool_t val=kTRUE);
+     void   doTriggerCut(const Bool_t val=kTRUE);
+     
   /// cvs
   virtual const char *GetCVS() const
     {
@@ -88,5 +94,8 @@ class StBTofMaker : public StMaker
   
   ClassDef(StBTofMaker, 1)    ///StBTofMaker - class to fille the StEvent from DAQ reader
 };
+
+inline void StBTofMaker::doINLCorr(const Bool_t val) { mDoINLCorr = val; }
+inline void StBTofMaker::doTriggerCut(const Bool_t val) { mDoTriggerCut = val; }
 
 #endif
