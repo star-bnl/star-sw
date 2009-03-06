@@ -1,7 +1,10 @@
-// $Id: LoopOverLaserTrees.C,v 1.5 2008/06/02 13:48:03 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.6 2009/03/06 22:46:43 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
-// Revision 1.5  2008/06/02 13:48:03  fisyak
-// Add  t0 handlers for Tpx/Tpc time offsets
+// Revision 1.6  2009/03/06 22:46:43  fisyak
+// Increase acceptable drift velocity interval from [5.5,5.9] to [5.2,5.9]
+//
+// Revision 1.2  2008/04/25 15:25:15  fisyak
+// Freeze macros
 //
 // Revision 1.4  2007/12/28 13:20:25  fisyak
 // Use average drift velocity from East and West
@@ -63,13 +66,13 @@ Double_t ScaleE2W(Double_t day) {// scale East to West drift velocity
 //________________________________________________________________________________
 void MakeTable() {
 #ifndef SeparateWestandEast
-  if (! (DVAll[0][0] > 5.5 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 1e-4)) {
+  if (! (DVAll[0][0] > 5.3 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 1e-4)) {
     cout << "Run " << run << " fails =============================" << endl;
     return;
   }
 #else
-  if (! (DVAll[0][1] > 5.5 && DVAll[0][1] < 5.9 && dDVAll[0][1] > 0 && dDVAll[0][1]< 4e-5 ||
-	 DVAll[0][2] > 5.5 && DVAll[0][2] < 5.9 && dDVAll[0][2] > 0 && dDVAll[0][2]< 4e-5)) {
+  if (! (DVAll[0][1] > 5.3 && DVAll[0][1] < 5.9 && dDVAll[0][1] > 0 && dDVAll[0][1]< 4e-5 ||
+	 DVAll[0][2] > 5.3 && DVAll[0][2] < 5.9 && dDVAll[0][2] > 0 && dDVAll[0][2]< 4e-5)) {
     cout << "Run " << run << " fails =============================" << endl;
     return;
   }
