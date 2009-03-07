@@ -368,13 +368,18 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 
 	s->count = 0 ;
-	if(unlikely(a->count==0)) return 0 ;
+
+	if(unlikely(a->count<=1)) return 0 ;	// no point....
 
 	// HACK put in on Mar 6th, 2009 to suppress those
-	// long strips of unknown nature (to that date).
+	// long strips (>=415 tb) of unknown nature (to that date).
 	// After run 10065096.
 	// Tonko.
-	if(a->count >= 415) return 0 ;
+	// Actually, I will leave this cut in and lower to 400
+	if(unlikely(a->count >= 400)) {
+		//LOG(WARN,"count %d on r:p %d:%d",a->count,a->row,a->pad) ;
+		return 0 ;
+	}
 
 	u_int t_ave, charge ;
 	u_int tb_start ;
@@ -520,7 +525,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 #endif
 
-	if(sim_adc && modes) {	// FCF_ANNOTATION for simulated data!
+	if(unlikely(sim_adc && modes)) {	// FCF_ANNOTATION for simulated data!
 		cl = s->cl ;
 		
 		for(int j=0;j<s->count;j++) {
