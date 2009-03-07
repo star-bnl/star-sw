@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.189 2009/02/22 21:36:23 perev Exp $
+* $Id: geometry.g,v 1.190 2009/03/07 01:04:00 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.190  2009/03/07 01:04:00  perev
+* SSD shield fix + cleanup
+*
 * Revision 1.189  2009/02/22 21:36:23  perev
 * Y2009 born
 *
@@ -842,6 +845,7 @@ replace [exe CALB02;] with [;CALB=on;
                      CalbConfig = 2;
                      emsEdit=on ; nmod={60,60}; shift={75,105}; " 60 sectors on both sides";]
 
+replace [exe CAVE03;] with [ "We need an even bigger Cave";   CaveConfig = 3;]
 replace [exe CAVE04;] with [ "We need an even bigger Cave";   CaveConfig = 4;]
 
 replace [exe ECALof;] with [;ECAL=off;]
@@ -857,6 +861,7 @@ replace [exe ECAL33;] with [;"ECAL"; ECAL=on;
 
 replace [exe FPDM00;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 0;]
 replace [exe FPDM01;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 1;]
+replace [exe FPDM02;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 2;]
 replace [exe FPDM03;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 3;]
 
 replace [exe FTPCof;] with ["ftpc configuration"; FTPC=off;]
@@ -872,10 +877,12 @@ replace [exe MFLD23;] with [ MFLD=on; magField = 2.5; MfldConfig=3;]
 replace [exe MFLD53;] with [ MFLD=on; magField = 5.0; MfldConfig=3;]
 replace [exe MFLD54;] with [ MFLD=on; magField = 5.0; MfldConfig=4;]
 
+replace [exe MUTD01;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 1;]
 replace [exe MUTD03;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 3;]
 
-replace [exe PHMD01;] with ["Photon Multiplicity Detector Version ";PHMD=on; PhmdConfig = 1;]
-replace [exe PHMD02;] with ["Photon Multiplicity Detector Version ";PHMD=on; PhmdConfig = 2;]
+replace [exe PHMDof;] with ["Photon Multiplicity Detector Version ";PHMD=off; PhmdConfig = 0;]
+replace [exe PHMD01;] with ["Photon Multiplicity Detector Version ";PHMD=on;  PhmdConfig = 1;]
+replace [exe PHMD02;] with ["Photon Multiplicity Detector Version ";PHMD=on;  PhmdConfig = 2;]
 
 replace [exe PIPE00;] with [ "Simplest.Gerrit"; PipeConfig = -1;PipeFlag   = -1;]
 replace [exe PIPE04;] with [ "The new pipe according to Kai"; PipeConfig = 4;
@@ -899,7 +906,10 @@ replace [exe SISD12;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=
 replace [exe SISD22;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=22;]
 replace [exe SISD23;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=23;]
 replace [exe SISD24;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=24;]
+replace [exe SISD35;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=35;]
+replace [exe SISD55;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=55;]
 replace [exe SISD65;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=65;]
+replace [exe SISD75;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=75;]
 
 replace [exe SVTTof;] with ["SVTT version"; SVTT=off; SvttConfig = -1;]
 replace [exe SVTT00;] with ["SVTT version"; SVTT=on;
@@ -930,10 +940,32 @@ replace [exe SVT206;] with ["SVTT version"; SVTT=on;
                               SvttConfig = 6; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
                               SvshConfig = 2; "SVT shield";]
 
-replace [exe BTOF42;] with [;BTOF=on; BtofConfig=4;Itof=2 " call btofgeo2 ";]
-replace [exe BTOF52;] with [;BTOF=on; BtofConfig=5;Itof=2 " call btofgeo2 ";]
-replace [exe BTOF72;] with [;BTOF=on; BtofConfig=7;Itof=2 " call btofgeo2 ";]
-replace [exe BTOF84;] with [;BTOF=on; BtofConfig=8;Itof=4 " call btofgeo4 ";]
+replace [exe SVT306;] with ["SVTT version"; SVTT=on;
+                              SvttConfig =  6; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
+                              SvshConfig = 3; "SVT shield";]
+replace [exe SVT306x;] with ["SVTT version"; SVTT=on;
+                              SvttConfig =  6; svtWater=on; nSvtVafer=0; nSvtLayer=7; svtWaferDim=0;
+                              SvshConfig = 3; "SVT shield";]
+replace [exe SVT310x;] with ["SVTT version"; SVTT=on;
+                              SvttConfig = 10; svtWater=on; nSvtVafer=0; nSvtLayer=7; svtWaferDim=0;
+                              SvshConfig = 3; "SVT shield";]
+replace [exe SVT211;] with ["SVTT version"; SVTT=on;
+                              SvttConfig = 11; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
+                              SvshConfig = 2; "SVT shield";]
+replace [exe SVT311;] with ["SVTT version"; SVTT=on;
+                              SvttConfig = 11; svtWater=on; nSvtVafer=0; nSvtLayer=6; svtWaferDim=0;
+                              SvshConfig = 3; "SVT shield";]
+replace [exe SVT312;] with ["SVTT version"; exe SVT311; SvttConfig = 12;]
+
+replace [exe SVT312x;] with ["SVTT version"; SVTT=on;
+                              SvttConfig = 12; svtWater=on; nSvtVafer=0; nSvtLayer=7; svtWaferDim=0;
+                              SvshConfig = 3; "SVT shield";]
+
+replace [exe BTOF42;] with [;BTOF=on; BtofConfig= 4;Itof=2 " call btofgeo2 ";]
+replace [exe BTOF52;] with [;BTOF=on; BtofConfig= 5;Itof=2 " call btofgeo2 ";]
+replace [exe BTOF72;] with [;BTOF=on; BtofConfig= 7;Itof=2 " call btofgeo2 ";]
+replace [exe BTOF84;] with [;BTOF=on; BtofConfig= 8;Itof=4 " call btofgeo4 ";]
+replace [exe BTOFa5;] with [;BTOF=on; BtofConfig=10;Itof=5 " call btofgeo5 ";]
 
 replace [exe BTOF16;] with [;" X.Dong";BTOF=on;
                             BtofConfig=1; Itof=6 " call btofgeo6 ";
@@ -1065,6 +1097,7 @@ replace [exe y2004y;] with [
                 exe SVT204; exe SCON02; exe BTOF72; exe CALBe0; exe ECAL31; exe BBCMon; exe FPDM01;
                 exe VPDD04; exe MFLD54; exe FTPC01; exe FTRO01; exe PHMD02; exe SISD22; exe TPCE02;
 ]
+*______________________________________________________________________________
 *========   y2005   y2005  y2005  y2005  y2005  y2005  y2005  y2005  =================================
 *********   y2005   ***
 replace [exe y2005;] with [
@@ -1083,51 +1116,75 @@ replace [exe y2005c;] with [ exe y2005b;  exe BTOF84;]
 *********   y2005d   ***
 replace [exe y2005d;] with [ exe y2005c;  exe SVT206;]
 
+*********   y2005e   ***
+replace [exe y2005e;] with [
+                exe SVT306; exe SCON02; exe BTOF84; exe CALB01; exe ECAL31; exe BBCMon; exe FPDM01;
+                exe VPDD04; exe MFLD54; exe FTPC01; exe PHMD02; exe FTRO01; exe SISD35; exe TPCE02;
+]
+replace [exe y2005f;] with [ exe y2005e; exe CALB02;exe SISD55;]
 
+replace [exe y2005g;] with [ exe y2005f; exe svt312; exe sisd75;]
+
+
+!//______________________________________________________________________________
+*********   y2006   ***
+replace [exe y2006;] with [ "y2006 baseline which is Y2005D+fixed TPC backplane+New SSD"
+                exe SVT306; exe SCON02; exe BTOF84; exe CALB01; exe ECAL31;
+	        exe BBCMon; exe FPDM01; exe VPDD04; exe MFLD54; exe FTPC01;
+		exe PHMD02; exe FTRO01; exe SISD35; exe TPCE03; exe mutd01; exe cave03;
+]
+*********   y2006a   ***
+replace [exe y2006a;] with ["Y2006 baseline which is Y2005D+fixed TPC backplane+New SSD"
+                            exe y2006; exe FPDM02;]
+*********   y2006b   ***
+replace [exe y2006b;] with ["Y2006A + improved SSD with dead area + improved CALB"
+                            exe y2006; exe CALB02; exe FPDM02;exe SISD55;]
+
+*********   y2006c   ***
+replace [exe y2006c;] with ["Y2006B without the PHMD"
+                            exe y2006b; exe PHMDof;]
+*********   y2006g   ***
+replace [exe y2006g;] with ["Y2006C new SVT dead material"
+                            exe y2006c; exe SVT312;exe SISD75;]
+
+!//______________________________________________________________________________
+*********   y2007   ***
+replace [exe y2007;] with ["y2006 baseline which is Y2006+FMS"
+                exe SVT306x;exe SCON02; exe BTOFa5; exe CALB02; exe ECAL31;
+	        exe BBCMon; exe FPDM03; exe VPDD07; exe MFLD54; exe FTPC01;
+		exe PHMD02; exe FTRO01; exe SISD55; exe TPCE03; exe mutd01; exe cave04;]
+
+*********   y2007a   ***
+replace [exe y2007a;] with ["y2007 but corrected SVT,carbon instead of Be water channels"
+		             exe y2007; exe SVT310x;]
+*********   y2007g   ***
+replace [exe y2007g;] with ["y2007A + dead material from Rene"
+                             exe y2007a; exe SVT312x;exe SISD75;]
+
+!//______________________________________________________________________________
 *********   y2008   ***
 replace [exe y2008;] with [;
-{ "Year 2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now"
-    exe SCON02;
-    exe TPCE03;
-    exe BTOFb6;
-    exe CALB02;
-    exe ECAL31;
-    exe BBCMon;
-    exe FPDM03;
-    exe VPDD07;
-    exe FTPC01;
-    exe SVTTof;
-    exe PHMD02;
-    exe SISDof;
-    exe FTRO01;
-    exe MUTD03;
-    exe CAVE04;
-    exe PIPE14;
+{ "y2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now"
+    exe SCON02;exe TPCE03;exe BTOFb6;exe CALB02;exe ECAL31;exe BBCMon;
+    exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;exe PHMD02;exe SISDof;
+    exe FTRO01;exe MUTD03;exe CAVE04;exe PIPE14;
 };]
 
 *********   y2008a   ***
 replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 
+
+!//______________________________________________________________________________
 *********   y2009   ***
 replace [exe y2009;] with [;
-{ "Year 2009 baseline: now(12.29.08) only place holder. No difference with y2008a"
-    exe SCON13;
-    exe TPCE04;
-    exe BTOF66;
-    exe CALB02;
-    exe ECAL31;
-    exe BBCMon;
-    exe FPDM03;
-    exe VPDD07;
-    exe FTPC01;
-    exe SVTTof;
-    exe PHMD02;
-    exe SISDof;
-    exe FTRO01;
-    exe MUTD03;
-    exe CAVE04;
+{ "y2009 baseline: now(12.29.08) only place holder. No difference with y2008a"
+    exe SCON13;exe TPCE04;exe BTOF66;exe CALB02;exe ECAL31;
+    exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
+    exe PHMD02;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
     exe PIPE14;
 };]
+
+!//______________________________________________________________________________
 replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
                             exe SVTTof; exe FTPCof; exe BTOF66; exe CALBc0; exe ECAL31;
                             exe BBCMon; exe FPDM00; exe MFLD54;
@@ -1244,7 +1301,7 @@ replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
    common/GCTLIT/ Thrind(4),Jmin,ItCkov,ImCkov,NpCkov
 * - - - - - - - - - - - - - - - - -
 
-replace[;ON#{#;] with [
+replace[;Case#{#;] with [
   IF ((JL.LT.JR) .and. (Commands(JL:JR) .eq. '#1')) {;
     myArg=0; jGotCom=2009;
     if (Commands(JR+1:JR+1).eq.'=') then;
@@ -1350,7 +1407,7 @@ If LL>0
   TOFMAX        = 1.e-4
 *
   for(jGotCom=1;jGotCom>0;) { jGotCom=0;
-  on HELP       { you may select the following keywords: ;
+  Case HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
                   <W>;('               : year_2a                      ');
@@ -1367,45 +1424,45 @@ If LL>0
                   <W>;('--------------------------------------------- ');
                 }
 
-  on YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
+  Case YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
                   BtofConfig=4;
                   {RICH,emsEdit}=on;  nmod={24,0}; shift={21,0};
                   nonf={0,2,2};  Itof=2;  richConfig=2;                        nSvtLayer=6; }
 
-  on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  BBCM=on;            }
+  Case YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  BBCM=on;            }
 
 *************************************************************************************************************
 * as complete as Y2003X below but with all corrections AND pixel detector
 *************************************************************************************************************
-  on COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+  Case COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                  exe complete;
                }
 ****************************************************************************************
 * corrected: MWC readout, RICH reconstructed position, no TOF
-  on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder;
+  Case YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder;
                   exe y2000; }
-  on Y2000      { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder;
+  Case Y2000      { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder;
                   exe y2000; }
 
-  on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
+  Case YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
                   exe y2001; }
-  on Y2001      { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
+  Case Y2001      { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
                   exe y2001; }
 
 ****************************************************************************************
-  on YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
+  Case YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
                   exe y2002;
                 }
-  on Y2002      { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
+  Case Y2002      { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
                   exe y2002;
                 }
 ****************************************************************************************
-  on YEAR2003   { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+  Case YEAR2003   { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   exe y2003;
                 }
 
 ****************************************************************************************
-  on Y2003      { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+  Case Y2003      { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   exe y2003;
                 }
 
@@ -1416,7 +1473,7 @@ If LL>0
 *    corrected CALB -- the shift variable (was 0,0 so the barrel wasn't tilted right)
 *    corrected SVT  -- the layer radii (from 250 to 150 microns, see the svt code)
 ****************************************************************************************
-  on Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+  Case Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                  exe y2003a; }
 ***********************************************************************
 * y2003b is y2003a, but with the extra material in the SVT
@@ -1426,16 +1483,16 @@ If LL>0
 * The endcap EMC has one third of one wheel, as before
 * For more info on the extra material in SVT -- see web page
 ****************************************************************************************
-  on Y2003B    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+  Case Y2003B    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                  exe y2003b;
                }
 ****************************************************************************************
-  on Y2003C    { Better SVT model on top of 2003B: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+  Case Y2003C    { Better SVT model on top of 2003B: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                  exe y2003c;
                }
 
 ****************************************************************************************
-  on Y2003X    { same as y2003b but with full calorimeters and PHMD
+  Case Y2003X    { same as y2003b but with full calorimeters and PHMD
                  exe y2003x;
                }
 
@@ -1450,38 +1507,42 @@ If LL>0
 *                >>>THIS IS THE MASTER GEOMETRY FOR THE SPRING 04<<<
 *
 ****************************************************************************************
-  on Y2004     { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with low cuts GSTPAR in PHMD;
+  Case Y2004     { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with low cuts GSTPAR in PHMD;
                  exe y2004;
                }
 
 ****************************************************************************************
-  on Y2004A    { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD;
+  Case Y2004A    { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD;
                  exe y2004a; }
 
 *
 ****************************************************************************************
-  on Y2004B    { corrected 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD;
+  Case Y2004B    { corrected 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD;
                  exe y2004b; }
 
 ****************************************************************************************
-  on Y2004C    { same as Y2004B but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
+  Case Y2004C    { same as Y2004B but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
                  exe y2004c; }
 ****************************************************************************************
-  on Y2004D    { Better SVT on top of Y2004B
+  Case Y2004D    { Better SVT on top of Y2004B
                  exe y2004d; }
 ****************************************************************************************
 
-  on Y2004X    { hypothetical 2004 geometry: full barrel. Standard cuts in PHMD.;
+  Case Y2004X    { hypothetical 2004 geometry: full barrel. Standard cuts in PHMD.;
                  exe y2004x;
                }
 
 ****************************************************************************************
-  on Y2004Y    { same as Y2004X but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
+  Case Y2004Y    { same as Y2004X but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
                  exe y2004y;
                 }
 
 ****************************************************************************************
-  on Y2005X    { first cut of full CALB 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
+  Case Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
+                exe y2005;
+              }
+****************************************************************************************
+  Case Y2005X    { first cut of full CALB 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
                   "svt: 3 layers ";
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -1538,765 +1599,84 @@ If LL>0
                 }
 
 ****************************************************************************************
-  on Y2005B    { TPC,FTPC,SVT and SSD correction of 2005 geometry
+  Case Y2005B    { TPC,FTPC,SVT and SSD correction of 2005 geometry
                 exe y2005b;
                }
 
 ****************************************************************************************
-  on Y2005C    { TPC,FTPC,SVT and SSD correction of 2005 geometry
+  Case Y2005C    { TPC,FTPC,SVT and SSD correction of 2005 geometry
                 exe y2005c;
                }
 
 ****************************************************************************************
-  on Y2005D    { Better SVT on top of Y2005C
+  Case Y2005D    { Better SVT on top of Y2005C
                 exe y2005d;
                }
 
 ****************************************************************************************
-  on Y2005E    { Better SVT, bigger shield and SSD on top of Y2005C, and full barrel calorimeter
-                  "svt: 3 layers ";
-                     nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-* NEW CONFIG!
-                     BtofConfig=8;
-
-* note the full barrel same as in y2003x:
-                  "CALB"
-                     emsEdit=on ;
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 1 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 35; "second version, full barrel with corrected radii"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 2;
-
-                }
+  Case Y2005E    { Better SVT, bigger shield and SSD on top of Y2005C, and full barrel calorimeter
+                 exe y2005e;
+               }
 
 ****************************************************************************************
-  on Y2005F    { Y2005E + corrected SSD with gaps and dead area
-                  "svt: 3 layers ";
-                     nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-* NEW CONFIG!
-                     BtofConfig=8;
-
-* note the full barrel same as in y2003x:
-                  "CALB"
-                     emsEdit=on ;
-                     CalbConfig = 2
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 1 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, full barrel with corrected radii and dead area"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 2;
-
-                }
-
+  Case Y2005F    { Y2005E + corrected SSD with gaps and dead area
+                 exe y2005f;
+	       }
 ****************************************************************************************
-  on Y2005G    { Y2005F + corrected corrected SVT dead volumes from Rene
-                  "svt: 3 layers ";
-                     nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-* NEW CONFIG!
-                     BtofConfig=8;
-
-* note the full barrel same as in y2003x:
-                  "CALB"
-                     emsEdit=on ;
-                     CalbConfig = 2
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 1 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig =11; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, full barrel with corrected radii and dead area"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 2;
-
-                }
-
+  Case Y2005G    { Y2005F + corrected corrected SVT dead volumes from Rene
+                 exe y2005g;
+               }
 ****************************************************************************************
-  on Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
-                exe y2005;
+****************************************************************************************
+  Case Y2006    { y2006 baseline which is Y2005D+fixed TPC backplane+New SSD
+                exe y2006;
               }
+****************************************************************************************
+  Case Y2006A   { y2006 baseline which is Y2005D+fixed TPC backplane+New SSD
+                exe y2006a;
+              }
+****************************************************************************************
+  Case Y2006B   { Y2006A + improved SSD with dead area + improved CALB
+                  exe y2006b;
+                }
 
 ****************************************************************************************
-  on Y2006C   { Y2006B without the PHMD
-                  "svt: 3 layers ";
-                     nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-                     BtofConfig=8;
-* Full barrel in 2006
-                  "CALB"
-                     emsEdit=on ;
-                     CalbConfig = 2
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-
-
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 2 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=off;
-                     PhmdConfig = 0;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, full barrel newly corrected radii and dead area"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     MUTD = on;
-                     MutdConfig = 1;
-                  "We need a bigger Cave"
-                     CaveConfig = 3;
+  Case Y2006C   { Y2006B without the PHMD
+                  exe y2006c;
                 }
 ****************************************************************************************
-  on Y2006G   { Y2006C new SVT dead material
-                  "svt: 3 layers ";
-                     nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-                     BtofConfig=8;
-* Full barrel in 2006
-                  "CALB"
-                     emsEdit=on ;
-                     CalbConfig = 2
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-
-
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 2 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig =11; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=off;
-                     PhmdConfig = 0;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, full barrel newly corrected radii and dead area"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     MUTD = on;
-                     MutdConfig = 1;
-                  "We need a bigger Cave"
-                     CaveConfig = 3;
+  Case Y2006G   { Y2006C + new SVT dead material
+                  exe y2006g;
                 }
 ****************************************************************************************
-  on Y2006B   { Y2006A + improved SSD with dead area + improved CALB
-                  "svt: 3 layers ";
-                     nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-* NEW CONFIG!
-                     BtofConfig=8;
-
-* Full barrel in 2006
-                  "CALB"
-                     emsEdit=on ;
-                     CalbConfig = 2
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-
-
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 2 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, full barrel newly corrected radii and dead area"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     MUTD = on;
-                     MutdConfig = 1;
-                  "We need a bigger Cave"
-                     CaveConfig = 3;
+****************************************************************************************
+  Case Y2007    { y2006 baseline which is Y2006+FMS
+                  exe y2007;
+	        }
+****************************************************************************************
+  Case Y2007A   { y2007 (see below) but with corrected SVT (carbon instead of Be water channels)
+                  exe y2007a;
                 }
 ****************************************************************************************
-  on Y2006A   { Year 2006 baseline which is Y2005D+fixed TPC backplane+New SSD
-                  "svt: 3 layers ";
-                     nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-* NEW CONFIG!
-                     BtofConfig=8;
-
-* Full barrel in 2006
-                  "CALB"
-                     emsEdit=on ;
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-
-
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 2 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 35; "third version, full barrel newly corrected radii"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     MUTD = on;
-                     MutdConfig = 1;
-                  "We need a bigger Cave"
-                     CaveConfig = 3;
+  Case Y2007G   { y2007A + dead material from Rene
+                  exe y2007g;
                 }
 ****************************************************************************************
-  on Y2006    { Year 2006 baseline which is Y2005D+fixed TPC backplane+New SSD
-                  "svt: 3 layers ";
-                     nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-* NEW CONFIG!
-                     BtofConfig=8;
-
-* Full barrel in 2006
-                  "CALB"
-                     emsEdit=on ;
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-
-
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 1 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=4;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 35; "third version, full barrel newly corrected radii"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     MUTD = on;
-                     MutdConfig = 1;
-                  "We need a bigger Cave"
-                     CaveConfig = 3;
-                }
 ****************************************************************************************
-  on Y2007A    { Year 2007 (see below) but with corrected SVT (carbon instead of Be water channels)
-                  "svt: 3 layers ";
-                     nSvtLayer=7  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=5 " call btofgeo5 ";
-* NEW CONFIG!
-                     BtofConfig=10;
-
-* Full barrel in 2007
-                  "CALB"
-                     emsEdit=on ;
-* important:
-                     CalbConfig = 2
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 3 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=7;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1;  "FTPC Support"
-                     SvttConfig = 10; "SVTT version"
-                     SvshConfig = 3;  "SVT shield"
-                     DensConfig = 1;  "gas density correction"
-                     FtpcConfig = 1;  "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     MUTD = on;
-                     MutdConfig = 1;
-                  "We need an even bigger Cave"
-                     CaveConfig = 4;
-                }
+  Case Y2008    { y2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now
+                  exe y2008; 
+		}
 ****************************************************************************************
-  on Y2007G    { Year 2007A + dead material from Rene
-                  "svt: 3 layers ";
-                     nSvtLayer=7  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=5 " call btofgeo5 ";
-* NEW CONFIG!
-                     BtofConfig=10;
-
-* Full barrel in 2007
-                  "CALB"
-                     emsEdit=on ;
-* important:
-                     CalbConfig = 2
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 3 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=7;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1;  "FTPC Support"
-                     SvttConfig = 11; "SVTT version"
-                     SvshConfig = 3;  "SVT shield"
-                     DensConfig = 1;  "gas density correction"
-                     FtpcConfig = 1;  "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     MUTD = on;
-                     MutdConfig = 1;
-                  "We need an even bigger Cave"
-                     CaveConfig = 4;
-                }
-****************************************************************************************
-  on Y2007    { Year 2006 baseline which is Y2006+FMS
-                  "svt: 3 layers ";
-                     nSvtLayer=7  " 3 bi-plane layers, nSvtLayer<=7 ";
-                     nSvtVafer=0  " numbering is in the code   ";
-                     svtWaferDim=0  " width is in the code      ";
-
-                     ConeConfig=2 " new cable weight estimate ";
-
-                  "ctb: central trigger barrer             ";
-                     Itof=5 " call btofgeo5 ";
-* NEW CONFIG!
-                     BtofConfig=10;
-
-* Full barrel in 2007
-                  "CALB"
-                     emsEdit=on ;
-* important:
-                     CalbConfig = 2
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ECAL"
-                     EcalConfig=1   " one ECAL patch, west "
-                     ecalFill=3     " all sectors filled "
-
-                  "beam-beam counter "
-                     BBCM=on
-
-                  "forward pion detector "
-                     FPDM=on
-                     FpdmConfig  = 3 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     VPDD=on;
-                     VpddConfig=7;
-
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
-                     SvshConfig = 3; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 2;
-
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
-
-
-                  "FTPC Readout barrel "
-                     FTRO=on;
-                     FtroConfig = 1;
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "Muon Trigger System"
-                     MUTD = on;
-                     MutdConfig = 1;
-                  "We need an even bigger Cave"
-                     CaveConfig = 4;
-                }
-****************************************************************************************
-  on Y2008    {  Year 2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now
-                exe y2008; }
+  Case Y2008a   { y2008 + SCONE
+                exe y2008a;
+	        }
 
 ****************************************************************************************
-  on Y2008a   { Year 2008 + SCONE
-                exe y2008a;}
-
-****************************************************************************************
-  on Y2009   { Year 2009 
+  Case Y2009   { y2009 
                 exe y2009;}
 
 ****************************************************************************************
-  on DUMM01   { R and D geometry: TPC+DUMM
+  Case DUMM01   { R and D geometry: TPC+DUMM
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2333,7 +1713,7 @@ If LL>0
                    DUMM=on;        " put the dummy in"
                 }
 ****************************************************************************************
-  on UPGR01   { R and D geometry: TPC+SSD+HFT-SVT
+  Case UPGR01   { R and D geometry: TPC+SSD+HFT-SVT
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2382,7 +1762,7 @@ If LL>0
                    ITSP=on;
                 }
 ****************************************************************************************
-  on UPGR02    { R and D geometry: TPC+IST+HFT-SVT
+  Case UPGR02    { R and D geometry: TPC+IST+HFT-SVT
                   "svt: 3 layers ";
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -2457,7 +1837,7 @@ If LL>0
 
                 }
 *************************************************************************************************************
-  on UPGR03   { New Tracking: IST+IGT+HFT-SVT
+  Case UPGR03   { New Tracking: IST+IGT+HFT-SVT
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2509,7 +1889,7 @@ If LL>0
                    IGTD=on;
                 }
 *************************************************************************************************************
-  on UPGR04   { New Tracking: HPD
+  Case UPGR04   { New Tracking: HPD
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2548,7 +1928,7 @@ If LL>0
                    HpdtConfig=1;   " base version"
                 }
 ****************************************************************************************
-  on UPGR05   { New Tracking: HFT+HPD+IST+TPC-SVT
+  Case UPGR05   { New Tracking: HFT+HPD+IST+TPC-SVT
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2605,7 +1985,7 @@ If LL>0
                    ITSP=on;
                 }
 ****************************************************************************************
-  on UPGR06   { New Tracking: HFT+HPD+SSD
+  Case UPGR06   { New Tracking: HFT+HPD+SSD
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2656,7 +2036,7 @@ If LL>0
                    ITSP=on;
                 }
 ****************************************************************************************
-  on UPGR07   { New Tracking: HFT+IST+TPC+SSD-SVT
+  Case UPGR07   { New Tracking: HFT+IST+TPC+SSD-SVT
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2703,7 +2083,7 @@ If LL>0
                    ITSP=on; "prototype of the Inner Tracker SuPport structure"
                 }
 ****************************************************************************************
-  on UPGR08   { New Tracking: HFT+HPD+IST+TPC-SVT-SSD
+  Case UPGR08   { New Tracking: HFT+HPD+IST+TPC-SVT-SSD
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2760,7 +2140,7 @@ If LL>0
                    ITSP=on;
                 }
 ****************************************************************************************
-  on UPGR09   { New Tracking: HFT+HPD+IST*outer+TPC-SVT-SSD
+  Case UPGR09   { New Tracking: HFT+HPD+IST*outer+TPC-SVT-SSD
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2817,7 +2197,7 @@ If LL>0
                    ITSP=on;
                 }
 ****************************************************************************************
-  on UPGR10   { New Tracking: HFT+innerLayerIST+TPC-SVT+SSD
+  Case UPGR10   { New Tracking: HFT+innerLayerIST+TPC-SVT+SSD
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2875,7 +2255,7 @@ If LL>0
                    ITSP=on;
                 }
 ****************************************************************************************
-  on UPGR11   { New Tracking: HFT+2LayerIST+TPC-SVT+SSD
+  Case UPGR11   { New Tracking: HFT+2LayerIST+TPC-SVT+SSD
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2930,7 +2310,7 @@ If LL>0
                    ITSP=on;
                 }
 ****************************************************************************************
-  on UPGR12   { New Tracking: HFT+HPD+IST+TPC+IGT*newRadii
+  Case UPGR12   { New Tracking: HFT+HPD+IST+TPC+IGT*newRadii
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2988,7 +2368,7 @@ If LL>0
                    ITSP=on;
                 }
 ****************************************************************************************
-  on UPGR13   { New Tracking: HFT+IST+TPC+SSD-SVT
+  Case UPGR13   { New Tracking: HFT+IST+TPC+SSD-SVT
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
@@ -3037,7 +2417,7 @@ If LL>0
                    ITSP=off; "prototype of the Inner Tracker SuPport structure"
                 }
 ****************************************************************************************
-  on UPGR14   { TUP sans IST: HFT+TPC+SSD-SVT
+  Case UPGR14   { TUP sans IST: HFT+TPC+SSD-SVT
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "ctb: central trigger barrer             ";
@@ -3093,10 +2473,10 @@ If LL>0
 *I explicitly wanted to break with this scheme to make it clear that these
 *designs are just for testing purposes. Gerrit
 
-  on UPGR15   { New Tracking: HFT+IST+TPC+SSD-SVT
+  Case UPGR15   { New Tracking: HFT+IST+TPC+SSD-SVT
                 exe UPGR15; }
 ****************************************************************************************
-  on UPGR16   { New Tracking: HFT+IST+TPC+SSD-SVT
+  Case UPGR16   { New Tracking: HFT+IST+TPC+SSD-SVT
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                      SCON=on;
@@ -3160,7 +2540,7 @@ If LL>0
                      CaveConfig = 4;
                 }
 ****************************************************************************************
-  on UPGR17   { UPGR16 - FGTD + FTPC  request Wei-Ming-Zhang
+  Case UPGR17   { UPGR16 - FGTD + FTPC  request Wei-Ming-Zhang
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                      SCON=on;
@@ -3223,7 +2603,7 @@ If LL>0
 
                 }
 ****************************************************************************************
-  on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
+  Case DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -3288,7 +2668,7 @@ If LL>0
                 }
 
 ****************************************************************************************
-  on DEV2007    { THIS TAG IS RESERVED FOR THE 2007 DEVELOPMENT ONLY
+  Case DEV2007    { THIS TAG IS RESERVED FOR THE 2007 DEVELOPMENT ONLY
                   "svt: 3 layers ";
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -3357,7 +2737,7 @@ If LL>0
 
 ****************************************************************************************
 ****************************************************************************************
-  on UPGR21    { Year UPGR20 + full tof;
+  Case UPGR21    { Year UPGR20 + full tof;
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
                      svtWaferDim=0  " width is in the code      ";
@@ -3423,7 +2803,7 @@ If LL>0
                      CaveConfig = 4;
                 }
 ****************************************************************************************
-  on UPGR20    { Year 2007 + one TOF
+  Case UPGR20    { y2007 + one TOF
                   "svt: 3 layers ";
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -3490,20 +2870,20 @@ If LL>0
                      CaveConfig = 4;
                 }
 ****************************************************************************************
-  on HADR_ON    { all Geant Physics On;                                       }
-  on HADR_OFF   { all Geant Physics on, except for hadronic interactions;
+  Case HADR_ON    { all Geant Physics On;                                       }
+  Case HADR_OFF   { all Geant Physics on, except for hadronic interactions;
                                                                        IHADR=0}
-  on GCALOR_ON { setting hadr 6 to activate hadronic showers;
+  Case GCALOR_ON { setting hadr 6 to activate hadronic showers;
                               IHADR=6;}
 
-  on PHYS_OFF   { No Physics: only energy loss;
+  Case PHYS_OFF   { No Physics: only energy loss;
       {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY,IMULS}=0; Iloss=2}
-  on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
+  Case DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
-  on NO_BREM    { No bremmstrahlung;
+  Case NO_BREM    { No bremmstrahlung;
                   IBREM=0;}
 
-  on LOW_EM     { Low cuts on ElectroMagnetic processes;
+  Case LOW_EM     { Low cuts on ElectroMagnetic processes;
                   CUTGAM=0.00001;
                   CUTELE=0.00001;
                   BCUTE =0.00001;
@@ -3512,58 +2892,58 @@ If LL>0
                   DCUTM =0.00001;
                 }
 
-  on TPC_ONLY   { Minimal geometry - only TPC;
+  Case TPC_ONLY   { Minimal geometry - only TPC;
                   {PIPE,SVTT,ftpc,BTOF,VPDD,CALB,ECAL,MAGP,UPST,ZCAL,PHMD,FPDM,BBCM,SISD,FTRO}=off; }
-  on TPC_AND_SVTT  { Only TPC and SVT;
+  Case TPC_AND_SVTT  { Only TPC and SVT;
                   {PIPE,ftpc,BTOF,VPDD,CALB,ECAL,MAGP,UPST,ZCAL,PHMD,FPDM,BBCM,FTRO}=off; }
-  on SVTT_ON    { Optional SVTT added on top of the minimal geo;
+  Case SVTT_ON    { Optional SVTT added on top of the minimal geo;
                      SVTT=on; }
-  on SVTT_OFF   { Optionally remove the SVTT;
+  Case SVTT_OFF   { Optionally remove the SVTT;
                      SVTT=off; }
-  on SISD_OFF   { Optionally remove the SISD sisd;
+  Case SISD_OFF   { Optionally remove the SISD sisd;
                      SISD=off; }
-  on ONLY_SVTT   { Only SVTT;
+  Case ONLY_SVTT   { Only SVTT;
                   {PIPE,TPCE,ftpc,BTOF,VPDD,CALB,ECAL,MAGP,UPST,ZCAL,PHMD,FPDM,BBCM,FTRO}=off; }
 *
-  on PIPE_ON    { Optional PIPE added on top of the minimal geo;
+  Case PIPE_ON    { Optional PIPE added on top of the minimal geo;
                      PIPE=on; }
-  on PIPE_OFF   { Pipe optionally removed;
+  Case PIPE_OFF   { Pipe optionally removed;
                      PIPE=off; }
 *
-  on FTPC_ON    { Optional FTPC added on top of the minimal geo;
+  Case FTPC_ON    { Optional FTPC added on top of the minimal geo;
                      ftpc=on; }
-  on BTOF_ON    { Optional BTOF added on top of the minimal geo;
+  Case BTOF_ON    { Optional BTOF added on top of the minimal geo;
                      BTOF=on; }
-  on ECAL_ON    { Optional ECAL added on top of the minimal geo;
+  Case ECAL_ON    { Optional ECAL added on top of the minimal geo;
                      ECAL=on; }
-  on CALB_ON    { Optional CALB added on top of the minimal geo;
+  Case CALB_ON    { Optional CALB added on top of the minimal geo;
                      CALB=on; }
 
-  on SHIELD_OFF { Can switch the shield off in the DEV geom;
+  Case SHIELD_OFF { Can switch the shield off in the DEV geom;
                      SHLD=off; }
 
-  on PIXL_ON    { Optional PIXL added on top of the minimal geo;
+  Case PIXL_ON    { Optional PIXL added on top of the minimal geo;
                      PIXL=on; }
 
-  on FIELD_ONLY { No geometry - only magnetic field;
+  Case FIELD_ONLY { No geometry - only magnetic field;
       NtrSubEv=0;
       {CAVE,PIPE,SVTT,TPCE,ftpc,BTOF,VPDD,MAGP,CALB,ECAL,RICH,UPST,ZCAL}=off; }
-  on FIELD_OFF  { no magnetic field;                
+  Case FIELD_OFF  { no magnetic field;                
                   magField=0;                  }
-  on FIELD_ON   { Standard (5 KGs) field on;        
+  Case FIELD_ON   { Standard (5 KGs) field on;        
                   magField=5;                  }
-  on FIELD      { defined mag field;
+  Case FIELD      { defined mag field;
                   magField=myArg; }
 
-  on 4TH_OFF    { SVT fourth layer off;
+  Case 4TH_OFF    { SVT fourth layer off;
 		nSvtLayer=min(nSvtLayer,6);           }
-  on SPLIT_OFF  { events will not be split into subevents;
+  Case SPLIT_OFF  { events will not be split into subevents;
 		NtrSubEv=0;    }
-  on SPLIT_ON   { events will be split into subevents;
+  Case SPLIT_ON   { events will be split into subevents;
            	NtrSubEv=1000; }
-  on DEBUG_ON   { verbose mode, some graphics;
+  Case DEBUG_ON   { verbose mode, some graphics;
 		Idebug=max(Idebug,1); Itest=1; }
-  on DEBUG_OFF  { standard debug mode;
+  Case DEBUG_OFF  { standard debug mode;
            	{Idebug,Itest}=0;              }
   } !// end of main moop
 
@@ -3666,6 +3046,7 @@ If LL>0
 * Optionally, switch to a larger inner shield, AND smaller beampipe support
 * Or, pick a shield that is slighly bigger outside according to Lilian observation
     if(SvshConfig>0) call AgDETP add ('svtg.SupportVer=',SvshConfig ,1)
+    call AgDETP add ('svtg.Config=',SvttConfig ,1)
 
 * Ugly, but I Do not want to hash function pointers in Fortran:
 
@@ -3679,7 +3060,7 @@ If LL>0
     if(SvttConfig==7)  call svttgeo7
     if(SvttConfig==9)  call svttgeo9
     if(SvttConfig==10) call svttgeo10
-    if(SvttConfig==11) call svttgeo11
+    if(SvttConfig>=11) call svttgeo11
 
   }!!end SVTT
 
@@ -3700,7 +3081,7 @@ If LL>0
 
        if (SisdConfig>10) then
          sisd_level=SisdConfig/10
-         SisdConfig=SisdConfig-sisd_level*10
+         if (sisd_level <= 5) SisdConfig=mod(SisdConfig,10)
 
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
          if     (sisd_level.eq.1) then
@@ -3711,13 +3092,8 @@ If LL>0
             call sisdgeo3
          elseif (sisd_level.eq.4) then
             call sisdgeo4
-         elseif (sisd_level.eq.5) then
-            call sisdgeo5
-         elseif (sisd_level.eq.6) then
-            call sisdgeo6
-         else ! Unimplemented level
-            write(*,*) '******************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ******************'
-            if (IPRIN==0) stop 'You better stop here to avoid problems'
+         else
+            call sisdgeo6	!//only sisdgeo6 is used from now
          endif
 
        else
