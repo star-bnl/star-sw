@@ -32,10 +32,10 @@
 #define FCF_FALLING             8	// offline: charge too big!
 #define FCF_BIG_CHARGE		8
 
-#define FCF_ROW_EDGE            16      // touched end of row
-#define FCF_BROKEN_EDGE         32      // touches one of the mezzanine edges
-#define FCF_DEAD_EDGE           64      // touches a dead pad
-#define FCF_IN_DOUBLE           128	// one should use the floating point in the union
+#define FCF_ROW_EDGE            16      // 0x10 touched end of row
+#define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
+#define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad
+#define FCF_IN_DOUBLE           128	// 0x80 one should use the floating point in the union
 
 
 
@@ -123,7 +123,7 @@ public:
 	static int fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version=0) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.5 2008/06/18 19:53:35 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.6 2009/03/07 19:34:20 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:
