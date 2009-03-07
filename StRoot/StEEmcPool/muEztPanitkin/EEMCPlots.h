@@ -14,8 +14,8 @@ public:
     EEMCPlots(TObjArray *list = 0, const char *eemcDbDump = 0, const char *eemcPathIn = 0, const char *eemcPathOut = 0);
     ~EEMCPlots();
 
-    void init(unsigned int date, unsigned int time, const char *eemcDbDump, const char *eemcPathIn, const char *eemcPathOut);
-    void clear();
+    //void init(unsigned int date, unsigned int time, const char *eemcDbDump, const char *eemcPathIn, const char *eemcPathOut);
+    void resetHistograms();
     void saveHistograms(TFile *hfile);    
     void processEvent(	  char *rdr
         		, const unsigned char * dsm0inp = 0
