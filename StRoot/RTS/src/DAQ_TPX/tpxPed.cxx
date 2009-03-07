@@ -261,11 +261,16 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		}
 #endif
 
+		// pedestal memory for the altro is really odd
 
+		// first should be the pedestals from the start
+		// of trigger...
 		for(t=15;t<timebins+15;t++) {
 			*ptr++ = (u_short) ped->ped[t] ;
 			tcou++ ;
 		}
+
+		// follow with pre-trigger pedestals
 		for(t=0;t<15;t++) {
 			*ptr++ = (u_short) ped->ped[t] ;
 			tcou++ ;

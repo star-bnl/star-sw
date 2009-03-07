@@ -372,6 +372,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 	// HACK put in on Mar 6th, 2009 to suppress those
 	// long strips of unknown nature (to that date).
+	// After run 10065096.
 	// Tonko.
 	if(a->count >= 415) return 0 ;
 
