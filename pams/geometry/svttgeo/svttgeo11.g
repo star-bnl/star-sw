@@ -1,6 +1,9 @@
-* $Id: svttgeo11.g,v 1.3 2008/11/30 01:30:55 perev Exp $
+* $Id: svttgeo11.g,v 1.4 2009/03/07 01:04:52 perev Exp $
 *
 * $Log: svttgeo11.g,v $
+* Revision 1.4  2009/03/07 01:04:52  perev
+* SSD shield fix
+*
 * Revision 1.3  2008/11/30 01:30:55  perev
 * modifs for extending alpha,theta,phi,ort commandas
 *
@@ -105,9 +108,9 @@ Module  SVTTGEO11 is evolution of svttgeo6 with carbon replacing Be as per Dave 
                        SBMM,SBMO,SBMI,SMRD,SALM,SISH,SSSH,SOSH,
                        SCBM,SCBL,SFED,SPLS,SOUM,SOUR
 *
-      structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
-		       ZsizeMax,  Angoff, SupportVer,   ConeVer,
-                       ifMany, Nmin}
+      structure SVTG { Version,   Config,    Nlayer, RsizeMin,
+                       RsizeMax,  ZsizeMax,  Angoff, SupportVer,
+		       ConeVer,   ifMany,    Nmin}
 *     
       structure SWCA { Version,   Length,
                        WaferWid,  WaferLen,  WaferThk,  RohaThk,
@@ -189,6 +192,7 @@ Module  SVTTGEO11 is evolution of svttgeo6 with carbon replacing Be as per Dave 
 ***************************
    Fill SVTG ! Basic SVT dimensions 
       Version   = 2          ! geometry version
+      Config    = 11         ! default one for svttgeo11.g
       Nlayer    = 7          ! number of svt layers (was 7)
       RsizeMin  = 4.100      ! STV innermost radius
       RsizeMax  = 46.107     ! STV outermost radius
@@ -437,7 +441,7 @@ Module  SVTTGEO11 is evolution of svttgeo6 with carbon replacing Be as per Dave 
       SSepROut = 22.018     ! separation shield cylinder, outer radius
       SSepLen  = 55.4       ! separation shield cylinder, half length
 
-      SOutRInn = 31.80       ! outer shield cylinder, inner radius
+      SOutRInn = 31.80      ! outer shield cylinder, inner radius
       SOutROut = 31.82      ! outer shield cylinder, outer radius
 
       SOutLen  = 65.4       ! outer shield cylinder, half length
@@ -708,7 +712,9 @@ Block SVTT is the mother of all SVT volumes
 * The shield cylinders
 *
       Create and position SISH " SVT inner shield "
-      Create and position SOSH " SVT outer shield "
+      if (SVTG_Config <= 11) { "Otherwice made in sisdgeo"
+        Create and position SOSH " SVT outer shield "
+      }
       if (svtg_Nlayer>6) then
          Create and position SSSH " SVT/SSD separation shield "
       endif
@@ -2085,18 +2091,18 @@ Block SSSH is the separation shield cylinder
       Shape TUBE rmin=ssld_SSepRInn rmax=ssld_SSepROut,
                   dz=ssld_SSepLen
 Endblock
-*
-*------------------------------------------------------------------------------
-*
-Block SOSH is the separation shield cylinder
-* use aluminised mylar mixture instead of kapton
-      material  SSDALMY
-      Attribute SOSH Seen=1 Colo=3
-      Shape TUBE rmin=ssld_SOutRInn rmax=ssld_SOutROut,
-                  dz=ssld_SOutLen
-Endblock
-*
-*------------------------------------------------------------------------------
-*
+ *
+ *------------------------------------------------------------------------------
+ *
+ Block SOSH is the separation shield cylinder
+ * use aluminised mylar mixture instead of kapton
+       material  SSDALMY
+       Attribute SOSH Seen=1 Colo=3
+       Shape TUBE rmin=ssld_SOutRInn rmax=ssld_SOutROut,
+                   dz=ssld_SOutLen
+ Endblock
+ *
+ *------------------------------------------------------------------------------
+ *
       End
 

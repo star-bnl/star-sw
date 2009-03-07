@@ -1,11 +1,18 @@
-* $Id: sisdgeo6.g,v 1.3 2009/02/23 20:38:02 perev Exp $
+* $Id: sisdgeo6.g,v 1.4 2009/03/07 01:04:31 perev Exp $
 * $Log: sisdgeo6.g,v $
+* Revision 1.4  2009/03/07 01:04:31  perev
+* SSD shield fix
+*
 * Revision 1.3  2009/02/23 20:38:02  perev
 * SSD hit max energy 10 times more.(Jonathan)
 *
 * Revision 1.2  2009/02/23 19:00:01  perev
 * SSD hit energy 32bit now. (Jonathan)
 *
+* Revision 1.1  2007/02/02 17:19:54  potekhin
+* Silicon wafers have an active area which is smaller than
+* the total size of the wafer. This was not reflected in the
+* previous design, and is corrected in this piece of code.
 * Revision 1.1  2007/03/09 21:36:53  potekhin
 * TUP-inspired version of the SSD -- the structural support parts
 * on the rim are constructed of Carbon as opposed to Aluminum, to
@@ -13,11 +20,16 @@
 *
 *
 *********************************************************************
+*  *maxim* Described the dead areas around the silicon sensor
+*          which are responcible for almost 10% inefficiency
+*
+*  Please see banner comment in sisdgeo4 for previous design comments
+*
 * same as version 5, but with structural support on the ends made of C
 *********************************************************************
 Module  SISDGEO6  is the Silicon Strip Detector with TUP modifications
    Author  Bouchet and Potekhin
-   created 9 Mar 07
+   created 1 Feb 07
 
 +CDE,AGECOM,GCONST,GCUNIT.
 * SSD Volumes
@@ -28,10 +40,11 @@ Module  SISDGEO6  is the Silicon Strip Detector with TUP modifications
 		SFLA,SFLB,SFLC,SFES,SFEB,
                 SFCO,SFCM,SFCB,SFCS,SFKF,SFKS,SSBS,SSBB,
 	        SFPR,SFPB,SSST,SSSS,SSRS,SSRT,SSLB,SSBQ,SBCH,SBCV,SBFH,SBFV,SSLT,
-		SCMP,SCVM,SCVB,SCVS
+		SCMP,SCVM,SCVB,SCVS,SOSH
 * SSD Parameters:
       Structure SSDP { Version,  Int Config , Int Placement}
-
+      integer ConfigA,ConfigB;
+    
       Structure SFJP { Version, AlphaZ,   AlphaZH,  SSST_Rmin,  SSST_Rmax,  SSST_Width,  SSST_Pz, SSSS_Rmin,
                        SSSS_Width,  SSRS_Rmin,  SSLB_Dx,  SSLB_Px, SSLB_Dy, SSLB_Dz, 
                        SSBQ_Dx,  SSBQ_Dy, SSBQ_Dz,
@@ -69,6 +82,7 @@ Module  SISDGEO6  is the Silicon Strip Detector with TUP modifications
       structure SFPB { Hhight,   Khight,   Hbase,   Kbase, Fsize,
 		       Zcoor}
       Structure SFPA { Version,  rmin,     rmax,     Len,
+                       SOutRInn, SOutROut, SOutLen,
                        rad,      nssd,     dmWid,    dmThk,
 		       dmLen,    smWid,    smThk,    smLen,
                        ssLen,    wpLen,    sdlen,    tilt,     
@@ -268,6 +282,9 @@ Module  SISDGEO6  is the Silicon Strip Detector with TUP modifications
         version  = 1          ! geometry version
         rmin     = 21.8       ! mother rmin
         rmax     = 32.        ! mother rmax
+        SOutRInn = 29.5       ! outer shield cylinder, inner radius
+        SOutROut = 29.52      ! outer shield cylinder, outer radius
+        SOutLen  = 65.4       ! outer shield cylinder, half length
         Len      = 107.       ! mother Len along the z direction
         rad      = 23.        ! distance from beam axis to detector center
         nssd     = 16         ! number of silicon strip detectors 
@@ -392,8 +409,11 @@ Module  SISDGEO6  is the Silicon Strip Detector with TUP modifications
 *************************************************************************************************
 
       USE SSDP
+      ConfigA = mod(SSDP_Config   ,10)
+      ConfigB = mod(SSDP_Config/10,10)
+
 * was hardcoded to 5:
-      USE SFPA version=SSDP_Config
+      USE SFPA version=ConfigA
       USE SFJP version=2
 
 *     G10 is about 60% SiO2 and 40% epoxy (stolen from ftpcgeo.g)
@@ -438,6 +458,10 @@ Block SFMO is the mother of all Silicon Strip Detector volumes
                  Rmax = SFPA_rmax,
                  dz   = SFPA_Len/2
                  dthk = SFPA_smThk + SFPA_gpThk
+
+      if (ConfigB .ge.7) {
+        Create and position SOSH " SSD outer shield "
+      }
 
 *** Putting the ladders in place
       Create SFLM " ladder mother"
@@ -1450,7 +1474,12 @@ Endblock
 *************************************************************************************
 *  Changing the material to Carbon for R and D purposes
 Block SSRT is the top of the side rib
+       if (ConfigB .le.5 ) {
+	Material Aluminium
+       } else {
 	Material Carbon
+       }
+
 	Attribute SSRT Seen=1, Colo=1
     SHAPE TUBS rmin = SFJP_SSST_Rmin, 
                rmax = SFJP_SSST_Rmax, 
@@ -1459,8 +1488,13 @@ Block SSRT is the top of the side rib
                phi2 = +SFJP_AlphaZH
 Endblock 
 *-------------------------------------------
+
 Block SSRS is the side of the small rib
+       if (ConfigB .le.5 ) {
+	Material Aluminium
+       } else {
 	Material Carbon
+       }
 	Attribute SSRS Seen=1, Colo=1
     SHAPE TUBS rmin =  SFJP_SSRS_Rmin, 
                rmax =  SFJP_SSST_Rmin, 
@@ -1468,7 +1502,7 @@ Block SSRS is the side of the small rib
                phi1 = -SFJP_AlphaZH, 
                phi2 = +SFJP_AlphaZH
 Endblock 
-
+*----------------------------------------------------------------------
 *************************************************************************************
 * Was in Aluminium in the previous version. Now it is the mother volume
 * of different real volumes depending on the Run considered.
@@ -1593,5 +1627,25 @@ Block SCVS is the side plate of the V-shape piece
 Endblock 
 
 
+ *
+ *------------------------------------------------------------------------------
+ *
+ Block SOSH is the separation shield cylinder
+* use aluminized mylar mixture for ssd shield
+        Component C5  A=12    Z=6  W=5
+        Component H4  A=1     Z=1  W=4
+        Component O2  A=16    Z=8  W=2
+        Component Al  A=27    Z=13 W=0.0986
+      Mixture  SSDALMY Dens=1.40845
+
+ * use aluminised mylar mixture instead of kapton
+       material  SSDALMY
+       Attribute SOSH Seen=1 Colo=3
+       Shape TUBE rmin=SFPA_SOutRInn rmax=SFPA_SOutROut,
+                   dz=SFPA_SOutLen
+ Endblock
+ *
+ *------------------------------------------------------------------------------
+ *
 *******************************************************************************
                                  End
