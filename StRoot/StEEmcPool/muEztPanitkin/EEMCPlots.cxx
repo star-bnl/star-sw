@@ -29,13 +29,13 @@ void EEMCPlots::initHisto(TObjArray *list, const char *eemcDbDump, const char *e
     if (EEMCPlotsInstance) delete EEMCPlotsInstance; EEMCPlotsInstance = 0;
     EEMCPlotsInstance = new EEMCPlots(list, eemcDbDump, eemcPathIn, eemcPathOut);
     if (EEMCPlotsInstance) {
-	EEMCPlotsInstance->clear();
+	EEMCPlotsInstance->resetHistograms();
     }
 }
 //-------------------------------------------------------------------
 void EEMCPlots::resetHisto() {
     if (EEMCPlotsInstance) {
-	EEMCPlotsInstance->clear();
+	EEMCPlotsInstance->resetHistograms();
     }
 }
 //-------------------------------------------------------------------
@@ -72,14 +72,14 @@ EEMCPlots::EEMCPlots(TObjArray *list, const char *eemcDbDump, const char *eemcPa
 }
 //-------------------------------------------------------------------
 EEMCPlots::~EEMCPlots() {
-    this->clear();
+    if (eeqa) delete eeqa;
+    if (eeDb) delete eeDb;
 }
 //-------------------------------------------------------------------
-void EEMCPlots::init(unsigned int date, unsigned int time, const char *eemcDbDump, const char *eemcPathIn, const char *eemcPathOut) {
-    this->clear();
-}
+//void EEMCPlots::init(unsigned int date, unsigned int time, const char *eemcDbDump, const char *eemcPathIn, const char *eemcPathOut) {}
 //-------------------------------------------------------------------
-void EEMCPlots::clear() {
+void EEMCPlots::resetHistograms() {
+    if (eeqa) eeqa->resetHisto();
 }
 //-------------------------------------------------------------------
 void EEMCPlots::saveHistograms(TFile *hfile) {

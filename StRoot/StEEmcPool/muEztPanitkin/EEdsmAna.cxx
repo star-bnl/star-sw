@@ -7,10 +7,6 @@
 #include <StMessMgr.h>
 
 #include "EEdsmAna.h"
-#if 1 // disable whole code, needs re-work to match with new EEdsm.so after Xin added  detailed Endcap triger simu code 
-
-//#include "daqFormats.h"
-//#include "trgReader.h"
 
 #define EEmapTP_USE // trick instattiates data only in the cxx
 #include "StEEmcUtil/EEdsm/EEmapTP.h" 
@@ -83,16 +79,15 @@ EEdsmAna::~EEdsmAna() {
 //--------------------------------------------------
 void EEdsmAna::clear() {
   
-  for (int i=0;i<Nee0;i++) ee0[i].clear();
+  for (int i=0;i<Nee0;i++) if (ee0) ee0[i].clear();
   for (int i=0;i<Nee0out;i++) { //# boards !=  # outputs
-    ee0outTPadc[i]=0;
-    ee0outHTadc[i]=0;
+    if (ee0outTPadc) ee0outTPadc[i]=0;
+    if (ee0outHTadc) ee0outHTadc[i]=0;
   }
 
   for (int i=0;i<Nee1;i++) { // # boards ==# outputs
-    ee1[i].clear();
-    ee1out3JPadc[i]=0;
-    // ee1outHT[i]=0;
+    if (ee1) ee1[i].clear();
+    if (ee1out3JPadc) ee1out3JPadc[i]=0;
   }
 
   memset(ee1outTPthrMax, 0, sizeof(ee1outTPthrMax));
@@ -101,17 +96,21 @@ void EEdsmAna::clear() {
   for (int i=0;i<EEnJetPatch;i++) { 
     ee1outJPadc[i]=0;
     ee1outHT[i]=0;
-    //    AdjJPsum[i]=0;
-    //    JPtrig[i]=0;
+    AdjJPsum[i]=0;
   }
 
-  ee2->clear();
+  for (int i = 0;i < EEnHalf;i++) {
+    ee1outTPthrMax[i] = 0;
+    ee1outHTTPthrMax[i] = 0;
+  }
+
+  if (ee2) ee2->clear();
   ee2outHT=0;
 
   for (int i=0;i<Nbe2;i++) 
-    be2[i].clear();
+    if (be2) be2[i].clear();
 
-  ee3->clear();
+  if (ee3) ee3->clear();
 }
 
 //--------------------------------------------------
@@ -272,6 +271,80 @@ void EEdsmAna::initHisto(TObjArray *HList){
 	    EEnJetPatch, 0.5, EEnJetPatch + 0.5); 
 	H5jpHot->SetFillColor(kRed); // this histo is updated in presenter - a bit tricky
 	if (HList) HList->Add(H5jpHot); // is _not_ filled by sorter
+    }
+}
+
+//--------------------------------------------------
+void EEdsmAna::resetHisto(){
+    // .................level-0 input, 2D, HT ..............
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H0inHT[iJ]) H0inHT[iJ]->Reset();
+    }
+    if (H0inHTall) H0inHTall->Reset();
+    // ........level-0 input, 2D, TP sum
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H0inTP[iJ]) H0inTP[iJ]->Reset();
+    }
+    if (H0inTPall) H0inTPall->Reset();
+
+    // .................level-1 input, 2D
+    //================================ TP 
+    for(int iJ = 0;iJ < EEnHalfJetPatch;iJ++) {
+	if (H1inTPvEmu[iJ]) H1inTPvEmu[iJ]->Reset();
+    }
+    //================================ HT 
+    for(int iJ = 0;iJ < EEnHalfJetPatch;iJ++) {
+	if (H1inHTvEmu[iJ]) H1inHTvEmu[iJ]->Reset();
+    }
+
+    // .................level-2 input
+    //================================ HT 
+    for(int iJ = 0;iJ < EEnHalf;iJ++) {
+	if (H2inHTTP[iJ]) H2inHTTP[iJ]->Reset();
+    }
+    //================================ half Etot sum
+    for(int iJ = 0;iJ < EEnHalf;iJ++) {
+	if (H1inEtot[iJ]) H1inEtot[iJ]->Reset();
+    }
+
+    // Total energy histos
+    for(int iJ = 0;iJ < mxEtotBit;iJ++) {
+        if (HEetot[iJ]) HEetot[iJ]->Reset();
+        if (HBetot[iJ]) HBetot[iJ]->Reset();
+        if (HBEetot[iJ]) HBEetot[iJ]->Reset();
+    }
+
+    // .................level-3 input
+    //================================ HT 
+    if (H3inHTTP) H3inHTTP->Reset();
+
+    //..................Jet Patch sums
+    //=================================summed patch spectra
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H4jpSums[iJ]) H4jpSums[iJ]->Reset();
+    }
+    //=================================Jet patch over threshold
+    for (int iJ = 0;iJ < EEnThresh;iJ++) {
+	if (H4jpFreq[iJ]) H4jpFreq[iJ]->Reset();
+    }
+    //=================================summed adjacent patch spectra
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H4adjpSums[iJ]) H4adjpSums[iJ]->Reset();
+    }
+    //=================================adjacent patch correlation
+    for(int iJ = 0;iJ < EEnJetPatch;iJ++) {
+	if (H4adjPcor[iJ]) H4adjPcor[iJ]->Reset();
+    }
+    { //====================freq summed adjacent patch spectra over thresh
+	if (H4adjpFreq) H4adjpFreq->Reset();
+    }
+    {
+	// added in 2005 
+	if (H5jpPed) H5jpPed->Reset();
+    }    
+    {
+	if (H5jpFreq) H5jpFreq->Reset();
+	if (H5jpHot) H5jpHot->Reset();
     }
 }
 
@@ -805,31 +878,3 @@ void EEdsmAna::saveHisto(TFile *f) const {
     }
 }
 
-#else 
-  void EEdsmAna::readDsm0( const unsigned char *){}
-  void EEdsmAna::readDsm1( const unsigned short *){}
-  void EEdsmAna::readDsm2( const unsigned short *){}
-  void EEdsmAna::readDsm3( const unsigned short *){}
-  void EEdsmAna::emulDsm0(){}
-  void EEdsmAna::emulDsm1(){}
-  void EEdsmAna::emulDsm2(){}
-  void EEdsmAna::histoDsm0(){}
-  void EEdsmAna::histoDsm1(){}
-  void EEdsmAna::histoDsm2(){}
-  void EEdsmAna::histoDsm3(){}
- EEdsmAna::EEdsmAna(const Char_t *n, int year){}
- void  EEdsmAna::printDsm0map()const{}
-
- EEdsmAna::~EEdsmAna(){}
- void  EEdsmAna::printAllEndcap(int k)const{}
- void  EEdsmAna::printAllBarrel(int k)const{}
- void  EEdsmAna::initHisto(TObjArray *L){}
- void  EEdsmAna::saveHisto(TFile *f) const {}
- void  EEdsmAna::clear(){}
- void  EEdsmAna::sort(const unsigned char * dsm0inp, 
-	    const unsigned short int  * dsm1inp ,
-	    const unsigned short int  * dsm2inp, 
-	    const unsigned short int  * dsm3inp){}
-       void  usePed(const Char_t *n){}
-
-#endif
