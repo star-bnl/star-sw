@@ -24,6 +24,8 @@ public:
 
 	int sector ;	// from 1
 
+	u_int stripes ;	// count of bad pads with all pizels lit...
+
 	// run in the thread!
 	void run_start(u_int rb_mask, int run_type) ;
 

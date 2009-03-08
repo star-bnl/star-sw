@@ -46,6 +46,7 @@ void tpxStat::run_start(u_int rb_mask, int run_type)
 
 	memset(r,0,sizeof(r)) ;
 	sector = 0 ;	// will get this from the data!
+	stripes = 0 ;	
 
 	if((run_type == RUN_TYPE_DAQCHECK) && (rb_mask==4)) {	// RDO #3
 		fee_check_on = 1 ;
@@ -114,6 +115,10 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 	int err = 0 ;
 
 	if(ofile==0) return 0 ;
+
+	if(stripes) {
+		LOG(WARN,"saw %d occurences of more than 400 timebins",stripes) ;
+	}
 
 for(int i=0;i<6;i++) {
 	int a, c ;
@@ -364,7 +369,15 @@ void tpxStat::accum(char *rdobuff, int bytes)
 			//LOG(ERR,"Got err %d:%d, log error = %d: data_end %p",a.id,a.ch,a.log_err,data_end) ;
 			errors = 1 ;
 		}
-
+		else {
+			if(a.count >= 400) {
+				stripes++ ;
+				if((stripes % 100)==0) {
+					LOG(WARN,"A lot of stripes: %d",stripes) ;
+				}
+			}
+		}
+		
 		r[a.rdo].a[a.id].c[a.ch].count++ ;
 
 
