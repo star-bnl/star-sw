@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.32 2008/02/05 22:51:50 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.33 2009/03/09 16:35:30 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.33  2009/03/09 16:35:30  genevb
+// Use small histogram ranges for pp qa_shift
+//
 // Revision 2.32  2008/02/05 22:51:50  genevb
 // Correction on two histogram names for QA shift
 //
@@ -147,7 +150,7 @@
   "QaGtrkPF",
   "QaGtrkChisq0T",
   "QaGtrkFlag",
-  "QaGtrkGood",
+  "QaGtrkGoodsm",
   "QaGtrkNPntFitTTS",
   "QaGtrkNPntF",
   "QaGtrkGoodTTS",
@@ -169,7 +172,7 @@
   "QaPtrkMeanEtaTTS",
   "QaPtrkMeanPtF",
   "QaPtrkMeanEtaF",
-  "QaPtrkGood",
+  "QaPtrkGoodsm",
   "QaPtrkGoodTTS",
   "QaPtrkChisq0TTS",
   "QaPtrkFlag",
