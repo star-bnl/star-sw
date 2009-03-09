@@ -41,8 +41,12 @@
 /* special DAQ commands sent out via Trigger */
 #define DAQCMD_DEFAULT		0	/* Run cluster finder _and_ wait for FORMAT_DATA */
 #define DAQCMD_FMT_WAIT		1	/* Will keep the buffer and wait for a FORMAT_DATA */
-#define DAQCMD_CL_RUN		2	/* Run cluster finder */
+
+/* Removed: was never really used #define DAQCMD_CL_RUN		2 */	/* Run cluster finder */
+#define DAQCMD_HLT_RUN		2	/* Run HLT -- new from FY09 */
+
 #define DAQCMD_FMT_ONLY		4	/* _Just_ format data - no clusters! */
+
 #define DAQCMD_SPEC_PED		8	/* used in pedestals runs for special hardware handling i.e. PMD*/
 #define DAQCMD_IGNORE		15	/* completelly ignores the event - acts as an ABORT - not used but could for cleanup events*/
 
