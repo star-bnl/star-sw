@@ -834,7 +834,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     oth->fill(	  h1[205],float(trgd->bbcEarliestTDC(east)),float(trgd->bbcEarliestTDC(west)));
     if( trgd->bbcEarliestTDC(east)>10 && trgd->bbcEarliestTDC(east)<3000 &&
 	trgd->bbcEarliestTDC(west)>10 && trgd->bbcEarliestTDC(west)<3000 ) {
-      mBbcTimeDiff = trgd->bbcTimeDifference();
+      mBbcTimeDiff = trgd->bbcTimeDifference()-4096;
       mBbcVertex   = mBbcTimeDiff/3/10.0;      
       oth->fill(h1[204],mBbcTimeDiff);
       oth->fill(h1[452],mBbcVertex);
@@ -2371,7 +2371,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.11 2009/03/05 01:31:43 genevb Exp $
+   * $Id: HistoHandler.cxx,v 1.12 2009/03/09 03:40:37 genevb Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2381,6 +2381,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.12  2009/03/09 03:40:37  genevb
+   * Akio's corrections for BBC timing
+   *
    * Revision 1.11  2009/03/05 01:31:43  genevb
    * Update L3 tracking for new DAQ reader
    *
