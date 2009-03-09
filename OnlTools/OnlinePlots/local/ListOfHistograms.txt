@@ -241,7 +241,7 @@
 1,h201_bbcl_AdcSum_west,BBC Large-tile AdcSum West,128,0,4096,0xffffffff,0xffffffff
 1,h202_bbc_earliest_tac_east,BBC East Earliest TAC,256,0.,4096.,0xffffffff,0xffffffff
 1,h203_bbc_earliest_tac_west,BBC West Earliest TAC,256,0.,4096.,0xffffffff,0xffffffff
-1,h204_bbc_tac_difference_e-w,BBC TAC Difference(widecut),256,-4096.,4096.,0xffffffff,0xffffffff
+1,h204_bbc_tac_difference_e-w,BBC TAC Difference,256,-4096.,4096.,0xffffffff,0xffffffff
 2,h205_bbc_tac_e_w,BBC TAC East vs West,64,0.,4096.,64, 0.,4096.,0xffffffff,0xffffffff
 1,h206_fpd_EN_adcsum,FPD EN AdcSum,128, 0.,256.,0xffffffff,0xffffffff
 1,h207_fpd_ES_adcsum,FPD ES AdcSum,128, 0.,256.,0xffffffff,0xffffffff
@@ -545,7 +545,7 @@
 
 1,h450_bbc_earliest_tac_east,BBC East Earliest TAC(trg),256,0.,4096.,0xffffffff,0xffffffff
 1,h451_bbc_earliest_tac_west,BBC West Earliest TAC(trg),256,0.,4096.,0xffffffff,0xffffffff
-1,h452_bbc_tac_difference_e-w,BBC TAC Difference(trg),256,-4096.,4096.,0xffffffff,0xffffffff
+1,h452_bbc_tac_difference_e-w,BBC Vertex,256,-300.,300.,0xffffffff,0xffffffff
 
 //Jing Liu, add TOFr5 histograms. 06-13-2005.
 //1,h453_tofr_leading_ToF,h453_tofr_leading_ToF, 200,-200.,800.,0xffffffff,0xffffffff     // ns
