@@ -2,7 +2,7 @@
 # Script to record the memeopry the OnlinePresneter occupied.
 # Usage: perl mempstat.pl -
 # ------  It discovered the PID of the root4starN process
-#         creates the log file "PID".log and record there 
+#         creates the log file "PID".log and record there
 #         the memory usage each second if it is growing.
 #
 # ------------ checkMemory -------------
@@ -42,7 +42,6 @@ sub checkMemory
         close(SPYFILE);
      }
   }
-#  return $vmsize[1];
 }
 
 # -----------main --------------
@@ -52,14 +51,16 @@ while(1) {
   my @line= split(" ",<PID>);
   close(PID);
   if (length($line[1])) {
-    print $line[1],"\n";
+    open(SPYFILE, ">>$line[1].log") or die;
+    print SPYFILE join(" : ", @line),"\n";
+    close(SPYFILE);
     while(1) {
        # is it still alive?
       open (PID, "$testCmd|" ) or die;
       my @testline= split(" ",<PID>);
       close(PID);
-      if ($line[1] != $testline[1]) { print "It dies. wait the next one\n"; last;} 
-      checkMemory($line[1],SPYFILE);
+      if ($line[1] != $testline[1]) { print "It dies. wait the next one\n"; last;}
+      checkMemory($line[1]);
       sleep 2;
     }
   } else {
