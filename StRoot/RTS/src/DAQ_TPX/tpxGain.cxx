@@ -407,7 +407,7 @@ void tpxGain::accum(char *evbuff, int bytes)
 				as->low_pulse++ ;
 			}
 
-			if((noise > 7.0) || (cou>10)) {
+			if((noise > 40.0) || (cou>20)) {
 				LOG(NOTE,"%d: row %d, pad %d, charge %f, noise %f, cou %f",events,a.row,a.pad,charge,noise,cou) ;
 				as->noise++ ;
 			}
