@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.61 2007/12/10 19:58:20 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.62 2009/03/09 16:34:54 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.62  2009/03/09 16:34:54  genevb
+// Tweak a couple histogram ranges
+//
 // Revision 2.61  2007/12/10 19:58:20  genevb
 // Use log10 for number of secondary vertices
 //
@@ -771,7 +774,7 @@ void StQABookHist::BookHistGlob(){
                             40,0.,12500.);
   m_globtrk_iflag    = QAH::H1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
   m_globtrk_good     = QAH::H1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
-  m_globtrk_good_sm  = QAH::H1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,500.);
+  m_globtrk_good_sm  = QAH::H1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,1000.);
   if (silHists)
   m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",150,0.,9000.);
   m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",150,0.,1500.,150,0.,1500.);
@@ -1232,10 +1235,10 @@ void StQABookHist::BookHistPrim(){
 
 // 1D
   m_primtrk_tot     = QAH::H1F("QaPtrkTot",   "primtrk: tot num tracks",50,0.,5000.);
-  m_primtrk_tot_sm  = QAH::H1F("QaPtrkTotsm", "primtrk: tot num tracks",50,0.,20.);
+  m_primtrk_tot_sm  = QAH::H1F("QaPtrkTotsm", "primtrk: tot num tracks",50,0.,200.);
   m_primtrk_iflag   = QAH::H1F("QaPtrkFlag",  "primtrk: iflag - all",160,-799.,900.);
   m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
-  m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,500.);
+  m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,200.);
   if (silHists)
   m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",150,0.,4500.);
   m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",150,0.,1500.,150,0.,1500.);
