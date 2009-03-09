@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.11 2009/02/21 14:19:12 caines Exp $
+ * $Id: StSvtSignal.cc,v 1.12 2009/03/09 20:11:45 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.12  2009/03/09 20:11:45  caines
+ * Fix to make different Rykov and Selemon methods have same gain
+ *
  * Revision 1.11  2009/02/21 14:19:12  caines
  * change gain to better reproduce data
  *
@@ -139,8 +142,9 @@ void StSvtSignal::pasaRelatedStuff()
  mPeakTimeS = 0.04308;
  mPasaMaxS = 2.74619e-09;
  mFwhmS = 0.0494;
- // mPasaNorm = 2.62181e+09; // [micro volts]/[micro seconds**4]-e
- mPasaNorm = 2*2.62181e+09; // [micro volts]/[micro seconds**4]-e
+ // mPasaNorm = 2.62181e+09; // [micro volts]/[micro seconds**4]-e 
+ mPasaNorm = mPasaGain*3.64140278e+08; // Automatic Conversion
+
  /*
  peakingTimeS();
  cout<<"\nmPeakTimeS = "<<mPeakTimeS<<endl;
@@ -377,7 +381,8 @@ void StSvtSignal::calcConvSignal(double chargeOnAnode)
  else
    {
      //cout<<"using both versions"<<endl;
-    if(mTimeWidth > 0.02 && mTimeWidth< 0.14)
+     if(mTimeWidth< 0.14)
+      //if(mTimeWidth > 0.02 && mTimeWidth< 0.14)
      {
        //cout<<"now using Rykove's version"<<endl;
        cout << "Rykov" << mTCenter << endl;
