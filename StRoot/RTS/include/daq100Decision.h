@@ -6,61 +6,41 @@
 /* 
 	The function returns a bitfield:
 
-	Bit1	Has FCF
-	Bit0	Has Raw
+	Bit2	Do HLT
+	Bit1	Do Cluster Finding
+	Bit0	Do raw ADC
 */
 
-extern inline int daq100Decision(u_int t, u_int daq_cmd, u_int run_type, u_int cl_run, u_int zero_wr)
+extern inline int daq100Decision(int t, u_int daq_cmd, u_int run_type, u_int cl_run, u_int zero_wr)
 {
-	int fmt, proc ;
+	int fmt, proc, hlt ;
 
 	proc = 0 ;
 	fmt = 0 ;
+	hlt = 0 ;
 
-	if(daq_cmd & DAQCMD_CL_RUN) {	// run CL unconditionally!
-		proc = 1 ;
-	}
-	else {
+	if(run_type == RUN_TYPE_DAQCHECK) return 1 ;	// JUST fmt
+	if((t <= 0) || (t>=4096)) return 1 ;		// JUST fmt for token 0 or other odd tokens...
+
+	// cluster finder only in non-pedestal runs
+	if(run_type != RUN_TYPE_PED) {	// only for non-pedestal runs!
 		if(cl_run == 0) proc = 0 ;
 		else if((t % cl_run)==0) proc = 1 ;
+
+		// HLT
+		if(daq_cmd & DAQCMD_HLT_RUN) hlt = 1 ;
 	}
 
-	if(daq_cmd & DAQCMD_FMT_ONLY) {	// run RAW unconditionally
+	// raw formatting
+	if(daq_cmd & DAQCMD_FMT_ONLY) {	// always i.e. zerobias
 		fmt = 1 ;
 	}
 	else {
 		if(zero_wr == 0) fmt = 0 ;
 		else if((t % zero_wr)==0) fmt = 1 ;
-	}			
-
-
-	// overrides
-	switch(run_type) {
-/*
-	case RUN_TYPE_PULSER :
-	case RUN_TYPE_LASER :
-		fmt = 1 ;	// always format; FCF as usual
-		break ;
-*/
-	case RUN_TYPE_CONFIG :
-	case RUN_TYPE_GAIN :
-	case RUN_TYPE_PED :
-		proc = 0 ;	// never proc
-		fmt = 1 ;	// always format
-		break ;
-	case RUN_TYPE_DEBUG :
-		proc = 0 ;	// never any...
-		fmt = 0 ;
-		break ;
 	}
 
-	// always!
-	if(t == 0) {
-		proc = 0 ;
-		fmt = 1 ;
-	}
-
-	return (proc << 1) | fmt ;
+	return (hlt << 2) | (proc << 1) | fmt ;
 
 }
 
