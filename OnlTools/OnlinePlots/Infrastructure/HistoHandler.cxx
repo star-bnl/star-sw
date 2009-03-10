@@ -364,8 +364,8 @@ void HistoHandler::Reset() {
   //      EMC histograms
   //==============================
   EEMCPlots::resetHisto();
-  //BEMCPlots::resetHisto(gEnv->GetValue("Online.bemcStatus", "bemcStatus.txt"));
-  BEMCPlots::resetHisto("/star/u/rfatemi/TestPPlots/home_local/bemc/bemcStatus.txt");
+  BEMCPlots::resetHisto(gEnv->GetValue("Online.bemcStatus", "bemcStatus.txt"));
+  //BEMCPlots::resetHisto("/star/u/rfatemi/TestPPlots/home_local/bemc/bemcStatus.txt");
 
   if(mDebugLevel) {
     cout<<"HistoHandler: Exiting Reset..."<<endl;
@@ -2371,7 +2371,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.12 2009/03/09 03:40:37 genevb Exp $
+   * $Id: HistoHandler.cxx,v 1.13 2009/03/10 17:31:57 genevb Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2381,6 +2381,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.13  2009/03/10 17:31:57  genevb
+   * Removed a reference to a user's directory
+   *
    * Revision 1.12  2009/03/09 03:40:37  genevb
    * Akio's corrections for BBC timing
    *
