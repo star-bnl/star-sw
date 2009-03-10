@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.11 2005/12/19 01:55:55 mvl Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.12 2009/03/10 23:43:53 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -46,6 +46,12 @@ void StMuDstFilterMaker::open(const Char_t *fname) {
   TBranch* branch;
   mTTree = new TTree("MuDst", "StMuDst",__SPLIT__);
   if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTYF__);
+
+  Long64_t MAXLONG=(Long64_t) TMath::Power(2,sizeof(Long64_t)*8)-1; // 1900000000 <=> 1.9 GB
+  LOG_INFO << "Tree size MAX will be " << (float) MAXLONG/1000/1000/1000 << " GB " << endm;
+
+  mTTree->SetMaxTreeSize(MAXLONG); 
+
   //  muDst stuff
   DEBUGMESSAGE2("arrays");
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -310,6 +316,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.12  2009/03/10 23:43:53  jeromel
+ * Set tree size to max size
+ *
  * Revision 1.11  2005/12/19 01:55:55  mvl
  * Introduced check before copying primary vertex for backwards compatibility
  *

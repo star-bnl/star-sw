@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.15 2007/08/31 01:55:14 mvl Exp $
+ * $Id: StMuIOMaker.cxx,v 1.16 2009/03/10 23:43:53 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -264,9 +264,14 @@ void StMuIOMaker::openMuWrite() {
   mOutFile->SetCompressionLevel(mCompression);
 
   TTree *tree;
+
+  Long64_t MAXLONG=(Long64_t) TMath::Power(2,sizeof(Long64_t)*8)-1; // 1900000000 <=> 1.9 GB
+  LOG_INFO << "Tree size MAX will be " << (float) MAXLONG/1000/1000/1000 << " GB " << endm;
+
   tree = mChain->GetTree();
   mOutTree = new TTree("MuDst", "StMuDst", mSplit);
-  mOutTree->SetAutoSave(1000000);
+  //mOutTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
+  mOutTree->SetMaxTreeSize(MAXLONG); // limited to 1.9 GB  - set to maximum
   mOutTree = tree->CloneTree(0);
 
   DEBUGMESSAGE3("out");
@@ -301,6 +306,9 @@ void StMuIOMaker::closeMuWrite(){
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.16  2009/03/10 23:43:53  jeromel
+ * Set tree size to max size
+ *
  * Revision 1.15  2007/08/31 01:55:14  mvl
  * Added protection against corrupted files by checking for return code -1 from TTree:GetEntry(). StMuDstMaker will silently skip these events; StMuIOMaker returns kStWarn.
  *

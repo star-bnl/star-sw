@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.89 2009/02/20 16:37:44 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.90 2009/03/10 23:43:53 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -704,9 +704,13 @@ void StMuDstMaker::openWrite(string fileName) {
   int bufsize = mBufferSize;
   if (mSplit) bufsize /= 4;
 
+  Long64_t MAXLONG=(Long64_t) TMath::Power(2,sizeof(Long64_t)*8)-1; // 1900000000 <=> 1.9 GB
+  LOG_INFO << "Tree size MAX will be " << (float) MAXLONG/1000/1000/1000 << " GB " << endm;
+
   //  all stuff
   mTTree = new TTree("MuDst", "StMuDst",mSplit);
-  // mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
+  mTTree->SetMaxTreeSize(MAXLONG);  // limited to 1.9 GB  - set to maximum
+  //mTTree->SetAutoSave(1000000);   // autosave when 1 Mbyte written
   DEBUGMESSAGE2("all arrays");
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
@@ -1377,6 +1381,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.90  2009/03/10 23:43:53  jeromel
+ * Set tree size to max size
+ *
  * Revision 1.89  2009/02/20 16:37:44  tone421
  * *** empty log message ***
  *
