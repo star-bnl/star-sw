@@ -60,7 +60,7 @@ float StReadLaserEvent::Make(int runNumber, int eventNumber, char* datap)
     // loop over sectors, rows, pads
     for(s=0; s<24 ;s++)                 // sector
     {
-        int ret = tpcReader(datap,s);
+        int ret = tpcReader(datap,s+1); // needs to be 1..24 for Run 9+
         if(ret < 0)
             continue;           // try another sector
         for(r=44; r<45; r++)            // row
@@ -576,7 +576,7 @@ void StReadLaserEvent::resetAll()
 
 /***************************************************************************
  *
- * $Id: StReadLaserEvent.cxx,v 1.2 2009/02/06 16:22:32 fine Exp $
+ * $Id: StReadLaserEvent.cxx,v 1.3 2009/03/10 18:51:24 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -586,6 +586,9 @@ void StReadLaserEvent::resetAll()
  ***************************************************************************
  *
  * $Log: StReadLaserEvent.cxx,v $
+ * Revision 1.3  2009/03/10 18:51:24  genevb
+ * Small mod for new DAQ reader
+ *
  * Revision 1.2  2009/02/06 16:22:32  fine
  * Add a few include files to compile OnlinePlots against of the ROOT 5.22
  *
