@@ -40,6 +40,15 @@ extern inline int daq100Decision(int t, u_int daq_cmd, u_int run_type, u_int cl_
 		else if((t % zero_wr)==0) fmt = 1 ;
 	}
 
+
+	// special run types override
+	switch(run_type) {
+	case RUN_TYPE_PULSER :
+	case RUN_TYPE_LASER :
+		fmt = 1 ;
+		break ;
+	}
+
 	return (hlt << 2) | (proc << 1) | fmt ;
 
 }
