@@ -373,7 +373,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 			if(a.count >= 400) {
 				stripes++ ;
 				if((stripes % 100)==0) {
-					LOG(WARN,"A lot of stripes: %d",stripes) ;
+					LOG(NOTE,"A lot of stripes: %d",stripes) ;
 				}
 			}
 		}

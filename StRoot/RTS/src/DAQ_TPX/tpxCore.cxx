@@ -482,7 +482,6 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
   ret = 0 ;
 
-//  LOG(WARN,"here A: %d %d",a->log_err,log) ;
 
   a->count = 0 ;
   a->row = 0 ;	// unknown...
@@ -495,20 +494,20 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
 
   if((lo & 0xCFF00000) || (hi & 0xCFF00000)) {
-    if(log) LOG(WARN,"  Header words have junk: HI 0x%08X, LO 0x%08X",hi,lo) ;
+    //if(log) LOG(WARN,"  Header words have junk: HI 0x%08X, LO 0x%08X",hi,lo) ;
     ret = -1 ;
   }
 
 
   // standard tests of the last ALTRO word...
   if((hi & 0xFFFC0) != 0xAAA80) {
-    if(log) LOG(WARN,"  Error HI in last ALTRO word: 0x%08X 0x%08X",hi,lo) ;
+    //if(log) LOG(WARN,"  Error HI in last ALTRO word: 0x%08X 0x%08X",hi,lo) ;
     ret = -1 ;
 
   }
 
   if((lo & 0x0F000) != 0x0A000) {
-    if(log) LOG(WARN,"  Error LO in last ALTRO word: 0x%08X 0x%08X",hi,lo) ;
+    //if(log) LOG(WARN,"  Error LO in last ALTRO word: 0x%08X 0x%08X",hi,lo) ;
     ret = -1 ;
   }
 
@@ -516,14 +515,13 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   wc = ((hi&0x3F)<<4) | ((lo&0xF0000)>>16) ;	// altro's word count
 
 
-//  LOG(WARN,"here B: %d %d",a->log_err,log) ;
 
   a->id = (lo & 0xFF0)>>4 ;	// altro ID 0..255
   a->ch = lo & 0xF ;		// channel 0..15
 
 
   if((wc > 529) || (wc<0)) {	// for 512 tb + 15 pre + 2
-    if(log) LOG(WARN,"  Error in last ALTRO word: 0x%08X 0x%08X; bad WC %d",hi,lo,wc) ;
+    //if(log) LOG(WARN,"  Error in last ALTRO word: 0x%08X 0x%08X; bad WC %d",hi,lo,wc) ;
     ret = -1 ;
   }
 
@@ -533,7 +531,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 	return 0 ;	// already error...
   }
 
-//  LOG(WARN,"here C: %d %d",a->log_err,log) ;
+
 
 
 
@@ -563,7 +561,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 	}
   }
 
-//  LOG(WARN,"here D: %d %d",a->log_err,log) ;
+
 
   int rrow, ppad ;
   // get the row and pad; this is why we needed the rdo...
@@ -572,7 +570,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   a->row = rrow ;
   a->pad = ppad ;
 
-//  LOG(WARN,"here Da: %d %d",a->log_err,log) ;
+
 
   if((a->row > 45) || (a->pad > 182)) {
 	if(log) LOG(ERR,"row:pad %d:%d illegal for altro %d:%d",a->row,a->pad,a->id,a->ch) ;
@@ -581,7 +579,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
   if(wc == 0) return h ;	// empty channel...
 
-//  LOG(WARN,"here E: %d %d",a->log_err,log) ;
+
 
   int p10 = 0 ;		// backward counter of the 10bit contributions
 
@@ -592,19 +590,19 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
   case 1 :
     if(get10(h,p10) != 0x2AA) {
-      if(log) LOG(WARN,"  Bad 0x2AA 1:1") ;
+      //if(log) LOG(WARN,"  Bad 0x2AA 1:1") ;
       ret = -1 ;
     }
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
-      if(log) LOG(WARN,"  Bad 0x2AA 1:2") ;
+      //if(log) LOG(WARN,"  Bad 0x2AA 1:2") ;
       ret = -1 ;
     }
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
-      if(log) LOG(WARN,"  Bad 0x2AA 1:3") ;
+      //if(log) LOG(WARN,"  Bad 0x2AA 1:3") ;
       ret = -1 ;
     }
     p10++ ;
@@ -613,13 +611,13 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
   case 2 :
     if(get10(h,p10) != 0x2AA) {
-      if(log) LOG(WARN,"  Bad 0x2AA 2:1") ;
+      //if(log) LOG(WARN,"  Bad 0x2AA 2:1") ;
       ret = - 1 ;
     }
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
-      if(log) LOG(WARN,"  Bad 0x2AA 2:2") ;
+      //if(log) LOG(WARN,"  Bad 0x2AA 2:2") ;
       ret = -1 ;
     }
     p10++ ;
@@ -628,7 +626,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
   case 3 :
     if(get10(h,p10) != 0x2AA) {
-      if(log) LOG(WARN,"  Bad 0x2AA 3:1") ;
+      //if(log) LOG(WARN,"  Bad 0x2AA 3:1") ;
       ret = -1 ;
     }
     p10++ ;
@@ -636,7 +634,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
     break ;
   }
 
-//  LOG(WARN,"here F: %d %d",a->log_err,log) ;
+
 
   int l10 = wc ;
 
@@ -664,7 +662,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   }
 
 
-//  LOG(WARN,"here G: %d %d",a->log_err,log) ;
+
 
   // data check; we are in the data mode now...
   int tb_prev = 512 ;
@@ -695,12 +693,12 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
 	// do some sanity checks...
 	if((tb_cou > wc) || (tb_cou <= 0) || (tb_cou > 512)) {
-		if(log) LOG(WARN,"  A%03d:%02d: Bad tb_cou %d > wc %d [tb_last %d]?",a->id,a->ch,tb_cou,wc,tb_last) ;
+		//if(log) LOG(WARN,"  A%03d:%02d: Bad tb_cou %d > wc %d [tb_last %d]?",a->id,a->ch,tb_cou,wc,tb_last) ;
 		ret = -1 ;
 	}
 
 	if((tb_last < 0) || (tb_last >= tb_prev)) {
-		if(log) LOG(WARN,"  A%03d:%02d: Bad tb_last %d => tb_prev %d?",a->id,a->ch,tb_last,tb_prev) ;
+		//if(log) LOG(WARN,"  A%03d:%02d: Bad tb_last %d => tb_prev %d?",a->id,a->ch,tb_last,tb_prev) ;
 		ret = -1 ;
 	}
 
@@ -726,7 +724,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 	
   }
 
-//  LOG(WARN,"here H: %d %d",a->log_err,log) ;
+
 
 
 
@@ -742,9 +740,9 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 			
   h -= l10 ;	// point now to the start of next altro...
 
-//  LOG(WARN,"here Z: %d %d",a->log_err,log) ;
 
-  //LOG(DBG,"AID %d:%d, %d ADCs...",a->id,a->ch,a->count) ;
+
+
   return h ;	// return pointer to the start of the next altro!
 }
 
