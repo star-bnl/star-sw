@@ -55,12 +55,11 @@ void LaserDriftTimeHistogramGroup::draw(TCanvas* cc) {
 
 #include <stdlib.h>
 bool LaserDriftTimeHistogramGroup::fill(evpReader* evp, char* datap) {  
-  //disable not compatible yet
-  float vDrift = 0.0;//mLaser->Make(evp->run, evp->event_number, &tpc, datap);
+  float vDrift = mLaser->Make(evp->run, evp->event_number, datap);
   //if(mDebugLevel)printf("drift velocity: %2.4f\n", vDrift);
   //    if(mDebugLevel)
   //LOG(INFO,"run %d  event %d : Tpc drift time = %f ",evp->run, evp->event_number,vDrift);
-  //printf("EventLopp::vDrift = %10.3f\n  run=%d", vDrift,evp->run);
+  printf("EventLopp::vDrift = %10.3f\n  run=%d", vDrift,evp->run);
   if (vDrift > 1.){ 
     hDriftTime->Fill(vDrift); 
   }
