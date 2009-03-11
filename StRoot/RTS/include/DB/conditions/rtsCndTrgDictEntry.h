@@ -7,7 +7,7 @@ struct rtsCndTrgDictEntry
 {
   ////////////
   // 10/04 index by hash rather than run
-  int idx_rn;    
+  //int idx_rn;    
   unsigned int hash;          
   ////////////
 
