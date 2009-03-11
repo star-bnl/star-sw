@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.6 2008/12/29 23:58:07 fine Exp $
+ * $Id: StTpcHitMaker.h,v 1.7 2009/03/11 18:38:20 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.7  2009/03/11 18:38:20  fisyak
+ * Add 22 time bins to account subtracted by Tonko, clean up
+ *
  * Revision 1.6  2008/12/29 23:58:07  fine
  * Optimize the DAQ data access
  *
@@ -58,12 +61,14 @@ class StTpcHitCollection;
 
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
+  enum EReaderType {kUnknown, kLegacyTpc, kLegacyTpx, kStandardTpx};
   enum EMode {kUndefined, kTpx, kTpxPulser, kTpxPadMonitor, kTpxDumpPxls2Nt, kTpxRaw, kAll};
 #ifndef NEW_DAQ_READER
-  StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker(name), mStEvent(0), kMode(kUndefined) {}
+  StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker(name), mStEvent(0), kMode(kUndefined),
+    kReaderType(kUnknown) {}
 #else /* NEW_DAQ_READER */
-  StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpc",name), mStEvent(0), kMode(kUndefined)
-        ,fTpc(0) {}
+    StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpc",name), mStEvent(0), kMode(kUndefined),
+        kReaderType(kUnknown), fTpc(0) {}
 #endif /* NEW_DAQ_READER */
   virtual ~StTpcHitMaker() {}
 
@@ -85,6 +90,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
 
   StEvent *mStEvent;
   EMode   kMode;
+  EReaderType kReaderType;
 #ifdef NEW_DAQ_READER
   tpc_t   *fTpc;
 #endif /* NEW_DAQ_READER */
@@ -97,7 +103,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
 #endif /* ! NEW_DAQ_READER */
     Int_t MakeSector(Int_t sector);
     StTpcHitCollection *GetHitCollection();
-    static StTpcHit *StTpcHitMaker::CreateTpcHit(const StDaqTpcClusterInterface &cluster, Int_t sector, Int_t row);
+    StTpcHit *CreateTpcHit(const StDaqTpcClusterInterface &cluster, Int_t sector, Int_t row);
     
  public:
 
