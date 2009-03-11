@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "StarChairDefs.h"
 #include "St_db_Maker/St_db_Maker.h"
 //___________________Calibrations/ftpc_____________________________________________________________
@@ -81,6 +82,7 @@ starClockOnl_st *St_starClockOnlC::Struct(Int_t i) {
   Int_t N =  getNumRows(); // with i < 0 look for positive frequency
   if (i >= 0 && i < N) return s + i;
   for (Int_t j = 0; j < N; j++, s++) if (s->frequency > 0) break;
+  assert(s->frequency > 0);
   return s;
 }
 #include "St_starMagOnlC.h"
@@ -205,7 +207,33 @@ MakeChairInstance(tpcDimensions,Geometry/tpc/tpcDimensions);
 #include "St_tpcWirePlanesC.h"
 MakeChairInstance(tpcWirePlanes,Geometry/tpc/tpcWirePlanes);
 #include "St_tpcSectorPositionC.h"
-MakeChairInstance(tpcSectorPosition,Geometry/tpc/tpcSectorPosition);
+ClassImp(St_tpcSectorPositionC); 
+St_tpcSectorPositionC *St_tpcSectorPositionC::fgInstance = 0; 
+St_tpcSectorPosition  *St_tpcSectorPositionC::fgTables[24] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+St_tpcSectorPositionC *St_tpcSectorPositionC::instance() { 
+  if (fgInstance) return fgInstance;					
+  St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetChain()->Maker("db");	
+  for (Int_t sec = 1; sec <= 24; sec++) {
+    TString path = Form("Geometry/tpc/Sector_%02i/tpcSectorPosition",sec);
+    fgTables[sec-1] = (St_tpcSectorPosition  *) StMaker::GetChain()->GetDataBase(path.Data()); 
+    if (! fgTables[sec-1]) {							
+      LOG_WARN << "St_tpcSectorPositionC::instance " << path.Data() << "\twas not found" << endm; 
+      assert(fgTables[sec-1]);							
+    }						
+    if (dbMk && dbMk->Debug() ) {						
+      TDatime t[2];							
+      dbMk->GetValidity(fgTables[sec-1],t);					        
+      Int_t Nrows = fgTables[sec-1]->GetNRows();					
+      LOG_WARN << "St_tpcSectorPositionC::instance found table " << fgTables[sec-1]->GetName() 
+	       << " with NRows = " << Nrows << " in db" << endm;		
+      LOG_WARN << "Validity:" << t[0].GetDate() << "/" << t[0].GetTime()	
+	       << " -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm; 
+      fgTables[sec-1]->Print(0,1);		
+    }
+  }			
+  fgInstance = new St_tpcSectorPositionC();				
+  return fgInstance;							
+}
 #include "St_tpcFieldCageC.h"
 MakeChairInstance(tpcFieldCage,Geometry/tpc/tpcFieldCage);
 #include "St_tpcPadPlanesC.h"
@@ -214,3 +242,54 @@ MakeChairInstance(tpcPadPlanes,Geometry/tpc/tpcPadPlanes);
 MakeChairInstance(tpcGlobalPosition,Geometry/tpc/tpcGlobalPosition);
 #include "St_tpcFieldCageShortC.h"
 MakeChairInstance(tpcFieldCageShort,Geometry/tpc/tpcFieldCageShort);
+#include "St_SurveyC.h"
+#include "St_SurveyC.h"
+ClassImp(St_SurveyC);
+#include "StSvtSurveyC.h"
+MakeChairInstance2(Survey,StSvtOnGlobal,Geometry/svt/SvtOnGlobal);
+MakeChairInstance2(Survey,StSvtShellOnGlobal,Geometry/svt/ShellOnGlobal);
+MakeChairInstance2(Survey,StSvtLadderOnSurvey,Geometry/svt/LadderOnSurvey);
+MakeChairInstance2(Survey,StSvtLadderOnShell,Geometry/svt/LadderOnShell);
+MakeChairInstance2(Survey,StSvtWaferOnLadder,Geometry/svt/WaferOnLadder);
+#include "StSsdSurveyC.h"
+MakeChairInstance2(Survey,StSsdOnGlobal,Geometry/ssd/SsdOnGlobal);
+MakeChairInstance2(Survey,StSsdSectorsOnGlobal,Geometry/ssd/SsdSectorsOnGlobal);
+MakeChairInstance2(Survey,StSsdLaddersOnSectors,Geometry/ssd/SsdLaddersOnSectors);
+MakeChairInstance2(Survey,StSsdWafersOnLadders,Geometry/ssd/SsdWafersOnLadders);
+//________________________________________________________________________________
+void St_SurveyC::GetAngles(Double_t &phi, Double_t &the, Double_t &psi, Int_t i) {
+  phi = the = psi = 0;  // Korn 14.10-5
+  Double_t cosDelta = (r00(i) + r11(i) + r22(i) - 1)/2; // (Tr(R) - 1)/2
+  Double_t Delta = TMath::ACos(cosDelta);      
+  if (Delta < 0) Delta += 2*TMath::Pi();  
+  Double_t sinDelta2 = TMath::Sin(Delta/2);
+  if (TMath::Abs(sinDelta2) < 1.e-7) return;
+  Double_t c[3] = {
+    (r21(i) - r12(i))/(2*sinDelta2), // a32-a23
+    (r02(i) - r20(i))/(2*sinDelta2), // a13-a31
+    (r10(i) - r01(i))/(2*sinDelta2)  // a21-a12
+  };
+  Double_t u = TMath::ATan2(c[0],c[1]);
+  Double_t v = TMath::ATan(c[2]*TMath::Tan(Delta/2));
+  phi = (v - u)/2 - TMath::Pi()/2;
+  psi = (v + u)/2 - TMath::Pi()/2;
+  the = 2*TMath::ATan2(c[0]*TMath::Sin(v),c[2]*TMath::Sin(u));
+  Double_t raddeg = 180./TMath::Pi();
+  phi   *= raddeg;
+  the   *= raddeg;
+  psi   *= raddeg;
+}
+//________________________________________________________________________________
+St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
+  TString Name(name);
+  if (Name == "SvtOnGlobal")          return (St_SurveyC   *) StSvtOnGlobal::instance();	    
+  if (Name == "ShellOnGlobal")        return (St_SurveyC   *) StSvtShellOnGlobal::instance();  
+  if (Name == "LadderOnSurvey")       return (St_SurveyC   *) StSvtLadderOnSurvey::instance(); 
+  if (Name == "LadderOnShell")        return (St_SurveyC   *) StSvtLadderOnShell::instance();  
+  if (Name == "WaferOnLadder")        return (St_SurveyC   *) StSvtWaferOnLadder::instance();  
+  if (Name == "SsdOnGlobal")          return (St_SurveyC   *) StSsdOnGlobal::instance();
+  if (Name == "SsdSectorsOnGlobal")   return (St_SurveyC   *) StSsdSectorsOnGlobal::instance();
+  if (Name == "SsdLaddersOnSectors")  return (St_SurveyC   *) StSsdLaddersOnSectors::instance();
+  if (Name == "SsdWafersOnLadders")   return (St_SurveyC   *) StSsdWafersOnLadders::instance();
+  return 0;
+}
