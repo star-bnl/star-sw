@@ -29,8 +29,10 @@
 
 void GroupCollection::serverCreate() {
   insert( new GroupStatisticsHistogramGroup("Trigger") );
-  insert( new LaserDriftTimeHistogramGroup("Laser","driftTime","laser","any") );
-  insert( new LaserTpcPadChargeHistogramGroup("Laser","driftTime","laser","any") );
+  // GVB (March 11, 2009): Until evpReader::evpgroups is properly set (currently 0),
+  //   the testBits mechanism doesn't work for lasers. Filled in HistoHandler instead
+  //insert( new LaserDriftTimeHistogramGroup("Laser","driftTime","laser","any") );
+  //insert( new LaserTpcPadChargeHistogramGroup("Laser","driftTime","laser","any") );
   insert( new L2UpsilonCountsHistogramGroup("L2 upsilon","Counts","upsilon","any") );
   insert( new L2UpsilonTowersHistogramGroup("L2 upsilon","Towers","upsilon","any") );
   insert( new L2UpsilonMassHistogramGroup("L2 upsilon","Mass","upsilon","any") );

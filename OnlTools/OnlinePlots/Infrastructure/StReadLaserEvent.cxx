@@ -500,17 +500,16 @@ void StReadLaserEvent::writeVDrift()
 
 void StReadLaserEvent::resetAll()
 {
-  //mMean->Reset();//comm out prs
-  //mVel->Reset();
-  //mDeltaVel->Reset();//end com out prs
-    
-//mVelGauss->Reset();
-
-  //nloop = 9;
-
-    //sorensen adding to be able to re do laser calc when it fails
     nloop = 0;
     setVDrift(0.);
+    if (mMean) {
+      for (int i=0; i<24; i++) mSector[i]->Reset();
+      mMean->Reset();
+      mVel->Reset();
+      mDeltaVel->Reset();
+      mVelGauss->Reset();
+      return;
+    }
 
     char buf[128];
 
@@ -576,7 +575,7 @@ void StReadLaserEvent::resetAll()
 
 /***************************************************************************
  *
- * $Id: StReadLaserEvent.cxx,v 1.3 2009/03/10 18:51:24 genevb Exp $
+ * $Id: StReadLaserEvent.cxx,v 1.4 2009/03/11 15:43:50 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -586,6 +585,9 @@ void StReadLaserEvent::resetAll()
  ***************************************************************************
  *
  * $Log: StReadLaserEvent.cxx,v $
+ * Revision 1.4  2009/03/11 15:43:50  genevb
+ * Some cleanup of laser codes (halt use of laser hist groups for now)
+ *
  * Revision 1.3  2009/03/10 18:51:24  genevb
  * Small mod for new DAQ reader
  *

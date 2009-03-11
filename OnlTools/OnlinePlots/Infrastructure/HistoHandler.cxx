@@ -868,6 +868,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   // laser event
   printf("fill TPC HistoHandler.cxx 1402\n");
+
+  // GVB (March 11, 2009): perhaps preferable to use the laser hist groups,
+  //   but evpReader::evpgroups is 0 presently
   if (trgcmd == 9) {
     float vDrift = mLaser->Make(int(evp->run), int(evp->event_number), datap);
     if(vDrift == 1972.){ mLaser->resetAll();}//try twice, bad value triggered by laser->Make
@@ -976,34 +979,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 	  adc_sector += pad_adc;// adc sum per sector
 	  
 	  
-	  //Pad histograms for LASER triggers goes here
-	  // West Side
-	  if(trgcmd == 9 && sec == 1) {
-	    TH2 *hh =  (TH2 *)h1[94];
-	    oth->fill(		      hh,(float)p, (float)r, pad_adc);
-	  }
-	  if(trgcmd == 9 && sec == 6) {
-	    TH2 *hh =  (TH2 *)h1[95];
-	    oth->fill(		      hh,(float)p, (float)r, pad_adc);
-	  }
-	  if(trgcmd == 9 && sec == 11) {
-	    TH2 *hh =  (TH2 *)h1[96];
-	    oth->fill(		      hh,(float)p, (float)r, pad_adc);
-	  }
-	  // East Side
-	  if(trgcmd == 9 && sec == 13) {
-	    TH2 *hh =  (TH2 *)h1[97];
-	    oth->fill(		      hh,(float)p, (float)r, pad_adc);
-	  }
-	  if(trgcmd == 9 && sec == 19) {
-	    TH2 *hh =  (TH2 *)h1[98];
-	    oth->fill(		      hh,(float)p, (float)r, pad_adc);
-	  }
-	  if(trgcmd == 9 && sec == 23) {
-	    TH2 *hh =  (TH2 *)h1[99];
-	    oth->fill(		      hh,(float)p, (float)r, pad_adc);
-	  }
-	  
 	  oth->fill(		  h1[66],mPhiAngleMap[sec][r][p],pad_adc);
 	  oth->fill(		  h1[67],float(secnum),pad_adc);
 	  
@@ -1085,119 +1060,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   if(mDebugLevel) {
     fprintf(stderr,"TPC: occupancy %3d %%, charge %d",(int)tpc_occ,(int)adc) ;
   }
-  //-----------------------------------------------------------------------
-  // Below is code for the old TPC reader
-  // Left for reference SP Nov 2002
-
-  //  		ret = tpcReader(datap) ;
-  //  		if(ret <= 0) {
-  //  		  if(ret < 0) {
-  //  		    fprintf(stderr,"TPC: problems with data (%d) - continuing...",ret) ;
-  //  		  }
-  //  		  else{
-  //  		    fprintf(stderr,"TPC: not present...") ;
-  //  		  }
-  //                  }
-  //  		else{
-  //  		  // example usage: calculate total charge and
-  //  		  // print occupancy
-  //  		  int s,r,p,t ;
-
-  //  		  uint_t adc ;
-  //  		  uchar_t val ;
-
-  //  		  if(mDebugLevel)fprintf(stderr,"TPC: %d bytes",ret);
-
-  //  		  tpc_size = float(ret);
-  //oth->fill(    		  h1[2],log10(tpc_size));
-
-  //  		  if(total_size != 0.){
-  //  		    tpc_fract = 100.* tpc_size/total_size;
-  //oth->fill(    		    h1[103],tpc_fract);
-  //  		  }
-  //  		  adc = 0 ; // Total Charge Counter
-  //  		  float dice = fabs(rand())/32767.;
-  //  		  if(ret != 0 && dice < 0.1) {
-  //  		    for(s=0;s<24;s++) {	// sector
-  //  		      int hist_index = s + 15;
-  //  		      int nhist = s + 120;
-
-  //  		      for(r=0;r<45;r++) {	// padrow
-  //  			for(p=0;p<182;p++) {	// pad
-
-  //  			  int pad_adc = 0; // Per pad counter
-  //  			  for(t=0;t<tpc.counts[s][r][p];t++) {
-  //  			    val = tpc.adc[s][r][p][t] ;
-  //                              pad_adc += val;
-  //  			    if (trgcmd == 4) {
-  //  			      int timebin = tpc.timebin[s][r][p][t];
-  //  			      if (0 < val && val < 1024) {
-  //oth->fill(    				h1[nhist],timebin,val);
-  //  			      }
-  //  			    }
-  //  			  }
-  //  			  adc += pad_adc ; // Total charge counter
-
-  //  			  //Watch out here! The position depends on the
-  //  			  // histogram description file.
-  //  			  // If description file is change then change
-  //  			  // it appropriately
-
-
-  //  			  TH2 *hh =  (TH2 *)h1[hist_index];
-  //oth->fill(    			  hh,(float)p, (float)r, (float)pad_adc);
-
-  //  			  //Pad histograms for LASER triggers goes here
-  //  			  // West Side
-  //  			  if(trgcmd == 9 && s == 1){
-  //  			  TH2 *hh =  (TH2 *)h1[94];
-  //oth->fill(    			  hh,(float)p, (float)r, (float)pad_adc);
-  //  			  }
-  //  			  if(trgcmd == 9 && s == 6){
-  //  			  TH2 *hh =  (TH2 *)h1[95];
-  //oth->fill(    			  hh,(float)p, (float)r, (float)pad_adc);
-  //  			  }
-  //  			  if(trgcmd == 9 && s == 11){
-  //  			  TH2 *hh =  (TH2 *)h1[96];
-  //oth->fill(    			  hh,(float)p, (float)r, (float)pad_adc);
-  //  			  }
-  //                            // East Side
-  //  			  if(trgcmd == 9 && s == 13){
-  //  			  TH2 *hh =  (TH2 *)h1[97];
-  //oth->fill(    			  hh,(float)p, (float)r, (float)pad_adc);
-  //  			  }
-  //  			  if(trgcmd == 9 && s == 19){
-  //  			  TH2 *hh =  (TH2 *)h1[98];
-  //oth->fill(    			  hh,(float)p, (float)r, (float)pad_adc);
-  //  			  }
-  //  			  if(trgcmd == 9 && s == 23){
-  //  			  TH2 *hh =  (TH2 *)h1[99];
-  //oth->fill(    			  hh,(float)p, (float)r, (float)pad_adc);
-  //  			  }
-
-  //  			}}}
-  //oth->fill(   		    h1[1],log10(float(adc)));
-  //  		  }
-  //  		  double tpc_occ = 100.0 *((double)tpc.channels/(double)tpc.max_channels);
-  //  		  // Physics triggers goes here
-  //  		  if(trgcmd != 8 && trgcmd != 9 && trgcmd !=10){
-  //oth->fill(   		    h1[3],tpc_occ);
-  //  		  }
-  //  		  // Occupancy for Pulser triggers goes here
-  //  		  if(trgcmd == 8 && trgcmd ==10){
-  //oth->fill(    		    h1[43],tpc_occ);
-  //  		  }
-  //  		  //Occupancy for Laser triggers goes here
-  //  		  if(trgcmd == 9){
-  //oth->fill(    		    h1[44],tpc_occ);
-
-  //    		    float vDrift = laser->Make(mRunNumber, evp->evb_cou, &tpc);
-  //    		    if(mDebugLevel)printf("drift velocity: %2.4f\n", vDrift);
-  //oth->fill(    		    if(vDrift > 0.)h1[102],vDrift);
-  //  		  }
-
-  //  		  if(mDebugLevel)fprintf(stderr,"TPC: occupancy %3d %%, charge %d",(int)tpc_occ,adc) ;
-  //  		}
 
   //--------------------------------------------------------------------
 
@@ -2371,7 +2233,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.13 2009/03/10 17:31:57 genevb Exp $
+   * $Id: HistoHandler.cxx,v 1.14 2009/03/11 15:43:50 genevb Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2381,6 +2243,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.14  2009/03/11 15:43:50  genevb
+   * Some cleanup of laser codes (halt use of laser hist groups for now)
+   *
    * Revision 1.13  2009/03/10 17:31:57  genevb
    * Removed a reference to a user's directory
    *
