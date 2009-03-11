@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.6 2009/03/06 22:46:43 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.7 2009/03/11 14:39:33 fisyak Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.7  2009/03/11 14:39:33  fisyak
+// relax cuts on no. of good lasers and drift velocity precision
+//
 // Revision 1.6  2009/03/06 22:46:43  fisyak
 // Increase acceptable drift velocity interval from [5.5,5.9] to [5.2,5.9]
 //
@@ -66,7 +69,7 @@ Double_t ScaleE2W(Double_t day) {// scale East to West drift velocity
 //________________________________________________________________________________
 void MakeTable() {
 #ifndef SeparateWestandEast
-  if (! (DVAll[0][0] > 5.3 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 1e-4)) {
+  if (! (DVAll[0][0] > 5.3 && DVAll[0][0] < 5.9 && dDVAll[0][0] > 0 && dDVAll[0][0]< 5e-4)) {
     cout << "Run " << run << " fails =============================" << endl;
     return;
   }
@@ -243,7 +246,7 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.tags.root") {
 	dv = new TH2D(Form("DV%i",fEvtHdr_fRun%1000000),Form("Drift Velocity for run %i",fEvtHdr_fRun%1000000),12,1,25,400,1,-1);
 	dv->SetBuffer(100000);
 #else
-	dv = new TH2D(Form("DV%i",fEvtHdr_fRun%1000000),Form("Drift Velocity for run %i",fEvtHdr_fRun%1000000),12,1,25,2000,5.35,5.85);
+	dv = new TH2D(Form("DV%i",fEvtHdr_fRun%1000000),Form("Drift Velocity for run %i",fEvtHdr_fRun%1000000),12,1,25,2000,5.3,5.9);
 #endif
 	dv->SetXTitle("Sector");
 	dv->SetYTitle("Drift Velocity ");
@@ -269,7 +272,7 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.tags.root") {
     }
     for (Int_t k = 0; k < 12; k++) {
 #ifndef __REFIT__
-      if (fFit_ndf[k] > 4 && fFit_Prob[k] > 1.e-2) {
+      if (fFit_ndf[k] > 2 && fFit_Prob[k] > 1.e-2) {
 	Double_t Slope = 1e3*fFit_slope[k];
 	if (fFit_Sector[k] > 12) Slope -= EastWRTWestDiff;
 	slope->Fill(fFit_Sector[k], Slope);
@@ -358,9 +361,9 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.tags.root") {
   All other numbers corresponded to time for laser light to propagate to particular raft (TPC sector). 
   Estimated error in table   0.1ns
   West:     sector             2             4         6        8             12
-  Time(ns)       10.33          3.34      6.14    13.11          17.31
+  Time(ns)                 10.33          3.34      6.14    13.11          17.31
   East:     sector            14            16        18       20      22     24
-  Time(ns)       19.88         12.95      5.97     3.18   10.17  17.14
+  Time(ns)                 19.88         12.95      5.97     3.18   10.17  17.14
   
 */  
 //________________________________________________________________________________
