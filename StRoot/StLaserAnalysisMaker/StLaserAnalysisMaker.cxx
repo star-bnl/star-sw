@@ -1,6 +1,9 @@
 // 
-// $Id: StLaserAnalysisMaker.cxx,v 1.15 2008/06/02 13:48:03 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.16 2009/03/11 15:49:40 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.16  2009/03/11 15:49:40  fisyak
+// Remove hits not beloging to primary tracks
+//
 // Revision 1.15  2008/06/02 13:48:03  fisyak
 // Add  t0 handlers for Tpx/Tpc time offsets
 //
@@ -20,7 +23,7 @@
 // Before Selection of good runs
 //
 #define CORRECT_LASER_POSITIONS
-#define __TRACKHITS__
+//#define __TRACKHITS__
 #ifndef __TRACKHITS__
 #define ADDPRIMTRACKHITS
 #endif
