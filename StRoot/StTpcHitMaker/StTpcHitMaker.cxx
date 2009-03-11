@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.13 2009/02/20 22:06:15 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.14 2009/03/11 18:38:20 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.14  2009/03/11 18:38:20  fisyak
+ * Add 22 time bins to account subtracted by Tonko, clean up
+ *
  * Revision 1.13  2009/02/20 22:06:15  fisyak
  * Restore access to TPX
  *
@@ -187,8 +190,6 @@ evpReader *StTpcHitMaker::InitReader() {
   }
   return fDaqReader;
 }
-#else /* NEW_DAQ_READER */
-
 #endif /* NEW_DAQ_READER */
 //_____________________________________________________________
 Int_t StTpcHitMaker::MakeSector(Int_t sector) {
@@ -198,13 +199,15 @@ Int_t StTpcHitMaker::MakeSector(Int_t sector) {
   return  evp ? tpcReader((char *)evp,sector) : 0;
 #else /* NEW_DAQ_READER */
   sector++; // with this version the first sector ==1 !!!
-  TString sec = Form("legacy[%i]",sector); 
-  TString query = "tpc/";
-//  StRtsTable *daqTpcTable = GetNext(sec);
-  StRtsTable *daqTpcTable = GetNextDaqElement(query+sec);
-  if (! daqTpcTable) {
-    query = "tpx/";
-    daqTpcTable = GetNextDaqElement(query+sec);
+  StRtsTable *daqTpcTable = GetNextDaqElement(Form("tpc/legacy[%i]",sector));
+  if (daqTpcTable) {
+    kReaderType = kLegacyTpc;
+  } else {
+    daqTpcTable = GetNextDaqElement(Form("tpx/legacy[%i]",sector));
+    if (daqTpcTable) {
+      assert(Sector() == sector);
+      kReaderType = kLegacyTpx;
+    }
   }
   if (daqTpcTable) {
      fTpc = (tpc_t*)*DaqDta()->begin();
@@ -267,13 +270,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const StDaqTpcClusterInterface &cluster, I
 
   Float_t pad  = cluster.pad();
   Float_t time = cluster.time();
-#if 0 // in EVP_READER now
-  if (sector != 16) {
-    pad  -= 0.5;
-    time -= 0.5;
-    
-  }
-#endif
+  if (kReaderType == kLegacyTpx) time += 22; // remove Tonko's offset
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;
   static StTpcLocalCoordinate global;
