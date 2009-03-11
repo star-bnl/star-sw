@@ -232,8 +232,8 @@ BEMCPlots::BEMCPlots(TObjArray *list)
     ADDHIST(this->mHist_JET_ped)
     ADDHIST(this->mHist_JETMAX_dist)
 
-    this->mHist_ADCEtaPhi_TowHits = new TH2F(Hist_ADCEtaPhi_TowHitsName, "Tower hits>pes+40; Phi Bin; Eta Bin",60 ,-3.15 ,3.15, 40, -1, 1); 
-    this->mHist_ADCEtaPhi_Pre1Hits = new TH2F(Hist_ADCEtaPhi_Pre1HitsName, "BPSD hits>pes+40;Phi Bin; Eta Bin", 60, -3.15, 3.15, 40, -1, 1);     
+    this->mHist_ADCEtaPhi_TowHits = new TH2F(Hist_ADCEtaPhi_TowHitsName, "Tower hits>ped+40; Phi Bin; Eta Bin",60 ,-3.15 ,3.15, 40, -1, 1); 
+    this->mHist_ADCEtaPhi_Pre1Hits = new TH2F(Hist_ADCEtaPhi_Pre1HitsName, "BPSD hits>ped+40;Phi Bin; Eta Bin", 60, -3.15, 3.15, 40, -1, 1);     
      
     ADDHIST(this->mHist_ADCEtaPhi_TowHits)
     ADDHIST(this->mHist_ADCEtaPhi_Pre1Hits)
