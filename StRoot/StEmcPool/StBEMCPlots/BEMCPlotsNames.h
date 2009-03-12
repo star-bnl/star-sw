@@ -24,6 +24,11 @@
 #define HistRawAdc3Name "bemc_RawAdc3"
 #define HistRawAdc4Name "bemc_RawAdc4"
 
+#define HistRawAdc1NameZoom "bemc_RawAdc1_zoom"
+#define HistRawAdc2NameZoom "bemc_RawAdc2_zoom"
+#define HistRawAdc3NameZoom "bemc_RawAdc3_zoom"
+#define HistRawAdc4NameZoom "bemc_RawAdc4_zoom"
+
 #define HistRawAdcPsd1Name "bprs_RawAdc1"
 #define HistRawAdcPsd2Name "bprs_RawAdc2"
 #define HistRawAdcPsd3Name "bprs_RawAdc3"
@@ -39,9 +44,9 @@
 #define HistPatchSumSpectrumName "bemc_PatchSumSpectrum"
 
 #define HistTriggerCorruptionHighTowerName "bemc_TriggerCorruptionHighTower"
-#define HistTriggerCorruptionHighTowerCorrName "bemc_TriggerCorruptionHighTowerCorr"
 #define HistTriggerCorruptionPatchSumName "bemc_TriggerCorruptionPatchSum"
-#define HistTriggerCorruptionPatchSumCorrName "bemc_TriggerCorruptionPatchSumCorr"
+#define HistDSM0HTCorrName "DSM0HTCorr"
+#define HistDSM0TPCorrName "DSM0TPCorr"
 
 #define Hist_TDC_statusName "bemc_TDC_status"
 #define Hist_SMD_statusName "bemc_SMD_status"

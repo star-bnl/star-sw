@@ -37,6 +37,7 @@ public:
   static void displayTrigger(FileType file, TPad *pad, int mDebug);
   static void displayJet(FileType file, TPad *pad, int mDebug);
   static void displayRawAdc(FileType file, TPad *pad, bool psd, int mDebug);
+  static void displayRawAdcZoom(FileType file, TPad *pad, bool psd, int mDebug);
   static void displayJetPatchHT(FileType file, TPad *pad, int mDebug);
   static void displayJetPatchSum(FileType file, TPad *pad, int mDebug);
   static void displayL0Input(FileType file, TPad *pad, int mDebug);
