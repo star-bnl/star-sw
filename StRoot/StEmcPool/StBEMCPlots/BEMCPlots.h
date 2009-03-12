@@ -1,14 +1,13 @@
 #ifndef BEMCPlots_H
 #define BEMCPlots_H
 
-#include "StRoot/StEmcPool/StBEMCPlots/BemcTwMask.h"
-
 class TH1F;
 class TH2F;
 class TFile;
 class TObjArray;
 
 #define BEMCNJET 12
+#define BEMCTOW 4800
 
 class BEMCPlots {
   
@@ -29,7 +28,7 @@ class BEMCPlots {
   
   int getDebug() {return mDebug;}
   void setDebug(int d) {mDebug = d;}
-  
+
   // These are called from Pplots
   static void initHisto(TObjArray *list = 0, const char *bemcStatus = 0);
   static void resetHisto(const char *bemcStatus = 0);
@@ -41,6 +40,7 @@ class BEMCPlots {
 			, const unsigned short *dsmL2Input = 0
 			, const unsigned short *dsmL3Input = 0
 			);
+  
   
  private:
   int mDebug;
@@ -83,6 +83,11 @@ class BEMCPlots {
   TH2F *mHistRawAdc3;
   TH2F *mHistRawAdc4;
   
+  TH2F *mHistRawAdc1zoom;
+  TH2F *mHistRawAdc2zoom;
+  TH2F *mHistRawAdc3zoom;
+  TH2F *mHistRawAdc4zoom;
+  
   TH2F *mHistRawAdcPsd1;
   TH2F *mHistRawAdcPsd2;
   TH2F *mHistRawAdcPsd3;
@@ -104,8 +109,8 @@ class BEMCPlots {
   TH1F *mHistTriggerCorruptionPatchSum;
   int mDsmSimuHighTower[300];
   int mDsmSimuPatchSum[300];
-  TH2F *mHistTriggerCorruptionHighTowerCorr;
-  TH2F *mHistTriggerCorruptionPatchSumCorr;
+  TH2F *mHistDSM0HTCorr;
+  TH2F *mHistDSM0TPCorr;
   
   TH2F *mHist_TDC_status;
   TH2F *mHist_SMD_status;
@@ -140,8 +145,8 @@ class BEMCPlots {
   
   int BEMCNJPPED[BEMCNJET];
   int BEMCJPPED[BEMCNJET];
-  
-  
+  float towerPed[BEMCTOW];
+
 };
 
 #endif

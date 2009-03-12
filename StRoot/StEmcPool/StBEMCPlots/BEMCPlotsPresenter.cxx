@@ -496,6 +496,235 @@ void BEMCPlotsPresenter::displayRawAdc(FileType file, TPad *pad, bool psd, Int_t
 	}
     }
 }
+
+//-------------------------------------------------------------------
+void BEMCPlotsPresenter::displayRawAdcZoom(FileType file, TPad *pad, bool psd, Int_t mDebug) {
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+
+
+    bool twMaskFound=false;
+    BemcTwMask *twMask =new BemcTwMask();
+    const Char_t *bemcTwMaskFilename=(gEnv->GetValue("Online.bemcStatus", "bemcStatus.txt"));
+    //const Char_t *bemcTwMaskFilename="/star/u/rfatemi/TestPPlots/home_local/bemc/bemcStatus.txt";
+    twMaskFound=useBtowMask(bemcTwMaskFilename, twMask);
+
+    TH2F *HistRawAdc1Zoom = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd1Name : HistRawAdc1NameZoom);
+    if (!HistRawAdc1Zoom || (mDebug >= 2)) cout << "HistRawAdc1zoom = " << HistRawAdc1Zoom << endl;
+    TH2F *HistRawAdc2Zoom = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd2Name : HistRawAdc2NameZoom);
+    if (!HistRawAdc2Zoom || (mDebug >= 2)) cout << "HistRawAdc2zoom = " << HistRawAdc2Zoom << endl;
+    TH2F *HistRawAdc3Zoom = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd3Name : HistRawAdc3NameZoom);
+    if (!HistRawAdc3Zoom || (mDebug >= 2)) cout << "HistRawAdc3zoom = " << HistRawAdc3Zoom << endl;
+    TH2F *HistRawAdc4Zoom = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd4Name : HistRawAdc4NameZoom);
+    if (!HistRawAdc4Zoom || (mDebug >= 2)) cout << "HistRawAdc4zoom = " << HistRawAdc4Zoom << endl;
+
+    if (!pad) return;
+    pad->Clear();
+    pad->cd(0);
+    
+    TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
+    c->Draw();
+    c->cd(0);
+    c->Divide(1, 4, 0.001, 0.001);
+    
+    // 12-19 are the grey shades dark-light
+    Int_t linesColor = 16;
+    Int_t crateMinSoftId[] = {4661, 2421, 2581, 2741, 2901, 3061, 3221, 3381, 3541, 3701, 3861, 4021, 4181, 4341, 4501, 2181, 2021, 1861, 1701, 1541, 1381, 1221, 1061,  901,  741,  581,  421,  261,  101,    1};
+    Int_t crateMaxSoftId[] = {4800, 2580, 2740, 2900, 3060, 3220, 3380, 3540, 3700, 3860, 4020, 4180, 4340, 4500, 4660, 2340, 2180, 2020, 1860, 1700, 1540, 1380, 1220, 1060,  900,  740,  580,  420,  260,  100};
+    Int_t pmtbxMinSoftId[] = {2261, 2181, 2101, 2021, 1941, 1861, 1781, 1701, 1621, 1541, 1461, 1381, 1301, 1221, 1141, 1061,  981,  901,  821,  741,  661,  581,  501,  421,  341,  261,  181,  101,   21, 2341/*and from 1*/,
+			     4661, 4741, 2421, 2501, 2581, 2661, 2741, 2821, 2901, 2981, 3061, 3141, 3221, 3301, 3381, 3461, 3541, 3621, 3701, 3781, 3861, 3941, 4021, 4101, 4181, 4261, 4341, 4421, 4501, 4581
+			 	   /*and from 2401*/
+			     };
+    Int_t pmtbxMaxSoftId[] = {2340, 2260, 2180, 2100, 2020, 1940, 1860, 1780, 1700, 1620, 1540, 1460, 1380, 1300, 1220, 1140, 1060,  980,  900,  820,  740,  660,  580,  500,  420,  340,  260,  180,  100, 2400/*to 20*/,
+			     4740, 4800, 2500, 2580, 2660, 2740, 2820, 2900, 2980, 3060, 3140, 3220, 3300, 3380, 3460, 3540, 3620, 3700, 3780, 3860, 3940, 4020, 4100, 4180, 4260, 4340, 4420, 4500, 4580, 4660
+				   /*to 2420*/
+			     };
+    if (useDecoderForBoundaries && BEMCDecoderPresenter) {
+	for (Int_t crate = 0;crate < 30;crate++) {
+	    crateMinSoftId[crate] = 4800;
+	    crateMaxSoftId[crate] = 1;
+	}
+	for (Int_t crate = 0;crate < 30;crate++) {
+    	    if (BEMCDecoderPresenter) {
+		for (Int_t crateSeq = 0;crateSeq < 160;crateSeq++) {
+		    Int_t softId;
+		    if (BEMCDecoderPresenter->GetTowerIdFromCrate(crate + 1, crateSeq, softId)) {
+			if (softId < crateMinSoftId[crate]) crateMinSoftId[crate] = softId;
+			if (softId > crateMaxSoftId[crate]) crateMaxSoftId[crate] = softId;
+		    }
+		}
+	    }
+	}
+	//for (Int_t crate = 0;crate < 30;crate++) cout << "Crate " << (crate+1) << ": SoftId " << crateMinSoftId[crate] << " - " << crateMaxSoftId[crate] << endl;
+	// no PMT boxes numeration scheme in decoder
+    }
+
+    Int_t *boxMinSoftId = psd ? pmtbxMinSoftId : crateMinSoftId;
+    Int_t *boxMaxSoftId = psd ? pmtbxMaxSoftId : crateMaxSoftId;
+    const Char_t *boxLabelFormat = psd ? "%i" : "0x%.2X";
+    Int_t numBoxes = psd ? (sizeof(pmtbxMinSoftId)/sizeof(pmtbxMinSoftId[0])) : (sizeof(crateMinSoftId)/sizeof(crateMinSoftId[0]));
+
+    c->cd(1);
+    if (HistRawAdc1Zoom) {
+	HistRawAdc1Zoom->SetStats(0);
+	HistRawAdc1Zoom->Draw("COLZ");
+	if (twMaskFound) {
+	  TGraph *g1=twMask->crG;
+	  g1->Draw("L");
+	  g1->SetLineWidth(1);
+	  g1->SetLineColor(2);
+	  TLine *testline1=new TLine(0,0,0,10000);
+	  testline1->SetLineColor(1);
+	  testline1->SetLineWidth(2);
+	  testline1->Draw();
+	}
+	for (Int_t crate = 0;crate < numBoxes;crate++) {
+	    if (!((boxMaxSoftId[crate] < HistRawAdc1Zoom->GetXaxis()->GetBinLowEdge(1))
+		|| (boxMinSoftId[crate] > HistRawAdc1Zoom->GetXaxis()->GetBinUpEdge(HistRawAdc1Zoom->GetXaxis()->GetNbins())))
+		) {
+		Float_t left = max(boxMinSoftId[crate], HistRawAdc1Zoom->GetXaxis()->GetBinCenter(1)) - 0.5;
+		Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc1Zoom->GetXaxis()->GetBinCenter(HistRawAdc1Zoom->GetXaxis()->GetNbins()));
+		TLine *lCrates = new TLine(left, HistRawAdc1Zoom->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc1Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc1Zoom->GetYaxis()->GetNbins()));
+		if (lCrates) {
+    		    lCrates->SetLineColor(linesColor); 
+		    lCrates->SetLineWidth(1);
+		    lCrates->Draw();
+		}
+		TLine *rCrates = new TLine(right, HistRawAdc1Zoom->GetYaxis()->GetBinLowEdge(1), right, HistRawAdc1Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc1Zoom->GetYaxis()->GetNbins()));
+		if (rCrates) {
+    		    rCrates->SetLineColor(linesColor); 
+		    rCrates->SetLineWidth(1);
+		    rCrates->Draw();
+		}
+    		TString crateLabel;
+    		crateLabel = Form(boxLabelFormat, crate + 1);
+		TLatex *textCrate = new TLatex(left + 10, HistRawAdc1Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc1Zoom->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
+		if (textCrate) {
+		    textCrate->SetTextColor(linesColor);
+    		    textCrate->SetTextSize(0.14);
+		    textCrate->Draw();
+		}
+	    }
+	}
+    }
+    c->cd(2);
+    if (HistRawAdc2Zoom) {
+	HistRawAdc2Zoom->SetStats(0);
+	HistRawAdc2Zoom->Draw("COLZ");
+	if (twMaskFound) {
+	  TGraph *g2=twMask->crG+1;
+	  g2->Draw("L");
+	  g2->SetLineColor(2);
+	}
+	for (Int_t crate = 0;crate < numBoxes;crate++) {
+	  if (!((boxMaxSoftId[crate] < HistRawAdc2Zoom->GetXaxis()->GetBinLowEdge(1))
+		|| (boxMinSoftId[crate] > HistRawAdc2Zoom->GetXaxis()->GetBinUpEdge(HistRawAdc2Zoom->GetXaxis()->GetNbins())))
+	      ) {
+	    Float_t left = max(boxMinSoftId[crate], HistRawAdc2Zoom->GetXaxis()->GetBinCenter(1)) - 0.5;
+	    Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc2Zoom->GetXaxis()->GetBinCenter(HistRawAdc2Zoom->GetXaxis()->GetNbins()));
+	    TLine *lCrates = new TLine(left, HistRawAdc2Zoom->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc2Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc2Zoom->GetYaxis()->GetNbins()));
+	    if (lCrates) {
+	      lCrates->SetLineColor(linesColor); 
+	      lCrates->SetLineWidth(1);
+	      lCrates->Draw();
+	    }
+	    TLine *rCrates = new TLine(right, HistRawAdc2Zoom->GetYaxis()->GetBinLowEdge(1), right, HistRawAdc2Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc2Zoom->GetYaxis()->GetNbins()));
+	    if (rCrates) {
+	      rCrates->SetLineColor(linesColor); 
+	      rCrates->SetLineWidth(1);
+	      rCrates->Draw();
+	    }
+	    TString crateLabel;
+	    crateLabel = Form(boxLabelFormat, crate + 1);
+	    TLatex *textCrate = new TLatex(left + 10, HistRawAdc2Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc2Zoom->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
+	    if (textCrate) {
+	      textCrate->SetTextColor(linesColor);
+	      textCrate->SetTextSize(0.14);
+	      textCrate->Draw();
+	    }
+	  }
+	}
+    }
+    
+    c->cd(3);
+    if (HistRawAdc3Zoom) {
+	HistRawAdc3Zoom->SetStats(0);
+	HistRawAdc3Zoom->Draw("COLZ");
+	if (twMaskFound) {
+	  TGraph *g3=twMask->crG+2;
+	  g3->Draw("L");
+	  g3->SetLineColor(2);
+	}
+	for (Int_t crate = 0;crate < numBoxes;crate++) {
+	    if (!((boxMaxSoftId[crate] < HistRawAdc3Zoom->GetXaxis()->GetBinLowEdge(1))
+		|| (boxMinSoftId[crate] > HistRawAdc3Zoom->GetXaxis()->GetBinUpEdge(HistRawAdc3Zoom->GetXaxis()->GetNbins())))
+		) {
+		Float_t left = max(boxMinSoftId[crate], HistRawAdc3Zoom->GetXaxis()->GetBinCenter(1)) - 0.5;
+		Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc3Zoom->GetXaxis()->GetBinCenter(HistRawAdc3Zoom->GetXaxis()->GetNbins()));
+		TLine *lCrates = new TLine(left, HistRawAdc3Zoom->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc3Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc3Zoom->GetYaxis()->GetNbins()));
+		if (lCrates) {
+    		    lCrates->SetLineColor(linesColor); 
+		    lCrates->SetLineWidth(1);
+		    lCrates->Draw();
+		}
+		TLine *rCrates = new TLine(right, HistRawAdc3Zoom->GetYaxis()->GetBinLowEdge(1), right, HistRawAdc3Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc3Zoom->GetYaxis()->GetNbins()));
+		if (rCrates) {
+    		    rCrates->SetLineColor(linesColor); 
+		    rCrates->SetLineWidth(1);
+		    rCrates->Draw();
+		}
+    		TString crateLabel;
+    		crateLabel = Form(boxLabelFormat, crate + 1);
+		TLatex *textCrate = new TLatex(left + 10, HistRawAdc3Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc3Zoom->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
+		if (textCrate) {
+		    textCrate->SetTextColor(linesColor);
+    		    textCrate->SetTextSize(0.14);
+		    textCrate->Draw();
+		}
+	    }
+	}
+    }
+
+    c->cd(4);
+    if (HistRawAdc4Zoom) {
+	HistRawAdc4Zoom->SetStats(0);
+	HistRawAdc4Zoom->Draw("COLZ");
+	if (twMaskFound) {
+	  TGraph *g4=twMask->crG+3;
+	  g4->Draw("L");
+	  g4->SetLineWidth(2);
+	  g4->SetLineColor(2);
+	}
+
+	for (Int_t crate = 0;crate < numBoxes;crate++) {
+	    if (!((boxMaxSoftId[crate] < HistRawAdc4Zoom->GetXaxis()->GetBinLowEdge(1))
+		|| (boxMinSoftId[crate] > HistRawAdc4Zoom->GetXaxis()->GetBinUpEdge(HistRawAdc4Zoom->GetXaxis()->GetNbins())))
+		) {
+		Float_t left = max(boxMinSoftId[crate], HistRawAdc4Zoom->GetXaxis()->GetBinCenter(1)) - 0.5;
+		Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc4Zoom->GetXaxis()->GetBinCenter(HistRawAdc4Zoom->GetXaxis()->GetNbins()));
+		TLine *lCrates = new TLine(left, HistRawAdc4Zoom->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc4Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc4Zoom->GetYaxis()->GetNbins()));
+		if (lCrates) {
+    		    lCrates->SetLineColor(linesColor); 
+		    lCrates->SetLineWidth(1);
+		    lCrates->Draw();
+		}
+		TLine *rCrates = new TLine(right, HistRawAdc4Zoom->GetYaxis()->GetBinLowEdge(1), right, HistRawAdc4Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc4Zoom->GetYaxis()->GetNbins()));
+		if (rCrates) {
+    		    rCrates->SetLineColor(linesColor); 
+		    rCrates->SetLineWidth(1);
+		    rCrates->Draw();
+		}
+    		TString crateLabel;
+    		crateLabel = Form(boxLabelFormat, crate + 1);
+		TLatex *textCrate = new TLatex(left + 10, HistRawAdc4Zoom->GetYaxis()->GetBinUpEdge(HistRawAdc4Zoom->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
+		if (textCrate) {
+		    textCrate->SetTextColor(linesColor);
+    		    textCrate->SetTextSize(0.14);
+		    textCrate->Draw();
+		}
+	    }
+	}
+    }
+}
 //-------------------------------------------------------------------
 void BEMCPlotsPresenter::displayJetPatchHT(FileType file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
@@ -1313,10 +1542,10 @@ void BEMCPlotsPresenter::displayTriggerCorruption(FileType file, TPad *pad, bool
     if (!HistTriggerCorruptionHighTower || (mDebug >= 2)) cout << "HistTriggerCorruptionHighTower = " << HistTriggerCorruptionHighTower << endl;
     TH1F *HistTriggerCorruptionPatchSum = (TH1F*)GetHisto(file, HistTriggerCorruptionPatchSumName);
     if (!HistTriggerCorruptionPatchSum || (mDebug >= 2)) cout << "HistTriggerCorruptionPatchSum = " << HistTriggerCorruptionPatchSum << endl;
-    TH2F *HistTriggerCorruptionHighTowerCorr = (TH2F*)GetHisto(file, HistTriggerCorruptionHighTowerCorrName);
-    if (!HistTriggerCorruptionHighTowerCorr || (mDebug >= 2)) cout << "HistTriggerCorruptionHighTowerCorr = " << HistTriggerCorruptionHighTowerCorr << endl;
-    TH2F *HistTriggerCorruptionPatchSumCorr = (TH2F*)GetHisto(file, HistTriggerCorruptionPatchSumCorrName);
-    if (!HistTriggerCorruptionPatchSumCorr || (mDebug >= 2)) cout << "HistTriggerCorruptionPatchSumCorr = " << HistTriggerCorruptionPatchSumCorr << endl;
+    TH2F *HistDSM0HTCorr = (TH2F*)GetHisto(file, HistDSM0HTCorrName);
+    if (!HistDSM0HTCorr || (mDebug >= 2)) cout << "HistDSM0HTCorr = " << HistDSM0HTCorrName << endl;
+    TH2F *HistDSM0TPCorr = (TH2F*)GetHisto(file, HistDSM0TPCorrName);
+    if (!HistDSM0TPCorr || (mDebug >= 2)) cout << "HistDSM0TPCorr = " << HistDSM0TPCorrName << endl;
 
     if (!pad) return;
     pad->Clear();
@@ -1328,46 +1557,33 @@ void BEMCPlotsPresenter::displayTriggerCorruption(FileType file, TPad *pad, bool
     c->Draw();
     c->cd(0);
 
-    if (hold==true){
-
-      c->Divide(2, 2, 0.001, 0.001);
-      
+    //c->Divide(2, 2, 0.001, 0.001);
+    c->Divide(2, 1, 0.001, 0.001);
+    
+    /*
       c->cd(1);
       if (HistTriggerCorruptionHighTower) {
-	HistTriggerCorruptionHighTower->SetStats(0);
-	HistTriggerCorruptionHighTower->Draw();
+      HistTriggerCorruptionHighTower->SetStats(0);
+      HistTriggerCorruptionHighTower->Draw();
       }
       c->cd(2);
       if (HistTriggerCorruptionHighTowerCorr) {
-	HistTriggerCorruptionHighTowerCorr->SetStats(0);
-	HistTriggerCorruptionHighTowerCorr->Draw("COLZ");
+      HistTriggerCorruptionHighTowerCorr->SetStats(0);
+      HistTriggerCorruptionHighTowerCorr->Draw("COLZ");
       }
-      c->cd(3);
-      if (HistTriggerCorruptionPatchSum) {
-	HistTriggerCorruptionPatchSum->SetStats(0);
-	HistTriggerCorruptionPatchSum->Draw();
-      }
-      c->cd(4);
-      if (HistTriggerCorruptionPatchSumCorr) {
-	HistTriggerCorruptionPatchSumCorr->SetStats(0);
-	HistTriggerCorruptionPatchSumCorr->Draw("COLZ");
-      }
+    */
+    c->cd(1);
+    if (HistDSM0HTCorr) {
+      HistDSM0HTCorr->SetStats(0);
+      HistDSM0HTCorr->Draw("COLZ");
     }
-
-    else if (hold== false) {
-      c->Divide(1, 2, 0.001, 0.001);
-      c->cd(1);
-      if (HistTriggerCorruptionHighTowerCorr) {
-	HistTriggerCorruptionHighTowerCorr->SetStats(0);
-	HistTriggerCorruptionHighTowerCorr->Draw();
-      }
-      c->cd(2);
-      if (HistTriggerCorruptionPatchSumCorr) {
-	HistTriggerCorruptionPatchSumCorr->SetStats(0);
-	HistTriggerCorruptionPatchSumCorr->Draw("COLZ");
-      }
+    c->cd(2);
+    if (HistDSM0TPCorr) {
+      HistDSM0TPCorr->SetStats(0);
+      HistDSM0TPCorr->Draw("COLZ");
     }
 }
+
 
 //-------------------------------------------------------------------
 void BEMCPlotsPresenter::displayAdcEtaPhi( FileType file, TPad *pad, Int_t mDebug)
@@ -1451,7 +1667,7 @@ void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType file, TPad 
     }
  if (tab == 1) {
         if (panel == 0) {
-            displayRawAdc(file, pad, false, mDebug);
+            displayRawAdcZoom(file, pad, false, mDebug);
         } else if (panel == 1) {
 	    displayAdcEtaPhi(file, pad, mDebug);
         } else if (panel == 2) {

@@ -8,43 +8,44 @@ using namespace std;
 // HighTower and PatchSum are the arrays to store the decoded values in the triggerPatch order (0 <= triggerPatch < 300)
 // See the StEmcDecoder for the conversions between triggerPatch, JetPatch and towers
 int BEMC_DSM_L0_decoder(const unsigned char* rawDsmL0West, const unsigned char* rawDsmL0East, int *HighTower, int* PatchSum) {
-    if (!rawDsmL0West && !rawDsmL0East) return 0;
-    int dsm_to_patch[30] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29};
-    int patch;
-    int dsm_read_map[16]={7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8};
-    int tower_map[10]={0,1,2,3,4,5,6,7,8,9};  // map into DSM board
-    unsigned char dsmby[30][16];
-    unsigned char ch[16];
-    for (int i = 0;i < 30;i++) {
-        for (int j = 0;j < 16;j++) {
-            int k = (16 * (i % 15)) + j;
-            dsmby[i][j] = (i < 15) ? (rawDsmL0East ? rawDsmL0East[k] : 0) : (rawDsmL0West ? rawDsmL0West[k] : 0);
-        }
+  
+  if (!rawDsmL0West && !rawDsmL0East) return 0;
+  int dsm_to_patch[30] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29};
+  int patch;
+  int dsm_read_map[16]={7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8};
+  int tower_map[10]={0,1,2,3,4,5,6,7,8,9};  // map into DSM board
+  unsigned char dsmby[30][16];
+  unsigned char ch[16];
+  for (int i = 0;i < 30;i++) {
+    for (int j = 0;j < 16;j++) {
+      int k = (16 * (i % 15)) + j;
+      dsmby[i][j] = (i < 15) ? (rawDsmL0East ? rawDsmL0East[k] : 0) : (rawDsmL0West ? rawDsmL0West[k] : 0);
     }
-    for(int i = 0;i < 30;i++) {
-        patch = dsm_to_patch[i];
-        for(int j = 0;j < 16;j++) {
-            int k = dsm_read_map[j];
-            ch[k] = dsmby[i][j];
-        }
-        int nt=0;
-        for(int k = 0;k < 5;k++) {
-            int nby = 3 * k;
-            int hi_tower = (ch[nby]) & 0x3f;
-            int sum_tower = ((ch[nby]>>6) & 0x3) + (((ch[nby+1]) & 0xf) << 2);
-            int it =  tower_map[nt] + 10*(patch);
-            if (HighTower) HighTower[it] = hi_tower;
-            if (PatchSum) PatchSum[it] = sum_tower;
-            nt++;
-            hi_tower = ((ch[nby+1]>>4) & 0xf) + (((ch[nby+2]) & 0x3) << 4);
-            sum_tower = ((ch[nby+2]>>2) & 0x3f);
-            it = tower_map[nt] + 10*(patch);
-            if (HighTower) HighTower[it]=hi_tower;
-            if (PatchSum) PatchSum[it]= sum_tower;
-            nt++;
-        }
+  }
+  for(int i = 0;i < 30;i++) {
+    patch = dsm_to_patch[i];
+    for(int j = 0;j < 16;j++) {
+      int k = dsm_read_map[j];
+      ch[k] = dsmby[i][j];
     }
-    return 1;
+    int nt=0;
+    for(int k = 0;k < 5;k++) {
+      int nby = 3 * k;
+      int hi_tower = (ch[nby]) & 0x3f;
+      int sum_tower = ((ch[nby]>>6) & 0x3) + (((ch[nby+1]) & 0xf) << 2);
+      int it =  tower_map[nt] + 10*(patch);
+      if (HighTower) HighTower[it] = hi_tower;
+      if (PatchSum) PatchSum[it] = sum_tower;
+      nt++;
+      hi_tower = ((ch[nby+1]>>4) & 0xf) + (((ch[nby+2]) & 0x3) << 4);
+      sum_tower = ((ch[nby+2]>>2) & 0x3f);
+      it = tower_map[nt] + 10*(patch);
+      if (HighTower) HighTower[it]=hi_tower;
+      if (PatchSum) PatchSum[it]= sum_tower;
+      nt++;
+    }
+  }
+  return 1;
 }
 
 // rawDsmL1 is the raw DSM level-1 input from the TRGD bank
@@ -175,27 +176,30 @@ int getFEEpedestal(float towerPedestal, float pedestalShift, bool debug) {
 }
 
 void simulateFEEaction(int adc, int ped, int bitConv, int &ht, int &pa, bool debug) {
-    int operationBit = ped & 0x10;
-    int pedestal = ped & 0x0F;
-    int adc1 = adc >> 2;
-    int adc2 = operationBit ? (adc1 - pedestal) : (adc1 + pedestal);
-    int adc3 = adc2 >> 2;
-    pa = adc3;
-    if (bitConv == 0) {
-	ht = adc2;
-    } else if (bitConv == 1) {
-	int adc4 = ((adc2 >> 1) & 0x1F) | ((adc2 & 0x03C0) ? 0x20 : 0);
-	ht = adc4;
-    } else if (bitConv == 2) {
-	int adc4 = ((adc2 >> 2) & 0x1F) | ((adc2 & 0x0380) ? 0x20 : 0);
-	ht = adc4;
-    } else if (bitConv == 3) {
-	int adc4 = ((adc2 >> 3) & 0x1F) | ((adc2 & 0x0300) ? 0x20 : 0);
-	ht = adc4;
-    }
-    if (debug) cout << "Simulating FEE: adc = " << adc << ", ped = " << ped << ", bitConv = " << bitConv;
-    if (debug) cout << ";pedestal = " << pedestal << ", adc2 = " << adc2;
-    if (debug) cout << "; HT = " << ht << ", PA = " << pa << endl;
+
+  int operationBit = ped & 0x10;
+  int pedestal = ped & 0x0F;
+  int adc1 = adc >> 2;
+  int adc2 = operationBit ? (adc1 - pedestal) : (adc1 + pedestal);
+  int adc3 = adc2 >> 2;
+  pa = adc3;
+  if (bitConv == 0) {
+    ht = adc2;
+  } else if (bitConv == 1) {
+    int adc4 = ((adc2 >> 1) & 0x1F) | ((adc2 & 0x03C0) ? 0x20 : 0);
+    ht = adc4;
+  } else if (bitConv == 2) {
+    int adc4 = ((adc2 >> 2) & 0x1F) | ((adc2 & 0x0380) ? 0x20 : 0);
+    ht = adc4;
+  } else if (bitConv == 3) {
+    int adc4 = ((adc2 >> 3) & 0x1F) | ((adc2 & 0x0300) ? 0x20 : 0);
+    ht = adc4;
+  }
+ 
+
+  //if (debug) cout << "Simulating FEE: adc = " << adc << ", ped = " << ped << ", bitConv = " << bitConv;
+  //if (debug) cout << ";pedestal = " << pedestal << ", adc2 = " << adc2;
+  //if (debug) cout << "; HT = " << ht << ", PA = " << pa << endl;
 }
 
 // This function calculates lookup table (LUT)
