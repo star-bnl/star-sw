@@ -1,5 +1,0 @@
-# $Id $
-# package StTpcHitFilterMaker
-# author: 
-Library:libStTpcHitFilterMaker.so:LIBS +=   -lStChain  -l_St_tpc  -ltpc_Tables
-#Library:libStTpcHitFilterMaker.so:LIBS +=   -lStChain  -lSt_tpc  -ltpc_Tables
