@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.12 2009/03/09 20:11:45 caines Exp $
+ * $Id: StSvtSignal.cc,v 1.13 2009/03/13 22:29:37 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.13  2009/03/13 22:29:37  baumgart
+ * Update mPasaGain to reflect new tune after bug fix
+ *
  * Revision 1.12  2009/03/09 20:11:45  caines
  * Fix to make different Rykov and Selemon methods have same gain
  *
@@ -75,7 +78,7 @@ StSvtSignal::StSvtSignal()
  memset(mSignal,0,sizeof(mSignal[0])*128);
 
  // mPasaGain = 7.2;      // uV/e Original number
- mPasaGain = 9.5; // Continuing tuning
+ mPasaGain = 10.5; // Continuing tuning
  
  for(int i = 0; i < 4; i++)
     mPasa[i] = 0.0;
