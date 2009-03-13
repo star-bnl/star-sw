@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.50 2009/03/13 19:27:24 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.51 2009/03/13 21:45:40 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.51  2009/03/13 21:45:40  genevb
+// Remove unhelpful stats
+//
 // Revision 2.50  2009/03/13 19:27:24  genevb
 // Now draw TPC xy hits in polar coords
 //
@@ -690,6 +693,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             if ( oName.Contains("PointXYTpc") &&
                (TMath::Abs((hobj->GetYaxis()->GetXmax()/TMath::TwoPi())-1.0)<0.01)) {
               TH2F* htmp = new TH2F(Form("%s.",obj->GetName()),obj->GetTitle(),1,-200,200,1,-200,200);
+              htmp->SetStats(kFALSE);
               htmp->Draw();
               obj->Draw("pol zcol same");
             } else
