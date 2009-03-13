@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.49 2009/01/17 01:48:54 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.50 2009/03/13 19:27:24 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.50  2009/03/13 19:27:24  genevb
+// Now draw TPC xy hits in polar coords
+//
 // Revision 2.49  2009/01/17 01:48:54  genevb
 // Fixed broken multi-page output introduced in previous commit
 //
@@ -683,6 +686,13 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                       oName.EndsWith("SSD") ||
                       oName.EndsWith("PointXYSvt") ||
                       oName.Contains("PointXYTpc"))) {
+            // Introduce possibility of polar coords
+            if ( oName.Contains("PointXYTpc") &&
+               (TMath::Abs((hobj->GetYaxis()->GetXmax()/TMath::TwoPi())-1.0)<0.01)) {
+              TH2F* htmp = new TH2F(Form("%s.",obj->GetName()),obj->GetTitle(),1,-200,200,1,-200,200);
+              htmp->Draw();
+              obj->Draw("pol zcol same");
+            } else
             obj->Draw("ZCol");
           } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
             obj->Draw("Box");
