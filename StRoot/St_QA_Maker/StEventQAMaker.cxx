@@ -1701,31 +1701,25 @@ void StEventQAMaker::MakeHistPoint() {
         StSPtrVecTpcHit& tpcHitsVec = tpcHitsSector->padrow(j)->hits();
 	for (UInt_t k=0; k<tpcHitsVec.size(); k++) {
           hitPos = tpcHitsVec[k]->position();
-	  Float_t x   = hitPos.x();
-	  Float_t y   = hitPos.y();
-	  Float_t z   = hitPos.z();
 	  Float_t phi = hitPos.phi()/degree;
           if (phi<0) phi+=360.;
-	  hists->m_z_hits->Fill(z);
-          // TPC East is sectors 13-24, and z<0
-          // TPC West is sectors  1-12, and z>0
+	  hists->m_z_hits->Fill(hitPos.z());
+          // TPC East is sectors 13-24, and (generally) z<0
+          // TPC West is sectors  1-12, and (generally) z>0
           // In StEvent, sectors are mapped starting at 0 instead of 1
 	  if (i>11) {
             rotator = 11-i;
 	    hists->m_pnt_phiT->Fill(phi,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
-	    hists->m_pnt_xyTE->Fill(x,y);
+	    hists->m_pnt_xyTE->Fill(hitPos.perp(),phi*degree);
 	  } else {
             rotator = i-11;
 	    hists->m_pnt_phiT->Fill(phi,1.);
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
-	    hists->m_pnt_xyTW->Fill(x,y);
+	    hists->m_pnt_xyTW->Fill(hitPos.perp(),phi*degree);
 	  }
           hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
-	  x   = hitPos.x();
-	  //y   = hitPos.y();
-          //mTpcSectorPlot[i]->Fill(x,y);
-          mTpcSectorPlot[i]->Fill(x,(float) (j+1));
+          mTpcSectorPlot[i]->Fill(hitPos.x(),(float) (j+1));
 	}
       }
     }
@@ -2370,8 +2364,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.89 2009/02/21 00:42:52 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.90 2009/03/13 19:27:24 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.90  2009/03/13 19:27:24  genevb
+// Now draw TPC xy hits in polar coords
+//
 // Revision 2.89  2009/02/21 00:42:52  genevb
 // TOF updates (BTOF classes), and single primVtx pointer
 //
