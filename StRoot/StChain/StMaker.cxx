@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.214 2009/01/26 14:32:49 fisyak Exp $
+// $Id: StMaker.cxx,v 1.215 2009/03/13 21:52:15 perev Exp $
 //
 //
 /*!
@@ -181,6 +181,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005e",      20041201,     2, "y2005e",   "y2005d + new SSD"},   //       {"y2005e",      20041201,     0}
   {"y2005f",      20041201,     3, "y2005f",   "y2005e + SSD5/CALB2"},//       {"y2005e",      20041201,     0}
   {"y2005g",      20041201,     4, "y2005g",   "y2005f + SVT dead material"},//{"y2005e",      20041201,     0}
+  {"y2005h",      20041201,     5, "y2005h",   "y2005g + TPC2009 "},
 
   // Dead area in SSD, in version y2006b
   {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane"},
@@ -193,6 +194,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
   {"y2007a",      20061105,     1, "y2007a",    "the material of the water channels is now carbon "}, // advertized simu 20061101
   {"y2007g",      20061105,     4, "y2007g",   "y2007b + SVT dead material"},
+  {"y2007h",      20061105,     5, "y2007h",   "y2007g + TPC2009"},
 
   // SVT/SSD is out
   {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone is lost"},
@@ -1889,6 +1891,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.215  2009/03/13 21:52:15  perev
+// y2005h and y2007h added
+//
 // Revision 1.214  2009/01/26 14:32:49  fisyak
 // rename TMemStat => StMemStat due clash with ROOT class
 //
