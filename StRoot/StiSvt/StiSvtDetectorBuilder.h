@@ -4,7 +4,7 @@
 #include "StSvtClassLibrary/StSvtGeometry.hh"
 #include "StThreeVector.hh"
 #include "Sti/StiDetectorBuilder.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 
 class StiSvtDetectorBuilder : public StiDetectorBuilder
 {

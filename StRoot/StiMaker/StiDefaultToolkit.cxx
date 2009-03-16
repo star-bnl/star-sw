@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.40 2008/02/29 16:28:00 fisyak Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.41 2009/03/16 13:50:14 fisyak Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.41  2009/03/16 13:50:14  fisyak
+ * Move out all Sti Chairs into StDetectorDb
+ *
  * Revision 2.40  2008/02/29 16:28:00  fisyak
  * Fix unassigned variable (_trackNodeInfFactory), synchronize name with BigFullChain.h
  *
@@ -150,10 +153,10 @@
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiDetectorGroup.h"
 #include "Sti/StiDetectorGroups.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtHitLoader.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 
 #include "StEvent/StHit.h"
 #include "StarClassLibrary/StMCTruth.h"

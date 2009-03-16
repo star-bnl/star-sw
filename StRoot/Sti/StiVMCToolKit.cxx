@@ -804,6 +804,7 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
   if (Debug()) 
     cout << "\tmaster  x\t" << master[0] << "\ty\t" << master[1] << "\tz\t" << master[2] << endl;
   if (!nodeP) nodeP = gGeoManager->MakePhysicalNode(pathT);
+  if (!nodeP) return nodeP;
 #if 0
   if (nodeP->IsAligned()) {
     trP = nodeP->GetNode()->GetMatrix();

@@ -3,7 +3,7 @@
 #include "StiUtilities/StiDebug.h"
 #include "StiTrackNodeHelper.h"
 #include "StiElossCalculator.h"
-#include "StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StMessMgr.h"
 #include "TArrayD.h"
 #if ROOT_VERSION_CODE < 331013

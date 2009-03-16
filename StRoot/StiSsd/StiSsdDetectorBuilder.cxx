@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.32 2008/08/12 20:54:40 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.33 2009/03/16 13:50:15 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.33  2009/03/16 13:50:15  fisyak
+// Move out all Sti Chairs into StDetectorDb
+//
 // Revision 1.32  2008/08/12 20:54:40  fisyak
 // If StSsdBarrel does not exist then take SSD as dead material from whatever exist in GEANT
 //
@@ -65,14 +68,14 @@ using namespace std;
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiElossCalculator.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiSsd/StiSsdIsActiveFunctor.h" 
 #include "StiSsd/StiSsdDetectorBuilder.h" 
 #include "StSsdUtil/StSsdBarrel.hh"
-#include "StiSsdHitErrorCalculator.h"
-#include "StiSsdTrackingParameters.h"
+#include "StDetectorDbMaker/StiSsdHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiSsdTrackingParameters.h"
 StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active, const string & inputFile)
     : StiDetectorBuilder("Ssd",active,inputFile), _siMat(0), _hybridMat(0)
 {
@@ -217,13 +220,10 @@ void StiSsdDetectorBuilder::useVMCGeometry() {
     // {"SFSD","the strip detector",                  "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""}// 0.002041 [kg]
   };
   Int_t NoSsdVols = sizeof(SsdVolumes)/sizeof(VolumeMap_t);
-  TString pathT("HALL_1/CAVE_1/SVTT_1/SFMO_1");
+  TString pathT("HALL_1/CAVE_1");
   gGeoManager->RestoreMasterVolume(); 
   gGeoManager->CdTop();
   // Check that SVTT_1/SFMO_1 exist
-  if (! gGeoManager->cd(pathT)) {
-    pathT = "HALL_1/CAVE_1/SFMO_1";
-  }
   TString path("");
   for (Int_t i = 0; i < NoSsdVols; i++) {
     gGeoManager->RestoreMasterVolume(); 

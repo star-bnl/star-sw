@@ -1,7 +1,7 @@
 #ifndef StiPixelDetectorBuilder_H
 #define StiPixelDetectorBuilder_H
 #include "Sti/StiDetectorBuilder.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 class StiPixelDetectorBuilder : public StiDetectorBuilder
 {
 public:

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.84 2008/08/22 13:32:52 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.85 2009/03/16 13:50:14 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.85  2009/03/16 13:50:14  fisyak
+ * Move out all Sti Chairs into StDetectorDb
+ *
  * Revision 2.84  2008/08/22 13:32:52  fisyak
  * add one more digit in trakc flag, mFlag=zxyy, where  z = 1 for pile up track in TPC (otherwise 0)
  *
@@ -450,7 +453,7 @@ using namespace std;
 //Sti
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiKalmanTrack.h"
-#include "Sti/StiKalmanTrackFitterParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 /////#include "Sti/StiGeometryTransform.h"
 #include "StiUtilities/StiDebug.h"
 #include "StiUtilities/StiPullEvent.h"

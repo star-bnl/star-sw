@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.189 2009/01/26 22:00:47 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.190 2009/03/16 13:50:14 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.190  2009/03/16 13:50:14  fisyak
+// Move out all Sti Chairs into StDetectorDb
+//
 // Revision 1.189  2009/01/26 22:00:47  fisyak
 // rename TMemStat => StMemStat
 //
@@ -379,11 +382,11 @@ More detailed: 				<br>
 #include "StiMaker.h"
 #include "TFile.h"
 #include "TCanvas.h"
-#include "Sti/StiKalmanTrackFinderParameters.h"
-#include "Sti/StiKalmanTrackFitterParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 #include "StiTpc/StiTpcDetectorBuilder.h"
 #include "StiSvt/StiSvtDetectorBuilder.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StiRnD/Ist/StiIstDetectorGroup.h"
 #include "StiUtilities/StiDebug.h"
 #include "StiUtilities/StiPullEvent.h"

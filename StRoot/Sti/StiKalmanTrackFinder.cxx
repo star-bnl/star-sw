@@ -37,7 +37,7 @@ using namespace std;
 #include "StiDefaultTrackFilter.h"
 #include "StiTrackFinderFilter.h"
 #include "StiUtilities/StiDebug.h"
-#include "Sti/StiKalmanTrackFinderParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StMessMgr.h"
 
 #define TIME_StiKalmanTrackFinder

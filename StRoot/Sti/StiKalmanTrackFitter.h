@@ -1,7 +1,7 @@
 #ifndef StiKalmanTrackFitter_H
 #define StiKalmanTrackFitter_H
 #include "StiTrackFitter.h"
-#include "StiKalmanTrackFitterParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
 class StiTrack;
 class EditableParameters;
 
