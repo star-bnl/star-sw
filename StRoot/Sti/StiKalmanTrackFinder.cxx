@@ -234,7 +234,10 @@ static int nCall=0;nCall++;
 //		Add DCA node
         StiHit dcaHit; dcaHit.makeDca();
         StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
-        if (extenDca) track->add(extenDca,kOutsideIn);
+        if (extenDca) {
+	  track->add(extenDca,kOutsideIn);
+	  if (debug() >= 1) StiKalmanTrackNode::PrintStep();
+	}
 //		End DCA node
         track->reduce();
         nTAdd++;
@@ -634,10 +637,10 @@ static  const double ref1a  = 110.*degToRad;
       position = testNode.propagate(leadNode,tDet,direction);
       if (position == kEnded) { gLevelOfFind--; return;}
       if (debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
-      if (debug() >= 1) StiKalmanTrackNode::PrintStep();
       if (position<0 || position>kEdgeZplus) { 
 	// not reaching this detector layer - stop track
 	if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
+	if (debug() >= 1) StiKalmanTrackNode::PrintStep();
 	continue; // will try the next available volume on this layer
       }
       if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
@@ -733,7 +736,7 @@ static  const double ref1a  = 110.*degToRad;
           if (status)  break;
           node->setChi2(hitCont.getChi2(jHit));
           if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
-	  if (debug() & 8) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
+	  if (debug() > 0) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
 
@@ -882,4 +885,3 @@ bool CloserAngle::operator()(const StiDetector*lhs, const StiDetector* rhs)
   double rhsda = fabs(rhsa-_refAngle); if (rhsda>3.1415) rhsda-=3.1415;
   return lhsda<rhsda;
 }
-
