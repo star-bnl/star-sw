@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.31 2008/09/10 15:46:36 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.32 2009/03/16 14:13:31 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.32  2009/03/16 14:13:31  fisyak
+ * Use StDetectorDb chairs for TpcGlobalPosition and TpcSectorPosition
+ *
  * Revision 1.31  2008/09/10 15:46:36  fisyak
  * Recalculate Tpc drift velocity once per event, avoid expensive conversion to unix time
  *
@@ -89,28 +92,6 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-
-/* #ifndef __CINT__ */
-/* #include "StarCallf77.h" */
-/* #define numberOfPadsAtRow_ F77_NAME(numberofpadsatrow,NUMBEROFPADSATROW) */
-/* #define tpc_row_to_y_ F77_NAME(tpc_row_to_y,TPC_ROW_TO_Y) */
-/* #define tpc_pad_to_x_ F77_NAME(tpc_pad_to_x,TPC_PAD_TO_X) */
-/* #define tpc_local_to_global_ F77_NAME(tpc_local_to_global,TPC_LOCAL_TO_GLOBAL) */
-/* #define tpc_drift_velocity_ F77_NAME(tpc_drift_velocity,TPC_DRIFT_VELOCITY) */
-/* #define tpc_time_to_z_ F77_NAME(tpc_time_to_z,TPC_TIME_TO_Z) */
-/* extern "C" { */
-/* R__EXTERN int type_of_call numberOfPadsAtRow_(int *); */
-/* } */
-/* extern "C" { */
-/* R__EXTERN int type_of_call tpc_row_to_y_(float *,float *); */
-/* } */
-/* extern "C" { */
-/* R__EXTERN int type_of_call tpc_pad_to_x_(float *,float *,float *); */
-/* } */
-/* extern "C" { */
-/* R__EXTERN int type_of_call tpc_global_to_local_(int *,float *,float *); */
-/* } */
-/* #endif */
 #include "StMessMgr.h"
 #include "StRTpcPadPlane.h"
 #include "StRTpcWirePlane.h"
@@ -118,8 +99,8 @@
 #include "StRTpcElectronics.h"
 #include "StRTpcT0.h"
 #include "StRTpcSlowControlSim.h"
-#include "StRTpcGlobalPosition.h"
-#include "StRTpcSectorPosition.h"
+#include "StDetectorDbMaker/St_tpcGlobalPositionC.h"
+#include "StDetectorDbMaker/St_tpcSectorPositionC.h"
 #include "StRTpcFieldCage.h"
 #include "StRTpcHitErrors.h"
 #include "TTable.h"
@@ -145,8 +126,6 @@ class StTpcDb {
  StTpcSlowControlSimI* slowControlSim;//! 
  StTpcElectronicsI*    electronics;   //!
  StTpcT0I*             t0[24];        //!
- StTpcSectorPositionI* sect[24];    //! 
- StTpcGlobalPositionI* GlobPos; //!
  StTpcFieldCageI*      FC;
  StTpcHitErrorsI*      hitErrors;
  TDataSet*           tpctrg[3];     //!
@@ -157,6 +136,9 @@ class StTpcDb {
  StMagUtilities*       mExB;           //!
  Int_t                 m_Debug;        //!
  TGeoHMatrix          *mTpc2GlobalMatrix;//!
+#if 0
+ TGeoHMatrix          *mTpcSectorAlignment[24][2];
+#endif
  Float_t               mDriftVel[2];   //!
  UInt_t                mUc;            //! time for which above mDriftVel have been calculateed
  protected:
@@ -172,11 +154,11 @@ class StTpcDb {
    StTpcDimensionsI* Dimensions();
    StTpcSlowControlSimI* SlowControlSim();
    StTpcElectronicsI* Electronics();
-   StTpcGlobalPositionI* GlobalPosition();
+   St_tpcGlobalPositionC* GlobalPosition() {return St_tpcGlobalPositionC::instance();}
    StTpcFieldCageI* FieldCage();
    StTpcHitErrorsI* HitErrors();
    StTpcT0I* T0(int sector);
-   StTpcSectorPositionI* SectorPosition(int sector);
+   St_tpcSectorPositionC *SectorPosition() {return St_tpcSectorPositionC::instance();}
    TTable *getTpcTable(int i);
    St_tpcPedestalC *Pedestal();
    St_tpcGainC     *tpcGain();
@@ -194,6 +176,9 @@ class StTpcDb {
    void SetDebug(Int_t m) {m_Debug = m;}
    Int_t Debug() {return m_Debug;}
    const TGeoHMatrix &Tpc2GlobalMatrix() const {return *mTpc2GlobalMatrix;}
+#if 0
+   const TGeoHMatrix &TpcSectorAlignment(Int_t io = 0; Int_t sector = 1) const {return *mTpcSectorAlignment[sector-1][io];}
+#endif
 #ifdef __ROOT__
    ClassDef(StTpcDb,0)
 #endif

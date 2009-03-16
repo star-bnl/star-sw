@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.49 2008/09/10 15:46:36 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.50 2009/03/16 14:13:30 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.50  2009/03/16 14:13:30  fisyak
+ * Use StDetectorDb chairs for TpcGlobalPosition and TpcSectorPosition
+ *
  * Revision 1.49  2008/09/10 15:46:36  fisyak
  * Recalculate Tpc drift velocity once per event, avoid expensive conversion to unix time
  *
@@ -153,10 +156,8 @@ ClassImp(StTpcElectronicsI)
 ClassImp(StTpcPadPlaneI)
 ClassImp(StTpcSlowControlSimI)
 ClassImp(StTpcT0I)
-ClassImp(StTpcGlobalPositionI)
 ClassImp(StTpcFieldCageI)
 ClassImp(StTpcHitErrorsI)
-ClassImp(StTpcSectorPositionI)
 #endif
 //_____________________________________________________________________________
 StTpcDb::StTpcDb(TDataSet* input) : m_Debug(0) {
@@ -183,6 +184,12 @@ StTpcDb::StTpcDb(TDataSet* input) : m_Debug(0) {
  dvelcounter = 0;
  mExB = 0;
  mTpc2GlobalMatrix = new TGeoHMatrix("Default Tpc2Global"); 
+#if 0
+ for (Int_t i = 1; i <= 24; i++) {
+   mTpcSectorAlignment[sector-1][0] = new TGeoHMatrix(Form("Default TpcSector%02iAlignment Inner",i));
+   mTpcSectorAlignment[sector-1][1] = new TGeoHMatrix(Form("Default TpcSector%02iAlignment Outer",i));
+ }
+#endif
  gStTpcDb = this;
 }
 
@@ -197,7 +204,7 @@ StTpcDb::StTpcDb(StMaker* maker) : m_Debug(0) {
  mTpc2GlobalMatrix = new TGeoHMatrix("Default Tpc2Global"); 
  gStTpcDb = this;
 }
-
+//_____________________________________________________________________________
 void StTpcDb::Clear(){
   trigtype = 0;
   dvelcounter = 0;
@@ -235,17 +242,14 @@ void StTpcDb::GetDataBase(StMaker* maker) {
 
 //_____________________________________________________________________________
 StTpcDb::~StTpcDb() {
-  //delete PadPlane;
-  //delete WirePlane;
-  //delete dimensions;
-  //delete slowControlSim;
-  //delete electronics;
-
-for (int i = 0;i<24;i++) {
-  //    delete gain[i]; delete t0[i];
-}
- SafeDelete(mTpc2GlobalMatrix);
-gStTpcDb = 0;
+#if 0
+  for (int i = 0;i<24;i++) {
+    SafeDelete(mTpcSectorAlignment[i][0]);
+    SafeDelete(mTpcSectorAlignment[i][1]);
+  }
+#endif
+  SafeDelete(mTpc2GlobalMatrix);
+  gStTpcDb = 0;
 }
 
 //_____________________________________________________________________________
@@ -362,24 +366,6 @@ StTpcElectronicsI* StTpcDb::Electronics(){
 }
 
 //_____________________________________________________________________________
-StTpcGlobalPositionI* StTpcDb::GlobalPosition(){
-  if (!GlobPos){            // get global position from data base
-    const int dbIndex = kGeometry;
-    if (tpctrg[dbIndex]){
-      //    TDataSet* tpd = tpctrg[dbIndex]->Find("tpcGlobalPosition");
-      St_tpcGlobalPosition* tpd = (St_tpcGlobalPosition*)FindTable("tpcGlobalPosition",dbIndex);
-      if (!(tpd && tpd->HasData()) ){
-	gMessMgr->Message("StTpcDb::Error Finding Tpc Global Positions","E");
-	return 0;
-      }
-      if (Debug()) tpd->Print(0,1);
-      GlobPos = new StRTpcGlobalPosition(tpd);
-    }
-  }
-  return GlobPos;
-}
-
-//_____________________________________________________________________________
 StTpcFieldCageI* StTpcDb::FieldCage(){
   if (!FC){            // get field cage from data base
     const int dbIndex = kGeometry;
@@ -443,32 +429,6 @@ StTpcT0I* StTpcDb::T0(int sector){
   }
  return t0[sector-1];
 }
-//_____________________________________________________________________________
-StTpcSectorPositionI* StTpcDb::SectorPosition(int sector){
-  
-  if(sector<1||sector>24){
-    gMessMgr->Message("StTpcDb::SectorPosition request for invalid sector","E");
-    return 0;
-  }
-  if(!sect[sector-1]){
-   const int dbIndex = kGeometry;
-   char dbname[40];
-   sprintf(dbname,"Sector_%.2d/tpcSectorPosition",sector);
-   if (tpctrg[dbIndex]){
-     //    TDataSet* tpd = (TDataSet*)tpctrg[dbIndex]->Find(dbname);
-     TDataSet *tpd = FindTable(dbname,dbIndex);
-    if (!(tpd && tpd->HasData()) ){
-     gMessMgr->Message("StTpcDb::Error Finding Tpc Sector Position","E");
-     return 0;
-    }
-    StRTpcSectorPosition* wptemp = new StRTpcSectorPosition((St_tpcSectorPosition*)tpd);
-    assert(wptemp);
-    sect[sector-1] = (StTpcSectorPositionI*)wptemp;
-   }
-  }
- return sect[sector-1];
-}
-
 //_____________________________________________________________________________
 TTable *StTpcDb::getTpcTable(int i){
   return (TTable *)tpctrg[i];
