@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.h,v 1.7 2009/02/06 21:26:49 wleight Exp $
+// $Id: StiIstDetectorBuilder.h,v 1.8 2009/03/16 13:51:00 fisyak Exp $
 // 
 // $Log: StiIstDetectorBuilder.h,v $
+// Revision 1.8  2009/03/16 13:51:00  fisyak
+// Move out all Sti Chairs into StDetectorDb
+//
 // Revision 1.7  2009/02/06 21:26:49  wleight
 // UPGR15 Update
 //
@@ -37,7 +40,7 @@ This class is the description of the StiIstDetectorBuilder
 //#include "StSsdUtil/StSsdGeometry.hh"
 //#include "StSsdUtil/StSsdConfig.hh"
 #include "Sti/StiDetectorBuilder.h"
-//#include "Sti/StiHitErrorCalculator.h"
+//#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StThreeVector.hh"
 
 class StiIstDetectorBuilder : public StiDetectorBuilder

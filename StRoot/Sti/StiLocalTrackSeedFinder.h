@@ -12,9 +12,9 @@ using std::vector;
 #include "Sti/StiTrackFinder.h"
 #include "Sti/StiSortedHitIterator.h"
 #include "Sti/StiMasterDetectorBuilder.h"
-#include "Sti/StiLocalTrackSeedFinderParameters.h"
+#include "StDetectorDbMaker/StiLocalTrackSeedFinderParameters.h"
 #include "Sti/StiDefaultTrackFilter.h"
-#include "Sti/StiLocalTrackSeedFinderParameters.h"
+#include "StDetectorDbMaker/StiLocalTrackSeedFinderParameters.h"
 
 class StiDetector;
 

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.120 2008/12/26 15:18:00 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.121 2009/03/16 13:50:15 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.121  2009/03/16 13:50:15  fisyak
+ * Move out all Sti Chairs into StDetectorDb
+ *
  * Revision 2.120  2008/12/26 15:18:00  fisyak
  * Enlarge fitting volume from 200 => 250 cm
  *
@@ -358,9 +361,9 @@ using namespace std;
 #include "StiCylindricalShape.h"
 #include "StiKalmanTrackNode.h"
 #include "StiElossCalculator.h"
-#include "StiTrackingParameters.h"
-#include "StiKalmanTrackFinderParameters.h"
-#include "StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiTrackingParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StiTrackNodeHelper.h"
 #include "StiFactory.h"
 #include "TString.h"

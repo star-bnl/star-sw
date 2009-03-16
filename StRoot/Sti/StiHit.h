@@ -64,35 +64,35 @@ public:
     ~StiHit();
 
     ///Return the local x, y, z values.
-    const float &x() const {return mx;}
-    const float &y() const {return my;}
-    const float &z() const {return mz;}
-    const float  y(float time) const {return my + _vy*time;}
-    const float  z(float time) const {return mz + _vz*time;}
+    const Float_t &x() const {return mx;}
+    const Float_t &y() const {return my;}
+    const Float_t &z() const {return mz;}
+    const Float_t  y(Float_t time) const {return my + _vy*time;}
+    const Float_t  z(Float_t time) const {return mz + _vz*time;}
     ///Return the global x, y, z values.
-    float x_g() const {return _xg;}
-    float y_g() const {return _yg;}
-    float z_g() const {return _zg;}
+    Float_t x_g() const {return _xg;}
+    Float_t y_g() const {return _yg;}
+    Float_t z_g() const {return _zg;}
     
     ///Return components of the error matrix.
-    float sxx() const {return msxx;}
-    float syy() const {return msyy;}
-    float szz() const {return mszz;}
-    float sxy() const {return msxy;}
-    float sxz() const {return msxz;}
-    float syz() const {return msyz;}
-    const float *errMtx() const   		{return &msxx;}
+    Float_t sxx() const {return msxx;}
+    Float_t syy() const {return msyy;}
+    Float_t szz() const {return mszz;}
+    Float_t sxy() const {return msxy;}
+    Float_t sxz() const {return msxz;}
+    Float_t syz() const {return msyz;}
+    const Float_t *errMtx() const   		{return &msxx;}
     ///Return the energy deposition associated with this point 
-    float getEloss();
+    Float_t getEloss();
     ///Return the refAngle of the detector plane from which the hit arose.
-    float refangle() const {return mrefangle;}
-    ///Return the position of the detector plane from whcih the hit arose.
-    float position() const {return mposition;}
+    Float_t refangle() const {return mrefangle;}
+    ///Return the position of the detector plane from which the hit arose.
+    Float_t position() const {return mposition;}
     ///Return a const pointer to the StiDetector object from which the hit
     ///arose.
     const StiDetector* detector() const {return mdetector;}
     ///Test for DCA.  Fake hit for dca calculation
-    int isDca() const;
+    Int_t isDca() const;
     ///Make fake hit for dca calculation
     void makeDca();
     ///Return a const pointer to the StHit object corresponding to this StiHit
@@ -105,7 +105,7 @@ public:
     //const StMcHit* stMcHit() const;
 
     ///Return the number of times this hit was assigned to a track
-    unsigned int timesUsed() const { return mTimesUsed;}
+    UInt_t timesUsed() const { return mTimesUsed;}
     
     ///Return a boolean that marks whether or not this hit is assigned to a
     ///track.
@@ -115,69 +115,69 @@ public:
     ///of the hit in global STAR coordinates.
     const StThreeVectorF globalPosition() const;
 
-    void set(float position,  float angle, float y, float z);
+    void set(Float_t position,  Float_t angle, Float_t y, Float_t z);
 
     ///Set the local position and error in one function call
     void set(const StiDetector * detector,
 	     const StMeasuredPoint * stHit,
-	     float energy,
-	     float x, float y, float z, 
-	     float sxx=1, float sxy=1, float sxz=1, float syy=1, float syz=1, float szz=1);
+	     Float_t energy,
+	     Float_t x, Float_t y, Float_t z, 
+	     Float_t sxx=1, Float_t sxy=1, Float_t sxz=1, Float_t syy=1, Float_t syz=1, Float_t szz=1);
     ///Set the global position and error in one function call 
     ///A transformation is performed internally from global to local coordinates
     ///according to the detector information.
     void setGlobal(const StiDetector * detector,
 		   const StMeasuredPoint * stHit,
-		   float x, float y, float z,
-		   float energy);
+		   Float_t x, Float_t y, Float_t z,
+		   Float_t energy);
     
     ///Set the position error matrix for the measurement from an StMatrixF
     ///object.
     void setError(const StMatrixF&);
-    ///Set the position error matrix for the measurement from an float array
+    ///Set the position error matrix for the measurement from an Float_t array
     ///object.
-    void setError(const float errMx[6]);
+    void setError(const Float_t errMx[6]);
     ///Set the pointer to the StiDetector from which the hit arose.
     void setDetector(const StiDetector*det) {mdetector=det;};
     ///Set the pointer to the corresponding StHit object.
     void setStHit(const StMeasuredPoint*hit){msthit=hit;}
     ///Set the number of times used
     void setTimesUsed(unsigned int);
-    void setVz(float vz) {_vz = vz;}
-    void setVy(float vy) {_vy = vy;}
+    void setVz(Float_t vz) {_vz = vz;}
+    void setVy(Float_t vy) {_vy = vy;}
     void reset();
     void unset(){;}
     void rotate(double angle);
-    double getValue(int key) const;
+    double getValue(Int_t key) const;
     double getPseudoRapidity() const;
-    float  vz() const {return _vz;}
-    float  vy() const {return _vy;}
+    Float_t  vz() const {return _vz;}
+    Float_t  vy() const {return _vy;}
     friend ostream& operator<<(ostream& os, const StiHit& h);
 private:
     char  mBeg[1];
     unsigned char mTimesUsed;
-    float mrefangle;
-    float mposition;
-    float mx;
-    float my;
-    float mz; 
-    float msxx;
-    float msxy;
-    float msyy;
-    float msxz;
-    float msyz;
-    float mszz;
+    Float_t mrefangle;
+    Float_t mposition;
+    Float_t mx;
+    Float_t my;
+    Float_t mz; 
+    Float_t msxx;
+    Float_t msxy;
+    Float_t msyy;
+    Float_t msxz;
+    Float_t msyz;
+    Float_t mszz;
     // global position
-    float _xg,_yg,_zg;
+    Float_t _xg,_yg,_zg;
     const StiDetector* mdetector;
     const StMeasuredPoint * msthit;
-    float _energy;
+    Float_t _energy;
     // drift velocities cm/mksec( 0 for non driting )
-    float _vy, _vz;
+    Float_t _vy, _vz;
     
     char  mEnd[1];
 public:
-    int mCount;
+    Int_t mCount;
 };
 
 //Functors for ordering hits

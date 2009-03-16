@@ -17,8 +17,8 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiIsSvtActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
-#include "StiSvtHitErrorCalculator.h"
-#include "StiSvtTrackingParameters.h"
+#include "StDetectorDbMaker/StiSvtHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiSvtTrackingParameters.h"
 #include <stdio.h>
 #include "tables/St_HitError_Table.h"
 #include "StiSvtLayerLadder.h"
@@ -301,7 +301,7 @@ void StiSvtDetectorBuilder::useVMCGeometry() {
     // StiDetectorVolume	SVTT_1_SCON_1_STAC_1	StiDetector OBJ: TTUBE	STAC	StiCylindricalShape Rmin 21.935 Rmax 37.77 dz 86.9 
   };
   Int_t NoSvtVols = sizeof(SvtVolumes)/sizeof(VolumeMap_t);
-  TString pathT("HALL_1/CAVE_1/SVTT_1");
+  TString pathT("HALL_1/CAVE_1");
   TString path("");
   for (Int_t i = 0; i < NoSvtVols; i++) {
     gGeoManager->RestoreMasterVolume(); 

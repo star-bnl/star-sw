@@ -9,7 +9,7 @@
 #include "StiTrackNode.h"
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
-#include "StiKalmanTrackFinderParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StiShape.h"
 #include "StiPlanarShape.h"
 #include "StiCylindricalShape.h"

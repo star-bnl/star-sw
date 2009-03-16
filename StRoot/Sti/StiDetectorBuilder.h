@@ -6,7 +6,7 @@
 #include <string>
 #include <stdexcept>
 #include <math.h>
-#include "Sti/StiTrackingParameters.h"
+#include "StDetectorDbMaker/StiTrackingParameters.h"
 #include "Sti/StiMapUtilities.h"
 #include "Sti/Base/Named.h"
 #include "StThreeVector.hh"

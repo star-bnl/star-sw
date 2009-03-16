@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.h,v 1.12 2008/04/03 20:04:22 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.h,v 1.13 2009/03/16 13:50:09 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.h,v $
+// Revision 1.13  2009/03/16 13:50:09  fisyak
+// Move out all Sti Chairs into StDetectorDb
+//
 // Revision 1.12  2008/04/03 20:04:22  fisyak
 // Straighten out DB access via chairs
 //
@@ -26,7 +29,7 @@ This class is the description of the StiSsdDetectorBuilder
 #ifndef StiSsdDetectorBuilder_H
 #define StiSsdDetectorBuilder_H
 #include "Sti/StiDetectorBuilder.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StThreeVector.hh"
 class ssdWafersPosition_st;
 class St_ssdWafersPosition;

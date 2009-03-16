@@ -1,7 +1,7 @@
 #ifndef StiTpcDetectorBuilder_H
 #define StiTpcDetectorBuilder_H
 #include "Sti/StiDetectorBuilder.h"
-#include "Sti/StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 class StTpcPadPlaneI;
 class StTpcDimensionsI;
 

@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.19 2009/02/06 21:26:30 wleight Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.20 2009/03/16 13:51:00 fisyak Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.20  2009/03/16 13:51:00  fisyak
+// Move out all Sti Chairs into StDetectorDb
+//
 // Revision 1.19  2009/02/06 21:26:30  wleight
 // UPGR15 Update
 //
@@ -44,14 +47,13 @@ using namespace std;
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
-#include "Sti/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StiRnD/Ist/StiIstIsActiveFunctor.h" 
 #include "StiRnD/Ist/StiIstDetectorBuilder.h" 
 #include "Sti/StiElossCalculator.h"
 #include "StiRnD/Ist/StiIstDetectorBuilder.h"
-#include "StiIst1HitErrorCalculator.h"
+#include "StDetectorDbMaker/StiIst1HitErrorCalculator.h"
 //#include "StSsdUtil/StSsdConfig.hh"
 //#include "StSsdUtil/StSsdGeometry.hh"
 //#include "StSsdUtil/StSsdWaferGeometry.hh"

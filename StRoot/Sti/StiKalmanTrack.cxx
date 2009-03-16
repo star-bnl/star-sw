@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.113 2008/10/27 21:01:30 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.113 2008/10/27 21:01:30 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.114 2009/03/16 13:50:15 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.114 2009/03/16 13:50:15 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.114  2009/03/16 13:50:15  fisyak
+ * Move out all Sti Chairs into StDetectorDb
+ *
  * Revision 2.113  2008/10/27 21:01:30  perev
  * Free not used hits again
  *
@@ -351,11 +354,11 @@
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiMaterial.h"
-#include "StiHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiHitErrorCalculator.h"
 #include "StPhysicalHelixD.hh"
 #include "StHelix.hh"
-#include "StiKalmanTrackFitterParameters.h"
-#include "StiKalmanTrackFinderParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFitterParameters.h"
+#include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StiHitContainer.h"
 #include "StiTrackNodeHelper.h"
 #include "StiUtilities/StiDebug.h"

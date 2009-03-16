@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.24 2009/02/09 02:47:19 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.25 2009/03/16 13:51:00 fisyak Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.25  2009/03/16 13:51:00  fisyak
+ * Move out all Sti Chairs into StDetectorDb
+ *
  * Revision 1.24  2009/02/09 02:47:19  andrewar
  * UPGR15 update. Will break backward compatibility with older geometries.
  *
@@ -63,8 +66,8 @@
 #include "Sti/StiElossCalculator.h"
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
-#include "StiPixelHitErrorCalculator.h"
-#include "StiPixelTrackingParameters.h"
+#include "StDetectorDbMaker/StiPixelHitErrorCalculator.h"
+#include "StDetectorDbMaker/StiPixelTrackingParameters.h"
 #include "TDataSetIter.h"
 #include "tables/St_HitError_Table.h"
 #include "StEvent.h"

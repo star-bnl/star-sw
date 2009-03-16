@@ -10,7 +10,6 @@
 #pragma link C++ class StiElossCalculator;
 #pragma link C++ class StiFilter;
 #pragma link C++ class StiHitContainer;
-#pragma link C++ class StiHitErrorCalculator;
 #pragma link C++ class StiHit;
 #pragma link C++ class StiIsActiveFunctor;
 #pragma link C++ class StiKalmanTrackFinder;

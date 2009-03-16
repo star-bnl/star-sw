@@ -8,7 +8,7 @@ using std::string;
 #include "Sti/Base/Named.h"
 #include "Sti/StiPlacement.h"
 #include "StiIsActiveFunctor.h"
-#include "StiTrackingParameters.h"
+#include "StDetectorDbMaker/StiTrackingParameters.h"
 
 class StiMaterial;
 class StiShape;

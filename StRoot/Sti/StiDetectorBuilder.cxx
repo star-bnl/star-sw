@@ -9,7 +9,7 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
-#include "Sti/StiDefaultTrackingParameters.h"
+#include "StDetectorDbMaker/StiDefaultTrackingParameters.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
