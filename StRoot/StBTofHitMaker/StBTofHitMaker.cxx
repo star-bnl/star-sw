@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.5 2009/02/20 22:54:19 dongx Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.6 2009/03/16 21:56:49 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -34,6 +34,13 @@ ClassImp(StBTofHitMaker);
 //_____________________________________________________________
 StBTofHitMaker::StBTofHitMaker(const char *name):StRTSBaseMaker("tof",name)
 , mStEvent(0),fTof(0)
+, mNValidTrays(-1)          //! number of valid TOF trays
+, mBTofCollection(0)        //! pointer to StBTofCollection
+, mRawHitCollection(0)      //! pointer to StBTofRawHitCollection
+, mHitCollection(0)         //! pointer to StBTofHitCollection
+, mBTofDaqMap(0)            //! pointer to the TOF daq map
+, mBTofINLCorr(0)           //! INL corretion;
+, mBTofSortRawHit(0)        //! to sort the TOF hits
 {
   LOG_INFO << "StBTofHitMaker::ctor"  << endm;
 }
