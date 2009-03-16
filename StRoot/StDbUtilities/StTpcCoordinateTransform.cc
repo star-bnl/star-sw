@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.32 2008/12/23 17:27:57 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.33 2009/03/16 14:23:59 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.33  2009/03/16 14:23:59  fisyak
+ * Use StDetectorDb chairs for TpcGlobalPosition and TpcSectorPosition
+ *
  * Revision 1.32  2008/12/23 17:27:57  fisyak
  * Use tpcT0 chair, use sector/row in global => local transformation
  *
@@ -253,10 +256,10 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 	    mSinForSector[sector-1] = sin(beta); // careful, sector is the sector number, not index
 	    Double_t s = -1;
 	    if (sector > 12) s = +1;
-	    mInnerPositionOffsetX[sector-1] = s*gTpcDbPtr->SectorPosition(sector)->innerPositionOffsetX();
-	    mOuterPositionOffsetX[sector-1] = s*gTpcDbPtr->SectorPosition(sector)->outerPositionOffsetX();
-	    mInnerRotation[sector-1]        = s*gTpcDbPtr->SectorPosition(sector)->innerRotation()*deg_2_rad;
-	    mOuterRotation[sector-1]        = s*gTpcDbPtr->SectorPosition(sector)->outerRotation()*deg_2_rad;
+	    mInnerPositionOffsetX[sector-1] = s*gTpcDbPtr->SectorPosition()->innerPositionOffsetX(sector-1);
+	    mOuterPositionOffsetX[sector-1] = s*gTpcDbPtr->SectorPosition()->outerPositionOffsetX(sector-1);
+	    mInnerRotation[sector-1]        = s*gTpcDbPtr->SectorPosition()->innerRotation(sector-1)*deg_2_rad;
+	    mOuterRotation[sector-1]        = s*gTpcDbPtr->SectorPosition()->outerRotation(sector-1)*deg_2_rad;
 // 	    PR(beta);
 // 	    PR(cos(beta));
 // 	    PR(sin(beta));
