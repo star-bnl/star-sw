@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.215 2009/03/13 21:52:15 perev Exp $
+// $Id: StMaker.cxx,v 1.216 2009/03/16 21:52:24 perev Exp $
 //
 //
 /*!
@@ -42,8 +42,11 @@
 #include "TObjectSet.h"
 #include "StChain.h"
 #include "TTable.h"
-
+#ifdef TMEMSTATinSTAR
+#include "TMemStat.h"
+#else
 #include "StMemStat.h"
+#endif
 #include "TAttr.h"
 #include "StMkDeb.h"
 #include "StMessMgr.h"
@@ -1891,6 +1894,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.216  2009/03/16 21:52:24  perev
+// TMemStat & StMemStat handling improved
+//
 // Revision 1.215  2009/03/13 21:52:15  perev
 // y2005h and y2007h added
 //
