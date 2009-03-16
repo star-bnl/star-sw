@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.h,v 1.3 2009/02/20 18:23:24 dongx Exp $
+ * $Id: StBTofHitMaker.h,v 1.4 2009/03/16 23:09:00 fine Exp $
  * StBTofHitMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -33,11 +33,11 @@ class StBTofINLCorr;
 class StBTofDaqMap;
 
 struct TofRawHit {
+  unsigned int   tdc;               /// tdc time (in bin) per hit.
+  unsigned int   dataword;          /// data word before unpack
   unsigned short fiberid;           /// 0 1 2,3
   unsigned short trayID;            /// 1,2,......,120,for tray, 121, 122 for upvpd
   unsigned short globaltdcchan;     /// 0,1,......,191   
-  unsigned int   tdc;               /// tdc time (in bin) per hit.
-  unsigned int   dataword;          /// data word before unpack
 };
 
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
