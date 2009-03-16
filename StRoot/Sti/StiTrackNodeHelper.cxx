@@ -316,8 +316,8 @@ StiDebug::Break(nCall);
     }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
-    if (!ians) 	break;
     if (debug() & 8) {cout << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
+    if (!ians) 	break;
     if (mTargetNode == mVertexNode)	return 15;
     mState = StiTrackNode::kTNReady;
     mFitdPars = mPredPars;
@@ -877,8 +877,10 @@ static int nCall=0; nCall++;
     double chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs,&mFitdPars,&mFitdErrs);
     mFitdPars._curv = mTargetHz*mFitdPars._ptin;
     assert(chi2>900 || fabs(mChi2-chi2)<1e-10);
+    if (debug()) {
+      StiKalmanTrackNode::ResetComment(Form("Vertex                        "));
+    }
   } else 		{ //Normal Hit
-
     r00=mHrr.hYY+mPredErrs._cYY;
     r01=mHrr.hZY+mPredErrs._cZY;
     r11=mHrr.hZZ+mPredErrs._cZZ;
@@ -943,6 +945,9 @@ static int nCall=0; nCall++;
     mFitdErrs._cEY-=k20*c00+k21*c10;mFitdErrs._cEZ-=k20*c10+k21*c11;mFitdErrs._cEE-=k20*c20+k21*c21;
     mFitdErrs._cPY-=k30*c00+k31*c10;mFitdErrs._cPZ-=k30*c10+k31*c11;mFitdErrs._cPE-=k30*c20+k31*c21;mFitdErrs._cPP-=k30*c30+k31*c31;
     mFitdErrs._cTY-=k40*c00+k41*c10;mFitdErrs._cTZ-=k40*c10+k41*c11;mFitdErrs._cTE-=k40*c20+k41*c21;mFitdErrs._cTP-=k40*c30+k41*c31;mFitdErrs._cTT-=k40*c40+k41*c41;
+    if (debug()) {
+      StiKalmanTrackNode::ResetComment(Form("%30s ",mDetector->getName().c_str()));
+    }
   }
   if (mFitdErrs.check()) return -12;
 //  mFitdErrs.recov();
@@ -965,7 +970,10 @@ if(ERRTEST) errTest(mPredPars,mPredErrs,mHit,mHrr,mFitdPars,mFitdErrs,mChi2);
       return -14;
     }  
   } //EndIf Not a primary	  
-  if (mTargetNode && debug() & 8) mTargetNode->PrintpT("U");
+  if (debug()) StiKalmanTrackNode::comment += Form(" chi2 = %6.2f",mChi2);
+  if (mTargetNode && debug()) {
+    mTargetNode->PrintpT("U");
+  }
   mState = StiTrackNode::kTNFitEnd;
   return 0; 
 }
