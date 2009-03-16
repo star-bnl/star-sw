@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.2 2009/02/18 22:43:47 dongx Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.3 2009/03/16 21:01:39 fine Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -116,6 +116,14 @@ void StBTofSortRawHit::setBTofCollection(StBTofCollection* tofColl) {
       int ichan = tofRawHits[i]->channel();
       int ifiber = tofRawHits[i]->fiberId();
       bool iexist = kFALSE;
+      if (itray > mNTRAY ) {
+         LOG_FATAL << " StBTofSortRawHit::setBTofCollection:: "
+                   << "i="<< i 
+                   << ": itray=" << itray 
+                   << ": ichan=" << ichan 
+                   << ": ifiber=" << ifiber
+                   << endm;
+      }
       for(size_t ii=0; ii<mRawHitVec[itray-1].size(); ii++) {
 	if(itray==mRawHitVec[itray-1][ii].tray && ichan==mRawHitVec[itray-1][ii].channel) {
 	  iexist = kTRUE;
