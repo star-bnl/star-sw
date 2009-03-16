@@ -1,30 +1,26 @@
-//#define DEBUG_DbUtil
 #include "StTpcHitMoverMaker.h"
-
+#include "StTpcDb/StTpcDb.h"
 #include "StMessMgr.h"
-
 #include "tables/St_tcl_tphit_Table.h"
-
 #include "StDbUtilities/StMagUtilities.h"
-#include "StDbUtilities/StSectorAligner.h"
-#include "StDbUtilities/StCoordinates.hh"
-
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StEventTypes.h"
 #include "TMath.h"
+ClassImp(StTpcHitMover)
+//________________________________________________________________________________
 StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name),
 						   mAlignSector(kFALSE),
-						   mSectorAligner(NULL),
-						   mExB(NULL) {
+						   mExB(NULL), mTpcTransForm(0) {
   gMessMgr->Info("StTpcHitMover::StTpcHitMover: constructor called");
   setInputDataSetName("tpc_hits");
   setInputHitName("tphit");
   setOutputMode(0);
 }
-
+//________________________________________________________________________________
 StTpcHitMover::~StTpcHitMover() {
   FlushDB();
 }
-
+//________________________________________________________________________________
 Int_t StTpcHitMover::Init() {
 
   TString giHN  = getInputHitName();
@@ -44,20 +40,17 @@ Int_t StTpcHitMover::Init() {
 
   return StMaker::Init();
 }
-
+//________________________________________________________________________________
 Int_t StTpcHitMover::InitRun(Int_t runnumber) {
   FlushDB();
   return kStOk;
 }
-
-
+//________________________________________________________________________________
 void StTpcHitMover::FlushDB() {
-  if (mSectorAligner) delete mSectorAligner; mSectorAligner= 0;
-  if (mExB)           delete mExB;           mExB          = 0;
-
+  SafeDelete(mExB);
+  SafeDelete(mTpcTransForm);
 }
-
-
+//________________________________________________________________________________
 Int_t StTpcHitMover::Make() {
   if (TMath::Abs(m_Mode) & 0x01) {
     // option handling needs some clean up, but right now we stay compatible
@@ -67,6 +60,8 @@ Int_t StTpcHitMover::Make() {
       mExB = new StMagUtilities(gStTpcDb, RunLog, option);
     }
   }
+  if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
+  static StGlobalCoordinate    coorG;
   StEvent* pEvent = dynamic_cast<StEvent*> (GetInputDS("StEvent"));
   if ( pEvent) {
     gMessMgr->Info() << "StTpcHitMover::Make use StEvent " << endm;
@@ -74,7 +69,6 @@ Int_t StTpcHitMover::Make() {
       gMessMgr->Error() << "StTpcHitMover::Make TpcDb has not been instantiated " << endm;
       return kStErr;
     }
-    StTpcCoordinateTransform transform(gStTpcDb);
     StTpcHitCollection* TpcHitCollection = pEvent->tpcHitCollection();
     if (TpcHitCollection) {
       UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
@@ -93,55 +87,8 @@ Int_t StTpcHitMover::Make() {
 		  if (m_Mode < 0 && tpcHit->idTruth() && tpcHit->idTruth() < 10000 && 
 		      tpcHit->qaTruth() > 95) continue; // don't move embedded hits
 		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
-		  static StTpcLocalSectorCoordinate  coorLS;
-		  transform(coorL,coorLS);   // to sector 12
-		  static StTpcLocalSectorAlignedCoordinate  coorLSA;
-		  transform(coorLS,coorLSA); // alignment
-		  static StTpcLocalCoordinate  coorLT;
-		  transform(coorLSA,coorLT); //
-		  static StTpcLocalCoordinate  coorLTD;
-		  coorLTD = coorLT;          // distortions
-		  // ExB corrections
-		  Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
-		  if ( mExB ) {
-		    Float_t posMoved[3];
-		    mExB->UndoDistortion(pos,posMoved);   // input pos[], returns posMoved[]
-		    StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
-		    coorLTD.setPosition(newPos);
-		  }
-		  static StGlobalCoordinate    coorG;
-		  transform(coorLTD,coorG);
+		  moveTpcHit(coorL,coorG);
 		  StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
-#ifdef DEBUG_DbUtil
-		  Float_t x[3] = {tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z()};
-		  Float_t xprime[3];
-		  moveTpcHit(x,xprime,i+1,j+1);
-		  Float_t xA[3] = {xyzF.x() - xprime[0],
-				   xyzF.y() - xprime[1],
-				   xyzF.z() - xprime[2]
-				     };
-		  Double_t dev = xA[0]*xA[0] + xA[1]*xA[1] +  xA[2]*xA[2];
-		  if (dev > 1.e-6) {
-		    static StTpcPadCoordinate coorP;
-		    transform(coorLS,coorP);
-		    StTpcLocalSectorCoordinate  coorLSR; // reference for sector/row/pad
-		    transform(coorP,coorLSR);
-		    cout << "sector/row " << i+1 << "/" << j+1
-			 << "\t xyzFCF\t" << pos[0] << "\t" << pos[1] << "\t" << pos[2] << endl;
-		    cout << "coorL " << coorL << endl;
-		    cout << "coorLS " <<  coorLS <<endl;
-		    cout << "coorP " << coorP << endl;
-		    cout << "coorLSR " << coorLSR <<endl;
-		    cout << "coorLSA " << coorLSA << endl;
-		    cout << "coorLT " << coorLT << endl;
-		    cout << "coorLTD " << coorLTD << endl;
-		    cout << "coorG " << coorG << endl;
-		    cout << "xprime/xA";
-		    for (int i = 0; i < 3; i++)
-		      cout << "\t" << xprime[i] << "/" << xA[i];
-		    cout << "\tdev\t" << dev << endl;
-		  }
-#endif
 		  tpcHit->setPosition(xyzF);
 		}
 	      }
@@ -187,18 +134,18 @@ Int_t StTpcHitMover::Make() {
     x[0] = spc->x;
     x[1] = spc->y;
     x[2] = spc->z;
-
-    moveTpcHit(x,xprime,sector,row);
-
+    StTpcLocalCoordinate  coorL(x[0],x[1],x[2],sector,row);
+    moveTpcHit(coorL,coorG);
+    StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
     if (mOutputMode == 0) {
-      spc->x = xprime[0];
-      spc->y = xprime[1];
-      spc->z = xprime[2];
+      spc->x = coorG.position().x();
+      spc->y = coorG.position().y();
+      spc->z = coorG.position().z();
     }
   }
   return kStOk;
 }
-
+//________________________________________________________________________________
 Int_t StTpcHitMover::Finish() {
   return kStOk;
 }
@@ -225,41 +172,24 @@ void StTpcHitMover::setOutputMode(Int_t mode) {
     mOutputMode = mode;
   }
 }
-
-void StTpcHitMover::moveTpcHit(Float_t pos[3], Float_t posMoved[3],
-			       Short_t sector, Short_t row) {
-  // initialize variables
-  posMoved[0] = pos[0];
-  posMoved[1] = pos[1];
-  posMoved[2] = pos[2];
-
-  // align sector
-  if (mAlignSector) {
-    if (! mSectorAligner) mSectorAligner = new StSectorAligner(gStTpcDb);
-    mSectorAligner->moveHit(pos,posMoved,sector,row);
-    pos[0] = posMoved[0];
-    pos[1] = posMoved[1];
-    pos[2] = posMoved[2];
-  }
-
+//________________________________________________________________________________
+void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &coorG) {
+  StTpcCoordinateTransform &transform = *mTpcTransForm;
+  static StTpcLocalSectorCoordinate  coorLS;
+  transform(coorL,coorLS);   // to sector 12
+  static StTpcLocalSectorAlignedCoordinate  coorLSA;
+  transform(coorLS,coorLSA); // alignment
+  static StTpcLocalCoordinate  coorLT;
+  transform(coorLSA,coorLT); //
+  static StTpcLocalCoordinate  coorLTD;
+  coorLTD = coorLT;          // distortions
   // ExB corrections
+  Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
   if ( mExB ) {
+    Float_t posMoved[3];
     mExB->UndoDistortion(pos,posMoved);   // input pos[], returns posMoved[]
-    pos[0] = posMoved[0];
-    pos[1] = posMoved[1];
-    pos[2] = posMoved[2];
+    StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
+    coorLTD.setPosition(newPos);
   }
-
-  // transformation to global coordinates
-  StTpcCoordinateTransform transform(gStTpcDb);
-
-  StTpcLocalCoordinate local(pos[0],pos[1],pos[2],sector,row);
-  static StGlobalCoordinate global;
-  transform(local,global);
-
-  posMoved[0] = global.position().x();
-  posMoved[1] = global.position().y();
-  posMoved[2] = global.position().z();
+  transform(coorLTD,coorG);
 }
-
-ClassImp(StTpcHitMover)

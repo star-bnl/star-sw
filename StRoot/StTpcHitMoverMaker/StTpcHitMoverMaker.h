@@ -2,9 +2,12 @@
 #define StTpcHitMoverMaker
 
 #include "StMaker.h"
-#include "TString.h"
+#include "StDbUtilities/StTpcLocalCoordinate.hh"
+#include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
+#include "StDbUtilities/StTpcLocalSectorAlignedCoordinate.hh"
+#include "StDbUtilities/StGlobalCoordinate.hh"
 
-class StSectorAligner;
+class StTpcCoordinateTransform;
 class StMagUtilities;
 
 //! StTpcHitMoverMaker - implements corrections on TPC hits
@@ -38,7 +41,7 @@ class StTpcHitMover : public StMaker {
   inline StMagUtilities* getExB() const {return mExB;}
 
   virtual const Char_t *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.6 2008/01/09 19:06:04 jeromel Exp $ built "__DATE__" "__TIME__;
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.7 2009/03/16 14:16:44 fisyak Exp $ built "__DATE__" "__TIME__;
     return cvs;
   }
  protected:
@@ -48,12 +51,10 @@ class StTpcHitMover : public StMaker {
   TString  mInputHitName;
   Bool_t   mAlignSector;
   Int_t    mOutputMode;
+  StTpcCoordinateTransform *mTpcTransForm; 
+  void moveTpcHit(StTpcLocalCoordinate &coorL, StGlobalCoordinate &coorG);
 
-  StSectorAligner*  mSectorAligner; //!
   StMagUtilities*   mExB; //!
-
-  void moveTpcHit(Float_t pos[3], Float_t posMoved[3],
-		  Short_t sector, Short_t row);
 
 
   ClassDef(StTpcHitMover,0)
