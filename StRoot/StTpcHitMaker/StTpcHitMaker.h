@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.7 2009/03/11 18:38:20 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.8 2009/03/16 13:41:45 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.8  2009/03/16 13:41:45  fisyak
+ * Switch to new scheme (avoid legacy) for TPX cluster reading
+ *
  * Revision 1.7  2009/03/11 18:38:20  fisyak
  * Add 22 time bins to account subtracted by Tonko, clean up
  *
@@ -41,35 +44,25 @@
  ***************************************************************************/
 
 #include "StRTSBaseMaker.h"
-
-class StEvent;
-class StTpcCoordinateTransform;
-class StTpcHitCollection;
-class StTpcHit;
-class StDaqTpcClusterInterface;
+#include "TString.h"
 class StTpcDigitalSector;
-
-#ifndef NEW_DAQ_READER
-class evpReader; 
-class rts_reader;
-
-struct tpc_cl;
-#else /* NEW_DAQ_READER */
-struct tpc_t;
-#endif /* NEW_DAQ_READER */
-class StTpcHitCollection;
+class StTpcHit;
+class tpc_cl;
+class daq_cld;
+class tpc_t;
 
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
   enum EReaderType {kUnknown, kLegacyTpc, kLegacyTpx, kStandardTpx};
-  enum EMode {kUndefined, kTpx, kTpxPulser, kTpxPadMonitor, kTpxDumpPxls2Nt, kTpxRaw, kAll};
-#ifndef NEW_DAQ_READER
-  StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker(name), mStEvent(0), kMode(kUndefined),
-    kReaderType(kUnknown) {}
-#else /* NEW_DAQ_READER */
-    StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpc",name), mStEvent(0), kMode(kUndefined),
-        kReaderType(kUnknown), fTpc(0) {}
-#endif /* NEW_DAQ_READER */
+  enum EMode {kUndefined, 
+	      kTpc, kTpx, 
+	      kTpcPulser, kTpxPulser, 
+	      kTpcPadMonitor, kTpxPadMonitor, 
+	      kTpcDumpPxls2Nt, kTpxDumpPxls2Nt, 
+	      kTpcRaw, kTpxRaw, 
+	      kAll};
+    StTpcHitMaker(const char *name="tpc_hits") : StRTSBaseMaker("tpc",name), kMode(kUndefined),
+      kReaderType(kUnknown), mQuery(""), fTpc(0) {}
   virtual ~StTpcHitMaker() {}
 
   Int_t   Init();
@@ -83,27 +76,17 @@ class StTpcHitMaker : public StRTSBaseMaker {
   Int_t   RawTpxData(Int_t sector);
   StTpcDigitalSector *GetDigitalSector(Int_t sector);
  private:
-#ifndef NEW_DAQ_READER
-  static evpReader  *fDaqReader;
-  static rts_reader *fRtsReader;
-#endif /* ! NEW_DAQ_READER */
 
-  StEvent *mStEvent;
   EMode   kMode;
   EReaderType kReaderType;
-#ifdef NEW_DAQ_READER
+  TString mQuery;
   tpc_t   *fTpc;
-#endif /* NEW_DAQ_READER */
   Short_t  ADCs[512];
   UShort_t IDTs[512];
 
  protected:
-#ifndef NEW_DAQ_READER
-    evpReader *InitReader();
-#endif /* ! NEW_DAQ_READER */
-    Int_t MakeSector(Int_t sector);
-    StTpcHitCollection *GetHitCollection();
-    StTpcHit *CreateTpcHit(const StDaqTpcClusterInterface &cluster, Int_t sector, Int_t row);
+  StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
+  StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
     
  public:
 
