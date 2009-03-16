@@ -41,7 +41,12 @@
 #include "StChain.h"
 #include "StEvtHddr.h"
 #include "StMessMgr.h"
+
+#ifdef TMEMSTATinSTAR
 #include "TMemStat.h"
+#else
+#include "StMemStat.h"
+#endif
 
 ClassImp(StChain)
 
@@ -130,14 +135,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Start'"
          << ",StepContext=" << "'MemUsed',"  << "MessageId='='"
-         << ",ProgrammMessage='" << int(TMemStat::Used())
+         << ",ProgrammMessage='" << int(StMemStat::Used())
          << "'" << endm;
          
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Start'"
          << ",StepContext=" << "'ProgSize',"  << "MessageId='='"
-         << ",ProgrammMessage='" << int(TMemStat::ProgSize())
+         << ",ProgrammMessage='" << int(StMemStat::ProgSize())
          << "'" << endm;
 #else
 // Add a record to MySQL tracking Db     
@@ -145,14 +150,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   LOG_QA 
          << "StageID=" << "'1'"
          << ",MessageKey=" << "'MemUsed'" 
-         << ",MessageValue='" << int(TMemStat::Used())
+         << ",MessageValue='" << int(StMemStat::Used())
          << "'" << endm;
          
 //  LOG_QA << "SequenceValue="<<mNTotal 
   LOG_QA 
          << "StageID=" << "'1'"
          << ",MessageKey=" << "'ProgSize'"
-         << ",MessageValue='" << int(TMemStat::ProgSize())
+         << ",MessageValue='" << int(StMemStat::ProgSize())
          << "'" << endm;
 #endif         
 #endif                
@@ -225,14 +230,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Finish'"
          << ",StepContext=" << "'MemUsed',"  << "MessageId='='"
-         << ",ProgrammMessage='" << int(TMemStat::Used())
+         << ",ProgrammMessage='" << int(StMemStat::Used())
          << "'" << endm;
 
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Finish'"
          << ",StepContext=" << "'ProgSize',"  << "MessageId='='"
-         << ",ProgrammMessage='" << int(TMemStat::ProgSize())
+         << ",ProgrammMessage='" << int(StMemStat::ProgSize())
          << "'" << endm;
 #else
 // Add a record to MySQL tracking Db     
@@ -241,14 +246,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   LOG_QA 
          << "StageID=" << "'3'"
          << ",MessageKey=" << "'MemUsed'"  
-         << ",MessageValue='" << int(TMemStat::Used())
+         << ",MessageValue='" << int(StMemStat::Used())
          << "'" << endm;
 
 //   LOG_QA << "SequenceValue="       << mNFailed
   LOG_QA 
          << "StageID=" << "'3'"
          << ",MessageKey=" << "'ProgSize'"
-         << ",MessageValue='" << int(TMemStat::ProgSize())
+         << ",MessageValue='" << int(StMemStat::ProgSize())
          << "'" << endm;
 #endif         
    if (GetLogger()) GetLogger()->Close();
@@ -259,8 +264,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.69 2008/06/03 22:33:14 fisyak Exp $
+// $Id: StChain.cxx,v 1.71 2009/03/16 21:52:24 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.71  2009/03/16 21:52:24  perev
+// TMemStat & StMemStat handling improved
+//
+// Revision 1.70  2009/01/26 14:32:33  fisyak
+// rename TMemStat => StMemStat due clash with ROOT class
+//
 // Revision 1.69  2008/06/03 22:33:14  fisyak
 // Add geometries for y2005g, y2006g and y2007g; use ROOT convention for variable definitions
 //

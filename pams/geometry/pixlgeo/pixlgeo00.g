@@ -11,11 +11,10 @@ Module PIXLGEO00 is the SIMPLIFIED pixel detector
 
       Content  PXMO, PXLA, PLMI, PLAC, PLPS, PXME
 *
-      Structure PXLV {int version, LadVer}
-
-      Structure PXLD {version,   TotalLength,
+      Structure PXLD {version,   SubVersion,
+                      TotalLength,
                       PassiveThk,  ActiveThk, 
-                      LayerThk,  Rin,         Rout}
+                      LayerThk,  Rin,Rout}
 
       Structure PIXG {Layer, NoLadders, r,a,pOffset,aOffset}
       Structure PXBG {version, Length, Rin, Thk}
@@ -23,13 +22,9 @@ Module PIXLGEO00 is the SIMPLIFIED pixel detector
 * -----------------------------------------------------------------------------
 *
 *
-  Fill PXLV                    ! Pixel ladder data
-      Version    =  1.0        ! config version
-      LadVer=1.0               ! Ladder Version
-  EndFill
-
   Fill PXLD                    ! General pixel parameters
       Version    =  1.0        ! version
+      SubVersion =  0.0        ! sub version
       TotalLength=  20.0       ! Overal length of the detector
       PassiveThk =  0.0280     ! Passive silicon Thickness
       ActiveThk  =  0.0020     ! Active  silicon Thickness
@@ -42,7 +37,7 @@ Module PIXLGEO00 is the SIMPLIFIED pixel detector
       Layer      =  1          ! Layer index 
       NoLadders  =  10         ! Number of ladders
       r          =  2.5        ! 1st ladder nominal radius
-      aOffset    =  90.0       ! Angular offset
+      aOffset    = -90.0       ! Angular offset
       pOffset    =  0.0        ! Position offset (shift)
    EndFill
 
@@ -50,7 +45,7 @@ Module PIXLGEO00 is the SIMPLIFIED pixel detector
       Layer      =  2          ! Layer index 
       NoLadders  =  30         ! Number of ladders
       r          =  8.0        ! Ladder radius
-      aOffset    =  90.        ! Angular offset
+      aOffset    = -90.0       ! Angular offset
       pOffset    =  0.0        ! Position offset (shift)
    EndFill
 
@@ -65,8 +60,7 @@ Module PIXLGEO00 is the SIMPLIFIED pixel detector
 * -----------------------------------------------------------------------------
       raddeg=3.14159265/180.0
 * -----------------------------------------------------------------------------
-      USE      PXLV
-      USE      PXLD version=1
+      USE      PXLD Version=1
 
       LadderThk = PXLD_ActiveThk + PXLD_PassiveThk
 
@@ -86,6 +80,7 @@ Block PXMO is the mother of the pixel detector volumes
                  Rmax=PXLD_Rout+PXLD_LayerThk/2.0 _
                  Dz=PXLD_TotalLength/2.0
 
+
 *      Make inner layer
        USE PIXG Layer=1
        Create   PXLA
@@ -98,7 +93,7 @@ endblock
 * -----------------------------------------------------------------------------
 Block PXLA is the mother of a layer
       Material Air
-      Attribute PXLA Seen=1 colo=1
+      Attribute PXLA Seen=0 colo=1
       Shape TUBE Rmin=PIXG_r-PXLD_LayerThk/2.0 _
                  Rmax=PIXG_r+PXLD_LayerThk/2.0 _
                  Dz=PXLD_TotalLength/2.0
@@ -120,21 +115,34 @@ Block PXLA is the mother of a layer
          Position PLMI x=LadderRadius*cos(anglePos) _
                        y=LadderRadius*sin(anglePos) _
                        z=0.0                  _
-                       AlphaZ=-PIXG_aOffset+angle
+                       AlphaZ=angle+PIXG_aOffset
       enddo
 endblock
 * -----------------------------------------------------------------------------
 Block PLMI is the mother of a silicon ladder
       Material  Air
-      Attribute PLMI   Seen=1  colo=6
+      Attribute PLMI   Seen=0  colo=6
       Shape BOX dX=LadderWidth/2.0 _
                 dY=LadderThk/2.0   _
                 Dz=PXLD_TotalLength/2.0
 
       Create   PLAC
-      Position PLAC y=-LadderThk/2.0+PXLD_ActiveThk/2.0
+      Position PLAC x =  0.0 _
+                    y = -1.0*LadderThk/2.0+PXLD_ActiveThk/2.0 _
+                    z =  0.0
       Create   PLPS
-      Position PLPS y=-LadderThk/2.0+PXLD_ActiveThk+PXLD_PassiveThk/2.0
+      Position PLPS x =  0.0 _
+                    y = +1.0*LadderThk/2.0-PXLD_PassiveThk/2.0 _
+                    z =  0.0
+endblock
+* -----------------------------------------------------------------------------
+Block PLPS is the passive layer of the ladder
+      Material  Silicon
+      Attribute PLPS   Seen=1  colo=4
+
+      Shape BOX dX=LadderWidth/2.0      _
+                dY=PXLD_PassiveThk/2.0  _
+                Dz=PXLD_TotalLength/2.0
 endblock
 * -----------------------------------------------------------------------------
 Block PLAC is the active layer of the ladder
@@ -145,22 +153,14 @@ Block PLAC is the active layer of the ladder
       Shape BOX dX=LadderWidth/2.0      _
                 dY=PXLD_ActiveThk/2.0   _
                 Dz=PXLD_TotalLength/2.0
+                
 
-      call      GSTPAR (%Imed,'STRA',1.)
+*      call      GSTPAR (%Imed,'STRA',1.)
 
       HITS    PLAC   Z:.00001:S  Y:.00001:   X:.00001:     Ptot:16:(0,100),
                      cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
                      ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
                    
-endblock
-* -----------------------------------------------------------------------------
-Block PLPS is the passive layer of the ladder
-      Material  Silicon
-      Attribute PLPS   Seen=1  colo=4
-
-      Shape BOX dX=LadderWidth/2.0      _
-                dY=PXLD_PassiveThk/2.0  _
-                Dz=PXLD_TotalLength/2.0
 endblock
 * -----------------------------------------------------------------------------
 *Block PXME is the exoskeleton tube

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.8 2006/11/17 16:54:58 didenko Exp $
+ * $Id: StMcPixelHit.cc,v 2.9 2009/02/06 15:56:46 fisyak Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.9  2009/02/06 15:56:46  fisyak
+ * Jonathan: decoding for upgr15 geometry
+ *
  * Revision 2.8  2006/11/17 16:54:58  didenko
  * fixes from Willie for upgr05
  *
@@ -36,7 +39,7 @@
 #include "StMcPixelHit.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.8 2006/11/17 16:54:58 didenko Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.9 2009/02/06 15:56:46 fisyak Exp $";
 
 #ifdef POOL
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
@@ -75,46 +78,14 @@ ostream&  operator<<(ostream& os, const StMcPixelHit& h)
 unsigned long
 StMcPixelHit::layer() const
 {
-  // 3 modules of 11 ladders each; 8 outer and 3 inner ladder per module
-  // layer 1 : ladder 1 -  9
-  // layer 2 : ladder 1 - 24
-  unsigned long iLadder = (mVolumeId%1000000)/10000;
-  unsigned long iLayer = 0;
-
-  //inner ladders now declared first (numbered 1-3 in sector)
-  if (iLadder<4)
-    {
-      iLayer = 1;
-    }
-  //otherwise, outer layer
-  else
-    {
-      iLayer = 2;
-    }
-
+  unsigned long iLayer=mVolumeId/1000000;
   return iLayer;
 }
 
 unsigned long
 StMcPixelHit::ladder() const
 {
-  // 3 modules of 11 ladders each; 8 outer and 3 inner ladder per module
-  // layer 1 : ladder 1 -  9
-  // layer 2 : ladder 1 - 24
-  unsigned long iModule = mVolumeId/1000000;
   unsigned long iLadder = (mVolumeId%1000000)/10000;
-  //cout<<"volume id: "<<mVolumeId<<endl;
-  //cout<<"iModule: "<<iModule<<endl;
-  //cout<<"iLadder: "<<iLadder<<endl;
-  if (iLadder>3) // outer: 3*(4-11) to 1-24 
-    {
-      iLadder=(iModule-1)*8+iLadder-3;
-    }
-  else
-    {
-      iLadder = (iModule-1)*3 + (iLadder);
-    }
-  //cout<<"final iLadder: "<<iLadder<<endl;
   return iLadder;
 }
 //________________________________________________________________________________

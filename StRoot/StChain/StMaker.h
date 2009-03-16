@@ -29,13 +29,24 @@
 typedef TDataSet::EDataSetPass EDataSetPass;
 #endif
 #endif
+#ifndef __CINT__
+  #if ROOT_VERSION_CODE < ROOT_VERSION(5,20,00)
+    #define TMEMSTATinSTAR 1946
+    class TMemStat;
+    typedef TMemStat StMemStat;
+  #else
+   class StMemStat;
+  #endif
+#else
+    class TMemStat;
+    class StMemStat;
+#endif
 
 class TList;
 class TBrowser;
 class TChain;
 class TTree;
 class TTable;
-class TMemStat;
 class StEvtHddr;
 class TAttr;
 class TFile;
@@ -84,8 +95,8 @@ protected:
    Int_t           m_DebugLevel;        //!Debug level
    Int_t           m_MakeReturn;        //!Make() return flag
    TStopwatch      m_Timer;             //!Timer object
-   TMemStat       *fMemStatMake;        //!TMemStat for Make
-   TMemStat       *fMemStatClear;       //!TMemStat for Clear
+   StMemStat       *fMemStatMake;        //!StMemStat for Make
+   StMemStat       *fMemStatClear;       //!StMemStat for Clear
    Int_t           fStatus;             //!Maker status
    mutable StMessMgr      *fLogger;             // This object logger instance
    mutable StTurnLogger   *fLoggerHold;         // hold the pointer to the previous StMessMgr
@@ -160,6 +171,7 @@ public:
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
    virtual TDatime      GetDateTime() const;
+   virtual TDatime      GetDBTime() const;
    virtual void         SetDateTime(Int_t idat,Int_t itim);// 
    virtual StEvtHddr   *GetEvtHddr() const; //
    virtual Int_t        GetDate()  const ;
@@ -191,7 +203,7 @@ public:
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
    virtual StMaker     *GetMaker (const Char_t *mkname);
-   virtual StMaker     *GetMakerInheritsFrom (const Char_t *mktype);
+   virtual StMaker     *GetMakerInheritsFrom (const Char_t *mktype) const;
    virtual Bool_t       IsActive() {return TestBIT(kActive);}
    virtual StMaker     *Maker (const Char_t *mkname){return GetMaker (mkname);};
 
@@ -244,7 +256,7 @@ public:
 TObject        *GetDirObj(const Char_t *dir) const;
 void            SetDirObj(TObject *obj,const Char_t *dir);
   virtual const Char_t *GetCVS() const
-  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.87 2008/06/03 22:33:15 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.90 2009/03/16 21:52:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const Char_t *logInput,
                                     const StMaker *uppMk=0,
@@ -278,16 +290,16 @@ void        PrintAttr() const;
 class StMakerIter 
 {
 public:
-  StMakerIter(StMaker *mk, Int_t second = 0);
+  StMakerIter(const StMaker *mk, Int_t second = 0);
  ~StMakerIter();
   StMaker *NextMaker();
-  StMaker *GetMaker () const {return fMaker;}
+  StMaker *GetMaker () const {return (StMaker *)fMaker;}
 private:
   Int_t fState;                 //!
   Int_t fSecond;                //!
-  StMaker *fMaker;              //!
+  const StMaker *fMaker;              //!
   StMakerIter *fMakerIter;      //!
-  TDataSet *fItWas;             //!
+  const TDataSet *fItWas;             //!
   TDataSetIter *fIter;          //!
 };  
 class StTestMaker : public StMaker {
@@ -308,8 +320,17 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.87 2008/06/03 22:33:15 fisyak Exp $
+// $Id: StMaker.h,v 1.90 2009/03/16 21:52:24 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.90  2009/03/16 21:52:24  perev
+// TMemStat & StMemStat handling improved
+//
+// Revision 1.89  2009/01/26 14:33:30  fisyak
+// rename TMemStat => StMemStat due clash with ROOT class
+//
+// Revision 1.88  2008/12/21 18:59:43  perev
+// GetDBTim() added
+//
 // Revision 1.87  2008/06/03 22:33:15  fisyak
 // Add geometries for y2005g, y2006g and y2007g; use ROOT convention for variable definitions
 //

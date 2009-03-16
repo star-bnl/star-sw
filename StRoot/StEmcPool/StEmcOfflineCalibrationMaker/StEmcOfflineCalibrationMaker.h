@@ -28,8 +28,7 @@ private:
 	TFile* myFile;
 	TTree* calibTree;
 	TH2* towerSlopes[2]; //[MB][HT]
-	TH2* preshowerSlopes; 
-	TH2* smdSlopes[2]; //[eta][phi] no caps
+	TH3* preshowerSlopes; 
 	StEmcOfflineCalibrationEvent* myEvent;
 	StEmcOfflineCalibrationTrack* myTrack;
 	
@@ -43,29 +42,23 @@ private:
 	
 	//all these random BEMC objects
 	StBemcTables*		mTables;
-	StEmcGeom*		mEmcGeom;
+	StEmcGeom*			mEmcGeom;
 	StEmcPosition*		mEmcPosition;
 	StEmcCollection*	mEmcCollection;
-	StEmcGeom*              mSmdEGeom;
-	StEmcGeom*              mSmdPGeom;
 	
-	//tower info (0==BTOW, 1==BPRS, 2=BSMDE, 3=BSMDP)
+	//tower info (0==BTOW, 1==BPRS)
 	unsigned short	mADC[2][4800];
-	unsigned short mADCSmd[2][18000];
 	float			mPedestal[2][4800];
 	float			mPedRMS[2][4800];
-	float mPedestalSmd[2][18000];
-	float mPedRMSSmd[2][18000];
 	int				mStatus[2][4800];
-	int mStatusSmd[2][18000];
 	unsigned char	mCapacitor[4800]; //only for BPRS
-	unsigned char mCapacitorSmd[2][18000];
 	
-	void getADCs(int det); //1==BTOW, 2==BPRS, 3=BSMDE, 4=BSMDP
-	pair<unsigned short, pair<float,float> > getTrackTower(StMuTrack* track, bool useExitRadius=false, int det=1);
+	void getADCs(int det); //1==BTOW, 2==BPRS
+	pair<unsigned short, pair<float,float> > getTrackTower(StMuTrack* track, bool useExitRadius=false);
 	float getTrackDeltaR(float track_eta, float track_phi, int id);
-	pair<float, float> getTrackDetaDphi(float track_eta, float track_phi, int id, int det);
+	pair<float, float> getTrackDetaDphi(float track_eta, float track_phi, int id);
 	double highestNeighbor(int id);
+	int getCorrectSignalForPRS(int softId);
 	
 	
 public:

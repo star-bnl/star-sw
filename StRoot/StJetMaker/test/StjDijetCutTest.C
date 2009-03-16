@@ -121,7 +121,7 @@ void StjDijetCutTest::testDPhi()
 void StjDijetCutTest::testTrgBHT_notPass()
 {
   StjTrgMock trg;
-  trg._passed = false;
+  trg._pass = false;
 
   StjDijetCutTrgBHT cut(&trg);
 
@@ -138,7 +138,7 @@ void StjDijetCutTest::testTrgBHT_notPass()
 void StjDijetCutTest::testTrgBHT_pass()
 {
   StjTrgMock trg;
-  trg._passed = true;
+  trg._pass = true;
   trg._towers.push_back(1);
 
   StjDijetCutTrgBHT cut(&trg);
@@ -165,7 +165,7 @@ void StjDijetCutTest::testTrgBHT_pass()
 void StjDijetCutTest::testTrgBHT_type()
 {
   StjTrgMock trg;
-  trg._passed = true;
+  trg._pass = true;
   trg._towers.push_back(1);
 
   StjDijetCutTrgBHT cut(&trg);
@@ -183,7 +183,7 @@ void StjDijetCutTest::testTrgBHT_type()
 void StjDijetCutTest::testTrgBHT_detectorId()
 {
   StjTrgMock trg;
-  trg._passed = true;
+  trg._pass = true;
   trg._towers.push_back(1);
 
   StjDijetCutTrgBHT cut(&trg);
@@ -201,7 +201,7 @@ void StjDijetCutTest::testTrgBHT_detectorId()
 void StjDijetCutTest::testTrgBHT_towerId()
 {
   StjTrgMock trg;
-  trg._passed = true;
+  trg._pass = true;
   trg._towers.push_back(1);
 
   StjDijetCutTrgBHT cut(&trg);
@@ -219,7 +219,7 @@ void StjDijetCutTest::testTrgBHT_towerId()
 void StjDijetCutTest::testTrgBJP_notPass()
 {
   StjTrgMock trg;
-  trg._passed = false;
+  trg._pass = false;
 
   StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
 
@@ -236,7 +236,7 @@ void StjDijetCutTest::testTrgBJP_notPass()
 void StjDijetCutTest::testTrgBJP_pass()
 {
   StjTrgMock trg;
-  trg._passed = true;
+  trg._pass = true;
   trg._jetPatches.push_back(2);
 
   StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
@@ -254,7 +254,7 @@ void StjDijetCutTest::testTrgBJP_pass()
 void StjDijetCutTest::testTrgBJP_type()
 {
   StjTrgMock trg;
-  trg._passed = true;
+  trg._pass = true;
   trg._jetPatches.push_back(2);
 
   StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
@@ -272,7 +272,7 @@ void StjDijetCutTest::testTrgBJP_type()
 void StjDijetCutTest::testTrgBJP_detectorId()
 {
   StjTrgMock trg;
-  trg._passed = true;
+  trg._pass = true;
   trg._jetPatches.push_back(2);
 
   StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);
@@ -290,7 +290,7 @@ void StjDijetCutTest::testTrgBJP_detectorId()
 void StjDijetCutTest::testTrgBJP_jetPatchId()
 {
   StjTrgMock trg;
-  trg._passed = true;
+  trg._pass = true;
   trg._jetPatches.push_back(2);
 
   StjDijetCutTrgBJP cut(&trg, new StjTrgBEMCJetPatchTowerIdMap2005);

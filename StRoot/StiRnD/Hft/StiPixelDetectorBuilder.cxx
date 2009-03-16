@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.23 2008/04/03 20:04:20 fisyak Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.24 2009/02/09 02:47:19 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.24  2009/02/09 02:47:19  andrewar
+ * UPGR15 update. Will break backward compatibility with older geometries.
+ *
  * Revision 1.23  2008/04/03 20:04:20  fisyak
  * Straighten out DB access via chairs
  *
@@ -208,16 +211,14 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
   // through loop over StiDetectorBuilder::AverageVolume
   const VolumeMap_t PxlVolumes[] = 
     { 
-      // PXL - only active volumes for now.
- 
-      //{"PXMO","the structure mother volume","HALL_1/CAVE_1/PXMO_1","",""}
-      //{"PSEC","Ladder group mother","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/*","",""}
-      //{"PLMO","Ladder Mother Volume","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/PLMO_1-11/*","",""}
-      {"PLAC","Active ladder volume","HALL_1/CAVE_1/PXMO_1/PSEC_1-3/PLMO_1-11/PLAC_1/*","",""}
+      {"PLAC","Active ladder volume",   "HALL_1/CAVE_1/PXMO_1","",""},
+      {"PLA1","Active ladder volume",   "HALL_1/CAVE_1/PXMO_1","",""},
+      {"PLPS","Inactive ladder volume", "HALL_1/CAVE_1/PXMO_1","",""},
+      {"PLP1","Inactive ladder volume", "HALL_1/CAVE_1/PXMO_1","",""}
     };
 
   Int_t NoPxlVols = sizeof(PxlVolumes)/sizeof(VolumeMap_t);
-  TString pathT("HALL_1/CAVE_1");
+  TString pathT("HALL_1/CAVE_1/PXMO_1");
   gGeoManager->RestoreMasterVolume(); 
   gGeoManager->CdTop();
   TString path("");
@@ -249,16 +250,20 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
       return;
     }
 
-
   // Note:
   // Volumes are currently all planes. I am coding this routine appropriately. Other
   // GEANT shapes (cylinder/sphere) are handled differently, and would require adding cases
   // if such are added to the PXL geometry.
   // AAR - Oct 31, 2006 
-
-    TString nameP(nodeP->GetName());
-
-
+  
+  TString nameP(nodeP->GetName());
+  
+  // Check whether this is an active volume
+  Bool_t ActiveVolume = kFALSE;
+  if (nodeP->GetVolume()->GetMedium()->GetParam(0) == 1) {
+    ActiveVolume = kTRUE;
+  }
+  
   //Material definitions
   TGeoMaterial *matP   = nodeP->GetVolume()->GetMaterial(); 
   Double_t PotI = StiVMCToolKit::GetPotI(matP);
@@ -315,10 +320,11 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     pPlacement->setZcenter(0);
     pPlacement->setLayerRadius(centerVector.perp()); //this is only used for ordering in detector container...
     pPlacement->setLayerAngle(centerVector.phi()); //this is only used for ordering in detector container...
+    /*
     LOG_INFO << " -I- Setting detector center angle: " << centerVector.phi()
 	     << " offset: " << dY << " Ist style offset: "
 	     << centerVector.magnitude()*TMath::Sin(normalVector.phi() - centerVector.phi()) << endm;
-
+    */
     pPlacement->setRegion(StiPlacement::kMidRapidity);
     pPlacement->setNormalRep(normalVector.phi(), r, dY); 
 
@@ -348,10 +354,31 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
 	LOG_INFO <<"StiPixelDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." <<endm;
 	return;
       }
+    p->setName(nameP.Data());
 
-    //p->setIsOn(true); //assume the detector is on if the detector builder is called
+    TString temp=nameP;
+    temp.ReplaceAll("HALL_1/CAVE_1/PXMO_1/","");
+    int q=temp.Index("_");
+    temp.Replace(0,q+1,"");
+    TString numlay=temp(0,1);
+    int layer=numlay.Atoi();
+    q=temp.Index("_");
+    temp.Replace(0,q+1,"");
+    TString numlad=temp(0,2);
+    if(!numlad.IsDigit()) numlad=temp(0,1);
+    int ladder=numlad.Atoi();
+
     p->setIsOn(false);
-    p->setIsActive(new StiPixelIsActiveFunctor);
+
+    p->setIsOn(false);
+    if (ActiveVolume) {
+      p->setIsActive(new StiPixelIsActiveFunctor);
+    }
+    else {
+      p->setIsActive(new StiNeverActiveFunctor);
+      layer=layer+2;
+    }
+
     p->setIsContinuousMedium(false);
     p->setIsDiscreteScatterer(true);
     p->setShape(sh);
@@ -361,50 +388,33 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     p->setMaterial(matS);
     p->setElossCalculator(ElossCalculator);
     p->setHitErrorCalculator(StiPixelHitErrorCalculator::instance());
-
-    int startMoth   = nameP.Index("PSEC_",5) + 5;
-    int startLadder = nameP.Index("PLMO_",5) + 5;
-    TString mother(nameP);
-    mother.Remove(0,startMoth);
-    mother.Remove(1,mother.Length());
-    int motherN=mother.Atoi();
- 
-    TString ladderNme(nameP);
-    ladderNme.Remove(0, startLadder);
-    ladderNme.Remove(2, ladderNme.Length());
-    if( ! ladderNme.IsDigit() ) ladderNme.Remove(1, ladderNme.Length());
-    int ladder = ladderNme.Atoi();
-
-    int layer=0;
-    if(ladder>3)
-      {
-	layer =1;
-	ladder = (motherN-1)*8 + (ladder-3);
-      }
-    else
-      {
-	layer=0;
-	ladder = (motherN-1)*3 + ladder;
-      }
     
-    
-    //ladder=ladder-1; //go from FORTRAN to C++
-
-    //now, correct for screw up in ladder numbering:
-    if(layer == 0)
-      ladder= ( 2*(motherN-1)+1)*3 - ladder;
-    else
-      ladder= ( 2*(motherN-1)+1)*8 - ladder;
-    
-    char name[50];
-    sprintf(name, "Pixel/Layer_%d/Ladder_%d", layer, ladder);
-    p->setName(name);
-    LOG_INFO <<"StiPixelDetectorBuilder: -I- built detector "
-	     << p->getName()
-	     << " from " << nameP.Data()<<" center: "
-	     <<centerVector.phi() <<" normal: "<<normalVector.phi()<<endm;
-  
+    // Adding detector, not sure if setKey is necessary  
+    //if(ActiveVolume){
     p->setKey(1, layer);
     p->setKey(2, ladder);
     add(layer,ladder, p);
+    //}
+    //else add(p);
+    
+    //LOG_INFO << "StiPixelDetectorBuilder: Added detector -I- " << p->getName() << endm;
+    
+    // Whole bunch of debugging information
+    
+    Float_t rad2deg = 180.0/3.1415927;
+    LOG_DEBUG << "===>NEW:PIXEL:pDetector:Name               = " << p->getName()                               << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pDetector:Layer              = " << layer                                      << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pDetector:Ladder             = " << ladder                                     << endm;
+    LOG_DEBUG << "===>NEW:PIXEL:pDetector:Active?            = " << p->isActive()                              << endm;
+    
+
 }

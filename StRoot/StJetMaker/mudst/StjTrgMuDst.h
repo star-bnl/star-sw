@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgMuDst.h,v 1.6 2008/09/22 00:06:49 tai Exp $
+// $Id: StjTrgMuDst.h,v 1.4 2008/08/18 06:37:20 tai Exp $
 #ifndef STJTRGMUDST_H
 #define STJTRGMUDST_H
 
@@ -21,7 +21,7 @@ public:
   int eventId();
   bool hard() const;
   bool soft() const;
-  bool passed() const;
+  bool pass();
   double prescale();
   double vertexZ();
 

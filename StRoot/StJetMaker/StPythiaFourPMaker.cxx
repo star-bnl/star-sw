@@ -1,4 +1,4 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.11 2008/08/22 17:32:52 tai Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.10 2008/08/03 00:26:17 tai Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
@@ -40,7 +40,7 @@ void StPythiaFourPMaker::Clear(Option_t* opt)
 
 Int_t StPythiaFourPMaker::Make()
 {
-  StjMCParticleList theList = _mc->getMCParticleList();
+  StjMCParticleList theList = _mc->getMCPartilceList();
 
   theList = (*_cut)(theList);
 

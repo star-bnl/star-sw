@@ -155,20 +155,18 @@ struct TcdSetup
 
 #define L1_DSM_OBJECT    1
 #define BC1_DSM_OBJECT   2
-#define MIX_DSM_OBJECT   3
+#define MXQ_QT_OBJECT    3
 #define TOF_DSM_OBJECT   4
 #define BCW_DSM_OBJECT   5
 #define BCE_DSM_OBJECT   6
 #define FEQ_QT_OBJECT    7
 #define BBC_DSM_OBJECT   8
-#define FPE_DSM_OBJECT   9
+#define BBQ_QT_OBJECT    9
 #define FMS_DSM_OBJECT  10
 #define QT1_FMS_OBJECT  11
 #define QT2_FMS_OBJECT  12
 #define QT3_FMS_OBJECT  13
 #define QT4_FMS_OBJECT  14
-#define MXQ_QT_OBJECT   15
-#define BBQ_QT_OBJECT   16
 #define TRG_OBJECT 29
 #define DAQ_OBJECT 30           // Reserved for DAQ use..
 #define PHYSICS_BIT_OBJECT 32
@@ -765,6 +763,8 @@ class EvbChooser
   int evbNodes[10][5];          // idx to server by evb/server
   int nevbserv[10];             // nservers by evb
   int nevbs;
+  char evb4token[4096];         
+
 };
 
 #endif

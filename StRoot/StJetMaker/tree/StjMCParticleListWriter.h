@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCParticleListWriter.h,v 1.6 2008/08/22 18:36:32 tai Exp $
+// $Id: StjMCParticleListWriter.h,v 1.5 2008/08/04 06:10:46 tai Exp $
 #ifndef STJMCPARTICLELISTWRITER_H
 #define STJMCPARTICLELISTWRITER_H
 
@@ -42,7 +42,6 @@ private:
   Double_t _e[4096];
   Int_t    _status[4096]; // 1: stable  2: unstable  3: incoming and parton
   Double_t _vertexZ;
-
   ClassDef(StjMCParticleListWriter, 1)
 
 };

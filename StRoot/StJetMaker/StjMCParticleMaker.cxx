@@ -1,4 +1,4 @@
-// $Id: StjMCParticleMaker.cxx,v 1.4 2008/08/22 17:32:52 tai Exp $
+// $Id: StjMCParticleMaker.cxx,v 1.3 2008/08/03 00:26:18 tai Exp $
 #include "StjMCParticleMaker.h"
 
 
@@ -45,7 +45,7 @@ Int_t StjMCParticleMaker::Init()
 
 Int_t StjMCParticleMaker::Make()
 {
-  StjMCParticleList theList = _mc->getMCParticleList();
+  StjMCParticleList theList = _mc->getMCPartilceList();
 
   theList = (*_mcCut)(theList);
 

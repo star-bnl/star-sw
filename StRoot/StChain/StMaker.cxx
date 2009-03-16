@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.210 2008/07/26 01:54:37 perev Exp $
+// $Id: StMaker.cxx,v 1.216 2009/03/16 21:52:24 perev Exp $
 //
 //
 /*!
@@ -42,8 +42,11 @@
 #include "TObjectSet.h"
 #include "StChain.h"
 #include "TTable.h"
-
+#ifdef TMEMSTATinSTAR
 #include "TMemStat.h"
+#else
+#include "StMemStat.h"
+#endif
 #include "TAttr.h"
 #include "StMkDeb.h"
 #include "StMessMgr.h"
@@ -107,7 +110,29 @@ old version of db tags
 {"y2005",       20041030,     0},
 {"y2005b",      20041101,     0},
 {"y2005c",      20041201,     0},
+  Production
+=============
+  MC:
 
+  2000: y1a,y1b,y1h,y2000,year_1a,year_1b
+  2001: y2001,y2001n
+  2002: y2a,y2b,y2x,y2y,year_2a
+  2003: y2003,y2003x 
+  2004: y2004a, y2004c,y2004,y2004y 
+  2005: y2005,y2005x
+  2006: y2006c,y2006  
+  2007: y2007g,y2007  
+  upgr: upgr01, upgr05, upgr06, upgr07, upgr08, upgr09, upgr10, upgr11, upgr13 
+=============
+  rawData:
+  2000: y1h,     y2000a (?), y2000 
+  y2001 
+  y2003 
+  y2004 
+  y2005b,y2005f
+  y2006g,y2006 
+  y2007g,y2007 
+  y2008  
 
 */
 static const DbAlias_t fDbAlias[] = {// geometry  Comment            old 
@@ -159,6 +184,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005e",      20041201,     2, "y2005e",   "y2005d + new SSD"},   //       {"y2005e",      20041201,     0}
   {"y2005f",      20041201,     3, "y2005f",   "y2005e + SSD5/CALB2"},//       {"y2005e",      20041201,     0}
   {"y2005g",      20041201,     4, "y2005g",   "y2005f + SVT dead material"},//{"y2005e",      20041201,     0}
+  {"y2005h",      20041201,     5, "y2005h",   "y2005g + TPC2009 "},
 
   // Dead area in SSD, in version y2006b
   {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane"},
@@ -171,13 +197,17 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
   {"y2007a",      20061105,     1, "y2007a",    "the material of the water channels is now carbon "}, // advertized simu 20061101
   {"y2007g",      20061105,     4, "y2007g",   "y2007b + SVT dead material"},
+  {"y2007h",      20061105,     5, "y2007h",   "y2007g + TPC2009"},
 
   // SVT/SSD is out
-  {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone in separate SCON"},
+  {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone is lost"},
+  {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
+  // 
+  {"y2009",       20081215,     0, "y2009",    "Practically place holder yet(VP)"},
 
   // development tags
-  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
-  {"complete",    20190101,     1, "complete", "non-production"},
+  //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
+  //  {"complete",    20190101,     1, "complete", "non-production"},
   //  {"ist1",        20190101,     2, "ist1",     "non-production"},
   //  {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
   {"upgr01",      20190101,     4, "upgr01",   ""},
@@ -195,6 +225,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr13",      20190101,    16, "upgr13",   ""},
   {"upgr14",      20190101,    17, "upgr14",   ""},
   {"upgr15",      20190101,    18, "upgr15",   ""},
+  {"upgr16",      20190101,    19, "upgr16",   ""},
+  {"upgr17",      20190101,    20, "upgr17",   ""},
   // Future development:
   {"simpletpc",   20200102,    16, "simpletpc",""},
   {"upgr20",      20200102,    17, "upgr20",    "y2007 +  one TOF"}, // advertized simu 20061101
@@ -616,7 +648,7 @@ TDataSet *StMaker::GetDataBase(const Char_t *logInput,const TDatime *td)
   return ds;
 }
 //______________________________________________________________________________
-StMaker *StMaker::GetMakerInheritsFrom (const Char_t *mktype)
+StMaker *StMaker::GetMakerInheritsFrom (const Char_t *mktype) const
 {
   TURN_LOGGER(this);
   StMaker  *mk = 0;
@@ -710,9 +742,9 @@ Int_t StMaker::Init()
      }
       TString ts1(maker->ClassName()); ts1+="("; ts1+=maker->GetName(); ts1+=")::";
       TString ts2 = ts1; ts2+="Make ";
-      maker->fMemStatMake  = new TMemStat(ts2);
+      maker->fMemStatMake  = new StMemStat(ts2);
       ts2 = ts1; ts2+="Clear";
-      maker->fMemStatClear = new TMemStat(ts2);
+      maker->fMemStatClear = new StMemStat(ts2);
       
       if ( maker->Init()) {
 #ifdef STAR_LOGGER 
@@ -760,10 +792,10 @@ void StMaker::StartMaker()
   else              
     if (GetDebug()) {
 #ifdef STAR_LOGGER 
-        LOG_DEBUG << "StMaker::StartMaker : cannot use TMemStat (no Init()) in [" << 
+        LOG_DEBUG << "StMaker::StartMaker : cannot use StMemStat (no Init()) in [" << 
               GetName() << "]" << endm;
 #else        
-        printf("StMaker::StartMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
+        printf("StMaker::StartMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
 #endif        
      }
 
@@ -786,12 +818,12 @@ void StMaker::EndMaker(Int_t ierr)
   else               
     if (GetDebug()) {
 #ifdef STAR_LOGGER     
-     LOG_DEBUG << "StMaker::EndMaker : cannot use TMemStat (no Init()) in [" 
+     LOG_DEBUG << "StMaker::EndMaker : cannot use StMemStat (no Init()) in [" 
                <<   GetName() 
                << "]" 
                << endm ;    
 #else     
-        printf("StMaker::EndMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
+        printf("StMaker::EndMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
 #endif
      }
 
@@ -913,7 +945,7 @@ Int_t StMaker::Finish()
    }  
 //VP   Printf("=================================================================================\n");
    
-   if (GetParent()==0) TMemStat::Summary();
+   if (GetParent()==0) StMemStat::Summary();
    return nerr;
 }
 
@@ -1101,6 +1133,15 @@ TDatime  StMaker::GetDateTime() const
    StEvtHddr *hd = GetEvtHddr();
    return hd->GetDateTime();
 }
+//_____________________________________________________________________________
+TDatime  StMaker::GetDBTime() const 
+{    
+  StMaker  *mk = GetMakerInheritsFrom("St_db_Maker");
+  assert(mk);
+  return mk->GetDateTime();
+}
+
+
 //_____________________________________________________________________________
 Int_t    StMaker::GetDate()  const {return GetDateTime().GetDate();}
 //_____________________________________________________________________________
@@ -1440,7 +1481,7 @@ static void doPs(const Char_t *who, const Char_t *where)
 #else
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
 #endif    
-  TMemStat::PrintMem(0);
+  StMemStat::PrintMem(0);
 #if 0
 #ifdef STAR_LOGGER_BUG  
   LOG_QA << endm;
@@ -1685,7 +1726,7 @@ static const Char_t *retCodes[] = {
 }
 
 //_____________________________________________________________________________
-StMakerIter::StMakerIter(StMaker *mk,Int_t secondary)
+StMakerIter::StMakerIter(const StMaker *mk,Int_t secondary)
 {
   fState = 0;
   fMaker = mk;
@@ -1728,7 +1769,7 @@ AGAIN: switch (fState) {
       delete fMakerIter; fMakerIter=0;
       delete fIter; 	 fIter = 0;
       fState = 3;
-      return fMaker;
+      return (StMaker*)fMaker;
 
     case 3:					// go upper when started
       if (fSecond) return 0;
@@ -1853,6 +1894,24 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.216  2009/03/16 21:52:24  perev
+// TMemStat & StMemStat handling improved
+//
+// Revision 1.215  2009/03/13 21:52:15  perev
+// y2005h and y2007h added
+//
+// Revision 1.214  2009/01/26 14:32:49  fisyak
+// rename TMemStat => StMemStat due clash with ROOT class
+//
+// Revision 1.213  2009/01/04 20:41:26  perev
+// fix , alias must be y2009, not 8
+//
+// Revision 1.212  2008/12/31 02:11:27  perev
+// y2009
+//
+// Revision 1.211  2008/12/21 18:59:33  perev
+// GetDBTim() added
+//
 // Revision 1.210  2008/07/26 01:54:37  perev
 // add y2007a
 //

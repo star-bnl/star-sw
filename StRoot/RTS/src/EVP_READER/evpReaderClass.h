@@ -53,7 +53,7 @@ class evpReader {
 
   int isevp;   // backward compatability...
   int IsEvp() { return (input_type == live); };
-
+  rts_reader *rts() const;
 
   // These variables describe the event storage
   //
@@ -199,6 +199,7 @@ class MemMap {
   int fd;
 };
   
+inline  rts_reader *evpReader::rts() const { return rts_rr;}
 
 
 #endif
