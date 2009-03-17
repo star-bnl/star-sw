@@ -51,15 +51,17 @@
 2,h36_tpc_sec22,Sec. 22 charge per pad,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
 2,h37_tpc_sec23,Sec. 23 charge per pad,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
 2,h38_tpc_sec24,Sec. 24 charge per pad,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
-2,h39_svt_NPixPed,Number of Pixels above Pedestal,432,0.5,432.5,100,0.,30000.,0xffffffff,0xffffffff
-2,h40_svt_NPix100,Number of Pixels above ADC 100,432,0.5,432.5,100,0.,30000.,0xffffffff,0xffffffff
-2,h41_svt_MeanAnode,Mean Anode Number,432,0.5,432.5,240,0.5,240.5,0xffffffff,0xffffffff
-2,h42_svt_MeanTimeBucket,Mean Time Bucket,432,0.5,432.5,128,0.5,127.5,0xffffffff,0xffffffff
+// GVB: svt hists unneeded, setting to 1 bin
+2,h39_svt_NPixPed,Number of Pixels above Pedestal,1,0.5,432.5,1,0.,30000.,0xffffffff,0xffffffff
+2,h40_svt_NPix100,Number of Pixels above ADC 100,1,0.5,432.5,1,0.,30000.,0xffffffff,0xffffffff
+2,h41_svt_MeanAnode,Mean Anode Number,1,0.5,432.5,1,0.5,240.5,0xffffffff,0xffffffff
+2,h42_svt_MeanTimeBucket,Mean Time Bucket,1,0.5,432.5,1,0.5,127.5,0xffffffff,0xffffffff
 1,h43_tpc_OccPulser,TPC Occupancy (in %) Pulsers,100,0.,100.,0xffffffff,0xffffffff
 1,h44_tpc_OccLaser,TPC Occupancy (in %) Lasers,100,0.,100.,0xffffffff,0xffffffff
-1,h45_svt,SVT Tot Occupancy (in %) Physics,100,0.,20.,0xffffffff,0xffffffff
-1,h46_svt_OccPulser,SVT Tot Occupancy (in %) Pulsers,100,0.,20.,0xffffffff,0xffffffff
-1,h47_svt_OccLaser,SVT Tot Occupancy (in %) Lasers,100,0.,20.,0xffffffff,0xffffffff
+// GVB: svt hists unneeded, setting to 1 bin
+1,h45_svt,SVT Tot Occupancy (in %) Physics,1,0.,20.,0xffffffff,0xffffffff
+1,h46_svt_OccPulser,SVT Tot Occupancy (in %) Pulsers,1,0.,20.,0xffffffff,0xffffffff
+1,h47_svt_OccLaser,SVT Tot Occupancy (in %) Lasers,1,0.,20.,0xffffffff,0xffffffff
 1,h48_ftp,log of Total FTPC Charge,30,0.,6.,0xffffffff,0xffffffff
 1,h49_ftp,FTPC Occupancy (in %),100,0.,100.,0xffffffff,0xffffffff
 1,h50_ftp_OccPulser,FTPC Occupancy (in %) Pulsers,100,0.,100.,0xffffffff,0xffffffff
@@ -125,12 +127,12 @@
 1,h92_zdc_unatt_east,ZDC Unattenuated East (Channel 4),50,0.,250.,0xffffffff,0xffffffff
 1,h93_zdc_unatt_west,ZDC Unattenuated West (Channel 0),50,0.,250.,0xffffffff,0xffffffff
 //--> Takenout as per Blair's request on April 2nd 2006
-2,h94_tpc_sec2_laser,Sec. 2 charge per pad LASER,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
-2,h95_tpc_sec7_laser,Sec. 7 charge per pad LASER,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
-2,h96_tpc_sec12_laser,Sec. 12 charge per pad LASER,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
-2,h97_tpc_sec14_laser,Sec. 14 charge per pad LASER,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
-2,h98_tpc_sec20_laser,Sec. 20 charge per pad LASER,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
-2,h99_tpc_sec24_laser,Sec. 24 charge per pad LASER,182,0.,182.,45,0.,45.,0xffffffff,0xffffffff
+2,h94_tpc_sec2_laser,Sec. 2 charge per pad LASER,1,0.,182.,1,0.,45.,0xffffffff,0xffffffff
+2,h95_tpc_sec7_laser,Sec. 7 charge per pad LASER,1,0.,182.,1,0.,45.,0xffffffff,0xffffffff
+2,h96_tpc_sec12_laser,Sec. 12 charge per pad LASER,1,0.,182.,1,0.,45.,0xffffffff,0xffffffff
+2,h97_tpc_sec14_laser,Sec. 14 charge per pad LASER,1,0.,182.,1,0.,45.,0xffffffff,0xffffffff
+2,h98_tpc_sec20_laser,Sec. 20 charge per pad LASER,1,0.,182.,1,0.,45.,0xffffffff,0xffffffff
+2,h99_tpc_sec24_laser,Sec. 24 charge per pad LASER,1,0.,182.,1,0.,45.,0xffffffff,0xffffffff
 //<--
 2,h100_l3_zdc_zvertex,ZDC Vertex vs L3 Vertex,100,-200.,200.,100,-100.,100.,0xffffffff,0xffffffff
 2,h101_l3_x_y,L3 Vertex Y vs X,100,-10.,10.,100,-10.,10.,0xffffffff,0xffffffff
@@ -270,88 +272,81 @@
 2,h230_l3_bbc_zvertex,BBC Vertex vs L3 Vertex,100,-100.,100.,100,-100.,100.,0xffffffff,0xffffffff
 
 // REMOVED HISTOGRAMS. CAN BE REUSED AAPSUAIDE 2005
-2,h231_bemc_TDC_status,BEMC TDC Status (0=total 1=OK 2=Not Installed 3=Corrupted),5,-0.5,4.5,30,-0.5,29.5,0xffffffff,0xffffffff
-1,h232_bemc_BTOW_Corruption,BEMC TDC corruption frequency (0=total 1=OK 2=Not Installed 3=Corrupted),5,-0.5,4.5,0xffffffff,0xffffffff
-2,h233_bemc_SMD_status,BEMC SMD Status (0=total 1=OK 2=Not Installed 3=Corrupted),5,-0.5,4.5,8,-0.5,7.5,0xffffffff,0xffffffff
-2,h234_bemc_btow_spectra_1,BEMC tower spectrum  0 < TDC < 10 (X = 160*TDC + index), 16,  -0.5,1599.5,10,0,1000,0xffffffff,0xffffffff
-2,h235_bemc_btow_spectra_2,BEMC tower spectrum 10 < TDC < 20 (X = 160*TDC + index), 16,1599.5,3199.5,10,0,1000,0xffffffff,0xffffffff
-2,h236_bemc_btow_spectra_3,BEMC tower spectrum 20 < TDC < 30 (X = 160*TDC + index), 16,3199.5,4799.5,10,0,1000,0xffffffff,0xffffffff
-1,h237_bsmd_smd_spectra,BEMC SMD total ADC,25,100000.,4000000.,0xffffffff,0xffffffff
-2,h238_bsmd_smd_capacitor,BEMC SMD capacitor distribution,12,-0.5,127.5,8,-0.5,7.5,0xffffffff,0xffffffff
-2,h239_bsmd_smd_sum,BEMC SMD total ADC per fiber,25,100000.,1000000.,8,-0.5,7.5,0xffffffff,0xffffffff
-1,h240_bsmd_psd_spectra,BEMC PSD total ADC,25,100000.,4000000.,0xffffffff,0xffffffff
-2,h241_bsmd_psd_capacitor,BEMC PSD capacitor distribution,18,-0.5,127.5,4,-0.5,3.5,0xffffffff,0xffffffff
-2,h242_bsmd_psd_sum,BEMC PSD total ADC per fiber,25,100000.,1000000.,4,-0.5,3.5,0xffffffff,0xffffffff
-2,h243_bemc_HT_spectra,BEMC High Tower spectrum, 30,-0.5,299.5,64,-0.5,63.5,0xffffffff,0xffffffff
-2,h244_bemc_PA_spectra,BEMC Patch Sum spectrum, 30,-0.5,299.5,64,-0.5,63.5,0xffffffff,0xffffffff
-2,h245_bemc_HTMAX_spectra,BEMC Maximum High Tower spectrum, 30,-0.5,299.5,64,-0.5,63.5,0xffffffff,0xffffffff
-2,h246_bemc_PAMAX_spectra,BEMC Maximum Patch Sum spectrum, 30,-0.5,299.5,64,-0.5,63.5,0xffffffff,0xffffffff
-1,h247_bemc_HTMAX_dist,BEMC Maximum High Tower distribution, 30,-0.5,299.5,0xffffffff,0xffffffff
-1,h248_bemc_PAMAX_dist,BEMC Maximum Patch Sum distribution, 30,-0.5,299.5,0xffffffff,0xffffffff
-2,h249_bemc_PSD_status,BEMC PSD Status (0=total 1=OK 2=Not Installed 3=Corrupted),5,-0.5,4.5,4,-0.5,3.5,0xffffffff,0xffffffff
+2,h231_bemc_TDC_status,BEMC TDC Status (0=total 1=OK 2=Not Installed 3=Corrupted),1,-0.5,4.5,1,-0.5,29.5,0xffffffff,0xffffffff
+1,h232_bemc_BTOW_Corruption,BEMC TDC corruption frequency (0=total 1=OK 2=Not Installed 3=Corrupted),1,-0.5,4.5,0xffffffff,0xffffffff
+2,h233_bemc_SMD_status,BEMC SMD Status (0=total 1=OK 2=Not Installed 3=Corrupted),1,-0.5,4.5,1,-0.5,7.5,0xffffffff,0xffffffff
+2,h234_bemc_btow_spectra_1,BEMC tower spectrum  0 < TDC < 10 (X = 160*TDC + index), 1,  -0.5,1599.5,1,0,1000,0xffffffff,0xffffffff
+2,h235_bemc_btow_spectra_2,BEMC tower spectrum 10 < TDC < 20 (X = 160*TDC + index), 1,1599.5,3199.5,1,0,1000,0xffffffff,0xffffffff
+2,h236_bemc_btow_spectra_3,BEMC tower spectrum 20 < TDC < 30 (X = 160*TDC + index), 1,3199.5,4799.5,1,0,1000,0xffffffff,0xffffffff
+1,h237_bsmd_smd_spectra,BEMC SMD total ADC,1,100000.,4000000.,0xffffffff,0xffffffff
+2,h238_bsmd_smd_capacitor,BEMC SMD capacitor distribution,1,-0.5,127.5,1,-0.5,7.5,0xffffffff,0xffffffff
+2,h239_bsmd_smd_sum,BEMC SMD total ADC per fiber,1,100000.,1000000.,1,-0.5,7.5,0xffffffff,0xffffffff
+1,h240_bsmd_psd_spectra,BEMC PSD total ADC,1,100000.,4000000.,0xffffffff,0xffffffff
+2,h241_bsmd_psd_capacitor,BEMC PSD capacitor distribution,1,-0.5,127.5,1,-0.5,3.5,0xffffffff,0xffffffff
+2,h242_bsmd_psd_sum,BEMC PSD total ADC per fiber,1,100000.,1000000.,1,-0.5,3.5,0xffffffff,0xffffffff
+2,h243_bemc_HT_spectra,BEMC High Tower spectrum, 1,-0.5,299.5,1,-0.5,63.5,0xffffffff,0xffffffff
+2,h244_bemc_PA_spectra,BEMC Patch Sum spectrum, 1,-0.5,299.5,1,-0.5,63.5,0xffffffff,0xffffffff
+2,h245_bemc_HTMAX_spectra,BEMC Maximum High Tower spectrum, 1,-0.5,299.5,1,-0.5,63.5,0xffffffff,0xffffffff
+2,h246_bemc_PAMAX_spectra,BEMC Maximum Patch Sum spectrum, 1,-0.5,299.5,1,-0.5,63.5,0xffffffff,0xffffffff
+1,h247_bemc_HTMAX_dist,BEMC Maximum High Tower distribution, 1,-0.5,299.5,0xffffffff,0xffffffff
+1,h248_bemc_PAMAX_dist,BEMC Maximum Patch Sum distribution, 1,-0.5,299.5,0xffffffff,0xffffffff
+2,h249_bemc_PSD_status,BEMC PSD Status (0=total 1=OK 2=Not Installed 3=Corrupted),1,-0.5,4.5,1,-0.5,3.5,0xffffffff,0xffffffff
 // END OF REMOVAL
 
 // SSD
 // MOVED FOR SSD BY B.HIPPOLYTE (12/2004)
-1,h250_ssd_evsize,log of SSD Buffer Size,50,0.,10.,0xffffffff,0xffffffff
-1,h251_ssd_frac,SSD Event Size Fraction (%),50,0.,100.,0xffffffff,0xffffffff
-1,h252_ssd_lad_occ,Mean Ladder Occupancy (%) ,40,1.,41.,0xffffffff,0xffffffff
-2,h253_ssd_mod_occ,Mean Module Occupancy (%) ,40,1.,41.,16,1.,17.,0xffffffff,0xffffffff
-1,h254_ssd_lad_sig_occ,Mean Ladder Occupancy (%) for signal,40,1.,41.,0xffffffff,0xffffffff
-2,h255_ssd_mod_sig_occ,Mean Module Occupancy (%) for signal,40,1.,41.,16,1.,17.,0xffffffff,0xffffffff
-1,h256_ssd_lad_pulse,Mean pulse per strip for ladders,40,1.,41.,0xffffffff,0xffffffff
-2,h257_ssd_mod_pulse,Mean pulse per strip for modules,40,1.,41.,16,1.,17.,0xffffffff,0xffffffff
+1,h250_ssd_evsize,log of SSD Buffer Size,1,0.,10.,0xffffffff,0xffffffff
+1,h251_ssd_frac,SSD Event Size Fraction (%),1,0.,100.,0xffffffff,0xffffffff
+1,h252_ssd_lad_occ,Mean Ladder Occupancy (%) ,1,1.,41.,0xffffffff,0xffffffff
+2,h253_ssd_mod_occ,Mean Module Occupancy (%) ,1,1.,41.,1,1.,17.,0xffffffff,0xffffffff
+1,h254_ssd_lad_sig_occ,Mean Ladder Occupancy (%) for signal,1,1.,41.,0xffffffff,0xffffffff
+2,h255_ssd_mod_sig_occ,Mean Module Occupancy (%) for signal,1,1.,41.,1,1.,17.,0xffffffff,0xffffffff
+1,h256_ssd_lad_pulse,Mean pulse per strip for ladders,1,1.,41.,0xffffffff,0xffffffff
+2,h257_ssd_mod_pulse,Mean pulse per strip for modules,1,1.,41.,1,1.,17.,0xffffffff,0xffffffff
 
 // REMOVED BY AAPSUAIDE 11/2004
-// 1,h250_bemc_crate_20,BEMC total ADC histogram TDC 19,1,0.,20000,0xffffffff,0xffffffff
-// 1,h251_bemc_crate_21,BEMC total ADC histogram TDC 20,1,0.,20000,0xffffffff,0xffffffff
-// 1,h252_bemc_crate_22,BEMC total ADC histogram TDC 21,1,0.,20000,0xffffffff,0xffffffff
-// 1,h253_bemc_crate_23,BEMC total ADC histogram TDC 22,1,0.,20000,0xffffffff,0xffffffff
-// 1,h254_bemc_crate_24,BEMC total ADC histogram TDC 23,1,0.,20000,0xffffffff,0xffffffff
-// 1,h255_bemc_crate_25,BEMC total ADC histogram TDC 24,1,0.,20000,0xffffffff,0xffffffff
-// 1,h256_bemc_crate_26,BEMC total ADC histogram TDC 25,1,0.,20000,0xffffffff,0xffffffff
-// 1,h257_bemc_crate_27,BEMC total ADC histogram TDC 26,1,0.,20000,0xffffffff,0xffffffff
 1,h258_bemc_crate_28,BEMC total ADC histogram TDC 27,1,0.,20000,0xffffffff,0xffffffff
 1,h259_bemc_crate_29,BEMC total ADC histogram TDC 28,1,0.,20000,0xffffffff,0xffffffff
 1,h260_bemc_crate_30,BEMC total ADC histogram TDC 29,1,0.,20000,0xffffffff,0xffffffff
 1,h261_bemc_TotalADC,BEMC total ADC distribution,1,0.,300000.,0xffffffff,0xffffffff
 1,h262_bemc_Status,BEMC Global status: 0=total; 1=good; 2=bad,1,-1.5,3.5,0xffffffff,0xffffffff
-2,h263_bemc_CratesStatus,BEMC TDC  status: 0=total; 1=good; 2=bad,1,-1.5,3.5,30,-0.5,29.5,0xffffffff,0xffffffff
+2,h263_bemc_CratesStatus,BEMC TDC  status: 0=total; 1=good; 2=bad,1,-1.5,3.5,1,-0.5,29.5,0xffffffff,0xffffffff
 2,h264_bsmd_Capacitor,BSMD Capacitor Distribution,1,-0.5,7.5,1,-0.5,127.5,0xffffffff,0xffffffff
 1,h265_bsmd_TotalADC,BSMD Total ADC Distribution,1,500000.,2500000.,0xffffffff,0xffffffff
 //END OF REMOVAL
 
 1,h266_bbc_bunchid,Bunch Crossing Counter,120,-0.5,119.5,0xffffffff,0xffffffff
-1,h267_svt_West,SVT West Occupancy (in %) Physics,100,0.,20.,0xffffffff,0xffffffff
-1,h268_svt_West_OccPulser,SVT West Occupancy (in %) Pulsers,100,0.,20.,0xffffffff,0xffffffff
-1,h269_svt_West_OccLaser,SVT West Occupancy (in %) Lasers,100,0.,20.,0xffffffff,0xffffffff
-1,h270_svt_East,SVT East Occupancy (in %) Physics,100,0.,20.,0xffffffff,0xffffffff
-1,h271_svt_East_OccPulser,SVT East Occupancy (in %) Pulsers,100,0.,20.,0xffffffff,0xffffffff
-1,h272_svt_East_OccLaser,SVT East Occupancy (in %) Lasers,100,0.,20.,0xffffffff,0xffffffff
-1,h273_svt_West_OccRec1,SVT Receiver1 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h274_svt_West_OccRec2,SVT Receiver2 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h275_svt_West_OccRec3,SVT Receiver3 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h276_svt_West_OccRec4,SVT Receiver4 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h277_svt_West_OccRec5,SVT Receiver5 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h278_svt_West_OccRec6,SVT Receiver6 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h279_svt_West_OccRec7,SVT Receiver7 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h280_svt_West_OccRec8,SVT Receiver8 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h281_svt_West_OccRec9,SVT Receiver9 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h282_svt_West_OccRec10,SVT Receiver10 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h283_svt_West_OccRec11,SVT Receiver11 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h284_svt_West_OccRec12,SVT Receiver12 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h285_svt_East_OccRec13,SVT Receiver13 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h286_svt_East_OccRec14,SVT Receiver14 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h287_svt_East_OccRec15,SVT Receiver15 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h288_svt_East_OccRec16,SVT Receiver16 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h289_svt_East_OccRec17,SVT Receiver17 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h290_svt_East_OccRec18,SVT Receiver18 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h291_svt_East_OccRec19,SVT Receiver19 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h292_svt_East_OccRec20,SVT Receiver20 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h293_svt_East_OccRec21,SVT Receiver21 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h294_svt_East_OccRec22,SVT Receiver22 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h295_svt_East_OccRec23,SVT Receiver23 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
-1,h296_svt_East_OccRec24,SVT Receiver24 Occupancy (in %) ,100,0.,20.,0xffffffff,0xffffffff
+// GVB: svt hists unneeded, setting to 1 bin
+1,h267_svt_West,SVT West Occupancy (in %) Physics,1,0.,20.,0xffffffff,0xffffffff
+1,h268_svt_West_OccPulser,SVT West Occupancy (in %) Pulsers,1,0.,20.,0xffffffff,0xffffffff
+1,h269_svt_West_OccLaser,SVT West Occupancy (in %) Lasers,1,0.,20.,0xffffffff,0xffffffff
+1,h270_svt_East,SVT East Occupancy (in %) Physics,1,0.,20.,0xffffffff,0xffffffff
+1,h271_svt_East_OccPulser,SVT East Occupancy (in %) Pulsers,1,0.,20.,0xffffffff,0xffffffff
+1,h272_svt_East_OccLaser,SVT East Occupancy (in %) Lasers,1,0.,20.,0xffffffff,0xffffffff
+1,h273_svt_West_OccRec1,SVT Receiver1 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h274_svt_West_OccRec2,SVT Receiver2 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h275_svt_West_OccRec3,SVT Receiver3 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h276_svt_West_OccRec4,SVT Receiver4 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h277_svt_West_OccRec5,SVT Receiver5 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h278_svt_West_OccRec6,SVT Receiver6 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h279_svt_West_OccRec7,SVT Receiver7 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h280_svt_West_OccRec8,SVT Receiver8 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h281_svt_West_OccRec9,SVT Receiver9 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h282_svt_West_OccRec10,SVT Receiver10 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h283_svt_West_OccRec11,SVT Receiver11 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h284_svt_West_OccRec12,SVT Receiver12 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h285_svt_East_OccRec13,SVT Receiver13 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h286_svt_East_OccRec14,SVT Receiver14 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h287_svt_East_OccRec15,SVT Receiver15 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h288_svt_East_OccRec16,SVT Receiver16 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h289_svt_East_OccRec17,SVT Receiver17 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h290_svt_East_OccRec18,SVT Receiver18 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h291_svt_East_OccRec19,SVT Receiver19 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h292_svt_East_OccRec20,SVT Receiver20 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h293_svt_East_OccRec21,SVT Receiver21 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h294_svt_East_OccRec22,SVT Receiver22 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h295_svt_East_OccRec23,SVT Receiver23 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
+1,h296_svt_East_OccRec24,SVT Receiver24 Occupancy (in %) ,1,0.,20.,0xffffffff,0xffffffff
 
 1,h297_trgwd,TriggerId,10,0.0,10.0,0xffffffff,0xffffffff
 1,h298_trgwd0_time,TriggerId vs time,30,0.0,30.0,0xffffffff,0xffffffff
@@ -368,41 +363,27 @@
 
 // SSD
 // ADDED FOR SSD BY B.HIPPOLYTE (12/2004)
-1,h309_ssd_lad01_chm,Charge Matching Ladder 1, 40,0.,2.,0xffffffff,0xffffffff
-1,h310_ssd_lad02_chm,Charge Matching Ladder 2, 40,0.,2.,0xffffffff,0xffffffff
-1,h311_ssd_lad03_chm,Charge Matching Ladder 3, 40,0.,2.,0xffffffff,0xffffffff
-1,h312_ssd_lad04_chm,Charge Matching Ladder 4, 40,0.,2.,0xffffffff,0xffffffff
-1,h313_ssd_lad05_chm,Charge Matching Ladder 5, 40,0.,2.,0xffffffff,0xffffffff
-1,h314_ssd_lad06_chm,Charge Matching Ladder 6, 40,0.,2.,0xffffffff,0xffffffff
-1,h315_ssd_lad07_chm,Charge Matching Ladder 7, 40,0.,2.,0xffffffff,0xffffffff
-1,h316_ssd_lad08_chm,Charge Matching Ladder 8, 40,0.,2.,0xffffffff,0xffffffff
-1,h317_ssd_lad09_chm,Charge Matching Ladder 9, 40,0.,2.,0xffffffff,0xffffffff
-1,h318_ssd_lad10_chm,Charge Matching Ladder 10,40,0.,2.,0xffffffff,0xffffffff
-1,h319_ssd_lad11_chm,Charge Matching Ladder 11,40,0.,2.,0xffffffff,0xffffffff
-1,h320_ssd_lad12_chm,Charge Matching Ladder 12,40,0.,2.,0xffffffff,0xffffffff
-1,h321_ssd_lad13_chm,Charge Matching Ladder 13,40,0.,2.,0xffffffff,0xffffffff
-1,h322_ssd_lad14_chm,Charge Matching Ladder 14,40,0.,2.,0xffffffff,0xffffffff
-1,h323_ssd_lad15_chm,Charge Matching Ladder 15,40,0.,2.,0xffffffff,0xffffffff
-1,h324_ssd_lad16_chm,Charge Matching Ladder 16,40,0.,2.,0xffffffff,0xffffffff
-1,h325_ssd_lad17_chm,Charge Matching Ladder 17,40,0.,2.,0xffffffff,0xffffffff
-1,h326_ssd_lad18_chm,Charge Matching Ladder 18,40,0.,2.,0xffffffff,0xffffffff
-1,h327_ssd_lad19_chm,Charge Matching Ladder 19,40,0.,2.,0xffffffff,0xffffffff
-1,h328_ssd_lad20_chm,Charge Matching Ladder 20,40,0.,2.,0xffffffff,0xffffffff
-
-// -- AAPSUAIDE - REMOVED in 11/2004
-// 1,h317_bsmd_totAdcFiber_0,BSMD total ADC TDC 0,1,83333.,625000.,0xffffffff,0xffffffff
-// 1,h318_bsmd_totAdcFiber_1,BSMD total ADC TDC 1,1,83333.,625000.,0xffffffff,0xffffffff
-// 1,h319_bsmd_totAdcFiber_2,BSMD total ADC TDC 2,1,83333.,625000.,0xffffffff,0xffffffff
-// 1,h320_bsmd_totAdcFiber_3,BSMD total ADC TDC 3,1,83333.,625000.,0xffffffff,0xffffffff
-// 1,h321_bsmd_totAdcFiber_4,BSMD total ADC TDC 4,1,83333.,625000.,0xffffffff,0xffffffff
-// 1,h322_bsmd_totAdcFiber_5,BSMD total ADC TDC 5,1,83333.,625000.,0xffffffff,0xffffffff
-// 1,h323_bsmd_totAdcFiber_6,BSMD total ADC TDC 6,1,83333.,625000.,0xffffffff,0xffffffff
-// 1,h324_bsmd_totAdcFiber_7,BSMD total ADC TDC 7,1,83333.,625000.,0xffffffff,0xffffffff
-// 2,h325_bemc_HT,High Tower trigger data,1,-0.5,299.5,1,-0.5,63.5,0xffffffff,0xffffffff
-// 2,h326_bemc_PA,Patch trigger data,1,-0.5,299.5,1,-0.5,63.5,0xffffffff,0xffffffff
-// 1,h327_bemc_HTDistr,High Tower histogram,1,-0.5,63.5,0xffffffff,0xffffffff
-// 1,h328_bemc_PADistr,Patch histogram,1,-0.5,63.5,0xffffffff,0xffffffff
-// -- END
+// GVB: ssd hists unneeded, setting to 1 bin
+1,h309_ssd_lad01_chm,Charge Matching Ladder 1, 1,0.,2.,0xffffffff,0xffffffff
+1,h310_ssd_lad02_chm,Charge Matching Ladder 2, 1,0.,2.,0xffffffff,0xffffffff
+1,h311_ssd_lad03_chm,Charge Matching Ladder 3, 1,0.,2.,0xffffffff,0xffffffff
+1,h312_ssd_lad04_chm,Charge Matching Ladder 4, 1,0.,2.,0xffffffff,0xffffffff
+1,h313_ssd_lad05_chm,Charge Matching Ladder 5, 1,0.,2.,0xffffffff,0xffffffff
+1,h314_ssd_lad06_chm,Charge Matching Ladder 6, 1,0.,2.,0xffffffff,0xffffffff
+1,h315_ssd_lad07_chm,Charge Matching Ladder 7, 1,0.,2.,0xffffffff,0xffffffff
+1,h316_ssd_lad08_chm,Charge Matching Ladder 8, 1,0.,2.,0xffffffff,0xffffffff
+1,h317_ssd_lad09_chm,Charge Matching Ladder 9, 1,0.,2.,0xffffffff,0xffffffff
+1,h318_ssd_lad10_chm,Charge Matching Ladder 10,1,0.,2.,0xffffffff,0xffffffff
+1,h319_ssd_lad11_chm,Charge Matching Ladder 11,1,0.,2.,0xffffffff,0xffffffff
+1,h320_ssd_lad12_chm,Charge Matching Ladder 12,1,0.,2.,0xffffffff,0xffffffff
+1,h321_ssd_lad13_chm,Charge Matching Ladder 13,1,0.,2.,0xffffffff,0xffffffff
+1,h322_ssd_lad14_chm,Charge Matching Ladder 14,1,0.,2.,0xffffffff,0xffffffff
+1,h323_ssd_lad15_chm,Charge Matching Ladder 15,1,0.,2.,0xffffffff,0xffffffff
+1,h324_ssd_lad16_chm,Charge Matching Ladder 16,1,0.,2.,0xffffffff,0xffffffff
+1,h325_ssd_lad17_chm,Charge Matching Ladder 17,1,0.,2.,0xffffffff,0xffffffff
+1,h326_ssd_lad18_chm,Charge Matching Ladder 18,1,0.,2.,0xffffffff,0xffffffff
+1,h327_ssd_lad19_chm,Charge Matching Ladder 19,1,0.,2.,0xffffffff,0xffffffff
+1,h328_ssd_lad20_chm,Charge Matching Ladder 20,1,0.,2.,0xffffffff,0xffffffff
 
 //ZDC_SMD Nevent and Amplitude
 1,h329_zdcsmd_w_v_N,ZDC_SMD_west_ver_N,8,0.5,8.5,0xffffffff,0xffffffff
@@ -420,50 +401,51 @@
 // End of new FTPC histograms
 
 // SSD
-1,h340_ssd_lad01_occ,Occupancy Ladder  1,101,0.,101.,0xffffffff,0xffffffff
-1,h341_ssd_lad02_occ,Occupancy Ladder  2,101,0.,101.,0xffffffff,0xffffffff
-1,h342_ssd_lad03_occ,Occupancy Ladder  3,101,0.,101.,0xffffffff,0xffffffff
-1,h343_ssd_lad04_occ,Occupancy Ladder  4,101,0.,101.,0xffffffff,0xffffffff
-1,h344_ssd_lad05_occ,Occupancy Ladder  5,101,0.,101.,0xffffffff,0xffffffff
-1,h345_ssd_lad06_occ,Occupancy Ladder  6,101,0.,101.,0xffffffff,0xffffffff
-1,h346_ssd_lad07_occ,Occupancy Ladder  7,101,0.,101.,0xffffffff,0xffffffff
-1,h347_ssd_lad08_occ,Occupancy Ladder  8,101,0.,101.,0xffffffff,0xffffffff
-1,h348_ssd_lad09_occ,Occupancy Ladder  9,101,0.,101.,0xffffffff,0xffffffff
-1,h349_ssd_lad10_occ,Occupancy Ladder 10,101,0.,101.,0xffffffff,0xffffffff
-1,h350_ssd_lad11_occ,Occupancy Ladder 11,101,0.,101.,0xffffffff,0xffffffff
-1,h351_ssd_lad12_occ,Occupancy Ladder 12,101,0.,101.,0xffffffff,0xffffffff
-1,h352_ssd_lad13_occ,Occupancy Ladder 13,101,0.,101.,0xffffffff,0xffffffff
-1,h353_ssd_lad14_occ,Occupancy Ladder 14,101,0.,101.,0xffffffff,0xffffffff
-1,h354_ssd_lad15_occ,Occupancy Ladder 15,101,0.,101.,0xffffffff,0xffffffff
-1,h355_ssd_lad16_occ,Occupancy Ladder 16,101,0.,101.,0xffffffff,0xffffffff
-1,h356_ssd_lad17_occ,Occupancy Ladder 17,101,0.,101.,0xffffffff,0xffffffff
-1,h357_ssd_lad18_occ,Occupancy Ladder 18,101,0.,101.,0xffffffff,0xffffffff
-1,h358_ssd_lad19_occ,Occupancy Ladder 19,101,0.,101.,0xffffffff,0xffffffff
-1,h359_ssd_lad20_occ,Occupancy Ladder 20,101,0.,101.,0xffffffff,0xffffffff
-1,h360_ssd_lad21_occ,Occupancy Ladder 21,101,0.,101.,0xffffffff,0xffffffff
-1,h361_ssd_lad22_occ,Occupancy Ladder 22,101,0.,101.,0xffffffff,0xffffffff
-1,h362_ssd_lad23_occ,Occupancy Ladder 23,101,0.,101.,0xffffffff,0xffffffff
-1,h363_ssd_lad24_occ,Occupancy Ladder 24,101,0.,101.,0xffffffff,0xffffffff
-1,h364_ssd_lad25_occ,Occupancy Ladder 25,101,0.,101.,0xffffffff,0xffffffff
-1,h365_ssd_lad26_occ,Occupancy Ladder 26,101,0.,101.,0xffffffff,0xffffffff
-1,h366_ssd_lad27_occ,Occupancy Ladder 27,101,0.,101.,0xffffffff,0xffffffff
-1,h367_ssd_lad28_occ,Occupancy Ladder 28,101,0.,101.,0xffffffff,0xffffffff
-1,h368_ssd_lad29_occ,Occupancy Ladder 29,101,0.,101.,0xffffffff,0xffffffff
-1,h369_ssd_lad30_occ,Occupancy Ladder 30,101,0.,101.,0xffffffff,0xffffffff
-1,h370_ssd_lad31_occ,Occupancy Ladder 31,101,0.,101.,0xffffffff,0xffffffff
-1,h371_ssd_lad32_occ,Occupancy Ladder 32,101,0.,101.,0xffffffff,0xffffffff
-1,h372_ssd_lad33_occ,Occupancy Ladder 33,101,0.,101.,0xffffffff,0xffffffff
-1,h373_ssd_lad34_occ,Occupancy Ladder 34,101,0.,101.,0xffffffff,0xffffffff
-1,h374_ssd_lad35_occ,Occupancy Ladder 35,101,0.,101.,0xffffffff,0xffffffff
-1,h375_ssd_lad36_occ,Occupancy Ladder 36,101,0.,101.,0xffffffff,0xffffffff
-1,h376_ssd_lad37_occ,Occupancy Ladder 37,101,0.,101.,0xffffffff,0xffffffff
-1,h377_ssd_lad38_occ,Occupancy Ladder 38,101,0.,101.,0xffffffff,0xffffffff
-1,h378_ssd_lad39_occ,Occupancy Ladder 39,101,0.,101.,0xffffffff,0xffffffff
-1,h379_ssd_lad40_occ,Occupancy Ladder 40,101,0.,101.,0xffffffff,0xffffffff
+// GVB: ssd hists unneeded, setting to 1 bin
+1,h340_ssd_lad01_occ,Occupancy Ladder  1,1,0.,101.,0xffffffff,0xffffffff
+1,h341_ssd_lad02_occ,Occupancy Ladder  2,1,0.,101.,0xffffffff,0xffffffff
+1,h342_ssd_lad03_occ,Occupancy Ladder  3,1,0.,101.,0xffffffff,0xffffffff
+1,h343_ssd_lad04_occ,Occupancy Ladder  4,1,0.,101.,0xffffffff,0xffffffff
+1,h344_ssd_lad05_occ,Occupancy Ladder  5,1,0.,101.,0xffffffff,0xffffffff
+1,h345_ssd_lad06_occ,Occupancy Ladder  6,1,0.,101.,0xffffffff,0xffffffff
+1,h346_ssd_lad07_occ,Occupancy Ladder  7,1,0.,101.,0xffffffff,0xffffffff
+1,h347_ssd_lad08_occ,Occupancy Ladder  8,1,0.,101.,0xffffffff,0xffffffff
+1,h348_ssd_lad09_occ,Occupancy Ladder  9,1,0.,101.,0xffffffff,0xffffffff
+1,h349_ssd_lad10_occ,Occupancy Ladder 10,1,0.,101.,0xffffffff,0xffffffff
+1,h350_ssd_lad11_occ,Occupancy Ladder 11,1,0.,101.,0xffffffff,0xffffffff
+1,h351_ssd_lad12_occ,Occupancy Ladder 12,1,0.,101.,0xffffffff,0xffffffff
+1,h352_ssd_lad13_occ,Occupancy Ladder 13,1,0.,101.,0xffffffff,0xffffffff
+1,h353_ssd_lad14_occ,Occupancy Ladder 14,1,0.,101.,0xffffffff,0xffffffff
+1,h354_ssd_lad15_occ,Occupancy Ladder 15,1,0.,101.,0xffffffff,0xffffffff
+1,h355_ssd_lad16_occ,Occupancy Ladder 16,1,0.,101.,0xffffffff,0xffffffff
+1,h356_ssd_lad17_occ,Occupancy Ladder 17,1,0.,101.,0xffffffff,0xffffffff
+1,h357_ssd_lad18_occ,Occupancy Ladder 18,1,0.,101.,0xffffffff,0xffffffff
+1,h358_ssd_lad19_occ,Occupancy Ladder 19,1,0.,101.,0xffffffff,0xffffffff
+1,h359_ssd_lad20_occ,Occupancy Ladder 20,1,0.,101.,0xffffffff,0xffffffff
+1,h360_ssd_lad21_occ,Occupancy Ladder 21,1,0.,101.,0xffffffff,0xffffffff
+1,h361_ssd_lad22_occ,Occupancy Ladder 22,1,0.,101.,0xffffffff,0xffffffff
+1,h362_ssd_lad23_occ,Occupancy Ladder 23,1,0.,101.,0xffffffff,0xffffffff
+1,h363_ssd_lad24_occ,Occupancy Ladder 24,1,0.,101.,0xffffffff,0xffffffff
+1,h364_ssd_lad25_occ,Occupancy Ladder 25,1,0.,101.,0xffffffff,0xffffffff
+1,h365_ssd_lad26_occ,Occupancy Ladder 26,1,0.,101.,0xffffffff,0xffffffff
+1,h366_ssd_lad27_occ,Occupancy Ladder 27,1,0.,101.,0xffffffff,0xffffffff
+1,h367_ssd_lad28_occ,Occupancy Ladder 28,1,0.,101.,0xffffffff,0xffffffff
+1,h368_ssd_lad29_occ,Occupancy Ladder 29,1,0.,101.,0xffffffff,0xffffffff
+1,h369_ssd_lad30_occ,Occupancy Ladder 30,1,0.,101.,0xffffffff,0xffffffff
+1,h370_ssd_lad31_occ,Occupancy Ladder 31,1,0.,101.,0xffffffff,0xffffffff
+1,h371_ssd_lad32_occ,Occupancy Ladder 32,1,0.,101.,0xffffffff,0xffffffff
+1,h372_ssd_lad33_occ,Occupancy Ladder 33,1,0.,101.,0xffffffff,0xffffffff
+1,h373_ssd_lad34_occ,Occupancy Ladder 34,1,0.,101.,0xffffffff,0xffffffff
+1,h374_ssd_lad35_occ,Occupancy Ladder 35,1,0.,101.,0xffffffff,0xffffffff
+1,h375_ssd_lad36_occ,Occupancy Ladder 36,1,0.,101.,0xffffffff,0xffffffff
+1,h376_ssd_lad37_occ,Occupancy Ladder 37,1,0.,101.,0xffffffff,0xffffffff
+1,h377_ssd_lad38_occ,Occupancy Ladder 38,1,0.,101.,0xffffffff,0xffffffff
+1,h378_ssd_lad39_occ,Occupancy Ladder 39,1,0.,101.,0xffffffff,0xffffffff
+1,h379_ssd_lad40_occ,Occupancy Ladder 40,1,0.,101.,0xffffffff,0xffffffff
 
 //  REMOVED FOR SSD BY B.HIPPOLYTE
-2,h380_ssd_cluster_charge,Mean Matched Cluster Charge,40,0.,40.,16,0.,16.,0xffffffff,0xffffffff
-2,h381_ssd_cluster_propor,Proportion of Matched Cluster,40,0.,40.,16,0.,16.,0xffffffff,0xffffffff
+2,h380_ssd_cluster_charge,Mean Matched Cluster Charge,1,0.,40.,1,0.,16.,0xffffffff,0xffffffff
+2,h381_ssd_cluster_propor,Proportion of Matched Cluster,1,0.,40.,1,0.,16.,0xffffffff,0xffffffff
 //  -> CAN BE REUSED
 
 // PMD Chain Histograms 
@@ -547,18 +529,6 @@
 1,h451_bbc_earliest_tac_west,BBC West Earliest TAC(trg),256,0.,4096.,0xffffffff,0xffffffff
 1,h452_bbc_tac_difference_e-w,BBC Vertex,256,-300.,300.,0xffffffff,0xffffffff
 
-//Jing Liu, add TOFr5 histograms. 06-13-2005.
-//1,h453_tofr_leading_ToF,h453_tofr_leading_ToF, 200,-200.,800.,0xffffffff,0xffffffff     // ns
-//1,h454_tofr_trailing_ToF,h454_tofr_trailing_ToF, 200,-200.,800.,0xffffffff,0xffffffff     // ns
-//2,h455_tofr_leading_ToF_vs_chan,h455_tofr_leading_ToF_vs_chan, 192,-0.5,191.5,1000,-52000.,52000.,0xffffffff,0xffffffff     // ns
-//2,h456_tofr_trailing_ToF_vs_chan,h456_tofr_trailing_ToF_vs_chan, 192,-0.5,191.5,1000,-52000.,52000.,0xffffffff,0xffffffff     // ns
-//1,h457_tofr_pvpd_le_t0west_t0east,h457_tofr_pvpd_le_t0west_t0east, 200,-400.,400.,0xffffffff,0xffffffff     // ns
-//2,h458_tofr_pvpd_le_t0west_vs_t0east,h458_tofr_pvpd_le_t0west_vs_t0east, 500,0.,52000.,500,0.,52000.,0xffffffff,0xffffffff    // ns
-//1,h459_tofr_pvpd_te_t0west_t0east,h459_tofr_pvpd_te_t0west_t0east, 200,-400.,400.,0xffffffff,0xffffffff     // ns
-//2,h460_tofr_pvpd_te_t0west_vs_t0east,h460_tofr_pvpd_te_t0west_vs_t0east, 500,0.,52000.,500,0.,52000.,0xffffffff,0xffffffff     // ns
-//1,h461_tofr_ToT,h461_tofr_ToT, 200,-10.,90.,0xffffffff,0xffffffff     // ns
-//2,h462_tofr_ToT_vs_chan,h462_tofr_ToT_vs_chan, 192,-0.5,191.5,200,-20.,120.,0xffffffff,0xffffffff     // ns
-// end of tof histograms, tofr5, 02/10/2005
 //Jing Liu, Histograms for Run8 and future. 02/25/2008
 2,h453_upvpd_eastT_vs_westT,h453_upvpd_eastT_vs_westT,1000,0.,51500.,1000,0.,51500.,0xffffffff,0xffffffff
 1,h454_upvpd_le_hitmap,h454_upvpd_le_hitmap, 38,-0.5,37.5,0xffffffff,0xffffffff     
