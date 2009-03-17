@@ -29,24 +29,13 @@
 typedef TDataSet::EDataSetPass EDataSetPass;
 #endif
 #endif
-#ifndef __CINT__
-  #if ROOT_VERSION_CODE < ROOT_VERSION(5,20,00)
-    #define TMEMSTATinSTAR 1946
-    class TMemStat;
-    typedef TMemStat StMemStat;
-  #else
-   class StMemStat;
-  #endif
-#else
-    class TMemStat;
-    class StMemStat;
-#endif
 
 class TList;
 class TBrowser;
 class TChain;
 class TTree;
 class TTable;
+class StMemStat;
 class StEvtHddr;
 class TAttr;
 class TFile;
@@ -256,7 +245,7 @@ public:
 TObject        *GetDirObj(const Char_t *dir) const;
 void            SetDirObj(TObject *obj,const Char_t *dir);
   virtual const Char_t *GetCVS() const
-  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.90 2009/03/16 21:52:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.91 2009/03/17 20:03:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const Char_t *logInput,
                                     const StMaker *uppMk=0,
@@ -320,10 +309,10 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.90 2009/03/16 21:52:24 perev Exp $
+// $Id: StMaker.h,v 1.91 2009/03/17 20:03:36 perev Exp $
 // $Log: StMaker.h,v $
-// Revision 1.90  2009/03/16 21:52:24  perev
-// TMemStat & StMemStat handling improved
+// Revision 1.91  2009/03/17 20:03:36  perev
+// Back to StMemSet version
 //
 // Revision 1.89  2009/01/26 14:33:30  fisyak
 // rename TMemStat => StMemStat due clash with ROOT class

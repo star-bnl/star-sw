@@ -41,12 +41,7 @@
 #include "StChain.h"
 #include "StEvtHddr.h"
 #include "StMessMgr.h"
-
-#ifdef TMEMSTATinSTAR
-#include "TMemStat.h"
-#else
 #include "StMemStat.h"
-#endif
 
 ClassImp(StChain)
 
@@ -264,10 +259,10 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.71 2009/03/16 21:52:24 perev Exp $
+// $Id: StChain.cxx,v 1.72 2009/03/17 20:03:36 perev Exp $
 // $Log: StChain.cxx,v $
-// Revision 1.71  2009/03/16 21:52:24  perev
-// TMemStat & StMemStat handling improved
+// Revision 1.72  2009/03/17 20:03:36  perev
+// Back to StMemSet version
 //
 // Revision 1.70  2009/01/26 14:32:33  fisyak
 // rename TMemStat => StMemStat due clash with ROOT class
