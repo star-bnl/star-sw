@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.79 2007/05/17 14:13:42 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.80 2009/03/17 22:37:48 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.80  2009/03/17 22:37:48  fisyak
+// Clean up
+//
 // Revision 1.79  2007/05/17 14:13:42  fisyak
 // replace printf and  cout by logger printouts
 //
@@ -258,18 +261,8 @@
 #include "tables/St_type_index_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "StDbUtilities/StMagUtilities.h"
-#include "StDbUtilities/StSectorAligner.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "TString.h"
-
-// Corrections moved in StTpcHitMoverMaker. However, for
-// debugging purposes, you may set this to one and run with 
-// -TpcHitMover option.
-#define TPT_CORRECTION 0
-
-#if TPT_CORRECTION
-static StMagUtilities* m_ExB = 0 ;
-#endif
 
 void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHeight);
  
@@ -379,50 +372,6 @@ Int_t St_tpt_Maker::Make(){
   if (! tphit) return kStWarn;
   gMessMgr->QAInfo() << Form(" Input hit table size is %d\n\n",(int)tphit->GetNRows()) << endm;
 
-#if 0 // disable it. pp chain crashs somewhere sometime.
-  // cluster vertex 
-  // 1). First create a temporary St_tcl_tphit table, which is a copy of 'tphit' table
-  //     but sorted by the entry 'row'.
-  // 2). Call function 'estimateVertexZ' with this temporary table.
-  // 3). Output cluster vertex.
-
-  Float_t vertexZ, relativeHeight=0;
-  St_tcl_tphit* tphit4VertexZ = new St_tcl_tphit("tphit4VertexZ",tphit->GetNRows());
-  TString row("row");
-  TTableSorter* tphitSorted = new TTableSorter(*tphit,row);
-
-  tcl_tphit_st* tphitSrcStart = tphit->GetTable();
-  tcl_tphit_st* tphitSrcPtr;
-  tcl_tphit_st* tphitDesPtr = tphit4VertexZ->GetTable();
-  Int_t tphitRowSize = sizeof(tcl_tphit_st);
-  for(Short_t i=101; i<=2445; i++) {
-    TTableIter nextHit(tphitSorted,i);
-    Int_t j=0;
-    while( (j=nextHit())>=0) {
-      tphitSrcPtr = tphitSrcStart + j;
-      ::memcpy(tphitDesPtr, tphitSrcPtr, tphitRowSize);
-      tphitDesPtr++;
-    }
-  }
-  tphit4VertexZ->SetNRows( tphit->GetNRows() );
-
-  estimateVertexZ(tphit4VertexZ, vertexZ, relativeHeight); 
-  delete tphit4VertexZ;
-  delete tphitSorted;
-
-  dst_vertex_st dstVertexRow;
-  ::memset(&dstVertexRow, 0, sizeof(dstVertexRow));
-  dstVertexRow.z = vertexZ;
-  dstVertexRow.id = 1;
-  dstVertexRow.iflag = 105;
-  dstVertexRow.det_id = 1;
-  dstVertexRow.vtx_id = 1;
-
-  St_dst_vertex  *clusterVertex = new St_dst_vertex("clusterVertex",1); 
-  m_DataSet->Add(clusterVertex);
-  clusterVertex->AddAt(&dstVertexRow, 0);
-  // end of cluster vertex finding
-#endif
   ///!!!!!!!!!!
   dst_vertex_st dstVertexRow;
   ::memset(&dstVertexRow, 0, sizeof(dstVertexRow));
@@ -442,92 +391,8 @@ Int_t St_tpt_Maker::Make(){
   if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
       
   St_tpt_track  *tptrack = new St_tpt_track("tptrack",maxNofTracks); m_DataSet->Add(tptrack);
-
-
   //			TPT
   if (!m_iftteTrack) {
-#if TPT_CORRECTION
-//==========================================================================
-// this part has moved to StTpcHitMover
-    //
-    //undo ExB distortions - only if ExB switch is set
-    //
-    //{gMessMgr->QAInfo() << Form("DEBUG :: %d 0x%X -> %d\n",m_Mode,m_Mode,m_Mode & 0x01) << endm;}
-
-    if (m_AlignSector) {
-           gMessMgr->QAInfo()  << "############# ALIGNING HITS" << endm;;
-      StSectorAligner* aligner = new StSectorAligner(gStTpcDb);
-      tcl_tphit_st* spc = tphit->GetTable();
-      float x[3], xprime[3];
-
-      for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ ){
-	short sector = short(spc->row/100.);
-	short row    = spc->row - sector*100;
-
-	 x[0] = spc->x;      x[1] = spc->y;      x[2] = spc->z;
-
-	 aligner->moveHit(x,xprime,sector,row);
-
-	 spc->x = xprime[0]; spc->y = xprime[1]; spc->z = xprime[2];
-      }
-      delete aligner;
-      gMessMgr->QAInfo()  << "############ done " << endm;;
-    }
-#if 1
-    m_ExB = gStTpcDb->ExB();
-    if (ExB)
-#else
-    if(m_Mode & 0x01)
-#endif
-      {
-	Float_t x[3], xprime[3] ;
-#if 0
-	Int_t   option = (m_Mode & 0x7FFFFFFE) >> 1;
-	// request from Jim Thomas to have 2 (or more)
-	// method in StMagUtilities. We then use the
-	// option as a mask. J.Lauret July 2001. 
-	gMessMgr->QAInfo() << Form("St_tpt_Maker: ExB StMagUtilities(0x%X)\n\n",option) << endm;
-	if ( m_ExB == 0 ) {
-	  TDataSet *RunLog = GetDataBase("RunLog");
-	  m_ExB = new StMagUtilities( gStTpcDb, RunLog, option ) ;
-        }
-#endif	
-	tcl_tphit_st *spc = tphit -> GetTable() ;
-	for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
-	  {
-	    //ExB corrections
-	    x[0] = spc -> x;    
-	    x[1] = spc -> y;    
-	    x[2] = spc -> z;
-	    m_ExB -> UndoDistortion(x,xprime);   // input x[3], return xprime[3]
-	    spc -> x = xprime[0];
-	    spc -> y = xprime[1];
-	    spc -> z = xprime[2];
-	  }
-      }
-
-
-    // now move hits to global coordinates;
-    
-    tcl_tphit_st* spc = tphit->GetTable();
-    float x[3];
-    StTpcCoordinateTransform transform(gStTpcDb);
-
-    for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ ){
-
-      x[0] = spc->x;      x[1] = spc->y;      x[2] = spc->z;
-      StTpcLocalCoordinate local(x[0],x[1],x[2],spc->row/100,spc->row%100);
-      StGlobalCoordinate global;
-      transform(local,global);
-
-      spc->x = global.position().x(); 
-      spc->y = global.position().y(); 
-      spc->z = global.position().z();
-    }
-//=========================================================================
-#endif
-
-
 
     if (Debug()) {gMessMgr->QAInfo()  << " start tpt_run " << endm;}
     Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
