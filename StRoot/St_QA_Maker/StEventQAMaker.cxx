@@ -1704,6 +1704,8 @@ void StEventQAMaker::MakeHistPoint() {
 	  Float_t phi = hitPos.phi()/degree;
           if (phi<0) phi+=360.;
 	  hists->m_z_hits->Fill(hitPos.z());
+          // scale by padrow density (1/4.8cm and 1/2.0cm) for polar xy plots
+          float hit_weight = (j>12 ? 1 : 2.4);
           // TPC East is sectors 13-24, and (generally) z<0
           // TPC West is sectors  1-12, and (generally) z>0
           // In StEvent, sectors are mapped starting at 0 instead of 1
@@ -1711,12 +1713,12 @@ void StEventQAMaker::MakeHistPoint() {
             rotator = 11-i;
 	    hists->m_pnt_phiT->Fill(phi,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
-	    hists->m_pnt_xyTE->Fill(hitPos.perp(),phi*degree);
+	    hists->m_pnt_xyTE->Fill(hitPos.perp(),phi*degree,hit_weight);
 	  } else {
             rotator = i-11;
 	    hists->m_pnt_phiT->Fill(phi,1.);
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
-	    hists->m_pnt_xyTW->Fill(hitPos.perp(),phi*degree);
+	    hists->m_pnt_xyTW->Fill(hitPos.perp(),phi*degree,hit_weight);
 	  }
           hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
           mTpcSectorPlot[i]->Fill(hitPos.x(),(float) (j+1));
@@ -2364,8 +2366,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.90 2009/03/13 19:27:24 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.91 2009/03/17 19:35:21 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.91  2009/03/17 19:35:21  genevb
+// Weight the TPC xy hit hists
+//
 // Revision 2.90  2009/03/13 19:27:24  genevb
 // Now draw TPC xy hits in polar coords
 //
