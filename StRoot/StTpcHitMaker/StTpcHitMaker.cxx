@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.15 2009/03/16 13:41:45 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.16 2009/03/17 19:19:21 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.16  2009/03/17 19:19:21  fisyak
+ * Account new Valery's interface for adc values
+ *
  * Revision 1.15  2009/03/16 13:41:45  fisyak
  * Switch to new scheme (avoid legacy) for TPX cluster reading
  *
@@ -158,7 +161,7 @@ Int_t StTpcHitMaker::Make() {
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
     // invoke tpcReader to fill the TPC DAQ sector structure
     TString cldadc("cld");
-    if ( kMode==kTpxRaw ) cldadc = "adc";
+    if ( kMode==kTpxRaw || kMode == kTpcRaw) cldadc = "adc";
     mQuery = Form("tpx/%s[%i]",cldadc.Data(),sector);
     StRtsTable *daqTpcTable = GetNextDaqElement(mQuery);
     if (daqTpcTable) {
@@ -178,10 +181,11 @@ Int_t StTpcHitMaker::Make() {
     }
     assert(Sector() == sector);
     while (daqTpcTable) {
-      Int_t row = daqTpcTable->Row();
+      Int_t row = 45;
+      fTpc = 0;
+      if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
+      else 	                                                  row = daqTpcTable->Row();
       if (row > 0 && row <= 45) {
-	fTpc = 0;
-	if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpx) fTpc = (tpc_t*)*DaqDta()->begin();
 	switch (kMode) {
 	case kTpc: 
 	case kTpx:             UpdateHitCollection(sector); break;
@@ -198,10 +202,12 @@ Int_t StTpcHitMaker::Make() {
 	  if (! fTpc)                  break;
 	  DumpPixels2Ntuple(sector);   break;
 	case kTpcRaw: 
-	  if (! fTpc)                  break;
-	  RawTpcData(sector);          break;
 	case kTpxRaw: 
-	  RawTpxData(sector);          break;
+	  if ( fTpc) {
+	    RawTpcData(sector);          break;
+	  } else {
+	    RawTpxData(sector);          break;
+	  }
 	default:
 	  break;
 	}
