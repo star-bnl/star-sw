@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.3 2009/03/16 21:01:39 fine Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.4 2009/03/17 18:32:26 fine Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -23,6 +23,7 @@
 StBTofSortRawHit::StBTofSortRawHit() {
   mDaqMap = 0;
   mDebug  = kFALSE;
+  Reset();
 }
 
 StBTofSortRawHit::~StBTofSortRawHit() {
@@ -31,15 +32,12 @@ StBTofSortRawHit::~StBTofSortRawHit() {
 
 void StBTofSortRawHit::Reset() {
   for(int i=0;i<mNTRAY;i++) mRawHitVec[i].clear();
-  for(int i=0;i<4;i++) mTriggerTime[i] = 0;
+  memset(mTriggerTime,0,sizeof(mTriggerTime));
 }
 
 void StBTofSortRawHit::Init() {
   Reset();
-  for(int i=0;i<mNTRAY;i++) {
-    mTriggerTimeWindow[i][0] = 0.0;
-    mTriggerTimeWindow[i][1] = 0.0;
-  }
+  memset(mTriggerTimeWindow,0,sizeof(mTriggerTimeWindow));
 }
 
 void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {

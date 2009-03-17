@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.7 2009/03/16 21:57:07 fine Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.8 2009/03/17 18:32:25 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -217,7 +217,8 @@ Int_t StBTofHitMaker::UnpackTofRawData()
       int tdigid=tdcid/4;   /// 0-3 for half tray.
       int tdcchan=(dataword&0x00E00000)>>21;         /// tdcchan is 0-7 here.
       ///
-      TofRawHit temphit;
+      TofRawHit temphit={0};
+      memset(&temphit,0,sizeof(temphit));
       temphit.fiberid = ifib;
       temphit.trayID  = trayid;
       unsigned int timeinbin = ((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  /// time in tdc bin
