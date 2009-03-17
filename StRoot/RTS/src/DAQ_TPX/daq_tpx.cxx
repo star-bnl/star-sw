@@ -523,7 +523,7 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 				int r = dd->row - 1 ;	// tpc_t counts from 0
 				int p = dd->pad - 1 ;	// tpc_t counts from 0 ;
 		
-				if((r<0) || (p<0)) continue ;	// altro can have row or pad == 0
+				if((r<0) || (p<0)) continue ;	// altro can have row or pad == 0 but not the legacy TPC...
 
 				found_something = 1 ;
 
@@ -553,8 +553,11 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 				found_something = 1 ;
 			}
 
-			legacy->finalize(1,s,0,0) ;
 
+			tpc_p->max_channels_sector = 512 * 5692 ;
+			tpc_p->max_channels_all = 512 * 5692 * 24 ;
+
+			legacy->finalize(1,s,0,0) ;
 
 			continue ;	// do NOT allow other ADC checks!
 		}
@@ -577,6 +580,7 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 				if((r<0) || (p<0)) continue ;	// altro can have row or pad == 0
 
 				found_something = 1 ;
+				tpc_p->max_channels_sector = 512 * 5692 ;	// this is how I mark that an ADC bank was found...
 
 				//LOG(NOTE,"rp %d:%d, ncontent %d",r,p,dd->ncontent) ;
 
@@ -657,7 +661,8 @@ daq_dta *daq_tpx::handle_legacy(int sec, int rdo)
 
 		if(tpc_p) {
 			tpc_p->mode = 0 ;
-			//...
+
+			tpc_p->max_channels_all = 512 * 5692 * 24 ;
 
 			legacy->finalize(1,s,0,0) ;
 		}
