@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofDaqMap.cxx,v 1.2 2009/02/13 19:47:32 dongx Exp $
+ * $Id: StBTofDaqMap.cxx,v 1.3 2009/03/17 18:32:26 fine Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofDaqMap.cxx,v $
+ * Revision 1.3  2009/03/17 18:32:26  fine
+ * make the print outs usefull
+ *
  * Revision 1.2  2009/02/13 19:47:32  dongx
  * mNValidTrays set by the tofTrayConfig in db now
  *
@@ -183,7 +186,7 @@ Int_t StBTofDaqMap::WestPMT2TDIGLeChan( const Int_t iTube )
 Int_t StBTofDaqMap::WestPMT2TDIGTeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
-    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
+    LOG_ERROR<<"StBTofDaqMap::WestPMT2TDIGTeChan:  Wrong vpd tube number ! "<< iTube<<endm; 
     return -1;
   }
 
@@ -193,7 +196,7 @@ Int_t StBTofDaqMap::WestPMT2TDIGTeChan( const Int_t iTube )
 Int_t StBTofDaqMap::TDIGLeChan2WestPMT( const Int_t iTdc )
 {
   if ( iTdc<0 || iTdc>=mNTOF ) {
-    LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
+    LOG_ERROR<<"StBTofDaqMap::TDIGLeChan2WestPMT: Wrong tdc channel number ! "<< iTdc<<endm; 
     return -1;
   }
 
@@ -203,7 +206,7 @@ Int_t StBTofDaqMap::TDIGLeChan2WestPMT( const Int_t iTdc )
 Int_t StBTofDaqMap::TDIGTeChan2WestPMT( const Int_t iTdc )
 {
   if ( iTdc<0 || iTdc>=mNTOF ) {
-    LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
+    LOG_ERROR<<"StBTofDaqMap::TDIGTeChan2WestPMT: Wrong tdc channel number ! "<< iTdc <<endm; 
     return -1;
   }
 
@@ -213,7 +216,7 @@ Int_t StBTofDaqMap::TDIGTeChan2WestPMT( const Int_t iTdc )
 Int_t StBTofDaqMap::EastPMT2TDIGLeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
-    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
+    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<iTube<< endm; 
     return -1;
   }
 
@@ -223,7 +226,7 @@ Int_t StBTofDaqMap::EastPMT2TDIGLeChan( const Int_t iTube )
 Int_t StBTofDaqMap::EastPMT2TDIGTeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
-    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
+    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<iTube<< endm; 
     return -1;
   }
 
@@ -233,7 +236,7 @@ Int_t StBTofDaqMap::EastPMT2TDIGTeChan( const Int_t iTube )
 Int_t StBTofDaqMap::TDIGLeChan2EastPMT( const Int_t iTdc )
 {
   if ( iTdc<0 || iTdc>=mNTOF ) {
-    LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
+    LOG_ERROR<<"StBTofDaqMap::TDIGLeChan2EastPMT: Wrong tdc channel number ! "<<iTdc<<endm; 
     return -1;
   }
 
@@ -243,7 +246,7 @@ Int_t StBTofDaqMap::TDIGLeChan2EastPMT( const Int_t iTdc )
 Int_t StBTofDaqMap::TDIGTeChan2EastPMT( const Int_t iTdc )
 {
   if ( iTdc<0 || iTdc>=mNTOF ) {
-    LOG_INFO<<"ERROR!!! Wrong tdc channel number ! "<<endm; 
+    LOG_ERROR<<"StBTofDaqMap::TDIGTeChan2EastPMT: Wrong tdc channel number ! "<<iTdc << endm; 
     return -1;
   }
 
