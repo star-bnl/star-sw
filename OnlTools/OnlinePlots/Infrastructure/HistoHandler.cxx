@@ -49,6 +49,11 @@ static const int sizL3_max = 1000000;
 static L3_P *l3p =(L3_P *)malloc(sizL3_max);
 static EventTracker *evtTracker = new EventTracker();
 
+static const int NTPCpads[45] = {
+    88,96,104,112,118,126,134,142,150,158,166,174,182, // Inner
+    98,100,102,104,106,106,108,110,112,112,114,116,118,120,122,122, //Outer 
+    124,126,128,128,130,132,134,136,138,138,140,142,144,144,144,144};
+
 
 using namespace std;
 char*  HistoHandler::mListOfHistograms = EvpUtil::cat(gEnv->GetValue("Online.plotsDir","."),"/local/ListOfHistograms.txt");
@@ -477,11 +482,6 @@ void  HistoHandler::SetPhiAngleMap(){
     187.195, 189.195};   
 
 
-  Int_t Npads[NP] = {
-    88,96,104,112,118,126,134,142,150,158,166,174,182, 
-    98,100,102,104,106,106,108,110,112,112,114,116,118,120,122,122, 
-    124,126,128,128,130,132,134,136,138,138,140,142,144,144,144,144};
-
   Double_t pitches[2] = {0.335, 0.67};
 
 
@@ -515,8 +515,8 @@ void  HistoHandler::SetPhiAngleMap(){
     for (int j=0; j<45; j++) {
       if (j >= 13) pitch = pitches[1];
       else pitch = pitches[0];
-      for (int k=0; k<Npads[j]; k++) {//loop over # pads in each padrow
-	YMIN = pitch * (k - 0.5*Npads[j]);//find Y at bottom of padrow
+      for (int k=0; k<NTPCpads[j]; k++) {//loop over # pads in each padrow
+	YMIN = pitch * (k - 0.5*NTPCpads[j]);//find Y at bottom of padrow
 	LPhi=atan(YMIN/Xpads[j]);//find local Phi (LPhi) within sector
 	LPhi*=DEG;
 	GPhi=LPhi+SPhi;//find global Phi (GPhi) 
@@ -875,11 +875,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     float vDrift = mLaser->Make(int(evp->run), int(evp->event_number), datap);
     if(vDrift == 1972.){ mLaser->resetAll();}//try twice, bad value triggered by laser->Make
 
-    //if(mDebugLevel)printf("drift velocity: %2.4f\n", vDrift);
-    //    if(mDebugLevel)
-    //printf("EventLopper::vDrift = %10.3f\n  run=%d\n", vDrift,evp->run);
-    //fflush(stdout);
-
     if (vDrift > 0 && vDrift <999 ){ 
       h1[113]->Add( mLaser->driftVelocityDistribution() );
       cout << __PRETTY_FUNCTION__ << " " << mLaser->driftVelocityDistribution()->GetEntries() << endl;;
@@ -888,11 +883,11 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     }
   } 
   
+  int hist_index;
+
   for(sec=0;sec<24;sec++) {
 
     int secnum = sec+1;
-    //printf("Filling laser:  Sector %d\n",sec);
-    //fflush(stdout);
 
 
 #ifndef NEW_DAQ_READER
@@ -916,9 +911,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
       break ;
     }
     
-    //printf("Ret---- %d\n",ret);
-    //fflush(stdout);
-
     if(ret == EVP_NO_DET)
       break ;
   
@@ -936,7 +928,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     int r,p,t ;
     float adc_sector ;
     //uchar_t val ;
-    unsigned char val;
     float tpc_sector_size = 0;
     
     // Watch out here! The position depends on the
@@ -944,34 +935,27 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     // if description file is changed then change
     // starting index accordingly
     
-    int hist_index = sec + 15;
+    hist_index = sec + 15;
     int nhist = sec + 120;
     
     tpc_sector_size = float(ret); //data size for the sector
     tpc_size += tpc_sector_size; // sum for all valid sectors
     
     adc_sector = 0 ; // adc sum for the sector
-    //PR(tpc.mode);
-    if(tpc.mode==0) {	// normal event
-      //PR(trgcmd);
-
-      //printf("About to loop over adcs\n");
-      //fflush(stdout);
+    if(tpc.mode==0 && tpc.max_channels_sector>0) {	// normal adc event
 
       for(r=0;r<45;r++) {	// padrow
-	for(p=0;p<182;p++) {	// pad
+	for(p=0;p<NTPCpads[r];p++) {	// pad
+
+          unsigned short tpc_counts = tpc.counts[r][p];
+          if (tpc_counts==0) continue;
+
 	  pad_adc =0; // adc sum per pad
-	  for(t=0;t<tpc.counts[r][p];t++) {
-	    val = tpc.adc[r][p][t] ;
-	    pad_adc += (float)val;
-	    
-	    //if(trgcmd != 4) { // 4 means physics    // FL, commented out on 5/30/2007 as requested by Blair
-	    // i.e. timebin for that channel would be
+	  for(t=0;t<tpc_counts;t++) {
+	    float val = (float) tpc.adc[r][p][t] ;
 	    int timebin = tpc.timebin[r][p][t];
-	    //PR(val);
-	    //PR(timebin);
-	      oth->fill(h1[nhist],timebin,val);
-	    //}
+	    pad_adc += val;
+	    oth->fill(h1[nhist],timebin,val);
 	  }//end pad time sequence
 	  TH2 *hh =  (TH2 *)h1[hist_index];
 	  oth->fill(		  hh,(float)p, (float)r, pad_adc);
@@ -984,10 +968,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 	  
 	}// end of pad loop
       }// end padrow
-      //fflush(stderr);
-      //fflush(stdout);
-      //printf("looped over adcs\n");
-      //fflush(stdout);
 
       if(mDebugLevel) {
 	fprintf(stderr,"TPC: Sector %d: occupancy %3d %%, charge %d",secnum,(tpc.max_channels_sector!=0? (int)(100.0 *((double)tpc.channels_sector/(double)tpc.max_channels_sector)) :0),(int)adc_sector);
@@ -998,9 +978,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
       //Aren't all sectors the same?
       tpc_max_channels += (double)tpc.max_channels_sector;
 
-
-      //printf("Ok what's up here\n");
-      //fflush(stdout);
 
     } else {	// special mode - currently just for pedestals
       // special mode has different packing i.e. it
@@ -1022,15 +999,6 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   } // end of sector loop for the TPC
 
 
-  //  		cout<<"h0: "<<h1[0]->GetEntries()<<endl;
-  //  		cout<<"h1: "<<h1[1]->GetEntries()<<endl;
-  //  		cout<<"h2: "<<h1[2]->GetEntries()<<endl;
-  //  		cout<<"h3: "<<h1[3]->GetEntries()<<endl;
-  //  		cout<<"h43: "<<h1[43]->GetEntries()<<endl;
-  //  		cout<<"h44: "<<h1[44]->GetEntries()<<endl;
-  //  		cout<<"h101: "<<h1[101]->GetEntries()<<endl;
-  //  		cout<<"h245: "<<h1[245]->GetEntries()<<endl;
-
   oth->fill(  h1[1],(adc>0? log10(adc) :0));
 
   oth->fill(  h1[2],(tpc_size>0? log10(tpc_size) :0));
@@ -1040,22 +1008,10 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   }
   if(tpc_max_channels != 0.) {
     tpc_occ = 100.0 *(tpc_channels/tpc_max_channels);
-    // Physics triggers goes here
-    if(trgcmd != 8 && trgcmd != 9 && trgcmd !=10){
-      oth->fill(	  h1[3],tpc_occ);
-    }
-    // Occupancy for Pulser triggers goes here
-    if(trgcmd == 8 && trgcmd ==10) {
-      oth->fill(	  h1[43],tpc_occ);
-    }
-    //Occupancy for Laser triggers goes here
-    if(trgcmd == 9){
-      //printf("filling oth\n");
-      //fflush(stdout);
-      oth->fill(	  h1[44],tpc_occ);
-      //printf("filled oth\n");
-      //fflush(stdout);
-    }
+    if (trgcmd == 9) hist_index=44; // laser triggers
+    else if (trgcmd==8 || trgcmd==10) hist_index=43; // pulser triggers
+    else hist_index = 3; // physics triggers
+    oth->fill(	  h1[hist_index],tpc_occ);
   }
   if(mDebugLevel) {
     fprintf(stderr,"TPC: occupancy %3d %%, charge %d",(int)tpc_occ,(int)adc) ;
@@ -2233,7 +2189,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.14 2009/03/11 15:43:50 genevb Exp $
+   * $Id: HistoHandler.cxx,v 1.15 2009/03/17 23:06:04 genevb Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2243,6 +2199,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.15  2009/03/17 23:06:04  genevb
+   * A few TPC optimizations
+   *
    * Revision 1.14  2009/03/11 15:43:50  genevb
    * Some cleanup of laser codes (halt use of laser hist groups for now)
    *
