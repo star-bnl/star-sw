@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.16 2009/03/17 19:19:21 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.17 2009/03/18 14:21:06 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.17  2009/03/18 14:21:06  fisyak
+ * Move sector check under condition that there is some TPC data
+ *
  * Revision 1.16  2009/03/17 19:19:21  fisyak
  * Account new Valery's interface for adc values
  *
@@ -179,8 +182,8 @@ Int_t StTpcHitMaker::Make() {
 	}
       }
     }
-    assert(Sector() == sector);
     while (daqTpcTable) {
+      assert(Sector() == sector);
       Int_t row = 45;
       fTpc = 0;
       if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
