@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.9 2009/03/04 02:01:30 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.10 2009/03/18 19:30:20 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.10  2009/03/18 19:30:20  ullrich
+ * In vpdTimeDifference() change index 6 to 7.
+ *
  * Revision 2.9  2009/03/04 02:01:30  ullrich
  * New access functions for ZDC DSM layer-1 and layer-2 data.
  *
@@ -893,7 +896,7 @@ unsigned short StTriggerData2009::vpdEarliestTDC(StBeamDirection eastwest) const
 
 unsigned short StTriggerData2009::vpdTimeDifference() const
 {
-  return L1_DSM->VTX[6]%8192;
+  return L1_DSM->VTX[7]%8192;
 }
 
 unsigned short StTriggerData2009::nQTdata(int prepost) const
