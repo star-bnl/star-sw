@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.3 2009/02/13 00:00:56 dongx Exp $
+ * $Id: StBTofGeometry.h,v 1.4 2009/03/18 14:18:18 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,10 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.4  2009/03/18 14:18:18  dongx
+ * - Optimized the geometry initialization function, reduced the CPU time use
+ * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
+ *
  * Revision 1.3  2009/02/13 00:00:56  dongx
  * Tray geometry alignment implemented.
  *
@@ -99,7 +103,7 @@ class StBTofNode : public TObject {
 
  protected:
 //    StBTofNode(TVolumeView *element, TVolumeView *top);
-    StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0);
+    StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
     
     StBTofNode& operator=(const StBTofNode&);
 
@@ -168,7 +172,7 @@ class StBTofGeomTray : public StBTofNode {
 
  public:
 //   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top);
-   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align=0);
+   StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
    StBTofGeomTray() {}
    ~StBTofGeomTray();
 
@@ -211,7 +215,7 @@ class StBTofGeomSensor : public StBTofNode {
 
  public:
 //   StBTofGeomSensor(TVolumeView *element, TVolumeView *top);
-   StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0);
+   StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align=0, TVolumePosition *pos=0);
 
    StBTofGeomSensor() {}
    ~StBTofGeomSensor();
@@ -274,7 +278,7 @@ class StBTofGeometry : public TNamed {
    TVolumeView*      mTopNode;       //top TNode as MRS
    const char* mRootFile;      //!the root file of geometry
    Int_t       mSectorsInBTOH; //number of sectors in one half TOF
-   Int_t       mTrays;         //amount of TOFr trays
+   Int_t       mNValidTrays;   //amount of TOF trays
    Int_t       mModulesInTray; //number of modules in a tray
    Int_t       mCellsInModule; //number of cell in a module
    Bool_t      mInitFlag;      //flag of initialization, kTRUE if done
@@ -283,8 +287,6 @@ class StBTofGeometry : public TNamed {
 
    StBTofGeomTray* mBTofTray[mNTrays];
    StBTofGeomSensor* mBTofSensor[mNTrays][mNModules];
-   Int_t       mNValidTrays;
-   Int_t       mNValidModules;
 
    static Bool_t   mDebug;     //!Control message printing of this class
 
@@ -344,7 +346,7 @@ class StBTofGeometry : public TNamed {
                          { return StBTofGeomSensor::GetCells(); }
    Int_t   ModulesInTray(const Int_t itray=0) const
                          { return mModulesInTray; }
-   Int_t   Trays() const { return mTrays; }
+   Int_t   Trays() const { return mNValidTrays; }
 
    const char* GeoRootFile() { return mRootFile; }
    virtual void      Print(Option_t *opt="") const ;
