@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.h,v 1.2 2009/02/18 22:43:47 dongx Exp $
+ * $Id: StBTofSortRawHit.h,v 1.3 2009/03/18 20:14:10 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -64,11 +64,13 @@ struct TOFRawHit {
 class StBTofSortRawHit : public StObject {
  private:
   static const Int_t mNTRAY = 122;
+  static const Int_t mNCHAN = 192;
+  static const Int_t mNFIBER = 4;
   tofRawHitVector mRawHitVec[mNTRAY];
   
   Float_t mTriggerTimeWindow[mNTRAY][2];    //
   Float_t mTriggerOffset;                   //
-  UInt_t  mTriggerTime[4];                  //
+  UInt_t  mTriggerTime[mNFIBER];            //
 
   Bool_t  mDebug;                           //! switch for debugging 
   StBTofDaqMap     *mDaqMap;

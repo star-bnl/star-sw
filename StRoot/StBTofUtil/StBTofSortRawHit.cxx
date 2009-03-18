@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.4 2009/03/17 18:32:26 fine Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.5 2009/03/18 20:14:10 dongx Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -82,7 +82,7 @@ void StBTofSortRawHit::setBTofCollection(StBTofCollection* tofColl) {
   Reset();
 
   if(tofColl && tofColl->tofHeader()) {
-    for(int i=0;i<4;i++) {
+    for(int i=0;i<mNFIBER;i++) {
       mTriggerTime[i] = tofColl->tofHeader()->triggerTime(i);
     }
     if(mDebug) {
@@ -113,15 +113,15 @@ void StBTofSortRawHit::setBTofCollection(StBTofCollection* tofColl) {
       int itray = tofRawHits[i]->tray();
       int ichan = tofRawHits[i]->channel();
       int ifiber = tofRawHits[i]->fiberId();
-      bool iexist = kFALSE;
-      if (itray > mNTRAY ) {
+      if (itray<=0 || itray>mNTRAY || ichan<0 || ichan>=mNCHAN || ifiber<0 || ifiber>=mNFIBER ) {
          LOG_FATAL << " StBTofSortRawHit::setBTofCollection:: "
-                   << "i="<< i 
                    << ": itray=" << itray 
                    << ": ichan=" << ichan 
                    << ": ifiber=" << ifiber
                    << endm;
+         continue;
       }
+      bool iexist = kFALSE;
       for(size_t ii=0; ii<mRawHitVec[itray-1].size(); ii++) {
 	if(itray==mRawHitVec[itray-1][ii].tray && ichan==mRawHitVec[itray-1][ii].channel) {
 	  iexist = kTRUE;
