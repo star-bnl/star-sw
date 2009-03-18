@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.3 2009/02/13 00:00:56 dongx Exp $
+ * $Id: StBTofGeometry.cxx,v 1.4 2009/03/18 14:18:18 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,10 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.4  2009/03/18 14:18:18  dongx
+ * - Optimized the geometry initialization function, reduced the CPU time use
+ * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
+ *
  * Revision 1.3  2009/02/13 00:00:56  dongx
  * Tray geometry alignment implemented.
  *
@@ -67,8 +71,8 @@ char* const StBTofGeometry::trayPref   = "BTRA";
 char* const StBTofGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
-StBTofNode::StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align)
-  : fView(element), pView(element->GetPosition()), mMasterNode(top), mTransFlag(kFALSE)
+StBTofNode::StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align, TVolumePosition *pos)
+  : fView(element), pView(new TVolumePosition(*pos)), mMasterNode(top), mTransFlag(kFALSE)
 {
    if(align) {
      mAlign[0] = align->x();  mAlign[1] = align->y();  mAlign[2] = align->z();
@@ -265,13 +269,17 @@ void StBTofNode::Local2Master(const Double_t* local, Double_t* master)
    //  pView->UpdateMatrix();
    if (!mTransFlag) {
      if (!mMasterNode) { LOG_INFO << " no Master! " << endm; return;}
-     TVolumeView *son = GetfView();
-     TVolumeView *mrs = GetTopNode();
+     if (pView) {
+       pView->Local2Master(local, master);
+     } else {
+       TVolumeView *son = GetfView();
+       TVolumeView *mrs = GetTopNode();
      
-     TVolumePosition *pos = 0;
-     pos = son->Local2Master(son, mrs);
-     pos->Local2Master(local, master);
-     delete pos;
+       TVolumePosition *pos = 0;
+       pos = son->Local2Master(son, mrs);
+       pos->Local2Master(local, master);
+       delete pos;
+     }
      return;
    }
 
@@ -444,8 +452,8 @@ ClassImp(StBTofGeomTray)
 Bool_t StBTofGeomTray::mDebug = kFALSE;
 
 //_____________________________________________________________________________
-StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align) 
-  : StBTofNode((TVolumeView *)sector->First(), top, align)
+StBTofGeomTray::StBTofGeomTray(const Int_t ibtoh, TVolumeView *sector, TVolumeView *top, StThreeVectorD *align, TVolumePosition *pos)
+  : StBTofNode((TVolumeView *)sector->First(), top, align, pos)
 {
   mSectorsInBTOH = top->GetListSize()/2;
   mBTOHIndex = ibtoh + 1;
@@ -480,8 +488,8 @@ ClassImp(StBTofGeomSensor)
 Bool_t StBTofGeomSensor::mDebug = kFALSE;
 
 //_____________________________________________________________________________
-StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align) 
-  : StBTofNode(element, top, align)
+StBTofGeomSensor::StBTofGeomSensor(TVolumeView *element, TVolumeView *top, StThreeVectorD *align, TVolumePosition *pos) 
+  : StBTofNode(element, top, align, pos)
 {
    mModuleIndex = element->GetPosition()->GetId();
    CreateGeomCells();
@@ -626,7 +634,7 @@ StBTofGeometry::StBTofGeometry(const char* name, const char* title)
 {
    mCellsInModule  = StBTofGeomSensor::GetCells();
    mModulesInTray  = 0;
-   mTrays          = 0;
+   mNValidTrays    = 0;
    mRootFile       = 0;
    mInitFlag       = kFALSE;
    mTopNode        = 0;
@@ -747,25 +755,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
   starHall->SetVisibility(TVolume::kBothVisible);
   mTopNode = new TVolumeView(*starHall,10); 
 
-  //  mTrays = 120;
-  //  mModulesInTray = 32;
-
   mSectorsInBTOH = mTopNode->GetListSize()/2;    // # of sectors in one half
-
-  // check tray-tofr or full-tofr
-  TDataSetIter nextSector(mTopNode);
-  TVolumeView *secVolume = 0;
-  mTrays = 0;     // non-emtry tray number
-  while ( (secVolume = (TVolumeView *)nextSector()) ) {
-    TVolumeView *trayVolume = (TVolumeView *)secVolume->First();
-    if ( trayVolume->GetListSize() ) {
-      mTrays++;
-      mModulesInTray = trayVolume->GetListSize();
-    }
-  }
-  mBTofConf = 0;
-  if (mTrays==120) mBTofConf = 1;
-  //
 
   /////////////////////////////
   // save the sensors and trays
@@ -774,50 +764,78 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
     LOG_WARN << " No Top Node for Tof Geometry! " << endm;
     return;
   }
-  if(mDebug) {
-//    mTopNode->ls(9);
-    LOG_INFO << " # of trays = " << mTopNode->GetListSize() << endm;
-  }
-  LOG_INFO << " # of trays = " << mTopNode->GetListSize() << endm;
-  TList *list = mTopNode->Nodes();
-  Int_t ibtoh =0;
-  TVolumeView *sectorVolume = 0;
+  LOG_INFO << " # of sectors = " << mTopNode->GetListSize() << endm;
+
+  TVolumePosition *transPos = 0;
+
+//  TDataSetIter nextDet(mTopNode, 0);
+  TVolumeViewIter nextDet((TVolumeView *)mTopNode, 0);
+  TVolumeView *secVolume = 0;
+  TVolumeView *detVolume = 0;
+  Int_t ibtoh = 0;
+  Int_t isec = 0;
+  Int_t isensor = 0;
   mNValidTrays = 0;
-  mNValidModules = 0;
-  for(Int_t i=0;i<list->GetSize();i++) {
-    sectorVolume = dynamic_cast<TVolumeView*> (list->At(i));
-    TVolumeView *trayVolume = (TVolumeView *)sectorVolume->First();
-    if( !trayVolume->GetListSize() ) continue;  /// Tray should not be empty
-    if ( i>=60 ) ibtoh = 1;
+  mModulesInTray = 0;
+  StThreeVectorD *align = 0;
+  while ( (detVolume = (TVolumeView *)nextDet()) ) {
 
-    int sectorsInBTOH = mTopNode->GetListSize()/2;
-    int trayIndex = ibtoh * sectorsInBTOH + sectorVolume->GetPosition()->GetId();
-    int itray = trayIndex - 1;
-    StThreeVectorD *align;
-    if(trayIndex<=60) align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], mTrayZ0[itray]);
-    else align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], -mTrayZ0[itray]);  // thus z0 will be the distance between the tray end to the TPC central membrane
-    mBTofTray[mNValidTrays] = new StBTofGeomTray(ibtoh, sectorVolume, mTopNode, align);
-
-    if(mDebug) {
-      LOG_INFO << "   # of modules in tray " << mBTofTray[mNValidTrays]->Index() << " = " << trayVolume->GetListSize() << endm;
-      LOG_INFO << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
-      mBTofTray[mNValidTrays]->Print();
+    if(strcmp(detVolume->GetName(), sectorPref)==0) {  // sector volume
+      isec++;
+      secVolume = (TVolumeView *)detVolume;
+      continue;   // sector continue;
     }
+    if(strcmp(detVolume->GetName(), trayPref)==0) {   // tray volume
+      if ( isec>60 ) ibtoh = 1;
+      int sectorsInBTOH = mTopNode->GetListSize()/2;
+      int trayIndex = ibtoh * sectorsInBTOH + secVolume->GetPosition()->GetId(); // secVolume
+      LOG_INFO << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
+      isensor = 0;   // clear for this tray
+      if(detVolume->GetListSize()) {   // valid tray
 
-    TList *list1 = trayVolume->Nodes();
-    if (!list1 ) continue;
-    TVolumeView *sensorVolume = 0;
-    if(list1->GetSize()>mNValidModules) mNValidModules=list1->GetSize(); 
-    for(Int_t j=0;j<list1->GetSize();j++) {
-      sensorVolume = dynamic_cast<TVolumeView*> (list1->At(j));
-      mBTofSensor[mNValidTrays][j] = new StBTofGeomSensor(sensorVolume, mTopNode, align);
-      if(mDebug) mBTofSensor[mNValidTrays][j]->Print();
+        int itray = trayIndex - 1;
+
+        if(align) delete align;    align = 0;
+        if(trayIndex<=60) align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], mTrayZ0[itray]);
+        else align = new StThreeVectorD(mTrayX0[itray], mTrayY0[itray], -mTrayZ0[itray]);  // thus z0 will be the distance between the tray end to the TPC central membrane
+
+        transPos = nextDet[0];
+
+        mNValidTrays++;
+
+        mBTofTray[mNValidTrays-1] = new StBTofGeomTray(ibtoh, secVolume, mTopNode, align, transPos);
+        delete transPos;  transPos = 0;
+
+        if(mDebug) {
+          LOG_INFO << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
+          LOG_INFO << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
+          mBTofTray[mNValidTrays-1]->Print();
+        }
+
+      }
     }
-    mNValidTrays++;
+    if(strcmp(detVolume->GetName(), senPref)==0) {   // module volume
+
+      transPos = nextDet[0];
+
+      mBTofSensor[mNValidTrays-1][isensor] = new StBTofGeomSensor(detVolume, mTopNode, align, transPos);
+      delete transPos;   transPos = 0;
+
+      if(mDebug) mBTofSensor[mNValidTrays-1][isensor]->Print();
+
+      isensor++;
+      if(isensor>mModulesInTray) mModulesInTray = isensor;
+    }
   }
+
+  mBTofConf = 0;
+  if (mNValidTrays==120) mBTofConf = 1;
+
   LOG_INFO << "\n-------------------------------------------\n"
            << " Summary of initialization: "
-           << "    NValidTrays = " << mNValidTrays << "   NValidModules = " << mNValidModules << endm;
+           << "    NValidTrays = " << mNValidTrays << "   NModulesInTray = " << mModulesInTray << endm;
+  LOG_INFO << "\n-------------------------------------------\n" << endm;
+
   if(mDebug) Print();
 
   return;
@@ -1105,7 +1123,7 @@ const
    for(int i=0;i<mNValidTrays;i++) {
      if(!mBTofTray[i]) continue;
      if(mBTofTray[i]->Index()==itray) {
-       for(int j=0;j<mNModules;j++) {
+       for(int j=0;j<mModulesInTray;j++) {
          if(!mBTofSensor[i][j]) continue;
          if(mBTofSensor[i][j]->Index()==imodule) return mBTofSensor[i][j];
        }
@@ -1203,7 +1221,7 @@ const
 //_____________________________________________________________________________
 void StBTofGeometry::Print(Option_t *opt)  const
 {
-   LOG_INFO << "Trays=" << mTrays <<"\t ModulesInTray=" << mModulesInTray
+   LOG_INFO << "Trays=" << mNValidTrays <<"\t ModulesInTray=" << mModulesInTray
         << "\t CellsInModule=" << mCellsInModule << endm;
 }
 
@@ -1234,7 +1252,7 @@ const
 	 return cellId;
        }
        
-       for( int j=0;j<mNValidModules;j++) {
+       for( int j=0;j<mModulesInTray;j++) {
 	 if(!mBTofSensor[i][j]) continue;
 	 if ( mBTofSensor[i][j]->IsGlobalPointIn(point) ) {
 	   imodule = mBTofSensor[i][j]->Index();
@@ -1278,6 +1296,9 @@ const
    //  and the path length of the helix before crossing the cell
    //
 
+   IntVec projTrayVec;
+   if( !projTrayVector(helix, projTrayVec) ) return kFALSE;
+
    Double_t pathLen;
    Int_t cellId;
    StThreeVectorD cross;
@@ -1289,7 +1310,19 @@ const
      if(!mBTofTray[i]) continue;
      int trayId = mBTofTray[i]->Index();
 
-     for(int j=0;j<mNValidModules;j++) {
+     /// first justify if the tray is within the projection range
+
+     bool itrayFind = kFALSE;
+     for(size_t it=0;it<projTrayVec.size();it++) {
+       int validtrayId = projTrayVec[it];
+       if(validtrayId==trayId) {
+         itrayFind = kTRUE;
+         break;
+       }
+     }
+     if(!itrayFind) continue;
+
+     for(int j=0;j<mModulesInTray;j++) {
        if(!mBTofSensor[i][j]) continue;
        int moduleId = mBTofSensor[i][j]->Index();
        if ( mBTofSensor[i][j]->HelixCross(helix,pathLen,cross) ) {	   
@@ -1380,7 +1413,7 @@ const
 
      //     LOG_INFO << " Helix cross sensitive tray " << trayId << endm;
 
-     for(int j=0;j<mNValidModules;j++) {
+     for(int j=0;j<mModulesInTray;j++) {
        if(!mBTofSensor[i][j]) continue;
        int moduleId = mBTofSensor[i][j]->Index();
        for(size_t iv=0;iv<validModuleVec.size();iv++) {
@@ -1421,44 +1454,63 @@ const
 Bool_t StBTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) const {
 
   trayVec.clear();
-  double R_tof = 215.;
-  double res = 5.0;
-  double s1 = helix.pathLength(R_tof).first;
-  if(s1<0.) s1 = helix.pathLength(R_tof).second;
-  StThreeVectorD point = helix.at(s1);
-  double phi = point.phi()*180/3.14159;
+  double R_tof[2]= {210., 216.};  // inner and outer surfaces
+//  double res = 5.0;
+// second choice - choose 2 neighbouring trays
 
-  // east ring, start from 108 deg (id=61) , clock-wise from east facing west
-  int itray_east = (255+(int)phi)%360/6+61;
-  trayVec.push_back(itray_east);
+  for(int i=0;i<2;i++) {
 
-  int itray_east1 = (255+(int)(phi+res))%360/6+61;
-  int itray_east2 = (255+(int)(phi-res))%360/6+61;
-  if(itray_east1!=itray_east) {
-    trayVec.push_back(itray_east1);
-  }
-  if(itray_east2!=itray_east&&itray_east2!=itray_east1) {
-    trayVec.push_back(itray_east2);
-  }
-  
-  // west ring, start from 72 deg (id=1) , clock-wise from west facing east
-  int itray_west = (435-(int)phi)%360/6+1;
-  trayVec.push_back(itray_west);
+    double s = helix.pathLength(R_tof[i]).first;
+    if(s<0.) s = helix.pathLength(R_tof[i]).second;
+    StThreeVectorD point = helix.at(s);
+    double phi = point.phi()*180/3.14159;
+    double z = point.z();
 
-  int itray_west1 = (435-(int)(phi+res))%360/6+1;
-  int itray_west2 = (435-(int)(phi-res))%360/6+1;
-  if(itray_west1!=itray_west) {
-    trayVec.push_back(itray_west1);
-  }
-  if(itray_west2!=itray_west&&itray_west2!=itray_west1) {
-    trayVec.push_back(itray_west2);
-  }
+    int itray[3] = {0,0,0};
+    if(z<0) {
+      // east ring, start from 108 deg (id=61) , clock-wise from east facing west
+      itray[0] = (255+(int)phi)%360/6+61;
+      itray[1] = itray[0] - 1;
+      if(itray[1]<=60) itray[1] += 60;
+      itray[2] = itray[0] + 1;
+      if(itray[2]>120) itray[2] -= 60;
+//      itray[1] = (255+(int)(phi+res))%360/6+61;
+//      itray[2] = (255+(int)(phi-res))%360/6+61;
+    } else {
+      // west ring, start from 72 deg (id=1) , clock-wise from west facing east
+      itray[0] = (435-(int)phi)%360/6+1;
+      itray[1] = itray[0] - 1;
+      if(itray[1]<=0) itray[1] += 60;
+      itray[2] = itray[0] + 1;
+      if(itray[2]>60) itray[2] -= 60;
+//      itray[1] = (435-(int)(phi+res))%360/6+1;
+//      itray[2] = (435-(int)(phi-res))%360/6+1;
+    }
 
-//   LOG_INFO << " proj tray id = ";
-//   for(size_t it=0;it<trayVec.size();it++) {
-//     LOG_INFO << trayVec[it] << " ";
-//   }
-//   LOG_INFO << endm;
+    for(int k=0;k<3;k++) {
+      if(itray[k]<=0 || itray[k]>120) continue;
+
+      bool found = kFALSE;
+      for(size_t j=0;j<trayVec.size();j++) {
+        if(trayVec[j]==itray[k]) {
+          found = kTRUE;
+          break;
+        }
+      }
+
+      if(found) continue;
+
+      trayVec.push_back(itray[k]);
+    } // end loop k  
+  } // end loop i
+
+/*
+   cout << " proj tray id = ";
+   for(size_t it=0;it<trayVec.size();it++) {
+     cout << trayVec[it] << " ";
+   }
+   cout << endl;
+*/
   
   if(trayVec.size()>0) return kTRUE;
   else return kFALSE;
