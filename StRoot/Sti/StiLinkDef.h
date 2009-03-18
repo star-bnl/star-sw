@@ -5,7 +5,6 @@
 #pragma link C++ class StiCylindricalShape;
 #pragma link C++ class StiDetectorBuilder;
 #pragma link C++ class StiDetectorContainer;
-#pragma link C++ class StiDetectorFinder;
 #pragma link C++ class StiDetectorTreeBuilder;
 #pragma link C++ class StiElossCalculator;
 #pragma link C++ class StiFilter;

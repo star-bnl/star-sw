@@ -1,6 +1,9 @@
-// $Id: StiSsdHitLoader.cxx,v 1.12 2005/10/26 21:59:12 fisyak Exp $
+// $Id: StiSsdHitLoader.cxx,v 1.13 2009/03/18 19:55:39 fisyak Exp $
 // 
 // $Log: StiSsdHitLoader.cxx,v $
+// Revision 1.13  2009/03/18 19:55:39  fisyak
+// remove StiDetectorFinder class
+//
 // Revision 1.12  2005/10/26 21:59:12  fisyak
 // get rid off dependencies from StMcEvent
 //
@@ -25,7 +28,6 @@
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
-#include "Sti/StiDetectorFinder.h"
 #include "Sti/StiDetector.h"
 
 StiSsdHitLoader::StiSsdHitLoader()

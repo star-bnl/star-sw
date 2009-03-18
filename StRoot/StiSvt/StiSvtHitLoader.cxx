@@ -10,7 +10,6 @@
 #include "Sti/StiTrack.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiDetectorBuilder.h"
-#include "Sti/StiDetectorFinder.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiHitTest.h"
 

@@ -6,7 +6,6 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Filter.h"
-#include "Sti/StiDetectorFinder.h"
 #include "Sti/StiToolkit.h"
 class StiHit;
 class StiTrack;
@@ -59,7 +58,6 @@ class StiHitLoader : public Named
   Factory<StiHit>     * _hitFactory;
   Factory<StiKalmanTrack> * _trackFactory;
   Detector            * _detector;
-  StiDetectorFinder   * _detectorFinder;
 };
 
 template<class Source1, class Detector>
@@ -69,8 +67,7 @@ StiHitLoader<Source1, Detector>::StiHitLoader(const string & name)
      _trackContainer(StiToolkit::instance()->getTrackContainer()),
      _hitFactory(StiToolkit::instance()->getHitFactory()),
      _trackFactory(StiToolkit::instance()->getTrackFactory()),
-     _detector(0),
-     _detectorFinder(StiDetectorFinder::instance())
+     _detector(0)
 {}
     
 template<class Source1, class Detector>
@@ -83,8 +80,7 @@ StiHitLoader<Source1, Detector>::StiHitLoader(const string & name,
      _trackContainer(StiToolkit::instance()->getTrackContainer()),
      _hitFactory(hitFactory),
      _trackFactory(StiToolkit::instance()->getTrackFactory()),
-     _detector(detector),
-     _detectorFinder(StiDetectorFinder::instance())
+     _detector(detector)
 {}
 
 template<class Source1, class Detector>StiHitLoader<Source1, Detector>::~StiHitLoader(){}

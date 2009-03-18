@@ -44,7 +44,6 @@ public:
   virtual StiTrackContainer        *getTrackContainer();
   
   // service and convenience class objects.
-  virtual StiDetectorFinder      *getDetectorFinder();
   virtual StiTrackFinder         *getTrackSeedFinder();
   virtual StiTrackFinder         *getTrackFinder();
   virtual StiTrackFitter         *getTrackFitter();
@@ -91,7 +90,6 @@ public:
   StiTrackContainer            *_trackContainer;
   
   // service and convenience class objects.
-  StiDetectorFinder       *_detectorFinder;
   StiTrackFinder          *_trackSeedFinder;
   StiTrackFinder          *_trackFinder;
   StiTrackFitter          *_trackFitter;
