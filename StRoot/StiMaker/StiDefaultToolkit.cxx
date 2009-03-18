@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.41 2009/03/16 13:50:14 fisyak Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.42 2009/03/18 19:55:39 fisyak Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.42  2009/03/18 19:55:39  fisyak
+ * remove StiDetectorFinder class
+ *
  * Revision 2.41  2009/03/16 13:50:14  fisyak
  * Move out all Sti Chairs into StDetectorDb
  *
@@ -134,7 +137,6 @@
 #include "Sti/StiMasterHitLoader.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorContainer.h"
-#include "Sti/StiDetectorFinder.h"
 #include "Sti/StiTrackContainer.h"
 //#include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiLocalTrackSeedFinder.h"
@@ -180,7 +182,6 @@ StiDefaultToolkit::StiDefaultToolkit()
   _detectorGroups(0),
   _hitContainer(0),
   _trackContainer(0),
-  _detectorFinder(0),
   _trackSeedFinder(0),
   _trackFinder(0),
   _trackFitter(0),
@@ -204,7 +205,6 @@ StiDefaultToolkit::~StiDefaultToolkit()
   delete _hitContainer;
   delete _detectorFactory;
   delete _detectorContainer;
-  StiDetectorFinder::kill(); 
   delete _trackNodeFactory;
   delete _trackNodeExtFactory;
   delete _trackNodeInfFactory;
@@ -385,17 +385,6 @@ StiTrackContainer     * StiDefaultToolkit::getTrackContainer()
   _trackContainer = new StiTrackContainer("TrackContainer","Reconstructed Tracks");
   return _trackContainer;
 }
-
-
-//______________________________________________________________________________
-StiDetectorFinder    * StiDefaultToolkit::getDetectorFinder()
-{
-  if (_detectorFinder)
-    return _detectorFinder;
-  _detectorFinder = StiDetectorFinder::instance();
-  return _detectorFinder;
-}
-
 //______________________________________________________________________________
 StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinder()
 {

@@ -53,7 +53,6 @@ using std::vector;
 #include "StiCompositeTreeNode.h"
 #include "StiDetector.h"
 class StiDetectorBuilder;
-class StiDetectorFinder;
 
 class StiDetectorTreeBuilder
 {
@@ -106,7 +105,6 @@ protected:
     StiDetectorNode* mregion;
     
     ///Convenience pointer to a detector finder
-    StiDetectorFinder *_detectorFinder;
     
 };
 

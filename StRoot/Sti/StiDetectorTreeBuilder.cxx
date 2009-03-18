@@ -13,7 +13,6 @@
 #include "StiDetectorBuilder.h"
 #include "StiDetectorTreeBuilder.h"
 #include "StlUtilities.h"
-#include "StiDetectorFinder.h" 
 #include "StiToolkit.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
@@ -21,8 +20,7 @@ ostream& operator<<(ostream&, const StiDetector&);
 StiDetectorTreeBuilder::StiDetectorTreeBuilder()
     : mroot(0), 
       mnodefactory(StiToolkit::instance()->getDetectorNodeFactory()), 
-    mregion(0),
-    _detectorFinder(StiDetectorFinder::instance() )
+    mregion(0)
 {
     cout <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() -I- Started/Done"<<endl;
 }
@@ -196,7 +194,6 @@ void StiDetectorTreeBuilder::loopOnDetectors()
       detector->build();
       addToTree(detector);
       // add to by-name map
-      _detectorFinder->addDetector(detector);
     }
   // cout << "StiDetectorTreeBuilder::loopOnDetectors() -I- Done"<<endl;
   return;
