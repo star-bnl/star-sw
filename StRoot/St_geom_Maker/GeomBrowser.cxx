@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.11 2009/02/12 19:58:30 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.12 2009/03/19 00:23:31 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #include "StChain.h"
@@ -271,7 +271,7 @@ void GeomBrowser::Init()
        QFile geomFile(found);
        if (geomFile.open(IO_ReadOnly)) {
        QString line;
-       QRegExp exp("^\\s+\\bon\\b.+");
+       QRegExp exp("^\\s+\\bCase\\b.+");
 	   char bufLine[1024];
        while (geomFile.readLine(bufLine, sizeof(bufLine)) >=0 ) 
        {
