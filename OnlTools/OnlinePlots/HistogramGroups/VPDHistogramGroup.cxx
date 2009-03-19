@@ -7,6 +7,7 @@
 #include "TVirtualPad.h"
 #include "TLine.h"
 #include "TLatex.h"
+#include "TStyle.h"
 
 #ifndef NEW_DAQ_READER
 #  include <evpReader.hh>
@@ -17,12 +18,19 @@
 #  include "DAQ_TRG/trgReader.h"
 #  include "DAQ_READER/cfgutil.h"
 #  include "StEvent/StTriggerData.h"
+#  include "DAQ_L3/l3Reader.h"
 #  include "TriggerData.h"
 #endif
 #include "TMapFile.h"
 #include "EvpUtil.h"
 #include "HistoHandler.h"
+#include "eventTrackerLib.hh"
 
+using namespace std;
+
+static const int sizL3_max = 1000000;
+static L3_P *l3p =(L3_P *)malloc(sizL3_max);
+static EventTracker *evtTracker = new EventTracker();
 
 ClassImp(VPDHistogramGroup) ;
 
@@ -35,6 +43,8 @@ VPDHistogramGroup::VPDHistogramGroup() {
 
 VPDHistogramGroup::VPDHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {
+
+#ifndef NEW_DAQ_READER
   for (int i = 0; i < 4; ++i) {
     stringstream n;
     n << "h_vpd_cdb_vp00" << i + 1;
@@ -47,29 +57,74 @@ VPDHistogramGroup::VPDHistogramGroup(const char* group, const char* subGroup, co
   h_vpd_tac_east_vs_tac_west = new TH2D( pre("h_vpd_tac_east_vs_tac_west"), "VPD TAC East vs. TAC West", 257, -1.5, 255.5, 257, -1.5, 255.5);
   h_vpd_tac_east_vs_tac_west->SetXTitle("TAC West");
   h_vpd_tac_east_vs_tac_west->SetYTitle("TAC East");
+
   h_vpd_vertex_vs_l3_vertex = new TH2D( pre("h_vpd_vertex_vs_l3_vertex"), "VPD TAC Difference vs. L3 Vertex z-Position", 200, -200, 200, 512, -0.5, 511.5);
   h_vpd_vertex_vs_l3_vertex->SetXTitle("L3 Vertex z-Position [cm]");
   h_vpd_vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
+#else
+  char tmpchr[200]; 
+
+  sprintf(tmpchr,"vpd_east_ADClo");
+  h_vpd_cdb[0]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
+  h_vpd_cdb[0]->SetXTitle("Channel # (east)");
+  h_vpd_cdb[0]->SetYTitle("Low-Th ADC (east)");
+  sprintf(tmpchr,"vpd_east_TAClo");
+  h_vpd_cdb[1]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
+  h_vpd_cdb[1]->SetXTitle("Channel # (east)");
+  h_vpd_cdb[1]->SetYTitle("Low-Th TAC (east)");
+
+  sprintf(tmpchr,"vpd_west_ADClo");
+  h_vpd_cdb[2]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
+  h_vpd_cdb[2]->SetXTitle("Channel # (west");
+  h_vpd_cdb[2]->SetYTitle("Low-Th ADC (west)");
+  sprintf(tmpchr,"vpd_west_TAClo");
+  h_vpd_cdb[3]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
+  h_vpd_cdb[3]->SetXTitle("Channel # (west)");
+  h_vpd_cdb[3]->SetYTitle("Low-Th TAC (west)");
+
+  sprintf(tmpchr,"h_vpd_tac_east_vs_tac_west");
+  h_vpd_tac_east_vs_tac_west = new TH2D(tmpchr,"VPD TAC East vs. TAC West", 400, -1.5, 4095.5, 400, -1.5, 4095.5);
+  h_vpd_tac_east_vs_tac_west->SetXTitle("TAC West");
+  h_vpd_tac_east_vs_tac_west->SetYTitle("TAC East");
+
+  sprintf(tmpchr,"h_vpd_vertex_vs_l3_vertex");
+  h_vpd_vertex_vs_l3_vertex = new TH2D(tmpchr,"VPD TAC Difference vs. L3 Vertex z-Position", 200, -200, 200, 800, -0.5, 8191.5);
+  h_vpd_vertex_vs_l3_vertex->SetXTitle("L3 Vertex z-Position [cm]");
+  h_vpd_vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
+
+  for(int i=0;i<4;i++){
+    h_vpd_cdb[i]->GetXaxis()->SetLabelSize(0.06);
+    h_vpd_cdb[i]->GetYaxis()->SetLabelSize(0.055);
+  }
+  h_vpd_tac_east_vs_tac_west->GetXaxis()->SetLabelSize(0.06);
+  h_vpd_tac_east_vs_tac_west->GetYaxis()->SetLabelSize(0.055);
+  h_vpd_vertex_vs_l3_vertex->GetXaxis()->SetLabelSize(0.06);
+  h_vpd_vertex_vs_l3_vertex->GetYaxis()->SetLabelSize(0.055);
+
+#endif
+
 }
 
 
 VPDHistogramGroup::~VPDHistogramGroup() {
-  for (int i = 0; i < 4; ++i)
-    delete h_vpd_cdb[i];
+
+  for (int i = 0; i < 4; ++i)delete h_vpd_cdb[i];
   delete h_vpd_tac_east_vs_tac_west;
   delete h_vpd_vertex_vs_l3_vertex;
 }
 
 
 void VPDHistogramGroup::reset() {
-  for (int i = 0; i < 4; ++i)
-    h_vpd_cdb[i]->Reset();
+  for (int i = 0; i < 4; ++i)  h_vpd_cdb[i]->Reset();
+
   h_vpd_tac_east_vs_tac_west->Reset();
   h_vpd_vertex_vs_l3_vertex->Reset();
 }
 
 
 void VPDHistogramGroup::draw(TCanvas* cc) {
+
+#ifndef NEW_DAQ_READER
   TLine  line;
   line.SetLineColor(16);
   TLatex label;
@@ -92,6 +147,46 @@ void VPDHistogramGroup::draw(TCanvas* cc) {
   cc->cd(6);
   h_vpd_vertex_vs_l3_vertex->Draw("COLZ");
   cc->Update();
+#else
+
+  TLatex label;
+  label.SetTextAlign(23);  // center, top
+  label.SetTextSize(0.06);
+  label.SetTextColor(16);
+  cc->cd();
+  gStyle->SetPalette(1);
+  gStyle->SetOptStat(0);
+  gStyle->SetLabelSize(0.09,"y");
+  gStyle->SetLabelSize(0.09,"x");
+  gStyle->SetTitleX(0.1); gStyle->SetTitleY(1.);
+  gStyle->SetTitleW(0.8); gStyle->SetTitleH(0.088);
+  gStyle->SetOptTitle(1);
+
+
+
+  cc->Clear();
+  cc->Divide(2, 3);
+  
+  cc->cd(1);
+  h_vpd_cdb[0]->Draw("colz");
+  cc->cd(2);
+  h_vpd_cdb[1]->Draw("colz");
+  cc->cd(3);
+  h_vpd_cdb[2]->Draw("colz");
+  cc->cd(4); 
+  h_vpd_cdb[3]->Draw("colz");
+  
+
+  cc->cd(5);
+  h_vpd_tac_east_vs_tac_west->Draw("COLZ");
+
+  cc->cd(6);
+  h_vpd_vertex_vs_l3_vertex->Draw("COLZ");
+
+  cc->Update();
+
+#endif
+
 } 
 
 
@@ -163,8 +258,35 @@ bool VPDHistogramGroup::fill(evpReader* evp, char* datap) {
 #else
   StTriggerData* trgd = TriggerData::Instance(datap);
   if(!trgd) return false;  
-  //Need to implement vpd QT maps in StTriggerData2009 first.
-  //Please contact akio@bnl.gov
+  
+  for(int i=0;i<2;i++) {   //
+    for(int ich=0;ich<16;ich++){
+      //int adc_hi = trgd->vpdADCHighThr((StBeamDirection)i,ich+1);
+      //int tdc_hi = trgd->vpdTDCHighThr((StBeamDirection)i,ich+1);
+      int adc_lo = trgd->vpdADC((StBeamDirection)i,ich+1);
+      int tdc_lo = trgd->vpdTDC((StBeamDirection)i,ich+1);
+      //cout<<"i="<<i<<" vpd:: "<<adc_hi<<" "<<tdc_hi<<" "<<adc_lo<<" "<<tdc_lo<<endl;
+      h_vpd_cdb[2*i+0]->Fill(ich, adc_lo);
+      h_vpd_cdb[2*i+1]->Fill(ich, tdc_lo);
+
+    }
+  }
+
+  int maxTacEast = trgd->vpdEarliestTDC((StBeamDirection)0);
+  int maxTacWest = trgd->vpdEarliestTDC((StBeamDirection)1);
+  h_vpd_tac_east_vs_tac_west->Fill(maxTacWest, maxTacEast);
+
+  int ret = evtTracker->trackEvent(evp, datap, l3p, sizL3_max);
+  if (!(ret<0)) ret = evtTracker->copyl3_t(l3,l3p);
+  if(ret < 0){
+      fprintf(stderr,"L3: problems in data (%d) - continuing...",ret) ;
+      cout<<"Error tracking event: "<<evp->seq<<endl;
+      return false;
+  }
+  unsigned int tacDiff=trgd->vpdTimeDifference();
+  //cout<<"tacdiff = "<<tacDiff<<" l3 zvertex="<<l3.zVertex<<endl;
+  h_vpd_vertex_vs_l3_vertex->Fill(l3.zVertex, tacDiff);
+
 #endif
   return true;
 

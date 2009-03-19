@@ -14,6 +14,7 @@
 #include "L2UpsilonTowersHistogramGroup.h"
 #include "L2UpsilonMassHistogramGroup.h"
 #include "VPDHistogramGroup.h"
+#include "VPDHiHistogramGroup.h"
 #include "FMSHistogramGroup.h"
 #include "pp2ppHistogramGroup.h"
 //#include "HighTowerFlensburgHistogramGroup.h"
@@ -42,6 +43,9 @@ void GroupCollection::serverCreate() {
   insert( new UPCHistogramCtbGroup("Upc","Ctb","upc","any") );
   insert( new UPCHistogramZdcGroup("Upc","Zdc","upc","any") );
   insert( new VPDHistogramGroup("Trigger","vpd","any","trg") );
+#ifdef NEW_DAQ_READER
+  insert( new VPDHiHistogramGroup("Trigger","vpdHi","any","trg") );
+#endif
   insert( new FMSHistogramGroup("Trigger","fms","any","trg") );
   insert( new pp2ppHistogramGroup(0, "P2P","Trg1-16","any","trg") );
   insert( new pp2ppHistogramGroup(1, "P2P","Trg17-32","any","trg") );
@@ -132,9 +136,14 @@ void GroupCollection::printName(TCanvas* cc, HistogramGroup* gr) {
 
 void  GroupCollection::fill(evpReader* evp, char* datap, unsigned int triggerBits,  unsigned int detectorBits) {
   for ( GroupIterator iter = begin(); iter != end(); iter++) {
-    if ( (*iter)->testBits( triggerBits, detectorBits) ) {
+
+    // Extra checks added to force filling of VPD histograms
+    // Remove when testBits is fixed!
+    //if((*iter)->testBits( triggerBits, detectorBits)){ 
+    if(!strcmp((*iter)->subGroupName(),"vpd") || !strcmp((*iter)->subGroupName(),"vpdHi") || (*iter)->testBits( triggerBits, detectorBits)){ 
       (*iter)->fill(evp,datap);
     }
+
   }
 }
 
