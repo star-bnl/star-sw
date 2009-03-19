@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.52 2009/03/19 01:08:08 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.53 2009/03/19 17:43:42 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.53  2009/03/19 17:43:42  genevb
+// Catch XYTpc hists which were polar
+//
 // Revision 2.52  2009/03/19 01:08:08  genevb
 // Show both xy and rphi TPC hit hists
 //
@@ -686,19 +689,20 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           // actually draw,print
           if ((chkdim == 3) && (obj->InheritsFrom("StMultiH2F"))) {
             obj->Draw("Box");
+          } else  if ((chkdim==2) && (oName.Contains("PointRPTpc") ||
+                      (oName.Contains("PointXYTpc") &&  // Unfortunately was polar for a short time
+                       TMath::Abs((hobj->GetYaxis()->GetXmax()/TMath::Pi())-2)<1e-5))) {
+            TH2F* htmp = new TH2F(Form("%s.",obj->GetName()),obj->GetTitle(),1,-200,200,1,-200,200);
+            htmp->SetStats(kFALSE);
+            htmp->Draw();
+            obj->Draw("pol zcol same");
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
                       oName.EndsWith("PVsDedx") ||
                       oName.EndsWith("SSD") ||
                       oName.EndsWith("PointXYSvt") ||
                       oName.Contains("PointXYTpc"))) {
-            // Introduce possibility of polar coords
             obj->Draw("ZCol");
-          } else  if ((chkdim==2) && oName.Contains("PointRPTpc")) {
-            TH2F* htmp = new TH2F(Form("%s.",obj->GetName()),obj->GetTitle(),1,-200,200,1,-200,200);
-            htmp->SetStats(kFALSE);
-            htmp->Draw();
-            obj->Draw("pol zcol same");
           } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
             obj->Draw("Box");
 	    if ((oName.EndsWith("trkGoodF"))||(oName.EndsWith("VtxSvtvsTpc"))) {
