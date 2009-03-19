@@ -1713,12 +1713,14 @@ void StEventQAMaker::MakeHistPoint() {
             rotator = 11-i;
 	    hists->m_pnt_phiT->Fill(phi,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
-	    hists->m_pnt_xyTE->Fill(hitPos.perp(),phi*degree,hit_weight);
+	    hists->m_pnt_rpTE->Fill(hitPos.perp(),phi*degree,hit_weight);
+	    hists->m_pnt_xyTE->Fill(hitPos.x(),hitPos.y());
 	  } else {
             rotator = i-11;
 	    hists->m_pnt_phiT->Fill(phi,1.);
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
-	    hists->m_pnt_xyTW->Fill(hitPos.perp(),phi*degree,hit_weight);
+	    hists->m_pnt_rpTW->Fill(hitPos.perp(),phi*degree,hit_weight);
+	    hists->m_pnt_xyTW->Fill(hitPos.x(),hitPos.y());
 	  }
           hitPos.rotateZ(((float) rotator)*TMath::Pi()/6.0);
           mTpcSectorPlot[i]->Fill(hitPos.x(),(float) (j+1));
@@ -2366,8 +2368,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.91 2009/03/17 19:35:21 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.92 2009/03/19 01:08:08 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.92  2009/03/19 01:08:08  genevb
+// Show both xy and rphi TPC hit hists
+//
 // Revision 2.91  2009/03/17 19:35:21  genevb
 // Weight the TPC xy hit hists
 //

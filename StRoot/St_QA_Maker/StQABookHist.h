@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.28 2007/11/30 05:38:50 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.29 2009/03/19 01:08:08 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.29  2009/03/19 01:08:08  genevb
+// Show both xy and rphi TPC hit hists
+//
 // Revision 2.28  2007/11/30 05:38:50  genevb
 // Changes for Run8: mostly silicon removal, TOF addition
 //
@@ -118,7 +121,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.28 2007/11/30 05:38:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.29 2009/03/19 01:08:08 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -588,6 +591,8 @@ class StQABookHist : public TObject {
   TH2F     *m_pnt_xyS;     //! xy dist. of hits, svt
   TH2F     *m_pnt_xyTE;    //! xy dist. of hits, tpcE
   TH2F     *m_pnt_xyTW;    //! xy dist. of hits, tpcW
+  TH2F     *m_pnt_rpTE;    //! rphi dist. of hits, tpcE
+  TH2F     *m_pnt_rpTW;    //! rphi dist. of hits, tpcW
   TH2F     *m_pnt_phiT;    //! phi dist. of hits, tpc
   TH1F     *m_pnt_phiS;    //! phi dist. of hits, svt
   TH2F     *m_pnt_padrowT; //! padrow dist. of hits, tpc

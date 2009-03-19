@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.63 2009/03/13 19:27:24 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.64 2009/03/19 01:08:08 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.64  2009/03/19 01:08:08  genevb
+// Show both xy and rphi TPC hit hists
+//
 // Revision 2.63  2009/03/13 19:27:24  genevb
 // Now draw TPC xy hits in polar coords
 //
@@ -674,6 +677,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_xyS=0;     //! xy dist. of hits, svt
   m_pnt_xyTE=0;    //! xy dist. of hits, tpcE
   m_pnt_xyTW=0;    //! xy dist. of hits, tpcW
+  m_pnt_rpTE=0;    //! rphi dist. of hits, tpcE
+  m_pnt_rpTW=0;    //! rphi dist. of hits, tpcW
   m_pnt_phiT=0;    //! phi dist. of hits, tpc
   m_pnt_padrowT=0; //! padrow dist. of hits, tpc
   m_pnt_zS=0;      //! z dist. of hits, svt
@@ -1698,10 +1703,12 @@ void StQABookHist::BookHistPoint(){
   m_pnt_svtLaserDiff->Rebin(1,"Laser 2");
   m_pnt_xyS     = QAH::H2F("QaPointXYSvt","point: x-y distribution of hits, svt,ssd",125,-25,25,125,-25,25);
   }
+  m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",40,-200,200,40,-200,200);
+  m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",40,-200,200,40,-200,200);
   // Now using polar coords (lego didn't work well because of inner radius and colored zero)
   // Drawing a lego plot requires r-phi,r. Drawing a plain polar plot reguirs r,r-phi
-  m_pnt_xyTE    = QAH::H2F("QaPointXYTpcE","point: x-y distribution of hits, tpcE",23,58.75,196.75,72,0,TMath::TwoPi());
-  m_pnt_xyTW    = QAH::H2F("QaPointXYTpcW","point: x-y distribution of hits, tpcW",20,58.75,196.75,72,0,TMath::TwoPi());
+  m_pnt_rpTE    = QAH::H2F("QaPointRPTpcE","point: r-phi distribution of hits, tpcE",23,58.75,196.75,72,0,TMath::TwoPi());
+  m_pnt_rpTW    = QAH::H2F("QaPointRPTpcW","point: r-phi distribution of hits, tpcW",20,58.75,196.75,72,0,TMath::TwoPi());
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
   m_pnt_phiT    = QAH::MH1F("QaPointPhiT","point: #phi distribution of hits, tpc",36,0,360,2);
   m_pnt_phiT->Rebin(0,"East");
