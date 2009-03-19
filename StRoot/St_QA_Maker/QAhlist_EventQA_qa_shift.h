@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.33 2009/03/09 16:35:30 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.34 2009/03/19 01:08:08 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.34  2009/03/19 01:08:08  genevb
+// Show both xy and rphi TPC hit hists
+//
 // Revision 2.33  2009/03/09 16:35:30  genevb
 // Use small histogram ranges for pp qa_shift
 //
@@ -121,6 +124,8 @@
   "QaPointFtpc",
   "QaPointXYTpcE",
   "QaPointXYTpcW",
+  "QaPointRPTpcE",
+  "QaPointRPTpcW",
   "QaPointXYFtpcE",
   "QaPointXYFtpcW",
   "QaPointPadTimeFtpcW",
