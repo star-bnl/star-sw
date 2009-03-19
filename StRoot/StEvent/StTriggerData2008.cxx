@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2008.cxx,v 2.4 2008/03/13 16:58:28 ullrich Exp $
+ * $Id: StTriggerData2008.cxx,v 2.5 2009/03/19 02:46:01 ullrich Exp $
  *
  * Author: Akio Ogawa, Nov 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2008.cxx,v $
+ * Revision 2.5  2009/03/19 02:46:01  ullrich
+ * Add 2nd argument (pre/post) to vpdEarliestTDC().
+ *
  * Revision 2.4  2008/03/13 16:58:28  ullrich
  * Move include file from .cxx to .h file
  *
@@ -877,8 +880,9 @@ unsigned short StTriggerData2008::vpdTDC(StBeamDirection eastwest, int pmt, int 
     return mData->rawTriggerDet[prepostAddress(prepost)].VPD[map[eastwest][pmt-1]];
 }
 
-unsigned short StTriggerData2008::vpdEarliestTDC(StBeamDirection eastwest) const
+unsigned short StTriggerData2008::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
+    if(prepost!=0) return 0;
     int map[2][2] = {{2, 0},{6, 4}};
     int i1 = map[eastwest][0];
     int i2 = map[eastwest][1];

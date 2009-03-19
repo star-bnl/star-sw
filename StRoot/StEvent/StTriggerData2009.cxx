@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.10 2009/03/18 19:30:20 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.11 2009/03/19 02:46:01 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.11  2009/03/19 02:46:01  ullrich
+ * Add 2nd argument (pre/post) to vpdEarliestTDC().
+ *
  * Revision 2.10  2009/03/18 19:30:20  ullrich
  * In vpdTimeDifference() change index 6 to 7.
  *
@@ -812,17 +815,17 @@ unsigned char* StTriggerData2009::getDsm0_EEMC(int prepost) const {
     return 0;
 }
 
-unsigned short int* StTriggerData2009::getDsm1_EEMC(int prepost) const{
+unsigned short* StTriggerData2009::getDsm1_EEMC(int prepost) const{
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if (mBC1[buffer]) return mBC1[buffer]->EEMClayer1;
     return 0;
 }
 
-unsigned short int  * StTriggerData2009::getDsm2_EMC() const{
+unsigned short* StTriggerData2009::getDsm2_EMC() const{
     return   L1_DSM->EMC;
 }
 
-unsigned short int  * StTriggerData2009::getDsm3() const{
+unsigned short* StTriggerData2009::getDsm3() const{
     return   L1_DSM->lastDSM;
 }
 
@@ -884,14 +887,14 @@ unsigned short StTriggerData2009::vpdTDCHighThr(StBeamDirection eastwest, int pm
     return 0;
 }
 
-unsigned short StTriggerData2009::vpdEarliestTDC(StBeamDirection eastwest) const
+unsigned short StTriggerData2009::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
-  int buffer = 0;
-  if(mBBC[buffer]){
-    if(eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
-    else               {return mBBC[buffer]->VPD[4]%4096;}
-  }
-  return 0;
+    int buffer = prepostAddress(prepost);
+    if(mBBC[buffer]){
+        if(eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+        else               {return mBBC[buffer]->VPD[4]%4096;}
+    }
+    return 0;
 }
 
 unsigned short StTriggerData2009::vpdTimeDifference() const
@@ -916,14 +919,14 @@ unsigned char* StTriggerData2009::getDsm_FMS(int prepost) const
     return 0;  
 }
 
-unsigned short int* StTriggerData2009::getDsm1_FMS(int prepost) const
+unsigned short* StTriggerData2009::getDsm1_FMS(int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) if(mMIX[buffer]) return mMIX[buffer]->FPDEastNSLayer1;
     return 0;
 }
 
-unsigned short int* StTriggerData2009::getDsm2_FMS() const {return L1_DSM->FPD;}
+unsigned short* StTriggerData2009::getDsm2_FMS() const {return L1_DSM->FPD;}
 
 unsigned short StTriggerData2009::mtdAtAddress(int address, int prepost) const
 {

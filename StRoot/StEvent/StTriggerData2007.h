@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.h,v 2.5 2009/02/11 23:33:55 jeromel Exp $
+ * $Id: StTriggerData2007.h,v 2.6 2009/03/19 02:46:01 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.h,v $
+ * Revision 2.6  2009/03/19 02:46:01  ullrich
+ * Add 2nd argument (pre/post) to vpdEarliestTDC().
+ *
  * Revision 2.5  2009/02/11 23:33:55  jeromel
  * Modifications by Akio to support getDsm0_BEMCE and getDsm0_BEMCW as well as
  * getDsm1_BEMC. However, use of const=0 impose implementation (was not done
@@ -134,7 +137,7 @@ public:
     // VPD
     unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short vpdTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
-    unsigned short vpdEarliestTDC(StBeamDirection eastwest) const;
+    unsigned short vpdEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short vpdTimeDifference() const;
 
     //MTD
@@ -147,20 +150,20 @@ public:
     TrgDataType2007*     getTriggerStructure2007();  
     int                  getRawSize() const;
 
-    unsigned      char* getDsm0_BEMCE(int prepost=0) const { return 0;}
-    unsigned      char* getDsm0_BEMCW(int prepost=0) const { return 0;}
-    unsigned      char*  getDsm0_EEMC(int prepost=0) const;  
-    unsigned short int*  getDsm1_BEMC(int prepost=0) const { return 0;}
+    unsigned char*  getDsm0_BEMCE(int prepost=0) const { return 0;}
+    unsigned char*  getDsm0_BEMCW(int prepost=0) const { return 0;}
+    unsigned char*  getDsm0_EEMC(int prepost=0) const;  
+    unsigned short* getDsm1_BEMC(int prepost=0) const { return 0;}
 
-    unsigned short int*  getDsm1_EEMC(int prepost=0) const;
-    unsigned short int*  getDsm2_EMC()  const;
-    unsigned short int*  getDsm3()      const;
-    unsigned      char*  getDsm_FMS(int prepost=0) const;
-    unsigned      char*  getDsm01_FMS(int prepost=0) const;
-    unsigned      char*  getDsm02_FMS(int prepost=0) const;
-    unsigned short int*  getDsm1_FMS(int prepost=0) const;
-    unsigned short int*  getDsm2_FMS() const;
-    unsigned int         l2ResultLength() const;
+    unsigned short* getDsm1_EEMC(int prepost=0) const;
+    unsigned short* getDsm2_EMC()  const;
+    unsigned short* getDsm3()      const;
+    unsigned char*  getDsm_FMS(int prepost=0) const;
+    unsigned char*  getDsm01_FMS(int prepost=0) const;
+    unsigned char*  getDsm02_FMS(int prepost=0) const;
+    unsigned short* getDsm1_FMS(int prepost=0) const;
+    unsigned short* getDsm2_FMS() const;
+    unsigned int    l2ResultLength() const;
     const unsigned int*  l2Result() const;
     
 protected:
