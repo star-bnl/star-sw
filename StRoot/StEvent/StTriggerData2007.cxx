@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.cxx,v 2.6 2007/07/02 17:04:32 ullrich Exp $
+ * $Id: StTriggerData2007.cxx,v 2.7 2009/03/19 02:46:01 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.cxx,v $
+ * Revision 2.7  2009/03/19 02:46:01  ullrich
+ * Add 2nd argument (pre/post) to vpdEarliestTDC().
+ *
  * Revision 2.6  2007/07/02 17:04:32  ullrich
  * Add two new members mtdAdc() and mtdTdc() (Akio).
  *
@@ -885,19 +888,20 @@ unsigned short StTriggerData2007::vpdTDC(StBeamDirection eastwest, int pmt, int 
     return mData->rawTriggerDet[prepostAddress(prepost)].VPD[map[eastwest][pmt-1]];
 }
 
-unsigned short StTriggerData2007::vpdEarliestTDC(StBeamDirection eastwest) const
+unsigned short StTriggerData2007::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
-  int map[2][2] = {{2, 0},{6, 4}};
-  int i1 = map[eastwest][0];
-  int i2 = map[eastwest][1];
-  bool b1 = (mData->TrgSum.DSMdata.VPD[i1] >> 8) & 0x1;
-  bool b2 = (mData->TrgSum.DSMdata.VPD[i2] >> 8) & 0x1;
-  int  t1 = mData->TrgSum.DSMdata.VPD[i1] & 0xFF;
-  int  t2 = mData->TrgSum.DSMdata.VPD[i2] & 0xFF;
-  if(b1 && b2)  {return (t1>t2) ? t1 : t2;}
-  else if(b1)   {return t1;}
-  else if(b2)   {return t2;}
-  else          {return 0;}
+    if(prepost!=0) return 0;
+    int map[2][2] = {{2, 0},{6, 4}};
+    int i1 = map[eastwest][0];
+    int i2 = map[eastwest][1];
+    bool b1 = (mData->TrgSum.DSMdata.VPD[i1] >> 8) & 0x1;
+    bool b2 = (mData->TrgSum.DSMdata.VPD[i2] >> 8) & 0x1;
+    int  t1 = mData->TrgSum.DSMdata.VPD[i1] & 0xFF;
+    int  t2 = mData->TrgSum.DSMdata.VPD[i2] & 0xFF;
+    if(b1 && b2)  {return (t1>t2) ? t1 : t2;}
+    else if(b1)   {return t1;}
+    else if(b2)   {return t2;}
+    else          {return 0;}
 }
 
 unsigned short StTriggerData2007::vpdTimeDifference() const

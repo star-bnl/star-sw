@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.26 2009/03/04 02:01:30 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.27 2009/03/19 02:46:01 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.27  2009/03/19 02:46:01  ullrich
+ * Add 2nd argument (pre/post) to vpdEarliestTDC().
+ *
  * Revision 2.26  2009/03/04 02:01:30  ullrich
  * New access functions for ZDC DSM layer-1 and layer-2 data.
  *
@@ -228,7 +231,7 @@ public:
     virtual unsigned short vpdTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
-    virtual unsigned short vpdEarliestTDC(StBeamDirection eastwest) const;
+    virtual unsigned short vpdEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short vpdTimeDifference() const;
 
     //MTD
@@ -251,19 +254,19 @@ public:
     // Experts only!
     virtual char* getTriggerStructure() = 0;
     virtual int getRawSize() const = 0;
-    virtual unsigned      char* getDsm0_BEMCE(int prepost=0) const =0;
-    virtual unsigned      char* getDsm0_BEMCW(int prepost=0) const =0;
-    virtual unsigned short int* getDsm1_BEMC(int prepost=0)  const =0;
-    virtual unsigned      char* getDsm0_EEMC(int prepost=0)  const =0;
-    virtual unsigned short int* getDsm1_EEMC(int prepost=0)  const =0;
-    virtual unsigned short int* getDsm2_EMC()                const =0;
-    virtual unsigned short int* getDsm3()                    const =0;
-    virtual unsigned      char* getDsm_FMS(int prepost=0)    const;
-    virtual unsigned      char* getDsm01_FMS(int prepost=0)  const;
-    virtual unsigned      char* getDsm02_FMS(int prepost=0)  const;
-    virtual unsigned short int* getDsm1_FMS(int prepost=0)   const;
-    virtual unsigned short int* getDsm2_FMS() const;
-    virtual unsigned int        l2ResultLength() const = 0;  // Length of raw info
+    virtual unsigned char*  getDsm0_BEMCE(int prepost=0) const =0;
+    virtual unsigned char*  getDsm0_BEMCW(int prepost=0) const =0;
+    virtual unsigned short* getDsm1_BEMC(int prepost=0)  const =0;
+    virtual unsigned char*  getDsm0_EEMC(int prepost=0)  const =0;
+    virtual unsigned short* getDsm1_EEMC(int prepost=0)  const =0;
+    virtual unsigned short* getDsm2_EMC()                const =0;
+    virtual unsigned short* getDsm3()                    const =0;
+    virtual unsigned char*  getDsm_FMS(int prepost=0)    const;
+    virtual unsigned char*  getDsm01_FMS(int prepost=0)  const;
+    virtual unsigned char*  getDsm02_FMS(int prepost=0)  const;
+    virtual unsigned short* getDsm1_FMS(int prepost=0)   const;
+    virtual unsigned short* getDsm2_FMS() const;
+    virtual unsigned int    l2ResultLength() const = 0;  // Length of raw info
     virtual const unsigned int* l2Result() const = 0;  // Pointer to raw info
 
 protected:
@@ -291,109 +294,6 @@ protected:
 
     ClassDef(StTriggerData,3) 
 };
-
-//
-//  Inline functions. Most of them return a default value (zero). Not all 
-//  of them will be overwritten by classes inheriting from StTriggerData.
-//
-inline int StTriggerData::year() const {return mYear;}
-inline float StTriggerData::zdcVertexZ() const {return mZdcVertexZ;}
-inline void StTriggerData::setZdcVertexZ(float val) {mZdcVertexZ = val;}
-inline unsigned short StTriggerData::dsmInput() const {return 0;}
-inline unsigned short StTriggerData::trgToken() const {return 0;}
-inline unsigned short StTriggerData::dsmAddress() const {return 0;}
-inline unsigned short StTriggerData::mAddBits() const {return 0;}
-inline unsigned short StTriggerData::bcData(int address) const {return 0;}
-inline unsigned short StTriggerData::busyStatus() const {return 0;}
-inline unsigned int StTriggerData::bunchCounterHigh() const {return 0;}
-inline unsigned int StTriggerData::bunchCounterLow() const {return 0;}
-inline unsigned int StTriggerData::bunchId48Bit() const {return 0;}
-inline unsigned int StTriggerData::bunchId7Bit() const {return 0;}
-inline unsigned int StTriggerData::spinBit() const {return 0;}
-inline unsigned int StTriggerData::spinBitYellowFilled() const {return 0;}
-inline unsigned int StTriggerData::spinBitYellowUp() const {return 0;}
-inline unsigned int StTriggerData::spinBitYellowDown() const {return 0;}
-inline unsigned int StTriggerData::spinBitYellowUnpol() const {return 0;}
-inline unsigned int StTriggerData::spinBitBlueFilled() const {return 0;}
-inline unsigned int StTriggerData::spinBitBlueUp() const {return 0;}
-inline unsigned int StTriggerData::spinBitBlueDown() const {return 0;}
-inline unsigned int StTriggerData::spinBitBlueUnpol() const {return 0;}
-inline unsigned short StTriggerData::lastDSM(int channel) const {return 0;};
-inline unsigned short StTriggerData::vertexDSM(int channel) const {return 0;}
-inline unsigned short StTriggerData::ctbLayer1DSM(int channel) const {return 0;}
-inline unsigned short StTriggerData::ctbLayer2DSM(int channel) const {return 0;}
-inline unsigned short StTriggerData::bemcLayer1DSM(int channel, int prepost) const {return 0;}
-inline unsigned short StTriggerData::eemcLayer1DSM(int channel, int prepost) const {return 0;}
-inline unsigned short StTriggerData::emcLayer2DSM(int channel) const {return 0;}
-inline unsigned short StTriggerData::fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost) const {return 0;}
-inline unsigned short StTriggerData::fpdLayer1DSM(StBeamDirection eastwest, int module, int board, int prepost) const {return 0;}
-inline unsigned short StTriggerData::fpdLayer2DSMRaw(int channel) const {return 0;}
-inline unsigned short StTriggerData::fpdLayer2DSM(StBeamDirection eastwest, int module) const {return 0;}
-inline unsigned short StTriggerData::ctbRaw(int address, int prepost) const {return 0;}
-inline unsigned short StTriggerData::ctb(int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::ctbTraySlat(int tray, int slat, int prepost) const {return 0;}
-inline unsigned short StTriggerData::ctbSum(int prepost) const {return 0;}
-inline unsigned short StTriggerData::mwc(int sector, int prepost) const {return 0;}
-inline bool StTriggerData::zdcPresent(int prepost) const {return 1;}
-inline unsigned short StTriggerData::zdcAtChannel(int channel, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcAtAddress(int address, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcUnAttenuated(StBeamDirection eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcAttenuated(StBeamDirection eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcTDC(StBeamDirection eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcPmtTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcHardwareSum(int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
-inline bool StTriggerData::zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost) const {return 0;}
-inline bool StTriggerData::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost) const {return 0;}
-inline bool StTriggerData::zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost) const {return 0;}
-inline bool StTriggerData::zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const {return 0;}
-inline bool StTriggerData::zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const {return 0;}
-inline bool StTriggerData::zdcBackADCaboveThresholdL2(StBeamDirection eastwest) const {return 0;}
-inline unsigned short StTriggerData::zdcTimeDifference() const {return 0;}
-inline bool StTriggerData::zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const {return 0;}
-inline bool StTriggerData::zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const {return 0;}
-inline bool StTriggerData::zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const {return 0;}
-inline bool StTriggerData::zdcTimeDifferenceInWindow() const {return 0;}
-inline bool StTriggerData::zdcSMDPresent(int prepost) const {return 1;}
-inline unsigned short StTriggerData::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const {return 0;}
-inline unsigned char  StTriggerData::bemcHighTower(int patch_id, int prepost) const {return 0;}
-inline unsigned char  StTriggerData::bemcJetPatch (int patch_id, int prepost) const {return 0;}
-inline unsigned char  StTriggerData::eemcHighTower(int patch_id, int prepost) const {return 0;}
-inline unsigned char  StTriggerData::eemcJetPatch (int patch_id, int prepost) const {return 0;}
-inline unsigned char  StTriggerData::bemcHighestTowerADC(int prepost) const {return 0;}
-inline unsigned char  StTriggerData::eemcHighestTowerADC(int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcADCSum(StBeamDirection eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
-inline unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
-inline unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
-inline unsigned short StTriggerData::nQTdata(int prepost) const {return 0;}
-inline unsigned int*  StTriggerData::QTdata(int prepost) const {return 0;}
-inline unsigned short StTriggerData::vpdADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::vpdTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest) const {return 0;}
-inline unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
-inline unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
-inline unsigned short StTriggerData::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::tofAtAddress(int address, int prepost) const {return 0;}
-inline unsigned short StTriggerData::tofMultiplicity(int prepost) const {return 0;}
-inline unsigned short StTriggerData::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
-inline unsigned short StTriggerData::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
-inline unsigned      char*  StTriggerData::getDsm_FMS(int prepost) const {return 0;}
-inline unsigned      char*  StTriggerData::getDsm01_FMS(int prepost) const {return 0;}
-inline unsigned      char*  StTriggerData::getDsm02_FMS(int prepost) const {return 0;}
-inline unsigned short int*  StTriggerData::getDsm1_FMS(int prepost) const {return 0;}
-inline unsigned short int*  StTriggerData::getDsm2_FMS() const {return 0;}
-
-inline int StTriggerData::L2ResultsOffset(StL2AlgorithmId id) const {return -1;}  
-inline bool StTriggerData::isL2Triggered(StL2TriggerResultType id) const {return false;}  
 
 inline void StTriggerData::swapI(unsigned int *var){
     *var = 
