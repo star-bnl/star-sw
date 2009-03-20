@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.191 2009/03/13 21:08:27 perev Exp $
+* $Id: geometry.g,v 1.192 2009/03/20 02:57:12 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.192  2009/03/20 02:57:12  perev
+* upgr16a == upgr16 +tpc2009
+*
 * Revision 1.191  2009/03/13 21:08:27  perev
 * y2005h, y2007h added
 *
@@ -1184,7 +1187,7 @@ replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 !//______________________________________________________________________________
 *********   y2009   ***
 replace [exe y2009;] with [;
-{ "y2009 baseline: now(12.29.08) only place holder. No difference with y2008a"
+{ "y2009 baseline: much more detailed TPC (thnx YF)"
     exe SCON13;exe TPCE04;exe BTOF66;exe CALB02;exe ECAL31;
     exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
     exe PHMD02;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
@@ -1201,6 +1204,76 @@ replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
                             exe FSTDof; exe FGTD02; 
 "* On Gerrit request, we disable the cone:"
                             exe ITSPof; "prototype of the Inner Tracker SuPport structure"]
+
+!//______________________________________________________________________________
+replace [exe UPGR16;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
+                     SVTT=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                     SCON=on;
+                     ConeConfig=2 " new cable weight estimate ";
+
+* X.Dong
+                 "ctb: central trigger barrer             ";
+                     Itof=6 " call btofgeo6 ";
+* NEW CONFIG!
+                     tofX0= 0.00;
+                     tofZ0=-0.50;
+                     BtofConfig=6;
+
+                  "CALB"
+                     emsEdit=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                     CalbConfig = 2
+                  "ECAL"
+                     EcalConfig=1   " west wheel "
+                     ecalFill=3     " all sectors filled "
+                  "beam-beam counter "
+                     BBCM=on
+                  "forward pion detector "
+                     FPDM=on
+                  "field version "
+                     MfldConfig=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     PHMD=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     SISD=on;
+                     SisdConfig = 65;
+* careful! Achtung!
+                   PipeConfig=4;   " provisional"
+                   pipeFlag=-1; !   " Simplest.Gerrit"
+                   PipeFlag = 1;    "pipe wrap only"
+
+                   PIXL=on;         " put the pixel detector in"
+                   PixlConfig=-1;   " Simplest.Gerrit"
+
+                   ISTB=on;  "IST barrel"
+                   IstbConfig=-1;
+
+                   FSTD=off;  "no pixel based forward tracker in this tag"
+                   FstdConfig=0;
+
+* Forward STAR tracker disk
+                   FGTD=on;  "GEM forward tracker"
+                   FgtdConfig=3;
+* On Gerrit request, we disable the cone:
+                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "We need an even bigger Cave"
+                     CaveConfig = 4;
+]
+!//______________________________________________________________________________
+replace [exe UPGR16a;] with ["upgr16 +tpc2009"
+			      exe upgr16;exe TPCE04;]
+
+
 
 
 *********HELP***HELP***HELP***HELP***HELP***HELP***HELP***HELP***HELP***
@@ -2492,68 +2565,10 @@ If LL>0
                 exe UPGR15; }
 ****************************************************************************************
   Case UPGR16   { New Tracking: HFT+IST+TPC+SSD-SVT
-                     SVTT=off; "no SVT  at all in this configuration"
-                     ftpc=off; "no FTPC at all in this configuration"
-                     SCON=on;
-                     ConeConfig=2 " new cable weight estimate ";
-
-* X.Dong
-                 "ctb: central trigger barrer             ";
-                     Itof=6 " call btofgeo6 ";
-* NEW CONFIG!
-                     tofX0= 0.00;
-                     tofZ0=-0.50;
-                     BtofConfig=6;
-
-                  "CALB"
-                     emsEdit=on
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                     CalbConfig = 2
-                  "ECAL"
-                     EcalConfig=1   " west wheel "
-                     ecalFill=3     " all sectors filled "
-                  "beam-beam counter "
-                     BBCM=on
-                  "forward pion detector "
-                     FPDM=on
-                  "field version "
-                     MfldConfig=4;      "tabulated field, with correction "
-
-                     SvshConfig = 0; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 0;
-
-                  "Photon Multiplicity Detector Version "
-                     PHMD=on;
-                     PhmdConfig = 1;
-                  "Silicon Strip Detector Version "
-                     SISD=on;
-                     SisdConfig = 65;
-* careful! Achtung!
-                   PipeConfig=4;   " provisional"
-                   pipeFlag=-1; !   " Simplest.Gerrit"
-                   PipeFlag = 1;    "pipe wrap only"
-
-                   PIXL=on;         " put the pixel detector in"
-                   PixlConfig=-1;   " Simplest.Gerrit"
-
-                   ISTB=on;  "IST barrel"
-                   IstbConfig=-1;
-
-                   FSTD=off;  "no pixel based forward tracker in this tag"
-                   FstdConfig=0;
-
-* Forward STAR tracker disk
-                   FGTD=on;  "GEM forward tracker"
-                   FgtdConfig=3;
-* On Gerrit request, we disable the cone:
-                   ITSP=off; "prototype of the Inner Tracker SuPport structure"
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-                  "We need an even bigger Cave"
-                     CaveConfig = 4;
-                }
+                  exe  UPGR16; }
+****************************************************************************************
+  Case UPGR16a   { upgr16 + tpc2009
+                  exe  UPGR16a; }
 ****************************************************************************************
   Case UPGR17   { UPGR16 - FGTD + FTPC  request Wei-Ming-Zhang
                      SVTT=off; "no SVT  at all in this configuration"
