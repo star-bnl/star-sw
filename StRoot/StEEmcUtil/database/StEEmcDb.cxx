@@ -223,7 +223,7 @@ void StEEmcDb::loadTables(StMaker *anyMaker) {
 	Bool_t ok = true;
 	for(int is = 0;(is < mNSector) && ok;is++) {
 	    if (optimizeMapping(is)) {
-		LOG_FATAL<<"\n\n" <<  "::loadTables\n  Total failure, no DB info for Endcap was retrived,\n all ETOW channels will be cleared for every event,\n fix the problem, JB\n\n "<<endm;
+		LOG_FATAL<<  "::loadTables  Total failure, no DB info for Endcap was retrived, all ETOW channels will be cleared for every event. Fix the problem! JB"<<endm;
 		ok = false;
 	    } else {
 		optimizeOthers(is); 
@@ -305,7 +305,7 @@ void  StEEmcDb::requestDataBase(StMaker *anyMaker){
 //--------------------------------------------------
 int  StEEmcDb::optimizeMapping(int is){
 
-  LOG_INFO <<"\n  conf ADC map for sector="<< mDbsectorID[is] <<endm;
+  LOG_INFO <<"  conf ADC map for sector="<< mDbsectorID[is] <<endm;
   assert(mDbsectorID[is]>0);
   
   eemcDbADCconf_st *t= mDbADCconf[is];
@@ -341,7 +341,7 @@ int  StEEmcDb::optimizeMapping(int is){
     assert(x->chan>=0 && x->chan<MaxAnyCh);
     assert(byCrate[x->crate]);// ERROR: duplicated crate ID from DB
     if(byCrate[x->crate][x->chan]) {
-      LOG_FATAL <<  "::Fatal Error of eemc DB records: the same crate="<<x->crate<<", ch="<<x->chan<<" entered twice \n\n Whole EEMC DB is erased from memory,\n  all data will be ignored,  FIX IT !, JB\n\n"<<endm;
+      LOG_FATAL <<  "::Fatal Error of eemc DB records: the same crate="<<x->crate<<", ch="<<x->chan<<" entered twice. Whole EEMC DB is erased from memory, all data will be ignored,  FIX IT !, JB"<<endm;
       //      byCrate[x->crate][x->chan]->print(); // first time
       //      x->print(); // second time
       LOG_FATAL<<(*byCrate[x->crate][x->chan])<<endm;// JCW 1/26
@@ -367,7 +367,7 @@ void StEEmcDb::optimizeOthers(int is){
   int ix1,ix2;
   EEindexRange(secID,ix1,ix2);
   
- LOG_DEBUG<<"\n   EEindexRange("<<secID<<","<<ix1<<","<<ix2<<")"<<endm;
+ LOG_DEBUG<<"   EEindexRange("<<secID<<","<<ix1<<","<<ix2<<")"<<endm;
   
   //  if(dbg)printf(" Size: ped=%d cal=%d name=%d stat=%d \n",sizeof(ped->name)/EEMCDbMaxName,sizeof(cal->name)/EEMCDbMaxName,sizeof(tubeTw->name)/EEMCDbMaxName,sizeof(stat->name)/EEMCDbMaxName);
   
@@ -469,7 +469,7 @@ void StEEmcDb::optimizeOthers(int is){
 //--------------------------------------------------
 //--------------------------------------------------
 void StEEmcDb::exportAscii(char *fname) const{
-  LOG_INFO<<Form("::exportAscii(\'%s') ...\n",fname)<<endm;
+  LOG_INFO << "::exportAscii(\'" << fname << "') ..." << endm;
 
   FILE * fd=fopen(fname,"w");
   assert(fd);
@@ -496,7 +496,7 @@ void StEEmcDb::exportAscii(char *fname) const{
     x->exportAscii(fd);
     nTot++;
   }
-  LOG_INFO<<Form("::exportAscii()     nTot=%d, done\n",nTot)<<endm;
+  LOG_INFO << "::exportAscii()     nTot=" << nTot << ", done" << endm;
   fclose(fd);
 }
 
@@ -564,17 +564,17 @@ void  StEEmcDb::optimizeFibers  (){
 
   }
   
-  LOG_FATAL <<"\n  mOptimizeFibers() map missing/wrong terminating key "<<endm;
+  LOG_FATAL <<"  mOptimizeFibers() map missing/wrong terminating key "<<endm;
   
  fatal:
-    LOG_FATAL <<"\n\n     EEMC  FiberConf  error,\n without it decoding of the _raw_ EEMC data from StEvent is not working\n(all data are dropped).\nHowever, this missing table is irreleveant for muDst analysis, JB\n\n"<<endm;
+    LOG_FATAL <<"     EEMC  FiberConf  error, without it decoding of the _raw_ EEMC data from StEvent is not working (all data are dropped). However, this missing table is irreleveant for muDst analysis, JB"<<endm;
     return;
 
  done:
-    LOG_INFO <<"\n   mOptimizeFibers() map found for nFiber="<<nFiber<<endm; 
+    LOG_INFO <<"   mOptimizeFibers() map found for nFiber="<<nFiber<<endm; 
    if(icr==nFiber)  return;
 
-    LOG_FATAL <<"\n   mOptimizeFibers() map nFiber missmatch is="<<icr<<" should be="<<nFiber<<endm;
+    LOG_FATAL <<"   mOptimizeFibers() map nFiber missmatch is="<<icr<<" should be="<<nFiber<<endm;
 goto fatal;
 } 
 
@@ -761,7 +761,7 @@ void StEEmcDb::setAsciiDatabase( const Char_t *ascii )
 
     //-- Apply a sanity check on the item
     if(key!=item.key) {
-      LOG_WARN<<Form(": name='%s' key=%d!=inpKey=%d, inpKey ignored\n",item.name,key,item.key)<<endm;
+      LOG_WARN<<Form(": name='%s' key=%d!=inpKey=%d, inpKey ignored",item.name,key,item.key)<<endm;
       item.key=key;
     }
     assert(key>=0 && key<EEindexMax);
@@ -783,7 +783,7 @@ void StEEmcDb::setAsciiDatabase( const Char_t *ascii )
 
     assert(byCrate[x->crate]); // ERROR: unsupported crate ID
     if(byCrate[x->crate][x->chan]) {
-      LOG_FATAL<<Form("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",x->crate,x->chan)<<endm;
+      LOG_FATAL<<Form("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :",x->crate,x->chan)<<endm;
       //      byCrate[x->crate][x->chan]->print(); // first time
       //      x->print(); // second time
       LOG_FATAL<<(*byCrate[x->crate][x->chan])<<endm;// JCW 1/26
@@ -803,12 +803,12 @@ void StEEmcDb::setAsciiDatabase( const Char_t *ascii )
 
       
   //--
-  LOG_INFO<<Form("setAsciiDataBase() done, found %d valid records\n",nd)<<endm;
+  LOG_INFO<<Form("setAsciiDataBase() done, found %d valid records",nd)<<endm;
 
   return;
 
  crashIt:// any failure of reading of the data
-  LOG_FATAL<<Form("EEmcDb - no/corrupted input file, continue\n")<<endm;
+  LOG_FATAL<<Form("EEmcDb - no/corrupted input file, continue")<<endm;
   //clearItemArray();
   //  assert(2==3);
 
@@ -866,7 +866,7 @@ void  StEEmcDb::changeGainsAction(const char *fname) {
     // printf("%s %p\n",cVal,x);
     if(x->isEmpty()) continue;
     // replace only initialized channels
-    if(xVal<=0)   LOG_WARN<<Form("Warning ! buf=%s=\n",buf)<<endm;
+    if(xVal<=0)   LOG_WARN<<Form("Warning ! buf=%s=",buf)<<endm;
     //    assert(xVal>0);
      x->gain=xVal;
      nd++;
@@ -964,7 +964,7 @@ StEEmcDb::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
     x=getByStrip(sec,uv,strip); break;
 
   default:
-    LOG_WARN <<"::getDb(), wrong detectorId=" << StDetId << " \n It is fatal - bug in the code, fix it, JB"<<endm;
+    LOG_WARN <<"::getDb(), wrong detectorId=" << StDetId << ". This is fatal - bug in the code, fix it, JB"<<endm;
     assert(1==2); // trap for bug in the code
   }
   
