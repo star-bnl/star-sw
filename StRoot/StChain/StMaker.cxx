@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.216 2009/03/16 21:52:24 perev Exp $
+// $Id: StMaker.cxx,v 1.217 2009/03/20 03:17:34 perev Exp $
 //
 //
 /*!
@@ -227,6 +227,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr15",      20190101,    18, "upgr15",   ""},
   {"upgr16",      20190101,    19, "upgr16",   ""},
   {"upgr17",      20190101,    20, "upgr17",   ""},
+  {"upgr16a",     20190101,    21, "upgr16a",  ""},
   // Future development:
   {"simpletpc",   20200102,    16, "simpletpc",""},
   {"upgr20",      20200102,    17, "upgr20",    "y2007 +  one TOF"}, // advertized simu 20061101
@@ -1894,6 +1895,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.217  2009/03/20 03:17:34  perev
+// upgr16a==upgr16+tpc2009
+//
 // Revision 1.216  2009/03/16 21:52:24  perev
 // TMemStat & StMemStat handling improved
 //
