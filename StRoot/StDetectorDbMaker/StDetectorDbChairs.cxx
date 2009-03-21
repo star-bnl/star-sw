@@ -82,7 +82,7 @@ starClockOnl_st *St_starClockOnlC::Struct(Int_t i) {
   Int_t N =  getNumRows(); // with i < 0 look for positive frequency
   if (i >= 0 && i < N) return s + i;
   for (Int_t j = 0; j < N; j++, s++) if (s->frequency > 0) break;
-  assert(s->frequency > 0);
+  assert(s->frequency > 0 && s->frequency < 1e7);
   return s;
 }
 #include "St_starMagOnlC.h"
