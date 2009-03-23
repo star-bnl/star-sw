@@ -148,6 +148,9 @@ public:
 
   // assume evtDescData comes in as big endian...
   // assume other args are host endian
+  //
+  // l25abort --> 1 = l2 abort
+  //              2 = l2 timeout
   int doEvent(gbPayload *pay, EvtDescData *evt, UINT32 l1trg, UINT32 l2trg, UINT32 l25abort, UINT32 token, UINT32 eventNumber)
   {
     // Stays big endian
@@ -185,7 +188,7 @@ public:
 	pay->EventDescriptor.TrgToken,
 	pay->EventDescriptor.actionWdTrgCommand,
 	pay->EventDescriptor.actionWdDaqCommand,0);
-
+y
     pay->flags = daq100Decision(l2h32(pay->token), evt->actionWdDaqCommand, run_type, cl_run, raw_write);
     
     if(l25abort & 0x1) {
