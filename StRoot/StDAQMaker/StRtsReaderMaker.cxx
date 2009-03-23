@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.19 2009/02/20 23:32:43 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.20 2009/03/23 15:38:23 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.20  2009/03/23 15:38:23  fine
+ * remove redundant messafes , reduce the level of others from INFO to DEBUG
+ *
  * Revision 1.19  2009/02/20 23:32:43  fine
  * avoid the fRtsTable double destruction. It causes the chain crash. Thanks Fisyak
  *
@@ -150,7 +153,7 @@ ClassImp(StRtsReaderMaker);
 StRtsReaderMaker::StRtsReaderMaker(const char *name):StMaker(name)
       ,fRtsReader(0),fRtsTable(0),fBank(0),fSlaveMode(true)
 {
-  LOG_DEBUG << "StRtsReaderMaker::ctor"  << endm;
+  // LOG_DEBUG << "StRtsReaderMaker::ctor"  << endm;
 }
 
 //_____________________________________________________________
@@ -180,7 +183,7 @@ rts_reader *StRtsReaderMaker::InitReader()
    // Init EVP_READER 
    if (!fRtsReader) {
       StDAQReader *daqReader = 0;
-      LOG_INFO << "StRtsReaderMaker::InitReader"  << endm;
+      LOG_DEBUG << "StRtsReaderMaker::InitReader"  << endm;
       TDataSet *dr = GetDataSet("StDAQReader");
       if(dr) daqReader = (StDAQReader *)(dr->GetObject());
 
@@ -286,11 +289,11 @@ TDataSet *StRtsReaderMaker::FillTable()
       fRtsTable->SetNRows(fBank->ncontent);
    } else {
       if (!fLastQuery.IsNull()) {
-         LOG_INFO <<" StRtsReaderMaker::FillTable(): No data has been found for \"" 
+         LOG_DEBUG <<" StRtsReaderMaker::FillTable(): No data has been found for \"" 
                   << fLastQuery << "\" to fill the table"
                   << endm;
       }
-      if (fRtsTable) fRtsTable->Print(0,5);
+      if (fRtsTable && Debug() > 3 ) fRtsTable->Print(0,5);
       delete fRtsTable; 
       fRtsTable = 0; // forget this table. It will be deleted by Clear method anyway
       fLastQuery = ""; 
@@ -340,7 +343,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
                case 2:
                  thisMaker->fBank = rts_det->get( tokens->At(2)->GetName()
                                  ,atoi(tokens->At(3)->GetName()));
-                 LOG_INFO <<" StRtsReaderMaker::FindDataSet det(\"" <<
+                 LOG_DEBUG <<" StRtsReaderMaker::FindDataSet det(\"" <<
                        detName << "\")->get(\""<<tokens->At(2)->GetName()
                        << "\"," << atoi(tokens->At(3)->GetName())
                        << ")  "
@@ -385,7 +388,7 @@ Int_t StRtsReaderMaker::InitRun(int run)
   Int_t res = kStOK;
 #ifndef NEW_EVP_READER
   if (!fSlaveMode && fRtsReader) {
-     LOG_INFO << "StRtsReaderMaker::InitRun"  << endm;
+     // LOG_DEBUG << "StRtsReaderMaker::InitRun"  << endm;
      fRtsReader->InitRun(run);               // some dummy for now
      fRtsReader->det("tpx")->SetMode(3);     // make TPX do all!  
   }
