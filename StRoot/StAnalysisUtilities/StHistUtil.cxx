@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.53 2009/03/19 17:43:42 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.54 2009/03/23 23:50:16 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.54  2009/03/23 23:50:16  genevb
+// Add color and logarithmic scales to TPC hit location plots
+//
 // Revision 2.53  2009/03/19 17:43:42  genevb
 // Catch XYTpc hists which were polar
 //
@@ -641,7 +644,10 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
 
 // Set logZ scale
-          if (oName.EndsWith("PVsDedx")) {
+          if (oName.EndsWith("PVsDedx") ||
+              oName.Contains("TpcSector") ||
+              oName.Contains("PointRPTpc") ||
+              oName.Contains("PointXYTpc") ) {
             gPad->SetLogz(1);
             LOG_INFO << "       -- Will draw in logZ scale: " << oname <<endm;
           } else gPad->SetLogz(0);
@@ -693,6 +699,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                       (oName.Contains("PointXYTpc") &&  // Unfortunately was polar for a short time
                        TMath::Abs((hobj->GetYaxis()->GetXmax()/TMath::Pi())-2)<1e-5))) {
             TH2F* htmp = new TH2F(Form("%s.",obj->GetName()),obj->GetTitle(),1,-200,200,1,-200,200);
+            htmp->Fill(0.,0.,.1);htmp->SetMinimum(1);
             htmp->SetStats(kFALSE);
             htmp->Draw();
             obj->Draw("pol zcol same");
@@ -701,6 +708,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                       oName.EndsWith("PVsDedx") ||
                       oName.EndsWith("SSD") ||
                       oName.EndsWith("PointXYSvt") ||
+                      oName.Contains("TpcSector") ||
                       oName.Contains("PointXYTpc"))) {
             obj->Draw("ZCol");
           } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
