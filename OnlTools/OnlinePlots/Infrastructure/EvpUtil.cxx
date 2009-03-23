@@ -634,11 +634,11 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
       cout << "hNames[1][2][2].Data()==\"\"" << endl;
       bad = true;
     }
-    if ( hNames[6][3][0].Data()=="" ) {
+    if ( hNames[7][3][0].Data()=="" ) {
       cout << "hNames[6][3][0].Data()!=0" << endl;
       bad = true;
     }
-    if ( hNames[6][3][1].Data()=="" ) {
+    if ( hNames[7][3][1].Data()=="" ) {
       cout << "hNames[6][3][1].Data()!=0" << endl;
       bad = true;
     } 
@@ -652,9 +652,9 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
     
     hHist[1][2][2] = (TH1 *)GetHistoFromGenericFile(gFile,hNames[1][2][2].Data(), hHist[1][2][2]);
     //h338_ftp_west it's 2d
-    hHist[6][3][0] = (TH2 *)GetHistoFromGenericFile(gFile,hNames[6][3][0].Data(), hHist[6][3][0]);
+    hHist[7][3][0] = (TH2 *)GetHistoFromGenericFile(gFile,hNames[7][3][0].Data(), hHist[7][3][0]);
     //h339_ftp_east
-    hHist[6][3][1] = (TH2 *)GetHistoFromGenericFile(gFile,hNames[6][3][1].Data(), hHist[6][3][1]);
+    hHist[7][3][1] = (TH2 *)GetHistoFromGenericFile(gFile,hNames[7][3][1].Data(), hHist[7][3][1]);
     
     int nEntries = (int) hHist[1][2][2]->GetEntries();
     //cout<<"h11 Entries "<<nEntries<<endl;
@@ -665,8 +665,8 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
     
     if(nEntries>0) ScaleFactor /= (nEntries);
     //cout<<"ScaleFactor:"<<ScaleFactor<<endl;
-    gcc->cd(1); hHist[6][3][0]->Scale(ScaleFactor);  hHist[6][3][0]->SetMaximum(600);  Draw(hHist[6][3][0],"colz");
-    gcc->cd(2); hHist[6][3][1]->Scale(ScaleFactor);  hHist[6][3][1]->SetMaximum(600);  Draw(hHist[6][3][1],"colz");
+    gcc->cd(1); hHist[7][3][0]->Scale(ScaleFactor);  hHist[7][3][0]->SetMaximum(600);  Draw(hHist[7][3][0],"colz");
+    gcc->cd(2); hHist[7][3][1]->Scale(ScaleFactor);  hHist[7][3][1]->SetMaximum(600);  Draw(hHist[7][3][1],"colz");
     goto ret;
   }
   
@@ -939,7 +939,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.7 2009/03/05 00:03:15 dkettler Exp $
+ * $Id: EvpUtil.cxx,v 1.8 2009/03/23 19:42:09 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -949,6 +949,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.8  2009/03/23 19:42:09  dkettler
+ * Fixed FTPC plots
+ *
  * Revision 1.7  2009/03/05 00:03:15  dkettler
  * EMC Updates
  *
