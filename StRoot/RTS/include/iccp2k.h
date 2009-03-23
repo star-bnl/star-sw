@@ -15,6 +15,7 @@
 #define EVBFLAG_RAW_DATA (1<<0)
 #define EVBFLAG_FCF_DATA (1<<1)
 #define EVBFLAG_L25ABORT (1<<2)
+#define EVBFLAG_L25TIMEOUT (1<<3)
 
 //#ifdef RTS_LITTLE_ENDIAN
 struct iccp2k {   
