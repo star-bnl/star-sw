@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.16 2009/02/04 21:05:42 kocolosk Exp $
+// $Id: StEemcRaw.cxx,v 1.17 2009/03/23 21:08:32 mattheww Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -113,7 +113,6 @@ Bool_t StEemcRaw::copyRawData(StEmcRawMaker* maker, StEmcRawData *raw)
       }
     }else{
       LOG_ERROR<<"ETOW Structure not found"<<endm;
-      return false;
     }
     StRtsTable* esmd = maker->GetDaqElement("esmd/adc");
     if(esmd){
@@ -135,7 +134,6 @@ Bool_t StEemcRaw::copyRawData(StEmcRawMaker* maker, StEmcRawData *raw)
       }
     }else{
       LOG_ERROR<<"ESMD Structure not found"<<endm;
-      return false;
     }
 
     LOG_INFO << "StEemcRaw::copyRawData() "<<nb<<" data bloks copied" << endm;
@@ -592,6 +590,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.17  2009/03/23 21:08:32  mattheww
+// Update default BPRS ZS handling and fix EEMC minor bug
+//
 // Revision 1.16  2009/02/04 21:05:42  kocolosk
 // Refactor StEEmcDb(Maker), new location for StEmcDecoder. Fixes RT #1388.
 //
