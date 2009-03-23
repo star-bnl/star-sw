@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.36 2009/02/26 12:00:40 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.37 2009/03/23 21:08:32 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.37  2009/03/23 21:08:32  mattheww
+// Update default BPRS ZS handling and fix EEMC minor bug
+//
 // Revision 1.36  2009/02/26 12:00:40  mattheww
 // added token check to BTOW header check
 //
@@ -157,11 +160,11 @@ StBemcRaw::StBemcRaw():TObject()
     mTables = new StBemcTables();
     mControlADCtoE = new controlADCtoE_st();
     Int_t   calib[]      = {1, 1, 1, 1, 0, 0, 0, 0};
-    Int_t   pedSub[]     = {1, 1, 0, 0, 0, 0, 0, 0};//default no bsmd pedsub
+    Int_t   pedSub[]     = {1, 0, 0, 0, 0, 0, 0, 0};//default no bsmd pedsub
     Float_t cut[]        = {-1, -1, 1.5, 1.5, -1, -1, -1, -1};
     //cutType will now specify which daq data block to use
     //cut will now do nothing
-    Int_t   cutType[]    = {0, 0, 1, 1, 0, 0, 0, 0};//default zs bsmd
+    Int_t   cutType[]    = {0, 1, 1, 1, 0, 0, 0, 0};//default zs bsmd
     Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
     Int_t   status[]     = {0, 0, 0, 0, 0, 0, 0, 0};
     Int_t   crate[]      = {1, 1, 1, 1, 0, 0, 0, 0};
