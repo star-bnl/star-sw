@@ -188,7 +188,7 @@ public:
 	pay->EventDescriptor.TrgToken,
 	pay->EventDescriptor.actionWdTrgCommand,
 	pay->EventDescriptor.actionWdDaqCommand,0);
-y
+
     pay->flags = daq100Decision(l2h32(pay->token), evt->actionWdDaqCommand, run_type, cl_run, raw_write);
     
     if(l25abort & 0x1) {
