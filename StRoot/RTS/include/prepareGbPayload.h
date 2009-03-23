@@ -188,8 +188,11 @@ public:
 
     pay->flags = daq100Decision(l2h32(pay->token), evt->actionWdDaqCommand, run_type, cl_run, raw_write);
     
-    if(l25abort) {
+    if(l25abort & 0x1) {
       pay->flags |= EVBFLAG_L25ABORT;
+    }
+    if(l25abort & 0x2) {
+      pay->flags |= EVBFLAG_L25TIMEOUT;
     }
 
     pay->flags = l2h32(pay->flags);
