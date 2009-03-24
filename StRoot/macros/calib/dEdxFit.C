@@ -28,7 +28,6 @@
 #include "TFileSet.h"
 #include "TDataSetIter.h"
 #include "TDataSet.h"
-#include "TDataSetIter.h"
 #include "TClassTable.h"
 //#include "DeDxTree.C"
 #include "TMinuit.h"
