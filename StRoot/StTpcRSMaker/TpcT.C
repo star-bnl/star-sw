@@ -876,7 +876,7 @@ void FitSlices(const Char_t *name="OuterPadRc", const Char_t *opt="K3", Int_t iy
     ga->FixParameter(4,K3OP);
     ga->FixParameter(5,0); // shift
     ga->FixParameter(6,0); // noise
-    ga->FixParameter(7,FWHM);
+    ga->FixParameter(7,FWHM);  
     ga->FixParameter(8,1);//tau);
     if (Name.Contains("Inner",TString::kIgnoreCase)) ga->FixParameter(9,CrossTalkInner); 
     else                                             ga->FixParameter(9,CrossTalkOuter);
@@ -916,10 +916,10 @@ void FitSlices(const Char_t *name="OuterPadRc", const Char_t *opt="K3", Int_t iy
     if (Opt.Contains("FWHM",TString::kIgnoreCase)) {
       ga->ReleaseParameter(7); // 
       ga->SetParameter(7,FWHM);
-      ga->SetParLimits(7,1,100);
+      ga->SetParLimits(7,2.5,4.5);
       ga->ReleaseParameter(8); // 
       ga->SetParameter(8,0.5);
-      ga->SetParLimits(8,0.1,10);
+      ga->SetParLimits(8,0.2,1.0);
     }
   }
   TString OutFile(fIn->GetName());
