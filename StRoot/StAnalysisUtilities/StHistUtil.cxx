@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.54 2009/03/23 23:50:16 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.55 2009/03/25 02:42:30 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.55  2009/03/25 02:42:30  genevb
+// Box --> Col for 2D plots
+//
 // Revision 2.54  2009/03/23 23:50:16  genevb
 // Add color and logarithmic scales to TPC hit location plots
 //
@@ -694,7 +697,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
           // actually draw,print
           if ((chkdim == 3) && (obj->InheritsFrom("StMultiH2F"))) {
-            obj->Draw("Box");
+            obj->Draw("Col");
           } else  if ((chkdim==2) && (oName.Contains("PointRPTpc") ||
                       (oName.Contains("PointXYTpc") &&  // Unfortunately was polar for a short time
                        TMath::Abs((hobj->GetYaxis()->GetXmax()/TMath::Pi())-2)<1e-5))) {
@@ -702,7 +705,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             htmp->Fill(0.,0.,.1);htmp->SetMinimum(1);
             htmp->SetStats(kFALSE);
             htmp->Draw();
-            obj->Draw("pol zcol same");
+            obj->Draw("Pol ZCol Same");
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
                       oName.EndsWith("PVsDedx") ||
@@ -712,7 +715,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                       oName.Contains("PointXYTpc"))) {
             obj->Draw("ZCol");
           } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
-            obj->Draw("Box");
+            obj->Draw("Col");
 	    if ((oName.EndsWith("trkGoodF"))||(oName.EndsWith("VtxSvtvsTpc"))) {
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
