@@ -1,6 +1,9 @@
-* $Id: svttgeo11.g,v 1.4 2009/03/07 01:04:52 perev Exp $
+* $Id: svttgeo11.g,v 1.5 2009/03/25 23:18:48 perev Exp $
 *
 * $Log: svttgeo11.g,v $
+* Revision 1.5  2009/03/25 23:18:48  perev
+* Old bug fixed. Important only for TGeo
+*
 * Revision 1.4  2009/03/07 01:04:52  perev
 * SSD shield fix
 *
@@ -1525,21 +1528,18 @@ endblock
 Block SGRA is the graphite/epoxy support cone
       Material   Carbon
       Attribute SGRA   Seen=1   Colo=6
-      SHAPE     PCON   Phi1=0   Dphi=360   Nz=7,
+      SHAPE     PCON   Phi1=0   Dphi=360   Nz=5,
       zi ={ssup_Rodlen/2, 
-           ssup_Rodlen/2, 
            ssup_Rodlen/2+ssup_GrphThk, 
            ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Con1IdMn+ssup_GrphThk, 
-           ssup_Con3IdMn+ssup_GrphThk,
+      Rmx={ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con3IdMn+ssup_GrphThk,
 	   ssup_Con4IdMn+ssup_GrphThk,
 	   ssup_Con4IdMx+ssup_GrphThk},
-      Rmn={ssup_Con1IdMn, 
-           ssup_Con1IdMn,
+      Rmn={ssup_Con1IdMn,
            ssup_Con1IdMn,
            ssup_Con3IdMn, 
 	   ssup_Con4IdMn,
