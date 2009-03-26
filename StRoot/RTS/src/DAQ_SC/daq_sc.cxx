@@ -172,10 +172,13 @@ daq_dta *daq_sc::handle_legacy()
 			swapit = 1 ;
 		}
 
+		LOG(DBG,"Need to swap SCD(sfs) %d?",swapit) ;
 
 		sc_p->time = qswap32(swapit,scd->time) ;
 
-		sc_p->mag_field = qswap32(swapit,scd->mag_field) ;
+		u_int tmp_f = qswap32(swapit,scd->mag_field) ;
+		memcpy(&(sc_p->mag_field),&tmp_f,4) ;
+		
 
 		for(u_int i=0;i<(sizeof(sc_p->rich_scalers)/4);i++) {
 			sc_p->rich_scalers[i] = qswap32(swapit, scd->rich_scalers[i]) ;

@@ -74,7 +74,8 @@ int sc_reader(char *m, struct sc_t *sc, u_int driver)
     
     return 0;
   }
-  
+
+  LOG(DBG,"Need to swap SCD? %d",swapscd) ;  
 
   // copy scd data into sc
   sc->time = qswap32(swapscd, scd->time);
