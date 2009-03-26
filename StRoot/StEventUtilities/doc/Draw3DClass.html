@@ -147,7 +147,7 @@ To draw the components (tracks, hits etc) of the StEvent,
    root[1] .x bfc.C(0,"doevents","st_physics_6048025_raw_1020002.event.root"); 
    root[2]  // One can use any other chain parameters instead of "doevents" above
    root[3] chain->MakeEvent();                 // to read the next event
-   root[4] StEvent *event = chain->GetDataSet("StEvent");   // Access the StEvent pointer
+   root[4] StEvent *event = (StEvent *)chain->GetDataSet("StEvent");   // Access the StEvent pointer
    root[5] gEventDisplay->SetBkColor(kWhite);  // Change the backgorund color
    root[6] gEventDisplay->Tracks(event);       // Draw the tracks
 </pre></bold></code>
@@ -228,6 +228,58 @@ the Coin widget  attributes from
 </TBODY>
 </table>
 </center>
+<p>
+The macro below shows how one can navigate the StEvebt structure read
+from the root files to find and draw the track 
+providing the eventNumber and trackId.
+<hr><code><bold><pre> 
+void Plot3Dtracks(int eventNumber=22394, int trackId=425, const char *file="st_physics_8112087_raw_1020015.event.root"){
+ // This example shows how to use Draw3D class to draw  the 
+ // track if one knows the track "event number" and "track id".
+ 
+  gROOT->Macro("Load.C");
+  gROOT->LoadMacro("bfc.C");
+  bfc(0,"in,StEvent",file); 
+  StEvent *event = 0;
+  gEventDisplay->SetBkColor(kWhite);
+  int MyEventId=eventNumber;
+  int MyTrackId=trackId;
+  printf(" Look up the file %s to find the track %d from the event %d \n"
+       , file,MyTrackId,MyEventId);
+
+  bool trackWasFound = false;
+  bool eventWasFound = false;
+
+  while (!eventWasFound && !chain->MakeEvent() ) {
+     // Access the StEvent pointer
+     event  =  (StEvent *)chain->GetDataSet("StEvent");
+     if (chain->GetEventNumber() == MyEventId) { eventWasFound = true; break; }
+     printf(" ----- Current event %d keep moving towards event %d\n"
+         ,chain->GetEventNumber(), MyEventId);
+  }
+  if (eventWasFound) {
+     // printf(" -++++++++++++++++++++++++++++++++ %p total tracks=%d\n",event
+     //      ,event->summary()->numberOfTracks());
+     const StSPtrVecTrackNode& theNodes = event->trackNodes();
+     StTrack *track = 0; int sz = theNodes.size();
+     for (unsigned int i=0; i<sz; i++) {
+        track = theNodes[i]->track(global);
+        printf(" - current track - %d  ---looking for %d \n", track->key(),MyTrackId);
+        // select tracks
+        if  (track && (track->key() == MyTrackId)) { trackWasFound  = true;  break; }
+      }
+      if (trackWasFound) gEventDisplay->Track(*track);
+      else {
+          printf("ATTENTION: No track %d was found in %d event from file <%s>\n"
+                , MyTrackId, MyEventId, file);
+      }
+
+  } else {
+     printf("ATTENTION: No event %d was found from file <%s> !!!\n", MyEventId, file);
+  }
+}
+</pre></bold></code>
+<hr>
 <p>
 Here you are the 
 <a href=" html/StuDraw3DEvent.html">StuDraw3DEvent</a>
