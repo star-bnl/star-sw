@@ -133,7 +133,19 @@ int main(int argc, char *argv[])
 		/***************** let's do simple detectors; the ones which only have legacy *****/
 
 		dd = evp->det("sc")->get() ;
-		if(dd) LOG(INFO,"SC found") ;
+		if(dd) {
+			if(dd->iterate()) {
+				LOG(INFO,"SC found") ;
+				if(strcasecmp(print_det,"sc")==0) {
+					sc_t *sc_p = (sc_t *) dd->Void ;
+
+					printf("SC: valid %d, time %u, timelag %d, B field %.3f\n",sc_p->valid,sc_p->time,sc_p->timelag,sc_p->mag_field) ;
+					for(int i=0;i<16;i++) {
+						printf("\tRICH scaler %2d: %u\n",i,sc_p->rich_scalers[i]) ;
+					}
+				}
+			}
+		}
 
 		dd = evp->det("fpd")->get("legacy") ;
 		if(dd) LOG(INFO,"FPD found") ;
