@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.5 2009/03/27 17:19:34 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.6 2009/03/27 17:40:16 fine Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -421,6 +421,9 @@ TKey *StFileIter::NextEventKey(UInt_t eventNumber, UInt_t runNumber, const char 
 {
 
    // Return the key that name matches the "event" . "run number" . "event number" schema
+   // Attention: Side effect: Been called from the end-user code this method causes
+   // =========  the  StFileIter::NextObjectGet() to get the "next" object, 
+   //            defined by "next" key. 
 
    Bool_t reset = kFALSE;
    if (name && name[0] && name[0] != '*') { if (fEventName > name) reset = kTRUE; fEventName   = name; }
