@@ -7,13 +7,13 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef StMaker_H
-#include "StMaker.h"
+#ifndef STAR_StRTSBaseMaker_H
+#include "StRTSBaseMaker.h"
 #endif
 #include "StTree.h"
 class StUKey;
 
-class StIOInterFace : public StMaker {
+class StIOInterFace : public  StRTSBaseMaker {
 private:
 TString fFileName;
 public:
