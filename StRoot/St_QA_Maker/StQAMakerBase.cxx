@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.33 2007/12/12 19:50:55 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.34 2009/03/27 21:18:36 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.34  2009/03/27 21:18:36  genevb
+// Add Jet Patch trigger histograms
+//
 // Revision 2.33  2007/12/12 19:50:55  genevb
 // Update for trigger words
 //
@@ -283,7 +286,8 @@ void StQAMakerBase::BookHist() {
       (prefix[1] = QAMakerType) += "CL";  // Central
       (prefix[2] = QAMakerType) += "HT";  // HighTower
       (prefix[3] = QAMakerType) += "XX";  // OtherPhysics
-      eventClass = 4;
+      (prefix[4] = QAMakerType) += "JP";  // JetPatch
+      eventClass = 5;
       break; }
 
     case (StQA_dAu) : {
@@ -359,7 +363,7 @@ void StQAMakerBase::BookHistTrigger(){
   QAH::preString = QAMakerType;
   if (mTrigWord) return;
   mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
-  mTrigWord->SetXTitle("1=MinBias, 2=Central, 3=HiPt, 5=HiTower, 6=OtherPhys");
+  mTrigWord->SetXTitle("1:MinBias 2:Central 3:HiPt 4:Jet 5:HiTower 6:OtherPhys");
   mTrigBits = QAH::H1F("QaTrigBits","trigger bits",32,-0.5,31.5);
 }
 //_____________________________________________________________________________
