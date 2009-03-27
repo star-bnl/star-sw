@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.3 2008/02/22 05:00:52 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.4 2009/03/27 17:40:16 fine Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -80,7 +80,6 @@ protected:
    TObject *ReadObj(const TKey *key) const;
    void     RestoreFileScope();
    void     SaveFileScope();
-   TKey    *NextEventKey(UInt_t eventNumber=UInt_t(-1), UInt_t runNumber=UInt_t(-1), const char *name="*");
 
 public:
 
@@ -105,6 +104,7 @@ public:
    virtual Bool_t      IsOpen() const;
    virtual TObject    *NextEventGet(UInt_t eventNumber=UInt_t(-1), UInt_t runNumber=UInt_t(-1), const char *name="*");
    virtual Int_t       NextEventPut(TObject *obj, UInt_t eventNum, UInt_t runNumber, const char *name=0);
+   TKey               *NextEventKey(UInt_t eventNumber=UInt_t(-1), UInt_t runNumber=UInt_t(-1), const char *name="*");
    void                SetCursorPosition(Int_t cursorPosition);
    void                SetCursorPosition(const char *keyNameToFind);
    Int_t               GetObjlen() const;
