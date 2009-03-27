@@ -391,7 +391,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 	LOG(DBG,"16bit words left: %d",w16) ;
 
 	int cur_ix = 0 ;
-
+	int next_good_ix = 0 ;
 
 	int bunch_xing = -1 ;
 	u_int trigger = 0xFFFFFFFF ;
@@ -418,9 +418,6 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 		chain_id = (seq[0] >> 8) & 3 ;
 
 
-
-
-
 		if(trigger == 0xFFFFFFFF) {
 			trigger = (trg[1] << 16) | trg[0] ;
 		}
@@ -430,6 +427,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 			if(tmp != trigger) {
 				ret |= 1 ;
 				LOG(ERR,"pp2pp: seq %d:%d: expect trigger 0x%08X, read 0x%08X",seq_id,chain_id,trigger,tmp) ;
+				return ret ;
 			}
 			else {
 				LOG(DBG,"pp2pp: seq %d:%d: expect trigger 0x%08X, read 0x%08X",seq_id,chain_id,trigger,tmp) ;
@@ -445,6 +443,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 			if(tmp != bunch_xing) {
 				ret |= 2 ;
 				LOG(ERR,"pp2pp: seq %d:%d: expect xing 0x%02X, read 0x%02X",seq_id,chain_id,bunch_xing,tmp) ;
+				return ret ;
 			}
 			else {
 				LOG(DBG,"pp2pp: seq %d:%d: expect xing 0x%02X, read 0x%02X",seq_id,chain_id,bunch_xing,tmp) ;
@@ -464,6 +463,11 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 		fifo_w16 -= 2 ;
 
 		d8 = (u_char *) &(d16[cur_ix]) ;
+		
+		next_good_ix = cur_ix + fifo_w16 ;
+		if(fifo_w16 & 1) {	// padding
+			next_good_ix++ ;
+		}
 
 		for(i=0;i<fifo_w16;i++) {
 			int ch, c_adc ;
@@ -477,6 +481,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 				if(c_adc != 0) {
 					ret |= 4 ;
 					LOG(ERR,"Bad channel in seq %d:%d: %d %d",seq_id,chain_id,ch,c_adc) ;
+					break ;
 				}
 				else {
 					LOG(NOTE,"SVX break: seq %d:%d: SVX 0x%02X",seq_id, chain_id,ch) ;
@@ -515,6 +520,8 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 			cur_ix++ ;
 		}
 
+
+			
 		if(fifo_w16 & 1) {
 			int ch, c_adc ;
 
@@ -531,7 +538,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 			requested = 0 ;
 		}
 		
-
+		cur_ix = next_good_ix ;
 
 	}
 
