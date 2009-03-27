@@ -16,138 +16,100 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
-#include "StDAQReader.h"
 #include "StSCReader.h"
-#include "StDaqLib/SC/SC_Reader.hh"
+#include "RTS/src/DAQ_SC/sc.h"
 #include "tables/St_trigDetSums_Table.h"
 
+#ifdef sc
+#    error "sc_t redefinition"
+#endif
+#define sc (*(fSC))
+
+// Copy of the sc_t from DAQ_SC/daq_sc.h
+//#include "DAQ_SC/daq-sc.h"
+
+//____________________________________________________________
+void StSCReader::FillTime(  unsigned int utime)
+{
+  //Keep BBCBkg scalers flipped as they were historically before 2009
+  //Note that new DAQ reader leads to UTime = 0, or tm_year=70 (1970)
+  //but new DAQ reader only gets used for 2009+ anyhow
+  unsigned int UTime = utime; //er->getEventInfo().UnixTime;
+  struct tm *time=gmtime((time_t*) &UTime);
+  flipBBCBkg = (time->tm_year > 95 && time->tm_year < 109 ? 1 : 0) ;
+}
 
 double StSCReader::getCTBWest() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->CTBWest();
-  return rv;
+  return 0;
 }
 
 double StSCReader::getCTBEast() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->CTBEast();
-  return rv;
+  return 0;
 }
 
 double StSCReader::getCTBOrTOFp() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->CTBOrTOFp();
-  return rv;
+  return 0;
 }
 
 double StSCReader::getTOFp() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->TOFp();
-  return rv;
+  return 0;
 }
 
 double StSCReader::getZDCWest() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->ZDCWest();
-  return rv;
+  return  sc.rich_scalers[6];
 }
 
 double StSCReader::getZDCEast() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->ZDCEast();
-  return rv;
+  return sc.rich_scalers[5];
 }
 
 double StSCReader::getZDCX() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->ZDCX();
-  return rv;
+  return sc.rich_scalers[7];
 }
 
 double StSCReader::getMult() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->Mult();
-  return rv;
+  return sc.rich_scalers[10];
 }
 
 double StSCReader::getL0() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->L0();
-  return rv;
+  return 0;
 }
 
 double StSCReader::getBBCX() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->BBCX();
-  return rv;
+  return sc.rich_scalers[2];
 }
 
 double StSCReader::getBBCXCTB() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->BBCXCTB();
-  return rv;
+  return 0;
 }
 
 double StSCReader::getBBCWest() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->BBCWest();
-  return rv;
+  return sc.rich_scalers[1];
 }
 
 double StSCReader::getBBCEast() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->BBCEast();
-  return rv;
+  return sc.rich_scalers[0];
 }
 
 double StSCReader::getBBCYellowBkg() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->BBCYellowBkg();
-  return rv;
+  return sc.rich_scalers[3 + flipBBCBkg];
 }
 
 double StSCReader::getBBCBlueBkg() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->BBCBlueBkg();
-  return rv;
+  return sc.rich_scalers[4 - flipBBCBkg];
 }
 
 double StSCReader::getPVPDWest() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->PVPDWest();
-  return rv;
+  return sc.rich_scalers[9];
 }
 
 double StSCReader::getPVPDEast() {
-  double rv = 0;
-  if(!fSCImpReader) return -1;
-  rv = fSCImpReader->PVPDEast();
-  return rv;
+  return  sc.rich_scalers[8];
 }
+StSCReader::StSCReader(sc_t *daqsc,unsigned int utime) : fSC(daqsc)
+{ FillTime(utime); }
 
-StSCReader::StSCReader(StDAQReader *daqr) {
-  fDAQReader = daqr;
-  fSCImpReader = ::getSCReader(daqr->getEventReader());
-}
-
-StSCReader::~StSCReader() {
-}
+StSCReader::~StSCReader() { }
 
 int StSCReader::close() {
   //  delete fSCImpReader; fSCImpReader=0;
@@ -155,18 +117,14 @@ int StSCReader::close() {
 }
 
 int StSCReader::Update() {
-  delete fSCImpReader;
-  fSCImpReader = ::getSCReader(fDAQReader->getEventReader());
-  // close();
   return 1;
 }
 
 char StSCReader::thereIsSCData() {
   // Make sure at least one non-zero ZDC or BBC scaler
   //   because of missing SCPresent value in 2005-2006
-  if (fSCImpReader &&
-     (getZDCWest() || getZDCEast() ||
-      getBBCWest() || getBBCEast())) return 7; // TRUE
+  if (getZDCWest() || getZDCEast() ||
+      getBBCWest() || getBBCEast())  return 7; // TRUE
   return 0; //FALSE
 }
 
