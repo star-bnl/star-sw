@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjDijetList.h,v 1.3 2008/09/19 23:19:17 tai Exp $
+// $Id: StjDijetList.h,v 1.4 2009/03/27 19:14:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJDIJETLIST_H
 #define STJDIJETLIST_H
@@ -20,13 +20,23 @@ public:
   double         costh;
   double         deta;
   double         dphi;
+  double         eth;
+  double         etl;
   double         vertexZ;
+  double         pt3;
+  double         pt4;
+  double         eta3;
+  double         eta4;
+  double         phi3;
+  double         phi4;
+  double         m3;
+  double         m4;
   StjJet         jet3;
   StjJet         jet4;
-  StjJet         jetSameSide;
-  StjJet         jetAwaySide;
   double         neuRt3;
   double         neuRt4;
+  StjJet         jetSameSide;
+  StjJet         jetAwaySide;
   double         neuRtSameSide;
   double         neuRtAwaySide;
   ClassDef(StjDijet, 1)

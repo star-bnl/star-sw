@@ -1,4 +1,4 @@
-// $Id: StjFormDijet.cxx,v 1.2 2008/09/19 23:19:17 tai Exp $
+// $Id: StjFormDijet.cxx,v 1.3 2009/03/27 19:14:27 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjFormDijet.h"
 
@@ -42,8 +42,33 @@ StjDijetList StjFormDijet::operator()(StjJetList jetList)
   dijet.eta = 0.5*(dijet.jet3.eta + dijet.jet4.eta);
   dijet.costh = tanh(0.5*(dijet.jet3.eta - dijet.jet4.eta));
   dijet.deta = dijet.jet3.eta - dijet.jet4.eta;
+
+  if(jet3.Et() >= jet4.Et())
+    {
+      dijet.eth = jet3.Et();
+      dijet.etl = jet4.Et();
+    }
+  else
+    {
+      dijet.eth = jet4.Et();
+      dijet.etl = jet3.Et();
+    }
+
+  dijet.pt3 = dijet.jet3.pt;
+  dijet.pt4 = dijet.jet4.pt;
+  dijet.eta3 = dijet.jet3.eta;
+  dijet.eta4 = dijet.jet4.eta;
+  dijet.phi3 = dijet.jet3.phi;
+  dijet.phi4 = dijet.jet4.phi;
+  dijet.m3 = dijet.jet3.m;
+  dijet.m4 = dijet.jet4.m;
+
   dijet.neuRt3 = dijet.jet3.neuRt;
   dijet.neuRt4 = dijet.jet4.neuRt;;
+  dijet.jetSameSide = dijet.jet3;
+  dijet.jetAwaySide = dijet.jet4;
+  dijet.neuRtSameSide = dijet.jet3.neuRt;
+  dijet.neuRtAwaySide = dijet.jet4.neuRt;;
   ret.push_back(dijet);
   return ret;
 }
