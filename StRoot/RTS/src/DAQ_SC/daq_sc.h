@@ -1,10 +1,7 @@
 #ifndef _DAQ_SC_H_
 #define _DAQ_SC_H_
 
-#include <stdio.h>
-#include <DAQ_READER/daq_det.h>
-
-
+#include <sys/types.h>  // for u_int
 
 struct sc_t {
   u_int valid;       
@@ -13,6 +10,10 @@ struct sc_t {
   float mag_field;
   u_int rich_scalers[16];
 };
+
+#ifndef DAQ_SC_DATA_STRUCTURE
+#include <stdio.h>
+#include <DAQ_READER/daq_det.h>
 
 
 
@@ -45,5 +46,5 @@ public:
 
 } ;
 
-
+#endif   //  DAQ_SC_DATA_STRUCTURE
 #endif	// _DAQ_SC_H_
