@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.4 2008/02/22 05:00:52 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.cxx,v 1.5 2009/03/27 17:19:34 fine Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -434,7 +434,7 @@ TKey *StFileIter::NextEventKey(UInt_t eventNumber, UInt_t runNumber, const char 
    while ( (key = SkipObjects()) ) {
       if (fDirection==kIterForward) fCursorPosition++;
       else                          fCursorPosition--;
-      if ( name != "*") {
+      if ( strcmp(name,"*") )  {
          thisKey.SetKey(key->GetName());
          if (thisKey.GetName() < name)  continue;
          if (thisKey.GetName() > name) { key = 0; break; }
