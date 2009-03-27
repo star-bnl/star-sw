@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.55 2009/03/25 02:42:30 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.56 2009/03/27 21:18:36 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.56  2009/03/27 21:18:36  genevb
+// Add Jet Patch trigger histograms
+//
 // Revision 2.55  2009/03/25 02:42:30  genevb
 // Box --> Col for 2D plots
 //
@@ -204,8 +207,8 @@
 typedef TH1* TH1ptr;
 typedef char* charptr;
 
-char* possibleQAPrefixes[9] = {"","LM","MM","HM","HP","XX","MB","CL","HT"};
-char* possibleQASuffixes[9] = {
+char* possibleQAPrefixes[10] = {"","LM","MM","HM","HP","XX","MB","CL","HT","JP"};
+char* possibleQASuffixes[10] = {
   "General",
   "Low Mult",
   "Mid Mult",
@@ -214,7 +217,8 @@ char* possibleQASuffixes[9] = {
   "Other Physics",
   "MinBias",
   "Central",
-  "High Tower"
+  "High Tower",
+  "Jet Patch"
 };
 
 int sizeOfCharPtr = sizeof(Char_t*);
@@ -228,7 +232,7 @@ ClassImp(StHistUtil)
 
 StHistUtil::StHistUtil(){
 
-  numOfPosPrefixes = 9;
+  numOfPosPrefixes = 10;
   possiblePrefixes = possibleQAPrefixes;
   possibleSuffixes = possibleQASuffixes;
 

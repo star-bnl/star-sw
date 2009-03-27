@@ -169,6 +169,7 @@ Int_t StEventQAMaker::Make() {
   Int_t nEvClasses = 1;
   Int_t run_num = event->runId();
   // Determine run year from run # (Oct. 1 goes to next year)
+  // e.g run 8350999 is run year 9, as is run 9071999 
   Int_t run_year = (run_num+727000)/1000000;
   if (allTrigs) {
     
@@ -283,6 +284,13 @@ Int_t StEventQAMaker::Make() {
 	mTrigWord->Fill(6.); // "Other Physics"
 	if (run_year >= 9) doEvent = kTRUE;
 	evClasses[nEvClasses] = 4;
+	nEvClasses++;
+	histsSet = StQA_AuAu;
+      }
+      if (run_year >= 10 && isTriggerInSubRange(trigId,400,499)) {
+	mTrigWord->Fill(4.); // "Jet patch"
+	doEvent = kTRUE;
+	evClasses[nEvClasses] = 5;
 	nEvClasses++;
 	histsSet = StQA_AuAu;
       }
@@ -2368,8 +2376,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.92 2009/03/19 01:08:08 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.93 2009/03/27 21:18:36 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.93  2009/03/27 21:18:36  genevb
+// Add Jet Patch trigger histograms
+//
 // Revision 2.92  2009/03/19 01:08:08  genevb
 // Show both xy and rphi TPC hit hists
 //
