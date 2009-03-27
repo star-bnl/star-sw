@@ -471,6 +471,8 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 			ch = *d8++ ;
 			c_adc = *d8++ ;
 
+			LOG(DBG,"Word %d/%d: ch %d, c_adc %d",i,fifo_w16,ch,c_adc) ;
+
 			if(ch & 0x80) {
 				if(c_adc != 0) {
 					ret |= 4 ;
@@ -499,8 +501,15 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 
 			}
 			else {				
-				LOG(DBG,"datum %d/%d: %3d = 0x%02X",i,fifo_w16,ch,c_adc) ;
-				d->adc[ch] = c_adc ;
+				if(!requested) {
+					LOG(ERR,"Bad data -- SVX ID was not found in sequencer %d, chain %d  (0x%X 0x%X)",seq_id, chain_id, ch,c_adc) ;
+					ret |=4 ;
+					break ;
+				}
+				else {
+					LOG(DBG,"datum %d/%d: %3d = 0x%02X",i,fifo_w16,ch,c_adc) ;
+					d->adc[ch] = c_adc ;
+				}
 			}
 
 			cur_ix++ ;
