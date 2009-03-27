@@ -10,6 +10,8 @@
 #include "StDAQReader.h"
 #include "StTPCReader.h"
 #include "StRtsReaderMaker.h"
+#include "StSCReader.h"
+#include "StRtsTable.h"
 
 ClassImp(StDAQMaker)
 
@@ -81,9 +83,14 @@ Int_t StDAQMaker::Make(){
   if (Debug()) {
     fDAQReader->printEventInfo();
     fEvtHddr->Print();
-  }  
+  }
 
-  AddData(fDAQReader->getSCTable());
+  StRtsTable *daqTofTable = GetNextLegacy();
+  if (daqTofTable) {
+     sc_t *c = (sc_t*)*DaqDta()->begin();
+     StSCReader scReader(c,fDAQReader->getUnixTime());
+     AddData(scReader.getSCTable());
+  }
   int adcOnly = IAttr("adcOnly");
   if (GetDebug()<=1 && !adcOnly) return 0;
 

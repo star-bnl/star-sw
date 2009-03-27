@@ -15,15 +15,13 @@
 #ifndef _StSCReader_
 #define _StSCReader_
 
-
-class SC_Reader;
-class StDAQReader;
 class TDataSet;
+struct sc_t;
 
 class StSCReader
 {
   public:
-    StSCReader(StDAQReader *rd);
+    StSCReader(sc_t *daqLegacy, unsigned int utime);
     virtual ~StSCReader();
     char thereIsSCData(); // returns FALSE if there is no SC data in the .daq file
     virtual int close();
@@ -46,9 +44,11 @@ class StSCReader
     double getPVPDWest();
     double getPVPDEast();
     TDataSet* getSCTable(unsigned long runno=0);
-  protected:
-    SC_Reader *fSCImpReader;
-    StDAQReader* fDAQReader;
+  protected: 
+    void FillTime(unsigned int utime);
+
+    sc_t *fSC;
+    short flipBBCBkg;
 };
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.75 2009/01/23 00:09:54 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.76 2009/03/27 23:07:33 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.76  2009/03/27 23:07:33  fine
+ * Pick the SC data via the new DAQ READER
+ *
  * Revision 1.75  2009/01/23 00:09:54  fine
  * restore the missed EventInfo. Should fix bug 1376, 1377
  *
@@ -729,10 +732,12 @@ StSCReader *StDAQReader::getSCReader()
 {
   // Must change order to handle missing SCPresent value in 2005-2006.
   // Only good check is to create a reader and see if there is data.
+#ifndef NEW_DAQ_READER
   if (!fSCReader) {
     fSCReader = new StSCReader(this);
   }
   if (!(SCPresent() || fSCReader->thereIsSCData())) return 0;
+#endif
   return fSCReader;
 }
 //-----------------------------------------------------------------------------
