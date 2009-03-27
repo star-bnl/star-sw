@@ -1,4 +1,4 @@
-// $Id: Ls.C,v 3.1 2009/03/27 17:20:21 fine Exp $
+// $Id: Ls.C,v 3.2 2009/03/27 19:06:15 fine Exp $
 // Author: Valeri Fine (fine@bnl.gov) 27.03.2009
 
 ///This macro prints the list of the object name from the /a dir TDirectory
@@ -16,7 +16,7 @@
 #  include "TRegexp.h"
 #  include "TKey.h"
 #endif 
-int Ls(TDirectory *dir, const char *pattern=".", Bool_t wildcard=kFALSE)
+int Ls(TDirectory *dir, const char *pattern="*", Bool_t wildcard=kTRUE)
 { 
    int counter = 0;
    if (!dir) dir = gDirectory;
@@ -47,7 +47,7 @@ int Ls(TDirectory *dir, const char *pattern=".", Bool_t wildcard=kFALSE)
 // where /a pattern can be either the TRegexp or "wildcard" as
 // the parameter /a wildcard defines
 // 
-int Ls(const char *pattern=".", Bool_t wildcard=kFALSE)
+int Ls(const char *pattern="*", Bool_t wildcard=kTRUE)
 {
    return Ls(gDirectory,pattern, wildcard);
 }
