@@ -4,7 +4,7 @@ int total = 0;
 
 void RunJetFinder2(
                    int nevents=100,
-		   const char* file="/star/data30/reco/ppProductionLong/FullField/P06ie/2006/140/7140051/st_physics_7140051_raw_2020002.MuDst.root",
+		   const char* file="/star/data54/reco/ppProductionTrans/FullField/P06ie/2006/117/7117002/st_physics_7117002_raw_1040035.MuDst.root",
                    const char* outfile="blah.jet.root",
                    const char* skimFile="blah.jetSkim.root"
                    )
@@ -37,7 +37,6 @@ void RunJetFinder2(
      gSystem->Load("StJets");
      gSystem->Load("StJetMaker");
      
-     double pi = atan(1.0)*4.0;
      cout << " loading done " << endl;
 
      chain= new StChain("StChain"); 
@@ -69,16 +68,16 @@ void RunJetFinder2(
      StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
      //Get TriggerMaker
-     //StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
-     //simuTrig->setMC(false); // must be before individual detectors, to be passed
-     //simuTrig->useBbc();
-     //simuTrig->useBemc();
-     //simuTrig->bemc->setConfig(StBemcTriggerSimu::kOffline);
-     //StGenericL2Emulator* simL2Mk = new StL2_2006EmulatorMaker;
-     //assert(simL2Mk);
-     //simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
-     //simL2Mk->setOutPath("/star/u/staszak/working/fullTriggerSimulator2/tempOut/");
-     //simuTrig->useL2(simL2Mk);
+     StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
+     simuTrig->setMC(false); // must be before individual detectors, to be passed
+     simuTrig->useBbc();
+     simuTrig->useBemc();
+     simuTrig->bemc->setConfig(StBemcTriggerSimu::kOffline);
+     StGenericL2Emulator* simL2Mk = new StL2_2006EmulatorMaker;
+     assert(simL2Mk);
+     simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
+     simL2Mk->setOutPath("./");
+     simuTrig->useL2(simL2Mk);
      
      //trigger simulater
      //StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
@@ -128,28 +127,5 @@ void RunJetFinder2(
      
      cout <<"\tLoop on branches"<<endl;
      
-     TChain* muchain = muDstMaker->chain();
-     assert(muchain);
-     
-     for (Int_t iev=0; iev<nevents; iev++) {
-         cout << "****************************************** " << endl;
-         cout << "Working on eventNumber " << iev << endl;
-         cout << "*************************1***************** " << endl;
-         chain->Clear();
-         TFile* currentFile = muchain->GetCurrentFile();
-         if (currentFile) {
-             cout <<"analyzing file:\t"<<currentFile->GetName()<<endl;
-         }
-         int iret = chain->Make(iev); 
-         total++;
-         if (iret) {
-             cout << "Bad return code!" << endl;
-             break;
-         }
-     } 
-     chain->Finish(); 
-     cout << "****************************************** " << endl;
-     cout << "total number of events  " << total << endl;
-     cout << "****************************************** " << endl;      
-     
+     chain->EventLoop(nevents);
 }
