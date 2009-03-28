@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.69 2008/08/03 00:26:16 tai Exp $
+// $Id: StJetMaker.cxx,v 1.70 2009/03/28 06:01:00 pibero Exp $
 #include "StJetMaker.h"
 
 #include "StjeParticleCollector.h"
@@ -12,17 +12,13 @@
 
 #include <StSpinPool/StJets/StJets.h>
 
-#include <string>
 #include <list>
-#include <vector>
-
-using namespace std;
 
 ClassImp(StJetMaker)
   
-StJetMaker::StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputName) 
+StJetMaker::StJetMaker(const char* name, StMuDstMaker* uDstMaker, const char* outputName) 
   : StMaker(name)
-  , _defaultTreeWriter(new StjeDefaultJetTreeWriter(*uDstMaker, string(outputName)))
+  , _defaultTreeWriter(new StjeDefaultJetTreeWriter(*uDstMaker, outputName))
   , _treeWriter(_defaultTreeWriter)
   , _backwordCompatibility(new StJetMakerBackwordCompatibility)
 {
@@ -40,7 +36,7 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 {
   list<StProtoJet>* protoJetList = new list<StProtoJet>;
 
-  vector<const AbstractFourVec*> *particleList = new vector<const AbstractFourVec*>;
+  vector<const AbstractFourVec*>* particleList = new vector<const AbstractFourVec*>;
 
   StJets* stjets = new StJets();
 
@@ -52,21 +48,19 @@ void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker*
 
   _treeWriter->addJetFinder(fp, particleList, protoJetList, name, stjets);
 
-  _stjetsMap[string(name)] = stjets;
+  _stjetsMap[name] = stjets;
 
   _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), _treeWriter, name);
 }
 
-void StJetMaker::SetTreeWriter(StjeTreeWriter *treeWriter)
+void StJetMaker::SetTreeWriter(StjeTreeWriter* treeWriter)
 {
   _treeWriter = treeWriter;
 }
 
 Int_t StJetMaker::Init() 
 {
-  for(vector<StjeJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
-    (*jetFinder)->Init();
-  }
+  for_each(_jetFinderList.begin(), _jetFinderList.end(), mem_fun(&StjeJetFinderRunner::Init));
 
   _treeWriter->Init();
 
@@ -75,17 +69,11 @@ Int_t StJetMaker::Init()
 
 Int_t StJetMaker::Make()
 {
-  for(vector<StjeParticleCollector*>::iterator particleCollector = _particleCollectorList.begin(); particleCollector != _particleCollectorList.end(); ++particleCollector) {
-    (*particleCollector)->Do();
-  }
+  for_each(_particleCollectorList.begin(), _particleCollectorList.end(), mem_fun(&StjeParticleCollector::Do));
 
-  for(vector<StjeJetFinderRunner*>::iterator jetFinder = _jetFinderList.begin(); jetFinder != _jetFinderList.end(); ++jetFinder) {
-    (*jetFinder)->Run();
-  }
+  for_each(_jetFinderList.begin(), _jetFinderList.end(), mem_fun(&StjeJetFinderRunner::Run));
 
-  for(vector<StjeJetCuts*>::iterator jetCuts = _jetCutsList.begin(); jetCuts != _jetCutsList.end(); ++jetCuts) {
-    (*jetCuts)->Apply();
-  }
+  for_each(_jetCutsList.begin(), _jetCutsList.end(), mem_fun(&StjeJetCuts::Apply));
 
   _treeWriter->fillJetTree();
 
