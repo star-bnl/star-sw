@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.52 2008/08/03 00:26:16 tai Exp $
+// $Id: StJetMaker.h,v 1.53 2009/03/28 06:01:00 pibero Exp $
 #ifndef STJETMAKER_H
 #define STJETMAKER_H
 
@@ -28,7 +28,7 @@ class StJetMaker : public StMaker {
 
 public:
 
-  StJetMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
+  StJetMaker(const char* name, StMuDstMaker* uDstMaker, const char* outputFile);
   virtual ~StJetMaker();
 
   Int_t Init();
@@ -37,14 +37,11 @@ public:
     
   TTree* tree() const;
     
-  void SetTreeWriter(StjeTreeWriter *treeWriter);
+  void SetTreeWriter(StjeTreeWriter* treeWriter);
 
   void addAnalyzer(const StppAnaPars*, StJetPars*, StFourPMaker*, const char* anaName);
 
-  StJets* getStJets(const char* branchName = "ConeJets12")
-  {
-    return _stjetsMap[string(branchName)];
-  }
+  StJets* getStJets(const char* branchName = "ConeJets12") { return _stjetsMap[branchName]; }
     
   typedef StJetMakerBackwordCompatibility::jetBranchesMap jetBranchesMap;
 
@@ -55,22 +52,22 @@ public:
   StjeTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.52 2008/08/03 00:26:16 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.53 2009/03/28 06:01:00 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
-  std::vector<StjeParticleCollector*> _particleCollectorList;
+  vector<StjeParticleCollector*> _particleCollectorList;
 
-  std::vector<StjeJetFinderRunner*> _jetFinderList;
+  vector<StjeJetFinderRunner*> _jetFinderList;
 
-  std::vector<StjeJetCuts*> _jetCutsList;
+  vector<StjeJetCuts*> _jetCutsList;
 
-  std::map<std::string, StJets*> _stjetsMap;
+  map<std::string, StJets*> _stjetsMap;
 
-  StjeTreeWriter *_defaultTreeWriter;
-  StjeTreeWriter *_treeWriter;
+  StjeTreeWriter* _defaultTreeWriter;
+  StjeTreeWriter* _treeWriter;
 
-  StJetMakerBackwordCompatibility *_backwordCompatibility;
+  StJetMakerBackwordCompatibility* _backwordCompatibility;
 
   ClassDef(StJetMaker, 0)
 
