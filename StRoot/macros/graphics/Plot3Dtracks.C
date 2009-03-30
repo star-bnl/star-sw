@@ -1,4 +1,4 @@
-// $Id: Plot3Dtracks.C,v 1.2 2009/03/30 18:28:02 fine Exp $
+// $Id: Plot3Dtracks.C,v 1.3 2009/03/30 18:37:02 fine Exp $
 // Author: Valeri Fine, 26.03.2009 (fine@bnl.gov)
 
 void Plot3Dtracks_usage() 
@@ -8,6 +8,7 @@ void Plot3Dtracks_usage()
    printf("\n");
    printf(" USAGE: Plot3Dtracks.C(int eventNumber, int trackId, const char *file)\n");
    printf(" ------\n");
+   printf(" see:  <http://www.star.bnl.gov/public/comp/vis/StDraw3D> as well\n\n");
 }
 
 void Plot3Dtracks(int eventNumber=22394, int trackId=425, const char *file="your_root_file"){
