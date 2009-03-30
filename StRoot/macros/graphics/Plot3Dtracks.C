@@ -1,10 +1,19 @@
-// $Id: Plot3Dtracks.C,v 1.1 2009/03/26 19:31:08 fine Exp $
+// $Id: Plot3Dtracks.C,v 1.2 2009/03/30 18:28:02 fine Exp $
 // Author: Valeri Fine, 26.03.2009 (fine@bnl.gov)
 
-void Plot3Dtracks(int eventNumber=22394, int trackId=425, const char *file="st_physics_8112087_raw_1020015.event.root"){
+void Plot3Dtracks_usage() 
+{
+   printf("\n The \"Plot3Dtracks.C\" macro creates a simple STAR chain to read the \"StEvent\" object \n");
+   printf(" from ROOT file and draw the track with the \"trackId\" from the \"eventNumber\" event\n");
+   printf("\n");
+   printf(" USAGE: Plot3Dtracks.C(int eventNumber, int trackId, const char *file)\n");
+   printf(" ------\n");
+}
+
+void Plot3Dtracks(int eventNumber=22394, int trackId=425, const char *file="your_root_file"){
  // This example shows how to use Draw3D class to draw  the 
  // track if one knows the track "event number" and "track id".
- 
+  if (!strcmp(file,"your_root_file")) { Plot3Dtracks_usage(); return;}
   gROOT->Macro("Load.C");
   gROOT->LoadMacro("bfc.C");
   bfc(0,"in,StEvent",file); 
