@@ -1,4 +1,5 @@
 #include <iomanip>
+#include "TMath.h"
 #include "TRVector.h"
 #include "TRSymMatrix.h"
 #include "TRDiagMatrix.h"
@@ -9,6 +10,49 @@ TRSymMatrix::TRSymMatrix(Int_t nrows,Double_t a0, ...) :
   TRArray(nrows*(nrows+1)/2), fNrows(nrows) {
   __VA_LIST__(a0);
 }
+//________________________________________________________________________________
+TRSymMatrix::TRSymMatrix(Int_t nrows,const Double_t *Array) : TRArray() {
+  fNrows = TMath::Abs(nrows);
+  if (nrows > 0) Set(fNrows*(fNrows+1)/2,Array);
+  else {// Upper to Lower
+    Set(fNrows*(fNrows+1)/2);
+    Int_t ij;
+    Int_t i = 0, j = 0;
+    for (Int_t l = 0; l < fN; l++) {
+      ij = i*(i+1)/2 + j;
+      fArray[ij] = Array[l];
+      if (i < fNrows - 1) i++;
+      else {
+	j++;
+	i = j;
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+TRSymMatrix::TRSymMatrix(Int_t nrows,const Float_t *Array) : TRArray() {
+  fNrows = TMath::Abs(nrows);
+  if (nrows > 0) {
+    Set(fNrows*(fNrows+1)/2);
+    TCL::ucopy(Array,fArray,fNrows*(fNrows+1)/2);
+  }
+  else {// Upper to Lower
+    Set(fNrows*(fNrows+1)/2);
+    Int_t ij;
+    Int_t i = 0, j = 0;
+    for (Int_t l = 0; l < fN; l++) {
+      ij = i*(i+1)/2 + j;
+      fArray[ij] = Array[l];
+      if (i < fNrows - 1) i++;
+      else {
+	j++;
+	i = j;
+      }
+    }
+  }
+}
+//________________________________________________________________________________
+TRSymMatrix::TRSymMatrix(Int_t nrows,const Char_t *s) : TRArray(nrows*(nrows+1)/2,s), fNrows(nrows) {}
 //________________________________________________________________________________
 TRSymMatrix::TRSymMatrix(ETRMatrixCreatorsOp kop,Int_t nrows) :
   TRArray(nrows*(nrows+1)/2), fNrows(nrows){
