@@ -232,8 +232,9 @@ the Coin widget  attributes from
 The macro below shows how one can navigate the StEvent structure read
 from the root files to find and draw the track 
 providing the eventNumber and trackId. You can pick this macro from 
-<code><bold>$STAR/StRoot/macros/analysis/Plot3Dtracks.C</bold></code>
-<hr><code><bold><pre>void Plot3Dtracks(int eventNumber=22394, int trackId=425, const char *file="st_physics_8112087_raw_1020015.event.root"){
+<code><bold>$STAR/StRoot/macros/graphics/Plot3Dtracks.C</bold></code>. Try:
+<code><bold><pre>root.exe Plot3Dtracks.C
+</pre></bold></code><hr><code><bold><pre>void Plot3Dtracks(int eventNumber=22394, int trackId=425, const char *file="st_physics_8112087_raw_1020015.event.root"){
  // This example shows how to use Draw3D class to draw  the 
  // track if one knows the track "event number" and "track id".
  
