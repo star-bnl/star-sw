@@ -1,8 +1,8 @@
-#ifndef NEW_DAQ_READER_DAQLIB
+#ifndef NEW_DAQ_READER_DAQ
 #  include "StDaqLib/EVP/scReader.h"
 #else
-#  include "RTS/src/DAQ_READER/daqReader.h"
-#  include "RTS/src/DAQ_SC/scReader.h"
+//#  include "RTS/src/DAQ_READER/daqReader.h"
+#  include "RTS/src/DAQ_SC/sc.h"
 #endif /* NEW_DAQ_READER */
 #include "SC_Reader.hh"
 #include "StDaqLib/GENERIC/EventReader.hh"
@@ -82,7 +82,7 @@ int SC_Reader::BBCXCTB() {
 
 SC_Reader::SC_Reader(EventReader *er) {
 
-  //Keep BBCBkg scalers flipped as they were historically before 2009
+  //Keep BBCBkg scalers flipped as theyStRoot/StDaqLib/SC/SC_Reader.cxx were historically before 2009
   //Note that new DAQ reader leads to UTime = 0, or tm_year=70 (1970)
   //but new DAQ reader only gets used for 2009+ anyhow
   unsigned int UTime = er->getEventInfo().UnixTime;
@@ -91,13 +91,14 @@ SC_Reader::SC_Reader(EventReader *er) {
 
   //  LDate = (((1900+time->tm_year)*100 + 1 + time->tm_mon)*100 + time->tm_mday)*100;
   //  LTime = (time->tm_hour*100 + time->tm_min)*100 + time->tm_sec;
-#ifndef NEW_DAQ_READER_DAQLIB
+#ifndef NEW_DAQ_READER
   char *datap; // ,ew;
   datap=er->getDATAP(); 
   if (datap) OLDEVP::scReader(datap); // call the "event pool" code
 #else 
-   daqReader *rdr=er->getDaqReader(); assert(rdr);
-  ::scReader((char*)rdr); // call the "event pool" code
+   assert(0 && "SC_Reader is no use with the new DAQ reader");
+//   daqReader *rdr=er->getDaqReader(); assert(rdr);
+//  ::scReader((char*)rdr); // call the "event pool" code
 #endif
 
 }
