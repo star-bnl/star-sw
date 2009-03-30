@@ -7,9 +7,9 @@ class TDiagMatrix;
 class TRSymMatrix : public TRArray {
  public:
   TRSymMatrix(Int_t nrows=0) : TRArray(nrows*(nrows+1)/2), fNrows(nrows) {}
-  TRSymMatrix(Int_t nrows,const Double_t *Array) : TRArray(nrows*(nrows+1)/2,Array), fNrows(nrows) {}
-  TRSymMatrix(Int_t nrows,const Float_t *Array) : TRArray(nrows*(nrows+1)/2,Array), fNrows(nrows) {}
-  TRSymMatrix(Int_t nrows,const Char_t *s) : TRArray(nrows*(nrows+1)/2,s), fNrows(nrows) {}
+  TRSymMatrix(Int_t nrows,const Double_t *Array);
+  TRSymMatrix(Int_t nrows,const Float_t *Array);
+  TRSymMatrix(Int_t nrows,const Char_t *s);
   TRSymMatrix(const TRSymMatrix& W,ETRMatrixCreatorsOp kop);
   TRSymMatrix(ETRMatrixCreatorsOp kop,Int_t nrows);
   TRSymMatrix(const TRMatrix& A);
