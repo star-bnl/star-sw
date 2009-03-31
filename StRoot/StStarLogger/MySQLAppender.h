@@ -31,7 +31,6 @@
 #include <windows.h>
 #endif
 
-#include <sqlext.h>
 #include <mysql/mysql.h>
 
 
@@ -125,7 +124,6 @@ namespace log4cxx
 			* <code>closeConnection</code> methods.
 			*/
 			MYSQL *connection;
-			SQLHENV env;
 			
 			/**
 			* Stores the string given to the pattern layout for conversion into a SQL
