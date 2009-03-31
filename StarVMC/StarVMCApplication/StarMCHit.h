@@ -1,12 +1,15 @@
-// $Id: StarMCHit.h,v 1.2 2007/01/05 21:37:08 potekhin Exp $
+// $Id: StarMCHit.h,v 1.3 2009/03/31 02:29:51 perev Exp $
 // $Log: StarMCHit.h,v $
+// Revision 1.3  2009/03/31 02:29:51  perev
+// Riostream.h added
+//
 // Revision 1.2  2007/01/05 21:37:08  potekhin
 // Add CVS tags
 //
 #ifndef StarMCHit_h
 #define StarMCHit_h
 
-#include <iostream.h>
+#include "Riostream.h"
 #include "TLorentzVector.h"
 #include "TDataSet.h"
 #include "TGeoMatrix.h"
