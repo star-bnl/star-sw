@@ -41,7 +41,7 @@ IMPLEMENT_LOG4CXX_OBJECT(MySQLAppender)
 
 //_________________________________________________________________________
 MySQLAppender::MySQLAppender()
-: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(5),fLastId(0),fIsConnectionOpen(false)
+: connection(0), bufferSize(5),fLastId(0),fIsConnectionOpen(false)
 { 
   // fprintf(stderr,"MySQLAppender::MySQLAppender() \n");
 }
@@ -105,7 +105,7 @@ String MySQLAppender::getLogStatement(const spi::LoggingEventPtr& event)
 //_________________________________________________________________________
 unsigned int  MySQLAppender::execute(const String& sql)
 {
-	SQLRETURN ret=1;
+	unsigned int ret=1;
    if (getConnection()) {
 //      fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
 //          String query = "INSERT INTO StarLogger VALUES (\"";
