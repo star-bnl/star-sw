@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.11 2009/01/26 15:17:41 fisyak Exp $
+ * $Id: TDirIter.cxx,v 1.12 2009/03/31 02:15:28 perev Exp $
  *
  ***************************************************************************
  *
@@ -96,7 +96,7 @@ void TDirIter::ResetQQ(const char *path)
     else     {fFile = "";}}
 
   if (fFile.Length()==0) f = ".";
-  if (fSele==0) {
+  if (fSele==0 && strstr(f,"://")==0) {
     Long_t flags, id = 0, modtime = 0; Long64_t size=0;
     int noexi = gSystem->GetPathInfo(f,&id,&size,&flags,&modtime);
     if (noexi) { 
@@ -105,7 +105,10 @@ void TDirIter::ResetQQ(const char *path)
     else if (size==0) {
       fSele = -2;
       Warning("TDirIter","*** File %s is empty ***",f);}
-    else       { if ((flags&2)==0) fSele = -1;}}
+    else  if ((flags&2)==0) {
+      fSele = -1;
+       Warning("TDirIter","*** File %s is special (like socket) ***",f);}
+    }
   
   fTop = fFile.Length();
   if (myPath[0]=='^') fTop = 0;
@@ -178,8 +181,10 @@ const char *TDirIter::NextFileQQ()
     if (fFile.Length()) fFile += "/"; fFile += name;
     Long_t flags=0; fState=0;
     Long_t id = 0, modtime = 0;Long64_t size=0;
-    gSystem->GetPathInfo(fFile.Data(),&id,&size,&flags,&modtime);
-    if (flags & 2) 	fState=1;
+    if (strstr(fFile.Data(),"://")==0) {
+      gSystem->GetPathInfo(fFile.Data(),&id,&size,&flags,&modtime);
+      if (flags & 2) 	fState=1;
+    }
     if (fSele==0) 	break;
     int len;
     TString qwe(fFile.Data()+fTop);
