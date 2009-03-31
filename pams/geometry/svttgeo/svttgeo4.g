@@ -1,8 +1,11 @@
-* $Id: svttgeo4.g,v 1.3 2008/11/19 04:08:33 perev Exp $
+* $Id: svttgeo4.g,v 1.4 2009/03/31 02:25:57 perev Exp $
 *
 * $Log: svttgeo4.g,v $
+* Revision 1.4  2009/03/31 02:25:57  perev
+* Bug in SVTT.SRDA fixed
+*
 * Revision 1.3  2008/11/19 04:08:33  perev
-* updates to the corrected(vp) starsim
+*  updates to the corrected(vp) starsim
 *
 * Revision 1.2  2007/11/13 21:33:44  perev
 * ALKAP fixed and innermost radius increased
@@ -1369,21 +1372,18 @@ endblock
 Block SGRA is the graphite/epoxy support cone
       Material   Carbon
       Attribute SGRA   Seen=1   Colo=6
-      SHAPE     PCON   Phi1=0   Dphi=360   Nz=7,
+      SHAPE     PCON   Phi1=0   Dphi=360   Nz=5,
       zi ={ssup_Rodlen/2, 
-           ssup_Rodlen/2, 
            ssup_Rodlen/2+ssup_GrphThk, 
            ssup_Rodlen/2+ssup_GrphThk, 
 	   ssup_Cone3zmx, 
 	   ssup_Cone4zmx},
-      Rmx={ssup_Con1IdMn+ssup_GrphThk, 
-           ssup_Con3IdMn+ssup_GrphThk,
+      Rmx={ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con3IdMn+ssup_GrphThk,
            ssup_Con3IdMn+ssup_GrphThk,
 	   ssup_Con4IdMn+ssup_GrphThk,
 	   ssup_Con4IdMx+ssup_GrphThk},
-      Rmn={ssup_Con1IdMn, 
-           ssup_Con1IdMn,
+      Rmn={ssup_Con1IdMn,
            ssup_Con1IdMn,
            ssup_Con3IdMn, 
 	   ssup_Con4IdMn,
