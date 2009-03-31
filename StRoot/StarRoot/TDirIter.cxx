@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.12 2009/03/31 02:15:28 perev Exp $
+ * $Id: TDirIter.cxx,v 1.13 2009/03/31 16:18:05 fisyak Exp $
  *
  ***************************************************************************
  *
@@ -77,6 +77,9 @@ void TDirIter::Reset(const char *path,Int_t maxlev)
 //______________________________________________________________________________
 void TDirIter::ResetQQ(const char *path)
 {
+  TString machine("root://");
+  machine += gSystem->HostName();
+  machine += "/";
   fLevel = 0; fState = 1; fSele=0; fTop = 0;
   fMaxLevQQ = fMaxLev;
   int n = strcspn(path," \t\n");
@@ -87,18 +90,25 @@ void TDirIter::ResetQQ(const char *path)
   const char *p = myPath.Data();
   if (*p == '^') p++;
   fFile = p; 
+  if (fFile.BeginsWith(machine)) {
+    fFile.ReplaceAll(machine,"");
+  } else {
+    fFile.ReplaceAll(".gov//",".gov:1095//");
+  }
   const char *c,*f=fFile.Data();
   c = strpbrk(f,"*#?[]\\");
   if (c) {
     fSele=1;fFile.Remove(c-f,9999);
     int s = fFile.Last('/');
     if (s>0) {fFile.Remove(s,9999);}
-    else     {fFile = "";}}
-
+    else     {fFile = "";}
+  }
   if (fFile.Length()==0) f = ".";
-  if (fSele==0 && strstr(f,"://")==0) {
-    Long_t flags, id = 0, modtime = 0; Long64_t size=0;
-    int noexi = gSystem->GetPathInfo(f,&id,&size,&flags,&modtime);
+  if (fSele==0) {
+    Long_t flags = 0, id = 0, modtime = 0; Long64_t size=1;
+    int noexi = 0;
+    if (! strstr(f,"://")) 
+      noexi = gSystem->GetPathInfo(f,&id,&size,&flags,&modtime);
     if (noexi) { 
       fSele = -2;
       Warning("TDirIter","*** File %s does not exist ***",f);}
@@ -137,6 +147,7 @@ const char *TDirIter::NextFile()
 //______________________________________________________________________________
 const char *TDirIter::NextFileQ()
 {
+  
   const char *name = NextFileQQ();
   if (name) return name;
   const char *full = fFull.Data();
@@ -181,10 +192,9 @@ const char *TDirIter::NextFileQQ()
     if (fFile.Length()) fFile += "/"; fFile += name;
     Long_t flags=0; fState=0;
     Long_t id = 0, modtime = 0;Long64_t size=0;
-    if (strstr(fFile.Data(),"://")==0) {
+    if (strstr(fFile.Data(),"://")==0)
       gSystem->GetPathInfo(fFile.Data(),&id,&size,&flags,&modtime);
-      if (flags & 2) 	fState=1;
-    }
+    if (flags & 2) 	fState=1;
     if (fSele==0) 	break;
     int len;
     TString qwe(fFile.Data()+fTop);
