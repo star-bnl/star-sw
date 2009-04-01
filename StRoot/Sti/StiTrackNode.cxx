@@ -442,12 +442,12 @@ RETN: *xx=save;
 int StiNodePars::check(const char *pri) const
 {
 
+  int ierr=0;
 //?? temp test
   double tmp = _curv - _ptin* _hz;
 //		1km for 1GeV is a zero field
-  assert(fabs(_hz)<1e-5 || fabs(tmp)<= 1e-3*fabs(_curv));
-//??
-  int ierr=0;
+//  assert(fabs(_hz)<1e-5 || fabs(tmp)<= 1e-3*fabs(_curv));
+  if (fabs(_hz)>=1e-5 && fabs(tmp)> 1e-3*fabs(_curv)) {ierr=1313; goto FAILED;}
   for (int i=0;i<kNPars;i++) {if (fabs(P[i]) > MAXPARS[i]) {ierr = i+1 ; break;}} 
   if(ierr) goto FAILED;
   for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.)         {ierr = i+12; break;}} 

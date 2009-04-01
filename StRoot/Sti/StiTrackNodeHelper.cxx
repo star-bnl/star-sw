@@ -398,8 +398,8 @@ if (!oldJoinPrim) {
 
 
 	if (kase == (kOLdValid|kNewFitd)) {	//Check errors improvements
-	  assert(mHrr.hYY > mJoinErrs._cYY);
-	  assert(mHrr.hZZ > mJoinErrs._cZZ);
+//VP	  assert(mHrr.hYY > mJoinErrs._cYY);
+//VP	  assert(mHrr.hZZ > mJoinErrs._cZZ);
           if (mHrr.hYY <= mJoinErrs._cYY) {
             LOG_DEBUG << Form("StiTrackNodeHelper::updateNode() WRONG hYY(%g) < nYY(%g)"
                    ,mHrr.hYY,mFitdErrs._cYY)<< endm;
