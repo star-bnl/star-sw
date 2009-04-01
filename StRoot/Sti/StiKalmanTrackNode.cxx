@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.121 2009/03/16 13:50:15 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.122 2009/04/01 19:20:17 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.122  2009/04/01 19:20:17  perev
+ * Replace asserts to error condition
+ *
  * Revision 2.121  2009/03/16 13:50:15  fisyak
  * Move out all Sti Chairs into StDetectorDb
  *
@@ -1227,7 +1230,8 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   if (fabs(mFP._sinCA+dsin)>0.99   )	return 1e41;
   if (fabs(mFP._eta)       >kMaxEta) 	return 1e41;
   if (fabs(mFP._curv)      >kMaxCur)    return 1e41;
-
+  if (mHrr.hYY>1000*mFE._cYY
+   && mHrr.hZZ>1000*mFE._cZZ)		return 1e41;
   setHitErrors(hit);
   r00=mHrr.hYY+mFE._cYY;
   r01=mHrr.hZY+mFE._cZY;  
