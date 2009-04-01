@@ -12,10 +12,11 @@ DSMLayer_LD301_2009::DSMLayer_LD301_2009() : DSMLayer<TriggerDataBlk>(1)
   front().name = "LD301";
 }
 
-void DSMLayer_LD301_2009::read(const TriggerDataBlk& event)
+bool DSMLayer_LD301_2009::read(const TriggerDataBlk& event)
 {
   L1_DSM_Data* L1data = (L1_DSM_Data*)((int)&event+event.L1_DSM_ofl.offset);
   copy_and_swap8(front().channels, L1data->lastDSM);
+  return true;
 }
 
 void DSMLayer_LD301_2009::run()

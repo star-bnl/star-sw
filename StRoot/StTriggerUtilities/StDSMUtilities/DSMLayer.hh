@@ -9,6 +9,7 @@
 
 #include <byteswap.h>
 #include <vector>
+#include <functional>
 
 using namespace std;
 
@@ -44,10 +45,11 @@ template<class T> struct DSMLayer : public vector<DSM> {
   DSMLayer(int n) : vector<DSM>(n) {}
   virtual ~DSMLayer() {}
   virtual void setRegister(int i, int value);
-  virtual void read(const T& event) = 0;
+  virtual bool read(const T& event) = 0;
   virtual void write(DSMLayer& layer) = 0;
   virtual void run() = 0;
   virtual void save(int nchannels, short* buffer);
+  virtual void dump() { for_each(begin(), end(), mem_fun_ref(&DSM::dump)); }
 };
 
 template<class T> inline void DSMLayer<T>::setRegister(int i, int value)

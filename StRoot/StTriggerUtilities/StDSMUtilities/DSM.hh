@@ -26,6 +26,7 @@ struct DSM {
   DSM(const string& name = "") : name(name) { clear(); }
   void clear();
   void setName(const string& basename, int layer, int dsm);
+  void dump();
 };
 
 inline void DSM::clear()
@@ -42,6 +43,14 @@ inline void DSM::setName(const string& basename, int layer, int dsm)
   ostringstream ss;
   ss << basename << layer << setw(2) << setfill('0') << dsm+1;
   name = ss.str();
+}
+
+inline void DSM::dump()
+{
+  printf("%s: ", name.c_str());
+  for (int ch = 0; ch < 8; ++ch)
+    printf("%04x ", (unsigned short)channels[ch]);
+  printf("\n");
 }
 
 #endif	// DSM_HH

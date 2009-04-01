@@ -27,6 +27,7 @@ class TCU_2009 {
 public:
   TCU_2009();
 
+  unsigned short bits() const { return mDSMInput; }
   void read(const TriggerDataBlk& event);
   void read(const DSMLayer_LD301_2009& layer);
   void update();
@@ -43,19 +44,15 @@ private:
   typedef map<int, pair<string, int> >::const_iterator MapIterator;
 
   void   defineTrigger(const char* name, int id, int mask);
-  int    triggerId(const MapIterator& i) const;
-  string triggerName(const MapIterator& i) const;
-  int    triggerMask(const MapIterator& i) const;
+  int    triggerId(const MapIterator& i) const { return i->first; }
+  string triggerName(const MapIterator& i) const { return i->second.first; }
+  int    triggerMask(const MapIterator& i) const { return i->second.second; }
   bool   isTrigger(const MapIterator& i) const;
 
   unsigned short mDSMInput;	// from trigger data
   unsigned short mTCUInput;	// from simulation
   multimap<int, pair<string, int> > mTriggers;
 };
-
-inline int    TCU_2009::triggerId(const MapIterator& i) const { return i->first; }
-inline string TCU_2009::triggerName(const MapIterator& i) const { return i->second.first; }
-inline int    TCU_2009::triggerMask(const MapIterator& i) const { return i->second.second; }
 
 inline bool TCU_2009::isTrigger(const MapIterator& i) const
 {

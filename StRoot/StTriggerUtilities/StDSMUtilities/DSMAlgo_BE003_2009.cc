@@ -28,7 +28,7 @@ void DSMAlgo_BE003_2009::operator()(DSM& dsm)
 
   // ACTION:
 
-  // JP1 - odd channels - to upper DSM
+  // JP1 - even channels - to lower DSM
 
   int highTowerBitsJP1 = 0;
   int  lowEtaSumJP1 = 0;
@@ -36,10 +36,10 @@ void DSMAlgo_BE003_2009::operator()(DSM& dsm)
 
   // Args: dsm, chMin, chMax, step, targetPedestal, sum, highTowerBits
 
-  sumTriggerPatchChannels(dsm, 1, 5, 2, 1,  lowEtaSumJP1, highTowerBitsJP1);
-  sumTriggerPatchChannels(dsm, 7, 9, 2, 1, highEtaSumJP1, highTowerBitsJP1);
+  sumTriggerPatchChannels(dsm, 0, 4, 2, 1,  lowEtaSumJP1, highTowerBitsJP1);
+  sumTriggerPatchChannels(dsm, 6, 8, 2, 1, highEtaSumJP1, highTowerBitsJP1);
 
-  // JP6 - even channels - to lower DSM
+  // JP6 - odd channels - to upper DSM
 
   int highTowerBitsJP6 = 0;
   int  lowEtaSumJP6 = 0;
@@ -47,8 +47,8 @@ void DSMAlgo_BE003_2009::operator()(DSM& dsm)
 
   // Args: dsm, chMin, chMax, step, targetPedestal, sum, highTowerBits
 
-  sumTriggerPatchChannels(dsm, 0, 4, 2, 1,  lowEtaSumJP6, highTowerBitsJP6);
-  sumTriggerPatchChannels(dsm, 6, 8, 2, 1, highEtaSumJP6, highTowerBitsJP6);
+  sumTriggerPatchChannels(dsm, 1, 5, 2, 1,  lowEtaSumJP6, highTowerBitsJP6);
+  sumTriggerPatchChannels(dsm, 7, 9, 2, 1, highEtaSumJP6, highTowerBitsJP6);
 
   // OUTPUT (32):
 

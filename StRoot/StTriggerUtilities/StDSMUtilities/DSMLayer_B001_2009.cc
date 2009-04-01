@@ -23,11 +23,13 @@ DSMLayer_B001_2009::DSMLayer_B001_2009() : DSMLayer<TriggerDataBlk>(30)
     (*this)[dsm].setName("BE", 0, dsm-15);
 }
 
-void DSMLayer_B001_2009::read(const TriggerDataBlk& event)
+bool DSMLayer_B001_2009::read(const TriggerDataBlk& event)
 {
   // BEMC West
 
-  if (event.MainX[BCW_CONF_NUM].offset && event.MainX[BCW_CONF_NUM].length) {
+  bool bcw_in = event.MainX[BCW_CONF_NUM].offset && event.MainX[BCW_CONF_NUM].length;
+
+  if (bcw_in) {
     BWestBlock* bcw = (BWestBlock*)((int)&event+event.MainX[BCW_CONF_NUM].offset);
     // 15 DSMs * 16 channels
     char cbuffer[15*16];
@@ -37,16 +39,18 @@ void DSMLayer_B001_2009::read(const TriggerDataBlk& event)
       char* cpMax = cpMin+15;
       short* sp = (*this)[dsm].channels;
       for (char* cp = cpMin; cp < cpMax; cp += 3) {
-	int ibuffer = *(int*)cp;
-	*sp++ = ibuffer & 0xfff;
-	*sp++ = ibuffer >> 12 & 0xfff;
+	int* ip = (int*)cp;
+	*sp++ = *ip & 0xfff;
+	*sp++ = *ip >> 12 & 0xfff;
       }
     }
   }
 
   // BEMC East
 
-  if (event.MainX[BCE_CONF_NUM].offset && event.MainX[BCE_CONF_NUM].length) {
+  bool bce_in = event.MainX[BCE_CONF_NUM].offset && event.MainX[BCE_CONF_NUM].length;
+
+  if (bce_in) {
     BEastBlock* bce = (BEastBlock*)((int)&event+event.MainX[BCE_CONF_NUM].offset);
     // 15 DSMs * 16 channels
     char cbuffer[15*16];
@@ -56,12 +60,14 @@ void DSMLayer_B001_2009::read(const TriggerDataBlk& event)
       char* cpMax = cpMin+15;
       short* sp = (*this)[dsm+15].channels;
       for (char* cp = cpMin; cp < cpMax; cp += 3) {
-	int ibuffer = *(int*)cp;
-	*sp++ = ibuffer & 0xfff;
-	*sp++ = ibuffer >> 12 & 0xfff;
+	int* ip = (int*)cp;
+	*sp++ = *ip & 0xfff;
+	*sp++ = *ip >> 12 & 0xfff;
       }
     }
   }
+
+  return (bcw_in || bce_in);
 }
 
 void DSMLayer_B001_2009::write(DSMLayer<TriggerDataBlk>& layer)

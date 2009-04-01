@@ -11,17 +11,21 @@
 
 DSMLayer_E101_2009::DSMLayer_E101_2009() : DSMLayer<TriggerDataBlk>(2)
 {
-  front().name = "EE101";
-  back ().name = "EE102";
+  (*this)[0].name = "EE101";
+  (*this)[1].name = "EE102";
 }
 
-void DSMLayer_E101_2009::read(const TriggerDataBlk& event)
+bool DSMLayer_E101_2009::read(const TriggerDataBlk& event)
 {
-  if (event.MainX[BC1_CONF_NUM].offset && event.MainX[BC1_CONF_NUM].length) {
+  bool bc1_in = event.MainX[BC1_CONF_NUM].offset && event.MainX[BC1_CONF_NUM].length;
+
+  if (bc1_in) {
     BELayerBlock* bc1 = (BELayerBlock*)((int)&event+event.MainX[BC1_CONF_NUM].offset);
-    for (int dsm = 0; dsm < 2; ++dsm)
+    for (size_t dsm = 0; dsm < size(); ++dsm)
       copy_and_swap8((*this)[dsm].channels, &bc1->EEMClayer1[dsm*8]);
   }
+
+  return bc1_in;
 }
 
 void DSMLayer_E101_2009::write(DSMLayer<TriggerDataBlk>& layer)
@@ -32,6 +36,6 @@ void DSMLayer_E101_2009::write(DSMLayer<TriggerDataBlk>& layer)
 
 void DSMLayer_E101_2009::run()
 {
-  DSMAlgo_EE101_2009()(front()); // EE101
-  DSMAlgo_EE102_2009()(back ()); // EE102
+  DSMAlgo_EE101_2009()((*this)[0]); // EE101
+  DSMAlgo_EE102_2009()((*this)[1]); // EE102
 }
