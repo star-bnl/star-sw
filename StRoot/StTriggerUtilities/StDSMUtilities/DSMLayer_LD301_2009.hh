@@ -18,7 +18,7 @@
 
 struct DSMLayer_LD301_2009 : public DSMLayer<TriggerDataBlk> {
   DSMLayer_LD301_2009();
-  void read(const TriggerDataBlk& event);
+  bool read(const TriggerDataBlk& event);
   void write(DSMLayer<TriggerDataBlk>&) {}
   void run();
 };

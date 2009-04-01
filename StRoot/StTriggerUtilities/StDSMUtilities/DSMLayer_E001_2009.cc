@@ -10,28 +10,32 @@
 
 DSMLayer_E001_2009::DSMLayer_E001_2009() : DSMLayer<TriggerDataBlk>(9)
 {
-  for (int dsm = 0; dsm < 9; ++dsm)
+  for (size_t dsm = 0; dsm < size(); ++dsm)
     (*this)[dsm].setName("EE", 0, dsm);
 }
 
-void DSMLayer_E001_2009::read(const TriggerDataBlk& event)
+bool DSMLayer_E001_2009::read(const TriggerDataBlk& event)
 {
-  if (event.MainX[BC1_CONF_NUM].offset && event.MainX[BC1_CONF_NUM].length) {
+  bool bc1_in = event.MainX[BC1_CONF_NUM].offset && event.MainX[BC1_CONF_NUM].length;
+
+  if (bc1_in) {
     // 9 DSMs * 16 channels
     char cbuffer[9*16];
     BELayerBlock* bc1 = (BELayerBlock*)((int)&event+event.MainX[BC1_CONF_NUM].offset);
-    for (int dsm = 0; dsm < 9; ++dsm) {
+    for (size_t dsm = 0; dsm < size(); ++dsm) {
       copy_and_swap16(&cbuffer[dsm*16], &bc1->EEMC[dsm*16]);
       char* cpMin = cbuffer+dsm*16;
       char* cpMax = cpMin+15;
       short* sp = (*this)[dsm].channels;
       for (char* cp = cpMin; cp < cpMax; cp += 3) {
-	int ibuffer = *(int*)cp;
-	*sp++ = ibuffer & 0xfff;
-	*sp++ = ibuffer >> 12 & 0xfff;
+	int* ip = (int*)cp;
+	*sp++ = *ip & 0xfff;
+	*sp++ = *ip >> 12 & 0xfff;
       }
     }
   }
+
+  return bc1_in;
 }
 
 void DSMLayer_E001_2009::write(DSMLayer<TriggerDataBlk>& layer)

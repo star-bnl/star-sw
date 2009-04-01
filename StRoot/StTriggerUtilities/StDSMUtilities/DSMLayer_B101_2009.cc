@@ -10,17 +10,21 @@
 
 DSMLayer_B101_2009::DSMLayer_B101_2009() : DSMLayer<TriggerDataBlk>(6)
 {
-  for (int dsm = 0; dsm < 6; ++dsm)
+  for (size_t dsm = 0; dsm < size(); ++dsm)
     (*this)[dsm].setName("BC", 1, dsm);
 }
 
-void DSMLayer_B101_2009::read(const TriggerDataBlk& event)
+bool DSMLayer_B101_2009::read(const TriggerDataBlk& event)
 {
-  if (event.MainX[BC1_CONF_NUM].offset && event.MainX[BC1_CONF_NUM].length) {
+  bool bc1_in = event.MainX[BC1_CONF_NUM].offset && event.MainX[BC1_CONF_NUM].length;
+
+  if (bc1_in) {
     BELayerBlock* bc1 = (BELayerBlock*)((int)&event+event.MainX[BC1_CONF_NUM].offset);
-    for (int dsm = 0; dsm < 6; ++dsm)
+    for (size_t dsm = 0; dsm < size(); ++dsm)
       copy_and_swap8((*this)[dsm].channels, &bc1->BEMClayer1[dsm*8]);
   }
+
+  return bc1_in;
 }
 
 void DSMLayer_B101_2009::write(DSMLayer<TriggerDataBlk>& layer)

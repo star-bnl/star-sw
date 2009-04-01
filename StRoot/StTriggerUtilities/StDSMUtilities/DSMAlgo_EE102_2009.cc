@@ -57,14 +57,22 @@ void DSMAlgo_EE102_2009::operator()(DSM& dsm)
   // Place jet patch thresholds on sums
 
   int jpaBits = 0;
+
+  if ((jpa > dsm.registers[0]) && !(jpa > dsm.registers[1]) && !(jpa > dsm.registers[2])) jpaBits = 1;
+  if ((jpa > dsm.registers[0]) &&  (jpa > dsm.registers[1]) && !(jpa > dsm.registers[2])) jpaBits = 2;
+  if ((jpa > dsm.registers[0]) &&  (jpa > dsm.registers[1]) &&  (jpa > dsm.registers[2])) jpaBits = 3;
+
   int jpbBits = 0;
+
+  if ((jpb > dsm.registers[0]) && !(jpb > dsm.registers[1]) && !(jpb > dsm.registers[2])) jpbBits = 1;
+  if ((jpb > dsm.registers[0]) &&  (jpb > dsm.registers[1]) && !(jpb > dsm.registers[2])) jpbBits = 2;
+  if ((jpb > dsm.registers[0]) &&  (jpb > dsm.registers[1]) &&  (jpb > dsm.registers[2])) jpbBits = 3;
+
   int jpcBits = 0;
 
-  for (int reg = 0; reg < 3; ++reg) {
-    if (jpa > dsm.registers[reg]) ++jpaBits;
-    if (jpb > dsm.registers[reg]) ++jpbBits;
-    if (jpc > dsm.registers[reg]) ++jpcBits;
-  }
+  if ((jpc > dsm.registers[0]) && !(jpc > dsm.registers[1]) && !(jpc > dsm.registers[2])) jpcBits = 1;
+  if ((jpc > dsm.registers[0]) &&  (jpc > dsm.registers[1]) && !(jpc > dsm.registers[2])) jpcBits = 2;
+  if ((jpc > dsm.registers[0]) &&  (jpc > dsm.registers[1]) &&  (jpc > dsm.registers[2])) jpcBits = 3;
 
   // OR HT bits
 
@@ -75,12 +83,29 @@ void DSMAlgo_EE102_2009::operator()(DSM& dsm)
 
   // Find largest sum for 1.09 < eta < 1.4 (low eta)
 
-  int maxId = 0;
-  int maxSum = 0;
+  int maxA = (lowEtaSumA > lowEtaSumB) && !(lowEtaSumC > lowEtaSumA);
+  int maxB = (lowEtaSumB > lowEtaSumC) && !(lowEtaSumA > lowEtaSumB);
+  int maxC = (lowEtaSumC > lowEtaSumA) && !(lowEtaSumB > lowEtaSumC);
 
-  if (lowEtaSumA > maxSum) { maxId = 1; maxSum = lowEtaSumA; }
-  if (lowEtaSumB > maxSum) { maxId = 2; maxSum = lowEtaSumB; }
-  if (lowEtaSumC > maxSum) { maxId = 3; maxSum = lowEtaSumC; }
+  int maxId;
+  int maxSum;
+
+  if (maxA) {
+    maxId  = 1;
+    maxSum = lowEtaSumA;
+  }
+  else if (maxB) {
+    maxId  = 2;
+    maxSum = lowEtaSumB;
+  }
+  else if (maxC) {
+    maxId  = 3;
+    maxSum = lowEtaSumC;
+  }
+  else {
+    maxId  = 1;
+    maxSum = lowEtaSumA;
+  }
 
   // If overflow, set to max
 

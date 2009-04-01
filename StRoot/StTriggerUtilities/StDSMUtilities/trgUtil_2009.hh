@@ -41,11 +41,11 @@ inline void swapEvtDescData(EvtDescData& evtDesc)
   evtDesc.addBits = bswap16(evtDesc.addBits);
   evtDesc.DSMInput = bswap16(evtDesc.DSMInput);
   evtDesc.externalBusy = bswap16(evtDesc.externalBusy);
-  evtDesc.modifiedBusyStatus = bswap16(evtDesc.modifiedBusyStatus);
+  evtDesc.internalBusy = bswap16(evtDesc.internalBusy);
   evtDesc.physicsWord = bswap16(evtDesc.physicsWord);
   evtDesc.TriggerWord = bswap16(evtDesc.TriggerWord);
   evtDesc.DSMAddress = bswap16(evtDesc.DSMAddress);
-  evtDesc.contaminationBusyStatus = bswap16(evtDesc.contaminationBusyStatus);
+  evtDesc.TCU_Mark = bswap16(evtDesc.TCU_Mark);
   evtDesc.npre = bswap16(evtDesc.npre);
   evtDesc.npost = bswap16(evtDesc.npost);
 }
@@ -69,7 +69,7 @@ inline void swapTrgSumData(TrgSumData& trgSum)
   transform(trgSum.L2Sum,trgSum.L2Sum+2,trgSum.L2Sum,bswap32);
   transform(trgSum.L1Result,trgSum.L1Result+32,trgSum.L1Result,bswap32);
   transform(trgSum.L2Result,trgSum.L2Result+64,trgSum.L2Result,bswap32);
-  transform(trgSum.CResult,trgSum.CResult+64,trgSum.CResult,bswap32);
+  transform(trgSum.C2Result,trgSum.C2Result+64,trgSum.C2Result,bswap32);
 }
 
 inline void swapDataBlock(DataBlock& data)
@@ -87,8 +87,8 @@ inline void swapBELayerBlock(BELayerBlock& bc1)
 inline void swapMIXBlock(MIXBlock& mix)
 {
   mix.length = bswap32(mix.length);
-  transform(mix.FPDEastNSlayer1,mix.FPDEastNSlayer1+8,mix.FPDEastNSlayer1,bswap16);
-  transform(mix.TOFlayer1,mix.TOFlayer1+8,mix.TOFlayer1,bswap16);
+  transform(mix.FPDEastNSLayer1,mix.FPDEastNSLayer1+8,mix.FPDEastNSLayer1,bswap16);
+  transform(mix.TOFLayer1,mix.TOFLayer1+8,mix.TOFLayer1,bswap16);
   transform(mix.TOF,mix.TOF+48,mix.TOF,bswap16);
 }
 
@@ -107,7 +107,7 @@ inline void swapBBCBlock(BBCBlock& bbc)
   bbc.length = bswap32(bbc.length);
   transform(bbc.BBClayer1,bbc.BBClayer1+16,bbc.BBClayer1,bswap16);
   transform(bbc.ZDClayer1,bbc.ZDClayer1+8,bbc.ZDClayer1,bswap16);
-  transform(bbc.VPDlayer1,bbc.VPDlayer1+8,bbc.VPDlayer1,bswap16);
+  transform(bbc.VPD,bbc.VPD+8,bbc.VPD,bswap16);
 }
 
 inline void swapFMSBlock(FMSBlock& fms)
@@ -192,7 +192,7 @@ inline void swapTriggerDataBlk(TriggerDataBlk& trgData)
   // Swap format version, total trigger length and event number
 
   trgData.FormatVersion = bswap32(trgData.FormatVersion);
-  assert(trgData.FormatVersion == FORMAT_VERSION);
+  //assert(trgData.FormatVersion == FORMAT_VERSION);
   trgData.totalTriggerLength = bswap32(trgData.totalTriggerLength);
   trgData.eventNumber = bswap32(trgData.eventNumber);
 
@@ -200,7 +200,7 @@ inline void swapTriggerDataBlk(TriggerDataBlk& trgData)
 
   swapTrgOfflen(trgData.EventDesc_ofl);
   EvtDescData* evtDesc = (EvtDescData*)((int)&trgData+trgData.EventDesc_ofl.offset);
-  assert(strncmp(evtDesc->name, "EVT", 3) == 0 || strncmp(evtDesc->name, "EVD", 3) == 0);
+  assert(strncmp(evtDesc->name, "EVD", 3) == 0 || strncmp(evtDesc->name, "EVT", 3) == 0);
   swapEvtDescData(*evtDesc);
 
   // Swap L1 DSM data
@@ -265,11 +265,11 @@ inline void printEvtDescData(const EvtDescData& evtDesc)
   printf("addBits: %d\n", evtDesc.addBits);
   printf("DSMInput: %d\n", evtDesc.DSMInput);
   printf("externalBusy: %d\n", evtDesc.externalBusy);
-  printf("modifiedBusyStatus: %d\n", evtDesc.modifiedBusyStatus);
+  printf("internalBusy: %d\n", evtDesc.internalBusy);
   printf("physicsWord: %d\n", evtDesc.physicsWord);
   printf("TriggerWord: %d\n", evtDesc.TriggerWord);
   printf("DSMAddress: %d\n", evtDesc.DSMAddress);
-  printf("contaminationBusyStatus: %d\n", evtDesc.contaminationBusyStatus);
+  printf("TCU_Mark: %d\n", evtDesc.TCU_Mark);
   printf("npre: %d\n", evtDesc.npre);
   printf("npost: %d\n", evtDesc.npost);
 }
@@ -323,9 +323,9 @@ inline void printTrgSumData(const TrgSumData& trgSum)
     printf("%08x ", trgSum.L2Result[i]);
     if (i %8 == 7) printf("\n");
   }
-  printf("CResult:\n");
+  printf("C2Result:\n");
   for (int i = 0; i < 64; ++i) {
-    printf("%08x ", trgSum.CResult[i]);
+    printf("%08x ", trgSum.C2Result[i]);
     if (i % 8 == 7) printf("\n");
   }
 }
@@ -334,16 +334,16 @@ inline void printMIXBlock(const MIXBlock& mix)
 {
   printName(mix.name);
   printf("length: %d\n", mix.length);
-  printf("FPDEastNSlayer1: ");
-  for (int i = 0; i < 8; ++i) printf("%04x ", mix.FPDEastNSlayer1[i]);
+  printf("FPDEastNSLayer1: ");
+  for (int i = 0; i < 8; ++i) printf("%04x ", mix.FPDEastNSLayer1[i]);
   printf("\n");
-  printf("MTD_P2Player1:\n");
+  printf("MTD_P2PLayer1:\n");
   for (int i = 0; i < 16; ++i) {
-    printf("%x ", mix.MTD_P2Player1[i]);
+    printf("%x ", mix.MTD_P2PLayer1[i]);
     if (i % 8 == 7) printf("\n");
   }
-  printf("TOFlayer1: ");
-  for (int i = 0; i < 8; ++i) printf("%04x ", mix.TOFlayer1[i]);
+  printf("TOFLayer1: ");
+  for (int i = 0; i < 8; ++i) printf("%04x ", mix.TOFLayer1[i]);
   printf("\n");
   printf("TOF:\n");
   for (int i = 0; i < 48; ++i) {
@@ -364,8 +364,8 @@ inline void printBBCBlock(const BBCBlock& bbc)
   printf("ZDClayer1:\n");
   for (int i = 0; i < 8; ++i) printf("%04x ", bbc.ZDClayer1[i]);
   printf("\n");
-  printf("VPDlayer1:\n");
-  for (int i = 0; i < 8; ++i) printf("%04x ", bbc.VPDlayer1[i]);
+  printf("VPD:\n");
+  for (int i = 0; i < 8; ++i) printf("%04x ", bbc.VPD[i]);
   printf("\n");
 }
 
