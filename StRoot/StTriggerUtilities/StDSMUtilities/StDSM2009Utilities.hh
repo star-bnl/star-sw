@@ -7,7 +7,6 @@
 #ifndef ST_DSM_2009_UTILITIES_HH
 #define ST_DSM_2009_UTILITIES_HH
 
-#include "FEE.hh"
 #include "DSMLayer_B001_2009.hh"
 #include "DSMLayer_B101_2009.hh"
 #include "DSMLayer_E001_2009.hh"
