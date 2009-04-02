@@ -15,8 +15,8 @@
 #include "TChain.h"
 #include "TEventList.h"
 
-#include "StJetMaker/StJetSkimEvent.h"
-#include "StJetMaker/StJet.h"
+#include "StSpinPool/StJetSkimEvent/StJetSkimEvent.h"
+#include "StSpinPool/StJets/StJet.h"
 #include "StSpinPool/StChargedPionAnalysisMaker/StChargedPionTrack.h"
 #include "TPi0Event.h"
 #include "StPrimaryElectron.h"
