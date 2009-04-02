@@ -1,7 +1,7 @@
 #ifndef EEdsmAna_h
 #define EEdsmAna_h
 /**************************************************************
- * $Id: EEdsmAna.h,v 1.5 2009/02/25 20:48:42 fisyak Exp $
+ * $Id: EEdsmAna.h,v 1.6 2009/04/02 14:30:06 pibero Exp $
  **************************************************************/
 #include <TObject.h>
 #include <TString.h>
@@ -12,13 +12,16 @@ class EEdsm1;
 class EEdsm2;
 class EEdsm3;
 
+struct DSM;
+
 class TH1F;
 class TH2F;
 class TFile;
 
+
 class EEdsmAna  {
 public:
-    EEdsmAna(const Char_t *name = 0, int year = 2006);
+    EEdsmAna(const Char_t *name = 0, int year = 2009);
     virtual ~EEdsmAna();
 
     void usePed(const Char_t *filename = "dsm0inp.ped");
@@ -161,6 +164,10 @@ private:
     TH1F *HBetot[mxEtotBit]; //label: BEMC ETOT BIT
     TH1F *HBEetot[mxEtotBit]; //label: B+EEMC ETOT BIT
 
+    // 2009 trigger data
+    DSM& EE101;
+    DSM& EE102;
+
     ClassDef(EEdsmAna, 1) 
 };
 #endif
@@ -168,6 +175,9 @@ private:
 
 /*
  * $Log: EEdsmAna.h,v $
+ * Revision 1.6  2009/04/02 14:30:06  pibero
+ * Updates to include jet patch plots for Run 9
+ *
  * Revision 1.5  2009/02/25 20:48:42  fisyak
  * Add forward declaration of TFile for ROOT >= 5.22
  *
