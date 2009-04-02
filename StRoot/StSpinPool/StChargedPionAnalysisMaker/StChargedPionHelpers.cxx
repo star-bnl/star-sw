@@ -1,4 +1,4 @@
-// $Id: StChargedPionHelpers.cxx,v 1.2 2008/12/29 15:58:28 kocolosk Exp $
+// $Id: StChargedPionHelpers.cxx,v 1.3 2009/04/02 18:25:42 kocolosk Exp $
 
 #include "StChargedPionHelpers.h"
 
@@ -9,9 +9,9 @@
 #include "StChargedPionTrack.h"
 #include "StChargedPionVertex.h"
 
-#include "StJetMaker/StJet.h"
-#include "StJetMaker/StJets.h"
-#include "StJetMaker/StJetSkimEvent.h"
+#include "StSpinPool/StJetSkimEvent/StJetSkimEvent.h"
+#include "StSpinPool/StJets/StJets.h"
+#include "StSpinPool/StJets/StJet.h"
 #include "StMiniMcEvent/StMiniMcEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
@@ -364,6 +364,9 @@ translateTrack(const StMuTrack *mu, StChargedPionTrack *cp) {
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.cxx,v $
+ * Revision 1.3  2009/04/02 18:25:42  kocolosk
+ * fixed paths to jet codes
+ *
  * Revision 1.2  2008/12/29 15:58:28  kocolosk
  * removed commented code and added Id and Log as needed
  *
