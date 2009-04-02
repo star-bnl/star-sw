@@ -13,6 +13,7 @@ struct pp2pp_t {
 	u_char error ;		// error occured!
 
 	u_char adc[PP2PP_SVX_CH] ;	
+	u_char trace[PP2PP_SVX_CH] ;	// 0-ch not found;1 - ch found OK; 2 - duplicate ch
 } ;
 
 class daq_pp2pp : public daq_det {

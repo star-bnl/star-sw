@@ -503,7 +503,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 
 				d->error = ret ;
 				memset(d->adc,0,sizeof(d->adc)) ;		
-
+				memset(d->trace,0,sizeof(d->trace)) ;
 			}
 			else {				
 				if(!requested) {
@@ -513,6 +513,14 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 				}
 				else {
 					LOG(DBG,"datum %d/%d: %3d = 0x%02X",i,fifo_w16,ch,c_adc) ;
+
+					if(d->trace[ch]) {
+						LOG(WARN,"duplicate channel %d: ADC now %d, was %d!",ch,c_adc,d->adc[ch]) ;
+						ret |= 4;
+						d->trace[ch] = 2 ;
+					}
+					else d->trace[ch] = 1 ;
+
 					d->adc[ch] = c_adc ;
 				}
 			}
