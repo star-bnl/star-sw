@@ -1649,21 +1649,22 @@ void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType file, TPad 
 	    displayJetPatchHT(file, pad, mDebug);
 	} else if (panel == 7) {
 	    displayJetPatchSum(file, pad, mDebug);
-	} else if (panel == 8) {
-	    displayL0Input(file, pad, mDebug);
-	} else if (panel == 9) {
-	    displayL1Input(file, pad, mDebug);
-	} else if (panel == 10) {
-	    displayL2Input(file, pad, mDebug);
-	} else if (panel == 11) {
-	    displaySmdFeeSum(file, pad, mDebug);
-	} else if (panel == 12) {
-	    displayTriggerCorruption(file, pad, true, mDebug);
-	} else if (panel == 13) {
-	    displayPsdFeeSum(file, pad, mDebug);
-	} else if (panel == 14) {
-	    displayRawAdc(file, pad, true, mDebug);
+	    //	} else if (panel == 8) {
+	    //  displayL0Input(file, pad, mDebug);
 	}
+	   else if (panel == 8) {
+	    displayL1Input(file, pad, mDebug);
+	} else if (panel == 9) {
+	    displayL2Input(file, pad, mDebug);
+	    //	} else if (panel == 10) {
+	    // displaySmdFeeSum(file, pad, mDebug);
+	    //	} else if (panel == 11) {
+	    //  displayTriggerCorruption(file, pad, true, mDebug);
+	    //	} else if (panel == 12) {
+	    //  displayPsdFeeSum(file, pad, mDebug);
+	    //	} else if (panel == 13) {
+	    // displayRawAdc(file, pad, true, mDebug);
+	    }
     }
  if (tab == 1) {
         if (panel == 0) {
@@ -1672,17 +1673,13 @@ void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType file, TPad 
 	    displayAdcEtaPhi(file, pad, mDebug);
         } else if (panel == 2) {
             displaySmdFeeSum(file, pad, mDebug);
-        } else if (panel == 3) {
-	  // displaySmdPed(file, pad, true, mDebug);
-        } else if (panel == 4) {
-          //  displaySmdPed(file, pad, false, mDebug);
-        } else if (panel == 5) {
+        }  else if (panel == 3) {
             displayPsdFeeSum(file, pad, mDebug);
-        } else if (panel == 6) {
+        } else if (panel == 4) {
             displayRawAdc(file, pad, true, mDebug);
-        } else if (panel == 7) {
+        } else if (panel == 5) {
             displayL0Input(file, pad, mDebug);
-        } else if (panel == 8) {
+        } else if (panel == 6) {
             displayTriggerCorruption(file, pad, true, mDebug);
         } 
     }

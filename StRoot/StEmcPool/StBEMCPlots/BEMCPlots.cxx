@@ -245,8 +245,8 @@ BEMCPlots::BEMCPlots(TObjArray *list)
     ADDHIST(this->mHist_JET_ped)
     ADDHIST(this->mHist_JETMAX_dist)
 
-    this->mHist_ADCEtaPhi_TowHits = new TH2F(Hist_ADCEtaPhi_TowHitsName, "Tower hits>ped+10; Phi Bin; Eta Bin",120 ,-3.15 ,3.15, 40, -1, 1); 
-    this->mHist_ADCEtaPhi_Pre1Hits = new TH2F(Hist_ADCEtaPhi_Pre1HitsName, "BPSD hits>ped+10;Phi Bin; Eta Bin",120, -3.15, 3.15, 40, -1, 1);     
+    this->mHist_ADCEtaPhi_TowHits = new TH2F(Hist_ADCEtaPhi_TowHitsName, "Tower hits>ped+20; Phi Bin; Eta Bin",120 ,-3.15 ,3.15, 40, -1, 1); 
+    this->mHist_ADCEtaPhi_Pre1Hits = new TH2F(Hist_ADCEtaPhi_Pre1HitsName, "BPSD hits>ped+20;Phi Bin; Eta Bin",120, -3.15, 3.15, 40, -1, 1);     
      
     ADDHIST(this->mHist_ADCEtaPhi_TowHits)
     ADDHIST(this->mHist_ADCEtaPhi_Pre1Hits)
@@ -884,7 +884,7 @@ void BEMCPlots::processEvent( char *datap
 		
 		StEmcGeom *BEMCGeom = StEmcGeom::instance("bemc");
 		
-		if(adcped>5)
+		if(adcped>20)
 		  {
 		    BEMCGeom->getEta(softId, eta);
 		    BEMCGeom->getPhi(softId, iphi);
@@ -1007,7 +1007,7 @@ void BEMCPlots::processEvent( char *datap
 				pmtSum[box - 1] += adc;
 				float iphi, eta;
 			        StEmcGeom *BEMCGeom = StEmcGeom::instance("bemc");
-				if(adc>40){
+				if(adc>20){
 				  BEMCGeom->getEta(softId, eta);
 				  BEMCGeom->getPhi(softId, iphi);
 				  if (this->mHist_ADCEtaPhi_Pre1Hits) this->mHist_ADCEtaPhi_Pre1Hits->Fill(iphi, eta);
