@@ -35,8 +35,10 @@
 #include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
 
 //StJetMaker
-#include "StJetMaker/StJetSkimEvent.h"
 #include "StJetMaker/StJetSkimEventMaker.h"
+
+//StSpinPool
+#include "StSpinPool/StJetSkimEvent/StJetSkimEvent.h"
 
 //StMCAsymMaker
 #include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"

@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.2 2008/08/03 00:26:51 tai Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.3 2009/04/02 17:02:42 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -6,8 +6,8 @@
 #include <StMuDSTMaker/COMMON/StMuEvent.h>
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 
-#include "StJets.h"
-#include "StJet.h"
+#include "StSpinPool/StJets/StJets.h"
+#include "StSpinPool/StJets/StJet.h"
 #include "StMuTrackFourVec.h"
 
 #include "StMuTrackEmu.h"
