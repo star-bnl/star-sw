@@ -2,55 +2,64 @@
 #include <TH2.h>
 #include <TF1.h>
 #include <TEnv.h>
-
 #include <TPaveStats.h>
 #include <TStyle.h> // for gPad
 #include <TROOT.h> // for gROOT
 #include <TSystem.h>
 #include <TMath.h>
+#include <TObjArray.h>
 
 #include <StMessMgr.h>
 
-const int mxh=64;
-static TH1 *hr[mxh] = {0};
-static TH1 *h[mxh] = {0};
-//static  TList *hCleanUp=new TList;
-
-
 #include "EEqaPresenter.h"
+
+static TObjArray *hCleanUp = new TObjArray();
 TStyle *defStyle=0; 
 TStyle *ee1Style=0;
 
+//--------------------------------------
+EemcTwMask::EemcTwMask() 
+    : txtH(0)
+    , nMask(0)
+{
+}
 
 //--------------------------------------
+EemcTwMask::~EemcTwMask() {
+    if (txtH) delete txtH; txtH = 0;
+}
+
+//--------------------------------------
+void EemcTwMask::clear() {
+    if (txtH) txtH->Clear();
+    nMask = 0;
+    memset(crCh, 0, sizeof(crCh));
+}
+
 //--------------------------------------
 void eePlotInit() {
   defStyle=gROOT->GetStyle("Default");
   ee1Style= new TStyle("ee1STyle","ee1Style (general, minimal Stat)");
-  ee1Style->SetOptStat(11); 
-  ee1Style->SetPalette(1);
-  //  ee1Style->cd();
-  ee1Style->SetTextSize(0.09);
+  if (ee1Style) {
+    ee1Style->SetOptStat(11); 
+    ee1Style->SetPalette(1);
+    ee1Style->SetTextSize(0.09);
+    //  ee1Style->cd();
+  }
 }
 
 //--------------------------------------
-//--------------------------------------
-void GetHisto(FileType &fd,const Char_t *name, int i) {
-  // this is very silly trick to avoid memory leak in the online version
-    hr[i] = 0;
-    h[i] = 0;
-    hr[i] = (TH1*)fd.Get(name, hr[i]);
-    if (!hr[i]) return;
-    hr[i]->SetDirectory(0);
-    h[i] = hr[i];
-//    h[i]=(TH1*) hr[i]->Clone();
-//    hCleanUp->Add(h[i]);
-    if (!h[i]) {
+TH1 *GetHisto(FileType &fd,const Char_t *name) {
+    TH1 *h = (TH1*)fd.Get(name, 0);
+    if (h) {
+	h->SetDirectory(0);
+	if (hCleanUp) hCleanUp->Add(h);
+    } else {
 	LOG_ERROR << "Histogram not found: " << name << endm;
     }
+    return h;
 }
 
-//--------------------------------------
 //--------------------------------------
 void eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskFilename){
   static int first=1;
@@ -65,49 +74,49 @@ void eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskF
   if(!twMaskFound) { delete twMask; twMask=0;}
   }  
   
-  ee1Style->cd(); // use my default style
-//  hCleanUp->Delete();
+  if (ee1Style) ee1Style->cd(); // use my default style
+  if (hCleanUp) hCleanUp->Delete();
   cc->Clear();
   
   if(page==11) {
     switch(panel) {
     case 1: eeJpQa(fd, cc, twMask); break;
     case 2: eeDaqCorr(fd, cc,1); break;
-    case 3: eeFreq(fd, cc, twMask); break;
-    case 4: eeDaqTwCr(fd, cc, twMask); break;
-    case 5: eeDaqTwHot(fd, cc, twMask); break;
-    case 6: eeDaqTwHit(fd, cc); break;
+      //  case 3: eeFreq(fd, cc, twMask); break;
+      // case 4: eeDaqTwCr(fd, cc, twMask); break;
+    case 3: eeDaqTwHot(fd, cc, twMask); break;
+    case 4: eeDaqTwHit(fd, cc); break;
     default:  plNone(cc); break;
     } 
   } else if (page==12) {
     switch(panel) {
     case 1: eeDaqCorr(fd, cc,2); break;
     case 2: eeDaqMapmtStat(fd, cc); break;
-    case 3: eeDaqMapmtCr(fd, cc,64); break;
-    case 4: eeDaqMapmtCr(fd, cc,72); break;
-    case 5: eeDaqMapmtCr(fd, cc,80); break;
-    case 6: eeDaqMapmtCr(fd, cc,88); break;
-    case 7: eeDaqMapmtCr(fd, cc,96); break;
-    case 8: eeDaqMapmtCr(fd, cc,104); break;
-    case 9:  eeDaqSmdA(fd, cc,"SmdA",'U'); break;
-    case 10: eeDaqSmdA(fd, cc,"SmdA",'V'); break;
-    case 11: eeDaqSmdA(fd, cc,"HSmd",'U'); break;
-    case 12: eeDaqSmdA(fd, cc,"HSmd",'V'); break;
+      // case 3: eeDaqMapmtCr(fd, cc,64); break;
+      ///case 4: eeDaqMapmtCr(fd, cc,72); break;
+      //case 5: eeDaqMapmtCr(fd, cc,80); break;
+      //case 6: eeDaqMapmtCr(fd, cc,88); break;
+      //case 7: eeDaqMapmtCr(fd, cc,96); break;
+      // case 8: eeDaqMapmtCr(fd, cc,104); break;
+    case 3:  eeDaqSmdA(fd, cc,"SmdA",'U'); break;
+    case 4: eeDaqSmdA(fd, cc,"SmdA",'V'); break;
+    case 5: eeDaqSmdA(fd, cc,"HSmd",'U'); break;
+    case 6: eeDaqSmdA(fd, cc,"HSmd",'V'); break;
     default:  plNone(cc); break;
       }
   } else if (page==13) {
     switch(panel) {
-    case 1: eeTrigHanks(fd, cc); break;  
-    case 2: eeTrigDsm0(fd, cc,"HT"); break;
-    case 3: eeTrigDsm0(fd, cc,"TP"); break;
-    case 4: eeTrigDsm1(fd, cc,"HT"); break;
-    case 5: eeTrigDsm1(fd, cc,"TP"); break;
-    case 6: eeTrigDsm2HT(fd, cc); break;
-    case 7: eeTrigJPsum(fd, cc,"_sum"); break;
-    case 8: eeTrigJPfreq(fd, cc); break;
-    case 9: eeTrigAdjJPsum(fd, cc,"_sum"); break;
-    case 10: eeTrigAdjJPcor(fd, cc,"_cor"); break;
-    case 11: eeTrigEtot(fd, cc); break;
+      // case 1: eeTrigHanks(fd, cc); break;  
+    case 1: eeTrigDsm0(fd, cc,"HT"); break;
+    case 2: eeTrigDsm0(fd, cc,"TP"); break;
+    case 3: eeTrigDsm1(fd, cc,"HT"); break;
+    case 4: eeTrigDsm1(fd, cc,"TP"); break;
+    case 5: eeTrigDsm2HT(fd, cc); break;
+    case 6: eeTrigJPsum(fd, cc,"_sum"); break;
+    case 7: eeTrigJPfreq(fd, cc); break;
+    case 8: eeTrigAdjJPsum(fd, cc,"_sum"); break;
+    case 9: eeTrigAdjJPcor(fd, cc,"_cor"); break;
+    case 10: eeTrigEtot(fd, cc); break;
     default:  plNone(cc); break;
     }
     }  else if (page==14) {
@@ -127,22 +136,21 @@ void eePlot(int page, int panel,FileType fd, TPad *cc, const Char_t *eemcTwMaskF
     }
     }
 
-    
-  
-  //  defStyle->cd(); // retun to default style
+  //  if (defStyle) defStyle->cd(); // retun to default style
  LOG_DEBUG << "JB panel=" << panel << " page=" << page << " done" << endm;
  
 }
 
 //--------------------------------------
-//--------------------------------------
-void plNone( TPad *c){
-  static TText txt(0.05,.5,"tempo disabled, Jan");
-  c->Clear();
-  txt.Draw();
+void plNone(TPad *c) {
+  if (c) c->Clear();
+  TText *txt = new TText(0.05,.5,"tempo disabled, Jan");
+  if (txt) {
+    if (hCleanUp) hCleanUp->Add(txt);
+    txt->Draw();
+  }
 }
   
-//--------------------------------------
 //--------------------------------------
 void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
   c0->Clear();
@@ -153,43 +161,34 @@ void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
   c->Divide(2,2);
   Char_t *name1[]={"JPpedZoom","JPtotCor","JPtotFreq","JPpedHot"};
   Char_t *name2[]={"JPpedZoom","JPsumTh3","JPtotFreq","xx"}; 
-  Char_t **name=name1;
-  if(m==0) name=name2; // dirty trick, JB
-  int i;
-  for(i=0;i<4;i++) {
-    GetHisto(fd,name[i],i);
-    if( h[i]==0) continue;
+  Char_t **name = (m == 0) ? name2 : name1; // dirty trick, JB
+
+  TH1* H4jpHot = 0;
+  for (int i = 0;i < 4;i++) {
+    TH1 *h = GetHisto(fd,name[i]);
+    if (!h) continue;
     c->cd(1+i);
     if(i==0) 
-      h[i]->Draw("colz");
+      h->Draw("colz");
     else
-      h[i]->Draw("b");
+      h->Draw("b");
     if(i==0) gPad->SetLogz();
-  }
-  // extra steps
-  if(h[2]) {
-    eeJpQaMinMax(h[2]);
-  }
-  if(h[1]) {
-    eeJpQaMinMax(h[1]);
+    if ((i == 1) || (i == 2)) {
+	eeJpQaMinMax(h);
+    }
+    if (i == 3) H4jpHot = h;
   }
   
   if(m==0) return;
-  if(h[3] && h[1]) {// start counting hot towers
-    TH1* H4jpHot=h[3];
+  if (H4jpHot) {// start counting hot towers
     H4jpHot->Reset(); // should be here, but online works w/o it 
-    
-    int cr;
-    TString tit;
-    for(cr=1;cr<6;cr++) {
-      tit = Form("cr%dHot",cr);
-      GetHisto(fd,tit.Data(),4+cr);
-      TH1F * hx=( TH1F *)h[4+cr];    
+    for(int cr=1;cr<6;cr++) {
+      TH1 *hx = GetHisto(fd, Form("cr%dHot",cr));
       if (!hx) continue;
       if(hx->Integral()<=50 ) continue;
       if(hx->GetRMS()<=2.)    continue;
       hx->Fit("pol0","0Q");
-      TF1 * ff=hx->GetFunction("pol0");
+      TF1 *ff=hx->GetFunction("pol0");
       float yM=ff->GetParameter(0);
       
       int nb=hx->GetNbinsX();
@@ -207,8 +206,7 @@ void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
   TPad *c3 = new TPad("pad3", "apd3",0.,0.,1.,.1);
   c3->Draw();
   c3->cd();
-  m->txtH->Draw();
-  
+  if (m->txtH) m->txtH->Draw();
 }
 
 //--------------------------------------
@@ -217,8 +215,6 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
 
   static  TPad *c2 =0;
   static  TPad *c3 =0;
-
-  //  if(c2) delete c2; // to avoid memory leak, breaks in online
 
   Char_t *nameT[]={"ETowHealth","ETowHeadCorr","ETowOFF","ETowN256","ETowOFFid","ETowGhost","ETowCorrBit"};
   Char_t *nameE[]={"ESmdHealth","ESmdHeadCorr","ESmdOFF","ESmdN256","ESmdOFFid","ESmdGhost","ESmdCorrBit"};
@@ -232,19 +228,18 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
     n1=4;
   }
 
-  int i;
   c->cd(0);
   c2 = new TPad("pad2", "apd2",0.0,y1+0.01,1.,1.);  
   c2->Draw();  c2->cd();
   c2->Divide(2,n1/2);
   
-  for(i=0;i<n1;i++) {
-    GetHisto(fd,name[i],i);
-    if( h[i]==0) continue;
+  for(int i=0;i<n1;i++) {
+    TH1 *h = GetHisto(fd,name[i]);
+    if(!h) continue;
     c2->cd(1+i);
-    h[i]->Draw();
+    h->Draw();
     //    gPad->SetLogy(0);
-    //  if(h[i]->Integral()>0 ) gPad->SetLogy();
+    //  if(h->Integral()>0 ) gPad->SetLogy();
     // if(i<2) gPad->SetLogx();
   }
 
@@ -253,15 +248,15 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
     float y2=y1*0.7;
     c2 = new TPad("pad2", "apd2",0.0,y2,1.,y1);  
     y1=y2;
-    c2->Draw();  c2->cd();
-    i=4;
-    GetHisto(fd,name[i],i);
-    if (h[i]) {
-	h[i]->Draw(); 
-	if(h[i]->Integral()>0 ) gPad->SetLogy();
+    c2->Draw();
+    c2->cd();
+    int i=4;
+    TH1 *h = GetHisto(fd,name[i]);
+    if (h) {
+	h->Draw(); 
+	if(h->Integral() > 0) gPad->SetLogy();
     }
   }
-
 
   c2->cd(5);
   gPad->SetGridx();
@@ -270,575 +265,427 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
   c3 = new TPad("pad3", "apd3",0.0,0.,1.,y1);
   c3->Draw();
   c3->cd();
-  i=6;
-  GetHisto(fd,name[i],i);
-  if (h[i]) {
-    h[i]->Draw();
+  int i=6;
+  TH1 *h = GetHisto(fd,name[i]);
+  if (h) {
+    h->Draw();
     gPad->SetGridx();
   }
 }
 
-
 //--------------------------------------
 void eeEmuVsSimu(FileType fd, TPad *c ) {
-
    char *name[2]={"HighTowerTriggerCorruption","PatchSumTriggerCorruption"};
    c->Divide(1,2);
-   
-   int i;
-   for(i=0;i<2;i++) {
-     GetHisto(fd,name[i],i);
-     // printf("aaa%d %s %p\n",i,name[i],h[i]);
-     if (h[i]) {
-       c->cd(1+i);
+   for (int i = 0;i < 2;i++) {
+     TH1 *h = GetHisto(fd, name[i]);
+     // printf("aaa%d %s %p\n",i,name[i],h);
+     if (h) {
+       c->cd(1 + i);
        gPad->SetLogz(0);
-       h[i]->Draw("colz");
-       if( h[i]->Integral()>0 ) gPad->SetLogz();
+       h->Draw("colz");
+       if (h->Integral() > 0) gPad->SetLogz();
      }
    }
-   
 }
 
 //--------------------------------------
-
 void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m) { 
   // raw tower crates 1-6
-  //  ee2Style->cd(); 
-
-  TString tit;
+  //  if (ee2Style) ee2Style->cd(); 
   c->Divide(3,2);
-  int i;
-  for(i=0;i<6;i++) {
-    tit = Form("cr%d",i+1);
-    GetHisto(fd,tit,i);
-    if (h[i]) {
-	c->cd(i+1);
+  for (int i = 0;i < 6;i++) {
+    TH1 *h = GetHisto(fd, Form("cr%d",i+1));
+    if (h) {
+	c->cd(i + 1);
 	gPad->SetLogz(0);
-	h[i]->Draw("colz"); 
-	h[i]->SetAxisRange(0,500);
-	if(h[i]->Integral()>0 )gPad->SetLogz();
-	TGraphErrors *gr=  m->crG2+i;
-	if(gr->GetN()>0) gr->Draw("P");
+	h->Draw("colz"); 
+	h->SetAxisRange(0, 500);
+	if (h->Integral() > 0) gPad->SetLogz();
+	TGraphErrors &gr = m->crG2[i];
+	if(gr.GetN() > 0) gr.Draw("P");
     }
   }
-
 }
 
 //--------------------------------------
-//--------------------------------------
-
 void eeFreq(FileType fd, TPad *c, EemcTwMask *m) {
   const int nh=4;
   Char_t *name[nh]={"TowHits","Pre1Hits","Pre2Hits","PostHits"};
-  int i;
   c->Divide(1,4);
-  for(i=0;i<nh;i++) {
-    GetHisto(fd,name[i],i);
-    if(h[i]==0) continue;
-    c->cd(1+i);
+  for (int i = 0;i < nh;i++) {
+    TH1 *h = GetHisto(fd, name[i]);
+    if (!h) continue;
+    c->cd(1 + i);
     gPad->SetLogz(0);
-    h[i]->Draw("colz");
+    h->Draw("colz");
     gPad->SetGrid();
-    if(h[i]->Integral()>0 ) gPad->SetLogz();
-    if(i==0 && m->phiG.GetN()>0){ // show hot towers
+    if (h->Integral() > 0 ) gPad->SetLogz();
+    if((i == 0) && m && (m->phiG.GetN() > 0)){ // show hot towers
       m->phiG.Draw("P");
     }
+    if (i == 0) addJPphiLimits(h);
   }
-  if(h[0]) addJPphiLimits(h[0]); 
- 
 }
 
-//--------------------------------------
 //--------------------------------------
 void eeDaqTwHit(FileType fd, TPad *c) {
   const int nh=4;
-
   Char_t *name[nh]={"HTow","HPre1","HPre2","HPost"};
-
-  int i;
-
   c->Divide(2,2);
-  
-  for(i=0;i<nh;i++) {
-    GetHisto(fd,name[i],i);
-    if (h[i]) {
-	c->cd(1+i);
+  for (int i = 0;i < nh;i++) {
+    TH1 *h = GetHisto(fd, name[i]);
+    if (h) {
+	c->cd(1 + i);
 	gPad->SetLogy(0);
-	h[i]->Draw();
-	if(h[i]->Integral()>0 ) gPad->SetLogy();
+	h->Draw();
+	if (h->Integral() > 0) gPad->SetLogy();
     }
   }
 }
 
-
-//--------------------------------------
 //--------------------------------------
 void eeMany1D(FileType fd, TPad *c, const Char_t *core, int nh, int nx, int ny) {
   int linLog=1; 
-  TString tit;
   c->Divide(nx,ny);
-  
-  int i;
-
-  for(i=0;i<nh;i++) {
-    tit = Form("%s%d",core,i+1);
-    GetHisto(fd,tit,i);
-    if (h[i]) {
-        c->cd(i+1);
-	h[i]->Draw();
+  for (int i = 0;i < nh;i++) {
+    TH1 *h = GetHisto(fd, Form("%s%d",core,i+1));
+    if (h) {
+        c->cd(i + 1);
+	h->Draw();
         gPad->SetLogy(0);    
-	if (h[i]->Integral()>0 && linLog==1) gPad->SetLogy();
+	if ((h->Integral() > 0) && (linLog == 1)) gPad->SetLogy();
     }
   }
 }
 
-
-
 //--------------------------------------
-//--------------------------------------
-
 void eeDaqTwHot(FileType fd, TPad *c, EemcTwMask *m) { 
   const int ncr=6; // raw tower crates 1-6
-  int i;
-  float ymax=2;
-  
-  TString tit;
-  c->Divide(1,ncr);
-  for(i=0;i<ncr;i++) {
-    tit = Form("cr%dHot",i+1);
-    GetHisto(fd,tit,i);
-    if (h[i]) {
-	c->cd(i+1);
+  TH1 *hh[ncr] = {0};
+  float ymax = 2.0;
+  c->Divide(1, ncr);
+  for (int i = 0;i < ncr;i++) {
+    TH1 *h = GetHisto(fd, Form("cr%dHot",i+1));
+    if (h) {
+	hh[i] = h;
+	c->cd(i + 1);
 	gPad->SetLogy(0);
 	gPad->SetGridx();
-	h[i]->Draw("b");
-	TH1F * hx=( TH1F *)h[i];    
-	if(hx->Integral()<=10 ) continue;
-	if(hx->GetRMS()<=2.)    continue;
-	if(hx->Integral()>1) gPad->SetLogy();
-	hx->Fit("pol0");
-	TF1 * ff=hx->GetFunction("pol0");
-	float yM=ff->GetParameter(0);
-	if(ymax<yM) ymax=yM;
-	TGraph *gr=  m->crG+i;
-	if(gr->GetN()>0) gr->Draw("P");
+	h->Draw("b");
+	if (h->Integral() <= 10) continue;
+	if (h->GetRMS() <= 2.0) continue;
+	if (h->Integral() > 1) gPad->SetLogy();
+	h->Fit("pol0");
+	TF1 *ff = h->GetFunction("pol0");
+	float yM = ff->GetParameter(0);
+	if (ymax < yM) ymax = yM;
+	if (m) {
+	    TGraph &gr = m->crG[i];
+	    if (gr.GetN() > 0) gr.Draw("P");
+	}
     }
  }
-
-  int j;
-  for(j=0;j<6;j++) {
-    if(h[j]==0) continue;
-    h[j]->SetMaximum(ymax*20.);
-  }
-
+ for (int i = 0;i < ncr;i++) if (hh[i]) hh[i]->SetMaximum(ymax * 20.);
 }
 
 //--------------------------------------
-//--------------------------------------
-
-void eeDaqMapmtCr(FileType fd, TPad *c,int cr1) {
+void eeDaqMapmtCr(FileType fd, TPad *c, int cr1) {
   //raw  mapmt crates 84-91 or 92-99 
-  int cr;
-  TString tit;
   c->Divide(4,2);
-  for(cr=cr1;cr<=cr1+7;cr++) {
-    int i=cr-cr1;
-    tit = Form("cr%d",cr);
-    GetHisto(fd,tit,i);
-    if (h[i]) {
-	c->cd(cr-cr1+1);
+  for (int cr = cr1;cr <= cr1 + 7;cr++) {
+    TH1 *h = GetHisto(fd, Form("cr%d", cr));
+    if (h) {
+	c->cd(cr - cr1 + 1);
 	gPad->SetLogz(0);
-	h[i]->Draw("colz"); 
-	h[i]->SetAxisRange(0,1000);
-	if(h[i]->Integral()>0 ) gPad->SetLogz();
+	h->Draw("colz"); 
+	h->SetAxisRange(0, 1000);
+	if(h->Integral() > 0) gPad->SetLogz();
     }
   }
-
 }
 
 //--------------------------------------
-//--------------------------------------
-
-void eeDaqSmdA(FileType fd, TPad *c, const Char_t *core,Char_t uv){
- 
-  TString tit;
-  if( strstr(core,"SmdA")) 
-    c->Divide(2,6);
-  else
-   c->Divide(3,4);
-
-  int sec;
-  int i=0;
-  for(sec=1;sec<=12;sec++) {
-    tit = Form("%s%d%c",core,sec,uv);
-    GetHisto(fd,tit,i);
-    if( h[i]==0) continue;    
-    c->cd(i+1);
-    h[i]->Draw();
-    gPad->SetLogy(0);
-    if (h[i]->Integral()>0 ) gPad->SetLogy();
-    i++;
-
+void eeDaqSmdA(FileType fd, TPad *c, const Char_t *core, Char_t uv){
+  if(strstr(core, "SmdA")) {
+    c->Divide(2, 6);
+  } else {
+    c->Divide(3, 4);
+  }
+  for (int sec = 1;sec <= 12;sec++) {
+    TH1 *h = GetHisto(fd, Form("%s%d%c",core,sec,uv));
+    if (h) {
+	c->cd(sec);
+	h->Draw();
+        gPad->SetLogy(0);
+	if (h->Integral() > 0) gPad->SetLogy();
+    }
   }
 }
 
-//--------------------------------------
 //--------------------------------------
 void eeDaqMapmtStat(FileType fd, TPad *c) {
-//  static TH2F *h2=0;
-  int i=0;
   c->Divide(1,2);
-  GetHisto(fd,"MAPMHits",i);
-  if(h[i]==0) return;
-  TH2F *h2 = (TH2F*)h[i];
-  //h2=(TH2F *) h[i]->Clone();
+  TH1 *h = GetHisto(fd, "MAPMHits");
+  if (h) {
+    c->cd(1);
+    h->Draw("colz");
+    gPad->SetGrid();
+    h->SetAxisRange(63, 87);
+    h->SetXTitle("Crate ID     12S1=64,  1S1=68,  2S1=72,  3S1=76,  4S1=80,  5S1=84"); 
+    gPad->SetLogz(0);    
+    if (h->Integral() > 0) gPad->SetLogz();
 
-  c->cd(1);
-  h2->Draw("colz");
-  gPad->SetGrid();
-  h2->SetAxisRange(63,87);
-  h2->SetXTitle("Crate ID     12S1=64,  1S1=68,  2S1=72,  3S1=76,  4S1=80,  5S1=84"); 
-  gPad->SetLogz(0);    
-  if (h2->Integral()>0) gPad->SetLogz();
-  
-
-  c->cd(2);
-  h2=(TH2F *) h[i];
-  h2->Draw("colz");
-  gPad->SetGrid();
-  h2->SetAxisRange(88,120);
-  h2->SetXTitle("Crate ID     6S1=88,  7S1=92,  8S1=96,  9S1=100, 10S1=104,  11S1=108");
-  gPad->SetLogz(0);    
-  if (h[i]->Integral()>0) gPad->SetLogz();
-
+    c->cd(2);
+    h->Draw("colz");
+    gPad->SetGrid();
+    h->SetAxisRange(88, 120);
+    h->SetXTitle("Crate ID     6S1=88,  7S1=92,  8S1=96,  9S1=100, 10S1=104,  11S1=108");
+    gPad->SetLogz(0);    
+    if (h->Integral()>0) gPad->SetLogz();
+  }
 }
 
-
-
-//--------------------------------------
 //--------------------------------------
 void eeTrigHanks(FileType fd, TPad *c ) {
-
   Char_t *name[2]={"dsm0inJPall_HT","dsm0inJPall_TP"};
   c->Divide(1,2);
- 
-  int i;
-  for(i=0;i<2;i++) {
-    GetHisto(fd,name[i],i);
-    if (h[i]) {
-	c->cd(1+i);
+  for (int i = 0;i < 2;i++) {
+    TH1 *h = GetHisto(fd, name[i]);
+    if (h) {
+	c->cd(1 + i);
 	gPad->SetLogz(0);
-	h[i]->Draw("colz");
-	if( h[i]->Integral()>0 ) gPad->SetLogz();
+	h->Draw("colz");
+	if (h->Integral() > 0) gPad->SetLogz();
     }
   }
-
 }
 
-
-//--------------------------------------
 //--------------------------------------
 void eeTrigDsm0(FileType fd, TPad *c, const Char_t *mode ) {
-  TString tit;
   c->Divide(2,3);
-  
-  float ymax=0;
-  int j;
-
-  for(j=0;j<6;j++) {
-    tit = Form("dsm0inJP%d_%s",j+1,mode);
-    c->cd(j+1);
-    GetHisto(fd,tit,j);
-    if (h[j]) {
+  const int ncr = 6;
+  TH1 *hh[ncr] = {0};
+  float ymax = 0;
+  for (int j = 0;j < ncr;j++) {
+    c->cd(j + 1);
+    TH1 *h = GetHisto(fd, Form("dsm0inJP%d_%s", j+1, mode));
+    if (h) {
+	hh[j] = h;
 	gPad->SetLogz(0);
-	h[j]->Draw("colz");
-	if(ymax<h[j]->GetMaximum()) ymax=h[j]->GetMaximum();
-
-	if ( h[j]->Integral()>0 ) gPad->SetLogz();
+	h->Draw("colz");
+	if (ymax < h->GetMaximum()) ymax = h->GetMaximum();
+	if (h->Integral() > 0) gPad->SetLogz();
     }
   }
-  
-  for(j=0;j<6;j++) {
-    if(h[j]==0) continue;
-    h[j]->SetMaximum(ymax);
-  }
+  for (int j = 0;j < ncr;j++) if (hh[j]) hh[j]->SetMaximum(ymax);
 }
 
-//--------------------------------------
 //--------------------------------------
 void eeTrigDsm1(FileType fd, TPad *c, const Char_t *mode ) {
-  TString tit;
   Char_t *core="dsm1HJP";
-  int j;
-   
-  if(mode[0]=='H') 
-    c->Divide(2,6);
-  else
-    c->Divide(4,3);
-
-  float ymax=0;
-
-  for(j=0;j<12;j++) { 
-
-    tit = Form("%s%d_%s",core,j+1,mode);
-    GetHisto(fd,tit,j);
-    if (h[j]) {
-	c->cd(j+1);
-	h[j]->Draw("colz");
+  if (mode[0] == 'H') {
+    c->Divide(2, 6);
+  } else {
+    c->Divide(4, 3);
+  }
+  const int n = 12;
+  TH1 *hh[n] = {0};
+  float ymax = 0;
+  for (int j = 0;j < n;j++) { 
+    TH1 *h = GetHisto(fd, Form("%s%d_%s",core,j+1,mode));
+    if (h) {
+	hh[j] = h;
+	c->cd(j + 1);
+	h->Draw("colz");
 	gPad->SetLogz(0);
-	if(ymax<h[j]->GetMaximum()) ymax=h[j]->GetMaximum();
-
-	if ( h[j]->Integral()>0 ) gPad->SetLogz();
-	if(mode[0]=='H') gPad->SetGridx();
+	if (ymax < h->GetMaximum()) ymax = h->GetMaximum();
+	if (h->Integral() > 0) gPad->SetLogz();
+	if(mode[0] == 'H') gPad->SetGridx();
     }
  }
-
-
-  for(j=0;j<12;j++) {
-    if(h[j]==0) continue;
-    h[j]->SetMaximum(ymax);
-  }
-  
+ for (int j = 0;j < n;j++) if (hh[j]) hh[j]->SetMaximum(ymax);
 }
-//--------------------------------------
+
 //--------------------------------------
 void eeTrigDsm2HT(FileType fd, TPad *c ) {
-
   Char_t *name[3]={"dsm2Half1_HTTP","dsm2Half2_HTTP","dsm3_HTTP"};
-  c->Divide(2,2);
- 
-  int i;
-  for(i=0;i<3;i++) {
-    GetHisto(fd,name[i],i);
-    if (h[i]) {
-	c->cd(1+i);
+  c->Divide(2, 2);
+  for (int i = 0;i < 3;i++) {
+    TH1 *h = GetHisto(fd,name[i]);
+    if (h) {
+	c->cd(1 + i);
 	gPad->SetLogz(0);
-
-	h[i]->Draw("colz");
-	if( h[i]->Integral()>0 ) gPad->SetLogz();
+	h->Draw("colz");
+	if (h->Integral() > 0) gPad->SetLogz();
     }
   }
-
 }
   
-
-
 //--------------------------------------
-//--------------------------------------
-void eeTrigJPsum(FileType fd, TPad *c, const Char_t *mode ) {
-
-  TString tit;
-  TString newtitle;
- 
-  c->Divide(2,3);
-
+void eeTrigJPsum(FileType fd, TPad *c, const Char_t *mode) {
+  c->Divide(2, 3);
   Char_t *core="JP";
-  int j;
-  for(j=0;j<6;j++) { 
-    tit = Form("%s%d%s",core,j+1,mode);
-    GetHisto(fd,tit,j); 
-    if (h[j]) {
-	c->cd(j+1);
-	int maxbin=h[j]->GetMaximumBin()-1;
-	const Char_t *title=h[j]->GetTitle();
-	newtitle = Form("%s    ped= %d\n",title,maxbin);
-	h[j]->SetTitle(newtitle);
+  for (int j = 0;j < 6;j++) { 
+    TH1 *h = GetHisto(fd, Form("%s%d%s", core, j + 1, mode));
+    if (h) {
+	c->cd(j + 1);
+	int maxbin = h->GetMaximumBin() - 1;
+	const Char_t *title = h->GetTitle();
+	h->SetTitle(Form("%s    ped= %d\n", title, maxbin));
         gPad->SetLogy(0);
-	h[j]->GetXaxis()->SetRange(1,200); //for p-p commnet out and use full range for Au-Au
-	h[j]->Draw();
-	if(h[j]->Integral()>0 ) gPad->SetLogy();
+	h->GetXaxis()->SetRange(1, 200); //for p-p commnet out and use full range for Au-Au
+	h->Draw();
+	if (h->Integral() > 0) gPad->SetLogy();
     }
   }
-  
 }
 
-
-//--------------------------------------
 //--------------------------------------
 void eeTrigJPfreq(FileType fd, TPad *c) {
-
-  TString tit;
- 
-  c->Divide(2,3);
+  c->Divide(2, 3);
   Char_t *core="JPsumTh";
-  int j;
-  for(j=0;j<4;j++) { 
-    tit = Form("%s%d",core,j);
-    GetHisto(fd,tit,j); 
-    if (h[j]) {
-	c->cd(j+1);
-        h[j]->Draw();
-	h[j]->SetMinimum(0.);
+  for (int j = 0;j < 4;j++) { 
+    TH1 *h = GetHisto(fd, Form("%s%d",core,j)); 
+    if (h) {
+	c->cd(j + 1);
+        h->Draw();
+	h->SetMinimum(0);
     }
   }
-
-
-  for(j=0;j<2;j++) { 
-    tit = Form("dsm2Half%d_Etot",j+1);
-    GetHisto(fd,tit,j); 
-    if (h[j]) {
-	c->cd(j+5);
-	h[j]->Draw();
+  for (int j = 0;j < 2;j++) { 
+    TH1 *h = GetHisto(fd, Form("dsm2Half%d_Etot",j+1)); 
+    if (h) {
+	c->cd(j + 5);
+	h->Draw();
     }
   }
-
-#if 0 // out 2006+
-  GetHisto(fd,"JPadjTh",5); 
+#if 0 
+  // out 2006+
+  TH1 *h = GetHisto(fd, "JPadjTh"); 
   c->cd(5);
-  if (h[5]) h[5]->Draw();
+  if (h) h->Draw();
 #endif
-  
 }
 
 //--------------------------------------
-//--------------------------------------
-void  eeTrigAdjJPsum(FileType fd, TPad *c, const Char_t *mode ) {
-
-  TString tit;
- 
-  c->Divide(2,3);
-
+void eeTrigAdjJPsum(FileType fd, TPad *c, const Char_t *mode) {
+  c->Divide(2, 3);
   Char_t *core="JP";
-  int j;
-  for(j=0;j<6;j++) { 
-    tit = Form("%s%d%d%s",core,j+1,((j+1)%6)+1,mode);
-    GetHisto(fd,tit,j); 
-    if (h[j]) {
-	c->cd(j+1);
+  for (int j = 0;j < 6;j++) {
+    TH1 *h = GetHisto(fd, Form("%s%d%d%s",core,j+1,((j+1)%6)+1,mode)); 
+    if (h) {
+	c->cd(j + 1);
 	gPad->SetLogy(0);
-	// h[j]->GetXaxis()->SetRange(19,69); //for p-p commnet out and use full range for Au-Au
-	h[j]->Draw();
-	if(h[j]->Integral()>0 ) gPad->SetLogy();
+	// h->GetXaxis()->SetRange(19,69); //for p-p commnet out and use full range for Au-Au
+	h->Draw();
+	if (h->Integral() > 0) gPad->SetLogy();
     }
   }
-  
 }
 
-
 //--------------------------------------
-//--------------------------------------
-void eeTrigEtot(FileType fd, TPad *c ) {
-
+void eeTrigEtot(FileType fd, TPad *c) {
   Char_t *nameA[3]={"dsm2E_etot","dsm2B_etot","dsm2BE_etot"};
-  c->Divide(1,3);
- 
-  int i;
-  int k=0;
-  TString name;
-  for(i=0;i<3;i++) {
-    c->cd(1+i);
+  c->Divide(1, 3);
+  const int n = 6;
+  TH1 *hh[n] = {0};
+  float ymax = 0;
+  for (int i = 0;i < 3;i++) {
+    c->cd(1 + i);
     gPad->SetLogy(0);
-    int ii;
-    for(ii=0;ii<=1;ii++) {  
-      name = Form("%s%d",nameA[i],ii);
-      GetHisto(fd,name,k);
-      if (h[k]) {
-	if(ii==0 ) {
-	    h[k]->Draw();
-	    TString tt=h[k]->GetTitle();
-	    tt+="  COLORS:   bit=0 BLUE , bit=1 RED";
-	    h[k]->SetTitle(tt);
-        } else h[k]->Draw("same");
-        if( ii==0&&h[k]->Integral()>0 ) gPad->SetLogy();
-      }
-      k++;
+    for (int ii = 0;ii <= 1;ii++) {  
+	TH1 *h = GetHisto(fd, Form("%s%d",nameA[i],ii));
+	if (h) {
+	    hh[i + (ii * 3)] = h;
+	    if (ii == 0) {
+		h->Draw();
+		TString tt = h->GetTitle();
+		tt += "  COLORS:   bit=0 BLUE , bit=1 RED";
+		h->SetTitle(tt);
+    	    } else {
+		h->Draw("same");
+	    }
+    	    if ((ii == 0) && (h->Integral() > 0)) gPad->SetLogy();
+	    if (ymax < h->GetMaximum()) ymax = h->GetMaximum();
+        }
     }
   }
-  //  return;
-
-  // lock maxY
-  float ymax=0;
-  int j;
-  for(j=0;j<6;j++) {
-    if(h[j]==0) continue;
-    if(ymax< h[j]->GetMaximum() ) ymax= h[j]->GetMaximum();
-  }
-  
-  for(j=0;j<6;j++) {
-    if(h[j]==0) continue;
-    h[j]->SetMaximum(ymax*1.1);
-  }
+  for (int j = 0;j < n;j++) if (hh[j]) hh[j]->SetMaximum(ymax * 1.1);
 }
   
 //--------------------------------------
-//--------------------------------------
-void  eeTrigAdjJPcor(FileType fd, TPad *c, const Char_t *mode ) {
-
-  TString tit;
- 
-  c->Divide(3,2);
-
+void eeTrigAdjJPcor(FileType fd, TPad *c, const Char_t *mode) {
+  c->Divide(3, 2);
   Char_t *core="JP";
-  int j;
-  for(j=0;j<6;j++) { 
-    tit = Form("%s%d%d%s",core,j+1,((j+1)%6)+1,mode);
-    GetHisto(fd,tit,j); 
-    if (h[j]) {
-	c->cd(j+1);
+  for (int j = 0;j < 6;j++) { 
+    TH1 *h = GetHisto(fd, Form("%s%d%d%s",core,j+1,((j+1)%6)+1,mode)); 
+    if (h) {
+	c->cd(j + 1);
 	gPad->SetLogz(0);
-	h[j]->Draw("colz");
-	if ( h[j]->Integral()>0) gPad->SetLogz();
+	h->Draw("colz");
+	if (h->Integral() > 0) gPad->SetLogz();
     }
   }
-  
 }
 
 //--------------------------------------
-//--------------------------------------
-bool  useTwMask(const Char_t *fname, EemcTwMask *m) {
+bool useTwMask(const Char_t *fname, EemcTwMask *m) {
+  if (!(fname && fname[0] && m)) return false;
   const int mx=1000;
   Char_t buf[mx];
   
   LOG_INFO << "EEqaPresenter::useTwMask(\"" << fname << "\") ..." << endm;
-  
-  FILE * fd=fopen(fname,"r");
-  int nok=0;
-  int nM=1;
-  m->txtH=new TPaveText(0,0.,1,1);
-  TString myTxt="ETOW masked (cr-ch-name): ";
-  if(fd==0) goto abandon;
+
+  m->clear();  
+  FILE *fd = fopen(fname, "r");
+  int nok = 0;
+  int nM = 1;
+  m->txtH = new TPaveText(0, 0., 1, 1);
+  TString myTxt = "ETOW masked (cr-ch-name): ";
+  if (!fd) goto abandon;
   while (1) {
-    Char_t * ret=fgets(buf,mx,fd);
-    if(ret==0) break ; //EOF 
-    if(buf[0]=='#') continue; // skip comment
-    if(buf[0]=='\n') continue; // skip empty lines
+    Char_t *ret = fgets(buf, mx, fd);
+    if (ret == 0) break ; //EOF 
+    if (buf[0] == '#') continue; // skip comment
+    if (buf[0] == '\n') continue; // skip empty lines
     Char_t name[100]; 
-    int cr,ch;
-    int sec,isub,jeta,jphi;
-    int  n=sscanf(buf,"%d %d %s",&cr, &ch, name);
-    if(n!=3)  goto abandon;
-    if(cr<1 || cr>m->nCr || ch<0 || ch>=m->nCh)  goto abandon;
-    if(name[2]!='T')   goto abandon;
-    sec=atoi(name);
-    isub=name[3]-'A';
-    jeta=atoi(name+4);
-    jphi=(sec-1)*5+isub;
+    int cr, ch;
+    int sec, isub, jeta, jphi;
+    int n = sscanf(buf, "%d %d %s", &cr, &ch, name);
+    if (n != 3) goto abandon;
+    if ((cr < 1) || (cr > m->nCr) || (ch < 0) || (ch >= m->nCh)) goto abandon;
+    if (name[2] != 'T') goto abandon;
+    sec = atoi(name);
+    isub = name[3] - 'A';
+    jeta = atoi(name + 4);
+    jphi = (sec - 1) * 5 + isub;
     // LOG_DEBUG << Form("%s sec=%d isub=%d jeta=%d, jphi=%d\n",name, sec,isub,jeta,jphi) << endm;
 
-    m->crCh[cr-1][ch]=1;
-    int jj=m->crG[cr-1].GetN();
-    m->crG[cr-1].SetPoint(jj,ch,10);
-    m->crG2[cr-1].SetPoint(jj,250,ch);
-    m->crG2[cr-1].SetPointError(jj,250,0.);
+    m->crCh[cr-1][ch] = 1;
+    int jj = m->crG[cr - 1].GetN();
+    m->crG[cr - 1].SetPoint(jj, ch, 10);
+    m->crG2[cr - 1].SetPoint(jj, 250, ch);
+    m->crG2[cr - 1].SetPointError(jj, 250, 0.);
 
-    jj=m->phiG.GetN();
-    m->phiG.SetPoint(jj,jphi,jeta);
-    TString tt = Form("%d-%d-%s,  ",cr,ch,name);  
-    myTxt+=tt;
+    jj = m->phiG.GetN();
+    m->phiG.SetPoint(jj, jphi, jeta);
+    TString tt = Form("%d-%d-%s,  ", cr, ch, name);  
+    myTxt += tt;
     nok++;
     nM++;
-    LOG_DEBUG << Form("mask ETOW cr=%d ch=%d =%s=\n",cr,ch,name) << endm;
-    if(nM%4==0) {
+    LOG_DEBUG << Form("mask ETOW cr=%d ch=%d =%s=",cr,ch,name) << endm;
+    if((nM % 4) == 0) {
        m->txtH->AddText(myTxt);
        myTxt=" ";
     }
   }
-  m->nMask=nok;
-  m->txtH->AddText(myTxt);  m->txtH->AddText("--");
+  m->nMask = nok;
+  m->txtH->AddText(myTxt);
+  m->txtH->AddText("--");
   LOG_INFO << " got " << nok << " masked towers" << endm; 
 
-  int i;
-  for(i=0;i<6;i++){
+  for (int i = 0;i < 6;i++){
     m->crG[i].SetMarkerStyle(23);
     m->crG[i].SetMarkerColor(kRed);
     m->crG2[i].SetMarkerStyle(1);
@@ -847,49 +694,54 @@ bool  useTwMask(const Char_t *fname, EemcTwMask *m) {
   
   m->phiG.SetMarkerStyle(24);
  
-  return 1;
- abandon: // any error has happened (this is a new approach for me, JB)
+  return true;
+abandon: // any error has happened (this is a new approach for me, JB)
   m->clear();
-  m->txtH->AddText("List of ETOW hot towers not found");  m->txtH->AddText("--");
+  m->txtH->AddText("List of ETOW hot towers not found");
+  m->txtH->AddText("--");
   LOG_ERROR << " EEqaPresenter::useTwMask() FAILED" << endm;
-  return 0;
+  return false;
 }
 
-
 //--------------------------------------
-//--------------------------------------
-void addJPphiLimits(TH1 *h){
-  TList *Lx= h->GetListOfFunctions(); 
-  if(Lx->GetSize()>0) return; // do it just once
-  int i;
-  for(i=0;i<=5;i++) { // boundarioes for JP
-    float x1=2.5+i*10;
-    TLine *ln=new TLine(x1,-0.2,x1,12.5); 
-    Lx->Add(ln);
-    int jpid=i+2;
-    if(jpid==7)jpid=1;
-    TString aa="Jet Patch "; aa+=jpid;
-    TText *tt=new TText(x1+1,12.6,aa);
-    tt->SetTextSize(0.08);
-    Lx->Add(tt);
+void addJPphiLimits(TH1 *h) {
+  TList *Lx = h ? h->GetListOfFunctions() : 0;
+  if (!Lx || (Lx->GetSize() > 0)) return; // do it just once
+  for (int i = 0;i <= 5;i++) { // boundarioes for JP
+    float x1 = 2.5 + (i * 10);
+    TLine *ln = new TLine(x1, -0.2, x1, 12.5);
+    if (ln) {
+	if (hCleanUp) hCleanUp->Add(ln);
+	Lx->Add(ln);
+    }
+    int jpid = i + 2;
+    if (jpid == 7) jpid = 1;
+    TString aa = "Jet Patch "; aa += jpid;
+    TText *tt = new TText(x1 + 1, 12.6, aa);
+    if (tt) {
+	if (hCleanUp) hCleanUp->Add(tt);
+	tt->SetTextSize(0.08);
+	Lx->Add(tt);
+    }
   }
- 
 }
 
-//--------------------------------------
 //--------------------------------------
 void eeJpQaMinMax(TH1 *hh) {
-    hh->SetAxisRange(0.5,6.4);
+    if (!hh) return;
+    hh->SetAxisRange(0.5, 6.4);
     hh->SetMinimum(0.);
-    int ib= hh->GetMaximumBin();
-    float yMax=hh->GetBinContent(ib);
-    ib= hh->GetMinimumBin();
-    float yMin=hh->GetBinContent(ib);
-    float r=0,er=999;
-    if(yMin<=0) yMin=1;
-    if(yMax<=0) yMax=1;    
-    r=yMin/yMax;
-    er=r*TMath::Sqrt(1/yMax + 1/yMin);
-    LOG_DEBUG << Form("JP min/max=%.2f +/- %.2f  (min=%.0f max=%.0f) \"%s\"\n",r,er,yMin, yMax,hh->GetTitle()) << endm;
-    LOG_DEBUG << Form("#JP %.2f %.2f %.0f %.0f :%s\n",r,er,yMin, yMax,hh->GetTitle()) << endm;
+    int ib = hh->GetMaximumBin();
+    float yMax = hh->GetBinContent(ib);
+    ib = hh->GetMinimumBin();
+    float yMin = hh->GetBinContent(ib);
+    float r = 0, er = 999;
+    if (yMin <= 0) yMin = 1;
+    if (yMax <= 0) yMax = 1;    
+    if ((yMin > 0) && (yMax > 0)) {
+	r = yMin / yMax;
+	er = r * TMath::Sqrt((1 / yMax) + (1 / yMin));
+	LOG_DEBUG << Form("JP min/max=%.2f +/- %.2f  (min=%.0f max=%.0f) \"%s\"", r, er, yMin, yMax, hh->GetTitle()) << endm;
+	LOG_DEBUG << Form("#JP %.2f %.2f %.0f %.0f :%s", r, er, yMin, yMax, hh->GetTitle()) << endm;
+    }
 }

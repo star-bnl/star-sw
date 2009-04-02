@@ -8,23 +8,18 @@ typedef GenericFile FileType;
 class TPad ;
 
 class EemcTwMask {
- public:
-    enum {nCr=6, nCh=120, nPhi=60,nEta=12};
+public:
+    EemcTwMask();
+    ~EemcTwMask();
+
+    void clear();
+
+    enum {nCr = 6, nCh = 120, nPhi = 60, nEta = 12};
     Char_t crCh[nCr][nCh];
     TGraph crG[nCr], phiG;
     TGraphErrors crG2[nCr];
-    TPaveText *txtH;// 1=knownHot
+    TPaveText *txtH; // 1=knownHot
     int nMask;
-    void clear() {
-      nMask=0;
-      memset(crCh,0,sizeof(crCh));
-      if(txtH) txtH->Clear();
-   }      
-
-    EemcTwMask() {
-      txtH=0;
-      clear();
-    }
 };
 
 
