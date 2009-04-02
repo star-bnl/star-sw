@@ -17,6 +17,10 @@
 #include "StEEmcUtil/EEdsm/EEdsm2.h"
 #include "StEEmcUtil/EEdsm/EEdsm3.h"
 
+#include "StTriggerUtilities/StDSMUtilities/DSM.hh"
+#include "StTriggerUtilities/StDSMUtilities/DSMAlgo_EE101_2009.hh"
+#include "StTriggerUtilities/StDSMUtilities/DSMAlgo_EE102_2009.hh"
+
 
 ClassImp(EEdsmAna)
 
@@ -24,6 +28,8 @@ ClassImp(EEdsmAna)
 EEdsmAna::EEdsmAna(const Char_t *name, int year)
     : myName(name)
     , mYear(year)
+    , EE101(*new DSM("EE101"))
+    , EE102(*new DSM("EE102"))
 {
   nTot=0;
 
@@ -69,16 +75,26 @@ EEdsmAna::EEdsmAna(const Char_t *name, int year)
   ee3 = new EEdsm3;
   ee3->setYear(mYear);
 
+  //===================== 2009 L1 DSM =====================
+
+  // JP E_T = (JP ADC - 5) * 0.236 GeV
+
+  EE101.registers[0] = EE102.registers[0] = 32;	// 6.4 GeV
+  EE101.registers[1] = EE102.registers[1] = 40;	// 8.3 GeV
+  EE101.registers[2] = EE102.registers[2] = 60;	// 13  GeV
+
   clear();
 }
 
 //--------------------------------------------------
 EEdsmAna::~EEdsmAna() {
+  delete& EE101;
+  delete& EE102;
 }
 
 //--------------------------------------------------
 void EEdsmAna::clear() {
-  
+
   for (int i=0;i<Nee0;i++) if (ee0) ee0[i].clear();
   for (int i=0;i<Nee0out;i++) { //# boards !=  # outputs
     if (ee0outTPadc) ee0outTPadc[i]=0;
@@ -215,14 +231,17 @@ void EEdsmAna::initHisto(TObjArray *HList){
     }
 
     //=================================Jet patch over threshold
+    static const char* JetPatchSumThresholdTitles[] = {
+      "Jet Patch Sum <= JP0",
+      "JP0 < Jet Patch Sum <= JP1",
+      "JP1 < Jet Patch Sum <= JP2",
+      "Jet Patch Sum > JP2"
+    };
+
     for (int iJ = 0;iJ < EEnThresh;iJ++) {
-	TH1F *h = new TH1F(Form("JPsumTh%d", iJ),
-	    (iJ == 0) ? Form("Emu Jet Patch sum > %d", mJPthr[0]) : 
-		(((iJ == 1) || (iJ == 2)) ? Form("Emu Jet Patch sum in [%d,%d]", mJPthr[iJ], mJPthr[iJ + 1] - 1) : 
-		Form("Emu Jet Patch sum > %d", mJPthr[iJ])),
-	    6, 0.5, 6.5);
+	TH1F *h = new TH1F(Form("JPsumTh%d", iJ), JetPatchSumThresholdTitles[iJ], 6, 0.5, 6.5);
 	h->GetXaxis()->SetTitle("Steve's Jet Patch ID");
-	h->GetYaxis()->SetTitle("Freq"); 
+	h->GetYaxis()->SetTitle("Frequency"); 
 	h->SetFillColor(kBlue);
 	H4jpFreq[iJ]=h;
 	if (HList) HList->Add(h);
@@ -413,31 +432,56 @@ void EEdsmAna::emulDsm0() {
 
 //--------------------------------------------------
 void EEdsmAna::emulDsm1() {
+  switch (mYear) {
+  case 2006:
     if (ee1) {
-	for (int i=0;i<Nee1;i++) {
-	    const EEdsm1 &br = ee1[i];           //Select data for board 1 or 2
-	    int maxTPthr=0;
-	    int maxHTTPthr=0;
-	    for(int j=0;j<br.getNc(); j++) {
-		int ix=j+i*br.getNc();
-		int ijp=ix/2;
-		ee1outJPadc[ijp]+=br.getInpTPsum(j);  
-		// Note jet patches are numbered in DSM input order.  So ijp=0 is FEE crate 3.
-		ee1out3JPadc[i]+=br.getInpTPsum(j);
-		//int val= br.getHTthr(j);
-		//if(ee1outHT[ijp]< val)ee1outHT[ijp]=val;
-		//if(maxTPthr< br.getTPthr(j)) maxTPthr= br.getTPthr(j);
-		//if(maxHTTPthr< br.getHTTPthr(j)) maxHTTPthr= br.getHTTPthr(j);
-	    }
-	    ee1outTPthrMax[i]  =maxTPthr;
-	    ee1outHTTPthrMax[i]=maxHTTPthr;
+      for (int i=0;i<Nee1;i++) {
+	const EEdsm1 &br = ee1[i];           //Select data for board 1 or 2
+	int maxTPthr=0;
+	int maxHTTPthr=0;
+	for(int j=0;j<br.getNc(); j++) {
+	  int ix=j+i*br.getNc();
+	  int ijp=ix/2;
+	  ee1outJPadc[ijp]+=br.getInpTPsum(j);  
+	  // Note jet patches are numbered in DSM input order.  So ijp=0 is FEE crate 3.
+	  ee1out3JPadc[i]+=br.getInpTPsum(j);
+	  //int val= br.getHTthr(j);
+	  //if(ee1outHT[ijp]< val)ee1outHT[ijp]=val;
+	  //if(maxTPthr< br.getTPthr(j)) maxTPthr= br.getTPthr(j);
+	  //if(maxHTTPthr< br.getHTTPthr(j)) maxHTTPthr= br.getHTTPthr(j);
 	}
+	ee1outTPthrMax[i]  =maxTPthr;
+	ee1outHTTPthrMax[i]=maxHTTPthr;
+      }
     }
     //Add some further processing to check jet patch sums for passing thresholds
     //and form adjacent patch sums.
     for (int i=0;i<EEnJetPatch;i++) {
-	AdjJPsum[i]=ee1outJPadc[i]+ee1outJPadc[(i+1)%EEnJetPatch]; //sum adj patches
+      AdjJPsum[i]=ee1outJPadc[i]+ee1outJPadc[(i+1)%EEnJetPatch]; //sum adj patches
     }
+    break;
+
+  case 2009:
+    DSMAlgo_EE101_2009()(EE101);
+    DSMAlgo_EE102_2009()(EE102);
+
+    // Get jet patch sums
+
+    ee1outJPadc[0] = EE102.info[0];
+    ee1outJPadc[1] = EE102.info[1];
+    ee1outJPadc[2] = EE102.info[2];
+
+    ee1outJPadc[3] = EE101.info[0];
+    ee1outJPadc[4] = EE101.info[1];
+    ee1outJPadc[5] = EE101.info[2];
+
+    // Calculate adjacent jet patch sums
+
+    for (int jp = 0; jp < 6; ++jp)
+      AdjJPsum[jp] = ee1outJPadc[jp] + ee1outJPadc[(jp+1)%6];
+
+    break;
+  }
 }
 
 //--------------------------------------------------
@@ -477,16 +521,43 @@ void EEdsmAna::readDsm1(const unsigned short *EEMC_l1) {
      the board.  For first board the order is crate 3,
      4 then 5, and for second board crate 6, 1 then 2.
   */
+
+  switch (mYear) {
+  case 20006:
     if (EEMC_l1 && ee1) {
-	for(int i = 0;i < Nee1;i++) {
-	    ee1[i].setWord(0, EEMC_l1[3 + i*8]);
-	    ee1[i].setWord(1, EEMC_l1[2 + i*8]);
-	    ee1[i].setWord(2, EEMC_l1[1 + i*8]);
-	    ee1[i].setWord(3, EEMC_l1[0 + i*8]);
-	    ee1[i].setWord(4, EEMC_l1[7 + i*8]);
-	    ee1[i].setWord(5, EEMC_l1[6 + i*8]);
-	}
+      for(int i = 0;i < Nee1;i++) {
+	ee1[i].setWord(0, EEMC_l1[3 + i*8]);
+	ee1[i].setWord(1, EEMC_l1[2 + i*8]);
+	ee1[i].setWord(2, EEMC_l1[1 + i*8]);
+	ee1[i].setWord(3, EEMC_l1[0 + i*8]);
+	ee1[i].setWord(4, EEMC_l1[7 + i*8]);
+	ee1[i].setWord(5, EEMC_l1[6 + i*8]);
+      }
     }
+    break;
+
+  case 2009:
+    if (EEMC_l1) {
+      EE101.channels[0] = EEMC_l1[3];
+      EE101.channels[1] = EEMC_l1[2];
+      EE101.channels[2] = EEMC_l1[1];
+      EE101.channels[3] = EEMC_l1[0];
+      EE101.channels[4] = EEMC_l1[7];
+      EE101.channels[5] = EEMC_l1[6];
+      EE101.channels[6] = EEMC_l1[5];
+      EE101.channels[7] = EEMC_l1[4];
+
+      EE102.channels[0] = EEMC_l1[11];
+      EE102.channels[1] = EEMC_l1[10];
+      EE102.channels[2] = EEMC_l1[ 9];
+      EE102.channels[3] = EEMC_l1[ 8];
+      EE102.channels[4] = EEMC_l1[15];
+      EE102.channels[5] = EEMC_l1[14];
+      EE102.channels[6] = EEMC_l1[13];
+      EE102.channels[7] = EEMC_l1[12];
+    }
+    break;
+  }
 }
 
 //--------------------------------------------------
@@ -514,67 +585,110 @@ void EEdsmAna::readDsm3( const unsigned short *lastDSM) {
 
 //--------------------------------------------------
 void EEdsmAna::histoDsm0() {
-    if (ee0) {
-	for(int i = 0;i < EEnTPphi;i++) {
-	    for(int j = 0;j < EEnTPeta;j++) {
-		const EEmapTP &y = eeMapTP[i][j];
-		//if (y) {
-		    int ibr = y.brdIn - 1;
-		    int ch = y.chIn;
-		    int iJP = y.JPid - 1;
-	    	    if ((iJP >= 0) && (iJP < EEnJetPatch)) {
-    			H0inHT[iJP]->Fill(ee0[ibr].getInpHT6bit(ch), y.TPid);
-    		        H0inTP[iJP]->Fill(ee0[ibr].getInpTP6bit(ch), y.TPid);
-		        H0inHTall->Fill((10 * ibr) + ch, ee0[ibr].getInpHT6bit(ch));
-    			H0inTPall->Fill((10 * ibr) + ch, ee0[ibr].getInpTP6bit(ch));
-		    }
-		//}
-	    }
+  if (ee0) {
+    for(int i = 0;i < EEnTPphi;i++) {
+      for(int j = 0;j < EEnTPeta;j++) {
+	const EEmapTP &y = eeMapTP[i][j];
+	//if (y) {
+	int ibr = y.brdIn - 1;
+	int ch = y.chIn;
+	int iJP = y.JPid - 1;
+	if ((iJP >= 0) && (iJP < EEnJetPatch)) {
+	  H0inHT[iJP]->Fill(ee0[ibr].getInpHT6bit(ch), y.TPid);
+	  H0inTP[iJP]->Fill(ee0[ibr].getInpTP6bit(ch), y.TPid);
+	  H0inHTall->Fill((10 * ibr) + ch, ee0[ibr].getInpHT6bit(ch));
+	  H0inTPall->Fill((10 * ibr) + ch, ee0[ibr].getInpTP6bit(ch));
 	}
+	//}
+      }
     }
+  }
 }
 
 //--------------------------------------------------
 void EEdsmAna::histoDsm1(){
+  switch (mYear) {
+  case 2006:
     if (ee1) {
-	for (int i = 0;i < Nee1;i++) {
-	    const EEdsm1 &br = ee1[i];
-	    //if (br) {
-		for(int j = 0;j < br.getNc();j++) {
-		    int ix = j + (i * br.getNc());
-		    // .... TP ..................
-		    H1inTPvEmu[ix]->Fill(ee0outTPadc[ix], br.getInpTPsum(j));
-		    //..... HT ............
-		    //H1inHTvEmu[ix]->Fill(ee0outHTadc[ix], br.getHTthr(j));
-		}
-	    //}
+      for (int i = 0;i < Nee1;i++) {
+	const EEdsm1 &br = ee1[i];
+	//if (br) {
+	for(int j = 0;j < br.getNc();j++) {
+	  int ix = j + (i * br.getNc());
+	  // .... TP ..................
+	  H1inTPvEmu[ix]->Fill(ee0outTPadc[ix], br.getInpTPsum(j));
+	  //..... HT ............
+	  //H1inHTvEmu[ix]->Fill(ee0outHTadc[ix], br.getHTthr(j));
 	}
+	//}
+      }
     }
 
-  /* 2006
-     6) For the upper 4 plots ( H4jpFreq[i]), change the JP sum cuts to:
-     JP sum > 16
-     JP sum in range [24,29]
-     JP sum in range [30,39]
-     JP sum > 40
-  */
+    /* 2006
+       6) For the upper 4 plots ( H4jpFreq[i]), change the JP sum cuts to:
+       JP sum > 16
+       JP sum in range [24,29]
+       JP sum in range [30,39]
+       JP sum > 40
+    */
 
     for (int i = 0;i < EEnJetPatch;i++) {     //histos for jet patch sums
-	int steve_jp = ((i + 2) % EEnJetPatch) + 1;  //stored by dsm input number 0-5 Want by Steves jp #
-	H4jpSums[i]->Fill(ee1outJPadc[i]);
-	int JPene = ee1outJPadc[i];
-        if(JPene > mJPthr[0]) H4jpFreq[0]->Fill(steve_jp);
-	if(JPene > mJPthr[3]) H4jpFreq[3]->Fill(steve_jp);
-	else if(JPene > mJPthr[2]) H4jpFreq[2]->Fill(steve_jp);
-	else if(JPene > mJPthr[1]) H4jpFreq[1]->Fill(steve_jp);
+      int steve_jp = ((i + 2) % EEnJetPatch) + 1;  //stored by dsm input number 0-5 Want by Steves jp #
+      H4jpSums[i]->Fill(ee1outJPadc[i]);
+      int JPene = ee1outJPadc[i];
+      if(JPene > mJPthr[0]) H4jpFreq[0]->Fill(steve_jp);
+      if(JPene > mJPthr[3]) H4jpFreq[3]->Fill(steve_jp);
+      else if(JPene > mJPthr[2]) H4jpFreq[2]->Fill(steve_jp);
+      else if(JPene > mJPthr[1]) H4jpFreq[1]->Fill(steve_jp);
     
-	H5jpPed->Fill(steve_jp, ee1outJPadc[i]);
-	if (ee1outJPadc[i] > mJPthr[1]) H5jpFreq->Fill(steve_jp); 
-	int j = (i + 1) % EEnJetPatch;
-	H4adjPcor[i]->Fill(ee1outJPadc[i], ee1outJPadc[j]);
-	H4adjpSums[i]->Fill(AdjJPsum[i]);
+      H5jpPed->Fill(steve_jp, ee1outJPadc[i]);
+      if (ee1outJPadc[i] > mJPthr[1]) H5jpFreq->Fill(steve_jp); 
+      int j = (i + 1) % EEnJetPatch;
+      H4adjPcor[i]->Fill(ee1outJPadc[i], ee1outJPadc[j]);
+      H4adjpSums[i]->Fill(AdjJPsum[i]);
 
-	if ((ee1outJPadc[i] > mJPthr[1]) && (ee1outJPadc[(i + 1) % EEnJetPatch] > mJPthr[1])) H4adjpFreq->Fill(steve_jp);
+      if ((ee1outJPadc[i] > mJPthr[1]) && (ee1outJPadc[(i + 1) % EEnJetPatch] > mJPthr[1])) H4adjpFreq->Fill(steve_jp);
+    }
+    break;
+
+  case 2009:
+    // The jet patch numbering scheme (0-5) follows that in the West Barrel:
+    // JP0:  150 degrees (Steve's Jet Patch 6/FEE Crate 6)
+    // JP1:   90 degrees (Steve's Jet Patch 1/FEE Crate 1)
+    // JP2:   30 degrees (Steve's Jet Patch 2/FEE Crate 2)
+    // JP3:  -30 degrees (Steve's Jet Patch 3/FEE Crate 3)
+    // JP4:  -90 degrees (Steve's Jet Patch 4/FEE Crate 4)
+    // JP5: -150 degrees (Steve's Jet Patch 5/FEE Crate 5)
+    // See http://www.iucf.indiana.edu/U/STAR/eemc_proj/electr_trig_daq/eemc_trigger_patches_annotated.pdf
+
+    static const int steve_jp[] = { 6, 1, 2, 3, 4, 5 };
+
+    for (int jp = 0; jp < 6; ++jp) {
+      H4jpSums[jp]->Fill(ee1outJPadc[jp]);
+
+      // JP threshold histogram indexes:
+      // 0 =       ADC <= JP0
+      // 1 = JP0 < ADC <= JP1
+      // 2 = JP1 < ADC <= JP2
+      // 3 = JP2 < ADC
+
+      if (ee1outJPadc[jp] <= EE101.registers[0])
+	H4jpFreq[0]->Fill(steve_jp[jp]);
+      else if (ee1outJPadc[jp] > EE101.registers[0] && ee1outJPadc[jp] <= EE101.registers[1])
+	H4jpFreq[1]->Fill(steve_jp[jp]);
+      else if (ee1outJPadc[jp] > EE101.registers[1] && ee1outJPadc[jp] <= EE101.registers[2])
+	H4jpFreq[2]->Fill(steve_jp[jp]);
+      else if (ee1outJPadc[jp] > EE101.registers[2])
+	H4jpFreq[3]->Fill(steve_jp[jp]);
+
+      H5jpPed->Fill(steve_jp[jp], ee1outJPadc[jp]);
+      if (ee1outJPadc[jp] > EE101.registers[1]) H5jpFreq->Fill(steve_jp[jp]); // JP1 threshold
+
+      H4adjPcor[jp]->Fill(ee1outJPadc[jp], ee1outJPadc[(jp+1)%6]);
+      H4adjpSums[jp]->Fill(AdjJPsum[jp]);
+    }
+
+    break;
   }
 }
 
