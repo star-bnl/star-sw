@@ -1,4 +1,4 @@
-// $Id: StChargedPionMaker.cxx,v 1.18 2008/12/29 15:58:30 kocolosk Exp $
+// $Id: StChargedPionMaker.cxx,v 1.19 2009/04/02 18:25:42 kocolosk Exp $
 
 #include "StChargedPionMaker.h"
 
@@ -36,9 +36,9 @@
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
 
 //StJetMaker
-#include "StJetMaker/StJetSkimEvent.h"
-#include "StJetMaker/StJets.h"
-#include "StJetMaker/StJet.h"
+#include "StSpinPool/StJetSkimEvent/StJetSkimEvent.h"
+#include "StSpinPool/StJets/StJets.h"
+#include "StSpinPool/StJets/StJet.h"
 #include "StJetMaker/StJetMaker.h"
 
 //StSpinDbMaker
@@ -448,6 +448,9 @@ void StChargedPionMaker::makeTriggerSimu(StChargedPionBaseEv *ev) {
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.cxx,v $
+ * Revision 1.19  2009/04/02 18:25:42  kocolosk
+ * fixed paths to jet codes
+ *
  * Revision 1.18  2008/12/29 15:58:30  kocolosk
  * removed commented code and added Id and Log as needed
  *
