@@ -70,6 +70,8 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
   gSystem->Load("StEmcUtil");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StTriggerUtilities");
   gSystem->Load("StEEmcPoolmuEztPanitkin");
   gSystem->Load("StBEMCPlots");
   gSystem->Load("StEvent");
