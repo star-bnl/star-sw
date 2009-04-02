@@ -279,7 +279,7 @@ void PresenterGui::SetDefaults()
   TabNames[4][5]="SVT Anode vs Hybrid";
 
   //BEMC and BSMD
-  nSubTabs[5]=15;
+  nSubTabs[5]=10;
   TabNames[5][1]="Status";
   TabNames[5][2]="Towers";
   TabNames[5][3]="SMD/PSD";
@@ -288,26 +288,24 @@ void PresenterGui::SetDefaults()
   TabNames[5][6]="BTOW ADC";
   TabNames[5][7]="JetPatch HighTower Spectra";
   TabNames[5][8]="JetPatch PatchSum Spectra";
-  TabNames[5][9]="DSM Level-0 Input";
-  TabNames[5][10]="DSM Level-1 Input";
-  TabNames[5][11]="DSM Level-2 Input";
-  TabNames[5][12]="SMD FEE Sum";
-  TabNames[5][13]="Trigger corruption";
-  TabNames[5][14]="PSD FEE Sum";
-  TabNames[5][15]="BPRS ADC";
+  // TabNames[5][9]="DSM Level-0 Input";
+  TabNames[5][9]="DSM Level-1 Input";
+  TabNames[5][10]="DSM Level-2 Input";
+  //  TabNames[5][11]="SMD FEE Sum";
+  // TabNames[5][12]="Trigger corruption";
+  // TabNames[5][13]="PSD FEE Sum";
+  // TabNames[5][14]="BPRS ADC";
   
   //BEMC Shift
-  nSubTabs[6]=9;
+  nSubTabs[6]=7;
   TabNames[6][1]="Tower ADC";
   TabNames[6][2]="ADC Eta Vs Phi";
   TabNames[6][3]="SMD FEE Sum";
-  TabNames[6][4]="SMD Ave ADC- PED Eta";
-  TabNames[6][5]="SMD Ave ADC- PED Phi";
-  TabNames[6][6]="PSD FEE SUM";
-  TabNames[6][7]="BPRS ADC";
-  TabNames[6][8]="HT/TP FEE Out";
-  TabNames[6][9]="EMU Vs FEE Out";
-
+  TabNames[6][4]="PSD FEE SUM";
+  TabNames[6][5]="BPRS ADC";
+  TabNames[6][6]="HT/TP FEE Out";
+  TabNames[6][7]="EMU Vs FEE Out";
+  
 
   //FTPC
   nSubTabs[7]=3;
@@ -349,42 +347,42 @@ void PresenterGui::SetDefaults()
 
 
   //ETOW   <===== DAQ
-  nSubTabs[11]=6;
+  nSubTabs[11]=4;
   TabNames[11][1]="Jet Patch QA";
   TabNames[11][2]="Corrupt";
-  TabNames[11][3]="Frequency";
-  TabNames[11][4]="Crates";
-  TabNames[11][5]="Hot Tw";
-  TabNames[11][6]="Mult >thr";
+  //TabNames[11][3]="Frequency";
+  //TabNames[11][4]="Crates";
+  TabNames[11][3]="Hot Tw";
+  TabNames[11][4]="Mult >thr";
     
   //ESMD  <===== DAQ
-  nSubTabs[12]=12;
+  nSubTabs[12]=6;
   TabNames[12][1]="corrupt";
   TabNames[12][2]="pmt freq";
-  TabNames[12][3]="sect 12+1";
-  TabNames[12][4]="sect 2+3";
-  TabNames[12][5]="sect 4+5";
-  TabNames[12][6]="sect 6+7";
-  TabNames[12][7]="sect 8+9";
-  TabNames[12][8]="sect 10+11";
-  TabNames[12][9]="U freq";
-  TabNames[12][10]="V freq";
-  TabNames[12][11]="U mult>thr";
-  TabNames[12][12]="V mult>thr";
+  //  TabNames[12][3]="sect 12+1";
+  // TabNames[12][4]="sect 2+3";
+  //TabNames[12][5]="sect 4+5";
+  //TabNames[12][6]="sect 6+7";
+  //TabNames[12][7]="sect 8+9";
+  // TabNames[12][8]="sect 10+11";
+  TabNames[12][3]="U freq";
+  TabNames[12][4]="V freq";
+  TabNames[12][5]="U mult>thr";
+  TabNames[12][6]="V mult>thr";
    
   //ETOW   <===== trig
-  nSubTabs[13]=11;
-  TabNames[13][1]="DSM-0 Hank's";
-  TabNames[13][2]="DSM-0 HT";
-  TabNames[13][3]="DSM-0 TP";
-  TabNames[13][4]="DSM-1 HT";
-  TabNames[13][5]="DSM-1 TP";
-  TabNames[13][6]="DSM 2+3 HT";
-  TabNames[13][7]="DSM-2 JP";
-  TabNames[13][8]="JP sum";
-  TabNames[13][9]="JP freq";
-  TabNames[13][10]="JP Adj";
-  TabNames[13][11]="Et Tot";
+  nSubTabs[13]=10;
+  // TabNames[13][1]="DSM-0 Hank's";
+  TabNames[13][1]="DSM-0 HT";
+  TabNames[13][2]="DSM-0 TP";
+  TabNames[13][3]="DSM-1 HT";
+  TabNames[13][4]="DSM-1 TP";
+  TabNames[13][5]="DSM 2+3 HT";
+  TabNames[13][6]="DSM-2 JP";
+  TabNames[13][7]="JP sum";
+  TabNames[13][8]="JP freq";
+  TabNames[13][9]="JP Adj";
+  TabNames[13][10]="Et Tot";
     
   //EEMC SHIFT
   nSubTabs[14]=10;
