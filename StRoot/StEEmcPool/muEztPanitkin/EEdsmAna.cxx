@@ -276,7 +276,7 @@ void EEdsmAna::initHisto(TObjArray *HList){
     {
 	// added in 2005 
 	H5jpPed = new TH2F("JPpedZoom", "Zoom in of 1x1 JP pedestals;Steve's JP ID",
-	    EEnJetPatch, 0.5, EEnJetPatch + 0.5, 41, 4.5, 45.5); //2005: Y:40,34.5,74.5
+	    EEnJetPatch, 0.5, EEnJetPatch + 0.5, 46, -0.5, 45.5); //2005: Y:40,34.5,74.5
 	if (HList) HList->Add(H5jpPed); 
     }
     
@@ -687,7 +687,6 @@ void EEdsmAna::histoDsm1(){
       H4adjPcor[jp]->Fill(ee1outJPadc[jp], ee1outJPadc[(jp+1)%6]);
       H4adjpSums[jp]->Fill(AdjJPsum[jp]);
     }
-
     break;
   }
 }
