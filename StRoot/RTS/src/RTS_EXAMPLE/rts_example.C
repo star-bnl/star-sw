@@ -639,7 +639,8 @@ static int pp2pp_doer(daqReader *rdr, char *do_print)
 			if(do_print) {
 				printf("PP2PP: sector %d, seq %d, chain %d, SVX %d:\n",dd->sec,d->seq_id,d->chain_id,d->svx_id) ;
 				for(int c=0;c<PP2PP_SVX_CH;c++) {
-					if(d->adc[c]) printf("   %3d: %3d [0x%02X]\n",c,d->adc[c],d->adc[c]) ;
+					// print only found channels via the "trace" array
+					if(d->trace[c]) printf("   %3d: %3d [0x%02X], trace %d\n",c,d->adc[c],d->adc[c],d->trace[c]) ;
 				}
 			}
 
