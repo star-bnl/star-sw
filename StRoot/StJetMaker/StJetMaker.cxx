@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.70 2009/03/28 06:01:00 pibero Exp $
+// $Id: StJetMaker.cxx,v 1.71 2009/04/02 17:02:23 pibero Exp $
 #include "StJetMaker.h"
 
 #include "StjeParticleCollector.h"
@@ -10,7 +10,7 @@
 
 #include <StJetFinder/StProtoJet.h>
 
-#include <StSpinPool/StJets/StJets.h>
+#include "StSpinPool/StJets/StJets.h"
 
 #include <list>
 

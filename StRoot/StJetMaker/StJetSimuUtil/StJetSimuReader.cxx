@@ -25,10 +25,12 @@
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 
 //StJetMaker
-#include "StJetMaker/StJet.h"
-#include "StJetMaker/StJets.h"
-#include "StJetMaker/StJetSkimEvent.h"
 #include "StJetMaker/StJetSimuUtil/StJetSimuReader.h"
+
+// StSpinPool
+#include "StSpinPool/StJets/StJet.h"
+#include "StSpinPool/StJets/StJets.h"
+#include "StSpinPool/StJetSkimEvent/StJetSkimEvent.h"
 
 ClassImp(StJetSimuReader)
 
