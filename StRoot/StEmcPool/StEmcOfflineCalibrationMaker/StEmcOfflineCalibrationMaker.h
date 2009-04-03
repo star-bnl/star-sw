@@ -12,6 +12,7 @@ class StEmcOfflineCalibrationTrack;
 class StMuDstMaker;
 class StEmcADCtoEMaker;
 class StEmcTriggerMaker;
+class StTriggerSimuMaker;
 
 class StBemcTables;
 class StEmcGeom;
@@ -39,8 +40,9 @@ private:
 	//pointers to makers - get them in Init()
 	StMuDstMaker*		muDstMaker;
 	StEmcADCtoEMaker*	mADCtoEMaker;
-	StEmcTriggerMaker*	emcTrigMaker;
-	
+	//StEmcTriggerMaker*	emcTrigMaker;
+	StTriggerSimuMaker* emcTrigMaker;
+
 	//all these random BEMC objects
 	StBemcTables*		mTables;
 	StEmcGeom*		mEmcGeom;

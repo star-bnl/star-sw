@@ -2,6 +2,8 @@
 #include <fstream>
 using namespace std;
 
+#include "CalibrationHelperFunctions.cxx"
+
 #include "TFile.h"
 #include "TMath.h"
 #include "TH1.h"
@@ -13,7 +15,7 @@ using namespace std;
 #include "TString.h"
 #include "TLine.h"
 
-void drawTower(TH1* h, TF1* f, int id);
+void drawTower(TH1* h, TF1* f, int id, int status, CalibrationHelperFunctions* helper);
 
 float getTowerEta(int id);
 TString towerQA(TH1* h, TF1* f);
@@ -23,9 +25,10 @@ bool isBadTower2005(int id);
 bool isPmtNew(int id);
 bool isBadTower2006(int id);
 
-void mip_histogram_fitter(const char* file_list="mips.list", const char* postscript="mip.ps", const char* gainfile="mip.gains"){
+void mip_histogram_fitter(const char* file_list="mips.list", const char* postscript="mip.ps", const char* gainfile="mip.gains",const char* ofname="2008.mipfit.root"){
 const int ntowers = 4800;
 
+ int mipstatus[ntowers];
 	cout<<"input files:  "<<file_list<<endl;
 	cout<<"plots:           "<<postscript<<endl;
 	cout<<"gains:           "<<gainfile<<endl;
@@ -35,12 +38,22 @@ const int ntowers = 4800;
 	gStyle->SetStatColor(10);
 	gStyle->SetOptTitle(0);
 	gStyle->SetOptFit(111);
-	gStyle->SetOptStat("oume");
+	gStyle->SetOptStat("mrie");
+
+	TFile* outfile = new TFile(ofname,"RECREATE");
+	CalibrationHelperFunctions* helper = new CalibrationHelperFunctions();
+	float pi = TMath::Pi();
 
 	TPostScript *ps = new TPostScript(postscript);
 	TCanvas *c = new TCanvas("c","",100,100,600.,800.);
 	int pad;	
 	TH1 *mip_histo[ntowers];
+	TH2F* etaphi = new TH2F("etaphi","Mip peaks",40,-1.0,1.0,120,-pi,pi);
+	TH2F* statcode = new TH2F("statcode","Mip peaks",40,-1.0,1.0,120,-pi,pi);
+	etaphi->SetXTitle("#eta");
+	etaphi->SetYTitle("#phi");
+	statcode->SetXTitle("#eta");
+	statcode->SetYTitle("#phi");
 	TH1 *dumhist;
 	char file[200];
 	int nfiles = 0;
@@ -76,13 +89,14 @@ const int ntowers = 4800;
 	
 	int counter = 0;
 	for(int i=0; i<ntowers; i++){		
+	  mipstatus[i] = 0;
 //		if(!isBadTower2005(i+1) && !isBadIso2005(i+1)) continue;
 //		if(!isBadTower2006(i+1)) continue;
-		if(counter%15 == 0){
+		if(counter%20 == 0){
 			c->Update();
 			ps->NewPage();
 			c->Clear();
-			c->Divide(3,5);
+			c->Divide(4,5);
 			pad = 1;
 		}
 		
@@ -96,9 +110,19 @@ const int ntowers = 4800;
 		gaussian_fit[i] = new TF1(name,"gaus",5.,250.);
 		landau_fit[i] = new TF1(name,"landau",5.,200.);
 //		fit[i] = new TF1(name,"gaus(0)+expo(3)",5.,250.);
-	
-		gaussian_fit[i]->SetParameter(1,20.);
-		gaussian_fit[i]->SetParameter(2,5.);
+
+		if((i+1) % 20 == 0){
+		  //cout<<i+1<<endl;
+		  mip_histo[i]->Rebin(4);
+		  mip_histo[i]->GetXaxis()->SetRangeUser(6.,100.);
+		}else{
+		  mip_histo[i]->Rebin(2);
+		  mip_histo[i]->GetXaxis()->SetRangeUser(6.,50.);
+		}
+		float guesspeak = mip_histo[i]->GetBinCenter(mip_histo[i]->GetMaximumBin());	
+		float guessrms = mip_histo[i]->GetRMS();
+		gaussian_fit[i]->SetParameter(1,guesspeak);
+		gaussian_fit[i]->SetParameter(2,guessrms);
 		
 		landau_fit[i]->SetParameter(1,17.);
 		landau_fit[i]->SetParameter(2,3.);
@@ -110,24 +134,48 @@ const int ntowers = 4800;
 //		fit[i]->SetParameter(3,7.);
 //		fit[i]->SetParameter(4,-0.1);
 		
-		gaussian_fit[i]->SetLineColor(kGreen);
+		gaussian_fit[i]->SetLineColor(kBlue);
 		gaussian_fit[i]->SetLineWidth(0.6);
 		
 		landau_fit[i]->SetLineColor(kYellow);
 		landau_fit[i]->SetLineWidth(0.6);
-		
-		if(mip_histo[i]->Integral() > 0)mip_histo[i]->Fit(gaussian_fit[i],"rq");
-//		mip_histo[i]->Fit(landau_fit[i],"rq+");
-		
-		mip_histo[i]->GetXaxis()->SetRangeUser(5.,35.);
-		
-		drawTower(mip_histo[i],gaussian_fit[i],i+1);
-		
+
 		double histogram_top = mip_histo[i]->GetBinContent(mip_histo[i]->GetMaximumBin());
+		double gaussian_mean = 0;
 		
-		double gaussian_mean = gaussian_fit[i]->GetParameter(1);
+		if(mip_histo[i]->Integral() > 0){
+		  mip_histo[i]->Fit(gaussian_fit[i],"rq");
+		  mipstatus[i]+=1;
+		  double gauss_const = gaussian_fit[i]->GetParameter(0);
+		  gaussian_mean = gaussian_fit[i]->GetParameter(1);
+		  //if((histogram_top / gauss_const > 2) || (histogram_top / gauss_const < 0.5))mipstatus[i]+=16;
+		  if(gaussian_mean < 5)mipstatus[i]+=4;
+		  if((i+1)%20==0){
+		    if(abs(gaussian_mean-guesspeak) > 10)mipstatus[i]+=8;
+		    if(gaussian_fit[i]->GetParameter(2) > 20)mipstatus[i]+=2;
+		  }else{
+		    if(abs(gaussian_mean-guesspeak) > 5)mipstatus[i]+=8;
+		    if(gaussian_fit[i]->GetParameter(2) > 15)mipstatus[i]+=2;
+		  }
+		  if(guesspeak > 50)mipstatus[i]+=64;
+		  if(mipstatus[i]==1){
+		    etaphi->Fill(helper->getEta(i+1),helper->getPhi(i+1),gaussian_mean);
+		    mipstatus[i]+=128;
+		  }
+		  statcode->Fill(helper->getEta(i+1),helper->getPhi(i+1),mipstatus[i]);
+
+		}
+		if(mipstatus[i]==129)mipstatus[i] = 1;
+//		mip_histo[i]->Fit(landau_fit[i],"rq+");
+		if(mipstatus[i]>1){
+		  //cout<<i+1<<" "<<mipstatus[i]<<endl;
+		  mip_histo[i]->GetFunction(name)->SetLineColor(kRed);
+		}				
+		drawTower(mip_histo[i],gaussian_fit[i],i+1,mipstatus[i],helper);
+		
 		TLine *gaussian_peak = new TLine(gaussian_mean,0.,gaussian_mean,histogram_top+15);
-		gaussian_peak->SetLineColor(kGreen);
+		gaussian_peak->SetLineColor(kBlue);
+		if(mipstatus[i]!=1)gaussian_peak->SetLineColor(kRed);
 		gaussian_peak->SetLineWidth(2.0);
 		gaussian_peak->Draw("same");
 		
@@ -148,12 +196,19 @@ const int ntowers = 4800;
 		pad++;
 		counter++;
 	}
-
+	c->Update();
+	ps->NewPage();
+	c->Clear();
+	c->Divide(1,2);
+	gStyle->SetPalette(1);
+	gStyle->SetOptStat("e");
+	c->cd(1);
+	etaphi->Draw("colz");
+	c->cd(2);
+	statcode->GetZaxis()->SetRangeUser(0,20);
+	statcode->Draw("colz");
 	ps->Close();
 
-	cout<<"finished tower fits"<<endl;
-	
-	//print fit stats to a file
 	ofstream gains(gainfile);
 	char line[500];
 	for(int i=0; i<ntowers; i++){
@@ -161,34 +216,63 @@ const int ntowers = 4800;
 		double mipPeak = gaussian_fit[i]->GetX(fitMaximum, 0., 100.);
 		double fitMean = gaussian_fit[i]->GetParameter(1);
 		
+		int hentries = mip_histo[i]->GetEntries();
+		double hmean = mip_histo[i]->GetMean();
+		double hrms = mip_histo[i]->GetRMS();
+		double fNDF = gaussian_fit[i]->GetNDF();
+		double fchi = gaussian_fit[i]->GetChisquare();
+		double chi = 0;
+		if(fNDF > 0)chi = fchi/fNDF;
+
 		if(TMath::Abs(mipPeak-fitMean)>0.001) cout<<i<<"  "<<fitMean<<"  "<<mipPeak<<endl;
 		
 		double gain = 0;
-		double width = 0;
-		double error = 0;
-		if(mipPeak > 0 && fitMEan > 0){
+		double fSig = 0;
+		double fMeanErr = 0;
+		double fSigErr = 0;
+		double fCon = 0;
+		double fConErr = 0;
+		double mInt = 0;
+		if(mipPeak > 0 && fitMean > 0){
 		  float eta = getTowerEta(i+1);
 		  float theta=2.*TMath::ATan(TMath::Exp(-eta));
 		  gain = 0.264*(1.+0.056*eta*eta)/(TMath::Sin(theta)*fitMean);
-		  width = gaussian_fit[i]->GetParameter(2);
-		  error = gaussian_fit[i]->GetParError(1);
-		}
-		
-		/*if(isBadTower2006(i+1)){
-			gain = 0.;
-			width = 0.;
-			}*/
-		
-		//sprintf(line,"%i     %2.2f     %2.2f     %1.2f     %1.3f     %1.6f",i+1,fit[i]->GetParameter(1),fit[i]->GetParameter(4),fit[i]->GetParameter(0),eta,gain);
-		sprintf(line,"%-4i     %1.6f     %2.6f     %1.6f",i+1,gain,width,);
-		//		sprintf(line,"%i     %2.2f     %2.2f     %1.2f     %1.3f     %1.6f",i+1,mipPeak,fit[i]->GetParameter(1),fit[i]->Mean(5.,50.),fit2[i]->GetParameter(1),gain);
+		  fSig = gaussian_fit[i]->GetParameter(2);
+		  fSigErr = gaussian_fit[i]->GetParError(2);
+		  fCon = gaussian_fit[i]->GetParameter(0);
+		  fConErr = gaussian_fit[i]->GetParError(0);
+		  fMeanErr = gaussian_fit[i]->GetParError(1);
+		  mip_histo[i]->GetXaxis()->SetRangeUser(fitMean-2*fSig,fitMean+2*fSig);
+		  mInt = mip_histo[i]->Integral();
+		  if((i+1) % 20 == 0){
+		    mip_histo[i]->GetXaxis()->SetRangeUser(6.,100.);
+		  }else{
+		    mip_histo[i]->GetXaxis()->SetRangeUser(6.,50.);
+		  }
+		}		
+
+		sprintf(line,"%-4i,%i,%2.3f,%2.3f,%2.3f,%i,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f",i+1,hentries,hmean,hrms,gain,mipstatus[i],chi,fCon,fConErr,fitMean,fMeanErr,fSig,fSigErr,mInt);
+
 		gains<<line<<endl;
 	}
+
+
+	outfile->cd();
+	for(int i = 0; i < ntowers; i++){
+	  mip_histo[i]->Write();
+	}
+	etaphi->Write();
+	statcode->Write();
+	outfile->Close();
+
+	cout<<"finished tower fits"<<endl;
+	
+	//print fit stats to a file
 	//cout<<"saved fit params in "<<argv[3]<<endl;
 	
 }
 			
-void drawTower(TH1* h, TF1* f, int id){		
+void drawTower(TH1* h, TF1* f, int id, int status, CalibrationHelperFunctions* helper){		
 	//calculate a few quantities
 	double peak = f->GetParameter(1);
 	double mean = f->Mean(5.,200.);
@@ -211,12 +295,30 @@ void drawTower(TH1* h, TF1* f, int id){
 	
 	//write the tower number on the plot
 	char tower_title[100];
+	char teta[100];
+	char tphi[100];
+	sprintf(teta,"e:%1.2f",helper->getEta(id));
+	sprintf(tphi,"p:%1.2f",helper->getPhi(id));
+	TLatex eta_latex;
+	TLatex phi_latex;
+	eta_latex.SetTextSize(0.15);
+	phi_latex.SetTextSize(0.15);
+	eta_latex.DrawTextNDC(0.65,0.5,teta);
+	phi_latex.DrawTextNDC(0.65,0.3,tphi);
 	sprintf(tower_title,"%i",id);//,f->GetParameter(1));
 	TLatex title_latex;
 	title_latex.SetTextSize(0.15);
-	if(isBadTower2006(id)) title_latex.SetTextColor(kRed);
+	if(status!=1) title_latex.SetTextColor(kRed);
 //	title_latex.DrawLatex(xLatexBin,0.94*histo_height,tower_title);
 	title_latex.DrawTextNDC(0.13,0.78,tower_title);
+	if(status!=1){
+	  char tower_code[100];
+	  sprintf(tower_code,"%i",status);
+	  TLatex status_latex;
+	  status_latex.SetTextSize(0.15);
+	  status_latex.SetTextColor(kRed);
+	  status_latex.DrawTextNDC(0.47,0.78,tower_code);
+	}
 /*	
 	//write the value of the MIP peak
 	char tower_peak[100];

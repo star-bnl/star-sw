@@ -6,7 +6,7 @@ using namespace std;
 void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskimfile.root") 
 {
   gROOT->Macro("LoadLogger.C");
-  gROOT->Macro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  gROOT->Macro("loadMuDst.C");
   gSystem->Load("StTpcDb");
   gSystem->Load("StDaqLib");
   gSystem->Load("StDetectorDbMaker");
@@ -86,22 +86,24 @@ void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskim
 		
 		//select on runnumbers to look for stability
 		//if(myEvent->run < 7135000) continue;
-				
+    //if(myEvent->tracks->GetEntries() > 0)cout<<"Processing event "<<i<<" with "<<myEvent->tracks->GetEntries()<<" tracks"<<endl;
     for(int j=0; j<myEvent->tracks->GetEntries(); j++){
       mip = (StEmcOfflineCalibrationTrack*)myEvent->tracks->At(j);
 						
       double pedsub = mip->tower_adc[0] - mip->tower_pedestal[0];
 			
+      //cout<<mip->tower_id[0]<<" "<<mip->tower_id_exit<<" "<<pedsub<<" "<<mip->tower_pedestal_rms[0]<<" "<<mip->p<<" "<<mip->highest_neighbor<<" "<<mip->vertexIndex<<endl;
       if(excluded_towers.find(mip->tower_id[0]) != excluded_towers.end()) continue;
       if(mip->p < 1.) continue;
       //if(mip->preshower_status[0] != 1) continue;
       if(mip->highest_neighbor > 2.) continue;
-      if(TMath::Abs(pedsub) < 1.5*mip->tower_pedestal_rms[0])continue;
+      if(pedsub < 1.5*mip->tower_pedestal_rms[0])continue;
       if(mip->tower_id[0] != mip->tower_id_exit) continue;
-      if(mip->vertexIndex > 0) continue;
+      //if(mip->vertexIndex > 0) continue;
 			
       int index = mip->tower_id[0];
       mip_histo[index-1]->Fill(pedsub);
+      //cout<<"track found in tower "<<index<<endl;
     }
   }
 	
