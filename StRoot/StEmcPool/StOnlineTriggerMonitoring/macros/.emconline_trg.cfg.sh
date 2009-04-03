@@ -1,3 +1,4 @@
+export EMCONLINE_TRG_DIR=/home/emc/online/emc/trigger
 
 # ROOT script
 export EMCONLINE_TRG_SCRIPT=${EMCONLINE_TRG_DIR}/saveTriggerLoad.C
@@ -26,7 +27,7 @@ export EMCONLINE_TRG_LOGS_DIR=${EMCONLINE_TRG_DIR}/logs.emconline_trg
 export EMCONLINE_TRG_TABLES_DIR=${EMCONLINE_TRG_DIR}/tables.emconline_trg/StarDb/Calibrations/emc/trigger
 # Directory for the config files currently being processed
 export EMCONLINE_TRG_CURRCONF_DIR=${EMCONLINE_TRG_DIR}/current_config.emconline_trg
-# Directory for the last seen configuration, to be compared with the latest downloaded files
+# Directory for hte last seen configuration, to be compared with the latest downloaded files
 export EMCONLINE_TRG_LASTCONF_DIR=${EMCONLINE_TRG_DIR}/last_config.emconline_trg
 
 # Mapping between DSM addresses and trigger patches
@@ -99,15 +100,14 @@ if [[ "${EMCONLINE_SLOWCTRL_CFG_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_
 if [[ "${EMCONLINE_SLOWCTRL_DSMMASK_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_DSMMASK_DIR='staruser@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT' ; fi
 
 # Directory that contains EMC Pplots installation
-if [[ "${EMCONLINE_PPLOTS_DIR}" == "" ]] ; then export EMCONLINE_PPLOTS_DIR='/home/emc/online/emc/pplots' ; fi
+#if [[ "${EMCONLINE_PPLOTS_DIR}" == "" ]] ; then export EMCONLINE_PPLOTS_DIR='/home/emc/online/emc/pplots' ; fi
 
 # Directory that contains pedestal monitoring installation
 if [[ "${EMCONLINE_PED_DIR}" == "" ]] ; then export EMCONLINE_PED_DIR='/home/emc/online/emc/pedestal' ; fi
 
 if [[ "${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}" == "" ]] ; then export EMCONLINE_TRG_BEMCSTATUS_CONSUMERS="\
-staruser@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
-bemc@evp.starp.bnl.gov:/home_local/bemc \
-bemc@evp.starp.bnl.gov:/evp/a \
+operator@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
+operator@evp.starp.bnl.gov:/a/pplot/files/bemc \
 ${EMCONLINE_PPLOTS_DIR} \
 ${EMCONLINE_PED_DIR} \
 " ; fi
@@ -122,14 +122,14 @@ if [[ "${SCP}" == "" ]] ; then export SCP='/home/emc/online/emc/scp' ; fi
 # Directory that contains pedestal files
 if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]]
 then
-    export EMCONLINE_SLOWCTRL_PED_DIR='~/emconline_slowctrl/pedestal_crate.emconline_slowctrl.current'
+    export EMCONLINE_SLOWCTRL_PED_DIR='~/emconline_slowctrl/pedestals'
     echo "EMC Slow Control pedestals directory not specified, assuming ${EMCONLINE_SLOWCTRL_PED_DIR}"
 fi
 
 # Directory that contains crate configuration files
 if [[ "${EMCONLINE_SLOWCTRL_CFG_DIR}" == "" ]]
 then
-    export EMCONLINE_SLOWCTRL_CFG_DIR='~/emconline_slowctrl/config_crate.emconline_slowctrl'
+    export EMCONLINE_SLOWCTRL_CFG_DIR='~/emconline_slowctrl/configuration'
     echo "EMC Slow Control crate configurations directory not specified, assuming ${EMCONLINE_SLOWCTRL_CFG_DIR}"
 fi
 

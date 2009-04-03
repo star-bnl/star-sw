@@ -83,7 +83,7 @@ Run the monitoring script manually
 or force, if monitoring is currently stopped
 ./job.emconline_trg "" "" RUN
 or force update even if no changes found
-./job.emconline_ped "" yes RUN
+./job.emconline_trg "" yes RUN
 The first argument "" means the current time, or it can be a timestamp "YYYYDDMM.HHMMSS".
 
 Backup ROOT files are saved in ./backup.emconline_trg, gzipped logs in ./logs.emconline_trg,
