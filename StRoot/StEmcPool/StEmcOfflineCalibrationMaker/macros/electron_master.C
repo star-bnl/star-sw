@@ -22,7 +22,7 @@ double fit_function(double *x, double *par);
 double fit_function2(double *x, double *par);
 double background_only_fit(double *x, double *par);
 
-void electron_master(const char* file_list="electrons.list",const char* output="electronmaster.root", const char* dbDate="1999-01-01 00:09:00", const char* geantfile="geant_func.root"){
+void electron_master(const char* file_list="electrons.list",const char* output="electronmaster_adam.root", const char* dbDate="1999-01-01 00:09:00", const char* geantfile="geant_func.root", const char* gfname="mips.gain.table"){
   //**********************************************//
   //Load Libraries                                //
   //**********************************************//
@@ -75,6 +75,19 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   const int ntowers = 4800;
   const int nrings = 40;
 
+  float gains[ntowers];
+  int status[ntowers];
+
+  ifstream gainfile(gfname);
+  while(1){
+    int id,stat;
+    float peak,err,gain;
+    gainfile >> id >> stat >> peak >> err >> gain;
+    if(!gainfile.good())break;
+    gains[id-1] = gain;
+    status[id-1] = stat;
+  }
+
   TFile* geant_file = new TFile(geantfile,"READ");
   TF1* geant_fit = (TF1*)geant_file->Get("geant_fit");
 
@@ -85,9 +98,12 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   TH1 *prs_histo[ntowers];
   TH1 *ring_histo[nrings];
   TF1 *ringfit[nrings];
+  TH2F* ring_pve[nrings];
+  TH2F* jan_pve[6];
   float eta;
   int etaindex;
   TH1F* ringprec = new TH1F("ringprec","",40,-1.0,1.0);
+  TH1F* ringprec2 = new TH1F("ringprec2","",40,-1.0,1.0);
   ringprec->SetYTitle("E/p");
   ringprec->SetXTitle("#eta");
   double ew[nrings];
@@ -142,9 +158,13 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   TH1F* west_histo = new TH1F("west_histo","Electron E/p in West",40,0.0,2.0);
   TH1F* all_histo = new TH1F("all_histo","Electron E/p",40,0.0,2.0);
 
+  double mipgains[40] = {0.0153384,0.0199435,0.0213435,0.0195892,0.0200876,0.0182992,0.0178393,0.0174514,0.0174794,0.0164953,0.0158151,0.0166528,0.0162374,0.0146685,0.0149648,0.0153254,0.0146326,0.0151221,0.0145512,0.0148793,0.0150701,0.0145633,0.0150305,0.0154839,0.0142929,0.0147277,0.0150759,0.0158363,0.0156365,0.0160211,0.0164128,0.0172054,0.017725,0.0172588,0.0177851,0.0187099,0.0200016,0.0200538,0.0169604,0.014336};
+
+
    //create the tower histograms
   char name[100];
   char name1[100];
+  /*
   for(int i=0; i<ntowers; i++){
     sprintf(name,"electron_histo_%i",i+1);
     electron_histo[i] = new TH1D(name,"",30,0.,140.);
@@ -153,6 +173,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     prs_histo[i] = new TH1D(name1,"",60,0.,500.);
     prs_histo[i]->SetXTitle("ADC");
   }
+  */
   char name2[100];
   for(int i=0; i<nrings;i++)
     {
@@ -161,8 +182,20 @@ void electron_master(const char* file_list="electrons.list",const char* output="
       //ring_histo[i]->SetXTitle("ADC / GeV Sin(#theta)");
       ring_histo[i] = new TH1D(name2,"",50,0.,3.0);
       ring_histo[i]->SetXTitle("E/p");
+      char namerpve[100];
+      sprintf(namerpve,"ring_pve_%i",i);
+      ring_pve[i] = new TH2F(namerpve,"",20,0,20.0,20,0,20.0);
+      ring_pve[i]->SetXTitle("E (GeV)");
+      ring_pve[i]->SetYTitle("p (GeV)");
     }
 
+  for(int i = 0; i < 6; i++){
+    char jname[100];
+    sprintf(jname,"jan_pve_%i",i);
+    jan_pve[i] = new TH2F(jname,"",120,0,3.0,20,0,20.0);
+    jan_pve[i]->SetXTitle("E/p");
+    jan_pve[i]->SetYTitle("p (GeV)");
+  }
   //global graphics functions
   gStyle->SetOptStat("oue");
   gStyle->SetOptFit(111);
@@ -181,23 +214,27 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   //**********************************************//
 
   int nentries = tree->GetEntries();
+  cout<<nentries<<endl;
   for(int j=0; j<nentries; j++){
     tree->GetEntry(j);
     track = &(cluster->centralTrack);
     TClonesArray *tracks = cluster->tracks;
+    //if(1) cout<<"reading "<<j<<" of "<<nentries<<endl;
 
-    if((track->tower_adc[0] - track->tower_pedestal[0]) < 1.5 * track->tower_pedestal_rms[0])continue;
+    if((track->tower_adc[0] - track->tower_pedestal[0]) < 2.5 * track->tower_pedestal_rms[0])continue;
     if(track->p < 1.0)continue;
-    if(j%200000 == 0) cout<<"reading "<<j<<" of "<<nentries<<endl;
-					
+    //if(track->p > 6.0)continue;				
     //change the fiducial cut to a square with diagonal = 0.06 in deta, dphi space
     float squarefid = 0.02;//0.03/TMath::Sqrt(2.0);
     //if(TMath::Abs(track->deta) > squarefid || TMath::Abs(track->dphi) > squarefid)continue;
 
     //calculate geant scaled, pedestal subtracted adc
     double dR = TMath::Sqrt(track->deta*track->deta + track->dphi*track->dphi);
+    //if(dR > 0.0125)continue;
+    if(dR > 0.025)continue;
+    double scaled_adc = (track->tower_adc[0] - track->tower_pedestal[0]) / track->p;
     double geant_scale = geant_fit->Eval(dR);
-    double scaled_adc = (track->tower_adc[0] - track->tower_pedestal[0]) * geant_scale / track->p;
+    scaled_adc *= geant_scale;
     //cout<<scaled_adc<<endl;
     int index = track->tower_id[0];
     //cout<<index<<" "<<helper->getTheta(index)<<endl;
@@ -205,8 +242,8 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     //scaled_adc = scaled_adc/TMath::Sin(helper->getTheta(index));
 
     //fill tower and prs histo
-    if(index <= ntowers)electron_histo[index - 1]->Fill(scaled_adc);
-    if(index <= ntowers && (track->preshower_adc[0] - track->preshower_pedestal[0]) > 1.5 * track->preshower_pedestal_rms[0])prs_histo[index - 1]->Fill(track->preshower_adc[0] - track->preshower_pedestal[0]);
+    //if(index <= ntowers)electron_histo[index - 1]->Fill(scaled_adc);
+    //if(index <= ntowers && (track->preshower_adc[0] - track->preshower_pedestal[0]) > 1.5 * track->preshower_pedestal_rms[0])prs_histo[index - 1]->Fill(track->preshower_adc[0] - track->preshower_pedestal[0]);
 
     //figure out eta and etaindex
     eta = helper->getEta(index);
@@ -217,8 +254,23 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     //get gain to calculate E/p
     //1.15 corrects to proper full scale
     double tgain = bemctables->calib(1,track->tower_id[0])*1.15;
-    double mipgains[40] = {0.0153384,0.0199435,0.0213435,0.0195892,0.0200876,0.0182992,0.0178393,0.0174514,0.0174794,0.0164953,0.0158151,0.0166528,0.0162374,0.0146685,0.0149648,0.0153254,0.0146326,0.0151221,0.0145512,0.0148793,0.0150701,0.0145633,0.0150305,0.0154839,0.0142929,0.0147277,0.0150759,0.0158363,0.0156365,0.0160211,0.0164128,0.0172054,0.017725,0.0172588,0.0177851,0.0187099,0.0200016,0.0200538,0.0169604,0.014336};
-    ring_histo[etaindex]->Fill(scaled_adc*mipgains[etaindex]);
+    ring_histo[etaindex]->Fill(scaled_adc*gains[index-1]);
+    ring_pve[etaindex]->Fill(scaled_adc*gains[index-1]*track->p,track->p);
+
+    float abseta = TMath::Abs(eta);
+    if(abseta > 0.95){
+      jan_pve[5]->Fill(scaled_adc*gains[index-1],track->p);
+    }else if(abseta > 0.9){
+      jan_pve[4]->Fill(scaled_adc*gains[index-1],track->p);
+    }else if(abseta > 0.6){
+      jan_pve[3]->Fill(scaled_adc*gains[index-1],track->p);
+    }else if(abseta > 0.3){
+      jan_pve[2]->Fill(scaled_adc*gains[index-1],track->p);
+    }else if(abseta > 0.05){
+      jan_pve[1]->Fill(scaled_adc*gains[index-1],track->p);
+    }else{
+      jan_pve[0]->Fill(scaled_adc*gains[index-1],track->p);
+    }
 
     if(track->tower_id[0] <= 2400)west_histo->Fill(scaled_adc*tgain);
     if(track->tower_id[0] > 2400)east_histo->Fill(scaled_adc*tgain);
@@ -273,7 +325,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 	    energyleak->Fill(dR,leaked);
 	    findbg->Fill(dR,leaked1);
 	    tevsp->Fill(track->p,(leakedenergy + (track->tower_adc[0] - track->tower_pedestal[0])*bemctables->calib(1,track->tower_id[0])));
-	    tevspcent->Fill(track->p,((track->tower_adc[0] - track->tower_pedestal[0])*bemctables->calib(1,track->tower_id[0]))*geant_scale);
+	    tevspcent->Fill(track->p,((track->tower_adc[0] - track->tower_pedestal[0])*bemctables->calib(1,track->tower_id[0])));
 	    towermult->Fill(nTowerneighbors);
 	    multvsp->Fill(track->p,nTowerneighbors);
 	    if(track->p >= 2 && track->p <= 3)
@@ -340,7 +392,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   //**********************************************//
   //Fit Tower Histograms                          //
   //**********************************************//
-
+  /*
   for(int i=0; i<ntowers; i++){
 	  
     if(i%600 == 0) cout<<"fitting tower "<<i+1<<" of "<<ntowers<<endl;
@@ -361,7 +413,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 		
     electron_histo[i]->Fit(fit[i],"rq");
   }
-
+  */
   //**********************************************//
   //Fit Ring Histograms                           //
   //**********************************************//
@@ -373,13 +425,19 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     sprintf(name,"ring_fit_%i",i);
     /*
     ringfit[i] = new TF1(name,fit_function,0.,140.,6);
-    ringfit[i]->SetParameter(1,65.);
-    ringfit[i]->SetParameter(2,10.);
-    ringfit[i]->SetParameter(3,10.); //relative height of peak to bg
-    ringfit[i]->SetParameter(4,10.);
-    ringfit[i]->SetParameter(5,3.);
+    ringfit[i]->SetParameter(1,1.);
+    ringfit[i]->SetParameter(2,0.2);
+    ringfit[i]->SetParameter(3,1.5); //relative height of peak to bg
+    ringfit[i]->SetParameter(4,0.15);
+    ringfit[i]->SetParameter(5,0.8);
     ringfit[i]->SetParNames("Constant","Mean","Sigma","Peak Ratio","Bg Mean","Bg Sigma");
     */		
+    //TF1* ffff = new TF1("ffff","expo(0) + gaus(2)",0.4,1.7);
+    ringfit[i] = new TF1(name,"expo(0) + gaus(2)",0.4,1.7);
+    ringfit[i]->SetParameter(3,1.);
+    ringfit[i]->SetParameter(4,0.15);
+    ringfit[i]->SetParNames("constant1","Slope","constant2","Mean","Sigma");
+    /*
     ringfit[i] = new TF1(name,fit_function2,0.1,2.5,8);
     ringfit[i]->SetParameter(1,1.);
     ringfit[i]->SetParameter(2,0.2);
@@ -389,13 +447,16 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     ringfit[i]->SetParameter(7,0.8);
     ringfit[i]->SetParNames("Constant","Mean","Sigma","Peak Ratio","Bg Mean","Bg Sigma","Bg2 constant","Bg2 decay");
     	
-    ringfit[i]->SetLineColor(kGreen);
+    */
+    ringfit[i]->SetLineColor(kBlue);
     ringfit[i]->SetLineWidth(0.6);
 		
     ring_histo[i]->Fit(ringfit[i],"rq");
 		
-    ringprec->SetBinContent(i+1,(ringfit[i]->GetParameter(1)));
-    ringprec->SetBinError(i+1,ringfit[i]->GetParameter(2));
+    ringprec->SetBinContent(i+1,(ringfit[i]->GetParameter(3)));
+    ringprec->SetBinError(i+1,ringfit[i]->GetParameter(4));
+    ringprec2->SetBinContent(i+1,(ringfit[i]->GetParameter(3)));
+    ringprec2->SetBinError(i+1,ringfit[i]->GetParError(3));
     //ew[i] = 4066/(60*(fit[i]->GetParameter(2))*(fit[i]->GetParameter(2)));
   }
 

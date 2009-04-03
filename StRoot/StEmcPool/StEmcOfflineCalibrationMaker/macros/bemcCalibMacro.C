@@ -1,11 +1,12 @@
-void bemcCalibMacro(const char* dir="/star/u/mattheww/StRoot/StEmcPool/StEmcOfflineCalibrationMaker/macros/",
+void bemcCalibMacro(const char* dir="./",
 			   const char* name  = "test.root",
-			   const char* filelist = "myfiles.list",
+			   const char* filelist = "test.list",
 			   int nFiles = 1,
-			   int nEvents = 272)
+			   int nEvents = 100,
+		           const char* outPath = "./")
 {
 	gROOT->Macro("LoadLogger.C");
-	gROOT->Macro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+	gROOT->Macro("loadMuDst.C");
     gSystem->Load("StarMagField.so");
     gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
@@ -18,10 +19,12 @@ void bemcCalibMacro(const char* dir="/star/u/mattheww/StRoot/StEmcPool/StEmcOffl
     gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
     gSystem->Load("StEpcMaker");
-    gSystem->Load("StEmcTriggerMaker");
+    gSystem->Load("StTriggerUtilities");
+    //gSystem->Load("StEmcTriggerMaker");
     gSystem->Load("StDbBroker");
     gSystem->Load("libgeometry_Tables");
-	
+    gSystem->Load("StEEmcUtil");
+    gSystem->Load("StEEmcDbMaker");
     gSystem->Load("StEmcOfflineCalibrationMaker");
 	
     StChain* chain = new StChain("StChain");
@@ -29,7 +32,7 @@ void bemcCalibMacro(const char* dir="/star/u/mattheww/StRoot/StEmcPool/StEmcOffl
 	
     StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",filelist,"",nFiles);
     St_db_Maker *dbMaker = new St_db_Maker("StarDb","MySQL:StarDb");
-	
+    StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
 	StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 	/*
 	StDetectorId towerid = static_cast<StDetectorId>(kBarrelEmcTowerId);
@@ -42,20 +45,32 @@ void bemcCalibMacro(const char* dir="/star/u/mattheww/StRoot/StEmcPool/StEmcOffl
 	adc->setDoZeroSuppression(smdpid,0);
 	*/	
 	//get control table so we can turn off BPRS zero-suppression and save hits from "bad" caps
+
 	controlADCtoE_st* control_table = adc->getControlTable();
 	control_table->CutOff[1] = -1;
 	control_table->CutOffType[1] = 0;
 	control_table->DeductPedestal[1] = 2;
-	
-	StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
-	emcTrig->setDbMaker(dbMaker);
+
+	//StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
+	//emcTrig->setDbMaker(dbMaker);
+
+    StTriggerSimuMaker* trigsim = new StTriggerSimuMaker();
+    trigsim->useBbc();
+    trigsim->useBemc();
+    trigsim->bemc->setConfig(StBemcTriggerSimu::kOffline);
+    StGenericL2Emulator* simL2Mk = new StL2_2006EmulatorMaker;
+    assert(simL2Mk);
+    simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
+    simL2Mk->setOutPath(outPath);
+    trigsim->useL2(simL2Mk);
+
 	
 	TString outfile(dir);
 	outfile += "/";
 	outfile += name;
 	StEmcOfflineCalibrationMaker* bemcCalibMaker = new StEmcOfflineCalibrationMaker("bemcCalibMaker",outfile.Data());
 	bemcCalibMaker->subtractPedestals = true;
-	/*
+	
 	bemcCalibMaker->addMinBiasTrigger(200000);
 	bemcCalibMaker->addMinBiasTrigger(200002);
 	bemcCalibMaker->addMinBiasTrigger(200012);
@@ -65,8 +80,8 @@ void bemcCalibMacro(const char* dir="/star/u/mattheww/StRoot/StEmcPool/StEmcOffl
 	bemcCalibMaker->addHighTowerTrigger(127212);
 	bemcCalibMaker->addHighTowerTrigger(127213);
 	bemcCalibMaker->addHighTowerTrigger(137213);
-	*/
-	TMemStat memory;
+	
+	StMemStat memory;
 	memory.PrintMem(NULL);
 	
 	chain->Init();

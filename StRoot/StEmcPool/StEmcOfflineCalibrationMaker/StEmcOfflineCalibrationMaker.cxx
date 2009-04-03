@@ -38,6 +38,7 @@
 #include "StEmcRawMaker/defines.h"
 #include "StEmcRawMaker/StBemcTables.h"
 #include "StEmcTriggerMaker/StEmcTriggerMaker.h"
+#include "StTriggerUtilities/StTriggerSimuMaker.h"
 
 //logger
 #include "StMessMgr.h"
@@ -81,7 +82,9 @@ Int_t StEmcOfflineCalibrationMaker::Init()
 	
   muDstMaker = dynamic_cast<StMuDstMaker*>(GetMaker("MuDst")); assert(muDstMaker);
   mADCtoEMaker = dynamic_cast<StEmcADCtoEMaker*>(GetMaker("Eread")); assert(mADCtoEMaker);
-  emcTrigMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); assert(emcTrigMaker);
+  //emcTrigMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); assert(emcTrigMaker);
+  emcTrigMaker = dynamic_cast<StTriggerSimuMaker*>(GetMaker("StarTrigSimu")); assert(emcTrigMaker);
+
 
   mTables = mADCtoEMaker->getBemcData()->getTables();
   mEmcGeom = StEmcGeom::instance("bemc");
@@ -200,8 +203,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
   if(trigs.isTrigger(2) || trigs.isTrigger(117460) || trigs.isTrigger(137460) || trigs.isTrigger(147461)) return kStOK;
 	
   myEvent->triggerIds = trigs.triggerIds();
-  myEvent->l2Result = event->L2Result();
-	
+  myEvent->l2Result = event->L2Result();	
 	//basic event info
   bool fillQA = (runInfo->beamFillNumber(blue)==runInfo->beamFillNumber(yellow));
   myEvent->fill = (fillQA) ? (unsigned short)runInfo->beamFillNumber(blue):0;
@@ -235,7 +237,8 @@ Int_t StEmcOfflineCalibrationMaker::Make()
   }
 		
 	//fill ADC values from StEmcCollection obtained from MuDst
-  mEmcCollection = muDst->emcCollection();
+  //mEmcCollection = muDst->emcCollection();
+  mEmcCollection = mADCtoEMaker->getEmcCollection();
   for(int p=0;p<2;p++)
     for(int q=0;q<18000;q++) mADCSmd[p][q]=0;
   getADCs(BTOW);
@@ -270,12 +273,20 @@ Int_t StEmcOfflineCalibrationMaker::Make()
   LOG_DEBUG << "got ADCs" << endm;
 	
 	//trigger maker
-  myEvent->htTrigMaker[0] = emcTrigMaker->isTrigger(137213);
-  std::map<int,int>::const_iterator p = (emcTrigMaker->barrelTowersAboveThreshold(137213)).begin();
-  myEvent->htTrigMaker[1] = p->first;
-  myEvent->htTrigMaker[2] = p->second;
+  for(unsigned int i = 0; i < htTriggers.size(); i++){
+    myEvent->triggerResult[htTriggers[i]]=emcTrigMaker->isTrigger(htTriggers[i]);
+  }
+  for(unsigned int i = 0; i < mbTriggers.size(); i++){
+    myEvent->triggerResult[mbTriggers[i]]=emcTrigMaker->isTrigger(mbTriggers[i]);
+  }
 
-	
+  myEvent->htTrigMaker[0] = emcTrigMaker->isTrigger(137213);
+  //std::map<int,int>::const_iterator p = (emcTrigMaker->barrelTowersAboveThreshold(137213)).begin();
+  //myEvent->htTrigMaker[1] = p->first;
+  //myEvent->htTrigMaker[2] = p->second;
+
+  const StEventSummary& evtSummary = muDstMaker->muDst()->event()->eventSummary();
+  Double_t mField = evtSummary.magneticField()/10;
 	//now for the tracks
   for(unsigned int vertex_index=0; vertex_index<myEvent->nVertices; vertex_index++){
     muDst->setVertexIndex(vertex_index);
@@ -283,6 +294,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
     StMuTrack* track;
     StMuTrack* primarytrack;
     int nentries = muDst->numberOfPrimaryTracks();
+    cout<<nentries<<" tracks in vertex "<<vertex_index<<endl;
     assert(nentries==primaryTracks->GetEntries());
     pair<unsigned int, pair<float,float> > smd_eta_center;
     pair<unsigned int, pair<float,float> > smd_phi_center;
@@ -291,18 +303,26 @@ Int_t StEmcOfflineCalibrationMaker::Make()
     for(int i=0; i<nentries; i++){
       track = NULL;
       primarytrack = muDst->primaryTracks(i);
-      if(primarytrack->flag()<=0)continue;
-      if(primarytrack->bad())continue;
-      if((float)(primarytrack->nHitsFit()/primarytrack->nHitsPoss()) < 0.51)continue;
-      if(primarytrack->eta() > 2)continue;
+      myTrack->flag = primarytrack->flag();
+      myTrack->bad = primarytrack->bad();
+
+      //if(primarytrack->flag()<=0)continue;
+      //if(primarytrack->bad())continue;
+      //if((float)(primarytrack->nHitsFit()/primarytrack->nHitsPoss()) < 0.51)continue;
+      //if(primarytrack->eta() > 2)continue;
       track = primarytrack->globalTrack();
-      if(!track)continue;
+      int primused = 0;
+      if(!track)primused=1;
+      if(!track)track = primarytrack;
+      myTrack->eta = track->eta();
       double p;
       StPhysicalHelixD outerhelix;
       pair<unsigned int, pair<float,float> > center_tower;
       outerhelix = track->outerHelix();
-      p = outerhelix.momentum(0).mag();
-      p = track->p().mag();
+      p = outerhelix.momentum(mField*tesla).mag();
+      //float testeta = outerhelix.momentum(mField*tesla).pseudoRapidity();
+      myTrack->track = outerhelix.momentum(mField*tesla);
+      //p = track->p().mag();
       center_tower = getTrackTower(track, false,1);
       smd_eta_center=getTrackTower(track,false,3);
       smd_phi_center=getTrackTower(track,false,4);
@@ -313,6 +333,8 @@ Int_t StEmcOfflineCalibrationMaker::Make()
       int id = center_tower.first;
 			
 			//cout<<p<<endl;
+
+      //cout<<i<<" "<<id<<" "<<primused<<" "<<p<<" "<<testeta<<endl;
 			
       if(id > 0 && p > 1.0){
 	int etaid=smd_eta_center.first;
@@ -435,20 +457,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	  myTrack->tower_pedestal_rms[tower] = mPedRMS[BTOW-1][softid[tower]-1];
 	  myTrack->tower_status[tower] = mStatus[BTOW-1][softid[tower]-1];
 	}
-				
-				//recenter the array to test new PRS mapping hypotheses
-	softid[0] = id;
-	softid[1] = mEmcPosition->getNextTowerId(softid[0],-1,-1);
-	softid[2] = mEmcPosition->getNextTowerId(softid[0],0,-1);
-	softid[3] = mEmcPosition->getNextTowerId(softid[0],1,-1);
-	softid[4] = mEmcPosition->getNextTowerId(softid[0],-1,0);
-	softid[5] = mEmcPosition->getNextTowerId(softid[0],1,0);
-	softid[6] = mEmcPosition->getNextTowerId(softid[0],-1,1);
-	softid[7] = mEmcPosition->getNextTowerId(softid[0],0,1);
-	softid[8] = mEmcPosition->getNextTowerId(softid[0],1,1);
-				
-	LOG_DEBUG << "BTOW id = " << id << " and BPRS id = " << softid[0] << endm;
-				
+			       				
 	for(int tower=0; tower<9; tower++){
 	  myTrack->preshower_adc[tower]	= mADC[BPRS-1][softid[tower]-1];
 	  myTrack->preshower_pedestal[tower] = mPedestal[BPRS-1][softid[tower]-1];
@@ -471,7 +480,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	myTrack->dEdx = track->dEdx();
 				
 	myEvent->addTrack(myTrack);
-				//cout<<"I think I added a track"<<endl;
+				cout<<"I think I added a track"<<endl;
       }
     }
   }
@@ -621,6 +630,7 @@ pair<unsigned short, pair<float,float> > StEmcOfflineCalibrationMaker::getTrackT
 	StThreeVectorD momentum,position;
 	Double_t radius;
 	if(det==1) radius = mEmcGeom->Radius();
+	if(det==2) radius = mEmcGeom->Radius();
 	if(det==3) radius = mSmdEGeom->Radius();
 	if(det==4) radius = mSmdPGeom->Radius();
 		

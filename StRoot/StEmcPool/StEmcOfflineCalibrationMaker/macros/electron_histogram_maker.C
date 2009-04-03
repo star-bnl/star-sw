@@ -88,16 +88,17 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 			if(j==0) nGoodEvents++;
 			
 			double dR = TMath::Sqrt(track->deta*track->deta + track->dphi*track->dphi);
-			if(dR > 0.03) continue;
-			//float squarefid = 0.03/TMath::Sqrt(2.0);
-			//if(TMath::Abs(track->deta) > squarefid || TMath::Abs(track->dphi) > squarefid)continue;
+			//if(dR > 0.03) continue;
+			//cout<<track->nSigmaElectron<<" "<<track->p<<" "<<track->nHits<<" "<<track->tower_id[0]<<" "<<track->tower_id_exit<<endl;
+			float squarefid = 0.03/TMath::Sqrt(2.0);
+			if(TMath::Abs(track->deta) > squarefid || TMath::Abs(track->dphi) > squarefid)continue;
 			
 			if(track->p < 1.5) continue;
 			if(track->p > 20.) continue;
 			if(track->tower_status[0] != 1)					continue;
 			if(track->tower_id[0] != track->tower_id_exit)	continue;
-			if(track->nHits < 20)							continue;
-			if(track->vertexIndex != 0)						continue;
+			if(track->nHits < 10)							continue;
+			//if(track->vertexIndex != 0)						continue;
 			
 			if(excluded_towers.find(track->tower_id[0]) != excluded_towers.end()) continue;
 

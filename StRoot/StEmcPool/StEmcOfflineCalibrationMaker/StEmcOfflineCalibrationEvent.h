@@ -5,9 +5,11 @@
 #include "TClonesArray.h"
 #include "TVector3.h"
 #include "TArrayI.h"
+#include "StThreeVectorF.hh"
 //#include "StEmcTowerCalibrationEvent.h"
 
 #include <vector>
+#include <map>
 using namespace std;
 
 //------------------------------------------------
@@ -45,8 +47,12 @@ public:
 	
 	unsigned short	vertexIndex;
 	
+	double eta;
+	short flag;
+	int bad;
 
 	double			p;
+	StThreeVectorF track;
 	float			deta;
 	float			dphi;
 	unsigned short	nHits;
@@ -63,7 +69,7 @@ public:
 	
 	void Clear(Option_t* option="");
 	
-	ClassDef(StEmcOfflineCalibrationTrack, 3)
+	ClassDef(StEmcOfflineCalibrationTrack, 5)
 };
 
 //----------------------------------------------------------------------
@@ -150,6 +156,7 @@ public:
 	float			ranking[10]; //[nVertices]
 	
 	//triggers (1 == trigger fired for this event)
+	map<unsigned int, unsigned int> triggerResult;
 	vector<unsigned int>	triggerIds;
 	TArrayI			l2Result;
 	
@@ -162,6 +169,6 @@ public:
 	
 	void addTrack(StEmcOfflineCalibrationTrack* track);
 	
-	ClassDef(StEmcOfflineCalibrationEvent,4)
+	ClassDef(StEmcOfflineCalibrationEvent,5)
 };	
 #endif
