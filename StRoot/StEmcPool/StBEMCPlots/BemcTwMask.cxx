@@ -15,12 +15,39 @@ using namespace std;
 #include <TSystem.h>
 #include <TMath.h>
 
-#include <StRoot/StEmcPool/StBEMCPlots/BemcTwMask.h>
+#include <StMessMgr.h>
+
+#include "BemcTwMask.h"
 
 //--------------------------------------
-bool  useBtowMask(const Char_t *fname, BemcTwMask *m) {
-  
-  cout << "BEMCPlots::useTwMask(\"" << fname << "\") ..." << endl;
+BemcTwMask::BemcTwMask()
+    : txtH(0)
+    , nMask(0)
+{
+}
+
+//--------------------------------------
+BemcTwMask::~BemcTwMask()
+{
+    if (txtH) delete txtH; txtH = 0;
+}
+
+//--------------------------------------
+void BemcTwMask::clear() {
+    for (int i = 0;i < nPl;i++) {
+	crG[i].Clear();
+	crG2[i].Clear();
+    }
+    nMask = 0;
+    memset(crCh, 0, sizeof(crCh));
+    if (txtH) txtH->Clear();
+}
+
+//--------------------------------------
+bool useBtowMask(const Char_t *fname, BemcTwMask *m) {
+  if (!(fname && fname[0] && m)) return false;
+
+  LOG_INFO << "BEMCPlots::useTwMask(\"" << fname << "\") ..." << endm;
  
   string line; 
   Int_t softid, cr, seq, TWmask, HTmask ,TPmask, tp;
@@ -30,12 +57,11 @@ bool  useBtowMask(const Char_t *fname, BemcTwMask *m) {
 
   ifstream BemcStatusFile(fname);
 
-  if (!BemcStatusFile)
-    {
-      cout << "BemcTwMask:: useBTowMask Failed due to NO FILE"<<endl;
+  if (!BemcStatusFile) {
+      LOG_ERROR << "BemcTwMask:: useBTowMask Failed due to NO FILE" << endm;
       m->clear();
-      return 0;
-    }
+      return false;
+  }
   
   if (BemcStatusFile)
     {
@@ -78,12 +104,11 @@ bool  useBtowMask(const Char_t *fname, BemcTwMask *m) {
   
   m->nMask=nok;
    
-  int i;
-  for(i=0;i<m->nPl;i++){
+  for(int i=0;i<m->nPl;i++){
     m->crG[i].SetMarkerStyle(23);
     m->crG[i].SetMarkerColor(kRed);
     //m->crG2[i].SetMarkerStyle(1);
     //m->crG2[i].SetLineColor(kRed);
   }
- 
+  return true; 
 }
