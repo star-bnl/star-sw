@@ -11,10 +11,9 @@ typedef GenericFile FileType;
 class BEMCPlotsPresenter {
 public:
 
-  bool twMaskFound;
-  BemcTwMask *twMask;
-  
-  static void displayTab(int tab, int panel, FileType file, TPad *pad, int mDebug);
+  static void displayTab(int tab, int panel, FileType file, TPad *pad, const char *bemcStatusFilename, int mDebug);
+  static void displayTab(int tab, int panel, FileType file, TPad *pad, int mDebug); // temporary
+
   // tab=0 "BEMC"
   // panel=0 "Status"
   // panel=1 "Towers"
@@ -36,8 +35,7 @@ public:
   static void displaySMDPSD(FileType file, TPad *pad, int mDebug);
   static void displayTrigger(FileType file, TPad *pad, int mDebug);
   static void displayJet(FileType file, TPad *pad, int mDebug);
-  static void displayRawAdc(FileType file, TPad *pad, bool psd, int mDebug);
-  static void displayRawAdcZoom(FileType file, TPad *pad, bool psd, int mDebug);
+  static void displayRawAdc(FileType file, TPad *pad, bool psd, bool zoom, BemcTwMask *twMask, int mDebug);
   static void displayJetPatchHT(FileType file, TPad *pad, int mDebug);
   static void displayJetPatchSum(FileType file, TPad *pad, int mDebug);
   static void displayL0Input(FileType file, TPad *pad, int mDebug);
