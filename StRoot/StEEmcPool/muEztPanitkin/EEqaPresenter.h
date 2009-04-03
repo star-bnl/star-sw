@@ -1,27 +1,10 @@
-#include <TGraph.h>
-#include <TGraphErrors.h>
-#include <TPaveText.h>
+#ifndef EEqaPresenter_H
+#define EEqaPresenter_H
+
 #include "GenericFile.h"
-
 typedef GenericFile FileType;
-
 class TPad ;
-
-class EemcTwMask {
-public:
-    EemcTwMask();
-    ~EemcTwMask();
-
-    void clear();
-
-    enum {nCr = 6, nCh = 120, nPhi = 60, nEta = 12};
-    Char_t crCh[nCr][nCh];
-    TGraph crG[nCr], phiG;
-    TGraphErrors crG2[nCr];
-    TPaveText *txtH; // 1=knownHot
-    int nMask;
-};
-
+class EemcTwMask;
 
 void plNone(TPad *c);
 
@@ -51,10 +34,9 @@ void eeTrigAdjJPsum(FileType fd, TPad *c, const Char_t *);
 void eeTrigAdjJPcor(FileType fd, TPad *c, const Char_t *);
 void eeTrigEtot(FileType fd, TPad *c);
 
-bool useTwMask(const Char_t *fname, EemcTwMask *m);
-
 //utility
 void addJPphiLimits(TH1 *h);
 void eeJpQaMinMax(TH1 *hh);
 
 //--
+#endif
