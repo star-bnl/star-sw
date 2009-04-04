@@ -1,5 +1,8 @@
-// K. Yip : Feb. 20, 2009 --- correction of Akio's stuff and preparation of making pp2pp detector plots ...
-// K. Yip : Feb. 15, 2008 
+/*
+ K. Yip : Apr. 3, 2009 --- h_P2P has only a dim. of 16 and both pp2ppHistogramGroup's use the same h_P2P[0..15]
+ K. Yip : Feb. 20, 2009 --- correction of Akio's stuff and preparation of making pp2pp detector plots ...
+ K. Yip : Feb. 15, 2008 
+*/
 
 #include "pp2ppHistogramGroup.h"
 
@@ -53,8 +56,7 @@ pp2ppHistogramGroup::pp2ppHistogramGroup(unsigned int iswitch, const char* group
   for ( int ii=0; ii<mMaxBits; ii++) {
     so.str("");
     so << "h" << ii+mswitch*mMaxBits ;  // mswitch=0: 0->15 ; mswitch=1: 16-31
-    const char* name = (so.str()).c_str();
-    h_P2P[ii] = new TH1D(name,name,256,0.,256);
+    h_P2P[ii] = new TH1D((so.str()).c_str(),(so.str()).c_str(),256,0.,256);
   }
 
 }
@@ -107,7 +109,9 @@ void pp2ppHistogramGroup::draw(TCanvas* cc) {
 
 bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) { 
 
+
 #ifndef NEW_DAQ_READER
+
   int ret = trgReader(datap);
   if(ret <= 0) {
     fprintf(stderr, "pp2pp Trigger RAW: problems in data (%d) - continuing...", ret);
@@ -128,6 +132,7 @@ bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) {
   }
 
 #else
+
   StTriggerData* trgd = TriggerData::Instance(datap);
   if(trgd){
     int i=0;
@@ -137,11 +142,11 @@ bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) {
           for(int ch=0; ch<2; ch++){
 	    if ( mswitch == 0 ) {
 	      unsigned short adc = trgd->pp2ppADC((StBeamDirection)ew,vh,udio,ch);
-	      h_P2P[i   ]->Fill( double(adc) );
+	      h_P2P[i]->Fill( double(adc) );
 	    }
 	    else {
 	      unsigned short tac = trgd->pp2ppTAC((StBeamDirection)ew,vh,udio,ch);
-	      h_P2P[i+16]->Fill( double(tac) );
+	      h_P2P[i]->Fill( double(tac) );
 	    }
             i++;
           }
@@ -150,36 +155,7 @@ bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) {
     }
   }
 
-  // Detector stuff 
-  daq_dta *dd ;
-  dd = evp->det("pp2pp")->get("adc") ;
-
-  if(dd) {
-
-    while(dd->iterate()) {
-
-      pp2pp_t *d = (pp2pp_t *) dd->Void ;
-
-      //      printf(" sector : %d; sequencer : %d; svx : %d\n", dd->sec,  d->seq_id , d->svx_id);
-
-      /*
-      sec[nstrips] = dd->sec ;
-      seq_id[nstrips] = d->seq_id;
-      chain_id[nstrips] = d->chain_id;
-      svx_id[nstrips] = d->svx_id;
-      for(int c=0;c<PP2PP_SVX_CH;c++) {
-	adc[nstrips][c] = d->adc[c];
-      }
-      */
-
-      //      nstrips++ ;
-
-    }
-
-  }
-
 #endif
-
 
   return true;
 

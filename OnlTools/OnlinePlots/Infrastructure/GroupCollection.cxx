@@ -140,7 +140,7 @@ void  GroupCollection::fill(evpReader* evp, char* datap, unsigned int triggerBit
     // Extra checks added to force filling of VPD histograms
     // Remove when testBits is fixed!
     //if((*iter)->testBits( triggerBits, detectorBits)){ 
-    if(!strcmp((*iter)->subGroupName(),"vpd") || !strcmp((*iter)->subGroupName(),"vpdHi") || (*iter)->testBits( triggerBits, detectorBits)){ 
+    if(!strcmp((*iter)->subGroupName(),"vpd") || !strcmp((*iter)->subGroupName(),"vpdHi") || !strcmp((*iter)->groupName(),"P2P") || (*iter)->testBits( triggerBits, detectorBits)){ 
       (*iter)->fill(evp,datap);
     }
 
