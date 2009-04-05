@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.56 2009/03/27 21:18:36 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.57 2009/04/05 14:37:59 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.57  2009/04/05 14:37:59  genevb
+// Catch missing files
+//
 // Revision 2.56  2009/03/27 21:18:36  genevb
 // Add Jet Patch trigger histograms
 //
@@ -2023,6 +2026,10 @@ void StHistUtil::SetRefAnalysis(const Char_t* refOutFile, const Char_t* refResul
     LOG_INFO << "StHistUtil: Using reference cuts file " << refCutsFile << endm;
     m_refCuts = new TList;
     ifstream refCuts(refCutsFile);
+    if (!refCuts.is_open()) {
+      LOG_ERROR << "StHistUtil: Unable to open cuts file! Proceeding with no cuts..." << endm;
+      return;
+    }
     char buf_name[256];
     char buf_opts[64];
     while (!refCuts.eof()) {
