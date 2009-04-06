@@ -27,7 +27,14 @@
 ** TPC+SSD+SVT     = 23
 ** SSD+SVT         = 24
 ** CPV(PMD)        = 25
-** PMD             = 26    */
+** PMD             = 26
+** Pixel Layer (HFT) PXL = 27
+** Strip Layer (HFT) IST = 28
+** Forward Tracker   FGT = 29
+** FPD West        = 30
+** FPD East        = 31
+** FMS             = 32
+*/
 
 
 
@@ -69,11 +76,18 @@
 #define kIstIdentifier                28
 #define kFgtIdentifier                29
 
- 
+/*
+**  The following are for the forward
+**  spectrometers (tu April 6, 2009)
+*/
+#define kFpdWestIdentifier            30
+#define kFpdEastIdentifier            31 
+#define kFmsIdentifier                32
+
 /*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
-**  happen or not. tu
+**  happen or not. (OBSOLETE)
 */
 /*
 #define kHftIdentifier                27
@@ -86,9 +100,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.6 2007/10/11 21:50:19 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.7 2009/04/06 19:23:53 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.7  2009/04/06 19:23:53  ullrich
+** Add detector Ids for FPD East/West and FMS.
+**
 ** Revision 2.6  2007/10/11 21:50:19  ullrich
 ** Added new enums for PXL and IST detectors.
 **

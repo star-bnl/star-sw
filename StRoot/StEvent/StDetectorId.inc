@@ -5,6 +5,7 @@
       INTEGER kBarrelSmdPhiStripId,kZdcWestId,kZdcEastId
       INTEGER kEndcapSmdUStripId,kEndcapSmdVStripId,kMwpcWestId,kMwpcEastId
       INTEGER kTpcSvtId,kTpcSsdId,kTpcSsdsvtId,kSsdSvtId,kPhmdCpvId,kPhmdId
+      INTEGER kPxlId,kIstId,kFgtId,kFpdWestId,kFpdEastId,kFmsId
 
 #include "StDetectorDefinitions.h"
       PARAMETER (kUnknownId = kUnknownIdentifier)
@@ -34,10 +35,19 @@
       PARAMETER (kSsdSvtId    = kSsdSvtIdentifier)
       PARAMETER (kPhmdCpvId = kPhmdCpvIdentifier)
       PARAMETER (kPhmdId = kPhmdIdentifier)
-
-C     $Id: StDetectorId.inc,v 2.1 2004/04/26 16:35:19 fisyak Exp $
+      PARAMETER (kPxlId       = kPxlIdentifier)
+      PARAMETER (kIstId       = kIstIdentifier)
+      PARAMETER (kFgtId       = kFgtIdentifier)
+      PARAMETER (kFpdWestId   = kFpdWestIdentifier)
+      PARAMETER (kFpdEastId   = kFpdEastIdentifier) 
+      PARAMETER (kFmsId       = kFmsIdentifier)    
+  
+C     $Id: StDetectorId.inc,v 2.2 2009/04/06 19:23:53 ullrich Exp $
 C
 C     $Log: StDetectorId.inc,v $
+C     Revision 2.2  2009/04/06 19:23:53  ullrich
+C     Add detector Ids for FPD East/West and FMS.
+C
 C     Revision 2.1  2004/04/26 16:35:19  fisyak
 C     Move enumerations from pams/global/inc => StEvent
 C
