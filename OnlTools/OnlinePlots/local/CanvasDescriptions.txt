@@ -38,6 +38,8 @@
 //4,4,3,4,12,[any|any],h273_svt_West_OccRec1,h274_svt_West_OccRec2,h275_svt_West_OccRec3,h276_svt_West_OccRec4,h277_svt_West_OccRec5,h278_svt_West_OccRec6,h279_svt_West_OccRec7,h280_svt_West_OccRec8,h281_svt_West_OccRec9,h282_svt_West_OccRec10,h283_svt_West_OccRec11,h284_svt_West_OccRec12
 //4,5,1,1,1,[any|any],h56_AnodeVsHybird
 
+4,1,1,1,1,[any|any],hGroup:Trigger#vpd#any#trg
+4,2,1,1,1,[any|any],hGroup:Trigger#vpdHi#any#trg
 
 
 //BEMC
