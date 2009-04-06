@@ -202,7 +202,8 @@ void PresenterGui::SetDefaults()
   TabNames[1][0]="DAQ";
   TabNames[2][0]="L3";
   TabNames[3][0]="TPC";
-  TabNames[4][0]="SVT";
+  //TabNames[4][0]="SVT";
+  TabNames[4][0]="VPD";
   TabNames[5][0]="BEMC Expert";
   TabNames[6][0]="BEMC Shift";
   TabNames[7][0]="FTPC";
@@ -270,13 +271,16 @@ void PresenterGui::SetDefaults()
   TabNames[3][7]="Charge Phi";
 
   //SVT
-  nSubTabs[4]=5;
+  //nSubTabs[4]=5;
+  nSubTabs[4]=2;
   //   TabNames[4][1]="SVT Total Occupancy";
-  TabNames[4][1]="SVT West and East";
-  TabNames[4][2]="SVT Receiver Occupancy East";
-  TabNames[4][3]="SVT Mean Anode-Time bucket";
-  TabNames[4][4]="SVT Receiver Occupancy West";
-  TabNames[4][5]="SVT Anode vs Hybrid";
+  TabNames[4][1]="VPD";
+  TabNames[4][2]="VPD Hi";
+  //TabNames[4][1]="SVT West and East";
+  //TabNames[4][2]="SVT Receiver Occupancy East";
+  //TabNames[4][3]="SVT Mean Anode-Time bucket";
+  //TabNames[4][4]="SVT Receiver Occupancy West";
+  //TabNames[4][5]="SVT Anode vs Hybrid";
 
   //BEMC and BSMD
   nSubTabs[5]=10;
