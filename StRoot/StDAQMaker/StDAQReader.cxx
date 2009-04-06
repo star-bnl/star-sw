@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.76 2009/03/27 23:07:33 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.77 2009/04/06 18:22:33 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.77  2009/04/06 18:22:33  fine
+ * remove the redundant methods and fix L1/L2/L3 summary
+ *
  * Revision 1.76  2009/03/27 23:07:33  fine
  * Pick the SC data via the new DAQ READER
  *
@@ -270,8 +273,6 @@
 #include "StFTPCReader.h"
 #include "StTRGReader.h"
 #include "StSVTReader.h"
-#include "StSCReader.h"
-#include "tables/St_trigDetSums_Table.h"
 #include "StMessMgr.h" 
 #include "TString.h" 
 //
@@ -296,7 +297,6 @@ StDAQReader::StDAQReader(const char *file)
   fL3Reader 	= 0;
   fTOFReader    = 0;
   fFPDReader    = 0;
-  fSCReader     = 0;
   m_ZeroTokens  = 0;
   fOffset = 0;
   fFile = 0;
@@ -499,20 +499,11 @@ int StDAQReader::readEvent()
   if (fEEMCReader && EMCPresent() ) fEEMCReader->Update();
   if (fPMDReader  && PMDPresent() ) fPMDReader ->Update();
 
-  // Must skip SCPresent check to handle missing SCPresent value in 2005-2006
-  // (SCPresent value indicates not present, but it may in fact be present)
-  if (fSCReader) fSCReader  ->Update();
-
-//	Trigger Summary, code provided by Herb
-  Bank_DATAP *datap = (Bank_DATAP*)(fEventReader->getDATAP());
-  if (datap ) {
-     assert(datap->header.BankType[0]=='D'); // first letter of DATAP
-     { int i;
-       for(i=0;i<2;i++) fTrigSummary->L1summary[i]=datap->reserved[i+0];
-       for(i=0;i<2;i++) fTrigSummary->L2summary[i]=datap->reserved[i+2];
-       for(i=0;i<4;i++) fTrigSummary->L3summary[i]=datap->reserved[i+4];
-     }
-  }
+// Trigger Summary
+  int i;
+  for(i=0;i<2;i++) fTrigSummary->L1summary[i]=fDaqFileReader->L1summary[i];
+  for(i=0;i<2;i++) fTrigSummary->L2summary[i]=fDaqFileReader->L2summary[i];
+  for(i=0;i<4;i++) fTrigSummary->L3summary[i]=fDaqFileReader->L3summary[i];
   return 0;
 }
 //_____________________________________________________________________________
@@ -604,8 +595,6 @@ unsigned int StDAQReader::getTrigWord() const {
    int StDAQReader::TRGPresent()  const {return  fEventInfo->TRGPresent;}
 //_____________________________________________________________________________
    int StDAQReader::L3Present()   const {return  fEventInfo->L3Present;}
-//_____________________________________________________________________________
-   int StDAQReader::SCPresent()   const {return  fEventInfo->SCPresent;}
 //_____________________________________________________________________________
    int StDAQReader::getEventSize()const {return  fEventInfo->EventLength;}
 //_____________________________________________________________________________
@@ -727,27 +716,7 @@ StSVTReader *StDAQReader::getSVTReader()
   }
   return fSVTReader;
 }
-//-----------------------------------------------------------------------------
-StSCReader *StDAQReader::getSCReader()
-{
-  // Must change order to handle missing SCPresent value in 2005-2006.
-  // Only good check is to create a reader and see if there is data.
-#ifndef NEW_DAQ_READER
-  if (!fSCReader) {
-    fSCReader = new StSCReader(this);
-  }
-  if (!(SCPresent() || fSCReader->thereIsSCData())) return 0;
-#endif
-  return fSCReader;
-}
-//-----------------------------------------------------------------------------
-TDataSet *StDAQReader::getSCTable()
-{
-  if (getSCReader()) {
-    return fSCReader->getSCTable((unsigned long) (fEventReader->runno()));
-  }
-  return 0;
-}
+
 //_____________________________________________________________________________
 void StDAQReader::printEventInfo()
 {fEventReader->printEventInfo();}

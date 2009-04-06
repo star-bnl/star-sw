@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.38 2009/01/20 22:56:32 fine Exp $
+ * $Id: StDAQReader.h,v 1.39 2009/04/06 18:22:33 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.39  2009/04/06 18:22:33  fine
+ * remove the redundant methods and fix L1/L2/L3 summary
+ *
  * Revision 1.38  2009/01/20 22:56:32  fine
  * remove the redundant CPP flag
  *
@@ -139,7 +142,6 @@ class StPMDReader ;
 class StFTPCReader;  
 class StTRGReader ;
 class StSVTReader ;
-class StSCReader  ;
 class TDataSet    ;
 
 class daqReader;
@@ -206,8 +208,7 @@ public:
   virtual int RICHPresent() const;
   virtual int TRGPresent () const;
   virtual int L3Present  () const;
-  virtual int SCPresent  () const;
-
+ 
   virtual void setTPCVersion(const char* vers = "TPCV2P0"); 
   virtual void setFTPCVersion(const char* vers = "FTPV1P0"); 
   virtual const char *getTPCVersion()  const {return fTPCVersion ;} 
@@ -224,8 +225,6 @@ public:
   StL3Reader   *getL3Reader  ();
   StTOFReader  *getTOFReader ();
   StFPDReader  *getFPDReader ();
-  StSCReader   *getSCReader  ();
-  TDataSet     *getSCTable   ();
   StTrigSummary *getTrigSummary () const {return fTrigSummary;}
   virtual void printEventInfo();
   virtual int  getEventSize() const;
@@ -253,7 +252,6 @@ protected:
   StL3Reader   *fL3Reader;
   StTOFReader  *fTOFReader;
   StFPDReader  *fFPDReader;
-  StSCReader   *fSCReader;
   long fOffset;
   DAQEventInfo *fEventInfo;
   char *fFile;
