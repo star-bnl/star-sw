@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.34 2007/10/11 21:50:19 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.35 2009/04/06 19:23:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.35  2009/04/06 19:23:53  ullrich
+ * Add detector Ids for FPD East/West and FMS.
+ *
  * Revision 2.34  2007/10/11 21:50:19  ullrich
  * Added new enums for PXL and IST detectors.
  *
@@ -177,10 +180,13 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kSsdSvtId    = kSsdSvtIdentifier,
                    kPhmdCpvId   = kPhmdCpvIdentifier,
                    kPhmdId      = kPhmdIdentifier,
-	         kPxlId       = kPxlIdentifier,
-	         kIstId       = kIstIdentifier,
-	         kFgtId       = kFgtIdentifier,
-	         kMaxDetectorId};
+                   kPxlId       = kPxlIdentifier,
+                   kIstId       = kIstIdentifier,
+                   kFgtId       = kFgtIdentifier,
+                   kFpdWestId   = kFpdWestIdentifier,
+                   kFpdEastId   = kFpdEastIdentifier, 
+                   kFmsId       = kFmsIdentifier,    
+                   kMaxDetectorId};
 
 /*!
  * \enum StTrackType
