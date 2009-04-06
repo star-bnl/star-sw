@@ -56,6 +56,7 @@ int EvpUtil::nHist[MAX_TABS][MAX_SUBTABS];
 unsigned int EvpUtil::canvasTriggerBits[MAX_TABS][MAX_SUBTABS];  
 unsigned int EvpUtil::canvasDetectorBits[MAX_TABS][MAX_SUBTABS];  
 TString EvpUtil::hNames[MAX_TABS][MAX_SUBTABS][MAX_PADS]; 
+TString EvpUtil::hGroupName[MAX_TABS][MAX_SUBTABS]; 
 TH1* EvpUtil::hHist[MAX_TABS][MAX_SUBTABS][MAX_PADS]; 
 TH1* EvpUtil::hUnknown = new TH1D("unknown","unknown histogram",10,0.,10.);
 
@@ -273,6 +274,17 @@ int EvpUtil::ReadCanvasDefinition(TString line) {
 	hHist[tab][subTab][i] = 0;
 	//cout <<hNames[tab][subTab][i]<< "***" << endl;
 	//printf("%d %d %d %s \n",tab,subTab,i,hNames[tab][subTab][i].Data());
+
+	// Now check for histogram groups
+	if(t.BeginsWith("hGroup:")) {
+		TString groupName = t;
+		pos = groupName.First(':');
+		groupName.Remove(0,pos+1);
+		hGroupName[tab][subTab] = groupName.Data();
+		cout << groupName.Data() << endl;
+	} else {
+		hGroupName[tab][subTab] = "";
+	}
     }
 
     ReadCanvasCondition(canvasCondition,canvasTriggerBits[tab][subTab],canvasDetectorBits[tab][subTab]);
@@ -574,6 +586,10 @@ void EvpUtil::Draw(TH1*h, const char* options) {
 
 //-------------------------------------------------------------
 bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, const int j, bool doClear) {
+  if(hGroupName[i][j] != "") {	//Skip histogram groups
+    return false;
+  }
+
 // get rid of red boarder around current pad on a canvas
   static TLegend* bunchCounterLegend = new TLegend(0.7, 0.6, 0.95, 0.95);
   static TLegend* bunchCounterLegend2 = new TLegend(0.7, 0.6, 0.95, 0.95);
@@ -939,7 +955,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.8 2009/03/23 19:42:09 dkettler Exp $
+ * $Id: EvpUtil.cxx,v 1.9 2009/04/06 18:49:21 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -949,6 +965,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.9  2009/04/06 18:49:21  dkettler
+ * Histogram groups can be added to the main tabs by editing CanvasDescriptions.txt
+ *
  * Revision 1.8  2009/03/23 19:42:09  dkettler
  * Fixed FTPC plots
  *

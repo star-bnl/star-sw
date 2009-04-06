@@ -56,6 +56,7 @@ class EvpUtil {
   static unsigned int canvasTriggerBits[MAX_TABS][MAX_SUBTABS];  
   static unsigned int canvasDetectorBits[MAX_TABS][MAX_SUBTABS];  
   static TString hNames[MAX_TABS][MAX_SUBTABS][MAX_PADS]; 
+  static TString hGroupName[MAX_TABS][MAX_SUBTABS]; 
   static TH1* hHist[MAX_TABS][MAX_SUBTABS][MAX_PADS]; 
 
   static int GetLogY(const int i,const int j);
@@ -102,7 +103,7 @@ class EvpUtil {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.h,v 1.5 2009/03/05 00:03:16 dkettler Exp $
+ * $Id: EvpUtil.h,v 1.6 2009/04/06 18:49:21 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -112,6 +113,9 @@ class EvpUtil {
  ***************************************************************************
  *
  * $Log: EvpUtil.h,v $
+ * Revision 1.6  2009/04/06 18:49:21  dkettler
+ * Histogram groups can be added to the main tabs by editing CanvasDescriptions.txt
+ *
  * Revision 1.5  2009/03/05 00:03:16  dkettler
  * EMC Updates
  *

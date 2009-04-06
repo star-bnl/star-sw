@@ -195,6 +195,11 @@ void EvpPresenter::CrossOfDeath(TCanvas* gcc) {
  
 
 void EvpPresenter::Draw(TCanvas* gcc, int  tab, int subTab) {
+  if(EvpUtil::hGroupName[tab][subTab] != "") {
+    Draw(gcc, EvpUtil::hGroupName[tab][subTab]);
+    return;
+  }
+
   if ( mDebugLevel) {
     cout << "Draw tab/subtab : " << tab << "/" << subTab << endl;
   }
@@ -213,7 +218,7 @@ void EvpPresenter::Draw(TCanvas* gcc, int  tab, int subTab) {
 }
 
 void EvpPresenter::Draw(TCanvas* gcc, const char* group) {
-  if ( mDebugLevel) {
+  if ( mDebugLevel ) {
     cout << "Draw group : " << group << endl;
   }
   HistogramGroup* hg = mGroups.read(mfile,group);
@@ -443,7 +448,7 @@ void EvpPresenter::ClosePresenter()
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.cxx,v 1.5 2009/02/04 03:43:10 dkettler Exp $
+ * $Id: EvpPresenter.cxx,v 1.6 2009/04/06 18:49:29 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -453,6 +458,9 @@ void EvpPresenter::ClosePresenter()
  ***************************************************************************
  *
  * $Log: EvpPresenter.cxx,v $
+ * Revision 1.6  2009/04/06 18:49:29  dkettler
+ * Histogram groups can be added to the main tabs by editing CanvasDescriptions.txt
+ *
  * Revision 1.5  2009/02/04 03:43:10  dkettler
  * Addes Reference Plot Option
  *
