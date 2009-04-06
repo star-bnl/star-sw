@@ -1724,7 +1724,8 @@ static int nCall=0; nCall++;
           wt = (fNor[0]*fNor[0]*exy[0]
 	       +fNor[0]*fNor[1]*exy[1]*2
 	       +fNor[1]*fNor[1]*exy[2]);
-          assert(wt>0.);
+//          assert(wt>0.);
+          if (wt<=0) return 3.e33;
           wt = 1/wt;
         }
         aux[i].wt = wt;
@@ -2884,7 +2885,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.36 2008/10/29 19:36:25 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.37 2009/04/06 17:51:32 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2900,6 +2901,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.37  2009/04/06 17:51:32  perev
+ * Replace assert(wt>0) by error condition
+ *
  * Revision 1.36  2008/10/29 19:36:25  perev
  * flag 2d and 3d dca added
  *
