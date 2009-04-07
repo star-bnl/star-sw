@@ -25,7 +25,7 @@
 #include <log4cxx/spi/loggingevent.h>
 #include <list>
 
-namespace TxTrackingAPI {
+namespace TxLogging {
   class TxEventLog;
 }
 
@@ -115,7 +115,7 @@ namespace log4cxx
 			* sub-class and overriding the <code>getConnection</code> and
 			* <code>closeConnection</code> methods.
 			*/
-			TxTrackingAPI::TxEventLog *connection;
+			TxLogging::TxEventLog *connection;
 
 
 			/**
@@ -188,7 +188,7 @@ namespace log4cxx
 			* By default this creates a single connection which is held open
 			* until the object is garbage collected.
 			*/
-			virtual TxTrackingAPI::TxEventLog *getConnection() /*throw(SQLException)*/;
+			virtual TxLogging::TxEventLog *getConnection() /*throw(SQLException)*/;
 			
 			/**
 			* Closes the appender, flushing the buffer first then closing the default
