@@ -1,4 +1,5 @@
 /*
+ K. Yip : Apr. 6, 2009 --- Put in the real names for the h_P2P 
  K. Yip : Apr. 3, 2009 --- h_P2P has only a dim. of 16 and both pp2ppHistogramGroup's use the same h_P2P[0..15]
  K. Yip : Feb. 20, 2009 --- correction of Akio's stuff and preparation of making pp2pp detector plots ...
  K. Yip : Feb. 15, 2008 
@@ -51,12 +52,24 @@ pp2ppHistogramGroup::pp2ppHistogramGroup() {
 pp2ppHistogramGroup::pp2ppHistogramGroup(unsigned int iswitch, const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector), mswitch(iswitch) {
 
+  /*
   ostringstream so ;
 
   for ( int ii=0; ii<mMaxBits; ii++) {
     so.str("");
     so << "h" << ii+mswitch*mMaxBits ;  // mswitch=0: 0->15 ; mswitch=1: 16-31
     h_P2P[ii] = new TH1D((so.str()).c_str(),(so.str()).c_str(),256,0.,256);
+  }
+  */
+
+
+  const char *hist_name[32] = { "RPEVU1_ADC", "RPEVU2_ADC", "RPEVD1_ADC", "RPEVD2_ADC", "RPWVU1_ADC", "RPWVU2_ADC", "RPWVD1_ADC", "RPWVD2_ADC",
+				"RPEHO1_ADC", "RPEHO2_ADC", "RPEHI1_ADC", "RPEHI2_ADC", "RPWHO1_ADC", "RPWHO2_ADC", "RPWHI1_ADC", "RPWHI2_ADC",
+				"RPEVU1_TAC", "RPEVU2_TAC", "RPEVD1_TAC", "RPEVD2_TAC", "RPWVU1_TAC", "RPWVU2_TAC", "RPWVD1_TAC", "RPWVD2_TAC",
+				"RPEHO1_TAC", "RPEHO2_TAC", "RPEHI1_TAC", "RPEHI2_TAC", "RPWHO1_TAC", "RPWHO2_TAC", "RPWHI1_TAC", "RPWHI2_TAC" };
+
+  for ( int ii=0; ii<mMaxBits; ii++) {
+    h_P2P[ii] = new TH1D(hist_name[ii+mswitch*mMaxBits],hist_name[ii+mswitch*mMaxBits],256,0.,256.);
   }
 
 }
@@ -133,6 +146,8 @@ bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) {
 
 #else
 
+  unsigned short adc, tac;
+
   StTriggerData* trgd = TriggerData::Instance(datap);
   if(trgd){
     int i=0;
@@ -141,11 +156,11 @@ bool pp2ppHistogramGroup::fill(evpReader* evp, char* datap) {
         for(int udio=0; udio<2; udio++){
           for(int ch=0; ch<2; ch++){
 	    if ( mswitch == 0 ) {
-	      unsigned short adc = trgd->pp2ppADC((StBeamDirection)ew,vh,udio,ch);
+	      adc = trgd->pp2ppADC((StBeamDirection)ew,vh,udio,ch);
 	      h_P2P[i]->Fill( double(adc) );
 	    }
 	    else {
-	      unsigned short tac = trgd->pp2ppTAC((StBeamDirection)ew,vh,udio,ch);
+	      tac = trgd->pp2ppTAC((StBeamDirection)ew,vh,udio,ch);
 	      h_P2P[i]->Fill( double(tac) );
 	    }
             i++;
