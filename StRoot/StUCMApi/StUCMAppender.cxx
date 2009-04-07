@@ -14,20 +14,22 @@
 #include "TString.h"
 #include "TObjString.h"
 
-#include "StUCMApi/TxEventLog.h"
+#include "StUCMApi/logging/TxEventLog.h"
+
+//#include "StUCMApi/TxEventLog.h"
 
 #include <log4cxx/helpers/loglog.h>
 #include <log4cxx/level.h>
 #include <log4cxx/helpers/optionconverter.h>
 #include <log4cxx/helpers/stringhelper.h>
 #include <log4cxx/patternlayout.h>
-#include <data/TxUCMException.h>
+// #include <data/TxUCMException.h>
 #include "TObjArray.h"
 using namespace log4cxx;
 using namespace log4cxx::helpers;
 using namespace log4cxx::db;
 using namespace log4cxx::spi;
-using namespace TxTrackingAPI;
+using namespace TxLogging;
 
 IMPLEMENT_LOG4CXX_OBJECT(StUCMAppender)
 
@@ -43,7 +45,11 @@ StUCMAppender::~StUCMAppender()
 {
 	 // fprintf(stderr,"StUCMAppender::~StUCMAppender()\n" );
     finalize();
-    if (connection) { delete connection; connection = 0; }
+    if (connection) { 
+       connection->logEnd(); 
+       delete connection; 
+       connection = 0; 
+    }
 }
 
 //_________________________________________________________________________
@@ -96,12 +102,7 @@ String StUCMAppender::getLogStatement(const spi::LoggingEventPtr& event)
 void StUCMAppender::closeConnection()
 {
   if (fIsConnectionOpen && connection) {
-     try {
         delete connection; 
-     }  catch (const TxUCMException& e) {
-           fprintf(stderr,"StUCMAppender::closeConnection() %s \n"
-                , e.getDescription().c_str());
-     }
   }
   connection = 0;
   fIsConnectionOpen = false;
@@ -113,7 +114,6 @@ TxEventLog *StUCMAppender::getConnection()
    if (!fIsConnectionOpen) {
    
      if (!connection) {
-        try {
            // Generates the UCM_STORE_INFO
           // setenv UCM_STORE_INFO 
           // "mysql:StarLogger(logger)@heston.star.bnl.gov:3306/logger"
@@ -133,27 +133,23 @@ TxEventLog *StUCMAppender::getConnection()
                      ucmStore += port;
                      ucmStore += "/";
                      ucmStore += db;
+          connection = new TxEventLog();
+          connection->logStart();
           if ( getenv("JOBINDEX") && getenv("REQUESTID") ) {
                const char *JOBINDEX = getenv("JOBINDEX");
                 std::string UCMJOB   =  getenv("REQUESTID");
-               UCMJOB +=JOBINDEX;
+                UCMJOB +=JOBINDEX;
                 fprintf(stderr,"StUCMAppender::getConnection() about to open the connection %s for JOBINDEX \n"
                         , ucmStore.c_str(),JOBINDEX);
-                 connection = new TxEventLog(ucmStore.c_str(),JOBINDEX);
-
+//                 connection = new TxEventLog(ucmStore.c_str(),JOBINDEX);
            // However, what we really need is:
            // const char *REQUESTID = getenv("REQUESTID");
            // const char *PROCESSID = getenv("PROCESSID");
            // connection = new TxEventLog(ucmStore.c_str(),REQUESTID,JOBINDEX);
               } else {
                  fprintf(stderr,"StUCMAppender::getConnection() no JOBINDEX/REQUESTID was provided \n");
-                 connection = 0;
+                 connection = new TxEventLog();
               }
-        } catch (const TxUCMException& e) {
-           fprintf(stderr,"Exception:  StUCMAppender::getConnection() %s \n"
-                , e.getDescription().c_str());
-        connection = 0;
-     }
     }
    }
 	return connection;
@@ -237,16 +233,12 @@ void StUCMAppender::flushBuffer()
           ucmParamters[0].ReplaceAll("'","");ucmParamters[1].ReplaceAll("'","");ucmParamters[2].ReplaceAll("'","");
           int ucmStage = ucmParamters[0].Atoi();
           assert (ucmStage >=TxEventLog::START && ucmStage <=TxEventLog::END);
-          try {
-               connection->logUserEvent(  TxEventLog::Stage(ucmStage)
-                                        , trackingLevel
-                                        , context
-                                        , ucmParamters[1].Data()
-                                        , ucmParamters[2].Data());
-          } catch (const TxUCMException& e) {
-              fprintf(stderr,"Exception:  StUCMAppender::flushBuffer() %s \n"
-                  , e.getDescription().c_str());
-          }
+               connection->logEvent(   ucmParamters[1].Data()
+                                     , ucmParamters[2].Data()
+                                     , trackingLevel
+                                     , TxEventLog::Stage(ucmStage)
+                                     , context
+                                   );
           pair->Delete();
           delete pair;
       }
