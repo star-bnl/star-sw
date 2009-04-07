@@ -652,7 +652,7 @@ int sfs_index::writev_call_retry(int fd, iovec *iovec, int vec)
 // this is now threadsafe!
 
 
-int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
+int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, int *sticky)
 {
   iovec iovec[MAX_SEND_IOVECS];
   char _buff[(sizeof(SFS_File) + 40)*50];
@@ -686,6 +686,11 @@ int sfs_index::writev_sticky(fs_iovec *fsiovec, int n, char *sticky)
       if(sticky) {
 	if(sticky[i]) {
 	  file->attr |= SFS_ATTR_POPSTICKY;
+	}
+	if(sticky[i] < 0) {
+	  LOG(DBG, "%d %d",sticky[i], file->sz);
+	  file->sz = -(sticky[i]);
+	  LOG(DBG, "Set file->sz=%d",file->sz);
 	}
       }
       strcpy(file->name, fsiovec[i].filename);
