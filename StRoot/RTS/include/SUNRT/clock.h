@@ -23,6 +23,8 @@ typedef unsigned long long RTS_CPUCYCLE;
 #include <taskLib.h>
 #endif
 
+
+
 // Returns medium resolution time  (~1ms)
 // Since last call in floating point number
 // Uses: ~.6 usec in overhead per call...
@@ -63,6 +65,47 @@ inline double record_time()
 #else
   clock_gettime(CLOCK_REALTIME, &ts_old);
 #endif
+  return 0;
+}
+
+inline double record_abs_time(int set)
+{
+  static bool nfirst = false;
+#ifdef linux
+  static timeval ts_old;
+  static timeval ts_new;
+#else
+  static timespec ts_old;
+  static timespec ts_new;
+#endif
+  static double t;
+
+  if(nfirst)
+  {
+#ifdef linux
+    gettimeofday(&ts_new, NULL);
+#else
+    clock_gettime(CLOCK_REALTIME, &ts_new);
+#endif
+    t = ts_new.tv_sec - ts_old.tv_sec;
+
+#ifdef linux
+    t += ((double)(ts_new.tv_usec - ts_old.tv_usec))/1000000.0;
+#else
+    t += ((double)(ts_new.tv_nsec - ts_old.tv_nsec))/1000000000.0;
+#endif
+    //    ts_old = ts_new;
+    return t;
+  }
+
+  if(set || nfirst) {
+    nfirst = true;
+#ifdef linux
+    gettimeofday(&ts_old,NULL);
+#else
+    clock_gettime(CLOCK_REALTIME, &ts_old);
+#endif
+  }
   return 0;
 }
 
