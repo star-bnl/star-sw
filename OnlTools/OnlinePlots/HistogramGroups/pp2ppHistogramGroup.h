@@ -22,6 +22,9 @@ public:
   virtual void reset();
   virtual bool fill(evpReader* evp, char* datap);
   virtual void draw(TCanvas* cc); 
+  virtual void beginRun(evpReader* evp, char* datap);
+ public:
+    unsigned int mRunNumber;
 
 private:
 
