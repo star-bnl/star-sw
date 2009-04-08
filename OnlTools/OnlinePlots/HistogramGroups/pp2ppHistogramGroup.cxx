@@ -14,6 +14,7 @@
 #include "TVirtualPad.h"
 #include "TLine.h"
 #include "TLatex.h"
+#include "TPaveLabel.h"
 
 #ifndef NEW_DAQ_READER
 #  include <evpReader.hh>
@@ -86,6 +87,9 @@ void pp2ppHistogramGroup::reset() {
     h_P2P[ii]->Reset();
 }
 
+void pp2ppHistogramGroup::beginRun(evpReader* evp, char* datap) {
+  mRunNumber = evp->run;
+}
 
 void pp2ppHistogramGroup::draw(TCanvas* cc) {
 
@@ -107,15 +111,28 @@ void pp2ppHistogramGroup::draw(TCanvas* cc) {
 
   gStyle->SetOptStat(1111);
 
-  cc->Divide(4, 4);
+  char txt[1024];
+
+  sprintf(txt,"Run: #%d",mRunNumber);
+
+  //  cc->SetTitle(txt);
+
+  TPad *pad1 = new TPad("pad1","",0.03,0.03,0.97,0.92);
+  pad1->Draw();
+
+  TPaveLabel *title = new TPaveLabel(0.1,0.94,0.9,0.98,txt);
+  title->Draw();
+
+  pad1->Divide(4, 4);
   for ( int ii=0; ii<mMaxBits; ii++) {
-    cc->cd(ii+1) ; 
-    cc->cd(ii+1)->SetLogy() ; 
+    pad1->cd(ii+1) ; 
+    pad1->cd(ii+1)->SetLogy() ; 
     h_P2P[ii]->SetFillColor(4) ;
     h_P2P[ii]->Draw();
-  }
-  cc->Update();
+  }  
 
+  cc->Update();
+  
 
 } 
 
