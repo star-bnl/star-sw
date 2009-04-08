@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.8 2009/03/17 18:32:25 fine Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.9 2009/04/08 04:04:30 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -187,8 +187,13 @@ Int_t StBTofHitMaker::UnpackTofRawData()
     int halftrayid    = -99;
     int trayid        = -99;
     mTriggerTimeStamp[ifib] = 0;
+
+//    printf("RDO %d: words %d:\n",ifib+1,fTof->ddl_words[ifib]) ;
+
     for (int iword=0;iword<nword;iword++) {
       unsigned int dataword=fTof->ddl[ifib][iword];
+
+
       ///  now process data word seperately, get TDC information from data words.
       if( (dataword&0xF0000000)>>28 == 0xD) continue;  /// header tag word
       if( (dataword&0xF0000000)>>28 == 0xE) continue;  /// TDIG separator word
@@ -219,13 +224,16 @@ Int_t StBTofHitMaker::UnpackTofRawData()
       ///
       TofRawHit temphit={0};
       memset(&temphit,0,sizeof(temphit));
-      temphit.fiberid = ifib;
-      temphit.trayID  = trayid;
+      temphit.fiberid = (UChar_t)ifib;
+      temphit.trayID  = (UChar_t)trayid;
       unsigned int timeinbin = ((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  /// time in tdc bin
       temphit.tdc     = timeinbin;
       /// global channel number here
-      temphit.globaltdcchan = tdcchan + (tdcid%4)*8+tdigid*24+halftrayid*96; /// 0-191 for tray
+      temphit.globaltdcchan = (UChar_t)(tdcchan + (tdcid%4)*8+tdigid*24+halftrayid*96); /// 0-191 for tray
       temphit.dataword      = dataword;
+
+//      printf("\t%d: 0x%08X [%u dec]\n",iword,fTof->ddl[ifib][iword],fTof->ddl[ifib][iword]) ;
+
       if(edgeid == 4) {     /// leading edge data
         TofLeadingHits.push_back(temphit);
       } else if (edgeid==5){     /// trailing edge data
