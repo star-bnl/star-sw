@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.88 2007/04/28 17:55:49 perev Exp $
+// $Id: St_dst_Maker.cxx,v 1.89 2009/04/08 21:06:10 fine Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.89  2009/04/08 21:06:10  fine
+// Fix the crash during debug print
+//
 // Revision 1.88  2007/04/28 17:55:49  perev
 // Redundant StChain.h removed
 //
@@ -277,7 +280,7 @@ enum EChainBits {
 };
 
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.88 2007/04/28 17:55:49 perev Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.89 2009/04/08 21:06:10 fine Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -409,9 +412,8 @@ Int_t St_dst_Maker::Make(){
     dst = m_DataSet;
     if (strcmp(name,"dst")) dst = m_DataSet->Find("dst");
     if (dst) ds->Shunt(dst);
-    if (Debug()) {
-      gMessMgr->Debug() << "\n*** <" << ClassName() << "::Make> *** selected ";
-      *gMessMgr << mkname << name << endm;}
+    LOG_DEBUG << "*** <" << ClassName() << "::Make> *** selected "
+                << mkname << name << endm;
   }
   return Filler();
 }
