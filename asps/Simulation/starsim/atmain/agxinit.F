@@ -1458,6 +1458,23 @@
       CALL KUGUID('FPU_CONTROL',GUID,42,'S')
       CALL KUACT('FPU_CONTROL',AGXUSER)
 
+      CALL KUCMD(' ','GFILTER','C')
+      CALL KUPAR('GFILTER','filterName','User defined filtername','C',
+     +'S')
+      GUID(1)=' GFILTER command provides a way to install user defined f
+     +ilter.'
+      GUID(2)=' This filter is defined on StMCFilter class. It has two r
+     +ejection'
+      GUID(3)=' methods. One for EG (Event Generator) and G3 (End of GEA
+     +NT3 event)'
+      GUID(4)=' Before this command, library containing filter must be l
+     +oaded'
+      GUID(5)=' Example.'
+      GUID(6)=' GEXEC $STAR_LIB)/StMCFilter.so'
+      GUID(7)=' GFILTER  myFilterName'
+      CALL KUGUID('GFILTER',GUID,7,'S')
+      CALL KUACT('GFILTER',AGXUSER)
+
       CALL KUCMD(' ','BUG_REPORT','C')
       GUID(1)=' send a bug report to nevski@cern.ch'
       CALL KUGUID('BUG_REPORT',GUID,1,'S')
