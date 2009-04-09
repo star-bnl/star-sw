@@ -1,6 +1,10 @@
-* $Id: agxinit.cdf,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: agxinit.cdf,v 1.2 2009/04/09 22:33:21 perev Exp $
 * $Log: agxinit.cdf,v $
+* Revision 1.2  2009/04/09 22:33:21  perev
+* gfilter added
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.12  2003/08/23 15:59:05  nevski
 * add bug report feature
@@ -1207,6 +1211,21 @@ The following is an abstract from fpu_control.
  *       11 - rounding toward zero
  * 12    IC: Infinity control for 8087 and 80287 (0)         (0)
  * 13-15     reserved                           (00)        (00)     
+
+>Action AGXUSER
+*-----------------------------------------------------------------------------
+>Command GFILTER
+>Parameters
+filterName 'User defined filtername' C
+>Guidance
+
+ GFILTER command provides a way to install user defined filter.
+ This filter is defined on StMCFilter class. It has two rejection
+ methods. One for EG (Event Generator) and G3 (End of GEANT3 event)
+ Before this command, library containing filter must be loaded 
+ Example.
+ GEXEC $STAR_LIB)/StMCFilter.so
+ GFILTER  myFilterName
 
 >Action AGXUSER
 *-----------------------------------------------------------------------------
