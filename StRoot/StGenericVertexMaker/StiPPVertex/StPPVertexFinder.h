@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.12 2009/02/05 21:43:59 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.13 2009/04/10 22:57:14 genevb Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -82,7 +82,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
 public:
   void setMC(bool x=true){isMC=x;}
   void useCTB(bool x=true){mUseCtb=x;}
-  void usePCT(bool x=true){setDropPostCrossingTrack(!x);}
+  void UsePCT(bool x=true){setDropPostCrossingTrack(!x);}
   void setDropPostCrossingTrack(bool x=true){mDropPostCrossingTrack=x;}
   void Finish();
 
@@ -107,6 +107,9 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.13  2009/04/10 22:57:14  genevb
+ * Typo correction
+ *
  * Revision 1.12  2009/02/05 21:43:59  balewski
  * Oleksandr renamed StEEmcDbMaker to StEEmcDb and requested this set of code corrections
  *
