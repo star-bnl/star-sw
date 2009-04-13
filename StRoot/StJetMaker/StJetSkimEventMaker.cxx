@@ -232,7 +232,7 @@ Int_t StJetSkimEventMaker::Make()
     
     //get spin info (Yellow,Blue): Up,Up = 5; Down,Up = 6; Up,Down = 9; Down,Down = 10;
     if(isRealData) {
-        StSpinDbMaker* spDbMaker = dynamic_cast<StSpinDbMaker*>(GetMaker("spinDb"));
+        StSpinDbMaker* spDbMaker = dynamic_cast<StSpinDbMaker*>(GetMakerInheritsFrom("StSpinDbMaker"));
         assert(spDbMaker);
         mEvent->setIsValid( spDbMaker->isValid() );
         mEvent->setIsPolLong( spDbMaker->isPolDirLong() );
