@@ -32,7 +32,7 @@ u_int expected_usercode[5] = {
 } ;
 
 static inline u_int get10(u_int *l, u_int p) ;
-static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)  ;
+static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *first)  ;
 
 //static int check_emul(u_int *a) ;
 
@@ -396,7 +396,7 @@ u_int *tpx_scan_to_next(u_int *now, u_int *first, struct tpx_altro_struct *a_str
 
 
 	do {
-		next_altro = data_test(now,a_struct,log_yes) ;	// returns pointer to next altro!
+		next_altro = data_test(now,a_struct,log_yes,first) ;	// returns pointer to next altro!
 
 		// logic to print out on first error only....
 		if(next_altro==0) {	// error in the bank!
@@ -487,11 +487,12 @@ int tpx_use_rdo(char *rdobuff, int bytes, int (userfunc)(struct tpx_altro_struct
 	a->rb points to the input RB!
 
 */
-static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log) 
+static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *first) 
 {
   u_int hi, lo ;
   int wc ;
   int ret ;
+  int delta ;
 
   ret = 0 ;
 
@@ -500,12 +501,16 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   a->row = 0 ;	// unknown...
   a->pad = 0 ;
 
+  delta = h - first ;
+  if(delta < 1) {
+	if(log) LOG(ERR,"Startup offset bad %d",delta) ;
+	return 0 ;
+  }
+
   lo = *h-- ;
   hi = *h-- ;
 
-  // "h" now points to the data part...
-
-
+  
   if((lo & 0xCFF00000) || (hi & 0xCFF00000)) {
     //if(log) LOG(WARN,"  Header words have junk: HI 0x%08X, LO 0x%08X",hi,lo) ;
     ret = -1 ;
@@ -584,7 +589,6 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   a->pad = ppad ;
 
 
-
   if((a->row > 45) || (a->pad > 182)) {
 	if(log) LOG(ERR,"row:pad %d:%d illegal for altro %d:%d",a->row,a->pad,a->id,a->ch) ;
 	return 0 ;
@@ -592,6 +596,18 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
   if(wc == 0) return h ;	// empty channel...
 
+  int l10 = wc ;
+
+  while(l10 % 4) l10++ ;	// move until divisible by 4
+
+  // l10 is minimally 4 for right now
+
+  // sanity check
+  delta = (h - l10/2) - first ;
+  if(delta < -1) {
+	if(log) LOG(ERR,"AID %d:%d: Bad offset %d, wrong wc %d", a->id, a->ch, delta, wc) ;
+	return 0 ;
+  }
 
 
   int p10 = 0 ;		// backward counter of the 10bit contributions
@@ -649,13 +665,9 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
 
 
-  int l10 = wc ;
 
-
-  while(l10 % 4) l10++ ;	// move until divisible by 4
-
-  // l10 is minimally 4 for right now
-
+//  LOG(TERR,"AID %d:%d, wc %d: p10 %d, l10 %d, delta %d, next at %d",a->id,a->ch,wc,
+//	p10,l10,h-first,(h-l10/2)-first) ;
 
 #ifdef VEERY_PARANOID
   // check general form of _all_ the data -- nothing should be in the upper 12 bits
@@ -754,7 +766,8 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
   h -= l10 ;	// point now to the start of next altro...
 
 
-
+//  LOG(TERR,"Returning delta %d",h-first) ;
+//  note that -1 is the last return!
 
   return h ;	// return pointer to the start of the next altro!
 }
