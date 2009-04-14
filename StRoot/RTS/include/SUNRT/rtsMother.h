@@ -16,6 +16,7 @@ struct ProcessDef {
   char *path;
   char *args[10];
   int restart_on_reboot;
+  int restart_on_somebodydead;
 };
 
 int rtsMother(char *myLogName, 
