@@ -1202,6 +1202,12 @@ void StBemcTriggerSimu::get2006_DSMLayer2()
       mFiredTriggers.push_back(137822);
       mFiredTriggers.push_back(137611);
       mFiredTriggers.push_back(5);
+
+      // Upsilon triggers
+      mFiredTriggers.push_back(117601);
+      mFiredTriggers.push_back(117602);
+      mFiredTriggers.push_back(137602);
+      mFiredTriggers.push_back(137603);
     } 
 
 
