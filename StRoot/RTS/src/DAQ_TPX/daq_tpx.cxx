@@ -1503,7 +1503,11 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 	u_int collision = 0 ;
 	int err = 0 ;
 
-	tpx_get_start(addr, words, &rdo, do_log) ;
+	int ret = tpx_get_start(addr, words, &rdo, do_log) ;
+	if(ret < 0) {
+		LOG(ERR,"get_l2: broken data!") ;
+		return 0 ;
+	}
 
 	LOG(DBG,"rdo %d, rdo token %d, trg cou %d",rdo.rdo,rdo.token,rdo.trg_cou) ;
 
@@ -1665,7 +1669,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			LOG(ERR,"  RDO %d: T %4d: %d/%d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg_cou, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
 	}
-	else if((rdo.rdo==1) && ((rdo.sector==13) || (rdo.sector==1))) {
+	else if((rdo.rdo==1) && ((rdo.sector==1))) {
 		for(u_int i=0;i<rdo.trg_cou;i++) {
 			LOG(NOTE,"RDO %d: T %4d: %d: data 0x%08X, CSR 0x%08X, RHIC %u",rdo.rdo, rdo.token, i, rdo.trg[i].data, rdo.trg[i].csr, rdo.trg[i].rhic_counter) ;
 		}
