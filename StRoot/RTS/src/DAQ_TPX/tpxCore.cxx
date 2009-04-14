@@ -163,13 +163,20 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 
 	u_int *l ;	// temporary pointer...
 
-//	buff +=8 ;	// suuuuuuuuper hack!
+
 	
 	hdr = (struct ddl_header *) buff ;
 
 	rdo->data_err = 0 ;
 	rdo->token = -ENOTSUP ;	// start as if error
 	rdo->trg_cou = 0 ;
+
+	if(words < (2*sizeof(struct ddl_header))/4) {
+		if(do_log) {
+			LOG(ERR,"Event oddly small -- words %d",words) ;
+			return rdo->token ;
+		}
+	}
 
 	// get stuff from the header...
 	rdo->type = hdr->type & 0xF ; ;
@@ -346,6 +353,12 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 
 	rdo->data_end = l ;
 
+	if((rdo->data_end - rdo->data_start) <= 0) {
+		if(rdo->token != 4097) {
+			LOG(ERR,"Bad RDO data: start 0x%X, end 0x%X, delta %d, tokenn %d!",rdo->data_start,rdo->data_end,rdo->data_end-rdo->data_start,rdo->token) ;
+		}
+		//return -1 ;
+	}
 	return rdo->token ;
 }
 
@@ -987,7 +1000,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 					int overriden = 0 ;
 					for(int i=0;i<over;i++) {
 						if((in_fee[i] == ix) || ((in_fee[i]+1)==ix)) {
-							LOG(WARN,"Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X -- should be A%3d",sector,rdo->rdo,fcou,
+							LOG(WARN,"Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X -- overriden, should be A%3d",sector,rdo->rdo,fcou,
 							    rdo->fee[b][c].pad_id,
 							    rdo->fee[b][c].id,
 							    rdo->fee[b][c].jumpers,
@@ -1007,7 +1020,7 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 					for(int i=0;i<tpx_odd_fee_count;i++) {
 						if((tpx_odd_fee[i].altro_id_padplane == ix) || ((tpx_odd_fee[i].altro_id_padplane+1) == ix)) {
 							
-							LOG(WARN,"msc: Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X -- marked bad",sector,rdo->rdo,fcou,
+							LOG(WARN,"msc: Sector %2d, RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X, 0x%X -- marked bad in gain file",sector,rdo->rdo,fcou,
 							    rdo->fee[b][c].pad_id,
 							    rdo->fee[b][c].id,
 							    rdo->fee[b][c].jumpers,
@@ -1048,13 +1061,14 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 	// now find missing ALTROs
 	for(int a=0;a<256;a++) {
 		if(altro[a] == 0) continue ;	// skip unneeded and not found...
+		if(altro[a] == 3) continue ;	// needed and found; all ok...
 
 		if(altro[a] == 1) {	// needed but missing
 			int overriden = 0 ;
 
 			for(int i=0;i<over;i++) {
 				if((a == should_be[i]) || (a == (should_be[i]+1))) {
-					LOG(WARN,"Sector %2d, RDO %d: ALTRO %3d missing: status 0x%X",sector,rb+1,a,altro[a]) ;
+					LOG(WARN,"Sector %2d, RDO %d: ALTRO %3d missing but was overriden: status 0x%X",sector,rb+1,a,altro[a]) ;
 					overriden = 1 ;
 					break ;
 				}
@@ -1066,6 +1080,12 @@ int tpx_show_status(int sector, int rb_mask, int *altro_list)
 			
 			err |= 2 ;
 		}	
+		else {
+			LOG(WARN,"msc: Sector %2d, RDO %d: ALTRO %3d odd status: status 0x%X",sector,rb+1,a,altro[a]) ;
+			if((altro[a] & 0xB)==0xB) {	// needed, found & error
+				err |= 2 ;
+			}
+		}
 	}
 
 
