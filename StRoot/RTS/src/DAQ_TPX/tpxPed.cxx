@@ -89,7 +89,7 @@ void tpxPed::accum(char *evbuff, int bytes)
 
 	// skip first few events!
 	if(evts[a.rdo] <= 3) {
-		LOG(WARN,"RDO %d: skipping event %d < 3",rdo.rdo,evts[a.rdo]) ;
+		LOG(NOTE,"RDO %d: skipping event %d < 3",rdo.rdo,evts[a.rdo]) ;
 		return ;
 	}
 	if(tpx_rdo_dbg[a.rdo].delta < 200000) {
