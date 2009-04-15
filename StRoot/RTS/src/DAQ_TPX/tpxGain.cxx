@@ -121,8 +121,11 @@ void tpxGain::init(int sec)
 
 	memset(tpx_pulser_peak,0,sizeof(tpx_pulser_peak))  ;
 
-	tb_start = 181 ;
-	tb_stop = 190 ;
+//	tb_start = 181 ;
+//	tb_stop = 190 ;
+
+	tb_start = 179 ;
+	tb_stop = 188 ;
 
 	memset(bad_rdo_mask,0,sizeof(bad_rdo_mask)) ;
 
@@ -913,7 +916,7 @@ int tpxGain::to_file(char *fname)
 	for(s=s_start;s<=s_stop;s++) {
 	for(r=1;r<=45;r++) {
 	for(p=1;p<=tpc_rowlen[r];p++) {
-		fprintf(f,"%d %d %d %.5f %.5f\n",s,r,p,
+		fprintf(f,"%d %d %d %.3f %6.3f\n",s,r,p,
 			get_gains(s,r,p)->g,
 			get_gains(s,r,p)->t0) ;
 	}
@@ -946,7 +949,16 @@ void tpxGain::compare(char *fname, int mysec)
 
 
 	while(!feof(f)) {
-		int ret = fscanf(f,"%d %d %d %f %f\n",&s,&r,&p,&g,&t0) ;
+		char str[1024] ;
+
+		if(fgets(str,sizeof(str)-1,f)==0) continue ;
+
+		if(strlen(str)==0) continue ;	// empty
+		if((str[0]=='#') || (str[0]=='/')) continue ;	// comment
+
+
+		int ret = sscanf(str,"%d %d %d %f %f\n",&s,&r,&p,&g,&t0) ;
+
 		if(ret != 5) continue ;
 		if(s < 0) continue ;
 
@@ -1095,7 +1107,7 @@ int tpxGain::summarize(char *fname, FILE *log)
 							if(err<2) err = 2 ;
 						}
 					}
-					if((t0<-0.1) || (t0>0.1)) {
+					if((t0<-0.15) || (t0>0.15)) {
 						bad_t0 = 1 ;
 
 
