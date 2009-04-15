@@ -106,18 +106,21 @@ bool L2UpsilonTowersHistogramGroup::fill(evpReader* evp, char* datap) {
   hNumberOfTowersL0->Fill( mL2->numberOfTowersL0 );
   hNumberOfTowersL2->Fill( mL2->numberOfTowersL2 );
 
-  BemcGeometry* geom = BemcGeometry::instance();
+  //BemcGeometry* geom = BemcGeometry::instance();
   
-  hEtaPhiL0->Fill( geom->eta(mL2->triggerTowerL0), geom->phi(mL2->triggerTowerL0) );
-  hEtaPhiL2->Fill( geom->eta(mL2->triggerTowerL2), geom->phi(mL2->triggerTowerL2) );
+  //hEtaPhiL0->Fill( geom->eta(mL2->triggerTowerL0), geom->phi(mL2->triggerTowerL0) );
+  //hEtaPhiL2->Fill( geom->eta(mL2->triggerTowerL2), geom->phi(mL2->triggerTowerL2) );
     
   return true;
 }
 
 /*************************************************************************************
- $Id: L2UpsilonTowersHistogramGroup.cxx,v 1.3 2009/02/19 22:32:05 genevb Exp $
+ $Id: L2UpsilonTowersHistogramGroup.cxx,v 1.4 2009/04/15 21:07:31 dkettler Exp $
  *************************************************************************************
  $Log: L2UpsilonTowersHistogramGroup.cxx,v $
+ Revision 1.4  2009/04/15 21:07:31  dkettler
+ Avoid segfaults
+
  Revision 1.3  2009/02/19 22:32:05  genevb
  More thorough default constructor implementations
 
