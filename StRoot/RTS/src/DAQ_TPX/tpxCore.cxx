@@ -28,7 +28,8 @@ u_int expected_usercode[5] = {
 	0x02b9ab26,	// Bob, 02Jan08
 	0x18a9352d,
 //	0x00acf6c3	//06Sep08
-	0x00ad0581	//07Sep08
+//	0x00ad0581	//07Sep08
+	0x00AD9A39	//15Apr09
 } ;
 
 static inline u_int get10(u_int *l, u_int p) ;
