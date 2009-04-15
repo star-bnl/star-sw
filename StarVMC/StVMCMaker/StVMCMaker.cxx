@@ -1,7 +1,10 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.9 2009/02/03 15:55:44 fisyak Exp $
+// $Id: StVMCMaker.cxx,v 1.10 2009/04/15 21:46:41 fisyak Exp $
 // $Log: StVMCMaker.cxx,v $
+// Revision 1.10  2009/04/15 21:46:41  fisyak
+// Add StarVMCDetectorSet
+//
 // Revision 1.9  2009/02/03 15:55:44  fisyak
 // synchronize with .DEV2
 //
@@ -98,7 +101,7 @@ StVMCMaker::Make
 #include "StarMCHBPrimaryGenerator.h"
 #include "TGeoDrawHelper.h"
 #include "StMessMgr.h"
-
+#include "StarVMCDetectorSet.h"
 ClassImp(StVMCMaker);
 
 StarVMCApplication* StVMCMaker::fgStarVMCApplication = 0;
