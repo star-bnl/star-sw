@@ -4,6 +4,7 @@
 #include <rtsLog.h>
 #include <rtsSystems.h>
 
+#include <SFS/sfs_index.h>
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
@@ -35,7 +36,8 @@ daq_l3::daq_l3(daqReader *rts_caller)
 
 	// dname is ignored 
 	rts_id  = L3_ID ;
-	sfs_name = name = rts2name(rts_id) ;
+	name = rts2name(rts_id) ;
+	sfs_name = "gl3" ;
 	caller = rts_caller ;
 	if(caller) caller->insert(this, rts_id) ;
 
@@ -80,8 +82,36 @@ daq_dta *daq_l3::handle_legacy()
 	
 
 	l3_t *l3_p = (l3_t *) legacy->request(1) ;	// need ONE l3_t object
- 
-	l3_reader(caller->mem, l3_p, m_Debug) ;
+
+	if(present & DET_PRESENT_DATAP) {
+		l3_reader(caller->mem, l3_p, 0) ;
+	}
+	else {
+		char str[256] ;
+		char *full_name ;
+
+		sprintf(str,"gl3/l3_gtd") ;
+		full_name = caller->get_sfs_name(str) ;
+
+		LOG(DBG,"full_name %s",full_name) ;
+
+		if(!full_name) return 0 ;
+
+		int bytes = caller->sfs->fileSize(full_name) ;
+
+		LOG(DBG,"bytes %d",bytes) ;
+
+		char *mem = (char *)valloc(bytes) ;
+
+
+		int ret = caller->sfs->read(str, mem, bytes) ;
+		
+		LOG(DBG,"ret %d",ret) ;
+
+		l3_reader(mem, l3_p, 1) ;
+
+		free(mem) ;
+	}
 
 	legacy->finalize(1,0,0,0) ;	// 1 entry; sector 0, row 0, pad 0
 	legacy->rewind() ;
