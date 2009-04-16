@@ -126,23 +126,22 @@ int main(int argc, char *argv[])
 		daq_dta *dd ;	// generic data pointer; reused all the time
 
 
-		LOG(INFO,"File name \"%s\": sequence %d: token %4d, trgcmd 0x%X, daqcmd 0x%X (evp status 0x%X)",evp->file_name, evp->seq, evp->token, evp->trgcmd, evp->daqcmd,evp->status) ;
+		LOG(INFO,"sequence %d: token %4d, trgcmd %2d, daqcmd %2d, time %u, detectors 0x%08X (status 0x%X)",evp->seq, evp->token, evp->trgcmd, evp->daqcmd,
+		    evp->evt_time, evp->detectors, evp->status) ;
 
 
 		if(print_det[0]) printf("***** Seq #%d, token %d\n",evp->seq,evp->token) ;
 		/***************** let's do simple detectors; the ones which only have legacy *****/
 
 		dd = evp->det("sc")->get() ;
-		if(dd) {
-			if(dd->iterate()) {
-				LOG(INFO,"SC found") ;
-				if(strcasecmp(print_det,"sc")==0) {
-					sc_t *sc_p = (sc_t *) dd->Void ;
+		if(dd && dd->iterate()) {
+			LOG(INFO,"SC found") ;
+			if(strcasecmp(print_det,"sc")==0) {
+				sc_t *sc_p = (sc_t *) dd->Void ;
 
-					printf("SC: valid %d, time %u, timelag %d, B field %.3f\n",sc_p->valid,sc_p->time,sc_p->timelag,sc_p->mag_field) ;
-					for(int i=0;i<16;i++) {
-						printf("\tRICH scaler %2d: %u\n",i,sc_p->rich_scalers[i]) ;
-					}
+				printf("SC: valid %d, time %u, timelag %d, B field %.3f\n",sc_p->valid,sc_p->time,sc_p->timelag,sc_p->mag_field) ;
+				for(int i=0;i<16;i++) {
+					printf("\tRICH scaler %2d: %u\n",i,sc_p->rich_scalers[i]) ;
 				}
 			}
 		}
@@ -154,8 +153,18 @@ int main(int argc, char *argv[])
 		if(dd) LOG(INFO,"FTP found") ;
 
 		dd = evp->det("l3")->get("legacy") ;
-		if(dd) LOG(INFO,"L3 found") ;
+		if(dd && dd->iterate()) {
+			LOG(INFO,"L3 found") ;
+			if(strcasecmp(print_det,"l3")==0) {
+				l3_t *l3_p = (l3_t *) dd->Void ;
 
+				printf("GL3: tracks %d, clusters %d, vertex %f:%f:%f\n",
+				       l3_p->tracks_num, l3_p->cluster_num,
+				       l3_p->xVertex, l3_p->yVertex, l3_p->xVertex) ;
+			}
+		}
+				
+				
 		dd = evp->det("rich")->get("legacy") ;
 		if(dd) LOG(INFO,"RIC found") ;
 
