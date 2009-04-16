@@ -32,19 +32,7 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 	struct DATAP *datap = (struct DATAP *)m ;
 	struct L3_P *l3p ;
 	int len, off ;
-
-	if(datap == NULL) return 0 ;
-
-	len = ntohl(datap->det[L3_ID].len) * 4 ;
-	if(len == 0) return 0 ;
-
-	off = ntohl(datap->det[L3_ID].off) ;
-	if(off == 0) return 0 ;
-
-	l3p = (struct L3_P *)((u_int *)m+off) ;
-
-
-        len = l3p->bh.length;
+	char *l3_gtd_start = 0 ;
 
 	l3->max_channels = 1280000 ;
 	l3->channels = 0 ;
@@ -58,16 +46,46 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 	l3->yVertex = -1000.0 ;
 	l3->zVertex = -1000.0 ;
 
-	LOG(DBG,"L3_P bytes %d",len,0,0,0) ;
 
-	if(checkBank(l3p->bh.bank_type,"L3_P") < 0) {
-		return -1 ;
+	if(datap == NULL) return 0 ;
+
+	if(driver) {	// "m" points directly to L3_GTD!
+		l3_gtd_start = m ;	// directly points to L3_GTD!		
+	}
+	else {
+
+		len = ntohl(datap->det[L3_ID].len) * 4 ;
+		if(len == 0) return 0 ;
+
+		off = ntohl(datap->det[L3_ID].off) ;
+		if(off == 0) return 0 ;
+
+		l3p = (struct L3_P *)((u_int *)m+off) ;
+
+
+		len = l3p->bh.length;
+
+
+		LOG(DBG,"L3_P bytes %d",len,0,0,0) ;
+
+		if(checkBank(l3p->bh.bank_type,"L3_P") < 0) {
+			return -1 ;
+		}
+
+
+		if(l3p->tracks.len && l3p->tracks.off){
+			l3_gtd_start = ((char*)l3p + l2h32(l3p->tracks.off)*4) ;
+		}
 	}
 
 
-	if(l3p->tracks.len && l3p->tracks.off){
-	      struct L3_GTD* l3gtd = 
-		    (struct L3_GTD*)((char*)l3p + l2h32(l3p->tracks.off)*4) ;
+	if(!l3_gtd_start) return 0 ;
+
+//	if(l3p->tracks.len && l3p->tracks.off){
+//	      struct L3_GTD* l3gtd = (struct L3_GTD*)((char*)l3p + l2h32(l3p->tracks.off)*4) ;
+
+	if(l3_gtd_start) {
+	      struct L3_GTD* l3gtd = (struct L3_GTD *) l3_gtd_start ;
 
 // Tonko, sanity check
 		if(checkBank(l3gtd->bh.bank_type,"L3_GTD") < 0) {
@@ -82,8 +100,8 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 
 // Tonko, sanity check
 		if(l3->tracks_num >= L3_MAX_NR_TRACKS) {
-			LOG(ERR,"L3 track number %d > %d!",l3->tracks_num,L3_MAX_NR_TRACKS ,0,0,0) ;
-			return -1 ;
+			LOG(ERR,"L3 track number %d > %d! Maxing them out...",l3->tracks_num,L3_MAX_NR_TRACKS ,0,0,0) ;
+			l3->tracks_num = L3_MAX_NR_TRACKS ;
 		}
 
 
@@ -158,7 +176,7 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 
 #endif
 
-	return len ;
+	return 1 ; // anything positive...
 
 }
 

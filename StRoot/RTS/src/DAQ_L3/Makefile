@@ -30,6 +30,9 @@ libl3.a : $(OBJS)
 
 daq_l3.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_l3.o: ../../../../StRoot/RTS/include/rtsSystems.h
+daq_l3.o: ../SFS/sfs_index.h
+daq_l3.o: ../SFS/fs_index.h
+daq_l3.o: ../SFS/sfs_base.h
 daq_l3.o: ../DAQ_READER/daqReader.h
 daq_l3.o: ../DAQ_READER/daqConfig.h
 daq_l3.o: ../DAQ_READER/daq_dta.h
