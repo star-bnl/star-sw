@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StMCFilter.h,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)STAR/eg:$Id: StMCFilter.h,v 1.2 2009/04/17 18:32:28 perev Exp $
 // Author: V.Perev  Mar/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -12,9 +12,8 @@ class StHepParticles;
 class StG3Particles;
 class StGenParticles;
 
-class StMCFilter  {
-
-
+class StMCFilter  
+{
 public:
                                 // ****** constructors and destructor
    StMCFilter(const char *name);

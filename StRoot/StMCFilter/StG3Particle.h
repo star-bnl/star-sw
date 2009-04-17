@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StG3Particle.h,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)STAR/eg:$Id: StG3Particle.h,v 1.2 2009/04/17 18:32:28 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -16,11 +16,11 @@ typedef void (*GFVERT_t) (int &,float*,int  &,int &, float &,int *,int &);
 
 class StG3Particles :public StGenParticles {
 public:
-StG3Particles(GFKINE_t fk,GFVERT_t fv);
+         StG3Particles(GFKINE_t fk,GFVERT_t fv);
 virtual ~StG3Particles();
-static const StG3Particles *Instance();
+static  const StG3Particles *Instance();
 virtual const StGenParticle *operator()(int idx) const;
-void Update() ;
+   void Update() ;
 
 private:
 static StG3Particles* mgInst;
