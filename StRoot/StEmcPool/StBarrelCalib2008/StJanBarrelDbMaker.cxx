@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StJanBarrelDbMaker.cxx,v 1.2 2009/02/04 20:33:32 ogrebeny Exp $
+// $Id: StJanBarrelDbMaker.cxx,v 1.3 2009/04/17 18:44:43 mattheww Exp $
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
@@ -321,6 +321,9 @@ void  StJanBarrelDbMaker::initBprsGeometry(){
 }
 
 // $Log: StJanBarrelDbMaker.cxx,v $
+// Revision 1.3  2009/04/17 18:44:43  mattheww
+// fixed a bug in the last comment
+//
 // Revision 1.2  2009/02/04 20:33:32  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //
@@ -329,7 +332,7 @@ void  StJanBarrelDbMaker::initBprsGeometry(){
 //
 
  #if 0
-Some combination of these two methods:
+//Some combination of these two methods:
 
 ///Get PSD id. Also returns PMTBox,  wire number and FEE value
 int       GetPsdId(int RDO, int posInFiber, int &softId, int &PMTbox, int &wire, int &A_value, bool print=false) const;
@@ -337,9 +340,9 @@ int       GetPsdId(int RDO, int posInFiber, int &softId, int &PMTbox, int &wire,
 ///Get PSD fiber and position from id
 int       GetPsdRDO(int softId, int &RDO, int &posInFiber) const;
 
-I believe RDO == CRATE-1.  I'm not sure how "wire" and "A_value" translate into "pixel" in the MAPMT.  But these are the methods you want.
+//I believe RDO == CRATE-1.  I'm not sure how "wire" and "A_value" translate into "pixel" in the MAPMT.  But these are the methods you want.
 
-Adam
+//Adam
 
 #endif
      
