@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StGenParticle.h,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)STAR/eg:$Id: StGenParticle.h,v 1.2 2009/04/17 18:32:28 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -39,14 +39,14 @@ virtual       double         Time() const=0;
               int            IsPrimary       ()  const { return !GetMother(0);} //Is this particle primary one?
               int            IsFinal         ()  const { return !GetStatusCode()==1;} //Is this particle final one?
 
-double       R     () const;
-double       Rho   () const;
-double       P     () const;
-double       Pt    () const;
-double       Energy() const;
-double       Eta   () const;
-double       Phi   () const;
-double       Theta () const;
+double        R     () const;
+double        Rho   () const;
+double        P     () const;
+double        Pt    () const;
+double        Energy() const;
+double        Eta   () const;
+double        Phi   () const;
+double        Theta () const;
 
 protected:
 

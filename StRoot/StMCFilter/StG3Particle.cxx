@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StG3Particle.cxx,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)root/eg:$Id: StG3Particle.cxx,v 1.2 2009/04/17 18:32:28 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -10,8 +10,8 @@
 #include "StGENParticle.h"
 
 StG3Particles *StG3Particles::mgInst =0;
-GFKINE_t StG3Particles::mgFK=0;
-GFVERT_t StG3Particles::mgFV=0;
+GFKINE_t StG3Particles::mgFK=0; //pointer to Geant routine GFKINE
+GFVERT_t StG3Particles::mgFV=0; //pointer to Geant routine GFVERT
 
 static std::vector<StGENParticle*> myVec;
 

@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StHepParticle.h,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)STAR/eg:$Id: StHepParticle.h,v 1.2 2009/04/17 18:32:28 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -36,11 +36,12 @@ protected:
 class my_hepevt;
 class StHepParticles :public StGenParticles {
 friend class StHepParticle;
+
 public:
-StHepParticles(void *addr);
+         StHepParticles(void *addr);
 virtual ~StHepParticles();
-static const StHepParticles *Instance();
-virtual const StHepParticle *operator()(int idx) const;
+static  const StHepParticles *Instance();
+virtual const StHepParticle  *operator()(int idx) const;
 void Update() ;
 
 private:
