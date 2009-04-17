@@ -17,6 +17,7 @@ void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = k
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StTpcDb");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities"); 
