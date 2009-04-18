@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.57 2009/04/05 14:37:59 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.58 2009/04/18 02:55:06 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.58  2009/04/18 02:55:06  genevb
+// Larger arrays for more trigger type hists
+//
 // Revision 2.57  2009/04/05 14:37:59  genevb
 // Catch missing files
 //
@@ -250,7 +253,7 @@ StHistUtil::StHistUtil(){
   m_OutMultiPage = kTRUE;
   m_RunYear = 0;
 
-  maxHistCopy = 512;
+  maxHistCopy = 4096;
   newHist = new TH1ptr[maxHistCopy];
   memset(newHist,0,maxHistCopy*sizeOfTH1Ptr);
   m_dirName[0] = 0;
