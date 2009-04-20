@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.192 2009/03/20 02:57:12 perev Exp $
+* $Id: geometry.g,v 1.193 2009/04/20 23:14:22 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.193  2009/04/20 23:14:22  perev
+* upgr22 fhcmgeo
+*
 * Revision 1.192  2009/03/20 02:57:12  perev
 * upgr16a == upgr16 +tpc2009
 *
@@ -280,7 +283,7 @@
 * creation of test geometries in which both the SVT
 * and the SSD are taken out. Needed for R&D.
 *
-* Revision 1.122  2006/05/05 17:38:41  potekhin
+* Revision 1.122  2006/05/05 17:38:41  potekhinconfig
 * Just rename the IST2 to UPGR03 to stivk with
 * previously chosen naming convention.
 *
@@ -1006,6 +1009,10 @@ replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
 
 replace [exe FSTDof;] with  [;FSTD=off;]
 replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport structure"
+
+replace [exe FHCM01;] with  [;FhcmConfig=1;] 
+
+
 ********* Geometry definitions *******************************************************
 *********   y2000   ***
 replace [exe y2000;] with [;"corrected: MWC readout, RICH reconstructed position, no TOF ";
@@ -1273,6 +1280,9 @@ replace [exe UPGR16;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
 replace [exe UPGR16a;] with ["upgr16 +tpc2009"
 			      exe upgr16;exe TPCE04;]
 
+!//______________________________________________________________________________
+replace [exe UPGR22;] with ["upgr16a + fhcm01"
+			      exe upgr16a;exe FHCM01;]
 
 
 
@@ -1338,7 +1348,9 @@ replace [exe UPGR16a;] with ["upgr16 +tpc2009"
    Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig, SisdConfig, PipeConfig,
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
-              ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig
+              ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
+              FhcmConfig
+
    Integer    pipeFlag
 
 *             DensConfig, ! TPC gas density correction
@@ -1366,7 +1378,7 @@ replace [exe UPGR16a;] with ["upgr16 +tpc2009"
 *             ShldConfig  ! Beam shield
 *             QuadConfig  ! All magnets from D0 and up
 *             MutdConfig  ! Muon Trigger System
-
+*	      FhcmConfig  ! Forward Hadron Detector
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
 * been a correction which resulted in new code.. We check the value
@@ -1432,6 +1444,7 @@ replace[;Case#{#;] with [
    SvttConfig  = 0 ! SVTT version
    TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
    VpddConfig  = 1 ! vpd...
+   FhcmConfig  = 0 ! Forward Hadron Detector off by default
 
    pipeFlag = 3 ! pipe wrap + svt shield
 
@@ -2900,6 +2913,11 @@ If LL>0
                      CaveConfig = 4;
                 }
 ****************************************************************************************
+  Case UPGR22    { first FHMC version;
+                 exe UPGR22;
+               }
+
+****************************************************************************************
   Case HADR_ON    { all Geant Physics On;                                       }
   Case HADR_OFF   { all Geant Physics on, except for hadronic interactions;
                                                                        IHADR=0}
@@ -3316,6 +3334,12 @@ If LL>0
 ********************************************************************
    if(DUMM) then
       call dummgeo
+   endif
+********************************************************************
+   If (FhcmConfig .ne.0) then
+      call AgDETP new ('FHCM')
+      call AgDETP add ('fhcg.Version='   ,FhcmConfig,1)
+      Call fhcmgeo
    endif
 ****************  Magnetic Field  ********************************
 *
