@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: EztEmcRawData.h,v 1.5 2005/03/10 16:59:54 mvl Exp $
+ * $Id: EztEmcRawData.h,v 1.6 2009/04/20 16:36:20 tone421 Exp $
  *
  * Author: Alex Suaide, Mar 2004, JB
  ***************************************************************************
@@ -41,7 +41,7 @@ public:
   
   const UShort_t getCorruption(int ib) const { return  mCorrupt[ib];}
   void          setCorruption(int ib, UShort_t x) {mCorrupt[ib]=x;}
-  bool          isCrateVoid(int ib) { return sizeData(ib)<=0; }
+  bool          isCrateVoid(int ib) const { return sizeData(ib)<=0; }
 
   static UShort_t  getErrFlag(const UShort_t* hd)  { 
     return  hd[ERRFLG] & 0x0FFF; }
@@ -98,6 +98,9 @@ public:
 /**************************************************************************
  *
  * $Log: EztEmcRawData.h,v $
+ * Revision 1.6  2009/04/20 16:36:20  tone421
+ * Added const to isCrateVoid function
+ *
  * Revision 1.5  2005/03/10 16:59:54  mvl
  * New routine for corruption checking by Jan Balewski
  *
