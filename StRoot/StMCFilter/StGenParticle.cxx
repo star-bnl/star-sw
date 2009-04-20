@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StGenParticle.cxx,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)root/eg:$Id: StGenParticle.cxx,v 1.2 2009/04/20 20:44:17 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -73,7 +73,7 @@ double StGenParticle::Eta()  const
 double StGenParticle::Phi()  const
 {
   double p[4]; Momentum(p);                 
-  return atan2(p[1],p[2]);
+  return atan2(p[1],p[0]);
 }  
 //______________________________________________________________________________
 double StGenParticle::Theta()  const

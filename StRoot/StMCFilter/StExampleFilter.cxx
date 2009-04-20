@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StExampleFilter.cxx,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)root/eg:$Id: StExampleFilter.cxx,v 1.2 2009/04/20 20:44:17 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -8,9 +8,12 @@
 #include "StExampleFilter.h"
 #include "StGenParticle.h"
 
-// 	IMPORTANT IMPORTANT IMPORTANT
+/// 	IMPORTANT IMPORTANT IMPORTANT
+/// Defining the static instance of user filter provides creating this
+/// class during the loading of library. Afterward GEANT could select 
+/// the needed filter by name. 
+/// more info in http://www.star.bnl.gov/~perev/SIM/mcFi;lter.ppt
 static StExampleFilter qwerty;
-
 //______________________________________________________________________________
 int StExampleFilter::RejectEG(const StGenParticles &ptl) const
 {
