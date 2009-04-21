@@ -12,10 +12,14 @@
 #define CMD2_RUN_DONE 0x04
 #define CMD2_LOG      0x05
 
+// set by daq100decision
 #define EVBFLAG_RAW_DATA (1<<0)
 #define EVBFLAG_FCF_DATA (1<<1)
-#define EVBFLAG_L25ABORT (1<<2)
-#define EVBFLAG_L25TIMEOUT (1<<3)
+#define EVBFLAG_HLT      (1<<2)
+
+// Appended by prepare_gb_payload
+#define EVBFLAG_L25ABORT (1<<12)
+#define EVBFLAG_L25TIMEOUT (1<<13)
 
 //#ifdef RTS_LITTLE_ENDIAN
 struct iccp2k {   
