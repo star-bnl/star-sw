@@ -71,9 +71,8 @@ Block FHCS is one longitudinal sub-dividsion of FHC cell
       Medium    standard
       Attribute FHCS   seen=1 colo=4
       shape     BOX    dx=FHCG_XWID/2.0 dy=FHCG_YWID/2.0 dz=FHCG_ZWID/FHCG_NZsub/2.0
-      Call GSTPAR (ag_imed,'CUTGAM',0.0005)
-      Call GSTPAR (ag_imed,'CUTELE',0.00015)
-*      HITS FHCS ELoss:0(0,250)
+
+      HITS FHCS ELoss:0:(0,250)
 EndBlock
 
 end
