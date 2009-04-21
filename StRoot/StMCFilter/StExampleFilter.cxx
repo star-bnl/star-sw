@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StExampleFilter.cxx,v 1.2 2009/04/20 20:44:17 perev Exp $
+// @(#)root/eg:$Id: StExampleFilter.cxx,v 1.3 2009/04/21 19:10:51 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -15,7 +15,7 @@
 /// more info in http://www.star.bnl.gov/~perev/SIM/mcFi;lter.ppt
 static StExampleFilter qwerty;
 //______________________________________________________________________________
-int StExampleFilter::RejectEG(const StGenParticles &ptl) const
+int StExampleFilter::RejectEG(const StGenParticleMaster &ptl) const
 {
 //  ptl.Print("************** In RejectEG ************** ");
 // Condition: number of tracks etaGate[0]<eta<= etaGate[1] must be bigger  etaGate[2]
@@ -35,13 +35,13 @@ const static double etaGate[3]={0.8,1.2, 3};
   return 0;
 }
 //______________________________________________________________________________
-int StExampleFilter::RejectGT(const StGenParticles &ptl) const
+int StExampleFilter::RejectGT(const StGenParticleMaster &ptl) const
 {
 //  ptl.Print("************** In RejectGT ************** ");
   return 0;
 }
 //______________________________________________________________________________
-int StExampleFilter::RejectGE(const StGenParticles &ptl) const
+int StExampleFilter::RejectGE(const StGenParticleMaster &ptl) const
 {
 //  ptl.Print("************** In RejectGE ************** ");
   return 0;

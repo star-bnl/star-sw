@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StGenParticle.h,v 1.2 2009/04/17 18:32:28 perev Exp $
+// @(#)STAR/eg:$Id: StGenParticle.h,v 1.3 2009/04/21 19:10:51 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -53,17 +53,17 @@ protected:
   int mIdx;
 };
 
-class StGenParticles  {
+class StGenParticleMaster  {
 
 
 protected:
                                 // ****** constructors and destructor
-   StGenParticles(){;}
+   StGenParticleMaster(){;}
 
 public:
 int Size() const { return mNTk;}
 
-virtual ~StGenParticles(){;}
+virtual ~StGenParticleMaster(){;}
 virtual void Update()=0;
 virtual void Print(const char *tit) const;
 
