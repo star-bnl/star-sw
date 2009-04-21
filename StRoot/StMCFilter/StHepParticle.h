@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StHepParticle.h,v 1.2 2009/04/17 18:32:28 perev Exp $
+// @(#)STAR/eg:$Id: StHepParticle.h,v 1.3 2009/04/21 19:10:51 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -10,7 +10,7 @@
 #include "StGenParticle.h"
 
 class StHepParticle :public StGenParticle {
-friend class StHepParticles;
+friend class StHepParticleMaster;
 
 public:
                                 // ****** constructors and destructor
@@ -34,20 +34,20 @@ protected:
 };
 
 class my_hepevt;
-class StHepParticles :public StGenParticles {
+class StHepParticleMaster :public StGenParticleMaster {
 friend class StHepParticle;
 
 public:
-         StHepParticles(void *addr);
-virtual ~StHepParticles();
-static  const StHepParticles *Instance();
+         StHepParticleMaster(void *addr);
+virtual ~StHepParticleMaster();
+static  const StHepParticleMaster *Instance();
 virtual const StHepParticle  *operator()(int idx) const;
 void Update() ;
 
 private:
 
 static my_hepevt *mgMyHepevt;
-static StHepParticles* mgInst;
+static StHepParticleMaster* mgInst;
 };
 
 #endif

@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StMCFilter.h,v 1.2 2009/04/17 18:32:28 perev Exp $
+// @(#)STAR/eg:$Id: StMCFilter.h,v 1.3 2009/04/21 19:10:51 perev Exp $
 // Author: V.Perev  Mar/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -8,9 +8,9 @@
 #ifndef STAR_StMCFilter
 #define STAR_StMCFilter
 #include <string>
-class StHepParticles;
-class StG3Particles;
-class StGenParticles;
+class StHepParticleMaster;
+class StG3ParticleMaster;
+class StGenParticleMaster;
 
 class StMCFilter  
 {
@@ -20,11 +20,11 @@ public:
    virtual ~StMCFilter();
 
 ///		Rejection inside of EventGenerator (Pythia)
-virtual int  RejectEG(const StGenParticles &ptl) const {return 0;}
+virtual int  RejectEG(const StGenParticleMaster &ptl) const {return 0;}
 ///		Rejection of GEANT Tracking
-virtual int  RejectGT(const StGenParticles &ptl) const {return 0;}
+virtual int  RejectGT(const StGenParticleMaster &ptl) const {return 0;}
 ///		Rejection at GEANT End, No GEANT output
-virtual int  RejectGE(const StGenParticles &ptl) const {return 0;}
+virtual int  RejectGE(const StGenParticleMaster &ptl) const {return 0;}
 ///		Finish
 virtual void Finish() const{;}
 
@@ -50,8 +50,8 @@ static void FINISH();
 
 //	static members
 static StMCFilter     *fgSelected;
-static StHepParticles *fgHepParticle;
-static StG3Particles  *fgG3Particle;
+static StHepParticleMaster *fgHepParticle;
+static StG3ParticleMaster  *fgG3Particle;
 
 protected:
 std::string     fName;

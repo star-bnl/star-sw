@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StG3Particle.cxx,v 1.2 2009/04/17 18:32:28 perev Exp $
+// @(#)root/eg:$Id: StG3Particle.cxx,v 1.3 2009/04/21 19:10:51 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -9,14 +9,14 @@
 #include "StG3Particle.h"
 #include "StGENParticle.h"
 
-StG3Particles *StG3Particles::mgInst =0;
-GFKINE_t StG3Particles::mgFK=0; //pointer to Geant routine GFKINE
-GFVERT_t StG3Particles::mgFV=0; //pointer to Geant routine GFVERT
+StG3ParticleMaster *StG3ParticleMaster::mgInst =0;
+GFKINE_t StG3ParticleMaster::mgFK=0; //pointer to Geant routine GFKINE
+GFVERT_t StG3ParticleMaster::mgFV=0; //pointer to Geant routine GFVERT
 
 static std::vector<StGENParticle*> myVec;
 
 //______________________________________________________________________________
-StG3Particles::StG3Particles(GFKINE_t fk,GFVERT_t fv)
+StG3ParticleMaster::StG3ParticleMaster(GFKINE_t fk,GFVERT_t fv)
 {
   assert(!mgInst);
   mgInst = this;
@@ -24,20 +24,20 @@ StG3Particles::StG3Particles(GFKINE_t fk,GFVERT_t fv)
   mgFV = fv;
 }
 //______________________________________________________________________________
-StG3Particles::~StG3Particles()
+StG3ParticleMaster::~StG3ParticleMaster()
 {
   mgInst = 0;
   for (int i=0;i<(int)myVec.size();i++) { delete myVec[i]; }
   myVec.resize(0);
 }
 //______________________________________________________________________________
-const StG3Particles *StG3Particles::Instance() 
+const StG3ParticleMaster *StG3ParticleMaster::Instance() 
 {
   assert(mgInst);
   return mgInst;
 }  
 //______________________________________________________________________________
-void StG3Particles::Update() 
+void StG3ParticleMaster::Update() 
 {
 //      SUBROUTINE GFKINE(ITRA,VERT,PVERT,IPART,NVERT,UBUF,NWBUF)
 //      SUBROUTINE GFVERT(NVTX,V,NTBEAM,NTTARG,TOFG,UBUF,NWBUF)
@@ -80,7 +80,7 @@ void StG3Particles::Update()
 
 }
 //______________________________________________________________________________
-const StGenParticle *StG3Particles::operator()(int idx) const
+const StGenParticle *StG3ParticleMaster::operator()(int idx) const
 {
   assert(idx>=0);
   if (idx >= mNTk) 			return 0;

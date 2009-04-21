@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StHepParticle.cxx,v 1.2 2009/04/17 18:32:28 perev Exp $
+// @(#)root/eg:$Id: StHepParticle.cxx,v 1.3 2009/04/21 19:10:51 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "StHepParticle.h"
-my_hepevt*      StHepParticles::mgMyHepevt=0;
-StHepParticles *StHepParticles::mgInst    =0;
+my_hepevt*      StHepParticleMaster::mgMyHepevt=0;
+StHepParticleMaster *StHepParticleMaster::mgInst    =0;
 static std::vector<StHepParticle*> myVec;
 
 //______________________________________________________________________________
@@ -136,14 +136,14 @@ public:
 };
 
 //______________________________________________________________________________
-StHepParticles::StHepParticles(void *addr)
+StHepParticleMaster::StHepParticleMaster(void *addr)
 {
   assert(!mgInst);
   mgInst = this;
   mgMyHepevt = (my_hepevt*)addr;
 }
 //______________________________________________________________________________
-StHepParticles::~StHepParticles()
+StHepParticleMaster::~StHepParticleMaster()
 {
   mgInst = 0;
   mgMyHepevt = 0;
@@ -151,7 +151,7 @@ StHepParticles::~StHepParticles()
   myVec.resize(0);
 }
 //______________________________________________________________________________
-void StHepParticles::Update() 
+void StHepParticleMaster::Update() 
 {
   mNTk = mgMyHepevt->nhep;
   if (mNTk <= (int)myVec.size()) return;
@@ -161,15 +161,15 @@ void StHepParticles::Update()
   } 
 }
 //______________________________________________________________________________
-const StHepParticles *StHepParticles::Instance() 
+const StHepParticleMaster *StHepParticleMaster::Instance() 
 {
   assert(mgInst);
   return mgInst;
 }  
 //______________________________________________________________________________
-const StHepParticle *StHepParticles::operator()(int idx) const
+const StHepParticle *StHepParticleMaster::operator()(int idx) const
 {
-  ((StHepParticles*)this)->Update();
+  ((StHepParticleMaster*)this)->Update();
   assert(idx>=0);
   if (idx >= (int)myVec.size()) 	return 0;
   if (!myVec[idx]->GetStatusCode()) 	return 0;
@@ -182,26 +182,26 @@ const StHepParticle *StHepParticles::operator()(int idx) const
 //______________________________________________________________________________
 int  StHepParticle::GetStatusCode()  const
 {
-  return StHepParticles::mgMyHepevt->isthep[mIdx];
+  return StHepParticleMaster::mgMyHepevt->isthep[mIdx];
 }
 //______________________________________________________________________________
 int  StHepParticle::GetPdgCode()     const
 {
-  return StHepParticles::mgMyHepevt->idhep[mIdx];
+  return StHepParticleMaster::mgMyHepevt->idhep[mIdx];
 }
 //______________________________________________________________________________
 const StHepParticle *StHepParticle::GetMother(int i)  const
 {
-  int j = StHepParticles::mgMyHepevt->jmohep[mIdx][i];
+  int j = StHepParticleMaster::mgMyHepevt->jmohep[mIdx][i];
   
   return (j) ? myVec[j-1]:0;
 }
 //______________________________________________________________________________
 const StHepParticle *StHepParticle::GetDaughter(int i)  const
 {
-  int j0 = StHepParticles::mgMyHepevt->jdahep[mIdx][0];
+  int j0 = StHepParticleMaster::mgMyHepevt->jdahep[mIdx][0];
   if (!j0) 		return 0;
-  int j1 = StHepParticles::mgMyHepevt->jdahep[mIdx][1];
+  int j1 = StHepParticleMaster::mgMyHepevt->jdahep[mIdx][1];
   j0+=i; if (j0>j1) 	return 0;
   return myVec[j0-1];
 }
@@ -209,29 +209,29 @@ const StHepParticle *StHepParticle::GetDaughter(int i)  const
 //______________________________________________________________________________
 double  StHepParticle::GetMass()  const
 {
-  return StHepParticles::mgMyHepevt->phep[mIdx][4];
+  return StHepParticleMaster::mgMyHepevt->phep[mIdx][4];
 }
 //______________________________________________________________________________
 int StHepParticle::GetNDaughters()  const
 {
-  int j0 = StHepParticles::mgMyHepevt->jdahep[mIdx][0];
+  int j0 = StHepParticleMaster::mgMyHepevt->jdahep[mIdx][0];
   if (!j0) 		return 0;
-  int j1 = StHepParticles::mgMyHepevt->jdahep[mIdx][1];
+  int j1 = StHepParticleMaster::mgMyHepevt->jdahep[mIdx][1];
   return j1-j0+1;
 }
 //______________________________________________________________________________
 void StHepParticle::Momentum(double p4[4]) const
 {
-  memcpy(p4,StHepParticles::mgMyHepevt->phep[mIdx],4*sizeof(double));
+  memcpy(p4,StHepParticleMaster::mgMyHepevt->phep[mIdx],4*sizeof(double));
 }
 //______________________________________________________________________________
 void  StHepParticle::Vertex(double v[3]) const
 {
-  double *V = StHepParticles::mgMyHepevt->vhep[mIdx];
+  double *V = StHepParticleMaster::mgMyHepevt->vhep[mIdx];
   for (int i=0;i<3;i++) {v[i] = V[i]*10;}
 }
 //______________________________________________________________________________
 double  StHepParticle::Time()  const
 {
-   return StHepParticles::mgMyHepevt->vhep[mIdx][3]*10;
+   return StHepParticleMaster::mgMyHepevt->vhep[mIdx][3]*10;
 }

@@ -1,10 +1,11 @@
-// @(#)root/eg:$Id: StGenParticle.cxx,v 1.2 2009/04/20 20:44:17 perev Exp $
+// @(#)root/eg:$Id: StGenParticle.cxx,v 1.3 2009/04/21 19:10:51 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
 #include "stdlib.h"
 #include "stdio.h"
 #include "math.h"
+#include <map>
 
 #include "StGenParticle.h"
 //______________________________________________________________________________
@@ -81,15 +82,15 @@ double StGenParticle::Theta()  const
   double p[4]; Momentum(p);                 
   return acos(p[2]/P());
 }  
-int  StGenParticle::GetPdgCode() const { return StGenParticles::Gea2Pdg(GetGeaCode());}
-int  StGenParticle::GetGeaCode() const { return StGenParticles::Pdg2Gea(GetPdgCode());}
+int  StGenParticle::GetPdgCode() const { return StGenParticleMaster::Gea2Pdg(GetGeaCode());}
+int  StGenParticle::GetGeaCode() const { return StGenParticleMaster::Pdg2Gea(GetPdgCode());}
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
-void StGenParticles::Print(const char *tit) const
+void StGenParticleMaster::Print(const char *tit) const
 {
   if (!tit) tit = "";
-   printf("StGenParticles::Print(%s)\n",tit);
+   printf("StGenParticleMaster::Print(%s)\n",tit);
    const StGenParticle *p=0;
    for (int i=0;p=(*this)(i);i++) {
      p->Print();
@@ -126,7 +127,7 @@ static const int IDPDG[] = {
                 24,  -24,   23,  -14,   14,  -16,   16,   71,   72,  75,
             700201,700301,700202,700302};
 //______________________________________________________________________________
-int StGenParticles::Gea2Pdg(int igea)  
+int StGenParticleMaster::Gea2Pdg(int igea)  
 {
 
 static int PdgOfGea[kNGEA]={0};
@@ -138,7 +139,7 @@ static int PdgOfGea[kNGEA]={0};
   return PdgOfGea[igea];
 }
 //______________________________________________________________________________
-double StGenParticles::Gea2Mas(int igea)  
+double StGenParticleMaster::Gea2Mas(int igea)  
 {
 static double mass[kNGEA]={
 	 0		,0		,0.00051	,0.00051	,0
@@ -156,9 +157,8 @@ static double mass[kNGEA]={
   return mass[igea];
 }
 
-#include <map>
 //______________________________________________________________________________
-int StGenParticles::Pdg2Gea(int ipdg)  
+int StGenParticleMaster::Pdg2Gea(int ipdg)  
 {
 typedef std::map<int, int > pdgMap_t;
 static  pdgMap_t pdgMap;

@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StMCFilter.cxx,v 1.2 2009/04/17 18:32:28 perev Exp $
+// @(#)root/eg:$Id: StMCFilter.cxx,v 1.3 2009/04/21 19:10:51 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -14,8 +14,8 @@
 typedef std::map<std::string, StMCFilter *> myMap_t;
 static  myMap_t myMap;
 StMCFilter      *StMCFilter::fgSelected   =0;
-StHepParticles *StMCFilter::fgHepParticle =0;
-StG3Particles  *StMCFilter::fgG3Particle  =0;
+StHepParticleMaster *StMCFilter::fgHepParticle =0;
+StG3ParticleMaster  *StMCFilter::fgG3Particle  =0;
 
 extern void *gStarFiltAction;
 
@@ -57,13 +57,13 @@ int StMCFilter::Select(const char *name)
 void StMCFilter::SetEG(void *hepEvt)
 {
   assert(!fgHepParticle);
-  fgHepParticle = new StHepParticles(hepEvt);
+  fgHepParticle = new StHepParticleMaster(hepEvt);
 }
 //______________________________________________________________________________
 void StMCFilter::SetG3(void *gfKine,void *gfVert)
 {
   assert(!fgG3Particle);
-  fgG3Particle = new StG3Particles((GFKINE_t)gfKine,(GFVERT_t)gfVert);
+  fgG3Particle = new StG3ParticleMaster((GFKINE_t)gfKine,(GFVERT_t)gfVert);
 }
 //______________________________________________________________________________
 int StMCFilter::REJECTEG()
