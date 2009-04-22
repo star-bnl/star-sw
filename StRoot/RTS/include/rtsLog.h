@@ -45,7 +45,7 @@ extern "C" {
 #define RTS_LOG_PORT_TPX	8006
 #define RTS_LOG_PORT_DB		8007
 #define RTS_LOG_PORT_ESB	8008
-#define RTS_LOG_PORT_NONE	8009
+#define RTS_LOG_PORT_L3		8009
 #define RTS_LOG_PORT_DET	8010
 
 #define RTS_LOG_PORT	RTS_LOG_PORT_RTS	/* default, rts.log, port */
