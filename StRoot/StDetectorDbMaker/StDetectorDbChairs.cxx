@@ -52,6 +52,8 @@ MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
 MakeChairInstance(TpcAltroParameters,Calibrations/tpc/TpcAltroParameters);
 #include "St_asic_thresholdsC.h"
 MakeChairInstance(asic_thresholds,Calibrations/tpc/asic_thresholds);
+#include "St_tpcAnodeHVC.h"
+MakeChairInstance(tpcAnodeHV,Calibrations/tpc/tpcAnodeHV);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
