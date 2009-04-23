@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.122 2009/04/01 19:20:17 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.123 2009/04/23 02:39:03 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.123  2009/04/23 02:39:03  perev
+ * GetTime defence sin <1 added
+ *
  * Revision 2.122  2009/04/01 19:20:17  perev
  * Replace asserts to error condition
  *
@@ -2166,6 +2169,7 @@ double StiKalmanTrackNode::getTime() {
   if (! _laser) {
     double d = sqrt(mFP._x*mFP._x+mFP._y*mFP._y);
     double sn = fabs(mFP._cosCA*mFP._y - mFP._sinCA*mFP._x)/d;
+    if (sn> 0.99) sn =  0.99;
     if (sn<0.2) {
       d *= (1.+sn*sn/6);
     } else {
