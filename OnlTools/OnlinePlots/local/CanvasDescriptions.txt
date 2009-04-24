@@ -78,13 +78,13 @@
 7,3,1,2,2,[any|any],h338_ftp_west,h339_ftp_east
 
 //Jing Liu, start tof display here, 02/25/2008
-8,1,2,2,4,[any|any],h454_upvpd_le_hitmap,h455_upvpd_te_hitmap,h456_upvpd_ToT_vs_Chan,h453_upvpd_eastT_vs_westT
-8,2,1,2,2,[any|any],h458_tof_leHitChan_vs_traynum_west,h460_tof_teHitChan_vs_traynum_west
-8,3,1,2,2,[any|any],h457_tof_leHitChan_vs_traynum_east,h459_tof_teHitChan_vs_traynum_east
-8,4,1,3,3,[any|any],h467_tof_tray01_10_ToT_vs_Chan_west,h468_tof_tray11_20_ToT_vs_Chan_west,h469_tof_tray21_30_ToT_vs_Chan_west
-8,5,1,3,3,[any|any],h470_tof_tray31_40_ToT_vs_Chan_west,h471_tof_tray41_50_ToT_vs_Chan_west,h472_tof_tray51_60_ToT_vs_Chan_west
-8,6,1,3,3,[any|any],h461_tof_tray01_10_ToT_vs_Chan_east,h462_tof_tray11_20_ToT_vs_Chan_east,h463_tof_tray21_30_ToT_vs_Chan_east
-8,7,1,3,3,[any|any],h464_tof_tray31_40_ToT_vs_Chan_east,h465_tof_tray41_50_ToT_vs_Chan_east,h466_tof_tray51_60_ToT_vs_Chan_east
+8,1,1,1,1,[any|any],hGroup:TOF#upvpd#any#TOF
+8,2,1,1,1,[any|any],hGroup:TOF#TOF check#any#TOF
+8,3,1,1,1,[any|any],hGroup:TOF#east Tray 1-30#any#TOF
+8,4,1,1,1,[any|any],hGroup:TOF#east Tray 31-60#any#TOF
+8,5,1,1,1,[any|any],hGroup:TOF#west Tray 61-90#any#TOF
+8,6,1,1,1,[any|any],hGroup:TOF#west Tray 91-120#any#TOF
+
 //
 // end of tof display
 

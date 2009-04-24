@@ -555,9 +555,8 @@ void HistoHandler::SetHistoListFile(char *lHistoListFile){
 #include "SsdAdcLogTable.h"               // Bo from Renaud 03/03
 
 
-
 // Jing Liu, for TOF  12/10/2007 ---
-#include "tofr.h"
+//#include "tofr.h"
 
 int mDebugLevel = 0;
 
@@ -1520,311 +1519,11 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
       if(mDebugLevel)
 	fprintf(stderr,"FTP: occupancy %3d %%, charge %d", (int)ftp_occ, adc) ;
     }
+
+
   //---------------------------------------------------------------------
-  // TOF online QA, fill histograms. 
+  // TOF online QA, moved to HistogramGroups.
   ret = tofReader(datap) ;
-  leadinghits.clear();
-  trailinghits.clear();
-  //cout<<"leading size="<<leadinghits.size()<<" trailing size "<<trailinghits.size()<<endl;
-  if(ret <= 0)   {
-    if (mDebugLevel) {fprintf(stderr,"TOF: problems in data (%d) - continuing...",ret);}
-  } else {
-    
-    if(mDebugLevel) fprintf(stderr,"TOF: %d bytes",ret) ;
-    /*
-    tof_size =float(ret);
-    oth->fill(    h1[14],log10(tof_size));
-    if(total_size != 0.){tof_fract = 100.* tof_size/total_size;oth->fill(	h1[107],tof_fract);}
-    */
-    // Jing Liu, 12/05/2007
-
-    int timeinbin=0;
-    float time=0.;
-    int halftrayid=-1;
-    int trayid=-1;
-
-    for(int ifib=0;ifib<4;ifib++) {  // fiber 0, east, fiber 2, west 
- 
-      int ndataword = tof.ddl_words[ifib];    // 
-      //cout<<"TOF:: ifib="<<ifib<<" ndataword="<< ndataword<<endl;
-      if(ndataword<=0) continue;
-      for(int iword=0;iword<ndataword;iword++){
-	int dataword=tof.ddl[ifib][iword];
-        //cout<<"TOF :: dataword=0x"<<hex<<dataword<<dec<<" "<<iword<<"/"<<dec<<ndataword<<" ifiber="<<ifib<<endl;
-	if( (dataword&0xF0000000)>>28 == 0x2) continue;  
-	if( (dataword&0xF0000000)>>28 == 0xD) continue;  
-	if( (dataword&0xF0000000)>>28 == 0xE) continue;  
-        if( (dataword&0xF0000000)>>28 == 0xA) {  // header trigger data flag
-	 // do nothing at this moment.
-	  continue;
-        }   
-	// liujing new .....         
-        if( (dataword&0xF0000000)>>28 == 0x6) {
-          //cout<<"StBTofHitMaker::DATA ERROR!! packid=0x6"<<endl;
-	  continue;
-        }            
-        if( (dataword&0xF0000000)>>28 == 0xC) {
-          halftrayid = dataword&0x01;    
-          trayid     = (dataword&0x0FE)>>1;
-          //cout<<"TOF:: dataword/ndataword=0x"<<hex<<dataword<<"/"<<dec<<ndataword<<" halftrayid="<<halftrayid<<" trayid="<<trayid<<" fiber="<<ifib<<endl;
-          continue;
-        }
-
-        if(halftrayid<0) continue;
-        //cout<<"TOFaa:: dataword/ndataword=0x"<<hex<<dataword<<"/"<<dec<<ndataword<<" halftrayid="<<halftrayid<<" trayid="<<trayid<<" fiber="<<ifib<<endl;
-        if(trayid<1 || trayid >122) {
-          cout<<"StBTofHitMaker::DATA ERROR!! unexpected trayID ! "<<endl;
-          continue;
-        }
-
-        //cout<<"TOFbb:: dataword/ndataword=0x"<<hex<<dataword<<"/"<<dec<<ndataword<<" halftrayid="<<halftrayid<<" trayid="<<trayid<<" fiber="<<ifib<<endl;
-
-       // now get tdc chan, time from trailing and leading edge.
-       // some triger words will be skipped.
-       int edgeid =int( (dataword & 0xf0000000)>>28 );
-       if((edgeid !=LEADING) && (edgeid!=TRAILING)) continue;
-
-
-       int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
-       //cout<<"tdcid="<<tdcid<<" halftrayid="<<halftrayid<<endl;
-       int tdigboardid=tdcid/4;   // 0-3 for half tray.
-       int tdcchan=0;
-
-       TofHitList temphit;
-       //
-       temphit.trayid=trayid;
-       temphit.fiberid=ifib; 
-       temphit.halftrayid=halftrayid;
-       temphit.hptdcid = tdcid%4;     // tdcid here is 0-3;
-       temphit.edgeid=edgeid;
-
-       tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
-       timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
-       temphit.timeinbin=timeinbin; 
-       time = timeinbin * 25./1024;   // time in ns 
-       temphit.time=time;
-       temphit.tdcchan=tdcchan;
-
-       temphit.globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
-
-       int moduleid=-1;
-       int modulechan=-1;
-       int globalmodulechan=-1;
-       if(trayid>0 && trayid< 121) { // TOF tray
-	 globalmodulechan = tdcchan2mrpcchan(temphit.globaltdcchan);
-         moduleid = globalmodulechan/6;
-	 modulechan = globalmodulechan%6;
-       } else if (trayid == 122 || trayid==121 ) {
-         moduleid=trayid;
-         modulechan=tdcchan2upvpdPMTchan(temphit.globaltdcchan,edgeid,trayid);
-         globalmodulechan=modulechan;
-       } 
-	//
-       temphit.moduleid=moduleid;
-       temphit.modulechan=modulechan;
-       temphit.globalmodulechan=globalmodulechan;
-	//  
-       temphit.numberforsort= time+globalmodulechan*1.e5+trayid*1.e8+ifib*1.e11;
-
-       if(edgeid == LEADING) {
-	 leadinghits.push_back(temphit);
-       } else if(edgeid==TRAILING){
-	 trailinghits.push_back(temphit); 
-       } 
-       //
-       //cout<<"dataword=0x"<<hex<<dataword<<dec<<" edgeid="<<edgeid<<" tdcid="<<tdcid<<" tdigboardid="<<tdigboardid<<" hptdcid="<<tdcid%4<<" tdcchan="<<tdcchan<<" timeinbin="<<timeinbin<<" time="<<time;
-       //cout<<" globaltdcchan="<<temphit.globaltdcchan<<" halftrayid="<<halftrayid<<" trayid="<<trayid<<" ifib="<<ifib<<endl;
-       //cout<<" moduleid="<<temphit.moduleid<<" modulechan="<<temphit.modulechan<<" globalmodulechan="<<temphit.globalmodulechan<<" trayid="<<trayid<<endl<<endl;        
-       //           
-      }   // end loop all data words
-    }  // end loop all fibers
-
-    // all information we need are put in 2 vectors, now do some anaylysis and fill histograms.
-    // sort it:
-    std::sort(leadinghits.begin(), leadinghits.end(), compareIt);
-    std::sort(trailinghits.begin(), trailinghits.end(), compareIt);
-    for(unsigned int i=0;i<leadinghits.size();i++){
-      //cout<<"leadinghits="<<i<<" fib="<<leadinghits[i].fiberid<<" trayid="<<leadinghits[i].trayid<<" globalmoduleid="<<leadinghits[i].globalmodulechan%19<<" time="<<leadinghits[i].time<<endl;
-    }
-    for(unsigned int i=0;i<trailinghits.size();i++){
-      //cout<<"trailinghits="<<i<<" fib="<<trailinghits[i].fiberid<<" trayid="<<trailinghits[i].trayid<<" globalmoduleid="<<trailinghits[i].globalmodulechan%19<<" time="<<trailinghits[i].time<<endl;
-    }
-
-    // 
-    // Make different loops on purpose, more readeable....
-    //
-    // get start time, t0east, t0west, t0 , only calculated from leading edge
-    //
-    float let0east(0),let0west(0);
-    int neast(0),nwest(0);
-    float let0(0);
-    int counted[TOTPVPDCHAN];
-    int pvpdchan[TOTPVPDCHAN];
-
-    for(int i=0;i<TOTPVPDCHAN;i++){counted[i]=0;pvpdchan[i]=i;}
-    // leading edge 
-    for(unsigned i=0;i<leadinghits.size();i++){
-      if(leadinghits[i].trayid==121) {
-	for(int ich=0;ich<NEASTCHAN;ich++){
-	  if((leadinghits[i].globalmodulechan==pvpdchan[ich]) && (counted[ich]==0 && leadinghits[i].time>0)){
-	    let0west = leadinghits[i].time+let0west;nwest++;counted[ich]++;
-	  }
-	}
-      }
-      //
-      if(leadinghits[i].trayid==122) {
-	for(int ich=NEASTCHAN;ich<TOTPVPDCHAN;ich++){
-	  if((leadinghits[i].globalmodulechan==pvpdchan[ich]) && (counted[ich]==0) && leadinghits[i].time>0){
-	    let0east = leadinghits[i].time+let0east;neast++;counted[ich]++;
-	  }
-	}
-      }
-    }
-
-    if(neast>0) let0east = let0east/neast;
-    if(nwest>0) let0west = let0west/nwest;
-    if(neast*nwest>0) {let0=(let0east+let0west)/2.;} 
-    else if (neast>0) {let0=let0east;} 
-    else if (nwest>0) {let0=let0west;} 
-    else {// no hit in either start detector? // 
-      //doing nothing
-    }
-    //cout<<"TOF:: let0west="<<let0west<<" let0east="<<let0east<<endl;
-    //oth->fill(h1[453],let0west,let0east);
-    int eastused[19],westused[19];
-    for(int i=0;i<19;i++){eastused[i]=0;westused[i]=0;}
-    for(unsigned int i=0;i<leadinghits.size();i++){
-      if(leadinghits[i].trayid != 121) continue;    
-      int westchan=leadinghits[i].globalmodulechan;
-      for(unsigned int j=0;j<leadinghits.size();j++){
-        if(leadinghits[j].trayid != 122) continue;    
-        int eastchan=leadinghits[j].globalmodulechan;
-        //if(eastchan !=westchan) continue;
-        //cout<<" east: "<<leadinghits[j].time<<" west: "<<leadinghits[i].time<<endl; 
-        if(eastused[eastchan]>0 || westused[westchan]>0) continue;
-        oth->fill(h1[453],leadinghits[i].time,leadinghits[j].time);
-        eastused[eastchan]++;westused[westchan]++;
-      }
-      }
-
-    // jing liu, 12/10/2007
-    // T0 from trailing edge , 
-    // similar to above, we can add later if necessary.
- 
-    // fill histograms.
-    // leading edge
-    for(unsigned int i=0;i<leadinghits.size();i++){
-      if(leadinghits[i].time>0&& leadinghits[i].trayid>0 && leadinghits[i].trayid<61) {
-	oth->fill(h1[458],leadinghits[i].trayid,leadinghits[i].globaltdcchan/8);
-      } else if(leadinghits[i].time>0&& leadinghits[i].trayid>60 && leadinghits[i].trayid<121){
-	oth->fill(h1[457],leadinghits[i].trayid,leadinghits[i].globaltdcchan/8);
-      } else if (leadinghits[i].time>0&& leadinghits[i].trayid==121){  //west start
-	oth->fill(h1[454],leadinghits[i].modulechan);
-      } else if (leadinghits[i].time>0&&leadinghits[i].trayid==122){  //east start
-	oth->fill(h1[454],leadinghits[i].modulechan);
-      }
-    }
-    // trailing edge.
-    for(unsigned int i=0;i<trailinghits.size();i++){
-      if(trailinghits[i].time>0&& trailinghits[i].trayid>0 && trailinghits[i].trayid<61) {
-	oth->fill(h1[460],trailinghits[i].trayid,trailinghits[i].globaltdcchan/8);
-      } else if(trailinghits[i].time>0&& trailinghits[i].trayid>60 && trailinghits[i].trayid<121){
-	oth->fill(h1[459],trailinghits[i].trayid,trailinghits[i].globaltdcchan/8);
-      } else if (trailinghits[i].time>0&& trailinghits[i].trayid==121){  //west start
-	oth->fill(h1[455],trailinghits[i].modulechan);
-      } else if (trailinghits[i].time>0&&trailinghits[i].trayid==122){  //east start
-	oth->fill(h1[455],trailinghits[i].modulechan);
-      }
-    }
-
-    // Make TOT plots ........
-    float trayToT=0.; 
-    int leused[120][192],teused[120][192];
-    for(int i=0;i<120;i++){for(int j=0;j<192;j++){leused[i][j]=0;teused[i][j]=0;}}
-    for(unsigned int ile=0;ile<leadinghits.size();ile++){
-      int ldchan = leadinghits[ile].globalmodulechan;
-      int ldtray = leadinghits[ile].trayid;
-      if(ldtray<0 || ldtray>120) continue;
-      if(ldchan<0 || ldchan>191 || leused[ldtray-1][ldchan]) continue;
-      for(unsigned int jte=0;jte<trailinghits.size();jte++){
-	int trchan=trailinghits[jte].globalmodulechan;
-        int trtray = trailinghits[jte].trayid;
-        if(trtray<0 || trtray>120) continue;
-        if(trtray != ldtray) continue;
-
-	if(trchan<0 || trchan>191 || teused[trtray-1][trchan]) continue;
-        //
-	if(ldchan == trchan) {
-	  trayToT=trailinghits[jte].time-leadinghits[ile].time;
-
-          //cout<<"TOFTOT:: TOT="<<trayToT<<" ldchan="<<ldchan<<" trchan="<<trchan<<" trayid="<<ldtray<<" ldtime="<<leadinghits[ile].time<<" trtime="<<trailinghits[jte].time<<endl;
-          if(trayToT<=0.00001) continue;
-	  teused[ldtray-1][ldchan]++;leused[ldtray-1][trchan]++;
-          int TheTrayChan=ldchan + 192*((ldtray-1)%10);
-          if(trtray >120 && trtray<123) { 
-            // oth->fill(	  h1[465],ldchan,trayToT);
-	  } else if (trtray>0 && trtray<11) {
-            oth->fill(	  h1[467],TheTrayChan,trayToT);
-	  } else if (trtray>10 && trtray<21) {
-	    oth->fill(	  h1[468],TheTrayChan,trayToT);
-	  } else if (trtray>20 && trtray<31) {
-	    oth->fill(	  h1[469],ldchan+((ldtray-1)%10)*192,trayToT);
-	  } else if (trtray>30 && trtray<41) {
-	    oth->fill(	  h1[470],TheTrayChan,trayToT);
-	  } else if (trtray>40 && trtray<51) {
-	    oth->fill(	  h1[471],TheTrayChan,trayToT);
-	  } else if (trtray>50 && trtray<61) {
-	    oth->fill(	  h1[472],TheTrayChan,trayToT);
-	  } else if (trtray>60 && trtray<71) {
-	    oth->fill(	  h1[461],TheTrayChan,trayToT);
-	  } else if (trtray>70 && trtray<81) {
-	    oth->fill(	  h1[462],TheTrayChan,trayToT);
-	  } else if (trtray>80 && trtray<91) {
-	    oth->fill(	  h1[463],TheTrayChan,trayToT);
-	  } else if (trtray>90 && trtray<101) {
-	    oth->fill(	  h1[464],TheTrayChan,trayToT);
-	  } else if (trtray>100 && trtray<111) {
-	    oth->fill(	  h1[465],TheTrayChan,trayToT);
-	  } else if (trtray>110 && trtray<121) {
-	    oth->fill(	  h1[466],TheTrayChan,trayToT);
-	  }
-	}
-      }
-    }  
-
-    // ToT plots for upvpd.
-    //
-    int sleused[38],steused[38];
-    for(int i=0;i<38;i++){sleused[i]=0;steused[i]=0;}
-    for(unsigned int ile=0;ile<leadinghits.size();ile++){
-      int ldchan = leadinghits[ile].globalmodulechan;
-      int ldtray = leadinghits[ile].trayid;
-      if(ldchan<0 || ldchan>37) continue;
-      if(sleused[ldchan]) continue;
-      if(ldtray != 121 && ldtray != 122) continue;
-      //cout<<"START:: ldtray="<<ldtray<<" ldchan="<<ldchan<<" time="<<leadinghits[ile].time<<endl;
-      for(unsigned int jte=0;jte<trailinghits.size();jte++){
-        int trtray = trailinghits[jte].trayid;
-        if(trtray != ldtray) continue;
-        int trchan=trailinghits[jte].globalmodulechan;
-        //cout<<"START:: trtray="<<trtray<<" trchan="<<trchan<<" time="<<trailinghits[ile].time<<endl;
-        if(trchan<0 || trchan>37) continue;
-        if(trchan != ldchan) continue;
-        if(steused[trchan]) continue;
-        trayToT=trailinghits[jte].time-leadinghits[ile].time;
-        steused[ldchan]++;sleused[trchan]++;
-        //cout<<"STARTTOT:: TOT="<<trayToT<<" ldchan="<<ldchan<<" trchan="<<trchan<<" trayid="<<ldtray<<" ldtime="<<leadinghits[ile].time<<" trtime="<<trailinghits[jte].time<<endl;
-        if(trayToT>0 && trayToT<80) {oth->fill(h1[456],ldchan,trayToT); oth->fill(h1[473],trayToT);}
-      }                
-    }
-    //
- 
-    //
-  }  // end if (ret <=0)
-
-  //==============================================================================
-  // end of TOF
-  //==============================================================================
 
 
   //printf("PMD\n");
@@ -2189,7 +1888,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.15 2009/03/17 23:06:04 genevb Exp $
+   * $Id: HistoHandler.cxx,v 1.16 2009/04/24 22:01:19 dkettler Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -2199,6 +1898,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.16  2009/04/24 22:01:19  dkettler
+   * TOF Updates
+   *
    * Revision 1.15  2009/03/17 23:06:04  genevb
    * A few TPC optimizations
    *

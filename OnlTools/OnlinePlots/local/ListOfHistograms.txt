@@ -94,8 +94,8 @@
 2,h68_emc_hiTowerTrig,High Tower Trigger,1,-0.5,299.5,1,0.,64.,0xffffffff,0xffffffff
 //
 //--WJL some new tof systems plots (WJL, mar 5, 2003)
-1,h69_tof_hadcwtdc,TOF ADC hit pattern with TDC hit,120,-0.5,119.5,0xffffffff,0xffffffff	//WJL
-1,h70_tof_htdcwadc,TOF TDC hit pattern with ADC hit,120,-0.5,119.5,0xffffffff,0xffffffff	//WJL
+1,h69_tof_hadcwtdc,TOF ADC hit pattern with TDC hit,1,-0.5,119.5,0xffffffff,0xffffffff	//WJL
+1,h70_tof_htdcwadc,TOF TDC hit pattern with ADC hit,1,-0.5,119.5,0xffffffff,0xffffffff	//WJL
 //--WJL end of some new tof systems plots (WJL, mar 5, 2003)
 //
 // RICH Histograms below are free for reuse
@@ -114,12 +114,12 @@
 1,h81_ric_occ_total,Total RICH Occupancy (in %),20,0.,10.,0xffffffff,0xffffffff
 //
 //--WJL start tof hists booking...
-1,h82_tof_hadc,TOF ADC hit pattern,120,-0.5,119.5,0xffffffff,0xffffffff	//WJL
-1,h83_tof_htdc,TOF TDC hit pattern,120,-0.5,119.5,0xffffffff,0xffffffff	//WJL
-1,h84_tof_ha2d,TOF Temperatures,29,1.,30.,0xffffffff,0xffffffff	//WJL
-1,h85_tof_hthresh,TOF Threshold Voltages,3,1.,4.,0xffffffff,0xffffffff	//WJL
-1,h86_tof_hramp,TOF Ramp ADC,1024,0.,1024.,0xffffffff,0xffffffff	//WJL
-1,h87_tof_hsca,TOF Scalers,12,1.,13.,0xffffffff,0xffffffff	//WJL
+1,h82_tof_hadc,TOF ADC hit pattern,1,-0.5,119.5,0xffffffff,0xffffffff	//WJL
+1,h83_tof_htdc,TOF TDC hit pattern,1,-0.5,119.5,0xffffffff,0xffffffff	//WJL
+1,h84_tof_ha2d,TOF Temperatures,1,1.,30.,0xffffffff,0xffffffff	//WJL
+1,h85_tof_hthresh,TOF Threshold Voltages,1,1.,4.,0xffffffff,0xffffffff	//WJL
+1,h86_tof_hramp,TOF Ramp ADC,1,0.,1024.,0xffffffff,0xffffffff	//WJL
+1,h87_tof_hsca,TOF Scalers,1,1.,13.,0xffffffff,0xffffffff	//WJL
 //--WJL end tof hists booking...
 //
 1,h88_l3_tracks,L3 Number of tracks,200,0.,800.,0xffffffff,0xffffffff
@@ -513,16 +513,16 @@
 2,h431_pmd_Chain_vs_channel_adc,Chain vs Channel 2D (ADC weighted),1,1.,1728.5,1,1.,48.5,0xffffffff,0xffffffff
 
 // Jing Liu, tof histograms , tofr5, 02/04/2005
-1,h432_tofr_hits_tdigchan_leading,h432_tofr_hits_tdigchan_leading, 192,-0.5,191.5,0xffffffff,0xffffffff
-1,h433_tofr_hits_tdigchan_trailing,h433_tofr_hits_tdigchan_trailing, 192,-0.5,191.5,0xffffffff,0xffffffff
-1,h434_tofr_hits_modulechan_leading,h434_tofr_hits_modulechan_leading, 192,-0.5,191.5,0xffffffff,0xffffffff
-1,h435_tofr_hits_modulechan_trailing,h435_tofr_hits_modulechan_trailing, 192,-0.5,191.5,0xffffffff,0xffffffff
-1,h436_tofr_tray_leading_time,h436_tofr_tray_leading_time, 200,0.,52000.,0xffffffff,0xffffffff       // us
-1,h437_tofr_tray_trailing_time,h437_tofr_tray_trailing_time, 200,0.,52000.,0xffffffff,0xffffffff     // us
-1,h438_tofr_hits_pvpd_leading,h438_tofr_hits_pvpd_leading, 38,-0.5,37.5,0xffffffff,0xffffffff
-1,h439_tofr_hits_pvpd_trailing,h439_tofr_hits_pvpd_trailing, 38,-0.5,37.5,0xffffffff,0xffffffff
-1,h440_tofr_pvpd_leading_time,h440_tofr_pvpd_leading_time, 200,0.,52000.,0xffffffff,0xffffffff       // us
-1,h441_tofr_pvpd_trailing_time,h441_tofr_pvpd_trailing_time, 200,0.,52000.,0xffffffff,0xffffffff     // us
+1,h432_tofr_hits_tdigchan_leading,h432_tofr_hits_tdigchan_leading, 1,-0.5,191.5,0xffffffff,0xffffffff
+1,h433_tofr_hits_tdigchan_trailing,h433_tofr_hits_tdigchan_trailing, 1,-0.5,191.5,0xffffffff,0xffffffff
+1,h434_tofr_hits_modulechan_leading,h434_tofr_hits_modulechan_leading, 1,-0.5,191.5,0xffffffff,0xffffffff
+1,h435_tofr_hits_modulechan_trailing,h435_tofr_hits_modulechan_trailing, 1,-0.5,191.5,0xffffffff,0xffffffff
+1,h436_tofr_tray_leading_time,h436_tofr_tray_leading_time, 1,0.,52000.,0xffffffff,0xffffffff       // us
+1,h437_tofr_tray_trailing_time,h437_tofr_tray_trailing_time, 1,0.,52000.,0xffffffff,0xffffffff     // us
+1,h438_tofr_hits_pvpd_leading,h438_tofr_hits_pvpd_leading, 1,-0.5,37.5,0xffffffff,0xffffffff
+1,h439_tofr_hits_pvpd_trailing,h439_tofr_hits_pvpd_trailing, 1,-0.5,37.5,0xffffffff,0xffffffff
+1,h440_tofr_pvpd_leading_time,h440_tofr_pvpd_leading_time, 1,0.,52000.,0xffffffff,0xffffffff       // us
+1,h441_tofr_pvpd_trailing_time,h441_tofr_pvpd_trailing_time, 1,0.,52000.,0xffffffff,0xffffffff     // us
 
 1,h442_bunch_yellow_fill,h442_bunch_yellow_fill,120,-0.5,119.5,0xffffffff,0xffffffff
 1,h443_bunch_yellow_up,h443_bunch_yellow_up,120,-0.5,119.5,0xffffffff,0xffffffff
@@ -538,30 +538,30 @@
 1,h452_bbc_tac_difference_e-w,BBC Vertex,256,-300.,300.,0xffffffff,0xffffffff
 
 //Jing Liu, Histograms for Run8 and future. 02/25/2008
-2,h453_upvpd_eastT_vs_westT,h453_upvpd_eastT_vs_westT,1000,0.,51500.,1000,0.,51500.,0xffffffff,0xffffffff
-1,h454_upvpd_le_hitmap,h454_upvpd_le_hitmap, 38,-0.5,37.5,0xffffffff,0xffffffff     
-1,h455_upvpd_te_hitmap,h455_upvpd_te_hitmap, 38,-0.5,37.5,0xffffffff,0xffffffff     
-2,h456_upvpd_ToT_vs_Chan,h456_upvpd_ToT_vs_Chan, 38,-0.5,37.5,100,0,50.,0xffffffff,0xffffffff     // ns
+2,h453_upvpd_eastT_vs_westT,h453_upvpd_eastT_vs_westT,1,0.,51500.,1,0.,51500.,0xffffffff,0xffffffff
+1,h454_upvpd_le_hitmap,h454_upvpd_le_hitmap, 1,-0.5,37.5,0xffffffff,0xffffffff     
+1,h455_upvpd_te_hitmap,h455_upvpd_te_hitmap, 1,-0.5,37.5,0xffffffff,0xffffffff     
+2,h456_upvpd_ToT_vs_Chan,h456_upvpd_ToT_vs_Chan, 1,-0.5,37.5,1,0,50.,0xffffffff,0xffffffff     // ns
 //
-2,h457_tof_leHitChan_vs_traynum_east,h457_tof_leHitChan_vs_traynum_east,60,59.5,119.5,24,-0.5,23.5,0xffffffff,0xffffffff     // ns
-2,h458_tof_leHitChan_vs_traynum_west,h458_tof_leHitChan_vs_traynum_west,60,-0.5,59.5,24,-0.5,23.5,0xffffffff,0xffffffff     // ns
-2,h459_tof_teHitChan_vs_traynum_east,h459_tof_teHitChan_vs_traynum_east,60,59.5,119.5,24,-0.5,23.5,0xffffffff,0xffffffff     // ns
-2,h460_tof_teHitChan_vs_traynum_west,h460_tof_teHitChan_vs_traynum_west,60,-0.5,59.5,24,-0.5,23.5,0xffffffff,0xffffffff     // ns
+2,h457_tof_leHitChan_vs_traynum_east,h457_tof_leHitChan_vs_traynum_east,1,59.5,119.5,1,-0.5,23.5,0xffffffff,0xffffffff     // ns
+2,h458_tof_leHitChan_vs_traynum_west,h458_tof_leHitChan_vs_traynum_west,1,-0.5,59.5,1,-0.5,23.5,0xffffffff,0xffffffff     // ns
+2,h459_tof_teHitChan_vs_traynum_east,h459_tof_teHitChan_vs_traynum_east,1,59.5,119.5,1,-0.5,23.5,0xffffffff,0xffffffff     // ns
+2,h460_tof_teHitChan_vs_traynum_west,h460_tof_teHitChan_vs_traynum_west,1,-0.5,59.5,1,-0.5,23.5,0xffffffff,0xffffffff     // ns
 //
-2,h461_tof_tray01_10_ToT_vs_Chan_east,h461_tof_tray01_10_ToT_vs_Chan_east,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h462_tof_tray11_20_ToT_vs_Chan_east,h462_tof_tray11_20_ToT_vs_Chan_east,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h463_tof_tray21_30_ToT_vs_Chan_east,h463_tof_tray21_30_ToT_vs_Chan_east,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h464_tof_tray31_40_ToT_vs_Chan_east,h464_tof_tray31_40_ToT_vs_Chan_east,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h465_tof_tray41_50_ToT_vs_Chan_east,h465_tof_tray41_50_ToT_vs_Chan_east,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h466_tof_tray51_60_ToT_vs_Chan_east,h466_tof_tray51_60_ToT_vs_Chan_east,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h467_tof_tray01_10_ToT_vs_Chan_west,h467_tof_tray01_10_ToT_vs_Chan_west,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h468_tof_tray11_20_ToT_vs_Chan_west,h468_tof_tray11_20_ToT_vs_Chan_west,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h469_tof_tray21_30_ToT_vs_Chan_west,h469_tof_tray21_30_ToT_vs_Chan_west,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h470_tof_tray31_40_ToT_vs_Chan_west,h470_tof_tray31_40_ToT_vs_Chan_west,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h471_tof_tray41_50_ToT_vs_Chan_west,h471_tof_tray41_50_ToT_vs_Chan_west,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
-2,h472_tof_tray51_60_ToT_vs_Chan_west,h472_tof_tray51_60_ToT_vs_Chan_west,1920,-0.5,1919.5,100,0.,50.,0xffffffff,0xffffffff     // ns
+2,h461_tof_tray01_10_ToT_vs_Chan_east,h461_tof_tray01_10_ToT_vs_Chan_east,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h462_tof_tray11_20_ToT_vs_Chan_east,h462_tof_tray11_20_ToT_vs_Chan_east,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h463_tof_tray21_30_ToT_vs_Chan_east,h463_tof_tray21_30_ToT_vs_Chan_east,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h464_tof_tray31_40_ToT_vs_Chan_east,h464_tof_tray31_40_ToT_vs_Chan_east,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h465_tof_tray41_50_ToT_vs_Chan_east,h465_tof_tray41_50_ToT_vs_Chan_east,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h466_tof_tray51_60_ToT_vs_Chan_east,h466_tof_tray51_60_ToT_vs_Chan_east,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h467_tof_tray01_10_ToT_vs_Chan_west,h467_tof_tray01_10_ToT_vs_Chan_west,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h468_tof_tray11_20_ToT_vs_Chan_west,h468_tof_tray11_20_ToT_vs_Chan_west,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h469_tof_tray21_30_ToT_vs_Chan_west,h469_tof_tray21_30_ToT_vs_Chan_west,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h470_tof_tray31_40_ToT_vs_Chan_west,h470_tof_tray31_40_ToT_vs_Chan_west,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h471_tof_tray41_50_ToT_vs_Chan_west,h471_tof_tray41_50_ToT_vs_Chan_west,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
+2,h472_tof_tray51_60_ToT_vs_Chan_west,h472_tof_tray51_60_ToT_vs_Chan_west,1,-0.5,1919.5,1,0.,50.,0xffffffff,0xffffffff     // ns
 //
-1,h473_upvpd_ToT,h473_upvpd_ToT,100,0.,50.,0xffffffff,0xffffffff     // ns
+1,h473_upvpd_ToT,h473_upvpd_ToT,1,0.,50.,0xffffffff,0xffffffff     // ns
 //
 //ZDC
 //

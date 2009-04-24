@@ -15,12 +15,15 @@
 #include "L2UpsilonMassHistogramGroup.h"
 #include "VPDHistogramGroup.h"
 #include "VPDHiHistogramGroup.h"
-#include "FMSHistogramGroup.h"
-#include "pp2ppHistogramGroup.h"
+//#include "FMSHistogramGroup.h"
+//#include "pp2ppHistogramGroup.h"
 //#include "HighTowerFlensburgHistogramGroup.h"
 #include "SVTAnodeHybridHistogramGroup.h"
 #include "SVTAnodeSumHistogramGroup.h"
 #include "SsdPedestalHistogramGroup.h"
+#include "TOFupvpdHistogramGroup.h"
+#include "TOFtrayHistogramGroup.h"
+#include "TOFcheckHistogramGroup.h"
 
 #include "TLatex.h"
 
@@ -46,9 +49,15 @@ void GroupCollection::serverCreate() {
 #ifdef NEW_DAQ_READER
   insert( new VPDHiHistogramGroup("Trigger","vpdHi","any","trg") );
 #endif
-  insert( new FMSHistogramGroup("Trigger","fms","any","trg") );
-  insert( new pp2ppHistogramGroup(0, "P2P","Trg1-16","any","trg") );
-  insert( new pp2ppHistogramGroup(1, "P2P","Trg17-32","any","trg") );
+  //insert( new FMSHistogramGroup("Trigger","fms","any","trg") );
+  //insert( new pp2ppHistogramGroup(0, "P2P","Trg1-16","any","trg") );
+  //insert( new pp2ppHistogramGroup(1, "P2P","Trg17-32","any","trg") );
+  insert( new TOFupvpdHistogramGroup("TOF", "upvpd","any","TOF") );
+  insert( new TOFtrayHistogramGroup(0,"TOF","east Tray 1-30","any","TOF") );
+  insert( new TOFtrayHistogramGroup(1,"TOF", "east Tray 31-60","any","TOF") );
+  insert( new TOFtrayHistogramGroup(2,"TOF", "west Tray 61-90","any","TOF") );
+  insert( new TOFtrayHistogramGroup(3,"TOF", "west Tray 91-120","any","TOF") );
+  insert( new TOFcheckHistogramGroup("TOF", "TOF check","any","TOF") );
 
   char sub[1024];
   for ( unsigned int i=0; i< 14; i++) {

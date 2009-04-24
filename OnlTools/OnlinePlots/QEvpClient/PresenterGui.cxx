@@ -52,7 +52,8 @@ static TQtBrowserMenuItem_t gMenu_Data[] = {
   { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
   { "&Print All", kFilePrintAll, 0,                  "Print the TCanvas image ",            mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
   { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
-  { "&Reference", kReference,    Qt::CTRL+Qt::Key_R, "Open reference plots ... ",           mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
+  { "&Reference", kReference,    Qt::CTRL+Qt::Key_R, "Open reference plots ... ",           
+mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
   { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/quit.xpm")    },
 
   { "About",      kHelpAbout,      0, "", ""},
@@ -322,14 +323,13 @@ void PresenterGui::SetDefaults()
   //TabNames[7][1]="TOFp Global";
   //TabNames[7][2]="TOFp Test";
   // Jing Liu changes the following, for run8 and future runs, 02/25/2008:
-  nSubTabs[8]=7;
+  nSubTabs[8]=6;
   TabNames[8][1]="upvpd";
-  TabNames[8][2]="TrayHitmap-west";  
-  TabNames[8][3]="TrayHitmap-east";  
-  TabNames[8][4]="ToT Tray01_30";
-  TabNames[8][5]="ToT Tray31_60";
-  TabNames[8][6]="ToT Tray61_90";
-  TabNames[8][7]="ToT Tray91_120";
+  TabNames[8][2]="Error check";  
+  TabNames[8][3]="TrayHitmap 01-30";  
+  TabNames[8][4]="TrayHitmap 31-60";  
+  TabNames[8][5]="TrayHitmap 61-90";  
+  TabNames[8][6]="TrayHitmap 91-120";  
 
   //BBC
   nSubTabs[9]=6;
