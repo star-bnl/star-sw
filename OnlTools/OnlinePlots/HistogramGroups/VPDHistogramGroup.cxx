@@ -63,22 +63,26 @@ VPDHistogramGroup::VPDHistogramGroup(const char* group, const char* subGroup, co
   h_vpd_vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 #else
   char tmpchr[200]; 
-
+  char tmpchr1[200];
   sprintf(tmpchr,"vpd_east_ADClo");
-  h_vpd_cdb[0]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
+  sprintf(tmpchr1,"vpd east ADC lowTH");
+  h_vpd_cdb[0]=new TH2D(tmpchr,tmpchr1,16,-0.5,15.5,400,-0.5,4095.5);
   h_vpd_cdb[0]->SetXTitle("Channel # (east)");
   h_vpd_cdb[0]->SetYTitle("Low-Th ADC (east)");
   sprintf(tmpchr,"vpd_east_TAClo");
-  h_vpd_cdb[1]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
+  sprintf(tmpchr1,"vpd east TAC lowTH");
+  h_vpd_cdb[1]=new TH2D(tmpchr,tmpchr1,16,-0.5,15.5,400,-0.5,4095.5);
   h_vpd_cdb[1]->SetXTitle("Channel # (east)");
   h_vpd_cdb[1]->SetYTitle("Low-Th TAC (east)");
 
   sprintf(tmpchr,"vpd_west_ADClo");
-  h_vpd_cdb[2]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
+  sprintf(tmpchr1,"vpd west ADC lowTH");
+  h_vpd_cdb[2]=new TH2D(tmpchr,tmpchr1,16,-0.5,15.5,400,-0.5,4095.5);
   h_vpd_cdb[2]->SetXTitle("Channel # (west");
   h_vpd_cdb[2]->SetYTitle("Low-Th ADC (west)");
   sprintf(tmpchr,"vpd_west_TAClo");
-  h_vpd_cdb[3]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
+  sprintf(tmpchr1,"vpd west TAC lowTH");
+  h_vpd_cdb[3]=new TH2D(tmpchr,tmpchr1,16,-0.5,15.5,400,-0.5,4095.5);
   h_vpd_cdb[3]->SetXTitle("Channel # (west)");
   h_vpd_cdb[3]->SetYTitle("Low-Th TAC (west)");
 
@@ -88,18 +92,19 @@ VPDHistogramGroup::VPDHistogramGroup(const char* group, const char* subGroup, co
   h_vpd_tac_east_vs_tac_west->SetYTitle("TAC East");
 
   sprintf(tmpchr,"h_vpd_vertex_vs_l3_vertex");
-  h_vpd_vertex_vs_l3_vertex = new TH2D(tmpchr,"VPD TAC Difference vs. L3 Vertex z-Position", 200, -200, 200, 800, -0.5, 8191.5);
+  //h_vpd_vertex_vs_l3_vertex = new TH2D(tmpchr,"VPD TAC Difference vs. L3 Vertex z-Position", 200, -200, 200, 800, -0.5, 8191.5);
+  h_vpd_vertex_vs_l3_vertex = new TH2D(tmpchr,"VPD TAC Difference vs. L3 Vertex z-Position", 200, -200, 200, 200, 3600,4600);
   h_vpd_vertex_vs_l3_vertex->SetXTitle("L3 Vertex z-Position [cm]");
   h_vpd_vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 
   for(int i=0;i<4;i++){
-    h_vpd_cdb[i]->GetXaxis()->SetLabelSize(0.06);
-    h_vpd_cdb[i]->GetYaxis()->SetLabelSize(0.055);
+    h_vpd_cdb[i]->GetXaxis()->SetLabelSize(0.055);
+    h_vpd_cdb[i]->GetYaxis()->SetLabelSize(0.05);
   }
-  h_vpd_tac_east_vs_tac_west->GetXaxis()->SetLabelSize(0.06);
-  h_vpd_tac_east_vs_tac_west->GetYaxis()->SetLabelSize(0.055);
-  h_vpd_vertex_vs_l3_vertex->GetXaxis()->SetLabelSize(0.06);
-  h_vpd_vertex_vs_l3_vertex->GetYaxis()->SetLabelSize(0.055);
+  h_vpd_tac_east_vs_tac_west->GetXaxis()->SetLabelSize(0.055);
+  h_vpd_tac_east_vs_tac_west->GetYaxis()->SetLabelSize(0.05);
+  h_vpd_vertex_vs_l3_vertex->GetXaxis()->SetLabelSize(0.055);
+  h_vpd_vertex_vs_l3_vertex->GetYaxis()->SetLabelSize(0.05);
 
 #endif
 
