@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.90 2009/03/10 23:43:53 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.91 2009/04/27 20:50:43 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -380,7 +380,7 @@ int StMuDstMaker::Init(){
   mIOMaker = (StIOMaker*)GetMaker("IOMaker");
   mTreeMaker = (StTreeMaker*)GetMaker("outputStream");
   mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("strangeMuDst");
-  TObjectSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers
+  TDataSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers
   if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers
 
   return 0;
@@ -1381,6 +1381,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.91  2009/04/27 20:50:43  perev
+ * Change type of DataSet
+ *
  * Revision 1.90  2009/03/10 23:43:53  jeromel
  * Set tree size to max size
  *
