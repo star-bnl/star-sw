@@ -1,5 +1,0 @@
-# $Id $
-# package geant3
-# author: 
-Library:libgeant3.so:LIBS +=   -lminicern -lVMC -lEG -lPhysics
-#Library:libgeant3.so:LIBS +=   -lapythia  -lminicern  -lEG  -lPhysics  -lVMC  -lPythia6

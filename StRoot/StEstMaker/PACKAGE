@@ -1,5 +1,0 @@
-# $Id $
-# package StEstMaker
-# author: 
-Library:libStEstMaker.so:LIBS +=   -lglobal_Tables  -lsim_Tables -lsvt_Tables  -ltpc_Tables -lStChain  -l_St_global  -lStSvtClassLibrary
-#Library:libStEstMaker.so:LIBS +=   -lglobal  -lglobal_Tables  -lsim_Tables  -lStChain  -lSt_global  -lStSvtClassLibrary  -lsvt_Tables  -ltpc_Tables
