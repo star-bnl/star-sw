@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.35 2009/04/06 19:23:53 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.36 2009/04/28 13:36:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.36  2009/04/28 13:36:32  ullrich
+ * Updated PWG enumarations.
+ *
  * Revision 2.35  2009/04/06 19:23:53  ullrich
  * Add detector Ids for FPD East/West and FMS.
  *
@@ -245,8 +248,8 @@ enum StVertexId {kUndefinedVtxId   = kUndefinedVertexIdentifier,
                  kXiVtxId          = kXiDecayIdentifier,
                  kKinkVtxId        = kKinkDecayIdentifier,
                  kOtherVtxId       = kOtherTypeIdentifier,
-	       kFtpcEastCalVtxId = kFtpcEastCalibrationVertexIdentifier,
-	       kFtpcWestCalVtxId = kFtpcWestCalibrationVertexIdentifier};
+                 kFtpcEastCalVtxId = kFtpcEastCalibrationVertexIdentifier,
+                 kFtpcWestCalVtxId = kFtpcWestCalibrationVertexIdentifier};
 
 /*!
  * \enum StRichPidFlag
@@ -293,13 +296,18 @@ enum StRichHitFlag {eDeconvoluted=1,                                   /**< enum
  * \enum StPwg
  */
 enum StPwg         {generic,                                           /**< enum value generic */
-                    ebye,                                              /**< enum value ebye */
-                    hbt,                                               /**< enum value hbt */
-                    highpt,                                            /**< enum value highpt */
-                    pcoll,                                             /**< enum value pcoll */
-                    spectra,                                           /**< enum value spectra */
-                    spin,                                              /**< enum value spin */
-                    strangeness};
+                    ebye,                                              /**< enum value for ebye PWG (obsolete) */
+                    hbt,                                               /**< enum value for hbt PWG (obsolete) */
+                    highpt,                                            /**< enum value for highpt PWG (obsolete) */
+                    pcoll,                                             /**< enum value for peripheral collision PWG */
+                    upc = pcoll,                                       /**< alias for pcoll */
+                    spectra,                                           /**< enum value for spectra PWG (obsolete) */
+                    spin,                                              /**< enum value for spin PWG */
+                    strangeness,                                       /**< enum value for strangeness PWG (obsolete) */
+                    heavy,                                             /**< enum value for heavy flavor PWG */
+                    bulkcorr,                                          /**< enum value for bulk correlation PWG */
+                    jetcorr,                                           /**< enum value for jet correlation PWG */
+                    lfspectra};                                        /**< enum value for light flavor spectra PWG */
 
 /*!
  * \enum StEmcCrateStatus
