@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StG3Particle.cxx,v 1.3 2009/04/21 19:10:51 perev Exp $
+// @(#)root/eg:$Id: StG3Particle.cxx,v 1.4 2009/04/28 22:40:26 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -63,6 +63,7 @@ void StG3ParticleMaster::Update()
     if (ITRA > size0) {myVec.push_back(new StGENParticle(ITRA-1));}
     else              {myVec[ITRA-1]->Clear()			 ;}
     StGENParticle *tk = myVec[ITRA-1];
+    tk->Clear();
     VERT[3] = TOFG*kC;
     PVERT[4] = Gea2Mas(IPART);
     tk->SetGea(IPART);
@@ -75,7 +76,7 @@ void StG3ParticleMaster::Update()
       tk->SetMother(0,myVec[NTBEAM-1]);
       myVec[NTBEAM-1]->AddDaughter(tk);
     }
-    if (NTTARG && NTTARG<ITRA) tk->SetMother(1,myVec[NTTARG-1]);
+    if (NTTARG>0 && NTTARG<ITRA) tk->SetMother(1,myVec[NTTARG-1]);
   } 
 
 }
