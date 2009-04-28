@@ -163,7 +163,7 @@ struct rtsMonL1Counters {
     u_int deadtime;
   } trgs[33];
   u_int detector_deadtime[16];
-}
+};
 
 struct rtsMonEVB {
 	u_int mb_run ;	// MB stored in this run 
