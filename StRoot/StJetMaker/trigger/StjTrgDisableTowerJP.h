@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgDisableTowerJP.h,v 1.1 2008/09/21 19:11:46 tai Exp $
+// $Id: StjTrgDisableTowerJP.h,v 1.2 2009/04/28 02:37:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGDISABLETOWERJP_H
 #define STJTRGDISABLETOWERJP_H
@@ -14,6 +14,9 @@ class StjTrgDisableTowerJP : public StjTrgDisableTower {
 public:
   StjTrgDisableTowerJP(StjTrg* src, int badTowerId, StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdMap* jpTowerMap)
     : StjTrgDisableTower(src, badTowerId)
+    , _bemc(bemc), _jpTowerMap(jpTowerMap) { }
+  StjTrgDisableTowerJP(StjTrg* src, int nbadTowerIds, int* badTowerIds, StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdMap* jpTowerMap)
+    : StjTrgDisableTower(src, nbadTowerIds, badTowerIds)
     , _bemc(bemc), _jpTowerMap(jpTowerMap) { }
   virtual ~StjTrgDisableTowerJP() { }
 
