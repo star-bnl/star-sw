@@ -37,7 +37,7 @@ public:
   virtual ~StjMCAsymMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCAsymMaker.C,v 1.1 2008/11/10 22:17:24 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCAsymMaker.C,v 1.2 2009/04/28 02:38:07 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -144,7 +144,7 @@ public:
     _tree->Branch("costh"         , &_costh             , "costh/D");	 
     _tree->Branch("x1"            , &_x1                , "x1/D");		 
     _tree->Branch("x2"            , &_x2                , "x2/D");		 
-    _tree->Branch("pid"           , &_pid               , "pid/D");		 
+    _tree->Branch("pid"           , &_pid               , "pid/I");		 
     _tree->Branch("pdg1"          , &_pdg1              , "pdg1/I");	 
     _tree->Branch("pdg2"          , &_pdg2              , "pdg2/I");	 
     _tree->Branch("pdg3"          , &_pdg3              , "pdg3/I");	 
