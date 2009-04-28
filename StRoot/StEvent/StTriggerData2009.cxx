@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.11 2009/03/19 02:46:01 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.12 2009/04/28 17:12:03 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.12  2009/04/28 17:12:03  ullrich
+ * Updated.
+ *
  * Revision 2.11  2009/03/19 02:46:01  ullrich
  * Add 2nd argument (pre/post) to vpdEarliestTDC().
  *
@@ -65,7 +68,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     mYear=2009;
     mRun = run;
     mData= new TriggerDataBlk2009;
-    debug = 0;
+    debug = 1;
     
     unsigned int ver = data->FormatVersion; 
     swapI(&ver);
