@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.16 2009/03/10 23:43:53 jeromel Exp $
+ * $Id: StMuIOMaker.cxx,v 1.17 2009/04/28 22:15:10 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -68,7 +68,7 @@ StMuIOMaker::~StMuIOMaker() {
 */
 int StMuIOMaker::Init(){
   DEBUGMESSAGE("");
-  TObjectSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers 
+  TDataSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers 
   if (muDstSet ) muDstSet ->SetName("MuDst");          ///< added for Valeri to be able to pick it up in other makers 
 
 // borrow StIOMaker::TString TreeName to pass a save flag for MuDst  
@@ -306,6 +306,9 @@ void StMuIOMaker::closeMuWrite(){
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.17  2009/04/28 22:15:10  perev
+ * CleanUp
+ *
  * Revision 1.16  2009/03/10 23:43:53  jeromel
  * Set tree size to max size
  *
