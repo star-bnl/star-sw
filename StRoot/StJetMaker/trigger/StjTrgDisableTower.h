@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgDisableTower.h,v 1.1 2008/09/21 19:11:45 tai Exp $
+// $Id: StjTrgDisableTower.h,v 1.2 2009/04/28 02:37:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGDISABLETOWER_H
 #define STJTRGDISABLETOWER_H
@@ -14,6 +14,10 @@ public:
   StjTrgDisableTower(StjTrg* src, int badTowerId)
     : _src(src)
     , _badTowerIdSet(&badTowerId, &badTowerId + 1)
+    , _runNumber(-1), _eventId(-1) { }
+  StjTrgDisableTower(StjTrg* src, int nbadTowerIds, int* badTowerIds)
+    : _src(src)
+    , _badTowerIdSet(badTowerIds, badTowerIds + nbadTowerIds)
     , _runNumber(-1), _eventId(-1) { }
 virtual ~StjTrgDisableTower() { }
 

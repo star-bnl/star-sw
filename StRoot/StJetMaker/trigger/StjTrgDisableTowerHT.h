@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgDisableTowerHT.h,v 1.1 2008/09/21 19:11:46 tai Exp $
+// $Id: StjTrgDisableTowerHT.h,v 1.2 2009/04/28 02:37:32 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGDISABLETOWERHT_H
 #define STJTRGDISABLETOWERHT_H
@@ -11,6 +11,8 @@ class StjTrgDisableTowerHT : public StjTrgDisableTower {
 public:
   StjTrgDisableTowerHT(StjTrg* src, int badTowerId)
     : StjTrgDisableTower(src, badTowerId) { }
+  StjTrgDisableTowerHT(StjTrg* src, int nbadTowerIds, int* badTowerIds)
+    : StjTrgDisableTower(src, nbadTowerIds, badTowerIds) { }
   virtual ~StjTrgDisableTowerHT() { }
 
   bool soft() const;
