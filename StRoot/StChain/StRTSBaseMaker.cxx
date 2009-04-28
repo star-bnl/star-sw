@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.5 2008/12/03 20:41:00 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.6 2009/04/28 16:31:19 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.6  2009/04/28 16:31:19  fine
+ * downgrade the message level from INFO to DEBUG
+ *
  * Revision 1.5  2008/12/03 20:41:00  fine
  * add the DetectorName method to make DAQ_READER happy
  *
@@ -56,7 +59,7 @@ StRTSBaseMaker::StRTSBaseMaker(const char *detectorName,const char *makerName)
       :StMaker(detectorName), fDaq_Dta(0), fDetectorName(detectorName)
 {
   if (makerName && makerName[0]) SetName(makerName);
-  LOG_INFO << "StRTSBaseMaker::ctor"  << endm;
+  LOG_DEBUG << "StRTSBaseMaker::ctor"  << endm;
 }
 
 //_____________________________________________________________

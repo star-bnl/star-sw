@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.20 2009/03/23 15:38:23 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.21 2009/04/28 16:35:48 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.21  2009/04/28 16:35:48  fine
+ * downgrade the message level from INFO to DEBUG
+ *
  * Revision 1.20  2009/03/23 15:38:23  fine
  * remove redundant messafes , reduce the level of others from INFO to DEBUG
  *
@@ -250,8 +253,8 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
        // make sure there was no data anymore
        if (fBank && !fBank->is_empty()) 
        {
-          LOG_INFO << " You are going to use \"" << detName << "/" << bankName << "\" RTS bank" << endm;
-          LOG_INFO << " even though you did not use all information from the previous RTS  bank: \""
+          LOG_DEBUG << " You are going to use \"" << detName << "/" << bankName << "\" RTS bank" << endm;
+          LOG_DEBUG << " even though you did not use all information from the previous RTS  bank: \""
                 << fLastQuery << "\" yet" << endm;
        }
        delete fRtsTable; 
@@ -265,7 +268,7 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
    if ( dtBankSize )  {
        // we will reallocate it within FillTable() method
       fRtsTable = new StRtsTable(dtBankSize,2);
-      fRtsTable->Print();
+      if (Debug() > 3 ) fRtsTable->Print();
       AddData(fRtsTable);
    }
    return fRtsTable;
@@ -421,8 +424,8 @@ Int_t StRtsReaderMaker::Make()
          << endm ;
          res = kStErr;
        }
-       LOG_INFO << " ----- > StRtsReaderMaker::Make() was Ok  < ----- ! " 
-                << kStOk << endm;
+       LOG_DEBUG << "StRtsReaderMaker::Make() was Ok  < ----- ! " 
+                 << kStOk << endm;
    }
    return res;
 #else
