@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.12 2009/04/28 17:12:03 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.13 2009/04/28 23:10:26 jeromel Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.13  2009/04/28 23:10:26  jeromel
+ * debug=0
+ *
  * Revision 2.12  2009/04/28 17:12:03  ullrich
  * Updated.
  *
@@ -68,7 +71,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     mYear=2009;
     mRun = run;
     mData= new TriggerDataBlk2009;
-    debug = 1;
+    debug = 0;
     
     unsigned int ver = data->FormatVersion; 
     swapI(&ver);
