@@ -156,6 +156,15 @@ struct rtsMonSCA {
 
 } ;
 
+struct rtsMonL1Counters {
+  struct {
+    char name[32];
+    u_int rate;
+    u_int deadtime;
+  } trgs[33];
+  u_int detector_deadtime[16];
+}
+
 struct rtsMonEVB {
 	u_int mb_run ;	// MB stored in this run 
 	u_int gb_free ;	// still free on all disks
