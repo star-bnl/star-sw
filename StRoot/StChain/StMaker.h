@@ -46,11 +46,11 @@ class StTestMaker;
 class StChainOpt;
 
 struct DbAlias_t {
-  Char_t *tag;
+  char *tag;
   Int_t date;
   Int_t time;
-  Char_t *geometry;
-  Char_t *comment;
+  char *geometry;
+  char *comment;
 };
 
 
@@ -96,7 +96,7 @@ public:
 
    /// Constructor & Destructor
 
-                        StMaker(const Char_t *name="",const Char_t *dummy=0);
+                        StMaker(const char *name="",const char *dummy=0);
    virtual              ~StMaker();
    virtual Int_t IsChain() const {return 0;}
 
@@ -113,9 +113,9 @@ public:
    virtual Int_t        FinishRun(Int_t oldrunumber);
 
    
-   virtual void         FatalErr(Int_t Ierr, const Char_t *Com);  
+   virtual void         FatalErr(Int_t Ierr, const char *Com);  
    virtual void         PrintInfo();
-   virtual void         NotifyMe(const Char_t *about,const void *ptr){;}
+   virtual void         NotifyMe(const char *about,const void *ptr){;}
    virtual void         AddMaker (StMaker *mk);
 #if 0
    virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE); 
@@ -123,29 +123,32 @@ public:
    virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE) {}
 #endif
    ///  User methods
-   virtual TDataSet   *AddData (TDataSet *data=0,const Char_t *dir=".data");
-   virtual TObjectSet *AddObj  (TObject *obj,const Char_t *dir);
-   virtual void  ToWhiteBoard(const Char_t *name, void *dat);
-   virtual void  ToWhiteBoard(const Char_t *name, TObject *dat, Int_t owner);
-   virtual void  ToWhiteConst(const Char_t *name, void *dat);
-   virtual void  ToWhiteConst(const Char_t *name, TObject *dat, Int_t owner);
+   virtual void  AddData (TDataSet *data,const char *dir=".data");
+   virtual TDataSet *AddObj  (TObject *obj ,const char *dir, int owner=1);
+   virtual TDataSet *ToWhiteBoard(const char *name, void *dat);
+   virtual TDataSet *ToWhiteBoard(const char *name, void *dat, void *del);
+   virtual TDataSet *ToWhiteBoard(const char *name, TObject *dat, Int_t owner);
+
+   virtual TDataSet *ToWhiteConst(const char *name, void *dat);
+   virtual TDataSet *ToWhiteConst(const char *name, TObject *dat, Int_t owner);
+   virtual TDataSet *ToWhiteConst(const char *name, void *dat, void *del);
 
 //  called WhiteBoard(name,&ptr)
-   virtual void *WhiteBoard  (const Char_t *name, void *v=0) const;
+   virtual TDataSet *WhiteBoard  (const char *name, void *v=0) const;
 //______________________________________________________________________________
    virtual Int_t        Skip(Int_t nskip);     //Skip events
 
    virtual void         AddConst(TDataSet *data=0){AddData(data,".const");}
-   virtual void         AddHist(TH1 *h,const Char_t *dir=0);
+   virtual void         AddHist(TH1 *h,const char *dir=0);
    virtual void         AddGarb (TDataSet *data=0){AddData(data,".garb");};
    virtual void         AddRunco (TDataSet *data=0){AddData(data,".runco");};
-   virtual void         AddRunco (Double_t par,const Char_t *name,const Char_t *comment);
+   virtual void         AddRunco (Double_t par,const char *name,const char *comment);
            void         AddRunCont (TDataSet *data=0){AddRunco(data);}; //alias
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
-   virtual TH1         *GetHist(const Char_t *histName) const {TList *l=GetHistList(); return l?(TH1*)l->FindObject(histName):(TH1*)0;};
+   virtual TH1         *GetHist(const char *histName) const {TList *l=GetHistList(); return l?(TH1*)l->FindObject(histName):(TH1*)0;};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
    virtual StMaker     *Cd(){return cd();};
-   static  StMaker     *New(const Char_t *classname, const Char_t *name="", void *title=0);
+   static  StMaker     *New(const char *classname, const char *name="", void *title=0);
 
 
    /// STAR methods
@@ -165,19 +168,19 @@ public:
    virtual StEvtHddr   *GetEvtHddr() const; //
    virtual Int_t        GetDate()  const ;
    virtual Int_t        GetTime()  const ;
-   virtual const Char_t *GetEventType() const ;
+   virtual const char *GetEventType() const ;
 
 
    // Get methods
-   virtual TDataSet  *GetData(const Char_t *name, const Char_t *dir=".data") const;
-   virtual TDataSet  *GetDataSet (const Char_t *logInput) const {return FindDataSet(logInput);}
-   virtual TDataSet  *   DataSet (const Char_t *logInput)   const 
+   virtual TDataSet  *GetData(const char *name, const char *dir=".data") const;
+   virtual TDataSet  *GetDataSet (const char *logInput) const {return FindDataSet(logInput);}
+   virtual TDataSet  *   DataSet (const char *logInput)   const 
                            {return GetDataSet(logInput);};
-   virtual TDataSet  *GetInputDS (const Char_t *logInput)   const 
+   virtual TDataSet  *GetInputDS (const char *logInput)   const 
                            {return GetDataSet(logInput);};
 
-   virtual TDataSet  *GetDataBase(const Char_t *logInput,const TDatime *td=0);
-   virtual TDataSet  *GetInputDB (const Char_t *logInput)
+   virtual TDataSet  *GetDataBase(const char *logInput,const TDatime *td=0);
+   virtual TDataSet  *GetInputDB (const char *logInput)
                           {return GetDataBase(logInput);};
    virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
 
@@ -186,15 +189,15 @@ public:
    virtual Int_t           Debug() const {return GetDebug();};
    virtual Int_t        GetMakeReturn() const {return m_MakeReturn;}
    virtual TList       *Histograms()  const {return GetHistList();}
-   virtual TString      GetAlias (const Char_t *log, const Char_t *dir=".aliases") const ;
-   virtual TString      GetInput (const Char_t *log) const {return GetAlias(log);};
-   virtual TString      GetOutput(const Char_t *log) const {return GetAlias(log,".aliases");};
+   virtual TString      GetAlias (const char *log, const char *dir=".aliases") const ;
+   virtual TString      GetInput (const char *log) const {return GetAlias(log);};
+   virtual TString      GetOutput(const char *log) const {return GetAlias(log,".aliases");};
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
-   virtual StMaker     *GetMaker (const Char_t *mkname);
-   virtual StMaker     *GetMakerInheritsFrom (const Char_t *mktype) const;
+   virtual StMaker     *GetMaker (const char *mkname);
+   virtual StMaker     *GetMakerInheritsFrom (const char *mktype) const;
    virtual Bool_t       IsActive() {return TestBIT(kActive);}
-   virtual StMaker     *Maker (const Char_t *mkname){return GetMaker (mkname);};
+   virtual StMaker     *Maker (const char *mkname){return GetMaker (mkname);};
 
 
    /// Maker Status Bits 
@@ -205,23 +208,23 @@ public:
    virtual void         SetActive(Bool_t k=kTRUE) {if(k) SetBIT(kActive); else ResetBIT(kActive);} 
    virtual void         SetDebug(Int_t l=1);          // *MENU*
    virtual void         SetDEBUG(Int_t l=1);          // *MENU*
-   virtual void         SetFlavor(const Char_t *flav,const Char_t *tabname);  //Set DB Flavor
+   virtual void         SetFlavor(const char *flav,const char *tabname);  //Set DB Flavor
    virtual void         SetMakeReturn(Int_t ret){m_MakeReturn=ret;}  
-   virtual void         SetAlias(const Char_t *log,const Char_t *act,const Char_t *dir=".aliases");
-   virtual void         AddAlias(const Char_t *log,const Char_t *act,const Char_t *dir=".aliases");
-   virtual void         SetInput(const Char_t *log,const Char_t *act){SetAlias(log,act);};
-   virtual void         SetOutput(const Char_t *log,const Char_t *act){SetAlias(log,act,".aliases");};
-   virtual void         SetOutput(const Char_t *log,TDataSet *ds);
+   virtual void         SetAlias(const char *log,const char *act,const char *dir=".aliases");
+   virtual void         AddAlias(const char *log,const char *act,const char *dir=".aliases");
+   virtual void         SetInput(const char *log,const char *act){SetAlias(log,act);};
+   virtual void         SetOutput(const char *log,const char *act){SetAlias(log,act,".aliases");};
+   virtual void         SetOutput(const char *log,TDataSet *ds);
    virtual void         SetOutput(TDataSet *ds){SetOutput(0,ds);};
    virtual void         SetOutputAll(TDataSet *ds,Int_t level=1);
    virtual void         SetMode(Int_t mode=0)   {m_Mode=mode;}   // *MENU*
-   virtual void         SetNotify(const Char_t *about,StMaker *mk);
+   virtual void         SetNotify(const char *about,StMaker *mk);
    virtual Int_t        GetMode() { return m_Mode;}
    virtual Int_t        GetDebug(){ return m_DebugLevel;}
    virtual const StChainOpt *GetChainOpt()    const;
    virtual TFile *GetTFile() const; 			
 
-   virtual void         NotifyEm(const Char_t *about,const void *ptr);
+   virtual void         NotifyEm(const char *about,const void *ptr);
 
    virtual Double_t     RealTime(){ return m_Timer.RealTime();}
    virtual Double_t     CpuTime() { return m_Timer.CpuTime();}
@@ -230,24 +233,24 @@ public:
    virtual void         PrintTimer(Option_t *option="");
    virtual void         PrintTotalTime(){}
 ///  special overload
-   virtual const Char_t  *GetName() const;
+   virtual const char  *GetName() const;
 
    /// Static functions
    static  StMaker     *GetMaker(const TDataSet *ds)  ;
    static EDataSetPass  ClearDS (TDataSet* ds,void *user );
-   static const Char_t *RetCodeAsString(Int_t kode);
-   static      Int_t    AliasDate(const Char_t *alias);
-   static      Int_t    AliasTime(const Char_t *alias);
-   static      Char_t  *AliasGeometry(const Char_t *alias);
+   static const char *RetCodeAsString(Int_t kode);
+   static      Int_t    AliasDate(const char *alias);
+   static      Int_t    AliasTime(const char *alias);
+   static      char  *AliasGeometry(const char *alias);
    static const DbAlias_t  *GetDbAliases();
    static      void     SetTestMaker(StTestMaker *mk)	{fgTestMaker=mk;}
 
-TObject        *GetDirObj(const Char_t *dir) const;
-void            SetDirObj(TObject *obj,const Char_t *dir);
-  virtual const Char_t *GetCVS() const
-  {static const Char_t cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.91 2009/03/17 20:03:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+TObject        *GetDirObj(const char *dir) const;
+void            SetDirObj(TObject *obj,const char *dir);
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.92 2009/04/28 22:45:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
-   virtual TDataSet  *FindDataSet (const Char_t *logInput,
+   virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
                                     const StMaker *dowMk=0) const ;
 
@@ -257,21 +260,21 @@ static void lsMakers(const StMaker *top);
 
 private:
   TAttr *m_Attr;		
-///< SetAttr(const Char_t *opt,const Char_t *for) 
+///< SetAttr(const char *opt,const char *for) 
 ///< sets value of m_Option data member
 public:
-Int_t         SetAttr(const Char_t *key,const Char_t *val,const Char_t *to=".");
-Int_t         SetAttr(const Char_t *key,Int_t         val,const Char_t *to=".");
-Int_t         SetAttr(const Char_t *key,UInt_t        val,const Char_t *to=".");
-Int_t         SetAttr(const Char_t *key,Double_t      val,const Char_t *to=".");
+Int_t         SetAttr(const char *key,const char *val,const char *to=".");
+Int_t         SetAttr(const char *key,Int_t         val,const char *to=".");
+Int_t         SetAttr(const char *key,UInt_t        val,const char *to=".");
+Int_t         SetAttr(const char *key,Double_t      val,const char *to=".");
 Int_t         SetAttr(const StMaker *mk);
-Int_t         RemAttr(const Char_t *key,                const Char_t *to=".")
+Int_t         RemAttr(const char *key,                const char *to=".")
             {return SetAttr(key,".remove",to);}
 const TAttr *GetAttr() const 	{return m_Attr;}
-Int_t         IAttr(const Char_t *key) const;
-UInt_t      UAttr(const Char_t *key) const;
-Double_t      DAttr(const Char_t *key) const;
-const Char_t *SAttr(const Char_t *key) const;
+Int_t         IAttr(const char *key) const;
+UInt_t      UAttr(const char *key) const;
+Double_t      DAttr(const char *key) const;
+const char *SAttr(const char *key) const;
 void        PrintAttr() const;
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
@@ -295,10 +298,10 @@ class StTestMaker : public StMaker {
 public:
    /// Constructor & Destructor
 
-             StTestMaker(const Char_t *name="");
+             StTestMaker(const char *name="");
 virtual     ~StTestMaker(){};
 virtual void SetNext(StMaker *mk);
-virtual void Print(const Char_t *opt="") const;
+virtual void Print(const char *opt="") const;
 protected:
 
    StMaker *fNext;
@@ -309,8 +312,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.91 2009/03/17 20:03:36 perev Exp $
+// $Id: StMaker.h,v 1.92 2009/04/28 22:45:43 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.92  2009/04/28 22:45:43  perev
+// WhiteBoard cleanup
+//
 // Revision 1.91  2009/03/17 20:03:36  perev
 // Back to StMemSet version
 //

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.217 2009/03/20 03:17:34 perev Exp $
+// $Id: StMaker.cxx,v 1.218 2009/04/28 22:45:57 perev Exp $
 //
 //
 /*!
@@ -57,6 +57,19 @@ StMaker     *StMaker::fgFailedMaker = 0;
 StTestMaker *StMaker::fgTestMaker   = 0;
 Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
+
+class MyObjectSet : public TObjectSet 
+{
+  typedef void (*MyDelete_t)(void *p);
+public:
+MyObjectSet(const char *name,void *p,void *d):TObjectSet(name,(TObject*)p,0)
+           {fD=(MyDelete_t)d;}
+~MyObjectSet(){ (*fD)(GetObject());}
+private:
+MyDelete_t fD;
+};
+
+
 /* geometry version from Maxim 09/29/2005
 year2000                     VMC
 year_2a         
@@ -347,31 +360,32 @@ void StMaker::SetDirObj(TObject *obj,const Char_t *dir)
   set->SetObject(obj);
 }
 //______________________________________________________________________________
-TObjectSet *StMaker::AddObj(TObject *obj,const Char_t *dir)
+TDataSet *StMaker::AddObj(TObject *obj,const Char_t *dir,int owner)
 { 
   assert (dir[0]=='.');
-  TObjectSet *set = (TObjectSet*)Find(dir);
+  if (strcmp(".hist",dir)==0) 	{ //Histogram directory
+    AddHist((TH1*)obj); return 0;
+  } else 			{ //NonHistogram
+    return ToWhiteBoard(obj->GetName(),obj,owner);
+  }
+}
+//______________________________________________________________________________
+ void StMaker::AddHist(TH1 *h,const Char_t *)
+{  
+  TObjectSet *set = (TObjectSet*)Find(".hist");
   if (!set) { // No dir, make it
-    set = new TObjectSet(dir); Add(set);}
+    set = new TObjectSet(".hist"); Add(set);}
 
   TList *list = (TList *)set->GetObject();
   if (!list) {// No list, make it
-    list = new TList();
-    set->SetObject((TObject*)list);}
-  if (!obj) return set;
-  if(!list->FindObject(obj)) list->Add(obj);
-  return set;
-}
-//______________________________________________________________________________
- void StMaker::AddHist(TH1 *h,const Char_t *dir)
-{  
-  if (dir){/*unused*/}
-  if (!h) {AddObj(0,".hist");return;}
+    list = new TList(); set->SetObject(list);}
+
+  if (!h) return ;
+  if(!list->FindObject(h)) list->Add(h);
   if (h->InheritsFrom(TH1::Class())) h->SetDirectory(0);
-  AddObj(h,".hist");
 }    
 //______________________________________________________________________________
- void StMaker::AddRunco (Double_t par,const Char_t *name,const Char_t *comment)
+void StMaker::AddRunco (Double_t par,const Char_t *name,const Char_t *comment)
 {
    assert (name && name && comment[0]); 
 
@@ -385,28 +399,28 @@ TObjectSet *StMaker::AddObj(TObject *obj,const Char_t *dir)
 
 
 //______________________________________________________________________________
-TDataSet *StMaker::AddData(TDataSet *ds, const Char_t *dir)
+void StMaker::AddData(TDataSet *ds, const Char_t *dir)
 { 
   assert (dir); assert(dir[0]=='.');
   TDataSet *set = Find(dir);
   if (!set) { // No dir, make it
     set = new TObjectSet(dir); Add(set);}
-  if (!ds) return set;
+  if (!ds) return;
   Int_t dotMake = (strcmp(dir,".make")==0);
   Int_t inhMake = ds->InheritsFrom(StMaker::Class());
   if (dotMake!=inhMake) {
      Error("AddData","Add to %s is NOT allowed: %s.%s\n"
              ,dir,ds->ClassName(),ds->GetName());
-     return 0;}
+     return;}
 
   TList *tl = set->GetList();
   if (!tl || !tl->FindObject(ds->GetName())) {
     set->Add(ds);
   } else {
     Error("AddData","Data %s/%s is not added. ***Name clash***",dir,ds->GetName());
-    return 0;
+    return;
   }
-  return set;
+  return;
 }
 //______________________________________________________________________________
 TDataSet  *StMaker::GetData(const Char_t *name, const Char_t *dir) const
@@ -416,35 +430,55 @@ TDataSet  *StMaker::GetData(const Char_t *name, const Char_t *dir) const
   return set->Find(name);
 }
 //______________________________________________________________________________
-void StMaker::ToWhiteBoard(const Char_t *name, void *dat)
+TDataSet *StMaker::ToWhiteBoard(const Char_t *name, void *dat)
 {
    TObjectSet *envelop = new TObjectSet(name,(TObject*)dat,0);
    envelop->SetTitle(".envelop");
    AddData(envelop,".data");
+   return envelop;
 }
 //______________________________________________________________________________
-void StMaker::ToWhiteConst(const Char_t *name, void *dat)
+TDataSet *StMaker::ToWhiteBoard(const Char_t *name, void *dat, void *owner)
 {
-   TObjectSet *envelop = new TObjectSet(name,(TObject*)dat,0);
+   MyObjectSet *envelop = new MyObjectSet(name,dat,owner);
    envelop->SetTitle(".envelop");
-   AddData(envelop,".const");
+   AddData(envelop,".data");
+   return envelop;
 }
 //______________________________________________________________________________
-void StMaker::ToWhiteBoard(const Char_t *name, TObject *dat, Int_t owner)
+TDataSet *StMaker::ToWhiteBoard(const Char_t *name, TObject *dat, Int_t owner)
 {
    TObjectSet *envelop = new TObjectSet(name,dat,owner);
    envelop->SetTitle(".envelop");
    AddData(envelop,".data");
+   return envelop;
 }
 //______________________________________________________________________________
-void StMaker::ToWhiteConst(const Char_t *name, TObject *dat, Int_t owner)
+TDataSet *StMaker::ToWhiteConst(const Char_t *name, void *dat)
+{
+   TObjectSet *envelop = new TObjectSet(name,(TObject*)dat,0);
+   envelop->SetTitle(".envelop");
+   AddData(envelop,".const");
+   return envelop;
+}
+//______________________________________________________________________________
+TDataSet *StMaker::ToWhiteConst(const Char_t *name, void *dat, void *owner)
+{
+   MyObjectSet *envelop = new MyObjectSet(name,dat,owner);
+   envelop->SetTitle(".envelop");
+   AddData(envelop,".const");
+   return envelop;
+}
+//______________________________________________________________________________
+TDataSet *StMaker::ToWhiteConst(const Char_t *name, TObject *dat, Int_t owner)
 {
    TObjectSet *envelop = new TObjectSet(name,dat,owner);
    envelop->SetTitle(".envelop");
    AddData(envelop,".const");
+   return envelop;
 }
 //______________________________________________________________________________
-void *StMaker::WhiteBoard(const Char_t *name, void *v) const
+TDataSet *StMaker::WhiteBoard(const Char_t *name, void *v) const
 {
   void **dat = (void **)v;
   *dat = 0;
@@ -452,7 +486,7 @@ void *StMaker::WhiteBoard(const Char_t *name, void *v) const
   if (!ds) return 0;
   if (strcmp(".envelop",ds->GetTitle())==0) {*dat = ds->GetObject();}
   else					    {*dat = ds             ;}
-  return ds->GetObject();
+  return ds;
 }
 //______________________________________________________________________________
 void StMaker::AddAlias(const Char_t *log, const Char_t *act,const Char_t *dir)
@@ -1895,6 +1929,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.218  2009/04/28 22:45:57  perev
+// WhiteBoard cleanup
+//
 // Revision 1.217  2009/03/20 03:17:34  perev
 // upgr16a==upgr16+tpc2009
 //
