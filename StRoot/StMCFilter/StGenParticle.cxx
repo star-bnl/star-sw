@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StGenParticle.cxx,v 1.3 2009/04/21 19:10:51 perev Exp $
+// @(#)root/eg:$Id: StGenParticle.cxx,v 1.4 2009/04/28 22:41:22 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -11,17 +11,30 @@
 //______________________________________________________________________________
 void StGenParticle::Print(const char *opt) const
 {
+static int nCall=0; nCall++;
   printf("%4d - ",GetIdx());
-  printf("Ist=%d",GetStatusCode());
-  printf("Pdg=%d",GetPdgCode());
-  printf("\tGea=%d",GetGeaCode());
-  printf("\tNkids=%d",GetNDaughters());
+  printf("Ist=%1d",GetStatusCode());
+  printf(" Pdg=%5d",GetPdgCode());
+  printf(" Gea=%3d",GetGeaCode());
+
+  double V[3];  Vertex(V); printf(" Z=%5.1f ",V[2]);
+
+  if (GetNDaughters()) printf("\tKids=%d",GetNDaughters());
+
   int moth1 = -1,moth2=-1;
   const StGenParticle *m = GetMother(0);
   if (m) moth1 = m->GetIdx();
   m = GetMother(1);
   if (m) moth2 = m->GetIdx();
-  printf("\tMoth=(%d %d)",moth1,moth2);
+
+  if (moth1>=0 || moth2>=0) {
+    printf("\tMoth=(");
+    if (moth1>=0) {printf("%d ",moth1);} else {printf("_ ");}
+    if (moth2>=0) {printf("%d ",moth2);} else {printf("_" );}
+    printf(")");
+  }
+
+
   printf("\n");
 }
 //______________________________________________________________________________
