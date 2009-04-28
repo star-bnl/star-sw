@@ -1,5 +1,8 @@
-* $Id: agxuser.age,v 1.3 2009/04/09 22:34:10 perev Exp $
+* $Id: agxuser.age,v 1.4 2009/04/28 22:47:01 perev Exp $
 * $Log: agxuser.age,v $
+* Revision 1.4  2009/04/28 22:47:01  perev
+* More comments
+*
 * Revision 1.3  2009/04/09 22:34:10  perev
 * gfilter added
 *
@@ -143,8 +146,8 @@
   {
      call kugetc (string1,Len1)
      call uctoh(string1(1:Len1)//char(0),itring1,4,Len1+1);
-     itring1(65) = filt_act(0,itring1,     0);
-     itring1(65) = filt_act(3,gfkine ,gfvert);
+     itring1(65) = filt_act(0,itring1,     0);  !//Filter selection
+     itring1(65) = filt_act(3,gfkine ,gfvert);  !//Init RegectGT (GeantTracking)
   }
   else If Command=='GFILE'
   {  IER=0

@@ -1,5 +1,8 @@
-* $Id: gutrev.age,v 1.2 2009/04/09 22:45:29 perev Exp $
+* $Id: gutrev.age,v 1.3 2009/04/28 22:47:34 perev Exp $
 * $Log: gutrev.age,v $
+* Revision 1.3  2009/04/28 22:47:34  perev
+* More comments
+*
 * Revision 1.2  2009/04/09 22:45:29  perev
 * Filter at the end of Geant tracking
 *
@@ -57,7 +60,7 @@
       If (JHITS==0 & JDIGI==0 & JVOLUM>0 & JKINE>0) then
         CALL GTREVE
       endif
-      ieotri = filt_act(6,0,0)
+      ieotri = filt_act(6,0,0) !// call RejectGE (GeantEnd)
       END
 
 
