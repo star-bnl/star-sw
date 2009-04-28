@@ -11,6 +11,14 @@ struct rtsCndPwCondition
 
   unsigned int onbits;
   unsigned int offbits;
+
+  unsigned int onbits1;        // Support 128 bit conditions.  onbits is lsw, onbits3 is msw
+  unsigned int onbits2;
+  unsigned int onbits3;
+
+  unsigned int offbits1;
+  unsigned int offbits2;
+  unsigned int offbits3;
 };
 
 #endif
