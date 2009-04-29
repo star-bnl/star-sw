@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.9 2008/06/09 15:03:25 fisyak Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.10 2009/04/29 23:04:17 perev Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -173,8 +173,9 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
       const StSPtrVecTrackNode& theNodes = event->trackNodes();
       for (unsigned int i=0; i<theNodes.size(); i++) {
          StTrack *track = theNodes[i]->track(type);
-         if (track && track->flag() > 0
-               && track->detectorInfo() 
+         if (track &&  track->flag() > 0
+                   &&  track->detectorInfo() 
+                   && !track->bad() 
          //  &&   track->fitTraits().numberOfFitPoints(kTpcId) >= minFitPoints) 
          )
         {
