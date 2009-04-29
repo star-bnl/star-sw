@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.31 2007/10/11 21:51:40 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.32 2009/04/29 23:02:36 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.32  2009/04/29 23:02:36  perev
+ * check for big lenght added
+ *
  * Revision 2.31  2007/10/11 21:51:40  ullrich
  * Added member to handle number of possible points fpr PXL and IST.
  *
@@ -122,7 +125,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.31 2007/10/11 21:51:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.32 2009/04/29 23:02:36 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -530,6 +533,7 @@ int StTrack::bad() const
     if (::fabs(mImpactParameter)>world   )	return   22;
     if (::fabs(mLength)         >world   ) 	return   23;
     if (mLength <1./world	         )    	return   33;
+    if (mLength >   world	         )    	return   34;
     if (!mGeometry                       )	return   24;
     ierr = mGeometry->bad();
     if (ierr                             )	return    4+100*ierr;
@@ -541,7 +545,7 @@ int StTrack::bad() const
     if (!di                              )   	return   26;
     ierr = di->bad();
     if (ierr                             )   	return    6+100*ierr;
-    if (flag() == 901) return 0; // don't check Hilix for Beam Background tracks
+    if (flag() == 901) return 0; // don't check Helix for Beam Background tracks
     StPhysicalHelixD hlx1 = mGeometry->helix();
     StThreeVectorD   ori2 = mOuterGeometry->origin();
     double len12 = hlx1.pathLength(ori2);
