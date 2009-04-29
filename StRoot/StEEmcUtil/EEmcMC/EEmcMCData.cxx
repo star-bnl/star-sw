@@ -1,4 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.16 2009/02/11 20:37:37 ogrebeny Exp $
+// $Id: EEmcMCData.cxx,v 1.17 2009/04/29 22:22:51 ogrebeny Exp $
 
 #include "StEventTypes.h"
 
@@ -153,9 +153,10 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
       mLastHit++;
       // printf("depth=%d nH=%d\n",depth,mLastHit);
 
-      if(mLastHit>=mSize && !expandMemory() ) 
+      if ((mLastHit >= mSize) && !expandMemory()) {
 	LOG_ERROR << "failed expandMemory() for tower tails" << endm;
 	goto crash;
+      }
     } // end of tower hits
   } 
 
@@ -238,9 +239,10 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
       mHit[mLastHit].track_p     = hit->track_p;
 
       mLastHit++;
-      if(mLastHit>=mSize && !expandMemory() ) 
+      if ((mLastHit >= mSize) && !expandMemory()) {
 	LOG_ERROR << "failed expandMemory() for SMD strips" << endm;
 	goto crash;
+      }
     }
   }
 
@@ -417,6 +419,9 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 }
 
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.17  2009/04/29 22:22:51  ogrebeny
+// Bug fixed - missing {}, thanks to Pibero.
+//
 // Revision 1.16  2009/02/11 20:37:37  ogrebeny
 // *** empty log message ***
 //
