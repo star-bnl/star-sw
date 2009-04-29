@@ -178,7 +178,7 @@ void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
       int k;
       for(k=1;k<=nb;k++){
 	if(hx->GetBinContent(k)<10*yM) continue;
-	if(m->crCh[cr-1][k-1]) continue; // ignore masked channels
+	if(m && m->crCh[cr-1][k-1]) continue; // ignore masked channels
 	LOG_DEBUG << " hot cr=" << cr << " ch=" << (k - 1) << " val=" << hx->GetBinContent(k) << endm;
 	H4jpHot->Fill(cr);
       }
@@ -189,7 +189,7 @@ void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
   TPad *c3 = new TPad("pad3", "apd3",0.,0.,1.,.1);
   c3->Draw();
   c3->cd();
-  if (m->txtH) m->txtH->Draw();
+  if (m && m->txtH) m->txtH->Draw();
 }
 
 //--------------------------------------
@@ -280,13 +280,15 @@ void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m) {
   for (int i = 0;i < 6;i++) {
     TH1 *h = GetHisto(fd, Form("cr%d",i+1));
     if (h) {
-	c->cd(i + 1);
-	gPad->SetLogz(0);
-	h->Draw("colz"); 
-	h->SetAxisRange(0, 500);
-	if (h->Integral() > 0) gPad->SetLogz();
-	TGraphErrors &gr = m->crG2[i];
-	if(gr.GetN() > 0) gr.Draw("P");
+      c->cd(i + 1);
+      gPad->SetLogz(0);
+      h->Draw("colz"); 
+      h->SetAxisRange(0, 500);
+      if (h->Integral() > 0) gPad->SetLogz();
+      if (m) {
+         TGraphErrors &gr = m->crG2[i];
+         if(gr.GetN() > 0) gr.Draw("P");
+      }
     }
   }
 }
