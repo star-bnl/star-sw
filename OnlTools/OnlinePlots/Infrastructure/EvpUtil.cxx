@@ -152,9 +152,8 @@ bool  EvpUtil::DisplayOneCanvas(TMapFile* mfile , TPad* gcc, const int i, const 
 
 
 
-  GenericFile* gen = new GenericFile(mfile);
-  bool iret = DisplayOneCanvas(gen, gcc, i, j, doClear); 
-  delete gen;
+  GenericFile gen(mfile);
+  bool iret = DisplayOneCanvas(&gen, gcc, i, j, doClear); 
   return iret;
 }
 
@@ -955,7 +954,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.9 2009/04/06 18:49:21 dkettler Exp $
+ * $Id: EvpUtil.cxx,v 1.10 2009/04/29 19:18:04 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -965,6 +964,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.10  2009/04/29 19:18:04  fine
+ * Eliminate the memory leak
+ *
  * Revision 1.9  2009/04/06 18:49:21  dkettler
  * Histogram groups can be added to the main tabs by editing CanvasDescriptions.txt
  *

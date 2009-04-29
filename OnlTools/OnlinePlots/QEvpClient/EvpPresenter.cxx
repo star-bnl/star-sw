@@ -391,6 +391,7 @@ void EvpPresenter::printAll(const char* filename) {
   //mGroups.display(cc);
   //ps.Close();
   cout << filename << " written " << endl;
+  delete cc;
 }
 
 
@@ -448,7 +449,7 @@ void EvpPresenter::ClosePresenter()
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.cxx,v 1.6 2009/04/06 18:49:29 dkettler Exp $
+ * $Id: EvpPresenter.cxx,v 1.7 2009/04/29 19:18:05 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -458,6 +459,9 @@ void EvpPresenter::ClosePresenter()
  ***************************************************************************
  *
  * $Log: EvpPresenter.cxx,v $
+ * Revision 1.7  2009/04/29 19:18:05  fine
+ * Eliminate the memory leak
+ *
  * Revision 1.6  2009/04/06 18:49:29  dkettler
  * Histogram groups can be added to the main tabs by editing CanvasDescriptions.txt
  *
