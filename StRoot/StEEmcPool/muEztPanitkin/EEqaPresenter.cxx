@@ -622,7 +622,8 @@ void addJPphiLimits(TH1 *h) {
     float x1 = 2.5 + (i * 10);
     TLine *ln = new TLine(x1, -0.2, x1, 12.5);
     if (ln) {
-	if (hCleanUp) hCleanUp->Add(ln);
+	// no need to garbage collect these because h->GetListOfFunctions() will clean them by itself
+	//if (hCleanUp) hCleanUp->Add(ln);
 	Lx->Add(ln);
     }
     int jpid = i + 2;
@@ -630,7 +631,7 @@ void addJPphiLimits(TH1 *h) {
     TString aa = "Jet Patch "; aa += jpid;
     TText *tt = new TText(x1 + 1, 12.6, aa);
     if (tt) {
-	if (hCleanUp) hCleanUp->Add(tt);
+	//if (hCleanUp) hCleanUp->Add(tt);
 	tt->SetTextSize(0.08);
 	Lx->Add(tt);
     }
