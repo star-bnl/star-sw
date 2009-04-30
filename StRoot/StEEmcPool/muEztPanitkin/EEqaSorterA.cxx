@@ -1,4 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.6 2009/02/27 18:34:13 ogrebeny Exp $
+// $Id: EEqaSorterA.cxx,v 1.7 2009/04/30 21:20:31 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 
@@ -55,9 +55,8 @@ void  EEqaSorterA::sortDaqTower1(const EztEmcRawData *t){
      and count ADC values = n*256 in all data blocks 
   */
   if(!t) return;
-  EztEmcRawData *tv = const_cast<EztEmcRawData*>(t); if (!tv) return;
   for(int icr=0;icr<t->getNBlocks();icr++) {
-    if(tv->isCrateVoid(icr)) continue;
+    if(t->isCrateVoid(icr)) continue;
     int crateID=icr+1;
     const UShort_t* data=t->data(icr);
     for(int i=0;i<t->sizeData(icr);i++) {
@@ -75,9 +74,8 @@ void  EEqaSorterA::sortDaqTowerHot(const EztEmcRawData *t){
   */
 
   if(!t) return;
-  EztEmcRawData *tv = const_cast<EztEmcRawData*>(t); if (!tv) return;
   for(int icr=0;icr<t->getNBlocks() && icr<MaxTwCrateID;icr++) {
-    if(tv->isCrateVoid(icr)) continue;
+    if(t->isCrateVoid(icr)) continue;
     int crateID=icr+1;
     const UShort_t* data=t->data(icr);
     int *pedA= &feePed[(crateID-1)*MaxTwCrateCh];
@@ -96,9 +94,8 @@ void  EEqaSorterA::sortDaqMapmt0(const EztEmcRawData *s, int ver){
      make histos of adc vs channel for each MAPMT crate
   */
   if(!s) return;
-  EztEmcRawData *sv = const_cast<EztEmcRawData*>(s); if (!sv) return;
   for(int icr=0;icr<s->getNBlocks();icr++) {
-    if(sv->isCrateVoid(icr)) continue;
+    if(s->isCrateVoid(icr)) continue;
     int crateID=icr+64;
     // in 2004 there was only 16 MAPMT crates for sectors 5-8
     if(ver<0x22) {
@@ -209,6 +206,9 @@ int EEqaSorterA::usePed4(const Char_t *filename) {
 
 
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.7  2009/04/30 21:20:31  ogrebeny
+// Improved constness after fixing bug 1457
+//
 // Revision 1.6  2009/02/27 18:34:13  ogrebeny
 // Small bug fixed
 //
