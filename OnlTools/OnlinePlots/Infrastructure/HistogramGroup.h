@@ -71,12 +71,15 @@ class HistogramGroup : public TNamed {
   bool testBits(unsigned int trigger, unsigned int detector);
   void setActive(bool b) { mActive = b; }
   bool active() { return mActive; }
+  bool setPrinted(bool b) { mPrinted = b; }
+  bool printed() { return mPrinted; } // Used to avoid duplicated with the main tabs
  protected:
   char* pre(const char* a);
   void pre(vector<TH1*>& );
   unsigned int mTriggerBits;
   unsigned int mDetectorBits;
   bool mActive;
+  bool mPrinted;
 
   ClassDef(HistogramGroup,2) ;
 };

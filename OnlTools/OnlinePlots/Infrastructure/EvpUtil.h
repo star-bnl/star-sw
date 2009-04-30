@@ -24,6 +24,9 @@ class TH2;
 #include "TObjString.h"
 
 #include "GenericFile.h"
+#include "GroupCollection.h"
+
+class GroupCollection;
 
 typedef GenericFile FileType;
 
@@ -62,7 +65,7 @@ class EvpUtil {
   static int GetLogY(const int i,const int j);
   static int GetLogZ(const int i,const int j);
   static bool DisplayOneCanvas(TMapFile* mfile , TPad* gcc, const int i, const int j, bool doClear=false);    // return true if canvas should be printed
-  static bool DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, const int j, bool doClear=false); // return true if canvas should be printed
+  static bool DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, const int j, bool doClear=false, GroupCollection* hGroups=NULL); // return true if canvas should be printed
   static bool HasEntries(GenericFile* gFile , int i, int j);
   static int ParseString (const TString &tChain, TObjArray &Opt);
   
@@ -103,7 +106,7 @@ class EvpUtil {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.h,v 1.6 2009/04/06 18:49:21 dkettler Exp $
+ * $Id: EvpUtil.h,v 1.7 2009/04/30 01:23:33 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -113,6 +116,9 @@ class EvpUtil {
  ***************************************************************************
  *
  * $Log: EvpUtil.h,v $
+ * Revision 1.7  2009/04/30 01:23:33  dkettler
+ * Histogram group printing improvements
+ *
  * Revision 1.6  2009/04/06 18:49:21  dkettler
  * Histogram groups can be added to the main tabs by editing CanvasDescriptions.txt
  *

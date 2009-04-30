@@ -82,11 +82,11 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
 
   TLatex label;
   label.SetTextAlign(23);  // center, top
-  label.SetTextSize(0.07);
+  label.SetTextSize(0.055);
   label.SetTextColor(45);
   TLatex labely;
-  labely.SetTextAlign(23);  // center, top
-  labely.SetTextSize(0.045);
+  //labely.SetTextAlign(23);  // center, top
+  labely.SetTextSize(0.04);
   labely.SetTextColor(1);
   labely.SetTextAngle(90);
 
@@ -94,6 +94,9 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
   line.SetLineColor(4);
   line.SetLineWidth(1);
   //
+  gROOT->SetStyle("Plain");
+  gStyle->SetPaperSize(TStyle::kUSLetter);
+
   gStyle->SetPalette(1);
   gStyle->SetLabelSize(0.09,"y");
   gStyle->SetLabelSize(0.09,"x");
@@ -133,7 +136,7 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
   label.DrawLatex(  7.5, 0.98*hmax, "east side");
   label.DrawLatex( 26.5, 0.98*hmax, "west side");
   label.DrawLatex( 45.5, 0.98*hmax, "PP2PP");
-  labely.DrawLatex(-5.2, 0.6*hmax, "Counts");
+  labely.DrawLatex(-5.5, 0.6*hmax, "Counts");
   
   cc->cd(2);
   upvpd_hitmap[1]->SetFillColor(19);
@@ -147,7 +150,7 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
   label.DrawLatex(  7.5, 0.98*hmax, "east side");
   label.DrawLatex( 26.5, 0.98*hmax, "west side");
   label.DrawLatex( 45.5, 0.98*hmax, "PP2PP");
-  labely.DrawLatex(-5.2, 0.6*hmax, "Counts");
+  labely.DrawLatex(-5.5, 0.6*hmax, "Counts");
 
   cc->cd(3);
   upvpd_ToT->Draw("colz");
@@ -157,10 +160,10 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
   label.DrawLatex(  7.5, 47, "east side");
   label.DrawLatex( 26.5, 47, "west side");
   label.DrawLatex( 45.5, 47, "PP2PP");
-  labely.DrawLatex(-5.2, 30, "ToT (ns)");
+  labely.DrawLatex(-5.4, 30, "ToT (ns)");
   cc->cd(4);
   upvpd_eastT_vs_westT->Draw("col");
-  labely.DrawLatex(-5120, 0.6*51200, "west time (ns)");
+  labely.DrawLatex(-5200, 0.6*51200, "west time (ns)");
 
   cc->Update();
 

@@ -53,11 +53,11 @@ void GroupCollection::serverCreate() {
   //insert( new pp2ppHistogramGroup(0, "P2P","Trg1-16","any","trg") );
   //insert( new pp2ppHistogramGroup(1, "P2P","Trg17-32","any","trg") );
   insert( new TOFupvpdHistogramGroup("TOF", "upvpd","any","TOF") );
+  insert( new TOFcheckHistogramGroup("TOF", "TOF check","any","TOF") );
   insert( new TOFtrayHistogramGroup(0,"TOF","east Tray 1-30","any","TOF") );
   insert( new TOFtrayHistogramGroup(1,"TOF", "east Tray 31-60","any","TOF") );
   insert( new TOFtrayHistogramGroup(2,"TOF", "west Tray 61-90","any","TOF") );
   insert( new TOFtrayHistogramGroup(3,"TOF", "west Tray 91-120","any","TOF") );
-  insert( new TOFcheckHistogramGroup("TOF", "TOF check","any","TOF") );
 
   char sub[1024];
   for ( unsigned int i=0; i< 14; i++) {
@@ -119,9 +119,15 @@ void  GroupCollection::display(TCanvas* cc) {
   }
 }
 
+void  GroupCollection::setNotPrinted() {
+  for ( GroupIterator iter = begin(); iter != end(); iter++) {
+    (*iter)->setPrinted(false);
+  }
+}
+
 void  GroupCollection::print(TCanvas* cc, const char* filename) {
   for ( GroupIterator iter = begin(); iter != end(); iter++) {
-    if ( (*iter)->active() ) {
+    if ( (*iter)->active() && !(*iter)->printed()) {
       cc->cd(0);
       (*iter)->draw(cc);
       printName(cc,(*iter));

@@ -75,7 +75,7 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
 
   TLatex label;
   //label.SetTextAlign(23);  // center, top
-  label.SetTextSize(0.10);
+  label.SetTextSize(0.07);
   label.SetTextColor(45);
 
   TLine  line;
@@ -105,38 +105,54 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   cc->Divide(1, 2);
   cc->cd(1);
 
-  TOF_Error1->GetYaxis()->SetLabelSize(0.08);
-  TOF_Error1->GetXaxis()->SetLabelSize(0.06);
+  TOF_Error1->GetYaxis()->SetLabelSize(0.07);
+  TOF_Error1->GetXaxis()->SetLabelSize(0.055);
   TOF_Error1->SetFillColor(45);
   TOF_Error1->Draw();
   double entry = TOF_Error1->GetEntries();
   if(entry>0) {
      float hmax=TOF_Error1->GetMaximum();
      label.SetTextColor(2);
-     label.DrawLatex(30, 0.8*hmax, "Electronics Error Found!!");
+     label.DrawLatex(20, 0.8*hmax, "Electronics Error Found!!");
   } else {
     float hmax=0.9 * gPad->GetUymax();
     label.SetTextColor(3);
     sprintf(tmpchr,"No electronics Error in %d events!",mNevents);
-    label.DrawLatex( 30, hmax, tmpchr);
+    label.DrawLatex( 20, hmax, tmpchr);
   }
 
   cc->cd(2);
-  TOF_Error2->GetYaxis()->SetLabelSize(0.08);
-  TOF_Error2->GetXaxis()->SetLabelSize(0.06);
+  TOF_Error2->GetYaxis()->SetLabelSize(0.07);
+  TOF_Error2->GetXaxis()->SetLabelSize(0.055);
   TOF_Error2->SetFillColor(45);
   TOF_Error2->Draw();
   entry = TOF_Error2->GetEntries();
+  float hmax=0;
   if(entry>0) {
-     float hmax=TOF_Error2->GetMaximum();
+     hmax=TOF_Error2->GetMaximum();
      label.SetTextColor(2);
-     label.DrawLatex( 1.5, 0.8*hmax, "Invalid Bunchid Shift Found!!");
+     label.DrawLatex( 1., 0.8*hmax, "Invalid Bunchid Shift Found!!");
   } else {
-    float hmax=0.9 * gPad->GetUymax();
+    hmax=0.9 * gPad->GetUymax();
     label.SetTextColor(3);
     sprintf(tmpchr,"No invalid bunchid shift in %d events!",mNevents);
-    label.DrawLatex( 1.5, hmax, tmpchr);
+    label.DrawLatex( 1., hmax, tmpchr);
   }
+  TLatex labela;
+  labela.SetTextSize(0.04);
+  labela.SetTextAlign(23);  // center, top
+  labela.DrawLatex(0.25,0.1*hmax,"THUB1-0");
+  labela.DrawLatex(0.75,0.2*hmax,"THUB1-1");
+  labela.DrawLatex(1.25,0.1*hmax,"THUB2-0");
+  labela.DrawLatex(1.75,0.2*hmax,"THUB2-1");
+  labela.DrawLatex(2.25,0.1*hmax,"THUB3-0");
+  labela.DrawLatex(2.75,0.2*hmax,"THUB3-1");
+  labela.DrawLatex(3.25,0.1*hmax,"THUB4-0");
+  labela.DrawLatex(3.75,0.2*hmax,"THUB4-1");
+  labela.DrawLatex(4.25,0.1*hmax,"121-0");
+  labela.DrawLatex(4.75,0.2*hmax,"121-1");
+  labela.DrawLatex(5.25,0.1*hmax,"122-0");
+  labela.DrawLatex(5.75,0.2*hmax,"122-1");
 
   /*
   cc->cd(3);
@@ -157,8 +173,6 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
     fprintf(stderr,"TOF: problems in data (%d) - continuing...",ret);
     return false;
   }
-
-  mNevents++;
 
   // 
   int halftrayid=-1;
@@ -188,6 +202,8 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
          continue;
       }
       if(!ValidDataword(packetid)) TOF_Error1->Fill(trayid);
+      //if(!ValidDataword(packetid)) cout<<"ERROR!!!!"<<hex<<"0x"<<dataword<<dec<<"tray="<<trayid<<endl;
+
       // bunch id 
       if(packetid == 0x2) {
         thebunchid = dataword&0xFFF;
@@ -210,6 +226,8 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
 
     }  // end loop nword
   }  // end loop fiber
+
+  mNevents++;
 
   // check bunch id shift
   int bunchidref1 =   allbunchid[0][0];   // bunchid from tray 1 as reference.
@@ -246,8 +264,7 @@ bool TOFcheckHistogramGroup::ValidDataword(int packetid)
 bool TOFcheckHistogramGroup::Tray_NotInRun(int trayid)
 {
   // the following 34 trays is not in run for run9!!
-  int notinrunlist[34]={13,14,42,43,73,74,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,
-102,103,38,39,52,75,47,68,112,118};
+  int notinrunlist[34]={13,14,42,43,73,74,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,102,103,38,39,52,75,47,68,112,118};
 
   for(int i=0;i<34;i++) {
     if(trayid == notinrunlist[i]) {return true;}
