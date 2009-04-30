@@ -2,7 +2,7 @@
  * @file TxUCMDBConstants.h
  * @author Stephen Tramer
  *
- * @(#)cpp/api:$Id: TxUCMConstants.h,v 1.1 2009/04/07 19:00:27 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMConstants.h,v 1.2 2009/04/30 17:09:27 fine Exp $
  *
  * This file is a collection of constants (collection names and record names)
  * used by the UCM API.  Rather than create a static object to contain all of

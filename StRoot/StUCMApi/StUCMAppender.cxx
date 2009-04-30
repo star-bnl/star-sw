@@ -15,7 +15,7 @@
 #include "TObjString.h"
 
 #include "StUCMApi/logging/TxEventLog.h"
-
+#include "StUCMApi/logging/TxEventLogFactory.h"
 //#include "StUCMApi/TxEventLog.h"
 
 #include <log4cxx/helpers/loglog.h>
@@ -133,7 +133,7 @@ TxEventLog *StUCMAppender::getConnection()
                      ucmStore += port;
                      ucmStore += "/";
                      ucmStore += db;
-          connection = new TxEventLog();
+          connection = TxEventLogFactory::create();
           connection->logStart();
           if ( getenv("JOBINDEX") && getenv("REQUESTID") ) {
                const char *JOBINDEX = getenv("JOBINDEX");
@@ -148,7 +148,7 @@ TxEventLog *StUCMAppender::getConnection()
            // connection = new TxEventLog(ucmStore.c_str(),REQUESTID,JOBINDEX);
               } else {
                  fprintf(stderr,"StUCMAppender::getConnection() no JOBINDEX/REQUESTID was provided \n");
-                 connection = new TxEventLog();
+                 connection = TxEventLogFactory::create();
               }
     }
    }
