@@ -192,6 +192,17 @@ void  GroupCollection::list() {
   }
 }
 
+bool  GroupCollection::contains(const char* name) {
+  bool isIn = false;
+  for ( GroupIterator iter = begin(); iter != end(); iter++) {
+    if(strcmp((*iter)->id(), name)==0) {
+      isIn = true;
+      break;
+    }
+  }
+  return isIn;
+}
+
 void  GroupCollection::setActive() {
   for ( GroupIterator iter = begin(); iter != end(); iter++) {
     bool act = (*iter)->testBits(mTriggerBits,mDetectorBits);
