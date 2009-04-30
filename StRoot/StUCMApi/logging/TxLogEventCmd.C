@@ -1,9 +1,11 @@
 #include "TxEventLog.h"
+#include "TxEventLogFactory.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <string>
+#include <iostream>
 
 void printUsage () {
   std::cout << "\nUSAGE:"
@@ -148,7 +150,7 @@ int main (int argc, char** argv) {
     return 1;
   }
 
-  TxLogging::TxEventLog* log = new TxLogging::TxEventLog ();
+  TxLogging::TxEventLog* log = TxLogging::TxEventLogFactory::create();
   int intBJobID = std::atoi (brokerJobID.c_str ());
   log->setBrokerJobID (intBJobID);
   log->setBrokerTaskID (brokerTaskID);
