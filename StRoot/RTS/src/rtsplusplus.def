@@ -46,6 +46,8 @@ DAQREADER_OBJS += daq_tpc.o tpc_FCFReader.o tpc_reader.o
 DAQREADER_OBJS += fcfAfterburner.o fcfClass.o
 DAQREADER_OBJS += daq_l3.o l3_reader.o 
 
+L3_SUPPORT_OBJS := gl3_trg_send.o gl3_trg_parse.o
+
 MYRINET_OBJS := myriLib.o platform.o vxFileRequestServer.o
 
 EVENTTRACKER_OBJS := 	FtfFinder.o l3CoordinateTransformer.o FtfSl3.o FtfDedx.o FtfPara.o FtfTrack.o FtfBaseTrack.o l3Swap.o FtfBaseHit.o FtfHit.o FtfUtilities.o gl3Event.o gl3EMC.o gl3Track.o l3TrgReader.o l3TrgReaderV20.o l3TrgReaderV21.o l3TrgReaderV12.o gl3LMVertexFinder.o gl3Hit.o gl3Histo.o l3BankUtils.o l3EmcCalibration.o gl3HistoManager.o eventTrackerLib.o
@@ -56,7 +58,7 @@ OFFSRC = $(RTS_DIR_PATH)/src
 ONLSRC = $(RTS_DIR_PATH)/../../online/RTS/src
 OFFRTS = $(RTS_DIR_PATH)
 
-MY_VPATH := $(ONLSRC)/RTSCOM_STUB:$(OFFSRC)/LOG:$(ONLSRC)/MYRI:$(ONLSRC)/SUNRT:$(ONLSRC)/RTSCFG:$(OFFSRC)/LOG:$(OFFSRC)/SFS:$(OFFSRC)/DAQ_READER:$(OFFRTS)/EventTracker:$(OFFSRC)/RTS_READER:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_PP2PP:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_TOF:$(ONLSRC)/ETHLIB_NEW:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_TPC:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_L3
+MY_VPATH := $(ONLSRC)/RTSCOM_STUB:$(OFFSRC)/LOG:$(ONLSRC)/MYRI:$(ONLSRC)/SUNRT:$(ONLSRC)/RTSCFG:$(OFFSRC)/LOG:$(OFFSRC)/SFS:$(OFFSRC)/DAQ_READER:$(OFFRTS)/EventTracker:$(OFFSRC)/RTS_READER:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_PP2PP:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_TOF:$(ONLSRC)/ETHLIB_NEW:$(OFFSRC)/DAQ_TPX:$(OFFSRC)/DAQ_TPC:$(OFFSRC)/FCF:$(OFFSRC)/DAQ_L3:$(ONLSRC)/L3_SUPPORT
 MY_DEPVPATH1 := $(subst :,/*.C ,$(MY_VPATH))
 MY_DEPVPATH2 := $(subst :,/*.cxx ,$(MY_VPATH))
 MY_DEPVPATH3 := $(subst :,/*.c ,$(MY_VPATH))
