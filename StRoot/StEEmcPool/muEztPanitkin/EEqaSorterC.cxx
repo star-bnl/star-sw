@@ -1,4 +1,4 @@
-// $Id: EEqaSorterC.cxx,v 1.8 2009/02/24 18:19:47 ogrebeny Exp $
+// $Id: EEqaSorterC.cxx,v 1.9 2009/04/30 21:20:31 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -71,10 +71,9 @@ void  EEqaSorterC::sort(const EztEmcRawData *t, const EztEmcRawData *s, int ver 
 //-------------------------------------------
 void EEqaSorterC::sortTower(const EztEmcRawData *t){
   if(!t) return;
-  EztEmcRawData *tv = const_cast<EztEmcRawData*>(t); if (!tv) return;
   int nTw=0;
   for(int icr=0;icr<t->getNBlocks();icr++) {
-    if(tv->isCrateVoid(icr)) continue;
+    if(t->isCrateVoid(icr)) continue;
     int crateID=icr+1;
     const UShort_t* data=t->data(icr);
     for(int i=0;i<t->sizeData(icr);i++) {
@@ -95,13 +94,12 @@ void EEqaSorterC::sortTower(const EztEmcRawData *t){
 //-------------------------------------------
 void  EEqaSorterC::sortMapmt(const EztEmcRawData *s, int ver){
   if(s==0) return;
-  EztEmcRawData *sv = const_cast<EztEmcRawData*>(s); if (!sv) return;
   int nHit[mxh], nSmdH[MaxSectors][MaxSmdPlains];
   memset(nHit,0,sizeof(nHit));
   memset(nSmdH,0,sizeof(nSmdH));
 
   for(int icr=0;icr<s->getNBlocks();icr++) {
-    if(sv->isCrateVoid(icr)) continue;
+    if(s->isCrateVoid(icr)) continue;
     int crateID=icr+64;
     // in 2004 there was only 16 MAPMT crates for sectors 5-8
     if(ver<0x22) {
@@ -253,6 +251,9 @@ void EEqaSorterC::initRun() {
 
 
 // $Log: EEqaSorterC.cxx,v $
+// Revision 1.9  2009/04/30 21:20:31  ogrebeny
+// Improved constness after fixing bug 1457
+//
 // Revision 1.8  2009/02/24 18:19:47  ogrebeny
 // Small workaround until ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1457 is resolved
 //
