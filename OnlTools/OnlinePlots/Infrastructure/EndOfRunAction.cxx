@@ -131,6 +131,8 @@ int  EndOfRunAction::WriteFile(const char* ps)
   sprintf(printPs,"%s",ps);
   sprintf(closePs,"%s]",ps);
 
+  mGroups.setNotPrinted();
+
   mCanvas->Print(openPs);
   // plot RunStatus
   DisplayRunStatus();
@@ -141,7 +143,7 @@ int  EndOfRunAction::WriteFile(const char* ps)
 	if(EvpUtil::nHist[i][j]>0 && EvpUtil::nHist[i][j]<MAX_PADS) {
 	  if ( (mRS->getDetectorBitsRun()&EvpUtil::canvasDetectorBits[i][j])==0 ) continue; 
 	  if ( (mRS->getTriggerBitsRun()&EvpUtil::canvasTriggerBits[i][j])  ==0 ) continue;
-	  EvpUtil::DisplayOneCanvas(mfile,mCanvas,i,j,true);
+	  EvpUtil::DisplayOneCanvas(mfile,mCanvas,i,j,true,&mGroups);
 	  mCanvas->Print(printPs);
 	}// well defined canvas
     }  // j - subtab
@@ -228,7 +230,7 @@ void EndOfRunAction::Cleanup() {
 
 /***************************************************************************
  *
- * $Id: EndOfRunAction.cxx,v 1.1 2009/01/23 16:11:01 jeromel Exp $
+ * $Id: EndOfRunAction.cxx,v 1.2 2009/04/30 01:23:33 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -238,6 +240,9 @@ void EndOfRunAction::Cleanup() {
  ***************************************************************************
  *
  * $Log: EndOfRunAction.cxx,v $
+ * Revision 1.2  2009/04/30 01:23:33  dkettler
+ * Histogram group printing improvements
+ *
  * Revision 1.1  2009/01/23 16:11:01  jeromel
  * Import from online/RTS/src/
  *

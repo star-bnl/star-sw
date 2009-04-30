@@ -584,9 +584,15 @@ void EvpUtil::Draw(TH1*h, const char* options) {
 }
 
 //-------------------------------------------------------------
-bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, const int j, bool doClear) {
-  if(hGroupName[i][j] != "") {	//Skip histogram groups
-    return false;
+bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, const int j, bool doClear, GroupCollection* hGroups) {
+  if(hGroupName[i][j] != "") {	// histogram groups
+    if(hGroups != NULL) {
+      HistogramGroup* hg = hGroups->read(gFile,EvpUtil::hGroupName[i][j]);
+      hg->draw(((TCanvas*) gcc));
+      hg->setPrinted(true);
+      return true;
+    } else
+      return false;
   }
 
 // get rid of red boarder around current pad on a canvas
@@ -954,7 +960,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.10 2009/04/29 19:18:04 fine Exp $
+ * $Id: EvpUtil.cxx,v 1.11 2009/04/30 01:23:33 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -964,6 +970,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.11  2009/04/30 01:23:33  dkettler
+ * Histogram group printing improvements
+ *
  * Revision 1.10  2009/04/29 19:18:04  fine
  * Eliminate the memory leak
  *

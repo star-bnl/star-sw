@@ -44,6 +44,7 @@ class GroupCollection : public set<HistogramGroup*,Alpha > {
   void setActive();
   void addToMapFile(TMapFile*);  
   void list();
+  void setNotPrinted();
   void print(TCanvas* cc, const char* filename);
   void display(TCanvas*);
   void push(TMapFile*);

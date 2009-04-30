@@ -112,8 +112,8 @@ void TOFtrayHistogramGroup::draw(TCanvas* cc) {
     gPad->SetGridx(0);
     gPad->SetGridy(0);
 
-    TOF_Tray_LEhitmap[i]->GetYaxis()->SetLabelSize(0.085);
-    TOF_Tray_LEhitmap[i]->GetXaxis()->SetLabelSize(0.095);
+    TOF_Tray_LEhitmap[i]->GetYaxis()->SetLabelSize(0.075);
+    TOF_Tray_LEhitmap[i]->GetXaxis()->SetLabelSize(0.055);
 
     TOF_Tray_LEhitmap[i]->SetXTitle("Chan #");
     TOF_Tray_LEhitmap[i]->SetYTitle("Counts");
@@ -123,7 +123,7 @@ void TOFtrayHistogramGroup::draw(TCanvas* cc) {
     TOF_Tray_LEhitmap[i]->Draw();
     TOF_Tray_TEhitmap[i]->Draw("same");
 
-    label.SetTextSize(0.16);
+    label.SetTextSize(0.13);
 
     if(Tray_NotInRun(actualTrayNum[i])) { 
       //float hmin=  gPad->GetUymin();
@@ -133,7 +133,7 @@ void TOFtrayHistogramGroup::draw(TCanvas* cc) {
       label.DrawLatex(  20., 0.95*hmax, tmpchr);
       sprintf(tmpchr,"Not Active");
       label.SetTextColor(2);
-      label.SetTextSize(0.18);
+      label.SetTextSize(0.14);
       label.DrawLatex(90., 0.6*hmax, tmpchr);
     } else {
       float hmax=TOF_Tray_LEhitmap[i]->GetMaximum();
