@@ -3,7 +3,7 @@
 
 #include "TChair.h"
 #include "tables/St_tss_tsspar_Table.h"
-
+#include "St_tpcAnodeHVC.h"
 class St_tss_tssparC : public TChair {
  public:
   static St_tss_tssparC* 	instance();
@@ -34,7 +34,15 @@ class St_tss_tssparC : public TChair {
   Float_t 	diff_long(Int_t i = 0) 	{return Struct(i)->diff_long;}
   Float_t 	diff_trans(Int_t i = 0) {return Struct(i)->diff_trans;}
   Float_t 	gain_in(Int_t i = 0) 	{return Struct(i)->gain_in;}
+  Float_t 	gain_in(Int_t sec, Int_t row) {
+    Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
+    return V > 0 ? 3558*TMath::Exp(13.05e-3*(V-1170)) : 0;
+  }
   Float_t 	gain_out(Int_t i = 0) 	{return Struct(i)->gain_out;}
+  Float_t 	gain_out(Int_t sec, Int_t row) {
+    Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
+    return V > 0 ? 1310*TMath::Exp(10.26e-3*(V-1390)) : 0;
+  }
   Float_t 	prf_in(Int_t i = 0) 	{return Struct(i)->prf_in;}
   Float_t 	prf_out(Int_t i = 0) 	{return Struct(i)->prf_out;}
   Float_t 	sca_rms(Int_t i = 0) 	{return Struct(i)->sca_rms;}
