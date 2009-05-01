@@ -13,6 +13,16 @@ class St_tpcRDOMasksC : public TChair {
   UInt_t 	sector(Int_t i = 0) 	        {return Struct(i)->sector;}
   UInt_t 	mask(Int_t i = 0) 	        {return Struct(i)->mask;}
   UInt_t        getSectorMask(UInt_t sector);
+  UInt_t        rdoForPadrow(Int_t row) {
+    UInt_t rdo = 0;
+    if      (row > 0 && row <=  8) rdo = 1;
+    else if (row > 8 && row <= 13) rdo = 2;
+    else if (row >13 && row <= 21) rdo = 3;
+    else if (row >21 && row <= 29) rdo = 4;
+    else if (row >29 && row <= 37) rdo = 5;
+    else if (row >37 && row <= 45) rdo = 6;
+    return rdo;
+  }
   Bool_t        isOn(UInt_t sector,UInt_t rdo)  {    
     if(sector < 1 || sector > 24 || rdo < 1 || rdo > 6)	return 0;
     UInt_t MASK = getSectorMask(sector);
@@ -20,6 +30,7 @@ class St_tpcRDOMasksC : public TChair {
     MASK &= 0x00000001;
     return MASK;
   }
+  Bool_t       isRowOn(UInt_t sector, UInt_t row) {return isOn(sector, rdoForPadrow(row));}
  protected:
   St_tpcRDOMasksC(St_tpcRDOMasks *table=0) : TChair(table) {}
   virtual ~St_tpcRDOMasksC() {fgInstance = 0;}
