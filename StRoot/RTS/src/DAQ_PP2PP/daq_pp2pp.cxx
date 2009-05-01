@@ -500,8 +500,10 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 				d->seq_id = seq_id  ;
 				d->chain_id = chain_id ;
 				d->svx_id = svx_id  ;
+				d->bunch_xing = bunch_xing ;
 
 				d->error = ret ;
+
 				memset(d->adc,0,sizeof(d->adc)) ;		
 				memset(d->trace,0,sizeof(d->trace)) ;
 			}

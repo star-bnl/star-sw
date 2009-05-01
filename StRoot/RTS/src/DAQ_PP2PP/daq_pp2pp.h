@@ -11,6 +11,11 @@ struct pp2pp_t {
 	u_char chain_id ;	// 0..3 ;
 	u_char svx_id ;		// 0..7 ;
 	u_char error ;		// error occured!
+	
+	u_char bunch_xing ;
+	u_char res1 ;	// needed to align on an int....
+	u_char res2 ;
+	u_char res3 ;
 
 	u_char adc[PP2PP_SVX_CH] ;	
 	u_char trace[PP2PP_SVX_CH] ;	// 0-ch not found;1 - ch found OK; 2 - duplicate ch
