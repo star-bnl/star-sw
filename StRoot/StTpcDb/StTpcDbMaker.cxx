@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.44 2008/09/10 15:46:37 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.45 2009/05/01 19:09:23 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.45  2009/05/01 19:09:23  fisyak
+ * StTpcDbMaker::Make is aware about TPC trips and generagte EoF when this happenss
+ *
  * Revision 1.44  2008/09/10 15:46:37  fisyak
  * Recalculate Tpc drift velocity once per event, avoid expensive conversion to unix time
  *
@@ -146,7 +149,7 @@
 #include "math_constants.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
-
+#include "StDetectorDbMaker/St_tpcAnodeHVC.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -583,7 +586,11 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 }
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Make(){
-
+  // check that TPC is tripped 
+  if (St_tpcAnodeHVC::instance()->tripped()) {
+    gMessMgr->Info() << "StTpcDbMaker::TPC has tripped" << endm;
+    return kStEOF;
+  }
   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
   m_TpcDb->SetDriftVelocity();
   if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
