@@ -435,10 +435,10 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 		}
 
 		if(bunch_xing < 0) {
-			bunch_xing = seq[0] & 0xFF ;
+			bunch_xing = seq[0] & 0x7F ;
 		}
 		else {
-			int tmp = seq[0] & 0xFF ;
+			int tmp = seq[0] & 0x7F ;
 
 			if(tmp != bunch_xing) {
 				ret |= 2 ;
