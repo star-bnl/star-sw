@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.58 2009/04/18 02:55:06 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.59 2009/05/04 23:37:40 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.59  2009/05/04 23:37:40  genevb
+// Add RDO boundary lines in TPC Sector plots
+//
 // Revision 2.58  2009/04/18 02:55:06  genevb
 // Larger arrays for more trigger type hists
 //
@@ -776,6 +779,25 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             latex.SetTextAlign(1);
             latex.DrawLatex(-0.5,0,Form("   missed:  %d",
               (int) (hobj->GetBinContent(hobj->FindBin(-1.)))));
+          }
+
+          if (oName.Contains("TpcSector")) {
+            // Draw RDO boundaries
+            ruler.SetLineColor(1);
+            ruler.SetLineWidth(1);
+            // between RDOs 2-6, draw +/- (npads_row1+npads_row2)/2 * (pitch/2)
+            float pitch = 0.67/2.0; // 6.7mm pitch
+            ruler.DrawLine(-137*pitch,37.5,137*pitch,37.5);
+            ruler.DrawLine(-123*pitch,29.5,123*pitch,29.5);
+            ruler.DrawLine(-111*pitch,21.5,111*pitch,21.5);
+            ruler.DrawLine( -97*pitch,13.5, 97*pitch,13.5);
+            // between RDOs 1-2, outer 24 pads (12 at each end) are in RDO 1
+            pitch = 0.335/2.0; // 3.35mm pitch
+            ruler.DrawLine(-(142-24)*pitch,8.5,(142-24)*pitch,8.5);
+            ruler.DrawLine(-138*pitch,7.5,-(138-24)*pitch,7.5);
+            ruler.DrawLine((142-24)*pitch,7.5,146*pitch,7.5);
+            ruler.DrawLine(-(142-24)*pitch,7.5,-(142-24)*pitch,8.5);
+            ruler.DrawLine((142-24)*pitch,7.5,(142-24)*pitch,8.5);
           }
 
           if (padAdvance) {if (gPad) gPad->Update();}
