@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.27 2009/03/19 02:46:01 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.28 2009/05/05 20:53:16 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.28  2009/05/05 20:53:16  ullrich
+ * Updates for MTD.
+ *
  * Revision 2.27  2009/03/19 02:46:01  ullrich
  * Add 2nd argument (pre/post) to vpdEarliestTDC().
  *
@@ -232,12 +235,15 @@ public:
     virtual unsigned short vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short vpdEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short vpdTimeDifference() const;
 
     //MTD
     virtual unsigned short mtdAtAddress(int address, int prepost=0) const;
     virtual unsigned short mtdAdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;
+    virtual bool           mtdDsmHit(int pmt, int prepost=0) const;
 
     //TOF
     virtual unsigned short tofAtAddress(int address, int prepost=0) const;

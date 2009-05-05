@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.8 2009/03/19 02:46:01 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.9 2009/05/05 20:53:16 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.9  2009/05/05 20:53:16  ullrich
+ * Updates for MTD.
+ *
  * Revision 2.8  2009/03/19 02:46:01  ullrich
  * Add 2nd argument (pre/post) to vpdEarliestTDC().
  *
@@ -37,7 +40,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.8 2009/03/19 02:46:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.9 2009/05/05 20:53:16 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -191,10 +194,13 @@ unsigned short StTriggerData::vpdTDC(StBeamDirection eastwest, int pmt, int prep
 unsigned short StTriggerData::vpdADCHighThr(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdTDCHighThr(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
+unsigned short StTriggerData::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
 unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+unsigned char  StTriggerData::mtdDsmAtCh(int ch, int prepost) const {return 0;}
+bool           StTriggerData::mtdDsmHit(int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::tofAtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::tofMultiplicity(int prepost) const {return 0;}
 unsigned short StTriggerData::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
