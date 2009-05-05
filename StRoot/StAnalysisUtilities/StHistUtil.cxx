@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.60 2009/05/05 00:31:07 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.61 2009/05/05 23:16:12 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.61  2009/05/05 23:16:12  genevb
+// Draw TPC sector boundaries and labels
+//
 // Revision 2.60  2009/05/05 00:31:07  genevb
 // Add Anode guide lines in TPC Sector plots
 //
@@ -830,6 +833,32 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             latex.DrawLatex(-50,33.1,"7");
             latex.DrawLatex(-50,41.1,"8");
             latex.SetTextColor(1);
+          }
+
+          if (oName.Contains("PointRPTpc") ||
+              oName.Contains("PointXYTpc") ) {
+            // Draw sector boundaries and label
+            int eastsec = (oName.Contains("TpcE") ? 12 : 0);
+            ruler.SetLineColor(0);
+            ruler.SetLineStyle(2);
+            float sz = latex.GetTextSize();
+            latex.SetTextAlign(32);
+            latex.SetTextSize(0.032);
+            int secn = (eastsec ? 21 : 13);
+            float phistep = TMath::Pi()/12;
+            for (float phi=phistep; phi<6.2; phi+=phistep) {
+              float xsec = TMath::Cos(phi);
+              float ysec = TMath::Sin(phi);
+              ruler.DrawLine(50*xsec,50*ysec,199*xsec,199*ysec);
+              phi+=phistep;
+              xsec = TMath::Cos(phi);
+              ysec = TMath::Sin(phi);
+              latex.SetTextAngle(phi*180/TMath::Pi());
+              latex.DrawLatex(52*xsec,52*ysec,Form("%d",secn%12 + eastsec + 1));
+              secn += (eastsec ? 1 : -1);
+            }
+            latex.SetTextSize(sz);
+            ruler.SetLineStyle(1);
           }
 
           if (padAdvance) {if (gPad) gPad->Update();}
