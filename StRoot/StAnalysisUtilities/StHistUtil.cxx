@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.59 2009/05/04 23:37:40 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.60 2009/05/05 00:31:07 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.60  2009/05/05 00:31:07  genevb
+// Add Anode guide lines in TPC Sector plots
+//
 // Revision 2.59  2009/05/04 23:37:40  genevb
 // Add RDO boundary lines in TPC Sector plots
 //
@@ -798,6 +801,35 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             ruler.DrawLine((142-24)*pitch,7.5,146*pitch,7.5);
             ruler.DrawLine(-(142-24)*pitch,7.5,-(142-24)*pitch,8.5);
             ruler.DrawLine((142-24)*pitch,7.5,(142-24)*pitch,8.5);
+            latex.SetTextAngle(0);
+            latex.SetTextAlign(32);
+            latex.DrawLatex(50,4,"RDO 1");
+            latex.DrawLatex(50,10,"2");
+            latex.DrawLatex(50,17,"3");
+            latex.DrawLatex(50,25,"4");
+            latex.DrawLatex(50,33,"5");
+            latex.DrawLatex(50,41,"6");
+
+            // Draw Anode guides
+            ruler.SetLineColor(2);
+            ruler.DrawLine(-52,2.9,-47,2.9);
+            ruler.DrawLine(-52,6.2,-47,6.2);
+            ruler.DrawLine(-52,9.4,-47,9.4);
+            ruler.DrawLine(-52,13.5,-47,13.5);
+            ruler.DrawLine(-52,21.1,-47,21.1);
+            ruler.DrawLine(-52,29.1,-47,29.1);
+            ruler.DrawLine(-52,37.1,-47,37.1);
+            latex.SetTextAlign(12);
+            latex.SetTextColor(2);
+            latex.DrawLatex(-50,1.5,"1 Anode");
+            latex.DrawLatex(-50,4.6,"2");
+            latex.DrawLatex(-50,7.8,"3");
+            latex.DrawLatex(-50,11.4,"4");
+            latex.DrawLatex(-50,17.1,"5");
+            latex.DrawLatex(-50,25.1,"6");
+            latex.DrawLatex(-50,33.1,"7");
+            latex.DrawLatex(-50,41.1,"8");
+            latex.SetTextColor(1);
           }
 
           if (padAdvance) {if (gPad) gPad->Update();}
