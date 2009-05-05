@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.13 2009/04/28 23:10:26 jeromel Exp $
+ * $Id: StTriggerData2009.cxx,v 2.14 2009/05/05 20:53:16 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.14  2009/05/05 20:53:16  ullrich
+ * Updates for MTD.
+ *
  * Revision 2.13  2009/04/28 23:10:26  jeromel
  * debug=0
  *
@@ -896,9 +899,32 @@ unsigned short StTriggerData2009::vpdTDCHighThr(StBeamDirection eastwest, int pm
 unsigned short StTriggerData2009::vpdEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if(mBBC[buffer]){
-        if(eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
-        else               {return mBBC[buffer]->VPD[4]%4096;}
+    if (buffer >= 0){
+      if(mBBC[buffer]){
+	if(mRun<=10096084){
+	  if(eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+	  else               {return mBBC[buffer]->VPD[4]%4096;}
+	}else{
+	  if(eastwest==east) {return mBBC[buffer]->VPD[2]%4096;}
+	  else               {return mBBC[buffer]->VPD[0]%4096;}
+	}
+      }
+    }
+    return 0;
+}
+ 
+unsigned short StTriggerData2009::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0){
+      if(mBBC[buffer]){
+	if(mRun<=10365999){ 
+	  return 0;
+	}else{
+	  if(eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+	  else               {return mBBC[buffer]->VPD[4]%4096;}
+	}
+      }
     }
     return 0;
 }
@@ -936,26 +962,67 @@ unsigned short* StTriggerData2009::getDsm2_FMS() const {return L1_DSM->FPD;}
 
 unsigned short StTriggerData2009::mtdAtAddress(int address, int prepost) const
 {
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && address>=0 && address<32) return mxq[buffer][0][address];
     return 0;
 }
 
 unsigned short StTriggerData2009::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const
 {
+    //pmt in not used for 2009, it is place holder for next year
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && pmt==0){
+        if(eastwest==east) return mxq[buffer][0][0];
+        if(eastwest==west) return mxq[buffer][0][8];
+    }
     return 0;
 }
 
 unsigned short StTriggerData2009::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const
 {
+    //pmt in not used for 2009, it is place holder for next year
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && pmt==0){
+        if(eastwest==east) return mxq[buffer][0][4];
+        if(eastwest==west) return mxq[buffer][0][12];
+    }
     return 0;
+}
+
+unsigned char StTriggerData2009::mtdDsmAtCh(int ch, int prepost) const
+{
+    int map[16] = {7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8};
+    int buffer = prepostAddress(prepost);    
+    if (buffer >= 0 && ch>=0 && ch<16){
+        if(mMIX[buffer]) return mMIX[buffer]->MTD_P2PLayer1[map[ch]];
+    }
+    return 0;
+}
+
+bool StTriggerData2009::mtdDsmHit(int pmt, int prepost) const
+{
+    //pmt in not used for 2009, it is place holder for next year
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0){
+        if(mMIX[buffer]){
+            if( (mMIX[buffer]->MTD_P2PLayer1[5] & 0x1) && (mMIX[buffer]->MTD_P2PLayer1[5] & 0x10) ) return true;
+        }
+    }
+    return false;
 }
 
 unsigned short StTriggerData2009::tofAtAddress(int address, int prepost) const 
 {
+    int buffer = prepostAddress(prepost);
+    if(buffer>=0 && address>=0 && address<48) {
+        if(mMIX[buffer]) return mMIX[buffer]->TOF[address];
+    }
     return 0;
 }
 
 unsigned short StTriggerData2009::tofMultiplicity(int prepost) const 
-{
+{  
+    if(prepost==0) return L1_DSM->TOF[1]%8192;
     return 0;
 }
 
