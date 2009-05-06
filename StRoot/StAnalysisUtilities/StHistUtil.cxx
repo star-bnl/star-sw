@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.61 2009/05/05 23:16:12 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.62 2009/05/06 17:19:09 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.62  2009/05/06 17:19:09  genevb
+// Avoid PDF bug with text at angles
+//
 // Revision 2.61  2009/05/05 23:16:12  genevb
 // Draw TPC sector boundaries and labels
 //
@@ -853,7 +856,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
               phi+=phistep;
               xsec = TMath::Cos(phi);
               ysec = TMath::Sin(phi);
-              latex.SetTextAngle(phi*180/TMath::Pi());
+              latex.SetTextAngle(phi*180/TMath::Pi()+1); // +1 degree necessary to avoid PDF bug
               latex.DrawLatex(52*xsec,52*ysec,Form("%d",secn%12 + eastsec + 1));
               secn += (eastsec ? 1 : -1);
             }
