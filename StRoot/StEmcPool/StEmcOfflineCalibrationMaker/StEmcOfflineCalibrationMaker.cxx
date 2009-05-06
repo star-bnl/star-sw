@@ -39,6 +39,7 @@
 #include "StEmcRawMaker/StBemcTables.h"
 #include "StEmcTriggerMaker/StEmcTriggerMaker.h"
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
+#include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
 
 //logger
 #include "StMessMgr.h"
@@ -200,7 +201,10 @@ Int_t StEmcOfflineCalibrationMaker::Make()
   const StTriggerId& trigs = event->triggerIdCollection().nominal();
 
 	//toss out fpd1-tpcdead-fast triggers immediately
-  if(trigs.isTrigger(2) || trigs.isTrigger(117460) || trigs.isTrigger(137460) || trigs.isTrigger(147461)) return kStOK;
+  for(unsigned int i = 0; i < fastTriggers.size(); i++){
+    if(trigs.isTrigger(fastTriggers[i]))return kStOK;
+  } 
+ //if(trigs.isTrigger(2) || trigs.isTrigger(117460) || trigs.isTrigger(137460) || trigs.isTrigger(147461)) return kStOK;
 	
   myEvent->triggerIds = trigs.triggerIds();
   myEvent->l2Result = event->L2Result();	
@@ -275,11 +279,17 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	//trigger maker
   for(unsigned int i = 0; i < htTriggers.size(); i++){
     myEvent->triggerResult[htTriggers[i]]=emcTrigMaker->isTrigger(htTriggers[i]);
+    myEvent->towersAboveThreshold[htTriggers[i]] = emcTrigMaker->bemc->getTowersAboveThreshold((int)htTriggers[i]);
   }
+  for(unsigned int i = 0; i < httpTriggers.size(); i++){
+    myEvent->triggerResult[httpTriggers[i]]=emcTrigMaker->isTrigger(httpTriggers[i]);
+    myEvent->towersAboveThreshold[httpTriggers[i]] = emcTrigMaker->bemc->getTriggerPatchesAboveThreshold(httpTriggers[i]);
+  }
+  /*
   for(unsigned int i = 0; i < mbTriggers.size(); i++){
     myEvent->triggerResult[mbTriggers[i]]=emcTrigMaker->isTrigger(mbTriggers[i]);
   }
-
+  */
   myEvent->htTrigMaker[0] = emcTrigMaker->isTrigger(137213);
   //std::map<int,int>::const_iterator p = (emcTrigMaker->barrelTowersAboveThreshold(137213)).begin();
   //myEvent->htTrigMaker[1] = p->first;
@@ -294,7 +304,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
     StMuTrack* track;
     StMuTrack* primarytrack;
     int nentries = muDst->numberOfPrimaryTracks();
-    cout<<nentries<<" tracks in vertex "<<vertex_index<<endl;
+    //cout<<nentries<<" tracks in vertex "<<vertex_index<<endl;
     assert(nentries==primaryTracks->GetEntries());
     pair<unsigned int, pair<float,float> > smd_eta_center;
     pair<unsigned int, pair<float,float> > smd_phi_center;
@@ -314,6 +324,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
       int primused = 0;
       if(!track)primused=1;
       if(!track)track = primarytrack;
+      myTrack->charge = track->charge();
       myTrack->eta = track->eta();
       double p;
       StPhysicalHelixD outerhelix;
@@ -480,7 +491,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	myTrack->dEdx = track->dEdx();
 				
 	myEvent->addTrack(myTrack);
-				cout<<"I think I added a track"<<endl;
+	//			cout<<"I think I added a track"<<endl;
       }
     }
   }
@@ -740,4 +751,10 @@ void StEmcOfflineCalibrationMaker::addMinBiasTrigger(unsigned int trigId){
 
 void StEmcOfflineCalibrationMaker::addHighTowerTrigger(unsigned int trigId){ 
 	htTriggers.push_back(trigId);
+}
+void StEmcOfflineCalibrationMaker::addHTTPTrigger(unsigned int trigId){
+  httpTriggers.push_back(trigId);
+}
+void StEmcOfflineCalibrationMaker::addFastTrigger(unsigned int trigId){
+  fastTriggers.push_back(trigId);
 }

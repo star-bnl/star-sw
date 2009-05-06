@@ -24,6 +24,8 @@ public:
 	float			tower_pedestal_rms[9];
 	int				tower_status[9];
 	float			highest_neighbor;
+
+	int charge;
 	
 	unsigned short	preshower_adc[9];
 	float			preshower_pedestal[9];
@@ -159,6 +161,8 @@ public:
 	map<unsigned int, unsigned int> triggerResult;
 	vector<unsigned int>	triggerIds;
 	TArrayI			l2Result;
+	map<unsigned int, vector< pair<int,int> > > towersAboveThreshold;//or patches
+
 	
 	int htTrigMaker[3]; //Yes/No ID DSM
 	
