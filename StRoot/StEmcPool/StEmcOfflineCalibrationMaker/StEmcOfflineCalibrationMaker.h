@@ -36,7 +36,8 @@ private:
 	
 	vector<unsigned int> mbTriggers;
 	vector<unsigned int> htTriggers;
-	
+	vector<unsigned int> httpTriggers;
+	vector<unsigned int> fastTriggers;	
 	//pointers to makers - get them in Init()
 	StMuDstMaker*		muDstMaker;
 	StEmcADCtoEMaker*	mADCtoEMaker;
@@ -84,6 +85,8 @@ public:
 	
 	void addMinBiasTrigger(unsigned int trigId);
 	void addHighTowerTrigger(unsigned int trigId);
+	void addHTTPTrigger(unsigned int trigId);
+	void addFastTrigger(unsigned int trigId);
 	
 	ClassDef(StEmcOfflineCalibrationMaker, 3)
 };

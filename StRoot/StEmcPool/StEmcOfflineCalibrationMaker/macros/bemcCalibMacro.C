@@ -58,7 +58,7 @@ void bemcCalibMacro(const char* dir="./",
     trigsim->useBbc();
     trigsim->useBemc();
     trigsim->bemc->setConfig(StBemcTriggerSimu::kOffline);
-    StGenericL2Emulator* simL2Mk = new StL2_2006EmulatorMaker;
+    StGenericL2Emulator* simL2Mk = new StL2_2008EmulatorMaker;
     assert(simL2Mk);
     simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
     simL2Mk->setOutPath(outPath);
@@ -69,8 +69,10 @@ void bemcCalibMacro(const char* dir="./",
 	outfile += "/";
 	outfile += name;
 	StEmcOfflineCalibrationMaker* bemcCalibMaker = new StEmcOfflineCalibrationMaker("bemcCalibMaker",outfile.Data());
-	bemcCalibMaker->subtractPedestals = true;
-	
+	//bemcCalibMaker->subtractPedestals = true;
+
+	/*
+	//2006 Triggers	
 	bemcCalibMaker->addMinBiasTrigger(200000);
 	bemcCalibMaker->addMinBiasTrigger(200002);
 	bemcCalibMaker->addMinBiasTrigger(200012);
@@ -80,6 +82,19 @@ void bemcCalibMacro(const char* dir="./",
 	bemcCalibMaker->addHighTowerTrigger(127212);
 	bemcCalibMaker->addHighTowerTrigger(127213);
 	bemcCalibMaker->addHighTowerTrigger(137213);
+	*/
+
+	//2008 Triggers
+	bemcCalibMaker->addMinBiasTrigger(220000);
+	bemcCalibMaker->addHighTowerTrigger(220500);//bht0
+	bemcCalibMaker->addHighTowerTrigger(220510);//bht1
+	bemcCalibMaker->addHighTowerTrigger(220520);//bht2
+
+	bemcCalibMaker->addFastTrigger(220900);//fms-fast
+	bemcCalibMaker->addFastTrigger(220901);//fms-fast
+	bemcCalibMaker->addFastTrigger(220910);//fms-fast tpc line
+	bemcCalibMaker->addFastTrigger(220920);//fpd e fast
+	bemcCalibMaker->addFastTrigger(220710);//tof reading only tpx and tof
 	
 	StMemStat memory;
 	memory.PrintMem(NULL);
