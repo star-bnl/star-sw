@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.17 2009/03/23 21:08:32 mattheww Exp $
+// $Id: StEemcRaw.cxx,v 1.18 2009/05/06 14:25:54 mattheww Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -400,7 +400,7 @@ Bool_t   StEemcRaw::headersAreSick(StEEMCReader *eeReader, StEmcRawData *raw, in
 Bool_t  StEemcRaw::towerDataAreSick(StEmcRawData* raw)
 {
     const int mxN256one=5;
-    const int mxN256tot=20; // may need to be changed for 2005 data with more MAPMT crates, JB
+    const int mxN256tot=40; // may need to be changed for 2005 data with more MAPMT crates, JB
 
     int nGhostTot=0, n256Tot=0;
     int icr;
@@ -590,6 +590,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.18  2009/05/06 14:25:54  mattheww
+// changed a threshold in EEMC
+//
 // Revision 1.17  2009/03/23 21:08:32  mattheww
 // Update default BPRS ZS handling and fix EEMC minor bug
 //
