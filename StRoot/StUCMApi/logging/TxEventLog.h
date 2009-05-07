@@ -2,7 +2,7 @@
  * @file TxEventLog.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLog.h,v 1.2 2009/04/30 17:09:27 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLog.h,v 1.3 2009/05/07 20:32:34 fine Exp $
  *
  * TxEventLog provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -62,6 +62,7 @@ protected:
      *
      */    
     TxEventLog ();
+    virtual void writeDown(const std::string& message)=0;
 public:
 
     /**
