@@ -102,7 +102,8 @@ String StUCMAppender::getLogStatement(const spi::LoggingEventPtr& event)
 void StUCMAppender::closeConnection()
 {
   if (fIsConnectionOpen && connection) {
-        delete connection; 
+      connection->logEnd(); 
+      delete connection; 
   }
   connection = 0;
   fIsConnectionOpen = false;
@@ -114,43 +115,22 @@ TxEventLog *StUCMAppender::getConnection()
    if (!fIsConnectionOpen) {
    
      if (!connection) {
-           // Generates the UCM_STORE_INFO
-          // setenv UCM_STORE_INFO 
-          // "mysql:StarLogger(logger)@heston.star.bnl.gov:3306/logger"
-         const char *host   = "heston.star.bnl.gov";
-         const char *user   = "StarLogger";
-         const char *passwd = "logger";
-         const char *db     = "logger";
-      //   unsigned int port  = 3306;
-         const char *port   = "3306";
-         std::string ucmStore = "mysql";
-                     ucmStore += ":";
-                     ucmStore += user;
-                     ucmStore +="("; ucmStore += passwd; ucmStore +=")";
-                     ucmStore += "@";
-                     ucmStore += host;
-                     ucmStore += ":";
-                     ucmStore += port;
-                     ucmStore += "/";
-                     ucmStore += db;
-          connection = TxEventLogFactory::create();
-          connection->logStart();
-          if ( getenv("JOBINDEX") && getenv("REQUESTID") ) {
-               const char *JOBINDEX = getenv("JOBINDEX");
-                std::string UCMJOB   =  getenv("REQUESTID");
-                UCMJOB +=JOBINDEX;
-                fprintf(stderr,"StUCMAppender::getConnection() about to open the connection %s for JOBINDEX \n"
-                        , ucmStore.c_str(),JOBINDEX);
-//                 connection = new TxEventLog(ucmStore.c_str(),JOBINDEX);
+       connection = TxEventLogFactory::create();
+//       connection = TxEventLogFactory::create("w"); // to access the Web interface
+       connection->logStart();
+       if ( getenv("JOBINDEX") && getenv("REQUESTID") ) {
+           const char *JOBINDEX = getenv("JOBINDEX");
+           std::string UCMJOB   = getenv("REQUESTID");
+           UCMJOB +=JOBINDEX;
            // However, what we really need is:
            // const char *REQUESTID = getenv("REQUESTID");
            // const char *PROCESSID = getenv("PROCESSID");
-           // connection = new TxEventLog(ucmStore.c_str(),REQUESTID,JOBINDEX);
-              } else {
-                 fprintf(stderr,"StUCMAppender::getConnection() no JOBINDEX/REQUESTID was provided \n");
-                 connection = TxEventLogFactory::create();
-              }
-    }
+       } else {
+          fprintf(stderr,"StUCMAppender::getConnection() no JOBINDEX/REQUESTID was provided \n");
+          connection = TxEventLogFactory::create();
+//       connection = TxEventLogFactory::create("w"); // to access the Web interface
+       }
+     }
    }
 	return connection;
 }

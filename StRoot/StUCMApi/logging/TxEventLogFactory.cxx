@@ -3,11 +3,14 @@
 #include <fstream>
 
 #include "TxEventLogFactory.h"
-#include "TxEventLogFile.h"
+#include "TxEventLogWeb.h"
 
 using namespace TxLogging;
 
 TxEventLog* TxEventLogFactory::create(const char *technology)
 {
-    return new TxEventLogFile;
+   if (technology && (*technology=='w' | *technology=='W'))
+      return new TxEventLogWeb;
+   else
+      return new TxEventLogFile;
 }
