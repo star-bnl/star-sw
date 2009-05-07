@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.1 2009/04/30 17:09:27 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.2 2009/05/07 20:32:34 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -40,6 +40,7 @@ void TxLogging::TxEventLogFile::setEnvBrokerTaskID (const std::string& envBroker
 void TxLogging::TxEventLogFile::setEnvBrokerJobID (const std::string& envBrokerJobID) {
   this->brokerJobID = 
     TxUCMUtils::getEnv (envBrokerJobID.c_str ());
+  if (brokerJobID=="orphan") brokerJobID="0";
 }
 
 void TxLogging::TxEventLogFile::setBrokerTaskID (const std::string& brokerTaskID) {
@@ -212,8 +213,17 @@ void TxLogging::TxEventLogFile::writeMessage (const std::string& event,
   msg += "stage=\""; msg += TxUCMUtils::itoa (stage); msg += "\" ";
   msg += "key=\"" + key;                              msg += "\" ";
   msg += "value=\"" + value;                          msg += "\"\n";
+  
+  writeDown(msg);
+}
 
+void TxLogging::TxEventLogFile::writeDown(const std::string& message)
+{
   std::ofstream logFile(logFilePath.c_str (), std::ios::app);
-  logFile << msg.c_str ();
+  logFile << message.c_str ();
   logFile.close();
+
+  std::string httpstring="wget -b -q -O  /dev/null 'http://connery.star.bnl.gov/ucm/m=";
+  httpstring+=message;
+  system( httpstring.c_str());
 }
