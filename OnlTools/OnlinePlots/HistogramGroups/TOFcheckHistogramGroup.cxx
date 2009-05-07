@@ -34,21 +34,24 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup() {
   // For ROOT I/O
   TOF_Error1=0;
   TOF_Error2=0;
-  TOF_Tray_hits1=0;
-  TOF_Tray_hits2=0;
+  TOF_EventCount=0;
+  //TOF_Tray_hits1=0;
+  //TOF_Tray_hits2=0;
 }
 
 TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {
  
-  mNevents=0;
-  TOF_Error1=new TH1F("TOF_Error1","TOF packetID error ",122,0.5,122.5);
-  TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",12,0,6.);
-  TOF_Tray_hits1=new TH1F("TOF_Tray_hits1","Hits in Trays",240,-0.5,119.5);
-  TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","Hits in Trays",240,-0.5,119.5);
+  TOF_Error1=new TH1F("TOF_Error1","TOF electronics error ",250,0.5,125.5);
+  TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",14,0,7.);
+
+  TOF_EventCount=new TH1F("TOF_EventCount","TOF_EventCount",2,0,2);
+
+  //TOF_Tray_hits1=new TH1F("TOF_Tray_hits1","Hits in Trays",240,-0.5,119.5);
+  //TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","Hits in Trays",240,-0.5,119.5);
 
   TOF_Error1->SetXTitle("Tray #");
-  TOF_Error2->SetXTitle("THUB+Tray121 122 #");
+  TOF_Error2->SetXTitle("THUB+Tray121 122 124");
  
 }
 
@@ -57,8 +60,9 @@ TOFcheckHistogramGroup::~TOFcheckHistogramGroup() {
 
   delete TOF_Error1;
   delete TOF_Error2;
-  delete TOF_Tray_hits1;
-  delete TOF_Tray_hits2;
+  delete TOF_EventCount;
+  //delete TOF_Tray_hits1;
+  //delete TOF_Tray_hits2;
 
 }
 
@@ -66,8 +70,9 @@ void TOFcheckHistogramGroup::reset() {
 
   TOF_Error1->Reset();
   TOF_Error2->Reset();
-  TOF_Tray_hits1->Reset();
-  TOF_Tray_hits2->Reset();
+  TOF_EventCount->Reset();
+  //TOF_Tray_hits1->Reset();
+  //TOF_Tray_hits2->Reset();
 }
 
 
@@ -75,7 +80,7 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
 
   TLatex label;
   //label.SetTextAlign(23);  // center, top
-  label.SetTextSize(0.07);
+  label.SetTextSize(0.06);
   label.SetTextColor(45);
 
   TLine  line;
@@ -104,6 +109,8 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   cc->Clear();
   cc->Divide(1, 2);
   cc->cd(1);
+
+  int mNevents=int(TOF_EventCount->GetEntries());
 
   TOF_Error1->GetYaxis()->SetLabelSize(0.07);
   TOF_Error1->GetXaxis()->SetLabelSize(0.055);
@@ -139,7 +146,7 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
     label.DrawLatex( 1., hmax, tmpchr);
   }
   TLatex labela;
-  labela.SetTextSize(0.04);
+  labela.SetTextSize(0.030);
   labela.SetTextAlign(23);  // center, top
   labela.DrawLatex(0.25,0.1*hmax,"THUB1-0");
   labela.DrawLatex(0.75,0.2*hmax,"THUB1-1");
@@ -153,14 +160,9 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   labela.DrawLatex(4.75,0.2*hmax,"121-1");
   labela.DrawLatex(5.25,0.1*hmax,"122-0");
   labela.DrawLatex(5.75,0.2*hmax,"122-1");
+  labela.DrawLatex(6.25,0.1*hmax,"124-0");
+  labela.DrawLatex(6.75,0.2*hmax,"124-1");
 
-  /*
-  cc->cd(3);
-  TOF_Tray_hits1->SetFillColor(2);
-  TOF_Tray_hits2->SetFillColor(4);
-  TOF_Tray_hits1->Draw();
-  TOF_Tray_hits2->Draw("same");
-  */
   cc->Update();
 
 } 
@@ -177,8 +179,8 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
   // 
   int halftrayid=-1;
   int trayid=-1;
-  int allbunchid[2][122];
-  for(int i=0;i<2;i++)for(int j=0;j<122;j++)allbunchid[i][j]=0;
+  int allbunchid[2][124];
+  for(int i=0;i<2;i++)for(int j=0;j<124;j++)allbunchid[i][j]=-9999;
 
   for(int ifib=0;ifib<4;ifib++){
     int ndataword = tof.ddl_words[ifib];    // 
@@ -187,7 +189,12 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
     for(int iword=0;iword<ndataword;iword++){
       int dataword=tof.ddl[ifib][iword];
       //cout<<"TOF:: ifib="<<ifib<<" dataword=0x"<<hex<<dataword<<dec<<endl;
-      int packetid = (dataword&0xF0000000)>>28 ;
+      int packetid = (dataword&0xF0000000)>>28;
+      if(TOF_EventCount->GetEntries()>1) {
+        if(!ValidDataword(packetid)) TOF_Error1->Fill(trayid+0.5*halftrayid);
+        //if(!ValidDataword(packetid)) cout<<"ERROR!!!!"<<hex<<"dataword=0x"<<dataword<<dec<<"tray="<<trayid<<endl;
+      }
+
       if(packetid == 0xD) continue;  
       if(packetid == 0xE) continue;  
       if(packetid == 0xA) {  // header trigger data flag
@@ -201,8 +208,9 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
          trayid     = (dataword&0x0FE)>>1;
          continue;
       }
-      if(!ValidDataword(packetid)) TOF_Error1->Fill(trayid);
-      //if(!ValidDataword(packetid)) cout<<"ERROR!!!!"<<hex<<"0x"<<dataword<<dec<<"tray="<<trayid<<endl;
+      //cout<<"tray="<<trayid<<" halftray="<<halftrayid<<endl;
+      if(trayid <1 || trayid >124) continue;
+      if(trayid == 123) continue;
 
       // bunch id 
       if(packetid == 0x2) {
@@ -212,38 +220,35 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
        continue;  
       }
 
-      if(trayid <1 || trayid >122) continue;
-
-
-      if( (dataword&0xF0000000)>>28 == 0x6) {continue;}
+      //if( (dataword&0xF0000000)>>28 == 0x6) {continue;}
       //
-      int edgeid =packetid;
-      if((edgeid !=4) && (edgeid!=5)) continue;
-      if(trayid<121) {
-        if(halftrayid==0) TOF_Tray_hits1->Fill(trayid-1);
-        if(halftrayid==1) TOF_Tray_hits2->Fill(trayid-0.5);
-      }
+      //int edgeid =packetid;
+      //if((edgeid !=4) && (edgeid!=5)) continue;
+      //if(trayid<121) {
+      //if(halftrayid==0) TOF_Tray_hits1->Fill(trayid-1);
+      //if(halftrayid==1) TOF_Tray_hits2->Fill(trayid-0.5);
+      //}
 
     }  // end loop nword
   }  // end loop fiber
 
-  mNevents++;
+  TOF_EventCount->Fill(1);
 
   // check bunch id shift
   int bunchidref1 =   allbunchid[0][0];   // bunchid from tray 1 as reference.
   int bunchidref2 =   allbunchid[1][0];   // bunchid from tray 1 as reference.
   if(bunchidref1 != bunchidref2) {TOF_Error2->Fill(0);}
 
-  for(int itray=0;itray<122;itray++){
+  for(int itray=0;itray<124;itray++){
     int traynum=itray+1;
     if(Tray_NotInRun(traynum)) continue;
     for(int ihalf=0;ihalf<2;ihalf++){
       int bunchid=allbunchid[ihalf][itray];
+      //if(bunchid == -9999) continue;
       int ret=ValidBunchid(traynum,ihalf,bunchid,bunchidref1);
       if(ret>=0) TOF_Error2->Fill(ret+0.5*ihalf);
     }
   }
-
   return true;
 
 }
@@ -275,7 +280,8 @@ bool TOFcheckHistogramGroup::Tray_NotInRun(int trayid)
 }
 int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchid)
 {
-  if(trayid<1 || trayid>122) return -1;
+  if(trayid<1 || trayid>124) return -1;
+  if(trayid == 123) return -1;
 
   int trayinTHUB1[30]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,51,52,53,54,55,56,57,58,59,60};
   int trayinTHUB2[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
@@ -287,6 +293,7 @@ int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,i
   //tray 122 half0: -5 -4  half1: -4 -3
   int tray121shift[2][2]={{ 4, 5},{ 5, 6}};
   int tray122shift[2][2]={{-5,-4},{-4,-3}};
+  int tray124shift[2]   = {-5,-6};
 
   int nthub=-1;
   int ret=-1;
@@ -298,6 +305,7 @@ int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,i
   }
   if(trayid == 121) nthub =4;
   if(trayid == 122) nthub =5;
+  if(trayid == 124) nthub  =6;
   int diff=bunchid-refbunchid;
   if(diff>2048)   {diff =diff-4096;} 
   else if(diff<-2048) {diff =diff+4096;}
@@ -309,6 +317,8 @@ int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,i
     if(diff !=tray121shift[halftrayid][0] && diff != tray121shift[halftrayid][1]) ret=nthub;
   } else if(trayid==122){
     if(diff !=tray122shift[halftrayid][0] && diff != tray122shift[halftrayid][1]) ret=nthub;
+  } else if(trayid==124) {
+    if(diff != tray124shift[0] && diff != tray124shift[1]) ret=nthub;
   }
 
   //if(ret>=0)cout<<"ERROR!! tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<ret<<endl;
