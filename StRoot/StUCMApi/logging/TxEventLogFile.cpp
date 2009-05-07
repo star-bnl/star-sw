@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.2 2009/05/07 20:32:34 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.3 2009/05/07 22:52:22 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -24,6 +24,7 @@ TxLogging::TxEventLogFile::TxEventLogFile ():TxLogging::TxEventLog() {
   // vars are set. If not, assume they are orphan messages
   brokerTaskID = TxUCMUtils::getEnv (TxUCMConstants::envBrokerTaskID);
   brokerJobID = TxUCMUtils::getEnv (TxUCMConstants::envBrokerJobID);
+  if (brokerJobID=="orphan")brokerJobID = "0";
   
   // set context, hostname and read properties file
   this->setDefaults ();
@@ -40,7 +41,6 @@ void TxLogging::TxEventLogFile::setEnvBrokerTaskID (const std::string& envBroker
 void TxLogging::TxEventLogFile::setEnvBrokerJobID (const std::string& envBrokerJobID) {
   this->brokerJobID = 
     TxUCMUtils::getEnv (envBrokerJobID.c_str ());
-  if (brokerJobID=="orphan") brokerJobID="0";
 }
 
 void TxLogging::TxEventLogFile::setBrokerTaskID (const std::string& brokerTaskID) {
@@ -212,7 +212,7 @@ void TxLogging::TxEventLogFile::writeMessage (const std::string& event,
   msg += "level=\""; msg += TxUCMUtils::itoa (level); msg += "\" ";
   msg += "stage=\""; msg += TxUCMUtils::itoa (stage); msg += "\" ";
   msg += "key=\"" + key;                              msg += "\" ";
-  msg += "value=\"" + value;                          msg += "\"\n";
+  msg += "value=\"" + value;                          msg += "\" ";
   
   writeDown(msg);
 }
@@ -220,10 +220,12 @@ void TxLogging::TxEventLogFile::writeMessage (const std::string& event,
 void TxLogging::TxEventLogFile::writeDown(const std::string& message)
 {
   std::ofstream logFile(logFilePath.c_str (), std::ios::app);
-  logFile << message.c_str ();
+  logFile << message.c_str () << "\n";
   logFile.close();
 
-  std::string httpstring="wget -b -q -O  /dev/null 'http://connery.star.bnl.gov/ucm/m=";
+  std::string httpstring="wget -b  -q -o /dev/null ";
+  httpstring+= "-O /dev/null \'http://connery.star.bnl.gov/ucm/?m=";
   httpstring+=message;
+  httpstring+="\'";
   system( httpstring.c_str());
 }
