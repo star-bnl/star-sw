@@ -110,7 +110,9 @@ void doEStruct( const char* filelist,
     ofstream ofs(getOutFileName(outputDir,jobName,"stats"));
     estructMaker-&gt;logAllStats(ofs);
     ecuts-&gt;printCuts(ofs);
+    ecuts-&gt;printCutStats(ofs);
     tcuts-&gt;printCuts(ofs);
+    tcuts-&gt;printCutStats(ofs);
     <variable refersTo='pairCutsWrite'/>
     ofs&lt;&lt;endl;
     ofs.close();
