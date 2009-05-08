@@ -21,11 +21,15 @@ namespace eval ::jobMonitor:: {
     variable LOGTYPE    .log
     variable bWindow
     variable jobList ""
-    variable actionList
+    variable actionList ""
     variable viewMenu
     variable selectedJob ""
     variable anchorJob ""
     variable IOwnProcess false
+    variable matchNumber -1
+    variable lastMatchNumber 1
+    variable matchEnd "start"
+    variable matchAll 1
 }
 
 ################################################################################
@@ -97,9 +101,10 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
 
     set edit [menu $m.edit]
     $m add cascade -label Edit -menu $edit
-    $edit add checkbutton -label "Ignore case"   -variable ::jobMonitor::ignoreCase
-    $edit add command     -label Editor          -command [namespace code chooseEditor]
-    $edit add command     -label "log file type" -command [namespace code setFileType]
+    $edit add checkbutton -label "Ignore case"          -variable ::jobMonitor::ignoreCase
+    $edit add command     -label "Editor..."            -command [namespace code chooseEditor]
+    $edit add command     -label "log file type..."     -command [namespace code setFileType]
+    $edit add command     -label "Number of matches..." -command [namespace code matchingNumber]
 
     set help [menu $m.help]
     $m add cascade -label Help -menu $help
@@ -247,7 +252,6 @@ proc ::jobMonitor::searchFiles {} {
     # Require log file to have size bigger than 0.
     # If we do not find the log file append the scripts file.
     set ::jobMonitor::jobList    [list]
-    set ::jobMonitor::actionList [list]
     set fileList [list]
     foreach file [lsort -dictionary [glob $::jobMonitor::scriptDir/sched*.csh]] {
         if { ![file isdirectory $file] } {
@@ -287,10 +291,27 @@ proc ::jobMonitor::searchFiles {} {
         incr iCol
     }
     $::jobMonitor::bWindow.f2.text config -state disabled
+
+    # Restore widget states for selections and anchor.
+    # Make sure selected job is in jobList
+    set missing [list]
+    foreach job $::jobMonitor::actionList {
+        if {[lsearch $::jobMonitor::jobList $job] >= 0} {
+            set ::jobMonitor::cbVar$job 1
+        } else {
+            lappend missing $job
+        }
+    }
+    set ::jobMonitor::actionList [lremove $::jobMonitor::actionList $missing]
+    if {$::jobMonitor::anchorJob ne "" && [lsearch $::jobMonitor::jobList $::jobMonitor::anchorJob] >= 0} {
+        $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief ridge
+    }
 }
 
 # searchPattern --
 #    Search for lines containing the given pattern in a file
+#        For each file keep a list of matches, then at end insert desired number from
+#        appropriate end of list.
 #
 # Arguments:
 #    filename      Name of the file to be searched
@@ -315,6 +336,7 @@ proc ::jobMonitor::searchPattern {jobName filename pattern ignoreCase} {
                 -variable ::jobMonitor::cbVar$jobName]
         bind $cb <Button-1> [namespace code "selectJob $jobName"]
         bind $cb <Shift-Button-1> [namespace code "selectJobRange $jobName"]
+        bind $cb <Shift-Control-Button-1> [namespace code "addSelectJobRange $jobName"]
         bind $cb <Control-Button-1> [namespace code "toggleJob $jobName"]
         variable var$jobName
         set stat [button $::jobMonitor::bWindow.f2.text.stat$jobName \
@@ -329,8 +351,12 @@ proc ::jobMonitor::searchPattern {jobName filename pattern ignoreCase} {
         set posE [$::jobMonitor::bWindow.f2.text index end]
 
         # Read the file line by line.
-        # As soon as we find a match add the line to the window.
-        # After all lines have been added we search and tag them for ALL matches.
+        # When we find a match add it to a list for that pattern
+        # That allows us to choose how many matches from either start or end of file to show.
+        # Tag matches for ALL matches after adding requested number of them to text widget.
+        foreach pat $pattern {
+            set matches($pat) [list]
+        }
         while { [gets $infile line] >= 0 } {
             foreach pat $pattern {
                 if { $ignoreCase } {
@@ -339,13 +365,33 @@ proc ::jobMonitor::searchPattern {jobName filename pattern ignoreCase} {
                     set match [regexp -indices -- $pat $line indices]
                 }
                 if { $match } {
-                    $::jobMonitor::bWindow.f2.text insert end "\n"
-                    $::jobMonitor::bWindow.f2.text insert end $line
+                    lappend matches($pat) $line
                     break
                 }
             }
         }
         close $infile
+        # Now copy desired number of matches from the desired of the list to the text widget.
+        set nMatches $::jobMonitor::matchNumber
+        incr nMatches -1
+        if {$::jobMonitor::matchAll} {
+            set start 0
+            set end end
+        } elseif {$::jobMonitor::matchEnd eq "start"} {
+            set start 0
+            set end $nMatches
+        } else {
+            set start "end-$nMatches"
+            set end end
+        }
+        foreach pat $pattern {
+            foreach line [lrange $matches($pat) $start $end] {
+                $::jobMonitor::bWindow.f2.text insert end "\n"
+                $::jobMonitor::bWindow.f2.text insert end $line
+            }
+        }
+
+        # Finally, tag matches so user can see them,
         foreach pat $pattern {
             # posE seems to be one line too far.
             # I'm not sure why.
@@ -488,7 +534,10 @@ proc ::jobMonitor::countTypes {m action} {
 #    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::selectJobs {type} {
-    set ::jobMonitor::anchorJob ""
+    if {$::jobMonitor::anchorJob ne ""} {
+        $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
+        set ::jobMonitor::anchorJob ""
+    }
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
         if {($type eq "all") || ($type eq $val)} {
@@ -509,7 +558,10 @@ proc ::jobMonitor::selectJobs {type} {
 #    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::deselectJobs {type} {
-    set ::jobMonitor::anchorJob ""
+    if {$::jobMonitor::anchorJob ne ""} {
+        $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
+        set ::jobMonitor::anchorJob ""
+    }
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
         if {($type eq "all") || ($type eq $val)} {
@@ -530,7 +582,10 @@ proc ::jobMonitor::deselectJobs {type} {
 #    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::toggleSelect {type} {
-    set ::jobMonitor::anchorJob ""
+    if {$::jobMonitor::anchorJob ne ""} {
+        $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
+        set ::jobMonitor::anchorJob ""
+    }
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
         if {($type eq "all") || ($type eq $val)} {
@@ -556,12 +611,15 @@ proc ::jobMonitor::toggleSelect {type} {
 # Question: do we want to give a visual indication to the anchor button?
 #
 proc ::jobMonitor::selectJob {jobName} {
+    if {$::jobMonitor::anchorJob ne ""} {
+        $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
+    }
     foreach job $::jobMonitor::jobList {
         set ::jobMonitor::cbVar$job 0
     }
     set ::jobMonitor::actionList $jobName
     set ::jobMonitor::anchorJob  $jobName
-#    set ::jobMonitor::cbVar$job  1
+    $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief ridge
 }
 # selectJobRange --
 #    Invoked via binding for Shift-Button-1 on checkbutton
@@ -569,10 +627,48 @@ proc ::jobMonitor::selectJob {jobName} {
 # Arguments: job name.
 # Result: none
 # Side effects: Select all jobs between this button and anchor.
-#   Add them to selected list. Leave all other job selections alone.
+#   Add them to selected list. Unselect all other jobs.
 #   If anchorJob = "" this is a noop.
 #
 proc ::jobMonitor::selectJobRange {jobName} {
+    if {$::jobMonitor::anchorJob eq ""} {
+        return
+    }
+    foreach job $::jobMonitor::jobList {
+        set ::jobMonitor::cbVar$job 0
+    }
+    set ::jobMonitor::actionList ""
+    set anchor [lsearch $::jobMonitor::jobList $::jobMonitor::anchorJob]
+    set current [lsearch $::jobMonitor::jobList $jobName]
+    if {$anchor > $current} {
+        set first $current
+        set last  $anchor
+    } else {
+        set first $anchor
+        set last  $current
+    }
+    foreach job [lrange $::jobMonitor::jobList $first $last] {
+        if {[lsearch $::jobMonitor::actionList $job] < 0} {
+            lappend ::jobMonitor::actionList $job
+        }
+    }
+    foreach job $::jobMonitor::actionList {
+        set ::jobMonitor::cbVar$job 1
+    }
+    # This routine is called before button is toggled.
+    # Turn selected button off so it will be toggled on.
+    set ::jobMonitor::cbVar$jobName 0
+}
+# addSelectJobRange --
+#    Invoked via binding for Shift-Ctrl-Button-1 on checkbutton
+#
+# Arguments: job name.
+# Result: none
+# Side effects: Select all jobs between this button and anchor.
+#   Add them to selected list. Leave all other job selections alone.
+#   If anchorJob = "" this is a noop.
+#
+proc ::jobMonitor::addSelectJobRange {jobName} {
     if {$::jobMonitor::anchorJob eq ""} {
         return
     }
@@ -580,12 +676,10 @@ proc ::jobMonitor::selectJobRange {jobName} {
     set current [lsearch $::jobMonitor::jobList $jobName]
     if {$anchor > $current} {
         set first $current
-        incr first
         set last  $anchor
     } else {
         set first $anchor
         set last  $current
-        incr last -1
     }
     foreach job [lrange $::jobMonitor::jobList $first $last] {
         if {[lsearch $::jobMonitor::actionList $job] < 0} {
@@ -593,7 +687,7 @@ proc ::jobMonitor::selectJobRange {jobName} {
             set ::jobMonitor::cbVar$job 1
         }
     }
-    lappend ::jobMonitor::actionList [lindex $::jobMonitor::jobList $current]
+    set ::jobMonitor::cbVar$jobName 0
 }
 # toggleJob --
 #    Invoked via binding for Control-Button-1 on checkbutton
@@ -602,14 +696,24 @@ proc ::jobMonitor::selectJobRange {jobName} {
 # Result: none
 # Side effects: Toggle selection status of this job, leave all
 #   other jobs alone.
+#   Make this job the anchor job for range selection if we are
+#   selecting button. Remove 
+#   wi
 #
 proc ::jobMonitor::toggleJob {jobName} {
+    if {$::jobMonitor::anchorJob ne ""} {
+        $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
+        set ::jobMonitor::anchorJob ""
+    }
     if {[lsearch $::jobMonitor::actionList $jobName] < 0} {
         lappend ::jobMonitor::actionList   $jobName
         set ::jobMonitor::cbVar$jobName 0
+        set ::jobMonitor::anchorJob  $jobName
+        $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief ridge
     } else {
         set ::jobMonitor::actionList  [lremove -all $::jobMonitor::actionList $jobName]
         set ::jobMonitor::cbVar$jobName 1
+        set ::jobMonitor::anchorJob  ""
     }
 }
 
@@ -809,9 +913,8 @@ proc ::jobMonitor::checkPopup {} {
         catch {$::jobMonitor::viewMenu delete "condorLog"}
     }
     set f [file join $::jobMonitor::logDir $job.log]
-    if {[file exists $f] &&
-        [info exists env(SGE_ROOT)] &&
-       (($status eq "") || ($status eq "DONE"))} {
+    if {[file exists $f] && [info exists ::env(SGE_ROOT)]
+        && (($status eq "") || ($status eq "DONE"))} {
         if {[catch {$::jobMonitor::viewMenu index qacct} err]} {
             $::jobMonitor::viewMenu add command -label "qacct" -command [namespace code qacctJob]
         }
@@ -1323,14 +1426,14 @@ proc ::jobMonitor::chooseEditor {} {
    vwait done
    destroy $w
 }
-# chooseEditor --
+# setFileType --
 #
 # Arguments:
 #    none
 # Result:
-#    open window requesting an editor
+#    open window requesting a file type extension
 # Side effects:
-#    Set env(EDITOR) to new value
+#    Set LOGTYPE to indicate what files we want to search
 #
 proc ::jobMonitor::setFileType {} {
    set w [toplevel .logFileType]
@@ -1347,6 +1450,63 @@ proc ::jobMonitor::setFileType {} {
    grid $w.ok
    vwait done
    destroy $w
+}
+# matchingNumber --
+#
+# Arguments:
+#    none
+# Result:
+#    open window requesting information about how many matching
+#    lines to display, and whether to count from start or end.
+# Side effects:
+#
+proc ::jobMonitor::matchingNumber {} {
+    set w [toplevel .matchingNumber]
+    wm resizable $w 0 0
+    wm title $w "Number of matching lines to display"
+    checkbutton $w.cb -text "Display all matches" \
+            -command [namespace code "setMatchSpinBoxState $w.f.sb"] \
+            -variable ::jobMonitor::matchAll
+    frame $w.f
+    spinbox $w.f.sb -textvariable ::jobMonitor::matchNumber \
+            -width 3 -from 1 -to 999 -increment 1
+    if {$::jobMonitor::matchAll} {
+        set ::jobMonitor::matchNumber -1
+        $w.f.sb configure -state disabled
+    } else {
+        set ::jobMonitor::matchNumber $::jobMonitor::lastMatchNumber
+        $w.f.sb configure -state normal
+    }
+    label $w.f.l  -text "Display at most this number of matches"
+    checkbutton $w.cbEnd -text "Display matches from start of file" \
+        -variable ::jobMonitor::matchEnd -onvalue start -offvalue end
+    button $w.ok     -text OK     -command [namespace code "set mDone 1"]
+    pack $w.cb -anchor w
+    pack $w.f -expand true -fill x
+    pack $w.f.sb $w.f.l -side left -anchor w
+    pack $w.cbEnd -anchor w
+    pack $w.ok -anchor s
+    vwait mDone
+    destroy $w
+}
+# setMatchSpinBoxState --
+#
+# Arguments:
+#    spinbox controlled by this proc
+# Result:
+#    If we activate spinbox set its value to last active value
+#    If we disable spinbox set its value to -1
+# Side effects:
+#
+proc ::jobMonitor::setMatchSpinBoxState {sb} {
+    if {$::jobMonitor::matchAll} {
+        set ::jobMonitor::lastMatchNumber $::jobMonitor::matchNumber
+        set ::jobMonitor::matchNumber -1
+        $sb configure -state disabled
+    } else {
+        set ::jobMonitor::matchNumber $::jobMonitor::lastMatchNumber
+        $sb configure -state normal
+    }
 }
 
 
@@ -1549,13 +1709,19 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end " o Button 1 mouse click\n" bullet
     $w insert end "(I.e. left button).\n" n
     $w insert end "- This will de-select all other jobs, select this job and set " n
-    $w insert end "the selection anchor to this job. \n" n
+    $w insert end "the selection anchor to this job. The selection anchor will be indicated " n
+    $w insert end "via a ridge around the button.\n" n
     $w insert end " o Shift-Button 1 mouse click\n" bullet
     $w insert end "- This selects all jobs between the selection anchor and this job. " n
+    $w insert end "Selected jobs outside the new selection range will be de-selected. " n
     $w insert end "If there is no selection anchor this will do nothing. " n
     $w insert end "The selection anchor is not changed.\n" n
     $w insert end " o Control-Button 1 mouse click\n" bullet
     $w insert end "- This will toggle the selection state of this job " n
+    $w insert end "leaving the selection state of all other jobs unchanged. " n
+    $w insert end "The selection anchor is moved to this job.\n\n" n
+    $w insert end " o Sift-Control-Button 1 mouse click\n" bullet
+    $w insert end "- This will select all jobs between the anchor and this job " n
     $w insert end "leaving the selection state of all other jobs and the " n
     $w insert end "selection anchor unchanged.\n\n" n
 
