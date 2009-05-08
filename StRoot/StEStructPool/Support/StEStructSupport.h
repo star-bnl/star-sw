@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.13 2008/12/02 23:52:53 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.14 2009/05/08 00:21:42 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -70,11 +70,12 @@ public:
   float *getChargePairs(int zBin);
 
   double *getd2NdEtadPhi(int zBin);
+  double *getScaleFactors();
+  double *getScaleFactors(int zBin);
   double *getptHat(int zBin);
+  int    histogramExists(const char* name, int zBin);
   TH2D** getHists(const char* name, int zBin);
   TH2D** getLocalClones(const char* name, int zBin);
-  TH2D** getNHists(const char* name, int zBin);
-  TH2D** getLocalNClones(const char* name, int zBin);
   TH2D** getPtHists(const char* name, int zBin);
   TH2D** getPtClones(const char* name, int zBin);
   float* getNorms(TH2D** histArray);
@@ -89,7 +90,6 @@ public:
   TH2D** buildCommonRFunctions(const char* name, float* sf, int zBin);
   TH2D** buildCommon(const char* name, int opt=2, float* sf=0);
   TH2D** buildCommon(const char* name, int opt, float* sf, int zBin);
-  void  adjustCommonErrors(const char* name, TH2D **hist, int opt);
   TH2D** buildPtCommon(const char* name, int opt=2, int subtract=1);
   TH2D** buildPtCommon(const char* name, int opt, int subtract, int zBin);
 
@@ -102,7 +102,6 @@ public:
   TH2D** buildChargeTypeRFunctions(const char* name, float* sf, int zBin);
   TH2D** buildChargeTypes(const char* name, int opt=2, float* sf=0);
   TH2D** buildChargeTypes(const char* name, int opt, float* sf, int zBin);
-  void  adjustChargeTypeErrors(const char* name, TH2D **hist, int opt);
   TH2D** buildPtChargeTypes(const char* name, int opt=2, int subtract=1);
   TH2D** buildPtChargeTypes(const char* name, int opt, int subtract, int zBin);
 
@@ -110,7 +109,6 @@ public:
   TH2D** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf, int zBin);
   
   void scaleBackGround(TH2D* sib, TH2D* mix, float sf=0);
-  TH2D* getSqrt(TH2D* h);
   void fixDEta(TH2** h, int numHists); // correct triangle in hists with DEta
 
   // helper for writing ascii dump of set a of histograms to file=fname
@@ -136,6 +134,14 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.14  2009/05/08 00:21:42  prindle
+ * In StEStructHadd remove support for old style of histogram names, do a better job calculating
+ * errors (at least for number (\eta_\Delta,\phi_\Delta) histograms), double bins which
+ * have an edge in the center (purely cosmetic when looking at intermediate histograms).
+ * In StEStructSupport check for existance of histograms and return gracefully.
+ * Code in buildChargeTypes and buildPtChargeTypes was essentially duplicate of code
+ * in buildCommon and buildPtCommon so I refactored to reduce redundancy.
+ *
  * Revision 1.13  2008/12/02 23:52:53  prindle
  * Get information about histogram XX being symmetrized from CutBin.
  * Changed TH1* to TH2D* in many places hoping to be able to plot DEtaDPhi
