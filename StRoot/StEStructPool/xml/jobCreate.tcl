@@ -1945,7 +1945,10 @@ proc ::jobCreate::addHistograms {} {
                     set ll [split $line]
                     if {[lindex $line 0] eq "hadd"} {
                         foreach f [lrange $ll 2 end] {
-                            if {[regexp {dataHists_M(\d+)_(\d+).root} $f m c v]} {
+                            # The match was dataHists_M(\d+)_(\d+).root
+                            # This didn't work with my splitting script. Question is if we
+                            # now allow undesirable matches.
+                            if {[regexp {dataHists_M(\d+)_(.+).root} $f m c v]} {
                                 if {$c == $i} {
                                     lappend ::jobCreate::alreadyAdded($i) $f
                                 }
@@ -2173,7 +2176,7 @@ proc ::jobCreate::toggleFileToAdd {f centrality} {
 proc ::jobCreate::startAddingHistograms {nCentralities} {
     .addHistograms.b.action configure -text Cancel \
             -command {set ::jobCreate::stopAddHistograms true; \
-                      addHistograms.b.action configure -text "...waiting for current hadd to finish"}
+                      .addHistograms.b.action configure -text "...waiting for current hadd to finish"}
 
     set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
     set path [$node text]
