@@ -32,6 +32,7 @@
             </allocateAnalysis>
             <pairCutsWrite id='pairCutsWrite' widget='none'>
     pcuts-&gt;printCuts(ofs);
+    pcuts-&gt;printCutStats(ofs);
             </pairCutsWrite>
             <weightsFile id='weightsFile' widget='entry' Comment='weights file for reaction plane analysis' typedef='char *weightsFile = '>none</weightsFile>
             <beforeEventLoop id='beforeEventLoop' widget = 'text'>
