@@ -46,6 +46,7 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
     char inFileName[1024];
 
     for (int ic=0;ic<nCent;ic++) {
+        printf("Scale factors for centrality %2i,    ++       +-       -+       --       CI   \n",ic);
         for (int ipid=0;ipid<8;ipid++) {
             sprintf(inFileName,"%s/%s%s.root",dirName,inNames[ic],oname[ipid]);
             tf        = new TFile(inFileName);
@@ -71,11 +72,13 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
             ptphiphi = (TH2F**) ehelp->buildPtChargeTypes("PhiPhi",2,subtract);
 
             dedpC     = (TH2F**) ehelp->buildCommon("DEtaDPhi",2);
+            ehelp->adjustCommonErrors("DEtaDPhi",dedpC,2);
             sedpC     = (TH2F**) ehelp->buildCommon("SEtaDPhi",2);
             etaetaC   = (TH2F**) ehelp->buildCommon("EtaEta",2);
             phiphiC   = (TH2F**) ehelp->buildCommon("PhiPhi",2);
 
             dedp     = (TH2F**) ehelp->buildChargeTypes("DEtaDPhi",2);
+            ehelp->adjustChargeTypeErrors("DEtaDPhi",dedp,2);
             sedp     = (TH2F**) ehelp->buildChargeTypes("SEtaDPhi",2);
             etaeta   = (TH2F**) ehelp->buildChargeTypes("EtaEta",2);
             phiphi   = (TH2F**) ehelp->buildChargeTypes("PhiPhi",2);
@@ -84,92 +87,128 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
             for (int icharge=0;icharge<4;icharge++) {
                 TString name(pidName[ipid]);
                 name += "_NDEtaDPhi"; name += chargeName[icharge];  name += ic;
-                dedp[icharge]->SetName(name.Data());
-                dedp[icharge]->SetTitle(name.Data());
-                dedp[icharge]->Write();
+                if (dedp) {
+                    dedp[icharge]->SetName(name.Data());
+                    dedp[icharge]->SetTitle(name.Data());
+                    dedp[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_PtDEtaDPhi"; name += chargeName[icharge];  name += ic;
-                ptdedp[icharge]->SetName(name.Data());
-                ptdedp[icharge]->SetTitle(name.Data());
-                ptdedp[icharge]->Write();
+                if (ptdedp) {
+                    ptdedp[icharge]->SetName(name.Data());
+                    ptdedp[icharge]->SetTitle(name.Data());
+                    ptdedp[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_NSEtaDPhi"; name += chargeName[icharge];  name += ic;
-                sedp[icharge]->SetName(name.Data());
-                sedp[icharge]->SetTitle(name.Data());
-                sedp[icharge]->Write();
+                if (sedp) {
+                    sedp[icharge]->SetName(name.Data());
+                    sedp[icharge]->SetTitle(name.Data());
+                    sedp[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_PtSEtaDPhi"; name += chargeName[icharge];  name += ic;
-                ptsedp[icharge]->SetName(name.Data());
-                ptsedp[icharge]->SetTitle(name.Data());
-                ptsedp[icharge]->Write();
+                if (ptsedp) {
+                    ptsedp[icharge]->SetName(name.Data());
+                    ptsedp[icharge]->SetTitle(name.Data());
+                    ptsedp[icharge]->Write();
+                }
 
                 TString name(pidName[ipid]);
                 name += "_NDEtaDPhi"; name += chargeType[icharge];  name += ic;
-                dedpC[icharge]->SetName(name.Data());
-                dedpC[icharge]->SetTitle(name.Data());
-                dedpC[icharge]->Write();
+                if (dedpC) {
+                    dedpC[icharge]->SetName(name.Data());
+                    dedpC[icharge]->SetTitle(name.Data());
+                    dedpC[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_PtDEtaDPhi"; name += chargeType[icharge];  name += ic;
-                ptdedpC[icharge]->SetName(name.Data());
-                ptdedpC[icharge]->SetTitle(name.Data());
-                ptdedpC[icharge]->Write();
+                if (ptdedpC) {
+                    ptdedpC[icharge]->SetName(name.Data());
+                    ptdedpC[icharge]->SetTitle(name.Data());
+                    ptdedpC[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_NSEtaDPhi"; name += chargeType[icharge];  name += ic;
-                sedpC[icharge]->SetName(name.Data());
-                sedpC[icharge]->SetTitle(name.Data());
-                sedpC[icharge]->Write();
+                if (sedpC) {
+                    sedpC[icharge]->SetName(name.Data());
+                    sedpC[icharge]->SetTitle(name.Data());
+                    sedpC[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_PtSEtaDPhi"; name += chargeType[icharge];  name += ic;
-                ptsedpC[icharge]->SetName(name.Data());
-                ptsedpC[icharge]->SetTitle(name.Data());
-                ptsedpC[icharge]->Write();
+                if (ptsedpC) {
+                    ptsedpC[icharge]->SetName(name.Data());
+                    ptsedpC[icharge]->SetTitle(name.Data());
+                    ptsedpC[icharge]->Write();
+                }
 
 
                 TString name(pidName[ipid]);
                 name += "_NEtaEta"; name += chargeName[icharge];  name += ic;
-                etaeta[icharge]->SetName(name.Data());
-                etaeta[icharge]->SetTitle(name.Data());
-                etaeta[icharge]->Write();
+                if (etaeta) {
+                    etaeta[icharge]->SetName(name.Data());
+                    etaeta[icharge]->SetTitle(name.Data());
+                    etaeta[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_PtEtaEta"; name += chargeName[icharge];  name += ic;
-                ptetaeta[icharge]->SetName(name.Data());
-                ptetaeta[icharge]->SetTitle(name.Data());
-                ptetaeta[icharge]->Write();
+                if (ptetaeta) {
+                    ptetaeta[icharge]->SetName(name.Data());
+                    ptetaeta[icharge]->SetTitle(name.Data());
+                    ptetaeta[icharge]->Write();
+                }
 
                 TString name(pidName[ipid]);
                 name += "_NEtaEta"; name += chargeType[icharge];  name += ic;
-                etaetaC[icharge]->SetName(name.Data());
-                etaetaC[icharge]->SetTitle(name.Data());
-                etaetaC[icharge]->Write();
+                if (etaetaC) {
+                    etaetaC[icharge]->SetName(name.Data());
+                    etaetaC[icharge]->SetTitle(name.Data());
+                    etaetaC[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_PtEtaEta"; name += chargeType[icharge];  name += ic;
-                ptetaetaC[icharge]->SetName(name.Data());
-                ptetaetaC[icharge]->SetTitle(name.Data());
-                ptetaetaC[icharge]->Write();
+                if (ptetaetaC) {
+                    ptetaetaC[icharge]->SetName(name.Data());
+                    ptetaetaC[icharge]->SetTitle(name.Data());
+                    ptetaetaC[icharge]->Write();
+                }
 
 
                 TString name(pidName[ipid]);
                 name += "_NPhiPhi"; name += chargeName[icharge];  name += ic;
-                phiphi[icharge]->SetName(name.Data());
-                phiphi[icharge]->SetTitle(name.Data());
-                phiphi[icharge]->Write();
+                if (phiphi) {
+                    phiphi[icharge]->SetName(name.Data());
+                    phiphi[icharge]->SetTitle(name.Data());
+                    phiphi[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_PtPhiPhi"; name += chargeName[icharge];  name += ic;
-                ptphiphi[icharge]->SetName(name.Data());
-                ptphiphi[icharge]->SetTitle(name.Data());
-                ptphiphi[icharge]->Write();
+                if (ptphiphi) {
+                    ptphiphi[icharge]->SetName(name.Data());
+                    ptphiphi[icharge]->SetTitle(name.Data());
+                    ptphiphi[icharge]->Write();
+                }
 
                 TString name(pidName[ipid]);
                 name += "_NPhiPhi"; name += chargeType[icharge];  name += ic;
-                phiphiC[icharge]->SetName(name.Data());
-                phiphiC[icharge]->SetTitle(name.Data());
-                phiphiC[icharge]->Write();
+                if (phiphiC) {
+                    phiphiC[icharge]->SetName(name.Data());
+                    phiphiC[icharge]->SetTitle(name.Data());
+                    phiphiC[icharge]->Write();
+                }
                 TString name(pidName[ipid]);
                 name += "_PtPhiPhi"; name += chargeType[icharge];  name += ic;
-                ptphiphiC[icharge]->SetName(name.Data());
-                ptphiphiC[icharge]->SetTitle(name.Data());
-                ptphiphiC[icharge]->Write();
+                if (ptphiphiC) {
+                    ptphiphiC[icharge]->SetName(name.Data());
+                    ptphiphiC[icharge]->SetTitle(name.Data());
+                    ptphiphiC[icharge]->Write();
+                }
             }
+            // Calculate and print scale factors
+            double *scale = ehelp->getScaleFactors();
+            printf("  bin %8s                    %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",binName[ibin],scale[0],scale[1],scale[2],scale[3],scale[4]);
+            delete [] scale;
             delete tf;
             delete ehelp;
         }
@@ -178,8 +217,13 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
     TH2D **ytyt;
     TH2D **ytytC;
     gROOT->LoadMacro("minimizeNegative.C");
-//    double sFactor[nCent][1][2], eSFactor[nCent][1][2];
-    double sFactor[2], eSFactor[2];
+    double *sFactor[2][3], *eSFactor[2][3];
+    for (int it=0;it<2;it++) {
+        for (int ibin=0;ibin<3;ibin++) {
+            sFactor[it][ibin] = new double[nCent];
+            eSFactor[it][ibin] = new double[nCent];
+        }
+    }
     float  sf[2];
     double argList[10];
     double start = 0.95;
@@ -204,6 +248,11 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
             ehelp->mIdenticalPair     = true;
             ehelp->setBGMode(1);
 
+            // Make sure LS histogram for zBin 0 is in file.
+            if (0 == ehelp->histogramExists("YtYt", 0)) {
+                continue;
+            }
+
             // A lot of stuff so we can find a scaling factor for \rho_{ref}
             // such that \Delta\rho is almost always positive.
             minData.mSupport    = ehelp;
@@ -213,12 +262,18 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
             minuit->SetFCN(minimizeNegative);
             minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
             minuit->SetErrorDef(1);
+            minuit->SetPrintLevel(-1);
             argList[0] = 1;
             minuit->mnexcm("SET STR",argList,1,errFlag);
             argList[0] = 500;
             cout << ">>>>>Starting scale factor 0 fit for centrality " << ic << " yt bin " << ibin << endl;
             minuit->mnexcm("MIGRAD",argList,1,errFlag);
-            minuit->GetParameter(0,sFactor[0],eSFactor[0]);
+            minuit->GetParameter(0,sFactor[0][ibin][ic],eSFactor[0][ibin][ic]);
+            if (0 != errFlag) {
+                cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
+                sFactor[0][ibin][ic]  =   1;
+                eSFactor[0][ibin][ic] = 100;
+            }
             delete minuit;
 
             // Seems like I should be able to reset the TMinuit object to do a
@@ -230,16 +285,22 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
             int errFlag = 0;
             minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
             minuit->SetErrorDef(1);
+            minuit->SetPrintLevel(-1);
             argList[0] = 1;
             minuit->mnexcm("SET STR",argList,1,errFlag);
             argList[0] = 500;
             cout << ">>>>>Starting scale factor 1 fit for centrality " << ic << " yt bin " << ibin << endl;
             minuit->mnexcm("MIGRAD",argList,1,errFlag);
-            minuit->GetParameter(0,sFactor[1],eSFactor[1]);
+            minuit->GetParameter(0,sFactor[1][ibin][ic],eSFactor[1][ibin][ic]);
+            if (0 != errFlag) {
+                cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
+                sFactor[1][ibin][ic]  =   1;
+                eSFactor[1][ibin][ic] = 100;
+            }
             delete minuit;
 
-            sf[0] = sFactor[0];
-            sf[1] = sFactor[1];
+            sf[0] = sFactor[0][ibin][ic];
+            sf[1] = sFactor[1][ibin][ic];
             ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
             ytytC = ehelp->buildCommon("YtYt",5,sf);
 
@@ -260,6 +321,20 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
             delete ehelp;
         }
     }
+    cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+    cout << " Here are Yt scale factors for rho_{ref}" << endl;
+    printf(" Centrality   all LS       SS LS        AS LS        all US       SS US        AS US    \n");
+    for (int ic=0;ic<nCent;ic++) {
+        printf("%6i    %9.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f)\n",ic,
+            sFactor[0][0][ic],1000*eSFactor[0][0][ic],sFactor[0][1][ic],1000*eSFactor[0][1][ic],sFactor[0][2][ic],1000*eSFactor[0][2][ic],
+            sFactor[1][0][ic],1000*eSFactor[1][0][ic],sFactor[1][1][ic],1000*eSFactor[1][1][ic],sFactor[1][2][ic],1000*eSFactor[1][2][ic]);
+    }
     out->Close();
 //    delete out;
+    for (int it=0;it<2;it++) {
+        for (int ibin=0;ibin<3;ibin++) {
+            delete sFactor[it][ibin];
+            delete eSFactor[it][ibin];
+        }
+    }
 }
