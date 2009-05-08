@@ -9,6 +9,13 @@ void addCentralities(const char* dirName, const char* inFile, const char* outFil
 
   // -- Combine files by renaming z-buffer indices. This allows the Support code to
   //    calculate the ratios for all centralitles and z-buffers.
+  //    Note: The assumption built in here is that you have split a centrality bin into parts
+  //          because the acceptance or efficiency of each part is different. When combining
+  //          centrality bins or z-buffers we form the ratio \Delta\rho/\rho_{ref} and do a
+  //          weighted averages of these. An alternative method of combining centralities
+  //          would be to sum \rho (sib and mix separately) over centralities for each z-buffer,
+  //          then average \Delta\rho/\rho_{ref}. If that's what you wanted you probably
+  //          shouldn't have split the centrality bin to begin with.
   //
   // root.exe -q -b addCentralities.C("dir","inFileBase","outFile", nFile, numFiles)
   // 
@@ -47,10 +54,13 @@ cout << "Input file " << fileName.Data() << endl;
         }
         nParents--;
 
+        // Had been looking for number of YtYt histograms to define number of cut bins.
+        // YtYt is now an optional set of histograms.
+        // Look for DEtaDPhi now. So far we always require those.
         nCuts = 0;
-        name = "SibppYtYt_cutBin_"; name += nCuts; name += "_zBuf_0";
+        name = "SibppDEtaDPhiArr_cutBin_"; name += nCuts; name += "_zBuf_0";
         while (gDirectory->Get(name.Data())) {
-            name ="SibppYtYt_cutBin_"; name += nCuts; name += "_zBuf_0";
+            name ="SibppDEtaDPhiArr_cutBin_"; name += nCuts; name += "_zBuf_0";
             nCuts++;
         }
         nCuts--;
@@ -318,214 +328,317 @@ cout << "Loop over main histograms:  zBin = " << iz << endl;
                     in->cd();
                     histName = type[it]; histName += "YtYt_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHYtYt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "YtYt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHYtYt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHYtYt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "YtYt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHYtYt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHYtYt[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "NYtYt_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHNYtYt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "NYtYt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHNYtYt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
-
+                    if (tmp) {
+                        out->cd();
+                        mHNYtYt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "NYtYt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHNYtYt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHNYtYt[ic][iz+ozBin[jf]][it] = 0;
+                    }
                     in->cd();
                     histName = type[it]; histName += "PtPt_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPtPt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PtPt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPtPt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPtPt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PtPt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPtPt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPtPt[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
 
                     in->cd();
                     histName = type[it]; histName += "PhiPhi_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPhiPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "NPhiPhi_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHNPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "NPhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHNPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHNPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "NPhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHNPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHNPhiPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "EtaEta_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHEtaEta[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "EtaEta_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHEtaEta[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "EtaEta_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHEtaEta[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PrPhiPhi_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPrPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PrPhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPrPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPrPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PrPhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPrPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPrPhiPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PrEtaEta_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPrEtaEta[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PrEtaEta_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPrEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPrEtaEta[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PrEtaEta_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPrEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPrEtaEta[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PaPhiPhi_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPaPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PaPhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPaPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPaPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PaPhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPaPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPaPhiPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PaEtaEta_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPaEtaEta[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PaEtaEta_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPaEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPaEtaEta[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PaEtaEta_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPaEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPaEtaEta[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PbPhiPhi_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPbPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PbPhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPbPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPbPhiPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PbPhiPhi_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPbPhiPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPbPhiPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PbEtaEta_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPbEtaEta[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PbEtaEta_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPbEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPbEtaEta[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PbEtaEta_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPbEtaEta[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPbEtaEta[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
 
                     in->cd();
                     histName = type[it]; histName += "SYtDYt_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHAtSYtDYt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "SYtDYt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHAtSYtDYt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHAtSYtDYt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "SYtDYt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHAtSYtDYt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHAtSYtDYt[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "NSYtDYt_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHAtNSYtDYt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "NSYtDYt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHAtNSYtDYt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHAtNSYtDYt[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "NSYtDYt_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHAtNSYtDYt[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHAtNSYtDYt[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "DEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHJtDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "DEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHJtDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHJtDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "DEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHJtDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHJtDEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "NDEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHJtNDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "NDEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHJtNDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHJtNDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "NDEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHJtNDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHJtNDEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PrDEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPrJtDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PrDEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPrJtDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPrJtDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PrDEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPrJtDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPrJtDEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PaDEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPaJtDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PaDEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPaJtDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPaJtDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PaDEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPaJtDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPaJtDEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PbDEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPbJtDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PbDEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPbJtDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPbJtDEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PbDEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPbJtDEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPbJtDEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
 
                     in->cd();
                     histName = type[it]; histName += "SEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHJtSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "SEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHJtSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHJtSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "SEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHJtSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHJtSEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "NSEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHJtNSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "NSEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHJtNSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHJtNSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "NSEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHJtNSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHJtNSEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PrSEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPrJtSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PrSEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPrJtSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPrJtSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PrSEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPrJtSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPrJtSEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PaSEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPaJtSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PaSEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPaJtSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPaJtSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PaSEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPaJtSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPaJtSEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "PbSEtaDPhiArr_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHPbJtSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
-                    outName = type[it];  outName += "PbSEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHPbJtSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHPbJtSEtaDPhi[ic][iz+ozBin[jf]][it] = (TH2D *) tmp->Clone();
+                        outName = type[it];  outName += "PbSEtaDPhiArr_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHPbJtSEtaDPhi[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHPbJtSEtaDPhi[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
 
                     in->cd();
                     histName = type[it]; histName += "Qinv_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHQinv[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
-                    outName = type[it];  outName += "Qinv_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHQinv[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHQinv[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                        outName = type[it];  outName += "Qinv_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHQinv[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHQinv[ic][iz+ozBin[jf]][it] = 0;
+                    }
 
                     in->cd();
                     histName = type[it]; histName += "NQinv_cutBin_"; histName += ic; histName += "_zBuf_"; histName += iz;
                     tmp = (TH1D *) gDirectory->Get(histName.Data());
-                    out->cd();
-                    mHNQinv[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
-                    outName = type[it];  outName += "NQinv_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
-                    mHNQinv[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    if (tmp) {
+                        out->cd();
+                        mHNQinv[ic][iz+ozBin[jf]][it] = (TH1D *) tmp->Clone();
+                        outName = type[it];  outName += "NQinv_cutBin_"; outName += ic; outName += "_zBuf_"; outName += iz+ozBin[jf];
+                        mHNQinv[ic][iz+ozBin[jf]][it]->SetName(outName.Data());
+                    } else {
+                        mHNQinv[ic][iz+ozBin[jf]][it] = 0;
+                    }
                 }
             }
         }
@@ -738,36 +851,36 @@ cout << "Closing input file " << jf << endl;
 
         for (int ic=0;ic<nCutBins;ic++) {
             for (int it=0;it<8;it++) {
-                mHYtYt[ic][iz][it]->Write();
-                mHNYtYt[ic][iz][it]->Write();
-                mHPtPt[ic][iz][it]->Write();
+                if (mHYtYt[ic][iz][it]) mHYtYt[ic][iz][it]->Write();
+                if (mHNYtYt[ic][iz][it]) mHNYtYt[ic][iz][it]->Write();
+                if (mHPtPt[ic][iz][it]) mHPtPt[ic][iz][it]->Write();
 
-                mHPhiPhi[ic][iz][it]->Write();
-                mHNPhiPhi[ic][iz][it]->Write();
-                mHEtaEta[ic][iz][it]->Write();
-                mHPrPhiPhi[ic][iz][it]->Write();
-                mHPrEtaEta[ic][iz][it]->Write();
-                mHPaPhiPhi[ic][iz][it]->Write();
-                mHPaEtaEta[ic][iz][it]->Write();
-                mHPbPhiPhi[ic][iz][it]->Write();
-                mHPbEtaEta[ic][iz][it]->Write();
+                if (mHPhiPhi[ic][iz][it]) mHPhiPhi[ic][iz][it]->Write();
+                if (mHNPhiPhi[ic][iz][it]) mHNPhiPhi[ic][iz][it]->Write();
+                if (mHEtaEta[ic][iz][it]) mHEtaEta[ic][iz][it]->Write();
+                if (mHPrPhiPhi[ic][iz][it]) mHPrPhiPhi[ic][iz][it]->Write();
+                if (mHPrEtaEta[ic][iz][it]) mHPrEtaEta[ic][iz][it]->Write();
+                if (mHPaPhiPhi[ic][iz][it]) mHPaPhiPhi[ic][iz][it]->Write();
+                if (mHPaEtaEta[ic][iz][it]) mHPaEtaEta[ic][iz][it]->Write();
+                if (mHPbPhiPhi[ic][iz][it]) mHPbPhiPhi[ic][iz][it]->Write();
+                if (mHPbEtaEta[ic][iz][it]) mHPbEtaEta[ic][iz][it]->Write();
 
-                mHAtSYtDYt[ic][iz][it]->Write();
-                mHAtNSYtDYt[ic][iz][it]->Write();
-                mHJtDEtaDPhi[ic][iz][it]->Write();
-                mHJtNDEtaDPhi[ic][iz][it]->Write();
-                mHPrJtDEtaDPhi[ic][iz][it]->Write();
-                mHPaJtDEtaDPhi[ic][iz][it]->Write();
-                mHPbJtDEtaDPhi[ic][iz][it]->Write();
+                if (mHAtSYtDYt[ic][iz][it]) mHAtSYtDYt[ic][iz][it]->Write();
+                if (mHAtNSYtDYt[ic][iz][it]) mHAtNSYtDYt[ic][iz][it]->Write();
+                if (mHJtDEtaDPhi[ic][iz][it]) mHJtDEtaDPhi[ic][iz][it]->Write();
+                if (mHJtNDEtaDPhi[ic][iz][it]) mHJtNDEtaDPhi[ic][iz][it]->Write();
+                if (mHPrJtDEtaDPhi[ic][iz][it]) mHPrJtDEtaDPhi[ic][iz][it]->Write();
+                if (mHPaJtDEtaDPhi[ic][iz][it]) mHPaJtDEtaDPhi[ic][iz][it]->Write();
+                if (mHPbJtDEtaDPhi[ic][iz][it]) mHPbJtDEtaDPhi[ic][iz][it]->Write();
 
-                mHJtSEtaDPhi[ic][iz][it]->Write();
-                mHJtNSEtaDPhi[ic][iz][it]->Write();
-                mHPrJtSEtaDPhi[ic][iz][it]->Write();
-                mHPaJtSEtaDPhi[ic][iz][it]->Write();
-                mHPbJtSEtaDPhi[ic][iz][it]->Write();
+                if (mHJtSEtaDPhi[ic][iz][it]) mHJtSEtaDPhi[ic][iz][it]->Write();
+                if (mHJtNSEtaDPhi[ic][iz][it]) mHJtNSEtaDPhi[ic][iz][it]->Write();
+                if (mHPrJtSEtaDPhi[ic][iz][it]) mHPrJtSEtaDPhi[ic][iz][it]->Write();
+                if (mHPaJtSEtaDPhi[ic][iz][it]) mHPaJtSEtaDPhi[ic][iz][it]->Write();
+                if (mHPbJtSEtaDPhi[ic][iz][it]) mHPbJtSEtaDPhi[ic][iz][it]->Write();
 
-                mHQinv[ic][iz][it]->Write();
-                mHNQinv[ic][iz][it]->Write();
+                if (mHQinv[ic][iz][it]) mHQinv[ic][iz][it]->Write();
+                if (mHNQinv[ic][iz][it]) mHNQinv[ic][iz][it]->Write();
             }
         }
 

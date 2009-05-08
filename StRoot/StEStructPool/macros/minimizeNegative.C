@@ -11,6 +11,10 @@ static void minimizeNegative(int &npar, double *gin, double &f, double *par, int
     sf[1] = par[0];
     const char* spaceName[]={"SYtDYt","YtYt"};
     TH2D **localHists = minData.mSupport->buildChargeTypes(spaceName[minData.mCorrType],5,sf);
+    if (!localHists) {
+        f = 2147483648;
+        return;
+    }
 
     double posVal=0.;
     double negVal=0.;
