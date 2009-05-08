@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.15 2008/03/19 22:06:00 prindle Exp $
+ * $Id: StEStructBinning.h,v 1.16 2009/05/08 00:09:54 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -334,12 +334,15 @@ public:
       dDPhi = M_PI/((float)nDPhi-1.0);
       return nDPhi;
   }
-  int   hdphiBins() {
+  int hdphiBins() {
       if (nDPhi%2 > 0) {
           return 2*nDPhi-1;
       } else {
           return 2*(nDPhi-1);
       }
+  }
+  int hdphiBin(float phi) {
+      return 1 + int( (phi-dphiMin()) / dDPhi);
   }
 
   float detaMax()   { return maxDEta; }
@@ -353,6 +356,9 @@ public:
       return nDEta;
   };
   int   hdetaBins() { return 2*nDEta-1; };
+  int   hdetaBin(float eta) {
+      return 1 + int( (eta-detaMin()) / dDEta);
+  };
 
   float dytMax()    { return maxDYt; }
   float dytMin()    { return minDYt; }
@@ -677,6 +683,14 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.16  2009/05/08 00:09:54  prindle
+ * In 2ptCorrelations we added switches to select blocks of histograms to fill.
+ * (See constructor in StEStruct2ptCorrelations.cxx)
+ * Use a brute force method for checking crossing cuts. I had too many corner
+ * cases with my clever check.
+ * In Binning, change Yt limit and add methods for accessing number of histogram bins
+ * to use (used in Support)
+ *
  * Revision 1.15  2008/03/19 22:06:00  prindle
  * Added doInvariantMass flag.
  * Added some plots in pairDensityHistograms.

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.12 2008/12/02 23:45:05 prindle Exp $
+ * $Id: StEStructBinning.cxx,v 1.13 2009/05/08 00:09:54 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -54,7 +54,7 @@ StEStructBinning::StEStructBinning(){
   // With ptMin = 0.15 find YtMin = 0.933. Close to 1.0
 
   minYt=1.0; //0.9; //0.15;
-  maxYt=5.0; //5.0;//4.5; // 0.925;
+  maxYt=4.5; //5.0;//4.5; // 0.925;
   nYt = ESTRUCT_YT_BINS-1;
   dYt = (maxYt-minYt)/(float)nYt;
 
@@ -188,6 +188,14 @@ void StEStructBinning::calculateDEtaWeights() {
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.13  2009/05/08 00:09:54  prindle
+ * In 2ptCorrelations we added switches to select blocks of histograms to fill.
+ * (See constructor in StEStruct2ptCorrelations.cxx)
+ * Use a brute force method for checking crossing cuts. I had too many corner
+ * cases with my clever check.
+ * In Binning, change Yt limit and add methods for accessing number of histogram bins
+ * to use (used in Support)
+ *
  * Revision 1.12  2008/12/02 23:45:05  prindle
  * Changed switchYt to switchXX (etc.) to better reflect function.
  * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)

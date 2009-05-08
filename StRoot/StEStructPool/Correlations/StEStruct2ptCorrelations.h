@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.13 2008/03/19 22:06:00 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.14 2009/05/08 00:09:54 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -77,74 +77,61 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH1D ** mHNQinv[8];//!  1D hist
 
   //-> X vs X 
-  ytBins **mYtYt[8]; //!
-  ytBins **mNYtYt[8]; //! Npair for eta_delta weight errors
-  xtBins **mXtXt[8]; //! Xt, legacy quantity -- currently off
-  ptBins **mPtPt[8]; //!
-  etaBins **mEtaEta[8]; //!
-  phiBins **mPhiPhi[8]; //!
-  phiBins **mNPhiPhi[8]; //! Npair for eta_delta weight errors
+  ytBins  **mYtYt[8];     //! YtYt are controlled by bit 9 of manalysisMode
+  ytBins  **mNYtYt[8];    //! Npair for eta_delta weight errors
 
+  etaBins **mEtaEta[8];   //! EtaEta, PhiPhi are controlled by bit 6 of manalysisMode
   etaBins **mPrEtaEta[8]; //! weight = pt1*pt2
-  phiBins **mPrPhiPhi[8]; //!  "
-
   etaBins **mPaEtaEta[8]; //! weight = pt1
-  phiBins **mPaPhiPhi[8]; //!  "
   etaBins **mPbEtaEta[8]; //! weight = pt2
+  phiBins **mPhiPhi[8];   //!
+  phiBins **mNPhiPhi[8];  //! Npair for eta_delta weight errors
+  phiBins **mPrPhiPhi[8]; //!  "
+  phiBins **mPaPhiPhi[8]; //!  "
   phiBins **mPbPhiPhi[8]; //!  "
 
-  TH2D ** mHYtYt[8]; //!
-  TH2D ** mHNYtYt[8]; //! Npair for eta_delta weight errors
-  TH2D ** mHXtXt[8]; //!  <--- currently off
-  TH2D ** mHPtPt[8]; //!
-  TH2D ** mHEtaEta[8]; //!
-  TH2D ** mHPhiPhi[8]; //!
-  TH2D ** mHNPhiPhi[8]; //! Npair for eta_delta weight errors
+  TH2D ** mHYtYt[8];     //!
+  TH2D ** mHNYtYt[8];    //! Npair for eta_delta weight errors
 
+  TH2D ** mHEtaEta[8];   //!
   TH2D ** mHPrEtaEta[8]; //!
-  TH2D ** mHPrPhiPhi[8]; //!
   TH2D ** mHPaEtaEta[8]; //!
-  TH2D ** mHPaPhiPhi[8]; //!
   TH2D ** mHPbEtaEta[8]; //!
+  TH2D ** mHPhiPhi[8];   //!
+  TH2D ** mHNPhiPhi[8];  //! Npair for eta_delta weight errors
+  TH2D ** mHPrPhiPhi[8]; //!
+  TH2D ** mHPaPhiPhi[8]; //!
   TH2D ** mHPbPhiPhi[8]; //!
 
   // Delta Y vs Delta X
-  dphiBins **mJtDYtDPhi[8]; //!  currently off
-  detaBins **mJtDYtDEta[8]; //!  currently off
   dphiBins **mJtDEtaDPhi[8]; //!
-  dphiBins **mJtNDEtaDPhi[8]; //! Npair for eta_delta weight errors
   dphiBins **mPrJtDEtaDPhi[8]; //!
   dphiBins **mPaJtDEtaDPhi[8]; //!
   dphiBins **mPbJtDEtaDPhi[8]; //!
 
-  TH2D ** mHJtDYtDPhi[8];//! currently off
-  TH2D ** mHJtDYtDEta[8];//! currently off
   TH2D ** mHJtDEtaDPhi[8];
-  TH2D ** mHJtNDEtaDPhi[8];//! Npair for eta_delta weight errors
   TH2D ** mHPrJtDEtaDPhi[8];
   TH2D ** mHPaJtDEtaDPhi[8];
   TH2D ** mHPbJtDEtaDPhi[8];
 
-  // Sum Y vs Delta X
+  // Sum Y vs Delta X. These are controlled by bit 7 of manalysisMode
   dytBins  **mAtSYtDYt[8];     //! smt array of dmt bins
-  dytBins  **mAtNSYtDYt[8];     //! Npair for eta_delta weight errors
-  dptBins  **mAtSPtDPt[8];     //! smt array of dmt bins -- currently off
-  dphiBins **mJtSEtaDPhi[8];//! 
-  dphiBins **mJtNSEtaDPhi[8];//!  Npair for eta_delta weight errors
-  dphiBins **mPrJtSEtaDPhi[8];//! 
-  dphiBins **mPaJtSEtaDPhi[8];//! 
-  dphiBins **mPbJtSEtaDPhi[8];//! 
+  dytBins  **mAtNSYtDYt[8];    //! Npair for eta_delta weight errors
+  dphiBins **mJtSEtaDPhi[8];   //! 
+  dphiBins **mJtNSEtaDPhi[8];  //!  Npair for eta_delta weight errors
+  dphiBins **mPrJtSEtaDPhi[8]; //! 
+  dphiBins **mPaJtSEtaDPhi[8]; //! 
+  dphiBins **mPbJtSEtaDPhi[8]; //! 
 
   TH2D ** mHAtSYtDYt[8];
   TH2D ** mHAtNSYtDYt[8];//! Npair for eta_delta weight errors
-  TH2D ** mHAtSPtDPt[8];//! currently off
   TH2D ** mHJtSEtaDPhi[8];//!
   TH2D ** mHJtNSEtaDPhi[8];//! Npair for eta_delta weight errors
   TH2D ** mHPrJtSEtaDPhi[8];//!
   TH2D ** mHPaJtSEtaDPhi[8];//!
   TH2D ** mHPbJtSEtaDPhi[8];//!
 
-  // TPC Separation
+  // TPC Separation. These are controlled by bit 5 of manalysisMode
   TPCSepBins *mTPCAvgTSep[8];  //1D
   TPCSepBins *mTPCAvgZSep[8];
   TPCSepBins *mTPCEntTSep[8];
@@ -215,6 +202,10 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   bool mdoPairDensityHistograms; 
   bool mskipEtaDeltaWeight; //!
   bool mdoInvariantMassHistograms; //!
+  bool mdoFillEtaEta; //!
+  bool mdoFillSumHistograms; //!
+  bool mdontFillMeanPt; //!
+  bool mdontFillYtYt; //!
   bool mInit;  //! found need when overridding this class
   bool mDeleted;//! "     " ...
   bool mHistosWritten;//! "     " ...
@@ -359,6 +350,14 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.14  2009/05/08 00:09:54  prindle
+ * In 2ptCorrelations we added switches to select blocks of histograms to fill.
+ * (See constructor in StEStruct2ptCorrelations.cxx)
+ * Use a brute force method for checking crossing cuts. I had too many corner
+ * cases with my clever check.
+ * In Binning, change Yt limit and add methods for accessing number of histogram bins
+ * to use (used in Support)
+ *
  * Revision 1.13  2008/03/19 22:06:00  prindle
  * Added doInvariantMass flag.
  * Added some plots in pairDensityHistograms.
