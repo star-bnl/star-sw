@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.13 2008/12/02 23:35:33 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.14 2009/05/08 00:04:22 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -77,7 +77,7 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	validRun = 1;
       }
       else if (!strcmp("2007ProductionMinBias",mRunPeriod)) {
-	// For use with trgsetupname=2007ProductionMinBias; productions P07id; recommended |Vz|<10 (maybe 5)
+	// For use with trgsetupname=2007ProductionMinBias; productions P08ic; recommended |Vz|<10 (maybe 5)
 	mtWord[0] = 200003;
 	mtWord[1] = 200020;
 	validRun = 1;
@@ -223,6 +223,9 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.14  2009/05/08 00:04:22  prindle
+ * Just putting Yuri's TMath back in
+ *
  * Revision 1.13  2008/12/02 23:35:33  prindle
  * Added code for pileup rejection in EventCuts and MuDstReader.
  * Modified trigger selections for some data sets in EventCuts.

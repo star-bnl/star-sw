@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.15 2008/12/02 23:35:34 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.16 2009/05/08 00:04:22 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -170,21 +170,26 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
         
     }
 
-    double zPile;
-    int    nPile;
-    double zVertSep = mPileup->nearest(muDst,z,&zPile,&nPile);
-    if (zVertSep > 0 && !mECuts->goodZVertSep(zPile)) {
-        useEvent=false;
-    }
-
     mECuts->fillHistogram(mECuts->triggerWordName(),(float)tword,useEvent);
     mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
     mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,useEvent);
-    mECuts->fillHistogram(mECuts->zVertSepName(),zPile,useEvent);
 
     if (!useEvent) {
         delete retVal;
         retVal=NULL;
+    } else {
+        // Only check for pileup if event passes other cuts.
+        // (I am interested in fraction of "good" events with pileup.)
+        double zDist;  // Distance from z to nearest pileup vertex.
+        int    mPile;  // Multiplicity of nearest pileup vertex.
+        int    nPile;  // Total number of pileup vertices found (multiple of 2).
+        nPile = mPileup->nearest(muDst,z,&zDist,&mPile);
+        if (nPile > 0 && !mECuts->goodZVertSep(zDist)) {
+            delete retVal;
+            retVal   = NULL;
+            useEvent = false;
+        }
+        mECuts->fillHistogram(mECuts->zVertSepName(),zDist,useEvent);
     }
 
     if (retVal) retVal->FillChargeCollections(); //creates track list by charge
@@ -413,6 +418,9 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.16  2009/05/08 00:04:22  prindle
+ * Just putting Yuri's TMath back in
+ *
  * Revision 1.15  2008/12/02 23:35:34  prindle
  * Added code for pileup rejection in EventCuts and MuDstReader.
  * Modified trigger selections for some data sets in EventCuts.
