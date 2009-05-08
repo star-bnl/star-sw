@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.12 2008/12/02 23:52:51 prindle Exp $
+ * $Id: StEStructHAdd.cxx,v 1.13 2009/05/08 00:21:42 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -25,6 +25,12 @@
 ClassImp(StEStructHAdd)
 
   /*
+   * 12/03/08 djp Instrumented StEStruct2ptCorrelations so we can select specific
+   *              groups of histograms. We still try to read all the possible histograms
+   *              but don't get upset if we don't find them.
+   *              Expunge code to look for old style of name (without zBin) to make code simpler.
+   */
+  /*
    * 06/05/08 djp Looking at SEtaDPhi histograms I was confused that they were not symmetric
    *              around SEta=0. I guess this was intentional with the idea that forward and
    *              backward could be different. Should re-think this as it may make more
@@ -45,11 +51,10 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                        "Qinv",         "NQinv"};
     int isXXHist[]={1,   1,   1,
                     1,   1,   1,   1,   1,
-                    1,   1,   1,   1,
+                    1,        1,   1,   1,
                     0,   0,   0,   0,   0,
                     0,   0,
                     0,   0,   0,   0,   0,
-                    0,   0,
                     0,   0};
     const char* symEtaPhi[]={"DEtaDPhi", "NDEtaDPhi", "PrDEtaDPhi", "PaDEtaDPhi", "PbDEtaDPhi"};
     const char* symPhi[]={"SEtaDPhi", "NSEtaDPhi", "PrSEtaDPhi", "PaSEtaDPhi", "PbSEtaDPhi"};
@@ -70,110 +75,125 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                 inFile->cd();
                 int zBin = 0;
                 while (zBin<99) {
-                    TString htype;
-                    // Changed histogram naming when I added the z-buffer binning to
-                    // the 2pt correlation class. New name is of form
+                    // Histogram name is of form
                     //    SibppDEtaDPhi_cutBin_n_zBuf_m
                     // where n is the usual cut bin number and m is the zbuffer index.
-                    // Try to be backward compatible with old name of format
-                    //    SibppDEtaDPhin
-                    htype+=base[i]; htype+=tpe[j]; htype+=knd[k];
+                    TString htype(base[i]); htype+=tpe[j]; htype+=knd[k];
                     for (int n=0;n<ntot;n++) {
-                        TString fullName(htype.Data()); fullName+=nlist[n];
+                        TString fullName(htype.Data()); fullName+="_cutBin_"; fullName+=nlist[n]; fullName+="_zBuf_"; fullName+=zBin;
+                        TString hName(htype.Data()); hName+="_zBuf_"; hName+=zBin;
                         inFile->GetObject(fullName.Data(),tmp);
-                        if(tmp) {
-                            // Histogram with older naming style was found.
-                            // No z-binning here.
-                            if (0==n) {
-                                outhist=(TH2D *)tmp->Clone();
-                                // This part was only intended to be used with mode 5 (pid)
-                                // (With recognition that mode3 (and now mode 8) have assymetric yt space
-                                // we have extended the XX symmetry thing.)
-                                if (symmXX && isXXHist[k]) {
-                                    // In cases where we have off-diagonal yt-yt bin or different pid
-                                    // we left XX histograms un-symmetrized. We need to symmetrize these
-                                    // before adding to other bins that have been symmetrized.
-                                    if (cb->notSymmetrizedXX(nlist[n],j)) {
-                                        symmetrizeXX(outhist);
-                                    }
+                        if (!tmp) {
+                            // Have either processed all zbins or this histogram (at least for zBuf=0) isn't in the file.
+                            goto lastZ;
+                        }
+                        if (0==n) {
+                            outhist=(TH2D *)tmp->Clone();
+                            // This part is (was) only intended to be used with mode 5 (pid)
+                            if (symmXX && isXXHist[k]) {
+                                if (cb->notSymmetrizedXX(nlist[n],j)) {
+                                    symmetrizeXX(outhist);
                                 }
-                                outhist->SetName(htype.Data());
-                                outhist->SetTitle(tmp->GetTitle());
-                            } else {
-                                cpy = (TH2D *)tmp->Clone();
-                                // This part was only intended to be used with mode 5 (pid)
-                                if (symmXX && isXXHist[k]) {
-                                    if (cb->notSymmetrizedXX(nlist[n],j)) {
-                                        symmetrizeXX(cpy);
-                                    }
-                                }
-                                outhist->Add(cpy);
-                                delete cpy;
                             }
-                            zBin = 100;
+                            outhist->SetName(hName.Data());
+                            outhist->SetTitle(tmp->GetTitle());
                         } else {
-                            TString fullName(htype.Data()); fullName+="_cutBin_"; fullName+=nlist[n]; fullName+="_zBuf_"; fullName+=zBin;
-                            TString hName(htype.Data()); hName+="_zBuf_"; hName+=zBin;
-                            inFile->GetObject(fullName.Data(),tmp);
-                            if (!tmp) {
-                                // Presumably have processed all zbins by now.
-                                goto lastZ;
-                            }
-                            if (0==n) {
-                                outhist=(TH2D *)tmp->Clone();
-                                // This part is (was) only intended to be used with mode 5 (pid)
-                                if (symmXX && isXXHist[k]) {
-                                    if (cb->notSymmetrizedXX(nlist[n],j)) {
-                                        symmetrizeXX(outhist);
-                                    }
+                            cpy = (TH2D *)tmp->Clone();
+                            // This part is (was) only intended to be used with mode 5 (pid)
+                            if (symmXX && isXXHist[k]) {
+                                if (cb->notSymmetrizedXX(nlist[n],j)) {
+                                    symmetrizeXX(cpy);
                                 }
-                                outhist->SetName(hName.Data());
-                                outhist->SetTitle(tmp->GetTitle());
-                            } else {
-                                cpy = (TH2D *)tmp->Clone();
-                                // This part is (was) only intended to be used with mode 5 (pid)
-                                if (symmXX && isXXHist[k]) {
-                                    if (cb->notSymmetrizedXX(nlist[n],j)) {
-                                        symmetrizeXX(cpy);
-                                    }
-                                }
-                                outhist->Add(cpy);
-                                delete cpy;
                             }
+                            outhist->Add(cpy);
+                            delete cpy;
                         }
                     }
                     for (int isym=0;isym<5;isym++) {
                         if (!strncmp(symEtaPhi[isym],knd[k],8)) {
+                            // Here outhist is not symmetrized. It will be replaced by tmp which is.
                             b->setNDEtaBins(outhist->GetNbinsX());
                             b->setNDPhiBins(outhist->GetNbinsY());
-                            TString hname(base[i]);
-                            hname+=tpe[j];
-                            hname+=symEtaPhi[isym];
-                            TString zName(hname);
-                            zName+="_zBuf_";
-                            zName+=zBin;
-                            TString htitle(Title[i]);
-                            htitle+=Type[j];
-                            htitle+=symEtaPhi[isym];
-                            TString zTitle(htitle);
-                            zTitle+="_zBuf_";
-                            zTitle+=zBin;
+                            TString hname(base[i]);    hname+=tpe[j];     hname+=symEtaPhi[isym];
+                            TString zName(hname);      zName+="_zBuf_";   zName+=zBin;
+                            TString htitle(Title[i]);  htitle+=Type[j];   htitle+=symEtaPhi[isym];
+                            TString zTitle(htitle);    zTitle+="_zBuf_";  zTitle+=zBin;
                             tmp = new TH2D(zName.Data(),zTitle.Data(),b->hdetaBins(),b->detaMin(),b->detaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
+                            // Turn error propagation on by default since it seems setting bin content bypasses that.
+                            // For a few histogram types we handle errors explicitly to avoid double counting.
+                            tmp->Sumw2();
                             for(int ieta=0;ieta<b->detaBins();ieta++){
                                 for(int iphi=0;iphi<b->dphiBins();iphi++){
                                     float eta1 = b->detaVal(ieta);
                                     float eta2 = -eta1;
+                                    int ieta1 = b->hdetaBin(eta1);
+                                    int ieta2 = b->hdetaBin(eta2);
                                     float phi1 = b->dphiVal(iphi,1);
                                     float phi2 = b->dphiVal(iphi,2);
+                                    int iphi1 = b->hdphiBin(phi1);
+                                    int iphi2 = b->hdphiBin(phi2);
                                     double val = outhist->GetBinContent(ieta+1,iphi+1);
-                                    tmp->Fill(eta1,phi1,val);
-                                    tmp->Fill(eta2,phi1,val);
-                                    tmp->Fill(eta1,phi2,val);
-                                    tmp->Fill(eta2,phi2,val);
+                                    double err = outhist->GetBinError(ieta+1,iphi+1);
+                                    tmp->SetBinContent(ieta1,iphi1,val);
+                                    tmp->SetBinContent(ieta2,iphi1,val);
+                                    tmp->SetBinContent(ieta1,iphi2,val);
+                                    tmp->SetBinContent(ieta2,iphi2,val);
+                                    tmp->SetBinError(ieta1,iphi1,err);
+                                    tmp->SetBinError(ieta2,iphi1,err);
+                                    tmp->SetBinError(ieta1,iphi2,err);
+                                    tmp->SetBinError(ieta2,iphi2,err);
                                 }
                             }
-                            if(tmp->GetBinContent(1,1)==0) {  // fill the repeated bin
-                                for(int ieta=0;ieta<tmp->GetNbinsX();ieta++) tmp->SetBinContent(ieta+1,1, tmp->GetBinContent(ieta+1,tmp->GetNbinsY()));
+                            // Adjust for bins at \eta_\Delta=0 and \phi_\Delta=0 and pi
+                            // Only do the adjustment if bin is centered.
+                            // (When calculating \Delta\rho/\rho_{ref} this adjustment divides out,
+                            //  but when looking at intermediate histograms it should be less surprising.)
+                            float phi1 = b->dphiVal(0,1);
+                            float phi2 = b->dphiVal(0,2);
+                            int iphi1 = b->hdphiBin(phi1);
+                            int iphi2 = b->hdphiBin(phi2);
+                            if (iphi1 == iphi2) {
+                                for (int ieta=1;ieta<=b->hdetaBins();ieta++) {
+                                    double val = 2*tmp->GetBinContent(ieta,iphi1);
+                                    double err = 2*tmp->GetBinError(ieta,iphi1);
+                                    tmp->SetBinContent(ieta,iphi1,val);
+                                    tmp->SetBinError(ieta,iphi1,err);
+                                }
+                            }
+                            // indices in StEStructBinning start at 0, histogram bins start at 1
+                            phi1 = b->dphiVal(outhist->GetNbinsY()-1,1);
+                            phi2 = b->dphiVal(outhist->GetNbinsY()-1,2);
+                            iphi1 = b->hdphiBin(phi1);
+                            iphi2 = b->hdphiBin(phi2);
+                            if (iphi1 == iphi2) {
+                                for (int ieta=1;ieta<=b->hdetaBins();ieta++) {
+                                    double val = 2*tmp->GetBinContent(ieta,iphi1);
+                                    double err = 2*tmp->GetBinError(ieta,iphi1);
+                                    tmp->SetBinContent(ieta,iphi1,val);
+                                    tmp->SetBinError(ieta,iphi1,err);
+                                }
+                            }
+                            float eta1 = b->detaVal(0);
+                            float eta2 = -eta1;
+                            int ieta1 = b->hdetaBin(eta1);
+                            int ieta2 = b->hdetaBin(eta2);
+                            if (ieta1 == ieta2) {
+                                for (int iphi=1;iphi<=b->hdphiBins();iphi++) {
+                                    double val = 2*tmp->GetBinContent(ieta1,iphi);
+                                    double err = 2*tmp->GetBinError(ieta1,iphi);
+                                    tmp->SetBinContent(ieta1,iphi,val);
+                                    tmp->SetBinError(ieta1,iphi,err);
+                                }
+                            }
+                            // fill the repeated \phi_\Delta bin
+                            if (0 == tmp->GetBinContent(1,1)) {
+                                int iphi = b->hdphiBins();
+                                for (int ieta=1;ieta<=b->hdetaBins();ieta++) {
+                                    double val = tmp->GetBinContent(ieta,iphi);
+                                    double err = tmp->GetBinError(ieta,iphi);
+                                    tmp->SetBinContent(ieta,1,val);
+                                    tmp->SetBinError(ieta,1,err);
+                                }
                             }
                             // Create rotated view from -pi to pi for CD 
                             hname+="Rot";  hname +="_zBuf_", hname+=zBin;
@@ -199,6 +219,7 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                                 rot->SetBinContent(ieta+1,bin1, 2*rot->GetBinContent(ieta+1,bin1));
                                 rot->SetBinContent(ieta+1,bin2, 2*rot->GetBinContent(ieta+1,bin2));
                             }
+                            // Note that we need to adjust errors here also.
                             outFile->cd();
                             rot->Write();
                             delete rot;
@@ -227,15 +248,26 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                             for(int ieta=0;ieta<b->setaBins();ieta++){
                                 for(int iphi=0;iphi<b->dphiBins();iphi++){
                                     float eta1 = b->setaVal(ieta);
+                                    int ieta1 = b->hdetaBin(eta1);
                                     float phi1 = b->dphiVal(iphi,1);
                                     float phi2 = b->dphiVal(iphi,2);
+                                    int iphi1 = b->hdphiBin(phi1);
+                                    int iphi2 = b->hdphiBin(phi2);
                                     double val = outhist->GetBinContent(ieta+1,iphi+1);
-                                    tmp->Fill(eta1,phi1,val);
-                                    tmp->Fill(eta1,phi2,val);
+                                    double err = outhist->GetBinError(ieta+1,iphi+1);
+                                    tmp->SetBinContent(ieta1,iphi1,val);
+                                    tmp->SetBinContent(ieta1,iphi2,val);
+                                    tmp->SetBinError(ieta1,iphi1,err);
+                                    tmp->SetBinError(ieta1,iphi2,err);
                                 }
                             }
-                            if(tmp->GetBinContent(1,1)==0) {  // fill the repeated bin
-                                for(int ieta=0;ieta<tmp->GetNbinsX();ieta++) tmp->SetBinContent(ieta+1,1, tmp->GetBinContent(ieta+1,tmp->GetNbinsY()));
+                            if (tmp->GetBinContent(1,1)==0) {  // fill the repeated bin
+                                for (int ieta=0;ieta<tmp->GetNbinsX();ieta++) {
+                                    double val = tmp->GetBinContent(ieta+1,tmp->GetNbinsY());
+                                    double err = tmp->GetBinError(ieta+1,tmp->GetNbinsY());
+                                    tmp->SetBinContent(ieta+1,1, val);
+                                    tmp->SetBinError(ieta+1,1, err);
+                                }
                             }
                             delete outhist;
                             outhist = tmp;
@@ -365,8 +397,11 @@ void StEStructHAdd::symmetrizeXX(TH2 *hist) {
     for (int ix=1;ix<=hist->GetNbinsX();ix++) {
         for (int iy=ix;iy<=hist->GetNbinsY();iy++) {
             double sum = hist->GetBinContent(ix,iy) + hist->GetBinContent(iy,ix);
+            double err = sqrt(pow(hist->GetBinError(ix,iy),2) + pow(hist->GetBinError(iy,ix),2));
             hist->SetBinContent(ix,iy,sum);
             hist->SetBinContent(iy,ix,sum);
+            hist->SetBinError(ix,iy,err);
+            hist->SetBinError(iy,ix,err);
         }
     }
 
@@ -480,33 +515,19 @@ void StEStructHAdd::combineUS(TFile * modFile) {
             int zBin = 0;
             while (zBin<99) {
                 if (k<31) {
-                    // Changed histogram naming when I added the z-buffer binning to
-                    // the 2pt correlation class. New name is of form
+                    // Histogram name is of form
                     //    SibppDEtaDPhi_cutBin_n_zBuf_m
                     // where n is the usual cut bin number and m is the zbuffer index.
-                    // Try to be backward compatible with old name of format
-                    //    SibppDEtaDPhin
                     TString pmHist; pmHist+=base[i]; pmHist+=tpe[1]; pmHist+=knd[k];
-
+                    pmHist+="_zBuf_"; pmHist+=zBin;
                     hpm=(TH1*)modFile->Get(pmHist.Data());
-                    if(hpm) {
-                        // Histogram with older naming style was found.
-                        // No z-binning here. Get -+ and add to +-.
-                        TString mpHist; mpHist+=base[i]; mpHist+=tpe[2]; mpHist+=knd[k];
-                        hmp=(TH1*)modFile->Get(mpHist.Data());
-                        zBin = 100;
-                    } else {
-                        TString pmHist; pmHist+=base[i]; pmHist+=tpe[1]; pmHist+=knd[k];
-                        pmHist+="_zBuf_"; pmHist+=zBin;
-                        hpm=(TH1*)modFile->Get(pmHist.Data());
-                        if (!hpm) {
-                            // Presumably have processed all zbins by now.
-                            goto lastZ;
-                        }
-                        TString mpHist; mpHist+=base[i]; mpHist+=tpe[2]; mpHist+=knd[k];
-                        mpHist+="_zBuf_"; mpHist+=zBin;
-                        hmp=(TH1*)modFile->Get(mpHist.Data());
+                    if (!hpm) {
+                        // Have either processed all zbins or this histogram (at least for zBuf=0) isn't in the file.
+                        goto lastZ;
                     }
+                    TString mpHist; mpHist+=base[i]; mpHist+=tpe[2]; mpHist+=knd[k];
+                    mpHist+="_zBuf_"; mpHist+=zBin;
+                    hmp=(TH1*)modFile->Get(mpHist.Data());
                     hpm->Add(hmp);
                     hmp->Scale(0);
                     modFile->cd();
@@ -523,75 +544,17 @@ void StEStructHAdd::combineUS(TFile * modFile) {
 };
 
 
-/*
- * Want to symmetrize DEtaDPhi and SEtaDPhi here.
-    createHist2D(mHJtDEtaDPhi,"DEtaDPhi",i,y,ncb,b->hdetaBins(),b->detaMin(),b->detaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    createHist2D(mHJtNDEtaDPhi,"NDEtaDPhi",i,y,ncb,b->hdetaBins(),b->detaMin(),b->detaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    createHist2D(mHPrJtDEtaDPhi,"PrDEtaDPhi",i,y,ncb,b->hdetaBins(),b->detaMin(),b->detaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    createHist2D(mHPaJtDEtaDPhi,"PaDEtaDPhi",i,y,ncb,b->hdetaBins(),b->detaMin(),b->detaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    createHist2D(mHPbJtDEtaDPhi,"PbDEtaDPhi",i,y,ncb,b->hdetaBins(),b->detaMin(),b->detaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    for(int k=0;k<b->detaBins();k++){
-      for(int j=0;j<b->dphiBins();j++){
-        // Symmetrize dEta,dPhi here for now. Want to move this to selectAll
-        // macro to make intermediate root files smaller and speed up hadd.
-        float eta1 = b->detaVal(k);
-        float eta2 = -eta1;
-        float phi1 = b->dphiVal(j,1);
-        float phi2 = b->dphiVal(j,2);
-        mHJtDEtaDPhi[i][y]->Fill(eta1,phi1,jtdetadphi[y][k].dphi[j]);
-        mHJtNDEtaDPhi[i][y]->Fill(eta1,phi1,jtndetadphi[y][k].dphi[j]);
-        mHPrJtDEtaDPhi[i][y]->Fill(eta1,phi1,prjtdetadphi[y][k].dphi[j]);
-        mHPaJtDEtaDPhi[i][y]->Fill(eta1,phi1,pajtdetadphi[y][k].dphi[j]);
-        mHPbJtDEtaDPhi[i][y]->Fill(eta1,phi1,pbjtdetadphi[y][k].dphi[j]);
-
-        mHJtDEtaDPhi[i][y]->Fill(eta2,phi1,jtdetadphi[y][k].dphi[j]);
-        mHJtNDEtaDPhi[i][y]->Fill(eta2,phi1,jtndetadphi[y][k].dphi[j]);
-        mHPrJtDEtaDPhi[i][y]->Fill(eta2,phi1,prjtdetadphi[y][k].dphi[j]);
-        mHPaJtDEtaDPhi[i][y]->Fill(eta2,phi1,pajtdetadphi[y][k].dphi[j]);
-        mHPbJtDEtaDPhi[i][y]->Fill(eta2,phi1,pbjtdetadphi[y][k].dphi[j]);
-
-        mHJtDEtaDPhi[i][y]->Fill(eta1,phi2,jtdetadphi[y][k].dphi[j]);
-        mHJtNDEtaDPhi[i][y]->Fill(eta1,phi2,jtndetadphi[y][k].dphi[j]);
-        mHPrJtDEtaDPhi[i][y]->Fill(eta1,phi2,prjtdetadphi[y][k].dphi[j]);
-        mHPaJtDEtaDPhi[i][y]->Fill(eta1,phi2,pajtdetadphi[y][k].dphi[j]);
-        mHPbJtDEtaDPhi[i][y]->Fill(eta1,phi2,pbjtdetadphi[y][k].dphi[j]);
-
-        mHJtDEtaDPhi[i][y]->Fill(eta2,phi2,jtdetadphi[y][k].dphi[j]);
-        mHJtNDEtaDPhi[i][y]->Fill(eta2,phi2,jtndetadphi[y][k].dphi[j]);
-        mHPrJtDEtaDPhi[i][y]->Fill(eta2,phi2,prjtdetadphi[y][k].dphi[j]);
-        mHPaJtDEtaDPhi[i][y]->Fill(eta2,phi2,pajtdetadphi[y][k].dphi[j]);
-        mHPbJtDEtaDPhi[i][y]->Fill(eta2,phi2,pbjtdetadphi[y][k].dphi[j]);
-      }
-    }
-    createHist2D(mHJtSEtaDPhi,"SEtaDPhi",i,y,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    createHist2D(mHJtNSEtaDPhi,"NSEtaDPhi",i,y,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    createHist2D(mHPrJtSEtaDPhi,"PrSEtaDPhi",i,y,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    createHist2D(mHPaJtSEtaDPhi,"PaSEtaDPhi",i,y,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    createHist2D(mHPbJtSEtaDPhi,"PbSEtaDPhi",i,y,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->hdphiBins(),b->dphiMin(),b->dphiMax());
-    for(int k=0;k<b->setaBins();k++) {
-      for(int j=0;j<b->dphiBins();j++) {
-        // Symmetrize dEta,dPhi here for now. Want to move this to selectAll
-        // macro to make intermediate root files smaller and speed up hadd.
-        float phi1 = b->dphiVal(j,1);
-        mHJtSEtaDPhi[i][y]->Fill(xv=b->setaVal(k),phi1,jtsetadphi[y][k].dphi[j]);
-        mHJtNSEtaDPhi[i][y]->Fill(xv,phi1,jtnsetadphi[y][k].dphi[j]);
-        mHPrJtSEtaDPhi[i][y]->Fill(xv,phi1,prjtsetadphi[y][k].dphi[j]);
-        mHPaJtSEtaDPhi[i][y]->Fill(xv,phi1,pajtsetadphi[y][k].dphi[j]);
-        mHPbJtSEtaDPhi[i][y]->Fill(xv,phi1,pbjtsetadphi[y][k].dphi[j]);
-
-        float phi2 = b->dphiVal(j,2);
-        mHJtSEtaDPhi[i][y]->Fill(xv,phi2,jtsetadphi[y][k].dphi[j]);
-        mHJtNSEtaDPhi[i][y]->Fill(xv,phi2,jtnsetadphi[y][k].dphi[j]);
-        mHPrJtSEtaDPhi[i][y]->Fill(xv,phi2,prjtsetadphi[y][k].dphi[j]);
-        mHPaJtSEtaDPhi[i][y]->Fill(xv,phi2,pajtsetadphi[y][k].dphi[j]);
-        mHPbJtSEtaDPhi[i][y]->Fill(xv,phi2,pbjtsetadphi[y][k].dphi[j]);
-      }
-    }
- */
-
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.13  2009/05/08 00:21:42  prindle
+ * In StEStructHadd remove support for old style of histogram names, do a better job calculating
+ * errors (at least for number (\eta_\Delta,\phi_\Delta) histograms), double bins which
+ * have an edge in the center (purely cosmetic when looking at intermediate histograms).
+ * In StEStructSupport check for existance of histograms and return gracefully.
+ * Code in buildChargeTypes and buildPtChargeTypes was essentially duplicate of code
+ * in buildCommon and buildPtCommon so I refactored to reduce redundancy.
+ *
  * Revision 1.12  2008/12/02 23:52:51  prindle
  * Get information about histogram XX being symmetrized from CutBin.
  * Changed TH1* to TH2D* in many places hoping to be able to plot DEtaDPhi
