@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.10 2008/12/02 23:45:06 prindle Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.11 2009/05/08 00:09:55 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -773,21 +773,30 @@ StEStructPairCuts::NominalTpcAvgZSeparation() const {
   else return (x1+x2+x3)/3.;
 }
 bool StEStructPairCuts::TracksCrossInPhi() const {
-    // Note: Tracks that are nearly back-to-back can have the sign of their
-    //       opening angles change from inner to outer radius and we don't want
-    //       to discard those. Rely on goodDeltaXY to keep those pairs from
-    //       getting here.
-    StThreeVectorF ent1 = mTrack1->NominalTpcEntrancePoint();
-    StThreeVectorF ent2 = mTrack2->NominalTpcEntrancePoint();
-    float sinEnt = (ent1.x()*ent2.y() - ent1.y()*ent2.x());
-    StThreeVectorF exit1 = mTrack1->NominalTpcExitPoint();
-    StThreeVectorF exit2 = mTrack2->NominalTpcExitPoint();
-    float sinExit = (exit1.x()*exit2.y() - exit1.y()*exit2.x());
-    if (sinEnt*sinExit < 0) {
-        return true;
-    } else {
-        return false;
+    // Try a direct (but must be quite a bit slower than the cross product)
+    // calculation of phi differences. I think the cross product method had too many corner cases.
+    double phiEnt1  = mTrack1->NominalTpcEntrancePoint().phi();
+    double phiEnt2  = mTrack2->NominalTpcEntrancePoint().phi();
+    double dphiEnt = phiEnt1 - phiEnt2;
+    while (dphiEnt > 2*M_PI) {
+        dphiEnt -= 2*M_PI;
     }
+    while (dphiEnt < -2*M_PI) {
+        dphiEnt += 2*M_PI;
+    }
+    double phiExit1 = mTrack1->NominalTpcExitPoint().phi();
+    double phiExit2 = mTrack2->NominalTpcExitPoint().phi();
+    double dphiExit = phiExit1 - phiExit2;
+    while (dphiExit > 2*M_PI) {
+        dphiExit -= 2*M_PI;
+    }
+    while (dphiExit < -2*M_PI) {
+        dphiExit += 2*M_PI;
+    }
+    if ((dphiEnt*dphiExit < 0) && (fabs(dphiEnt) < M_PI/4)) {
+        return true;
+    }
+    return false;
 }
 
 //--------------------------------------------------------
@@ -888,6 +897,14 @@ int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.11  2009/05/08 00:09:55  prindle
+ * In 2ptCorrelations we added switches to select blocks of histograms to fill.
+ * (See constructor in StEStruct2ptCorrelations.cxx)
+ * Use a brute force method for checking crossing cuts. I had too many corner
+ * cases with my clever check.
+ * In Binning, change Yt limit and add methods for accessing number of histogram bins
+ * to use (used in Support)
+ *
  * Revision 1.10  2008/12/02 23:45:06  prindle
  * Changed switchYt to switchXX (etc.) to better reflect function.
  * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)

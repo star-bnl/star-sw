@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.24 2008/12/02 23:45:04 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.25 2009/05/08 00:09:54 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -76,11 +76,15 @@ void  StEStruct2ptCorrelations::initInternalData(){
   moutFileName = NULL;
   mqaoutFileName = NULL;
 
-  mskipPairCuts            = false;
-  mdoPairCutHistograms     = false;
-  mdoPairDensityHistograms = false;
-  mskipEtaDeltaWeight      = false;
-  mdoInvariantMassHistograms      = false;
+  mskipPairCuts              = false;
+  mdoPairCutHistograms       = false;
+  mdoPairDensityHistograms   = false;
+  mskipEtaDeltaWeight        = false;
+  mdoInvariantMassHistograms = false;
+  mdoFillEtaEta              = false;
+  mdoFillSumHistograms       = false;
+  mdontFillMeanPt            = false;
+  mdontFillYtYt              = false;
 
   mInit = false;
   mDeleted = false;
@@ -122,20 +126,32 @@ void StEStruct2ptCorrelations::init(){
      strcpy(bTitle[i],_tmpTitle[i]);
    }
 
-  if(manalysisMode & 1) {
+  if (manalysisMode & 0x1) {
      mskipPairCuts=true;
   } 
-  if(manalysisMode & 2){
+  if (manalysisMode & 0x2) {
     mdoPairCutHistograms=true;
   }
-  if(manalysisMode & 4){
+  if (manalysisMode & 0x4) {
     mdoPairDensityHistograms=true;
   }
-  if(manalysisMode & 8){
+  if (manalysisMode & 0x8) {
     mskipEtaDeltaWeight = true;
   }
-  if(manalysisMode & 16){
+  if (manalysisMode & 0x10) {
     mdoInvariantMassHistograms = true;
+  }
+  if (manalysisMode & 0x20) {
+    mdoFillEtaEta = true;
+  }
+  if (manalysisMode & 0x40) {
+    mdoFillSumHistograms = true;
+  }
+  if (manalysisMode & 0x80) {
+    mdontFillMeanPt = true;
+  }
+  if (manalysisMode & 0x100) {
+    mdontFillYtYt = true;
   }
 
   cout << "  Skip Pair Cuts = " << mskipPairCuts << endl;
@@ -143,6 +159,10 @@ void StEStruct2ptCorrelations::init(){
   cout << "  Do Pair Density Hists = " << mdoPairDensityHistograms << endl;
   cout << "  Skip EtaDelta weights = " << mskipEtaDeltaWeight << endl;
   cout << "  Do Invariant mass histograms = " << mdoInvariantMassHistograms << endl;
+  cout << "  Fill EtaEta (and PhiPhi) = " << mdoFillEtaEta << endl;
+  cout << "  Fill Sum Histograms (SYt, SEta) = " << mdoFillSumHistograms << endl;
+  cout << "  Don't fill mean pt histograms = " << mdontFillMeanPt << endl;
+  cout << "  Don't fill YtYt histograms = " << mdontFillYtYt << endl;
 
   for(int i=0;i<8;i++)numPairs[i]=numPairsProcessed[i]=mpossiblePairs[i]=0;
 
@@ -425,7 +445,7 @@ if (0) {
         // Choose mass according to dEdx (in which case transverse and longitudinal
         // rapidities will be calculated as actual rapidities) or set mass to 0
         // in which case we will use the quantity Jeff was using for transverse rapidity
-        // (a mid-rapidity approximation for pions) and eta for logitudinal rapidity.
+        // (a mid-rapidity approximation for pions) and eta for longitudinal rapidity.
         // Sould really have a switch accessible from macro level instead of
         // using cutMode.
 
@@ -563,49 +583,68 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   StEStructBinning* b = StEStructBinning::Instance();
   StEStructCutBin* cb = StEStructCutBin::Instance();
 
-  ytBins**  ytyt        = mYtYt[j];
-  ytBins**  nytyt       = mNYtYt[j];
-  ptBins**  ptpt        = mPtPt[j];
-  etaBins** etaeta      = mEtaEta[j];
-  phiBins** phiphi      = mPhiPhi[j];
-  phiBins** nphiphi     = mNPhiPhi[j];
+    ytBins**  ytyt;
+    ytBins**  nytyt;
+    if (!mdontFillYtYt) {
+        ytyt        = mYtYt[j];
+        nytyt       = mNYtYt[j];
+    }
 
-  etaBins** pretaeta      = mPrEtaEta[j];
-  phiBins** prphiphi      = mPrPhiPhi[j];
-  etaBins** paetaeta      = mPaEtaEta[j];
-  phiBins** paphiphi      = mPaPhiPhi[j];
-  etaBins** pbetaeta      = mPbEtaEta[j];
-  phiBins** pbphiphi      = mPbPhiPhi[j];
+    dphiBins** jtdetadphi =   mJtDEtaDPhi[j];
+    dphiBins** prjtdetadphi;
+    dphiBins** pajtdetadphi;
+    dphiBins** pbjtdetadphi;
+    if (!mdontFillMeanPt) {
+        prjtdetadphi = mPrJtDEtaDPhi[j];
+        pajtdetadphi = mPaJtDEtaDPhi[j];
+        pbjtdetadphi = mPbJtDEtaDPhi[j];
+    }
 
-  dytBins**  atytyt      = mAtSYtDYt[j];
-  dytBins**  atnytyt     = mAtNSYtDYt[j];
+    etaBins** etaeta;
+    phiBins** phiphi;
+    phiBins** nphiphi;
+    etaBins** pretaeta;
+    etaBins** paetaeta;
+    etaBins** pbetaeta;
+    phiBins** prphiphi;
+    phiBins** paphiphi;
+    phiBins** pbphiphi;
 
-  dphiBins** jtdetadphi  = mJtDEtaDPhi[j];
-  dphiBins** jtsetadphi  = mJtSEtaDPhi[j];
-  dphiBins** jtndetadphi = mJtNDEtaDPhi[j];
-  dphiBins** jtnsetadphi = mJtNSEtaDPhi[j];
+    if (mdoFillEtaEta) {
+        etaeta   = mEtaEta[j];
+        phiphi   = mPhiPhi[j];
+        nphiphi  = mNPhiPhi[j];
+        if (!mdontFillMeanPt) {
+            pretaeta = mPrEtaEta[j];
+            paetaeta = mPaEtaEta[j];
+            pbetaeta = mPbEtaEta[j];
+            prphiphi = mPrPhiPhi[j];
+            paphiphi = mPaPhiPhi[j];
+            pbphiphi = mPbPhiPhi[j];
+        }
+    }
 
-  dphiBins** prjtdetadphi = mPrJtDEtaDPhi[j];
-  dphiBins** prjtsetadphi = mPrJtSEtaDPhi[j];
-  dphiBins** pajtdetadphi = mPaJtDEtaDPhi[j];
-  dphiBins** pajtsetadphi = mPaJtSEtaDPhi[j];
-  dphiBins** pbjtdetadphi = mPbJtDEtaDPhi[j];
-  dphiBins** pbjtsetadphi = mPbJtSEtaDPhi[j];
+    dytBins**  atytyt;
+    dytBins**  atnytyt;
+    dphiBins** jtsetadphi;
+    dphiBins** jtnsetadphi;
+    dphiBins** prjtsetadphi;
+    dphiBins** pajtsetadphi;
+    dphiBins** pbjtsetadphi;
+    if (mdoFillSumHistograms) {
+        atytyt      = mAtSYtDYt[j];
+        atnytyt     = mAtNSYtDYt[j];
+        jtsetadphi  = mJtSEtaDPhi[j];
+        jtnsetadphi = mJtNSEtaDPhi[j];
+        if (!mdontFillMeanPt) {
+            prjtsetadphi = mPrJtSEtaDPhi[j];
+            pajtsetadphi = mPaJtSEtaDPhi[j];
+            pbjtsetadphi = mPbJtSEtaDPhi[j];
+        }
+    }
 
   qBins*  qinv  = mQinv[j];
   qBins*  nqinv = mNQinv[j];
-
-  /* --> rjp 4/24/2006 
-     --> I removed these set when having to add both N and nwgt histograms
-     --> to handle the errors correctly            
-
-  xtBins**  xtxt        = mXtXt[j];
-  dphiBins** jtdytdphi  = mJtDYtDPhi[j];
-  detaBins** jtdytdeta  = mJtDYtDEta[j];
-  dptBins**  atptpt     = mAtSPtDPt[j];
-  dptBins**  atnptpt    = mAtNSPtDPt[j];
-
-  */
 
   TPCSepBins* avgtsep = mTPCAvgTSep[j];
   TPCSepBins* avgzsep = mTPCAvgZSep[j];
@@ -711,7 +750,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   StEStructTrackIterator Iter2;
 
   int iyt1,iyt2,idyt,isyt;
-  int ipt1,ipt2,ispt;
+  int ipt1,ipt2;
   int ieta1,ieta2,ideta,iseta;
   int iphi1,iphi2,idphi;
   int isavgt, isavgz, isentt, isentz;
@@ -794,11 +833,12 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           float spta=pt1;
           float sptb=pt2;
           float nwgt = 1.0;
+          float ytwgt = 1.0;
           if( !mskipEtaDeltaWeight ) {
-             nwgt = b->getDEtaWeight(mPair.DeltaEta());
-             pwgt*=nwgt;
-             spta*=nwgt;
-             sptb*=nwgt;
+             ytwgt = b->getDEtaWeight(mPair.DeltaEta());
+//             pwgt*=nwgt;
+//             spta*=nwgt;
+//             sptb*=nwgt;
           }
 
          /*
@@ -807,91 +847,105 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           int symmetrizeXX = cb->symmetrizeXX(&mPair);
           int switchXX     = cb->switchXX(&mPair);
           if (switchXX) {
-              ytyt[icb][iyt2].yt[iyt1]+=nwgt;
-              nytyt[icb][iyt2].yt[iyt1]+=1;
-              ptpt[icb][ipt2].pt[ipt1]+=nwgt;
-
-              etaeta[icb][ieta2].eta[ieta1]+=1; // nwgt;
-              pretaeta[icb][ieta2].eta[ieta1]+=pwgt/nwgt;
-              paetaeta[icb][ieta2].eta[ieta1]+=sptb/nwgt;
-              pbetaeta[icb][ieta2].eta[ieta1]+=spta/nwgt;
-
-              phiphi[icb][iphi2].phi[iphi1]+=nwgt;
-              nphiphi[icb][iphi2].phi[iphi1]+=1;
-              prphiphi[icb][iphi2].phi[iphi1]+=pwgt;
-              paphiphi[icb][iphi2].phi[iphi1]+=sptb;
-              pbphiphi[icb][iphi2].phi[iphi1]+=spta;
-          } else {
-              ytyt[icb][iyt1].yt[iyt2]+=nwgt;
-              nytyt[icb][iyt1].yt[iyt2]+=1;
-              ptpt[icb][ipt1].pt[ipt2]+=nwgt;
-
-              etaeta[icb][ieta1].eta[ieta2]+=1; // nwgt;
-              pretaeta[icb][ieta1].eta[ieta2]+=pwgt/nwgt;
-              paetaeta[icb][ieta1].eta[ieta2]+=spta/nwgt;
-              pbetaeta[icb][ieta1].eta[ieta2]+=sptb/nwgt;
-
-              phiphi[icb][iphi1].phi[iphi2]+=nwgt;
-              nphiphi[icb][iphi1].phi[iphi2]+=1;
-              prphiphi[icb][iphi1].phi[iphi2]+=pwgt;
-              paphiphi[icb][iphi1].phi[iphi2]+=spta;
-              pbphiphi[icb][iphi1].phi[iphi2]+=sptb;
-              if (symmetrizeXX) {
-                  ytyt[icb][iyt2].yt[iyt1]+=nwgt;
+              if (!mdontFillYtYt) {
+                  ytyt[icb][iyt2].yt[iyt1]+=ytwgt;
                   nytyt[icb][iyt2].yt[iyt1]+=1;
-                  ptpt[icb][ipt2].pt[ipt1]+=nwgt;
+              }
 
-                  //-> X vs X (symmetry)
+              if (mdoFillEtaEta) {
                   etaeta[icb][ieta2].eta[ieta1]+=1; // nwgt;
-                  pretaeta[icb][ieta2].eta[ieta1]+=pwgt/nwgt;
-// Note: Previously I filled paetaeta(phiphi) with sptb and pbetaeta(phiphi) with spta.
-//       I think that is the role of switchXX, not symmetrizeXX.
-                  paetaeta[icb][ieta2].eta[ieta1]+=spta/nwgt;
-                  pbetaeta[icb][ieta2].eta[ieta1]+=sptb/nwgt;
-
                   phiphi[icb][iphi2].phi[iphi1]+=nwgt;
                   nphiphi[icb][iphi2].phi[iphi1]+=1;
-                  prphiphi[icb][iphi2].phi[iphi1]+=pwgt;
-                  paphiphi[icb][iphi2].phi[iphi1]+=spta;
-                  pbphiphi[icb][iphi2].phi[iphi1]+=sptb;
+                  if (!mdontFillMeanPt) {
+                      pretaeta[icb][ieta2].eta[ieta1]+=pwgt/nwgt;
+                      paetaeta[icb][ieta2].eta[ieta1]+=sptb/nwgt;
+                      pbetaeta[icb][ieta2].eta[ieta1]+=spta/nwgt;
+                      prphiphi[icb][iphi2].phi[iphi1]+=pwgt;
+                      paphiphi[icb][iphi2].phi[iphi1]+=sptb;
+                      pbphiphi[icb][iphi2].phi[iphi1]+=spta;
+                  }
+              }
+          } else {
+              if (!mdontFillYtYt) {
+                  ytyt[icb][iyt1].yt[iyt2]+=ytwgt;
+                  nytyt[icb][iyt1].yt[iyt2]+=1;
+              }
+
+              if (mdoFillEtaEta) {
+                  etaeta[icb][ieta1].eta[ieta2]+=1; // nwgt;
+                  phiphi[icb][iphi1].phi[iphi2]+=nwgt;
+                  nphiphi[icb][iphi1].phi[iphi2]+=1;
+                  if (!mdontFillMeanPt) {
+                      pretaeta[icb][ieta1].eta[ieta2]+=pwgt/nwgt;
+                      paetaeta[icb][ieta1].eta[ieta2]+=spta/nwgt;
+                      pbetaeta[icb][ieta1].eta[ieta2]+=sptb/nwgt;
+                      prphiphi[icb][iphi1].phi[iphi2]+=pwgt;
+                      paphiphi[icb][iphi1].phi[iphi2]+=spta;
+                      pbphiphi[icb][iphi1].phi[iphi2]+=sptb;
+                  }
+              }
+              if (symmetrizeXX) {
+                  if (!mdontFillYtYt) {
+                      ytyt[icb][iyt2].yt[iyt1]+=ytwgt;
+                      nytyt[icb][iyt2].yt[iyt1]+=1;
+                  }
+
+                  //-> X vs X (symmetry)
+                  if (mdoFillEtaEta) {
+                      etaeta[icb][ieta2].eta[ieta1]+=1; // nwgt;
+                      phiphi[icb][iphi2].phi[iphi1]+=nwgt;
+                      nphiphi[icb][iphi2].phi[iphi1]+=1;
+                      if (!mdontFillMeanPt) {
+                          pretaeta[icb][ieta2].eta[ieta1]+=pwgt/nwgt;
+                          paetaeta[icb][ieta2].eta[ieta1]+=spta/nwgt;
+                          pbetaeta[icb][ieta2].eta[ieta1]+=sptb/nwgt;
+                          prphiphi[icb][iphi2].phi[iphi1]+=pwgt;
+                          paphiphi[icb][iphi2].phi[iphi1]+=spta;
+                          pbphiphi[icb][iphi2].phi[iphi1]+=sptb;
+                      }
+                  }
               }
           }
 
           //-> delta y vs delta x
-          idyt  = b->idyt(mPair.DeltaYt(mass1,mass2));
           ideta = b->ideta(mPair.DeltaEta(mass1,mass2));
           idphi = b->idphi(mPair.DeltaPhi());
 
-          isyt = b->isyt(mPair.SigmaYt(mass1,mass2));
-          ispt = b->ispt(mPair.SigmaPt());
-          iseta= b->iseta(mPair.SigmaEta(mass1,mass2));
-        
           jtdetadphi[icb][ideta].dphi[idphi] +=nwgt;
-          jtndetadphi[icb][ideta].dphi[idphi] +=1;
-          prjtdetadphi[icb][ideta].dphi[idphi] += pwgt;
-          if (switchXX) {
-              pajtdetadphi[icb][ideta].dphi[idphi] += sptb;
-              pbjtdetadphi[icb][ideta].dphi[idphi] += spta;
-          } else {
-              pajtdetadphi[icb][ideta].dphi[idphi] += spta;
-              pbjtdetadphi[icb][ideta].dphi[idphi] += sptb;
+          if (!mdontFillMeanPt) {
+              prjtdetadphi[icb][ideta].dphi[idphi] += pwgt;
+              if (switchXX) {
+                  pajtdetadphi[icb][ideta].dphi[idphi] += sptb;
+                  pbjtdetadphi[icb][ideta].dphi[idphi] += spta;
+              } else {
+                  pajtdetadphi[icb][ideta].dphi[idphi] += spta;
+                  pbjtdetadphi[icb][ideta].dphi[idphi] += sptb;
+              }
           }
 
-         //-> Sum y vs delta x
-         // For symmetry only reflect around the delta axis.
-         // Symmetrization done later.
-          atytyt[icb][isyt].dyt[idyt] +=nwgt;
-          atnytyt[icb][isyt].dyt[idyt] +=1;
+          //-> Sum y vs delta x
+          // For symmetry only reflect around the delta axis.
+          // Symmetrization done later.
+          if (mdoFillSumHistograms) {
+              idyt  = b->idyt(mPair.DeltaYt(mass1,mass2));
+              isyt = b->isyt(mPair.SigmaYt(mass1,mass2));
+              iseta= b->iseta(mPair.SigmaEta(mass1,mass2));
 
-          jtsetadphi[icb][iseta].dphi[idphi]+=nwgt;
-          jtnsetadphi[icb][iseta].dphi[idphi]+=1;
-          prjtsetadphi[icb][iseta].dphi[idphi] += pwgt;
-          if (switchXX) {
-              pajtsetadphi[icb][iseta].dphi[idphi] += sptb;
-              pbjtsetadphi[icb][iseta].dphi[idphi] += spta;
-          } else {
-              pajtsetadphi[icb][iseta].dphi[idphi] += spta;
-              pbjtsetadphi[icb][iseta].dphi[idphi] += sptb;
+              atytyt[icb][isyt].dyt[idyt] +=ytwgt;
+              atnytyt[icb][isyt].dyt[idyt] +=1;
+
+              jtsetadphi[icb][iseta].dphi[idphi]+=nwgt;
+              jtnsetadphi[icb][iseta].dphi[idphi]+=1;
+              if (!mdontFillMeanPt) {
+                  prjtsetadphi[icb][iseta].dphi[idphi] += pwgt;
+                  if (switchXX) {
+                      pajtsetadphi[icb][iseta].dphi[idphi] += sptb;
+                      pbjtsetadphi[icb][iseta].dphi[idphi] += spta;
+                  } else {
+                      pajtsetadphi[icb][iseta].dphi[idphi] += spta;
+                      pbjtsetadphi[icb][iseta].dphi[idphi] += sptb;
+                  }
+              }
           }
 
 
@@ -903,7 +957,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           if (jden >= 0) {
             ipcb = jden*nZBin + iZBin;
           }
-          if(mdoPairDensityHistograms && ipcb >= 0) {
+          if (mdoPairDensityHistograms && ipcb >= 0) {
             avgtsep[ipcb].sep[isavgt=b->isep(mPair.NominalTpcAvgXYSeparation())]+=nwgt;
             avgzsep[ipcb].sep[isavgz=b->isep(mPair.NominalTpcAvgZSeparation())]+=nwgt;
             float entXYSep = mPair.NominalTpcXYEntranceSeparation();
@@ -999,192 +1053,202 @@ void StEStruct2ptCorrelations::fillHistograms() {
 
   for(int i=0; i<8; i++){
 
-    ytBins**  ytyt   = mYtYt[i];
-    ytBins**  nytyt   = mNYtYt[i];
-    //    xtBins**  xtxt   = mXtXt[i];
-    ptBins**  ptpt   = mPtPt[i];
-
-    etaBins** etaeta  = mEtaEta[i];
-    phiBins** phiphi  = mPhiPhi[i];
     qBins*    qinv    = mQinv[i];
     phiBins** nphiphi = mNPhiPhi[i];
     qBins*    nqinv   = mNQinv[i];
 
-    etaBins** pretaeta = mPrEtaEta[i];
-    phiBins** prphiphi = mPrPhiPhi[i];
-    etaBins** paetaeta = mPaEtaEta[i];
-    phiBins** paphiphi = mPaPhiPhi[i];
-    etaBins** pbetaeta = mPbEtaEta[i];
-    phiBins** pbphiphi = mPbPhiPhi[i];
+    ytBins**  ytyt;
+    ytBins**  nytyt;
+    if (!mdontFillYtYt) {
+        ytyt   = mYtYt[i];
+        nytyt   = mNYtYt[i];
+    }
 
-    dytBins**  atytyt   = mAtSYtDYt[i];
-    dytBins**  atnytyt   = mAtNSYtDYt[i];
-    //    dptBins**  atptpt   = mAtSPtDPt[i];
+    dphiBins** jtdetadphi  = mJtDEtaDPhi[i];
+    dphiBins** prjtdetadphi;
+    dphiBins** pajtdetadphi;
+    dphiBins** pbjtdetadphi;
+    if (!mdontFillMeanPt) {
+        prjtdetadphi = mPrJtDEtaDPhi[i];
+        pajtdetadphi = mPaJtDEtaDPhi[i];
+        pbjtdetadphi = mPbJtDEtaDPhi[i];
+    }
 
-    //   dphiBins** jtdytdphi = mJtDYtDPhi[i];
-    //    detaBins** jtdytdeta = mJtDYtDEta[i];
-    dphiBins** jtdetadphi = mJtDEtaDPhi[i];
-    dphiBins** jtsetadphi = mJtSEtaDPhi[i];
-    dphiBins** jtndetadphi = mJtNDEtaDPhi[i];
-    dphiBins** jtnsetadphi = mJtNSEtaDPhi[i];
+    etaBins** etaeta;
+    phiBins** phiphi;
+    etaBins** pretaeta;
+    phiBins** prphiphi;
+    etaBins** paetaeta;
+    phiBins** paphiphi;
+    etaBins** pbetaeta;
+    phiBins** pbphiphi;
 
-    dphiBins** prjtdetadphi = mPrJtDEtaDPhi[i];
-    dphiBins** prjtsetadphi = mPrJtSEtaDPhi[i];
-    dphiBins** pajtdetadphi = mPaJtDEtaDPhi[i];
-    dphiBins** pajtsetadphi = mPaJtSEtaDPhi[i];
-    dphiBins** pbjtdetadphi = mPbJtDEtaDPhi[i];
-    dphiBins** pbjtsetadphi = mPbJtSEtaDPhi[i];
+    if (mdoFillEtaEta) {
+        etaeta  = mEtaEta[i];
+        phiphi  = mPhiPhi[i];
+        if (!mdontFillMeanPt) {
+            pretaeta = mPrEtaEta[i];
+            prphiphi = mPrPhiPhi[i];
+            paetaeta = mPaEtaEta[i];
+            paphiphi = mPaPhiPhi[i];
+            pbetaeta = mPbEtaEta[i];
+            pbphiphi = mPbPhiPhi[i];
+        }
+    }
+
+    dytBins**  atytyt;
+    dytBins**  atnytyt;
+    dphiBins** jtsetadphi;
+    dphiBins** jtnsetadphi;
+    dphiBins** prjtsetadphi;
+    dphiBins** pajtsetadphi;
+    dphiBins** pbjtsetadphi;
+    if (mdoFillSumHistograms) {
+        atytyt   = mAtSYtDYt[i];
+        atnytyt   = mAtNSYtDYt[i];
+        jtsetadphi = mJtSEtaDPhi[i];
+        jtnsetadphi = mJtNSEtaDPhi[i];
+        if (!mdontFillMeanPt) {
+            prjtsetadphi = mPrJtSEtaDPhi[i];
+            pajtsetadphi = mPaJtSEtaDPhi[i];
+            pbjtsetadphi = mPbJtSEtaDPhi[i];
+        }
+    }
+
 
     for(int y=0;y<numCutBins;y++){
         for (int z=0;z<nzb;z++) {
             int yz = y*nzb + z;
 
-            createHist2D(mHYtYt,"YtYt",i,y,z,yz,b->ytBins(),b->ytMin(),b->ytMax(),b->ytBins(),b->ytMin(),b->ytMax());
-            createHist2D(mHNYtYt,"NYtYt",i,y,z,yz,b->ytBins(),b->ytMin(),b->ytMax(),b->ytBins(),b->ytMin(),b->ytMax());
-            for(int k=0;k<b->ytBins();k++){
-              for(int j=0;j<b->ytBins();j++){
-                mHYtYt[i][yz]->Fill(b->ytVal(k),b->ytVal(j),ytyt[yz][k].yt[j]);
-                mHNYtYt[i][yz]->Fill(b->ytVal(k),b->ytVal(j),nytyt[yz][k].yt[j]);
-              }
-            }
-            delete [] ytyt[yz];
-            delete [] nytyt[yz];
-
-            /*
-            createHist2D(mHXtXt,"XtXt",i,y,z,yz,b->xtBins(),b->xtMin(),b->xtMax(),b->xtBins(),b->xtMin(),b->xtMax());
-            for(int k=0;k<b->xtBins();k++)
-              for(int j=0;j<b->xtBins();j++)
-                mHXtXt[i][yz]->Fill(b->xtVal(k),b->xtVal(j),xtxt[yz][k].xt[j]);
-
-            delete [] xtxt[yz];
-            */
-
-            createHist2D(mHPtPt,"PtPt",i,y,z,yz,b->ptBins(),b->ptMin(),b->ptMax(),b->ptBins(),b->ptMin(),b->ptMax());
-            for(int k=0;k<b->ptBins();k++)
-              for(int j=0;j<b->ptBins();j++)
-                mHPtPt[i][yz]->Fill(b->ptVal(k),b->ptVal(j),ptpt[yz][k].pt[j]);
-
-            delete [] ptpt[yz];
-
-            createHist2D(mHPhiPhi,"PhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
-            createHist2D(mHNPhiPhi,"NPhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
-            createHist2D(mHPrPhiPhi,"PrPhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
-            createHist2D(mHPaPhiPhi,"PaPhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
-            createHist2D(mHPbPhiPhi,"PbPhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
-            for(int k=0;k<b->phiBins();k++){
-              for(int j=0;j<b->phiBins();j++){
-                mHPhiPhi[i][yz]->Fill(xv=b->phiVal(k),yv=b->phiVal(j),phiphi[yz][k].phi[j]);
-                mHNPhiPhi[i][yz]->Fill(xv=b->phiVal(k),yv=b->phiVal(j),nphiphi[yz][k].phi[j]);
-                mHPrPhiPhi[i][yz]->Fill(xv,yv,prphiphi[yz][k].phi[j]);
-                mHPaPhiPhi[i][yz]->Fill(xv,yv,paphiphi[yz][k].phi[j]);
-                mHPbPhiPhi[i][yz]->Fill(xv,yv,pbphiphi[yz][k].phi[j]);
-              }
+            if (!mdontFillYtYt) {
+                createHist2D(mHYtYt,"YtYt",i,y,z,yz,b->ytBins(),b->ytMin(),b->ytMax(),b->ytBins(),b->ytMin(),b->ytMax());
+                createHist2D(mHNYtYt,"NYtYt",i,y,z,yz,b->ytBins(),b->ytMin(),b->ytMax(),b->ytBins(),b->ytMin(),b->ytMax());
+                for(int k=0;k<b->ytBins();k++){
+                  for(int j=0;j<b->ytBins();j++){
+                    mHYtYt[i][yz]->Fill(b->ytVal(k),b->ytVal(j),ytyt[yz][k].yt[j]);
+                    mHNYtYt[i][yz]->Fill(b->ytVal(k),b->ytVal(j),nytyt[yz][k].yt[j]);
+                  }
+                }
+                delete [] ytyt[yz];
+                delete [] nytyt[yz];
             }
 
-            delete [] phiphi[yz];
-            delete [] nphiphi[yz];
-            delete [] prphiphi[yz];
-            delete [] paphiphi[yz];
-            delete [] pbphiphi[yz];
-
-            createHist2D(mHEtaEta,"EtaEta",i,y,z,yz,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
-            createHist2D(mHPrEtaEta,"PrEtaEta",i,y,z,yz,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
-            createHist2D(mHPaEtaEta,"PaEtaEta",i,y,z,yz,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
-            createHist2D(mHPbEtaEta,"PbEtaEta",i,y,z,yz,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
-            for(int k=0;k<b->etaBins();k++){
-              for(int j=0;j<b->etaBins();j++){
-                mHEtaEta[i][yz]->Fill(xv=b->etaVal(k),yv=b->etaVal(j),etaeta[yz][k].eta[j]);
-                mHPrEtaEta[i][yz]->Fill(xv,yv,pretaeta[yz][k].eta[j]);
-                mHPaEtaEta[i][yz]->Fill(xv,yv,paetaeta[yz][k].eta[j]);
-                mHPbEtaEta[i][yz]->Fill(xv,yv,pbetaeta[yz][k].eta[j]);
-              }
-            }
-
-            delete [] etaeta[yz];
-            delete [] pretaeta[yz];
-            delete [] paetaeta[yz];
-            delete [] pbetaeta[yz];
-
-            createHist2D(mHJtDEtaDPhi,"DEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            createHist2D(mHJtNDEtaDPhi,"NDEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            createHist2D(mHPrJtDEtaDPhi,"PrDEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            createHist2D(mHPaJtDEtaDPhi,"PaDEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            createHist2D(mHPbJtDEtaDPhi,"PbDEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+            createHist2D(mHJtDEtaDPhi,  "DEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
             for(int k=0;k<b->detaBins();k++){
               for(int j=0;j<b->dphiBins();j++){
                 // Symmetrize dEta,dPhi in StEStructHAdd of Support code.
                 // here is just a copy of the array.
                 mHJtDEtaDPhi[i][yz]->SetBinContent(k+1,j+1,jtdetadphi[yz][k].dphi[j]);
-                mHJtNDEtaDPhi[i][yz]->SetBinContent(k+1,j+1,jtndetadphi[yz][k].dphi[j]);
-                mHPrJtDEtaDPhi[i][yz]->SetBinContent(k+1,j+1,prjtdetadphi[yz][k].dphi[j]);
-                mHPaJtDEtaDPhi[i][yz]->SetBinContent(k+1,j+1,pajtdetadphi[yz][k].dphi[j]);
-                mHPbJtDEtaDPhi[i][yz]->SetBinContent(k+1,j+1,pbjtdetadphi[yz][k].dphi[j]);
               }
             }
-
             delete [] jtdetadphi[yz];
-            delete [] jtndetadphi[yz];
-            delete [] prjtdetadphi[yz];
-            delete [] pajtdetadphi[yz];
-            delete [] pbjtdetadphi[yz];
-
-            createHist2D(mHAtSYtDYt,"SYtDYt",i,y,z,yz,b->sytBins(),b->sytMin(),b->sytMax(),b->dytBins(),b->dytMin(),b->dytMax());
-            createHist2D(mHAtNSYtDYt,"NSYtDYt",i,y,z,yz,b->sytBins(),b->sytMin(),b->sytMax(),b->dytBins(),b->dytMin(),b->dytMax());
-            for(int k=0;k<b->sytBins();k++){
-              for(int j=0;j<b->dytBins();j++){
-                mHAtSYtDYt[i][yz]->Fill(b->sytVal(k),b->dytVal(j),atytyt[yz][k].dyt[j]);
-                mHAtNSYtDYt[i][yz]->Fill(b->sytVal(k),b->dytVal(j),atnytyt[yz][k].dyt[j]);
-              }
+            if (!mdontFillMeanPt) {
+                createHist2D(mHPrJtDEtaDPhi,"PrDEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+                createHist2D(mHPaJtDEtaDPhi,"PaDEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+                createHist2D(mHPbJtDEtaDPhi,"PbDEtaDPhiArr",i,y,z,yz,b->detaBins(),0.5,b->detaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+                for(int k=0;k<b->detaBins();k++){
+                  for(int j=0;j<b->dphiBins();j++){
+                    // Symmetrize dEta,dPhi in StEStructHAdd of Support code.
+                    // here is just a copy of the array.
+                    mHPrJtDEtaDPhi[i][yz]->SetBinContent(k+1,j+1,prjtdetadphi[yz][k].dphi[j]);
+                    mHPaJtDEtaDPhi[i][yz]->SetBinContent(k+1,j+1,pajtdetadphi[yz][k].dphi[j]);
+                    mHPbJtDEtaDPhi[i][yz]->SetBinContent(k+1,j+1,pbjtdetadphi[yz][k].dphi[j]);
+                  }
+                }
+                delete [] prjtdetadphi[yz];
+                delete [] pajtdetadphi[yz];
+                delete [] pbjtdetadphi[yz];
             }
 
-            delete [] atytyt[yz];
-            delete [] atnytyt[yz];
+            if (mdoFillEtaEta) {
+                createHist2D(mHPhiPhi,"PhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+                createHist2D(mHNPhiPhi,"NPhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+                for(int k=0;k<b->phiBins();k++){
+                  for(int j=0;j<b->phiBins();j++){
+                    mHPhiPhi[i][yz]->Fill(xv=b->phiVal(k),yv=b->phiVal(j),phiphi[yz][k].phi[j]);
+                    mHNPhiPhi[i][yz]->Fill(xv,yv,nphiphi[yz][k].phi[j]);
+                  }
+                }
+                delete [] phiphi[yz];
+                delete [] nphiphi[yz];
+                if (!mdontFillMeanPt) {
+                    createHist2D(mHPrPhiPhi,"PrPhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+                    createHist2D(mHPaPhiPhi,"PaPhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+                    createHist2D(mHPbPhiPhi,"PbPhiPhi",i,y,z,yz,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+                    for(int k=0;k<b->phiBins();k++){
+                      for(int j=0;j<b->phiBins();j++){
+                        mHPrPhiPhi[i][yz]->Fill(xv=b->phiVal(k),yv=b->phiVal(j),prphiphi[yz][k].phi[j]);
+                        mHPaPhiPhi[i][yz]->Fill(xv,yv,paphiphi[yz][k].phi[j]);
+                        mHPbPhiPhi[i][yz]->Fill(xv,yv,pbphiphi[yz][k].phi[j]);
+                      }
+                    }
+                    delete [] prphiphi[yz];
+                    delete [] paphiphi[yz];
+                    delete [] pbphiphi[yz];
+                }
 
-           /*
-           createHist2D(mHAtSPtDPt,"SPtDPt",i,y,z,yz,b->sptBins(),b->sptMin(),b->sptMax(),b->dptBins(),b->dptMin(),b->dptMax());
-           for(int k=0;k<b->sptBins();k++)
-              for(int j=0;j<b->dptBins();j++)
-                mHAtSPtDPt[i][yz]->Fill(b->sptVal(k),b->dptVal(j),atptpt[yz][k].dpt[j]);
-         
-           delete [] atptpt[yz];
-           */
-            createHist2D(mHJtSEtaDPhi,"SEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            createHist2D(mHJtNSEtaDPhi,"NSEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            createHist2D(mHPrJtSEtaDPhi,"PrSEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            createHist2D(mHPaJtSEtaDPhi,"PaSEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            createHist2D(mHPbJtSEtaDPhi,"PbSEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
-            for(int k=0;k<b->setaBins();k++) {
-              for(int j=0;j<b->dphiBins();j++) {
-                // Symmetrize dEta,dPhi in StEStructHAdd of Support code.
-                // here is just a copy of the array.
-                mHJtSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,jtsetadphi[yz][k].dphi[j]);
-                mHJtNSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,jtnsetadphi[yz][k].dphi[j]);
-                mHPrJtSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,prjtsetadphi[yz][k].dphi[j]);
-                mHPaJtSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,pajtsetadphi[yz][k].dphi[j]);
-                mHPbJtSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,pbjtsetadphi[yz][k].dphi[j]);
-              }
+                createHist2D(mHEtaEta,"EtaEta",i,y,z,yz,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+                for(int k=0;k<b->etaBins();k++){
+                  for(int j=0;j<b->etaBins();j++){
+                    mHEtaEta[i][yz]->Fill(xv=b->etaVal(k),yv=b->etaVal(j),etaeta[yz][k].eta[j]);
+                  }
+                }
+                delete [] etaeta[yz];
+                if (!mdontFillMeanPt) {
+                    createHist2D(mHPrEtaEta,"PrEtaEta",i,y,z,yz,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+                    createHist2D(mHPaEtaEta,"PaEtaEta",i,y,z,yz,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+                    createHist2D(mHPbEtaEta,"PbEtaEta",i,y,z,yz,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+                    for(int k=0;k<b->etaBins();k++){
+                      for(int j=0;j<b->etaBins();j++){
+                        mHPrEtaEta[i][yz]->Fill(xv=b->etaVal(k),yv=b->etaVal(j),pretaeta[yz][k].eta[j]);
+                        mHPaEtaEta[i][yz]->Fill(xv,yv,paetaeta[yz][k].eta[j]);
+                        mHPbEtaEta[i][yz]->Fill(xv,yv,pbetaeta[yz][k].eta[j]);
+                      }
+                    }
+                    delete [] pretaeta[yz];
+                    delete [] paetaeta[yz];
+                    delete [] pbetaeta[yz];
+                }
             }
 
-            delete [] jtsetadphi[yz];
-            delete [] jtnsetadphi[yz];
-            delete [] prjtsetadphi[yz];
-            delete [] pbjtsetadphi[yz];   
-            delete [] pajtsetadphi[yz];   
+            if (mdoFillSumHistograms) {
+                createHist2D(mHAtSYtDYt, "SYtDYt",i,y,z,yz,b->sytBins(),b->sytMin(),b->sytMax(),b->dytBins(),b->dytMin(),b->dytMax());
+                createHist2D(mHAtNSYtDYt,"NSYtDYt",i,y,z,yz,b->sytBins(),b->sytMin(),b->sytMax(),b->dytBins(),b->dytMin(),b->dytMax());
+                for(int k=0;k<b->sytBins();k++){
+                  for(int j=0;j<b->dytBins();j++){
+                    mHAtSYtDYt[i][yz]->Fill(b->sytVal(k),b->dytVal(j),atytyt[yz][k].dyt[j]);
+                    mHAtNSYtDYt[i][yz]->Fill(b->sytVal(k),b->dytVal(j),atnytyt[yz][k].dyt[j]);
+                  }
+                }
+                delete [] atytyt[yz];
+                delete [] atnytyt[yz];
 
-            /*
-            createHist2D(mHJtDYtDPhi,"DYtDPhi",i,y,z,yz,b->dytBins(),b->dytMin(),b->dytMax(),b->hdphiBins(),b->hdphiMin(),b->hdphiMax());
-            createHist2D(mHJtDYtDEta,"DYtDEta",i,y,z,yz,b->dytBins(),b->dytMin(),b->dytMax(),b->hdetaBins(),b->detaMin(),b->detaMax());
-            for(int k=0;k<b->dytBins();k++){
-              for(int j=0;j<b->dphiBins();j++){
-                mHJtDYtDPhi[i][yz]->Fill(xv=b->dytVal(k),yv=b->dphiVal(j),jtdytdphi[yz][k].dphi[j]);
-              }      
-              for(int j=0;j<b->detaBins();j++){
-                mHJtDYtDEta[i][yz]->Fill(xv=b->dytVal(k),yv=b->detaVal(j),jtdytdeta[yz][k].deta[j]);
-              }      
+                createHist2D(mHJtSEtaDPhi,  "SEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+                createHist2D(mHJtNSEtaDPhi, "NSEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+                for(int k=0;k<b->setaBins();k++) {
+                  for(int j=0;j<b->dphiBins();j++) {
+                    mHJtSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,jtsetadphi[yz][k].dphi[j]);
+                    mHJtNSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,jtnsetadphi[yz][k].dphi[j]);
+                  }
+                }
+                delete [] jtsetadphi[yz];
+                delete [] jtnsetadphi[yz];
+                if (!mdontFillMeanPt) {
+                    createHist2D(mHPrJtSEtaDPhi,"PrSEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+                    createHist2D(mHPaJtSEtaDPhi,"PaSEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+                    createHist2D(mHPbJtSEtaDPhi,"PbSEtaDPhiArr",i,y,z,yz,b->setaBins(),0.5,b->setaBins()+0.5,b->dphiBins(),0.5,b->dphiBins()+0.5);
+                    for(int k=0;k<b->setaBins();k++) {
+                      for(int j=0;j<b->dphiBins();j++) {
+                        mHPrJtSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,prjtsetadphi[yz][k].dphi[j]);
+                        mHPaJtSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,pajtsetadphi[yz][k].dphi[j]);
+                        mHPbJtSEtaDPhi[i][yz]->SetBinContent(k+1,j+1,pbjtsetadphi[yz][k].dphi[j]);
+                      }
+                    }
+                    delete [] prjtsetadphi[yz];
+                    delete [] pbjtsetadphi[yz];
+                    delete [] pajtsetadphi[yz];
+                }
             }
-            delete [] jtdytdphi[yz];
-            delete [] jtdytdeta[yz];
-            */
 
             createHist1D(mHQinv,"Qinv",i,y,z,yz,b->qBins(),b->qMin(),b->qMax());
             createHist1D(mHNQinv,"NQinv",i,y,z,yz,b->qBins(),b->qMin(),b->qMax());
@@ -1346,39 +1410,43 @@ void StEStruct2ptCorrelations::writeHistograms() {
   }
   for(int i=0;i<8;i++){
     for(int j=0;j<numCutBins;j++){
-      mHYtYt[i][j]->Write();
-      mHNYtYt[i][j]->Write();
-      //    mHXtXt[i][j]->Write();
-      mHPtPt[i][j]->Write();
+      if (!mdontFillYtYt) {
+          mHYtYt[i][j]->Write();
+          mHNYtYt[i][j]->Write();
+      }
 
-      mHPhiPhi[i][j]->Write();
-      mHNPhiPhi[i][j]->Write();
-      mHEtaEta[i][j]->Write();
-      mHPrPhiPhi[i][j]->Write();
-      mHPrEtaEta[i][j]->Write();
-      mHPaPhiPhi[i][j]->Write();
-      mHPaEtaEta[i][j]->Write();
-      mHPbPhiPhi[i][j]->Write();
-      mHPbEtaEta[i][j]->Write();
-
-      mHAtSYtDYt[i][j]->Write();
-      mHAtNSYtDYt[i][j]->Write();
-      //     mHAtSPtDPt[i][j]->Write();
-      /*
-      mHJtDYtDPhi[i][j]->Write();
-      mHJtDYtDEta[i][j]->Write();
-      */
       mHJtDEtaDPhi[i][j]->Write();
-      mHJtNDEtaDPhi[i][j]->Write();
-      mHPrJtDEtaDPhi[i][j]->Write();
-      mHPaJtDEtaDPhi[i][j]->Write();
-      mHPbJtDEtaDPhi[i][j]->Write();
+      if (!mdontFillMeanPt) {
+          mHPrJtDEtaDPhi[i][j]->Write();
+          mHPaJtDEtaDPhi[i][j]->Write();
+          mHPbJtDEtaDPhi[i][j]->Write();
+      }
 
-      mHJtSEtaDPhi[i][j]->Write();
-      mHJtNSEtaDPhi[i][j]->Write();
-      mHPrJtSEtaDPhi[i][j]->Write();
-      mHPaJtSEtaDPhi[i][j]->Write();
-      mHPbJtSEtaDPhi[i][j]->Write();
+      if (mdoFillEtaEta) {
+          mHPhiPhi[i][j]->Write();
+          mHNPhiPhi[i][j]->Write();
+          mHEtaEta[i][j]->Write();
+          if (!mdontFillMeanPt) {
+              mHPrPhiPhi[i][j]->Write();
+              mHPrEtaEta[i][j]->Write();
+              mHPaPhiPhi[i][j]->Write();
+              mHPaEtaEta[i][j]->Write();
+              mHPbPhiPhi[i][j]->Write();
+              mHPbEtaEta[i][j]->Write();
+          }
+      }
+
+      if (mdoFillSumHistograms) {
+          mHAtSYtDYt[i][j]->Write();
+          mHAtNSYtDYt[i][j]->Write();
+          mHJtSEtaDPhi[i][j]->Write();
+          mHJtNSEtaDPhi[i][j]->Write();
+          if (!mdontFillMeanPt) {
+              mHPrJtSEtaDPhi[i][j]->Write();
+              mHPaJtSEtaDPhi[i][j]->Write();
+              mHPbJtSEtaDPhi[i][j]->Write();
+          }
+      }
 
       mHQinv[i][j]->Write();
       mHNQinv[i][j]->Write();
@@ -1441,38 +1509,44 @@ void StEStruct2ptCorrelations::initArrays(){
 
   for(int i=0;i<8;i++){
 
-     mYtYt[i]=new ytBins*[numCutBins];
-     mAtSYtDYt[i]=new dytBins*[numCutBins];
-     mNYtYt[i]=new ytBins*[numCutBins];
-     mAtNSYtDYt[i]=new dytBins*[numCutBins];
-     //    mXtXt[i]=new xtBins*[numCutBins];
-     mPtPt[i]=new ptBins*[numCutBins];
-     //     mAtSPtDPt[i]=new dptBins*[numCutBins];
+     if (!mdontFillYtYt) {
+         mYtYt[i]=new ytBins*[numCutBins];
+         mNYtYt[i]=new ytBins*[numCutBins];
+     }
 
-     mEtaEta[i]=new etaBins*[numCutBins];
-     mPhiPhi[i]=new phiBins*[numCutBins];
-     mNPhiPhi[i]=new phiBins*[numCutBins];
-     //     mJtDYtDPhi[i]=new dphiBins*[numCutBins];
-     //     mJtDYtDEta[i]=new detaBins*[numCutBins];
-     mJtDEtaDPhi[i]=new dphiBins*[numCutBins];
-     mJtSEtaDPhi[i]=new dphiBins*[numCutBins];
-     mJtNDEtaDPhi[i]=new dphiBins*[numCutBins];
-     mJtNSEtaDPhi[i]=new dphiBins*[numCutBins];
-
-     mPaEtaEta[i]=new etaBins*[numCutBins];
-     mPaPhiPhi[i]=new phiBins*[numCutBins];
-     mPaJtDEtaDPhi[i]=new dphiBins*[numCutBins];
-     mPaJtSEtaDPhi[i]=new dphiBins*[numCutBins];
-     mPbEtaEta[i]=new etaBins*[numCutBins];
-     mPbPhiPhi[i]=new phiBins*[numCutBins];
-     mPbJtDEtaDPhi[i]=new dphiBins*[numCutBins];
-     mPbJtSEtaDPhi[i]=new dphiBins*[numCutBins];
-
-     mPrEtaEta[i]=new etaBins*[numCutBins];
-     mPrPhiPhi[i]=new phiBins*[numCutBins];
-     mPrJtDEtaDPhi[i]=new dphiBins*[numCutBins];
-     mPrJtSEtaDPhi[i]=new dphiBins*[numCutBins];
+     mJtDEtaDPhi[i]  =new dphiBins*[numCutBins];
+     if (!mdontFillMeanPt) {
+         mPaJtDEtaDPhi[i]=new dphiBins*[numCutBins];
+         mPbJtDEtaDPhi[i]=new dphiBins*[numCutBins];
+         mPrJtDEtaDPhi[i]=new dphiBins*[numCutBins];
+     }
      
+     if (mdoFillEtaEta) {
+         mEtaEta[i]=new etaBins*[numCutBins];
+         mPhiPhi[i]=new phiBins*[numCutBins];
+         mNPhiPhi[i]=new phiBins*[numCutBins];
+         if (!mdontFillMeanPt) {
+             mPrEtaEta[i]=new etaBins*[numCutBins];
+             mPaEtaEta[i]=new etaBins*[numCutBins];
+             mPbEtaEta[i]=new etaBins*[numCutBins];
+             mPrPhiPhi[i]=new phiBins*[numCutBins];
+             mPaPhiPhi[i]=new phiBins*[numCutBins];
+             mPbPhiPhi[i]=new phiBins*[numCutBins];
+         }
+     }
+
+     if (mdoFillSumHistograms) {
+         mAtSYtDYt[i]=new dytBins*[numCutBins];
+         mAtNSYtDYt[i]=new dytBins*[numCutBins];
+         mJtSEtaDPhi[i]=new dphiBins*[numCutBins];
+         mJtNSEtaDPhi[i]=new dphiBins*[numCutBins];
+         if (!mdontFillMeanPt) {
+             mPaJtSEtaDPhi[i]=new dphiBins*[numCutBins];
+             mPbJtSEtaDPhi[i]=new dphiBins*[numCutBins];
+             mPrJtSEtaDPhi[i]=new dphiBins*[numCutBins];
+         }
+     }
+
      /*  --- I cut out the ql,qo,qs
      if(mPair.doHbt3D()){
        mQlQs[i]=new qBins*[numCutBins];
@@ -1523,70 +1597,65 @@ void StEStruct2ptCorrelations::initArrays(){
 
 
     for(int j=0;j<numCutBins;j++){
-      mYtYt[i][j]=new ytBins[ESTRUCT_YT_BINS];
-      memset(mYtYt[i][j],0,ESTRUCT_YT_BINS*sizeof(ytBins));
-      mAtSYtDYt[i][j]=new dytBins[ESTRUCT_SYT_BINS];
-      memset(mAtSYtDYt[i][j],0,ESTRUCT_SYT_BINS*sizeof(dytBins));
-      mNYtYt[i][j]=new ytBins[ESTRUCT_YT_BINS];
-      memset(mNYtYt[i][j],0,ESTRUCT_YT_BINS*sizeof(ytBins));
-      mAtNSYtDYt[i][j]=new dytBins[ESTRUCT_SYT_BINS];
-      memset(mAtNSYtDYt[i][j],0,ESTRUCT_SYT_BINS*sizeof(dytBins));
-      mPtPt[i][j]=new ptBins[ESTRUCT_PT_BINS];
-      memset(mPtPt[i][j],0,ESTRUCT_PT_BINS*sizeof(ptBins));
+      if (!mdontFillYtYt) {
+          mYtYt[i][j]=new ytBins[ESTRUCT_YT_BINS];
+          memset(mYtYt[i][j],0,ESTRUCT_YT_BINS*sizeof(ytBins));
+          mNYtYt[i][j]=new ytBins[ESTRUCT_YT_BINS];
+          memset(mNYtYt[i][j],0,ESTRUCT_YT_BINS*sizeof(ytBins));
+      }
 
-     /*
-      mXtXt[i][j]=new xtBins[ESTRUCT_XT_BINS];
-      memset(mXtXt[i][j],0,ESTRUCT_XT_BINS*sizeof(xtBins));
-      mAtSPtDPt[i][j]=new dptBins[ESTRUCT_SPT_BINS];
-      memset(mAtSPtDPt[i][j],0,ESTRUCT_SPT_BINS*sizeof(dptBins));
-     */
-
-      mEtaEta[i][j]=new etaBins[ESTRUCT_ETA_BINS];
-      memset(mEtaEta[i][j],0,ESTRUCT_ETA_BINS*sizeof(etaBins));
-      mPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
-      memset(mPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
-      mNPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
-      memset(mNPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
-     /*
-      mJtDYtDPhi[i][j]=new dphiBins[ESTRUCT_DYT_BINS];
-      memset(mJtDYtDPhi[i][j],0,ESTRUCT_DYT_BINS*sizeof(dphiBins));
-      mJtDYtDEta[i][j]=new detaBins[ESTRUCT_DYT_BINS];
-      memset(mJtDYtDEta[i][j],0,ESTRUCT_DYT_BINS*sizeof(detaBins));
-     */
       mJtDEtaDPhi[i][j]=new dphiBins[ESTRUCT_DETA_BINS];
       memset(mJtDEtaDPhi[i][j],0,ESTRUCT_DETA_BINS*sizeof(dphiBins));
-      mJtNDEtaDPhi[i][j]=new dphiBins[ESTRUCT_DETA_BINS];
-      memset(mJtNDEtaDPhi[i][j],0,ESTRUCT_DETA_BINS*sizeof(dphiBins));
-      mJtSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
-      memset(mJtSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
-      mJtNSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
-      memset(mJtNSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
+      if (!mdontFillMeanPt) {
+          mPaJtDEtaDPhi[i][j]=new dphiBins[ESTRUCT_DETA_BINS];
+          memset(mPaJtDEtaDPhi[i][j],0,ESTRUCT_DETA_BINS*sizeof(dphiBins));
+          mPbJtDEtaDPhi[i][j]=new dphiBins[ESTRUCT_DETA_BINS];
+          memset(mPbJtDEtaDPhi[i][j],0,ESTRUCT_DETA_BINS*sizeof(dphiBins));
+          mPrJtDEtaDPhi[i][j]=new dphiBins[ESTRUCT_DETA_BINS];
+          memset(mPrJtDEtaDPhi[i][j],0,ESTRUCT_DETA_BINS*sizeof(dphiBins));
+      }
 
-      mPaEtaEta[i][j]=new etaBins[ESTRUCT_ETA_BINS];
-      memset(mPaEtaEta[i][j],0,ESTRUCT_ETA_BINS*sizeof(etaBins));
-      mPaPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
-      memset(mPaPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
-      mPaJtDEtaDPhi[i][j]=new dphiBins[ESTRUCT_DETA_BINS];
-      memset(mPaJtDEtaDPhi[i][j],0,ESTRUCT_DETA_BINS*sizeof(dphiBins));
-      mPaJtSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
-      memset(mPaJtSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
-      mPbEtaEta[i][j]=new etaBins[ESTRUCT_ETA_BINS];
-      memset(mPbEtaEta[i][j],0,ESTRUCT_ETA_BINS*sizeof(etaBins));
-      mPbPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
-      memset(mPbPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
-      mPbJtDEtaDPhi[i][j]=new dphiBins[ESTRUCT_DETA_BINS];
-      memset(mPbJtDEtaDPhi[i][j],0,ESTRUCT_DETA_BINS*sizeof(dphiBins));
-      mPbJtSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
-      memset(mPbJtSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
+      if (mdoFillEtaEta) {
+          mEtaEta[i][j]=new etaBins[ESTRUCT_ETA_BINS];
+          memset(mEtaEta[i][j],0,ESTRUCT_ETA_BINS*sizeof(etaBins));
+          mPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
+          memset(mPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
+          mNPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
+          memset(mNPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
+          if (!mdontFillMeanPt) {
+              mPrEtaEta[i][j]=new etaBins[ESTRUCT_ETA_BINS];
+              memset(mPrEtaEta[i][j],0,ESTRUCT_ETA_BINS*sizeof(etaBins));
+              mPaEtaEta[i][j]=new etaBins[ESTRUCT_ETA_BINS];
+              memset(mPaEtaEta[i][j],0,ESTRUCT_ETA_BINS*sizeof(etaBins));
+              mPbEtaEta[i][j]=new etaBins[ESTRUCT_ETA_BINS];
+              memset(mPbEtaEta[i][j],0,ESTRUCT_ETA_BINS*sizeof(etaBins));
+              mPrPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
+              memset(mPrPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
+              mPaPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
+              memset(mPaPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
+              mPbPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
+              memset(mPbPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
+          }
+      }
 
-      mPrEtaEta[i][j]=new etaBins[ESTRUCT_ETA_BINS];
-      memset(mPrEtaEta[i][j],0,ESTRUCT_ETA_BINS*sizeof(etaBins));
-      mPrPhiPhi[i][j]=new phiBins[ESTRUCT_PHI_BINS];
-      memset(mPrPhiPhi[i][j],0,ESTRUCT_PHI_BINS*sizeof(phiBins));
-      mPrJtDEtaDPhi[i][j]=new dphiBins[ESTRUCT_DETA_BINS];
-      memset(mPrJtDEtaDPhi[i][j],0,ESTRUCT_DETA_BINS*sizeof(dphiBins));
-      mPrJtSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
-      memset(mPrJtSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
+      if (mdoFillSumHistograms) {
+          mAtSYtDYt[i][j]=new dytBins[ESTRUCT_SYT_BINS];
+          memset(mAtSYtDYt[i][j],0,ESTRUCT_SYT_BINS*sizeof(dytBins));
+          mAtNSYtDYt[i][j]=new dytBins[ESTRUCT_SYT_BINS];
+          memset(mAtNSYtDYt[i][j],0,ESTRUCT_SYT_BINS*sizeof(dytBins));
+          mJtSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
+          memset(mJtSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
+          mJtNSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
+          memset(mJtNSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
+          if (!mdontFillMeanPt) {
+              mPrJtSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
+              memset(mPrJtSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
+              mPaJtSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
+              memset(mPaJtSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
+              mPbJtSEtaDPhi[i][j]=new dphiBins[ESTRUCT_SETA_BINS];
+              memset(mPbJtSEtaDPhi[i][j],0,ESTRUCT_SETA_BINS*sizeof(dphiBins));
+          }
+      }
     }
 
     if(mdoPairDensityHistograms) {
@@ -1627,35 +1696,45 @@ void StEStruct2ptCorrelations::deleteArrays(){
   }
 
   for(int i=0;i<8;i++){
-    for(int j=0;j<numCutBins;j++){
+    for(int j=0;j<numCutBins;j++){ // Why were these all commented out?
       
-      //      delete []  mYtYt[i][j];
-      //      delete []  mXtXt[i][j];
-      //      delete []  mPtPt[i][j];
+      if (!mdontFillYtYt) {
+          delete []  mYtYt[i][j];
+          delete []  mNYtYt[i][j];
+      }
+
+      delete []  mJtDEtaDPhi[i][j];
+      if (!mdontFillMeanPt) {
+          delete []  mPrJtDEtaDPhi[i][j];
+          delete []  mPaJtDEtaDPhi[i][j];
+          delete []  mPbJtDEtaDPhi[i][j];
+      }
+
+      if (mdoFillEtaEta) {
+          delete []  mEtaEta[i][j];
+          delete []  mPhiPhi[i][j];
+          delete []  mNPhiPhi[i][j];
+          if (!mdontFillMeanPt) {
+              delete []  mPrEtaEta[i][j];
+              delete []  mPrPhiPhi[i][j];
+              delete []  mPaEtaEta[i][j];
+              delete []  mPaPhiPhi[i][j];
+              delete []  mPbEtaEta[i][j];
+              delete []  mPbPhiPhi[i][j];
+          }
+      }
       
-      //      delete []  mEtaEta[i][j];
-      //      delete []  mPhiPhi[i][j];
-      //      delete []  mPrEtaEta[i][j];
-      //      delete []  mPrPhiPhi[i][j];
-      //      delete []  mPaEtaEta[i][j];
-      //      delete []  mPaPhiPhi[i][j];
-      //      delete []  mPbEtaEta[i][j];
-      //      delete []  mPbPhiPhi[i][j];
+      if (mdoFillSumHistograms) {
+          delete []  mAtSYtDYt[i][j];
+          delete []  mJtSEtaDPhi[i][j];
+          delete []  mJtNSEtaDPhi[i][j];
+          if (!mdontFillMeanPt) {
+              delete []  mPrJtSEtaDPhi[i][j];
+              delete []  mPaJtSEtaDPhi[i][j];
+              delete []  mPbJtSEtaDPhi[i][j];
+          }
+      }
       
-      //      delete []  mAtSYtDYt[i][j];
-      //      delete []  mAtSPtDPt[i][j];
-      
-      //      delete []  mJtDYtDPhi[i][j];
-      //      delete []  mJtDYtDEta[i][j];
-      //      delete []  mJtDEtaDPhi[i][j];
-      //      delete []  mJtSEtaDPhi[i][j];
-      
-      //      delete []  mPrJtDEtaDPhi[i][j];
-      //      delete []  mPrJtSEtaDPhi[i][j];
-      //      delete []  mPaJtDEtaDPhi[i][j];
-      //      delete []  mPaJtSEtaDPhi[i][j];
-      //      delete []  mPbJtDEtaDPhi[i][j];
-      //      delete []  mPbJtSEtaDPhi[i][j];
     }
       
     if(mdoPairDensityHistograms)  { // These are the 2D arrays. Delete along one axis.
@@ -1672,34 +1751,45 @@ void StEStruct2ptCorrelations::deleteArrays(){
       }
     }
     
-    delete []  mYtYt[i];
-    delete []  mXtXt[i];
-    delete []  mPtPt[i];
-    
-    delete []  mEtaEta[i];
-    delete []  mPhiPhi[i];
-    delete []  mPrEtaEta[i];
-    delete []  mPrPhiPhi[i];
-    delete []  mPaEtaEta[i];
-    delete []  mPaPhiPhi[i];
-    delete []  mPbEtaEta[i];
-    delete []  mPbPhiPhi[i];
+    if (!mdontFillYtYt) {
+        delete []  mYtYt[i];
+        delete []  mNYtYt[i];
+    }
 
-    delete []  mAtSYtDYt[i];
-    delete []  mAtSPtDPt[i];
-
-    delete []  mJtDYtDPhi[i];
-    delete []  mJtDYtDEta[i];
     delete []  mJtDEtaDPhi[i];
-    delete []  mJtSEtaDPhi[i];
-    delete []  mPrJtDEtaDPhi[i];
-    delete []  mPrJtSEtaDPhi[i];
-    delete []  mPaJtDEtaDPhi[i];
-    delete []  mPaJtSEtaDPhi[i];
-    delete []  mPbJtDEtaDPhi[i];
-    delete []  mPbJtSEtaDPhi[i];
+    if (!mdontFillMeanPt) {
+        delete []  mPrJtDEtaDPhi[i];
+        delete []  mPaJtDEtaDPhi[i];
+        delete []  mPbJtDEtaDPhi[i];
+    }
+
+    if (mdoFillEtaEta) {
+        delete []  mEtaEta[i];
+        delete []  mPhiPhi[i];
+        delete []  mNPhiPhi[i];
+        if (!mdontFillMeanPt) {
+            delete []  mPrEtaEta[i];
+            delete []  mPrPhiPhi[i];
+            delete []  mPaEtaEta[i];
+            delete []  mPaPhiPhi[i];
+            delete []  mPbEtaEta[i];
+            delete []  mPbPhiPhi[i];
+        }
+    }
+
+    if (mdoFillSumHistograms) {
+        delete []  mAtSYtDYt[i];
+        delete []  mJtSEtaDPhi[i];
+        delete []  mJtNSEtaDPhi[i];
+        if (!mdontFillMeanPt) {
+            delete []  mPrJtSEtaDPhi[i];
+            delete []  mPaJtSEtaDPhi[i];
+            delete []  mPbJtSEtaDPhi[i];
+        }
+    }
     
     delete []  mQinv[i];
+    delete []  mNQinv[i];
 
     if(mdoPairDensityHistograms) {
       delete [] mTPCAvgTSep[i];
@@ -1743,39 +1833,43 @@ void StEStruct2ptCorrelations::initHistograms(){
 
   for(int i=0; i<8; i++){
 
-    mHYtYt[i]=new TH2D*[numCutBins];
-    mHAtSYtDYt[i]=new TH2D*[numCutBins];
-    mHNYtYt[i]=new TH2D*[numCutBins];
-    mHAtNSYtDYt[i]=new TH2D*[numCutBins];
-    //    mHXtXt[i]=new TH2D*[numCutBins];
-    mHPtPt[i]=new TH2D*[numCutBins];
-    //    mHAtSPtDPt[i]=new TH2D*[numCutBins];
+    if (!mdontFillYtYt) {
+        mHYtYt[i]=new TH2D*[numCutBins];
+        mHNYtYt[i]=new TH2D*[numCutBins];
+    }
 
-    mHEtaEta[i]=new TH2D*[numCutBins];
-    mHPhiPhi[i]=new TH2D*[numCutBins];
-    mHNPhiPhi[i]=new TH2D*[numCutBins];
-    mHPrEtaEta[i]=new TH2D*[numCutBins];
-    mHPrPhiPhi[i]=new TH2D*[numCutBins];
-    mHPaEtaEta[i]=new TH2D*[numCutBins];
-    mHPaPhiPhi[i]=new TH2D*[numCutBins];
-    mHPbEtaEta[i]=new TH2D*[numCutBins];
-    mHPbPhiPhi[i]=new TH2D*[numCutBins];
-
-    /*
-    mHJtDYtDPhi[i]=new TH2D*[numCutBins];
-    mHJtDYtDEta[i]=new TH2D*[numCutBins];
-    */
- 
     mHJtDEtaDPhi[i]=new TH2D*[numCutBins];
-    mHJtSEtaDPhi[i]=new TH2D*[numCutBins];
-    mHJtNDEtaDPhi[i]=new TH2D*[numCutBins];
-    mHJtNSEtaDPhi[i]=new TH2D*[numCutBins];
-    mHPrJtDEtaDPhi[i]=new TH2D*[numCutBins];
-    mHPrJtSEtaDPhi[i]=new TH2D*[numCutBins];
-    mHPaJtDEtaDPhi[i]=new TH2D*[numCutBins];
-    mHPaJtSEtaDPhi[i]=new TH2D*[numCutBins];
-    mHPbJtDEtaDPhi[i]=new TH2D*[numCutBins];
-    mHPbJtSEtaDPhi[i]=new TH2D*[numCutBins];
+    if (!mdontFillMeanPt) {
+        mHPrJtDEtaDPhi[i]=new TH2D*[numCutBins];
+        mHPaJtDEtaDPhi[i]=new TH2D*[numCutBins];
+        mHPbJtDEtaDPhi[i]=new TH2D*[numCutBins];
+    }
+
+    if (mdoFillEtaEta) {
+        mHEtaEta[i]=new TH2D*[numCutBins];
+        mHPhiPhi[i]=new TH2D*[numCutBins];
+        mHNPhiPhi[i]=new TH2D*[numCutBins];
+        if (!mdontFillMeanPt) {
+            mHPrEtaEta[i]=new TH2D*[numCutBins];
+            mHPrPhiPhi[i]=new TH2D*[numCutBins];
+            mHPaEtaEta[i]=new TH2D*[numCutBins];
+            mHPaPhiPhi[i]=new TH2D*[numCutBins];
+            mHPbEtaEta[i]=new TH2D*[numCutBins];
+            mHPbPhiPhi[i]=new TH2D*[numCutBins];
+        }
+    }
+
+    if (mdoFillSumHistograms) {
+        mHAtSYtDYt[i]=new TH2D*[numCutBins];
+        mHAtNSYtDYt[i]=new TH2D*[numCutBins];
+        mHJtSEtaDPhi[i]=new TH2D*[numCutBins];
+        mHJtNSEtaDPhi[i]=new TH2D*[numCutBins];
+        if (!mdontFillMeanPt) {
+            mHPrJtSEtaDPhi[i]=new TH2D*[numCutBins];
+            mHPaJtSEtaDPhi[i]=new TH2D*[numCutBins];
+            mHPbJtSEtaDPhi[i]=new TH2D*[numCutBins];
+        }
+    }
 
     mHQinv[i]=new TH1D*[numCutBins];
     mHNQinv[i]=new TH1D*[numCutBins];
@@ -1829,39 +1923,43 @@ void StEStruct2ptCorrelations::deleteHistograms(){
   }
   for(int i=0;i<8;i++){
     for(int j=0;j<numCutBins;j++){
-      delete mHYtYt[i][j];
-      delete mHNYtYt[i][j];
-      //      delete mHXtXt[i][j];
-      delete mHPtPt[i][j];
+      if (!mdontFillYtYt) {
+          delete mHYtYt[i][j];
+          delete mHNYtYt[i][j];
+      }
       
-      delete mHEtaEta[i][j];
-      delete mHPhiPhi[i][j];
-      delete mHNPhiPhi[i][j];
-      delete mHPrEtaEta[i][j];
-      delete mHPrPhiPhi[i][j];
-      delete mHPaEtaEta[i][j];
-      delete mHPaPhiPhi[i][j];
-      delete mHPbEtaEta[i][j];
-      delete mHPbPhiPhi[i][j];
-
-      delete mHAtSYtDYt[i][j];
-      delete mHAtNSYtDYt[i][j];
-      //      delete mHAtSPtDPt[i][j];
-
-      /*
-      delete mHJtDYtDPhi[i][j];
-      delete mHJtDYtDEta[i][j];
-      */
       delete mHJtDEtaDPhi[i][j];
-      delete mHJtSEtaDPhi[i][j];
-      delete mHJtNDEtaDPhi[i][j];
-      delete mHJtNSEtaDPhi[i][j];
-      delete mHPrJtDEtaDPhi[i][j];
-      delete mHPrJtSEtaDPhi[i][j];
-      delete mHPaJtDEtaDPhi[i][j];
-      delete mHPaJtSEtaDPhi[i][j];
-      delete mHPbJtDEtaDPhi[i][j];
-      delete mHPbJtSEtaDPhi[i][j];
+      if (!mdontFillMeanPt) {
+          delete mHPrJtDEtaDPhi[i][j];
+          delete mHPaJtDEtaDPhi[i][j];
+          delete mHPbJtDEtaDPhi[i][j];
+      }
+
+      if (mdoFillEtaEta) {
+          delete mHEtaEta[i][j];
+          delete mHPhiPhi[i][j];
+          delete mHNPhiPhi[i][j];
+          if (!mdontFillMeanPt) {
+              delete mHPrEtaEta[i][j];
+              delete mHPrPhiPhi[i][j];
+              delete mHPaEtaEta[i][j];
+              delete mHPaPhiPhi[i][j];
+              delete mHPbEtaEta[i][j];
+              delete mHPbPhiPhi[i][j];
+          }
+      }
+
+      if (mdoFillSumHistograms) {
+          delete mHAtSYtDYt[i][j];
+          delete mHAtNSYtDYt[i][j];
+          delete mHJtSEtaDPhi[i][j];
+          delete mHJtNSEtaDPhi[i][j];
+          if (!mdontFillMeanPt) {
+              delete mHPrJtSEtaDPhi[i][j];
+              delete mHPaJtSEtaDPhi[i][j];
+              delete mHPbJtSEtaDPhi[i][j];
+          }
+      }
 
       delete mHQinv[i][j];
       delete mHNQinv[i][j];
@@ -1893,38 +1991,43 @@ void StEStruct2ptCorrelations::deleteHistograms(){
     
     }
 
-    delete [] mHYtYt[i];
-    delete [] mHNYtYt[i];
-    //    delete [] mHXtXt[i];
-    delete [] mHPtPt[i];
+    if (!mdontFillYtYt) {
+        delete [] mHYtYt[i];
+        delete [] mHNYtYt[i];
+    }
 
-    delete [] mHEtaEta[i];
-    delete [] mHPhiPhi[i];
-    delete [] mHNPhiPhi[i];
-    delete [] mHPrEtaEta[i];
-    delete [] mHPrPhiPhi[i];
-    delete [] mHPaEtaEta[i];
-    delete [] mHPaPhiPhi[i];
-    delete [] mHPbEtaEta[i];
-    delete [] mHPbPhiPhi[i];
-
-    delete [] mHAtSYtDYt[i];
-    delete [] mHAtNSYtDYt[i];
-    //    delete [] mHAtSPtDPt[i];
-    /*
-    delete [] mHJtDYtDPhi[i];
-    delete [] mHJtDYtDEta[i];
-    */
     delete [] mHJtDEtaDPhi[i];
-    delete [] mHJtSEtaDPhi[i];
-    delete [] mHJtNDEtaDPhi[i];
-    delete [] mHJtNSEtaDPhi[i];
-    delete [] mHPrJtDEtaDPhi[i];
-    delete [] mHPrJtSEtaDPhi[i];
-    delete [] mHPaJtDEtaDPhi[i];
-    delete [] mHPaJtSEtaDPhi[i];
-    delete [] mHPbJtDEtaDPhi[i];
-    delete [] mHPbJtSEtaDPhi[i];
+    if (!mdontFillMeanPt) {
+        delete [] mHPrJtDEtaDPhi[i];
+        delete [] mHPaJtDEtaDPhi[i];
+        delete [] mHPbJtDEtaDPhi[i];
+    }
+
+    if (mdoFillEtaEta) {
+        delete [] mHEtaEta[i];
+        delete [] mHPhiPhi[i];
+        delete [] mHNPhiPhi[i];
+        if (!mdontFillMeanPt) {
+            delete [] mHPrEtaEta[i];
+            delete [] mHPrPhiPhi[i];
+            delete [] mHPaEtaEta[i];
+            delete [] mHPaPhiPhi[i];
+            delete [] mHPbEtaEta[i];
+            delete [] mHPbPhiPhi[i];
+        }
+    }
+
+    if (mdoFillSumHistograms) {
+        delete [] mHAtSYtDYt[i];
+        delete [] mHAtNSYtDYt[i];
+        delete [] mHJtSEtaDPhi[i];
+        delete [] mHJtNSEtaDPhi[i];
+        if (!mdontFillMeanPt) {
+            delete [] mHPrJtSEtaDPhi[i];
+            delete [] mHPaJtSEtaDPhi[i];
+            delete [] mHPbJtSEtaDPhi[i];
+        }
+    }
 
     delete [] mHQinv[i];
     delete [] mHNQinv[i];
@@ -2004,6 +2107,14 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.25  2009/05/08 00:09:54  prindle
+ * In 2ptCorrelations we added switches to select blocks of histograms to fill.
+ * (See constructor in StEStruct2ptCorrelations.cxx)
+ * Use a brute force method for checking crossing cuts. I had too many corner
+ * cases with my clever check.
+ * In Binning, change Yt limit and add methods for accessing number of histogram bins
+ * to use (used in Support)
+ *
  * Revision 1.24  2008/12/02 23:45:04  prindle
  * Changed switchYt to switchXX (etc.) to better reflect function.
  * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)

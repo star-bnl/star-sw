@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.16 2008/12/02 23:45:07 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.17 2009/05/08 00:09:55 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -558,7 +558,9 @@ inline int StEStructPairCuts::cutCrossing(){
 
 inline int StEStructPairCuts::cutMerging2() {
     // If tracks ever get close we cut them. Ignore TPC entrance.
-    //  Doesn't seem to take care of crossing cut.
+    //  Doesn't seem to take care of crossing tracks.
+    // Turns out when one of the tracks leaves via the endcap the nominal
+    // Z separation is -1. We try only use the XY separation in this case.
     if (!mMergingCut2) {
         return 0;
     }
@@ -578,40 +580,18 @@ inline int StEStructPairCuts::cutMerging2() {
         }
     }
     return 0;
-    // This removes rectangular region in separation distance at midpoint of TPC
-    // Expect tracks to come from common vertex, so cutting at any radius should
-    // be effective for merging.
-/*
-    if (MidTpcZSeparation()>mMerging2[0]) {
-        return 0;
-    }
-    if (MidTpcXYSeparation() > mMerging2[1]) {
-        return 0;
-    }
-    return ++(mMergingCounter2[mType]);
- */
 }
 inline int StEStructPairCuts::cutCrossing2() {
-    // Only for tracks that _do_ cross.
-    // This removes a slot in Z separation at midplane of TPC
+    // For tracks that cross.
+    // This removes a slot narrow in Z separation but perhaps wide in XY separation.
     // I find that low-y_t, high-y_t pairs can be far apart at the middle of the
-    // tpc but close together near the outer radius. Require large z separation
-    // at both radii. Turns out when one of the tracks leaves via the endcap the nominal
-    // Z separation is -1. I guess we try using the XY separation
+    // tpc but close together near the outer radius, so require large z separation
+    // at both radii.
 
     if (!mCrossingCut2) {
         return 0;
     }
-    // Need to protect against opening angle changing from 180+eps to 180-eps.
-    // Already done by GoodDeltaZDeltaZY cut, but if that wasn't turned on...
-    if (!mGooddeltaZdeltaXYCut) {
-        if (MidTpcZSeparation()>8) {
-            return 0;
-        }
-        if ( (MidTpcXYSeparation()>50) && (OuterMidTpcXYSeparation()>50) ) {
-            return 0;
-        }
-    }
+    // If tracks are far enough apart in Z don't bother to look for crossing.
     if ( (MidTpcZSeparation()>mCrossing2[0]) && (OuterMidTpcZSeparation()>mCrossing2[1]) ) {
         return 0;
     }
@@ -938,6 +918,14 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.17  2009/05/08 00:09:55  prindle
+ * In 2ptCorrelations we added switches to select blocks of histograms to fill.
+ * (See constructor in StEStruct2ptCorrelations.cxx)
+ * Use a brute force method for checking crossing cuts. I had too many corner
+ * cases with my clever check.
+ * In Binning, change Yt limit and add methods for accessing number of histogram bins
+ * to use (used in Support)
+ *
  * Revision 1.16  2008/12/02 23:45:07  prindle
  * Changed switchYt to switchXX (etc.) to better reflect function.
  * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)
