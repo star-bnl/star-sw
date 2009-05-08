@@ -2,7 +2,7 @@
  * @file TxEventLogFile.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.h,v 1.2 2009/05/07 20:32:34 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.h,v 1.3 2009/05/08 23:46:01 fine Exp $
  *
  * TxEventLogFile provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -30,7 +30,7 @@ namespace TxLogging {
   class TxEventLogFile: public TxEventLog {
   protected:
     /**
-     * Write downb the prepared plain message using the concete media 
+     * Write down the prepared plain message using the concete media 
      * 
      * @param string message , Message to be written out
      *
