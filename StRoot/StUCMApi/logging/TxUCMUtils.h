@@ -57,7 +57,7 @@ namespace TxUCMUtils {
     struct tm *tm;
 
     ltime = time (NULL); /* get current cal time */  
-    tm = localtime(&ltime);
+    tm = gmtime(&ltime);
   
     std::string ts = "";
     std::ostringstream date;
