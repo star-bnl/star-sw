@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StG3Particle.h,v 1.3 2009/04/21 19:10:51 perev Exp $
+// @(#)STAR/eg:$Id: StG3Particle.h,v 1.4 2009/05/09 00:44:58 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -14,6 +14,7 @@
 typedef void (*GFKINE_t) (int &,float*,float*,int &, int   &,int *,int &);
 typedef void (*GFVERT_t) (int &,float*,int  &,int &, float &,int *,int &);
 
+/// Master class for StGENParticle filled from GEANT3 internal structures
 class StG3ParticleMaster :public StGenParticleMaster {
 public:
          StG3ParticleMaster(GFKINE_t fk,GFVERT_t fv);

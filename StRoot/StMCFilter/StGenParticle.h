@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StGenParticle.h,v 1.3 2009/04/21 19:10:51 perev Exp $
+// @(#)STAR/eg:$Id: StGenParticle.h,v 1.4 2009/05/09 00:44:58 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -9,8 +9,8 @@
 #define ROOT_StGenParticle
 
 
+/// Abstract base class for particles related to common /HEPEVT/
 class StGenParticle  {
-
 
 protected:
                                 // ****** constructors and destructor
