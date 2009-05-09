@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StMCFilter.h,v 1.3 2009/04/21 19:10:51 perev Exp $
+// @(#)STAR/eg:$Id: StMCFilter.h,v 1.4 2009/05/09 00:44:58 perev Exp $
 // Author: V.Perev  Mar/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -25,12 +25,13 @@ virtual int  RejectEG(const StGenParticleMaster &ptl) const {return 0;}
 virtual int  RejectGT(const StGenParticleMaster &ptl) const {return 0;}
 ///		Rejection at GEANT End, No GEANT output
 virtual int  RejectGE(const StGenParticleMaster &ptl) const {return 0;}
-///		Finish
+///		Finish called at the end of GEANT
 virtual void Finish() const{;}
 
         const std::string &GetName() const { return fName;}
-public:
+private:
 //	static methods
+///		Select filter by name
 static int  Select(const char *name);
 static int  REJECTEG();
 static int  REJECTGT();

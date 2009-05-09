@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StGENParticle.h,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)STAR/eg:$Id: StGENParticle.h,v 1.2 2009/05/09 00:44:58 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -10,7 +10,7 @@
 #include <vector>
 #include "StGenParticle.h"
 
-
+/// Implementation of StGenParticle similar to ROOT TParticle 
 class StGENParticle : public StGenParticle {
 public:
 

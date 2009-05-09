@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StG3Particle.cxx,v 1.4 2009/04/28 22:40:26 perev Exp $
+// @(#)root/eg:$Id: StG3Particle.cxx,v 1.5 2009/05/09 00:44:58 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -18,7 +18,7 @@ static std::vector<StGENParticle*> myVec;
 //______________________________________________________________________________
 StG3ParticleMaster::StG3ParticleMaster(GFKINE_t fk,GFVERT_t fv)
 {
-  assert(!mgInst);
+  assert(!mgInst && "Never,Jamais");
   mgInst = this;
   mgFK = fk;
   mgFV = fv;
@@ -33,7 +33,7 @@ StG3ParticleMaster::~StG3ParticleMaster()
 //______________________________________________________________________________
 const StG3ParticleMaster *StG3ParticleMaster::Instance() 
 {
-  assert(mgInst);
+  assert(mgInst && "Never,Jamais");
   return mgInst;
 }  
 //______________________________________________________________________________
@@ -72,7 +72,7 @@ void StG3ParticleMaster::Update()
     tk->SetMom(PVERT);
     if (!NVTX) continue;
     if (NTBEAM) {
-      assert(NTBEAM<ITRA);
+      assert(NTBEAM<ITRA && "Never,Jamais");
       tk->SetMother(0,myVec[NTBEAM-1]);
       myVec[NTBEAM-1]->AddDaughter(tk);
     }
@@ -83,7 +83,7 @@ void StG3ParticleMaster::Update()
 //______________________________________________________________________________
 const StGenParticle *StG3ParticleMaster::operator()(int idx) const
 {
-  assert(idx>=0);
+  assert(idx>=0 && "Never,Jamais");
   if (idx >= mNTk) 			return 0;
   if (!myVec[idx]->GetStatusCode()) 	return 0;
   return myVec[idx];
