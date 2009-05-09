@@ -146,8 +146,9 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
     label.DrawLatex( 1., hmax, tmpchr);
   }
   TLatex labela;
-  labela.SetTextSize(0.030);
+  labela.SetTextSize(0.032);
   labela.SetTextAlign(23);  // center, top
+  labela.SetTextAngle(90);
   labela.DrawLatex(0.25,0.1*hmax,"THUB1-0");
   labela.DrawLatex(0.75,0.2*hmax,"THUB1-1");
   labela.DrawLatex(1.25,0.1*hmax,"THUB2-0");
@@ -175,6 +176,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
     fprintf(stderr,"TOF: problems in data (%d) - continuing...",ret);
     return false;
   }
+  TOF_EventCount->Fill(1);
 
   // 
   int halftrayid=-1;
@@ -210,7 +212,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       }
       //cout<<"tray="<<trayid<<" halftray="<<halftrayid<<endl;
       if(trayid <1 || trayid >124) continue;
-      if(trayid == 123) continue;
+      if(trayid == 123) continue;  // no such tray number.
 
       // bunch id 
       if(packetid == 0x2) {
@@ -232,7 +234,6 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
     }  // end loop nword
   }  // end loop fiber
 
-  TOF_EventCount->Fill(1);
 
   // check bunch id shift
   int bunchidref1 =   allbunchid[0][0];   // bunchid from tray 1 as reference.

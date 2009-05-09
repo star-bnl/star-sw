@@ -37,7 +37,7 @@
 //4,3,1,2,2,[any|any],h39_svt_NPixPed,h40_svt_NPix100
 //4,4,3,4,12,[any|any],h273_svt_West_OccRec1,h274_svt_West_OccRec2,h275_svt_West_OccRec3,h276_svt_West_OccRec4,h277_svt_West_OccRec5,h278_svt_West_OccRec6,h279_svt_West_OccRec7,h280_svt_West_OccRec8,h281_svt_West_OccRec9,h282_svt_West_OccRec10,h283_svt_West_OccRec11,h284_svt_West_OccRec12
 //4,5,1,1,1,[any|any],h56_AnodeVsHybird
-
+//VPD
 4,1,1,1,1,[any|any],hGroup:Trigger#vpd#any#trg
 4,2,1,1,1,[any|any],hGroup:Trigger#vpdHi#any#trg
 
@@ -70,7 +70,6 @@
 
 
 //END OF BEMC
-
 
 
 7,1,2,3,6,[any|any],h0_evt_size,h49_ftp,h11_ftp_evsize,h51_ftp_OccLaser,h48_ftp,h50_ftp_OccPulser
@@ -147,6 +146,9 @@
 14,10,1,1,1,[any|any],eeTot
 
 
+//MTD 
+15,1,1,1,1,[any|any],hGroup:MTD#MTD hits#any#TOF
+15,2,1,1,1,[any|any],hGroup:MTD#MTD trigger#any#TOF
 // SSD
 //15,1,2,2,4,[any|any],h250_ssd_evsize,h251_ssd_frac,h256_ssd_lad_pulse,h257_ssd_mod_pulse
 //
@@ -159,6 +161,7 @@
 //15,6,2,4,8,[any|any],h356_ssd_lad17_occ,h357_ssd_lad18_occ,h358_ssd_lad19_occ,h359_ssd_lad20_occ,h360_ssd_lad21_occ,h361_ssd_lad22_occ,h362_ssd_lad23_occ,h363_ssd_lad24_occ
 //15,7,2,4,8,[any|any],h364_ssd_lad25_occ,h365_ssd_lad26_occ,h366_ssd_lad27_occ,h367_ssd_lad28_occ,h368_ssd_lad29_occ,h369_ssd_lad30_occ,h370_ssd_lad31_occ,h371_ssd_lad32_occ
 //15,8,2,4,8,[any|any],h372_ssd_lad33_occ,h373_ssd_lad34_occ,h374_ssd_lad35_occ,h375_ssd_lad36_occ,h376_ssd_lad37_occ,h377_ssd_lad38_occ,h378_ssd_lad39_occ,h379_ssd_lad40_occ
+
 
 // ZDC
 16,1,2,4,8,[any|any],h329_zdcsmd_w_v_N,h330_zdcsmd_w_h_N,h331_zdcsmd_e_v_N,h332_zdcsmd_e_h_N,h333_zdcsmd_w_v_A,h334_zdcsmd_w_h_A,h335_zdcsmd_e_v_A,h336_zdcsmd_e_h_A
@@ -181,3 +184,4 @@
 17,8,2,3,6,[any|any],h424_pmd_Chain_43,h425_pmd_Chain_44,h426_pmd_Chain_45,h427_pmd_Chain_46,h428_pmd_Chain_47,h429_pmd_Chain_48
 
 17,9,1,2,2,[any|any],h430_pmd_Chain_vs_channel,h431_pmd_Chain_vs_channel_adc
+

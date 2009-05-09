@@ -215,7 +215,7 @@ void PresenterGui::SetDefaults()
   TabNames[12][0]="ESMD";
   TabNames[13][0]="EEMC trig";
   TabNames[14][0]="EEMC Shift";
-  TabNames[15][0]="SSD";
+  TabNames[15][0]="MTD";
   TabNames[16][0]="ZDC SMD";
   TabNames[17][0]="PMD";
   //
@@ -275,7 +275,7 @@ void PresenterGui::SetDefaults()
   //nSubTabs[4]=5;
   nSubTabs[4]=2;
   //   TabNames[4][1]="SVT Total Occupancy";
-  TabNames[4][1]="VPD";
+  TabNames[4][1]="VPD Lo";
   TabNames[4][2]="VPD Hi";
   //TabNames[4][1]="SVT West and East";
   //TabNames[4][2]="SVT Receiver Occupancy East";
@@ -402,16 +402,21 @@ void PresenterGui::SetDefaults()
   TabNames[14][10]="EMU Vs FEE Out";
   
 
+  //MTD 
+  nSubTabs[15]=2;
+  TabNames[15][1]="MTD hits";
+  TabNames[15][2]="MTD trigger info."; 
   //SSD
-  nSubTabs[15]=8;
-  TabNames[15][1]="Event Size and Pulse";
-  TabNames[15][2]="Mean Occupancy";
-  TabNames[15][3]="Charge Matching";
-  TabNames[15][4]="Ladder Occupancy 1";
-  TabNames[15][5]="Ladder Occupancy 2";
-  TabNames[15][6]="Ladder Occupancy 3";
-  TabNames[15][7]="Ladder Occupancy 4";
-  TabNames[15][8]="Ladder Occupancy 5";
+  //nSubTabs[15]=8;
+  //TabNames[15][1]="Event Size and Pulse";
+  //TabNames[15][2]="Mean Occupancy";
+  //TabNames[15][3]="Charge Matching";
+  //TabNames[15][4]="Ladder Occupancy 1";
+  //TabNames[15][5]="Ladder Occupancy 2";
+  //TabNames[15][6]="Ladder Occupancy 3";
+  //TabNames[15][7]="Ladder Occupancy 4";
+  //TabNames[15][8]="Ladder Occupancy 5";
+
   //ZDCSMD
   nSubTabs[16]=1;
   TabNames[16][1]="ZDC SMD";
@@ -426,7 +431,6 @@ void PresenterGui::SetDefaults()
   TabNames[17][7]="37-42";
   TabNames[17][8]="43-48";
   TabNames[17][9]="Chain vs Channel";
-  
   
   // define embedded canvas
   // gEc = new TRootEmbeddedCanvas(lCanvasName, fF5, mHight,mHight);

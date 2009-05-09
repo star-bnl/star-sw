@@ -163,7 +163,7 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
   labely.DrawLatex(-5.4, 30, "ToT (ns)");
   cc->cd(4);
   upvpd_eastT_vs_westT->Draw("col");
-  labely.DrawLatex(-5200, 0.6*51200, "west time (ns)");
+  labely.DrawLatex(-5100, 0.6*51200, "west time (ns)");
 
   cc->Update();
 
@@ -242,7 +242,7 @@ bool TOFupvpdHistogramGroup::fill(evpReader* evp, char* datap) {
   std::sort(trailinghits.begin(),trailinghits.end());
 
   float leadingtime[54],trailingtime[54];  // will only get one hit of each channel
-  for(int i=0;i<54;i++){leadingtime[i]=-1.;trailingtime[i]=-1.;}
+  for(int i=0;i<54;i++){leadingtime[i]=0.;trailingtime[i]=0;}
 
   for(int ich=0;ich<54;ich++){
     for(unsigned int ile=0;ile<leadinghits.size();ile++){
@@ -270,10 +270,9 @@ bool TOFupvpdHistogramGroup::fill(evpReader* evp, char* datap) {
     if(ToT>0)upvpd_ToT->Fill(ich,ToT);
   }
   for(int ieast=0;ieast<19;ieast++){
-    for(int iwest=0;iwest<19;iwest++){
-      if(leadingtime[ieast]*leadingtime[iwest]<1) continue;
-      upvpd_eastT_vs_westT->Fill(leadingtime[ieast],leadingtime[iwest]);
-    }
+    int iwest=ieast+19;
+    if(leadingtime[ieast]*leadingtime[iwest]<1) continue;
+    upvpd_eastT_vs_westT->Fill(leadingtime[ieast],leadingtime[iwest]);
   }
 
   return true;
