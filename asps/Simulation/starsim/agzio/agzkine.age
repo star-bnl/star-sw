@@ -1,8 +1,12 @@
 *
-* $Id: agzkine.age,v 1.1.1.1 2004/01/12 23:49:37 potekhin Exp $
+* $Id: agzkine.age,v 1.2 2009/05/09 01:35:16 perev Exp $
 * $Name:  $
 * $Log: agzkine.age,v $
+* Revision 1.2  2009/05/09 01:35:16  perev
+* StMCFilter: immediat return after reject
+*
 * Revision 1.1.1.1  2004/01/12 23:49:37  potekhin
+*
 *
 * Revision 1.12  2002/08/24 20:16:13  nevski
 * production prints improved
@@ -32,7 +36,7 @@
 #include "atlsim/config.h"
 ******************************************************************************
 *                                                                            *
-                   Subroutine  A G Z K I N E
+                   Subroutine  AGZKINE
 *                                                                            *
 * Description: Read or Generate Kinematics for primary tracks (new version)  *
 * This routine understands the KINE card in the following format (a la SLUG) *
@@ -110,8 +114,10 @@
 
       If (LkEvnt<=0 & IKINE>0)    Call HEPEFILL
       If (LkEvnt<=0 & IKINE<=-1)  Call HEPEREAD
-
+      Ieotri=0
         J=CsADDR('AGUKINE');  If (J>0) Call CSjCAL(J,1,Ier,0,0,0,0,0,0,0,0,0)
+      if (Ieotri .ne.0) { Iquest(1)=0; return;}
+
 *
       If  ier!=0
       {   Ikineold=0; Ieotri=1; Iquest(1)=Ier; Return; }
