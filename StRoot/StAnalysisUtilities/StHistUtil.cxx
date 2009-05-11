@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.62 2009/05/06 17:19:09 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.63 2009/05/11 17:52:14 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.63  2009/05/11 17:52:14  genevb
+// Fix fit-not-attached-to-hist-for-empty-hists, needed for ROOT 5.22
+//
 // Revision 2.62  2009/05/06 17:19:09  genevb
 // Avoid PDF bug with text at angles
 //
@@ -752,7 +755,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	    hobj->SetLineWidth(2);
             if (oName.EndsWith("Mass")) hobj->Draw("e");
 	    else hobj->Draw();
-	    if (oName.BeginsWith("fcl_radial")) {
+	    if (oName.BeginsWith("fcl_radial") && (hobj->GetEntries() > 0)) {
               //Fits to radial steps FTPCE+W/////05/14/08///nav+gvb
 	      hobj->GetXaxis()->SetRangeUser(6.5,9.0);
 	      hobj->Fit("pol0","","", 6.5, 7.2);
