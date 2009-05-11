@@ -2,7 +2,7 @@
  * @file TxEventLog.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLog.h,v 1.3 2009/05/07 20:32:34 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLog.h,v 1.4 2009/05/11 17:11:04 fine Exp $
  *
  * TxEventLog provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -139,14 +139,24 @@ public:
      * @param string url, Job submit location. 
      *
      */    
+    virtual void logJobSubmitLocation (const std::string& url)=0;
     virtual void setJobSubmitLocation (const std::string& url)=0;
 
+   /**
+     * Log the task size. This method will be called by the
+     * Broker to log the new task and its size.
+     *
+     * @param string url, Job submit location. 
+     *
+     */    
+    virtual void logTask (unsigned int size=1)=0;
     /**
      * Log the job state. This method will be called by the Broker.
      *
      * @param enum Stage, Job state. 
      *
      */    
+    virtual void logJobSubmitState (State state)=0;
     virtual void setJobSubmitState (State state)=0;
 
     /**
@@ -156,6 +166,7 @@ public:
      * @param string ID, Job submit ID. 
      *
      */    
+    virtual void logJobSubmitID (const std::string& ID)=0;
     virtual void setJobSubmitID (const std::string& ID)=0;
 
     /**

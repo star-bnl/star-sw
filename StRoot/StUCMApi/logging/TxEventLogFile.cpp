@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.3 2009/05/07 22:52:22 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.4 2009/05/11 17:11:04 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -94,6 +94,9 @@ void TxLogging::TxEventLogFile::logEvent (const std::string& userKey,
 		      userValue);
 }
 
+void TxLogging::TxEventLogFile::logJobSubmitLocation (const std::string& url) 
+{setJobSubmitLocation(url) ;}
+
 void TxLogging::TxEventLogFile::setJobSubmitLocation (const std::string& url) {
   this->writeMessage (TxUCMConstants::submitEvent,
 		      this->context,
@@ -102,6 +105,9 @@ void TxLogging::TxEventLogFile::setJobSubmitLocation (const std::string& url) {
 		      TxUCMConstants::siteLocation,
 		      url);
 }
+
+void TxLogging::TxEventLogFile::logJobSubmitState (State state) 
+{ setJobSubmitState (state) ; }
 
 void TxLogging::TxEventLogFile::setJobSubmitState (State state) {
   this->writeMessage (TxUCMConstants::submitEvent,
@@ -112,6 +118,9 @@ void TxLogging::TxEventLogFile::setJobSubmitState (State state) {
 		      TxUCMUtils::itoa (state));
 }
 
+void TxLogging::TxEventLogFile::logJobSubmitID (const std::string& ID) 
+{ setJobSubmitID(ID); }
+
 void TxLogging::TxEventLogFile::setJobSubmitID (const std::string& ID) {
   this->writeMessage (TxUCMConstants::submitEvent,
 		      this->context,
@@ -119,6 +128,13 @@ void TxLogging::TxEventLogFile::setJobSubmitID (const std::string& ID) {
 		      TxEventLogFile::STATUS,
 		      TxUCMConstants::gridJobID,
 		      ID);
+}
+
+void TxLogging::TxEventLogFile::logTask (unsigned int size)
+{
+   std::string taskSize = "taskSize='";
+   taskSize += TxUCMUtils::itoa(size); taskSize +="'";
+   this->logEvent ("com.txcorp.ucm.newtask",taskSize);
 }
 
 void TxLogging::TxEventLogFile::logEnd (const std::string& key, 
