@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StMCFilter.cxx,v 1.4 2009/05/09 00:44:58 perev Exp $
+// @(#)root/eg:$Id: StMCFilter.cxx,v 1.5 2009/05/11 19:24:19 perev Exp $
 // Author: Victor Perev  17/03/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -74,7 +74,7 @@ StMCFilter::~StMCFilter()
 //______________________________________________________________________________
 int StMCFilter::Select(const char *name)
 {
-  assert(!fgSelected && "Only one filter is allowed");
+//VP  assert(!fgSelected && "Only one filter is allowed");
   std::string myName(name);
   for (int i=0;i<(int)myName.size();i++) { myName[i]=tolower(myName[i]);}
   myMap_t::iterator it = myMap.find(std::string(myName));
@@ -86,13 +86,13 @@ int StMCFilter::Select(const char *name)
 //______________________________________________________________________________
 void StMCFilter::SetEG(void *hepEvt)
 {
-  if (!fgHepParticle) return;
+  if (fgHepParticle) return;
   fgHepParticle = new StHepParticleMaster(hepEvt);
 }
 //______________________________________________________________________________
 void StMCFilter::SetG3(void *gfKine,void *gfVert)
 {
-  if(!fgG3Particle) return;
+  if (fgG3Particle) return;
   fgG3Particle = new StG3ParticleMaster((GFKINE_t)gfKine,(GFVERT_t)gfVert);
 }
 //______________________________________________________________________________
