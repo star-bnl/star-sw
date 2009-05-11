@@ -29,7 +29,7 @@ namespace TxUCMUtils {
    * @param string, string to be trimmed
    * @return const char*, stringified integer
    */
-  inline const char* itoa (int integer) {
+  inline std::string itoa (int integer) {
     std::ostringstream str;
     str << integer;
     return str.str ().c_str ();
