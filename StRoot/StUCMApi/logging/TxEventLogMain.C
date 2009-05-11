@@ -1,7 +1,8 @@
 #include "TxEventLog.h"
+#include "TxEventLogFactory.h"
 
 int main () {
-  TxLogging::TxEventLog* el1 = new TxLogging::TxEventLog ();
+  TxLogging::TxEventLog* el1 = TxLogging::TxEventLogFactory::create();
   el1->setBrokerTaskID ("RoopaBrokerTaskID1234");
   el1->setBrokerJobID (1234);
   el1->setRequesterName ("Roopa");
