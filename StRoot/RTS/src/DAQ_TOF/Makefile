@@ -54,4 +54,7 @@ tofReader.o: ../../../../StRoot/RTS/include/rts.h
 tofReader.o: ../DAQ_READER/daq_dta_structs.h
 tofReader.o: ../DAQ_READER/daq_det.h
 tofReader.o: tofReader.h
+tofReader.o: daq_tof.h
 daq_tof.o: ../DAQ_READER/daq_det.h
+tofReader.o: daq_tof.h
+tofReader.o: ../DAQ_READER/daq_det.h

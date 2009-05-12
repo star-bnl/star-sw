@@ -57,13 +57,13 @@ daq_dta.o: ../../../../StRoot/RTS/include/rtsLog.h
 daq_dta.o: daq_dta.h
 daq_dta.o: ../../../../StRoot/RTS/include/rts.h
 daq_dta.o: daq_dta_structs.h
-daqReader.o: ../../../../StRoot/RTS/include/rtsLog.h
+daqReader.o: ../../../../StRoot/RTS/include/iccp2k.h
 daqReader.o: ../../../../StRoot/RTS/include/daqFormats.h
 daqReader.o: ../../../../StRoot/RTS/include/SECTOR/sector.h
 daqReader.o: ../../../../StRoot/RTS/trg/include/trgStructures_32.h
 daqReader.o: ../../../../StRoot/RTS/include/L3/L3Formats.h
+daqReader.o: ../../../../StRoot/RTS/include/rtsLog.h
 daqReader.o: ../../../../StRoot/RTS/include/iccp.h
-daqReader.o: ../../../../StRoot/RTS/include/iccp2k.h
 daqReader.o: ../../../../StRoot/RTS/include/cmds.h
 daqReader.o: ../../../../StRoot/RTS/include/rtsCmds.h
 daqReader.o: ../../../../StRoot/RTS/include/tasks.h
