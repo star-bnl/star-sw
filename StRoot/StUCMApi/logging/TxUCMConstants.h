@@ -2,7 +2,7 @@
  * @file TxUCMDBConstants.h
  * @author Stephen Tramer
  *
- * @(#)cpp/api:$Id: TxUCMConstants.h,v 1.2 2009/04/30 17:09:27 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMConstants.h,v 1.3 2009/05/12 00:14:42 fine Exp $
  *
  * This file is a collection of constants (collection names and record names)
  * used by the UCM API.  Rather than create a static object to contain all of
@@ -44,6 +44,11 @@ namespace TxUCMConstants {
   /**
    * Special Message keys for messages from broker
    */
+  static const char* newTask      = "com.txcorp.ucm.newtask";
+  static const char* updateTask   = "com.txcorp.ucm.updatetask";
+  static const char* addJob       = "com.txcorp.ucm.addjob";
+  static const char* updateJob    = "com.txcorp.ucm.updatejob";
+
   static const char* siteLocation = "com.txcorp.ucm.job.siteLocation";
   static const char* stateID      = "com.txcorp.ucm.job.stateID";
   static const char* gridJobID    = "com.txcorp.ucm.job.gridJobID";
