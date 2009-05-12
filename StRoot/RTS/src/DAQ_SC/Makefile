@@ -62,5 +62,7 @@ scReader.o: ../DAQ_READER/daq_det.h
 scReader.o: scReader.h
 scReader.o: daq_sc.h
 daq_sc.o: ../DAQ_READER/daq_det.h
+sc.o: daq_sc.h
+sc.o: ../DAQ_READER/daq_det.h
 scReader.o: daq_sc.h
 scReader.o: ../DAQ_READER/daq_det.h
