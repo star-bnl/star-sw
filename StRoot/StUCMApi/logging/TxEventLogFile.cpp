@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.6 2009/05/12 16:10:14 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.7 2009/05/12 23:20:39 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -132,11 +132,19 @@ void TxLogging::TxEventLogFile::setJobSubmitID (const std::string& ID) {
 
 void TxLogging::TxEventLogFile::logTask (unsigned int size)
 {
-   std::string taskSize = "taskSize='";
-   taskSize += TxUCMUtils::itoa(size); taskSize +="'";
-   logEvent(TxUCMConstants::newTask,taskSize,
-		      TxEventLogFile::LEVEL_INFO,
-		      TxEventLogFile::START,"SUMS");
+   std::string taskSize = "taskSize='\\''";
+   taskSize += TxUCMUtils::itoa(size); taskSize +="'\\''";
+   logEvent(TxUCMConstants::newTask,taskSize
+		      ,TxEventLogFile::LEVEL_INFO
+		      ,TxEventLogFile::START,"SUMS");
+}
+
+
+void TxLogging::TxEventLogFile::logTask (const std::string& taskAttributes)
+{
+   logEvent(TxUCMConstants::newTask,taskAttributes
+            ,TxEventLogFile::LEVEL_INFO
+            ,TxEventLogFile::START,"SUMS");
 }
 
 void TxLogging::TxEventLogFile::logEnd (const std::string& key, 
