@@ -2,7 +2,7 @@
  * @file TxEventLogFile.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.h,v 1.4 2009/05/11 17:11:04 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.h,v 1.5 2009/05/12 23:20:39 fine Exp $
  *
  * TxEventLogFile provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -129,14 +129,29 @@ namespace TxLogging {
      */
      virtual void logJobSubmitState (State state);
      virtual void setJobSubmitState (State state);
-     /**
+
+   /**
      * Log the task size. This method will be called by the
      * Broker to log the new task and its size.
      *
-     * @param string url, Job submit location.
+     * @param int size, The new task size (the total number of the jobs)
      *
      */
     virtual void logTask (unsigned int size=1);
+
+   /**
+     * Log the task with the attributes. 
+     * This method will be called by the
+     * Broker to log the new task and its attributes.
+     * The attribuites MUST match the "Task" MySQL table
+     * column names. The attribute types must match 
+     * the mySql Task table column types
+     *
+     * @param string attributes. Task attributes
+     *
+     */
+
+    virtual void logTask (const std::string& taskAttributes);
 
     /**
      * Log the job submit ID. This method will be called by the
