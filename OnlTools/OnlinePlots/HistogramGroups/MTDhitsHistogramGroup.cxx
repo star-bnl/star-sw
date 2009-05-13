@@ -123,7 +123,7 @@ void MTDhitsHistogramGroup::draw(TCanvas* cc) {
   gStyle->SetTitleW(0.8); gStyle->SetTitleH(0.086);
   //gStyle->SetTitleSize(0.06);
  
-  gStyle->SetOptStat(01010);
+  gStyle->SetOptStat(110110);
   gStyle->SetStatX(0.99); gStyle->SetStatY(0.91);
   gStyle->SetStatW(0.18); gStyle->SetStatH(0.14);
 
@@ -263,7 +263,7 @@ bool MTDhitsHistogramGroup::fill(evpReader* evp, char* datap) {
       //cout<<"MTD===:: tray="<<trayid<<" halftray="<<halftrayid<<" globaltdcchan="<<globaltdcchan<<" modulechan="<<modulechan<<" time="<<time<<" edgeid="<<edgeid<<endl;
 
       // fill hitmap.
-      MTD_hitmap[edgeid-4]->Fill(modulechan);
+      if(trayid==124) MTD_hitmap[edgeid-4]->Fill(modulechan);
 
       numberforsort= time+globalmodulechan*1.e5+trayid*1.e8;
       if(edgeid==4)leadinghits.push_back(numberforsort);
