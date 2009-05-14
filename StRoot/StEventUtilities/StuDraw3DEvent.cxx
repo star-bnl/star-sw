@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.11 2009/05/14 18:00:48 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.12 2009/05/14 20:42:02 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -80,14 +80,51 @@ TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
 
 //___________________________________________________
 void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
-{}
+{
+   // Draw hits the "track" was built from
+   // using the "sty" style provided
+   const StDraw3DStyle &style =  Style(sty);
+   Hits(track, style.Col(),style.Sty(),style.Siz());
+}
 
 //___________________________________________________
 void  StuDraw3DEvent::Hits(const StTrack &track
                   ,  Color_t col
                   ,  Style_t sty
                   ,  Size_t siz )
-{}
+{
+    // Draw hits the "track" was built from
+    // with the "col", "sty", "size graphical attributes provided
+   if (track.flag() > 0 &&  track.detectorInfo()&& !track.bad() ) {
+      const Int_t lightness    = 50;
+      const Int_t saturation   = 100;
+      Int_t hue  = 0;
+
+      Style_t sty = Style(kUsedHit).Sty();
+      Size_t  siz = Style(kUsedHit).Siz();
+      double pt = track.geometry()->momentum().perp();
+      hue = Int_t(256.*(1.-pt/1.5)); //color code from StuPostscript
+      if (pt > 1.5 ) hue = 0;
+      Int_t r,g,b;
+      TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
+      // Normalize
+      float factor = 1./TMath::Sqrt(1.*r*r+1.*g*g+1.*b*b);
+      Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
+      
+      // look for the hits:
+      std::vector<float> hitPoints;
+      const StPtrVecHit& trackHits = track.detectorInfo()->hits(kTpcId);
+      for (unsigned int m=0; m<trackHits.size(); m++) {
+         StHit *hit = trackHits[m];
+         hitPoints.push_back( hit->position().x());
+         hitPoints.push_back( hit->position().y());
+         hitPoints.push_back( hit->position().z());
+      }
+      std::vector<float>::iterator xyz = hitPoints.begin();
+      Points(hitPoints.size()/3,&*xyz,trackColor,sty,siz);
+      SetModel(&(StTrack &)track);
+   }
+}
 
 //___________________________________________________
 TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vertex
