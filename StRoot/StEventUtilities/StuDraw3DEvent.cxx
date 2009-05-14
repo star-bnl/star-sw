@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.12 2009/05/14 20:42:02 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.13 2009/05/14 20:56:25 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -88,13 +88,10 @@ void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
 }
 
 //___________________________________________________
-void  StuDraw3DEvent::Hits(const StTrack &track
-                  ,  Color_t col
-                  ,  Style_t sty
-                  ,  Size_t siz )
+void  StuDraw3DEvent::Hits(const StTrack &track)
 {
     // Draw hits the "track" was built from
-    // with the "col", "sty", "size graphical attributes provided
+    // with the graphical attributes defined by "track"
    if (track.flag() > 0 &&  track.detectorInfo()&& !track.bad() ) {
       const Int_t lightness    = 50;
       const Int_t saturation   = 100;
@@ -110,22 +107,29 @@ void  StuDraw3DEvent::Hits(const StTrack &track
       // Normalize
       float factor = 1./TMath::Sqrt(1.*r*r+1.*g*g+1.*b*b);
       Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
-      
-      // look for the hits:
-      std::vector<float> hitPoints;
-      const StPtrVecHit& trackHits = track.detectorInfo()->hits(kTpcId);
-      for (unsigned int m=0; m<trackHits.size(); m++) {
-         StHit *hit = trackHits[m];
-         hitPoints.push_back( hit->position().x());
-         hitPoints.push_back( hit->position().y());
-         hitPoints.push_back( hit->position().z());
-      }
-      std::vector<float>::iterator xyz = hitPoints.begin();
-      Points(hitPoints.size()/3,&*xyz,trackColor,sty,siz);
-      SetModel(&(StTrack &)track);
+      Hits(track, trackColor,sty,siz);
    }
 }
 
+//___________________________________________________
+void  StuDraw3DEvent::Hits(const StTrack &track
+                  ,  Color_t col
+                  ,  Style_t sty
+                  ,  Size_t siz )
+{
+    // Draw hits the "track" was built from
+    // with the graphical attributes "col", "sty", "siz"
+   std::vector<float> hitPoints;
+   const StPtrVecHit& trackHits = track.detectorInfo()->hits(kTpcId);
+   for (unsigned int m=0; m<trackHits.size(); m++) {
+      StHit *hit = trackHits[m];
+      hitPoints.push_back( hit->position().x());
+      hitPoints.push_back( hit->position().y());
+      hitPoints.push_back( hit->position().z());
+   }
+   std::vector<float>::iterator xyz = hitPoints.begin();
+   Points(hitPoints.size()/3,&*xyz,col,sty,siz); 
+}
 //___________________________________________________
 TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vertex
                   ,  Color_t col,  Style_t sty, Size_t siz)
@@ -212,7 +216,6 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
       const Int_t saturation   = 100;
       Int_t hue  = 0;
 
-      StHit *hit;
       Style_t sty = Style(kUsedHit).Sty();
       Size_t  siz = Style(kUsedHit).Siz();
       Style_t styPnt = Style(kTrackBegin).Sty();
@@ -241,18 +244,8 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
                TrackInOut(*track, false, trackColor,  styPnt, sizPnt);
             }
             if ( trackHitsOnly != kTracksOnly) {
-               // look for the hits:
-               std::vector<float> hitPoints;
-               const StPtrVecHit& trackHits = track->detectorInfo()->hits(kTpcId);
-               for (m=0; m<trackHits.size(); m++) {
-                  hit = trackHits[m];
-                  hitPoints.push_back( hit->position().x());
-                  hitPoints.push_back( hit->position().y());
-                  hitPoints.push_back( hit->position().z());
-              }
-              std::vector<float>::iterator xyz = hitPoints.begin();
-              Points(hitPoints.size()/3,&*xyz,trackColor,sty,siz);
-              if (trackHitsOnly == kUsedHits) SetModel(track);
+               Hits(*track,trackColor,sty,siz);
+               if (trackHitsOnly == kUsedHits) SetModel(track);
            }
         }
      }
