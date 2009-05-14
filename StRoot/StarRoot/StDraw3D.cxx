@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.34 2008/06/11 14:49:22 fine Exp $
+// $Id: StDraw3D.cxx,v 1.35 2009/05/14 23:54:14 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -30,8 +30,8 @@ ClassImp(StDraw3D)
   //  decoratated with the STAR detector geometry
   //
   //  It provides the simple way to visualize the event 
-  //  primitives in 3D quickly against of the STAR detector 
-  //  geometry.
+  //  primitives in 3D against of the STAR detector 
+  //  geometry quickly.
   //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
   //
   ////////////////////////////////////////////////////////////////////////
@@ -405,14 +405,14 @@ TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
 //___________________________________________________
 void StDraw3D::Joint(StDraw3D *dsp)
 {
-   // The method to force tow different instancses
-   // of the StDraw3D class  paint on to one and the same
+   // The method to force two different instancses
+   // of the StDraw3D class  paint onto one and the same
    // TPad.
+
    // Force "dsp" to share the fPad of this object
    // As result of the "Joint method both objects 
-   //  this as "well" as "dsp"
-   // will sahe "this" object TPad.
-   // the original TPad of "dsp" is to be abandoned if exi
+   // "this" as well as "dsp" will share the PAd of "this" object.
+   // The original TPad of "dsp" is to be abandoned if exists
 
    if (dsp) dsp->SetMaster(this);
 }
