@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.13 2009/05/14 20:56:25 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.14 2009/05/14 21:50:40 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -82,7 +82,7 @@ TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
 void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
 {
    // Draw hits the "track" was built from
-   // using the "sty" style provided
+   // using the "sty" graphical style provided
    const StDraw3DStyle &style =  Style(sty);
    Hits(track, style.Col(),style.Sty(),style.Siz());
 }
