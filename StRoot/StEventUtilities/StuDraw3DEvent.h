@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.7 2008/05/16 17:36:52 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.8 2009/05/14 18:00:48 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
@@ -49,6 +49,11 @@ class StuDraw3DEvent : public StDraw3D
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
      virtual void    Hits(const StEvent* event, EStuDraw3DEvent trackHitsOnly=kUsedHits, StTrackType type=global);
+     virtual void    Hits(const StTrack &track,  EDraw3DStyle sty=kUsedHit);
+     virtual void    Hits(const StTrack &track
+                  ,  Color_t col
+                  ,  Style_t sty= Style_t(-1)
+                  ,  Size_t siz = Size_t (-1));
      virtual TObject *Hit(const StMeasuredPoint &hit, EDraw3DStyle sty=kUsedHit);
      virtual TObject *Vertex(const StMeasuredPoint &hit
                   ,  Color_t col
