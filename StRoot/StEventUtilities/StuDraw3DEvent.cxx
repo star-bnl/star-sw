@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.10 2009/04/29 23:04:17 perev Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.11 2009/05/14 18:00:48 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -77,6 +77,17 @@ TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
    const StDraw3DStyle &style =  Style(sty);
    return Hit(hit, style.Col(),style.Sty(),style.Siz() );
 }
+
+//___________________________________________________
+void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
+{}
+
+//___________________________________________________
+void  StuDraw3DEvent::Hits(const StTrack &track
+                  ,  Color_t col
+                  ,  Style_t sty
+                  ,  Size_t siz )
+{}
 
 //___________________________________________________
 TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vertex
