@@ -13,7 +13,7 @@ struct pp2pp_t {
 	u_char error ;		// error occured!
 	
 	u_char bunch_xing ;
-	u_char res1 ;	// needed to align on an int....
+	u_char not_sparse ;	
 	u_char res2 ;
 	u_char res3 ;
 

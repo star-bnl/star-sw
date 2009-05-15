@@ -396,6 +396,8 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 	int bunch_xing = -1 ;
 	u_int trigger = 0xFFFFFFFF ;
 
+	int not_sparse = 0 ;
+
 	while(cur_ix < w16) {
 		struct pp2pp_t *d = 0 ;	// to provoke a core dump
 		int requested = 0 ;
@@ -434,8 +436,9 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 			}
 		}
 
-		if(bunch_xing < 0) {
+		if(bunch_xing < 0) {	// first time...
 			bunch_xing = seq[0] & 0x7F ;
+			not_sparse = (seq[0] & 0x80)?1:0 ;
 		}
 		else {
 			int tmp = seq[0] & 0x7F ;
@@ -448,6 +451,22 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 			else {
 				LOG(DBG,"pp2pp: seq %d:%d: expect xing 0x%02X, read 0x%02X",seq_id,chain_id,bunch_xing,tmp) ;
 			}
+
+
+			tmp = (seq[0] & 0x80)?1:0 ;
+
+			if(tmp != not_sparse) {
+				ret |= 2 ;
+				LOG(ERR,"pp2pp: seq %d:%d: expect not_sparse 0x%02X, read 0x%02X",seq_id,chain_id,not_sparse,tmp) ;
+				return ret ;
+			}
+			else {
+				LOG(DBG,"pp2pp: seq %d:%d: expect not_sparse 0x%02X, read 0x%02X",seq_id,chain_id,not_sparse,tmp) ;
+			}
+
+
+
+
 		}
 
 
@@ -501,6 +520,7 @@ int daq_pp2pp::decode(int sec_id, char *raw, int bytes)
 				d->chain_id = chain_id ;
 				d->svx_id = svx_id  ;
 				d->bunch_xing = bunch_xing ;
+				d->not_sparse = not_sparse ;
 
 				d->error = ret ;
 
