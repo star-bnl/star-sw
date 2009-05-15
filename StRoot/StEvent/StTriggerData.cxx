@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.9 2009/05/05 20:53:16 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.10 2009/05/15 18:16:15 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.10  2009/05/15 18:16:15  ullrich
+ * Updates for pp2pp and ToF.
+ *
  * Revision 2.9  2009/05/05 20:53:16  ullrich
  * Updates for MTD.
  *
@@ -40,7 +43,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.9 2009/05/05 20:53:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.10 2009/05/15 18:16:15 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -202,9 +205,11 @@ unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prep
 unsigned char  StTriggerData::mtdDsmAtCh(int ch, int prepost) const {return 0;}
 bool           StTriggerData::mtdDsmHit(int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::tofAtAddress(int address, int prepost) const {return 0;}
+unsigned short StTriggerData::tofTrayMultiplicity(int tray, int prepost) const {return 0;}
 unsigned short StTriggerData::tofMultiplicity(int prepost) const {return 0;}
 unsigned short StTriggerData::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
+unsigned long  StTriggerData::pp2ppDSM(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm_FMS(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm01_FMS(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm02_FMS(int prepost) const {return 0;}

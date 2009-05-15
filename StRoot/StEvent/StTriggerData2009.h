@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.8 2009/05/05 20:53:16 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.9 2009/05/15 18:16:15 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.9  2009/05/15 18:16:15  ullrich
+ * Updates for pp2pp and ToF.
+ *
  * Revision 2.8  2009/05/05 20:53:16  ullrich
  * Updates for MTD.
  *
@@ -176,11 +179,13 @@ public:
 
     //TOF
     unsigned short tofAtAddress(int address, int prepost=0) const;
+    unsigned short tofTrayMultiplicity(int tray, int prepost=0) const;
     unsigned short tofMultiplicity(int prepost=0) const;
 
     //PP2PP
     unsigned short pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
     unsigned short pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
+    unsigned long  pp2ppDSM(int prepost=0) const;
 
     // Experts only
     char*                getTriggerStructure();
