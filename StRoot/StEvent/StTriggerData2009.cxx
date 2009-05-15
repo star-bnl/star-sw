@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.14 2009/05/05 20:53:16 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.15 2009/05/15 18:16:15 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.15  2009/05/15 18:16:15  ullrich
+ * Updates for pp2pp and ToF.
+ *
  * Revision 2.14  2009/05/05 20:53:16  ullrich
  * Updates for MTD.
  *
@@ -636,6 +639,23 @@ unsigned short StTriggerData2009::pp2ppTAC(StBeamDirection eastwest, int vh, int
     return 0;  
 }
 
+unsigned long StTriggerData2009::pp2ppDSM(int prepost) const {
+  unsigned long res;
+  int buffer = prepostAddress(prepost);
+  res = 0;
+  if(buffer >= 0){
+    if(mMIX[buffer] != NULL) {
+      res  = mMIX[buffer]->MTD_P2PLayer1[2];           /* Data from MTD and PP2PP */
+      res += mMIX[buffer]->MTD_P2PLayer1[3] << 8;
+      res += mMIX[buffer]->MTD_P2PLayer1[0] << 16;
+      res += mMIX[buffer]->MTD_P2PLayer1[1] << 24;
+    } else {
+      gMessMgr->Warning() << "Bank mMIX prepost = " << prepost << " not found" << endm ;
+    }
+  }
+  return res;
+}
+
 unsigned short StTriggerData2009::bemcLayer1DSM(int channel, int prepost) const {
     const int n_bemc_layer1=48;
     if (channel<0 || channel >=n_bemc_layer1) {
@@ -972,8 +992,11 @@ unsigned short StTriggerData2009::mtdAdc(StBeamDirection eastwest, int pmt, int 
     //pmt in not used for 2009, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt==0){
-        if(eastwest==east) return mxq[buffer][0][0];
-        if(eastwest==west) return mxq[buffer][0][8];
+      if(eastwest==east) {
+	if(mRun<=10133008) return mxq[buffer][0][0];
+	else               return mxq[buffer][0][24];
+      }
+      if(eastwest==west) return mxq[buffer][0][8];
     }
     return 0;
 }
@@ -983,7 +1006,10 @@ unsigned short StTriggerData2009::mtdTdc(StBeamDirection eastwest, int pmt, int 
     //pmt in not used for 2009, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt==0){
-        if(eastwest==east) return mxq[buffer][0][4];
+        if(eastwest==east) {
+	  if(mRun<=10133008) return mxq[buffer][0][4];
+	  else               return mxq[buffer][0][28];
+	}
         if(eastwest==west) return mxq[buffer][0][12];
     }
     return 0;
@@ -1004,7 +1030,7 @@ bool StTriggerData2009::mtdDsmHit(int pmt, int prepost) const
     //pmt in not used for 2009, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
-        if(mMIX[buffer]){
+        if(mMIX[buffer] && mRun<10133008){
             if( (mMIX[buffer]->MTD_P2PLayer1[5] & 0x1) && (mMIX[buffer]->MTD_P2PLayer1[5] & 0x10) ) return true;
         }
     }
@@ -1016,6 +1042,32 @@ unsigned short StTriggerData2009::tofAtAddress(int address, int prepost) const
     int buffer = prepostAddress(prepost);
     if(buffer>=0 && address>=0 && address<48) {
         if(mMIX[buffer]) return mMIX[buffer]->TOF[address];
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2009::tofTrayMultiplicity(int tray, int prepost) const
+{
+    int dsmmap[8] = {3,2,1,0,7,6,5,4};
+    int traydsm[120] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5,
+		     5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3,
+		     3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+		     1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
+		     3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5,
+		     5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1};
+    int traych[120]  = { 2, 1, 0, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 9, 8, 7, 6, 5, 4, 3,
+		     2, 1, 0, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 9, 8, 7, 6, 5, 4, 3,
+		     2, 1, 0, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 9, 8, 7, 6, 5, 4, 3,
+		     18,19,10,11,12,13,14,15,16,17,18,19,10,11,12,13,14,15,16,17,
+		     18,19,10,11,12,13,14,15,16,17,18,19,10,11,12,13,14,15,16,17,
+		     18,19,10,11,12,13,14,15,16,17,18,19,10,11,12,13,14,15,16,17};
+    int buffer = prepostAddress(prepost);
+    if (buffer>=0 && tray>=1 && tray<=120) {
+        if (mMIX[buffer]) {
+	  int address = traydsm[tray-1]*8 + dsmmap[traych[tray-1]/3];
+	  int ch = traych[tray-1]%3;
+	  return (mMIX[buffer]->TOF[address] >> (5*ch)) & 0x1f;
+        }    
     }
     return 0;
 }

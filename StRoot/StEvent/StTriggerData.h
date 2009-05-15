@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.28 2009/05/05 20:53:16 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.29 2009/05/15 18:16:15 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.29  2009/05/15 18:16:15  ullrich
+ * Updates for pp2pp and ToF.
+ *
  * Revision 2.28  2009/05/05 20:53:16  ullrich
  * Updates for MTD.
  *
@@ -247,11 +250,13 @@ public:
 
     //TOF
     virtual unsigned short tofAtAddress(int address, int prepost=0) const;
+    virtual unsigned short tofTrayMultiplicity(int tray, int prepost=0) const;
     virtual unsigned short tofMultiplicity(int prepost=0) const;
 
     //PP2PP
     virtual unsigned short pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
     virtual unsigned short pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost=0) const;
+    virtual unsigned long  pp2ppDSM(int prepost=0) const;
 
     // auxiliary information
     float zdcVertexZ() const;
