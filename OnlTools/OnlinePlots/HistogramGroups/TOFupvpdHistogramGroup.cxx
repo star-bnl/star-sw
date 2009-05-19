@@ -133,8 +133,8 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
   line.SetLineColor(4);
   line.DrawLine(18.5, hmin, 18.5, 1.05*hmax);
   line.DrawLine(37.5, hmin, 37.5, 1.05*hmax);
-  label.DrawLatex(  7.5, 0.98*hmax, "east side");
-  label.DrawLatex( 26.5, 0.98*hmax, "west side");
+  label.DrawLatex(  7.5, 0.98*hmax, "west side");
+  label.DrawLatex( 26.5, 0.98*hmax, "east side");
   label.DrawLatex( 45.5, 0.98*hmax, "PP2PP");
   labely.DrawLatex(-5.5, 0.6*hmax, "Counts");
   
@@ -147,8 +147,8 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
   line.SetLineColor(4);
   line.DrawLine(18.5, hmin, 18.5, 1.05*hmax);
   line.DrawLine(37.5, hmin, 37.5, 1.05*hmax);
-  label.DrawLatex(  7.5, 0.98*hmax, "east side");
-  label.DrawLatex( 26.5, 0.98*hmax, "west side");
+  label.DrawLatex(  7.5, 0.98*hmax, "west side");
+  label.DrawLatex( 26.5, 0.98*hmax, "east side");
   label.DrawLatex( 45.5, 0.98*hmax, "PP2PP");
   labely.DrawLatex(-5.5, 0.6*hmax, "Counts");
 
@@ -157,8 +157,8 @@ void TOFupvpdHistogramGroup::draw(TCanvas* cc) {
   line.SetLineColor(44);
   line.DrawLine(18.5, hmin, 18.5, 50);
   line.DrawLine(37.5, hmin, 37.5, 50);
-  label.DrawLatex(  7.5, 47, "east side");
-  label.DrawLatex( 26.5, 47, "west side");
+  label.DrawLatex(  7.5, 47, "west side");
+  label.DrawLatex( 26.5, 47, "east side");
   label.DrawLatex( 45.5, 47, "PP2PP");
   labely.DrawLatex(-5.4, 30, "ToT (ns)");
   cc->cd(4);
@@ -269,8 +269,8 @@ bool TOFupvpdHistogramGroup::fill(evpReader* evp, char* datap) {
     if(ToT<0) ToT = ToT + 51200;
     if(ToT>0)upvpd_ToT->Fill(ich,ToT);
   }
-  for(int ieast=0;ieast<19;ieast++){
-    int iwest=ieast+19;
+  for(int iwest=0;iwest<19;iwest++){
+    int ieast=iwest+19;
     if(leadingtime[ieast]*leadingtime[iwest]<1) continue;
     upvpd_eastT_vs_westT->Fill(leadingtime[ieast],leadingtime[iwest]);
   }
@@ -288,7 +288,7 @@ int TOFupvpdHistogramGroup::tdcchan2upvpdPMTchan(int globaltdcchan, int edgeid,i
 //                      1   2   3  4  5  6  7  8  9  10  11 12  13  14  15 16 17 18 19
   int upvpdLEchan[54]={142,122,118,98,46,26,22,2,112,101,24,136,123,120,99,40,27,16,3,  //west
                        142,122,118,98,46,26,22,2,112,101,24,136,123,120,99,40,27,16,3,  //east
-		       48,64,50,70,0,29,5,96,   48,64,50,70,0,29,5,96};                //pp2pp 
+		       48,64,50,70,0,29,5,96,   48,64,50,70,0,29,5,96};                 //pp2pp 
   int upvpdTEchan[54]={129,131,105,107,33,35,9,11,109,110,39,133,132,135,108,37,36,13,12,  //west
                        129,131,105,107,33,35,9,11,109,110,39,133,132,135,108,37,36,13,12,  //east
 		       63,61,59,57,15,38,14,111,    63,61,59,57,15,38,14,111};             //pp2pp 

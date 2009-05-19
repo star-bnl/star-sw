@@ -34,6 +34,7 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup() {
   // For ROOT I/O
   TOF_Error1=0;
   TOF_Error2=0;
+  TOF_Error3=0;
   TOF_EventCount=0;
   //TOF_Tray_hits1=0;
   //TOF_Tray_hits2=0;
@@ -44,6 +45,7 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* su
  
   TOF_Error1=new TH1F("TOF_Error1","TOF electronics error ",250,0.5,125.5);
   TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",14,0,7.);
+  TOF_Error3=new TH1F("TOF_Error3","TOF bunchid shift error",14,0,7.);
 
   TOF_EventCount=new TH1F("TOF_EventCount","TOF_EventCount",2,0,2);
 
@@ -51,7 +53,7 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* su
   //TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","Hits in Trays",240,-0.5,119.5);
 
   TOF_Error1->SetXTitle("Tray #");
-  TOF_Error2->SetXTitle("THUB+Tray121 122 124");
+  TOF_Error2->SetXTitle("THUB upvpd MTD");
  
 }
 
@@ -60,6 +62,7 @@ TOFcheckHistogramGroup::~TOFcheckHistogramGroup() {
 
   delete TOF_Error1;
   delete TOF_Error2;
+  delete TOF_Error3;
   delete TOF_EventCount;
   //delete TOF_Tray_hits1;
   //delete TOF_Tray_hits2;
@@ -70,6 +73,7 @@ void TOFcheckHistogramGroup::reset() {
 
   TOF_Error1->Reset();
   TOF_Error2->Reset();
+  TOF_Error3->Reset();
   TOF_EventCount->Reset();
   //TOF_Tray_hits1->Reset();
   //TOF_Tray_hits2->Reset();
@@ -99,16 +103,15 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   gStyle->SetOptStat(0);
   gStyle->SetStatX(0.95); gStyle->SetStatY(0.92);
   gStyle->SetStatW(0.42); gStyle->SetStatH(0.20);
-
-  gStyle->SetPadGridX(0);
-  gStyle->SetPadGridX(1);
   //gStyle->SetStatFontSize(0.14);
-  //gStyle->SetOptStat(1);
+
   char tmpchr[200];
   cc->cd(); cc->SetFillColor(0);
   cc->Clear();
   cc->Divide(1, 2);
   cc->cd(1);
+  gPad->SetGridx(1);
+  gPad->SetGridy(0);
 
   int mNevents=int(TOF_EventCount->GetEntries());
 
@@ -129,6 +132,8 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   }
 
   cc->cd(2);
+  gPad->SetGridx(1);
+  gPad->SetGridy(0);
   TOF_Error2->GetYaxis()->SetLabelSize(0.07);
   TOF_Error2->GetXaxis()->SetLabelSize(0.055);
   TOF_Error2->SetFillColor(45);
@@ -138,7 +143,10 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   if(entry>0) {
      hmax=TOF_Error2->GetMaximum();
      label.SetTextColor(2);
-     label.DrawLatex( 1., 0.8*hmax, "Invalid Bunchid Shift Found!!");
+     label.DrawLatex( 1., 0.88*hmax, "Invalid Bunchid Shift Found!!");
+     label.SetTextColor(4);
+     if(TOF_Error3->GetEntries()>0)label.DrawLatex( 1., 0.78*hmax, "(Possible tray lost.Check hitmap!)");
+
   } else {
     hmax=0.9 * gPad->GetUymax();
     label.SetTextColor(3);
@@ -146,23 +154,23 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
     label.DrawLatex( 1., hmax, tmpchr);
   }
   TLatex labela;
-  labela.SetTextSize(0.032);
+  labela.SetTextSize(0.035);
   labela.SetTextAlign(23);  // center, top
   labela.SetTextAngle(90);
-  labela.DrawLatex(0.25,0.1*hmax,"THUB1-0");
-  labela.DrawLatex(0.75,0.2*hmax,"THUB1-1");
-  labela.DrawLatex(1.25,0.1*hmax,"THUB2-0");
-  labela.DrawLatex(1.75,0.2*hmax,"THUB2-1");
-  labela.DrawLatex(2.25,0.1*hmax,"THUB3-0");
-  labela.DrawLatex(2.75,0.2*hmax,"THUB3-1");
-  labela.DrawLatex(3.25,0.1*hmax,"THUB4-0");
-  labela.DrawLatex(3.75,0.2*hmax,"THUB4-1");
-  labela.DrawLatex(4.25,0.1*hmax,"121-0");
-  labela.DrawLatex(4.75,0.2*hmax,"121-1");
-  labela.DrawLatex(5.25,0.1*hmax,"122-0");
-  labela.DrawLatex(5.75,0.2*hmax,"122-1");
-  labela.DrawLatex(6.25,0.1*hmax,"124-0");
-  labela.DrawLatex(6.75,0.2*hmax,"124-1");
+  labela.DrawLatex(0.25,0.1*hmax,"THUB-SW0");
+  labela.DrawLatex(0.75,0.2*hmax,"THUB-SW1");
+  labela.DrawLatex(1.25,0.1*hmax,"THUB-NW0");
+  labela.DrawLatex(1.75,0.2*hmax,"THUB-NW1");
+  labela.DrawLatex(2.25,0.1*hmax,"THUB-SE0");
+  labela.DrawLatex(2.75,0.2*hmax,"THUB-SE1");
+  labela.DrawLatex(3.25,0.1*hmax,"THUB-NE0");
+  labela.DrawLatex(3.75,0.2*hmax,"THUB-NE1");
+  labela.DrawLatex(4.25,0.1*hmax,"upvpd-west0");
+  labela.DrawLatex(4.75,0.2*hmax,"upvpd-west1");
+  labela.DrawLatex(5.25,0.1*hmax,"upvpd-east0");
+  labela.DrawLatex(5.75,0.2*hmax,"upvpd-east1");
+  labela.DrawLatex(6.25,0.1*hmax,"MTD-0");
+  labela.DrawLatex(6.75,0.2*hmax,"MTD-1");
 
   cc->Update();
 
@@ -248,6 +256,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       //if(bunchid == -9999) continue;
       int ret=ValidBunchid(traynum,ihalf,bunchid,bunchidref1);
       if(ret>=0) TOF_Error2->Fill(ret+0.5*ihalf);
+      if(ret>=0 && bunchid==-9999) TOF_Error3->Fill(ret+0.5*ihalf);
     }
   }
   return true;
@@ -283,10 +292,13 @@ int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,i
 {
   if(trayid<1 || trayid>124) return -1;
   if(trayid == 123) return -1;
-
+  // THUB SW
   int trayinTHUB1[30]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,51,52,53,54,55,56,57,58,59,60};
+  // THUB NW
   int trayinTHUB2[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
+  // THUB SE
   int trayinTHUB3[30]={61,62,63,64,65,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120};
+  // THUB NE 
   int trayinTHUB4[30]={66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95};
   int trayvalidshift[2][4]={{0,4,-7,-5},{0,5,-6,-4}};
   //=
