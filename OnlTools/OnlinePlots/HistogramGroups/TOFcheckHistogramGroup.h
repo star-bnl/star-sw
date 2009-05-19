@@ -19,6 +19,7 @@ private:
 
   TH1* TOF_Error1;
   TH1* TOF_Error2;
+  TH1* TOF_Error3;
   TH1* TOF_EventCount;
   //TH1F* TOF_Tray_hits1;
   //TH1F* TOF_Tray_hits2;
