@@ -1,5 +1,6 @@
 #include <TPad.h>
 #include <TH2.h>
+#include <TH1.h>
 #include <TF1.h>
 #include <TEnv.h>
 #include <TPaveStats.h>
@@ -65,7 +66,7 @@ void eePlot(int page, int panel, FileType fd, TPad *cc, const Char_t *eemcTwMask
     switch(panel) {
     case 1: eeJpQa(fd, cc, twMask); break;
     case 2: eeDaqCorr(fd, cc,1); break;
-      //  case 3: eeFreq(fd, cc, twMask); break;
+      // case 3: eeFreq(fd, cc, twMask); break;
       // case 4: eeDaqTwCr(fd, cc, twMask); break;
     case 3: eeDaqTwHot(fd, cc, twMask); break;
     case 4: eeDaqTwHit(fd, cc); break;
@@ -76,10 +77,10 @@ void eePlot(int page, int panel, FileType fd, TPad *cc, const Char_t *eemcTwMask
     case 1: eeDaqCorr(fd, cc,2); break;
     case 2: eeDaqMapmtStat(fd, cc); break;
       // case 3: eeDaqMapmtCr(fd, cc,64); break;
-      ///case 4: eeDaqMapmtCr(fd, cc,72); break;
-      //case 5: eeDaqMapmtCr(fd, cc,80); break;
-      //case 6: eeDaqMapmtCr(fd, cc,88); break;
-      //case 7: eeDaqMapmtCr(fd, cc,96); break;
+      // case 4: eeDaqMapmtCr(fd, cc,72); break;
+      // case 5: eeDaqMapmtCr(fd, cc,80); break;
+      // case 6: eeDaqMapmtCr(fd, cc,88); break;
+      // case 7: eeDaqMapmtCr(fd, cc,96); break;
       // case 8: eeDaqMapmtCr(fd, cc,104); break;
     case 3:  eeDaqSmdA(fd, cc,"SmdA",'U'); break;
     case 4: eeDaqSmdA(fd, cc,"SmdA",'V'); break;
@@ -412,22 +413,24 @@ void eeDaqSmdA(FileType fd, TPad *c, const Char_t *core, Char_t uv){
 void eeDaqMapmtStat(FileType fd, TPad *c) {
   c->Divide(1,2);
   TH1 *h = GetHisto(fd, "MAPMHits");
+  TH1 *hcopy = GetHisto(fd, "MAPMHits");
   if (h) {
     c->cd(1);
-    h->Draw("colz");
-    gPad->SetGrid();
     h->SetAxisRange(63, 87);
     h->SetXTitle("Crate ID     12S1=64,  1S1=68,  2S1=72,  3S1=76,  4S1=80,  5S1=84"); 
-    gPad->SetLogz(0);    
-    if (h->Integral() > 0) gPad->SetLogz();
-
-    c->cd(2);
     h->Draw("colz");
     gPad->SetGrid();
-    h->SetAxisRange(88, 120);
-    h->SetXTitle("Crate ID     6S1=88,  7S1=92,  8S1=96,  9S1=100, 10S1=104,  11S1=108");
     gPad->SetLogz(0);    
     if (h->Integral()>0) gPad->SetLogz();
+  }
+  if (hcopy) {
+    c->cd(2);
+    hcopy->SetAxisRange(88, 120);
+    hcopy->SetXTitle("Crate ID     6S1=88,  7S1=92,  8S1=96,  9S1=100, 10S1=104,  11S1=108");
+    hcopy->Draw("colz");
+    gPad->SetGrid();
+    gPad->SetLogz(0);    
+    if (hcopy->Integral()>0) gPad->SetLogz();
   }
 }
 
