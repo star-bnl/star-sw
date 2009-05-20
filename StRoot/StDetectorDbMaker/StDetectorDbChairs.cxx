@@ -46,6 +46,8 @@ MakeChairInstance(tpcHighVoltages,Calibrations/tpc/tpcHighVoltages);
 MakeChairInstance(tpcGain,Calibrations/tpc/tpcGain);
 #include "St_tpcT0C.h"
 MakeChairInstance(tpcT0,Calibrations/tpc/tpcT0);
+#include "St_tpcPadrowT0C.h"
+MakeChairInstance(tpcPadrowT0,Calibrations/tpc/tpcPadrowT0);
 #include "St_tpcSectorT0offsetC.h"
 MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
 #include "St_TpcAltroParametersC.h"

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.13 2008/05/27 14:26:40 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.14 2009/05/20 02:49:51 genevb Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.14  2009/05/20 02:49:51  genevb
+ * Introduce tpcPadrowT0 time offsets
+ *
  * Revision 1.13  2008/05/27 14:26:40  fisyak
  * Use TChairs, absorb shift tau shift, introduce sector to sector time offset
  *
@@ -174,8 +177,8 @@ public:
   void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&, Int_t sector = 0, Int_t row = 0, Bool_t useT0=kTRUE, Bool_t useTau=kTRUE);
   StThreeVector<Double_t> sector12Coordinate(StThreeVector<Double_t>&, Int_t*);
   StThreeVector<Double_t> padCentroid(StTpcLocalSectorCoordinate&, Int_t*, Int_t*)  ;
-  Float_t   tBFromZ(Double_t z, Int_t sector=24) const;
-  Double_t  zFromTB(Float_t tb, Int_t sector=24) const;
+  Float_t   tBFromZ(Double_t z, Int_t sector=24, Int_t row=45) const;
+  Double_t  zFromTB(Float_t tb, Int_t sector=24, Int_t row=45) const;
   // Transformation Routines!!
   // Raw Data From tpc local Coordinates
   Int_t      sectorFromCoordinate(const StThreeVector<Double_t>&)    const;
