@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.33 2009/03/16 14:23:59 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.34 2009/05/20 02:49:51 genevb Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.34  2009/05/20 02:49:51  genevb
+ * Introduce tpcPadrowT0 time offsets
+ *
  * Revision 1.33  2009/03/16 14:23:59  fisyak
  * Use StDetectorDb chairs for TpcGlobalPosition and TpcSectorPosition
  *
@@ -205,6 +208,7 @@
 #include "StMatrix.hh"
 #include <unistd.h>
 #include "StMessMgr.h"
+#include "StDetectorDbMaker/St_tpcPadrowT0C.h"
 #include "StDetectorDbMaker/St_tpcSectorT0offsetC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "TMath.h"
@@ -346,7 +350,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
     t0offset -= 3.0 * St_tss_tssparC::instance()->tau();   // correct for convolution lagtime
   Double_t t0zoffset = t0offset*gTpcDbPtr->DriftVelocity(a.sector())*1e-6;
   //t0 offset -- DH  27-Mar-00
-  Double_t z = zFromTB(a.timeBucket(),a.sector())-zoffset+t0zoffset;
+  Double_t z = zFromTB(a.timeBucket(),a.sector(),a.row())-zoffset+t0zoffset;
   tmp.setZ(z);
   b = StTpcLocalSectorCoordinate(tmp,a.sector(),a.row());
 }
@@ -629,7 +633,7 @@ Double_t StTpcCoordinateTransform::xFromPad(Int_t row, Float_t pad) const
     return x;
 }
 
-Double_t StTpcCoordinateTransform::zFromTB(Float_t tb, Int_t sector) const
+Double_t StTpcCoordinateTransform::zFromTB(Float_t tb, Int_t sector, Int_t row) const
 {
     Double_t timeBin = tb; // to avoid using const_cast<int> & static_cast<double>
     //    Double_t z = 
@@ -639,12 +643,13 @@ Double_t StTpcCoordinateTransform::zFromTB(Float_t tb, Int_t sector) const
          gTpcDbPtr->DriftVelocity(sector)*1e-6*                //units are cm/s->cm/us
 	 (gTpcDbPtr->triggerTimeOffset()*1e6                   // units are s
 	  + gTpcDbPtr->Electronics()->tZero()                  // units are us 
+	  + St_tpcPadrowT0C::instance()->T0(sector,row)        // units are us 
 	  + (timeBin + St_tpcSectorT0offsetC::instance()->t0offset(sector))*(mTimeBinWidth));  // 
    
     return(z);
 }
 
-Float_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector) const
+Float_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector, Int_t row) const
 {
     //PR(gTpcDbPtr->PadPlaneGeometry->driftDistance()); // Not available yet.
     //PR(z);
@@ -658,7 +663,8 @@ Float_t StTpcCoordinateTransform::tBFromZ(Double_t z, Int_t sector) const
 		     + ( z / (gTpcDbPtr->DriftVelocity(sector)*1e-6))
 		     ); // tZero + (z/v_drift); the z already has the proper offset
     
-    return ( (Float_t)(time/mTimeBinWidth) - St_tpcSectorT0offsetC::instance()->t0offset(sector) );
+    return ( (Float_t) ((time-St_tpcPadrowT0C::instance()->T0(sector,row))/mTimeBinWidth)
+              - St_tpcSectorT0offsetC::instance()->t0offset(sector) );
 }
 
 //
