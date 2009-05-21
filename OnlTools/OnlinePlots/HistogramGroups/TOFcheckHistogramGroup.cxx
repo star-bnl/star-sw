@@ -278,10 +278,10 @@ bool TOFcheckHistogramGroup::ValidDataword(int packetid)
 }
 bool TOFcheckHistogramGroup::Tray_NotInRun(int trayid)
 {
-  // the following 34 trays is not in run for run9!!
-  int notinrunlist[34]={13,14,42,43,73,74,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,102,103,38,39,52,75,47,68,112,118};
+  // the following 35 trays is not in run for run9!!
+  int notinrunlist[35]={13,14,42,43,73,74,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,102,103,38,39,52,75,47,68,112,118,64};
 
-  for(int i=0;i<34;i++) {
+  for(int i=0;i<35;i++) {
     if(trayid == notinrunlist[i]) {return true;}
   }
 
