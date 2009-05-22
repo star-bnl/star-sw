@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.10 2008/05/21 17:48:39 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.11 2009/05/22 23:50:50 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -52,7 +52,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.10 2008/05/21 17:48:39 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.11 2009/05/22 23:50:50 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -93,8 +93,11 @@ class StVertexSeedMaker : public StMaker {
   int    time;
   int    run;
   float  zdc; // ZDC sum rate
-  int    itpc; // inner tpc track mask
-  int    otpc; // inner tpc track mask
+  // The following integer maps can only be stored to 24 bits
+  // because of the conversion to float
+  int    itpc; // inner tpc track map
+  int    otpc; // inner tpc track map
+  int    detmap; // map any other detectors
   float  rank;
   int    minEntries;
   float    maxX0Err;
@@ -127,8 +130,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.10 2008/05/21 17:48:39 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.11 2009/05/22 23:50:50 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.11  2009/05/22 23:50:50  genevb
+// Code mods for BEMC matches, BeamWidth
+//
 // Revision 1.10  2008/05/21 17:48:39  genevb
 // Use vertex errors for weighting
 //

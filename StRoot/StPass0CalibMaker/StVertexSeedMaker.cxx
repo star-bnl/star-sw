@@ -39,6 +39,7 @@
 //_____________________________________________________________________________
 static TArrayF xVert, yVert, zVert, multA, exVert, eyVert;
 int nverts,nsize;
+double beamWidth;
 Double_t funcX(float z,Double_t *par) {
   Double_t x = par[0] + par[1]*z;
   return x;
@@ -69,8 +70,13 @@ void fnch(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
 
     } else {
 
-      chisq += TMath::Power((xVert[i]-funcX(zVert[i],par))/exVert[i],2) +
-               TMath::Power((yVert[i]-funcY(zVert[i],par))/eyVert[i],2);
+      //chisq += TMath::Power((xVert[i]-funcX(zVert[i],par))/exVert[i],2) +
+      //         TMath::Power((yVert[i]-funcY(zVert[i],par))/eyVert[i],2);
+
+      double errx2 = exVert[i]*exVert[i] + beamWidth*beamWidth;
+      double erry2 = eyVert[i]*eyVert[i] + beamWidth*beamWidth;
+      chisq += TMath::Power(xVert[i]-funcX(zVert[i],par),2)/errx2 +
+               TMath::Power(yVert[i]-funcY(zVert[i],par),2)/erry2;
 
     }
   }
@@ -134,7 +140,7 @@ void StVertexSeedMaker::Reset() {
   xerr->Reset();
   yerr->Reset();
   if (resNtuple) delete resNtuple;
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:ex:ey");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey");
   date = 0;
   time = 0;
   fill = -1;
@@ -143,6 +149,7 @@ void StVertexSeedMaker::Reset() {
   rank = 0;
   itpc = 0;
   otpc = 0;
+  detmap = 0;
   a[0]   = -888.0;
   //a[0]   = 0.0;
   a[1] = 0.0;
@@ -214,7 +221,7 @@ Int_t StVertexSeedMaker::Make(){
     eventNumber = (float)GetEventNumber();
     resNtuple->Fill(eventNumber,xvertex,yvertex,zvertex,mult,trig,
                     (float) run,(float) fill,zdc,rank,
-                    (float) itpc,(float) otpc,exvertex,eyvertex);
+                    (float) itpc,(float) otpc,(float) detmap,exvertex,eyvertex);
     addVert(xvertex,yvertex,zvertex,mult,exvertex,eyvertex);
   }
 
@@ -334,7 +341,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.39 2008/05/21 17:48:39 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.40 2009/05/22 23:50:50 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -540,6 +547,10 @@ void StVertexSeedMaker::FitData() {
 // Now ready for minimization step
    double arglist[10];
    arglist[0] = 500;
+
+   beamWidth = 0;
+   do {
+
    int status = minuit->ExecuteCommand("MIGRAD", arglist ,1);
    if (status) {
      LOG_ERROR << "StVertexMaker: error on migrad call, err = "
@@ -551,8 +562,11 @@ void StVertexSeedMaker::FitData() {
    int nvpar,nparx;
    minuit->GetStats(amin,edm,errdef,nvpar,nparx);
    chi = amin/((double) (nverts-4));
-   LOG_INFO << "chisq = " << amin << ", chisq/dof = " << chi <<
+   LOG_INFO << "beamWidth = " << beamWidth << ", chisq = " << amin << ", chisq/dof = " << chi <<
      "\n  *****************************************************" << endm;
+
+   beamWidth += 0.005; // 50 micron steps
+   } while (chi>1.1 && beamWidth<=0.15);
    
    char pname[10];
    for (int i=0; i<4; i++)
@@ -651,8 +665,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.39 2008/05/21 17:48:39 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.40 2009/05/22 23:50:50 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.40  2009/05/22 23:50:50  genevb
+// Code mods for BEMC matches, BeamWidth
+//
 // Revision 1.39  2008/05/21 17:48:39  genevb
 // Use vertex errors for weighting
 //
