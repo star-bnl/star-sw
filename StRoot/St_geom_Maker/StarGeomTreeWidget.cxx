@@ -206,6 +206,7 @@ void StarGeomTreeWidget::Init()
    this->setItemDelegate(new GeomBrowseItemDeledate(this));
    ConnectTreeSlots();
    setMouseTracking(true);
+   setUniformRowHeights(true);
 }
 
 //_____________________________________________________________________________
@@ -494,6 +495,7 @@ void StarGeomTreeWidget::itemExpandedCB ( QTreeWidgetItem * item )
          CreateTreeWidgetItem(child,item, (nVolume >1) ? QString("> #%1").arg(nVolume) : QString());  
       }
       this->setSortingEnabled(true);
+      this->resizeColumnToContents(0);
 
    }
 }
@@ -574,11 +576,11 @@ void StarGeomTreeWidget::contextMenuRequestedCB(const QPoint &pos)
       response = contextMenu->exec(QCursor::pos());
       if (response) {
          TQtLockUpdateWidget listLock(this);
-         bool saved = false;
+         // bool saved = false;
          Color_t rootColor = -1;
          Style_t rootStyle = -1;
-         TVolume *topVolumeToSave = 0;
-         TFile  *file2Save = 0;
+         // TVolume *topVolumeToSave = 0;
+         // TFile  *file2Save = 0;
          for (int i = 0; i < nSelected; ++i) {
             QTreeWidgetItem* itemRoot =lst.at(i);
             QVariant model = itemRoot->data(0, Qt::UserRole);
