@@ -23,6 +23,6 @@ static void PadRefresh(TPad *pad,int flag=0);
 static void HistRelease(TDirectory *dir);
 static int  LineToD(const char *line, const char **lend,
 		    int nItems, double *Items, TString *Names=0);
-static bool IsTreeWritable(const TTree *tree, bool fatal=true);
+static bool IsTreeWritable(const TTree *tree, bool fatal=false);
 };
 #endif //ROOT_THack
