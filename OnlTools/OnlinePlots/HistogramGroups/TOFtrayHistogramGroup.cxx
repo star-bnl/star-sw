@@ -8,6 +8,7 @@
 #include "TLine.h"
 #include "TLatex.h"
 #include "TStyle.h"
+#include <TEnv.h>
 
 #ifndef NEW_DAQ_READER
 #  include <evpReader.hh>
@@ -25,6 +26,7 @@
 #include "HistoHandler.h"
 
 using namespace std;
+char*  TOFtrayHistogramGroup::mTrayList = EvpUtil::cat(gEnv->GetValue("Online.tofConfigPath","."),"TOF_TrayNotInRun.txt");
 
 ClassImp(TOFtrayHistogramGroup) ;
 
@@ -52,6 +54,8 @@ TOFtrayHistogramGroup::TOFtrayHistogramGroup(unsigned int ipart,const char* grou
     sprintf(tmpchr1,"Tray %03d trailing hitmap",actualTrayNum[itray]);
     TOF_Tray_TEhitmap[itray]=new TH1F(tmpchr,tmpchr1,192,-0.5,191.5);
   }
+  ReadTrayList(); 
+
 }
 
 
@@ -64,6 +68,8 @@ TOFtrayHistogramGroup::~TOFtrayHistogramGroup() {
 void TOFtrayHistogramGroup::reset() {
   for (int i = 0; i < mNtray; ++i)TOF_Tray_LEhitmap[i]->Reset();
   for (int i = 0; i < mNtray; ++i)TOF_Tray_TEhitmap[i]->Reset();
+  ReadTrayList();
+
 }
 
 
@@ -125,22 +131,19 @@ void TOFtrayHistogramGroup::draw(TCanvas* cc) {
 
     label.SetTextSize(0.11);
 
-    if(Tray_NotInRun(actualTrayNum[i])) { 
-      //float hmin=  gPad->GetUymin();
-      float hmax=  gPad->GetUymax();
-      label.SetTextColor(45);
-      sprintf(tmpchr,"%d",actualTrayNum[i]);
-      label.DrawLatex(  20., 0.95*hmax, tmpchr);
+    label.SetTextColor(45);
+    float hmax=TOF_Tray_LEhitmap[i]->GetMaximum();
+    if(hmax<1) hmax=1;
+    sprintf(tmpchr,"%d",actualTrayNum[i]);
+    label.DrawLatex(  20., 0.95*hmax, tmpchr);
+
+    if(NotActiveTray[actualTrayNum[i]]) { 
       sprintf(tmpchr,"Not Active");
       label.SetTextColor(2);
       label.SetTextSize(0.12);
       label.DrawLatex(90., 0.6*hmax, tmpchr);
-    } else {
-      float hmax=TOF_Tray_LEhitmap[i]->GetMaximum();
-      label.SetTextColor(45);
-      sprintf(tmpchr,"%d",actualTrayNum[i]);
-      label.DrawLatex(  20., 0.98*hmax, tmpchr);
-    }
+    } 
+
   }
 
   cc->Update();
@@ -210,51 +213,25 @@ bool TOFtrayHistogramGroup::fill(evpReader* evp, char* datap) {
   return true;
 
 }
-/*
-int TOFtrayHistogramGroup::tdcchan2mrpcchan(int globaltdcchan)
-{
-  if(globaltdcchan<0 || globaltdcchan>191) {cout<<"Wrong global tdc chan: "<<globaltdcch
-an<<endl; return -1;}
 
-  int tdcidmap[4][6] = { {0,1,0,1,0,1}, {2,0,2,0,1,0}, {1,2,0,2,0,2}, {2,1,2,1,2,1}};
-  int tdcchanmap[4][6]={ {7,7,0,2,5,6}, {7,4,4,2,3,6}, {0,2,3,3,1,6}, {0,5,1,4,5,1}};
+void TOFtrayHistogramGroup::ReadTrayList(){
+  
+  //cout<<"TOFtrayHistogramGroup::TrayList config file:"<<mTrayList<<endl;
 
-  int theglobalmodulechan[192];
-  int theglobaltdcchan[192];
+  TString buffer;
 
-  for(int isec=0;isec<8;isec++){
-    for(int imodule=0;imodule<4;imodule++){
-      for(int ipad=0;ipad<6;ipad++){
-        int globalmodule  =  isec*24 + imodule*6 + ipad;
-        int globaltdc     =  isec*24 + tdcidmap[imodule][ipad]*8+tdcchanmap[imodule][ipa
-d];
-        theglobalmodulechan[globalmodule]=globalmodule;
-        theglobaltdcchan[globalmodule]=globaltdc;
-        //cout<<"global module chan="<<globalmodule<<" global tdc chan="<<globaltdc<<end
-l;
-     }
-    }
-  }
-  int returnthis=0;
-
-  //int thistdcchan=tdig*24+(tdcid%4)*8+tdcchan;
-  int thistdcchan=globaltdcchan;
-  for(int i=0;i<192;i++){
-    if(thistdcchan == theglobaltdcchan[i]) {returnthis = i;break;}
-  }
-  return returnthis;
-}
- 
-*/
-bool TOFtrayHistogramGroup::Tray_NotInRun(int trayid)
-{
-  // the following 35 trays is not in run for run9!!
-  int notinrunlist[35]={13,14,42,43,73,74,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,102,103,38,39,52,75,47,68,112,118,64};
-
-  for(int i=0;i<35;i++) {
-    if(trayid == notinrunlist[i]) {return true;}
-  }
-
-  return false;
+  ifstream filein(mTrayList);
+  for(int i=0;i<128;i++){NotActiveTray[i]=false;}
+  if(filein){ 
+    while(!filein.eof()) {
+      buffer.ReadLine(filein);
+      if(buffer.BeginsWith("/")) continue;
+      if(buffer.BeginsWith("#")) continue;
+      int trayid = atoi(buffer.Data());
+      if(trayid<1 || trayid>127) continue;
+      NotActiveTray[trayid]=true;
+    }   
+  } else {cout<<"TOFtrayHistogramGroup::Can not open file:"<<mTrayList<<endl;}
+  filein.close();
 
 }

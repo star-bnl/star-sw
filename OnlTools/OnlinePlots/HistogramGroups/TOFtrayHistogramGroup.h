@@ -29,7 +29,11 @@ private:
   int mNtray;
   int actualTrayNum[MAXTRAYS];
 
-  bool Tray_NotInRun(int);
+  bool NotActiveTray[128];  // Highest TOF tray  number is MTD: 124, leave some rooms here. 
+  static char* mTrayList;
+  void ReadTrayList();
+
+  //bool Tray_NotInRun(int);
 
   ClassDef(TOFtrayHistogramGroup,1) ;
 

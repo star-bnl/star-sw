@@ -26,7 +26,20 @@ private:
 
   bool ValidDataword(int);
   int ValidBunchid(int,int,int,int);
-  bool Tray_NotInRun(int);
+  //
+  bool NotActiveTray[128];  // Highest TOF tray  number is MTD: 124, leave some rooms here. 
+  static char* mTrayList;
+  void ReadTrayList();
+  // 
+  static char* mBunchShiftList;
+  void ReadValidBunchidPhase();
+  int mReferenceTray;
+  int mValidShiftTray[2][4];
+  int mValidShift121[2][2];
+  int mValidShift122[2][2];
+  int mValidShift124[2];
+
+  //bool Tray_NotInRun(int);
 
   ClassDef(TOFcheckHistogramGroup,1) ;
 
