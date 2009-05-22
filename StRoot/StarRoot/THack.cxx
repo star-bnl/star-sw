@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: THack.cxx,v 1.4 2005/05/12 18:36:29 perev Exp $
+ * $Id: THack.cxx,v 1.5 2009/05/22 23:38:51 fine Exp $
  *
  ***************************************************************************
  *
@@ -20,6 +20,8 @@
 #include "TList.h"
 #include "TSystem.h"
 #include "TH1.h"
+#include "TTree.h"
+#include "TError.h"
 
 class myClonesArray :public TClonesArray
 {
@@ -143,6 +145,19 @@ int THack::LineToD(const char *line, const char **lend,
   }  
   if (lend) *lend=le;
   return nIt;
+}
+
+bool THack::IsTreeWritable(const TTree *tree, bool fatal)
+{
+   // Test whether the TFile assocoated wit TTree is writable
+   bool out = false;
+   TDirectory *d = 0;
+   if (tree && (d = tree->GetDirectory())  && d->IsWritable() ) {
+      out = true;
+   } else if (tree) {
+      Fatal("IsTreeWritable", "TTree %p %s can not be written", tree,tree->GetName());
+   }
+   return out;
 }
 
 
