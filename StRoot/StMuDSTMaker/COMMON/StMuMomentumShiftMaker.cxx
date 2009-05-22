@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuMomentumShiftMaker.cxx,v 1.3 2007/05/16 18:50:49 mvl Exp $
+ * $Id: StMuMomentumShiftMaker.cxx,v 1.4 2009/05/22 22:25:31 fine Exp $
  * Author: Marco van Leeuwen, LBNL
  *
  * This class is used to correct the momenta of tracks on MicroDst after 
@@ -89,7 +89,8 @@ int StMuMomentumShiftMaker::Make() {
       }
       mOutFile=new TFile(mOutDir+inBaseName,"RECREATE");
       if (!mOutFile->IsOpen()) {
-	LOG_ERROR << "ERROR in StMuMomentumShiftMaker::Make: cannot open output file: " << mOutDir+inBaseName << endm;
+         LOG_ERROR << "ERROR in StMuMomentumShiftMaker::Make: cannot open output file: " << mOutDir+inBaseName << endm;
+         delete mOutFile; mOutFile = 0;
       }
     }
   }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.17 2009/04/28 22:15:10 perev Exp $
+ * $Id: StMuIOMaker.cxx,v 1.18 2009/05/22 22:25:31 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -261,6 +261,11 @@ void StMuIOMaker::openMuWrite() {
   DEBUGVALUE(mOutFileName.c_str());
 
   mOutFile = new TFile(mOutFileName.c_str(),"RECREATE","StMuDst");
+  if (mOutFile->IsZombie()) {
+      LOG_FATAL << "StMuIOMaker::openMuWrite" << " Can not create TFile object for "
+                 << mOutFileName.c_str()  << " file" << endm;
+  }
+     
   mOutFile->SetCompressionLevel(mCompression);
 
   TTree *tree;
@@ -306,6 +311,9 @@ void StMuIOMaker::closeMuWrite(){
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.18  2009/05/22 22:25:31  fine
+ * Add the Zombue test for TFile ctors
+ *
  * Revision 1.17  2009/04/28 22:15:10  perev
  * CleanUp
  *
