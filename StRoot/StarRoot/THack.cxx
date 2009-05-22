@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: THack.cxx,v 1.5 2009/05/22 23:38:51 fine Exp $
+ * $Id: THack.cxx,v 1.6 2009/05/22 23:49:16 fine Exp $
  *
  ***************************************************************************
  *
@@ -154,7 +154,7 @@ bool THack::IsTreeWritable(const TTree *tree, bool fatal)
    TDirectory *d = 0;
    if (tree && (d = tree->GetDirectory())  && d->IsWritable() ) {
       out = true;
-   } else if (tree) {
+   } else if (tree && fatal) {
       Fatal("IsTreeWritable", "TTree %p %s can not be written", tree,tree->GetName());
    }
    return out;
