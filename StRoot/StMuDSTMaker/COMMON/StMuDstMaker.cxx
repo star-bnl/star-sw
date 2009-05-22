@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.92 2009/05/22 22:25:31 fine Exp $
+ * $Id: StMuDstMaker.cxx,v 1.93 2009/05/22 23:48:18 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -8,6 +8,7 @@
 #include "Stiostream.h"
 #include "Stsstream.h"
 #include "StChain.h"
+#include "THack.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StTrack.h"
 #include "StEvent/StTrackNode.h"
@@ -495,7 +496,7 @@ void StMuDstMaker::write(){
   }
 
   DEBUGMESSAGE2("now fill tree");
-  mTTree->Fill();
+  mTTree->Fill();  THack::IsTreeWritable(mTTree);
   DEBUGMESSAGE2("tree filled");
 
   return;
@@ -1381,6 +1382,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.93  2009/05/22 23:48:18  fine
+ * Test I/O errors after filling the TTree
+ *
  * Revision 1.92  2009/05/22 22:25:31  fine
  * Add the Zombue test for TFile ctors
  *

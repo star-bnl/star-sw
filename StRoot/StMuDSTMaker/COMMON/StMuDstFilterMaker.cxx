@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.13 2009/05/22 22:25:31 fine Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.14 2009/05/22 23:48:18 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -10,6 +10,7 @@
 
 #include "StEvent/StEventTypes.h"
 
+#include "THack.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TBranch.h"
@@ -217,7 +218,7 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
     
     // write the event only if it has at least one primary track
     if ( mArrays[muPrimary]->GetEntries()>0) { 
-      mTTree->Fill();
+      mTTree->Fill(); THack::IsTreeWritable(mTTree);
     }
     return 0;
 }
@@ -316,6 +317,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.14  2009/05/22 23:48:18  fine
+ * Test I/O errors after filling the TTree
+ *
  * Revision 1.13  2009/05/22 22:25:31  fine
  * Add the Zombue test for TFile ctors
  *
