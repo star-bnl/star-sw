@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuMomentumShiftMaker.cxx,v 1.4 2009/05/22 22:25:31 fine Exp $
+ * $Id: StMuMomentumShiftMaker.cxx,v 1.5 2009/05/22 23:48:18 fine Exp $
  * Author: Marco van Leeuwen, LBNL
  *
  * This class is used to correct the momenta of tracks on MicroDst after 
@@ -21,6 +21,7 @@
 #include "StMessMgr.h"
 
 #include "TChain.h"
+#include "THack.h"
 #include "TFile.h"
 
 ClassImp(StMuMomentumShiftMaker)
@@ -148,8 +149,9 @@ int StMuMomentumShiftMaker::Make() {
     ScaleMomentum(xi);
   }
 
-  if (mWriteMuDst)
-    mOutTree->Fill();
+  if (mWriteMuDst) {
+    mOutTree->Fill(); THack::IsTreeWritable(mOutTree); 
+  }
   return kStOk;
 }
 

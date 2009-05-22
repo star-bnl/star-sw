@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.18 2009/05/22 22:25:31 fine Exp $
+ * $Id: StMuIOMaker.cxx,v 1.19 2009/05/22 23:48:18 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -16,6 +16,7 @@
 #include "StMuEvent.h"
 
 #include "TFile.h"
+#include "THack.h"
 #include "TChain.h"
 #include "TClonesArray.h"
 
@@ -125,7 +126,7 @@ int StMuIOMaker::Make(int index){
   }
 
   DEBUGVALUE(mMuSave);
-  if(mMuSave) mOutTree->Fill();
+  if(mMuSave) { mOutTree->Fill(); THack::IsTreeWritable(mOutTree); }
 // One event would be skipped in StChain if making increment here!!!!
 //  mCurrentIndex++;
   DEBUGVALUE3(bytes);
@@ -311,6 +312,9 @@ void StMuIOMaker::closeMuWrite(){
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.19  2009/05/22 23:48:18  fine
+ * Test I/O errors after filling the TTree
+ *
  * Revision 1.18  2009/05/22 22:25:31  fine
  * Add the Zombue test for TFile ctors
  *
