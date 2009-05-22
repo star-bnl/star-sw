@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.91 2009/04/27 20:50:43 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.92 2009/05/22 22:25:31 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -693,7 +693,7 @@ void StMuDstMaker::openWrite(string fileName) {
   DEBUGMESSAGE2("now create file");
   mCurrentFile = new TFile(fileName.c_str(),"RECREATE","StMuDst");
 
-  if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
+  if (mCurrentFile->IsZombie()) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
 
   mCurrentFile->SetCompressionLevel(mCompression);
 
@@ -1381,6 +1381,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.92  2009/05/22 22:25:31  fine
+ * Add the Zombue test for TFile ctors
+ *
  * Revision 1.91  2009/04/27 20:50:43  perev
  * Change type of DataSet
  *

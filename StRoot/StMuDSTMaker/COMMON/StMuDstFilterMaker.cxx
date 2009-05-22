@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.12 2009/03/10 23:43:53 jeromel Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.13 2009/05/22 22:25:31 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -37,7 +37,7 @@ StMuDstFilterMaker::StMuDstFilterMaker(const char* name) : StMaker(name), mMuDst
  */
 void StMuDstFilterMaker::open(const Char_t *fname) {
   mFile = new TFile(fname,"RECREATE","StMuDst");
-  if (!mFile) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
+  if (mFile->IsZombie() ) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
   mFile->SetCompressionLevel(__COMPRESSION__);
 
   // Create a ROOT Tree and one superbranch
@@ -316,6 +316,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.13  2009/05/22 22:25:31  fine
+ * Add the Zombue test for TFile ctors
+ *
  * Revision 1.12  2009/03/10 23:43:53  jeromel
  * Set tree size to max size
  *
