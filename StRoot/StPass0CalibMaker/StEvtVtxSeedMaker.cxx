@@ -80,8 +80,7 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
   rank = primVtx->ranking();
 
   // Determine sub-sectors of tracks associated with this vertex
-  itpc = 0;
-  otpc = 0;
+  itpc = 0; otpc = 0; detmap = 0;
   bool ibits[24];
   bool obits[24];
   unsigned int hitn,trkn;
@@ -95,24 +94,33 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
       else obits[hit->sector()-1] = true;
     }
   }
+  // pack into bits 0..23
   for (trkn=0; trkn<24; trkn++) {
     if (ibits[trkn]) itpc += (int) (::pow(2,trkn));
     if (obits[trkn]) otpc += (int) (::pow(2,trkn));
   }
+
+  unsigned short nBEMC = primVtx->numMatchesWithBEMC();
+  if (nBEMC>7) nBEMC=7; // 7 should be enough to convince
+  // pack into bits 0,1,2
+  detmap += nBEMC;
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.4 2008/05/21 17:48:38 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.5 2009/05/22 23:50:50 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.4 2008/05/21 17:48:38 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.5 2009/05/22 23:50:50 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.5  2009/05/22 23:50:50  genevb
+// Code mods for BEMC matches, BeamWidth
+//
 // Revision 1.4  2008/05/21 17:48:38  genevb
 // Use vertex errors for weighting
 //

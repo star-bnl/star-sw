@@ -88,21 +88,30 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   rank = primVtx->ranking();
 
   // hits not saved in MuDst
-  itpc = 0; otpc = 0;
+  itpc = 0; otpc = 0; detmap = 0;
+
+  unsigned short nBEMC = primVtx->nBEMCMatch();
+  if (nBEMC>7) nBEMC=7; // 7 should be enough to convince
+  // pack into bits 0,1,2
+  detmap += nBEMC;
+
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.6 2008/05/21 17:48:39 genevb Exp $"
+           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.7 2009/05/22 23:50:50 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.6 2008/05/21 17:48:39 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.7 2009/05/22 23:50:50 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.7  2009/05/22 23:50:50  genevb
+// Code mods for BEMC matches, BeamWidth
+//
 // Revision 1.6  2008/05/21 17:48:39  genevb
 // Use vertex errors for weighting
 //
