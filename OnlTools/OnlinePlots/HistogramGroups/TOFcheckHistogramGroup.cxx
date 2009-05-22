@@ -1,6 +1,7 @@
 #include "TOFcheckHistogramGroup.h"
 
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <stdlib.h>
 
@@ -8,6 +9,7 @@
 #include "TLine.h"
 #include "TLatex.h"
 #include "TStyle.h"
+#include <TEnv.h>
 
 #ifndef NEW_DAQ_READER
 #  include <evpReader.hh>
@@ -27,6 +29,9 @@
 #include "HistoHandler.h"
 
 using namespace std;
+
+char*  TOFcheckHistogramGroup::mTrayList = EvpUtil::cat(gEnv->GetValue("Online.tofConfigPath","."),"TOF_TrayNotInRun.txt");
+char*  TOFcheckHistogramGroup::mBunchShiftList = EvpUtil::cat(gEnv->GetValue("Online.tofConfigPath","."),"TOF_ValidBunchidPhase.txt");
 
 ClassImp(TOFcheckHistogramGroup) ;
 
@@ -54,7 +59,9 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* su
 
   TOF_Error1->SetXTitle("Tray #");
   TOF_Error2->SetXTitle("THUB upvpd MTD");
- 
+
+  ReadTrayList(); 
+  ReadValidBunchidPhase();
 }
 
 
@@ -75,6 +82,8 @@ void TOFcheckHistogramGroup::reset() {
   TOF_Error2->Reset();
   TOF_Error3->Reset();
   TOF_EventCount->Reset();
+  ReadTrayList();
+  ReadValidBunchidPhase();
   //TOF_Tray_hits1->Reset();
   //TOF_Tray_hits2->Reset();
 }
@@ -145,32 +154,34 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
      label.SetTextColor(2);
      label.DrawLatex( 1., 0.88*hmax, "Invalid Bunchid Shift Found!!");
      label.SetTextColor(4);
-     if(TOF_Error3->GetEntries()>0)label.DrawLatex( 1., 0.78*hmax, "(Possible tray lost.Check hitmap!)");
+     if(TOF_Error3->GetEntries()>mNevents)label.DrawLatex( 1., 0.78*hmax, "(Possible tray lost.Check hitmap!)");
 
   } else {
-    hmax=0.9 * gPad->GetUymax();
+    hmax=gPad->GetUymax();
     label.SetTextColor(3);
     sprintf(tmpchr,"No invalid bunchid shift in %d events!",mNevents);
-    label.DrawLatex( 1., hmax, tmpchr);
+    label.DrawLatex( 1., 0.88*hmax, tmpchr);
   }
   TLatex labela;
   labela.SetTextSize(0.035);
   labela.SetTextAlign(23);  // center, top
   labela.SetTextAngle(90);
-  labela.DrawLatex(0.25,0.1*hmax,"THUB-SW0");
-  labela.DrawLatex(0.75,0.2*hmax,"THUB-SW1");
-  labela.DrawLatex(1.25,0.1*hmax,"THUB-NW0");
-  labela.DrawLatex(1.75,0.2*hmax,"THUB-NW1");
-  labela.DrawLatex(2.25,0.1*hmax,"THUB-SE0");
-  labela.DrawLatex(2.75,0.2*hmax,"THUB-SE1");
-  labela.DrawLatex(3.25,0.1*hmax,"THUB-NE0");
-  labela.DrawLatex(3.75,0.2*hmax,"THUB-NE1");
-  labela.DrawLatex(4.25,0.1*hmax,"upvpd-west0");
-  labela.DrawLatex(4.75,0.2*hmax,"upvpd-west1");
-  labela.DrawLatex(5.25,0.1*hmax,"upvpd-east0");
-  labela.DrawLatex(5.75,0.2*hmax,"upvpd-east1");
-  labela.DrawLatex(6.25,0.1*hmax,"MTD-0");
-  labela.DrawLatex(6.75,0.2*hmax,"MTD-1");
+  float txty1=0.11*hmax;
+  float txty2=0.22*hmax;
+  labela.DrawLatex(0.25,txty1," THUB1-NW0");
+  labela.DrawLatex(0.75,txty2," THUB1-NW1");
+  labela.DrawLatex(1.25,txty1," THUB2-NE0");
+  labela.DrawLatex(1.75,txty2," THUB2-NE1");
+  labela.DrawLatex(2.25,txty1," THUB3-SW0");
+  labela.DrawLatex(2.75,txty2," THUB3-SW1");
+  labela.DrawLatex(3.25,txty1," THUB4-SE0");
+  labela.DrawLatex(3.75,txty2," THUB4-SE1");
+  labela.DrawLatex(4.25,txty1," upvpd-west0");
+  labela.DrawLatex(4.75,txty2," upvpd-west1");
+  labela.DrawLatex(5.25,txty1," upvpd-east0");
+  labela.DrawLatex(5.75,txty2," upvpd-east1");
+  labela.DrawLatex(6.25,txty1," MTD-0");
+  labela.DrawLatex(6.75,txty2," MTD-1");
 
   cc->Update();
 
@@ -244,13 +255,14 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
 
 
   // check bunch id shift
-  int bunchidref1 =   allbunchid[0][0];   // bunchid from tray 1 as reference.
-  int bunchidref2 =   allbunchid[1][0];   // bunchid from tray 1 as reference.
-  if(bunchidref1 != bunchidref2) {TOF_Error2->Fill(0);}
+
+  int bunchidref1 =   allbunchid[0][mReferenceTray-1];   // bunchid from tray 1 as reference.
+  int bunchidref2 =   allbunchid[1][mReferenceTray-1];   // bunchid from tray 1 as reference.
+  if(bunchidref1 != bunchidref2) {TOF_Error2->Fill(3);}
 
   for(int itray=0;itray<124;itray++){
     int traynum=itray+1;
-    if(Tray_NotInRun(traynum)) continue;
+    if(NotActiveTray[traynum]) continue;
     for(int ihalf=0;ihalf<2;ihalf++){
       int bunchid=allbunchid[ihalf][itray];
       //if(bunchid == -9999) continue;
@@ -276,37 +288,82 @@ bool TOFcheckHistogramGroup::ValidDataword(int packetid)
   return false;
 
 }
-bool TOFcheckHistogramGroup::Tray_NotInRun(int trayid)
-{
-  // the following 35 trays is not in run for run9!!
-  int notinrunlist[35]={13,14,42,43,73,74,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,102,103,38,39,52,75,47,68,112,118,64};
+void TOFcheckHistogramGroup::ReadTrayList(){
+  
+  //cout<<"TOFcheckHistogramGroup::TrayList config file:"<<mTrayList<<endl;
 
-  for(int i=0;i<35;i++) {
-    if(trayid == notinrunlist[i]) {return true;}
-  }
+  TString buffer;
 
-  return false;
+  ifstream filein(mTrayList);
+  for(int i=0;i<128;i++){NotActiveTray[i]=false;}
+  if(filein){ 
+    while(!filein.eof()) {
+      buffer.ReadLine(filein);
+      if(buffer.BeginsWith("/")) continue;
+      if(buffer.BeginsWith("#")) continue;
+      int trayid = atoi(buffer.Data());
+      if(trayid<1 || trayid>127) continue;
+      NotActiveTray[trayid]=true;
+    }   
+  } else {cout<<"TOFcheckHistogramGroup::Can not open file:"<<mTrayList<<endl;}
+  filein.close();
 
 }
+
+void TOFcheckHistogramGroup::ReadValidBunchidPhase(){
+  //cout<<"TOFcheckHistogramGroup::Bunchid phase config file:"<<mBunchShiftList<<endl;
+
+  mReferenceTray=1;
+  
+  TString buffer;
+  ifstream filein(mBunchShiftList);
+  int count=0;
+
+  if(filein){
+    while(!filein.eof()){
+      buffer.ReadLine(filein);
+      if(buffer.BeginsWith("/")) continue;
+      if(buffer.BeginsWith("#")) continue;
+      int number=atoi(buffer.Data());
+      if(count==0) mReferenceTray=number;
+      if(count>=1 && count<=8)mValidShiftTray[(count-1)%2][(count-1)/2]=number;
+
+      if(count== 9 || count==10) mValidShift121[0][(count-1)%2]=number;
+      if(count==11 || count==12) mValidShift121[1][(count-1)%2]=number;
+
+      if(count==13 || count==14) mValidShift122[0][(count-1)%2]=number;
+      if(count==15 || count==16) mValidShift122[1][(count-1)%2]=number;
+
+      if(count==17 || count==18) mValidShift124[(count-1)%2]=number;
+
+      count++;
+    }
+  } else {cout<<"TOFcheckHistogramGroup::Can not open file:"<<mBunchShiftList<<endl;}
+
+}
+
 int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchid)
 {
   if(trayid<1 || trayid>124) return -1;
   if(trayid == 123) return -1;
-  // THUB SW
-  int trayinTHUB1[30]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,51,52,53,54,55,56,57,58,59,60};
   // THUB NW
-  int trayinTHUB2[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
-  // THUB SE
-  int trayinTHUB3[30]={61,62,63,64,65,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120};
+  int trayinTHUB1[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
   // THUB NE 
-  int trayinTHUB4[30]={66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95};
-  int trayvalidshift[2][4]={{0,4,-7,-5},{0,5,-6,-4}};
-  //=
+  int trayinTHUB2[30]={66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95};
+  // THUB SW
+  int trayinTHUB3[30]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,51,52,53,54,55,56,57,58,59,60};
+  // THUB SE
+  int trayinTHUB4[30]={61,62,63,64,65,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120};
+ 
+  // the following numbers are moved into TOF_ValidBunchidPhase.txt 
+  /*
+  int trayvalidshift[2][4]={{4,-5,0,-7},{5,-4,0,-6}};
   //tray 121 half0: 4 5    half1: 5 6
   //tray 122 half0: -5 -4  half1: -4 -3
   int tray121shift[2][2]={{ 4, 5},{ 5, 6}};
   int tray122shift[2][2]={{-5,-4},{-4,-3}};
   int tray124shift[2]   = {-5,-6};
+  */
 
   int nthub=-1;
   int ret=-1;
@@ -325,16 +382,17 @@ int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,i
 
   //cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
   if(trayid>1 && trayid<121){
-    if( (diff != trayvalidshift[0][nthub])  && (diff != trayvalidshift[1][nthub]) ) ret=nthub;
+    if( (diff != mValidShiftTray[0][nthub])  && (diff != mValidShiftTray[1][nthub]) ) ret=nthub;
   } else if(trayid==121){
-    if(diff !=tray121shift[halftrayid][0] && diff != tray121shift[halftrayid][1]) ret=nthub;
+    if(diff !=mValidShift121[halftrayid][0] && diff != mValidShift121[halftrayid][1]) ret=nthub;
   } else if(trayid==122){
-    if(diff !=tray122shift[halftrayid][0] && diff != tray122shift[halftrayid][1]) ret=nthub;
+    if(diff !=mValidShift122[halftrayid][0] && diff != mValidShift122[halftrayid][1]) ret=nthub;
   } else if(trayid==124) {
-    if(diff != tray124shift[0] && diff != tray124shift[1]) ret=nthub;
+    if(diff != mValidShift124[0] && diff != mValidShift124[1]) ret=nthub;
   }
 
   //if(ret>=0)cout<<"ERROR!! tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<ret<<endl;
 
   return ret;
 }
+ 

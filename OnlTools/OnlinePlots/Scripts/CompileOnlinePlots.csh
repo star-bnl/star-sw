@@ -18,6 +18,7 @@ cat >.rootrc <<__ROOTRC__
 
 Online.GuiRefreshRate:  50
 
+Online.tofConfigPath:   /a/pplot/files/tof/
 Online.eemcMask:     /a/pplot/files/eemc/defaultPanitkinSetup/eemcTwMask.dat
 Online.eemcDbDump:   /a/pplot/files/eemc/defaultPanitkinSetup/eemcDbDump.dat
 Online.eemcPathIn:   /a/pplot/files/eemc/defaultPanitkinSetup/
