@@ -114,7 +114,7 @@ void EEMCPlots::processEvent( char *datap
 
 	Tonko2Ezt ezt(datap);
 	eeqa->clear();
-	eeqa->sort(&ezt.eETow, &ezt.eESmd, runId, token, TRG_VERSION, dsm0inp, dsm1inp, dsm2inp, dsm3inp);
+	eeqa->sort(ezt.eETowPresent ? &ezt.eETow : 0, ezt.eESmdPresent ? &ezt.eESmd : 0, runId, token, TRG_VERSION, dsm0inp, dsm1inp, dsm2inp, dsm3inp);
         //if (isEvp) eeqa->spy(&ezt.eETow, &ezt.eESmd, runId, eventId);
     }
 }
