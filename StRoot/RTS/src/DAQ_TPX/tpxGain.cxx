@@ -643,6 +643,13 @@ void tpxGain::calc()
 	}
 
 
+#if 0
+	/* Dump absolute values here for debugging! */
+	printf("%2d %2d %f %f %f %f\n",s,r,
+	       get_means(s,r)->g, get_means(s,r)->g_rms,
+	       get_means(s,r)->t0, get_means(s,r)->t0_rms) ;
+#endif
+
 	/* 
 		Now we apply the per-row normalization of the gain and T0 constants using
 		the previously calculated average gains and T0
