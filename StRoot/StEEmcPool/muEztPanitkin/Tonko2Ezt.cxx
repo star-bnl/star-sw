@@ -1,4 +1,4 @@
-// $Id: Tonko2Ezt.cxx,v 1.5 2009/01/24 03:47:43 ogrebeny Exp $
+// $Id: Tonko2Ezt.cxx,v 1.6 2009/05/26 08:45:12 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -24,6 +24,8 @@ using namespace std;
 //-------------------------------------------
 //-------------------------------------------
 Tonko2Ezt::Tonko2Ezt(char *rdrc) {
+    eETowPresent = false;
+    eESmdPresent = false;
 #ifdef NEW_DAQ_READER
     daqReader *rdr = (daqReader*)(rdrc);
 #endif
@@ -46,6 +48,7 @@ Tonko2Ezt::Tonko2Ezt(char *rdrc) {
     		eETow.setHeader(ib,emc.etow_pre[ib]);
     		eETow.setData(ib,emc.etow[ib]);
 #endif
+		eETowPresent = true;
 	    }
     	}
     }
@@ -67,6 +70,7 @@ Tonko2Ezt::Tonko2Ezt(char *rdrc) {
     		eESmd.setHeader(ib,emc.esmd_pre[ib]);
     		eESmd.setData(ib,emc.esmd[ib]);
 #endif
+		eESmdPresent = true;
     		//eESmd.print(ib,0);
     		//printf("%x %x %x %x \n", emc.esmd_pre[ib][0], emc.esmd_pre[ib][1], emc.esmd_pre[ib][2], emc.esmd_pre[ib][3]);
 	    }
@@ -75,6 +79,9 @@ Tonko2Ezt::Tonko2Ezt(char *rdrc) {
 }
 
 // $Log: Tonko2Ezt.cxx,v $
+// Revision 1.6  2009/05/26 08:45:12  ogrebeny
+// Bug fix to disable EEMC plots if the detector is not in the run
+//
 // Revision 1.5  2009/01/24 03:47:43  ogrebeny
 // Fuxed bug - can see ETOW data now
 //
