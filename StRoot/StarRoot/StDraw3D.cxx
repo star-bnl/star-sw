@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.35 2009/05/14 23:54:14 fine Exp $
+// $Id: StDraw3D.cxx,v 1.36 2009/05/26 19:07:06 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -53,13 +53,14 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
       if (!StCheckQtEnv::SetQtEnv(false)) {   CheckCoin = true; }
    }
 
-   if (CheckCoin && pad ) {
+//   if (CheckCoin && pad ) {
+   if (CheckCoin) {
       // define the background image
       TString backShape = detectorName;
       backShape.ReplaceAll(",",".iv:");
       backShape+= ".iv";
       printf(" Setting the background shape to be 	%s\n", backShape.Data());
-      gEnv->SetValue("Gui.InventorShapeDir",":.:StRoot/macros/graphics:$STAR/StRoot/macros/graphics");
+      gEnv->SetValue("Gui.InventorShapeDir",":.:StRoot/macros/graphics:$STAR/StRoot/macros/graphics:/afs/rhic.bnl.gov/star/doc/www/comp/2/vis/iv");
       if  (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")) {
           viewer->SetDrawOption(backShape.Data());
          // Create Open GL viewer
@@ -521,6 +522,13 @@ void StDraw3D::Draw3DTest(){
    SetComment("The recontstructed track");
 }
 
+//______________________________________________________________________________
+void StDraw3D::ShowDetectorTest(const char *detectorName)
+{
+   // Test to show the detector geometry only
+   StDraw3D *viewer = new StDraw3D(detectorName); 
+   if (!viewer->Viewer()) viewer->InitViewer();
+}
 //______________________________________________________________________________
 void StDraw3D::ShowTest()
 {
