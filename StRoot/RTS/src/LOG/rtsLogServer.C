@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	int ret ;
 //	int i ;
 	int port ;
-	int fd ;
+	int fd = 0;
 	static struct sockaddr_in cAddr ;
 	int cSize ;
 	static char *buffer ;
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 		tm = localtime(&t) ;
 
 		memset(tbuff,'*',sizeof(tbuff)) ;
-		sprintf(tbuff,"[%-8s %02d:%02d:%02d %03d] ","STARTUP",tm->tm_hour,tm->tm_min,tm->tm_sec,tm->tm_yday) ;
+		sprintf(tbuff,"[%-8s %02d:%02d:%02d %03d] ","STARTUP",tm->tm_hour,tm->tm_min,tm->tm_sec,tm->tm_yday+1) ;
 		int pre_len = strlen(tbuff) ;
 		buffer = tbuff + pre_len - 4;
 
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 			tm = localtime(&t) ;
 
 			char tmp = *(buffer+4) ;
-			sprintf(tbuff,"[%-8s %02d:%02d:%02d %03d] ",hname_short,tm->tm_hour,tm->tm_min,tm->tm_sec,tm->tm_yday) ;
+			sprintf(tbuff,"[%-8s %02d:%02d:%02d %03d] ",hname_short,tm->tm_hour,tm->tm_min,tm->tm_sec,tm->tm_yday+1) ;
 			*(buffer+4) = tmp ;
 
 			// skip the first INT which has the counter in it and for NL
@@ -184,7 +184,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	close(fd) ;
+	if(testing) ;
+	else close(fd) ;
 	return 0 ;
 }
 
