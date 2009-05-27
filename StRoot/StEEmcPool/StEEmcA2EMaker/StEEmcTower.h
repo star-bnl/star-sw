@@ -2,6 +2,7 @@
 #define __StEEmcTower_h__
 
 #include "StEEmcElement.h"
+#include "TVector3.h"
 
 #include <vector>
 
@@ -20,6 +21,10 @@ class StEEmcTower : public StEEmcElement {
 
   /// copy constructor
   StEEmcTower( const StEEmcTower &other );
+
+  /// Returns a direction vector pointing from the specified vertex
+  /// to the center of the tower
+  TVector3 direction( Float_t zvertex=0.0 ); 
 
   /// Sets the index for this tower, pre- or postshower element.
   /// See StEEmcAnalysisMaker.  This single index will define the
