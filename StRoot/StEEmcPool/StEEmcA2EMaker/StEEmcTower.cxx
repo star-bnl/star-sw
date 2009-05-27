@@ -8,14 +8,16 @@
  * to its 8 nearest neighbors on the endcap.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/23 16:55:32 $
- * $Revision: 1.1 $
+ * $Date: 2009/05/27 21:40:06 $
+ * $Revision: 1.2 $
  *
  */
 
 
 #include "StEEmcTower.h"
 #include <iostream>
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+
 ClassImp(StEEmcTower);
 
 // ----------------------------------------------------------------------------
@@ -118,4 +120,13 @@ Bool_t StEEmcTower::isNeighbor( StEEmcTower t )
 
   return false;
 
+}
+// ----------------------------------------------------------------------------
+TVector3 StEEmcTower::direction( Float_t zvertex )
+{
+  TVector3 vertex(0.,0.,zvertex);
+  EEmcGeomSimple &geom=EEmcGeomSimple::Instance();
+  TVector3 position=geom.getTowerCenter( (UInt_t)sector(), (UInt_t)subsector(), (UInt_t)etabin() ); 
+  position -= vertex;
+  return position.Unit();
 }
