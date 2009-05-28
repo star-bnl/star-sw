@@ -11,6 +11,7 @@
 #define CMD2_RELEASE  0x03
 #define CMD2_RUN_DONE 0x04
 #define CMD2_LOG      0x05
+#define CMD2_L3_RELEASE 0x06
 
 // set by daq100decision
 #define EVBFLAG_RAW_DATA (1<<0)
