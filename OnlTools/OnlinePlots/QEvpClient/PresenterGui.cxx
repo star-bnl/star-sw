@@ -99,22 +99,26 @@ mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
 
   {0,0,0,"",""}
 };
-#if QT_VERSION < 0x40000
-
-#else /* QT4 */
+#if QT_VERSION >= 0x40000
 class  PresenterSuspend {
    // class to suspend signal emitting to complete initialization
    private:
          std::stack<QObject *> fWidgets;
    public:
         PresenterSuspend(){}
-       ~PresenterSuspend(){ 
+       ~PresenterSuspend(){
+#if 1          
           while (!fWidgets.empty()) {
              fWidgets.top()->blockSignals(false);
              fWidgets.pop();
           }
+#endif
         }
-       void operator=(QObject *o){o->blockSignals(true); fWidgets.push(o);}
+       void operator<<(QObject *o){
+#if 1
+          o->blockSignals(true); fWidgets.push(o);
+#endif
+       }
    };
 #endif /* QT4 */
 //------------------------------------------------------------------------
@@ -131,7 +135,7 @@ PresenterGui::PresenterGui(bool isRefWindow) :
    setAttribute(Qt::WA_DeleteOnClose);
    setWindowModality(Qt::WindowModal);
    PresenterSuspend blockWidgets;
-   blockWidgets = this;
+   blockWidgets << this;
 #endif /* QT4 */
   // Some preparations here
   // Here is starting directory name
@@ -141,14 +145,13 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   // Create test main frame. A QMainFrame is a top level window.
 
 //  connect(qApp,SIGNAL(lastWindowClosed () ), qApp, SLOT(quit ()) );
-  connect(qApp,SIGNAL(lastWindowClosed()),TQtRootSlot::CintSlot(),SLOT(TerminateAndQuit()));
 
   setUsesTextLabel(true); // use the text labels for the tool bar buttons
   
 #if QT_VERSION < 0x40000
   mCentralWidget = new QHBox(this);
 #else /* QT4 */
-  blockWidgets = mCentralWidget = new Q3HBox(this);
+  blockWidgets << (mCentralWidget = new Q3HBox(this));
 #endif /* QT4 */
   mCentralWidget->setMargin(0);
 #if QT_VERSION >= 0x40000
@@ -170,73 +173,67 @@ PresenterGui::PresenterGui(bool isRefWindow) :
 
   MakeConnectionFrame();
 
-
   // Create ZoomWidget 
   mZoomer = new TQtZoomPadWidget(0);
   mZoomer->SetZoomFactor(3);
-  connect(this,SIGNAL(destroyed()), mZoomer, SLOT(close()));
-  
+
   //
   // Define Tabs
   //
   // main tab holding
   fTab = new QTabWidget(mCentralWidget);
 #if QT_VERSION >= 0x40000
-  blockWidgets = fTab;
+  blockWidgets << fTab;
 #endif /* QT4 */
   fTab->setMargin(0);
-  connect(fTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
   // tab for dynamically defined groups histograms
   fDynamicTab = new QTabWidget(fTab);
 #if QT_VERSION >= 0x40000
-  blockWidgets = fDynamicTab;
+  blockWidgets << fDynamicTab;
 #endif /* QT4 */
   fDynamicTab->setMargin(0);
-  connect(fDynamicTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
   fTab->addTab(fDynamicTab,"Extra");
   // tab for statically defined histograms
   fStaticTab = new QTabWidget(fTab);
 #if QT_VERSION >= 0x40000
-  blockWidgets = fStaticTab;
+  blockWidgets << fStaticTab;
 #endif /* QT4 */
   fStaticTab->setMargin(0);
-  connect(fStaticTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
-
   fTab->addTab(fStaticTab,"Standard");
- 
+
   // create only one TQTWidget
   // Loop over upper level Tabs
   for(int i=0;i<MAX_TABS;i++) {
     if((nSubTabs[i] != 0) && (nSubTabs[i]<=MAX_SUBTABS)) {
       QTabWidget *topTab = new QTabWidget(fStaticTab);
 #if QT_VERSION >= 0x40000
-      blockWidgets = topTab;
+      blockWidgets << topTab;
 #endif /* QT4 */
       topTab->setMargin(0);
-      connect(topTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
       // Define upper level tab
       fStaticTab->addTab(topTab,TabNames[i][0]);
       // Add subTabs for current Tab
       // Note that we started with 1                         
       for(int j=1;j<=nSubTabs[i];j++) {
-	TQtWidget* w = new TQtWidget(topTab);
+         TQtWidget* w = new TQtWidget(topTab);
 #if QT_VERSION >= 0x40000
-   blockWidgets = w;
+         blockWidgets << w;
 #endif /* QT4 */
         QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
-	topTab->addTab( w ,TabNames[i][j]);
-	topTab->showPage(w);
-	mZoomer->Connect(w);
+        topTab->addTab( w ,TabNames[i][j]);
+        topTab->showPage(w);
+        mZoomer->Connect(w);
+        connect(topTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );
       }
     } else {
-	TQtWidget* w = new TQtWidget(fStaticTab);
+      TQtWidget* w = new TQtWidget(fStaticTab);
 #if QT_VERSION >= 0x40000
-   blockWidgets = w;
+      blockWidgets << w;
 #endif /* QT4 */
-   QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
-	fStaticTab->addTab( w ,TabNames[i][0]);
-	fStaticTab->showPage(w);
-	mZoomer->Connect(w);
+      QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
+      fStaticTab->addTab( w ,TabNames[i][0]);
+      fStaticTab->showPage(w);
+      mZoomer->Connect(w);
     }
   }
 
@@ -253,8 +250,13 @@ PresenterGui::PresenterGui(bool isRefWindow) :
     fActions[kAutoUpdate]->setOn(true);
     fActions[kAutoUpdate]->blockSignals(false);
   }
-  
-  
+
+  connect(fTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
+  connect(fDynamicTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
+  connect(fStaticTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
+  connect(qApp,SIGNAL(lastWindowClosed()),TQtRootSlot::CintSlot(),SLOT(TerminateAndQuit()));
+  connect(this,SIGNAL(destroyed()), mZoomer, SLOT(close()));
+
   //emit update(GetCanvas(), GetTabId(), GetSubTabId() );
   //QTabWidget* first = (QTabWidget*) fStaticTab->currentPage();
   //first->setCurrentPage(2);
@@ -1047,9 +1049,9 @@ void PresenterGui::addGroupTab(const char* name) {
   //cout << " adding " << groupName << endl;
   QTabWidget* tab = new QTabWidget(fDynamicTab,name);
   tab->setMargin(0);
-  connect(tab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
   fDynamicTab->addTab(tab,name);
   fDynamicTab->showPage(tab);
+  connect(tab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
   cout << __PRETTY_FUNCTION__ << " " << name <<endl;
 }
 //______________________________________________________________________________ 
