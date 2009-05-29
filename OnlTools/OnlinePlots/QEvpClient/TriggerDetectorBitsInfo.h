@@ -1,12 +1,28 @@
 #ifndef TriggerDetectorBitsInfo_h
 #define TriggerDetectorBitsInfo_h
 
-#include "TriggerDetectorBitsInfoUi.h"
+#if QT_VERSION < 0x40000
+#  include "TriggerDetectorBitsInfoUi.h"
+#else
+#  include "ui_TriggerDetectorBitsInfoUi.h"
+   typedef Ui_TriggerDetectorBitsInfoUi TriggerDetectorBitsInfoUi;
+#endif
 
-class TriggerDetectorBitsInfo : public TriggerDetectorBitsInfoUi {
+using namespace std;
+
+
+class TriggerDetectorBitsInfo :
+#if QT_VERSION > 0x40000
+      public QWidget, 
+#endif 
+      public TriggerDetectorBitsInfoUi {
  public:
-  TriggerDetectorBitsInfo( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 ) : TriggerDetectorBitsInfoUi(parent, name, fl) { /* no-op */}
-
+  TriggerDetectorBitsInfo( QWidget* parent = 0, const char* name = 0, Qt::WFlags fl = 0 ) :
+#if QT_VERSION > 0x40000
+       QWidget(parent, fl) {if (name) setName(name); setupUi(this); }
+#else
+       TriggerDetectorBitsInfoUi(parent, name, fl) { /* no-op */}
+#endif
   public slots:
 
   virtual void setTriggerBitsRun(unsigned int v) { RunTrig->setText( utoa(v) ) ;}

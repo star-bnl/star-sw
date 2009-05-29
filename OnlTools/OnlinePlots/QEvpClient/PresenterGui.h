@@ -14,22 +14,37 @@
 #include <sstream>
 #include "EvpUtil.h"
 #include "TQtRootAction.h"
-#include <qintdict.h> 
-#include <qmainwindow.h>
+#include <qobject.h> 
+#if QT_VERSION < 0x40000
+#ifndef Q_MOC_RUN
+#  include <qintdict.h> 
+#  include <qmainwindow.h>
+#endif
+#else /* QT4 */
+#  include <q3intdict.h> 
+#  include <q3mainwindow.h>
+#  include <Q3Frame>
+#endif /* QT4 */
 
 class EvpPresenter;
-class QMainWindow;
+
+#if QT_VERSION < 0x40000
+  class QToolBar;
+  class QHBox;
+  class QProgressBar;
+#else /* QT4 */
+  class Q3ToolBar;
+  class Q3HBox;
+  class Q3ProgressBar;
+#endif /* QT4 */
+
 class QTabWidget ;
 class QPushButton;
 class QButton;
 class TCanvas;
 class QMenuBar;
 class QWidget;
-class QToolBar;
 class QLineEdit;
-class QHBox;
-class QProgressBar;
-
 class EventInfo;
 class ServerInfo;
 class ServerStatus;
@@ -45,10 +60,18 @@ using namespace std;
 enum { kFileSave, kFileSaveAs, kFilePrint, kFilePrintAll, kFileExit, kHelpAbout, kLive, kFile, kUpdate, kAutoUpdate, kToolBar, kOnlPrinter2, kBits, kReference}; 
 
 // ************************************************************************
-class PresenterGui : public QMainWindow
-{
-
+#if QT_VERSION < 0x40000
+#ifndef Q_MOC_RUN
+   class PresenterGui : public  QMainWindow {
+#endif
+#else
+//MOC_SKIP_BEGIN
+  class PresenterGui : public Q3MainWindow {
+//MOC_SKIP_END
+#endif
+     
   Q_OBJECT
+
  public:
     EventInfo* mEventInfo;
     ServerInfo* mServerInfo;
@@ -60,17 +83,30 @@ private:
     int mHight;
     char mPsName[1024];
 
+#if QT_VERSION < 0x40000
     QFrame* mBitsFrame;
+#else /* QT4 */
+    Q3Frame* mBitsFrame;
+#endif /* QT4 */
     QTabWidget* fTab;
     QTabWidget* fStaticTab;
     QTabWidget* fDynamicTab;
+#if QT_VERSION < 0x40000
     QToolBar* fToolBar;
+#else /* QT4 */
+    Q3ToolBar* fToolBar;
+#endif /* QT4 */
     QLineEdit* mRun;
     QLineEdit* mCount;
     QLineEdit* mEvent;
     QLineEdit* mToken;
+#if QT_VERSION < 0x40000
     QHBox* mCentralWidget;
     QProgressBar* fProgressBar;
+#else /* QT4 */
+    Q3HBox* mCentralWidget;
+    Q3ProgressBar* fProgressBar;
+#endif /* QT4 */
     //Array of tabs
     // Fist index upper_level tabs
     // Second index subtabs
@@ -112,7 +148,11 @@ private:
     TString mStrFile;
     TString mStrRun;
     TString mStrStop;
+#if QT_VERSION < 0x40000
     QIntDict<TQtRootAction> fActions;
+#else /* QT4 */
+    Q3IntDict<TQtRootAction> fActions;
+#endif /* QT4 */
     QMenuBar *fMenuBar;
     
     Int_t   fGuiRefreshRate; // msec.

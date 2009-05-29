@@ -39,6 +39,9 @@
 #include "RunStatus.h"
 #include "ServerStatus.h"
 #include <qobject.h>
+#if QT_VERSION >= 0x40000
+#  include <QEvent>
+#endif /* QT4 */
 #include "GroupCollection.h"
 
 
@@ -172,7 +175,7 @@ class EvpPresenter : public QObject {
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.h,v 1.3 2009/02/04 03:43:10 dkettler Exp $
+ * $Id: EvpPresenter.h,v 1.4 2009/05/29 18:17:05 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -182,6 +185,9 @@ class EvpPresenter : public QObject {
  ***************************************************************************
  *
  * $Log: EvpPresenter.h,v $
+ * Revision 1.4  2009/05/29 18:17:05  fine
+ * merge Qt3 and Qt4  versions
+ *
  * Revision 1.3  2009/02/04 03:43:10  dkettler
  * Addes Reference Plot Option
  *

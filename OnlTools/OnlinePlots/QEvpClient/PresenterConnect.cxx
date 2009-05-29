@@ -1,15 +1,23 @@
 #include "PresenterConnect.h"
 
-#include <qfiledialog.h>
+#include "EvpPresenter.h"
+#include "PresenterGui.h"
+
+#if QT_VERSION < 0x40000
+#  include <qfiledialog.h>
+#else /* QT4 */
+#  include <q3filedialog.h>
+#endif /* QT4 */
 
 #include "TH1.h"
 #include "TCanvas.h"
 
-#include "EvpPresenter.h"
-#include "PresenterGui.h"
-
 PresenterConnect::PresenterConnect(PresenterGui* gui, EvpPresenter* pre) :
+#if QT_VERSION < 0x40000
   mGui(gui), mPresenter(pre) {
+#else /* QT4 */
+  QObject(0),mGui(gui), mPresenter(pre) {
+#endif /* QT4 */
 
   connect(mGui,SIGNAL(live()), this, SLOT(live()) ); 
   connect(mGui,SIGNAL(file()), this, SLOT(file()) ); 
@@ -50,7 +58,11 @@ void PresenterConnect::save() {
 void PresenterConnect::saveAs() {
   QString dir(EvpUtil::GetOutputPath());
   QString filter("*.root");
+#if QT_VERSION < 0x40000
   QFileDialog dialog( dir, filter, mGui, "", true );
+#else /* QT4 */
+  Q3FileDialog dialog( dir, filter, mGui, "", true );
+#endif /* QT4 */
   dialog.exec();
   if (!dialog.selectedFile().isEmpty()) {
     mPresenter->Save( dialog.selectedFile().ascii() );
@@ -68,7 +80,11 @@ void PresenterConnect::file() {
   //cout << "fileButton" << endl;
   QString dir(EvpUtil::GetOutputPath());
   QString caption("File dialog");
+#if QT_VERSION < 0x40000
   QFileDialog dialog(dir, QString(), mGui,caption);
+#else /* QT4 */
+  Q3FileDialog dialog(dir, QString(), mGui,caption);
+#endif /* QT4 */
   dialog.setCaption(caption);
   dialog.addFilter("*.root");
   //  dialog.addFilter("*.map");
@@ -83,7 +99,11 @@ void PresenterConnect::file() {
 //  } 
 
   if (iret) {
+#if QT_VERSION < 0x40000
     cerr << "### error ### Can not open file : " << mapFile << endl;
+#else /* QT4 */
+    cerr << "### error ### Can not open file : " << mapFile.toStdString() << endl;
+#endif /* QT4 */
     return;
   }
 
@@ -118,7 +138,7 @@ void PresenterConnect::update() {
   if ( mPresenter->serverStatus()->diffTimeInSec() >120.) {
     if ( mPresenter->Status() ) {
       live();
-      cout << "live again "<< endl;
+      std::cout << "live again "<< endl;
     }
   }
   emit signalEventInfo(mPresenter->run(),mPresenter->event(),mPresenter->counter(),mPresenter->token(),mPresenter->triggerBits(),mPresenter->detectorBits(),mPresenter->triggerBitsRun(),mPresenter->detectorBitsRun());

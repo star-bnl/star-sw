@@ -1,7 +1,11 @@
 #ifndef PresenterConnect_h
 #define PresenterConnect_h
 
-#include <qwidget.h>
+#if QT_VERSION < 0x40000
+#  include <qwidget.h>
+#else /* QT4 */
+#  include <QObject>
+#endif /* QT4 */
 
 class ServerStatus;
 class PresenterGui;
