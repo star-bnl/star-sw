@@ -1,3 +1,4 @@
+rm TriggerDetectorBitsInfoUi.ui EventInfoUi.ui ServerInfoUi.ui
 ln -s TriggerDetectorBitsInfoUi.ui.qt3  TriggerDetectorBitsInfoUi.ui 
 ln -s EventInfoUi.ui.qt3  EventInfoUi.ui 
 ln -s ServerInfoUi.ui.qt3 ServerInfoUi.ui
