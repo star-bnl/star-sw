@@ -2,13 +2,28 @@
 #define ServerInfo_h
 
 
-#include "ServerInfoUi.h"
+#if QT_VERSION < 0x40000
+#  include "ServerInfoUi.h"
+#else
+#  include "ui_ServerInfoUi.h"
+   typedef Ui_ServerInfoUi ServerInfoUi;
+#endif
+
 #include <time.h>
 
-class ServerInfo : public ServerInfoUi {
- public:
-  ServerInfo( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 ) : ServerInfoUi(parent, name, fl) {}
+class ServerInfo : 
+#if QT_VERSION > 0x40000
+      public QWidget,
+#endif /* QT4 */
+      public ServerInfoUi {
 
+ public:
+  ServerInfo( QWidget* parent = 0, const char* name = 0, Qt::WFlags fl = 0 ) 
+#if QT_VERSION > 0x40000
+       : QWidget(parent, fl) {if (name) setName(name); setupUi(this); }
+#else
+       : ServerInfoUi(parent, name, fl) {}
+#endif
   public slots:
     void setRequestTime(time_t t) { request->setText( toStr(t) ); }
     void setReceiveTime(time_t t) { receive->setText( toStr(t) ); }

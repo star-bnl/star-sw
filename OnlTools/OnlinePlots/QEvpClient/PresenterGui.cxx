@@ -15,28 +15,42 @@
 
 #include "qapplication.h"
 #include "qtabwidget.h"
-#include "qvbox.h"
-#include "qhbox.h"
-#include "qmainwindow.h"
-#include "qpopupmenu.h"
-#include "qvbuttongroup.h"
 #include "qpushbutton.h"
 #include "qmenubar.h"
 #include "qlayout.h"
 #include "qtooltip.h"
-#include "qiconset.h"
 #include "qpixmap.h"
-#include "qtoolbar.h"
 #include "qlineedit.h"
 #include "qlabel.h"
 #include "qcursor.h"
-#include "qprogressbar.h"
 #include "qtimer.h"
+
+#if QT_VERSION >= 0x40000
+//Added by qt3to4:
+#  include "q3vbox.h"
+#  include "q3hbox.h"
+#  include "q3mainwindow.h"
+#  include "q3popupmenu.h"
+#  include "qicon.h"
+#  include "q3progressbar.h"
+#  include "q3toolbar.h"
+#  include <QCustomEvent>
+#  include <Q3Frame>
+#  include <stack>
+#else
+#  include "qprogressbar.h"
+#  include "qtoolbar.h"
+#  include "qiconset.h"
+#  include "qvbox.h"
+#  include "qhbox.h"
+#  include "qmainwindow.h"
+#  include "qpopupmenu.h"
+#  include "qvbuttongroup.h"
+#endif /* QT4 */
 
 #include "EventInfo.h"
 #include "ServerInfo.h"
 #include "TriggerDetectorBitsInfo.h"
-
 
 char* mystrcat(const char* a, const char* b) {
   char* txt = new char[1024];
@@ -47,6 +61,7 @@ char* mystrcat(const char* a, const char* b) {
 static TQtBrowserMenuItem_t gMenu_Data[] = {
   // { filename,      tooltip,            staydown,  id,              button}
 /* File Menu */
+#if QT_VERSION < 0x40000
   { "&Save",      kFileSave,     Qt::CTRL+Qt::Key_S, "Save histograms in root file",        mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/save.xpm")    },
   { "Save &As",   kFileSaveAs,   0,                  "Save histograms in root file as ... ",mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/hdisk_t.xpm") },
   { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
@@ -56,25 +71,68 @@ static TQtBrowserMenuItem_t gMenu_Data[] = {
 mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
   { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/quit.xpm")    },
 
+#else /* QT4 */
+  { "&Save",      kFileSave,     Qt::CTRL+Qt::Key_S, "Save histograms in root file",        ":/save.xpm"    },
+  { "Save &As",   kFileSaveAs,   0,                  "Save histograms in root file as ... ",":/hdisk_t.xpm" },
+  { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            ":/printer.xpm" },
+  { "&Print All", kFilePrintAll, 0,                  "Print the TCanvas image ",            ":/printer.xpm" },
+  { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       ":/printer.xpm" },
+  { "&Reference", kReference,    Qt::CTRL+Qt::Key_R, "Open reference plots ... ",           ":/fileopen.xpm"},
+  { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           ":/quit.xpm"    },
+#endif /* QT4 */
   { "About",      kHelpAbout,      0, "", ""},
 
+#if QT_VERSION < 0x40000
   { "&Live",      kLive,         Qt::CTRL+Qt::Key_L, "Connect to current run ... ",          mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/connect.xpm")  },
   { "&File",      kFile,         Qt::CTRL+Qt::Key_F, "Open datafile or directory ... ",      mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
   { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/update.xpm")   },
   { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/update.xpm")   },  
   { "&bits",kBits,   Qt::CTRL+Qt::Key_B, "Show Trigger and Detector bits",                   mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/bits.xpm")   },
+#else /* QT4 */
+  { "&Live",      kLive,         Qt::CTRL+Qt::Key_L, "Connect to current run ... ",          ":/connect.xpm" },
+  { "&File",      kFile,         Qt::CTRL+Qt::Key_F, "Open datafile or directory ... ",      ":/fileopen.xpm"},
+  { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      ":/update.xpm"  },
+  { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   ":/update.xpm"  },
+  { "&bits",kBits,   Qt::CTRL+Qt::Key_B, "Show Trigger and Detector bits",                   ":/bits.xpm"    },
+#endif /* QT4 */
   { "View Toolbar",     kToolBar,        0, "show toolbar ",                            "" },
 
   {0,0,0,"",""}
 };
+#if QT_VERSION < 0x40000
 
+#else /* QT4 */
+class  PresenterSuspend {
+   // class to suspend signal emitting to complete initialization
+   private:
+         std::stack<QObject *> fWidgets;
+   public:
+        PresenterSuspend(){}
+       ~PresenterSuspend(){ 
+          while (!fWidgets.empty()) {
+             fWidgets.top()->blockSignals(false);
+             fWidgets.pop();
+          }
+        }
+       void operator=(QObject *o){o->blockSignals(true); fWidgets.push(o);}
+   };
+#endif /* QT4 */
 //------------------------------------------------------------------------
 PresenterGui::PresenterGui(bool isRefWindow) : 
+#if QT_VERSION < 0x40000
   QMainWindow( 0, "example application main window", WDestructiveClose | WGroupLeader ), 
+#else /* QT4 */
+  Q3MainWindow(),
+#endif /* QT4 */
   mWidth(400), mHight(500), mStrLive(" Live  "), mStrFile(" File  "), mStrRun("Running"), mStrStop("Stopped")
   ,fGuiRefreshRate(10)
 {
- 
+#if QT_VERSION >= 0x40000
+   setAttribute(Qt::WA_DeleteOnClose);
+   setWindowModality(Qt::WindowModal);
+   PresenterSuspend blockWidgets;
+   blockWidgets = this;
+#endif /* QT4 */
   // Some preparations here
   // Here is starting directory name
   SetDefaults();
@@ -87,8 +145,15 @@ PresenterGui::PresenterGui(bool isRefWindow) :
 
   setUsesTextLabel(true); // use the text labels for the tool bar buttons
   
+#if QT_VERSION < 0x40000
   mCentralWidget = new QHBox(this);
+#else /* QT4 */
+  blockWidgets = mCentralWidget = new Q3HBox(this);
+#endif /* QT4 */
   mCentralWidget->setMargin(0);
+#if QT_VERSION >= 0x40000
+  mCentralWidget->setSpacing(0); 
+#endif /* QT4 */
   setCentralWidget(mCentralWidget);
 
 
@@ -116,17 +181,27 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   //
   // main tab holding
   fTab = new QTabWidget(mCentralWidget);
+#if QT_VERSION >= 0x40000
+  blockWidgets = fTab;
+#endif /* QT4 */
   fTab->setMargin(0);
   connect(fTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
   // tab for dynamically defined groups histograms
   fDynamicTab = new QTabWidget(fTab);
+#if QT_VERSION >= 0x40000
+  blockWidgets = fDynamicTab;
+#endif /* QT4 */
   fDynamicTab->setMargin(0);
   connect(fDynamicTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
   fTab->addTab(fDynamicTab,"Extra");
   // tab for statically defined histograms
   fStaticTab = new QTabWidget(fTab);
+#if QT_VERSION >= 0x40000
+  blockWidgets = fStaticTab;
+#endif /* QT4 */
   fStaticTab->setMargin(0);
   connect(fStaticTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
+
   fTab->addTab(fStaticTab,"Standard");
  
   // create only one TQTWidget
@@ -134,6 +209,9 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   for(int i=0;i<MAX_TABS;i++) {
     if((nSubTabs[i] != 0) && (nSubTabs[i]<=MAX_SUBTABS)) {
       QTabWidget *topTab = new QTabWidget(fStaticTab);
+#if QT_VERSION >= 0x40000
+      blockWidgets = topTab;
+#endif /* QT4 */
       topTab->setMargin(0);
       connect(topTab, SIGNAL( currentChanged(QWidget*)), this, SLOT(tabChanged(QWidget*)) );  
       // Define upper level tab
@@ -142,6 +220,9 @@ PresenterGui::PresenterGui(bool isRefWindow) :
       // Note that we started with 1                         
       for(int j=1;j<=nSubTabs[i];j++) {
 	TQtWidget* w = new TQtWidget(topTab);
+#if QT_VERSION >= 0x40000
+   blockWidgets = w;
+#endif /* QT4 */
         QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
 	topTab->addTab( w ,TabNames[i][j]);
 	topTab->showPage(w);
@@ -149,7 +230,10 @@ PresenterGui::PresenterGui(bool isRefWindow) :
       }
     } else {
 	TQtWidget* w = new TQtWidget(fStaticTab);
-        QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
+#if QT_VERSION >= 0x40000
+   blockWidgets = w;
+#endif /* QT4 */
+   QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
 	fStaticTab->addTab( w ,TabNames[i][0]);
 	fStaticTab->showPage(w);
 	mZoomer->Connect(w);
@@ -163,8 +247,6 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   else {
     setCaption("STAR Histogram Presenter");
 
- //   fActions[kLive]->setOn(true);
-//    emit live();
     // Adjust the GUI refresh rate msec.
     fGuiRefreshRate = gEnv->GetValue("Online.GuiRefreshRate",100);
     fActions[kAutoUpdate]->blockSignals(true);
@@ -472,7 +554,11 @@ void PresenterGui::MakeMenuBar()
    fMenuBar = mainMenu;
 
    // File Menue
+#if QT_VERSION < 0x40000
    QPopupMenu *fileMenu      = new QPopupMenu();
+#else /* QT4 */
+   Q3PopupMenu *fileMenu      = new Q3PopupMenu();
+#endif /* QT4 */
    mainMenu->insertItem("&File",fileMenu);
    fActions[kFileSave]->addTo(fileMenu); 
    fActions[kFileSaveAs]->addTo(fileMenu); 
@@ -484,7 +570,11 @@ void PresenterGui::MakeMenuBar()
    fActions[kFileExit]->addTo(fileMenu); 
 
    // Input Menue
+#if QT_VERSION < 0x40000
    QPopupMenu *inputMenu      = new QPopupMenu();
+#else /* QT4 */
+   Q3PopupMenu *inputMenu     = new Q3PopupMenu();
+#endif /* QT4 */
    mainMenu->insertItem("&Input",inputMenu);
    fActions[kLive]->addTo(inputMenu); 
    fActions[kLive]->setToggleAction(true);
@@ -498,14 +588,22 @@ void PresenterGui::MakeMenuBar()
    fActions[kBits]->addTo(inputMenu);
 
    // Option Menue
+#if QT_VERSION < 0x40000
    QPopupMenu *optionMenu      = new QPopupMenu();
+#else /* QT4 */
+   Q3PopupMenu *optionMenu     = new Q3PopupMenu();
+#endif /* QT4 */
    mainMenu->insertItem("&Option",optionMenu);
    fActions[kToolBar]->addTo(optionMenu);
    fActions[kToolBar]->setToggleAction(true);
    fActions[kToolBar]->setOn(true);
 
    mainMenu->insertSeparator();
+#if QT_VERSION < 0x40000
    QPopupMenu *helpMenu   = new QPopupMenu();
+#else /* QT4 */
+   Q3PopupMenu *helpMenu  = new Q3PopupMenu();
+#endif /* QT4 */
    mainMenu->insertItem("&Help",helpMenu);
    helpMenu->insertSeparator();
    fActions[kHelpAbout]->addTo(helpMenu);
@@ -528,7 +626,11 @@ void PresenterGui::MakeMenuBar()
 
    // create tool bar
    if (fToolBar) { delete fToolBar; fToolBar = 0;}
+#if QT_VERSION < 0x40000
    fToolBar = new QToolBar(this);
+#else /* QT4 */
+   fToolBar = new Q3ToolBar(this);
+#endif /* QT4 */
    addDockWindow(fToolBar);
    // populate toolbar
    fActions[kFileExit]->addTo(fToolBar);
@@ -558,21 +660,38 @@ void PresenterGui::MakeConnectionFrame()
   // Mother Connection frame defined here
   //
 
+#if QT_VERSION < 0x40000
   QVBox *leftPane = new QVBox(centralWidget());
+#else /* QT4 */
+  Q3VBox *leftPane = new Q3VBox(centralWidget());
+#endif /* QT4 */
   leftPane->setMaximumSize(230,32767);
   mEventInfo = new EventInfo(leftPane);
   mServerInfo = new ServerInfo(leftPane);
 
 
 
+#if QT_VERSION < 0x40000
   //fStarLogo = new  QPushButton(QIconSet(QPixmap("../images/starlogo_1.xpm")),"",leftPane);
+#else /* QT4 */
+  //fStarLogo = new  QPushButton(QIcon(":/starlogo_1.xpm"),"",leftPane);
+#endif /* QT4 */
   //connect(fStarLogo, SIGNAL(clicked()) ,this, SLOT(DoUpdateButton()) );
+#if QT_VERSION < 0x40000
   // QToolTip::add(fStarLogo,"Experiment shutdown. Don't push this button!");
   fProgressBar = new QProgressBar(leftPane,"Progress");
+#else /* QT4 */
+  // fStarLogo->setToolTip("Experiment shutdown. Don't push this button!");
+  fProgressBar = new Q3ProgressBar(leftPane,"Progress");
+#endif /* QT4 */
   //fProgressBar->setMaximumSize(leftPane->width(),25);
   fProgressBar->setProgress(0,10);
   
+#if QT_VERSION < 0x40000
   mBitsFrame = new QFrame(0,"Trigger/ Detector-Bits");
+#else /* QT4 */
+  mBitsFrame = new Q3Frame(0,"Trigger/ Detector-Bits");
+#endif /* QT4 */
   mTriggerDetectorBitsInfo = new TriggerDetectorBitsInfo(mBitsFrame);
   mBitsFrame->adjustSize();
 }
