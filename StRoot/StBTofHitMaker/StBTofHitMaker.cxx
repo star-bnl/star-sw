@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.9 2009/04/08 04:04:30 dongx Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.10 2009/06/02 20:04:54 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -202,7 +202,7 @@ Int_t StBTofHitMaker::UnpackTofRawData()
         continue;
       }            
       if( (dataword&0xF0000000)>>28 == 0x2) {   /// trigger time here.
-        mTriggerTimeStamp[ifib] = dataword;
+        if(mTriggerTimeStamp[ifib]==0) mTriggerTimeStamp[ifib] = dataword;  // Save the first trigger time in each fiber
         continue; 
       } 
       if( (dataword&0xF0000000)>>28 == 0xC) {   /// geographical data
