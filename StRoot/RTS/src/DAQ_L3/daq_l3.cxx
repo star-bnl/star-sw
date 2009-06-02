@@ -37,7 +37,7 @@ daq_l3::daq_l3(daqReader *rts_caller)
 	// dname is ignored 
 	rts_id  = L3_ID ;
 	name = rts2name(rts_id) ;
-	sfs_name = "gl3" ;
+	sfs_name = "l3" ;
 	caller = rts_caller ;
 	if(caller) caller->insert(this, rts_id) ;
 
@@ -95,7 +95,15 @@ daq_dta *daq_l3::handle_legacy()
 
 		LOG(DBG,"full_name %s",full_name) ;
 
-		if(!full_name) return 0 ;
+		if(!full_name) {
+			sprintf(str,"l3/l3_gtd") ;
+			full_name = caller->get_sfs_name(str) ;
+
+			LOG(DBG,"full_name %s",full_name) ;
+
+
+			if(!full_name) 	return 0 ;
+		}
 
 		int bytes = caller->sfs->fileSize(full_name) ;
 
