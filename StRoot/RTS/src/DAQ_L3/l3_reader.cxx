@@ -33,6 +33,7 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 	struct L3_P *l3p ;
 	int len, off ;
 	char *l3_gtd_start = 0 ;
+	int fy09_format = 0 ;
 
 	l3->max_channels = 1280000 ;
 	l3->channels = 0 ;
@@ -49,8 +50,12 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 
 	if(datap == NULL) return 0 ;
 
-	if(driver) {	// "m" points directly to L3_GTD!
+	if(driver) {	// "m" points directly to L3_GTD! Used in FY09 HLT data
 		l3_gtd_start = m ;	// directly points to L3_GTD!		
+		fy09_format = 1 ;
+		
+		l3->mode = 0 ;	// this holds the trigger def
+		l3->channels = 0 ;	// this holds the sequnce number
 	}
 	else {
 
@@ -90,6 +95,11 @@ int l3_reader(char *m, struct l3_t *l3, u_int driver)
 // Tonko, sanity check
 		if(checkBank(l3gtd->bh.bank_type,"L3_GTD") < 0) {
 			return -1 ;
+		}
+
+		if(fy09_format) {	// override stuff
+			l3->mode = l2h32(l3gtd->bh.crc) ;	// contains the decision!
+			l3->channels = l2h32(l3gtd->bh.w9) ;	// contains the event sequence number from trigger!
 		}
 
 	      l3->tracks_num = l2h32(l3gtd->nTracks);
