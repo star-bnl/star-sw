@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include <rtsLog.h>	// for my LOG() call
-
+#include <rtsSystems.h>
 
 // this needs to be always included
 #include <DAQ_READER/daqReader.h>
@@ -132,6 +132,19 @@ int main(int argc, char *argv[])
 
 		if(print_det[0]) printf("***** Seq #%d, token %d\n",evp->seq,evp->token) ;
 		/***************** let's do simple detectors; the ones which only have legacy *****/
+
+		if(print_det[0]) {
+		  if(strcmp(print_det, "tinfo") == 0) {
+
+		    
+		    
+		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%x\n",
+			   evp->seq,
+			   evp->token,
+			   evp->detectors,
+			   evp->daqbits);
+		  }
+		}
 
 		dd = evp->det("sc")->get() ;
 		if(dd && dd->iterate()) {
