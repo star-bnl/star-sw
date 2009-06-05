@@ -8,8 +8,8 @@
 #define L3_MAX_NR_TRACKS 10000
 
 struct l3_t {
-    int mode;
-    int channels;
+    int mode;	// for FY09 HLT this contains the "decision"!
+    int channels;	// for FY09 HLT this contains the unique event sequence!
     int max_channels;
     
     u_int tracks_num;
