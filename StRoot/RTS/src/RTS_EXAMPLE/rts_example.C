@@ -43,6 +43,7 @@ static int tpx_doer(daqReader *rdr, char *do_print) ;
 static int trg_doer(daqReader *rdr, char *do_print) ;
 static int emc_pseudo_doer(daqReader *rdr, char *do_print) ;
 static int pp2pp_doer(daqReader *rdr, char *do_print) ;
+static int l3_doer(daqReader *rdr, char *do_print) ;
 
 int main(int argc, char *argv[])
 {
@@ -134,10 +135,7 @@ int main(int argc, char *argv[])
 		/***************** let's do simple detectors; the ones which only have legacy *****/
 
 		if(print_det[0]) {
-		  if(strcmp(print_det, "tinfo") == 0) {
-
-		    
-		    
+		  if(strcmp(print_det, "tinfo") == 0) {		    
 		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%x\n",
 			   evp->seq,
 			   evp->token,
@@ -164,19 +162,6 @@ int main(int argc, char *argv[])
 
 		dd = evp->det("ftp")->get("legacy") ;
 		if(dd) LOG(INFO,"FTP found") ;
-
-		dd = evp->det("l3")->get("legacy") ;
-		if(dd && dd->iterate()) {
-			LOG(INFO,"L3 found") ;
-			if(strcasecmp(print_det,"l3")==0) {
-				l3_t *l3_p = (l3_t *) dd->Void ;
-
-				printf("GL3: tracks %d, clusters %d, vertex %f:%f:%f\n",
-				       l3_p->tracks_num, l3_p->cluster_num,
-				       l3_p->xVertex, l3_p->yVertex, l3_p->xVertex) ;
-			}
-		}
-				
 				
 		dd = evp->det("rich")->get("legacy") ;
 		if(dd) LOG(INFO,"RIC found") ;
@@ -227,6 +212,10 @@ int main(int argc, char *argv[])
 
 		/*************************** PP2PP **********************/
 		if(pp2pp_doer(evp,print_det)) LOG(INFO,"PP2PP found") ;
+
+
+		/*************************** L3/HLT **************************/
+		if(l3_doer(evp,print_det)) LOG(INFO,"L3/HLT found") ;
 
 		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
 #ifdef INSIST_ON_EMC_PSEUDO
@@ -663,6 +652,43 @@ static int pp2pp_doer(daqReader *rdr, char *do_print)
 				for(int c=0;c<PP2PP_SVX_CH;c++) {
 					// print only found channels via the "trace" array
 					if(d->trace[c]) printf("   %3d: %3d [0x%02X], trace %d\n",c,d->adc[c],d->adc[c],d->trace[c]) ;
+				}
+			}
+
+		}
+	}
+
+	return found ;
+}
+
+static int l3_doer(daqReader *rdr, char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"l3")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	dd = rdr->det("l3")->get("legacy") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			l3_t *l3_p = (l3_t *) dd->Void ;
+
+			if(do_print) {
+				printf("L3/HLT: sequence %u, decision 0x%X: tracks %d, clusters %d, vertex %f:%f:%f\n",
+				       l3_p->channels, l3_p->mode, // note comment in daq_l3.h!
+				       l3_p->tracks_num, l3_p->cluster_num,
+				       l3_p->xVertex, l3_p->yVertex, l3_p->xVertex) ;
+
+
+				for(u_int i=0;i<l3_p->tracks_num;i++) {
+					// just an example of what one would print out...
+					printf("  track %d: Pt %f, charge %d, nHits %d\n",i+1, 
+					       l3_p->track[i].pt, l3_p->track[i].q, l3_p->track[i].nHits) ;
+
 				}
 			}
 
