@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: StMCStepping.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
 //
 //
 // Class StMCStepping
@@ -111,6 +111,7 @@ void StMCStepping::Case()
   fVolume = fNode->GetVolume();
   fMedium = fVolume->GetMedium();
   fMaterial = fMedium->GetMaterial();
+  fX0 = fMaterial->GetRadLen();
   myMC = gMC;
   fCase = 0;
 //if(myMC->IsNewTrack 		 ()) fCase |= kNewTrack;
@@ -150,6 +151,7 @@ void StMCStepping::Case()
       fCurrentPosition = fEnterPosition;
       myMC->TrackMomentum(fEnterMomentum);
       fCurrentMomentum = fEnterMomentum;
+      assert(fCurrentMomentum[3]>1e-6);
       fEnterLength     = myMC->TrackLength();
       fCurrentLength   = fEnterLength;
 //      fCharge = myMC->TrackCharge();
@@ -169,6 +171,7 @@ void StMCStepping::Case()
     case kTrackDisappeared|kTrackOut:
       myMC->TrackPosition(fCurrentPosition);
       myMC->TrackMomentum(fCurrentMomentum);
+      assert(fCurrentMomentum[3]>1e-6);
       fCurrentLength     = myMC->TrackLength();
       fEdep   = myMC->Edep();
       fEtot   = myMC->Etot();

@@ -1,4 +1,4 @@
-// $Id: StVMCApplication.cxx,v 1.1 2009/03/25 23:15:11 perev Exp $
+// $Id: StVMCApplication.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
 // Class StVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -36,16 +36,9 @@ int StVMCApplication::Init()
   return 0;
 }
 //_____________________________________________________________________________
-int StVMCApplication::AddStepping(GCall *gc) 
-{  
-   mStepping[mNStepping++] = gc;
-   assert(mNStepping*sizeof(void*)<=sizeof(mStepping));
-   return mNStepping;
-}
-//_____________________________________________________________________________
 void StVMCApplication::Stepping() 
 {   
-  for (int i=0;i<mNStepping;i++) {(*mStepping[i])();}
+  (*mStepping)();
 }
 //_____________________________________________________________________________
 void StVMCApplication::GeneratePrimaries() 

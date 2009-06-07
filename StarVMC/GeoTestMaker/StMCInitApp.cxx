@@ -1,4 +1,4 @@
-// $Id: StMCInitApp.cxx,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: StMCInitApp.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
 //
 //
 // Class StMCInitApp
@@ -25,6 +25,15 @@ ClassImp(StMCInitApp)
 //_____________________________________________________________________________
 StMCInitApp::StMCInitApp()  
 {
+fNPrim  = 10;
+fGCode	= 48;
+fPt [0]	=    1;	fPt [1]	=   1;
+fEta[0] =   -6; fEta[1] =   6;
+fPhi[0] = -180;	fPhi[1] = 180;
+fZ  [0] =    0;	fZ  [1] =   0;
+fOpt = "G";
+printf("*%p = %g %g\n",fPt,fPt [0],fPt [1]);
+
 }   
 //_____________________________________________________________________________
 int  StMCInitApp::Fun()
@@ -35,7 +44,13 @@ int  StMCInitApp::Fun()
   StMCConstructGeometry *geo = new StMCConstructGeometry(app->GetName());
   app->SetConstructGeometry(geo);
 
-  StMCSimplePrimaryGenerator *gen = new StMCSimplePrimaryGenerator( 10, 48, 1.,1., 0.,6, -15,15,  0.,0., "G");
+  StMCSimplePrimaryGenerator *gen = new StMCSimplePrimaryGenerator( 
+     fNPrim, fGCode, 
+     fPt [0]	,fPt [1], 
+     fEta[0]	,fEta[1], 
+     fPhi[0]	,fPhi[1],  
+     fZ  [0]	,fZ  [1], fOpt);
+
   app->SetPrimaryGenerator(gen);
 
 

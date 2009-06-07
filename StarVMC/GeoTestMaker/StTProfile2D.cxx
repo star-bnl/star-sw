@@ -4,6 +4,22 @@
 
 ClassImp(StTProfile2D)
 //______________________________________________________________________________
+StTProfile2D::StTProfile2D():TProfile2D()
+{
+ fPainter = new StTHistPainter();
+ fPainter->SetHistogram(this);
+}
+//______________________________________________________________________________
+StTProfile2D::StTProfile2D(const char* name, const char* title
+                          ,Int_t nbinsx, Double_t xlow, Double_t xup
+			  ,Int_t nbinsy, Double_t ylow, Double_t yup
+			  ,double,double, Option_t* option):
+  TProfile2D(name,title,nbinsx,xlow,xup,nbinsy,ylow,yup,option)
+{
+ fPainter = new StTHistPainter();
+ fPainter->SetHistogram(this);
+}
+//______________________________________________________________________________
 TProfile *StTProfile2D::ProfileX(const char *name, Int_t firstybin, Int_t lastybin, Option_t *option) const
 {
    // *-*-*-*-*Project a 2-D histogram into a profile histogram along X*-*-*-*-*-*
@@ -147,4 +163,175 @@ TProfile *StTProfile2D::DoProfile(bool onX, const char *name, Int_t firstbin, In
 
    return h1;
 }
+//______________________________________________________________________________
+//______________________________________________________________________________
+//______________________________________________________________________________
+#include "Riostream.h"
+#include "TROOT.h"
+#include "TClass.h"
+#include "TSystem.h"
+#include "THistPainter.h"
+#include "TH3.h"
+#include "TH2.h"
+#include "TF2.h"
+#include "TF3.h"
+#include "TCutG.h"
+#include "TMatrixDBase.h"
+#include "TMatrixFBase.h"
+#include "TVectorD.h"
+#include "TVectorF.h"
+#include "TPad.h"
+#include "TPaveStats.h"
+#include "TFrame.h"
+#include "TLatex.h"
+#include "TLine.h"
+#include "TPolyLine.h"
+#include "TPoints.h"
+#include "TStyle.h"
+#include "TGraph.h"
+#include "TPie.h"
+#include "TGaxis.h"
+#include "TColor.h"
+#include "TPainter3dAlgorithms.h"
+#include "TGraph2DPainter.h"
+#include "TGraphDelaunay.h"
+#include "TView.h"
+#include "TMath.h"
+#include "TRandom.h"
+#include "TObjArray.h"
+#include "TVectorD.h"
+#include "Hoption.h"
+#include "Hparam.h"
+#include "TPluginManager.h"
+#include "TPaletteAxis.h"
+#include "TCrown.h"
+#include "TVirtualPadEditor.h"
+#include "TEnv.h"
+#include "TPoint.h"
 
+ClassImp(StTHistPainter)
+
+extern Hoption_t Hoption;
+extern Hparam_t  Hparam;
+//______________________________________________________________________________
+void StTHistPainter::PaintColorLevels(Option_t *)
+{
+   /* Begin_html
+   <a href="#HP14">Control function to draw a 2D histogram as a color plot.</a>
+   End_html */
+
+   Double_t z, zc, xk, xstep, yk, ystep, xlow, xup, ylow, yup;
+
+   Double_t zmin = fH->GetMinimum();
+   Double_t zmax = fH->GetMaximum();
+   if (Hoption.Logz) {
+      if (zmin > 0) {
+         zmin = TMath::Log10(zmin);
+         zmax = TMath::Log10(zmax);
+      } else {
+         return;
+      }
+   }
+
+   Double_t dz = zmax - zmin;
+
+   if (dz <= 0) return;
+
+   Style_t fillsav   = fH->GetFillStyle();
+   Style_t colsav    = fH->GetFillColor();
+   fH->SetFillStyle(1001);
+   fH->TAttFill::Modify();
+
+   // Initialize the levels on the Z axis
+   Int_t ncolors  = gStyle->GetNumberOfColors();
+   Int_t ndiv   = fH->GetContour();
+   if (ndiv == 0 ) {
+      ndiv = gStyle->GetNumberContours();
+      fH->SetContour(ndiv);
+   }
+   Int_t ndivz  = TMath::Abs(ndiv);
+   if (fH->TestBit(TH1::kUserContour) == 0) fH->SetContour(ndiv);
+   Double_t scale = ndivz/dz;
+
+   Int_t color;
+   for (Int_t j=Hparam.yfirst; j<=Hparam.ylast;j++) {
+      yk    = fYaxis->GetBinLowEdge(j);
+      ystep = fYaxis->GetBinWidth(j);
+      if (Hoption.System == kPOLAR && yk<0) yk= 2*TMath::Pi()+yk;
+      for (Int_t i=Hparam.xfirst; i<=Hparam.xlast;i++) {
+         Int_t bin  = j*(fXaxis->GetNbins()+2) + i;
+         xk    = fXaxis->GetBinLowEdge(i);
+         xstep = fXaxis->GetBinWidth(i);
+         if (!IsInside(xk+0.5*xstep,yk+0.5*ystep)) continue;
+         z     = fH->GetBinContent(bin);
+//VP     if (z == 0 && (zmin >= 0 || Hoption.Logz)) continue; // don't draw the empty bins for histograms with positive content
+         if (z == 0 && (fH->GetBinError(bin) <=0 || Hoption.Logz)) continue; // don't draw the empty bins for histograms with positive content
+         if (Hoption.Logz) {
+            if (z > 0) z = TMath::Log10(z);
+            else       z = zmin;
+         }
+         if (z < zmin) continue;
+         xup  = xk + xstep;
+         xlow = xk;
+         if (Hoption.Logx) {
+            if (xup > 0)  xup  = TMath::Log10(xup);
+            else continue;
+            if (xlow > 0) xlow = TMath::Log10(xlow);
+            else continue;
+         }
+         yup  = yk + ystep;
+         ylow = yk;
+         if (Hoption.System != kPOLAR) {
+            if (Hoption.Logy) {
+               if (yup > 0)  yup  = TMath::Log10(yup);
+               else continue;
+               if (ylow > 0) ylow = TMath::Log10(ylow);
+               else continue;
+            }
+            if (xup  < gPad->GetUxmin()) continue;
+            if (yup  < gPad->GetUymin()) continue;
+            if (xlow > gPad->GetUxmax()) continue;
+            if (ylow > gPad->GetUymax()) continue;
+            if (xlow < gPad->GetUxmin()) xlow = gPad->GetUxmin();
+            if (ylow < gPad->GetUymin()) ylow = gPad->GetUymin();
+            if (xup  > gPad->GetUxmax()) xup  = gPad->GetUxmax();
+            if (yup  > gPad->GetUymax()) yup  = gPad->GetUymax();
+         }
+
+         if (fH->TestBit(TH1::kUserContour)) {
+            zc = fH->GetContourLevelPad(0);
+            if (z < zc) continue;
+            color = -1;
+            for (Int_t k=0; k<ndiv; k++) {
+               zc = fH->GetContourLevelPad(k);
+               if (z < zc) {
+                  continue;
+               } else {
+                  color++;
+               }
+            }
+         } else {
+            color = Int_t(0.01+(z-zmin)*scale);
+         }
+
+         Int_t theColor = Int_t((color+0.99)*Float_t(ncolors)/Float_t(ndivz));
+         if (theColor > ncolors-1) theColor = ncolors-1;
+         fH->SetFillColor(gStyle->GetColorPalette(theColor));
+         fH->TAttFill::Modify();
+         if (Hoption.System != kPOLAR) {
+            gPad->PaintBox(xlow, ylow, xup, yup);
+         } else  {
+            TCrown crown(0,0,xlow,xup,ylow*TMath::RadToDeg(),yup*TMath::RadToDeg());
+            crown.SetFillColor(gStyle->GetColorPalette(theColor));
+            crown.Paint();
+         }
+      }
+   }
+
+   if (Hoption.Zscale) PaintPalette();
+
+   fH->SetFillStyle(fillsav);
+   fH->SetFillColor(colsav);
+   fH->TAttFill::Modify();
+
+}
