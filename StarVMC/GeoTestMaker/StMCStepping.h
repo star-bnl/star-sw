@@ -1,4 +1,4 @@
-// $Id: StMCStepping.h,v 1.1 2009/03/25 23:15:11 perev Exp $
+// $Id: StMCStepping.h,v 1.2 2009/06/07 02:28:36 perev Exp $
 //
 //
 // Class StMCStepping
@@ -75,6 +75,7 @@ static  TString KazeAsString(int kase);
    float  fEdep;
    float  fEtot;
    float  fLife;
+   float  fX0;
    double fTrackNumber;
    int    fPDG;
    int    fPid;

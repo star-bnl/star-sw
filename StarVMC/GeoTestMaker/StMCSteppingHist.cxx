@@ -1,4 +1,4 @@
-// $Id: StMCSteppingHist.cxx,v 1.1 2009/03/25 23:15:11 perev Exp $
+// $Id: StMCSteppingHist.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
 //
 //
 // Class StMCSteppingHist
@@ -368,7 +368,7 @@ void StMCSteppingHist::FillHist()
    
    double r1 = fEnterPosition.Perp();
    double r2 = fCurrentPosition.Perp();
-   double eta = fCurrentPosition.Eta();
+   double eta = fCurrentMomentum.Eta();
    double phi = fCurrentMomentum.Phi()/M_PI*180;
 //   printf("vol=%s.%s radL=%g\n",fVolume->GetName(),fMaterial->GetName(),fMaterial->GetRadLen());
    double radl = fMaterial->GetRadLen(); if (radl<=0) return;

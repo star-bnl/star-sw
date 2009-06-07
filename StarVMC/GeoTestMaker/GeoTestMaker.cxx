@@ -1,7 +1,10 @@
-//*-- Author : Yuri Fisyak
+//*-- Author : Victor Perev
 // 
-// $Id: GeoTestMaker.cxx,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: GeoTestMaker.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
 // $Log: GeoTestMaker.cxx,v $
+// Revision 1.2  2009/06/07 02:28:36  perev
+// 1st reasonable version with orth2
+//
 // Revision 1.1  2009/03/25 23:15:10  perev
 // New VMC maker
 //
@@ -62,7 +65,8 @@ GeoTestMaker::Init()
 #include "TVirtualMC.h"
 #include "TGeant3TGeo.h"
 #include "StMCInitApp.h"
-#include "StMCSteppingHist.h"
+//#include "StMCSteppingHist.h"
+#include "StMCStepping2Hist.h"
 
 ClassImp(GeoTestMaker);
 
@@ -77,9 +81,19 @@ gSystem->AddIncludePath("${STAR}2/StarDb/VmcGeometry");
 int GeoTestMaker::Init() 
 {
   StVMCApplication *app = new StVMCApplication(fGeo, "StVMC application");
-  app->SetInit(new StMCInitApp);
-  StMCSteppingHist *steps =   new StMCSteppingHist(fGeo);
-  app->AddStepping(steps);
+  StMCInitApp *ini = new StMCInitApp();
+
+  if (*SAttr("PtMin" )) {ini->SetPt (DAttr( "PtMin"),DAttr( "PtMax"));}
+  if (*SAttr("EtaMin")) {ini->SetEta(DAttr("EtaMin"),DAttr("EtaMax"));}
+  if (*SAttr("PhiMin")) {ini->SetEta(DAttr("PhiMin"),DAttr("PhiMax"));}
+  if (*SAttr("ZMin"  )) {ini->SetZ  (DAttr(  "ZMin"),DAttr(  "ZMax"));}
+
+  app->SetInit(ini);
+//StMCSteppingHist *steps =   new StMCSteppingHist(fGeo);
+  StMCStepping2Hist *steps =   new StMCStepping2Hist(fGeo);
+  app->SetStepping(steps);
+  if (*SAttr("SteppingDebug")) {steps->SetDebug(IAttr("SteppingDebug"));}
+  
   app->Init();
   return StMaker::Init();
 }
@@ -98,7 +112,8 @@ int GeoTestMaker::Make()
 int GeoTestMaker::Finish()
 {
   //  StMCSteppingHist::Instance()->Finish();
-  StMCSteppingHist::Instance()->Finish();
+//StMCSteppingHist::Instance()->Finish();
+  StMCStepping2Hist::Instance()->Finish();
   return StMaker::Finish();
 }
 

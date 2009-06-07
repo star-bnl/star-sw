@@ -1,4 +1,4 @@
-// $Id: GCall.h,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: GCall.h,v 1.2 2009/06/07 02:28:36 perev Exp $
 //
 //
 // Class GCall
@@ -31,10 +31,12 @@ class GCall : public TNamed
 
     int operator()(){return Fun();}
     int operator()(const double* d1, double* d2) {return FunDD(d1,d2);}
-
+    void SetDebug(int db=1)	{fDebug = db  ;}
+    int  GetDebug() const 	{return fDebug;}
 
   protected:
     // data members
+  int fDebug;
   TVirtualMC            *fMC; // .............. Interface to Monte Carlo 
   TVirtualMCApplication *fMCA;// .............. Interface to MonteCarlo application 
   TVirtualMCStack       *fStack;

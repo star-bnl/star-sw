@@ -1,4 +1,4 @@
-// $Id: GCall.cxx,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: GCall.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
 //
 //
 // Class GCall
@@ -15,6 +15,7 @@ ClassImp(GCall)
 GCall::GCall(const char *name,const char *tit)
   : TNamed(name,tit),fMC(0),fMCA(0)
 {
+  fDebug=0;
 }   
 //_____________________________________________________________________________
  void GCall::SetInterfaces(TVirtualMCApplication *mca,TVirtualMC *mc,TVirtualMCStack *stk)

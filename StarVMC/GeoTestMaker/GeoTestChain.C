@@ -9,7 +9,12 @@ if (!loaded) Load();
 StChain *chain =  new StChain;
 TString tsy(gy);
 gSystem->ExpandPathName(tsy);
- new GeoTestMaker("GeoTest",tsy.Data(),20000);
+StMaker *mk = new GeoTestMaker("GeoTest",tsy.Data(), 50000);
+// StMaker *mk = new GeoTestMaker("GeoTest",tsy.Data(),1);
+// mk->SetAttr("EtaMin",0.50);
+// mk->SetAttr("EtaMax",0.51);
+// mk->SetAttr("SteppingDebug",1);
+
  chain->Init();
  chain->EventLoop(1);
  chain->Finish();
@@ -18,7 +23,7 @@ gSystem->ExpandPathName(tsy);
 
 void Load()
 {
-
+TH1D h1d; h1d.GetPainter();
 gSystem->Load("libVMC.so");
 gSystem->Load("St_base.so");
 gSystem->Load("St_Tables.so");

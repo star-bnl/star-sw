@@ -1,4 +1,4 @@
-// $Id: StVMCApplication.h,v 1.1 2009/03/25 23:15:11 perev Exp $
+// $Id: StVMCApplication.h,v 1.2 2009/06/07 02:28:36 perev Exp $
 // Class StVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -31,7 +31,7 @@ class StVMCApplication : public TVirtualMCApplication
   virtual void AddParticles() {}
 //functions setters
  void SetInit             (GCall* gc) { mInit             =gc;}
- int  AddStepping(GCall *gc = 0);
+ void SetStepping         (GCall *gc) { mStepping         =gc;}
  void SetPrimaryGenerator (GCall* gc) { mPrimaryGenerator =gc;}
  void SetConstructGeometry(GCall* gc) { mConstructGeometry=gc;}
  void SetInitGeometry     (GCall* gc) { mInitGeometry	  =gc;}
@@ -42,9 +42,21 @@ class StVMCApplication : public TVirtualMCApplication
  void SetFinishPrimary 	  (GCall* gc) { mFinishPrimary	  =gc;}
  void SetFinishEvent      (GCall* gc) { mFinishEvent	  =gc;}
  void SetField            (GCall* gc) { mField		  =gc;}
-
  void SetDebug            (int db=1);
 
+//functions getters
+ GCall *GetInit             () { return mInit             ;}
+ GCall *GetStepping         () { return mStepping         ;}
+ GCall *GetPrimaryGenerator () { return mPrimaryGenerator ;}
+ GCall *GetConstructGeometry() { return mConstructGeometry;}
+ GCall *GetInitGeometry     () { return mInitGeometry	  ;}
+ GCall *GetBeginEvent  	    () { return mBeginEvent	  ;}
+ GCall *GetBeginPrimary	    () { return mBeginPrimary	  ;}
+ GCall *GetPreTrack	    () { return mPreTrack	  ;}
+ GCall *GetPostTrack	    () { return mPostTrack	  ;}
+ GCall *GetFinishPrimary    () { return mFinishPrimary	  ;}
+ GCall *GetFinishEvent      () { return mFinishEvent	  ;}
+ GCall *GetField            () { return mField		  ;}
 
     
   virtual double TrackingRmax() const { return 1.e4; }
@@ -59,7 +71,7 @@ class StVMCApplication : public TVirtualMCApplication
  int    mDebug;
  int    mNStepping;
  GCall* mInit;  
- GCall* mStepping[10];  
+ GCall* mStepping;  
  GCall* mPrimaryGenerator;  
  GCall* mConstructGeometry;
  GCall* mInitGeometry;
