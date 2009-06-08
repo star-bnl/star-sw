@@ -16,17 +16,12 @@ public:
 	tpxPed() ;
 	~tpxPed() ;
 
-	struct peds {
-		double ped[512] ;
-		double rms[512] ;
-		u_short cou[512] ;
-	} *ped_store ;
 
+	int sector ; // if fee is overriden...
+	int valid ;	// when calced or loaded
 
-	void init() ;					// mallocs (if nece) and clears ped_store
-	void accum(tpx_altro_struct *a) ;	// adds values into ped_store
+	void init(int active_rbs) ;					// mallocs (if nece) and clears ped_store
 	void accum(char *evbuff, int bytes) ;
-
 	void calc() ;					// calculates mean/rms into ped_store
 
 	int to_altro(char *buff, int rb, int timebins) ;		// to ALTRO format from ped_store
@@ -39,23 +34,34 @@ public:
 
 	void kill_bad(int row, int pad) ;		// kills this specific pad in ped_store
 
-	u_int evts[6] ;	// RDOs count from 0 here!
-	u_int valid_evts[6] ;
 
 	void smooth() ;					// from ped_store to ped_store
 	int summarize(FILE *log=0) ;
 
-	int sector ; // if fee is overriden...
+
 
 private:
+	struct peds {
+		double ped[512] ;
+		double rms[512] ;
+		u_short cou[512] ;
+	} *ped_store ;
+
 	int smoothed ;	// boolean
 
-	int valid ;	// when calced or loaded
+
 
 	int sizeof_ped ;
 
-	struct peds *get(int row, int pad) ;		// returns pointer to ped_store
+	u_int evts[6] ;	// RDOs count from 0 here!
+	u_int valid_evts[6] ;
+	int rb_mask ;
 
+	void accum(tpx_altro_struct *a) ;	// adds values into ped_store
+
+	struct peds *get(int row, int pad) {		// returns pointer to ped_store
+		return (ped_store + row*183 + pad) ;
+	}
 } ;
 
 #endif
