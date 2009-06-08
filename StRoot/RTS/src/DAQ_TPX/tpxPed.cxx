@@ -20,6 +20,8 @@ tpxPed::tpxPed()
 {
 	smoothed = 0 ;
 	valid = 0 ;
+	rb_mask = 0x3F ;	// assume all..
+
 	memset(evts,0,sizeof(evts)) ;
 	memset(valid_evts,0,sizeof(valid_evts)) ;
 	
@@ -39,18 +41,21 @@ tpxPed::~tpxPed()
 	return ;
 }
 
+#if 0
 tpxPed::peds *tpxPed::get(int row, int pad)
 {
 	return (ped_store + row*183 + pad) ;
 }
+#endif
 
-void tpxPed::init()
+void tpxPed::init(int active_rbs)
 {
 	smoothed = 0 ;
 	valid = 0 ;
 
 	memset(evts,0,sizeof(evts)) ;
 	memset(valid_evts,0,sizeof(valid_evts)) ;
+	rb_mask = active_rbs ;
 
 	if(ped_store == 0) {
 		ped_store = (struct peds *) malloc(sizeof_ped) ;
@@ -58,7 +63,7 @@ void tpxPed::init()
 
 	memset(ped_store,0,sizeof_ped) ;
 
-	LOG(TERR,"Pedestals zapped.") ;
+	LOG(TERR,"Pedestals zapped: sector %2d, rb_mask 0x%02X.", sector, rb_mask) ;
 }
 
 /*
@@ -156,8 +161,13 @@ void tpxPed::accum(tpx_altro_struct *a)
 void tpxPed::calc()
 {
 	int r,p,t ;
+	int bad ;
+	const u_int MIN_EVENTS = 500 ;
 
-	LOG(TERR,"Calculating pedestals...") ;
+	LOG(NOTE,"Calculating pedestals for sector %2d",sector) ;
+
+	bad = 0 ;
+
 	for(r=0;r<=45;r++) {
 	for(p=0;p<=182;p++) {
 		struct peds *ped = get(r,p) ;
@@ -185,15 +195,24 @@ void tpxPed::calc()
 	}
 
 	for(r=0;r<6;r++) {
-		if(evts[r]) {	// RDO got some events
-			if(valid_evts[r]<10) {
-				LOG(ERR,"RDO %d: not enough pedestal events with required characteristics: %d/%d",r+1,valid_evts[r],evts[r]) ;
+		if(rb_mask & (1<<r)) {
+			if(valid_evts[r] < MIN_EVENTS) {
+				bad = 1 ;
+				LOG(ERR,"RDO %d: not enough valid events (%d < %d) [%d]",r+1,valid_evts[r],MIN_EVENTS,evts[r]) ;
 			}
 		}
 	}
 
 	LOG(TERR,"Pedestals calculated. RDO counts: %u %u %u %u %u %u",valid_evts[0],valid_evts[1],valid_evts[2],valid_evts[3],valid_evts[4],valid_evts[5]) ;
-	valid = 1 ;
+
+	valid = ! bad ;	// if there's any problem I invalidate validity!
+
+	if(valid) {
+		LOG(TERR,"Pedestals calculated. RDO counts: %u %u %u %u %u %u",valid_evts[0],valid_evts[1],valid_evts[2],valid_evts[3],valid_evts[4],valid_evts[5]) ;
+	}
+	else {
+		LOG(ERR,"Pedestals calculated. RDO counts: %u %u %u %u %u %u",valid_evts[0],valid_evts[1],valid_evts[2],valid_evts[3],valid_evts[4],valid_evts[5]) ;
+	}
 
 	return ;
 }
@@ -217,7 +236,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 	char *rbuff = buff ;
 
 	if(!valid || !smoothed) {
-		LOG(ERR,"ped::to_evb peds are bad: valid %d, smoothed %d",valid,smoothed) ;
+		LOG(ERR,"ped::to_altro peds are bad: valid %d, smoothed %d",valid,smoothed) ;
 	}
 
 	LOG(NOTE,"Preparing pedestals for RDO %d...",rb) ;
@@ -321,10 +340,12 @@ int tpxPed::to_evb(char *buff)
 	char *rbuff = buff ;	// remember
 
 	if(!valid || !smoothed) {
+		// log error but continue...
 		LOG(ERR,"ped::to_evb peds are bad: valid %d, smoothed %d",valid,smoothed) ;
 	}
 
-	LOG(TERR,"Preparing pedestals for later EVB...") ;
+	LOG(NOTE,"Preparing pedestals for later EVB...") ;
+
 	for(r=0;r<=45;r++) {
 		for(p=1;p<=tpc_rowlen[r];p++) {
 			struct peds *ped = get(r, p) ;
@@ -357,7 +378,7 @@ int tpxPed::to_evb(char *buff)
 	// short row|pad
 	// short: 6bit RMS, 10bit ped
 
-	LOG(TERR,"Pedestals prepared for later EVB: %d bytes",rbuff-buff) ;
+	LOG(TERR,"Pedestals prepared for later EVB, sector %2d: %d bytes",sector,rbuff-buff) ;
 	return (rbuff-buff) ;
 }
 
@@ -366,8 +387,8 @@ int tpxPed::from_cache(char *fname)
 	FILE *f ;
 	char *fn ;
 
-	init() ;	// to clear
-
+	init(0x3F) ;	// to clear
+	
 	// trivial load from disk...
 	if(fname) {
 		fn = fname ;
@@ -384,7 +405,8 @@ int tpxPed::from_cache(char *fname)
 	}
 
 
-	LOG(TERR,"Loading pedestals from cache \"%s\"...",fn) ;
+	LOG(NOTE,"Loading pedestals from cache \"%s\"...",fn) ;
+
 	while(!feof(f)) {
 		int r, p , t ;
 		float pp, rr ;
@@ -401,11 +423,12 @@ int tpxPed::from_cache(char *fname)
 	}
 
 	fclose(f) ;
-	LOG(TERR,"Pedestals loaded.") ;
+	LOG(TERR,"Pedestals loaded from cache \"%s\": sector %2d.",fn,sector) ;
+
 	smoothed = 0 ;
 	valid = 1 ;
 
-	return 1 ;
+	return valid ;
 }
 
 int tpxPed::to_cache(char *fname)
@@ -416,7 +439,8 @@ int tpxPed::to_cache(char *fname)
 	char f_sum_name[128] ;
 
 	if(!valid || smoothed) {
-		LOG(ERR,"ped::to_cache peds are bad: valid %d, smoothed %d",valid,smoothed) ;
+		LOG(ERR,"ped::to_cache peds are bad: valid %d, smoothed %d -- not caching",valid,smoothed) ;
+		return -1 ;
 	}
 
 	if(fname) {
@@ -442,7 +466,8 @@ int tpxPed::to_cache(char *fname)
 	}
 
 
-	LOG(TERR,"Writing pedestals to cache \"%s\"...",fn) ;
+	LOG(NOTE,"Writing pedestals to cache \"%s\"...",fn) ;
+
 	for(r=0;r<=45;r++) {
 
 		// ONLY from 1 to rowlen!
@@ -469,7 +494,9 @@ int tpxPed::to_cache(char *fname)
 
 	fclose(f) ;	
 	fclose(f_sum) ;
-	LOG(TERR,"Pedestals written.") ;
+
+	LOG(TERR,"Pedestals written to cache \"%s\", for sector %2d...",fn,sector) ;
+
 	return 1 ;
 }
 
@@ -482,16 +509,18 @@ void tpxPed::smooth()
 	double mean ;
 	int cou ;
 
-	if(smoothed) {
-		LOG(ERR,"ped::smooth already done!") ;
+	if(smoothed || !valid) {
+		LOG(ERR,"ped::smooth sector %2d invalid: smoothed %d, valid %d",sector,smoothed,valid) ;
 		return ;
 	}
+
 #define TPX_GG_START	22
 #define TPX_START_OF_RIPPLE	32
 #define TPX_GG_STOP	51	// was 32 before Feb 20, 2008!
 #define TPX_CLEAN_SLATE 56
 
-	LOG(TERR,"Smoothing pedestals...") ;
+	LOG(NOTE,"Smoothing pedestals...") ;
+
 	for(r=0;r<=45;r++) {
 	for(p=0;p<183;p++) {
 		struct peds *ped = get(r,p) ;
@@ -587,7 +616,7 @@ void tpxPed::smooth()
 	}
 	}
 
-	LOG(TERR,"Pedestals smoothed.") ;
+	LOG(TERR,"Pedestals smoothed: sector %2d",sector) ;
 	smoothed = 1 ;
 
 	return ;
@@ -609,9 +638,10 @@ void tpxPed::kill_bad(int row, int pad)
 	return ;
 }
 
+// what's this???
 int tpxPed::from_evb(char *buff, int bytes) 
 {
-	init() ;	// zap struct
+	init(0x3F) ;	// zap struct
 	valid = 0 ;
 	smoothed = 0 ;
 
@@ -620,6 +650,7 @@ int tpxPed::from_evb(char *buff, int bytes)
 	return 0 ;
 }
 
+// unused....
 int tpxPed::summarize(FILE *log)
 {
 	int notes = 0 ;

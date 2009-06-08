@@ -171,12 +171,15 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	rdo->data_err = 0 ;
 	rdo->token = -ENOTSUP ;	// start as if error
 	rdo->trg_cou = 0 ;
+	rdo->rdo = 6 ;	// put bullshit values but not completelly bad!
+	rdo->sector = 24 ;
 
+	// the event needs to have at least the header and trailer!
 	if(words < (2*sizeof(struct ddl_header))/4) {
 		if(do_log) {
 			LOG(ERR,"Event oddly small -- words %d",words) ;
-			return rdo->token ;
 		}
+		return rdo->token ;
 	}
 
 	// get stuff from the header...
@@ -357,9 +360,10 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	if((rdo->data_end - rdo->data_start) <= 0) {
 		if(rdo->token != 4097) {
 			LOG(ERR,"Bad RDO data: start 0x%X, end 0x%X, delta %d, tokenn %d!",rdo->data_start,rdo->data_end,rdo->data_end-rdo->data_start,rdo->token) ;
+			rdo->token = -EBADF ;
 		}
-		//return -1 ;
 	}
+
 	return rdo->token ;
 }
 
