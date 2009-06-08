@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHitMaker.cxx,v 1.3 2008/12/15 21:27:31 fine Exp $
+ * $Id: StTofHitMaker.cxx,v 1.4 2009/06/08 17:56:30 geurts Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  * Revision 1.7, 02/09/2008, Jing liu
  *
  * $Log: StTofHitMaker.cxx,v $
+ * Revision 1.4  2009/06/08 17:56:30  geurts
+ * prevent a chain from running this maker on Run9+ data
+ *
  * Revision 1.3  2008/12/15 21:27:31  fine
  * Prepare the code for the new DAQ_READER from Tonko
  *
@@ -49,6 +52,7 @@
  **************************************************************************/
 #include "StTofHitMaker.h"
 
+#include "TError.h"
 #include "StEventTypes.h"
 #include "StEvent/StTofData.h"
 #include "StEvent/StTofRawData.h"
@@ -91,6 +95,14 @@ StTofHitMaker::StTofHitMaker(const char *name):StRTSBaseMaker("tof",name)
 StTofHitMaker::~StTofHitMaker() 
 { }
 
+//_____________________________________________________________
+Int_t StTofHitMaker::InitRun(int runnumber) {
+  // prevent a chain from running this Maker for Run9+ data.
+  if (runnumber>=10000000) {
+    Fatal (":InitRun"," Wrong BFC configuration for run %d. Use StBTofHitMaker for Run9+ data.", runnumber);
+  }
+  return 0;
+}
 //_____________________________________________________________
 StTofCollection *StTofHitMaker::GetTofCollection()
 {
