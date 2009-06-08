@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StTofHitMaker.h,v 1.3 2008/12/15 21:27:32 fine Exp $
+ * $Id: StTofHitMaker.h,v 1.4 2009/06/08 17:56:30 geurts Exp $
  * StTofHitMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -76,6 +76,7 @@ class StTofHitMaker:public StRTSBaseMaker
     ~StTofHitMaker() ;
 
      Int_t Make();
+     Int_t InitRun(int);
 
   /// cvs
   virtual const char *GetCVS() const
