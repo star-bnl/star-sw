@@ -262,7 +262,7 @@ struct rtsMonRC {
 } ;
 
 
-struct rtsMonL1 {
+struct rtsMonL1 {		// used by GL3 as well!
 	u_int late_events ;	// number of events above the time cutoff (i.e. 7 ms)
 	u_int max_us ;		// the current maximum turaround time (in us)
 	struct {
@@ -280,5 +280,6 @@ struct rtsMonDET {
 	u_int evtsSpur ;	// spurious events; evtsBad are only the bad ones _with_ the Trigger
 	u_char rb_status[12] ;	// USED in DDL dets!
 } ;
+
 
 #endif
