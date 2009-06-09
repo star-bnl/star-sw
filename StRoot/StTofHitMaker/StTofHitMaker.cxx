@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHitMaker.cxx,v 1.4 2009/06/08 17:56:30 geurts Exp $
+ * $Id: StTofHitMaker.cxx,v 1.5 2009/06/09 19:45:36 jeromel Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  * Revision 1.7, 02/09/2008, Jing liu
  *
  * $Log: StTofHitMaker.cxx,v $
+ * Revision 1.5  2009/06/09 19:45:36  jeromel
+ * Changes for BT#1428
+ *
  * Revision 1.4  2009/06/08 17:56:30  geurts
  * prevent a chain from running this maker on Run9+ data
  *
@@ -82,10 +85,10 @@ ClassImp(StTofHitMaker);
 //_____________________________________________________________
 #ifndef NEW_DAQ_READER
 StTofHitMaker::StTofHitMaker(const char *name):StRTSBaseMaker(name)
-, mStEvent(0),fDaqReader(0)
+					       , mStEvent(0),fDaqReader(0), mInitialized(0)
 #else /* NEW_DAQ_READER */
 StTofHitMaker::StTofHitMaker(const char *name):StRTSBaseMaker("tof",name)
-, mStEvent(0),fTof(0)
+					       , mStEvent(0),fTof(0), mInitialized(0)
 #endif /* NEW_DAQ_READER */
 {
   LOG_INFO << "StTofHitMaker::ctor"  << endm;
@@ -96,13 +99,23 @@ StTofHitMaker::~StTofHitMaker()
 { }
 
 //_____________________________________________________________
-Int_t StTofHitMaker::InitRun(int runnumber) {
+Int_t StTofHitMaker::InitRun(Int_t runnumber) {
   // prevent a chain from running this Maker for Run9+ data.
   if (runnumber>=10000000) {
-    Fatal (":InitRun"," Wrong BFC configuration for run %d. Use StBTofHitMaker for Run9+ data.", runnumber);
+    Error (":InitRun"," Wrong BFC configuration for run %d. Use StBTofHitMaker for Run9+ data.", runnumber);
+    mInitialized=(1==0);
+  } else {
+    mInitialized=(1==1);
   }
   return 0;
 }
+
+Int_t StTofHitMaker::FinishRun(Int_t runnumber) {
+  // re-initialize this to false
+  mInitialized=(1==0);
+  return 0;
+}
+
 //_____________________________________________________________
 StTofCollection *StTofHitMaker::GetTofCollection()
 {
@@ -152,6 +165,7 @@ evpReader *StTofHitMaker::InitReader()
 //_____________________________________________________________
 StRtsTable *StTofHitMaker::GetNextRaw() 
 {
+  if ( ! mInitialized) return NULL;
   /// Query  RTS/tof/raw cluster data from DAQ system
   LOG_INFO  << " StTofHitMaker::GetNextRaw()" << endm;
 #ifndef NEW_DAQ_READER
@@ -170,6 +184,7 @@ StRtsTable *StTofHitMaker::GetNextRaw()
 //_____________________________________________________________
 Int_t StTofHitMaker::Make()
 {
+  if ( ! mInitialized) return 0;
    StTofCollection *tofCollection = GetTofCollection();
    LOG_INFO << " getting the tof collection " << tofCollection << endm;
    if (tofCollection) {

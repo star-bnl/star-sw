@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.26 2008/07/23 19:22:03 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.27 2009/06/09 19:45:35 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.27  2009/06/09 19:45:35  jeromel
+ * Changes for BT#1428
+ *
  * Revision 1.26  2008/07/23 19:22:03  dongx
  * New track quality cuts for Run8
  *
@@ -213,6 +216,12 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
   mYear4 = (runnumber>5000000&&runnumber<6000000);
   mYear5 = (runnumber>6000000&&runnumber<7000000);
   mYear8 = (runnumber>9000000&&runnumber<10000000);
+  mYearX = (runnumber>10000000);
+
+  if (mYearX){
+    Error(":InitRun","Wrong BFC configuration for run %d. Use StBTofHitMaker for Run9+ data.",runnumber);
+    return 0;
+  }
 
   gMessMgr->Info("StTofrMatchMaker -- Initializing TofGeometry (InitRun)","OS");
   /////////////////////////////////////////////////////////////////////
