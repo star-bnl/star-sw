@@ -1,7 +1,8 @@
-* $Id: gdecay.F,v 1.1.1.1 2004/01/12 23:49:40 potekhin Exp $
+* $Id: gdecay.F,v 1.2 2009/06/09 01:02:17 perev Exp $
 * $Name:  $
 * $Log: gdecay.F,v $
-* Revision 1.1.1.1  2004/01/12 23:49:40  potekhin
+* Revision 1.2  2009/06/09 01:02:17  perev
+* Dalitz decays in starsim T.Ullrich & P.Nevski
 *
 * Revision 1.2  2003/10/06 15:55:47  nevski
 * allow for particles codes up to 999 to be packed in decay MODEs
@@ -31,6 +32,8 @@ C.    *                                                                *
 C.    *  Modifications history                                         *
 C.    *  PN, 28.05.99:                                                 *
 C     *      Allow "one body" decay - particle type transformation     *
+C.    *  PN, 11.05.09:                                                 *
+C.    *      in case of eeX and mumuX decays use HELIOS DALGEN code    *
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
@@ -51,9 +54,13 @@ C.
       DIMENSION PCM(4,3)
       DIMENSION XM(3)
       DIMENSION RNDM(1)
-      LOGICAL ROTATE
+      LOGICAL   ROTATE
       Integer   Nba/100/
-C.
+      Real      P(5,5)
+      Integer   nt,n1,n2,n3,i,idal
+      character *2 cKrollWada
+      integer      iKrollWada/-1/
+      save         iKrollWada,cKrollWada
 C.    ------------------------------------------------------------------
 C.
 C             Search for parent particle in decay list.
@@ -146,14 +153,45 @@ C--                 (M.Guckes)
 C
 C             Three body decay.
 C
-         NGKINE  = 3
-         JP3 = LQ(JPART-NTYPE(3))
-         XM(3) = Q(JP3+7)
+        NGKINE  = 3
+        JP3 = LQ(JPART-NTYPE(3))
+        XM(3) = Q(JP3+7)
+C-- a Dalitz decay is recognised by e+/e- or mu+/mu- pair
+        n1=999
+        n2=0
+        n3=0
+        DO i=1,3
+           nt=ntype(i)
+           if (nt.gt.1.and.nt.lt.7) then
+              n1=min(n1,nt)
+              n2=max(n2,nt)
+           else
+              n3=nt
+           endif
+        enddo
+        if (iKrollWada .lt.0) then
+          iKrollWada=1
+	  call getenv('G3KrollWada',cKrollWada)
+	  if (cKrollWada(1:2) .eq. 'NO') iKrollWada=0
+	endif
+
+        if (iKrollWada .ne.0 
+     ..And.((n1.eq.2.or.n1.eq.5).and.n2.eq.n1+1.and.n3>0)) then 
+C        decay it via Kroll-Wada mecanism, no mass smearing
+         CALL VZERO(P,25)
+         P(4,1)=AMASS
+         P(5,1)=AMASS
+         IDAL=DALDEC(XM,P,P(1,2))
+         DO 23 j=1,3
+           DO 23 i=1,4
+ 23           PCM(i,j)=P(i,j+1)                  
+        else
+C        any other 3 body decay
          IF (TLIFE.LT.1.E-15) THEN
-            XMTOT = XM(1)+XM(2)+XM(3)
-            DO 31 I=1,1000
 C--  Create Lorentz distributed energy with FWHM HBAR/TLIFE.
 C--  (via integral-transformation of Lorentz-distribution)
+            XMTOT = XM(1)+XM(2)+XM(3)
+            DO 31 I=1,1000
               CALL GRNDM(RNDM,1)
               RMASS = DMASS
      1                + 3.291086E-25/TLIFE * TAN(PI*(RNDM(1)-0.5))
@@ -166,6 +204,7 @@ C--  (via integral-transformation of Lorentz-distribution)
  41         DMASS = RMASS
          END IF
          CALL GDECA3(DMASS,XM(1),XM(2),XM(3),PCM)
+        endif
       ENDIF
 C
 C             LORENTZ boost into LAB system defined along parent vector
