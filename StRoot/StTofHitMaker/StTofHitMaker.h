@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StTofHitMaker.h,v 1.4 2009/06/08 17:56:30 geurts Exp $
+ * $Id: StTofHitMaker.h,v 1.5 2009/06/09 19:45:35 jeromel Exp $
  * StTofHitMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -56,10 +56,10 @@ class StTofHitMaker:public StRTSBaseMaker
      vector<TofRawHit> TofLeadingHits;
      vector<TofRawHit> TofTrailingHits;
 
-     StTofCollection*         tofCollection; //!
+     StTofCollection*         tofCollection;     //!
      StTofDataCollection*     mDataCollection;   //!
-     StTofRawDataCollection*  mRawDataCollection;     //!
-
+     StTofRawDataCollection*  mRawDataCollection;//!
+     Bool_t                   mInitialized;      //!
      
    protected:
       StRtsTable *GetNextRaw();
@@ -75,8 +75,9 @@ class StTofHitMaker:public StRTSBaseMaker
      
     ~StTofHitMaker() ;
 
-     Int_t Make();
-     Int_t InitRun(int);
+    Int_t Make();
+    Int_t InitRun(Int_t);
+    Int_t FinishRun(Int_t);
 
   /// cvs
   virtual const char *GetCVS() const

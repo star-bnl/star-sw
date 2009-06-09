@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.14 2008/07/23 19:22:03 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.15 2009/06/09 19:45:35 jeromel Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.15  2009/06/09 19:45:35  jeromel
+ * Changes for BT#1428
+ *
  * Revision 1.14  2008/07/23 19:22:03  dongx
  * New track quality cuts for Run8
  *
@@ -223,6 +226,7 @@ private:
     Bool_t mYear4; //! STAR year4: TOFp+pVPD+TOFr'
     Bool_t mYear5; //! STAR year5: pVPD+TOFr5
     Bool_t mYear8; //! STAR year8; upVPD+TOFr8
+    Bool_t mYearX; //! STAR year9 and beyond - new code 
 
     Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
     Bool_t mGeometrySave;
@@ -343,7 +347,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.14 2008/07/23 19:22:03 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.15 2009/06/09 19:45:35 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
