@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.10 2008/11/07 15:11:31 caines Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.11 2009/06/11 23:17:21 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.11  2009/06/11 23:17:21  baumgart
+ * Increase initial hit sizes and add projection to tSigMaj in function setInitWidths
+ *
  * Revision 1.10  2008/11/07 15:11:31  caines
  * Initialize variables (that REALLY do not need to be) to see if this makes valgrind happy
  *
@@ -154,7 +157,8 @@ void StSvtElectronCloud::setInitWidths(double w1, double w2)
   double tSigMaj,tSigMin;
   mSigX=0; mSigY=0; mSigXY=0;
   
-  tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta));  //  [mm] 
+  //tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta));  //  [mm]
+  tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta)) + w1/cos(mTheta); // Stephen Tune: add projection of larger initial hit size
   if (tSigMaj<w1) {        //almost perpendicular
     tSigMaj = w1;          //initial size cannot be smaller than minimal
     mTheta=0.;
@@ -232,7 +236,8 @@ void StSvtElectronCloud::CalcExpansion(double mTc)
   //set initial sizes
   mPhi = mInitPhi;
  
-  setInitWidths(0.002, 0.002);
+  //setInitWidths(0.002, 0.002);
+  setInitWidths(0.09, 0.09); // Stephen tune to Run 7 Au+Au
   
   double steps=mTc*AdBashDiv*RungeDiv;
   int isteps=(int)floor(steps + 0.5);
