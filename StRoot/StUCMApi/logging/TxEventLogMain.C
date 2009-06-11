@@ -1,5 +1,7 @@
 #include "TxEventLog.h"
 #include "TxEventLogFactory.h"
+#include <unistd.h>
+
 
 int main () {
   TxLogging::TxEventLog* el1 = TxLogging::TxEventLogFactory::create();
