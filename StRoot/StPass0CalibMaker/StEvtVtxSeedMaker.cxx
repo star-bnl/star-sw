@@ -76,7 +76,10 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
   xvertex = pvert.x();
   eyvertex = epvert.y();
   exvertex = epvert.x();
-  mult = (float)(primVtx->numberOfDaughters());
+  // Number of good primary tracks for this vertex
+  mult = 0;
+  for (unsigned int trkn=0; trkn<primVtx->numberOfDaughters(); trkn++)
+    if (!(primVtx->daughter(trkn)->bad())) mult++;
   rank = primVtx->ranking();
 
   // Determine sub-sectors of tracks associated with this vertex
@@ -110,14 +113,17 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.5 2009/05/22 23:50:50 genevb Exp $"
+           << "\n* $Id: StEvtVtxSeedMaker.cxx,v 1.6 2009/06/12 17:09:17 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.5 2009/05/22 23:50:50 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.6 2009/06/12 17:09:17 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.6  2009/06/12 17:09:17  genevb
+// Match mult for MuDst and StEvent
+//
 // Revision 1.5  2009/05/22 23:50:50  genevb
 // Code mods for BEMC matches, BeamWidth
 //
