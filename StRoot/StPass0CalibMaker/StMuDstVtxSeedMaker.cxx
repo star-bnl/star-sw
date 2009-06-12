@@ -84,7 +84,9 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   eyvertex = epvert.y();
   exvertex = epvert.x();
 
-  mult = (float) (primVtx->nTracksUsed());
+  // Number of good primary tracks for this vertex
+  mudst->setVertexIndex(pvn);
+  mult = mudst->numberOfPrimaryTracks();
   rank = primVtx->ranking();
 
   // hits not saved in MuDst
@@ -101,14 +103,17 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.7 2009/05/22 23:50:50 genevb Exp $"
+           << "\n* $Id: StMuDstVtxSeedMaker.cxx,v 1.8 2009/06/12 17:09:17 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.7 2009/05/22 23:50:50 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.8 2009/06/12 17:09:17 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.8  2009/06/12 17:09:17  genevb
+// Match mult for MuDst and StEvent
+//
 // Revision 1.7  2009/05/22 23:50:50  genevb
 // Code mods for BEMC matches, BeamWidth
 //
