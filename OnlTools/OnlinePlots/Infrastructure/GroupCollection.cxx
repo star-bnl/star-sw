@@ -16,7 +16,7 @@
 #include "VPDHistogramGroup.h"
 #include "VPDHiHistogramGroup.h"
 //#include "FMSHistogramGroup.h"
-//#include "pp2ppHistogramGroup.h"
+#include "pp2ppHistogramGroup.h"
 //#include "HighTowerFlensburgHistogramGroup.h"
 #include "SVTAnodeHybridHistogramGroup.h"
 #include "SVTAnodeSumHistogramGroup.h"
@@ -52,8 +52,8 @@ void GroupCollection::serverCreate() {
   insert( new VPDHiHistogramGroup("Trigger","vpdHi","any","trg") );
 #endif
   //insert( new FMSHistogramGroup("Trigger","fms","any","trg") );
-  //insert( new pp2ppHistogramGroup(0, "P2P","Trg1-16","any","trg") );
-  //insert( new pp2ppHistogramGroup(1, "P2P","Trg17-32","any","trg") );
+  insert( new pp2ppHistogramGroup(0, "P2P","Trg1-16","any","trg") );
+  insert( new pp2ppHistogramGroup(1, "P2P","Trg17-32","any","trg") );
   insert( new TOFupvpdHistogramGroup("TOF", "upvpd","any","TOF") );
   insert( new TOFcheckHistogramGroup("TOF", "TOF check","any","TOF") );
   insert( new TOFtrayHistogramGroup(0,"TOF","east Tray 1-30","any","TOF") );
