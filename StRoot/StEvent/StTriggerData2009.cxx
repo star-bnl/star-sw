@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.15 2009/05/15 18:16:15 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.16 2009/06/15 18:03:35 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.16  2009/06/15 18:03:35  ullrich
+ * Modified pp2ppDSM() die ti changes in DSM structure.
+ *
  * Revision 2.15  2009/05/15 18:16:15  ullrich
  * Updates for pp2pp and ToF.
  *
@@ -640,20 +643,8 @@ unsigned short StTriggerData2009::pp2ppTAC(StBeamDirection eastwest, int vh, int
 }
 
 unsigned long StTriggerData2009::pp2ppDSM(int prepost) const {
-  unsigned long res;
-  int buffer = prepostAddress(prepost);
-  res = 0;
-  if(buffer >= 0){
-    if(mMIX[buffer] != NULL) {
-      res  = mMIX[buffer]->MTD_P2PLayer1[2];           /* Data from MTD and PP2PP */
-      res += mMIX[buffer]->MTD_P2PLayer1[3] << 8;
-      res += mMIX[buffer]->MTD_P2PLayer1[0] << 16;
-      res += mMIX[buffer]->MTD_P2PLayer1[1] << 24;
-    } else {
-      gMessMgr->Warning() << "Bank mMIX prepost = " << prepost << " not found" << endm ;
-    }
-  }
-  return res;
+  if(prepost!=0) return 0;
+  return L1_DSM->TOF[7];
 }
 
 unsigned short StTriggerData2009::bemcLayer1DSM(int channel, int prepost) const {
