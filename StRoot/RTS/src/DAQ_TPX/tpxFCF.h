@@ -121,9 +121,10 @@ public:
 
 	static int fcf_decode(u_int *p_buff, daq_cld *dc, u_short version=0) ;
 	static int fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version=0) ;
+	static int afterburner(int cou, daq_cld *store[]) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.6 2009/03/07 19:34:20 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.7 2009/06/16 15:19:16 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:

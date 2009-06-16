@@ -1182,6 +1182,9 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 
 
 	for(int s=min_sec;s<=max_sec;s++) {
+	const int FCF_MAX_MERGED_COU = 128 ;
+	int merged_cou = 0 ;
+	daq_cld *merged_store[FCF_MAX_MERGED_COU] ;
 	for(int r=min_rdo;r<=max_rdo;r++) {
 		daq_dta *dd ;
 
@@ -1222,6 +1225,11 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 
 			for(u_int i=0;i<cou;i++) {
 				p_buff += fcf_algo[0]->fcf_decode(p_buff, dc, version) ;
+				if((row==8) && (dc->flags & FCF_BROKEN_EDGE) && (merged_cou<FCF_MAX_MERGED_COU)) {
+					// copy the pointer!
+					merged_store[merged_cou] = dc ;
+					merged_cou++ ;
+				}
 				dc++ ;
 			}
 
@@ -1300,8 +1308,10 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 
 
 
-	}
-	}
+	}	// end of RDO loop
+	LOG(NOTE,"Sector %2d: merged cou %d",s,merged_cou) ;
+	fcf_algo[0]->afterburner(merged_cou, merged_store) ;
+	}	// end of sector loop
 
 
 	cld->rewind() ;	// wind data pointers to the beginning so that they can be used

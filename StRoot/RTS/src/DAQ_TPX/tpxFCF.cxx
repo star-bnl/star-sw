@@ -25,6 +25,118 @@
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
+int tpxFCF::afterburner(int cou, daq_cld *store[])
+{
+	int merged = 0 ;
+
+	if(cou == 0) return 0 ;	// many cases like this...
+
+//	printf("\n") ;
+
+	for(int i=0;i<cou;i++) {
+		daq_cld *l = store[i] ;	// left guy
+		int merge_ix = -1 ;
+
+//		printf("AfterB: %2d: P [%d:%d], T [%d:%d], flags %d, charge %d\n",i,l->p1,l->p2,l->t1,l->t2,l->flags,l->charge) ;
+
+		if(l->charge == 0) continue ;	// already merged
+		
+		
+		for(int j=0;j<cou;j++) {
+			int ok = 0 ;
+			if(i==j) continue ;
+			daq_cld *r = store[j] ;	// right guy
+		
+			if(r->charge == 0) continue ;	// already merged!
+
+			if(r->p1==13) {	// right
+				if(l->p2 != 12) continue ;
+			}
+			else if(r->p2==12) {
+				if(l->p1 != 13) continue ;
+			}
+			else if(r->p1==131) {
+				if(l->p2 != 130) continue ;
+			}
+			else if(r->p2==130) {
+				if(l->p1 != 131) continue ;
+			}
+
+
+			if((r->t1 >= l->t1) && (r->t1 <= l->t2)) ok = 1 ;
+			if((r->t2 >= l->t1) && (r->t2 <= l->t2)) ok = 1 ;
+
+			if(ok==0) continue ;
+
+			merge_ix = j ;
+			break ;
+			
+			
+
+		}
+
+		if(merge_ix < 0) {	// no merge -- let it go...
+			
+		}
+		else {
+			// merge...
+			merged++ ;
+			
+			// merge
+			daq_cld *r = store[merge_ix] ;
+			double charge = l->charge + r->charge ;
+
+			/*
+			printf("can merge: L: [%d:%d] %f, R: [%d:%d] %f\n",
+			       l->p1,l->p2,l->tb,
+			       r->p1,r->p2,r->tb) ;
+			*/
+
+			l->tb = (l->tb * l->charge + r->tb * r->charge) / charge ;
+			l->pad = (l->pad * l->charge + r->pad * r->charge) / charge ;
+			
+			if(r->t1 < l->t1) l->t1 = r->t1 ;
+			if(r->t2 > l->t2) l->t2 = r->t2 ;
+
+			if(r->p1 < l->p1) l->p1 = r->p1 ;
+			if(r->p2 > l->p2) l->p2 = r->p2 ;
+
+			l->flags |= r->flags ;		// merge flags
+			l->flags &= ~FCF_ONEPAD ;	// remove onepad, by dedfinition.
+
+			if(charge > (double)0x7FFF) {
+				l->charge = (u_short) (charge / 1024.0) ;
+				l->flags |= FCF_BIG_CHARGE ;
+			}
+			else {
+				l->charge = (u_short) charge ;
+			}
+
+			// and kill the right guy!
+			r->flags |= FCF_DEAD_EDGE  ;
+			r->charge = 0 ;
+		}
+
+
+		
+	}
+
+	// cleanup flags
+	for(int i=0;i<cou;i++) {
+		daq_cld *l = store[i] ;	// left guy
+
+		if(l->flags & (FCF_ONEPAD | FCF_DEAD_EDGE)) {	// is this is still on, kill it with dead edge
+			l->flags |= FCF_DEAD_EDGE ;
+		}
+		else {
+			l->flags &= ~FCF_BROKEN_EDGE ;	// remove this flag since we ran the afterburner
+		}
+
+	}
+
+	return merged ;
+}
+
 int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 {
 	double p, t ;
@@ -956,7 +1068,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 
 	// first set of pre-cuts
 	if(likely(do_cuts)) {
-		if(unlikely(fla & FCF_BROKEN_EDGE)) ;	// pass hits on row 8...
+		if(unlikely(fla & FCF_BROKEN_EDGE)) ;	// pass hits on row 8 even when dead because of the afterburner!
 		else if((do_cuts == 1) && (fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE))) return ;	// kill clusters touching the edge or a dead pad
 	}
 
@@ -986,7 +1098,9 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 
 	if(!(fla & FCF_IN_DOUBLE)) {	// the values were not turned to double
 		if(fla & FCF_ONEPAD) {	// this is the only valid case
-			cl->p1 = cl->p2 ;
+			cl->p1 = cl->p2 ;	// adjust the start pad...
+
+			// I don't have the gain corrections here yet (in FY09) so I use a 1.0!
 			cl->f_charge = (float)cl->charge * 1.0 ;
 			cl->p_ave = cl->p1 * cl->f_charge ;
 			cl->f_t_ave = (float)cl->t_ave * 1.0 ;
