@@ -15,7 +15,7 @@
 #include "L2UpsilonMassHistogramGroup.h"
 #include "VPDHistogramGroup.h"
 #include "VPDHiHistogramGroup.h"
-//#include "FMSHistogramGroup.h"
+#include "FMSHistogramGroup.h"
 #include "pp2ppHistogramGroup.h"
 //#include "HighTowerFlensburgHistogramGroup.h"
 #include "SVTAnodeHybridHistogramGroup.h"
@@ -51,7 +51,7 @@ void GroupCollection::serverCreate() {
 #ifdef NEW_DAQ_READER
   insert( new VPDHiHistogramGroup("Trigger","vpdHi","any","trg") );
 #endif
-  //insert( new FMSHistogramGroup("Trigger","fms","any","trg") );
+  insert( new FMSHistogramGroup("Trigger","fms","any","trg") );
   insert( new pp2ppHistogramGroup(0, "P2P","Trg1-16","any","trg") );
   insert( new pp2ppHistogramGroup(1, "P2P","Trg17-32","any","trg") );
   insert( new TOFupvpdHistogramGroup("TOF", "upvpd","any","TOF") );
