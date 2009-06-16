@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.9 2009/05/15 18:16:15 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.10 2009/06/16 15:44:26 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.10  2009/06/16 15:44:26  ullrich
+ * Added fmsADC() method.
+ *
  * Revision 2.9  2009/05/15 18:16:15  ullrich
  * Updates for pp2pp and ToF.
  *
@@ -122,6 +125,7 @@ public:
     // FMS
     unsigned short nQTdata(int prepost=0) const;
     unsigned int*  QTdata(int prepost=0) const;    
+    unsigned short fmsADC(int crt, int adr, int ch, int prepost=0) const;
 
     //ZDC
     bool zdcPresent(int prepost=0) const;
