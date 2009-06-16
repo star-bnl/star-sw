@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.29 2009/05/15 18:16:15 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.30 2009/06/16 15:44:26 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.30  2009/06/16 15:44:26  ullrich
+ * Added fmsADC() method.
+ *
  * Revision 2.29  2009/05/15 18:16:15  ullrich
  * Updates for pp2pp and ToF.
  *
@@ -231,6 +234,7 @@ public:
     // FMS 
     virtual unsigned short nQTdata(int prepost=0) const;
     virtual unsigned int*  QTdata(int prepost=0) const;
+    virtual unsigned short fmsADC(int crt, int adr, int ch, int prepost=0) const;
 
     // VPD
     virtual unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;

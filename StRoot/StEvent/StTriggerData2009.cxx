@@ -1,6 +1,6 @@
- /***************************************************************************
+/***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.16 2009/06/15 18:03:35 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.17 2009/06/16 15:44:26 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.17  2009/06/16 15:44:26  ullrich
+ * Added fmsADC() method.
+ *
  * Revision 2.16  2009/06/15 18:03:35  ullrich
- * Modified pp2ppDSM() die ti changes in DSM structure.
+ * Modified pp2ppDSM() due to changes in DSM structure.
  *
  * Revision 2.15  2009/05/15 18:16:15  ullrich
  * Updates for pp2pp and ToF.
@@ -150,9 +153,9 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     memset(feq,0,sizeof(feq)); memset(tfeq,0,sizeof(tfeq));
     memset(bbq,0,sizeof(bbq)); memset(tbbq,0,sizeof(tbbq));
     memset(qt1,0,sizeof(qt1)); memset(tqt1,0,sizeof(tqt1));
-    memset(qt1,0,sizeof(qt2)); memset(tqt1,0,sizeof(tqt2));
-    memset(qt1,0,sizeof(qt3)); memset(tqt1,0,sizeof(tqt3));
-    memset(qt1,0,sizeof(qt4)); memset(tqt1,0,sizeof(tqt4));
+    memset(qt2,0,sizeof(qt2)); memset(tqt2,0,sizeof(tqt2));
+    memset(qt3,0,sizeof(qt3)); memset(tqt3,0,sizeof(tqt3));
+    memset(qt4,0,sizeof(qt4)); memset(tqt4,0,sizeof(tqt4));
     TrgOfflen2009* offlen;
 
     for (int i=0; i<1+npre+npost; i++){
@@ -952,6 +955,20 @@ unsigned short StTriggerData2009::nQTdata(int prepost) const
 
 unsigned int* StTriggerData2009::QTdata(int prepost) const
 {
+    return 0;
+}
+
+unsigned short StTriggerData2009::fmsADC(int crt, int adr, int ch, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && crt>=1 && crt<=4 && adr>=0 && adr<=10 && ch>=0 && ch<=31){
+        switch(crt){
+        case 1: return qt1[buffer][adr][ch]; 
+        case 2: return qt2[buffer][adr][ch]; 
+        case 3: return qt3[buffer][adr][ch];
+        case 4: return qt4[buffer][adr][ch];
+        }
+    }
     return 0;
 }
 

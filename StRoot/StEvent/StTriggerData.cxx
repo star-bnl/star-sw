@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.10 2009/05/15 18:16:15 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.11 2009/06/16 15:44:26 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.11  2009/06/16 15:44:26  ullrich
+ * Added fmsADC() method.
+ *
  * Revision 2.10  2009/05/15 18:16:15  ullrich
  * Updates for pp2pp and ToF.
  *
@@ -43,7 +46,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.10 2009/05/15 18:16:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.11 2009/06/16 15:44:26 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -210,6 +213,7 @@ unsigned short StTriggerData::tofMultiplicity(int prepost) const {return 0;}
 unsigned short StTriggerData::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
 unsigned short StTriggerData::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
 unsigned long  StTriggerData::pp2ppDSM(int prepost) const {return 0;}
+unsigned short StTriggerData::fmsADC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm_FMS(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm01_FMS(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm02_FMS(int prepost) const {return 0;}
