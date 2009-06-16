@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.14 2009/05/14 21:50:40 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.15 2009/06/16 19:48:08 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -47,8 +47,10 @@ StuDraw3DEvent::~StuDraw3DEvent()
 //___________________________________________________
 TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size_t siz)
 {
-   StTrackPoints trPnt(&track);
-   TObject *l = Line(trPnt.Size(),trPnt.GetXYZ(0),col,sty,siz);
+   StTrackHelper trPnt(&track);
+   Int_t size;
+   Float_t *xyz = trPnt.GetPoints(size);
+   TObject *l = Line(size,xyz,col,sty,siz);
    SetModel((TObject*)&track);
    return l;
 }
