@@ -32,7 +32,8 @@ StGammaCandidateMaker::StGammaCandidateMaker(const char *name): StMaker(name)
 
     mMinimumEt = 0.0;
     mRadius = 0.7; 
-    mSmdRange = 20.0;   
+    mBsmdRange = 0.05237;
+    mEsmdRange = 20.0;   
     
 }
 
@@ -343,18 +344,23 @@ Int_t StGammaCandidateMaker::MakeBarrel()
                 // Find vertex corrected position of the strip
                 float x, y, z;
                 StEmcGeom::instance("bsmde")->getXYZ(id, x, y, z);
-                TVector3 d(x, y, z);
-                d -= cluster->position();
+                TVector3 vEta(x, y, z);
                 
+                float deta = cluster->position().Eta() - vEta.Eta();
+     	        float dphi = cluster->position().Phi() - vEta.Phi();
+                dphi = TVector2::Phi_mpi_pi(dphi);
+     	        float r = hypot(deta, dphi);
+             
                 // If the strip is within range then associate the strip
-                if(d.Mag() <= mSmdRange) 
-                {
+                if(r <= mBsmdRange)
+                {                      
                 
                     candidate->addSmdEta(strip);
                     strip->candidates.Add(candidate);
                     smdEtaEnergy += strip->energy;
                 
                 }
+
             }
             
             if(StGammaStrip* strip = mGammaRawMaker->strip(sector, kBEmcSmdPhi, id)) 
@@ -363,11 +369,15 @@ Int_t StGammaCandidateMaker::MakeBarrel()
                 // Find vertex corrected position of the strip
                 float x, y, z;
                 StEmcGeom::instance("bsmdp")->getXYZ(id, x, y, z);
-                TVector3 d(x, y, z);
-                d -= cluster->position();
+                TVector3 vPhi(x, y, z);
                 
+                float deta = cluster->position().Eta() - vPhi.Eta();
+     	        float dphi = cluster->position().Phi() - vPhi.Phi();
+                dphi = TVector2::Phi_mpi_pi(dphi);
+      	        float r = hypot(deta, dphi);
+             
                 // If the strip is within range then associate the strip
-                if(d.Mag() <= mSmdRange) 
+                if(r < mBsmdRange)
                 {
                 
                     candidate->addSmdPhi(strip);
@@ -744,10 +754,10 @@ Int_t StGammaCandidateMaker::MakeEndcap()
                 { 
                     umid[isec] /= ntow[isec]; 
                     vmid[isec] /= ntow[isec]; 
-                    umin[isec] = TMath::Max(umid[isec] - mSmdRange * 2.0, 0. );
-                    vmin[isec] = TMath::Max(vmid[isec] - mSmdRange * 2.0, 0. );
-                    umax[isec] = TMath::Min(umid[isec] + mSmdRange * 2.0, 287. );
-                    vmax[isec] = TMath::Min(vmid[isec] + mSmdRange * 2.0, 287. );
+                    umin[isec] = TMath::Max(umid[isec] - mEsmdRange * 2.0, 0. );
+                    vmin[isec] = TMath::Max(vmid[isec] - mEsmdRange * 2.0, 0. );
+                    umax[isec] = TMath::Min(umid[isec] + mEsmdRange * 2.0, 287. );
+                    vmax[isec] = TMath::Min(vmid[isec] + mEsmdRange * 2.0, 287. );
                 }
                 
             }
