@@ -25,7 +25,7 @@ bool isBadTower2005(int id);
 bool isPmtNew(int id);
 bool isBadTower2006(int id);
 
-void mip_histogram_fitter(const char* file_list="mips.list", const char* postscript="mip.ps", const char* gainfile="mip.gains",const char* ofname="2008.mipfit.root"){
+void mip_histogram_fitter(const char* file_list="mips.list", const char* postscript="mip.ps", const char* gainfile="mip.gains.long",const char* ofname="2008.mipfit.root",const char* gfiles="mip.gains"){
 const int ntowers = 4800;
 
  int mipstatus[ntowers];
@@ -107,7 +107,8 @@ const int ntowers = 4800;
 
 		sprintf(name,"fit_%i",i+1);
 		
-		gaussian_fit[i] = new TF1(name,"gaus",5.,250.);
+		gaussian_fit[i] = new TF1(name,"gaus(0) + pol0(3)",5.,250.);
+		//gaussian_fit[i] = new TF1(name,"gaus(0)",5.,250.);
 		landau_fit[i] = new TF1(name,"landau",5.,200.);
 //		fit[i] = new TF1(name,"gaus(0)+expo(3)",5.,250.);
 
@@ -123,7 +124,10 @@ const int ntowers = 4800;
 		float guessrms = mip_histo[i]->GetRMS();
 		gaussian_fit[i]->SetParameter(1,guesspeak);
 		gaussian_fit[i]->SetParameter(2,guessrms);
-		
+		gaussian_fit[i]->SetParLimits(0,1,1000000);
+		gaussian_fit[i]->SetParLimits(1,1,250);
+		gaussian_fit[i]->SetParLimits(2,0,100);
+		gaussian_fit[i]->SetParLimits(3,0,1000000);
 		landau_fit[i]->SetParameter(1,17.);
 		landau_fit[i]->SetParameter(2,3.);
 									
@@ -144,7 +148,7 @@ const int ntowers = 4800;
 		double gaussian_mean = 0;
 		
 		if(mip_histo[i]->Integral() > 0){
-		  mip_histo[i]->Fit(gaussian_fit[i],"rq");
+		  mip_histo[i]->Fit(gaussian_fit[i],"rql","",guesspeak-2*guessrms,guesspeak+2*guessrms);
 		  mipstatus[i]+=1;
 		  double gauss_const = gaussian_fit[i]->GetParameter(0);
 		  gaussian_mean = gaussian_fit[i]->GetParameter(1);
@@ -210,7 +214,11 @@ const int ntowers = 4800;
 	ps->Close();
 
 	ofstream gains(gainfile);
+	ofstream shortgain(gfiles);
 	char line[500];
+
+	int nGood = 0;
+	int nZero = 0;
 	for(int i=0; i<ntowers; i++){
 		double fitMaximum = gaussian_fit[i]->GetMaximum(0.,100.);
 		double mipPeak = gaussian_fit[i]->GetX(fitMaximum, 0., 100.);
@@ -224,7 +232,7 @@ const int ntowers = 4800;
 		double chi = 0;
 		if(fNDF > 0)chi = fchi/fNDF;
 
-		if(TMath::Abs(mipPeak-fitMean)>0.001) cout<<i<<"  "<<fitMean<<"  "<<mipPeak<<endl;
+		//if(TMath::Abs(mipPeak-fitMean)>0.001) cout<<i<<"  "<<fitMean<<"  "<<mipPeak<<endl;
 		
 		double gain = 0;
 		double fSig = 0;
@@ -252,8 +260,10 @@ const int ntowers = 4800;
 		}		
 
 		sprintf(line,"%-4i,%i,%2.3f,%2.3f,%2.3f,%i,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f,%2.3f",i+1,hentries,hmean,hrms,gain,mipstatus[i],chi,fCon,fConErr,fitMean,fMeanErr,fSig,fSigErr,mInt);
-
+		if(mipstatus[i]==1)nGood++;
+		if(mipstatus[i]==0)nZero++;
 		gains<<line<<endl;
+		shortgain<<i+1<<" "<<fitMean<<" "<<fMeanErr<<" "<<mipstatus[i]<<endl;
 	}
 
 
@@ -266,10 +276,11 @@ const int ntowers = 4800;
 	outfile->Close();
 
 	cout<<"finished tower fits"<<endl;
-	
+	cout<<"nGood = "<<nGood<<", nZero = "<<nZero<<endl;
 	//print fit stats to a file
 	//cout<<"saved fit params in "<<argv[3]<<endl;
-	
+	gains.close();
+	shortgain.close();
 }
 			
 void drawTower(TH1* h, TF1* f, int id, int status, CalibrationHelperFunctions* helper){		

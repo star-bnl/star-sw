@@ -58,11 +58,11 @@ void bemcCalibMacro(const char* dir="./",
     trigsim->useBbc();
     trigsim->useBemc();
     trigsim->bemc->setConfig(StBemcTriggerSimu::kOffline);
-    StGenericL2Emulator* simL2Mk = new StL2_2008EmulatorMaker;
-    assert(simL2Mk);
-    simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
-    simL2Mk->setOutPath(outPath);
-    trigsim->useL2(simL2Mk);
+    //StGenericL2Emulator* simL2Mk = new StL2_2008EmulatorMaker;
+    //assert(simL2Mk);
+    //simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
+    //simL2Mk->setOutPath(outPath);
+    //trigsim->useL2(simL2Mk);
 
 	
 	TString outfile(dir);
@@ -89,12 +89,14 @@ void bemcCalibMacro(const char* dir="./",
 	bemcCalibMaker->addHighTowerTrigger(220500);//bht0
 	bemcCalibMaker->addHighTowerTrigger(220510);//bht1
 	bemcCalibMaker->addHighTowerTrigger(220520);//bht2
+	bemcCalibMaker->addHighTowerTrigger(1);//bht2-mon
 
 	bemcCalibMaker->addFastTrigger(220900);//fms-fast
 	bemcCalibMaker->addFastTrigger(220901);//fms-fast
 	bemcCalibMaker->addFastTrigger(220910);//fms-fast tpc line
 	bemcCalibMaker->addFastTrigger(220920);//fpd e fast
 	bemcCalibMaker->addFastTrigger(220710);//tof reading only tpx and tof
+	bemcCalibMaker->addFastTrigger(19);//bbc-fast
 	
 	StMemStat memory;
 	memory.PrintMem(NULL);

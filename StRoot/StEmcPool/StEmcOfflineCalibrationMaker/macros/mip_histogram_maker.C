@@ -21,8 +21,8 @@ void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskim
   gSystem->Load("StDbBroker");
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StAssociationMaker");
-  gSystem->Load("StEmcTriggerMaker");
-
+  //gSystem->Load("StEmcTriggerMaker");
+  gSystem->Load("StTriggerUtilities");
   gSystem->Load("StEmcOfflineCalibrationMaker");
 
   const int ntowers=4800;
@@ -58,7 +58,8 @@ void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskim
 	//keep track of all hit towers and exclude any with >1 track/tower
   set<int> track_towers;
   set<int> excluded_towers;
-	
+  int ntracks = 0;
+  int ngood = 0;
   unsigned int nentries = calib_tree->GetEntries();
   for(unsigned int i=0; i<nentries; i++){
     if(i%100000 == 0) cout<<"processing "<<i<<" of "<<nentries<<endl;
@@ -89,7 +90,7 @@ void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskim
     //if(myEvent->tracks->GetEntries() > 0)cout<<"Processing event "<<i<<" with "<<myEvent->tracks->GetEntries()<<" tracks"<<endl;
     for(int j=0; j<myEvent->tracks->GetEntries(); j++){
       mip = (StEmcOfflineCalibrationTrack*)myEvent->tracks->At(j);
-						
+      ntracks++;
       double pedsub = mip->tower_adc[0] - mip->tower_pedestal[0];
 			
       //cout<<mip->tower_id[0]<<" "<<mip->tower_id_exit<<" "<<pedsub<<" "<<mip->tower_pedestal_rms[0]<<" "<<mip->p<<" "<<mip->highest_neighbor<<" "<<mip->vertexIndex<<endl;
@@ -103,10 +104,12 @@ void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskim
 			
       int index = mip->tower_id[0];
       mip_histo[index-1]->Fill(pedsub);
+      ngood++;
       //cout<<"track found in tower "<<index<<endl;
     }
   }
 	
+  cout<<"Added "<<ngood<<" tracks of "<<ntracks<<endl;
   TFile* output_file = new TFile(skimfile,"RECREATE");
   for(int k=0; k<ntowers; k++) mip_histo[k]->Write();
   output_file->Close();
