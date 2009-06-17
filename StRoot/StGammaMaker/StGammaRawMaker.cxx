@@ -414,7 +414,12 @@ void StGammaRawMaker::GetBarrel()
                     bstrip->stat   = smde_status;
                     bstrip->fail   = (int)(smde_status != 1);
                     bstrip->energy = hit->energy();
-                    bstrip->position = 2 * atan( exp( - eta ) );
+                    bstrip->position = 230.705 * sinh(eta);
+
+                    double offset = fabs(eta) < 0.5 ? 0.73 : 0.94;
+                
+                    bstrip->right = bstrip->position + offset;
+                    bstrip->left = bstrip->position - offset;
 
                     LOG_DEBUG << " eStrip ID =" << smde_id << ", Status = " << smde_status << endm;
                     LOG_DEBUG << " Energy = " << hit->energy() << ", Module = " << hit->module() << endm;
@@ -463,6 +468,11 @@ void StGammaRawMaker::GetBarrel()
                     bstrip->fail   = (int)(smdp_status != 1);
                     bstrip->energy = hit->energy(); 
                     bstrip->position = phi;
+
+                    double offset = 0.00293;
+
+                    bstrip->left = phi - offset;
+                    bstrip->right = phi + offset;
     
                     LOG_DEBUG << " pStrip ID =" << smdp_id << ", Status = " << smdp_status << endm;
                     LOG_DEBUG << " Energy = " << hit->energy() << ", Module = " << hit->module() << endm;
