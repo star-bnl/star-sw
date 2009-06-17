@@ -41,9 +41,12 @@
 #include <log4cxx/layout.h>
 #include <log4cxx/xml/domconfigurator.h>
 
+#include "StStarLogger/StUCMAppender.h"
+
 using namespace log4cxx;
 using namespace log4cxx::helpers;
 using namespace log4cxx::varia;
+using namespace log4cxx::db;
 // using namespace log4cxx::xml;
 
 class  StMessage  {
@@ -242,14 +245,23 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
 		      new PatternLayout("%-3c{2}:%-5p - %m%n"));
 //		      new PatternLayout(PatternLayout::TTCC_CONVERSION_PATTERN)));
        appender->setName(_T("defaultAppender"));       
-       filter = new StarOptionFilter();
-       appender->addFilter(filter);
        root->addAppender(appender);
        //Set the default threashold to be 
        root->setLevel(Level::INFO);
     }
-    Logger::getRootLogger();
+    LoggerPtr root = Logger::getRootLogger();
+
     fgQALogger = Logger::getLogger("QA");
+    // Check the mandatory UCM appender
+    TString ucmenv = gSystem->Getenv("LOGGING");
+    if (ucmenv == "UCM" && gSystem->Getenv("JOBINDEX") && gSystem->Getenv("REQUESTID") ) {
+       StUCMAppenderPtr appender = new StUCMAppender;
+       appender->setLayout(new PatternLayout("%m"));
+       appender->setName(_T("UCM"));       
+       fgQALogger->addAppender(appender);
+       //Set the default threashold to be 
+       fgQALogger->setLevel(Level::DEBUG);
+    }
     //Almost all QA messages are on the info level
     NDC::push(_T(":"));
 
@@ -477,7 +489,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.30 2008/05/19 15:08:20 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.31 2009/06/17 22:11:59 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -861,8 +873,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.30 2008/05/19 15:08:20 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.31 2009/06/17 22:11:59 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.31  2009/06/17 22:11:59  fine
+// Add UCM appender to the StStarLogger and activate it as soon as the env LOGGING is set to UCM
+//
 // Revision 1.30  2008/05/19 15:08:20  fine
 // allow complex formating with several logger stream concurrently. Thanx Victor
 //
