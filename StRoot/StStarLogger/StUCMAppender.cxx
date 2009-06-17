@@ -46,7 +46,6 @@ StUCMAppender::~StUCMAppender()
 	 // fprintf(stderr,"StUCMAppender::~StUCMAppender()\n" );
     finalize();
     if (connection) { 
-       connection->logEnd(); 
        delete connection; 
        connection = 0; 
     }
@@ -117,7 +116,6 @@ TxEventLog *StUCMAppender::getConnection()
      if (!connection) {
        connection = TxEventLogFactory::create();
 //       connection = TxEventLogFactory::create("w"); // to access the Web interface
-       connection->logStart();
        if ( getenv("JOBINDEX") && getenv("REQUESTID") ) {
            const char *JOBINDEX = getenv("JOBINDEX");
            std::string UCMJOB   = getenv("REQUESTID");
