@@ -103,7 +103,8 @@ void runGammaTreeMaker
     
     gammaMaker->setClusterEtThreshold(5.1);
     gammaMaker->setConeRadius(0.4);
-    gammaMaker->setSmdRange(20.0);
+    gammaMaker->setBsmdRange(0.05237);
+    gammaMaker->setEsmdRange(20.0);
     
     gammaMaker->setSeedEnergyThreshold(3.6);
     gammaMaker->setClusterEnergyThreshold(5.1);
