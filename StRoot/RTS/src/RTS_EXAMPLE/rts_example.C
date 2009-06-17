@@ -41,6 +41,8 @@ static int etow_doer(daqReader *rdr, char  *do_print) ;
 static int tpc_doer(daqReader *rdr, char *do_print) ;
 static int tpx_doer(daqReader *rdr, char *do_print) ;
 static int trg_doer(daqReader *rdr, char *do_print) ;
+static int ftp_doer(daqReader *rdr, char *do_print) ;
+
 static int emc_pseudo_doer(daqReader *rdr, char *do_print) ;
 static int pp2pp_doer(daqReader *rdr, char *do_print) ;
 static int l3_doer(daqReader *rdr, char *do_print) ;
@@ -160,8 +162,8 @@ int main(int argc, char *argv[])
 		dd = evp->det("fpd")->get("legacy") ;
 		if(dd) LOG(INFO,"FPD found") ;
 
-		dd = evp->det("ftp")->get("legacy") ;
-		if(dd) LOG(INFO,"FTP found") ;
+		if(ftp_doer(evp,print_det)) LOG(INFO,"FTP found") ;
+	
 				
 		dd = evp->det("rich")->get("legacy") ;
 		if(dd) LOG(INFO,"RIC found") ;
@@ -388,6 +390,44 @@ static int tpx_doer(daqReader *rdr, char  *do_print)
 	return found ;
 
 }
+
+static int ftp_doer(daqReader *rdr, char *do_print)
+{
+  int found = 0;
+  daq_dta *dd;
+  
+  if(strcasestr(do_print,"ftp")) ;	// leave as is...
+  else do_print = 0 ;
+
+  dd = rdr->det("ftp")->get("legacy") ;
+
+  while(dd && dd->iterate()) {	
+    found++ ;	// mark as found..
+    ftp_t *ftp = (ftp_t *) dd->Void ;
+
+    if(do_print) {
+      printf("FTP sector %d: pixels %d\n",dd->sec,ftp->channels) ;
+	   
+		
+      for(int ss=0;ss<2;ss++) {
+	for(int rb=0;rb<10;rb++) {
+	  for(int pad=0;pad<960;pad++) {
+	    for(int tbi=0;tbi<ftp->counts[ss][rb][pad];tbi++) {
+	      printf("%d %d %d %d %d\n",
+		     ss,rb,pad,
+		     ftp->timebin[ss][rb][pad][tbi],
+		     ftp->adc[ss][rb][pad][tbi]);
+	    }
+	  }
+	}
+      }
+    }
+  }
+  
+
+  return found ;
+}
+
 
 static int tpc_doer(daqReader *rdr, char  *do_print)
 {
