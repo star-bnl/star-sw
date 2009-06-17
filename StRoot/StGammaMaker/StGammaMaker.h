@@ -76,7 +76,7 @@ class StGammaMaker: public StMaker
         ~StGammaMaker() {};
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaMaker.h,v 1.1 2008/12/03 15:40:52 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaMaker.h,v 1.2 2009/06/17 06:22:52 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();
@@ -95,10 +95,12 @@ class StGammaMaker: public StMaker
         // Set StGammaCandidateMaker parameters
         // MinimumEt defaults to 0.0
         // Radius    defaults to 0.7
-        // Range     defaults to 20.0
+        // BSMD Range defaults to 0.05
+        // ESMD Range defaults to 20 cm
         void setClusterEtThreshold(double threshold) { mCandidateMaker->SetMinimumEt(threshold); }
         void setConeRadius(double radius) { mCandidateMaker->SetRadius(radius); }
-        void setSmdRange(double range) { mCandidateMaker->SetSmdRange(range); }
+        void setBsmdRange(double range) { mCandidateMaker->SetBsmdRange(range); }
+        void setEsmdRange(double range) { mCandidateMaker->SetEsmdRange(range); }
         
         void useStrictBemcStatus() { mCandidateMaker->useStrictBemcStatus(); }
         
