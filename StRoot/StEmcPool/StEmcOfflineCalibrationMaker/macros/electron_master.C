@@ -21,8 +21,9 @@ void drawTower(TH1* h, TF1* f, int id, CalibrationHelperFunctions* helper);
 double fit_function(double *x, double *par);
 double fit_function2(double *x, double *par);
 double background_only_fit(double *x, double *par);
+int lookup_crate(float,float);
 
-void electron_master(const char* file_list="electrons.list",const char* output="electronmaster_adam.root", const char* dbDate="1999-01-01 00:09:00", const char* geantfile="geant_func.root", const char* gfname="mips.gain.table"){
+void electron_master(const char* file_list="electrons.list",const char* output="electronmaster.root", const char* dbDate="1999-01-01 00:09:00", const char* geantfile="geant_func.root", const char* gfname="mip.gains.final", const char* ngname="electron.gains"){
   //**********************************************//
   //Load Libraries                                //
   //**********************************************//
@@ -43,7 +44,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StAssociationMaker");
   gSystem->Load("StEmcTriggerMaker");
-
+  gSystem->Load("StTriggerUtilities");
   gSystem->Load("StEmcOfflineCalibrationMaker");
 
   cout<<"input filelist: "<<file_list<<endl;
@@ -74,18 +75,26 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 
   const int ntowers = 4800;
   const int nrings = 40;
-
+  const int ncrates = 30;
   float gains[ntowers];
   int status[ntowers];
+  float peaks[ntowers];
+  float peakerr[ntowers];
 
   ifstream gainfile(gfname);
   while(1){
     int id,stat;
-    float peak,err,gain;
-    gainfile >> id >> stat >> peak >> err >> gain;
+    float peak,err,gain,eta,theta;
+    gainfile >> id >> peak >> err >> stat;
     if(!gainfile.good())break;
+    eta = helper->getEta(id);
+    theta = helper->getTheta(id);
+    gain = 0.264*(1+0.056*eta*eta)/(sin(theta)*peak);
+    peaks[id-1] = peak;
     gains[id-1] = gain;
     status[id-1] = stat;
+    peakerr[id-1] = err;
+    //cout<<id<<" "<<gain;
   }
 
   TFile* geant_file = new TFile(geantfile,"READ");
@@ -93,6 +102,8 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 
   TFile outfile(output,"RECREATE");
 
+  TH1 *crate_histo[ncrates];
+  TF1 *crate_fit[ncrates];
   TH1 *electron_histo[ntowers];
   TF1 *fit[ntowers];
   TH1 *prs_histo[ntowers];
@@ -107,6 +118,10 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   ringprec->SetYTitle("E/p");
   ringprec->SetXTitle("#eta");
   double ew[nrings];
+
+  TH1F* crateprec = new TH1F("crateprec","",30,0.5,30.5);
+  crateprec->SetXTitle("Crate");
+  crateprec->SetYTitle("E/p");
 
   TH2F *energyleak = new TH2F("energyleak","",20,0.0,0.03,20,0.0,1.0);
   TH2F *findbg = new TH2F("findbg","",20,0.0,0.03,30,0.0,5.0);
@@ -162,7 +177,6 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 
 
    //create the tower histograms
-  char name[100];
   char name1[100];
   /*
   for(int i=0; i<ntowers; i++){
@@ -174,6 +188,15 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     prs_histo[i]->SetXTitle("ADC");
   }
   */
+  for(int i = 0; i < ncrates; i++){
+    char name[100];
+    char title[100];
+    sprintf(name,"crate_%i",i+1);
+    sprintf(title,"E/p for Crate %i",i+1);
+    crate_histo[i] = new TH1F(name,title,50,0.,3.0);
+    crate_histo[i]->SetXTitle("E/p");
+  }
+
   char name2[100];
   for(int i=0; i<nrings;i++)
     {
@@ -222,7 +245,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     //if(1) cout<<"reading "<<j<<" of "<<nentries<<endl;
 
     if((track->tower_adc[0] - track->tower_pedestal[0]) < 2.5 * track->tower_pedestal_rms[0])continue;
-    if(track->p < 1.0)continue;
+    if(track->p < 1.5)continue;
     //if(track->p > 6.0)continue;				
     //change the fiducial cut to a square with diagonal = 0.06 in deta, dphi space
     float squarefid = 0.02;//0.03/TMath::Sqrt(2.0);
@@ -231,7 +254,12 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     //calculate geant scaled, pedestal subtracted adc
     double dR = TMath::Sqrt(track->deta*track->deta + track->dphi*track->dphi);
     //if(dR > 0.0125)continue;
-    if(dR > 0.025)continue;
+    //if(dR > 0.025)continue;
+    if(track->p > 15)continue;
+    //cout<<track->dEdx<<endl;
+    if(track->dEdx*1000000 > 4.5 || track->dEdx*1000000 < 3.5)continue;
+    if(!track->nonhtTrig)continue;
+    //if(track->nHits < 25)continue;
     double scaled_adc = (track->tower_adc[0] - track->tower_pedestal[0]) / track->p;
     double geant_scale = geant_fit->Eval(dR);
     scaled_adc *= geant_scale;
@@ -253,8 +281,10 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     //if(eta > 0.224 && eta < 0.226)cout<<etaindex<<endl;
     //get gain to calculate E/p
     //1.15 corrects to proper full scale
-    double tgain = bemctables->calib(1,track->tower_id[0])*1.15;
-    ring_histo[etaindex]->Fill(scaled_adc*gains[index-1]);
+    //double tgain = bemctables->calib(1,track->tower_id[0])*1.15;
+    double tgain = gains[index-1];
+    if(status[index-1]==1)ring_histo[etaindex]->Fill(scaled_adc*gains[index-1]);
+    //cout<<index<<" "<<gains[index-1]<<" "<<scaled_adc*track->p<<" "<<track->p<<" "<<status[index-1]<<endl;
     ring_pve[etaindex]->Fill(scaled_adc*gains[index-1]*track->p,track->p);
 
     float abseta = TMath::Abs(eta);
@@ -289,7 +319,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     //calculate leaked energy, the towen < 5 removes trigger towers
     for(int k = 1; k < 9; k++)
       {
-	float sgain = bemctables->calib(1,track->tower_id[k]);
+	float sgain = gains[track->tower_id[k]-1];
 	float towen = (track->tower_adc[k] - track->tower_pedestal[k])*sgain;
 	if(track->tower_adc[k] > track->tower_pedestal[k])
 	  {
@@ -420,7 +450,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 
   for(int i=0; i<nrings; i++){
 	  
-    cout<<"fitting ring "<<i+1<<" of "<<nrings<<endl;
+    //cout<<"fitting ring "<<i+1<<" of "<<nrings<<endl;
 		
     sprintf(name,"ring_fit_%i",i);
     /*
@@ -433,8 +463,11 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     ringfit[i]->SetParNames("Constant","Mean","Sigma","Peak Ratio","Bg Mean","Bg Sigma");
     */		
     //TF1* ffff = new TF1("ffff","expo(0) + gaus(2)",0.4,1.7);
-    ringfit[i] = new TF1(name,"expo(0) + gaus(2)",0.4,1.7);
-    ringfit[i]->SetParameter(3,1.);
+    ringfit[i] = new TF1(name,"pol1(0) + gaus(2)",0.3,1.6);
+    ringfit[i]->SetParLimits(1,-10000,0);
+    ringfit[i]->SetParLimits(2,0,10000);
+    ringfit[i]->SetParLimits(3,0,10);
+    ringfit[i]->SetParameter(3,0.95);
     ringfit[i]->SetParameter(4,0.15);
     ringfit[i]->SetParNames("constant1","Slope","constant2","Mean","Sigma");
     /*
@@ -451,14 +484,109 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     ringfit[i]->SetLineColor(kBlue);
     ringfit[i]->SetLineWidth(0.6);
 		
-    ring_histo[i]->Fit(ringfit[i],"rq");
+    ring_histo[i]->Fit(ringfit[i],"rq","",0.3,1.6);
 		
     ringprec->SetBinContent(i+1,(ringfit[i]->GetParameter(3)));
     ringprec->SetBinError(i+1,ringfit[i]->GetParameter(4));
     ringprec2->SetBinContent(i+1,(ringfit[i]->GetParameter(3)));
     ringprec2->SetBinError(i+1,ringfit[i]->GetParError(3));
     //ew[i] = 4066/(60*(fit[i]->GetParameter(2))*(fit[i]->GetParameter(2)));
+
+    float mean = ringfit[i]->GetParameter(3);
+    float merr = ringfit[i]->GetParError(3);
+    cout<<"ring "<<i<<" "<<mean<<" "<<merr/mean<<endl;
   }
+
+  float gains2[ntowers];
+  float gerr2[ntowers];
+  for(int i = 0; i < ntowers; i++){
+    float eta = helper->getEta(i+1);
+    if(TMath::Abs(eta) > 0.968) eta += 0.005 * TMath::Abs(eta)/eta;
+    int etaindex = ((TMath::Nint(eta * 1000.0) + 25)/50 + 19);
+    float adjust = ringfit[etaindex]->GetParameter(3);
+    float og = gains[i];
+    float ng = og/adjust;
+    float aerr = ringfit[etaindex]->GetParError(3);
+    float ne = sqrt(pow(og*peakerr[i]/(adjust*peaks[i]),2)+pow(og*aerr/(adjust*adjust),2));
+    //newgain << i+1 << " " << ng << " " << ne << " " << status[i] << endl;
+    gains2[i] = ng;
+    gerr2[i] = ne;
+  }
+
+    ///////////////////////////////////////
+   //Using new gains regenerate by crate//
+  ///////////////////////////////////////
+
+  for(int j=0; j<nentries; j++){
+    tree->GetEntry(j);
+    track = &(cluster->centralTrack);
+    TClonesArray *tracks = cluster->tracks;
+
+    if((track->tower_adc[0] - track->tower_pedestal[0]) < 2.5 * track->tower_pedestal_rms[0])continue;
+    if(track->p < 1.5)continue;
+    float squarefid = 0.02;//0.03/TMath::Sqrt(2.0);
+
+    double dR = TMath::Sqrt(track->deta*track->deta + track->dphi*track->dphi);
+    if(track->p > 15)continue;
+    if(track->dEdx*1000000 > 4.5 || track->dEdx*1000000 < 3.5)continue;
+    if(track->htTrig && !track->nonhtTrig)continue;
+    //if(track->nHits < 25)continue;
+    double scaled_adc = (track->tower_adc[0] - track->tower_pedestal[0]) / track->p;
+    double geant_scale = geant_fit->Eval(dR);
+    scaled_adc *= geant_scale;
+    //cout<<scaled_adc<<endl;
+    int index = track->tower_id[0];
+
+    eta = helper->getEta(index);
+    double tgain = gains2[index-1];
+    float phi = helper->getPhi(index);
+    int crate = lookup_crate(eta,phi);
+    if(status[index-1]==1)crate_histo[crate-1]->Fill(scaled_adc*tgain);
+  }
+
+  for(int i = 0; i < ncrates; i++){
+    sprintf(name,"crate_fit_%i",i);
+    crate_fit[i] = new TF1(name,"pol1(0) + gaus(2)",0.3,1.6);
+    crate_fit[i]->SetParLimits(1,-10000,0);
+    crate_fit[i]->SetParLimits(2,0,10000);
+    crate_fit[i]->SetParLimits(3,0,10);
+    crate_fit[i]->SetParameter(3,0.95);
+    crate_fit[i]->SetParameter(4,0.15);
+    crate_fit[i]->SetParNames("constant1","Slope","constant2","Mean","Sigma");
+    crate_fit[i]->SetLineColor(kBlue);
+    crate_fit[i]->SetLineWidth(0.6);
+		
+    crate_histo[i]->Fit(crate_fit[i],"rq","",0.6,1.4);
+    float mean = crate_histo[i]->GetFunction(name)->GetParameter(3);
+    float merr = crate_histo[i]->GetFunction(name)->GetParError(3);
+    crateprec->SetBinContent(i+1,mean);
+    crateprec->SetBinError(i+1,merr);
+    cout<<"crate "<<i+1<<" "<<mean<<" "<<merr/mean<<endl;
+  }
+
+  ofstream newgain(ngname);
+
+  float gains3[ntowers];
+  float gerr3[ntowers];
+  for(int i = 0; i < ntowers; i++){
+    float eta = helper->getEta(i+1);
+    float phi = helper->getPhi(i+1);
+    int crate = lookup_crate(eta,phi);
+    float adjust = crate_fit[crate-1]->GetParameter(3);
+    float og = gains2[i];
+    float ng = og;
+    float aerr = crate_fit[crate-1]->GetParError(3);
+    float ne = gerr2[i];
+    if(fabs(adjust-1)/aerr > 1.5){
+      ne = sqrt(pow(gerr2[i]/(adjust),2)+pow(og*aerr/(adjust*adjust),2));
+      ng /= adjust;
+    }
+    newgain << i+1 << " " << ng << " " << ne << " " << status[i] << endl;
+    gains3[i] = ng;
+    gerr3[i] = ne;
+  }
+
+  newgain.close();
 
   outfile.Write();
   outfile.Close();
@@ -526,4 +654,41 @@ double fit_function2(double *x, double *par){
     fitval = par[0]*TMath::Exp(-0.5*arg1*arg1) + par3*TMath::Exp(-0.5*arg2*arg2) + par6*TMath::Exp(-arg3);
   }
   return fitval;
+}
+
+int lookup_crate(float eta,float phi)
+{
+    if (eta < 0){
+      if (phi < -2.72) return 5;
+      else if (phi < -2.30) return 6;
+      else if (phi < -1.88) return 7;
+      else if (phi < -1.46) return 8;
+      else if( phi < -1.04) return 9;
+      else if( phi < -0.62) return 10;
+      else if( phi < -0.20) return 11;
+      else if( phi <  0.22) return 12;
+      else if( phi <  0.64) return 13;
+      else if( phi <  1.06) return 14;
+      else if( phi <  1.48) return 15;
+      else if( phi <  1.90) return 1;
+      else if( phi <  2.32) return 2;
+      else if( phi <  2.74) return 3;
+      else             return 4;
+    }else{
+      if   (phi < -2.72) return 20;
+      else if( phi < -2.30) return 21;
+      else if( phi < -1.88) return 22;
+      else if( phi < -1.46) return 23;
+      else if( phi < -1.04) return 24;
+      else if( phi < -0.62) return 25;
+      else if( phi < -0.20) return 26;
+      else if( phi <  0.22) return 27;
+      else if( phi <  0.64) return 28;
+      else if( phi <  1.06) return 29;
+      else if( phi <  1.48) return 30;
+      else if( phi <  1.90) return 16;
+      else if( phi <  2.32) return 17;
+      else if( phi <  2.74) return 18;
+      else             return 19;
+    }
 }

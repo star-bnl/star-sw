@@ -143,23 +143,9 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
 		
   }
 	
-  LOG_DEBUG << "finished init run for " << run << endm;
-  return StMaker::InitRun(run);
-}
-
-Int_t StEmcOfflineCalibrationMaker::Make()
-{		
-  LOG_DEBUG<<"StEmcOfflineCalibrationMaker::Make()"<<endm;
-	//get pointers to useful objects
-  TChain* chain = muDstMaker->chain(); assert(chain);
-  StMuDst* muDst = muDstMaker->muDst(); assert(muDst);
-  StMuEvent* event = muDst->event(); assert(event);
-  StRunInfo* runInfo = &(event->runInfo()); assert(runInfo);
-//	TrgDataType2005* trgData	= (TrgDataType2005*)event->triggerData()->getTriggerStructure(); assert(trgData);
-	
-  LOG_DEBUG << "general pointer assertions OK" << endm;
-	
 	//pedestals, rms, status
+
+
   float pedestal, rms;
   int status;
   int pedstatus;
@@ -195,15 +181,31 @@ Int_t StEmcOfflineCalibrationMaker::Make()
   }
 	
 
-  LOG_DEBUG << "got peds and status in Make()" << endm;
-	
-	//triggers
-  const StTriggerId& trigs = event->triggerIdCollection().nominal();
+  LOG_DEBUG << "got peds and status in InitRun()" << endm;
+  LOG_DEBUG << "finished init run for " << run << endm;
+  return StMaker::InitRun(run);
+}
 
+Int_t StEmcOfflineCalibrationMaker::Make()
+{		
+  LOG_DEBUG<<"StEmcOfflineCalibrationMaker::Make()"<<endm;
+	//get pointers to useful objects
+  TChain* chain = muDstMaker->chain(); assert(chain);
+  StMuDst* muDst = muDstMaker->muDst(); assert(muDst);
+  StMuEvent* event = muDst->event(); assert(event);
+  StRunInfo* runInfo = &(event->runInfo()); assert(runInfo);
+//	TrgDataType2005* trgData	= (TrgDataType2005*)event->triggerData()->getTriggerStructure(); assert(trgData);
+	
+  LOG_DEBUG << "general pointer assertions OK" << endm;
+	
+  const StTriggerId& trigs = event->triggerIdCollection().nominal();
 	//toss out fpd1-tpcdead-fast triggers immediately
   for(unsigned int i = 0; i < fastTriggers.size(); i++){
     if(trigs.isTrigger(fastTriggers[i]))return kStOK;
   } 
+	
+	//triggers
+
  //if(trigs.isTrigger(2) || trigs.isTrigger(117460) || trigs.isTrigger(137460) || trigs.isTrigger(147461)) return kStOK;
 	
   myEvent->triggerIds = trigs.triggerIds();

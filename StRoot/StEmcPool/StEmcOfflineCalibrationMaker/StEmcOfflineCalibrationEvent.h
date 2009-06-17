@@ -64,6 +64,8 @@ public:
 	double			dEdx;
 	double			nSigmaElectron;	
 	
+	unsigned short htTrig;//was there an ht trigger
+	unsigned short nonhtTrig;//was there a non ht trigger
 
 	//void takeTowerTrack(StEmcTowerCalibrationTrack* track);
 	StEmcOfflineCalibrationTrack();
@@ -71,7 +73,7 @@ public:
 	
 	void Clear(Option_t* option="");
 	
-	ClassDef(StEmcOfflineCalibrationTrack, 5)
+	ClassDef(StEmcOfflineCalibrationTrack, 6)
 };
 
 //----------------------------------------------------------------------

@@ -2,6 +2,7 @@
 //and writes them to a slimmer tree
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <set>
 using namespace std;
 
@@ -40,6 +41,11 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 		calib_tree->Add(file);
 	}
 	
+	vector<unsigned int> htTriggers;
+	htTriggers.push_back(220500);
+	htTriggers.push_back(220510);
+	htTriggers.push_back(220520);
+
 	StEmcOfflineCalibrationEvent* myEvent = new StEmcOfflineCalibrationEvent();
 	calib_tree->SetBranchAddress("event_branch",&myEvent);
 	StEmcOfflineCalibrationCluster* cluster = new StEmcOfflineCalibrationCluster();
@@ -65,6 +71,19 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 		//event level cuts
 		if(TMath::Abs(myEvent->vz[0]) > 60.) continue;
 
+		int nht = 0;
+		int yht = 0;
+		for(unsigned int h = 0; h < myEvent->triggerIds.size(); h++){
+		  int isht = 0;
+		  for(unsigned int f = 0; f < htTriggers.size(); f++){
+		    if(htTriggers[f] == myEvent->triggerIds[h])isht = 1;
+		  }
+		  if(!isht)nht = 1;
+		  if(isht)yht = 1;
+		  //cout<<i<<" "<<myEvent->triggerIds[h]<<endl;
+		}
+		//cout<<i<<" "<<nht<<" "<<yht<<endl;
+		//if(!nht && yht)continue;
 		//do a quick loop over tracks to get excluded towers
 		track_towers.clear();
 		excluded_towers.clear();
@@ -102,10 +121,13 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 			
 			if(excluded_towers.find(track->tower_id[0]) != excluded_towers.end()) continue;
 
+			track->htTrig = yht;
+			track->nonhtTrig = nht;
+
 			//looking for tracks at surrounding towers
 			//cout<<"passed basic cuts"<<endl;
 
-			if(track->nSigmaElectron > -1.){
+			if(track->nSigmaElectron > -2.){
 			  //create start using cluster
 			  cluster->centralTrack = *track;
 

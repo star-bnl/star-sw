@@ -47,7 +47,7 @@ void StEmcOfflineCalibrationElectronAnalyzer::analyze(TChain* calib_tree, char* 
 		for(unsigned int k = 0; k < myEvent->triggerIds.size(); k++){
 		  int isht = 0;
 		  for(unsigned int l = 0; l < HTtrigs.size(); l++){
-		    if(myEvent->triggerIds[k] == HTtrigs[l]){
+		    if((int)myEvent->triggerIds[k] == HTtrigs[l]){
 		      isht = 1;
 		      break;
 		    }
@@ -55,8 +55,8 @@ void StEmcOfflineCalibrationElectronAnalyzer::analyze(TChain* calib_tree, char* 
 		  if(isht)ht=1;
 		  else nht=1;
 		}
-		if(nht == 0 && ht == 1) oht=1;
-
+		//if(nht == 0 && ht == 1) oht=1;
+		if(ht == 1)oht=1;
 		map<unsigned int, vector< pair<int,int> > >tws;
 		tws = myEvent->towersAboveThreshold;
 		map<unsigned int, vector< pair<int,int> > >::iterator miter;
