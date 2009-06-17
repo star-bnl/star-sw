@@ -30,7 +30,7 @@ class StGammaCandidateMaker: public StMaker
         ~StGammaCandidateMaker();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidateMaker.h,v 1.9 2008/12/03 15:29:57 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidateMaker.h,v 1.10 2009/06/17 06:21:45 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();
@@ -41,7 +41,8 @@ class StGammaCandidateMaker: public StMaker
         // Mutators
         void SetMinimumEt(Float_t et) { mMinimumEt = et; }
         void SetRadius(Float_t r) { mRadius = r; }
-        void SetSmdRange(Float_t r){ mSmdRange = r; }
+        void SetBsmdRange(Float_t r){ mBsmdRange = r; }
+        void SetEsmdRange(Float_t r){ mEsmdRange = r; }
         
         void useBemc() { mUseBemc = true; }
         void useEemc() { mUseEemc = true; }
@@ -67,7 +68,8 @@ class StGammaCandidateMaker: public StMaker
 
         Float_t mMinimumEt; // GeV
         Float_t mRadius;    // sqrt( deta**2 + dphi**2 )
-        Float_t mSmdRange;  // cm
+        Float_t mBsmdRange;  // eta-phi
+        Float_t mEsmdRange;  // cm
         Int_t   mCompressLevel;
         
         Int_t mId;
@@ -82,7 +84,7 @@ class StGammaCandidateMaker: public StMaker
         TVector3 getEEmcClusterPosition(const StEEmcCluster& cluster);
 
 
-  ClassDef(StGammaCandidateMaker, 3);
+  ClassDef(StGammaCandidateMaker, 4);
 
 };
 
