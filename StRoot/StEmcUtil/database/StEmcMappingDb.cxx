@@ -1,4 +1,4 @@
-// $Id: StEmcMappingDb.cxx,v 1.5 2009/02/01 17:34:52 kocolosk Exp $
+// $Id: StEmcMappingDb.cxx,v 1.6 2009/04/20 16:38:57 mattheww Exp $
 
 #include "StEmcMappingDb.h"
 
@@ -286,82 +286,85 @@ StEmcMappingDb::softIdFromRDO(StDetectorId det, int rdo, int channel) const {
     short id;
     switch(det) {
         case kBarrelEmcPreShowerId:
-        const bprsMap_st* prs = bprs();
-        if(mCacheBprsRdo[rdo][channel] == -1) {
-            for(int i=0; i<4800; i++) {
+	  {
+	    const bprsMap_st* prs = bprs();
+	    if(mCacheBprsRdo[rdo][channel] == -1) {
+	      for(int i=0; i<4800; i++) {
                 if(prs[i].rdo == rdo && prs[i].rdoChannel == channel) {
-                    mCacheBprsRdo[rdo][channel] = i+1;
-                    return i+1;
+		  mCacheBprsRdo[rdo][channel] = i+1;
+		  return i+1;
                 }
-            }
-        }
+	      }
+	    }
 
-        switch((id = mCacheBprsRdo[rdo][channel])) {
+	    switch((id = mCacheBprsRdo[rdo][channel])) {
             // didn't find it on a linear search, must be empty channel
             case -1:
-            mCacheBprsRdo[rdo][channel] = 0;
-            return 0;
+	      mCacheBprsRdo[rdo][channel] = 0;
+	      return 0;
             
             // check cache validity before accepting an empty channel
             case 0:
-            if(maybe_reset_cache(kBarrelEmcPreShowerId)) 
+	      if(maybe_reset_cache(kBarrelEmcPreShowerId))
                 return softIdFromRDO(det, rdo, channel);
-            else return 0;
+	      else return 0;
             
             default:
-            if(prs[id-1].rdo == rdo && prs[id-1].rdoChannel == channel) {
+	      if(prs[id-1].rdo == rdo && prs[id-1].rdoChannel == channel){
                 return id;
-            } else {
+	      } else {
                 reset_bprs_cache();
                 return softIdFromRDO(det, rdo, channel);
-            }
-        }
-        
+	      }
+	    }
+	  }
+
         case kBarrelSmdEtaStripId: case kBarrelSmdPhiStripId:
-        const bsmdeMap_st *smde = bsmde();
-        const bsmdpMap_st *smdp = bsmdp();
-        if(mCacheSmdRdo[rdo][channel] == -1) {
-            for(int i=0; i<18000; i++) {
+	  {
+	    const bsmdeMap_st *smde = bsmde();
+	    const bsmdpMap_st *smdp = bsmdp();
+	    if(mCacheSmdRdo[rdo][channel] == -1) {
+	      for(int i=0; i<18000; i++) {
                 if(smde[i].rdo == rdo && smde[i].rdoChannel == channel) {
-                    mCacheSmdRdo[rdo][channel] = i+1;
-                    if(det == kBarrelSmdEtaStripId) return i+1;
+		  mCacheSmdRdo[rdo][channel] = i+1;
+		  if(det == kBarrelSmdEtaStripId) return i+1;
                 }
-                else if(smdp[i].rdo == rdo && smdp[i].rdoChannel == channel) {
-                    mCacheSmdRdo[rdo][channel] = i+1;
-                    if(det == kBarrelSmdPhiStripId) return i+1;
+                else if(smdp[i].rdo == rdo && smdp[i].rdoChannel == channel){
+		  mCacheSmdRdo[rdo][channel] = i+1;
+		  if(det == kBarrelSmdPhiStripId) return i+1;
                 }
-            }
-        }
+	      }
+	    }
         
-        switch((id = mCacheSmdRdo[rdo][channel])) {
+	    switch((id = mCacheSmdRdo[rdo][channel])) {
             // didn't find it on a linear search, must be empty channel
             case -1:
-            mCacheSmdRdo[rdo][channel] = 0;
-            return 0;
+	      mCacheSmdRdo[rdo][channel] = 0;
+	      return 0;
             
             // check cache validity before accepting an empty channel
             case 0:
-            if(maybe_reset_cache(det)) 
+	      if(maybe_reset_cache(det))
                 return softIdFromRDO(det, rdo, channel);
-            else return 0;
+	      else return 0;
             
             // confirm result
             default:
-            if(smde[id-1].rdo == rdo && smde[id-1].rdoChannel == channel) {
+	      if(smde[id-1].rdo == rdo && smde[id-1].rdoChannel == channel){
                 if(det == kBarrelSmdEtaStripId) return id;
                 return 0;
-            }
-            else if(smdp[id-1].rdo == rdo && smdp[id-1].rdoChannel == channel) {
+	      }
+	      else if(smdp[id-1].rdo == rdo && smdp[id-1].rdoChannel == channel){
                 if(det == kBarrelSmdPhiStripId) return id;
                 return 0;
-            } 
-            else {
+	      }
+	      else{
                 reset_smde_cache(); // also resets smdp cache
                 return softIdFromRDO(det, rdo, channel);
-            }
-        }
-        
-        default: break;
+	      }
+	    }
+	  }
+    default: break;
     }
     return 0;
 }
@@ -488,6 +491,9 @@ void StEmcMappingDb::reset_smdp_cache() const {
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.cxx,v $
+ * Revision 1.6  2009/04/20 16:38:57  mattheww
+ * fixed case statements so that we can compile SL305
+ *
  * Revision 1.5  2009/02/01 17:34:52  kocolosk
  * more caching and optimization.
  *

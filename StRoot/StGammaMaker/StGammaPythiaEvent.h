@@ -15,79 +15,67 @@ using std::vector;
 #include "TLorentzVector.h"
 #include "StSpinPool/StMCAsymMaker/StPythiaEvent.h"
 
-class StGammaPythiaEvent : public StPythiaEvent {
-public:
-  StGammaPythiaEvent() {}
-  StGammaPythiaEvent(const StPythiaEvent* pythia) : StPythiaEvent(*pythia) {}
-  ~StGammaPythiaEvent() {}
+class StGammaPythiaEvent : public StPythiaEvent 
+{
 
-  virtual const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StGammaPythiaEvent.h,v 1.4 2008/06/30 14:58:41 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+    public:
+    
+        StGammaPythiaEvent() {}
+        StGammaPythiaEvent(const StPythiaEvent* pythia) : StPythiaEvent(*pythia) {}
+        ~StGammaPythiaEvent() {}
+        
+        virtual const char* GetCVS() const
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaPythiaEvent.h,v 1.5 2009/06/18 05:49:41 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        
+        void Clear(Option_t* option = "");
+        
+        int numberOfPrompt() const;
+        int numberOfConversion() const;
+        int numberOfHadron() const;
+        int numberOfNeutralPion() const;
+        
+        TLorentzVector& prompt(int i);
+        TLorentzVector& conversion(int i);
+        TLorentzVector& hadron(int i);
+        TLorentzVector& neutralPion(int i);
+        
+        vector<TLorentzVector>& prompt();
+        vector<TLorentzVector>& conversion();
+        vector<TLorentzVector>& hadron();
+        vector<TLorentzVector>& neutralPion();
 
-  void Clear(Option_t* option = "");
-
-  int numberOfPion0() const;
-  int numberOfPrompt() const;
-  int numberOfDecay() const;
-  int numberOfFrag() const;
-  int numberOfInitial() const;
-  int numberOfFinal() const;
-
-  TLorentzVector& pion0(int i);
-  TLorentzVector& prompt(int i);
-  TLorentzVector& decay(int i);
-  TLorentzVector& frag(int i);
-  TLorentzVector& initial(int i);
-  TLorentzVector& final(int i);
-
-  vector<TLorentzVector>& pion0();
-  vector<TLorentzVector>& prompt();
-  vector<TLorentzVector>& decay();
-  vector<TLorentzVector>& frag();
-  vector<TLorentzVector>& initial();
-  vector<TLorentzVector>& final();
-
-private:
-  vector<TLorentzVector> mPion0;
-  vector<TLorentzVector> mPrompt;
-  vector<TLorentzVector> mDecay;
-  vector<TLorentzVector> mFrag;
-  vector<TLorentzVector> mInitial;
-  vector<TLorentzVector> mFinal;
-
-  ClassDef(StGammaPythiaEvent, 1);
+    private:
+        vector<TLorentzVector> mPrompt;
+        vector<TLorentzVector> mConversion;
+        vector<TLorentzVector> mHadron;
+        vector<TLorentzVector> mNeutralPion;
+        
+        ClassDef(StGammaPythiaEvent, 2);
+        
 };
 
 inline void StGammaPythiaEvent::Clear(Option_t* option)
 {
-  mPion0.clear();
-  mPrompt.clear();
-  mDecay.clear();
-  mFrag.clear();
-  mInitial.clear();
-  mFinal.clear();
-  StPythiaEvent::Clear(option);
+    mPrompt.clear();
+    mConversion.clear();
+    mHadron.clear();
+    mNeutralPion.clear();
+    StPythiaEvent::Clear(option);
 }
 
-inline int StGammaPythiaEvent::numberOfPion0() const { return mPion0.size(); }
 inline int StGammaPythiaEvent::numberOfPrompt() const { return mPrompt.size(); }
-inline int StGammaPythiaEvent::numberOfDecay() const { return mDecay.size(); }
-inline int StGammaPythiaEvent::numberOfFrag() const { return mFrag.size(); }
-inline int StGammaPythiaEvent::numberOfInitial() const { return mInitial.size(); }
-inline int StGammaPythiaEvent::numberOfFinal() const { return mFinal.size(); }
+inline int StGammaPythiaEvent::numberOfConversion() const { return mConversion.size(); }
+inline int StGammaPythiaEvent::numberOfHadron() const { return mHadron.size(); }
+inline int StGammaPythiaEvent::numberOfNeutralPion() const { return mNeutralPion.size(); }
 
-inline TLorentzVector& StGammaPythiaEvent::pion0(int i) { return mPion0[i]; }
 inline TLorentzVector& StGammaPythiaEvent::prompt(int i) { return mPrompt[i]; }
-inline TLorentzVector& StGammaPythiaEvent::decay(int i) { return mDecay[i]; }
-inline TLorentzVector& StGammaPythiaEvent::frag(int i) { return mFrag[i]; }
-inline TLorentzVector& StGammaPythiaEvent::initial(int i) { return mInitial[i]; }
-inline TLorentzVector& StGammaPythiaEvent::final(int i) { return mFinal[i]; }
+inline TLorentzVector& StGammaPythiaEvent::conversion(int i) { return mConversion[i]; }
+inline TLorentzVector& StGammaPythiaEvent::hadron(int i) { return mHadron[i]; }
+inline TLorentzVector& StGammaPythiaEvent::neutralPion(int i) { return mNeutralPion[i]; }
 
-inline vector<TLorentzVector>& StGammaPythiaEvent::pion0() { return mPion0; }
 inline vector<TLorentzVector>& StGammaPythiaEvent::prompt() { return mPrompt; }
-inline vector<TLorentzVector>& StGammaPythiaEvent::decay() { return mDecay; }
-inline vector<TLorentzVector>& StGammaPythiaEvent::frag() { return mFrag; }
-inline vector<TLorentzVector>& StGammaPythiaEvent::initial() { return mInitial; }
-inline vector<TLorentzVector>& StGammaPythiaEvent::final() { return mFinal; }
+inline vector<TLorentzVector>& StGammaPythiaEvent::conversion() { return mConversion; }
+inline vector<TLorentzVector>& StGammaPythiaEvent::hadron() { return mHadron; }
+inline vector<TLorentzVector>& StGammaPythiaEvent::neutralPion() { return mNeutralPion; }
 
 #endif
