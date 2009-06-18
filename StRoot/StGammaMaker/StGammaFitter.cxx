@@ -70,14 +70,14 @@ StGammaFitter* StGammaFitter::instance()
   return mInstance;
 }
 
-int StGammaFitter::fit(StGammaCandidate* candidate, StGammaFitterResult* fits)
+int StGammaFitter::fit(StGammaCandidate* candidate, StGammaFitterResult* fits, Int_t plane)
 {
   // Require at least 5 strips in each SMD plane
   if (candidate->numberOfSmdu() < 5) return 9;
   if (candidate->numberOfSmdv() < 5) return 9;
 
   // Clear fit results
-  memset(fits, 0, 2 * sizeof(StGammaFitterResult));
+  //memset(fits, 0, 1 * sizeof(StGammaFitterResult));
 
   TF1* fit = 0;
 
@@ -91,7 +91,8 @@ int StGammaFitter::fit(StGammaCandidate* candidate, StGammaFitterResult* fits)
     return 9;
 
   // Loop over planes
-  for (int plane = 0; plane < 2; ++plane) {
+  //  for (int plane = 0; plane < 2; ++plane) {
+  {
     static TH1* hStrips = new TH1F("hStrips", "hStrips", 288, 0, 288);
     hStrips->Reset();
 
