@@ -38,6 +38,11 @@
 #define RUN_TYPE_FEE_PROM	101	// download flash to TPX RDOs
 #define RUN_TYPE_BOB_PROM	102	// download flash to TPX RDOs
 
+// test runs of misc types, Tonko
+#define RUN_TYPE_PED_A		200
+#define RUN_TYPE_PED_B		201
+#define RUN_TYPE_PULSER_A	202
+
 /* special DAQ commands sent out via Trigger */
 #define DAQCMD_DEFAULT		0	/* Run cluster finder _and_ wait for FORMAT_DATA */
 #define DAQCMD_FMT_WAIT		1	/* Will keep the buffer and wait for a FORMAT_DATA */
