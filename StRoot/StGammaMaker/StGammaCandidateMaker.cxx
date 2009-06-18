@@ -891,9 +891,12 @@ Int_t StGammaCandidateMaker::MakeEndcap()
         StGammaCandidate* candidate = mGammaEvent->candidate(i);
         if (candidate->detectorId() == StGammaCandidate::kEEmc) 
         {
-            StGammaFitterResult fit;
-            int status = StGammaFitter::instance()->fit(candidate, &fit);
-            if(status == 0) candidate->SetSmdFit(fit);
+            StGammaFitterResult ufit;
+	    StGammaFitterResult vfit;
+            int ustatus = StGammaFitter::instance()->fit(candidate, &ufit, 0);
+            if(ustatus == 0) candidate->SetSmdFit(ufit,0);
+	    int vstatus = StGammaFitter::instance()->fit(candidate, &vfit, 1);
+	    if(vstatus == 0) candidate->SetSmdFit(vfit,1);
         }
     
     }
