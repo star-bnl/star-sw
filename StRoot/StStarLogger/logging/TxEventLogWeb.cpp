@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.1 2009/06/17 22:12:00 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.2 2009/06/18 16:54:31 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -26,6 +26,6 @@ void TxLogging::TxEventLogWeb::writeDown(const std::string& message)
         pos++;
   }
   httpstring+=qmessage;
-  httpstring+="\'";
+  httpstring+="\'>/dev/null";
   system( httpstring.c_str());
 }
