@@ -32,6 +32,8 @@ public:
 	int from_cache(char *fname = 0) ;		// from cached file to ped_store
 	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
 
+	int special_setup(int run_type, int sub_type) ;
+
 	void kill_bad(int row, int pad) ;		// kills this specific pad in ped_store
 
 
