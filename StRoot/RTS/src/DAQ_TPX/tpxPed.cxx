@@ -9,7 +9,7 @@
 
 #include <rtsLog.h>
 #include <TPC/rowlen.h>
-
+#include <daqModes.h>
 #include <TPX/tpx_altro_to_pad.h>
 
 #include "tpxCore.h"
@@ -505,6 +505,62 @@ int tpxPed::to_cache(char *fname, u_int run)
 	return 1 ;
 }
 
+int tpxPed::special_setup(int run_type, int sub_type)
+{
+	int r, p, t ;
+	int m ;
+
+	LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
+
+	for(r=0;r<=45;r++) {
+	for(p=0;p<=182;p++) {
+		struct peds *ped = get(r,p) ;
+
+		
+		switch(run_type) {
+		case RUN_TYPE_PULSER_A :
+			for(t=0;t<140;t++) ped->ped[t] = 1023.0 ;
+			for(t=140;t<150;t++) ped->ped[t] = 0.0 ;
+			for(t=150;t<175;t++) ped->ped[t] = 1023.0 ;
+			for(t=175;t<192;t++) ped->ped[t] = 0.0 ;
+			for(t=192;t<412;t++) ped->ped[t] = 1023.0 ;
+			break ;
+		case RUN_TYPE_PED_A :	// starts with ped=0
+			m = 0 ;			
+			for(t=0;t<512;) {
+				for(int i=0;i<16;i++) {
+					ped->ped[t+i] = m * 1023.0 ;
+				}
+				if(m==0) m = 1 ;
+				else m = 0 ;
+				t += 16 ;
+			}
+			break ;
+		case RUN_TYPE_PED_B :	// starts with ped=1
+			m = 1 ;			
+			for(t=0;t<512;) {
+				for(int i=0;i<16;i++) {
+					ped->ped[t+i] = m * 1023.0 ;
+				}
+				if(m==0) m = 1 ;
+				else m = 0 ;
+				t += 16 ;
+			}
+			break ;
+		default :	// some pattern
+			for(t=0;t<512;t++) ped->ped[t] = 1023.0 ;	// kill all
+			for(t=p;t<(p+10);t++) ped->ped[t] = 0 ;		// some pattern depending on row
+			break ;	
+		}
+
+	}
+	}	
+
+	valid = 1 ;
+	smoothed = 1 ;
+
+	return 1 ;
+}
 
 
 void tpxPed::smooth()
@@ -527,7 +583,7 @@ void tpxPed::smooth()
 	LOG(NOTE,"Smoothing pedestals...") ;
 
 	for(r=0;r<=45;r++) {
-	for(p=0;p<183;p++) {
+	for(p=0;p<=182;p++) {
 		struct peds *ped = get(r,p) ;
 		double smoother[513] ;
 		double ripple[513] ;
