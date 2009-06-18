@@ -750,3 +750,43 @@ StGammaStrip *StGammaRawMaker::strip(Int_t sec, Int_t plane, Int_t index)
     return 0;
   
 }
+
+//////////////////////////////////////////////////
+//      Add eta strip from external source      //
+//////////////////////////////////////////////////
+void StGammaRawMaker::AddEtaStrip(StGammaStrip *strip)
+{
+
+    int smdStatus = 0;
+
+    mTables->getStatus(BSMDE, strip->index, smdStatus);
+
+    strip->stat   = smdStatus;
+    strip->fail   = (int)(smdStatus != 1);
+
+    mStrips.push_back(*strip);
+    mBarrelSmdEtaStrip[strip->index] = strip;
+
+    return;
+
+}
+
+//////////////////////////////////////////////////
+//      Add eta strip from external source      //
+//////////////////////////////////////////////////
+void StGammaRawMaker::AddPhiStrip(StGammaStrip *strip)
+{
+
+    int smdStatus = 0;
+    
+    mTables->getStatus(BSMDP, strip->index, smdStatus);
+    
+    strip->stat   = smdStatus;
+    strip->fail   = (int)(smdStatus != 1);
+ 
+    mStrips.push_back(*strip);
+    mBarrelSmdPhiStrip[strip->index] = strip;
+
+    return;
+
+}
