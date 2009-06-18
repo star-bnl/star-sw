@@ -431,7 +431,7 @@ int tpxPed::from_cache(char *fname)
 	return valid ;
 }
 
-int tpxPed::to_cache(char *fname)
+int tpxPed::to_cache(char *fname, u_int run)
 {
 	FILE *f, *f_sum ;
 	int r, p, t ;
@@ -445,19 +445,24 @@ int tpxPed::to_cache(char *fname)
 
 	if(fname) {
 		fn = fname ;
-		f = fopen(fname,"w") ;
 	}
 	else {
 		fn = "/RTScache/pedestals.txt" ;
-		f = fopen(fn,"w") ;
 	}
 
+
+	f = fopen(fn,"w") ;
 	if(f==0) {
 		LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]",fn,strerror(errno)) ;
 		return -1 ;
 	}
 
-	sprintf(f_sum_name,"/RTScache/ped_sum_%u.txt",(u_int)time(NULL)) ;
+	if(run==0) {
+		sprintf(f_sum_name,"/RTScache/ped_sum_%u.txt",(u_int)time(NULL)) ;
+	}
+	else {
+		sprintf(f_sum_name,"/RTScache/ped_sum_%08u.txt",run) ;
+	}
 
 	f_sum = fopen(f_sum_name,"w") ;
 	if(f_sum==0) {
