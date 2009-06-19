@@ -255,7 +255,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     // Check the mandatory UCM appender
     TString ucmenv = gSystem->Getenv("LOGGING");
     if (ucmenv == "UCM" && gSystem->Getenv("JOBINDEX") && gSystem->Getenv("REQUESTID") ) {
-       StUCMAppenderPtr appender = new StUCMAppender;
+       StUCMAppenderPtr appender = new StUCMAppender(ucmenv.Data());
        appender->setLayout(new PatternLayout("%m"));
        appender->setName(_T("UCM"));       
        fgQALogger->addAppender(appender);
@@ -489,7 +489,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.31 2009/06/17 22:11:59 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.32 2009/06/19 22:18:36 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -873,8 +873,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.31 2009/06/17 22:11:59 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.32 2009/06/19 22:18:36 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.32  2009/06/19 22:18:36  fine
+// pick the technology from the LOGGING var
+//
 // Revision 1.31  2009/06/17 22:11:59  fine
 // Add UCM appender to the StStarLogger and activate it as soon as the env LOGGING is set to UCM
 //
