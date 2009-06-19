@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogCollector.cpp,v 1.2 2009/06/19 20:10:52 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogCollector.cpp,v 1.3 2009/06/19 22:16:56 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -25,5 +25,6 @@ TxLogging::TxEventLogCollector::~TxEventLogCollector ()
 //______________________________________________________________
 void TxLogging::TxEventLogCollector::writeDown(const std::string& message)
 {
+   fCollector->initDb();
    fCollector->processMessage(message);
 }
