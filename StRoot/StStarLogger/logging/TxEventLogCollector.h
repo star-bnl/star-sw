@@ -2,7 +2,7 @@
  * @file TxEventLogCollector.h
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogCollector.h,v 1.1 2009/06/19 20:02:31 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogCollector.h,v 1.2 2009/06/19 20:10:52 fine Exp $
  *
  * TxEventLogCollector provides an interface for applications so that they can send
  * event across of the Collector into a CEDPS formated messages.
@@ -13,9 +13,12 @@
 
 #include "TxEventLogFile.h"
 
+class TxUCMCollector;
 
 namespace TxLogging {
   class TxEventLogCollector: public TxEventLogFile {
+  private:
+     TxUCMCollector *fCollector;
   protected:
     /**
      * Write down the prepared plain message using the Collector interface 
@@ -31,14 +34,14 @@ namespace TxLogging {
      * - Gets hostname and sets nodeLocation for the running job.  
      *
      */    
-    TxEventLogCollector(){}
+    TxEventLogCollector();
 
     /**
      * Destructor: 
      * - Sets job state to finished (STAGE = END) 
      *
      */
-    virtual ~TxEventLogCollector (){}
+    virtual ~TxEventLogCollector ();
   };
 }
 #endif
