@@ -117,7 +117,11 @@ namespace log4cxx
 			*/
 			TxLogging::TxEventLog *connection;
 
-
+         /**
+          * Technology to save the logging messages 
+			 */
+         String technology;
+         
 			/**
 			* Stores the string given to the pattern layout for conversion into a SQL
 			* statement, eg: insert into LogTable (Thread, File, Message) values
@@ -148,7 +152,7 @@ namespace log4cxx
 				LOG4CXX_CAST_ENTRY_CHAIN(AppenderSkeleton)
 			END_LOG4CXX_CAST_MAP()
 
-			StUCMAppender();
+			StUCMAppender(const char *mode="F");
 			virtual ~StUCMAppender();
 			
 		    /**

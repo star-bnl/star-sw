@@ -34,10 +34,10 @@ using namespace TxLogging;
 IMPLEMENT_LOG4CXX_OBJECT(StUCMAppender)
 
 //_________________________________________________________________________
-StUCMAppender::StUCMAppender()
-: connection(0), bufferSize(1),fLastId(0),fIsConnectionOpen(false)
+StUCMAppender::StUCMAppender(const char *mode)
+: connection(0),technology(mode), bufferSize(1),fLastId(0),fIsConnectionOpen(false)
 { 
-   fprintf(stderr,"StUCMAppender::StUCMAppender() \n");
+   fprintf(stderr,"StUCMAppender::StUCMAppender() %s \n", mode);
 }
 
 //_________________________________________________________________________
@@ -101,7 +101,7 @@ String StUCMAppender::getLogStatement(const spi::LoggingEventPtr& event)
 void StUCMAppender::closeConnection()
 {
   if (fIsConnectionOpen && connection) {
-      connection->logEnd(); 
+      // connection->logEnd(); 
       delete connection; 
   }
   connection = 0;
@@ -114,7 +114,8 @@ TxEventLog *StUCMAppender::getConnection()
    if (!fIsConnectionOpen) {
    
      if (!connection) {
-       connection = TxEventLogFactory::create();
+       connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
+//       connection = TxEventLogFactory::create();
 //       connection = TxEventLogFactory::create("w"); // to access the Web interface
        if ( getenv("JOBINDEX") && getenv("REQUESTID") ) {
            const char *JOBINDEX = getenv("JOBINDEX");
@@ -125,7 +126,8 @@ TxEventLog *StUCMAppender::getConnection()
            // const char *PROCESSID = getenv("PROCESSID");
        } else {
           fprintf(stderr,"StUCMAppender::getConnection() no JOBINDEX/REQUESTID was provided \n");
-          connection = TxEventLogFactory::create();
+          connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
+//          connection = TxEventLogFactory::create();
 //       connection = TxEventLogFactory::create("w"); // to access the Web interface
        }
      }
