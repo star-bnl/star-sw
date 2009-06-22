@@ -57,19 +57,19 @@ MYSQL *TxUCMCollector::getConnection (const string&dbUrl,const string&dbUsername
 }
  
 //_________________________________________________________________________
-MYSQL *TxUCMCollector::getConnection (const char *dbUrl,const char *dbUsername
-      , const char *dbPassword)
+MYSQL *TxUCMCollector::getConnection (const char *cdbUrl,const char *cdbUsername
+      , const char *cdbPassword)
 {
    if (!fIsConnectionOpen) {
      if ( !(connection= mysql_init(connection)) ) {
          fprintf(stderr,"MYSQL:  ---- > No init connection \n");
      } else {    
-         const char *host   = dbUrl;
-         const char *user   = dbUsername;
-         const char *passwd = dbPassword;
-         const char *db     = "logger";
+         const char *host   = cdbUrl;
+         const char *user   = cdbUsername;
+         const char *passwd = cdbPassword;
+         const char *db     = dbName.c_str();
          unsigned int port  = 3306;
-//         fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n", fIsConnectionOpen);
+         fprintf(stderr,"TxUCMCollector::getConnection:  ---- >  Establishing MySQL connection open %d \n", fIsConnectionOpen);
          if (!(mysql_real_connect(connection
                      , host
                      , user
@@ -79,7 +79,7 @@ MYSQL *TxUCMCollector::getConnection (const char *dbUrl,const char *dbUsername
                      , 0,0
                      )))
          {
-             fprintf(stderr, "MYSQL:  ---- > No connection: %s  \n",mysql_error(connection));
+             fprintf(stderr, "TxUCMCollector::getConnection:  ---- > No connection: %s %s %s %s %d  %s  \n",host, user, passwd, db, port,mysql_error(connection));
              connection = 0;
              fIsConnectionOpen = false;
          } else {
@@ -230,6 +230,11 @@ boolean TxUCMCollector::init ()
 //             log->error (e.getMessage ());
 //             throw e;
 //        }
+#else
+           dbName = "logger";
+           dbUrl  = "heston.star.bnl.gov";
+           dbUsername = "StarLogger";
+           dbPassword = "logger";
 #endif
        return success=true;
     }
