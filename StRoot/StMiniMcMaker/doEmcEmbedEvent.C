@@ -148,13 +148,13 @@ void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = k
   chain->Init();
   int iev = 0;
   int istat = 0; 
-  
+#if 0  
   controlEmcSimulatorMaker_st* simControl = emcSim->getControlSimulator()->GetTable();
   simControl->keyDB[0] = 1;
   simControl->keyDB[1] = 0;
   simControl->keyDB[2] = 1;
   simControl->keyDB[3] = 1;
-  
+#endif  
 // do the event loop    
   while ( istat!=2 && istat!=3 && istat!=4 && iev<=nevents ) {
     chain->Clear();
