@@ -49,7 +49,9 @@ bool  StMessMgr::isFatalEnabled()  const{ return true; }
 //______________________________________________________________________________
 bool  StMessMgr::isEnabledFor()    const{ return true; }
 //______________________________________________________________________________
-bool  StMessMgr::isQAInfoEnabled()   const{ return true; }
+bool  StMessMgr::isQAInfoEnabled() const{ return true; }
+//______________________________________________________________________________
+bool  StMessMgr::isUCMInfoEnabled()const{ return true; }
 
 //
 // C and Fortran routines:
@@ -223,6 +225,10 @@ void type_of_call QAInfo_(const char* mess, size_t len) {
   StCaller(mess,"Q",otsOpt,len);
 }
 //________________________________________
+void type_of_call UCMInfo_(const char* mess, size_t len) {
+  StCaller(mess,"U",otsOpt,len);
+}
+//________________________________________
 void type_of_call StInfoOpt_(const char* mess, const char* opt,
                              size_t len1, size_t len2) {
   StCallerOpt(mess,"I",opt,len1,len2,oOpt);
@@ -248,6 +254,11 @@ void type_of_call QAInfoOpt_(const char* mess, const char* opt,
   StCallerOpt(mess,"Q",opt,len1,len2,otsOpt);
 }
 //________________________________________
+void type_of_call UCMInfoOpt_(const char* mess, const char* opt,
+                             size_t len1, size_t len2) {
+  StCallerOpt(mess,"U",opt,len1,len2,otsOpt);
+}
+//________________________________________
 void type_of_call StMessAddType_(const char* type, const char* text,
                                  size_t len1, size_t len2) {
   if (strlen(type) > len1) (const_cast<char*> (type))[len1] = 0;
@@ -256,4 +267,4 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 }
 
 //_____________________________________________________________________________
-// $Id: StMessMgr.cxx,v 1.6 2005/08/19 21:26:52 fine Exp $
+// $Id: StMessMgr.cxx,v 1.7 2009/06/22 22:36:02 fine Exp $

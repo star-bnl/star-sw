@@ -202,6 +202,7 @@ StLoggerManager::~StLoggerManager() {
   delete [] fCurOpt;  fCurOpt = 0;
 }
 log4cxx::LoggerPtr StLoggerManager::fgQALogger;      //!  Logger to server QA stream
+log4cxx::LoggerPtr StLoggerManager::fgUCMLogger;     //!  Logger to server UCM stream
 //_____________________________________________________________________________
 StMessMgr* StLoggerManager::Instantiate() 
 {return StLoggerManager::StarLoggerInit(); }
@@ -251,17 +252,18 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     }
     LoggerPtr root = Logger::getRootLogger();
 
-    fgQALogger = Logger::getLogger("QA");
-#if 0
+    fgQALogger  = Logger::getLogger("QA");
+    fgUCMLogger = Logger::getLogger("UCM");
+#if 1
     // Check the mandatory UCM appender
     TString ucmenv = gSystem->Getenv("LOGGING");
     if (ucmenv == "UCM" && gSystem->Getenv("JOBINDEX") && gSystem->Getenv("REQUESTID") ) {
        StUCMAppenderPtr appender = new StUCMAppender(ucmenv.Data());
        appender->setLayout(new PatternLayout("%m"));
        appender->setName(_T("UCM"));       
-       fgQALogger->addAppender(appender);
+       fgUCMLogger->addAppender(appender);
        //Set the default threashold to be 
-       fgQALogger->setLevel(Level::DEBUG);
+       fgUCMLogger->setLevel(Level::DEBUG);
     }
 #endif
     //Almost all QA messages are on the info level
@@ -308,6 +310,8 @@ bool  StLoggerManager::isFatalEnabled()  const{ return fLogger->isFatalEnabled()
 bool  StLoggerManager::isEnabledFor()    const{ return true; /*fLogger->isEnabledFor();*/ }
 //______________________________________________________________________________
 bool  StLoggerManager::isQAInfoEnabled() const{ return fgQALogger? fgQALogger->isInfoEnabled():false; }
+//______________________________________________________________________________
+bool  StLoggerManager::isUCMInfoEnabled() const{ return fgUCMLogger? fgUCMLogger->isInfoEnabled():false; }
 //_____________________________________________________________________________
 ostrstream& StLoggerManager::Message(const char* mess, const char* type,
   const char* opt,const char *sourceFileName,int lineNumber) {
@@ -323,6 +327,7 @@ ostrstream& StLoggerManager::Message(const char* mess, const char* type,
 //   'I' - info
 //   'D' - debug
 //   'Q' - QA 
+//   'U' - UCM 
 //------------------------------
 //
 // opt = 
@@ -361,6 +366,7 @@ void StLoggerManager::BuildMessage(const char* mess, unsigned char type,
 //   'I' - info
 //   'D' - debug
 //   'Q' - QA 
+//   'U' - UCM 
 //------------------------------
 //
 // opt = 
@@ -410,6 +416,7 @@ void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
         case 'I': fLogger->info   (_T(mess),sourceFileName,lineNumber); break;
         case 'D': fLogger->debug  (_T(mess),sourceFileName,lineNumber); break;
         case 'Q': fgQALogger->info(_T(mess),sourceFileName,lineNumber); break;
+        case 'U': fgUCMLogger->info(_T(mess),sourceFileName,lineNumber); break;
         default: fLogger->info(_T(mess),sourceFileName,lineNumber);     break;
       };
    }
@@ -491,7 +498,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.33 2009/06/22 01:12:08 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.34 2009/06/22 22:36:01 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -651,6 +658,12 @@ _NO_IMPLEMENTATION_;   return 0;
 ostrstream& StLoggerManager::QAInfo(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
 { return Message(mess, "Q", opt,sourceFileName,lineNumber);}
 //_____________________________________________________________________________
+//
+// UCMInfo Messages:
+//_____________________________________________________________________________
+ostrstream& StLoggerManager::UCMInfo(const char* mess, const char* opt,const char *sourceFileName,int lineNumber)
+{ return Message(mess, "U", opt,sourceFileName,lineNumber);}
+//_____________________________________________________________________________
 void StLoggerManager::IgnoreRepeats()
 { 
     AllowRepeats(0);
@@ -699,6 +712,33 @@ _NO_IMPLEMENTATION_;    return 0;
 }
 //_____________________________________________________________________________
 messVec* StLoggerManager::FindQAInfoList(const char* s1, const char* s2,
+                                         const char* s3, const char* s4)
+{
+_NO_IMPLEMENTATION_;   return 0;
+   // return FindMessageList(s1,s2,s3,s4,messCollection[5]);
+}
+
+//_____________________________________________________________________________
+int StLoggerManager::PrintUCMInfo() 
+{ 
+_NO_IMPLEMENTATION_;   return 0;
+    // return PrintList(messCollection[5]); 
+}
+//_____________________________________________________________________________
+const messVec* StLoggerManager::GetUCMInfos() 
+{
+_NO_IMPLEMENTATION_;   return 0;
+  // return (messCollection[5]);
+}
+//_____________________________________________________________________________
+StMessage* StLoggerManager::FindUCMInfo(const char* s1, const char* s2,
+                                       const char* s3, const char* s4)
+{
+_NO_IMPLEMENTATION_;    return 0;
+    // return FindMessage(s1,s2,s3,s4,messCollection[5]);
+}
+//_____________________________________________________________________________
+messVec* StLoggerManager::FindUCMInfoList(const char* s1, const char* s2,
                                          const char* s3, const char* s4)
 {
 _NO_IMPLEMENTATION_;   return 0;
@@ -775,7 +815,8 @@ void StLoggerManager::Close()
 {
  // Close the messenger streams
  // Close the QA-related appenders to flush its buffers
-   if (fgQALogger) fgQALogger->closeNestedAppenders();
+   if (fgQALogger)  fgQALogger->closeNestedAppenders();
+   if (fgUCMLogger) fgUCMLogger->closeNestedAppenders();
 }
 //_____________________________________________________________________________
 void StLoggerManager::RemoveLimit(const char* str) 
@@ -875,8 +916,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.33 2009/06/22 01:12:08 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.34 2009/06/22 22:36:01 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.34  2009/06/22 22:36:01  fine
+// Add the new dedicated UCM logger, It should force the recompilation of many STAR packages
+//
 // Revision 1.33  2009/06/22 01:12:08  fine
 // Disable the default UCM. Use log4j.xml instead, for the time being
 //

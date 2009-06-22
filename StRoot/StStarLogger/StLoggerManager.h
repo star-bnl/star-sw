@@ -6,7 +6,7 @@
   It inherits from StMessMgr, which provides the external interface.
   Messages are stored in a vector, and come in several types
   (i.e. info, error, debug ). The types "I" (info), "W" (warning),
-  "E" (error), "D" (debug), and "Q" (QAInfo) are predefined.
+  "E" (error), "D" (debug), "Q" (QAInfo), "U" (UCMInfo) are predefined.
   Message finding and summary tools are also available.
   \sa http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StUtilities/doc/StMessMgr.html
 
@@ -45,6 +45,7 @@ class StLoggerManager : public StMessMgr {
 #ifndef __CINT__
    log4cxx::LoggerPtr fLogger;        //!  Logger to server the old STAR MessageManager interface
    static log4cxx::LoggerPtr fgQALogger;      //!  Logger to server QA stream
+   static log4cxx::LoggerPtr fgUCMLogger;     //!  Logger to server UCM stream
 #endif
 
    static StMessMgr* mInstance;       //!
@@ -109,6 +110,7 @@ protected:
    virtual bool isFatalEnabled()  const;
    virtual bool isEnabledFor()    const;
    virtual bool isQAInfoEnabled() const;
+   virtual bool isUCMInfoEnabled()const;
 
 
 // Generic Messages:
@@ -195,6 +197,16 @@ protected:
    virtual messVec* FindQAInfoList(const char* s1, const char* s2="",
          const char* s3="", const char* s4="");
 
+// UCMInfo Messages:
+   virtual ostrstream& UCMInfo(const char* mess="", const char* opt="OS"
+                            ,const char *sourceFileName=0, int lineNumber=-1);
+   virtual        int PrintUCMInfo();
+   virtual const messVec* GetUCMInfos();
+   virtual StMessage* FindUCMInfo(const char* s1, const char* s2="",
+         const char* s3="", const char* s4="");
+   virtual messVec* FindUCMInfoList(const char* s1, const char* s2="",
+         const char* s3="", const char* s4="");
+   
 // "As is" Messages:
    virtual ostrstream& out(const char* mess="");
    virtual ostrstream& err(const char* mess="");
@@ -234,4 +246,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.13 2008/05/19 15:08:21 fine Exp $
+// $Id: StLoggerManager.h,v 1.14 2009/06/22 22:36:01 fine Exp $
