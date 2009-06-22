@@ -5,7 +5,6 @@
     copyright            : (C) 2007 by Valeri Fine
     email                :  fine@bnl.gov
  ***************************************************************************/
-#ifdef _UCMLOGGER_
 #include <log4cxx/config.h>
 
 
@@ -31,13 +30,15 @@ using namespace log4cxx::db;
 using namespace log4cxx::spi;
 using namespace TxLogging;
 
-IMPLEMENT_LOG4CXX_OBJECT(StUCMAppender)
+static int lockUcm  =0;
 
+IMPLEMENT_LOG4CXX_OBJECT(StUCMAppender)
 //_________________________________________________________________________
 StUCMAppender::StUCMAppender(const char *mode)
 : connection(0),technology(mode), bufferSize(1),fLastId(0),fIsConnectionOpen(false)
 { 
-   fprintf(stderr,"StUCMAppender::StUCMAppender() %s \n", mode);
+   fprintf(stderr,"StUCMAppender::StUCMAppender() %p %s %i\n", this, mode, lockUcm);
+   lockUcm++;
 }
 
 //_________________________________________________________________________
@@ -110,11 +111,12 @@ void StUCMAppender::closeConnection()
 
 //_________________________________________________________________________
 TxEventLog *StUCMAppender::getConnection()
-{   
+{
    if (!fIsConnectionOpen) {
-   
+
      if (!connection) {
-       connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
+       connection = TxEventLogFactory::create("U"); // create ucm collector factory
+//       connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
 //       connection = TxEventLogFactory::create();
 //       connection = TxEventLogFactory::create("w"); // to access the Web interface
        if ( getenv("JOBINDEX") && getenv("REQUESTID") ) {
@@ -126,7 +128,8 @@ TxEventLog *StUCMAppender::getConnection()
            // const char *PROCESSID = getenv("PROCESSID");
        } else {
           fprintf(stderr,"StUCMAppender::getConnection() no JOBINDEX/REQUESTID was provided \n");
-          connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
+          connection = TxEventLogFactory::create("U"); // create ucm collector factory
+//          connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
 //          connection = TxEventLogFactory::create();
 //       connection = TxEventLogFactory::create("w"); // to access the Web interface
        }
@@ -187,7 +190,7 @@ void StUCMAppender::flushBuffer()
          } else if (level == Level::DEBUG) {
               trackingLevel = TxEventLog::LEVEL_DEBUG;
          } else {
-              continue;
+ //             continue;
          }
 
          // void logUserEvent(Stage stage, Level level, const std::string& userContext, 
@@ -215,7 +218,7 @@ void StUCMAppender::flushBuffer()
           // Map Stage tp TxEventLog Stage
           ucmParamters[0].ReplaceAll("'","");ucmParamters[1].ReplaceAll("'","");ucmParamters[2].ReplaceAll("'","");
           int ucmStage = ucmParamters[0].Atoi();
-          assert (ucmStage >=TxEventLog::START && ucmStage <=TxEventLog::END);
+ //         assert (ucmStage >=TxEventLog::START && ucmStage <=TxEventLog::END);
                connection->logEvent(   ucmParamters[1].Data()
                                      , ucmParamters[2].Data()
                                      , trackingLevel
@@ -227,6 +230,5 @@ void StUCMAppender::flushBuffer()
       }
       buffer.clear();
    }
-   closeConnection();	
+   closeConnection();
 }
-#endif
