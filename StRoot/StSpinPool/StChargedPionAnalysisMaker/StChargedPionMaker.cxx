@@ -1,4 +1,4 @@
-// $Id: StChargedPionMaker.cxx,v 1.19 2009/04/02 18:25:42 kocolosk Exp $
+// $Id: StChargedPionMaker.cxx,v 1.20 2009/06/22 14:44:50 kocolosk Exp $
 
 #include "StChargedPionMaker.h"
 
@@ -172,10 +172,15 @@ Int_t StChargedPionMaker::InitRun(int runnumber) {
             mJets = ((mJetMk->getJets()).find("ConeJets"))->second->getmuDstJets();
             LOG_INFO << "found Jets in Run 5 branch " << mJets << endm;
         }
-        else {
+        else if((mJetMk->getJets()).count("ConeJets12")) {
             mJets = ((mJetMk->getJets()).find("ConeJets12"))->second->getmuDstJets();
             LOG_INFO << "found Jets in Run 6 branch " << mJets << endm;
         }
+        else {
+            mJets = ((mJetMk->getJets()).find("ConeJets12_0.7"))->second->getmuDstJets();
+            LOG_INFO << "found ConeJets12_0.7 branch " << mJets << endm;
+        }
+
     }
     else {
         LOG_INFO << "trying to get the jets off disk" << endm;
@@ -448,6 +453,9 @@ void StChargedPionMaker::makeTriggerSimu(StChargedPionBaseEv *ev) {
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.cxx,v $
+ * Revision 1.20  2009/06/22 14:44:50  kocolosk
+ * support for new ConeJets12_0.7 branch name
+ *
  * Revision 1.19  2009/04/02 18:25:42  kocolosk
  * fixed paths to jet codes
  *
