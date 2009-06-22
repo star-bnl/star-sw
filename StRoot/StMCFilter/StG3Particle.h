@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StG3Particle.h,v 1.4 2009/05/09 00:44:58 perev Exp $
+// @(#)STAR/eg:$Id: StG3Particle.h,v 1.5 2009/06/22 23:59:54 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -8,6 +8,12 @@
 #ifndef ROOT_StG3Particle
 #define ROOT_StG3Particle
 #include "StGENParticle.h"
+
+/// class StG3ParticleMaster is a implementation of container of tracks 
+/// in HEPEVT style:
+/// http://cepa.fnal.gov/psm/simulation/mcgen/lund/pythia_manual/pythia6.3/pythia6301/node39.html
+/// It is interface to Geant3 tracks and vertices 
+///
 
 //      SUBROUTINE GFKINE(ITRA,VERT,PVERT,IPART,NVERT,UBUF,NWBUF)
 //      SUBROUTINE GFVERT(NVTX,V,NTBEAM,NTTARG,TOFG,UBUF,NWBUF)
