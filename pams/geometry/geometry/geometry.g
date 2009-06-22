@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.193 2009/04/20 23:14:22 perev Exp $
+* $Id: geometry.g,v 1.194 2009/06/22 22:21:44 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.194  2009/06/22 22:21:44  perev
+* Remove redundant messages
+*
 * Revision 1.193  2009/04/20 23:14:22  perev
 * upgr22 fhcmgeo
 *
@@ -1397,8 +1400,6 @@ replace[;Case#{#;] with [
   IF ((JL.LT.JR) .and. (Commands(JL:JR) .eq. '#1')) {;
     myArg=0; jGotCom=2009;
     if (Commands(JR+1:JR+1).eq.'=') then;
-      write(*,*) 'UUUUUUUUUUU ',JL,JR,Commands(1:LL);
-      write(*,*) 'UUUUUUUUUUU ',par(6);
       i = ((JR+1+3+4)/4); myArg = par(i+1);
       Commands(JR+1:i*4)=' ';
     endif
