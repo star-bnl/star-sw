@@ -32,6 +32,7 @@
 #  define LOG_FATAL LOGGERMESSAGE(Fatal)
 #  define LOG_DEBUG LOGGERMESSAGE(Debug)
 #  define LOG_QA    LOGGERMESSAGE(QAInfo)
+#  define LOG_UCM   LOGGERMESSAGE(UCMInfo)
 
 #define STAR_INFO(name) \
    GetLogger(_QUITE_(name))->MESSAGELEVEL(__FUNCTION__, __LINE__) 
@@ -53,11 +54,13 @@
 #define StError_ F77_NAME(sterror,STERROR)
 #define StDebug_ F77_NAME(stdebug,STDEBUG)
 #define QAInfo_ F77_NAME(qainfo,QAINFO)
+#define UCMInfo_ F77_NAME(ucminfo,UCMINFO)
 #define StInfoOpt_ F77_NAME(stinfoopt,STINFOOPT)
 #define StWarningOpt_ F77_NAME(stwarningopt,STWARNINGOPT)
 #define StErrorOpt_ F77_NAME(sterroropt,STERROROPT)
 #define StDebugOpt_ F77_NAME(stdebugopt,STDEBUGOPT)
 #define QAInfoOpt_ F77_NAME(qainfoopt,QAINFOOPT)
+#define UCMInfoOpt_ F77_NAME(ucminfoopt,UCMINFOOPT)
 #define StMessAddType_ F77_NAME(stmessaddtype,STMESSADDTYPE)
 extern "C" {
 void type_of_call Message_(const char* mess, int *lines, int *id, size_t len);
@@ -73,6 +76,7 @@ void type_of_call StWarning_(const char* mess, size_t len);
 void type_of_call StError_(const char* mess, size_t len);
 void type_of_call StDebug_(const char* mess, size_t len);
 void type_of_call QAInfo_(const char* mess, size_t len);
+void type_of_call UCMInfo_(const char* mess, size_t len);
 void type_of_call StInfoOpt_(const char* mess, const char* opt,
                                   size_t len1, size_t len2);
 void type_of_call StWarningOpt_(const char* mess, const char* opt,
@@ -82,6 +86,8 @@ void type_of_call StErrorOpt_(const char* mess, const char* opt,
 void type_of_call StDebugOpt_(const char* mess, const char* opt,
                                   size_t len1, size_t len2);
 void type_of_call QAInfoOpt_(const char* mess, const char* opt,
+                                  size_t len1, size_t len2);
+void type_of_call UCMInfoOpt_(const char* mess, const char* opt,
                                   size_t len1, size_t len2);
 void type_of_call StMessAddType_(const char* type, const char* text,
                                   size_t len1, size_t len2);
@@ -185,7 +191,8 @@ class StMessMgr : public ostrstream {
   virtual bool isInfoEnabled()   const;
   virtual bool isFatalEnabled()  const;
   virtual bool isEnabledFor()    const;
-  virtual bool isQAInfoEnabled()   const;
+  virtual bool isQAInfoEnabled() const;
+  virtual bool isUCMInfoEnabled()const;
 
   
    
@@ -243,6 +250,15 @@ public:
    virtual StMessage* FindQAInfo(const char* s1, const char* s2="",
          const char* s3="", const char* s4="") =0;
    virtual messVec* FindQAInfoList(const char* s1, const char* s2="",
+         const char* s3="", const char* s4="") =0;
+
+// UCMInfo Messages:
+   virtual ostrstream& UCMInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1) = 0;
+   virtual        int PrintUCMInfo() =0;
+   virtual const messVec* GetUCMInfos() =0;
+   virtual StMessage* FindUCMInfo(const char* s1, const char* s2="",
+         const char* s3="", const char* s4="") =0;
+   virtual messVec* FindUCMInfoList(const char* s1, const char* s2="",
          const char* s3="", const char* s4="") =0;
 
 // "As is" Messages:
@@ -320,4 +336,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.12 2008/05/15 23:40:25 fine Exp $
+// $Id: StMessMgr.h,v 1.13 2009/06/22 22:36:02 fine Exp $

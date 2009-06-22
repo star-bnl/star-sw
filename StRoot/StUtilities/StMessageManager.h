@@ -153,6 +153,18 @@ class StMessageManager : public StMessMgr {
          const char* s3="", const char* s4="")
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[5]);}
 
+// UCMInfo Messages:
+   virtual ostrstream& UCMInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1)
+         { return Message(mess, "U", opt,sourceFileName,lineNumber);}
+   virtual        int PrintUCMInfo() {return PrintList(messCollection[6]); }
+   virtual const messVec* GetUCMInfos() {return (messCollection[6]);}
+   virtual StMessage* FindUCMInfo(const char* s1, const char* s2="",
+         const char* s3="", const char* s4="")
+	 {return FindMessage(s1,s2,s3,s4,messCollection[6]);}
+   virtual messVec* FindUCMInfoList(const char* s1, const char* s2="",
+         const char* s3="", const char* s4="")
+	 {return FindMessageList(s1,s2,s3,s4,messCollection[6]);}
+
 // "As is" Messages:
    virtual ostrstream& out(const char* mess="")
 	 {return Message(mess,"I","OP-");}
@@ -169,8 +181,11 @@ class StMessageManager : public StMessMgr {
 
 #endif
 
-// $Id: StMessageManager.h,v 1.28 2008/05/15 23:40:24 fine Exp $
+// $Id: StMessageManager.h,v 1.29 2009/06/22 22:36:01 fine Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.29  2009/06/22 22:36:01  fine
+// Add the new dedicated UCM logger, It should force the recompilation of many STAR packages
+//
 // Revision 1.28  2008/05/15 23:40:24  fine
 // Change the abstarct class return type to separate the different STAR streams
 //

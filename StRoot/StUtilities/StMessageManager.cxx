@@ -6,8 +6,10 @@
 // It inherits from StMessMgr, which provides the external interface.   //
 // Messages are stored in a vector, and come in several types           //
 // (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
-// "E" (error), "D" (debug), and "Q" (QAInfo) are predefined. Message   //
-// finding and summary tools are also available.                        //
+// "E" (error), "D" (debug), "Q" (QAInfo), and "U" (UCMInfo) 
+// are predefined.
+//
+// Message finding and summary tools are also available.                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
  
@@ -79,6 +81,7 @@ StMessageManager::StMessageManager() : StMessMgr()
   AddType("E","Error");
   AddType("D","Debug");
   AddType("Q","QAInfo");
+  AddType("U","UCMInfo");
   SwitchOff("D");
 #ifdef __linux__
   memset(listOfMessPtrs,0,(maxLOMP * sizeof(char*)));
@@ -437,7 +440,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.47 2008/05/15 23:40:24 fine Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.48 2009/06/22 22:36:01 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -467,8 +470,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.47 2008/05/15 23:40:24 fine Exp $
+// $Id: StMessageManager.cxx,v 1.48 2009/06/22 22:36:01 fine Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.48  2009/06/22 22:36:01  fine
+// Add the new dedicated UCM logger, It should force the recompilation of many STAR packages
+//
 // Revision 1.47  2008/05/15 23:40:24  fine
 // Change the abstarct class return type to separate the different STAR streams
 //
