@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StMCFilter.h,v 1.4 2009/05/09 00:44:58 perev Exp $
+// @(#)STAR/eg:$Id: StMCFilter.h,v 1.5 2009/06/22 23:19:33 perev Exp $
 // Author: V.Perev  Mar/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -19,39 +19,55 @@ public:
    StMCFilter(const char *name);
    virtual ~StMCFilter();
 
-///		Rejection inside of EventGenerator (Pythia)
+				///Rejection inside of EventGenerator (Pythia)
 virtual int  RejectEG(const StGenParticleMaster &ptl) const {return 0;}
-///		Rejection of GEANT Tracking
+				///Rejection of GEANT Tracking
 virtual int  RejectGT(const StGenParticleMaster &ptl) const {return 0;}
-///		Rejection at GEANT End, No GEANT output
+				///Rejection at GEANT End, No GEANT output
 virtual int  RejectGE(const StGenParticleMaster &ptl) const {return 0;}
-///		Finish called at the end of GEANT
+				///Finish called at the end of GEANT
 virtual void Finish() const{;}
 
         const std::string &GetName() const { return fName;}
 private:
-//	static methods
-///		Select filter by name
+///private static methods for Pythia & Geant3 connections
+				///Select filter by name
 static int  Select(const char *name);
+				///hidden envelope for RejectEG
 static int  REJECTEG();
+				///hidden envelope for RejectGT
 static int  REJECTGT();
+				///hidden envelope for RejectGE
 static int  REJECTGE();
+				///Define the address of common/hepevt/ from F77
 static void SetEG(void *hepEvt);
+				///Define the addresses  of gfKine & gfVert Geant3 routines
 static void SetG3(void *gfKine,void *gfVert);
+				///Routine performs connection with pythia and Geant3.
+				///it is called from F77 for EG,GT & GE init and connections
 static int  Action(int kase, void *par1,void *par2);
 
+				///Number of total EG events
 static int  GetNTotEG() { return fgSelected->fCnt[0][0];}
+				///Number of total GT events
 static int  GetNTotGT() { return fgSelected->fCnt[1][0];}
+				///Number of total GE events
 static int  GetNTotGE() { return fgSelected->fCnt[2][0];}
-
+				///Number of rejected GE events
 static int  GetNRejEG() { return fgSelected->fCnt[0][1];}
+				///Number of rejected GT events
 static int  GetNRejGT() { return fgSelected->fCnt[1][1];}
+				///Number of rejected GE events
 static int  GetNRejGE() { return fgSelected->fCnt[2][1];}
+				///Print of numbers above at the end of STARSIM 
 static void FINISH();
-
-//	static members
+private:
+///static members
+				///pointer to selected filter
 static StMCFilter     *fgSelected;
+				///pointer to HEPEVT implementation(Pythia)
 static StHepParticleMaster *fgHepParticle;
+				///pointer to HEPEVT implementation(Geant3)
 static StG3ParticleMaster  *fgG3Particle;
 
 protected:
