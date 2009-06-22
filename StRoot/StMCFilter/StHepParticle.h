@@ -1,4 +1,4 @@
-// @(#)STAR/eg:$Id: StHepParticle.h,v 1.3 2009/04/21 19:10:51 perev Exp $
+// @(#)STAR/eg:$Id: StHepParticle.h,v 1.4 2009/06/22 23:59:54 perev Exp $
 // Author: V.Perev  Mar/2009
 ////////////////////////////////
 //                                                                      //
@@ -32,6 +32,12 @@ virtual       double         Time() 		 const;
 protected:
 
 };
+
+/// class StHepParticleMaster is a implementation of container of tracks 
+/// in HEPEVT style:
+/// http://cepa.fnal.gov/psm/simulation/mcgen/lund/pythia_manual/pythia6.3/pythia6301/node39.html
+/// It is interface to Pythia tracks and vertices 
+///
 
 class my_hepevt;
 class StHepParticleMaster :public StGenParticleMaster {
