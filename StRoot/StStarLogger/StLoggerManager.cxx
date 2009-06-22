@@ -252,6 +252,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     LoggerPtr root = Logger::getRootLogger();
 
     fgQALogger = Logger::getLogger("QA");
+#if 0
     // Check the mandatory UCM appender
     TString ucmenv = gSystem->Getenv("LOGGING");
     if (ucmenv == "UCM" && gSystem->Getenv("JOBINDEX") && gSystem->Getenv("REQUESTID") ) {
@@ -262,6 +263,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        //Set the default threashold to be 
        fgQALogger->setLevel(Level::DEBUG);
     }
+#endif
     //Almost all QA messages are on the info level
     NDC::push(_T(":"));
 
@@ -489,7 +491,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.32 2009/06/19 22:18:36 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.33 2009/06/22 01:12:08 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -873,8 +875,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.32 2009/06/19 22:18:36 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.33 2009/06/22 01:12:08 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.33  2009/06/22 01:12:08  fine
+// Disable the default UCM. Use log4j.xml instead, for the time being
+//
 // Revision 1.32  2009/06/19 22:18:36  fine
 // pick the technology from the LOGGING var
 //
