@@ -1,9 +1,11 @@
-// @(#)STAR/eg:$Id: StG3Particle.h,v 1.5 2009/06/22 23:59:54 perev Exp $
-// Author: V.Perev  Mar/2009
-////////////////////////////////
-//                                                                      //
-// StG3Particle: defines  equivalent of HEPEVT particle                //
-//////////////////////////////////////////////////////////////////////////
+/*!
+ * \class StG3ParticleMaster 
+ * \author V.Perev  Mar/2009
+ * 
+ * Defines  equivalent of HEPEVT particle  
+ */
+// @(#)STAR/eg:$Id: StG3Particle.h,v 1.6 2009/06/23 19:52:05 jeromel Exp $
+
 
 #ifndef ROOT_StG3Particle
 #define ROOT_StG3Particle

@@ -1,9 +1,11 @@
-// @(#)STAR/eg:$Id: StGENParticle.h,v 1.2 2009/05/09 00:44:58 perev Exp $
-// Author: V.Perev  Mar/2009
-////////////////////////////////
-//                                                                      //
-// StGenParticle: defines  equivalent of HEPEVT particle                //
-//////////////////////////////////////////////////////////////////////////
+/*!
+ * \class StGENParticle 
+ * \author V.Perev  Mar/2009
+ *
+ * Defines  equivalent of HEPEVT particle
+ * 
+ */
+// @(#)STAR/eg:$Id: StGENParticle.h,v 1.3 2009/06/23 19:52:05 jeromel Exp $
 
 #ifndef STAR_StGENParticle
 #define STAR_StGENParticle
