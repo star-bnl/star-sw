@@ -40,6 +40,8 @@
 #include <log4cxx/patternlayout.h>
 #include <log4cxx/layout.h>
 #include <log4cxx/xml/domconfigurator.h>
+#include <log4cxx/varia/stringmatchfilter.h>
+#include <log4cxx/varia/denyallfilter.h>
 
 #include "StStarLogger/StUCMAppender.h"
 
@@ -262,6 +264,12 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        appender->setLayout(new PatternLayout("%m"));
        appender->setName(_T("UCM"));       
        fgUCMLogger->addAppender(appender);
+       StringMatchFilterPtr filter = new StringMatchFilter;
+       filter->setStringToMatch(_T("StageID="));
+       filter->setAcceptOnMatch(true);
+       appender->addFilter(filter);
+       appender->addFilter(new DenyAllFilter);
+
        //Set the default threashold to be 
        fgUCMLogger->setLevel(Level::DEBUG);
     }
@@ -498,7 +506,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.34 2009/06/22 22:36:01 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.35 2009/06/23 19:21:21 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -916,8 +924,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.34 2009/06/22 22:36:01 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.35 2009/06/23 19:21:21 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.35  2009/06/23 19:21:21  fine
+// Add the mandatory UCM filters
+//
 // Revision 1.34  2009/06/22 22:36:01  fine
 // Add the new dedicated UCM logger, It should force the recompilation of many STAR packages
 //
