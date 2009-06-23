@@ -55,7 +55,7 @@ class  StMessage  {
   public: StMessage(){}
 };
 
-const char *StLoggerManager::fgLevels = "FEWIDQ";
+const char *StLoggerManager::fgLevels = "FEWIDQU";
 #ifdef __ROOT__
 //    ROOT Error handling subrotuine
 //______________________________________________________________________________
@@ -506,7 +506,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.35 2009/06/23 19:21:21 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.36 2009/06/23 19:37:33 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -924,8 +924,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.35 2009/06/23 19:21:21 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.36 2009/06/23 19:37:33 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.36  2009/06/23 19:37:33  fine
+// replace QA logger with the dedicated UCM one
+//
 // Revision 1.35  2009/06/23 19:21:21  fine
 // Add the mandatory UCM filters
 //

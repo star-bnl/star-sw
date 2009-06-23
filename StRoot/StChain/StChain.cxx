@@ -142,14 +142,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 #else
 // Add a record to MySQL tracking Db     
 //  LOG_QA << "SequenceValue="<< mNTotal
-  LOG_QA 
+  LOG_UCM 
          << "StageID=" << "'1'"
          << ",MessageKey=" << "'MemUsed'" 
          << ",MessageValue='" << int(StMemStat::Used())
          << "'" << endm;
          
 //  LOG_QA << "SequenceValue="<<mNTotal 
-  LOG_QA 
+  LOG_UCM 
          << "StageID=" << "'1'"
          << ",MessageKey=" << "'ProgSize'"
          << ",MessageValue='" << int(StMemStat::ProgSize())
@@ -192,14 +192,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 #else
 // Add a record to MySQL tracking Db     
 //  LOG_QA << "SequenceValue="       << mNTotal
-  LOG_QA
+  LOG_UCM
          << "StageID=" << "'3'"
          << ",MessageKey=" << "'Cpu'"
          << ",MessageValue='" << evnt.GetCpuTime("QAInfo:")
          << "'" << endm;
 
 //  LOG_QA << "SequenceValue="       << mNFailed
-  LOG_QA 
+  LOG_UCM 
          << "StageID=" << "'3'"
          << ",MessageKey=" << "'RealTime'" 
          << ",MessageValue='" << evnt.GetRealTime("QAInfo:")
@@ -238,14 +238,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 // Add a record to MySQL tracking Db     
 
 //   LOG_QA << "SequenceValue="       << mNTotal
-  LOG_QA 
+  LOG_UCM 
          << "StageID=" << "'3'"
          << ",MessageKey=" << "'MemUsed'"  
          << ",MessageValue='" << int(StMemStat::Used())
          << "'" << endm;
 
 //   LOG_QA << "SequenceValue="       << mNFailed
-  LOG_QA 
+  LOG_UCM 
          << "StageID=" << "'3'"
          << ",MessageKey=" << "'ProgSize'"
          << ",MessageValue='" << int(StMemStat::ProgSize())
@@ -259,8 +259,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.72 2009/03/17 20:03:36 perev Exp $
+// $Id: StChain.cxx,v 1.73 2009/06/23 19:37:33 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.73  2009/06/23 19:37:33  fine
+// replace QA logger with the dedicated UCM one
+//
 // Revision 1.72  2009/03/17 20:03:36  perev
 // Back to StMemSet version
 //
