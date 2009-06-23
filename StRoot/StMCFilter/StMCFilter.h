@@ -1,9 +1,14 @@
-// @(#)STAR/eg:$Id: StMCFilter.h,v 1.5 2009/06/22 23:19:33 perev Exp $
+// @(#)STAR/eg:$Id: StMCFilter.h,v 1.6 2009/06/23 19:46:37 jeromel Exp $
 // Author: V.Perev  Mar/2009
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StMCFilter: base filter class for EvGen and Geant                		//
-//////////////////////////////////////////////////////////////////////////
+/*!
+
+ \class  StMCFilter
+ \author Victor Perevoztchikov
+ \date   2009
+
+  base filter class for EvGen and Geant         
+
+*/
 
 #ifndef STAR_StMCFilter
 #define STAR_StMCFilter
