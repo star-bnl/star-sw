@@ -1,16 +1,19 @@
-/*******************************************************************
+//! Barrel TOF Match Maker
+/*!  \class StBTofMatchMaker
+ *   \brief Match Maker for the BTOF detector
+ *   \author Xin Dong, Frank Geurts
+ *   \date June 2009
  *
- * $Id: StBTofMatchMaker.h,v 1.1 2009/06/23 13:15:03 geurts Exp $
- *
- * Author: Xin Dong
- *****************************************************************
- *
- * Description: BTof Match Maker to do the matching between the 
- *              fired celles and TPC tracks
- *
- *****************************************************************
+ * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
+ * 
+ * $Id: StBTofMatchMaker.h,v 1.2 2009/06/23 21:15:09 geurts Exp $
+ */
+/*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.2  2009/06/23 21:15:09  geurts
+ * first set of doxygen tags
+ *
  * Revision 1.1  2009/06/23 13:15:03  geurts
  * *** empty log message ***
  *
@@ -61,24 +64,35 @@ public:
     StBTofMatchMaker(const Char_t *name="btofMatch");
     ~StBTofMatchMaker();
     
-    //    void Clear(Option_t *option="");
+    // void Clear(Option_t *option="");
+    /// process start-up options
     Int_t  Init();
-    /// initial functions - DaqMap, Geometry Alignment, INL are extracted from db
+    /// initialize  DaqMap, Geometry, and INL
     Int_t  InitRun(Int_t);
-    Int_t  FinishRun(Int_t);
+    Int_t  FinishRun(Int_t); 
+    /// Main match algorithm
     Int_t  Make();
+    /// Print run summary, and write QA histograms
     Int_t  Finish();
     
-    void setCreateHistoFlag(Bool_t histos=kTRUE);
+    /// enable QA histogram filling
+    void setCreateHistoFlag(Bool_t histos=kTRUE); 
+    /// enable track-tree filling
     void setCreateTreeFlag(Bool_t tree=kTRUE);
     /// selection of inner or outer geometry. By default - outerGeometry
     void setOuterTrackGeometry();
     void setStandardTrackGeometry();
+    /// set minimum hits per track
     void setMinHitsPerTrack(Int_t);
+    /// set minimum fit points per track
     void setMinFitPointsPerTrack(Int_t);
+    /// set minimum fit-points/max-points ratio
     void setMinFitPointsOverMax(Float_t);
+    /// set maximum distance of closest approach
     void setMaxDCA(Float_t);
+    /// set histogram output file name
     void setHistoFileName(Char_t*);
+    /// set ntuple output file name
     void setNtupleFileName(Char_t*);
     /// save geometry if it will be used by following makers in the chain
     void setSaveGeometry(Bool_t geomSave=kFALSE);
@@ -86,8 +100,9 @@ public:
 private:
     StTrackGeometry* trackGeometry(StTrack*);//!
 
-    /// book and write histograms
+    /// book histograms
     void bookHistograms();
+    /// write histograms
     void writeHistogramsToFile();
 
     /// event selection    
@@ -102,13 +117,20 @@ public:
 private:
     static const Int_t mDAQOVERFLOW = 255;
 
-    static const Int_t mNTray = 120;   // 120 trays
-    static const Int_t mNTOF = 192;    // 192 for tof in Run 8++
-    static const Int_t mNModule = 32;  // 32 for tofr5++ 
+    /// number of trays (12)
+    static const Int_t mNTray = 120;
+    /// number of cells per tray (192)
+    static const Int_t mNTOF = 192;
+    /// number of modules per tray (32)
+    static const Int_t mNModule = 32;
+    /// number of cells per module (6)
     static const Int_t mNCell = 6;
-    static const Int_t mNVPD = 19;    //
+    /// number of tubes per upVPD (19)
+    static const Int_t mNVPD = 19;
 
+    /// fixed tray ID for upVPD-east
     static const Int_t mEastVpdTrayId = 122;
+    /// fixed tray ID for upVPD-west
     static const Int_t mWestVpdTrayId = 121;
 
     ///
@@ -230,7 +252,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.1 2009/06/23 13:15:03 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.2 2009/06/23 21:15:09 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
