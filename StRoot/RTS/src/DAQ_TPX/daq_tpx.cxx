@@ -1144,7 +1144,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 
 	int min_sec, max_sec ;
 	int min_rdo, max_rdo ;
-
+	int found_broken_edges = 0 ;	// afterburner assist
 
 	// sanity
 	if(sec <= 0) {
@@ -1178,13 +1178,11 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 	// guess the byte size...
 	int guess_bytes = rdos * (1152/10) * (sizeof(daq_store) + 10*sizeof(daq_cld)) ;
 
+	// start the allocation with the guessed size...
 	cld->create(guess_bytes,(char *)"cld",rts_id,DAQ_DTA_STRUCT(daq_cld)) ;
 
 
 	for(int s=min_sec;s<=max_sec;s++) {
-	const int FCF_MAX_MERGED_COU = 128 ;
-	int merged_cou = 0 ;
-	daq_cld *merged_store[FCF_MAX_MERGED_COU] ;
 	for(int r=min_rdo;r<=max_rdo;r++) {
 		daq_dta *dd ;
 
@@ -1217,105 +1215,64 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 			u_int cou = *p_buff++ ;
 			
 
-			u_int version = (row >> 16) ;
-			row &= 0xFFFF ;
+			u_int version = (row >> 16) ;	// decoder needs the version
+			row &= 0xFFFF ;			// finalize the row...
 
-			daq_cld *dc = (daq_cld *) cld->request(cou) ;
-	
+			daq_cld *dc = (daq_cld *) cld->request(cou) ;	// ask for storage; we know exactly how much...
+			
 
 			for(u_int i=0;i<cou;i++) {
 				p_buff += fcf_algo[0]->fcf_decode(p_buff, dc, version) ;
-				if((row==8) && (dc->flags & FCF_BROKEN_EDGE) && (merged_cou<FCF_MAX_MERGED_COU)) {
-					// copy the pointer!
-					merged_store[merged_cou] = dc ;
-					merged_cou++ ;
+				if((row==8) && (dc->flags & FCF_BROKEN_EDGE)) {
+					found_broken_edges = 1 ;	// mark for later use...
 				}
 				dc++ ;
 			}
 
-			cld->finalize(cou,s,row,0) ;
+			cld->finalize(cou,s,row,0) ;	// commit storage...
 
-		
-#ifdef OLD_WAY
-			while(cou) {
-				daq_store *st = cld->get() ;
-				
-				st->sec = s ;
-				st->row = row ;
-				st->nitems = 1 ;	// just one
-
-				//daq_cld *dc = (daq_cld *)(st+1) ;
-
-				double p, t ;
-				int p1,p2,t1,t2,cha,fla ;
-				int ptmp ;
-
-				fla = 0 ;
-
-				// pad
-				u_int tmp = *p_buff & 0xFFFF ;
-				if(tmp & 0x8000) fla |= FCF_MERGED ;
-				if(tmp & 0x4000) fla |= FCF_DEAD_EDGE ;
-
-				p = (double)(tmp & 0x3FFF) / 32.0 ;
-				
-				// time
-				tmp = *p_buff >> 16 ;
-				if(tmp & 0x8000) fla |= FCF_ONEPAD ;
-				t = (double)(tmp & 0x7FFF) / 32.0 ;
-				
-				p_buff++ ;
-
-				cha = *p_buff >> 16 ;
-
-				if(cha >= 0x8000) fla |= FCF_BIG_CHARGE ;
-
-				ptmp = *p_buff & 0xFFFF ;
-
-				if(ptmp & 0x8000) fla |= FCF_ROW_EDGE ;
-				if(ptmp & 0x4000) fla |= FCF_BROKEN_EDGE ;
-
-				t1 = ptmp & 0xF ;
-				t2 = (ptmp >> 4) & 0xF ;
-
-
-				p1 = (ptmp >> 8) & 0x7 ;
-				p2 = (ptmp >> 11) & 0x7 ;
-
-				t1 = (u_int)t - t1 ;
-				t2 = (u_int)t + t2 ;
-				p1 = (u_int)p - p1 ;
-				p2 = (u_int)p + p2 ;
-
-				dc->t1 = t1 ;
-				dc->t2 = t2 ;
-				dc->p1 = p1 ;
-				dc->p2 = p2 ;
-				dc->charge = cha ;
-				dc->flags = fla ;
-				dc->pad = p ;
-				dc->tb = t ;
-
-				cld->commit() ;
-
-				p_buff++ ;
-				//LOG(INFO,"\trow %d\t%d: %f [%d:%d], %f [%d:%d] %d 0x%04X",row,cou,p,p1,p2,t,t1,t2,cha,fla) ;
-				cou-- ;
-			}
-#endif
 
 		}
 
 
 
 	}	// end of RDO loop
-	LOG(NOTE,"Sector %2d: merged cou %d",s,merged_cou) ;
-	fcf_algo[0]->afterburner(merged_cou, merged_store) ;
 	}	// end of sector loop
 
 
 	cld->rewind() ;	// wind data pointers to the beginning so that they can be used
 	
+	// and now run the afterburner if any found...
+	if(found_broken_edges) {
+		// prepare afterburner
+		const int FCF_MAX_MERGED_COU = 128 ;
+
+		daq_cld *merged_store[25][FCF_MAX_MERGED_COU] ;
+		int merged_cou[25] ;
+		
+		memset(merged_cou,0, sizeof(merged_cou)) ;
+
+		while(cld->iterate()) {
+			if(cld->row != 8) continue ;	// immediatelly skip the row if not 8 
+		
+			int s = cld->sec ;	// shorthand
+			
+			for(u_int i=0;i<cld->ncontent;i++) {
+				if((cld->cld[i].flags & FCF_BROKEN_EDGE) && (merged_cou[s] < FCF_MAX_MERGED_COU)) {
+					merged_store[s][merged_cou[s]] = &cld->cld[i] ;	// remember the ptr...
+					merged_cou[s]++ ;	// count 'em
+				}
+			}
+		}
+
+		for(int s=1;s<=24;s++) {
+			fcf_algo[0]->afterburner(merged_cou[s],merged_store[s]) ;
+		}
+
+		cld->rewind() ;	// and go back
+	}
+
+
 
 	return cld ;
 
