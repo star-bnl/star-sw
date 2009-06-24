@@ -27,17 +27,19 @@
 
 int tpxFCF::afterburner(int cou, daq_cld *store[])
 {
-	int merged = 0 ;
+	int merged ;
 
-	if(cou == 0) return 0 ;	// many cases like this...
+	if(likely(cou == 0)) return 0 ;	// most cases like this...
 
-//	printf("\n") ;
+//	printf("AFTER: %d\n",cou) ;
+
+	merged = 0 ;
 
 	for(int i=0;i<cou;i++) {
 		daq_cld *l = store[i] ;	// left guy
 		int merge_ix = -1 ;
 
-//		printf("AfterB: %2d: P [%d:%d], T [%d:%d], flags %d, charge %d\n",i,l->p1,l->p2,l->t1,l->t2,l->flags,l->charge) ;
+
 
 		if(l->charge == 0) continue ;	// already merged
 		
@@ -45,6 +47,7 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 		for(int j=0;j<cou;j++) {
 			int ok = 0 ;
 			if(i==j) continue ;
+
 			daq_cld *r = store[j] ;	// right guy
 		
 			if(r->charge == 0) continue ;	// already merged!
@@ -124,6 +127,8 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 	// cleanup flags
 	for(int i=0;i<cou;i++) {
 		daq_cld *l = store[i] ;	// left guy
+
+//		printf("AfterB: %2d: P [%d:%d], T [%d:%d], flags %d, charge %d\n",i,l->p1,l->p2,l->t1,l->t2,l->flags,l->charge) ;
 
 		if(l->flags & (FCF_ONEPAD | FCF_DEAD_EDGE)) {	// is this is still on, kill it with dead edge
 			l->flags |= FCF_DEAD_EDGE ;
