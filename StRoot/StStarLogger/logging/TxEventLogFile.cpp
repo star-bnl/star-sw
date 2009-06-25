@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.2 2009/06/18 16:54:31 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.3 2009/06/25 00:18:30 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -168,7 +168,7 @@ void TxLogging::TxEventLogFile::readProperties () {
 
       if ((line.find ("#") != 1) 
 	  && line.length () > 0) {
-	int delim = line.find ("=");
+	unsigned int delim = line.find ("=");
 	if (delim == std::string::npos) {
 	  continue;
 	}
@@ -202,8 +202,8 @@ void TxLogging::TxEventLogFile::setDefaults () {
   // set user name
   this->username = TxUCMUtils::getEnv ("LOGNAME");
 
-  // requester is "orphan" by default
-  this->requester = "orphan";
+  // requester is "username" by default
+  this->requester = username; // "orphan";
 
   // read properties file location of the log file
   this->readProperties ();
