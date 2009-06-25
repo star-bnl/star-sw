@@ -69,7 +69,7 @@ MYSQL *TxUCMCollector::getConnection (const char *cdbUrl,const char *cdbUsername
          const char *passwd = cdbPassword;
          const char *db     = dbName.c_str();
          unsigned int port  = 3306;
-         fprintf(stderr,"TxUCMCollector::getConnection:  ---- >  Establishing MySQL connection open %d \n", fIsConnectionOpen);
+         // fprintf(stderr,"TxUCMCollector::getConnection:  ---- >  Establishing MySQL connection open %d \n", fIsConnectionOpen);
          if (!(mysql_real_connect(connection
                      , host
                      , user
@@ -126,7 +126,7 @@ TxUCMCollector::TxUCMCollector ()
 : connection(0),fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
 { 
    log =  Logger::getLogger(_T("TxUCMCollector")); 
-   log->setLevel(Level::DEBUG);
+   //  log->setLevel(Level::DEBUG);
 }
  /**
   * Tests if this string ends with the specified suffix.
@@ -621,7 +621,7 @@ void TxUCMCollector::processMessage (const char * msg) {
            this->createEventsTable ();
        }
        else {
-           log->info (string("Record with brokerTaskID = ") + msgHashMap[fgBTaskID] +
+           log->debug (string("Record with brokerTaskID = ") + msgHashMap[fgBTaskID] +
                     " already exists");
        }
     }
@@ -700,7 +700,7 @@ void TxUCMCollector::addJob () {
                        "Jobs_" + msgHashMap[fgRequester] + 
                        "_"     + msgHashMap[fgBTaskID]);
     } else {
-       log->info ("Record with brokerJobID = " + msgHashMap[fgBJobID] +
+       log->debug ("Record with brokerJobID = " + msgHashMap[fgBJobID] +
                     " already exists");
     }
 }
@@ -722,9 +722,9 @@ void TxUCMCollector::updateJob () {
                           "_"            + msgHashMap[fgBTaskID], 
                        "brokerJobID = '" + msgHashMap[fgBJobID] + "'");
   } else {
-      log->error ("Record with brokerJobID = " +  msgHashMap[fgBJobID] +
+      log->debug ("Record with brokerJobID = " +  msgHashMap[fgBJobID] +
                      " does not exist, so creating a new record instead of updating");
-       this->addJob ();
+      this->addJob ();
   }
 }
 
@@ -855,7 +855,7 @@ void TxUCMCollector::insertRecord (const char * insertStr, const char * tableNam
        TRY{
 //           Statement stmt = connection->createStatement();
        if (!execute(string("INSERT INTO `") + tableName + "` " + insertStr)) 
-          log->info (string("Created new record for ") + tableName + ": " + insertStr);
+          log->debug (string("Created new record for ") + tableName + ": " + insertStr);
        else 
           log->error (string(mysql_error(connection)) + " the new record for " + tableName + ": " + insertStr);
        closeConnection();
@@ -886,7 +886,7 @@ void TxUCMCollector::updateRecord (const char * updateStr, const char * tableNam
       if (!execute(string("UPDATE `")   + tableName 
                            +   "` SET " + updateStr
                            + " WHERE " + condition))
-         log->info (string("Updated new record for ") + tableName + " with values: " + updateStr);
+         log->debug(string("Updated new record for ") + tableName + " with values: " + updateStr);
          closeConnection();
       }
 //        CATCH(SQLException se) {
@@ -909,20 +909,17 @@ boolean TxUCMCollector::recordExists (const string&selectStr, const string&table
 
 //________________________________________________
 boolean TxUCMCollector::recordExists (const char * selectStr, const char * tableName) {
-   boolean exists = false;
+   MYSQL_RES *exists = 0;
+   unsigned long nRows = 0;
    TRY
    {
-      log->debug(" ");
-      log->debug("=====================");
-      log->debug("========= TxUCMCollector::recordExists ============");
       execute(string("SELECT * FROM `") + tableName 
                                     + "` WHERE " + selectStr);
       exists = mysql_store_result(connection); 
-      if (exists) log->debug("=========FOUND !!! ============");
-      else log->debug("========= Boom !!! ============");
-
-      log->debug("=====================");
-      log->debug(" ");
+      if (exists) {
+         nRows = mysql_num_rows(exists);
+         mysql_free_result(exists);
+      }
    }
    closeConnection();
 //        CATCH(SQLException se) {
@@ -930,7 +927,7 @@ boolean TxUCMCollector::recordExists (const char * selectStr, const char * table
 //            exists = false;
 //        }
 
-   return exists;
+   return nRows ? true: false;
 }
 
     /**
@@ -948,7 +945,7 @@ void TxUCMCollector::createTable (const string&table)
 void TxUCMCollector::createTable (const char * table) {
    TRY{
        if (!execute(string("CREATE TABLE IF NOT EXISTS ") + table))
-       log->info (string("Created new table: ") + table);
+       log->debug (string("Created new table: ") + table);
    }
    closeConnection();
 //        CATCH(SQLException se) {
