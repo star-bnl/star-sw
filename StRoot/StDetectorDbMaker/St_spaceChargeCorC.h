@@ -5,6 +5,7 @@
 #include "tables/St_spaceChargeCor_Table.h"
 #include "StDetectorDbRichScalers.h"
 #include "StDetectorDbMagnet.h"
+#include "StChain/StChain.h"
 class St_spaceChargeCorC : public TChair {
  public:
   spaceChargeCor_st 	*Struct(Int_t i = 0) 	{return ((St_spaceChargeCor*) Table())->GetTable()+i;}
@@ -35,6 +36,7 @@ class St_spaceChargeCorC : public TChair {
     Double_t zf = zeroField(0); // potential validity margin for scalers
     if (zf>0 && zf<1) scalers->setValidityMargin(zf);
     Double_t coulombs = 0;
+    bool use_powers = (StMaker::GetChain()->GetDate() > 20090101);
     for (int row=0;row< (int) getNumRows();row++) {
       Double_t mult = 0;
       switch ((int) getSpaceChargeDetector(row)) {
@@ -56,7 +58,8 @@ class St_spaceChargeCorC : public TChair {
       Double_t factor     = getSpaceChargeFactor(row);
       Double_t offset     = getSpaceChargeOffset(row);
       Double_t intens = (mult < saturation) ? mult : saturation;
-      coulombs += factor * (intens-offset) * correction ;
+      if (use_powers) coulombs += ::pow(intens-offset,factor) * correction ;
+      else coulombs += factor * (intens-offset) * correction ;
     }
     return coulombs;
   };
