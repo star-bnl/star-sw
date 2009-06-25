@@ -1,5 +1,5 @@
 #include "TxUCMCollector.h"
-
+#include <stdlib.h>
 #include <log4cxx/logger.h>
 #include <log4cxx/helpers/loglog.h>
 #include <log4cxx/helpers/optionconverter.h>
@@ -62,7 +62,7 @@ MYSQL *TxUCMCollector::getConnection (const char *cdbUrl,const char *cdbUsername
 {
    if (!fIsConnectionOpen) {
      if ( !(connection= mysql_init(connection)) ) {
-         fprintf(stderr,"MYSQL:  ---- > No init connection \n");
+         log->error("MYSQL:  ---- > No init connection");
      } else {    
          const char *host   = cdbUrl;
          const char *user   = cdbUsername;
@@ -102,6 +102,7 @@ unsigned int  TxUCMCollector::execute(const char *sql)
 	unsigned int ret=1;
    if (getConnection()) {
       String query = sql;
+      log->debug(string("TxUCMCollector::execute ") + sql);
       if (( ret = mysql_query(connection,query.c_str()) )) {
          log->error(std::string("MYSQL QUERY:") + mysql_error(connection));
       }
@@ -123,7 +124,10 @@ void TxUCMCollector::closeConnection()
 //______________________________________________________________________
 TxUCMCollector::TxUCMCollector ()
 : connection(0),fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
-{ log =  Logger::getLogger(_T("TxUCMCollector")); }
+{ 
+   log =  Logger::getLogger(_T("TxUCMCollector")); 
+ //  log->setLevel(Level::DEBUG);
+}
  /**
   * Tests if this string ends with the specified suffix.
   */
@@ -160,8 +164,10 @@ static vector<std::string> split(const std::string &str, const std::string &sep)
    while ((posNew = str.find(sep,posOld)) != string::npos)
    {
       splits.push_back(str.substr(posOld,posNew-posOld));
-      posOld=posNew+1; 
+      posOld=posNew+sep.size(); 
    }
+   // add the tail
+   if (posOld < str.size()) splits.push_back(str.substr(posOld,string::npos));
 
    return splits;
 }
@@ -524,14 +530,23 @@ void TxUCMCollector::processMessage (const char * msg) {
                    : value;
        // add it to the message hash map
        msgHashMap.insert(pair<std::string,std::string>(trim(keyNVal [0]), value));
+       log->debug(string("next pair: ") + trim(keyNVal [0]) + "<" + value + ">");
     }
     // 
     // Check for special messages:
     //
-    std::string keyVal = msgHashMap[fgKey];
+    std::string keyVal = msgHashMap[string(fgKey)];
     if (keyVal.empty()) {
-       log->error (string("Wrong message format: \"") + message+ "\""+ " par:");
-// ------              + keysNVals.size());
+       char buffer[20];
+       sprintf(buffer,"%d",keysNVals.size());
+       log->error (string("Wrong message format: \"")
+                   + message
+                   + "\" par:"
+                   + buffer
+                   + "does not contains any <" 
+                   + fgKey 
+                   + ">");
+
        return;
     }
 
