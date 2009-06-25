@@ -854,7 +854,7 @@ void TxUCMCollector::insertRecord (const string &insertStr, const string &tableN
 void TxUCMCollector::insertRecord (const char * insertStr, const char * tableName) {
        TRY{
 //           Statement stmt = connection->createStatement();
-       if (!execute(string("INSERT INTO ") + tableName + " " + insertStr)) 
+       if (!execute(string("INSERT INTO '") + tableName + "' " + insertStr)) 
           log->info (string("Created new record for ") + tableName + ": " + insertStr);
        else 
           log->error (string(mysql_error(connection)) + " the new record for " + tableName + ": " + insertStr);
@@ -883,8 +883,8 @@ void TxUCMCollector::updateRecord (const char * updateStr, const char * tableNam
 {
    TRY{
           // Statement stmt = connection->createStatement();
-      if (!execute(string("UPDATE ")   + tableName 
-                           +   " SET " + updateStr
+      if (!execute(string("UPDATE '")   + tableName 
+                           +   "' SET " + updateStr
                            + " WHERE " + condition))
          log->info (string("Updated new record for ") + tableName + " with values: " + updateStr);
          closeConnection();
@@ -912,8 +912,8 @@ boolean TxUCMCollector::recordExists (const char * selectStr, const char * table
    boolean exists = false;
    TRY
    {
-      execute(string("SELECT * FROM ") + tableName 
-                                    + " WHERE " + selectStr);
+      execute(string("SELECT * FROM '") + tableName 
+                                    + "' WHERE " + selectStr);
       exists = mysql_store_result(connection);
    }
    closeConnection();
