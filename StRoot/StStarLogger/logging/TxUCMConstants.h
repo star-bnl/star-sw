@@ -2,7 +2,7 @@
  * @file TxUCMDBConstants.h
  * @author Stephen Tramer
  *
- * @(#)cpp/api:$Id: TxUCMConstants.h,v 1.1 2009/06/17 22:12:00 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMConstants.h,v 1.2 2009/06/25 00:17:08 fine Exp $
  *
  * This file is a collection of constants (collection names and record names)
  * used by the UCM API.  Rather than create a static object to contain all of
@@ -30,8 +30,8 @@ namespace TxUCMConstants {
    * API.  Stored as const char* to avoid c_str() conversions when
    * calling getenv().
    */
-  static const char* envBrokerTaskID   = "UCM_BROKER_TASKID";
-  static const char* envBrokerJobID    = "UCM_BROKER_JOBID";
+  static const char* envBrokerTaskID   = "REQUESTID"; // "UCM_BROKER_TASKID";
+  static const char* envBrokerJobID    = "JOBINDEX";  // "UCM_BROKER_JOBID";
   static const char* defaultContext    = "UCM Default Context";
   static const char* defaultRequester  = "UCM Default Requester";
 
