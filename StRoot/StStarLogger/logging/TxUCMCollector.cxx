@@ -126,7 +126,7 @@ TxUCMCollector::TxUCMCollector ()
 : connection(0),fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
 { 
    log =  Logger::getLogger(_T("TxUCMCollector")); 
- //  log->setLevel(Level::DEBUG);
+   log->setLevel(Level::DEBUG);
 }
  /**
   * Tests if this string ends with the specified suffix.
@@ -801,8 +801,8 @@ void TxUCMCollector::addEvent () {
    // Insert the new events table record
 
    std::string newEventKeys = "jobID, levelID, context, time, stageID, messageKey, messageValue";
-   std::string newEventVals = string("(SELECT jobID FROM Jobs_") + msgHashMap[fgRequester] + 
-           "_" +  msgHashMap[fgBTaskID] + " WHERE brokerJobID=" +
+   std::string newEventVals = string("(SELECT jobID FROM `Jobs_") + msgHashMap[fgRequester] + 
+           "_" +  msgHashMap[fgBTaskID] + "` WHERE brokerJobID=" +
            "'" + msgHashMap[fgBJobID] + "')" +
            ", '" + msgHashMap[fgLevel] + "'" +
            ", '" + msgHashMap[fgContext] + "'" +
@@ -821,9 +821,9 @@ void TxUCMCollector::addEvent () {
   */
 void TxUCMCollector::createJobsTable () {
        // create new jobs table if it does not exist
-    std::string tableName = string("Jobs_")
+    std::string tableName = "`" + string("Jobs_")
            + msgHashMap[fgRequester] + "_"
-           + msgHashMap[fgBTaskID];
+           + msgHashMap[fgBTaskID]+ "` ";
     this->createTable (tableName + fgJobsTableCols);
 }
 
@@ -833,9 +833,9 @@ void TxUCMCollector::createJobsTable () {
 //________________________________________________
 void TxUCMCollector::createEventsTable () {
        // create new events table if it does not exist
-   std::string tableName = string("Events_")
+   std::string tableName = "`" + string("Events_")
            + msgHashMap[fgRequester] + "_"
-           + msgHashMap[fgBTaskID];
+           + msgHashMap[fgBTaskID] + "` ";
    this->createTable (tableName + fgEventsTableCols);
 }
 
@@ -848,13 +848,13 @@ void TxUCMCollector::createEventsTable () {
      */
 void TxUCMCollector::insertRecord (const string &insertStr, const string &tableName) 
 {
-     insertRecord(insertStr,tableName);
+     insertRecord(insertStr.c_str(),tableName.c_str());
 }
 
 void TxUCMCollector::insertRecord (const char * insertStr, const char * tableName) {
        TRY{
 //           Statement stmt = connection->createStatement();
-       if (!execute(string("INSERT INTO '") + tableName + "' " + insertStr)) 
+       if (!execute(string("INSERT INTO `") + tableName + "` " + insertStr)) 
           log->info (string("Created new record for ") + tableName + ": " + insertStr);
        else 
           log->error (string(mysql_error(connection)) + " the new record for " + tableName + ": " + insertStr);
@@ -883,8 +883,8 @@ void TxUCMCollector::updateRecord (const char * updateStr, const char * tableNam
 {
    TRY{
           // Statement stmt = connection->createStatement();
-      if (!execute(string("UPDATE '")   + tableName 
-                           +   "' SET " + updateStr
+      if (!execute(string("UPDATE `")   + tableName 
+                           +   "` SET " + updateStr
                            + " WHERE " + condition))
          log->info (string("Updated new record for ") + tableName + " with values: " + updateStr);
          closeConnection();
@@ -912,9 +912,17 @@ boolean TxUCMCollector::recordExists (const char * selectStr, const char * table
    boolean exists = false;
    TRY
    {
-      execute(string("SELECT * FROM '") + tableName 
-                                    + "' WHERE " + selectStr);
-      exists = mysql_store_result(connection);
+      log->debug(" ");
+      log->debug("=====================");
+      log->debug("========= TxUCMCollector::recordExists ============");
+      execute(string("SELECT * FROM `") + tableName 
+                                    + "` WHERE " + selectStr);
+      exists = mysql_store_result(connection); 
+      if (exists) log->debug("=========FOUND !!! ============");
+      else log->debug("========= Boom !!! ============");
+
+      log->debug("=====================");
+      log->debug(" ");
    }
    closeConnection();
 //        CATCH(SQLException se) {
