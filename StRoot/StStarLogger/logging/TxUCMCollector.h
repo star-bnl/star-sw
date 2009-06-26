@@ -4,6 +4,15 @@
  * UCM Collector
  *
  */
+/*****************************************************************
+ * @file TxUCMCollector.h
+ * @author Roopa Pundaleeka
+ *
+ * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.2 2009/06/26 16:18:47 fine Exp $
+ *
+ * Please see TxUCMCollector.h for more documentation.
+ * "Translated" from the original TxUCMCOllector.java version 
+ */
 
 #include <map>
 #include <string>

@@ -1,3 +1,12 @@
+/*****************************************************************
+ * @file TxUCMCollector.cpp
+ * @author Roopa Pundaleeka
+ *
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.7 2009/06/26 16:18:47 fine Exp $
+ *
+ * Please see TxUCMCollector.h for more documentation.
+ * "Translated" from the original TxUCMCOllector.java version 
+ */
 #include "TxUCMCollector.h"
 #include <stdlib.h>
 #include <log4cxx/logger.h>
@@ -1067,6 +1076,7 @@ void TxUCMCollector::usage (Options options)
      const char *TxUCMCollector::fgJobsTableCols = 
        "(" 
        "jobID             int(11) NOT NULL AUTO_INCREMENT KEY COMMENT 'ID of job when entry is created, unique within table', " 
+       "updateTime        timestamp    NOT NULL default CURRENT_TIMESTAMP COMMENT 'Time that job execution state was last updated', "
        "brokerJobID       int(11) NOT NULL COMMENT 'ID of job as assigned by Broker', " 
        "taskID            int(11) NOT NULL COMMENT 'Foreign key reference to Tasks table', " 
        "gridJobID         varchar(64) default NULL  COMMENT 'ID for job as assigned by Grid Resource Allocation Manager (GRAM)', " 
@@ -1078,7 +1088,6 @@ void TxUCMCollector::usage (Options options)
        "queuePosition     int(11)      default NULL  COMMENT 'Integer slot position of job in local resource manager or scheduler', "
        "nodeLocation      varchar(64)  default NULL  COMMENT 'Name of worker node that job lands on', "
        "startTime         datetime     default NULL  COMMENT 'Time that job started execution', "
-       "updateTime        timestamp    NOT NULL default CURRENT_TIMESTAMP COMMENT 'Time that job execution state was last updated', "
        "executionUserName varchar(32)  default NULL  COMMENT 'A login ID on the local resource site & worker node that actually executes', "
        "stateID           int(11)      NOT NULL default '1' COMMENT 'Foreign key reference to StateDictionary table', "
        "CONSTRAINT UNIQUE INDEX jobID (brokerJobID, taskID)"
@@ -1095,10 +1104,10 @@ void TxUCMCollector::usage (Options options)
      const char * TxUCMCollector::fgEventsTableCols = 
        "(" 
        "eventID      int(11) NOT NULL AUTO_INCREMENT KEY COMMENT 'ID of event when entry is created, unique within table', "
+       "time         timestamp   NOT NULL default CURRENT_TIMESTAMP COMMENT 'Time that event was recorded by the Tracking Library', "
        "jobID        int(11) NOT NULL COMMENT 'Job that this message is associated with', "
        "levelID      int(11) NOT NULL COMMENT 'The ID of the log level of the event (WARNING, DEBUG, ERROR, etc.)', "
        "context      VARCHAR(40) NOT NULL COMMENT 'The bulk category of the log event or the facilty or code where the event happens', "
-       "time         datetime    NOT NULL COMMENT 'Time that event was recorded by the Tracking Library', "
        "stageID      int(11)     NOT NULL COMMENT 'The ID of the logging stage of the event (i.e., START, STATUS, or END)', "
        "messageKey   VARCHAR(40)  COMMENT 'A user defined property key or SYSTEM for system event', "
        "messageValue VARCHAR(120) COMMENT 'A user defined property value or textual content of a log message for a system event', "
