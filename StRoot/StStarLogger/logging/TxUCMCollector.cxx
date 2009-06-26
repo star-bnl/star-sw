@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.10 2009/06/26 21:25:29 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.11 2009/06/26 21:47:06 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -10,10 +10,11 @@
 #include "TxUCMCollector.h"
 #include <stdlib.h>
 #include <log4cxx/logger.h>
+#include <log4cxx/consoleappender.h>
+#include <log4cxx/patternlayout.h>
 #include <log4cxx/helpers/loglog.h>
 #include <log4cxx/helpers/optionconverter.h>
 #include <log4cxx/helpers/stringhelper.h>
-#include <log4cxx/patternlayout.h>
 
 using namespace log4cxx;
 using namespace log4cxx::helpers;
@@ -135,8 +136,16 @@ TxUCMCollector::TxUCMCollector ()
 : connection(0),fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
 {
    // init the logger
-   Logger::getRootLogger();
    log =  Logger::getLogger(_T("TxUCMCollector")); 
+   // check for appender 
+   AppenderList apps = log->getAllAppenders();
+   if (!apps.size()) {
+      // make one 
+      ConsoleAppenderPtr appender = new ConsoleAppender(
+            new PatternLayout("TxUCMCollector: %-3c{2}:%-5p - %m%n"));
+       appender->setName(_T("TxUCMCollectorAppender"));
+       log->addAppender(appender);
+   }
    // log->setLevel(Level::DEBUG);
 }
  /**
