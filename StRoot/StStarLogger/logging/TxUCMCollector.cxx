@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.7 2009/06/26 16:18:47 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.8 2009/06/26 19:23:45 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -135,27 +135,22 @@ TxUCMCollector::TxUCMCollector ()
 : connection(0),fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
 { 
    log =  Logger::getLogger(_T("TxUCMCollector")); 
-   //  log->setLevel(Level::DEBUG);
+//   log->setLevel(Level::DEBUG);
 }
  /**
   * Tests if this string ends with the specified suffix.
   */
 boolean endsWith (std::string str, const char *suffix)
 {
-    return str.rfind(suffix) != string::npos;
+    return StringHelper::endsWith(str, _T(suffix));
 }
+
  /**
   * Returns a copy of the string, with leading and trailing whitespace omitted.
   */
 static string  trim (std::string str)
 {
-   size_t first = str.find(' ');
-   first = (first == string::npos) ? 0 : first;
-   
-   size_t last  = str.rfind(' ');
-   last = (last == std::string::npos) ? last : last - 1;
-
-   return str.substr(first,last);
+   return StringHelper::trim(str);
 }
 
  /**
@@ -523,6 +518,7 @@ void TxUCMCollector::processMessage (const char * msg) {
       keysNVals = split(message,"\" ");
    }
    //const char *[] keysNVals = (message.split (":") [1]).split ("\" ");
+   log->debug(_T("TxUCMCollector::processMessage: ")+ message);
    for (size_t i = 0; i < keysNVals.size(); i++) {
 
        // get the key value pairs separated by ="

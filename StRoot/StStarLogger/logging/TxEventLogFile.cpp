@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.3 2009/06/25 00:18:30 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.4 2009/06/26 19:23:45 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -23,7 +23,7 @@ TxLogging::TxEventLogFile::TxEventLogFile ():TxLogging::TxEventLog() {
   // No broker task/job id info provided. Check if the default env
   // vars are set. If not, assume they are orphan messages
   brokerTaskID = TxUCMUtils::getEnv (TxUCMConstants::envBrokerTaskID);
-  brokerJobID = TxUCMUtils::getEnv (TxUCMConstants::envBrokerJobID);
+  brokerJobID  = TxUCMUtils::getEnv (TxUCMConstants::envBrokerJobID);
   if (brokerJobID=="orphan")brokerJobID = "0";
   
   // set context, hostname and read properties file
@@ -136,8 +136,8 @@ void TxLogging::TxEventLogFile::logTask (unsigned int size)
    taskSize += TxUCMUtils::itoa(size); taskSize +="\', taskRemainSize=\'";
    taskSize += TxUCMUtils::itoa(size); taskSize +="\'";
    logEvent(TxUCMConstants::newTask,taskSize
-		      ,TxEventLogFile::LEVEL_INFO
-		      ,TxEventLogFile::START,"SUMS");
+           ,TxEventLogFile::LEVEL_INFO
+           ,TxEventLogFile::START,"SUMS");
 }
 
 
