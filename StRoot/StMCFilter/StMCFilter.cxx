@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StMCFilter.cxx,v 1.5 2009/05/11 19:24:19 perev Exp $
+// @(#)root/eg:$Id: StMCFilter.cxx,v 1.6 2009/06/26 22:57:26 perev Exp $
 // Author: Victor Perev  17/03/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -62,6 +62,7 @@ StMCFilter::StMCFilter(const char *name)
   assert (it == myMap.end() && "Filter name must be unique");
   myMap[myName] = this;
   gStarFiltAction=(void*)&StMCFilter::Action;
+  printf("*** StMCFilter::StMCFilter(%s) CREATED ***\n",myName.c_str());
 }
 //______________________________________________________________________________
 StMCFilter::~StMCFilter()
@@ -81,6 +82,7 @@ int StMCFilter::Select(const char *name)
   assert (it != myMap.end() && "Filter MUST be found");
   if (it == myMap.end()) return 1;
   fgSelected = (*it).second;
+  printf("*** StMCFilter::Select(%s) SELCTED ***\n",myName.c_str());
   return 0;
 }
 //______________________________________________________________________________
