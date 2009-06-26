@@ -219,12 +219,21 @@ void StUCMAppender::flushBuffer()
           ucmParamters[0].ReplaceAll("'","");ucmParamters[1].ReplaceAll("'","");ucmParamters[2].ReplaceAll("'","");
           int ucmStage = ucmParamters[0].Atoi();
  //         assert (ucmStage >=TxEventLog::START && ucmStage <=TxEventLog::END);
-               connection->logEvent(   ucmParamters[1].Data()
-                                     , ucmParamters[2].Data()
-                                     , trackingLevel
-                                     , TxEventLog::Stage(ucmStage)
-                                     , context
-                                   );
+          // log tast at once
+          static bool taskDone = false;
+          if (!taskDone) {
+              taskDone = true;
+              const char *taskSize = getenv("SUMS_nProcesses");
+              int iTaskSize = atoi(taskSize);
+              if (taskSize && taskSize[0]) connection->logTask(iTaskSize);
+          }
+
+          connection->logEvent(  ucmParamters[1].Data()
+                               , ucmParamters[2].Data()
+                               , trackingLevel
+                               , TxEventLog::Stage(ucmStage)
+                               , context
+                              );
           pair->Delete();
           delete pair;
       }
