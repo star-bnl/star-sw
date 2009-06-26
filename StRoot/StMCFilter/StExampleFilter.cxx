@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StExampleFilter.cxx,v 1.5 2009/06/22 23:47:56 perev Exp $
+// @(#)root/eg:$Id: StExampleFilter.cxx,v 1.6 2009/06/26 22:57:26 perev Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -14,6 +14,8 @@
 /// the needed filter by name. 
 /// more info in http://www.star.bnl.gov/~perev/SIM/mcFilter.pdf
 
+static StExampleFilter qwerty;
+
 /// StMCFilter base class is :
 /// 1. A user interface. User must overload functions:
 /// 	a)RejectEG (StGenParticles &) ? called inside Pythia. Interaction point
@@ -27,7 +29,7 @@
 ///    based on this name.
 /// 4. Apart of that in this base class all the machinery of connection to Pythia
 ///    and Geant is hidden
-/// 5. At the end Finish() is called. Print statistics. Could be overloadedstatic StExampleFilter qwerty;
+/// 5. At the end Finish() is called. Print statistics. Could be overloaded
 /// 
 /// An argument of RejectXX(StGenParticles &Ptl)
 /// Class StGenParticles is a container class containing StGenParticle objects.
@@ -75,6 +77,8 @@
 /// All three methods are called in a proper places. Method which is not
 /// overloaded, always returns zero (no rejection)
 /// 
+
+
 
 //______________________________________________________________________________
 int StExampleFilter::RejectEG(const StGenParticleMaster &ptl) const
