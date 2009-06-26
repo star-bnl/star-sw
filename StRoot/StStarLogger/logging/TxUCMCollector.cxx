@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.8 2009/06/26 19:23:45 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.9 2009/06/26 20:48:39 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -135,7 +135,7 @@ TxUCMCollector::TxUCMCollector ()
 : connection(0),fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
 { 
    log =  Logger::getLogger(_T("TxUCMCollector")); 
-//   log->setLevel(Level::DEBUG);
+   // log->setLevel(Level::DEBUG);
 }
  /**
   * Tests if this string ends with the specified suffix.
@@ -157,7 +157,7 @@ static string  trim (std::string str)
   * Splits this string around matches of the given regular expression. 
   * @str std::string input strig to be splited
   * @sep std::string the string separator to split the input.
-  *                   the separatotr is excluded from any ourpur string  
+  *                   the separator is excluded from any ourpur string  
   * @return vector<std::string" with all found components
   */
 static vector<std::string> split(const std::string &str, const std::string &sep)
@@ -614,7 +614,7 @@ void TxUCMCollector::processMessage (const char * msg) {
 
                   newTaskVals += ", '";
                   newTaskVals += endsWith (trim(taskKeyNVal [1]),"'") 
-                     ? taskKeyNVal [1].substr (0, taskKeyNVal.size() - 1)
+                     ? taskKeyNVal [1].substr (0, taskKeyNVal[1].size()-1)
                      : trim(taskKeyNVal [1]);
                   newTaskVals += "'";
               }
