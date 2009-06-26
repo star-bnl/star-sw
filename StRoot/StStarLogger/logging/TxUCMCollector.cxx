@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.9 2009/06/26 20:48:39 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.10 2009/06/26 21:25:29 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -133,7 +133,9 @@ void TxUCMCollector::closeConnection()
 //______________________________________________________________________
 TxUCMCollector::TxUCMCollector ()
 : connection(0),fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
-{ 
+{
+   // init the logger
+   Logger::getRootLogger();
    log =  Logger::getLogger(_T("TxUCMCollector")); 
    // log->setLevel(Level::DEBUG);
 }
