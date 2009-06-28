@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.43 2009/06/11 23:22:07 baumgart Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.44 2009/06/28 04:04:06 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.44  2009/06/28 04:04:06  baumgart
+ * Increase of trapping constant to compensate for changes in electron cloud shape
+ *
  * Revision 1.43  2009/06/11 23:22:07  baumgart
  * Decrease of cTrapConst to reflect proper time evolution of hits
  *
@@ -193,7 +196,7 @@ ClassImp(StSvtSimulationMaker)
 #define cDiffusionConst 0.0035
 #define cLifeTime 1000000.0
 //#define cTrapConst 4.0e-5
-#define cTrapConst 2.0e-5 // Stephens tuning to real data
+#define cTrapConst 5.0e-5 // Stephens tuning to real data
 //___________________________________________________________________________
 /// the only place where electron cloud expansioin constants are set
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
