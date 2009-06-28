@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.14 2009/06/11 23:19:40 baumgart Exp $
+ * $Id: StSvtSignal.cc,v 1.15 2009/06/28 03:59:37 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.15  2009/06/28 03:59:37  baumgart
+ * Compensate for addition of angular dependence in StSvtElectronCloud.cc
+ *
  * Revision 1.14  2009/06/11 23:19:40  baumgart
  * Small increase of mPasaGain during tune
  *
@@ -81,7 +84,7 @@ StSvtSignal::StSvtSignal()
  memset(mSignal,0,sizeof(mSignal[0])*128);
 
  // mPasaGain = 7.2;      // uV/e Original number
- mPasaGain = 11.2; // Continuing tuning
+ mPasaGain = 12.4; // Continuing tuning
  
  for(int i = 0; i < 4; i++)
     mPasa[i] = 0.0;
