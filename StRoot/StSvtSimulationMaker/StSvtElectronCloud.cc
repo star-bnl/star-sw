@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.11 2009/06/11 23:17:21 baumgart Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.12 2009/06/28 03:56:07 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.12  2009/06/28 03:56:07  baumgart
+ * Fix of angular dependencies
+ *
  * Revision 1.11  2009/06/11 23:17:21  baumgart
  * Increase initial hit sizes and add projection to tSigMaj in function setInitWidths
  *
@@ -148,6 +151,7 @@ void StSvtElectronCloud::setPar(double energy,double theta, double phi, double t
   
   //mTotCharge = mEnergy/mSi_EnergyGap;
   mTotCharge = mEnergy*0.27777777777777;    // in number of electrons, ~25000 electrons for MIPs
+  mTotCharge = 0.5*mTotCharge*(1+cos(mTheta)); // Fix eta-dependence
   //cout<<"mTotCharge = "<<mTotCharge<<endl;
   }
 
@@ -158,7 +162,7 @@ void StSvtElectronCloud::setInitWidths(double w1, double w2)
   mSigX=0; mSigY=0; mSigXY=0;
   
   //tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta));  //  [mm]
-  tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta)) + w1/cos(mTheta); // Stephen Tune: add projection of larger initial hit size
+  tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta)) + w1; 
   if (tSigMaj<w1) {        //almost perpendicular
     tSigMaj = w1;          //initial size cannot be smaller than minimal
     mTheta=0.;
