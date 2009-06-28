@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.12 2009/06/28 03:56:07 baumgart Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.13 2009/06/28 04:01:46 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.13  2009/06/28 04:01:46  baumgart
+ * Correction of SDD thickness
+ *
  * Revision 1.12  2009/06/28 03:56:07  baumgart
  * Fix of angular dependencies
  *
@@ -84,7 +87,7 @@ StSvtElectronCloud::~StSvtElectronCloud()
 
 void StSvtElectronCloud::setSiliconProp()
 {
- mSDD_thickness = 0.3;                                 //  [mm]
+ mSDD_thickness = 0.28;                                 //  [mm]
  mLifeTime = 1000000.0;                                // [micro seconds]
  mTrapConst = 0.0;                                     //  [micro seconds]
  mDiffusionConst=0.0035;                               //  [mm**2/micro seconds]
