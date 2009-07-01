@@ -26,15 +26,6 @@ void   Rot(double angle);
 void   Rot(double cosa,double sina);
 void   Backward();
 double Eval(double step,double *xy,double *dir=0) const;
-double Approx(int nPts,const double *Pts  ,int pstep=2);
-double Fit   (int nPts,const double *Pts  ,int pstep=2
-                      ,const double *Err=0,int estep=3);
-double Resid (int nPts,const double *Pts  ,int pstep=2
-                      ,const double *Err=0,int estep=3);
-double FitZ  (double *Z0TanL,int nPts
-                      ,const double *points,int pstep
-                      ,const double *zets  ,int zstep=1
-                      ,const double *errs=0,int estep=1);
 void   Show(int nPts,const double *Pts,int pstep=2);
 virtual void   Print(const char* chopt = "") const;
 void   SetStrait(int strait=1) 		{SetBit(1,strait) ;}
@@ -148,7 +139,6 @@ public:
 
 	THelixTrack();
 	THelixTrack(const double *xyz,const double *dir,double rho,double drho=0);
-	THelixTrack(const double *pnts,int npnts, int size = 3);
 	THelixTrack(const THelixTrack &from);
 
 	void Set   (const double *xyz,const double *dir,double rho,double drho=0);
@@ -160,8 +150,6 @@ public:
 	void Fill  (TCircle &circ) const;
 ///		Change direction
 	void Backward();
-///		Obsolete
-	double Fit(const double *pnts,int npnts, int size = 3);
 ///		Move along helix
 	double Move(double step);
 ///		Evaluate params with given step along helix
