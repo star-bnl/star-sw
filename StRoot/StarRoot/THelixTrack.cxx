@@ -159,149 +159,6 @@ THelixTrack::THelixTrack()
   fEmxXY[0]=-2006; fEmxSZ[0]=-2006;
 }
 //_____________________________________________________________________________
-THelixTrack::THelixTrack(const double *pnts,int npnts, int rowsize)
-//
-//    ******************************************************************
-//    *                                                                *
-//    *  Create helix as fit of array of points                        *
-//    *                                                                *
-//    ******************************************************************
-//
-{
-  Fit(pnts,npnts,rowsize);
-}
-
-//_____________________________________________________________________________
-double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
-//
-//    ******************************************************************
-//    *                                                                *
-//    *  Create helix as fit of array of points                        *
-//    *                                                                *
-//    ******************************************************************
-//
-{
-   double xm,ym,xxm,yym,xym,rrm,rrxm,rrym;
-   double x,y,z,x1st=0,y1st=0,s,Xcd,Ycd,Rhoc,Rhoc2,dR,Rho,xyz[3],res,resmax;
-   int ip,np,lv,maxres;
-
-
-   int    *ign = new int   [npnts]; 
-   double *stp = new double[npnts];
-
-   memset (ign,0,npnts*sizeof(int));
-
-   for (int iter=0; iter <3; iter++) {
-     np = 0;
-     xm=0,ym=0,xxm=0,yym=0,xym=0,rrm=0,rrxm=0,rrym=0;
-     for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
-     {
-       if (ign[ip]) 	continue;
-       np++;
-       x = pnts[lv+0]-pnts[0];  
-       y = pnts[lv+1]-pnts[1];  
-       if (np==1) {x1st=x; y1st=y;}
-       xm   += x;   ym  += y;
-       xxm  += x*x; yym += y*y; xym += x*y;
-       rrm  += 0.5*(x*x+y*y);
-       rrxm += 0.5*(x*x+y*y)*x;
-       rrym += 0.5*(x*x+y*y)*y;
-     }
-     xm  /=np; 	ym   /=np;
-     xxm /=np;	yym  /=np;	xym  /=np;
-     rrm /=np; 	rrxm /=np; 	rrym /=np;
-     xxm -= xm*xm; 	yym -= ym*ym; 	xym -= xm*ym;
-     rrxm -= rrm*xm;	rrym -= rrm*ym;
-
-     double det = (xxm*yym-xym*xym);
-     double a   = (rrxm*yym-rrym*xym);
-     double b   = (rrym*xxm-rrxm*xym);
-     double ab2  = (a*a+b*b);
-     double ab  = ::sqrt(ab2);
-
-     if (fabs(det) < ab ) { 	//small Rhoc
-       Xcd = a/ab; if (det<0) Xcd = -Xcd;  
-       Ycd = b/ab; if (det<0) Ycd = -Ycd;  
-       Rhoc2 = det*det/(ab2);   
-       Rhoc = ::sqrt(Rhoc2);   
-       double c = 2.*((xm*Xcd+ym*Ycd)-rrm*Rhoc);
-       dR = -c/(1.+::sqrt(1.-Rhoc*c));
-       Rho = Rhoc/(1.+dR*Rhoc);
-     } else {			//big Rhoc
-       Xcd = a/det;   
-       Ycd = b/det;   
-       double Rc2 = (ab2)/(det*det);
-       double Rc  = ::sqrt(Rc2);
-       double c = 2.*((xm*Xcd+ym*Ycd)-rrm);
-       dR = -c/(Rc+::sqrt(Rc*Rc-c));
-       Rho = 1./(Rc+dR);
-       ab = ::sqrt(Xcd*Xcd+Ycd*Ycd);
-       double r1st = ::sqrt(x1st*x1st + y1st*y1st);
-       if (ab < 0.001*r1st) {
-         Xcd = -x1st/r1st;
-         Ycd = -y1st/r1st;
-       } else {
-         Xcd = Xcd/ab;
-         Ycd = Ycd/ab;
-       }  
-     }
-
-     fX[0] = -dR*Xcd;
-     fX[1] = -dR*Ycd;
-     fX[2] = 0;
-     fP[0] = +Ycd;
-     fP[1] = -Xcd;
-     fP[2] = 0;
-     if (xm*fP[0]+ym*fP[1] < 0) {fP[0] = -fP[0];fP[1] = -fP[1]; Rho = -Rho;}
-     fX[0] += pnts[0];
-     fX[1] += pnts[1];
-
-     Set(fX,fP,Rho,0);
-     THelixTrack temp(*this);
-
-     double zm=0,sm=0,zs=0,ss=0,s0=0;
-     double fullen = 1.e+10;
-     if (fabs(Rho)>1./fullen) fullen = 2.*M_PI/fabs(Rho);
-     for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
-     {
-       if (ign[ip]) 	continue;
-       z = pnts[lv+2];  
-       s = temp.Step(pnts+lv); 
-       if (fabs(s*fCosL) > fabs(s*fCosL-fullen)) s = s-fullen/fCosL;
-       temp.Move(s); s0 += s; stp[ip] = s0;
-       zm += z; sm += s0; ss += s0*s0; zs += z*s0; 
-     }
-     zm /= np; sm /= np; ss /= np; zs /= np; 
-     ss -= sm*sm; zs -= zm*sm; 
-     double Z1 = zs/ss; 
-     double Z0 = zm - Z1*sm;
-     fX[2] = Z0;
-     double p[3] = {fP[0],fP[1],Z1};
-
-     Set(fX,p,Rho,0);
-     maxres = 0;resmax = 0; res=0;
-     for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
-     {
-       if (ign[ip]) 	continue;
-       Step(stp[ip]/fCosL,xyz);
-       double rs = 0;
-       for(int i=0;i<3;i++) {rs += ::pow(pnts[lv+i]-xyz[i],2);}
-       if (rs>resmax) {resmax = rs; maxres = ip;} 
-       res += rs;
-     }
-     res /= np;
-     if (resmax < 1.e-6) 	break;
-     if (resmax < 9*res) 	break;
-     if (np <= 3)		break;
-     ign[maxres] = 1;
-                                break;//VP
-   }
-  delete [] ign;
-  delete [] stp;
-  
-  return ::sqrt(resmax);
-}
-//_____________________________________________________________________________
 void THelixTrack::Set(const double *xyz,const double *dir,double rho
 		     ,double drho)
 {
@@ -1283,333 +1140,58 @@ void TCircle::Backward()
   fRho=-fRho;fD[0]=-fD[0];fD[1]=-fD[1];
   if(fEmx[0]>-1) {fEmx[3]=-fEmx[3];fEmx[4]=-fEmx[4];}
 }
-//______________________________________________________________________________
-double TCircle::Approx(int nPts,const double *Pts,int istep)
-{
-	
-  double xmed[12];memset(xmed,0,sizeof(xmed));
-  double &xx  =xmed[2],&yy  =xmed[ 3],&xy  =xmed[4 ]
-        ,&xxx =xmed[5],&yyy =xmed[ 6],&xxy =xmed[7 ],&xyy=xmed[8]
-        ,&xxxx=xmed[9],&yyyy=xmed[10],&xxyy=xmed[11];
 
-  double x, y,tmp;int i;
-  double const *p;
-  for (i=0,p=Pts;i<nPts;i++,p+=istep) {xmed[0]+=p[0]; xmed[1]+=p[1];}
-  for (i=0;i<2;i++)      {xmed[i]/=nPts;}  
-
-  for (i=0,p=Pts;i<nPts;i++,p+=istep){
-    x = p[0]-xmed[0], y = p[1]-xmed[1];
-    xx  += x*x;   yy += y*y;   xy +=x*y;   }
-  for (i=2;i<5;i++)      {xmed[i]/=nPts;}  
-
-  double Ei[2][2]={{1,0},{0,1}};
-  double lMin = 2*(xx*yy- xy*xy)/((xx+yy)+sqrt((xx-yy)*(xx-yy) + 4*xy*xy));
-  double lMax = xx+yy-lMin;
-  if (lMax-lMin > 0.1*lMax) {
-    if (fabs(xx-lMax)>fabs(yy-lMax)) {Ei[0][0]=- xy      ;Ei[0][1]=(xx-lMax);}
-    else                             {Ei[0][0]=-(yy-lMax);Ei[0][1]= xy      ;}
-    tmp = sqrt(Ei[0][0]*Ei[0][0]+Ei[0][1]*Ei[0][1]);
-    Ei[0][0]/=tmp       ;Ei[0][1]/=tmp;
-    Ei[1][0] = -Ei[0][1];Ei[1][1] = Ei[0][0];
-    xx = lMax; yy = lMin; xy = 0;
-  }
-
-  for (i=0,p=Pts;i<nPts;i++,p+=istep){
-    double xt = p[0]-xmed[0], yt = p[1]-xmed[1];
-    x = Ei[0][0]*xt+Ei[0][1]*yt;
-    y = Ei[1][0]*xt+Ei[1][1]*yt;
-    xxx  += (x*x-xx)*x;       yyy  += (y*y-yy)*y; 
-    xxy  += (x*x-xx)*y;       xyy  += (y*y-yy)*x;   
-    xxxx += (x*x-xx)*(x*x-xx);yyyy += (y*y-yy)*(y*y-yy);
-    xxyy += (x*x-xx)*(y*y-yy);             }
-  for (i=5;i<12;i++)      {xmed[i]/=nPts;}  
-
-
-  double det = xx*yy-xy*xy;
-  double Rho,a,b,c,r,r2 = 0;
-  double pars[2][6]; //contains qality,x0,y0,cos,sin,curv
-
-  pars[0][0] = 3e33;pars[1][0] = 3e33;
-  if (IsStrait()) det = 0;
-  do {
-    if (det <= (xx+yy)*1e-6) break;
-  
-    a =  0.5*( (xxx + xyy)*yy - (xxy + yyy)*xy);
-    b =  0.5*(-(xxx + xyy)*xy + (xxy + yyy)*xx);
-    r2 = (a*a + b*b +det*det*(xx+yy));
-    r  = sqrt(r2);
-    Rho = det/r;
-    double ab = sqrt(a*a+b*b)+3e-33;
-    double aDir = (a+3e-33)/(ab);
-    double bDir = b/(ab);
-//  double xc = xmed[0]+a/det;
-//  double yc = xmed[1]+b/det;
-//  printf ("R=%g %g %g\n",1./Rho,xc,yc);
-//	Evaluate quality
-    pars[0][0]  =(xxxx+yyyy)+2*(xxyy)
-     + (-4*((xxx+xyy)*a+(xxy+yyy)*b))/det
-     + ( 4*(xx*a*a +yy*b*b +2*xy*a*b))/det/det;
-    pars[0][0] *=(Rho*Rho)/4;
-
-    pars[0][1] = -det*(xx+yy)/(ab+r)*(aDir); 
-    pars[0][2] = -det*(xx+yy)/(ab+r)*(bDir);  
-    pars[0][3] = bDir; pars[0][4]=-aDir; pars[0][5]=Rho;
-//  printf ("UUUUUUUUUUUUUUUUUU qa=%g rad=%g\n",pars[0][0],pars[0][5]);
-  }while(0);// end of do 
-
-//	Stright track approx
-  {
-    c = (xxy*xx-xy*xxx)/(xxxx*xx-xxx*xxx);
-    b = (xy-c*xxx)/xx; a = -c*xx;
-    pars[1][0] = a*a+b*b*xx+c*c*(xxxx+xx*xx)+yy
-               +2*(a*c*xx+b*c*xxx-b*xy-c*xxy);
-    pars[1][1] = 0;pars[1][2] = a;
-    tmp = sqrt(1+b*b);
-    pars[1][3] = 1/tmp;pars[1][4] = b/tmp;
-    pars[1][5] = 2*c/((1+b*b)*tmp);
-/// printf ("LLLLLLLLLLLLLLLLLL qa=%g rad=%g\n",pars[1][0],pars[1][5]);
-  }
-
-  i = (pars[0][0]<pars[1][0])? 0:1;
-  memcpy(fX,pars[i]+1,5*sizeof(fX[0]));
-  tmp = sqrt(fD[0]*fD[0]+fD[1]*fD[1]);
-  fD[0]/=tmp; fD[1]/=tmp;
-  Rot( atan2(Ei[0][1],Ei[0][0]));
-  fX[0]+=xmed[0]; fX[1]+=xmed[1];
-
-  double s = Path(Pts);
-  Move(s);
-  if (s>0) Backward();
-  return pars[i][0];
-}
-
-//______________________________________________________________________________
-double TCircle::Resid(int nPts,const double *Pts,int pstep
-                              ,const double *Ers,int estep)
-{
-  if (!nPts) return 0;
-  TCircle M = *this;
-  const double *p = Pts,*e = Ers;
-  double sum = 0,wtot=0,wt;
-  for (int i=0;i<nPts;i++,p+=pstep,e+=estep) {
-    double s = M.Path(p);
-    M.Move(s);
-    wt = (Ers)? 1./e[0]:1;
-    sum+= (pow(M.fX[0]-p[0],2)+pow(M.fX[1]-p[1],2))*wt;
-    wtot +=wt;
-  }
-  return sqrt(sum/wtot);
-}
-
-//______________________________________________________________________________
-double TCircle::FitZ(double *Z0Tan,int nPts
-                    ,const double *Pts,int pstep
-		    ,const double *Zts,int zstep
-		    ,const double *Ers,int estep)
-{
-  enum {kS,kZ,kSS,kSZ,kZZ,kWT,kZ0=0,kTan=1};
-  double aver[6] = {0,0,0,0,0,0};
-  TCircle MC = *this;
-  double s = 0;
-  const double *p = Pts;
-  const double *z = Zts;
-  const double *e = Ers;
-  int n = 0;
-  for (int i=0;i<nPts;i++) {
-    double ds = MC.Path(p);
-    MC.Move(ds);
-    s+=ds;
-    double wt = (Ers)? 1./(*e):1;
-    aver[kWT]+=wt; 
-    aver[kS ]+=s	*wt; 
-    aver[kZ ]+=z[0]	*wt; 
-    aver[kSS]+=s*s	*wt; 
-    aver[kSZ]+=z[0]*s	*wt; 
-    aver[kZZ]+=z[0]*z[0]*wt; 
-    p+=pstep; z+=zstep;e+=estep,n++;
-  }
-  for (int j=kS;j<kWT;j++) {aver[j]/=aver[kWT];}
-  aver[kSS]-=aver[kS]*aver[kS];
-  aver[kSZ]-=aver[kS]*aver[kZ];
-  aver[kZZ]-=aver[kZ]*aver[kZ];
-  Z0Tan[kTan] = aver[kSZ]/aver[kSS];
-  Z0Tan[kZ0 ] = aver[kZ]-Z0Tan[kTan]*aver[kS];
-  double res = pow(Z0Tan[kZ0]+Z0Tan[kTan]*aver[kS] - aver[kZ],2)
-             + Z0Tan[kTan]*Z0Tan[kTan]*aver[kSS] +aver[kZZ]
-             - 2*Z0Tan[kTan]*aver[kSZ];
-  return res;
-}
-//______________________________________________________________________________
-double TCircle::Fit(int nPts,const double *Pts,int pstep
-                            ,const double *Err,int estep)
-{
-//  C,S direction to the center
-//  Dx,Dy direction of moving
-//  C = -Dy, S=Dx  for positve curvature
-  enum {kC=0,kS,kR,kCC,kSS,kCS,kCR,kSR,kRR,kXX=0,kXY,kYY};
-
-  TArrayD ta(nPts*4); double *ar = ta.GetArray();
-  double *C = ar,*S = (ar+=nPts),*R = (ar+=nPts),*W = (ar+=nPts);
-  double av[9];
-  double mySize = sqrt(pow(Pts[0]-Pts[0+(nPts-1)*pstep],2)+
-                     pow(Pts[1]-Pts[1+(nPts-1)*pstep],2));
-
-
-//  calc average
-  TCircle TCbeg = *this;
-  double dl = TCbeg.Path(Pts);
-  TCbeg.Move(dl);
-  double begNor[2],curNor[2];
-  for (int iter=0;iter<20;iter++) {
-    int cutStep = 0;
-    double wtot=0,wt;
-    begNor[0] =  TCbeg.fD[1]; begNor[1] = - TCbeg.fD[0];
-    double rho = TCbeg.fRho;
-    TCircle TCcur = TCbeg;
-    memset(av,0,sizeof(av));
-    double l = 0,dc,ds,res;
-    const double *p = Pts; const double *e = Err;
-    for (int iPt=0;iPt<nPts;iPt++,p+=pstep,e+=estep) {
-      dl = TCcur.Path(p);
-      TCcur.Move(dl);
-      l += dl;
-      curNor[0] =  TCcur.fD[1]; curNor[1] = - TCcur.fD[0];
-
-      if (fabs(rho*l)<1e-3) {
-	dc = -0.5*(curNor[1]+begNor[1])*l; 
-	ds =  0.5*(curNor[0]+begNor[0])*l;
-      } else {
-	dc = (curNor[0]-begNor[0])/(rho);
-	ds = (curNor[1]-begNor[1])/(rho);
-      }
-      res = 0;
-      for (int j=0;j<2;j++) {res+=(p[j]-TCcur.fX[j])*curNor[j];}
-      wt = 1;
-//		Account errors
-      if (Err) {
-        double err = e[kXX]*curNor[0]*curNor[0]
-                   + e[kYY]*curNor[1]*curNor[1]
-                   + e[kXY]*curNor[0]*curNor[1]*2;
-        if (err < 1e-8) err = 1e-8;
-	wt = 1./err; W[iPt] = wt;
-      }
-	
-
-      C[iPt]= dc; S[iPt]=ds; R[iPt]=res;
-      av[kC]+=dc	*wt;
-      av[kS]+=ds	*wt;
-      av[kR]+=res	*wt;
-      wtot  +=wt;
-    }
-    for (int j=kC;j<=kR;j++){ av[j]/=wtot;}
-
-    for (int iPt=0;iPt<nPts;iPt++) {
-      dc  = C[iPt]-av[kC];
-      ds  = S[iPt]-av[kS];
-      res = R[iPt]-av[kR];
-      wt = (Err)? W[iPt]:1;
-      av[kCC]+= dc*dc	*wt;
-      av[kSS]+= ds*ds	*wt;
-      av[kCS]+= dc*ds	*wt;
-      av[kCR]+= dc*res	*wt;
-      av[kSR]+= ds*res	*wt;
-      av[kRR]+= res*res	*wt;
-    }
-    for (int j=kCC;j<=kRR;j++){ av[j]/=wtot;}
-    double det =  av[kCC]*av[kSS]-av[kCS]*av[kCS];
-    double dx  = 100, dy  = 100;
-    if (det > 1e-5 *av[kCC]*av[kSS]) {
-      dx  = ( av[kSS]*av[kCR]-av[kCS]*av[kSR])/det;
-      dy  = (-av[kCS]*av[kCR]+av[kCC]*av[kSR])/det;
-    }  else {
-      dx = av[kCC]; dy = av[kCS];
-      double alfa = av[kCR]/(dx*dx+dy*dy);
-      dx *= alfa;   dy*=alfa; 
-    }
-    double tmp = fabs(dx); if (tmp<fabs(dy)) tmp=fabs(dy);
-    if (tmp > 0.3) {
-       cutStep = 1; tmp = 0.1/tmp;
-       dx *= tmp; dy *= tmp; av[kR]*=tmp;
-    }
-    
-    double h = (av[kR]-av[kC]*dx-av[kS]*dy);
-    double dRR   = h*rho - (begNor[0]*dx+begNor[1]*dy);
-    TCbeg.fRho  -= dRR*rho/(1+dRR);
-    double sinD  = (TCbeg.fD[0]*dx+TCbeg.fD[1]*dy);
-    double cosD  = sqrt(1-sinD)*(1+sinD);
-    double newDx =  TCbeg.fD[0]*cosD + TCbeg.fD[1]*sinD;
-    double newDy = -TCbeg.fD[0]*sinD + TCbeg.fD[1]*cosD;
-    tmp = sqrt(newDx*newDx+newDy*newDy);
-    TCbeg.fD[0]  = newDx/tmp;
-    TCbeg.fD[1]  = newDy/tmp;
-    TCbeg.fX[0] += h*begNor[0];
-    TCbeg.fX[1] += h*begNor[1];
-    if (fabs(h/mySize) + fabs(dRR) + fabs(sinD) <1e-5 && !cutStep) break;
-
-  }
-  *this = TCbeg;
-  if (!Err) return av[kRR];
-  
-
-
-
-  
-
-
-  return av[kRR];
-}    
-  
 //______________________________________________________________________________
 void TCircle::Test2() 
 {
-double xyz[4][3]= {{-39.530250549316406, -165.19537353515625, 184.05630493164062}
-                  ,{-37.718906402587891, -167.19537353515625, 186.41175842285156}
-		  ,{-35.468486785888672, -169.19537353515625, 189.05546569824219}
-                  ,{-33.657142639160156, -171.19537353515625, 191.347900390625}};
-double x[4],y[4];
-for (int i=0;i<4;i++) { x[i]=xyz[i][0];  y[i]=xyz[i][1]; }
-
-
-
-TCircle TC;
-double qa0 = TC.Approx(4,xyz[0],3);
-double qa1 = TC.Resid (4,xyz[0],3);
-printf("Approx qa0 = %g qa1=%g\n",qa0,qa1);
-TC.Print();
-
+// double xyz[4][3]= {{-39.530250549316406, -165.19537353515625, 184.05630493164062}
+//                   ,{-37.718906402587891, -167.19537353515625, 186.41175842285156}
+// 		  ,{-35.468486785888672, -169.19537353515625, 189.05546569824219}
+//                   ,{-33.657142639160156, -171.19537353515625, 191.347900390625}};
+// double x[4],y[4];
+// for (int i=0;i<4;i++) { x[i]=xyz[i][0];  y[i]=xyz[i][1]; }
+// 
+// 
+// 
+// TCircle TC;
+// double qa0 = TC.Approx(4,xyz[0],3);
+// double qa1 = TC.Resid (4,xyz[0],3);
+// printf("Approx qa0 = %g qa1=%g\n",qa0,qa1);
+// TC.Print();
+// 
 
 }
 //______________________________________________________________________________
 void TCircle::Test3() 
 {
-enum {nPnts=4};
-double xyz[nPnts][3] = 
-{{80.815544128417969, 159.77731323242188, 129.11553955078125}
-,{82.239913940429688, 161.25840759277344, 131.24034118652344}
-,{84.462181091308594, 162.28025817871094, 133.59538269042969}
-,{86.321846008300781, 163.51133728027344, 135.19621276855469}};
-
-double err[nPnts][4] = 
-{{0.0010703595155359307, 0.00061836299089800776, 0.00035723771589107141,0.0032088035791992191}
-,{0.0010505530116463389, 0.00060692047199979574, 0.00035062719848397145,0.0031350950603759769}
-,{0.0010286003088986414, 0.00059423806134026682, 0.00034330037672605356,0.0030533996126220703}
-,{0.0010136781863030494, 0.00058561716272119912, 0.00033831985920934062,0.0029978674575439454}};
-
-
-double res;
-TCircle circ;
-res=circ.Approx(nPnts,xyz[0],3);
-printf("res = %g \n",res);
-circ.Print();
-res=circ.Resid (nPnts,xyz[0],3);
-printf("res = %g \n",res);
-circ.Print();
-
-circ.Show(nPnts,xyz[0],3);
-res = circ.Fit(nPnts,xyz[0],3,err[0],4);
-printf("res = %g \n",res);
-circ.Print();
-circ.Show(nPnts,xyz[0],3);
+// enum {nPnts=4};
+// double xyz[nPnts][3] = 
+// {{80.815544128417969, 159.77731323242188, 129.11553955078125}
+// ,{82.239913940429688, 161.25840759277344, 131.24034118652344}
+// ,{84.462181091308594, 162.28025817871094, 133.59538269042969}
+// ,{86.321846008300781, 163.51133728027344, 135.19621276855469}};
+// 
+// double err[nPnts][4] = 
+// {{0.0010703595155359307, 0.00061836299089800776, 0.00035723771589107141,0.0032088035791992191}
+// ,{0.0010505530116463389, 0.00060692047199979574, 0.00035062719848397145,0.0031350950603759769}
+// ,{0.0010286003088986414, 0.00059423806134026682, 0.00034330037672605356,0.0030533996126220703}
+// ,{0.0010136781863030494, 0.00058561716272119912, 0.00033831985920934062,0.0029978674575439454}};
+// 
+// 
+// double res;
+// TCircle circ;
+// res=circ.Approx(nPnts,xyz[0],3);
+// printf("res = %g \n",res);
+// circ.Print();
+// res=circ.Resid (nPnts,xyz[0],3);
+// printf("res = %g \n",res);
+// circ.Print();
+// 
+// circ.Show(nPnts,xyz[0],3);
+// res = circ.Fit(nPnts,xyz[0],3,err[0],4);
+// printf("res = %g \n",res);
+// circ.Print();
+// circ.Show(nPnts,xyz[0],3);
 
 }
 //______________________________________________________________________________
@@ -1725,7 +1307,7 @@ static int nCall=0; nCall++;
 	       +fNor[0]*fNor[1]*exy[1]*2
 	       +fNor[1]*fNor[1]*exy[2]);
 //          assert(wt>0.);
-          if (wt<=0) return 3.e33;
+          if (wt<1e-8) wt = 1e-8;
           wt = 1/wt;
         }
         aux[i].wt = wt;
@@ -2495,6 +2077,7 @@ double THelixFitter::Fit()
   TCircleFitterAux* myAux= GetAux(0);
   int nDat = Size();
   double Xi2xy = fCircleFitter.Fit();
+  if (Xi2xy>1e11) return Xi2xy;
   int ndfXY = fCircleFitter.Ndf();
   TCircle circ(fCircleFitter);
   const double *xy=0;
@@ -2885,7 +2468,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.37 2009/04/06 17:51:32 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.38 2009/07/01 21:48:39 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2901,6 +2484,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.38  2009/07/01 21:48:39  perev
+ * Fix -tive errors & remove obsolete
+ *
  * Revision 1.37  2009/04/06 17:51:32  perev
  * Replace assert(wt>0) by error condition
  *
