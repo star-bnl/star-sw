@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.10 2009/02/04 21:40:42 andrewar Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.11 2009/07/01 23:20:34 andrewar Exp $
  *
  */
 
@@ -24,6 +24,8 @@
 #include "StPrepEmbedMaker.h"
 #include "StEvtHddr.h"
 #include "TTree.h"
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "StGenericVertexMaker/StFixedVertexFinder.h"
 
 #include <unistd.h>
 
@@ -39,6 +41,11 @@ struct embedSettings{
   Double_t phihigh;
   Int_t rnd1;
   Int_t rnd2;
+  Double_t vzlow;
+  Double_t vzhigh;
+  Int_t NReqTrg;
+  Int_t ReqTrgId[32];
+  TString mode;
 };
 
 static embedSettings  *mSettings = 0;
@@ -100,20 +107,69 @@ Int_t StPrepEmbedMaker::InitRun(int runnum)
       return kStErr;
     }
     
+   if (mSpreadMode){
+         mMoreTagsFile = mTagFile;
+         int indx1 = mMoreTagsFile.Index(".tags",0);
+         int indx2 = mMoreTagsFile.Last('.');
+         if (indx1!=indx2) mMoreTagsFile.Remove(indx1+1,(indx2-indx1));
+         mMoreTagsFile.Insert(indx1+1,"moretags.");
+         mMoreFile = new TFile(mMoreTagsFile);
+         if (! mMoreFile ) {
+            LOG_ERROR << "MoreTagsFile : " << mMoreTagsFile << " cannot be opened" << endm;
+            return kStErr;
+         }
+         mMoreTree = (TTree *) mMoreFile->Get("MoreTags");
+         if (! mMoreTree ) {
+            LOG_ERROR << "In MoreTagsFile : " << mMoreTagsFile << " cannot find TTree \"MoreTags\"" << endm;
+            return kStErr;
+         }
+    }
     
     
-    Do("detp  hadr_on");
+//    Do("detp  hadr_on");
+ //   Do("make gstar");
     cout <<"Setting up Jpsi particle"<<endl;
     Do("vec/cr JBUF(1)");
     Do("vec/cr BR(6) R 100. 0. 0. 0. 0. 0.");
     Do("vec/cr MODE(6) I 302 0 0 0 0 0");
-    Do("spart 160 'JPSI' 3 3.09688 0 8.E-21 JBUF 0 BR MODE");
+    Do("spart 160 'JPSI' 3 3.09688 0 8.E-21 JBUF 0 BR MODE");	
 
+    Do("vec/cr UBUF1(1)");
+    Do("vec/cr BRATIO1(6) R 100. 0. 0. 0. 0. 0.");
+    Do("vec/cr MODE1(6) I 809 0 0 0 0 0");
+    Do("spart 16 'KAON 0 SHORT' 3 0.497671 0 8.922E-11 UBUF1 0 BRATIO1 MODE1");
+  
+    Do("vec/cr UBUF2(1)");
+    Do("vec/cr BRATIO2(6) R 100. 0. 0. 0. 0. 0.");
+    Do("vec/cr MODE2(6) I 1112 0 0 0 0 0");
+    Do("spart 151 'Phi-KK' 3 1.0194 0 1.482e-22 UBUF2 0 BRATIO2 MODE2");
+
+    Do("vec/cr UBUF2(1)");
+    Do("vec/cr BRATIO3(6) R 50. 50. 0. 0. 0. 0.");
+    Do("vec/cr MODE3(6) I 0760 0 0 0 0 0");
+    Do("spart 845 'Special DALITZ' 4 1.5318 +1 8.4e-17 UBUF2 0 BRATIO2 MODE3");
+    Do("vec/cr BRATIO4(6) R 50. 50. 0. 0. 0. 0.");
+    Do("vec/cr MODE4(6) I 010203 0 0 0 0 0");
+    Do("spart 60 'Special DALITZ' 4 .1349766 0 8.4e-17 UBUF2 0 BRATIO4 MODE4");
+
+    Do("vec/cr UBUF2(1)");
+    Do("vec/cr BRATIO2(6) R 100. 0. 0. 0. 0. 0.");
+    Do("vec/cr MODE2(6) I 203 0 0 0 0 0");
+    Do("spart 161 'Upsilon1S' 4 9.460  0 1.254e-20 UBUF2 0 BR(6) MODE2");
+    Do("spart 162 'Upsilon2S' 4 10.023 0 1.545e-20 UBUF2 0 BR(6) MODE2");
+    Do("spart 163 'Upsilon3S' 4 10.355 0 2.556e-20 UBUF2 0 BR(6) MODE2");
+
+       
+               
+ 
+    Do("detp  hadr_on");
     TString cmd("rndm ");
     cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
     Do(cmd.Data());
     
     Do("user/output o temp.fz");
+
+
   }
   return 0;
 }
@@ -184,14 +240,50 @@ Int_t StPrepEmbedMaker::Make() {
   //make sure zlow!=zhigh in particle definition - not sure of result. 
   //Z vertex will be forced in vxyz statement.
 
+       Double_t xyzerr[3] = {0.,0.,0.};
+          Double_t vzlow = xyz[2];
+          Double_t vzhigh = xyz[2];
+   
+  if(mSettings->mode.Contains("strange"))
+    {
+     //get primary vertex errors from moretags.root
+     nFound = (Int_t) mMoreTree->Draw("VXERR:VYERR:VZERR",
+             Form("RunId==%i&&EvtId==%i",
+                  EvtHddr->GetRunNumber(),
+                  EvtHddr->GetEventNumber()),
+             "goff");
+     if (nFound != 1) {
+          LOG_ERROR << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber()
+             << " has been found in moretags file" << nFound << " times" <<  endm;
+          return kStErr;
+     }
+     //xyzerr[0] = mMoreTree->GetV1()[0];
+     //xyzerr[1] = mMoreTree->GetV2()[0];
+
+     xyzerr[0] = 0;
+     xyzerr[1] = 0;
+     xyzerr[2] = mMoreTree->GetV3()[0];
+     LOG_INFO << xyzerr[0] << " " << xyzerr[1] << " " << xyzerr[2] << endm;
+     vzlow = -100.0;
+     vzhigh = 100.0;
+
+     //Set the vertex for StEvent with StGenericVertexMaker
+     StGenericVertexMaker * vmaker = (StGenericVertexMaker*) GetMaker("GenericVertex");
+     StFixedVertexFinder * vfinder = (StFixedVertexFinder *) vmaker->GetGenericFinder();
+     vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
+  }
+
+
+
   TString cmd;
-#if 1
-  cmd = Form("gkine %i %i %f %f %f %f %f %f %f %f;",
-	     npart, mSettings->pid,
-	     mSettings->ptlow, mSettings->pthigh,
-	     mSettings->etalow, mSettings->etahigh,
-	     mSettings->philow, mSettings->phihigh, xyz[2], xyz[2]);
-  Do(cmd.Data());
+#if 1 
+   cmd = Form("gkine %i %i %f %f %f %f %f %f %f %f;",
+            npart, mSettings->pid,
+            mSettings->ptlow, mSettings->pthigh,
+            mSettings->etalow, mSettings->etahigh,
+            mSettings->philow, mSettings->phihigh, xyz[2], xyz[2]);
+            //mSettings->philow, mSettings->phihigh, vzlow, vzhigh);
+   Do(cmd.Data());
 #endif
   cmd = Form("phasespace %i %i %f %f %f %f;",
 	     npart, mSettings->pid,
@@ -200,7 +292,14 @@ Int_t StPrepEmbedMaker::Make() {
   
   Do(cmd.Data());
   Do(Form("gvertex %f %f %f",xyz[0],xyz[1],xyz[2]));
-  Do("vsig 0 0;");
+  if( mSettings->mode.Contains("strange") )
+    {
+	Do(Form("gspread %f %f %f", xyzerr[0],xyzerr[1],xyzerr[2]));
+    }
+  else
+    { 
+ 	Do("vsig 0 0;");
+    }
 
   Do("trig 1");
 
@@ -244,8 +343,9 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
- * Revision 1.10  2009/02/04 21:40:42  andrewar
- * Update w/ declaration of Jpsi particle.
+ * Revision 1.11  2009/07/01 23:20:34  andrewar
+ * Updated with codes for Strangeness embedding (taken from Xianglei's code,
+ * Feb 09)
  *
  * Revision 1.9  2008/09/04 00:07:27  fisyak
  * Change default from gkine to phasespace
