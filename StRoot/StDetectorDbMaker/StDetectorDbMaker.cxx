@@ -12,6 +12,11 @@ Int_t StDetectorDbMaker::Make(){
     // Also need to update instances for classes done in InitRun.
     // This is needed because of a feature in TTable
     // Please ingore unused variables..the call to instane() is needed!
+
+  // Must delete any existing St_trigDetSumsC first, or absence from DAQ stream
+  //  in the middle of a file won't properly trigger looking to DB, nor do we
+  //  want to keep old table around
+  delete St_trigDetSumsC::instance();
   if (GetMode() != 1) {
     TDataSet *set = GetDataSet("inputStream_DAQ");
     if (set) {
