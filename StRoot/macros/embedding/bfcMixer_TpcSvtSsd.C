@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.5 2009/02/23 20:58:03 fisyak Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.6 2009/07/01 23:23:49 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -18,19 +18,27 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsdIn=1
 		    const Char_t *tagfile="/star/rcf/test/embedding/2007ProductionMinBias/FullField/P08if/2007/113/8113044/st_physics_8113044_raw_1040042.tags.root",
 		    const Double_t pt_low=0.1,
 		    const Double_t pt_high=5.0,
-		    const Double_t eta_low=-1.0,
-		    const Double_t eta_high=1.0,
-		    const Int_t pid=9,
+		    const Double_t eta_low=-1.1,
+		    const Double_t eta_high=1.1,
+		    const Int_t pid=8,
 		    const Double_t mult = 100.) {
+
+  // Get number of events from tags file
+//  gROOT->ProcessLine(".L /star/institutions/lbl/hmasui/embedding/SVT/getNumberOfEvents.C");
+//  const Int_t neventsTag = getNumberOfEvents(tagfile);
+
   // production chain for P07ib
   TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 ssd_daq");// KeepSvtHit hitfilt skip1row");
-  TString prodP08if("B2007g DbV20080418 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE  OShortR trgd Corr5 OSpaceZ2 ssd_daq KeepSvtHit hitfilt VFMCE");// KeepSvtHit hitfilt skip1row");
+  TString prodP08if("B2007g DbV20080418 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE  OShortR trgd Corr5 OSpaceZ2 ssd_daq KeepSvtHit -hitfilt VFMCE");// KeepSvtHit hitfilt skip1row");
   TString geomP07ib("ry2007g");
-  TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput");
+  TString chain1Opt("in magF tpcDb adcOnly NoDefault -ittf NoOutput");
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geomP07ib;
   TString chain3Opt = prodP08if;
-  chain3Opt += " Embedding onlraw GeantOut McAna IdTruth -in NoInput,useInTracker"; 
+//  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker"; 
+//  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt"; 
+  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut IdTruth -in NoInput -hitfilt"; 
+
   if (isSvtIn) chain3Opt += " SvtEmbed";
   if (isSsdIn) {
     chain1Opt += ",ssddat";
@@ -59,7 +67,7 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsdIn=1
       cout << "Cannot find Trs in chain2" << endl;
       return;
     }
-    trsMk->setNormalFactor(1.35);
+    trsMk->setNormalFactor(1.05);
   }
   //________________________________________________________________________________
   gSystem->Load("StMixerMaker");
@@ -125,6 +133,13 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsdIn=1
   Int_t iInit = Chain->Init();
   if (iInit >=  kStEOF) {Chain->FatalErr(iInit,"on init"); return;}
   StMaker *treeMk = Chain->GetMaker("outputStream");
+
+  // Use input Nevents if Nevents < neventsTag
+//  const Int_t nevents = (Nevents<neventsTag) ? Nevents : neventsTag ;
+//  cout << endl;
+//  cout << Form("bfcMixer_TpcSvtSsd.C : Process %10d events ...", nevents) << endl;
+//  cout << endl;
+
   Chain->EventLoop(Nevents,treeMk);
   gMessMgr->QAInfo() << "Run completed " << endm;
   gSystem->Exec("date");
