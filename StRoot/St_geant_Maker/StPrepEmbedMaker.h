@@ -5,11 +5,15 @@
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.3 2008/08/15 15:10:41 lbarnby Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.4 2009/07/01 23:21:03 andrewar Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.4  2009/07/01 23:21:03  andrewar
+ * Updated with Strangeness embedding code options, taken from Xianglei's
+ * code, Feb 09.
+ *
  * Revision 1.3  2008/08/15 15:10:41  lbarnby
  * Flag to skip embedding events without primary vertex with setter (default is to skip)
  *
@@ -48,7 +52,7 @@ class StPrepEmbedMaker : public StMaker {
   Int_t  InitRun(int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.3 2008/08/15 15:10:41 lbarnby Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.4 2009/07/01 23:21:03 andrewar Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -58,13 +62,18 @@ class StPrepEmbedMaker : public StMaker {
 	      Double_t phihigh);
   void SetTagFile(const Char_t *file) {mTagFile = file;}
   void SetSkipMode(Bool_t flag=kTRUE) {mSkipMode = flag;}
+  void SetSpreadMode(Bool_t flag=kFALSE) {mSpreadMode=flag;}
  private:
   TGiant3 *mGeant3;
   TString mTagFile;
+  TString mMoreTagsFile;
   Int_t mEventCounter;
   TFile *mFile;
+  TFile *mMoreFile;
   TTree *mTree;
+  TTree *mMoreTree;
   Bool_t mSkipMode;
+  Bool_t mSpreadMode;
   ClassDef(StPrepEmbedMaker,0)    
 };
 #endif
