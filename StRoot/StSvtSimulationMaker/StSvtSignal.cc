@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.15 2009/06/28 03:59:37 baumgart Exp $
+ * $Id: StSvtSignal.cc,v 1.16 2009/07/02 20:29:56 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.16  2009/07/02 20:29:56  baumgart
+ * Suppression of cout statements in function calcConvSignal
+ *
  * Revision 1.15  2009/06/28 03:59:37  baumgart
  * Compensate for addition of angular dependence in StSvtElectronCloud.cc
  *
@@ -394,13 +397,13 @@ void StSvtSignal::calcConvSignal(double chargeOnAnode)
       //if(mTimeWidth > 0.02 && mTimeWidth< 0.14)
      {
        //cout<<"now using Rykove's version"<<endl;
-       cout << "Rykov" << mTCenter << endl;
+       //cout << "Rykov" << mTCenter << endl;
       rykovSignal(nMin,nMax, tStep);
      }
     else
      {
        //cout<<"now using selemons version"<<endl;
-       cout << "Selemon" << mTCenter << endl;
+       //cout << "Selemon" << mTCenter << endl;
       selemonSignal(nMin,nMax,tStep,chargeOnAnode);
      }
    }
