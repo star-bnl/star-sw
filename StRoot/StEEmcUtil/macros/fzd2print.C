@@ -17,7 +17,7 @@ void fzd2print(const Int_t Nevents=1, const Char_t *fzfile ="/star/u/spinka/EEMC
 
   gROOT->LoadMacro("$STAR/StRoot/macros/bfc.C");
   gSystem->Load("StEEmcUtil.so"); 
-  bfc(0,"fzin sim_T gen_T nodefault sdt20090101 ",fzfile);
+  bfc(0,"fzin sim_T gen_T nodefault ",fzfile);
   /* note, if BFC crashes due to missing DB time stamp your fzd file is strange
       you can overcome the crash by everwiting event time stamp with 
       the value of your choice.  Add sdt20090101 to the chain options.
