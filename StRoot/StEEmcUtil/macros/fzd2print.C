@@ -9,7 +9,7 @@ St_geant_Maker *geant= 0;
 // reads .fzd file and prints on the screen
 
 // ______________________________________________
-void fzd2print(const Int_t Nevents=1, const Char_t *fzfile ="../sim2003/mc_pi0-pt2_5-eta1_6.fzd") {
+void fzd2print(const Int_t Nevents=1, const Char_t *fzfile ="/star/u/spinka/EEMC_sim1/Data/singleGamma1.fzd") {
   Int_t  i=0;
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -17,7 +17,14 @@ void fzd2print(const Int_t Nevents=1, const Char_t *fzfile ="../sim2003/mc_pi0-p
 
   gROOT->LoadMacro("$STAR/StRoot/macros/bfc.C");
   gSystem->Load("StEEmcUtil.so"); 
-  bfc(0,"fzin sim_T gen_T",fzfile);
+  bfc(0,"fzin sim_T gen_T nodefault sdt20090101 ",fzfile);
+  /* note, if BFC crashes due to missing DB time stamp your fzd file is strange
+      you can overcome the crash by everwiting event time stamp with 
+      the value of your choice.  Add sdt20090101 to the chain options.
+      Note, you take responsibility for content of DB for this time stamp.
+      Jan B.
+  */
+
   EEmcMCData *evIN=new   EEmcMCData;
   
   for (i=1; i<=Nevents; i++ ) {
