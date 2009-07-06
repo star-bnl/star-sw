@@ -4,27 +4,6 @@
 TRandom* Lock::mRandom = new TRandom(123);
 
 
-int Lock::lock1() { 
-  int iret = 0<open("/locker1",O_EXCL|O_CREAT|O_RDWR,S_IRWXU);
-  return iret;
-}
-
-int Lock::lock2() {
-  int iret = 0<open("/locker2",O_EXCL|O_CREAT|O_RDWR,S_IRWXU);
-  return iret;  
-}
-
-void Lock::unlock1() { 
-  unlink("/locker1"); 
-}
-
-void Lock::unlock2() { 
-  unlink("/locker2"); 
-}
-
-void Lock::sleep() {
-  gSystem->Sleep( mRandom->Integer(100)+50 );
-}
 
 int Lock::update(TMapFile* mFile) {
   //printf("TMapFile 0x%x\n",mFile);
@@ -39,36 +18,10 @@ int Lock::update(TMapFile* mFile) {
   return 0;
 }
 
-/*
-template<class T>
-T* read(TMapFile* mFile, const char* name, T* t=0) {
-  bool done = false;
-  while ( !lock1() && !done) { 
-    sleep();
-  }
-  if ( lock2() ) {
-    t = (T*) mFile->Get("name", t);
-    done = true;
-    unlock2();
-  }
-  unlock1();
-  return t;
-}
-*/
-
-void Lock::unlock() {
-  unlock1();
-  unlock2();
-
-}
-
-
-
-
 
 /***************************************************************************
  *
- * $Id: Lock.cxx,v 1.1 2009/01/23 16:11:05 jeromel Exp $
+ * $Id: Lock.cxx,v 1.2 2009/07/06 22:46:49 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -78,6 +31,9 @@ void Lock::unlock() {
  ***************************************************************************
  *
  * $Log: Lock.cxx,v $
+ * Revision 1.2  2009/07/06 22:46:49  fine
+ * remove the redundant lock methods
+ *
  * Revision 1.1  2009/01/23 16:11:05  jeromel
  * Import from online/RTS/src/
  *

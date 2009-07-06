@@ -19,21 +19,7 @@ class Lock {
  private:
   static TRandom* mRandom;
  public:
-  
-  static int lock1();
-  static int lock2();
-  
-  static void unlock1();
-  static void unlock2();
-  
-  static void sleep();
-  
   static int update(TMapFile* mFile);
-
-  //  template<class T> static T* read(TMapFile* mFile, const char* name, T* t);
-
-  static void unlock();
-  
 };
   
 #endif
@@ -44,7 +30,7 @@ class Lock {
 
 /***************************************************************************
  *
- * $Id: Lock.h,v 1.1 2009/01/23 16:10:56 jeromel Exp $
+ * $Id: Lock.h,v 1.2 2009/07/06 22:46:49 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -54,6 +40,9 @@ class Lock {
  ***************************************************************************
  *
  * $Log: Lock.h,v $
+ * Revision 1.2  2009/07/06 22:46:49  fine
+ * remove the redundant lock methods
+ *
  * Revision 1.1  2009/01/23 16:10:56  jeromel
  * Import from online/RTS/src/
  *

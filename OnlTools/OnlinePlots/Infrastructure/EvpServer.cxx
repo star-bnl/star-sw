@@ -92,7 +92,7 @@ EvpServer::EvpServer(bool gui) :
   rtsLogLevel(NOTE);
   rtsLogAddDest("172.16.0.1",8002);
   rtsLogOutput(RTS_LOG_NET);
-  Lock::unlock();
+  // Lock::unlock();
   //TMapFile::SetMapAddress(0xb0468000);
   //TMapFile::SetMapAddress(0xb0506000);
 
@@ -618,7 +618,7 @@ void EvpServer::SetStopFlag(void)
 
 /***************************************************************************
  *
- * $Id: EvpServer.cxx,v 1.3 2009/01/30 01:15:46 dkettler Exp $
+ * $Id: EvpServer.cxx,v 1.4 2009/07/06 22:46:49 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -628,6 +628,9 @@ void EvpServer::SetStopFlag(void)
  ***************************************************************************
  *
  * $Log: EvpServer.cxx,v $
+ * Revision 1.4  2009/07/06 22:46:49  fine
+ * remove the redundant lock methods
+ *
  * Revision 1.3  2009/01/30 01:15:46  dkettler
  * Restored status check
  *
