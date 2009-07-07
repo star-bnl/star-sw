@@ -1,4 +1,4 @@
-// $Id: StMCStepping2Hist.cxx,v 1.1 2009/06/07 02:28:36 perev Exp $
+// $Id: StMCStepping2Hist.cxx,v 1.2 2009/07/07 19:07:19 perev Exp $
 //
 //
 // Class StMCStepping2Hist
@@ -29,6 +29,7 @@
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TSystem.h"
+#include "TQtCanvas2Html.h"
 #include "StTProfile2D.h"
 #include "StiELossTrk.h"
 
@@ -111,7 +112,7 @@ From_t  from[kMAXMODU];
 
 public:
    My2Hist(const char *tit);
-
+const char *GetName() const {return mName.Data();}
 void SetEta(double eta){ mEta = eta;}
 Node_t &AddNode();
 
@@ -182,12 +183,12 @@ My2Hist::My2Hist(const char *tit)
    mName = tit;
    TString ts("P2_");ts+=mName; ts+="_ZR";
    double zLow=-2000,zUpp=2000;
-   double rLow=0   ,rUpp=400;
-   int nZ=400,nR=200;
+   double rLow=0   ,rUpp=500;
+   int nZ=400,nR=250;
    mDelta2Z = (zUpp-zLow)/nZ;
    mDelta2R = (rUpp-rLow)/nR;
    mP2 = new StTProfile2D(ts,"invX0(Z,Rxy)",nZ,zLow,zUpp,nR,rLow,rUpp);
-   mHt = new TH1D("OldStar","TrackLen(Rxy)",70,60,200);
+   mHt = new TH1D("OldStar","TrackLen(Rxy)",100,1./200,1./60);
 }   
 
 //_____________________________________________________________________________
@@ -198,7 +199,7 @@ My2Hist::Node_t  &My2Hist::AddNode()
 //_____________________________________________________________________________
 void My2Hist::Fill(double r0,double r1,double z0,double z1,double radL)
 {
-  if (radL <=0.) radL = 1e9;
+  if (radL <=0.) radL = 3e33;
   double dR = r1-r0,dZ = z1 - z0;
   double Delta2R = (dR<0) ? -mDelta2R:mDelta2R;
   double Delta2Z = (dZ<0) ? -mDelta2Z:mDelta2Z;
@@ -221,7 +222,7 @@ void My2Hist::Fill(double r0,double r1,double z0,double z1,double radL)
     zB = zA + dZ*tau;
     double dL = dQ*tau;
     mP2->Fill(0.5*(zA+zB),0.5*(rA+rB),1./radL,dL);
-    if (fabs(z0) <200 && fabs(z1) <200 && r1<200) { mHt->Fill(0.5*(rA+rB),dL);}
+    if (fabs(z0) <200 && fabs(z1) <200 && r1<200) { mHt->Fill(1/(0.5*(rA+rB)),dL);}
     rA = rB; zA = zB;
   }
 
@@ -311,7 +312,7 @@ void My2Hist::Paint()
     ,mModu[i].kolo
     );
   }
-static const char *ParaName[3]={"RadL" ,"RadL","Ort "};  
+static const char *ParaName[3]={"RadL" ,"RadL","Ort"};  
 static const char *SmallBig[2]={"Small","Big" };  
 static const char *FromInto[3]={"ThisToAll" ,"AllToThis","AllToThis"};  
 static const double   myMax[3]={    3  ,3     ,    3 };
@@ -346,6 +347,7 @@ static const double   myMax[3]={    3  ,3     ,    3 };
     }//end sb
   }//end jk
 
+   mP2->SupressZeros(1e-5);
    TString ts("C_"); ts+=mName; ts+="_ZR";
    mCt = new TCanvas("OldStar","TrakLen(Rxy)" ,600,800);
    mHt->Draw();
@@ -376,10 +378,19 @@ void My2Hist::Save()
 {
    for (int i=0;i<7;i++) {
      if(!mC[0][i]) continue;
+     mC[0][i]->Update();
      mC[0][i]->Print(".png");
      PadClean(mC[0][i]);
      mC[0][i]->Print(".C");
-  }
+     if (i>5) continue;
+     TString ts(mC[0][i]->GetName());ts.Replace(0,1,"HTM");
+     TQtCanvas2Html WebSite(mC[0][i],1.8,ts.Data());
+//        char cc[500];
+//        sprintf(cc,"TQtCanvas2Html WebSite((TCanvas*)%p,1.8,\"%s\");"
+//               ,(void*)mC[0][i],mC[0][i]->GetName());
+// 
+//        gROOT->ProcessLine(cc);
+   }
 }
 //_____________________________________________________________________________
 My2Hist::Modu_t &My2Hist::GetModu(const TString &name)
@@ -431,7 +442,13 @@ void My2Hist::PadClean(TPad *pad)
 //_____________________________________________________________________________
 void My2Hist::PrintFrom()
 {
-  printf("\n\n   PrintFrom() contribution\n\n");
+#define QWE(x) (int(x*1000)/1000.)
+  TString ts(GetName()); ts+=".tab";
+  FILE *ftab = fopen(ts.Data(),"w");
+  assert (ftab);
+
+
+  fprintf(ftab,"\n\n   PrintFrom() %s contributions\n\n",GetName());
 
   for (int im=0;im<mNModu; im++) {
     int nfr = mModu[im].nfrom;
@@ -446,22 +463,23 @@ void My2Hist::PrintFrom()
       fr[jm].ort2=sqrt(fr[jm].ort2);
     }
     ort2 = sqrt(ort2);
-    printf("%s(%6.4g  ) =\t",mModu[im].name.Data(),radL);
+    fprintf(ftab,"%s(%6.4g  ) =\t",mModu[im].name.Data(),QWE(radL));
     for (int jm=0;jm<nfr;jm++) {
       if (fr[jm].ort2<0.1*ort2) continue;
-      printf("%s(%6.4g  ) \t"
-            ,fr[jm].name.Data()
-            ,fr[jm].radL);
+      fprintf(ftab,"%s(%6.4g  ) \t"
+             ,fr[jm].name.Data()
+             ,QWE(fr[jm].radL));
     }
-    printf("\n%s(%6.4gcm) =\t",mModu[im].name.Data(),ort2);
+    fprintf(ftab,"\n%s(%6.4gcm) =\t",mModu[im].name.Data(),QWE(ort2));
     for (int jm=0;jm<nfr;jm++) {
       if (fr[jm].ort2<0.1*ort2) continue;
-      printf("%s(%6.4gcm) \t"
+      fprintf(ftab,"%s(%6.4gcm) \t"
             ,fr[jm].name.Data()
-            ,fr[jm].ort2);
+            ,QWE(fr[jm].ort2));
     }     
-    printf("\n\n");  
+    fprintf(ftab,"\n\n");  
   }  
+  fclose(ftab);
 }
 
 
