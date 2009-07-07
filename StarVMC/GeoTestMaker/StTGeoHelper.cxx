@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.cxx,v 1.1 2009/06/07 02:28:36 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.2 2009/07/07 19:08:16 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <string>
+#include <set>
 #include "TROOT.h"
 #include "TObjArray.h"
 #include "TGeoManager.h"
@@ -149,6 +151,19 @@ int StTGeoHelper::IsHitPlane(const TGeoVolume *volu)  const
 int StTGeoHelper::IsHitPlane(const TGeoNode   *node)  const
 { return IsHitPlane(node->GetVolume()); }
 
+//_____________________________________________________________________________
+int StTGeoHelper::MayHitPlane(const TGeoVolume *volu, double dir[3])  const
+{
+  const TGeoShape* sh=volu->GetShape() ;
+  const char *shaName = sh->GetName();
+  if      (strcmp("TgeoBBox",shaName)==0) {
+  } else if (strcmp("TgeoPgon",shaName)==0) {
+  } else if (strcmp("TgeoPara",shaName)==0) {
+  } else if (strcmp("TgeoTrd1",shaName)==0) {
+  } else if (strcmp("TgeoTrd2",shaName)==0) {
+  }
+  
+}
 //_____________________________________________________________________________
 int StTGeoHelper::IsSensitive(const TGeoVolume *volu)
 {
@@ -356,3 +371,47 @@ int  StTGeoHitShape::Inside(double z,double rxy) const
    if (rxy >=fRxy[jj]) return 0;
    return 1;
 }
+//_____________________________________________________________________________
+void  StTGeoHelper::ShootZR(double z,double rxy) 
+{
+    typedef std::set<std::string> MySet_t ;
+    MySet_t  mySet;
+
+    double step = rxy*0.01; 
+    if (step>1.0) step = 1;
+    if (step<0.1) step = 0.1;
+    int nStep = (int)(2*M_PI*rxy/step);
+    double dAng = (2*M_PI)/nStep;
+    
+    for (int iStep=0;iStep<nStep;iStep++) {
+      double xyz[3];xyz[2]=z;
+      xyz[0]= rxy*cos(iStep*dAng);
+      xyz[1]= rxy*sin(iStep*dAng);
+      
+      gGeoManager->FindNode(xyz[0],xyz[1],xyz[2]);
+      TString tPath(gGeoManager->GetPath()); 
+//      printf("path=%s\n",tPath.Data());
+      if (gGeoManager->GetLevel()<2) 	continue;
+      tPath.Replace(0,15,"");
+      int j = tPath.Length()-1;
+      if (j<0) 				continue;
+      for(;tPath[j]!='_'&&j>0;j--){}
+      if (j<0) 				continue;
+      tPath.Replace(j,999,"");
+      tPath.Replace(4,tPath.Length()-8,"...");
+//      printf("path=%s\n",tPath.Data());
+      std::string path(tPath.Data()); 
+      mySet.insert(path);
+//      printf("path=%s\n",path.c_str());
+   }
+   MySet_t::iterator it; int cnt=0;
+   for (it=mySet.begin();it != mySet.end();++it) {
+     cnt++; printf("%4d - %s\n",cnt,(*it).c_str());
+   }
+
+}
+
+
+
+
+
