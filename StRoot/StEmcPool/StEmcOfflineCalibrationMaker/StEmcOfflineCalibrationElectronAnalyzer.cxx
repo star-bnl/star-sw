@@ -1,4 +1,5 @@
 #include "StEmcOfflineCalibrationElectronAnalyzer.h"
+#include "TMath.h"
 #include "TChain.h"
 #include "TNtuple.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
