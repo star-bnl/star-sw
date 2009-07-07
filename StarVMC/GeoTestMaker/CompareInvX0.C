@@ -58,13 +58,16 @@ void CompareInvX0(const char *m1, const char *m2)
       double err = pow(P[0]->GetBinError(iX,iY),2) 
                  + pow(P[1]->GetBinError(iX,iY),2);
 
-      if (del*del < 9*err) 		continue;
+//      if (del*del < 9*err) 		continue;
       if (fabs(del)< 0.005*sum) 	continue;
       P[2]->Fill(xLow+0.5*xWid*(iX-1),yLow+0.5*yWid*(iY-1),del);
   } }
-  TCanvas *CC = new TCanvas(P[2]->GetName(),P[2]->GetName(),600,800);
-  P[2]->Draw("colz");
 
+  TString ts("C_"); ts +=P[2]->GetName();
+  TCanvas *CC = new TCanvas(ts,ts,600,800);
+  P[2]->Draw("colz");
+  CC->Print(".C");
+  CC->Print(".png");
 }
 
 void Load()
