@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StMuHelix.cxx,v 1.3 2003/10/30 20:08:13 perev Exp $
+ * $Id: StMuHelix.cxx,v 1.4 2009/07/07 19:37:58 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -29,10 +29,17 @@ int StMuHelix::bad() const
    if (fabs(mB) >  1000)        return 41;
    return 0;
 }
+StPhysicalHelix  StMuHelix::helix() const
+{
+   return StPhysicalHelix(mP,mOrigin,mB*kilogauss,mQ);
+}
 ClassImp(StMuHelix)
 /***************************************************************************
  *
  * $Log: StMuHelix.cxx,v $
+ * Revision 1.4  2009/07/07 19:37:58  perev
+ * helix() method added
+ *
  * Revision 1.3  2003/10/30 20:08:13  perev
  * Check of quality added
  *
