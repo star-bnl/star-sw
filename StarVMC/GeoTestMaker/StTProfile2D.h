@@ -15,6 +15,7 @@ StTProfile2D(const char* name, const char* title
 	    ,const char* option = "");
 TProfile* ProfileX(const char* name = "_pfx", Int_t firstybin = 1, Int_t lastybin = -1, Option_t* option = "") const;
 TProfile* ProfileY(const char* name = "_pfy", Int_t firstxbin = 1, Int_t lastxbin = -1, Option_t* option = "") const;
+void      SupressZeros(double minZ=1e-10);
 private:
 TProfile *DoProfile(bool onX, const char *name, Int_t firstbin, Int_t lastbin, Option_t *option) const;
 

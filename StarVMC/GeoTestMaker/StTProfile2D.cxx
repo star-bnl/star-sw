@@ -1,3 +1,4 @@
+#include <math.h>
 #include "StTProfile2D.h"
 #include "TROOT.h"
 #include "TVirtualHistPainter.h"
@@ -162,6 +163,18 @@ TProfile *StTProfile2D::DoProfile(bool onX, const char *name, Int_t firstbin, In
    if ((firstbin <=1 && lastbin >= inN) && !ncuts) h1->SetEntries(fEntries);
 
    return h1;
+}
+//______________________________________________________________________________
+void StTProfile2D::SupressZeros(double minZ)
+{
+  int nBinX = fXaxis.GetNbins();
+  int nBinY = fYaxis.GetNbins();
+    for (int ix = 1;ix<=nBinX;ix++) {
+    for (int iy = 1;iy<=nBinY;iy++) {
+      if (fabs(GetBinContent(ix,iy)) >minZ) continue;
+      SetBinContent(ix,iy,0.);
+      SetBinError  (ix,iy,0.);
+   } }
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
