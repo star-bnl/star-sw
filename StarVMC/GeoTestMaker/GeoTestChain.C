@@ -9,7 +9,7 @@ if (!loaded) Load();
 StChain *chain =  new StChain;
 TString tsy(gy);
 gSystem->ExpandPathName(tsy);
-StMaker *mk = new GeoTestMaker("GeoTest",tsy.Data(), 50000);
+StMaker *mk = new GeoTestMaker("GeoTest",tsy.Data(), 1000000);
 // StMaker *mk = new GeoTestMaker("GeoTest",tsy.Data(),1);
 // mk->SetAttr("EtaMin",0.50);
 // mk->SetAttr("EtaMax",0.51);
