@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.3 2009/04/02 17:02:42 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.4 2009/07/07 19:57:37 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -67,6 +67,8 @@ void StjeDefaultJetTreeWriter::Finish()
 
 void StjeDefaultJetTreeWriter::fillJetTree()
 {
+  static const StThreeVectorF noVertex(-999,-999,-999);
+  if (StMuDst::event()->primaryVertexPosition() == noVertex) return;
   for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
     StFourPMaker* fourPMaker = (*it)._fourPMaker;
     std::list<StProtoJet>* protoJetList = (*it)._protoJetList;
