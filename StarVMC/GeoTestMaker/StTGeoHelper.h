@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.1 2009/06/07 02:28:36 perev Exp $
+// $Id: StTGeoHelper.h,v 1.2 2009/07/07 19:08:34 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -36,7 +36,11 @@ public:
 	 int  IsHitModul (const TGeoVolume *volu) 	const;
 	 int  IsHitPlane (const TGeoVolume *volu) 	const;
 	 int  IsHitPlane (const TGeoNode   *node) 	const;
+	 int  MayHitPlane(const TGeoVolume *volu, double dir[3]) const;
 static	 int  IsSensitive(const TGeoVolume *volu) 	     ;
+
+        void  ShootZR(double z,double rxy);
+
 const StTGeoHitShape* GetHitShape() const {return fHitShape;}
 
 
