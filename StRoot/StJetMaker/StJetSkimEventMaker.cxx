@@ -155,6 +155,9 @@ Int_t StJetSkimEventMaker::Make()
     assert(muDst);
     StMuEvent* muEvent = muDst->event();
     assert(muEvent);
+
+    static const StThreeVectorF noVertex(-999,-999,-999);
+    if (muEvent->primaryVertexPosition() == noVertex) return kStOk;
     
     StBbcTriggerDetector* bbc = &(muEvent->bbcTriggerDetector());
     assert(bbc);
