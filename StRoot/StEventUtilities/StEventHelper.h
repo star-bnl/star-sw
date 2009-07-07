@@ -20,6 +20,8 @@
 #include "StPhysicalHelixD.hh"
 #include "StPhysicalHelixD.hh"
 #include "StHelixD.hh"
+#include "StEnumerations.h"
+
 class StEvent;
 class StTrack;
 class StHit;
@@ -33,6 +35,7 @@ class BetheBloch;
 class THelixTrack;
 
 
+//................................................................................
 class StVertexHelper: public TObject
 {
 public:
@@ -55,6 +58,7 @@ float fErrMtx[6];
 ClassDef(StVertexHelper,0)
 };
 
+//................................................................................
 class StTrackHelper: public TObject
 {
 public:
@@ -92,6 +96,7 @@ mutable THelixTrack       *fTHlx[2];
 ClassDef(StTrackHelper,0)
 };
 
+//................................................................................
 class StHitHelper: public TObject
 {
 public:
@@ -109,51 +114,8 @@ const StHit *fHit;
 ClassDef(StHitHelper,0)
 };
 
-class StObject; 
-class StHitIter 
-{
-protected:
-    StHitIter();
-void      Reset();
-StHitIter &Next();
-virtual StObject *GetO(int lev,int idx)=0; 
-virtual int       GetN(int lev) const =0; 
-public:
-int    GetIdx(int i) const {return fI[i];}
-int    IHit()        const {return fI[0];}
-StHit *GetHit()      const {return (StHit*)fO[0];}
-protected:
-enum {kStHitIterDeep=5};
-StEvent  *fEvent;
-int       fI[kStHitIterDeep]; //Index  of hit,  Index  of container1, ...
-int       fN[kStHitIterDeep]; //Number of hits, Number of container1,...
-StObject *fO[kStHitIterDeep]; //StiHit,container1,container2,...
-};
 
-class StSvtHit;
-class StSvtHitCollection;
-class StSvtBarrelHitCollection;
-class StSvtLadderHitCollection;
-class StSvtWaferHitCollection;
-class StSvtHit;
-class StSvtHitIter : public StHitIter
-{
-public:
-    StSvtHitIter(StEvent *ev);
-StSvtHit *operator*() const 	{return (StSvtHit*)GetHit();}
-StSvtHitIter &operator++()      {return (StSvtHitIter&)Next();}
-
-int IBarrel() const 		{return GetIdx(3);}
-int ILadder() const 		{return GetIdx(2);}
-int IWafer () const 		{return GetIdx(1);}
-// Overloading
-protected:
-StObject *GetO(int lev,int idx); 
-int       GetN(int lev) const; 
-
-};
-  
-
+//................................................................................
 class TExMap;
 class TArrayI;
 class StErrorHelper: public TObject
@@ -183,6 +145,7 @@ ClassDef(StErrorHelper,0)
 
 
 
+//................................................................................
 enum EHKind {kUDF = 0 
     ,kVTX = BIT( 1),kTRK = BIT( 2),kHIT = BIT( 3),kHRR = BIT( 4)//StEvent types
     ,kPRM = BIT( 5),kKNK = BIT( 6),kV0  = BIT( 7),kXI  = BIT( 8)//Vertex  types
@@ -191,7 +154,7 @@ enum EHKind {kUDF = 0
     ,kUSE = BIT(20),kUNU = BIT(21),kFIT = BIT(22),kTHT = BIT(23)//Hit     types
     ,kTRR = BIT(30)};                                           //TObjArray
 
-//#ifndef __EVENTHELPER_ONLY__
+//#ifndef ..EVENTHELPER_ONLY..
 extern const char *EHKindN[]; 
 extern const int   EHKindS[];
 //#endif
@@ -213,6 +176,7 @@ const int EHKindS[]= {kUDF
 #endif
 
 
+//................................................................................
 class StEventHelper : public TNamed{
 
 protected:
@@ -238,7 +202,7 @@ private:
 
 ClassDef(StEventHelper,0)    
 };
-//______________________________________________________________________________
+//................................................................................
 class StPoints3DABC : public TPoints3DABC 
 {
 public:
@@ -289,7 +253,7 @@ protected:
 };
 
 
-//______________________________________________________________________________
+//................................................................................
 class StTrackPoints : public StPoints3DABC 
 {
 public:
@@ -308,7 +272,7 @@ private:
  ClassDef(StTrackPoints,0)    
 };
 
-//______________________________________________________________________________
+//................................................................................
 class StVertexPoints : public StPoints3DABC 
 {
 public:
@@ -322,7 +286,7 @@ private:
 private:  
  ClassDef(StVertexPoints,0)    
 };
-//______________________________________________________________________________
+//................................................................................
 class StInnOutPoints : public StPoints3DABC 
 {
 public:
@@ -339,7 +303,7 @@ private:
 };
 
 
-//______________________________________________________________________________
+//..............................................................................
 class StHitPoints : public StPoints3DABC 
 {
 public:
@@ -355,7 +319,7 @@ private:
  ClassDef(StHitPoints,0)    
 };
 
-//______________________________________________________________________________
+//..............................................................................
 class StFilterABC : public TNamed {     //base class for StEvent filters
 public:
    StFilterABC(const char *name,bool active=true);
@@ -376,7 +340,7 @@ private:
    static int fgDial;
    ClassDef(StFilterABC,0)
 };
-//______________________________________________________________________________
+//..............................................................................
 
 class StFilterDef : public StFilterABC { // An example of default filter
 public:
@@ -411,7 +375,7 @@ private:
 
 ClassDef(StFilterDef,0)
 };
-//______________________________________________________________________________
+//..............................................................................
 
 class StMuDstFilterHelper : public StFilterABC { // An example of default filter
 public:
@@ -454,13 +418,13 @@ private:
   ClassDef(StMuDstFilterHelper,0)
 };
 
+//..............................................................................
    class StTpcDedxPidAlgorithm;
    class StElectron;
    class StPionPlus;
    class StKaonPlus;
    class StProton;
   
-//______________________________________________________________________________
 
 class StColorFilterHelper : public StFilterABC { // An example of default coloring filter
 public:
@@ -507,14 +471,146 @@ private:
   ClassDef(StColorFilterHelper,0)
 };
 
+//..............................................................................
+class StHitIter 
+{
+private:
+  class StkCell_t {
+  public:
+    const void *mV;	//pointer to collection of objects
+    int mN;		//size of collection
+    int mJ; 		//current index of object in collection
+  };
+enum {kINI=0,kDOW=1,kHOR=2,kUPP=3,kHIT=4,kEND};
+protected:
+    StHitIter(const void    *cont=0);
+virtual const void *GetObj(const void *cont,int lev,int idx) const =0; 
+virtual       int  GetSize(const void *cont,int lev        ) const =0; 
+public:
+virtual void Reset(const StEvent *evt=0){Reset(GetContainer(evt));}
+virtual void Reset(const void *cont=0);
+virtual StDetectorId DetectorId() const = 0;
+virtual int          HitPlaneId() const{return 0;};
+virtual int operator++();
+virtual StHit *operator*();
+virtual const void *GetContainer(const StEvent *ev) const=0;
+virtual void Print(const char *opt="");
+protected:
+const void *fCont;
+int fKase;
+int fLev;
+StkCell_t fStk[10];
+};
+
+//..............................................................................
+class StTpcHitCollection;
+class StTpcHitIter : public StHitIter {
+public:
+  StTpcHitIter(const StTpcHitCollection *hc):StHitIter(hc){}
+  StTpcHitIter(const StEvent            *ev):StHitIter(GetContainer(ev)){}
+  StDetectorId DetectorId() const {return kTpcId;}
+  const void *GetContainer(const StEvent *ev) const;
+
+protected:
+const void *GetObj(const void *cont,int lev,int idx) const; 
+      int  GetSize(const void *cont,int lev        ) const; 
+};
+
+//..............................................................................
+class StSvtHitCollection;
+class StSvtHitIter : public StHitIter {
+public:
+  StSvtHitIter(const StEvent            *ev):StHitIter(GetContainer(ev)){}
+  StSvtHitIter(const StSvtHitCollection *hc):StHitIter(hc){}
+  StDetectorId DetectorId() const {return kSvtId;}
+  const void *GetContainer(const StEvent *ev) const;
+protected:
+const void *GetObj(const void *cont,int lev,int idx) const; 
+      int  GetSize(const void *cont,int lev        ) const; 
+};
 
 
+//..............................................................................
+class StSsdHitCollection;
+class StSsdHitIter : public StHitIter {
+public:
+  StSsdHitIter(const StEvent            *ev):StHitIter(GetContainer(ev)){}
+  StSsdHitIter(const StSsdHitCollection *hc):StHitIter(hc){}
+  StDetectorId DetectorId() const {return kSsdId;}
+  const void *GetContainer(const StEvent *ev) const;
+protected:
+const void *GetObj(const void *cont,int lev,int idx) const; 
+      int  GetSize(const void *cont,int lev        ) const; 
+};
 
 
+//..............................................................................
+class StFtpcHitCollection;
+class StFtpcHitIter : public StHitIter {
+public:
+  StFtpcHitIter(const StEvent             *ev):StHitIter(GetContainer(ev)){}
+  StFtpcHitIter(const StFtpcHitCollection *hc):StHitIter(hc){}
+  StDetectorId DetectorId() const {return kFtpcWestId;}
+  const void *GetContainer(const StEvent *ev) const;
+protected:
+const void *GetObj(const void *cont,int lev,int idx) const; 
+      int  GetSize(const void *cont,int lev        ) const; 
+};
 
 
+//..............................................................................
+class StRnDHitCollection;
+class StRnDHitIter : public StHitIter {
+public:
+  StRnDHitIter(const StEvent*ev,StDetectorId id):StHitIter(GetContainer(ev)){fId=id;}
+  StRnDHitIter(const StRnDHitCollection *hc,StDetectorId id):StHitIter(hc){fId=id;}
+  StDetectorId DetectorId() const {return fId;}
+  const void *GetContainer(const StEvent *ev) const;
+protected:
+const void *GetObj(const void *cont,int lev,int idx) const; 
+      int  GetSize(const void *cont,int lev        ) const; 
+private:
+  StDetectorId fId;
+};
 
+//..............................................................................
+class StTofCollection;
+class StTofHitIter : public StHitIter {
+public:
+  StTofHitIter(const StEvent *ev):StHitIter(GetContainer(ev)){}
+  StTofHitIter(const StTofCollection *hc):StHitIter(hc){}
+  StDetectorId DetectorId() const {return kTofId;}
+  const void *GetContainer(const StEvent *ev) const;
+protected:
+const void *GetObj(const void *cont,int lev,int idx) const; 
+      int  GetSize(const void *cont,int lev        ) const; 
+};
 
+//..............................................................................
+class StEvent;
+class StAllHitIter : public StHitIter {
+  enum {kMaxIters=10};
+public:
+  StAllHitIter(const StEvent *ev);
+  virtual ~StAllHitIter();
+  void  Reset(const StEvent *evt=0);
+  int   AddDetector(StDetectorId detId);
+  StDetectorId DetectorId() const;
+  int operator++();
+  StHit *operator*();
+
+protected:
+  const void *GetObj(const void *cont,int lev,int idx) const{return 0;} 
+        int  GetSize(const void *cont,int lev        ) const{return 0;} 
+private:
+  const void *GetContainer(const StEvent *ev) const{return 0;}
+  void  Reset(const void *cont){assert(0);}
+
+private:
+  const StEvent *fStEvent;
+  int    fJter,fNter;  
+  StHitIter 	*fIter[kMaxIters];
+};
 
 
 
