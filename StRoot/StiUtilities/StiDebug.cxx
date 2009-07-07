@@ -105,6 +105,13 @@ if (kase!=myBreak) return;
   printf("*** Break(%d) ***\n",kase);
 }		
 //______________________________________________________________________________
+void StiDebug::FpeOn()
+{
+    gSystem->SetFPEMask(kInvalid | kDivByZero | kOverflow );
+    printf("*** Float Point Exception is ON ***\n");
+
+}
+//______________________________________________________________________________
 void StiDebug::show(StiKalmanTrack *kt)
 {
 //  lev=0  draw all nodes

@@ -17,6 +17,7 @@ class StiDebug
 {
 public:
 static void   Break(int kase);
+static void   FpeOn();
 static void   show(StiKalmanTrack *kt);
 static void   Init();
 static void   Finish();
