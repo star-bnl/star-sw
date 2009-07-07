@@ -48,10 +48,7 @@
 #undef   __EVENTHELPER_ONLY__
 #include <map>
 
-#include "StSvtHitCollection.h"
-#include "StSvtBarrelHitCollection.h"
-#include "StSvtLadderHitCollection.h"
-#include "StSvtWaferHitCollection.h"
+#include "StRnDHitCollection.h"
 
 void Break(){printf("InBreak\n");}
 
@@ -1392,81 +1389,350 @@ TString ts;
 }
 //________________________________________________________________________________
 //________________________________________________________________________________
-StHitIter::StHitIter()
-{
-  fEvent = 0;
-  Reset();
-}
 //________________________________________________________________________________
-void StHitIter::Reset()
-{
-  memset(fO,  0,sizeof(fO));
-  memset(fN,  0,sizeof(fN));
-  memset(fI ,-1,sizeof(fI));
-}
-//________________________________________________________________________________
-StHitIter &StHitIter::Next()
-{
-  int kase = 0;
-  fO[0]= 0;
 
-  while(2005) {
-    if (++fI[kase] >= fN[kase]) {kase++;continue;}
-    fO[kase] = GetO(kase+1,fI[kase]);
-    if (!fO[kase]) break;
-    if (!kase    ) break;
-    fN[kase-1] = GetN(kase);
-    fI[kase-1] = -1;
-    kase--; 
+//________________________________________________________________________________
+ StHitIter::StHitIter(const void *cont)
+{
+  fCont = cont; fKase=kINI;
+} 
+//________________________________________________________________________________
+void StHitIter::Reset(const void *cont)
+{
+ if (cont) fCont = cont; fKase=kINI;
+ if (fCont) ++(*this);
+}  
+//________________________________________________________________________________
+int StHitIter::operator++()
+{
+   int n,j; const void *v;
+   do  {
+     switch (fKase) {
+
+     case kINI: {
+       if (!fCont) {fKase = kEND; break;}
+       fLev=0; fStk[0].mN=GetSize(fCont,0); fStk[0].mJ=0; fStk[0].mV=fCont;
+       fKase = kDOW; if (!fStk[0].mN) fKase = kEND; 
+       break;}
+
+     case kDOW: {
+       fStk[fLev+1].mV = v = GetObj(fStk[fLev].mV,fLev,fStk[fLev].mJ);
+       if (!v) {fKase=kHOR; break;}
+       fStk[++fLev].mN = n = GetSize(v,fLev);
+       fStk[  fLev].mJ = -1;
+       if (n==-1){fKase=kHIT; break;} 
+       fKase = kHOR; break;}
+
+
+
+     case kHIT: {
+      j = ++fStk[fLev-1].mJ; 
+      if (j >=fStk[fLev-1].mN) {fLev++; fKase=kUPP; break;}
+      fStk[fLev].mV = v = GetObj(fStk[fLev-1].mV,fLev-1,j);
+      break;}
+
+     case kHOR: {
+       j = ++(fStk[fLev].mJ);
+       if(j>=fStk[fLev].mN) {fKase=kUPP; break;}
+       fStk[fLev+1].mV = v = GetObj(fStk[fLev].mV,fLev,j); if (!v) break;
+       fStk[fLev+1].mN = n = GetSize(v           ,fLev+1); if (!n) break;
+       fStk[++fLev].mJ = -1;
+       if (n == -1) {fKase=kHIT; break;}
+       fKase = kHOR; break;}
+
+     case kUPP: {
+       fLev--; if (fLev<0) { fKase = kEND; break;}
+       fKase = kHOR; break;
+     }
+     case kEND: break;
+     
+     default: assert(0 && "Wrong fKase");
+     }
+
+   } while (fKase!=kEND && !(fKase==kHIT && fStk[fLev].mV));
+   return (fKase!=kEND);      
+}     
+//________________________________________________________________________________
+StHit *StHitIter::operator*() 
+{ 
+  if (fKase==kINI) ++(*this);
+  return (StHit*)((fKase==kHIT)? fStk[fLev].mV:0);
+}     
+//________________________________________________________________________________
+void StHitIter::Print(const char *opt) 
+{ 
+  Reset((StEvent*)0);
+  StHitIter &it = *this;
+  StHit *hit=0;
+  int nhit = 0;
+  for (;(hit=*it);++it) {
+    nhit++;
+    printf("%4d - Det=%d(%d) Hardw=%p XYZ=%g %g %g\n",nhit
+          ,(int)it.DetectorId(),(int)hit->detector()
+	  ,(void*)hit->hardwarePosition()
+	  ,hit->position().x()
+	  ,hit->position().y()
+	  ,hit->position().z());
   }
-  return *this;
+  Reset((StEvent*)0);
+}
+//________________________________________________________________________________
+const void *StTpcHitIter::GetContainer(const StEvent *ev) const
+{ return (ev)? ev->tpcHitCollection():0; }
+//________________________________________________________________________________
+const void *StTpcHitIter::GetObj(const void *cont,int lev,int idx) const 
+{
+   switch (lev) {
+   
+     case 0: return ((StTpcHitCollection*)cont)->sector(idx);
+
+     case 1: return ((StTpcSectorHitCollection*)cont)->padrow(idx);
+
+     case 2: return ((StTpcPadrowHitCollection*)cont)->hits().at(idx);
+
+     default: return 0;
+   }
+}
+
+//________________________________________________________________________________
+int StTpcHitIter::GetSize(const void *cont,int lev) const 
+{
+   switch (lev) {
+   
+     case 0: return ((StTpcHitCollection*)cont)->numberOfSectors();
+
+     case 1: return ((StTpcSectorHitCollection*)cont)->numberOfPadrows();
+
+     case 2: return ((StTpcPadrowHitCollection*)cont)->hits().size();
+
+     case 3: return -1;
+
+     default: assert(0 && "Wrong level");;
+   }
+}
+//________________________________________________________________________________
+//________________________________________________________________________________
+const void *StSvtHitIter::GetContainer(const StEvent *ev) const
+{ return (ev)? ev->svtHitCollection():0; }
+//________________________________________________________________________________
+const void *StSvtHitIter::GetObj(const void *cont,int lev,int idx) const 
+{
+   switch (lev) {
+   
+     case 0: return ((StSvtHitCollection*)cont)->barrel(idx);
+
+     case 1: return ((StSvtBarrelHitCollection*)cont)->ladder(idx);
+
+     case 2: return ((StSvtLadderHitCollection*)cont)->wafer(idx);
+
+     case 3: return ((StSvtWaferHitCollection*)cont)->hits().at(idx);
+
+     default: return 0;
+   }
+}
+
+//________________________________________________________________________________
+int StSvtHitIter::GetSize(const void *cont,int lev) const 
+{
+   switch (lev) {
+   
+     case 0: return ((StSvtHitCollection*)cont)->numberOfBarrels();
+
+     case 1: return ((StSvtBarrelHitCollection*)cont)->numberOfLadders();
+
+     case 2: return ((StSvtLadderHitCollection*)cont)->numberOfWafers();
+
+     case 3: return ((StSvtWaferHitCollection*)cont)->hits().size();
+
+     case 4: return -1;
+
+     default: assert(0 && "Wrong level");;
+   }
+}
+//________________________________________________________________________________
+//________________________________________________________________________________
+const void *StSsdHitIter::GetContainer(const StEvent *ev) const
+{ return (ev)? ev->ssdHitCollection():0; }
+//________________________________________________________________________________
+const void *StSsdHitIter::GetObj(const void *cont,int lev,int idx) const 
+{
+   switch (lev) {
+   
+     case 0: return ((StSsdHitCollection*)cont)->ladder(idx);
+
+     case 1: return ((StSsdLadderHitCollection*)cont)->wafer(idx);
+
+     case 2: return ((StSsdWaferHitCollection*)cont)->hits().at(idx);
+
+     default: return 0;
+   }
+}
+
+//________________________________________________________________________________
+int StSsdHitIter::GetSize(const void *cont,int lev) const 
+{
+   switch (lev) {
+   
+     case 0: return ((StSsdHitCollection*)cont)->numberOfLadders();
+
+     case 1: return ((StSsdLadderHitCollection*)cont)->numberOfWafers();
+
+     case 2: return ((StSsdWaferHitCollection*)cont)->hits().size();
+
+     case 3: return -1;
+
+     default: assert(0 && "Wrong level");;
+   }
 }
 //________________________________________________________________________________
 //________________________________________________________________________________
 //________________________________________________________________________________
-StSvtHitIter::StSvtHitIter(StEvent *ev):StHitIter()
+const void *StFtpcHitIter::GetContainer(const StEvent *ev) const
+{ return (ev)? ev->ftpcHitCollection():0; }
+//________________________________________________________________________________
+const void *StFtpcHitIter::GetObj(const void *cont,int lev,int idx) const 
 {
-  fEvent = ev;
-  fO[4] = fEvent->svtHitCollection();
-  fN[3] = 1;
-  ++(*this);
+   switch (lev) {
+   
+     case 0: return ((StFtpcHitCollection*)cont)->plane(idx);
+
+     case 1: return ((StFtpcPlaneHitCollection*)cont)->sector(idx);
+
+     case 2: return ((StFtpcSectorHitCollection*)cont)->hits().at(idx);
+
+     default: return 0;
+   }
+}
+
+//________________________________________________________________________________
+int StFtpcHitIter::GetSize(const void *cont,int lev) const 
+{
+   switch (lev) {
+   
+     case 0: return ((StFtpcHitCollection*)cont)->numberOfPlanes();
+
+     case 1: return ((StFtpcPlaneHitCollection*)cont)->numberOfSectors();
+
+     case 2: return ((StFtpcSectorHitCollection*)cont)->hits().size();
+
+     case 3: return -1;
+
+     default: assert(0 && "Wrong level");;
+   }
 }
 //________________________________________________________________________________
-StObject *StSvtHitIter::GetO(int lev,int idx)
+//________________________________________________________________________________
+//________________________________________________________________________________
+const void *StRnDHitIter::GetContainer(const StEvent *ev) const
+{ return (ev)? ev->rndHitCollection():0; }
+//________________________________________________________________________________
+const void *StRnDHitIter::GetObj(const void *cont,int lev,int idx) const 
 {
-  switch (lev) {
-    
-    case 1: //StSvtHit
-      return ((StSvtWaferHitCollection *)fO[1])->hits()[idx];
-    case 2: //Wafer
-      return ((StSvtLadderHitCollection*)fO[2])->wafer (idx);
-    case 3: //Ladder
-      return ((StSvtBarrelHitCollection*)fO[3])->ladder(idx);
-    case 4: //Ladder
-      return ((StSvtHitCollection      *)fO[4])->barrel(idx);
-    case 5: //SvtHitCollection
-      return fEvent->svtHitCollection();
-    default: return 0;
+   switch (lev) {
+   
+     case 0: return ((StRnDHitCollection*)cont)->hits().at(idx);
+     default: return 0;
+   }
+}
+
+//________________________________________________________________________________
+int StRnDHitIter::GetSize(const void *cont,int lev) const 
+{
+   switch (lev) {
+   
+     case 0: return ((StRnDHitCollection*)cont)->hits().size();
+
+     case 1: return -1;
+
+     default: assert(0 && "Wrong level");;
+   }
+}
+//________________________________________________________________________________
+//________________________________________________________________________________
+const void *StTofHitIter::GetContainer(const StEvent *ev) const
+{ return (ev)? ev->tofCollection():0; }
+//________________________________________________________________________________
+const void *StTofHitIter::GetObj(const void *cont,int lev,int idx) const 
+{
+   switch (lev) {
+   
+     case 0: return ((const StTofCollection*)cont)->tofHits().at(idx);
+     default: return 0;
+   }
+}
+
+//________________________________________________________________________________
+int StTofHitIter::GetSize(const void *cont,int lev) const 
+{
+   switch (lev) {
+   
+     case 0: return ((const StTofCollection*)cont)->tofHits().size();
+
+     case 1: return -1;
+
+     default: assert(0 && "Wrong level");;
+   }
+}
+//________________________________________________________________________________
+//________________________________________________________________________________
+StAllHitIter::StAllHitIter(const StEvent *ev):StHitIter(0)
+{
+ fStEvent = ev;
+ fJter=0; fNter=0;
+ memset(fIter,0,sizeof(fIter));
+}
+//________________________________________________________________________________
+StAllHitIter::~StAllHitIter()
+{
+  for (int jk=0;jk<fNter;jk++) {delete fIter[jk];fIter[jk]=0;}
+}
+//________________________________________________________________________________
+int StAllHitIter::AddDetector(StDetectorId detId)
+{
+   switch ((int)detId) {
+   
+     case kTpcId: fIter[fNter++] = new StTpcHitIter(fStEvent->tpcHitCollection());break;
+     case kSvtId: fIter[fNter++] = new StSvtHitIter(fStEvent->svtHitCollection());break;
+     case kSsdId: fIter[fNter++] = new StSsdHitIter(fStEvent->ssdHitCollection());break;
+     case kFtpcWestId:; 
+     case kFtpcEastId:
+                  fIter[fNter++] = new StFtpcHitIter(fStEvent->ftpcHitCollection());break;
+     case kPxlId: case kIstId: case kFgtId: case kFmsId: 
+                  fIter[fNter++] = new StRnDHitIter(fStEvent->rndHitCollection(),detId);break;
+
+     case kTofId: fIter[fNter++] = new StTofHitIter(fStEvent->tofCollection())   ;break;
+
+     default: printf("StAllHitIter::AddDetector: No iterator for detectorId=%d",(int)detId);
+     assert(0 && "No iterator for detectorId");
+     return 1;
   }
+  return 0;
 }
 
 //________________________________________________________________________________
-int StSvtHitIter::GetN(int lev) const
+void StAllHitIter::Reset(const StEvent *ev)
 {
-  switch (lev) {
-    case 1: //N StSvtHits
-      return ((StSvtWaferHitCollection *)fO[1])->hits().size();
-    case 2: //N Wafers
-      return ((StSvtLadderHitCollection*)fO[2])->numberOfWafers();
-    case 3: //N Ladders
-      return ((StSvtBarrelHitCollection*)fO[3])->numberOfLadders();
-    case 4: //N Barrels
-      return ((StSvtHitCollection      *)fO[4])->numberOfBarrels();
-    case 5: //N SvtHitCollections
-      return 1;
-    default: return 0;
-  }
+  fJter = 0;
+  if (ev) fStEvent = ev;
+  for (int jk=0;jk<fNter;jk++) {fIter[jk]->Reset(fStEvent);}
 }
 
+//________________________________________________________________________________
+int StAllHitIter::operator++()
+{
+  for (;fJter<fNter;fJter++) {if (++(*fIter[fJter])) return 1;}
+  return 0;
+}
 
-
+//________________________________________________________________________________
+StDetectorId StAllHitIter::DetectorId() const
+{
+   if (fJter >= fNter) return kUnknownId;
+   return fIter[fJter]->DetectorId();
+}
+//________________________________________________________________________________
+StHit *StAllHitIter::operator*() 
+{
+   if (fJter>=fNter) return 0;
+   return *(*(fIter[fJter]));
+}
