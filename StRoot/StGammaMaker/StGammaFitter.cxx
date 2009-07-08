@@ -121,7 +121,7 @@ int StGammaFitter::fit(StGammaCandidate* candidate, StGammaFitterResult* fits, I
     // Fit to Ilya's shower shape
     float yield = hStrips->Integral(bin1, bin2);
     fit->SetParameters(yield, hStrips->GetBinLowEdge(mean));
-    hStrips->Fit(fit, "WW", "", hStrips->GetBinLowEdge(bin1), hStrips->GetBinLowEdge(bin2));
+    hStrips->Fit(fit, "WWQ", "", hStrips->GetBinLowEdge(bin1), hStrips->GetBinLowEdge(bin2));
 
     // Save fit results
     fits[plane].yield = yield;
