@@ -42,9 +42,9 @@ Int_t StGammaEventMaker::Init()
         mPythiaMaker->SetPythia(mPythia);
         mGammaEvent->SetPythia(mPythia);
     }
-    
-    AddObj(mGammaEvent, ".data"); // ok, but what can I do with this?
-    
+
+//    AddObj(mGammaEvent,".const"); // ok, but what can I do with this?
+
     // Retrieve StMuDstMaker from the chain
     muDstMaker  = dynamic_cast<StMuDstMaker*>(GetMakerInheritsFrom("StMuDstMaker"));
     assert(muDstMaker);

@@ -9,8 +9,29 @@ ClassImp(StGammaEvent);
 //                 Constructor                  //
 //////////////////////////////////////////////////
 StGammaEvent::StGammaEvent()
+      :   mFlags(0x0000)
+        , mRunNumber(0)             /// Run number
+        , mEventNumber(0)           /// Event number  
+        , mVertex(0,0,0)            /// Event vertex (TPC)
+        , mMagneticField(1956)      /// Magnetic field (kG)
+        , mPythia(0)
+
+        , mSpinDbValid(false)
+        , mSpin4(kUnknownSpin4)
+        , mBunchCrossing7bit(255)
+        , mBunchCrossing48bit(255)
+        , mBunchCrossingStar(255)
+        , mPolarizationType(kUnknownPol)
+        
+        , mDsmVertex(255)
+        , mTracks(0)     //-> array of all tracks
+        , mTowers(0)     //-> array of all towers
+        , mPreshower1(0) //-> array of all preshower1
+        , mPreshower2(0) //-> array of all preshower2
+        , mPostshower(0) //-> array of all postshower
+        , mStrips(0)     //-> array of all strips
+        , mCandidates(0) //-> array of all candidates
 {
-    mPythia = 0;
     InitArrays(); // initialize tclones arrays
     Clear();
 }
@@ -19,14 +40,21 @@ StGammaEvent::StGammaEvent()
 //                  Destructor                  //
 //////////////////////////////////////////////////
 StGammaEvent::~StGammaEvent()
-{}
+{   
+  delete mTracks;     mTracks     = 0;
+  delete mTowers;     mTowers     = 0;     //-> array of all towers
+  delete mPreshower1; mPreshower1 = 0; //-> array of all preshower1
+  delete mPreshower2; mPreshower2 = 0;//-> array of all preshower2
+  delete mPostshower; mPostshower = 0;//-> array of all postshower
+  delete mStrips;     mStrips     = 0; //-> array of all strips
+  delete mCandidates; mCandidates = 0; //-> array of all candidates
+}
 
 //////////////////////////////////////////////////
 //               Clear the event                //
 //////////////////////////////////////////////////
 void StGammaEvent::Clear(Option_t *opts)
 {
-
     mRunNumber = 0;
     mEventNumber = 0;
     mTriggerIds.clear();
@@ -59,16 +87,14 @@ void StGammaEvent::Clear(Option_t *opts)
 //////////////////////////////////////////////////
 Int_t StGammaEvent::InitArrays()
 {
-
-    mTracks     = new TClonesArray("StGammaTrack", 1000);
-    mTowers     = new TClonesArray("StGammaTower", 4800 + 720);
-    mPreshower1 = new TClonesArray("StGammaTower", 4800 + 720);
-    mPreshower2 = new TClonesArray("StGammaTower", 720);
-    mPostshower = new TClonesArray("StGammaTower", 720);
-    mStrips     = new TClonesArray("StGammaStrip", 10000);
-    mCandidates = new TClonesArray("StGammaCandidate", 10);
+    if (!mTracks)    mTracks     = new TClonesArray("StGammaTrack", 1000);
+    if (!mTowers)    mTowers      = new TClonesArray("StGammaTower", 4800 + 720);
+    if (!mPreshower1)mPreshower1 = new TClonesArray("StGammaTower", 4800 + 720);
+    if (!mPreshower2)mPreshower2 = new TClonesArray("StGammaTower", 720);
+    if (!mPostshower)mPostshower = new TClonesArray("StGammaTower", 720);
+    if (!mStrips)    mStrips     = new TClonesArray("StGammaStrip", 10000);
+    if (!mCandidates)mCandidates = new TClonesArray("StGammaCandidate", 10);
     return 1;
-    
 }
 
 //////////////////////////////////////////////////
