@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.17 2008/10/23 20:37:31 genevb Exp $
+ * $Id: StGenericVertexFinder.h,v 1.18 2009/07/09 00:16:12 genevb Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -30,6 +30,7 @@ class StGenericVertexFinder {
           void           NoVertexConstraint();
           int            IsVertexConstraint() const {return mVertexConstrain;}
   virtual void           UsePCT(bool usePCT = true);
+  virtual void           CalibBeamLine(){ /* noop */;} // overload if useful
 
   virtual void           printInfo(ostream& = cout) const=0;
 
@@ -62,6 +63,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.18  2009/07/09 00:16:12  genevb
+// Create a calib mode for StGenericVertex when using VtxSeedCalG
+//
 // Revision 1.17  2008/10/23 20:37:31  genevb
 // Add switches for turning on/off use of Post-Crossing Tracks [default:off]
 //
