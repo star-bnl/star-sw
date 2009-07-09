@@ -1,6 +1,6 @@
 #!/bin/bash
 #######################################################
-# $Id: Rts_Example.sh,v 1.5 2009/02/19 16:26:31 fine Exp $
+# $Id: Rts_Example.sh,v 1.6 2009/07/09 16:17:26 fine Exp $
 # Author: v.Fine [ fine@bnl.gov ]
 #######################################################
 # The simple script to compile and build the main RTS application
@@ -33,7 +33,7 @@ echo \"libRTS.so\" from the STAR offline release.
      -I$STAR/StRoot/RTS/src         \
      -DINSIST_ON_EMC_PSEUDO         \
       $source_application -L.$STAR_HOST_SYS/lib -L$STAR_LIB -lRTS
-if [ -f rts_example  ] ; then
+if [ -f $executable_name  ] ; then
   echo ""
   echo Your \"$executable_name\" application is ready to be used:
   echo ""
