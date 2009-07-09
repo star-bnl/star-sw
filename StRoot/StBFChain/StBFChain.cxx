@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.544 2009/01/26 16:21:36 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.545 2009/07/09 00:16:12 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -395,11 +395,12 @@ Int_t StBFChain::Instantiate()
       
       // All VertexFinders implement those (or not)
       if (GetOption("beamLine") || GetOption("CtbMatchVtx") || GetOption("min2trkVtx") ||
-          GetOption("usePct4Vtx")) {
+          GetOption("usePct4Vtx") || GetOption("VtxSeedCalG")) {
 	TString  cmd(Form("StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) %p;",mk));
 	if (GetOption("beamLine"))    {cmd += "gvtxMk->UseBeamLine();";}
 	if (GetOption("CtbMatchVtx")) {cmd += "gvtxMk->UseCTB();";}
 	if (GetOption("min2trkVtx"))  {cmd += "gvtxMk->SetMinimumTracks(2);";}
+	if (GetOption("VtxSeedCalG")) {cmd += "gvtxMk->CalibBeamLine();";}
 
         // WARNING: introduction of this option (usePct4Vtx) with default:false
         // breaks backward compatibility for any StGenericVertexMaker

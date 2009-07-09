@@ -50,6 +50,7 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
 {
   useITTF=kTRUE;
   useBeamline = kFALSE;
+  calibBeamline = kFALSE;
   useCTB = kFALSE;
   usePCT = kFALSE;
   eval = kFALSE;
@@ -210,6 +211,7 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
      LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
      theFinder->UseVertexConstraint(x0,y0,dxdz,dydz,0.0001);
   }
+  if (calibBeamline) theFinder->CalibBeamLine();
   return StMaker::InitRun(runnumber);
 }
 
