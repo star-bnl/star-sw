@@ -949,7 +949,7 @@ if ( $#src > -1 ) {
 	InstallAs $envPlain $lib, $SO_PKG_PLAIN;
       }
     }
-    if ($pkg eq "RTS" and -r "./StRoot/RTS/src/#RTS_READER/Reader.C" and -r "./StRoot/RTS/src/EVP_READER/special.C") {
+    if ($pkg eq "RTS") {
       my $cppflags = "-DRTS_PROJECT_STAR -DTPXREADER -DRTS_LITTLE_ENDIAN";
       my $cpppath  = $main::PATH_SEPARATOR . "#StRoot/RTS/include" 
 	. $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
@@ -964,10 +964,10 @@ if ( $#src > -1 ) {
 			     'LIBPATH'  => $LIB,
 			     'LIBS'     => "-lRTS"
 		      );
-      my @programs = ("RTS_READER/Reader","EVP_READER/special");
+      my @programs = glob "./StRoot/RTS/src/RTS_EXAMPLE/*.C"; #("RTS_EX/Reader","EVP_READER/special","RTS_EXAMPLE/daqFileChopper");
       foreach my $progD (@programs) {
-	my $prog = File::Basename::basename($progD);
-	Program      $envRTS $prog, ("#StRoot/RTS/src/" . $progD . ".C");
+	my $prog = File::Basename::basename($progD,".C");
+	Program      $envRTS $prog, ("src/RTS_EXAMPLE/" . $prog . ".C");
 	Install $envRTS $BIN, $prog;
       }
     }
