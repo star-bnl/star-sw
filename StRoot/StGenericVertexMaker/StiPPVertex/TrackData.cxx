@@ -17,6 +17,7 @@ TrackData::TrackData() {
   mCtb=mBemc=mEemc=mTpc=0;
   weight=1;
   zDca=ezDca=rxyDca=0;
+  mother=0;
 }
 
 

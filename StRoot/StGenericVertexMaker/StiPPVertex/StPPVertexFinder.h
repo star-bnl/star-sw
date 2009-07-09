@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.13 2009/04/10 22:57:14 genevb Exp $
+ * $Id: StPPVertexFinder.h,v 1.14 2009/07/09 21:29:03 balewski Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -21,6 +21,7 @@ class EEmcGeomSimple;
 class  CtbHitList;
 class  BemcHitList;
 class  EemcHitList;
+class Vertex3D;
 
 class StPPVertexFinder: public StGenericVertexFinder {
  private:
@@ -33,9 +34,10 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool isPostCrossingTrack(const StiKalmanTrack* track);
   vector<TrackData>  mTrackData;
   vector<VertexData> mVertexData;
-  bool buildLikelihood();
-  bool findVertex(VertexData &);
-  bool evalVertex(VertexData &);
+  Vertex3D *vertex3D; // for stand alone 3D vertex reco
+  bool buildLikelihoodZ();
+  bool findVertexZ(VertexData &);
+  bool evalVertexZ(VertexData &);
   void exportVertices(); 
 
   void saveHisto(TString fname);
@@ -58,6 +60,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   bool   mDropPostCrossingTrack;  // enable/disable post crossing tarck rejection
   int    mStoreUnqualifiedVertex; // set the max # of vertices, sorted by rank
   float  mCut_oneTrackPT; // threshold for storing one track vertices
+  int    mBeamLineTracks; // activates writing them out + lot of QA histos, use  BFC option: VtxSeedCalG to enable it, expert only
 
   // beam line
   double          mX0  ;     // starting point of beam parameterization
@@ -72,7 +75,6 @@ class StPPVertexFinder: public StGenericVertexFinder {
   EemcHitList    *eemcList;
   StEEmcDb       *eeDb;
   EEmcGeomSimple *geomE;
-
   
   void dumpKalmanNodes(const StiKalmanTrack *track);
   //  void plotVertex(VertexData *);
@@ -102,11 +104,16 @@ public:
   virtual void  Init();
   virtual void  InitRun  (int runumber);
   virtual void  Clear(); 
+  virtual void  CalibBeamLine(); // activates saving high quality prim tracks for 3D fit of the beamLine
 };
 
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.14  2009/07/09 21:29:03  balewski
+ * allow export of prim tracks for 3D beam line fit (use VtxSeedCalG option),
+ * oneTrack vertex thresholds was lowered form 15 to 10 GeV/c
+ *
  * Revision 1.13  2009/04/10 22:57:14  genevb
  * Typo correction
  *

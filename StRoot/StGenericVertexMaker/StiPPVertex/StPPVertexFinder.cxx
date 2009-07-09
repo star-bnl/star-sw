@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.33 2009/02/05 21:43:59 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.34 2009/07/09 21:29:03 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -17,21 +17,23 @@
 #include <TLine.h>
 #include <TCanvas.h> //tmp
 
-#include "math_constants.h"
-#include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
+#include <math_constants.h>
+#include <tables/St_g2t_vertex_Table.h> // tmp for Dz(vertex)
 
 #include "StPPVertexFinder.h"
 #include "TrackData.h"
 #include "VertexData.h" 
+#include "Vertex3D.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
 
-#include "Sti/StiToolkit.h"
-#include "Sti/StiKalmanTrack.h"
-#include "Sti/StiKalmanTrackNode.h"
-#include "Sti/StiTrackContainer.h"
+#include <Sti/StiToolkit.h>
+#include <Sti/StiKalmanTrack.h>
+#include <Sti/StiKalmanTrackNode.h>
+#include <Sti/StiTrackContainer.h>
 
-#include "St_db_Maker/St_db_Maker.h"
-#include "StIOMaker/StIOMaker.h" //tmp
+#include <St_db_Maker/St_db_Maker.h>
+#include <StIOMaker/StIOMaker.h> // to save  local histos 
+#include <StBFChain/StBFChain.h>
 
 #define xL(t)   (t->getX())
 #define yL(t)   (t->getY())
@@ -44,10 +46,10 @@
 #define zG(t)   (t->z_g())
 #define rxyG(t) sqrt(xG(t)*xG(t) + yG(t)*yG(t)) 
 
-#include "StEEmcUtil/database/StEEmcDb.h"
-#include "StEEmcUtil/database/EEmcDbItem.h"
-#include "StEEmcUtil/database/cstructs/eemcConstDB.hh"
-#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h" 
+#include <StEEmcUtil/database/StEEmcDb.h>
+#include <StEEmcUtil/database/EEmcDbItem.h>
+#include <StEEmcUtil/database/cstructs/eemcConstDB.hh>
+#include <StEEmcUtil/EEmcGeom/EEmcGeomSimple.h>
 
 #include "CtbHitList.h"
 #include "BemcHitList.h"
@@ -76,7 +78,8 @@ StPPVertexFinder::StPPVertexFinder() {
 
   //........... tune for W-boson reco
   mAlgoSwitches|=kSwitchOneHighPT;
-  mCut_oneTrackPT=15; // GeV, used only if coresponding algoSwitch switch is ON.
+  mCut_oneTrackPT=10; // GeV, used only if coresponding algoSwitch switch is ON.
+  mBeamLineTracks=0; // expert only, activation via BFC 
 
   // special histogram for finding the vertex, not to be saved
   int nb=5000;
@@ -106,17 +109,13 @@ StPPVertexFinder::Init() {
 
   mStoreUnqualifiedVertex=5; // extension requested by Akio, October 2008, set to 0 do disable it
 
-  if(isMC) {
-    mMinAdcBemc =7; //ideal BTOW gain 60 GeV ET @ 3500 ADC
-  }
-
   //get pointer to Sti toolkit
   mToolkit = StiToolkit::instance();
   assert(mToolkit); // internal error of Sti
   
   ctbList =new CtbHitList;
   bemcList =new BemcHitList;
-  
+  vertex3D=0; // default
   // access EEMC-DB
   eeDb = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb"); 
   assert(eeDb); // eemcDB must be in the chain, fix it,JB
@@ -130,7 +129,6 @@ StPPVertexFinder::Init() {
   ctbList->initHisto( HList);
   bemcList->initHisto( HList);
   eemcList->initHisto( HList);
-
 }
 
 //==========================================================
@@ -146,6 +144,11 @@ StPPVertexFinder::InitRun(int runnumber){
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
   if(isMC) {
     LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
+    // simu prior to 2008 
+    mMinAdcBemc =7; //ideal BTOW gain 60 GeV ET @ 3500 ADC 
+    // in late 2008 Matt uploaded ideal (aka sim) gians matching endcap
+    if(dateY>=2008)  mMinAdcBemc =8; //ideal BTOW gain 60 GeV ET @ 4076 ADC
+
     if(dateY>2006)  LOG_WARN <<
 	  "PPV InitRun() , M-C time stamp differs from 2005,\n BTOW status tables questionable,\n PPV results qauestionable, \n\n  F I X    B T O W    S T A T U S     T A B L E S     B E F O R E     U S E  !!!  \n \n chain will continue taking whatever is loaded in to DB\n  Jan Balewski, January 2006\n"<<endm; 
   }
@@ -159,6 +162,14 @@ StPPVertexFinder::InitRun(int runnumber){
   ctbList->initRun(); 
   bemcList->initRun();
   eemcList->initRun();
+  
+  if(mBeamLineTracks){
+    assert(vertex3D==0); // crash means initRun was called twice - not foreseen,Jan B.
+    vertex3D=new Vertex3D;
+    vertex3D->setCuts(0.8,8.0, 3.3,5); // pT1(GeV), pT2, sigY(cm), nTr
+    vertex3D->initHisto( HList);
+    vertex3D->initRun();
+  }
 
   gMessMgr->Message("","I") 
     << "PPV::cuts "
@@ -174,7 +185,8 @@ StPPVertexFinder::InitRun(int runnumber){
     <<"\n bool useCtb ="<<mUseCtb
     <<"\n bool DropPostCrossingTrack ="<<mDropPostCrossingTrack
     <<"\n Store # of UnqualifiedVertex ="<<mStoreUnqualifiedVertex
-    <<"\n Store="<<(mAlgoSwitches & kSwitchOneHighPT)<<" oneTrack-vertex if trackPT>"<< mCut_oneTrackPT
+    <<"\n Store="<<(mAlgoSwitches & kSwitchOneHighPT)<<" oneTrack-vertex if track PT/GeV>"<< mCut_oneTrackPT 
+    <<"\n dump tracks for beamLine study ="<<mBeamLineTracks
     <<"\n"
     <<endm; 
 
@@ -207,10 +219,11 @@ StPPVertexFinder::initHisto() {
   hA[14]=new TH1F("EzDca","Error of Z DCA for all accepted tracks; Z (cm)",100,-0.,4);
   hA[15]=new TH1F("nTpcT","No. tracks: accepted Dca /eve ",201,-.5,200.5);
   hA[16]=new TH1F("ptTr","pT, ppv pool tracks; pT (GeV/c) ",50,0.,10.);
+  hA[17]=new TH1F("vRL","PPV Vertex rank, 'funny' X-axis; X=Log10(rank-1e6)+offset", 150, -11,25);
 
 
   int i;
-  for(i=0;i<=mxH; i++) if(hA[i]) HList->Add(hA[i]);
+  for(i=0;i<mxH; i++) if(hA[i]) HList->Add(hA[i]);
 
 }
 
@@ -294,7 +307,7 @@ StPPVertexFinder::printInfo(ostream& os) const
       // --------------  A C C E S S    G E A N T   V E R T E X  (for histo)
       g2t_vertex_st *GVER= g2t_ver->GetTable();
       zGeant=GVER->ge_x[2];
-      printf("#GVER z=%.1f  nEve=%d nV=%d ",zGeant,mTotEve,mVertexData.size());  
+      printf("#GVER z=%.1f x=%.1f y=%.1f  nEve=%d nV=%d ",zGeant,GVER->ge_x[0],GVER->ge_x[1],mTotEve,mVertexData.size());  
     }
   }
   
@@ -310,6 +323,13 @@ StPPVertexFinder::printInfo(ostream& os) const
 
 }
 
+//======================================================
+//======================================================
+void 
+StPPVertexFinder::CalibBeamLine(){
+  LOG_INFO << "StPPVertexFinder::CalibBeamLine: activated saving high quality prim tracks for 3D fit of the beamLine"<<endm;
+  mBeamLineTracks=1; 
+}
 
 //======================================================
 //======================================================
@@ -335,8 +355,10 @@ StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double 
 //==========================================================
 int 
 StPPVertexFinder::fit(StEvent* event) {
+  if(mBeamLineTracks) vertex3D->clearEvent();
 
   hA[0]->Fill(1);
+
   StEvent *mEvent = (StEvent *)  StMaker::GetChain()->GetInputDS("StEvent");
   assert(mEvent); 
 
@@ -453,6 +475,7 @@ StPPVertexFinder::fit(StEvent* event) {
     matchTrack2BEMC(track,t,242); // middle of tower in Rxy
     matchTrack2EEMC(track,t,288); // middle of tower in Z
     //.... all test done on this track .........
+    t.mother=track;
     mTrackData.push_back(t); 
 
     hA[5]->Fill(t.rxyDca);
@@ -466,13 +489,13 @@ StPPVertexFinder::fit(StEvent* event) {
     //  t.print();
   }
 
-  LOG_INFO<< Form("PPV:: # of input track          = %d\n",ntrk[0])<<endm;
-  LOG_INFO<< Form("PPV:: dropped due to flag       = %d\n",ntrk[1])<<endm;
-  LOG_INFO<< Form("PPV:: dropped due to pt         = %d\n",ntrk[2])<<endm;
-  LOG_INFO<< Form("PPV:: dropped due to PCT check  = %d\n",ntrk[3])<<endm;
-  LOG_INFO<< Form("PPV:: dropped due to DCA check  = %d\n",ntrk[4])<<endm;
-  LOG_INFO<< Form("PPV:: dropped due to NHit check = %d\n",ntrk[5])<<endm;
-  LOG_INFO<< Form("PPV:: # of track after all cuts = %d\n",ntrk[6])<<endm;
+  LOG_INFO<< Form("PPV:: # of input track          = %d",ntrk[0])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to flag       = %d",ntrk[1])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to pt         = %d",ntrk[2])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to PCT check  = %d",ntrk[3])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to DCA check  = %d",ntrk[4])<<endm;
+  LOG_INFO<< Form("PPV:: dropped due to NHit check = %d",ntrk[5])<<endm;
+  LOG_INFO<< Form("PPV:: # of track after all cuts = %d",ntrk[6])<<endm;
 
   if(mUseCtb) {
     ctbList ->print();
@@ -507,11 +530,12 @@ StPPVertexFinder::fit(StEvent* event) {
   int nBadVertex=0;
   int vertexID=0;
   while(1) {
-    if(! buildLikelihood() ) break;
+    if(! buildLikelihoodZ() ) break;
     VertexData V;
     V.id=++vertexID;
-    if(! findVertex(V)) break;
-    bool trigV=evalVertex(V);   // V.print();
+    if(! findVertexZ(V)) break;
+  
+    bool trigV=evalVertexZ(V);   // V.print();
     //bump up rank of 2+ track all vertices 
     if(V.nAnyMatch>=mMinMatchTr) V.Lmax+=par_rankOffset;
     if(!trigV) {
@@ -522,15 +546,24 @@ StPPVertexFinder::fit(StEvent* event) {
       nBadVertex++;
       //bump down rank of sub-prime vertices 
       V.Lmax-=par_rankOffset; 
+    } 
+    
+    {// ... more rank QA ...
+      float rank=V.Lmax;
+      if(rank>1e6)  hA[17]->Fill(log(rank-1e6)+10);
+      else if(rank>0)   hA[17]->Fill(log(rank));
+      else   hA[17]->Fill(log(rank+1e6)-10);
     }
+    
     mVertexData.push_back(V);
+    if(trigV && mBeamLineTracks) vertex3D->study(V.r,eveID);
   }
 
   LOG_INFO << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found, nBadVertex=" <<nBadVertex<< endm;
   
   if(mVertexData.size()>0)  hA[0]->Fill(8);
   if(mVertexData.size()>1)  hA[0]->Fill(9);
-  
+
   exportVertices();
   printInfo();
   
@@ -552,7 +585,7 @@ StPPVertexFinder::fit(StEvent* event) {
 //==========================================================
 //==========================================================
 bool  
-StPPVertexFinder::buildLikelihood(){
+StPPVertexFinder::buildLikelihoodZ(){
   hL->Reset();
   hM->Reset();
   hW->Reset();
@@ -616,7 +649,7 @@ StPPVertexFinder::buildLikelihood(){
 //==========================================================
 //==========================================================
 bool  
-StPPVertexFinder::findVertex(VertexData &V) {
+StPPVertexFinder::findVertexZ(VertexData &V) {
 
   if(hL->GetMaximum()<=0) return false; // no more tracks left
 
@@ -671,9 +704,9 @@ StPPVertexFinder::findVertex(VertexData &V) {
 //==========================================================
 //==========================================================
 bool  
-StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
-  // returns true if accepted
-
+StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
+  // returns true if vertex is accepted accepted
+  if(mBeamLineTracks) vertex3D->clearTracks();
   int nt=mTrackData.size();
   LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<V.id<<" start ..."<<endm;
   int n1=0, nHiPt=0;
@@ -682,12 +715,12 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   for(i=0;i<nt;i++) {
     TrackData *t=&mTrackData[i];
     if(t->vertexID!=0) continue;
-    if(! t->matchVertex(V,mMaxZradius)) continue; // track to fare
+    if(! t->matchVertex(V,mMaxZradius)) continue; // track to far
     // this track belongs to this vertex
     n1++;
     t->vertexID=V.id;
     V.gPtSum+=t->gPt;
-
+    if(mBeamLineTracks) vertex3D->addTrack(t);
     if( t->gPt>mCut_oneTrackPT && ( t->mBemc>0|| t->mEemc>0) ) nHiPt++;
 
     if(  t->mTpc>0)       V.nTpc++;
@@ -776,18 +809,26 @@ StPPVertexFinder::exportVertices(){
 void 
 StPPVertexFinder::Finish() {
 
-#if 0 // save local histo w/ PPV monitoring
-  StIOMaker *ioMk=(StIOMaker*)StMaker::GetChain()->GetMaker("inputStream");
-  assert(ioMk);
-  const char *fname=ioMk->GetFileName();
-  LOG_INFO << "fname="<<fname<<endm;
-  TString tt=strstr(fname,"st_");
-  tt.ReplaceAll(".daq",".ppv");
-  saveHisto(tt.Data());
-#endif
+  if(mBeamLineTracks) { // save local histo w/ PPV monitoring
+    StIOMaker *ioMk=(StIOMaker*)StMaker::GetChain()->GetMaker("inputStream");
+    
+    TString tt="ppv";
+    if(ioMk) {
+      assert(ioMk);
+      const char *fname=ioMk->GetFileName();
+      tt=strstr(fname,"st_");
+      tt.ReplaceAll(".daq",".ppv");
+    } else {
+      tt= ((StBFChain*)StMaker::GetChain())->GetFileOut() ;
+      tt.ReplaceAll(".root",".ppv");
+    }
+    LOG_INFO << "PPV save local histo="<<tt<<endm;
+    saveHisto(tt.Data());
+  }
 
   LOG_INFO << "StPPVertexFinder::Finish() done, seen eve=" <<mTotEve<< endm;
- 
+  //  TString fileIn    = ((StBFChain*)StMaker::GetChain())->GetFileIn() ;
+  // LOG_INFO << "in="<<fileIn<< endm;
 }
 
 //-------------------------------------------------
@@ -893,6 +934,19 @@ StPPVertexFinder::examinTrackDca(const StiKalmanTrack*track,TrackData &t){
   t.ezDca=ezL(bmNode);
   t.rxyDca=rxy;
   t.gPt=bmNode->getPt();
+
+  //...... record more detals for 3D vertex reco
+  t.dcaTrack.R.SetXYZ(xG(bmNode),yG(bmNode),zG(bmNode));
+  // approximation below: use sigX=sigY, I do not want to deal wih rotations in X-Y plane, Jan B.
+  t.dcaTrack.sigYloc=eyL(bmNode); 
+  t.dcaTrack.sigZ=ezL(bmNode); 
+  StThreeVectorF const globP3=bmNode->getGlobalMomentumF();
+  t.dcaTrack.gP.SetXYZ(globP3.x(),globP3.y(),globP3.z());
+  t.dcaTrack.fitErr=bmNode->fitErrs();
+  t.dcaTrack.gChi2=track1.getChi2();
+  t.dcaTrack.nFitPoint=track1.getFitPointCount();
+  //  t.dcaTrack.print();
+
   return true;
 }
 
@@ -1171,6 +1225,10 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.34  2009/07/09 21:29:03  balewski
+ * allow export of prim tracks for 3D beam line fit (use VtxSeedCalG option),
+ * oneTrack vertex thresholds was lowered form 15 to 10 GeV/c
+ *
  * Revision 1.33  2009/02/05 21:43:59  balewski
  * Oleksandr renamed StEEmcDbMaker to StEEmcDb and requested this set of code corrections
  *
