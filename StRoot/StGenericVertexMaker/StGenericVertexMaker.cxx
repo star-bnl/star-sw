@@ -147,6 +147,8 @@ Int_t StGenericVertexMaker::Init()
 
   theFinder->UsePCT(usePCT);
 
+  if (calibBeamline) theFinder->CalibBeamLine();
+
   if(isMinuit) { // this is ugly, one should abort at 'else' above, Jan
     if (useITTF)  ((StMinuitVertexFinder*)theFinder)->DoUseITTF();
     if (useCTB) ((StMinuitVertexFinder*)theFinder)->CTBforSeed();
@@ -211,7 +213,6 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
      LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
      theFinder->UseVertexConstraint(x0,y0,dxdz,dydz,0.0001);
   }
-  if (calibBeamline) theFinder->CalibBeamLine();
   return StMaker::InitRun(runnumber);
 }
 
