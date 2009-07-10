@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.11 2009/06/26 21:47:06 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.12 2009/07/10 23:27:03 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -517,6 +517,7 @@ void TxUCMCollector::processMessage (const char * msg) {
    // If message has a colon, make sure it is at the end of the
    // header and not a part of the message itself.
    //
+   msgHashMap.clear(); 
    vector<std::string> keysNVals;
    std::string message = msg;
    size_t hdrDelimIndex = message.find(':');
