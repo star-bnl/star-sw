@@ -150,7 +150,7 @@ void StiHit::setGlobal(const StiDetector * detector,
       if (dif > 180) dif-=360;
       if (dif <-180) dif+=360;
       if (fabs(dif) > 1.1*22) {
-         LOG_FATAL <<
+         LOG_WARN <<
            Form("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****"
            ,detector->getName().c_str(),myAngle,centerAngle,dif)
          << endm;
@@ -161,7 +161,7 @@ void StiHit::setGlobal(const StiDetector * detector,
       if (dif > 180) dif-=360;
       if (dif <-180) dif+=360;
       if (fabs(dif) > 1.1*30) {
-         LOG_FATAL <<
+         LOG_WARN <<
          Form("**** StiHit.%s wrong angle: hitAng=%f norAng=%g dif=%g ****"
          ,detector->getName().c_str(),myAngle,normalAngle,dif)
                << endm;
@@ -194,8 +194,8 @@ void StiHit::setGlobal(const StiDetector * detector,
   if (!detector) return;
   double pos = detector->getPlacement()->getNormalRadius();
   double dif = mx-pos;
-  if (fabs(dif)<0.01*pos) return;
-  LOG_FATAL <<
+  if (fabs(dif)<0.05*pos) return;
+  LOG_WARN <<
      Form("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
           ,detector->getName().c_str(),mx,pos,dif)
   << endm;
