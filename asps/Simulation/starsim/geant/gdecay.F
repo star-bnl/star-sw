@@ -1,6 +1,9 @@
-* $Id: gdecay.F,v 1.2 2009/06/09 01:02:17 perev Exp $
+* $Id: gdecay.F,v 1.3 2009/07/11 21:27:42 perev Exp $
 * $Name:  $
 * $Log: gdecay.F,v $
+* Revision 1.3  2009/07/11 21:27:42  perev
+* Remove <cr>
+*
 * Revision 1.2  2009/06/09 01:02:17  perev
 * Dalitz decays in starsim T.Ullrich & P.Nevski
 *
@@ -105,7 +108,7 @@ C
       MXX      = MODE(ID)
       if (Mxx.lt.1 000 000) then
        nba=100
-      else 
+      else
        nba=1000
       endif
 
@@ -171,12 +174,12 @@ C-- a Dalitz decay is recognised by e+/e- or mu+/mu- pair
         enddo
         if (iKrollWada .lt.0) then
           iKrollWada=1
-	  call getenv('G3KrollWada',cKrollWada)
-	  if (cKrollWada(1:2) .eq. 'NO') iKrollWada=0
-	endif
+          call getenv('G3KrollWada',cKrollWada)
+          if (cKrollWada(1:2) .eq. 'NO') iKrollWada=0
+        endif
 
-        if (iKrollWada .ne.0 
-     ..And.((n1.eq.2.or.n1.eq.5).and.n2.eq.n1+1.and.n3>0)) then 
+        if (iKrollWada .ne.0
+     ..And.((n1.eq.2.or.n1.eq.5).and.n2.eq.n1+1.and.n3>0)) then
 C        decay it via Kroll-Wada mecanism, no mass smearing
          CALL VZERO(P,25)
          P(4,1)=AMASS
@@ -184,7 +187,7 @@ C        decay it via Kroll-Wada mecanism, no mass smearing
          IDAL=DALDEC(XM,P,P(1,2))
          DO 23 j=1,3
            DO 23 i=1,4
- 23           PCM(i,j)=P(i,j+1)                  
+ 23           PCM(i,j)=P(i,j+1)
         else
 C        any other 3 body decay
          IF (TLIFE.LT.1.E-15) THEN
