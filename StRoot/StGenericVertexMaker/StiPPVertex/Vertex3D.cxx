@@ -150,7 +150,7 @@ Vertex3D::doExtrapolation(){ // study track cov matrix for individual tracks usi
 	 float Ly=node->y();
 	 float Lz=node->z();
 	 if(fabs(Ly)>40.) break; // to not cross sector boundary ??
-	 if(iI==1 && fabs(Ly)>32.) break; // to not cross sector boundary ??
+	 if(iDir==1 && fabs(Ly)>36.) break; // to not cross sector boundary ??
 	 node->propagateError();
 	 float sLy=sqrt(node->fitErrs()._cYY);
 	 float sLz=sqrt(node->fitErrs()._cZZ);
