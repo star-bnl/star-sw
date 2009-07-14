@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.194 2009/06/22 22:21:44 perev Exp $
+* $Id: geometry.g,v 1.195 2009/07/14 01:02:59 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.195  2009/07/14 01:02:59  perev
+* Increase interaction/decay volume
+*
 * Revision 1.194  2009/06/22 22:21:44  perev
 * Remove redundant messages
 *
@@ -3009,7 +3012,13 @@ If LL>0
 * ie put a MODE or/and DETP command and executing them for selected systems.
 *
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
-   dcay={210,210,0.1,0.01}
+* - where 210 = max Rxy, 210=max abs(Z). 
+* - 0.1 min energy 0.01 min kin of out tracks of secondary(decay)
+
+!// here Rxy & aZ for all STAR sensetive volumes
+!// when it is too much, use card like "DETP TRAC DCAY 210 210 0.1 0.01"
+   dcay={450,2000,0.1,0.01}
+
    If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
 
