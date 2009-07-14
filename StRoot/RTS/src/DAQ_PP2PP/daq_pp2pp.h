@@ -1,9 +1,6 @@
 #ifndef _DAQ_PP2PP_H_
 #define _DAQ_PP2PP_H_
 
-
-#include <DAQ_READER/daq_det.h>
-
 #define PP2PP_SVX_CH	128
 
 struct pp2pp_t {
@@ -20,6 +17,11 @@ struct pp2pp_t {
 	u_char adc[PP2PP_SVX_CH] ;	
 	u_char trace[PP2PP_SVX_CH] ;	// 0-ch not found;1 - ch found OK; 2 - duplicate ch
 } ;
+
+#ifndef DAQ_PP2PP_DATA_STRUCTURE
+#include <stdio.h>
+#include <DAQ_READER/daq_det.h>
+
 
 class daq_pp2pp : public daq_det {
 private:
@@ -55,4 +57,5 @@ public:
 } ;
 
 
-#endif	// _DAQ_PP2PP_H_
+#endif   //  DAQ_PP2PP_DATA_STRUCTURE
+#endif   // _DAQ_PP2PP_H_
