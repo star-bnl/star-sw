@@ -150,7 +150,7 @@ int main (int argc, char** argv) {
     return 1;
   }
 
-  TxLogging::TxEventLog* log = TxLogging::TxEventLogFactory::create();
+  TxLogging::TxEventLog* log = TxLogging::TxEventLogFactory::create("ucm");
   int intBJobID = std::atoi (brokerJobID.c_str ());
   log->setBrokerJobID (intBJobID);
   log->setBrokerTaskID (brokerTaskID);
