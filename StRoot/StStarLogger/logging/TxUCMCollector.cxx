@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.12 2009/07/10 23:27:03 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.13 2009/07/16 19:00:10 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -953,16 +953,19 @@ boolean TxUCMCollector::recordExists (const char * selectStr, const char * table
      *
      * @param Table info
      */
-void TxUCMCollector::createTable (const string&table) 
+void TxUCMCollector::createTable (const string&table,const string&like)
 {
-   createTable (table.c_str());
+   const char *likestr = like.empty() ? 0 : like.c_str();
+   createTable (table.c_str(), likestr);
 }
 
 //________________________________________________
-void TxUCMCollector::createTable (const char * table) {
+void TxUCMCollector::createTable (const char * table, const char *like) {
    TRY{
-       if (!execute(string("CREATE TABLE IF NOT EXISTS ") + table))
-       log->debug (string("Created new table: ") + table);
+       std::string query = string("CREATE TABLE IF NOT EXISTS ") + table;
+       if (like && like[0]) query += std::string(" LIKE `") + like + "`"; 
+       if (!execute(query)) 
+          log->debug (string("Created new table: ") + table);
    }
    closeConnection();
 //        CATCH(SQLException se) {
