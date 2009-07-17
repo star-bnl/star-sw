@@ -8,7 +8,7 @@
  * @file TxUCMCollector.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.2 2009/06/26 16:18:47 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.3 2009/07/17 13:34:59 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -185,8 +185,8 @@ class TxUCMCollector {
      *
      * @param Table info
      */
-     void createTable (const char * table);
-     void createTable (const std::string &table);
+     void createTable (const char * table, const char *like=0);
+     void createTable (const std::string &table, const std::string &like=std::string());
     /**
      * print usage
      * @param options the encapsulated list of options
