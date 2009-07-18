@@ -185,9 +185,18 @@ public:
 ///		DCA to given 2dim point (with error matrix)
         double Dca(double x,double y,double *dcaErr=0) const ;
 
-///		Distance to nearest point to other helix
+///		Returns length to nearest point of other helix 
+///             along this helix. *s2 the length along the other helix
+///             Both lengths are positive
+
         double Path(const THelixTrack &hlx,double *s2=0) const ;
 
+///		Extention of previous method. 
+///             Both lengths could be -ve.
+///             *dist - distance between helicies
+///		xyz[6] - 1st and 2nd space points on the helicies
+        double PathX(const THelixTrack &hlx,double *s2=0
+	            ,double *dist=0, double *xyz=0) const;
 
 ///		distance and DCAxy and DCAz to given space point (with error matrix)
         double Dca(const double point[3]
@@ -207,6 +216,7 @@ public:
         void Rot(double angle);
         void Rot(double cosa,double sina);
 
+        void Show(double len, const THelixTrack *other=0) const;
         void Print(Option_t *opt="") const;
 //	statics
 static  void Test1();
