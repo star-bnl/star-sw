@@ -469,6 +469,34 @@ double THelixTrack::Path(const THelixTrack &th,double *s2) const
    return SMe;
 }
 //_____________________________________________________________________________
+double THelixTrack::PathX(const THelixTrack &th,double *s2, double *dst, double *xyz) const
+{
+  double ss1,ss2,dd,ss1Best,ss2Best,ddBest=1e33;
+  double xx[9];
+  int jkBest=-1;
+  for (int jk=0;jk<4;jk++) {
+    THelixTrack th1(*this),th2(th);
+    if (jk&1) th1.Backward();
+    if (jk&2) th2.Backward();
+    ss1 = th1.Path(th2,&ss2);
+    if (ss1>=1e33) continue;
+    if (ss2>=1e33) continue;
+    th1.Eval(ss1,xx+0);
+    th2.Eval(ss2,xx+3);
+    TCL::vsub(xx,xx+3,xx+6,3);
+    dd = TCL::vdot(xx+6,xx+6,3);
+    if (dd > ddBest) continue;
+    ddBest = dd; jkBest=jk; ss1Best = ss1; ss2Best = ss2;
+    if (xyz) TCL::ucopy(xx,xyz,6);
+  }
+  if (jkBest<0) { if(s2) *s2=3e33; return 3e33; }
+  if (jkBest&1) ss1Best = -ss1Best;
+  if (jkBest&2) ss2Best = -ss2Best;
+  if (s2 ) *s2  = ss2Best;
+  if (dst) *dst = ddBest;
+  return ss1Best;
+}
+//_____________________________________________________________________________
 double THelixTrack::Path(double x,double y) const
 {
    double ar[6]={fX[0],fX[1],0,fP[0]/fCosL,fP[1]/fCosL,0};
@@ -897,6 +925,71 @@ void THelixTrack::Test5()
 
 
 }
+//______________________________________________________________________________
+void THelixTrack::Show(double len, const THelixTrack *other) const
+{
+static TCanvas *myCanvas = 0;
+  int kolor[2]={kRed,kBlue};
+
+  TGraph  *ciGraph[2][2] = {{0}};
+  TGraph  *ptGraph[2][2] = {{0}};
+  TGraph  *szGraph[2]    = {0};
+  
+  double  x[100],y[100],z[100],l[100],xyz[3];
+  double  X[4],Y[4],Z[4],L[4];
+  const THelixTrack *th[]={this,other};
+  int nH = (other)? 2:1;
+  for (int ih=0;ih<nH;ih++) {
+    double rho = fabs(th[ih]->GetRho());
+    double step = 0.01*(1./(rho+1e-10));
+   
+    if (step>fabs(len)*0.10) step=fabs(len)*0.1;
+    if (step<fabs(len)*0.01) step=fabs(len)*0.01;
+
+
+    int nPts = (int)(fabs(len)/step);
+    step = fabs(len)/nPts;
+    if (len<0) {len = -len; step = -step;}
+    for (int ipt=0; ipt<nPts; ipt++) {
+      double s = ipt*step;
+      th[ih]->Eval(s,xyz); 
+      l[ipt]=s; x[ipt]=xyz[0]; y[ipt]=xyz[1], z[ipt]=xyz[2];
+    }
+    ciGraph[ih][0]  = new TGraph(nPts  , x, y);
+    ciGraph[ih][1]  = new TGraph(nPts  , l, z);
+    ciGraph[ih][0]->SetLineColor(kolor[ih]);
+    ciGraph[ih][1]->SetLineColor(kolor[ih]);
+    ptGraph[ih][0]  = new TGraph(   1  , x, y);
+    ptGraph[ih][1]  = new TGraph(   1  , l, z);
+    ptGraph[ih][0]->SetMarkerColor(kolor[ih]);
+    ptGraph[ih][1]->SetMarkerColor(kolor[ih]);
+
+    X[ih*2+0]=x[0]; X[ih*2+1]=x[nPts-1];
+    Y[ih*2+0]=y[0]; Y[ih*2+1]=y[nPts-1];
+    Z[ih*2+0]=z[0]; Z[ih*2+1]=z[nPts-1];
+    L[ih*2+0]=l[0]; L[ih*2+1]=l[nPts-1];
+  }
+
+  szGraph[0]  = new TGraph(nH*2  , X, Y);
+  szGraph[1]  = new TGraph(nH*2  , L, Z);
+// 
+  myCanvas = new TCanvas("THelixTrack_Show","",600,800);
+  myCanvas->Divide(1,2);
+  for (int ipad=0;ipad<2;ipad++) {
+    myCanvas->cd(ipad+1); 
+    szGraph[ipad]->Draw("AP");
+    for (int ih = 0;ih<nH;ih++) {
+      ptGraph[ih][ipad]->Draw("same *");
+      ciGraph[ih][ipad]->Draw("same CP");
+  } }
+
+
+  myCanvas->Modified();
+  myCanvas->Update();
+  while(!gSystem->ProcessEvents()){}; 
+
+}
+
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -2468,7 +2561,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.38 2009/07/01 21:48:39 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.39 2009/07/18 00:12:56 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2484,6 +2577,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.39  2009/07/18 00:12:56  perev
+ * method PatX(helx,,,) added
+ *
  * Revision 1.38  2009/07/01 21:48:39  perev
  * Fix -tive errors & remove obsolete
  *
