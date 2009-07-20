@@ -495,8 +495,12 @@ void StarGeomTreeWidget::itemExpandedCB ( QTreeWidgetItem * item )
          CreateTreeWidgetItem(child,item, (nVolume >1) ? QString("> #%1").arg(nVolume) : QString());  
       }
       this->setSortingEnabled(true);
+      int currentWidth = columnWidth(0); 
       this->resizeColumnToContents(0);
-
+      if (currentWidth > this->columnWidth(0) ) {
+         // restore the wider dimension. Do no shrink to column
+         this->setColumnWidth(0,currentWidth);
+      }
    }
 }
 //_____________________________________________________________________________
