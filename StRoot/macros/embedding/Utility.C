@@ -1,3 +1,9 @@
+TString MuDSTFile(TString production, TString trgsetupname)
+{
+   if( production.Contains("P08ic") && trgsetupname.Contains("upsilon"))
+	return "/star/data06/embed/andrewar/MuDstReduced/P08ic_MuDst_st_upsilon.root";
+  
+}
 int Quit(char* prompt="Hit q or n to quit...")
 {
   char character;
