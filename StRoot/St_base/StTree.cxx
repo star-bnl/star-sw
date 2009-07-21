@@ -294,7 +294,7 @@ fHandle=0;
 //_______________________________________________________________________________
 Option_t *StBranch::GetIOMode()
 {
-IOMODE[0]=0; if (fIOMode>0) IOMODE[0] = RWU[fIOMode]; return IOMODE;
+IOMODE[0]=0; if (fIOMode>0) IOMODE[0] = RWU[int(fIOMode)]; return IOMODE;
 }
 
 //_______________________________________________________________________________
@@ -525,7 +525,7 @@ void StBranch::OpenTFile()
   TFile *tf= gROOT->GetFile(GetFile());
   fTFile = tf;
   if (!fTFile) {
-    fTFile = StIO::Open(GetFile(),TFOPT[fIOMode],GetName());
+    fTFile = StIO::Open(GetFile(),TFOPT[int(fIOMode)],GetName());
 
   }
   if (!fTFile) {
@@ -542,7 +542,7 @@ void StBranch::OpenTFile()
     if (tf) return;
 
     printf("** <StBranch::Open> Branch=%s \tMode=%s \tFile=%s \tOpened **\n"
-        ,GetName(),TFOPT[fIOMode],(const char*)fFile);
+        ,GetName(),TFOPT[int(fIOMode)],(const char*)fFile);
 
   }
 }
@@ -733,7 +733,7 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
 //_______________________________________________________________________________
 void StTree::SetBaseName(const char *baseName,const char *dirname)
 {
-  const char *sla,*dot;
+  const char *dot;
   fBaseName = gSystem->BaseName(baseName);
   if (dirname && *dirname) {
     TString ts(dirname); 
