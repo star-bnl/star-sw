@@ -117,7 +117,7 @@ void StObjArray::Browse(TBrowser *b)
    Int_t counter = 0;
    Int_t totalSize = size();
    for (int i=0; i<totalSize && ++counter <  maxBrowsable ; i++) {
-       obj = at(i); if (!obj || ((UInt_t)obj)&1) continue;
+       obj = at(i); if (!obj || ((ULong_t)obj)&1) continue;
        TString browseName(obj->GetName());
        if (browseName.IsNull()) browseName = obj->ClassName();
        char buffer[100];
