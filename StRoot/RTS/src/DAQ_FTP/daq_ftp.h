@@ -1,11 +1,6 @@
 #ifndef _DAQ_FTP_H_
 #define _DAQ_FTP_H_
 
-
-#include <stdio.h>
-#include <DAQ_READER/daq_det.h>
-
-
 struct ftp_t {
 	int channels ;
 	int mode ;	// 0 normal, 1 pedestals/RMSs
@@ -21,6 +16,9 @@ struct ftp_t {
 
 } ;
 
+#ifndef DAQ_FTP_DATA_STRUCTURE
+#include <stdio.h>
+#include <DAQ_READER/daq_det.h>
 
 class daq_ftp : public daq_det {
 private:
@@ -49,5 +47,5 @@ public:
 
 } ;
 
-
+#endif   //  DAQ_FTP_DATA_STRUCTURE
 #endif	// _DAQ_FTP_H_
