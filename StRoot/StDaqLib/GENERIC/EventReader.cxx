@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.56 2009/01/08 23:49:23 fine Exp $
+ * $Id: EventReader.cxx,v 1.57 2009/07/22 20:23:57 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.57  2009/07/22 20:23:57  fine
+ * generate the EventInfo from the daqReader rather from the DATAP structure
+ *
  * Revision 1.56  2009/01/08 23:49:23  fine
  * Adjust the EventInfo error message
  *
@@ -220,6 +223,7 @@
 #include <assert.h>
 #include <errno.h>
 #include "StMessMgr.h"
+#include "RTS/src/DAQ_READER/daqReader.h"
 
 using namespace OLDEVP;
 
@@ -751,7 +755,21 @@ enum {
   EventInfo ei;
   memset(&ei,0,sizeof(EventInfo));
   Bank_DATAP *dp   = (Bank_DATAP *)DATAP; 
-  if (dp) {
+  if  ( daqReader *dr = getDaqReader() ) {
+     //  use the daqReader data is present
+    ei.Token         = dr->token;
+    ei.EventLength   = dr->bytes;
+    ei.UnixTime      = dr->evt_time;
+    ei.EventSeqNo    = dr->event_number;
+    ei.TrigWord      = dr->trgword;
+    ei.TrigInputWord = dp ? dp->TriggerInWord :0;
+    int detpre       = dr->detectors;
+    LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<<endm;
+
+    for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
+      *p = !!(detpre&1); detpre>>=1;                                }
+    ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
+  } else if (dp) {
     ei.Token         = dp->header.Token;
     ei.EventLength   = dp->EventLength;
     ei.UnixTime      = dp->Time;
@@ -764,7 +782,7 @@ enum {
     for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
       *p = !!(detpre&1); detpre>>=1;                                }
     ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
-  } else if (!getDaqReader()) {
+  } else {
      LOG_ERROR << "EventReader::getEventInfo: No EventInfo is available with the new DAQ" << endm;
   }
   return ei;
