@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.h,v 1.5 2008/11/25 21:33:23 fine Exp $
+ * $Id: StRtsReaderMaker.h,v 1.6 2009/07/22 21:42:52 fine Exp $
  * StRtsReaderMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -32,6 +32,7 @@ class StRtsReaderMaker:public StMaker
 
    protected:
       TDataSet   *FillTable();
+      void        FillDaqHeader();
       StRtsTable *InitTable(const char *detName,const char *bankName);
       rts_reader *InitReader();
 

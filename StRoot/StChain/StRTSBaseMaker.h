@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.5 2008/12/03 20:41:00 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.6 2009/07/22 21:42:52 fine Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -38,6 +38,21 @@ class StRTSBaseMaker : public StMaker
      Int_t Pad () const;
      Int_t Rdo () const;
      Int_t Row () const;
+
+     // DAQ Event raw data
+
+     UInt_t Token()      const;    // current token
+     UInt_t Trgcmd()     const;    // current trigger command
+     UInt_t Daqcmd()     const;    // current DAQ command
+     UInt_t Trgword()    const;    // the Trigger Word
+     UInt_t Phyword()    const;    // the Physics Word
+     UInt_t Daqbits()    const;    // "offline" bits aka L3 summary...
+     UInt_t Daqbits_l1() const;    // triggers satisfying l1 
+     UInt_t Daqbits_l2() const;    // triggers satisfying l2
+     UInt_t Evpgroups()  const;    // evp groups aka L3 summary[2]     
+  
+     UInt_t Detectors()  const;	  // detectors present bit mask according to DAQ!
+     
      const TString &DetectorName() const { return fDetectorName; }
 
      virtual Int_t Make() = 0;

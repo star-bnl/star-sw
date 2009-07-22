@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.21 2009/04/28 16:35:48 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.22 2009/07/22 21:42:52 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.22  2009/07/22 21:42:52  fine
+ * Add DAQ event header to pass
+ *
  * Revision 1.21  2009/04/28 16:35:48  fine
  * downgrade the message level from INFO to DEBUG
  *
@@ -273,6 +276,20 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
    }
    return fRtsTable;
 }
+//_____________________________________________________________
+void StRtsReaderMaker::FillDaqHeader() 
+{
+   fRtsTable->SetToken   (fRtsReader->token  );
+   fRtsTable->SetTrgcmd  (fRtsReader->trgcmd );
+   fRtsTable->SetDaqcmd  (fRtsReader->daqcmd );
+   fRtsTable->SetTrgword (fRtsReader->trgword);
+   fRtsTable->SetPhyword (fRtsReader->phyword);
+   fRtsTable->SetDaqbits (fRtsReader->daqbits);
+   fRtsTable->SetDaqbits_l1 (fRtsReader->daqbits_l1);
+   fRtsTable->SetDaqbits_l2 (fRtsReader->daqbits_l2);
+   fRtsTable->SetEvpgroups (fRtsReader->evpgroups);
+   fRtsTable->SetDetectors (fRtsReader->detectors);
+}
 
 //_____________________________________________________________
 TDataSet *StRtsReaderMaker::FillTable() 
@@ -378,6 +395,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
   }
 
   if (rtsSystem) {
+     thisMaker->FillDaqHeader();
      ds = thisMaker->FillTable();
   } else {
      ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
