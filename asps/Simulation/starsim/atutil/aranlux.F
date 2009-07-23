@@ -1,6 +1,11 @@
-* $Id: aranlux.F,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+#define SILENT_RANLUX
+* $Id: aranlux.F,v 1.2 2009/07/23 00:47:38 perev Exp $
 * $Log: aranlux.F,v $
+* Revision 1.2  2009/07/23 00:47:38  perev
+* Supress redundant prints
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.2  2001/12/18 02:02:55  nevski
 * add entry to set counters
@@ -78,15 +83,19 @@ C              Default Initialization by Multiplicative Congruential
          NOTYET = .FALSE.
          JSEED = JSDFLT
          INSEED = JSEED
+#ifndef SILENT_RANLUX
          WRITE(6,'(A,I12)') ' RANLUX DEFAULT INITIALIZATION: ',JSEED
+#endif
          LUXLEV = LXDFLT
          NSKIP = NDSKIP(LUXLEV)
          LP = NSKIP + 24
          IN24 = 0
          KOUNT = 0
          MKOUNT = 0
+#ifndef SILENT_RANLUX
          WRITE(6,'(A,I2,A,I4)')  ' RANLUX DEFAULT LUXURY LEVEL =  ',
      +        LUXLEV,'      p =',LP
+#endif
             TWOM24 = 1.
          DO 25 I= 1, 24
             TWOM24 = TWOM24 * 0.5
@@ -164,8 +173,10 @@ C           Entry to input and float integer seeds from previous run
   195    TWOM24 = TWOM24 * 0.5
          NEXT(1) = 24
          TWOM12 = TWOM24 * 4096.
+#ifndef SILENT_RANLUX
       WRITE(6,'(A)') ' FULL INITIALIZATION OF RANLUX WITH 25 INTEGERS:'
       WRITE(6,'(5X,5I12)') ISDEXT
+#endif
       DO 200 I= 1, 24
       SEEDS(I) = REAL(ISDEXT(I))*TWOM24
   200 CONTINUE
@@ -181,14 +192,20 @@ C           Entry to input and float integer seeds from previous run
       LUXLEV = ISD
         IF (LUXLEV .LE. MAXLEV) THEN
           NSKIP = NDSKIP(LUXLEV)
+#ifndef SILENT_RANLUX
           WRITE (6,'(A,I2)') ' RANLUX LUXURY LEVEL SET BY RLUXIN TO: ',
      +                         LUXLEV
+#endif
         ELSE  IF (LUXLEV .GE. 24) THEN
           NSKIP = LUXLEV - 24
+#ifndef SILENT_RANLUX
           WRITE (6,'(A,I5)') ' RANLUX P-VALUE SET BY RLUXIN TO:',LUXLEV
+#endif
         ELSE
           NSKIP = NDSKIP(MAXLEV)
+#ifndef SILENT_RANLUX
           WRITE (6,'(A,I5)') ' RANLUX ILLEGAL LUXURY RLUXIN: ',LUXLEV
+#endif
           LUXLEV = MAXLEV
         ENDIF
       INSEED = -1
@@ -228,22 +245,30 @@ C                    Entry to initialize from one or three integers
          ENDIF
       IF (LUXLEV .LE. MAXLEV)  THEN
          NSKIP = NDSKIP(LUXLEV)
+#ifndef SILENT_RANLUX
          WRITE(6,'(A,I2,A,I4)') ' RANLUX LUXURY LEVEL SET BY RLUXGO :',
      +        LUXLEV,'     P=', NSKIP+24
+#endif
       ELSE
           NSKIP = LUXLEV - 24
+#ifndef SILENT_RANLUX
           WRITE (6,'(A,I5)') ' RANLUX P-VALUE SET BY RLUXGO TO:',LUXLEV
+#endif
       ENDIF
       IN24 = 0
       IF (INS .LT. 0)  WRITE (6,'(A)')
      +   ' Illegal initialization by RLUXGO, negative input seed'
       IF (INS .GT. 0)  THEN
         JSEED = INS
+#ifndef SILENT_RANLUX
         WRITE(6,'(A,3I12)') ' RANLUX INITIALIZED BY RLUXGO FROM SEEDS',
      +      JSEED, K1,K2
+#endif
       ELSE
         JSEED = JSDFLT
+#ifndef SILENT_RANLUX
         WRITE(6,'(A)')' RANLUX INITIALIZED BY RLUXGO FROM DEFAULT SEED'
+#endif
       ENDIF
       INSEED = JSEED
       NOTYET = .FALSE.
