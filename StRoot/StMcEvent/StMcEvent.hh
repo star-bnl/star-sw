@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.24 2009/07/24 19:08:06 perev Exp $
+ * $Id: StMcEvent.hh,v 2.25 2009/07/24 20:26:20 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.25  2009/07/24 20:26:20  perev
+ * Increase version in ClassDef
+ *
  * Revision 2.24  2009/07/24 19:08:06  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -309,8 +312,8 @@ class StMcEvent : public TDataSet {
  private:
   const StMcEvent& operator=(const StMcEvent&);
   StMcEvent(const StMcEvent&);
-  ClassDef(StMcEvent,1)
-    };
+  ClassDef(StMcEvent,2)
+};
 
 ostream&  operator<<(ostream& os, const StMcEvent&);
 
