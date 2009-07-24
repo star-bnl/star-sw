@@ -6,11 +6,20 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.2 2009/06/23 21:15:09 geurts Exp $
+ * $Id: StBTofMatchMaker.h,v 1.3 2009/07/24 18:52:53 dongx Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.3  2009/07/24 18:52:53  dongx
+ * - Local Z window restricted in the projection
+ * - ToT selection is used firstly when more than one hits associated with a track
+ * - matchFlag updated
+ *    0:   no matching
+ *    1:   1-1 matching
+ *    2:   1-2 matching, pick up the one with higher ToT value (<25ns)
+ *    3:   1-2 matching, pick up the one with closest projection posision along y
+ *
  * Revision 1.2  2009/06/23 21:15:09  geurts
  * first set of doxygen tags
  *
@@ -225,6 +234,7 @@ private:
       Int_t matchFlag;
       Float_t zhit;
       Float_t yhit;
+      Double_t tot;
       Int_t index2BTofHit;
     };
     
@@ -252,7 +262,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.2 2009/06/23 21:15:09 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.3 2009/07/24 18:52:53 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
