@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.1 2009/06/23 13:15:03 geurts Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.2 2009/07/24 18:52:53 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,15 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.2  2009/07/24 18:52:53  dongx
+ * - Local Z window restricted in the projection
+ * - ToT selection is used firstly when more than one hits associated with a track
+ * - matchFlag updated
+ *    0:   no matching
+ *    1:   1-1 matching
+ *    2:   1-2 matching, pick up the one with higher ToT value (<25ns)
+ *    3:   1-2 matching, pick up the one with closest projection posision along y
+ *
  * Revision 1.1  2009/06/23 13:15:03  geurts
  * *** empty log message ***
  *
@@ -228,6 +237,7 @@ Int_t StBTofMatchMaker::Make(){
      aDaqCellHit.tray = trayId;
      aDaqCellHit.module = moduleId;
      aDaqCellHit.cell = cellId;
+     aDaqCellHit.tot = aHit->tot();
      aDaqCellHit.index2BTofHit = i;
      daqCellsHitVec.push_back(aDaqCellHit);
 
@@ -372,8 +382,8 @@ Int_t StBTofMatchMaker::Make(){
 	    StThreeVectorD glo(global[0], global[1], global[2]);
 	    StThreeVectorD hitPos(local[0], local[1], local[2]);
 //	    delete sensor;   /// function in StBTofGeometry modified. Don't delete here.
-//	    if (local[2]<=2.7&&local[2]>=-3.4) {
-            if (fabs(local[2])<4.) {   // loose local z cut at first step
+	    if (local[2]<=2.7&&local[2]>=-3.4) {
+//            if (fabs(local[2])<4.) {   // loose local z cut at first step
 	      ncells++;
 	      cellHit.tray = itray;
 	      cellHit.module = imodule;
@@ -466,6 +476,7 @@ Int_t StBTofMatchMaker::Make(){
 	cellHit.trackIdVec = proIter->trackIdVec;
 	cellHit.zhit = proIter->zhit;
 	cellHit.yhit = proIter->yhit;
+        cellHit.tot = daqIter->tot;
         cellHit.index2BTofHit = daqIter->index2BTofHit;
 	matchHitCellsVec.push_back(cellHit);
       }
@@ -510,6 +521,7 @@ Int_t StBTofMatchMaker::Make(){
     cellHit.trackIdVec = trackIdVec;
     cellHit.zhit = tempIter->zhit;
     cellHit.yhit = tempIter->yhit;
+    cellHit.tot = tempIter->tot;
     cellHit.index2BTofHit = tempIter->index2BTofHit;
 
     Float_t ycenter = (tempIter->cell-1-2.5)*mWidthPad;
@@ -577,6 +589,7 @@ Int_t StBTofMatchMaker::Make(){
     vector<StThreeVectorD> vPosition;
     vector<Int_t> vchannel, vtray, vmodule, vcell;
     vector<Float_t> vzhit, vyhit;
+    vector<Double_t> vtot;
     vector<Int_t> vindex2BTofHit;
 
     tofCellHitVectorIter tempIter=tempVec.begin();
@@ -591,6 +604,7 @@ Int_t StBTofMatchMaker::Make(){
 	vTrackId.push_back(erasedIter->trackIdVec.back());
 	vzhit.push_back(erasedIter->zhit);
 	vyhit.push_back(erasedIter->yhit);
+        vtot.push_back(erasedIter->tot);
         vindex2BTofHit.push_back(erasedIter->index2BTofHit);
 
 	erasedVec.erase(erasedIter);
@@ -606,9 +620,10 @@ Int_t StBTofMatchMaker::Make(){
       cellHit.cell = vcell[0];
       cellHit.trackIdVec.push_back(vTrackId[0]);
       cellHit.hitPosition = vPosition[0];
-      cellHit.matchFlag = 0; 
+      cellHit.matchFlag = 1; 
       cellHit.zhit = vzhit[0];
       cellHit.yhit = vyhit[0];
+      cellHit.tot = vtot[0];
       cellHit.index2BTofHit = vindex2BTofHit[0];
 
       FinalMatchedCellsVec.push_back(cellHit);
@@ -626,25 +641,41 @@ Int_t StBTofMatchMaker::Make(){
       Int_t thiscandidate(-99);
       Int_t thisMatchFlag(0);
 
-      // sort on hitposition
-      Float_t ss(99.);
-      vector<Int_t> ssCandidates;
-      thisMatchFlag = 2;
-      for (Int_t i=0;i<nCells;i++){
-	Float_t yy = vyhit[i];
-	Float_t ycell = (vcell[i]-1-2.5)*mWidthPad;
-	Float_t ll = fabs(yy-ycell);
-	if(ll<ss) {
-	  ss = ll;
-	  ssCandidates.clear();
-	  ssCandidates.push_back(i);
-	}else if  (ll==ss)
-	  ssCandidates.push_back(i);	  
+      // sort on tot
+      Float_t tot(0.);
+      vector<Int_t> ttCandidates;
+      for (Int_t i=0;i<nCells;i++) {
+        Double_t tt = vtot[i];
+        if(tt<25.&&tt>tot) {
+          tot = tt;
+          ttCandidates.clear();
+          ttCandidates.push_back(i);
+        } else if (tt==tot) {
+          ttCandidates.push_back(i);
+        }
       }
-      if (ssCandidates.size()==1){
-	thiscandidate = ssCandidates[0];
+      if (ttCandidates.size()==1) {
+        thiscandidate = ttCandidates[0];
+        thisMatchFlag = 2;
+      } else if (ttCandidates.size()>1) {  // sort on hitposition
+        Float_t ss(99.);
+        vector<Int_t> ssCandidates;
+        for(size_t j=0;j<ttCandidates.size();j++) {
+          Float_t yy = vyhit[ttCandidates[j]];
+          Float_t ycell = (vcell[ttCandidates[j]]-1-2.5)*mWidthPad;
+          Float_t ll = fabs(yy-ycell);
+          if(ll<ss) {
+            ss = ll; 
+            ssCandidates.clear();
+            ssCandidates.push_back(ttCandidates[j]);
+          }else if  (ll==ss)
+            ssCandidates.push_back(ttCandidates[j]);
+        }
+        if (ssCandidates.size()==1){
+          thiscandidate = ssCandidates[0];
+          thisMatchFlag = 3;
+        }
       }
-      
 
       if (thiscandidate>=0) {
 	cellHit.tray = vtray[thiscandidate];
@@ -655,6 +686,7 @@ Int_t StBTofMatchMaker::Make(){
 	cellHit.matchFlag = thisMatchFlag;
 	cellHit.zhit = vzhit[thiscandidate];
 	cellHit.yhit = vyhit[thiscandidate];
+        cellHit.tot = vtot[thiscandidate];
         cellHit.index2BTofHit = vindex2BTofHit[thiscandidate];
 
 	FinalMatchedCellsVec.push_back(cellHit);
