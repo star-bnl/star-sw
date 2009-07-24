@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.63 2007/02/06 19:06:39 posk Exp $
+// $Id: doFlowEvents.C,v 1.64 2009/07/24 21:00:11 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
 // It reads dst.root, event.root, MuDst.root, or picoevent.root
 //   files to fill StFlowEvent
-// It works with the Grid Collector for event.root and MuDst.root files
 //
 // Environment:
 // Software developed for the STAR Detector at Brookhaven National Laboratory
@@ -27,7 +26,6 @@
 //      file = a. file names in directory (takes all files)
 //             b. the one particular full file name (with directory) you want
 //      phiWgtOnly = kTRUE runs the StPhiWgtMaker only
-//      GC         = kTRUE runs the Grid Collector
 //
 // Usage: 
 // doFlowEvents.C(nEvents, "-", "some_directory/some_dst_file.root")
@@ -46,34 +44,6 @@
 //        .q
 //eof
 //
-// Examples using the Grid Collector
-// 0) The Bool_t argument, GC, must be kTRUE in order to access Grid
-//    Collector functions
-// 1) process first ten events generated, request is default at the end of this file
-// .x doFlowEvents.C(10, kFALSE, kTRUE)
-// 2) specify the request as a string argument (analyze the event branch of
-//    selected data). First argument 0 (or smaller)
-//    indicates that all events satisfying the condition will be analyzed.
-// .x doFlowEvents.C(0, "select event where Production=P02gg and NV0>2000", kFALSE, kTRUE)
-// 3) specify the request in a text file
-// .x doFlowEvents.C(0, "@./request.txt", kFALSE, kTRUE)
-//
-//  The rules for constructing valid conditions are as follows
-//  a) simple conditions can be joined together with logical operator "AND",
-//     "OR", "XOR" and "!" (for NOT).
-//  b) a simple condition is a range such as 'p1 < name' and 'p1 <= name <
-//     p2'.  The supported range operators are >, >=, <, <=, == and !=.
-//     The name is the name of a leaf of the ROOT tree in tags.root files.
-//     In case a leaf contains many values, the name to be used are of the
-//     form leaf_name[0], leaf_name[1], and so on.
-//  c) only '==' operator is supported for string attributes.  To ensure
-//     a string literal is definitely treated as a string literal, not a
-//     name, it should be quoted either with "" or with ''.
-//
-// Put in your .cshrc:
-//  at RCF: setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/star/data10/gc/lib
-//  at PDSF: setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/auto/pdsfdv65/starprod/collector/lib
-//
 // Author List: Torre Wenaus, BNL  2/99
 //              Victor Perevoztchikov
 //              Art Poskanzer
@@ -83,13 +53,12 @@
 //              John Wu
 //  
 ///////////////////////////////////////////////////////////////////////////////
-#include <iostream.h> // needed on Solaris
 class    StChain;
 StChain  *chain = 0;
 TBrowser *b = 0;
 Int_t    RunType;
 Char_t*  OutPicoDir;
-class    StFileI;
+ class    StFileI;
 StFileI* setFiles = 0;
 TString  mainBranch;
 
@@ -97,19 +66,14 @@ const char *dstFile = 0;
 const char *fileList[] = {dstFile, 0};
 
 //--------- Prototypes -----------
-void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly = kFALSE,
-		  Bool_t GC = kFALSE);
+void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly = kFALSE);
 void doFlowEvents(Int_t nEvents, const Char_t *path, const Char_t *file, 
-		  Bool_t phiWgtOnly = kFALSE, Bool_t GC = kFALSE);
-void doFlowEvents(Int_t nEvents, const Char_t *path/file, 
-		  Bool_t phiWgtOnly = kFALSE, Bool_t GC = kFALSE);
-void doFlowEvents(Int_t nEvents = 2, Bool_t phiWgtOnly = kFALSE, Bool_t GC = kFALSE);
-
-int  gcReadCommands(const char *file, TString& cmds);
-int  gcInit  (const char *request); 
+		  Bool_t phiWgtOnly = kFALSE);
+void doFlowEvents(Int_t nEvents, const Char_t *path/file, Bool_t phiWgtOnly = kFALSE);
+void doFlowEvents(Int_t nEvents = 2, Bool_t phiWgtOnly = kFALSE);
 
 // -------- Here is the actual method ----------
-void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Bool_t GC)
+void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
 {
   cout <<  endl << endl <<" doFlowEvents - input # events = " << nEvents << endl;
   Int_t ilist = 0;
@@ -117,9 +81,6 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     cout << " doFlowEvents - input fileList = " << fileList[ilist] << endl;
     ilist++; 
   }
-
-  //Bool_t IO = kFALSE; // don't use the IOMaker for old muDsts, needed for mevSim
-  Bool_t IO = kTRUE; // use the IOMaker for muDst; needed for new (P05) MuDsts
 
   Int_t maxTheta = 5;
   Int_t nSels    = 2;
@@ -129,16 +90,6 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   } else {
     cout << " doFlowEvents - phiWgtOnly = kFALSE" << endl;
   }
-  if (GC) {
-    cout << " doFlowEvents - GC = kTRUE" << endl;
-  } else {
-    cout << " doFlowEvents - GC = kFALSE" << endl;
-  }
-  if (IO) {
-    cout << " doFlowEvents - IO = kTRUE" << endl;
-  } else {
-    cout << " doFlowEvents - IO = kFALSE" << endl;
-  }
   cout << endl << endl;
 
   //
@@ -146,22 +97,12 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   //
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
-  gSystem->Load("StarMagField"); // ?
-  gSystem->Load("StMagF");       // ?
-  
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowAnalysisMaker");
   
-  // Read the GC request or make a chain with a file list
+  // Make a chain with a file list
   chain  = new StChain("StChain");
-  setFiles = 0;
-  if (GC) {	// Grid Collector
-    int nev = gcInit(fileList[0]); 
-    if (nev<=0) return;
-    if (nEvents <= 0) nEvents = nev;
-  } else {	// Normal case -- user has specified a list of files
-    setFiles = new StFile(fileList);
-  }
+  setFiles = new StFile(fileList);
   
   //
   // Make Selection objects
@@ -170,7 +111,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   StFlowSelection flowSelect;
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
 //   flowSelect.SetPidPart("pr-");               // for parts. wrt plane
-//   flowSelect.SetPtPart(0.15, 6.0);             // for parts. wrt plane
+//   flowSelect.SetPtPart(0.15, 6.0);            // for parts. wrt plane
 //   flowSelect.SetPtBinsPart(60);               // for parts. wrt plane
 //   flowSelect.SetPPart(0.15, 5.);              // for parts. wrt plane
 //   flowSelect.SetEtaPart(-1.3, 1.3);           // for parts. wrt plane
@@ -178,37 +119,18 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //   flowSelect.SetFitOverMaxPtsPart(0.52, 1.);  // for parts. wrt plane
 //   flowSelect.SetChiSqPart(0.1, 1.3);          // for parts. wrt plane
 //   flowSelect.SetDcaGlobalPart(0., 2.0);       // for parts. wrt plane
-//   flowSelect.SetDcaGlobalPart(0., 0.);        // for mevSim data
 //   flowSelect.SetYPart(-0.5, 0.5);             // for parts. wrt plane
 
   // Uncomment next line if you make a selection object
 //   sprintf(makerName, "Flow");
   
   // Determine the kind of file and instantiate the FlowMaker after the IOMaker
-  if (GC || IO) {
-    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
-    IOMk->SetIOMode("r");
-    IOMk->SetBranch("*",0,"0");	// deactivate all branches
-    if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-    //IOMk->SetDebug(1);
+  StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");	// deactivate all branches
+  if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
 
-    // Maker to read events from file or database into StEvent
-    printf("***GC mainBranch=%s ***\n",mainBranch.Data());
-    if (makerName[0]=='\0') {
-      StFlowMaker* flowMaker = new StFlowMaker();
-    } else {
-      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
-    }
-    if (mainBranch.Contains("mudst")) {
-      flowMaker->MuEventReadGC(kTRUE);
-      cout << "### doFlowEvents: MuDstGC = kTRUE" << endl;
-    } else if (IO) {
-      flowMaker->MuEventReadGC(kTRUE);
-      cout << "### doFlowEvents: IO = kTRUE" << endl;
-    } else {
-      cout << "### doFlowEvents: MuDstGC = kFALSE" << endl;
-    }
-  } else if (strstr(fileList[0], "MuDst.root")) {
+  if (strstr(fileList[0], "MuDst.root")) {
     // Read mu-DST
     if (makerName[0]=='\0') {
       StFlowMaker* flowMaker = new StFlowMaker();
@@ -237,12 +159,6 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     mainBranch.Replace(0,idot+1,"");
     mainBranch += "Branch";
     printf("*** mainBranch=%s ***\n",mainBranch.Data());
-
-    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
-    IOMk->SetIOMode("r");
-    IOMk->SetBranch("*",0,"0");	// deactivate all branches
-    if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-    //IOMk->SetDebug(1);
     
     // Maker to read events from file or database into StEvent
     if (!mainBranch.Contains("eventBranch")) {
@@ -270,25 +186,19 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     bool lyzMaker    = kFALSE;
   } else {
     bool phiWgtMaker = kFALSE;
-    //bool anaMaker    = kFALSE;
-    bool anaMaker  = kTRUE;
+    bool anaMaker    = kTRUE;
     bool cumMaker    = kFALSE;
-    //bool cumMaker  = kTRUE;
     bool spMaker     = kFALSE;
-    //bool spMaker   = kTRUE;
-    bool lyzMaker  = kFALSE;
-    //bool lyzMaker    = kTRUE;
+    bool lyzMaker    = kFALSE;
   }
-
   Bool_t includeTpcTracks  = kTRUE;
+  Bool_t includeFtpcTracks = kTRUE;
+
 // For LYZ and anaMaker
   Float_t ptRange_for_vEta[2] = {0.15, 2.};
   Float_t etaRange_for_vPt[2] = {0., 1.3}; // show only TPC particles in v(pt)
 //   Float_t ptRange_for_vEta[2] = {0., 0.}; // integrate over the full pt range
 //   Float_t etaRange_for_vPt[2] = {0., 0.}; // integrate over the full eta range
-
-//   Bool_t includeFtpcTracks = kFALSE;
-  Bool_t includeFtpcTracks = kTRUE;
 //   Float_t ptRange_for_vEta[2] = {0., 2.};
 //   Float_t etaRange_for_vPt[2] = {2.5, 4.}; // show only FTPC particles in v(pt)
   
@@ -304,7 +214,6 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   // To make full use of it, the cuts for Har1 should allow for FTPC tracks only, 
   // while the cuts for Har2 should use TPC tracks only. This method works for 
   // FTPC eta subevents (SetEtaSubs(kTRUE)) and random subevents (SetEtaSubs(kFALSE)).
-//  Bool_t v1Ep1Ep2 = kTRUE;
   Bool_t v1Ep1Ep2 = kFALSE;
 
   if (makerName[0]=='\0') { // blank if there is no selection object
@@ -372,6 +281,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //   flowMaker->SetPicoEventDir("./");
 
   // Set Debug status
+//  IOMk->SetDebug(1);
 //  flowMaker->SetDebug();
 //  flowAnalysisMaker->SetDebug();
 //  flowPhiWgtMaker->SetDebug();
@@ -410,8 +320,6 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   StFlowCutEvent::SetVertexZ(-30., 30.);
 //   StFlowCutEvent::SetEtaSymTpc(0., 0.);
 //   StFlowCutEvent::SetEtaSymFtpc(0., 0.);
-//   StFlowCutEvent::SetTrigger(1); // necessary for year4, but default = 1
-//   StFlowCutEvent::SetTrigger(10); // necessary for mevSim data
    if (phiWgtOnly) { // all centralities
      StFlowCutEvent::SetCent(0, 0);
    }
@@ -422,9 +330,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSqTpc(0., 0.);
 //   StFlowCutTrack::SetPtTpc(0.15, 12.);
-//   StFlowCutTrack::SetPtTpc(0., 0.); // open wide for mevSim data
 //   StFlowCutTrack::SetEtaTpc(-2.0, 2.0);
-//   StFlowCutTrack::SetEtaTpc(-5.0, 5.0); // open wide for mevSim data
 //   StFlowCutTrack::SetChgTpc(0., 0.);
   
    StFlowCutTrack::IncludeFtpcTracks(includeFtpcTracks);
@@ -432,18 +338,18 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
    StFlowCutTrack::SetChiSqFtpc(0., 4.);
    StFlowCutTrack::SetDcaFtpc(0., 2.);
 //   StFlowCutTrack::SetDcaGlobalFtpc(0., 0.);
-//    StFlowCutTrack::SetPtFtpc(0.15, 6.);
+   StFlowCutTrack::SetPtFtpc(0.15, 2.);
    StFlowCutTrack::SetEtaFtpc(-5.0, 0., 0., 5.0);
 //   StFlowCutTrack::SetChgFtpc(0, 0);
 
   // Set the event plane selections
     // Harmonic 1 means odd, harmonic 2 means even
   // TPC
-   StFlowEvent::SetEtaTpcCut(0.5, 2., 0, 0);  // harmonic 1, selection 1
-//    StFlowEvent::SetEtaTpcCut(0.0, 1., 1, 0);  // harmonic 2, selection 1
-//   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1);  // harmonic 2, selection 2
-//   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
-//   StFlowEvent::SetDcaGlobalTpcCut(0., 1.);    // for event plane
+   StFlowEvent::SetEtaTpcCut(0.5, 2., 0, 0);    // harmonic 1, selection 1
+//   StFlowEvent::SetEtaTpcCut(0.0, 1., 1, 0);  // harmonic 2, selection 1
+//   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1); // harmonic 2, selection 2
+//   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);   // harmonic 2, selection 2
+//   StFlowEvent::SetDcaGlobalTpcCut(0., 1.);   // for event plane
   // FTPC
 //   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 0, 0);  // harmonic 1, selection 1
 //   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 1, 0);  // harmonic 2, selection 1
@@ -521,7 +427,6 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   //
   if (nEvents > 1) {
     chain->Finish();
-    //delete chain; // causes segmentation violation for GC muDst
   } else {
     if (!b) { b = new TBrowser; }
   }
@@ -629,7 +534,7 @@ END:
 
 // ----------- This concatenates the path and the file name ---------------------
 void doFlowEvents(Int_t nEvents, const Char_t *path, const Char_t *file, 
-		  Bool_t phiWgtOnly, Bool_t GC)
+		  Bool_t phiWgtOnly)
 {
   const char *fileListQQ[] = {0,0};
   if (path[0] == '-') {
@@ -637,21 +542,21 @@ void doFlowEvents(Int_t nEvents, const Char_t *path, const Char_t *file,
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-  doFlowEvents(nEvents, fileListQQ, phiWgtOnly, GC);
+  doFlowEvents(nEvents, fileListQQ, phiWgtOnly);
 }
 
-// ----------- When only a file or GC request is specified ---------------------
-void doFlowEvents(Int_t nEvents, const char *file, Bool_t phiWgtOnly, Bool_t GC)
+// ----------- When only a file is specified ---------------------
+void doFlowEvents(Int_t nEvents, const char *file, Bool_t phiWgtOnly)
 {
     printf("*file = %s\n",file);
     const char *fileListQQ[]={0,0};
     fileListQQ[0]=file;
-    cout << "Calling (nEvents, fileListQQ, phiWgtOnly, GC)" << endl;
-    doFlowEvents(nEvents,fileListQQ,phiWgtOnly,GC);
+    cout << "Calling (nEvents, fileListQQ, phiWgtOnly)" << endl;
+    doFlowEvents(nEvents,fileListQQ,phiWgtOnly);
 }
 
 // ----------- This sets default path and file names ---------------------------
-void doFlowEvents(Int_t nEvents, Bool_t phiWgtOnly, Bool_t GC) {
+void doFlowEvents(Int_t nEvents, Bool_t phiWgtOnly) {
 
 //  Char_t* filePath="./";
 //  Char_t* fileExt="*.flowpicoevent.root";
@@ -671,122 +576,30 @@ void doFlowEvents(Int_t nEvents, Bool_t phiWgtOnly, Bool_t GC) {
 
   // run 4 P05ic
   // muDST files
-  Char_t* filePath="/eliza12/starprod/reco/ProductionMinBias/FullField/P05ic/2004/028/";
+  Char_t* filePath="/eliza9/starprod/reco/productionMinBias/ReversedFullField/P05ic/2004/024/";
   if (nEvents < 450) {
-    Char_t* fileExt="st_physics_5028057_raw_1010001.MuDst.root";
+    Char_t* fileExt="st_physics_5024001_raw_1010001.MuDst.root";
    } else {
      Char_t* fileExt="*.MuDst.root";
    }
 
-  doFlowEvents(nEvents, filePath, fileExt, phiWgtOnly, GC);
-}
+  // run 7 P07id
+  // muDST files
+//   Char_t* filePath="/eliza12/starprod/reco/2007ProductionMinBias/FullField/P07id/2007/102/8102049/";
+//   if (nEvents < 450) {
+//     Char_t* fileExt="st_physics_8102049_raw_1010001.MuDst.root";
+//    } else {
+//      Char_t* fileExt="*.MuDst.root";
+//    }
 
-//____________________________________________________________________________
-// read GC command file as one single string,
-// return number of bytes in the command string, cmds.
-
-int gcReadCommands(const char *file, TString& cmds)
-{   
-  if (*file != 0) { // must have a valid file name
-    FILE *inp = 0;
-    inp = fopen(file, "r");
-    if (!inp) { // File not found
-      printf("doFlowEvents: ERROR.  File (%s) Not Found \n", file);
-      return -1;
-    }
-
-    char line[500], *comm, *fst;
-    while(fgets(line, 500, inp)) {
-      for (int i=0; line[i]; i++) // change new line to space
-	if (line[i]=='\t' || line[i]=='\n') line[i]=' ';
-      // strip away comments
-      fst = line + strspn(line," \t");
-      if (fst[0]            == 0 ) continue; // blank line
-      if (fst[0]            =='#') continue; // # comment
-      if (strncmp(fst,"//",2)==0 ) continue; // // comment
-      //comm = strstr(line,"#"  ); if (comm) comm[0]=0; // # comment
-      comm = strstr(line," //"); if (comm) comm[0]=0; // // comment
-      cmds += fst;
-    }
-    fclose(inp);
-  }
-
-  return 0;
-}
-
-//____________________________________________________________________________
-// Initialize global variable setFiles for Grid Collector operations
-// also initialize variable mainBranch
-
-int gcInit(const char *request) 
-{
-  Int_t ierr = 0;
-  gSystem->Load("StGridCollector");
-  StGridCollector *req = StGridCollector::Create();
-  req->SetDebug(1);
-
-  if (request == 0 || *request == 0) {
-    // This is an example to show how to initialize Grid Collector in
-    // another way.
-    const char *argv[] = {
-      "-v", "5",
-      "-c", "/afs/rhic.bnl.gov/star/incoming/GCA/gca.rc"
-      "-s", "MuDST",
-      "-w", "production=P04ih and zdc1Energy>50"
-    };
-    const Int_t argc = sizeof(argv)/4;
-    ierr = req->Init(argc, argv);
-    if (0 != ierr) {
-      std::cout << "doFlowEvents.C can not initialize the Grid Collector "
-		<< "with argument \"";
-      std::cout << *argv;
-      for (Int_t i = 1; i < argc; ++ i)
-	std::cout << " " << argv[i];
-      std::cout << "\"\nError code is " << ierr
-		<< std::endl;
-    }
-  }
-  else if (*request == '@') { // read the command file
-    TString cmds;
-    ierr = gcReadCommands(request+1, cmds);
-    if (!ierr) ierr = req->Init(cmds.Data());
-    if (0 != ierr) {
-      std::cout << "doFlowEvents.C can not initialize the Grid Collector "
-		<< "with argument \"" << cmds.Data()
-		<< "\"\nError code is " << ierr
-		<< std::endl;
-    }
-  }
-  else { // use the input value directly
-    ierr = req->Init(request);
-    if (0 != ierr) {
-      std::cout << "doFlowEvents.C can not initialize the Grid Collector "
-		<< "with argument \"" << request
-		<< "\"\nError code is " << ierr
-		<< std::endl;
-    }
-  }
-
-  if (0 != ierr) { // initialization failure, message printed already
-    ierr = 0;
-  }
-  else {
-    int nEvents =  req->GetNEvents();
-    std::cout << "INFO: actual number of events " << nEvents << std::endl;
-    setFiles = req;
-    mainBranch = req->GetCompName();
-    mainBranch += "Branch";
-    ierr = nEvents;
-  }
-
-  return ierr;
+  doFlowEvents(nEvents, filePath, fileExt, phiWgtOnly);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
-// Revision 1.63  2007/02/06 19:06:39  posk
-// In Lee Yang Zeros method, SetReCent() default is true. For other methods it is false.
+// Revision 1.64  2009/07/24 21:00:11  posk
+// Removed John Wu's Grid Collector.
 //
 // Revision 1.61  2006/03/22 22:15:26  posk
 // Updated to read the flow.firstPassLYZ.root files.
