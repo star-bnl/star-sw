@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.20 2007/10/16 19:49:46 fisyak Exp $
+ * $Id: StMcEventMaker.h,v 1.21 2009/07/24 19:06:41 perev Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.21  2009/07/24 19:06:41  perev
+ * Btof added (Geurts)
+ *
  * Revision 1.20  2007/10/16 19:49:46  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -100,7 +103,7 @@ public:
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.20 2007/10/16 19:49:46 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.21 2009/07/24 19:06:41 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -117,6 +120,7 @@ public:
     Bool_t  doUseCtb;              //!
     Bool_t  doUseTofp;             //!
     Bool_t  doUseTof;              //!
+    Bool_t  doUseBtof;             //!
     Bool_t  doUseEemc;             //!
     Bool_t  doUsePixel;            //!
     Bool_t  doUseIst;              //!
