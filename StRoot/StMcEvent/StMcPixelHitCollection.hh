@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHitCollection.hh,v 2.2 2005/05/11 20:54:29 calderon Exp $
+ * $Id: StMcPixelHitCollection.hh,v 2.3 2009/07/24 19:08:07 perev Exp $
  * $Log: StMcPixelHitCollection.hh,v $
+ * Revision 2.3  2009/07/24 19:08:07  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.2  2005/05/11 20:54:29  calderon
  * Added persistency: ClassImp, ClassDef and inheritance from StObject.
  *
@@ -22,7 +25,7 @@ class StMcPixelHitCollection : public StObject {
 public:
 
     StMcPixelHitCollection();
-    ~StMcPixelHitCollection();
+    virtual ~StMcPixelHitCollection();
     
     bool addHit(StMcPixelHit*);
     unsigned long numberOfHits() const;

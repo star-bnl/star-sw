@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcSectorHitCollection.hh,v 2.2 2005/01/27 23:40:49 calderon Exp $
+ * $Id: StMcTpcSectorHitCollection.hh,v 2.3 2009/07/24 19:08:09 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcSectorHitCollection.hh,v $
+ * Revision 2.3  2009/07/24 19:08:09  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.2  2005/01/27 23:40:49  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -33,7 +36,7 @@ class StMcTpcSectorHitCollection : public StObject
 {    
 public:
     StMcTpcSectorHitCollection();
-    ~StMcTpcSectorHitCollection();
+    virtual ~StMcTpcSectorHitCollection();
     // StMcTpcSectorHitCollection(const StMcTpcSectorHitCollection&);            use default
     // StMcTpcSectorHitCollection& operator=(const StMcTpcSectorHitCollection&); use default
     

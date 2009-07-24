@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHitCollection.hh,v 2.2 2005/01/27 23:40:49 calderon Exp $
+ * $Id: StMcTpcHitCollection.hh,v 2.3 2009/07/24 19:08:09 perev Exp $
  * $Log: StMcTpcHitCollection.hh,v $
+ * Revision 2.3  2009/07/24 19:08:09  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.2  2005/01/27 23:40:49  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -27,7 +30,7 @@ class StMcTpcHit;
 class StMcTpcHitCollection : public StObject {
 public:
     StMcTpcHitCollection();
-    ~StMcTpcHitCollection();
+    virtual ~StMcTpcHitCollection();
     // StMcTpcHitCollection(const StMcTpcHitCollection&);            use default
     // StMcTpcHitCollection& operator=(const StMcTpcHitCollection&); use default
     

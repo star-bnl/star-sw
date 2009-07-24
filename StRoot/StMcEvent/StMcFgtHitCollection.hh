@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHitCollection.hh,v 2.1 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcFgtHitCollection.hh,v 2.2 2009/07/24 19:08:07 perev Exp $
  *
  * $Log: StMcFgtHitCollection.hh,v $
+ * Revision 2.2  2009/07/24 19:08:07  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.1  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -19,7 +22,7 @@ class StMcFgtHitCollection : public StObject {
 public:
     
     StMcFgtHitCollection();
-    ~StMcFgtHitCollection();
+    virtual ~StMcFgtHitCollection();
     
     bool addHit(StMcFgtHit*);
     unsigned long numberOfHits() const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtBarrelHitCollection.hh,v 2.3 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcSvtBarrelHitCollection.hh,v 2.4 2009/07/24 19:08:08 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, March 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtBarrelHitCollection.hh,v $
+ * Revision 2.4  2009/07/24 19:08:08  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.3  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -36,7 +39,7 @@ class StMcSvtBarrelHitCollection : public StObject
 {    
 public:
     StMcSvtBarrelHitCollection();
-    ~StMcSvtBarrelHitCollection();
+    virtual ~StMcSvtBarrelHitCollection();
     // StMcSvtBarrelHitCollection(const StMcSvtBarrelHitCollection&); use default
     // const StMcSvtBarrelHitCollection&
     // operator=(const StMcSvtBarrelHitCollection&);               use default

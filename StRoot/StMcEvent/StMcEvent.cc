@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.28 2007/10/16 19:49:13 fisyak Exp $
+ * $Id: StMcEvent.cc,v 2.29 2009/07/24 19:08:06 perev Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.29  2009/07/24 19:08:06  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.28  2007/10/16 19:49:13  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -125,6 +128,7 @@
 #include "StMcSsdHitCollection.hh"
 #include "StMcEmcHitCollection.hh"
 #include "StMcTofHitCollection.hh"
+#include "StMcBTofHitCollection.hh"
 #include "StMcPixelHitCollection.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcFgtHitCollection.hh"
@@ -138,6 +142,7 @@
 #include "StMcSsdHit.hh"
 #include "StMcCalorimeterHit.hh"
 #include "StMcTofHit.hh"
+#include "StMcBTofHit.hh"
 #include "StMcPixelHit.hh"
 #include "StMcIstHit.hh"
 #include "StMcFgtHit.hh"
@@ -145,90 +150,17 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.28 2007/10/16 19:49:13 fisyak Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.28 2007/10/16 19:49:13 fisyak Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.29 2009/07/24 19:08:06 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.29 2009/07/24 19:08:06 perev Exp $";
 ClassImp(StMcEvent);
-#if 0
-template<class T> void
-_lookup(T*& val, StSPtrVecObject &vec)
-{
-    val = 0;
-    for (unsigned int i=0; i<vec.size(); i++)
-        if (vec[i] && typeid(*vec[i]) == typeid(T)) {
-            val = static_cast<T*>(vec[i]);
-            break;
-        }
-}
-
-template<class T> void
-_lookupOrCreate(T*& val, StSPtrVecObject &vec)
-{
-    T* t = 0;
-    _lookup(t, vec);
-    if (!t) {
-        t = new T;
-        vec.push_back(t);
-    }
-    val = t;
-}
-
-template<class T> void
-_lookupAndSet(T* val, StSPtrVecObject &vec)
-{
-    for (unsigned int i=0; i<vec.size(); i++)
-        if (vec[i] && typeid(*vec[i]) == typeid(T)) {
-            delete vec[i];
-            vec[i] = val;
-            return;
-        }
-    if (!val) return;
-    vec.push_back(val);
-}
-
-template<class T> void
-_lookupDynamic(T*& val, StSPtrVecObject &vec)
-{
-    val = 0;
-    for (unsigned int i=0; i<vec.size(); i++)
-        if (vec[i]) {
-	    val = dynamic_cast<T*>(vec[i]);
-	    if (val) break;	    
-	}
-}
-
-template<class T> void
-_lookupDynamicAndSet(T* val, StSPtrVecObject &vec)
-{
-    T *test;
-    for (unsigned int i=0; i<vec.size(); i++) {
-        if (vec[i]) {
-	    test = dynamic_cast<T*>(vec[i]);
-	    if (test) {
-		delete vec[i];
-		vec[i] = val;
-		return;
-	    }	    
-	}
-    }
-    if (!val) return;
-    vec.push_back(val);
-}
-#endif
+//______________________________________________________________________________
 void StMcEvent::initToZero()
 {
-    
-    mPrimaryVertex = 0;       
-    mTpcHits = 0;             
-    mSvtHits = 0;             
-    mSsdHits = 0;       
-    mFtpcHits = 0;            
-    mRichHits = 0;            
-    mCtbHits = 0;
-    mTofHits = 0;
-    mPixelHits = 0;
-    mIstHits = 0;
-    mFgtHits = 0;
-
+    memset(mBeg,0,mEnd-mBeg+1);    
+}
+//______________________________________________________________________________
+void StMcEvent::makeColls()
+{
     // Create the collections
     
     mTpcHits  = new StMcTpcHitCollection();
@@ -236,44 +168,21 @@ void StMcEvent::initToZero()
     mSsdHits  = new StMcSsdHitCollection();
     mFtpcHits = new StMcFtpcHitCollection();
     mRichHits = new StMcRichHitCollection();
-    mCtbHits = new StMcCtbHitCollection();
-#if 0
-    mBemcHits  = new StMcEmcHitCollection();
-    mBprsHits  = new StMcEmcHitCollection();
-    mBsmdeHits = new StMcEmcHitCollection();
-    mBsmdpHits = new StMcEmcHitCollection();
-#endif
-    mTofHits = new StMcTofHitCollection();
-#if 0
-    mEemcHits = new StMcEmcHitCollection();
-    mEprsHits = new StMcEmcHitCollection();
-    mEsmduHits = new StMcEmcHitCollection();
-    mEsmdvHits = new StMcEmcHitCollection();
-#endif
+    mCtbHits  = new StMcCtbHitCollection();
+    mTofHits  = new StMcTofHitCollection();
+    mBTofHits = new StMcBTofHitCollection();
     mPixelHits = new StMcPixelHitCollection();
-    mIstHits = new StMcIstHitCollection();
-    mFgtHits = new StMcFgtHitCollection();
+    mIstHits   = new StMcIstHitCollection();
+    mFgtHits   = new StMcFgtHitCollection();
 }
 
-StMcEvent::StMcEvent()    
-    :TDataSet("StMcEvent"),
-     mEventGeneratorEventLabel(0),
-     mEventNumber(0),
-     mRunNumber(0),
-     mType(0),
-     mZWest(0),
-     mNWest(0),
-     mZEast(0),
-     mNEast(0),
-     mPrimaryTracks(0),
-     mSubProcessId(0),
-     mImpactParameter(0),
-     mPhiReactionPlane(0),
-     mTriggerTimeOffset(0)
+//______________________________________________________________________________
+StMcEvent::StMcEvent() :TDataSet("StMcEvent")
 {
     initToZero();
 }
 
+//______________________________________________________________________________
 StMcEvent::StMcEvent(g2t_event_st* evTable)
     :TDataSet("StMcEvent"),
      mEventGeneratorEventLabel(evTable->eg_label),
@@ -296,47 +205,30 @@ StMcEvent::StMcEvent(g2t_event_st* evTable)
      mNJets(evTable->njets)
 {
     initToZero();
+    makeColls();
 }
 
 
+//______________________________________________________________________________
 StMcEvent::StMcEvent(const StMcEvent&) { /* noop */} // private
 
+//______________________________________________________________________________
 const StMcEvent&
 StMcEvent::operator=(const StMcEvent&) { return *this;} // private
 
 StMcEvent::~StMcEvent()
 {
-  SafeDelete(mTpcHits);
-  SafeDelete(mSvtHits);
-  SafeDelete(mSsdHits);
-  SafeDelete(mFtpcHits);
-  SafeDelete(mRichHits);
-  SafeDelete(mCtbHits);
-#if 0    
-  SafeDelete(mBemcHits);
-  SafeDelete(mBprsHits);
-  SafeDelete(mBsmdeHits);
-  SafeDelete(mBsmdpHits);
-  SafeDelete(mTofHits);
-  SafeDelete(mEemcHits);
-  SafeDelete(mEprsHits);
-  SafeDelete(mEsmduHits);
-  SafeDelete(mEsmdvHits);
-#endif    
-  SafeDelete(mPixelHits);
-  SafeDelete(mIstHits);
-  SafeDelete(mFgtHits);
-  for(StMcTrackIterator it=mTracks.begin();
-      it != mTracks.end(); it++)
-    delete *it;    
+  for (int jk=1; mBegColl+jk<mEndColl;jk++) { 
+    delete mBegColl[jk]; mBegColl[jk]=0;
+  }
+  for(int jk=0;jk<(int)mTracks.size()  ;jk++) {delete mTracks[jk]  ;}    
   mTracks.clear();
   
-  for(StMcVertexIterator iv=mVertices.begin();
-      iv != mVertices.end(); iv++)
-    delete *iv;
+  for(int jk=0;jk<(int)mVertices.size();jk++) {delete mVertices[jk];}
   mVertices.clear();
 }
 
+//______________________________________________________________________________
 int StMcEvent::operator==(const StMcEvent& e) const
 {
   return (e.mEventNumber == mEventNumber &&
@@ -345,11 +237,13 @@ int StMcEvent::operator==(const StMcEvent& e) const
 	  );  
 }
 
+//______________________________________________________________________________
 int StMcEvent::operator!=(const StMcEvent& e) const
 {
     return !(e == *this);   // invoke operator==()
 }
 
+//______________________________________________________________________________
 ostream&  operator<<(ostream& os, const StMcEvent& e)
 {
     os << "Label: " << e.eventGeneratorEventLabel()
@@ -372,132 +266,172 @@ ostream&  operator<<(ostream& os, const StMcEvent& e)
 }
 
 
+//______________________________________________________________________________
 void StMcEvent::setEventGeneratorEventLabel(unsigned long val) { mEventGeneratorEventLabel = val; }
 
+//______________________________________________________________________________
 void StMcEvent::setEventNumber(unsigned long  val) { mEventNumber = val;  }
 
+//______________________________________________________________________________
 void StMcEvent::setRunNumber(unsigned long val) { mRunNumber = val; }                
 
+//______________________________________________________________________________
 void StMcEvent::setType(unsigned long val) { mType = val; }              
 
+//______________________________________________________________________________
 void StMcEvent::setZWest(unsigned long val) { mZWest = val; }              
+//______________________________________________________________________________
 
 void StMcEvent::setNWest(unsigned long val) { mNWest = val; }     
 
+//______________________________________________________________________________
 void StMcEvent::setZEast(unsigned long val) { mZEast = val; }              
 
+//______________________________________________________________________________
 void StMcEvent::setNEast(unsigned long val) { mNEast = val; }     
 
+//______________________________________________________________________________
 void StMcEvent::setEventGeneratorFinalStateTracks(unsigned long val){ mEvGenFSTracks = val; } 
 
+//______________________________________________________________________________
 void StMcEvent::setNumberOfPrimaryTracks(unsigned long val){ mPrimaryTracks = val; } 
 
+//______________________________________________________________________________
 void StMcEvent::setImpactParameter(float val) { mImpactParameter = val; }               
 
+//______________________________________________________________________________
 void StMcEvent::setPhiReactionPlane(float val) { mPhiReactionPlane = val; } 
 
+//______________________________________________________________________________
 void StMcEvent::setTriggerTimeOffset(float val) { mTriggerTimeOffset = val; }
 
+//______________________________________________________________________________
 void StMcEvent::setNBinary(unsigned long val) { mNBinary = val; }
 
+//______________________________________________________________________________
 void StMcEvent::setNWoundedEast(unsigned long val) { mNWoundedEast = val; }
 
+//______________________________________________________________________________
 void StMcEvent::setNWoundedWest(unsigned long val) { mNWoundedWest = val; }
 
+//______________________________________________________________________________
 void StMcEvent::setNJets(unsigned long val) { mNJets = val; }
 
+//______________________________________________________________________________
 void StMcEvent::setPrimaryVertex(StMcVertex* val) {  mPrimaryVertex = val; }
 
+//______________________________________________________________________________
 void StMcEvent::setTpcHitCollection(StMcTpcHitCollection* val)
 {   
     if (mTpcHits && mTpcHits!= val) delete mTpcHits;
     mTpcHits = val;
 }               
 
+//______________________________________________________________________________
 void StMcEvent::setSvtHitCollection(StMcSvtHitCollection* val)
 {
     if (mSvtHits && mSvtHits!= val) delete mSvtHits;
     mSvtHits = val;
 }               
 
+//______________________________________________________________________________
 void StMcEvent::setSsdHitCollection(StMcSsdHitCollection* val)
 {
     if (mSsdHits && mSsdHits!= val) delete mSsdHits;
     mSsdHits = val;
 }               
 
+//______________________________________________________________________________
 void StMcEvent::setFtpcHitCollection(StMcFtpcHitCollection* val)
 {
     if (mFtpcHits && mFtpcHits!= val) delete mFtpcHits;
     mFtpcHits = val;
 }              
 
+//______________________________________________________________________________
 void StMcEvent::setRichHitCollection(StMcRichHitCollection* val)
 {
     if (mRichHits && mRichHits!= val) delete mRichHits;
     mRichHits = val;
 }              
 #if 0
+//______________________________________________________________________________
 void StMcEvent::setBemcHitCollection(StMcEmcHitCollection* val)
 {
     if (mBemcHits && mBemcHits!= val) delete mBemcHits;
     mBemcHits = val;
 }              
 
+//______________________________________________________________________________
 void StMcEvent::setBprsHitCollection(StMcEmcHitCollection* val)
 {
     if (mBprsHits && mBprsHits!= val) delete mBprsHits;
     mBprsHits = val;
 }              
 
+//______________________________________________________________________________
 void StMcEvent::setBsmdeHitCollection(StMcEmcHitCollection* val)
 {
     if (mBsmdeHits && mBsmdeHits!= val) delete mBsmdeHits;
     mBsmdeHits = val;
 }              
 
+//______________________________________________________________________________
 void StMcEvent::setBsmdpHitCollection(StMcEmcHitCollection* val)
 {
     if (mBsmdpHits && mBsmdpHits!= val) delete mBsmdpHits;
     mBsmdpHits = val;
 }              
 #endif
+//______________________________________________________________________________
 void StMcEvent::setTofHitCollection(StMcTofHitCollection* val)
 {
     if (mTofHits && mTofHits!= val) delete mTofHits;
     mTofHits = val;
 }
+//______________________________________________________________________________
+void StMcEvent::setBTofHitCollection(StMcBTofHitCollection* val)
+{
+    if (mBTofHits && mBTofHits!= val) delete mBTofHits;
+    mBTofHits = val;
+}
 #if 0
+//______________________________________________________________________________
 void StMcEvent::setEemcHitCollection(StMcEmcHitCollection* val)
 {
     if (mEemcHits && mEemcHits!= val) delete mEemcHits;
     mEemcHits = val;
 }
 
+//______________________________________________________________________________
 void StMcEvent::setEprsHitCollection(StMcEmcHitCollection* val)
 {
     if (mEprsHits && mEprsHits!= val) delete mEprsHits;
     mEprsHits = val;
 }
 
+//______________________________________________________________________________
 void StMcEvent::setEsmduHitCollection(StMcEmcHitCollection* val)
 {
     if (mEsmduHits && mEsmduHits!= val) delete mEsmduHits;
     mEsmduHits = val;
 }
 
+//______________________________________________________________________________
 void StMcEvent::setEsmdvHitCollection(StMcEmcHitCollection* val)
 {
     if (mEsmdvHits && mEsmdvHits!= val) delete mEsmdvHits;
     mEsmdvHits = val;
 }
 #endif
+//______________________________________________________________________________
 void StMcEvent::setPixelHitCollection(StMcPixelHitCollection* val)
 {
     if (mPixelHits && mPixelHits!= val) delete mPixelHits;
     mPixelHits = val;
 }   
 
+//______________________________________________________________________________
 void StMcEvent::setIstHitCollection(StMcIstHitCollection* val)
 {
     if (mIstHits && mIstHits!= val) delete mIstHits;
@@ -505,6 +439,7 @@ void StMcEvent::setIstHitCollection(StMcIstHitCollection* val)
 }
    
 
+//______________________________________________________________________________
 void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
 {
     if (mFgtHits && mFgtHits!= val) delete mFgtHits;
@@ -725,6 +660,7 @@ void StMcEvent::Print(Option_t *option) const {
   }
   PrintHitCollectionW(Ssd,ssd,ladder,Ladders,wafer,Wafers);
   PrintHitCollection(Tof,tof);
+  PrintHitCollection(BTof,btof);
   PrintHitCollectionL(Pixel,pixel,layer,Layers);
   PrintHitCollectionL(Ist,ist,layer,Layers);
   PrintHitCollectionL(Fgt,fgt,layer,Layers);

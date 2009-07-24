@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHitCollection.hh,v 2.3 2009/02/06 15:38:12 fisyak Exp $
+ * $Id: StMcIstHitCollection.hh,v 2.4 2009/07/24 19:08:07 perev Exp $
  * $Log: StMcIstHitCollection.hh,v $
+ * Revision 2.4  2009/07/24 19:08:07  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.3  2009/02/06 15:38:12  fisyak
  * Jonathan: decoding for upgr15 geometry
  *
@@ -28,7 +31,7 @@ class StMcIstHitCollection : public StObject {
 public:
 
     StMcIstHitCollection();
-    ~StMcIstHitCollection();
+    virtual ~StMcIstHitCollection();
     
     bool addHit(StMcIstHit*);
     unsigned long numberOfHits() const;

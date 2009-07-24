@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.23 2007/10/16 19:49:13 fisyak Exp $
+ * $Id: StMcEvent.hh,v 2.24 2009/07/24 19:08:06 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.24  2009/07/24 19:08:06  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.23  2007/10/16 19:49:13  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -111,6 +114,7 @@
 #include "TString.h"
 #include "TDataSet.h"
 #include "TBrowser.h"
+class StObject;
 class StMcTpcHitCollection;
 class StMcFtpcHitCollection;
 class StMcRichHitCollection;
@@ -119,6 +123,7 @@ class StMcSvtHitCollection;
 class StMcSsdHitCollection;
 #include "StMcEmcHitCollection.hh"
 class StMcTofHitCollection;
+class StMcBTofHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
 class StMcFgtHitCollection;
@@ -136,6 +141,7 @@ class StMcEvent : public TDataSet {
   int operator!=(const StMcEvent&) const;
   
   void initToZero();
+  void makeColls();
   
   
   //"Get" Methods
@@ -198,6 +204,8 @@ class StMcEvent : public TDataSet {
   			      
   StMcTofHitCollection*          tofHitCollection()       {return mTofHits;}		
   const StMcTofHitCollection*    tofHitCollection() const {return mTofHits;}
+  StMcBTofHitCollection*         btofHitCollection()       {return mBTofHits;}		
+  const StMcBTofHitCollection*   btofHitCollection() const {return mBTofHits;}
   			      
   StMcEmcHitCollection*         eemcHitCollection()       {return emcHitCollection("EemcHits");}
   const StMcEmcHitCollection*   eemcHitCollection() const {return emcHitCollection("EemcHits");}
@@ -248,6 +256,7 @@ class StMcEvent : public TDataSet {
   void setBsmdpHitCollection(StMcEmcHitCollection*);              
 #endif
   void setTofHitCollection(StMcTofHitCollection*);
+  void setBTofHitCollection(StMcBTofHitCollection*);
 #if 0
   void setEemcHitCollection(StMcEmcHitCollection*);              
   void setEprsHitCollection(StMcEmcHitCollection*);              
@@ -260,6 +269,7 @@ class StMcEvent : public TDataSet {
   virtual void Print(Option_t *option="") const; // *MENU* 
   virtual void Browse(TBrowser *b) {TDataSet::Browse(b); Print("");}
  protected:
+  char mBeg[1];
   unsigned long                  mEventGeneratorEventLabel;
   unsigned long                  mEventNumber;
   unsigned long                  mRunNumber;
@@ -279,33 +289,22 @@ class StMcEvent : public TDataSet {
   unsigned long                  mNWoundedWest;      // Number of Wounded Nucleons West
   unsigned long                  mNJets;             // Number of Jets
   StMcVertex*                    mPrimaryVertex;
-  StSPtrVecMcVertex              mVertices;
-  StSPtrVecMcTrack               mTracks;
+  StObject*                      mBegColl[1];
   StMcTpcHitCollection*          mTpcHits;
   StMcSvtHitCollection*          mSvtHits;
   StMcSsdHitCollection*          mSsdHits;
   StMcFtpcHitCollection*         mFtpcHits;
   StMcRichHitCollection*         mRichHits;
   StMcCtbHitCollection*          mCtbHits;
-#if 0
-  StMcEmcHitCollection*          mBemcHits;
-  StMcEmcHitCollection*          mBprsHits;
-  StMcEmcHitCollection*          mBsmdeHits;
-  StMcEmcHitCollection*          mBsmdpHits;
-#endif
   StMcTofHitCollection*          mTofHits;
-#if 0
-  StMcEmcHitCollection*          mEemcHits;
-  StMcEmcHitCollection*          mEprsHits;
-  StMcEmcHitCollection*          mEsmduHits;
-  StMcEmcHitCollection*          mEsmdvHits;
-#endif
+  StMcBTofHitCollection*         mBTofHits;
   StMcPixelHitCollection*        mPixelHits;
   StMcIstHitCollection*          mIstHits;
   StMcFgtHitCollection*          mFgtHits;
-#if 0
-  mutable StSPtrVecObject        mContent;
-#endif
+  StObject*                      mEndColl[1];
+  char                           mEnd[1];
+  StSPtrVecMcVertex              mVertices;
+  StSPtrVecMcTrack               mTracks;
   static TString                 mCvsTag;
  private:
   const StMcEvent& operator=(const StMcEvent&);
