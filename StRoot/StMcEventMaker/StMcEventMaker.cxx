@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.66 2007/10/16 19:49:46 fisyak Exp $
+ * $Id: StMcEventMaker.cxx,v 1.67 2009/07/24 19:06:41 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.67  2009/07/24 19:06:41  perev
+ * Btof added (Geurts)
+ *
  * Revision 1.66  2007/10/16 19:49:46  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -292,7 +295,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.66 2007/10/16 19:49:46 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.67 2009/07/24 19:06:41 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -329,8 +332,9 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseBemc        (kTRUE),
     doUseBsmd        (kTRUE),
     doUseCtb         (kTRUE),
-    doUseTofp        (kTRUE),
-    doUseTof         (kTRUE),
+    doUseTofp        (kFALSE),
+    doUseTof         (kFALSE),
+    doUseBtof        (kTRUE),
     doUseEemc        (kTRUE),
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
