@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.27 2009/06/09 19:45:35 jeromel Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.28 2009/07/24 22:33:33 fine Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.28  2009/07/24 22:33:33  fine
+ * Make the code C++ compliant
+ *
  * Revision 1.27  2009/06/09 19:45:35  jeromel
  * Changes for BT#1428
  *
@@ -134,8 +137,48 @@
 
 ClassImp(StTofrMatchMaker)
 
+// Define the  static constants:
+
+const Int_t StTofrMatchMaker::mDAQOVERFLOW = 255;
+const Int_t StTofrMatchMaker::mNTOFP       = 41;
+const Int_t StTofrMatchMaker::mNPVPD       = 6;
+const Int_t StTofrMatchMaker::mNTOFR       = 120;
+const Int_t StTofrMatchMaker::mNTOFR5      = 192;
+
+const Int_t StTofrMatchMaker::mNTOF    = 192;    // 192 for tof in Run 8++
+const Int_t StTofrMatchMaker::mNModule = 32;  // 32 for tofr5++ 
+const Int_t StTofrMatchMaker::mNCell   = 6;
+const Int_t StTofrMatchMaker::mNVPD    = 19;    //
+
+const Int_t StTofrMatchMaker::mEastVpdTrayId = 122;
+const Int_t StTofrMatchMaker::mWestVpdTrayId = 121;
+
+const Int_t StTofrMatchMaker::mNValidTrays_Run3 = 1;
+const Int_t StTofrMatchMaker::mNValidTrays_Run4 = 1;
+const Int_t StTofrMatchMaker::mNValidTrays_Run5 = 1;
+const Int_t StTofrMatchMaker::mNValidTrays_Run6 = 0;
+const Int_t StTofrMatchMaker::mNValidTrays_Run7 = 0;
+const Int_t StTofrMatchMaker::mNValidTrays_Run8 = 5;
+    
+const Int_t StTofrMatchMaker::mTdigBoard  = 10;
+const Int_t StTofrMatchMaker::mTdcOnBoard = 4;
+const Int_t StTofrMatchMaker::mTdcChannel = 1024;
+
 //---------------------------------------------------------------------------
-StTofrMatchMaker::StTofrMatchMaker(const Char_t *name): StMaker(name){
+StTofrMatchMaker::StTofrMatchMaker(const Char_t *name): StMaker(name)
+ , mTofrAdc(mNTOFR,0)
+ , mTofrTdc(mNTOFR,0)
+ , mPvpdAdc(mNPVPD,0)
+ , mPvpdAdcLoRes( mNPVPD,0)
+ , mPvpdTdc(mNPVPD,0)
+    //year 5
+ , mPvpdToT(mNPVPD,0)
+ , mTofr5Tdc(mNTOFR5,0)
+ , mTofr5ToT(mNTOFR5,0) // ToT as adc
+ , mHitCorr(mNValidTrays_Run8,(TH2D*)0)
+ , mHitCorrModule(mNValidTrays_Run8,(TH2D*)0)
+{
+
   // set default values
   mEventCounter = 0;
   mAcceptedEventCounter = 0;
