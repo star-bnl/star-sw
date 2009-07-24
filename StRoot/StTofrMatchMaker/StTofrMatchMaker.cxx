@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.28 2009/07/24 22:33:33 fine Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.29 2009/07/24 22:42:08 fine Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.29  2009/07/24 22:42:08  fine
+ * replace the deprecated API of the STAR messenger
+ *
  * Revision 1.28  2009/07/24 22:33:33  fine
  * Make the code C++ compliant
  *
@@ -216,11 +219,11 @@ StTofrMatchMaker::~StTofrMatchMaker(){ /* nope */}
 //---------------------------------------------------------------------------
 Int_t StTofrMatchMaker::Init(){
   gMessMgr->Info("StTofrMatchMaker -- initializing ...","OS");
-  gMessMgr->Info("","OS") << "Valid TDC range: " << mMinValidTdc << " " << mMaxValidTdc << endm;
-  gMessMgr->Info("","OS") << "Valid ADC range: " << mMinValidAdc << " " << mMaxValidAdc << endm;
-  gMessMgr->Info("","OS") << "Minimum hits per track: " << mMinHitsPerTrack << endm;
-  gMessMgr->Info("","OS") << "Minimum fitpoints per track: " << mMinFitPointsPerTrack << endm;
-  gMessMgr->Info("","OS") << "Maximum DCA: " << mMaxDCA << endm;
+  LOG_INFO  << "Valid TDC range: " << mMinValidTdc << " " << mMaxValidTdc << endm;
+  LOG_INFO  << "Valid ADC range: " << mMinValidAdc << " " << mMaxValidAdc << endm;
+  LOG_INFO  << "Minimum hits per track: " << mMinHitsPerTrack << endm;
+  LOG_INFO  << "Minimum fitpoints per track: " << mMinFitPointsPerTrack << endm;
+  LOG_INFO  << "Maximum DCA: " << mMaxDCA << endm;
   if (!mOuterTrackGeometry)
     gMessMgr->Warning("Warning: using standard trackgeometry()","OS");
   
@@ -233,9 +236,9 @@ Int_t StTofrMatchMaker::Init(){
 
   if (mHisto){
     bookHistograms();
-    gMessMgr->Info("","OS") << "Histograms are booked" << endm;
+    LOG_INFO  << "Histograms are booked" << endm;
     if (mHistoFileName!="")
-      gMessMgr->Info("","OS") << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
+      LOG_INFO  << "Histograms will be stored in " << mHistoFileName.c_str() << endm;
   }
 
   // reset event counters
@@ -295,19 +298,19 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
     
     topNode->ls(9);
     //  TShape *topshape = topNode->GetShape();
-    gMessMgr->Info("","OS") << " # of trays = " << topNode->GetListSize() << endm;
+    LOG_INFO  << " # of trays = " << topNode->GetListSize() << endm;
     TList *list = topNode->Nodes();
     Int_t ibtoh =0;
     TVolumeView *sectorVolume = 0;
     for(Int_t i=0;i<list->GetSize();i++) {
       sectorVolume = dynamic_cast<TVolumeView*> (list->At(i));
       if ( i>=60 ) ibtoh = 1;
-      gMessMgr->Info("","OS") << " test sector size = " <<sectorVolume->GetListSize() << endm;
+      LOG_INFO  << " test sector size = " <<sectorVolume->GetListSize() << endm;
       StTofrGeomTray *tray = new StTofrGeomTray(ibtoh, sectorVolume, topNode);
       tray->Print();
       TVolumeView *trayVolume = tray->GetfView();
       TList *list1 = trayVolume->Nodes();
-      gMessMgr->Info("","OS") << "   # of modules in tray " << tray->Index() << " = " << trayVolume->GetListSize() << endm;
+      LOG_INFO  << "   # of modules in tray " << tray->Index() << " = " << trayVolume->GetListSize() << endm;
       if (!list1 ) continue;
       TVolumeView *sensorVolume = 0;
       for(Int_t j=0;j<list1->GetSize();j++) {
@@ -330,13 +333,13 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
     if(mYear4) mDaqMap->setNValidTrays(mNValidTrays_Run4);
     mDaqMap->init(this);
     //  AddConst(new TObjectSet("tofrDaqMap",mDaqMap));
-    gMessMgr->Info("","OS") << " Initialize Daq map for run 2,3,4 ... " << endm;
+    LOG_INFO  << " Initialize Daq map for run 2,3,4 ... " << endm;
     
     if(Debug()) {
       for(Int_t i=0;i<mNTOFR;i++) {
-	gMessMgr->Info("","OS") << i << " -- adc=" << mDaqMap->DaqChan2ADCChan(i) << " -- tdc=" << mDaqMap->DaqChan2TDCChan(i) << endm;
+	LOG_INFO  << i << " -- adc=" << mDaqMap->DaqChan2ADCChan(i) << " -- tdc=" << mDaqMap->DaqChan2TDCChan(i) << endm;
 	IntVec map = mDaqMap->DaqChan2Cell(i);
-	gMessMgr->Info("","OS") << "    tray=" << map[0] << "  module=" << map[1] << "  cell=" << map[2] << endm;
+	LOG_INFO  << "    tray=" << map[0] << "  module=" << map[1] << "  cell=" << map[2] << endm;
       }
     }
     
@@ -365,7 +368,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
 	mStrobeTdcMin[ii] = strobeDef[i].strobeTdcMin;
 	mStrobeTdcMax[ii] = strobeDef[i].strobeTdcMax;
 	if (Debug())
-	  gMessMgr->Info("","OS") << "tube " << strobeDef[i].id << "  min:"<< strobeDef[i].strobeTdcMin
+	  LOG_INFO  << "tube " << strobeDef[i].id << "  min:"<< strobeDef[i].strobeTdcMin
 				  <<" max:"<< strobeDef[i].strobeTdcMax<< endm;
       }
       
@@ -385,7 +388,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
 	if(adcChan>=60) 
 	  mPedTOFr[ii] = (Double_t)(pedestal[0].adcPedestal[i]);
 	if (Debug())
-	  gMessMgr->Info("","OS") << "daqChannel" << ii << " ped:" << pedestal[0].adcPedestal[i] <<endm;
+	  LOG_INFO  << "daqChannel" << ii << " ped:" << pedestal[0].adcPedestal[i] <<endm;
       }
       
       /*   only test
@@ -402,26 +405,26 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
       Int_t iTray = toftrayconf[0].iTray[i];
       Int_t nModules = toftrayconf[0].nModules[i];
       if(Debug())
-      gMessMgr->Info("","OS") <<  "   " << iTray << " tray has " << nModules << " modules " << endm;
+      LOG_INFO  <<  "   " << iTray << " tray has " << nModules << " modules " << endm;
       }
       */
       
   } else if(mYear5) {
     mDaqMap->setNValidTrays(mNValidTrays_Run5);
     mDaqMap->initFromDbaseY5(this);
-    gMessMgr->Info("","OS") << " Initialize Daq map for run 5 ... " << endm;
+    LOG_INFO  << " Initialize Daq map for run 5 ... " << endm;
     
     if(Debug()) {
       //    if(0) {
       for(Int_t i=0;i<mNTOFR5;i++) {
 	IntVec map = mDaqMap->Tofr5TDCChan2Cell(i);
-	gMessMgr->Info("","OS") << "InitRun():i="<<i<<" tray=" << map[0] << "  module=" << map[1] << "  cell=" << map[2] << endm;
+	LOG_INFO  << "InitRun():i="<<i<<" tray=" << map[0] << "  module=" << map[1] << "  cell=" << map[2] << endm;
       }
     }
     
     /* move INL calibration to StTofCalibMaker
     // read INL table
-    gMessMgr->Info("","OS") << "read in INL table" << endm;
+    LOG_INFO  << "read in INL table" << endm;
     TDataSet *mDbTOFDataSet = this->GetDataBase("Calibrations/tof");
     if(!mDbTOFDataSet) {
       gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
@@ -438,7 +441,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
     tofr5INLtable_st* inltable = static_cast<tofr5INLtable_st*>(tofr5INLtable->GetArray());
     Int_t numRows = tofr5INLtable->GetNRows();
     
-    gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << endm;
+    LOG_INFO  << " Number of rows read in: " << numRows << endm;
     
     Char_t *boardName;
     Short_t boardId;
@@ -457,10 +460,10 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
       boardId = inltable[i].boardNumber;
       tdcId = inltable[i].TDCID;
       if(Debug())
-	gMessMgr->Info("","OS") << " name = " << boardName << " bId = " << boardId << " tdcId = " << tdcId << endm;
+	LOG_INFO  << " name = " << boardName << " bId = " << boardId << " tdcId = " << tdcId << endm;
       for(int j=0;j<mTdcChannel;j++) {
 	INLcorr[j] = inltable[i].INLcorrection[j];
-	if(Debug()&&j%100==0) gMessMgr->Info("","OS") << " j=" << j << " inlcorr=" << INLcorr[j] << endm;
+	if(Debug()&&j%100==0) LOG_INFO  << " j=" << j << " inlcorr=" << INLcorr[j] << endm;
 	mINLtable[boardId][tdcId][j] = INLcorr[j];
       }
             
@@ -470,11 +473,11 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
   } else if(mYear8) {
     mDaqMap->setNValidTrays(mNValidTrays_Run8);
     mDaqMap->initFromDbaseGeneral(this);
-    gMessMgr->Info("","OS") << " Initialize Daq map for run 8 ... " << endm;
+    LOG_INFO  << " Initialize Daq map for run 8 ... " << endm;
 
     mTofINLCorr->setNValidTrays(mNValidTrays_Run8);
     mTofINLCorr->initFromDbase(this);
-    gMessMgr->Info("","OS") << " Initialize INL table for run 8 ... " << endm;
+    LOG_INFO  << " Initialize INL table for run 8 ... " << endm;
 
   }
   
@@ -484,7 +487,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
 //----------------------------------------------------------------------------
 Int_t StTofrMatchMaker::FinishRun(Int_t runnumber){
 
-  gMessMgr->Info("","OS") << "StTofrMatchMaker -- cleaning up geometry (FinishRun)" << endm;
+  LOG_INFO  << "StTofrMatchMaker -- cleaning up geometry (FinishRun)" << endm;
   if (mTofrGeom) delete mTofrGeom;
   mTofrGeom=0;
 
@@ -501,7 +504,7 @@ Int_t StTofrMatchMaker::FinishRun(Int_t runnumber){
 //---------------------------------------------------------------------------
 Int_t StTofrMatchMaker::Finish(){
 
-  gMessMgr->Info("","OS") << "StTofrMatchMaker -----  RUN SUMMARY ----- (Finish)\n"
+  LOG_INFO  << "StTofrMatchMaker -----  RUN SUMMARY ----- (Finish)\n"
        << "\tProcessed "  << mEventCounter << " events."
        << " Accepted  "   << mAcceptedEventCounter << " events."
        << " Rejected  "   << mEventCounter - mAcceptedEventCounter << " events\n"
@@ -569,7 +572,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
     if (adcValid && tdcValid) nAdcTdcTofr++;
   }
   if (Debug())
-    gMessMgr->Info("","OS") << " Tofr #Adc:" << nAdcTofr << "   #Tdc:" << nTdcTofr << endm;
+    LOG_INFO  << " Tofr #Adc:" << nAdcTofr << "   #Tdc:" << nTdcTofr << endm;
 
   //..................................
   // update pVPD tubes counters
@@ -582,7 +585,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
     if (adcValid) nAdcPvpd++;
   }
   if (Debug())
-    gMessMgr->Info("","OS") << " pVPD #Adc:" << nAdcPvpd << "   #Tdc:" << nTdcPvpd << endm;
+    LOG_INFO  << " pVPD #Adc:" << nAdcPvpd << "   #Tdc:" << nTdcPvpd << endm;
 
 
     
@@ -596,11 +599,11 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
     refmult = uncorrectedNumberOfPrimaries(*mEvent);
 
   if (Debug()){
-    gMessMgr->Info("","OS") << " #Tracks           :"      << mEvent->summary()->numberOfTracks()
+    LOG_INFO  << " #Tracks           :"      << mEvent->summary()->numberOfTracks()
 	 << "\n #goodPrimaryTracks:"    << mEvent->summary()->numberOfGoodPrimaryTracks()
 	 << "\n #uncorr.prim.tracks  :" << refmult << endm;
     if (!richTofMuDST)
-      gMessMgr->Info("","OS") << " #goodTracks (global):"  << mEvent->summary()->numberOfGoodTracks() << endm;
+      LOG_INFO  << " #goodTracks (global):"  << mEvent->summary()->numberOfGoodTracks() << endm;
   }
 
   //.........................................................................
@@ -645,15 +648,15 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 	mADCTDCCorelation->Fill(tdcchan, adcchan);
       }
       if(Debug()) {
-	gMessMgr->Info("","OS") <<"A: daqId=" << i << "  rawAdc= " << rawAdc << " rawTdc="<< rawTdc <<endm;
+	LOG_INFO  <<"A: daqId=" << i << "  rawAdc= " << rawAdc << " rawTdc="<< rawTdc <<endm;
       }
     }
   }
   // end of Sect.A
   if(Debug()) {
-    gMessMgr->Info("","OS") << "    total # of cells = " << daqCellsHitVec.size() << endm;
+    LOG_INFO  << "    total # of cells = " << daqCellsHitVec.size() << endm;
     for(size_t iv = 0;iv<validModuleVec.size();iv++) {
-      gMessMgr->Info("","OS") << " module # " << validModuleVec[iv] << " Valid! " << endm;
+      LOG_INFO  << " module # " << validModuleVec[iv] << " Valid! " << endm;
     }
   }
   if(mHisto) {
@@ -739,8 +742,8 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 	      }
 	      
 	      if(Debug()) {
-		gMessMgr->Info("","OS") <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
-		gMessMgr->Info("","OS") <<"   hit position " << hitPos << endm;
+		LOG_INFO  <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
+		LOG_INFO  <<"   hit position " << hitPos << endm;
 	      }
 	    }
 	} // for (Int_t i=0...)
@@ -750,7 +753,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
     } // if(ValidTrack).. 
   } // loop over nodes
   if(Debug())
-    gMessMgr->Info("","OS") << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm;
+    LOG_INFO  << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm;
   if(mHisto) {
     mHitsMultInEvent->Fill(allCellsHitVec.size());
     if(allCellsHitVec.size()) mEventCounterHisto->Fill(7);
@@ -790,7 +793,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
     }
   } //end {sec. C}
   if(Debug()) {
-    gMessMgr->Info("","OS") << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm;
+    LOG_INFO  << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm;
   }
   if(mHisto&&matchHitCellsVec.size()) mEventCounterHisto->Fill(8);
 
@@ -853,20 +856,20 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
       // for multiple hit cells either discard (yes) or
       // find the most likely candidate.
     } else {
-      gMessMgr->Info("","OS") << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
+      LOG_INFO  << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
     }
     
     if (Debug()) {
-      gMessMgr->Info("","OS") << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+      LOG_INFO  << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
       idVectorIter ij=trackIdVec.begin();
-      while (ij != trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-      gMessMgr->Info("","OS") <<endm;
+      while (ij != trackIdVec.end()) { LOG_INFO  << " " << *ij; ij++; }
+      LOG_INFO  <<endm;
     }
     
     tempVec = erasedVec;
   }
   if(Debug())
-    gMessMgr->Info("","OS") << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm;
+    LOG_INFO  << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm;
   //end of Sect.C
   if(mHisto) {
     mCellsPerEventMatch1->Fill(singleHitCellsVec.size()+multiHitsCellsVec.size());
@@ -937,10 +940,10 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 
       // debugging output
       if (Debug()) {
-	gMessMgr->Info("","OS") << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+	LOG_INFO  << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
 	idVectorIter ij=vTrackId.begin();
-	while (ij != vTrackId.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-	gMessMgr->Info("","OS") <<endm;
+	while (ij != vTrackId.end()) { LOG_INFO  << " " << *ij; ij++; }
+	LOG_INFO  <<endm;
       }
     }
     else if (nCells>1){   // for multiple hit cells  find the most likely candidate.
@@ -951,7 +954,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
       Float_t weight(0);
       vector<Int_t> weightCandidates;
       thisMatchFlag = 1;
-      if (Debug()) gMessMgr->Info("","OS") << "E: find ... weight ";
+      if (Debug()) LOG_INFO  << "E: find ... weight ";
       for (Int_t i=0;i<nCells;i++){
 	if(vchannel[i]>=0&&vchannel[i]<mNTOFR) {
 	  Float_t adcwt = mTofrAdc[vchannel[i]]-mPedTOFr[vchannel[i]];
@@ -967,7 +970,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
       if (weightCandidates.size()==1){
 	thiscandidate = weightCandidates[0];
 	Int_t daqId = vchannel[thiscandidate];
-	if (Debug()) gMessMgr->Info("","OS") << "candidate =" << daqId << endm;
+	if (Debug()) LOG_INFO  << "candidate =" << daqId << endm;
       }
 
       // 2. if still undecided check on hitposition
@@ -975,7 +978,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 	Float_t ss(99.);
 	vector<Int_t> ssCandidates;
 	thisMatchFlag = 2;
-	if (Debug()) gMessMgr->Info("","OS") << " ss ";
+	if (Debug()) LOG_INFO  << " ss ";
 	for (unsigned int i=0;i<weightCandidates.size();i++){
 	  Int_t ii=weightCandidates[i];	  
 	  //	  Int_t daqId = vchannel[ii];
@@ -993,7 +996,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 	if (ssCandidates.size()==1){
 	  thiscandidate = ssCandidates[0];
 	  Int_t daqId = vchannel[thiscandidate];
-    	  if (Debug()) gMessMgr->Info("","OS") << "candidate =" << daqId << endm;
+    	  if (Debug()) LOG_INFO  << "candidate =" << daqId << endm;
 	}
 
       }
@@ -1013,18 +1016,18 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 	
 	// debugging output
 	if (Debug()) {
-	  gMessMgr->Info("","OS") << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm;
+	  LOG_INFO  << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm;
 	}
       }
 
     } else {
-      gMessMgr->Info("","OS") << "E: no cells belong to this track ... should not happen!" << endm;
+      LOG_INFO  << "E: no cells belong to this track ... should not happen!" << endm;
     }
 
     tempVec = erasedVec;
   }
 
-  gMessMgr->Info("","OS") << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm;
+  LOG_INFO  << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm;
   // end of Sect.E
 
   //.........................................................................
@@ -1059,7 +1062,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
     Float_t ycenter = (cell-1-2.5)*mWidthPad;
     Float_t dy = FinalMatchedCellsVec[ii].yhit - ycenter;
     if (FinalMatchedCellsVec[ii].trackIdVec.size()!=1)
-      gMessMgr->Info("","OS") << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
+      LOG_INFO  << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
 
     // 1. fill valid single track AND valid tdc histograms
     if (validTdc(mTofrTdc[jj])) nValidSingleHitCells++;
@@ -1126,10 +1129,10 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
       
       // dump debug data
       if (Debug()){
-	gMessMgr->Info("","OS") << "F: itray=" << tray << " imodule=" << module << " icell=" << cell << "\tnodeid:";
+	LOG_INFO  << "F: itray=" << tray << " imodule=" << module << " icell=" << cell << "\tnodeid:";
 	idVectorIter ij=FinalMatchedCellsVec[ii].trackIdVec.begin();
-	while (ij != FinalMatchedCellsVec[ii].trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-	gMessMgr->Info("","OS") << "\tR=" << 1/(theTrackGeometry->helix().curvature())
+	while (ij != FinalMatchedCellsVec[ii].trackIdVec.end()) { LOG_INFO  << " " << *ij; ij++; }
+	LOG_INFO  << "\tR=" << 1/(theTrackGeometry->helix().curvature())
 	     << "\tpT=" << momentum.perp() << "\tp=" << momentum.mag()
 	     << "\thits="<< nHitsPerTrack << "\ts="<< pathLength
 	     << "\t#fitp=" <<theTrack->fitTraits().numberOfFitPoints(kTpcId)
@@ -1137,7 +1140,7 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 	     << " \tdedx=" << dedx
 	     << " \tdca="<< globalTrack->geometry()->helix().distance(mEvent->primaryVertex()->position())<<" and "<<theTrackGeometry->helix().distance(mEvent->primaryVertex()->position());
 	if (cherang!=0) LOG_INFO  << " \trich="<< cherang << " (" << cherang_nph << ")";
-	gMessMgr->Info("","OS") << endm;
+	LOG_INFO  << endm;
       }
 
     } // track exists 
@@ -1148,23 +1151,23 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
   
   //check StEvent collections --
   if (theTof->dataPresent())
-    gMessMgr->Info("","OS") << " TofCollection: raw data container present" << endm;
+    LOG_INFO  << " TofCollection: raw data container present" << endm;
   if (theTof->cellsPresent()){
-    gMessMgr->Info("","OS") << " TofCollection: cell container present."<<endm;
+    LOG_INFO  << " TofCollection: cell container present."<<endm;
     if (Debug()){
       StSPtrVecTofCell& tmpCellTofVec = theTof->tofCells();
       for (size_t i = 0; i < tmpCellTofVec.size(); i++) {
 	StTofCell* p = tmpCellTofVec[i];
-	gMessMgr->Info("","OS") << p->trayIndex() << " " << p->moduleIndex() << " " << p->cellIndex() << " " << p->adc() << " " << p->tdc() << " " << p->associatedTrack() << " " << p->matchFlag() << " " << p->position() << endm;
+	LOG_INFO  << p->trayIndex() << " " << p->moduleIndex() << " " << p->cellIndex() << " " << p->adc() << " " << p->tdc() << " " << p->associatedTrack() << " " << p->matchFlag() << " " << p->position() << endm;
       }
     }
   }
   //-- end check
   
-  gMessMgr->Info("","OS") << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm;
+  LOG_INFO  << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm;
  // end of Sect.F
 
-  gMessMgr->Info("","OS") << "#(cell tracks): " << allCellsHitVec.size()
+  LOG_INFO  << "#(cell tracks): " << allCellsHitVec.size()
        << " #(hit cells): " << FinalMatchedCellsVec.size()
        << " #cells (valid tdc): " << nTdcTofr
        << "\n#(single hits): " << nSingleHitCells 
@@ -1180,11 +1183,11 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
   }
   if (doPrintCpuInfo) {
     timer.stop();
-    gMessMgr->Info("","OS") << "CPU time for StTofrMatchMaker::Make(): "
+    LOG_INFO  << "CPU time for StTofrMatchMaker::Make(): "
 	 << timer.elapsedTime() << " sec\n" << endm;
   }
 
-  gMessMgr->Info("","OS") << "StTofrMatchMaker -- bye-bye" << endm;
+  LOG_INFO  << "StTofrMatchMaker -- bye-bye" << endm;
   return kStOK;
 }
 
@@ -1215,22 +1218,22 @@ Int_t StTofrMatchMaker::processEventYear5(){
   IntVec validchannel = mSortTofRawData->GetValidChannel();
   // Any Hits in TOF+PVPD ?
   if(validchannel.size()<=0) {
-    gMessMgr->Info("","OS") << " No hits in TOF or pVPD! " << endm;
+    LOG_INFO  << " No hits in TOF or pVPD! " << endm;
     // return kStOK;
   } else {
-    gMessMgr->Info("","OS") << " Number of TOF+pVPD fired hits: " << validchannel.size() << endm;
+    LOG_INFO  << " Number of TOF+pVPD fired hits: " << validchannel.size() << endm;
   }
   if(Debug()) {
     for(size_t iv=0;iv<validchannel.size();iv++) {
       //if(validchannel[iv]<0||validchannel[iv]>=mNTOFR5) continue; // skip pvpd
-      gMessMgr->Info("","OS") << " channel = " << validchannel[iv]<<endm;
+      LOG_INFO  << " channel = " << validchannel[iv]<<endm;
       IntVec leTdc = mSortTofRawData->GetLeadingTdc(validchannel[iv]);
       IntVec teTdc = mSortTofRawData->GetTrailingTdc(validchannel[iv]);
       for(size_t iv1=0;iv1<leTdc.size();iv1++) {
-        gMessMgr->Info("","OS") << " leading Tdc = " << leTdc[iv1]<<endm;
+        LOG_INFO  << " leading Tdc = " << leTdc[iv1]<<endm;
       }
       for(size_t iv2=0;iv2<teTdc.size();iv2++) {
-        gMessMgr->Info("","OS") << " trailing Tdc = " << teTdc[iv2] << endm;
+        LOG_INFO  << " trailing Tdc = " << teTdc[iv2] << endm;
       }
     }
   }   // end mdebug 
@@ -1241,7 +1244,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
   refmult = uncorrectedNumberOfPrimaries(*mEvent);
   
   if (Debug()){
-    gMessMgr->Info("","OS") << " #Tracks           :"      << mEvent->summary()->numberOfTracks()
+    LOG_INFO  << " #Tracks           :"      << mEvent->summary()->numberOfTracks()
 	 << "\n #goodPrimaryTracks:"    << mEvent->summary()->numberOfGoodPrimaryTracks()
 	 << "\n #uncorr.prim.tracks  :" << refmult << endm;
   }
@@ -1284,9 +1287,9 @@ Int_t StTofrMatchMaker::processEventYear5(){
 
   // end of Sect.A
   if(Debug()) {
-    gMessMgr->Info("","OS") << "    total # of cells = " << daqCellsHitVec.size() << endm;
+    LOG_INFO  << "    total # of cells = " << daqCellsHitVec.size() << endm;
     for(size_t iv = 0;iv<validModuleVec.size();iv++) {
-      gMessMgr->Info("","OS") << " module # " << validModuleVec[iv] << " Valid! " << endm;
+      LOG_INFO  << " module # " << validModuleVec[iv] << " Valid! " << endm;
     }
   }
   if(mHisto) {
@@ -1372,8 +1375,8 @@ Int_t StTofrMatchMaker::processEventYear5(){
 	      }
 	      
 	      if(Debug()) {
-		gMessMgr->Info("","OS") <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
-		gMessMgr->Info("","OS") <<"   hit position " << hitPos << endm;
+		LOG_INFO  <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
+		LOG_INFO  <<"   hit position " << hitPos << endm;
 	      }
 	      //	    }
 	} // for (Int_t i=0...)
@@ -1383,7 +1386,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
     } // if(ValidTrack).. 
   } // loop over nodes
   if(Debug())
-    gMessMgr->Info("","OS") << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm;
+    LOG_INFO  << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm;
   if(mHisto) {
     mHitsMultInEvent->Fill(allCellsHitVec.size());
     if(allCellsHitVec.size()) mEventCounterHisto->Fill(7);
@@ -1423,7 +1426,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
     }
   } //end {sec. C}
   if(Debug()) {
-    gMessMgr->Info("","OS") << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm;
+    LOG_INFO  << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm;
   }
   if(mHisto&&matchHitCellsVec.size()) mEventCounterHisto->Fill(8);
 
@@ -1486,20 +1489,20 @@ Int_t StTofrMatchMaker::processEventYear5(){
       // for multiple hit cells either discard (yes) or
       // find the most likely candidate.
     } else {
-      gMessMgr->Info("","OS") << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
+      LOG_INFO  << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
     }
     
     if (Debug()) {
-      gMessMgr->Info("","OS") << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+      LOG_INFO  << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
       idVectorIter ij=trackIdVec.begin();
-      while (ij != trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-      gMessMgr->Info("","OS") <<endm;
+      while (ij != trackIdVec.end()) { LOG_INFO  << " " << *ij; ij++; }
+      LOG_INFO  <<endm;
     }
     
     tempVec = erasedVec;
   }
   if(Debug())
-    gMessMgr->Info("","OS") << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm;
+    LOG_INFO  << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm;
   //end of Sect.C
   if(mHisto) {
     mCellsPerEventMatch1->Fill(singleHitCellsVec.size()+multiHitsCellsVec.size());
@@ -1569,10 +1572,10 @@ Int_t StTofrMatchMaker::processEventYear5(){
 
       // debugging output
       if (Debug()) {
-	gMessMgr->Info("","OS") << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+	LOG_INFO  << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
 	idVectorIter ij=vTrackId.begin();
-	while (ij != vTrackId.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-	gMessMgr->Info("","OS") <<endm;
+	while (ij != vTrackId.end()) { LOG_INFO  << " " << *ij; ij++; }
+	LOG_INFO  <<endm;
       }
     }
     else if (nCells>1){   // for multiple hit cells  find the most likely candidate.
@@ -1583,7 +1586,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
       Float_t ss(99.);
       vector<Int_t> ssCandidates;
       thisMatchFlag = 2;
-      if (Debug()) gMessMgr->Info("","OS") << " ss " << endm;
+      if (Debug()) LOG_INFO  << " ss " << endm;
       for (Int_t i=0;i<nCells;i++){
 	Float_t yy = vyhit[i];
 	Float_t ycell = (vcell[i]-1-2.5)*mWidthPad;
@@ -1598,7 +1601,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
       if (ssCandidates.size()==1){
 	thiscandidate = ssCandidates[0];
 	Int_t daqId = vchannel[thiscandidate];
-	if (Debug()) gMessMgr->Info("","OS") << "candidate =" << daqId << endm;
+	if (Debug()) LOG_INFO  << "candidate =" << daqId << endm;
       }
       
 
@@ -1617,18 +1620,18 @@ Int_t StTofrMatchMaker::processEventYear5(){
 	
 	// debugging output
 	if (Debug()) {
-	gMessMgr->Info("","OS") << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm;
+	LOG_INFO  << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm;
 	}
       }
 
     } else {
-      gMessMgr->Info("","OS") << "E: no cells belong to this track ... should not happen!" << endm;
+      LOG_INFO  << "E: no cells belong to this track ... should not happen!" << endm;
     }
 
     tempVec = erasedVec;
   }
 
-  gMessMgr->Info("","OS") << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm;
+  LOG_INFO  << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm;
   // end of Sect.E
 
   //.........................................................................
@@ -1663,7 +1666,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
     Float_t ycenter = (cell-1-2.5)*mWidthPad;
     Float_t dy = FinalMatchedCellsVec[ii].yhit - ycenter;
     if (FinalMatchedCellsVec[ii].trackIdVec.size()!=1)
-      gMessMgr->Info("","OS") << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
+      LOG_INFO  << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
 
 
     /* move INL correction to calibration maker
@@ -1750,10 +1753,10 @@ Int_t StTofrMatchMaker::processEventYear5(){
       
       // dump debug data
       if (Debug()){
-	gMessMgr->Info("","OS") << "F: itray=" << tray << " imodule=" << module << " icell=" << cell << "\tnodeid:";
+	LOG_INFO  << "F: itray=" << tray << " imodule=" << module << " icell=" << cell << "\tnodeid:";
 	idVectorIter ij=FinalMatchedCellsVec[ii].trackIdVec.begin();
-	while (ij != FinalMatchedCellsVec[ii].trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-	gMessMgr->Info("","OS") << "\tR=" << 1/(theTrackGeometry->helix().curvature())
+	while (ij != FinalMatchedCellsVec[ii].trackIdVec.end()) { LOG_INFO  << " " << *ij; ij++; }
+	LOG_INFO  << "\tR=" << 1/(theTrackGeometry->helix().curvature())
 	     << "\tpT=" << momentum.perp() << "\tp=" << momentum.mag()
 	     << "\thits="<< nHitsPerTrack << "\ts="<< pathLength
 	     << "\t#fitp=" <<theTrack->fitTraits().numberOfFitPoints(kTpcId)
@@ -1761,7 +1764,7 @@ Int_t StTofrMatchMaker::processEventYear5(){
 	     << " \tdedx=" << dedx
 	     << " \tdca="<< globalTrack->geometry()->helix().distance(mEvent->primaryVertex()->position())<<" and "<<theTrackGeometry->helix().distance(mEvent->primaryVertex()->position());
 	if (cherang!=0) LOG_INFO  << " \trich="<< cherang << " (" << cherang_nph << ")";
-	gMessMgr->Info("","OS") << endm;
+	LOG_INFO  << endm;
       }
 
     } // track exists 
@@ -1775,24 +1778,24 @@ Int_t StTofrMatchMaker::processEventYear5(){
   
   //check StEvent collections --
   if (theTof->dataPresent())
-    gMessMgr->Info("","OS") << " TofCollection: raw data container present" << endm;
+    LOG_INFO  << " TofCollection: raw data container present" << endm;
   if (theTof->cellsPresent()){
-    gMessMgr->Info("","OS") << " TofCollection: cell container present."<<endm;
+    LOG_INFO  << " TofCollection: cell container present."<<endm;
     if (Debug()){
       StSPtrVecTofCell& tmpCellTofVec = theTof->tofCells();
-      gMessMgr->Info("","OS") << " # of matched cells " << tmpCellTofVec.size() << endm;
+      LOG_INFO  << " # of matched cells " << tmpCellTofVec.size() << endm;
       for (size_t i = 0; i < tmpCellTofVec.size(); i++) {
 	StTofCell* p = tmpCellTofVec[i];
-	gMessMgr->Info("","OS") << p->trayIndex() << " " << p->moduleIndex() << " " << p->cellIndex() << " " << p->trailingEdgeTime() << " " << p->leadingEdgeTime() << " " << p->associatedTrack() << " " << p->matchFlag() << " " << p->position() << endm;
+	LOG_INFO  << p->trayIndex() << " " << p->moduleIndex() << " " << p->cellIndex() << " " << p->trailingEdgeTime() << " " << p->leadingEdgeTime() << " " << p->associatedTrack() << " " << p->matchFlag() << " " << p->position() << endm;
       }
     }
   }
   //-- end check
   
-  gMessMgr->Info("","OS") << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm;
+  LOG_INFO  << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm;
  // end of Sect.F
 
-  gMessMgr->Info("","OS") << "#(cell tracks): " << allCellsHitVec.size()
+  LOG_INFO  << "#(cell tracks): " << allCellsHitVec.size()
        << " #(hit cells): " << FinalMatchedCellsVec.size()
        << "\n#(single hits): " << nSingleHitCells 
        << " #(single valid hits): " << nValidSingleHitCells
@@ -1807,11 +1810,11 @@ Int_t StTofrMatchMaker::processEventYear5(){
   }
   if (doPrintCpuInfo) {
     timer.stop();
-    gMessMgr->Info("","OS") << "CPU time for StTofrMatchMaker::Make(): "
+    LOG_INFO  << "CPU time for StTofrMatchMaker::Make(): "
 	 << timer.elapsedTime() << " sec\n" << endm;
   }
 
-  gMessMgr->Info("","OS") << "StTofrMatchMaker -- bye-bye" << endm;
+  LOG_INFO  << "StTofrMatchMaker -- bye-bye" << endm;
 
 
 
@@ -1860,7 +1863,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
   for(size_t i=0;i<validtray.size();i++) {
     int trayId = validtray[i];
     IntVec validchannel = mSortTofRawData->GetValidChannel(trayId);
-    if(Debug()) gMessMgr->Info("","OS") << " Number of fired hits on tray " << trayId << " = " << validchannel.size() << endm;
+    if(Debug()) LOG_INFO  << " Number of fired hits on tray " << trayId << " = " << validchannel.size() << endm;
 
     for(size_t iv=0;iv<validchannel.size();iv++) {
       IntVec leTdc = mSortTofRawData->GetLeadingTdc(trayId, validchannel[iv], kTRUE);
@@ -1905,10 +1908,10 @@ Int_t StTofrMatchMaker::processEventYear8(){
 
       if(Debug()) {
 	for(size_t iv1=0;iv1<leTdc.size();iv1++) {
-	  gMessMgr->Info("","OS") << " leading Tdc = " << leTdc[iv1]<<endm;
+	  LOG_INFO  << " leading Tdc = " << leTdc[iv1]<<endm;
 	}
 	for(size_t iv2=0;iv2<teTdc.size();iv2++) {
-	  gMessMgr->Info("","OS") << " trailing Tdc = " << teTdc[iv2] << endm;
+	  LOG_INFO  << " trailing Tdc = " << teTdc[iv2] << endm;
 	}
       } // end debug
     } // end channel
@@ -1919,7 +1922,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
   for(int ivpd=0;ivpd<2;ivpd++) { // west and east sides
     int trayId = (ivpd==0) ? mWestVpdTrayId : mEastVpdTrayId;
     IntVec validtube = mSortTofRawData->GetValidChannel(trayId);
-    if(Debug()) gMessMgr->Info("","OS") << " Number of fired hits on tray(vpd) " << trayId << " = " << validtube.size() << endm;
+    if(Debug()) LOG_INFO  << " Number of fired hits on tray(vpd) " << trayId << " = " << validtube.size() << endm;
 
     if(!validtube.size()) continue;
     for(int i=0;i<mNVPD;i++) {
@@ -1943,9 +1946,9 @@ Int_t StTofrMatchMaker::processEventYear8(){
 
   // end of Sect.A
   if(Debug()) {
-    gMessMgr->Info("","OS") << "    total # of cells = " << daqCellsHitVec.size() << endm;
+    LOG_INFO  << "    total # of cells = " << daqCellsHitVec.size() << endm;
     for(size_t iv = 0;iv<validModuleVec.size();iv++) {
-      gMessMgr->Info("","OS") << " module # " << validModuleVec[iv] << " Valid! " << endm;
+      LOG_INFO  << " module # " << validModuleVec[iv] << " Valid! " << endm;
     }
   }
   if(mHisto) {
@@ -2090,8 +2093,8 @@ Int_t StTofrMatchMaker::processEventYear8(){
               }
 
 	      if(Debug()) {
-		gMessMgr->Info("","OS") <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
-		gMessMgr->Info("","OS") <<"   hit position " << hitPos << endm;
+		LOG_INFO  <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
+		LOG_INFO  <<"   hit position " << hitPos << endm;
 	      }
 	    }
 	} // for (Int_t i=0...)
@@ -2103,7 +2106,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     } // if(ValidTrack).. 
   } // loop over nodes
   if(Debug())
-    gMessMgr->Info("","OS") << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm;
+    LOG_INFO  << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm;
   if(mHisto) {
     mHitsMultInEvent->Fill(allCellsHitVec.size());
     if(allCellsHitVec.size()) mEventCounterHisto->Fill(7);
@@ -2160,7 +2163,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     }
   } //end {sec. C}
   if(Debug()) {
-    gMessMgr->Info("","OS") << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm;
+    LOG_INFO  << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm;
   }
   if(mHisto&&matchHitCellsVec.size()) mEventCounterHisto->Fill(8);
 
@@ -2224,20 +2227,20 @@ Int_t StTofrMatchMaker::processEventYear8(){
       // for multiple hit cells either discard (yes) or
       // find the most likely candidate.
     } else {
-      gMessMgr->Info("","OS") << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
+      LOG_INFO  << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
     }
     
     if (Debug()) {
-      gMessMgr->Info("","OS") << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+      LOG_INFO  << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
       idVectorIter ij=trackIdVec.begin();
-      while (ij != trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-      gMessMgr->Info("","OS") <<endm;
+      while (ij != trackIdVec.end()) { LOG_INFO  << " " << *ij; ij++; }
+      LOG_INFO  <<endm;
     }
     
     tempVec = erasedVec;
   }
   if(Debug())
-    gMessMgr->Info("","OS") << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm;
+    LOG_INFO  << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm;
   //end of Sect.C
   if(mHisto) {
     mCellsPerEventMatch1->Fill(singleHitCellsVec.size()+multiHitsCellsVec.size());
@@ -2308,10 +2311,10 @@ Int_t StTofrMatchMaker::processEventYear8(){
 
       // debugging output
       if (Debug()) {
-	gMessMgr->Info("","OS") << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+	LOG_INFO  << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
 	idVectorIter ij=vTrackId.begin();
-	while (ij != vTrackId.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-	gMessMgr->Info("","OS") <<endm;
+	while (ij != vTrackId.end()) { LOG_INFO  << " " << *ij; ij++; }
+	LOG_INFO  <<endm;
       }
     }
     else if (nCells>1){   // for multiple hit cells  find the most likely candidate.
@@ -2322,7 +2325,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
       Float_t ss(99.);
       vector<Int_t> ssCandidates;
       thisMatchFlag = 2;
-      if (Debug()) gMessMgr->Info("","OS") << " ss " << endm;
+      if (Debug()) LOG_INFO  << " ss " << endm;
       for (Int_t i=0;i<nCells;i++){
 	Float_t yy = vyhit[i];
 	Float_t ycell = (vcell[i]-1-2.5)*mWidthPad;
@@ -2337,7 +2340,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
       if (ssCandidates.size()==1){
 	thiscandidate = ssCandidates[0];
 	Int_t daqId = vchannel[thiscandidate];
-	if (Debug()) gMessMgr->Info("","OS") << "candidate =" << daqId << endm;
+	if (Debug()) LOG_INFO  << "candidate =" << daqId << endm;
       }
       
 
@@ -2356,18 +2359,18 @@ Int_t StTofrMatchMaker::processEventYear8(){
 	
 	// debugging output
 	if (Debug()) {
-	gMessMgr->Info("","OS") << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm;
+	LOG_INFO  << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm;
 	}
       }
 
     } else {
-      gMessMgr->Info("","OS") << "E: no cells belong to this track ... should not happen!" << endm;
+      LOG_INFO  << "E: no cells belong to this track ... should not happen!" << endm;
     }
 
     tempVec = erasedVec;
   }
 
-  gMessMgr->Info("","OS") << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm;
+  LOG_INFO  << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm;
   // end of Sect.E
 
   //.........................................................................
@@ -2403,7 +2406,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
 //    Float_t ycenter = (cell-1-2.5)*mWidthPad;
 //    Float_t dy = FinalMatchedCellsVec[ii].yhit - ycenter;
     if (FinalMatchedCellsVec[ii].trackIdVec.size()!=1)
-      gMessMgr->Info("","OS") << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
+      LOG_INFO  << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
 
 
     // Read in Leading and Trailing edge TDC, apply on INL correction
@@ -2444,10 +2447,10 @@ Int_t StTofrMatchMaker::processEventYear8(){
       
       // dump debug data
       if (Debug()){
-	gMessMgr->Info("","OS") << "F: itray=" << tray << " imodule=" << module << " icell=" << cell << "\tnodeid:";
+	LOG_INFO  << "F: itray=" << tray << " imodule=" << module << " icell=" << cell << "\tnodeid:";
 	idVectorIter ij=FinalMatchedCellsVec[ii].trackIdVec.begin();
-	while (ij != FinalMatchedCellsVec[ii].trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
-	gMessMgr->Info("","OS") << endm;
+	while (ij != FinalMatchedCellsVec[ii].trackIdVec.end()) { LOG_INFO  << " " << *ij; ij++; }
+	LOG_INFO  << endm;
       }
 
 //    } // track exists 
@@ -2486,7 +2489,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     mCellCollection->push_back(tofCell);
 
     if (Debug()){
-      gMessMgr->Info("","OS") << "F: itray=" << trayId << " imodule=" << 0 << " itube=" << tubeId << " letime=" << letime << " tetime=" << tetime << endm;
+      LOG_INFO  << "F: itray=" << trayId << " imodule=" << 0 << " itube=" << tubeId << " letime=" << letime << " tetime=" << tetime << endm;
     }
   }
 
@@ -2499,24 +2502,24 @@ Int_t StTofrMatchMaker::processEventYear8(){
   
   //check StEvent collections --
   if (theTof->dataPresent())
-    gMessMgr->Info("","OS") << " TofCollection: raw data container present" << endm;
+    LOG_INFO  << " TofCollection: raw data container present" << endm;
   if (theTof->cellsPresent()){
-    gMessMgr->Info("","OS") << " TofCollection: cell container present."<<endm;
+    LOG_INFO  << " TofCollection: cell container present."<<endm;
     if (Debug()){
       StSPtrVecTofCell& tmpCellTofVec = theTof->tofCells();
-      gMessMgr->Info("","OS") << " # of matched cells " << tmpCellTofVec.size() << endm;
+      LOG_INFO  << " # of matched cells " << tmpCellTofVec.size() << endm;
       for (size_t i = 0; i < tmpCellTofVec.size(); i++) {
 	StTofCell* p = tmpCellTofVec[i];
-	gMessMgr->Info("","OS") << p->trayIndex() << " " << p->moduleIndex() << " " << p->cellIndex() << " " << p->trailingEdgeTime() << " " << p->leadingEdgeTime() << " " << p->associatedTrack() << " " << p->matchFlag() << " " << p->position() << endm;
+	LOG_INFO  << p->trayIndex() << " " << p->moduleIndex() << " " << p->cellIndex() << " " << p->trailingEdgeTime() << " " << p->leadingEdgeTime() << " " << p->associatedTrack() << " " << p->matchFlag() << " " << p->position() << endm;
       }
     }
   }
   //-- end check
   
-  gMessMgr->Info("","OS") << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm;
+  LOG_INFO  << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm;
  // end of Sect.F
 
-  gMessMgr->Info("","OS") << "#(cell tracks): " << allCellsHitVec.size()
+  LOG_INFO  << "#(cell tracks): " << allCellsHitVec.size()
        << " #(hit cells): " << FinalMatchedCellsVec.size()
        << "\n#(single hits): " << nSingleHitCells 
        << " #(single valid hits): " << nValidSingleHitCells
@@ -2531,11 +2534,11 @@ Int_t StTofrMatchMaker::processEventYear8(){
   }
   if (doPrintCpuInfo) {
     timer.stop();
-    gMessMgr->Info("","OS") << "CPU time for StTofrMatchMaker::Make(): "
+    LOG_INFO  << "CPU time for StTofrMatchMaker::Make(): "
 	 << timer.elapsedTime() << " sec\n" << endm;
   }
 
-  gMessMgr->Info("","OS") << "StTofrMatchMaker -- bye-bye" << endm;
+  LOG_INFO  << "StTofrMatchMaker -- bye-bye" << endm;
 
 
 
@@ -2547,14 +2550,14 @@ Int_t StTofrMatchMaker::processEventYear8(){
 Int_t StTofrMatchMaker::storeMatchData(StTofCellCollection *cellCollection,
 					 StTofCollection* tofCollection){
   if(!tofCollection){
-    gMessMgr->Info("","OS") << "Error: no TofCollection -- returning" << endm;
+    LOG_INFO  << "Error: no TofCollection -- returning" << endm;
     return kStErr;
   }
 
   for (size_t j=0;j<cellCollection->size();j++){
     tofCollection->addCell(cellCollection->getCell(j)); 
     if (Debug())
-      gMessMgr->Info("","OS") << "storing " << j << "  " << "  tray:"
+      LOG_INFO  << "storing " << j << "  " << "  tray:"
 	   << cellCollection->getCell(j)->trayIndex() << "  module:"
 	   << cellCollection->getCell(j)->moduleIndex() << "  cell:"
 	   << cellCollection->getCell(j)->cellIndex() << endm;
@@ -2567,12 +2570,12 @@ Int_t StTofrMatchMaker::storeMatchData(StTofCellCollection *cellCollection,
 // create a local copy of the raw tofp data tofData in StEvent's tofCollection
 Int_t StTofrMatchMaker::getTofData(StTofCollection* tofCollection){
   if (!tofCollection) return kStERR;
-  gMessMgr->Info("","OS") << " Read in tof data ... " << endm;
+  LOG_INFO  << " Read in tof data ... " << endm;
   StSPtrVecTofData &tofData = tofCollection->tofData();
 
   // perform consistency check
   bool dataOK(true);
-  gMessMgr->Info("","OS") << "TOF raw data consistency test ...";
+  LOG_INFO  << "TOF raw data consistency test ...";
 
   Int_t tofsize = tofData.size();
   Int_t nTOFr = 0;
@@ -2695,7 +2698,7 @@ void StTofrMatchMaker::bookHistograms(void){
 void StTofrMatchMaker::writeHistogramsToFile(){
   // Output file
   TFile *theHistoFile =  new TFile(mHistoFileName.c_str(), "RECREATE");
-  gMessMgr->Info("","OS") << "StTofrMatchMaker::writeHistogramsToFile()"
+  LOG_INFO  << "StTofrMatchMaker::writeHistogramsToFile()"
        << " histogram file " <<  mHistoFileName << endm;
 
   theHistoFile->cd();
@@ -2799,16 +2802,16 @@ bool StTofrMatchMaker::validEvent(StEvent *event){
 
   // 3a. must have TOF collection
   if (!event->tofCollection()){
-    gMessMgr->Info("","OS") << "TOF is not present" << endm;
+    LOG_INFO  << "TOF is not present" << endm;
     return false;
   }
   if(mHisto) mEventCounterHisto->Fill(3);
 
   // 3b. must have TOF raw data available
   if (!(event->tofCollection()->dataPresent()||event->tofCollection()->rawdataPresent())){
-    gMessMgr->Info("","OS") << "TOF is present but no Raw Data" << endm;
+    LOG_INFO  << "TOF is present but no Raw Data" << endm;
     if  (!(event->tofCollection()->cellsPresent())){
-      gMessMgr->Info("","OS") << "              and no Cell Data" << endm;
+      LOG_INFO  << "              and no Cell Data" << endm;
     }
     return false;
   }
@@ -2820,7 +2823,7 @@ bool StTofrMatchMaker::validEvent(StEvent *event){
   // 4. must be a TOF beam event, i.e. a non-strobe event
   if(event->tofCollection()->dataPresent()) {
     StSPtrVecTofData  &tofData = event->tofCollection()->tofData();
-    gMessMgr->Info("","OS") << " tofData size = " << tofData.size() << endm;
+    LOG_INFO  << " tofData size = " << tofData.size() << endm;
     if (strobeEvent(tofData)){
       mTofStrobeEventCounter++;
       if (event->primaryVertex()) mAcceptAndStrobe++; // keep track of #valid strobed evts
@@ -2904,8 +2907,8 @@ bool StTofrMatchMaker::validTofTrack(StTrack *track){
   // 4. DCA cut (obsolete?)
   Double_t DCA= track->impactParameter();
   Int_t charge = track->geometry()->charge();
-  if (DCA > mMaxDCA) {gMessMgr->Info("","OS") << "dca>max:" << DCA<< endm; return false;}
-  if (charge==0) { gMessMgr->Info("","OS") << " neutral charge" << endm; return false; }
+  if (DCA > mMaxDCA) {LOG_INFO  << "dca>max:" << DCA<< endm; return false;}
+  if (charge==0) { LOG_INFO  << " neutral charge" << endm; return false; }
 
   return true;
 }  
