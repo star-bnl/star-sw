@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.13 2009/07/16 19:00:10 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.14 2009/07/24 21:10:01 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -841,7 +841,8 @@ void TxUCMCollector::createJobsTable () {
     std::string tableName = "`" + string("Jobs_")
            + msgHashMap[fgRequester] + "_"
            + msgHashMap[fgBTaskID]+ "` ";
-    this->createTable (tableName + fgJobsTableCols);
+    this->createTable (tableName , std::string("jobspattern"));
+//    this->createTable (tableName + fgJobsTableCols);
 }
 
     /**
@@ -853,7 +854,8 @@ void TxUCMCollector::createEventsTable () {
    std::string tableName = "`" + string("Events_")
            + msgHashMap[fgRequester] + "_"
            + msgHashMap[fgBTaskID] + "` ";
-   this->createTable (tableName + fgEventsTableCols);
+   this->createTable (tableName, std::string("eventspattern"));
+//   this->createTable (tableName + fgEventsTableCols);
 }
 
     /**
