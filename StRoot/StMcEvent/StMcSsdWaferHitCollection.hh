@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSsdWaferHitCollection.hh,v 2.1 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcSsdWaferHitCollection.hh,v 2.2 2009/07/24 19:08:08 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSsdWaferHitCollection.hh,v $
+ * Revision 2.2  2009/07/24 19:08:08  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.1  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -43,7 +46,7 @@ public:
     StMcSsdWaferHitCollection();
     // StMcSsdWaferHitCollection(const StMcSsdWaferHitCollection&); use default
     // const StMcSsdWaferHitCollection& operator=(const StMcSsdWaferHitCollection&); use default
-    ~StMcSsdWaferHitCollection();
+    virtual ~StMcSsdWaferHitCollection();
     
     StSPtrVecMcSsdHit&       hits();
     const StSPtrVecMcSsdHit& hits() const;

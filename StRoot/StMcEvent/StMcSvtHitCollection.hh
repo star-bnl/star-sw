@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHitCollection.hh,v 2.4 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcSvtHitCollection.hh,v 2.5 2009/07/24 19:08:08 perev Exp $
  * $Log: StMcSvtHitCollection.hh,v $
+ * Revision 2.5  2009/07/24 19:08:08  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.4  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -37,7 +40,7 @@ class StMcSvtHit;
 class StMcSvtHitCollection : public StObject {
 public:
     StMcSvtHitCollection();
-    ~StMcSvtHitCollection();
+    virtual ~StMcSvtHitCollection();
     // StMcSvtHitCollection(const StMcSvtHitCollection&);            use default
     // StMcSvtHitCollection& operator=(const StMcSvtHitCollection&); use default
     

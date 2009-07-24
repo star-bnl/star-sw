@@ -14,6 +14,7 @@
 #pragma link C++ function operator<<(ostream&, const StMcSsdHit&);
 #pragma link C++ function operator<<(ostream&, const StMcSvtHit&);
 #pragma link C++ function operator<<(ostream&, const StMcTofHit&);
+#pragma link C++ function operator<<(ostream&, const StMcBTofHit&);
 #pragma link C++ function operator<<(ostream&, const StMcTpcHit&);
 #pragma link C++ function operator<<(ostream&, const StMcTrack&);
 #pragma link C++ function operator<<(ostream&, const StMcVertex&);
@@ -31,6 +32,7 @@
 #pragma link C++ typedef StSPtrVecMcIstHit; 
 #pragma link C++ typedef StSPtrVecMcFgtHit; 
 #pragma link C++ typedef StSPtrVecMcTofHit; 
+#pragma link C++ typedef StSPtrVecMcBTofHit; 
 #pragma link C++ typedef StSPtrVecMcTrack;  
 // Not owners
 #pragma link C++ typedef StPtrVecMcVertex; 
@@ -46,6 +48,7 @@
 #pragma link C++ typedef StPtrVecMcIstHit;
 #pragma link C++ typedef StPtrVecMcFgtHit; 
 #pragma link C++ typedef StPtrVecMcTofHit; 
+#pragma link C++ typedef StPtrVecMcBTofHit; 
 #pragma link C++ typedef StPtrVecMcTrack; 
 
 #pragma link C++ typedef StMcVertexIterator; 
@@ -61,6 +64,7 @@
 #pragma link C++ typedef StMcIstHitIterator; 
 #pragma link C++ typedef StMcFgtHitIterator; 
 #pragma link C++ typedef StMcTofHitIterator; 
+#pragma link C++ typedef StMcBTofHitIterator; 
 #pragma link C++ typedef StMcTrackIterator; 
 //Const Iterators
 #pragma link C++ typedef StMcVertexConstIterator; 
@@ -76,6 +80,7 @@
 #pragma link C++ typedef StMcIstHitConstIterator;
 #pragma link C++ typedef StMcFgtHitConstIterator; 
 #pragma link C++ typedef StMcTofHitConstIterator; 
+#pragma link C++ typedef StMcBTofHitConstIterator; 
 #pragma link C++ typedef StMcTrackConstIterator; 
 
 #pragma link C++ class vector<StMcHit*>+;
@@ -91,6 +96,7 @@
 #pragma link C++ class vector<StMcIstHit*>+;
 #pragma link C++ class vector<StMcFgtHit*>+;
 #pragma link C++ class vector<StMcTofHit*>+;
+#pragma link C++ class vector<StMcBTofHit*>+;
 #pragma link C++ class vector<StMcTrack*>+;
 // Not owners
 #pragma link C++ class vector<StMcVertex*>+;
@@ -106,5 +112,6 @@
 #pragma link C++ class vector<StMcIstHit*>+;
 #pragma link C++ class vector<StMcFgtHit*>+;
 #pragma link C++ class vector<StMcTofHit*>+;
+#pragma link C++ class vector<StMcBTofHit*>+;
 #pragma link C++ class vector<StMcTrack*>+;
 #endif

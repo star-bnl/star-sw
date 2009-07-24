@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcPlaneHitCollection.hh,v 2.2 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcFtpcPlaneHitCollection.hh,v 2.3 2009/07/24 19:08:07 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StMcFtpcPlaneHitCollection.hh,v $
+ * Revision 2.3  2009/07/24 19:08:07  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.2  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -40,7 +43,7 @@ class StMcFtpcPlaneHitCollection : public StObject
 {
 public:
     StMcFtpcPlaneHitCollection();
-    ~StMcFtpcPlaneHitCollection();
+    virtual ~StMcFtpcPlaneHitCollection();
     
     unsigned long numberOfHits() const;
 

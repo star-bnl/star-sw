@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcIstLayerHitCollection.hh,v 2.2 2005/05/11 20:54:29 calderon Exp $
+ * $Id: StMcIstLayerHitCollection.hh,v 2.3 2009/07/24 19:08:07 perev Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMcIstLayerHitCollection.hh,v $
+ * Revision 2.3  2009/07/24 19:08:07  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.2  2005/05/11 20:54:29  calderon
  * Added persistency: ClassImp, ClassDef and inheritance from StObject.
  *
@@ -37,7 +40,7 @@ class StMcIstHit;
 class StMcIstLayerHitCollection : public StObject {
 public:
     StMcIstLayerHitCollection();
-    ~StMcIstLayerHitCollection();
+    virtual ~StMcIstLayerHitCollection();
     
     unsigned long numberOfHits() const;
 

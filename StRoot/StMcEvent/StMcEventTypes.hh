@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.12 2007/10/16 19:49:14 fisyak Exp $
+ * $Id: StMcEventTypes.hh,v 2.13 2009/07/24 19:08:06 perev Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.13  2009/07/24 19:08:06  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.12  2007/10/16 19:49:14  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -86,6 +89,8 @@
 #include "StMcTpcSectorHitCollection.hh"
 #include "StMcTofHit.hh"
 #include "StMcTofHitCollection.hh"
+#include "StMcBTofHit.hh"
+#include "StMcBTofHitCollection.hh"
 #include "StMcPixelHit.hh"
 #include "StMcPixelHitCollection.hh"
 #include "StMcPixelLayerHitCollection.hh"

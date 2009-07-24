@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcTpcPadrowHitCollection.hh,v 2.3 2005/01/27 23:40:49 calderon Exp $
+ * $Id: StMcTpcPadrowHitCollection.hh,v 2.4 2009/07/24 19:08:09 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcTpcPadrowHitCollection.hh,v $
+ * Revision 2.4  2009/07/24 19:08:09  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.3  2005/01/27 23:40:49  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -37,7 +40,7 @@ class StMcTpcPadrowHitCollection : public StObject
 {
 public:
     StMcTpcPadrowHitCollection();
-    ~StMcTpcPadrowHitCollection();
+    virtual ~StMcTpcPadrowHitCollection();
     // StMcTpcPadrowHitCollection(const StMcTpcPadrowHitCollection&); use default
     // const StMcTpcPadrowHitCollection&
     // operator=(const StMcTpcPadrowHitCollection&);                use default

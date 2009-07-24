@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcPixelLayerHitCollection.hh,v 2.2 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcPixelLayerHitCollection.hh,v 2.3 2009/07/24 19:08:08 perev Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMcPixelLayerHitCollection.hh,v $
+ * Revision 2.3  2009/07/24 19:08:08  perev
+ * Cleanup + Btof added (Geurts)
+ *
  * Revision 2.2  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -35,7 +38,7 @@ class StMcPixelLayerHitCollection : public StObject
 {
 public:
     StMcPixelLayerHitCollection();
-    ~StMcPixelLayerHitCollection();
+    virtual ~StMcPixelLayerHitCollection();
     
     unsigned long numberOfHits() const;
 
