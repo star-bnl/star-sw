@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.15 2009/06/09 19:45:35 jeromel Exp $
+ * $Id: StTofrMatchMaker.h,v 1.16 2009/07/24 22:33:33 fine Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.16  2009/07/24 22:33:33  fine
+ * Make the code C++ compliant
+ *
  * Revision 1.15  2009/06/09 19:45:35  jeromel
  * Changes for BT#1428
  *
@@ -163,53 +166,55 @@ public:
     Bool_t  doPrintCpuInfo;        //!
 
 private:
-    static const Int_t mDAQOVERFLOW = 255;
-    static const Int_t mNTOFP = 41;
-    static const Int_t mNPVPD = 6;
-    static const Int_t mNTOFR = 120;
-    static const Int_t mNTOFR5 = 192; 
+    static const Int_t mDAQOVERFLOW;
+    static const Int_t mNTOFP;
+    static const Int_t mNPVPD;
+    static const Int_t mNTOFR;
+    static const Int_t mNTOFR5; 
     //    static const Float_t mWidthPad = 3.45;
 
-    static const Int_t mNTOF = 192;    // 192 for tof in Run 8++
-    static const Int_t mNModule = 32;  // 32 for tofr5++ 
-    static const Int_t mNCell = 6;
-    static const Int_t mNVPD = 19;    //
+    static const Int_t mNTOF;     // 192 for tof in Run 8++
+    static const Int_t mNModule;  // 32 for tofr5++ 
+    static const Int_t mNCell;
+    static const Int_t mNVPD;     //
 
-    static const Int_t mEastVpdTrayId = 122;
-    static const Int_t mWestVpdTrayId = 121;
+    static const Int_t mEastVpdTrayId;
+    static const Int_t mWestVpdTrayId;
 
-    static const Int_t mNValidTrays_Run3 = 1;
-    static const Int_t mNValidTrays_Run4 = 1;
-    static const Int_t mNValidTrays_Run5 = 1;
-    static const Int_t mNValidTrays_Run6 = 0;
-    static const Int_t mNValidTrays_Run7 = 0;
-    static const Int_t mNValidTrays_Run8 = 5;
+    static const Int_t mNValidTrays_Run3;
+    static const Int_t mNValidTrays_Run4;
+    static const Int_t mNValidTrays_Run5;
+    static const Int_t mNValidTrays_Run6;
+    static const Int_t mNValidTrays_Run7;
+    static const Int_t mNValidTrays_Run8;
     
-    Float_t     mWidthPad;
-    Float_t	mTofrAdc[mNTOFR];
-    Float_t	mTofrTdc[mNTOFR];
-    Float_t	mPvpdAdc[mNPVPD];
-    Float_t	mPvpdAdcLoRes[mNPVPD];
-    Float_t	mPvpdTdc[mNPVPD];
     //year 5
-    static const Int_t mTdigBoard = 10;
-    static const Int_t mTdcOnBoard = 4;
-    static const Int_t mTdcChannel = 1024;
-    Float_t	mPvpdToT[mNPVPD];
+    static const Int_t mTdigBoard;
+    static const Int_t mTdcOnBoard;
+    static const Int_t mTdcChannel;
+
+    Float_t           mWidthPad;
+    vector<Float_t>	mTofrAdc;
+    vector<Float_t>	mTofrTdc;
+    vector<Float_t>	mPvpdAdc;
+    vector<Float_t>	mPvpdAdcLoRes;
+    vector<Float_t>	mPvpdTdc;
+    //year 5
+    vector<Float_t>	mPvpdToT;
     IntVec      mTofr5LdChan;
     IntVec      mTofr5LdTdc;
     IntVec      mTofr5TrChan;
     IntVec      mTofr5TrTdc;
-    Float_t     mTofr5Tdc[mNTOFR5];
-    Float_t     mTofr5ToT[mNTOFR5]; // ToT as adc
+    vector<Float_t>     mTofr5Tdc;
+    vector<Float_t>     mTofr5ToT; // ToT as adc
 
     // moved to calibration maker
     //    Float_t     mINLtable[mTdigBoard][mTdcOnBoard][mTdcChannel];
     //
     
-    Int_t mStrobeTdcMin[mNPVPD]; //! lower strobe event range
-    Int_t mStrobeTdcMax[mNPVPD]; //! upper strobe event range
-    Double_t mPedTOFr[mNTOFR]; //! pedestals for tofr
+    IntVec    mStrobeTdcMin; //! lower strobe event range
+    IntVec    mStrobeTdcMax; //! upper strobe event range
+    DoubleVec mPedTOFr; //! pedestals for tofr
     
     StEvent *mEvent;
     StTofrGeometry *mTofrGeom; //! pointer to the TOFr geometry utility class
@@ -270,8 +275,8 @@ private:
     TH1D* mDaqOccupancyVpd;
     TH1D* mDaqOccupancyValidVpd;
     
-    TH2D* mHitCorr[mNValidTrays_Run8];
-    TH2D* mHitCorrModule[mNValidTrays_Run8];
+    vector<TH2D*> mHitCorr;
+    vector<TH2D*> mHitCorrModule;
     TH2D* mHitCorrAll;
 
 
@@ -347,7 +352,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.15 2009/06/09 19:45:35 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.16 2009/07/24 22:33:33 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
