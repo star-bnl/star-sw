@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.50 2007/02/06 18:58:00 posk Exp $
+//  $Id: StFlowMaker.h,v 1.51 2009/07/24 20:23:35 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -22,6 +22,8 @@
 #include "TString.h"
 #include "TTree.h"
 #include "StFlowConstants.h"
+#include "StThreeVectorF.hh"
+#include "StPhysicalHelixD.hh"
 class StRunInfo;
 class StEvent;
 class StTrack;
@@ -35,10 +37,6 @@ class StFlowSelection;
 class StIOMaker;
 class StFileI;
 class TChain;
-class StHbtEvent; // Randy added these 2
-class StHbtTrack;
-#include "StThreeVectorF.hh"
-#include "StPhysicalHelixD.hh"
 class TClonesArray;
 
 class StFlowMaker : public StMaker {
@@ -58,7 +56,6 @@ public:
   void          PicoEventWrite(Bool_t flag=kFALSE);
   void          PicoEventRead(Bool_t flag=kFALSE);
   void          MuEventRead(Bool_t flag=kFALSE);
-  void          MuEventReadGC(Bool_t flag=kFALSE); // Grid Collector
   void          SetPicoEventDir(const Char_t* name="./");
   void          SetPicoEventFileName(StFileI* fileList);
   void          SetMuEventDir(const Char_t* name="./");
@@ -66,11 +63,10 @@ public:
   void          SetReCent(Bool_t flag=kTRUE);
   Bool_t        ReCent();
 
-  void          FillFlowEvent(StHbtEvent* hbtEvent); //rcwells added this
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.50 2007/02/06 18:58:00 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.51 2009/07/24 20:23:35 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -87,8 +83,8 @@ protected:
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtWest;	  //! ZDCSMD west Psi
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtEast;      //! ZDCSMD east Psi
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtFull;      //! ZDCSMD full Psi
-  Double_t mZDCSMDCenterEx,mZDCSMDCenterEy;       //! ZDCSMD Beam Center
-  Double_t mZDCSMDCenterWx,mZDCSMDCenterWy;       //! ZDCSMD Beam Center
+  Double_t mZDCSMDCenterEx, mZDCSMDCenterEy;      //! ZDCSMD Beam Center
+  Double_t mZDCSMDCenterWx, mZDCSMDCenterWy;      //! ZDCSMD Beam Center
   Double_t mZDCSMDPed[2][2][8];                   //! ZDCSMD pedestal
   Flow::ReCent_t       mReCentX;                  //! Recentering parameters
   Flow::ReCent_t       mReCentY;                  //! Recentering parameters
@@ -102,8 +98,7 @@ private:
   StFileI*         pMuFileList;               //! Mu-DST File List
   Bool_t           mPicoEventWrite;           // switch for pico-DST
   Bool_t           mPicoEventRead;            // switch for pico-DST
-  Bool_t           mMuEventRead;              // switch for Mu-DST non GC
-  Bool_t           mMuEventReadGC;            // switch for Mu-DST GC
+  Bool_t           mMuEventRead;              // switch for Mu-DST
   Bool_t           mReCent;                   // switch for recentering
   UInt_t           mEventCounter;             // number of Bytes in pico event
   Bool_t           mFirstLastPhiWgt;          // use z of first-last for phi weights
@@ -118,9 +113,6 @@ private:
   void             FillFlowEvent();           // fill the flow event
   void             FillPicoEvent();           // fill pico-DST
   Bool_t           FillFromPicoDST(StFlowPicoEvent* pPicoEvent);
-  Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
-  Bool_t           FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent);
-  Bool_t           FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromMuDST();
   Bool_t           FillFromMuVersion0DST();
@@ -139,7 +131,7 @@ private:
   TChain*          pMuChain;                  //! pointer to chain of mu-DST files
   StMuDst*         pMu;                       //! pointer to Mu-DST class
   StMuEvent*       pMuEvent;                  //! pointer to Mu-DST Event
-  TClonesArray*    pMuEvents;                 //! pointer to Mu-DST Event array
+  TClonesArray*    pMuEvents;                 //! pointer to Mu-DST Event array (not used)
   TObjArray*       pMuTracks;                 //! Mu-DST Primary Tracks
   TObjArray*       pMuGlobalTracks;           //! Mu-DST Global Tracks
 
@@ -164,9 +156,6 @@ inline void StFlowMaker::PicoEventRead(Bool_t flag) {
 inline void StFlowMaker::MuEventRead(Bool_t flag) {
   mMuEventRead=flag; }
 
-inline void StFlowMaker::MuEventReadGC(Bool_t flag) {
-  mMuEventReadGC=flag; }
-
 inline void StFlowMaker::SetPicoEventDir(const Char_t* name) {
   strncpy(mPicoEventDir, name, 63); mPicoEventDir[63] = '\0'; }
 
@@ -180,7 +169,7 @@ inline void StFlowMaker::SetMuEventFileName(StFileI* fileList) {
   pMuFileList = fileList; }
 
 inline StFlowSelection* StFlowMaker::FlowSelection() {
-	return pFlowSelect; }
+  return pFlowSelect; }
 
 inline void StFlowMaker::SetReCent(Bool_t flag) {
   mReCent=flag; }
@@ -193,6 +182,9 @@ inline Bool_t StFlowMaker::ReCent() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.51  2009/07/24 20:23:35  posk
+//  Clean up: Removed John Wu's Grid Collector, reading any data before year4, and calculating event plane for hbt Maker. Kept only the most recent pico DST read.
+//
 //  Revision 1.50  2007/02/06 18:58:00  posk
 //  In Lee Yang Zeros method, introduced recentering of Q vector.
 //  Reactivated eta symmetry cut.
