@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.5 2009/03/01 18:46:36 perev Exp $
+!// $Id: tpcegeo3.g,v 1.6 2009/07/25 02:07:56 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.6  2009/07/25 02:07:56  perev
+!// Prompt hits added
+!//
 !// Revision 1.5  2009/03/01 18:46:36  perev
 !// double shift -15 fixed
 !//
@@ -73,7 +76,7 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
           TWGC,TWGB,TPIP,TMAN,TRDV,TRDS,TRDC,TIAD,TOIG,
           FEES,FEEP,FEER,FEEI,FEEA,
 	  TSAS,TWAS,TALS,TSGT,TWBT,TWRC,TWRG,TWRI,TWTR,TWMR,
-          TRDO,TBRW,TWRB,TCOO,TCAB,TRIB,TWIR
+          TRDO,TBRW,TWRB,TCOO,TCAB,TRIB,TWIR,TGGR
 *
 	Real INCH ,CM; 
 	Parameter (INCH=2.54,CM=1.); 
@@ -85,11 +88,12 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
   	Real cos15 /.965925826289068312/ !// Cos(15./180*Pi);
   	Real tan15 /.267949192431122696/ !// Tan(Pi*15./180);
 !//   int's
-   Integer i,j,iSecAng,nCount/0/,jTRIB;
+   Integer i,j,iSecAng,nCount/0/,jTRIB,kase;
 !//   real's
   Real x,x0,x1,x2,dx,dx1,dx2,xc;
   Real y,y0,y1,y2,dy,dy1,dy2;
   Real z,z0,z1,z2,dz,dz1,dz2;
+  Real zGG,zGG1,zGG2;
   Real r,r0,r1,r2,dr;
   Real alpha,beta;
   Real xw,dxw,yw,dyw,zw,dzw,dYdX
@@ -186,7 +190,6 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 !// RDO & cool
   Real dRDOCooling(0:6) /16.0, 16.0, 16.0, 16.7, 15.0, 3.5, 14.5/;
   Real RCoolingTube/123456789/;
-  Real zRdo        /123456789/;
   character *4 mySha;
   integer iCoo,iCab,jCoo,iRib,iTALS,jTALS;
 
@@ -200,7 +203,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 		    	tohaDR,tiadDR,tinxDR,tikaDR,tialDR,
 			tifcRF,tifcDRT,dzYF1,dzYF2,dzYF3,
 			PadPlaneThickness,distanceGG2AnodeWire,WireMountWidth,
-			WireMountHeight,dxRDO,dyRDO,dzRDO,
+			WireMountHeight,dxRDO,dyRDO,dzRDO,zRDO,
 			heigTube,widTube,RDOCoolingdX,RDOCoolingdY,RDOCoolingdZ,
 			tpeaTHK}			
 			
@@ -209,7 +212,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 !//  sector of padrows
 !//  YF temporary off
 !//YF  structure TPRS {sec, nRow, pitch, width,  dAnode, Npads(40), Rpads(40)}
-Structure TPRS { sec,Nrow,pitch,width,super,Rpads(40),Npads(40) }
+Structure TPRS { sec,Nrow,pitch,width,super,dAnode,Rpads(40),Npads(40) }
 
 !// EC trapezoid and support Wheel
  structure TECW {sec, GapWidI, GapWidO, GapHeit, GapRad, inwidth, ouwidth, 
@@ -265,6 +268,7 @@ Structure TPCR { RdoVthk,Rdothk,Rdolen,NRdobrd,Rdoht(9) }
 	dxRDO 	= 1.75/2  		!// A.Lebedev 1 RDO = 5 lb
         dyRDO 	= 45./2 		!// 
         dzRDO 	= 17.0/2		!// 
+        zRDO    = TPCG_LengthW/2 + 20.0 	!//
 	heigTube = 0.703*INCH   	!// x Cooling TUBE Drawing 24A0801B 
         widTube  = 0.500*INCH   	!// z Mixture TPCE_Water_Pipe => rho = 2.32155 g/cm**3
 	RDOCoolingdX = (38.0 + 9.0 + 58.0)/2	!//
@@ -274,24 +278,26 @@ Structure TPCR { RdoVthk,Rdothk,Rdolen,NRdobrd,Rdoht(9) }
 	endFill
         USE TPCG
 
-   Fill TPRS              ! sector of padrows
-      sec    = 1            ! sector number: 1 for inner, 2 for outer
-      nRow   = 13           ! number of padrows in the sector
-      pitch  = 0.335        ! tpc padrow pitch width
-      width  = 1.15         ! tpc padrow thickness
-      super  = 3            ! number of padraws in a superpadrow
+   Fill TPRS              	! sector of padrows
+      sec    = 1            	! sector number: 1 for inner, 2 for outer
+      nRow   = 13           	! number of padrows in the sector
+      pitch  = 0.335        	! tpc padrow pitch width
+      width  = 1.15         	! tpc padrow thickness
+      super  = 3            	! number of padraws in a superpadrow
+      dAnode = 0.2		!// distance to anode wire from pad plane
       Npads  = { 88, 96, 104, 112, 118, 126, 134, 142, 150, 
                 158, 166, 174, 182 }        ! number of pads in row
       Rpads  = {60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8, 
                104.0,109.2,114.4,119.6 }    ! tpc padrow radii
   EndFill
 *
-   Fill TPRS              ! sector of padrows
-      sec    = 2            ! sector number: 1 for inner, 2 for outer
-      nRow   = 32           ! number of padrows in outer sector
-      pitch  = 0.67         ! outer tpc padrow pitch width
-      width  = 1.95         ! outer tpc padrow thickness
-      super  = 1            ! number of padrows in a superpadrow
+   Fill TPRS              	! sector of padrows
+      sec    = 2            	! sector number: 1 for inner, 2 for outer
+      nRow   = 32           	! number of padrows in outer sector
+      pitch  = 0.67         	! outer tpc padrow pitch width
+      width  = 1.95         	! outer tpc padrow thickness
+      super  = 1           	! number of padrows in a superpadrow
+      dAnode = 0.4		!// distance to anode wire from pad plane
       Npads  = { 98, 100, 102, 104, 106, 106, 108, 110, 112,
                 112, 114, 116, 118, 120, 122, 122, 124, 126, 
                 128, 128, 130, 132, 134, 136, 138, 138, 140, 
@@ -385,9 +391,7 @@ EndFill
 !//   */
 
  tofcLENG = tpcg_Length-2*tpcg_WheelTHK-2*TPCR_RdoVthk  !// gas plus endcaps
- tpgvLeng = (tofcLeng-tpcg_MembTHK-2*tpcg_TpeaThk)/2 	!// active gas
-
- zRDO = TPCG_LengthW/2 + 20.0;
+ tpgvLeng = (tofcLeng-tpcg_MembTHK)/2 	!// active gas
 
 
 !// calculate radii of outer finest structureures 
@@ -407,16 +411,16 @@ EndFill
  
  !// ?
 
-  write(*,*)  'tocsIR = ' , tocsIR , '  tocsOR = ' , tocsOR ;
-  write(*,*)  'tokaIR = ' , tokaIR , '  tokaOR = ' , tokaOR ;
-  write(*,*)  'tonxIR = ' , tonxIR , '  tonxOR = ' , tonxOR ;
-  write(*,*)  'toadIR = ' , toadIR , '  toadOR = ' , toadOR ;
-  write(*,*)  'toigIR = ' , toigIR , '  toigOR = ' , toigOR ;
-  write(*,*)  'toalIR = ' , toalIR , '  toalOR = ' , toalOR ;
-  write(*,*)  'tohaIR = ' , tohaIR , '  tohaOR = ' , tohaOR ;
-  write(*,*)  'toalIR2= ' , toalIR2, '  toalOR2 =' , toalOR2;
-  write(*,*)  'tofcIR = ' , tofcIR , '  tofcOR = ' , tofcOR ;
-  write(*,*)  'tofsIR = ' , tofsIR , '  tofsOR = ' , tofsOR ;
+!//   write(*,*)  'tocsIR = ' , tocsIR , '  tocsOR = ' , tocsOR ;
+!//   write(*,*)  'tokaIR = ' , tokaIR , '  tokaOR = ' , tokaOR ;
+!//   write(*,*)  'tonxIR = ' , tonxIR , '  tonxOR = ' , tonxOR ;
+!//   write(*,*)  'toadIR = ' , toadIR , '  toadOR = ' , toadOR ;
+!//   write(*,*)  'toigIR = ' , toigIR , '  toigOR = ' , toigOR ;
+!//   write(*,*)  'toalIR = ' , toalIR , '  toalOR = ' , toalOR ;
+!//   write(*,*)  'tohaIR = ' , tohaIR , '  tohaOR = ' , tohaOR ;
+!//   write(*,*)  'toalIR2= ' , toalIR2, '  toalOR2 =' , toalOR2;
+!//   write(*,*)  'tofcIR = ' , tofcIR , '  tofcOR = ' , tofcOR ;
+!//   write(*,*)  'tofsIR = ' , tofsIR , '  tofsOR = ' , tofsOR ;
 
   !// calculate radii of inner finest structureures
  tifcIR = TPCG_RminIFC; 
@@ -427,11 +431,11 @@ EndFill
  tifcOR = tiadOR + TPCG_tialDR/2.;
 
 !// calculate radii of inner finest structureures
-  write(*,*) 'tialDR = ' , TPCG_tialDR , '  tialIR = ' , tialIR , '  tialOR = ' , tialOR ;
-  write(*,*) 'tikaDR = ' , TPCG_tikaDR , '  tikaIR = ' , tikaIR , '  tikaOR = ' , tikaOR ;
-  write(*,*) 'tinxDR = ' , TPCG_tinxDR , '  tinxIR = ' , tinxIR , '  tinxOR = ' , tinxOR ;
-  write(*,*) 'tiadDR = ' , TPCG_tiadDR , '  tiadIR = ' , tiadIR , '  tiadOR = ' , tiadOR ;
-  write(*,*) 'tifcIR = ' , tifcIR      , '  tifcOR = ' , tifcOR ;
+!//  write(*,*) 'tialDR = ' , TPCG_tialDR , '  tialIR = ' , tialIR , '  tialOR = ' , tialOR ;
+!//  write(*,*) 'tikaDR = ' , TPCG_tikaDR , '  tikaIR = ' , tikaIR , '  tikaOR = ' , tikaOR ;
+!//  write(*,*) 'tinxDR = ' , TPCG_tinxDR , '  tinxIR = ' , tinxIR , '  tinxOR = ' , tinxOR ;
+!//  write(*,*) 'tiadDR = ' , TPCG_tiadDR , '  tiadIR = ' , tiadIR , '  tiadOR = ' , tiadOR ;
+!//  write(*,*) 'tifcIR = ' , tifcIR      , '  tifcOR = ' , tifcOR ;
 !//  derive radii of larger structureures
   tpgvIR = tifcOR;         !// TPC gas inner radius
   
@@ -470,8 +474,8 @@ EndFill
 
 
 !//  derive radii of larger structureures
-  write(*,*)  'tifcOR = ' , tifcOR ;
-  write(*,*)  'tpgvIR = ' , tpgvIR ;
+!//  write(*,*)  'tifcOR = ' , tifcOR ;
+!//  write(*,*)  'tpgvIR = ' , tpgvIR ;
 
 
 
@@ -547,7 +551,7 @@ EndFill
 !//__________________________________________ Geomety ______________________________________
 *
 *
-      write(*,*) '*** Building the Underwood version of the TPC ***'
+!//      write(*,*) '*** Building the Underwood version of the TPC ***'
       create and position TPCE in CAVE 
 *
 *------------------------------------------------------------------------------
@@ -559,27 +563,23 @@ Block TPCE is the TPC envelope
       Attribute TPCE  seen=0 colo=kRed
       shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_length/2
 
-      tpgvz  = (tpcg_MembTHK + tpgvLeng)/2               "   gas volume   " 
-                                          
-      Create and position  TPGV z=+tpgvz,
-                                thetax=90 thetay=90 thetaz=0,
-                                phix = 75 phiy =-15 phiz=0
-                 position  TPGV z=-tpgvz,
-                                thetax=90 thetay=90 thetaz=180,
-                                phix =105 phiy =195 phiz=0
-*                                                                2
-
-
-
-
-
-
-      Create and position  TPCM                          "    membrane    "
-
+      tpgvz  = (tpcg_MembTHK + tpgvLeng)/2               " z center of gas volume   " 
       zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK; 	!// write(*,*) 'zWheel1 ', zWheel1;
       zTOFCend = TPCG_LengthW/2 - TPCG_WheelTHK1;	!// write(*,*) 'zTOFCend', zTOFCend; !// end of TOFC
       zTIFCend = TPCG_LengthW/2 + 0.97; 		!// write(*,*) 'zTIFCend', zTIFCend; !// end of TIFC + flange
       zTIFCFlangeBegin = zTIFCend - 1*INCH;		!// write(*,*) 'zTIFCFlangeBegin' , zTIFCFlangeBegin;
+                                          
+      Create and position  TPGV kONLY = 'MANY',
+                                z=+tpgvz,
+                                thetax=90 thetay=90 thetaz=0,
+                                phix = 75 phiy =-15 phiz=0
+                 position  TPGV kONLY = 'MANY',
+		                z=-tpgvz,
+                                thetax=90 thetay=90 thetaz=180,
+                                phix =105 phiy =195 phiz=0
+*                                                                2
+
+      Create and position  TPCM       "    membrane    "
 
       Create and position TIFC        "   inner cage   "
       Create and position TOFC        "   outer cage   "                 
@@ -999,17 +999,17 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
     dx1 = (z-dz)*tan15 - 2*TPCG_RDOCoolingdY;
     dx2 = (z+dz)*tan15 - 2*TPCG_RDOCoolingdY;
 !//    TGeoVolume *coolingTube = gGeoManager->MakeTrd1("CoolingTube", GetMed("TPCE_Water_Pipe"), dx1, dx2, dy, dz);
-!//    TpcSectorAndWheel->AddNode(coolingTube,iCoo+3, new TGeoCombiTrans(z, 0, zRDO - 2*dy, GetRot("90XD")));
+!//    TpcSectorAndWheel->AddNode(coolingTube,iCoo+3, new TGeoCombiTrans(z, 0, TPCG_zRDO - 2*dy, GetRot("90XD")));
     mySha='TRD1';
     myPar = {dx1,dx2,dy,dz}; 
-    Create and Position TCOO x=z z=(zRDO-2*dy) ORT=YZX
+    Create and Position TCOO x=z z=(TPCG_zRDO-2*dy) ORT=YZX
     RCoolingTube -= dRDOCooling(iCoo);
   }
 
 !// 		Cables
   dz = 4.5;
   dy = 4.5/2;
-  z  = zRDO + TPCG_dzRDO + dz;
+  z  = TPCG_zRDO + TPCG_dzRDO + dz;
   x1 = TPCG_WheelR0;
   x2 = TPCG_WheelR2;
   dx = (x2 - x1)/2;
@@ -1389,21 +1389,21 @@ Attribute TRDO seen=1  colo=kYellow
 
 !// RDOs and their cooling
 !//  TGeoVolume *coolingTube = gGeoManager->MakePara("CoolingTube", GetMed("TPCE_Water_Pipe"), TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, +15, 0, 0);
-!//  TpcRDO->AddNode(coolingTube,1,new TGeoCombiTrans(x, y, zRDO - 2*dy,GetRot("YZXZ")));
+!//  TpcRDO->AddNode(coolingTube,1,new TGeoCombiTrans(x, y, TPCG_zRDO - 2*dy,GetRot("YZXZ")));
   mySha = 'PARA';
   myPar = {TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, 15};
   x = TPCG_WheelR2 - TPCG_RDOCoolingdX;
   y = x*tan15 - TPCG_RDOCoolingdY ;
-  z = zRDO - 2*dy;
+  z = TPCG_zRDO - 2*dy;
   Create And Position TCOO x=x y=y z=z ORT=YX-Z
   
 !//  coolingTube = gGeoManager->MakePara("CoolingTube", GetMed("TPCE_Water_Pipe"), TPCG_RDOCoolingdY, TPCG_RDOCoolingdX,TPCG_RDOCoolingdZ, -15, 0, 0);
-!//  TpcRDO->AddNode(coolingTube,2,new TGeoCombiTrans(x,-y, zRDO - 2*dy,GetRot("YZXZ")));
+!//  TpcRDO->AddNode(coolingTube,2,new TGeoCombiTrans(x,-y, TPCG_zRDO - 2*dy,GetRot("YZXZ")));
   mySha = 'PARA';
   myPar = {TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, -15};
   x = TPCG_WheelR2 - TPCG_RDOCoolingdX;
   y = x*tan15 - TPCG_RDOCoolingdY ;
-  z = zRDO - 2*dy;
+  z =  - 2*dy;
   Create And Position TCOO x=x y=-y z=z ORT=YX-Z
 
 
@@ -1419,17 +1419,17 @@ Attribute TRDO seen=1  colo=kYellow
 
 
 !//    TGeoVolume *coolingTube = gGeoManager->MakeTrd1("CoolingTube", GetMed("TPCE_Water_Pipe"), dx1, dx2, dy, dz);
-!//    TpcRDO->AddNode(coolingTube,iCoo+3, new TGeoCombiTrans(z, 0, zRDO - 2*dy, GetRot("90XD")));
+!//    TpcRDO->AddNode(coolingTube,iCoo+3, new TGeoCombiTrans(z, 0, TPCG_zRDO - 2*dy, GetRot("90XD")));
     mySha = 'TRD1';
     myPar = {dx1, dx2, dy, dz};
-    myPar(11) = z; myPar(13) = zRDO - 2*dy;
+    myPar(11) = z; myPar(13) = TPCG_zRDO - 2*dy;
     Create And Position TCOO x=myPar(11) y=0 z=myPar(13) ORT=YZX
 !//     write(*,*) '###TRDO.TCOO myPar(1-4)=', myPar(1),myPar(2),myPar(3),myPar(4);
 !//     write(*,*) '###TRDO.TCOO myPar(11,13)=', myPar(11),myPar(13);
 
     if (iCoo. ne. 0 .and. iCoo .ne. 6) {
-!//      TpcRDO->AddNode(RDOCard, iRDOCard++, new TGeoTranslation(z+dz+TPCG_dxRDO, 0, zRDO - TPCG_dzRDO));
-       myPar(11) = z+dz+TPCG_dxRDO; myPar(13) =zRDO-TPCG_dzRDO;
+!//      TpcRDO->AddNode(RDOCard, iRDOCard++, new TGeoTranslation(z+dz+TPCG_dxRDO, 0, TPCG_zRDO - TPCG_dzRDO));
+       myPar(11) = z+dz+TPCG_dxRDO; myPar(13) =TPCG_zRDO-TPCG_dzRDO;
        Create And Position TRDC x=myPar(11) y=0 z=myPar(13);
 !//     write(*,*) '###TRDO.TRDC myPar(11,13)=', myPar(11),myPar(13);
     }
@@ -1570,25 +1570,54 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
       attribute TPSS  seen=1  colo=kBlue
       shape Division  NDIV=12  IAXIS=2
 *
+      ag_ncopy = 1;
+      do kase=1,3
       do i_sec=1,2
-         Use    TPRS  sec=i_sec
-
+         Use    TPRS  sec=i_sec;
+         Use    TECW  sec=i_sec;
+         z1 = 0;
+	 z2 = tpgvLeng - TECW_Thick;
+         zGG2 = z2-TPRS_dAnode;
+         zGG1 = zGG2 - TPCG_distanceGG2AnodeWire;
+         if (kase .eq.1) {dz = (zGG1 - z1  )/2; z = (zGG1 + z1  )/2;}
+         if (kase .eq.3) {dz = (zGG2 - zGG1)/2; z = (zGG2 + zGG1)/2;}
+         if (kase .eq.2) {dz = (z2   - zGG2)/2; z = (zGG2 +   z2)/2;}
 *        position within supersector (this assumes rectangular padrows)
-         do i_row = 1,nint(tprs_nRow)
-            If (nint(tprs_super)==3 | i_row==1) then
-               Create and Position TPAD  x=tprs_Rpads(i_row)-tprs_width,
-                          dx=tprs_width/2 dy=tprs_npads(i_row)*tprs_pitch/2
-            endif
-            If (nint(tprs_super)>0)  then
-               create and position TPAD  x=tprs_Rpads(i_row),
-                          dx=tprs_width/2 dy=tprs_npads(i_row)*tprs_pitch/2
-            endif
-            If (nint(tprs_super)==3 | i_row==nint(tprs_nRow))  then
-               Create and Position TPAD  x=tprs_Rpads(i_row)+tprs_width,
-                          dx=tprs_width/2 dy=tprs_npads(i_row)*tprs_pitch/2
-            endif
-         enddo
+           do i_row = 1,nint(tprs_nRow)
+               If (kase ==1 .and. (nint(tprs_super)==3 | i_row==1)) then
+         	 Create and Position TPAD  x=tprs_Rpads(i_row)-tprs_width z=z,
+                             dx=tprs_width/2,
+			    dy=tprs_npads(i_row)*tprs_pitch/2,
+                             dz=dz
+!//              write(*,*) 'A Ncopy=',ag_ncopy;
+              endif
+              If (kase==1 .or. kase==2)  then
+        	 create and position TPAD  x=tprs_Rpads(i_row) z=z,
+                            dx=tprs_width/2 ,
+			    dy=tprs_npads(i_row)*tprs_pitch/2,
+                            dz=dz
+!//              if (kase==1) write(*,*) 'B Ncopy=',ag_ncopy;
+!//              if (kase==2) write(*,*) 'C Ncopy=',ag_ncopy;
+              endif
+
+              If (kase==1 .and. (nint(tprs_super)==3 | i_row==nint(tprs_nRow)))  then
+         	 Create and Position TPAD  x=tprs_Rpads(i_row)+tprs_width z=z,
+                             dx=tprs_width/2, 
+ 			     dy=tprs_npads(i_row)*tprs_pitch/2,
+                             dz=dz
+!//              write(*,*) 'D Ncopy=',ag_ncopy;
+              endif
+
+              If (kase==3 )  then
+        	 create and position TGGR  x=tprs_Rpads(i_row) z=z,
+                            dx=tprs_width/2 ,
+			    dy=tprs_npads(i_row)*tprs_pitch/2,
+                            dz=dz
+!//              write(*,*) 'E Ncopy=',ag_ncopy;
+              endif
+           enddo
       enddo
+    enddo
 Endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 block TPAD is a real padrow with dimensions defined at positioning time
@@ -1600,7 +1629,7 @@ block TPAD is a real padrow with dimensions defined at positioning time
 * According to AGI rules for this we need A parameter. Lets use ISVOL=1 (!)
 * (- this eliminates a need for a separate medium definition ?)
 *
-      attribute TPAD seen=0 colo=2
+      attribute TPAD seen=1 colo=2
       material p10
       material sensitive_gas  ISVOL=1  stemax=2.5*tprs_width
       SHAPE    BOX   dx=0   dy=0   dz=0    
@@ -1613,6 +1642,10 @@ block TPAD is a real padrow with dimensions defined at positioning time
                      Step:11:(0,10)       USER:21:(-.01,.01) 
 
 endblock
-
-
-end
+block TGGR dead region between Gating Grid and Cathode wires
+      attribute TGGR seen=1 colo=7
+      material p10
+      SHAPE    BOX   dx=0   dy=0   dz=0    
+endblock
+      
+      end
