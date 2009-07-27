@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.25 2009/07/24 20:26:20 perev Exp $
+ * $Id: StMcEvent.hh,v 2.26 2009/07/27 18:22:40 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.26  2009/07/27 18:22:40  perev
+ * Supress I/O for serice words
+ *
  * Revision 2.25  2009/07/24 20:26:20  perev
  * Increase version in ClassDef
  *
@@ -272,7 +275,7 @@ class StMcEvent : public TDataSet {
   virtual void Print(Option_t *option="") const; // *MENU* 
   virtual void Browse(TBrowser *b) {TDataSet::Browse(b); Print("");}
  protected:
-  char mBeg[1];
+  char mBeg[1];				//!
   unsigned long                  mEventGeneratorEventLabel;
   unsigned long                  mEventNumber;
   unsigned long                  mRunNumber;
@@ -292,7 +295,7 @@ class StMcEvent : public TDataSet {
   unsigned long                  mNWoundedWest;      // Number of Wounded Nucleons West
   unsigned long                  mNJets;             // Number of Jets
   StMcVertex*                    mPrimaryVertex;
-  StObject*                      mBegColl[1];
+  StObject*                      mBegColl[1];		//!
   StMcTpcHitCollection*          mTpcHits;
   StMcSvtHitCollection*          mSvtHits;
   StMcSsdHitCollection*          mSsdHits;
@@ -304,8 +307,8 @@ class StMcEvent : public TDataSet {
   StMcPixelHitCollection*        mPixelHits;
   StMcIstHitCollection*          mIstHits;
   StMcFgtHitCollection*          mFgtHits;
-  StObject*                      mEndColl[1];
-  char                           mEnd[1];
+  StObject*                      mEndColl[1];	//!
+  char                           mEnd[1];	//!
   StSPtrVecMcVertex              mVertices;
   StSPtrVecMcTrack               mTracks;
   static TString                 mCvsTag;
