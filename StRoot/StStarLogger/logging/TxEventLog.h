@@ -2,7 +2,7 @@
  * @file TxEventLog.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLog.h,v 1.1 2009/06/17 22:12:00 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLog.h,v 1.2 2009/07/27 21:10:55 fine Exp $
  *
  * TxEventLog provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -81,6 +81,7 @@ public:
      *
      */
     virtual void setEnvBrokerTaskID (const std::string& envBrokerTaskID)=0;
+    void setEnvBrokerTaskID (const char *envBrokerTaskID);
     
     /**
      * The concept of a job ID and task ID assigned by broker is
@@ -91,6 +92,7 @@ public:
      *
      */
     virtual void setEnvBrokerJobID (const std::string& envBrokerJobID)=0;
+    void setEnvBrokerJobID (const char *envBrokerJobID);
     
     /**
      * The concept of a job ID and task ID assigned by broker is
@@ -100,6 +102,7 @@ public:
      *
      */
     virtual void setBrokerTaskID (const std::string& brokerTaskID)=0;
+    void setBrokerTaskID (const char *brokerTaskID);
     
     /**
      * The concept of a job ID and task ID assigned by broker is
@@ -117,6 +120,7 @@ public:
      *
      */
     virtual void setRequesterName (const std::string& requester)=0;
+    void setRequesterName (const char *requester);
     
     /**
      * Set context for this task/job
@@ -124,13 +128,15 @@ public:
      * @param context, the message context
      */
     virtual void setContext (const std::string& context)=0;
+    void setContext (const char *context);
 
     /**
      * Called by the *application* to log a START event
      *
      */
-    virtual void logStart (const std::string& key   = TxUCMConstants::appStart,
-		   const std::string& value = "application started")=0;
+    virtual void logStart (const std::string& key, const std::string& value)=0;
+    void logStart (const char *key = TxUCMConstants::appStart,
+		   const char *value = "application started");
 
     /**
      * Log the job submit location. This method will be called by the
@@ -140,7 +146,9 @@ public:
      *
      */    
     virtual void logJobSubmitLocation (const std::string& url)=0;
+    void logJobSubmitLocation (const char *url);
     virtual void setJobSubmitLocation (const std::string& url)=0;
+    void setJobSubmitLocation (const char *url);;
 
    /**
      * Log the task size. This method will be called by the
@@ -163,6 +171,7 @@ public:
      *
      */    
     virtual void logTask (const std::string& taskAttributes)=0;
+    void logTask (const char *taskAttributes);
     /**
      * Log the job state. This method will be called by the Broker.
      *
@@ -180,7 +189,9 @@ public:
      *
      */    
     virtual void logJobSubmitID (const std::string& ID)=0;
+    void logJobSubmitID (const char *ID);
     virtual void setJobSubmitID (const std::string& ID)=0;
+    void setJobSubmitID (const char *ID);
 
     /**
      * Log a simple message event. This event is always associated
@@ -193,9 +204,14 @@ public:
      *
      */
     virtual void logEvent (const std::string& logMsg, 
-		   Level level = LEVEL_INFO, 
+		   Level level = LEVEL_INFO,
 		   Stage stage = STATUS, 
 		   const std::string& msgContext = TxUCMConstants::defaultContext)=0;
+    
+    void logEvent (const char *logMsg, 
+		   Level level = LEVEL_INFO, 
+		   Stage stage = STATUS, 
+		   const char *msgContext = TxUCMConstants::defaultContext);
     
     /**
      * Log a key-value pair type event. This event is always
@@ -213,13 +229,19 @@ public:
 		   Level level = LEVEL_INFO, 
 		   Stage stage = STATUS, 
 		   const std::string& msgContext = TxUCMConstants::defaultContext)=0;
+    void logEvent (const char *userKey, 
+		   const char *userValue,
+		   Level level = LEVEL_INFO,
+		   Stage stage = STATUS, 
+		   const char *msgContext = TxUCMConstants::defaultContext);
 
     /**
      * Called by the *application* to log an END event
      *
      */
-    virtual void logEnd (const std::string& key   = TxUCMConstants::appEnd,
-		 const std::string& value = "application ended")=0;
+    virtual void logEnd (const std::string& key, const std::string& value)=0;
+    void logEnd (const char *key   = TxUCMConstants::appEnd,
+		 const char *value = "application ended");
   };
 }
 #endif
