@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.83 2008/10/13 19:56:09 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.84 2009/07/28 14:40:46 fisyak Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.84  2009/07/28 14:40:46  fisyak
+// Comment out cut on TPC fiducial volume
+//
 // Revision 1.83  2008/10/13 19:56:09  fisyak
 // Account that Z-offset is sector dependent
 //
@@ -391,7 +394,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.83 2008/10/13 19:56:09 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.84 2009/07/28 14:40:46 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -684,6 +687,7 @@ Int_t StTrsMaker::Make(){
       int id3=tpc_track[id2-1].start_vertex_p; //  "-1" is (Fortran-->C++)
       whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
       float BunchZoffset=(gver[id3-1].ge_tof+tpc_hit->tof)* mSlowControlDb->driftVelocity(bsectorOfHit);
+#if 0
       float absHitZ=fabs(tpc_hit->x[2]);
       
 	      if(PILEUP_ON)
@@ -693,6 +697,7 @@ Int_t StTrsMaker::Make(){
 	   continue;//out of TPC
 	     }    //  for piled up events
 
+#endif
 // 		gMessMgr->QAInfo()  << "--> tpc_hit:  " << i << endm;
 // 		raw << tpc_hit->volume_id   << ' '
 // 		    << tpc_hit->de          << ' '
