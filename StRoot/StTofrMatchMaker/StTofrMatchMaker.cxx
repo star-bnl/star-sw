@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.29 2009/07/24 22:42:08 fine Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.30 2009/07/28 16:06:42 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.30  2009/07/28 16:06:42  geurts
+ * Bug Ticket #1591: explicit initialization of mStrobeTdcMin, mStrobeTdcMax, and mPedTOFr.
+ *
  * Revision 1.29  2009/07/24 22:42:08  fine
  * replace the deprecated API of the STAR messenger
  *
@@ -174,6 +177,9 @@ StTofrMatchMaker::StTofrMatchMaker(const Char_t *name): StMaker(name)
  , mPvpdAdc(mNPVPD,0)
  , mPvpdAdcLoRes( mNPVPD,0)
  , mPvpdTdc(mNPVPD,0)
+ , mStrobeTdcMin(mNPVPD,0)
+ , mStrobeTdcMax(mNPVPD,0)
+ , mPedTOFr(mNTOFR,0)
     //year 5
  , mPvpdToT(mNPVPD,0)
  , mTofr5Tdc(mNTOFR5,0)
