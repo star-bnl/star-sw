@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.114 2009/07/24 20:23:32 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.115 2009/07/28 16:11:52 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -54,6 +54,8 @@
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "TClass.h"
 #include "TDatime.h"
+#include "StHbtMaker/StHbtMaker.h"
+#include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowMaker)
@@ -249,7 +251,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.114 2009/07/24 20:23:32 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.115 2009/07/28 16:11:52 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -1783,9 +1785,143 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
   return (Float_t)(radius - dPosCenter);
 }
 
+//----------------------------------------------------------------------
+
+void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
+  // For use with HBT Maker. By Randy Wells.
+
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent(HbtEvent)" << endm;
+
+  // Delete previous StFlowEvent
+  if (pFlowEvent) delete pFlowEvent;
+  pFlowEvent = NULL;
+  // Instantiate a new StFlowEvent
+  pFlowEvent = new StFlowEvent;
+
+  cout << "Inside FlowMaker::FillFlowEvent(HbtEvent)..." << endl;
+
+  // set phiweights
+  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
+  pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
+  pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+  pFlowEvent->SetPhiWeightFtpcFarWest(mPhiWgtFtpcFarWest);
+
+  // Event ID and Run ID
+  // ????????
+  // Primary Vertex
+  pFlowEvent->SetVertexPos( hbtEvent->PrimVertPos() );
+  // Triggers
+  pFlowEvent->SetCTB( hbtEvent->CtbMult() );
+  pFlowEvent->SetZDCe( hbtEvent->ZdcAdcEast() );
+  pFlowEvent->SetZDCw( hbtEvent->ZdcAdcWest() );
+  // Get initial multiplicity before TrackCuts
+  UInt_t origMult = hbtEvent->NumberOfTracks();
+  pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
+  // Fill track info
+  int goodTracks    = 0;
+  int goodTracksEta = 0;
+  StHbtTrack* pParticle;
+  StHbtTrackIterator pIter;
+  StHbtTrackIterator startLoop = hbtEvent->TrackCollection()->begin();
+  StHbtTrackIterator endLoop   = hbtEvent->TrackCollection()->end();
+  for (pIter=startLoop; pIter!=endLoop; pIter++){
+    pParticle = *pIter;
+    // Instantiate new StFlowTrack
+    StFlowTrack* pFlowTrack = new StFlowTrack;
+    if (!pFlowTrack) return;
+    double px = pParticle->P().x();
+    double py = pParticle->P().y();
+    double phi = atan2(py,px);
+    if (phi<0.0) phi+=twopi;
+    pFlowTrack->SetPhi( phi );
+    pFlowTrack->SetPhiGlobal( phi );
+    double pz = pParticle->P().z();
+    double pTotal = pParticle->P().mag();
+    double eta = 0.5*::log( (1.0+pz/pTotal)/(1.0-pz/pTotal) );
+    pFlowTrack->SetEta( eta );
+    pFlowTrack->SetEtaGlobal( eta );
+    pFlowTrack->SetPt( pParticle->Pt() );
+    pFlowTrack->SetPtGlobal( pParticle->Pt() );
+    pFlowTrack->SetCharge( int(pParticle->Charge()) );
+    double dcaXY = pParticle->DCAxy();
+    double dcaZ = pParticle->DCAz();
+    double dca = ::sqrt( dcaXY*dcaXY + dcaZ*dcaZ );
+    //pFlowTrack->SetDca( dca );
+    pFlowTrack->SetDcaGlobal( dca );
+    pFlowTrack->SetChi2( pParticle->ChiSquaredXY() );
+    pFlowTrack->SetFitPts( pParticle->NHits() );
+    pFlowTrack->SetMaxPts( pParticle->NHitsPossible() );
+    cout << "pParticle->NHits(), pParticle->NHitsPossible() in StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) might be wrong!" << endl;
+    cout << "(MuDst, StEvent were changed and nFitPts might be different from nHits.)" << endl;
+    cout << "Whoever uses them, check it, please!" << endl;
+    // PID
+    pFlowTrack->SetPidPiPlus( pParticle->NSigmaPion() );
+    pFlowTrack->SetPidPiMinus( pParticle->NSigmaPion() );
+    pFlowTrack->SetPidProton( pParticle->NSigmaProton() );
+    pFlowTrack->SetPidAntiProton( pParticle->NSigmaProton() );
+    pFlowTrack->SetPidKaonMinus( pParticle->NSigmaKaon() );
+    pFlowTrack->SetPidKaonPlus( pParticle->NSigmaKaon() );
+    pFlowTrack->SetPidDeuteron( 0.0 );
+    pFlowTrack->SetPidAntiDeuteron( 0.0 );
+    pFlowTrack->SetPidElectron( pParticle->NSigmaElectron() );
+    pFlowTrack->SetPidPositron( pParticle->NSigmaElectron() );
+    // dEdx
+    if ( pParticle->NSigmaKaon() > 2.0 ) {
+      if (pParticle->Charge() > 0 ) {
+	pFlowTrack->SetMostLikelihoodPID(14); // proton
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+      else {
+	pFlowTrack->SetMostLikelihoodPID(15); // anti-proton
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+    }
+    if ( pParticle->NSigmaPion() > 2.0 ) {
+      if (pParticle->Charge() > 0 ) {
+	pFlowTrack->SetMostLikelihoodPID(11); // kaon
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+      else {
+	pFlowTrack->SetMostLikelihoodPID(12); // anti-kaon
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+    }
+    if ( pParticle->NSigmaPion() < -2.0 ) {
+      if (pParticle->Charge() < 0 ) {
+	pFlowTrack->SetMostLikelihoodPID(3); // electron
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+      else {
+	pFlowTrack->SetMostLikelihoodPID(2); // positron
+	pFlowTrack->SetMostLikelihoodProb( 0.99 ); // guaranteed
+      }
+    }
+    pFlowTrack->SetExtrapTag(0); // none are in the PID merging area
+    pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+    goodTracks++;
+  }
+
+  pFlowEvent->SetMultEta(goodTracksEta);
+  pFlowEvent->SetCentrality();
+  pFlowEvent->TrackCollection()->random_shuffle();
+  pFlowEvent->SetSelections();
+  pFlowEvent->MakeSubEvents();
+}
+
+//----------------------------------------------------------------------
+
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.115  2009/07/28 16:11:52  posk
+// Reinstalled hbt stuff.
+//
 // Revision 1.114  2009/07/24 20:23:32  posk
 // Clean up: Removed John Wu's Grid Collector, reading any data before year4, and calculating event plane for hbt Maker. Kept only the most recent pico DST read.
 //

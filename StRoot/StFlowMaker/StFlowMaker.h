@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.51 2009/07/24 20:23:35 posk Exp $
+//  $Id: StFlowMaker.h,v 1.52 2009/07/28 16:11:55 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -38,6 +38,8 @@ class StIOMaker;
 class StFileI;
 class TChain;
 class TClonesArray;
+class StHbtEvent; // Randy added these 2
+class StHbtTrack;
 
 class StFlowMaker : public StMaker {
 
@@ -62,11 +64,12 @@ public:
   void          SetMuEventFileName(StFileI* fileList);
   void          SetReCent(Bool_t flag=kTRUE);
   Bool_t        ReCent();
+  void          FillFlowEvent(StHbtEvent* hbtEvent); //rcwells added this
 
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.51 2009/07/24 20:23:35 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.52 2009/07/28 16:11:55 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -182,6 +185,9 @@ inline Bool_t StFlowMaker::ReCent() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.52  2009/07/28 16:11:55  posk
+//  Reinstalled hbt stuff.
+//
 //  Revision 1.51  2009/07/24 20:23:35  posk
 //  Clean up: Removed John Wu's Grid Collector, reading any data before year4, and calculating event plane for hbt Maker. Kept only the most recent pico DST read.
 //
