@@ -113,7 +113,7 @@ $(MYMOD)_perl_wrap.cxx: $(SWIGI) $(INCSI)
 	swig -perl5 -c++ -o $@ $<
 
 $(MYMOD)_java_wrap.cxx: $(SWIGI) $(INCSI)
-	swig $(INCDIRS:%=-I%) -java -c++ -o $@ $<
+	swig $(INCDIRS:%=-I%) -package "com.txLogging" -java -c++ -o $@ $<
 
 # XXX_wrap.cxx will be generated from the .i, .i was created
 # once in "lazzy" mode. Compile using langage specific
