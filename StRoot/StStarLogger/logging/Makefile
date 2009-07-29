@@ -35,6 +35,7 @@ endif
 
 # My project definition (same name in .i)
 MYMOD = logging
+MYJAR = tx-ucm
 
 UCMINC = $(STAR_USM_MODULE_DIR)/TxEventLog.h 
 
@@ -74,7 +75,6 @@ SWIGI = $(STAR_USM_BASE_DIR)/$(MYMOD).i
 OBJS  = $(filter-out %.cxx,$(SRCS:%.cpp=%.o))
 OBJS += $(filter-out %.cpp,$(SRCS:%.cxx=%.o))
 
-
 JAVAS= $(MYMOD).java
 JDEPS= $(MYMOD)_java_wrap.cxx
 JOBJS= $(MYMOD)_java_wrap.o  $(JSRCS:%.cxx=%.o)
@@ -84,11 +84,15 @@ PDEPS= $(MYMOD)_perl_wrap.cxx
 POBJS= $(MYMOD)_perl_wrap.o  $(PSRCS:%.cxx=%.o)
 
 # Main target $(MYMOD).$(SOEXT)  $(MYMOD)_main.class $(MYMOD)_perl.$(SOEXT)
-all: lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT)
+all: lib$(MYMOD).$(SOEXT) $(MYJAR).jar
 	@ echo "Try % perl test.pl"
 	@ echo "Try % $(JAVAX) -Djava.library.path=./ $(MYMOD)_main"
 
 # $(OBJS): $(SRCS)
+# make jar
+$(MYJAR).jar: lib$(MYMOD)_java.$(SOEXT)
+	javac -d ./ *.java
+	jar -cf $@ com
 
 # the needed .so for the pm to work
 lib$(MYMOD).$(SOEXT): $(OBJS)
@@ -139,8 +143,9 @@ $(MYMOD)_main.class:  $(MYMOD).java $(UCMINC:%.h=%.java)
 	$(CXX) $(CXXFLAGS)  $< -o $@
 
 clean:
+	/bin/rm -f $(MYJAR).jar
 	/bin/rm -f *.o
-	/bin/rm -f *.class
+	/bin/rm -rf com
 	/bin/rm -f *.java
 	/bin/rm -f *_wrap.c
 	/bin/rm -f *_wrap.cxx
