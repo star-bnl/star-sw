@@ -65,6 +65,7 @@ private:
   double mTimBinSize;
   
   double mSDD_thickness;                      //  [mm]
+  double mInitHitSize;                      //  [mm]
   double mTrapConst;
   double mDiffusionConst;                           //  [mm**2/micro seconds] X and Y are calculated from this
   double mDiffConstX;                          //  [mm**2/micro seconds] in drift direction
