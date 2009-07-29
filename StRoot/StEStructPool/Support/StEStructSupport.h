@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.14 2009/05/08 00:21:42 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.15 2009/07/29 21:47:47 dkettler Exp $
  *
  * Author: Jeff Porter 
  *
@@ -69,7 +69,7 @@ public:
   float *getChargeNumber(int zBin);
   float *getChargePairs(int zBin);
 
-  double *getd2NdEtadPhi(int zBin);
+  double *getd2NdEtadPhi(int zBin, bool include2s=true);
   double *getScaleFactors();
   double *getScaleFactors(int zBin);
   double *getptHat(int zBin);
@@ -134,6 +134,9 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.15  2009/07/29 21:47:47  dkettler
+ * New weighting for z bins
+ *
  * Revision 1.14  2009/05/08 00:21:42  prindle
  * In StEStructHadd remove support for old style of histogram names, do a better job calculating
  * errors (at least for number (\eta_\Delta,\phi_\Delta) histograms), double bins which
