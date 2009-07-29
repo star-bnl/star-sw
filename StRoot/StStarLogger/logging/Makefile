@@ -75,16 +75,17 @@ SWIGI = $(STAR_USM_BASE_DIR)/$(MYMOD).i
 OBJS  = $(filter-out %.cxx,$(SRCS:%.cpp=%.o))
 OBJS += $(filter-out %.cpp,$(SRCS:%.cxx=%.o))
 
+# JAVASRC = $(STAR_USM_BASE_DIR)/loadlogging.java
 JAVAS= $(MYMOD).java
 JDEPS= $(MYMOD)_java_wrap.cxx
 JOBJS= $(MYMOD)_java_wrap.o  $(JSRCS:%.cxx=%.o)
 
-PSRCS= $(MYMOD).java
+PSRCS= $(MYMOD).perl
 PDEPS= $(MYMOD)_perl_wrap.cxx
 POBJS= $(MYMOD)_perl_wrap.o  $(PSRCS:%.cxx=%.o)
 
 # Main target $(MYMOD).$(SOEXT)  $(MYMOD)_main.class $(MYMOD)_perl.$(SOEXT)
-all: lib$(MYMOD).$(SOEXT) $(MYJAR).jar
+all: lib$(MYMOD)Impl.$(SOEXT) $(MYJAR).jar
 	@ echo "Try % perl test.pl"
 	@ echo "Try % $(JAVAX) -Djava.library.path=./ $(MYMOD)_main"
 
@@ -95,15 +96,16 @@ $(MYJAR).jar: lib$(MYMOD)_java.$(SOEXT)
 	jar -cf $@ com
 
 # the needed .so for the pm to work
-lib$(MYMOD).$(SOEXT): $(OBJS)
-	$(LD) $(SOFLAGS) $@ $(OBJS)
+lib$(MYMOD)Impl.$(SOEXT): $(OBJS)
+	$(LD) $(SOFLAGS) $@ $(OBJS) -L$(OPTSTAR)/lib -llog4cxx -L$(OPTSTAR)/lib/mysql -lmysqlclient 
 
 # the needed .so for the pm to work
-lib$(MYMOD)_perl.$(SOEXT): $(POBJS)  lib$(MYMOD).$(SOEXT)
-	$(LD) $(SOFLAGS) $@ $(POBJS) $(PERL_LDL)  -L. -llogging
+lib$(MYMOD)_perl.$(SOEXT): $(POBJS)  lib$(MYMOD)Impl.$(SOEXT)
+	$(LD) $(SOFLAGS) $@ $(POBJS) $(PERL_LDL)  -L. -l$(MYMOD)Impl
 
-lib$(MYMOD)_java.$(SOEXT): $(JOBJS) lib$(MYMOD).$(SOEXT)
-	$(LD) $(SOFLAGS) $@ $(JOBJS) -L. -llogging
+lib$(MYMOD)_java.$(SOEXT): $(JOBJS) lib$(MYMOD)Impl.$(SOEXT)
+	$(LD) $(SOFLAGS) $@ $(JOBJS) -L. -l$(MYMOD)Impl
+	ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
 
 #+
 # SWIG dependencies
