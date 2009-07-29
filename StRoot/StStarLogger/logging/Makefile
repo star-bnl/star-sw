@@ -105,8 +105,6 @@ lib$(MYMOD)_perl.$(SOEXT): $(POBJS)  lib$(MYMOD).$(SOEXT)
 lib$(MYMOD)_java.$(SOEXT): $(JOBJS) lib$(MYMOD).$(SOEXT)
 	$(LD) $(SOFLAGS) $@ $(JOBJS) -L. -llogging
 
-
-
 #+
 # SWIG dependencies
 #-
@@ -143,7 +141,6 @@ $(MYMOD)_main.class:  $(MYMOD).java $(UCMINC:%.h=%.java)
 	$(CXX) $(CXXFLAGS)  $< -o $@
 
 clean:
-	/bin/rm -f $(MYJAR).jar
 	/bin/rm -f *.o
 	/bin/rm -rf com
 	/bin/rm -f *.java
@@ -151,10 +148,12 @@ clean:
 	/bin/rm -f *_wrap.cxx
 	/bin/rm -f *~ *.*~
 	/bin/rm -f $(MYMOD)*.java
-	/bin/rm -f *.$(SOEXT)
 	/bin/rm -f $(MYMOD).pm
 
-realclean: clean
+distclean: clean
+	/bin/rm -f $(MYJAR).jar
+	/bin/rm -f *.$(SOEXT)
+
 
 print:
 	echo $(JOBJS)
