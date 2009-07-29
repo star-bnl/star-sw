@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.13 2009/06/28 04:01:46 baumgart Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.14 2009/07/29 18:23:44 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.14  2009/07/29 18:23:44  baumgart
+ * Modified several formulae to better account for non-infinitesimal initial hit sizes
+ *
  * Revision 1.13  2009/06/28 04:01:46  baumgart
  * Correction of SDD thickness
  *
@@ -87,7 +90,8 @@ StSvtElectronCloud::~StSvtElectronCloud()
 
 void StSvtElectronCloud::setSiliconProp()
 {
- mSDD_thickness = 0.28;                                 //  [mm]
+ mSDD_thickness = 0.28;                                 //  [mm] 
+ mInitHitSize = 0.16;                                  //  [mm] 
  mLifeTime = 1000000.0;                                // [micro seconds]
  mTrapConst = 0.0;                                     //  [micro seconds]
  mDiffusionConst=0.0035;                               //  [mm**2/micro seconds]
@@ -154,7 +158,7 @@ void StSvtElectronCloud::setPar(double energy,double theta, double phi, double t
   
   //mTotCharge = mEnergy/mSi_EnergyGap;
   mTotCharge = mEnergy*0.27777777777777;    // in number of electrons, ~25000 electrons for MIPs
-  mTotCharge = 0.5*mTotCharge*(1+cos(mTheta)); // Fix eta-dependence
+   mTotCharge = mTotCharge*(1- 2*mInitHitSize*fabs(sin(mTheta))/(3*mSDD_thickness)); // Fix eta-dependence
   //cout<<"mTotCharge = "<<mTotCharge<<endl;
   }
 
@@ -165,14 +169,15 @@ void StSvtElectronCloud::setInitWidths(double w1, double w2)
   mSigX=0; mSigY=0; mSigXY=0;
   
   //tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta));  //  [mm]
-  tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta)) + w1; 
-  if (tSigMaj<w1) {        //almost perpendicular
-    tSigMaj = w1;          //initial size cannot be smaller than minimal
-    mTheta=0.;
-    mPhi = 0.;
-  }
-  tSigMin = w1;                                         //  [mm]
-  
+   tSigMaj = 0.288675134*(fabs(mSDD_thickness*tan(mTheta))+2*w1*cos(mTheta));  //  [mm]
+
+   // if (tSigMaj<w1) {        //almost perpendicular
+   // tSigMaj = w1;          //initial size cannot be smaller than minimal
+   // mTheta=0.;
+   // mPhi = 0.;
+   //}
+  tSigMin= 0.288675134*2*w1;          
+
   if ((1. - tSigMin/tSigMaj) < 0.001 || (fabs(mPhi)< 0.001)) mPhi=0.;
 
   //calculate initial size in XY
@@ -244,7 +249,7 @@ void StSvtElectronCloud::CalcExpansion(double mTc)
   mPhi = mInitPhi;
  
   //setInitWidths(0.002, 0.002);
-  setInitWidths(0.09, 0.09); // Stephen tune to Run 7 Au+Au
+  setInitWidths(mInitHitSize,mInitHitSize); // Stephen tune to Run 7 Au+Au
   
   double steps=mTc*AdBashDiv*RungeDiv;
   int isteps=(int)floor(steps + 0.5);
