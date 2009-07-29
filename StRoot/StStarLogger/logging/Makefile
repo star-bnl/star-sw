@@ -55,7 +55,7 @@ SRCCPPS +=TxEventLogCollector.cpp  \
           TxEventLogWeb.cpp        \
           TxUCMCollector.cxx
           
-# SRCS += $(SRCCPPS:%=$(STAR_USM_BASE_DIR)/%)
+SRCS += $(SRCCPPS:%=$(STAR_USM_BASE_DIR)/%)
 
 INCS = $(STAR_USM_BASE_DIR)/TxEventLogCollector.h      \
        $(STAR_USM_BASE_DIR)/TxEventLogFactory.h        \
