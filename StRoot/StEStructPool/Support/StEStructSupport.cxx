@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.21 2009/05/08 00:21:42 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.22 2009/07/29 21:47:47 dkettler Exp $
  *
  * Author: Jeff Porter 
  *
@@ -234,15 +234,17 @@ float *StEStructSupport::getChargePairs(int zBin) {
 };
 
 //---------------------------------------------------------
-double *StEStructSupport::getd2NdEtadPhi(int zBin) {
-    double* retVal = new double[5];
+double *StEStructSupport::getd2NdEtadPhi(int zBin, bool include2s) {
+    double* retVal = new double[6];
     // (nA+)*(nB+), (nA+)*(nB-), (nA-)*(nB+), (nA-)*(nB-), (nA+)+(nA-)+(nB+)+(nB-)
     // where the () means {d^2() \over d\eta d\phi}
     // Note that in cases where we don't distinguish a and b
     // (nA+)*(nB-) and (nA-)*(nB+) are the same and retVal[2] is not necessary.
 
+    
     TString hSibName("NEventsSib_zBuf_"); hSibName += zBin;  TH1* hNSum;  mtf->GetObject(hSibName.Data(),hNSum);
     double nEvents = hNSum->Integral();
+    retVal[5] = nEvents;
 
     double nTracksAP, nTracksAM, nTracksBP, nTracksBM;
     double dNdEtaAP, dNdEtaAM, dNdEtaBP, dNdEtaBM;
@@ -267,16 +269,19 @@ double *StEStructSupport::getd2NdEtadPhi(int zBin) {
     // There are factors of 2 when expanding the full correlation term that
     // could be included in loops over pairs, but appear not to have been.
     // Fix that up here.
-    if (mIdenticalPair) {
-        retVal[1] *= 2;
-        retVal[2]  = 0;
-        retVal[4] = (dNdEtaAP + dNdEtaAM) / (2*3.1415926);
-    } else {
-        retVal[0] *= 2;
-        retVal[2] *= 2;
-        retVal[3] *= 2;
-        retVal[4] = (dNdEtaAP + dNdEtaAM + dNdEtaBP + dNdEtaBM) / (2*3.1415926);
+    if(include2s) {
+        if (mIdenticalPair) {
+            retVal[1] *= 2;
+            retVal[2]  = 0;
+            retVal[4] = (dNdEtaAP + dNdEtaAM) / (2*3.1415926);
+        } else {
+            retVal[0] *= 2;
+            retVal[2] *= 2;
+            retVal[3] *= 2;
+            retVal[4] = (dNdEtaAP + dNdEtaAM + dNdEtaBP + dNdEtaBM) / (2*3.1415926);
+        }
     }
+
     return retVal;
 }
 //---------------------------------------------------------
@@ -385,6 +390,7 @@ void StEStructSupport::rescale(TH2D** hists, int zBin) {
     double nMix = hNum->Integral();
 
     for (int i=0;i<4;i++) {
+    	cout << "\ni=" << i << " Integral: " << hists[i]->Integral();
         if (hists[i]->Integral() > 0) {
             // dividing by ex*ey converts all input hists from counts to densities, so all operations and final result should also be density.
             double dx = (hists[i]->GetXaxis())->GetBinWidth(1);
@@ -399,11 +405,17 @@ void StEStructSupport::rescale(TH2D** hists, int zBin) {
                 // This is original normalization. Average value of \Delta\rho should be one.
                 double nSibPairs = hists[i]->Integral();
                 double nMixPairs = hists[i+4]->Integral();
+		cout << "\ni=" << i << " Scaling by: " << nSibPairs/nMixPairs << endl;
                 if (nMixPairs > 0) {
                     hists[i+4]->Scale(nSibPairs/nMixPairs);
                 } else {
                     hists[i+4]->Scale(0);
                 }
+                //if (nSibPairs > 0) {
+                //    hists[i]->Scale(nMixPairs/nSibPairs);
+                //} else {
+                //    hists[i]->Scale(0);
+                //}
             } else {
                 // We know how many sibling and mixed events there were.
                 // In this normalization we should be able to integrate (weighted with an
@@ -670,34 +682,58 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
         //    Combining centralities in this way will not give the same result as using a larger
         //    centrality bin to begin with, but may remove some of the systematic problems.
 
+	// We want to first calculate the total number of events and pairs for all zbins
+	double nEvents = 0.;
+	double totPairs = 0.;
+	double Totals[4] = {0, 0, 0, 0};
+        for (int iz=0;iz<mNumZBins;iz++) {
+	    double *d2NdEtadPhi = getd2NdEtadPhi(iz, false);
+	    nEvents += d2NdEtadPhi[5];
+	    totPairs += d2NdEtadPhi[4]*d2NdEtadPhi[5];
+	    for (int iType=0;iType<4;iType++) {
+		Totals[iType] += d2NdEtadPhi[iType]*d2NdEtadPhi[5];
+	    }
+	}
+		
         double *d2NdEtadPhi = getd2NdEtadPhi(0);
-        double dNdEtadPhi = d2NdEtadPhi[4];
+        double dNdEtadPhi = d2NdEtadPhi[4]*d2NdEtadPhi[5];
         for (int iType=0;iType<4;iType++) {
-            retVal[iType]->Scale(d2NdEtadPhi[iType]);
+	    if(d2NdEtadPhi[iType]!=0.) {
+                retVal[iType]->Scale(d2NdEtadPhi[iType]*d2NdEtadPhi[5]/Totals[iType]);
+	    } else
+		retVal[iType]->Scale(0.);
         }
         delete [] d2NdEtadPhi;
 
         for (int iz=1;iz<mNumZBins;iz++) {
             d2NdEtadPhi = getd2NdEtadPhi(iz);
-            dNdEtadPhi += d2NdEtadPhi[4];
+            dNdEtadPhi += d2NdEtadPhi[4]*d2NdEtadPhi[5];
             TH2D** tmpVal= buildCommon(name, opt, sf, iz);
             for (int iType=0;iType<4;iType++) {
-                retVal[iType]->Add(tmpVal[iType],d2NdEtadPhi[iType]);
+		if(d2NdEtadPhi[iType]!=0) {
+            	    retVal[iType]->Add(tmpVal[iType],d2NdEtadPhi[iType]*d2NdEtadPhi[5]/Totals[iType]);
+		}
                 delete tmpVal[iType];
             }
             delete [] tmpVal;
             delete [] d2NdEtadPhi;
         }
-        double sqrtRho = dNdEtadPhi / mNumZBins;
+        //double sqrtRho = dNdEtadPhi / mNumZBins;
+	dNdEtadPhi *= 1./(nEvents);
+        double sqrtRho = sqrt(dNdEtadPhi);
         for (int iType=0;iType<4;iType++) {
             if (0 < sqrtRho) {
                 // Note: I can imagine cases where a bin is empty (or nearly so) so it should
                 //       not count. Currently rely on some other QA to catch.
-                retVal[iType]->Scale(1.0/mNumZBins);
+                //retVal[iType]->Scale(1.0/mNumZBins);
                 if (0 == opt) {
-                    retVal[iType]->Scale(1.0/pow(sqrtRho,2));
+		    // Do nothing
+                    //retVal[iType]->Scale(1.0/pow(sqrtRho,2));
+		} else if (1 == opt) {
+		    retVal[iType]->Scale(dNdEtadPhi);
                 } else if (2 == opt) {
-                    retVal[iType]->Scale(1.0/sqrtRho);
+                    //retVal[iType]->Scale(1.0/sqrtRho);
+                    retVal[iType]->Scale(sqrtRho);
                 }
             } else {
                 retVal[iType]->Scale(0.0);
@@ -1474,6 +1510,9 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.22  2009/07/29 21:47:47  dkettler
+ * New weighting for z bins
+ *
  * Revision 1.21  2009/05/08 00:21:42  prindle
  * In StEStructHadd remove support for old style of histogram names, do a better job calculating
  * errors (at least for number (\eta_\Delta,\phi_\Delta) histograms), double bins which
@@ -1528,15 +1567,12 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
  * this is a bigger change. I left the old versions (with _Old appended)
  * for now.
  *
-<<<<<<< StEStructSupport.cxx
-=======
  * Revision 1.13  2006/10/27 00:05:32  prindle
  *   Modified buildChargeTypes to handle case where the -+ histogram is
  * empty. Also tried making buildCommonTypes work, but there one of the
  * output histograms was intended to be -+ and most of the time that
  * will be empty.
  *
->>>>>>> 1.13
  * Revision 1.11  2006/04/26 18:52:12  dkettler
  *
  * Added reaction plane determination for the analysis
