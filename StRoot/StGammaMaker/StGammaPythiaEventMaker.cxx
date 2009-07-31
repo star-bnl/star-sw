@@ -11,6 +11,7 @@
 #include "StSpinPool/StMCAsymMaker/StMCAsymMaker.h"
 #include "StGammaPythiaEvent.h"
 #include "StGammaPythiaEventMaker.h"
+#include "TMath.h"
 
 ClassImp(StGammaPythiaEventMaker);
 
@@ -59,7 +60,7 @@ int StGammaPythiaEventMaker::Make()
         
         if(pTable[i].isthep != 1) continue;
 
-        if(fabs(pTable[i].idhep) < 100) continue;
+        if(TMath::Abs(pTable[i].idhep) < 100) continue;
         
         mPythia->hadron().push_back(TLorentzVector(pTable[i].phep[0], pTable[i].phep[1], pTable[i].phep[2], pTable[i].phep[3]));
 
