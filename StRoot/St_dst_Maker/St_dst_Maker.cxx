@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.89 2009/04/08 21:06:10 fine Exp $
+// $Id: St_dst_Maker.cxx,v 1.90 2009/08/03 23:35:45 fine Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.90  2009/08/03 23:35:45  fine
+// Silence the compilation warning
+//
 // Revision 1.89  2009/04/08 21:06:10  fine
 // Fix the crash during debug print
 //
@@ -280,7 +283,7 @@ enum EChainBits {
 };
 
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.89 2009/04/08 21:06:10 fine Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.90 2009/08/03 23:35:45 fine Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -516,7 +519,7 @@ Int_t  St_dst_Maker::Filler(){
   for(int i=0; i<scs_spt->GetNRows(); i++,sgroups++){
     assert(sgroups->id >=0);
     if (sgroups->id >= svtIndex.GetSize()) {
-        svtIndex.Set(svtIndex.GetSize()*1.5);
+        svtIndex.Set(Int_t(svtIndex.GetSize()*1.5));
         svtindex= svtIndex.GetArray();} 
     svtindex[sgroups->id] = sgroups->id_globtrk;
   }
