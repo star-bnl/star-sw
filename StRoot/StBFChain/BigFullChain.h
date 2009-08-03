@@ -870,12 +870,34 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                            "New simulator for BEMC",kFALSE},
   {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
                                      "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
+
+  // Time Of Flight related options
+  {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
+  {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
+  {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
+                                                                              "TOF Data base chain",kFALSE},
+  {"tofXDat"   ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
+                                                                                    "TOF hit maker",kFALSE},
+  {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker",
+                                                                                   "BTOF hit maker",kFALSE},
+  {"tofsim"    ,"","TofChain","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker",
+                                                                                    "TOF Simulator",kFALSE},
+  {"tofrMatch" ,"","TofChain","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
+                                                                       "TPC to TOFr track matching",kFALSE},
+  {"tofpMatch"   ,"","TofChain","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
+                                                                       "TPC to TOFp track matching",kFALSE},
+  {"tofCalib"   ,"","TofChain","db,TofUtil","StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
+
+
+  // Some global Sti stuff including vertexing
   {"StiLibs","","","StarMagField,StiTpcLib,StiSvtLib,StiSsdlib,StiRnDLib,StiUtil","",
                                                                        "","ITTF:load Sti libraries",kFALSE},
   {"StiTpcLib","","","tpcDB","",                          "Sti,StiTpc","Sti Tpc related libratries",kFALSE},
   {"StiSvtLib","","","svtDB","",        "Sti,StSvtClassLibrary,StiSvt","Sti Svt related libratries",kFALSE},
   {"StiSsdLib","","","ssdDB","",                "Sti,StSsdUtil,StiSsd","Sti Ssd related libratries",kFALSE},
   {"StiRnDLib","","","","",                               "Sti,StiRnD","Sti RnD related libratries",kFALSE},
+
   {"laserIT" ,"","","","",                               "TpcIT","use Sti for laser reconstruction",kFALSE},
   {"TpcIT"       ,""  ,"","TpcDb,StiLibs",""                       ,"","ITTF: track using TPC geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
@@ -886,6 +908,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"PixelIT"     ,""  ,"","StiLibs",""                           ,"","ITTF: track using Pixel geom",kFALSE},
   {"IstIT"       ,""  ,"","StiLibs",""                             ,"","ITTF: track using Ist geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
+
   {"genvtx"   ,"","","EEmcUtil,ctf","StGenericVertexMaker","Minuit,Sti,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
   {"StiUtil"  ,"","","",                              "","StiUtilities","Load StiUtilities library",kFALSE},
@@ -898,7 +921,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
-  // needs to be done after the tracker
+  // Options in need to be done after the tracker
   {"FindVtxSeed"   ,"FindVtxSeed"   ,"","MuDSTDeps","StVertexSeedMaker",  
    "St_global,St_dst_Maker,StMuDSTMaker,StPass0CalibMaker",          "Performs vertex seed finding",kFALSE},
   {"FindEvtVtxSeed","FindEvtVtxSeed","","MuDSTDeps","StEvtVtxSeedMaker",
@@ -957,23 +980,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
-    
-  {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
-  {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
-  {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
-                                                                              "TOF Data base chain",kFALSE},
-  {"tofXDat"   ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
-                                                                                    "TOF hit maker",kFALSE},
-  {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker",
-                                                                                   "BTOF hit maker",kFALSE},
-  {"tofsim"    ,"","TofChain","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker",
-                                                                                    "TOF Simulator",kFALSE},
-  {"tofrMatch" ,"","TofChain","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
-                                                                       "TPC to TOFr track matching",kFALSE},
-  {"tofpMatch"   ,"","TofChain","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
-                                                                       "TPC to TOFp track matching",kFALSE},
-  {"tofCalib"   ,"","TofChain","db,TofUtil","StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
-    
+        
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T,l3util"        ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3Chain","l3_T,l3util"                ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
