@@ -60,15 +60,7 @@ using namespace std;
 enum { kFileSave, kFileSaveAs, kFilePrint, kFilePrintAll, kFileExit, kHelpAbout, kLive, kFile, kUpdate, kAutoUpdate, kToolBar, kOnlPrinter2, kBits, kReference}; 
 
 // ************************************************************************
-#if QT_VERSION < 0x40000
-#ifndef Q_MOC_RUN
-   class PresenterGui : public  QMainWindow {
-#endif
-#else
-//MOC_SKIP_BEGIN
-  class PresenterGui : public Q3MainWindow {
-//MOC_SKIP_END
-#endif
+class PresenterGui : public Q3MainWindow {
      
   Q_OBJECT
 
