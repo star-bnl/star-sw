@@ -915,7 +915,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"fgain"     ,"","","fcl,fpt","","",
                         "StFtpcClusterMaker and StFtpcTrackMaker will produce gain scan histograms",kFALSE},
   {"fdbg"     ,"","","fcl,fpt","","","StFtpcClusterMaker and StFtpcTrackMaker will write debugfile",kFALSE},
-  {"flaser"    ,"","","fpt"                              ,"","","StFtpcTrackMaker in LASERTRACKING",kFALSE},
+  {"flaser"   ,"","","fcl,fpt"   ,"","","StFtpcClusterMaker and StFtpcTrackMaker for LASERTRACKING",kFALSE},
 
 
   {"pmdReco"   ,"pmdReco","","PmdUtil,pmdRead,pmdClust"       ,"StMaker","StChain","PMD Reco chain",kFALSE},

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.545 2009/07/09 00:16:12 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.546 2009/08/03 16:44:51 starlib Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -754,8 +754,10 @@ Int_t StBFChain::Instantiate()
     if ((maker == "StFtpcClusterMaker" ||
 	 maker == "StFtpcTrackMaker"    )  &&
 	GetOption("fdbg"))                     mk->SetMode(mk->GetMode()+2);
-    if ( maker == "StFtpcTrackMaker"       &&
+    if ( ( maker == "StFtpcTrackMaker" ||
+	    maker == "StFtpcTrackMaker" ) &&
 	 GetOption("flaser"))                  mk->SetMode(mk->GetMode()+1);
+
     if ((maker == "StFtpcClusterMaker" ||
 	 maker == "StFtpcTrackMaker"    )  &&
 	GetOption("fgain"))                    mk->SetMode(mk->GetMode()+4);
