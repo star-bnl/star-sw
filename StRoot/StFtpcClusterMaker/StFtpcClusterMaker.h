@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.h,v 1.30 2008/01/07 14:46:10 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.31 2009/08/04 08:37:28 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.31  2009/08/04 08:37:28  jcs
+// When the flaser option is included in the bfc, the 'perfect' gain table and
+// adjustAverageWest = adjustAverageEast = 0.0, will be used for cluster finding
+//
 // Revision 1.30  2008/01/07 14:46:10  jcs
 // create and fill the special set of Ftpc point histograms used to evaluate
 // the Ftpc gain scan runs when bfc option fgain is in the chain
@@ -146,7 +150,8 @@ class TObjArray;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.30 2008/01/07 14:46:10 jcs Exp $";
+   Bool_t laserRun;
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.31 2009/08/04 08:37:28 jcs Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -203,6 +208,7 @@ class StFtpcClusterMaker : public StMaker {
    char             m_ThEnd[1];
 
    Float_t          microsecondsPerTimebin;
+   
 
  public: 
                   StFtpcClusterMaker(const char *name="ftpc_hits");
@@ -212,7 +218,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.30 2008/01/07 14:46:10 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.31 2009/08/04 08:37:28 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker,0)   //StAF chain virtual base class for Makers
 };

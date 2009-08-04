@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.100  2009/08/04 08:37:28  jcs
+// When the flaser option is included in the bfc, the 'perfect' gain table and
+// adjustAverageWest = adjustAverageEast = 0.0, will be used for cluster finding
+//
 // Revision 1.99  2008/10/02 16:20:43  jcs
 // standardize m_Mode LOG_INFO messages
 //
@@ -516,6 +520,8 @@ Int_t StFtpcClusterMaker::Init(){
   //          0                                  normal setting for production runs
   //          2               fdbg               open special Ftpc root file and fill with cluster information 
   //                                             for analysis in StFtpcCalibMaker
+  //          3               fdbg + flaser      open special Ftpc root file for laser run and fill with cluster information 
+  //                                             for analysis in StFtpcCalibMaker
   //          4               fgain              initialize and fill the special set of Ftpc cluster histograms
   //                                             used to evaluate the Ftpc gain scan runs
 
@@ -524,6 +530,12 @@ Int_t StFtpcClusterMaker::Init(){
   if (m_Mode == 2) {
     LOG_INFO << "StFtpcClusterMaker running with fdbg option selected"<<endm;
   }
+  
+  if (m_Mode == 3) {
+    LOG_INFO << "StFtpcClusterMaker writing to DEBUGFILE (fdbg option selected) for laser run (flaser option selected)"<<endm;
+    laserRun = kTRUE;
+  }
+  else {laserRun = kFALSE;}
 
   if (m_Mode == 4) {
     LOG_INFO << "StFtpcClusterMaker running with fgain option selected"<<endm;
@@ -641,6 +653,7 @@ Int_t StFtpcClusterMaker::Make()
   }
 
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
+     dbReader.setLaserRun(laserRun);
      LOG_INFO<<"Using the following values from database:"<<endm;
      if (microsecondsPerTimebin > 0.0 ) {
         dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
@@ -802,7 +815,7 @@ Int_t StFtpcClusterMaker::Make()
       
     Int_t searchResult = kStOK;
 
-    if (m_Mode == 2) {
+    if (m_Mode == 2 || m_Mode==3) {
        StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
        cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), dbReader.microsecondsPerTimebin(), paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
 
