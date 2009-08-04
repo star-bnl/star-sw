@@ -15,6 +15,7 @@
 # All the below files will have a local copy instead of a link
 %LOCAL = ("configure",1,
           "config/Makefile.config",1,
+	  "build/unix/compiledata.sh",1,
           "Makefile",1);
 
 # one of those files will be touch-ed during build 
@@ -60,7 +61,7 @@ if ( ! defined($CERN) ){
 
 # Now do the work
 if ( ! -e "Makefile" ){
-    die "You are probably not in the proper directory\n";
+    die "Missing Makefile - you are probably not in the proper directory\n";
 } else {
     # if -l, copy local otherwise it will be share by debug / no-debug
     # version and create confusions.
