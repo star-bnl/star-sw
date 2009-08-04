@@ -85,6 +85,6 @@ void hplfra_(float* x1,float* x2,float* y1,
                                     float* y2,const char* dum6, const int dum) {}
 void igmeta_(int* dum, int* dum2) {}
 void iselnt_(int* dum) {}
-int igiwty_(int* dum) {}
+int igiwty_(int* dum) {return 0;}
 void igqwk_(int* dum, const char *name, float* rval, const int l1) {}
 
