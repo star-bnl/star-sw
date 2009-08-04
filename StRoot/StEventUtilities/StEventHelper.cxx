@@ -269,28 +269,7 @@ int StEventHelper::Kind(const TObject *to)
   }
   return kind;
 }
-//______________________________________________________________________________
-THelixTrack *StEventHelper::MyHelix(THelixTrack *myHlx,const StHelixD *evHlx)
-{
-  if (!myHlx) 	myHlx= new THelixTrack;
-  double curv = evHlx->curvature();
-  double phase = evHlx->phase();
-  double dip   = evHlx->dipAngle();
-  int h = evHlx->h();
-
-  double myDir[3];
-  myDir[0]= -sin(phase)*cos(dip);	
-  myDir[1]=  cos(phase)*cos(dip);
-  myDir[2]=             sin(dip);
-  if (h<0) {myDir[0]=-myDir[0]; myDir[1]=-myDir[1];}
-  double myX[3];
-  myX[0]= evHlx->x(0.);
-  myX[1]= evHlx->y(0.);
-  myX[2]= evHlx->z(0.);
-  
-  myHlx->Set(myX,myDir,curv*h);
-  return myHlx;		
-}		
+		
 //______________________________________________________________________________
 void StEventHelper::ls(Option_t* option) const
 {
@@ -1098,43 +1077,24 @@ const float *StVertexHelper::GetErrMtx()
 //______________________________________________________________________________
 //______________________________________________________________________________
 ClassImp(StTrackHelper)
-StTrackHelper::StTrackHelper(const StTrack *trk)
-{ 
-  fHelx[0]=0; fHelx[1]=0; 
-  fTHlx[0]=0; fTHlx[1]=0; 
-  SetTrack(trk);
-}
+StTrackHelper::StTrackHelper(const StTrack *trk) : 
+      StHelixHelper(trk->geometry()->helix(),
+                    trk->outerGeometry()->helix(),trk->length())
+      , fTrk(trk), fHits(0)
+{    GetNHits();  }
 
 StTrackHelper::~StTrackHelper()
-{  
-  delete fHelx[0];delete fHelx[1];
-  delete fTHlx[0];delete fTHlx[1];
-}
-void StTrackHelper::SetTrack(const StTrack *trk){fTrk=trk;fHits=0;GetNHits();}    
+{  }
 int  StTrackHelper::GetType()  			const	{return fTrk->type();}
         int     StTrackHelper::GetFlag()	const 	{return fTrk->flag();}
         int     StTrackHelper::GetCharge() 	const	{return fTrk->geometry()->charge();}
 const StVertex *StTrackHelper::GetParent() 	const  	{return fTrk->vertex();}	 
       float     StTrackHelper::GetImpact() 	const 	{return fTrk->impactParameter();}
       float     StTrackHelper::GetCurv() 	const  	{return GetTHelix(0)->GetRho() ;}
-      float     StTrackHelper::GetLength() 	const 	{return fTrk->length();}
 const StThreeVectorF &StTrackHelper::GetFirstPoint() const {return fTrk->geometry()->origin();}
 const StThreeVectorF &StTrackHelper::GetLastPoint()  const {return fTrk->outerGeometry()->origin();}
 const StThreeVectorF &StTrackHelper::GetMom()        const {return fTrk->geometry()->momentum();}
-//______________________________________________________________________________
-StPhysicalHelixD *StTrackHelper::GetHelix(int idx) const
-{
-  if (!fHelx[idx]) fHelx[idx]= new StPhysicalHelixD;
-  *fHelx[idx] = (idx==0) ? fTrk->geometry()->helix():fTrk->outerGeometry()->helix();
-  return fHelx[idx];
-}
-//______________________________________________________________________________
-THelixTrack *StTrackHelper::GetTHelix(int idx) const
-{
-   StPhysicalHelixD *hlx = GetHelix(idx);
-   fTHlx[idx] = StEventHelper::MyHelix(fTHlx[idx],hlx);
-   return fTHlx[idx];
-}		
+	
 //______________________________________________________________________________
 const StPtrVecHit *StTrackHelper::GetHits() const
 {
@@ -1142,7 +1102,7 @@ const StPtrVecHit *StTrackHelper::GetHits() const
   const StTrackDetectorInfo *tdi = fTrk->detectorInfo();
   if (!tdi)	return 0;
   fHits = &tdi->hits();
-  		return fHits;
+  return fHits;
 }
 //______________________________________________________________________________
 int StTrackHelper::GetNHits() const
@@ -1187,50 +1147,6 @@ StMCTruth StTrackHelper::GetTruth(int byNumb,double rXYMin,double rXYMax) const
    if (!nUsed) return 0;
    return pivo.Get(byNumb);
 }		
-		
-//______________________________________________________________________________
-Float_t  *StTrackHelper::GetPoints(int &npoints) const
-{
-  static int ndebug=0; ndebug++;
-  npoints=0;
-  double len,len0,len1;
-  len = fTrk->length();   
-  if (len <= 0.0001) {
-    Warning("GetPoints","Zero length %s(%p), IGNORED",fTrk->ClassName(),(void*)fTrk);
-    return 0;
-  }
-  
-  GetHelix(0); GetHelix(1);
-  for (int i=0;i<2;i++) {fTHlx[i] = StEventHelper::MyHelix(fTHlx[i],fHelx[i]);}
-
-  len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
-  double rho0 = fTHlx[0]->GetRho();
-  double rho1 = fTHlx[1]->GetRho();
-  double drho = (rho1-rho0)/(len0*fTHlx[0]->GetCos());
-  fTHlx[0]->Set(rho0,drho);
-  fTHlx[1]->Set(rho1,drho);
-  fTHlx[1]->Backward();
-  npoints  = abs(int(len*fTHlx[0]->GetCos()*rho0*90))+2;   
-  double step = 1./(npoints-1);
-  len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
-  len1 = fTHlx[1]->Step(fTHlx[0]->GetXYZ());
-  float *arr = new Float_t[npoints*3];
-  double xyz[3][3];
-  for (int i =0;i<npoints;i++)
-  {
-     double s0 = i*step;
-     double s1 = 1.-s0;
-     fTHlx[0]->Step(s0*len0,xyz[0]);
-     fTHlx[1]->Step(s1*len1,xyz[1]);
-     s0 = s0*s0*s0; s1 = s1*s1*s1;
-     double tmp = s0+s1;
-     s0 /=tmp;      s1 /=tmp;
-     TCL::vlinco(xyz[0],s1,xyz[1],s0,xyz[2],3);
-     TCL::ucopy(xyz[2],arr+i*3,3);
-  }
-  return arr;
-}
-
 
 //______________________________________________________________________________
 //______________________________________________________________________________
