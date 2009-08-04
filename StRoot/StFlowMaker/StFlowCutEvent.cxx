@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.44 2007/02/06 18:57:48 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.45 2009/08/04 23:00:27 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -332,7 +332,6 @@ Bool_t StFlowCutEvent::CheckEvent(StMuDst* pMu) {
   Int_t* cent = 0;
   Int_t centrality = 0; // Centrality=0 is not retrievable
 
-  if (pMuEvent->runId() > 4000000 ) { // trigger collections were used
     flowTriggerBitMap = 0;
 
     /////////////////////////////////////////////////
@@ -362,6 +361,13 @@ Bool_t StFlowCutEvent::CheckEvent(StMuDst* pMu) {
       flowTriggerBitMap += 1;
       cent = Flow::cent62; // 62.4 GeV data
     }
+    else if ( // year7
+	     pMuEvent->triggerIdCollection().nominal().isTrigger(200001)||
+	     pMuEvent->triggerIdCollection().nominal().isTrigger(200003)||
+	     pMuEvent->triggerIdCollection().nominal().isTrigger(200013)) {
+      flowTriggerBitMap += 1;
+      cent = Flow::cent200Year7; // 200 GeV year 7 data
+    }
 
     /////////////////////////////////////////////////
     // Add new central triggers to look for here
@@ -389,40 +395,6 @@ Bool_t StFlowCutEvent::CheckEvent(StMuDst* pMu) {
       mTriggerCutN++;
       return kFALSE;
     }
-
-  } 
-  //////////////////////////////////////////
-  // before run 4 triggerWords were used
-  else {
-    if (!pMuEvent->l3EventSummary().unbiasedTrigger()) {
-      // cout << "FlowCutEvent: L3 biased trigger event " << endl;
-      return kFALSE;
-    }
-    
-    UInt_t triggerWord = pMuEvent->l0Trigger().triggerWord();
-    
-    switch (triggerWord) {
-    case 4096:  mTriggersFound = 1;  break; // minbias
-    case 4352:  mTriggersFound = 2;  break; // central
-    case 61952: mTriggersFound = 3;  break; // laser
-    default:    mTriggersFound = 10; break; // no clue
-    }
-    
-    if (pMuEvent->runInfo().centerOfMassEnergy() >= 199.) {
-      if (fabs(pMuEvent->magneticField()) >= 4.) { // year=2, Au+Au, Full Field
-	cent = Flow::cent200Full;
-      } else { // year=2, Au+Au, Half Field
-	cent = Flow::cent200Half;
-      }
-    } else if (pMuEvent->runInfo().centerOfMassEnergy() <= 25.){ // year=2, 22 GeV
-      cent = Flow::cent22;
-    }
-    if (mTriggerCut && mTriggersFound != mTriggerCut) {
-      mTriggerCutN++;
-      return kFALSE;
-    }
-
-  }
   
   Int_t tracks =  pMuEvent->refMult();
 
@@ -657,9 +629,9 @@ void StFlowCutEvent::PrintCutList() {
   cout << "#   EtaSymFtpc cuts= " << mEtaSymFtpcCuts[0] << ", " << mEtaSymFtpcCuts[1] 
        << " :\t Events Cut= " << mEtaSymFtpcCutN << "\t (" <<  setprecision(3) << 
     (float)mEtaSymFtpcCutN/(float)mEventN/perCent << "% cut)" << endl;
-  cout << "#   Trigger cut= " << mTriggerCut 
-       << " :\t\t Events Cut= " << mTriggerCutN << "\t (" <<  setprecision(3) << 
-    (float)mTriggerCutN/(float)mEventN/perCent << "% cut)" << endl;
+//   cout << "#   Trigger cut= " << mTriggerCut 
+//        << " :\t\t Events Cut= " << mTriggerCutN << "\t (" <<  setprecision(3) << 
+//     (float)mTriggerCutN/(float)mEventN/perCent << "% cut)" << endl;
   cout << "# Good Events = " << mGoodEventN << ", " << setprecision(3) <<
     (float)mGoodEventN/(float)mEventN/perCent << "%" << endl;
   cout << "#######################################################" << endl;
@@ -669,6 +641,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.45  2009/08/04 23:00:27  posk
+// Reads year 7 MuDsts.
+//
 // Revision 1.44  2007/02/06 18:57:48  posk
 // In Lee Yang Zeros method, introduced recentering of Q vector.
 // Reactivated eta symmetry cut.

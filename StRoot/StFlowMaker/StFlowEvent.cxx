@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.60 2007/02/06 18:57:52 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.61 2009/08/04 23:00:28 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1221,14 +1221,16 @@ void StFlowEvent::SetCentrality() {
   Int_t* cent = 0;
   Int_t  tracks = mMultEta; // converts UInt_t to Int_t
 
-  if (mRunID > 4000000 ) { // year 4
+  if (mRunID > 8000000) { // year 7
+    cent = Flow::cent200Year7;
+  } else if (mRunID > 4000000) { // year 4
     if (mCenterOfMassEnergy >= 199.) {
       if (fabs(mMagneticField) >= 4.) { // year=4, Au+Au, Full Field
 	cent = Flow::cent200Year4Full;
       } else { // year=4, Au+Au, Half Field
 	cent = Flow::cent200Year4Half;
       }
-    } else if (mCenterOfMassEnergy >60. && mCenterOfMassEnergy < 65. ) { // 62 GeV
+    } else if (mCenterOfMassEnergy >60. && mCenterOfMassEnergy < 65.) { // 62 GeV
       cent = Flow::cent62;
     }
   } else if (mCenterOfMassEnergy >= 199.) {
@@ -1336,6 +1338,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.61  2009/08/04 23:00:28  posk
+// Reads year 7 MuDsts.
+//
 // Revision 1.60  2007/02/06 18:57:52  posk
 // In Lee Yang Zeros method, introduced recentering of Q vector.
 // Reactivated eta symmetry cut.

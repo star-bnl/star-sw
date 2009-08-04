@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.115 2009/07/28 16:11:52 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.116 2009/08/04 23:00:29 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -144,20 +144,6 @@ Int_t StFlowMaker::Make() {
     pMuGlobalTracks = pMu->globalTracks();
     if (!FillFromMuDST()) return kStEOF; // false if EOF
     if (!pFlowEvent) return kStOK; // could have been deleted
-//     mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
-//     if (mEventFileName != mEventFileNameOld) { 
-//       if (Debug()) gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
-//       if (mPicoEventWrite) {
-// 	if (pPicoDST->IsOpen()) {
-// 	  pPicoDST->Write(0, TObject::kOverwrite);
-// 	  pPicoDST->Close();
-// 	}
-//         if (pPicoDST) delete pPicoDST;
-//         pPicoDST = NULL;
-//         InitPicoEventWrite();
-//       }
-//       mEventFileNameOld = mEventFileName;
-//     }
     if (mPicoEventWrite) FillPicoEvent();
 
   } else {
@@ -251,7 +237,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.115 2009/07/28 16:11:52 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.116 2009/08/04 23:00:29 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -271,7 +257,7 @@ Int_t StFlowMaker::Init() {
 
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
-  // if (mMuEventRead)    kRETURN += InitMuEventRead();; // not used
+  if (mMuEventRead)    kRETURN += InitMuEventRead();; 
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -1287,48 +1273,22 @@ Bool_t StFlowMaker::FillFromMuDST() {
 
   // Set centrality, etc.
   pFlowEvent->SetRunID(pMuEvent->runId());
+  //cout << "######### FillFromMuEvent runID = " << pFlowEvent->RunID() << endl;
   pFlowEvent->SetCenterOfMassEnergy(pMuEvent->runInfo().centerOfMassEnergy());
   pFlowEvent->SetMagneticField(pMuEvent->runInfo().magneticField());
   pFlowEvent->SetUncorrNegMult(pMuEvent->refMultNeg());
   pFlowEvent->SetUncorrPosMult(pMuEvent->refMultPos());
-  pFlowEvent->SetMultEta(pMuEvent->refMult()); 
+  if (pMuEvent->runId() > 8000000) { // year 7
+    pFlowEvent->SetMultEta(pMuEvent->grefmult());
+  } else {
+    pFlowEvent->SetMultEta(pMuEvent->refMult()); 
+  }
   pFlowEvent->SetCentrality(); 
   pFlowEvent->SetEventID(pMuEvent->eventId());
   pFlowEvent->SetVertexPos(pMuEvent->primaryVertexPosition());
   pFlowEvent->SetL0TriggerWord(StFlowCutEvent::TriggersFound());
   pFlowEvent->SetBeamMassNumberEast(pMuEvent->runInfo().beamMassNumber(east));
   pFlowEvent->SetBeamMassNumberWest(pMuEvent->runInfo().beamMassNumber(west));
-
-  FillFromMuVersion0DST();
-
-  // Check Eta Symmetry
-  if (!StFlowCutEvent::CheckEtaSymmetry(pMuEvent)) {  
-    Int_t eventID = pMuEvent->eventId();
-    gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
-                     << " cut" << endm;
-    delete pFlowEvent;             // delete this event
-    pFlowEvent = NULL;
-    return kTRUE;
-  }
-  
-  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
-    pFlowEvent->SetPidsDeviant();
-
-  pFlowEvent->TrackCollection()->random_shuffle();
-
-  pFlowEvent->SetSelections();
-  (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
-    pFlowEvent->MakeSubEvents();
-  
-  return kTRUE;
-}
-
-//-----------------------------------------------------------------------
-
-Bool_t StFlowMaker::FillFromMuVersion0DST() {
-  // Finish making StFlowEvent from StMuEvent
-  
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST()" << endm;
 
   StuProbabilityPidAlgorithm uPid;
 
@@ -1371,7 +1331,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   PR(origMult);  
   int goodTracks = 0;
   // Fill FlowTracks
-  for (Int_t nt=0; nt < origMult; nt++) {
+  for (Int_t nt=0; nt < (Int_t)origMult; nt++) {
    StMuTrack* pMuTrack = (StMuTrack*)pMuTracks->UncheckedAt(nt);
     if (pMuTrack && pMuTrack->flag()>0 && StFlowCutTrack::CheckTrack(pMuTrack)) {
       // Instantiate new StFlowTrack
@@ -1543,6 +1503,25 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
     }
   }
   
+  // Check Eta Symmetry
+  if (!StFlowCutEvent::CheckEtaSymmetry(pMuEvent)) {  
+    Int_t eventID = pMuEvent->eventId();
+    gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
+                     << " cut" << endm;
+    delete pFlowEvent;             // delete this event
+    pFlowEvent = NULL;
+    return kTRUE;
+  }
+  
+  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
+    pFlowEvent->SetPidsDeviant();
+
+  pFlowEvent->TrackCollection()->random_shuffle();
+
+  pFlowEvent->SetSelections();
+  (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
+    pFlowEvent->MakeSubEvents();
+  
   return kTRUE;
 }
 
@@ -1675,75 +1654,91 @@ Int_t StFlowMaker::InitPicoEventRead() {
 
 //-----------------------------------------------------------------------
 
+// Int_t StFlowMaker::InitMuEventRead() {
+//   // NOT USED
+
+//   if (Debug()) gMessMgr->Info() << "FlowMaker: InitMuEventRead()" << endm;
+  
+//   pMuEvents = new TClonesArray("StMuEvent", 1); 
+//   pMuTracks = new TClonesArray("StMuTrack", 10000);
+//   pMuGlobalTracks = new TClonesArray("StMuTrack", 10000);
+
+//   pMuChain = new TChain("MuDst");
+  
+//   for (Int_t ilist = 0;  ilist < pMuFileList->GetNBundles(); ilist++) {
+//     pMuFileList->GetNextBundle();
+
+// #if 0
+//     TFile* dummyFile = TFile::Open(pMuFileList->GetFileName(0),"READ");
+
+//     if (!dummyFile ||!(dummyFile->IsOpen())) {
+//       gMessMgr->Info() <<pMuFileList->GetFileName(0)<<" open failed ! not chained"<<endm;
+//       continue;   
+//     }
+
+//     if (dummyFile->IsZombie()) {
+//       gMessMgr->Info() <<"  sth. very wrong (overwritten, invalid) with "<<pMuFileList->GetFileName(0)<<", not chained "<<endm;
+//       continue;   
+//     }
+//     // this shoudl fix the memory leak and the code crash
+//     delete dummyFile;
+    
+//     // this produced the misleading statement, because the file was open to READ and it can not be recovered.
+//     if (dummyFile->TestBit(1024)) { 
+//       gMessMgr->Info() <<"  revocer procedure applied to "<<pMuFileList->GetFileName(0)<<", maybe useful but still not chained for flow analyses"<<endm;
+//       continue;   
+//     }
+// #endif
+
+
+//     //**************  this block is to remove files with # evts < 5
+//     // if there is only one event in a file, the job will crash
+//     TChain* pTempChain = new TChain("MuDst");
+//     pTempChain->Add(pMuFileList->GetFileName(0));
+//     if (((Int_t)pTempChain->GetEntries()) > 5 ) 
+//     pMuChain->Add(pMuFileList->GetFileName(0));
+//     if (pTempChain) { delete pTempChain; pTempChain=0; }
+//     //**************  end of the block   
+
+// //     if (Debug()) gMessMgr->Info() << " doFlowEvents -  input fileList = " 
+// // 				  << pMuFileList->GetFileName(0) << endm;
+
+      
+//     pMuChain->SetBranchAddress("MuEvent", &pMuEvents);
+//     pMuChain->SetBranchAddress("PrimaryTracks", &pMuTracks);
+//     pMuChain->SetBranchAddress("GlobalTracks", &pMuGlobalTracks);
+
+//     pMuChain->SetBranchStatus("*",0);
+//     pMuChain->SetBranchStatus("MuEvent*",1);
+//     pMuChain->SetBranchStatus("PrimaryTracks*",1);
+//     pMuChain->SetBranchStatus("GlobalTracks.mPt",1);
+//     pMuChain->SetBranchStatus("GlobalTracks.mPhi",1);
+//     pMuChain->SetBranchStatus("GlobalTracks.mEta",1);
+
+//     Int_t nEntries = (Int_t)pMuChain->GetEntries(); 
+//     // if (Debug()) gMessMgr->Info() << "##### FlowMaker: events in Mu-DST chain = "
+//     // << nEntries << endm;
+//     gMessMgr->Info() << "### ## FlowMaker: " << pMuFileList->GetFileName(0)
+// 				  << " " << nEntries << " events" << endm;
+    
+//   }
+  
+//   mEventCounter = 0;
+  
+//   return kStOK;
+// }
+
+//-----------------------------------------------------------------------
+
 Int_t StFlowMaker::InitMuEventRead() {
-  // NOT USED
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: InitMuEventRead()" << endm;
   
-  pMuEvents = new TClonesArray("StMuEvent", 1); 
-  pMuTracks = new TClonesArray("StMuTrack", 10000);
-  pMuGlobalTracks = new TClonesArray("StMuTrack", 10000);
+//   pMu = (StMuDst*)GetInputDS("MuDst");
+//   pMuEvent = pMu->event(); // this does not work
+//   Int_t runID = pMuEvent->runId();
+//   cout << "######### InitMuEventRead runID = " << runID << endl;
 
-  pMuChain = new TChain("MuDst");
-  
-  for (Int_t ilist = 0;  ilist < pMuFileList->GetNBundles(); ilist++) {
-    pMuFileList->GetNextBundle();
-
-#if 0
-    TFile* dummyFile = TFile::Open(pMuFileList->GetFileName(0),"READ");
-
-    if (!dummyFile ||!(dummyFile->IsOpen())) {
-      gMessMgr->Info() <<pMuFileList->GetFileName(0)<<" open failed ! not chained"<<endm;
-      continue;   
-    }
-
-    if (dummyFile->IsZombie()) {
-      gMessMgr->Info() <<"  sth. very wrong (overwritten, invalid) with "<<pMuFileList->GetFileName(0)<<", not chained "<<endm;
-      continue;   
-    }
-    // this shoudl fix the memory leak and the code crash
-    delete dummyFile;
-    
-    // this produced the misleading statement, because the file was open to READ and it can not be recovered.
-    if (dummyFile->TestBit(1024)) { 
-      gMessMgr->Info() <<"  revocer procedure applied to "<<pMuFileList->GetFileName(0)<<", maybe useful but still not chained for flow analyses"<<endm;
-      continue;   
-    }
-#endif
-
-
-    //**************  this block is to remove files with # evts < 5
-    // if there is only one event in a file, the job will crash
-    TChain* pTempChain = new TChain("MuDst");
-    pTempChain->Add(pMuFileList->GetFileName(0));
-    if (((Int_t)pTempChain->GetEntries()) > 5 ) 
-    pMuChain->Add(pMuFileList->GetFileName(0));
-    if (pTempChain) { delete pTempChain; pTempChain=0; }
-    //**************  end of the block   
-
-//     if (Debug()) gMessMgr->Info() << " doFlowEvents -  input fileList = " 
-// 				  << pMuFileList->GetFileName(0) << endm;
-
-      
-    pMuChain->SetBranchAddress("MuEvent", &pMuEvents);
-    pMuChain->SetBranchAddress("PrimaryTracks", &pMuTracks);
-    pMuChain->SetBranchAddress("GlobalTracks", &pMuGlobalTracks);
-
-    pMuChain->SetBranchStatus("*",0);
-    pMuChain->SetBranchStatus("MuEvent*",1);
-    pMuChain->SetBranchStatus("PrimaryTracks*",1);
-    pMuChain->SetBranchStatus("GlobalTracks.mPt",1);
-    pMuChain->SetBranchStatus("GlobalTracks.mPhi",1);
-    pMuChain->SetBranchStatus("GlobalTracks.mEta",1);
-
-    Int_t nEntries = (Int_t)pMuChain->GetEntries(); 
-    // if (Debug()) gMessMgr->Info() << "##### FlowMaker: events in Mu-DST chain = "
-    // << nEntries << endm;
-    gMessMgr->Info() << "### ## FlowMaker: " << pMuFileList->GetFileName(0)
-				  << " " << nEntries << " events" << endm;
-    
-  }
-  
   mEventCounter = 0;
   
   return kStOK;
@@ -1919,6 +1914,9 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.116  2009/08/04 23:00:29  posk
+// Reads year 7 MuDsts.
+//
 // Revision 1.115  2009/07/28 16:11:52  posk
 // Reinstalled hbt stuff.
 //

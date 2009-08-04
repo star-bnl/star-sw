@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.25 2007/02/06 18:57:47 posk Exp $
+// $Id: StFlowConstants.h,v 1.26 2009/08/04 23:00:26 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -64,8 +64,8 @@ class Flow{
   static Int_t   cent200Full[nCents];
   static Int_t   cent200Half[nCents];
   static Int_t   cent200Year4Full[nCents];
-  static Int_t   cent200Year4Full15003[nCents];
   static Int_t   cent200Year4Half[nCents];
+  static Int_t   cent200Year7[nCents];
   static Int_t   cent130[nCents];
   static Int_t   cent62[nCents];
   static Int_t   cent22[nCents];
@@ -82,6 +82,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.26  2009/08/04 23:00:26  posk
+// Reads year 7 MuDsts.
+//
 // Revision 1.25  2007/02/06 18:57:47  posk
 // In Lee Yang Zeros method, introduced recentering of Q vector.
 // Reactivated eta symmetry cut.
