@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.hh,v 1.28 2008/07/30 14:47:32 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.29 2009/08/04 08:37:28 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.29  2009/08/04 08:37:28  jcs
+// When the flaser option is included in the bfc, the 'perfect' gain table and
+// adjustAverageWest = adjustAverageEast = 0.0, will be used for cluster finding
+//
 // Revision 1.28  2008/07/30 14:47:32  jcs
 // if microsecondsPerTimebin calculated from RHIC clock, write the new value for mMicrosecondsPerTimebin back into
 // Calibrations_ftpc/ftpcElectronics table
@@ -205,12 +209,15 @@ protected:
   ftpcAmpSlope_st   *ampslopeTable;
   ftpcAmpOffset_st  *ampoffsetTable;
   ftpcTimeOffset_st *timeoffsetTable;
+  ftpcGas_st* gasTable;
   ftpcElectronics_st *electronicsTable;
   //SlowSimulator parameters
   Float_t mPadLength;
   Float_t mPadPitch;
 
 private:
+
+Bool_t mLaserRun;                         // indicator to know if this is a laser run
 
 Int_t FtpcAmpOffset(St_ftpcAmpOffset *ampoffset);
 Int_t FtpcAmpSlope(St_ftpcAmpSlope *ampslope);
@@ -309,6 +316,7 @@ public:
   Int_t setMagboltzdVDriftdP(Int_t i, Int_t padrow, Float_t  newvalue);
   Int_t setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t  newvalue);
   Int_t setMicrosecondsPerTimebin(Float_t newvalue);
+  Bool_t setLaserRun(Bool_t laserRun);
 
   // inline get functions
   Int_t numberOfPadrows() {return mNumberOfPadrows;}

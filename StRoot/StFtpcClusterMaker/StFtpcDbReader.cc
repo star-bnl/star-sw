@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.42 2008/07/30 14:47:30 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.43 2009/08/04 08:37:28 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.43  2009/08/04 08:37:28  jcs
+// When the flaser option is included in the bfc, the 'perfect' gain table and
+// adjustAverageWest = adjustAverageEast = 0.0, will be used for cluster finding
+//
 // Revision 1.42  2008/07/30 14:47:30  jcs
 // if microsecondsPerTimebin calculated from RHIC clock, write the new value for mMicrosecondsPerTimebin back into
 // Calibrations_ftpc/ftpcElectronics table
@@ -182,6 +186,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcInnerCathode(cathode);
   returnCode += FtpcClusterGeom(clustergeo);
 
+  mLaserRun = (Bool_t)kFALSE;
   //LOG_DEBUG << "StFtpcDbReader constructed for StFtpcClusterMaker" << endm;
 
 }
@@ -203,7 +208,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
 			       St_ftpcInnerCathode  *cathode)
 {
 
-
   returnCode = kStOK;
   returnCode += FtpcDimensions(dimensions);
   returnCode += FtpcAsicMap(asicmap);
@@ -220,6 +224,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcTimeOffset(timeoffset);
   returnCode += FtpcInnerCathode(cathode);
 
+  mLaserRun = (Bool_t)kFALSE;
   //LOG_DEBUG << "StFtpcDbReader constructed for StFtpcSlowSimMaker" << endm;
 }
 
@@ -235,7 +240,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcDriftField    *driftfield)
 {
 
-
   returnCode = kStOK;
   returnCode += FtpcDimensions(dimensions);
   returnCode += FtpcPadrowZ(zrow);
@@ -247,6 +251,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcGas(gas);
   returnCode += FtpcDriftField(driftfield);
 
+  mLaserRun = (Bool_t)kFALSE;
   //LOG_DEBUG << "StFtpcDbReader constructed for StFtpcDriftMapMaker" << endm;
 }
 
@@ -263,7 +268,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcDriftField    *driftfield)
 {
 
-
   returnCode = kStOK;
   returnCode += FtpcDimensions(dimensions);
   returnCode += FtpcPadrowZ(zrow);
@@ -276,6 +280,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcGas(gas);
   returnCode += FtpcDriftField(driftfield);
 
+  mLaserRun = (Bool_t)kFALSE;
   //LOG_DEBUG << "StFtpcDbReader constructed for StFtpcCalibMaker" << endm;
 }
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -284,11 +289,11 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcPadrowZ       *zrow         )
 {
 
-
   returnCode = kStOK;
   returnCode += FtpcDimensions(dimensions);
   returnCode += FtpcPadrowZ(zrow);
 
+  mLaserRun = (Bool_t)kFALSE;
   //LOG_DEBUG << "StFtpcDbReader constructed for Sti/StFtpcDetectorBuilder" << endm;
  
 }
@@ -302,6 +307,7 @@ StFtpcDbReader::~StFtpcDbReader()
 
 Int_t StFtpcDbReader::FtpcDimensions(St_ftpcDimensions *dimensions)
 {
+
 
   //  just copy dimensions table start to pointer
   ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
@@ -501,7 +507,7 @@ Int_t StFtpcDbReader::FtpcDriftField(St_ftpcDriftField *driftfield)
 Int_t StFtpcDbReader::FtpcGas(St_ftpcGas *gas)
 {
   //  just copy gas table start to pointer
-  ftpcGas_st* gasTable = (ftpcGas_st*)gas->GetTable();
+  gasTable = (ftpcGas_st*)gas->GetTable();
   if(gasTable){
    mPercentAr              = gasTable->percentAr;
    mPercentCO2             = gasTable->percentCO2;
@@ -671,6 +677,11 @@ Float_t StFtpcDbReader::magboltzdDeflectiondP(Int_t i, Int_t padrow)
 
 Float_t StFtpcDbReader::amplitudeSlope(Int_t i, Int_t padrow)
 {
+  // User "perfect" gain table for laser runs
+  if (mLaserRun) {
+      return 1.0;
+   }
+
   if(i>0 && i<=(numberOfSectors()*numberOfPads()) && padrow>=0 && padrow<numberOfPadrows())
     {
        // Since the gain tables were produced without inverting the sector
@@ -797,5 +808,19 @@ Int_t StFtpcDbReader::setMicrosecondsPerTimebin(Float_t newvalue)
   // write the new value for mMicrosecondsPerTimebin back into electronicsTable
   electronicsTable->uSecondsPerTimebin = mMicrosecondsPerTimebin;
 
+   return 0;
+}
+
+Bool_t StFtpcDbReader::setLaserRun(Bool_t laserRun)
+{
+   mLaserRun = laserRun;
+   if (mLaserRun) {
+      mAdjustAverageWest      = 0.0;
+      mAdjustAverageEast      = 0.0;
+      // set adjustAverageWest/East = 0.0 in gasTable
+      gasTable->adjustAverageWest = 0.0;
+      gasTable->adjustAverageEast = 0.0;
+      LOG_INFO << "LASER RUN:   Using 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0"<< endm;
+   }
    return 0;
 }
