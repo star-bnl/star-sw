@@ -20,6 +20,7 @@
 #include "StPhysicalHelixD.hh"
 #include "StPhysicalHelixD.hh"
 #include "StHelixD.hh"
+#include "StHelixHelper.h"
 #include "StEnumerations.h"
 
 class StEvent;
@@ -59,7 +60,7 @@ ClassDef(StVertexHelper,0)
 };
 
 //................................................................................
-class StTrackHelper: public TObject
+class StTrackHelper: public StHelixHelper
 {
 public:
       StTrackHelper(const StTrack *trk=0);
@@ -71,7 +72,6 @@ public:
 const StVertex *GetParent()	const;     
       float     GetImpact()     const;
       float     GetCurv()       const;
-      float     GetLength()     const;
       int       numberOfFitPoints(int detid=0) const;
 const StThreeVectorF &GetFirstPoint() 	const;
 const StThreeVectorF &GetLastPoint()	const;
@@ -82,17 +82,12 @@ const StThreeVectorF &GetMom() 	const;
         int     GetNHits()	const;
 const StHit    *GetHit(int idx) const;
 const StPtrVecHit *GetHits() 	const;
-      StPhysicalHelixD *GetHelix(int idx=0) 	const;
-      THelixTrack *GetTHelix(int idx=0) 	const;
-      Float_t  *GetPoints(int &npoints) 	const;
 StMCTruth GetTruth(int byCount=0,double rXYMin=0.,double rXYMax=1000.) const; 
 
 
 private:
 const StTrack *fTrk;
 mutable const StPtrVecHit *fHits;
-mutable StPhysicalHelixD  *fHelx[2];
-mutable THelixTrack       *fTHlx[2];
 ClassDef(StTrackHelper,0)
 };
 
@@ -196,7 +191,6 @@ public:
     virtual void Clear(Option_t *opt="");
     void Reset(const TObject *evt=0,const char *opt="");
 static int Kind(const TObject *to);
-static THelixTrack *MyHelix(THelixTrack *myHlx,const StHelixD *evHlx);
 static void Break(int kase);
 private:
 
