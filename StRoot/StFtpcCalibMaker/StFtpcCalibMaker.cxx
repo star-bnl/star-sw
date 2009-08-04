@@ -1,6 +1,10 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.9 2008/05/15 22:39:47 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.10 2009/08/04 08:42:09 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.10  2009/08/04 08:42:09  jcs
+// The 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0
+// are used for laser run calibration
+//
 // Revision 1.9  2008/05/15 22:39:47  jcs
 // re-activate helix fit
 //
@@ -207,6 +211,8 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
   if (ftpc == 1) deltap = deltapW;
   if (ftpc == 2) deltap = deltapE;
 
+  Bool_t laserRun = kTRUE;
+  dbReader->setLaserRun(laserRun);
 
  // get  Laser t0 from Calibrations_ftpc/ftpcElectronics offline database table
   tZero = dbReader->laserTZero();
@@ -327,6 +333,9 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
 void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mbfield)
 {
 
+
+  Bool_t laserRun = kFALSE;
+  dbReader->setLaserRun(laserRun);
 
   tZero = dbReader->tZero();
   LOG_INFO<<"StFtpcCalibMaker::DoT0Calib entered with filename "<<filename<<" t0 "<<t0<<" gas "<<gas<<" mbfield "<<mbfield<<" and tZero = "<<tZero<<endm;

@@ -1,6 +1,10 @@
-// $Id: lasertest_single.C,v 1.6 2008/05/14 21:46:01 jcs Exp $
+// $Id: lasertest_single.C,v 1.7 2009/08/04 08:42:23 jcs Exp $
 //
 // $Log: lasertest_single.C,v $
+// Revision 1.7  2009/08/04 08:42:23  jcs
+// The 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0
+// are used for laser run calibration
+//
 // Revision 1.6  2008/05/14 21:46:01  jcs
 // remove minz,maxz,minrad,maxrad from argument list and set values in macro
 //
@@ -98,6 +102,8 @@ void lasertest_single(TString filename,int ftpc, int lsec, int straight, int gfi
       
       St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
       dbMk->SetDateTime(laser->Date(),laser->Time());
+
+      Bool_t laserRun = kTRUE; 
 
       dbMk->InitRun(laser->RunNum());
       dbMk->Init();
