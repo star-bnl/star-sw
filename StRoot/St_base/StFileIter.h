@@ -1,4 +1,4 @@
-// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.5 2009/08/03 23:57:26 fine Exp $
+// @(#)root/table:$Name:  $:$Id: StFileIter.h,v 1.6 2009/08/04 15:03:00 fine Exp $
 // Author: Valery Fine(fine@bnl.gov)   01/03/2001
 
 /*************************************************************************
@@ -66,8 +66,8 @@ private:
    TDirectory *fDirectoryBackUp;  //! to save/restore TFile/TDirectory global scope
    StFileIter *fNestedIterator;   //! The inner TFidrectory interator;
    
-   bool operator!=(const TIterator&) const; // silence the hidden warning 
-   TIterator& operator=(const TIterator&);  // silence the hidden warning 
+   bool operator!=(const TIterator&) const{return true;} // silence the hidden warning 
+   TIterator& operator=(const TIterator&){ return *this;} // silence the hidden warning 
 
 protected:
    TDirectory   *fRootFile;       // TDirectory/TFile to be iterated over
