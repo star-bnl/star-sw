@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.19 2007/02/06 18:57:45 posk Exp $
+// $Id: StFlowConstants.cxx,v 1.20 2009/08/04 23:00:25 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -31,14 +31,14 @@ ClassImp(Flow)
   Float_t Flow::epsV1 = 0.5;
 
   // centralities
-  Int_t Flow::cent200Full[nCents] = {14,30,56,94,146,217,312,431,510};
-  Int_t Flow::cent200Half[nCents] = {14,32,59,98,149,216,302,409,474};
+  Int_t Flow::cent200Full[nCents]      = {14,30,56,94,146,217,312,431,510};
+  Int_t Flow::cent200Half[nCents]      = {14,32,59,98,149,216,302,409,474};
   Int_t Flow::cent200Year4Full[nCents] = {14,31,57,96,150,222,319,441,520};
-  Int_t Flow::cent200Year4Full15003[nCents] = {14,31,57,96,150,222,319,441,520};// not sure why/where needed (MDO 08/26/2005)
   Int_t Flow::cent200Year4Half[nCents] = {14,30,56,94,146,217,312,431,510};
-  Int_t Flow::cent130[nCents]     = {20,100,180,270,360,460,560,660,870};
-  Int_t Flow::cent62[nCents]	  = {9,20,38,65,102,154,222,313,373};
-  Int_t Flow::cent22[nCents]      = {8,16,30,51,80,120,173,240,284}; // Cebra
+  Int_t Flow::cent200Year7[nCents]     = {10,21,39,69,114,178,269,399,485};
+  Int_t Flow::cent130[nCents]          = {20,100,180,270,360,460,560,660,870};
+  Int_t Flow::cent62[nCents]	       = {9,20,38,65,102,154,222,313,373};
+  Int_t Flow::cent22[nCents]           = {7,14,28,48,77,117,170,237,281}; // 20 GeV paper
 
   //ZDC_SMD Beam Center(run5040129)
   Double_t Flow::zdcsmd_wx0 = 4.39604;
@@ -64,6 +64,9 @@ ClassImp(Flow)
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.cxx,v $
+// Revision 1.20  2009/08/04 23:00:25  posk
+// Reads year 7 MuDsts.
+//
 // Revision 1.19  2007/02/06 18:57:45  posk
 // In Lee Yang Zeros method, introduced recentering of Q vector.
 // Reactivated eta symmetry cut.

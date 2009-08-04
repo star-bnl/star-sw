@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.52 2009/07/28 16:11:55 posk Exp $
+//  $Id: StFlowMaker.h,v 1.53 2009/08/04 23:00:31 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -69,7 +69,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.52 2009/07/28 16:11:55 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.53 2009/08/04 23:00:31 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -118,7 +118,6 @@ private:
   Bool_t           FillFromPicoDST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromMuDST();
-  Bool_t           FillFromMuVersion0DST();
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing
   StFlowSelection* pFlowSelect;               //! selection object
@@ -185,6 +184,9 @@ inline Bool_t StFlowMaker::ReCent() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.53  2009/08/04 23:00:31  posk
+//  Reads year 7 MuDsts.
+//
 //  Revision 1.52  2009/07/28 16:11:55  posk
 //  Reinstalled hbt stuff.
 //
