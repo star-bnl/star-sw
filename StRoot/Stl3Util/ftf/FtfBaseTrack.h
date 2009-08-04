@@ -56,10 +56,10 @@ class FtfBaseTrack
     double getXCenter();
     double getYCenter();
     
-    inline virtual   void startLoop( ){ currentHit = firstHit ; } ;
-    inline virtual   void nextHit  ( ) = 0 ; 
-    inline virtual   int  done     ( ) { return currentHit != 0 ; } ;
-    void       Print       ( int level ) ;
+    virtual   void startLoop( );
+    virtual   void nextHit  ( ) = 0 ; 
+    virtual   int  done     ( );
+    void      Print       ( int level ) ;
 	  
 
     int       id     ;  // primary key 
