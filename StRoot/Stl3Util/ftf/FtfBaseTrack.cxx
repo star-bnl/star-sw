@@ -1280,3 +1280,5 @@ double FtfBaseTrack::getYCenter()
  return ( y0 - getRadius() * sin(tPhi0) );
  }
  
+void FtfBaseTrack::startLoop( ){ currentHit = firstHit ; } ;
+int  FtfBaseTrack::done     ( ) { return currentHit != 0 ; } ;
