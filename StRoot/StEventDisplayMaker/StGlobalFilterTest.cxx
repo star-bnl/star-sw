@@ -1,4 +1,4 @@
-// $Id: StGlobalFilterTest.cxx,v 1.9 2006/11/13 05:13:32 fine Exp $
+// $Id: StGlobalFilterTest.cxx,v 1.10 2009/08/05 15:33:59 fine Exp $
 #include "TError.h"
 #include "TSystem.h"
 #include "TCanvas.h"
@@ -41,7 +41,6 @@ StGlobalFilterTest::StGlobalFilterTest(): StGlobalFilterABC("Test","Test")
 //_____________________________________________________________________________
 void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
 {
-  static int nKount=0;
   int kind,nTot=0,nSel=0,iSel=0;;
   TObject *to;
   
@@ -67,28 +66,11 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
 //    if (mom<0.3) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
     if (th.GetFlag()<0) 	{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
 //   Only bad tracks
-    
+
     iSel=0;
-    
 
-    StPhysicalHelixD *hlx[2] ={0,0};
-    THelixTrack myHlx[2];
-    double myBeg[2][3],myDir[2][3];
-    for (int i=0;i<2;i++) { 
-       nKount++;
-       hlx[i]=th.GetHelix(i);
-       StEventHelper::MyHelix(myHlx+i,hlx[i]);
-       if (i) myHlx[i].Backward();
-       myHlx[i].Step(0.,myBeg[i],myDir[i]);
-    }
-    double rho[2],drho,dlen;
-    rho[0]=myHlx[0].GetRho();
-    rho[1]=myHlx[1].GetRho();
-    dlen = myHlx[0].Step(myBeg[1])*myHlx[0].GetCos();
-    drho = ((-rho[1])-rho[0])/dlen;
-    myHlx[0].Set(rho[0],drho);
-    myHlx[1].Set(rho[1],drho);
-
+    StPhysicalHelixD *hlx[2] = { th.GetHelix(0),   th.GetHelix(1) };
+    THelixTrack     myHlx[2] = {*th.GetTHelix(0), *th.GetTHelix(1)};
 
 
     double maxRes[2] = {0,0};
