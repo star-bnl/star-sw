@@ -1,1 +1,1 @@
-mysql -A -h heston.star.bnl.gov -u StarLogger -p
+mysql --skip-auto-rehash -h heston.star.bnl.gov -u StarLogger -p
