@@ -1,1 +1,1 @@
-mysql -h heston.star.bnl.gov -u StarLogger -p
+mysql -A -h heston.star.bnl.gov -u StarLogger -p
