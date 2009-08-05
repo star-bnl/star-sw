@@ -27,7 +27,6 @@ class StHelixHelper: public TObject
   protected: 
       StHelixHelper();
       static THelixTrack *MyHelix(THelixTrack *myHlx,const StHelixD *evHlx);
-      THelixTrack *GetTHelix(int idx=0)     const;
   public:
       enum {kInnerHelix, kOutterHelix};
       StHelixHelper(const StPhysicalHelix &helix
@@ -36,8 +35,9 @@ class StHelixHelper: public TObject
      ~StHelixHelper();
       float     GetLength()     const;
 
-      StPhysicalHelixD *GetHelix(int idx=0) const;
-      Float_t  *GetPoints(int &npoints)     const;
+      virtual StPhysicalHelixD *GetHelix(int idx=0) const;
+      virtual THelixTrack *GetTHelix(int idx=0)     const;
+      virtual Float_t  *GetPoints(int &npoints)     const;
 
 
 private:
