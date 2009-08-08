@@ -48,8 +48,8 @@ Int_t StTriggerDataMaker::Make(){
   run = daqReader->getRunNumber();
 
   StTRGReader* trgReader = daqReader->getTRGReader();
-  if (trgReader){ 
-    year = trgReader->getYear();
+  if (trgReader  && ( year = trgReader->getYear()) ){ 
+    
     cout << "StTriggerDataMaker Make() found old data for year " << year << endl;  
     switch(year){
     case 2003:
@@ -78,8 +78,7 @@ Int_t StTriggerDataMaker::Make(){
       AddData(new TObjectSet("StTriggerData",new StTriggerData2008(trgdata2008,run),kTRUE));
       break;
     }
-  }
-  if (!(trgReader && year) ){
+  } else {
     LOG_INFO << "StTriggerDataMaker Make() found no old format data, trying to get new data format" << endm;
 
     StRtsTable *daqData = GetNextRaw();
