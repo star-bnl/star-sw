@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.77 2009/04/06 18:22:33 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.78 2009/08/08 18:04:03 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.78  2009/08/08 18:04:03  fine
+ * Add Event num / Run num to the error message
+ *
  * Revision 1.77  2009/04/06 18:22:33  fine
  * remove the redundant methods and fix L1/L2/L3 summary
  *
@@ -489,7 +492,8 @@ int StDAQReader::readEvent()
       fTRGReader ->Update();
       if ( ! fTRGReader->thereIsTriggerData() ){
          LOG_INFO <<
-            Form("StDAQReader::readEvent: No or bad TRG data - Skipping event")<< endm;
+            Form("StDAQReader::readEvent: No or bad TRG data - Skipping event: ") 
+            << getRunNumber() << " : " <<getEventNumber()<< endm;
             return kStErr;
       }
   }
