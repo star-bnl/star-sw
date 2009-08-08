@@ -77,8 +77,9 @@ Int_t StTriggerDataMaker::Make(){
       if (!trgdata2008) return kStWarn;
       AddData(new TObjectSet("StTriggerData",new StTriggerData2008(trgdata2008,run),kTRUE));
       break;
-    }	      
-  }else{
+    }
+  }
+  if (!(trgReader && year) ){
     LOG_INFO << "StTriggerDataMaker Make() found no old format data, trying to get new data format" << endm;
 
     StRtsTable *daqData = GetNextRaw();
