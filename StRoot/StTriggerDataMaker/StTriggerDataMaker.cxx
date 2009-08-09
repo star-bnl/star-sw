@@ -30,7 +30,8 @@ StTriggerDataMaker::StTriggerDataMaker(const char *name):StRTSBaseMaker("trg",na
 //_____________________________________________________________________________
 
 Int_t StTriggerDataMaker::Make(){
-  cout << "StTriggerDataMaker Make() starting..................................."  << endl;
+  LOG_INFO << "StTriggerDataMaker Make() starting..........Run=" 
+        << GetRunNumber() << " : Event=" << GetEventNumber() << endl;
 
   int year=0, run=0;
   const TrgDataType2003    *trgdata2003=0;
@@ -50,7 +51,7 @@ Int_t StTriggerDataMaker::Make(){
   StTRGReader* trgReader = daqReader->getTRGReader();
   if (trgReader  && ( year = trgReader->getYear()) ){ 
     
-    cout << "StTriggerDataMaker Make() found old data for year " << year << endl;  
+    LOG_INFO << "StTriggerDataMaker Make() found old data for year " << year << endl;  
     switch(year){
     case 2003:
       trgdata2003=trgReader->getDataType2003();
