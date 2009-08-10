@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.17 2009/07/29 18:42:08 baumgart Exp $
+ * $Id: StSvtSignal.cc,v 1.18 2009/08/10 05:23:14 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.18  2009/08/10 05:23:14  baumgart
+ * Adjust mPasaGain due to adjustments in initial cloud size
+ *
  * Revision 1.17  2009/07/29 18:42:08  baumgart
  * Increased mPasaGain to compensate for edge effects subtraction in StSvtElectronCloud.cc
  *
@@ -90,7 +93,7 @@ StSvtSignal::StSvtSignal()
  memset(mSignal,0,sizeof(mSignal[0])*128);
 
  // mPasaGain = 7.2;      // uV/e Original number
- mPasaGain = 14.4; // Continuing tuning
+ mPasaGain = 13.4; // Continuing tuning
  
  for(int i = 0; i < 4; i++)
     mPasa[i] = 0.0;
