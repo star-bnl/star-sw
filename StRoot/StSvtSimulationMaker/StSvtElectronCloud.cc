@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.14 2009/07/29 18:23:44 baumgart Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.15 2009/08/10 05:21:32 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.15  2009/08/10 05:21:32  baumgart
+ * Fix Minor Axis of Initial Electron Cloud Size
+ *
  * Revision 1.14  2009/07/29 18:23:44  baumgart
  * Modified several formulae to better account for non-infinitesimal initial hit sizes
  *
@@ -91,7 +94,7 @@ StSvtElectronCloud::~StSvtElectronCloud()
 void StSvtElectronCloud::setSiliconProp()
 {
  mSDD_thickness = 0.28;                                 //  [mm] 
- mInitHitSize = 0.16;                                  //  [mm] 
+ mInitHitSize = 0.12;                                  //  [mm] 
  mLifeTime = 1000000.0;                                // [micro seconds]
  mTrapConst = 0.0;                                     //  [micro seconds]
  mDiffusionConst=0.0035;                               //  [mm**2/micro seconds]
@@ -176,7 +179,7 @@ void StSvtElectronCloud::setInitWidths(double w1, double w2)
    // mTheta=0.;
    // mPhi = 0.;
    //}
-  tSigMin= 0.288675134*2*w1;          
+  tSigMin= w1;          
 
   if ((1. - tSigMin/tSigMaj) < 0.001 || (fabs(mPhi)< 0.001)) mPhi=0.;
 
