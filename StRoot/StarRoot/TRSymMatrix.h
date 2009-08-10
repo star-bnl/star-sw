@@ -29,10 +29,10 @@ class TRSymMatrix : public TRArray {
   static  Int_t    spminv(Double_t *v, Double_t *b, Int_t n, 
 			  Int_t &nrank, Double_t *diag, Bool_t *flag);
   virtual void    Print(Option_t *opt="") const;
-  Double_t       &operator()(Int_t i)                    {return TRArray::operator[](i);}
-  Double_t        operator()(Int_t i) const              {return TRArray::operator[](i);}
+  Double_t       &operator()(Int_t i)         {return TRArray::operator[](i);}
+  Double_t        operator()(Int_t i) const   {return TRArray::operator[](i);}
   Double_t       &operator()(Int_t i,Int_t j);
-  Double_t       &operator()(Int_t i,Int_t j) const {return operator()(i,j);}
+  Double_t        operator()(Int_t i,Int_t j) const;
   void AddRow(const Double_t *row) {
     fNrows++; Set(fNrows*(fNrows+1)/2); memcpy(fArray+(fNrows-1)*fNrows/2, row, fNrows*sizeof(Double_t));
   }
@@ -50,11 +50,31 @@ class TRSymMatrix : public TRArray {
 };
 ostream& operator<<(ostream& s,const TRSymMatrix &target);
 inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
+  //  assert(! (j < 0 || j >= fNrows));
   if (j < 0 || j >= fNrows) {
     ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
 	    j, fNrows, this); 
     j = 0;
   }
+  //  assert(! (i < 0 || i >= fNrows));
+  if (i < 0 || i >= fNrows) {
+    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+	    i, fNrows, this); 
+    i = 0;
+  }
+  Int_t m = i;
+  Int_t l = j;
+  if (i > j) {m = j; l = i;}
+  return TArrayD::operator[](m + (l+1)*l/2);
+}
+inline Double_t TRSymMatrix::operator()(Int_t i,Int_t j) const {
+  //  assert(! (j < 0 || j >= fNrows));
+  if (j < 0 || j >= fNrows) {
+    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+	    j, fNrows, this); 
+    j = 0;
+  }
+  //  assert(! (i < 0 || i >= fNrows));
   if (i < 0 || i >= fNrows) {
     ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
 	    i, fNrows, this); 

@@ -37,8 +37,7 @@ class TRArray : public TArrayD {
 			     kAxAT, kATxA,
 			     kAxSxAT, kATxSxA, kRxSxR
   };
-
-  TRArray(Int_t N=0):  TArrayD(N), fValid(kTRUE) {}
+  TRArray(Int_t N=0):  TArrayD(N), fValid(kTRUE), fIsNotOwn(kFALSE) {}
   //  TRArray(Int_t N,Double_t scalar):  TArrayD(N) {if (scalar != 0) Reset(scalar);}
 #ifndef __CINT__
   TRArray(Int_t N,Double_t a0, ...);
@@ -50,13 +49,20 @@ class TRArray : public TArrayD {
     TCL::vlinco(A.GetArray(),fA,B.GetArray(),fB,fArray,N);  
   }
   TRArray(Int_t N,const Char_t *s);  
-  virtual ~TRArray() {;}
-
+  virtual ~TRArray() {if (fIsNotOwn) fArray = 0;}
   virtual Int_t GetNrows()                           const {return GetSize();} 
   virtual Int_t GetNcols()                           const {return 1;}
   virtual ETRMatrixType GetMatrixType()              const {return kUndefined;}
   virtual Bool_t IsValid()                           const {return fValid;}
+  virtual Double_t Mag2()                            const;
+  virtual Double_t Mag()                             const {return TMath::Sqrt(Mag2());}
   virtual void   SetValid(Bool_t Valid=kTRUE)              {fValid = Valid;}
+  void           Set(Int_t n);
+  void           Set(Int_t n, const Double_t *array);
+  void           Set(Int_t n, const Float_t *array);
+  void           AdoptA(Int_t n, Double_t *arr);
+  void           reset() {Reset();}
+  TRArray& operator=(const TRArray &rhs);
   virtual Double_t &operator()(Int_t i)                    {return operator[](i);}
   virtual Double_t operator()(Int_t i) const               {return operator[](i);}
   friend TRArray &operator-=(TRArray &target, Double_t scalar) {
@@ -98,14 +104,20 @@ class TRArray : public TArrayD {
     const Double_t *fB  = A.GetArray();
     for (int i=0; i<target.fN; i++) if (target.fArray[i] != fB[i]) return kFALSE; return kTRUE;
   }
+  friend TRArray operator + (const TRArray &A, const TRArray &B) {TRArray C(A); C += B; return C;}
+  friend TRArray operator - (const TRArray &A, const TRArray &B) {TRArray C(A); C -= B; return C;}
   
   Bool_t Verify(const TRArray &A, const Double_t zeru=5.e-7, Int_t Level=1) const;
   virtual void   Print(Option_t *opt="") const;
  protected:
   Bool_t fValid;
+  Bool_t fIsNotOwn; /* == kTRUE If TRArray created via AdoptA(Int_t n, Double_t *array) method 		  	
+		       then TRArray is not owner of fArray and user has to care to its size and delete
+		       in contrary TArrayD                                                            */
  public:
   ClassDef(TRArray,1)  // TRArray class (double precision)
 };
 ostream& operator<<(ostream& s,const TRArray &target);
 istream & operator>>(istream &s, TRArray &target);
+
 #endif
