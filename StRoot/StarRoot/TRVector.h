@@ -2,6 +2,7 @@
 #define ROOT_TRVector
 #include "TRMatrix.h"
 #include "TRSymMatrix.h"
+#include "TVector3.h"
 class TRVector : public TRMatrix {
  public:
   TRVector(Int_t nrows=0);
@@ -13,6 +14,10 @@ class TRVector : public TRMatrix {
   TRVector(Int_t nrows,const Char_t *s);
   TRVector(const TRSymMatrix &S, ETRMatrixCreatorsOp kop,const TRVector& A);
   TRVector(const TRVector& A, ETRMatrixCreatorsOp kop,const TRSymMatrix &S);
+  TRVector       &operator=(const TVector3 &rhs);
+  TRVector(const TVector3 &rhs); 
+  TRVector       Cross(const TRVector& v) const;
+  TRVector       Unit() const;
   friend TRVector operator*(const TRVector &source, Double_t scalar) {TRVector s(source); s *= scalar; return s;}
   friend TRVector operator*(Double_t scalar, const TRVector &source) {TRVector s(source); s *= scalar; return s;}
   friend TRVector operator/(const TRVector &source, Double_t scalar) {TRVector s(source); s /= scalar; return s;}
@@ -23,7 +28,7 @@ class TRVector : public TRMatrix {
 #ifndef __CINT__
   TRVector(Int_t nrows,Double_t a0, ...);
 #endif
-  virtual ~TRVector(){;}
+  virtual ~TRVector(){}
   ETRMatrixType GetMatrixType() const {return kVector;}
   //  void Add(const TRMatrix& A, ETRMatrixCreatorsOp kop,con.xst  TRVector& B); 
   //  void Substruct(const TRMatrix& A, ETRMatrixCreatorsOp kop,const  TRVector& B); 

@@ -30,6 +30,10 @@ TRArray::TRArray(Int_t N,const Char_t *s): TArrayD(N), fValid(kTRUE) {
   delete array;
 }
 //________________________________________________________________________________
+Double_t TRArray::Mag2() const {
+  return TCL::vdot(fArray,fArray,fN);
+}
+//________________________________________________________________________________
 ostream& operator<<(ostream& s,const TRArray &target) {
   s << "Size \t" << target.fN << endl;
   if (target.fArray) 
@@ -48,6 +52,17 @@ istream & operator>>(istream &s, TRArray &target) {
   if (N != target.fN) target.Set(N);
   for (int i = 0; i < N; i++) s >> target.fArray[i];
   return s;
+}
+//________________________________________________________________________________
+TRArray &TRArray::operator=(const TRArray &rhs) {   // TRArray assignment operator.
+  if (this != &rhs) {
+    if (! fIsNotOwn) Set(rhs.fN, rhs.fArray);
+    else {
+      fN = rhs.fN;
+      memcpy(fArray,rhs.fArray, fN*sizeof(Double_t));
+    }
+  }
+  return *this;
 }
 //________________________________________________________________________________
 Bool_t TRArray::Verify(const TRArray &A, Double_t zeru, Int_t Level) const {
@@ -77,3 +92,79 @@ Bool_t TRArray::Verify(const TRArray &A, Double_t zeru, Int_t Level) const {
 }
 //________________________________________________________________________________
 void TRArray::Print(Option_t *opt) const {if (opt) {}; cout << *this << endl;}
+//______________________________________________________________________________
+void TRArray::AdoptA(Int_t n, Double_t *arr)
+{
+   // Adopt array arr into TRArray, i.e. don't copy arr but use it directly
+   // in TRArray. User may delete arr, TRArray dtor will not do it.
+
+   if (fArray && fIsNotOwn) delete [] fArray;
+   fIsNotOwn = kTRUE;
+   fN     = n;
+   fArray = arr;
+}
+//______________________________________________________________________________
+void TRArray::Set(Int_t n)
+{
+   // Set size of this array to n doubles.
+   // A new array is created, the old contents copied to the new array,
+   // then the old array is deleted.
+   // This function should not be called if the array was declared via Adopt.
+
+   if (n < 0) return;
+   if (fIsNotOwn) {
+     memset(&fArray[fN],0,(n-fN)*sizeof(Double_t));
+     fN = n;
+     return;
+   }
+   if (n != fN) {
+      Double_t *temp = fArray;
+      if (n != 0) {
+	fArray = new Double_t[n];
+	if (n < fN) memcpy(fArray,temp, n*sizeof(Double_t));
+	else {
+	  memcpy(fArray,temp,fN*sizeof(Double_t));
+	  memset(&fArray[fN],0,(n-fN)*sizeof(Double_t));
+	}
+      } else {
+         fArray = 0;
+      }
+      if (fN) delete [] temp;
+      fN = n;
+   }
+}
+//________________________________________________________________________________
+void TRArray::Set(Int_t n, const Float_t *array) {
+  // Set size of this array to n doubles and set the contents
+  // This function should not be called if the array was declared via Adopt.
+  if (fArray && fN != n && ! fIsNotOwn) {
+    delete [] fArray;
+    fArray = 0;
+   }
+  fN = n;
+  if (fN == 0) return;
+  if (array == 0) return;
+  if (!fArray) {
+    fIsNotOwn = kFALSE;
+    fArray = new Double_t[fN];
+  }
+  TCL::ucopy(array,fArray,n);
+}
+//______________________________________________________________________________
+void TRArray::Set(Int_t n, const Double_t *array)
+{
+   // Set size of this array to n doubles and set the contents
+   // This function should not be called if the array was declared via Adopt.
+   if (fArray && fN != n && ! fIsNotOwn) {
+      delete [] fArray;
+      fArray = 0;
+   }
+   fN = n;
+   if (fN == 0) return;
+   if (array == 0) return;
+   if (!fArray) {
+     fIsNotOwn = kFALSE;
+     fArray = new Double_t[fN];
+   }
+   memcpy(fArray,array, n*sizeof(Double_t));
+}
