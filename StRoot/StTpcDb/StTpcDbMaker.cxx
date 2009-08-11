@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.45 2009/05/01 19:09:23 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.46 2009/08/11 20:38:04 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.46  2009/08/11 20:38:04  genevb
+ * slightly more detailed message
+ *
  * Revision 1.45  2009/05/01 19:09:23  fisyak
  * StTpcDbMaker::Make is aware about TPC trips and generagte EoF when this happenss
  *
@@ -588,7 +591,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 Int_t StTpcDbMaker::Make(){
   // check that TPC is tripped 
   if (St_tpcAnodeHVC::instance()->tripped()) {
-    gMessMgr->Info() << "StTpcDbMaker::TPC has tripped" << endm;
+    gMessMgr->Info() << "StTpcDbMaker::TPC has tripped - declaring EOF to avoid possibly bad data" << endm;
     return kStEOF;
   }
   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
