@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.107 2009/02/28 02:02:21 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.108 2009/08/12 13:42:38 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -104,8 +104,11 @@
 	$LLIB = "lib";
     }
 
-
-    $G77           = "g77";
+    if ( -x "/usr/bin/gfortran"){
+	$G77       = "gfortran";
+    } else {
+	$G77       = "g77";
+    }
     $G77FLAGS      = "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
     if ($STAR_HOST_SYS =~ /gcc3/) {
       $G77FLAGS    = "-pipe " . $G77FLAGS;
