@@ -1,7 +1,10 @@
 *
-* $Id: nxtcrd.F,v 1.2 2004/01/25 01:36:12 fisyak Exp $
+* $Id: nxtcrd.F,v 1.3 2009/08/12 14:42:24 jeromel Exp $
 *
 * $Log: nxtcrd.F,v $
+* Revision 1.3  2009/08/12 14:42:24  jeromel
+* ICHAR of expected size 1 was of size 2 to 3
+*
 * Revision 1.2  2004/01/25 01:36:12  fisyak
 * Clean up unused variable to avoid waning by Victor request
 *
@@ -40,7 +43,7 @@ C------------------------------------------------------------------
       INTEGER MQUOT/48/
       O(62)=0
       IF(O(52).EQ.2) CALLMESAGE(16,1,0,0)
-      IBK=ICHAR('   ')
+      IBK=ICHAR(' ')
       IF (O(55).EQ.MQUOT .AND. EXCL.GT.0 .AND. QUOT.GT.0) THEN
          IF (O(21).GT.0) PRINT *,' Parser warning: closing quota in comm
      *ent field, line ',O(19)

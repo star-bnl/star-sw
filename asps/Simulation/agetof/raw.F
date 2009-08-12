@@ -1,7 +1,10 @@
 *
-* $Id: raw.F,v 1.1.1.1 2003/12/23 14:54:43 fisyak Exp $
+* $Id: raw.F,v 1.2 2009/08/12 14:42:24 jeromel Exp $
 *
 * $Log: raw.F,v $
+* Revision 1.2  2009/08/12 14:42:24  jeromel
+* ICHAR of expected size 1 was of size 2 to 3
+*
 * Revision 1.1.1.1  2003/12/23 14:54:43  fisyak
 * ATLAS version of mortran (geant3 => agetof)
 *
@@ -35,7 +38,7 @@ C------------------------------------------------------------------
      *0,0,-2,107,24,0/
 20    CALLRW(0,O(9),769,769+114)
       DO 31 K = 0,9
-         IF(O(769+K).NE.(ICHAR('0 ')+K))GOTO20
+         IF(O(769+K).NE.(ICHAR('0')+K))GOTO20
 31    CONTINUE
       LINE(5)=1
 CMAKE INPUT AND OUTPUT SAME

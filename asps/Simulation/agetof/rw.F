@@ -1,7 +1,10 @@
 *
-* $Id: rw.F,v 1.2 2004/01/25 01:36:12 fisyak Exp $
+* $Id: rw.F,v 1.3 2009/08/12 14:42:24 jeromel Exp $
 *
 * $Log: rw.F,v $
+* Revision 1.3  2009/08/12 14:42:24  jeromel
+* ICHAR of expected size 1 was of size 2 to 3
+*
 * Revision 1.2  2004/01/25 01:36:12  fisyak
 * Clean up unused variable to avoid waning by Victor request
 *
@@ -42,7 +45,7 @@ C------------------------------------------------------------------
 C STATEMENT FUN
       ROUND(K)=MOD(K,5)+1
 C
-      IBK=ICHAR('  ')
+      IBK=ICHAR(' ')
       LINL = MAX(TO-FROM+1,0)
       IF( WICHIN.NE.0) GOTO 20
       LIL=ROUND(LIL)
