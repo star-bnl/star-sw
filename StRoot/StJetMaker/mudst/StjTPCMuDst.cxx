@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.3 2008/08/03 00:29:03 tai Exp $
+// $Id: StjTPCMuDst.cxx,v 1.4 2009/08/12 18:26:59 pibero Exp $
 #include "StjTPCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
@@ -66,7 +66,12 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.dcaD       = mutrack->dcaD();
 
   track.BField      = magneticField;
-  track.bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
+  //track.bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
+
+  // The optimum BEMC radius to use in extrapolating the track was determined to be 238.6 cm
+  // (slightly behind the shower max plane) in Murad Sarsour's electron jets analysis.
+  // http://cyclotron.tamu.edu/star/2006Jets/nov27_2007/details.html
+  track.bemcRadius = 238.6;	// cm
 
   StThreeVectorF vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
   track.vertexZ = vertex.z(); 
