@@ -1,9 +1,12 @@
 ******************************************************************************
-* $Id: fpdmgeo2.g,v 1.2 2008/11/19 04:08:22 perev Exp $
+* $Id: fpdmgeo2.g,v 1.3 2009/08/14 22:40:26 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo2.g,v $
+* Revision 1.3  2009/08/14 22:40:26  perev
+* Fix BIRK3 constant
+*
 * Revision 1.2  2008/11/19 04:08:22  perev
-* updates to the corrected(vp) starsim
+*  updates to the corrected(vp) starsim
 *
 * Revision 1.1  2006/06/12 18:33:40  potekhin
 * New version of the FPD re-designed by Akio and
@@ -507,7 +510,7 @@ Block FHMS is sHower Max Strip
       Call GSTPAR (ag_imed,'BCUTE', 0.0001)
       Call GSTPAR (ag_imed,'BIRK1',1.)
       Call GSTPAR (ag_imed,'BIRK2',0.0130)
-      Call GSTPAR (ag_imed,'BIRK3',9.6E-3)
+      Call GSTPAR (ag_imed,'BIRK3',9.6E-6)
       HITS FHMS    Birk:0:(0,10)
 Endblock
 * ----------------------------------------------------------------------------

@@ -1,9 +1,12 @@
 ******************************************************************************
-* $Id: fpdmgeo3.g,v 1.7 2008/11/19 04:08:23 perev Exp $
+* $Id: fpdmgeo3.g,v 1.8 2009/08/14 22:40:27 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo3.g,v $
+* Revision 1.8  2009/08/14 22:40:27  perev
+* Fix BIRK3 constant
+*
 * Revision 1.7  2008/11/19 04:08:23  perev
-* updates to the corrected(vp) starsim
+*  updates to the corrected(vp) starsim
 *
 * Revision 1.6  2007/09/21 23:00:08  perev
 * corrects E.Braidot@phys.uu.nl
@@ -748,7 +751,7 @@ Block FHMS is sHower Max Strip
       Call GSTPAR (ag_imed,'BCUTE', 0.0001)
       Call GSTPAR (ag_imed,'BIRK1',1.)
       Call GSTPAR (ag_imed,'BIRK2',0.0130)
-      Call GSTPAR (ag_imed,'BIRK3',9.6E-3)
+      Call GSTPAR (ag_imed,'BIRK3',9.6E-6)
       HITS FHMS    Birk:0:(0,10)
 Endblock
 * ----------------------------------------------------------------------------

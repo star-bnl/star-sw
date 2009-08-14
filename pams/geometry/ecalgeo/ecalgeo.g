@@ -923,7 +923,7 @@ Block EHMS is  sHower Max Strip
 * define Birks law parameters
       Call GSTPAR (ag_imed,'BIRK1',1.)
       Call GSTPAR (ag_imed,'BIRK2',0.0130)
-      Call GSTPAR (ag_imed,'BIRK3',9.6E-3)
+      Call GSTPAR (ag_imed,'BIRK3',9.6E-6)
 *
        HITS EHMS     Birk:0:(0,10)  
 *                     xx:16:SH(-250,250)  yy:16:(-250,250)  zz:16:(-350,350),
