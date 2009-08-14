@@ -1,4 +1,4 @@
-// $Id: StjBEMCMuDst.cxx,v 1.6 2008/08/18 02:41:22 tai Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.7 2009/08/14 20:07:31 pibero Exp $
 #include "StjBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
@@ -58,17 +58,15 @@ StjTowerEnergyList StjBEMCMuDst::getlist()
   StjTowerEnergyList ret;
 
   StEmcCollection* emcCollection = findEmcCollection();
-  StEmcDetector* detector = emcCollection->detector(kBarrelEmcTowerId);
-
-  static const int nBemcModules = 120;
-
-  for(int m = 1; m <= nBemcModules; ++m) {
-
-    StSPtrVecEmcRawHit& rawHits = detector->module(m)->hits();
-
-    for(UInt_t k = 0; k < rawHits.size(); ++k) {
-  	    
-      ret.push_back(readTowerHit(*rawHits[k]));
+  if (emcCollection) {
+    StEmcDetector* detector = emcCollection->detector(kBarrelEmcTowerId);
+    if (detector) {
+      for(unsigned int m = 1; m <= detector->numberOfModules(); ++m) {
+	StSPtrVecEmcRawHit& rawHits = detector->module(m)->hits();
+	for(size_t k = 0; k < rawHits.size(); ++k) {
+	  ret.push_back(readTowerHit(*rawHits[k]));
+	}
+      }
     }
   }
 
