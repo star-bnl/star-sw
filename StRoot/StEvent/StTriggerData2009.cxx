@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.17 2009/06/16 15:44:26 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.18 2009/08/14 15:06:09 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.18  2009/08/14 15:06:09  ullrich
+ * Added checks of trigger data banks.
+ *
  * Revision 2.17  2009/06/16 15:44:26  ullrich
  * Added fmsADC() method.
  *
@@ -168,19 +171,20 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
 	  offlen = (TrgOfflen2009*) ((char*)mData + mData->PrePostList[i-1]);
 	}
         swapRawDetOfflen(offlen);
-        if (offlen[y9BC1_CONF_NUM].length>0) {mBC1[i] = (BELayerBlock2009*)((char*)mData + offlen[y9BC1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBC1[i],y9BC1_CONF_NUM); }
-        if (offlen[y9MXQ_CONF_NUM].length>0) {mMXQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9MXQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMXQ[i],y9MXQ_CONF_NUM); }
-        if (offlen[y9MIX_CONF_NUM].length>0) {mMIX[i] = (MIXBlock2009*    )((char*)mData + offlen[y9MIX_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMIX[i],y9MIX_CONF_NUM); }
-        if (offlen[y9BCW_CONF_NUM].length>0) {mBCW[i] = (BWestBlock2009*  )((char*)mData + offlen[y9BCW_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBCW[i],y9BCW_CONF_NUM); }
-        if (offlen[y9BCE_CONF_NUM].length>0) {mBCE[i] = (BEastBlock2009*  )((char*)mData + offlen[y9BCE_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBCE[i],y9BCE_CONF_NUM); }
-        if (offlen[y9FEQ_CONF_NUM].length>0) {mFEQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9FEQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mFEQ[i],y9FEQ_CONF_NUM); }
-        if (offlen[y9BBC_CONF_NUM].length>0) {mBBC[i] = (BBCBlock2009*    )((char*)mData + offlen[y9BBC_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBBC[i],y9BBC_CONF_NUM); }
-        if (offlen[y9BBQ_CONF_NUM].length>0) {mBBQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9BBQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBBQ[i],y9BBQ_CONF_NUM); }
-        if (offlen[y9FMS_CONF_NUM].length>0) {mFMS[i] = (FMSBlock2009*    )((char*)mData + offlen[y9FMS_CONF_NUM].offset); swapRawDet((DataBlock2009*)mFMS[i],y9FMS_CONF_NUM); }
-        if (offlen[y9QT1_CONF_NUM].length>0) {mQT1[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT1[i],y9QT1_CONF_NUM); }
-        if (offlen[y9QT2_CONF_NUM].length>0) {mQT2[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT2_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT2[i],y9QT2_CONF_NUM); }
-        if (offlen[y9QT3_CONF_NUM].length>0) {mQT3[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT3_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT3[i],y9QT3_CONF_NUM); }
-        if (offlen[y9QT4_CONF_NUM].length>0) {mQT4[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT4_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT4[i],y9QT4_CONF_NUM); }
+	int j;
+        j=offlen[y9BC1_CONF_NUM].length; if(j>0){mBC1[i] = (BELayerBlock2009*)((char*)mData + offlen[y9BC1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBC1[i],y9BC1_CONF_NUM,j);}
+        j=offlen[y9MXQ_CONF_NUM].length; if(j>0){mMXQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9MXQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMXQ[i],y9MXQ_CONF_NUM,j);}
+        j=offlen[y9MIX_CONF_NUM].length; if(j>0){mMIX[i] = (MIXBlock2009*    )((char*)mData + offlen[y9MIX_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMIX[i],y9MIX_CONF_NUM,j);}
+        j=offlen[y9BCW_CONF_NUM].length; if(j>0){mBCW[i] = (BWestBlock2009*  )((char*)mData + offlen[y9BCW_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBCW[i],y9BCW_CONF_NUM,j);}
+        j=offlen[y9BCE_CONF_NUM].length; if(j>0){mBCE[i] = (BEastBlock2009*  )((char*)mData + offlen[y9BCE_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBCE[i],y9BCE_CONF_NUM,j);}
+        j=offlen[y9FEQ_CONF_NUM].length; if(j>0){mFEQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9FEQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mFEQ[i],y9FEQ_CONF_NUM,j);}
+        j=offlen[y9BBC_CONF_NUM].length; if(j>0){mBBC[i] = (BBCBlock2009*    )((char*)mData + offlen[y9BBC_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBBC[i],y9BBC_CONF_NUM,j);}
+        j=offlen[y9BBQ_CONF_NUM].length; if(j>0){mBBQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9BBQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBBQ[i],y9BBQ_CONF_NUM,j);}
+        j=offlen[y9FMS_CONF_NUM].length; if(j>0){mFMS[i] = (FMSBlock2009*    )((char*)mData + offlen[y9FMS_CONF_NUM].offset); swapRawDet((DataBlock2009*)mFMS[i],y9FMS_CONF_NUM,j);}
+        j=offlen[y9QT1_CONF_NUM].length; if(j>0){mQT1[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT1[i],y9QT1_CONF_NUM,j);}
+        j=offlen[y9QT2_CONF_NUM].length; if(j>0){mQT2[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT2_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT2[i],y9QT2_CONF_NUM,j);}
+        j=offlen[y9QT3_CONF_NUM].length; if(j>0){mQT3[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT3_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT3[i],y9QT3_CONF_NUM,j);}
+        j=offlen[y9QT4_CONF_NUM].length; if(j>0){mQT4[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT4_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT4[i],y9QT4_CONF_NUM,j);}
         if (mMXQ[i]) decodeQT(mMXQ[i]->length/4, mMXQ[i]->data, mxq[i], tmxq[i]); 
         if (mFEQ[i]) decodeQT(mFEQ[i]->length/4, mFEQ[i]->data, feq[i], tfeq[i]); 
         if (mBBQ[i]) decodeQT(mBBQ[i]->length/4, mBBQ[i]->data, bbq[i], tbbq[i]); 

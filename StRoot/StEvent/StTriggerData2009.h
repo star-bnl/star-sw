@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.10 2009/06/16 15:44:26 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.11 2009/08/14 15:06:10 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.11  2009/08/14 15:06:10  ullrich
+ * Added checks of trigger data banks.
+ *
  * Revision 2.10  2009/06/16 15:44:26  ullrich
  * Added fmsADC() method.
  *
@@ -241,7 +244,7 @@ protected:
     void swapL1_DSM(L1_DSM_Data2009* L1_DSM);
     void swapTrgSum(TrgSumData2009* TrgSum);
     void swapRawDetOfflen(TrgOfflen2009* offlen);
-    void swapRawDet(DataBlock2009* data, int name);
+    void swapRawDet(DataBlock2009* data, int name, int hlength);
 
     ClassDef(StTriggerData2009,1) 
 };
@@ -290,13 +293,28 @@ inline void StTriggerData2009::swapRawDetOfflen(TrgOfflen2009* offlen)
     }
 }
 
-inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name)
+inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name, int hlength)
 {
     BELayerBlock2009* bc1;
     MIXBlock2009* mix;
     BBCBlock2009 *bbc;
     QTBlock2009* qtdata;
+    int header_length = 8;
     swapI((unsigned int*)&data->length);
+    switch(name){
+    case y9MXQ_CONF_NUM : case y9FEQ_CONF_NUM : case y9BBQ_CONF_NUM : 
+    case y9QT1_CONF_NUM : case y9QT2_CONF_NUM : case y9QT3_CONF_NUM : case y9QT4_CONF_NUM :
+      header_length = 12; break;
+    }
+    if(hlength != data->length + header_length){
+      printf("StTriggerData2009: Error reading Block=%2d [%1c%1c%1c%1c] length %d != %d + %d\n",
+	     name,data->name[0],data->name[1],data->name[2],data->name[3],
+	     hlength,data->length,header_length);      
+      printf("StTriggerData2009: Droping the data block =%2d [%1c%1c%1c%1c]\n",
+	     name,data->name[0],data->name[1],data->name[2],data->name[3]);
+      data=0;
+      return;
+    }
     switch(name){
     case y9BC1_CONF_NUM :
         bc1 = (BELayerBlock2009*) data;
