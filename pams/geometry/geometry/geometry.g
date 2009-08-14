@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.195 2009/07/14 01:02:59 perev Exp $
+* $Id: geometry.g,v 1.196 2009/08/14 22:38:06 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.196  2009/08/14 22:38:06  perev
+* Remove Cone fr upgr16 (Jan request)
+*
 * Revision 1.195  2009/07/14 01:02:59  perev
 * Increase interaction/decay volume
 *
@@ -1222,7 +1225,7 @@ replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
 replace [exe UPGR16;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
-                     SCON=on;
+                     SCON=off;
                      ConeConfig=2 " new cable weight estimate ";
 
 * X.Dong
