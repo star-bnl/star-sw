@@ -723,7 +723,7 @@ Double_t StMCAsymMaker::get_polPDF_LO(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_LO: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8)  polar_(&polset_LO, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6)  polar_(&polset_LO, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_LO:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -747,7 +747,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO, &x, &Q2, parpol, &polid);
     //cout <<"get_polPDF_NLO:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -770,7 +770,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_g0(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_g0: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_g0, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_g0, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_g0:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -794,7 +794,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_gmax(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_gmax: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_gmax, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_gmax, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_gmax:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -818,7 +818,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_gmin(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_gmin: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_gmin, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_gmin, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_gmin:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -841,7 +841,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_m015(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_m015: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_m015, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_m015, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_m015:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -864,7 +864,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_m030(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_m030: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_m030, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_m030, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_m030:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -887,7 +887,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_m045(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_m045: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_m045, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_m045, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_m045:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -910,7 +910,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_m060(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_m060: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_m060, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_m060, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_m060:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -933,7 +933,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_m075(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_m075: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_m075, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_m075, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_m075:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -956,7 +956,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_m090(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_m090: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_m090, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_m090, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_m090:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -979,7 +979,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_m105(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_m105: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_m105, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_m105, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_m105:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1002,7 +1002,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_p030(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_p030: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_p030, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_p030, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_p030:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1025,7 +1025,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_p045(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_p045: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_p045, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_p045, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_p045:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1048,7 +1048,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_p060(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_p060: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_p060, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_p060, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_p060:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1071,7 +1071,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_p070(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_p070: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_p070, &x, &Q2, parpol, &polid);
+    if (Q2>=0.8&&Q2<=1.0e6) polar_(&polset_NLO_p070, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_p070:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1094,7 +1094,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_DSSV(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_DSSV: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_DSSV, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=1.0e5) polar_(&polset_NLO_DSSV, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_DSSV:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1]+parpol[2];      //dv + dsea quark
@@ -1117,7 +1117,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_LSS1(int flavor, double x, double Q2){
     int polid=0;
     //    cout<<"get_polPDF_NLO_LSS1: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_LSS1, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=5.8e5) polar_(&polset_NLO_LSS1, &x, &Q2, parpol, &polid);
     //    cout <<"getpolPDF_NLO_LSS1:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1140,7 +1140,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_LSS2(int flavor, double x, double Q2){
     int polid=0;
     //    cout<<"get_polPDF_NLO_LSS2: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_LSS2, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=5.8e5) polar_(&polset_NLO_LSS2, &x, &Q2, parpol, &polid);
     //    cout <<"getpolPDF_NLO_LSS2:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1163,7 +1163,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_LSS3(int flavor, double x, double Q2){
     int polid=0;
     //    cout<<"get_polPDF_NLO_LSS3: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_LSS3, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=5.8e5) polar_(&polset_NLO_LSS3, &x, &Q2, parpol, &polid);
     //    cout <<"getpolPDF_NLO_LSS3:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1186,7 +1186,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_AAC1(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_AAC1: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_AAC1, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=1.0e8) polar_(&polset_NLO_AAC1, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_AAC1:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1209,7 +1209,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_AAC2(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_AAC2: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_AAC2, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=1.0e8) polar_(&polset_NLO_AAC2, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_AAC2:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1232,7 +1232,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_AAC3(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_AAC3: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_AAC3, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=1.0e8) polar_(&polset_NLO_AAC3, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_AAC3:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1255,7 +1255,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_BB1(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_BB1: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_BB1, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=1.0e6) polar_(&polset_NLO_BB1, &x, &Q2, parpol, &polid);
     //cout <<"get_polPDF_NLO_BB1:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1278,7 +1278,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_BB2(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_BB2: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_BB2, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=1.0e6) polar_(&polset_NLO_BB2, &x, &Q2, parpol, &polid);
     //cout <<"get_polPDF_NLO_BB2:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1301,7 +1301,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_DNS1(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_p070: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_DNS1, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=5.0e4) polar_(&polset_NLO_DNS1, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_p070:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
@@ -1324,7 +1324,7 @@ Double_t StMCAsymMaker::get_polPDF_NLO_DNS2(int flavor, double x, double Q2){
     int polid=0;
     //cout<<"get_polPDF_NLO_p070: flavor="<<flavor<<" x="<<x<<" Q2="<<Q2<<" id="<<polid<<endl;
 
-    if (Q2>=0.8) polar_(&polset_NLO_DNS2, &x, &Q2, parpol, &polid);
+    if (Q2>=1.0&&Q2<=5.0e4) polar_(&polset_NLO_DNS2, &x, &Q2, parpol, &polid);
     //cout <<"getpolPDF_NLO_p070:  U="<<parpol[0]<<" D="<<parpol[1]<<" UB="<<parpol[2]<<" DB="<<parpol[3]<<" ST="<<parpol[4]<<" GL="<<parpol[5]<<endl;
 
     if (flavor==1) pdf=parpol[1];      //dv + dsea quark
