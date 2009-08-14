@@ -7,8 +7,9 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
 			  const char* outfile = "Jets_minbias_01.root",
 			  const char* skimFile = "Skim_minbias_01.root")
 {
-  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
-  loadSharedLibraries();
+  gROOT->Macro("loadMuDst.C");
+  gROOT->Macro("LoadLogger.C");
+
   gSystem->Load("StTpcDb");
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StDbUtilities");
@@ -38,8 +39,6 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   
   StChain* chain = new StChain; 
   chain->SetDebug(1);
-  gMessMgr->SwitchOff("D");
-  gMessMgr->SwitchOff("I");
   
   StIOMaker* ioMaker = new StIOMaker;
   ioMaker->SetFile(fname);
