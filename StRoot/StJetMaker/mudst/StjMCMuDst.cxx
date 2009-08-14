@@ -1,4 +1,4 @@
-// $Id: StjMCMuDst.cxx,v 1.4 2008/08/22 17:32:54 tai Exp $
+// $Id: StjMCMuDst.cxx,v 1.5 2009/08/14 13:55:56 pibero Exp $
 
 #include <StjMCMuDst.h>
 
@@ -17,40 +17,44 @@
 
 StjMCParticleList StjMCMuDst::getMCParticleList()
 {
-
-  TDataSet *Event = _maker->GetDataSet("geant");
-
-  TDataSetIter geantDstI(Event);
-  const St_particle* particleTabPtr = (St_particle*)geantDstI("particle");
-  const particle_st* particleTable = particleTabPtr->GetTable();
-
   StjMCParticleList theList;
 
-  StMuDstMaker *uDstMaker = dynamic_cast<StMuDstMaker*>(_maker->GetMaker("MuDst"));
+  TDataSet *Event = _maker->GetDataSet("geant");
+  if (Event) {
+    TDataSetIter geantDstI(Event);
+    const St_particle* particleTabPtr = (St_particle*)geantDstI("particle");
+    if (particleTabPtr) {
+      const particle_st* particleTable = particleTabPtr->GetTable();
+      if (particleTable) {
+	StMuDstMaker *uDstMaker = dynamic_cast<StMuDstMaker*>(_maker->GetMaker("MuDst"));
+	if (uDstMaker) {
+	  StjMCParticle particle;
+	  particle.runNumber = uDstMaker->muDst()->event()->runId();
+	  particle.eventId = uDstMaker->muDst()->event()->eventId();
+	  particle.vertexZ = uDstMaker->muDst()->event()->primaryVertexPosition().z();
 
-  StjMCParticle particle;
-  particle.runNumber = uDstMaker->muDst()->event()->runId();
-  particle.eventId = uDstMaker->muDst()->event()->eventId();
-  particle.vertexZ = uDstMaker->muDst()->event()->primaryVertexPosition().z();
-
-  for (int i = 0; i < particleTabPtr->GetNRows(); ++i) {
+	  for (int i = 0; i < particleTabPtr->GetNRows(); ++i) {
 		
-    particle.status          = particleTable[i].isthep;
-    particle.mcparticleId    = i + 1;
-    particle.pdg             = particleTable[i].idhep;
-    particle.firstMotherId   = particleTable[i].jmohep[0];
-    particle.lastMotherId    = particleTable[i].jmohep[1];
-    particle.firstDaughterId = particleTable[i].jdahep[0];
-    particle.lastDaughterId  = particleTable[i].jdahep[1];
+	    particle.status          = particleTable[i].isthep;
+	    particle.mcparticleId    = i + 1;
+	    particle.pdg             = particleTable[i].idhep;
+	    particle.firstMotherId   = particleTable[i].jmohep[0];
+	    particle.lastMotherId    = particleTable[i].jmohep[1];
+	    particle.firstDaughterId = particleTable[i].jdahep[0];
+	    particle.lastDaughterId  = particleTable[i].jdahep[1];
 
-    TLorentzVector p4(particleTable[i].phep[0], particleTable[i].phep[1], particleTable[i].phep[2], particleTable[i].phep[3]);
-    particle.pt  = p4.Pt();
-    particle.eta = p4.Eta();
-    particle.phi = p4.Phi();
-    particle.m   = p4.M();
-    particle.e   = p4.E();
+	    TLorentzVector p4(particleTable[i].phep[0], particleTable[i].phep[1], particleTable[i].phep[2], particleTable[i].phep[3]);
+	    particle.pt  = p4.Pt();
+	    particle.eta = p4.Eta();
+	    particle.phi = p4.Phi();
+	    particle.m   = p4.M();
+	    particle.e   = p4.E();
 
-    theList.push_back(particle);
+	    theList.push_back(particle);
+	  }
+	}
+      }
+    }
   }
 
   return theList;
