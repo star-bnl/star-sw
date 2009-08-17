@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.22 2009/07/29 21:47:47 dkettler Exp $
+ * $Id: StEStructSupport.cxx,v 1.23 2009/08/17 23:05:20 dkettler Exp $
  *
  * Author: Jeff Porter 
  *
@@ -720,8 +720,9 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
         }
         //double sqrtRho = dNdEtadPhi / mNumZBins;
 	dNdEtadPhi *= 1./(nEvents);
-        double sqrtRho = sqrt(dNdEtadPhi);
+        double sqrtRho = dNdEtadPhi;
         for (int iType=0;iType<4;iType++) {
+	    retVal[iType]->Scale(1./4.);
             if (0 < sqrtRho) {
                 // Note: I can imagine cases where a bin is empty (or nearly so) so it should
                 //       not count. Currently rely on some other QA to catch.
@@ -1510,8 +1511,8 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
- * Revision 1.22  2009/07/29 21:47:47  dkettler
- * New weighting for z bins
+ * Revision 1.23  2009/08/17 23:05:20  dkettler
+ * Normalization fix
  *
  * Revision 1.21  2009/05/08 00:21:42  prindle
  * In StEStructHadd remove support for old style of histogram names, do a better job calculating
