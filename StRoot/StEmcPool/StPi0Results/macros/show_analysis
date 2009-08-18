@@ -1,9 +1,9 @@
 #!/bin/bash
 
-export ANALYSIS_DIR=${0%/*}
-if [[ -f ./.analysis.cfg.sh ]]
+export ANALYSIS_DIR="${0%/*}"
+if [[ -f "./.analysis.cfg.sh" ]]
 then
-    source ./.analysis.cfg.sh
+    source "./.analysis.cfg.sh"
 fi
 
 export DATA_DIRS="$@"
@@ -14,12 +14,12 @@ then
     #export DATA_DIRS="smd2_MBHT1"
     #export DATA_DIRS="nosmd_MB"
     #export DATA_DIRS="smdadc"
-    #export DATA_DIRS="towerMB_smd2HT1"
-    export DATA_DIRS="towerMB_smd2HT1_gammaetacut"
+    export DATA_DIRS="towerMB_smd2HT1"
+    #export DATA_DIRS="towerMB_smd2HT1_gammaetacut"
 fi
 export OPTIONS=""
 
 for DATA_DIR in ${DATA_DIRS}
 do
-    root ${OPTIONS} load_libs.C show_analysis.C\(\"${DATA_DIR}\"\)
+    root ${OPTIONS} "load_libs.C" "style.C" "show_analysis.C"\(\"${DATA_DIR}\"\)
 done

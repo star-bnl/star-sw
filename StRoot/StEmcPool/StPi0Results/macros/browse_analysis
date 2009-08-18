@@ -1,9 +1,9 @@
 #!/bin/sh
 
-export ANALYSIS_DIR=${0%/*}
-if [[ -f ./.analysis.cfg.sh ]]
+export ANALYSIS_DIR="${0%/*}"
+if [[ -f "./.analysis.cfg.sh" ]]
 then
-    source ./.analysis.cfg.sh
+    source "./.analysis.cfg.sh"
 fi
 
-root load_libs.C browse_analysis.C
+root "load_libs.C" "browse_analysis.C"

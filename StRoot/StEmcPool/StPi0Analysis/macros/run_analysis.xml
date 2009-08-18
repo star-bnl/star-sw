@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job simulateSubmission="false" maxFilesPerProcess="&mymaxfiles;" minFilesPerProcess="&myminfiles;" filesPerHour="&myfilesperhour;" name="&mytag;">
+<job simulateSubmission="false" maxFilesPerProcess="&mymaxfiles;" minFilesPerProcess="&myminfiles;" filesPerHour="&myfilesperhour;" name="&mytag;" fileListSyntax="paths">
     <command>
 starver &mystarver;
 cp -fr &mypwdanalysis;/StPi0Analysis/macros/&myrun; $SCRATCH/

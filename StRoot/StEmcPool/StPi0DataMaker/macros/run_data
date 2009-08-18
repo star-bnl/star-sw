@@ -32,40 +32,40 @@ export mynevents=${14}
 if [[ "$mynevents" == "" ]] ; then export mynevents='-1' ; fi
 echo mynevents=$mynevents
 
-cd $myscratch
+cd "$myscratch"
 echo "Running on host "`hostname`
 
 export myscratchanalysis=${myscratch}${mypwdanalysis#$mypwd}
 
-if [[ "$mydocons" == "yes" ]] ; then export COPY_COMPILED='-compiled' ; else COPY_COMPILED='compiled' ; fi
+if [[ "$mydocons" == "yes" ]] ; then export COPY_COMPILED='-compiled' ; else export COPY_COMPILED='compiled' ; fi
 
-$mypwdanalysis/StPi0Common/macros/copy data $COPY_COMPILED $mypwd $myscratch $mypwdanalysis $myscratchanalysis
-$mypwdanalysis/StPi0Common/macros/configure data $myscratchanalysis $myscratch
+"$mypwdanalysis/StPi0Common/macros/copy" data $COPY_COMPILED "$mypwd" "$myscratch" "$mypwdanalysis" "$myscratchanalysis"
+"$mypwdanalysis/StPi0Common/macros/configure" data "$myscratchanalysis" "$myscratch"
 
-source $myscratchanalysis/StPi0Common/macros/commands
+source "$myscratchanalysis/StPi0Common/macros/commands"
 
-cp -fr $myfilelist $myscratch/filelist_$myjobid.list
+cp -fr "$myfilelist" "$myscratch/filelist_$myjobid.list"
 
-if [[ ( "$STAR_HOST_SYS" == "") || ( ! ( -d $myscratch/.$STAR_HOST_SYS ) ) ]] ; then export mydocons='yes' ; fi
+if [[ ( "$STAR_HOST_SYS" == "") || ( ! ( -d "$myscratch/.$STAR_HOST_SYS" ) ) ]] ; then export mydocons='yes' ; fi
 
 ls -al
 
 if [[ "$mydocons" == "yes" ]] ; then cons ; fi
 
-if [[ "$myfilelistsyntax" == "xrootd" ]] ; then /star/u/starlib/ROOT/xrootd/bin/preStageFileList $myscratch/filelist_$myjobid.list ; fi
+if [[ "$myfilelistsyntax" == "xrootd" ]] ; then "/star/u/starlib/ROOT/xrootd/bin/preStageFileList" "$myscratch/filelist_$myjobid.list" ; fi
 
 if [[ "$myjprof" == "yes" ]] ; then export RUNJPROF='run_jprof.C' ; else export RUNJPROF='' ; fi
 
-run_command $mydebug root4star -q -b load_libs.C load_data_libs.C $RUNJPROF $myscript`bash_escape_all '('${mynevents}',"'${myscratch}'/'${mytag}'_'${myjobid}'.root","'${myscratch}'/filelist_'${myjobid}'.list","'${myconfig}'")'`
+run_command $mydebug root4star -q -b load_libs.C load_data_libs.C $RUNJPROF "$myscript"`bash_escape_all '('${mynevents}',"'${myscratch}'/'${mytag}'_'${myjobid}'.root","'${myscratch}'/filelist_'${myjobid}'.list","'${myconfig}'")'`
 
-mkdir -p $mypathout
+mkdir -p "$mypathout"
 
-copy_file_qa $myscratch/${mytag}_${myjobid}.root $mypathout/${mytag}_${myjobid}.root
+copy_file_qa "$myscratch/${mytag}_${myjobid}.root" "$mypathout/${mytag}_${myjobid}.root"
 
 if [[ "$myjprof" == "yes" ]]
 then
-    jprof `which root4star` $myscratch/jprof-log > $myscratch/jprof.html
-    copy_file_qa $myscratch/jprof.html $mypathout/${mytag}_${myjobid}.jprof.html
+    jprof `which root4star` "$myscratch/jprof-log" > "$myscratch/jprof.html"
+    copy_file_qa "$myscratch/jprof.html" "$mypathout/${mytag}_${myjobid}.jprof.html"
 fi
 
 ls -al

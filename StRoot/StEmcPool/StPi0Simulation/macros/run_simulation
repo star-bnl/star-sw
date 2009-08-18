@@ -27,14 +27,14 @@ echo mypathout=$mypathout
 export mykeepfzd=${12}
 echo mykeepfzd=$mykeepfzd
 
-cd $myscratch
+cd "$myscratch"
 
 export myscratchanalysis=${myscratch}${mypwdanalysis#$mypwd}                                                                                                                 
 
-$mypwdanalysis/StPi0Common/macros/copy simulation $mypwd $myscratch $mypwdanalysis $myscratchanalysis
-$mypwdanalysis/StPi0Common/macros/configure simulation $myscratchanalysis $myscratch
+"$mypwdanalysis/StPi0Common/macros/copy" simulation "$mypwd" "$myscratch" "$mypwdanalysis" "$myscratchanalysis"
+"$mypwdanalysis/StPi0Common/macros/configure" simulation "$myscratchanalysis" "$myscratch"
 
-source $myscratchanalysis/StPi0Common/macros/commands
+source "$myscratchanalysis/StPi0Common/macros/commands"
 
 ls -al
 
@@ -43,16 +43,16 @@ env
 export SCRIPTCMD=${myscript}
 export SCRIPTCMD=${SCRIPTCMD//*\/}
 export SCRIPTCMD=${SCRIPTCMD//.kumac}
-run_command $mydebug starsim -m 0 -b ${myscratchanalysis}/StPi0Simulation/macros/${myscript} \\'#'${SCRIPTCMD} nevent=$mynevents file=${myscratch}/${mytag}_${myjobid}.fzd nparticles=1 geometrytag=$mygeometrytag
+run_command $mydebug starsim -m 0 -b "${myscratchanalysis}/StPi0Simulation/macros/${myscript}" \\'#'${SCRIPTCMD} nevent=$mynevents file="${myscratch}/${mytag}_${myjobid}.fzd" nparticles=1 geometrytag=$mygeometrytag
 
 ls -al
 
 run_command $mydebug root4star -b -q bfc.C`bash_escape_all '(1,'$mynevents',"'\`cpp_escape_quo $myconfig\`'","'${myscratch}'/'${mytag}'_'${myjobid}'.fzd")'`
 
-mkdir -p $mypathout
+mkdir -p "$mypathout"
 
-copy_file_qa ${myscratch}/${mytag}_${myjobid}.event.root $mypathout/${mytag}_${myjobid}.event.root
-copy_file_qa ${myscratch}/${mytag}_${myjobid}.geant.root $mypathout/${mytag}_${myjobid}.geant.root
-if [[ "$mykeepfzd" == "yes" ]] ; then copy_file_qa ${myscratch}/${mytag}_${myjobid}.fzd $mypathout/${mytag}_${myjobid}.fzd ; fi
+copy_file_qa "${myscratch}/${mytag}_${myjobid}.event.root" "$mypathout/${mytag}_${myjobid}.event.root"
+copy_file_qa "${myscratch}/${mytag}_${myjobid}.geant.root" "$mypathout/${mytag}_${myjobid}.geant.root"
+if [[ "$mykeepfzd" == "yes" ]] ; then copy_file_qa "${myscratch}/${mytag}_${myjobid}.fzd" "$mypathout/${mytag}_${myjobid}.fzd" ; fi
 
 ls -al

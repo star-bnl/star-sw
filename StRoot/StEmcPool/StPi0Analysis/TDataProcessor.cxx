@@ -56,7 +56,7 @@ TDataProcessor::this_type &TDataProcessor::operator=(const this_type &processor)
 	return *this;
 }
 
-Bool_t TDataProcessor::operator<(const this_type &processor) const {
+Bool_t TDataProcessor::operator<(const this_type &/*processor*/) const {
 	return true;
 }
 
@@ -108,7 +108,7 @@ void TDataProcessor::Print(Option_t* option) const {
 	weightCalculator.Print(newPrefix.Data());
 }
 
-Bool_t TDataProcessor::process(const void *data, const void *evt, Float_t wRef) {
+Bool_t TDataProcessor::process(const void *data, const void * /*evt*/, Float_t /*wRef*/) {
 	if (this->debug) cout << "TDataProcessor::process() started" << endl;
 	Bool_t result = false;
 	if (data) {

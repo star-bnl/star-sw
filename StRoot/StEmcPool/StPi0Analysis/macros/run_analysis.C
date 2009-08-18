@@ -357,10 +357,10 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	cutParameters.ptBinStep = 0.5;
 	cutParameters.gammaConversionRadiusLow = 180;
 	cutParameters.gammaConversionRadiusHigh = 10000;
-	cutParameters.massRegionLeft = 0.3;//0.07;
-	cutParameters.massRegionLeftPt = 0;//0.001;
-	cutParameters.massRegionRight = 5;//0.186;
-	cutParameters.massRegionRightPt = 0;//0.01;
+	cutParameters.massRegionLeft = 0.075;
+	cutParameters.massRegionLeftPt = 0.0017;
+	cutParameters.massRegionRight = 0.250;
+	cutParameters.massRegionRightPt = 0.0033;
 	cutParameters.pointEnergyLow = 0.0;
 	cutParameters.pointEnergyHigh = 1000;
 	cutParameters.smdEnergyLow = 2.5;
@@ -495,7 +495,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 		cutParameters.ftpcRefMultHigh = 1000;
 		nocentral = true;
 	}
-	cutParameters.isBadRun = 11000011 + (nocentral ? 0 : 100000);
+	cutParameters.isBadRun = 13000011 + (nocentral ? 0 : 100000);
 
 	TString badEventsFilenameMB = "badEvents_pythiaPi0Pt_";
 	badEventsFilenameMB += dataSetStr;
@@ -531,7 +531,7 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 
 	TCutParameters cutParametersEventPPMinBias = cutParametersEvent;
         cutParametersEventPPMinBias.SetNameTitle("parametersEventPPMinBias", "Parameters - event (pp2005 MinBias)");
-	cutParametersEventPPMinBias.isBadRun = ((Int_t(cutParametersEvent.isBadRun / 10000000)) * 10000000) + 2000000 + (cutParametersEvent.isBadRun % 1000000);
+	cutParametersEventPPMinBias.isBadRun = ((Int_t(cutParametersEvent.isBadRun / 10000000)) * 10000000) + 4000000 + (cutParametersEvent.isBadRun % 1000000);
 	cutParametersEventPPMinBias.zSimuSmearingPt = &weightZSimuSmearingPtMB;
 	cutParametersEventPPMinBias.zSimuSmearingZeroPt = &weightZSimuSmearingZeroPtMB;
 	cutParametersEventPPMinBias.badEventsListFilename = badEventsFilenameMB;
@@ -826,9 +826,12 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	cuts.CANDIDATE_ALL_CUTS =  CANDIDATE_VALID_CUT 
 				 | CANDIDATE_ASYMETRY_CUT
 				 | CANDIDATE_ETA_CUT
+				 | CANDIDATE_MASS_CUT
+				// | CANDIDATE_IN_JET_CUT
 				// | CANDIDATE_PT_CUT
 				// | CANDIDATE_MASS_CUT
 				;
+	cuts.CANDIDATE_ALL_CUTS_NOT = CANDIDATE_IN_JET_CUT;
 	cuts.GAMMA_ALL_CUTS =      GAMMA_VALID_CUT
 				;
 	cuts.PION_ALL_CUTS =       PION_VALID_CUT
@@ -1352,6 +1355,10 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	//TH2F histTPCGlobalsEMCEt("histTPCGlobalsEMCEt", "Num of global TPC tracks vs. EMC E_{T};Number of global TPC tracks, GeV/c;Total EMC E_{T}, GeV", 100, 0, 700, 40, 0, 100);
 	TH2F histCandidatePtEventEt("histCandidatePtEventEt", "Candidate p_{T} vs. event E_{T};#pi^{0} p_{T}, GeV/c;Event E_{T}, GeV", 30, 0, 15, 30, 0, 15);
 	TH2F histCandidatePtJetEt("histCandidatePtJetEt", "Candidate p_{T} vs. jet E_{T};#pi^{0} p_{T}, GeV/c;Jet E_{T}, GeV", 30, 0, 15, 30, 0, 30);
+	TH2F histCandidateEtaJetEta("histCandidateEtaJetEta", "Candidate #eta vs. jet #eta;#pi^{0} #eta;Jet #eta", 40, -0.2, 1.2, 40, -0.2, 1.2);
+	TH2F histCandidatePhiJetPhi("histCandidatePhiJetPhi", "Candidate #phi vs. jet #phi;#pi^{0} #phi;Jet #phi", 40, -TMath::Pi(), +TMath::Pi(), 40, -TMath::Pi(), +TMath::Pi());
+	TH1F histCandidatePhiMinusJetPhi("histCandidatePhiMinusJetPhi", "Candidate #phi - jet #phi;#pi^{0} #phi - Jet #phi", 200, -2*TMath::Pi(), +2*TMath::Pi());
+	TH2F histCandidateJetEtaPhi("histCandidateJetEtaPhi", "Candidate - jet #eta vs. #phi;#pi^{0} #eta - Jet #eta;#pi^{0} #phi - Jet #phi", 40, -1.2, 1.2, 40, -2*TMath::Pi(), +2*TMath::Pi());
 	TH2F histCandidateEEventE("histCandidateEEventE", "Candidate energy vs. event energy;#pi^{0} energy, GeV;Event energy, GeV", 30, 0, 15, 30, 0, 15);
 	TH2F histPointJetDist("histPointJetDist", "Point-to-jet distance;#eta_{point} - #eta_{jet};#phi_{point} - #phi_{jet}", 30, -1.3, +1.3, 30, -TMath::TwoPi(), +TMath::TwoPi());
 	TH2F histBbcWE("histBbcWE", "BbcWE", 40, -10, +270, 40, -10, +270);
@@ -1552,6 +1559,10 @@ void run_analysis(const Char_t *filelist = "filelist.list", const Char_t *weight
 	candidateDataProcessor.setDeltaEtaPhiCoord(histDeltaEtaPhiCoord);
 	candidateDataProcessor.setCandidatePtEventEt(histCandidatePtEventEt);
 	candidateDataProcessor.setCandidatePtJetEt(histCandidatePtJetEt);
+	candidateDataProcessor.setCandidateEtaJetEta(histCandidateEtaJetEta);
+	candidateDataProcessor.setCandidatePhiJetPhi(histCandidatePhiJetPhi);
+	candidateDataProcessor.setCandidatePhiMinusJetPhi(histCandidatePhiMinusJetPhi);
+	candidateDataProcessor.setCandidateJetEtaPhi(histCandidateJetEtaPhi);
 	candidateDataProcessor.setCandidateEEventE(histCandidateEEventE);
 	candidateDataProcessor.setTPCVertYes(histPt);
 	candidateDataProcessor.setTPCVertNo(histPt);

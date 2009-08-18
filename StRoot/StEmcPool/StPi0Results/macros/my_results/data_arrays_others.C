@@ -224,6 +224,24 @@
 	    SCALE_POINTS(SPPPmye, SPPPmye_xsec, 30.0)
 	    const Char_t *showStarChargedPionsMinusPPLegend = "STAR #font[12]{p}+#font[12]{p} #pi^{-}, |#eta| < 0.5";
 
+	    // STAR (pi- + pi+)/2 from TOFr and rdE/dx in p+p NSD, |eta| < 0.5, syst. err. excl. 14% norm. uncert.
+	    // pi- and pi+ are from Phys. Lett. B 637 (2006) 161-169
+	    // here I average over the two
+	    Float_t SPPPpmx[] =  {3.50e-01,4.50e-01,5.50e-01,6.50e-01,7.50e-01,8.50e-01,9.50e-01,1.05e+00,1.15e+00,1.30e+00,1.50e+00,1.70e+00,1.90e+00,2.25e+00,2.75e+00,3.25e+00,3.75e+00,4.25e+00,4.75e+00,5.50e+00,6.50e+00,7.50e+00,9.00e+00};
+	    Float_t SPPPpmxe[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	    Float_t SPPPpmy[] =  {9.71e-01,5.47e-01,3.09e-01,1.84e-01,1.00e-01,6.36e-02,3.80e-02,2.44e-02,1.57e-02,8.70e-03,3.62e-03,1.69e-03,1.10e-03,3.50e-04,1.00e-04,2.83e-05,9.00e-06,3.86e-06,1.50e-06,4.40e-07,1.07e-07,3.27e-08,7.83e-09};
+	    Float_t SPPPpmye[] = {1.22e-02,8.02e-03,5.38e-03,3.89e-03,2.50e-03,1.89e-03,1.38e-03,1.03e-03,7.87e-04,4.02e-04,2.45e-04,1.76e-04,1.59e-04,5.07e-05,1.14e-06,5.46e-07,3.01e-07,1.62e-07,1.00e-07,4.04e-08,2.10e-08,1.25e-08,4.53e-09};
+	    Float_t SPPPpmye_syst[] = {7.76e-02,4.37e-02,2.47e-02,1.47e-02,8.01e-03,5.09e-03,3.04e-03,1.95e-03,1.25e-03,6.96e-04,2.90e-04,1.35e-04,1.32e-04,8.75e-05,1.32e-05,3.68e-06,1.17e-06,5.02e-07,1.95e-07,5.72e-08,1.39e-08,4.25e-09,1.02e-09};
+	    for (UInt_t i = 0;i < sizeof(SPPPpmx)/sizeof(SPPPpmx[0]);i++) {
+		SPPPpmy[i] = (SPPPpy[i] + SPPPmy[i]) / 2.0;
+	    }
+	    ADD_ERROR_POINTS(SPPPpmye, SPPPpye)
+	    MULTIPLY(SPPPpmye, 1.0 / TMath::Sqrt(2.0))
+	    ADD_ERROR_POINTS(SPPPpmye, SPPPpmye_syst)
+	    MULTIPLY(SPPPpmy, 30)
+	    MULTIPLY(SPPPpmye, 30)
+	    const Char_t *showStarChargedPionsPPLegend = "STAR #font[12]{p}+#font[12]{p} (#pi^{+}+#pi^{-})/2, |#eta| < 0.5";
+
 	    // STAR (h+ + h-)/2 in d+Au min. bias, |eta| < 0.5, stat. + syst. err. excl. 10% norm. uncert.
 	    // Phys. Rev. Lett. 91 (2003) 072304
 	    Float_t Sx[] =   {1.05, 1.15, 1.25, 1.35, 1.45, 1.55, 1.65, 1.75, 1.85, 1.95, 2.05, 2.15, 2.25, 2.35, 2.50, 2.70, 2.90, 3.16, 3.56, 4.07, 4.71, 5.50, 6.44, 7.45, 8.45, 9.46, 10.84};

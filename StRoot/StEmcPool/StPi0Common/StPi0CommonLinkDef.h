@@ -19,6 +19,7 @@
 #pragma link C++ function setHistFontSize;
 #pragma link C++ function setLegendFontSize;
 #pragma link C++ function setLatexFontSize;
+#pragma link C++ function SetShadowColor;
 
 #pragma link C++ class StPi0CommonUtil+;
 

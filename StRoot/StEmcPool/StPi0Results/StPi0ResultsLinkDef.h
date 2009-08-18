@@ -29,7 +29,6 @@
 #pragma link C++ function selectInvSim;
 #pragma link C++ function selectInvPoint;
 #pragma link C++ function selectInvMCGamma;
-#pragma link C++ function showPointsRcp;
 #pragma link C++ function calculatePSFromPoints;
 #pragma link C++ function calculatePSFromSim;
 #pragma link C++ function calculateBunchCrossingId7bitOffset;
@@ -50,8 +49,8 @@
 #pragma link C++ function calculateMeanAcceptance;
 #pragma link C++ function showResults;
 #pragma link C++ function showResultsOthers;
-#pragma link C++ function showPointsRcp;
-#pragma link C++ function showPointsRcpEtaPhiCoord;
+//#pragma link C++ function showPointsRcp;
+//#pragma link C++ function showPointsRcpEtaPhiCoord;
 #pragma link C++ function showResultsDAuCentrality;
 #pragma link C++ function showResultsRDA;
 #pragma link C++ function getCentralityBin;

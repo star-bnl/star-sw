@@ -94,7 +94,7 @@ DEFINE_CUT(POINT, ETA,                          (pointParameters.eta >= cutParam
 DEFINE_CUT(CANDIDATE, VALID,                    candidate.isValid() && candidate.point1.isValid() && candidate.point1.point.isValid() && candidate.point2.isValid() && candidate.point2.point.isValid(), "Valid candidate")
 DEFINE_CUT(CANDIDATE, ASYMETRY,                 (candidateParameters.asymetry >= cutParameters.asymCutLow) && (candidateParameters.asymetry < cutParameters.asymCutHigh), "Asymmetry cut")
 DEFINE_CUT(CANDIDATE, PTBIN,                    (cutParameters.ptBinStep == 0) || (Int_t((candidateParameters.pTRec - cutParameters.ptBinStart) / cutParameters.ptBinStep) == Int_t((candidate.point1.event.simulatedParticle.pT - cutParameters.ptBinStart) / cutParameters.ptBinStep)), "pi0 is reconstructed in the correct pT bin")
-DEFINE_CUT(CANDIDATE, MASS,                     (candidateParameters.m >= massRegionLeft) && (candidateParameters.m < massRegionRight), "Invariant mass cut")
+DEFINE_CUT(CANDIDATE, MASS,                     (candidateParameters.m >= candidateParameters.massRegionLeft) && (candidateParameters.m < candidateParameters.massRegionRight), "Invariant mass cut")
 DEFINE_CUT(CANDIDATE, TRIGGERED_HT1,            point1Parameters.triggeredHT1 || point2Parameters.triggeredHT1, "Candidate has triggered HighTower-1")
 DEFINE_CUT(CANDIDATE, TRIGGERED_HT2,            point1Parameters.triggeredHT2 || point2Parameters.triggeredHT2, "Candidate has triggered HighTower-2")
 DEFINE_CUT(CANDIDATE, OPENANGLE_KINEMATIC,      candidateParameters.openangle >= ((getMinimumOpenangle(candidateParameters.m, candidateParameters.energy) * cutParameters.openAngleMinFraction) + cutParameters.openAngleMinOffset), "Opening angle cut (using reconstructed mass)")

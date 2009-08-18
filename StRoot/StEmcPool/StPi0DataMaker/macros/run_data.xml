@@ -2,16 +2,16 @@
 <job simulateSubmission="false" fileListSyntax="&myfilelistsyntax;" maxFilesPerProcess="&mymaxfiles;" minFilesPerProcess="&myminfiles;" filesPerHour="&myfilesperhour;">
     <command>
 starver &mystarver;
-cp -fr &mypwdanalysis;/StPi0DataMaker/macros/&myrun; $SCRATCH/
-$SCRATCH/&myrun; \
+cp -fr "&mypwdanalysis;/StPi0DataMaker/macros/&myrun;" "$SCRATCH/"
+"$SCRATCH/&myrun;" \
 '&mypwd;' \
 '&mypwdanalysis;' \
 '&mydebug;' \
 '&myscript;' \
 '&mytag;' \
 '&myconfig;' \
-$SCRATCH \
-$FILELIST \
+"$SCRATCH" \
+"$FILELIST" \
 $JOBID \
 '&mydocons;' \
 '&myfilelistsyntax;' \

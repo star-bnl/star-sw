@@ -56,7 +56,7 @@ class TWeightCalculator : public TNamed {
 
 		TF1 *createFunc(Bool_t forDrawing) const;
 
-		void Fit(const bin_list_type &points, Option_t *option = 0, Option_t *optionWeight = 0, Float_t pTLow = 0, Float_t pTHigh = 1000);
+		void Fit(const bin_list_type &points, Option_t *option = 0, Option_t *optionWeight = 0, Float_t pTLow = 0, Float_t pTHigh = 1000, TF1 *extFunc = 0);
 		void Fit(const TH1 *hist, Option_t *option = 0, Option_t *optionWeight = 0, Float_t pTLow = 0, Float_t pTHigh = 1000);
 		void Fit(const TGraphErrors *graph, Option_t *option = 0, Option_t *optionWeight = 0, Float_t pTLow = 0, Float_t pTHigh = 1000);
 		void DrawCopy(Option_t* option = "") const;

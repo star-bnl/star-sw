@@ -3,14 +3,14 @@
 ####################################################
 # Check the analysis environment
 ####################################################
-export ANALYSIS_DIR=${0%/*}
-if [[ -f ./.analysis.cfg.sh ]]
+export ANALYSIS_DIR="${0%/*}"
+if [[ -f "./.analysis.cfg.sh" ]]
 then
-    source ./.analysis.cfg.sh
+    source "./.analysis.cfg.sh"
 fi
-if [[ -f $ANALYSIS_DIR/StPi0Common/macros/commands ]]
+if [[ -f "$ANALYSIS_DIR/StPi0Common/macros/commands" ]]
 then
-    source $ANALYSIS_DIR/StPi0Common/macros/commands
+    source "$ANALYSIS_DIR/StPi0Common/macros/commands"
 else
     echo "Analysis environment is not configured!"
 fi
@@ -22,7 +22,7 @@ fi
 
 ####################################################
 function do_submit () {
-    export ARGS="$@"
+    #export ARGS="$@"
 
     export SUMSOPT=''
     if [[ "$MYSUBMITPOLICY" != "" ]] ; then export SUMSOPT="$SUMSOPT -p $MYSUBMITPOLICY" ; fi
@@ -30,7 +30,7 @@ function do_submit () {
     if [[ "$MYSUBMITNOCHECKQUEUE" == "yes" ]] ; then export SUMSOPT="$SUMSOPT -u nqc" ; fi
     if [[ "$SUMSOPT" != "" ]] ; then export SUMSOPT=" --$SUMSOPT" ; fi
 
-    export COMMAND=${MYSTARSUBMIT}' '${ARGS}${SUMSOPT}
+    export COMMAND=${MYSTARSUBMIT}' '"$@"${SUMSOPT}
     echo "$COMMAND"
     if [[ "$MYDOSUBMIT" == "yes" ]]
     then
@@ -583,8 +583,8 @@ myrun=`xml_escape_star-submit-template $MYSIMURUN`\
 
 ####################################################
 function submit_starsim_file () {
-    export CURRENT_OPTION=$1
-    export CURRENT_FILE=$2
+    export CURRENT_OPTION="$1"
+    export CURRENT_FILE="$2"
     if [[ -f "$CURRENT_FILE" ]]
     then
 	export SIMU_NAME=''
@@ -595,7 +595,7 @@ function submit_starsim_file () {
         export SIMU_STARLEVEL=''
         export SIMU_GEOMETRY=''
         export SIMU_BFCHAIN=''
-	source $CURRENT_FILE
+	source "$CURRENT_FILE"
 	if [[ ("$SIMU_NAME" != "") && ("$SIMU_TAG" != "") && ("$SIMU_DIR" != "") && ("$SIMU_SCRIPT" != "") && ("$SIMU_STARLEVEL" != "") && ("$SIMU_GEOMETRY" != "") && ("$SIMU_BFCHAIN" != "") ]]
 	then
 	    submit_starsim "$CURRENT_OPTION" "$SIMU_TAG" "$SIMU_DIR" "$SIMU_SCRIPT" "$SIMU_STARLEVEL" "$SIMU_BFCHAIN" "$SIMU_GEOMETRY" "$SIMU_NAME" "$SIMU_SUBTAG"
@@ -609,8 +609,8 @@ function submit_starsim_file () {
 
 ####################################################
 function submit_datapass_file () {
-    export CURRENT_OPTION=$1
-    export CURRENT_FILE=$2
+    export CURRENT_OPTION="$1"
+    export CURRENT_FILE="$2"
     if [[ -f "$CURRENT_FILE" ]]
     then
 	export DATA_NAME=''
@@ -619,7 +619,7 @@ function submit_datapass_file () {
         export DATA_QUERY=''
         export DATA_CONFIG=''
         export DATA_DIR=''
-	source $CURRENT_FILE
+	source "$CURRENT_FILE"
         if [[ ("$DATA_NAME" != "") && ("$DATA_TAG" != "") && ("$DATA_QUERY" != "") && ("$DATA_CONFIG" != "") && ("$DATA_DIR" != "") ]]
         then
     	    submit_datapass "$CURRENT_OPTION" "$DATA_TAG" "$DATA_QUERY" "$DATA_CONFIG" "$DATA_DIR" "$DATA_SUBTAG" "$DATA_NAME"
@@ -633,8 +633,8 @@ function submit_datapass_file () {
 
 ####################################################
 function submit_analysis_file () {
-    export CURRENT_OPTION=$1
-    export CURRENT_FILE=$2
+    export CURRENT_OPTION="$1"
+    export CURRENT_FILE="$2"
     if [[ -f "$CURRENT_FILE" ]]
     then
         export ANALYSIS_NAME=''
@@ -645,7 +645,7 @@ function submit_analysis_file () {
         export ANALYSIS_WEIGHT=''
         export ANALYSIS_OUTDIR=''
         export ANALYSIS_FINALDIR=''
-	source $CURRENT_FILE
+	source "$CURRENT_FILE"
         if [[ ("$ANALYSIS_NAME" != "") && ("$ANALYSIS_TAG" != "") && ("$ANALYSIS_DATA" != "") && ("$ANALYSIS_CONFIG" != "") && ("$ANALYSIS_OUTDIR" != "")  && ("$ANALYSIS_FINALDIR" != "") ]]
         then
 	    submit_analysis "$CURRENT_OPTION" "$ANALYSIS_TAG" "$ANALYSIS_CONFIG" "$ANALYSIS_SUBTAG" "$ANALYSIS_DATA" "$ANALYSIS_OUTDIR" "$ANALYSIS_WEIGHT" "$ANALYSIS_NAME" "$ANALYSIS_FINALDIR"
@@ -797,12 +797,18 @@ fi
 export SIMU_FILES=''
 export DATA_FILES=''
 export ANALYSIS_FILES=''
+export IFS_OLD=$IFS
+export IFS=':'
 for DIRECTORY in $ANALYSIS_MACRO_PATH
 do
-    for FILE in $DIRECTORY/submit.starsim.*  ; do if [[ -f $FILE ]] ; then export SIMU_FILES="$SIMU_FILES $FILE" ; fi ; done
-    for FILE in $DIRECTORY/submit.data.*     ; do if [[ -f $FILE ]] ; then export DATA_FILES="$DATA_FILES $FILE" ; fi ; done
-    for FILE in $DIRECTORY/submit.analysis.* ; do if [[ -f $FILE ]] ; then export ANALYSIS_FILES="$ANALYSIS_FILES $FILE" ; fi ; done
+#echo $DIRECTORY
+    export IFS=$IFS_OLD
+    for FILE in "$DIRECTORY"/submit.starsim.*  ; do if [[ -f $FILE ]] ; then export SIMU_FILES="$SIMU_FILES:$FILE" ; fi ; done
+    for FILE in "$DIRECTORY"/submit.data.*     ; do if [[ -f $FILE ]] ; then export DATA_FILES="$DATA_FILES:$FILE" ; fi ; done
+    for FILE in "$DIRECTORY"/submit.analysis.* ; do if [[ -f $FILE ]] ; then export ANALYSIS_FILES="$ANALYSIS_FILES:$FILE" ; fi ; done
+    export IFS=':'
 done
+export IFS=$IFS_OLD
 ####################################################
 
 ####################################################
@@ -811,8 +817,11 @@ done
 for OPTION in $OPTIONS_SUBMIT
 do
     export THIS_OPTION_FOUND='no'
+    export IFS_OLD=$IFS
+    export IFS=':'
     for ANALYSIS_FILE in $ANALYSIS_FILES
     do
+	export IFS=$IFS_OLD
 	set_default_options
 	if [[ "$OPTIONS_OPTIONS" != "" ]]
 	then
@@ -821,9 +830,14 @@ do
 	    export ALLOW_CHANGE_VARS='no'
 	fi
 	submit_analysis_file "$OPTION" "$ANALYSIS_FILE"
+	export IFS=':'
     done
+    export IFS=$IFS_OLD
+    export IFS_OLD=$IFS
+    export IFS=':'
     for DATA_FILE in $DATA_FILES
     do
+	export IFS=$IFS_OLD
 	set_default_options
 	if [[ "$OPTIONS_OPTIONS" != "" ]]
 	then
@@ -832,9 +846,14 @@ do
 	    export ALLOW_CHANGE_VARS='no'
 	fi
 	submit_datapass_file "$OPTION" "$DATA_FILE"
+	export IFS=':'
     done
+    export IFS=$IFS_OLD
+    export IFS_OLD=$IFS
+    export IFS=':'
     for SIMU_FILE in $SIMU_FILES
     do
+	export IFS=$IFS_OLD
 	set_default_options
 	if [[ "$OPTIONS_OPTIONS" != "" ]]
 	then
@@ -843,7 +862,9 @@ do
 	    export ALLOW_CHANGE_VARS='no'
 	fi
 	submit_starsim_file  "$OPTION" "$SIMU_FILE"
+	export IFS=':'
     done
+    export IFS=$IFS_OLD
     if [[ "$THIS_OPTION_FOUND" != "yes" ]] ; then export OPTIONS_UNKNOWN="$OPTIONS_UNKNOWN $OPTION" ; else export SUBMIT_FOUND='yes' ; fi
 done
 ####################################################

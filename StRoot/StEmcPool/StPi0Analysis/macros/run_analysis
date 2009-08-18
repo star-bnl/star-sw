@@ -45,7 +45,7 @@ echo mysleep=$mysleep
 export mydiscardstdout=${21}
 echo mydiscardstdout=$mydiscardstdout
 
-cd $myscratch
+cd "$myscratch"
 
 export NEED_RUN_TEMP=no
 if [[ "${myfinal//*temp*/yes}" == "yes" ]] ; then export NEED_RUN_TEMP=yes ; fi
@@ -56,18 +56,18 @@ if [[ ( "$NEED_RUN_TEMP" != "yes" ) && ( "$NEED_RUN_FINAL" != "yes" ) ]] ; then 
 
 export myscratchanalysis=${myscratch}${mypwdanalysis#$mypwd}
 
-if [[ ( "$mydocons" == "yes" ) || ( "$mydomake" == "yes" ) ]] ; then export COPY_COMPILED='-compiled' ; else COPY_COMPILED='compiled' ; fi
-if [[ "$NEED_RUN_TEMP" == "yes" ]] ; then export COPY_ANALYSIS='analysis' ; else COPY_ANALYSIS='analysisFinal' ; fi
+if [[ ( "$mydocons" == "yes" ) || ( "$mydomake" == "yes" ) ]] ; then export COPY_COMPILED='-compiled' ; else export COPY_COMPILED='compiled' ; fi
+if [[ "$NEED_RUN_TEMP" == "yes" ]] ; then export COPY_ANALYSIS='analysis' ; else export COPY_ANALYSIS='analysisFinal' ; fi
 
-$mypwdanalysis/StPi0Common/macros/copy $COPY_ANALYSIS $COPY_COMPILED $mypwd $myscratch $mypwdanalysis $myscratchanalysis
-$mypwdanalysis/StPi0Common/macros/configure $COPY_ANALYSIS $myscratchanalysis $myscratch
+"$mypwdanalysis/StPi0Common/macros/copy" "$COPY_ANALYSIS" "$COPY_COMPILED" "$mypwd" "$myscratch" "$mypwdanalysis" "$myscratchanalysis"
+"$mypwdanalysis/StPi0Common/macros/configure" "$COPY_ANALYSIS" "$myscratchanalysis" "$myscratch"
 
-source $myscratchanalysis/StPi0Common/macros/commands
+source "$myscratchanalysis/StPi0Common/macros/commands"
 
-if [[ "$NEED_RUN_TEMP" == "yes" ]] ; then cp -fr $myfilelist $myscratch/filelist_$myjobid.list ; fi
-if [[ ( "$NEED_RUN_FINAL" == "yes" ) && ( "$NEED_RUN_TEMP" != "yes" ) ]] ; then cp -fr $myfilelist $myscratch/filelistFinal_$myjobid.list ; fi
+if [[ "$NEED_RUN_TEMP" == "yes" ]] ; then cp -fr "$myfilelist" "$myscratch/filelist_$myjobid.list" ; fi
+if [[ ( "$NEED_RUN_FINAL" == "yes" ) && ( "$NEED_RUN_TEMP" != "yes" ) ]] ; then cp -fr "$myfilelist" "$myscratch/filelistFinal_$myjobid.list" ; fi
 
-if [[ ( "$mycompiledpath" != "" ) && ( -d $myscratch/$mycompiledpath ) ]] ; then echo "No need to make or cons" ; else if [[ "$mydocons" != "yes" ]] ; then export mydomake='yes' ; fi ; fi
+if [[ ( "$mycompiledpath" != "" ) && ( -d "$myscratch/$mycompiledpath" ) ]] ; then echo "No need to make or cons" ; else if [[ "$mydocons" != "yes" ]] ; then export mydomake='yes' ; fi ; fi
 
 ls -al
 
@@ -79,9 +79,9 @@ then
 
     export STDOUTFILE=${myscratch}/root_${mytag}_temp_${myjobid}.out
     if [[ "${mydiscardstdout}" == "true" ]] ; then export STDOUTFILE='/dev/null' ; fi
-    run_command $mydebug root -b -q load_libs.C $myscript+`bash_escape_all '("@'${myscratch}'/filelist_'$myjobid'.list","'${myscratchanalysis}'/StPi0Analysis/macros/'${myweightfile}'","'${myscratch}'/root_'${mytag}'_temp_'$myjobid'.root","'\`cpp_escape_quo $myconfig\`'")'` &> ${STDOUTFILE}
+    run_command $mydebug root -b -q load_libs.C "$myscript"+`bash_escape_all '("@'${myscratch}'/filelist_'$myjobid'.list","'${myscratchanalysis}'/StPi0Analysis/macros/'${myweightfile}'","'${myscratch}'/root_'${mytag}'_temp_'$myjobid'.root","'\`cpp_escape_quo $myconfig\`'")'` &> ${STDOUTFILE}
 
-    cat ${STDOUTFILE}
+    cat "${STDOUTFILE}"
 
     ls -al
 
@@ -93,7 +93,7 @@ then
 	then
 
 	    echo "Only one process"
-    	    mv -f ${myscratch}/root_${mytag}_temp_$myjobid.root ${myscratch}/${mytag}_final_${myjobid}.root
+    	    mv -f "${myscratch}/root_${mytag}_temp_$myjobid.root" "${myscratch}/${mytag}_final_${myjobid}.root"
 
 	else
 
@@ -107,13 +107,13 @@ then
 		date
 	    fi
 
-	    if ( resubmit $myrequestid "${mypathout} ${myscratch}" 'no' ${mypwd} )
+	    if ( resubmit "$myrequestid" "\"${mypathout}\" \"${myscratch}\"" 'no' "${mypwd}" )
 	    then
 
     		echo "All jobs finished well, proceed to dataFinal..."
-    	        rm -fr ${myscratch}/filelistFinal_$myjobid.list ; touch ${myscratch}/filelistFinal_$myjobid.list
-    	        ls -1 --indicator-style=none ${mypathout}/${mytag}_temp_${myrequestid}_*.root >> ${myscratch}/filelistFinal_$myjobid.list
-    	        ls -1 --indicator-style=none ${myscratch}/root_${mytag}_temp_${myjobid}.root >> ${myscratch}/filelistFinal_$myjobid.list
+    	        rm -fr "${myscratch}/filelistFinal_$myjobid.list" ; touch "${myscratch}/filelistFinal_$myjobid.list"
+    	        ls -1 --indicator-style=none "${mypathout}/${mytag}_temp_${myrequestid}_*.root" >> "${myscratch}/filelistFinal_$myjobid.list"
+    	        ls -1 --indicator-style=none "${myscratch}/root_${mytag}_temp_${myjobid}.root" >> "${myscratch}/filelistFinal_$myjobid.list"
 
 	        export NEED_RUN_FINAL=yes
 
@@ -131,16 +131,16 @@ fi
 if [[ "$NEED_RUN_FINAL" == "yes" ]]
 then
 
-    run_command $mydebug root -b -q load_libs.C $myscriptfinal`bash_escape_all '("@'${myscratch}'/filelistFinal_'$myjobid'.list","'${myscratch}'/'${mytag}'_final_'${myjobid}'.root")'`
+    run_command $mydebug root -b -q load_libs.C "$myscriptfinal"`bash_escape_all '("@'${myscratch}'/filelistFinal_'$myjobid'.list","'${myscratch}'/'${mytag}'_final_'${myjobid}'.root")'`
 
 fi
 
-if [[ "$NEED_RUN_TEMP" == "yes" ]] ; then mv -f ${myscratch}/root_${mytag}_temp_${myjobid}.root ${myscratch}/${mytag}_temp_${myjobid}.root ; fi
+if [[ "$NEED_RUN_TEMP" == "yes" ]] ; then mv -f "${myscratch}/root_${mytag}_temp_${myjobid}.root" "${myscratch}/${mytag}_temp_${myjobid}.root" ; fi
 
-mkdir -p $mypathout
-mkdir -p $mypathfinal
+mkdir -p "$mypathout"
+mkdir -p "$mypathfinal"
 
-if [[ -f ${myscratch}/${mytag}_temp_${myjobid}.root ]] ; then copy_file_qa ${myscratch}/${mytag}_temp_${myjobid}.root  $mypathout/${mytag}_temp_${myjobid}.root ; fi
-if [[ -f ${myscratch}/${mytag}_final_${myjobid}.root ]] ; then copy_file_qa ${myscratch}/${mytag}_final_${myjobid}.root $mypathfinal/${mytag}.root ; fi
+if [[ -f "${myscratch}/${mytag}_temp_${myjobid}.root" ]] ; then copy_file_qa "${myscratch}/${mytag}_temp_${myjobid}.root"  "$mypathout/${mytag}_temp_${myjobid}.root" ; fi
+if [[ -f "${myscratch}/${mytag}_final_${myjobid}.root" ]] ; then copy_file_qa "${myscratch}/${mytag}_final_${myjobid}.root" "$mypathfinal/${mytag}.root" ; fi
 
 ls -al
