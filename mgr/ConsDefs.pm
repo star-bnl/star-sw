@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.109 2009/08/18 13:05:23 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.110 2009/08/18 21:23:01 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -516,7 +516,9 @@
 	}
 	# print "*** $CXX_VERSION $SYSLIBS\n";
 
-        if ($PGI) {
+        if ($PGI) { 
+            # under SL5 where PGI is installed, this test make PGI used
+	    # but eventually fail at link-time - TBC [TODO: JL 200908]
 	    $FC    = "pgf77";
 	    $FFLAGS = "";
 	    $FEXTEND = "-Mextend";
