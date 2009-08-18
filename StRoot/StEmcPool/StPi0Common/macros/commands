@@ -672,7 +672,7 @@ function configure () {
     export CONFIGURE_PHOTONANALYSIS='no'
     export SRC_PATH=''
     export DST_PATH=''
-    export SRC_PATH_DEFAULT=`pwd`'/StRoot/StEmcPool'
+    export SRC_PATH_DEFAULT=${0%/StRoot/*}'/StRoot/StEmcPool'
     export DST_PATH_DEFAULT=`pwd`
     export MYCXXFLAGS_DEFAULT='-Wall -Wextra -fPIC -g'
 
