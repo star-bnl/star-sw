@@ -56,14 +56,18 @@ $FPPFLAGS = "-D__ROOT__ -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB
 #  $CPPFLAGS  = "-pthread -D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
   $CPPFLAGS  = "-D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
   "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
-if ($FC =~ /g77/) {$CPPFLAGS .= " -DPrivateMalloc";}
+if ($FC =~ /g77/ || $FC eq "gfortran") {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build $pkg with cons\n";
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
 $LIBS .= " " . $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}# -lStar2Root";}
 my $FEXTEND   = $env->{FEXTEND};
-if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/) {$FPPFLAGS .= " -DCERNLIB_LINUX";}
+if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^sl/ or 
+    $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^x8684/ or 
+    $STAR_SYS =~ m/^linux/) {
+    $FPPFLAGS .= " -DCERNLIB_LINUX";
+}
 if ($FC =~ /^pgf/) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
@@ -96,7 +100,7 @@ my $LIBSN = $LIBS; $LIBSN =~ s/-lRint/-lRint -lNew/;
 $envN = $env2->clone('LIBS'         => $LIBSN);
 my @src = qw(MAIN_rmain.cxx);#  dummy.g);
 my @dirs = split /$main::PATH_SEPARATOR/,$env->{CPPPATH};
-if ($FC =~ /g77/) {push @src, "df.F";}
+if ($FC =~ /g77/ || $FC eq "gfortran") {push @src, "df.F";}
 for my $cpp (@dirs,$Dir) {
   next if $cpp =~ ' ';
   if ($cpp =~ /cern/ ||
@@ -153,7 +157,10 @@ foreach my $d ($TG3dir){
   foreach my $s (@sources) {
     my $ss = $d . "/" . $s;
     my $ss = $d . "/" . $s;# print "FC = $FC and $ss\n";
-    if ($FC != /g77/ and $ss =~ /\/df\.F$/) {print "$ss ==========skipped\n" if $param::debug; next;}
+    if (($FC != /g77/ || $FC != /gfortran/) and $ss =~ /\/df\.F$/) {
+	print "$ss ==========skipped\n" if $param::debug; 
+	next;
+    }
     push @src, $ss; 
   }
 }
