@@ -1,6 +1,9 @@
-* $Id: fpdmgeo.g,v 1.6 2009/08/14 22:40:26 perev Exp $
+* $Id: fpdmgeo.g,v 1.7 2009/08/18 17:28:02 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo.g,v $
+* Revision 1.7  2009/08/18 17:28:02  perev
+* J.Webb Air is not an Iron fix
+*
 * Revision 1.6  2009/08/14 22:40:26  perev
 * Fix BIRK3 constant
 *
@@ -567,7 +570,7 @@ endblock
 * ----------------------------------------------------------------------------
 Block FSHM  is the SHower Max  section
 *
-      Material  Air Isvol=0
+      Material  Air 
       Attribute FSHM   seen=1   colo=4			!  blue
       Shape     CONS   dz=SecWid/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
@@ -635,7 +638,7 @@ EndBlock
 Block FXSG  is the Shower max  Gap for scintillator strips
 *
       Attribute FXSG   seen=1   colo=7			! black
-      Material  Air   Isvol=0
+      Material  Air   
       Shape     CONS   dz=msecwd/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
 		phi2=fmcs_PhiMax/fmcs_Nsupsec,

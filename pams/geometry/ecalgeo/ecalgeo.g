@@ -380,7 +380,7 @@ EndBlock
 * ----------------------------------------------------------------------------
 Block ESHM  is the SHower Max  section
 *
-      Material  Air Isvol=0
+      Material  Air 
       Attribute ESHM   seen=1   colo=4                  !  blue
       Shape     CONS   dz=SlcWid/2,
           rmn1=zslice*Tan_Low-dd,
@@ -807,7 +807,7 @@ Endblock
 Block EXSG  is the Shower max  Gap for scintillator strips
 *
       Attribute EXSG   seen=1   colo=7   serial=cut     ! black
-      Material  Air   Isvol=0
+      Material  Air   
       Shape     TUBS   dz=SecWid/2,
                 rmin=section*Tan_Low-1.526,
                 rmax=(section-secwid/2)*Tan_Upp+dup,
