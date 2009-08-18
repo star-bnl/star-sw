@@ -19,7 +19,7 @@
 #include <StEmcUtil/geometry/StEmcGeom.h>
 #include <StEmcUtil/database/StBemcTables.h>
 #include <StEmcUtil/projection/StEmcPosition.h>
-#include <StEmcUtil/database/StEmcDecoder.h>
+#include <StDaqLib/EMC/StEmcDecoder.h>
 #include <tables/St_emcStatus_Table.h>
 #include <tables/St_smdStatus_Table.h>
 #include <St_db_Maker/St_db_Maker.h>

@@ -280,7 +280,7 @@ TF1 *TWeightCalculator::createFunc(Bool_t forDrawing) const {
 	return func;
 }
 
-void TWeightCalculator::Fit(const bin_list_type &points, Option_t *option, Option_t *optionWeight, Float_t pTLow, Float_t pTHigh) {
+void TWeightCalculator::Fit(const bin_list_type &points, Option_t *option, Option_t *optionWeight, Float_t pTLow, Float_t pTHigh, TF1 *extFunc) {
 	if (points.size() == 0) return;
 	if (!option) option = "RQN";
         TString optionWeightStr = optionWeight;
@@ -310,8 +310,9 @@ void TWeightCalculator::Fit(const bin_list_type &points, Option_t *option, Optio
 		//Float_t switchMin = xMin;
 		Float_t chi2 = 0;
 		Float_t ndf = 0;
-		TF1 *func = this->createFunc(false);
-		if (func) {
+		TF1 *func = extFunc;
+		if (!func) func = this->createFunc(false);
+		if (func && (func != extFunc)) {
                     func->SetParameter(0, y[0]);
                     func->SetParameter(1, 0.0);
                     func->SetParameter(2, 1.0);
@@ -337,7 +338,6 @@ void TWeightCalculator::Fit(const bin_list_type &points, Option_t *option, Optio
                         func->FixParameter(8, func->GetParameter(8));
                         func->FixParameter(9, func->GetParameter(9));
                         func->FixParameter(10, func->GetParameter(10));
-                        graph->Fit(func, option, "", pTLow, pTHigh);
                     }
                     if (optionWeightStr.Contains("EXPONENT")) {
                         func->SetParameter(0, y[0]);
@@ -352,7 +352,6 @@ void TWeightCalculator::Fit(const bin_list_type &points, Option_t *option, Optio
                         func->FixParameter(9, func->GetParameter(9));
                         func->SetParameter(10, 1.0);
                         func->SetParLimits(10, 0.0, 5.0);
-                        graph->Fit(func, option, "", pTLow, pTHigh);
                     }
                     if (optionWeightStr.Contains("POLYNOMIAL")) {
                         func->FixParameter(0, func->GetParameter(0));
@@ -396,15 +395,17 @@ void TWeightCalculator::Fit(const bin_list_type &points, Option_t *option, Optio
                             func->FixParameter(9, 0.0);
                         }
                         func->FixParameter(10, func->GetParameter(10));
-                        graph->Fit(func, option, "", pTLow, pTHigh);
                     }
-			chi2 += func->GetChisquare();
-			ndf += func->GetNDF();
+		}
+		if (func) {
+                    graph->Fit(func, option, "", pTLow, pTHigh);
+		    chi2 += func->GetChisquare();
+		    ndf += func->GetNDF();
 		}
 		chi2min = chi2;
 		Double_t par[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		if (func) func->GetParameters(par);
-		if (func) delete func;
+		if (func && (func != extFunc)) delete func;
 		this->mult = 0.0;//par[0];
 		this->multDrift = par[0];
 		this->pt0 = par[2];

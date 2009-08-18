@@ -124,7 +124,7 @@ function run_command () {
     if [[ "$DEBUG" == "yes" ]] 
     then
 	printf "$0: Running command in gdb...\n"
-	gdb `which $COMMAND` << ENDOFINPUT
+	gdb `which "$COMMAND"` << ENDOFINPUT
 run $ARGS
 where
 c
@@ -149,7 +149,7 @@ ENDOFINPUT
 
 function resubmit () {
 export IDS=$1
-export IDS=`echo $IDS | grep -o -E '[0-9A-F]{32}'`
+export IDS=`echo "$IDS" | grep -o -E '[0-9A-F]{32}'`
 export DATA_PATH=$2
 export EXECUTE=$3
 export CURDIR=$4
@@ -159,9 +159,9 @@ export DATA_PATH_default=data
 export EXECUTE_default=no
 export CURDIR_default=.
 export FINISHED_default=FINISHED
-if [[ -f ./.analysis.cfg.sh ]]
+if [[ -f "./.analysis.cfg.sh" ]]
 then
-    source ./.analysis.cfg.sh
+    source "./.analysis.cfg.sh"
     export CURDIR_default=$ANALYSIS_WORKING_DIR
 fi
 
@@ -231,28 +231,28 @@ do
     export EXISTS_FILE=false
     for FILE in $FILES
     do
-	if [[ ( -f $FILE ) && ( ( -f ${FILE/.root/.out} ) || ( -f ${FILE/.root/.err} ) ) ]]
+	if [[ ( -f "$FILE" ) && ( ( -f "${FILE/.root/.out}" ) || ( -f "${FILE/.root/.err}" ) ) ]]
 	then
     	    export EXISTS_FILE=true
-	    export GREPPED=`tail -q -n 100 ${FILE/.root/.out} | grep -s -m 1 -c -o -E "[^\"]$FINISHED[^\"]"`
+	    export GREPPED=`tail -q -n 100 "${FILE/.root/.out}" | grep -s -m 1 -c -o -E "[^\"]$FINISHED[^\"]"`
 	    if [[ "$GREPPED" == "1" ]]
 	    then
         	export EXISTS=true
 		echo -n "."
 	    else
-		export GREPPED=`grep -s -m 1 -c -o -E "[^\"]$FINISHED[^\"]" ${FILE/.root/.out}`
+		export GREPPED=`grep -s -m 1 -c -o -E "[^\"]$FINISHED[^\"]" "${FILE/.root/.out}"`
 		if [[ "$GREPPED" == "1" ]]
 		then
         	    export EXISTS=true
 		    echo -n ","
 		else
-		    export GREPPED=`tail -q -n 100 ${FILE/.root/.err} | grep -s -m 1 -c -o -E "[^\"]$FINISHED[^\"]"`
+		    export GREPPED=`tail -q -n 100 "${FILE/.root/.err}" | grep -s -m 1 -c -o -E "[^\"]$FINISHED[^\"]"`
 		    if [[ "$GREPPED" == "1" ]]
 		    then
         		export EXISTS=true
 			echo -n ":"
 		    else
-			export GREPPED=`grep -s -m 1 -c -o -E "[^\"]$FINISHED[^\"]" ${FILE/.root/.err}`
+			export GREPPED=`grep -s -m 1 -c -o -E "[^\"]$FINISHED[^\"]" "${FILE/.root/.err}"`
 			if [[ "$GREPPED" == "1" ]]
 			then
         		    export EXISTS=true
@@ -287,7 +287,7 @@ echo " done"
 if [[ ( "$RESUBMIT" != "0" ) && ( "$RESUBMIT" != "" ) ]]
 then
     echo "# Your command to resubmit $RESUBMIT of $TOTAL jobs is..."
-    export COMMAND="star-submit -r $NUMBERS $CURDIR/$ID.session.xml"
+    export COMMAND="star-submit -r $NUMBERS \"$CURDIR/$ID.session.xml\""
     echo $COMMAND
     if [[ "$EXECUTE" == "yes" ]]
     then
@@ -324,9 +324,9 @@ function get_random_number () {
 function clear_sched () {
     export PATHCLEAN=$1
     export PATHCLEAN_default='.'
-    if [[ -f ./.analysis.cfg.sh ]]
+    if [[ -f "./.analysis.cfg.sh" ]]
     then
-	source ./.analysis.cfg.sh
+	source "./.analysis.cfg.sh"
 	export PATHCLEAN_default=$ANALYSIS_WORKING_DIR
     fi
 
@@ -339,33 +339,33 @@ function clear_sched () {
     if [[ "$PATHCLEAN" != "" ]]
     then
 	echo "$0: Cleaning scheduler files in $PATHCLEAN"
-        rm -f $PATHCLEAN/sched*.csh
-        rm -f $PATHCLEAN/sched*.list
-        rm -f $PATHCLEAN/sched*.dataset
-        rm -f $PATHCLEAN/sched*.dataset.tmp
-        rm -f $PATHCLEAN/sched*.report
-        rm -f $PATHCLEAN/sched*.condor
-        rm -f $PATHCLEAN/sched*.condor.log
-        rm -f $PATHCLEAN/*.session.xml
-        rm -f $PATHCLEAN/*.test.out
-        rm -f $PATHCLEAN/schedTemplateExp.xml
-        rm -f $PATHCLEAN/last.kumac*
-        rm -f $PATHCLEAN/paw.metafile
+        rm -f "$PATHCLEAN/sched*.csh"
+        rm -f "$PATHCLEAN/sched*.list"
+        rm -f "$PATHCLEAN/sched*.dataset"
+        rm -f "$PATHCLEAN/sched*.dataset.tmp"
+        rm -f "$PATHCLEAN/sched*.report"
+        rm -f "$PATHCLEAN/sched*.condor"
+        rm -f "$PATHCLEAN/sched*.condor.log"
+        rm -f "$PATHCLEAN/*.session.xml"
+        rm -f "$PATHCLEAN/*.test.out"
+        rm -f "$PATHCLEAN/schedTemplateExp.xml"
+        rm -f "$PATHCLEAN/last.kumac*"
+        rm -f "$PATHCLEAN/paw.metafile"
     fi
 }
 
 function get_file_size () {
-    export STR=`ls -al $1 | grep -o -E '[^ ]{10}[[:space:]]+[[:digit:]]+[[:space:]]+[[:alnum:]]+[[:space:]]+[[:alnum:]]+[[:space:]]+[[:digit:]]+' | grep -o -E '[[:digit:]]+$'`
+    export STR=`ls -al "$1" | grep -o -E '[^ ]{10}[[:space:]]+[[:digit:]]+[[:space:]]+[[:alnum:]]+[[:space:]]+[[:alnum:]]+[[:space:]]+[[:digit:]]+' | grep -o -E '[[:digit:]]+$'`
     #export STR=`du -b $1`
     #export STR1=${STR//	*/}
-    echo ${STR}
+    echo "${STR}"
 }
 
 function copy_file_qa () {
     export SRC=$1
     export DST=$2
     echo "Copying file ${SRC} to ${DST}..."
-    if [[ -e $SRC ]]
+    if [[ -e "$SRC" ]]
     then
 	export ATTEMPTS_NUM=120;
     else
@@ -376,11 +376,11 @@ function copy_file_qa () {
     export SUCCESS='false'
     for (( ATTEMPT=1 ; ATTEMPT<=$ATTEMPTS_NUM ; ++ATTEMPT ))
     do
-	cp -fr $SRC $DST
-	if [[ -e $DST ]]
+	cp -fr "$SRC" "$DST"
+	if [[ -e "$DST" ]]
 	then
-	    export SIZE_SRC=`get_file_size $SRC`
-	    export SIZE_DST=`get_file_size $DST`
+	    export SIZE_SRC=`get_file_size "$SRC"`
+	    export SIZE_DST=`get_file_size "$DST"`
 	    if [[ "$SIZE_SRC" == "$SIZE_DST" ]]
 	    then
 		export SUCCESS='true'
@@ -430,6 +430,9 @@ function copy () {
     export COPY_MYDATAMAKER='no'
     export COPY_STPI0ANALYSIS='no'
     export COPY_STPI0RESULTS='no'
+    export COPY_STPHOTONCOMMON='no'
+    export COPY_STPHOTONDATAMAKER='no'
+    export COPY_STPHOTONANALYSIS='no'
     export COPY_COMPILED='no'
     export SRC_PATH=''
     export DST_PATH=''
@@ -437,9 +440,7 @@ function copy () {
     export DST_ANALYSIS_PATH=''
     export ANALYSIS_PATH_DEFAULT='StRoot/StEmcPool'
 
-    export OPTIONS=$@
-
-    for OPT in $OPTIONS ;
+    for OPT in "$@" ;
     do
 	if [[ "$OPT" == "StPi0Common" ]] ; then export COPY_STPI0COMMON='yes' ;
 	elif [[ "$OPT" == "-StPi0Common" ]] ; then export COPY_STPI0COMMON='no' ;
@@ -451,6 +452,12 @@ function copy () {
 	elif [[ "$OPT" == "-StPi0Analysis" ]] ; then export COPY_STPI0ANALYSIS='no' ;
 	elif [[ "$OPT" == "StPi0Results" ]] ; then export COPY_STPI0RESULTS='yes' ;
 	elif [[ "$OPT" == "-StPi0Results" ]] ; then export COPY_STPI0RESULTS='no' ;
+	elif [[ "$OPT" == "StPhotonCommon" ]] ; then export COPY_STPHOTONCOMMON='yes' ;
+	elif [[ "$OPT" == "-StPhotonCommon" ]] ; then export COPY_STPHOTONCOMMON='no' ;
+	elif [[ "$OPT" == "StPhotonDataMaker" ]] ; then export COPY_STPHOTONDATAMAKER='yes' ;
+	elif [[ "$OPT" == "-StPhotonDataMaker" ]] ; then export COPY_STPHOTONDATAMAKER='no' ;
+	elif [[ "$OPT" == "StPhotonAnalysis" ]] ; then export COPY_STPHOTONANALYSIS='yes' ;
+	elif [[ "$OPT" == "-StPhotonAnalysis" ]] ; then export COPY_STPHOTONANALYSIS='no' ;
 	elif [[ "$OPT" == "compiled" ]] ; then export COPY_COMPILED='yes' ;
 	elif [[ "$OPT" == "-compiled" ]] ; then export COPY_COMPILED='no' ;
 	elif [[ "$OPT" == "simulation" ]]
@@ -495,6 +502,26 @@ function copy () {
 	    export COPY_STPI0COMMON='no'
 	    export COPY_STPI0ANALYSIS='no'
 	    export COPY_STPI0RESULTS='no'
+	elif [[ "$OPT" == "photondata" ]]
+	then
+	    export COPY_STPI0COMMON='yes'
+	    export COPY_STPHOTONCOMMON='yes'
+	    export COPY_STPHOTONDATAMAKER='yes'
+	elif [[ "$OPT" == "-photondata" ]]
+	then
+	    export COPY_STPI0COMMON='no'
+	    export COPY_STPHOTONCOMMON='no'
+	    export COPY_STPHOTONDATAMAKER='no'
+	elif [[ "$OPT" == "photonanalysis" ]]
+	then
+	    export COPY_STPI0COMMON='yes'
+	    export COPY_STPHOTONCOMMON='yes'
+	    export COPY_STPHOTONANALYSIS='yes'
+	elif [[ "$OPT" == "-photonanalysis" ]]
+	then
+	    export COPY_STPI0COMMON='no'
+	    export COPY_STPHOTONCOMMON='no'
+	    export COPY_STPHOTONANALYSIS='no'
 	elif [[ "$OPT" == "all" ]]
 	then
 	    export COPY_STPI0COMMON='yes'
@@ -502,6 +529,9 @@ function copy () {
 	    export COPY_MYSIMULATION='yes'
 	    export COPY_STPI0ANALYSIS='yes'
 	    export COPY_STPI0RESULTS='yes'
+	    export COPY_STPHOTONCOMMON='yes'
+	    export COPY_STPHOTONDATAMAKER='yes'
+	    export COPY_STPHOTONANALYSIS='yes'
 	    #export COPY_COMPILED='yes'
 	elif [[ "$OPT" == "-all" ]]
 	then
@@ -510,6 +540,9 @@ function copy () {
 	    export COPY_MYSIMULATION='no'
 	    export COPY_STPI0ANALYSIS='no'
 	    export COPY_STPI0RESULTS='no'
+	    export COPY_STPHOTONCOMMON='no'
+	    export COPY_STPHOTONDATAMAKER='no'
+	    export COPY_STPHOTONANALYSIS='no'
 	    #export COPY_COMPILED='no'
 	elif [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$OPT ;
 	elif [[ "$DST_PATH" == "" ]] ; then export DST_PATH=$OPT ;
@@ -520,20 +553,23 @@ function copy () {
 
     if [[ "$SRC_PATH" == "" ]]
     then
-	export SRC_PATH=$0
-	export SRC_PATH=${SRC_PATH%/StRoot/*}
+	#export SRC_PATH=$0
+	export SRC_PATH="${0%/StRoot/*}"
     fi
-    if [[ "$DST_PATH" == "" ]] ; then export DST_PATH='.' ; fi
+    if [[ "$DST_PATH" == "" ]] ; then export DST_PATH=`pwd` ; fi
     if [[ "$SRC_ANALYSIS_PATH" == "" ]] ; then export SRC_ANALYSIS_PATH=${SRC_PATH}/$ANALYSIS_PATH_DEFAULT ; fi
     if [[ "$DST_ANALYSIS_PATH" == "" ]] ; then export DST_ANALYSIS_PATH=${DST_PATH}${SRC_ANALYSIS_PATH#$SRC_PATH} ; fi
 
-    if [[ "$OPTIONS" == "" ]]
+    if [[ "$@"'x' == "x" ]]
     then
-	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) ]] ; then export COPY_STPI0COMMON='yes' ; fi
-	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) && ( -d $SRC_ANALYSIS_PATH/StPi0Simulation ) ]] ; then export COPY_MYSIMULATION='yes' ; fi
-	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) && ( -d $SRC_ANALYSIS_PATH/StPi0DataMaker ) ]] ; then export COPY_MYDATAMAKER='yes' ; fi
-	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) && ( -d $SRC_ANALYSIS_PATH/StPi0Analysis ) ]] ; then export COPY_STPI0ANALYSIS='yes' ; fi
-	if [[ ( -d $SRC_ANALYSIS_PATH/StPi0Common ) && ( -d $SRC_ANALYSIS_PATH/StPi0Results ) ]] ; then export COPY_STPI0RESULTS='yes' ; fi
+	if [[ ( -d "$SRC_ANALYSIS_PATH/StPi0Common" ) ]] ; then export COPY_STPI0COMMON='yes' ; fi
+	if [[ ( -d "$SRC_ANALYSIS_PATH/StPi0Common" ) && ( -d "$SRC_ANALYSIS_PATH/StPi0Simulation" ) ]] ; then export COPY_MYSIMULATION='yes' ; fi
+	if [[ ( -d "$SRC_ANALYSIS_PATH/StPi0Common" ) && ( -d "$SRC_ANALYSIS_PATH/StPi0DataMaker" ) ]] ; then export COPY_MYDATAMAKER='yes' ; fi
+	if [[ ( -d "$SRC_ANALYSIS_PATH/StPi0Common" ) && ( -d "$SRC_ANALYSIS_PATH/StPi0Analysis" ) ]] ; then export COPY_STPI0ANALYSIS='yes' ; fi
+	if [[ ( -d "$SRC_ANALYSIS_PATH/StPi0Common" ) && ( -d "$SRC_ANALYSIS_PATH/StPi0Results" ) ]] ; then export COPY_STPI0RESULTS='yes' ; fi
+	if [[ ( -d "$SRC_ANALYSIS_PATH/StPi0Common" ) && ( -d "$SRC_ANALYSIS_PATH/StPhotonCommon" ) ]] ; then export COPY_STPHOTONCOMMON='yes' ; fi
+	if [[ ( -d "$SRC_ANALYSIS_PATH/StPi0Common" ) && ( -d "$SRC_ANALYSIS_PATH/StPhotonCommon" ) && ( -d "$SRC_ANALYSIS_PATH/StPhotonDataMaker" ) ]] ; then export COPY_STPHOTONDATAMAKER='yes' ; fi
+	if [[ ( -d "$SRC_ANALYSIS_PATH/StPi0Common" ) && ( -d "$SRC_ANALYSIS_PATH/StPhotonCommon" ) && ( -d "$SRC_ANALYSIS_PATH/StPhotonAnalysis" ) ]] ; then export COPY_STPHOTONANALYSIS='yes' ; fi
 	export COPY_COMPILED='no'
     fi
 
@@ -542,13 +578,16 @@ function copy () {
     echo "Copy StPi0Simulation:      $COPY_MYSIMULATION"
     echo "Copy StPi0Analysis:        $COPY_STPI0ANALYSIS"
     echo "Copy StPi0Results:         $COPY_STPI0RESULTS"
+    echo "Copy StPhotonCommon:       $COPY_STPHOTONCOMMON"
+    echo "Copy StPhotonDataMaker:    $COPY_STPHOTONDATAMAKER"
+    echo "Copy StPhotonAnalysis:     $COPY_STPHOTONANALYSIS"
     echo "Copy compiled libraries:   $COPY_COMPILED"
     echo "Source directory:          $SRC_PATH"
     echo "Destination directory:     $DST_PATH"
     echo "Source subdirectory:       $SRC_ANALYSIS_PATH"
     echo "Destination subdirectory:  $DST_ANALYSIS_PATH"
 
-    if [[ "${COPY_STPI0COMMON} ${COPY_MYDATAMAKER} ${COPY_MYSIMULATION} ${COPY_STPI0ANALYSIS} ${COPY_STPI0RESULTS}" != "no no no no no" ]]
+    if [[ "${COPY_STPI0COMMON} ${COPY_MYDATAMAKER} ${COPY_MYSIMULATION} ${COPY_STPI0ANALYSIS} ${COPY_STPI0RESULTS} ${COPY_STPHOTONCOMMON} ${COPY_STPHOTONDATAMAKER} ${COPY_STPHOTONANALYSIS}" != "no no no no no no no no" ]]
     then
 	if [[ ( "$SRC_PATH" == "" ) || ( "$DST_PATH" == "" ) ]]
 	then
@@ -557,49 +596,70 @@ function copy () {
 	    export COPY_MYDATAMAKER='no'
 	    export COPY_STPI0ANALYSIS='no'
 	    export COPY_STPI0RESULTS='no'
+	    export COPY_STPHOTONCOMMON='no'
+	    export COPY_STPHOTONDATAMAKER='no'
+	    export COPY_STPHOTONANALYSIS='no'
 	    export COPY_COMPILED='no'
 	    echo "Please specify source and destination directories!"
 	else
-	    mkdir -p $DST_ANALYSIS_PATH
+	    mkdir -p "$DST_ANALYSIS_PATH"
 	fi
     fi
 
     if [[ "$COPY_STPI0COMMON" == "yes" ]]
     then
 	echo "Copying StPi0Common..."
-	cp -rf $SRC_ANALYSIS_PATH/StPi0Common $DST_ANALYSIS_PATH
-	chmod a+x $DST_ANALYSIS_PATH/StPi0Common/macros/configure
+	cp -rf "$SRC_ANALYSIS_PATH/StPi0Common" "$DST_ANALYSIS_PATH"
+	chmod a+x "$DST_ANALYSIS_PATH/StPi0Common/macros/configure"
     fi
 
     if [[ "$COPY_MYDATAMAKER" == "yes" ]]
     then
 	echo "Copying StPi0DataMaker..."
-	cp -rf $SRC_ANALYSIS_PATH/StPi0DataMaker $DST_ANALYSIS_PATH
+	cp -rf "$SRC_ANALYSIS_PATH/StPi0DataMaker" "$DST_ANALYSIS_PATH"
     fi
 
     if [[ "$COPY_MYSIMULATION" == "yes" ]]
     then
 	echo "Copying StPi0Simulation..."
-	cp -rf $SRC_ANALYSIS_PATH/StPi0Simulation $DST_ANALYSIS_PATH
+	cp -rf "$SRC_ANALYSIS_PATH/StPi0Simulation" "$DST_ANALYSIS_PATH"
     fi
 
     if [[ "$COPY_STPI0ANALYSIS" == "yes" ]]
     then
 	echo "Copying StPi0Analysis..."
-	cp -rf $SRC_ANALYSIS_PATH/StPi0Analysis $DST_ANALYSIS_PATH
+	cp -rf "$SRC_ANALYSIS_PATH/StPi0Analysis" "$DST_ANALYSIS_PATH"
     fi
 
     if [[ "$COPY_STPI0RESULTS" == "yes" ]]
     then
 	echo "Copying StPi0Results..."
-	cp -rf $SRC_ANALYSIS_PATH/StPi0Results $DST_ANALYSIS_PATH
+	cp -rf "$SRC_ANALYSIS_PATH/StPi0Results" "$DST_ANALYSIS_PATH"
+    fi
+
+    if [[ "$COPY_STPHOTONCOMMON" == "yes" ]]
+    then
+	echo "Copying StPhotonCommon..."
+	cp -rf "$SRC_ANALYSIS_PATH/StPhotonCommon" "$DST_ANALYSIS_PATH"
+    fi
+
+    if [[ "$COPY_STPHOTONDATAMAKER" == "yes" ]]
+    then
+	echo "Copying StPhotonDataMaker..."
+	cp -rf "$SRC_ANALYSIS_PATH/StPhotonDataMaker" "$DST_ANALYSIS_PATH"
+    fi
+
+    if [[ "$COPY_STPHOTONANALYSIS" == "yes" ]]
+    then
+	echo "Copying StPhotonAnalysis..."
+	cp -rf "$SRC_ANALYSIS_PATH/StPhotonAnalysis" "$DST_ANALYSIS_PATH"
     fi
 
     if [[ "$COPY_COMPILED" == "yes" ]]
     then
 	if [[ "$STAR_HOST_SYS" == "" ]] ; then export STAR_HOST_SYS=`get_sys` ; fi
 	echo "Copying compiled libraries .$STAR_HOST_SYS ..."
-	cp -rf $SRC_PATH/.$STAR_HOST_SYS $DST_PATH
+	cp -rf "$SRC_PATH/.$STAR_HOST_SYS" "$DST_PATH"
     fi
 }
 
@@ -608,119 +668,134 @@ function configure () {
     export CONFIGURE_DATA='no'
     export CONFIGURE_ANALYSIS='no'
     export CONFIGURE_RESULTS='no'
+    export CONFIGURE_PHOTONDATA='no'
+    export CONFIGURE_PHOTONANALYSIS='no'
     export SRC_PATH=''
     export DST_PATH=''
-    export SRC_PATH_DEFAULT='./StRoot/StEmcPool'
-    export DST_PATH_DEFAULT='.'
+    export SRC_PATH_DEFAULT=`pwd`'/StRoot/StEmcPool'
+    export DST_PATH_DEFAULT=`pwd`
+    export MYCXXFLAGS_DEFAULT='-Wall -Wextra -fPIC -g'
 
-    export OPTIONS=$@
-
-    for OPT in $OPTIONS ;
+    for OPT in "$@" ;
     do
 	if [[ "$OPT" == "simulation" ]] ; then export CONFIGURE_SIMULATION='yes' ;
 	elif [[ "$OPT" == "data" ]] ; then export CONFIGURE_DATA='yes' ;
 	elif [[ "$OPT" == "analysis" ]] ; then export CONFIGURE_ANALYSIS='yes' ;
 	elif [[ "$OPT" == "analysisFinal" ]] ; then export CONFIGURE_ANALYSIS='yes' ;
 	elif [[ "$OPT" == "results" ]] ; then export CONFIGURE_RESULTS='yes' ;
+	elif [[ "$OPT" == "photondata" ]] ; then export CONFIGURE_PHOTONDATA='yes' ;
+	elif [[ "$OPT" == "photonanalysis" ]] ; then export CONFIGURE_PHOTONANALYSIS='yes' ;
 	elif [[ "$OPT" == "all" ]]
 	then
 	    export CONFIGURE_SIMULATION='yes'
 	    export CONFIGURE_DATA='yes'
 	    export CONFIGURE_ANALYSIS='yes'
 	    export CONFIGURE_RESULTS='yes'
-	elif [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$OPT ;
-	elif [[ "$DST_PATH" == "" ]] ; then export DST_PATH=$OPT ;
+	    export CONFIGURE_PHOTONDATA='yes'
+	    export CONFIGURE_PHOTONANALYSIS='yes'
+	elif [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH="$OPT" ;
+	elif [[ "$DST_PATH" == "" ]] ; then export DST_PATH="$OPT" ;
 	else echo "Skipping unknown option $OPT" ; fi
     done
 
     if [[ "$SRC_PATH" == "" ]] ; then export SRC_PATH=$SRC_PATH_DEFAULT ; fi
     if [[ "$DST_PATH" == "" ]] ; then export DST_PATH=$DST_PATH_DEFAULT ; fi
 
-    pushd $SRC_PATH > /dev/null
+    if [[ "$MYCXXFLAGS" == "" ]] ; then export MYCXXFLAGS=$MYCXXFLAGS_DEFAULT ; fi
+
+    pushd "$SRC_PATH" > /dev/null
     export SRC_PATH=`pwd`
     popd > /dev/null
 
-    pushd $DST_PATH > /dev/null
+    pushd "$DST_PATH" > /dev/null
     export DST_PATH=`pwd`
     popd > /dev/null
 
-    if [[ "$OPTIONS" == "" ]]
+    if [[ "$OPTIONS"'x' == "x" ]]
     then
-	if [[ ( -d $SRC_PATH/StPi0Common ) && ( -d $SRC_PATH/StPi0Simulation ) ]] ; then export CONFIGURE_SIMULATION='yes' ; fi
-	if [[ ( -d $SRC_PATH/StPi0Common ) && ( -d $SRC_PATH/StPi0DataMaker ) ]] ; then export CONFIGURE_DATA='yes' ; fi
-	if [[ ( -d $SRC_PATH/StPi0Common ) && ( -d $SRC_PATH/StPi0Analysis ) ]] ; then export CONFIGURE_ANALYSIS='yes' ; fi
-	if [[ ( -d $SRC_PATH/StPi0Common ) && ( -d $SRC_PATH/StPi0Results ) ]] ; then export CONFIGURE_RESULTS='yes' ; fi
+	if [[ ( -d "$SRC_PATH/StPi0Common" ) && ( -d "$SRC_PATH/StPi0Simulation" ) ]] ; then export CONFIGURE_SIMULATION='yes' ; fi
+	if [[ ( -d "$SRC_PATH/StPi0Common" ) && ( -d "$SRC_PATH/StPi0DataMaker" ) ]] ; then export CONFIGURE_DATA='yes' ; fi
+	if [[ ( -d "$SRC_PATH/StPi0Common" ) && ( -d "$SRC_PATH/StPi0Analysis" ) ]] ; then export CONFIGURE_ANALYSIS='yes' ; fi
+	if [[ ( -d "$SRC_PATH/StPi0Common" ) && ( -d "$SRC_PATH/StPi0Results" ) ]] ; then export CONFIGURE_RESULTS='yes' ; fi
+	if [[ ( -d "$SRC_PATH/StPi0Common" ) && ( -d "$SRC_PATH/StPhotonCommon" ) && ( -d "$SRC_PATH/StPhotonDataMaker" ) ]] ; then export CONFIGURE_PHOTONDATA='yes' ; fi
+	if [[ ( -d "$SRC_PATH/StPi0Common" ) && ( -d "$SRC_PATH/StPhotonCommon" ) && ( -d "$SRC_PATH/StPhotonAnalysis" ) ]] ; then export CONFIGURE_PHOTONANALYSIS='yes' ; fi
     fi
 
     echo "Configure simulation:      $CONFIGURE_SIMULATION"
     echo "Configure data:            $CONFIGURE_DATA"
     echo "Configure analysis:        $CONFIGURE_ANALYSIS"
     echo "Configure results:         $CONFIGURE_RESULTS"
+    echo "Configure photon data:     $CONFIGURE_PHOTONDATA"
+    echo "Configure photon analysis: $CONFIGURE_PHOTONANALYSIS"
     echo "Code directory:            $SRC_PATH"
     echo "Working directory:         $DST_PATH"
 
-    if [[ "${CONFIGURE_SIMULATION} ${CONFIGURE_DATA} ${CONFIGURE_ANALYSIS} ${CONFIGURE_RESULTS}" != "no no no no" ]]
-    then
+#    if [[ "${CONFIGURE_SIMULATION} ${CONFIGURE_DATA} ${CONFIGURE_ANALYSIS} ${CONFIGURE_RESULTS} ${CONFIGURE_PHOTONDATA} ${CONFIGURE_PHOTONANALYSIS}" != "no no no no no no" ]]
+#    then
 
 	if [[ "$STAR_HOST_SYS" == "" ]] ; then export STAR_HOST_SYS=`get_sys` ; fi
 
 	export RCFILE_SH=$DST_PATH/.analysis.cfg.sh
-	rm -fr $RCFILE_SH
-	echo "#!/bin/bash" > $RCFILE_SH
-	echo "" >> $RCFILE_SH
-	echo "export ANALYSIS_DIR=$SRC_PATH" >> $RCFILE_SH
-	echo "export ANALYSIS_WORKING_DIR=$DST_PATH" >> $RCFILE_SH
-	echo "export ANALYSIS_MACRO_PATH=\". ./macros $SRC_PATH/StPi0Common/macros $SRC_PATH/StPi0Analysis/macros $SRC_PATH/StPi0Simulation/macros $SRC_PATH/StPi0DataMaker/macros $SRC_PATH/StPi0Results/macros\"" >> $RCFILE_SH
-	echo "export STAR_HOST_SYS=$STAR_HOST_SYS" >> $RCFILE_SH
-	echo "" >> $RCFILE_SH
-	echo "#export DEFAULT_SUBMIT_OPTIONS=\"\$DEFAULT_SUBMIT_OPTIONS check_script_data check_script_analysis debug discard_stdout=no discard_stderr=no sleep_analysis\"" >> $RCFILE_SH
+	rm -fr "$RCFILE_SH"
+	echo "#!/bin/bash" > "$RCFILE_SH"
+	echo "" >> "$RCFILE_SH"
+	echo "export ANALYSIS_DIR=\"$SRC_PATH\"" >> "$RCFILE_SH"
+	echo "export ANALYSIS_WORKING_DIR=\"$DST_PATH\"" >> "$RCFILE_SH"
+	echo "export ANALYSIS_MACRO_PATH=\".:./macros:$SRC_PATH/StPi0Common/macros:$SRC_PATH/StPi0Analysis/macros:$SRC_PATH/StPi0Simulation/macros:$SRC_PATH/StPi0DataMaker/macros:$SRC_PATH/StPi0Results/macros:$SRC_PATH/StPhotonCommon/macros:$SRC_PATH/StPhotonDataMaker/macros:$SRC_PATH/StPhotonAnalysis/macros\"" >> "$RCFILE_SH"
+	echo "export STAR_HOST_SYS=\"$STAR_HOST_SYS\"" >> "$RCFILE_SH"
+	echo "" >> "$RCFILE_SH"
+	echo "#export DEFAULT_SUBMIT_OPTIONS=\"\$DEFAULT_SUBMIT_OPTIONS check_script_data check_script_analysis debug discard_stdout=no discard_stderr=no sleep_analysis\"" >> "$RCFILE_SH"
 
 	export RCFILE_MAKE=$DST_PATH/Makefile.cfg
-	rm -fr $RCFILE_MAKE
-	echo "ANALYSIS_DIR=$SRC_PATH" >> $RCFILE_MAKE
-	echo "ANALYSIS_WORKING_DIR=$DST_PATH" >> $RCFILE_MAKE
-	echo "STAR_HOST_SYS=$STAR_HOST_SYS" >> $RCFILE_MAKE
+	rm -fr "$RCFILE_MAKE"
+	echo "ANALYSIS_DIR=\"$SRC_PATH\"" >> "$RCFILE_MAKE"
+	echo "ANALYSIS_WORKING_DIR=\"$DST_PATH\"" >> "$RCFILE_MAKE"
+	echo "STAR_HOST_SYS=\"$STAR_HOST_SYS\"" >> "$RCFILE_MAKE"
+	echo "MYCXXFLAGS=\"$MYCXXFLAGS\"" >> "$RCFILE_MAKE"
 
 	export RCFILE_ROOT=$DST_PATH/.rootrc
-	rm -fr $RCFILE_ROOT
-	echo "+ACLiC.IncludePaths:          -I$SRC_PATH -I$DST_PATH/StRoot" >> $RCFILE_ROOT
-	#echo "ACLiC.BuildDir:              $DST_PATH/.$STAR_HOST_SYS" >> $RCFILE_ROOT
-	echo "+Unix.*.Root.IncludePath:     -I$SRC_PATH -I$DST_PATH/StRoot -I$SRC_PATH/StPi0Common/macros -I$SRC_PATH/StPi0Analysis/macros -I$SRC_PATH/StPi0Simulation/macros -I$SRC_PATH/StPi0DataMaker/macros -I$SRC_PATH/StPi0Results/macros" >> $RCFILE_ROOT
-	echo "+WinNT.*.Root.IncludePath:    -I$SRC_PATH -I$DST_PATH/StRoot -I$SRC_PATH/StPi0Common/macros -I$SRC_PATH/StPi0Analysis/macros -I$SRC_PATH/StPi0Simulation/macros -I$SRC_PATH/StPi0DataMaker/macros -I$SRC_PATH/StPi0Results/macros" >> $RCFILE_ROOT
-	echo "+Unix.*.Root.MacroPath:      .:$SRC_PATH/StPi0Common/macros:$SRC_PATH/StPi0Analysis/macros:$SRC_PATH/StPi0Simulation/macros:$SRC_PATH/StPi0DataMaker/macros:$SRC_PATH/StPi0Results/macros" >> $RCFILE_ROOT
-	echo "+WinNT.*.Root.MacroPath:     .;$SRC_PATH/StPi0Common/macros;$SRC_PATH/StPi0Analysis/macros;$SRC_PATH/StPi0Simulation/macros;$SRC_PATH/StPi0DataMaker/macros;$SRC_PATH/StPi0Results/macros" >> $RCFILE_ROOT
+	rm -fr "$RCFILE_ROOT"
+	echo "+ACLiC.IncludePaths:          -I\"$SRC_PATH\" -I\"$DST_PATH/StRoot\"" >> "$RCFILE_ROOT"
+	#echo "ACLiC.BuildDir:              \"$DST_PATH/.$STAR_HOST_SYS\"" >> "$RCFILE_ROOT"
+	echo "+Unix.*.Root.IncludePath:     -I\"$SRC_PATH\" -I\"$DST_PATH/StRoot\" -I\"$SRC_PATH/StPi0Common/macros\" -I\"$SRC_PATH/StPi0Analysis/macros\" -I\"$SRC_PATH/StPi0Simulation/macros\" -I\"$SRC_PATH/StPi0DataMaker/macros\" -I\"$SRC_PATH/StPi0Results/macros\" -I\"$SRC_PATH/StPhotonCommon/macros\" -I\"$SRC_PATH/StPhotonDataMaker/macros\" -I\"$SRC_PATH/StPhotonAnalysis/macros\"" >> "$RCFILE_ROOT"
+	echo "+WinNT.*.Root.IncludePath:    -I\"$SRC_PATH\" -I\"$DST_PATH/StRoot\" -I\"$SRC_PATH/StPi0Common/macros\" -I\"$SRC_PATH/StPi0Analysis/macros\" -I\"$SRC_PATH/StPi0Simulation/macros\" -I\"$SRC_PATH/StPi0DataMaker/macros\" -I\"$SRC_PATH/StPi0Results/macros\" -I\"$SRC_PATH/StPhotonCommon/macros\" -I\"$SRC_PATH/StPhotonDataMaker/macros\" -I\"$SRC_PATH/StPhotonAnalysis/macros\"" >> "$RCFILE_ROOT"
+	echo "+Unix.*.Root.MacroPath:      .:$SRC_PATH/StPi0Common/macros:$SRC_PATH/StPi0Analysis/macros:$SRC_PATH/StPi0Simulation/macros:$SRC_PATH/StPi0DataMaker/macros:$SRC_PATH/StPi0Results/macros:$SRC_PATH/StPhotonCommon/macros:$SRC_PATH/StPhotonDataMaker/macros:$SRC_PATH/StPhotonAnalysis/macros" >> "$RCFILE_ROOT"
+	echo "+WinNT.*.Root.MacroPath:     .;$SRC_PATH/StPi0Common/macros;$SRC_PATH/StPi0Analysis/macros;$SRC_PATH/StPi0Simulation/macros;$SRC_PATH/StPi0DataMaker/macros;$SRC_PATH/StPi0Results/macros;$SRC_PATH/StPhotonCommon/macros;$SRC_PATH/StPhotonDataMaker/macros;$SRC_PATH/StPhotonAnalysis/macros" >> "$RCFILE_ROOT"
 
-	chmod a+x $SRC_PATH/StPi0Common/macros/commands
-	chmod a+x $SRC_PATH/StPi0Common/macros/configure
-	chmod a+x $SRC_PATH/StPi0Common/macros/copy
-	chmod a+x $SRC_PATH/StPi0Common/macros/clear_sched
-	chmod a+x $SRC_PATH/StPi0Common/macros/resubmit
-	chmod a+x $SRC_PATH/StPi0Common/macros/submit
+	chmod a+x "$SRC_PATH/StPi0Common/macros/commands"
+	chmod a+x "$SRC_PATH/StPi0Common/macros/configure"
+	chmod a+x "$SRC_PATH/StPi0Common/macros/copy"
+	chmod a+x "$SRC_PATH/StPi0Common/macros/clear_sched"
+	chmod a+x "$SRC_PATH/StPi0Common/macros/resubmit"
+	chmod a+x "$SRC_PATH/StPi0Common/macros/submit"
 
-	if [[ "${CONFIGURE_SIMULATION}" != "no" ]] ; then chmod a+x $SRC_PATH/StPi0Simulation/macros/run_simulation ; fi
-	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then       chmod a+x $SRC_PATH/StPi0DataMaker/macros/run_data ; fi
-	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then   chmod a+x $SRC_PATH/StPi0Analysis/macros/run_analysis ; fi
-	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then    chmod a+x $SRC_PATH/StPi0Results/macros/show_analysis ; fi
-	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then    chmod a+x $SRC_PATH/StPi0Results/macros/browse_analysis ; fi
+	if [[ "${CONFIGURE_SIMULATION}" != "no" ]] ; then chmod a+x "$SRC_PATH/StPi0Simulation/macros/run_simulation" ; fi
+	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then       chmod a+x "$SRC_PATH/StPi0DataMaker/macros/run_data" ; fi
+	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then   chmod a+x "$SRC_PATH/StPi0Analysis/macros/run_analysis" ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then    chmod a+x "$SRC_PATH/StPi0Results/macros/show_analysis" ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then    chmod a+x "$SRC_PATH/StPi0Results/macros/browse_analysis" ; fi
+	if [[ "${CONFIGURE_PHOTONANALYSIS}" != "no" ]] ; then   chmod a+x "$SRC_PATH/StPhotonAnalysis/macros/show_photon" ; fi
 
-        #ln -sf $SRC_PATH/StPi0Common/macros/commands    $DST_PATH
-        #ln -sf $SRC_PATH/StPi0Common/macros/configure   $DST_PATH
-        #ln -sf $SRC_PATH/StPi0Common/macros/copy        $DST_PATH
-        ln -sf $SRC_PATH/StPi0Common/macros/clear_sched $DST_PATH
-        ln -sf $SRC_PATH/StPi0Common/macros/resubmit    $DST_PATH
-        ln -sf $SRC_PATH/StPi0Common/macros/submit      $DST_PATH
-        ln -sf $SRC_PATH/StPi0Common/macros/Makefile    $DST_PATH
-        ln -sf $SRC_PATH/StPi0Common/macros/style.C     $DST_PATH
-	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then     ln -sf $SRC_PATH/StPi0DataMaker/macros/run_data.C          $DST_PATH ; fi
-	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then     ln -sf $SRC_PATH/StPi0DataMaker/macros/log4j.xml           $DST_PATH ; fi
-	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then ln -sf $SRC_PATH/StPi0Analysis/macros/run_analysis.C       $DST_PATH ; fi
-	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then ln -sf $SRC_PATH/StPi0Analysis/macros/run_analysis_final.C $DST_PATH ; fi
-	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/show_analysis.C       $DST_PATH ; fi
-	#if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/data_arrays_others.C  $DST_PATH ; fi
-	#if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/data_arrays_this.C    $DST_PATH ; fi
-	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/show_analysis         $DST_PATH ; fi
-	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/browse_analysis.C     $DST_PATH ; fi
-	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf $SRC_PATH/StPi0Results/macros/browse_analysis       $DST_PATH ; fi
+        #ln -sf "$SRC_PATH/StPi0Common/macros/commands"    "$DST_PATH"
+        #ln -sf "$SRC_PATH/StPi0Common/macros/configure"   "$DST_PATH"
+        #ln -sf "$SRC_PATH/StPi0Common/macros/copy"        "$DST_PATH"
+        ln -sf "$SRC_PATH/StPi0Common/macros/clear_sched" "$DST_PATH"
+        ln -sf "$SRC_PATH/StPi0Common/macros/resubmit"    "$DST_PATH"
+        ln -sf "$SRC_PATH/StPi0Common/macros/submit"      "$DST_PATH"
+        ln -sf "$SRC_PATH/StPi0Common/macros/Makefile"    "$DST_PATH"
+        ln -sf "$SRC_PATH/StPi0Common/macros/style.C"     "$DST_PATH"
+	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then     ln -sf "$SRC_PATH/StPi0DataMaker/macros/run_data.C"          "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_DATA}" != "no" ]] ; then     ln -sf "$SRC_PATH/StPi0DataMaker/macros/log4j.xml"           "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then ln -sf "$SRC_PATH/StPi0Analysis/macros/run_analysis.C"       "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_ANALYSIS}" != "no" ]] ; then ln -sf "$SRC_PATH/StPi0Analysis/macros/run_analysis_final.C" "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf "$SRC_PATH/StPi0Results/macros/show_analysis.C"       "$DST_PATH" ; fi
+	#if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf "$SRC_PATH/StPi0Results/macros/data_arrays_others.C"  "$DST_PATH" ; fi
+	#if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf "$SRC_PATH/StPi0Results/macros/data_arrays_this.C"    "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf "$SRC_PATH/StPi0Results/macros/show_analysis"         "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf "$SRC_PATH/StPi0Results/macros/browse_analysis.C"     "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_RESULTS}" != "no" ]] ; then  ln -sf "$SRC_PATH/StPi0Results/macros/browse_analysis"       "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_PHOTONANALYSIS}" != "no" ]] ; then ln -sf "$SRC_PATH/StPhotonAnalysis/macros/show_photon" "$DST_PATH" ; fi
+	if [[ "${CONFIGURE_PHOTONANALYSIS}" != "no" ]] ; then ln -sf "$SRC_PATH/StPhotonAnalysis/macros/show_photon.C" "$DST_PATH" ; fi
 
-    fi
+#    fi
 }

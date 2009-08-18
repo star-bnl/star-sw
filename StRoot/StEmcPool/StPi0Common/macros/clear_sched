@@ -1,12 +1,13 @@
 #!/bin/bash
-export ANALYSIS_DIR=${0%/*}
-if [[ -f ./.analysis.cfg.sh ]]
+
+export ANALYSIS_DIR="${0%/*}"
+if [[ -f "./.analysis.cfg.sh" ]]
 then 
-    source ./.analysis.cfg.sh
+    source "./.analysis.cfg.sh"
 fi
-if [[ -f $ANALYSIS_DIR/StPi0Common/macros/commands ]]
+if [[ -f "$ANALYSIS_DIR/StPi0Common/macros/commands" ]]
 then
-    source $ANALYSIS_DIR/StPi0Common/macros/commands
+    source "$ANALYSIS_DIR/StPi0Common/macros/commands"
     clear_sched "$@"
 else
     echo "Analysis environment is not configured!"

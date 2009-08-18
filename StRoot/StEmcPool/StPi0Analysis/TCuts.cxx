@@ -457,8 +457,6 @@ TCuts::cut_type TCuts::passCandidateCuts(const TMyCandidateTreeData &candidate
 	cut_type result = 0;
         const parameters_type &cutParameters = this->getParametersCandidate();
 	getCandidateParams(candidate, event1, event1Parameters, point1, point1Parameters, event2, event2Parameters, point2, point2Parameters, cutParameters, candidateParameters);
-	Float_t massRegionLeft = 0;
-	Float_t massRegionRight = 0;
 #define INCLUDE_CANDIDATE_CUTS
 #define DEFINE_CUT(CLASS, NAME, CONDITION, TITLE) if (CONDITION) result |= CLASS##_##NAME##_CUT;
 #include "CutDefinitions.h"

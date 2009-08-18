@@ -48,6 +48,10 @@ DEFINE_HISTOGRAM_1D(PtSmdSz,(PASSED(passedPointCuts1,POINT_SMDE_SIZE_CUT|POINT_S
 DEFINE_HISTOGRAM_1D(PtSmdSz1,(PASSED(passedPointCuts1,POINT_SMDE_SIZE_CUT|POINT_SMDP_SIZE_CUT)||PASSED(passedPointCuts2,POINT_SMDE_SIZE_CUT|POINT_SMDP_SIZE_CUT))?candidateParameters.pTRec:-1, "At least one point with both SMD size;p_{T}, GeV/c");
 DEFINE_HISTOGRAM_1D(PtSmdSz01,(PASSED(passedPointCuts1,POINT_SMDE_SIZE_CUT)||PASSED(passedPointCuts1,POINT_SMDP_SIZE_CUT)||PASSED(passedPointCuts2,POINT_SMDE_SIZE_CUT)||PASSED(passedPointCuts2,POINT_SMDP_SIZE_CUT))?candidateParameters.pTRec:-1,"SMDsz01");
 DEFINE_HISTOGRAM_2D(TpcRefmultTrackDist,    candidate.point1.event.uncorrectedNumberOfTpcPrimaries, candidateParameters.distTrackClosest, "Mult. vs. closest track dist.;Event mult.;Dist. to closest track");
+DEFINE_HISTOGRAM_2D(CandidateEtaJetEta,     candidateParameters.eta, candidate.point1.event.jet.eta, "Candidate #eta vs. jet #eta;#pi^{0} #eta;Jet #eta");
+DEFINE_HISTOGRAM_2D(CandidatePhiJetPhi,     candidateParameters.phi, candidate.point1.event.jet.phi, "Candidate #phi vs. jet #phi;#pi^{0} #phi;Jet #phi");
+DEFINE_HISTOGRAM_1D(CandidatePhiMinusJetPhi, candidateParameters.jetDeltaPhi, "Candidate #phi - jet #phi;#pi^{0} #phi - Jet #phi");
+DEFINE_HISTOGRAM_2D(CandidateJetEtaPhi,     candidateParameters.jetDeltaEta, candidateParameters.jetDeltaPhi, "Candidate - jet #eta vs #phi;#pi^{0} #eta - Jet #eta;#pi^{0} #phi - Jet #phi");
 
 #else
 

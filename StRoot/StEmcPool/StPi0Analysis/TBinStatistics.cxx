@@ -412,7 +412,7 @@ void smoothPoints(const bin_stat_list_type &input, bin_stat_list_type &output, b
 	if (bufferY) delete [] bufferY;
 }
 
-void mergePoints(const bin_stat_list_type &input, bin_stat_list_type &output, bin_stat_list_type &outputSys) {
+void mergePoints(const bin_stat_list_type &input, bin_stat_list_type &output, bin_stat_list_type &/*outputSys*/) {
 	for (bin_stat_list_type::const_iterator iterIn = input.begin();iterIn != input.end();iterIn++) {
 		const TBinStatistics &binIn = *iterIn;
 		Bool_t found = false;

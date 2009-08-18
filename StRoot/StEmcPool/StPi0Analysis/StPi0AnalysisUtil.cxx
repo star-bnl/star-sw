@@ -28,6 +28,7 @@ using namespace std;
 #include "./badRuns_bunchCrossingId7bit.C"
 
 #include "./pp2005_goldenruns_a.C"
+#include "./pp2005_runlist.C"
 
 Int_t badRunsList[] = {-1};
 //Int_t badRunsList[] = {4063046, 4063047, 4080080, 4080085, 4080086, 4080087, 4080089, -1}; // test: dAuMinBias early runs only
@@ -40,10 +41,10 @@ Bool_t isBadRun_default(Int_t runId, Int_t year, Int_t day, Int_t runday) {
 	  if ((day == 78) && (runday > 40)) result = true;
 	  if ((day == 79) && (runday < 20)) result = true;
 	  if (day < 41) result = true; // strange BSMDP pedestals problem before that day
-	} else if (year == 6) {
+	} else if ((year == 6) && false) {
 	    //if (day < 111) result = true; // beginning of 2005 p+p
-	    if (day > 164) result = true; // East side status changes so much (from M. Russcher)
-	    if ((runId >= 6131062) && (runId <=6134011)) result = true; // SMD status is bad these days (from M. Russcher)
+	    //if (day > 164) result = true; // East side status changes so much (from M. Russcher)
+	    //if ((runId >= 6131062) && (runId <=6134011)) result = true; // SMD status is bad these days (from M. Russcher)
 	    if (runId == 6146044) result = true; // tower 2076 has stuck bit 2048, comment out when fixed in status table
 	    if (((runId >= 6128043) && (runId <= 6128054)) || ((runId >= 6141046) && (runId <= 6141059))) result = true; // tower 3287 has stuck bit 256, comment out when fixed in status table
 	}
@@ -52,13 +53,13 @@ Bool_t isBadRun_default(Int_t runId, Int_t year, Int_t day, Int_t runday) {
 	return result;
 }
 
-Bool_t isBadRun_embeddingonly(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isBadRun_embeddingonly(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = true;
 	if ((runId == 4049021) || (runId == 4036043)) result = false;
 	return result;
 }
 
-Bool_t isBadRun_normal(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isBadRun_normal(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t badRunsListIndex = 0;
 	badRunsListIndex = 0; while ((!result) && (badRuns_normal_MB[badRunsListIndex] != -1)) result = (badRuns_normal_MB[badRunsListIndex++] == runId);
@@ -67,7 +68,7 @@ Bool_t isBadRun_normal(Int_t runId, Int_t year, Int_t day, Int_t runday) {
 	return result;
 }
 
-Bool_t isBadRun_strict(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isBadRun_strict(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t badRunsListIndex = 0;
 	badRunsListIndex = 0; while ((!result) && (badRuns_strict_MB[badRunsListIndex] != -1)) result = (badRuns_strict_MB[badRunsListIndex++] == runId);
@@ -76,7 +77,7 @@ Bool_t isBadRun_strict(Int_t runId, Int_t year, Int_t day, Int_t runday) {
 	return result;
 }
 
-Bool_t isBadRun_verystrict(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isBadRun_verystrict(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t badRunsListIndex = 0;
 	badRunsListIndex = 0; while ((!result) && (badRuns_verystrict_MB[badRunsListIndex] != -1)) result = (badRuns_verystrict_MB[badRunsListIndex++] == runId);
@@ -85,7 +86,7 @@ Bool_t isBadRun_verystrict(Int_t runId, Int_t year, Int_t day, Int_t runday) {
 	return result;
 }
 
-Bool_t isBadRun_beambg(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isBadRun_beambg(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t badRunsListIndex = 0;
 	badRunsListIndex = 0; while ((!result) && (badRuns_beambg_MB[badRunsListIndex] != -1)) result = (badRuns_beambg_MB[badRunsListIndex++] == runId);
@@ -94,35 +95,42 @@ Bool_t isBadRun_beambg(Int_t runId, Int_t year, Int_t day, Int_t runday) {
 	return result;
 }
 
-Bool_t isGoodFtpcRun(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isGoodFtpcRun(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t goodRunsListIndex = 0;
 	goodRunsListIndex = 0; while ((!result) && (goodFTPCruns[goodRunsListIndex] != -1)) result = (goodFTPCruns[goodRunsListIndex++] == runId);
 	return result;
 }
 
-Bool_t isGoodPP2005Run(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isGoodPP2005Run(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t goodRunsListIndex = 0;
 	goodRunsListIndex = 0; while ((!result) && (goodPP2005runs[goodRunsListIndex] != -1)) result = (goodPP2005runs[goodRunsListIndex++] == runId);
 	return result;
 }
 
-Bool_t isGoodPP2005Run_ppProductionMinBias(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isGoodPP2005Run_frank(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
+	Bool_t result = false;
+	Int_t goodRunsListIndex = 0;
+	goodRunsListIndex = 0; while ((!result) && (goodPP2005runs_frank[goodRunsListIndex] != -1)) result = (goodPP2005runs_frank[goodRunsListIndex++] == runId);
+	return result;
+}
+
+Bool_t isGoodPP2005Run_ppProductionMinBias(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t goodRunsListIndex = 0;
 	goodRunsListIndex = 0; while ((!result) && (goodPP2005runs_ppProductionMinBias[goodRunsListIndex] != -1)) result = (goodPP2005runs_ppProductionMinBias[goodRunsListIndex++] == runId);
 	return result;
 }
 
-Bool_t isBadPP2005Run(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isBadPP2005Run(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t badRunsListIndex = 0;
 	badRunsListIndex = 0; while ((!result) && (badPP2005runs[badRunsListIndex] != -1)) result = (badPP2005runs[badRunsListIndex++] == runId);
 	return result;
 }
 
-Bool_t isBadRun_bunchCrossingId7bit(Int_t runId, Int_t year, Int_t day, Int_t runday) {
+Bool_t isBadRun_bunchCrossingId7bit(Int_t runId, Int_t /*year*/, Int_t /*day*/, Int_t /*runday*/) {
 	Bool_t result = false;
 	Int_t badRunsListIndex = 0;
 	badRunsListIndex = 0; while ((!result) && (badRuns_highBgEmptyBunch[badRunsListIndex] != -1)) result = (badRuns_highBgEmptyBunch[badRunsListIndex++] == runId);
@@ -156,6 +164,8 @@ Bool_t isBadRun(Int_t parameter, Int_t runId, Int_t year, Int_t day, Int_t runda
 		switch ((parameter / 1000000) % 10) {
 			case 1: if (year == 6) resultGood &= isGoodPP2005Run(runId, year, day, runday); break;
 			case 2: if (year == 6) resultGood &= isGoodPP2005Run(runId, year, day, runday) || isGoodPP2005Run_ppProductionMinBias(runId, year, day, runday); break;
+			case 3: if (year == 6) resultGood &= isGoodPP2005Run_frank(runId, year, day, runday); break;
+			case 4: if (year == 6) resultGood &= isGoodPP2005Run_frank(runId, year, day, runday) || isGoodPP2005Run_ppProductionMinBias(runId, year, day, runday); break;
 		}
 		switch ((parameter / 10000000) % 10) {
 			case 1: resultBad |= isBadPP2005Run(runId, year, day, runday); break;
@@ -209,9 +219,9 @@ void parseRunId(Int_t runId, Int_t &year, Int_t &day, Int_t &runDay) {
 
 void getCandidateParams(const TMyCandidateTreeData &candidate
     , const TMyEventData &event1, const TEventParameters &event1Parameters
-    , const TMyPointData &point1, const TPointParameters &point1Parameters
+    , const TMyPointData &/*point1*/, const TPointParameters &point1Parameters
     , const TMyEventData &event2, const TEventParameters &event2Parameters
-    , const TMyPointData &point2, const TPointParameters &point2Parameters
+    , const TMyPointData &/*point2*/, const TPointParameters &point2Parameters
     , const TCutParameters &cutParameters, TCandidateParameters &candidateParameters) {
 
 	Float_t z1 = event1Parameters.zUse;
@@ -278,7 +288,7 @@ void getCandidateParams(const TMyCandidateTreeData &candidate
 	candidateParameters.distTrackClosest2 = TMath::Min(point1Parameters.distTrack2, point2Parameters.distTrack2);
 }
 
-void getHitParams(const TMyEventData &event, const TMyHitData &hit, const TEventParameters &eventParameters, const TCutParameters &cutParameters, THitParameters &hitParameters) {
+void getHitParams(const TMyEventData &/*event*/, const TMyHitData &hit, const TEventParameters &eventParameters, const TCutParameters &cutParameters, THitParameters &hitParameters) {
 	hitParameters.etaCoord = (Float_t(Int_t(hit.etaphiCoord)) / 100000.0) - 1.0;
 	hitParameters.phiCoord = ((hit.etaphiCoord - Float_t(Int_t(hit.etaphiCoord))) * 7.0) - 3.5;
 	Float_t z = eventParameters.zUse;
@@ -330,7 +340,7 @@ void getPointParams(const TMyEventData &event, const TMyPointData &point, const 
 	pointParameters.triggeredTowerHT2Et = (pointParameters.highestEnergyHitBTOW.eT >= cutParameters.HT2EtThreshold);
 }
 
-void getPionParams(const TMyEventData &event, const TMySimulatedDecayData &pion, const TEventParameters &eventParameters, const TGammaParameters &gamma1Parameters, const TGammaParameters &gamma2Parameters, const TCutParameters &cutParameters, TPionParameters &pionParameters) {
+void getPionParams(const TMyEventData &event, const TMySimulatedDecayData &pion, const TEventParameters &eventParameters, const TGammaParameters &gamma1Parameters, const TGammaParameters &gamma2Parameters, const TCutParameters &/*cutParameters*/, TPionParameters &pionParameters) {
 	Float_t z = event.simulatedParticle.z;
 	if (z == 0.0) z = eventParameters.zUse;
 	pionParameters.pT = pion.parent.summary.pT;
@@ -419,7 +429,7 @@ Int_t digitHigh = 120;
 Int_t digitDiff = digitHigh - digitLow;
 Int_t *bunchPattern100 = 0;
 Int_t *bunchPattern52 = 0;
-Bool_t isGoodBunchCrossingId7bitPlusOffset(Int_t runId, Int_t year, Int_t day, Int_t runDay, Int_t bunchCrossingId7bitPlusOffset, Bool_t checkAbortGaps, Bool_t checkEmptyBuckets) {
+Bool_t isGoodBunchCrossingId7bitPlusOffset(Int_t /*runId*/, Int_t year, Int_t day, Int_t /*runDay*/, Int_t bunchCrossingId7bitPlusOffset, Bool_t checkAbortGaps, Bool_t checkEmptyBuckets) {
 	if (!bunchPattern100) {
 		bunchPattern100 = new Int_t[digitDiff];
 		for (Int_t i = 0;i < digitDiff;i++) if (bunchPattern100) bunchPattern100[i] = 1;

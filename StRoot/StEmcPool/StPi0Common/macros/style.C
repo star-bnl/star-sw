@@ -3,6 +3,7 @@
 #include <TStyle.h> 
 #include <TAttFill.h> 
 #include <TColor.h> 
+#include <TTF.h>
 
 #endif 
 
@@ -18,7 +19,7 @@ void style() {
         gStyle->SetFrameFillColor(kWhite);
         gStyle->SetFrameLineColor(kBlack);
         gStyle->SetFrameBorderSize(1);
-        //gStyle->SetFrameBorderMode(0);
+        gStyle->SetFrameBorderMode(0);
         gStyle->SetPadColor(kWhite);
         gStyle->SetStatColor(kWhite);
         gStyle->SetLabelFont(132, "xyz");
@@ -34,4 +35,8 @@ void style() {
         gStyle->SetPadBottomMargin(0.13);
 
 	//gStyle->SetEndErrorSize(5);
+
+	//TTF::SetSmoothing(kFALSE); // default is kTRUE
+	//TTF::SetKerning(kFALSE); // default is kTRUE
+	//TTF::SetHinting(kTRUE); // default is kFALSE
 }

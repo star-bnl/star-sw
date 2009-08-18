@@ -50,6 +50,8 @@ Bool_t load_libs(Bool_t useUroot = false
 		, const Char_t *commonLib = "StPi0Common"
 		, const Char_t *analysisLib = "StPi0Analysis"
 		, const Char_t *resultsLib = "StPi0Results"
+		, const Char_t *photonCommonLib = "StPhotonCommon"
+		, const Char_t *photonAnalysisLib = "StPhotonAnalysis"
 		) {
     Bool_t result = true;
     //gPrintViaErrorHandler = true;
@@ -58,7 +60,7 @@ Bool_t load_libs(Bool_t useUroot = false
     dynPath = TString(gSystem->GetDynamicPath()) + "" + thisPath;// + "/" + dynPath;
     gSystem->SetDynamicPath(dynPath);
     result &= (gSystem->Load("libPhysics") >= 0);
-    result &= (gSystem->Load("libThread") >= 0);
+    result &= (gSystem->Load("libPostscript") >= 0);
     result &= load_lib(commonLib);
     if (load_lib(analysisLib)) {
 	initCuts();
@@ -66,9 +68,8 @@ Bool_t load_libs(Bool_t useUroot = false
 	result = false;
     }
     result &= load_lib(resultsLib);
-    //result &= load_lib(dataLib);
-    //result &= load_lib(timeRandomizerLib);
-    //result &= load_lib(triggerSimulatorLib);
+    result &= load_lib(photonCommonLib);
+    result &= load_lib(photonAnalysisLib);
     TH1::AddDirectory(0);
     gStyle->SetPalette(1);
     if (result) {

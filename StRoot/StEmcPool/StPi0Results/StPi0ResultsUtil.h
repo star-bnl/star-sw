@@ -316,10 +316,10 @@ public:
     Bool_t fitPeakShapeDistribution;
     Bool_t fitPeakShapeEtaDistribution;
     Bool_t fitPeakShapeEtabgDistribution;
-    Float_t fitDistributionLeft;
-    Float_t fitDistributionRight;
-    Float_t fitDistributionLeft2;
-    Float_t fitDistributionRight2;
+    TFitSettings fitDistributionLeft;
+    TFitSettings fitDistributionRight;
+    TFitSettings fitDistributionLeft2;
+    TFitSettings fitDistributionRight2;
     Option_t *fitDistributionOption;
     
     TFitSettings lowNormFixed;
@@ -1091,16 +1091,16 @@ void savePtSlices(const Char_t *filenameOut
 
 void showResultsOthers(TH1F *histSpectrum, TLegend *legendSpectrum, const data_points_list &dataPointsList);
 
-void showPointsRcp(const Char_t *name, const Char_t *title
+/*void showPointsRcp(const Char_t *name, const Char_t *title
 	, const TDataProcessorPool *poolMostcentral, const TDataProcessorPool *poolMostperipheral
 	, Bool_t chargedPoints, Bool_t allPoints
 	, Bool_t showSpectrum, Bool_t show, Bool_t print
 	, Float_t binSizeMB, Float_t binSizeHT1, Float_t binSizeHT2
 	, Float_t minPtMB, Float_t minPtHT1, Float_t minPtHT2
 	, Float_t maxPtMB, Float_t maxPtHT1, Float_t maxPtHT2
-);
+);*/
 
-void showPointsRcpEtaPhiCoord(const Char_t *name, const Char_t *title
+/*void showPointsRcpEtaPhiCoord(const Char_t *name, const Char_t *title
 	, const TDataProcessorPool *poolMostcentral, const TDataProcessorPool *poolMostperipheral
 	, Bool_t chargedPoints, Bool_t allPoints
 	, Bool_t show, Bool_t print
@@ -1109,7 +1109,7 @@ void showPointsRcpEtaPhiCoord(const Char_t *name, const Char_t *title
 	, Float_t minPtMB, Float_t minPtHT1, Float_t minPtHT2
 	, Float_t maxPtMB, Float_t maxPtHT1, Float_t maxPtHT2
 	, Float_t integralLow, Float_t maxError
-);
+);*/
 
 void showResultsDAuCentrality(const Char_t *dAuCentralityName, const Char_t *dAuCentralityTitle
 	, Bool_t showRcp, Bool_t showRcpEta, Bool_t dAuCentralityShow, Bool_t dAuCentralityPrint, Bool_t showDAuCentralityTriggersSeparately

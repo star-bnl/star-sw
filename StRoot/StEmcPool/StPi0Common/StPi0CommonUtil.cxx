@@ -110,18 +110,13 @@ Float_t getRapidity(Float_t m, Float_t pT, Float_t eta) {
     return 0.5 * TMath::Log((E + pL) / (E - pL));
 }
 
-
 Float_t getFontSize(const TVirtualPad *pad, Float_t padWidthPt, Float_t fontSizePt) {
     if (!pad || (padWidthPt == 0)) return 0;
     Float_t wh = TMath::Abs((Float_t)pad->XtoPixel(pad->GetX2()) - (Float_t)pad->XtoPixel(pad->GetX1()));
     Float_t hh = TMath::Abs((Float_t)pad->YtoPixel(pad->GetY2()) - (Float_t)pad->YtoPixel(pad->GetY1()));
-    //Float_t hh = pad->GetWh();
-    //Float_t wh = pad->GetWw();
     Float_t fontRel = fontSizePt / padWidthPt;
-    if (wh > hh)  {
-	fontRel *= (hh != 0) ? (wh / hh) : 0;
-    }
-    return fontRel;
+    if (wh > hh) fontRel *= (hh != 0) ? (wh / hh) : 1.0;
+    return fontRel * 1.30; // fudge factor
 }
 
 void setHistFontSize(TH1 *hist, Float_t padWidthPt, Float_t fontSizePt, const TVirtualPad *pad) {
