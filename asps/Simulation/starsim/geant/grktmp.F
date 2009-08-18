@@ -61,9 +61,9 @@ C
       END DO
       H = STEP / C
       CALL GRKDMP(CHARGE, M0, Q0, DQ0)
-D     WRITE(*,*) 'H = ', H
-D     WRITE(*,*) 'Q0 = ', Q0
-D     WRITE(*,*) 'DQ0 = ', DQ0
+C     WRITE(*,*) 'H = ', H
+C     WRITE(*,*) 'Q0 = ', Q0
+C     WRITE(*,*) 'DQ0 = ', DQ0
 *
 *** What follows is adapted from Numerical Recipes.
 *
@@ -71,26 +71,26 @@ D     WRITE(*,*) 'DQ0 = ', DQ0
          QT(I) = Q0(I) + 0.5 * H * DQ0(I)
       END DO
       CALL GRKDMP(CHARGE, M0, QT, DQT)
-D     WRITE(*,*) 'QT = ', QT
-D     WRITE(*,*) 'DQT = ', DQT
+C     WRITE(*,*) 'QT = ', QT
+C     WRITE(*,*) 'DQT = ', DQT
       DO I = 1, 6
          QT(I) = Q0(I) + 0.5 * H * DQT(I)
       END DO
       CALL GRKDMP(CHARGE, M0, QT, DQM)
-D     WRITE(*,*) 'QT = ', QT
-D     WRITE(*,*) 'DQM = ', DQM
+C     WRITE(*,*) 'QT = ', QT
+C     WRITE(*,*) 'DQM = ', DQM
       DO I = 1, 6
          QT(I) = Q0(I) + H * DQM(I)
          DQM(I) = DQT(I) + DQM(I)
       END DO
       CALL GRKDMP(CHARGE, M0, QT, DQT)
-D     WRITE(*,*) 'QT = ', QT
-D     WRITE(*,*) 'DQM = ', DQM
-D     WRITE(*,*) 'DQT = ', DQT
+C     WRITE(*,*) 'QT = ', QT
+C     WRITE(*,*) 'DQM = ', DQM
+C     WRITE(*,*) 'DQT = ', DQT
       DO I = 1, 6
          Q(I) = Q0(I) + (H/6.0) * (DQ0(I) + DQT(I) + 2.0 * DQM(I))
       END DO
-D     WRITE(*,*) 'Q = ', Q
+C     WRITE(*,*) 'Q = ', Q
 *
 * *** Return the answer in GEANT standard form.
 *
@@ -154,6 +154,6 @@ C.    ******************************************************************
 * dp(i)/ds = const * m * g * B(i) / p
       DO I = 4, 6
          DQ(I) = C * K * M * CHARGE * B(I-3) / P
-D        WRITE(*,*) 'm, charge, B, P = ', M, CHARGE, B(I-3), P
+C        WRITE(*,*) 'm, charge, B, P = ', M, CHARGE, B(I-3), P
       END DO
       END
