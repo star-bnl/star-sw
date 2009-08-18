@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.108 2009/08/12 13:42:38 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.109 2009/08/18 13:05:23 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -152,10 +152,17 @@
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
     $AGETOFLAGS    = "-V 1";
-    $LIBG2C        = `gcc -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
-    chomp($LIBG2C);
     $LIBSTDC       = `gcc -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
+
+    if ( $G77 eq "gfortran" ){
+	$LIBG2C = `gcc -print-file-name=libgfortran.a | awk '{ if (\$1 != "libgfortran.a") print \$1}'`;
+    } else {
+	$LIBG2C = `gcc -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
+    }
+    chomp($LIBG2C);
+
+
     $KUIP          = $CERN_ROOT . "/bin/kuipc";
     if ( !$ROOT )       { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOT_LEVEL ) { print "ROOT_LEVEL has to be defined\n"; exit 1;}
@@ -498,8 +505,9 @@
         $THREAD    = "-lpthread";
         $CRYPTLIBS = "-lcrypt";
 
-	if ($CXX_VERSION >= 4){
-	    # Either a version 4 issue but made thisfor Mac
+	if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/macintosh/ ){
+	    # Either a version 4 issue but made this for Mac
+	    # 2009/08 -> not an issue with gcc4
 	    $SYSLIBS   = "-lm -ldl -dynamiclib -single_module ";
 	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl  -dynamiclib -single_module ";
 	} else {
@@ -517,11 +525,17 @@
 	    $FFLAGS  = $G77FLAGS;
 	    $FEXTEND = $G77EXTEND;
 	}
-	if ($CXX_VERSION >= 4){
-	    # Same coment, not sure if V4 or a Mac issue
-	    $F77LIBS = " -lg2c";
+
+	if ( $G77 eq "gfortran"){
+	    $F77LIBS = " -lgfortran";
 	} else {
-	    $F77LIBS = " -lg2c -lnsl";
+	    if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/macintosh/ ){
+		# Same comment, not sure if V4 or a Mac issue
+		# 2009/08 -> not an issue with gcc4
+		$F77LIBS = " -lg2c";
+	    } else {
+		$F77LIBS = " -lg2c -lnsl";
+	    }
 	}
         $FLIBS  .= $F77LIBS;
 
@@ -643,14 +657,14 @@
 	}
 
 	# Coin3D - WHAT??! JL 2009 
-	if ( !defined($IVROOT)) {
-	    if ($QT_VERSION==4) {
-		$IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package 
-	    } else {
-		$IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
-	    }
-	    print "*** ATTENTION *** IVROOT $IVROOT\n";
-	}
+	#if ( !defined($IVROOT)) {
+	#    if ($QT_VERSION==4) {
+	#	$IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package 
+	#    } else {
+	#	$IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
+	#    }
+	#    print "*** ATTENTION *** IVROOT $IVROOT\n";
+	#}
 	if ( defined($IVROOT) &&  -d $IVROOT) {
 	    if (-e $IVROOT . "/bin/coin-config") {
 		$COIN3DIR     = $IVROOT;
