@@ -1,7 +1,10 @@
 /*
-** $Id: dblib.cxx,v 1.5 2005/10/12 21:26:06 potekhin Exp $
+** $Id: dblib.cxx,v 1.6 2009/08/18 19:23:20 jeromel Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.6  2009/08/18 19:23:20  jeromel
+** string.h needed for gcc 4 (??)
+**
 ** Revision 1.5  2005/10/12 21:26:06  potekhin
 ** Comment out the previous "fix", as we now have a better solution
 ** by excluding "-ansi" in the branch of Cons specific for this Linux version
@@ -166,6 +169,9 @@
 #        include <string>
 #        include <sstream>
          using namespace std;
+#       if (__GNUC__ >= 4)
+#           include <string.h>
+#       endif
 int my_query(ostringstream *Query);
 #else //.h for gcc-2 and SunOS
 #        include <stdio.h>
