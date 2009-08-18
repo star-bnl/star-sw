@@ -46,8 +46,8 @@ if ($LD eq 'gcc' && $CXX_VERSION < 4 ) {
     $LDFLAGS = "-Wl,-Bstatic";
 }
 my $Libraries = $CERNLIBS .  " " . $FLIBS . " " . $CLIBS;
-if ($FC eq 'g77') { 
-  if ($env->{CXX_VERSION} >= 3) {$Libraries .= " -lfrtbegin";}
+if ($FC eq 'g77' || $FC eq "gfortran") { 
+  if ($env->{CXX_VERSION} == 3) {$Libraries .= " -lfrtbegin";}
   $Libraries .= " " . $env->{LIBG2C};
 }
 #if ($FC eq 'ifort') { 
