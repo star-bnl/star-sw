@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.196 2009/08/14 22:38:06 perev Exp $
+* $Id: geometry.g,v 1.197 2009/08/18 17:29:13 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.197  2009/08/18 17:29:13  perev
+* F.Geurts TOF for run 9
+*
 * Revision 1.196  2009/08/14 22:38:06  perev
 * Remove Cone fr upgr16 (Jan request)
 *
@@ -994,6 +997,9 @@ replace [exe BTOF66;] with [;" X.Dong";BTOF=on;
 replace [exe BTOFb6;] with [;" X.Dong";BTOF=on;
                             BtofConfig=11; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
+replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=7 " call btofgeo7 ";]
+
+
 
 replace [exe TPCE00;] with [;"New version of the TPC backplane "; TpceConfig = 1;]
 replace [exe TPCE01;] with [;"New version of the TPC backplane "; TpceConfig = 1;
@@ -1204,11 +1210,12 @@ replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 *********   y2009   ***
 replace [exe y2009;] with [;
 { "y2009 baseline: much more detailed TPC (thnx YF)"
-    exe SCON13;exe TPCE04;exe BTOF66;exe CALB02;exe ECAL31;
+    exe SCON13;exe TPCE04;exe BTOFc7;exe CALB02;exe ECAL31;
     exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
     exe PHMD02;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
     exe PIPE14;
 };]
+
 
 !//______________________________________________________________________________
 replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
@@ -3211,7 +3218,7 @@ If LL>0
       if(Itof.eq.2) call btofgeo2
       if(Itof.eq.4) call btofgeo4
       if(Itof.eq.5) call btofgeo5
-      if(Itof.eq.6) call btofgeo6       !X.Dong
+      if(Itof.ge.6) call btofgeo6       !X.Dong + F.Geurts
    }
 
    Call AGSFLAG('SIMU',1)

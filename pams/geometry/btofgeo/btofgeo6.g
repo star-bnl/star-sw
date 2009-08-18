@@ -1,7 +1,10 @@
-* $Id: btofgeo6.g,v 1.6 2009/01/03 23:03:33 perev Exp $
+* $Id: btofgeo6.g,v 1.7 2009/08/18 17:26:17 perev Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo6.g,v $
+* Revision 1.7  2009/08/18 17:26:17  perev
+* F.Geurts TOF for run 9
+*
 * Revision 1.6  2009/01/03 23:03:33  perev
 * BtofConfig=6 in 2008a,2009
 *
@@ -119,7 +122,7 @@ Module  BTOFGEO6 is the Geometry of Barrel Trigger / Time Of Flight system
 *
 *   Data Base interface staff:
       Structure BTOG { Version, Rmin, Rmax, dz, X0, Z0, choice,
-                       posit1(2), posit2, posit3, posit4(5), dphi1(5)}
+                       posit1(2), posit2, posit3, posit4(5), dphi1(5),posit5(120)}
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -208,6 +211,19 @@ Module  BTOFGEO6 is the Geometry of Barrel Trigger / Time Of Flight system
 	 posit3    = 33        ! TOFr tray position for choice 8,9,10 -> run-5,6,7 posn
          posit4    = {16,17,18,19,20}  			! TOFr8 tray positions for choice 11,12 -> run 8 east and west trays
          dphi1     = {0.24, 0.17, 0.15, 0.08, 0.02} 	! TOFr8 tray phi alignment parameter
+
+         posit5    = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+                      1, 1, 0, 0, 1, 1, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+                      1, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+                      1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+                      1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 
+                      1, 1, 1, 1, 1, 1, 1, 1, 1, 1}   ! TOF run-9 tray map (west=1-60, east=61-120)
 *
       Fill TRAY ! general tray stats        
          Height    = 11.43      ! tray height(8.128+3.302)
@@ -562,13 +578,16 @@ Block BTOF is the whole CTF system envelope
 	  if (btog_choice ==  9) print *,' TOF: btog_choice=9: This is the Run-VI geometry...'
 	  if (btog_choice == 10) print *,' TOF: btog_choice=10: This is the Run-VII geometry...'
 	  if (btog_choice == 11) print *,' TOF: btog_choice=11: This is the Run-VIII geometry...'
+	  if (btog_choice == 12) print *,' TOF: btog_choice=12: This is the Run-IX geometry...'
 
-      choice = 1                                     ! ctb
-      if (btog_choice == 2) choice=btog_choice       ! full tofp
-      if (btog_choice == 6) choice=btog_choice       ! full tofr
+      choice = 1                           ! ctb
+      if (btog_choice == 2)  choice= 2     ! full tofp
+      if (btog_choice == 6)  choice= 6     ! full tofr
+      if (btog_choice == 12) choice=12     ! run-9 selection (west)
       print *,' Positioning West Barrel, choice=',choice
       Create and Position BTOH  z=+btog_dz/2+btog_Z0   alphay=180   ! West barrel
-      choice=btog_choice                   
+      choice = btog_choice                   
+      if (btog_choice == 12) choice=-12    ! run-9 selection (east)
       print *,' Positioning East Barrel, choice=',choice
       Create and Position BTOH  z=-btog_dz/2-btog_Z0                 ! East barrel
 EndBlock
@@ -584,6 +603,7 @@ Block BTOH is a half of trigger system (west-east)
 
       ! tof=0 means ctb, tof=1 means TOFp, tof=2 means TOFr, tof=3 means TOFr', tof=4 means TOFr5 '
       ! tof=5 means TOFr6 tray (not active), tof=6 means TOFr7 tray, tof=7 means TOFr8++ tray
+      ! tof=-1 means no tray (Run 9)
       do is=1,60
          tof=0		                                !-> all CTB for choice=1                     
          if (choice==2)                       tof=1	!-> all TOFp
@@ -602,6 +622,11 @@ Block BTOH is a half of trigger system (west-east)
          if (choice==11 & is==btog_posit4(3)) tof=7	!-> Run-8 (5 TOFr8 trays)
          if (choice==11 & is==btog_posit4(4)) tof=7 	!-> Run-8 (5 TOFr8 trays)
          if (choice==11 & is==btog_posit4(5)) tof=7 	!-> Run-8 (5 TOFr8 trays)
+
+         if (choice==12  & btog_posit5(is)   ==1) tof= 7 !-> Run-9:TOFr8 tray (west)
+         if (choice==12  & btog_posit5(is)   ==0) tof=-1 !-> Run-9: no tray (west)
+         if (choice==-12 & btog_posit5(is+60)==1) tof= 7 !-> Run-9: TOFr8 tray (east)
+         if (choice==-12 & btog_posit5(is+60)==0) tof=-1 !-> Run-9: no tray (east)
 
 *         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
 *         Create and Position BSEC  alphaz = 102+6*is
@@ -647,9 +672,13 @@ Block BTRA is one full tray plus supporting structure for CTB/TOF
       Attribute BTRA      seen=1   colo=2
       Shape     BOX       dx=(tray_SupFullH+tray_height+tray_StripT)/2,
                           dy=tray_Width/2
-      Create and Position BXTR     X=(tray_SupFullH+tray_StripT)/2,
+* --- skip creating a tray if tof==-1
+      if(tof!=-1) then
+       Create and Position BXTR     X=(tray_SupFullH+tray_StripT)/2,
                                    z=(btog_dz-tray_length)/2
 *      print *,' position BXTR ...'
+      endif
+* --- always create the support structure
       Create and Position BUND     X=-(tray_height+tray_StripT)/2,
                                    z=(btog_dz-tray_SupLen)/2 
 EndBlock
