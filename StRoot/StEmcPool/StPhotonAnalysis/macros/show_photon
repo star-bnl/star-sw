@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export ANALYSIS_DIR="${0%/*}"
+if [[ -f "./.analysis.cfg.sh" ]]
+then
+    source "./.analysis.cfg.sh"
+fi
+
+export OPTIONS=""
+
+root ${OPTIONS} "load_libs.C" "style.C" "show_photon.C"
