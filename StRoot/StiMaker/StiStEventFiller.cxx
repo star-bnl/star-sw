@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.85 2009/03/16 13:50:14 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.86 2009/08/19 21:27:57 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.86  2009/08/19 21:27:57  perev
+ * Account time of flight for StiPulls
+ *
  * Revision 2.85  2009/03/16 13:50:14  fisyak
  * Move out all Sti Chairs into StDetectorDb
  *
@@ -1289,6 +1292,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
     inf = node->getInfo();
     if (!inf)	return;
   }
+  double timeFlight = node->getTime();
   const StiNodeErrs &mFE = (inf)? inf->mPE : node->fitErrs();
   const StiNodePars &mFP = (inf)? inf->mPP : node->fitPars(); 
   StiHitErrs  mHrr;
@@ -1301,8 +1305,8 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   aux.iHitCand = node->getIHitCand();
   if (!aux.nHitCand)  aux.nHitCand=1;
   aux.lXHit = stiHit->x();
-  aux.lYHit = stiHit->y();
-  aux.lZHit = stiHit->z();
+  aux.lYHit = stiHit->y(timeFlight);
+  aux.lZHit = stiHit->z(timeFlight);
   aux.lYHitErr = sqrt(mHrr.hYY);
   aux.lZHitErr = sqrt(mHrr.hZZ);
   aux.lHitEmx[0] = mHrr.hYY;
@@ -1344,7 +1348,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   float F[2][2];
 
 //		global Hit
-  x = stiHit->x(); y = stiHit->y(); z = stiHit->z();
+  x = stiHit->x(); y = stiHit->y(timeFlight); z = stiHit->z(timeFlight);
   r = sqrt(x*x+y*y);
 
   aux.gRHit = r;
