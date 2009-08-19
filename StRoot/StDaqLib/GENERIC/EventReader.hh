@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.22 2009/01/08 22:14:49 fine Exp $
+ * $Id: EventReader.hh,v 1.23 2009/08/19 19:06:37 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.23  2009/08/19 19:06:37  jeromel
+ * Basic fix for gcc 4 (explicit .h include needed)
+ *
  * Revision 1.22  2009/01/08 22:14:49  fine
  * teach EventReader tp provide the new daqReader pointer
  *
@@ -120,10 +123,15 @@
 using std::string;
 #endif
 
+#if (__GNUC__ >= 4)
+#   include <string.h>
+#   include <stdlib.h>
+#endif
+
 #include "RecHeaderFormats.hh"
 #include "Error.hh"
 
-#define TRUE 1
+#define TRUE  1
 #define FALSE 0
 
 
