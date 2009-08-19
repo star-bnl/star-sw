@@ -549,7 +549,6 @@ endblock
 Block ESEC is a single EM section
       Attribute ESEC   seen=1    colo=1 serial=filled
       Material Air
-      Material CAir   Isvol=0
       Medium standard
 *
       Shape     CONS  dz=secwid/2,  
@@ -611,7 +610,6 @@ Endblock
 Block EMGT is a megatile EM section
       Attribute EMGT   seen=1  colo=1 
       Material Air
-      Material CAir Isvol=0
       Medium standard
 *
       Shape     CONS  dz=mgt/2,
@@ -727,7 +725,6 @@ endblock
 Block ELED  is lead absorber Plate 
 *
       Material  Lead
-      Material  CLead Isvol=0
       Attribute ELED   seen=1   colo=4  fill=1
       Shape     TUBS  dz=emcs_Pbplate/2,  
                 rmin=(current)*Tan_Low,
@@ -758,7 +755,6 @@ endblock
 Block EALP  is ALuminium  Plate in calorimeter cell
 *
       Material  Aluminium
-      Material  CAluminium   Isvol=0
       Attribute EALP   seen=1  colo=1
       Shape     TRD1   dy=emcs_AlinCell/2  dz=(RTop-RBot)/2
       Call GSTPAR (ag_imed,'CUTGAM',0.00001)
@@ -769,7 +765,7 @@ endblock
 * ----------------------------------------------------------------------------
 Block ESPL  is one of the Shower max  PLanes
 *
-      Material  Air Isvol=0
+      Material  Air 
       Attribute ESPL   seen=1   colo=3                  !  blue
       Shape     TUBS   dz=SecWid/2,
                 rmin=section*Tan_Low-1.526,
