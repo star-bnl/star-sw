@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.123 2009/04/23 02:39:03 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.124 2009/08/19 21:19:37 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.124  2009/08/19 21:19:37  perev
+ * getTime() is a const now
+ *
  * Revision 2.123  2009/04/23 02:39:03  perev
  * GetTime defence sin <1 added
  *
@@ -2163,7 +2166,8 @@ void StiKalmanTrackNode::setUntouched()
   mUnTouch.set(mPP(),mPE());
 }
 //________________________________________________________________________________
-double StiKalmanTrackNode::getTime() {
+double StiKalmanTrackNode::getTime() const
+{
   static const double smax = 1e3; 
   double time = 0;
   if (! _laser) {
