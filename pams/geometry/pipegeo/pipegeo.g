@@ -3,9 +3,12 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
 
-* $Id: pipegeo.g,v 1.14 2007/11/15 22:37:14 perev Exp $
+* $Id: pipegeo.g,v 1.15 2009/08/19 22:47:24 perev Exp $
 *
 * $Log: pipegeo.g,v $
+* Revision 1.15  2009/08/19 22:47:24  perev
+* Jan: thinner beam pipe for upgr16
+*
 * Revision 1.14  2007/11/15 22:37:14  perev
 * MLI=3MIL mylar + 1.5MIL alum defined
 *
@@ -118,36 +121,7 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
 
    FILL PIPG    !  Beam Pipe data
       config   =  1     ! both material and geo params
-      BeInnR    = 3.9   ! Berillium section inner radius
-      BeOutR    = 4.0   ! Berillium section outer radius
-      BeLeng    = 76.2  ! Berillium section half length
       material  ='IRON' ! material is steel
-      S1InnR    = 3.875 ! first Aluminum section inner radius
-      S1OutR    = 4.0   ! first Aluminum section outer radius
-      S1Leng    = 153.4 ! first Aluminum section half length
-      S2InnR    = 3.875 ! second Aluminum section inner radius
-      S2OutR    = 4.00  ! second Aluminum section outer radius
-      S2Leng    = 18.0  ! second Aluminum section half length
-      S3InnR    = 3.875 ! Transition Stub Aluminum section inner radius
-      S3OutR    = 4.0   ! Transition Stub Aluminum section outer radius
-      S3Leng    = 1.0   ! Transition Stub Aluminum section half length
-      S4InnR    = 6.20  ! Large OD Aluminum section inner radius
-      S4OutR    = 6.35  ! Large OD Aluminum section outer radius
-      S4Leng    = 150.0 ! Large OD Aluminum section half length
-      ConeLen   = 12.5  ! half length of the Bell Reducer Cone
-      Flange1T  = 2.0   ! flange SET half thickness
-      Flange1R  = 5.85  ! flange outer radius
-      RibNum    = 8     ! number of Ribs
-      RibSpa    = 1.75  ! spacing between Ribs
-      RibThk    = 0.05  ! Rib half thickness
-      RibOutR   = 4.8   ! Rib Outer Radius
-      RibCent   = 454.5 ! Rib Set center 
-      WrpInnR   = 4.0   ! inner radius of beampipe multi layer insulation
-      WrpOutR   = 4.0+WrpThk 		! outer radius of beampipe multi layer insulation
-      WrpLeng   = 300   		! length of beampipe multi layer insulation
-      SldInnR   = 4.0+WrpThk 		! inner radius of SVT beam pipe shield
-      SldOutR   = 4.0+WrpThk+SldThk	! outer radius of SVT beam pipe shield
-      SldLeng   = 56    		! length of SVT beam pipe shield
 
    endfill
 
@@ -163,34 +137,7 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       config   =  4     ! both material and geo params
       BeInnR    = 1.374 ! Berillium section inner radius
       BeOutR    = 1.450 ! Berillium section outer radius
-      BeLeng    = 76.2  ! Berillium section half length
       material  ='ALUM' ! pipe main section material 
-      S1InnR    = 3.875 ! first Aluminum section inner radius
-      S1OutR    = 4.0   ! first Aluminum section outer radius
-      S1Leng    = 153.4 ! first Aluminum section half length
-      S2InnR    = 3.875 ! second Aluminum section inner radius
-      S2OutR    = 4.00  ! second Aluminum section outer radius
-      S2Leng    = 18.0  ! second Aluminum section half length
-      S3InnR    = 3.875 ! Transition Stub Aluminum section inner radius
-      S3OutR    = 4.0   ! Transition Stub Aluminum section outer radius
-      S3Leng    = 1.0   ! Transition Stub Aluminum section half length
-      S4InnR    = 6.20  ! Large OD Aluminum section inner radius
-      S4OutR    = 6.35  ! Large OD Aluminum section outer radius
-      S4Leng    = 150.0 ! Large OD Aluminum section half length
-      ConeLen   = 12.5  ! half length of the Bell Reducer Cone
-      Flange1T  = 2.0   ! flange SET half thickness
-      Flange1R  = 5.85  ! flange outer radius
-      RibNum    = 8     ! number of Ribs
-      RibSpa    = 1.75  ! spacing between Ribs
-      RibThk    = 0.05  ! Rib half thickness
-      RibOutR   = 4.8   ! Rib Outer Radius
-      RibCent   = 454.5 ! Rib Set center 
-      WrpInnR   = 4.0   ! inner radius of beampipe multi layer insulation
-      WrpOutR   = 4.0+WrpThk 		! outer radius of beampipe multi layer insulation
-      WrpLeng   = 300   		! length of beampipe multi layer insulation
-      SldInnR   = 4.0+WrpThk 		! inner radius of SVT beam pipe shield
-      SldOutR   = 4.0+WrpThk+SldThk	! outer radius of SVT beam pipe shield
-      SldLeng   = 56    		! length of SVT beam pipe shield
 
    endfill
 *
@@ -199,35 +146,18 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       config   =  5     ! both material and geo params
       BeInnR    = 1.374 ! Berillium section inner radius
       BeOutR    = 1.424 ! Berillium section outer radius
-      BeLeng    = 76.2  ! Berillium section half length
-      material  ='ALUM' ! pipe main section material 
-      S1InnR    = 3.875 ! first Aluminum section inner radius
-      S1OutR    = 4.0   ! first Aluminum section outer radius
-      S1Leng    = 153.4 ! first Aluminum section half length
-      S2InnR    = 3.875 ! second Aluminum section inner radius
-      S2OutR    = 4.00  ! second Aluminum section outer radius
-      S2Leng    = 18.0  ! second Aluminum section half length
-      S3InnR    = 3.875 ! Transition Stub Aluminum section inner radius
-      S3OutR    = 4.0   ! Transition Stub Aluminum section outer radius
-      S3Leng    = 1.0   ! Transition Stub Aluminum section half length
-      S4InnR    = 6.20  ! Large OD Aluminum section inner radius
-      S4OutR    = 6.35  ! Large OD Aluminum section outer radius
-      S4Leng    = 150.0 ! Large OD Aluminum section half length
-      ConeLen   = 12.5  ! half length of the Bell Reducer Cone
-      Flange1T  = 2.0   ! flange SET half thickness
-      Flange1R  = 5.85  ! flange outer radius
-      RibNum    = 8     ! number of Ribs
-      RibSpa    = 1.75  ! spacing between Ribs
-      RibThk    = 0.05  ! Rib half thickness
-      RibOutR   = 4.8   ! Rib Outer Radius
-      RibCent   = 454.5 ! Rib Set center 
-      WrpInnR   = 4.0   ! inner radius of beampipe multi layer insulation
-      WrpOutR   = 4.0+WrpThk 		! outer radius of beampipe multi layer insulation
-      WrpLeng   = 300   		! length of beampipe multi layer insulation
-      SldInnR   = 4.0+WrpThk 		! inner radius of SVT beam pipe shield
-      SldOutR   = 4.0+WrpThk+SldThk	! outer radius of SVT beam pipe shield
-      SldLeng   = 56    		! length of SVT beam pipe shield
-
+   endfill
+!//  upgr16.Jan 
+!//  based on recent mail from Fleming (startup-hn) this is the answer:
+!//    the new beam-pipe for HFT is supposed to be ID 2 cm and have a 
+!//    thickness of 0.76 mm. 
+!//  Jan correction:
+!//   please use :  BeInnR=2.00cm, BeOutR=2.076cm .
+!//Where R means Radius.
+   FILL PIPG    !  Beam Pipe data
+      config   =  6       ! both material and geo params
+      BeInnR    = 2.0     ! Berillium section inner radius (Jan upgr16)
+      BeOutR    = 2.076   ! Berillium section outer radius
    endfill
 *
 *
