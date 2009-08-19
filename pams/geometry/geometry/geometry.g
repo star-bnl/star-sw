@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.197 2009/08/18 17:29:13 perev Exp $
+* $Id: geometry.g,v 1.198 2009/08/19 22:48:11 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.198  2009/08/19 22:48:11  perev
+* Jan: thinner beam pipe for upgr16
+*
 * Revision 1.197  2009/08/18 17:29:13  perev
 * F.Geurts TOF for run 9
 *
@@ -1269,9 +1272,8 @@ replace [exe UPGR16;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
                      SISD=on;
                      SisdConfig = 65;
 * careful! Achtung!
-                   PipeConfig=4;   " provisional"
-                   pipeFlag=-1; !   " Simplest.Gerrit"
-                   PipeFlag = 1;    "pipe wrap only"
+                   PipeConfig=6;   " thinner pipe"
+                   PipeFlag = 0;    "no wrap,no shild"
 
                    PIXL=on;         " put the pixel detector in"
                    PixlConfig=-1;   " Simplest.Gerrit"
