@@ -1,6 +1,9 @@
-* $Id: fpdmgeo.g,v 1.7 2009/08/18 17:28:02 perev Exp $
+* $Id: fpdmgeo.g,v 1.8 2009/08/19 22:11:05 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo.g,v $
+* Revision 1.8  2009/08/19 22:11:05  perev
+* Jason. Remove redundant Isvol=0
+*
 * Revision 1.7  2009/08/18 17:28:02  perev
 * J.Webb Air is not an Iron fix
 *
@@ -397,7 +400,6 @@ endblock
 Block FPSE is a single EM section
       Attribute FPSE   seen=1  colo=1 
       Material Air
-      Material CAir Isvol=0
       Medium standard
 *
       Shape     CONS  dz=secwid/2,  
@@ -536,7 +538,6 @@ endblock
 Block FLED  is lead absorber Plate 
 *
       Material  Lead
-      Material  CLead Isvol=0
       Attribute FLED   seen=1   colo=3  fill=1			! green
       Shape     TRD1   dy=fmcs_Plate/2  dz=(RTop-RBot)/2
       Call GSTPAR (ag_imed,'CUTGAM',0.00008)
@@ -742,7 +743,6 @@ Endblock
 Block FALP  is ALuminium  Plate in shower max 
 *
       Material  Aluminium
-      Material  CAluminium   Isvol=0
       Attribute FALP   seen=1  colo=1
       Shape     CONS   dz=msecwd/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
