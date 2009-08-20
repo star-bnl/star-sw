@@ -3,9 +3,12 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
 
-* $Id: pipegeo.g,v 1.15 2009/08/19 22:47:24 perev Exp $
+* $Id: pipegeo.g,v 1.16 2009/08/20 16:48:21 perev Exp $
 *
 * $Log: pipegeo.g,v $
+* Revision 1.16  2009/08/20 16:48:21  perev
+* Remove obsolete config=3
+*
 * Revision 1.15  2009/08/19 22:47:24  perev
 * Jan: thinner beam pipe for upgr16
 *
@@ -125,12 +128,12 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
 
    endfill
 
-* some seriously obsolete config
-   FILL PIPG    !  Beam Pipe data
-      config   = 3      ! both material and geo params
-      BeLeng   = 0      ! Berillium section half length
-      S1Leng   = 230    ! first Aluminum section half length
-   endfill
+!// * some seriously obsolete config
+!//    FILL PIPG    !  Beam Pipe data
+!//       config   = 3      ! both material and geo params
+!//       BeLeng   = 0      ! Berillium section half length
+!//       S1Leng   = 230    ! first Aluminum section half length
+!//    endfill
 
 * The new pipe according to Kai
    FILL PIPG    !  Beam Pipe data
