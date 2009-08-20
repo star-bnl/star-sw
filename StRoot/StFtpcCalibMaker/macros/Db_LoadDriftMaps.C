@@ -1,6 +1,6 @@
 void Db_LoadDriftMaps(char* dirname, char* timestamp, char* flavor){
 
-//  Use this macro to load the 5 sets ofthe 4  FTPC "flavored" drift map tables 
+//  Use this macro to load the 5 sets of the 4  FTPC "flavored" drift map tables 
 //  (ftpcDeflection,ftpcVDrift,ftpcdDeflectiondP,ftpcdVDriftdP)
 //  to the Calibrations_ftpc database
 //
