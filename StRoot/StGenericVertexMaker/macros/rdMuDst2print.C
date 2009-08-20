@@ -1,12 +1,14 @@
 class StChain;
 class StMuEmcCollection;
+class StMuTriggerIdCollection;
 StChain *chain=0;
 
 
+
 int rdMuDst2print(
-	  char* file    = "st_physics_9069005_raw_1010002.MuDst.root",
+		  char* file    = "st_W_10103041_raw_7170001.MuDst.root",
 	  int nEve=3,
-	  char* inDir   = "/star/data05/scratch/balewski/bug3c/"
+	  char* inDir   = "/star/data35/reco/production2009_500Gev_c/ReversedFullField/P09ib/2009/103/10103041/"
 	  )
 { 
   Int_t nFiles  = 1;
@@ -57,15 +59,16 @@ int rdMuDst2print(
 
     StEventInfo &info=muEve->eventInfo();
     int nPrimV=muMk->muDst()->numberOfPrimaryVertices();
-    StMuTriggerIdCollection &tic=muEve->triggerIdCollection();
+    StMuTriggerIdCollection *tic=&(muEve->triggerIdCollection());
 
     int trigID=96211;
-    bool fired=tic.nominal().isTrigger(trigID);
+    bool fired=tic->nominal().isTrigger(trigID);
   
     Int_t nGlobTrAll=muMk->muDst()->GetNGlobalTrack();
   
     //assert(tic.nominal().isTrigger(127271)==0);
-    
+    printTrig(tic);
+
     if(eventCounter%1==0) {
       printf("ieve=%d  eventID %d nPrimV=%d  nGlobTrAll=%d =============\n", eventCounter,info.id(),nPrimV,nGlobTrAll);
       // printf("TrigID=%d fired=%d\n",trigID,fired);
@@ -101,7 +104,7 @@ int rdMuDst2print(
 
     } 
 
-    // continue;   // do NOT print prim tracks for each vertex  
+     continue;   // do NOT print prim tracks for each vertex  
 
     if(0)for(iv=0;iv<nPrimV;iv++) {
       printf("  Prim tracks belonging to %d prim vertex:\n",iv);      
@@ -288,3 +291,16 @@ printBEsmd( StMuEmcCollection* emc ) {
 
   printf("   --> %d BSMD-E & %d BSMD-P  hits with ADC>thr\n",n1,n2);
 }
+
+//--------------------------------------
+void printTrig(StMuTriggerIdCollection *tic){
+ 
+  const StTriggerId &l1=tic->l1();
+  vector<unsigned int> idL=l1.triggerIds();
+  printf("nTrig=%d, trigID: ",idL.size());
+  for(unsigned int i=0;i<idL.size(); i++){
+    printf("%d, ",idL[i]);
+  }
+  printf("\n");
+}
+
