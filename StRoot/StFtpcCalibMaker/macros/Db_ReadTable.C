@@ -1,7 +1,7 @@
-void Db_ReadTable(char* tableName, char* timestamp){
+void Db_ReadTable(char* domainName, char* tableName, char* timestamp){
 
-//  Use this macro to read an FTPC table from the Calibrations_ftpc database 
-//  and write it out into your working directory
+//  Use this macro to read the FTPC table "tableName" from the "domainName" database, 
+//  Calibrations_ftpc or Geometry_ftpc, and write it out into your working directory
 //
 //   Don't forget to
 //   
@@ -9,7 +9,7 @@ void Db_ReadTable(char* tableName, char* timestamp){
 //
 //   For example:
 //   
-//         root4star -b -q 'Db_ReadTable.C("ftpcGas","2008-05-01 00:00:00")'
+//         root4star -b -q 'Db_ReadTable.C("Calibrations_ftpc","ftpcGas","2008-05-01 00:00:00")'
 
   gSystem->Load("St_base"); // needed for StDbModifier
   gSystem->Load("StChain");
@@ -20,7 +20,7 @@ void Db_ReadTable(char* tableName, char* timestamp){
   gSystem->Load("StDbLib");                                                     
   StDbManager* dbManager=StDbManager::Instance();
   StDbModifier* modify=new StDbModifier();
-    modify->SetDbName("Calibrations_ftpc");
+    modify->SetDbName(domainName);
     modify->SetDateTime(timestamp);
     modify->SetFlavor("ofl");
                                                                                 
@@ -31,7 +31,7 @@ void Db_ReadTable(char* tableName, char* timestamp){
     modify->SetOutputFileName(fname.Data());
     modify->ReadDataFromDB();
 
-    cout<<"Wrote out Calibrations_ftpc database table "<<fname.Data()<<endl;
+    cout<<"Wrote out "<<domainName<<" database table "<<fname.Data()<<endl;
  
 }
 

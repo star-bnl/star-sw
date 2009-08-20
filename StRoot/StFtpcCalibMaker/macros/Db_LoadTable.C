@@ -1,7 +1,7 @@
-void Db_LoadTable(char* tableName, char* timestamp){
+void Db_LoadTable(char* domainName, char* tableName, char* timestamp){
 
-//  Use this macro to load an FTPC table from your working directory 
-//  into the Calibrations_ftpc database 
+//  Use this macro to load the FTPC table "tableName" from your working directory 
+//  into the "domainName" database, Calibrations_ftpc or Geometry_ftpc 
 //
 //   Don't forget to
 //   
@@ -9,7 +9,7 @@ void Db_LoadTable(char* tableName, char* timestamp){
 //
 //   For example:
 //   
-//         root4star -b -q 'Db_LoadTable.C("ftpcGas","2008-05-01 00:00:00")'
+//         root4star -b -q 'Db_LoadTable.C("Calibrations_ftpc","ftpcGas","2008-05-01 00:00:00")'
 
   gSystem->Load("St_base"); // needed for StDbModifier
   gSystem->Load("StChain");
@@ -20,7 +20,7 @@ void Db_LoadTable(char* tableName, char* timestamp){
   gSystem->Load("StDbLib");                                                     
   StDbManager* dbManager=StDbManager::Instance();
   StDbModifier* modify=new StDbModifier();
-    modify->SetDbName("Calibrations_ftpc");
+    modify->SetDbName(domainName);
     modify->SetDateTime(timestamp);
     modify->SetFlavor("ofl");
                                                                                 
@@ -32,7 +32,7 @@ void Db_LoadTable(char* tableName, char* timestamp){
     modify->SetInputFileName(fname.Data());
     modify->WriteDataToDB();
 
-    cout<<"Loaded "<<fname.Data()<<" into the Calibrations_ftpc database"<<endl;
+    cout<<"Loaded "<<fname.Data()<<" into the "<<domainName<<" database"<<endl;
  
 }
 
