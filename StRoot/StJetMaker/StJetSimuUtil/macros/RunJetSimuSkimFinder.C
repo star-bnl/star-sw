@@ -4,8 +4,8 @@
 void RunJetSimuSkimFinder(const int nevents = 2000,
                           const char* mudstfile = "/star/data47/reco/pp200/pythia6_410/15_25gev/cdf_a/y2006c/gheisha_on/p07ic/rcf1307_01_2000evts.MuDst.root",
                           const char* geantfile = "/star/data47/reco/pp200/pythia6_410/15_25gev/cdf_a/y2006c/gheisha_on/p07ic/rcf1307_01_2000evts.geant.root",
-			  const char* outfile = "Jets_pt15_25_01.root",
-			  const char* skimFile = "Skim_pt15_25_01.root")
+			  const char* jetfile = "Jets_pt15_25_01.root",
+			  const char* skimfile = "Skim_pt15_25_01.root")
 {
   // Load shared libraries
   gROOT->Macro("loadMuDst.C");
@@ -106,7 +106,7 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   StMCAsymMaker* asym = new StMCAsymMaker("MCAsym");
 
   // Get skimMaker
-  StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker",muDstMaker,skimFile);
+  StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker",muDstMaker,skimfile);
   //skimEventMaker->addSimuTrigger(127501);
   //skimEventMaker->addSimuTrigger(137501);
   //skimEventMaker->addSimuTrigger(137213);  
@@ -121,7 +121,7 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   StPythiaFourPMaker* pythiaFourPMaker = new StPythiaFourPMaker;
   
   // Instantiate the JetMaker
-  StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker",muDstMaker,outfile);
+  StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker",muDstMaker,jetfile);
   
   StppAnaPars* anapars = new StppAnaPars();
   anapars->setFlagMin(0); //track->flag() > 0
