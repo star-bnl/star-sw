@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.198 2009/08/19 22:48:11 perev Exp $
+* $Id: geometry.g,v 1.199 2009/08/21 18:33:01 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.199  2009/08/21 18:33:01  perev
+* PMD off for y2009
+*
 * Revision 1.198  2009/08/19 22:48:11  perev
 * Jan: thinner beam pipe for upgr16
 *
@@ -1201,7 +1204,7 @@ replace [exe y2007h;] with ["y2007g + TPC y2009"
 replace [exe y2008;] with [;
 { "y2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now"
     exe SCON02;exe TPCE03;exe BTOFb6;exe CALB02;exe ECAL31;exe BBCMon;
-    exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;exe PHMD02;exe SISDof;
+    exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;exe PHMDof;exe SISDof;
     exe FTRO01;exe MUTD03;exe CAVE04;exe PIPE14;
 };]
 
@@ -1215,7 +1218,7 @@ replace [exe y2009;] with [;
 { "y2009 baseline: much more detailed TPC (thnx YF)"
     exe SCON13;exe TPCE04;exe BTOFc7;exe CALB02;exe ECAL31;
     exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
-    exe PHMD02;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
+    exe PHMDof;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
     exe PIPE14;
 };]
 
