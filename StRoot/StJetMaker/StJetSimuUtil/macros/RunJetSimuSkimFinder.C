@@ -2,11 +2,12 @@
 //=========================================================================================
 
 void RunJetSimuSkimFinder(const int nevents = 2000,
-                          const char* file = "/star/data13/simu/pp200/pythia6_410/minbias/cdf_a/y2006c/gheisha_on/p07ic/rcf1319_01_1688evts.MuDst.root",
-                          const char* fname = "/star/data13/simu/pp200/pythia6_410/minbias/cdf_a/y2006c/gheisha_on/p07ic/rcf1319_01_1688evts.geant.root",
-			  const char* outfile = "Jets_minbias_01.root",
-			  const char* skimFile = "Skim_minbias_01.root")
+                          const char* mudstfile = "/star/data47/reco/pp200/pythia6_410/15_25gev/cdf_a/y2006c/gheisha_on/p07ic/rcf1307_01_2000evts.MuDst.root",
+                          const char* geantfile = "/star/data47/reco/pp200/pythia6_410/15_25gev/cdf_a/y2006c/gheisha_on/p07ic/rcf1307_01_2000evts.geant.root",
+			  const char* outfile = "Jets_pt15_25_01.root",
+			  const char* skimFile = "Skim_pt15_25_01.root")
 {
+  // Load shared libraries
   gROOT->Macro("loadMuDst.C");
   gROOT->Macro("LoadLogger.C");
 
@@ -34,64 +35,92 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StJets");
   gSystem->Load("StJetMaker");
+  gSystem->Load("StEEmcSimulatorMaker");
 
-  cout << " loading done " << endl;
-  
+  cout << "Loading shared libraries done" << endl;
+
+  // Create StChain 
   StChain* chain = new StChain; 
-  chain->SetDebug(1);
-  
+
+  // I/O maker
   StIOMaker* ioMaker = new StIOMaker;
-  ioMaker->SetFile(fname);
+  ioMaker->SetFile(geantfile);
   ioMaker->SetIOMode("r");
-  ioMaker->SetBranch("*",0,"0");             //deactivate all branches
-  ioMaker->SetBranch("geantBranch",0,"r");   //activate geant Branch
+  ioMaker->SetBranch("*",0,"0");             // Deactivate all branches
+  ioMaker->SetBranch("geantBranch",0,"r");   // Activate geant Branch
   
-  StMcEventMaker *mcEventMaker = new StMcEventMaker;
+  StMcEventMaker* mcEventMaker = new StMcEventMaker;
   mcEventMaker->doPrintEventInfo = false;
   mcEventMaker->doPrintMemoryInfo = false;
   
-  //Instantiate the MuDstReader
+  // Instantiate the MuDstReader
   StMuDebug::setLevel(1); 
-  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",file,"",1e6,"MuDst");
+  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",mudstfile,"",1e6,"MuDst");
   
-  //Database -- get a real calibration (this is ok, MLM)
+  // Database -- get a real calibration (this is ok, MLM)
   St_db_Maker* dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
-  //dbMk->SetDateTime(20050506,214129); // for simulation
   dbMk->SetDateTime(20060516,110349); // Run 7136022
-   
-  //Database interface
+  dbMk->SetFlavor("sim","eemcPMTcal");
+  dbMk->SetFlavor("sim","eemcPIXcal");
+  dbMk->SetFlavor("sim","eemcPMTped");
+  dbMk->SetFlavor("sim","eemcPMTstat");
+  dbMk->SetFlavor("sim","eemcPMTname");
+  dbMk->SetFlavor("sim","eemcADCconf");
+
+  // Database interface
   StDetectorDbMaker* detDbMk = new StDetectorDbMaker;
   
-  //Endcap DB
+  // Endcap DB
   StEEmcDbMaker* eemcb = new StEEmcDbMaker("eemcDb");
-  
-  //get BEMC calibration
+
+  // Endcap slow simulator
+  // Note: Slow simulator has a bug for Endcap SMD, sector 11: v-plane (as of 2008.04.09 not yet fixed)
+  // This SMD bug should not affect JetFinder results, since it is uses only Tower energies.
+  StEEmcSlowMaker* slowSim = new StEEmcSlowMaker("slowSim");
+  slowSim->setSamplingFraction(0.0384); // effectively scales all Tower energies with a factor of 1.3 (added by: Ilya Selyuzhenkov; April 11, 2008)
+
+  // Get BEMC calibration
   StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker; //use this instead to "redo" converstion from geant->adc
   emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);
   StPreEclMaker* preEcl = new StPreEclMaker; //need this to fill new StEvent information
-  
-  //get trigger
-  StEmcTriggerMaker* emcTrig = new StEmcTriggerMaker("bemctrigger");
 
-  //get pythia record
+  // Barrel ADC to energy maker
+  StEmcADCtoEMaker* adc = new StEmcADCtoEMaker;
+
+  // Trigger simulator
+  StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
+  simuTrig->setMC(true); // Must be before individual detectors, to be passed
+  simuTrig->useBbc();
+  simuTrig->useBemc();
+  simuTrig->bemc->setConfig(StBemcTriggerSimu::kOffline);
+
+#if 0
+  StGenericL2Emulator* simL2Mk = new StL2_2006EmulatorMaker;
+  assert(simL2Mk);
+  simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
+  simL2Mk->setOutPath("./");
+  simuTrig->useL2(simL2Mk);
+#endif
+
+  // Get pythia record
   StMCAsymMaker* asym = new StMCAsymMaker("MCAsym");
 
-  //get skimMaker
+  // Get skimMaker
   StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker",muDstMaker,skimFile);
   //skimEventMaker->addSimuTrigger(127501);
   //skimEventMaker->addSimuTrigger(137501);
   //skimEventMaker->addSimuTrigger(137213);  
   //skimEventMaker->addSimuTrigger(127221);
-  skimEventMaker->addSimuTrigger(137222); // bemc-jp1-mb, th1=60(8.3 GeV)
+  skimEventMaker->addSimuTrigger(137222); // bemc-jp1-mb, th1=60 (8.3 GeV)
 
-  //test Mike's new 4p maker:
+  // Mike's 4p maker:
   bool doTowerSwapFix = true;
-  StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker, doTowerSwapFix);
+  StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker,doTowerSwapFix);
   
-  //Pythia4pMaker
+  // Pythia4pMaker
   StPythiaFourPMaker* pythiaFourPMaker = new StPythiaFourPMaker;
   
-  //Instantiate the JetMaker
+  // Instantiate the JetMaker
   StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker",muDstMaker,outfile);
   
   StppAnaPars* anapars = new StppAnaPars();
