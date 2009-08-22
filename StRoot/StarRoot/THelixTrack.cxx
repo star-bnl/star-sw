@@ -37,16 +37,51 @@ TComplex expOneD(TComplex x)
 {
   double a = TComplex::Abs(x);
   if (a<0.01) {
-    return (1/2. + x*((1/3.)+ x*((1/8.)+x*(1/30.))));
+    return (1/2. + x*((1/6.)+ x*((1/24.)+x*(1/120.))));
   } else {
-    return (TComplex::Exp(x)*(x-1.)+1.)/(x*x);
+    return (TComplex::Exp(x)-1.-x)/(x*x);
   }
 }
 
+//______________________________________________________________________________
+void TCEmx_t::Set(const double *err)  	
+{ if (err) {memcpy(this,err,sizeof(*this));} else {Clear();}}
 
+//______________________________________________________________________________
+void TCEmx_t::Move(const double F[3][3])
+{
+  double oErr[6];
+  memcpy(oErr,Arr(),sizeof(oErr));
+  TCL::trasat(F[0],oErr,Arr(),3,3); 
+}
+//______________________________________________________________________________
+void TCEmx_t::Backward()
+{
+  mHA*=-1; mAC*=-1; 
+}
 
-
-
+//______________________________________________________________________________
+void THEmx_t::Set(const double *errxy,const double *errz)
+{
+  Clear();
+  memcpy(&mHH,errxy,sizeof(mHH)*6);
+  mZZ = errz[0]; mZL =errz[1]; mLL =errz[2];
+}
+//______________________________________________________________________________
+void THEmx_t::Set(const double *err)  	
+{ if (err) {memcpy(this,err,sizeof(*this));} else {Clear();}}
+//_____________________________________________________________________________
+void THEmx_t::Backward()
+{
+  mHA*=-1; mAC*=-1; mHZ*=-1; mCZ*=-1; mAL*=-1; mZL*=-1;
+}
+//______________________________________________________________________________
+void THEmx_t::Move(const double F[5][5])
+{
+  double oErr[15];
+  memcpy(oErr,Arr(),sizeof(oErr));
+  TCL::trasat(F[0],oErr,Arr(),5,5); 
+}
 
 const double Zero = 1.e-6;
 static TComplex sgCX1,sgCX2,sgCD1,sgCD2,sgImTet,sgCOne,sgCf1;
@@ -91,7 +126,6 @@ static void Eigen2(const double err[3], double lam[2], double eig[2][2])
   }
   eig[1][0]=-eig[0][1];  eig[1][1]= eig[0][0];
 }
-#endif //0
 //_____________________________________________________________________________
 static TComplex MyFactor(double rho,double drho,double s)
 {
@@ -115,6 +149,7 @@ static TComplex MyFactor(double rho,double drho,double s)
   }
   return Sum;
 }
+#endif //0
 
 ClassImp(THelixTrack)
 //_____________________________________________________________________________
@@ -144,19 +179,20 @@ THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho
 //    ******************************************************************
 //
   memset(fBeg,0,fEnd-fBeg);
-  fEmxXY[0]=-2006; fEmxSZ[0]=-2006;
+  fEmx=0;
   Set(xyz,dir,rho,drho);
 }
 //_____________________________________________________________________________
 THelixTrack::THelixTrack(const THelixTrack &from)
 {
   memcpy(fBeg,from.fBeg,fEnd-fBeg);
+  fEmx=0;
+  if (from.fEmx) SetEmx(from.fEmx->Arr());
 }
 //_____________________________________________________________________________
 THelixTrack::THelixTrack()
 {
   memset(fBeg,0,fEnd-fBeg);
-  fEmxXY[0]=-2006; fEmxSZ[0]=-2006;
 }
 //_____________________________________________________________________________
 void THelixTrack::Set(const double *xyz,const double *dir,double rho
@@ -170,14 +206,14 @@ void THelixTrack::Set(const double *xyz,const double *dir,double rho
 //_____________________________________________________________________________
 void THelixTrack::SetEmx(const double*  err2xy,const double*  err2sz)
 {
-  memcpy(fEmxXY,err2xy,sizeof(fEmxXY));
-  memcpy(fEmxSZ,err2sz,sizeof(fEmxSZ));
+  if (!fEmx) fEmx = new THEmx_t;
+  fEmx->Set(err2xy,err2sz);
 }
 //_____________________________________________________________________________
-void THelixTrack::GetEmx(double err2xy[6],double err2sz[3]) const
+void THelixTrack::SetEmx(const double*  err)
 {
-   if(err2xy) memcpy(err2xy,fEmxXY,sizeof(fEmxXY));
-   if(err2sz) memcpy(err2sz,fEmxSZ,sizeof(fEmxSZ));
+  if (!fEmx) fEmx = new THEmx_t;
+  fEmx->Set(err);
 }
 //_____________________________________________________________________________
 void THelixTrack::StiEmx(double err[21]) const
@@ -189,23 +225,24 @@ enum {kXX
      ,kPX,kPY,kPZ,kPE,kPP     
      ,kTX,kTY,kTZ,kTE,kTP,kTT
      ,kLN
-     ,kHHth=0
-     ,kAHth,kAAth
-     ,kCHth,kCAth,kCCth
-     ,kZZth=0
-     ,kTZth,kTTth
      };
    memset(err,0,sizeof(err[0])*kLN);
    double cosCA = fP[0]/fCosL;
-   err[kYY] = fEmxXY[kHHth]/(cosCA*cosCA);
-   err[kZZ] = fEmxSZ[kZZth];
-   err[kEY] = fEmxXY[kAHth]/cosCA;
-   err[kEE] = fEmxXY[kAAth];
-   err[kPY] = fEmxXY[kCHth]/cosCA;
-   err[kPE] = fEmxXY[kCAth];
-   err[kPP] = fEmxXY[kCCth];
-   err[kTZ] = fEmxSZ[kTZth];
-   err[kTT] = fEmxSZ[kTTth];
+   err[kYY] = fEmx->mHH/(cosCA*cosCA);
+   err[kZY] = fEmx->mHZ/(cosCA);
+   err[kZZ] = fEmx->mZZ;
+   err[kEY] = fEmx->mHA/cosCA;
+   err[kEZ] = fEmx->mAZ;
+   err[kEE] = fEmx->mAA;
+   err[kPY] = fEmx->mHC/cosCA;
+   err[kPZ] = fEmx->mCZ;
+   err[kPE] = fEmx->mAC;
+   err[kPP] = fEmx->mCC;
+   err[kTY] = fEmx->mHL/(cosCA*fCosL*fCosL);
+   err[kTZ] = fEmx->mZL/(      fCosL*fCosL);
+   err[kTE] = fEmx->mAL/(      fCosL*fCosL);
+   err[kTP] = fEmx->mCL/(      fCosL*fCosL);
+   err[kTT] = fEmx->mLL/(      fCosL*fCosL*fCosL*fCosL);
 }
 //_____________________________________________________________________________
 void THelixTrack::Set(double rho,double drho)
@@ -216,12 +253,10 @@ void THelixTrack::Set(double rho,double drho)
 void THelixTrack::Backward()
 {
 
-  double x[3],d[3],rho;
-  for (int i=0;i<3;i++) { x[i]=fX[i]; d[i]=-fP[i];}
-  rho = -fRho;
-  Set(x,d,rho,fDRho); 
-  if(fEmxXY[0]>-1) {fEmxXY[3]=-fEmxXY[3];fEmxXY[4]=-fEmxXY[4];
-                    fEmxSZ[1]=-fEmxSZ[1];}
+  double d[3];
+  for (int i=0;i<3;i++) { d[i]=-fP[i];}
+  Set(fX,d,-fRho,-fDRho); 
+  if(fEmx) fEmx->Backward();
 }
 //_____________________________________________________________________________
 void THelixTrack::GetSpot(const double axis[3][3],double emx[3]) const
@@ -248,7 +283,7 @@ void THelixTrack::GetSpot(const double axis[3][3],double emx[3]) const
    }
    TCL::vlinco(T[0],1.,T[2],-T[0][2]/T[2][2],t[0],2);
    TCL::vlinco(T[1],1.,T[2],-T[1][2]/T[2][2],t[1],2);
-   double myerr[3]={fEmxXY[0],0,fEmxSZ[0]};
+   double myerr[3]={fEmx->mHH,0,fEmx->mZZ};
    TCL::trasat(t[0],myerr,emx,2,2);
    return;
 }
@@ -264,25 +299,32 @@ void THelixTrack::Build()
     
   fCosL = ::sqrt(fP[0]*fP[0]+fP[1]*fP[1]);
 }
+//______________________________________________________________________________
+void THelixTrack::MakeMtx(double step,double F[5][5])
+{
+//  H,A,C,Z,L
+  double ztep = step*fCosL;
+  memset(F[0],0,sizeof(F[0][0])*5*5);
+  F[0][0] = sgCf1.Re()+1.;
+  F[0][1] = ztep*sgCOne.Re();
+  F[0][2] = ztep*ztep*expOneD(-sgImTet).Re();
+  F[1][1] = 1;
+  F[1][2] = ztep;
+  F[2][2] = 1;
+  F[3][3] = 1;
+  F[3][4] = ztep/(fCosL*fCosL);
+  F[4][4] = 1;
+}
 
 //_____________________________________________________________________________
 double THelixTrack::Move(double step) 
 {
-  if (fEmxXY[0]<0) {
-    double xyz[3],dir[3],rho;
-    Step(step,xyz,dir,rho);
-    Set(xyz,dir,rho,fDRho);
-  } else {
-    double s = step*fCosL;
-    TCircle circ;
-    Fill(circ);
-    circ.Move(s);
-    fX[0] = circ.fX[0];       fX[1] = circ.fX[1];
-    fP[0] = circ.fD[0]*fCosL; fP[1] = circ.fD[1]*fCosL;
-    memcpy(fEmxXY,circ.fEmx,sizeof(fEmxXY));
-    fX[2]+=fP[2]*step;
-    fEmxSZ[0]+=s*(2*fEmxSZ[1]+s*fEmxSZ[2]);
-    fEmxSZ[1]+=s*fEmxSZ[2];
+  double xyz[3],dir[3],rho,F[5][5];
+  Eval(step,xyz,dir,rho);
+  Set(xyz,dir,rho,fDRho);
+  if (fEmx) {
+    MakeMtx(step,F);
+    fEmx->Move(F);
   } 
   return step;
 }
@@ -628,7 +670,7 @@ double THelixTrack::Dca(double x,double y,double *dcaErr) const
 {
   double dir[3]={fP[0],fP[1],0};
   THelixTrack hlx(fX,dir,fRho);
-  if (fEmxXY[0]>0) hlx.SetEmx(fEmxXY,fEmxSZ);
+  if (fEmx) hlx.SetEmx(fEmx->Arr());
   double vtx[3]={x,y,fX[2]};
   return hlx.Dca(vtx,dcaErr);
 }
@@ -664,12 +706,11 @@ double THelixTrack::Dca(const double point[3]
 
    dcaXY = T[0][0]*dif[0]+T[0][1]*dif[1];
    dcaZ  = dif[2];
-   double emxXY[6],emxSZ[3];
-   th.GetEmx(emxXY,emxSZ);
-   dcaEmx[0] = emxXY[0];
+   THEmx_t *emx =th.Emx();
+   dcaEmx[0] = emx->mHH;
    dcaEmx[1] = 0;
 //	cos(Lambda) **4 to account that we are in the nearest point
-   dcaEmx[2] = emxSZ[0]*pow(th.GetCos(),4);
+   dcaEmx[2] = emx->mZZ*pow(th.GetCos(),4);
    return s;
 }
 
@@ -777,38 +818,25 @@ double THelixTrack::Eval(double step, double *xyz, double *dir) const
   double ztep = step*fCosL;
   double teta = ztep*(fRho+0.5*ztep*fDRho);
 
-  sgCX1=TComplex(fX[0]  ,fX[1]  );
-  sgCD1=TComplex(fP[0],fP[1]);
-  sgCD1 /=TComplex::Abs(sgCD1);
+  sgCX1   = TComplex(fX[0]  ,fX[1]);
+  sgCD1   = TComplex(fP[0],fP[1])/fCosL;
   sgImTet = TComplex(0,teta);
-  TComplex ImRho(0,fRho);
-  if (fabs(sgImTet.Im()) > 0.01)	{
-//    TComplex sgCf1 = TComplex::Exp(sgImTet)-1.;
-    TComplex hlf = TComplex::Exp(0.5*sgImTet);
-    sgCf1 = 2.*TComplex(0,1)*hlf*hlf.Im();
-    sgCD2 = sgCD1 + sgCD1*sgCf1;
-    sgCX2 = sgCD1*sgCf1/(ImRho);
-    if (fDRho) {//
-      sgCX2 += sgCD1*(sgCf1+1.)/(ImRho)*MyFactor(fRho,fDRho,ztep);
-    }
+  sgCOne  = expOne(sgImTet);
+  sgCf1   = sgImTet*sgCOne;
+  sgCD2   = sgCD1*sgCf1+sgCD1; 			// exp(I*Fi0+I*Rho*L)
+  sgCX2   = sgCD1*sgCOne*ztep;			// exp(I*Fi0)*(exp(I*Rho*L)-1)/(I*Rho)
 
-  } else { 
-    sgCOne = (1.+sgImTet*(0.5 +sgImTet*(1./6+sgImTet*(1./24+sgImTet/120.))));
-    sgCf1 = sgImTet*sgCOne;
-    sgCD2 = sgCD1 + sgCD1*sgCf1; 
-    sgCX2 = sgCD1*ztep*sgCOne;
-  }
   if (xyz) {
-    xyz[0] = sgCX1.Re()+sgCX2.Re();
-    xyz[1] = sgCX1.Im()+sgCX2.Im();
+    xyz[0] = sgCX2.Re()+sgCX1.Re();
+    xyz[1] = sgCX2.Im()+sgCX1.Im();
     xyz[2] = fX[2]+fP[2]*step;
-  } 
-  if (dir) {
+  }
+  if (dir) {    
+    sgCD2/= TComplex::Abs(sgCD2);
     dir[0] = sgCD2.Re()*fCosL;
     dir[1] = sgCD2.Im()*fCosL;
     dir[2] = fP[2];
   }
-
   return step;
 }
 //_____________________________________________________________________________
@@ -819,7 +847,7 @@ void THelixTrack::Fill(TCircle &circ) const
   circ.fD[0]=fP[0]/fCosL;
   circ.fD[1]=fP[1]/fCosL;
   circ.fRho=fRho;
-  memcpy(circ.fEmx,fEmxXY,sizeof(fEmxXY));
+  if (fEmx) circ.SetEmx(fEmx->Arr());
 }
 //_____________________________________________________________________________
 void THelixTrack::Test1()
@@ -996,7 +1024,19 @@ static TCanvas *myCanvas = 0;
 //______________________________________________________________________________
 ClassImp(TCircle)
 //______________________________________________________________________________
-TCircle::TCircle(double *x,double *d,double rho)
+TCircle::TCircle()
+{
+  Set(0,0,0.);
+  fEmx = 0;
+}
+//______________________________________________________________________________
+TCircle::TCircle(const double *x,const double *d,double rho)
+{
+  Set(x,d,rho);
+  fEmx = 0;
+}
+//______________________________________________________________________________
+void TCircle::Set(const double *x,const double *d,double rho)
 {
   fX[0]=0; fX[1]=0; fD[0]=0; fD[1]=0;
   if (x) {fX[0]=x[0];fX[1]=x[1];}
@@ -1006,19 +1046,28 @@ TCircle::TCircle(double *x,double *d,double rho)
     fD[0]/=n; fD[1]/=n;
   }
   fRho = rho;
-  memset(fEmx,0,sizeof(fEmx)); fEmx[0] = -2006;
+}
+//______________________________________________________________________________
+TCircle::TCircle(const TCircle& fr)
+{
+  Set(fr.fX,fr.fD,fr.fRho);
+  fEmx = 0;
+  if (fr.fEmx) SetEmx(fr.fEmx->Arr());
 }
 //______________________________________________________________________________
 void TCircle::Clear(const char *)   
 {
- memset(fX,0,(char*)(fEmx+6)-(char*)fX);fEmx[0] = -2006;
+ if (fEmx) fEmx->Clear();
+ memset(fX,0,(char*)(&fEmx)-(char*)fX);
 }
 
 
 //______________________________________________________________________________
 void TCircle::SetEmx(const double *err)   
-{ memcpy(fEmx,err,sizeof(fEmx));}
-
+{ 
+  if(!fEmx) fEmx = new TCEmx_t;
+  fEmx->Set(err);
+}
 //______________________________________________________________________________
 void TCircle::Nor(double *norVec) const  
 {
@@ -1033,10 +1082,10 @@ void TCircle::Print(const char* txt) const
 {
   if (!txt) txt="";
   printf("TCircle(%s): x,y=%g %g dir=%g %g curv=%g\n",txt,fX[0],fX[1],fD[0],fD[1],fRho);
-  if (fEmx[0]<-1) return;
-  printf("Errs: %g\n"          ,fEmx[0]); 
-  printf("    : %g \t%g\n"     ,fEmx[1],fEmx[2]); 
-  printf("    : %g \t%g \t%g\n",fEmx[3],fEmx[4],fEmx[5]); 
+  if (!fEmx) return;
+  printf("Errs: %g\n"          ,fEmx->mHH); 
+  printf("    : %g \t%g\n"     ,fEmx->mHA,fEmx->mAA); 
+  printf("    : %g \t%g \t%g\n",fEmx->mHC,fEmx->mAC,fEmx->mCC); 
 }
 //______________________________________________________________________________
 double TCircle::Path(const double pnt[2]) const
@@ -1058,7 +1107,7 @@ double TCircle::Path(const double pnt[2]) const
    return s;
 }
 //______________________________________________________________________________
-double TCircle::Path(const double pnt[2],const double exy[3]) const
+double TCircle::Path(const double *pnt,const double *exy) const
 {
   double x[2],d[2];
   double s = Path(pnt);
@@ -1180,8 +1229,10 @@ double TCircle::Eval(double step,double *X, double *D) const
   
   sgCD2 = sgCD1*sgCf1+sgCD1; 			// exp(I*Fi0+I*Rho*L)
   sgCX2 = sgCD1*sgCOne*step;			// exp(I*Fi0)*(exp(I*Rho*L)-1)/(I*Rho)
-  X[0] = sgCX2.Re()+sgCX1.Re();
-  X[1] = sgCX2.Im()+sgCX1.Im();
+  if (X) {
+    X[0] = sgCX2.Re()+sgCX1.Re();
+    X[1] = sgCX2.Im()+sgCX1.Im();
+  }
   if (D) {
     sgCD2/= TComplex::Abs(sgCD2);
     D[0] = sgCD2.Re();
@@ -1193,16 +1244,15 @@ double TCircle::Eval(double step,double *X, double *D) const
 double TCircle::Move(double step)
 {
   Eval(step,fX,fD);
-  if (fEmx[0]>-1) MoveErrs(step);
+  if (fEmx) MoveErrs(step);
   if (fabs(fD[0])>1) fD[0]=(fD[0]<0)? -1:1;
   if (fabs(fD[1])>1) fD[1]=(fD[1]<0)? -1:1;
   return step;
 }
 //______________________________________________________________________________
-void TCircle::MoveErrs(double l)
+void TCircle::MakeMtx(double l,double F[3][3])
 {
-  double F[3][3],oErr[6];
-  memset(F[0],0,sizeof(F));
+  memset(F[0],0,sizeof(F[0][0])*3*3);
   F[0][0] = sgCf1.Re()+1.;
   F[0][1] = l*sgCOne.Re();
   F[0][2] = l*l*expOneD(-sgImTet).Re();
@@ -1210,8 +1260,13 @@ void TCircle::MoveErrs(double l)
   F[1][1] = 1;
   F[1][2] = l;
   F[2][2] = 1;
-  memcpy(oErr,fEmx,sizeof(fEmx));
-  TCL::trasat(F[0],oErr,fEmx,3,3); 
+}
+//______________________________________________________________________________
+void TCircle::MoveErrs(double l)
+{
+  double F[3][3];
+  MakeMtx(l,F);
+  fEmx->Move(F);
 }
 //______________________________________________________________________________
 void TCircle::Rot(double angle)
@@ -1231,7 +1286,7 @@ void TCircle::Rot(double cosa,double sina)
 void TCircle::Backward()
 {
   fRho=-fRho;fD[0]=-fD[0];fD[1]=-fD[1];
-  if(fEmx[0]>-1) {fEmx[3]=-fEmx[3];fEmx[4]=-fEmx[4];}
+  if(fEmx) fEmx->Backward();
 }
 
 //______________________________________________________________________________
@@ -1288,10 +1343,81 @@ void TCircle::Test3()
 
 }
 //______________________________________________________________________________
+void TCircle::TestMtx() 
+{
+  double Dir[8],X[8]={0},Rho[2],step,F[3][3],f[3][3],Del[3],Dif[3]={0};
+    
+  step = 20;
+  int nErr=0;
+  for (int iR = 10;iR<100;iR+=10) {
+    Rho[0] = 1./iR;
+    for (int iAlf=0;iAlf<360;iAlf+=10){  
+      Dir[0] = cos(iAlf/180.*M_PI);
+      Dir[1] = sin(iAlf/180.*M_PI);
+      TCircle tc(X,Dir,Rho[0]);
+      tc.Eval(step,X+2,Dir+2);
+      tc.MakeMtx(step,F);
+
+      for (int iHAR=0;iHAR<3;iHAR++) {
+        memcpy(X  +4,X  ,sizeof(X[0]  )*2);
+        memcpy(Dir+4,Dir,sizeof(Dir[0])*2);
+        Rho[1]=Rho[0];
+        switch (iHAR) {
+	case 0: { 
+	  Del[0] = 0.001*iR;
+          X[4+0] = X[0]-Dir[1]*Del[0];
+          X[4+1] = X[1]+Dir[0]*Del[0];
+          break;}
+	  
+	case 1: {
+	  Del[1] = M_PI/180*0.1;
+          Dir[4+0] = cos(iAlf/180.*M_PI+Del[1]);
+          Dir[4+1] = sin(iAlf/180.*M_PI+Del[1]);
+          break;}
+
+	case 2: {
+          Del[2] = Rho[0]*0.001;
+          Rho[1] = Rho[0]+Del[2];
+          break;}
+        }//end switch
+      
+        TCircle tcc(X+4,Dir+4,Rho[1]);
+        tcc.Eval(step,X+6,Dir+6);
+        tcc.MakeMtx(step,f);
+        TCL::vlinco(F[0],0.5,f[0],0.5,f[0],3*3);
+        for (int jHAR=0;jHAR<2; jHAR++) {
+	  switch(jHAR) {
+	  case 0: {
+	    Dif[0] = (X[6+0]-X[2+0])*(-Dir[2+1])
+	           + (X[6+1]-X[2+1])*( Dir[2+0]);
+            break;}
+	  case 1: {
+	    Dif[1] = (atan2(Dir[6+1],Dir[6+0])
+	           -  atan2(Dir[2+1],Dir[2+0])); 
+            if (Dif[1]>  M_PI) Dif[1]-=2*M_PI;
+            if (Dif[1]< -M_PI) Dif[1]+=2*M_PI;
+            break;}
+          }
+          double est = Dif[jHAR]/Del[iHAR];
+	  double eps = fabs(est-f[jHAR][iHAR])*2
+	             /(fabs(est)+fabs(f[jHAR][iHAR]+1e-12));
+          if (eps < 1e-2) continue;
+          nErr++;
+          printf(" Mtx[%d][%d] %g %g Angle=%g\n",
+	         jHAR,iHAR,f[jHAR][iHAR],est, step/iR/M_PI*180);
+	
+    } } } } 
+    printf("TestMtx: %d errors\n",nErr);
+
+}
+
+
+//______________________________________________________________________________
 //______________________________________________________________________________
 TCircleFitter::TCircleFitter()
 {
   Clear();
+  SetEmx();
 }
 //______________________________________________________________________________
 void TCircleFitter::Clear(const char*)
@@ -1549,7 +1675,7 @@ SWIT:
 //______________________________________________________________________________
 void TCircleFitter::MakeErrs() 
 {
-   memset(fEmx,0,sizeof(fEmx));
+   fEmx->Clear();
    double F[3][3]; memset(F[0],0,sizeof(F));
    double myFact = 1.;
    switch (fKase) {
@@ -1617,9 +1743,9 @@ void TCircleFitter::MakeErrs()
       }
       default: assert(0);
    } // end switch
-   TCL::trasat(F[0],fCov,fEmx,3,3); 
-   TCL::vscale(fEmx,myFact/fWtot,fEmx,6);
-   if (fBack) {fEmx[1]*=-1;fEmx[4]*=-1;}
+   TCL::trasat(F[0],fCov,fEmx->Arr(),3,3); 
+   TCL::vscale(fEmx->Arr(),myFact/fWtot,fEmx->Arr(),6);
+   if (fBack) {fEmx->mHA*=-1;fEmx->mAC*=-1;}
 }
 //______________________________________________________________________________
 double TCircleFitter::EvalChi2() 
@@ -1652,7 +1778,7 @@ double TCircleFitter::FixAt(const double vals[5],int flag)
 ///  vals[4]	- Curvature
 ///  flag	- +1=xy fix,+2=Psi fix,+4 =curv fix
 
-   assert(fEmx[0]>0);
+   assert(fEmx);
    assert(flag);
    double g[6]={1,0,1,0,0,1},c[6]={1,0,1,0,0,1}
          ,e[6],adj[3]={0},amda[3],dlt[2];
@@ -1677,25 +1803,25 @@ double TCircleFitter::FixAt(const double vals[5],int flag)
    for (int i=0,li=0;i< 3;li+=++i) {
      for (int j=0   ;j<=i;j++    ) {
        if (!(sel[i]&sel[j])) continue;
-       c[li+j] = fEmx[li+j];     } }
+       c[li+j] = (*fEmx)[li+j];     } }
    double addXi2=0;
    TCL::trsinv(c        ,c   ,3  );
    TCL::trasat(adj,c,&addXi2,1,3); 
 
-   TCL::trsinv(fEmx,e,3);
+   TCL::trsinv(fEmx->Arr(),e,3);
    for (int i=0,li=0;i< 3;li+=++i) {
      for (int j=0   ;j<=i;j++    ) {
        if (!(sel[i]|sel[j])) continue;
        e[li+j] = (i==j);
        if (!(sel[i]&sel[j])) continue;
-       g[li+j] = fEmx[li+j];
+       g[li+j] = (*fEmx)[li+j];
    } }
    TCL::trsinv(g        ,g   ,3  );
    TCL::trsa  (g   ,adj ,amda,3,1);
-   TCL::trsa  (fEmx,amda,adj ,3,1);
-   TCL::trsinv(e        ,fEmx,3  );
+   TCL::trsa  (fEmx->Arr(),amda,adj   ,3,1);
+   TCL::trsinv(e          ,fEmx->Arr(),3  );
 
-   for (int i=0,li=0;i< 3;li+=++i) {if (sel[i]) fEmx[li+i]=0;}
+   for (int i=0,li=0;i< 3;li+=++i) {if (sel[i]) (*fEmx)[li+i]=0;}
 //     	update x,y
    fX[0] += -adj[0]*fD[1];
    fX[1] +=  adj[0]*fD[0];
@@ -1724,42 +1850,6 @@ void TCircleFitter::Skip(int idx)
 void TCircleFitter::SetNdf(int ndf) 
 {
   fChi2*=fNdf; if (ndf) fChi2/=ndf; fNdf=ndf;
-}
-//______________________________________________________________________________
-double TCircleFitter::FitZ()
-{
-  enum {kS,kZ,kSS,kSZ,kZZ,kWT,kZ0=0,kTan=1};
-  double aver[6] = {0,0,0,0,0,0};
-  TCircle MC = *this;
-  double dS = MC.Path(&(fAux[0].x));
-  MC.Move(dS);
-  double s = 0;
-  int n = 0;
-  for (int i=0;i<fN;i++) {
-    double ds = MC.Path(&(fAux[i].x));
-    MC.Move(ds);
-    s+=ds;
-    double z   = fAux[i].z;
-    double ezz = fAux[i].ezz;
-    double wt = (ezz>0) ? 1./ezz : 1.;
-    aver[kWT]+=wt; 
-    aver[kS ]+=s	*wt; 
-    aver[kZ ]+=z	*wt; 
-    aver[kSS]+=s*s	*wt; 
-    aver[kSZ]+=z*s	*wt; 
-    aver[kZZ]+=z*z	*wt; 
-    n++;
-  }
-  for (int j=kS;j<kWT;j++) {aver[j]/=aver[kWT];}
-  aver[kSS]-=aver[kS]*aver[kS];
-  aver[kSZ]-=aver[kS]*aver[kZ];
-  aver[kZZ]-=aver[kZ]*aver[kZ];
-  fTanL = aver[kSZ]/aver[kSS];
-  fZ0   = aver[kZ]-fTanL*(aver[kS]+dS);
-
-
-  double res = aver[kZZ]-2*fTanL*aver[kSZ];
-  return res;
 }
 //______________________________________________________________________________
 void TCircleFitter::Print(const char* txt) const
@@ -1819,16 +1909,19 @@ void TCircleFitter::Test()
 TRandom ran;
 static TCanvas* myCanvas=0;
 static TH1F *hh[6]={0,0,0,0,0,0};
-static const char *hNams[]={"dH","pH","dA","pA","dC","pC",0};
+static const char *hNams[]={"dH","pH","dA","pA","dC","pC","Xi2",0};
 static const char *hTits[]=
-{"delta H","pull H","delta Psi","pull Psi","delta Curv","pull Curv",0};
+{"delta H","pull H","delta Psi","pull Psi","delta Curv","pull Curv","Xi2",0};
+static const double lims[]={-0.1,-5,-0.1,-5,-0.1,-5,5};
+  int nPads = sizeof(hNams)/sizeof(void*)-1;
   if(!myCanvas)  myCanvas=new TCanvas("TCircleFitter_Test","",600,800);
   myCanvas->Clear();
-  myCanvas->Divide(1,6);
+  myCanvas->Divide(1,nPads);
 
-  for (int i=0;i<6;i++) { 
-    double lim = (i&1)? 5:0.1;
-    delete hh[i]; hh[i]= new TH1F(hNams[i],hTits[i],100,-lim,lim);
+  for (int i=0;i<nPads;i++) { 
+    double limin = lims[i]; if(limin>0) limin=0;
+    double limax = fabs(lims[i]); ;
+    delete hh[i]; hh[i]= new TH1F(hNams[i],hTits[i],100,limin,limax);
     myCanvas->cd(i+1); hh[i]->Draw();
   }
 
@@ -1861,7 +1954,7 @@ static const char *hTits[]=
           x[1]+=  CC*eR; 
           helx.Add (x[0],x[1],e);
 	}		//end points
-	helx.Fit();
+	double Xi2 = helx.Fit();
 //if (helx.GetCase()!=1) continue;
 //if (R<0) continue;
 	nFit++;
@@ -1872,18 +1965,19 @@ static const char *hTits[]=
         assert(s<0);
 	assert(fabs(s) < len);
 	helx.Move(s);
-	double dd[6];
+	double dd[10];
 	double dx = x[0]-helx.Pos()[0];
 	double dy = x[1]-helx.Pos()[1];
 	dd[0] = -dx*S0+dy*C0;
-	dd[1] = dd[0]/sqrt(helx.Emx()[0]);
+	dd[1] = dd[0]/sqrt(helx.Emx()->mHH);
 	dd[2] = atan2(helx.Dir()[1],helx.Dir()[0])-ang0;
 	if (dd[2]> M_PI) dd[2]-=2*M_PI;
 	if (dd[2]<-M_PI) dd[2]+=2*M_PI;
-	dd[3] = dd[2]/sqrt(helx.Emx()[2]);
+	dd[3] = dd[2]/sqrt(helx.Emx()->mAA);
 	dd[4] = helx.Rho()-1./R;
-	dd[5] = dd[4]/sqrt(helx.Emx()[5]);
-	for (int ih=0;ih<6;ih++) { hh[ih]->Fill(dd[ih]);}
+	dd[5] = dd[4]/sqrt(helx.Emx()->mCC);
+        dd[6]=Xi2;
+	for (int ih=0;ih<nPads;ih++) { hh[ih]->Fill(dd[ih]);}
     } 		//end sign
   }		//end ang0
   } 		// curv
@@ -2072,18 +2166,18 @@ if (!(helx.GetCase()&kase)) continue;
 	double dd[6],hf[6];
 	double dx = helx.Pos()[0]-x[0];
 	double dy = helx.Pos()[1]-x[1];
-        const double *emx = helx.Emx();
+        const TCEmx_t *emx = helx.Emx();
 	dd[0] = -dx*S0+dy*C0;
 	dd[1] = atan2(helx.Dir()[1],helx.Dir()[0])-ang0;
 	if (dd[1]> M_PI) dd[1]-=2*M_PI;
 	if (dd[1]<-M_PI) dd[1]+=2*M_PI;
 	dd[2] = helx.Rho()-1./R;
         hf[0] = (dd[0]*dd[1])	*1e1/(RERR*RERR);
-        hf[1] = (emx[1])	*1e1/(RERR*RERR);
+        hf[1] = (emx->mHA)	*1e1/(RERR*RERR);
         hf[2] = dd[0]*dd[2]	*1e3/(RERR*RERR);
-        hf[3] = (emx[3])	*1e3/(RERR*RERR);
+        hf[3] = (emx->mHC)	*1e3/(RERR*RERR);
         hf[4] = dd[1]*dd[2]	*1e4/(RERR*RERR);
-        hf[5] = (emx[4])	*1e4/(RERR*RERR);
+        hf[5] = (emx->mAC)	*1e4/(RERR*RERR);
 
         
 	for (int ih=0;ih<6;ih++) { hh[ih]->Fill(hf[ih]);}
@@ -2138,6 +2232,7 @@ static TGraph  *ciGraph  = 0;
 THelixFitter::THelixFitter():fPoli1Fitter(1)
 {
   Clear();
+  SetEmx();
 }
 //______________________________________________________________________________
 void THelixFitter::Clear(const char*)
@@ -2266,8 +2361,11 @@ void THelixFitter::Update(int kase)
     fRho  = haslet[4];
   }
   if(kase&2) {
-    memcpy(fEmxXY,fCircleFitter.Emx(),sizeof(fEmxXY));
-    memcpy(fEmxSZ, fPoli1Fitter.Emx(),sizeof(fEmxSZ));
+    double emx[3];
+    emx[0] = fPoli1Fitter.Emx()[0];
+    emx[1] = fPoli1Fitter.Emx()[1]*fCosL*fCosL;
+    emx[2] = fPoli1Fitter.Emx()[2]*fCosL*fCosL*fCosL*fCosL;
+    fEmx->Set(fCircleFitter.Emx()->Arr(),emx);
   }
 }
 //______________________________________________________________________________
@@ -2429,10 +2527,9 @@ if (kase&128) helx.Show();
 //      assert(s<0);
 //	assert(fabs(s) < len*1.1);
 
-        double eXY[6],eSZ[3];
         double pos[3],dir[3],rho;
 	helx.Move(s);
-        helx.GetEmx(eXY,eSZ);
+        THEmx_t *emx = helx.Emx();
         helx.Get   (pos,dir,rho);
 	double psi = atan2(dir[1],dir[0]);
 	double sinPsi = sin(psi);
@@ -2442,19 +2539,19 @@ if (kase&128) helx.Show();
 	double dx = x[0]-pos[0];
 	double dy = x[1]-pos[1];
 	dd[0] = -dx*sinPsi+dy*cosPsi;
-	hf[0] = dd[0]/sqrt(eXY[0]+1e-20);
+	hf[0] = dd[0]/sqrt(emx->mHH+1e-20);
 	dd[2] = psi-ang0;
 	if (dd[2]> M_PI) dd[2]-=2*M_PI;
 	if (dd[2]<-M_PI) dd[2]+=2*M_PI;
-	hf[1] = dd[2]/sqrt(eXY[2]+1e-20);
+	hf[1] = dd[2]/sqrt(emx->mAA+1e-20);
 	dd[4] = rho-1./R;
-	hf[2] = dd[4]/sqrt(eXY[5]+1e-20);
+	hf[2] = dd[4]/sqrt(emx->mCC+1e-20);
         dd[6] = (helx.Pos()[2]-x[2])/pow(helx.GetCos(),2);
-        hf[3] = dd[6]/sqrt(eSZ[0]+1e-20);
+        hf[3] = dd[6]/sqrt(emx->mZZ+1e-20);
         dd[8] = asin(dir[2])-dip;
 	if (dd[8]> M_PI) dd[8]-=2*M_PI;
 	if (dd[8]<-M_PI) dd[8]+=2*M_PI;
-        hf[4] = dd[8]/(sqrt(eSZ[2])*(1-dir[2]*dir[2]));
+        hf[4] = dd[8]/(sqrt(emx->mLL));
         hf[5] = Xi2;
         hf[6] = Xi2E;
         hf[7] = Xi2E-Xi2+1;
@@ -2478,7 +2575,7 @@ if (kase&128) helx.Show();
         if (sFit>=1000 ) continue;
         if (fabs(pIde[0]-pFit[0])>0.1) continue;
         helx.Move(sFit);
-        helx.GetEmx(eXY,eSZ);
+        emx = helx.Emx();
         helx.GetSpot(spotAxis,eSpot);
         hfil = (xFit[1]-xIde[1]); hfil/= sqrt(eSpot[0]); 
         h2h[0]->Fill(hfil);
@@ -2561,7 +2658,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.39 2009/07/18 00:12:56 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.40 2009/08/22 00:11:59 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2577,6 +2674,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.40  2009/08/22 00:11:59  perev
+ * Full error matrix + derivatives matrix
+ *
  * Revision 1.39  2009/07/18 00:12:56  perev
  * method PatX(helx,,,) added
  *

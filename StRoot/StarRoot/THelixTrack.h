@@ -3,12 +3,59 @@
 #include "TObject.h"
 #include "TArrayD.h"
 #include "TPolinom.h"
+class TCEmx_t
+{ 
+public:
+const double *Arr() const 	{ return &mHH;}
+      double *Arr()   	{ return &mHH;}
+const double &operator[](int idx) const 	{ return (&mHH)[idx];}
+      double &operator[](int idx)       	{ return (&mHH)[idx];}
+void Clear()  			{ memset(this,0,sizeof(*this));}
+     TCEmx_t()			{ Clear();}
+void Set(const double *err);  	
+void Move(double const F[3][3]);
+void Backward();
+public:
+
+double
+mHH,
+mHA, mAA,
+mHC, mAC, mCC;
+};
+
+class THEmx_t
+{ 
+public:
+     THEmx_t()			{ Clear();}
+const double *Arr() const 	{ return &mHH;}
+      double *Arr()   	{ return &mHH;}
+const double &operator[](int idx) const 	{ return (&mHH)[idx];}
+      double &operator[](int idx)       	{ return (&mHH)[idx];}
+void Clear()  			{ memset(this,0,sizeof(*this));}
+void Set(const double *err);
+void Set(const double *errxy,const double *errz);
+void Move(double const F[5][5]);
+void Backward();
+public:
+
+double
+mHH,
+mHA, mAA,
+mHC, mAC, mCC,
+mHZ, mAZ, mCZ, mZZ,
+mHL, mAL, mCL, mZL, mLL;
+};
+
 
 class TCircle: public TObject
 {
 friend class THelixTrack;
 public:
-TCircle(double *x=0,double *dir=0,double rho=0);
+ TCircle();
+ TCircle(const double *x,const double *dir,double rho);
+ TCircle(const TCircle& fr);
+~TCircle(){delete fEmx;};
+ void Set(const double *x=0,const double *dir=0,const double rho=0);
 virtual void  Clear(const char *opt="");
 const double* Pos() const 	{return fX;  } 
       double* Pos()      	{return fX;  } 
@@ -16,10 +63,10 @@ const double* Dir() const 	{return fD;  }
       double  Rho() const       {return fRho;}
       double& Rho()             {return fRho;}
       void    Nor(double *norVec) const; 
-      void    SetEmx(const double *err);
-const double* Emx() const 	{return fEmx;  } 
+      void    SetEmx(const double *err=0);
+const TCEmx_t *Emx() const 	{return fEmx;} 
 double Path(const double pnt[2]) const;
-double Path(const double pnt[2],const double exy[3]) const;
+double Path(const double pnt[2], const double exy[3]) const;
 double Path(const TCircle &tc,double *s2=0) const;
 double Move(double step);
 void   Rot(double angle);
@@ -35,15 +82,17 @@ int    IsStrait()  			{return TestBit(1);}
 static void Test2();
 static void Test3();
 static void Test4();
+static void TestMtx();
 
 private:
 void  MoveErrs(double l);
+void  MakeMtx (double l,double F[3][3]);
 
 protected:
 double fX[2];
 double fD[2];
 double fRho;
-double fEmx[6]; //let h = fX[1]*fD[0], a=atan2(fD[1],fD[0]),c=fRho
+TCEmx_t *fEmx; //let h = fX[1]*fD[0], a=atan2(fD[1],fD[0]),c=fRho
                 // hh,
 		// ah,aa,
 		// ch,ca,cc
@@ -140,11 +189,13 @@ public:
 	THelixTrack();
 	THelixTrack(const double *xyz,const double *dir,double rho,double drho=0);
 	THelixTrack(const THelixTrack &from);
+virtual ~THelixTrack(){delete fEmx;}
 
 	void Set   (const double *xyz,const double *dir,double rho,double drho=0);
 	void Set   (double rho,double drho=0);
 	void SetEmx(const double*  err2xy,const double*  err2z);
-	void GetEmx(double err2xy[6],double err2z[3]) const;
+	void SetEmx(const double*  err=0);
+    THEmx_t *Emx() const{return fEmx;}
 	void StiEmx(double emx[21]) const;
         void GetSpot(const double axis[3][3],double emx[3]) const;
 	void Fill  (TCircle &circ) const;
@@ -152,6 +203,8 @@ public:
 	void Backward();
 ///		Move along helix
 	double Move(double step);
+///     	Make transformatiom matrix to transform errors
+	void MakeMtx(double step,double F[5][5]);
 ///		Evaluate params with given step along helix
 	double Eval(double step, double *xyz, double *dir,double &rho) const;
 	double Step(double step, double *xyz, double *dir,double &rho) const
@@ -237,8 +290,7 @@ protected:
 	double fRho;
 	double fDRho;
 	double fCosL;
-        double fEmxXY[6];
-        double fEmxSZ[3];
+        THEmx_t *fEmx;
         char fEnd[1];
 ClassDef(THelixTrack,0)
 };
