@@ -510,7 +510,15 @@ int tpxPed::special_setup(int run_type, int sub_type)
 	int r, p, t ;
 	int m ;
 
-	LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
+	switch(run_type) {
+	case RUN_TYPE_PULSER_A :
+	case RUN_TYPE_PED_A :
+	case RUN_TYPE_PED_B :
+		LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
+		break ;
+	default :
+		return 1 ;
+	}
 
 	for(r=0;r<=45;r++) {
 	for(p=0;p<=182;p++) {
@@ -519,11 +527,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 		
 		switch(run_type) {
 		case RUN_TYPE_PULSER_A :
-			for(t=0;t<140;t++) ped->ped[t] = 1023.0 ;
-			for(t=140;t<150;t++) ped->ped[t] = 0.0 ;
-			for(t=150;t<175;t++) ped->ped[t] = 1023.0 ;
-			for(t=175;t<192;t++) ped->ped[t] = 0.0 ;
-			for(t=192;t<412;t++) ped->ped[t] = 1023.0 ;
+			for(t=95;t<110;t++) ped->ped[t] = 0.0 ;
 			break ;
 		case RUN_TYPE_PED_A :	// starts with ped=0
 			m = 0 ;			

@@ -124,8 +124,13 @@ void tpxGain::init(int sec)
 //	tb_start = 181 ;
 //	tb_stop = 190 ;
 
+#if 0
+	// used in run FY09
 	tb_start = 179 ;
 	tb_stop = 188 ;
+#endif
+	tb_start = 100 ;
+	tb_stop = 103 ;
 
 	memset(bad_rdo_mask,0,sizeof(bad_rdo_mask)) ;
 
