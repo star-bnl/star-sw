@@ -20,7 +20,7 @@ void GeomDrawUsage() {
           printf("One always can select the geometry from the \"file menu\" of the GUI interface later on too\n");          
           printf("\n");                
           printf("---------------\n"); 
-          printf("\n$Id: GeomBrowse.C,v 1.9 2008/10/29 19:41:54 perev Exp $\n");
+          printf("\n$Id: GeomBrowse.C,v 1.10 2009/08/24 18:28:49 perev Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 void GeomBrowse(const char *fzFile="y2008")
@@ -29,7 +29,7 @@ void GeomBrowse(const char *fzFile="y2008")
    // gSystem->Load("libGeomBrowser");  
    gSystem->Load("St_base");
    // check Coin env and load if present
-   TString ivrootDir = "$ROOT/5.99.99/Coin2/.$STAR_HOST_SYS/lib/";
+   TString ivrootDir = "$ROOT/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d/lib/";
    gSystem->ExpandPathName(ivrootDir);
    bool CheckCoin = true;
    if (!gSystem->AccessPathName(ivrootDir.Data())) {
@@ -52,6 +52,7 @@ void GeomBrowse(const char *fzFile="y2008")
       gSystem->Load("St_geom_Maker");  
       StGeomBrowser *a = new StGeomBrowser;
       a->SetFile(fzFile); 
+      a->SetSize(360,600); 
       a->Show();
    }
 }
