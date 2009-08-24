@@ -1,5 +1,0 @@
-# $Id $
-# package St_tpcdaq_Maker
-# author: 
-Library:libSt_tpcdaq_Maker.so:LIBS +=   -lStChain  -lStDAQMaker  -lStDb_Tables  -lStDetectorDbMaker  -l_StTrsMaker  -ltpc_Tables
-#Library:libSt_tpcdaq_Maker.so:LIBS +=   -lStChain  -lStDAQMaker  -lStDb_Tables  -lStDetectorDbMaker  -lStTrsMaker  -ltpc_Tables
