@@ -54,7 +54,8 @@ public:
  TCircle();
  TCircle(const double *x,const double *dir,double rho);
  TCircle(const TCircle& fr);
-~TCircle(){delete fEmx;};
+~TCircle();
+TCircle &operator=(const TCircle& fr);
  void Set(const double *x=0,const double *dir=0,const double rho=0);
 virtual void  Clear(const char *opt="");
 const double* Pos() const 	{return fX;  } 
@@ -189,8 +190,8 @@ public:
 	THelixTrack();
 	THelixTrack(const double *xyz,const double *dir,double rho,double drho=0);
 	THelixTrack(const THelixTrack &from);
-virtual ~THelixTrack(){delete fEmx;}
-
+virtual ~THelixTrack();
+THelixTrack &operator=(const THelixTrack &from);
 	void Set   (const double *xyz,const double *dir,double rho,double drho=0);
 	void Set   (double rho,double drho=0);
 	void SetEmx(const double*  err2xy,const double*  err2z);
@@ -298,6 +299,7 @@ class THelixFitter: public THelixTrack
 {
 public:
        THelixFitter();
+      ~THelixFitter();
 int    Size() const 			{return fCircleFitter.Size();}
 int    Used() const 			{return fCircleFitter.Used();}
 void   Add (double x,double y,double z); 

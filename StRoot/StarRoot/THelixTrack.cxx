@@ -178,17 +178,30 @@ THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho
 //    *                                                                *
 //    ******************************************************************
 //
-  memset(fBeg,0,fEnd-fBeg);
   fEmx=0;
   Set(xyz,dir,rho,drho);
 }
 //_____________________________________________________________________________
+THelixTrack &THelixTrack::operator=(const THelixTrack &from)
+{
+  THEmx_t *save = fEmx;
+  memcpy(fBeg,from.fBeg,fEnd-fBeg);
+  fEmx=save;
+  if (from.fEmx) SetEmx(from.fEmx->Arr());
+  return *this;
+}
+//_____________________________________________________________________________
 THelixTrack::THelixTrack(const THelixTrack &from)
 {
-  memcpy(fBeg,from.fBeg,fEnd-fBeg);
   fEmx=0;
-  if (from.fEmx) SetEmx(from.fEmx->Arr());
+  *this = from;
 }
+
+
+
+//_____________________________________________________________________________
+THelixTrack::~THelixTrack()
+{ delete fEmx;fEmx=0;}
 //_____________________________________________________________________________
 THelixTrack::THelixTrack()
 {
@@ -1030,6 +1043,10 @@ TCircle::TCircle()
   fEmx = 0;
 }
 //______________________________________________________________________________
+TCircle::~TCircle()
+{delete fEmx;fEmx=0;}
+
+//______________________________________________________________________________
 TCircle::TCircle(const double *x,const double *d,double rho)
 {
   Set(x,d,rho);
@@ -1050,10 +1067,17 @@ void TCircle::Set(const double *x,const double *d,double rho)
 //______________________________________________________________________________
 TCircle::TCircle(const TCircle& fr)
 {
-  Set(fr.fX,fr.fD,fr.fRho);
   fEmx = 0;
-  if (fr.fEmx) SetEmx(fr.fEmx->Arr());
+  *this = fr;
 }
+//______________________________________________________________________________
+TCircle &TCircle::operator=(const TCircle& fr)
+{
+  Set(fr.fX,fr.fD,fr.fRho);
+  if (fr.fEmx) SetEmx(fr.fEmx->Arr());
+  return *this;
+}
+
 //______________________________________________________________________________
 void TCircle::Clear(const char *)   
 {
@@ -2235,6 +2259,9 @@ THelixFitter::THelixFitter():fPoli1Fitter(1)
   SetEmx();
 }
 //______________________________________________________________________________
+THelixFitter::~THelixFitter()
+{;}
+//______________________________________________________________________________
 void THelixFitter::Clear(const char*)
 {
   fCircleFitter.Clear();
@@ -2658,7 +2685,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.40 2009/08/22 00:11:59 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.41 2009/08/24 23:40:33 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2674,6 +2701,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.41  2009/08/24 23:40:33  perev
+ * operator=() added
+ *
  * Revision 1.40  2009/08/22 00:11:59  perev
  * Full error matrix + derivatives matrix
  *
