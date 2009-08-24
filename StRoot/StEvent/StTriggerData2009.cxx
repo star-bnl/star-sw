@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.18 2009/08/14 15:06:09 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.19 2009/08/24 22:39:13 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.19  2009/08/24 22:39:13  ullrich
+ * Flag corruption in new member mErrorFlag.
+ *
  * Revision 2.18  2009/08/14 15:06:09  ullrich
  * Added checks of trigger data banks.
  *
@@ -86,7 +89,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     mYear=2009;
     mRun = run;
     mData= new TriggerDataBlk2009;
-    debug = 0;
+    debug = 1;
     
     unsigned int ver = data->FormatVersion; 
     swapI(&ver);
@@ -166,12 +169,19 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
         if (i==0)
 	  {offlen = mData->MainX;}
         else {
-          //printf("Prepost list offset = %d\n",mData->PrePostList[i-1]);
+            //printf("Prepost list offset = %d\n",mData->PrePostList[i-1]);
 	  if(mData->PrePostList[i-1]==0) continue;
 	  offlen = (TrgOfflen2009*) ((char*)mData + mData->PrePostList[i-1]);
-	}
+        }
         swapRawDetOfflen(offlen);
-	int j;
+        for(int k=0; k<y9MAX_OFFLEN; k++){
+	  if(static_cast<unsigned int>(offlen[k].length + offlen[k].offset) > size) {
+                gMessMgr->Warning() << "StTriggerData2009: offset ("<<offlen[k].offset<<") + length ("<<offlen[k].length
+                                    <<") exceeds total size("<<size<<") for data block id="<<k<< endm;
+                assert(0);
+	  }
+        }
+        int j;
         j=offlen[y9BC1_CONF_NUM].length; if(j>0){mBC1[i] = (BELayerBlock2009*)((char*)mData + offlen[y9BC1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBC1[i],y9BC1_CONF_NUM,j);}
         j=offlen[y9MXQ_CONF_NUM].length; if(j>0){mMXQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9MXQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMXQ[i],y9MXQ_CONF_NUM,j);}
         j=offlen[y9MIX_CONF_NUM].length; if(j>0){mMIX[i] = (MIXBlock2009*    )((char*)mData + offlen[y9MIX_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMIX[i],y9MIX_CONF_NUM,j);}
