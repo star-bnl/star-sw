@@ -148,7 +148,7 @@ class fs_index {
   virtual int write(char *fn, char *buff, int sz) { return -1; };
   virtual int getwritevsz(fs_iovec *fsiovec, int n) { return 0; };
   virtual int writev(fs_iovec *iovec, int n) { return -1; };
-  virtual int writev_sticky(fs_iovec *iovec, int n, char *sticky) { return -1; };
+  virtual int writev_sticky(fs_iovec *iovec, int n, int *sticky) { return -1; };
 
   int fileSize(char *fn);
   

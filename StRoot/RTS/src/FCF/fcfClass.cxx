@@ -42,7 +42,7 @@
 #include <rtsSystems.h>
 #include <fcfClass.hh>
 
-static char *fcf_cvs_revision = "$Revision: 1.3 $" ;
+static char *fcf_cvs_revision = "$Revision: 1.4 $" ;
 
 #ifdef __ROOT__	// STAR Offline
 
@@ -270,13 +270,13 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		u_int *ptrs = fastMem->cppStore ;
 #endif
 		register u_int *ptrs_r = ptrs ;
-		register u_int *cpp_r = (u_int *)((u_int)cppin + cppOff[pad]) ;
+		register u_int *cpp_r = (u_int *)((char *)cppin + cppOff[pad]) ;
 		register u_int fe00  = 0xFE00FE00 ;
 
 		u_int *ptrs_end = ptrs_r + 31 ;
 
 
-		//LOG(DBG,"cppin 0x%X, cpp_off[] 0x%X, cpp_r 0x%X, cpp_off 0x%X",(u_int)cppin,cpp_off[pad],(u_int)cpp_r,(u_int)cpp_off,0) ;
+		//LOG(DBG,"cppin 0x%X, cpp_off[] 0x%X, cpp_r 0x%X, cpp_off 0x%X",cppin,cpp_off[pad],cpp_r,cpp_off,0) ;
 
 		while(ptrs_r < ptrs_end) {
 			//asm("#tada") ;
@@ -324,15 +324,15 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 
 #ifdef FCF_10BIT_ADC
-		u_short *val = (u_short *)((u_int)adcin + adcOff[pad]) ;
+		u_short *val = (u_short *)((char *)adcin + adcOff[pad]) ;
 #else
-		u_char *val = (u_char *)((u_int)adcin + adcOff[pad]) ;
+		u_char *val = (u_char *)((char *)adcin + adcOff[pad]) ;
 #endif
 
 #ifdef FCF_SIM_ON
 		u_short *simval ;
 		if(simout) {
-			simval = (u_short *)((u_int)simin + adcOff[pad]) ;
+			simval = (u_short *)((char *)simin + adcOff[pad]) ;
 		}
 		else {
 			simval = 0 ;
@@ -535,7 +535,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					}
 #endif
 
-					//LOG(DBG,"... adc_p 0x%08X (end 0x%08X)",(u_int)adc_p,(u_int)adc_end,0,0,0) ;
+					//LOG(DBG,"... adc_p 0x%08X (end 0x%08X)",adc_p,adc_end,0,0,0) ;
 
 					start++ ;
 
@@ -950,7 +950,7 @@ fcfClass::fcfClass(int det, u_short *table)
 	for(i=0;i<2;i++) {
 		for(j=0;j<FCF_MAX_RES_COU_FAST;j++) {
 			resx[i][j] = res_fast[i] + j ;
-			//LOG(WARN,"B %d:%d = 0x%08X",i,j,(u_int)resx[i][j],0,0) ;
+			//LOG(WARN,"B %d:%d = 0x%08X",i,j,resx[i][j],0,0) ;
 		}
 	}
 	for(i=0;i<2;i++) {

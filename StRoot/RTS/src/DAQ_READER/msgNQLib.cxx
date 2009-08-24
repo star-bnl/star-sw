@@ -57,7 +57,7 @@ int msgNQCreate(char *host, int port, int msglen)
 
 	hostent = gethostbyname(host) ;
 	if(hostent == NULL) {
-		LOG(CRIT,"Unknown host %s",(u_int)host,0,0,0,0) ;
+		LOG(CRIT,"Unknown host %s",host,0,0,0,0) ;
 		return -1 ;
 	}
 
@@ -67,7 +67,7 @@ int msgNQCreate(char *host, int port, int msglen)
 	errno = 0 ;
 	dsc = socket(AF_INET, SOCK_STREAM, 0) ;
 	if(dsc < 0) {
-		LOG(CRIT,"socket() failed [%s]",(u_int)strerror(errno),0,0,0,0) ;
+		LOG(CRIT,"socket() failed [%s]",strerror(errno),0,0,0,0) ;
 		return -1 ;
 	}
 
@@ -77,7 +77,7 @@ int msgNQCreate(char *host, int port, int msglen)
 
 	errno = 0 ;
 	if(connect(dsc,(struct sockaddr *)&me,size) < 0) {
-		LOG(CRIT,"connect() to %s, port %d failed [%s]",(u_int)host,port,(u_int)strerror(errno),0,0) ;
+		LOG(CRIT,"connect() to %s, port %d failed [%s]",host,port,strerror(errno),0,0) ;
 		close(dsc) ;
 		return -1 ;
 	}
@@ -88,7 +88,7 @@ int msgNQCreate(char *host, int port, int msglen)
 	errno = 0 ;
 	ret = fcntl(dsc,F_SETFL, O_NONBLOCK) ;
 	if(ret < 0) {
-		LOG(CRIT,"fcntl() failed [%s]",(u_int)strerror(errno),0,0,0,0) ;
+		LOG(CRIT,"fcntl() failed [%s]",strerror(errno),0,0,0,0) ;
 		close(dsc) ;
 		return -1 ;
 	}
@@ -100,7 +100,7 @@ int msgNQCreate(char *host, int port, int msglen)
 	errno = 0 ;
 	ret = fcntl(dsc,F_GETFL,&modes) ;
 	if(ret < 0) {
-		LOG(CRIT,"fcntl() failed [%s]",(u_int)strerror(errno),0,0,0,0) ;
+		LOG(CRIT,"fcntl() failed [%s]",strerror(errno),0,0,0,0) ;
 		close(dsc) ;
 		return -1 ;
 	}
@@ -109,7 +109,7 @@ int msgNQCreate(char *host, int port, int msglen)
 	errno = 0 ;
 	ret = fcntl(dsc,F_SETFL, modes|O_NONBLOCK) ;
 	if(ret < 0) {
-		LOG(CRIT,"fcntl() failed [%s]",(u_int)strerror(errno),0,0,0,0) ;
+		LOG(CRIT,"fcntl() failed [%s]",strerror(errno),0,0,0,0) ;
 		close(dsc) ;
 		return -1 ;
 	}
@@ -172,14 +172,14 @@ int msgNQSend(int dsc, char *what, int size, int timeout, int prio)
 					if(errno == EINTR) {	// a signal was caught
 						continue ;	// retry ;
 					}
-					LOG(ERR,"poll() returned (%s)",(int)strerror(errno),0,0,0,0) ;
+					LOG(ERR,"poll() returned (%s)",strerror(errno),0,0,0,0) ;
 					return MSG_Q_ERROR ;
 
 				}
 				else break ;
 			}
 			else {
-				LOG(ERR,"Can't write to task (%s)",(int)strerror(errno),0,0,0,0) ;
+				LOG(ERR,"Can't write to task (%s)",strerror(errno),0,0,0,0) ;
 				return MSG_Q_ERROR ;
 			}
 		}
@@ -189,7 +189,7 @@ int msgNQSend(int dsc, char *what, int size, int timeout, int prio)
 	if(ret < 0) return MSG_Q_TIMEOUT ;
 
 	if(ret != size) {
-		LOG(ERR,"Bad size (%d != ret %d) in task %d (%s)",120,ret,dsc,(int)strerror(errno),prio) ;
+		LOG(ERR,"Bad size (%d != ret %d) in task %d (%s)",120,ret,dsc,strerror(errno),prio) ;
 		return MSG_Q_ERROR ;	// oops
 	}
 
@@ -249,7 +249,7 @@ int msgNQReceive(int dsc, char *where, int size, int timeout)
 						LOG(DBG,"Signal caught while in rcv. poll() from task %d...",dsc,0,0,0,0) ;
 						continue ;	// retry ;
 					}
-					LOG(ERR,"poll() returned (%s)",(int)strerror(errno),0,0,0,0) ;
+					LOG(ERR,"poll() returned (%s)",strerror(errno),0,0,0,0) ;
 					return MSG_Q_ERROR ;
 
 				}
@@ -257,7 +257,7 @@ int msgNQReceive(int dsc, char *where, int size, int timeout)
 					
 			}
 			else {
-				LOG(ERR,"Can't read from task %d (%s)",dsc,(int)strerror(errno),0,0,0) ;
+				LOG(ERR,"Can't read from task %d (%s)",dsc,strerror(errno),0,0,0) ;
 				return MSG_Q_ERROR ;
 			}
 		}
@@ -314,7 +314,7 @@ int msgNQCheck(int dsc)
 	// do something to the socket, doesn't matter what...
 	ret = getsockopt(dsc, SOL_SOCKET, SO_KEEPALIVE, (char *)&optval, &size) ;
 	if(ret < 0) {
-		LOG(ERR,"getsockopt() returned error for dsc %d [%s]",dsc,(u_int)strerror(errno),0,0,0) ;
+		LOG(ERR,"getsockopt() returned error for dsc %d [%s]",dsc,strerror(errno),0,0,0) ;
 		return 0 ;	// dead
 	}
 

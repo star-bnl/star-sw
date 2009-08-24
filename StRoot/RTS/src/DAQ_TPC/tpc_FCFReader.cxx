@@ -148,8 +148,8 @@ int daq_tpc::fcfReader(int sector, int *t0c, u_int *gainc, tpc_t *tpc)          
 
     // Point to correct locations...
     for(int i=0;i<182;i++) {
-      adcOff[i+1] = (unsigned int)(&adc[i][0]) - (unsigned int)(&adc[0][0]);
-      cppOff[i+1] = (unsigned int)(&cpp[i][0]) - (unsigned int)(&cpp[0][0]) ;
+      adcOff[i+1] = (char *)(&adc[i][0]) - (char *)(&adc[0][0]);
+      cppOff[i+1] = (char *)(&cpp[i][0]) - (char *)(&cpp[0][0]) ;
     }
 
 //     for(int i=0;i<182;i++) {

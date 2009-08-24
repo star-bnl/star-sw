@@ -33,7 +33,6 @@ char *bsmd_reader(char *e, struct bsmd_desc *bsmd_d)
 
 	off = b2h32(emcp->sec[1].off) ;	// BSMD is at 1
 	len = b2h32(emcp->sec[1].len) ;
-
 	LOG(DBG,"BSMD: sector 1: %d %d",off,len) ;
 
 	if((len==0) || (off==0)) return 0 ;

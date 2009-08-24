@@ -211,7 +211,7 @@ daq_dta *daq_etow::handle_adc()
 
 
 	// unpack 
-	u_short *data = (u_short *)((u_int)raw_dta + 4 + 128) ;	// 4 byte dummy, 128 byte header
+	u_short *data = (u_short *)((char *)raw_dta + 4 + 128) ;	// 4 byte dummy, 128 byte header
 	
 	for(int j=0;j<ETOW_PRESIZE;j++) {
 		for(int i=0;i<ETOW_MAXFEE;i++) {
