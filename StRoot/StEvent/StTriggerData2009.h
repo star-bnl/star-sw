@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.11 2009/08/14 15:06:10 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.12 2009/08/24 22:39:13 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.12  2009/08/24 22:39:13  ullrich
+ * Flag corruption in new member mErrorFlag.
+ *
  * Revision 2.11  2009/08/14 15:06:10  ullrich
  * Added checks of trigger data banks.
  *
@@ -307,11 +310,12 @@ inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name, int hle
       header_length = 12; break;
     }
     if(hlength != data->length + header_length){
+      mErrorFlag = mErrorFlag | (1 << name);
       printf("StTriggerData2009: Error reading Block=%2d [%1c%1c%1c%1c] length %d != %d + %d\n",
 	     name,data->name[0],data->name[1],data->name[2],data->name[3],
 	     hlength,data->length,header_length);      
-      printf("StTriggerData2009: Droping the data block =%2d [%1c%1c%1c%1c]\n",
-	     name,data->name[0],data->name[1],data->name[2],data->name[3]);
+      printf("StTriggerData2009: Droping the data block =%2d [%1c%1c%1c%1c] with ErrorFlag=0x%x\n",
+	     name,data->name[0],data->name[1],data->name[2],data->name[3],mErrorFlag);
       data=0;
       return;
     }
