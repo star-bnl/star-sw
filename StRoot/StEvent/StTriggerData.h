@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.30 2009/06/16 15:44:26 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.31 2009/08/24 22:38:28 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.31  2009/08/24 22:38:28  ullrich
+ * New data member mErrorFlag and referring access fct.
+ *
  * Revision 2.30  2009/06/16 15:44:26  ullrich
  * Added fmsADC() method.
  *
@@ -122,11 +125,12 @@ public:
     
     virtual void dump() const = 0;   //dump data into text
     
-    // version and data type information
+    // version and data type information   
     virtual int year() const;                          // year of the data
     virtual unsigned int version() const = 0;          // TrgDataType Version Number 
     virtual unsigned int numberOfPreXing() const = 0;  // # of pre xing data for detectors
     virtual unsigned int numberOfPostXing() const = 0; // # of post xing data for detectors
+    virtual unsigned int errorFlag() const;            // error flag
 
     // generic trigger infomations
     virtual unsigned int token() const = 0;
@@ -306,8 +310,9 @@ protected:
     int   mYear;
     float mZdcVertexZ;    
     int   mRun;
+    unsigned int mErrorFlag;
 
-    ClassDef(StTriggerData,3) 
+    ClassDef(StTriggerData,4) 
 };
 
 inline void StTriggerData::swapI(unsigned int *var){

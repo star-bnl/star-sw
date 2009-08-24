@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.11 2009/06/16 15:44:26 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.12 2009/08/24 22:38:28 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.12  2009/08/24 22:38:28  ullrich
+ * New data member mErrorFlag and referring access fct.
+ *
  * Revision 2.11  2009/06/16 15:44:26  ullrich
  * Added fmsADC() method.
  *
@@ -46,11 +49,11 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.11 2009/06/16 15:44:26 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.12 2009/08/24 22:38:28 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
-StTriggerData::StTriggerData() : mYear(0), mZdcVertexZ(-999), mRun(0) { /* noop */ }
+StTriggerData::StTriggerData() : mYear(0), mZdcVertexZ(-999), mRun(0), mErrorFlag(0) { /* noop */ }
 
 StTriggerData::~StTriggerData() { /* noop */}
 
@@ -119,6 +122,7 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
 //
 
 int StTriggerData::year() const {return mYear;}
+unsigned int StTriggerData::errorFlag() const {return mErrorFlag;}
 float StTriggerData::zdcVertexZ() const {return mZdcVertexZ;}
 void StTriggerData::setZdcVertexZ(float val) {mZdcVertexZ = val;}
 unsigned short StTriggerData::dsmInput() const {return 0;}
