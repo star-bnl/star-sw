@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.57 2009/07/22 20:23:57 fine Exp $
+ * $Id: EventReader.cxx,v 1.58 2009/08/24 19:56:37 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,8 +23,11 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.58  2009/08/24 19:56:37  fine
+ * Create the fired detector mask. Thanks Tonko
+ *
  * Revision 1.57  2009/07/22 20:23:57  fine
- * generate the EventInfo from the daqReader rather from the DATAP structure
+ *  generate the EventInfo from the daqReader rather from the DATAP structure
  *
  * Revision 1.56  2009/01/08 23:49:23  fine
  * Adjust the EventInfo error message
@@ -220,6 +223,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 #include "EventReader.hh"
+#include "swaps.hh"
 #include <assert.h>
 #include <errno.h>
 #include "StMessMgr.h"
@@ -726,6 +730,30 @@ EventReader::~EventReader()
   if (logfd!=NULL) fclose(logfd);
 }
 
+static inline unsigned int OldDetectorsMask(Pointer *p, int nPointers, bool datapx=false)
+{
+    // The method to recreate the unsupported mask of the detectors
+    unsigned int mask  = 0;
+    unsigned int mbit = datapx ? 0x200 : 0x1; 
+    for (int i=0; i <nPointers; i++, mbit <<= 1) {
+       if ( p[i].offset && p[i].length)  mask |= mbit;
+    }
+    return mask;
+}
+static inline unsigned int OldDetectorsMask(Bank_DATAP *dp)
+{
+    // The method to recreate the unsupported mask of the detectors
+    unsigned int mask  = OldDetectorsMask(&dp->TPC,10);
+    // check datax
+    if (dp->EXT_ID.offset) {
+       INT32 offset = dp->EXT_ID.offset;
+       swap_raw(dp->header.ByteOrder,&offset,1);
+       Bank_DATAPX *datax =  (Bank_DATAPX *) (((unsigned int *)dp) + offset);
+       mask |= OldDetectorsMask(&datax->EXT_DET[0],22,true);
+    }
+    return mask;
+}
+
 EventInfo EventReader::getEventInfo()
 {
 enum {
@@ -763,8 +791,9 @@ enum {
     ei.EventSeqNo    = dr->event_number;
     ei.TrigWord      = dr->trgword;
     ei.TrigInputWord = dp ? dp->TriggerInWord :0;
-    int detpre       = dr->detectors;
-    LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<<endm;
+    unsigned int detpre = dr->detectors;
+//    LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<< OldDetectorsMask(dp) << endm;
+//    assert( (detpre == OldDetectorsMask(dp)) && " Detecor mask mismatch" );
 
     for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
       *p = !!(detpre&1); detpre>>=1;                                }
