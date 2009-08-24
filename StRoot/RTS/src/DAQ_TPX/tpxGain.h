@@ -47,6 +47,7 @@ public:
 		//short wrong_peak ;	// hm?
 		short cou ;		// count of good events
 		short need ;		// count of expected events!
+		u_int adc_store[20] ;
 	} *aux	;	// [24][46][182]
 
 	struct aux *get_aux(int s, int r, int p) {
@@ -91,6 +92,10 @@ public:
 
 	void free_store() ;
 
+	u_int c_date ;	// date of file as YYYYMMDD
+	u_int c_time ;	// time of file as HHMMSS
+	u_int c_run ;	// run of file
+
 private:
 	void do_default(int sector) ;
 
@@ -101,6 +106,11 @@ private:
 	int sector ;
 	int events ;
 	int tb_start, tb_stop ;	// timebin window
+
+//	struct tpx_odd_fee_t tpx_odd_fee[256] ;
+//	int tpx_odd_fee_count  ;
+
+
 	//int charge_peak ;	// peak of the charge
 } ;
 
