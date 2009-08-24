@@ -5,14 +5,40 @@ TObjArray  *HList=0;
 TFile *fd=0;
 
 void RunJetSimuSkimReader(int nevents=100,
-			  const char* jetInFile = "/star/data04/sim/staszak/2006jets/2006jets_30grids/jets_pt4_01.root",
-			  const char* skimInFile = "/star/data04/sim/staszak/2006jets/2006jets_30grids/skim_pt4_01.root",
-			  const char* histfile = "pt4.hist.root")
+			  const char* jetInFile = "/star/institutions/uky/jettrees/jets_pt35_01.root",
+			  const char* skimInFile = "/star/institutions/uky/jettrees/skim_pt35_01.root",
+			  const char* histfile = "pt35.hist.root")
 {
   
  
-  setMacroPath();
-  gROOT->Macro("LoadJetLibraries.C");
+  //setMacroPath();
+  //gROOT->Macro("LoadJetLibraries.C");
+
+  // Load shared libraries
+  gROOT->Macro("loadMuDst.C");
+  gSystem->Load("StTpcDb");
+  gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("StMcEvent");
+  gSystem->Load("StMcEventMaker");
+  gSystem->Load("StDaqLib");
+  gSystem->Load("StEmcRawMaker");
+  gSystem->Load("StEmcADCtoEMaker");
+  gSystem->Load("StEpcMaker");
+  gSystem->Load("StEmcSimulatorMaker");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
+  gSystem->Load("StSpinDbMaker");
+  gSystem->Load("StEmcTriggerMaker");
+  gSystem->Load("StTriggerUtilities");
+  gSystem->Load("StMCAsymMaker");
+  gSystem->Load("StJetFinder");
+  gSystem->Load("StJetSkimEvent");
+  gSystem->Load("StJets");
+  gSystem->Load("StJetMaker");
+
   double pi = atan(1.0)*4.0;
   cout << " loading done " << endl;
    
@@ -32,8 +58,8 @@ void RunJetSimuSkimReader(int nevents=100,
   jetReader->InitJetSkimFile(skimInFile);
   int ready = jetReader->preparedForDualRead();
   HList=new TObjArray ;
-  jetReader->SetHList(HList);
-  jetReader->PythiaAnaHisto();
+  //jetReader->SetHList(HList);
+  //jetReader->PythiaAnaHisto();
   
   chain->PrintInfo();
   
@@ -49,7 +75,7 @@ void RunJetSimuSkimReader(int nevents=100,
       break;
     }
     //Here's where you can do your analysis, for an example look in this method
-    jetReader->PythiaAna();
+    //jetReader->PythiaAna();
   } 
   chain->Finish(); 
   cout << "****************************************** " << endl;
