@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.58 2009/08/24 19:56:37 fine Exp $
+ * $Id: EventReader.cxx,v 1.59 2009/08/24 20:17:20 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,8 +23,8 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
- * Revision 1.58  2009/08/24 19:56:37  fine
- * Create the fired detector mask. Thanks Tonko
+ * Revision 1.59  2009/08/24 20:17:20  jml
+ * remove 1.57, install correct handling of detectors present
  *
  * Revision 1.57  2009/07/22 20:23:57  fine
  *  generate the EventInfo from the daqReader rather from the DATAP structure
@@ -223,7 +223,6 @@
 #include <sys/uio.h>
 #include <unistd.h>
 #include "EventReader.hh"
-#include "swaps.hh"
 #include <assert.h>
 #include <errno.h>
 #include "StMessMgr.h"
@@ -730,75 +729,65 @@ EventReader::~EventReader()
   if (logfd!=NULL) fclose(logfd);
 }
 
-static inline unsigned int OldDetectorsMask(Pointer *p, int nPointers, bool datapx=false)
+int EventReader::system_present(Bank_DATAP *datap, int sys)
 {
-    // The method to recreate the unsupported mask of the detectors
-    unsigned int mask  = 0;
-    unsigned int mbit = datapx ? 0x200 : 0x1; 
-    for (int i=0; i <nPointers; i++, mbit <<= 1) {
-       if ( p[i].offset && p[i].length)  mask |= mbit;
+  Point *pointer;
+  datap->swap();
+
+  if(sys >= 10) {
+    pointer = &datap->EXT_ID;
+    if((pointer->offset == 0) || (pointer->length == 0)) {
+      return 0;
     }
-    return mask;
-}
-static inline unsigned int OldDetectorsMask(Bank_DATAP *dp)
-{
-    // The method to recreate the unsupported mask of the detectors
-    unsigned int mask  = OldDetectorsMask(&dp->TPC,10);
-    // check datax
-    if (dp->EXT_ID.offset) {
-       INT32 offset = dp->EXT_ID.offset;
-       swap_raw(dp->header.ByteOrder,&offset,1);
-       Bank_DATAPX *datax =  (Bank_DATAPX *) (((unsigned int *)dp) + offset);
-       mask |= OldDetectorsMask(&datax->EXT_DET[0],22,true);
+
+    Bank_DATAPX *datapx = (Bank_DATAPX *)(((INT32 *)pBankDATAP) + (ptr->offset));
+    datapx->swap();
+
+    pointer = &datapx->EXT_DET[sys-10];
+    if((pointer->offset == 0) || (pointer->length == 0)) {
+      return 0;
     }
-    return mask;
+  }
+  else {
+    pointer = &datap->TPC;
+    pointer += sys;
+    if((pointer->offset == 0) || (pointer->length == 0)) {
+      return 0;
+    }
+  }
+  return 1;
 }
 
 EventInfo EventReader::getEventInfo()
 {
-enum {
- TPC_SYSTEM  =    0
-,SVT_SYSTEM  =    1
-,TOF_SYSTEM  =    2
-,BTOW_SYSTEM =    3  //EMC Barrel Tower
-,FPD_SYSTEM  =    4
-,FTP_SYSTEM  =    5
-,EXT_SYSTEM  =    6 // ignore
-,RIC_SYSTEM  =    7
-,TRG_SYSTEM  =    8
-,L3_SYSTEM   =    9
-,SC_SYSTEM   =   10 // reserved for Slow Controls
-,EXT2_SYSTEM =   11 // ignore
-,PMD_SYSTEM  =   12
-,SSD_SYSTEM  =   13
-,ETOW_SYSTEM =   14 //EMC EndCup Tower
-,DAQ_SYSTEM  =   15 // ignore
-,FP2_SYSTEM  =   16 // reserved for future FPD
-,PP_SYSTEM   =   17 // ignore
-,BSMD_SYSTEM =   18 //EMC Barrel Shower
-,ESMD_SYSTEM =   19 //EMC Endcup Shower
-};
+  enum {
+    TPC_SYSTEM  =    0
+    ,SVT_SYSTEM  =    1
+    ,TOF_SYSTEM  =    2
+    ,BTOW_SYSTEM =    3  //EMC Barrel Tower
+    ,FPD_SYSTEM  =    4
+    ,FTP_SYSTEM  =    5
+    ,EXT_SYSTEM  =    6 // ignore
+    ,RIC_SYSTEM  =    7
+    ,TRG_SYSTEM  =    8
+    ,L3_SYSTEM   =    9
+    ,SC_SYSTEM   =   10 // reserved for Slow Controls
+    ,EXT2_SYSTEM =   11 // ignore
+    ,PMD_SYSTEM  =   12
+    ,SSD_SYSTEM  =   13
+    ,ETOW_SYSTEM =   14 //EMC EndCup Tower
+    ,DAQ_SYSTEM  =   15 // ignore
+    ,FP2_SYSTEM  =   16 // reserved for future FPD
+    ,PP_SYSTEM   =   17 // ignore
+    ,BSMD_SYSTEM =   18 //EMC Barrel Shower
+    ,ESMD_SYSTEM =   19 //EMC Endcup Shower
+  };
 
   //cout << "Getting event info" << endl;
   EventInfo ei;
   memset(&ei,0,sizeof(EventInfo));
   Bank_DATAP *dp   = (Bank_DATAP *)DATAP; 
-  if  ( daqReader *dr = getDaqReader() ) {
-     //  use the daqReader data is present
-    ei.Token         = dr->token;
-    ei.EventLength   = dr->bytes;
-    ei.UnixTime      = dr->evt_time;
-    ei.EventSeqNo    = dr->event_number;
-    ei.TrigWord      = dr->trgword;
-    ei.TrigInputWord = dp ? dp->TriggerInWord :0;
-    unsigned int detpre = dr->detectors;
-//    LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<< OldDetectorsMask(dp) << endm;
-//    assert( (detpre == OldDetectorsMask(dp)) && " Detecor mask mismatch" );
-
-    for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
-      *p = !!(detpre&1); detpre>>=1;                                }
-    ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
-  } else if (dp) {
+  if (dp) {
     ei.Token         = dp->header.Token;
     ei.EventLength   = dp->EventLength;
     ei.UnixTime      = dp->Time;
@@ -808,11 +797,15 @@ enum {
     int detpre       = dp->DetectorPresence;
     LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<<endm;
 
+    int sys = 0;
     for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
-      *p = !!(detpre&1); detpre>>=1;                                }
+      if(system_present(dp, sys)) *p = 1;
+      else *p = 0;
+      sys++;
+    }
     ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent|ei.TRGPresent);
   } else {
-     LOG_ERROR << "EventReader::getEventInfo: No EventInfo is available with the new DAQ" << endm;
+    LOG_ERROR << "EventReader::getEventInfo: No DATAP exists" << endm;
   }
   return ei;
 }

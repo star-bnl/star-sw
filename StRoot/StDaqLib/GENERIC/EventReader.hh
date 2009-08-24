@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.24 2009/08/24 20:04:43 jml Exp $
+ * $Id: EventReader.hh,v 1.25 2009/08/24 20:17:20 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.25  2009/08/24 20:17:20  jml
+ * remove 1.57, install correct handling of detectors present
+ *
  * Revision 1.24  2009/08/24 20:04:43  jml
  * changing back
  *
@@ -471,6 +474,7 @@ public:
   daqReader *getDaqReader() { return fDaqReader; };
   void setDaqReader(daqReader *rdr) { fDaqReader = rdr; }
   struct EventInfo getEventInfo();
+  int system_present(Bank_DATAP *datap, int sys);
 
   void printEventInfo(FILE *fd=stdout);
   void fprintError(int err, char *file, int line, char *userstring);
