@@ -394,13 +394,13 @@ int FtfFinder::setConformalCoordinates ( )
 -------------------------------------------------------------------------*/
      thisHit = &(hit[ihit]) ;
 
-     uint v1 = (uint)volumeC;
-     uint v2 = (uint)&volumeC[20746];
-     uint h = (uint)thisHit;
+     uint *v1 = (uint *)volumeC;
+     uint *v2 = (uint *)&volumeC[20746];
+     uint *h = (uint *)thisHit;
      
      if((h>v1) && (h<v2)) {
-       printf("hit: 0x%x v1=0x%x v2=0x%x ihit=%d nHits=%d hit=0x%x\n",
-	      h,v1,v2,ihit,nHits,(uint)hit);
+       printf("hit: 0x%p v1=0x%p v2=0x%p ihit=%d nHits=%d hit=0x%p\n",
+	      h,v1,v2,ihit,nHits,hit);
      }
 
 

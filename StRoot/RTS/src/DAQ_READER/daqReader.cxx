@@ -88,22 +88,22 @@ daqReader::daqReader(char *name)
   // This code is reached only if the argument was non-NULL
   // file or directory?
   if(stat64(fname, &stat_buf) < 0) {	// error
-    LOG(CRIT,"Can't stat \"%s\" [%s]",(int)fname,(int)strerror(errno),0,0,0);
+    LOG(CRIT,"Can't stat \"%s\" [%s]",fname,strerror(errno),0,0,0);
     status = EVP_STAT_CRIT;
     sleep(1);
     return;
   }
 
-  LOG(INFO,"Using file \"%s\"...",(int)fname,0,0,0,0) ;
+  LOG(INFO,"Using file \"%s\"...",fname,0,0,0,0) ;
 
   // directory?
   if(stat_buf.st_mode & S_IFDIR) {
-    LOG(DBG,"Running through a directory %s...",(uint)fname,0,0,0,0) ;
+    LOG(DBG,"Running through a directory %s...",fname,0,0,0,0) ;
     input_type = dir;
 
     // change to that directory...
     if(chdir(fname) < 0) {
-      LOG(ERR,"Can't chdir %s [%s]",(int)fname,(int)strerror(errno),0,0,0) ;
+      LOG(ERR,"Can't chdir %s [%s]",fname,strerror(errno),0,0,0) ;
       sleep(1) ;
       return ;
     }
@@ -120,11 +120,11 @@ daqReader::daqReader(char *name)
   strcpy(file_name,fname) ;
 
   // descriptor for ".daq" view of file...
-  LOG(DBG,"Running through a file %s of %d bytes",(int)fname,file_size,0,0,0) ;
+  LOG(DBG,"Running through a file %s of %d bytes",fname,file_size,0,0,0) ;
 	
   desc = open64(fname,O_RDONLY,0444) ;
   if(desc < 0) {	// error
-    LOG(ERR,"Can't open %s [%s]",(int)fname,(int)strerror(errno),0,0,0) ;
+    LOG(ERR,"Can't open %s [%s]",fname,strerror(errno),0,0,0) ;
     sleep(1) ;
     return ;
   }
@@ -226,7 +226,7 @@ char *daqReader::setEvpDisk(char *name)
 
 daqReader::~daqReader(void)
 {
-	LOG(DBG,"Destructor %s",(uint)fname,0,0,0,0) ;
+	LOG(DBG,"Destructor %s",fname,0,0,0,0) ;
 
 	// clean-up input file...
 	if(desc >= 0) close(desc) ;
@@ -671,7 +671,7 @@ int daqReader::getEventSize()
     LOG(DBG, "Space left = %d",space_left);
 
     if(space_left == 0) return 0;
-    if(space_left < (int)sizeof(LOGREC)) return -1;
+    if(space_left < (long long int)sizeof(LOGREC)) return -1;
 
     m = headermap.map(desc, offset, space_left);
     if(!m) {
@@ -866,7 +866,7 @@ int daqReader::openEventFile()
 
   desc = open64(file_name,O_RDONLY,0666) ;
   if(desc < 0) {	
-    LOG(ERR,"Error opening file %s [%s] - skipping...",(int)file_name,(int)strerror(errno),0,0,0) ;
+    LOG(ERR,"Error opening file %s [%s] - skipping...",file_name,strerror(errno),0,0,0) ;
     status = EVP_STAT_EVT ;
     return -1; 
   }
@@ -874,7 +874,7 @@ int daqReader::openEventFile()
   // get the file_size ;
   int ret = stat64(file_name,&stat_buf) ;
   if(ret < 0) {	
-    LOG(ERR,"Can't stat %s",(int)file_name,0,0,0,0) ;
+    LOG(ERR,"Can't stat %s",file_name,0,0,0,0) ;
     status = EVP_STAT_EVT ;
     close(desc) ;
     desc = -1 ;
@@ -1569,8 +1569,8 @@ int daqReader::reconnect(void)
     evpDesc = msgNQCreate(EVP_HOSTNAME,EVP_PORT,120) ;
 
     if(evpDesc < 0) {
-      LOG(ERR,"Can't create connection to %s:%d [%s] - will retry...",(u_int)EVP_HOSTNAME,EVP_PORT,
-	  (u_int)strerror(errno),0,0) ;
+      LOG(ERR,"Can't create connection to %s:%d [%s] - will retry...",EVP_HOSTNAME,EVP_PORT,
+	  strerror(errno),0,0) ;
       fprintf(stderr,"CRITICAL: Can't create connection to %s:%d [%s] - will retry...\n",EVP_HOSTNAME,EVP_PORT,
 	      strerror(errno)) ;
       sleep(1) ;
@@ -1583,7 +1583,7 @@ int daqReader::reconnect(void)
     }
 
 
-    LOG(DBG,"Opened connection to %s, port %d on descriptor %d",(u_int)EVP_HOSTNAME, EVP_PORT,evpDesc,0,0) ;
+    LOG(DBG,"Opened connection to %s, port %d on descriptor %d",EVP_HOSTNAME, EVP_PORT,evpDesc,0,0) ;
 
     msg.head.daq_cmd = RTS_ETHDOOR_ANNOUNCE ;
     msg.head.status = 0 ;
@@ -1618,7 +1618,7 @@ int daqReader::reconnect(void)
 
     ret = msgNQSend(evpDesc,(char *)&msg,120,60) ;
     if(ret < 0) {
-      LOG(ERR,"Can't send data to %s! - will reconnect...",(u_int)EVP_HOSTNAME,0,0,0,0) ;
+      LOG(ERR,"Can't send data to %s! - will reconnect...",EVP_HOSTNAME,0,0,0,0) ;
       msgNQDelete(evpDesc) ;
       evpDesc = -1 ;
       continue ;
@@ -1898,7 +1898,7 @@ char *MemMap::map(int _fd, long long int _offset, int _size)
   madvise(actual_mem_start, actual_size, MADV_SEQUENTIAL);
   
   if(((void *)actual_mem_start) == MAP_FAILED) {
-    LOG(ERR,"Error in mmap (%s)",(int)strerror(errno),0,0,0,0) ;
+    LOG(ERR,"Error in mmap (%s)",strerror(errno),0,0,0,0) ;
 
     mem=NULL;
     offset=0;

@@ -155,7 +155,10 @@ ifeq (${TARGET_SYSTEM},LINUX)
 	ifeq (${TARGET_CPU},604) 
 		HOSTFLAGS = -mcpu=$(TARGET_CPU)
 	else
-		HOSTFLAGS = -march=$(TARGET_CPU)
+		ifeq (${TARGET_CPU},x86_64)
+		else
+			HOSTFLAGS = -march=$(TARGET_CPU)
+		endif
 	endif
 else
 	HOSTFLAGS = -mcpu=$(TARGET_CPU)
@@ -275,6 +278,9 @@ endif
 ifeq (${TARGET_CPU}, i686)
 	HOSTDEFINES += -DRTS_LITTLE_ENDIAN
 else
+ifeq (${TARGET_CPU}, x86_64)
+	HOSTDEFINES += -DRTS_LITTLE_ENDIAN
+else
 ifeq (${TARGET_CPU}, 21264)
 	HOSTDEFINES += -DRTS_LITTLE_ENDIAN
 else
@@ -288,6 +294,7 @@ ifeq (${TARGET_CPU}, ultrasparc)
 	HOSTDEFINES += -DRTS_BIG_ENDIAN
 else
 	HOSTDEFINES += -DRTS_BIG_ENDIAN
+endif
 endif
 endif
 endif

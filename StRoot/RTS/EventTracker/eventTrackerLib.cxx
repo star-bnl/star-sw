@@ -27,7 +27,7 @@ int EventTracker::trackEvent(daqReader *rdr, char *mem, L3_P *l3p, int max_size)
   DATAP *datap = (DATAP *)mem;
   // Build L3_p
   int ret=0;
-  uint buff = (uint)l3p;
+  char *buff = (char *)l3p;
 
   // First do tracking...
   L3_GTD *gtd = (L3_GTD *)(buff + sizeof(L3_P));

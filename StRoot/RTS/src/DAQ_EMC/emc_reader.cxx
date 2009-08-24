@@ -80,22 +80,21 @@ static struct emc_describe_t {
 
 int emc_reader(char *m, struct emc_t *emc, u_int driver, int rts_id, char *ptrs[12], int f_bytes[12]) 
 {
-	struct DATAP *datap = (struct DATAP *)m ;
-	struct DATAPX *datapx ;
-	struct EMCP *emcp;
-	struct EMCSECP *emcsecp ;
-	struct EMCRBP *emcrbp ; 
-	struct DUMMYDATA *dummy ;
-	int len, off ;
-	int err ;
-
-	int swapdatap = 0;
-	int swapdatapx = 0;
-	int swapemcp = 0;
-
 #if 1
 	return 0 ;
 #else
+  	struct DATAP *datap = (struct DATAP *)m ;
+  	struct DATAPX *datapx ;
+  	struct EMCP *emcp;
+  	struct EMCSECP *emcsecp ;
+  	struct EMCRBP *emcrbp ; 
+  	struct DUMMYDATA *dummy ;
+  	int len, off ;
+  	int err ;
+
+  	int swapdatap = 0;
+  	int swapdatapx = 0;
+  	int swapemcp = 0;
 
 	// setup
 	if(datap == 0) return 0 ;
@@ -564,11 +563,11 @@ int readBTOW(u_short *_data, int token)
 
   emc_p->btow_in = 1;
 
-  data = (u_short *)((u_int)_data + 4 + 4);
+  data = (u_short *)((char *)_data + 4 + 4);
   thi = l2h16(*data);
-  data = (u_short *)((u_int)_data + 4 + 6);
+  data = (u_short *)((char *)_data + 4 + 6);
   tlo = l2h16(*data);
-  data = (u_short *)((u_int)_data + 4 + 128);
+  data = (u_short *)((char *)_data + 4 + 128);
 
   local_token = thi * 256 + tlo ;
 
@@ -577,7 +576,7 @@ int readBTOW(u_short *_data, int token)
   }		
 
   // 4 bytes dummy, 128 bytes fiber header...
-  data = (u_short *)((u_int)_data + 4 + 128);
+  data = (u_short *)((char *)_data + 4 + 128);
   emc_p->btow_raw = data ;
 						
   // get the preamble
@@ -625,11 +624,11 @@ int readETOW(u_short *_data, int token) {
   // ...but first grab the token from the header...
 
   
-  data = (u_short *)((u_int)_data + 4 + 4);
+  data = (u_short *)((char *)_data + 4 + 4);
   thi = l2h16(*data);
-  data = (u_short *)((u_int)_data + 4 + 6);
+  data = (u_short *)((char *)_data + 4 + 6);
   tlo = l2h16(*data);
-  data = (u_short *)((u_int)_data + 4 + 128);
+  data = (u_short *)((char *)_data + 4 + 128);
 
   local_token = thi * 256 + tlo ;
 

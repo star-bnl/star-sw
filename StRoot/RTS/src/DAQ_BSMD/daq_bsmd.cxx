@@ -141,7 +141,7 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 
 		memset(bsmd,0,sizeof(bsmd_t)) ;	
 
-		u_short *data = (u_short *)((u_int)bsmd_d.dta[r-1][1]) ;	// move to data start
+		u_short *data = (u_short *)(bsmd_d.dta[r-1][1]) ;	// move to data start
 
 		if(bsmd_d.endian[r-1][1]) {	// big!
 			version = b2h16(data[0]) ;
@@ -240,7 +240,7 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 			
 		if(bsmd_d.bytes[r-1][2] == 0) continue ;
 
-		u_short *data = (u_short *)((u_int)bsmd_d.dta[r-1][2]) ;	// move to data start
+		u_short *data = (u_short *)(bsmd_d.dta[r-1][2]) ;	// move to data start
 
 		LOG(DBG,"BSMD PEDR: rdo %d: 0x%04X 0x%04X 0x%04X 0x%04X",r,data[0],data[1],data[2],data[3]) ;
 
@@ -327,11 +327,11 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 //		memset(bsmd,0,sizeof(bsmd_t)) ;	
 
 		// cap is 64 bytes after the start
-		bsmd->cap = *(char *)((u_int)bsmd_d.dta[r-1][0] + 4 + 4*16) ;
+		bsmd->cap = *(char *)((char *)bsmd_d.dta[r-1][0] + 4 + 4*16) ;
 
 		LOG(DBG,"Found cap %d",bsmd->cap) ;
 
-		u_short *data = (u_short *)((u_int)bsmd_d.dta[r-1][0] + 4 + 256) ;	// move to data start
+		u_short *data = (u_short *)((char *)bsmd_d.dta[r-1][0] + 4 + 256) ;	// move to data start
 		
 		for(int c=0;c<BSMD_DATSIZE;c++) {
 			bsmd->adc[c] = l2h16(*data++) ;

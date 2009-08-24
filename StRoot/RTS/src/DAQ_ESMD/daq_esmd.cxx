@@ -178,7 +178,7 @@ daq_dta *daq_esmd::handle_adc()
 
 
 		
-	u_short *data = (u_short *)((u_int)raw_dta + 128) ;	
+	u_short *data = (u_short *)((char *)raw_dta + 128) ;	
 
 	if(present & DET_PRESENT_DATAP) {
 		data += 2 ;	// for old, VME based RBs we need to also skip 4 bytes of junk

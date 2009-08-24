@@ -154,7 +154,7 @@ int trg_reader(char *m, struct trg_t *trg, u_int driver, u_int evp_daqbits)
 	if(trgp_banks >= 2) {
 	  if(trgp->trgId.len && trgp->trgId.off) {
 	    int off = qswap32(swaptrgp, trgp->trgId.off);
-	    struct TRGID *trgid = (struct TRGID *)((u_int)trgp + 4*off) ;
+	    struct TRGID *trgid = (struct TRGID *)((char *)trgp + 4*off) ;
 
 	    if(trgid->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swaptrgid = 1;
 	    
@@ -178,7 +178,7 @@ int trg_reader(char *m, struct trg_t *trg, u_int driver, u_int evp_daqbits)
 	if(trgp->trgData.off == 0) return 0 ;
 
 	off = qswap32(swaptrgp, trgp->trgData.off);
-	trgd = (struct TRGD *) ((u_int)trgp + 4*off) ;
+	trgd = (struct TRGD *) ((char *)trgp + 4*off) ;
 
 	if(trgd->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swaptrgd = 1;
 	
