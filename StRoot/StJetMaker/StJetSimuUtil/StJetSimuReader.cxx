@@ -101,6 +101,7 @@ void StJetSimuReader::InitFile(const char* file)
 	  LOG_DEBUG <<"\t\tset branch address for branch:\t"<<bname.c_str()<<endm;
 	  t->SetBranchStatus(bname.c_str(), 1);
 	  t->SetBranchAddress(bname.c_str(), &jets);
+          branch->SetAutoDelete(true);
 	}
     }
 
