@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.13 2008/12/29 15:24:54 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.14 2009/08/24 20:16:41 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.14  2009/08/24 20:16:41  fisyak
+// Freeze with new Altro parameters
+//
 // Revision 1.13  2008/12/29 15:24:54  fisyak
 // Freeze ~/WWW/star/Tpc/TpcRS/ComparisonMIP31
 //
@@ -19,7 +22,8 @@
 //
 // doxygen info here
 /*
-  Version 26 o. additional gain, correct transverse diffusion 
+  All formula for induced signal are taken from 
+  http://www.inst.bnl.gov/programs/gasnobledet/publications/Mathieson's_Book.pdf
 */
 #include <assert.h>
 #include "StTpcRSMaker.h"
@@ -39,6 +43,7 @@
 #include "TProfile2D.h"
 #include "TVirtualMC.h"
 #include "TInterpreter.h"
+#include "Math/SpecFuncMathMore.h"
 // Chain
 #include "StBFChain.h"
 // Dave's Header file
@@ -49,11 +54,13 @@
 #include "StDetectorDbMaker/St_TpcAltroParametersC.h"
 #include "StDetectorDbMaker/St_asic_thresholdsC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+
 #include "StTpcRawData.h"
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.13 2008/12/29 15:24:54 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.14 2009/08/24 20:16:41 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -99,7 +106,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   I0(13.1),
   mCluster(3.2), tauGlobalOffSet(0), 
   OmegaTauC(2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
-  transverseDiffusionConstant(0.049), // (0.0514), // (0.0623), 
+  transverseDiffusionConstant(0.040), // (0.049), // (0.0514), // (0.0623), 
   longitudinalDiffusionConstant(0.0360), 
   Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision with data
   Outer_wire_to_plane_couplingScale(5.0718e-01*1.43), //  -"-
@@ -117,7 +124,8 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
 #endif
   mAveragePedestal(50.0), //1.24102e+02), 
   mAveragePedestalRMS(0.5), //  tonko's rms =1.4), //1.95684e+01),
-  mAveragePedestalRMSX(0.3), // tonkos rms = 0.8), //1.95684e+01),
+  //  mAveragePedestalRMSX(0.3), // tonkos rms = 0.8), //1.95684e+01),
+  mAveragePedestalRMSX(0.06), // tonkos rms = 0.04 - 0.08 06/22/09
   minSignal(1e-3),
   LorenzAngle(8), // degrees for P10 at B = 4 kG and E = 1.5 kV/cm
   InnerAlphaVariation(0),
@@ -129,7 +137,14 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   ElectronRangePower(1.78), // sigma =  ElectronRange*(eEnery/ElectronRangeEnergy)**ElectronRangePower
   CrossTalkInner    (0), //(4e-3), //0.15),
   CrossTalkOuter    (0), //(4e-3)  //0.025)
-  mtauIntegrationX(74.6e-9), // secs
+  //  mtauIntegrationX(74.6e-9), // secs
+#if 0
+  mtauIntegrationX(2.5* 74.6e-9), // secs
+#else
+  //E  mtauIntegrationX(     74.6e-9/2.5), // secs
+  mtauIntegrationX(     74.6e-9), // secs
+#endif
+  mtauCX(1000e-9),
   mtauIntegration (2.5* 74.6e-9), // secs
   NoOfSectors(24),
   NoOfRows(45),
@@ -137,12 +152,17 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   NoOfPads(182),
   NoOfTimeBins(512),
   tauF(394.0e-9), 
-  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
+  //not used  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
   tauP(775.0e-9),
   mSigmaJitterTI(0.6), // v30(0.5),  //v29 (0.25), // v28 (0.10), // timebuckets from comparison rho*phi 
   mSigmaJitterTO(0.5), // v30 (0.3),  //v29 (0.25), // v28 (0.20), // and z resolutions
+#if 0
   mSigmaJitterXI(0.1), // v30 (0.057), //v28 0.172), // cm
   mSigmaJitterXO(0.1), // v30 (0.066), //v28 (0.198),
+#else
+  mSigmaJitterXI(0.0), // v30 (0.057), //v28 0.172), // cm
+  mSigmaJitterXO(0.0), // v30 (0.066), //v28 (0.198),
+#endif
   mAltro(0),
   mCutEle(1e-3)
 {
@@ -296,7 +316,11 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
     if (! fgTimeShape0[io]) {// new electronics only integration
       fgTimeShape0[io] = new TF1(Form("TimeShape%s",Names[io]),
 			    shapeEI,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,5);
-      fgTimeShape0[io]->SetParNames("t0","tauI","width","norm","io");
+      fgTimeShape0[io]->SetParNames("t0","tauI","width","tauC","io");
+#if 0
+      params0[3] = (io == 0) ? 2.457e-6 : 11.463e-6; // tauC
+#endif
+      params0[3] = mtauCX;
       fgTimeShape0[io]->SetParameters(params0);
       params0[3] = fgTimeShape0[io]->Integral(0,timeBinMax*mTimeBinWidth);
       fgTimeShape0[io]->SetTitle(fgTimeShape0[io]->GetName());
@@ -446,8 +470,6 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   // tss
   
   W = St_tss_tssparC::instance()->ave_ion_pot()*GeV; // eV
-  InnerSectorGasGain = St_tss_tssparC::instance()->gain_in();
-  OuterSectorGasGain = St_tss_tssparC::instance()->gain_out();
   Inner_wire_to_plane_coupling = St_tss_tssparC::instance()->wire_coupling_in() ;//0.90914;//0.81;//avr for 2 highest points// 0.774; // average for 3 points
   Outer_wire_to_plane_coupling = St_tss_tssparC::instance()->wire_coupling_out();//1.01459;//1.02;//                        // 0.972;
   numberOfElectronsPerADCcount = St_tss_tssparC::instance()->scale();
@@ -528,6 +550,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #endif
       do {
 	Int_t iPadrow = volId%100;
+	InnerSectorGasGain = St_tss_tssparC::instance()->gain_in(sector,iPadrow);
+	OuterSectorGasGain = St_tss_tssparC::instance()->gain_out(sector,iPadrow);
 	Int_t Id         = tpc_hit->track_p;
 	Int_t TrackId    = Id;
 	Int_t id3        = tpc_track[Id-1].start_vertex_p;
@@ -825,13 +849,15 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      TF1 *mShaperResponse = mShaperResponses[io][sector-1];
 	      for(Int_t pad = padMin; pad <= padMax; pad++) {
 		Double_t dt = dT;
+		Double_t gain = 1;
 		if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
-		  Double_t gain   = gStTpcDb->tpcGain()->Gain(sector,row,pad);
+		  Double_t gain   = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
 		  if (gain <= 0.0) continue;
+		  dt -= St_tpcPadGainT0C::instance()->T0(sector,row,pad);
 		}
 		Double_t xPad = pad - padX;
 		Double_t xpad[1] = {xPad};
-		Double_t localXDirectionCoupling = PadResponseFunction->GetSave(xpad);
+		Double_t localXDirectionCoupling = gain*PadResponseFunction->GetSave(xpad);
 		if (localXDirectionCoupling < minSignal) continue;
 		Double_t XYcoupling = localYDirectionCoupling*localXDirectionCoupling;
 		if(XYcoupling < minSignal)  continue;
@@ -1069,7 +1095,7 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
     Int_t io = 0;
     if (row > 13) io = 1;
     for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
-      gain   = gStTpcDb->tpcGain()->Gain(Sector,row,pad);
+      gain = St_tpcPadGainT0C::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
 #if 0
       gain  /= gainCorrection[io][itpc];
@@ -1080,7 +1106,34 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
       static UShort_t IDTs[512];
       memset(ADCs, 0, sizeof(ADCs));
       memset(IDTs, 0, sizeof(IDTs));
+      Int_t NoTB = 0;
+      index = NoOfTimeBins*((row-1)*NoOfPads+pad-1);
+      for (bin = 0; bin < NoOfTimeBins; bin++,index++) {
+	//	Int_t index= NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin;
+	// Digits : gain + ped
+	if (pedRMS > 0) {
+	  adc = (Int_t) (SignalSum[index].Sum/gain + gRandom->Gaus(ped,pedRMS));
+	  adc = adc - (int) ped;
+	}
+	else            adc = (Int_t) (SignalSum[index].Sum/gain);
+	if (adc > 1023) adc = 1023;
+	if (adc < 1) continue;
+	SignalSum[index].Adc = adc;
+	NoTB++;
+	ADCs[bin] = adc;
+	IDTs[bin] = SignalSum[index].TrackId;
+#if 0
+	if (Debug() > 1) {
+	  cout << "digi R/P/T/I = " << row << " /\t" << pad << " /\t" << bin << " /\t" << index 
+	       << "\tSum/Adc/TrackId = " << SignalSum[index].Sum << " /\t" 
+	       << SignalSum[index].Adc << " /\t" << SignalSum[index].TrackId << endl;
+	}
+#endif
+      }
+      if (! NoTB) continue;
       if (St_TpcAltroParametersC::instance()->N(sector-1) >= 0 && ! mAltro) {
+	mAltro = new Altro(512,ADCs);
+#ifdef y2008
 	/* Tonk 06/25/08
 First, there is no BSL1 (which is the pedestal subtraction) since
 you're data is already subtracted.
@@ -1099,7 +1152,6 @@ so try them.
 Jeff,what were the "ASIC" parameters for TPX in dAu?
 Can you get it from the RC databases?
 	*/
-	mAltro = new Altro(512,ADCs);
 	//from ~/public/sources/Altro++/AltroConfigs/AltroConfig.globaltcf.v1.data
 	// ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
 	//	altro->ConfigAltro(                    1,                      1,                         1,              1,                     0);
@@ -1130,48 +1182,86 @@ Can you get it from the RC databases?
 	  mAltro->ConfigZerosuppression(2,2,0,0); // added 09/04/08 
 	  mAltro->ConfigBaselineCorrection_2(2,2,0,0,0); // Tonko 06/25/08 &&  08/07/08
 	}
+#else
+	/* Tonko 08/20/2009
+	   for all of 2009 you should have this:
+
+	1) ConfigAltro(0,0,0,1,1) ;
+	  //void ConfigZerosuppression(int Threshold, int MinSamplesaboveThreshold, int Presamples, int Postsamples);
+	2) ConfigZerosuppression(3,1,0,0);
+	
+	1) This means:
+	
+	- NO pedestal subtraction (because your data is ped subtracted)
+	- NO "BC2" correction (not used in 09)
+	- NO tail correction (not used in 09)
+	- YES clipping (as usual)
+	- YES zero suppression (as usual)
+	
+	2) The zero suppression parameters are:
+	
+	- at LEAST 1 pixel above or equal to 3 ADC counts
+	- NO pre or post
+	*/
+	mAltro->ConfigAltro(0,0,0,1,1); 
+	/*moved to DB	mAltro->ConfigZerosuppression(3,1,0,0); */
+	mAltro->ConfigZerosuppression(St_asic_thresholdsC::instance()->thresh_lo(),
+				      St_asic_thresholdsC::instance()->n_seq_lo(),
+				      0,0);
+	
+#endif
 	mAltro->PrintParameters();
       }
-      Int_t NoTB = 0;
-      index = NoOfTimeBins*((row-1)*NoOfPads+pad-1);
-      for (bin = 0; bin < NoOfTimeBins; bin++,index++) {
-	//	Int_t index= NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin;
-	// Digits : gain + ped
-	if (pedRMS > 0) {
-	  adc = (Int_t) (SignalSum[index].Sum/gain + gRandom->Gaus(ped,pedRMS));
-	  adc = adc - (int) ped;
-	}
-	else            adc = (Int_t) (SignalSum[index].Sum/gain);
-	if (adc > 1023) adc = 1023;
-	if (adc <= 0) continue;
-	SignalSum[index].Adc = adc;
-	NoTB++;
-	ADCs[bin] = adc;
-	IDTs[bin] = SignalSum[index].TrackId;
-#if 0
-	if (Debug() > 1) {
-	  cout << "digi R/P/T/I = " << row << " /\t" << pad << " /\t" << bin << " /\t" << index 
-	       << "\tSum/Adc/TrackId = " << SignalSum[index].Sum << " /\t" 
-	       << SignalSum[index].Adc << " /\t" << SignalSum[index].TrackId << endl;
-	}
-#endif
-      }
-      if (! NoTB) continue;
       if (mAltro) {
-#if 0
+	//#define PixelDUMP
+#ifdef PixelDUMP
 	static Short_t ADCsSaved[512];
 	memcpy(ADCsSaved, ADCs,sizeof(ADCsSaved));
 #endif
+#if 0
+	memset(mAltro->ADCkeep, 0, 512*sizeof(Short_t)); 
+#endif
 	mAltro->RunEmulation();
+#if 0
 	for(Int_t i=0;i<512;i++) {
 	  if(!mAltro->ADCkeep[i]) ADCs[i] = 0 ;   // zap the value ourselves
 	}
+#endif
 #if 0
+	// Run IX remove ADC = 1 at the start and end of time sequence
+	Int_t start = 512;
+	Int_t end   =   0;
+	NoTB = 0;
+	for (Int_t i = 0; i < 512; i++) {
+	  if (ADCs[i]) {
+	    if (ADCs[i] <= 1 && start > i) {
+	      ADCs[i] = 0;
+	      IDTs[i] = 0;
+	      continue;
+	    }
+	    if (start > i) start = i;
+	    end = i;
+	    NoTB++;
+	  } else {
+	    if (i > start && i == end+1) {
+	      Int_t j = i - 1;
+	      while (ADCs[j] == 1) {
+		ADCs[j] = 0;
+		IDTs[j] = 0;
+		j--;
+	      }
+	    }
+	    start = 512;
+	    end   = 0;
+	  }
+	}
+#endif
+#ifdef PixelDUMP
 	ofstream *out = new ofstream("digi.dump",ios_base::app);
 	for (Int_t i = 0; i < 512; i++) {
 	  if (ADCsSaved[i] > 0 || ADCs[i] > 0) {
-	    cout << Form("s %2i r %i p %3i t %3i: %10i => %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i]) << endl;
-	    *out << Form("s %2i r %i p %3i t %3i: %10i => %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i]) << endl;
+	    cout << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro->ADCkeep[i]) << endl;
+	    *out << Form("s %2i r %i p %3i t %3i: %10i => %10i keep %10i",sector,row,pad,i,ADCsSaved[i],ADCs[i],mAltro->ADCkeep[i]) << endl;
 	  }
 	}
 	delete out;
@@ -1284,116 +1374,16 @@ Double_t StTpcRSMaker::DriftLength(Double_t x, Double_t y) {
   return NStep*Step;
 }
 #endif
-//______________ EXPONENTIAL INTEGRALS En __________________________________________________________________
-// define: E_n(x) = \int_1^infty{exp(-xt)/t^n}dt, x>0, n=0,1,...
-Double_t StTpcRSMaker::expint(Int_t n, Double_t x) {
-  // based on Numerical Recipes in C
-  const Double_t euler = 0.57721566; // Euler's constant, gamma
-  const Int_t    maxit = 100;        // max. no. of iterations allowed
-  const Double_t fpmin = 1.0e-30;    // close to smallest floating-point   number
-  const Double_t eps = 6.0e-8;       // relative error, or absolute error near
-  // the zero of Ei at x=0.3725
-  
-  Int_t i, ii, nm1;
-  Double_t a,b,c,d,del,fact,h,psi,ans;
-  
-  nm1=n-1;
-  if(n<0 || x<0 || (x==0 && (n==0 || n==1))) {
-    cout << "Bad argument for expint(n,x)" << endl; return -1;
-  }
-  else {
-    if(n==0) ans=exp(-x)/x;
-    else {
-      if(x==0) ans=1.0/nm1;
-      else {
-	if(x>1) {
-	  b=x+n;
-	  c=1.0/fpmin;
-	  d=1.0/b;
-	  h=d;
-	  for(i=1; i<maxit; i++) {
-	    a = -i*(nm1+i);
-	    b += 2.0;
-	    d=1.0/(a*d+b);
-	    c=b+a/c;
-	    del=c*d;
-	    h *= del;
-	    if(fabs(del-1.0)<eps) {
-	      ans=h*exp(-x);
-	      return ans;
-	    }
-	  }
-	  cout << "***continued fraction failed in expint(n,x)!!!" << endl;
-	  return -1;
-	} else {
-	  ans = (nm1!=0 ? 1.0/nm1 : -log(x)-euler);
-	  fact=1;
-	  for(i=1; i<=maxit; i++) {
-	    fact *= -x/i;
-	    if(i!=nm1) del = -fact/(i-nm1);
-	    else {
-	      psi = -euler;
-	      for(ii=1; ii<=nm1; ii++) psi += 1.0/ii;
-	      del = fact*(-log(x)+psi);
-	    }
-	    ans += del;
-	    if(fabs(del)<fabs(ans)*eps) return ans;
-	  }
-	  cout << "***series failed in expint!!!" << endl;
-	  return -1;
-	}
-      }
-    }
-  }
-  
-  return ans;
-}
-//______________ EXPONENTIAL INTEGRAL Ei __________________________________________________________________
-// define: ei(x) = -\int_{-x}^{\infty}{exp(-t)/t}dt,  for x>0
-// power series: ei(x) = eulerconst + ln(x) + x/(1*1!) + x^2/(2*2!) + ...
-Double_t StTpcRSMaker::ei(Double_t x)
-{ // taken from Numerical Recipes in C
-  const Double_t euler = 0.57721566; // Euler's constant, gamma
-  const Int_t maxit = 100;           // max. no. of iterations allowed
-  const Double_t fpmin = 1.e-7; //1.0e-40;    // close to smallest floating-point number
-  const Double_t eps = 1.e-7; //1.0e-30;       // relative error, or absolute error  near
-                                    // the zero of Ei at x=0.3725
-  //  I actually changed fpmin and eps into smaller values than in NR
-  
-  Int_t k;
-  Double_t fact, prev, sum, term;
-  
-  // special case
-  if(x < 0) return -expint(1,-x);
-  
-  if(x == 0.0) { cout << "Bad argument for ei(x)" << endl; return -1; }
-  if(x < fpmin) return log(x)+euler;
-  if(x <= -log(eps)) {
-    sum = 0;
-    fact = 1;
-    for(k=1; k<=maxit; k++) {
-      fact *= x/k;
-      term = fact/k;
-      sum += term;
-      if(term < eps*sum) break;
-    }
-    if(k>maxit) { cout << "Series failed in ei(x)" << endl; return -1; }
-    return sum+log(x)+euler;
-  } else {
-    sum = 0;
-    term = 1;
-    for(k=1; k<=maxit; k++) {
-      prev = term;
-      term *= k/x;
-      if(term<eps) break;
-      if(term<prev) sum+=term;
-      else {
-	sum -= prev;
-	break;
-      }
-    }
-    return exp(x)*(1.0+sum)/x;
-  }
+//________________________________________________________________________________
+Double_t StTpcRSMaker::fei(Double_t t, Double_t t0, Double_t T) {
+  static const Double_t xmaxt = 708.39641853226408;
+  static const Double_t xmax  = xmaxt - TMath::Log(xmaxt);
+  Double_t t01 = xmax, t11 = xmax;
+  if (T > 0) {t11 = (t+t0)/T;}
+  if (t11 > xmax) t11 = xmax;
+  if (T > 0) {t01 = t0/T;}
+  if (t01 > xmax) t01  = xmax;
+  return TMath::Exp(-t11)*(ROOT::Math::expint(t11) - ROOT::Math::expint(t01));
 }
 //________________________________________________________________________________
 Double_t StTpcRSMaker::shapeEI(Double_t *x, Double_t *par) {// does not work. It is needed to 1/s
@@ -1401,21 +1391,14 @@ Double_t StTpcRSMaker::shapeEI(Double_t *x, Double_t *par) {// does not work. It
   Double_t value = 0;
   if (t <= 0) return value;
   Double_t t0    = par[0];
-  Double_t tau_I = par[1];
-  Double_t tau_C = par[3];
-  Double_t a[2] = {- 1./tau_I, 0};
-  Double_t A[2] = {  1., 0.};
-  Int_t N = 1;
-  if (tau_C > 0) {
-    N = 2;
-    a[1] = - 1./tau_C;
-    A[0] = 1./(a[0]-a[1]);
-    A[1] = -A[0];
-  }
-  for (Int_t i = 0; i < N; i++) {
-    value += A[i]*TMath::Exp(a[i]*(t+t0))*(ei(-a[i]*(t+t0))-ei(-a[i]*t0));
-  }
-  return value;
+  Double_t T1 = par[1]; // tau_I
+  Double_t T2 = par[3]; // tau_C
+  if (TMath::Abs((T1-T2)/(T1+T2)) < 1e-7) {
+    return TMath::Max(0.,(t + t0)/T1*fei(t,t0,T1) + TMath::Exp(-t/T1) - 1);
+  } 
+  if (T2 <= 0) return fei(t,t0,T1);
+  if (T1 <= 0) return 0;
+  return T1/(T1 - T2)*(fei(t,t0,T1) - fei(t,t0,T2));
 }
 //________________________________________________________________________________
 Double_t StTpcRSMaker::shapeEI3(Double_t *x, Double_t *par) {// does not work. It is needed to 1/s
@@ -1439,7 +1422,7 @@ Double_t StTpcRSMaker::shapeEI3(Double_t *x, Double_t *par) {// does not work. I
     A[2] = (a[2] + d)/a[2]/(a[2] - a[0])/(a[2] - a[1]); 
   }
   for (Int_t i = 0; i < N; i++) {
-    value += A[i]*TMath::Exp(a[i]*(t+t0))*(ei(-a[i]*(t+t0))-ei(-a[i]*t0));
+    value += A[i]*TMath::Exp(a[i]*(t+t0))*(ROOT::Math::expint(-a[i]*(t+t0))-ROOT::Math::expint(-a[i]*t0));
   }
   return value;
 }
@@ -1480,6 +1463,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.14  2009/08/24 20:16:41  fisyak
+// Freeze with new Altro parameters
+//
 // Revision 1.13  2008/12/29 15:24:54  fisyak
 // Freeze ~/WWW/star/Tpc/TpcRS/ComparisonMIP31
 //

@@ -85,11 +85,11 @@ class StTpcRSMaker : public StMaker {
   static Double_t shapeEI_I(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3(Double_t *x, Double_t *par=0);
   static Double_t shapeEI3_I(Double_t *x, Double_t *par=0);
-  static Double_t expint(Int_t n, Double_t x); // Exponential Integrals En
-  static Double_t ei(Double_t x); // Exponential Integral Ei
+  static Double_t fei(Double_t t, Double_t t0, Double_t T);
   SignalSum_t  *GetSignalSum();
   SignalSum_t  *ResetSignalSum();
   void SettauIntegrationX(Double_t p =      74.6e-9) {mtauIntegrationX = p;}
+  void SettauCX(Double_t           p =    1000.0e-9) {mtauCX = p;}
   void SettauIntegration (Double_t p = 2.5* 74.6e-9) {mtauIntegration  = p;}
   void SetCutEle(Double_t p = 1e-3)                  {mCutEle = p;}
  private:
@@ -170,6 +170,7 @@ class StTpcRSMaker : public StMaker {
   const Double_t CrossTalkInner; //!
   const Double_t CrossTalkOuter; //!
   Double_t      mtauIntegrationX; //! for TPX
+  Double_t      mtauCX;           //! -"-
   Double_t      mtauIntegration;  //! for TPC
   const Int_t NoOfSectors;//!
   const Int_t NoOfRows;   //!
@@ -177,7 +178,7 @@ class StTpcRSMaker : public StMaker {
   const Int_t NoOfPads;//!
   const Int_t NoOfTimeBins;//!
   const Double_t tauF;//!
-  const Double_t tauFx;//!
+  // not used  const Double_t tauFx;//!
   const Double_t tauP;//!
   Double_t   mSigmaJitterTI;
   Double_t   mSigmaJitterTO;
@@ -188,14 +189,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.7 2008/12/29 15:24:55 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.8 2009/08/24 20:16:41 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.7 2008/12/29 15:24:55 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.8 2009/08/24 20:16:41 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.8  2009/08/24 20:16:41  fisyak
+// Freeze with new Altro parameters
+//
 // Revision 1.7  2008/12/29 15:24:55  fisyak
 // Freeze ~/WWW/star/Tpc/TpcRS/ComparisonMIP31
 //

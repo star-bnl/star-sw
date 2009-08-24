@@ -28,10 +28,9 @@ class St_db_Maker;
 St_db_Maker *dbMk = 0;
 #endif
 //________________________________________________________________________________
-void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",  
+void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS,fcf",  
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "PAI", 
-	   Double_t jitterI = 0, Double_t jitterO = 0) {
-	   //	   Int_t tauI = 0, Int_t tauIX = 0) {
+	   Int_t tauIX = 0, Int_t tauCX = 0) {
   gROOT->LoadMacro("bfc.C"); 
   TString ChainOpt("");
   TString RootFile("");
@@ -39,7 +38,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
   TString RunOpt(Run);
   RunOpt.ToLower();
   ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,-EventQA,-EvOut,-dstout,analysis,dEdxY2,noHistos,";
-  ChainOpt += "McAna,McTpcAna,IdTruth,useInTracker,";
+  ChainOpt += "McTpcAna,IdTruth,useInTracker,-hitfilt,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += "tpc_daq,tpcI";
     RunOpt.ReplaceAll("TpcRS,","");
@@ -51,7 +50,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
   TString FileIn(fileIn);
   if (FileIn == "") {
     ChainOpt += "gstar,"; RootFile += "gstar_y8";
-    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2008,";
+    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2009,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
     else                                                     ChainOpt += "FieldOn,";
@@ -61,6 +60,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
     RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
     RootFile.ReplaceAll(".daq","");
   } else {
+    ChainOpt += "McAna,";
     if (FileIn.Contains(".fz",TString::kIgnoreCase)) {
       RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
       ChainOpt += "fzin,";
@@ -71,13 +71,9 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
   ChainOpt += RunOpt;
   RootFile += Form("_%s_%s_%i_%i",Run,Opt.Data(),First,NEvents);
   RootFile.ReplaceAll(",","_");
-#if 0
-  if (tauI > 0) {RootFile += "tauI=";RootFile += tauI; RootFile += "ns";}
-  if (tauIX > 0) {RootFile += ",tauIX=";RootFile += tauIX; RootFile += "ns";}
-#else
-  if (jitterI > 0) {RootFile += "jI=";RootFile += jitterI;}
-  if (jitterO > 0) {RootFile += "jO=";RootFile += jitterO;}
-#endif
+  if (tauIX > 0) {RootFile += "jI=";RootFile += tauIX;}
+  if (tauCX > 0) {RootFile += "tauCX=";RootFile += tauCX;}
+
   RootFile += ".root";
   RootFile.ReplaceAll(" ","");
   cout << "ChainOpt : " << ChainOpt.Data() << "\tOuput file " << RootFile.Data() << endl;
@@ -101,13 +97,8 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
       //    SETBIT(m_Mode,StTpcRSMaker::kdEdxCorr);
       //    SETBIT(m_Mode,StTpcRSMaker::kTree);
       tpcRS->SetMode(m_Mode);
-#if 0
-      if (tauI  > 0) tpcRS->SettauIntegration (1e-9*tauI );
-      if (tauIX > 0) tpcRS->SettauIntegrationX(1e-9*tauIX);
-#else
-      if (jitterI  > 0) tpcRS->SetSigmaJitterI(jitterI);
-      if (jitterO  > 0) tpcRS->SetSigmaJitterO(jitterO);
-#endif
+      if (tauIX  > 0) tpcRS->SettauIntegrationX(1e-9*tauIX);
+      if (tauCX  > 0) tpcRS->SettauCX(1e-9*tauCX);
       //      tpcRS->SetDebug(112);
     }
   }
@@ -164,9 +155,11 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2008,TpcRS,fcf",
   }
   if (FileIn == "" && gClassTable->GetID("TGiant3") >= 0) {
     St_geant_Maker *geant = (St_geant_Maker *) chain->GetMakerInheritsFrom("St_geant_Maker");
+#if 0
     geant->Do("debug on");
     geant->Do("swit 1 2");
     geant->Do("swit 2 2");
+#endif
     //    geant->SetDebug(0);
     //            NTRACK  ID PTLOW PTHIGH YLOW YHIGH PHILOW PHIHIGH ZLOW ZHIGH
     //    geant->Do("gkine 100  14   0.1    10.  -1     1      0    6.28    0.    0.;");
@@ -225,11 +218,12 @@ void TpcRS(Int_t NEvents=100,
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
 	   //		 const Char_t *fileIn = 0,
 	   //"/star/rcf/simu/auau200/hijing/b0_20/inverse/year2001/hadronic_on/gstardata/rcf0191_01_380evts.fzd",
-	   const Char_t *opt = "CheckFcF"
+	   const Char_t *opt = "CheckFcF",
+	   Int_t tauIX = 0, Int_t tauCX = 0
 	   ) {
   //  /star/data03/daq/2004/093/st_physics_adc_5093007_raw_2050001.daq
   //  /star/data03/daq/2004/fisyak/st_physics_adc_5114043_raw_2080001.daq
   // nofield /star/data03/daq/2004/076/st_physics_adc_5076061_raw_2060001.daq
   //                                   st_physics_adc_5076061_raw_4050001.daq
-  TpcRS(0,NEvents,Run,fileIn,opt);
+  TpcRS(0,NEvents,Run,fileIn,opt,tauIX,tauCX);
 }
