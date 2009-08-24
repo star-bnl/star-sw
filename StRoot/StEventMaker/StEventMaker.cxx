@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.84 2008/01/29 18:45:01 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.85 2009/08/24 23:06:11 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -347,7 +347,7 @@ StEventMaker::makeEvent()
 	  StTriggerData* pTrg = (StTriggerData*)os->GetObject();
 	  assert(pTrg); 		// wrong, empty data
 	  assert(os->IsOwner()); 	// wrong, data allready taken
-	  os->DoOwner(0); 	        //change ownership
+	  os->DoOwner(0); 	          //change ownership
 	  mCurrentEvent->setTriggerData(pTrg);
         }
     }
@@ -418,13 +418,25 @@ StEventMaker::makeEvent()
 		for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
 		    // Shift the mask by daqTrigId bits to examine that bit
 		    if ( whichTrig->mask() &  (1 << (dbTriggerId->getDaqTrgId(iTrg)) )  ) {
-			whichTrig->addTrigger(
-			    dbTriggerId->getOfflineTrgId(iTrg),
-			    dbTriggerId->getTrgVersion(iTrg),
-			    dbTriggerId->getTrgNameVersion(iTrg),
-			    dbTriggerId->getThreashVersion(iTrg),
-			    dbTriggerId->getPsVersion(iTrg)
-			    );
+
+		        //Check if StTriggerData found (partial) data corruption
+		        //and if so, add 9000 to offline trigger Id
+  		        UInt_t offlineId = dbTriggerId->getOfflineTrgId(iTrg);
+                            if (mCurrentEvent->triggerData()){
+			  if (mCurrentEvent->triggerData()->errorFlag()>0) {
+                                    offlineId += 9000;
+                                    printf("StEventMaker: StTriggerData found partial corruption, thus adding 9000 to offline trigger id =%d\n",offlineId);
+			  }
+                            }
+                            
+                            whichTrig->addTrigger(
+                                                  //dbTriggerId->getOfflineTrgId(iTrg),
+                                                  offlineId,		      
+                                                  dbTriggerId->getTrgVersion(iTrg),
+                                                  dbTriggerId->getTrgNameVersion(iTrg),
+                                                  dbTriggerId->getThreashVersion(iTrg),
+                                                  dbTriggerId->getPsVersion(iTrg)
+                                                  );
 		    }
 		}
 		
@@ -1794,8 +1806,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.84 2008/01/29 18:45:01 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.85 2009/08/24 23:06:11 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.85  2009/08/24 23:06:11  ullrich
+ * Added checks for corruption in StTriggerData.
+ *
  * Revision 2.84  2008/01/29 18:45:01  perev
  * WarnOff
  *
