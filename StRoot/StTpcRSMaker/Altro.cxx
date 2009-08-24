@@ -239,6 +239,9 @@ void Altro::RunEmulation(){
 		cout << "ERROR cant run Altro Emulation because not configured" << endl;
 		return;
 	}
+	for(int i = 0; i < ftimebins; i++){
+		ADCkeep[i] = 0;
+	}
 
 	//cout << "Altro::RunEmulation | start BSL1 on: " << fOnBSL1 << " configures: " << fConfiguredBSL1 << endl;
 	if(fOnBSL1 == 1){
@@ -281,6 +284,9 @@ void Altro::RunEmulation(){
 			cout << "ERROR cant run Zero Suppression Unit because not configured" << endl;
 			return;
 		}
+	}
+	for(int i = 0; i < ftimebins; i++){
+	  if (! ADCkeep[i]) channelShort[i]  = 0;
 	}
 }
 
