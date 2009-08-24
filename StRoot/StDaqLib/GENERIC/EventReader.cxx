@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.59 2009/08/24 20:17:20 jml Exp $
+ * $Id: EventReader.cxx,v 1.60 2009/08/24 20:27:10 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.60  2009/08/24 20:27:10  jml
+ * fixed typos
+ *
  * Revision 1.59  2009/08/24 20:17:20  jml
  * remove 1.57, install correct handling of detectors present
  *
@@ -226,7 +229,7 @@
 #include <assert.h>
 #include <errno.h>
 #include "StMessMgr.h"
-#include "RTS/src/DAQ_READER/daqReader.h"
+//#include "RTS/src/DAQ_READER/daqReader.h"
 
 using namespace OLDEVP;
 
@@ -731,7 +734,7 @@ EventReader::~EventReader()
 
 int EventReader::system_present(Bank_DATAP *datap, int sys)
 {
-  Point *pointer;
+  Pointer *pointer;
   datap->swap();
 
   if(sys >= 10) {
@@ -740,7 +743,7 @@ int EventReader::system_present(Bank_DATAP *datap, int sys)
       return 0;
     }
 
-    Bank_DATAPX *datapx = (Bank_DATAPX *)(((INT32 *)pBankDATAP) + (ptr->offset));
+    Bank_DATAPX *datapx = (Bank_DATAPX *)(((INT32 *)datap) + (pointer->offset));
     datapx->swap();
 
     pointer = &datapx->EXT_DET[sys-10];
