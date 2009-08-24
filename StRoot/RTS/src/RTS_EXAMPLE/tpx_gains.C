@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
 				if((tpx_gains[s] == 0)) {	// create if it didn't exist already...
 					tpx_gains[s] = new tpxGain ;
 					tpx_gains[s]->init(s) ;
+					tpx_gains[s]->c_run = r->run ;	// assign the file's run number here
 				}
 
 
