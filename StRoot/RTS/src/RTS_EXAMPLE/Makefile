@@ -16,7 +16,7 @@ VPATH += ../DAQ_BSMD ../DAQ_BTOW ../DAQ_EMC ../DAQ_ESMD ../DAQ_FPD ../DAQ_FTP ..
 	../DAQ_READER  ../SFS ../LOG 
 
 
-BINS = daqFileChopper rts_example tpc_rerun tpx_gains
+BINS = daqFileChopper rts_example tpc_rerun tpx_gains tpx_read_gains
 
 all:   $(BINS)
 
@@ -29,6 +29,9 @@ tpc_rerun: tpc_rerun.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 tpx_gains: tpx_gains.o $(VOBJS)
+	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
+
+tpx_read_gains: tpx_read_gains.o $(VOBJS)
 	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 sfs_stuff: sfs_stuff.o $(VOBJS)

@@ -304,6 +304,7 @@ static int tpx_doer(daqReader *rdr, char  *do_print)
 
 	for(int s=1;s<=24;s++) {
 
+/* stop using legacy, even in the example...
 		dd = rdr->det("tpx")->get("legacy",s) ;	// uses tpc_t
 		while(dd && dd->iterate()) {
 			found = 1 ;
@@ -319,7 +320,7 @@ static int tpx_doer(daqReader *rdr, char  *do_print)
 			}
 
 		}
-
+*/
 
 		int pixel_count[46] ;	// as an example we'll count pixels per row
 		memset(pixel_count,0,sizeof(pixel_count)) ;
