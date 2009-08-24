@@ -23,10 +23,10 @@ struct svtHybridDriftVelocity {
                 // I != 0 drift region is valid in range [dtim,dtmax] only   
                 // For type=0 & npar=2, |x|=v0-v1*t in Local Wafer Frame (LWF) for t>27 tbins
   long   Id;    // 10*(1000* layer + 100* wafer +  ladder) + hybrid;
-  octet  barrel;
-  octet  ladder;
-  octet  wafer;
-  octet  hybrid;
+  short  barrel;
+  short  ladder;
+  short  wafer;
+  short  hybrid;
   double tmin;  // fit range
   double dtmin;
   double tmax;  // 
