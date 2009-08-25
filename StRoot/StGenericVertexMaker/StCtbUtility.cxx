@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <cmath>
+#include <sys/types.h>
 #include "math_constants.h"
 
 #include "tables/St_g2t_ctf_hit_Table.h"

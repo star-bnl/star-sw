@@ -1,6 +1,6 @@
 #ifndef EemcHitList_h
 #define EemcHitList_h
-
+#include <sys/types.h>
 #include "ScintHitList.h"
 #include "StEEmcUtil/EEfeeRaw/EEdims.h"
 class StEmcDetector;
