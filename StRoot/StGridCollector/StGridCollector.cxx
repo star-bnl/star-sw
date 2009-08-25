@@ -9,8 +9,7 @@
 // Based on StChallenger by                                             //
 // Alexandre V. Vaniachine <AVVaniachine@lbl.gov>                       //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
-
+#include "Riostream.h"
 #include "TROOT.h"
 #include "TClass.h"
 #include "StGridCollector.h"
