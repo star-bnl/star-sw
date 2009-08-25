@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.5 2009/03/04 04:57:36 dongx Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.6 2009/08/25 01:02:44 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.6  2009/08/25 01:02:44  dongx
+ * Correct the total # of rows read-in for the TDIGOnTray table
+ *
  * Revision 1.5  2009/03/04 04:57:36  dongx
  * INL arrays changed from float to short - memory occupied reduced by a factor of 2
  *
@@ -77,7 +80,7 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
 
   Int_t numRows = tofTDIGOnTray->GetNRows();
 //  LOG_INFO << "number of rows = " << numRows << endm;
-  for (Int_t i=0;i<mNValidTrays+2;i++) {
+  for (Int_t i=0;i<mNTray+2;i++) {
     Int_t trayId = (Int_t)tdigOnTray[i].trayId;
 
     if(trayId==mEastVpdTrayId) {  // east vpd
@@ -92,11 +95,11 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
     }
 
     if(maker->Debug()) {
-      LOG_DEBUG << " tray id=" << trayId;
+      LOG_INFO << " tray id=" << trayId;
       for(int j=0;j<mNTDIGOnTray;j++) {
-	LOG_DEBUG << "  " << tdigOnTray[i].tdigId[j];
+	LOG_INFO << "  " << tdigOnTray[i].tdigId[j];
       }
-      LOG_DEBUG << endm;
+      LOG_INFO << endm;
     }
 
   }
@@ -131,16 +134,16 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
         
     tdigId_old = tdigId;
 
-    if(maker->Debug()) { LOG_DEBUG << " tdigId=" << tdigId << "  tdcChanId=" << tdcChanId << endm; }
+    if(maker->Debug()) { LOG_INFO << " tdigId=" << tdigId << "  tdcChanId=" << tdcChanId << endm; }
     for(Int_t j=0;j<mNChanMAX;j++) {
       Short_t corr = (Short_t)(inlcorr[i].INLCorr[j]);
       mINLCorr[NTdig-1][tdcChanId][j] = corr;
       
       if(maker->Debug()&&(j%200==0)) {
-	LOG_DEBUG << " " << corr;
+	LOG_INFO << " " << corr;
       }
     }
-    if(maker->Debug()) LOG_DEBUG << endm;
+    if(maker->Debug()) { LOG_INFO << endm; }
   }
 
   LOG_INFO << " Total # of boards read in : " << NTdig << endm;
