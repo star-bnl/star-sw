@@ -54,8 +54,12 @@ MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
 MakeChairInstance(TpcAltroParameters,Calibrations/tpc/TpcAltroParameters);
 #include "St_asic_thresholdsC.h"
 MakeChairInstance(asic_thresholds,Calibrations/tpc/asic_thresholds);
+#include "St_asic_thresholds_tpxC.h"
+MakeChairInstance(asic_thresholds_tpx,Calibrations/tpc/asic_thresholds_tpx);
 #include "St_tpcAnodeHVC.h"
 MakeChairInstance(tpcAnodeHV,Calibrations/tpc/tpcAnodeHV);
+#include "St_tpcPadGainT0C.h"
+MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
