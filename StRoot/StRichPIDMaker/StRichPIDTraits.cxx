@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPIDTraits.cxx,v 2.1 2001/03/27 03:33:04 perev Exp $
+ * $Id: StRichPIDTraits.cxx,v 2.2 2009/08/25 22:50:09 fine Exp $
  *
  * Author: Matt Horsley, March 30, 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPIDTraits.cxx,v $
+ * Revision 2.2  2009/08/25 22:50:09  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 2.1  2001/03/27 03:33:04  perev
  * clone += static
  *
@@ -26,10 +29,11 @@
 #include "StRichPIDTraits.h"
 #include "StParticleDefinition.hh"
 #include <math.h>
+#include "StMessMgr.h"
 
 ClassImp(StRichPIDTraits)
 
-static const char rcsid[] = "$Id: StRichPIDTraits.cxx,v 2.1 2001/03/27 03:33:04 perev Exp $";
+static const char rcsid[] = "$Id: StRichPIDTraits.cxx,v 2.2 2009/08/25 22:50:09 fine Exp $";
 
 StRichPIDTraits::StRichPIDTraits() { }
 
@@ -100,8 +104,7 @@ StRichPIDTraits::getDensityArray() {
   TArrayD dens;
 
   if (mAreaArray.GetSize() != mHitArray.GetSize() ) {
-    cout << "StRichPIDTraits::getDensityArray---> bad indexes!" << endl;
-    abort();
+    LOG_FATAL  << "StRichPIDTraits::getDensityArray---> bad indexes!" << endm;
   }
   
   dens.Set(mHitArray.GetSize());
@@ -112,10 +115,9 @@ StRichPIDTraits::getDensityArray() {
     double tempHits = mHitArray[k];
     
     if (tempArea < 0 || tempHits < 0) {
-      cout << "StRichPIDTraits::getDensityArray() ----> problem!" << endl;
-      cout << "index = " << k << "   area = " << tempArea << "  cm^2    " 
-	   << "    hits = " << tempHits << endl;
-      abort();
+       LOG_FATAL << "StRichPIDTraits::getDensityArray() ----> problem!" << endm;
+       LOG_FATAL << "index = " << k << "   area = " << tempArea << "  cm^2    " 
+	   << "    hits = " << tempHits << endm;
     }
     
     if (tempArea>0) {
