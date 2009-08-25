@@ -6,11 +6,14 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.3 2009/07/24 18:52:53 dongx Exp $
+ * $Id: StBTofMatchMaker.h,v 1.4 2009/08/25 15:46:44 fine Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.4  2009/08/25 15:46:44  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.3  2009/07/24 18:52:53  dongx
  * - Local Z window restricted in the projection
  * - ToT selection is used firstly when more than one hits associated with a track
@@ -100,9 +103,9 @@ public:
     /// set maximum distance of closest approach
     void setMaxDCA(Float_t);
     /// set histogram output file name
-    void setHistoFileName(Char_t*);
+    void setHistoFileName(const Char_t*);
     /// set ntuple output file name
-    void setNtupleFileName(Char_t*);
+    void setNtupleFileName(const Char_t*);
     /// save geometry if it will be used by following makers in the chain
     void setSaveGeometry(Bool_t geomSave=kFALSE);
 
@@ -262,7 +265,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.3 2009/07/24 18:52:53 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.4 2009/08/25 15:46:44 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
@@ -280,7 +283,7 @@ inline void StBTofMatchMaker::setMinFitPointsOverMax(Float_t ratio) {mMinFitPoin
 
 inline void StBTofMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 
-inline void StBTofMatchMaker::setHistoFileName(Char_t* filename){mHistoFileName=filename;}
+inline void StBTofMatchMaker::setHistoFileName(const Char_t* filename){mHistoFileName=filename;}
 
 inline void StBTofMatchMaker::setCreateHistoFlag(Bool_t histos){mHisto = histos;}
 
