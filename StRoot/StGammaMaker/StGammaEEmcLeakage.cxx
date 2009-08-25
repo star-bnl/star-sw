@@ -9,6 +9,7 @@ ClassImp(StGammaEEmcLeakage);
 #include <TH2F.h>
 #include <TMarker.h>
 #include <iostream>
+#include <cassert>
 
 
 StGammaEEmcLeakage *StGammaEEmcLeakage::sInstance = 0;
