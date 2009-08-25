@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTripletCut.h,v 1.4 2000/06/15 18:51:33 willson Exp $
+ * $Id: StHbtTripletCut.h,v 1.5 2009/08/25 20:17:51 fine Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTripletCut.h,v $
+ * Revision 1.5  2009/08/25 20:17:51  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.4  2000/06/15 18:51:33  willson
  * Cuts and Correlation function information moved from StBaseAnalysis
  * to the derived analysis classes.  Global functions installed in
@@ -35,6 +38,8 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTriplet.hh"
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorHandler.h"
+
+class StHbtBaseAnalysis;
 
 class StHbtTripletCut : public StHbtCutMonitorHandler {
 

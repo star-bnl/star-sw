@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtParticleCut.h,v 1.8 2000/06/15 18:51:33 willson Exp $
+ * $Id: StHbtParticleCut.h,v 1.9 2009/08/25 20:17:51 fine Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticleCut.h,v $
+ * Revision 1.9  2009/08/25 20:17:51  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.8  2000/06/15 18:51:33  willson
  * Cuts and Correlation function information moved from StBaseAnalysis
  * to the derived analysis classes.  Global functions installed in
@@ -74,6 +77,8 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorHandler.h"
+
+class StHbtBaseAnalysis;
 
 class StHbtParticleCut : public StHbtCutMonitorHandler {
 
