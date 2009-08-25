@@ -6,8 +6,8 @@
 class St_tpcGainC : public TChair {
  public:
   static St_tpcGainC* 	instance();
-  tpcGain_st 	*Struct(Int_t i = 0) {return ((St_tpcGain*) Table())->GetTable()+i;}
-  Float_t St_tpcGainC::Gain(Int_t sector, Int_t row, Int_t pad) {return Struct(sector-1)->Gain[row-1][pad-1];}
+  tpcGain_st  *Struct(Int_t i = 0) {return ((St_tpcGain*) Table())->GetTable()+i;}
+  Float_t   Gain(Int_t sector, Int_t row, Int_t pad) {return Struct(sector-1)->Gain[row-1][pad-1];}
  protected:
   St_tpcGainC(St_tpcGain *table=0) : TChair(table) {}
   virtual ~St_tpcGainC() {fgInstance = 0;}
