@@ -2,6 +2,7 @@
 #include "Cut.h"
 
 #include "Stiostream.h"
+#include <string.h>
 
 ClassImp(Cut)
 
