@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.14 2009/08/24 20:16:41 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.15 2009/08/25 15:45:58 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.15  2009/08/25 15:45:58  fisyak
+// Version J
+//
 // Revision 1.14  2009/08/24 20:16:41  fisyak
 // Freeze with new Altro parameters
 //
@@ -60,7 +63,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.14 2009/08/24 20:16:41 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.15 2009/08/25 15:45:58 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -125,7 +128,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mAveragePedestal(50.0), //1.24102e+02), 
   mAveragePedestalRMS(0.5), //  tonko's rms =1.4), //1.95684e+01),
   //  mAveragePedestalRMSX(0.3), // tonkos rms = 0.8), //1.95684e+01),
-  mAveragePedestalRMSX(0.06), // tonkos rms = 0.04 - 0.08 06/22/09
+  mAveragePedestalRMSX(0.7), // 0.06), // tonkos rms = 0.04 - 0.08 06/22/09
   minSignal(1e-3),
   LorenzAngle(8), // degrees for P10 at B = 4 kG and E = 1.5 kV/cm
   InnerAlphaVariation(0),
@@ -809,8 +812,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // Grid plane (1 mm spacing) focusing effect + Lorentz angle in drift volume 
 	    Int_t iGridWire = (Int_t ) TMath::Abs(10.*distanceToWire);
 	    Double_t dist2Grid = TMath::Sign(0.05 + 0.1*iGridWire, distanceToWire);
-	    //	    Double_t yShift   = dist2Grid - distanceToWire;
 #if 0
+	    Double_t yShift   = dist2Grid - distanceToWire;
 	    xOnWire -= yShift*OmegaTau;
 	    zOnWire += TMath::Abs(yShift);
 #endif
@@ -818,7 +821,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    Int_t iGroundWire = (Int_t ) TMath::Abs(10.*dist2Grid);
 	    Double_t distFocused = TMath::Sign(0.05 + 0.1*iGroundWire, dist2Grid);
 	    xOnWire += distFocused*tangLorenzAngle; // Lorentz shift
-#if 0
+#if 1
 	    zOnWire += TMath::Abs(distFocused);
 #endif
 	    zOnWire += tof*gStTpcDb->DriftVelocity(sector);
@@ -1463,6 +1466,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.15  2009/08/25 15:45:58  fisyak
+// Version J
+//
 // Revision 1.14  2009/08/24 20:16:41  fisyak
 // Freeze with new Altro parameters
 //
