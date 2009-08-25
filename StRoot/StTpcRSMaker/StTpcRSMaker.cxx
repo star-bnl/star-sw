@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.15 2009/08/25 15:45:58 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.16 2009/08/25 20:39:40 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.16  2009/08/25 20:39:40  fisyak
+// Variant K
+//
 // Revision 1.15  2009/08/25 15:45:58  fisyak
 // Version J
 //
@@ -56,6 +59,7 @@
 #include "StDaqLib/TPC/trans_table.hh"
 #include "StDetectorDbMaker/St_TpcAltroParametersC.h"
 #include "StDetectorDbMaker/St_asic_thresholdsC.h"
+#include "StDetectorDbMaker/St_asic_thresholds_tpxC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 
@@ -63,7 +67,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.15 2009/08/25 15:45:58 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.16 2009/08/25 20:39:40 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -109,7 +113,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   I0(13.1),
   mCluster(3.2), tauGlobalOffSet(0), 
   OmegaTauC(2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
-  transverseDiffusionConstant(0.040), // (0.049), // (0.0514), // (0.0623), 
+  transverseDiffusionConstant(0.0443),// J(0.040), // (0.049), // (0.0514), // (0.0623), 
   longitudinalDiffusionConstant(0.0360), 
   Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision with data
   Outer_wire_to_plane_couplingScale(5.0718e-01*1.43), //  -"-
@@ -820,7 +824,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // Ground plane (1 mm spacing) focusing effect
 	    Int_t iGroundWire = (Int_t ) TMath::Abs(10.*dist2Grid);
 	    Double_t distFocused = TMath::Sign(0.05 + 0.1*iGroundWire, dist2Grid);
+#if 0
 	    xOnWire += distFocused*tangLorenzAngle; // Lorentz shift
+#else
+	    xOnWire += distFocused*OmegaTau;
+#endif
 #if 1
 	    zOnWire += TMath::Abs(distFocused);
 #endif
@@ -1136,83 +1144,20 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
       if (! NoTB) continue;
       if (St_TpcAltroParametersC::instance()->N(sector-1) >= 0 && ! mAltro) {
 	mAltro = new Altro(512,ADCs);
-#ifdef y2008
-	/* Tonk 06/25/08
-First, there is no BSL1 (which is the pedestal subtraction) since
-you're data is already subtracted.
-
-Second, there is no BSL2 in dAu.
-
-For the zero-suppression thresholds I don't remember for
-sure, they should be in the RC database (Jeff?) but I think
-they were:
-
-pre & post samples = 0
-threshold & min-above threshold = 2
-
-so try them.
-
-Jeff,what were the "ASIC" parameters for TPX in dAu?
-Can you get it from the RC databases?
-	*/
-	//from ~/public/sources/Altro++/AltroConfigs/AltroConfig.globaltcf.v1.data
-	// ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
-	//	altro->ConfigAltro(                    1,                      1,                         1,              1,                     0);
 	if (St_TpcAltroParametersC::instance()->N(sector-1) > 0) {// Tonko 06/25/08
-	  // ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
-	  //altro->ConfigAltro(                    0,                      1,                         0,              1,                     0); 
-	  /* 	     Zerosuppression must be ON! It is always ON.	Tonko 08/07/08  */
-	  mAltro->ConfigAltro(                    0,                      1,                         0,              1,                     1); 
-	  //     ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
-	  //	altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
+	  //      ConfigAltro(ONBaselineCorrection1, ONTailcancellation, ONBaselineCorrection2, ONClipping, ONZerosuppression)
+	  mAltro->ConfigAltro(                    0,                  1,                     0,          1,                 1); 
+	  //       ConfigBaselineCorrection_1(int mode, int ValuePeDestal, int *PedestalMem, int polarity)
+	  //altro->ConfigBaselineCorrection_1(4, 0, PedestalMem, 0);  // Tonko 06/25/08
 	  Int_t *altro_reg = St_TpcAltroParametersC::instance()->altro_reg(sector-1);
 	  mAltro->ConfigTailCancellationFilter(altro_reg[0],altro_reg[1],altro_reg[2], // K1-3
-					      altro_reg[3],altro_reg[4],altro_reg[5]);// L1-3
-	  //     ConfigBaselineCorrection_2(int HighThreshold, int LowThreshold, int Offset, int Presamples, int Postsamples);
-	  //void ConfigZerosuppression(int Threshold, int MinSamplesaboveThreshold, int Presamples, int Postsamples);
-	  //	altro->ConfigZerosuppression(            3,                            3,              2,               3);
-	  mAltro->ConfigZerosuppression(            2,                            2,              0,               0); // Tonko 06/25/08
+					       altro_reg[3],altro_reg[4],altro_reg[5]);// L1-3
 	} else {
-	  /* Tonko, 08/07/08
-	     But for pp-data (no-tail suppression) you need this:
-	     ==> ConfigAltro(0,0,0,1,1);
-	     -- no BS1, NO tail, no BS2, yes clipping, yes ZS
-	     ==> ConfigZeroSuppression(2,2,0,0)	   */
-	  // ConfigAltro(int ONBaselineCorrection1, int ONTailcancellation, int ONBaselineCorrection2, int ONClipping, int ONZerosuppression)
-	  /*	  altro->ConfigAltro(                    0,                      0,                         1,              1,                     0);  */
-	  mAltro->ConfigAltro(0,0,0,1,1); // From Tonko , 08/07/08
-	  //     ConfigBaselineCorrection_2(int HighThreshold, int LowThreshold, int Offset, int Presamples, int Postsamples);
-	  mAltro->ConfigZerosuppression(2,2,0,0); // added 09/04/08 
-	  mAltro->ConfigBaselineCorrection_2(2,2,0,0,0); // Tonko 06/25/08 &&  08/07/08
+	  mAltro->ConfigAltro(0,0,0,1,1); 
 	}
-#else
-	/* Tonko 08/20/2009
-	   for all of 2009 you should have this:
-
-	1) ConfigAltro(0,0,0,1,1) ;
-	  //void ConfigZerosuppression(int Threshold, int MinSamplesaboveThreshold, int Presamples, int Postsamples);
-	2) ConfigZerosuppression(3,1,0,0);
-	
-	1) This means:
-	
-	- NO pedestal subtraction (because your data is ped subtracted)
-	- NO "BC2" correction (not used in 09)
-	- NO tail correction (not used in 09)
-	- YES clipping (as usual)
-	- YES zero suppression (as usual)
-	
-	2) The zero suppression parameters are:
-	
-	- at LEAST 1 pixel above or equal to 3 ADC counts
-	- NO pre or post
-	*/
-	mAltro->ConfigAltro(0,0,0,1,1); 
-	/*moved to DB	mAltro->ConfigZerosuppression(3,1,0,0); */
-	mAltro->ConfigZerosuppression(St_asic_thresholdsC::instance()->thresh_lo(),
-				      St_asic_thresholdsC::instance()->n_seq_lo(),
+	mAltro->ConfigZerosuppression(St_asic_thresholds_tpxC::instance()->thresh_lo(),
+				      St_asic_thresholds_tpxC::instance()->n_seq_lo(),
 				      0,0);
-	
-#endif
 	mAltro->PrintParameters();
       }
       if (mAltro) {
@@ -1221,44 +1166,7 @@ Can you get it from the RC databases?
 	static Short_t ADCsSaved[512];
 	memcpy(ADCsSaved, ADCs,sizeof(ADCsSaved));
 #endif
-#if 0
-	memset(mAltro->ADCkeep, 0, 512*sizeof(Short_t)); 
-#endif
 	mAltro->RunEmulation();
-#if 0
-	for(Int_t i=0;i<512;i++) {
-	  if(!mAltro->ADCkeep[i]) ADCs[i] = 0 ;   // zap the value ourselves
-	}
-#endif
-#if 0
-	// Run IX remove ADC = 1 at the start and end of time sequence
-	Int_t start = 512;
-	Int_t end   =   0;
-	NoTB = 0;
-	for (Int_t i = 0; i < 512; i++) {
-	  if (ADCs[i]) {
-	    if (ADCs[i] <= 1 && start > i) {
-	      ADCs[i] = 0;
-	      IDTs[i] = 0;
-	      continue;
-	    }
-	    if (start > i) start = i;
-	    end = i;
-	    NoTB++;
-	  } else {
-	    if (i > start && i == end+1) {
-	      Int_t j = i - 1;
-	      while (ADCs[j] == 1) {
-		ADCs[j] = 0;
-		IDTs[j] = 0;
-		j--;
-	      }
-	    }
-	    start = 512;
-	    end   = 0;
-	  }
-	}
-#endif
 #ifdef PixelDUMP
 	ofstream *out = new ofstream("digi.dump",ios_base::app);
 	for (Int_t i = 0; i < 512; i++) {
@@ -1466,6 +1374,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.16  2009/08/25 20:39:40  fisyak
+// Variant K
+//
 // Revision 1.15  2009/08/25 15:45:58  fisyak
 // Version J
 //
