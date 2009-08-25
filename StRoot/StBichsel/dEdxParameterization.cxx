@@ -29,11 +29,11 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   fI60Shift(I60Shift)
 {
   TDirectory *dir = gDirectory;
-  Char_t                                         *rootf = "P10T.root";
+  const Char_t                                   *rootf = "P10T.root";
   if (fTag.Contains("pai" ,TString::kIgnoreCase)) rootf = "PaiT.root";
   if (fTag.Contains("p10" ,TString::kIgnoreCase)) rootf = "P10T.root";
   if (fTag.Contains("bich",TString::kIgnoreCase)) rootf = "BichselT.root";
-  static Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx:./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
+  static const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx:./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
   Char_t *file = gSystem->Which(path,rootf,kReadPermission);
   if (! file) Fatal("dEdxParameterization::GetFile","File %s has not been found in path %s",rootf,path);
   else        Warning("dEdxParameterization::GetFile","File %s has been found as %s",rootf,file);
