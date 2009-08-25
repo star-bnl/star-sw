@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.23 2009/01/09 19:43:47 tone421 Exp $
+ * $Id: StMuEvent.h,v 1.24 2009/08/25 15:49:49 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -82,7 +82,7 @@ class StMuEvent : public TObject {
   unsigned short refMultFtpcWest(int vtx_id = -1);
   /// Reference multiplicity of particles in the east+west FTPC as defined in StEventUtilities/StuFtpcRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
   unsigned short refMultFtpc(int vtx_id = -1);
-  unsigned short StMuEvent::grefmult(int vtx_id=-1);
+  unsigned short grefmult(int vtx_id=-1);
 
 	/// Currently not filled properly.
   double reactionPlane(unsigned short);
@@ -210,6 +210,9 @@ inline float StMuEvent::vpdVz() { return mVpdVz; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.24  2009/08/25 15:49:49  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.23  2009/01/09 19:43:47  tone421
  * OAdded gremult in StMuEvent (globals tracks with DCA < 3cm, >= 10 TPC fit hits and |eta| < 0.5)
  *
