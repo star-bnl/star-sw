@@ -1,5 +1,5 @@
 //
-// $Id: StMiniMcEvent.cxx,v 1.6 2007/02/23 17:07:00 fisyak Exp $
+// $Id: StMiniMcEvent.cxx,v 1.7 2009/08/25 21:22:56 fine Exp $
 //
 
 #include "StMiniMcEvent.h"
@@ -139,10 +139,9 @@ StMiniMcPair* StMiniMcEvent::addTrackPair(StMiniMcPair* pair,Category category)
     tracks = mMatGlobPairs; nPair = &mNMatGlobPair;
     break;
   default:
-    cout << "****ERROR!****" << endl 
-	 << "WRONG CATEGORY " 
-	 << " IN StMiniMcEvent::addPair()" << endl;
-    std::exit(-1);
+    Fatal("StMiniMcEvent", "WRONG CATEGORY  IN StMiniMcEvent::addPair()");
+//    std::exit(-1);
+    break;
   }
 
   if (pair) 
