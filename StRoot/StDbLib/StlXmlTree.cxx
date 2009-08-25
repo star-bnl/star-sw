@@ -1,5 +1,6 @@
 #ifndef NoXmlTreeReader
 #include <iostream>
+#include <limits.h>
 #include "StlXmlTree.h"
 #include "ChapiStringUtilities.h"
 

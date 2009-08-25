@@ -1,4 +1,6 @@
 #include "ChapiStringUtilities.h"
+#include <sys/types.h>
+#include <string.h>
 using namespace std;
 typedef vector<string>::const_iterator VCI;
 
