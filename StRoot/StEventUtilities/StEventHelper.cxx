@@ -488,7 +488,7 @@ static const int     nlitra  = sizeof(plitra)/sizeof(Color_t);
   for (int i=0;i<nbjs;i++) {
     TObject *to = inp->At(i);
     int kind = Kind(to);
-    if (!(kind&kHRR)) ilitra = (++ilitra)%nlitra;
+    if (!(kind&kHRR)) { ilitra++; ilitra = ilitra%nlitra; }
     int take = (kind&flag);
     if (!take) 	continue;
 //??    if (take&kHIT) take -=kHIT;

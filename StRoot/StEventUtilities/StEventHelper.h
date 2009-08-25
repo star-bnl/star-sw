@@ -22,6 +22,7 @@
 #include "StHelixD.hh"
 #include "StHelixHelper.h"
 #include "StEnumerations.h"
+#include <cassert>
 
 class StEvent;
 class StTrack;
