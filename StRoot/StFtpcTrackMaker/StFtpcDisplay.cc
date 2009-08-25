@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.cc,v 1.18 2007/01/15 08:23:01 jcs Exp $
+// $Id: StFtpcDisplay.cc,v 1.19 2009/08/25 19:41:19 fine Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.19  2009/08/25 19:41:19  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 1.18  2007/01/15 08:23:01  jcs
 // replace printf, cout and gMesMgr with Logger commands
 //
@@ -570,7 +573,7 @@ void StFtpcDisplay::TrackInfo()
       {for (Int_t j = 0; j < trackcluster; j++) {
 	
 	h = (StFtpcConfMapPoint *)hits->At(j);
-	cout << "#" << h->GetHitNumber() << " address:" << (Int_t) h << endl;
+	cout << "#" << h->GetHitNumber() << " address:" <<  h << endl;
 	phi_track->SetPoint(j, h->GetX(), h->GetY());
 	eta_track->SetPoint(j, h->GetZ(), h->GetY());
 	circle_track->SetPoint(j, h->GetXprime(), h->GetYprime());

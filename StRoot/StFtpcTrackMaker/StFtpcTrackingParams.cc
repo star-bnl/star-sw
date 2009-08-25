@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.36 2007/12/13 10:35:21 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.37 2009/08/25 19:41:19 fine Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.37  2009/08/25 19:41:19  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 1.36  2007/12/13 10:35:21  jcs
 // standardize logger messages
 //
@@ -478,7 +481,7 @@ StFtpcTrackingParams::StFtpcTrackingParams()
   mGlobalToTpcRotation(3, 2) =   TMath::Cos(psi)   * TMath::Sin(theta) * TMath::Sin(phi) - TMath::Sin(psi) * TMath::Cos(phi);
   mGlobalToTpcRotation(3, 3) =   TMath::Cos(theta) * TMath::Cos(psi);
   
-  UInt_t ierr;
+  size_t ierr;
   mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
   
   if (ierr!=0) { 
@@ -874,7 +877,7 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     mGlobalToTpcRotation(3, 2) =   TMath::Cos(psi)   * TMath::Sin(theta) * TMath::Sin(phi) - TMath::Sin(psi) * TMath::Cos(phi);
     mGlobalToTpcRotation(3, 3) =   TMath::Cos(theta) * TMath::Cos(psi);
     
-    UInt_t ierr;
+    size_t ierr;
     mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
     
     if (ierr!=0) { 
@@ -945,7 +948,7 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     (*mFtpcRotationY[i])(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
     (*mFtpcRotationY[i])(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
     
-    UInt_t ierr;
+    size_t ierr;
     
     (*mFtpcRotationYInverse[i]) = (*mFtpcRotationY[i]).inverse(ierr);
     
