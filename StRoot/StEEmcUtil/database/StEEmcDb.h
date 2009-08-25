@@ -104,7 +104,7 @@ public:
   void setFiberOff(int icr);
   const int getNFiber(){return nFiber;}
   const EEmcDbItem* getByIndex(int ikey); ///< returns full DB info for one pixel
-  void exportAscii(char *fname="eemcDbDump.dat") const; 
+  void exportAscii(const char *fname="eemcDbDump.dat") const; 
   void print() {exportAscii();}
 
   const  EEmcDbItem*  getByCrate(int crateID, int channel); // full DB info, crateID counts from 1, channel from 0  
