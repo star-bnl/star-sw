@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.48 2009/01/26 18:55:45 genevb Exp $
+ * $Id: MysqlDb.cc,v 1.49 2009/08/25 17:41:36 fine Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.49  2009/08/25 17:41:36  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.48  2009/01/26 18:55:45  genevb
  * Fixed reporting of port numbers to what is actually used
  *
@@ -201,6 +204,7 @@
 #include "stdb_streams.h"
 #include "StDbDefaults.hh"
 #include "StDbManagerImpl.hh"
+#include <assert.h>
 
 #ifndef __STDB_STANDALONE__
 #include "StMessMgr.h"

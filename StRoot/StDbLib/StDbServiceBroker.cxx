@@ -3,6 +3,7 @@
 #include "ChapiStringUtilities.h"
 #include "mysql.h"
 #include "math.h"
+#include <string.h>
 #include <libxml/nanohttp.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -78,7 +79,7 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
       return;  
     }
 
-  char* access_mode = getenv("DB_ACCESS_MODE");
+  const char* access_mode = getenv("DB_ACCESS_MODE");
   if (!access_mode)  
     {
       access_mode = "read";
