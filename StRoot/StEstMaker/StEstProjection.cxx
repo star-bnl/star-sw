@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.11 2004/01/15 00:25:30 fisyak Exp $
+ * $Id: StEstProjection.cxx,v 1.12 2009/08/25 18:54:13 fine Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.12  2009/08/25 18:54:13  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.11  2004/01/15 00:25:30  fisyak
  * unsigned int => size_t
  *
@@ -132,8 +135,8 @@ int StEstTracker::Preprojection(StEstBranch *branch, int slayer) {
     break;
   default:
     ret = 4;
-    gMessMgr->Error()<<"ERROR in Preprojection !!! slay<1 or slay>4 !!!"<<endm;
-    gMessMgr->Error()<<"     slay = "<<slayer<<"     branch* = "<<int(&branch)<<endm;
+    LOG_ERROR <<"ERROR in Preprojection !!! slay<1 or slay>4 !!!"<<endm;
+    LOG_ERROR <<"     slay = "<<slayer<<"     branch* = "<<&branch<<endm;
     return(ret);
   }
 

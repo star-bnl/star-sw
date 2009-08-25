@@ -1560,7 +1560,7 @@ Int_t TNNUtils::UpdateNewBranch()
   if(!fT){printf("no tree associated!\n");return 0;}
   if(!fK){printf("no kernel associated!\n");return 0;}
   if(!fFName){printf("no file associated to contain the new branch!\n");return 0;}
-  if(fOAdr==(UInt_t)(fK->GetOutputAdr())&&fNOut==fK->GetNOutput())return 1;
+  if(fOAdr==(ULong_t)(fK->GetOutputAdr())&&fNOut==fK->GetNOutput())return 1;
   
   if(fB) delete fB;
     
@@ -1573,7 +1573,7 @@ Int_t TNNUtils::UpdateNewBranch()
   fB=(fT->Branch("OutputU",fK->GetOutputAdr(),varname));
   delete [] varname;  
   fB->SetFile(fFName);
-  fOAdr=(UInt_t)fK->GetOutputAdr();
+  fOAdr=(ULong_t)fK->GetOutputAdr();
   fNOut=fK->GetNOutput();
   return 1;
 }
