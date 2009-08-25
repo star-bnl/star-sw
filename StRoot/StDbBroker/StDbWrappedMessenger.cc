@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.8 2007/08/08 20:51:04 fine Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.9 2009/08/25 17:00:43 fine Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.9  2009/08/25 17:00:43  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.8  2007/08/08 20:51:04  fine
  * replace the cutom messanger with the standard STAR logger
  *
@@ -40,6 +43,7 @@
 
 #include "StDbWrappedMessenger.hh"
 #include <string.h>
+#include <assert.h>
 #include "StUtilities/StMessageManager.h"
 
 //////////////////////////////////////////////////////////////////////////
