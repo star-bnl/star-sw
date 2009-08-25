@@ -1,11 +1,12 @@
 /**********************************************************
- * $Id: StRichAreaSegment.cxx,v 2.1 2000/11/21 16:24:22 horsley Exp $
+ * $Id: StRichAreaSegment.cxx,v 2.2 2009/08/25 22:50:09 fine Exp $
  *
  * Description:
  **********************************************************/
 
 #include "StRichAreaSegment.h"
 #include "StThreeVectorF.hh"
+#include "StMessMgr.h"
 
 /*
 #ifndef ST_NO_NAMESPACES
@@ -32,18 +33,16 @@ StRichAreaSegment::~StRichAreaSegment() {
 
 StThreeVectorF& StRichAreaSegment::getPoint(int i) {
   if (i<0 || i>11) {
-    cout << "StRichAreaSegment::getPoint() passed " << i 
-	 << "  which is out of bounds." << endl;
-    abort();
+    LOG_FATAL << "StRichAreaSegment::getPoint() passed " << i 
+	 << "  which is out of bounds." << endm;
   }
   return mPoints[i];
 }
 
 void StRichAreaSegment::addPoint(int i, StThreeVectorF p) {
   if (i<0 || i>11) {
-    cout << "StRichAreaSegment::addPoint() passed " << i 
-	 << "  which is out of bounds." << endl;
-    abort();
+    LOG_FATAL << "StRichAreaSegment::addPoint() passed " << i 
+	 << "  which is out of bounds." << endm;
   }
   mPoints[i] = p;
 }
@@ -51,9 +50,8 @@ void StRichAreaSegment::addPoint(int i, StThreeVectorF p) {
 
 void StRichAreaSegment::addAngle(int i, double ang) {
   if (i<0 || i>1) {
-    cout << "StRichAreaSegment::addAngle() passed " << i 
+    LOG_FATAL << "StRichAreaSegment::addAngle() passed " << i 
 	 << "  which is out of bounds." << endl;
-    abort(); 
   } 
   mAngle[i] = ang;
   if (i==0) mAngle_0 = ang;
@@ -63,9 +61,8 @@ void StRichAreaSegment::addAngle(int i, double ang) {
 
 double StRichAreaSegment::getAngle(int i) {
   if (i<0 || i>1) {
-    cout << "StRichAreaSegment::getAngle() passed " << i 
+    LOG_FATAL << "StRichAreaSegment::getAngle() passed " << i 
 	 << "  which is out of bounds." << endl;
-    abort(); 
   } 
   if (i==0) return mAngle_0;
   if (i==1) return mAngle_1;
