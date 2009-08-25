@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.73 2008/05/27 14:26:40 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.74 2009/08/25 00:44:17 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.74  2009/08/25 00:44:17  jhthomas
+ * Significant Updates to Undo3DGridLeakDistortion.  Faster and more reliable near pad row 13
+ *
  * Revision 1.73  2008/05/27 14:26:40  fisyak
  * Use TChairs, absorb shift tau shift, introduce sector to sector time offset
  *
@@ -2516,6 +2519,18 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
   Int_t loops = 1 + (int) ( 0.5 + TMath::Log2( (double) TMath::Max(i_one,j_one) ) ) ;  // Solve for N in 2**N and add one
 
   for ( Int_t count = 0 ; count < loops ; count++ ) {  // Do several loops as the matrix expands and the resolution increases
+
+    Float_t tempGRIDSIZER = GRIDSIZER * i_one ;
+    Float_t tempRatio     = Ratio * i_one * i_one / ( j_one * j_one ) ;
+    Float_t tempFourth    = 1.0 / (2.0 + 2.0*tempRatio) ;
+
+    Float_t coef1[ROWS],coef2[ROWS];
+    for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
+      Float_t Radius = IFCRadius + i*GRIDSIZER ;
+      coef1[i] = 1.0 + tempGRIDSIZER/(2*Radius);
+      coef2[i] = 1.0 - tempGRIDSIZER/(2*Radius);
+    }
+
     TMatrix SumCharge(ROWS,COLUMNS) ;
 
     for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
@@ -2537,21 +2552,18 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
 	  }
 	  SumCharge(i,j) /= sum ;
 	}
-      }
+        SumCharge(i,j) *= tempGRIDSIZER*tempGRIDSIZER; // just saving a step later on
+       }
     }
-
-    Float_t tempGRIDSIZER = GRIDSIZER * i_one ;
-    Float_t tempRatio     = Ratio * i_one * i_one / ( j_one * j_one ) ;
-    Float_t tempFour      = 2.0 + 2.0*tempRatio ;
 
     for ( Int_t k = 1 ; k <= ITERATIONS; k++ ) {               // Solve Poisson's Equation
       for ( Int_t i = i_one ; i < ROWS-1 ; i += i_one ) {
-	Float_t Radius = IFCRadius + i*GRIDSIZER ;
 	for ( Int_t j = j_one ; j < COLUMNS-1 ; j += j_one ) {
-	  ArrayV(i,j) = ( ArrayV(i+i_one,j) + ArrayV(i-i_one,j) + tempRatio*ArrayV(i,j+j_one) + tempRatio*ArrayV(i,j-j_one) ) 
-	    + ArrayV(i+i_one,j)*tempGRIDSIZER/(2*Radius) - ArrayV(i-i_one,j)*tempGRIDSIZER/(2*Radius)
-	    + SumCharge(i,j)*tempGRIDSIZER*tempGRIDSIZER ;
-	  ArrayV(i,j) *=  1.0/tempFour ;
+
+	  ArrayV(i,j) = ( coef1[i]*ArrayV(i+i_one,j) + coef2[i]*ArrayV(i-i_one,j)
+            + tempRatio*(ArrayV(i,j+j_one) + ArrayV(i,j-j_one))
+	    + SumCharge(i,j) ) * tempFourth;
+
 	  if ( k == ITERATIONS ) {       // After full solution is achived, copy low resolution solution into higher res array
 	    if ( i_one > 1 ) {              
 	      ArrayV(i+i_one/2,j)                    =  ( ArrayV(i+i_one,j) + ArrayV(i,j)     ) / 2 ;
@@ -2568,6 +2580,7 @@ void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, 
 	      // Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
 	    }
 	  }
+
 	}
       }
     }
@@ -2674,7 +2687,20 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
   if  ( PHISLICES > 1000 ) { cout << "StMagUtilities::Poisson3D  PHISLICES > 1000 is not allowed (nor wise) " << endl ; exit(1) ; }  
   for ( Int_t i = 0 ; i < PHISLICES ; i++ ) { ArrayofSumCharge[i] = new TMatrix(ROWS,COLUMNS) ; }
 
-  for ( Int_t count = 0 ; count < loops ; count++ ) {  // START the master loop and do the binary expansion    
+  for ( Int_t count = 0 ; count < loops ; count++ ) {  // START the master loop and do the binary expansion
+   
+    Float_t  tempGRIDSIZER   =  GRIDSIZER  * i_one ;
+    Float_t  tempRatioPhi    =  RatioPhi * i_one * i_one ; // Used to be divided by ( m_one * m_one ) when m_one was != 1
+    Float_t  tempRatioZ      =  RatioZ   * i_one * i_one / ( j_one * j_one ) ;
+
+    Float_t coef1[ROWS],coef2[ROWS],coef3[ROWS],coef4[ROWS];
+    for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
+      Float_t Radius = IFCRadius + i*GRIDSIZER ;
+      coef1[i] = 1.0 + tempGRIDSIZER/(2*Radius);
+      coef2[i] = 1.0 - tempGRIDSIZER/(2*Radius);
+      coef3[i] = tempRatioPhi/(Radius*Radius);
+      coef4[i] = 0.5 / (1.0 + tempRatioZ + coef3[i]);
+    }
 
     for ( Int_t m = 0 ; m < PHISLICES ; m++ ) {
       TMatrix &Charge    = *ArrayofCharge[m] ;
@@ -2698,16 +2724,14 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
 	    }
 	    SumCharge(i,j) /= sum ;
 	  }
+          SumCharge(i,j) *= tempGRIDSIZER*tempGRIDSIZER; // just saving a step later on
 	}
       }
     }
-   
-    Float_t  tempGRIDSIZER   =  GRIDSIZER  * i_one ;
-    Float_t  tempRatioPhi    =  RatioPhi * i_one * i_one ; // Used to be divided by ( m_one * m_one ) when m_one was != 1
-    Float_t  tempRatioZ      =  RatioZ   * i_one * i_one / ( j_one * j_one ) ;
 
     for ( Int_t k = 1 ; k <= ITERATIONS; k++ ) {
       for ( Int_t m = 0 ; m < PHISLICES ; m++ ) {
+
 	m_plus  = m + 1;
 	m_minus = m - 1 ; 
 	if (SYMMETRY==1) {  // Reflection symmetry in phi (e.g. symmetry at sector boundaries, or half sectors, etc.)
@@ -2724,13 +2748,13 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
 	TMatrix &SumCharge =  *ArrayofSumCharge[m] ;
 
 	for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  {
-	  Float_t Radius = IFCRadius + i*GRIDSIZER ;
 	  for ( Int_t j = j_one ; j < COLUMNS-1 ; j+=j_one ) {
-	    ArrayV(i,j) = ( ArrayV(i+i_one,j) + ArrayV(i-i_one,j) + tempRatioZ*ArrayV(i,j+j_one) + tempRatioZ*ArrayV(i,j-j_one) ) 
-	      + ArrayV(i+i_one,j)*tempGRIDSIZER/(2*Radius) -  ArrayV(i-i_one,j)*tempGRIDSIZER/(2*Radius)
-	      + ArrayVP(i,j)*tempRatioPhi/(Radius*Radius)  +  ArrayVM(i,j)*tempRatioPhi/(Radius*Radius)
-	      + SumCharge(i,j)*tempGRIDSIZER*tempGRIDSIZER ;
-	    ArrayV(i,j) *=  1.0/( 2.0 + 2.0*tempRatioZ + 2.0*tempRatioPhi/(Radius*Radius) ) ;
+
+            ArrayV(i,j) = ( coef1[i]*ArrayV(i+i_one,j) + coef2[i]*ArrayV(i-i_one,j)
+              + tempRatioZ*(ArrayV(i,j+j_one) + ArrayV(i,j-j_one))
+              + coef3[i]*(ArrayVP(i,j)  +  ArrayVM(i,j))
+              + SumCharge(i,j) ) * coef4[i];
+	   
 	    if ( k == ITERATIONS ) {       // After full solution is achieved, copy low resolution solution into higher res array
 	      if ( i_one > 1 ) {              
 		ArrayV(i+i_one/2,j)                    =  ( ArrayV(i+i_one,j) + ArrayV(i,j)     ) / 2 ;
@@ -2747,8 +2771,10 @@ void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **Arr
 		// Note that this leaves a point at the upper left and lower right corners uninitialized.  Not a big deal.
 	      }
 	    }
+
 	  }
 	}
+
       }
     }      
 
@@ -3791,12 +3817,13 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
      
   const Int_t   ITERATIONS  =  750  ;  //  
   const Int_t   SYMMETRY    =    1  ;  // The Poisson problem to be solved has reflection symmetry (1) or not (0).
-  const Int_t   ROWS        =  257  ;  // ( 2**n + 1 )  eg. 65, 129, 257, 513 
+  const Int_t   ROWS        =  513  ;  // ( 2**n + 1 )  eg. 65, 129, 257, 513 
   const Int_t   COLUMNS     =  129  ;  // ( 2**m + 1 )  eg. 65, 129, 257, 513
   const Int_t   PHISLICES   =    7  ;  // Keep this coordinated with "GRIDSIZEPHI" and "SYMMETRY"
-  const Float_t GRIDSIZEPHI =  2.5 * TMath::Pi() / 180. ;
+  const Float_t GRIDSIZEPHI =  (2 - SYMMETRY) * TMath::Pi() / (12.0*(PHISLICES-1)) ;
   const Float_t GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Float_t GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+  const Int_t   neR3D       =   54  ;  // Number of rows in the interpolation table for the Electric field
 
   static TMatrix *ArrayofArrayV[PHISLICES], *ArrayofCharge[PHISLICES] ; 
   static TMatrix *ArrayofEroverEz[PHISLICES], *ArrayofEPhioverEz[PHISLICES] ; 
@@ -3810,13 +3837,17 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
   static TMatrix *ArrayoftiltEphi[PHISLICES] ;
 
   // Use custom list of radii because we need extra resolution near the gap
-  static Float_t eRlist[neR] = {   50.0,  60.0,  70.0,  80.0,  90.0, 
-				  100.0, 110.0, 115.0, 118.0, 
-				  119.0, 120.0, 121.0, 122.0, 123.0, 
-				  124.0, 125.0, 126.0, 127.0, 128.0, 
-				  129.0, 130.0, 131.0, 132.0, 133.0, 
-				  135.0, 140.0, 145.0, 150.0, 160.0, 
-				  170.0, 180.0, 190.0, 200.0 } ;
+  static Float_t eRlist[neR3D] = {   50.0,   60.0,   70.0,   80.0,   90.0, 
+				    100.0,  110.0,  115.0,  118.0,  118.5, 
+				    119.0,  119.5,  120.0,  120.25, 120.5, 
+				    120.75, 121.0,  121.25, 121.5,  121.75, 
+				    122.0,  122.25, 122.5,  122.75, 123.0, 
+				    123.25, 123.5,  123.75, 124.0,  124.25, 
+				    124.5,  125.75, 125.0,  125.25, 125.5, 
+				    126.0,  126.5,  127.0,  127.5,  128.0, 
+				    129.0,  130.0,  131.0,  132.0,  133.0, 
+				    135.0,  140.0,  145.0,  150.0,  160.0, 
+				    170.0,  180.0,  190.0,  200.0 } ;
 
   Float_t  Er_integral, Ephi_integral ;
   Float_t  r, phi, z ;
@@ -3835,8 +3866,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
       for ( Int_t k = 0 ; k < PHISLICES ; k++ )
 	{
-	  ArrayoftiltEr[k]   =  new TMatrix(neR,neZ) ;
-	  ArrayoftiltEphi[k] =  new TMatrix(neR,neZ) ;
+	  ArrayoftiltEr[k]   =  new TMatrix(neR3D,neZ) ;
+	  ArrayoftiltEphi[k] =  new TMatrix(neR3D,neZ) ;
 	}
 
       for ( Int_t k = 0 ; k < PHISLICES ; k++ )
@@ -3857,25 +3888,50 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 	      Rlist[i] = IFCRadius + i*GRIDSIZER ;
 	      for ( Int_t j = 0 ; j < COLUMNS ; j++ )  // Fill Vmatrix with Boundary Conditions
 		{
-		  Zedlist[j] = j * GRIDSIZEZ ;
+		  Zedlist[j]  = j * GRIDSIZEZ ;
 		  ArrayV(i,j) = 0.0 ; 
 		  Charge(i,j) = 0.0 ;
 		}
 	    }      
 	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) 
 	    { 
-	      const Float_t BackwardsCompatibilityRatio = 3.0 ; // DB uses values different by a factor of 3 for legacy reasons.
+	      const Float_t BackwardsCompatibilityRatio = 3.75 ; // DB uses values different value for legacy reasons.
+	      // Physical width of the gap is about 1.6 cm. The DB contiain 3.0 cm so divide by 3.75 to get halfwidth.
 	      Float_t Radius = IFCRadius + i*GRIDSIZER ;
 	      for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )    
 		{
-		  Float_t phi_prime ;
+
+		  Float_t phi_prime = 0, top = 0, bottom = 0 ;
 		  Int_t   N = (int)(Philist[k]/(TMath::Pi()/12.0))  ;
 		  phi_prime = Philist[k] - N * TMath::Pi() / 12.0 ;
 		  if ( TMath::Power(-1,N) < 0 ) phi_prime = -1 * ( TMath::Pi() / 12.0 - phi_prime ) ; 
-		  Float_t local_y = Radius * TMath::Cos(phi_prime) ;
-		  if ( (local_y >= MiddlGridLeakRadius-MiddlGridLeakWidth/BackwardsCompatibilityRatio) && 
-		       (local_y <= MiddlGridLeakRadius+MiddlGridLeakWidth/BackwardsCompatibilityRatio) )
-		    Charge(i,j) = MiddlGridLeakStrength*BackwardsCompatibilityRatio ;  
+
+		  Float_t local_y_hi  = (Radius+GRIDSIZER/2.0) * TMath::Cos(phi_prime) ;
+		  Float_t local_y_lo  = (Radius-GRIDSIZER/2.0) * TMath::Cos(phi_prime) ;
+		  Float_t charge_y_hi =  MiddlGridLeakRadius + MiddlGridLeakWidth/BackwardsCompatibilityRatio ;
+		  Float_t charge_y_lo =  MiddlGridLeakRadius - MiddlGridLeakWidth/BackwardsCompatibilityRatio ;
+
+		  if (local_y_hi > charge_y_lo && local_y_hi < charge_y_hi) 
+		    {
+		      top    = local_y_hi ; 
+		      if (local_y_lo > charge_y_lo && local_y_lo < charge_y_hi) 
+			bottom = local_y_lo ;
+		      else 
+			bottom = charge_y_lo ;
+		    } 
+		  if (local_y_lo > charge_y_lo && local_y_lo < charge_y_hi) 
+		    {
+		      bottom    = local_y_lo ; 
+		      if (local_y_hi > charge_y_lo && local_y_hi < charge_y_hi) 
+			top = local_y_hi ;
+		      else 
+		        top = charge_y_hi ;
+		    } 
+
+		  Float_t Weight  =  1. / (local_y_hi*local_y_hi - local_y_lo*local_y_lo) ;
+		  // Weight by ratio of volumes for a partially-full cell / full cell (in Cylindrical Coords).
+		  Charge(i,j)  =  (top*top-bottom*bottom) * Weight * MiddlGridLeakStrength*BackwardsCompatibilityRatio ;
+
 		}
 	    }
 	}      
@@ -3896,7 +3952,7 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 	  for ( Int_t i = 0 ; i < neZ ; i++ ) 
 	    {
 	      z = TMath::Abs(eZList[i]) ;              // Assume a symmetric solution in Z that depends only on ABS(Z)
-	      for ( Int_t j = 0 ; j < neR ; j++ ) 
+	      for ( Int_t j = 0 ; j < neR3D ; j++ ) 
 		{ 
 		  r = eRlist[j] ;
 		  tiltEr(j,i)    = Interpolate3DTable( r, z, phi, ROWS, COLUMNS, PHISLICES, Rlist, Zedlist, Philist, ArrayofEroverEz ) ;
@@ -3934,8 +3990,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
       if ( TMath::Power(-1,N) < 0 ) FLIP = -1 ;   // Note change of sign.  Assume reflection symmetry!!
     }
 
-  Er_integral   = Interpolate3DTable( r, z, phi_prime, neR, neZ, PHISLICES, eRlist, eZList, Philist, ArrayoftiltEr ) ;
-  Ephi_integral = Interpolate3DTable( r, z, phi_prime, neR, neZ, PHISLICES, eRlist, eZList, Philist, ArrayoftiltEphi ) ;
+  Er_integral   = Interpolate3DTable( r, z, phi_prime, neR3D, neZ, PHISLICES, eRlist, eZList, Philist, ArrayoftiltEr )   ;
+  Ephi_integral = Interpolate3DTable( r, z, phi_prime, neR3D, neZ, PHISLICES, eRlist, eZList, Philist, ArrayoftiltEphi ) ;
   Ephi_integral *= FLIP ;   // Note possible change of sign if we have reflection symmetry!!
 
   if (fSpaceChargeR2) GetSpaceChargeR2(); // need to reset it. 
