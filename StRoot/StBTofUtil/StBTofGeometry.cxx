@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.4 2009/03/18 14:18:18 dongx Exp $
+ * $Id: StBTofGeometry.cxx,v 1.5 2009/08/25 15:41:29 fine Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.5  2009/08/25 15:41:29  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.4  2009/03/18 14:18:18  dongx
  * - Optimized the geometry initialization function, reduced the CPU time use
  * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
@@ -66,9 +69,9 @@ ClassImp(StBTofNode)
 
 Bool_t StBTofNode::mDebug = kFALSE;
 Double_t const StBTofGeomSensor::mSensorDy = 10.35;   // Actual module length;
-char* const StBTofGeometry::sectorPref = "BSEC";
-char* const StBTofGeometry::trayPref   = "BTRA";
-char* const StBTofGeometry::senPref    = "BRMD";
+const char* StBTofGeometry::sectorPref = "BSEC";
+const char* StBTofGeometry::trayPref   = "BTRA";
+const char* StBTofGeometry::senPref    = "BRMD";
 
 //_____________________________________________________________________________
 StBTofNode::StBTofNode(TVolumeView *element, TVolumeView *top, StThreeVectorD *align, TVolumePosition *pos)

@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.4 2009/03/18 14:18:18 dongx Exp $
+ * $Id: StBTofGeometry.h,v 1.5 2009/08/25 15:41:29 fine Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.5  2009/08/25 15:41:29  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.4  2009/03/18 14:18:18  dongx
  * - Optimized the geometry initialization function, reduced the CPU time use
  * - Optimized the HelixCrossCellIds() function, now doing the tray fast projection to reduce the loop
@@ -290,9 +293,9 @@ class StBTofGeometry : public TNamed {
 
    static Bool_t   mDebug;     //!Control message printing of this class
 
-   static char* const sectorPref ;//= "BSEC";
-   static char* const trayPref   ;//= "BTRA";
-   static char* const senPref    ;//= "BRMD";
+   static const char* sectorPref ;//= "BSEC";
+   static const char* trayPref   ;//= "BTRA";
+   static const char* senPref    ;//= "BRMD";
    
    /// Alignment parameters
    Double_t    mTrayX0[mNTrays];

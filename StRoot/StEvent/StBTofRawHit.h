@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofRawHit.h,v 2.2 2009/01/15 00:48:10 ullrich Exp $
+ * $Id: StBTofRawHit.h,v 2.3 2009/08/25 15:41:28 fine Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBTofRawHit.h,v $
+ * Revision 2.3  2009/08/25 15:41:28  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 2.2  2009/01/15 00:48:10  ullrich
  * mLeTeFlag changed to mFlag, tray(), module(), cell() now return int.
  *
@@ -27,6 +30,7 @@
 
 #include <Stiostream.h>
 #include "StObject.h"
+#include "TMath.h"
 
 class StBTofRawHit : public StObject {
 public:
@@ -101,7 +105,7 @@ StBTofRawHit::trailingEdge() const
 inline int
 StBTofRawHit::fiberId() const
 {
-    return abs(mFlag) - 1;   //! fiber Id = 0, 1, 2, 3
+    return TMath::Abs(mFlag) - 1;   //! fiber Id = 0, 1, 2, 3
 }
 
 inline int
