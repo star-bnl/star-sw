@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.546 2009/08/03 16:44:51 starlib Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.547 2009/08/25 15:32:35 fine Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -51,7 +51,7 @@ ClassImp(StBFChain);
  * chain and the ITTF chain options.
  */
 void StBFChain::Setup(Int_t mode) {
-  static Char_t *path  = "./StRoot/StBFChain:$STAR/StRoot/StBFChain";
+  static const Char_t *path  = "./StRoot/StBFChain:$STAR/StRoot/StBFChain";
   TString chain("BFC.C");
   if (mode == 2) chain = "BFC2.C";
   Char_t *file = gSystem->Which(path,chain,kReadPermission);
@@ -875,7 +875,7 @@ Int_t StBFChain::Init() {
 	TString dbTag("r");
 	dbTag += DbAlias[i].tag;
 	if (GetOption(dbTag)) {
-	  Char_t *path  = "./StarDb/VmcGeometry:$STAR/StarDb/VmcGeometry";
+	  const Char_t *path  = "./StarDb/VmcGeometry:$STAR/StarDb/VmcGeometry";
 	  TString geom("Geometry.");
 	  geom +=  DbAlias[i].geometry;
 	  geom += ".C";
@@ -1092,7 +1092,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 	    SetOption(kgo,chain);
 	  } else {
 	    // Check that option can be library name or / and Maker
-	    static Char_t *path = ".:.$STAR_HOST_SYS/lib::.$STAR_HOST_SYS/LIB:$STAR/.$STAR_HOST_SYS/lib:$STAR/.$STAR_HOST_SYS/LIB";
+	    static const Char_t *path = ".:.$STAR_HOST_SYS/lib::.$STAR_HOST_SYS/LIB:$STAR/.$STAR_HOST_SYS/lib:$STAR/.$STAR_HOST_SYS/LIB";
 	    TString File = Tag; File += ".so";
 	    Char_t *file = gSystem->Which(path,File.Data(),kReadPermission);
 	    if (file) {
@@ -1404,8 +1404,8 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   if (fFileOut != "")  gMessMgr->QAInfo() << "Output root file name " <<  fFileOut.Data() << endm;  
   else                 SetOption("NoOutput","No Output File"); 
   if (!GetTFile()) {
-    if (GetOption("tags")  && fFileOut != "" ||
-	GetOption("lana") ||  GetOption("Laser") || GetOption("lanaDV") ) {
+    if (GetOption("tags")  &&  ( (fFileOut != "") ||
+	GetOption("lana") ||  GetOption("Laser") || GetOption("lanaDV") ) ) {
       TString TagsName = fFileOut;
       if(GetOption("LaserCal")){
 	TagsName.ReplaceAll(".root",".laser.root");
@@ -1523,7 +1523,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
   } // check if maker is St_db_Maker
   if (!GetOption("fzin")) {
     struct Field_t {
-      Char_t *name;
+      const Char_t *name;
       Float_t scale;
     };
     Field_t FieldOptions[5] = {
