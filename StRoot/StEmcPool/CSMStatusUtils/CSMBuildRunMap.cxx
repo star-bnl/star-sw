@@ -18,6 +18,8 @@
 #include <map>
 #include <set>
 #include <string>
+#include <stdlib.h>
+#include <assert.h>
 
 using namespace std;
 

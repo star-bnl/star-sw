@@ -13,7 +13,7 @@ BprsCapPolygraph::BprsCapPolygraph( TObjArray *HList, StJanBarrelDbMaker* jdb, i
     par_pedFlag=pedFlag;
     mJanDbMaker=jdb; assert(mJanDbMaker);
 
-    char *fname="all"; //tmp
+    const char *fname="all"; //tmp
     //QA histos
 
     hChiB=new TH1F("bppg_chb","BprsPoly logN(chi2/dof), nominal capID ; logN(chi2/dof)",200,-1.,9.);

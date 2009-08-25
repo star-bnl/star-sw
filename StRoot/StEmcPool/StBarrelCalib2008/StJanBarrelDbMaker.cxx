@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StJanBarrelDbMaker.cxx,v 1.3 2009/04/17 18:44:43 mattheww Exp $
+// $Id: StJanBarrelDbMaker.cxx,v 1.4 2009/08/25 16:08:04 fine Exp $
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
@@ -76,7 +76,7 @@ Int_t StJanBarrelDbMaker::InitRun  (int runNo){
     LOG_INFO<<"upload local peds from  run"<<pedRun<<endm;
     char txt[100];
 
-    char *pedPath="/star/institutions/mit/balewski/2008-janDb-BprsPeds-v3.1";
+    const char *pedPath="/star/institutions/mit/balewski/2008-janDb-BprsPeds-v3.1";
     sprintf(txt,"%s/pedBprsR%d-allCap.hist.root",pedPath,pedRun);
     TFile* fd=new TFile(txt);  assert(fd->IsOpen());
     fd->ls();   
@@ -84,12 +84,12 @@ Int_t StJanBarrelDbMaker::InitRun  (int runNo){
     janDb_bprsSigPed2D=(TH2S *)fd->Get("rmsPedBPRScap"); assert(janDb_bprsSigPed2D);
     janDb_bprsStat=(TH1S *)fd->Get("statBPRSallCap"); assert( janDb_bprsStat); // use stats from every run
 
-    char *path= "calib-jan3.1/";
+    const char *path= "calib-jan3.1/";
 
     sprintf(txt,"%s/mipGainBprs+Btow_v2.hist.root",path);
     TFile* fd5=new TFile(txt);  assert(fd5->IsOpen());
     fd5->ls();   
-    char *core[mxBTile]={"btow","bprs"};
+    const char *core[mxBTile]={"btow","bprs"};
     for(int ibp=0;ibp<mxBTile;ibp++) {
       TString tit=core[ibp]; tit+="MipGain";
       janDb_mipMean[ibp]=(TH1F *)fd5->Get(tit); assert(   janDb_mipMean[ibp]);
@@ -321,6 +321,9 @@ void  StJanBarrelDbMaker::initBprsGeometry(){
 }
 
 // $Log: StJanBarrelDbMaker.cxx,v $
+// Revision 1.4  2009/08/25 16:08:04  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 1.3  2009/04/17 18:44:43  mattheww
 // fixed a bug in the last comment
 //
