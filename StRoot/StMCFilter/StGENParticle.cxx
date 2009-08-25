@@ -1,9 +1,10 @@
-// @(#)root/eg:$Id: StGENParticle.cxx,v 1.1 2009/04/10 19:59:20 perev Exp $
+// @(#)root/eg:$Id: StGENParticle.cxx,v 1.2 2009/08/25 20:49:16 fine Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
 #include "stdlib.h"
 #include "math.h"
+#include "string.h"
 
 #include "StGENParticle.h"
 

@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StMCFilter.cxx,v 1.6 2009/06/26 22:57:26 perev Exp $
+// @(#)root/eg:$Id: StMCFilter.cxx,v 1.7 2009/08/25 20:49:16 fine Exp $
 // Author: Victor Perev  17/03/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -35,6 +35,8 @@ At the end Finish() is called. Print statistics.  Could be overloaded
 #include "stdlib.h"
 #include "ctype.h"
 #include "math.h"
+#include <cassert>
+#include <cstring>
 
 #include "StMCFilter.h"
 #include <map>
