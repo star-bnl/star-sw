@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.14 2008/02/17 17:37:32 balewski Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.15 2009/08/25 18:33:11 fine Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -35,11 +35,12 @@
 #include "Stiostream.h"
 #include "EEmcSmdGeom.h"
 #include "EEmcStripGeom.h"
+#include <assert.h>
+#include <TMath.h>
 
 // decouple from StarClassLibrary
 //#include "PhysicalConstants.h"  
 #ifndef HEP_SYSTEM_OF_UNITS_H
-#include <math.h>
 static const double     radian      = 1.;
 static const double     pi          = M_PI; // from <math.h>
 static const double     degree      = (M_PI/180.0)*radian;
@@ -470,7 +471,7 @@ const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV,
     bool match = false;
     if(stripStructId1.UVId == stripStructId2.UVId &&
        stripStructId1.sectorId == stripStructId2.sectorId) {
-         if((abs(stripStructId1.stripId - stripStructId2.stripId) <= nTolerance))
+         if((TMath::Abs(stripStructId1.stripId - stripStructId2.stripId) <= nTolerance))
            match = true;
     }
     return match;
@@ -766,6 +767,9 @@ ostream& operator<<(ostream &os, const StructEEmcStrip strip)
 /////////////////////////////////////////////////////////////////////////////
 /*
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.15  2009/08/25 18:33:11  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.14  2008/02/17 17:37:32  balewski
  * demote warning about strips intersecting beyond modle to DEBUG
  *

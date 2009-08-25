@@ -468,7 +468,7 @@ void StEEmcDb::optimizeOthers(int is){
 
 //--------------------------------------------------
 //--------------------------------------------------
-void StEEmcDb::exportAscii(char *fname) const{
+void StEEmcDb::exportAscii(const char *fname) const{
   LOG_INFO << "::exportAscii(\'" << fname << "') ..." << endm;
 
   FILE * fd=fopen(fname,"w");
@@ -678,7 +678,7 @@ template <class St_T, class T_st> void StEEmcDb
 const EEmcDbItem*  
 StEEmcDb::getByStrip0(int isec, int iuv, int istrip){
   //  printf("isec=%d iuv=%d istrip=%d \n",isec,iuv,istrip);
-  assert(isec>=0 & isec<MaxSectors);
+  assert(isec>=0 && isec<MaxSectors);
   assert(iuv>=0 && iuv<MaxSmdPlains);
   assert(istrip>=0 && istrip<MaxSmdStrips);
   return byStrip[isec][iuv][istrip];  

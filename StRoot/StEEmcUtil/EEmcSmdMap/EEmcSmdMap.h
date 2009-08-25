@@ -51,6 +51,7 @@
 #include <TString.h>
 
 #include <vector>
+#include <assert.h>
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 class EEmcStrip2StripMapItem;
