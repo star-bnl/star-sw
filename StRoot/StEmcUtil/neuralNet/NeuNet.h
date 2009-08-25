@@ -176,7 +176,7 @@ class TNNControlE : public TCanvas
   virtual Float_t* GetYV(){return fYV;};  
   virtual Int_t GetNT(){return fNT;};
   virtual Int_t GetNV(){return fNV;};    
-  virtual void DrawT(Text_t *text, Float_t x, Float_t y, Float_t angle=0., Int_t color=1)
+  virtual void DrawT(const Text_t *text, Float_t x, Float_t y, Float_t angle=0., Int_t color=1)
   {
     TText *tText= new TText(x,y,text);
     tText->SetNDC(kTRUE);
@@ -320,8 +320,8 @@ class TNNUtils : public TNamed
   TNNKernel *fK;   // associated kernel
   Text_t fFName[400];  // file name for the new branch
   TFile fTF;       // Tfile for the new branch
-  TBranch *fB;      // new branch
-  UInt_t fOAdr;     // adress of output units of the kernel
+  TBranch *fB;     // new branch
+  ULong_t fOAdr;   // adress of output units of the kernel
   Int_t  fNOut;    // number of output units of the kernel
   TNNFormula fForm;// formula to compute output
   
