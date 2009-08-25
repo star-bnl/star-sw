@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.12  2009/08/25 20:57:54  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 2.11  2007/10/05 00:01:20  calderon
  * Changes to include a EMC hit collection that does not care about
  * parent tracks, so that now there are two collections.  This
@@ -58,6 +61,8 @@
 #include "StMessMgr.h"
 #include "TObjectSet.h"
 #include "TDataSetIter.h"
+#include <cassert>
+
 static const char rcsid[] = "$Id ";
 
 ClassImp(StMcEmcHitCollection);
