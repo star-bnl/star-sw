@@ -2,7 +2,7 @@
 #define STAR_StBarrelMonitorMaker
 
 /************************************************************
- * $Id: StBarrelMonitorMaker.h,v 1.1 2008/11/24 23:06:36 balewski Exp $
+ * $Id: StBarrelMonitorMaker.h,v 1.2 2009/08/25 16:08:04 fine Exp $
  ************************************************************
  Goal: Unpack & monitor barrel events
  *
@@ -57,7 +57,8 @@ class StBarrelMonitorMaker : public StMaker {
   int  par_calibPass; //  0=raw, 1=capPed , 2=capIdfix... stages of calibration
   int  par_bprsHisto; // 1=comCap, 2=128cap   
 
-  char cTile[mxBTile], *cTile4[mxBTile];
+  char cTile[mxBTile];
+  const char *cTile4[mxBTile];
 
   // output histograms
   TH1  *hTile[mxBTile]; // ADC spectra, one per channel
@@ -101,7 +102,7 @@ class StBarrelMonitorMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBarrelMonitorMaker.h,v 1.1 2008/11/24 23:06:36 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StBarrelMonitorMaker.h,v 1.2 2009/08/25 16:08:04 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -112,6 +113,9 @@ class StBarrelMonitorMaker : public StMaker {
 
 
 // $Log: StBarrelMonitorMaker.h,v $
+// Revision 1.2  2009/08/25 16:08:04  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 1.1  2008/11/24 23:06:36  balewski
 // start
 //

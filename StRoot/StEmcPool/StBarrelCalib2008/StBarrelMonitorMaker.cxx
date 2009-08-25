@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StBarrelMonitorMaker.cxx,v 1.2 2009/02/04 20:33:32 ogrebeny Exp $
+// $Id: StBarrelMonitorMaker.cxx,v 1.3 2009/08/25 16:08:04 fine Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -139,7 +139,7 @@ StBarrelMonitorMaker::Make(){
   
 
   vector<unsigned int> trgL=mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().triggerIds();
-  printf("trigL len=%d\n",trgL.size());
+  printf("trigL len=%dL\n",trgL.size());
   uint ii;
   for( ii=0;ii<trgL.size();ii++) printf("ii=%d trigID=%d\n",ii,trgL[ii]);
   if (mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(19)) return kStOK; // drop bbc-fast events
@@ -232,7 +232,7 @@ StBarrelMonitorMaker::unpackStTiles(int ibp){
       StEmcModule* module = detector->module(2+icr*30);assert(module);
       StSPtrVecEmcRawHit& rawHit=module->hits();
       if(rawHit.size()<=0) {
-	 printf("ss icr=%d n=%d, ABORT BpRS for this event\n",icr,rawHit.size()); 
+	 printf("ss icr=%d n=%dL, ABORT BpRS for this event\n",icr,rawHit.size()); 
 	return ;
 }	
 	assert(rawHit.size()>0);
@@ -381,6 +381,9 @@ StBarrelMonitorMaker::populateBprsEveA(){
 
 //---------------------------------------------------
 // $Log: StBarrelMonitorMaker.cxx,v $
+// Revision 1.3  2009/08/25 16:08:04  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 1.2  2009/02/04 20:33:32  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //
