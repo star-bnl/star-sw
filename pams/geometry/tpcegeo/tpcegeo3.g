@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.6 2009/07/25 02:07:56 perev Exp $
+!// $Id: tpcegeo3.g,v 1.7 2009/08/25 19:48:47 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.7  2009/08/25 19:48:47  perev
+!// wrong TPAD shift fixed
+!//
 !// Revision 1.6  2009/07/25 02:07:56  perev
 !// Prompt hits added
 !//
@@ -1579,15 +1582,17 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
 	 z2 = tpgvLeng - TECW_Thick;
          zGG2 = z2-TPRS_dAnode;
          zGG1 = zGG2 - TPCG_distanceGG2AnodeWire;
-         if (kase .eq.1) {dz = (zGG1 - z1  )/2; z = (zGG1 + z1  )/2;}
-         if (kase .eq.3) {dz = (zGG2 - zGG1)/2; z = (zGG2 + zGG1)/2;}
-         if (kase .eq.2) {dz = (z2   - zGG2)/2; z = (zGG2 +   z2)/2;}
+         if (kase .eq.1) {dz = (zGG1 - z1  )/2; z = (zGG1 + z1  -tpgvLeng)/2;}
+         if (kase .eq.2) {dz = (z2   - zGG2)/2; z = (zGG2 + z2  -tpgvLeng)/2;}
+         if (kase .eq.3) {dz = (zGG2 - zGG1)/2; z = (zGG2 + zGG1-tpgvLeng)/2;}
 *        position within supersector (this assumes rectangular padrows)
            do i_row = 1,nint(tprs_nRow)
+              write(*,*) 'TPAD Kase,Z,dZ=',kase,z,dz;
+
                If (kase ==1 .and. (nint(tprs_super)==3 | i_row==1)) then
          	 Create and Position TPAD  x=tprs_Rpads(i_row)-tprs_width z=z,
                              dx=tprs_width/2,
-			    dy=tprs_npads(i_row)*tprs_pitch/2,
+			     dy=tprs_npads(i_row)*tprs_pitch/2,
                              dz=dz
 !//              write(*,*) 'A Ncopy=',ag_ncopy;
               endif
