@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixelCollection.cxx,v 2.1 2007/04/27 11:26:45 hippolyt Exp $
+ * $Id: StRichSinglePixelCollection.cxx,v 2.2 2009/08/25 22:44:02 fine Exp $
  *
  * Description:
  *  Container for cluster finder which allows access in
@@ -11,6 +11,9 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixelCollection.cxx,v $
+ * Revision 2.2  2009/08/25 22:44:02  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 2.1  2007/04/27 11:26:45  hippolyt
  * Star logger recommendations
  *
@@ -34,7 +37,7 @@
 //#include <string.h>  // only for memcpy and memset functions
 
 #include "StGlobals.hh"
-
+#include "TError.h"
 #include "StRichSinglePixelCollection.h"
 
 StRichSinglePixelCollection::StRichSinglePixelCollection()
@@ -110,8 +113,8 @@ StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection& old)
 	
 	mPixelArray  = new StRichSinglePixel* [newx*newy];
 	if(!mPixelArray) {
-	  { LOG_ERROR << "StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection&) %n FATAL: %n Cannot allocate memory for array. %n Aborting..." << endm; }
-	    abort();
+	  { LOG_FATAL << "StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection&) %n FATAL: %n Cannot allocate memory for array. %n Aborting..." << endm; }
+	    Fatal("StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection& old)","Abort");
 	}
 	StRichSinglePixel* fillValue = 0;
 	uninitialized_fill_n(mPixelArray,newx*newy,fillValue);
@@ -151,8 +154,8 @@ StRichSinglePixelCollection::resize(size_t x, size_t y)
 
     mPixelArray = new StRichSinglePixel* [newsize];
     if(!mPixelArray) {
-      { LOG_ERROR << "StRichSinglePixelCollection::resize(): %n ERROR %n Cannot allocate memory for 2-d array. Aborting" << endm; }
-	abort();
+      { LOG_FATAL << "StRichSinglePixelCollection::resize(): %n ERROR %n Cannot allocate memory for 2-d array. Aborting" << endm; }
+        Fatal("StRichSinglePixelCollection::resize","Abort");
     }
 
     // fill 0 bytes into array...old and STL
