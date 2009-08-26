@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridDaqData.cc,v 1.4 2005/07/23 03:37:34 perev Exp $
+ * $Id: StSvtHybridDaqData.cc,v 1.5 2009/08/26 17:51:35 fine Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridDaqData.cc,v $
+ * Revision 1.5  2009/08/26 17:51:35  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.4  2005/07/23 03:37:34  perev
  * IdTruth + Cleanup
  *
@@ -32,6 +35,7 @@
 #include "StSvtHybridDaqData.hh"
 #include "StSequence.hh"
 #include "StDAQMaker/StSVTReader.h"
+#include <cassert>
 
 ClassImp(StSvtHybridDaqData)
 
