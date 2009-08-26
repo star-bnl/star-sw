@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.21 2006/08/10 03:34:38 perev Exp $
+// $Id: StObject.cxx,v 1.22 2009/08/26 20:44:08 fine Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.22  2009/08/26 20:44:08  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 1.21  2006/08/10 03:34:38  perev
 // Assert==>assert
 //
@@ -143,8 +146,8 @@ void StUUId::Generate()
    if (fID[0])	return;
    fID[3] = uu[3]; 
    fID[2] = uu[2]++;
-   fID[1] = (UInt_t)this;
-   fID[0] = (UInt_t)((Long_t)gSystem->Now());
+   fID[1] = (UInt_t)((ULong_t)this);
+   fID[0] = (UInt_t)((ULong_t)gSystem->Now());
 }
 
 //_____________________________________________________________________________

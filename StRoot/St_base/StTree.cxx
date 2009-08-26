@@ -5,6 +5,7 @@
 #include "TDirIter.h"
 #include "TKey.h"
 #include "TError.h"
+#include <stdlib.h>
 
 #ifdef __RFIO__
 #include "TRFIOFile.h"
