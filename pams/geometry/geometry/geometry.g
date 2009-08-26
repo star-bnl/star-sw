@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.199 2009/08/21 18:33:01 perev Exp $
+* $Id: geometry.g,v 1.200 2009/08/26 20:13:15 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.200  2009/08/26 20:13:15  perev
+* JanB pixel off for upgr16
+*
 * Revision 1.199  2009/08/21 18:33:01  perev
 * PMD off for y2009
 *
@@ -1278,7 +1281,7 @@ replace [exe UPGR16;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
                    PipeConfig=6;   " thinner pipe"
                    PipeFlag = 0;    "no wrap,no shild"
 
-                   PIXL=on;         " put the pixel detector in"
+                   PIXL=off;        " put the pixel detector in"
                    PixlConfig=-1;   " Simplest.Gerrit"
 
                    ISTB=on;  "IST barrel"
