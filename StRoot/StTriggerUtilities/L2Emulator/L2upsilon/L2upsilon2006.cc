@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <algorithm>
 #include <functional>
+#include <cstring>
+#include <cassert>
 
 #include "L2upsilonResult2006.h"
 #include "L2upsilon2006.hh"

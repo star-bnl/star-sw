@@ -1,6 +1,7 @@
 #include <TH2.h>
 #include "StEemcTriggerSimu.h"
 #include "TObjArray.h"
+#include <cassert>
 
 //==================================================
 //==================================================
@@ -172,6 +173,9 @@ StEemcTriggerSimu::initHisto() {
 
 //
 // $Log: StEemcTriggerHisto.cxx,v $
+// Revision 1.5  2009/08/26 19:33:56  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 1.4  2009/01/26 15:09:07  fisyak
 // Add missing (in ROOT 5.22) includes
 //

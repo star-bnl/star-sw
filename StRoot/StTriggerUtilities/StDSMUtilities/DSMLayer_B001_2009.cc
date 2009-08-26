@@ -30,7 +30,7 @@ bool DSMLayer_B001_2009::read(const TriggerDataBlk& event)
   bool bcw_in = event.MainX[BCW_CONF_NUM].offset && event.MainX[BCW_CONF_NUM].length;
 
   if (bcw_in) {
-    BWestBlock* bcw = (BWestBlock*)((int)&event+event.MainX[BCW_CONF_NUM].offset);
+    BWestBlock* bcw = (BWestBlock*)(((char *)&event)+event.MainX[BCW_CONF_NUM].offset);
     // 15 DSMs * 16 channels
     char cbuffer[15*16];
     for (int dsm = 0; dsm < 15; ++dsm) {
@@ -51,7 +51,7 @@ bool DSMLayer_B001_2009::read(const TriggerDataBlk& event)
   bool bce_in = event.MainX[BCE_CONF_NUM].offset && event.MainX[BCE_CONF_NUM].length;
 
   if (bce_in) {
-    BEastBlock* bce = (BEastBlock*)((int)&event+event.MainX[BCE_CONF_NUM].offset);
+    BEastBlock* bce = (BEastBlock*)(((char *)&event)+event.MainX[BCE_CONF_NUM].offset);
     // 15 DSMs * 16 channels
     char cbuffer[15*16];
     for (int dsm = 0; dsm < 15; ++dsm) {
