@@ -683,10 +683,10 @@ extern inline u_int grp2rts_mask(int grp)
 	ret = 0 ;
 
 	if(grp & (1<<FTP_GRP)) {
-	  ret  |= (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM) | (1<<SSD_SYSTEM) | (1<<FGT_SYSTEM);
+	  ret  |= (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM) | (1<<SSD_SYSTEM) ;
 	}
 	if(grp & (1 << PP_GRP)) {
-	  ret |= (1 << PP_SYSTEM);
+	  ret |= (1 << PP_SYSTEM) | (1<<FGT_SYSTEM);
 	}
 	if(grp & (1 << ETOW_GRP)) {
 	  ret |= (1 << ETOW_SYSTEM) ;
@@ -722,9 +722,10 @@ extern inline int rts2grp(int rts)
     case HFT_ID:
     case SSD_ID:
     case FPD_ID: 
-    case FGT_ID:	// no idea which group it will belong...
-      return FTP_GRP;
-    case PP_ID:      return PP_GRP;
+	return FTP_GRP;
+    case FGT_ID:
+    case PP_ID:      
+	return PP_GRP;
     case BTOW_ID:    return BTOW_GRP;
     case BSMD_ID:    return BSMD_GRP;
     case ETOW_ID:    return ETOW_GRP;
