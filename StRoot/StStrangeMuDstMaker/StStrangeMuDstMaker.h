@@ -45,7 +45,7 @@ enum StrDstType  {
   strDstT};
 
 /// DST type names
-static char* strTypeNames[strDstT] = {"Ev","V0","Xi","Kink"};
+static const char* strTypeNames[strDstT] = {"Ev","V0","Xi","Kink"};
 /// I/O modes
 enum StrangeEnum {StrangeNoKeep, StrangeNoFile, StrangeWrite, StrangeRead};
 
@@ -159,7 +159,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.18 2004/11/02 17:54:07 genevb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.19 2009/08/26 16:56:06 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   //@}
@@ -342,8 +342,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.18 2004/11/02 17:54:07 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.19 2009/08/26 16:56:06 fine Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.19  2009/08/26 16:56:06  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 3.18  2004/11/02 17:54:07  genevb
 // Leave corrupt file protection to ROOT / Remove my protection
 //
