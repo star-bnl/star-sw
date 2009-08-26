@@ -6,11 +6,14 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.4 2009/08/25 15:46:44 fine Exp $
+ * $Id: StBTofMatchMaker.h,v 1.5 2009/08/26 20:33:56 dongx Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.5  2009/08/26 20:33:56  dongx
+ * Geometry init moved to Init() function, also allow reading in from others
+ *
  * Revision 1.4  2009/08/25 15:46:44  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *
@@ -155,8 +158,9 @@ private:
     Bool_t mSaveTree; //! create, fill and write out trees for tpc tracks
     
     Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
-    Bool_t mGeometrySave;
-
+    Bool_t mGeometrySave;    //! flag to save the geometry for others
+    Bool_t mInitFromOther;   //! flag indicating geometry initialized from others
+    
     string mHistoFileName; //! name of histogram file, if empty no write-out
     
     /// event counters
@@ -265,7 +269,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.4 2009/08/25 15:46:44 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.5 2009/08/26 20:33:56 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
