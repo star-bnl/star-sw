@@ -1,11 +1,14 @@
 /******************************************************************
- *  $Id: StRichPadPlane.cxx,v 2.0 2000/08/09 16:17:02 gans Exp $
+ *  $Id: StRichPadPlane.cxx,v 2.1 2009/08/26 13:09:39 fine Exp $
  *
  * Description:
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  ********************************************************************
  *  $Log: StRichPadPlane.cxx,v $
+ *  Revision 2.1  2009/08/26 13:09:39  fine
+ *  fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  *  Revision 2.0  2000/08/09 16:17:02  gans
  *  Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  *  for StRichDrawableT(foo)
@@ -33,6 +36,7 @@
 
 #include "StRichPadPlane.h"
 #include "StGlobals.hh"
+#include "StMessMgr.h"
 
 ostream& operator<<(ostream& os, const StRichID& id)
 {
@@ -61,10 +65,9 @@ StRichPadPlane::StRichPadPlane(size_t rows, size_t cols)
      for (unsigned int i=0; i<rows; i++ ) {
 	 v[i].resize(cols,tmp);
 	 if(v[i].size() != cols) {
-	     cout << "StRichPadPlane::StRichPadPlane()\n";
-	     cout << "\tv[i].size()= " << v[i].size() << "\n";
-	     cout << "\tAborting...Error in allocation" << endl;
-	     abort();
+	     LOG_FATAL << "StRichPadPlane::StRichPadPlane()" << endl;
+	     LOG_FATAL << "\tv[i].size()= " << v[i].size() << endl;
+	     LOG_FATAL << "\tAborting...Error in allocation" << endl;
 	 }
      }
 #else

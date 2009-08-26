@@ -1,10 +1,13 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 2.6 2002/02/22 18:37:18 dunlop Exp $
+ * $Id: StRichGeometryDb.cxx,v 2.7 2009/08/26 13:09:39 fine Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
+ * Revision 2.7  2009/08/26 13:09:39  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 2.6  2002/02/22 18:37:18  dunlop
  * adjusted production version as short-term fix
  *
@@ -63,6 +66,7 @@
  *
  *******************************************************************/
 #include <stdlib.h>
+#include <cstring>
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
