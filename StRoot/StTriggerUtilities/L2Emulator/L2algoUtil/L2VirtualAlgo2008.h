@@ -3,7 +3,7 @@
 
 
 /*************************************************************
- * $Id: L2VirtualAlgo2008.h,v 1.5 2008/01/30 21:56:40 balewski Exp $
+ * $Id: L2VirtualAlgo2008.h,v 1.6 2009/08/26 19:33:57 fine Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -25,6 +25,7 @@
   #include "StDaqLib/TRG/trgStructures.h"
 #endif
 
+#include <cassert>
 #include <string>
 #include "L2eventStream2008.h"
    

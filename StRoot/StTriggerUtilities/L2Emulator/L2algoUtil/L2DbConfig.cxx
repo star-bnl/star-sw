@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <cassert>
 
 #include "L2DbConfig.h"
 

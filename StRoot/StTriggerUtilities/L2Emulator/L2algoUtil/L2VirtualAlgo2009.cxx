@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
   #include "../L2algoUtil/L2Histo.h"
   #include "../L2algoUtil/L2EmcDb.h"
@@ -500,6 +501,9 @@ unsigned short L2VirtualAlgo2009::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2009.cxx,v $
+  Revision 1.2  2009/08/26 19:33:57  fine
+  fix the compilation issues under SL5_64_bits  gcc 4.3.2
+
   Revision 1.1  2009/03/28 19:43:40  balewski
   2009 code
 
