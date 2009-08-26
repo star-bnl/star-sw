@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.2 2009/07/24 18:52:53 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.3 2009/08/26 20:33:56 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.3  2009/08/26 20:33:56  dongx
+ * Geometry init moved to Init() function, also allow reading in from others
+ *
  * Revision 1.2  2009/07/24 18:52:53  dongx
  * - Local Z window restricted in the projection
  * - ToT selection is used firstly when more than one hits associated with a track
@@ -83,6 +86,7 @@ StBTofMatchMaker::StBTofMatchMaker(const Char_t *name): StMaker(name){
   setHistoFileName("tofana.root");
   setCreateTreeFlag(kFALSE);
   setSaveGeometry(kFALSE);
+  mInitFromOther = kFALSE;
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
 }
@@ -124,6 +128,32 @@ Int_t StBTofMatchMaker::Init(){
   mTofEventCounter = 0;
   mAcceptAndBeam = 0;
   
+  LOG_INFO << "StBTofMatchMaker -- Initializing TofGeometry (Init)" << endm;
+  /////////////////////////////////////////////////////////////////////
+  // TOF geometry initializtion -- from GEANT geometry directly
+  //                               need St_geant_Maker be loaded before
+  /////////////////////////////////////////////////////////////////////
+  StTimer geomTimer;
+  geomTimer.start();
+  mBTofGeom = 0;
+  if(TDataSet *geom = GetDataSet("btofGeometry")) {
+    mBTofGeom = (StBTofGeometry *)geom->GetObject();
+    LOG_INFO << " Found btofGeometry ... " << endm; 
+    mInitFromOther = kTRUE;
+  } else {
+    mBTofGeom = new StBTofGeometry("btofGeometry","btofGeometry in MatchMaker");
+    LOG_INFO << " Create a new btofGeometry ... " << endm;
+  } 
+  if(mBTofGeom && !mBTofGeom->IsInitDone()) {
+    LOG_INFO << " BTofGeometry initialization ... " << endm;
+    TVolume *starHall = (TVolume *)GetDataSet("HALL");
+    mBTofGeom->Init(this, starHall);
+    AddConst(new TObjectSet("btofGeometry",mBTofGeom));
+  }
+
+  geomTimer.stop();
+  LOG_INFO << "CPU time for StBTofGeometry initialization : " << geomTimer.elapsedTime() << " sec" << endm;
+
   return kStOK;
 }
 
@@ -133,37 +163,11 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
 
   // determine TOF configuration from run#
 
-  LOG_INFO << "StBTofMatchMaker -- Initializing TofGeometry (InitRun)" << endm;
-  /////////////////////////////////////////////////////////////////////
-  // TOF geometry initializtion -- from GEANT geometry directly
-  //                               need St_geant_Maker be loaded before
-  /////////////////////////////////////////////////////////////////////
-  StTimer geomTimer;
-  geomTimer.start();
-  mBTofGeom = new StBTofGeometry("btofGeom","btofGeom in MatchMaker");
-  if(!mBTofGeom->IsInitDone()) {
-    gMessMgr->Info("BTofGemetry initialization..." ,"OS");
-    TVolume *starHall = (TVolume *)GetDataSet("HALL");
-    mBTofGeom->Init(this, starHall);
-  }
-  // other makers can get this geometry
-  if(mGeometrySave) {
-    if(TDataSet *geom = GetDataSet("btofGeometry")) delete geom;
-    AddConst(new TObjectSet("btofGeometry",mBTofGeom)); 
-  }
-
-  geomTimer.stop();
-  LOG_INFO << "CPU time for StBTofGeometry initialization : " << geomTimer.elapsedTime() << " sec" << endm;
-
   return kStOK;
 }
 
 //----------------------------------------------------------------------------
 Int_t StBTofMatchMaker::FinishRun(Int_t runnumber){
-
-  LOG_INFO << "StBTofMatchMaker -- cleaning up geometry (FinishRun)" << endm;
-  if (mBTofGeom) delete mBTofGeom;
-  mBTofGeom=0;
 
   return kStOK;
 }
@@ -181,6 +185,11 @@ Int_t StBTofMatchMaker::Finish(){
   
   //if (mHisto) writeHistogramsToFile();
   if (mHistoFileName!="") writeHistogramsToFile();
+
+  LOG_INFO << "StBTofMatchMaker -- cleaning up geometry (Finish)" << endm;
+  if (!mInitFromOther && mBTofGeom) delete mBTofGeom;
+  mBTofGeom=0;
+
   return kStOK;
 }
 
@@ -263,7 +272,7 @@ Int_t StBTofMatchMaker::Make(){
   LOG_DEBUG << "    total # of cells = " << daqCellsHitVec.size() << endm;
   if(Debug()) {
     for(size_t iv = 0;iv<validModuleVec.size();iv++) {
-      LOG_DEBUG << " module # " << validModuleVec[iv] << " Valid! " << endm;
+      LOG_INFO << " module # " << validModuleVec[iv] << " Valid! " << endm;
     }
   }
   if(mHisto) {
@@ -549,9 +558,9 @@ Int_t StBTofMatchMaker::Make(){
     LOG_DEBUG << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
     if (Debug()) {
       idVectorIter ij=trackIdVec.begin();
-      while (ij != trackIdVec.end()) { LOG_DEBUG << " " << *ij; ij++; }
+      while (ij != trackIdVec.end()) { LOG_INFO << " " << *ij; ij++; }
     }
-    LOG_DEBUG <<endm;
+    LOG_INFO <<endm;
 
     tempVec = erasedVec;
   }
@@ -632,9 +641,9 @@ Int_t StBTofMatchMaker::Make(){
       LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
       if (Debug()) {
 	idVectorIter ij=vTrackId.begin();
-	while (ij != vTrackId.end()) { LOG_DEBUG << " " << *ij; ij++; }
+	while (ij != vTrackId.end()) { LOG_INFO << " " << *ij; ij++; }
       }
-      LOG_DEBUG <<endm;
+      LOG_INFO <<endm;
       
     }
     else if (nCells>1){   // for multiple hit cells  find the most likely candidate.
