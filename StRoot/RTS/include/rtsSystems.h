@@ -74,7 +74,7 @@
 #define TCD_BBC         7
 #define TCD_ETOW        8
 #define TCD_SSD         9
-#define TCD_FPD         10
+#define TCD_FGT         10	// Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //
 #define TCD_PP          12      // added Oct 20, 07
 #define TCD_SVT		12	// keep copy for backwards compatibility
@@ -596,27 +596,27 @@ extern inline int rts2det(int ix)
 extern inline int rts2tcd(int rts)
 {
 	static const int map[32] = {
-		TCD_TPC,	// gone...
-		TCD_SVT,	// gone...
-		TCD_TOF,
-		TCD_BTOW,
-		TCD_FPD,
-		TCD_FTPC,
+		-1,		// TPC gone...
+		-1,		// SVT gone...
+		TCD_TOF,	//2
+		TCD_BTOW,	//3
+		-1,		//4: FPD gone...
+		TCD_FTPC,	//5
 		-1,
 		-1,
 		-1,
 		-1,
 		-1,
 		-1,
-		TCD_PMD,
-		TCD_SSD,
+		TCD_PMD,	//12
+		-1,	//13: SSD gone...
 		TCD_ETOW,	//14
 		-1,
-		TCD_FPD,	//16
+		TCD_FGT,	//16
 		TCD_PP,		//17
-		TCD_BSMD,
-		TCD_ESMD,
-		TCD_TPX,       /* TPX */
+		TCD_BSMD,	//18
+		TCD_ESMD,	//19
+		TCD_TPX,	//20
 		-1,
 		-1,
 		-1,
@@ -641,7 +641,7 @@ extern inline int tcd2rts(int tcd)
         -1,		// BBC
         ETOW_SYSTEM,
         SSD_SYSTEM,
-        FPD_SYSTEM,
+        FGT_SYSTEM,
         TOF_SYSTEM,
         PP_SYSTEM,	//12	// moved from SVT_SYSTem to PP!
         -1,		// EMPTY
