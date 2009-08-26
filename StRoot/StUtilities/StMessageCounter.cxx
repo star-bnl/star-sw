@@ -10,6 +10,7 @@
 
 #include "StMessageCounter.h"
 #include "StMessageStream.h"
+#include <cstring>
 
 StMessageCounter* StMessageCounter::mInstance = 0;
 
@@ -211,8 +212,11 @@ void StMessageCounter::AddType(const char* type) {
 }
 
 //_____________________________________________________________________________
-// $Id: StMessageCounter.cxx,v 1.19 2003/10/01 20:06:50 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.20 2009/08/26 19:39:04 fine Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.20  2009/08/26 19:39:04  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 1.19  2003/10/01 20:06:50  genevb
 // Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
 //
