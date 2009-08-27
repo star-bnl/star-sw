@@ -1,6 +1,9 @@
-* $Id: fpdmgeo.g,v 1.8 2009/08/19 22:11:05 perev Exp $
+* $Id: fpdmgeo.g,v 1.9 2009/08/27 03:20:42 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo.g,v $
+* Revision 1.9  2009/08/27 03:20:42  perev
+* Stra_Air added
+*
 * Revision 1.8  2009/08/19 22:11:05  perev
 * Jason. Remove redundant Isvol=0
 *
@@ -572,6 +575,7 @@ endblock
 Block FSHM  is the SHower Max  section
 *
       Material  Air 
+      Material  Stra_Air isvol=0
       Attribute FSHM   seen=1   colo=4			!  blue
       Shape     CONS   dz=SecWid/2,
                 phi1=fmcs_PhiMin/fmcs_Nsupsec,
