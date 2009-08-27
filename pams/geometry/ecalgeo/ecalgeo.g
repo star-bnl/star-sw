@@ -755,6 +755,7 @@ endblock
 Block EALP  is ALuminium  Plate in calorimeter cell
 *
       Material  Aluminium
+      Material  StrAluminium isvol=0
       Attribute EALP   seen=1  colo=1
       Shape     TRD1   dy=emcs_AlinCell/2  dz=(RTop-RBot)/2
       Call GSTPAR (ag_imed,'CUTGAM',0.00001)
