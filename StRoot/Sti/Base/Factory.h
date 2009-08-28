@@ -2,6 +2,7 @@
 #define Factory_H 
 
 #include "Sti/Base/Named.h"
+#include <cassert>
 
 /*!
   Abstract base class defining a  factory mechanism

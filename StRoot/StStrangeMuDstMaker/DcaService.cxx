@@ -15,6 +15,7 @@
 #include "math_constants.h"
 #include "TClass.h"
 #include "StMessMgr.h"
+#include <cassert>
 
 int GGetOffset(TClass* cl, TDataMember* that);
 
@@ -102,7 +103,8 @@ void DcaService::replaceDca(TObject* obj, float dca, int* offset, TClass* cl,
       memname,cl->GetName()) << endm;
   }
   float* cf = (float*) obj;
-  float* dcaptr = (float*) ((int) cf + (*offset));
+  assert(0 && "Fix it !!! for 64-bits");
+  float* dcaptr = 0; //(float*) ((int) cf + (*offset));
   *dcaptr = dca;
 }
 
@@ -219,8 +221,11 @@ int GGetOffset(TClass* cl, TDataMember* that) {
 }
 
 //_____________________________________________________________________________
-// $Id: DcaService.cxx,v 3.3 2007/07/12 20:01:47 fisyak Exp $
+// $Id: DcaService.cxx,v 3.4 2009/08/28 16:37:53 fine Exp $
 // $Log: DcaService.cxx,v $
+// Revision 3.4  2009/08/28 16:37:53  fine
+// fix the compilation issues under SL5_64_bits  gcc 4.3.2
+//
 // Revision 3.3  2007/07/12 20:01:47  fisyak
 // Add includes for ROOT 5.16
 //

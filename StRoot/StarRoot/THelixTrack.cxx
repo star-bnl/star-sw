@@ -17,6 +17,8 @@
 #include "StMatrixD.hh"
 #include "TComplex.h"
 #include "TH1.h"
+#include <cassert>
+
 // Complex numbers
 //const TComplex Im(0,1);
 //_____________________________________________________________________________
@@ -2685,7 +2687,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.41 2009/08/24 23:40:33 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.42 2009/08/28 16:38:55 fine Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2701,6 +2703,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.42  2009/08/28 16:38:55  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.41  2009/08/24 23:40:33  perev
  * operator=() added
  *

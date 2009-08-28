@@ -8,6 +8,8 @@
 #include "TCernLib.h"
 #endif
 #include "TPolinom.h"
+#include <cassert>
+
 ClassImp(TPolinom)
 //_____________________________________________________________________________
 TPolinom::TPolinom(int npw,const double *coefs)
