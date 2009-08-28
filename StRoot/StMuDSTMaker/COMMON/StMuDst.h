@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.34 2009/02/20 16:37:44 tone421 Exp $
+ * $Id: StMuDst.h,v 1.35 2009/08/28 14:55:55 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -313,8 +313,8 @@ public:
   // run 5 - dongx
   static unsigned int numberOfTofRawData()    { return tofArrays[muTofRawData]->GetEntries(); }
   // dongx
-  static unsigned int numberOfBTofHit()       { return tofArrays[muBTofHit]->GetEntries(); }
-  static unsigned int numberOfBTofRawHit()    { return tofArrays[muBTofRawHit]->GetEntries(); }
+  static unsigned int numberOfBTofHit()       { return btofArrays[muBTofHit]->GetEntries(); }
+  static unsigned int numberOfBTofRawHit()    { return btofArrays[muBTofRawHit]->GetEntries(); }
 
   static unsigned int GetNPrimaryVertex()    { return numberOfPrimaryVertices(); }  
   static unsigned int GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
@@ -359,6 +359,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.35  2009/08/28 14:55:55  tone421
+ * Changed tofArrays to btofArrays returned objects in numberOfBTofHit() and numberOfBTofRawHit()
+ *
  * Revision 1.34  2009/02/20 16:37:44  tone421
  * *** empty log message ***
  *
