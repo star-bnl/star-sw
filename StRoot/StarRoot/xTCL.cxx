@@ -1,5 +1,6 @@
 #include "xTCL.h"
 #include "TArrayI.h"
+#include <cassert>
 
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -62,9 +63,12 @@ void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: xTCL.cxx,v 1.3 2008/10/29 19:38:06 perev Exp $
+* $Id: xTCL.cxx,v 1.4 2009/08/28 16:38:55 fine Exp $
 *
 * $Log: xTCL.cxx,v $
+* Revision 1.4  2009/08/28 16:38:55  fine
+* fix the compilation issues under SL5_64_bits  gcc 4.3.2
+*
 * Revision 1.3  2008/10/29 19:38:06  perev
 * method toEuler added
 *

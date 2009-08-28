@@ -20,6 +20,7 @@
 //#include <memory.h>
 #include <stdio.h>
 #include <math.h>
+#include <cstring>
 #include "Stl3Util/ftf/FtfTrack.h"
 #include "Stl3Util/ftf/FtfHit.h"
 

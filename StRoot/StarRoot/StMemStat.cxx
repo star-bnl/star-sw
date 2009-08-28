@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemStat.cxx,v 1.1 2009/01/26 14:31:47 fisyak Exp $
+ * $Id: StMemStat.cxx,v 1.2 2009/08/28 16:38:55 fine Exp $
  *
  ***************************************************************************
  *
@@ -16,6 +16,7 @@
 #include "StMemStat.h"
 #include "TList.h"
 #include "TError.h"
+#include <cassert>
 
 Double_t  StMemStat::fgUsed=0;
 TList    *StMemStat::fgList=0;

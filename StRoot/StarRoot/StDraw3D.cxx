@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.36 2009/05/26 19:07:06 fine Exp $
+// $Id: StDraw3D.cxx,v 1.37 2009/08/28 16:38:55 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -10,6 +10,7 @@
 #include "StCheckQtEnv.h"
 #include "TStyle.h"
 #include "TVirtualViewer3D.h"
+#include <cassert>
 
 static Color_t colorDefault = Color_t(-1);
 static Style_t styDefault   = Style_t(-1);
@@ -61,7 +62,7 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
       backShape+= ".iv";
       printf(" Setting the background shape to be 	%s\n", backShape.Data());
       gEnv->SetValue("Gui.InventorShapeDir",":.:StRoot/macros/graphics:$STAR/StRoot/macros/graphics:/afs/rhic.bnl.gov/star/doc/www/comp/2/vis/iv");
-      if  (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv")) {
+      if  ( (viewer = TVirtualViewer3D::Viewer3D(pad,"oiv") )) {
           viewer->SetDrawOption(backShape.Data());
          // Create Open GL viewer
 //        TGQt::SetCoinFlag(1);
@@ -426,7 +427,7 @@ void StDraw3D::Redraw()
       if (p) {
          TObject *o = 0;
          TIter next(p);
-         while (o=next())  Draw(o);
+         while ( (o=next()) )  Draw(o);
          p->Clear();
       }
    }

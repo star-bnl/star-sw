@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.cc,v 3.4 2003/02/10 15:59:20 genevb Exp $
+ * $Id: StStrangeCuts.cc,v 3.5 2009/08/28 16:37:53 fine Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.cc,v $
+ * Revision 3.5  2009/08/28 16:37:53  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 3.4  2003/02/10 15:59:20  genevb
  * Fix bug with adding new cuts
  *
@@ -73,7 +76,7 @@ void StStrangeCuts::Fill(const char* prefix, TDataSet* cutSet) {
         colName += buf;
       }
       UInt_t colOffset = cutTable->GetOffset(col);
-      void* colValue = (void*) (((UInt_t) ((*cutTable)[0])) + colOffset);
+      void* colValue = 0; //(void*) (((UInt_t) ((*cutTable)[0])) + colOffset);
       TDataType* colType = rowClass->GetDataMember(colBaseName)->GetDataType();
       Add(colName.Data(),colType->AsString(colValue));
     }

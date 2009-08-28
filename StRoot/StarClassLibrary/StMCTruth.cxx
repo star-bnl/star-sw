@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMCTruth.cxx,v 1.1 2005/07/19 22:39:58 perev Exp $
+ * $Id: StMCTruth.cxx,v 1.2 2009/08/28 16:38:26 fine Exp $
  *
  * Author: Victor Perev, Jun 2005
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMCTruth.cxx,v $
+ * Revision 1.2  2009/08/28 16:38:26  fine
+ * fix the compilation issues under SL5_64_bits  gcc 4.3.2
+ *
  * Revision 1.1  2005/07/19 22:39:58  perev
  * IdTruth classes
  *
@@ -18,6 +21,7 @@
 #include "StMCTruth.h"
 #include "TMath.h"
 #include "TExMap.h"
+#include <cassert>
 //__________________________________________________________________________________________________
 StMCTruth &StMCTruth::operator=(int word)
 {  

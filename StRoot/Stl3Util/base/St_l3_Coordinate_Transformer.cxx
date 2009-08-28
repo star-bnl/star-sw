@@ -25,6 +25,7 @@
 #include <iomanip>
 #include "Stl3Util/base/FtfLog.h"
 #include <stdlib.h>
+#include <cstring>
 
 #include <unistd.h>
 #include <sys/mman.h>
@@ -97,7 +98,7 @@ int St_l3_Coordinate_Transformer::LoadTPCLookupTable(char * mapfilename)
 
     int filesize = lseek(fd, 0, SEEK_END);
     void *file = mmap(0, filesize, PROT_READ, MAP_PRIVATE, fd, 0);
-    if ((int)file == -1) {
+    if ( file ==  MAP_FAILED ) {
 	ftfLog("Unable to mmap transformation map '%s'.Aborting.\n",
 	       mapfilename);
 	return -1;
