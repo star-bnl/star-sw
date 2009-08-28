@@ -3,10 +3,9 @@
 
 #include "rtsDbConstants.h"
 
-struct rtsHash
+struct detsDict
 {
   int first_idx_rn;
-  int last_idx_rn;
 
   int det_idx;
   
