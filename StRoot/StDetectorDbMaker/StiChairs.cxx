@@ -25,6 +25,10 @@ void StiHitErrorCalculator::calculateError(Double_t _z,  Double_t _eta, Double_t
          edip=Coeff[3]+Coeff[4]*dz*cosDipInv2+Coeff[5]*tanDip*tanDip;
   if (edip< min2Err) edip = min2Err;
   if (edip> max2Err) edip = max2Err;
+//	Temporary hack for Gene. Increase prompt hit errors
+  if (fabs(_z) >200) {ecross*=10; edip*=10;}
+
+
 }
 //________________________________________________________________________________
 #include "StiTrackingParameters.h"
