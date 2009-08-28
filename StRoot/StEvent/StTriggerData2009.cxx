@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.19 2009/08/24 22:39:13 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.20 2009/08/28 16:01:31 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.20  2009/08/28 16:01:31  ullrich
+ * Set debug level in constructor to 0
+ *
  * Revision 2.19  2009/08/24 22:39:13  ullrich
  * Flag corruption in new member mErrorFlag.
  *
@@ -89,7 +92,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     mYear=2009;
     mRun = run;
     mData= new TriggerDataBlk2009;
-    debug = 1;
+    debug = 0;
     
     unsigned int ver = data->FormatVersion; 
     swapI(&ver);
