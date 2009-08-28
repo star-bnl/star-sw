@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.7 2009/08/25 19:48:47 perev Exp $
+!// $Id: tpcegeo3.g,v 1.8 2009/08/28 16:50:12 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.8  2009/08/28 16:50:12  perev
+!// CleanUp of write(*,*)
+!//
 !// Revision 1.7  2009/08/25 19:48:47  perev
 !// wrong TPAD shift fixed
 !//
@@ -1587,7 +1590,6 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
          if (kase .eq.3) {dz = (zGG2 - zGG1)/2; z = (zGG2 + zGG1-tpgvLeng)/2;}
 *        position within supersector (this assumes rectangular padrows)
            do i_row = 1,nint(tprs_nRow)
-              write(*,*) 'TPAD Kase,Z,dZ=',kase,z,dz;
 
                If (kase ==1 .and. (nint(tprs_super)==3 | i_row==1)) then
          	 Create and Position TPAD  x=tprs_Rpads(i_row)-tprs_width z=z,

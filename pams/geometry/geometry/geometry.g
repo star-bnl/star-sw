@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.200 2009/08/26 20:13:15 perev Exp $
+* $Id: geometry.g,v 1.201 2009/08/28 16:50:12 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.201  2009/08/28 16:50:12  perev
+* CleanUp of write(*,*)
+*
 * Revision 1.200  2009/08/26 20:13:15  perev
 * JanB pixel off for upgr16
 *
@@ -3070,14 +3073,16 @@ If LL>0
 
    if (RICH) ItCKOV = 1
 
-   if (CAVE) then
+   if (CAVE) {
+      write(*,*) 'CAVE'
       call AgDETP new ('CAVE')
       call AgDETP add ('CVCF.config=',CaveConfig,1)
       call cavegeo
-   endif
+   }
 
 * Pipe:
    If (PIPE)   {
+     write(*,*) 'PIPE'
      call AgDETP new ('PIPE')
      call AgDETP add ('pipv.PipeConfig=',PipeConfig,1);
      call AgDETP add ('pipv.PipeFlag=',PipeFlag,1);
@@ -3086,21 +3091,23 @@ If LL>0
    }
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
-   if (UPST)        Call upstgeo
-   if (SHLD)        Call shldgeo
-   if (QUAD)        Call quadgeo
+   if (UPST)        {write(*,*) 'UPST'; Call upstgeo;}
+   if (SHLD)        {write(*,*) 'SHLD'; Call shldgeo;}
+   if (QUAD)        {write(*,*) 'QUAD'; Call quadgeo;}
 
 * ---
    Call AGSFLAG('SIMU',2)
 
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6
    if (SCON) {
+     write(*,*) 'SCON'
      call AgDETP new ('SCON')
      call AgDETP add ('svtg.ConeVer=',ConeConfig ,1) ! could have more copper on the cone
      call scongeo
    }
 
-   If (SVTT) {
+   If (SVTT) { 
+     write(*,*) 'SVT'
      call AgDETP new ('SVTT')
      if (nSvtLayer < 7)     call AgDETP add ('svtg.nlayer=',   nSvtLayer,1)
      if (nSvt1stLayer > 1)  call AgDETP add ('svtg.nmin=',     nSvt1stLayer,1)
@@ -3145,6 +3152,7 @@ If LL>0
 * cut, as opposed to configuration of the detector:
 
   if(SISD) {
+       write(*,*) 'SVT' 
        sisd_level=0
        call AgDETP new ('SISD')
 
@@ -3189,7 +3197,8 @@ If LL>0
 
 
 
-   if (TPCE)  {write(*,*) 'TPC';
+   if (TPCE)  {
+      write(*,*) 'TPC';
 * Back in July 2003 Yuri has discovered the discrepancy
 * in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
      if(DensConfig>0) { call AgDETP new('TPCE');  call AgDETP add ('tpcg.gasCorr=',2 ,1);}
@@ -3198,8 +3207,8 @@ If LL>0
      if (TpceConfig==3) Call tpcegeo2
      if (TpceConfig==4) Call tpcegeo3
    }
-   write(*,*) 'FTPC'
    if (ftpc) then
+        write(*,*) 'FTPC'
         if(FtpcConfig==0) Call ftpcgeo
         if(FtpcConfig==1) Call ftpcgeo1
 *       and look at the support pieces, was: if(CorrNum==0)
@@ -3210,9 +3219,9 @@ If LL>0
 * FTPC readout electronics barrel
    if (FTRO) Call ftrogeo
 
-   write(*,*) 'BTOF'
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (BTOF) { 
+     write(*,*) 'BTOF'
      call AgDETP new ('BTOF')
      call AgDETP add ('btog.choice=',BtofConfig,1)
 * X.Dong
@@ -3243,6 +3252,7 @@ If LL>0
 ********************** BARREL CALORIMETER ************************
 *  - Set up the parameters for the barrel calorimeter
    If (CALB) {
+     write(*,*) 'CALB'
      call AgDETP new ('CALB')
      if (emsEdit)  call AgDETP add ('calg.nmodule=',Nmod, 2)
      if (emsEdit)  call AgDETP add ('calg.shift=',  shift,2)
@@ -3276,6 +3286,7 @@ If LL>0
 ******************************************************************
 *  - Set up the parameters for the endcap calorimeter
    If (ECAL) then
+      write(*,*) 'ECAL'
       call AgDETP new ('ECAL')
       call AgDETP add ('emcg.OnOff='   ,EcalConfig,1)
       call AgDETP add ('emcg.FillMode=',ecalFill,1)
@@ -3285,44 +3296,55 @@ If LL>0
 ******************************************************************
 * The rest of steering:
 
-   if (BBCM)                   Call bbcmgeo
+   if (BBCM)                   { write(*,*) 'CALB';Call bbcmgeo}
 
-   if (FPDM.and.FpdmConfig==0) Call fpdmgeo
-   if (FPDM.and.FpdmConfig==1) Call fpdmgeo1
-   if (FPDM.and.FpdmConfig==2) Call fpdmgeo2
-   if (FPDM.and.FpdmConfig==3) Call fpdmgeo3
-
-   if (ZCAL)                   Call zcalgeo
-   if (MAGP)                   Call magpgeo
-
-   if (MUTD.and.MutdConfig==1) Call mutdgeo
-   if (MUTD.and.MutdConfig==2) Call mutdgeo2
-   if (MUTD.and.MutdConfig==3) Call mutdgeo3
-
-   if (PIXL.and.PixlConfig==-1)Call pixlgeo00
-   if (PIXL.and.PixlConfig==1) Call pixlgeo
-   if (PIXL.and.PixlConfig==2) Call pixlgeo1
-   if (PIXL.and.PixlConfig==3) Call pixlgeo2
-   if (PIXL.and.PixlConfig==4) Call pixlgeo3
-   if (PIXL.and.PixlConfig==5) then
-         call AgDETP new ('PIXL')
-         call AgDETP add ('PXLV.LadVer=',2.0,1)
-         call pixlgeo3
-   endif
-
-   if (ISTB.and.IstbConfig==-1)Call istbgeo00
-   if (ISTB.and.IstbConfig==1) Call istbgeo
-   if (ISTB.and.IstbConfig==2) Call istbgeo1
-   if (ISTB.and.IstbConfig==3) Call istbgeo2
-   if (ISTB.and.IstbConfig==4) Call istbgeo3
-   if (ISTB.and.IstbConfig==5) Call istbgeo4
-   if (ISTB.and.IstbConfig==6) Call istbgeo5
-   if (ISTB.and.IstbConfig==7) Call istbgeo6
+   if (FPDM){
+     write(*,*) 'FPDM'
+     if (FpdmConfig==0) Call fpdmgeo
+     if (FpdmConfig==1) Call fpdmgeo1
+     if (FpdmConfig==2) Call fpdmgeo2
+     if (FpdmConfig==3) Call fpdmgeo3
+   }
+   if (ZCAL)   { write(*,*) 'ZCAL';Call zcalgeo;}
+   if (MAGP)   { write(*,*) 'MAGP';Call magpgeo;}
 
 
-   if (GEMB.and.GembConfig>0)  Call gembgeo
+   if (MUTD) {
+     write(*,*) 'MUTD'
+     if (MutdConfig==1) Call mutdgeo
+     if (MutdConfig==2) Call mutdgeo2
+     if (MutdConfig==3) Call mutdgeo3
+   }
+   if (PIXL){
+     write(*,*) 'CALB'
+     if (PixlConfig==-1)Call pixlgeo00
+     if (PixlConfig==1) Call pixlgeo
+     if (PixlConfig==2) Call pixlgeo1
+     if (PixlConfig==3) Call pixlgeo2
+     if (PixlConfig==4) Call pixlgeo3
+     if (PixlConfig==5) {
+           call AgDETP new ('PIXL')
+           call AgDETP add ('PXLV.LadVer=',2.0,1)
+           call pixlgeo3
+     }
+   }
+
+   if (ISTB){
+     write(*,*) 'ISTB'
+     if (IstbConfig==-1) Call istbgeo00
+     if (IstbConfig== 1) Call istbgeo
+     if (IstbConfig== 2) Call istbgeo1
+     if (IstbConfig== 3) Call istbgeo2
+     if (IstbConfig== 4) Call istbgeo3
+     if (IstbConfig== 5) Call istbgeo4
+     if (IstbConfig== 6) Call istbgeo5
+     if (IstbConfig== 7) Call istbgeo6
+   }
+
+   if (GEMB.and.GembConfig>0)  {write(*,*) 'GEMB'; Call gembgeo;}
 
    if (FSTD.and.FstdConfig>0)  then
+      write(*,*) 'FSTD'
       if(FstdConfig==2) then
          call AgDETP new ('FSTD')
          call AgDETP add ('fstg.Rmax=',22.3,1)
@@ -3331,28 +3353,31 @@ If LL>0
    endif
 
    if (FGTD) then
+     write(*,*) 'FGTD'
      if (FgtdConfig==1)    Call fgtdgeo  ! old, decomissioned
      if (FgtdConfig==2)    Call fgtdgeo1
      if (FgtdConfig==3)    Call fgtdgeo2
    endif
 
    if (IGTD) then
-       if(IgtdConfig==2) then
-           call AgDETP new ('IGTD')
-           call AgDETP add ('igtv.Config=',IgtdConfig ,1)
-       endif
-       Call igtdgeo
+     write(*,*) 'IGTD'
+     if(IgtdConfig==2) then
+         call AgDETP new ('IGTD')
+         call AgDETP add ('igtv.Config=',IgtdConfig ,1)
+     endif
+     Call igtdgeo
    endif
 
-   if (HPDT.and.HpdtConfig>0)  Call hpdtgeo
+   if (HPDT.and.HpdtConfig>0) { write(*,*) 'HPDT';Call hpdtgeo;}
 
-   if (ITSP)                   Call itspgeo
+   if (ITSP)                  { write(*,*) 'ITSP';Call itspgeo;}
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
 * is defined, pass the version number to its constructor
 * and create it:
 
    if  (PHMD.and.PhmdConfig>0) then
+     write(*,*) 'PHMD'
       call AgDETP new ('PHMD')
       call AgDETP add ('PMVR.Config=', PhmdConfig,1)
       call phmdgeo
@@ -3365,6 +3390,7 @@ If LL>0
    endif
 ********************************************************************
    If (FhcmConfig .ne.0) then
+     write(*,*) 'FHCM'
       call AgDETP new ('FHCM')
       call AgDETP add ('fhcg.Version='   ,FhcmConfig,1)
       Call fhcmgeo

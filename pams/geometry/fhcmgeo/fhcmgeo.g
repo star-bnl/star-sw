@@ -45,7 +45,7 @@ Block FHCM is one FHC module
            xx= (i-0.5)*FHCG_XWID - FHCG_NXCell*FHCG_XWID/2.0
 	   if (sn.eq.2) xx = -xx
            yy= -(j-0.5)*FHCG_YWID + FHCG_NYCell*FHCG_YWID/2.0
-           write(*,*) i,j,xx,yy
+!//vp           write(*,*) i,j,xx,yy
            Position FHCC x=xx y=yy
         enddo
       enddo
@@ -60,7 +60,7 @@ Block FHCC is one FHC cell
       do k=1,FHCG_NZsub
         zz= (k - 0.5)*FHCG_ZWID/FHCG_NZsub - FHCG_ZWID/2.0
 *        zz= (k - FHCG_NZsub/2.0-0.5)*FHCG_ZWID/FHCG_NZsub
-        write(*,*) zz
+!//vp        write(*,*) zz
         Position FHCS z=zz
       enddo
 EndBlock
