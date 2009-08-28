@@ -11,6 +11,7 @@
 //: AUTHOR:      ppy - Pablo Yepes, yepes@rice.edu
 //:>------------------------------------------------------------------
 #include "FtfMcTrack.h"
+ #include <stdlib.h>
 
 void FtfMcTrack::set ( int _id, float _r0, float _z0, float _phi0,
                        float _pt, float _tanl, float _psi, 
