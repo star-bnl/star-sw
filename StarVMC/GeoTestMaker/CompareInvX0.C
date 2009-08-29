@@ -59,7 +59,8 @@ void CompareInvX0(const char *m1, const char *m2)
                  + pow(P[1]->GetBinError(iX,iY),2);
 
 //      if (del*del < 9*err) 		continue;
-      if (fabs(del)< 0.005*sum) 	continue;
+//      if (fabs(del)< 0.005*sum) 	continue;
+      if (fabs(del)< 0.001*sum) 	continue;
       P[2]->Fill(xLow+0.5*xWid*(iX-1),yLow+0.5*yWid*(iY-1),del);
   } }
 
