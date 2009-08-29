@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.cxx,v 1.2 2009/07/07 19:08:16 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.3 2009/08/29 21:23:12 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -31,7 +31,8 @@ StTGeoHelper::StTGeoHelper()
 {
   memset(fBeg,0,fEnd-fBeg);  
   fExtArr = new TObjArray();
-  fModuLev = 1;
+  fPlaArr = new TObjArray();
+  fModuLev = 2;
 }
 //_____________________________________________________________________________
 void StTGeoHelper::Init()
@@ -98,8 +99,8 @@ void StTGeoHelper::Init()
         if (!myModu) 		continue;
 	if (!IsModule(vol)) 	continue;
         if (nHits) {
-	  myModu->SetHitModul();
- 	  printf("HitModu = %s(%d) hits=%d",vol->GetName(),volId,nHits);
+	  myModu->SetHidule();
+ 	  printf("Hidule = %s(%d) hits=%d",vol->GetName(),volId,nHits);
 	  it.Print(0);
         }  
       myModu=0; nHits=0;
@@ -131,6 +132,11 @@ void StTGeoHelper::SetExt(StVoluExt* ext)
   fExtArr->AddAtAndExpand(ext,ext->GetNumber());
 }    
 //_____________________________________________________________________________
+void StTGeoHelper::SetPlane(StGenHitPlane* pla)
+{
+  fPlaArr->Add(pla);
+}    
+//_____________________________________________________________________________
 int StTGeoHelper::IsModule(const TGeoVolume *volu)  const
 {
   StVoluExt *ext = GetExt(volu->GetNumber());
@@ -152,18 +158,57 @@ int StTGeoHelper::IsHitPlane(const TGeoNode   *node)  const
 { return IsHitPlane(node->GetVolume()); }
 
 //_____________________________________________________________________________
-int StTGeoHelper::MayHitPlane(const TGeoVolume *volu, double dir[3])  const
+int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
 {
+  enum {kHow=5};
+
   const TGeoShape* sh=volu->GetShape() ;
-  const char *shaName = sh->GetName();
-  if      (strcmp("TgeoBBox",shaName)==0) {
-  } else if (strcmp("TgeoPgon",shaName)==0) {
-  } else if (strcmp("TgeoPara",shaName)==0) {
-  } else if (strcmp("TgeoTrd1",shaName)==0) {
-  } else if (strcmp("TgeoTrd2",shaName)==0) {
-  }
-  
+  if (!sh) 			return 0;
+  if (!sh->IsValidBox()) 	return 0;     
+  const TGeoBBox *bb = (const TGeoBBox*)sh;
+  double dd[3]={bb->GetDX(),bb->GetDY(),bb->GetDZ()};
+  int jMin = 0;
+  for (int j=1;j<3;j++) { if (dd[j]<dd[jMin]) jMin=j;}
+  for (int j=1;j<3;j++) { if (j==jMin) continue;  if (dd[j]<kHow*dd[jMin]) return 0;} 
+  return jMin+1;
 }
+//_____________________________________________________________________________
+int StTGeoHelper::MakeHitPlane(const TGeoVolume *volu) 
+{
+   if (!IsSensitive(volu)) 			return 0;
+   int ax = MayHitPlane(volu);	if (!ax) 	return 0;
+
+   StGenHitPlane *bhp=0;
+   const TGeoShape *sh = volu->GetShape();
+   const TGeoBBox *bb = (const TGeoBBox*)sh;
+  
+   int iv = volu->GetNumber();
+   StVoluExt *ext = GetExt(iv);
+   int kase = 0;
+   if (ext) kase = ext->Kind() +1;
+   switch(kase) {
+   
+     case 0: //no extention
+     case 1: //basic extention
+       bhp = new StGenHitPlane(iv);
+       if (ext) *bhp = *ext;
+       bhp->SetHitPlane();
+       bhp->fDir[ax-1]=1;
+       bhp->fDir[ax-1]=1;
+       memcpy(bhp->fOrg,bb->GetOrigin(),3*sizeof(double));
+       SetExt(bhp);
+       SetPlane(bhp);
+       delete ext;
+       break;
+
+     case 2: //HitPlane  extention
+       bhp = (StGenHitPlane*)ext; 
+       break;
+     default: assert(0 && " Wrong kind of StVoluExt");
+  }
+  return 0;
+}
+
 //_____________________________________________________________________________
 int StTGeoHelper::IsSensitive(const TGeoVolume *volu)
 {
@@ -201,6 +246,11 @@ void StTGeoHelper::Print(const char *tit) const
 
 }
 //_____________________________________________________________________________
+TString  StTGeoHelper::FullPath() const     
+{
+return StTGeoIterator::FullPath(gGeoManager->GetCurrentNavigator());
+}
+//_____________________________________________________________________________
 void StTGeoHelper::Test()
 {
    gROOT->Macro("$STAR/StarDb/VmcGeometry/y2009.h");
@@ -219,7 +269,12 @@ void StTGeoHelper::Test()
 //    }
 
 }
-
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+StGenHitPlane::StGenHitPlane(int volId) : StVoluExt(volId)	
+{
+   memset(fOrg,0,2*sizeof(fOrg));
+}
 //_____________________________________________________________________________
 //_____________________________________________________________________________
   enum {kEND,kDOWN,kNEXT,kUPP};
@@ -330,6 +385,21 @@ void StTGeoIterator::Print(const char *tit) const
 
 }
 //_____________________________________________________________________________
+TString StTGeoIterator::FullPath(const TGeoNavigator *nav)     
+{
+  TString path;
+  const TGeoNodeCache *cache = nav->GetCache();
+  int level = cache->GetLevel();
+  const TGeoNode **nodes = (const TGeoNode**)cache->GetBranch();
+  for (int lev=0;lev<=level; lev++) {
+      path += "/";
+      path += nodes[lev]->GetName();
+      path += "#";
+      path += nodes[lev]->GetNumber();
+  }
+  return path;  
+}
+//_____________________________________________________________________________
 void  StTGeoIterator::LocalToMaster(const double* local, double* master) const
 { fNavi->LocalToMaster(local,master);}
 
@@ -412,6 +482,41 @@ void  StTGeoHelper::ShootZR(double z,double rxy)
 }
 
 
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+#if 0
+StTGeoPath::StTGeoPath(const int *path)
+{
+  mPath = new int[path[0]+2];
+  for (int j=0;j<path[0]+2;j++) {mPath[j]=path[j];}
+}
+
+//_____________________________________________________________________________
+StTGeoPath::StTGeoPath(const StTGeoPath &fr)
+{
+  mPath = new int[fr.mPath[0]+2];
+  for (int j=0;j<fr.mPath[0]+2;j++) {mPath[j]=fr.mPath[j];}
+}
+
+//_____________________________________________________________________________
+bool StTGeoPath::operator<(const StTGeoPath &other) const
+{
+   if (mPath[0]!=other.mPath[0])
+     return (mPath[0]<other.mPath[0])? true:false;
+   for (int j= mPath[0]+1;j>0;j--) {
+     if (mPath[j]==other.mPath[j]) continue;
+     return (mPath[j]<other.mPath[j])? true:false;
+   }
+   return false;
+}
+
+//_____________________________________________________________________________
+void StTGeoPath::Print() const
+{
+  for (int i=0;i<=mPath[0];i++) {printf("%d\t ",mPath[i]);}
+  printf("\n");
+}
+#endif
 
 
 
