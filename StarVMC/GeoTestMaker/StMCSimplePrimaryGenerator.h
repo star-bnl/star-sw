@@ -1,5 +1,8 @@
-// $Id: StMCSimplePrimaryGenerator.h,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: StMCSimplePrimaryGenerator.h,v 1.2 2009/08/29 21:20:08 perev Exp $
 // $Log: StMCSimplePrimaryGenerator.h,v $
+// Revision 1.2  2009/08/29 21:20:08  perev
+// No I/O for StMCSimplePrimaryGenerator
+//
 // Revision 1.1  2009/03/25 23:15:10  perev
 // New VMC maker
 //
@@ -52,7 +55,7 @@ class StMCSimplePrimaryGenerator :  public StMCPrimaryGenerator  {
   double fPhi_max;
   double fZ_min;
   double fZ_max;
-  ClassDef(StMCSimplePrimaryGenerator,1)  //StMCSimplePrimaryGenerator
+  ClassDef(StMCSimplePrimaryGenerator,0)  //StMCSimplePrimaryGenerator
 };
 #endif //StMCSimplePrimaryGenerator_h
 
