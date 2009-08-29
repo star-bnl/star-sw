@@ -1,4 +1,4 @@
-// $Id: StMCStepping2Hist.h,v 1.1 2009/06/07 02:28:36 perev Exp $
+// $Id: StMCStepping2Hist.h,v 1.2 2009/08/29 21:22:25 perev Exp $
 //
 //
 // Class StMCStepping2Hist
@@ -32,7 +32,9 @@ private:
 static const char *Alias(const char *modu);
 void FillHist(int flag);
 protected:
-char fFist;
+char fFist[1];
+double fSensMaxR;
+double fSensMaxZ;
 double fTotRadL;
 double fTotOrt2;
 double fVolRadL;
@@ -41,7 +43,7 @@ double fVolRadL;
       StiELossTrk 	*fELossTrk[2];
       My2Hist 		*fMy2Hist;
 const StTGeoHitShape 	*fHitShape ;
-char fLast;
+char fLast[1];
 TString fModName;
 
 private:
