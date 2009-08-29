@@ -1,7 +1,7 @@
 int loaded=0;
 
 void Load();
-void GeoTestChain(const char *gy="y2009")
+void GeoTestChain(const char *gy="y2009",int nEv = 10000)
 {
 if (!loaded) Load();
 
@@ -9,7 +9,8 @@ if (!loaded) Load();
 StChain *chain =  new StChain;
 TString tsy(gy);
 gSystem->ExpandPathName(tsy);
-StMaker *mk = new GeoTestMaker("GeoTest",tsy.Data(), 1000000);
+StMaker *mk = new GeoTestMaker("GeoTest",tsy.Data(), nEv);
+mk->SetAttr("nPrim",100);
 // StMaker *mk = new GeoTestMaker("GeoTest",tsy.Data(),1);
 // mk->SetAttr("EtaMin",0.50);
 // mk->SetAttr("EtaMax",0.51);
