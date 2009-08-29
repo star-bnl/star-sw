@@ -1,7 +1,10 @@
 //*-- Author : Victor Perev
 // 
-// $Id: GeoTestMaker.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
+// $Id: GeoTestMaker.cxx,v 1.3 2009/08/29 21:19:04 perev Exp $
 // $Log: GeoTestMaker.cxx,v $
+// Revision 1.3  2009/08/29 21:19:04  perev
+// 100 * 10000 tracks
+//
 // Revision 1.2  2009/06/07 02:28:36  perev
 // 1st reasonable version with orth2
 //
@@ -83,6 +86,7 @@ int GeoTestMaker::Init()
   StVMCApplication *app = new StVMCApplication(fGeo, "StVMC application");
   StMCInitApp *ini = new StMCInitApp();
 
+  if (*SAttr("NPrim" )) {ini->SetNPrim(IAttr( "NPrim"));}
   if (*SAttr("PtMin" )) {ini->SetPt (DAttr( "PtMin"),DAttr( "PtMax"));}
   if (*SAttr("EtaMin")) {ini->SetEta(DAttr("EtaMin"),DAttr("EtaMax"));}
   if (*SAttr("PhiMin")) {ini->SetEta(DAttr("PhiMin"),DAttr("PhiMax"));}
