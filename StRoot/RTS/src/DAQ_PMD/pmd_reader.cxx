@@ -29,18 +29,38 @@ int pmd_reader(char *m, struct pmd_t *pmd, u_int driver)
 	int off ;
 	int len ;
 
+	int start_sec, stop_sec ;
 	int sec, type ;
 	int ret ;
+	int swapdatap = 0;
+	int swapdatapx = 0;
 
 	pmd_p = pmd ;	// need this for support routines!
 
-	pmd_p->channels = 0 ;
-	pmd_p->max_channels = 2*PMD_CRAMS_MAX*2*PMD_CRAMS_CH_MAX ;
-	pmd_p->mode = 0 ;
-	pmd_p->status[0] = pmd_p->status[1] = 0 ;
+	if(pmd_p->max_channels) ;	// already set...
+	else {
+		pmd_p->channels = 0 ;
+		pmd_p->max_channels = 2*PMD_CRAMS_MAX*2*PMD_CRAMS_CH_MAX ;
+		pmd_p->mode = 0 ;
+		pmd_p->status[0] = pmd_p->status[1] = 0 ;
+	}
 
-	if(datap == NULL) return 0 ;
-	int swapdatap = 0;
+	LOG(DBG,"PMD reader: %p: sector %d",datap,driver) ;
+
+	if(datap == NULL) return 0 ;	// no datap and no request from SFS
+
+	if(driver != 0) {
+		secp = (struct PMDSECP *) m ;	// this comes directly from SFS!
+		start_sec = stop_sec = driver - 1 ;
+		goto do_sectors ;
+	}
+	else {
+		start_sec = 0 ;
+		stop_sec = 1 ;
+	}
+
+
+
 	if(datap->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapdatap = 1;
 
 	off = qswap32(swapdatap, datap->det[EXT_ID].len) ;
@@ -56,7 +76,7 @@ int pmd_reader(char *m, struct pmd_t *pmd, u_int driver)
 		return 0 ;
 	}
 
-	int swapdatapx = 0;
+
 	if(datapx->bh.byte_order != DAQ_RAW_FORMAT_ORDER) swapdatapx = 1;
 
 	len = qswap32(swapdatapx, datapx->det[PMD_ID-10].len) * 4 ;
@@ -74,16 +94,21 @@ int pmd_reader(char *m, struct pmd_t *pmd, u_int driver)
 	}
 	
 
-	memset(pmd_p->adc,0,sizeof(pmd_p->adc)) ;
+//	memset(pmd_p->adc,0,sizeof(pmd_p->adc)) ;
 
-	for(sec=0;sec<2;sec++) {	// 2 possible sectors
 
-		LOG(DBG,"PMD %d, len %d, offset %u",sec,b2h32(pmdp->sec[sec].len),b2h32(pmdp->sec[sec].off),0,0) ;
+	do_sectors:;
+	for(sec=start_sec;sec<=stop_sec;sec++) {	// 2 possible sectors
+		
+		if(driver == 0) {
+			LOG(DBG,"PMD %d, len %d, offset %u",sec,b2h32(pmdp->sec[sec].len),b2h32(pmdp->sec[sec].off),0,0) ;
 
-		if(pmdp->sec[sec].len == 0) continue ;
+			if(pmdp->sec[sec].len == 0) continue ;
 
 		
-		secp = (struct PMDSECP *)((char *)pmdp + b2h32(pmdp->sec[sec].off)*4) ;
+			secp = (struct PMDSECP *)((char *)pmdp + b2h32(pmdp->sec[sec].off)*4) ;
+		}
+
 		if(checkBank((char *)secp,CHAR_PMDSECP) < 0) return -1 ;
 
 		pmd_p->status[sec] = b2h32(secp->bh.format_number) ;
@@ -293,8 +318,8 @@ static int pedReader(int sec, int type, struct PMDPEDR *pedr)
 			datum++ ;
 
 
-			printf("   t %d: crate %d: rb %d, mz %d, ch %4d == 0x%04X ",type,sec,rb,mz,channel,val) ;
-			printf("%f\n",(double)val/16.0) ;
+			//printf("   t %d: crate %d: rb %d, mz %d, ch %4d == 0x%04X ",type,sec,rb,mz,channel,val) ;
+			//printf("%f\n",(double)val/16.0) ;
 
 			switch(type) {
 			case PMD_PEDR_N :
