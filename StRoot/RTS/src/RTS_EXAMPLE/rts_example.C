@@ -42,6 +42,7 @@ static int tpc_doer(daqReader *rdr, char *do_print) ;
 static int tpx_doer(daqReader *rdr, char *do_print) ;
 static int trg_doer(daqReader *rdr, char *do_print) ;
 static int ftp_doer(daqReader *rdr, char *do_print) ;
+static int pmd_doer(daqReader *rdr, char *do_print) ;
 
 static int emc_pseudo_doer(daqReader *rdr, char *do_print) ;
 static int pp2pp_doer(daqReader *rdr, char *do_print) ;
@@ -174,8 +175,8 @@ int main(int argc, char *argv[])
 		dd = evp->det("svt")->get("legacy") ;
 		if(dd) LOG(INFO,"SVT found") ;
 
-		dd = evp->det("pmd")->get("legacy") ;
-		if(dd) LOG(INFO,"PMD found") ;
+		
+		if(pmd_doer(evp, print_det)) LOG(INFO,"PMD found") ;
 
 		dd = evp->det("tof")->get("legacy") ;
 		if(dd) {
@@ -459,6 +460,34 @@ static int tpc_doer(daqReader *rdr, char  *do_print)
 			//LOG(NOTE,"TPC: rerun cluster finder: sector %d: found %d clusters",dd->sec,cl_found) ;
 		}
 	}
+
+	return found ;
+
+	
+}
+
+
+static int pmd_doer(daqReader *rdr, char  *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"pmd")) ;	// leave as is...
+	else do_print = 0 ;
+
+	dd = rdr->det("pmd")->get("legacy") ;
+
+	if(dd && dd->iterate()) {	
+		struct pmd_t *pmd_p = (pmd_t *) dd->Void ;
+
+		if(do_print) {
+			printf("PMD statuses %d %d: channels %d\n",pmd_p->status[0],pmd_p->status[1],pmd_p->channels) ;
+		}
+
+		found = 1  ;	// mark as found..
+	}
+
+	if(found) LOG(NOTE,"PMD legacy found") ;
 
 	return found ;
 
