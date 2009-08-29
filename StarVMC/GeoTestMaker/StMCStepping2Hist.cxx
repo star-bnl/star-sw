@@ -1,4 +1,4 @@
-// $Id: StMCStepping2Hist.cxx,v 1.2 2009/07/07 19:07:19 perev Exp $
+// $Id: StMCStepping2Hist.cxx,v 1.3 2009/08/29 21:21:37 perev Exp $
 //
 //
 // Class StMCStepping2Hist
@@ -494,7 +494,7 @@ StMCStepping2Hist::StMCStepping2Hist(const char *name,const char *tit)
 {
    gStyle->SetPalette(1);
    assert(!fThis);
-   memset(&fFist,0,&fLast-&fFist);
+   memset(fFist,0,fLast-fFist);
    TString tsName(GetName());
    int yf = tsName.Contains(".DEV2");
    tsName = gSystem->BaseName(tsName.Data());
@@ -530,6 +530,11 @@ if (!nCall)  {
 nCall++;
   const TGeoVolume *modu = 0;     TString ts,modName;
   Case();
+// Sensitive volume
+   
+  if (fSensMaxZ < fabs(fCurrentPosition.Z())) fSensMaxZ = fabs(fCurrentPosition.Z());
+  if (fSensMaxR < fCurrentPosition.Perp()   ) fSensMaxR = fCurrentPosition.Perp();
+//
 
   assert(fCurrentLength< 10000);
   assert(fEnterLength  < 10000);
@@ -597,6 +602,9 @@ if (strcmp(fVolume->GetName(),"TPAD")==0) Break(1);
 //_____________________________________________________________________________
 void StMCStepping2Hist::Finish(const char *)
 {
+  printf("\nMaxSensVolu: Rxy=%g aZ=%g\n\n",fSensMaxR,fSensMaxZ);
+
+
   fMy2Hist->Paint();
   fMy2Hist->Save();
   fMy2Hist->PrintFrom();
