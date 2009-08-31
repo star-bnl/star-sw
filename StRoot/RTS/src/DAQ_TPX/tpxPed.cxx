@@ -512,6 +512,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 
 	switch(run_type) {
 	case RUN_TYPE_PULSER_A :
+	case RUN_TYPE_PULSER :
 	case RUN_TYPE_PED_A :
 	case RUN_TYPE_PED_B :
 		LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
@@ -526,6 +527,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 
 		
 		switch(run_type) {
+		case RUN_TYPE_PULSER :
 		case RUN_TYPE_PULSER_A :
 			for(t=95;t<110;t++) ped->ped[t] = 0.0 ;
 			break ;
