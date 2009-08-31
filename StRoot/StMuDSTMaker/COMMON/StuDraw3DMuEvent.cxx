@@ -1,9 +1,10 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.1 2009/08/05 00:22:29 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.2 2009/08/31 23:59:22 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
 #include "StHelixHelper.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StThreeVector.hh"
 
 StuDraw3DMuEvent *StuDraw3DMuEvent::gMuEventDisplay = new StuDraw3DMuEvent();
 
@@ -36,6 +37,39 @@ StuDraw3DMuEvent::~StuDraw3DMuEvent()
    if (gMuEventDisplay == this) gMuEventDisplay = 0;
 }
 
+///
+/// Tracks(StTrackType type) add all tracks opf the
+///  seclted type from the current event to Event Display
+///
+//___________________________________________________
+void StuDraw3DMuEvent::Tracks(StTrackType type)
+{
+   Int_t n_prim=0;
+   Int_t n_glob=0;
+   TObjArray *globTracks = 0;
+   TObjArray *primTracks = 0;
+   if (type == global && ( globTracks= StMuDst::globalTracks() ) ){
+      n_glob=StMuDst::GetNGlobalTrack();
+   } else if (primTracks = StMuDst::primaryTracks() ) {
+      n_prim=StMuDst::GetNPrimaryTrack();
+   }
+
+   Int_t i_track=0;
+   while (i_track < n_prim) {
+       StMuTrack &pr_track = *(StMuTrack *)primTracks->UncheckedAt(i_track++);
+       Track(pr_track,kPrimaryTrack);
+       cout << ".";
+   }
+   i_track=0;
+   while (i_track < n_glob) {
+       StMuTrack &pr_track = *(StMuTrack *)globTracks->UncheckedAt(i_track++);
+       Track(pr_track,kGlobalTrack);
+       cout << "+";
+   }
+   cout << n_prim << "primary and " << n_glob << "global tracks have been rendered" << endl;;
+
+}
+
 //___________________________________________________
 TObject *StuDraw3DMuEvent::Track(const StMuTrack &track, Color_t col,Style_t sty,Size_t siz)
 {
@@ -59,14 +93,10 @@ TObject *StuDraw3DMuEvent::Track(const StMuTrack &track, EDraw3DStyle sty)
 TObject *StuDraw3DMuEvent::TrackInOut(const StMuTrack &track, Bool_t in
                   ,  Color_t col,  Style_t sty,  Size_t siz)
 {
-#if 0
    // to be completed yet
-   StInnOutPoints trInOut(track,in);
-   return Points(trInOut.Size(),trInOut.GetXYZ(0),col,sty,siz);
-#else 
-   if (col && sty && siz && track.length())  {}
-   return 0;
-#endif
+   const StThreeVectorF  &pnt = in ? track.firstPoint() : track.lastPoint();
+
+   return Point(pnt.x(),pnt.y(),pnt.z(), col,sty,siz);
 }
 
 //___________________________________________________
