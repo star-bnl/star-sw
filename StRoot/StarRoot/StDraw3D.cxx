@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.37 2009/08/28 16:38:55 fine Exp $
+// $Id: StDraw3D.cxx,v 1.38 2009/08/31 23:38:57 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -43,7 +43,7 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
    TVirtualViewer3D *viewer = 0;
    // check Coin env and load if present
    TString ivrootDir = gSystem->Getenv("IVROOT");
-   if (ivrootDir.IsNull() )  ivrootDir = "$ROOT/5.99.99/Coin2/.$STAR_HOST_SYS";
+   if (ivrootDir.IsNull() )  ivrootDir = "$ROOT/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d";
    ivrootDir +=   "/lib/";
    gSystem->ExpandPathName(ivrootDir);
    static bool CheckCoin = false;
