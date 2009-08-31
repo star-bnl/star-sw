@@ -1,10 +1,11 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.1 2009/08/05 00:22:29 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.2 2009/08/31 23:59:23 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "StDraw3D.h"
+#include "StEnumerations.h"
 
   ///////////////////////////////////////////////////////////////////////
   //
@@ -18,6 +19,7 @@
   ///////////////////////////////////////////////////////////////////////
   
 class StMuTrack;
+class StMuDst;
 
 enum EStuDraw3DMuEvent {kUnusedHitsOnly=-1,kUsedHits=0,kUsedHitsTracks=1,kTracksOnly=2};
 
@@ -33,6 +35,7 @@ class StuDraw3DMuEvent : public StDraw3D
      StuDraw3DMuEvent(const char *detectorName="TPC",TVirtualPad *pad = 0);
      virtual ~StuDraw3DMuEvent();
      static StuDraw3DMuEvent *Display();
+     virtual void Tracks(StTrackType type=global);
      virtual TObject *Track(const StMuTrack &track
                   ,  Color_t col
                   ,  Style_t sty= Style_t(-1)
