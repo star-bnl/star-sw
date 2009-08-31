@@ -18,10 +18,63 @@
 #define TPX_PULSER_PED		95
 #define TPX_PULSER_START	100
 #define TPX_PULSER_STOP		103
-#define TPX_PULSER_TIME		100.90
+#define TPX_PULSER_TIME		100.84	// or perhaps 100.90?
 
 struct tpx_odd_fee_t tpx_odd_fee[256] ;
 int tpx_odd_fee_count = 0 ;
+
+
+static u_int histo_data[2000] ;
+static void histo_init()
+{
+	memset(histo_data,0,sizeof(histo_data)) ;
+}
+
+static void histo_fill(double gain)
+{
+	int i_gain = (int) gain ;
+
+	if((i_gain>=0) && (i_gain<2000)) histo_data[i_gain]++ ;
+
+	return ;
+}
+
+static double histo_peak()
+{
+	int max_sum, sum ;
+	int start_i = 0;
+	double peak ;
+
+	max_sum = 0 ;
+	for(int i=0;i<(2000-10);i++) {
+		sum = 0 ;
+		for(int j=0;j<10;j++) {
+			sum += histo_data[i+j] ;
+		}
+		if(sum > max_sum) {
+			max_sum = sum ;
+			start_i = i ;
+		}
+	}
+
+	sum = 0 ;
+	peak = 0.0 ;
+
+	for(int i=start_i;i<(start_i+10);i++) {
+		sum += histo_data[i] ;
+		peak += i*histo_data[i] ;
+	}
+
+
+	if(sum) {
+		peak /= sum ;
+		peak += 0.5 ;	// to unbias it...
+	}
+
+	return peak ;
+}
+
+	
 
 tpxGain::tpxGain()
 {
@@ -278,8 +331,8 @@ void tpxGain::calc()
 
 	char fname[128];
 	sprintf(fname,"/RTS/log/tpx/tpx_raw_gains_%02d.txt",sector) ;
-	//FILE *ofile = fopen(fname,"w") ;
-	FILE *ofile = stdout ;
+	FILE *ofile = fopen(fname,"w") ;
+	//FILE *ofile = stdout ;
 
 	for(s=s_start;s<=s_stop;s++) {
 
@@ -294,7 +347,7 @@ void tpxGain::calc()
 	for(p=1;p<=tpc_rowlen[r];p++) {
 		c = get_aux(s,r,p)->cou ;	// get count of events for this pad...
 
-		if(!c) {	// nothing ever fell in the timing acceptance window
+		if(!c) {	// nothing ever fell on this pad _at_all_
 			get_gains(s,r,p)->g = 0.0 ;
 			get_gains(s,r,p)->t0 = 9.999 ;	
 
@@ -348,10 +401,16 @@ void tpxGain::calc()
 			}
 
 			// and fill in the final absolute charge and t0...
-			get_gains(s,r,p)->g = charge ;
-			get_gains(s,r,p)->t0 = t0/charge ;
 
-			//printf("...%d %d %d: %f %d %.3f %.3f\n",s,r,p,ped,ped_cou,get_gains(s,r,p)->g, get_gains(s,r,p)->t0) ;
+			get_gains(s,r,p)->g = charge ;		// this might be small or even negative in case the pad is not connected
+
+			if(charge) {
+				get_gains(s,r,p)->t0 = t0/charge ;
+			}
+			else {
+				get_gains(s,r,p)->t0 = 0.0 ;	// *shrug* what else...
+			}
+
 		}
 	}
 	
@@ -361,55 +420,55 @@ void tpxGain::calc()
 		We will skip first and last 3 pads because the gain 
 		(calculated with the pulser) is usually wrong.
 
-
 		We will also skip any pads which had _any_ to low
 		or to high pulse...
 	*/
-								     
-	c = 0 ;
-	int accepted_pads_cou = 0 ;
 
-	// calc noise etc.
-	for(p=1;p<=(tpc_rowlen[r]);p++) {	// skip first and last 3 pads!
+	// normalize the odd pulser to 100%
+	for(p=1;p<=tpc_rowlen[r];p++) {	// skip first and last 3 pads!
 		struct aux *aux = get_aux(s,r,p) ;
 		
-		if(events) {
+		if(events) {	// normalize to 100%
 			aux->low_pulse = (100 * aux->low_pulse) / events ;
 			aux->high_pulse = (100 * aux->high_pulse) / events ;
 			aux->noise = (100 * aux->noise) / events ;
 		}
 	}
 
-	double row_means = 0.0 ;
-	for(p=4;p<=(tpc_rowlen[r]-3);p++) {	// skip first and last 3 pads!
+	histo_init() ;
+
+	c = 0 ;
+
+	for(p=1;p<=tpc_rowlen[r];p++) {
 		struct aux *aux = get_aux(s,r,p) ;
 		int fired = aux->cou ;
 		
 
-		if(fired) ;
+		if(fired) ;			// do nothing, all is well...
 		else aux->low_pulse = 100 ;	// obviously
 
-		if(get_gains(s,r,p)->g == 0.0) aux->low_pulse = 100 ;
+		// the gain now has the mean charge, absolute, so let's cut on some
+		// sanitiy numbers here i.e. 100 ...
+		if(get_gains(s,r,p)->g < 100.0) aux->low_pulse = 100 ;
+		if(get_gains(s,r,p)->g > 2000.0) aux->high_pulse = 100 ;
 
+		// skip obviously bad ones...
 		if((aux->low_pulse > 10) || (aux->noise > 10) || (aux->high_pulse > 10)) {
 			if(r != 0) LOG(NOTE,"ROW %d, pad %d: lo %d, noise %d, hi %d -- skipping",r,p,
 					aux->low_pulse, aux->noise, aux->high_pulse) ;
 			continue ;
 		}
-		row_means += get_gains(s,r,p)->g ;
-		c++ ;
-
+		
+		// use only _known_ good ones
+		if((p>=4) && (p<=(tpc_rowlen[r]-3))) {
+			histo_fill(get_gains(s,r,p)->g) ;
+			c++ ;
+		}
 	}
 
-	accepted_pads_cou = c ;
-
-	// calculate the rough mean charge of the row...
-	if(c==0) {
-		row_means = 0.0 ;
-//		LOG(WARN,"ROW %d: no good pads???",r) ;
-	}
-	else row_means /= c ;
-
+	int accepted_pads_cou = c ;
+	
+	double row_means = histo_peak() ;	// rough mean of the charge on this row...
 
 	/* 
 		now, we skip all gains where the gain is not within
@@ -473,22 +532,15 @@ void tpxGain::calc()
 
 	for(p=1;p<=tpc_rowlen[r];p++) {
 
-		if(get_gains(s,r,p)->g) {
-			if(ofile) fprintf(ofile,"%d %d %d %.3f %.3f ",s,r,p,get_gains(s,r,p)->g,get_gains(s,r,p)->t0) ;
-			
-			// this is the actual correction...
-			get_gains(s,r,p)->g = get_means(s,r)->g / get_gains(s,r,p)->g ;
-			//get_gains(s,r,p)->t0 = get_means(s,r)->t0 - get_gains(s,r,p)->t0;
-			get_gains(s,r,p)->t0 = TPX_PULSER_TIME - get_gains(s,r,p)->t0;
-			
-			if(get_gains(s,r,p)->g > 9.9) {
-				get_gains(s,r,p)->g = 0.0 ;	// kill!
-				get_gains(s,r,p)->t0 = -9.9 ;
-			}
+		if(ofile) fprintf(ofile,"%d %d %d %.3f %.3f ",s,r,p,get_gains(s,r,p)->g,get_gains(s,r,p)->t0) ;
 
-			if(ofile) fprintf(ofile,"%.3f %.3f\n",get_gains(s,r,p)->g, get_gains(s,r,p)->t0) ;
-			//printf("...%d %d: %.3f %.3f\n",r,p,get_gains(s,r,p)->g, get_gains(s,r,p)->t0) ;
+		if(get_gains(s,r,p)->g) {			
+			// this is the actual correction...
+			get_gains(s,r,p)->g = get_means(s,r)->g / get_gains(s,r,p)->g ;	// relative to row
+			get_gains(s,r,p)->t0 = TPX_PULSER_TIME - get_gains(s,r,p)->t0;	// absolute to TPX!
 		}
+
+		if(ofile) fprintf(ofile,"%.3f %.3f\n",get_gains(s,r,p)->g, get_gains(s,r,p)->t0) ;
 	}
 	
 
@@ -595,7 +647,7 @@ int tpxGain::from_file(char *fname, int sec)
 	if(f==0) {
 		LOG(WARN,"from_file: error in fopen \"%s\" [%s]",fname,strerror(errno)) ;
 		do_default(sector) ;
-		return 1 ;	// assume hange...
+		return -1 ;	// assume hange...
 	}
 
 	
@@ -649,10 +701,10 @@ int tpxGain::from_file(char *fname, int sec)
 				sscanf(cix+4,"%u",&c_run) ;
 			}
 			else if((cix = strstr(str,"Date "))) {
-				sscanf(cix+4,"%u",&c_date) ;
+				sscanf(cix+5,"%u",&c_date) ;
 			}
 			else if((cix = strstr(str,"Time "))) {
-				sscanf(cix+4,"%u",&c_time) ;
+				sscanf(cix+5,"%u",&c_time) ;
 			}
 			else {
 				continue ;	// comment
@@ -785,6 +837,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.20 2009/08/31 19:33:30 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -889,7 +942,8 @@ int tpxGain::summarize(char *fname, FILE *log)
 	else {
 		ofile = fopen(fname,"w") ;
 		if(ofile==0) {
-			LOG(ERR,"summarize: error in fopen \"%s\" [%s]",fname,strerror(errno)) ;
+			getcwd(reason,100) ;
+			LOG(ERR,"summarize: error in fopen %s\"%s\" [%s] ",reason,fname,strerror(errno)) ;
 			return notes ;
 		}
 	}
@@ -970,8 +1024,7 @@ int tpxGain::summarize(char *fname, FILE *log)
 				int bad_t0, bad_gain, bad_noise, bad_low ;
 				bad_t0 = bad_gain = bad_noise = bad_low = 0 ;
 
-				if(row != 0) {	// only for physically connected rows!
-						
+				if(row != 0) {	// only for physically connected rows!						
 
 					if((g<0.9) || (g>1.1)) {				
 						bad_gain = 1 ;
@@ -985,7 +1038,8 @@ int tpxGain::summarize(char *fname, FILE *log)
 							if(err<2) err = 2 ;
 						}
 					}
-					if((t0<-0.15) || (t0>0.15)) {
+
+					if((t0<-0.30) || (t0>0.30)) {
 						bad_t0 = 1 ;
 
 
