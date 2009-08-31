@@ -47,7 +47,7 @@
 
 #define RTS_LITTLE_ENDIAN
 
-#ilif defined(__x86_64)
+#elif defined(__x86_64)
 
 #define RTS_LITTLE_ENDIAN
 
