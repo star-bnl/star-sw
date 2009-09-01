@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.30 2009/02/27 19:54:25 tone421 Exp $
+ * $Id: StMuTrack.h,v 1.31 2009/09/01 16:37:11 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -103,6 +103,7 @@ class StMuTrack : public TObject {
     StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
     StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
     StMuBTofPidTraits btofPidTraits() const; /// dongx
+    void setBTofPidTraits(const StMuBTofPidTraits& pid); /// dongx
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
     virtual void Print(Option_t* option = "") const;  ///< Print track info
@@ -205,16 +206,20 @@ inline StMuProbPidTraits StMuTrack::probPidTraits() const { return mProbPidTrait
 inline StMuBTofPidTraits StMuTrack::btofPidTraits() const { return mBTofPidTraits;} /// dongx
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
 inline void StMuTrack::setProbabilityPidCentrality(double cent) { mProbabilityPidCentrality = cent;}
+inline void StMuTrack::setBTofPidTraits(const StMuBTofPidTraits& pid) { mBTofPidTraits = pid; }
 
 inline StMuTrack* StMuTrack::globalTrack() const { return (mIndex2Global>=0) ? (StMuTrack*)StMuDst::array(muGlobal)->UncheckedAt(mIndex2Global) :0;}
 inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectra>=0) ? (StRichSpectra*)StMuDst::array(muRich)->UncheckedAt(mIndex2RichSpectra) : 0;}
-inline StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (StMuBTofHit*)StMuDst::array(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;} /// dongx
+inline StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (StMuBTofHit*)StMuDst::btofArray(muBTofHit)->UncheckedAt(mIndex2BTofHit) :0;} /// dongx
 
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.31  2009/09/01 16:37:11  tone421
+ * Fixed in a bug for setBTofPidTraits
+ *
  * Revision 1.30  2009/02/27 19:54:25  tone421
  * Iterated Class Def by 1 to accommodate new BTOF data member
  *
