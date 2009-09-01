@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.16 2009/08/25 20:39:40 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.17 2009/09/01 15:06:44 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.17  2009/09/01 15:06:44  fisyak
+// Version N
+//
 // Revision 1.16  2009/08/25 20:39:40  fisyak
 // Variant K
 //
@@ -28,8 +31,11 @@
 //
 // doxygen info here
 /*
-  All formula for induced signal are taken from 
-  http://www.inst.bnl.gov/programs/gasnobledet/publications/Mathieson's_Book.pdf
+  The maker's algorithms and formulae based on 
+  http://www.inst.bnl.gov/programs/gasnobledet/publications/Mathieson's_Book.pdf,
+  and  Photo Absorption Model
+  "Ionization energy loss in very thin absorbers.", V.M. Grishin, V.K. Ermilova, S.K. Kotelnikov Nucl.Instrum.Meth.A309:476-484,1991
+  "A method to improve tracking and particle identification in TPC's and silicon detectors.", Hans Bichsel, Nucl.Instrum.Meth.A562:154-197,2006
 */
 #include <assert.h>
 #include "StTpcRSMaker.h"
@@ -67,7 +73,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.16 2009/08/25 20:39:40 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.17 2009/09/01 15:06:44 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -77,9 +83,9 @@ static const Double_t tauC[2]   = {999.655e-9, 919.183e-9};
 TF1*     StTpcRSMaker::fgTimeShape3[2]    = {0, 0};
 TF1*     StTpcRSMaker::fgTimeShape0[2]    = {0, 0};
 //________________________________________________________________________________
-static const Int_t nx[2] = {200,250};
+static const Int_t nx[2] = {200,500};
 static const Double_t xmin[2] =  {-10., -6};
-static const Double_t xmax[2] =  { 10., 19};
+static const Double_t xmax[2] =  { 10., 44};
 static const Int_t nz = 42;
 static const Double_t zmin = -210;
 static const Double_t zmax = -zmin;
@@ -113,7 +119,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   I0(13.1),
   mCluster(3.2), tauGlobalOffSet(0), 
   OmegaTauC(2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
-  transverseDiffusionConstant(0.0443),// J(0.040), // (0.049), // (0.0514), // (0.0623), 
+  transverseDiffusionConstant(0.0450), // L(0.0475), // K(0.0443),// J(0.040), // (0.049), // (0.0514), // (0.0623), 
   longitudinalDiffusionConstant(0.0360), 
   Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision with data
   Outer_wire_to_plane_couplingScale(5.0718e-01*1.43), //  -"-
@@ -133,8 +139,10 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mAveragePedestalRMS(0.5), //  tonko's rms =1.4), //1.95684e+01),
   //  mAveragePedestalRMSX(0.3), // tonkos rms = 0.8), //1.95684e+01),
   mAveragePedestalRMSX(0.7), // 0.06), // tonkos rms = 0.04 - 0.08 06/22/09
-  minSignal(1e-3),
+  minSignal(1e-4),
+#if 0
   LorenzAngle(8), // degrees for P10 at B = 4 kG and E = 1.5 kV/cm
+#endif
   InnerAlphaVariation(0),
   OuterAlphaVariation(0),
   innerSectorAnodeVoltage(1170),
@@ -149,9 +157,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mtauIntegrationX(2.5* 74.6e-9), // secs
 #else
   //E  mtauIntegrationX(     74.6e-9/2.5), // secs
-  mtauIntegrationX(     74.6e-9), // secs
 #endif
-  mtauCX(1000e-9),
   mtauIntegration (2.5* 74.6e-9), // secs
   NoOfSectors(24),
   NoOfRows(45),
@@ -174,9 +180,13 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mCutEle(1e-3)
 {
   memset (mShaperResponses, 0, sizeof(mShaperResponses));
+  mtauIntegrationX[0] = 15e-9; mtauCX[0] = 30e-9; // Inner
+  mtauIntegrationX[1] = 20e-9; mtauCX[1] = 50e-9; // Outer
   SETBIT(m_Mode,kPAI); 
   //  SETBIT(m_Mode,kTree);
+#if 0
   TanLorenzAngle = TMath::Tan(LorenzAngle/180.*TMath::Pi())*5./4.; // for 5 kG
+#endif
 }
 //________________________________________________________________________________
 StTpcRSMaker::~StTpcRSMaker() {
@@ -291,7 +301,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   StMagF::Agufld(xyz,BFieldG);
   // Shapers
   Double_t timeBinMin = -0.5;
-  Double_t timeBinMax = 24.5;
+  Double_t timeBinMax = 44.5;
   const Char_t *Names[2] = {"I","O"};
   for (Int_t io = 0; io < 2; io++) {// In/Out
     if (io == 0) {
@@ -309,7 +319,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
 					  outerSectorAnodeVoltage, t0IO[io]);
     }
     Double_t params3[7] = {t0IO[io], tauF, tauP, mtauIntegration , mTimeBinWidth,     0, io};
-    Double_t params0[5] = {t0IO[io],             mtauIntegrationX, mTimeBinWidth,     0, io};
+    Double_t params0[5] = {t0IO[io],             mtauIntegrationX[io], mTimeBinWidth,     0, io};
     if (! fgTimeShape3[io]) {// old electronics, intergation + shaper alltogether
       fgTimeShape3[io] = new TF1(Form("TimeShape3%s",Names[io]),
 				 shapeEI3,timeBinMin*mTimeBinWidth,timeBinMax*mTimeBinWidth,7);
@@ -327,7 +337,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
 #if 0
       params0[3] = (io == 0) ? 2.457e-6 : 11.463e-6; // tauC
 #endif
-      params0[3] = mtauCX;
+      params0[3] = mtauCX[io];
       fgTimeShape0[io]->SetParameters(params0);
       params0[3] = fgTimeShape0[io]->Integral(0,timeBinMax*mTimeBinWidth);
       fgTimeShape0[io]->SetTitle(fgTimeShape0[io]->GetName());
@@ -642,7 +652,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	transform(BA,BLocalSector);
 	Float_t BField[3] = {BLocalSector.position().x(), BLocalSector.position().y(), BLocalSector.position().z()};
 	Double_t OmegaTau = OmegaTauC*BField[2]/5.0;// from diffusion 586 um / 106 um at B = 0/ 5kG
+#if 0
 	Double_t tangLorenzAngle = TanLorenzAngle*BField[2]/5.;
+#endif
 	StPhysicalHelixD track(dirLocalSector.position(),
 			       xyzLocalSector.position(),
 			       BField[2]*kilogauss,charge);  if (Debug() % 10 > 1) PrPP(Make,track);
@@ -827,7 +839,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #if 0
 	    xOnWire += distFocused*tangLorenzAngle; // Lorentz shift
 #else
-	    xOnWire += distFocused*OmegaTau;
+	    xOnWire += distFocused*OmegaTau/1.47; // OmegaTau near wires taken from comparison with data
 #endif
 #if 1
 	    zOnWire += TMath::Abs(distFocused);
@@ -928,7 +940,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }								                          
 	  if (hist[ioH][1]) {						                          
 	    Double_t S = 0;
-	    for (Int_t t = 0; t < 32; t++) S += tbksdE[t];
+	    for (Int_t t = 0; t < 64; t++) S += tbksdE[t];
 	    if (S > 0) {
 	      for (Int_t t = 0; t < 64; t++) hist[ioH][1]->Fill((t+tbk0+0.5)-tbkH,xyzL.position().z(),tbksdE[t]/S);
 	    }
@@ -1051,7 +1063,9 @@ void  StTpcRSMaker::Print(Option_t *option) const {
     PrPP(Print, mAveragePedestalRMSX);
   }
   PrPP(Print, FanoFactor);
+#if 0
   PrPP(Print, TanLorenzAngle);
+#endif
   PrPP(Print, innerSectorAnodeVoltage);
   PrPP(Print, outerSectorAnodeVoltage);
   PrPP(Print, K3IP);
@@ -1374,6 +1388,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.17  2009/09/01 15:06:44  fisyak
+// Version N
+//
 // Revision 1.16  2009/08/25 20:39:40  fisyak
 // Variant K
 //

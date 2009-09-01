@@ -1,6 +1,7 @@
 #define PRINT
 //#define __LASER__
 //#define __REAL_DATA__
+//#define __useGainT0__
 #if !defined(__CINT__)
 // code that should be seen ONLY by the compiler
 #include "TH1.h"
@@ -58,8 +59,16 @@ static const Double_t tauF                 = 394.0e-9;
 static const Double_t tauP                 = 775.0e-9;
 // H(s) = (1 + s*tau_P)/(1 + s*tau_F) => (s + d)/(s - b);
 /*1.6  (s + d) / ((s - a)*(s - b)) => A*exp(a*t) + B*exp(b*t) =
-                                      (a+d)/(a-b)*exp(a*t) + (b+d)/(b-a)*exp(b*t) 
-				      d = 1/tau_F; a = - 1/tau_I; b = - 1/tau_P;
+  (a+d)/(a-b)*exp(a*t) + (b+d)/(b-a)*exp(b*t) 
+  d = 1/tau_F; a = - 1/tau_I; b = - 1/tau_P;
+  06/27/09  
+  Inner  Decay DAQ = 5.879 timebuckets
+  SIM = 7.892 -"-
+  extra decay       23.059 -"- ->  2.457e-6 sec
+  Outer        DAQ = 7.310 -"-
+  SIM = 7.843
+  107.55  -"- -> 11.463e-6 sec
+  
 */
 //                                    Inner        Outer
 static const Double_t t0IO[2]   = {1.20868e-9, 1.43615e-9};
@@ -71,18 +80,35 @@ static const Double_t tauC[2]   = {999.655e-9, 919.183e-9};
 */
 static const  Double_t mTimeBinWidth              = 1.06580379191673078e-07;//1.e-6/gStTpcDb->Electronics()->samplingFrequency();
 #include "HardWarePosition.C"
+#ifdef __useGainT0__
+#if 1
+#include "tables/St_tpcPadGainT0_Table.h"
+#else
 #include "tables/St_tpcGain_Table.h"
 #include "tables/St_tpcT0_Table.h"
+#endif
+#endif
 //#include "DrawList.C"
 //--------------------------------------------------------------------------------
-void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *Out = "", const Char_t *Time = "20080208.174701") {
+void TpcT(const Char_t *opt = "F", const Char_t *files="*.root", const Char_t *Out = "", const Char_t *Time = "20090415.000000") {
   //	   Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Double_t pMomax) {
+#ifdef __useGainT0__
   gSystem->Load("libStDb_Tables.so");
+#if 0
   TFile *f = new TFile(Form("$STAR/StarDb/Calibrations/tpc/tpcGain.%s.root",Time));
+#else
+  TFile *f = new TFile(Form("$STAR/StarDb/Calibrations/tpc/tpcPadGainT0.%s.root",Time));
+#endif
   if (! f) return;
+#if 0
   St_tpcGain *G = (St_tpcGain*) f->Get("tpcGain");
+#else
+  St_tpcPadGainT0 *G = (St_tpcPadGainT0*) f->Get("tpcPadGainT0");
+  tpcPadGainT0_st *gainT0s = G->GetTable();
+#endif
   delete f;
   if (! G) return;
+#if 0
   cout << "Got " << G->GetName() << endl;
   f = new TFile(Form("$STAR/StarDb/Calibrations/tpc/tpcT0.%s.root",Time));
   if (! f) return;
@@ -92,6 +118,8 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
   cout << "Got " << T->GetName() << endl;
   tpcGain_st *gains = G->GetTable();
   tpcT0_st   *t0s   = T->GetTable();
+#endif
+#endif
   TDirIter Dir(files);
   Char_t *file = 0;
   Char_t *file1 = 0;
@@ -99,7 +127,9 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
   TTreeIter iter("TpcT");
   while ((file = (Char_t *) Dir.NextFile())) {
     TString File(file);
-    if (File.Contains("Plot") || File.Contains("Fit")|| File.Contains("hist")) continue;
+    if (File.Contains("Plot") || File.Contains("Fit") || 
+	File.Contains("hist") || File.Contains("tags") ||
+	File.Contains("MuDst")) continue;
     iter.AddFile(file); 
     NFiles++; 
     file1 = file;
@@ -114,99 +144,99 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
     output += ".root";
   }
   cout << "Output for " << output << endl;
-	const Int_t&       fNoPixels                                = iter("fNoPixels");
+  const Int_t&       fNoPixels                                = iter("fNoPixels");
 #ifndef __REAL_DATA__
-	const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
+  const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
 #endif
-	const Int_t&       fNofPV                                   = iter("fNofPV");
-	const Int_t&       fNoTracksAtBestPV                        = iter("fNoTracksAtBestPV");
-	const Float_t&     fxV                                      = iter("fxV");
-	const Float_t&     fyV                                      = iter("fyV");
-	const Float_t&     fzV                                      = iter("fzV");
-	const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
-	const Int_t&       fNoRcTrack                               = iter("fNoRcTrack");
-	const Int_t&       fAdcSum                                  = iter("fAdcSum");
+  const Int_t&       fNofPV                                   = iter("fNofPV");
+  const Int_t&       fNoTracksAtBestPV                        = iter("fNoTracksAtBestPV");
+  const Float_t&     fxV                                      = iter("fxV");
+  const Float_t&     fyV                                      = iter("fyV");
+  const Float_t&     fzV                                      = iter("fzV");
+  const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
+  const Int_t&       fNoRcTrack                               = iter("fNoRcTrack");
+  const Int_t&       fAdcSum                                  = iter("fAdcSum");
 #if 0
-	const Int_t&       fPixels_                                 = iter("fPixels");
-	const UChar_t*&    fPixels_mDetector                        = iter("fPixels.mDetector");
+  const Int_t&       fPixels_                                 = iter("fPixels");
+  const UChar_t*&    fPixels_mDetector                        = iter("fPixels.mDetector");
 #endif
-	const UChar_t*&    fPixels_mSector                          = iter("fPixels.mSector");
-	const UChar_t*&    fPixels_mRow                             = iter("fPixels.mRow");
-	const UChar_t*&    fPixels_mPad                             = iter("fPixels.mPad");
-	const UShort_t*&   fPixels_mTimeBin                         = iter("fPixels.mTimeBin");
-	const UShort_t*&   fPixels_mAdc                             = iter("fPixels.mAdc");
+  const UChar_t*&    fPixels_mSector                          = iter("fPixels.mSector");
+  const UChar_t*&    fPixels_mRow                             = iter("fPixels.mRow");
+  const UChar_t*&    fPixels_mPad                             = iter("fPixels.mPad");
+  const UShort_t*&   fPixels_mTimeBin                         = iter("fPixels.mTimeBin");
+  const UShort_t*&   fPixels_mAdc                             = iter("fPixels.mAdc");
 #ifdef PRINT
-	const UShort_t*&   fPixels_mIdTruth                         = iter("fPixels.mIdTruth");
-#endif
-#ifndef __REAL_DATA__
-#if 0
-	const Short_t*&    fPixels_mId                              = iter("fPixels.mId");
-	const Float_t*&    fMcHit_mPosition_mX1                     = iter("fMcHit.mPosition.mX1");
-	const Float_t*&    fMcHit_mPosition_mX2                     = iter("fMcHit.mPosition.mX2");
-#endif
-	const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
-#if 0
-	const Float_t*&    fMcHit_mLocalMomentum_mX1                = iter("fMcHit.mLocalMomentum.mX1");
-	const Float_t*&    fMcHit_mLocalMomentum_mX2                = iter("fMcHit.mLocalMomentum.mX2");
-	const Float_t*&    fMcHit_mLocalMomentum_mX3                = iter("fMcHit.mLocalMomentum.mX3");
-	const Float_t*&    fMcHit_mdE                               = iter("fMcHit.mdE");
-	const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
-	const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
-#endif
-#ifdef PRINT
-	const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
-#endif
-#if 0
-	const Float_t*&    fMcHit_mLgamma                           = iter("fMcHit.mLgamma");
-#endif
-	const Short_t*&    fMcHit_mMcl_x                            = iter("fMcHit.mMcl_x");
-	const Short_t*&    fMcHit_mMcl_t                            = iter("fMcHit.mMcl_t");
-#endif
-#if 0
-	const Float_t*&    fRcHit_mPosition_mX1                     = iter("fRcHit.mPosition.mX1");
-	const Float_t*&    fRcHit_mPosition_mX2                     = iter("fRcHit.mPosition.mX2");
-#endif
-	const Float_t*&    fRcHit_mPosition_mX3                     = iter("fRcHit.mPosition.mX3");
-#ifdef PRINT
-	const UInt_t*&     fRcHit_mHardwarePosition                 = iter("fRcHit.mHardwarePosition");
-#endif
-	const Float_t*&    fRcHit_mCharge                           = iter("fRcHit.mCharge");
-#if 0
-	const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
-	const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const UShort_t*&   fPixels_mIdTruth                         = iter("fPixels.mIdTruth");
 #endif
 #ifndef __REAL_DATA__
-	const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+#if 0
+  const Short_t*&    fPixels_mId                              = iter("fPixels.mId");
+  const Float_t*&    fMcHit_mPosition_mX1                     = iter("fMcHit.mPosition.mX1");
+  const Float_t*&    fMcHit_mPosition_mX2                     = iter("fMcHit.mPosition.mX2");
+#endif
+  const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
+#if 0
+  const Float_t*&    fMcHit_mLocalMomentum_mX1                = iter("fMcHit.mLocalMomentum.mX1");
+  const Float_t*&    fMcHit_mLocalMomentum_mX2                = iter("fMcHit.mLocalMomentum.mX2");
+  const Float_t*&    fMcHit_mLocalMomentum_mX3                = iter("fMcHit.mLocalMomentum.mX3");
+  const Float_t*&    fMcHit_mdE                               = iter("fMcHit.mdE");
+  const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
+  const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
+#endif
+#ifdef PRINT
+  const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
 #endif
 #if 0
-	const UChar_t*&    fRcHit_mFitFlag                          = iter("fRcHit.mFitFlag");
-	const UChar_t*&    fRcHit_mTrackRefCount                    = iter("fRcHit.mTrackRefCount");
-	const UChar_t*&    fRcHit_mFlag                             = iter("fRcHit.mFlag");
-	const UChar_t*&    fRcHit_mMinpad                           = iter("fRcHit.mMinpad");
-	const UChar_t*&    fRcHit_mMaxpad                           = iter("fRcHit.mMaxpad");
-	const UChar_t*&    fRcHit_mMintmbk                          = iter("fRcHit.mMintmbk");
-	const UChar_t*&    fRcHit_mMaxtmbk                          = iter("fRcHit.mMaxtmbk");
+  const Float_t*&    fMcHit_mLgamma                           = iter("fMcHit.mLgamma");
 #endif
-	const Short_t*&    fRcHit_mMcl_x                            = iter("fRcHit.mMcl_x");
-	const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
+  const Short_t*&    fMcHit_mMcl_x                            = iter("fMcHit.mMcl_x");
+  const Short_t*&    fMcHit_mMcl_t                            = iter("fMcHit.mMcl_t");
+#endif
+#if 0
+  const Float_t*&    fRcHit_mPosition_mX1                     = iter("fRcHit.mPosition.mX1");
+  const Float_t*&    fRcHit_mPosition_mX2                     = iter("fRcHit.mPosition.mX2");
+#endif
+  const Float_t*&    fRcHit_mPosition_mX3                     = iter("fRcHit.mPosition.mX3");
 #ifdef PRINT
-	const Int_t*&      fRcTrack_fSector                         = iter("fRcTrack.fSector");
-	const Int_t*&      fRcTrack_fRow                            = iter("fRcTrack.fRow");
+  const UInt_t*&     fRcHit_mHardwarePosition                 = iter("fRcHit.mHardwarePosition");
+#endif
+  const Float_t*&    fRcHit_mCharge                           = iter("fRcHit.mCharge");
+#if 1
+  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
+  const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+#endif
+#ifndef __REAL_DATA__
+  const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+#endif
+#if 0
+  const UChar_t*&    fRcHit_mFitFlag                          = iter("fRcHit.mFitFlag");
+  const UChar_t*&    fRcHit_mTrackRefCount                    = iter("fRcHit.mTrackRefCount");
+  const UChar_t*&    fRcHit_mFlag                             = iter("fRcHit.mFlag");
+  const UChar_t*&    fRcHit_mMinpad                           = iter("fRcHit.mMinpad");
+  const UChar_t*&    fRcHit_mMaxpad                           = iter("fRcHit.mMaxpad");
+  const UChar_t*&    fRcHit_mMintmbk                          = iter("fRcHit.mMintmbk");
+  const UChar_t*&    fRcHit_mMaxtmbk                          = iter("fRcHit.mMaxtmbk");
+#endif
+  const Short_t*&    fRcHit_mMcl_x                            = iter("fRcHit.mMcl_x");
+  const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
+#ifdef PRINT
+  const Int_t*&      fRcTrack_fSector                         = iter("fRcTrack.fSector");
+  const Int_t*&      fRcTrack_fRow                            = iter("fRcTrack.fRow");
 #endif
 #if 1
-	const Short_t*&    fRcTrack_mMcl_x                          = iter("fRcTrack.mMcl_x");
-	const Short_t*&    fRcTrack_mMcl_t                          = iter("fRcTrack.mMcl_t");
+  const Short_t*&    fRcTrack_mMcl_x                          = iter("fRcTrack.mMcl_x");
+  const Short_t*&    fRcTrack_mMcl_t                          = iter("fRcTrack.mMcl_t");
 #endif
 #if 0
-	const Int_t*&      fRcTrack_fNpoints                        = iter("fRcTrack.fNpoints");
+  const Int_t*&      fRcTrack_fNpoints                        = iter("fRcTrack.fNpoints");
 #endif
-	const Int_t*&      fRcTrack_fNfitpoints                     = iter("fRcTrack.fNfitpoints");
-	const Int_t*&      fRcTrack_fifPrim                         = iter("fRcTrack.fifPrim");
-	const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
-	const Float_t*&    fRcTrack_fpy                             = iter("fRcTrack.fpy");
-	const Float_t*&    fRcTrack_fpz                             = iter("fRcTrack.fpz");
-	const Float_t*&    fRcTrack_fdEdx                           = iter("fRcTrack.fdEdx");
-	const Float_t*&    fRcTrack_fTrackLength70                  = iter("fRcTrack.fTrackLength70");
+  const Int_t*&      fRcTrack_fNfitpoints                     = iter("fRcTrack.fNfitpoints");
+  const Int_t*&      fRcTrack_fifPrim                         = iter("fRcTrack.fifPrim");
+  const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
+  const Float_t*&    fRcTrack_fpy                             = iter("fRcTrack.fpy");
+  const Float_t*&    fRcTrack_fpz                             = iter("fRcTrack.fpz");
+  const Float_t*&    fRcTrack_fdEdx                           = iter("fRcTrack.fdEdx");
+  const Float_t*&    fRcTrack_fTrackLength70                  = iter("fRcTrack.fTrackLength70");
   static Int_t nx = 200;
   static Double_t xmin =   -5.;
   static Double_t xmax =   15.;
@@ -224,12 +254,19 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
     Char_t *Name;
     Char_t *Title;
   };
+#if 0
   Name_t InOut[4] = {
     {"Inner","Inner for all except 16"},
     {"Outer","Outer for all except 16"},
     {"InnerX","Inner for Sector 16"},
     {"OuterX","Outer for Sector 16"}
   };
+#else
+  Name_t InOut[2] = {
+    {"Inner","Inner TPX"},
+    {"Outer","Outer TPX"}
+  };
+#endif
   Name_t RcMcTk[3] = {
     {"Rc","Rc"},
     {"Mc","Mc"},
@@ -244,7 +281,8 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
   TH1D       *histA[4][2];
   TH2D       *histB[4];
   memset (hist, 0, sizeof(hist));
-  for (Int_t io = 0; io < 4; io++) {// TPC + TPX
+  //  for (Int_t io = 0; io < 4; io++) {// TPC + TPX
+  for (Int_t io = 0; io < 2; io++) {// TPX
     Int_t color = 1;
     for (Int_t rmt = 0; rmt < 3; rmt++) {
 #ifdef __REAL_DATA__
@@ -279,10 +317,11 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
     if (! fNoPixels ) continue;
     TVector3 mom(fRcTrack_fpx[0],fRcTrack_fpy[0],fRcTrack_fpz[0]);
 #if defined(__REAL_DATA__) && ! defined(__LASER__)
-    if (fNofPV == 0) continue;
+    if (fNofPV != 1) continue;
     if (TMath::Abs(fzV) > 20) continue;
     if (TMath::Abs(fxV) > 1 || TMath::Abs(fyV) > 1) continue;
-    if (mom.Pt() < 0.4 || mom.Pt() > 0.6) continue;
+    if (mom.Pt()  < 0.4 || mom.Pt()  > 0.6) continue;
+    if (mom.Eta() <-1.0 || mom.Eta() > 0.0) continue;
     if (fRcTrack_fTrackLength70[0] < 40) continue;
     if (fRcTrack_fdEdx[0] < 2e-6 || fRcTrack_fdEdx[0] > 3e-6) continue;
 #endif
@@ -328,8 +367,11 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
 #endif    
     Int_t io = 0;
     if (row > 13) io = 1;
+#if 0
     if (sector  == 16) io += 2;
+#endif
     for (Int_t i = 0; i < fNoPixels; i++) {
+      if (fRcHit_mIdTruth[0] != fPixels_mIdTruth[i]) continue;
       pad = fPixels_mPad[i];
       tb  = fPixels_mTimeBin[i];
       if (tb  >= 512) continue;
@@ -346,18 +388,32 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
     Int_t pMax = -1;
     Double_t AtMax = -1; 
     for  (Int_t i = 0; i < fNoPixels; i++) {
+      if (fRcHit_mIdTruth[0] != fPixels_mIdTruth[i]) continue;
       pad = fPixels_mPad[i];
       tb  = fPixels_mTimeBin[i];
       if (tb  < kTbMin  || tb  > kTbMax) continue;
       if (pad < kPadMin || pad > kPadMax) continue;
-      Double_t ADC = fPixels_mAdc[i]*gains[sector-1].Gain[row-1][pad-1];
+#ifdef __useGainT0__
+      Double_t ADC = fPixels_mAdc[i]*gainT0s->Gain[sector-1][row-1][pad-1];
+#else
+      Double_t ADC = fPixels_mAdc[i];
+#endif
+      if (ADC <= 0.0) continue;
       adcs(pad     - kPadMin,tb - kTbMin) = ADC;
       adcs(pad     - kPadMin,NT-1)       += ADC;
       adcs(NP-2,tb - kTbMin)             += ADC;
-      adcs(NP-1,tb - kTbMin)             += (tb+t0s[sector-1].T0[row-1][pad-1])*ADC;
+#ifdef __useGainT0__
+      adcs(NP-1,tb - kTbMin)             += (tb+gainT0s->T0[sector-1][row-1][pad-1])*ADC;
+#else
+      adcs(NP-1,tb - kTbMin)             += (tb)*ADC;
+#endif
       adcs(NP-1,NT-1)                    += ADC;
       pav                                += pad*ADC;
-      tav                                += (tb+t0s[sector-1].T0[row-1][pad-1])*ADC;
+#ifdef __useGainT0__
+      tav                                += (tb+gainT0s->T0[sector-1][row-1][pad-1])*ADC;
+#else
+      tav                                += (tb)*ADC;
+#endif
       if (ADC > AtMax) {
 	AtMax = ADC;
 	tMax  = tb;
@@ -371,25 +427,9 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
     Double_t pax  = fRcHit_mMcl_x[0]/64.;
     Double_t tax  = fRcHit_mMcl_t[0]/64.;
     histB[io]->Fill(pav-pax,tav-tax);
-    //    if (TMath::Abs(pax - pav) > 0.2 || TMath::Abs(tax - tav) > 0.2) continue;
-    if (adcs(NP-1,NT-1) <= 0) continue;
-    histA[io][0]->Fill(sum);
-    histA[io][1]->Fill(AtMax);
-    for (Int_t j = 0; j < NT-1; j++) {
-      if (adcs(NP-2,j) > 0) adcs(NP-1,j) /= adcs(NP-2,j);
-    }
-    for (Int_t i = 0; i < NP-1 ; i++) {
-      for (Int_t j = 0; j < NT; j++) {
-       adcs(i,j) /= adcs(NP-1,NT-1);
-      }
-    }
-#ifdef PRINT
     entry++;
     if (entry%1000 == 1) {
       cout << entry << "\t =======================================================" << endl;
-      if (sector == 16) {
-	cout << "\t =======================================================" << endl;
-      }
       cout << "Sector/Row = " << sector << " / " << row;
       cout << "\tfNoPixels \t" << fNoPixels << "\tNPads " << endl; // fNoRcHit << endl;
       cout << "Charge(keV) \t" << 1e6*fRcHit_mCharge[0];
@@ -408,7 +448,6 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
       cout << "\tsum = " << sum << "\tpax = " << pax << "\ttax = " << tax << endl;
       cout << "kPadMin/kPadMax\t" << kPadMin << "/" << kPadMax
 	   << "\tkTbMin/kTbMax\t" << kTbMin << "/" << kTbMax << endl;
-      adcs.Print();
       cout << " ";
       for (tb = kTbMin; tb <= kTbMax + 1; tb++) cout << "\t|" << tb;
       cout << endl;
@@ -417,9 +456,9 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
       cout << endl;
       for (pad = kPadMin; pad <= kPadMax + 2; pad++) {
 	if (pad >= kPadMax + 1) cout << "---------------------------------------------" << endl;
-#if 0
-	cout << pad << "|" << "G:" << gains[sector-1].Gain[row-1][pad-1] 
-	     << "|T0:" << t0s[sector-1].T0[row-1][pad-1] << "|";
+#ifdef __useGainT0__
+	cout << pad << "|" << "G:" << gainT0s->Gain[sector-1][row-1][pad-1] 
+	     << "|T0:" << gainT0s->T0[sector-1][row-1][pad-1] << "|";
 #else
 	cout << pad << "|";
 #endif
@@ -430,6 +469,22 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
 	}
 	cout << endl;
       }
+    }
+    //    if (TMath::Abs(pax - pav) > 0.2 || TMath::Abs(tax - tav) > 0.2) continue;
+    if (adcs(NP-1,NT-1) <= 0) continue;
+    histA[io][0]->Fill(sum);
+    histA[io][1]->Fill(AtMax);
+    for (Int_t j = 0; j < NT-1; j++) {
+      if (adcs(NP-2,j) > 0) adcs(NP-1,j) /= adcs(NP-2,j);
+    }
+    for (Int_t i = 0; i < NP-1 ; i++) {
+      for (Int_t j = 0; j < NT; j++) {
+	adcs(i,j) /= adcs(NP-1,NT-1);
+      }
+    }
+    if (entry%1000 == 1) {
+#ifdef PRINT
+      adcs.Print();
 #if 0
       for (Int_t i = 0; i < fNoPixels; i++) 
 	cout << i 
@@ -454,7 +509,7 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
 #endif
 #endif
     } // end of print
-//________________________________________________________________________________
+      //________________________________________________________________________________
 #endif
     // Sector 1; RDO 4;
     //    if (fRcTrack_fSector[0] == 1 && fRcTrack_fRow[0] >= 22 && fRcTrack_fRow[0] <= 29) continue;
@@ -463,7 +518,8 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
 #endif
     for (Int_t i = 0; i < NP - 2; i++) {
       Double_t ratio = adcs(i,NT-1);
-      Double_t delPadRc = i + kPadMin - pax;
+      //      Double_t delPadRc = i + kPadMin - pax;
+      Double_t delPadRc = i + kPadMin - pav;
       Double_t delPadTk = i + kPadMin - (fRcTrack_mMcl_x[0]/64.);
       hist[io][0][0]->Fill(delPadRc, zRc, ratio);
       if (fNoRcTrack == 1)
@@ -477,7 +533,8 @@ void TpcT(const Char_t *opt = "A", const Char_t *files="*.root", const Char_t *O
     for (Int_t j = 0; j < NT - 1; j++) {
       Double_t ratio = adcs(NP-2,j);
       Double_t tb    = adcs(NP-1,j);
-      Double_t delTbRc = tb + 0.5 - tax;
+      //      Double_t delTbRc = tb + 0.5 - tax;
+      Double_t delTbRc = tb + 0.5 - tav;
       Double_t delTbTk = tb + 0.5 - (fRcTrack_mMcl_t[0]/64.);
       hist[io][0][1]->Fill(delTbRc, zRc,ratio);
       if (fNoRcTrack == 1)
@@ -722,14 +779,14 @@ void MakeFunctions() {
   params[0] = 2.85e-01;//gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();                     // w = width of pad       
   params[1] = 0.2;//gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
   params[2] = 0.4;//gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
-    //    params[3] = anodeWireRadius;                                                         // a = Anode wire radius  
+  //    params[3] = anodeWireRadius;                                                         // a = Anode wire radius  
   params[4] = 0;
   params[5] = 0;
   Double_t xmin = 0; 
   Double_t xmax = 5.0;//4.5*gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth();// 4.5 
   if (! mPadResponseFunctionInner)
     mPadResponseFunctionInner = new TF1("PadResponseFunctionInner",
-				      PadResponseFunc,xmin,xmax,6); 
+					PadResponseFunc,xmin,xmax,6); 
   params[3] =  K3IP;  
   params[4] =  0; // CrossTalk
   params[5] = innerSectorPadPitch;
@@ -741,7 +798,7 @@ void MakeFunctions() {
   xmax = 5.0;//5*gStTpcDb->PadPlaneGeometry()->innerSectorPadLength(); // 1.42
   if (! mChargeFractionInner) 
     mChargeFractionInner = new TF1("ChargeFractionInner",
-				 PadResponseFunc,xmin,xmax,5);
+				   PadResponseFunc,xmin,xmax,5);
   params[0] = 1.15;//gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
   params[3] = K3OR;
   params[4] =  0; // CrossTalk
@@ -753,7 +810,7 @@ void MakeFunctions() {
   xmax = 5;//5.*gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth(); // 3.
   if (! mPadResponseFunctionOuter) 
     mPadResponseFunctionOuter = new TF1("PadResponseFunctionOuter",
-				      PadResponseFunc,xmin,xmax,6); 
+					PadResponseFunc,xmin,xmax,6); 
   params[0] = 6.2e-01;//gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth();                    // w = width of pad       
   params[1] = 0.4;//gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
   params[2] = 0.4;//gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
@@ -769,7 +826,7 @@ void MakeFunctions() {
   xmax = 5;//5*gStTpcDb->PadPlaneGeometry()->outerSectorPadLength(); // 1.26
   if (! mChargeFractionOuter) 
     mChargeFractionOuter = new TF1("ChargeFractionOuter",
-				 PadResponseFunc,xmin,xmax,5);
+				   PadResponseFunc,xmin,xmax,5);
   params[0] = 1.95; //gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
   params[3] =  K3OR;    // K3 from E.Mathieson, Fig. 5.3a (row) for a/s = 2.5e-3 and h/s = 1.0
   params[4] =  0; // CrossTalk
@@ -796,7 +853,7 @@ void MakeFunctions() {
   mConvolution->SetParName(13,"innerSectorAnodeWirePadPlaneSeparation"); mConvolution->FixParameter(13,0.2); 
   mConvolution->SetParName(14,"innerSectorPadWidth"); mConvolution->FixParameter(14,2.85e-01); 
   mConvolution->SetParName(15,"innerSectorPadPitch"); mConvolution->FixParameter(15,innerSectorPadPitch);
-
+  
   mConvolution->SetParName(16,"outerSectorAnodeWirePadPlaneSeparation"); mConvolution->FixParameter(16,0.4); 
   mConvolution->SetParName(17,"outerSectorPadWidth"); mConvolution->FixParameter(17,6.2e-01); 
   mConvolution->SetParName(18,"outerSectorPadPitch"); mConvolution->FixParameter(18,outerSectorPadPitch);
@@ -1212,7 +1269,7 @@ Double_t ei(Double_t x)
   const Int_t maxit = 100;           // max. no. of iterations allowed
   const Double_t fpmin = 1.e-7; //1.0e-40;    // close to smallest floating-point number
   const Double_t eps = 1.e-7; //1.0e-30;       // relative error, or absolute error  near
-                                    // the zero of Ei at x=0.3725
+  // the zero of Ei at x=0.3725
   //  I actually changed fpmin and eps into smaller values than in NR
   
   Int_t k;
@@ -1411,7 +1468,7 @@ void Fits(const Char_t *opt="Rc", Int_t tp = -1) {
       for (Int_t io = 0; io < 2; io++) {
 	TString Name(Form("%s%s%s%s",InOut[io],X[ix],PadTime[ip],opt));
 	FitSlices(Name,PadTimeFitOptions[ip]);
-
+	
 	//  FitSlices(Form("InnerTime%s",opt),"FWHMNoiseConv");
 	//  FitSlices(Form("OuterTime%s",opt),"FWHMNoiseConv");
 	//  FitSlices(Form("InnerXTime%s",opt),"FWHMNoiseConv");
@@ -1420,8 +1477,8 @@ void Fits(const Char_t *opt="Rc", Int_t tp = -1) {
 	//  FitSlices(Form("OuterPad%s",opt),"NoiseConv");
 	//   FitSlices(Form("InnerXPad%s",opt),"NoiseConv");
 	//   FitSlices(Form("OuterXPad%s",opt),"NoiseConv");
-// 	Name += "_*";
-// 	DrawList(Name);
+	// 	Name += "_*";
+	// 	DrawList(Name);
       }
     }
   }
@@ -1453,4 +1510,34 @@ TF1 *Exp2F() {
   f->SetParLimits(2,-100,0);
   f->SetParLimits(3,-100,0);
   return f;
+}
+//________________________________________________________________________________
+void MakeProjections(const Char_t *name="OuterXTimeMc") {
+  TDirectory *fIn = gDirectory;
+  if (! fIn) return;
+  TProfile2D *h = (TProfile2D *) fIn->Get(name);
+  if (! h) return;
+  TString Name(name);
+  Name += ".root";
+  TFile *fOut = new TFile(Name,"recreate");
+  h->Write();
+  Int_t nx = h->GetNbinsX();
+  Int_t ny = h->GetNbinsY();
+  TCanvas *c1 = new TCanvas(name,name);
+  for (Int_t i = 1; i <= ny; i++) {
+    TH1D *proj = h->ProjectionX(Form("%s_%i",name,i),i,i);
+    proj->SetTitle(Form("Projection in [%4.0f,%4.0f] z range",h->GetYaxis()->GetBinLowEdge(i),h->GetYaxis()->GetBinUpEdge(i)));
+    if (proj->GetEntries() < 10) {
+      delete proj;
+      continue;
+    }
+    TString O(proj->GetName());
+    O += ".txt";
+    ofstream out(O.Data());
+    proj->SavePrimitive(out);
+    proj->Draw();
+    proj->Write();
+  }
+  delete fOut;
+  fIn->cd();
 }
