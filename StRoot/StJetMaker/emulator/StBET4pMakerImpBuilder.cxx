@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.6 2008/08/11 02:22:13 tai Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.7 2009/09/01 12:24:52 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -28,11 +28,12 @@
 #include "StjTowerEnergyCutBemcStatus.h"
 #include "StjTowerEnergyCutAdc.h"
 
-#include "StjTowerEnergyCorrectionForTracks.h"
+#include "StjAbstractTowerEnergyCorrectionForTracks.h"
 
 StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool useEEMC,
 					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts,
-					       StMuDstMaker* uDstMaker, bool doTowerSwapFix)
+					       StMuDstMaker* uDstMaker, bool doTowerSwapFix,
+					       StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks)
 {
   StjTPC*  tpc;
   StjTrackListCut* tpcCut  = new StjTrackListCut();
@@ -66,8 +67,6 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
   } else {
     eemc = new StjEEMCMuDst(uDstMaker);
   }
-
-  StjTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks = new StjTowerEnergyCorrectionForTracks();
 
   StBET4pMakerImp* ret = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.10 2008/11/04 08:08:09 tai Exp $
+// $Id: StBET4pMaker.h,v 1.11 2009/09/01 12:25:30 pibero Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -16,11 +16,13 @@ class StjTowerEnergyListCut;
 class StjeTrackListToStMuTrackFourVecList;
 class StjeTowerEnergyListToStMuTrackFourVecList;
 
+class StjAbstractTowerEnergyCorrectionForTracks;
+
 class StBET4pMaker : public StFourPMaker {
 
 public:
     
-  StBET4pMaker(const char* name, StMuDstMaker* maker, bool doTowerSwapFix = true);
+  StBET4pMaker(const char* name, StMuDstMaker* maker, bool doTowerSwapFix = true, StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks = 0);
     
   virtual ~StBET4pMaker() {};
     
@@ -47,7 +49,7 @@ public:
   StBET4pMakerImp* GetImp() { return _imp; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.10 2008/11/04 08:08:09 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.11 2009/09/01 12:25:30 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -55,6 +57,7 @@ private:
 
   StMuDstMaker* _uDstMaker;
   bool _doTowerSwapFix;
+  StjAbstractTowerEnergyCorrectionForTracks* _correctTowerEnergyForTracks;
 
   bool _useTPC;
   bool _useBEMC;
