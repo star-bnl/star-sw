@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.15 2009/06/16 19:48:08 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.16 2009/09/01 20:06:26 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -15,19 +15,42 @@
 #include "TMath.h"
 #include "StTrackDetectorInfo.h"
 
-ClassImp(StuDraw3DEvent)
            
+  ///////////////////////////////////////////////////////////////////////
+  ///
+  ///  \brief Class StuDraw3DEvent - to draw the 3D StEvent primitives like 
+  ///         StTrack, StHit, StVertex decoratated with the STAR detector geometry
+  ///
+  ///  Class StuDraw3DEvent provides the simple way to visualize the event 
+  ///  primitives in 3D quickly against of the STAR detector 
+  ///  geometry.
+  ///  One instance of the class is instantiated as soon as the class shared library
+  ///  is loaded.
+  ///  This allows to use the class object (invoke class methods) with one C++ statement
+  ///  This  is to alow creating the 3D views "on fly", 
+  ///  for example, from the GNU debugger (gdb) command prompt
+  ///
+  ///  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
+  ///
   ////////////////////////////////////////////////////////////////////////
-  //
-  //  Class StuDraw3DEvent - to draw the 3D StEvent primitives like StTrack, StHit, StVertex
-  //  decoratated with the STAR detector geometry
-  //
-  //  It provides the simple way to visualize the event 
-  //  primitives in 3D quickly against of the STAR detector 
-  //  geometry.
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
-  //
-  ////////////////////////////////////////////////////////////////////////
+
+ClassImp(StuDraw3DEvent)
+
+//! StuDraw3DEvent( const char *detectorName,TVirtualPad *pad) ctor
+/*!
+   Create an instance of the Event display for ther StEvent primitives;
+   If this is the first instance of the class the global pointer to the 
+         current "display" is to be set too /sa Display()
+         \param detectorName (default = "TPC") - the names of the STAR detectors 
+                                                 to be used as the "event primities" background.
+                               The detectorName is a comma separated list of the OpenInventor files 
+                               with no extension
+                               For all names on the list one should provide the iv file with 
+                               the "iv extension:
+                                            <name>.iv
+         \param pad (default = 0) - The ROOT TPad to be used to render the event wired view
+
+*/
 //___________________________________________________
 StuDraw3DEvent::StuDraw3DEvent( const char *detectorName,TVirtualPad *pad): 
 StDraw3D(detectorName,pad)
