@@ -1,15 +1,15 @@
 void RunJetFinder2(int nevents = 100,
-		   const char* file = "/star/data54/reco/ppProductionTrans/FullField/P06ie/2006/117/7117002/st_physics_7117002_raw_1040035.MuDst.root",
-                   const char* jetFile = "blah.jet.root",
-                   const char* skimFile = "blah.skim.root")
+		   const char* mudstfile = "/star/data54/reco/ppProductionTrans/FullField/P06ie/2006/117/7117002/st_physics_7117002_raw_1040035.MuDst.root",
+                   const char* jetfile = "blah.jet.root",
+                   const char* skimfile = "blah.skim.root")
 {
-  cout << "Read file:\t" << file << endl;
-  cout << "Write jet file:\t" << jetFile << endl;
-  cout << "Write skim file:\t" << skimFile << endl;
-
-  cout << "Loading shared libraries..." << endl;
+  cout << "Read MuDst file:\t" << mudstfile << endl;
+  cout << "Write jet file:\t" << jetfile << endl;
+  cout << "Write skim file:\t" << skimfile << endl;
 
   gROOT->Macro("loadMuDst.C");
+  gROOT->Macro("LoadLogger.C");
+
   gSystem->Load("StTpcDb");
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StDbUtilities");
@@ -33,17 +33,13 @@ void RunJetFinder2(int nevents = 100,
   gSystem->Load("StJets");
   gSystem->Load("StJetMaker");
 
-  cout << "Done loading shared libraries." << endl;
-
   StChain* chain = new StChain; 
-  chain->SetDebug(1);
 
   // MuDst reader
-  StMuDebug::setLevel(1);
-  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",file,"",100000,"MuDst");
+  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",mudstfile,"",100000,"MuDst");
 
   //StMuDbReader...
-  //StMuDbReader* db = StMuDbReader::instance();
+  StMuDbReader* db = StMuDbReader::instance();
 
   //StMuDst2StEventMaker
   //StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
@@ -74,8 +70,11 @@ void RunJetFinder2(int nevents = 100,
 
   // Add Mike's 4p maker.
   // Here we also tag whether or not to do the swap.
+  // The classes available for correcting tower energy for tracks are:
+  // 1. StjTowerEnergyCorrectionForTracksMip
+  // 2. StjTowerEnergyCorrectionForTracksFraction
   bool doTowerSwapFix = true;
-  StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker,doTowerSwapFix);
+  StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.00));
   bet4pMaker->setUseTPC(true);
   bet4pMaker->setUseBEMC(true);
   bet4pMaker->setUseEndcap(true);
@@ -84,10 +83,10 @@ void RunJetFinder2(int nevents = 100,
   bet4pMaker->setUse2006Cuts(true);
 
   // Jet maker
-  StJetMaker* jetMaker = new StJetMaker("jetMaker",muDstMaker,jetFile);
+  StJetMaker* jetMaker = new StJetMaker("jetMaker",muDstMaker,jetfile);
 
   // Skim event maker
-  StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker",muDstMaker,skimFile);
+  StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker",muDstMaker,skimfile);
 
   //Instantiate Jet Histogram Maker
   //StJetHistMaker* jetHistMaker = new StJetHistMaker(muDstMaker, histfile.Data() );
@@ -114,32 +113,14 @@ void RunJetFinder2(int nevents = 100,
   cpars->setDoSplitMerge(true);
   cpars->setDebug(false);
 
-  vector<float> cones;
-  cones.push_back(0.40);
-  cones.push_back(0.55);
-  cones.push_back(0.70);
+  jetMaker->addAnalyzer(anapars,cpars,bet4pMaker,"ConeJets12");
 
-  vector<int> numberOfFitPoints;
-  numberOfFitPoints.push_back(12);
-  numberOfFitPoints.push_back(5);
-  numberOfFitPoints.push_back(10000000);
+  anapars->setNhits(5);
+  jetMaker->addAnalyzer(anapars,cpars,bet4pMaker,"ConeJets5");
 
-  // Loop over cone radii
-  for (size_t iCone = 0; iCone < cones.size(); ++iCone) {
-    cpars->setConeRadius(cones[iCone]);
-    int coneRadius = TMath::Nint(100*cones[iCone]);
-    // Loop over number of fit points
-    for (size_t iFit = 0; iFit < numberOfFitPoints.size(); ++iFit) {
-      TString branchName = Form("Cone%03dFit%d",coneRadius,numberOfFitPoints[iFit]);
-      if (numberOfFitPoints[iFit] == 10000000) branchName.ReplaceAll("Fit10000000","Emc");
-      cout << "Adding jet branch=" << branchName << endl;
-      anapars->setNhits(numberOfFitPoints[iFit]);
-      jetMaker->addAnalyzer(anapars,cpars,bet4pMaker,branchName);
-    } // End loop over number of fit points
-  } // End loop over cone radii
+  anapars->setNhits(1000000);
+  jetMaker->addAnalyzer(anapars,cpars,bet4pMaker,"ConeJetsEMC");
 
-  chain->PrintInfo();
   chain->Init();
-
   chain->EventLoop(nevents);
 }
