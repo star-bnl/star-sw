@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.8 2009/08/28 16:50:12 perev Exp $
+!// $Id: tpcegeo3.g,v 1.9 2009/09/01 19:43:16 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.9  2009/09/01 19:43:16  perev
+!// Fix FEEA position bug #1570
+!//
 !// Revision 1.8  2009/08/28 16:50:12  perev
 !// CleanUp of write(*,*)
 !//
@@ -144,10 +147,6 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 	equivalence 	(yHoles(0,0),yhI),(yHoles(0,1),yhO),(yhO,yhOF);
 
         Real xHoles(0:15);
-!//	FEE stuff
-	Real FeeCardDX ,FeeCardDY,FeeCardDZ,FeePlateDX,FeePlateDY,
-     	     FeePlateDZ,FEERibDX ,FEERibDY ,FEERibDZ  ,FEEAssemblyThickness;
-	Real FeeAss(3) /1.6, 4, 10/;
 
 
 !// Inner/Outer         {   24A3696A,     24A4296A} Sector Cooling Manifold Overall Dimensions
@@ -199,6 +198,11 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
   character *4 mySha;
   integer iCoo,iCab,jCoo,iRib,iTALS,jTALS;
 
+
+
+
+
+
 !// 		TPC Parameters
     structure TPCG {	version,Rmin,Rmax,RminIFC,
                     	LengthT,Length,LengthW,LengthV,WheelIR,
@@ -226,6 +230,12 @@ Structure TPRS { sec,Nrow,pitch,width,super,dAnode,Rpads(40),Npads(40) }
    		 ThickAl, rMin, Rcenter,holeDx,holeDy}
 
 Structure TPCR { RdoVthk,Rdothk,Rdolen,NRdobrd,Rdoht(9) }
+
+!//	FEE stuff
+Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
+                AssemblyThickness,RibDX ,RibDY  ,RibDZ, Ass(3) }
+
+
 
   Fill  TPCG !//   TPC basic dimensions
 	version = 	3		!// version    => current version
@@ -363,7 +373,6 @@ Fill TECW	!// EC trapezoid and support Wheel
    holeDx       =         0.750/2*INCH	!//
    holeDy       =         2.500/2*INCH	!//
 endFill			 
-USE TECW
 *
 Fill TPCR              ! volume for tpc readout boards
    RdoVthk   = 30.     ! length of RDO volume
@@ -373,8 +382,24 @@ Fill TPCR              ! volume for tpc readout boards
    Rdoht = {60.0, 74.0, 84.0, 101.0,106.0,
             126.0,146.0,166.0,186.0} ! radial pos of rdo boards
 EndFill
+*
+Fill TFEE                               ! frontEndElectronics
+   Vers    = 1				!// version of FrontEndElectronics
+   CardDX  = 1.47*0.110*INCH/2	 	!// 1.47 scale factor account for 9 lb of cables
+   CardDY  = 2.900*INCH/2		!//...
+   CardDZ  = 7.000*INCH/2		!//...
+   PlateDX = 0.110*INCH/2		!//...
+   PlateDY = 1.480*INCH			!//...
+   PlateDZ = 4.650*INCH/2		!//...
+   AssemblyThickness =    TFEE_CardDX + TFEE_PlateDX	!//...
+   RibDX   = 0.820*INCH/2 - 2*   TFEE_CardDX		!//...
+   RibDY   = 2.900*INCH/2 - 2*   TFEE_CardDX		!//...
+   RibDZ   = TFEE_CardDX		!//...
+   Ass  = {1.6, 4, 10} 			!// Fee assembly brik size
+EndFill
+USE TFEE
 
-
+USE TECW
       Use TPCR
       Use TPCG  
 !//  /*
@@ -1113,8 +1138,6 @@ Block TWAS  TpcWheelInnerAssembly & TpcWheelOuterAssembly     TWAS and TWA1
        zi = {zzzWA(1),zzzWA(2)}, Rmn={rmnWA(inOut),rmnWA(inOut)},
                                  Rmx={rmxWA(inOut),rmxWA(inOut)}
 
-Create And Position FEEA Konly='Many'
-
 !// put holes, cooling tube and FEE
 !//    cout << "put holes in " << noHolesRows(inOut) << " rows for sector\t" << inOut << endl; 
     dx =   TPCG_widTube*cm/2;
@@ -1152,13 +1175,23 @@ Create And Position FEEA Konly='Many'
 
 !//     coolingTube = gGeoManager->MakeTrd1("CoolingTube", GetMed("TPCE_Water_Pipe"), dy1, dy2, dz, dx);
 !//     tpcWheel(inOut)->AddNode(coolingTube, 2*iCoo+inOut+5, // "90XD" : (x,y,z) => ( y, z, x)
-!//	new TGeoCombiTrans(x-dx-FEEAssemblyThickness/2+dRSectorShift,0, zWheel1+ dz,GetRot("90XD")));
+!//	new TGeoCombiTrans(x-dx-TFEE_AssemblyThickness/2+dRSectorShift,0, zWheel1+ dz,GetRot("90XD")));
       mySha='TRD1';
       myPar= {dy1, dy2, dz, dx};
-      myPar(11) = x-dx-FEEAssemblyThickness/2+dRSectorShift;
+      myPar(11) = x-dx-TFEE_AssemblyThickness/2+dRSectorShift;
       myPar(13) = zWheel1+dz;
       Create And Position TCOO x=myPar(11) z=myPar(13) ORT=YZX
 
+
+      do jCoo = 0,noHolesPerRow(iCoo,inOut)-1
+      {
+!// 	tpcWheel[sec]->AddNode(FEE,2*(9*i+j)+sec+1, 
+!// 			       new TGeoTranslation(X+FEEAssemblyThickness/2+dRSectorShift,Y,zWheel1+ 2*dz+TFEERibDZ));	    
+       y = yHoles(9*iCoo+jCoo,InOut)*INCH; 	
+       Create And Position FEEA X=x+TFEE_AssemblyThickness/2+dRSectorShift,
+                                Y=y,                         
+                                Z=zWheel1+2*dz+TFEE_RibDZ Konly='Many'
+      }
     }
 
 endBlock  	"end TWAS"
@@ -1168,18 +1201,8 @@ endBlock  	"end TWAS"
 Block FEEA  TGeoVolumeAssembly(FEE)
 !//TGeoVolumeAssembly *FEE = new TGeoVolumeAssembly("FEE"); // Weight = 181*FEE = 26 kG (A.Lebedev)
       Attribute FEEA      seen=1  colo=kGreen
-      SHAPE     BOX    dX=FeeAss(1), dY=FeeAss(2), dZ=FeeAss(3)
+      SHAPE     BOX    dX=TFEE_Ass(1), dY=TFEE_Ass(2), dZ=TFEE_Ass(3)
 
-FeeCardDX  = 1.47*0.110*INCH/2; !// 1.47 scale factor account for 9 lb of cables
-FeeCardDY  = 2.900*INCH/2;
-FeeCardDZ  = 7.000*INCH/2;
-FeePlateDX = 0.110*INCH/2;
-FeePlateDY = 1.480*INCH;
-FeePlateDZ = 4.650*INCH/2;
-FEEAssemblyThickness = FeeCardDX + FeePlateDX;
-FEERibDX   = 0.820*INCH/2 - 2*FeeCardDX;
-FEERibDY   = 2.900*INCH/2 - 2*FeeCardDX;
-FEERibDZ   = FeeCardDX;
 
 
 !//FEE->AddNode(FEEplate,  1, gGeoIdentity);                // Cables = 9 lb ( - " -)
@@ -1187,8 +1210,8 @@ FEERibDZ   = FeeCardDX;
 !//FEE->AddNode(FEEitself, 1, new TGeoTranslation(2*FeeCardDX,0,0.5));
 
       Create And Position FEEP
-      Create And Position FEER x=-FEERibDX-FeeCardDX
-      Create And Position FEEI x=2*FeeCardDX z=0.5
+      Create And Position FEER x=-TFEE_RibDX-TFEE_CardDX
+      Create And Position FEEI x=2*TFEE_CardDX z=0.5
 
 
 
@@ -1200,7 +1223,7 @@ Block FEEP  FEEplate
 !//TGeoVolume *FEEplate = gGeoManager->MakeBox("FEEPlate",  GetMed("TPCE_ALUMINIUM"), FeePlateDX, FeePlateDY, FeePlateDZ);
       Attribute FEEP      seen=1  colo=kRed
       Material ALUMINIUM
-      SHAPE     BOX    dX=FeePlateDX dY=FeePlateDY dZ=FeePlateDZ
+      SHAPE     BOX    dX=TFEE_PlateDX dY=TFEE_PlateDY dZ=TFEE_PlateDZ
 endBlock	"end FEEP"
 *  
 *------------------------------------------------------------------------------
@@ -1209,7 +1232,7 @@ Block FEER  FEERib
 !//TGeoVolume *FEERib   = gGeoManager->MakeBox("FEERib",    GetMed("TPCE_ALUMINIUM"), FEERibDX,  FEERibDY,  FEERibDZ);
       Attribute FEER      seen=1  colo=1
       Material ALUMINIUM
-      SHAPE     BOX    dX=FEERibDX  dY=FEERibDY  dZ=FEERibDZ
+      SHAPE     BOX    dX=TFEE_RibDX  dY=TFEE_RibDY  dZ=TFEE_RibDZ
 endBlock	"end FEER"
 *  
 *------------------------------------------------------------------------------
@@ -1220,7 +1243,7 @@ Block FEEI  FEEitself
 !// TGeoVolume *FEEitself= gGeoManager->MakeBox("FEEitself", GetMed("TPCE_G10"),       FeeCardDX, FeeCardDY, FeeCardDZ);
       Attribute FEEI      seen=1  colo=kViolet
       Material G10
-      SHAPE     BOX  dX=FeeCardDX dY=FeeCardDY dZ=FeeCardDZ
+      SHAPE     BOX  dX=TFEE_CardDX dY=TFEE_CardDY dZ=TFEE_CardDZ
 endBlock	"end FEEI"
 *  
 *------------------------------------------------------------------------------
