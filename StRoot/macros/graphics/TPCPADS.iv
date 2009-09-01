@@ -1,0 +1,3497 @@
+#Inventor V2.1 ascii
+
+
+DEF ShapesNode Separator {
+
+  DEF WiredShapes Separator {
+
+  }
+  DEF ClippingShapes Separator {
+
+    DEF RawShapes Separator {
+
+    }
+    DEF SolidShapes Separator {
+
+      DEF TObjectSet Group {
+
+        DEF TPCE Separator {
+
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 104.2794
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 0.25881904 0.96592581 6.1230318e-17 0
+                0.96592581 -0.25881907 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          DEF TPGV+0 Group {
+
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix 0.96592581 0.25881907 6.1230318e-17 0
+                    -0.25881904 0.96592581 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              DEF TPSS+1 Group {
+
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 58.849995 6.7292899e-07 0
+
+                    }
+                  }
+                  DEF TPAD+2 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -14.740001 104.2756,
+                            -0.57499999 14.740001 104.2756,
+                            -0.57499999 14.740001 -104.2756,
+                            -0.57499999 -14.740001 -104.2756,
+                            -0.57499999 14.740001 104.2756,
+                            0.57499999 14.740001 104.2756,
+                            0.57499999 14.740001 -104.2756,
+                            -0.57499999 14.740001 -104.2756,
+                            0.57499999 14.740001 104.2756,
+                            0.57499999 -14.740001 104.2756,
+                            0.57499999 -14.740001 -104.2756,
+                            0.57499999 14.740001 -104.2756,
+                            0.57499999 -14.740001 -104.2756,
+                            0.57499999 -14.740001 104.2756,
+                            -0.57499999 -14.740001 104.2756,
+                            -0.57499999 -14.740001 -104.2756,
+                            0.57499999 -14.740001 104.2756,
+                            0.57499999 14.740001 104.2756,
+                            -0.57499999 14.740001 104.2756,
+                            -0.57499999 -14.740001 104.2756,
+                            -0.57499999 -14.740001 -104.2756,
+                            -0.57499999 14.740001 -104.2756,
+                            0.57499999 14.740001 -104.2756,
+                            0.57499999 -14.740001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 60 -8.3446503e-07 0
+
+                    }
+                  }
+                  USE TPAD+2
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 61.150002 -4.3451041e-07 0
+
+                    }
+                  }
+                  USE TPAD+2
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 63.649998 3.2544881e-07 0
+
+                    }
+                  }
+                  DEF TPAD+3 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -16.08 104.2756,
+                            -0.57499999 16.08 104.2756,
+                            -0.57499999 16.08 -104.2756,
+                            -0.57499999 -16.08 -104.2756,
+                            -0.57499999 16.08 104.2756,
+                            0.57499999 16.08 104.2756,
+                            0.57499999 16.08 -104.2756,
+                            -0.57499999 16.08 -104.2756,
+                            0.57499999 16.08 104.2756,
+                            0.57499999 -16.08 104.2756,
+                            0.57499999 -16.08 -104.2756,
+                            0.57499999 16.08 -104.2756,
+                            0.57499999 -16.08 -104.2756,
+                            0.57499999 -16.08 104.2756,
+                            -0.57499999 -16.08 104.2756,
+                            -0.57499999 -16.08 -104.2756,
+                            0.57499999 -16.08 104.2756,
+                            0.57499999 16.08 104.2756,
+                            -0.57499999 16.08 104.2756,
+                            -0.57499999 -16.08 104.2756,
+                            -0.57499999 -16.08 -104.2756,
+                            -0.57499999 16.08 -104.2756,
+                            0.57499999 16.08 -104.2756,
+                            0.57499999 -16.08 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 64.800003 7.2540342e-07 0
+
+                    }
+                  }
+                  USE TPAD+3
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 65.950005 -7.8199059e-07 0
+
+                    }
+                  }
+                  USE TPAD+3
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 68.449997 4.8904121e-07 0
+
+                    }
+                  }
+                  DEF TPAD+4 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -17.42 104.2756,
+                            -0.57499999 17.42 104.2756,
+                            -0.57499999 17.42 -104.2756,
+                            -0.57499999 -17.42 -104.2756,
+                            -0.57499999 17.42 104.2756,
+                            0.57499999 17.42 104.2756,
+                            0.57499999 17.42 -104.2756,
+                            -0.57499999 17.42 -104.2756,
+                            0.57499999 17.42 104.2756,
+                            0.57499999 -17.42 104.2756,
+                            0.57499999 -17.42 -104.2756,
+                            0.57499999 17.42 -104.2756,
+                            0.57499999 -17.42 -104.2756,
+                            0.57499999 -17.42 104.2756,
+                            -0.57499999 -17.42 104.2756,
+                            -0.57499999 -17.42 -104.2756,
+                            0.57499999 -17.42 104.2756,
+                            0.57499999 17.42 104.2756,
+                            -0.57499999 17.42 104.2756,
+                            -0.57499999 -17.42 104.2756,
+                            -0.57499999 -17.42 -104.2756,
+                            -0.57499999 17.42 -104.2756,
+                            0.57499999 17.42 -104.2756,
+                            0.57499999 -17.42 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 69.599998 8.8899583e-07 0
+
+                    }
+                  }
+                  USE TPAD+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 70.75 -6.1839819e-07 0
+
+                    }
+                  }
+                  USE TPAD+4
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 73.25 1.4156127e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+5 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -18.76 104.2756,
+                            -0.57499999 18.76 104.2756,
+                            -0.57499999 18.76 -104.2756,
+                            -0.57499999 -18.76 -104.2756,
+                            -0.57499999 18.76 104.2756,
+                            0.57499999 18.76 104.2756,
+                            0.57499999 18.76 -104.2756,
+                            -0.57499999 18.76 -104.2756,
+                            0.57499999 18.76 104.2756,
+                            0.57499999 -18.76 104.2756,
+                            0.57499999 -18.76 -104.2756,
+                            0.57499999 18.76 -104.2756,
+                            0.57499999 -18.76 -104.2756,
+                            0.57499999 -18.76 104.2756,
+                            -0.57499999 -18.76 104.2756,
+                            -0.57499999 -18.76 -104.2756,
+                            0.57499999 -18.76 104.2756,
+                            0.57499999 18.76 104.2756,
+                            -0.57499999 18.76 104.2756,
+                            -0.57499999 -18.76 104.2756,
+                            -0.57499999 -18.76 -104.2756,
+                            -0.57499999 18.76 -104.2756,
+                            0.57499999 18.76 -104.2756,
+                            0.57499999 -18.76 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 74.400002 5.4151587e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+5
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 75.550003 -9.6587814e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+5
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 78.049995 3.0515366e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+6 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -19.765001 104.2756,
+                            -0.57499999 19.765001 104.2756,
+                            -0.57499999 19.765001 -104.2756,
+                            -0.57499999 -19.765001 -104.2756,
+                            -0.57499999 19.765001 104.2756,
+                            0.57499999 19.765001 104.2756,
+                            0.57499999 19.765001 -104.2756,
+                            -0.57499999 19.765001 -104.2756,
+                            0.57499999 19.765001 104.2756,
+                            0.57499999 -19.765001 104.2756,
+                            0.57499999 -19.765001 -104.2756,
+                            0.57499999 19.765001 -104.2756,
+                            0.57499999 -19.765001 -104.2756,
+                            0.57499999 -19.765001 104.2756,
+                            -0.57499999 -19.765001 104.2756,
+                            -0.57499999 -19.765001 -104.2756,
+                            0.57499999 -19.765001 104.2756,
+                            0.57499999 19.765001 104.2756,
+                            -0.57499999 19.765001 104.2756,
+                            -0.57499999 -19.765001 104.2756,
+                            -0.57499999 -19.765001 -104.2756,
+                            -0.57499999 19.765001 -104.2756,
+                            0.57499999 19.765001 -104.2756,
+                            0.57499999 -19.765001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 79.199997 -1.2022404e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+6
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 80.349991 1.1050629e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+6
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 82.849991 1.8650221e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+7 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -21.105001 104.2756,
+                            -0.57499999 21.105001 104.2756,
+                            -0.57499999 21.105001 -104.2756,
+                            -0.57499999 -21.105001 -104.2756,
+                            -0.57499999 21.105001 104.2756,
+                            0.57499999 21.105001 104.2756,
+                            0.57499999 21.105001 -104.2756,
+                            -0.57499999 21.105001 -104.2756,
+                            0.57499999 21.105001 104.2756,
+                            0.57499999 -21.105001 104.2756,
+                            0.57499999 -21.105001 -104.2756,
+                            0.57499999 21.105001 -104.2756,
+                            0.57499999 -21.105001 -104.2756,
+                            0.57499999 -21.105001 104.2756,
+                            -0.57499999 -21.105001 104.2756,
+                            -0.57499999 -21.105001 -104.2756,
+                            0.57499999 -21.105001 104.2756,
+                            0.57499999 21.105001 104.2756,
+                            -0.57499999 21.105001 104.2756,
+                            -0.57499999 -21.105001 104.2756,
+                            -0.57499999 -21.105001 -104.2756,
+                            -0.57499999 21.105001 -104.2756,
+                            0.57499999 21.105001 -104.2756,
+                            0.57499999 -21.105001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 84 3.576281e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+7
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 85.150002 -1.1497659e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+7
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 87.650002 -3.898067e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+8 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -22.445 104.2756,
+                            -0.57499999 22.445 104.2756,
+                            -0.57499999 22.445 -104.2756,
+                            -0.57499999 -22.445 -104.2756,
+                            -0.57499999 22.445 104.2756,
+                            0.57499999 22.445 104.2756,
+                            0.57499999 22.445 -104.2756,
+                            -0.57499999 22.445 -104.2756,
+                            0.57499999 22.445 104.2756,
+                            0.57499999 -22.445 104.2756,
+                            0.57499999 -22.445 -104.2756,
+                            0.57499999 22.445 -104.2756,
+                            0.57499999 -22.445 -104.2756,
+                            0.57499999 -22.445 104.2756,
+                            -0.57499999 -22.445 104.2756,
+                            -0.57499999 -22.445 -104.2756,
+                            0.57499999 -22.445 104.2756,
+                            0.57499999 22.445 104.2756,
+                            -0.57499999 22.445 104.2756,
+                            -0.57499999 -22.445 104.2756,
+                            -0.57499999 -22.445 -104.2756,
+                            -0.57499999 22.445 -104.2756,
+                            0.57499999 22.445 -104.2756,
+                            0.57499999 -22.445 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 88.800003 -1.8972007e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+8
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 89.950005 4.1010253e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+8
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 92.449989 1.6811343e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+9 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -23.785 104.2756,
+                            -0.57499999 23.785 104.2756,
+                            -0.57499999 23.785 -104.2756,
+                            -0.57499999 -23.785 -104.2756,
+                            -0.57499999 23.785 104.2756,
+                            0.57499999 23.785 104.2756,
+                            0.57499999 23.785 -104.2756,
+                            -0.57499999 23.785 -104.2756,
+                            0.57499999 23.785 104.2756,
+                            0.57499999 -23.785 104.2756,
+                            0.57499999 -23.785 -104.2756,
+                            0.57499999 23.785 -104.2756,
+                            0.57499999 -23.785 -104.2756,
+                            0.57499999 -23.785 104.2756,
+                            -0.57499999 -23.785 104.2756,
+                            -0.57499999 -23.785 -104.2756,
+                            0.57499999 -23.785 104.2756,
+                            0.57499999 23.785 104.2756,
+                            -0.57499999 23.785 104.2756,
+                            -0.57499999 -23.785 104.2756,
+                            -0.57499999 -23.785 -104.2756,
+                            -0.57499999 23.785 -104.2756,
+                            0.57499999 23.785 -104.2756,
+                            0.57499999 -23.785 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 93.599998 1.7374033e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+9
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 94.75 -1.3336537e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+9
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 97.650002 -1.1646671e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+10 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -25.125 104.2756,
+                            -0.57499999 25.125 104.2756,
+                            -0.57499999 25.125 -104.2756,
+                            -0.57499999 -25.125 -104.2756,
+                            -0.57499999 25.125 104.2756,
+                            0.57499999 25.125 104.2756,
+                            0.57499999 25.125 -104.2756,
+                            -0.57499999 25.125 -104.2756,
+                            0.57499999 25.125 104.2756,
+                            0.57499999 -25.125 104.2756,
+                            0.57499999 -25.125 -104.2756,
+                            0.57499999 25.125 -104.2756,
+                            0.57499999 -25.125 -104.2756,
+                            0.57499999 -25.125 104.2756,
+                            -0.57499999 -25.125 104.2756,
+                            -0.57499999 -25.125 -104.2756,
+                            0.57499999 -25.125 104.2756,
+                            0.57499999 25.125 104.2756,
+                            -0.57499999 25.125 104.2756,
+                            -0.57499999 -25.125 104.2756,
+                            -0.57499999 -25.125 -104.2756,
+                            -0.57499999 25.125 -104.2756,
+                            0.57499999 25.125 -104.2756,
+                            0.57499999 -25.125 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 98.799995 1.1426362e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+10
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 99.950005 -3.6475785e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+10
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 102.85 3.1530135e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+11 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -26.465 104.2756,
+                            -0.57499999 26.465 104.2756,
+                            -0.57499999 26.465 -104.2756,
+                            -0.57499999 -26.465 -104.2756,
+                            -0.57499999 26.465 104.2756,
+                            0.57499999 26.465 104.2756,
+                            0.57499999 26.465 -104.2756,
+                            -0.57499999 26.465 -104.2756,
+                            0.57499999 26.465 104.2756,
+                            0.57499999 -26.465 104.2756,
+                            0.57499999 -26.465 -104.2756,
+                            0.57499999 26.465 -104.2756,
+                            0.57499999 -26.465 -104.2756,
+                            0.57499999 -26.465 104.2756,
+                            -0.57499999 -26.465 104.2756,
+                            -0.57499999 -26.465 -104.2756,
+                            0.57499999 -26.465 104.2756,
+                            0.57499999 26.465 104.2756,
+                            -0.57499999 26.465 104.2756,
+                            -0.57499999 -26.465 104.2756,
+                            -0.57499999 -26.465 -104.2756,
+                            -0.57499999 26.465 -104.2756,
+                            0.57499999 26.465 -104.2756,
+                            0.57499999 -26.465 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 104 -1.1920927e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+11
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 105.14999 1.1152106e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+11
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 108.04999 1.7952698e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+12 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -27.805 104.2756,
+                            -0.57499999 27.805 104.2756,
+                            -0.57499999 27.805 -104.2756,
+                            -0.57499999 -27.805 -104.2756,
+                            -0.57499999 27.805 104.2756,
+                            0.57499999 27.805 104.2756,
+                            0.57499999 27.805 -104.2756,
+                            -0.57499999 27.805 -104.2756,
+                            0.57499999 27.805 104.2756,
+                            0.57499999 -27.805 104.2756,
+                            0.57499999 -27.805 -104.2756,
+                            0.57499999 27.805 -104.2756,
+                            0.57499999 -27.805 -104.2756,
+                            0.57499999 -27.805 104.2756,
+                            -0.57499999 -27.805 104.2756,
+                            -0.57499999 -27.805 -104.2756,
+                            0.57499999 -27.805 104.2756,
+                            0.57499999 27.805 104.2756,
+                            -0.57499999 27.805 104.2756,
+                            -0.57499999 -27.805 104.2756,
+                            -0.57499999 -27.805 -104.2756,
+                            -0.57499999 27.805 -104.2756,
+                            0.57499999 27.805 -104.2756,
+                            0.57499999 -27.805 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 109.2 2.8787576e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+12
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 110.35 -1.2195183e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+12
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 113.25 -1.0505316e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+13 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -29.145 104.2756,
+                            -0.57499999 29.145 104.2756,
+                            -0.57499999 29.145 -104.2756,
+                            -0.57499999 -29.145 -104.2756,
+                            -0.57499999 29.145 104.2756,
+                            0.57499999 29.145 104.2756,
+                            0.57499999 29.145 -104.2756,
+                            -0.57499999 29.145 -104.2756,
+                            0.57499999 29.145 104.2756,
+                            0.57499999 -29.145 104.2756,
+                            0.57499999 -29.145 -104.2756,
+                            0.57499999 29.145 -104.2756,
+                            0.57499999 -29.145 -104.2756,
+                            0.57499999 -29.145 104.2756,
+                            -0.57499999 -29.145 104.2756,
+                            -0.57499999 -29.145 -104.2756,
+                            0.57499999 -29.145 104.2756,
+                            0.57499999 29.145 104.2756,
+                            -0.57499999 29.145 104.2756,
+                            -0.57499999 -29.145 104.2756,
+                            -0.57499999 -29.145 -104.2756,
+                            -0.57499999 29.145 -104.2756,
+                            0.57499999 29.145 -104.2756,
+                            0.57499999 -29.145 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 114.39999 1.2567716e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+13
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 115.55 -2.5062241e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+13
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 118.44999 4.294368e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPAD+14 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.57499999 -30.485001 104.2756,
+                            -0.57499999 30.485001 104.2756,
+                            -0.57499999 30.485001 -104.2756,
+                            -0.57499999 -30.485001 -104.2756,
+                            -0.57499999 30.485001 104.2756,
+                            0.57499999 30.485001 104.2756,
+                            0.57499999 30.485001 -104.2756,
+                            -0.57499999 30.485001 -104.2756,
+                            0.57499999 30.485001 104.2756,
+                            0.57499999 -30.485001 104.2756,
+                            0.57499999 -30.485001 -104.2756,
+                            0.57499999 30.485001 -104.2756,
+                            0.57499999 -30.485001 -104.2756,
+                            0.57499999 -30.485001 104.2756,
+                            -0.57499999 -30.485001 104.2756,
+                            -0.57499999 -30.485001 -104.2756,
+                            0.57499999 -30.485001 104.2756,
+                            0.57499999 30.485001 104.2756,
+                            -0.57499999 30.485001 104.2756,
+                            -0.57499999 -30.485001 104.2756,
+                            -0.57499999 -30.485001 -104.2756,
+                            -0.57499999 30.485001 -104.2756,
+                            0.57499999 30.485001 -104.2756,
+                            0.57499999 -30.485001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 119.6 -1.0779572e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+14
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 120.74999 1.229346e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPAD+14
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 125.245 -1.3953013e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1+15 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -32.830002 104.2756,
+                            -0.97500002 32.830002 104.2756,
+                            -0.97500002 32.830002 -104.2756,
+                            -0.97500002 -32.830002 -104.2756,
+                            -0.97500002 32.830002 104.2756,
+                            0.97500002 32.830002 104.2756,
+                            0.97500002 32.830002 -104.2756,
+                            -0.97500002 32.830002 -104.2756,
+                            0.97500002 32.830002 104.2756,
+                            0.97500002 -32.830002 104.2756,
+                            0.97500002 -32.830002 -104.2756,
+                            0.97500002 32.830002 -104.2756,
+                            0.97500002 -32.830002 -104.2756,
+                            0.97500002 -32.830002 104.2756,
+                            -0.97500002 -32.830002 104.2756,
+                            -0.97500002 -32.830002 -104.2756,
+                            0.97500002 -32.830002 104.2756,
+                            0.97500002 32.830002 104.2756,
+                            -0.97500002 32.830002 104.2756,
+                            -0.97500002 -32.830002 104.2756,
+                            -0.97500002 -32.830002 -104.2756,
+                            -0.97500002 32.830002 -104.2756,
+                            0.97500002 32.830002 -104.2756,
+                            0.97500002 -32.830002 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 127.19499 2.4112933e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+15
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 129.19501 1.1009636e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -33.5 104.2756,
+                            -0.97500002 33.5 104.2756,
+                            -0.97500002 33.5 -104.2756,
+                            -0.97500002 -33.5 -104.2756,
+                            -0.97500002 33.5 104.2756,
+                            0.97500002 33.5 104.2756,
+                            0.97500002 33.5 -104.2756,
+                            -0.97500002 33.5 -104.2756,
+                            0.97500002 33.5 104.2756,
+                            0.97500002 -33.5 104.2756,
+                            0.97500002 -33.5 -104.2756,
+                            0.97500002 33.5 -104.2756,
+                            0.97500002 -33.5 -104.2756,
+                            0.97500002 -33.5 104.2756,
+                            -0.97500002 -33.5 104.2756,
+                            -0.97500002 -33.5 -104.2756,
+                            0.97500002 -33.5 104.2756,
+                            0.97500002 33.5 104.2756,
+                            -0.97500002 33.5 104.2756,
+                            -0.97500002 -33.5 104.2756,
+                            -0.97500002 -33.5 -104.2756,
+                            -0.97500002 33.5 -104.2756,
+                            0.97500002 33.5 -104.2756,
+                            0.97500002 -33.5 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 131.19501 -1.3428269e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -34.170002 104.2756,
+                            -0.97500002 34.170002 104.2756,
+                            -0.97500002 34.170002 -104.2756,
+                            -0.97500002 -34.170002 -104.2756,
+                            -0.97500002 34.170002 104.2756,
+                            0.97500002 34.170002 104.2756,
+                            0.97500002 34.170002 -104.2756,
+                            -0.97500002 34.170002 -104.2756,
+                            0.97500002 34.170002 104.2756,
+                            0.97500002 -34.170002 104.2756,
+                            0.97500002 -34.170002 -104.2756,
+                            0.97500002 34.170002 -104.2756,
+                            0.97500002 -34.170002 -104.2756,
+                            0.97500002 -34.170002 104.2756,
+                            -0.97500002 -34.170002 104.2756,
+                            -0.97500002 -34.170002 -104.2756,
+                            0.97500002 -34.170002 104.2756,
+                            0.97500002 34.170002 104.2756,
+                            -0.97500002 34.170002 104.2756,
+                            -0.97500002 -34.170002 104.2756,
+                            -0.97500002 -34.170002 -104.2756,
+                            -0.97500002 34.170002 -104.2756,
+                            0.97500002 34.170002 -104.2756,
+                            0.97500002 -34.170002 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 133.19501 2.8079976e-08 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -34.84 104.2756,
+                            -0.97500002 34.84 104.2756,
+                            -0.97500002 34.84 -104.2756,
+                            -0.97500002 -34.84 -104.2756,
+                            -0.97500002 34.84 104.2756,
+                            0.97500002 34.84 104.2756,
+                            0.97500002 34.84 -104.2756,
+                            -0.97500002 34.84 -104.2756,
+                            0.97500002 34.84 104.2756,
+                            0.97500002 -34.84 104.2756,
+                            0.97500002 -34.84 -104.2756,
+                            0.97500002 34.84 -104.2756,
+                            0.97500002 -34.84 -104.2756,
+                            0.97500002 -34.84 104.2756,
+                            -0.97500002 -34.84 104.2756,
+                            -0.97500002 -34.84 -104.2756,
+                            0.97500002 -34.84 104.2756,
+                            0.97500002 34.84 104.2756,
+                            -0.97500002 34.84 104.2756,
+                            -0.97500002 -34.84 104.2756,
+                            -0.97500002 -34.84 -104.2756,
+                            -0.97500002 34.84 -104.2756,
+                            0.97500002 34.84 -104.2756,
+                            0.97500002 -34.84 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 135.19501 1.3989868e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1+16 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -35.510002 104.2756,
+                            -0.97500002 35.510002 104.2756,
+                            -0.97500002 35.510002 -104.2756,
+                            -0.97500002 -35.510002 -104.2756,
+                            -0.97500002 35.510002 104.2756,
+                            0.97500002 35.510002 104.2756,
+                            0.97500002 35.510002 -104.2756,
+                            -0.97500002 35.510002 -104.2756,
+                            0.97500002 35.510002 104.2756,
+                            0.97500002 -35.510002 104.2756,
+                            0.97500002 -35.510002 -104.2756,
+                            0.97500002 35.510002 -104.2756,
+                            0.97500002 -35.510002 -104.2756,
+                            0.97500002 -35.510002 104.2756,
+                            -0.97500002 -35.510002 104.2756,
+                            -0.97500002 -35.510002 -104.2756,
+                            0.97500002 -35.510002 104.2756,
+                            0.97500002 35.510002 104.2756,
+                            -0.97500002 35.510002 104.2756,
+                            -0.97500002 -35.510002 104.2756,
+                            -0.97500002 -35.510002 -104.2756,
+                            -0.97500002 35.510002 -104.2756,
+                            0.97500002 35.510002 -104.2756,
+                            0.97500002 -35.510002 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 137.19501 -1.0448036e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+16
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 139.19501 3.2610319e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -36.18 104.2756,
+                            -0.97500002 36.18 104.2756,
+                            -0.97500002 36.18 -104.2756,
+                            -0.97500002 -36.18 -104.2756,
+                            -0.97500002 36.18 104.2756,
+                            0.97500002 36.18 104.2756,
+                            0.97500002 36.18 -104.2756,
+                            -0.97500002 36.18 -104.2756,
+                            0.97500002 36.18 104.2756,
+                            0.97500002 -36.18 104.2756,
+                            0.97500002 -36.18 -104.2756,
+                            0.97500002 36.18 -104.2756,
+                            0.97500002 -36.18 -104.2756,
+                            0.97500002 -36.18 104.2756,
+                            -0.97500002 -36.18 104.2756,
+                            -0.97500002 -36.18 -104.2756,
+                            0.97500002 -36.18 104.2756,
+                            0.97500002 36.18 104.2756,
+                            -0.97500002 36.18 104.2756,
+                            -0.97500002 -36.18 104.2756,
+                            -0.97500002 -36.18 -104.2756,
+                            -0.97500002 36.18 -104.2756,
+                            0.97500002 36.18 -104.2756,
+                            0.97500002 -36.18 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 141.19501 1.69701e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -36.850002 104.2756,
+                            -0.97500002 36.850002 104.2756,
+                            -0.97500002 36.850002 -104.2756,
+                            -0.97500002 -36.850002 -104.2756,
+                            -0.97500002 36.850002 104.2756,
+                            0.97500002 36.850002 104.2756,
+                            0.97500002 36.850002 -104.2756,
+                            -0.97500002 36.850002 -104.2756,
+                            0.97500002 36.850002 104.2756,
+                            0.97500002 -36.850002 104.2756,
+                            0.97500002 -36.850002 -104.2756,
+                            0.97500002 36.850002 -104.2756,
+                            0.97500002 -36.850002 -104.2756,
+                            0.97500002 -36.850002 104.2756,
+                            -0.97500002 -36.850002 104.2756,
+                            -0.97500002 -36.850002 -104.2756,
+                            0.97500002 -36.850002 104.2756,
+                            0.97500002 36.850002 104.2756,
+                            -0.97500002 36.850002 104.2756,
+                            -0.97500002 -36.850002 104.2756,
+                            -0.97500002 -36.850002 -104.2756,
+                            -0.97500002 36.850002 -104.2756,
+                            0.97500002 36.850002 -104.2756,
+                            0.97500002 -36.850002 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 143.19501 -7.4678042e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1+17 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -37.52 104.2756,
+                            -0.97500002 37.52 104.2756,
+                            -0.97500002 37.52 -104.2756,
+                            -0.97500002 -37.52 -104.2756,
+                            -0.97500002 37.52 104.2756,
+                            0.97500002 37.52 104.2756,
+                            0.97500002 37.52 -104.2756,
+                            -0.97500002 37.52 -104.2756,
+                            0.97500002 37.52 104.2756,
+                            0.97500002 -37.52 104.2756,
+                            0.97500002 -37.52 -104.2756,
+                            0.97500002 37.52 -104.2756,
+                            0.97500002 -37.52 -104.2756,
+                            0.97500002 -37.52 104.2756,
+                            -0.97500002 -37.52 104.2756,
+                            -0.97500002 -37.52 -104.2756,
+                            0.97500002 -37.52 104.2756,
+                            0.97500002 37.52 104.2756,
+                            -0.97500002 37.52 104.2756,
+                            -0.97500002 -37.52 104.2756,
+                            -0.97500002 -37.52 -104.2756,
+                            -0.97500002 37.52 -104.2756,
+                            0.97500002 37.52 -104.2756,
+                            0.97500002 -37.52 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 145.19501 6.2412641e-07 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+17
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 147.19501 -1.819664e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -38.190002 104.2756,
+                            -0.97500002 38.190002 104.2756,
+                            -0.97500002 38.190002 -104.2756,
+                            -0.97500002 -38.190002 -104.2756,
+                            -0.97500002 38.190002 104.2756,
+                            0.97500002 38.190002 104.2756,
+                            0.97500002 38.190002 -104.2756,
+                            -0.97500002 38.190002 -104.2756,
+                            0.97500002 38.190002 104.2756,
+                            0.97500002 -38.190002 104.2756,
+                            0.97500002 -38.190002 -104.2756,
+                            0.97500002 38.190002 -104.2756,
+                            0.97500002 -38.190002 -104.2756,
+                            0.97500002 -38.190002 104.2756,
+                            -0.97500002 -38.190002 104.2756,
+                            -0.97500002 -38.190002 -104.2756,
+                            0.97500002 -38.190002 104.2756,
+                            0.97500002 38.190002 104.2756,
+                            -0.97500002 38.190002 104.2756,
+                            -0.97500002 -38.190002 104.2756,
+                            -0.97500002 -38.190002 -104.2756,
+                            -0.97500002 38.190002 -104.2756,
+                            0.97500002 38.190002 -104.2756,
+                            0.97500002 -38.190002 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 149.19501 -4.4875719e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -38.860001 104.2756,
+                            -0.97500002 38.860001 104.2756,
+                            -0.97500002 38.860001 -104.2756,
+                            -0.97500002 -38.860001 -104.2756,
+                            -0.97500002 38.860001 104.2756,
+                            0.97500002 38.860001 104.2756,
+                            0.97500002 38.860001 -104.2756,
+                            -0.97500002 38.860001 -104.2756,
+                            0.97500002 38.860001 104.2756,
+                            0.97500002 -38.860001 104.2756,
+                            0.97500002 -38.860001 -104.2756,
+                            0.97500002 38.860001 -104.2756,
+                            0.97500002 -38.860001 -104.2756,
+                            0.97500002 -38.860001 104.2756,
+                            -0.97500002 -38.860001 104.2756,
+                            -0.97500002 -38.860001 -104.2756,
+                            0.97500002 -38.860001 104.2756,
+                            0.97500002 38.860001 104.2756,
+                            -0.97500002 38.860001 104.2756,
+                            -0.97500002 -38.860001 104.2756,
+                            -0.97500002 -38.860001 -104.2756,
+                            -0.97500002 38.860001 -104.2756,
+                            0.97500002 38.860001 -104.2756,
+                            0.97500002 -38.860001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 151.19501 -2.8925476e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -39.530003 104.2756,
+                            -0.97500002 39.530003 104.2756,
+                            -0.97500002 39.530003 -104.2756,
+                            -0.97500002 -39.530003 -104.2756,
+                            -0.97500002 39.530003 104.2756,
+                            0.97500002 39.530003 104.2756,
+                            0.97500002 39.530003 -104.2756,
+                            -0.97500002 39.530003 -104.2756,
+                            0.97500002 39.530003 104.2756,
+                            0.97500002 -39.530003 104.2756,
+                            0.97500002 -39.530003 -104.2756,
+                            0.97500002 39.530003 -104.2756,
+                            0.97500002 -39.530003 -104.2756,
+                            0.97500002 -39.530003 104.2756,
+                            -0.97500002 -39.530003 104.2756,
+                            -0.97500002 -39.530003 -104.2756,
+                            0.97500002 -39.530003 104.2756,
+                            0.97500002 39.530003 104.2756,
+                            -0.97500002 39.530003 104.2756,
+                            -0.97500002 -39.530003 104.2756,
+                            -0.97500002 -39.530003 -104.2756,
+                            -0.97500002 39.530003 -104.2756,
+                            0.97500002 39.530003 -104.2756,
+                            0.97500002 -39.530003 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 153.19499 2.2930565e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -40.200001 104.2756,
+                            -0.97500002 40.200001 104.2756,
+                            -0.97500002 40.200001 -104.2756,
+                            -0.97500002 -40.200001 -104.2756,
+                            -0.97500002 40.200001 104.2756,
+                            0.97500002 40.200001 104.2756,
+                            0.97500002 40.200001 -104.2756,
+                            -0.97500002 40.200001 -104.2756,
+                            0.97500002 40.200001 104.2756,
+                            0.97500002 -40.200001 104.2756,
+                            0.97500002 -40.200001 -104.2756,
+                            0.97500002 40.200001 -104.2756,
+                            0.97500002 -40.200001 -104.2756,
+                            0.97500002 -40.200001 104.2756,
+                            -0.97500002 -40.200001 104.2756,
+                            -0.97500002 -40.200001 -104.2756,
+                            0.97500002 -40.200001 104.2756,
+                            0.97500002 40.200001 104.2756,
+                            -0.97500002 40.200001 104.2756,
+                            -0.97500002 -40.200001 104.2756,
+                            -0.97500002 -40.200001 -104.2756,
+                            -0.97500002 40.200001 -104.2756,
+                            0.97500002 40.200001 -104.2756,
+                            0.97500002 -40.200001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 155.19501 -1.5073395e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1+18 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -40.870003 104.2756,
+                            -0.97500002 40.870003 104.2756,
+                            -0.97500002 40.870003 -104.2756,
+                            -0.97500002 -40.870003 -104.2756,
+                            -0.97500002 40.870003 104.2756,
+                            0.97500002 40.870003 104.2756,
+                            0.97500002 40.870003 -104.2756,
+                            -0.97500002 40.870003 -104.2756,
+                            0.97500002 40.870003 104.2756,
+                            0.97500002 -40.870003 104.2756,
+                            0.97500002 -40.870003 -104.2756,
+                            0.97500002 40.870003 -104.2756,
+                            0.97500002 -40.870003 -104.2756,
+                            0.97500002 -40.870003 104.2756,
+                            -0.97500002 -40.870003 104.2756,
+                            -0.97500002 -40.870003 -104.2756,
+                            0.97500002 -40.870003 104.2756,
+                            0.97500002 40.870003 104.2756,
+                            -0.97500002 40.870003 104.2756,
+                            -0.97500002 -40.870003 104.2756,
+                            -0.97500002 -40.870003 -104.2756,
+                            -0.97500002 40.870003 -104.2756,
+                            0.97500002 40.870003 -104.2756,
+                            0.97500002 -40.870003 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 157.19501 -2.5945244e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+18
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 159.19499 2.5910797e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -41.540001 104.2756,
+                            -0.97500002 41.540001 104.2756,
+                            -0.97500002 41.540001 -104.2756,
+                            -0.97500002 -41.540001 -104.2756,
+                            -0.97500002 41.540001 104.2756,
+                            0.97500002 41.540001 104.2756,
+                            0.97500002 41.540001 -104.2756,
+                            -0.97500002 41.540001 -104.2756,
+                            0.97500002 41.540001 104.2756,
+                            0.97500002 -41.540001 104.2756,
+                            0.97500002 -41.540001 -104.2756,
+                            0.97500002 41.540001 -104.2756,
+                            0.97500002 -41.540001 -104.2756,
+                            0.97500002 -41.540001 104.2756,
+                            -0.97500002 -41.540001 104.2756,
+                            -0.97500002 -41.540001 -104.2756,
+                            0.97500002 -41.540001 104.2756,
+                            0.97500002 41.540001 104.2756,
+                            -0.97500002 41.540001 104.2756,
+                            -0.97500002 -41.540001 104.2756,
+                            -0.97500002 -41.540001 -104.2756,
+                            -0.97500002 41.540001 -104.2756,
+                            0.97500002 41.540001 -104.2756,
+                            0.97500002 -41.540001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 161.19501 1.4728927e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -42.210003 104.2756,
+                            -0.97500002 42.210003 104.2756,
+                            -0.97500002 42.210003 -104.2756,
+                            -0.97500002 -42.210003 -104.2756,
+                            -0.97500002 42.210003 104.2756,
+                            0.97500002 42.210003 104.2756,
+                            0.97500002 42.210003 -104.2756,
+                            -0.97500002 42.210003 -104.2756,
+                            0.97500002 42.210003 104.2756,
+                            0.97500002 -42.210003 104.2756,
+                            0.97500002 -42.210003 -104.2756,
+                            0.97500002 42.210003 -104.2756,
+                            0.97500002 -42.210003 -104.2756,
+                            0.97500002 -42.210003 104.2756,
+                            -0.97500002 -42.210003 104.2756,
+                            -0.97500002 -42.210003 -104.2756,
+                            0.97500002 -42.210003 104.2756,
+                            0.97500002 42.210003 104.2756,
+                            -0.97500002 42.210003 104.2756,
+                            -0.97500002 -42.210003 104.2756,
+                            -0.97500002 -42.210003 -104.2756,
+                            -0.97500002 42.210003 -104.2756,
+                            0.97500002 42.210003 -104.2756,
+                            0.97500002 -42.210003 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 163.19501 -2.2965012e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1+19 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -42.880001 104.2756,
+                            -0.97500002 42.880001 104.2756,
+                            -0.97500002 42.880001 -104.2756,
+                            -0.97500002 -42.880001 -104.2756,
+                            -0.97500002 42.880001 104.2756,
+                            0.97500002 42.880001 104.2756,
+                            0.97500002 42.880001 -104.2756,
+                            -0.97500002 42.880001 -104.2756,
+                            0.97500002 42.880001 104.2756,
+                            0.97500002 -42.880001 104.2756,
+                            0.97500002 -42.880001 -104.2756,
+                            0.97500002 42.880001 -104.2756,
+                            0.97500002 -42.880001 -104.2756,
+                            0.97500002 -42.880001 104.2756,
+                            -0.97500002 -42.880001 104.2756,
+                            -0.97500002 -42.880001 -104.2756,
+                            0.97500002 -42.880001 104.2756,
+                            0.97500002 42.880001 104.2756,
+                            -0.97500002 42.880001 104.2756,
+                            -0.97500002 -42.880001 104.2756,
+                            -0.97500002 -42.880001 -104.2756,
+                            -0.97500002 42.880001 -104.2756,
+                            0.97500002 42.880001 -104.2756,
+                            0.97500002 -42.880001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 165.19499 2.8891029e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+19
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 167.19501 4.4531248e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -43.549999 104.2756,
+                            -0.97500002 43.549999 104.2756,
+                            -0.97500002 43.549999 -104.2756,
+                            -0.97500002 -43.549999 -104.2756,
+                            -0.97500002 43.549999 104.2756,
+                            0.97500002 43.549999 104.2756,
+                            0.97500002 43.549999 -104.2756,
+                            -0.97500002 43.549999 -104.2756,
+                            0.97500002 43.549999 104.2756,
+                            0.97500002 -43.549999 104.2756,
+                            0.97500002 -43.549999 -104.2756,
+                            0.97500002 43.549999 -104.2756,
+                            0.97500002 -43.549999 -104.2756,
+                            0.97500002 -43.549999 104.2756,
+                            -0.97500002 -43.549999 104.2756,
+                            -0.97500002 -43.549999 -104.2756,
+                            0.97500002 -43.549999 104.2756,
+                            0.97500002 43.549999 104.2756,
+                            -0.97500002 43.549999 104.2756,
+                            -0.97500002 -43.549999 104.2756,
+                            -0.97500002 -43.549999 -104.2756,
+                            -0.97500002 43.549999 -104.2756,
+                            0.97500002 43.549999 -104.2756,
+                            0.97500002 -43.549999 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 169.19501 -1.998478e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -44.220001 104.2756,
+                            -0.97500002 44.220001 104.2756,
+                            -0.97500002 44.220001 -104.2756,
+                            -0.97500002 -44.220001 -104.2756,
+                            -0.97500002 44.220001 104.2756,
+                            0.97500002 44.220001 104.2756,
+                            0.97500002 44.220001 -104.2756,
+                            -0.97500002 44.220001 -104.2756,
+                            0.97500002 44.220001 104.2756,
+                            0.97500002 -44.220001 104.2756,
+                            0.97500002 -44.220001 -104.2756,
+                            0.97500002 44.220001 -104.2756,
+                            0.97500002 -44.220001 -104.2756,
+                            0.97500002 -44.220001 104.2756,
+                            -0.97500002 -44.220001 104.2756,
+                            -0.97500002 -44.220001 -104.2756,
+                            0.97500002 -44.220001 104.2756,
+                            0.97500002 44.220001 104.2756,
+                            -0.97500002 44.220001 104.2756,
+                            -0.97500002 -44.220001 104.2756,
+                            -0.97500002 -44.220001 -104.2756,
+                            -0.97500002 44.220001 -104.2756,
+                            0.97500002 44.220001 -104.2756,
+                            0.97500002 -44.220001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 171.19499 3.1871261e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -44.889999 104.2756,
+                            -0.97500002 44.889999 104.2756,
+                            -0.97500002 44.889999 -104.2756,
+                            -0.97500002 -44.889999 -104.2756,
+                            -0.97500002 44.889999 104.2756,
+                            0.97500002 44.889999 104.2756,
+                            0.97500002 44.889999 -104.2756,
+                            -0.97500002 44.889999 -104.2756,
+                            0.97500002 44.889999 104.2756,
+                            0.97500002 -44.889999 104.2756,
+                            0.97500002 -44.889999 -104.2756,
+                            0.97500002 44.889999 -104.2756,
+                            0.97500002 -44.889999 -104.2756,
+                            0.97500002 -44.889999 104.2756,
+                            -0.97500002 -44.889999 104.2756,
+                            -0.97500002 -44.889999 -104.2756,
+                            0.97500002 -44.889999 104.2756,
+                            0.97500002 44.889999 104.2756,
+                            -0.97500002 44.889999 104.2756,
+                            -0.97500002 -44.889999 104.2756,
+                            -0.97500002 -44.889999 -104.2756,
+                            -0.97500002 44.889999 -104.2756,
+                            0.97500002 44.889999 -104.2756,
+                            0.97500002 -44.889999 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 173.19501 7.433357e-07 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -45.560001 104.2756,
+                            -0.97500002 45.560001 104.2756,
+                            -0.97500002 45.560001 -104.2756,
+                            -0.97500002 -45.560001 -104.2756,
+                            -0.97500002 45.560001 104.2756,
+                            0.97500002 45.560001 104.2756,
+                            0.97500002 45.560001 -104.2756,
+                            -0.97500002 45.560001 -104.2756,
+                            0.97500002 45.560001 104.2756,
+                            0.97500002 -45.560001 104.2756,
+                            0.97500002 -45.560001 -104.2756,
+                            0.97500002 45.560001 -104.2756,
+                            0.97500002 -45.560001 -104.2756,
+                            0.97500002 -45.560001 104.2756,
+                            -0.97500002 -45.560001 104.2756,
+                            -0.97500002 -45.560001 -104.2756,
+                            0.97500002 -45.560001 104.2756,
+                            0.97500002 45.560001 104.2756,
+                            -0.97500002 45.560001 104.2756,
+                            -0.97500002 -45.560001 104.2756,
+                            -0.97500002 -45.560001 -104.2756,
+                            -0.97500002 45.560001 -104.2756,
+                            0.97500002 45.560001 -104.2756,
+                            0.97500002 -45.560001 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 175.19501 -1.7004547e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1+20 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -46.23 104.2756,
+                            -0.97500002 46.23 104.2756,
+                            -0.97500002 46.23 -104.2756,
+                            -0.97500002 -46.23 -104.2756,
+                            -0.97500002 46.23 104.2756,
+                            0.97500002 46.23 104.2756,
+                            0.97500002 46.23 -104.2756,
+                            -0.97500002 46.23 -104.2756,
+                            0.97500002 46.23 104.2756,
+                            0.97500002 -46.23 104.2756,
+                            0.97500002 -46.23 -104.2756,
+                            0.97500002 46.23 -104.2756,
+                            0.97500002 -46.23 -104.2756,
+                            0.97500002 -46.23 104.2756,
+                            -0.97500002 -46.23 104.2756,
+                            -0.97500002 -46.23 -104.2756,
+                            0.97500002 -46.23 104.2756,
+                            0.97500002 46.23 104.2756,
+                            -0.97500002 46.23 104.2756,
+                            -0.97500002 -46.23 104.2756,
+                            -0.97500002 -46.23 -104.2756,
+                            -0.97500002 46.23 -104.2756,
+                            0.97500002 46.23 -104.2756,
+                            0.97500002 -46.23 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 177.19499 3.4851494e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+20
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 179.19501 1.0413589e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -46.900002 104.2756,
+                            -0.97500002 46.900002 104.2756,
+                            -0.97500002 46.900002 -104.2756,
+                            -0.97500002 -46.900002 -104.2756,
+                            -0.97500002 46.900002 104.2756,
+                            0.97500002 46.900002 104.2756,
+                            0.97500002 46.900002 -104.2756,
+                            -0.97500002 46.900002 -104.2756,
+                            0.97500002 46.900002 104.2756,
+                            0.97500002 -46.900002 104.2756,
+                            0.97500002 -46.900002 -104.2756,
+                            0.97500002 46.900002 -104.2756,
+                            0.97500002 -46.900002 -104.2756,
+                            0.97500002 -46.900002 104.2756,
+                            -0.97500002 -46.900002 104.2756,
+                            -0.97500002 -46.900002 -104.2756,
+                            0.97500002 -46.900002 104.2756,
+                            0.97500002 46.900002 104.2756,
+                            -0.97500002 46.900002 104.2756,
+                            -0.97500002 -46.900002 104.2756,
+                            -0.97500002 -46.900002 -104.2756,
+                            -0.97500002 46.900002 -104.2756,
+                            0.97500002 46.900002 -104.2756,
+                            0.97500002 -46.900002 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 181.19501 -1.4024315e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -47.57 104.2756,
+                            -0.97500002 47.57 104.2756,
+                            -0.97500002 47.57 -104.2756,
+                            -0.97500002 -47.57 -104.2756,
+                            -0.97500002 47.57 104.2756,
+                            0.97500002 47.57 104.2756,
+                            0.97500002 47.57 -104.2756,
+                            -0.97500002 47.57 -104.2756,
+                            0.97500002 47.57 104.2756,
+                            0.97500002 -47.57 104.2756,
+                            0.97500002 -47.57 -104.2756,
+                            0.97500002 47.57 -104.2756,
+                            0.97500002 -47.57 -104.2756,
+                            0.97500002 -47.57 104.2756,
+                            -0.97500002 -47.57 104.2756,
+                            -0.97500002 -47.57 -104.2756,
+                            0.97500002 -47.57 104.2756,
+                            0.97500002 47.57 104.2756,
+                            -0.97500002 47.57 104.2756,
+                            -0.97500002 -47.57 104.2756,
+                            -0.97500002 -47.57 -104.2756,
+                            -0.97500002 47.57 -104.2756,
+                            0.97500002 47.57 -104.2756,
+                            0.97500002 -47.57 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 183.19499 3.7831726e-06 -7.6293945e-06
+
+                    }
+                  }
+                  DEF TPA1+21 Group {
+
+                    DEF CoinShapeNode Separator {
+
+                      DEF Transparent_Shape Group {
+
+                        LightModel {
+                          model BASE_COLOR
+
+                        }
+                        DrawStyle {
+                          style LINES
+
+                        }
+                        BaseColor {
+                          rgb 0.58431375 0.58431375 0.58431375
+
+                        }
+                      }
+                      NormalBinding {
+                        value PER_FACE
+
+                      }
+                      Coordinate3 {
+                        point [ -0.97500002 -48.240002 104.2756,
+                            -0.97500002 48.240002 104.2756,
+                            -0.97500002 48.240002 -104.2756,
+                            -0.97500002 -48.240002 -104.2756,
+                            -0.97500002 48.240002 104.2756,
+                            0.97500002 48.240002 104.2756,
+                            0.97500002 48.240002 -104.2756,
+                            -0.97500002 48.240002 -104.2756,
+                            0.97500002 48.240002 104.2756,
+                            0.97500002 -48.240002 104.2756,
+                            0.97500002 -48.240002 -104.2756,
+                            0.97500002 48.240002 -104.2756,
+                            0.97500002 -48.240002 -104.2756,
+                            0.97500002 -48.240002 104.2756,
+                            -0.97500002 -48.240002 104.2756,
+                            -0.97500002 -48.240002 -104.2756,
+                            0.97500002 -48.240002 104.2756,
+                            0.97500002 48.240002 104.2756,
+                            -0.97500002 48.240002 104.2756,
+                            -0.97500002 -48.240002 104.2756,
+                            -0.97500002 -48.240002 -104.2756,
+                            -0.97500002 48.240002 -104.2756,
+                            0.97500002 48.240002 -104.2756,
+                            0.97500002 -48.240002 -104.2756 ]
+
+                      }
+                      Normal {
+                        vector [ -1 0 0,
+                            0 1 -0,
+                            1 0 0,
+                            0 -1 0,
+                            -0 0 1,
+                            -0 0 -1 ]
+
+                      }
+                      FaceSet {
+                        numVertices [ 4, 4, 4, 4, 4, 4 ]
+
+                      }
+                    }
+                  }
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 185.19501 1.3393822e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+21
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 187.19501 -1.1044083e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+21
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 189.19501 -3.5481987e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+21
+                }
+                DEF Position Separator {
+
+                  DEF VolumeTransformation Group {
+
+                    Translation {
+                      translation 191.14499 1.9029292e-06 -7.6293945e-06
+
+                    }
+                  }
+                  USE TPA1+21
+                }
+              }
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix 0.70710677 0.70710677 6.1230318e-17 0
+                    -0.70710677 0.70710677 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix 0.25881904 0.96592581 6.1230318e-17 0
+                    -0.96592581 0.25881904 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix -0.25881904 0.96592581 6.1230318e-17 0
+                    -0.96592581 -0.25881904 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix -0.70710677 0.70710677 6.1230318e-17 0
+                    -0.70710677 -0.70710677 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix -0.96592581 0.25881904 6.1230318e-17 0
+                    -0.25881916 -0.96592581 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix -0.96592581 -0.25881904 6.1230318e-17 0
+                    0.25881904 -0.96592581 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix -0.70710677 -0.70710677 6.1230318e-17 0
+                    0.70710671 -0.70710689 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix -0.25881904 -0.96592581 6.1230318e-17 0
+                    0.96592587 -0.25881892 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix 0.25881892 -0.96592587 6.1230318e-17 0
+                    0.96592581 0.25881907 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix 0.70710671 -0.70710689 6.1230318e-17 0
+                    0.70710689 0.70710671 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+            DEF Position Separator {
+
+              DEF VolumeTransformation Group {
+
+                DEF straight MatrixTransform {
+                  matrix 0.96592587 -0.25881881 6.1230318e-17 0
+                    0.25881878 0.96592587 6.1230318e-17 0
+                    -4.3711392e-08 -4.3711392e-08 1 0
+                    0 0 0 1
+
+                }
+              }
+              USE TPSS+1
+            }
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -104.2794
+
+            }
+            DEF reflection MatrixTransform {
+              matrix -0.25881904 0.96592581 6.1230318e-17 0
+                -0.96592581 -0.25881904 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TPGV+0
+        }
+        DEF Position Separator {
+
+          DEF TIFC Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF TOFC Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF TPCM Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 213.405
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 0.25881904 0.96592581 6.1230318e-17 0
+                0.96592581 -0.25881907 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          DEF TPEA+22 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -213.405
+
+            }
+            DEF reflection MatrixTransform {
+              matrix -0.25881904 0.96592581 6.1230318e-17 0
+                -0.96592581 -0.25881904 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TPEA+22
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 223.97
+
+            }
+            DEF reflection MatrixTransform {
+              matrix 0.25881904 0.96592581 6.1230318e-17 0
+                0.96592581 -0.25881907 6.1230318e-17 0
+                0 0 1 0
+                0 0 0 1
+
+            }
+          }
+          DEF TPCW+23 Group {
+
+          }
+        }
+        DEF Position Separator {
+
+          DEF VolumeTransformation Group {
+
+            Translation {
+              translation 0 0 -223.97
+
+            }
+            DEF reflection MatrixTransform {
+              matrix -0.25881904 0.96592581 6.1230318e-17 0
+                -0.96592581 -0.25881904 6.1230318e-17 0
+                -1.2246064e-16 -1.4996607e-32 -1 0
+                0 0 0 1
+
+            }
+          }
+          USE TPCW+23
+        }
+      }
+    }
+  }
+}
