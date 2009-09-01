@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.8 2008/11/04 08:08:11 tai Exp $
+// $Id: StBET4pMakerImp.h,v 1.9 2009/09/01 12:24:52 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMP_H
 #define STBET4PMAKERIMP_H
@@ -15,7 +15,7 @@ class StjEEMC;
 class StjTrackListCut;
 class StjTowerEnergyListCut;
 
-class StjTowerEnergyCorrectionForTracks;
+class StjAbstractTowerEnergyCorrectionForTracks;
 
 class StBET4pMakerImp {
 
@@ -25,7 +25,7 @@ public:
 		  StjTrackListCut* tpcCut,
 		  StjBEMC* bemc,
 		  StjTowerEnergyListCut* bemcCut,
-		  StjTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks,
+		  StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks,
 		  StjEEMC* eemc);
     
   virtual ~StBET4pMakerImp() { };
@@ -50,7 +50,7 @@ private:
   StjTrackListCut* _tpcCut;
   StjTowerEnergyListCut* _bemcCut;
 
-  StjTowerEnergyCorrectionForTracks* _correctTowerEnergyForTracks;
+  StjAbstractTowerEnergyCorrectionForTracks* _correctTowerEnergyForTracks;
 
 };
 

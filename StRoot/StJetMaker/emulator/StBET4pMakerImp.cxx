@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImp.cxx,v 1.5 2008/08/04 02:37:28 tai Exp $
+// $Id: StBET4pMakerImp.cxx,v 1.6 2009/09/01 12:24:52 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImp.h"
 
@@ -9,7 +9,7 @@
 #include "StjTrackListCut.h"
 #include "StjTowerEnergyListCut.h"
 
-#include "StjTowerEnergyCorrectionForTracks.h"
+#include "StjAbstractTowerEnergyCorrectionForTracks.h"
 
 #include <iostream>
 
@@ -17,7 +17,7 @@ using namespace std;
 
 StBET4pMakerImp::StBET4pMakerImp(StjTPC* tpc, StjTrackListCut* tpcCut,
 				 StjBEMC* bemc, StjTowerEnergyListCut* bemcCut,
-				 StjTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks,
+				 StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks,
 				 StjEEMC* eemc)
   : _tpc(tpc), _bemc(bemc), _eemc(eemc)
   , _tpcCut(tpcCut), _bemcCut(bemcCut)

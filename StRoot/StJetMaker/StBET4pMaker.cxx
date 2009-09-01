@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.8 2009/02/04 22:14:28 kocolosk Exp $
+// $Id: StBET4pMaker.cxx,v 1.9 2009/09/01 12:25:30 pibero Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -10,6 +10,7 @@
 #include "StjeBemcEnergySumCalculatorBuilder.h"
 
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
+#include "StjTowerEnergyCorrectionForTracksMip.h"
 
 #include <iostream>
 
@@ -17,10 +18,11 @@ using namespace std;
 
 ClassImp(StBET4pMaker)
     
-StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
+StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix, StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks)
   : StFourPMaker(name)
   , _entryMaker(0)
   , _uDstMaker(uDstMaker), _doTowerSwapFix(doTowerSwapFix)
+  , _correctTowerEnergyForTracks(correctTowerEnergyForTracks ? correctTowerEnergyForTracks : new StjTowerEnergyCorrectionForTracksMip)
   , _useTPC(true), _useBEMC(true), _useEEMC(false)
   , _use2003Cuts(false), _use2005Cuts(false), _use2006Cuts(false)
   , _useBEMCEnergySum(true)
@@ -33,7 +35,7 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
 Int_t StBET4pMaker::Init()
 {
   StBET4pMakerImpBuilder impBuilder;
-  _imp = impBuilder.build(_useTPC, _useBEMC, _useEEMC, _use2003Cuts, _use2005Cuts, _use2006Cuts, _uDstMaker, _doTowerSwapFix);
+  _imp = impBuilder.build(_useTPC, _useBEMC, _useEEMC, _use2003Cuts, _use2005Cuts, _use2006Cuts, _uDstMaker, _doTowerSwapFix, _correctTowerEnergyForTracks);
   _imp->Init();
 
   StjeBemcEnergySumCalculatorBuilder bemcEnergySumCalculatorBuilder;
