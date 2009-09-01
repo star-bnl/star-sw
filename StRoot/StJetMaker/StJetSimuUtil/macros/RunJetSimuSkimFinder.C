@@ -114,28 +114,40 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   skimEventMaker->addSimuTrigger(137222); // bemc-jp1-mb, th1=60 (8.3 GeV)
 
   // Mike's 4p maker:
+  // The classes available for correcting tower energy for tracks are:
+  // 1. StjTowerEnergyCorrectionForTracksMip
+  // 2. StjTowerEnergyCorrectionForTracksFraction
   bool doTowerSwapFix = true;
-  StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker,doTowerSwapFix);
+  StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksMip);
+  StBET4pMaker* bet4pMakerFrac000 = new StBET4pMaker("BET4pMakerFrac000",muDstMaker,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(0.0));
+  StBET4pMaker* bet4pMakerFrac020 = new StBET4pMaker("BET4pMakerFrac020",muDstMaker,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(0.2));
+  StBET4pMaker* bet4pMakerFrac050 = new StBET4pMaker("BET4pMakerFrac050",muDstMaker,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(0.5));
+  StBET4pMaker* bet4pMakerFrac070 = new StBET4pMaker("BET4pMakerFrac070",muDstMaker,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(0.7));
+  StBET4pMaker* bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100",muDstMaker,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.0));
+  StBET4pMaker* bet4pMakerFrac130 = new StBET4pMaker("BET4pMakerFrac130",muDstMaker,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.3));
   
   // Pythia4pMaker
   StPythiaFourPMaker* pythiaFourPMaker = new StPythiaFourPMaker;
   
   // Instantiate the JetMaker
   StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker",muDstMaker,jetfile);
-  
-  StppAnaPars* anapars = new StppAnaPars();
-  anapars->setFlagMin(0); //track->flag() > 0
-  anapars->setNhits(20); //track->nHitsFit()>20
-  anapars->setCutPtMin(0.2); //track->pt() > 0.2
-  anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
-  anapars->setJetPtMin(3.0);
-  anapars->setJetEtaMax(100.0);
+
+  // Setup 3 jet analyses that use the same track/jet cuts  
+  // Set the analysis cuts: (See StJetMaker/StppJetAnalyzer.h -> class StppAnaPars)
+  StppAnaPars* anapars = new StppAnaPars;
+  anapars->setFlagMin(0); // track->flag()>0
+  anapars->setNhits(12); 
+  anapars->setCutPtMin(0.2); // track->pt()>0.2
+  anapars->setAbsEtaMax(2); // abs(track->eta())<1.6
+  anapars->setJetPtMin(3.5);
+  anapars->setJetEtaMax(100);
   anapars->setJetEtaMin(0);
   anapars->setJetNmin(0);
-
+  
+  // Setup the cone finder with R=0.7
   StConePars* cpars4 = new StConePars;
-  cpars4->setGridSpacing(56, -1.6, 1.6, 120, -TMath::Pi(), TMath::Pi());
-  cpars4->setConeRadius(0.4);
+  cpars4->setGridSpacing(105,-3,3,120,-TMath::Pi(),TMath::Pi()); // including EEMC
+  cpars4->setConeRadius(0.7);
   cpars4->setSeedEtMin(0.5);
   cpars4->setAssocEtMin(0.1);
   cpars4->setSplitFraction(0.5);
@@ -144,8 +156,21 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   cpars4->setRequireStableMidpoints(true);
   cpars4->setDoSplitMerge(true);
   cpars4->setDebug(false);
-  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMaker,"MkConeR04");  
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMaker,"ConeJets12");
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMakerFrac000,"ConeJets12_000");
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMakerFrac020,"ConeJets12_020");
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMakerFrac050,"ConeJets12_050");
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMakerFrac070,"ConeJets12_070");
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMakerFrac100,"ConeJets12_100");
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMakerFrac130,"ConeJets12_130");
+  
+  anapars->setNhits(5);
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMaker,"ConeJets5"); 
 
+  anapars->setNhits(1000000);
+  emcJetMaker->addAnalyzer(anapars,cpars4,bet4pMaker,"ConeJetsEMC"); 
+
+  // Set the analysis cuts for pythia clustering: (See StJetMaker/StppJetAnalyzer.h -> class StppAnaPars)
   StppAnaPars* pythiapars = new StppAnaPars;
   pythiapars->setFlagMin(0);
   pythiapars->setNhits(0);
@@ -155,10 +180,10 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   pythiapars->setJetEtaMax(5.0);
   pythiapars->setJetEtaMin(0);
   pythiapars->setJetNmin(0);
-
+    
   StConePars* pythia_cpars4 = new StConePars;
-  pythia_cpars4->setGridSpacing(200, -5.0, 5.0, 120, -TMath::Pi(), TMath::Pi());
-  pythia_cpars4->setConeRadius(0.4);
+  pythia_cpars4->setGridSpacing(105,-3,3,120,-TMath::Pi(),TMath::Pi()); // including EEMC
+  pythia_cpars4->setConeRadius(0.7);
   pythia_cpars4->setSeedEtMin(0.5);
   pythia_cpars4->setAssocEtMin(0.1);
   pythia_cpars4->setSplitFraction(0.5);
@@ -167,10 +192,8 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   pythia_cpars4->setRequireStableMidpoints(true);
   pythia_cpars4->setDoSplitMerge(true);
   pythia_cpars4->setDebug(false);
-  emcJetMaker->addAnalyzer(pythiapars, pythia_cpars4, pythiaFourPMaker, "PythiaConeR04");
- 
+  emcJetMaker->addAnalyzer(pythiapars,pythia_cpars4,pythiaFourPMaker,"PythiaConeJets");
+
   chain->Init();
-  chain->PrintInfo();
-  chain->ls(3);
   chain->EventLoop(nevents);
 }
