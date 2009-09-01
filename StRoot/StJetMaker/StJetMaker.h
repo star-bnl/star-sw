@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.53 2009/03/28 06:01:00 pibero Exp $
+// $Id: StJetMaker.h,v 1.54 2009/09/01 23:38:59 pibero Exp $
 #ifndef STJETMAKER_H
 #define STJETMAKER_H
 
@@ -41,8 +41,6 @@ public:
 
   void addAnalyzer(const StppAnaPars*, StJetPars*, StFourPMaker*, const char* anaName);
 
-  StJets* getStJets(const char* branchName = "ConeJets12") { return _stjetsMap[branchName]; }
-    
   typedef StJetMakerBackwordCompatibility::jetBranchesMap jetBranchesMap;
 
   // To be removed. Please do not call this method.
@@ -52,7 +50,7 @@ public:
   StjeTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.53 2009/03/28 06:01:00 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.54 2009/09/01 23:38:59 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -61,8 +59,6 @@ private:
   vector<StjeJetFinderRunner*> _jetFinderList;
 
   vector<StjeJetCuts*> _jetCutsList;
-
-  map<std::string, StJets*> _stjetsMap;
 
   StjeTreeWriter* _defaultTreeWriter;
   StjeTreeWriter* _treeWriter;
