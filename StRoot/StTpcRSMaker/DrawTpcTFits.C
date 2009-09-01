@@ -1,0 +1,27 @@
+void DrawTpcTFits() {
+  DrawList("InnerPadMcNoiseConv");
+  DrawList("InnerPadRcNoiseConv");
+  DrawList("InnerPadTkNoiseConv");
+  DrawList("InnerTimeMcpShapeTauNoise");
+  DrawList("InnerTimeRcpShapeTauNoise");
+  DrawList("InnerTimeTkpShapeTauNoise");
+  DrawList("InnerXPadMcNoiseConv");
+  DrawList("InnerXPadRcNoiseConv");
+  DrawList("InnerXPadTkNoiseConv");
+  DrawList("InnerXTimeMcpShapeTauNoise");
+  DrawList("InnerXTimeRcpShapeTauNoise");
+  DrawList("InnerXTimeTkpShapeTauNoise");
+  DrawList("OuterPadMcNoiseConv");
+  DrawList("OuterPadRcNoiseConv");
+  DrawList("OuterPadTkNoiseConv");
+  DrawList("OuterTimeMcpShapeTauNoise");
+  DrawList("OuterTimeRcFWHMNoiseConv");
+  DrawList("OuterTimeRcpShapeTauNoise");
+  DrawList("OuterTimeTkpShapeTauNoise");
+  DrawList("OuterXPadMcNoiseConv");
+  DrawList("OuterXPadRcNoiseConv");
+  DrawList("OuterXPadTkNoiseConv");
+  DrawList("OuterXTimeMcpShapeTauNoise");
+  DrawList("OuterXTimeRcpShapeTauNoise");
+  DrawList("OuterXTimeTkpShapeTauNoise");
+};

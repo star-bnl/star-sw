@@ -90,7 +90,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS,fcf",
       Int_t m_Mode = 0;
       if (Opt.Contains("pai",TString::kIgnoreCase))  SETBIT(m_Mode,StTpcRSMaker::kPAI); 
       if (Opt.Contains("bichsel",TString::kIgnoreCase))  SETBIT(m_Mode,StTpcRSMaker::kBICHSEL); 
-      //      SETBIT(m_Mode,StTpcRSMaker::kNONOISE);
+      //    SETBIT(m_Mode,StTpcRSMaker::kNONOISE);
       //    SETBIT(m_Mode,StTpcRSMaker::kPseudoPadRow);
       //    SETBIT(m_Mode,StTpcRSMaker::kPedestal);
       //    SETBIT(m_Mode,StTpcRSMaker::kAVERAGEPEDESTAL);

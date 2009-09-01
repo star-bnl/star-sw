@@ -88,8 +88,8 @@ class StTpcRSMaker : public StMaker {
   static Double_t fei(Double_t t, Double_t t0, Double_t T);
   SignalSum_t  *GetSignalSum();
   SignalSum_t  *ResetSignalSum();
-  void SettauIntegrationX(Double_t p =      74.6e-9) {mtauIntegrationX = p;}
-  void SettauCX(Double_t           p =    1000.0e-9) {mtauCX = p;}
+  void SettauIntegrationX(Double_t p =      74.6e-9, Int_t io=0) {mtauIntegrationX[io] = p;}
+  void SettauCX(Double_t           p =    1000.0e-9, Int_t io=0) {mtauCX[io] = p;}
   void SettauIntegration (Double_t p = 2.5* 74.6e-9) {mtauIntegration  = p;}
   void SetCutEle(Double_t p = 1e-3)                  {mCutEle = p;}
  private:
@@ -158,8 +158,10 @@ class StTpcRSMaker : public StMaker {
   const Double_t mAveragePedestalRMS; //!
   const Double_t mAveragePedestalRMSX; //!
   const Double_t minSignal;    //!
+#if 0
   const Double_t LorenzAngle;  //!
   Double_t TanLorenzAngle; //!
+#endif
   Double_t InnerAlphaVariation; //!
   Double_t OuterAlphaVariation; //!
   Double_t innerSectorAnodeVoltage; //!
@@ -169,8 +171,8 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangePower; //!
   const Double_t CrossTalkInner; //!
   const Double_t CrossTalkOuter; //!
-  Double_t      mtauIntegrationX; //! for TPX
-  Double_t      mtauCX;           //! -"-
+  Double_t      mtauIntegrationX[2]; //! for TPX inner=0/outer=1
+  Double_t      mtauCX[2];           //! -"- 
   Double_t      mtauIntegration;  //! for TPC
   const Int_t NoOfSectors;//!
   const Int_t NoOfRows;   //!
@@ -189,14 +191,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.8 2009/08/24 20:16:41 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.9 2009/09/01 15:06:44 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.8 2009/08/24 20:16:41 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.9 2009/09/01 15:06:44 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.9  2009/09/01 15:06:44  fisyak
+// Version N
+//
 // Revision 1.8  2009/08/24 20:16:41  fisyak
 // Freeze with new Altro parameters
 //
