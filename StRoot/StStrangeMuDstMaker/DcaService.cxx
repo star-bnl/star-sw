@@ -17,7 +17,7 @@
 #include "StMessMgr.h"
 #include <cassert>
 
-int GGetOffset(TClass* cl, TDataMember* that);
+Long_t GGetOffset(TClass* cl, TDataMember* that);
 
 ClassImp(DcaService)
 
@@ -25,10 +25,10 @@ double DcaService::B = 0.0;
 StThreeVectorD DcaService::PrimVertex(0.,0.,0.);
 StThreeVectorD DcaService::Origin(0.,0.,0.);
 StHelixD DcaService::Track(0.,0.,0.,DcaService::Origin,0);
-int DcaService::offsetDcaXiToPrimVertex = 0;
-int DcaService::offsetDcaBachelorToPrimVertex = 0;
-int DcaService::offsetDcaPosToPrimVertex = 0;
-int DcaService::offsetDcaNegToPrimVertex = 0;
+Long_t DcaService::offsetDcaXiToPrimVertex = 0;
+Long_t DcaService::offsetDcaBachelorToPrimVertex = 0;
+Long_t DcaService::offsetDcaPosToPrimVertex = 0;
+Long_t DcaService::offsetDcaNegToPrimVertex = 0;
 
 void DcaService::initOffsets() {
   offsetDcaXiToPrimVertex = 0;
@@ -43,8 +43,8 @@ void DcaService::setPrimVertex(StStrangeEvMuDst* ev) {
   PrimVertex.setZ(ev->primaryVertexZ());
 }
 
-double DcaService::dcaToPrimVertex(int charge, float x, float y, float z,
-                                   float px, float py, float pz) {
+double DcaService::dcaToPrimVertex(int charge, Float_t x, Float_t y, Float_t z,
+                                   Float_t px, Float_t py, Float_t pz) {
   // Given a charge, position and momentum, calculate DCA to primary vertex
   double pt        = TMath::Sqrt(px*px + py*py);
   double bcharge   = ((double) charge)*B;
@@ -95,36 +95,35 @@ double DcaService::signIt() {
   return 1.0;
 }
 
-void DcaService::replaceDca(TObject* obj, float dca, int* offset, TClass* cl,
+void DcaService::replaceDca(TObject* obj, Float_t dca, Long_t& offset, TClass* cl,
                             const char* memname) {
-  if (!(*offset)) {
-    *offset = GGetOffset(cl,cl->GetDataMember(memname));
-    if (!(*offset)) LOG_WARN << Form("OFFSET NOT FOUND: %s in %s\n",
+  if (!offset) {
+    offset = GGetOffset(cl,cl->GetDataMember(memname));
+    if (!offset) LOG_WARN << Form("OFFSET NOT FOUND: %s in %s\n",
       memname,cl->GetName()) << endm;
   }
-  float* cf = (float*) obj;
-  assert(0 && "Fix it !!! for 64-bits");
-  float* dcaptr = 0; //(float*) ((int) cf + (*offset));
+  Float_t* cf = (Float_t*) obj;
+  Float_t* dcaptr = (Float_t*) (((Long_t) cf) + offset);
   *dcaptr = dca;
 }
 
-void DcaService::replaceDcaXiToPrimVertex(StXiMuDst* xi,float dca) {
-  replaceDca(xi,dca,&offsetDcaXiToPrimVertex,xi->Class(),
+void DcaService::replaceDcaXiToPrimVertex(StXiMuDst* xi,Float_t dca) {
+  replaceDca(xi,dca,offsetDcaXiToPrimVertex,xi->Class(),
     "mDcaXiToPrimVertex");
 }
 
-void DcaService::replaceDcaBachelorToPrimVertex(StXiMuDst* xi,float dca) {
-  replaceDca(xi,dca,&offsetDcaBachelorToPrimVertex,xi->Class(),
+void DcaService::replaceDcaBachelorToPrimVertex(StXiMuDst* xi,Float_t dca) {
+  replaceDca(xi,dca,offsetDcaBachelorToPrimVertex,xi->Class(),
     "mDcaBachelorToPrimVertex");
 }
 
-void DcaService::replaceDcaPosToPrimVertex(StV0MuDst* v0,float dca) {
-  replaceDca(v0,dca,&offsetDcaPosToPrimVertex,v0->Class(),
+void DcaService::replaceDcaPosToPrimVertex(StV0MuDst* v0,Float_t dca) {
+  replaceDca(v0,dca,offsetDcaPosToPrimVertex,v0->Class(),
     "mDcaPosToPrimVertex");
 }
 
-void DcaService::replaceDcaNegToPrimVertex(StV0MuDst* v0,float dca) {
-  replaceDca(v0,dca,&offsetDcaNegToPrimVertex,v0->Class(),
+void DcaService::replaceDcaNegToPrimVertex(StV0MuDst* v0,Float_t dca) {
+  replaceDca(v0,dca,offsetDcaNegToPrimVertex,v0->Class(),
     "mDcaNegToPrimVertex");
 }
 
@@ -188,7 +187,7 @@ void DcaService::fixSignedDcasV0s(StStrangeMuDstMaker* mk) {
 // using TDataMember::GetOffset(), but it doesn't work in all versions.
 // This code is copied from that used in version 1.12 of TDataMember.
 
-int GGetOffset(TClass* cl, TDataMember* that) {
+Long_t GGetOffset(TClass* cl, TDataMember* that) {
    //case of a compiled class
    //Note that the offset cannot be computed in case of an abstract class
    //for which the list of real data has not yet been computed via
@@ -221,8 +220,11 @@ int GGetOffset(TClass* cl, TDataMember* that) {
 }
 
 //_____________________________________________________________________________
-// $Id: DcaService.cxx,v 3.4 2009/08/28 16:37:53 fine Exp $
+// $Id: DcaService.cxx,v 3.5 2009/09/02 19:39:44 genevb Exp $
 // $Log: DcaService.cxx,v $
+// Revision 3.5  2009/09/02 19:39:44  genevb
+// Fixes to pointer and string conversions (RT ticket 1612), prep for 64-bit
+//
 // Revision 3.4  2009/08/28 16:37:53  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //

@@ -57,10 +57,10 @@ class DcaService {
 
   /// @name Functions which replace the actual data members
   //@{
-  static   void replaceDcaXiToPrimVertex(StXiMuDst* xi, float dca);
-  static   void replaceDcaBachelorToPrimVertex(StXiMuDst* xi, float dca);
-  static   void replaceDcaPosToPrimVertex(StV0MuDst* v0, float dca);
-  static   void replaceDcaNegToPrimVertex(StV0MuDst* v0, float dca);
+  static   void replaceDcaXiToPrimVertex(StXiMuDst* xi, Float_t dca);
+  static   void replaceDcaBachelorToPrimVertex(StXiMuDst* xi, Float_t dca);
+  static   void replaceDcaPosToPrimVertex(StV0MuDst* v0, Float_t dca);
+  static   void replaceDcaNegToPrimVertex(StV0MuDst* v0, Float_t dca);
   //@}
 
   /// @name Functions which replace the data members with the correct DCAs
@@ -95,15 +95,15 @@ class DcaService {
   static StThreeVectorD PrimVertex;
   static StThreeVectorD Origin;
   static StHelixD Track;
-  static int offsetDcaXiToPrimVertex;
-  static int offsetDcaBachelorToPrimVertex;
-  static int offsetDcaPosToPrimVertex;
-  static int offsetDcaNegToPrimVertex;
+  static Long_t offsetDcaXiToPrimVertex;
+  static Long_t offsetDcaBachelorToPrimVertex;
+  static Long_t offsetDcaPosToPrimVertex;
+  static Long_t offsetDcaNegToPrimVertex;
 
   static   void initOffsets();
   static double signIt();
-  static   void replaceDca(TObject*, float, int*, TClass*, const char*);
-  static double dcaToPrimVertex(int, float, float, float, float, float, float);
+  static   void replaceDca(TObject*, Float_t, Long_t&, TClass*, const char*);
+  static double dcaToPrimVertex(int, Float_t, Float_t, Float_t, Float_t, Float_t, Float_t);
 
   ClassDef(DcaService,0)
 };
@@ -163,8 +163,11 @@ inline void DcaService::fixSignedDcas(StStrangeMuDstMaker* mk)
 #endif
 
 //_____________________________________________________________________________
-// $Id: DcaService.h,v 3.2 2003/05/30 21:20:18 genevb Exp $
+// $Id: DcaService.h,v 3.3 2009/09/02 19:39:44 genevb Exp $
 // $Log: DcaService.h,v $
+// Revision 3.3  2009/09/02 19:39:44  genevb
+// Fixes to pointer and string conversions (RT ticket 1612), prep for 64-bit
+//
 // Revision 3.2  2003/05/30 21:20:18  genevb
 // doxygen savvy, encoding of FTPC mults, change virtual funcs
 //
