@@ -62,7 +62,8 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
   StRandyTopMapMaker *topoMapFixer;
-  Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
+  Char_t *file, *dir, *outfile[3], line[80];
+  TString prefix[3];
   Int_t mNDstMakers = 0;
 
   // Create a chain
@@ -115,7 +116,7 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
       //      outfile[i] = strdup(dir);    // doesn't work - too short ?
       outfile[i] = new char[strlen(output)+5];
       strcpy(outfile[i],dir);
-      strcat(outfile[i],prefix[i]);
+      strcat(outfile[i],prefix[i].Data());
       strcat(outfile[i],file);
       muDstMakers[i]->SetWrite(outfile[i]);
       if( doT0Abort ) 
@@ -171,7 +172,8 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   StStrangeMuDstMaker *v0MuDstMaker=0;
   StStrangeMuDstMaker *xiMuDstMaker=0;
   StStrangeMuDstMaker *kinkMuDstMaker=0;
-  Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
+  Char_t *file, *dir, *outfile[3], line[80];
+  TString prefix[3];
   Int_t mNDstMakers = 0;
 
   // Create a chain
@@ -212,7 +214,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
       //      outfile[i] = strdup(dir);    // doesn't work - too short ?
       outfile[i] = new char[strlen(output)+5];
       strcpy(outfile[i],dir);
-      strcat(outfile[i],prefix[i]);
+      strcat(outfile[i],prefix[i].Data());
       strcat(outfile[i],file);
       newMuDstMakers[i]->SetWrite(outfile[i]);
       if( doT0Abort ) 
@@ -375,7 +377,8 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   StMcEventMaker *mcEventReader;
   StAssociationMaker *associator;
   StRandyTopMapMaker *topoMapFixer;
-  Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
+  Char_t *file, *dir, *outfile[3], line[80];
+  TString prefix[3];
   Int_t mNDstMakers = 0;
 
   // Create a chain
@@ -434,7 +437,7 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
       //      outfile[i] = strdup(dir);    // doesn't work - too short ?
       outfile[i] = new char[strlen(output)+5];
       strcpy(outfile[i],dir);
-      strcat(outfile[i],prefix[i]);
+      strcat(outfile[i],prefix[i].Data());
       strcat(outfile[i],file);
       newMuDstMakers[i]->SetWrite(outfile[i]);
       if( doT0Abort ) 
@@ -594,7 +597,8 @@ void StrangeMuDstPlayer::Copy(Int_t NEvents, StFile* input, Char_t* output) {
   StStrangeMuDstMaker *v0MuDstMaker=0;
   StStrangeMuDstMaker *xiMuDstMaker=0;
   StStrangeMuDstMaker *kinkMuDstMaker=0;
-  Char_t *file, *dir, *outfile[3], *prefix[3], line[80];
+  Char_t *file, *dir, *outfile[3], line[80];
+  TString prefix[3];
   Int_t mNDstMakers = 0;
 
   // Create a chain
@@ -635,7 +639,7 @@ void StrangeMuDstPlayer::Copy(Int_t NEvents, StFile* input, Char_t* output) {
       //      outfile[i] = strdup(dir);    // doesn't work - too short ?
       outfile[i] = new char[strlen(output)+5];
       strcpy(outfile[i],dir);
-      strcat(outfile[i],prefix[i]);
+      strcat(outfile[i],prefix[i].Data());
       strcat(outfile[i],file);
       newMuDstMakers[i]->SetWrite(outfile[i]);
       if( doT0Abort ) 

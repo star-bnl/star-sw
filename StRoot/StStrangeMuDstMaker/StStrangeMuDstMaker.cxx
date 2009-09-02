@@ -27,11 +27,11 @@
 #define EachController(proc) EachDoT( if( cont[i]) cont[i]->proc );
 
 // Defaults file and tree names;
-static char* defFileName = "evMuDst.root";
-static char* defName = "StrangeMuDst";
-static char* altName = "MuDst";
-static char* defTitle = "Strangeness Micro-DST";
-static char* trNames[3] = {defName,altName,0};
+static const char* defFileName = "evMuDst.root";
+static const char* defName = "StrangeMuDst";
+static const char* altName = "MuDst";
+static const char* defTitle = "Strangeness Micro-DST";
+static const char* trNames[3] = {defName,altName,0};
 
 Int_t thisRun,thisEvent,lastRun,lastEvent,readEventNumber;
 TFile* lastFile;
@@ -60,7 +60,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
     bsize[i] = 0;
   }
 
-  file = defFileName;
+  strcpy(file,defFileName);
   fileBlind = kFALSE;
 
   doMc = kFALSE;
@@ -481,7 +481,7 @@ void StStrangeMuDstMaker::SetWrite(const char* eFile) {
   SetFile(eFile);
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetRead(const char* eFile, char* treeName) {
+void StStrangeMuDstMaker::SetRead(const char* eFile, const char* treeName) {
   SetMode(StrangeRead);
   if (!eFile) eFile = defFileName;
 
@@ -531,7 +531,7 @@ void StStrangeMuDstMaker::SetRead(const char* eFile, char* treeName) {
   muDst = chain->GetFile();
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetRead(StFile* eFiles, char* treeName) {
+void StStrangeMuDstMaker::SetRead(StFile* eFiles, const char* treeName) {
   SetMode(StrangeRead);
   while (!(eFiles->GetNextBundle()))
     SetRead(eFiles->GetFileName(0),treeName);
@@ -542,7 +542,7 @@ void StStrangeMuDstMaker::SetNoKeep() {
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetFile(const char* eFile) {
-  if (eFile) file = const_cast<char*> (eFile);
+  if (eFile) strcpy(file,eFile);
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetTreeName(const char* treeName) {
@@ -587,21 +587,16 @@ void StStrangeMuDstMaker::CheckFile() {
       char buf_[10];
       sprintf(buf_,"_%d",(++outFileNum));
 	TString fixer = file;
-	size_t len = fixer.Length();
 	if (outFileNum>2) {
 	  TString suffix = strrchr(file,'.');
 	  size_t last_ = fixer.Last('_');
-	  size_t len_ = len - last_;
+	  size_t len_ = fixer.Length() - last_;
 	  fixer.Remove(last_,len_).Append(buf_).Append(suffix);
-	  len = fixer.Length();
 	} else {
 	  size_t lastdot = fixer.Last('.');
 	  fixer.Insert(lastdot,buf_);
-	  len = fixer.Length();
-	  file = new char[len + 5];
 	}
-	strncpy(file,fixer.Data(),len);
-	(file)[len] = 0;
+	strcpy(file,fixer.Data());
       OpenFile();
       InitCreateDst();
       if (dstMaker) InitCreateSubDst();
@@ -631,17 +626,20 @@ void StStrangeMuDstMaker::SetFractionFile(char* fname) {
   StStrangeEvMuDst::SetFractionFile(fname);
 }
 //_____________________________________________________________________________
-char* StStrangeMuDstMaker::GetFile() const {
+char* StStrangeMuDstMaker::GetFile() {
   if (chain) {
     TFile* fptr = chain->GetFile();
     if (fptr) return const_cast<char*> (fptr->GetName());
   }
-  return file; 
+  return file;
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.34 2005/09/27 20:32:22 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.35 2009/09/02 19:39:44 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.35  2009/09/02 19:39:44  genevb
+// Fixes to pointer and string conversions (RT ticket 1612), prep for 64-bit
+//
 // Revision 3.34  2005/09/27 20:32:22  genevb
 // New method for StMcEvent access
 //

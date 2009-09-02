@@ -65,12 +65,12 @@ class StStrangeMuDstMaker : public StMaker {
 
   /// @name I/O modes
   //@{
-  void SetRead (const char* eFile=0, char* treeName=0);
-  void SetRead (StFile* eFiles, char* treeName=0);
+  void SetRead (const char* eFile=0, const char* treeName=0);
+  void SetRead (StFile* eFiles, const char* treeName=0);
   void SetWrite(const char* eFile);
   void SetWrite(){SetWrite(0);}
   void SetNoKeep();
-  char* GetFile() const;
+  char* GetFile();
   //@}
 
   /// @name Branch modes
@@ -159,7 +159,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.19 2009/08/26 16:56:06 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.20 2009/09/02 19:39:44 genevb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   //@}
@@ -227,7 +227,7 @@ class StStrangeMuDstMaker : public StMaker {
   TTree* tree;                   //!
   TChain* chain;                 //!
   StStrangeCuts* cuts;           //!
-  char* file;                    //!
+  char file[1024];               //!
   TFile* muDst;                  //!
 
   Bool_t abortEvent;
@@ -342,8 +342,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.19 2009/08/26 16:56:06 fine Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.20 2009/09/02 19:39:44 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.20  2009/09/02 19:39:44  genevb
+// Fixes to pointer and string conversions (RT ticket 1612), prep for 64-bit
+//
 // Revision 3.19  2009/08/26 16:56:06  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //

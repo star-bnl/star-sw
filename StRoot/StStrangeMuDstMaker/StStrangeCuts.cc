@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.cc,v 3.5 2009/08/28 16:37:53 fine Exp $
+ * $Id: StStrangeCuts.cc,v 3.6 2009/09/02 19:39:44 genevb Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.cc,v $
+ * Revision 3.6  2009/09/02 19:39:44  genevb
+ * Fixes to pointer and string conversions (RT ticket 1612), prep for 64-bit
+ *
  * Revision 3.5  2009/08/28 16:37:53  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *
@@ -75,8 +78,8 @@ void StStrangeCuts::Fill(const char* prefix, TDataSet* cutSet) {
         sprintf(buf,":%d",row);
         colName += buf;
       }
-      UInt_t colOffset = cutTable->GetOffset(col);
-      void* colValue = 0; //(void*) (((UInt_t) ((*cutTable)[0])) + colOffset);
+      Long_t colOffset = (Long_t) (cutTable->GetOffset(col));
+      void* colValue = (void*) (((Long_t) ((*cutTable)[row])) + colOffset);
       TDataType* colType = rowClass->GetDataMember(colBaseName)->GetDataType();
       Add(colName.Data(),colType->AsString(colValue));
     }
