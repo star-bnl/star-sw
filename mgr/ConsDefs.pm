@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.110 2009/08/18 21:23:01 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.111 2009/09/03 15:14:48 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -105,14 +105,20 @@
     }
 
     if ( -x "/usr/bin/gfortran"){
+	# give preference to gfortran for now - JL 200908
 	$G77       = "gfortran";
+	if ( defined( $ARG{NODEBUG} ) || $NODEBUG )  {
+	    $G77FLAGS  = "-fd-lines-as-comments ";
+	} else {
+	    $G77FLAGS  = "-fd-lines-as-code ";
+	}
+	$G77FLAGS .= "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
     } else {
 	$G77       = "g77";
+	$G77FLAGS  = "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
     }
-    $G77FLAGS      = "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
-    if ($STAR_HOST_SYS =~ /gcc3/) {
-      $G77FLAGS    = "-pipe " . $G77FLAGS;
-    }
+
+    if ($STAR_HOST_SYS =~ /gcc3/) {  $G77FLAGS    = "-pipe " . $G77FLAGS;}
     $G77EXTEND     = "-ffixed-line-length-132";
 
     $CXX           = "g++";
@@ -128,7 +134,7 @@
     $FCPATH        = "";
     $EXTRA_FCPATH  = "";
     $FFLAGS        = $G77FLAGS;
-    $FEXTEND       = $G77EXTEND;
+    $FEXTEND       = $G77EXTEND; 
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
     $EXTRA_FPPFLAGS= "";
@@ -156,9 +162,9 @@
     chomp($LIBSTDC);
 
     if ( $G77 eq "gfortran" ){
-	$LIBG2C = `gcc -print-file-name=libgfortran.a | awk '{ if (\$1 != "libgfortran.a") print \$1}'`;
+	$LIBG2C  = `gcc -print-file-name=libgfortran.a | awk '{ if (\$1 != "libgfortran.a") print \$1}'`;
     } else {
-	$LIBG2C = `gcc -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
+	$LIBG2C  = `gcc -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
     }
     chomp($LIBG2C);
 
@@ -454,9 +460,15 @@
         #
         # Case linux
         #
-	$CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-	$CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-
+	if ( $G77 eq "gfortran" ){
+	 # TODO: Possible cleanup to do between GFORTRAN and CERNLIB_LINUX
+	 $CERNLIB_FPPFLAGS .= " -DGFORTRAN -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+	 $CERNLIB_CPPFLAGS .= " -DGFORTRAN -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+	} else {
+	 $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+	 $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+	}
+		 
         #print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);
@@ -578,8 +590,11 @@
 
     # ------- packages -------
     # MySQL
-    #my $os_name = `uname`;
-    #chomp($os_name);
+    # my $os_name = `uname`;
+    # chomp($os_name);
+    #
+    # *** Standard package first, then OPTSTAR ***
+    #
     my ($MYSQLINCDIR,$mysqlheader) = 
 	script::find_lib( $MYSQL . " " .
 			 "/include /usr/include ".
@@ -588,24 +603,45 @@
 			 "/usr/mysql  ".
 			 $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql " ,
 			 "mysql.h");
+
     if (! $MYSQLINCDIR) {
-      die "Can't find mysql.h in $OPTSTAR/include  $OPTSTAR/mysql/include ";
-    }
+	die "Can't find mysql.h in standard path and $OPTSTAR/include  $OPTSTAR/include/mysql\n";
+    } 
 
+    # search for the config
+    my ($MYSQLCONFIG,$mysqlconf) =
+	script::find_lib($MYSQL . " ".
+	                 "/usr/bin /usr/bin/mysql ".
+			 $OPTSTAR . "/bin " .  $OPTSTAR . "/bin/mysql ",
+			 "mysql_config");
+
+
+    # Associate the proper lib with where the inc was found
     my ($mysqllibdir)=$MYSQLINCDIR;
-
     $mysqllibdir =~ s/include/$LLIB/;
-#    print "DEBUG :: $mysqllibdir\n";
+
+    # print "DEBUG :: $mysqllibdir\n";
     my ($MYSQLLIBDIR,$MYSQLLIB) =
 	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
 			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
 			 "libmysqlclient");
+
     if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
-	$MYSQLLIB .= " -L/usr/$LLIB";
-	if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
-	if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
-	if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
-	$MYSQLLIB .= " -lz";
+        # if ( $mysqlconf ){
+	if ( 1==0 ){
+	    # Do not guess, just take it - this leads to a cons error though TBC
+	    chomp($MYSQLLIB = `$mysqlconf  --libs`);
+	    # mysqlconf returns (on SL5, 64 bits)
+	    #  -L/usr/lib64/mysql -lmysqlclient -lz -lcrypt -lnsl -lm -L/usr/lib64 -lssl -lcrypto
+	} else {
+	    $MYSQLLIB .= " -L/usr/$LLIB";
+	    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
+	    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
+	    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
+	    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
+	    $MYSQLLIB .= " -lz";
+	    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
+	}
     }
     print "Use MYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
 	if $MYSQLLIBDIR && ! $param::quiet;
@@ -842,7 +878,7 @@
 		      'OPTSTAR'         => $OPTSTAR,
 		      'QTDIR'           => $QTDIR,
 		      'COIN3DIR'        => $COIN3DIR,
-            'IVROOT'          => $IVROOT,
+		      'IVROOT'          => $IVROOT,
 		      'HOME'            => $HOME
 		      },
 		  'Packages' => {
@@ -861,22 +897,22 @@
 			    'FPPFLAGS' => $CERNLIB_FPPFLAGS,
 			    'CPPFLAGS' => $CERNLIB_CPPFLAGS,
 			    'CERNLIBS' => $CERNLIBS
-				     },
+			    },
 		       'MYSQL' => {
 			   'LIBDIR'=> $MYSQLLIBDIR,
 			   'INCDIR'=> $MYSQLINCDIR,
 			   'LIBS'  => $MYSQLLIB
-			   },
-		        'QT' => {
-             'QT_VERSION' => $QT_VERSION,
+		           }, 
+		       'QT' => {
+			    'QT_VERSION' => $QT_VERSION,
 			    'DIR'        => $QTDIR,
 			    'INCDIR'     => $QTINCDIR,
 			    'BINDIR'     => $QTBINDIR,
 			    'FLAGS'      => $QTFLAGS,
 			    'LIBDIR'     => $QTLIBDIR,
 			    'LIBS'       => $QTLIBS
-			    },
-		        'COIN3D' => {
+			},
+		       'COIN3D' => {
 			    'DIR'   => $COIN3DIR,
 			    'INCDIR'=> $COIN3DINCDIR,
 			    'BINDIR'=> $COIN3DBINDIR,
