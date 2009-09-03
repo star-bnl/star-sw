@@ -22,7 +22,7 @@ if ($env->{ENV}->{STAR_SYS} =~ /i386/) {
 }
 
 my $CXX_VERSION= $env->{CXX_VERSION};
-#print "DEBUG CXX_VERSION -- $CXX_VERSION\n";
+# print "DEBUG CXX_VERSION -- $CXX_VERSION\n";
 
 $CPPPATH = "#" . $Dir . "/src" .  $main::PATH_SEPARATOR . $ObjDir . "/src";
 my $LD        = $env->{LD}; #!
