@@ -30,16 +30,17 @@ my $CXX_VERSION= $env->{CXX_VERSION};
 
 
 if ($FC eq 'pgf77') { 
-#  $CERNLIBS = `cernlib kernlib`;
-#  chomp($CERNLIBS);
-  $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
-  $FFLAGS   = $env->{G77FLAGS}; 
-  $FEXTEND  = $env->{G77EXTEND};
+    #  $CERNLIBS = `cernlib kernlib`;
+    #  chomp($CERNLIBS);
+    $FC       = $env->{G77}; 
+    print "set FC => $FC ==============================\n" if $param::debug;
+    $FFLAGS   = $env->{G77FLAGS}; 
+    $FEXTEND  = $env->{G77EXTEND};
 }
 my $LD        = $env->{LD}; #!
-#if ($LD eq 'g++') {
+# if ($LD eq 'g++') {
 #  $LD = "gcc";
-#} 
+# } 
 #                                          or $LD eq 'icpc'
 if ($LD eq $env->{CC} or $LD eq $env->{CXX} or $LD eq 'icpc') {$LD = $FC;}
 if ($LD eq 'gcc' && $CXX_VERSION < 4 ) { 
@@ -50,10 +51,10 @@ if ($FC eq 'g77' || $FC eq "gfortran") {
   if ($env->{CXX_VERSION} == 3) {$Libraries .= " -lfrtbegin";}
   $Libraries .= " " . $env->{LIBG2C};
 }
-#if ($FC eq 'ifort') { 
+# if ($FC eq 'ifort') { 
 #  my $LIBIFCPATH    = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
 #  $Libraries .= " " . $LIBIFCPATH . "/for_main.o"; 
-#}
+# }
 $env2 = $env->clone('FC'           => $FC,
 		    'LD'           => $LD,
 		    'LDFLAGS'      => $LDFLAGS,
@@ -68,15 +69,15 @@ $env2 = $env->clone('FC'           => $FC,
 my @srcc = script::find_sources($Dir);# print "src = @srcc\n";
 my @src = ();
 foreach my $s (@srcc) {
-  next if $s =~ /^cmt/;
-  push @src, $s;
+    next if $s =~ /^cmt/;
+    push @src, $s;
 }
 if ($#src > -1) {
-  script::Keep $pkg;
-  Program      $env2 $pkg, @src;
-  Depends $env2 $pkg, $BIN . "/agetof.def";
-  Install $env2 $BIN, $pkg;
-  Install $env2 $BIN, "agetof.def";
-  InstallAs $env2 $BIN . "/geant3", $BIN . "/" . $pkg;
-  InstallAs $env2 $BIN . "/geant3.def", $BIN . "/agetof.def";
+    script::Keep $pkg;
+    Program      $env2 $pkg, @src;
+    Depends $env2 $pkg, $BIN . "/agetof.def";
+    Install $env2 $BIN, $pkg;
+    Install $env2 $BIN, "agetof.def";
+    InstallAs $env2 $BIN . "/geant3", $BIN . "/" . $pkg;
+    InstallAs $env2 $BIN . "/geant3.def", $BIN . "/agetof.def";
 }  
