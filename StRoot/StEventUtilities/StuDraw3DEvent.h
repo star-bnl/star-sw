@@ -1,32 +1,46 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.9 2009/05/14 20:56:25 fine Exp $
-// *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
+// $Id: StuDraw3DEvent.h,v 1.10 2009/09/03 16:49:14 fine Exp $
+// *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
 #include "StThreeVector.hh"
 #include "StEnumerations.h"
 
-  ///////////////////////////////////////////////////////////////////////
-  //
-  // class StuDraw3DEvent - to draw the StEvent primitives like StTrack and StMeasuredPoint 
-  // as 3D points and 3D lines
-  // decoratated with the STAR detector geometry
-  //
-  //
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
-  //
-  ///////////////////////////////////////////////////////////////////////
-  
+
 class StTrack;
 class StMeasuredPoint;
 class StEvent;
 class StTpcHitCollection;
 class StSPtrVecTrackNode;
 
-enum EStuDraw3DEvent {kUnusedHitsOnly=-1,kUsedHits=0,kUsedHitsTracks=1,kTracksOnly=2};
+enum EStuDraw3DEvent {kUnusedHitsOnly=-1 //!< Render the unused hits only
+                     ,kUsedHits=0        //!< Render the "used" hits
+                     ,kUsedHitsTracks=1  //!< Render the "used" hits and tracks
+                     ,kTracksOnly=2      //!< Render the tracks only no hit
+      };
 
+//! \author Valery Fine(fine@bnl.gov)
+//! \date 27/04/2008
+
+/*! \brief  Class StuDraw3DEvent - to draw the 3D StEvent primitives like 
+ *          StTrack, StHit, StVertex decorated with the STAR detector geometry
+ */
+/// \author Valery Fine (fine@bnl.gov)
+/// \date 27/04/2008
+///
+///  Class StuDraw3DEvent provides the simple way to visualize the event 
+///  primitives in 3D quickly against of the STAR detector 
+///  geometry.
+///  One instance of the class is instantiated as soon as the class shared library
+///  is loaded.
+///  This allows to use the class object (invoke class methods) with one C++ statement. 
+///  This  is to allow creating the 3D views "on fly", 
+///  for example, from the GNU debugger (gdb) command prompt 
+///  \image  html Draw3DClass.png "Example of the STAR reconstructed event rendering"
+///
+////////////////////////////////////////////////////////////////////////
 class StuDraw3DEvent : public StDraw3D
 {
   private:
@@ -87,5 +101,4 @@ template <class T> TObject *StuDraw3DEvent::Vector(const StThreeVector<T> &vecto
      const StDraw3DStyle &style =  Style(sty);
      return Vector(vector.x(),vector.y(),vector.z(),style.Col(),style.Sty(),style.Siz()); 
 }
-
 #endif

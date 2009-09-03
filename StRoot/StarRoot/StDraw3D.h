@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.24 2009/05/26 19:07:06 fine Exp $
+// $Id: StDraw3D.h,v 1.25 2009/09/03 16:49:14 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -8,24 +8,34 @@
 #include "TString.h"
 #include <map>
 
-  //
-  //  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
-  //  decoratated with the STAR detector geometry
-  //
-  //  It provides the simple way to visualize the event 
-  //  primitives in 3D against of the STAR detector 
-  //  geometry quickly.
-  //
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
+  ///
+  ///  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
+  ///  decorated with the STAR detector geometry
+  ///
+  ///  It provides the simple way to visualize the event 
+  ///  primitives in 3D against of the STAR detector 
+  ///  geometry quickly.
+  ///
+  ///  \image html Draw3DClass.png
   
 class TVirtualPad;
 class TVirtualViewer3D;
 
-enum EDraw3DStyle {kVtx,kPrimaryTrack,kGlobalTrack,kUsedHit,kUnusedHit,kTrackBegin,kTrackEnd,kUser};
+//! EDraw3DStyle defines the set of the pre-defined "STAR event component" styles
+enum EDraw3DStyle {kVtx           //!< "Vertex" style
+                  ,kPrimaryTrack  //!< "Primary" track style
+                  ,kGlobalTrack   //!< "Global" track style
+                  ,kUsedHit       //!< "Used" hit style
+                  ,kUnusedHit     //!< "Unsed" hit style
+                  ,kTrackBegin    //!< The track "begin" point
+                  ,kTrackEnd      //!< The track "end" point
+                  ,kUser          //!< "Custom" style
+};
 
+//! StDraw3DStyle maps "STAR event" EDraw3DStyle onto ROOT  \b (color,style,size) attributes
 class StDraw3DStyle {
    private:
-       EDraw3DStyle  fType;
+       EDraw3DStyle  fType; 
        Color_t fColor;
        Style_t fSty;
        Size_t  fSiz;
@@ -48,15 +58,23 @@ class StDraw3DStyle {
      void         SetSiz(Size_t  siz) { Siz() = siz;}
      void         SetType(Color_t col, Style_t sty, Size_t  siz)
                   { SetCol(col); SetSiz(siz); SetSty(sty);  }
-     
- //    operator Color_t ()  const { return Col();}
- //    operator Style_t ()  const { return Sty();}
- //    operator Size_t  ()  const { return Siz();}
 };
 
 
 class view_3D;
 
+//! \author Valery Fine(fine@bnl.gov)
+//! \date 27/04/2008
+
+/*! \brief  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
+ *          decorated with the STAR detector geometry
+ */
+///
+///  Class provides the simple way to visualize the event 
+///  primitives in 3D against of the STAR detector 
+///  geometry quickly.
+///
+///  \image html Draw3DClass.png
 class StDraw3D : public TObject
 {
    private:
