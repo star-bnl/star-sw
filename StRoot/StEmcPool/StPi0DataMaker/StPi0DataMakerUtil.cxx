@@ -800,26 +800,32 @@ void getEventData(const StEvent *event, const StMcEvent *mc_event, StEmcGeom *em
     StJetMaker *jetMk = jetMaker ? dynamic_cast<StJetMaker*>(jetMaker) : 0;
     if (jetMk) {
 	{LOG_DEBUG << "Getting a jet from StJetMaker branch " << jetBranchName << endm;}
-	StJets *stjets = jetMk->getStJets(jetBranchName);
-	if (stjets) {
-	    TClonesArray *jets = stjets->jets();
-	    if (jets) {
-		Float_t eTMax = -100;
-		for (Int_t i = 0;i < jets->GetEntries();i++) {
-		    TObject *jetobj = (*jets)[i];
-		    StJet *jet = jetobj ? dynamic_cast<StJet *>(jetobj) : 0;
-		    if (jet && (jet->jetEt > eTMax)) {
-			eTMax = jet->jetEt;
-			eventData.jet.eta = jet->jetEta;
-			eventData.jet.phi = jet->jetPhi;
-			eventData.jet.eT = jet->jetEt;
-			eventData.jet.nPoints = jet->nBtowers;
-			eventData.jet.nTracks = jet->nTracks;
-		    }
-		}
-		{LOG_DEBUG << "Jet eta = " << eventData.jet.eta << ", phi = " << eventData.jet.phi << ", eT = " << eventData.jet.eT << ", nPoints = " << eventData.jet.nPoints << ", nTracks = " << eventData.jet.nTracks << endm;}
-	    } else {LOG_DEBUG << "No jets found" << endm;}
-	} else {LOG_WARN << "Jet finder branch " << jetBranchName << " not found" << endm;}
+        TTree* jetTree = jetMk->tree();
+        if (jetTree) {
+            TBranch* branch = jetTree->GetBranch(jetBranchName);
+            if (branch) {
+                StJets* stjets = *(StJets**)branch->GetAddress();
+		if (stjets) {
+		    TClonesArray *jets = stjets->jets();
+		    if (jets) {
+			Float_t eTMax = -100;
+			for (Int_t i = 0;i < jets->GetEntries();i++) {
+			    TObject *jetobj = (*jets)[i];
+			    StJet *jet = jetobj ? dynamic_cast<StJet *>(jetobj) : 0;
+			    if (jet && (jet->jetEt > eTMax)) {
+				eTMax = jet->jetEt;
+				eventData.jet.eta = jet->jetEta;
+				eventData.jet.phi = jet->jetPhi;
+				eventData.jet.eT = jet->jetEt;
+				eventData.jet.nPoints = jet->nBtowers;
+				eventData.jet.nTracks = jet->nTracks;
+			    }
+			}
+			{LOG_DEBUG << "Jet eta = " << eventData.jet.eta << ", phi = " << eventData.jet.phi << ", eT = " << eventData.jet.eT << ", nPoints = " << eventData.jet.nPoints << ", nTracks = " << eventData.jet.nTracks << endm;}
+		    } else {LOG_DEBUG << "No jets found" << endm;}
+		} else {LOG_WARN << "Jet finder branch " << jetBranchName << " address not found" << endm;}
+	    } else {LOG_WARN << "Jet finder branch " << jetBranchName << " not found" << endm;}
+	} else {LOG_WARN << "Jet tree not found" << endm;}
 	if (eventData.jet.eT == 0.0) {LOG_INFO << "StJetMaker didn't provide a jet" << endm;}
     }
     if (eventData.jet.eT == 0.0) {
