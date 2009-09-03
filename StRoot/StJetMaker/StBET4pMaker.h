@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.11 2009/09/01 12:25:30 pibero Exp $
+// $Id: StBET4pMaker.h,v 1.12 2009/09/03 23:36:09 pibero Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -40,6 +40,8 @@ public:
   void setUse2005Cuts(bool v = true) { _use2005Cuts = v; }
   void setUse2006Cuts(bool v = true) { _use2006Cuts = v; }
   void setUseBEMCEnergySum(bool v = true) { _useBEMCEnergySum = v; }
+  void setUseBEMCEnergyVariation(bool v = true) { _useBEMCEnergyVariation = v; }
+  void setBEMCEnergyVariationRatio(double ratio) {  _bemcEnergyVariationRatio= ratio; }
 
   int nDylanPoints() const;
   double sumEmcEt() const;
@@ -49,7 +51,7 @@ public:
   StBET4pMakerImp* GetImp() { return _imp; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.11 2009/09/01 12:25:30 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.12 2009/09/03 23:36:09 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -66,6 +68,9 @@ private:
   bool _use2005Cuts;
   bool _use2006Cuts;
   bool _useBEMCEnergySum;
+  bool _useBEMCEnergyVariation;
+  double _bemcEnergyVariationRatio;
+
 
   StBET4pMakerImp* _imp;
 
