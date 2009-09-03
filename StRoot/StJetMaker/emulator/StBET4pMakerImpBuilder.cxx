@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.7 2009/09/01 12:24:52 pibero Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.8 2009/09/03 23:36:14 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -9,6 +9,8 @@
 #include "StjTPCNull.h"
 #include "StjBEMCNull.h"
 #include "StjEEMCNull.h"
+
+#include "StjBEMCSockeVariation.h"
 
 #include "StjTPCTree.h"
 #include "StjBEMCTree.h"
@@ -28,10 +30,14 @@
 #include "StjTowerEnergyCutBemcStatus.h"
 #include "StjTowerEnergyCutAdc.h"
 
+#include "StjTowerEnergyListVariation.h"
+#include "StjTowerEnergyVariationEnergy.h"
+
 #include "StjAbstractTowerEnergyCorrectionForTracks.h"
 
 StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool useEEMC,
 					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts,
+					       bool useBEMCEnergyVariation, double bemcEnergyVariationRatio,
 					       StMuDstMaker* uDstMaker, bool doTowerSwapFix,
 					       StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks)
 {
@@ -59,6 +65,12 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
     bemcCut->addCut(new StjTowerEnergyCutEnergy());
     bemcCut->addCut(new StjTowerEnergyCutBemcStatus());
     bemcCut->addCut(new StjTowerEnergyCutAdc());
+  }
+
+  if( useBEMCEnergyVariation ) {
+    StjTowerEnergyListVariation* variation = new StjTowerEnergyListVariation;
+    variation->addVariation(new StjTowerEnergyVariationEnergy(bemcEnergyVariationRatio));
+    bemc = new StjBEMCSockeVariation(bemc, variation);
   }
 
   StjEEMC* eemc;
