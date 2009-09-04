@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.10 2009/09/03 16:49:14 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.11 2009/09/04 16:34:57 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -15,6 +15,8 @@ class StEvent;
 class StTpcHitCollection;
 class StSPtrVecTrackNode;
 
+/*! The constant defining the StTrack components to be rendered
+ */
 enum EStuDraw3DEvent {kUnusedHitsOnly=-1 //!< Render the unused hits only
                      ,kUsedHits=0        //!< Render the "used" hits
                      ,kUsedHitsTracks=1  //!< Render the "used" hits and tracks
@@ -38,6 +40,7 @@ enum EStuDraw3DEvent {kUnusedHitsOnly=-1 //!< Render the unused hits only
 ///  This allows to use the class object (invoke class methods) with one C++ statement. 
 ///  This  is to allow creating the 3D views "on fly", 
 ///  for example, from the GNU debugger (gdb) command prompt 
+///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">
 ///  \image  html Draw3DClass.png "Example of the STAR reconstructed event rendering"
 ///
 ////////////////////////////////////////////////////////////////////////
