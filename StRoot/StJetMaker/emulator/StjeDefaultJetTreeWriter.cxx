@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.4 2009/07/07 19:57:37 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.5 2009/09/04 20:07:51 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -11,6 +11,7 @@
 #include "StMuTrackFourVec.h"
 
 #include "StMuTrackEmu.h"
+#include "StMuTowerEmu.h"
 
 #include <StJetFinder/StProtoJet.h>
 
@@ -128,11 +129,11 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
     else
       detectorId = kUnknownId;
       
-    TrackToJetIndex t2j( jets.nJets(), muTrackIndex, detectorId );
-    t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e() );
-      
     StMuTrackEmu* track = particle->track();
     if (track) {
+      TrackToJetIndex t2j( jets.nJets(), muTrackIndex, detectorId );
+
+      t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e() );
       t2j.setCharge( track->charge() );
       t2j.setNhits( track->nHits() );
       t2j.setNhitsPoss( track->nHitsPoss() );
@@ -146,11 +147,24 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
       t2j.setphiext ( track->phiext() );
       t2j.setdEdx ( track->dEdx() );
       t2j.setTrackID( track->id() );
-    } else {
-      t2j.setTowerID(muTrackIndex);
+
+      jets.addTrackToIndex(t2j);
     }
-     
-    jets.addTrackToIndex(t2j);
+
+    StMuTowerEmu* tower = particle->tower();
+    if (tower) {
+      TowerToJetIndex t2j(jets.nJets());
+
+      t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e());
+      t2j.setTowerId(tower->id());
+      t2j.setDetectorId(tower->detectorId());
+      t2j.setAdc(tower->adc());
+      t2j.setPedestal(tower->pedestal());
+      t2j.setRms(tower->rms());
+      t2j.setStatus(tower->status());
+
+      jets.addTowerToIndex(t2j);
+    }
 
     if (mDetId==kTpcIdentifier) {
       aJet.nTracks++;
@@ -167,6 +181,4 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
   }
 
   jets.addJet(aJet);
-
 }
-
