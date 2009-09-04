@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeTowerEnergyListToStMuTrackFourVecList.h,v 1.2 2008/08/03 00:26:52 tai Exp $
+// $Id: StjeTowerEnergyListToStMuTrackFourVecList.h,v 1.3 2009/09/04 17:30:20 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTOWERENERGYLISTTOSTMUTRACKFOURVECLIST_H
 #define STJTOWERENERGYLISTTOSTMUTRACKFOURVECLIST_H
@@ -11,6 +11,8 @@ typedef std::vector<AbstractFourVec*> FourList;
 
 class StjTowerEnergyToTLorentzVector;
 
+class StMuTowerEmu;
+
 class StjeTowerEnergyListToStMuTrackFourVecList {
 
 public:
@@ -20,6 +22,8 @@ public:
   FourList operator()(const StjTowerEnergyList& energyDepositList);
 
 private:
+
+  StMuTowerEmu* createTowerEmu(const StjTowerEnergy& tower);
 
   StjTowerEnergyToTLorentzVector& _energyTo4p;
 

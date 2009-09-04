@@ -1,4 +1,4 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.12 2009/08/23 16:19:16 pibero Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.13 2009/09/04 17:29:54 pibero Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
@@ -48,7 +48,7 @@ Int_t StPythiaFourPMaker::Make()
     TLorentzVector p4_;
     p4_.SetPtEtaPhiM((*it).pt, (*it).eta, (*it).phi, (*it).m);
 
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, p4_, 0, (*it).mcparticleId - 1, kUnknownId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(0, 0, p4_, 0, (*it).mcparticleId - 1, kUnknownId);
 				
     tracks.push_back(pmu);
   }

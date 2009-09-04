@@ -1,4 +1,4 @@
-// $Id: StjeTrackListToStMuTrackFourVecList.cxx,v 1.2 2008/08/03 00:26:52 tai Exp $
+// $Id: StjeTrackListToStMuTrackFourVecList.cxx,v 1.3 2009/09/04 17:30:20 pibero Exp $
 #include "StjeTrackListToStMuTrackFourVecList.h"
 
 #include "StjTrackToTLorentzVector.h"
@@ -20,7 +20,7 @@ FourList StjeTrackListToStMuTrackFourVecList::operator()(const StjTrackList& tra
 
     TLorentzVector p4 = _trackTo4p(*track);
 
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(trackEmu, p4, (*track).charge, (*track).trackIndex, kTpcId);
+    StMuTrackFourVec* pmu = new StMuTrackFourVec(trackEmu, 0, p4, (*track).charge, (*track).trackIndex, kTpcId);
     ret.push_back(pmu);
   }
 
