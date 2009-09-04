@@ -1,49 +1,58 @@
-// $Id: StJets.cxx,v 1.1 2008/06/01 03:41:45 tai Exp $
+// $Id: StJets.cxx,v 1.2 2009/09/04 20:07:13 pibero Exp $
 #include "StJet.h"
 #include "StJets.h"
 
 #include "TrackToJetIndex.h"
+#include "TowerToJetIndex.h"
 
-ClassImp(StJets)
-
-using namespace std;
+ClassImp(StJets);
 
 StJets::StJets()
   : mDylanPoints(0)
-  , mSumEmcE(0.0)
+  , mSumEmcE(0)
   , mEventId(0)
   , mEventNumber(0)
   , mRunId(0)
   , mRunNumber(0)
   , mCorrupt(false)
   , mJets(new TClonesArray("StJet",100))
-  , mTrackToJetIndices(new TClonesArray("TrackToJetIndex",200)) 
+  , mTrackToJetIndices(new TClonesArray("TrackToJetIndex",100)) 
+  , mTowerToJetIndices(new TClonesArray("TowerToJetIndex",100))
 {
-	
 }
 
 StJets::~StJets()
 {
-    mJets->Delete();
-    delete mJets;
-    mJets = 0;
-	
-    mTrackToJetIndices->Delete();
-    delete mTrackToJetIndices;
-    mTrackToJetIndices = 0;
+  mJets->Delete();
+  mTrackToJetIndices->Delete();
+  mTowerToJetIndices->Delete();
+
+  delete mJets;
+  delete mTrackToJetIndices;
+  delete mTowerToJetIndices;
+
+  mJets = 0;
+  mTrackToJetIndices = 0;
+  mTowerToJetIndices = 0;
 }
 
 void StJets::Clear(bool clearAll)
 {
-    mJets->Clear();
-    mTrackToJetIndices->Clear();
-    mDylanPoints = 0;
-    mSumEmcE = 0.;
+  mJets->Clear();
+  mTrackToJetIndices->Clear();
+  mTowerToJetIndices->Clear();
+  mDylanPoints = 0;
+  mSumEmcE = 0.;
 }
 
 void StJets::addTrackToIndex(TrackToJetIndex& t2j)
 {
-  new ((*mTrackToJetIndices)[mTrackToJetIndices->GetLast() + 1]) TrackToJetIndex(t2j);
+  new ((*mTrackToJetIndices)[mTrackToJetIndices->GetEntriesFast()]) TrackToJetIndex(t2j);
+}
+
+void StJets::addTowerToIndex(TowerToJetIndex& t2j)
+{
+  new ((*mTowerToJetIndices)[mTowerToJetIndices->GetEntriesFast()]) TowerToJetIndex(t2j);
 }
 
 void StJets::addJet(StJet& jet)
@@ -51,81 +60,75 @@ void StJets::addJet(StJet& jet)
   new((*mJets)[nJets()]) StJet(jet);
 }
 
-vector<TrackToJetIndex*> StJets::particles(int jetIndex)
+vector<TrackToJetIndex*> StJets::tracks(int jetIndex) const
 {
-    int size = mTrackToJetIndices->GetLast()+1;
-    vector<TrackToJetIndex*> vec;
-    
-    for (int i=0; i<size; ++i) {
-		TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
-		if (id->jetIndex()==jetIndex) {
-			vec.push_back(id);
-		}
-    }
-    return vec;
+  vector<TrackToJetIndex*> v;
+  for (int i = 0; i < mTrackToJetIndices->GetEntriesFast(); ++i) {
+    TrackToJetIndex* track = (TrackToJetIndex*)mTrackToJetIndices->At(i);
+    if (track->jetIndex() == jetIndex) v.push_back(track);
+  }
+  return v;
 }
 
-TObjArray StJets::particles_(int jetIndex)
+vector<TowerToJetIndex*> StJets::towers(int jetIndex) const
 {
-  TObjArray ret;
-
-  vector<TrackToJetIndex*> vec = particles(jetIndex);
-  for (vector<TrackToJetIndex*>::iterator iter = vec.begin(); iter != vec.end(); ++iter)
-    ret.Add(*iter);
-
-  return ret;
-} 
+  vector<TowerToJetIndex*> v;
+  for (int i = 0; i < mTowerToJetIndices->GetEntriesFast(); ++i) {
+    TowerToJetIndex* tower = (TowerToJetIndex*)mTowerToJetIndices->At(i);
+    if (tower->jetIndex() == jetIndex) v.push_back(tower);
+  }
+  return v;
+}
 
 bool StJets::inBounds(int i)
 {
-    return (i>0 && i<nJets());
+  return (i>0 && i<nJets());
 }
 
-double StJets::e(int i) 
+double StJets::e(int i)  const
 {
-    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
-    return (j) ? j->E() : -999.;
+  StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
+  return (j) ? j->E() : -999.;
 }
 
-double StJets::et(int i) 
+double StJets::et(int i) const
 {
-    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
-    return (j) ? j->et() : -999.;
+  StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
+  return (j) ? j->et() : -999.;
 }
 
-double StJets::p(int i) 
+double StJets::p(int i) const
 {
-    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
-    return (j) ? j->P() : -999.;
+  StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
+  return (j) ? j->P() : -999.;
 }
 
-double StJets::pt(int i) 
+double StJets::pt(int i) const
 {
-    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
-    return (j) ? j->Pt() : -999.;
+  StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
+  return (j) ? j->Pt() : -999.;
 }
 
-double StJets::phi(int i)
+double StJets::phi(int i) const
 {
-    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
-    return (j) ? j->Phi() : -999.;
+  StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
+  return (j) ? j->Phi() : -999.;
 }
 
-double StJets::eta(int i) 
+double StJets::eta(int i) const
 {
-    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
-    return (j) ? j->Eta() : -999.;
+  StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
+  return (j) ? j->Eta() : -999.;
 }
 
-int StJets::nCell(int i) 
+int StJets::nCell(int i) const
 {
-    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
-    return (j) ? j->nCell : -999;
+  StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
+  return (j) ? j->nCell : -999;
 }
 
-int StJets::charge(int i) 
+int StJets::charge(int i) const
 {
-    StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
-    return (j) ? j->charge : -999;
+  StJet* j = dynamic_cast<StJet*>(mJets->UncheckedAt(i));
+  return (j) ? j->charge : -999;
 }
-
