@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.38 2009/08/31 23:38:57 fine Exp $
+// $Id: StDraw3D.cxx,v 1.39 2009/09/04 16:34:58 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -6,11 +6,13 @@
 #include "TPolyLine3D.h"
 #include "TSystem.h"
 #include "TROOT.h"
+#include "TColor.h"
 #include "TEnv.h"
 #include "StCheckQtEnv.h"
 #include "TStyle.h"
 #include "TVirtualViewer3D.h"
 #include <cassert>
+#include <cmath>
 
 static Color_t colorDefault = Color_t(-1);
 static Style_t styDefault   = Style_t(-1);
@@ -71,6 +73,23 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
       }
     }
     return viewer;
+}
+//! Maps the track \pt to the STAt StEvent track color code
+/*!
+  \param pt - pt value from some StEvent /StMuDst \c track object
+  \return the ROOT color index
+ */
+//___________________________________________________
+Color_t StDraw3DStyle::Pt2Color(double pt)
+{ 
+   const Int_t lightness    = 50;
+   const Int_t saturation   = 100;
+   Int_t hue  = (pt > 1.5 ) ? 0 : Int_t(256.*(1.-pt/1.5)); //color code from StuPostscript
+   Int_t r,g,b;
+   TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
+   // Normalize
+   float factor = 1./sqrt(1.*r*r+1.*g*g+1.*b*b);
+   return  TColor::GetColor(r*factor,g*factor,b*factor);
 }
 
 //___________________________________________________

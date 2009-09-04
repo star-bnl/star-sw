@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.17 2009/09/03 16:49:14 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.18 2009/09/04 16:34:57 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -24,7 +24,8 @@
                                with no extension\n
                                For all names on the list one should provide the iv file with 
                                the "iv" extension:\n
-                                     \code   <name>.iv \endcode
+                                     \code   <name>.iv \endcode   
+         \param detectorName = 0  - no detector geometry is to be rendered
          \param pad (default = 0) - The ROOT TPad to be used to render the event wired view
 \note 
    If this is the first instance of the class then the global pointer to the 
@@ -50,11 +51,12 @@ StuDraw3DEvent::~StuDraw3DEvent()
    if (gEventDisplay == this) gEventDisplay = 0;
 }
 
-//! Add \a track to the display list with the \a col color \sty sty and \siz size if provided
+//! Add \a track to the display list with the \a col color \a sty and \a size if provided
 /*! 
    \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
    \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
    \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TObject of \a track model
 */
 //___________________________________________________
 TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size_t siz)
@@ -68,7 +70,7 @@ TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Siz
 }
 
 //! This is an overloaded member function, provided for convenience.
-/*! Add \a track to the display list with the \a sty style if provided 
+/*! Add \a track to the display list with the \a sty pre-defined style if provided 
  */
 //___________________________________________________
 TObject *StuDraw3DEvent::Track(const StTrack &track, EDraw3DStyle sty)
@@ -77,12 +79,13 @@ TObject *StuDraw3DEvent::Track(const StTrack &track, EDraw3DStyle sty)
    return Track(track, style.Col(),style.Sty(),style.Siz() );
 }
 
-//! Add one \a hit to the display list with the \a col color \sty sty and \siz size if provided
+//! Add one \a hit to the display list with the \a col color \a sty and \a siz size if provided
 /*! Draw the StMeasuredPoint, StHit, StVertex with the graphical attribute provided
    \param   col - ROOT marker color (see:  http://root.cern.ch/root/html/TAttMarker.html )
    \param   sty - ROOT marker style (see:  http://root.cern.ch/root/html/TAttMarker.html )
    \param   siz - ROOT marker size (see:  http://root.cern.ch/root/html/TAttMarker.html )
- */
+   \return - a pointer to the ROOT "view" TObject of \a hit model
+*/
 //___________________________________________________
 TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit
                   ,  Color_t col,  Style_t sty,  Size_t siz)
@@ -95,7 +98,7 @@ TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit
 }
 
 //! This is an overloaded member function, provided for convenience.
-/*! Add \a hit to the display list with the \a sty style if provided 
+/*! Add \a hit to the display list with the \a sty pre-defined style if provided 
  */
 //___________________________________________________
 TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
@@ -105,7 +108,8 @@ TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
 }
 
 //! This is an overloaded member function, provided for convenience.
-/*! Add \a vertex to the display list with the \a col color \sty sty and \siz size if provided
+/*! Add \a vertex to the display list with the \a col color \a sty and \a siz size if provided
+   \return - a pointer to the ROOT "view" TObject of \a vertex model
  */
 //___________________________________________________
 TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vertex
@@ -116,9 +120,8 @@ TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vertex
 
 //! This is an overloaded member function, provided for convenience.
 /*! Add \a vtx to the display list with the \a sty style if provided 
-   \param   col - ROOT marker color (see:  http://root.cern.ch/root/html/TAttMarker.html )
-   \param   sty - ROOT marker style (see:  http://root.cern.ch/root/html/TAttMarker.html )
-   \param   siz - ROOT marker size (see:  http://root.cern.ch/root/html/TAttMarker.html )
+   \param   sty - EDraw3DStyle EventDisplay pre-defined style 
+   \return - pointer to the ROOT "view" TObject of \a vertex model
 */
 //___________________________________________________
 TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vtx, EDraw3DStyle sty)
@@ -129,8 +132,9 @@ TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vtx, EDraw3DStyle sty)
 
 //! Add all \b good hits for the given \a track to the display
 /*! the \c style and \c size vizual attributes are defined by the kUsedHit style
-    the \c color is defined by the tracl \c pt 
+    the \c color is defined by the track \c pt 
     \code double pt = track.geometry()->momentum().perp(); \endcode
+   \return - a pointer to the ROOT "view" TObject of \a vtx model
  */
 //___________________________________________________
 void  StuDraw3DEvent::Hits(const StTrack &track)
@@ -138,25 +142,14 @@ void  StuDraw3DEvent::Hits(const StTrack &track)
     // Draw hits the "track" was built from
     // with the graphical attributes defined by "track"
    if (track.flag() > 0 &&  track.detectorInfo()&& !track.bad() ) {
-      const Int_t lightness    = 50;
-      const Int_t saturation   = 100;
-      Int_t hue  = 0;
-
       Style_t sty = Style(kUsedHit).Sty();
       Size_t  siz = Style(kUsedHit).Siz();
       double pt = track.geometry()->momentum().perp();
-      hue = Int_t(256.*(1.-pt/1.5)); //color code from StuPostscript
-      if (pt > 1.5 ) hue = 0;
-      Int_t r,g,b;
-      TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
-      // Normalize
-      float factor = 1./TMath::Sqrt(1.*r*r+1.*g*g+1.*b*b);
-      Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
-      Hits(track, trackColor,sty,siz);
+      Hits(track, StDraw3DStyle::Pt2Color(pt),sty,siz);
    }
 }
 
-//! Add all hits of the given \a track to the display list with the \a col color \sty sty and \siz size if provided
+//! Add all hits of the given \a track to the display list with the \a col color \a sty and \a siz size if provided
 /*!
    \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
    \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
@@ -183,7 +176,7 @@ void  StuDraw3DEvent::Hits(const StTrack &track
 }
 
 //! This is an overloaded member function, provided for convenience.
-/*! Add all hits fof the given \a track to the display list with the \a sty style if provided
+/*! Add all hits fof the given \a track to the display list with the \a sty pre-defined style if provided
  */
 //___________________________________________________
 void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
@@ -194,14 +187,15 @@ void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
    Hits(track, style.Col(),style.Sty(),style.Siz());
 }
 
-//! Add all \a in  point of the give \a track to the display list with the \a col color \sty sty and \siz size if provided
+//! Add  the \a in  point of the given \a track to the display list with the \a col color \a sty and \a siz size if provided
 /*! 
    \param track - reference to the StTrack object from StEvent data structure
-   \param in      flag \c true (default) is to be set to ad the \a track  \c in point \n
+   \param in      flag \c true (default) is to be set to add the \a track  \c in point \n
                       \c false is to be set to add the \a track  \c out point to the list
    \param   col - ROOT marker color (see:  http://root.cern.ch/root/html/TAttMarker.html )
    \param   sty - ROOT marker style (see:  http://root.cern.ch/root/html/TAttMarker.html )
    \param   siz - ROOT marker size (see:  http://root.cern.ch/root/html/TAttMarker.html )
+   \return - a pointer to the ROOT "view" TObject of star/end point of \a track model
 */
 //___________________________________________________
 TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
@@ -216,7 +210,8 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
    \param track - reference to the StTrack object from StEvent data structure
    \param in    - flag \c true (default) is to be set to ad the \a track  \c in point \n
                       \c false is to be set to add the \a track  \c out point to the list
-   \param   sty - EDraw3DStyle visual style of this object.
+   \param   sty - EDraw3DStyle pre-defined visual style of this object.
+   \return - a pointer to the ROOT "view" TObject of star/end point of \a track model
 */
 //___________________________________________________
 TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_t in)
@@ -231,21 +226,16 @@ void StuDraw3DEvent::Tracks(const StEvent* event, StTrackType type)
    Hits(event,kTracksOnly,type);
 }
 
+
+//! Add all tracks of the given \a type from the \a theNodes to the display list.
+/*! the \c style and \c size vizual attributes are defined by the StTrackType \c global style
+    the \c color is defined by the track \c pt 
+    \code double pt = track.geometry()->momentum().perp(); \endcode
+ */
 //___________________________________________________
 void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes
       , StTrackType type)
 {
-   // const double lineWidth    = 0.4;
- //  const double sstep        = mFewerPointsPerTrack ? 4 : 1;
-   const Int_t lightness    = 50;
-   const Int_t saturation   = 100;
-   Int_t hue  = 0;
-
-   //
-   //  Handle options
-   //
-   // int  trackGrayLevel = mBlackBackground ? 1 : 0;
-
    StTrack *track;
    StThreeVectorD p;
    unsigned int i;
@@ -258,14 +248,7 @@ void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes
          )
       {
          double pt = track->geometry()->momentum().perp();
-         hue = Int_t(256.*(1.-pt/1.5)); //color code from StuPostscript
-         if (pt > 1.5 ) hue = 0;
-         Int_t r,g,b;
-         TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
-         // Normalize
-         float factor = 1./TMath::Sqrt(1.*r*r+1.*g*g+1.*b*b);
-         Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
-         Track(*track,trackColor);
+         Track(*track,StDraw3DStyle::Pt2Color(pt));
       }
    }
 }
@@ -278,10 +261,6 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
    if (!hits) return; // there is no hits
    unsigned int m, n, h;
    if (trackHitsOnly != kUnusedHitsOnly) {
-      const Int_t lightness    = 50;
-      const Int_t saturation   = 100;
-      Int_t hue  = 0;
-
       Style_t sty = Style(kUsedHit).Sty();
       Size_t  siz = Style(kUsedHit).Siz();
       Style_t styPnt = Style(kTrackBegin).Sty();
@@ -297,13 +276,7 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
          )
         {
             double pt = track->geometry()->momentum().perp();
-            hue = Int_t(256.*(1.-pt/1.5)); //color code from StuPostscript
-            if (pt > 1.5 ) hue = 0;
-            Int_t r,g,b;
-            TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
-            // Normalize
-            float factor = 1./TMath::Sqrt(1.*r*r+1.*g*g+1.*b*b);
-            Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
+            Color_t trackColor = StDraw3DStyle::Pt2Color(pt);
             if ( trackHitsOnly != kUsedHits) {
                Track(*track,trackColor);
                TrackInOut(*track, true,  trackColor,  styPnt, sizPnt);
@@ -334,6 +307,7 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
    }
 }
 
+//! \return The pointer to the current instance of the StuDraw3DEvent  class to visualize StEvent components
 //___________________________________________________
 StuDraw3DEvent *StuDraw3DEvent::Display(){ return gEventDisplay;}
 

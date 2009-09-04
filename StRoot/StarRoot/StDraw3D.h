@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.25 2009/09/03 16:49:14 fine Exp $
+// $Id: StDraw3D.h,v 1.26 2009/09/04 16:34:58 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -58,6 +58,7 @@ class StDraw3DStyle {
      void         SetSiz(Size_t  siz) { Siz() = siz;}
      void         SetType(Color_t col, Style_t sty, Size_t  siz)
                   { SetCol(col); SetSiz(siz); SetSty(sty);  }
+     static Color_t Pt2Color(double pt);
 };
 
 

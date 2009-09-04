@@ -1,28 +1,46 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.2 2009/08/31 23:59:23 fine Exp $
-// *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
+// $Id: StuDraw3DMuEvent.h,v 1.3 2009/09/04 16:34:58 fine Exp $
+// *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
 #include "StEnumerations.h"
 
-  ///////////////////////////////////////////////////////////////////////
-  //
-  // class StuDraw3DMuEvent - to draw the StEvent primitives like StMuTrack 
-  // as 3D points and 3D lines
-  // decoratated with the STAR detector geometry
-  //
-  //
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
-  //
-  ///////////////////////////////////////////////////////////////////////
   
 class StMuTrack;
 class StMuDst;
 
-enum EStuDraw3DMuEvent {kUnusedHitsOnly=-1,kUsedHits=0,kUsedHitsTracks=1,kTracksOnly=2};
+/*! The constant defining the StMuTrack components to be rendered
+ */
+enum EStuDraw3DMuEvent {
+                      kUnusedHitsOnly=-1 //!< Render the unused hits only
+                     ,kUsedHits=0        //!< Render the "used" hits
+                     ,kUsedHitsTracks=1  //!< Render the "used" hits and tracks
+                     ,kTracksOnly=2      //!< Render the tracks only no hit
+ };
 
+//! \author Valery Fine(fine@bnl.gov)
+//! \date 01/08/2009
+
+///////////////////////////////////////////////////////////////////////
+///
+/*! \brief  class StuDraw3DMuEvent - to draw the StMuDst primitives like StMuTrack 
+     as 3D points and 3D lines decoratated with the STAR detector geometry
+ */
+///
+///  Class StuDraw3DMuEvent provides the simple way to visualize the event 
+///  primitives in 3D quickly against of the STAR detector 
+///  geometry.
+///  One instance of the class is instantiated as soon as the class shared library
+///  is loaded.
+///  This allows to use the class object (invoke class methods) with one C++ statement. 
+///  This  is to allow creating the 3D views "on fly", 
+///  for example, from the GNU debugger (gdb) command prompt 
+///
+///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/StMuTracks.png">
+///
+///////////////////////////////////////////////////////////////////////
 class StuDraw3DMuEvent : public StDraw3D
 {
   private:
