@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.39 2009/09/04 16:34:58 fine Exp $
+// $Id: StDraw3D.cxx,v 1.40 2009/09/04 21:43:28 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -22,6 +22,7 @@ Color_t StDraw3D::fgColorDefault = Color_t(-1);
 Style_t StDraw3D::fgStyDefault   = Style_t(-1);
 Size_t  StDraw3D::fgSizDefault   = Size_t (-1);
 Color_t StDraw3D::fgBkColor      = kBlack;
+
 // Canvas counter to create the Unique Canvas names
 Int_t   StDraw3D::fDrawCanvasCounter = -1; 
 
@@ -29,14 +30,14 @@ ClassImp(StDraw3D)
            
   ////////////////////////////////////////////////////////////////////////
   //
-  //  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
-  //  decoratated with the STAR detector geometry
-  //
-  //  It provides the simple way to visualize the event 
-  //  primitives in 3D against of the STAR detector 
-  //  geometry quickly.
-  //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
-  //
+  ///  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
+  ///  decoratated with the STAR detector geometry
+  ///
+  ///  It provides the simple way to visualize the event 
+  ///  primitives in 3D against of the STAR detector 
+  ///  geometry quickly.
+  ///  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
+  ///
   ////////////////////////////////////////////////////////////////////////
 
 //___________________________________________________
@@ -74,7 +75,7 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
     }
     return viewer;
 }
-//! Maps the track \pt to the STAt StEvent track color code
+//! Maps the track \pt to the STAR StTrack track color code
 /*!
   \param pt - pt value from some StEvent /StMuDst \c track object
   \return the ROOT color index
@@ -167,6 +168,42 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
         else TPolyMarker3D::Inspect();
      }
 };
+      
+//! StDraw3D( const char *detectorName,TVirtualPad *pad) ctor
+/*!  
+     \param detectorName (default = "TPC") - the names of the STAR detectors 
+                                                 to be used as the "event primitives" background.
+                               The detectorName is a comma separated list of the OpenInventor files 
+                               with no extension\n
+                               For all names on the list one should provide the iv file with 
+                               the "iv" extension:\n
+                                     \code   <name>.iv \endcode   
+         \param detectorName = 0  - no detector geometry is to be rendered
+         \param pad (default = 0) - The ROOT TPad to be used to render the event wired view
+ \note This is the base class for the advanced EventDisplay subclasses. \n
+        Normaly you do not need to instantiate StDraw3D directly.
+              
+ \note StDraw class ctor defines the set of the pre-defines styles:
+ 
+\htmlonly 
+<center>
+  <table>
+  <thead><th> Style       </th><th> Color   </th><th> Style </th><th> Size </th><th> comment </th></thead>
+  <tr> <td> kVtx          </td><td> kYellow </td><td>  5    </td><td> 3.5 </td><td>  <a href="http://root.cern.ch/root/html/TAttMarker.html">3D marker</a> - vertex  </tr>
+  <tr> <td> kPrimaryTrack </td><td> kRed    </td><td>  1    </td><td> 2.00 </td><td> <a href="http://root.cern.ch/root/html/TAttLine.html">3D polyline</a> - track </tr>
+  <tr> <td> kGlobalTrack  </td><td> kRed    </td><td>  1    </td><td> 2.00 </td><td> <a href="http://root.cern.ch/root/html/TAttLine.html">3D polyline</a> - track </tr>
+  <tr> <td> kTrackBegin   </td><td> kYellow </td><td>  5    </td><td> 3.5 </td><td>  <a href="http://root.cern.ch/root/html/TAttMarker.html">3D marker</a> - vertex  </tr>
+  <tr> <td> kTrackEnd     </td><td> kYellow </td><td>  5    </td><td> 3.5 </td><td>  <a href="http://root.cern.ch/root/html/TAttMarker.html">3D marker</a> - vertex  </tr>
+  <tr> <td> kUsedHit      </td><td> kBlue   </td><td>  4    </td><td> 0.35 </td><td> <a href="http://root.cern.ch/root/html/TAttMarker.html">3D marker</a> - track start point  </td></tr>
+  <tr> <td> kUnusedHit    </td><td> kGreen  </td><td>  1    </td><td> 1.00 </td><td> <a href="http://root.cern.ch/root/html/TAttMarker.html">3D marker</a> - track end point   </td></tr>
+  </table>
+  </center>
+ \endhtmlonly
+ \sa http://root.cern.ch/root/html/TColor.html
+ \sa http://root.cern.ch/root/html/TAttLine.html
+ \sa http://root.cern.ch/root/html/TAttMarker.html
+
+*/
 //___________________________________________________
 StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
       , fDetectorName(detectorName),fMaster(0)
@@ -231,24 +268,34 @@ StDraw3D::~StDraw3D()
     }
 }
 
+//! \return The TString of the comma separated names 
 //__________________________________________________________________________________
 const TString &StDraw3D::DetectorNames() const 
 {
    // return the list of the names 
    return fDetectorName; 
 } 
+/*! \return The TPad pointer used to paint onto.
+ */
 //__________________________________________________________________________________
 TVirtualPad *StDraw3D::Pad() const 
 { 
    return fMaster ? fMaster->Pad() : fPad;
 }
 
+//! \return The TVirtualViewer3D viewer pointer used to render into.
 //__________________________________________________________________________________
 TVirtualViewer3D *StDraw3D::Viewer() const
 {
    return fMaster ? fMaster->Viewer() : fViewer;
 }
 
+//! Set the list of the detector names to be used as the event "background"
+/*! \param  nameDetectors - a comma separated list of the OpenInventor files with no extension\n
+                               For all names on the list one should provide the iv file with 
+                               the "iv" extension:\n
+                              \code   <name>.iv \endcode   
+ */   
 //__________________________________________________________________________________
 void StDraw3D::SetDetectors(const char*nameDetectors)
 {
@@ -261,6 +308,12 @@ void StDraw3D::SetDetectors(const char*nameDetectors)
       fDetectorName = nameDetectors;
    }
 }
+//! Append the detector names to the list of  the event "background" shapes.
+/*! \param  nameDetectors - a comma separated list of the OpenInventor files with no extension\n
+                               For all names on the list one should provide the iv file with 
+                               the "iv" extension:\n
+                              \code   <name>.iv \endcode   
+*/
 //__________________________________________________________________________________
 void StDraw3D::AddDetectors(const char*nameDetectors)
 { 
@@ -276,6 +329,7 @@ void StDraw3D::AddDetectors(const char*nameDetectors)
    }
 }
 
+//! Remove all objects fron the screen
 //___________________________________________________
 void  StDraw3D::Clear(Option_t *opt)
 {
@@ -303,6 +357,10 @@ TObject *StDraw3D::Draw(TObject *o)
    }
    return o;
 }
+//! The the TROOT color as the widget background
+/*! 
+    \param newBkColor - ROOT index of the color to paint the widget backgorund ( \sa http://root.cern.ch/root/html/TColor.html )
+*/
 //___________________________________________________
 void StDraw3D::SetBkColor(Color_t newBkColor)
 {
@@ -312,6 +370,17 @@ void StDraw3D::SetBkColor(Color_t newBkColor)
    if (pad && pad->GetFillColor() != fBkColor)
        pad->SetFillColor(fBkColor);
 }
+
+//! Map the predefined style \a type to the ROOT graphical attributes \a col color \a sty style \a siz size
+/*! 
+    Normally one does not need to call this  method. All pre-defined styles are to be filled by  StDraw3D class ctor
+    \param   type - The pre-define type we want to define
+    \param col - ROOT color attribute \sa http://root.cern.ch/root/html/TColor.html
+    \param sty - ROOT style attribute. It can be either line http://root.cern.ch/root/html/TAttLine.html or marker 
+                                       http://root.cern.ch/root/html/TAttMarker.html
+    \param size - ROOT graphical attribute size . It can be either line http://root.cern.ch/root/html/TAttLine.html or marker 
+                                       http://root.cern.ch/root/html/TAttMarker.html                                   
+ */
 //___________________________________________________
 const StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t sty,Size_t siz)
 {
@@ -426,13 +495,13 @@ TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
 //___________________________________________________
 void StDraw3D::Joint(StDraw3D *dsp)
 {
-   // The method to force two different instancses
+   // The method to force two different instances
    // of the StDraw3D class  paint onto one and the same
    // TPad.
 
    // Force "dsp" to share the fPad of this object
-   // As result of the "Joint method both objects 
-   // "this" as well as "dsp" will share the PAd of "this" object.
+   // As result of the "Joint" method both objects 
+   // "this" as well as "dsp" will share the TPad of "this" object.
    // The original TPad of "dsp" is to be abandoned if exists
 
    if (dsp) dsp->SetMaster(this);
