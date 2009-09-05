@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.6 2008/08/03 00:26:50 tai Exp $
+// $Id: StMuTrackEmu.h,v 1.7 2009/09/05 18:21:57 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -45,6 +45,9 @@ public:
   unsigned short nHitsDedx()   const { return _nHitsDedx; }
   unsigned short nHitsFit()    const { return _nHitsFit; }
   double         nSigmaPion()  const { return _nSigmaPion; }
+  double         nSigmaElectron() const { return _nSigmaElectron; }
+  double         nSigmaKaon() const { return _nSigmaKaon; }
+  double         nSigmaProton() const { return _nSigmaProton; }
   double         Tdca()        const { return _Tdca; }
   Float_t        dcaZ()        const { return _dcaZ; }
   Float_t        dcaD()        const { return _dcaD; }
@@ -53,9 +56,7 @@ public:
   double         etaext()      const { return _etaext; }
   double         phiext()      const { return _phiext; }
   double         dEdx()        const { return _dEdx; }
-			       
   int            trackIndex()  const { return _trackIndex; }
-			       
   short          id()          const { return _id; }
 
 private:
@@ -72,6 +73,9 @@ private:
   unsigned short _nHitsDedx;
   unsigned short _nHitsFit;
   double         _nSigmaPion;
+  double         _nSigmaElectron;
+  double         _nSigmaKaon;
+  double         _nSigmaProton;
   double         _Tdca;
   Float_t        _dcaZ;
   Float_t        _dcaD;
