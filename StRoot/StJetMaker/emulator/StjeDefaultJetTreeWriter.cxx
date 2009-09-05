@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.6 2009/09/05 18:21:57 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.7 2009/09/05 22:16:14 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -158,7 +158,8 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &stjets, StProtoJet& pj)
       t2j.setdEdx ( track->dEdx() );
       t2j.setTrackId( track->id() );
 
-      stjets.addTrackToIndex(t2j);
+      stjets.addTrackToIndex(t2j); // for backward compatibility
+      jet->addTrack((TrackToJetIndex*)stjets.tracks()->Last());
     }
 
     StMuTowerEmu* tower = particle->tower();
@@ -173,7 +174,8 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &stjets, StProtoJet& pj)
       t2j.setRms(tower->rms());
       t2j.setStatus(tower->status());
 
-      stjets.addTowerToIndex(t2j);
+      stjets.addTowerToIndex(t2j); // for backward compatibility
+      jet->addTower((TowerToJetIndex*)stjets.towers()->Last());
     }
 
     if (mDetId==kTpcIdentifier) {

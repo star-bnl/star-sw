@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.cxx,v 1.2 2009/09/05 18:18:05 pibero Exp $
+// $Id: StJet.cxx,v 1.3 2009/09/05 22:15:16 pibero Exp $
 // $Log: StJet.cxx,v $
+// Revision 1.3  2009/09/05 22:15:16  pibero
+// Add tracks and towers references to jet
+//
 // Revision 1.2  2009/09/05 18:18:05  pibero
 // Add utility functions for trigger patches
 //
@@ -52,8 +55,11 @@
 // Revision 1.0  2001/06/14 Akio Ogawa
 //
 //////////////////////////////////////////////////////////////////////
+
 #include <iostream>
 #include <stdio.h>
+
+#include "TrackToJetIndex.h"
 #include "StJet.h"
 
 ClassImp(StJet);
@@ -74,10 +80,6 @@ StJet::StJet()
   , jetPhi(0.0)
   , zVertex(-999)
 {
-  jetEt = Et();
-  jetPt = Pt();
-  jetEta = Eta();
-  jetPhi = Phi();
 }
 
 StJet::StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
@@ -96,6 +98,16 @@ StJet::StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
   jetPt = Pt();
   jetEta = Eta();
   jetPhi = Phi();
+}
+
+TrackToJetIndex* StJet::leadingChargedParticle() const
+{
+  TrackToJetIndex* lcp = 0;
+  for (int iTrack = 0; iTrack < numberOfTracks(); ++iTrack) {
+    TrackToJetIndex* t = track(iTrack);
+    if (!lcp || t->Pt() > lcp->Pt()) lcp = t;
+  }
+  return lcp;
 }
 
 Float_t StJet::detEta() const {
