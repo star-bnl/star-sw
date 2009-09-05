@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.cxx,v 1.1 2008/06/01 03:41:44 tai Exp $
+// $Id: StJet.cxx,v 1.2 2009/09/05 18:18:05 pibero Exp $
 // $Log: StJet.cxx,v $
+// Revision 1.2  2009/09/05 18:18:05  pibero
+// Add utility functions for trigger patches
+//
 // Revision 1.1  2008/06/01 03:41:44  tai
 // moved StJet, StJets, and TrackToJetIndex to StSpinPool/StJets
 //
@@ -53,31 +56,12 @@
 #include <stdio.h>
 #include "StJet.h"
 
-ClassImp(StJet)
+ClassImp(StJet);
 
 StJet::StJet()
   : TLorentzVector(0,0,0,0)
   , nCell(0)
   , charge(0)
-  , nTracks(0)
-  , nBtowers(0)
-  , nEtowers(0)
-  , tpcEtSum(0.0)
-  , btowEtSum(0.0)
-  , etowEtSum(0.0)
-  , jetEt(0.0)
-  , jetPt(0.0)
-  , jetEta(0.0)
-  , jetPhi(0.0)
-  , zVertex(-999)
-{
-  jetPhi = Phi();
-}
-
-StJet::StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
-  : TLorentzVector(lpx, lpy, lpz, lE)
-  , nCell(size)
-  , charge(c)
   , nTracks(0)
   , nBtowers(0)
   , nEtowers(0)
@@ -96,8 +80,22 @@ StJet::StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
   jetPhi = Phi();
 }
 
-StJet::~StJet()
+StJet::StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c)
+  : TLorentzVector(lpx, lpy, lpz, lE)
+  , nCell(size)
+  , charge(c)
+  , nTracks(0)
+  , nBtowers(0)
+  , nEtowers(0)
+  , tpcEtSum(0.0)
+  , btowEtSum(0.0)
+  , etowEtSum(0.0)
+  , zVertex(-999)
 {
+  jetEt = Et();
+  jetPt = Pt();
+  jetEta = Eta();
+  jetPhi = Phi();
 }
 
 Float_t StJet::detEta() const {
@@ -133,4 +131,96 @@ bool StJet::geomTrigger(int trigId) const {
         if (mGeomTriggers[i] == trigId) return true;
     }
     return false;
+}
+
+bool StJet::getJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
+{
+  //
+  // Pibero Djawotho <pibero@tamu.edu>
+  // Texas A&M University
+  // 5 September 2009
+  //
+
+  // Sanity check
+  if (jetPatch < 0 || jetPatch >= 12) return false;
+
+  //
+  // The jet patches are numbered starting with JP0 centered at 150 degrees
+  // looking from the West into the IR (intersection region) and increasing
+  // clockwise, i.e. JP1 at 90 degrees, JP2 at 30 degrees, etc. On the East
+  // side the numbering picks up at JP6 centered again at 150 degrees and
+  // increasing clockwise (again as seen from the *West* into the IR). Thus
+  // JP0 and JP6 are in the same phi location in the STAR coordinate system.
+  // So are JP1 and JP7, etc.
+  //
+  // Jet Patch#  Eta  Phi  Quadrant
+  //
+  //          0  0.5  150       10'
+  //          1  0.5   90       12'
+  //          2  0.5   30        2'
+  //          3  0.5  -30        4'
+  //          4  0.5  -90        6'
+  //          5  0.5 -150        8'
+  //          6 -0.5  150       10'
+  //          7 -0.5   90       12'
+  //          8 -0.5   30        2'
+  //          9 -0.5  -30        4'
+  //         10 -0.5  -90        6'
+  //         11 -0.5 -150        8'
+  //
+  // http://www.nikhef.nl/~ogrebeny/emc/files/Towers%20Layout.pdf
+  // http://www.nikhef.nl/~ogrebeny/emc/files/BEMC.pdf
+  // http://drupal.star.bnl.gov/STAR/system/files/BEMC_y2004.pdf
+  //
+  eta = (jetPatch < 6) ? 0.5 : -0.5;
+  phi = 150 - (jetPatch % 6) * 60; // Degrees
+
+  // Degrees to radians
+  phi *= TMath::DegToRad();
+
+  // Map phi into [-pi,pi]
+  phi = TVector2::Phi_mpi_pi(phi);
+
+  return true;
+}
+
+bool StJet::getJetPatchId(float eta, float phi, int& id)
+{
+  //
+  // Pibero Djawotho <pibero@tamu.edu>
+  // Texas A&M University
+  // 5 September 2009
+  //
+
+  // Jet patch id is left at -1 on failure
+  id = -1;
+
+  // Check range of eta
+  if (eta < -1 || eta > 1) return false;
+
+  // Map phi into [-pi,pi] if necessary
+  if (phi < -M_PI || phi > M_PI) phi = TVector2::Phi_mpi_pi(phi);
+
+  // Get jet patch id
+  static const double PI_OVER_3 = M_PI/3;
+
+  if (0 <= eta && eta <= 1) {
+    if ( 2*PI_OVER_3 <= phi && phi <         M_PI) id = 0;
+    if (   PI_OVER_3 <= phi && phi <  2*PI_OVER_3) id = 1;
+    if (           0 <= phi && phi <    PI_OVER_3) id = 2;
+    if (  -PI_OVER_3 <= phi && phi <            0) id = 3;
+    if (-2*PI_OVER_3 <= phi && phi <   -PI_OVER_3) id = 4;
+    if (       -M_PI <= phi && phi < -2*PI_OVER_3) id = 5;
+  }
+
+  if (-1 <= eta && eta < 0) {
+    if ( 2*PI_OVER_3 <= phi && phi <         M_PI) id = 6;
+    if (   PI_OVER_3 <= phi && phi <  2*PI_OVER_3) id = 7;
+    if (           0 <= phi && phi <    PI_OVER_3) id = 8;
+    if (  -PI_OVER_3 <= phi && phi <            0) id = 9;
+    if (-2*PI_OVER_3 <= phi && phi <   -PI_OVER_3) id = 10;
+    if (       -M_PI <= phi && phi < -2*PI_OVER_3) id = 11;
+  }
+
+  return (0 <= id && id < 12);
 }
