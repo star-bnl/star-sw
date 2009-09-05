@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.5 2009/09/04 20:07:51 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.6 2009/09/05 18:21:57 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -56,6 +56,8 @@ void StjeDefaultJetTreeWriter::Init()
   for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
     _jetTree->Branch((*it)._branchName.c_str(), "StJets", &((*it)._jets));
   }
+
+  _jetTree->BranchRef();
 }
 
 void StjeDefaultJetTreeWriter::Finish()
@@ -100,10 +102,13 @@ void StjeDefaultJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets
   }
 }
 
-void StjeDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
+void StjeDefaultJetTreeWriter::fillJet(StJets &stjets, StProtoJet& pj)
 {
-  StJet aJet(pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0);
-  aJet.zVertex = _uDstMaker.muDst()->event()->primaryVertexPosition().z();
+  StJet aJet(StJet(pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0));
+  stjets.addJet(aJet);
+  TClonesArray* jets = stjets.jets();
+  StJet* jet = (StJet*)jets->Last();
+  jet->zVertex = _uDstMaker.muDst()->event()->primaryVertexPosition().z();
 
   StProtoJet::FourVecList &particleList = pj.list();
   for(StProtoJet::FourVecList::iterator it2 = particleList.begin(); it2 != particleList.end(); ++it2)  {
@@ -131,29 +136,34 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
       
     StMuTrackEmu* track = particle->track();
     if (track) {
-      TrackToJetIndex t2j( jets.nJets(), muTrackIndex, detectorId );
+      TrackToJetIndex t2j( jets->GetLast(), muTrackIndex, detectorId, jet );
 
       t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e() );
+      t2j.setTrackId( track->id() );
+      t2j.setFlag( track->flag() );
       t2j.setCharge( track->charge() );
       t2j.setNhits( track->nHits() );
       t2j.setNhitsPoss( track->nHitsPoss() );
       t2j.setNhitsDedx( track->nHitsDedx() );
       t2j.setNhitsFit( track->nHitsFit() );
       t2j.setNsigmaPion( track->nSigmaPion() );
+      t2j.setNsigmaElectron( track->nSigmaElectron() );
+      t2j.setNsigmaKaon( track->nSigmaKaon() );
+      t2j.setNsigmaProton( track->nSigmaProton() );
       t2j.setTdca ( track->Tdca() );
       t2j.setTdcaz ( track->dcaZ() );
       t2j.setTdcaxy ( track->dcaD() );
       t2j.setetaext ( track->etaext() );
       t2j.setphiext ( track->phiext() );
       t2j.setdEdx ( track->dEdx() );
-      t2j.setTrackID( track->id() );
+      t2j.setTrackId( track->id() );
 
-      jets.addTrackToIndex(t2j);
+      stjets.addTrackToIndex(t2j);
     }
 
     StMuTowerEmu* tower = particle->tower();
     if (tower) {
-      TowerToJetIndex t2j(jets.nJets());
+      TowerToJetIndex t2j(jets->GetLast());
 
       t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e());
       t2j.setTowerId(tower->id());
@@ -163,22 +173,20 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &jets, StProtoJet& pj)
       t2j.setRms(tower->rms());
       t2j.setStatus(tower->status());
 
-      jets.addTowerToIndex(t2j);
+      stjets.addTowerToIndex(t2j);
     }
 
     if (mDetId==kTpcIdentifier) {
-      aJet.nTracks++;
-      aJet.tpcEtSum += particle->eT();
+      jet->nTracks++;
+      jet->tpcEtSum += particle->eT();
     }
     else if (mDetId==kBarrelEmcTowerIdentifier) {
-      aJet.nBtowers++;
-      aJet.btowEtSum += particle->eT();
+      jet->nBtowers++;
+      jet->btowEtSum += particle->eT();
     }
     else if (mDetId==kEndcapEmcTowerIdentifier) {
-      aJet.nEtowers++;
-      aJet.etowEtSum += particle->eT();
+      jet->nEtowers++;
+      jet->etowEtSum += particle->eT();
     }
   }
-
-  jets.addJet(aJet);
 }

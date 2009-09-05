@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeDefaultJetTreeWriter.h,v 1.4 2008/08/02 23:10:19 tai Exp $
+// $Id: StjeDefaultJetTreeWriter.h,v 1.5 2009/09/05 18:21:57 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJEDEFAULTJETTREEWRITER_H
 #define STJEDEFAULTJETTREEWRITER_H
@@ -36,8 +36,8 @@ public:
 
 private:
   
-  void fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
-  void fillJet(StJets &jets, StProtoJet& pj);
+  void fillJetTreeForOneJetFindingAlgorithm(StJets& stjets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
+  void fillJet(StJets &stjets, StProtoJet& pj);
 
   struct AnalyzerCtl {
     std::string _branchName;
