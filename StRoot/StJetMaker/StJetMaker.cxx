@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.72 2009/09/01 23:39:08 pibero Exp $
+// $Id: StJetMaker.cxx,v 1.73 2009/09/05 22:15:55 pibero Exp $
 #include "StJetMaker.h"
 
 #include "StjeParticleCollector.h"
@@ -13,6 +13,8 @@
 #include "StSpinPool/StJets/StJets.h"
 
 #include <list>
+#include "TTree.h"
+//#include "TBranch.h"
 
 ClassImp(StJetMaker)
   
@@ -86,4 +88,14 @@ Int_t StJetMaker::Finish()
 TTree* StJetMaker::tree() const 
 {
   return _treeWriter->jetTree();
+}
+
+StJets* StJetMaker::getStJets(const char* branchName) const
+{
+  TTree* jetTree = _treeWriter->jetTree();
+  if (jetTree) {
+    TBranch* branch = jetTree->GetBranch(branchName);
+    if (branch) return *(StJets**)branch->GetAddress();
+  }
+  return 0;
 }
