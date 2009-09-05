@@ -1,7 +1,11 @@
+// -*- mode:c++ -*-
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.2 2009/09/05 18:18:05 pibero Exp $
+// $Id: StJet.h,v 1.3 2009/09/05 22:15:16 pibero Exp $
 // $Log: StJet.h,v $
+// Revision 1.3  2009/09/05 22:15:16  pibero
+// Add tracks and towers references to jet
+//
 // Revision 1.2  2009/09/05 18:18:05  pibero
 // Add utility functions for trigger patches
 //
@@ -68,10 +72,14 @@
 #ifndef StJet_h
 #define StJet_h
 
+class TrackToJetIndex;
+class TowerToJetIndex;
+
 #include <cmath>
 #include <vector>
 
 #include "TLorentzVector.h"
+#include "TRefArray.h"
 
 /*!
   \class StJet
@@ -131,9 +139,10 @@ class StJet : public TLorentzVector {
   float neutralFraction() const { return (btowEtSum+etowEtSum)/(btowEtSum+etowEtSum+tpcEtSum); }
   float chargedFraction() const { return 1-neutralFraction(); }
   float rt() const { return neutralFraction(); }
+  TrackToJetIndex* leadingChargedParticle() const;
     
   //default radius is in between BSMD radii
-  Float_t      detEta(float vz, float r=231.72) const;
+  Float_t      detEta(float vz, float radius = 231.72) const;
   Float_t      detEta() const;
     
   //methods to record jet pointing at trigger tower/patch
@@ -148,10 +157,26 @@ class StJet : public TLorentzVector {
   // Utility functions to get jet patch eta and phi from jet patch id and vice-versa
   static bool getJetPatchEtaPhi(int id, float& eta, float& phi);
   static bool getJetPatchId(float eta, float phi, int& id);
+
+  // Tracks and towers associated with this jet
+  int numberOfTracks() const { return mTracks.GetEntriesFast(); }
+  int numberOfTowers() const { return mTowers.GetEntriesFast(); }
+
+  TrackToJetIndex* track(int i) const { return (TrackToJetIndex*)mTracks.At(i); }
+  TowerToJetIndex* tower(int i) const { return (TowerToJetIndex*)mTowers.At(i); }
+
+  TRefArray& tracks() { return mTracks; }
+  TRefArray& towers() { return mTowers; }
+
+  void addTrack(const TrackToJetIndex* track) { mTracks.Add((TObject*)track); }
+  void addTower(const TowerToJetIndex* tower) { mTowers.Add((TObject*)tower); }
     
  private:
   std::vector<int> mGeomTriggers;
-    
+
+  TRefArray mTracks;
+  TRefArray mTowers;
+
   ClassDef(StJet,8);
 };
 
