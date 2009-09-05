@@ -1,13 +1,15 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.7 2008/06/01 19:11:23 tai Exp $
+// $Id: TrackToJetIndex.h,v 1.8 2009/09/05 18:18:06 pibero Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
+class StJet;
+
 #include "TLorentzVector.h"
+#include "TRef.h"
 
 #include <ostream>
 #include <string>
-
 
 #ifndef StEnumerations_hh
 #define StEnumerations_hh
@@ -26,84 +28,87 @@ enum StDetectorId {
 
 #endif // StEnumerations_hh
 
-
 class TrackToJetIndex : public TLorentzVector
 {
 public:
-  TrackToJetIndex(int ji=-1, int ti=-1, StDetectorId id=kUnknownId);
-	
-  virtual ~TrackToJetIndex() {};
-    
-  int jetIndex() const {return mJetIndex;}
+  TrackToJetIndex(int jetIndex = -1, int trackIndex = -1, StDetectorId detId = kUnknownId, StJet* jet = 0);
 
-  int trackIndex() const {return mTrackIndex;}
-  // if detectorId == kTpcId,            the index of the track in the primaryTracks
-  // If detectorId == kBarrelEmcTowerId, the tower index (software id)
-  // If detectorId == kEndcapEmcTowerId, the tower ID
+  int jetIndex() const { return mJetIndex; }
+  int trackIndex() const {return mTrackIndex; }
+  StJet* jet() const { return (StJet*)mJet.GetObject(); }
 
-  int          towerID()    const   { return mTowerID; }
-  short        trackID()    const   { return mTrackID; }
-
-  StDetectorId detectorId() const   { return mDetId;      }
-	
-  Short_t        charge()     const { return mCharge;     }
+  short          trackId()    const { return mTrackId; }
+  StDetectorId   detectorId() const { return mDetId  ; }
+  short          flag()       const { return mFlag; }
+  short          charge()     const { return mCharge;     }
   unsigned short nHits()      const { return mNhits;      } //< Return total number of hits on track.
   unsigned short nHitsPoss()  const { return mNhitsPoss;  } //< Return number of possible hits on track.
   unsigned short nHitsDedx()  const { return mNhitsDedx;  } //< Return number of hits used for dEdx. 
   unsigned short nHitsFit()   const { return mNhitsFit;   } //< Return total number of hits used in fit. 
   double         nSigmaPion() const { return mNsigmaPion; } //< Rdistance to the calculated dE/dx band for pions in units of sigma.
+  double         nSigmaElectron() const { return mNsigmaElectron; }
+  double         nSigmaKaon() const { return mNsigmaKaon; }
+  double         nSigmaProton() const { return mNsigmaProton; }
   double         Tdca()       const { return mTdca;       }
   double         Tdcaz()      const { return mTdcaz;      }
   double         Tdcaxy()     const { return mTdcaxy;     }
   double         etaext()     const { return metaext;     }
   double         phiext()     const { return mphiext;     }
   double         dEdx()       const { return mdEdx;       }
+  double         jt()         const { return localMomentum().Perp(); }
+  double         ps()         const { return localMomentum().Px  (); }
+  double         pn()         const { return localMomentum().Py  (); }
+  double         pl()         const { return localMomentum().Pz  (); }
+  double         frag()       const;
 
+  TVector3 momentum() const { return Vect(); }
+  TVector3 localMomentum() const;
 
-  void setJetIndex(int n)            { mJetIndex = n; }
-  void setTrackIndex(int n)          { mTrackIndex = n; }
-  void setDetectorId(StDetectorId v) { mDetId = v; }
-
-  void setCharge(Short_t v)           { mCharge = v; }
+  void setJetIndex(int n)             { mJetIndex = n; }
+  void setTrackIndex(int n)           { mTrackIndex = n; }
+  void setDetectorId(StDetectorId v)  { mDetId = v; }
+  void setFlag(short v)               { mFlag = v; }
+  void setCharge(short v)             { mCharge = v; }
   void setNhits(unsigned short v)     { mNhits = v; }
   void setNhitsPoss(unsigned short v) { mNhitsPoss = v; }
   void setNhitsDedx(unsigned short v) { mNhitsDedx = v; }
   void setNhitsFit(unsigned short v)  { mNhitsFit = v; }
   void setNsigmaPion(double v)        { mNsigmaPion = v; }
+  void setNsigmaElectron(double v) { mNsigmaElectron = v; }
+  void setNsigmaKaon(double v) { mNsigmaKaon = v; }
+  void setNsigmaProton(double v) { mNsigmaProton = v; }
   void setTdca(double v)              { mTdca = v; }
   void setTdcaz(double v)             { mTdcaz = v; }
   void setTdcaxy(double v)            { mTdcaxy = v; }
   void setetaext(double v)            { metaext = v; }
   void setphiext(double v)            { mphiext = v; }
   void setdEdx(double v)              { mdEdx = v; }
-  void setTowerID(int v)              { mTowerID = v; }
-  void setTrackID(int v)              { mTrackID = v; }
-	
+  void setTrackId(int v)              { mTrackId = v; }
 
 private:
-
   int mJetIndex;
   int mTrackIndex;
   StDetectorId mDetId;
-	
-  Short_t mCharge;
+  short mFlag;
+  short mCharge;
   unsigned short mNhits;
   unsigned short mNhitsPoss;
   unsigned short mNhitsDedx;
   unsigned short mNhitsFit;
   double mNsigmaPion;
+  double mNsigmaElectron;
+  double mNsigmaKaon;
+  double mNsigmaProton;
   double mTdca; //jan 27, 2007	
   double mTdcaz; //jan 27, 2007
   double mTdcaxy; //jan 27, 2007
   double metaext;
   double mphiext;
   double mdEdx;
+  short  mTrackId;
+  TRef mJet;
 
-  int   mTowerID;
-  short mTrackID;
-
-  ClassDef(TrackToJetIndex, 5)
-
+  ClassDef(TrackToJetIndex, 6);
 };
 
 inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
@@ -125,6 +130,5 @@ inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
     
   return os <<"jetIndex:\t"<<t.jetIndex()<<"\ttrackIndex:\t"<<t.trackIndex()<<"\tdetId:\t"<<t.detectorId()<<"\t"<<idstring;
 }
-
 
 #endif // TRACKTOJETINDEX_H

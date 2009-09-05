@@ -1,4 +1,4 @@
-// $Id: StJets.cxx,v 1.2 2009/09/04 20:07:13 pibero Exp $
+// $Id: StJets.cxx,v 1.3 2009/09/05 18:18:05 pibero Exp $
 #include "StJet.h"
 #include "StJets.h"
 
@@ -60,22 +60,32 @@ void StJets::addJet(StJet& jet)
   new((*mJets)[nJets()]) StJet(jet);
 }
 
-vector<TrackToJetIndex*> StJets::tracks(int jetIndex) const
+TObjArray StJets::tracks(int jetIndex) const
+{
+  TObjArray a;
+  for (int i = 0; i < mTrackToJetIndices->GetEntriesFast(); ++i) {
+    TrackToJetIndex* track = (TrackToJetIndex*)mTrackToJetIndices->At(i);
+    if (track->jetIndex() == jetIndex) a.Add(track);
+  }
+  return a;
+}
+
+TObjArray StJets::towers(int jetIndex) const
+{
+  TObjArray a;
+  for (int i = 0; i < mTowerToJetIndices->GetEntriesFast(); ++i) {
+    TowerToJetIndex* tower = (TowerToJetIndex*)mTowerToJetIndices->At(i);
+    if (tower->jetIndex() == jetIndex) a.Add(tower);
+  }
+  return a;
+}
+
+vector<TrackToJetIndex*> StJets::particles(int jetIndex) const
 {
   vector<TrackToJetIndex*> v;
   for (int i = 0; i < mTrackToJetIndices->GetEntriesFast(); ++i) {
     TrackToJetIndex* track = (TrackToJetIndex*)mTrackToJetIndices->At(i);
     if (track->jetIndex() == jetIndex) v.push_back(track);
-  }
-  return v;
-}
-
-vector<TowerToJetIndex*> StJets::towers(int jetIndex) const
-{
-  vector<TowerToJetIndex*> v;
-  for (int i = 0; i < mTowerToJetIndices->GetEntriesFast(); ++i) {
-    TowerToJetIndex* tower = (TowerToJetIndex*)mTowerToJetIndices->At(i);
-    if (tower->jetIndex() == jetIndex) v.push_back(tower);
   }
   return v;
 }

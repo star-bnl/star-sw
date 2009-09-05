@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.1 2008/06/01 03:41:45 tai Exp $
+// $Id: StJet.h,v 1.2 2009/09/05 18:18:05 pibero Exp $
 // $Log: StJet.h,v $
+// Revision 1.2  2009/09/05 18:18:05  pibero
+// Add utility functions for trigger patches
+//
 // Revision 1.1  2008/06/01 03:41:45  tai
 // moved StJet, StJets, and TrackToJetIndex to StSpinPool/StJets
 //
@@ -65,10 +68,10 @@
 #ifndef StJet_h
 #define StJet_h
 
-#include "TObject.h"
-#include "TLorentzVector.h"
 #include <cmath>
 #include <vector>
+
+#include "TLorentzVector.h"
 
 /*!
   \class StJet
@@ -76,71 +79,80 @@
   StJet is a simple class for persistent storage of the properties of a single jet.
   The 4-momentum is handled via the inheritance from TLorentzVector, and jet-specific
   properties are added as public members.
- */
+*/
 class StJet : public TLorentzVector {
 
-public:  
-
+ public:
   StJet();
   StJet(double lE, double lpx, double lpy, double lpz, Int_t size, int c);
     
-  virtual ~StJet();
-
-    ///The number of 4-vectors contributing to this jet
-    Int_t nCell;
+  ///The number of 4-vectors contributing to this jet
+  Int_t nCell;
     
-    ///The summed coulomb charge of the tracks in this jet
-    int charge;
+  ///The summed coulomb charge of the tracks in this jet
+  int charge;
 
-    ///The number of tracks in this jet
-    int nTracks;
+  ///The number of tracks in this jet
+  int nTracks;
 
-    ///The number of Barrel towers in this jet
-    int nBtowers;
+  ///The number of Barrel towers in this jet
+  int nBtowers;
 
-    ///The number of Endcap towers in this jet
-    int nEtowers;
+  ///The number of Endcap towers in this jet
+  int nEtowers;
 
-    ///The summed Et from tracks
-    float tpcEtSum;
+  ///The summed Et from tracks
+  float tpcEtSum;
 
-    ///The summed Et from Barrel towers
-    float btowEtSum;
+  ///The summed Et from Barrel towers
+  float btowEtSum;
 
-    ///The summed Et from Endcap towers
-    float etowEtSum;
+  ///The summed Et from Endcap towers
+  float etowEtSum;
 
-    ///Et (stored for convenience when drawing TTree)
-    float jetEt;
+  ///Et (stored for convenience when drawing TTree)
+  float jetEt;
 
-    ///Pt (stored for convenience when drawing TTree)
-    float jetPt;
+  ///Pt (stored for convenience when drawing TTree)
+  float jetPt;
 
-    ///Eta (stored for convenience when drawing TTree)
-    float jetEta;
+  ///Eta (stored for convenience when drawing TTree)
+  float jetEta;
 
-    ///Phi (stored for convenience when drawing TTree)
-    float jetPhi;
+  ///Phi (stored for convenience when drawing TTree)
+  float jetPhi;
     
-    ///position of vertex used to reconstruct jet
-    float zVertex;
+  ///position of vertex used to reconstruct jet
+  float zVertex;
     
-    Float_t      et() const {return E()*sqrt(1.0-tanh(Eta())*tanh(Eta()));}
-    Float_t      ez() const {return E()*fabs(tanh(Eta()));}
+  Float_t      et() const {return E()*sqrt(1.0-tanh(Eta())*tanh(Eta()));}
+  Float_t      ez() const {return E()*fabs(tanh(Eta()));}
+
+  float neutralFraction() const { return (btowEtSum+etowEtSum)/(btowEtSum+etowEtSum+tpcEtSum); }
+  float chargedFraction() const { return 1-neutralFraction(); }
+  float rt() const { return neutralFraction(); }
     
-    //default radius is in between BSMD radii
-    Float_t      detEta(float vz, float r=231.72) const;
-    Float_t      detEta() const;
+  //default radius is in between BSMD radii
+  Float_t      detEta(float vz, float r=231.72) const;
+  Float_t      detEta() const;
     
-    //methods to record jet pointing at trigger tower/patch
-    void addGeomTrigger(int trigId);
-    bool geomTrigger(int trigId) const;
-    std::vector<int>& geomTriggers() { return mGeomTriggers; }
+  //methods to record jet pointing at trigger tower/patch
+  void addGeomTrigger(int trigId);
+  bool geomTrigger(int trigId) const;
+  std::vector<int>& geomTriggers() { return mGeomTriggers; }
+
+  // Distance in eta-phi plane between this jet and the argument
+  double deltaPhi(const StJet* jet) const { return Vect().DeltaPhi(jet->Vect()); }
+  double deltaR(const StJet* jet) const { return Vect().DeltaR(jet->Vect()); }
+
+  // Utility functions to get jet patch eta and phi from jet patch id and vice-versa
+  static bool getJetPatchEtaPhi(int id, float& eta, float& phi);
+  static bool getJetPatchId(float eta, float phi, int& id);
     
-private:
-    std::vector<int> mGeomTriggers;
+ private:
+  std::vector<int> mGeomTriggers;
     
-    ClassDef(StJet,7)
+  ClassDef(StJet,8);
 };
 
 #endif

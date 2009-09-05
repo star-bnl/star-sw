@@ -1,13 +1,13 @@
 // -*- mode: c++;-*-
-// $Id: StJets.h,v 1.2 2009/09/04 20:07:13 pibero Exp $
+// $Id: StJets.h,v 1.3 2009/09/05 18:18:05 pibero Exp $
 #ifndef StJets_h
 #define StJets_h
 
-#include "TObject.h"
-#include "TClonesArray.h"
-
 #include <vector>
 using std::vector;
+
+#include "TObject.h"
+#include "TClonesArray.h"
 
 #include "TrackToJetIndex.h"
 #include "TowerToJetIndex.h"
@@ -16,7 +16,7 @@ class StJet;
 
 /*!
   \class StJets
-  \authro T.Henry (Texas A&M)
+  \author T.Henry (Texas A&M)
   StJets persistently encapsulates the event-wise results of a given jet algorithm.  That is,
   it stores a container of StJet objects.  Additionally, it also stores some information
   to persistently store  the parent-daughter relationsip between jets and tracks.
@@ -51,13 +51,10 @@ public:
   void addTowerToIndex(TowerToJetIndex& t2j);
     
   ///Here's how you get the 4-momenta of a track/tower in a given jet.  This contains tracks and energy-corrected-towers.  Use this for Frag. Function
-  vector<TrackToJetIndex*> tracks(int jetIndex) const;
-  vector<TowerToJetIndex*> towers(int jetIndex) const;
-  vector<TrackToJetIndex*> particles(int jetIndex) const { return tracks(jetIndex); }
+  TObjArray tracks(int jetIndex) const;
+  TObjArray towers(int jetIndex) const;
+  vector<TrackToJetIndex*> particles(int jetIndex) const; // for backward compatibility
 
-  ///Access to a container of the charged-tracks associated with a jet
-  //    TrackVec jetParticles(StMuDst*, int jetIndex);
-    
   ///access to event numbers, used to synchronize with StMuDstMaker for simultaneous reading
   int eventId    () const { return mEventId    ; }
   int eventNumber() const { return mEventNumber; }
@@ -110,7 +107,7 @@ private:
 };
 
 //inlines
-inline void StJets::Clear(const char *opt)
+inline void StJets::Clear(Option_t* opt)
 {
   TObject::Clear(opt);
   mEventId = mEventNumber = mRunId = mRunNumber = 0;
