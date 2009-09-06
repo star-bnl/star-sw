@@ -26,23 +26,23 @@ public:
   {
   }
 
-  StJetCandidate(const TVector3& vertex, double pt, double eta, double phi, double E);
+  StJetCandidate(const TVector3& vertex, float pt, float eta, float phi, float E);
 
   TLorentzVector fourMomentum() const;
   TVector3 momentum() const;
 
-  double pt () const { return mPt ; }
-  double eta() const { return mEta; }
-  double phi() const { return mPhi; }
-  double E  () const { return mE  ; }
-  double px () const { return momentum().Px(); }
-  double py () const { return momentum().Py(); }
-  double pz () const { return momentum().Pz(); }
-  double detEta() const { return mDetEta; }
-  double sumTrackPt() const;
-  double sumTowerPt() const;
-  double neutralFraction() const { return sumTowerPt() / mPt; }
-  double chargedFraction() const { return sumTrackPt() / mPt; }
+  float pt () const { return mPt ; }
+  float eta() const { return mEta; }
+  float phi() const { return mPhi; }
+  float E  () const { return mE  ; }
+  float px () const { return momentum().Px(); }
+  float py () const { return momentum().Py(); }
+  float pz () const { return momentum().Pz(); }
+  float detEta() const { return mDetEta; }
+  float sumTrackPt() const;
+  float sumTowerPt() const;
+  float neutralFraction() const { return sumTowerPt() / mPt; }
+  float chargedFraction() const { return sumTrackPt() / mPt; }
   StJetTrack* leadingChargedParticle() const;
 
   int numberOfTracks() const { return mTracks.GetEntriesFast(); }
@@ -54,17 +54,17 @@ public:
   const TRefArray& tracks() const { return mTracks; }
   const TRefArray& towers() const { return mTowers; }
 
-  void setPtEtaPhiE(double pt, double eta, double phi, double E);
-  void setPxPyPzE(double px, double py, double pz, double E);
+  void setPtEtaPhiE(float pt, float eta, float phi, float E);
+  void setPxPyPzE(float px, float py, float pz, float E);
   void addTrack(StJetTrack* track) { mTracks.Add((TObject*)track); }
   void addTower(StJetTower* tower) { mTowers.Add((TObject*)tower); }
 
 private:
-  double mPt;
-  double mEta;
-  double mPhi;
-  double mE;
-  double mDetEta;
+  float mPt;
+  float mEta;
+  float mPhi;
+  float mE;
+  float mDetEta;
 
   TRefArray mTracks;
   TRefArray mTowers;
@@ -86,7 +86,7 @@ inline TVector3 StJetCandidate::momentum() const
   return mom;
 }
 
-inline void StJetCandidate::setPtEtaPhiE(double pt, double eta, double phi, double E)
+inline void StJetCandidate::setPtEtaPhiE(float pt, float eta, float phi, float E)
 {
   mPt  = pt;
   mEta = eta;
@@ -94,7 +94,7 @@ inline void StJetCandidate::setPtEtaPhiE(double pt, double eta, double phi, doub
   mE   = E;
 }
 
-inline void StJetCandidate::setPxPyPzE(double px, double py, double pz, double E)
+inline void StJetCandidate::setPxPyPzE(float px, float py, float pz, float E)
 {
   TVector3 mom(px, py, pz);
   mPt  = mom.Pt();
