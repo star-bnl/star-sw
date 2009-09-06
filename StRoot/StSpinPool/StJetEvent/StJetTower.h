@@ -11,8 +11,6 @@
 
 class StMuTowerEmu;
 
-#include "TVector3.h"
-
 #include "StJetElement.h"
 
 class StJetTower : public StJetElement {
@@ -20,6 +18,7 @@ public:
   StJetTower();
   StJetTower(const StMuTowerEmu* tower);
 
+  float energy()   const { return momentum().Mag(); }
   short adc()      const { return mAdc; }
   float pedestal() const { return mPedestal; }
   float rms()      const { return mRms; }
