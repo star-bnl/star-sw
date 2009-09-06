@@ -1,4 +1,4 @@
-// $Id: StjeTrackListToStMuTrackFourVecList.cxx,v 1.4 2009/09/06 05:43:01 pibero Exp $
+// $Id: StjeTrackListToStMuTrackFourVecList.cxx,v 1.5 2009/09/06 15:32:16 pibero Exp $
 #include "StjeTrackListToStMuTrackFourVecList.h"
 
 #include "StjTrackToTLorentzVector.h"
@@ -34,27 +34,30 @@ StMuTrackEmu* StjeTrackListToStMuTrackFourVecList::createTrackEmu(const StjTrack
   TVector3 momentum;
   momentum.SetPtEtaPhi(track.pt, track.eta, track.phi);
 
-  ret->_px             =  momentum.Px()	     ;
-  ret->_py	       =  momentum.Py()	     ;
-  ret->_pz	       =  momentum.Pz()	     ;
-  ret->_flag	       =  track.flag	     ;
-  ret->_nHits	       =  track.nHits	     ;
-  ret->_charge	       =  track.charge	     ;
-  ret->_nHitsPoss      =  track.nHitsPoss    ;
-  ret->_nHitsDedx      =  track.nHitsDedx    ;
-  ret->_nHitsFit       =  track.nHitsFit     ;
-  ret->_nSigmaPion     =  track.nSigmaPion   ;
-  ret->_Tdca	       =  track.Tdca	     ;
-  ret->_dcaZ	       =  track.dcaZ	     ;
-  ret->_dcaD	       =  track.dcaD	     ;
-  ret->_BField	       =  track.BField	     ;
-  ret->_bemcRadius     =  track.bemcRadius   ;
-  ret->_etaext	       =  track.exitEta      ;
-  ret->_phiext	       =  track.exitPhi      ;
-  ret->_dEdx	       =  track.dEdx	     ;
-  ret->_trackIndex     =  track.trackIndex   ;
-  ret->_id             =  track.id           ;
-  ret->_detectorId     =  track.detectorId   ;
+  ret->_px             =  momentum.Px()	      ;
+  ret->_py	       =  momentum.Py()	      ;
+  ret->_pz	       =  momentum.Pz()	      ;
+  ret->_flag	       =  track.flag	      ;
+  ret->_nHits	       =  track.nHits	      ;
+  ret->_charge	       =  track.charge	      ;
+  ret->_nHitsPoss      =  track.nHitsPoss     ;
+  ret->_nHitsDedx      =  track.nHitsDedx     ;
+  ret->_nHitsFit       =  track.nHitsFit      ;
+  ret->_nSigmaPion     =  track.nSigmaPion    ;
+  ret->_nSigmaKaon     =  track.nSigmaKaon    ;
+  ret->_nSigmaProton   =  track.nSigmaProton  ;
+  ret->_nSigmaElectron =  track.nSigmaElectron;
+  ret->_Tdca	       =  track.Tdca	      ;
+  ret->_dcaZ	       =  track.dcaZ	      ;
+  ret->_dcaD	       =  track.dcaD	      ;
+  ret->_BField	       =  track.BField	      ;
+  ret->_bemcRadius     =  track.bemcRadius    ;
+  ret->_etaext	       =  track.exitEta       ;
+  ret->_phiext	       =  track.exitPhi       ;
+  ret->_dEdx	       =  track.dEdx	      ;
+  ret->_trackIndex     =  track.trackIndex    ;
+  ret->_id             =  track.id            ;
+  ret->_detectorId     =  track.detectorId    ;
 
   return ret;
 }
