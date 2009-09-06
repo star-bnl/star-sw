@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.11 2009/09/04 16:34:57 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.12 2009/09/06 19:01:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -40,6 +40,13 @@ enum EStuDraw3DEvent {kUnusedHitsOnly=-1 //!< Render the unused hits only
 ///  This allows to use the class object (invoke class methods) with one C++ statement. 
 ///  This  is to allow creating the 3D views "on fly", 
 ///  for example, from the GNU debugger (gdb) command prompt 
+/// \n Try:
+/// \code
+///  > starnew	
+///  > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+///  > root.exe Draw3D.C
+/// \endcode
+///  to get the test picture below:\n
 ///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">
 ///  \image  html Draw3DClass.png "Example of the STAR reconstructed event rendering"
 ///

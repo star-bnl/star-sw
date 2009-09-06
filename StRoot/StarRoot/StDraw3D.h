@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.26 2009/09/04 16:34:58 fine Exp $
+// $Id: StDraw3D.h,v 1.27 2009/09/06 19:01:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -8,16 +8,6 @@
 #include "TString.h"
 #include <map>
 
-  ///
-  ///  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
-  ///  decorated with the STAR detector geometry
-  ///
-  ///  It provides the simple way to visualize the event 
-  ///  primitives in 3D against of the STAR detector 
-  ///  geometry quickly.
-  ///
-  ///  \image html Draw3DClass.png
-  
 class TVirtualPad;
 class TVirtualViewer3D;
 
@@ -75,7 +65,25 @@ class view_3D;
 ///  primitives in 3D against of the STAR detector 
 ///  geometry quickly.
 ///
-///  \image html Draw3DClass.png
+/// \n Try:
+  /// \code
+  ///  > starnew	
+  ///  > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+  ///  > root.exe Draw3D.C
+  /// \endcode
+  ///  to get the test picture below:\n
+  ///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">
+  ///  \image html Draw3DClass.png
+  ///  The base StDraw3D class is a controller connecting the arbitrary "model" object 
+  ///  with the arbitrary ROOT 3D class "view" object to implement the so-called 
+  ///  "Model / View" paradigm. \n
+  ///  In our case, the "Model" is an arbitrary object and the "View" is an instance of some ROOT 3D class. 
+  ///  To render views the StDraw3D instantiates the TCanvas and TVirtualViewer3D to allow 
+  ///  the user select interactively the "view" instance and invoke the model methods like:
+  ///
+  ///  \li \c TObject::Inspect() to inspect the model data-member values; 
+  ///  \li \c TObject::GetObjectInfo to label the view with the current model information; 
+  ///  \li \c TVirtualPadEditor to set the model attributes.
 class StDraw3D : public TObject
 {
    private:

@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.3 2009/09/04 16:34:58 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.4 2009/09/06 19:01:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -19,6 +19,17 @@
                                      \code   <name>.iv \endcode   
          \param detectorName = 0  - no detector geometry is to be rendered
          \param pad (default = 0) - The ROOT TPad to be used to render the event wired view
+\htmlonly
+<table>
+<tr>
+<th>Event over detector geometry
+<th>Event with no detector geometry
+</tr>
+<tr>
+<td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EventDisplayWGeom.png">
+<td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EventDisplayWOGeom.png">
+</tr></table>
+\endhtmlonly
 \note 
    If this is the first instance of the class then the global pointer to the 
          current "display" is to be set too \sa Display()
@@ -88,6 +99,7 @@ void StuDraw3DMuEvent::Tracks(StTrackType type)
 
 //! Add \a track to the display list with the \a col color \a sty and \a size if provided
 /*! 
+   \param track - reference to the StMuTrack object from StMuDst data structure
    \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
    \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
    \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
