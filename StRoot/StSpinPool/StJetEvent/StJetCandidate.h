@@ -56,6 +56,10 @@ public:
   const TRefArray& tracks() const { return mTracks; }
   const TRefArray& towers() const { return mTowers; }
 
+  // Utility functions to get jet patch eta and phi from jet patch id and vice-versa
+  static bool getJetPatchEtaPhi(int id, float& eta, float& phi);
+  static bool getJetPatchId(float eta, float phi, int& id);
+
   void setPtEtaPhiE(float pt, float eta, float phi, float E);
   void setPxPyPzE(float px, float py, float pz, float E);
   StJetTrack* addTrack(StJetTrack* track) { mTracks.Add((TObject*)track); return (StJetTrack*)mTracks.Last(); }
