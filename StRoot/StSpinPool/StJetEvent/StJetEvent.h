@@ -40,9 +40,9 @@ public:
 
   void setRunId(int runId) { mRunId = runId; }
   void setEventId(int eventId) { mEventId = eventId; }
-  void addJet(const StJetCandidate* jet);
-  StJetTrack* newTrack(const StMuTrackEmu* track);
-  StJetTower* newTower(const StMuTowerEmu* tower);
+  StJetCandidate* addJet(const StJetCandidate* jet);
+  StJetTrack* addTrack(const StMuTrackEmu* track);
+  StJetTower* addTower(const StMuTowerEmu* tower);
 
 private:
   int mRunId;
