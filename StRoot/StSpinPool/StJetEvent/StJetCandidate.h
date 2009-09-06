@@ -44,6 +44,8 @@ public:
   float neutralFraction() const { return sumTowerPt() / mPt; }
   float chargedFraction() const { return sumTrackPt() / mPt; }
   StJetTrack* leadingChargedParticle() const;
+  float deltaPhi(const StJetCandidate* jet) const { return momentum().DeltaPhi(jet->momentum()); }
+  float deltaR(const StJetCandidate* jet) const { return momentum().DeltaR(jet->momentum()); }
 
   int numberOfTracks() const { return mTracks.GetEntriesFast(); }
   int numberOfTowers() const { return mTowers.GetEntriesFast(); }
@@ -56,8 +58,8 @@ public:
 
   void setPtEtaPhiE(float pt, float eta, float phi, float E);
   void setPxPyPzE(float px, float py, float pz, float E);
-  void addTrack(StJetTrack* track) { mTracks.Add((TObject*)track); }
-  void addTower(StJetTower* tower) { mTowers.Add((TObject*)tower); }
+  StJetTrack* addTrack(StJetTrack* track) { mTracks.Add((TObject*)track); return (StJetTrack*)mTracks.Last(); }
+  StJetTower* addTower(StJetTower* tower) { mTowers.Add((TObject*)tower); return (StJetTower*)mTowers.Last(); }
 
 private:
   float mPt;

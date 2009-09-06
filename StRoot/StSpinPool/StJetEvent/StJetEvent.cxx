@@ -50,6 +50,6 @@ StJetCandidate* StJetEvent::jet(int i) const { return (StJetCandidate*)mJets->At
 StJetTrack* StJetEvent::track(int i) const { return (StJetTrack*)mTracks->At(i); }
 StJetTower* StJetEvent::tower(int i) const { return (StJetTower*)mTowers->At(i); }
 
-void StJetEvent::addJet(const StJetCandidate* jet) { new ((*mJets)[mJets->GetEntriesFast()]) StJetCandidate(*jet); }
-StJetTrack* StJetEvent::newTrack(const StMuTrackEmu* track) { return new ((*mTracks)[mTracks->GetEntriesFast()]) StJetTrack(track); }
-StJetTower* StJetEvent::newTower(const StMuTowerEmu* tower) { return new ((*mTowers)[mTowers->GetEntriesFast()]) StJetTower(tower); }
+StJetCandidate* StJetEvent::addJet(const StJetCandidate* jet) { return new ((*mJets)[mJets->GetEntriesFast()]) StJetCandidate(*jet); }
+StJetTrack* StJetEvent::addTrack(const StMuTrackEmu* track) { return new ((*mTracks)[mTracks->GetEntriesFast()]) StJetTrack(track); }
+StJetTower* StJetEvent::addTower(const StMuTowerEmu* tower) { return new ((*mTowers)[mTowers->GetEntriesFast()]) StJetTower(tower); }
