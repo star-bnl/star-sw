@@ -10,7 +10,7 @@
 
 ClassImp(StJetCandidate);
 
-StJetCandidate::StJetCandidate(const TVector3& vertex, double pt, double eta, double phi, double E)
+StJetCandidate::StJetCandidate(const TVector3& vertex, float pt, float eta, float phi, float E)
   : mPt(pt)
   , mEta(eta)
   , mPhi(phi)
@@ -18,7 +18,7 @@ StJetCandidate::StJetCandidate(const TVector3& vertex, double pt, double eta, do
 {
   // Front plate of BEMC towers or BPRS layer (See StEmcGeom/geometry/StEmcGeom.cxx)
   // This only works for BEMC jets.
-  static const double BEMC_RADIUS = 225.405;
+  static const float BEMC_RADIUS = 225.405;
 
   TVector3 pos = momentum();
   pos.SetPerp(BEMC_RADIUS);
@@ -36,16 +36,16 @@ StJetTrack* StJetCandidate::leadingChargedParticle() const
   return lcp;
 }
 
-double StJetCandidate::sumTrackPt() const
+float StJetCandidate::sumTrackPt() const
 {
-  double sumPt = 0;
+  float sumPt = 0;
   for (int i = 0; i < numberOfTracks(); ++i) sumPt += track(i)->pt();
   return sumPt;
 }
 
-double StJetCandidate::sumTowerPt() const
+float StJetCandidate::sumTowerPt() const
 {
-  double sumPt = 0;
+  float sumPt = 0;
   for (int i = 0; i < numberOfTowers(); ++i) sumPt += tower(i)->pt();
   return sumPt;
 }
