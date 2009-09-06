@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.40 2009/09/04 21:43:28 fine Exp $
+// $Id: StDraw3D.cxx,v 1.41 2009/09/06 19:01:51 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -26,19 +26,7 @@ Color_t StDraw3D::fgBkColor      = kBlack;
 // Canvas counter to create the Unique Canvas names
 Int_t   StDraw3D::fDrawCanvasCounter = -1; 
 
-ClassImp(StDraw3D)
-           
-  ////////////////////////////////////////////////////////////////////////
-  //
-  ///  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
-  ///  decoratated with the STAR detector geometry
-  ///
-  ///  It provides the simple way to visualize the event 
-  ///  primitives in 3D against of the STAR detector 
-  ///  geometry quickly.
-  ///  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
-  ///
-  ////////////////////////////////////////////////////////////////////////
+
 
 //___________________________________________________
 static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorName) 
@@ -180,13 +168,24 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
                                      \code   <name>.iv \endcode   
          \param detectorName = 0  - no detector geometry is to be rendered
          \param pad (default = 0) - The ROOT TPad to be used to render the event wired view
+ \htmlonly
+ <table>
+ <tr>
+ <th>Event over detector geometry
+ <th>Event with no detector geometry
+ </tr>
+ <tr>
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EventDisplayWGeom.png">
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EventDisplayWOGeom.png">
+ </tr></table>
+ \endhtmlonly
+             
  \note This is the base class for the advanced EventDisplay subclasses. \n
         Normaly you do not need to instantiate StDraw3D directly.
-              
+
  \note StDraw class ctor defines the set of the pre-defines styles:
  
 \htmlonly 
-<center>
   <table>
   <thead><th> Style       </th><th> Color   </th><th> Style </th><th> Size </th><th> comment </th></thead>
   <tr> <td> kVtx          </td><td> kYellow </td><td>  5    </td><td> 3.5 </td><td>  <a href="http://root.cern.ch/root/html/TAttMarker.html">3D marker</a> - vertex  </tr>
@@ -197,7 +196,6 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
   <tr> <td> kUsedHit      </td><td> kBlue   </td><td>  4    </td><td> 0.35 </td><td> <a href="http://root.cern.ch/root/html/TAttMarker.html">3D marker</a> - track start point  </td></tr>
   <tr> <td> kUnusedHit    </td><td> kGreen  </td><td>  1    </td><td> 1.00 </td><td> <a href="http://root.cern.ch/root/html/TAttMarker.html">3D marker</a> - track end point   </td></tr>
   </table>
-  </center>
  \endhtmlonly
  \sa http://root.cern.ch/root/html/TColor.html
  \sa http://root.cern.ch/root/html/TAttLine.html
@@ -375,10 +373,10 @@ void StDraw3D::SetBkColor(Color_t newBkColor)
 /*! 
     Normally one does not need to call this  method. All pre-defined styles are to be filled by  StDraw3D class ctor
     \param   type - The pre-define type we want to define
-    \param col - ROOT color attribute \sa http://root.cern.ch/root/html/TColor.html
+    \param col - ROOT color attribute  (See:  http://root.cern.ch/root/html/TColor.html) 
     \param sty - ROOT style attribute. It can be either line http://root.cern.ch/root/html/TAttLine.html or marker 
                                        http://root.cern.ch/root/html/TAttMarker.html
-    \param size - ROOT graphical attribute size . It can be either line http://root.cern.ch/root/html/TAttLine.html or marker 
+    \param siz - ROOT graphical attribute size . It can be either line http://root.cern.ch/root/html/TAttLine.html or marker 
                                        http://root.cern.ch/root/html/TAttMarker.html                                   
  */
 //___________________________________________________
@@ -693,3 +691,4 @@ void StDraw3D::ShowTest()
   for (int i=0;i<2;i++) { fine[i]->Modified(); fine[i]->Update();}
 //  while(!gSystem->ProcessEvents()){}; 
 }
+ClassImp(StDraw3D)

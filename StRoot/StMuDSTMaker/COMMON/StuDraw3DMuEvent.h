@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.3 2009/09/04 16:34:58 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.4 2009/09/06 19:01:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -25,8 +25,8 @@ enum EStuDraw3DMuEvent {
 
 ///////////////////////////////////////////////////////////////////////
 ///
-/*! \brief  class StuDraw3DMuEvent - to draw the StMuDst primitives like StMuTrack 
-     as 3D points and 3D lines decoratated with the STAR detector geometry
+/*! \brief  Class StuDraw3DMuEvent - to draw the StMuDst primitives like StMuTrack 
+     as 3D points and 3D lines decorated with the STAR detector geometry
  */
 ///
 ///  Class StuDraw3DMuEvent provides the simple way to visualize the event 
@@ -37,7 +37,13 @@ enum EStuDraw3DMuEvent {
 ///  This allows to use the class object (invoke class methods) with one C++ statement. 
 ///  This  is to allow creating the 3D views "on fly", 
 ///  for example, from the GNU debugger (gdb) command prompt 
-///
+/// \n Try:
+/// \code
+///  > stardev	
+///  > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+///  > root.exe $STAR/StRoot/macros/mudst/draw3DTracks.C
+/// \endcode
+///  to  read some MuDst ROOT file and get the pictire below:\n
 ///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/StMuTracks.png">
 ///
 ///////////////////////////////////////////////////////////////////////
