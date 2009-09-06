@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.7 2009/09/05 18:21:57 pibero Exp $
+// $Id: StMuTrackEmu.h,v 1.8 2009/09/06 05:43:01 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -31,6 +31,7 @@ public:
     , _dEdx(0)
     , _trackIndex(0)
     , _id(0)
+    , _detectorId(0)
  { }
 
   virtual ~StMuTrackEmu() { }
@@ -58,6 +59,7 @@ public:
   double         dEdx()        const { return _dEdx; }
   int            trackIndex()  const { return _trackIndex; }
   short          id()          const { return _id; }
+  short          detectorId()  const { return _detectorId; }
 
 private:
 
@@ -88,6 +90,7 @@ private:
   int            _trackIndex;
 
   short          _id;
+  short          _detectorId;
 };
 
 #endif // STMUTRACKEMU_H
