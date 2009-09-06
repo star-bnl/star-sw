@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.4 2009/08/12 18:26:59 pibero Exp $
+// $Id: StjTPCMuDst.cxx,v 1.5 2009/09/06 15:32:29 pibero Exp $
 #include "StjTPCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
@@ -61,6 +61,9 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.nHitsDedx  = mutrack->nHitsDedx();
   track.nHitsFit   = mutrack->nHitsFit();
   track.nSigmaPion = mutrack->nSigmaPion();
+  track.nSigmaKaon = mutrack->nSigmaKaon();
+  track.nSigmaProton = mutrack->nSigmaProton();
+  track.nSigmaElectron = mutrack->nSigmaElectron();
   track.Tdca       = mutrack->dcaGlobal().mag();
   track.dcaZ       = mutrack->dcaZ();
   track.dcaD       = mutrack->dcaD();
