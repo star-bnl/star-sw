@@ -30,6 +30,7 @@ public:
   float nSigmaProton()        const { return mNSigmaProton; }
   float nSigmaElectron()      const { return mNSigmaElectron; }
   const TVector3& exitPoint() const { return mExitPoint; }
+  short exitTowerId()         const { return mExitTowerId; }
   short exitDetectorId()      const { return mExitDetectorId; }
   float dca()                 const { return mDca; }
   float dcaZ()                const { return mDcaZ; }
@@ -48,6 +49,7 @@ private:
   float mNSigmaProton;
   float mNSigmaElectron;
   TVector3 mExitPoint;
+  short mExitTowerId;
   short mExitDetectorId;
   float mDca;
   float mDcaZ;

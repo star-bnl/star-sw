@@ -1,4 +1,4 @@
-// $Id: StjeTrackListToStMuTrackFourVecList.cxx,v 1.5 2009/09/06 15:32:16 pibero Exp $
+// $Id: StjeTrackListToStMuTrackFourVecList.cxx,v 1.6 2009/09/06 23:47:06 pibero Exp $
 #include "StjeTrackListToStMuTrackFourVecList.h"
 
 #include "StjTrackToTLorentzVector.h"
@@ -54,6 +54,8 @@ StMuTrackEmu* StjeTrackListToStMuTrackFourVecList::createTrackEmu(const StjTrack
   ret->_bemcRadius     =  track.bemcRadius    ;
   ret->_etaext	       =  track.exitEta       ;
   ret->_phiext	       =  track.exitPhi       ;
+  ret->_exitTowerId    =  track.exitTowerId   ;
+  ret->_exitDetectorId =  track.exitDetectorId;
   ret->_dEdx	       =  track.dEdx	      ;
   ret->_trackIndex     =  track.trackIndex    ;
   ret->_id             =  track.id            ;

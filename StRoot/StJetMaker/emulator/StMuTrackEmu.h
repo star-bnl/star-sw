@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.9 2009/09/06 15:32:16 pibero Exp $
+// $Id: StMuTrackEmu.h,v 1.10 2009/09/06 23:47:06 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -31,6 +31,8 @@ public:
     , _bemcRadius(0)
     , _etaext(0)
     , _phiext(0)
+    , _exitTowerId(0)
+    , _exitDetectorId(0)
     , _dEdx(0)
     , _trackIndex(0)
     , _id(0)
@@ -59,6 +61,8 @@ public:
   double         bemcRadius()  const { return _bemcRadius; }
   double         etaext()      const { return _etaext; }
   double         phiext()      const { return _phiext; }
+  short          exitTowerId() const { return _exitTowerId; }
+  short          exitDetectorId() const { return _exitDetectorId; }
   double         dEdx()        const { return _dEdx; }
   int            trackIndex()  const { return _trackIndex; }
   short          id()          const { return _id; }
@@ -88,6 +92,8 @@ private:
   double         _bemcRadius;
   double         _etaext;
   double         _phiext;
+  short          _exitTowerId;
+  short          _exitDetectorId;
   double         _dEdx;
 
   int            _trackIndex;
