@@ -1,4 +1,4 @@
-// $Id: EveDis.C,v 1.2 2008/05/16 17:36:52 fine Exp $
+// $Id: EveDis.C,v 1.3 2009/09/07 04:34:26 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #ifndef __CINT__
@@ -31,6 +31,7 @@ class EveDis : public StuDraw3DEvent {
   //      root.exe [1].L EveDis.C++
   //      root.exe [2] EveDis display;
   //      root.exe [3] display.Draw3DTest()
+  //      root.exe [3] display.Print("Draw3DTest.wrl");
   //
   //  See: http://www.star.bnl.gov/public/comp/vis/StDraw3D\n");
   //
@@ -49,17 +50,13 @@ EveDis(const char *detectorName="TPC",TVirtualPad *pad=0)
 ~EveDis(){ }
 
 //___________________________________________________
-void Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType type)
+void AddHits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType type)
 {
    if (!event) return; // no event
    const StTpcHitCollection* hits = event->tpcHitCollection();
    if (!hits) return; // there is no hits
    unsigned int m, n, h;
    if (trackHitsOnly != kUnusedHitsOnly) {
-      const Int_t lightness    = 50;
-      const Int_t saturation   = 100;
-      Int_t hue  = 0;
-
       StHit *hit=0;
       Style_t sty    = Style(kUsedHit).Sty();
       Size_t  siz    = Style(kUsedHit).Siz();
@@ -83,13 +80,7 @@ void Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType type)
 //-- Create the coloring code
 //
             double pt = track->geometry()->momentum().perp();
-            hue = Int_t(256.*(1.-pt/1.5)); //color code from StuPostscript
-            if (pt > 1.5 ) hue = 0;
-            Int_t r,g,b;
-            TColor::HLS2RGB(hue, lightness, saturation, r, g, b);
-            // Normalize
-            float factor = 1./TMath::Sqrt(1.*r*r+1.*g*g+1.*b*b);
-            Color_t trackColor =  TColor::GetColor(r*factor,g*factor,b*factor);
+            Color_t trackColor = StDraw3DStyle::Pt2Color (pt);
             if ( trackHitsOnly != kUsedHits) {
 //--
 //-- PAY YOUR ATTENTION:    you  MUST call the "Track" method to get your tracks renndred
@@ -156,4 +147,6 @@ void Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType type)
       SetComment("Unused TPC hits");
    }
 }
+ClassDef(EveDis,0);
 };
+
