@@ -1,4 +1,4 @@
-// $Id: EveDis.C,v 1.3 2009/09/07 04:34:26 fine Exp $
+// $Id: EveDis.C,v 1.4 2009/09/07 04:39:18 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #ifndef __CINT__
@@ -83,7 +83,7 @@ void AddHits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType typ
             Color_t trackColor = StDraw3DStyle::Pt2Color (pt);
             if ( trackHitsOnly != kUsedHits) {
 //--
-//-- PAY YOUR ATTENTION:    you  MUST call the "Track" method to get your tracks renndred
+//-- PAY YOUR ATTENTION:    you  MUST call the "Track" method to get your tracks rendered
 //
                Track(*track,trackColor);                               // render the track
                TrackInOut(*track, true,  trackColor,  styPnt, sizPnt); // draw the track start point
@@ -141,7 +141,7 @@ void AddHits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType typ
       }
       std::vector<float>::iterator xyz = hitPoints.begin();
 //--               
-//-- PAY YOUR ATTENTION:  you  MUST call the "Points" to get your hits poistion renndred
+//-- PAY YOUR ATTENTION:  you  MUST call the "Points" to get your hit positions rendered
 //               
       Points(hitPoints.size()/3,&*xyz,kUnusedHit);
       SetComment("Unused TPC hits");
