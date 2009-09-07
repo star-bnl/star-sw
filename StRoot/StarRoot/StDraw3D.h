@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.28 2009/09/07 03:48:27 fine Exp $
+// $Id: StDraw3D.h,v 1.29 2009/09/07 04:33:44 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -150,8 +150,9 @@ public:
    virtual void SetModel(TObject *model);
    virtual void SetComment(const char *cmnt);
    virtual void AddComment(const char *cmnt);
-   virtual void Print(const char *filename, const char*type="wrl");
-   virtual void Save(const char *filename, const char*type="png");
+   virtual void Print(const char *filename) const ;
+   virtual void Print(const char *filename, const char*type) const ;
+   virtual void Save(const char *filename, const char*type="png") const ;
    virtual void Update();
    virtual void Modified();
 
