@@ -1699,6 +1699,13 @@ SWIT:
     return fChi2;
 }
 //______________________________________________________________________________
+double TCircleFitter::FitZ() 
+{
+   assert(0 && "There is no implemation yet"); // VF 
+   return 0;
+}
+
+//______________________________________________________________________________
 void TCircleFitter::MakeErrs() 
 {
    fEmx->Clear();
@@ -2687,7 +2694,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.42 2009/08/28 16:38:55 fine Exp $
+ * $Id: THelixTrack.cxx,v 1.43 2009/09/07 04:32:50 fine Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2703,6 +2710,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.43  2009/09/07 04:32:50  fine
+ * workaround for the bug #1628
+ *
  * Revision 1.42  2009/08/28 16:38:55  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *
