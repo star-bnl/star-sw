@@ -53,6 +53,9 @@ public:
   StJetTrack* track(int i) const { return (StJetTrack*)mTracks.At(i); }
   StJetTower* tower(int i) const { return (StJetTower*)mTowers.At(i); }
 
+  StJetTrack* getTrackById(int id) const;
+  StJetTower* getTowerById(int id) const;
+
   const TRefArray& tracks() const { return mTracks; }
   const TRefArray& towers() const { return mTowers; }
 

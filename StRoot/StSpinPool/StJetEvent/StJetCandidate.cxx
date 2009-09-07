@@ -50,6 +50,24 @@ float StJetCandidate::sumTowerPt() const
   return sumPt;
 }
 
+StJetTrack* StJetCandidate::getTrackById(int id) const
+{
+  for (int i = 0; i < numberOfTracks(); ++i) {
+    StJetTrack* t = track(i);
+    if (t->id() == id) return t;
+  }
+  return 0;
+}
+
+StJetTower* StJetCandidate::getTowerById(int id) const
+{
+  for (int i = 0; i < numberOfTowers(); ++i) {
+    StJetTower* t = tower(i);
+    if (t->id() == id) return t;
+  }
+  return 0;
+}
+
 bool StJetCandidate::getJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
 {
   //
