@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.42 2009/09/07 03:48:27 fine Exp $
+// $Id: StDraw3D.cxx,v 1.43 2009/09/07 04:33:44 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -553,12 +553,18 @@ void StDraw3D::AddComment(const char *cmnt)
 }
 
 //___________________________________________________
-void StDraw3D::Print(const char *filename, const char*type)
+void StDraw3D::Print(const char *filename) const
+{
+   Save(filename,"wrl");
+}
+
+//___________________________________________________
+void StDraw3D::Print(const char *filename, const char*type) const
 {
    Save(filename,type);
 }
 //___________________________________________________
-void StDraw3D::Save(const char *filename, const char*type)
+void StDraw3D::Save(const char *filename, const char*type) const
 {
     if ( TVirtualViewer3D *viewer = Viewer() ) {
        viewer->Print(filename);
