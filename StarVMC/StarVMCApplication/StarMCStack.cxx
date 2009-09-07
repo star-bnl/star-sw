@@ -1,5 +1,6 @@
-// $Id: StarMCStack.cxx,v 1.2 2005/06/09 20:13:47 fisyak Exp $
+// $Id: StarMCStack.cxx,v 1.3 2009/09/07 20:55:36 jeromel Exp $
 #include <iostream>
+#include <assert.h>
 #include "StarMCStack.h"
 
 using namespace std;
