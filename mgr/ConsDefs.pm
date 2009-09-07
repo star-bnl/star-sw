@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.111 2009/09/03 15:14:48 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.112 2009/09/07 21:31:35 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -704,18 +704,37 @@
 	#    print "*** ATTENTION *** IVROOT $IVROOT\n";
 	#}
 	if ( defined($IVROOT) &&  -d $IVROOT) {
+	    # This is an initial logic relying on IVROOT to be defined
 	    if (-e $IVROOT . "/bin/coin-config") {
 		$COIN3DIR     = $IVROOT;
 		$COIN3DBINDIR = $COIN3DIR . "/lib";
 		$COIN3DLIBDIR = $COIN3DIR . "/bin";
 	    }
-	    if ($COIN3DBINDIR) {
+	    if ($COIN3DIR) {
 		$COIN3DINCDIR = $COIN3DIR . "/include";
 		$COIN3DFLAGS  = ""; # "-DR__QT";#-DQT_THREAD_SUPPORT";
 		$COIN3DLIBS   = "-lCoin -lSmallChange -lSoQt -lsimage";
-		
-		print "Use COIN3DLIBDIR = $COIN3DLIBDIR \tCOIN3DINCDIR = $COIN3DINCDIR \tCOIN3DFLAGS = $COIN3DFLAGS \tCOIN3DLIBS = $COIN3DLIBS\n"
-		    if $COIN3DLIBDIR ;//&& ! $param::quiet;
+	    }
+	    
+	} else {
+	    # try finding it in $OPTSTAR
+	    my($coin);
+	    if ( -e "$OPTSTAR/bin/coin-config"){
+		$coin = "$OPTSTAR/bin/coin-config";
+	    }
+	    if ( defined($coin) ){
+		chomp($COIN3DINCDIR = `$coin --includedir`);
+		chomp($COIN3DFLAGS  = "");
+		chomp($COIN3DLIBDIR = `$coin  --prefix`); $COIN3DLIBDIR .= "/lib";
+		chomp($COIN3DLIBS   = `$coin --libs`);
+	    }
+	}
+
+	if ( ! $param::quiet){
+	    if (defined($COIN3DLIBDIR)){
+		print "Use COIN3DLIBDIR = $COIN3DLIBDIR \tCOIN3DINCDIR = $COIN3DINCDIR \tCOIN3DFLAGS = $COIN3DFLAGS \tCOIN3DLIBS = $COIN3DLIBS\n";
+	    } else {
+		print "No Coin defined\n";
 	    }
 	}
     }
