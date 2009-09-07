@@ -44,6 +44,10 @@
 
 #define RTS_LITTLE_ENDIAN
 
+#elif defined(__x86_64)
+
+#define RTS_LITTLE_ENDIAN
+
 #elif defined(i960)	/* assume vxworks, GCC 2.7 */
 
 #define RTS_LITTLE_ENDIAN
