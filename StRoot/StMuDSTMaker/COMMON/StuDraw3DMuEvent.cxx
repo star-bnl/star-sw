@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.4 2009/09/06 19:01:51 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.5 2009/09/07 05:07:52 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -92,7 +92,7 @@ void StuDraw3DMuEvent::Tracks(StTrackType type)
        Track(track,StDraw3DStyle::Pt2Color(pt),sty,siz);
        cout << "+";
    }
-   cout << n_prim << "primary and " << n_glob << "global tracks have been rendered" << endl;;
+   cout << endl << n_prim << " primary and " << n_glob << " global tracks have been rendered" << endl;
 
 }
 
