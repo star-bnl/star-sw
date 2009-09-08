@@ -6,6 +6,7 @@
 
 // C++ STL
 #include <iostream>
+#include <cassert>
 
 // STAR
 #include "StMuDSTMaker/COMMON/StMuEmcUtil.h"

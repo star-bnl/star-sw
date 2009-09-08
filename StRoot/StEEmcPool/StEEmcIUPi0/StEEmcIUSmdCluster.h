@@ -1,6 +1,7 @@
 #ifndef __StEEmcIUSmdCluster_h__
 #define __StEEmcIUSmdCluster_h__
 
+#include <cassert>
 #include <TObject.h>
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcStrip.h"
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcTower.h"
