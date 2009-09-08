@@ -2,11 +2,12 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.14 2009/07/24 21:10:01 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.15 2009/09/08 23:09:11 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
  */
+#include "StStarLogger/StLoggerConfig.h"
 #include "TxUCMCollector.h"
 #include <stdlib.h>
 #include <log4cxx/logger.h>
