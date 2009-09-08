@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.4 2009/09/06 19:01:51 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.5 2009/09/08 05:32:48 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -29,22 +29,30 @@ enum EStuDraw3DMuEvent {
      as 3D points and 3D lines decorated with the STAR detector geometry
  */
 ///
-///  Class StuDraw3DMuEvent provides the simple way to visualize the event 
-///  primitives in 3D quickly against of the STAR detector 
+///  Class StuDraw3DMuEvent provides the simple way to visualize the StMuDst event 
+///  primitivies in 3D quickly against of the STAR detector 
 ///  geometry.
 ///  One instance of the class is instantiated as soon as the class shared library
 ///  is loaded.
-///  This allows to use the class object (invoke class methods) with one C++ statement. 
+///  This allows to use the class object (invoke the class methods) with one C++ statement. 
 ///  This  is to allow creating the 3D views "on fly", 
 ///  for example, from the GNU debugger (gdb) command prompt 
 /// \n Try:
 /// \code
-///  > stardev	
+///  > star.dev	
 ///  > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
 ///  > root.exe $STAR/StRoot/macros/mudst/draw3DTracks.C
 /// \endcode
-///  to  read some MuDst ROOT file and get the pictire below:\n
-///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/StMuTracks.png">
+///  to  read some MuDst ROOT file and get the pictire below:
+///  \htmlonly
+///  <P>You need to install the <a href="http://get.adobe.com/reader/?promoid=BUIGO">Adobe Reader version 9 or higher
+///  <img src="http://www.adobe.com/images/shared/download_buttons/get_adobe_reader.png"></a>
+///  to be able to "click and see" the interactive ( zoom, pan, select / highlight the pieces, etc )  3D image also
+///  <center>
+///  <a href="http://www.star.bnl.gov/public/comp/vis/StDraw3D/StuDraw3DMuEvent.pdf">
+///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/StMuTracks.png"></a>
+///  </center><p>
+///  \endhtmlonly
 ///
 ///////////////////////////////////////////////////////////////////////
 class StuDraw3DMuEvent : public StDraw3D
