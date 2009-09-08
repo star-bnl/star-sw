@@ -1,6 +1,6 @@
 {
 //=========Macro generated from canvas: CanvasName/ STAR Maker Histogram Canvas
-//=========  (Mon Aug  3 15:27:18 2009) by ROOT version5.12/00h-rc2
+//=========  (Tue Sep  8 10:25:21 2009) by ROOT version5.22/00
    TCanvas *CanvasName = new TCanvas("CanvasName", " STAR Maker Histogram Canvas",1,1,600,756);
    gStyle->SetOptFit(1);
    CanvasName->Range(0,0,1,1);
@@ -25,7 +25,7 @@
    text = pt->AddText("Hists");
    pt->Draw();
    
-   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Mon Aug  3 15:27:18 2009","br");
+   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Tue Sep  8 10:25:21 2009","br");
    pl->SetTextSize(0.6);
    pl->Draw();
    
@@ -47,7 +47,7 @@
    PadName->SetFrameBorderMode(0);
   
 // ------------>Primitives in pad: PadName_1
-   PadName_1 = new TPad("PadName_1", "PadName_1",0.01,0.676667,0.49,0.99);
+   PadName_1 = new TPad("PadName_1", "PadName_1",0.01,0.6766667,0.49,0.99);
    PadName_1->Draw();
    PadName_1->cd();
    PadName_1->Range(-62.5,-0.39375,62.5,3.54375);
@@ -96,7 +96,7 @@
    ptstats->SetFillStyle(0);
    ptstats->SetTextAlign(12);
    text = ptstats->AddText("StEQaVtxPrZ");
-   text->SetTextSize(0.0490667);
+   text->SetTextSize(0.04906667);
    text = ptstats->AddText("Entries = 59     ");
    text = ptstats->AddText("Mean  =   4.16");
    text = ptstats->AddText("RMS   =  23.75");
@@ -111,7 +111,7 @@
    StEQaVtxPrZ->GetXaxis()->SetTitleOffset(1.2);
    StEQaVtxPrZ->Draw("");
    
-   pt = new TPaveText(0.01,0.938413,0.344597,0.995,"blNDC");
+   pt = new TPaveText(0.01,0.9384133,0.3445973,0.995,"blNDC");
    pt->SetName("title");
    pt->SetBorderSize(1);
    pt->SetFillColor(10);
@@ -121,10 +121,10 @@
    PadName->cd();
   
 // ------------>Primitives in pad: PadName_2
-   PadName_2 = new TPad("PadName_2", "PadName_2",0.51,0.676667,0.99,0.99);
+   PadName_2 = new TPad("PadName_2", "PadName_2",0.51,0.6766667,0.99,0.99);
    PadName_2->Draw();
    PadName_2->cd();
-   PadName_2->Range(-45,-2.19281,405,21.2353);
+   PadName_2->Range(-45,-2.568438,405,23.61594);
    PadName_2->SetFillColor(10);
    PadName_2->SetBorderMode(0);
    PadName_2->SetBorderSize(2);
@@ -135,41 +135,41 @@
    TH1 *StEQaV0VtxPhiDist = new TH1F("StEQaV0VtxPhiDist","StE V0 azimuthal distribution relative to primvtx",36,0,360);
    StEQaV0VtxPhiDist->SetBinContent(1,16);
    StEQaV0VtxPhiDist->SetBinContent(2,12);
-   StEQaV0VtxPhiDist->SetBinContent(3,17);
+   StEQaV0VtxPhiDist->SetBinContent(3,20);
    StEQaV0VtxPhiDist->SetBinContent(4,9);
-   StEQaV0VtxPhiDist->SetBinContent(5,7);
+   StEQaV0VtxPhiDist->SetBinContent(5,6);
    StEQaV0VtxPhiDist->SetBinContent(6,12);
    StEQaV0VtxPhiDist->SetBinContent(7,9);
    StEQaV0VtxPhiDist->SetBinContent(8,11);
    StEQaV0VtxPhiDist->SetBinContent(9,5);
-   StEQaV0VtxPhiDist->SetBinContent(10,12);
+   StEQaV0VtxPhiDist->SetBinContent(10,11);
    StEQaV0VtxPhiDist->SetBinContent(11,13);
    StEQaV0VtxPhiDist->SetBinContent(12,7);
    StEQaV0VtxPhiDist->SetBinContent(13,18);
    StEQaV0VtxPhiDist->SetBinContent(14,9);
    StEQaV0VtxPhiDist->SetBinContent(15,11);
    StEQaV0VtxPhiDist->SetBinContent(16,10);
-   StEQaV0VtxPhiDist->SetBinContent(17,5);
+   StEQaV0VtxPhiDist->SetBinContent(17,6);
    StEQaV0VtxPhiDist->SetBinContent(18,8);
-   StEQaV0VtxPhiDist->SetBinContent(19,9);
-   StEQaV0VtxPhiDist->SetBinContent(20,9);
+   StEQaV0VtxPhiDist->SetBinContent(19,10);
+   StEQaV0VtxPhiDist->SetBinContent(20,8);
    StEQaV0VtxPhiDist->SetBinContent(21,4);
    StEQaV0VtxPhiDist->SetBinContent(22,1);
    StEQaV0VtxPhiDist->SetBinContent(23,5);
    StEQaV0VtxPhiDist->SetBinContent(24,7);
-   StEQaV0VtxPhiDist->SetBinContent(25,6);
+   StEQaV0VtxPhiDist->SetBinContent(25,5);
    StEQaV0VtxPhiDist->SetBinContent(26,11);
    StEQaV0VtxPhiDist->SetBinContent(27,9);
    StEQaV0VtxPhiDist->SetBinContent(28,8);
    StEQaV0VtxPhiDist->SetBinContent(29,11);
-   StEQaV0VtxPhiDist->SetBinContent(30,10);
+   StEQaV0VtxPhiDist->SetBinContent(30,11);
    StEQaV0VtxPhiDist->SetBinContent(31,12);
-   StEQaV0VtxPhiDist->SetBinContent(32,14);
-   StEQaV0VtxPhiDist->SetBinContent(33,11);
-   StEQaV0VtxPhiDist->SetBinContent(34,7);
+   StEQaV0VtxPhiDist->SetBinContent(32,15);
+   StEQaV0VtxPhiDist->SetBinContent(33,10);
+   StEQaV0VtxPhiDist->SetBinContent(34,8);
    StEQaV0VtxPhiDist->SetBinContent(35,12);
    StEQaV0VtxPhiDist->SetBinContent(36,16);
-   StEQaV0VtxPhiDist->SetEntries(353);
+   StEQaV0VtxPhiDist->SetEntries(356);
    StEQaV0VtxPhiDist->SetDirectory(0);
    
    ptstats = new TPaveStats(0.78,0.675,0.98,0.995,"brNDC");
@@ -179,10 +179,10 @@
    ptstats->SetFillStyle(0);
    ptstats->SetTextAlign(12);
    text = ptstats->AddText("StEQaV0VtxPhiDist");
-   text->SetTextSize(0.0490667);
-   text = ptstats->AddText("Entries = 353    ");
-   text = ptstats->AddText("Mean  =  175.3");
-   text = ptstats->AddText("RMS   =  112.5");
+   text->SetTextSize(0.04906667);
+   text = ptstats->AddText("Entries = 356    ");
+   text = ptstats->AddText("Mean  =  175.2");
+   text = ptstats->AddText("RMS   =    113");
    text = ptstats->AddText("Underflow =      0");
    text = ptstats->AddText("Overflow  =      0");
    ptstats->SetOptStat(111111);
@@ -194,7 +194,7 @@
    StEQaV0VtxPhiDist->GetXaxis()->SetTitleOffset(1.2);
    StEQaV0VtxPhiDist->Draw("");
    
-   pt = new TPaveText(0.01,0.938413,0.71,0.995,"blNDC");
+   pt = new TPaveText(0.01,0.9384133,0.71,0.995,"blNDC");
    pt->SetName("title");
    pt->SetBorderSize(1);
    pt->SetFillColor(10);
@@ -204,10 +204,10 @@
    PadName->cd();
   
 // ------------>Primitives in pad: PadName_3
-   PadName_3 = new TPad("PadName_3", "PadName_3",0.01,0.343333,0.49,0.656667);
+   PadName_3 = new TPad("PadName_3", "PadName_3",0.01,0.3433333,0.49,0.6566667);
    PadName_3->Draw();
    PadName_3->cd();
-   PadName_3->Range(-45,2.23875,405,51.8513);
+   PadName_3->Range(-45,2.050937,405,53.04156);
    PadName_3->SetFillColor(10);
    PadName_3->SetBorderMode(0);
    PadName_3->SetBorderSize(2);
@@ -217,10 +217,10 @@
    PadName->cd();
   
 // ------------>Primitives in pad: PadName_4
-   PadName_4 = new TPad("PadName_4", "PadName_4",0.51,0.343333,0.99,0.656667);
+   PadName_4 = new TPad("PadName_4", "PadName_4",0.51,0.3433333,0.99,0.6566667);
    PadName_4->Draw();
    PadName_4->cd();
-   PadName_4->Range(-2.5,-0.657333,2.5,2.90569);
+   PadName_4->Range(-2.5,-0.6573326,2.5,2.905693);
    PadName_4->SetFillColor(10);
    PadName_4->SetBorderMode(0);
    PadName_4->SetBorderSize(2);
@@ -231,10 +231,10 @@
    PadName->cd();
   
 // ------------>Primitives in pad: PadName_5
-   PadName_5 = new TPad("PadName_5", "PadName_5",0.01,0.01,0.49,0.323333);
+   PadName_5 = new TPad("PadName_5", "PadName_5",0.01,0.01,0.49,0.3233333);
    PadName_5->Draw();
    PadName_5->cd();
-   PadName_5->Range(-3.75,-0.334492,3.75,2.73014);
+   PadName_5->Range(-3.75,-0.6427694,3.75,2.774624);
    PadName_5->SetFillColor(10);
    PadName_5->SetBorderMode(0);
    PadName_5->SetBorderSize(2);
@@ -245,10 +245,10 @@
    PadName->cd();
   
 // ------------>Primitives in pad: PadName_6
-   PadName_6 = new TPad("PadName_6", "PadName_6",0.51,0.01,0.99,0.323333);
+   PadName_6 = new TPad("PadName_6", "PadName_6",0.51,0.01,0.99,0.3233333);
    PadName_6->Draw();
    PadName_6->cd();
-   PadName_6->Range(1.625,-0.209492,5.375,1.60514);
+   PadName_6->Range(1.625,-0.5166184,5.375,1.639265);
    PadName_6->SetFillColor(10);
    PadName_6->SetBorderMode(0);
    PadName_6->SetBorderSize(2);
