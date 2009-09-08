@@ -17,6 +17,7 @@
 #ifndef _LOG4CXX_VARIA_STAR_OPTION_FILTER_H
 #define _LOG4CXX_VARIA_STAR_OPTION_FILTER_H
 
+#include "StLoggerConfig.h"
 #include <log4cxx/spi/filter.h>
 
 namespace log4cxx
