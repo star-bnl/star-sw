@@ -46,7 +46,7 @@ void TXUcmLog::ucmlogmessage(const char*message)
 //_________________________________________________________________
 // send "Job finished" record and close the ucm systen.
 int TXUcmLog::closelog()
-{  }
+{ return 0; }
 
 //_________________________________________________________________
 // register the task with the ID provided and make it current
