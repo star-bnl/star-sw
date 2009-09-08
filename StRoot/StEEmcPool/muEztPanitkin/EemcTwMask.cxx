@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include <StMessMgr.h>
 
 #include "EemcTwMask.h"

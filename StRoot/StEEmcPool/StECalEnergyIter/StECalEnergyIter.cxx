@@ -11,7 +11,7 @@
 bool StECalEnergyIter::mIsSimu = false;
 
 StECalEnergyIter::StECalEnergyIter(StMuEmcCollection *emCol, int det, StEEmcDb *db, bool flag) 
-  : mEmCol(emCol), mdetector(det), mIhits(0), mEEdb(db), mSuppBad(flag) {
+  : mEmCol(emCol), mEEdb(db), mdetector(det), mIhits(0), mSuppBad(flag) {
 
   char cuv = 'U';
   switch (mdetector)

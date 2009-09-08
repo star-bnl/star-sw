@@ -39,6 +39,7 @@
  *
  */
 
+#include <cassert>
 #include <TObject.h>
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcStrip.h"
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcTower.h"

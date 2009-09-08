@@ -7,10 +7,12 @@
  * planes.
  *
  * \author Jason C. Webb
- * $Date: 2007/07/12 19:27:18 $
- * $Revision: 1.3 $
+ * $Date: 2009/09/08 20:39:11 $
+ * $Revision: 1.4 $
  *
  */
+
+#include <cassert>
 
 #include "EEmcSectorFit.h"
 #include "eeSinglePeak.h"

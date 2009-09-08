@@ -102,14 +102,14 @@ void EEMCPlots::processEvent( char *datap
 #ifdef NEW_DAQ_READER
     unsigned int runId = rdr->run;
     unsigned int token = rdr->token;
-    unsigned int eventId = rdr->seq;
-    int isEvp = rdr->IsEvp();
+//    unsigned int eventId = rdr->seq;
+//    int isEvp = rdr->IsEvp();
 #else
     evpReader *evp = (evpReader*)(datap);
     unsigned int runId = evp->run;
     unsigned int token = evp->token;
-    unsigned int eventId = evp->seq;
-    int isEvp = evp->isevp;
+//    unsigned int eventId = evp->seq;
+//    int isEvp = evp->isevp;
 #endif
 
 	Tonko2Ezt ezt(datap);

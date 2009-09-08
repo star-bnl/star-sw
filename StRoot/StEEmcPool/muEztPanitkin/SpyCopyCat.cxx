@@ -1,4 +1,5 @@
-#include<stdio.h>
+#include <stdio.h>
+#include <cassert>
 
 #include <TH1.h>
 #include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
