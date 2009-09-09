@@ -5,9 +5,8 @@
     copyright            : (C) 2007 by Valeri Fine
     email                :  fine@bnl.gov
  ***************************************************************************/
-#include <log4cxx/config.h>
-
-
+#include <cstdlib>
+#include <cassert>
 #include "StUCMAppender.h"
 #include "TSystem.h"
 #include "TString.h"
@@ -20,7 +19,6 @@
 #include <log4cxx/helpers/loglog.h>
 #include <log4cxx/level.h>
 #include <log4cxx/helpers/optionconverter.h>
-#include <log4cxx/helpers/stringhelper.h>
 #include <log4cxx/patternlayout.h>
 // #include <data/TxUCMException.h>
 #include "TObjArray.h"
@@ -56,20 +54,20 @@ StUCMAppender::~StUCMAppender()
 void StUCMAppender::setOption(const String& option,
 	const String& value)
 {
-	if (StringHelper::equalsIgnoreCase(option, _T("buffersize")))
+	if (equalsIgnoreCase(option, _T("buffersize")))
 	{
 		setBufferSize((size_t)OptionConverter::toInt(value, 1));
 	}
-	else if (StringHelper::equalsIgnoreCase(option, _T("password")))
+	else if (equalsIgnoreCase(option, _T("password")))
 	{
 		setPassword(value);
 	}
-	else if (StringHelper::equalsIgnoreCase(option, _T("url"))
-		|| StringHelper::equalsIgnoreCase(option, _T("dns")))
+	else if (equalsIgnoreCase(option, _T("url"))
+		|| equalsIgnoreCase(option, _T("dns")))
 	{
 		setURL(value);
 	}
-	else if (StringHelper::equalsIgnoreCase(option, _T("user")))
+	else if (equalsIgnoreCase(option, _T("user")))
 	{
 		setUser(value);
 	}
@@ -92,9 +90,15 @@ void StUCMAppender::append(const spi::LoggingEventPtr& event)
 // String StUCMAppender::getLogStatement(const spi::LoggingEventPtr& event) const
 String StUCMAppender::getLogStatement(const spi::LoggingEventPtr& event)
 {
-	StringBuffer sbuf;
-	((StUCMAppender*)this)->getLayout()->format(sbuf, event);
-	return sbuf.str();
+#if (STAR_LOG4CXX_VERSION == 9)
+  StringBuffer sbuf;
+  ((StUCMAppender*)this)->getLayout()->format(sbuf, event);
+  return sbuf.str();
+#else
+	String sbuf;
+	((StUCMAppender*)this)->getLayout()->format(sbuf,event,pool);
+	return sbuf;
+#endif
 }
 
 //_________________________________________________________________________
@@ -181,13 +185,13 @@ void StUCMAppender::flushBuffer()
          const LoggingEventPtr& logEvent = *i;
          const LevelPtr &level = logEvent->getLevel();
          TxEventLog::Level trackingLevel =TxEventLog::LEVEL_INFO;
-         if        (level == Level::FATAL) {
+         if        (level == LOG4CXX_LEVEL_FATAL) {
               trackingLevel = TxEventLog::LEVEL_FATAL;
-         } else if (level == Level::ERROR) {
+         } else if (level == LOG4CXX_LEVEL_ERROR) {
               trackingLevel = TxEventLog::LEVEL_ERROR;
-         } else if (level == Level::WARN)  {
+         } else if (level == LOG4CXX_LEVEL_WARN)  {
               trackingLevel = TxEventLog::LEVEL_WARNING;
-         } else if (level == Level::DEBUG) {
+         } else if (level == LOG4CXX_LEVEL_DEBUG) {
               trackingLevel = TxEventLog::LEVEL_DEBUG;
          } else {
  //             continue;
@@ -214,12 +218,17 @@ void StUCMAppender::flushBuffer()
              delete &keyValue;
              keyCounter++;
           }
-          String context = logEvent->getNDC();
-          // Map Stage tp TxEventLog Stage
+          String context;
+#if (STAR_LOG4CXX_VERSION == 9)
+          context = logEvent->getNDC();
+#else
+          logEvent->getNDC(context);
+#endif                    
+          // Map Stage to TxEventLog Stage
           ucmParamters[0].ReplaceAll("'","");ucmParamters[1].ReplaceAll("'","");ucmParamters[2].ReplaceAll("'","");
           int ucmStage = ucmParamters[0].Atoi();
  //         assert (ucmStage >=TxEventLog::START && ucmStage <=TxEventLog::END);
-          // log tast at once
+          // log task at once
           static bool taskDone = false;
           if (!taskDone) {
               taskDone = true;
@@ -241,3 +250,10 @@ void StUCMAppender::flushBuffer()
    }
    closeConnection();
 }
+#if (STAR_LOG4CXX_VERSION == 10) 
+//_________________________________________________________________________
+void StUCMAppender::append(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& p)
+{
+}
+#endif
+

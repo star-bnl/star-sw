@@ -19,6 +19,7 @@
 #ifndef __CINT__
 # include <log4cxx/logger.h>
 # include <vector>
+# include <cassert>
 # include "StarOptionFilter.h"
 #endif
 
@@ -246,4 +247,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.14 2009/06/22 22:36:01 fine Exp $
+// $Id: StLoggerManager.h,v 1.15 2009/09/09 00:05:13 fine Exp $
