@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.2 2009/09/09 23:13:58 fine Exp $
+// $Id: EdMu.C,v 1.3 2009/09/09 23:15:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file EdMu.C 
@@ -76,7 +76,7 @@ void mrd(bool hits=false, bool clear=false)
       } else gEd->Tracks();
    }
  }
-//! This function is to search for the next non-empty event and draw it by looping over StBFChain (reading the next events from the file)
+//! This function is to search for the next non-empty event and draw it by looping over STAR muDST file (reading the next events from the file)
 /*! 
    \param hits - flag to mark whether the hits from the event should be rendered 
    if the \a hist = \c true the hits is to be drawn otherwise it is to render the tracks
