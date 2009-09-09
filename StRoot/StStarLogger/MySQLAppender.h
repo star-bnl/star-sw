@@ -17,8 +17,7 @@
 #ifndef _LOG4CXX_DB_MYSQL_APPENDER_H
 #define _LOG4CXX_DB_MYSQL_APPENDER_H
 
-#include <log4cxx/config.h>
-
+#include "StLoggerConfig.h"
 #if 1
 // def HAVE_MYSQL
  
@@ -26,18 +25,16 @@
 #include <log4cxx/appenderskeleton.h>
 #include <log4cxx/spi/loggingevent.h>
 #include <list>
-
 #ifdef HAVE_MS_MYSQL
 #include <windows.h>
 #endif
 
 #include <mysql/mysql.h>
-
-
 namespace log4cxx
 {
 	namespace db
 	{
+#if  0
 		class LOG4CXX_EXPORT SQLException : public helpers::Exception
 		{
 		public:
@@ -46,7 +43,7 @@ namespace log4cxx
 
 			int code;
 		};
-
+#endif
 		class MySQLAppender;
 		typedef helpers::ObjectPtrT<MySQLAppender> MySQLAppenderPtr;
 
@@ -180,6 +177,10 @@ namespace log4cxx
 		protected:
 			String getLogStatement(const spi::LoggingEventPtr& event);
 //			String getLogStatement(const spi::LoggingEventPtr& event) const;
+#if (STAR_LOG4CXX_VERSION == 10) 
+      protected:
+         virtual void append(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& p);
+#endif
 
 			/**
 			*

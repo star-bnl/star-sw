@@ -13,9 +13,6 @@
  * License version 1.1, a copy of which has been included with this        *
  * distribution in the LICENSE.txt file.                                   *
  ***************************************************************************/
-
-#include <log4cxx/config.h>
-
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -29,7 +26,6 @@
 
 #include <log4cxx/helpers/loglog.h>
 #include <log4cxx/helpers/optionconverter.h>
-#include <log4cxx/helpers/stringhelper.h>
 #include <log4cxx/patternlayout.h>
 
 using namespace log4cxx;
@@ -57,24 +53,24 @@ MySQLAppender::~MySQLAppender()
 void MySQLAppender::setOption(const String& option,
 	const String& value)
 {
-	if (StringHelper::equalsIgnoreCase(option, _T("buffersize")))
+	if (equalsIgnoreCase(option, _T("buffersize")))
 	{
 		setBufferSize((size_t)OptionConverter::toInt(value, 1));
 	}
-	else if (StringHelper::equalsIgnoreCase(option, _T("password")))
+	else if (equalsIgnoreCase(option, _T("password")))
 	{
 		setPassword(value);
 	}
-	else if (StringHelper::equalsIgnoreCase(option, _T("sql")))
+	else if (equalsIgnoreCase(option, _T("sql")))
 	{
 		setSql(value);
 	}
-	else if (StringHelper::equalsIgnoreCase(option, _T("url"))
-		|| StringHelper::equalsIgnoreCase(option, _T("dns")))
+	else if (equalsIgnoreCase(option, _T("url"))
+		|| equalsIgnoreCase(option, _T("dns")))
 	{
 		setURL(value);
 	}
-	else if (StringHelper::equalsIgnoreCase(option, _T("user")))
+	else if (equalsIgnoreCase(option, _T("user")))
 	{
 		setUser(value);
 	}
@@ -97,9 +93,15 @@ void MySQLAppender::append(const spi::LoggingEventPtr& event)
 // String MySQLAppender::getLogStatement(const spi::LoggingEventPtr& event) const
 String MySQLAppender::getLogStatement(const spi::LoggingEventPtr& event)
 {
-	StringBuffer sbuf;
-	((MySQLAppender*)this)->getLayout()->format(sbuf, event);
-	return sbuf.str();
+#if (STAR_LOG4CXX_VERSION == 9)
+       StringBuffer sbuf;
+       ((MySQLAppender*)this)->getLayout()->format(sbuf, event);
+       return sbuf.str();
+#else
+	String sbuf;
+	((MySQLAppender*)this)->getLayout()->format(sbuf, event,pool);
+	return sbuf;
+#endif
 }
 
 //_________________________________________________________________________
@@ -344,5 +346,11 @@ void MySQLAppender::setSql(const String& s)
 		}
 	}
 }
-
+#if (STAR_LOG4CXX_VERSION == 10)
+//_________________________________________________________________________
+void MySQLAppender::append(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& p)
+{
+    append(event);
+}
+#endif
 #endif //HAVE_MySQL

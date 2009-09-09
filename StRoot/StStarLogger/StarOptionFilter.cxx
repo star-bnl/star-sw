@@ -14,9 +14,9 @@
  * limitations under the License.
  */
  
+#include <cstring>
 #include "StarOptionFilter.h"
 #include <log4cxx/spi/loggingevent.h>
-#include <log4cxx/helpers/stringhelper.h>
 #include <log4cxx/helpers/optionconverter.h>
 
 // #include <iostream>
@@ -28,9 +28,11 @@ using namespace log4cxx::helpers;
 
 IMPLEMENT_LOG4CXX_OBJECT(StarOptionFilter)
 
-String StarOptionFilter::ACCEPT_REPEAT_COUNTER  = _T("RepeatMessageQuota");
-String StarOptionFilter::TOTAL_MESSAGE_LIMIT    = _T("TotalMessagesQuota");
-String StarOptionFilter::STRING_TO_COUNT_OPTION = _T("StringToCount");
+
+ String StarOptionFilter::ACCEPT_REPEAT_COUNTER  = _T("RepeatMessageQuota");
+ String StarOptionFilter::TOTAL_MESSAGE_LIMIT    = _T("TotalMessagesQuota");
+ String StarOptionFilter::STRING_TO_COUNT_OPTION = _T("StringToCount");
+
 
 //______________________________________________________________________________
 StarOptionFilter::StarOptionFilter() : acceptRepeatCounter(-1),acceptTotalCounter(-1)
@@ -45,11 +47,11 @@ void StarOptionFilter::setOption(const String& option,
 {
    // fprintf(stderr, " StarOptionFilter::setOption option = %s; value = %s\n"
    //    , option.c_str(), value.c_str());
-	if (StringHelper::equalsIgnoreCase(option, ACCEPT_REPEAT_COUNTER))
+	if (equalsIgnoreCase(option, ACCEPT_REPEAT_COUNTER))
 	{
 		acceptRepeatCounter = OptionConverter::toInt(value,acceptRepeatCounter);
 	} 
-   else if (StringHelper::equalsIgnoreCase(option,STRING_TO_COUNT_OPTION)) 
+   else if (equalsIgnoreCase(option,STRING_TO_COUNT_OPTION)) 
    {  
       if ( lastLoggerMessageToCompare != value)  {
           currentRepeatCounter = 0;
@@ -59,7 +61,7 @@ void StarOptionFilter::setOption(const String& option,
       if (lastLoggerMessageToCompare.empty())  
          matchPredefinedStringOnly  = false;
    } 
-   else if (StringHelper::equalsIgnoreCase(option,TOTAL_MESSAGE_LIMIT)) 
+   else if (equalsIgnoreCase(option,TOTAL_MESSAGE_LIMIT)) 
    {
 		acceptTotalCounter = OptionConverter::toInt(value,acceptTotalCounter);      
   }

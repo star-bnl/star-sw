@@ -1,16 +1,17 @@
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StLoggerManager                                                      //
-//                                                                      //
-// This class manages the messages in STAR software. It is a singleton. //
-// It inherits from StMessMgr, which provides the external interface.   //
-// Messages are stored in a vector, and come in several types           //
-// (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
-// "E" (error), "D" (debug), and "Q" (QAInfo) are predefined. Message   //
-// finding and summary tools are also available.                        //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
- 
+///////////////////////////////////////////////////////////////////////////
+///                                                                      //
+/// StLoggerManager                                                      //
+///                                                                      //
+/// This class manages the messages in STAR software. It is a singleton. //
+/// It inherits from StMessMgr, which provides the external interface.   //
+/// Messages are stored in a vector, and come in several types           //
+/// (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
+/// "E" (error), "D" (debug), and "Q" (QAInfo) are predefined. Message   //
+/// finding and summary tools are also available.                        //
+//                                                                       //
+///////////////////////////////////////////////////////////////////////////
+#include <stdlib.h>
+
 #ifdef __ROOT__
 #include "TROOT.h"
 #include "TSystem.h"
@@ -31,7 +32,6 @@
 
 #include "StLoggerManager.h"
 
-// #include <log4cxx/logger.h>
 #include <log4cxx/basicconfigurator.h>
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/helpers/exception.h>
@@ -40,16 +40,19 @@
 #include <log4cxx/patternlayout.h>
 #include <log4cxx/layout.h>
 #include <log4cxx/xml/domconfigurator.h>
-#include <log4cxx/varia/stringmatchfilter.h>
-#include <log4cxx/varia/denyallfilter.h>
+//#include <log4cxx/varia/stringmatchfilter.h>
+// #include <log4cxx/varia/denyallfilter.h>
 
 #include "StStarLogger/StUCMAppender.h"
 
 using namespace log4cxx;
 using namespace log4cxx::helpers;
+using namespace log4cxx::spi;
 using namespace log4cxx::varia;
 using namespace log4cxx::db;
-// using namespace log4cxx::xml;
+#if (STAR_LOG4CXX_VERSION == 10)
+   using namespace log4cxx::filter;
+#endif
 
 class  StMessage  {
   public: StMessage(){}
@@ -250,7 +253,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        appender->setName(_T("defaultAppender"));       
        root->addAppender(appender);
        //Set the default threashold to be 
-       root->setLevel(Level::INFO);
+       root->setLevel(LOG4CXX_LEVEL_INFO);
     }
     LoggerPtr root = Logger::getRootLogger();
 
@@ -271,7 +274,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        appender->addFilter(new DenyAllFilter);
 
        //Set the default threashold to be 
-       fgUCMLogger->setLevel(Level::DEBUG);
+       fgUCMLogger->setLevel(LOG4CXX_LEVEL_DEBUG);
     }
 #endif
     //Almost all QA messages are on the info level
@@ -348,7 +351,7 @@ ostrstream& StLoggerManager::Message(const char* mess, const char* type,
   unsigned char typeChar = 'I';
   if (type && type[0]) typeChar = type[0];
   if (!opt) opt = "";
-  size_t messSize = (mess && mess[0]) ? strlen(mess) : 0;
+  // size_t messSize = (mess && mess[0]) ? strlen(mess) : 0;
 //  *fCurType = typeChar;
   fCurType = typeChar;
   strcpy(fCurOpt,opt);
@@ -418,14 +421,14 @@ void StLoggerManager::PrintLogger(const char* mess, unsigned char type,
       if ( (mess == 0) || (mess[0] == 0)) mess = "."; // logger doesn't like the empty messages 
       // fprintf(stderr, " **** LOGGER **** %c %s\n", typeChar, mess);
       switch (typeChar)  {
-        case 'F': fLogger->fatal  (_T(mess),sourceFileName,lineNumber); break;
-        case 'E': fLogger->error  (_T(mess),sourceFileName,lineNumber); break;
-        case 'W': fLogger->warn   (_T(mess),sourceFileName,lineNumber); break;
-        case 'I': fLogger->info   (_T(mess),sourceFileName,lineNumber); break;
-        case 'D': fLogger->debug  (_T(mess),sourceFileName,lineNumber); break;
-        case 'Q': fgQALogger->info(_T(mess),sourceFileName,lineNumber); break;
-        case 'U': fgUCMLogger->info(_T(mess),sourceFileName,lineNumber); break;
-        default: fLogger->info(_T(mess),sourceFileName,lineNumber);     break;
+        case 'F': fLogger->fatal  (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'E': fLogger->error  (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'W': fLogger->warn   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'I': fLogger->info   (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'D': fLogger->debug  (_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'Q': fgQALogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+        case 'U': fgUCMLogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber)); break;
+        default: fLogger->info(_T(mess),LocationInfo(sourceFileName,"",lineNumber));     break;
       };
    }
 //   seekp(0);
@@ -506,7 +509,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.36 2009/06/23 19:37:33 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.37 2009/09/09 00:05:13 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -869,28 +872,28 @@ void StLoggerManager::SetLevel(Int_t level)
    // Map STAR level to the logger level and set the logger level
    switch (level) {
       case kFatal:
-         fLogger->setLevel(Level::FATAL);
+         fLogger->setLevel(LOG4CXX_LEVEL_FATAL);
          break;
       case kError:
-         fLogger->setLevel(Level::ERROR);
+         fLogger->setLevel(LOG4CXX_LEVEL_ERROR);
          break;
       case kWarning:
-         fLogger->setLevel(Level::WARN);
+         fLogger->setLevel(LOG4CXX_LEVEL_WARN);
          break;
       case kInfo:
-         fLogger->setLevel(Level::INFO);
+         fLogger->setLevel(LOG4CXX_LEVEL_INFO);
          break;
       case kAll:
       case kDebug:
       case kDebug2: 
-         fLogger->setLevel(Level::DEBUG);
+         fLogger->setLevel(LOG4CXX_LEVEL_DEBUG);
          break;
       case kDefault:
          // restore the default level (defined the XML configuration if present)
          fLogger->setLevel(fDefaultLevel);
          break;
       default:
-         fLogger->setLevel(Level::DEBUG);
+         fLogger->setLevel(LOG4CXX_LEVEL_DEBUG);
          break;            
    };   
 }
@@ -900,11 +903,11 @@ Int_t StLoggerManager::GetLevel(Int_t) const
    // Map the current logger level to the STAR one
 #if 0
    const LevelPtr &level = fLogger->getLevel();
-        if (level == &Level::DEBUG)  return kDebug; 
-   else if (level == &Level::FATAL)  return kFatal;  
-   else if (level == &Level::ERROR)  return kError;
-   else if (level == &Level::WARN )  return kWarning;
-   else if (level == &Level::INFO )  return kInfo;
+        if (level == &LOG4CXX_LEVEL_DEBUG)  return kDebug; 
+   else if (level == &LOG4CXX_LEVEL_FATAL)  return kFatal;  
+   else if (level == &LOG4CXX_LEVEL_ERROR)  return kError;
+   else if (level == &LOG4CXX_LEVEL_WARN )  return kWarning;
+   else if (level == &LOG4CXX_LEVEL_INFO )  return kInfo;
 #endif
    return kAll;
 }
@@ -924,8 +927,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.36 2009/06/23 19:37:33 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.37 2009/09/09 00:05:13 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.37  2009/09/09 00:05:13  fine
+// Merge log4cxx version 9 and 10
+//
 // Revision 1.36  2009/06/23 19:37:33  fine
 // replace QA logger with the dedicated UCM one
 //

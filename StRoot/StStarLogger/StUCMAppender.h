@@ -17,8 +17,7 @@
 #ifndef _LOG4CXX_UCM_APPENDER_H
 #define _LOG4CXX_UCM_APPENDER_H
 #ifdef   _UCMLOGGER_
-#include <log4cxx/config.h>
-
+#include "StLoggerConfig.h"
 
 #include <log4cxx/helpers/exception.h>
 #include <log4cxx/appenderskeleton.h>
@@ -33,6 +32,7 @@ namespace log4cxx
 {
 	namespace db
 	{
+#if REDUNDANT_EXCEPTION
 		class LOG4CXX_EXPORT UCMException : public helpers::Exception
 		{
 		public:
@@ -41,6 +41,7 @@ namespace log4cxx
          ~UCMException() {}
 			int code;
 		};
+#endif
 
 		class StUCMAppender;
 		typedef helpers::ObjectPtrT<StUCMAppender> StUCMAppenderPtr;
@@ -144,6 +145,10 @@ namespace log4cxx
 			std::list<spi::LoggingEventPtr> buffer;
          unsigned long fLastId;
          bool fIsConnectionOpen;
+#if (STAR_LOG4CXX_VERSION == 10) 
+      protected:
+         virtual void append(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& p);
+#endif
  			
 		public:				
          DECLARE_LOG4CXX_OBJECT(StUCMAppender)
@@ -200,19 +205,33 @@ namespace log4cxx
 			*/
 		public:
 			virtual void close();
-			
-			/**
-			* loops through the buffer of LoggingEvents, gets a
+
+			/* loops through the buffer of LoggingEvents, gets a
 			* sql string from getLogStatement() and sends it to execute().
 			* Errors are sent to the errorHandler.
 			*
 			* If a statement fails the LoggingEvent stays in the buffer!
 			*/
 			void flushBuffer();
-			
+         			
 			/**
 			* StUCMAppender requires a layout.
 			* */
+       /**
+        Configurators call this method to determine if the appender
+        requires a layout. If this method returns <code>true</code>,
+        meaning that layout is required, then the configurator will
+        configure an layout using the configuration information at its
+        disposal.  If this method returns <code>false</code>, meaning that
+        a layout is not required, then layout configuration will be
+        skipped even if there is available layout configuration
+        information at the disposal of the configurator..
+
+        <p>In the rather exceptional case, where the appender
+        implementation admits a layout but can also work without it, then
+        the appender should return <code>true</code>.
+       */
+        
 //			virtual bool requiresLayout()
 			virtual bool requiresLayout() const
 				{ return true; }
