@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.5 2009/09/08 05:32:48 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.6 2009/09/09 23:13:58 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -20,14 +20,15 @@ enum EStuDraw3DMuEvent {
                      ,kTracksOnly=2      //!< Render the tracks only no hit
  };
 
-//! \author Valery Fine(fine@bnl.gov)
-//! \date 01/08/2009
 
 ///////////////////////////////////////////////////////////////////////
 ///
 /*! \brief  Class StuDraw3DMuEvent - to draw the StMuDst primitives like StMuTrack 
      as 3D points and 3D lines decorated with the STAR detector geometry
  */
+/// \author Valery Fine (fine@bnl.gov)
+/// \date 01/08/2009
+/// \sa  EdMu.C
 ///
 ///  Class StuDraw3DMuEvent provides the simple way to visualize the StMuDst event 
 ///  primitivies in 3D quickly against of the STAR detector 
