@@ -1,14 +1,14 @@
-// $Id: EdMu.C,v 1.1 2009/09/09 20:46:44 fine Exp $
+// $Id: EdMu.C,v 1.2 2009/09/09 23:13:58 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file EdMu.C 
 
 /*!
-  \brief EdMu.C macro is the simple ROOT macro to draw the StEvent from ROOT file
+  \brief EdMu.C macro is the simple ROOT macro to draw the StMuDst from ROOT file
 
   EdMu.C macro demonstrates how the StuDraw3DEvent class object can be used
-    to loop over StEvent from the ROOT file and to draw the event components
-    like "tracks" and hits" in 3D space over the the detector geometry.
+    to loop over StMuEvent's from the ROOT file and draw the event components
+    like "tracks" in 3D space over the the detector geometry.
     
  \author Valery Fine ( fine@bnl.gov )   25/02/2009
     
