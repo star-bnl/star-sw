@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.19 2009/09/06 19:01:51 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.20 2009/09/09 20:47:03 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -38,6 +38,7 @@
 <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EventDisplayWOGeom.png">
 </tr></table>
 \endhtmlonly
+\sa StDraw3D::StDraw3D( const char *detectorName,TVirtualPad *pad) ctor
 \note 
    If this is the first instance of the class then the global pointer to the 
          current "display" is to be set too \sa Display()
@@ -83,7 +84,7 @@ TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Siz
 }
 
 //! This is an overloaded member function, provided for convenience.
-/*! Add \a track to the display list with the \a sty pre-defined style if provided 
+/*! Add \a track to the display list with the \a sty pre-defined style
  */
 //___________________________________________________
 TObject *StuDraw3DEvent::Track(const StTrack &track, EDraw3DStyle sty)
@@ -244,15 +245,28 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_
    return TrackInOut(track, in, style.Col(),style.Sty(),style.Siz() );
 }
 
+
+//! Add all tracks of the given \a type from the \a event to the display list.
+/*! 
+    \param  event - The pointer to the instance of the StEvent class
+    \param type   - The StTrack type as defined by StTrackType class
+
+    The \c style and \c size of the visual attributes are defined by the StTrackType \c global style
+    the \c color is defined by the track \c pt 
+    \code double pt = track.geometry()->momentum().perp(); \endcode
+ */
 //___________________________________________________
 void StuDraw3DEvent::Tracks(const StEvent* event, StTrackType type)
 {
    Hits(event,kTracksOnly,type);
 }
 
-
-//! Add all tracks of the given \a type from the \a theNodes to the display list.
-/*! the \c style and \c size vizual attributes are defined by the StTrackType \c global style
+//! This is an overloaded member function, provided for convenience.
+/*! Add all tracks of the given \a type from the \a theNodes to the display list.
+    \param theNodes  - The reference to the StSPtrVecTrackNode track container from the StEvent object    
+    \param type      - The StTrack type as defined by StTrackType class
+    
+    The \c style and \c size of the visual attributes are defined by the StTrackType \c global style
     the \c color is defined by the track \c pt 
     \code double pt = track.geometry()->momentum().perp(); \endcode
  */

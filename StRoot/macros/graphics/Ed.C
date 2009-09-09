@@ -1,39 +1,66 @@
-// $Id: Ed.C,v 1.6 2009/02/25 21:37:43 fine Exp $
+// $Id: Ed.C,v 1.7 2009/09/09 20:47:03 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
-//! Ed.C macro is the simple script to draw the StEvent from ROOT file
+//! \file Ed.C 
 
-/*! Ed.C macro demonstrates how the StuDraw3DEvent class can be use
-    to loop over event read from the ROOT file and draw the event comonents
-    like "tracks" and hits" in 3D space over the the detector geometry
+/*!
+  \brief Ed.C macro is the simple ROOT macro to draw the StEvent from ROOT file
+
+  Ed.C macro demonstrates how the StuDraw3DEvent class object can be used
+    to loop over StEvent from the ROOT file and to draw the event components
+    like "tracks" and hits" in 3D space over the the detector geometry.
     
-    Macro defines two functions:
+ \author Valery Fine ( fine@bnl.gov )   25/02/2009
     
-     void Ed() - is an entry points
-     void ae() - advance event function
+    Macro defines three functions:
+    
+     - void Ed() - is a main entry point
+     - void ae() - advance event function
+     - void rd() - redraw  event function
+     .
      Macro creates two global pointers 
-    /a StEvent *event is a pointer to the StEvent object read by /a ae() function
-    /a gEventDisplay is a pointer to the instance of StuDraw3DEvent
+     
+    - \c StEvent \c *event is a pointer to the StEvent object read by \a ae() function
+    - \c gEventDisplay is a pointer to the instance of StuDraw3DEvent
     
-    These two pouner are to allow the user to play with the image 
-    from ROOT commnad prompt:
-      gEventDisplay->Clear(); - to clear the displya
-      gEventDisplay->Hits(event): to add the "used" hits to display
-      gEventDisplay->Tacks(event): to add the all tracks of the cuurent
-      /a event to display
-      gEventDisplay->Hits(event,kUnusedHitsOnly);  to add the "unused" hits to display
-      
+    These two pointers are to allow the user to play with the image 
+    from ROOT command prompt directly:
+    
+      - \c gEventDisplay->Clear(); - to clear the display \sa StDraw3D::Clear(Option_t *)
+      - \c gEventDisplay->Hits(event); - to add the "used" hits to display
+      - \c gEventDisplay->Tracks(event); - to add the all tracks of the current
+      \a event to display
+      - \c gEventDisplay->Hits(event,kUnusedHitsOnly); -  to add the "unused" hits to display
+      .
       To start the display invoke:
-      
-          root.exe Ed.C
+
+          \code 
+                root4star Ed.C
+          \endcode
           
-       to draw the next event invoke from the ROOT command promot:
-          root[] ae()
-          
+       - To draw the next event invoke from the ROOT command prompt:
+         \code
+               root4star[] ae()
+         \endcode
+       - To re-draw the current event invoke from the ROOT command prompt:
+         \code
+               root4star[] rd()
+         \endcode
+         
+         \note to make this macro useful one is supposed to provide his /her own 
+         version of the \code "void rd(bool hits=false, bool clear=false)"  \endcode function
 */
+
 class StEvent;
 StEvent* event = 0;
 
+//! This function \b redraws all hits and/or tracks from the \c current event
+/*! 
+   \param hits - flag to mark whether the hits from the event should be rendered 
+   if the \a hits = \c true the hits is to be drawn otherwise it is to render the tracks
+   \param clear - flag to mark whether the screen has to be cleaned 
+                   first (before any new component is added)
+*/
 //__________________________________________
 void rd(bool hits=false, bool clear=false) 
 {  
@@ -44,6 +71,11 @@ void rd(bool hits=false, bool clear=false)
       else gEventDisplay->Tracks(event);
    }
  }
+//! This function is to search for the next non-empty event and draw it by looping over StBFChain (reading the next events from the file)
+/*! 
+   \param hits - flag to mark whether the hits from the event should be rendered 
+   if the \a hist = \c true the hits is to be drawn otherwise it is to render the tracks
+*/
 //__________________________________________
 void ae(bool hits=false) 
 {
@@ -55,22 +87,45 @@ void ae(bool hits=false)
      chain->MakeEvent();
      event = (StEvent*)chain->GetDataSet("StEvent");
      if (event && !event->trackNodes().empty())) {
-         gEventDisplay->Tracks(event);
-         if (hits) gEventDisplay->Hits(event);
+         rd();     // Draw the tracks
+         rd(hits); // Add the hits to the image
     } else {
         printf(" event is empty\n");
         goto newevent;
      }
  }
+//! Main entry point to initialize the primitive "Event Display" and the STAR bfc chain 
+/*! 
+   \param file  - the ROOT file with StEvent
+   \param detectorNames  - the list of the detector names or "0" to draw none 
+   \note To start "Event Display" \c Ed just invoke:
+   \code root4star Ed.C \endcode
+*/
 //__________________________________________
  void Ed(const char* file =
- "/star/data07/calib/fisyak/TpcRS/daq_2008_AuAu9_7/st_physics_9071073_raw_1010001.event.root")
+ "/star/data15/reco/production_dAu2008/ReversedFullField/P08ie/2008/025/9025036/st_physics_9025036_raw_1010030.event.root"
+ , const char * detectorNames="TPC")
  {
-   // Start application open the file provided. 
+   // Start application open the file provided.
+   if ( gSystem->AccessPathName(file)) {
+      cout << endl << endl 
+           << "** Error ** : The input file: <"<< file << "> does not exist !!!" 
+           << endl << endl
+           <<  " Please select the existing one and re-call the function: " 
+           << endl
+           << endl << " root [0] Ed(\"new file ROOT file name\")" 
+           << endl 
+           << endl << "To draw the StEvent components with no detector geometry, use: "
+           << endl
+           << endl << " root [0] Ed(\"new file ROOT file name\",0)" 
+           << endl
+           << endl;
+      return;
+   }
    gROOT->Macro("Load.C");
    gROOT->Macro(Form("bfc.C(0,\"doevents\",\"%s\")",file));
    delete gEventDisplay; // destroy the built-in display
-   new StuDraw3DEvent(0); // create our own one (with no detector geometry)
+   new StuDraw3DEvent(detectorNames); // create our own one (with no detector geometry)
 //   new StuDraw3DEvent("TPC"); // create our own one (with TPC detector)
    gEventDisplay->SetBkColor(kBlack);
    printf("\n The display is ready!\n");

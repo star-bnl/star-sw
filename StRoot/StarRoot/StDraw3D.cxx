@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.43 2009/09/07 04:33:44 fine Exp $
+// $Id: StDraw3D.cxx,v 1.44 2009/09/09 20:47:03 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -63,7 +63,7 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
     }
     return viewer;
 }
-//! Maps the track \pt to the STAR StTrack track color code
+//! Maps the track \a pt to the STAR StTrack track color code
 /*!
   \param pt - pt value from some StEvent /StMuDst \c track object
   \return the ROOT color index
@@ -327,7 +327,7 @@ void StDraw3D::AddDetectors(const char*nameDetectors)
    }
 }
 
-//! Remove all objects fron the screen
+//! Remove all objects from the screen
 //___________________________________________________
 void  StDraw3D::Clear(Option_t *opt)
 {
