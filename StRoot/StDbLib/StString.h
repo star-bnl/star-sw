@@ -6,7 +6,7 @@ class StString : public std::string {
 public:
           StString(){fPrec=0;}   
 
-StString& operator<<(const char *txt){ (*this)+=txt; return *this;}   
+StString& operator<<(const char *txt){ if(txt) { (*this)+=txt; }; return *this;}   
 StString& operator<<(int I);   
 StString& operator<<(unsigned int I);   
 StString& operator<<(short I);   
