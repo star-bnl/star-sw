@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.13 2009/09/08 05:32:48 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.14 2009/09/09 20:47:03 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -31,6 +31,7 @@ enum EStuDraw3DEvent {kUnusedHitsOnly=-1 //!< Render the unused hits only
  */
 /// \author Valery Fine (fine@bnl.gov)
 /// \date 27/04/2008
+/// \sa  Ed.C
 ///
 ///  Class StuDraw3DEvent provides the simple way to visualize the event 
 ///  primitives in 3D quickly against of the STAR detector 
