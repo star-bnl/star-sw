@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.112 2009/09/07 21:31:35 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.113 2009/09/10 20:11:06 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -346,8 +346,8 @@
 	$FFLAGS        = "-save";
 	$FEXTEND       = "-132";
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
-	$SYSLIBS       = "-lm -ldl";# -rdynamic";
-	$CLIBS         = "-lm -ldl";# -rdynamic";
+	$SYSLIBS       = "-lm -ldl -lrt";# -rdynamic";
+	$CLIBS         = "-lm -ldl -lrt";# -rdynamic";
 	$CRYPTLIBS     = "-lcrypt";
 	$LD            = "icpc";
 	$LDFLAGS       = "";#--no-warn-mismatch";
@@ -520,11 +520,11 @@
 	if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/macintosh/ ){
 	    # Either a version 4 issue but made this for Mac
 	    # 2009/08 -> not an issue with gcc4
-	    $SYSLIBS   = "-lm -ldl -dynamiclib -single_module ";
-	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl  -dynamiclib -single_module ";
+	    $SYSLIBS   = "-lm -ldl -lrt -dynamiclib -single_module ";
+	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl -lrt -dynamiclib -single_module ";
 	} else {
-	    $SYSLIBS   = "-lm -ldl -rdynamic";
-	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
+	    $SYSLIBS   = "-lm -ldl -lrt -rdynamic";
+	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl -lrt -rdynamic ";
 	}
 	# print "*** $CXX_VERSION $SYSLIBS\n";
 
