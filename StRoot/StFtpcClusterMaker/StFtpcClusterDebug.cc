@@ -114,31 +114,49 @@ static MVERTEX mvertex;
 static RAW raw;
 
 
-StFtpcClusterDebug::StFtpcClusterDebug()
+StFtpcClusterDebug::StFtpcClusterDebug() 
+  : histofile(0), hardsecold(-1), hardrowold(-1) 
+  , hardsecold2(-1), hardrowold2(-1)
+  , run(-1956), nevent(0), neventold(0)
+  , clusterhisto(new TH2F()), clusterhisto2(new TH2F())
+  , vertex_east(0),vertex_west(0),vertex_both(0)
+  , fileopen(false),dir(false),dir2(false)
+  , bRun(0),bhit(0), bevent(0), bcluster(0)
+  , bthit(0), btcluster(0), btevent(0)
+  , btrevent(0), btrack(0), btrvertex(0)
+  , bclusterraw(0)
+
+  , histdir(0), histdir2(0), vertexdir(0), topdir(0)
+  , drtree (0), dtree(0), dttree(0), dtrtree(0), dtreeraw(0)
+  , drawclhisto(-1956), drawvertexhisto(-1956)
 {
   // default constructor
   //LOG_INFO << "StFtpcClusterDebug constructed" << endm; 
-  hardsecold=-1; hardrowold=-1; clusterhisto=new TH2F(),clusterhisto2=new TH2F();
 }
 
 StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
+  : histofile(0)
+  , hardsecold(-1), hardrowold(-1) 
+  , hardsecold2(-1), hardrowold2(-1)
+  , run(grun), nevent(gevent), neventold(0)
+  , clusterhisto(new TH2F()), clusterhisto2(new TH2F())
+  , vertex_east(new TH1F()),vertex_west(new TH1F()),vertex_both(new TH1F())
+      
+  , fileopen(false),dir(false),dir2(false)
+      
+  , bRun(0),bhit(0), bevent(0), bcluster(0)
+  , bthit(0), btcluster(0), btevent(0)
+  , btrevent(0), btrack(0), btrvertex(0)
+  , bclusterraw(0)
+
+  , histdir(0), histdir2(0), vertexdir(0), topdir(0)
+  , drtree (0), dtree(0), dttree(0), dtrtree(0), dtreeraw(0)
+  , drawclhisto(-1956), drawvertexhisto(-1956)
 {
 
   // initialize filename and open file
   
-  TFile *test;
-  fileopen=false;
-  dir=false;dir2=false;
-  hardsecold=-1; hardrowold=-1;
-  hardsecold2=-1; hardrowold2=-1;
-  clusterhisto=new TH2F();
-  clusterhisto2=new TH2F();
-  vertex_west=new TH1F();
-  vertex_east=new TH1F();
-  vertex_both=new TH1F();
-
-  run=grun;
-  nevent=gevent;
+  TFile *test=0;
   
   // lese ini file ein 
   ifstream ini;
@@ -184,46 +202,52 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
     {
       fileopen=true;
       histofile=new TFile(histodatei,"UPDATE","histogramme fuer fcl");
-
-         drtree=(TTree*) histofile->Get("rinfo");
+      bRun = 0;
+      drtree=(TTree*) histofile->Get("rinfo");
+      if (drtree) {
          bRun=drtree->GetBranch("Run");
-         bRun->SetAddress(&Run);
+        
  
-      dtree=(TTree*) histofile->Get("cl");
-      bhit=dtree->GetBranch("hit");
-      bhit->SetAddress(&hit);
-      bcluster=dtree->GetBranch("cluster");
-      bcluster->SetAddress(&cluster);
-      bevent=dtree->GetBranch("event");
-      bevent->SetAddress(&event);
+         dtree=(TTree*) histofile->Get("cl");
+         bhit=dtree->GetBranch("hit");
+         bhit->SetAddress(&hit);
+         bcluster=dtree->GetBranch("cluster");
+         bcluster->SetAddress(&cluster);
+         bevent=dtree->GetBranch("event");
+         bevent->SetAddress(&event);
 
-      dttree=(TTree*) histofile->Get("clot");
-      btcluster=dttree->GetBranch("cluster");
-      btcluster->SetAddress(&tcluster);
-      bthit=dttree->GetBranch("hit");
-      bthit->SetAddress(&thit);
-      btevent=dttree->GetBranch("event");
-      btevent->SetAddress(&tevent);
+         dttree=(TTree*) histofile->Get("clot");
+         btcluster=dttree->GetBranch("cluster");
+         btcluster->SetAddress(&tcluster);
+         bthit=dttree->GetBranch("hit");
+         bthit->SetAddress(&thit);
+         btevent=dttree->GetBranch("event");
+         btevent->SetAddress(&tevent);
 
-      dtrtree=(TTree*) histofile->Get("tr");
-      btrevent=dtrtree->GetBranch("event");
-      btrevent->SetAddress(&trevent);
-      btrack=dtrtree->GetBranch("track");
-      btrack->SetAddress(&track);
-      btrvertex=dtrtree->GetBranch("vertex");
-      btrvertex->SetAddress(&mvertex);
+         dtrtree=(TTree*) histofile->Get("tr");
+         btrevent=dtrtree->GetBranch("event");
+         btrevent->SetAddress(&trevent);
+         btrack=dtrtree->GetBranch("track");
+         btrack->SetAddress(&track);
+         btrvertex=dtrtree->GetBranch("vertex");
+         btrvertex->SetAddress(&mvertex);
 
-      dtreeraw=(TTree*) histofile->Get("raw");
-      bclusterraw=dtreeraw->GetBranch("cl_raw");
-      bclusterraw->SetAddress(&raw);
+         dtreeraw=(TTree*) histofile->Get("raw");
+         bclusterraw=dtreeraw->GetBranch("cl_raw");
+         bclusterraw->SetAddress(&raw);
 
-      histofile->Delete("rinfo;1");
-      histofile->Delete("cl;1");
-      histofile->Delete("clot;1");
-      histofile->Delete("tr;1");
-      histofile->Delete("raw;1");
+         histofile->Delete("rinfo;1");
+         histofile->Delete("cl;1");
+         histofile->Delete("clot;1");
+         histofile->Delete("tr;1");
+         histofile->Delete("raw;1");
       
-      topdir=(TDirectory*) histofile->Get("histograms");
+         topdir=(TDirectory*) histofile->Get("histograms");
+      } else {
+         LOG_ERROR << "StFtpcClusterDebug::StFtpcClusterDebug():" 
+                   << " No \"rinfo\" object was found on <" 
+                   << histodatei << "> ROOT file"  << endm;
+      }
     }
 
   delete test;
