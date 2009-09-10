@@ -123,7 +123,7 @@ CXXFLAGS += $(shell xml2-config --cflags)
 
 LOCAL_INCS = -I. -I$(OPTSTAR)/include -I/usr/include/mysql
 
-SHARED_LIBS = -L$(OPTSTAR)/lib/ -L$(OPTSTAR)/lib/mysql -L/usr/lib/mysql/ -lmysqlclient $(LIBS)
+SHARED_LIBS = -L$(OPTSTAR)/lib/ -L$(OPTSTAR)/lib/mysql -L/usr/lib64/mysql -L/usr/lib/mysql/ -lmysqlclient $(LIBS)
 SHARED_LIBS += $(shell xml2-config --libs)
 #SHARED_LIBS += $(shell root-config --libs)
 
