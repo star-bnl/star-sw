@@ -119,12 +119,15 @@ SO  := $(CXX)
 LIBS += $(EXTRA_LIBS)
 
 CXXFLAGS += $(shell xml2-config --cflags)
+CXXFLAGS += $(shell mysql_config --cflags)
 #CXXFLAGS += $(shell root-config --cflags)
 
-LOCAL_INCS = -I. -I$(OPTSTAR)/include -I/usr/include/mysql
+LOCAL_INCS = -I. -I$(OPTSTAR)/include
 
-SHARED_LIBS = -L$(OPTSTAR)/lib/ -L$(OPTSTAR)/lib/mysql -L/usr/lib64/mysql -L/usr/lib/mysql/ -lmysqlclient $(LIBS)
+SHARED_LIBS = -L$(OPTSTAR)/lib/ -L$(OPTSTAR)/lib/mysql $(LIBS)
 SHARED_LIBS += $(shell xml2-config --libs)
+SHARED_LIBS += $(shell mysql_config --libs)
+
 #SHARED_LIBS += $(shell root-config --libs)
 
 STATIC_LIBS = $(OPTSTAR)/lib/libmysqlclient.a $(LIBS)
