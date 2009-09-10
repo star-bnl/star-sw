@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.10 2007/09/03 05:39:03 fisyak Exp $
+ * $Id: StDbTableDescriptor.h,v 1.11 2009/09/10 18:06:08 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.11  2009/09/10 18:06:08  dmitry
+ * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
+ *
  * Revision 1.10  2007/09/03 05:39:03  fisyak
  * Anti Cint corrections
  *
@@ -90,6 +93,8 @@ protected:
  StTypeE lastType;
  int padsize;
 
+ unsigned int mAlign[Stmaxtype];
+
  tableDescriptor* mcols;
  int mMax;
  int mCur;
@@ -101,6 +106,7 @@ protected:
   static int rowSizeTT;
  bool misValid;  // schema has been filled
  bool mhasDouble;
+ unsigned int maxAlign;
 
   void init();
   virtual void reSize();
@@ -108,6 +114,7 @@ protected:
   virtual void fillLengths(char* length, int elementNum);
   virtual StTypeE getType(char* type);
   virtual unsigned int getSize(StTypeE type);
+  virtual unsigned int getAlign(StTypeE type);
 
 public:
 
@@ -140,6 +147,8 @@ public:
   int getTrowSize() ;  
   void endRowPadding();
   void storeRowSize(int rowSize);
+  unsigned int getMaxAlign();
+  
 };
 #ifndef __CINT__
 inline unsigned int
@@ -204,6 +213,7 @@ return mcols[elementNum].dimensionlen[dimensionNum];
 }
 
 inline unsigned int StDbTableDescriptor::getSize(StTypeE type){ return mycsize[type];}
+inline unsigned int StDbTableDescriptor::getAlign(StTypeE type){ return mAlign[type];}
 inline int  StDbTableDescriptor::getSchemaID() const { return mschemaID; }
 inline int  StDbTableDescriptor::getStructID() const { return mstructID; }
 inline void StDbTableDescriptor::setSchemaID(int id) { mschemaID=id; }
@@ -212,6 +222,7 @@ inline bool StDbTableDescriptor::IsValid() const { return misValid; }
 inline int  StDbTableDescriptor::getCurrentInternalSize() { return mMax; };
 inline void StDbTableDescriptor::storeRowSize(int rowSize) { rowSizeTT = rowSize; }
 inline int  StDbTableDescriptor::getTrowSize() { return rowSizeTT; };
+inline unsigned int  StDbTableDescriptor::getMaxAlign() { return maxAlign; };
 #endif
 
 #endif

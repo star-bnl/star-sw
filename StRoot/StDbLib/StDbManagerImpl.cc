@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.30 2008/04/08 02:08:34 fine Exp $
+ * $Id: StDbManagerImpl.cc,v 1.31 2009/09/10 18:06:07 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.31  2009/09/10 18:06:07  dmitry
+ * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
+ *
  * Revision 1.30  2008/04/08 02:08:34  fine
  * restore the previouse version
  *
@@ -228,6 +231,8 @@
 #include "StDbTableIter.hh"
 #include "dbCollection.h"
 #include "StDbMessenger.hh"
+
+#include <cstdlib>
 
 #ifndef __STDB_STANDALONE__
 #include "StMessMgr.h"
@@ -1009,11 +1014,12 @@ return initConfig(type,domain,configName,opt);
 ////////////////////////////////////////////////////////////////
 StDbConfigNode* StDbManagerImpl::initConfig(StDbType type, StDbDomain domain){
   // create Config node with appropriate name for db type & domain 
-  char* name = getConfigNodeName(type,domain);
+  char* name = 0;
+  name = getConfigNodeName(type,domain);
   StDbConfigNode* configNode = new StDbConfigNodeImpl(type,domain,name);
   configNode->setIsDbNode(true);
   delete [] name;
- return configNode;
+  return configNode;
 }
 
 ////////////////////////////////////////////////////////////////

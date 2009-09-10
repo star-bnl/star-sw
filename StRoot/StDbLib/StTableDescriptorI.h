@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTableDescriptorI.h,v 1.8 2005/09/07 22:04:02 deph Exp $
+ * $Id: StTableDescriptorI.h,v 1.9 2009/09/10 18:06:08 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTableDescriptorI.h,v $
+ * Revision 1.9  2009/09/10 18:06:08  dmitry
+ * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
+ *
  * Revision 1.8  2005/09/07 22:04:02  deph
  * update to correct padding issue for packed tables
  *
@@ -57,10 +60,10 @@
 #ifndef StTableDescriptorI_HH
 #define StTableDescriptorI_HH
 
-enum StTypeE {Stchar,Stuchar,Stshort,Stushort,Stint,Stuint,Stlong,Stulong,Stlonglong,Stfloat,Stdouble};
+enum StTypeE {Stchar = 0, Stuchar, Stshort, Stushort, Stint, Stuint, Stlong, Stulong, Stlonglong, Stfloat, Stdouble, Stmaxtype };
 
 #ifndef ROOT_CINT
-const int StTypeSize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(unsigned short), sizeof(int),sizeof(unsigned int),sizeof(long),sizeof(unsigned long), sizeof(long long),sizeof(float),sizeof(double)};
+const int StTypeSize[]={sizeof(char), sizeof(unsigned char), sizeof(short), sizeof(unsigned short), sizeof(int), sizeof(unsigned int), sizeof(long), sizeof(unsigned long), sizeof(long long), sizeof(float), sizeof(double)};
 #endif
 
 class StTableDescriptorI {
@@ -76,6 +79,7 @@ public:
   virtual unsigned int getElementSize(int elementNum)          const = 0;
   //MPD
   virtual int getTrowSize()           = 0;
+  virtual unsigned int getMaxAlign()           = 0;
   virtual StTypeE getElementType(int elementNum)               const = 0;
   virtual unsigned int* getElementDimensions(int elementNum)   const = 0;
   virtual unsigned int getElementLength(int elementNum)        const = 0;

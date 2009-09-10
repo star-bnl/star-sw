@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.40 2007/08/20 18:21:30 deph Exp $
+ * $Id: StDbTable.cc,v 1.41 2009/09/10 18:06:08 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.41  2009/09/10 18:06:08  dmitry
+ * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
+ *
  * Revision 1.40  2007/08/20 18:21:30  deph
  * New Version of Load Balancer
  *
@@ -174,6 +177,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.41  2009/09/10 18:06:08  dmitry
+ * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
+ *
  * Revision 1.40  2007/08/20 18:21:30  deph
  * New Version of Load Balancer
  *
@@ -1098,6 +1104,9 @@ float* mfloat; double* mdouble;
       } else { printNoDataReturned(name); }
     break;
     }
+  case Stmaxtype:
+    printNoDataReturned(name);
+    break;
   }
 
 }
@@ -1176,6 +1185,8 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
     buff->WriteArray(mdouble,len,name);
     break;
     }
+  case Stmaxtype:
+    break;
   }
 
 }
@@ -1274,6 +1285,9 @@ StDbTable::PassInElement(char* ptr, char* name, int len, StTypeE type, typeAccep
      delete [] data;
      break;
     }
+  case Stmaxtype:
+    // should never get here
+    break;
   }
 }
 
@@ -1384,6 +1398,9 @@ StDbTable::PassOutElement(char* ptr, char* name, int len, StTypeE type, typeAcce
     }
     break;
     }
+  case Stmaxtype:
+    // should never get here
+    break;
   }
 }
 
