@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.25 2005/09/07 22:04:02 deph Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.26 2009/09/10 18:06:08 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.26  2009/09/10 18:06:08  dmitry
+ * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
+ *
  * Revision 1.25  2005/09/07 22:04:02  deph
  * update to correct padding issue for packed tables
  *
@@ -129,6 +132,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include "stdb_streams.h"
+#include <iostream>
+
+// Alignment test struct
+template <typename T>                                                                                                                                        
+struct StCompilerAlignTest {                                                                                                                                 
+   char m0;                                                                                                                                                  
+      T m1;                                                                                                                                                     
+};                                                                                                                                                           
+                                                                                                                                                                   
+#define st_alignof(TYPE)     (size_t)&(((StCompilerAlignTest<TYPE>*)0)->m1) 
 
 int StDbTableDescriptor::rowSizeTT = 0;
 
@@ -165,6 +178,20 @@ mschemaID=mstructID=0;
 misValid=false;
 mhasDouble=false;
 
+mAlign[Stchar] = st_alignof(char);
+mAlign[Stuchar] = st_alignof(unsigned char);
+mAlign[Stshort] = st_alignof(short);
+mAlign[Stushort] = st_alignof(unsigned short);
+mAlign[Stint] = st_alignof(int);
+mAlign[Stuint] = st_alignof(unsigned int);
+mAlign[Stlong] = st_alignof(long);
+mAlign[Stulong] = st_alignof(unsigned long);
+mAlign[Stlonglong] = st_alignof(long long);
+mAlign[Stfloat] = st_alignof(float);
+mAlign[Stdouble] = st_alignof(double);
+
+maxAlign = mAlign[Stchar];
+
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -182,6 +209,19 @@ mschemaID=d.getSchemaID();
 mstructID=d.getStructID();
 misValid=d.IsValid();
 mhasDouble=d.mhasDouble;
+maxAlign=d.maxAlign;
+
+mAlign[Stchar] = st_alignof(char);
+mAlign[Stuchar] = st_alignof(unsigned char);
+mAlign[Stshort] = st_alignof(short);
+mAlign[Stushort] = st_alignof(unsigned short);
+mAlign[Stint] = st_alignof(int);
+mAlign[Stuint] = st_alignof(unsigned int);
+mAlign[Stlong] = st_alignof(long);
+mAlign[Stulong] = st_alignof(unsigned long);
+mAlign[Stlonglong] = st_alignof(long long);
+mAlign[Stfloat] = st_alignof(float);
+mAlign[Stdouble] = st_alignof(double);
 
 }
 
@@ -209,7 +249,7 @@ return dScr;
 
 void
 StDbTableDescriptor::fillElement(StDbBuffer* buff, int tableID){
-
+    
   //bool ClientMode;
 //  if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
   int schemaID;
@@ -235,16 +275,21 @@ StDbTableDescriptor::fillElement(StDbBuffer* buff, int tableID){
        if(length) delete [] length;
    }
 
-   if(mcols[i].type==Stlonglong || mcols[i].type==Stdouble ) mhasDouble=true;
+   if (mcols[i].type==Stlonglong || mcols[i].type==Stdouble ) mhasDouble=true;
+   if (getAlign(mcols[i].type) > maxAlign) { maxAlign = getAlign(mcols[i].type); }
    
    mCur++;
    mnumElements++;
 
    // for multiple rows, add padding as needed at end of structure (tableSize)
-   int rowpad;
-   if((rowpad=offsetToNextEmptyByte%2))rowpad=2-rowpad;
 
-   mtableSize = offsetToNextEmptyByte+rowpad;
+   int rowpad;
+   if ( ( rowpad = offsetToNextEmptyByte%2 ) ) { rowpad = 2 - rowpad; }
+
+   //mtableSize = offsetToNextEmptyByte + rowpad;
+
+   // correct padding should be based on max align:
+   mtableSize = int(ceil(float(offsetToNextEmptyByte) / float(maxAlign)) * maxAlign);
 
    //if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
 
@@ -302,85 +347,20 @@ char* id= strstr(length,",");
 void
 StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
 
+  fillLengths(length,elementNum);
+  StTypeE type = mcols[elementNum].type;
 
-  int i = elementNum;
-  fillLengths(length,i);
-  int space = 4-(offsetToNextEmptyByte-offsetToLast4Bytes);
+  int j = 0;
+  mcols[elementNum].size = getSize(mcols[elementNum].type);
 
-  int j,jj;
-  StTypeE type = mcols[i].type;
-  j=0;
-  mcols[i].size = getSize(mcols[i].type);
-  int k= (int)(sizeof(mcols[i].dimensionlen)/sizeof(j));
-  for(j=0;j<k;j++)mcols[i].size*=mcols[i].dimensionlen[j];
+  int k= (int)(sizeof(mcols[elementNum].dimensionlen)/sizeof(j));
+  std::cout << "k: " << k << std::endl;
+  for (j=0; j<k; j++) mcols[elementNum].size *= mcols[elementNum].dimensionlen[j];
 
-  if(offsetToLast4Bytes < 0){
+  int offp = int(ceil(float(offsetToNextEmptyByte) / float(getAlign(type))) * getAlign(type));
+  mcols[elementNum].offset = offp;
+  offsetToNextEmptyByte = mcols[elementNum].offset + mcols[elementNum].size;
 
-    mcols[i].offset = 0;
-    offsetToNextEmptyByte = mcols[i].offset+mcols[i].size;
-    j = 4* ((int) floor ( (float) (mcols[i].size-1)/4 ));
-    offsetToLast4Bytes = mcols[i].offset + j;// + 4;
- 
-
-  } else if(type==Stchar || type==Stuchar){
-
-     mcols[i].offset=offsetToNextEmptyByte;
-     offsetToNextEmptyByte = mcols[i].offset+mcols[i].size;
-     jj=mcols[i].offset+mcols[i].size-offsetToLast4Bytes;
-     if(jj>1)  
-     j = 4* ((int) floor ((float) (jj-1)/4 ));
-     // j= number of bytes (in 4s) past last offset
-      if(j)
-      offsetToLast4Bytes = offsetToLast4Bytes+j;
-
-  } else if( (space>=2) && (type == Stshort || type == Stushort) ){
-
-      mcols[i].offset=offsetToLast4Bytes+2;
-      j = 4* ((int) floor ((float) (mcols[i].size-2-1)/4 ));    // note the 2
-      offsetToNextEmptyByte=mcols[i].offset+mcols[i].size;
-     jj=mcols[i].offset+mcols[i].size-offsetToLast4Bytes;
-     if(jj>1)  
-     j = 4* ((int) floor ((float) (jj-1)/4 ));
-     // j= number of bytes (in 4s) past last offset
-      if(j)
-      offsetToLast4Bytes = offsetToLast4Bytes+j;
-
-  } else {
-
-
-    if( (type==Stdouble || type==Stlonglong) && 
-        (lastType != Stdouble) && (lastType != Stlonglong) && padsize < 8){
-      offsetToLast4Bytes+=padsize;
-      offsetToNextEmptyByte+=padsize;
-    }
-
-     mcols[i].offset=offsetToLast4Bytes+4;
-     offsetToNextEmptyByte = mcols[i].offset + mcols[i].size;
-     j = 4* ((int) floor ((float) (mcols[i].size-1)/4 ));
-     offsetToLast4Bytes = mcols[i].offset + j;// + 4;
-     
-  }
-
-  if(offsetToLast4Bytes<0)offsetToLast4Bytes=0;
-
-#ifdef __linux__
-  lastType=Stdouble;
-#else
-  if(type==Stdouble || type==Stlonglong )padsize = 0;
-  lastType=type;
-
-  unsigned int onesize = getSize(mcols[i].type);
-  for(j=0;j<k;j++){
-    if(mcols[i].dimensionlen[j]==1 && j>0)continue;
-    for(int jk=0; jk< (int)mcols[i].dimensionlen[j]; jk++){
-      padsize=padsize+(int)onesize;
-      if(padsize>=8)padsize=padsize-8;
-    }
-  }
- if(padsize>0 && padsize<=4) padsize=4; 
- // padsize = 4* ((int) floor ((float) (padsize)/4 ));
-
-#endif
 }
 
 /////////////////////////////////////////////////////////////////////////
