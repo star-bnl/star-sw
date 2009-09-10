@@ -39,7 +39,21 @@ Bool_t StArchInfo::isLittleEndian()
 }
 
 
-/// Returns predefined Endianess as 1234for little and 4321 for big
+/*
+ * Returns predefined Endianess as 1234 for little and 4321 for big
+ * This does not treat middle-endian.
+ * 
+ * Base principle: we use an array of two char (1 byte ecah) and force cast to
+ * a short value and test.
+ * 
+ * If the system is little-endian, the 0 and 1 is interpreted
+ * backwards and seen as if it is 0,1. Since the high byte is 0, it
+ * doesn't matter and the low byte is 1, so x is equal to 1.
+ * 
+ * If it's a big-endian system, the high byte is 1.
+ * 
+ * 
+ */ 
 Int_t StArchInfo::Endian()
 {
 
@@ -52,18 +66,15 @@ Int_t StArchInfo::Endian()
       x = * ((short *) endian);
 
       if ( x == 1) {
-	 // If this is a little-endian system, the 0 and 1 is interpreted 
-	 // backwards and seen as if it is 0,1. Since the high byte is 0, it 
-	 // doesn't matter and the low byte is 1, so x is equal to 1.
+	 // little
 	 fEndian = __LITTLE_ENDIAN;
       } else {
-	 // If it's a big-endian system, the high byte is 1
+	 // big or middle
 	 fEndian = __BIG_ENDIAN;
 
-	 // One possible problem ... We cannot detect middle-edian with the 1,0 0,1 
-	 // combo but would need at least 4 bytes to test the 3412 ordering.
-	 // 
-	 // This test is hence not suitable if we get into middle-edian arch.
+	 //
+	 // One possible problem ... We do not detect middle-edian 
+	 // This test ould need to be extended for middle-edian arch (rare)
 	 // 
       }
 
