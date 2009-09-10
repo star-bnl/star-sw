@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.26 2009/09/10 18:06:08 dmitry Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.27 2009/09/10 20:01:30 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.27  2009/09/10 20:01:30  dmitry
+ * removed redundant output
+ *
  * Revision 1.26  2009/09/10 18:06:08  dmitry
  * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
  *
@@ -354,7 +357,6 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
   mcols[elementNum].size = getSize(mcols[elementNum].type);
 
   int k= (int)(sizeof(mcols[elementNum].dimensionlen)/sizeof(j));
-  std::cout << "k: " << k << std::endl;
   for (j=0; j<k; j++) mcols[elementNum].size *= mcols[elementNum].dimensionlen[j];
 
   int offp = int(ceil(float(offsetToNextEmptyByte) / float(getAlign(type))) * getAlign(type));
