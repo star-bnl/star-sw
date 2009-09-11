@@ -194,7 +194,7 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
       drtree=(TTree*) histofile->Get("rinfo");
       if (drtree) {
          bRun=drtree->GetBranch("Run");
-
+         bRun->SetAddress(&Run);
          dtree=(TTree*) histofile->Get("cl");
            bhit=dtree->GetBranch("hit");
            bhit->SetAddress(&hit);
