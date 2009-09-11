@@ -14,10 +14,7 @@
 
 #include "StMuTrackEmu.h"
 #include "StMuTowerEmu.h"
-#include "StSpinPool/StJetEvent/StJetTrack.h"
-#include "StSpinPool/StJetEvent/StJetTower.h"
-#include "StSpinPool/StJetEvent/StJetEvent.h"
-#include "StSpinPool/StJetEvent/StJetCandidate.h"
+#include "StSpinPool/StJetEvent/StJetEventTypes.h"
 
 #include <StJetFinder/StProtoJet.h>
 
