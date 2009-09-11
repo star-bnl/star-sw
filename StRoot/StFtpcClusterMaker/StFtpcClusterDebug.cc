@@ -13,7 +13,7 @@
 
 #include "StFtpcTrackMaker/StFtpcConfMapper.hh"
 
-
+namespace {
 struct RUN
 {
   Int_t run;
@@ -21,14 +21,14 @@ struct RUN
   Int_t time;
   Float_t micropertimebin;
   Float_t deltapW,deltapE;
-};
+} Run;
 
 struct HIT 
 {
   Float_t x,y,z;
   Float_t rad,phi;
   Float_t raderror,phierror;
-};
+} hit;
 
 struct CLUSTER
 {
@@ -39,19 +39,19 @@ struct CLUSTER
   Int_t row,sec;
   Int_t flag;
   Int_t numpeaks;
-};
+} cluster;
 
 struct EVENT
 {
   Int_t run;
   Int_t nevent;
-};
+}event;
 
 struct TEVENT
 {
   Int_t run;
   Int_t nevent;
-};
+}tevent;
 
 
 struct TCLUSTER
@@ -61,7 +61,7 @@ struct TCLUSTER
   Int_t ntracks;
   Float_t padpos, timepos;
   Float_t padpossigma, timepossigma;
-};
+} tcluster;
 
 struct THIT
 {
@@ -69,13 +69,13 @@ struct THIT
   Float_t ex,ey,ez;
   Float_t globResX,globResY,globResPhi,globResR;
   Float_t primResX,primResY,primResPhi,primResR;
-};
+}thit;
 
 struct TREVENT
 {
   Int_t run;
   Int_t nevent;
-};
+}trevent;
 
 struct TRACK
 {
@@ -86,33 +86,21 @@ struct TRACK
   Int_t type;
   Int_t sec;
   //Double_t chi2;
-};
+}track;
 
 struct MVERTEX
 {
   Float_t x,y,z;
-};
+}mvertex;
 
 struct RAW
 {
   Int_t sec,row,time,pad;
   Float_t adc;
-};
+}raw;
 
 // so nur vor Klasse !? genauer !!!
-
-static RUN Run;
-static CLUSTER cluster;
-static HIT hit;
-static TCLUSTER tcluster;
-static THIT thit;
-static TRACK track;
-static EVENT event;
-static TEVENT tevent;
-static TREVENT trevent;
-static MVERTEX mvertex;
-static RAW raw;
-
+}
 
 StFtpcClusterDebug::StFtpcClusterDebug() 
   : histofile(0), hardsecold(-1), hardrowold(-1) 
@@ -131,7 +119,7 @@ StFtpcClusterDebug::StFtpcClusterDebug()
   , drawclhisto(-1956), drawvertexhisto(-1956)
 {
   // default constructor
-  //LOG_INFO << "StFtpcClusterDebug constructed" << endm; 
+  //   LOG_INFO << "StFtpcClusterDebug constructed" << endm; 
 }
 
 StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
@@ -155,9 +143,7 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
 {
 
   // initialize filename and open file
-  
   TFile *test=0;
-  
   // lese ini file ein 
   ifstream ini;
   ini.open("./debug.ini",ios::in);
@@ -171,77 +157,84 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
 
   if (!(test->IsOpen()))
     {
+      delete test; test = 0;
       fileopen=false;
       LOG_INFO << "histodatei = " << histodatei << endm;
       histofile=new TFile(histodatei,"RECREATE","FTPC Cluster Finder histograms");
 
-        drtree=new TTree("rinfo","Run calibration information");
+      drtree=new TTree("rinfo","Run calibration information");
         drtree->Branch("Run",&Run,"run/I:date/I:time/I:micropertimebin/F:deltapW/F:deltapE/F");
 
       dtree=new TTree("cl","Cluster calibration informations");
-      dtree->Branch("hit",&hit,"x/F:y/F:z/F:rad/F:phi/F:raderror/F:phierror/F");
-      dtree->Branch("cluster",&cluster,"timepos/F:padpos/F:timesigma/F:padsigma/F:peakheight/F:charge/F:timebin/I:pad/I:padlength/I:timelength/I:row/I:sec/I:flag/I:numpeaks/I");
-      dtree->Branch("event",&event,"run/I:nevent/I");
+        dtree->Branch("hit",&hit,"x/F:y/F:z/F:rad/F:phi/F:raderror/F:phierror/F");
+        dtree->Branch("cluster",&cluster,"timepos/F:padpos/F:timesigma/F:padsigma/F:peakheight/F:charge/F:timebin/I:pad/I:padlength/I:timelength/I:row/I:sec/I:flag/I:numpeaks/I");
+        dtree->Branch("event",&event,"run/I:nevent/I");
 
       dttree=new TTree("clot","Cluster on tracks calibration information");
-      dttree->Branch("cluster",&tcluster,"row/I:sec/I:padlength/I:timelength/I:peakheight/F:charge/F:ntracks/I:padpos/F:timepos/F:padsigma/F:timesigma/F");
-      dttree->Branch("hit",&thit,"x/F:y/F:z/F:ex/F:ey/F:ez/F:globResX/F:globResY/F:globResR/F:globResPhi/F:primResX/F:primResY/F:primResR/F:primResPhi/F");
-      dttree->Branch("event",&tevent,"run/I:nevent/I");
+        dttree->Branch("cluster",&tcluster,"row/I:sec/I:padlength/I:timelength/I:peakheight/F:charge/F:ntracks/I:padpos/F:timepos/F:padsigma/F:timesigma/F");
+        dttree->Branch("hit",&thit,"x/F:y/F:z/F:ex/F:ey/F:ez/F:globResX/F:globResY/F:globResR/F:globResPhi/F:primResX/F:primResY/F:primResR/F:primResPhi/F");
+        dttree->Branch("event",&tevent,"run/I:nevent/I");
 
       dtrtree=new TTree("tr","Track calibration information");
-      dtrtree->Branch("event",&trevent,"run/I:nevent/I");
-      dtrtree->Branch("track",&track,"px/F:py/F:pz/F:eta/F:p/F:pt/F:npoints/I:charge/I:type/I:sec/I");//:chi2/D");
-      dtrtree->Branch("vertex",&mvertex,"x/F:y/F:z/F");
+        dtrtree->Branch("event",&trevent,"run/I:nevent/I");
+        dtrtree->Branch("track",&track,"px/F:py/F:pz/F:eta/F:p/F:pt/F:npoints/I:charge/I:type/I:sec/I");//:chi2/D");
+        dtrtree->Branch("vertex",&mvertex,"x/F:y/F:z/F");
 
       dtreeraw=new TTree("raw","Cluster raw data");
-      dtreeraw->Branch("cl_raw",&raw,"sec/I:row/I:time/I:pad/I:adc/F");
+        dtreeraw->Branch("cl_raw",&raw,"sec/I:row/I:time/I:pad/I:adc/F");
 
       topdir=histofile->mkdir("histograms");
     }
   else
     {
+      delete test; test = 0;
       fileopen=true;
       histofile=new TFile(histodatei,"UPDATE","histogramme fuer fcl");
       bRun = 0;
       drtree=(TTree*) histofile->Get("rinfo");
       if (drtree) {
          bRun=drtree->GetBranch("Run");
-        
- 
+
          dtree=(TTree*) histofile->Get("cl");
-         bhit=dtree->GetBranch("hit");
-         bhit->SetAddress(&hit);
-         bcluster=dtree->GetBranch("cluster");
-         bcluster->SetAddress(&cluster);
-         bevent=dtree->GetBranch("event");
-         bevent->SetAddress(&event);
+           bhit=dtree->GetBranch("hit");
+           bhit->SetAddress(&hit);
+
+           bcluster=dtree->GetBranch("cluster");
+           bcluster->SetAddress(&cluster);
+         
+           bevent=dtree->GetBranch("event");
+           bevent->SetAddress(&event);
 
          dttree=(TTree*) histofile->Get("clot");
-         btcluster=dttree->GetBranch("cluster");
-         btcluster->SetAddress(&tcluster);
-         bthit=dttree->GetBranch("hit");
-         bthit->SetAddress(&thit);
-         btevent=dttree->GetBranch("event");
-         btevent->SetAddress(&tevent);
+           btcluster=dttree->GetBranch("cluster");
+           btcluster->SetAddress(&tcluster);
+         
+           bthit=dttree->GetBranch("hit");
+           bthit->SetAddress(&thit);
+           
+           btevent=dttree->GetBranch("event");
+           btevent->SetAddress(&tevent);
 
          dtrtree=(TTree*) histofile->Get("tr");
-         btrevent=dtrtree->GetBranch("event");
-         btrevent->SetAddress(&trevent);
-         btrack=dtrtree->GetBranch("track");
-         btrack->SetAddress(&track);
-         btrvertex=dtrtree->GetBranch("vertex");
-         btrvertex->SetAddress(&mvertex);
+           btrevent=dtrtree->GetBranch("event");
+           btrevent->SetAddress(&trevent);
+           
+           btrack=dtrtree->GetBranch("track");
+           btrack->SetAddress(&track);
+           
+           btrvertex=dtrtree->GetBranch("vertex");
+           btrvertex->SetAddress(&mvertex);
 
          dtreeraw=(TTree*) histofile->Get("raw");
-         bclusterraw=dtreeraw->GetBranch("cl_raw");
-         bclusterraw->SetAddress(&raw);
+           bclusterraw=dtreeraw->GetBranch("cl_raw");
+           bclusterraw->SetAddress(&raw);
 
          histofile->Delete("rinfo;1");
          histofile->Delete("cl;1");
          histofile->Delete("clot;1");
          histofile->Delete("tr;1");
          histofile->Delete("raw;1");
-      
+
          topdir=(TDirectory*) histofile->Get("histograms");
       } else {
          LOG_ERROR << "StFtpcClusterDebug::StFtpcClusterDebug():" 
@@ -257,15 +250,19 @@ StFtpcClusterDebug::~StFtpcClusterDebug()
 {
   //LOG_INFO << "StFtpcClusterDebug deconstructed" << endm;
   histofile->Write();
+#if 0  
   delete clusterhisto;
   delete vertex_west; delete vertex_east; delete vertex_both;
+#endif  
   //if (fileopen)
   //{
   //delete bhit; delete bcluster; delete bevent; 
   //delete btcluster; delete bthit; delete btevent;
   //delete btrevent; delete btrack; delete btrvertex;
   //  }
+#if 0  
   delete dtree; delete dttree; delete dtrtree; // bei sim hier seg. violat.(auch ab > 2300003) !???
+#endif  
   histofile->Close();
   delete histofile; // ???? (auch ab > 2300003)
 }
