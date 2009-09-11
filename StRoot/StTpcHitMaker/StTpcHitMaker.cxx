@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.17 2009/03/18 14:21:06 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.18 2009/09/11 22:11:58 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.18  2009/09/11 22:11:58  genevb
+ * Introduce TPC slewing corrections
+ *
  * Revision 1.17  2009/03/18 14:21:06  fisyak
  * Move sector check under condition that there is some TPC data
  *
@@ -121,6 +124,7 @@
 #include "StRtsTable.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
+#include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "TFile.h"
 #include "TNtuple.h"
 #include "TH2.h"
@@ -331,6 +335,16 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 
   Float_t pad  = cluster.pad;
   Float_t time = cluster.tb;
+
+  Double_t gain = (row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
+  Double_t wire_coupling = (row<=13) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
+  Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
+				   (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+
+  // Correct for slewing (needs corrected q, and time in microsec)
+  Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
+  time = freq * St_tpcSlewingC::instance()->correctedT(row,q,time/freq);
+
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;
   static StTpcLocalCoordinate global;
@@ -349,11 +363,6 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   hw += (ntmbk << 22);  // ntmbks...
 
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
-
-  Double_t gain = (row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
-  Double_t wire_coupling = (row<=13) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
-  Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
-				   (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
             , (unsigned char ) 0  // c
