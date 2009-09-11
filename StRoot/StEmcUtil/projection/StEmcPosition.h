@@ -54,6 +54,7 @@ class StEmcPosition : public TObject
     Int_t             getNextTowerId(Int_t softId, Int_t nTowersdEta, Int_t nTowersdPhi) const; ///< Return neighbor tower id's
     Int_t             getNextTowerId(Int_t m, Int_t e, Int_t s, Int_t nTowersdEta, Int_t nTowersdPhi) const; ///< Return neighbor tower id's
 	Int_t             getNextId(Int_t det, Int_t m, Int_t e, Int_t s, Int_t nEta, Int_t nPhi) const; ///< Return neighbor id (works for all detectors 1=bemc, 2=bprs, 3=bsmde, 4=bsmdp)
+	Int_t getNextId(Int_t det, Int_t softId, Int_t nEta, Int_t nPhi)const;///< Return neighbor id (works for all detectors 1=bemc, 2=bprs, 3=bsmde, 4=bsmdp)
 
 	Float_t           getDistTowerToTrack(Double_t trackEta, Double_t trackPhi, Int_t nTowersdEta, Int_t nTowersdPhi) const; ///< Return distance from track to center of one tower
 
