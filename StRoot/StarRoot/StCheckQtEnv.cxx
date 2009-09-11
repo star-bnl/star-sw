@@ -1,21 +1,33 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/10/2006
 //
-// $Id: StCheckQtEnv.cxx,v 1.8 2008/02/09 01:17:19 fine Exp $
+// $Id: StCheckQtEnv.cxx,v 1.9 2009/09/11 23:51:21 fine Exp $
 // This class sets the Qt/Root environment "on fly" and 
 // generates the correct ROOT resource ".rootrc" file 
 // also
 
 #include "StCheckQtEnv.h"
 #include "TSystem.h"
+#include "TApplication.h"
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,00,0)
 #include "TPRegexp.h"
 #endif
 #include "TEnv.h"
+namespace {
+class InitGraph { 
+   public: 
+     InitGraph() {
+         gEnv->SetValue("Gui.Backend", "qt");
+         gEnv->SetValue("Gui.Factory", "qtgui");
+         gApplication->NeedGraphicsLibs(); 
+         gApplication->InitializeGraphics();
+      }
+};
+}
 
 //__________________________________________________________________
 FILE *StCheckQtEnv::OpeFileName(const char *fileNamePrototype)
 {
-   // Open the file by the giverm file name
+   // Open the file by the given file name
    return fopen( (const char*)GetNewFileName(fileNamePrototype),"w");
 }
 //__________________________________________________________________
@@ -93,6 +105,7 @@ Long_t  StCheckQtEnv::SetQtEnv(bool checkCoin) {
   //         0 - Correct env. 
   //       > 0 - Wrong env. The user should fix his/her env.
   //------------------
+  static InitGraph init_graph;
   const char *plugins[] = {
                    "Plugin.TVirtualX"
                  , "GQt"
