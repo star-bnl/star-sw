@@ -436,6 +436,22 @@ Int_t StEmcPosition::getNextId(const Int_t det, const Int_t m, const Int_t e, co
 
 }
 //------------------------------------------------------------------------------
+Int_t StEmcPosition::getNextId(const Int_t det, const Int_t softId, const Int_t nEta, const Int_t nPhi)const
+{
+  if(det<1 || det>4) return 0;
+  Int_t m,e,s;
+  if(softId<1)return 0;
+  if((det == 1 || det == 2) && softId > 4800)return 0;
+  if((det == 3 || det == 4) && softId > 18000)return 0;
+  mGeom[det-1]->getBin(softId,m,e,s);
+  if(m>0 && m<=120)
+    {
+      if(s<0) s=1;
+      return getNextId(det,m,e,s,nEta,nPhi);
+    }
+  return 0;
+}
+//------------------------------------------------------------------------------
 Float_t StEmcPosition::getDistTowerToTrack( Double_t trackEta, Double_t trackPhi, 
                                          Int_t nTowersdEta, Int_t nTowersdPhi ) const
 
