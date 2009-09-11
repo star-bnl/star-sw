@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.31 2009/09/10 18:06:07 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.32 2009/09/11 13:11:49 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.32  2009/09/11 13:11:49  dmitry
+ * added FMS to domain list
+ *
  * Revision 1.31  2009/09/10 18:06:07  dmitry
  * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
  *
@@ -350,6 +353,7 @@ addDbDomain(dbPmd,"pmd");
 addDbDomain(dbBbc,"bbc"); 
 addDbDomain(dbTracker,"tracker"); 
 addDbDomain(dbZdc,"zdc"); 
+addDbDomain(dbFms,"fms"); 
 
 }
 
