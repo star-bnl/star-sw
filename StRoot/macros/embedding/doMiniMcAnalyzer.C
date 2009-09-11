@@ -35,7 +35,7 @@ void doEmbeddingQA(
     const TString particleName = "PiPlus",
     const TString inputFileList = "minimc.PiPlus.list",
 ){
-  doQA(year, production, particleName, kTRUE, inputFileList, "");
+  doMiniMcAnalyzer(year, production, particleName, kTRUE, inputFileList, "");
 }
 
 //______________________________________________________________________
@@ -45,7 +45,7 @@ void doRealDataQA(
     const TString particleName = "PiPlus",
     const Char_t* inputFileList = "MuDst.P08ic.list",
 ){
-  doQA(year, production, particleName, kFALSE, inputFileList, "");
+  doMiniMcAnalyzer(year, production, particleName, kFALSE, inputFileList, "");
 }
 
 //______________________________________________________________________
