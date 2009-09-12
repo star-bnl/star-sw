@@ -1,6 +1,9 @@
-// $Id: lasertest.C,v 1.8 2009/08/04 08:42:23 jcs Exp $
+// $Id: lasertest.C,v 1.9 2009/09/12 16:00:23 jcs Exp $
 //
 // $Log: lasertest.C,v $
+// Revision 1.9  2009/09/12 16:00:23  jcs
+// Necessary to load the following additional libraries for ROOT 5.22.00:libMinuit.so, libSpectrum.so
+//
 // Revision 1.8  2009/08/04 08:42:23  jcs
 // The 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0
 // are used for laser run calibration
@@ -65,6 +68,9 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char*
 
   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
 
+  gSystem->Load("libMinuit.so");
+  gSystem->Load("libSpectrum.so");
+
   gSystem->Load("St_base");
   gSystem->Load("StChain");
 
@@ -103,9 +109,6 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char*
 
       St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
       dbMk->SetDateTime(laser->Date(),laser->Time()); 
-
-      Bool_t laserRun = kTRUE;
-      dbMk->setLaserRun(laserRun);
       
       dbMk->Init();
       dbMk->Make();
