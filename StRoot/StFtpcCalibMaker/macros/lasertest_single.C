@@ -1,6 +1,9 @@
-// $Id: lasertest_single.C,v 1.7 2009/08/04 08:42:23 jcs Exp $
+// $Id: lasertest_single.C,v 1.8 2009/09/12 14:45:48 jcs Exp $
 //
 // $Log: lasertest_single.C,v $
+// Revision 1.8  2009/09/12 14:45:48  jcs
+// For ROOT 5.22.00 must load libMinuit.so and libSpectrum.so
+//
 // Revision 1.7  2009/08/04 08:42:23  jcs
 // The 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0
 // are used for laser run calibration
@@ -61,6 +64,9 @@ void lasertest_single(TString filename,int ftpc, int lsec, int straight, int gfi
   cout<<endl;
 
   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
+
+  gSystem->Load("libMinuit.so");
+  gSystem->Load("libSpectrum.so");
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
