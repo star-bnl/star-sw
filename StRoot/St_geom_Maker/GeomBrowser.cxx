@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.13 2009/09/14 22:15:20 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.14 2009/09/14 22:38:12 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -113,6 +113,8 @@ void GeomBrowser::Connect()
    
    connect(fDepthControl, SIGNAL(ValueChanged(int))
          , this,  SLOT( DrawObject())); 
+   connect(fDepthControl, SIGNAL(ValueChanged(int))
+         , fTreeWidget,  SLOT(SetDepthCD(int)));
 }
 /// Create QAction for the menu and tool bars
 //_____________________________________________________________________________

@@ -54,6 +54,7 @@ private:
    QTreeWidgetItem *fCurrentDrawn;
    bool             fNewItemCreating;
    QMenu           *fPopupContextMenu;
+   Int_t            fDepth; //< Look up depth;
 
    protected:
       friend class GeomBrowser;
@@ -85,6 +86,7 @@ private:
       void itemSelectionChangedCB ();
       void contextMenuRequestedCB(const QPoint &pos);
       void SelectByTObject( TObject *obj, const QPoint &);
+      void SetDepthCB(Int_t depth=3);
 
 signals:
       void DrawObject(TObject *o,bool expanded);
