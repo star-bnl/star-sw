@@ -18,6 +18,7 @@ class TQtRangeControl;
 class TextEdit;
 class QAction;
 class QStatusBar;
+class StQtDelayRedrawTimer;
 
 class GeomBrowser : public QMainWindow {
   Q_OBJECT
@@ -45,6 +46,7 @@ class GeomBrowser : public QMainWindow {
    QAction   *fEditGeoSrc;
    QStatusBar *fStatusBar;
    TQtRangeControl *fDepthControl;
+   StQtDelayRedrawTimer    *fDelayDrawTimer; //< Timer to delay re-drawing
 
    protected:
      static int Geant3Init;
