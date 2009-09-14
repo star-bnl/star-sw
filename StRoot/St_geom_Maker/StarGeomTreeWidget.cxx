@@ -190,7 +190,7 @@ static const QString  &GetVolumeDescriptor(const QString &volumeName,bool richTe
 //_____________________________________________________________________________
 StarGeomTreeWidget::StarGeomTreeWidget(QWidget *parent) : QTreeWidget(parent)
 , fContextMenu(0),fGeoManager2Delete(0),fCurrentDrawn(0),fNewItemCreating(false)
-, fPopupContextMenu(0)
+, fPopupContextMenu(0),fDepth(0)
 {
    Init();
 }
@@ -198,6 +198,7 @@ StarGeomTreeWidget::StarGeomTreeWidget(QWidget *parent) : QTreeWidget(parent)
 //_____________________________________________________________________________
 void StarGeomTreeWidget::Init()
 {
+   SetDepthCB(3);
    this->setContextMenuPolicy(Qt::CustomContextMenu); 
    QStringList labels;
       labels << "Name" << "Title" << "# <- mother" <<"Class";
@@ -339,7 +340,7 @@ void StarGeomTreeWidget::itemClickedCB ( QTreeWidgetItem * item, int column )
             else {
                // check whether the item parent was drawn
                QTreeWidgetItem *lookup = item;
-               int depth = 3;
+               int depth = fDepth;
                while( lookup && depth && (lookup != fCurrentDrawn))  {
                   lookup = lookup->parent(); 
                   depth--;
@@ -777,4 +778,10 @@ TObject * StarGeomTreeWidget::CurrentObject(QTreeWidgetItem *item)
    QVariant model = item->data(0, Qt::UserRole);
    TObject *obj = (TObject *)model.value<void *>();
    return obj;
+}
+
+//_____________________________________________________________________________
+void StarGeomTreeWidget::SetDepthCB(Int_t depth)
+{
+   fDepth = depth;
 }
