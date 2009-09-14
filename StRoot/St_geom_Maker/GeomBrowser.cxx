@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.14 2009/09/14 22:38:12 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.15 2009/09/14 23:40:56 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -45,6 +45,7 @@
 #include <QPrintDialog>
 #include <QDebug>
 #include <QStatusBar>
+#include "StQtDelayRedrawTimer.h"
 
 int GeomBrowser::Geant3Init = 0;
 //_____________________________________________________________________________
@@ -68,7 +69,7 @@ static void RefreshCanvas(TQtWidget *w)
  , fFile_New(0),  fFile_Open(0),  fFile_Reload(0), fFile_Save(0), fFile_SaveAs(0)
  , fFile_Print(0), fFile_Exit(0)  
  , fView_Coin3DAction(0), fView_GLAction(0)
- , fEditGeoSrc(0), fStatusBar(0),fDepthControl(0)
+ , fEditGeoSrc(0), fStatusBar(0),fDepthControl(0),fDelayDrawTimer(0)
  { 
    this->setWindowTitle(tr("STAR Geometry Browser"));
    CreateActions();
@@ -115,6 +116,8 @@ void GeomBrowser::Connect()
          , this,  SLOT( DrawObject())); 
    connect(fDepthControl, SIGNAL(ValueChanged(int))
          , fTreeWidget,  SLOT(SetDepthCD(int)));
+   connect(fDelayDrawTimer, SIGNAL(DrawObjectSignal(TObject *,bool))
+                       ,this,SLOT(DrawObject(TObject *, bool)));
 }
 /// Create QAction for the menu and tool bars
 //_____________________________________________________________________________
@@ -386,6 +389,7 @@ void GeomBrowser::Init()
         fTreeWidget->AddModel2ListView(gGeoManager->GetTopVolume(),QString());
       }
    }
+   fDelayDrawTimer = new StQtDelayRedrawTimer(this);
 }
 
 //_____________________________________________________________________________
@@ -609,6 +613,14 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
 //_____________________________________________________________________________
 void GeomBrowser::DrawObject(TObject *obj,bool expanded)
 {
+   // add delay
+#if 0
+   if (fDelayDrawTimer->isActive()) {
+      // re-throw the timer
+      fDelayDrawTimer->DrawObject(obj,expanded);
+      return;
+   }
+#endif
    if (!obj && fTreeWidget) obj = fTreeWidget->CurrentObject();
    if (obj) {
       TVolume *volume = dynamic_cast<TVolume *>(obj);
