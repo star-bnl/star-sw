@@ -772,7 +772,7 @@ void StarGeomTreeWidget::ClearCB()
 //_____________________________________________________________________________
 TObject * StarGeomTreeWidget::CurrentObject(QTreeWidgetItem *item)
 {
-   // return the TObject accosiated wioth the current tree item
+   // return the TObject associated with the current tree item
    if (!item) item = fCurrentDrawn;
    QVariant model = item->data(0, Qt::UserRole);
    TObject *obj = (TObject *)model.value<void *>();
