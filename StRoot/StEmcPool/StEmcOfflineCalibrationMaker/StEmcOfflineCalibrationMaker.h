@@ -28,6 +28,7 @@ private:
 	const char* filename;
 	TFile* myFile;
 	TTree* calibTree;
+	TH2* mapcheck;
 	TH2* towerSlopes[2]; //[MB][HT]
 	TH2* preshowerSlopes; 
 	TH2* smdSlopes[2]; //[eta][phi] no caps
