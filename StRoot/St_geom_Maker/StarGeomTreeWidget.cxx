@@ -189,7 +189,8 @@ static const QString  &GetVolumeDescriptor(const QString &volumeName,bool richTe
 
 //_____________________________________________________________________________
 StarGeomTreeWidget::StarGeomTreeWidget(QWidget *parent) : QTreeWidget(parent)
-,fContextMenu(0),fGeoManager2Delete(0),fCurrentDrawn(0),fNewItemCreating(false)
+, fContextMenu(0),fGeoManager2Delete(0),fCurrentDrawn(0),fNewItemCreating(false)
+, fPopupContextMenu(0)
 {
    Init();
 }
@@ -199,7 +200,7 @@ void StarGeomTreeWidget::Init()
 {
    this->setContextMenuPolicy(Qt::CustomContextMenu); 
    QStringList labels;
-      labels << "Name" << "Title" << "#" <<"Class";
+      labels << "Name" << "Title" << "# <- mother" <<"Class";
    this->setHeaderLabels(labels);
    this->setColumnCount(4);
    this->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -490,9 +491,10 @@ void StarGeomTreeWidget::itemExpandedCB ( QTreeWidgetItem * item )
 
       TDataSetIter next(volume);
       TVolume *child = 0;
+      QString volName = volume->GetName();
       while ( (child = (TVolume *)next()) ) {
          Int_t nVolume = CountInstances(volume,child);
-         CreateTreeWidgetItem(child,item, (nVolume >1) ? QString("> #%1").arg(nVolume) : QString());  
+         CreateTreeWidgetItem(child,item, (nVolume >1) ? QString("#%1 <- %2").arg(nVolume).arg(volName) : QString());  
       }
       this->setSortingEnabled(true);
       int currentWidth = columnWidth(0); 
@@ -543,41 +545,40 @@ void StarGeomTreeWidget::contextMenuRequestedCB(const QPoint &pos)
          fContextMenu->Popup(QCursor::pos().x(),QCursor::pos().y(), obj,(TBrowser *)0);
    } else {
       QAction *response = 0; //QMessageBox::question(listView1,"Change the volume visibility","Visible","Both","Child","none");
-      static QMenu *contextMenu = 0;
-      static QAction *menus[4]={0};
-      if (!contextMenu) {
-         contextMenu = new QMenu(this);
-         contextMenu->setTitle("Visibility:");
-         QAction *action =  contextMenu->menuAction();
+      static vector<QAction *> menus;
+      if (!fPopupContextMenu) {
+         menus.clear();
+         fPopupContextMenu = new QMenu(this);
+         fPopupContextMenu->setTitle("Visibility:");
+         QAction *action =  fPopupContextMenu->menuAction();
          QFont af = action->font();
          af.setBold(true);
          action->setFont(af);
          QAction  *itemPosition = 0;
          // menu title :
-         itemPosition = contextMenu->addAction("&Both");
-         int j =0;
+         itemPosition = fPopupContextMenu->addAction("&Both");
          itemPosition->setWhatsThis("Make the selected volumes and its children visible");
-         menus[j++] = itemPosition;
+         menus.push_back(itemPosition);
 
-         itemPosition=contextMenu->addAction("&Children");
+         itemPosition=fPopupContextMenu->addAction("&Children");
          itemPosition->setWhatsThis("Make the selected the children of the selected volumes visible but the volume itself none");
-         menus[j++] = itemPosition;
+         menus.push_back(itemPosition);
 
-         itemPosition=contextMenu->addAction("&None");
+         itemPosition=fPopupContextMenu->addAction("&None");
          itemPosition->setWhatsThis("Make the selected the volumes invisible");
-         menus[j++] = itemPosition;
+         menus.push_back(itemPosition);
 
-         contextMenu->addSeparator();
+         fPopupContextMenu->addSeparator();
 
-         itemPosition=contextMenu->addAction("&Save");
+         itemPosition=fPopupContextMenu->addAction("&Save");
          itemPosition->setWhatsThis("Save the selected object into ROOT file");
-         menus[j++] = itemPosition;
+         menus.push_back(itemPosition);
 
-         itemPosition=contextMenu->addAction("&Color");
+         itemPosition=fPopupContextMenu->addAction("&Color");
          itemPosition->setWhatsThis("Change the color of the selected object");
-         menus[j++] = itemPosition;
+         menus.push_back(itemPosition);
       }
-      response = contextMenu->exec(QCursor::pos());
+      response = fPopupContextMenu->exec(QCursor::pos());
       if (response) {
          TQtLockUpdateWidget listLock(this);
          // bool saved = false;

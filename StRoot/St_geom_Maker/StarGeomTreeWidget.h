@@ -8,6 +8,7 @@
 class TObject;
 class TContextMenu;
 class TGeoManager;
+class QMenu;
 
 //_____________________________________________________________________________
 class TQtLockUpdateWidget {
@@ -20,7 +21,7 @@ private:
 public: 
    TQtLockUpdateWidget(QAbstractScrollArea *view) : fView (view),fHasBeenLocked(FALSE) {
       if (fView) {
-         fHasBeenLocked = !fView->isUpdatesEnabled();
+         fHasBeenLocked = !fView->updatesEnabled();
          if (!fHasBeenLocked) {
             // We should lock the view
             fView->setCursor(Qt::WaitCursor);
@@ -48,10 +49,11 @@ class StarGeomTreeWidget : public QTreeWidget
 {
       Q_OBJECT
 private:
-   TContextMenu *fContextMenu;
-   TGeoManager  *fGeoManager2Delete;
+   TContextMenu    *fContextMenu;
+   TGeoManager     *fGeoManager2Delete;
    QTreeWidgetItem *fCurrentDrawn;
    bool             fNewItemCreating;
+   QMenu           *fPopupContextMenu;
 
    protected:
       friend class GeomBrowser;

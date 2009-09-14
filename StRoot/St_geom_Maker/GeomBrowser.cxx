@@ -1,12 +1,15 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.12 2009/03/19 00:23:31 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.13 2009/09/14 22:15:20 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
-#include "StChain.h"
-#include "St_geant_Maker/St_geant_Maker.h"
+#ifndef  NO_GEANT_MAKER
+#  include "StChain.h"
+#  include "St_geant_Maker/St_geant_Maker.h"
+#endif
 
 #include "TROOT.h"
+#include "TDataSetIter.h"
 #include "TSystem.h"
 #include "TFile.h"
 #include "TKey.h"
@@ -19,8 +22,9 @@
 #include "TQtWidget.h"
 #include "TQtRootCommandCombo.h"
 #include "TQtRangeControl.h"
-#include "TextEdit.h"
-
+#ifndef  NO_GEANT_MAKER
+#  include "TextEdit.h"
+#endif
 #include <QApplication>
 #include <QComboBox>
 #include <QFileInfo>
@@ -66,7 +70,7 @@ static void RefreshCanvas(TQtWidget *w)
  , fView_Coin3DAction(0), fView_GLAction(0)
  , fEditGeoSrc(0), fStatusBar(0),fDepthControl(0)
  { 
-   this->setCaption("STAR Geometry Browser");
+   this->setWindowTitle(tr("STAR Geometry Browser"));
    CreateActions();
 	CreateMenu();
 	CreateToolBar();
@@ -97,7 +101,8 @@ void GeomBrowser::Connect()
    connect(fView_GLAction,    SIGNAL(triggered()),this,SLOT(viewGLSlot()) );
    connect(fView_Coin3DAction,SIGNAL(triggered()),this,SLOT(viewCoin3DSlot()));
    
-   connect(fGeometrySelector,SIGNAL(currentIndexChanged(const QString &))
+   if (fGeometrySelector) 
+      connect(fGeometrySelector,SIGNAL(currentIndexChanged(const QString &))
                        ,this,SLOT(STAR_geometry_activated( const QString &)));
                        
    connect(fTreeWidget,SIGNAL(DrawObject(TObject *,bool))
@@ -131,9 +136,11 @@ void GeomBrowser::CreateActions()
    fView_GLAction      = new QAction( QIcon(":/qglviewer.icon.xpm") , "Open&GL"      , this);
    fView_GLAction      ->setToolTip(tr("Open the QGLViewer-based 3D geometry viewer"));
 
+#ifndef  NO_GEANT_MAKER
    fEditGeoSrc         = new QAction(  "Edit Geant Geometry", this);
    fEditGeoSrc         ->setToolTip(tr("Find the MORTRAN file defining the picked volume to edit"));
    fEditGeoSrc->setCheckable(true);
+#endif
 }
 
 /// Create menu
@@ -185,7 +192,8 @@ void GeomBrowser::CreateToolBar()
    fDepthControl = new TQtRangeControl(depthTool);
    depthTool->addWidget(fDepthControl);
    addToolBar(depthTool);
-   
+
+#ifndef  NO_GEANT_MAKER   
    QToolBar *editTool = new QToolBar(this);
    editTool->addAction(fEditGeoSrc);
    addToolBar(editTool);
@@ -194,6 +202,7 @@ void GeomBrowser::CreateToolBar()
    fGeometrySelector = new QComboBox(selectTool);
    selectTool->addWidget (fGeometrySelector);   
    addToolBar(selectTool);
+#endif
 }
 
 //_____________________________________________________________________________
@@ -250,8 +259,10 @@ void GeomBrowser::Init()
 #endif
 //   QWhatsThis::whatsThisButton(geometry);
 #ifdef  NO_GEANT_MAKER
-   fGeometrySelector->setEnabled(FALSE);
-   fGeometrySelector->hide();
+   if (fGeometrySelector) {
+      fGeometrySelector->setEnabled(FALSE);
+      fGeometrySelector->hide();
+   }
 #else
    // Create a text editor
    fTextEdit = new TextEdit(this);
@@ -349,8 +360,8 @@ void GeomBrowser::Init()
    if (qApp->argc() > 1 && QFileInfo(argv[1]).isReadable() ) {
 
       fSaveFileName = argv[1];
-      printf(" file %s\n", (const char *)fSaveFileName);
-      fFile=new TFile(fSaveFileName);
+      qDebug() << " file " << fSaveFileName;
+      fFile=new TFile(fSaveFileName.toStdString().c_str());
       fSaveFileName = "";
       
       // TUpdateList listLock(fTreeWidget);
@@ -380,11 +391,11 @@ void GeomBrowser::fileOpenMacro( const QString &fileName )
 {
   // Read ROOT macro with the ROOT TGeo geometry model
     QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
-    if (!gROOT->LoadMacro((const char *)fileName)) {
+    if (!gROOT->LoadMacro(fileName.toStdString().c_str()))  {
       TDataSet *topSet = (TDataSet *)gROOT->ProcessLineFast("CreateTable()");
       if (topSet) {
          // Look for the "Geometry" set
-		 QString name = QFileInfo(fileName).baseName(TRUE);
+		   QString name = QFileInfo(fileName).completeBaseName();
          fTreeWidget->AddModel2ListView(gGeoManager,name);
       }
       fOpenFileName = fileName;
@@ -400,8 +411,8 @@ void GeomBrowser::fileOpenRoot( const QString &fileName )
 {
   QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
   if (fFile) delete fFile;
-     QString base = QFileInfo(fileName).baseName(TRUE); 
-     fFile = TFile::Open((const char *)fileName);
+     QString base = QFileInfo(fileName).completeBaseName(); 
+     fFile = TFile::Open(fileName.toStdString().c_str());
      if (!fFile->IsZombie()) {
         TKey *key = 0;
         TIter next(fFile->GetListOfKeys());
@@ -443,7 +454,6 @@ St_geant_Maker & GeomBrowser::Geant()
        gSystem->Load("StarMagField");
        gSystem->Load("St_geant_Maker");  
        gSystem->Load("StUtilities");
-       
        fChain = new StChain(); 
        fGeant = new St_geant_Maker();
     }
@@ -471,7 +481,7 @@ void GeomBrowser::fileOpenZebra( const QString &fileName )
    QApplication::restoreOverrideCursor();
 #else
    if (fileName.isEmpty()) {}
-   fGeometrySelector->setEnabled(FALSE); // we can communicate GEANT one time only :(
+   if (fGeometrySelector) fGeometrySelector->setEnabled(FALSE); // we can communicate GEANT one time only :(
 #endif
 }
 //_____________________________________________________________________________
@@ -484,7 +494,7 @@ void GeomBrowser::fileOpenInventor( const QString &fileName )
          TQtRootViewer3D *v  = (TQtRootViewer3D*)(viewer);
          if (v) {
             TGLViewerImp *viewerImp = v->GetViewerImp();
-            if (viewerImp) viewerImp->ReadInputFile((const char*)fileName);
+            if (viewerImp) viewerImp->ReadInputFile(fileName.toStdString().c_str());
          }
       }
    }
@@ -619,7 +629,7 @@ void GeomBrowser::DrawObject(TObject *obj,bool expanded)
          setEnabled(false);
          view->cd();
          if (set) {
-            volume->Draw((const char *)QString().setNum(depth));
+            volume->Draw(QString().setNum(depth).toStdString().c_str());
          } else
             view->GetCanvas()->Clear();
          RefreshCanvas(view);
@@ -667,21 +677,22 @@ void GeomBrowser::fileOpenSlot()
    QString dir = fSaveFileName;
    if (dir.isEmpty()) dir = gSystem->WorkingDirectory();
    else   {
-      TString exp((const char*)fSaveFileName);
+      TString exp(fSaveFileName.toStdString().c_str());
       gSystem->ExpandPathName(exp);
       dir = exp.Data();
-      dir = QFileInfo(dir).dirPath();
+      dir = QFileInfo(dir).path();
    }
 
-   QString fileName = QFileDialog::getOpenFileName (dir
-      , filetypes, this, "Open"
+   QString fileName = QFileDialog::getOpenFileName (this
       , "Open ROOT file "
+      ,  dir
+      , filetypes
       , &selectedFilter);
    if (!fileName.isEmpty()){
       QFileInfo openFile(fileName);
-      if (openFile.extension(FALSE).contains("C")) {
+      if (openFile.suffix().contains("C")) {
          fileOpenMacro(fileName);
-      } else if (openFile.extension(FALSE).contains("fz")) {
+      } else if (openFile.suffix().contains("fz")) {
          fileOpenZebra(fileName);
       } else {
          fileOpenRoot(fileName);
@@ -720,7 +731,7 @@ void GeomBrowser::fileSaveAsSlot()
       if (i) filter +=',';
       filter += "*.";	  
       QString str =  *j; i++;      
-	   filter += str.lower();
+	   filter += str.toLower();
    }
    filter +=");";
    filter +=";all files (*.*);;";
@@ -728,7 +739,7 @@ void GeomBrowser::fileSaveAsSlot()
    QString selectedFilter;
    QString dir = fSaveFileName;
    if (dir.isEmpty()) dir = gSystem->WorkingDirectory(); 
-   else               dir = QFileInfo(dir).dirPath();
+   else               dir = QFileInfo(dir).path();
    
    QString thatFile = QFileDialog::getSaveFileName(this, tr("Save File"),
                             dir,filter);
@@ -736,10 +747,10 @@ void GeomBrowser::fileSaveAsSlot()
    if (thatFile.isEmpty()) return;
    fSaveFileName = thatFile;
 
-   QString fileNameExtension = QFileInfo(thatFile).extension(FALSE);
-   QString  saveType = fileNameExtension.upper();
+   QString fileNameExtension = QFileInfo(thatFile).suffix();
+   QString  saveType = fileNameExtension.toUpper();
 
-   fSingleVolumeCanvas->Save(fSaveFileName,saveType,-1);
+   fSingleVolumeCanvas->Save(fSaveFileName,saveType.toStdString().c_str(),-1);
 }
 //_____________________________________________________________________________
 void GeomBrowser::filePrintSlot()
@@ -762,7 +773,9 @@ void GeomBrowser::fileExitSlot()
 //_____________________________________________________________________________
 void GeomBrowser::RemakeGeomSlot( const QString &)
 {
+#ifndef NO_GEANT_MAKER
    Geant().SetRemake(kTRUE);
+#endif
 }
 
 //_____________________________________________________________________________
@@ -808,7 +821,7 @@ void GeomBrowser::fileReloadSlot()
    fTreeWidget->ClearCB();   
    if (!fOpenFileName.isEmpty()){
       QFileInfo openFile(fOpenFileName);
-      if (openFile.extension(FALSE).contains("C"))
+      if (openFile.suffix().contains("C"))
          fileOpenMacro(fOpenFileName);   
       else {
          fileOpenRoot(fOpenFileName);
