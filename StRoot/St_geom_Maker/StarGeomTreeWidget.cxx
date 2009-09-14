@@ -561,11 +561,11 @@ void StarGeomTreeWidget::contextMenuRequestedCB(const QPoint &pos)
          menus.push_back(itemPosition);
 
          itemPosition=fPopupContextMenu->addAction("&Children");
-         itemPosition->setWhatsThis("Make the selected the children of the selected volumes visible but the volume itself none");
+         itemPosition->setWhatsThis("Make the selected children of the selected volumes visible but the volume itself none");
          menus.push_back(itemPosition);
 
          itemPosition=fPopupContextMenu->addAction("&None");
-         itemPosition->setWhatsThis("Make the selected the volumes invisible");
+         itemPosition->setWhatsThis("Make the selected volumes invisible");
          menus.push_back(itemPosition);
 
          fPopupContextMenu->addSeparator();
