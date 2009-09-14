@@ -1,6 +1,7 @@
 //StEmcOfflineCalibrationMaker.cxx
 
 #include <math.h>
+#include <vector>
 //#include <algorithm>
 
 #include "TFile.h"
@@ -51,6 +52,8 @@
 //use this to get kBarrelEmcTowerId defined
 #include "StEnumerations.h"
 
+using namespace std;
+
 ClassImp(StEmcOfflineCalibrationMaker)
 
 StEmcOfflineCalibrationMaker::StEmcOfflineCalibrationMaker(const char* name, const char* file)
@@ -65,7 +68,7 @@ StEmcOfflineCalibrationMaker::StEmcOfflineCalibrationMaker(const char* name, con
   smdSlopes[0]=NULL;
   smdSlopes[1]=NULL;
   preshowerSlopes = NULL;
-	
+  mapcheck = NULL;
   mbTriggers.clear();
   htTriggers.clear();
 }
@@ -107,6 +110,7 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
     preshowerSlopes->Write();
     smdSlopes[0]->Write();
     smdSlopes[1]->Write();
+    mapcheck->Write();
   }
 	
 	//look for histograms from this run in the current file and switch to them if found, otherwise create them
@@ -140,9 +144,10 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
 
     sprintf(name,"smdSlopesP_R%i",run);
     smdSlopes[1]=new TH2F(name,"ADC vs. stripID",18000,0.5,18000.5,1223,-199.5,1023.5);
-		
   }
-	
+  if(!mapcheck){
+    mapcheck = new TH2F("mapcheck","Track Projection vs EMC hit",4800,0.5,4800.5,4800,0.5,4800.5);
+  }	
 	//pedestals, rms, status
 
 
@@ -253,12 +258,12 @@ Int_t StEmcOfflineCalibrationMaker::Make()
   getADCs(BSMDE);
   for(int id=1; id<=4800; id++){
     if((mADC[BTOW-1][id-1] != 0)){
-			//if(myEvent->mbTrigger)
+      //if(myEvent->mbTrigger)
       towerSlopes[0]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]);
       //if(myEvent->htTrigger) towerSlopes[1]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]); 
     }
     if(mADC[BPRS-1][id-1] != 0 && mCapacitor[id-1]!= CAP1 && mCapacitor[id-1]!=CAP2){		
-	//		LOG_DEBUG << "filling preshower slopes histogram" << endm;
+      //		LOG_DEBUG << "filling preshower slopes histogram" << endm;
       preshowerSlopes->Fill(id, mADC[BPRS-1][id-1]-mPedestal[BPRS-1][id-1]);
     }
   }
@@ -299,8 +304,11 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 
   const StEventSummary& evtSummary = muDstMaker->muDst()->event()->eventSummary();
   Double_t mField = evtSummary.magneticField()/10;
-	//now for the tracks
-  for(unsigned int vertex_index=0; vertex_index<myEvent->nVertices; vertex_index++){
+  //now for the tracks
+
+  vector<int> track_ids; 
+
+ for(unsigned int vertex_index=0; vertex_index<myEvent->nVertices; vertex_index++){
     muDst->setVertexIndex(vertex_index);
     TObjArray* primaryTracks = muDst->primaryTracks();
     StMuTrack* track;
@@ -340,6 +348,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
       smd_eta_center=getTrackTower(track,false,3);
       smd_phi_center=getTrackTower(track,false,4);
 
+      track_ids.push_back(center_tower.first);
 
 			//project track to BEMC
 
@@ -354,45 +363,27 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	int phiid=smd_phi_center.first;
 	LOG_DEBUG<<"using track projection to the SMD, we get strips eta: "<<etaid<<" and phi: "<<phiid<<endm;
 	if(etaid>0){
-	  int g=-999,d=0;
-	  while(g==-999){
-	    if(mADCSmd[0][etaid+d-1]>0&&mADCSmd[0][etaid+d-1]<1023) g=d;
-	    else if(mADCSmd[0][etaid-d-1]>0&&mADCSmd[0][etaid-d-1]<1023) g=-d;
-	    else d++;
-	    if(d > 20)break;
+	  int smdeids[11];
+	  smdeids[0] = etaid;
+	  smdeids[1] = mEmcPosition->getNextId(3,etaid,0,1);
+	  smdeids[2] = mEmcPosition->getNextId(3,etaid,0,2);
+	  smdeids[3] = mEmcPosition->getNextId(3,etaid,0,3);
+	  smdeids[4] = mEmcPosition->getNextId(3,etaid,0,4);
+	  smdeids[5] = mEmcPosition->getNextId(3,etaid,0,5);
+	  smdeids[6] = mEmcPosition->getNextId(3,etaid,0,-1);
+	  smdeids[7] = mEmcPosition->getNextId(3,etaid,0,-2);
+	  smdeids[8] = mEmcPosition->getNextId(3,etaid,0,-3);
+	  smdeids[9] = mEmcPosition->getNextId(3,etaid,0,-4);
+	  smdeids[10] = mEmcPosition->getNextId(3,etaid,0,-5);
+
+	  for(int i = 0; i < 11; i++){
+	    myTrack->smde_id[i] = smdeids[i];
+	    myTrack->smde_adc[i] = mADCSmd[0][smdeids[i]-1];
+	    myTrack->smde_pedestal[i] = mPedestalSmd[0][smdeids[i]-1];
+	    myTrack->smde_pedestal_rms[i] = mPedRMSSmd[0][smdeids[i]-1];
+	    myTrack->smde_status[i] = mStatusSmd[0][smdeids[i]-1];
 	  }
-	  if(g<0 && g != -999){
-	    for(int i=0;i<11;i++){
-	      LOG_DEBUG<<"ADC value for eta strip "<<etaid+g-i<<" is "<<mADCSmd[0][etaid+g-i-1]<<endm;
-	      myTrack->smde_id[i]=etaid+g-i;
-	      myTrack->smde_adc[i]=mADCSmd[0][etaid+g-i-1];
-	      myTrack->smde_pedestal[i]=mPedestalSmd[0][etaid+g-i-1];
-	      myTrack->smde_pedestal_rms[i]=mPedRMSSmd[0][etaid+g-i-1];
-	      myTrack->smde_status[i]=mStatusSmd[0][etaid+g-i-1];
-	    }
-	  }
-	  else if(g>0){
-	    for(int i=0;i<11;i++){
-	      LOG_DEBUG<<"ADC value for eta strip "<<etaid+g+i<<" is "<<mADCSmd[0][etaid+g+i-1]<<endm;
-	      myTrack->smde_id[i]=etaid+g+i;
-	      myTrack->smde_adc[i]=mADCSmd[0][etaid+g+i-1];
-	      myTrack->smde_pedestal[i]=mPedestalSmd[0][etaid+g+i-1];
-	      myTrack->smde_pedestal_rms[i]=mPedRMSSmd[0][etaid+g+i-1];
-	      myTrack->smde_status[i]=mStatusSmd[0][etaid+g+i-1];
-	    }
-	  }
-	  else if(g==0){
-	    for(int i=-5;i<6;i++){
-	      LOG_DEBUG<<"ADC value for eta strip "<<etaid+i<<" is "<<mADCSmd[0][etaid+i-1]<<endm;
-	      myTrack->smde_id[i+5]=etaid+i;
-	      myTrack->smde_adc[i+5]=mADCSmd[0][etaid+i-1];
-	      myTrack->smde_pedestal[i+5]=mPedestalSmd[0][etaid+i-1];
-	      myTrack->smde_pedestal_rms[i+5]=mPedRMSSmd[0][etaid+i-1];
-	      myTrack->smde_status[i+5]=mStatusSmd[0][etaid+i-1];
-	    }
-	  }
-	}
-	else{
+	}else{
 	  for(int i=0;i<11;i++){
 	    myTrack->smde_id[i]=0;
 	    myTrack->smde_adc[i]=0;
@@ -402,45 +393,27 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	  }
 	}
 	if(phiid>0){
-	  int g=-999,d=0;
-	  while(g==-999){
-	    if(mADCSmd[1][phiid+d-1]>0&&mADCSmd[1][phiid+d-1]<1023) g=d;
-	    else if(mADCSmd[1][phiid-d-1]>0&&mADCSmd[1][phiid-d-1]<1023) g=-d;
-	    else d++;
-	    if(d > 20) break;
+	  int smdpids[11];
+	  smdpids[0] = etaid;
+	  smdpids[1] = mEmcPosition->getNextId(4,phiid,1,0);
+	  smdpids[2] = mEmcPosition->getNextId(4,phiid,2,0);
+	  smdpids[3] = mEmcPosition->getNextId(4,phiid,3,0);
+	  smdpids[4] = mEmcPosition->getNextId(4,phiid,4,0);
+	  smdpids[5] = mEmcPosition->getNextId(4,phiid,5,0);
+	  smdpids[6] = mEmcPosition->getNextId(4,phiid,-1,0);
+	  smdpids[7] = mEmcPosition->getNextId(4,phiid,-2,0);
+	  smdpids[8] = mEmcPosition->getNextId(4,phiid,-3,0);
+	  smdpids[9] = mEmcPosition->getNextId(4,phiid,-4,0);
+	  smdpids[10] = mEmcPosition->getNextId(4,phiid,-5,0);
+
+	  for(int i = 0; i < 11; i++){
+	    myTrack->smdp_id[i] = smdpids[i];
+	    myTrack->smdp_adc[i] = mADCSmd[1][smdpids[i]-1];
+	    myTrack->smdp_pedestal[i] = mPedestalSmd[1][smdpids[i]-1];
+	    myTrack->smdp_pedestal_rms[i] = mPedRMSSmd[1][smdpids[i]-1];
+	    myTrack->smdp_status[i] = mStatusSmd[1][smdpids[i]-1];
 	  }
-	  if(g<0 && g != -999){
-	    for(int i=0;i<11;i++){
-	      LOG_DEBUG<<"ADC value for phi strip "<<phiid+g-i<<" is "<<mADCSmd[1][phiid+g-i-1]<<endm;
-	      myTrack->smdp_id[i]=phiid+g-i;
-	      myTrack->smdp_adc[i]=mADCSmd[1][phiid+g-i-1];
-	      myTrack->smdp_pedestal[i]=mPedestalSmd[1][phiid+g-i-1];
-	      myTrack->smdp_pedestal_rms[i]=mPedRMSSmd[1][phiid+g-i-1];
-	      myTrack->smdp_status[i]=mStatusSmd[1][phiid+g-i-1];
-	    }
-	  }
-	  else if(g>0){
-	    for(int i=0;i<11;i++){
-	      LOG_DEBUG<<"ADC value for phi strip "<<phiid+g+i<<" is "<<mADCSmd[1][phiid+g+i-1]<<endm;
-	      myTrack->smdp_id[i]=phiid+g+i;
-	      myTrack->smdp_adc[i]=mADCSmd[1][phiid+g+i-1];
-	      myTrack->smdp_pedestal[i]=mPedestalSmd[1][phiid+g+i-1];
-	      myTrack->smdp_pedestal_rms[i]=mPedRMSSmd[1][phiid+g+i-1];
-	      myTrack->smdp_status[i]=mStatusSmd[1][phiid+g+i-1];
-	    }
-	  }
-	  else if(g==0){
-	    for(int i=-5;i<6;i++){
-	      LOG_DEBUG<<"ADC value for phi strip "<<phiid+i<<" is "<<mADCSmd[1][phiid+i-1]<<endm;
-	      myTrack->smdp_id[i+5]=phiid+i;
-	      myTrack->smdp_adc[i+5]=mADCSmd[1][phiid+i-1];
-	      myTrack->smdp_pedestal[i+5]=mPedestalSmd[1][phiid+i-1];
-	      myTrack->smdp_pedestal_rms[i+5]=mPedRMSSmd[1][phiid+i-1];
-	      myTrack->smdp_status[i+5]=mStatusSmd[1][phiid+i-1];
-	    }
-	  }
-	}
-	else{
+	}else{
 	  for(int i=0;i<11;i++){
 	    myTrack->smdp_id[i]=0;
 	    myTrack->smdp_adc[i]=0;
@@ -497,6 +470,13 @@ Int_t StEmcOfflineCalibrationMaker::Make()
       }
     }
   }
+
+ for(int i = 0; i < 4800; i++){
+   if((mADC[BTOW-1][i]-mPedestal[BTOW-1][i]) < 5 || (mADC[BTOW-1][i]-mPedestal[BTOW-1][i]) > 100)continue;
+   for(unsigned int j = 0; j < track_ids.size(); j++){
+     mapcheck->Fill(track_ids[j],i+1);
+   }
+ }
 
   calibTree->Fill();
   myEvent->Clear();
@@ -660,6 +640,7 @@ pair<unsigned short, pair<float,float> > StEmcOfflineCalibrationMaker::getTrackT
 		float phi=position.phi();
 		if(det==1){
 		  mEmcGeom->getBin(phi,eta,m,e,s);
+		  s = abs(s);
 		
 		  if(mEmcGeom->getId(m,e,s,id)==0){
 		    tower.first = id;
@@ -669,6 +650,7 @@ pair<unsigned short, pair<float,float> > StEmcOfflineCalibrationMaker::getTrackT
 		else if(det==3){
 		  int check=mSmdEGeom->getBin(phi,eta,m,e,s);
 		  if(!check){
+		    s = abs(s);
 		    if(mSmdEGeom->getId(m,e,s,id)==0){
 		      tower.first = id;
 		      tower.second = getTrackDetaDphi(eta, phi, id, det);
@@ -677,6 +659,7 @@ pair<unsigned short, pair<float,float> > StEmcOfflineCalibrationMaker::getTrackT
 		}
 		else if(det==4){
 		  int check=mSmdPGeom->getBin(phi,eta,m,e,s);
+		  s = abs(s);
 		  if(!check){
 		    if(mSmdPGeom->getId(m,e,s,id)==0){
 		      tower.first = id;
