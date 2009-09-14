@@ -509,6 +509,7 @@ Int_t StEmcOfflineCalibrationMaker::Finish()
 	LOG_INFO << "write preshower histogram" << preshowerSlopes->Write() << endm;
 	LOG_INFO << "write smd histogram" <<smdSlopes[0]->Write() << endm;
 	smdSlopes[1]->Write();
+	mapcheck->Write();
 	LOG_INFO << "close the output file" << endm;
 	myFile->Close();
 	LOG_INFO << "StEmcOfflineCalibrationMaker::Finish() == kStOk"<<endm;
