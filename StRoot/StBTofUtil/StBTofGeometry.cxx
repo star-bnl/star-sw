@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.5 2009/08/25 15:41:29 fine Exp $
+ * $Id: StBTofGeometry.cxx,v 1.6 2009/09/15 00:17:27 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.6  2009/09/15 00:17:27  dongx
+ * Corrected the calculation for tray alignment parameters in X-Y
+ *
  * Revision 1.5  2009/08/25 15:41:29  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *
@@ -712,8 +715,18 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
 //   Int_t numRows = tofGeomAlign->GetNRows();
 //   LOG_INFO << "number of rows = " << numRows << endm;
    for (Int_t i=0;i<mNTrays;i++) {
-     mTrayX0[i] = geomAlign[i].x0;
-     mTrayY0[i] = geomAlign[i].phi0;
+
+     double phi0 = geomAlign[i].phi0;
+     double phi;
+     if(i<60) {
+       phi = 72 - i*6;   // phi angle of tray Id = i+1, west
+       mTrayX0[i] = TMath::Sin(phi*TMath::Pi()/180.)*phi0;
+       mTrayY0[i] = -1.*TMath::Cos(phi*TMath::Pi()/180.)*phi0;
+     } else {
+       phi = 108 + (i-60)*6;   // phi angle of tray Id = i+1, east
+       mTrayX0[i] = -1.*TMath::Sin(phi*TMath::Pi()/180.)*phi0;
+       mTrayY0[i] = TMath::Cos(phi*TMath::Pi()/180.)*phi0; 
+     }
      mTrayZ0[i] = geomAlign[i].z0;
 
      if(maker->Debug()) {
