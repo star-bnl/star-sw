@@ -34,7 +34,7 @@ class ServerInfo :
     char txt[1024];
     char* toStr(time_t t) { 
       time_t tt = t;
-      std::tm* bla = localtime(&tt);
+      tm* bla = localtime(&tt);
       strftime(txt, 10,"%H:%M:%S",bla);
       return txt; 
     }
