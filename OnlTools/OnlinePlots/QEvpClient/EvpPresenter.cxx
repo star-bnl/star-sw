@@ -326,7 +326,7 @@ void EvpPresenter::WriteCurrentCanvasToPSFile(const char* filename, int tab, int
   //int type =112; //landscape ps
   //int type =113; //eps
 
-  char *name = "Saving Canvas in PS File";
+  const char *name = "Saving Canvas in PS File";
   int canvasWidth  = EvpUtil::mCanvasWidth;
   int canvasHeight = EvpUtil::mCanvasHeight;
 
@@ -449,7 +449,7 @@ void EvpPresenter::ClosePresenter()
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.cxx,v 1.7 2009/04/29 19:18:05 fine Exp $
+ * $Id: EvpPresenter.cxx,v 1.8 2009/09/15 23:38:06 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -459,6 +459,9 @@ void EvpPresenter::ClosePresenter()
  ***************************************************************************
  *
  * $Log: EvpPresenter.cxx,v $
+ * Revision 1.8  2009/09/15 23:38:06  fine
+ * SL5 warning
+ *
  * Revision 1.7  2009/04/29 19:18:05  fine
  * Eliminate the memory leak
  *
