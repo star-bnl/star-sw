@@ -1,5 +1,0 @@
-# $Id $
-# package StRichSpectraMaker
-# author: 
-Library:libStRichSpectraMaker.so:LIBS +=   -lStChain  -lStDbUtilities     -l_StEvent  -lStRichPIDMaker  -lStRrsMaker
-#Library:libStRichSpectraMaker.so:LIBS +=   -lStChain  -lStDbUtilities  -lStEvent  -lStRichPIDMaker  -lStRrsMaker
