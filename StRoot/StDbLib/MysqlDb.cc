@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.49 2009/08/25 17:41:36 fine Exp $
+ * $Id: MysqlDb.cc,v 1.50 2009/09/15 21:49:06 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.50  2009/09/15 21:49:06  dmitry
+ * LB timer fix, now it is accurate up to 1 ms, as planned
+ *
  * Revision 1.49  2009/08/25 17:41:36  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *
@@ -204,7 +207,8 @@
 #include "stdb_streams.h"
 #include "StDbDefaults.hh"
 #include "StDbManagerImpl.hh"
-#include <assert.h>
+#include <cassert>
+#include <ctime>
 
 #ifndef __STDB_STANDALONE__
 #include "StMessMgr.h"
@@ -249,6 +253,15 @@
 
 #define __CLASS__ "MysqlDb"
 
+namespace {
+
+time_t get_time_nanosec() {
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (ts.tv_sec*1000 + ts.tv_nsec/1000000);
+}
+
+}
 
 static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 static MYSQL *conn;
@@ -400,9 +413,8 @@ bool MysqlDb::loadBalance()
   bool ok = false;
 
 #ifndef NoXmlTreeReader
-  clock_t start,finish;
- double lbtime;
-  start = clock();
+  time_t startTime = get_time_nanosec();
+  time_t stopTime = 0, totalTime = 0;
 
   if (my_manager->myServiceBroker)
     {
@@ -424,9 +436,9 @@ bool MysqlDb::loadBalance()
 	}
     }
 
-  finish = clock();
-  lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
-  cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<":"<<mdbPort<<" \n";
+  stopTime = get_time_nanosec();
+  totalTime = stopTime - startTime;
+  cout << "MysqlDb::Connect: Load balancer took "<< totalTime <<" ms, will use "<< mdbhost << ":" << mdbPort <<" \n";
 
 #endif
 
