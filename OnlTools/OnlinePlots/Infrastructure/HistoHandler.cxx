@@ -723,13 +723,8 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   //datap = mem;
 
   
-  if(datap == NULL)
-    {	// huge error
-      printf("datap is null\n");
-    if (mDebugLevel) fprintf(stderr, "\nProblems with DATAP - ignoring this event!") ;
-      //			continue ;
-      goto END;
-    }
+  if(datap )
+  {	// huge error
 
   daqReader* daqr = (daqReader*)datap;
 
@@ -1632,12 +1627,8 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   ret = evtTracker->trackEvent(evp, mem, l3p, sizL3_max);
   if (!(ret<0)) ret = evtTracker->copyl3_t(l3,l3p);
 
-  if(ret < 0)
-    {
-      fprintf(stderr,"L3: problems in data (%d) - continuing...",ret) ;
-      cout<<"Error tracking event: "<<evp->seq<<endl;
-      goto END;
-    }
+  if(ret >= 0)
+  {
      
   // if(l3p->tracks.off == 0){
   //       cout<<"No tracks produced for event: "<<evp->seq<<endl;
@@ -1762,7 +1753,14 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
 
   //	}
- END:
+ } else {
+      fprintf(stderr,"L3: problems in data (%d) - continuing...",ret) ;
+      cout<<"Error tracking event: "<<evp->seq<<endl;
+    }
+  } else {
+    printf("datap is null\n");
+    if (mDebugLevel) fprintf(stderr, "\nProblems with DATAP - ignoring this event!") ;
+  }
 
   //printf("Histohandler::filled...\n");
   //fflush(stdout);
@@ -1888,7 +1886,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.16 2009/04/24 22:01:19 dkettler Exp $
+   * $Id: HistoHandler.cxx,v 1.17 2009/09/15 23:39:23 fine Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -1898,6 +1896,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.17  2009/09/15 23:39:23  fine
+   * fix goto issue
+   *
    * Revision 1.16  2009/04/24 22:01:19  dkettler
    * TOF Updates
    *
