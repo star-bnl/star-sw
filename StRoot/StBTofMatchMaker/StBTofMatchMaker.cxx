@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.3 2009/08/26 20:33:56 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.4 2009/09/15 00:30:45 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,15 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.4  2009/09/15 00:30:45  dongx
+ * 1) Added the functionality to perform the matching with MuDst directly.
+ * 2) Several updates on the track cuts used for matching
+ *    - flag<1000 was added
+ *    - nHits>15 cut was removed
+ * 3) Created a new StBTofPidTraits for any primary track
+ * 4) Local Z window cut set to symmetric (fabs(localz)<3.05)
+ * 5) Some small changes in the LOGGER output.
+ *
  * Revision 1.3  2009/08/26 20:33:56  dongx
  * Geometry init moved to Init() function, also allow reading in from others
  *
@@ -59,6 +68,14 @@
 #include "StMessMgr.h"
 #include "StMemoryInfo.hh"
 #include "StTimer.hh"
+
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuBTofHit.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StMuDSTMaker/COMMON/StMuBTofPidTraits.h"
+
 #include "StBTofMatchMaker.h"
 //#include "TMemStat.h"
 
@@ -89,6 +106,10 @@ StBTofMatchMaker::StBTofMatchMaker(const Char_t *name): StMaker(name){
   mInitFromOther = kFALSE;
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
+
+  mEvent = 0;
+  mMuDst = 0;
+  mMuDstIn = kFALSE;
 }
 
 StBTofMatchMaker::~StBTofMatchMaker(){ /* nope */}
@@ -99,7 +120,7 @@ StBTofMatchMaker::~StBTofMatchMaker(){ /* nope */}
 Int_t StBTofMatchMaker::Init(){
   LOG_INFO << "StBTofMatchMaker -- initializing ..." << endm;
   if(Debug()) {
-    LOG_INFO << "Minimum hits per track: " << mMinHitsPerTrack << endm;
+    LOG_INFO << "Minimum hits per track (obsolete): " << mMinHitsPerTrack << endm;
     LOG_INFO << "Minimum fitpoints per track: " << mMinFitPointsPerTrack << endm;
     LOG_INFO << "Maximum DCA: " << mMaxDCA << endm;
   }
@@ -193,22 +214,29 @@ Int_t StBTofMatchMaker::Finish(){
   return kStOK;
 }
 
-
 //---------------------------------------------------------------------------
 Int_t StBTofMatchMaker::Make(){
   LOG_INFO << "StBTofMatchMaker -- welcome" << endm;
   LOG_DEBUG << " processing event ... " << endm;
 
+  if(mMuDstIn) processMuDst();
+  else         processStEvent();
+
+  return kStOK;
+}
+
+//---------------------------------------------------------------------------
+void StBTofMatchMaker::processStEvent(){
+
   if(mHisto) mEventCounterHisto->Fill(0);
   // event selection ...
   mEvent = (StEvent *) GetInputDS("StEvent");
-//  if (!validEvent(mEvent)){
   if(!mEvent || !(mEvent->btofCollection()) || !(mEvent->btofCollection()->hitsPresent()) ) {
     if (!mEvent) cout << "no mevent" << endl;
     if (!(mEvent->btofCollection())) cout << "no btofcollection" << endl;
     if (!(mEvent->btofCollection()->hitsPresent()) ) cout << "no hitspresent" << endl;
     LOG_INFO << "StBTofMatchMaker -- nothing to do ... bye-bye" << endm;
-    return kStOK;
+    return;
   }
   if(mHisto) mEventCounterHisto->Fill(1);
 
@@ -230,6 +258,7 @@ Int_t StBTofMatchMaker::Make(){
 
   // multi-tray system
   StSPtrVecBTofHit& tofHits = theTof->tofHits();
+  LOG_INFO << " Number of BTOF Hits = " << tofHits.size() << endm;
   for(size_t i=0;i<tofHits.size();i++) {
     //fg StBTofHit* aHit = dynamic_cast<StBTofHit *>(tofHits[i]);
     StBTofHit* aHit = tofHits[i];
@@ -240,7 +269,7 @@ Int_t StBTofMatchMaker::Make(){
      int moduleId = aHit->module();
      int cellId = aHit->cell();
 
-     LOG_DEBUG <<"A: fired hit in " << " tray="<< trayId << " module="<<moduleId<<" cell="<<cellId<<endm;
+     if(Debug()) { LOG_INFO <<"A: fired hit in " << " tray="<< trayId << " module="<<moduleId<<" cell="<<cellId<<endm; }
 
      StructCellHit aDaqCellHit;
      aDaqCellHit.tray = trayId;
@@ -269,17 +298,17 @@ Int_t StBTofMatchMaker::Make(){
   }
       
   // end of Sect.A
-  LOG_DEBUG << "    total # of cells = " << daqCellsHitVec.size() << endm;
-  if(Debug()) {
+  if(Debug()) { 
+    LOG_INFO << "    total # of cells = " << daqCellsHitVec.size() << endm;
     for(size_t iv = 0;iv<validModuleVec.size();iv++) {
-      LOG_INFO << " module # " << validModuleVec[iv] << " Valid! " << endm;
+      LOG_DEBUG << " module # " << validModuleVec[iv] << " Valid! " << endm;
     }
   }
   if(mHisto) {
     mCellsMultInEvent->Fill(daqCellsHitVec.size());
     if(daqCellsHitVec.size()) mEventCounterHisto->Fill(6);
   }
-//  if(!daqCellsHitVec.size()) return kStOK;
+//  if(!daqCellsHitVec.size()) return;
 
 
   //.........................................................................
@@ -391,13 +420,15 @@ Int_t StBTofMatchMaker::Make(){
 	    StThreeVectorD glo(global[0], global[1], global[2]);
 	    StThreeVectorD hitPos(local[0], local[1], local[2]);
 //	    delete sensor;   /// function in StBTofGeometry modified. Don't delete here.
-	    if (local[2]<=2.7&&local[2]>=-3.4) {
+            if (fabs(local[2])<3.05) {   // to be consistent with GEANT geometry
+                                         // and the alignment calibration
+//	    if (local[2]<=2.7&&local[2]>=-3.4) {
 //            if (fabs(local[2])<4.) {   // loose local z cut at first step
 	      ncells++;
 	      cellHit.tray = itray;
 	      cellHit.module = imodule;
 	      cellHit.cell = icell;
-	      cellHit.trackIdVec.push_back(iNode);
+	      cellHit.trackIdVec.push_back((Int_t)iNode);
 	      cellHit.hitPosition = glo;        // global position
 	      cellHit.zhit = (Float_t)hitPos.z();
 	      cellHit.yhit = (Float_t)hitPos.y();
@@ -418,9 +449,11 @@ Int_t StBTofMatchMaker::Make(){
                 trackTree.projZ = local[2];
               }
 
-	      LOG_DEBUG <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
-	      LOG_DEBUG <<"   hit position " << hitPos << endm;
-	      // LOG_DEBUG <<"   momemtum= " << pt << " " << eta << " " << phi << endm;
+	      if(Debug()) {
+                LOG_DEBUG <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
+	        LOG_DEBUG <<"   hit position " << hitPos << endm;
+	        // LOG_DEBUG <<"   momemtum= " << pt << " " << eta << " " << phi << endm;
+              }
 	    }
 	} // for (Int_t i=0...)
       } // endif(helixcross...)
@@ -430,7 +463,7 @@ Int_t StBTofMatchMaker::Make(){
 
     } // if(ValidTrack).. 
   } // loop over nodes
-  LOG_DEBUG << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm;
+  if(Debug()) { LOG_INFO << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm; }
   if(mHisto) {
     mHitsMultInEvent->Fill(allCellsHitVec.size());
     mHitsPrimaryInEvent->Fill(nPrimaryHits);
@@ -491,7 +524,7 @@ Int_t StBTofMatchMaker::Make(){
       }
     }
   } //end {sec. C}
-  LOG_DEBUG << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm;
+  if(Debug()) { LOG_INFO << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm; }
   if(mHisto&&matchHitCellsVec.size()) mEventCounterHisto->Fill(8);
 
   //.........................................................................
@@ -555,16 +588,16 @@ Int_t StBTofMatchMaker::Make(){
       LOG_WARN << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
     }
     
-    LOG_DEBUG << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
-    if (Debug()) {
+    if(Debug()) { 
+      LOG_DEBUG << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
       idVectorIter ij=trackIdVec.begin();
-      while (ij != trackIdVec.end()) { LOG_INFO << " " << *ij; ij++; }
+      while (ij != trackIdVec.end()) { LOG_DEBUG << " " << *ij; ij++; }
+      LOG_DEBUG << endm;
     }
-    LOG_INFO <<endm;
 
     tempVec = erasedVec;
   }
-  LOG_DEBUG << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm;
+  if(Debug()) { LOG_INFO << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm; }
   //end of Sect.D
 
   if(mHisto) {
@@ -638,12 +671,12 @@ Int_t StBTofMatchMaker::Make(){
       FinalMatchedCellsVec.push_back(cellHit);
 
       // debugging output
-      LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
-      if (Debug()) {
+      if(Debug()) {
+        LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
 	idVectorIter ij=vTrackId.begin();
-	while (ij != vTrackId.end()) { LOG_INFO << " " << *ij; ij++; }
+	while (ij != vTrackId.end()) { LOG_DEBUG << " " << *ij; ij++; }
+        LOG_DEBUG << endm;
       }
-      LOG_INFO <<endm;
       
     }
     else if (nCells>1){   // for multiple hit cells  find the most likely candidate.
@@ -701,7 +734,7 @@ Int_t StBTofMatchMaker::Make(){
 	FinalMatchedCellsVec.push_back(cellHit);
 	
 	// debugging output
-	LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm;
+	if(Debug()) { LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm; }
       }
 
     } else {
@@ -711,7 +744,7 @@ Int_t StBTofMatchMaker::Make(){
     tempVec = erasedVec;
   }
 
-  LOG_DEBUG << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm;
+  if(Debug()) { LOG_INFO << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm; }
   // end of Sect.E
 
   //.........................................................................
@@ -744,8 +777,8 @@ Int_t StBTofMatchMaker::Make(){
     }
 
     // get track-id from cell hit vector
-    unsigned int trackNode = FinalMatchedCellsVec[ii].trackIdVec[0];
-    StTrack *globalTrack = nodes[trackNode]->track(global);
+    int trackNode = FinalMatchedCellsVec[ii].trackIdVec[0];
+    StGlobalTrack *globalTrack = dynamic_cast<StGlobalTrack*>(nodes[trackNode]->track(global));
     if(!globalTrack) {
       LOG_WARN << "Wrong global track!" << endm;
       continue;
@@ -760,9 +793,6 @@ Int_t StBTofMatchMaker::Make(){
     }
     nValidSingleHitCells++;
 
-    StTrack *theTrack = nodes[trackNode]->track(primary);
-    if(theTrack) nValidSinglePrimHitCells++;
-
     ///
     tofHit->setAssociatedTrack(globalTrack);
 
@@ -776,13 +806,26 @@ Int_t StBTofMatchMaker::Make(){
 
     globalTrack->addPidTraits(pidTof);
 
+    StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack*>(nodes[trackNode]->track(primary));
+    if(pTrack) {
+      nValidSinglePrimHitCells++;
+      StBTofPidTraits *ppidTof = new StBTofPidTraits();
+      ppidTof->setTofHit(tofHit);
+      ppidTof->setMatchFlag(FinalMatchedCellsVec[ii].matchFlag);
+      ppidTof->setYLocal(dy);
+      ppidTof->setZLocal(FinalMatchedCellsVec[ii].zhit);
+      ppidTof->setPosition(FinalMatchedCellsVec[ii].hitPosition);
+
+      pTrack->addPidTraits(ppidTof);
+    }
+
   } // end final matched cells
   
   if(mHisto) {
     mCellsPrimaryPerEventMatch3->Fill(nValidSinglePrimHitCells);
   }
   
-  LOG_DEBUG << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm;
+  if(Debug()) { LOG_INFO << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm; }
  // end of Sect.F
 
   LOG_INFO << " #(daq hits): " << daqCellsHitVec.size()
@@ -795,10 +838,10 @@ Int_t StBTofMatchMaker::Make(){
 
   //check StEvent collections --
   if (theTof->hitsPresent()){
-    gMessMgr->Info("","OS") << " BTofCollection: hit container present."<<endm;
+    LOG_DEBUG << " BTofCollection: hit container present."<<endm;
     if (Debug()){
       StSPtrVecBTofHit& tmpCellTofVec = theTof->tofHits();
-      gMessMgr->Info("","OS") << " # of hits in this event:" << tmpCellTofVec.size() << endm;
+      LOG_INFO << " # of hits in this event:" << tmpCellTofVec.size() << endm;
       for (size_t i = 0; i < tmpCellTofVec.size(); i++) {
 	StBTofHit* p = tmpCellTofVec[i];
         LOG_INFO << (*p) << endm;
@@ -820,7 +863,635 @@ Int_t StBTofMatchMaker::Make(){
 
   LOG_INFO << "StBTofMatchMaker -- bye-bye" << endm;
 
-  return kStOK;
+  return;
+}
+
+//---------------------------------------------------------------------------
+void StBTofMatchMaker::processMuDst(){
+
+  if(mHisto) mEventCounterHisto->Fill(0);
+  // event selection ...
+  StMuDstMaker *mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
+  if(!mMuDstMaker) {
+    LOG_WARN << " No MuDstMaker ...  bye-bye ... " << endm;
+    return;
+  }
+  mMuDst = mMuDstMaker->muDst();
+  if(!mMuDst) {
+    LOG_WARN << " No MuDst ... bye-bye" << endm;
+    return;
+  }
+
+  // timing & memory info -only when requested-
+  StTimer timer;
+  if (doPrintCpuInfo) timer.start();
+  if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
+
+  //.........................................................................
+  // read data from StBTofHit
+  /// A. build vector of candidate cells
+  //
+  tofCellHitVector daqCellsHitVec;
+  idVector validModuleVec;
+
+  // multi-tray system
+  Int_t nhits = mMuDst->numberOfBTofHit();
+  LOG_INFO << " Number of BTOF Hits = " << nhits << endm;
+  if(mHisto&&nhits>0) mEventCounterHisto->Fill(1);
+  for(int i=0;i<nhits;i++) {
+     StMuBTofHit *aHit = (StMuBTofHit*)mMuDst->btofHit(i);
+     if(!aHit) continue;
+     if(aHit->tray()<=0||aHit->tray()>mNTray) continue;  // barrel tray hits
+
+     int trayId = aHit->tray();
+     int moduleId = aHit->module();
+     int cellId = aHit->cell();
+
+     if(Debug()) { LOG_INFO <<"A: fired hit in " << " tray="<< trayId << " module="<<moduleId<<" cell="<<cellId<<endm; }
+
+     StructCellHit aDaqCellHit;
+     aDaqCellHit.tray = trayId;
+     aDaqCellHit.module = moduleId;
+     aDaqCellHit.cell = cellId;
+     aDaqCellHit.tot = aHit->tot();
+     aDaqCellHit.index2BTofHit = i;
+     daqCellsHitVec.push_back(aDaqCellHit);
+
+     // additional valid number configuration
+     int id = trayId*100+moduleId;
+     //fg bool ifind = kFALSE;
+     //fg for(size_t im=0;im<validModuleVec.size();im++) {
+     //fg   if(id==validModuleVec[im]) {
+     //fg     ifind = kTRUE;
+     //fg     break;
+     //fg   }
+     //fg }
+     //fg if(!ifind) validModuleVec.push_back(id);
+     if (find(validModuleVec.begin(), validModuleVec.end(), id) == validModuleVec.end())
+       validModuleVec.push_back(id);
+
+     if(mHisto) {
+       mDaqOccupancy[trayId-1]->Fill((moduleId-1)*mNCell+(cellId-1));
+     }      
+  }
+      
+  // end of Sect.A
+  if(Debug()) {
+    LOG_DEBUG << "    total # of cells = " << daqCellsHitVec.size() << endm;
+    for(size_t iv = 0;iv<validModuleVec.size();iv++) {
+      LOG_DEBUG << " module # " << validModuleVec[iv] << " Valid! " << endm;
+    }
+  }
+  if(mHisto) {
+    mCellsMultInEvent->Fill(daqCellsHitVec.size());
+    if(daqCellsHitVec.size()) mEventCounterHisto->Fill(6);
+  }
+//  if(!daqCellsHitVec.size()) return;
+
+
+  //.........................................................................
+  /// B. loop over global tracks and determine all cell-track matches
+  //
+  tofCellHitVector allCellsHitVec;
+  StructCellHit cellHit;
+
+  StTimer projTimer;
+  if (doPrintCpuInfo) projTimer.start();
+
+  Int_t nGlobals = mMuDst->numberOfGlobalTracks();
+  Int_t nAllTracks=0;
+  Int_t nPrimaryHits = 0;
+  for (int iNode=0; iNode<nGlobals; iNode++){
+    tofCellHitVector cellHitVec;
+    //    cellHitVec.clear();
+    StMuTrack *theTrack = mMuDst->globalTracks(iNode);
+    if(!theTrack) continue;
+
+    bool isPrimary = kFALSE;
+    int iv = theTrack->vertexIndex();
+    if(iv>=0) isPrimary = kTRUE;
+
+    StThreeVectorF mom = theTrack->momentum();
+    float pt = mom.perp();
+    float eta = mom.pseudoRapidity();
+    float phi = mom.phi();
+    //fg if (phi<0.) phi += 2.*3.14159;
+    if (phi<0.) phi += 2.*M_PI;
+
+    float nSigmaPion = theTrack->nSigmaPion();
+    float dEdx = theTrack->dEdx();
+    int ndEdxpts = theTrack->nHitsDedx();
+    int nfitpts = theTrack->nHitsFit(kTpcId);
+
+    // make sure we have a track, a miniDST might have removed it...
+    if (validTrack(theTrack)){
+      if(mHisto) {
+        mTrackPtEta->Fill(pt, eta);
+        mTrackPtPhi->Fill(pt, phi);
+        mTrackNFitPts->Fill(nfitpts);
+        if(dEdx>0.) mTrackdEdxvsp->Fill(mom.mag(), dEdx*1.e6);
+        if(fabs(nSigmaPion)<5.) mNSigmaPivsPt->Fill(pt, nSigmaPion+5.*theTrack->charge());
+      }
+
+      if(mSaveTree) {
+        trackTree.pt = pt;
+        trackTree.eta = eta;
+        trackTree.phi = phi;
+        trackTree.nfitpts = nfitpts;
+        trackTree.dEdx = dEdx*1.e6;
+        trackTree.ndEdxpts = ndEdxpts;
+        trackTree.charge = theTrack->charge();      
+        trackTree.projTrayId = 0;
+        trackTree.projCellChan = -1;
+        trackTree.projY = -999.;
+        trackTree.projZ = -999.;
+      }
+
+      nAllTracks++;
+      StPhysicalHelixD theHelix = mOuterTrackGeometry ? theTrack->outerHelix() : theTrack->helix();
+
+//      IntVec projTrayVec;
+//      if(!mBTofGeom->projTrayVector(theHelix, projTrayVec)) continue;
+
+      IntVec idVec;
+      DoubleVec pathVec;
+      PointVec  crossVec;
+
+//       idVec.clear();
+//       pathVec.clear();
+//       crossVec.clear();
+
+      Int_t ncells = 0;
+      if(mBTofGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec) ) {
+//      if(mBTofGeom->HelixCrossCellIds(theHelix, validModuleVec, projTrayVec, idVec, pathVec, crossVec)) {
+	Int_t cells = idVec.size();
+	for (Int_t i=0; i<cells; i++) {
+            Int_t icell,imodule,itray;
+            Double_t local[3],global[3];
+            for(Int_t i2=0;i2<3;i2++){
+                 local[i2]=0;
+            }
+            global[0]=crossVec[i].x();
+            global[1]=crossVec[i].y();
+            global[2]=crossVec[i].z();
+            mBTofGeom->DecodeCellId(idVec[i], icell, imodule, itray);
+//	    LOG_INFO << " decode " << idVec[i] << "  to tray#" << itray << " module#" << imodule << " cell#" << icell << endm;
+	    StBTofGeomSensor* sensor = mBTofGeom->GetGeomSensor(imodule,itray);
+	    if(!sensor) {
+	      LOG_WARN << " No sensitive module in the projection??? -- Something weird!!! " << endm;
+	      continue;
+	    }
+            sensor->Master2Local(&global[0],&local[0]);
+            icell = sensor->FindCellIndex(local);
+	    //	    StThreeVectorD glo=sensor->GetCenterPosition();
+	    StThreeVectorD glo(global[0], global[1], global[2]);
+	    StThreeVectorD hitPos(local[0], local[1], local[2]);
+//	    delete sensor;   /// function in StBTofGeometry modified. Don't delete here.
+            if (fabs(local[2])<3.05) {   // to be consistent with GEANT geometry
+                                         // and the alignment calibration
+//	    if (local[2]<=2.7&&local[2]>=-3.4) {
+//            if (fabs(local[2])<4.) {   // loose local z cut at first step
+	      ncells++;
+	      cellHit.tray = itray;
+	      cellHit.module = imodule;
+	      cellHit.cell = icell;
+	      cellHit.trackIdVec.push_back(iNode);
+	      cellHit.hitPosition = glo;        // global position
+	      cellHit.zhit = (Float_t)hitPos.z();
+	      cellHit.yhit = (Float_t)hitPos.y();
+	      cellHitVec.push_back(cellHit);
+	      allCellsHitVec.push_back(cellHit);
+
+              if(isPrimary) nPrimaryHits++;
+
+	      if(mHisto) {
+                mDaqOccupancyProj[itray-1]->Fill((imodule-1)*mNCell+(icell-1));
+		mHitsPosition->Fill(hitPos.y(), hitPos.z());
+	      }
+	      
+              if(mSaveTree) {
+                trackTree.projTrayId = itray;
+                trackTree.projCellChan = (imodule-1)*mNCell+(icell-1);
+                trackTree.projY = local[1];
+                trackTree.projZ = local[2];
+              }
+
+              if(Debug()) {
+     	        LOG_DEBUG <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
+  	        LOG_DEBUG <<"   hit position " << hitPos << endm;
+	        // LOG_DEBUG <<"   momemtum= " << pt << " " << eta << " " << phi << endm;
+              }
+	    }
+	} // for (Int_t i=0...)
+      } // endif(helixcross...)
+      if(ncells>0&&mHisto) mHitsMultPerTrack->Fill(ncells);
+
+      if(mHisto && mSaveTree) mTrackTree->Fill();
+
+    } // if(ValidTrack).. 
+  } // loop over nodes
+  if(Debug()) { LOG_INFO << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nGlobals << endm; }
+  if(mHisto) {
+    mHitsMultInEvent->Fill(allCellsHitVec.size());
+    mHitsPrimaryInEvent->Fill(nPrimaryHits);
+    if(allCellsHitVec.size()) mEventCounterHisto->Fill(7);
+  }
+  // end of Sect.B
+  if (doPrintCpuInfo) {
+    projTimer.stop();
+    LOG_INFO << "CPU time for Step B - projection : "
+	 << projTimer.elapsedTime() << " sec" << endm;
+  }
+
+  //.........................................................................
+  /// C. Match find Neighbours -- identify crosstalk
+  //
+  tofCellHitVector matchHitCellsVec;
+
+  tofCellHitVectorIter daqIter = daqCellsHitVec.begin();
+  for(unsigned int idaq=0;idaq<daqCellsHitVec.size();idaq++, daqIter++) {
+    tofCellHitVectorIter proIter = allCellsHitVec.begin();
+    for(unsigned int ipro=0;ipro<allCellsHitVec.size();ipro++, proIter++) {
+
+      int daqIndex = (daqIter->module-1)*6 + (daqIter->cell-1);
+      int proIndex = (proIter->module-1)*6 + (proIter->cell-1);
+      int hisIndex = daqIter->tray - 1;
+//      int daqAllIndex = (daqIter->tray - 1)*mNTOF + daqIndex;
+//      int proAllIndex = (proIter->tray - 1)*mNTOF + proIndex;
+      if(daqIter->tray==proIter->tray) {
+	if (mHisto) {
+	  if(hisIndex>=0&&hisIndex<mNTray) {
+	    mHitCorr[hisIndex]->Fill(proIndex,daqIndex);
+	    mHitCorrModule[hisIndex]->Fill(proIter->module-1,daqIter->module-1);
+	  } else {
+	    LOG_WARN << " weird tray # " << daqIter->tray << endm;
+	  }
+	}
+      }
+      if( (daqIter->tray==proIter->tray)&& 
+	  (daqIter->module==proIter->module) &&
+	  ( ( (proIter->cell==6)&&((proIter->cell==daqIter->cell) ||
+				   (proIter->cell==daqIter->cell+1)) )
+	    || ( (proIter->cell==1)&&((proIter->cell==daqIter->cell) ||
+				      (proIter->cell==daqIter->cell-1)) )
+	    || ( (proIter->cell>=2&&proIter->cell<=6) &&
+		 ( (proIter->cell==daqIter->cell) ||
+		   (proIter->cell==daqIter->cell-1) ||
+		   (proIter->cell==daqIter->cell+1) ) ) ) ) {
+	cellHit.tray = daqIter->tray;
+	cellHit.module = daqIter->module;
+	cellHit.cell = daqIter->cell;
+	cellHit.hitPosition = proIter->hitPosition;
+	cellHit.trackIdVec = proIter->trackIdVec;
+	cellHit.zhit = proIter->zhit;
+	cellHit.yhit = proIter->yhit;
+        cellHit.tot = daqIter->tot;
+        cellHit.index2BTofHit = daqIter->index2BTofHit;
+	matchHitCellsVec.push_back(cellHit);
+      }
+    }
+  } //end {sec. C}
+  if(Debug()) { LOG_INFO << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm; }
+  if(mHisto&&matchHitCellsVec.size()) mEventCounterHisto->Fill(8);
+
+  //.........................................................................
+  /// D. sort hit vectors  and deal with (discard) cells matched by multiple tracks
+  //
+  Int_t nSingleHitCells(0);
+  Int_t nMultiHitsCells(0);
+
+  tofCellHitVector singleHitCellsVec;
+  tofCellHitVector multiHitsCellsVec;
+
+  tofCellHitVector tempVec = matchHitCellsVec;
+  tofCellHitVector erasedVec = tempVec;
+  while (tempVec.size() != 0) {
+    Int_t nTracks = 0;
+    idVector trackIdVec;
+
+    tofCellHitVectorIter tempIter=tempVec.begin();
+    tofCellHitVectorIter erasedIter=erasedVec.begin();
+    while(erasedIter!= erasedVec.end()) {
+      if(tempIter->tray == erasedIter->tray &&
+	 tempIter->module == erasedIter->module &&
+	 tempIter->cell == erasedIter->cell) {
+	nTracks++;
+	trackIdVec.push_back(erasedIter->trackIdVec.back());  // merge
+	erasedVec.erase(erasedIter);
+	erasedIter--;
+      }
+      erasedIter++;
+    }
+
+    cellHit.cell = tempIter->cell;
+    cellHit.module = tempIter->module;
+    cellHit.tray = tempIter->tray;
+    cellHit.hitPosition = tempIter->hitPosition;
+    cellHit.trackIdVec = trackIdVec;
+    cellHit.zhit = tempIter->zhit;
+    cellHit.yhit = tempIter->yhit;
+    cellHit.tot = tempIter->tot;
+    cellHit.index2BTofHit = tempIter->index2BTofHit;
+
+    Float_t ycenter = (tempIter->cell-1-2.5)*mWidthPad;
+    Float_t dy = tempIter->yhit - ycenter;
+    Float_t dz = tempIter->zhit;
+
+    if(mHisto) {
+      mTracksPerCellMatch1->Fill(trackIdVec.size());
+//      mDaqOccupancyMatch1->Fill((tempIter->module-1)*mNCell+(tempIter->cell-1));
+      mDeltaHitMatch1->Fill(dy, dz);
+    }
+
+    if (nTracks==1){
+      nSingleHitCells++;      
+      singleHitCellsVec.push_back(cellHit);
+    } else if (nTracks>1){
+      nMultiHitsCells++;
+      multiHitsCellsVec.push_back(cellHit);
+      // for multiple hit cells either discard (yes) or
+      // find the most likely candidate.
+    } else {
+      LOG_WARN << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
+    }
+    
+    if(Debug()) {
+      LOG_DEBUG << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+      idVectorIter ij=trackIdVec.begin();
+      while (ij != trackIdVec.end()) { LOG_DEBUG << " " << *ij; ij++; }
+      LOG_DEBUG << endm;
+    }
+
+    tempVec = erasedVec;
+  }
+  if(Debug()) { LOG_INFO << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm; }
+  //end of Sect.D
+
+  if(mHisto) {
+    mCellsPerEventMatch1->Fill(singleHitCellsVec.size()+multiHitsCellsVec.size());
+    if(singleHitCellsVec.size()) mEventCounterHisto->Fill(9);
+  } 
+
+  //.........................................................................
+  /// E. sort and deal singleHitCellsVector for multiple cells associated to single tracks
+  //
+  tofCellHitVector FinalMatchedCellsVec;
+  //  FinalMatchedCellsVec.clear();
+  tempVec = singleHitCellsVec;
+  if(mHisto) {
+    mCellsPerEventMatch2->Fill(tempVec.size());
+    for(unsigned int ii=0;ii<tempVec.size();ii++) {
+      mTracksPerCellMatch2->Fill(tempVec[ii].trackIdVec.size());
+//      mDaqOccupancyMatch2->Fill((tempVec[ii].module-1)*mNCell+(tempVec[ii].cell-1));
+      Float_t ycenter = (tempVec[ii].cell-1-2.5)*mWidthPad;
+      Float_t dy = tempVec[ii].yhit-ycenter;
+      Float_t dz = tempVec[ii].zhit;
+      mDeltaHitMatch2->Fill(dy, dz);
+    }
+  }
+
+  erasedVec = tempVec;
+  while (tempVec.size() != 0) {
+    StructCellHit cellHit;
+    Int_t nCells = 0;
+    idVector vTrackId;
+    vector<StThreeVectorD> vPosition;
+    vector<Int_t> vchannel, vtray, vmodule, vcell;
+    vector<Float_t> vzhit, vyhit;
+    vector<Double_t> vtot;
+    vector<Int_t> vindex2BTofHit;
+
+    tofCellHitVectorIter tempIter=tempVec.begin();
+    tofCellHitVectorIter erasedIter=erasedVec.begin();
+    while(erasedIter!= erasedVec.end()) {
+      if(tempIter->trackIdVec.back() == erasedIter->trackIdVec.back()) {
+	nCells++;
+	vtray.push_back(erasedIter->tray);
+	vmodule.push_back(erasedIter->module);
+	vcell.push_back(erasedIter->cell);
+	vPosition.push_back(erasedIter->hitPosition);
+	vTrackId.push_back(erasedIter->trackIdVec.back());
+	vzhit.push_back(erasedIter->zhit);
+	vyhit.push_back(erasedIter->yhit);
+        vtot.push_back(erasedIter->tot);
+        vindex2BTofHit.push_back(erasedIter->index2BTofHit);
+
+	erasedVec.erase(erasedIter);
+	erasedIter--;
+      }
+      erasedIter++;
+    }
+
+    if (nCells==1){
+      // for singly hit cell, copy data in singleHitCellsVec
+      cellHit.tray = vtray[0];
+      cellHit.module = vmodule[0];
+      cellHit.cell = vcell[0];
+      cellHit.trackIdVec.push_back(vTrackId[0]);
+      cellHit.hitPosition = vPosition[0];
+      cellHit.matchFlag = 1; 
+      cellHit.zhit = vzhit[0];
+      cellHit.yhit = vyhit[0];
+      cellHit.tot = vtot[0];
+      cellHit.index2BTofHit = vindex2BTofHit[0];
+
+      FinalMatchedCellsVec.push_back(cellHit);
+
+      // debugging output
+      if(Debug()) {
+        LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+	idVectorIter ij=vTrackId.begin();
+	while (ij != vTrackId.end()) { LOG_DEBUG << " " << *ij; ij++; }
+        LOG_DEBUG << endm;
+      }
+      
+    }
+    else if (nCells>1){   // for multiple hit cells  find the most likely candidate.
+      Int_t thiscandidate(-99);
+      Int_t thisMatchFlag(0);
+
+      // sort on tot
+      Float_t tot(0.);
+      vector<Int_t> ttCandidates;
+      for (Int_t i=0;i<nCells;i++) {
+        Double_t tt = vtot[i];
+        if(tt<25.&&tt>tot) {
+          tot = tt;
+          ttCandidates.clear();
+          ttCandidates.push_back(i);
+        } else if (tt==tot) {
+          ttCandidates.push_back(i);
+        }
+      }
+      if (ttCandidates.size()==1) {
+        thiscandidate = ttCandidates[0];
+        thisMatchFlag = 2;
+      } else if (ttCandidates.size()>1) {  // sort on hitposition
+        Float_t ss(99.);
+        vector<Int_t> ssCandidates;
+        for(size_t j=0;j<ttCandidates.size();j++) {
+          Float_t yy = vyhit[ttCandidates[j]];
+          Float_t ycell = (vcell[ttCandidates[j]]-1-2.5)*mWidthPad;
+          Float_t ll = fabs(yy-ycell);
+          if(ll<ss) {
+            ss = ll; 
+            ssCandidates.clear();
+            ssCandidates.push_back(ttCandidates[j]);
+          }else if  (ll==ss)
+            ssCandidates.push_back(ttCandidates[j]);
+        }
+        if (ssCandidates.size()==1){
+          thiscandidate = ssCandidates[0];
+          thisMatchFlag = 3;
+        }
+      }
+
+      if (thiscandidate>=0) {
+	cellHit.tray = vtray[thiscandidate];
+	cellHit.module = vmodule[thiscandidate];
+	cellHit.cell = vcell[thiscandidate];
+	cellHit.trackIdVec.push_back(vTrackId[thiscandidate]);
+	cellHit.hitPosition = vPosition[thiscandidate];
+	cellHit.matchFlag = thisMatchFlag;
+	cellHit.zhit = vzhit[thiscandidate];
+	cellHit.yhit = vyhit[thiscandidate];
+        cellHit.tot = vtot[thiscandidate];
+        cellHit.index2BTofHit = vindex2BTofHit[thiscandidate];
+
+	FinalMatchedCellsVec.push_back(cellHit);
+	
+	// debugging output
+	if(Debug()) { LOG_DEBUG << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm; }
+      }
+
+    } else {
+      LOG_WARN << "E: no cells belong to this track ... should not happen!" << endm;
+    }
+
+    tempVec = erasedVec;
+  }
+
+  if(Debug()) { LOG_INFO << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm; }
+  // end of Sect.E
+
+  //.........................................................................
+  //// F. perform further selection and fill valid track histograms, ntuples and BTofPidTraits
+  //
+  if(mHisto) {
+    if(FinalMatchedCellsVec.size()) mEventCounterHisto->Fill(10);
+    mCellsPerEventMatch3->Fill(FinalMatchedCellsVec.size());
+  }
+
+//  StSPtrVecBTofHit& tofHits = theTof->tofHits();
+  Int_t nValidSingleHitCells(0), nValidSinglePrimHitCells(0);
+
+  for (size_t ii=0; ii < FinalMatchedCellsVec.size(); ii++){
+    Int_t tray = FinalMatchedCellsVec[ii].tray;
+    Int_t module = FinalMatchedCellsVec[ii].module;
+    Int_t cell = FinalMatchedCellsVec[ii].cell;
+
+    Float_t ycenter = (cell-1-2.5)*mWidthPad;
+    Float_t dy = FinalMatchedCellsVec[ii].yhit - ycenter;
+    Float_t dz = FinalMatchedCellsVec[ii].zhit;
+    if (FinalMatchedCellsVec[ii].trackIdVec.size()!=1)
+      LOG_WARN << "F: WHAT!?!  mult.matched cell in single cell list " << tray << " " << module << " " << cell << endm;
+
+    if(mHisto) {
+      mTracksPerCellMatch3->Fill(FinalMatchedCellsVec[ii].trackIdVec.size());
+//      mDaqOccupancyMatch3->Fill((module-1)*mNCell+(cell-1));
+      mDeltaHitMatch3->Fill(dy, dz);
+      mDeltaHitFinal[tray-1]->Fill(dy,dz);      
+    }
+
+    // get track-id from cell hit vector
+    int trackNode = FinalMatchedCellsVec[ii].trackIdVec[0];
+    StMuTrack *globalTrack = mMuDst->globalTracks(trackNode);
+    if(!globalTrack) {
+      LOG_WARN << "Wrong global track!" << endm;
+      continue;
+    }
+
+    // Fill association in TOF Hit Collection
+    StMuBTofHit *tofHit = mMuDst->btofHit(FinalMatchedCellsVec[ii].index2BTofHit);
+    if(tofHit->tray()!=tray || tofHit->module()!=module || tofHit->cell()!=cell) {
+      LOG_WARN << "Wrong hit in the MuBTofHit!" << endm;
+      continue;
+    }
+    nValidSingleHitCells++;
+
+    int iv = globalTrack->vertexIndex();
+    if(iv>=0) nValidSinglePrimHitCells++;
+
+    /// set cross-indices
+    tofHit->setAssociatedTrackId(globalTrack->id());
+    tofHit->setIndex2Global(trackNode);
+    globalTrack->setIndex2BTofHit(FinalMatchedCellsVec[ii].index2BTofHit);
+
+    int ip = -1;
+    for(int j=0;j<(int)mMuDst->numberOfPrimaryTracks();j++) {
+      StMuTrack *pTrack = mMuDst->primaryTracks(j);
+      if(!pTrack) continue;
+      if(pTrack->index2Global() == trackNode) {
+        ip = j;
+        break;
+      }
+    }
+    StMuTrack *primaryTrack = 0;
+    if(ip>=0) {
+      tofHit->setIndex2Primary(ip);
+      primaryTrack = (StMuTrack *)mMuDst->primaryTracks(ip);
+      if(primaryTrack) {
+        primaryTrack->setIndex2BTofHit(FinalMatchedCellsVec[ii].index2BTofHit);
+      }
+    }
+
+    // Fill the matched data in StBTofPidTraits
+    StMuBTofPidTraits pidTof = globalTrack->btofPidTraits();
+    pidTof.setMatchFlag(FinalMatchedCellsVec[ii].matchFlag);
+    pidTof.setYLocal(dy);
+    pidTof.setZLocal(FinalMatchedCellsVec[ii].zhit);
+    pidTof.setPosition(FinalMatchedCellsVec[ii].hitPosition);
+    globalTrack->setBTofPidTraits(pidTof);
+
+    if(primaryTrack) {
+      StMuBTofPidTraits ppidTof = primaryTrack->btofPidTraits();
+      ppidTof.setMatchFlag(FinalMatchedCellsVec[ii].matchFlag);
+      ppidTof.setYLocal(dy);
+      ppidTof.setZLocal(FinalMatchedCellsVec[ii].zhit);
+      ppidTof.setPosition(FinalMatchedCellsVec[ii].hitPosition);
+      primaryTrack->setBTofPidTraits(ppidTof);
+    }
+
+  } // end final matched cells
+  
+  if(mHisto) {
+    mCellsPrimaryPerEventMatch3->Fill(nValidSinglePrimHitCells);
+  }
+  
+  if(Debug()) { LOG_INFO << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm; }
+ // end of Sect.F
+
+  LOG_INFO << " #(daq hits): " << daqCellsHitVec.size()
+       << "\t#(proj hits): " << allCellsHitVec.size()
+       << "\t#(prim proj hits): " << nPrimaryHits
+       << "\n#(matched hits): " << FinalMatchedCellsVec.size() 
+       << "\n#(single valid hits): " << nValidSingleHitCells
+       << "\t#(single prim valid hits): " << nValidSinglePrimHitCells
+       << endm;
+
+  if (doPrintMemoryInfo) {
+        StMemoryInfo::instance()->snapshot();
+        StMemoryInfo::instance()->print();
+  }
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time for StBTofMatchMaker::Make(): "
+	 << timer.elapsedTime() << " sec" << endm;
+  }
+
+  LOG_INFO << "StBTofMatchMaker -- bye-bye" << endm;
+
+  return;
 }
 
 //---------------------------------------------------------------------------
@@ -981,64 +1652,42 @@ void StBTofMatchMaker::writeHistogramsToFile(){
 }
 
 //---------------------------------------------------------------------------
-// determine whether this is a valid TOF beam event
-bool StBTofMatchMaker::validEvent(StEvent *event){
-  mEventCounter++;
-  // 1. must have non-zero pointer
-  if (!event) return false;
-  if(mHisto) mEventCounterHisto->Fill(1);
-
-  // 2. must have a valid primary vertex 
-//  if (!event->primaryVertex()) return false;
-  mAcceptedEventCounter++;
-  if(mHisto) mEventCounterHisto->Fill(2);
-
-  // 3a. must have TOF collection
-  if (!event->btofCollection()){
-    LOG_WARN << "TOF is not present" << endm;
-    return false;
-  }
-  if(mHisto) mEventCounterHisto->Fill(3);
-
-  // 3b. must have TOF raw data available
-  if (!(event->btofCollection()->rawHitsPresent()) ) {
-    LOG_WARN << "TOF is present but no Raw Hits" << endm;
-    if  (!(event->btofCollection()->hitsPresent())){
-      LOG_WARN << "              and no Cell Data" << endm;
-      return false;
-    }
-    return false;
-  }
-  mTofEventCounter++;
-  if(mHisto) mEventCounterHisto->Fill(4);
-  
-  if(mHisto) mEventCounterHisto->Fill(5);
-  
-  mAcceptAndBeam++;
-
-  // and we have a winner!
-  LOG_INFO << "TOF present ... and valid beam event" << endm;
-
-  return true;
-}
-
-
-//---------------------------------------------------------------------------
 // determine whether this is a valid TPC track
 bool StBTofMatchMaker::validTrack(StTrack *track){
   // 1. no track, no go.
   if (!track) return false;
 
   // 2. track quality flag, should be >0
-  if (track->flag()<=0) return false;
+  if (track->flag()<=0 || track->flag()>=1000) return false;
 
-  // 3. minimum #hits per track
-  if (track->topologyMap().numberOfHits(kTpcId) < mMinHitsPerTrack) return false;
+  // 3. minimum #hits per track - obsolete
+  //  if (track->topologyMap().numberOfHits(kTpcId) < mMinHitsPerTrack) return false;
   // 4. minimum #fit points per track
   if (track->fitTraits().numberOfFitPoints(kTpcId) < mMinFitPointsPerTrack) return false;
   // 5. minimum #fit points over #maximum points
   //fg float ratio = (1.0*track->fitTraits().numberOfFitPoints(kTpcId)) / (1.0*track->numberOfPossiblePoints(kTpcId));
   float ratio = (float)track->fitTraits().numberOfFitPoints(kTpcId) / (1.0*track->numberOfPossiblePoints(kTpcId));
+  if (ratio < mMinFitPointsOverMax) return false;
+
+  return true;
+}
+
+//---------------------------------------------------------------------------
+// determine whether this is a valid TPC track
+bool StBTofMatchMaker::validTrack(StMuTrack *track){
+  // 1. no track, no go.
+  if (!track) return false;
+
+  // 2. track quality flag, should be >0
+  if (track->flag()<=0 || track->flag()>=1000) return false;
+
+  // 3. minimum #hits per track - obsolete
+  //  if (track->nHits() < mMinHitsPerTrack) return false;
+  // 4. minimum #fit points per track
+  if (track->nHitsFit(kTpcId) < mMinFitPointsPerTrack) return false;
+  // 5. minimum #fit points over #maximum points
+  //fg float ratio = (1.0*track->fitTraits().numberOfFitPoints(kTpcId)) / (1.0*track->numberOfPossiblePoints(kTpcId));
+  float ratio = (float)track->nHitsFit(kTpcId) / (1.0*track->nHitsPoss(kTpcId));
   if (ratio < mMinFitPointsOverMax) return false;
 
   return true;
