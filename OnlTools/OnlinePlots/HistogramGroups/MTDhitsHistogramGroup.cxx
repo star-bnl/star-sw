@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
+#include <algorithm>
 
 #include "TVirtualPad.h"
 #include "TLine.h"
@@ -272,8 +273,8 @@ bool MTDhitsHistogramGroup::fill(evpReader* evp, char* datap) {
     }  // end loop nword
   }  // end loop fiber
   
-  std::sort(leadinghits.begin(),leadinghits.end());
-  std::sort(trailinghits.begin(),trailinghits.end());
+  sort(leadinghits.begin(),leadinghits.end());
+  sort(trailinghits.begin(),trailinghits.end());
 
   float leadingtime[36],trailingtime[36];  // will only get one hit of each channel
   for(int i=0;i<36;i++){leadingtime[i]=0.;trailingtime[i]=0.;}

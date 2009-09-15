@@ -149,7 +149,7 @@ class EvpPresenter : public QObject {
  bool Status() { return mGo; }
  void Start() { mGo = true; }
  void Stop() { mGo = false; }
- void Print(TCanvas* cc, int tab, int tab);
+ void Print(TCanvas* cc, int tab, int subtab);
  void Draw(TCanvas*, int  tab, int subTab);
  void Draw(TCanvas*, const char* group);
  void SetDebugLevel(int lDebugLevel){mDebugLevel = lDebugLevel;}
@@ -175,7 +175,7 @@ class EvpPresenter : public QObject {
 
 /***************************************************************************
  *
- * $Id: EvpPresenter.h,v 1.4 2009/05/29 18:17:05 fine Exp $
+ * $Id: EvpPresenter.h,v 1.5 2009/09/15 23:37:41 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -185,6 +185,9 @@ class EvpPresenter : public QObject {
  ***************************************************************************
  *
  * $Log: EvpPresenter.h,v $
+ * Revision 1.5  2009/09/15 23:37:41  fine
+ * Fix namespaces
+ *
  * Revision 1.4  2009/05/29 18:17:05  fine
  * merge Qt3 and Qt4  versions
  *
