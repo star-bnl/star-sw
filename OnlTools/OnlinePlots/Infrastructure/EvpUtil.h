@@ -75,13 +75,13 @@ class EvpUtil {
   static void CheckCanvasDefinitions(TMapFile* mfile) ;
 
   // map file sanity
-  static int EvpUtil::GetSizeOfMappedObjects(TMapFile *);
+  static int GetSizeOfMappedObjects(TMapFile *);
 
   // retrieving histograms
-  static TObject* EvpUtil::GetObjectFromMapFile(TMapFile *,const char* name, TObject* o=0);
-  static TH1*     EvpUtil::GetHistoFromMapFile(TMapFile *,const char* name, TH1* h=0);
-  static TObject* EvpUtil::GetObjectFromGenericFile(GenericFile *,const char* name, TObject* o=0);
-  static TH1*     EvpUtil::GetHistoFromGenericFile(GenericFile*,const char* name, TH1* h=0);
+  static TObject* GetObjectFromMapFile(TMapFile *,const char* name, TObject* o=0);
+  static TH1*     GetHistoFromMapFile(TMapFile *,const char* name, TH1* h=0);
+  static TObject* GetObjectFromGenericFile(GenericFile *,const char* name, TObject* o=0);
+  static TH1*     GetHistoFromGenericFile(GenericFile*,const char* name, TH1* h=0);
   static TH1* hUnknown; // default histogram if histo is not found by name in the map file
   // converting file types
   static int Map2Root(TMapFile* mFile, const char* root);
@@ -91,7 +91,7 @@ class EvpUtil {
   static unsigned int evpgroupmask( char* );
   static unsigned int detmask( char* );
 
-  static void EvpUtil::Draw(TH1*h, const char* options="");
+  static void Draw(TH1*h, const char* options="");
 
 };
 
@@ -106,7 +106,7 @@ class EvpUtil {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.h,v 1.7 2009/04/30 01:23:33 dkettler Exp $
+ * $Id: EvpUtil.h,v 1.8 2009/09/15 23:15:09 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -116,6 +116,9 @@ class EvpUtil {
  ***************************************************************************
  *
  * $Log: EvpUtil.h,v $
+ * Revision 1.8  2009/09/15 23:15:09  fine
+ * Adjust for SL5
+ *
  * Revision 1.7  2009/04/30 01:23:33  dkettler
  * Histogram group printing improvements
  *
