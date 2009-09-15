@@ -6,11 +6,20 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.5 2009/08/26 20:33:56 dongx Exp $
+ * $Id: StBTofMatchMaker.h,v 1.6 2009/09/15 00:30:45 dongx Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.6  2009/09/15 00:30:45  dongx
+ * 1) Added the functionality to perform the matching with MuDst directly.
+ * 2) Several updates on the track cuts used for matching
+ *    - flag<1000 was added
+ *    - nHits>15 cut was removed
+ * 3) Created a new StBTofPidTraits for any primary track
+ * 4) Local Z window cut set to symmetric (fabs(localz)<3.05)
+ * 5) Some small changes in the LOGGER output.
+ *
  * Revision 1.5  2009/08/26 20:33:56  dongx
  * Geometry init moved to Init() function, also allow reading in from others
  *
@@ -63,6 +72,10 @@ class TH1D;
 class TH2D;
 class TTree;
 
+class StMuDst;
+class StMuEvent;
+class StMuTrack;
+
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
 typedef vector<Int_t>  IntVec;
 typedef vector<UInt_t>  UIntVec;
@@ -112,6 +125,9 @@ public:
     /// save geometry if it will be used by following makers in the chain
     void setSaveGeometry(Bool_t geomSave=kFALSE);
 
+    /// switch to read in StEvent/MuDst
+    void setMuDstIn(Bool_t muDstIn=kTRUE);
+
 private:
     StTrackGeometry* trackGeometry(StTrack*);//!
 
@@ -120,11 +136,17 @@ private:
     /// write histograms
     void writeHistogramsToFile();
 
-    /// event selection    
-    Bool_t validEvent(StEvent *);
+    ///
+    void processStEvent();
+    ///
+    void processMuDst();
+        
     /// track selection
     Bool_t validTrack(StTrack*);
 
+    /// track selection
+    Bool_t validTrack(StMuTrack*);
+                
 public:
     Bool_t  doPrintMemoryInfo;     //! 
     Bool_t  doPrintCpuInfo;        //!
@@ -163,6 +185,9 @@ private:
     
     string mHistoFileName; //! name of histogram file, if empty no write-out
     
+    StMuDst*          mMuDst;
+    Bool_t            mMuDstIn;          //! switch - default is to read in StEvent
+                
     /// event counters
     Int_t  mEventCounter;          //! #processed events
     Int_t  mAcceptedEventCounter;  //! #events w/ valid prim.vertex
@@ -269,7 +294,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.5 2009/08/26 20:33:56 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.6 2009/09/15 00:30:45 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
@@ -295,4 +320,5 @@ inline void StBTofMatchMaker::setCreateTreeFlag(Bool_t tree){mSaveTree = tree;}
 
 inline void StBTofMatchMaker::setSaveGeometry(Bool_t geomSave){mGeometrySave = geomSave; }
 
+inline void StBTofMatchMaker::setMuDstIn(Bool_t val) { mMuDstIn = val; }
 #endif
