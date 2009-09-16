@@ -31,6 +31,7 @@ void RunJetFinder2(int nevents = 100,
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StJets");
+  gSystem->Load("StJetEvent");
   gSystem->Load("StJetMaker");
 
   StChain* chain = new StChain; 
