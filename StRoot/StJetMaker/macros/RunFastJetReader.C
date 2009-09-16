@@ -5,7 +5,7 @@ int total=0;
 void RunFastJetReader(
                       int nevents=10000,
                       const char* jetInFile = "blah.jet.root",
-                      const char* skimInFile = "blah.jetSkim.root"
+                      const char* skimInFile = "blah.skim.root"
                       )
 {
     cout <<"hello world"<<endl;
@@ -35,6 +35,7 @@ void RunFastJetReader(
     gSystem->Load("StEmcTriggerMaker");
     gSystem->Load("StTriggerUtilities");
     gSystem->Load("StJetFinder");
+    gSystem->Load("StJetEvent");
     gSystem->Load("StJetMaker");
     
     cout << " loading done " << endl;
