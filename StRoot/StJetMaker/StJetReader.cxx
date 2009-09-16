@@ -106,6 +106,7 @@ void StJetReader::InitFile(const char* file)
 			cout <<"\t\tset branch address for branch:\t"<<bname.c_str()<<endl;
 			t->SetBranchStatus(bname.c_str(), 1);
 			t->SetBranchAddress(bname.c_str(), &jets);
+			branch->SetAutoDelete(true);
 		}
     }
 	
@@ -402,7 +403,7 @@ void StJetReader::exampleFastAna()
 			//loop on jets
 			StJet* j = static_cast<StJet*>( (*jets)[ijet] );
 			assert(j);
-			assert(verifyJet(stjets, ijet));
+			//assert(verifyJet(stjets, ijet));
 			
 			cout <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<"\tdetEta:\t"<<j->detEta()<<endl;
 			
