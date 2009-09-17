@@ -8,6 +8,7 @@ class StGeomBrowser {
       GeomBrowser *fBrowser;
    public:
       StGeomBrowser(const char *filename="complete");
+     ~StGeomBrowser();
       void SetSize(Int_t w=340,Int_t h=600);
       void SetFile(const char *filename="complete");      
       void Show();      

@@ -87,9 +87,12 @@ private:
       void contextMenuRequestedCB(const QPoint &pos);
       void SelectByTObject( TObject *obj, const QPoint &);
       void SetDepthCB(Int_t depth=3);
-
 signals:
       void DrawObject(TObject *o,bool expanded);
       void ObjectInfo(QString objInfo);
 };
+
+QDataStream & operator>> ( QDataStream & in,  StarGeomTreeWidget & item ) ;
+QDataStream & operator<< ( QDataStream & out, const StarGeomTreeWidget & item ) ;
+      
 #endif
