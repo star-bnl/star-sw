@@ -47,7 +47,7 @@ virtual       double Quality();
 virtual       int    ls(const char *file="") const;
 
   const float *GetKeys() const { return mKeys;}
-        float  GetKey()  const { return (mObj)? mKeys[mIKey]:mDiv;}
+        float  GetKey()  const { return (mObj)? mKeys[int(mIKey)]:mDiv;}
         void   SetKey(float f) { assert(!mObj); mDiv = f;}
         int    GetIKey() const { return mIKey;} 
         int    GetNKey() const { return mNKey;} 
