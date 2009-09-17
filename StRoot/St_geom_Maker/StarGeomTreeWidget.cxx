@@ -256,8 +256,24 @@ QTreeWidgetItem *StarGeomTreeWidget::CreateTreeWidgetItem(TVolume  *volume, QTre
    SetVisibility(item, volume->GetVisibility());
    if (QString(volume->GetName()).startsWith("{")) {
       // make  it blue
-      for (int i=0;i<4;i++)item->setData(i,Qt::ForegroundRole,Qt::blue);
+      for (int i=0;i<4;i++) item->setData(i,Qt::ForegroundRole,Qt::blue);
    }
+   // Calculate the path
+   stack<QString> fullPath;
+   fullPath.push(item->text(0));
+   QTreeWidgetItem *itemParent = item;
+   while (itemParent && (itemParent = itemParent->parent()) ) {
+      fullPath.push("/");
+      fullPath.push(itemParent->text(0));
+   }
+   // Build ToolTip
+   QString tip;
+   while (!fullPath.empty()) { 
+      tip += fullPath.top(); 
+      fullPath.pop(); 
+      if (fullPath.size() == 2) item->setToolTip(2,tip); // mother path tip
+   }
+   item->setToolTip(0,tip); // item path tip
    // Set the icon if any
    TShape *sh = volume->GetShape(); 
    if (sh)  {

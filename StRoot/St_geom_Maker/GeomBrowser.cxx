@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.15 2009/09/14 23:40:56 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.16 2009/09/17 17:40:49 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -614,13 +614,11 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
 void GeomBrowser::DrawObject(TObject *obj,bool expanded)
 {
    // add delay
-#if 0
-   if (fDelayDrawTimer->isActive()) {
+   if ( (sender() != fDelayDrawTimer ) || fDelayDrawTimer->IsActive(expanded)  ) {
       // re-throw the timer
-      fDelayDrawTimer->DrawObject(obj,expanded);
+      fDelayDrawTimer->DrawObject(obj,expanded,fDepthControl->Value());
       return;
    }
-#endif
    if (!obj && fTreeWidget) obj = fTreeWidget->CurrentObject();
    if (obj) {
       TVolume *volume = dynamic_cast<TVolume *>(obj);
@@ -905,6 +903,14 @@ static const QString  &GetVolumeDescriptor(const QString &volumeName,bool richTe
    static map<QString,QString> volumeMap;
    static QString dsc;
    static bool errorMessage = false;// show it at once;
+#ifdef  NO_GEANT_MAKER
+   static QString dsc="No STAR GEANT3 narrative description is provided";
+   static bool StarGeant = false;
+#else   
+   static QString dsc;
+   static bool StarGeant = true;
+#endif
+   if (!StarGeant) return dsc;
    if (first) {
       first = false;
       TString helpFile = "volumes.txt";
