@@ -17,6 +17,11 @@
 StGeomBrowser::StGeomBrowser(const char *fileName)
 : fFileName(fileName), fBrowser(0) {}
 //______________________________________________________________
+StGeomBrowser::~StGeomBrowser()
+{
+    delete fBrowser; fBrowser=0;
+}
+//______________________________________________________________
 void StGeomBrowser::SetFile(const char *fileName) 
 {
    fFileName = fileName;

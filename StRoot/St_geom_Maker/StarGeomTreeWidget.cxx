@@ -32,6 +32,8 @@ using namespace std;
 #include <QKeyEvent>
 #include <QStyledItemDelegate>
 #include <QApplication>
+#include <QDataStream>
+#include <QFile>
 
 class GeomBrowseItemDeledate  : public  QStyledItemDelegate {
 public:
@@ -226,10 +228,43 @@ void StarGeomTreeWidget::ConnectTreeSlots()
    connect(this,SIGNAL(itemSelectionChanged()),                                   this,SLOT(itemSelectionChangedCB()));
    connect(this,SIGNAL(customContextMenuRequested(const QPoint & )),              this,SLOT(contextMenuRequestedCB(const QPoint & )));
 }
-
+//_____________________________________________________________________________
+static void unRollChildren( QDataStream & stream, QTreeWidgetItem &top, bool out = true) 
+{   
+   if (out) stream << top;
+   else  stream >> top;
+   int n = top.childCount ();
+   for (int i=0; i<n; ++i) {
+       QTreeWidgetItem *item = top.child(i); 
+       unRollChildren(stream, *item, out);
+   }
+}
+//_____________________________________________________________________________
+QDataStream & operator>> ( QDataStream & in,  StarGeomTreeWidget & item ) 
+{
+   return in;
+}
+//_____________________________________________________________________________
+QDataStream & operator<< ( QDataStream & out, const StarGeomTreeWidget & item ) 
+{
+    int nItem = item.topLevelItemCount(); 
+    for (int i=0; i<nItem; ++i) {
+      QTreeWidgetItem *it = item.topLevelItem (i);
+      unRollChildren(out,*it);
+   }
+   return out;
+}
 //_____________________________________________________________________________
 StarGeomTreeWidget::~StarGeomTreeWidget() 
 {
+#ifdef QT_IO_4_STAR
+   {
+     QFile file("file.dat");
+     file.open(QIODevice::WriteOnly);
+     QDataStream out(&file);   // we will serialize the data into the file
+     out << this;
+   }
+#endif
    // delete the custom delegate
    delete itemDelegate();
 }
