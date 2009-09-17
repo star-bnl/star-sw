@@ -224,7 +224,7 @@ static int nCall=0; nCall++;
   assert(!node->mLink[1]);
   assert(*keep == this);
   node->mIKey = (mIKey+1000003)%mNKey;
-  int way = (node->mKeys[mIKey] <= GetKey())? 0:1;
+  int way = (node->mKeys[int(mIKey)] <= GetKey())? 0:1;
   mNumb[way]++;
   if (mLink[way])            { mLink[way]->Add(node,mLink+way); return;}
   if (!mObj || mLink[1-way]) { mLink[way] = node;		return;}
