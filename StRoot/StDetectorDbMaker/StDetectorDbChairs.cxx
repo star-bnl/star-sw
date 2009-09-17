@@ -58,6 +58,74 @@ MakeChairInstance(asic_thresholds,Calibrations/tpc/asic_thresholds);
 MakeChairInstance(asic_thresholds_tpx,Calibrations/tpc/asic_thresholds_tpx);
 #include "St_tpcAnodeHVC.h"
 MakeChairInstance(tpcAnodeHV,Calibrations/tpc/tpcAnodeHV);
+//________________________________________________________________________________
+Float_t St_tpcAnodeHVC::voltagePadrow(int sector, int padrow) {
+  // sector=1..24 , padrow=1..45
+  Int_t e1 = (sector-1)*19;
+  Int_t e2 = e1;
+  Float_t f2 = 0;
+  // f2 represents signal couplings from neighboring HV sections
+  // see: http://www.star.bnl.gov/public/tpc/hard/signals/signal_division.html
+  switch (padrow) {
+    case  1: e1+= 1; e2+= 2; f2 = 0.00197; break;
+    case  2: e1+= 2; break;
+    case  3: e1+= 3; e2+= 2; f2 = 0.04547; break;
+    case  4: e1+= 3; break;
+    case  5: e1+= 4; break;
+    case  6: e1+= 4; e2+= 5; f2 = 0.00007; break;
+    case  7: e1+= 5; break;
+    case  8: e1+= 6; e2+= 5; f2 = 0.04547; break;
+    case  9: e1+= 6; break;
+    case 10: e1+= 7; break;
+    case 11: e1+= 8; e2+= 7; f2 = 0.33523; break;
+    case 12: e1+= 8; break;
+    case 13: e1+=17; break;
+    case 14: e1+= 9; e2+=18; f2 = 0.00312; break;
+    case 15:
+    case 16: e1+= 9; break;
+    case 17: e1+= 9; e2+=10; f2 = 0.40250; break;
+    case 18:
+    case 19:
+    case 20: e1+=10; break;
+    case 21: e1+=10; e2+=11; f2 = 0.40250; break;
+    case 22:
+    case 23:
+    case 24: e1+=11; break;
+    case 25: e1+=11; e2+=12; f2 = 0.40250; break;
+    case 26:
+    case 27:
+    case 28: e1+=12; break;
+    case 29: e1+=12; e2+=13; f2 = 0.40250; break;
+    case 30:
+    case 31:
+    case 32: e1+=13; break;
+    case 33: e1+=13; e2+=14; f2 = 0.40250; break;
+    case 34:
+    case 35:
+    case 36: e1+=14; break;
+    case 37: e1+=14; e2+=15; f2 = 0.40250; break;
+    case 38:
+    case 39:
+    case 40: e1+=15; break;
+    case 41: e1+=15; e2+=16; f2 = 0.40250; break;
+    case 42:
+    case 43:
+    case 44: e1+=16; break;
+    case 45: e1+=16; e2+=19; f2 = 0.40250; break;
+    default: e1 = 0; e2 = 0; f2 = 0;
+  }
+  if (e1==0) return -99;
+  Float_t v1=voltage(e1-1);
+  if (f2==0) return v1;
+  Float_t v2=voltage(e2-1);
+  if (v2==v1) return v1;
+  // different voltages on influencing HVs
+  // effective voltage is a sum of exponential gains
+  Float_t B = (padrow <= 13 ? 13.05e-3 : 10.26e-3);
+  Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
+  return v_eff;
+}
+//________________________________________________________________________________
 #include "St_tpcPadGainT0C.h"
 MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
 #include "St_tpcSlewingC.h"
