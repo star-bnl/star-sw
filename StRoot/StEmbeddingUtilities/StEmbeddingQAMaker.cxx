@@ -710,7 +710,7 @@ void StEmbeddingQAMaker::FillHistograms(const StEmbeddingQATrack& track, const I
       hPtVsEta[trackid][iparticle]->Fill(eta, pt);
       hPtVsY[trackid][iparticle]->Fill(y, pt);
       hPtVsPhi[trackid][iparticle]->Fill(phi, pt);
-      hPtVsMom[trackid][iparticle]->Fill(phi, mom);
+      hPtVsMom[trackid][iparticle]->Fill(mom, pt);
       hdPtVsPt[trackid][iparticle]->Fill(pt, pt-track.GetPtMc());
 
       if( pt >= 0.2 && pt < 5.0 ){
