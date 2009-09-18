@@ -1,0 +1,14 @@
+/*    fmsMap.idl
+*
+*  Table: fmsMap
+*
+*       description: // FMS & FPD detector map
+*/ 
+
+struct fmsMap {   
+  octet detectorId;     /* DetectorId */
+  unsigned short ch;    /* Ch 0-577*/
+  octet qtCrate;        /* QT crate# 1-4 & 7 */
+  octet qtSlot;         /* QT slot# 1-16 */
+  octet qtChannel;      /* QT channel# 0-31 */
+};  
