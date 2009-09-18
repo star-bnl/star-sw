@@ -95,7 +95,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
   // Set default file name if output filename is blank
   if( fileName.IsWhitespace() ){
     const TString data = (kIsSimulation) ? "embedding" : "real" ;
-    fileName = Form("embeedingqa_%s_%d_%s_%s.root", 
+    fileName = Form("qa_%s_%d_%s_%s.root", 
         data.Data(), kYear, kProduction.Data(), StEmbeddingQAUtilities::GetParticleName(kParticleId, kFALSE).Data()) ;
   }
 
