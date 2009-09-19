@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <map>
 
 #include "TError.h"
 
@@ -7,6 +8,9 @@
 
 using namespace std ;
 
+namespace StEmbeddingQAUtilities {
+
+  // Category
   static const Category kCategory[] = {MC, MATCHED, GHOST, CONTAM, MATGLOB};
   static const TString kCategoryName[] = {"MC", "MATCHED", "GHOST", "CONTAM", "MATGLOB", "PRIMARY", "GLOBAL"};
   static const TString kCategoryTitle[] = { 
@@ -14,7 +18,41 @@ using namespace std ;
     "Primary tracks (real)", "Global tracks (real)" 
   };
 
-namespace StEmbeddingQAUtilities {
+  static Bool_t isParticleRegisterd = kFALSE ;
+  map<TString, Int_t> kParticleId;
+
+  //____________________________________________________________________________________________________
+  void RegisterParticleId()
+  {
+    if( isParticleRegisterd ) return ;
+
+    // Register paticle id's
+    kParticleId.insert(pair<TString, Int_t>("photon", 1));      kParticleId.insert(pair<TString, Int_t>("gamma", 1)); // photon
+    kParticleId.insert(pair<TString, Int_t>("eplus", 2));       kParticleId.insert(pair<TString, Int_t>("e+", 2));    // positron
+    kParticleId.insert(pair<TString, Int_t>("eminus", 3));      kParticleId.insert(pair<TString, Int_t>("e-", 3));    // electron
+    kParticleId.insert(pair<TString, Int_t>("pi0", 7));                                                               // pi0
+    kParticleId.insert(pair<TString, Int_t>("piplus", 8));      kParticleId.insert(pair<TString, Int_t>("pi+", 8));   // pi+
+    kParticleId.insert(pair<TString, Int_t>("piminus", 9));     kParticleId.insert(pair<TString, Int_t>("pi-", 9));   // pi-
+    kParticleId.insert(pair<TString, Int_t>("kplus", 11));      kParticleId.insert(pair<TString, Int_t>("k+", 11));   // k+
+    kParticleId.insert(pair<TString, Int_t>("kminus", 12));     kParticleId.insert(pair<TString, Int_t>("k-", 12));   // k-
+    kParticleId.insert(pair<TString, Int_t>("proton", 14));     kParticleId.insert(pair<TString, Int_t>("p", 14));    // proton
+    kParticleId.insert(pair<TString, Int_t>("antiproton", 15)); kParticleId.insert(pair<TString, Int_t>("pbar", 15)); // anti-proton
+    kParticleId.insert(pair<TString, Int_t>("d0", 37));                                                               // D0
+    kParticleId.insert(pair<TString, Int_t>("d0bar", 38));                                                            // D0bar
+    kParticleId.insert(pair<TString, Int_t>("phi", 50));                                                              // phi
+    kParticleId.insert(pair<TString, Int_t>("jpsi", 160));                                                            // J/Psi
+    kParticleId.insert(pair<TString, Int_t>("lambda1520", 995));                                                      // Lambda(1520)
+
+//    cout << "#--------------------------------------------------" << endl;
+//    cout << "List of available particles (alphabetical order)" << endl;
+//    for(map<TString, Int_t>::iterator iter = kParticleId.begin();
+//        iter != kParticleId.end(); iter++){
+//      cout << Form("Particle: %10s,   particleid: %10d", iter->first.Data(), iter->second) << endl;
+//    }
+//    cout << "#--------------------------------------------------" << endl;
+
+    isParticleRegisterd = kTRUE;
+  }
 
   //__________________________________________________________________________________________
   Int_t GetParticleId(const TString name)
@@ -23,28 +61,41 @@ namespace StEmbeddingQAUtilities {
     //  - Input particle name is case insensitive
     //     For example, eplus, Eplus, ePlus etc should work
  
+    RegisterParticleId();
+
     TString _name(name);
     _name.ToLower() ;
+
+    map<TString, Int_t>::iterator particleId(kParticleId.find(_name));
+
+    if( particleId != kParticleId.end() ){
+      const TString pname(particleId->first);
+      const Int_t pid(particleId->second);
+      cout << pname << " " << pid << endl;
+      return pid ;
+    }
  
-    if ( _name.Contains("photon") || _name.Contains("gamma") )         return 1 ;
-    else if ( _name.Contains("eplus") || _name.Contains("e+") )        return 2 ;
-    else if ( _name.Contains("eminus") || _name.Contains("e-") )       return 3 ;
-    else if ( _name.Contains("pi0") )                                  return 7 ;
-    else if ( _name.Contains("piplus") || _name.Contains("pi+") )      return 8 ;
-    else if ( _name.Contains("piminus") || _name.Contains("pi-") )     return 9 ;
-    else if ( _name.Contains("kplus") || _name.Contains("k+") )        return 11 ;
-    else if ( _name.Contains("kminus") || _name.Contains("k-") )       return 12 ;
-    else if ( _name.Contains("proton") || _name.Contains("p") )        return 14 ;
-    else if ( _name.Contains("antiproton") || _name.Contains("pbar") ) return 15 ;
-    else if ( _name.Contains("d0") )                                   return 37 ;
-    else if ( _name.Contains("d0bar") )                                return 38 ;
-    else if ( _name.Contains("phi") )                                  return 50 ;
-    else if ( _name.Contains("jpsi") )                                 return 160 ;
-    else if ( _name.Contains("lambda1520") )                           return 995 ;
+    /*
+    if ( _name.CompareTo("photon") || _name.CompareTo("gamma") )         return 1 ;
+    else if ( _name.CompareTo("eplus") || _name.CompareTo("e+") )        return 2 ;
+    else if ( _name.CompareTo("eminus") || _name.CompareTo("e-") )       return 3 ;
+    else if ( _name.CompareTo("pi0") )                                   return 7 ;
+    else if ( _name.CompareTo("piplus") || _name.CompareTo("pi+") )      return 8 ;
+    else if ( _name.CompareTo("piminus") || _name.CompareTo("pi-") )     return 9 ;
+    else if ( _name.CompareTo("kplus") || _name.CompareTo("k+") )        return 11 ;
+    else if ( _name.CompareTo("kminus") || _name.CompareTo("k-") )       return 12 ;
+    else if ( _name.CompareTo("proton") || _name.CompareTo("p") )        return 14 ;
+    else if ( _name.CompareTo("antiproton") || _name.CompareTo("pbar") ) return 15 ;
+    else if ( _name.CompareTo("d0") )                                    return 37 ;
+    else if ( _name.CompareTo("d0bar") )                                 return 38 ;
+    else if ( _name.CompareTo("phi") )                                   return 50 ;
+    else if ( _name.CompareTo("jpsi") )                                  return 160 ;
+    else if ( _name.CompareTo("lambda1520") )                            return 995 ;
     else{
       Error("GetParticleId", "Unknown particle name, name = %15s", name.Data());
       Print("pid");
     }
+    */
  
     return -1 ;
   }
