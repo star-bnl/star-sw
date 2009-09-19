@@ -27,6 +27,7 @@ namespace StEmbeddingQAUtilities {
   };
 
   // Particle id
+  void RegisterParticleId();                        // Define particle id
   Int_t GetParticleId(const TString name) ;         // Geant particle id from particle name
   Int_t GetDaughterParticleId(const TString name,   // Daughter particle id from parent particle name
       const Int_t daughter=0);                      // daughter (=0,1,2,...)
