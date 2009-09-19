@@ -111,6 +111,8 @@ bool editorEvent(QEvent *event,
 static QIcon GetGeoIcon(const char *className) {
    QString cN = QString(className).toLower();
    cN.remove(0,1);
+   cN.replace("brik","bbox");
+   if (!cN.startsWith("geo")) cN.insert(0,"geo");
    cN+="_t.xpm";
    TString iconsPath = "$ROOTSYS/icons";
    gSystem->ExpandPathName(iconsPath);
@@ -832,7 +834,7 @@ TObject * StarGeomTreeWidget::CurrentObject(QTreeWidgetItem *item)
 }
 
 //_____________________________________________________________________________
-void StarGeomTreeWidget::SetDepthCB(Int_t depth)
+void StarGeomTreeWidget::SetDepthCB(int depth)
 {
    fDepth = depth;
 }

@@ -72,7 +72,7 @@ private:
       TObject *CurrentObject(QTreeWidgetItem *item=0);
 
    public slots:
-   
+
       void ClearCB();
       void currentItemChangedCB ( QTreeWidgetItem * current, QTreeWidgetItem * previous );
       void itemActivatedCB ( QTreeWidgetItem * item, int column );
@@ -86,7 +86,7 @@ private:
       void itemSelectionChangedCB ();
       void contextMenuRequestedCB(const QPoint &pos);
       void SelectByTObject( TObject *obj, const QPoint &);
-      void SetDepthCB(Int_t depth=3);
+      void SetDepthCB(int  depth=3);
 signals:
       void DrawObject(TObject *o,bool expanded);
       void ObjectInfo(QString objInfo);
