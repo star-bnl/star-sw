@@ -42,6 +42,11 @@
 #include "StEEmcUtil/EEdsm/EEdsm3.h"
 #include "StEEmcUtil/EEdsm/EemcTrigUtil.h"
 
+// ROOT MySQL
+#include "TMySQLServer.h"
+#include "TMySQLResult.h"
+#include "TMySQLRow.h"
+
 // #### modified by Liaoyuan ####
 // DSM 2009 Utilities
 #include "StTriggerUtilities/StDSMUtilities/StDSM2009Utilities.hh"
@@ -72,14 +77,21 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   dsm2TreeTRG =new EMCdsm2Tree("TRG");
   dsm3TRG     =new EEdsm3();
 
+  // 2009
+  mE001 = new DSMLayer_E001_2009;
+  mE101 = new DSMLayer_E101_2009;
+
   LOG_INFO <<"Eemc::constructor"<<endm;
 }
 
 
 
 //==================================================
-StEemcTriggerSimu::~StEemcTriggerSimu(){ /* nop */}
-
+StEemcTriggerSimu::~StEemcTriggerSimu()
+{
+  delete mE001; mE001 = 0;
+  delete mE101; mE101 = 0;
+}
 
 //==================================================
 //==================================================
@@ -214,8 +226,9 @@ StEemcTriggerSimu::InitRun(int runnumber){
     initHisto();
   } // #### modified line by Liaoyuan 
   // #### modified by Liaoyuan ####
-  else if( mYear == 2009 ){
+  else if (mYear == 2009) {
 
+#if 0
     DsmThreshold thresholds;
     EemcTrigUtil::getDsmThresholds( yyyymmdd, hhmmss, thresholds );
 
@@ -224,6 +237,9 @@ StEemcTriggerSimu::InitRun(int runnumber){
 
     for (int i = 0; i < 2; ++i) mE001->setRegister(i,thresholds.HT[i]);
     for (int i = 0; i < 3; ++i) mE101->setRegister(i,thresholds.JP[i]);
+#endif
+
+    get2009_DSMRegisters(runnumber);
 
   }
   // #### modified end ####
@@ -336,7 +352,7 @@ StEemcTriggerSimu::Make(){
   // dsm2TreeADC->print(0); 
   
   //if(mDumpEve) printf("\nzzzzz===================================================\n\n");
-  } // #### modified line by Liaoyuan 
+  }// #### modified line by Liaoyuan 
   // #### modified by Liaoyuan ####
   else if( mYear == 2009 ){
     get2009_DSMLayer0();
@@ -549,8 +565,104 @@ StEemcTriggerSimu::get2009_DSMLayer1(){
 
 // #### modified end ####
 
+//==================================================
+//==================================================
+
+int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
+{
+  // Open connection to Run 9 database
+
+  LOG_INFO << "Open connection to Run 9 database" << endm;
+
+  TString database = "mysql://dbbak.starp.bnl.gov:3408/Conditions_rts";
+  TString user = "";
+  TString pass = "";
+
+  LOG_INFO << "database:\t" << database << endm;
+  LOG_INFO << "user:\t" << user << endm;
+  LOG_INFO << "pass:\t" << pass << endm;
+  
+  TMySQLServer* mysql = (TMySQLServer*)TMySQLServer::Connect(database, user, pass);
+
+  if (!mysql) {
+    LOG_WARN << "Could not connect to Run 9 database" << endm;
+    return kStWarn;
+  }
+
+  // E001
+
+  LOG_INFO << "Get DSM registers for EEMC layer 0" << endm;
+
+  TString query6 = Form("select reg,label,value,defaultvalue from dict where object = 2 and idx = 23 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
+
+  LOG_INFO << query6 << endm;
+
+  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query6)) {
+    LOG_INFO << setw(20) << "reg"
+             << setw(20) << "label"
+             << setw(20) << "value"
+             << setw(20) << "defaultvalue"
+             << endm;
+    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
+      int reg = atoi(row->GetField(0));
+      TString label = row->GetField(1);
+      int value = atoi(row->GetField(2));
+      int defaultvalue = atoi(row->GetField(3));
+      mE001->setRegister(reg, (value == -1) ? defaultvalue : value);
+      LOG_INFO << setw(20) << reg
+               << setw(20) << label
+               << setw(20) << value
+               << setw(20) << defaultvalue
+               << endm;
+      delete row;
+    }
+    delete result;
+  }
+
+  // E101
+
+  LOG_INFO << "Get DSM registers for EEMC layer 1" << endm;
+
+  TString query3 = Form("select reg,label,value,defaultvalue from dict where object = 2 and idx = 21 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
+
+  LOG_INFO << query3 << endm;
+
+  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query3)) {
+    LOG_INFO << setw(20) << "reg"
+             << setw(20) << "label"
+             << setw(20) << "value"
+             << setw(20) << "defaultvalue"
+             << endm;
+    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
+      int reg = atoi(row->GetField(0));
+      TString label = row->GetField(1);
+      int value = atoi(row->GetField(2));
+      int defaultvalue = atoi(row->GetField(3));
+      mE101->setRegister(reg, (value == -1) ? defaultvalue : value);
+      LOG_INFO << setw(20) << reg
+               << setw(20) << label
+               << setw(20) << value
+               << setw(20) << defaultvalue
+               << endm;
+      delete row;
+    }
+    delete result;
+  }
+
+  // Close connection to Run 9 database
+
+  LOG_INFO << "Close connection to Run 9 database" << endm;
+
+  mysql->Close();
+
+  return kStOk;
+}
+
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.14  2009/09/20 06:46:41  pibero
+// Updates for Run 9
+//
 // Revision 1.13  2009/02/21 19:21:02  pibero
 // Updates to match changes in EemcTrigUtil
 //
