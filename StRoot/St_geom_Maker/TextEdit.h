@@ -44,7 +44,7 @@
 
 #include <QMainWindow>
 
-class Highlighter;
+class StGeomHighlighter;
 
 QT_BEGIN_NAMESPACE
 class QTextEdit;
@@ -73,7 +73,7 @@ private:
     void setupHelpMenu();
 
     QTextEdit *editor;
-    Highlighter *highlighter;
+    StGeomHighlighter *highlighter;
 };
 //! [0]
 
