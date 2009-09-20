@@ -1,90 +1,80 @@
 /****************************************************************************
-** $Id: TextEdit.h,v 1.4 2009/02/06 00:05:00 fine Exp $
 **
-** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
+** Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
+** Contact: Nokia Corporation (qt-info@nokia.com)
 **
-** This file is part of an example program for Qt.  This example
-** program may be used, distributed and modified without limitation.
+** This file is part of the examples of the Qt Toolkit.
 **
-*****************************************************************************/
+** $QT_BEGIN_LICENSE:LGPL$
+** Commercial Usage
+** Licensees holding valid Qt Commercial licenses may use this file in
+** accordance with the Qt Commercial License Agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Nokia.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU Lesser General Public License version 2.1 requirements
+** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** In addition, as a special exception, Nokia gives you certain
+** additional rights. These rights are described in the Nokia Qt LGPL
+** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
+** package.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+**
+** If you are unsure which license is appropriate for your use, please
+** contact the sales department at http://www.qtsoftware.com/contact.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
 
-#ifndef TEXTEDIT_H
-#define TEXTEDIT_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QString>
-#include <QTextEdit>
-#include <map>
 
-class QAction;
-class QComboBox;
-class QTabWidget;
+class Highlighter;
 
+QT_BEGIN_NAMESPACE
+class QTextEdit;
+QT_END_NAMESPACE
+
+
+//! [0]
 class TextEdit : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    TextEdit( QWidget *parent = 0, const char *name = 0 );
+    TextEdit(QWidget *parent = 0);
     void load( const QString &f );
-    
-signals:
-    void  textSaved(const QString &fileName); 
+
+public slots:
+    void about();
+    void newFile();
+    void openFile(const QString &path = QString());
 public slots:
     void findBlock(const QString & expr);
-private:
-    void setupFileActions();
-    void setupEditActions();
-    void setupTextActions();
-    QTextEdit *currentEditor() const;
-    void doConnections( QTextEdit *e );
-
-private slots:
-    void fileNew();
-    void fileOpen();
-    void fileSave();
-    void fileSaveAs();
-    void filePrint();
-    void fileClose();
-    void fileExit();
-
-    void editUndo();
-    void editRedo();
-    void editCut();
-    void editCopy();
-    void editPaste();
-
-    void textBold();
-    void textChanged();
-    void textUnderline();
-    void textItalic();
-    void textFamily( const QString &f );
-    void textSize( const QString &p );
-    void textColor();
-    void textAlign( QAction *a );
-
-    void fontChanged( const QFont &f );
-    void colorChanged( const QColor &c );
-    void alignmentChanged( int a );
-    void editorChanged( QWidget * );
-    
-    void searchActivated( const QString &);
-    void searchContinue( const QString &);
 
 private:
-    QAction *actionTextBold,
-	*actionTextUnderline,
-	*actionTextItalic,
-	*actionTextColor,
-	*actionAlignLeft,
-	*actionAlignCenter,
-	*actionAlignRight,
-	*actionAlignJustify;
-    QComboBox 	*comboFont,	*comboSize;
-    QTabWidget *tabWidget;
-    std::map<QTextEdit*, QString> filenames;
+    void setupEditor();
+    void setupFileMenu();
+    void setupHelpMenu();
 
+    QTextEdit *editor;
+    Highlighter *highlighter;
 };
-
+//! [0]
 
 #endif
