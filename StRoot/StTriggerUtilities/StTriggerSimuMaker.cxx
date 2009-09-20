@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.25 2009/02/04 20:00:48 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.26 2009/09/20 06:46:29 pibero Exp $
 
 
 #include <Stiostream.h>
@@ -52,6 +52,10 @@
 #include "StTriggerSimuMaker.h"
 #include "StTriggerSimuResult.h"
 
+// ROOT MySQL
+#include "TMySQLServer.h"
+#include "TMySQLResult.h"
+#include "TMySQLRow.h"
 
 ClassImp(StTriggerSimuMaker)
 
@@ -130,26 +134,26 @@ void StTriggerSimuMaker::Clear(const Option_t*){
 }
 
 Int_t StTriggerSimuMaker::InitRun(int runNumber) {
-    for(Int_t i=0; i<numSimulators; i++) {
-      if (mSimulators[i]){
-        mSimulators[i]->InitRun(runNumber);
-      }
+    assert(mDbMk);
+    mYear = mDbMk->GetDateTime().GetYear();
+    int yyyymmdd = mDbMk->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
+    int hhmmss = mDbMk->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
+    LOG_INFO << Form("InitRun() run=%d yyyymmdd=%d  hhmmss=%06d\n", runNumber, yyyymmdd, hhmmss) << endm;
+
+    //Use unified EMC trigger for EEMC/BEMC triggers in y=2009 or later
+    if (mYear >= 2009 && (mSimulators[0] || mSimulators[2])) {
+      emc->setHeadMaker(this);
+      emc->setBemc(bemc);
+      emc->setEemc(eemc);
+      mSimulators[3] = emc;
+
+      // If MC, get real run number from database time stamp
+      if (mMCflag) runNumber = get2009RunNumberFromTimestamp(GetDBTime());
     }
 
-    assert(mDbMk);
-    mYear=mDbMk->GetDateTime().GetYear();
-    int yyyymmdd=mDbMk->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
-    int hhmmss=mDbMk->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
-
-    if (mYear>=2009 && (mSimulators[0] || mSimulators[2])){ 
-      emc=new StEmcTriggerSimu;
-      emc->setHeadMaker(this);
-      mSimulators[3]=emc;
-    }//Use unified EMC trigger for EEMC/BEMC triggers in y=2009 or later
-     //This loop formerly useEmc() function
-
-
-    LOG_INFO<<Form("InitRun() run=%d yyyymmdd=%d  hhmmss=%06d\n",runNumber, yyyymmdd, hhmmss )<<endm;
+    for (Int_t i = 0; i < numSimulators; ++i)
+      if (mSimulators[i])
+	mSimulators[i]->InitRun(runNumber);
 
     return kStOK;
 }
@@ -225,8 +229,51 @@ Int_t StTriggerSimuMaker::Finish() {
   return StMaker::Finish();
 }
 
+int StTriggerSimuMaker::get2009RunNumberFromTimestamp(const TDatime& timestamp) const
+{
+  LOG_INFO << "Open connection to RunLog database for Run 9" << endm;
+
+  TString database = "mysql://dbbak.starp.bnl.gov:3408/RunLog";
+  TString user = "";
+  TString pass = "";
+
+  LOG_INFO << "database:\t" << database << endm;
+  LOG_INFO << "user:\t" << user << endm;
+  LOG_INFO << "pass:\t" << pass << endm;
+  
+  TMySQLServer* mysql = (TMySQLServer*)TMySQLServer::Connect(database, user, pass);
+
+  if (!mysql) {
+    LOG_WARN << "Could not connect to Run 9 database" << endm;
+    return kStWarn;
+  }
+
+  int runNumber = 0;
+
+  TString query = Form("select runNumber from runDescriptor where (from_unixtime(startRunTime) <= '%s') and ('%s' <= from_unixtime(endRunTime))", timestamp.AsSQLString(), timestamp.AsSQLString());
+
+  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query)) {
+    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
+      runNumber = atoi(row->GetField(0));
+      LOG_INFO << Form("Found run number = %d for timestamp '%s'", runNumber, timestamp.AsSQLString()) << endm;
+    }
+  }
+  else {
+    LOG_WARN << Form("No run number found for database timestamp '%s'", timestamp.AsSQLString()) << endm;
+  }
+
+  LOG_INFO << "Close connection to database" << endm;
+
+  mysql->Close();
+
+  return runNumber;
+}
+
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.26  2009/09/20 06:46:29  pibero
+ * Updates for Run 9
+ *
  * Revision 1.25  2009/02/04 20:00:48  rfatemi
  * change includes for StEmcDecoder
  *

@@ -73,6 +73,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
   void get2009_DSMLayer0();	// Reads output from feeTPTreeADC & process
   void get2009_DSMLayer1();     // Reads output from mE101 & process
+  int  get2009_DSMRegisters(int runNumber);
 
   // Access to 2009 EEMC Layer 0 + 1
  public:
@@ -127,6 +128,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.13  2009/09/20 06:46:42  pibero
+// Updates for Run 9
+//
 // Revision 1.12  2009/02/20 23:40:04  pibero
 // Updates for Run 9 by Liaoyuan
 //

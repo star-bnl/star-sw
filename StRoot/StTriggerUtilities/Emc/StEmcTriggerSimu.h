@@ -11,6 +11,7 @@
 class StBemcTriggerSimu;
 class StEemcTriggerSimu;
 struct DSMLayer_EM201_2009;
+struct DSMLayer_LD301_2009;
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
@@ -20,9 +21,11 @@ public:
   StEmcTriggerSimu();
   virtual ~StEmcTriggerSimu();
 
+  bool isPhysicsBits(int physicsBits) const;
+  bool isTrigger(int trigId);
   StTriggerSimuDecision triggerDecision(int trigId);
 
-  void setHeadMaker(StTriggerSimuMaker *maker) {mHeadMaker=maker;};
+  void setHeadMaker(StTriggerSimuMaker* maker) { mHeadMaker = maker; }
 
   void InitRun(int runNumber);
   void Make();
@@ -32,15 +35,23 @@ public:
   
 
 private:
+  int  get2009_DSMRegisters(int runNumber);
+
   int mYear;
-  StTriggerSimuMaker *mHeadMaker;
+  StTriggerSimuMaker* mHeadMaker;
   StBemcTriggerSimu* mBemc;
   StEemcTriggerSimu* mEemc;
   DSMLayer_EM201_2009* mEM201;
+  DSMLayer_LD301_2009* mLD301;
 
-  std::vector<int>  mFiredTriggers;
-  std::set<int>     mAllTriggers;
-  
+  struct TriggerDefinition {
+    int idx_trigger;
+    TString name;
+    int triggerId;
+    int physicsBits;
+  };
+
+  multimap<int, TriggerDefinition> mTriggers;
 
   ClassDef(StEmcTriggerSimu,1);
 };

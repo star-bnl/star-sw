@@ -28,6 +28,11 @@
 // DSM 2009 Utilities
 #include "StTriggerUtilities/StDSMUtilities/StDSM2009Utilities.hh"
 
+// MySQL
+#include "TMySQLServer.h"
+#include "TMySQLResult.h"
+#include "TMySQLRow.h"
+
 ClassImp(StBemcTriggerSimu)
 //==================================================
 //==================================================
@@ -180,6 +185,8 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(220510);//BEMC-HT1-mb
   mAllTriggers.insert(220520);//BEMC-HT2-mb-slow
 
+  //2009pp - filled in setDsmRegisters()
+
   Clear();
 
 #ifdef DEBUG
@@ -279,6 +286,11 @@ void StBemcTriggerSimu::InitRun(int runnumber){
   HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
   
   for ( int tpid=0;tpid<kNPatches;tpid++) numMaskTow[tpid]=0;
+
+  if (year >= 2009) {
+    mAllTriggers.clear();
+    get2009_DSMRegisters(runnumber);
+  }
 }
 //==================================================
 //==================================================
@@ -2529,18 +2541,6 @@ void StBemcTriggerSimu::get2009_DSMLayer0()
 {
   // Loop over modules
   for (int dsm = 0; dsm < kL0DsmModule; ++dsm) {
-    // Set DSM registers (thresholds)
-    // R0: BEMC-High-Tower-th0 (6-bit)
-    // R1: BEMC-High-Tower-th1 (6)
-    // R2: BEMC-High-Tower-th2 (6)
-    // R3: BEMC-High-Tower-th3 (6)
-    // R4: BEMC-Trigger-Patch-th0 (6)
-    (*mB001)[dsm].registers[0] = mDbThres->GetHT_DSM0_threshold(dsm,timestamp,0);
-    (*mB001)[dsm].registers[1] = mDbThres->GetHT_DSM0_threshold(dsm,timestamp,1);
-    (*mB001)[dsm].registers[2] = mDbThres->GetHT_DSM0_threshold(dsm,timestamp,2);
-    (*mB001)[dsm].registers[3] = mDbThres->GetHT_DSM0_threshold(dsm,timestamp,3);
-    (*mB001)[dsm].registers[4] = mDbThres->GetTP_DSM0_threshold(dsm,timestamp,0);
-
     //Loop over 10 input channels to each module 
     for (int ch = 0 ; ch < kL0DsmInputs; ++ch) {
       int tpid = dsm*10+ch;
@@ -2558,17 +2558,6 @@ void StBemcTriggerSimu::get2009_DSMLayer1()
 {
   // Get input from BEMC layer 0
   mB001->write(*mB101);
-
-  // Loop over modules
-  for (int dsm = 0; dsm < kL1DsmModule; ++dsm) {
-    // Set DSM registers (thresholds)
-    // R0: BEMC-Jet-Patch-th0 (12)
-    // R1: BEMC-Jet-Patch-th1 (12)
-    // R2: BEMC-Jet-Patch-th2 (12)
-    (*mB101)[dsm].registers[0] = mDbThres->GetJP_DSM1_threshold(dsm,timestamp,0);
-    (*mB101)[dsm].registers[1] = mDbThres->GetJP_DSM1_threshold(dsm,timestamp,1);
-    (*mB101)[dsm].registers[2] = mDbThres->GetJP_DSM1_threshold(dsm,timestamp,2);
-  } // End loop over modules
 
   // Emulate BEMC layer 1
   mB101->run();
@@ -2691,3 +2680,125 @@ int StBemcTriggerSimu::getJetPatchThreshold(int trigId, int dsmid) const {
   return threshold;
 }
 
+
+int StBemcTriggerSimu::get2009_DSMRegisters(int runNumber)
+{
+  // Open connection to Run 9 database
+
+  LOG_INFO << "Open connection to Run 9 database" << endm;
+
+  TString database = "mysql://dbbak.starp.bnl.gov:3408/Conditions_rts";
+  TString user = "";
+  TString pass = "";
+
+  LOG_INFO << "database:\t" << database << endm;
+  LOG_INFO << "user:\t" << user << endm;
+  LOG_INFO << "pass:\t" << pass << endm;
+  
+  TMySQLServer* mysql = (TMySQLServer*)TMySQLServer::Connect(database, user, pass);
+
+  if (!mysql) {
+    LOG_WARN << "Could not connect to Run 9 database" << endm;
+    return kStWarn;
+  }
+
+  // B001 (BCW)
+
+  LOG_INFO << "Get DSM registers for West BEMC layer 0" << endm;
+
+  TString query6 = Form("select reg,label,value,defaultvalue from dict where object = 5 and idx = 16 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
+
+  LOG_INFO << query6 << endm;
+
+  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query6)) {
+    LOG_INFO << setw(20) << "reg"
+	     << setw(20) << "label"
+	     << setw(20) << "value"
+	     << setw(20) << "defaultvalue"
+	     << endm;
+    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
+      int reg = atoi(row->GetField(0));
+      TString label = row->GetField(1);
+      int value = atoi(row->GetField(2));
+      int defaultvalue = atoi(row->GetField(3));
+      for (int dsm = 0; dsm < 15; ++dsm)
+	(*mB001)[dsm].registers[reg] = (value == -1) ? defaultvalue : value;
+      LOG_INFO << setw(20) << reg
+	       << setw(20) << label
+	       << setw(20) << value
+	       << setw(20) << defaultvalue
+	       << endm;
+      delete row;
+    }
+    delete result;
+  }
+
+  // B001 (BCE)
+
+  LOG_INFO << "Get DSM registers for East BEMC layer 0" << endm;
+
+  TString query9 = Form("select reg,label,value,defaultvalue from dict where object = 6 and idx = 16 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
+
+  LOG_INFO << query6 << endm;
+
+  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query9)) {
+    LOG_INFO << setw(20) << "reg"
+             << setw(20) << "label"
+             << setw(20) << "value"
+             << setw(20) << "defaultvalue"
+             << endm;
+    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
+      int reg = atoi(row->GetField(0));
+      TString label = row->GetField(1);
+      int value = atoi(row->GetField(2));
+      int defaultvalue = atoi(row->GetField(3));
+      for (int dsm = 15; dsm < 30; ++dsm)
+	(*mB001)[dsm].registers[reg] = (value == -1) ? defaultvalue : value;
+      LOG_INFO << setw(20) << reg
+               << setw(20) << label
+               << setw(20) << value
+               << setw(20) << defaultvalue
+               << endm;
+      delete row;
+    }
+    delete result;
+  }
+
+  // B101
+
+  LOG_INFO << "Get DSM registers for BEMC layer 1" << endm;
+
+  TString query3 = Form("select reg,label,value,defaultvalue from dict where object = 2 and idx = 33 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
+
+  LOG_INFO << query3 << endm;
+
+  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query3)) {
+    LOG_INFO << setw(20) << "reg"
+             << setw(20) << "label"
+             << setw(20) << "value"
+             << setw(20) << "defaultvalue"
+             << endm;
+    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
+      int reg = atoi(row->GetField(0));
+      TString label = row->GetField(1);
+      int value = atoi(row->GetField(2));
+      int defaultvalue = atoi(row->GetField(3));
+      mB101->setRegister(reg, (value == -1) ? defaultvalue : value);
+      LOG_INFO << setw(20) << reg
+               << setw(20) << label
+               << setw(20) << value
+               << setw(20) << defaultvalue
+               << endm;
+      delete row;
+    }
+    delete result;
+  }
+
+  // Close connection to Run 9 database
+
+  LOG_INFO << "Close connection to Run 9 database" << endm;
+
+  mysql->Close();
+
+  return kStOk;
+}

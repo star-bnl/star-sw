@@ -35,7 +35,6 @@ const int numSimulators=5;
 
 class StTriggerSimuMaker : public StMaker {
 private:
-
   int mYear,mMCflag; // set mcFlag=0 for real data
   
   /// useful pointers
@@ -48,6 +47,9 @@ private:
   
   /// detailed results for individual trigger simulations
   std::vector<StTriggerSimuResult> mResults;
+
+  /// Used to get run number corresponding to database timestamp when in MC mode for Run 9
+  int get2009RunNumberFromTimestamp(const TDatime& timestamp) const;
   
 public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
@@ -85,9 +87,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.17 2009/02/03 15:40:55 rfatemi Exp $
+// $Id: StTriggerSimuMaker.h,v 1.18 2009/09/20 06:46:29 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.18  2009/09/20 06:46:29  pibero
+// Updates for Run 9
+//
 // Revision 1.17  2009/02/03 15:40:55  rfatemi
 // Update mSimulators structure for 2009 EMC simulator update
 //

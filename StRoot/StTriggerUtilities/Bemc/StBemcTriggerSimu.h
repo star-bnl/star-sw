@@ -146,6 +146,8 @@ private:
   void get2008pp_DSMLayer2();
   void get2009_DSMLayer0();
   void get2009_DSMLayer1();
+  int  get2009_DSMRegisters(int runNumber);
+
 
   //#define DEBUG			// Comment out to switch off debugging
 
