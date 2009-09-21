@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef HIGHLIGHTER_H
-#define HIGHLIGHTER_H
+#ifndef STAR_STGEOMHIGHLIGHTER_H
+#define STAR_STGEOMHIGHLIGHTER_H
 
 #include <QSyntaxHighlighter>
 
