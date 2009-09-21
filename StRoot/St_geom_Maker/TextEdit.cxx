@@ -53,8 +53,12 @@
 #include <QTextCursor>
 #include <QDebug>
 #include <QRegExp>
-
+#include <QDir>
+#include <QFileInfo>
+#include <QStringList>
+ 
 #include "TextEdit.h"
+#include "TSystem.h"
 
 #include "StGeomHighlighter.h"
 
@@ -89,9 +93,18 @@ void TextEdit::openFile(const QString &path)
 {
     QString fileName = path;
 
-    if (fileName.isNull())
-        fileName = QFileDialog::getOpenFileName(this,
-            tr("Open File"), "", "C++ Files (*.cpp *.h)");
+    if (fileName.isNull()) {
+       static QString filetypes = "MORTRAN Geometry  (*.g);"
+                               ";STAR Geometry macro (*.C)"
+                              ";";
+       // create the STAR search path
+       QStringList paths; paths << "." << gSystem->Getenv("STAR"); 
+       QDir::setSearchPaths("geometry",paths);
+       QFileInfo file("geometry:pams/geometry");
+       QString defaultDir =  file.exists() ?  file.absoluteFilePath () : "";
+       fileName = QFileDialog::getOpenFileName(this,
+            tr("Open Geometry File"), defaultDir ,filetypes);
+    }
 
     if (!fileName.isEmpty()) {
         QFile file(fileName);
