@@ -120,9 +120,12 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
   hdVy->SetXTitle("#Deltav_{y} = v_{y} - v_{y}(MC) (cm)");
   hdVz->SetXTitle("#Deltav_{z} = v_{z} - v_{z}(MC) (cm)");
 
-  const Int_t ptBin   = 50 ;
-  const Float_t ptMin = 0.0 ;
-  const Float_t ptMax = 5.0 ;
+  const Int_t ptBin    = 100 ;
+  const Float_t ptMin  = 0.0 ;
+  const Float_t ptMax  = 10.0 ;
+  const Int_t etaBin   = 100 ;
+  const Float_t etaMin = -2.5 ;
+  const Float_t etaMax =  2.5 ;
 
   // Track-wise informations
 //  TString particleName(StEmbeddingQAUtilities::GetParticleName(kParticleId, kTRUE));
@@ -170,7 +173,9 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
  
       // NHit
       hNHit[ic][ih] = new TH3D(Form("hNHit%s", nameSuffix.Data()), "", 10, 0, 5, 10, -1.0, 1.0, 50, 0, 50);
-      hNHit[ic][ih]->SetXTitle("N_{fit}");
+      hNHit[ic][ih]->SetXTitle("p_{T} (GeV/c)");
+      hNHit[ic][ih]->SetYTitle("#eta");
+      hNHit[ic][ih]->SetZTitle("N_{hit}");
       if( ic == 0 ) hNHit[ic][ih]->SetTitle( Form("N_{fit} distribution, %s", title.Data()) );
       else          hNHit[ic][ih]->SetTitle( Form("N_{fit} distribution (|dcaGl|<3 cm), %s", title.Data()) );
  
@@ -185,7 +190,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
       else                          hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs p_{T} (N_{fit}>=10), %s", title.Data()) );
  
       // pt vs eta
-      hPtVsEta[ic][ih] = new TH2D(Form("hPtVsEta%s", nameSuffix.Data()), "", 100, -1.5, 1.5, ptBin, ptMin, ptMax);
+      hPtVsEta[ic][ih] = new TH2D(Form("hPtVsEta%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
       hPtVsEta[ic][ih]->SetXTitle("#eta");
       hPtVsEta[ic][ih]->SetYTitle("p_{T} (GeV/c)");
       if( ic == 0 )                 hPtVsEta[ic][ih]->SetTitle( Form("p_{T} vs #eta, %s", title.Data()) );
@@ -193,7 +198,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
       else                          hPtVsEta[ic][ih]->SetTitle( Form("p_{T} vs #eta (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
  
       // pt vs y
-      hPtVsY[ic][ih] = new TH2D(Form("hPtVsY%s", nameSuffix.Data()), "", 100, -1.5, 1.5, ptBin, ptMin, ptMax);
+      hPtVsY[ic][ih] = new TH2D(Form("hPtVsY%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
       hPtVsY[ic][ih]->SetXTitle("rapidity y");
       hPtVsY[ic][ih]->SetYTitle("p_{T} (GeV/c)");
       if( ic == 0 )                 hPtVsY[ic][ih]->SetTitle( Form("p_{T} vs y, %s", title.Data()) );
@@ -234,7 +239,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
       TString pt("0.2 < p_{T} < 5 GeV/c");
  
       // eta vs phi
-      hEtaVsPhi[ic][ih] = new TH2D(Form("hEtaVsPhi%s", nameSuffix.Data()), "", 100, -TMath::Pi(), TMath::Pi(), 100, -1.5, 1.5);
+      hEtaVsPhi[ic][ih] = new TH2D(Form("hEtaVsPhi%s", nameSuffix.Data()), "", 100, -TMath::Pi(), TMath::Pi(), etaBin, etaMin, etaMax);
       hEtaVsPhi[ic][ih]->SetXTitle("#phi (rad)");
       hEtaVsPhi[ic][ih]->SetYTitle("#eta");
       if( ic == 0 )                 hEtaVsPhi[ic][ih]->SetTitle( Form("#eta vs #phi, %s", title.Data()) );
@@ -242,7 +247,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
       else                          hEtaVsPhi[ic][ih]->SetTitle( Form("#eta vs #phi (N_{fit}>=10 & |dcaGl|<3cm), %s, %s", pt.Data(), title.Data()) );
  
       // eta vs vz
-      hEtaVsVz[ic][ih] = new TH2D(Form("hEtaVsVz%s", nameSuffix.Data()), "", 120, -30, 30, 200, -1.5, 1.5);
+      hEtaVsVz[ic][ih] = new TH2D(Form("hEtaVsVz%s", nameSuffix.Data()), "", 200, -50, 50, 200, etaMin, etaMax);
       hEtaVsVz[ic][ih]->SetXTitle("v_{z} (cm)");
       hEtaVsVz[ic][ih]->SetYTitle("#eta");
       if( ic == 0 )                 hEtaVsVz[ic][ih]->SetTitle( Form("#eta vs v_{z}, %s", title.Data()) );
@@ -250,7 +255,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
       else                          hEtaVsVz[ic][ih]->SetTitle( Form("#eta vs v_{z} (N_{fit}>=10 & |dcaGl|<3cm), %s, %s", pt.Data(), title.Data()) );
  
       // rapidity vs vz
-      hYVsVz[ic][ih] = new TH2D(Form("hYVsVz%s", nameSuffix.Data()), "", 120, -30, 30, 200, -1.5, 1.5);
+      hYVsVz[ic][ih] = new TH2D(Form("hYVsVz%s", nameSuffix.Data()), "", 200, -50, 50, 200, etaMin, etaMax);
       hYVsVz[ic][ih]->SetXTitle("v_{z} (cm)");
       hYVsVz[ic][ih]->SetYTitle("rapidity y");
       if( ic == 0 )                 hYVsVz[ic][ih]->SetTitle( Form("rapidity y vs v_{z}, %s", pt.Data(), title.Data()) );
