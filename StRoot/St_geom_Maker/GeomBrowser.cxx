@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.17 2009/09/19 04:54:22 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.18 2009/09/21 02:22:33 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -143,7 +143,7 @@ void GeomBrowser::CreateActions()
 
 #ifndef  NO_GEANT_MAKER
    fEditGeoSrc         = new QAction(  "Edit Geant Geometry", this);
-   fEditGeoSrc         ->setToolTip(tr("Find the MORTRAN file defining the picked volume to edit"));
+   fEditGeoSrc         ->setToolTip(tr("Find and display the MORTRAN file defining the picked volume to edit"));
    fEditGeoSrc->setCheckable(true);
 #endif
 }
@@ -288,10 +288,10 @@ void GeomBrowser::Init()
        if (geomFile.open(IO_ReadOnly)) {
        QString line;
        QRegExp exp("^\\s+\\bCase\\b.+");
-	   char bufLine[1024];
+       char bufLine[1024];
        while (geomFile.readLine(bufLine, sizeof(bufLine)) >=0 ) 
        {
-	      line = bufLine;
+          line = bufLine;
           if (line.contains( exp ) ) {
              line = line.simplifyWhiteSpace ();
              QString tag = line.section(' ',1,1);
