@@ -23,11 +23,6 @@ using namespace units;
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h" 
-#include "tables/St_raw_sec_m_Table.h"
-#include "tables/St_raw_row_Table.h"
-#include "tables/St_raw_pad_Table.h"
-#include "tables/St_raw_seq_Table.h"
-#include "tables/St_type_shortdata_Table.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
@@ -191,14 +186,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.9 2009/09/01 15:06:44 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.10 2009/09/21 13:20:39 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.9 2009/09/01 15:06:44 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.10 2009/09/21 13:20:39 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.10  2009/09/21 13:20:39  fisyak
+// Variant O4, no mSigmaJitter, 100 keV
+//
 // Revision 1.9  2009/09/01 15:06:44  fisyak
 // Version N
 //

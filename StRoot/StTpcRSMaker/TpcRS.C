@@ -28,8 +28,8 @@ class St_db_Maker;
 St_db_Maker *dbMk = 0;
 #endif
 //________________________________________________________________________________
-void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS,fcf",  
-	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "PAI", 
+void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",  
+	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "Bichsel", 
 	   Int_t tauIX = 0, Int_t tauCX = 0) {
   gROOT->LoadMacro("bfc.C"); 
   TString ChainOpt("");
@@ -135,10 +135,14 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS,fcf",
     //  SETBIT(mask,StTpcdEdxCorrection::kTpcdEdxCor);
     //  SETBIT(mask,StTpcdEdxCorrection::kTpcLengthCorrection);
 #endif    
-    Int_t Mode = 2;
+    SETBIT(mask,StTpcdEdxCorrection::kAdcCorrection);
+    SETBIT(mask,StTpcdEdxCorrection::kTpcLast);
+    Int_t Mode = 0; // kDoNotCorrectdEdx
     //    SETBIT(Mode,StdEdxY2Maker::kOldClusterFinder); 
+    //    SETBIT(Mode,StdEdxY2Maker::kDoNotCorrectdEdx);
     SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
     SETBIT(Mode,StdEdxY2Maker::kCalibration);
+    
     if (Mode) {
       cout << " set dEdxY2 Mode" << Mode << " =======================================" << endl;
       dEdx->SetMode(Mode); 
@@ -218,7 +222,7 @@ void TpcRS(Int_t NEvents=100,
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
 	   //		 const Char_t *fileIn = 0,
 	   //"/star/rcf/simu/auau200/hijing/b0_20/inverse/year2001/hadronic_on/gstardata/rcf0191_01_380evts.fzd",
-	   const Char_t *opt = "CheckFcF",
+	   const Char_t *opt = "Bichsel",
 	   Int_t tauIX = 0, Int_t tauCX = 0
 	   ) {
   //  /star/data03/daq/2004/093/st_physics_adc_5093007_raw_2050001.daq

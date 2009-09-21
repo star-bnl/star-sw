@@ -10,6 +10,7 @@
 #include "TCanvas.h"
 #include "TProfile2D.h"
 #include "TF1.h"
+#include "TF2.h"
 #include "TLegend.h"
 #include "Riostream.h"
 #include "TSystem.h"
@@ -22,6 +23,7 @@
 #include "TFile.h"
 #include "TVector3.h"
 #include "TRMatrix.h"
+#include "TNtuple.h"
 #endif
 TFile *fOut = 0;
 //#include "StTpcMcAnalysisMaker/TpcCluster.h"
@@ -90,7 +92,7 @@ static const  Double_t mTimeBinWidth              = 1.06580379191673078e-07;//1.
 #endif
 //#include "DrawList.C"
 //--------------------------------------------------------------------------------
-void TpcT(const Char_t *opt = "F", const Char_t *files="*.root", const Char_t *Out = "", const Char_t *Time = "20090415.000000") {
+void TpcT(const Char_t *opt = "G", const Char_t *files="*.root", const Char_t *Out = ""){//, const Char_t *Time = "20090415.000000") {
   //	   Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Double_t pMomax) {
 #ifdef __useGainT0__
   gSystem->Load("libStDb_Tables.so");
@@ -149,7 +151,9 @@ void TpcT(const Char_t *opt = "F", const Char_t *files="*.root", const Char_t *O
   const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
 #endif
   const Int_t&       fNofPV                                   = iter("fNofPV");
+#if 0
   const Int_t&       fNoTracksAtBestPV                        = iter("fNoTracksAtBestPV");
+#endif
   const Float_t&     fxV                                      = iter("fxV");
   const Float_t&     fyV                                      = iter("fyV");
   const Float_t&     fzV                                      = iter("fzV");
@@ -183,8 +187,10 @@ void TpcT(const Char_t *opt = "F", const Char_t *files="*.root", const Char_t *O
   const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
   const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
 #endif
+#if 0
 #ifdef PRINT
   const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
+#endif
 #endif
 #if 0
   const Float_t*&    fMcHit_mLgamma                           = iter("fMcHit.mLgamma");
@@ -197,12 +203,16 @@ void TpcT(const Char_t *opt = "F", const Char_t *files="*.root", const Char_t *O
   const Float_t*&    fRcHit_mPosition_mX2                     = iter("fRcHit.mPosition.mX2");
 #endif
   const Float_t*&    fRcHit_mPosition_mX3                     = iter("fRcHit.mPosition.mX3");
+#if 0
 #ifdef PRINT
   const UInt_t*&     fRcHit_mHardwarePosition                 = iter("fRcHit.mHardwarePosition");
 #endif
+#endif
   const Float_t*&    fRcHit_mCharge                           = iter("fRcHit.mCharge");
 #if 1
+#if 0
   const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
+#endif
   const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
 #endif
 #ifndef __REAL_DATA__
@@ -220,8 +230,10 @@ void TpcT(const Char_t *opt = "F", const Char_t *files="*.root", const Char_t *O
   const Short_t*&    fRcHit_mMcl_x                            = iter("fRcHit.mMcl_x");
   const Short_t*&    fRcHit_mMcl_t                            = iter("fRcHit.mMcl_t");
 #ifdef PRINT
+#if 0
   const Int_t*&      fRcTrack_fSector                         = iter("fRcTrack.fSector");
   const Int_t*&      fRcTrack_fRow                            = iter("fRcTrack.fRow");
+#endif
 #endif
 #if 1
   const Short_t*&    fRcTrack_mMcl_x                          = iter("fRcTrack.mMcl_x");
@@ -229,13 +241,15 @@ void TpcT(const Char_t *opt = "F", const Char_t *files="*.root", const Char_t *O
 #endif
 #if 0
   const Int_t*&      fRcTrack_fNpoints                        = iter("fRcTrack.fNpoints");
-#endif
   const Int_t*&      fRcTrack_fNfitpoints                     = iter("fRcTrack.fNfitpoints");
   const Int_t*&      fRcTrack_fifPrim                         = iter("fRcTrack.fifPrim");
+#endif
   const Float_t*&    fRcTrack_fpx                             = iter("fRcTrack.fpx");
   const Float_t*&    fRcTrack_fpy                             = iter("fRcTrack.fpy");
   const Float_t*&    fRcTrack_fpz                             = iter("fRcTrack.fpz");
+#if 0
   const Float_t*&    fRcTrack_fdEdx                           = iter("fRcTrack.fdEdx");
+#endif
   const Float_t*&    fRcTrack_fTrackLength70                  = iter("fRcTrack.fTrackLength70");
   static Int_t nx = 200;
   static Double_t xmin =   -5.;
@@ -316,14 +330,18 @@ void TpcT(const Char_t *opt = "F", const Char_t *files="*.root", const Char_t *O
   while (iter.Next()) {
     if (! fNoPixels ) continue;
     TVector3 mom(fRcTrack_fpx[0],fRcTrack_fpy[0],fRcTrack_fpz[0]);
-#if defined(__REAL_DATA__) && ! defined(__LASER__)
+#ifndef __LASER__
     if (fNofPV != 1) continue;
     if (TMath::Abs(fzV) > 20) continue;
     if (TMath::Abs(fxV) > 1 || TMath::Abs(fyV) > 1) continue;
     if (mom.Pt()  < 0.4 || mom.Pt()  > 0.6) continue;
+#if 0
     if (mom.Eta() <-1.0 || mom.Eta() > 0.0) continue;
+#endif
     if (fRcTrack_fTrackLength70[0] < 40) continue;
+#if 0
     if (fRcTrack_fdEdx[0] < 2e-6 || fRcTrack_fdEdx[0] > 3e-6) continue;
+#endif
 #endif
     //    if (fNoPixels > 80) continue;
     //    if (fNoRcHit < NpadCut) continue;
@@ -745,25 +763,256 @@ TGraphErrors *OmegaTau() {
   return gr2;
 }
 //________________________________________________________________________________
-void TpcTAdc() {
-  TTree *TpcT = (TTree *) gDirectory->Get("TpcT");
-  if (! TpcT) return;
-  //  TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
-  TpcT->SetMarkerStyle(20);
-  TpcT->SetMarkerColor(1);
-  TpcT->Draw("fMcHit.mlgam/fAdcSum:log(fAdcSum)>>I(70,3.,10.)",
-	     "fNoMcHit==1&&fNoRcHit==1&&fAdcSum/fMcHit.mlgam>0.5&& fAdcSum/fMcHit.mlgam<1.4&&fMcPad.fRow<14",
-	     "prof");
-  TProfile *I = (TProfile *) gDirectory->Get("I");
-  if (! I) return;
-  I->Fit("off","r","",3,10);
-  TpcT->SetMarkerColor(2);
-  TpcT->Draw("fMcHit.mlgam/fAdcSum:log(fAdcSum)>>O(70,3.,10.)",
-	     "fNoMcHit==1&&fNoRcHit==1&&fAdcSum/fMcHit.mlgam>0.5&& fAdcSum/fMcHit.mlgam<1.4&&fMcPad.fRow>=14",
-	     "prof");
-  TProfile *O = (TProfile *) gDirectory->Get("O");
-  if (! O) return;
-  O->Fit("off","r","",3,10);
+void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
+  TDirIter Dir(files);
+  Char_t *file = 0;
+  Char_t *file1 = 0;
+  Int_t NFiles = 0;
+  TTreeIter iter("TpcT");
+  while ((file = (Char_t *) Dir.NextFile())) {
+    TString File(file);
+    if (File.Contains("Plot") || File.Contains("Fit") || 
+	File.Contains("hist") || File.Contains("tags") ||
+	File.Contains("MuDst")) continue;
+    iter.AddFile(file); 
+    NFiles++; 
+    file1 = file;
+  }
+  cout << files << "\twith " << NFiles << " files" << endl; 
+  if (! file1 ) return;
+  TString output(Out);
+  if (output == "") {
+    output = file1;
+    output.ReplaceAll(".root",".ADC.root");
+  }
+  cout << "Output for " << output << endl;
+  const Int_t&       fNoRcHit                                 = iter("fNoRcHit");
+  const Int_t&       fNoMcHit                                 = iter("fNoMcHit");
+  const Int_t&       fAdcSum                                  = iter("fAdcSum");
+  const Float_t*&    fMcHit_mPosition_mX3                     = iter("fMcHit.mPosition.mX3");
+  const Float_t*&    fMcHit_mdE                               = iter("fMcHit.mdE");
+  const Float_t*&    fMcHit_mdS                               = iter("fMcHit.mdS");
+  const Long_t*&     fMcHit_mKey                              = iter("fMcHit.mKey");
+  const Long_t*&     fMcHit_mVolumeId                         = iter("fMcHit.mVolumeId");
+  const Float_t*&    fMcHit_mLgamma                           = iter("fMcHit.mLgamma");
+  //  const Int_t*&      fRcHit_mId                               = iter("fRcHit.mId");
+  const UShort_t*&   fRcHit_mIdTruth                          = iter("fRcHit.mIdTruth");
+  const UShort_t*&   fRcHit_mQuality                          = iter("fRcHit.mQuality");
+  if (! fOut) fOut = new TFile(output,"update");
+  fOut->cd();
+#if 0
+  TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
+#endif
+  TProfile2D *inout[2];
+  inout[0] = new TProfile2D("inner","simulated ADC versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  inout[1] = new TProfile2D("outer","simulated ADC versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  Double_t dsCut[2] = {1., 2.};
+  while (iter.Next()) {
+    if (fNoRcHit != 1) continue;
+    if (fNoMcHit != 1) continue;
+    if (fAdcSum <= 0) continue;
+    for (Int_t k = 0; k < fNoMcHit; k++) {
+      if (fMcHit_mKey[k] != fRcHit_mIdTruth[k]) continue;
+      if (fRcHit_mQuality[k] < 95) continue;
+      Int_t io = 0;
+      if (fMcHit_mVolumeId[k]%100 > 13) io = 1;
+      if (fMcHit_mdS[k] < dsCut[io]) continue;
+      if (fMcHit_mdE[k] <= 0 || fMcHit_mdE[k] > 1e-3) continue;
+      if (fMcHit_mLgamma[k] <= 0) continue;
+      Double_t ratio = fMcHit_mLgamma[k]/fAdcSum;
+      if (ratio < 0.1 || ratio > 10) continue;
+      inout[io]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mLgamma[k]));
+    }
+  }
+  fOut->Write();
+}
+//________________________________________________________________________________
+Double_t fun2(Double_t *x, Double_t *par) {
+  /*
+innerM
+ FCN=49665 FROM MINOS     STATUS=UNCHANGED       0 CALLS         387 TOTAL
+                     EDM=3.82662e-11    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       6.51171e+01   9.45741e-02  -5.95917e-05   1.25163e-04
+   2  z            3.50041e-01   5.17444e-03   6.60756e-06   8.73189e-03
+   3  zxAdcL      -8.60050e-02   9.37586e-04  -1.19618e-06   5.04555e-02
+   4  adcL         1.11909e+00   1.87552e-04   2.80116e-08   2.56762e-01
+   5  adcL2       -1.31037e-02   2.45839e-05   2.45839e-05   1.88516e+00
+   6  adcL3        0.00000e+00     fixed    
+
+    f2->SetParameters(6.52745e+01,  3.29340e-01, -8.19982e-02,  1.11882e+00, -1.30767e-02,  0.00000e+00)
+//                    9.54303e-02,  5.28211e-03,  9.59268e-04,  1.90611e-04,  2.50096e-05,   fixed    
+    .L TpcT.C+
+    TF2 *f2 = new TF2("f2",fun2,3.5,8.5,-210,210, 6);
+    f2->SetParameters(6.52745e+01,  3.29340e-01, -8.19982e-02,  1.11882e+00, -1.30767e-02,  0.00000e+00)
+    f2->SetParNames("offset","z","zxAdcL","adcL","adcL2","adcL3");
+    f2->FixParameter(5,0);
+    innerM->Fit("f2","er");
+    innerM->Draw("colz");
+    f2->Draw("cont1 same");
+   */
+  Double_t adcL   = x[0];
+  Double_t Z      = TMath::Abs(x[1]);
+  Double_t offset = par[0] + Z*par[1] + Z*adcL*par[2];
+  Double_t adc    = adcL*(par[3] + adcL*(par[4] + adcL*par[5]));
+  Double_t adcS   = offset + TMath::Exp(adc);
+  Double_t result = 0;
+  if (adcS > 0) result = TMath::Log(adcS);
+  return result;
+}
+//________________________________________________________________________________
+Double_t fun1(Double_t *x, Double_t *par) {
+  /*
+    Int_t i;
+    TAxis *y = innerM->GetYaxis();
+    TF1 *f1 = new TF1("f1",fun1,3,9,7);
+    f1->SetParNames("offset","z","zxAdcL","adcL","adcL2","adcL3","Z");
+    Double_t params[7];
+    f2->GetParameters(params);
+    i = 111; TH1D *h = innerM->ProjectionX(Form("i%i",i),i,i);  params[6] = y->GetBinCenter(i); 
+    h->SetTitle(Form("%s at z = %5.2f",innerM->GetTitle(),params[6]));
+    h->SetStats(0); h->Draw();
+    f1->SetParameters(params);  f1->Draw("same");
+   */
+  Double_t xz[2] = {x[0], par[6]};
+  return fun2(xz,par);
+}
+//________________________________________________________________________________
+void DrawF1(const Char_t *name = "innerM", Int_t i = 111, Char_t *opt="") {
+  TProfile2D *hist = (TProfile2D *) gDirectory->Get(name);
+  if (! hist) return;
+  TF2 *f2 = (TF2 *) hist->GetListOfFunctions()->FindObject("f2");
+  if (! f2) return;
+  TAxis *y = hist->GetYaxis();
+  TF1 *f1 = new TF1("f1",fun1,3,9,7);
+  f1->SetParNames("offset","z","zxAdcL","adcL","adcL2","adcL3","Z");
+  Double_t params[7];
+  f2->GetParameters(params);
+  TH1D *h = hist->ProjectionX(Form("i%i",i),i,i);  
+  params[6] = y->GetBinCenter(i); 
+  h->SetTitle(Form("%s at z = %5.2f",hist->GetTitle(),params[6]));
+  h->SetStats(0); h->Draw(opt);
+  f1->SetParameters(params);  f1->Draw("same");
+}
+//________________________________________________________________________________
+TProfile2D *CleanAdc(const Char_t *name) {
+  TProfile2D *hist = (TProfile2D *) gDirectory->Get(name);
+  if (! hist) return 0;
+  TProfile2D *histM = new TProfile2D(*hist);
+  histM->SetName(Form("%sM",hist->GetName()));
+  histM->SetXTitle("log(ADC)");
+  histM->SetYTitle("Z (cm)");
+  Int_t nx = hist->GetNbinsX();
+  Int_t ny = hist->GetNbinsY();
+#if 0
+  TNtuple *FitP = new TNtuple(Form("FitP%s",hist->GetName()),"Fit results","x:y:entries:mean:rms");
+#endif
+  Float_t xx[5];
+  TAxis *ax = hist->GetXaxis();
+  TAxis *ay = hist->GetYaxis();
+  for (Int_t i = 1; i <= nx; i++) {
+    xx[0] = ax->GetBinCenter(i);
+    for (Int_t j = 1; j <= ny; j++) {
+      Int_t bin = hist->GetBin(i,j);
+      xx[1] = ay->GetBinCenter(j);
+      xx[2] = hist->GetBinEntries(bin);
+      if (xx[2] <= 20.0) {
+	histM->SetBinEntries(bin,0.);
+	histM->SetBinContent(bin,0.);
+	histM->SetBinError(bin,0.);
+	continue;
+      }
+      xx[3] = hist->GetBinContent(bin);
+      xx[4] = hist->GetBinError(bin);
+#if 0
+      FitP->Fill(xx);
+#endif
+    }
+  }
+  return histM;
+}
+//________________________________________________________________________________
+void AdcCorrections() {
+  /*
+root.exe [7] AdcCorrections()
+Inner
+ PARAMETER NUMBER   6 NOT A VARIABLE. IGNORED.
+ THERE ARE NO MINOS ERRORS TO CALCULATE.
+ FCN=49665 FROM MINOS     STATUS=UNCHANGED       0 CALLS         387 TOTAL
+                     EDM=3.82662e-11    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       6.51171e+01   9.45741e-02  -5.95917e-05   1.25163e-04
+   2  z            3.50041e-01   5.17444e-03   6.60756e-06   8.73189e-03
+   3  zxAdcL      -8.60050e-02   9.37586e-04  -1.19618e-06   5.04555e-02
+   4  adcL         1.11909e+00   1.87552e-04   2.80116e-08   2.56762e-01
+   5  adcL2       -1.31037e-02   2.45839e-05   2.45839e-05   1.88516e+00
+   6  adcL3        0.00000e+00     fixed    
+
+Outer
+ PARAMETER NUMBER   6 NOT A VARIABLE. IGNORED.
+ THERE ARE NO MINOS ERRORS TO CALCULATE.
+ FCN=26465.4 FROM MINOS     STATUS=UNCHANGED       0 CALLS         417 TOTAL
+                     EDM=1.04284e-10    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  offset       4.73062e+01   1.18038e-01  -6.21885e-05   2.75367e-04
+   2  z            5.90289e-02   4.19343e-03   3.29939e-06   2.92729e-02
+   3  zxAdcL      -2.07588e-02   8.13723e-04  -6.46022e-07   1.60206e-01
+   4  adcL         1.12948e+00   3.57744e-04   3.51452e-08   2.74937e-01
+   5  adcL2       -1.46575e-02   5.06778e-05   5.06778e-05   3.90317e+00
+   6  adcL3        0.00000e+00     fixed    
+ Font metric w =  133  h =  21 points= 9 pixels= 12 QFont( "Arial,9,12,0,80,0,0,0,0,0" ) 
+  */
+  Char_t *histNames[2] = {"inner","outer"};
+  Char_t *parNames[7] = {"offset","z","zxAdcL","adcL","adcL2","adcL3","Z"};
+  TF2 *f2 = new TF2("f2",fun2,3.5,8.5,-210,210, 6);
+  f2->SetParameters(6.52745e+01,  3.29340e-01, -8.19982e-02,  1.11882e+00, -1.30767e-02,  0.00000e+00);
+  f2->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5]);
+  f2->FixParameter(5,0);
+  TCanvas *c1 = new TCanvas("c1","Adc Corrections");
+  TCanvas *c2 = new TCanvas("c2","Adc Corrections Projections");
+  c1->Divide(2,1);
+  c2->Divide(2,1);
+  for (Int_t i = 0; i < 2; i++) {
+    TProfile2D *hist = (TProfile2D *) gDirectory->Get(histNames[i]);
+    if (! hist) continue;
+    //    Int_t nx = hist->GetNbinsX();
+    Int_t ny = hist->GetNbinsY();
+    TProfile2D *histM = (TProfile2D *) gDirectory->Get(Form("%sM",histNames[i]));
+    if (! histM) histM = CleanAdc(histNames[i]);
+    c1->cd(i+1);
+    histM->Fit("f2","er");
+    histM->Draw("colz");
+    f2->Draw("cont1 same");
+    c2->cd(i+1);
+    TLegend *leg = new TLegend(0.6,0.1,0.9,0.4);
+    TAxis *y = histM->GetYaxis();
+    Double_t params[7];
+    f2->GetParameters(params);
+    Int_t color = 0;
+    for (Int_t j = 106; j <= ny; j += 20) {
+      TH1D *h = histM->ProjectionX(Form("%sj%i",histM->GetName(),j),j,j);  
+      params[6] = y->GetBinCenter(j); 
+      h->SetTitle(Form("%s at z = %5.2f",histM->GetTitle(),params[6]));
+      color++;
+      h->SetMarkerStyle(20);
+      h->SetMarkerColor(color);
+      h->SetStats(0); 
+      TF1 *f1 = new TF1(Form("f%i_%i",i,j),fun1,3,9,7);
+      f1->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5],parNames[6]);
+      f1->SetParameters(params); 
+      f1->SetLineColor(color);
+      if (color == 1) h->Draw();
+      else            h->Draw("same");
+      f1->Draw("same");
+      leg->AddEntry(h,Form("z = %5.2f",params[6]));
+    }
+    leg->Draw();
+  }
 }
 //________________________________________________________________________________
 void MakeFunctions() {
@@ -1521,9 +1770,11 @@ void MakeProjections(const Char_t *name="OuterXTimeMc") {
   Name += ".root";
   TFile *fOut = new TFile(Name,"recreate");
   h->Write();
+#if 0
   Int_t nx = h->GetNbinsX();
+#endif
   Int_t ny = h->GetNbinsY();
-  TCanvas *c1 = new TCanvas(name,name);
+  new TCanvas(name,name);
   for (Int_t i = 1; i <= ny; i++) {
     TH1D *proj = h->ProjectionX(Form("%s_%i",name,i),i,i);
     proj->SetTitle(Form("Projection in [%4.0f,%4.0f] z range",h->GetYaxis()->GetBinLowEdge(i),h->GetYaxis()->GetBinUpEdge(i)));
