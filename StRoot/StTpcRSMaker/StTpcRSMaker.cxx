@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.17 2009/09/01 15:06:44 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.18 2009/09/21 13:20:39 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.18  2009/09/21 13:20:39  fisyak
+// Variant O4, no mSigmaJitter, 100 keV
+//
 // Revision 1.17  2009/09/01 15:06:44  fisyak
 // Version N
 //
@@ -73,7 +76,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.17 2009/09/01 15:06:44 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.18 2009/09/21 13:20:39 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -167,8 +170,13 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   tauF(394.0e-9), 
   //not used  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
   tauP(775.0e-9),
+#if 0
   mSigmaJitterTI(0.6), // v30(0.5),  //v29 (0.25), // v28 (0.10), // timebuckets from comparison rho*phi 
   mSigmaJitterTO(0.5), // v30 (0.3),  //v29 (0.25), // v28 (0.20), // and z resolutions
+#else
+  mSigmaJitterTI(0.0), 
+  mSigmaJitterTO(0.0), 
+#endif
 #if 0
   mSigmaJitterXI(0.1), // v30 (0.057), //v28 0.172), // cm
   mSigmaJitterXO(0.1), // v30 (0.066), //v28 (0.198),
@@ -558,12 +566,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       }
       sortedIndex++;
       Int_t isDet  = tpc_hit->volume_id/100000;
-      if (isDet) continue; // skip pseudo padrow
 #if 0
-      if (tpc_track[Id-1].next_parent_p && ipart == 3) { // delta electrons ?
-	Id = tpc_track[Id-1].next_parent_p;
-	ipart      = tpc_track[Id-1].ge_pid;
-      }
+      if (isDet) continue; // skip pseudo padrow
 #endif
       do {
 	Int_t iPadrow = volId%100;
@@ -574,6 +578,12 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Int_t id3        = tpc_track[Id-1].start_vertex_p;
 	Int_t ipart      = tpc_track[Id-1].ge_pid;
 	Float_t charge = tpc_track[Id-1].charge;
+#if 1
+	if (tpc_track[Id-1].next_parent_p && ipart == 3) { // delta electrons ?
+	  Id = tpc_track[Id-1].next_parent_p;
+	  ipart      = tpc_track[Id-1].ge_pid;
+	}
+#endif
 	if (ipart == Laserino || ipart == Chasrino) charge = 0;
 	Int_t io = 0;
 	if (iPadrow > 13) io = 1;
@@ -1388,6 +1398,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.18  2009/09/21 13:20:39  fisyak
+// Variant O4, no mSigmaJitter, 100 keV
+//
 // Revision 1.17  2009/09/01 15:06:44  fisyak
 // Version N
 //
