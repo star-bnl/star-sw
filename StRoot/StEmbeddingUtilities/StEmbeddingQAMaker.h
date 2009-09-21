@@ -38,6 +38,7 @@
 //----------------------------------------------------------------------------------------------------
 //   Revised history
 //
+//   Sep/20/2009 : Fix title for Nhit histograms. Wider eta/y range (-2.5,2.5)
 //   Sep/18/2009 : Added QA histograms for decay daughters (H. Masui)
 //   Sep/09/2009 : 1st version checked in   (H. Masui)
 //****************************************************************************************************
