@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.cxx,v 1.3 2009/08/29 21:23:12 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.4 2009/09/21 23:42:40 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -37,10 +37,11 @@ StTGeoHelper::StTGeoHelper()
 //_____________________________________________________________________________
 void StTGeoHelper::Init()
 {
-  StTGeoIterator it;
+  StTGeoIter it;
   it.Print("StTGeoHelper_Init");
 //	Create HitShape
   const TGeoVolume *vol= *it;
+
   TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
   bb->ComputeBBox();
   const double *ori = bb->GetOrigin();
@@ -53,7 +54,9 @@ void StTGeoHelper::Init()
   int nHits=0;
   StVoluExt *myModu=0;
   for (;(vol=*it);++it) {
+    vol->GetShape()->ComputeBBox();
 //	Check for MODULE    
+
     int volId = vol->GetNumber();
 //		First visit
     if (it.IsFirst()) {		//First visit
@@ -67,6 +70,9 @@ void StTGeoHelper::Init()
         myModu = ext; nHits=0;
  	printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
       } while(0);
+
+      MakeGenHitPlane(it);
+
 
       if (IsSensitive(vol)) {//Update HitShape
         nHits++;
@@ -94,18 +100,21 @@ void StTGeoHelper::Init()
         fHitShape->Update(z1,z2,rMax);
       }
 
-    } else { 		//Last visit 
+    } else if (it.IsLast()) { 		//Last visit 
 
         if (!myModu) 		continue;
 	if (!IsModule(vol)) 	continue;
         if (nHits) {
-	  myModu->SetHidule();
- 	  printf("Hidule = %s(%d) hits=%d",vol->GetName(),volId,nHits);
+	  myModu->SetMODULE();
+ 	  printf("MODULE = %s(%d) hits=%d",vol->GetName(),volId,nHits);
 	  it.Print(0);
         }  
       myModu=0; nHits=0;
     }
 
+    StGenHitPlane *ghp = IsHitPlane(vol);
+    if (!ghp) continue;
+    ghp->MakeHitPlane(it);
   }
 
 
@@ -144,17 +153,25 @@ int StTGeoHelper::IsModule(const TGeoVolume *volu)  const
   return ext->IsModule();
 }    
 //_____________________________________________________________________________
-int StTGeoHelper::IsModule(const TGeoNode   *node)  const
-{ return IsModule(node->GetVolume()); }
-//_____________________________________________________________________________
-int StTGeoHelper::IsHitPlane(const TGeoVolume *volu)  const
+int StTGeoHelper::IsMODULE(const TGeoVolume *volu)  const
 {
   StVoluExt *ext = GetExt(volu->GetNumber());
   if (!ext) return 0;
-  return ext->IsHitPlane();
+  return ext->IsMODULE();
 }    
 //_____________________________________________________________________________
-int StTGeoHelper::IsHitPlane(const TGeoNode   *node)  const
+int StTGeoHelper::IsModule(const TGeoNode   *node)  const
+{ return IsModule(node->GetVolume()); }
+//_____________________________________________________________________________
+StGenHitPlane* StTGeoHelper::IsHitPlane(const TGeoVolume *volu)  const
+{
+  StVoluExt *ext = GetExt(volu->GetNumber());
+  if (!ext) 			return 0;
+  if (!ext->IsHitPlane())	return 0;
+  return (StGenHitPlane*)ext;
+}    
+//_____________________________________________________________________________
+StGenHitPlane* StTGeoHelper::IsHitPlane(const TGeoNode   *node)  const
 { return IsHitPlane(node->GetVolume()); }
 
 //_____________________________________________________________________________
@@ -169,46 +186,55 @@ int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
   double dd[3]={bb->GetDX(),bb->GetDY(),bb->GetDZ()};
   int jMin = 0;
   for (int j=1;j<3;j++) { if (dd[j]<dd[jMin]) jMin=j;}
-  for (int j=1;j<3;j++) { if (j==jMin) continue;  if (dd[j]<kHow*dd[jMin]) return 0;} 
+  for (int j=0;j<3;j++) { if (j==jMin) continue;  if (dd[j]<kHow*dd[jMin]) return 0;} 
   return jMin+1;
 }
 //_____________________________________________________________________________
-int StTGeoHelper::MakeHitPlane(const TGeoVolume *volu) 
+int StTGeoHelper::MakeGenHitPlane(const StTGeoIter &it) 
 {
-   if (!IsSensitive(volu)) 			return 0;
-   int ax = MayHitPlane(volu);	if (!ax) 	return 0;
+static int nCall=0; nCall++;   
 
+   const TGeoVolume *myVolu = *it;
+   if (!IsSensitive(myVolu)) 			return 0;
+   const TGeoVolume *volu=0;
    StGenHitPlane *bhp=0;
-   const TGeoShape *sh = volu->GetShape();
-   const TGeoBBox *bb = (const TGeoBBox*)sh;
-  
-   int iv = volu->GetNumber();
-   StVoluExt *ext = GetExt(iv);
-   int kase = 0;
-   if (ext) kase = ext->Kind() +1;
-   switch(kase) {
-   
-     case 0: //no extention
-     case 1: //basic extention
-       bhp = new StGenHitPlane(iv);
-       if (ext) *bhp = *ext;
-       bhp->SetHitPlane();
-       bhp->fDir[ax-1]=1;
-       bhp->fDir[ax-1]=1;
-       memcpy(bhp->fOrg,bb->GetOrigin(),3*sizeof(double));
-       SetExt(bhp);
-       SetPlane(bhp);
-       delete ext;
-       break;
+   for (int force=0;force<2;force++) { 
+     for (int up=0;volu=it.GetVolu(up);up++) {
+       int ax = (force)? 1: MayHitPlane(volu);
+       if (!ax) 	continue;
 
-     case 2: //HitPlane  extention
-       bhp = (StGenHitPlane*)ext; 
+       const TGeoShape *sh = volu->GetShape();
+       const TGeoBBox *bb = (const TGeoBBox*)sh;
+       int iv = volu->GetNumber();
+       StVoluExt *ext = GetExt(iv);
+       int kase = 0;
+       if (ext) kase = ext->Kind()+1;
+       switch(kase) {
+
+	 case 0: //no extention
+	 case 1: //basic extention
+	   bhp = new StGenHitPlane(iv);
+	   if (ext) *bhp = *ext;
+	   bhp->SetHitPlane();
+           for (int jk=0;jk<3;jk++){bhp->fDir[jk][(ax+jk-1)%3]=1;}
+	   memcpy(bhp->fOrg,bb->GetOrigin(),3*sizeof(double));
+	   SetExt(bhp);
+	   SetPlane(bhp);
+	   delete ext;
+	   break;
+
+	 case 2: //HitPlane  extention
+	   bhp = (StGenHitPlane*)ext; 
+	   break;
+	 default: assert(0 && " Wrong kind of StVoluExt");
+       }
        break;
-     default: assert(0 && " Wrong kind of StVoluExt");
+    }
+    if (bhp) return 0;
+    printf(" ***Warning: Default HitPlane for:"); it.Print(0);
   }
   return 0;
 }
-
 //_____________________________________________________________________________
 int StTGeoHelper::IsSensitive(const TGeoVolume *volu)
 {
@@ -246,9 +272,44 @@ void StTGeoHelper::Print(const char *tit) const
 
 }
 //_____________________________________________________________________________
-TString  StTGeoHelper::FullPath() const     
+void StTGeoHelper::ls(const char *opt) const
 {
-return StTGeoIterator::FullPath(gGeoManager->GetCurrentNavigator());
+static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
+  int opta = strstr(opt,"a")!=0;
+  int optm = strstr(opt,"m")!=0;
+  int optM = strstr(opt,"M")!=0;
+  int opts = strstr(opt,"s")!=0;
+  int optp = strstr(opt,"p")!=0;
+
+  StTGeoIter it;
+  const TGeoVolume *vol= *it;
+  int num=0;
+  for (;(vol=*it);++it) {
+    if (!it.IsFirst()) continue;
+//    int volId = vol->GetNumber();
+    int jk= (opta)? 0:-1;
+    StGenHitPlane *ghp=0;
+    do {
+      if (optM && IsMODULE   (vol)) 	{jk=1;break;}
+      if (optm && IsModule   (vol)) 	{jk=2;break;}
+      if (optp && (ghp=IsHitPlane(vol))){jk=3;break;}
+      if (opts && IsSensitive(vol)) 	{jk=4;break;}
+    } while (0);
+    if (jk<0) continue;
+    num++;
+    const TGeoShape    *sh = vol->GetShape();
+    const TGeoMaterial *ma = vol->GetMaterial();
+    printf("%3d - %s(%s",num,vol->GetName(),types[jk]);
+    if (ghp) printf("#%d",ghp->fMap.size());
+    printf(",%s,%s)\t %s\n"
+           ,sh->ClassName()+4
+	   ,ma->GetName(),it.GetPath());
+  }
+}
+//_____________________________________________________________________________
+const char *StTGeoHelper::GetPath() const     
+{
+  return gGeoManager->GetPath();
 }
 //_____________________________________________________________________________
 void StTGeoHelper::Test()
@@ -256,31 +317,55 @@ void StTGeoHelper::Test()
    gROOT->Macro("$STAR/StarDb/VmcGeometry/y2009.h");
    StTGeoHelper hlp;
    hlp.Init();
-
-
-//    StTGeoIterator it;  
-//    const TGeoVolume *volu=0;
-//    int n = 0;
-//    for (; volu=it.GetVolu();++it) 
-//    {
-//      if (it.IsLast()) continue;
-//      n++;
-//      printf("%4d - ",n); it.Print(0);
-//    }
-
+   hlp.ls("p");
 }
 //_____________________________________________________________________________
+void StTGeoHelper::Break(int kase) 
+{
+static int myKase = -2009;
+if (kase!=myKase) return;
+printf("Break(%d)\n",kase); 
+}
+//_____________________________________________________________________________
+
 //_____________________________________________________________________________
 StGenHitPlane::StGenHitPlane(int volId) : StVoluExt(volId)	
 {
-   memset(fOrg,0,2*sizeof(fOrg));
+   memset(fOrg,0,sizeof(fOrg)+sizeof(fDir));
 }
+//_____________________________________________________________________________
+StHitPlane *StGenHitPlane::MakeHitPlane(const StTGeoIter &it)
+
+{
+  TString path(it.GetPath());
+  StHitPlane *hp= (StHitPlane *)GetHitPlane(path);
+  if (hp) return hp;
+  hp = new StHitPlane;
+  fMap[path] = hp;
+  it.LocalToMaster(fOrg, hp->fOrg);
+  for (int i=0;i<3;i++) {it.LocalToMasterVect(fDir[i], hp->fDir[i]);}
+  return hp;
+}
+//_____________________________________________________________________________
+const StHitPlane *StGenHitPlane::GetHitPlane (const TString &path) const	
+{
+static int nCall=0; nCall++;
+   StHitPlaneMapIter it = fMap.find(path);
+   if (it ==  fMap.end()) return 0;
+   return (*it).second;
+}
+//_____________________________________________________________________________
+StHitPlane::StHitPlane() 	
+{
+   memset(fOrg,0,sizeof(fOrg)+sizeof(fDir));
+}
+//_____________________________________________________________________________
 //_____________________________________________________________________________
 //_____________________________________________________________________________
   enum {kEND,kDOWN,kNEXT,kUPP};
 //_____________________________________________________________________________
 //_____________________________________________________________________________
-  StTGeoIterator::StTGeoIterator()
+  StTGeoIter::StTGeoIter()
 {
   fLev = 0;
   fStk[0]=0;
@@ -293,26 +378,26 @@ StGenHitPlane::StGenHitPlane(int volId) : StVoluExt(volId)
   assert(fLev == fNavi->GetLevel());
 }
 //_____________________________________________________________________________
-  StTGeoIterator::~StTGeoIterator()
+  StTGeoIter::~StTGeoIter()
 { delete fNavi; fNavi = 0;}
 
 //_____________________________________________________________________________
-StTGeoIterator &StTGeoIterator::Down()
+StTGeoIter &StTGeoIter::Down()
 {
   fKase = kDOWN; return ++(*this);
 }
 //_____________________________________________________________________________
-StTGeoIterator &StTGeoIterator::Next()
+StTGeoIter &StTGeoIter::Next()
 {
   fKase = kNEXT; return ++(*this);
 }
 //_____________________________________________________________________________
-StTGeoIterator &StTGeoIterator::Upp()
+StTGeoIter &StTGeoIter::Upp()
 {
   fKase = kUPP; return ++(*this);
 }
 //_____________________________________________________________________________
-StTGeoIterator &StTGeoIterator::operator++()
+StTGeoIter &StTGeoIter::operator++()
 {
   int nKids;
 CASE:
@@ -337,13 +422,14 @@ CASE:
       fVolu = fNavi->GetCurrentVolume();
       nKids = fVolu->GetNdaughters();
       fStk[fLev]++; 
-      if (fStk[fLev]>=nKids)  {			fKase=kNEXT ; fNow=2; break;}
-      fNavi->CdDown(fStk[fLev]);fLev++; ; 
+      if (fStk[fLev]>=nKids)  { 		fKase=kNEXT ; fNow=2; break;}
+      fNavi->CdDown(fStk[fLev]);fLev++; fStk[fLev]=0; 
   assert(fLev == fNavi->GetLevel());
-      fVolu = fNavi->GetCurrentVolume();	fKase=kDOWN; fNow=1; break;}  
+      fVolu = fNavi->GetCurrentVolume();	fKase=kDOWN ; fNow=1; break;}  
 
   case kUPP: {
-    if (!fLev) {fVolu=0; 			fKase=kEND ; fNow=0; break;}
+    if (!fLev) {fVolu=0; 			fKase=kEND  ; fNow=0; break;}
+    TGeoNode *node = fNavi->GetCurrentNode();
     fNavi->CdUp(); fLev--;
     fVolu = fNavi->GetCurrentVolume();	 
   assert(fLev == fNavi->GetLevel());
@@ -353,15 +439,18 @@ CASE:
   return *this;
 }
 //_____________________________________________________________________________
-const TGeoNode *StTGeoIterator::GetNode(int idx) const
+const TGeoNode *StTGeoIter::GetNode(int idx) const
 {
- if (!fLev) return 0;
- if (fLev<idx) return 0;
  return fNavi->GetMother(idx);
+}
+//_____________________________________________________________________________
+const TGeoHMatrix *StTGeoIter::GetMatr(int idx) const
+{
+ return fNavi->GetMotherMatrix(idx);
 }
 
 //_____________________________________________________________________________
-const TGeoVolume *StTGeoIterator::GetVolu(int idx) const
+const TGeoVolume *StTGeoIter::GetVolu(int idx) const
 {
   if (!idx) return fVolu;
   const TGeoNode *node = GetNode(idx);
@@ -369,10 +458,10 @@ const TGeoVolume *StTGeoIterator::GetVolu(int idx) const
   return node->GetVolume();
 }
 //_____________________________________________________________________________
-void StTGeoIterator::Print(const char *tit) const
+void StTGeoIter::Print(const char *tit) const
 {
   const TGeoVolume *v =0;
-  if (tit) printf("\nStTGeoIterator::Print(%s)\n\n",tit);   
+  if (tit) printf("\nStTGeoIter::Print(%s)\n\n",tit);   
   printf("%d ",fNow);
   for (int l=0;l<=fLev;l++) {
     v = GetVolu(fLev-l);
@@ -385,23 +474,16 @@ void StTGeoIterator::Print(const char *tit) const
 
 }
 //_____________________________________________________________________________
-TString StTGeoIterator::FullPath(const TGeoNavigator *nav)     
+const char *StTGeoIter::GetPath() const  
 {
-  TString path;
-  const TGeoNodeCache *cache = nav->GetCache();
-  int level = cache->GetLevel();
-  const TGeoNode **nodes = (const TGeoNode**)cache->GetBranch();
-  for (int lev=0;lev<=level; lev++) {
-      path += "/";
-      path += nodes[lev]->GetName();
-      path += "#";
-      path += nodes[lev]->GetNumber();
-  }
-  return path;  
+  return fNavi->GetPath();
 }
 //_____________________________________________________________________________
-void  StTGeoIterator::LocalToMaster(const double* local, double* master) const
+void  StTGeoIter::LocalToMaster(const double* local, double* master) const
 { fNavi->LocalToMaster(local,master);}
+//_____________________________________________________________________________
+void  StTGeoIter::LocalToMasterVect(const double* local, double* master) const
+{ fNavi->LocalToMasterVect(local,master);}
 
 //_____________________________________________________________________________
 //_____________________________________________________________________________
