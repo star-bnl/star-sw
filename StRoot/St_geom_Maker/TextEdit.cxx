@@ -63,6 +63,7 @@
 #include "StGeomHighlighter.h"
 
 //! [0]
+//__________________________________________________________________________________
 TextEdit::TextEdit(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -75,6 +76,7 @@ TextEdit::TextEdit(QWidget *parent)
 }
 //! [0]
 
+//__________________________________________________________________________________
 void TextEdit::about()
 {
     QMessageBox::about(this, tr("About Syntax Highlighter"),
@@ -84,11 +86,13 @@ void TextEdit::about()
                    "highlighting rules using regular expressions.</p>"));
 }
 
+//__________________________________________________________________________________
 void TextEdit::newFile()
 {
     editor->clear();
 }
 
+//__________________________________________________________________________________
 void TextEdit::openFile(const QString &path)
 {
     QString fileName = path;
@@ -114,6 +118,7 @@ void TextEdit::openFile(const QString &path)
 }
 
 //! [1]
+//__________________________________________________________________________________
 void TextEdit::setupEditor()
 {
     QFont font;
@@ -125,13 +130,10 @@ void TextEdit::setupEditor()
     editor->setFont(font);
 
     highlighter = new StGeomHighlighter(editor->document());
-
-    QFile file("mainwindow.h");
-    if (file.open(QFile::ReadOnly | QFile::Text))
-        editor->setPlainText(file.readAll());
 }
 //! [1]
 
+//__________________________________________________________________________________
 void TextEdit::setupFileMenu()
 {
     QMenu *fileMenu = new QMenu(tr("&File"), this);
@@ -148,6 +150,7 @@ void TextEdit::setupFileMenu()
 //                                        "File|Exit")));
 }
 
+//__________________________________________________________________________________
 void TextEdit::setupHelpMenu()
 {
     QMenu *helpMenu = new QMenu(tr("&Help"), this);
@@ -156,6 +159,7 @@ void TextEdit::setupHelpMenu()
     helpMenu->addAction(tr("&About"), this, SLOT(about()));
 //    helpMenu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
 }
+//__________________________________________________________________________________
 void TextEdit::load( const QString &f )
 {
    if ( QFile::exists( f ) ) {
@@ -172,6 +176,7 @@ void TextEdit::load( const QString &f )
    }
 }
 
+//__________________________________________________________________________________
 void TextEdit::findBlock(const QString & expr)
 {
    QRegExp exp(QString("^Block\\s+%1").arg(expr));
