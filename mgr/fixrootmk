@@ -7,9 +7,14 @@
 #
 # (c) J. Lauret 2003 - 2009
 #
-# -fix  re-establish the link for system.rootrc and also fixes
-#       bin/root-config
+# -unlink  remove the soft-links for etc/ files system.rootc and
+#          root.mimes
+# -fix     re-establish the link for system.rootrc and also fixes
+#          bin/root-config
 # 
+# Default action will also create several files as local files
+# rather than links allowing to escape some AFS side effects (timestamp
+# issues).
 #
 
 # All the below files will have a local copy instead of a link
@@ -68,9 +73,12 @@ if ( ! -e "Makefile" ){
     foreach $f (keys %LOCAL){
 	if ( -l $f ){
 	    $link = readlink($f);
-	    unlink($f);
-	    system("/bin/cp -fp $link $f");
-	    print "Made local $f\n" if ($LOCAL{$f});
+	    if ( unlink($f) ){
+		system("/bin/cp -fp $link $f");
+		print "Made local $f\n" if ($LOCAL{$f});
+	    } else {
+		&Die($f);
+	    }
 	}
     }
 }
@@ -94,27 +102,53 @@ while ( defined($arg = shift(@ARGV))) {
 $ADDMESS="";
 print "Checking etc/ files\n";
 foreach $file (("system.rootrc","root.mimes")){
+    # if we have a .new file as link and a plain config file
     if ( -l "etc/$file.new" && ! -l "etc/$file"){
 	if ($FIXIT){
 	    print "  Establishing etc/$file\n";
 	    $link = readlink("etc/$file.new");
 	    $link =~ s/\.new//;
-	    if ( -f "etc/$file" ){  unlink("etc/$file");}
+	    if ( -f "etc/$file" ){  
+		if ( ! unlink("etc/$file") ){  &Die("etc/$file");}
+	    }
 	    system("/bin/ln -s $link etc/$file");
 	} else {
 	    print 
 		" + Native etc/$file - we could establish a link to common file\n".
 		"   Use -fix if you want to do that (but after all is compiled)\n";
 	}
+
     } elsif ( -e "etc/$file"){
-	if ( ! -e "etc/$file.new"){
+	# else at least we need the config file existing (and a link)
+	if ( ! -e "etc/$file.new" && $FIXIT ){
 	    print "  WARNING Could not find $file.new\n";
 	} else {
+	    # ! $FIXIT or -e etc/$file.new
+	    if ( ! -e "etc/$file.new" && -e "etc/$file" ){
+		# create one
+		$ilink = $link  = readlink("etc/$file");
+		$link .= ".new";
+		if ( ! -e $link ){
+		    # create a copy of $ROOT/$ROOT_LEVEL/root/etc/$file
+		    if ( ! open(FI,"$ilink") ){  die "Cannot open R $ilink ($!)\n";}
+		    if ( ! open(FO,">$link") ){  die "Cannot open W $link ($!)\n";}
+		    while ( defined($Line = <FI>)){
+			chomp($line);
+			print FO "$line\n";
+		    }
+		    close(FI); close(FO);
+		    print " INFO $link created from $ilink\n";
+		} 
+		if ( link($link,"etc/$file.new") ){
+		    print " INFO etc/$file.new created\n";
+		}
+	    }
+
 	    # This also requires an arg because we do not want to alter anything
 	    # by accident if the post-comoiation actions were all made
 	    if ( $ULINK ){
 		print "  Unlinking $file\n";
-		unlink("etc/$file");
+		if ( ! unlink("etc/$file") ){  	&Die("etc/$file");}
 	    } else {
 		print 
 		    " + etc/$file is a link - you may want to remove using -unlink\n";
@@ -305,3 +339,8 @@ if ($FIXIT){
 
 
 
+sub Die
+{
+    my($file)=@_;
+    die "Could not unlink $file ($!) - Is this a token or accesss perm issue?\n";
+}
