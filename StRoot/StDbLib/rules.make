@@ -101,7 +101,7 @@ AR       := /usr/bin/ar -rvu
   CFLAGS   := $(DBG) -fPIC -Wall
 #  LDFLAGS  := $(DBG) -Wl,-Bstatic
   SOFLAGS  := $(DBG) -shared  
-  CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic 
+  CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic -lrt
 
 endif
 
