@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.12 2006/01/09 23:47:27 fisyak Exp $
+ * $Id: StLorentzVector.hh,v 1.13 2009/09/22 16:42:38 fine Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
+ * Revision 1.13  2009/09/22 16:42:38  fine
+ * Add the extra ctor to complete the neet the template specilication signatures #1612
+ *
  * Revision 1.12  2006/01/09 23:47:27  fisyak
  * Add missing methods (found by Zhangbu) to Cint dictionary
  *
@@ -67,30 +70,19 @@
 #include "StThreeVector.hh"
 template<class T> class StLorentzVector {
 public:
-    StLorentzVector(T = 0, T = 0, T = 0, T = 0);
+    StLorentzVector(T, T, T, T);
+    StLorentzVector();
     virtual ~StLorentzVector();
     
-#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
     template<class X> StLorentzVector(const StThreeVector<X>&, T);
+    template<class X, class Y> StLorentzVector(const StThreeVector<X>&, Y);
+    template<class X, class Y> StLorentzVector(Y, const StThreeVector<X>&);   
     template<class X> StLorentzVector(T, const StThreeVector<X>&);   
 
     template<class X> StLorentzVector(const StLorentzVector<X>&);
     template<class X> StLorentzVector<T>& operator=(const StLorentzVector<X>&);
     // StLorentzVector(const StLorentzVector<T>&);                use default
     // StLorentzVector<T>& operator=(const StLorentzVector<T>&);  use default
-#else
-    StLorentzVector(const StThreeVector<float>&, T);
-    StLorentzVector(T, const StThreeVector<float>&);   
-    StLorentzVector(const StLorentzVector<float>&);
-    
-    StLorentzVector(const StThreeVector<double>&, T);
-    StLorentzVector(T, const StThreeVector<double>&);   
-    StLorentzVector(const StLorentzVector<double>&);
-        
-    StLorentzVector<T>& operator=(const StLorentzVector<float>&);
-    StLorentzVector<T>& operator=(const StLorentzVector<double>&);
-#endif
-    
     T x()                     const;
     T y()                     const;
     T z()                     const;
@@ -179,6 +171,10 @@ protected:
 //
 //        Implementation of member functions
 //
+template<class T>
+StLorentzVector<T>::StLorentzVector()
+    : mThreeVector(0, 0, 0), mX4(0) { /* nop */ }
+
 template<class T>
 StLorentzVector<T>::StLorentzVector(T x, T y, T z, T t)
     : mThreeVector(x, y, z), mX4(t) { /* nop */ }
@@ -630,51 +626,7 @@ StLorentzVector<T>::operator-= (const StLorentzVector<double>& v)
 
 #endif // ST_NO_MEMBER_TEMPLATES
 #endif /* ! __CINT__ */
-#ifdef __CINT__
-template<> StLorentzVector<double>::StLorentzVector<double>(const StThreeVector<double>&, double);
-template<> StLorentzVector<double>::StLorentzVector<double>(const StThreeVector<double>&, float);
-template<> StLorentzVector<double>::StLorentzVector<double>(double,const StThreeVector<double>&);
-template<> StLorentzVector<double>::StLorentzVector<double>(float ,const StThreeVector<double>&);
-template<> StLorentzVector<float>::StLorentzVector<float>(const StThreeVector<float>&, double);
-template<> StLorentzVector<float>::StLorentzVector<float>(const StThreeVector<float>&, float);
-template<> StLorentzVector<float>::StLorentzVector<float>(double,const StThreeVector<float>&);
-template<> StLorentzVector<float>::StLorentzVector<float>(float ,const StThreeVector<float>&);
 
-template<> StLorentzVector<double> StLorentzVector<double>::boost(const StLorentzVector<double>& pframe) const;
-template<> StLorentzVector<double> StLorentzVector<double>::boost(const StLorentzVector<float>& pframe) const;
-template<> StLorentzVector<float>  StLorentzVector<float>::boost(const StLorentzVector<double>& pframe) const;
-template<> StLorentzVector<float>  StLorentzVector<float>::boost(const StLorentzVector<float>& pframe) const;
-template<> StLorentzVector<double> operator+ (const StLorentzVector<double>& v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<double> operator+ (const StLorentzVector<double>& v1, const StLorentzVector<float>& v2);
-template<> StLorentzVector<double> operator+ (const StLorentzVector<float>&  v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<float>  operator+ (const StLorentzVector<float>&  v1, const StLorentzVector<float>& v2);
-template<> StLorentzVector<double> operator- (const StLorentzVector<double>& v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<double> operator- (const StLorentzVector<double>& v1, const StLorentzVector<float>& v2);
-template<> StLorentzVector<double> operator- (const StLorentzVector<float>&  v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<float>  operator- (const StLorentzVector<float>&  v1, const StLorentzVector<float>& v2);
-template<> StLorentzVector<double> operator* (const StLorentzVector<double>& v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<double> operator* (const StLorentzVector<double>& v1, const StLorentzVector<float>& v2);
-template<> StLorentzVector<double> operator* (const StLorentzVector<float>&  v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<float>  operator* (const StLorentzVector<float>&  v1, const StLorentzVector<float>& v2);
-template<> StLorentzVector<double> operator* (const              double v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<double> operator* (const              double v1, const StLorentzVector<float>&  v2);
-template<> StLorentzVector<double> operator* (const StLorentzVector<double>& v1, const double              v2);
-template<> StLorentzVector<double> operator* (const StLorentzVector<float>&  v1, const double              v2);
-template<> StLorentzVector<double> operator/ (const StLorentzVector<double>& v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<double> operator/ (const StLorentzVector<double>& v1, const StLorentzVector<float>& v2);
-template<> StLorentzVector<double> operator/ (const StLorentzVector<float>&  v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<float>  operator/ (const StLorentzVector<float>&  v1, const StLorentzVector<float>& v2);
-template<> StLorentzVector<double> operator/ (const              double v1, const StLorentzVector<double>& v2);
-template<> StLorentzVector<double> operator/ (const              double v1, const StLorentzVector<float>&  v2);
-template<> StLorentzVector<double> operator/ (const StLorentzVector<double>& v1, const double              v2);
-template<> StLorentzVector<double> operator/ (const StLorentzVector<float>&  v1, const double              v2);
-template<> istream& operator>> (istream& is, const StLorentzVector<double>& v);
-template<> ostream& operator<< (ostream& os, const StLorentzVector<double>& v);
-template<> istream& operator>> (istream& is, const StLorentzVector<float>& v);
-template<> ostream& operator<< (ostream& os, const StLorentzVector<float>& v);
-template<> double abs(const StLorentzVector<double>& v);
-template<> float  abs(const StLorentzVector<float>& v);
-#else
 //
 //   Non-member operators
 //
@@ -693,8 +645,7 @@ operator- (const StLorentzVector<T>& v1, const StLorentzVector<X>& v2)
 }
 
 template<class T, class X>
-T
-operator* (const StLorentzVector<T>& v1, const StLorentzVector<X>& v2)
+T operator* (const StLorentzVector<T>& v1, const StLorentzVector<X>& v2)
 {
     return v1.t()*v2.t() - v1.vect()*v2.vect();
 }
@@ -741,6 +692,4 @@ istream&  operator>>(istream& is, StLorentzVector<T>& v)
 //
 template<class T>
 T abs(const StLorentzVector<T>& v) {return v.m();}
-
-#endif /*  __CINT__ */
 #endif
