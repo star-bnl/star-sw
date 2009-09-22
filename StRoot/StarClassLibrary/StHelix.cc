@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.28 2008/09/11 20:34:31 ullrich Exp $
+ * $Id: StHelix.cc,v 1.29 2009/09/22 16:21:05 fine Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.29  2009/09/22 16:21:05  fine
+ * Silence the compilation warning
+ *
  * Revision 1.28  2008/09/11 20:34:31  ullrich
  * Fixed sign problem in seed calculation for helix-helix DCA.
  *
@@ -466,7 +469,7 @@ double StHelix::pathLength(const StThreeVector<double>& r,
         const double angMax = 0.21;
         double deltas = fabs(angMax/(mCurvature*mCosDipAngle));
 //              dampingFactor = exp(-0.5);
-	double dampingFactor = 0.60653;
+//	double dampingFactor = 0.60653;
 	int i;
 
 	for (i=0; i<MaxIterations; i++) {
