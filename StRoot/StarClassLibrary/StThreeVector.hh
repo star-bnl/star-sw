@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.21 2008/10/29 19:16:13 perev Exp $
+ * $Id: StThreeVector.hh,v 1.22 2009/09/22 16:43:29 fine Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.22  2009/09/22 16:43:29  fine
+ * Introdcue the dedicated default ctor for StThreeVector #1612
+ *
  * Revision 1.21  2008/10/29 19:16:13  perev
  * set(x,y,z) added
  *
@@ -108,7 +111,8 @@ using std::out_of_range;
 
 template<class T> class StThreeVector {
 public:    
-    StThreeVector(T = 0, T = 0, T = 0);
+    StThreeVector();
+    StThreeVector(T, T, T);
   //                     ROOT_VERSION(5,03,01)
 #if ROOT_VERSION_CODE >= 328449
    StThreeVector(TRootIOCtor*) : mX1(0), mX2(0), mX3(0) {}
@@ -221,6 +225,10 @@ protected:
 //
 //        Implementation of member functions
 //
+template<class T>
+inline StThreeVector<T>::StThreeVector()
+    : mX1(0), mX2(0), mX3(0) {/* nop */}
+
 template<class T>
 inline StThreeVector<T>::StThreeVector(T x, T y, T z)
     : mX1(x), mX2(y), mX3(z) {/* nop */}
@@ -761,9 +769,9 @@ StThreeVector<T>::bad(double world) const
 //
 //        Non-member functions
 //
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
 template<class T>
 inline T abs(const StThreeVector<T>& v) {return v.mag();}
-#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
 template<class T, class X>
 inline StThreeVector<T>
 cross_product(const StThreeVector<T>& v1, const StThreeVector<X>& v2)
@@ -790,6 +798,12 @@ inline T operator* (const StThreeVector<T>& v1, const StThreeVector<X>& v2)
     return StThreeVector<T>(v1).dot(v2);
 }
 #else
+template<>
+inline double abs(const StThreeVector<double>& v) {return v.mag();}
+
+template<>
+inline float abs(const StThreeVector<float>& v) {return v.mag();}
+
 template<class T>
 inline StThreeVector<T>
 cross_product(const StThreeVector<T>& v1, const StThreeVector<double>& v2)
