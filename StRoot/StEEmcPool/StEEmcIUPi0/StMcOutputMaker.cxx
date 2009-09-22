@@ -1,6 +1,6 @@
 //*-- Author :Weihong He
 // 
-// $Id: StMcOutputMaker.cxx,v 1.1 2008/10/30 15:52:15 balewski Exp $
+// $Id: StMcOutputMaker.cxx,v 1.2 2009/09/22 23:19:02 fine Exp $
 #include <TH2.h>
 
 #include "StMcOutputMaker.h"
@@ -93,7 +93,7 @@ StMcOutputMaker::Make(){
   //std::cout<<"hlow="<<hlow<<"hhigh="<<hhigh<<std::endl;
 
 
-  probTr= StLorentzVectorF(0,0,0);
+  probTr= StLorentzVectorF();
   
   // **************************************
   // get pointer to mcEventMaker, Event *
