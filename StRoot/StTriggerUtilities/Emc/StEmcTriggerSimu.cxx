@@ -5,9 +5,11 @@
 //
 
 // ROOT MySQL
+#if 0
 #include "TMySQLServer.h"
 #include "TMySQLResult.h"
 #include "TMySQLRow.h"
+#endif
 
 // STAR
 #include "St_db_Maker/St_db_Maker.h"
@@ -107,6 +109,7 @@ StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
 
 int StEmcTriggerSimu::get2009_DSMRegisters(int runNumber)
 {
+#if 0
   // Open connection to Run 9 database
 
   LOG_INFO << "Open connection to Run 9 database" << endm;
@@ -240,6 +243,6 @@ int StEmcTriggerSimu::get2009_DSMRegisters(int runNumber)
   LOG_INFO << "Close connection to Run 9 database" << endm;
 
   mysql->Close();
-
+#endif
   return kStOk;
 }
