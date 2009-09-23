@@ -145,13 +145,17 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
   // initialize filename and open file
   TFile *test=0;
   // lese ini file ein 
+  std::string fname="no_debug_ini";
   ifstream ini;
   ini.open("./debug.ini",ios::in);
-  char fname[25]; 
-  ini>>fname;ini>>drawclhisto;ini>>drawvertexhisto;
+  if (ini.good() ) {
+     ini>>fname>>drawclhisto>>drawvertexhisto;
+  }
   //LOG_INFO << "StFtpcClusterDebug constructed" << endm;
-  char histodatei[50];
-  sprintf(histodatei,"run_%d_%s.root",run,fname);
+  stringstream histodateis;
+  histodateis <<"run_" <<run<<"_" << fname <<".root";
+  std::string  histodateistring = histodateis.str();
+  const char *histodatei = histodateistring.c_str();
 
   test=new TFile(histodatei);
 
