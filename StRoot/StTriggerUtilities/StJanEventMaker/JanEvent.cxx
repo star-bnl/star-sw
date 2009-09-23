@@ -5,6 +5,7 @@
 //
 
 #include "JanEvent.h"
+#include <cstring>
 
 JanEvent::JanEvent()
 {

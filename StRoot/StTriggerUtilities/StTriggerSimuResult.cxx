@@ -1,4 +1,4 @@
-// $Id: StTriggerSimuResult.cxx,v 1.3 2008/01/30 15:09:24 balewski Exp $
+// $Id: StTriggerSimuResult.cxx,v 1.4 2009/09/23 23:22:42 fine Exp $
 
 #include <utility>
 using std::make_pair;
@@ -12,6 +12,7 @@ using std::make_pair;
 #include "L2Emulator/L2jetAlgo/L2jetResults2006.h"
 #include "L2Emulator/L2gammaAlgo/L2gammaResult2006.h"
 #include "L2Emulator/L2upsilon/L2upsilonResult2006.h"
+#include <cstring>
 
 ClassImp(HttpResult)
 ClassImp(StTriggerSimuResult)
@@ -125,6 +126,9 @@ void StTriggerSimuResult::setL2Result(const unsigned int* result) {
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.cxx,v $
+ * Revision 1.4  2009/09/23 23:22:42  fine
+ * add the missed cstring header file
+ *
  * Revision 1.3  2008/01/30 15:09:24  balewski
  * Added upsilon2006, needs cleaunp in few days
  *
