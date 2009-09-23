@@ -16,7 +16,7 @@ DSMLayer_EM201_2009::DSMLayer_EM201_2009() : DSMLayer<TriggerDataBlk>(1)
 
 bool DSMLayer_EM201_2009::read(const TriggerDataBlk& event)
 {
-  L1_DSM_Data* L1data = (L1_DSM_Data*)((int)&event+event.L1_DSM_ofl.offset);
+  L1_DSM_Data* L1data = (L1_DSM_Data*)((char*)&event+event.L1_DSM_ofl.offset);
   copy_and_swap8(front().channels, L1data->EMC);
   return true;
 }

@@ -20,7 +20,7 @@ bool DSMLayer_E101_2009::read(const TriggerDataBlk& event)
   bool bc1_in = event.MainX[BC1_CONF_NUM].offset && event.MainX[BC1_CONF_NUM].length;
 
   if (bc1_in) {
-    BELayerBlock* bc1 = (BELayerBlock*)((int)&event+event.MainX[BC1_CONF_NUM].offset);
+    BELayerBlock* bc1 = (BELayerBlock*)((char*)&event+event.MainX[BC1_CONF_NUM].offset);
     for (size_t dsm = 0; dsm < size(); ++dsm)
       copy_and_swap8((*this)[dsm].channels, &bc1->EEMClayer1[dsm*8]);
   }
