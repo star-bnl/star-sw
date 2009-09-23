@@ -80,7 +80,7 @@
 
       CALL VZERO (C(1,1), N1cp*Ncp*2)
 
-      charge = sign(1.0,XX(5))
+      charge = sign(1.D0,XX(5))
       r1 = 1./(XX(5)*CONSB+1.e-10) ! signed radius of curvature
       pt1 = 1./(abs(XX(5))+1.e-10)
       psi1b = XX(4)+charge*C_PI_2 !mangled psi

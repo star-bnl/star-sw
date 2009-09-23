@@ -111,8 +111,8 @@
       r2 = 1./(XX(10)*CONSB) ! signed radius of curvature
       pt1 = 1./abs(XX(5))
       pt2 = 1./abs(XX(10))
-      psi1b = XX(4)+sign(1.0,XX(5))*C_PI_2 !mangled psi
-      psi2b = XX(9)+sign(1.0,XX(10))*C_PI_2 !mangled psi
+      psi1b = XX(4)+sign(1.D0,XX(5))*C_PI_2 !mangled psi
+      psi2b = XX(9)+sign(1.D0,XX(10))*C_PI_2 !mangled psi
       if(psi1b.gt. C_2PI)psi1b = psi1b-C_2PI
       if(psi1b.lt.0)psi1b = psi1b+C_2PI
       if(psi2b.gt.C_2PI)psi2b = psi2b-C_2PI
@@ -159,8 +159,8 @@
       DY = XX(12) - Xb(21)
       DZ = XX(13) - Xb(22)
 
-      psi1a = psi1-sign(1.0,XX(5))*C_PI_2 !mangled psi
-      psi2a = psi2-sign(1.0,XX(10))*C_PI_2 !mangled psi
+      psi1a = psi1-sign(1.D0,XX(5))*C_PI_2 !mangled psi
+      psi2a = psi2-sign(1.D0,XX(10))*C_PI_2 !mangled psi
       spsi1a = sin(psi1a)
       cpsi1a = cos(psi1a)
       spsi2a = sin(psi2a)
@@ -192,8 +192,8 @@
       dbzdpsi1 = dist*pt1*pz*(py*cpsi1a-px*spsi1a)/ptot**3
       dbzdpsi2 = dist*pt2*pz*(py*cpsi2a-px*spsi2a)/ptot**3
 
-      s1 = sign(1.0,XX(5))
-      s2 = sign(1.0,XX(10))
+      s1 = sign(1.D0,XX(5))
+      s2 = sign(1.D0,XX(10))
       dpxdqovpt1 = -s1*cpsi1a/XX(5)**2 - spsi1a*XX(14)*CONSB/abs(XX(5))
       dpxdqovpt2 = -s2*cpsi2a/XX(10)**2 - spsi2a*XX(15)*CONSB/abs(XX(10))
       dpydqovpt1 = -s1*spsi1a/XX(5)**2 + cpsi1a*XX(14)*CONSB/abs(XX(5))
