@@ -19,6 +19,9 @@
  * corrected calculation of opening angle 
  **
  * $Log: StHbtPair.cc,v $
+ * Revision 1.28  2009/09/23 00:51:21  jeromel
+ * Fix for StThreevector
+ *
  * Revision 1.27  2003/09/02 17:58:32  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -235,10 +238,14 @@ void StHbtPair::qYKPLCMS(double& qP, double& qT, double& q0) const
   double dummyPz = ::sqrt( (beta2) / (1-beta2) ) ;
   // boost in the correct direction
   if (beta>0.0) { dummyPz = -dummyPz; } ;
+
   // create dummy particle
-  StHbtLorentzVector  l(0.0, 0.0, dummyPz) ; 
+  StHbtLorentzVector  l;
   double dummyMass = 1.0 ;
+
+  l.setZ(dummyPz);
   l.setE(l.vect().massHypothesis(dummyMass) );
+
   // boost particles along the beam into a frame with velocity beta 
   StHbtLorentzVector l1boosted = l1.boost(l) ;
   StHbtLorentzVector l2boosted = l2.boost(l) ;
