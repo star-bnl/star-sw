@@ -1,4 +1,5 @@
 //#define __CLEANUP__ not yet ready
+#define __KEEP_TPCDAQ_TCL_FCF__
 #ifndef __BFC2__
 Bfc_st BFC[] = { // standard chains
 #else /* __BFC2__ */
@@ -701,8 +702,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"VMCAppl"  ,"","","geomT,gen_t,sim_T,RootVMC",""                  ,"StarVMCApplication","VMC G3",kFALSE},
   {"VMC"         ,"geant","","Simu,VMCAppl,-geant","StVMCMaker",           "StVMCMaker","VMC Maker",kFALSE},
   {"VMCPassive"  ,"geant","","VMCAppl"    ,"StVMCMaker",   "StVMCMaker","VMC Maker in Passive Mode",kFALSE},
-  {"StMcEvent"   ,"","","gen_t,sim_T"                                            ,"","StMcEvent","",kFALSE},
-  {"McEvent"     ,"","","StEvent,EEmcUtil,EmcUtil,StMcEvent","StMcEventMaker"  ,"StMcEventMaker","",kFALSE},
   {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker",
                                                                          "<Early StEvent creation>",kFALSE},
 
@@ -728,22 +727,38 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"tpcI" ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,TpcHitMover","StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
-  {"Trs"         ,"Trs","tpcChain","scl,tpcDB,TrsToF,StEvent"         ,"StTrsMaker","StTrsMaker","",kFALSE},
-  {"TpcRS"    ,"","tpcChain","scl,tpcDB,-Trs,Simu","StTpcRSMaker","StTpcRSMaker"
+  {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
+  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut","StTpcRSMaker","libMathMore,StTpcRSMaker"
                                                                       ,"New Tpc Response Simulator",kFALSE},
+  {"EmbeddingShortCut","","","","","","" ,"Embedding Short Cut for StdEdxY2Maker and StTpcHitMover",kFALSE},
+  {"StMcEvent"   ,"","","gen_t,sim_T"                                            ,"","StMcEvent","",kFALSE},
+  {"McEvent"     ,"","","StEvent,EEmcUtil,EmcUtil,StMcEvent","StMcEventMaker"  ,"StMcEventMaker","",kFALSE},
   {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
   {"St_tpc"      ,"","","tpc_T,tpcDb"                                               ,"","St_tpc","",kFALSE},
   {"St_svt"      ,"","","svt_T,tls,svtDb"                                           ,"","St_svt","",kFALSE},
   //  {"StGlobal"     ,"","","globT",                                                 ,"","St_global","",kFALSE},
+#ifdef __KEEP_TPCDAQ_TCL_FCF__
   {"tpc_daq"  ,"tpc_raw","tpcChain","detDb,tpc_T","St_tpcdaq_Maker","StTrsMaker,St_tpcdaq_Maker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tls,St_tpc,StEvent,tpc_daq,-fcf","St_tcl_Maker","St_tcl_Maker", 
                                                                         "Cluster Finder (from raw)",kFALSE},
   {"fcf","","tpcChain","daq,-tcl,tpc_daq,StEvent","StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
+#else
+  {"tpc_daq"  ,"","","",                        "","","St_tpcdaq_Maker has been replaced by TpxRaw",kFALSE},
+  {"tcl"      ,"","","TpxRaw,TpxClu",    "","","St_tcl_Maker has been replaced by StTpcRTSHitMaker",kFALSE},
+  {"fcf"      ,"","","Tpx","",         "","StRTSClientFCFMaker has been replaced by StTpcHitMaker",,kFALSE},
+#endif
   {"tfs"         ,"tpc_hits","tpcChain","MakeEvent,Simu,-trs,-tcl,-fcf,-tpc_daq,tls,St_tpc,StEvent" 
                                            ,"St_tfs_Maker","St_tcl_Maker","use tfs (no StTrsMaker)",kFALSE},
-  {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,-trs,-tcl,-fcf,-tpc_daq,-tfs,-St_tpc,StEvent,rts,detDb" 
+  {"TpcFastSim"  ,"tpc_hits","tpcChain","MakeEvent,Simu,-tfs,-trs,-tcl,-fcf,-tpc_daq,tls,St_tpc,StEvent" 
+                                      ,"StTpcFastSimMaker","St_tcl_Maker","use tfs (no StTrsMaker)",kFALSE},
+#ifdef __KEEP_TPCDAQ_TCL_FCF__
+  {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,-trs,-tcl,-fcf,-tpc_daq,-tfs,-St_tpc,StEvent,rts,detDb"
                      ,"StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx via EVP_READER",kFALSE},
+#else
+  {"tpx"         ,"tpc_hits","tpcChain","MakeEvent,tpc_T,StEvent,rts,detDb" 
+                     ,"StTpcHitMaker","StTpcHitMaker","TPC hit reader for tpc + tpx via EVP_READER",kFALSE},
+#endif
   {"TpxPulser","TpxPulser","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker","TPC+TPX pulser analysis"
                                                                                                   , kFALSE},
   {"TpxPadMonitor","TpxPadMonitor","tpcChain","rts,detDb","StTpcHitMaker","StTpcHitMaker",
@@ -763,15 +778,13 @@ Bfc_st BFC2[] = { // ITTF Chains
 #endif
   {"TpcHitMover" ,"tpc_hit_mover","tpcChain","StEvent",
                       "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
-  {"tpt"   ,"tpc_tracks","tpcChain","tls,St_tpc,TpcHitMover",      "St_tpt_Maker","St_tpt_Maker","",kFALSE},
+  {"tpt"         ,"tpc_tracks","tpcChain","tls,St_tpc,TpcHitMover","St_tpt_Maker","St_tpt_Maker","",kFALSE},
   {"tpt_old"     ,"tpc_tracks","tpcChain","St_tpc,tls",            "St_tpt_Maker","St_tpt_Maker","",kFALSE},
+#ifdef __KEEP_TPCDAQ_TCL_FCF__
   {"TpcT0"  ,"TpcT0","","ctf_T,ftpcT,tls,St_tpc,St_svt,tpc_daq,kalman,StEvent,MuDSTDeps,","StTpcT0Maker",
                "St_tcl_Maker,St_tpt_Maker,St_global,St_dst_Maker,StMuDSTMaker,StPass0CalibMaker","",kFALSE},
-#ifndef __CLEANUP__ 
-  {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
-#else
-  {"ChargeStep","","","",                                "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
 #endif
+  {"ChargeStep","","","",                                "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
   {"laser"       ,"tpc_tracks","LaserTest,tpcChain","tpc_daq,tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},
   {"PreVtx"      ,"","tpcChain","tpt,SCL,sim_T,St_tpc,St_svt,ftpcT,ctf_T",
@@ -893,6 +906,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   // Some global Sti stuff including vertexing
   {"StiLibs","","","StarMagField,StiTpcLib,StiSvtLib,StiSsdlib,StiRnDLib,StiUtil","",
                                                                        "","ITTF:load Sti libraries",kFALSE},
+  {"StiVMCLibs","","","detDb,StarMagField,StiUtil","",              "","ITTF:load StiVMC libraries",kFALSE},
   {"StiTpcLib","","","tpcDB","",                          "Sti,StiTpc","Sti Tpc related libratries",kFALSE},
   {"StiSvtLib","","","svtDB","",        "Sti,StSvtClassLibrary,StiSvt","Sti Svt related libratries",kFALSE},
   {"StiSsdLib","","","ssdDB","",                "Sti,StSsdUtil,StiSsd","Sti Ssd related libratries",kFALSE},
@@ -908,13 +922,14 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"PixelIT"     ,""  ,"","StiLibs",""                           ,"","ITTF: track using Pixel geom",kFALSE},
   {"IstIT"       ,""  ,"","StiLibs",""                             ,"","ITTF: track using Ist geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
-
-  {"genvtx"   ,"","","EEmcUtil,ctf","StGenericVertexMaker","Minuit,Sti,StGenericVertexMaker"
+  {"genvtx"   ,"","","EEmcUtil,ctf","StGenericVertexMaker","Minuit,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
   {"StiUtil"  ,"","","",                              "","StiUtilities","Load StiUtilities library",kFALSE},
   {"StiRnD"   ,"","","Sti",                               "","StiRnD", "Load StiRnD shared library",kFALSE},
   {"Sti"      ,"Sti","","SCL,StEvent,StDbT,TpcIT,StiUtil","StiMaker",
                                                     "StEventUtilities,Sti,StiMaker" ,"ITTF tracker",kFALSE},
+  {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb","StiVMCMaker"
+   ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
   {"StiPulls" ,"","","Sti",                                      "","", "Request to make Sti Pulls",kFALSE},
   {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker"
                                                               ,"Beam background tracker in the TPC",kFALSE},
@@ -980,10 +995,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
-        
+#ifdef __KEEP_TPCDAQ_TCL_FCF__        
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T,l3util"        ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3Chain","l3_T,l3util"                ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
+#endif
   {"l3onl"       ,"","",""                            ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
   {"l3count"     ,"","",""                              ,"Stl3CounterMaker","Stl3RawReaderMaker","",kFALSE},
     
@@ -1473,17 +1489,26 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Test.reco.ITTF","","","MakeEvent,tpcI,fcf,ftpc,SvtCL,Test.ITTF"                       ,"","","",kFALSE},
   {"Test.fast.ITTF","","","gstar,tfs,Simu,sfs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,SvtCL,"
    "tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,"
-   "StarMagField,FieldOn,IAna,y2007,CMuDst"                                               ,"","","",kFALSE},
+   "StarMagField,FieldOn,IAna,CMuDst"                                                     ,"","","",kFALSE},
+  {"Test.VeryFast.ITTF","","","gstar,TpcFastSim,Simu,sfs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,"
+   "SvtCL,tpc_T,globT,tls,db,tpcDB,svtDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,"
+   "EvOut,StarMagField,FieldOn,IAna,CMuDst"                                               ,"","","",kFALSE},
 #if 0
   {"Test.default.ITTF","","","gstar,trs,Simu,sss,svt,ssd,fss,bbcSim,emcY2,McEvOut,GeantOut,IdTruth,MakeEvent,"
    "miniMcMk,McAna,Test.ITTF"                                                             ,"","","",kFALSE},
 #else
   {"Test.default.ITTF","","","gstar,trs,Simu,sss,svt,ssd,fss,bbcSim,IdTruth,MakeEvent,"
    "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
-  {"Test.default.y2005g.ITTF","","","Test.default.ITTF,sdt20050322,noSimuDb"              ,"","","",kFALSE},
+  {"Test.default.y2005g.ITTF","","","Test.default.ITTF,sdt20050130,noSimuDb"              ,"","","",kFALSE},
   {"Test.default.y2007g.ITTF","","","Test.default.ITTF,sdt20070322,noSimuDb"              ,"","","",kFALSE},
-  {"Test.fast.y2005g.ITTF","","","Test.fast.ITTF,sdt20050322,noSimuDb"                    ,"","","",kFALSE},
+  {"Test.fast.y2005g.ITTF","","","Test.fast.ITTF,sdt20050130,noSimuDb"                    ,"","","",kFALSE},
+  {"Test.fast.StiVMC","","","gstar,tfs,Simu,sfs,ssdfast,McEvOut,GeantOut,IdTruth,miniMcMk,McAna,SvtCL,"
+   "tpc_T,globT,tls,db,tpcDB,svtDb,StiVMC,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,"
+   "StarMagField,FieldOn,IAna,CMuDst"                                                     ,"","","",kFALSE},
+  {"Test.fast.y2005g.StiVMC","","","Test.fast.StiVMC,sdt20050130,noSimuDb"                ,"","","",kFALSE},
+  {"Test.VeryFast.y2005g.ITTF","","","Test.VeryFast.ITTF,sdt20050130,noSimuDb"            ,"","","",kFALSE},
   {"Test.fast.y2007g.ITTF","","","Test.fast.ITTF,sdt20070322,noSimuDb"                    ,"","","",kFALSE},
+  {"Test.VeryFast.y2007g.ITTF","","","Test.VeryFast.ITTF,sdt20070322,noSimuDb"            ,"","","",kFALSE},
 #endif
   {"Test.default.Fast.ITTF","","","gstar,tfs,sfs,ssdFast,IdTruth,MakeEvent,miniMcMk,McAna,Test.ITTF",
    ""                                                                                        ,"","",kFALSE},
