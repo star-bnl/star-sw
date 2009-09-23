@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.15 2009/09/22 22:39:38 fine Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.16 2009/09/23 23:30:14 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.16  2009/09/23 23:30:14  fisyak
+ * Follow up Valery's corrections
+ *
  * Revision 1.15  2009/09/22 22:39:38  fine
  * fix the StThreeVector invocation
  *
@@ -192,10 +195,7 @@ public:
   Float_t    padFromLocal(const StThreeVector<Double_t>&, Int_t)     const;
   Float_t    padFromX(Double_t x, Int_t row)                         const; 
   Int_t      rowFromLocal(const StTpcLocalSectorCoordinate& a)       const {return rowFromLocal(a.position());}
-  Float_t    padFromLocal(const StTpcLocalSectorCoordinate& a)       const {
-                 StThreeVector<double> pad(a.position().x(),0,0);
-                 return padFromLocal(pad,a.fromRow());
-     }
+  Float_t    padFromLocal(const StTpcLocalSectorCoordinate& a)       const {return padFromLocal(a.position(),a.fromRow());}
   // tpc local sector Coordinates from Raw Data
   StThreeVector<Double_t> xyFromRaw(const StTpcPadCoordinate&);
   Double_t                yFromRow(Int_t row)                        const;
