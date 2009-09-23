@@ -19,6 +19,9 @@
  * corrected calculation of opening angle 
  **
  * $Log: StHbtPair.cc,v $
+ * Revision 1.29  2009/09/23 04:43:41  fine
+ * Fix StLorentxVector ctor
+ *
  * Revision 1.28  2009/09/23 00:51:21  jeromel
  * Fix for StThreevector
  *
@@ -240,7 +243,7 @@ void StHbtPair::qYKPLCMS(double& qP, double& qT, double& q0) const
   if (beta>0.0) { dummyPz = -dummyPz; } ;
 
   // create dummy particle
-  StHbtLorentzVector  l;
+  StHbtLorentzVector  l(0.0, 0.0, dummyPz,0) ; 
   double dummyMass = 1.0 ;
 
   l.setZ(dummyPz);
