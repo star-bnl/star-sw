@@ -512,7 +512,8 @@ StThreeVectorF StSkimPionMaker::getPoint(StEmcPoint *p, Int_t &id, Float_t &e, F
     if(!event)
 	{
 	    cout << "++++++++++++ StSkimPionMaker::getPoint: Can't get Event pointer" << endl;
-	    return kStOk;
+       assert ( 0 && " Can't convert kStOk to StThreeVectorF. Please fix me!!!");
+//	    return kStOk;
 	}
     
     // get primary vertex
