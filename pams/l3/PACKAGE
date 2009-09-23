@@ -1,0 +1,8 @@
+# $Id $
+# package l3
+# author: 
+Library:libl3.so:LIBS +=   -lStDbUtilities  -l_StTpcDb
+Library:libSt_l3.so:LIBS +=   -lStDbUtilities  -l_StTpcDb
+#Library:libl3_Tables.so:LIBS += 
+#Library:libl3.so:LIBS +=   -lStDbUtilities  -lStTpcDb
+#Library:libSt_l3.so:LIBS +=   -lStDbUtilities  -lStTpcDb
