@@ -197,7 +197,7 @@ int OLDEVP::DAQemcReader(char *m)
 	char *trg_btow_data = 0; // BTOW data read elsewhere
 	if(trg_btow_data) {
 	  LOG_INFO << "Getting BTOW data from trigger banks..." << endm;
-	  readBTOW((u_short *)((u_int)trg_btow_data), token);
+	  readBTOW((u_short *)(trg_btow_data), token);
 	  bytes += (64 + 2 + 30 * 164) * 2;
 	}
 
@@ -205,7 +205,7 @@ int OLDEVP::DAQemcReader(char *m)
 	char *trg_etow_data = getEmcTrgData(datap, y8ETOW_INDEX);
 	if(trg_etow_data) {
 	  LOG_INFO << "Getting ETOW data from trigger banks..." << endm;
-	  readETOW((u_short *)((u_int)trg_etow_data), token);
+	  readETOW((u_short *)(trg_etow_data), token);
 	  bytes += (64 + 2 + 6 * 164) * 2;
 	}
 
@@ -363,7 +363,7 @@ int OLDEVP::DAQemcReader(char *m)
 					  if(trg_btow_data) {
 					    LOG_ERROR << "Reading BTOW data from DAQ banks but already read it from trigger banks" << endm;
 					  }
-					  readBTOW((u_short *)((u_int)emcadcr + 40), token);
+					  readBTOW((u_short *)((char *)emcadcr + 40), token);
 					}
 					else if((type==0) && (i == EMC_B_SMD)) {	// barrel SMD
 						
@@ -373,10 +373,10 @@ int OLDEVP::DAQemcReader(char *m)
 						emc.bsmd_in = 1;
 						// get to the data: 40 bytes bank header, 4 bytes dummy,
 						// 256 bytes fiber header...
-						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 256) ; 
+						data = (u_short *) ((char *) emcadcr + 40 + 4 + 256) ; 
 					
 
-						emc.bsmd_cap[j] = *(u_char *)((u_int)emcadcr + 40 + 4 + 4*16) ;
+						emc.bsmd_cap[j] = *(u_char *)((char *)emcadcr + 40 + 4 + 4*16) ;
 						for(l=0;l<4800;l++) {
 							emc.bsmd[j][l] = l2h16(*data++) ;
 							if(emc.bsmd[j][l] > 0) emc.bsmd_ch++ ;
@@ -390,7 +390,7 @@ int OLDEVP::DAQemcReader(char *m)
 					    LOG_ERROR << "Reading ETOW data in the DAQ banks, but already read it from the trigger banks." << endm;
 					  }
 
-					  readETOW((u_short *)((u_int)emcadcr + 40), token);
+					  readETOW((u_short *)((char*)emcadcr + 40), token);
 					}
 					else if((type==1) && (i == EMC_B_SMD)) {	// endcap SMD
 						
@@ -403,9 +403,9 @@ int OLDEVP::DAQemcReader(char *m)
 						// get to the data: 40 bytes bank header, 4 bytes dummy,
 						// 128 bytes fiber header...
 						// ...but first grab the token from the header...
-						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 4) ;
+						data = (u_short *) ((char*) emcadcr + 40 + 4 + 4) ;
 						thi = l2h16(*data) ;
-						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 6) ;
+						data = (u_short *) ((char*) emcadcr + 40 + 4 + 6) ;
 						tlo = l2h16(*data) ;
 
 						local_token = thi * 256 + tlo ;
@@ -414,7 +414,7 @@ int OLDEVP::DAQemcReader(char *m)
 						  LOG_ERROR << Form("ESMD: Token in bank %d different from token in data %d",token,local_token) << endm;
 						}
 
-						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 128) ; 
+						data = (u_short *) ((char*) emcadcr + 40 + 4 + 128) ; 
 					
 						emc.esmd_raw = data ;
 
@@ -455,7 +455,7 @@ int OLDEVP::DAQemcReader(char *m)
 
 // Starts from after the EMCADCR bankHeader...
 //
-//    ie...   data = (u_int)emcadcr + 40
+//    ie...   data = (char*)emcadcr + 40
 //                 = (u_int)trg_btow_data
 //
 int OLDEVP::readBTOW(u_short *_data, int token)
@@ -467,11 +467,11 @@ int OLDEVP::readBTOW(u_short *_data, int token)
   emc.btow_in = 1;
 
 
-  data = (u_short *)((u_int)_data + 4 + 4);
+  data = (u_short *)((char*)_data + 4 + 4);
   thi = l2h16(*data);
-  data = (u_short *)((u_int)_data + 4 + 6);
+  data = (u_short *)((char*)_data + 4 + 6);
   tlo = l2h16(*data);
-  data = (u_short *)((u_int)_data + 4 + 128);
+  data = (u_short *)((char*)_data + 4 + 128);
 
   local_token = thi * 256 + tlo ;
 
@@ -481,7 +481,7 @@ int OLDEVP::readBTOW(u_short *_data, int token)
 
 
   // 4 bytes dummy, 128 bytes fiber header...
-  data = (u_short *)((u_int)_data + 4 + 128);
+  data = (u_short *)((char*)_data + 4 + 128);
   emc.btow_raw = data ;
 						
   // get the preamble
@@ -514,7 +514,7 @@ int OLDEVP::readBTOW(u_short *_data, int token)
 
 // Starts from after the bankHeader...
 //
-//    ie...   data = (u_int)emcadcr + 40
+//    ie...   data = (char*)emcadcr + 40
 //                 = (u_int)trg_btow_data + 136
 //
 int OLDEVP::readETOW(u_short *_data, int token) {
@@ -530,11 +530,11 @@ int OLDEVP::readETOW(u_short *_data, int token) {
   // ...but first grab the token from the header...
 
   
-  data = (u_short *)((u_int)_data + 4 + 4);
+  data = (u_short *)((char*)_data + 4 + 4);
   thi = l2h16(*data);
-  data = (u_short *)((u_int)_data + 4 + 6);
+  data = (u_short *)((char*)_data + 4 + 6);
   tlo = l2h16(*data);
-  data = (u_short *)((u_int)_data + 4 + 128);
+  data = (u_short *)((char*)_data + 4 + 128);
 
   local_token = thi * 256 + tlo ;
 
@@ -606,7 +606,8 @@ char* OLDEVP::getEmcTrgData(DATAP* datap, int index)
   if (swaptrgd) {
     const size_t SIZE = sizeof(TrgTowerTrnfer2008) / 4;
     unsigned int* p = (unsigned int*)&trgd->tow;
-    transform(p, p + SIZE, p, bswap);
+    assert(0 && "Unknow function \"transform\" : \"transform(p, p + SIZE, p, bswap);\"!!! Please fix me. VF");
+//    transform(p, p + SIZE, p, bswap);
   }
 
   TrgTowerTrnfer2008* trgtowertrnfer = &trgd->tow;
