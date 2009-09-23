@@ -214,11 +214,13 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 #endif
       if (west) {
 	Int_t sec = sector+1;
-	west = St_tpcAnodeHVC::instance()->livePadrow(sec,row+1);
+	west = St_tpcAnodeHVC::instance()->livePadrow(sec,row+1) &&
+	       St_tpcGainC::instance()->livePadrow(sec,row+1);
       }
       if (east) {
 	Int_t sec = 24-(sector+1)%12;
-	east = St_tpcAnodeHVC::instance()->livePadrow(sec,row+1);
+	east = St_tpcAnodeHVC::instance()->livePadrow(sec,row+1) &&
+	       St_tpcGainC::instance()->livePadrow(sec,row+1);
       }
       pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
       pDetector->setIsContinuousMedium(true);
