@@ -29,9 +29,11 @@
 #include "StTriggerUtilities/StDSMUtilities/StDSM2009Utilities.hh"
 
 // MySQL
+#if 0
 #include "TMySQLServer.h"
 #include "TMySQLResult.h"
 #include "TMySQLRow.h"
+#endif
 
 ClassImp(StBemcTriggerSimu)
 //==================================================
@@ -2683,6 +2685,7 @@ int StBemcTriggerSimu::getJetPatchThreshold(int trigId, int dsmid) const {
 
 int StBemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 {
+#if 0
   // Open connection to Run 9 database
 
   LOG_INFO << "Open connection to Run 9 database" << endm;
@@ -2799,6 +2802,6 @@ int StBemcTriggerSimu::get2009_DSMRegisters(int runNumber)
   LOG_INFO << "Close connection to Run 9 database" << endm;
 
   mysql->Close();
-
+#endif
   return kStOk;
 }

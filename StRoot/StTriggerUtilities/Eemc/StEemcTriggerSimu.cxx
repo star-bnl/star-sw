@@ -43,9 +43,11 @@
 #include "StEEmcUtil/EEdsm/EemcTrigUtil.h"
 
 // ROOT MySQL
+#if 0
 #include "TMySQLServer.h"
 #include "TMySQLResult.h"
 #include "TMySQLRow.h"
+#endif
 
 // #### modified by Liaoyuan ####
 // DSM 2009 Utilities
@@ -570,6 +572,7 @@ StEemcTriggerSimu::get2009_DSMLayer1(){
 
 int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 {
+#if 0
   // Open connection to Run 9 database
 
   LOG_INFO << "Open connection to Run 9 database" << endm;
@@ -654,12 +657,15 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
   LOG_INFO << "Close connection to Run 9 database" << endm;
 
   mysql->Close();
-
+#endif
   return kStOk;
 }
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.15  2009/09/23 22:35:43  pibero
+// Removed dependencies on ROOT MySQL
+//
 // Revision 1.14  2009/09/20 06:46:41  pibero
 // Updates for Run 9
 //
