@@ -13,8 +13,8 @@
 #include "TROOT.h"
 #include "TFile.h"
 #include "TNtuple.h"
-#include "iostream.h"
-#include "fstream.h"
+#include <iostream>
+#include <fstream>
 #include "TTimeStamp.h"
 #include "TDatime.h"
 #endif
@@ -101,6 +101,7 @@ void FindTOffset() {
   TTimeStamp begin1((UInt_t) ff2[1],(UInt_t) ff2[2],(UInt_t) ff2[3],
                     (UInt_t) ff2[4],(UInt_t) ff2[5],(UInt_t) ff2[6]);
   tOffset = begin1.GetSec() - (UInt_t) ff2[7];
+  printf("Found time offset to be: %u\n",tOffset);
 }
 
 void UpdateF2() {
@@ -123,8 +124,9 @@ void WriteTable() {
 
   // Only do Iow (which is index i=3, though it _should_ be index i=4 from db labels)
   Float_t ring = 80.5;
-  Float_t reference = TMath::Max(ff3[1],ff3[4]);
-  Float_t missing_resistance = (2.0*183.0)*(1.0 - reference/ff3[3]); // delR = R*(1-(I1/I2))
+  //Float_t reference = TMath::Max(ff3[1],ff3[4]); // Use max(Ioe,Iiw) as reference
+  Float_t reference = TMath::Max(ff3[1],ff3[2]); // Use max(Iow,Iie) as reference
+  Float_t missing_resistance = 364.44*(1.0 - reference/ff3[3]); // delR = R*(1-(I1/I2))
 //printf("GGGG ref = %g  , cur = %g\n",reference,ff3[3]);
   //missing_resistance += resistor;
   
@@ -151,6 +153,7 @@ void WriteTable() {
   missing_res2 = (missing_resistance > 0.2 ? 0.345 : 0.0);
 
   TString buffer = Form("\"%d\",\"%s\",\"33\",\"1\",",dataid,eT);
+  //TString buffer = "\"33\",\"1\",";
   buffer += Form("\"%04d-%02d-%02d %02d:%02d:%02d\",\"ofl\",\"1\",\"0\",",ii[0],ii[1],ii[2],ii[3],ii[4],ii[5]);
   buffer += Form("\"1.0\",\"1.0\",\"%5.3f\",\"%7.5f\",\"%7.5f\"",ring,0.0,missing_res2);
   if (writing) (*out1) << buffer << endl;
@@ -200,6 +203,7 @@ void IncludeThisMeasure() {
 
 // Big change test
   if (tcnt) {
+  //if (tcnt>2) { // don't decide based on one or two points?
     float avg = ff3[3];
     if (tcnt>1) avg /= ff3[0];
     if (TMath::Abs(avg-ff1[3]) > 0.045) ResetMeasure(); // 45nA change from the average
@@ -261,8 +265,11 @@ void matchTpcFieldCageShorts(char* T, float lr, float lm, int i) {
 }
 
 //////////////////////////////////////////
-// $Id: matchTpcFieldCageShorts.C,v 1.1 2009/02/20 18:50:58 genevb Exp $
+// $Id: matchTpcFieldCageShorts.C,v 1.2 2009/09/23 00:06:55 genevb Exp $
 // $Log: matchTpcFieldCageShorts.C,v $
+// Revision 1.2  2009/09/23 00:06:55  genevb
+// More precise resistances
+//
 // Revision 1.1  2009/02/20 18:50:58  genevb
 // Placement in CVS of automatic TpcFieldCageShort calib codes
 //
