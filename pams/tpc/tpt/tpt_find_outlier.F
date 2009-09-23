@@ -1,5 +1,8 @@
-* $Id: tpt_find_outlier.F,v 1.7 2000/03/10 05:02:07 sakrejda Exp $
+* $Id: tpt_find_outlier.F,v 1.8 2009/09/23 23:34:16 fisyak Exp $
 * $Log: tpt_find_outlier.F,v $
+* Revision 1.8  2009/09/23 23:34:16  fisyak
+* set dsxy <= 1
+*
 * Revision 1.7  2000/03/10 05:02:07  sakrejda
 * Track length calculation fixed, was not going past 90 deg before....
 *
@@ -113,6 +116,7 @@ cc      chisqr=0
              cury=ycir(i)-bcent
              curmod=sqrt(curx**2+cury**2)
              dsxy = abs(refx*cury-refy*curx)/(refmod*curmod)
+             if (dsxy .gt. 1) dsxy = 1
              stot = asin(dsxy)*rr
              if(stot.lt.stot_old) then
                  stot = rr*(C_PI-dsxy)
