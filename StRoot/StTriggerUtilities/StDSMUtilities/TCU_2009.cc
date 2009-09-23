@@ -27,7 +27,7 @@ TCU_2009::TCU_2009() : mDSMInput(0), mTCUInput(0)
 
 void TCU_2009::read(const TriggerDataBlk& event)
 {
-  EvtDescData* evtDesc = (EvtDescData*)((int)&event+event.EventDesc_ofl.offset);
+  EvtDescData* evtDesc = (EvtDescData*)((char*)&event+event.EventDesc_ofl.offset);
   mDSMInput = evtDesc->DSMInput;
 }
 

@@ -21,7 +21,7 @@ bool DSMLayer_E001_2009::read(const TriggerDataBlk& event)
   if (bc1_in) {
     // 9 DSMs * 16 channels
     char cbuffer[9*16];
-    BELayerBlock* bc1 = (BELayerBlock*)((int)&event+event.MainX[BC1_CONF_NUM].offset);
+    BELayerBlock* bc1 = (BELayerBlock*)((char*)&event+event.MainX[BC1_CONF_NUM].offset);
     for (size_t dsm = 0; dsm < size(); ++dsm) {
       copy_and_swap16(&cbuffer[dsm*16], &bc1->EEMC[dsm*16]);
       char* cpMin = cbuffer+dsm*16;
