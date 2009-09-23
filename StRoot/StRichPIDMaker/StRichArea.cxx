@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.8 2003/04/30 20:38:06 perev Exp $
+ * $Id: StRichArea.cxx,v 2.9 2009/09/23 05:19:30 fine Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 2.9  2009/09/23 05:19:30  fine
+ *  add assert and file #1648 RT
+ *
  *  Revision 2.8  2003/04/30 20:38:06  perev
  *  Warnings cleanup. Modified lines marked VP
  *
@@ -48,6 +51,7 @@
 
 #include "StRichAreaSegment.h"
 #include "StRichMinimization.h"
+#include <cassert>
 
 // root stuff (sorry!)
 #include "TDatime.h"
@@ -1374,7 +1378,9 @@ StRichArea::adjacentCheck(StThreeVectorF& ixy, StThreeVectorF& oxy) {
   //
   // check to see if points are in adjacent quadrants
   //
-  StThreeVectorF check = ixy*oxy;
+   assert (0 && "Fix me please, There is no suitable StThreeVectorF method yet");
+         
+  StThreeVectorF check;// = ixy*oxy;
   if (check.x() > 0 || check.y() > 0) { return true;}
   
   return false;
