@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.548 2009/09/23 20:17:21 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.549 2009/09/23 23:31:10 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -19,7 +19,7 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #define STAR_LOGGER 1
-
+#define __KEEP_TPCDAQ_TCL_FCF__
 //_____________________________________________________________________
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
