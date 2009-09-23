@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.201 2009/08/28 16:50:12 perev Exp $
+* $Id: geometry.g,v 1.202 2009/09/23 23:28:51 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.202  2009/09/23 23:28:51  perev
+* BugFix. pipe14==>pipe12 in y2008 & y2009
+*
 * Revision 1.201  2009/08/28 16:50:12  perev
 * CleanUp of write(*,*)
 *
@@ -918,6 +921,7 @@ replace [exe PHMD01;] with ["Photon Multiplicity Detector Version ";PHMD=on;  Ph
 replace [exe PHMD02;] with ["Photon Multiplicity Detector Version ";PHMD=on;  PhmdConfig = 2;]
 
 replace [exe PIPE00;] with [ "Simplest.Gerrit"; PipeConfig = -1;PipeFlag   = -1;]
+replace [exe PIPE12;] with [ "Default pipe"; PipeConfig = 2 ; PipeFlag   = 1;]
 replace [exe PIPE04;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 0;]
 replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
@@ -1211,7 +1215,7 @@ replace [exe y2008;] with [;
 { "y2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now"
     exe SCON02;exe TPCE03;exe BTOFb6;exe CALB02;exe ECAL31;exe BBCMon;
     exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;exe PHMDof;exe SISDof;
-    exe FTRO01;exe MUTD03;exe CAVE04;exe PIPE14;
+    exe FTRO01;exe MUTD03;exe CAVE04;exe PIPE12;
 };]
 
 *********   y2008a   ***
@@ -1225,7 +1229,7 @@ replace [exe y2009;] with [;
     exe SCON13;exe TPCE04;exe BTOFc7;exe CALB02;exe ECAL31;
     exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
     exe PHMDof;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
-    exe PIPE14;
+    exe PIPE12;
 };]
 
 
