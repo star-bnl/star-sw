@@ -105,7 +105,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
     
     /* local results */
     register struct resx  *r ;
-    UInt_t pres1[500], pres2[500] ;
+    ULong_t pres1[500], pres2[500] ;
     struct resx rr_local ;
     struct resx *rr = &rr_local ;
 
@@ -124,7 +124,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 	    /* Define variables */
 	    Int_t j ;
 	    Int_t pres_cou1, pres_cou2 ;
-	    UInt_t *r1, *r2 ;
+	    ULong_t *r1, *r2 ;
 
 	    /* check if this row is to be done */
 	    if(rowAbs[i] == 0) break ;
@@ -206,7 +206,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 			    UInt_t flags ;
 			    Int_t last_falling= -999999 ;
 			    Int_t k ;
-			    UInt_t *ri ;
+			    ULong_t *ri ;
 			    UInt_t tmp_charge ;
 			
 			    /* Set flag */
@@ -421,7 +421,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 					    go_on = 0 ;
 					    					    
 					    // store the pointer to the matched in "2" 
-					    r2[pres_cou2++] = (UInt_t) rr_tmp ;
+					    r2[pres_cou2++] = (ULong_t) rr_tmp ;
 
 					    ////////////////////////
 					    // calculate and fill the new means, charge etc in rr = rr_tmp
@@ -454,7 +454,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 			    if(go_on) 
 				{
 				    // store this guy because it's the first
-				    r2[pres_cou2++] = (UInt_t )r ;
+				    r2[pres_cou2++] = (ULong_t )r ;
 				    mstore((UInt_t *)r,av,tmp_charge,charge,flags|FLAG_ONEPAD,mean) ;
 				    r++ ;
 				}

@@ -40,11 +40,12 @@ c----------------------------------------------------------
       real energy,energy_emc,s_energy,isol,phil,phis,dphi
       real p_cluster,pt_sum_out
       real e_corr,c_rphi,phi_corr
-      real eta,eta0,phi,et_tot,et_tot_sim,phi0,dphim,dphir,rad_smd_p
+      real eta,eta0,et_tot,et_tot_sim,phi0,dphim,dphir,rad_smd_p
       real s_phi,s_eta,detam,detar,eta_corr,sigma_eta,sigma_phi
       integer n_tower_eta,n_tower_phi,det,sub,module,out_num,i,p_bemc
       real bemc_max_eta,energy_cut,et_seed,r_shower,r_isol
       real phi_smd_tower,xcor,emc_res_a,emc_res_b,emc_res_c
+      double precision phi
       logical first /.true./
       integer iprin,ISLFLAG
 c----------------------------------------------------------------------
@@ -185,7 +186,8 @@ c
       integer n_iter,n_r_int
       real p(dim,5)
       real p_sim(dim)
-      real etmax,eta,phi,dphia,phic,e_cell
+      real etmax,eta,dphia,phic,e_cell
+      double precision phi
       real prec,r_int,eta_old,phi_old,eta_b,phi_b,esum_out
       real eta_tower,phi_tower
       data prec/0.05/
@@ -379,7 +381,7 @@ c
       else
         p(nj,3)=p(nj,3)/p(nj,5)
         p(nj,4)=p(nj,4)/p(nj,5)
-        if(abs(p(nj,4)).gt.C_PI) p(nj,4)=p(nj,4)-sign(C_2PI,p(nj,4))
+        if(abs(p(nj,4)).gt.C_PI) p(nj,4)=p(nj,4)-sign(C_2PI,dble(p(nj,4)))
         do 180 ic=n+1,nc
  180    if(k(ic,1).lt.0) k(ic,1)=0
 c        do 190 j=1,4

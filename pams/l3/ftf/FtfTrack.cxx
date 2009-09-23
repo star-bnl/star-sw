@@ -20,6 +20,7 @@
 //#include <memory.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 #include "FtfTrack.h"
 #include "FtfHit.h"
 

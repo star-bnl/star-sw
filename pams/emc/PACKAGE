@@ -1,0 +1,6 @@
+# $Id $
+# package emc
+# author: 
+#Library:libemc_Tables.so:LIBS += 
+#Library:libemc.so:LIBS +=   -lminicern
+#Library:libSt_emc.so:LIBS +=   -lminicern
