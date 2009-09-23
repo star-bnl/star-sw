@@ -95,7 +95,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) :
     (void) printf("TRG_Reader::TRG_Reader: swap error: %s %d\n",__FILE__,__LINE__); 
   }
   pBankTRGP->header.CRC=0;
-  pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
+  pBankTRGD=(Bank_TRGD*) ((char *)pBankTRGP + 4*pBankTRGP->theData.offset);
   assert(pBankTRGD);
 
   if(!pBankTRGD->test_CRC()) {
@@ -165,7 +165,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) :
         mErr = 2007;
         (void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__);
       }
-      pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
+      pBankTRGD=(Bank_TRGD*) ((char *)pBankTRGP + 4*pBankTRGP->theData.offset);
       break;
 
     case 2008:
@@ -174,7 +174,7 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) :
         mErr = 2008;
         (void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__);
       }
-      pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
+      pBankTRGD=(Bank_TRGD*) ((char *)pBankTRGP + 4*pBankTRGP->theData.offset);
       break;
 
     default: 

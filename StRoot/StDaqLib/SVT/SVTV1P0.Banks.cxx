@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: SVTV1P0.Banks.cxx,v 1.7 2007/12/24 06:04:27 fine Exp $
+ * $Id: SVTV1P0.Banks.cxx,v 1.8 2009/09/23 16:13:03 fine Exp $
  *
  * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0.Banks.cxx,v $
+ * Revision 1.8  2009/09/23 16:13:03  fine
+ * fix pointer arithmetics and cpu type
+ *
  * Revision 1.7  2007/12/24 06:04:27  fine
  * introduce OLDEVP namespace to allow ole and new EVP library concurrently
  *
@@ -90,7 +93,7 @@ int classname(Bank_SVTANODK)::swap()
     return iret;
   else
     iret = swap_raw(header.ByteOrder,&bpADC,12);
-#elif defined(__i386__) || defined(__osf__)
+#elif defined(__i386__) || defined(__osf__) || defined(__x86_64__)
   if(!iret) 
     return 0;
   else if(iret < 0) 

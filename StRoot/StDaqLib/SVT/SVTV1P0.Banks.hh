@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.Banks.hh,v 1.5 2004/03/01 18:05:47 fisyak Exp $
+ * $Id: SVTV1P0.Banks.hh,v 1.6 2009/09/23 16:13:03 fine Exp $
  *      
  * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.Banks.hh,v $
+ * Revision 1.6  2009/09/23 16:13:03  fine
+ * fix pointer arithmetics and cpu type
+ *
  * Revision 1.5  2004/03/01 18:05:47  fisyak
  * Account for new place for rts.h, add osf
  *
@@ -116,7 +119,7 @@ struct SVTCoordinates
   u_char ladder;
   u_char waferID;  // 4:hybrid, 4:wafer
   u_char hybridID;  // 1:not used, 2:transition board, 3:wafer, 2:hybrid
-#elif defined(__i386__) || defined(__osf__)
+#elif defined(__i386__) || defined(__osf__) || defined(__x86_64__)
   u_char hybridID;  // 1:not used, 2:transition board, 3:wafer, 2:hybrid
   u_char waferID;  // 4:hybrid, 4:wafer
   u_char ladder;
