@@ -1,6 +1,6 @@
 /*******************************************************************************
  * 
- * $Id: StPi0InvMassMaker.cxx,v 1.2 2006/06/01 13:21:12 kocolosk Exp $
+ * $Id: StPi0InvMassMaker.cxx,v 1.3 2009/09/23 03:46:36 fine Exp $
  *
  * Author: Andre Mischke, Utrecht, Jan 2005 (a.mischke@phys.uu.nl)
  *******************************************************************************
@@ -529,14 +529,14 @@ StThreeVectorF StPi0InvMassMaker::getPoint(StEmcPoint *p, Int_t &id, Float_t &e,
   if(!event)
   {
     cout << "++++++++++++ StPi0InvMassMaker::getPoint: Can't get Event pointer" << endl;
-    return kStOk;
+    return  StThreeVectorF(kStOk,0,0);
   }
 
   StPrimaryVertex* primaryVertex = event->primaryVertex(); 
   if(!primaryVertex)
   {
     cout << "++++++++++++ StPi0InvMassMaker::getPoint: Event w/o primary vertex" << endl;
-    return kStOk;
+    return StThreeVectorF(kStOk,0,0);
   }
   // get primary vertex
   StThreeVectorF MainVertexPosition;
