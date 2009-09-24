@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.18 2009/09/21 02:22:33 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.19 2009/09/24 15:41:55 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -142,7 +142,7 @@ void GeomBrowser::CreateActions()
    fView_GLAction      ->setToolTip(tr("Open the QGLViewer-based 3D geometry viewer"));
 
 #ifndef  NO_GEANT_MAKER
-   fEditGeoSrc         = new QAction(  "Edit Geant Geometry", this);
+   fEditGeoSrc         = new QAction( QIcon(":/manual.xpm"), "Edit Geant Geometry", this);
    fEditGeoSrc         ->setToolTip(tr("Find and display the MORTRAN file defining the picked volume to edit"));
    fEditGeoSrc->setCheckable(true);
 #endif
