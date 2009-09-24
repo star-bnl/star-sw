@@ -116,7 +116,7 @@ StFtpcClusterDebug::StFtpcClusterDebug()
 
   , histdir(0), histdir2(0), vertexdir(0), topdir(0)
   , drtree (0), dtree(0), dttree(0), dtrtree(0), dtreeraw(0)
-  , drawclhisto(-1956), drawvertexhisto(-1956)
+  , drawclhisto(0), drawvertexhisto(0)
 {
   // default constructor
   //   LOG_INFO << "StFtpcClusterDebug constructed" << endm; 
@@ -139,17 +139,21 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
 
   , histdir(0), histdir2(0), vertexdir(0), topdir(0)
   , drtree (0), dtree(0), dttree(0), dtrtree(0), dtreeraw(0)
-  , drawclhisto(-1956), drawvertexhisto(-1956)
+  , drawclhisto(0), drawvertexhisto(0)
 {
 
   // initialize filename and open file
   TFile *test=0;
-  // lese ini file ein 
-  std::string fname="no_debug_ini";
+  // Initialize debug root file name
+  std::string fname="fdbg";
+  // Read debug.ini file
   ifstream ini;
   ini.open("./debug.ini",ios::in);
   if (ini.good() ) {
      ini>>fname>>drawclhisto>>drawvertexhisto;
+  }
+  else {
+     LOG_WARN << "debug.ini file missing - used default filename, drawclhisto = " << drawclhisto << " drawvertexhist0 = " << drawvertexhisto <<endm;
   }
   //LOG_INFO << "StFtpcClusterDebug constructed" << endm;
   stringstream histodateis;
@@ -278,6 +282,7 @@ void StFtpcClusterDebug::backup()
 
 void StFtpcClusterDebug::drawgainhisto(int hardsec, int hardrow,int iPad, float gainfac,TPCSequence HSequence)
 {
+  // called from StFtpcClusterMaker/StFtpcClusterFinder.cc if drawclhist = 1 in debug.ini file
   // define histogramname only if new sector or row
   if (!dir2)
     {
@@ -322,6 +327,7 @@ void StFtpcClusterDebug::drawgainhisto(int hardsec, int hardrow,int iPad, float 
 
 void StFtpcClusterDebug::drawhisto(int hardsec, int hardrow, int iPad, TPCSequence HSequence)
 {
+  // called from StFtpcClusterMaker/StFtpcClusterFinder.cc if drawclhist = 1 in debug.ini file
   // define histogramname only if new sector or row
   if (!dir)
     {
@@ -397,6 +403,8 @@ void StFtpcClusterDebug::fillraw(int hardsec, int hardrow, int iPad, TPCSequence
 
 void StFtpcClusterDebug::drawvertex(TH1F *veast,TH1F *vwest, TH1F *v)
 {
+  // called from StFtpcTrackMaker/StFtpcTrackMaker.cxx if drawvertexhist = 1 in debug.ini file
+  // (currently commented out - may be obsolete)
   char dirname[10];
   sprintf(dirname,"vtx_%d",nevent);
   vertexdir=topdir->mkdir(dirname);
