@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.202 2009/09/23 23:28:51 perev Exp $
+* $Id: geometry.g,v 1.203 2009/09/24 00:36:57 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.203  2009/09/24 00:36:57  perev
+* BTOFc6 <== BTOFc7 in y2009 F.Geurts
+*
 * Revision 1.202  2009/09/23 23:28:51  perev
 * BugFix. pipe14==>pipe12 in y2008 & y2009
 *
@@ -1013,7 +1016,7 @@ replace [exe BTOF66;] with [;" X.Dong";BTOF=on;
 replace [exe BTOFb6;] with [;" X.Dong";BTOF=on;
                             BtofConfig=11; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
-replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=7 " call btofgeo7 ";]
+replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo7 ";]
 
 
 
@@ -1226,7 +1229,7 @@ replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 *********   y2009   ***
 replace [exe y2009;] with [;
 { "y2009 baseline: much more detailed TPC (thnx YF)"
-    exe SCON13;exe TPCE04;exe BTOFc7;exe CALB02;exe ECAL31;
+    exe SCON13;exe TPCE04;exe BTOFc6;exe CALB02;exe ECAL31;
     exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
     exe PHMDof;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
     exe PIPE12;
