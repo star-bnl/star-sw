@@ -391,7 +391,7 @@ void EvpServer::run() {
     if (mGui) gSystem->ProcessEvents();
     if ( mGoFlag ) {
       MainLoop();
-    }
+    } else if (!mGui) mQuit = true; // termonate the loop and leave run
   }
 }
 
@@ -618,7 +618,7 @@ void EvpServer::SetStopFlag(void)
 
 /***************************************************************************
  *
- * $Id: EvpServer.cxx,v 1.5 2009/09/24 20:39:04 fine Exp $
+ * $Id: EvpServer.cxx,v 1.6 2009/09/24 20:48:02 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -628,6 +628,9 @@ void EvpServer::SetStopFlag(void)
  ***************************************************************************
  *
  * $Log: EvpServer.cxx,v $
+ * Revision 1.6  2009/09/24 20:48:02  fine
+ * terminate the infinite loop
+ *
  * Revision 1.5  2009/09/24 20:39:04  fine
  * break some run-tine gui dependency
  *
