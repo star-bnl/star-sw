@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.58 2009/07/25 02:07:17 perev Exp $
+* $Id: g2t_volume_id.g,v 1.59 2009/09/24 02:54:23 perev Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.59  2009/09/24 02:54:23  perev
+* BugFix in TOF g2t_volume_id F.Geurts
+*
 * Revision 1.58  2009/07/25 02:07:17  perev
 * Prompt hits added
 *
@@ -375,12 +378,20 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             rileft     = 2               !  east (pre-set)
             sector     = btog_posit2     !  tray (pre-set)
             module     = numbv(1)        !  module (eta)
-            layer      = numbv(2)        !  layer (phi, get from hit position)
-         else if (btog_choice==6) then ! full TOFr
+            layer      = numbv(2)        !  layer (1-6, gap in module)
+         else if (btog_choice==11) then                     ! Run 8
+            rileft     = 2               !  east (pre-set)
+            sector     = numbv(1)        !  tray(1-60)
+            module     = numbv(2)        !  module (eta)
+            layer      = numbv(3)        !  layer (1-6, gap in module)
+         else if (btog_choice==6 .or. btog_choice>=12) then ! full TOF or Run 9
             rileft     = numbv(1)        !  west(1)/east(2)
             sector     = numbv(2)        !  tray(1-60)
             module     = numbv(3)        !  module (eta)
-            layer      = numbv(4)        !  layer (phi, get from hit position)
+            layer      = numbv(4)        !  layer (1-6, gap in module)
+         else
+            print *,' g2t_volume_id: unknown TOFr choice.'
+            print *,' g2t_volume_id: btog_choice=',btog_choice
          endif
          volume_id = layer +10*(module +100*(sector+100*rileft) )
 
