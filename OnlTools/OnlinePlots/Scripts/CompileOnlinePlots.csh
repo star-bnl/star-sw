@@ -60,7 +60,8 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
   gSystem->Load("RTS");
   if (gROOT->IsBatch()) {
      // too foolish the loaded
-     gSystem->Load("libqt-mt.so");
+     gSystem->Load("libQtCore.so");
+     gSystem->Load("libQtGui.so");
      gSystem->Load("libGui.so");
      gSystem->Load("libGQt.so");
   }
