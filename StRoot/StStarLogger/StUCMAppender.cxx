@@ -12,8 +12,8 @@
 #include "TString.h"
 #include "TObjString.h"
 
-#include "StUCMApi/logging/TxEventLog.h"
-#include "StUCMApi/logging/TxEventLogFactory.h"
+#include "StStarLogger/logging/TxEventLog.h"
+#include "StStarLogger/logging/TxEventLogFactory.h"
 //#include "StUCMApi/TxEventLog.h"
 
 #include <log4cxx/helpers/loglog.h>
