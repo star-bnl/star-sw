@@ -42,7 +42,7 @@
 #include <rtsSystems.h>
 #include <fcfClass.hh>
 
-static char *fcf_CVS_revision = "$Revision: 1.18 $" ;
+static char *fcf_CVS_revision = "$Revision: 1.19 $" ;
 
 #ifdef __ROOT__	// STAR Offline
 
@@ -272,7 +272,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		u_int *ptrs = fastMem->cppStore ;
 #endif
 		register u_int *ptrs_r = ptrs ;
-		register u_int *cpp_r = (u_int *)((u_int)cppin + cppOff[pad]) ;
+		register u_int *cpp_r = (u_int *)((char*)cppin + cppOff[pad]) ;
 		register u_int fe00  = 0xFE00FE00 ;
 
 		u_int *ptrs_end = ptrs_r + 31 ;
@@ -326,7 +326,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 
 #ifdef FCF_10BIT_ADC
-		u_short *val = (u_short *)((u_int)adcin + adcOff[pad]) ;
+		u_short *val = (u_short *)((char*)adcin + adcOff[pad]) ;
 #else
 		u_char *val = (u_char *)((u_int)adcin + adcOff[pad]) ;
 #endif
@@ -334,7 +334,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 #ifdef FCF_SIM_ON
 		u_short *simval ;
 		if(simout) {
-			simval = (u_short *)((u_int)simin + adcOff[pad]) ;
+			simval = (u_short *)((char*)simin + adcOff[pad]) ;
 		}
 		else {
 			simval = 0 ;

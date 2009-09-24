@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.39 2008/05/27 14:31:01 fisyak Exp $
+ * $Id: FCFMaker.cxx,v 1.40 2009/09/24 16:39:35 fine Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.40  2009/09/24 16:39:35  fine
+ * fix the pointer arithmetics
+ *
  * Revision 1.39  2008/05/27 14:31:01  fisyak
  * Move coorditane transformation into StTpcCoordinateTransformation from StDbUtilities
  *
@@ -402,8 +405,8 @@ Int_t StRTSClientFCFMaker::Init()
 
   for(int i=0;i<FCF_MAX_PADS_EVER+1;i++)
   {
-    croat_adcOff[i] = (unsigned int)(&croat_adc[i][0]) - (unsigned int)(&croat_adc[0][0]);
-    croat_cppOff[i] = (unsigned int)(&croat_cpp[i][0]) - (unsigned int)(&croat_cpp[0][0]);
+    croat_adcOff[i] = (char*)(&croat_adc[i][0]) - (char*)(&croat_adc[0][0]);
+    croat_cppOff[i] = (char*)(&croat_cpp[i][0]) - (char*)(&croat_cpp[0][0]);
   }
   fcf->adcOff = croat_adcOff;
   fcf->cppOff = (short unsigned int *)croat_cppOff;
@@ -472,7 +475,7 @@ Int_t StRTSClientFCFMaker::Make()
 
     if(!t0Corr || !gainCorr) {    // not if already done!
       if(t0Corr || gainCorr) {
-	printf("<FCFMaker:Make>: Thats funny: we have one set of corrections but not the other? t0=0x%x, gain=0x%x\n",(u_int)t0Corr, (u_int)gainCorr);
+	printf("<FCFMaker:Make>: Thats funny: we have one set of corrections but not the other? t0=0x%p, gain=0x%p\n",(char*)t0Corr, (char*)gainCorr);
       }
 
       t0Corr = (t0_corr_t *)malloc(sizeof(t0_corr_t));
