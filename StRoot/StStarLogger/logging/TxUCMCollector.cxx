@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.15 2009/09/08 23:09:11 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.16 2009/09/24 19:15:38 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -556,7 +556,7 @@ void TxUCMCollector::processMessage (const char * msg) {
     std::string keyVal = msgHashMap[string(fgKey)];
     if (keyVal.empty()) {
        char buffer[20];
-       sprintf(buffer,"%d",keysNVals.size());
+       sprintf(buffer,"%d",(int)keysNVals.size());
        log->error (string("Wrong message format: \"")
                    + message
                    + "\" par:"
