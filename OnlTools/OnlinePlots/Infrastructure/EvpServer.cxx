@@ -172,7 +172,7 @@ int  EvpServer::NextEvent() {
   static int lastEndOfRunAction;
 
   if(mDebugLevel) cout<<"Next Event"<<endl;
-  gSystem->ProcessEvents();
+  if (mGui) gSystem->ProcessEvents();
 
   int now = time(0);
   mSS->setRequestTime(now);
@@ -388,7 +388,7 @@ int  EvpServer::NextEvent() {
 void EvpServer::run() {
   while ( !mQuit ) {
     //    gSystem->Sleep(100);
-    gSystem->ProcessEvents();
+    if (mGui) gSystem->ProcessEvents();
     if ( mGoFlag ) {
       MainLoop();
     }
@@ -618,7 +618,7 @@ void EvpServer::SetStopFlag(void)
 
 /***************************************************************************
  *
- * $Id: EvpServer.cxx,v 1.4 2009/07/06 22:46:49 fine Exp $
+ * $Id: EvpServer.cxx,v 1.5 2009/09/24 20:39:04 fine Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -628,6 +628,9 @@ void EvpServer::SetStopFlag(void)
  ***************************************************************************
  *
  * $Log: EvpServer.cxx,v $
+ * Revision 1.5  2009/09/24 20:39:04  fine
+ * break some run-tine gui dependency
+ *
  * Revision 1.4  2009/07/06 22:46:49  fine
  * remove the redundant lock methods
  *
