@@ -1,4 +1,4 @@
-// $Id: StChargedPionHelpers.cxx,v 1.3 2009/04/02 18:25:42 kocolosk Exp $
+// $Id: StChargedPionHelpers.cxx,v 1.4 2009/09/25 14:26:37 fine Exp $
 
 #include "StChargedPionHelpers.h"
 
@@ -111,7 +111,7 @@ translateJet(StJet* oldJet, vector<TrackToJetIndex*> particles, StChargedPionJet
     }
     
     StChargedPionJetParticle particle;
-    StThreeVectorF dca(0.0);
+    StThreeVectorF dca;
     for(unsigned i=0; i<particles.size(); i++) {
         particle.SetPt ( particles[i]->Pt()  );
         particle.SetEta( particles[i]->Eta() );
@@ -364,6 +364,9 @@ translateTrack(const StMuTrack *mu, StChargedPionTrack *cp) {
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.cxx,v $
+ * Revision 1.4  2009/09/25 14:26:37  fine
+ * fix compilation error on SL5/64-bit machine
+ *
  * Revision 1.3  2009/04/02 18:25:42  kocolosk
  * fixed paths to jet codes
  *
