@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.113 2009/09/10 20:11:06 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.114 2009/09/25 13:21:09 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -750,24 +750,52 @@
 	    "LIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
 	    if $LoggerLIBDIR && ! $param::quiet;
     }
- # xml2
+    # xml2
     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
     my ($xml) =  script::find_lib($OPTSTAR . "/bin /usr/bin",
 				  "xml2-config");
     if ($xml) {
-      $xml .= "/xml2-config";
-      $XMLINCDIR = `$xml --cflags`;
-      chomp($XMLINCDIR);
-      $XMLINCDIR =~ s/-I//;
-      my $XML = `$xml --libs`;# print "$XML\n";
-      ($XMLLIBDIR,$XMLLIBS) = split ' ', $XML;
-      $XMLLIBDIR =~ s/-L//;
-      my $XMLVersion = `$xml --version`;#      print "XMLVersion = $XMLVersion\n";
-      my ($major,$minor) = split '\.', $XMLVersion;# print "major = $major,minor = $minor\n";
-      $XMLCPPFlag = "";#-DXmlTreeReader";
-      if ($major < 2 or $major == 2 and $minor < 5) {$XMLCPPFlag = "-DNoXmlTreeReader";}
+	$xml .= "/xml2-config";
+	$XMLINCDIR = `$xml --cflags`;
+	chomp($XMLINCDIR);
+	$XMLINCDIR =~ s/-I//;
+	my $XML  = `$xml --libs`;# print "$XML\n";
+	my(@libs)= split(" ", $XML);
 
-      print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS XMLCPPFlag =$XMLCPPFlag\n" if $XMLLIBDIR && ! $param::quiet;
+	$XMLLIBDIR = shift(@libs);
+	if ($XMLLIBDIR =~ /-L/){
+	    $XMLLIBDIR =~ s/-L//;
+	    $XMLLIBS   = join(" ",@libs);
+	} else {
+	    # no -L, assume all were LIBS
+	    $XMLLIBS   = $XMLLIBDIR ." ".join(" ",@libs);
+	    # and fix -L / should work for both 32 and 64
+	    $XMLLIBDIR = "/usr/$LLIB";
+	}
+
+	#($XMLLIBDIR,$XMLLIBS) = split(' ', $XML);
+	#if ($XMLLIBDIR =~ /-L/){
+	#    $XMLLIBDIR =~ s/-L//;
+	#} else {
+	#    # may not have any -L
+	#    if ($XMLLIBS 
+	#}
+
+	my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
+	my ($major,$minor) = split '\.', $XMLVersion; # print "major = $major,minor = $minor\n";
+	$XMLCPPFlag = "";#-DXmlTreeReader";
+	if ($major < 2 or $major == 2 and $minor < 5) {
+	    $XMLCPPFlag = "-DNoXmlTreeReader";
+	}
+	if ( ! $param::quiet ){
+	    if ( $XMLLIBDIR ){
+		print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS XMLCPPFlag =$XMLCPPFlag\n";
+	    } else {
+		print "Use xml -> WARNING ** Could not define XMLLIBDIR, XMLINCDIR, XMLLIBS\n";
+	    }
+	}
+    } else {
+	print "Could not find xml libs\n" if (! $param::quiet);
     }
     my @params = (
 		  'Package'       => 'None',
