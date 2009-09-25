@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTables.h,v 1.7 2007/09/18 19:41:47 kocolosk Exp $
+ * $Id: StBemcTables.h,v 1.8 2009/09/25 15:50:29 mattheww Exp $
  * Author:      Alexandre A. P. Suaide
  * Maintainer:  Adam Kocoloski, MIT, kocolosk@mit.edu
  *
@@ -130,6 +130,8 @@ public:
     void    getTriggerFormulaTag(Int_t crate, Int_t index, Int_t& formula) const; ///< Return LUT formula
     void    getTriggerFormulaParameters(Int_t crate, Int_t index, Int_t* parameters) const; ///< Return LUT formula parameters
     
+    StEmcDecoder* getDecoder() {return mDecoder;}///< Return pointer to decoder
+
     ClassDef(StBemcTables, 1)  
 };
 
@@ -138,6 +140,9 @@ public:
 /***************************************************************************
  *
  * $Log: StBemcTables.h,v $
+ * Revision 1.8  2009/09/25 15:50:29  mattheww
+ * added getter to StBemcTable for StEmcDecoder used
+ *
  * Revision 1.7  2007/09/18 19:41:47  kocolosk
  * added an optional argument to status methods to get status for calib, pedestal, and gain tables
  *
