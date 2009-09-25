@@ -1,5 +1,6 @@
 #include "StPrimaryElectron.h"
 #include "StGlobalElectron.h"
+#include <cassert>
 
 ClassImp(StPrimaryElectron)
 

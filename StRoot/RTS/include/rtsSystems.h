@@ -507,7 +507,7 @@ so we keep it here for source compatibility
 #define TPX_NODES(x)     ((EXT2_SYSTEM<<12) | ((TPX_SYSTEM)<<7) | (x))
 #define HFT_NODES(x)     ((EXT2_SYSTEM<<12) | ((HFT_SYSTEM)<<7) | (x))
 
-extern inline char *rts2name(int rts_id)
+extern inline const char *rts2name(int rts_id)
 {
 	switch(rts_id) {
 	case TPC_SYSTEM :
@@ -559,7 +559,7 @@ extern inline char *rts2name(int rts_id)
 extern inline int name2rts(const char *name)
 {
 	for(int rts_id=0;rts_id<32;rts_id++) {
-		char *r_name = rts2name(rts_id) ;
+		const char *r_name = rts2name(rts_id) ;
 		if(r_name && name && (strncasecmp(name,r_name,strlen(r_name))==0)) return rts_id ;
 	}
 
