@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.203 2009/09/24 00:36:57 perev Exp $
+* $Id: geometry.g,v 1.204 2009/09/25 18:02:16 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.204  2009/09/25 18:02:16  perev
+* Comment corrected
+*
 * Revision 1.203  2009/09/24 00:36:57  perev
 * BTOFc6 <== BTOFc7 in y2009 F.Geurts
 *
@@ -1016,7 +1019,7 @@ replace [exe BTOF66;] with [;" X.Dong";BTOF=on;
 replace [exe BTOFb6;] with [;" X.Dong";BTOF=on;
                             BtofConfig=11; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
-replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo7 ";]
+replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo6 ";]
 
 
 
