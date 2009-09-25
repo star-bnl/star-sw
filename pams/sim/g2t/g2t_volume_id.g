@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.59 2009/09/24 02:54:23 perev Exp $
+* $Id: g2t_volume_id.g,v 1.60 2009/09/25 18:09:20 perev Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.60  2009/09/25 18:09:20  perev
+* Monor improvements by F.Geurts
+*
 * Revision 1.59  2009/09/24 02:54:23  perev
 * BugFix in TOF g2t_volume_id F.Geurts
 *
@@ -384,7 +387,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             sector     = numbv(1)        !  tray(1-60)
             module     = numbv(2)        !  module (eta)
             layer      = numbv(3)        !  layer (1-6, gap in module)
-         else if (btog_choice==6 .or. btog_choice>=12) then ! full TOF or Run 9
+         else if (btog_choice==6 .or. btog_choice==12) then ! full TOF or Run 9
             rileft     = numbv(1)        !  west(1)/east(2)
             sector     = numbv(2)        !  tray(1-60)
             module     = numbv(3)        !  module (eta)
