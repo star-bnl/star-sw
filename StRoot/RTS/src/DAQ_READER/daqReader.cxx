@@ -54,7 +54,7 @@ DATAP *getlegacydatap(char *mem, int bytes);
 
 //static int thisNode = EVP_NODE ;
 //static int evpDesc ;
-static char *getCommand(void) ;
+static const char *getCommand(void) ;
 
 
 
@@ -1267,7 +1267,7 @@ static u_int parse_det_string(const char *list)
 	reparse:;
 
 	for(int i=0;i<32;i++) {
-		char *name = rts2name(i) ;
+		const char *name = rts2name(i) ;
 
 		if(name==0) continue ;
 
@@ -1317,7 +1317,7 @@ daq_det *daqReader::det(const char *which)
 
 	// not yet created; try real dets first...
 	for(int i=0;i<DAQ_READER_MAX_DETS;i++) {
-		char *name = rts2name(i) ;
+      const char *name = rts2name(i) ;
 		if(name == 0) continue ;
 
 		if(strcasecmp(name,which)==0) {
@@ -1672,11 +1672,11 @@ static int ask(int desc, ic_msg *m)
 }
 
 
-  static char *getCommand(void)
+  static const char *getCommand(void)
     {
 
 
-      static char *str = "(no-name)" ;
+      static const char *str = "(no-name)" ;
 #ifdef __linux__
       FILE *file ;
       static char name[128] ;

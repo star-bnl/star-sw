@@ -1030,7 +1030,7 @@ void sfs_index::addnode(SFS_ittr *ittr)
 
 
 
-void sfs_index::dump(char *path, fs_inode *inode) {
+void sfs_index::dump(const char *path, fs_inode *inode) {
   if(inode->fchild == NULL) {
     LOG(DBG,"%s%s\n",path,inode->name);
     return;
