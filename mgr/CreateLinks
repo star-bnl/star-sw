@@ -65,16 +65,30 @@ if ( -e .rh80_gcc32) then
     # Note that those are backward compatibility links
     # only.
     if ( $1 != "") then
-	/usr/bin/test -e .sl301_gcc323 || (/bin/ln -s .rh80_gcc322 .sl301_gcc323 && echo "SL301 compatbility link created")
-	/usr/bin/test -e .sl302_gcc323 || (/bin/ln -s .rh80_gcc322 .sl302_gcc323 && echo "SL302 compatbility link created")
-	/usr/bin/test -e .sl303_gcc323 || (/bin/ln -s .rh80_gcc322 .sl303_gcc323 && echo "SL303 compatbility link created")
-	/usr/bin/test -e .sl304_gcc323 || (/bin/ln -s .rh80_gcc322 .sl304_gcc323 && echo "SL304 compatbility link created")
-	/usr/bin/test -e .sl305_gcc323 || (/bin/ln -s .rh80_gcc322 .sl305_gcc323 && echo "SL305 compatbility link created")
+	/usr/bin/test -e .sl301_gcc323 || (/bin/ln -s .rh80_gcc322 .sl301_gcc323 && echo "SL301 compatility link created")
+	/usr/bin/test -e .sl302_gcc323 || (/bin/ln -s .rh80_gcc322 .sl302_gcc323 && echo "SL302 compatility link created")
+	/usr/bin/test -e .sl303_gcc323 || (/bin/ln -s .rh80_gcc322 .sl303_gcc323 && echo "SL303 compatility link created")
+	/usr/bin/test -e .sl304_gcc323 || (/bin/ln -s .rh80_gcc322 .sl304_gcc323 && echo "SL304 compatility link created")
+	/usr/bin/test -e .sl305_gcc323 || (/bin/ln -s .rh80_gcc322 .sl305_gcc323 && echo "SL305 compatility link created")
     endif
 
-else
-    echo "The base OS support directory, .rh80_gcc32, does not exists"
+#else
+#    echo "The base OS support directory, .rh80_gcc32, does not exists"
 endif
+
+#
+# Make it easy to do SL5/64 to SL4/32
+#
+
+if ( -e .sl44_gcc346 && ! -e .sl53_x8664_gcc432 ) then
+    # as above, request confirmation
+    if ( $1 != "") then
+	/bin/ln -s .sl44_gcc346 .sl53_x8664_gcc432 && echo "SL44 compatibility link created"
+    endif
+endif
+
+
+
 
 #
 # Scientific Linux
