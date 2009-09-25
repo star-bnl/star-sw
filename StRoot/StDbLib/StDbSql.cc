@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.31 2007/08/20 18:21:30 deph Exp $
+ * $Id: StDbSql.cc,v 1.32 2009/09/25 19:14:09 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.32  2009/09/25 19:14:09  dmitry
+ * number of rows is reset to fetched number of rows, if it is less than total indexed number of rows
+ *
  * Revision 1.31  2007/08/20 18:21:30  deph
  * New Version of Load Balancer
  *
@@ -426,6 +429,12 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
 
   if(retVal){
     table->addWrittenRows(dataIDList,numRows);
+    if (rowsLeft > 0) {
+        StString tp;
+        tp<<"Fixing row size, setting it to " << (numRows-rowsLeft) << " for Table = " << tName;
+        mgr->printInfo((tp.str()).c_str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+        table->resizeNumRows(numRows-rowsLeft);
+    }
     table->setTimeValues(timeValues);
     unsigned int t1=table->getMaxTime();
     table->setBeginTime(t1);
