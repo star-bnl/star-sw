@@ -162,7 +162,7 @@ class sfs_index : public fs_index {
 
   fs_inode *find_last_lesser_child(fs_inode *parent, char *name, int &first, int &eq);
   fs_inode *find_last_lesser_neighbor(fs_inode *neighbor, char *name, int &eq);
-  void dump(char *path, fs_inode *inode);
+  void dump(const char *path, fs_inode *inode);
 
   int writeFsHeader();
 };

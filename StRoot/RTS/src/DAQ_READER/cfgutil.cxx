@@ -89,7 +89,7 @@ void initEvpGroups()
 int s2did(char *str)
 {
   for(int i=0;i<32;i++) {
-    char *t = rts2name(i);
+    const char *t = rts2name(i);
     if(t) {
       if(strcasecmp(t,str) == 0) return i;
     }
@@ -99,7 +99,7 @@ int s2did(char *str)
 }
 
 // comma delimited
-UINT32 str2detmask(char *str)
+UINT32 str2detmask(const char *str)
 {
   char s[256];
   UINT32 mask = 0;
@@ -124,7 +124,7 @@ UINT32 str2detmask(char *str)
 }
 
 // single group
-int s2gid(char *str)
+int s2gid(const char *str)
 {
   for(int i=0;i<32;i++) {
     if(strcasecmp(str,evpgroups[i]) == 0) return i;
@@ -134,7 +134,7 @@ int s2gid(char *str)
 }
 
 // comma delimited
-UINT32 str2evpgroupmask(char *str)
+UINT32 str2evpgroupmask(const char *str)
 {
   char s[256];
   UINT32 mask = 0;
