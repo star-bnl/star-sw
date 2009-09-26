@@ -48,9 +48,6 @@ private:
   /// detailed results for individual trigger simulations
   std::vector<StTriggerSimuResult> mResults;
 
-  /// Used to get run number corresponding to database timestamp when in MC mode for Run 9
-  int get2009RunNumberFromTimestamp(const TDatime& timestamp);
-  
 public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
   virtual           ~StTriggerSimuMaker();
@@ -87,9 +84,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.19 2009/09/23 22:35:30 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.20 2009/09/26 18:46:28 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.20  2009/09/26 18:46:28  pibero
+// Migration from ROOT MySQL to STAR DB API
+//
 // Revision 1.19  2009/09/23 22:35:30  pibero
 // Removed dependencies on ROOT MySQL
 //

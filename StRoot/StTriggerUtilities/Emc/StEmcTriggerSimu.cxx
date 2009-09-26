@@ -4,15 +4,10 @@
 // 12 Jan 2009
 //
 
-// ROOT MySQL
-#if 0
-#include "TMySQLServer.h"
-#include "TMySQLResult.h"
-#include "TMySQLRow.h"
-#endif
-
 // STAR
 #include "St_db_Maker/St_db_Maker.h"
+#include "tables/St_trgDsmReg_Table.h"
+#include "tables/St_triggerInfo_Table.h"
 
 // Local
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
@@ -23,11 +18,11 @@
 ClassImp(StEmcTriggerSimu);
 
 StEmcTriggerSimu::StEmcTriggerSimu()
-  : mYear(0)
-  , mBemc(0)
+  : mBemc(0)
   , mEemc(0)
   , mEM201(new DSMLayer_EM201_2009)
   , mLD301(new DSMLayer_LD301_2009)
+  , mTcu(new TCU)
 {
 }
 
@@ -35,6 +30,7 @@ StEmcTriggerSimu::~StEmcTriggerSimu()
 {
   delete mEM201; mEM201 = 0;
   delete mLD301; mLD301 = 0;
+  delete mTcu; mTcu = 0;
 }
 
 void StEmcTriggerSimu::setBemc(StBemcTriggerSimu* bemc)
@@ -49,57 +45,34 @@ void StEmcTriggerSimu::setEemc(StEemcTriggerSimu* eemc)
 
 void StEmcTriggerSimu::InitRun(int runNumber)
 {
-  St_db_Maker* starDb = (St_db_Maker*) StMaker::GetChain()->GetMakerInheritsFrom("St_db_Maker");
-  assert(starDb);
-  mYear = starDb->GetDateTime().GetYear();
-  mTriggers.clear();
+  // Get DB timestamp
+  StMaker* chain = StMaker::GetChain();
+  assert(chain);
+  mDBTime = chain->GetDBTime();
+
   get2009_DSMRegisters(runNumber);
+  defineTriggers();
 }
 
 void StEmcTriggerSimu::Make()
 {
-  switch (mYear) {
+  switch (mDBTime.GetYear()) {
   case 2009:
     if (mBemc) mBemc->get2009_DSMLayer1_Result()->write(*mEM201);
     if (mEemc) mEemc->get2009_DSMLayer1_Result()->write(*mEM201);
+    mEM201->run();
+    mEM201->write(*mLD301);
+    mLD301->run();
+    mTcu->setInput((*mLD301)[0].output);
     break;
   default:
     return;
   }
-
-  mEM201->run();
-  mEM201->write(*mLD301);
-  mLD301->run();
-
-  LOG_DEBUG << setw(20) << "idx_trigger"
-	    << setw(20) << "name"
-	    << setw(20) << "triggerId"
-	    << setw(20) << "physicsBits"
-	    << setw(20) << "isPhysicsBits"
-	    << endm;
-
-  for (map<int, TriggerDefinition>::const_iterator i = mTriggers.begin(); i != mTriggers.end(); ++i) {
-    LOG_DEBUG << setw(20) << i->second.idx_trigger
-	      << setw(20) << i->second.name
-	      << setw(20) << i->second.triggerId
-	      << setw(20) << Form("0x%04x", i->second.physicsBits)
-	      << setw(20) << isPhysicsBits(i->second.physicsBits)
-	      << endm;
-  }
-}
-
-bool StEmcTriggerSimu::isPhysicsBits(int physicsBits) const
-{
-  return ((*mLD301)[0].output & physicsBits) == physicsBits;
 }
 
 bool StEmcTriggerSimu::isTrigger(int trigId)
 {
-  typedef map<int, TriggerDefinition>::const_iterator MI;
-  pair<MI, MI> p = mTriggers.equal_range(trigId);
-  for (MI i = p.first; i != p.second; ++i)
-    if (isPhysicsBits(i->second.physicsBits)) return true;
-  return false;
+  return mTcu->isTrigger(trigId);
 }
 
 StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
@@ -109,140 +82,127 @@ StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
 
 int StEmcTriggerSimu::get2009_DSMRegisters(int runNumber)
 {
-#if 0
-  // Open connection to Run 9 database
-
-  LOG_INFO << "Open connection to Run 9 database" << endm;
-
-  TString database = "mysql://dbbak.starp.bnl.gov:3408/Conditions_rts";
-  TString user = "";
-  TString pass = "";
-
-  LOG_INFO << "database:\t" << database << endm;
-  LOG_INFO << "user:\t" << user << endm;
-  LOG_INFO << "pass:\t" << pass << endm;
-  
-  TMySQLServer* mysql = (TMySQLServer*)TMySQLServer::Connect(database, user, pass);
-
-  if (!mysql) {
-    LOG_WARN << "Could not connect to Run 9 database" << endm;
+  // Get chain
+  StMaker* chain = StMaker::GetChain();
+  if (!chain) {
+    LOG_WARN << "Can't get chain" << endm;
     return kStWarn;
   }
 
-  // Trigger definitions
+  // Retrieve DSM threshold table from offline DB
+  TDataSet* db = chain->GetDataBase("RunLog/onl/trgDsmReg");
 
-  LOG_INFO << "Get triggers for run " << runNumber << endm;
-
-  TriggerDefinition triggers[32];
-
-  TString query = Form("select idx_trigger,name,offlineBit from triggers where idx_rn = %d", runNumber);
-
-  LOG_INFO << query << endm;
-
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query)) {
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int idx_trigger = atoi(row->GetField(0));
-      triggers[idx_trigger].idx_trigger = idx_trigger;
-      triggers[idx_trigger].name = row->GetField(1);
-      triggers[idx_trigger].triggerId = atoi(row->GetField(2));
-      delete row;
-    }
-    delete result;
+  if (!db) {
+    LOG_WARN << "Can't get DB table RunLog/onl/trgDsmReg" << endm;
+    return kStWarn;
   }
 
-  TString query2 = Form("select idx_idx,onbits from pwc where idx_rn = %d", runNumber);
+  // Fetch ROOT descriptor of DB table
+  St_trgDsmReg* des = (St_trgDsmReg*)db->Find("trgDsmReg");
 
-  LOG_INFO << query2 << endm;
-
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query2)) {
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int idx_trigger = atoi(row->GetField(0));
-      triggers[idx_trigger].physicsBits = atoi(row->GetField(1));
-      mTriggers.insert(make_pair(triggers[idx_trigger].triggerId, triggers[idx_trigger]));
-      delete row;
-    }
-    delete result;
+  if (!des) {
+    LOG_WARN << "Can't get DB table descriptor trgDsmReg" << endm;
+    return kStWarn;
   }
 
-  LOG_INFO << setw(20) << "idx_trigger"
-	   << setw(20) << "name"
-	   << setw(20) << "offlineBit"
-	   << setw(20) << "physicsBits"
+  trgDsmReg_st* table = des->GetTable();
+  int nrows = des->GetNRows();
+
+  LOG_INFO << "Found " << nrows << " rows in table trgDsmReg for run " << chain->GetRunNumber() << endm;
+
+  // Loop over rows and set DSM thresholds in registers
+
+  LOG_INFO << setw(20) << "register"
+           << setw(30) << "label"
+           << setw(20) << "value"
+           << endm;
+
+  for (int i = 0; i < nrows; ++i) {
+    int object = table[i].dcObject;
+    int index  = table[i].dcIndex;
+    int reg    = table[i].dcRegister;
+    TString label = table[i].dcLabel;
+    int value  = table[i].dcValue != -1 ? table[i].dcValue : table[i].dcDefaultvalue;
+
+    // EM201
+    if (object == 1 && index == 20) {
+      LOG_INFO << setw(20) << reg
+               << setw(30) << label
+               << setw(20) << value
+               << endm;
+
+      mEM201->setRegister(reg, value);
+    }
+
+    // LD301
+    if (object == 1 && index == 30) {
+      LOG_INFO << setw(20) << reg
+               << setw(30) << label
+               << setw(20) << value
+               << endm;
+
+      mLD301->setRegister(reg, value);
+    }
+  } // End loop over rows
+
+  return kStOk;
+}
+
+int StEmcTriggerSimu::defineTriggers()
+{
+  // Get chain
+  StMaker* chain = StMaker::GetChain();
+  if (!chain) {
+    LOG_WARN << "Can't get chain" << endm;
+    return kStWarn;
+  }
+
+  // Retrieve triggerInfo table from offline DB
+  TDataSet* db = chain->GetDataBase("RunLog/onl/triggerInfo");
+
+  if (!db) {
+    LOG_WARN << "Can't get offline DB table RunLog/onl/triggerInfo" << endm;
+    return kStWarn;
+  }
+
+  // Fetch ROOT descriptor of DB table
+  St_triggerInfo* des = (St_triggerInfo*)db->Find("triggerInfo");
+
+  if (!des) {
+    LOG_WARN << "Can't get DB table descriptor for triggerInfo" << endm;
+    return kStWarn;
+  }
+
+  triggerInfo_st* table = des->GetTable();
+  int nrows = des->GetNRows();
+
+  LOG_INFO << "Found " << nrows << " rows in table triggerInfo for run " << chain->GetRunNumber() << endm;
+
+  // Loop over rows
+  LOG_INFO << setw(20) << "idxTrg"
+	   << setw(30) << "name"
+	   << setw(20) << "oflineTrgId"
+	   << setw(20) << "detectorLiveOnBits"
 	   << endm;
 
-  for (multimap<int, TriggerDefinition>::const_iterator i = mTriggers.begin(); i != mTriggers.end(); ++i) {
-    LOG_INFO << setw(20) << i->second.idx_trigger
-	     << setw(20) << i->second.name
-	     << setw(20) << i->second.triggerId
-	     << setw(20) << Form("0x%04x", i->second.physicsBits)
+  mTcu->clear();
+
+  for (int i = 0; i < nrows; ++i) {
+    TriggerDefinition trgDef;
+
+    trgDef.idx_trigger = table[i].idxTrg;
+    trgDef.name        = table[i].name;
+    trgDef.triggerId   = table[i].offlineTrgId;
+    trgDef.physicsBits = table[i].detectorLiveOnBits;
+
+    LOG_INFO << setw(20) << trgDef.idx_trigger
+	     << setw(30) << trgDef.name
+	     << setw(20) << trgDef.triggerId
+	     << setw(20) << trgDef.physicsBits
 	     << endm;
-  }
 
-  // EM201
+    mTcu->defineTrigger(trgDef);
+  } // End loop over rows
 
-  LOG_INFO << "Get DSM registers for EMC layer 2" << endm;
-
-  TString query7 = Form("select reg,label,value,defaultvalue from dict where object = 1 and idx = 20 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
-
-  LOG_INFO << query7 << endm;
-
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query7)) {
-    LOG_INFO << setw(25) << "reg"
-	     << setw(25) << "label"
-	     << setw(25) << "value"
-	     << setw(25) << "defaultvalue"
-	     << endm;
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int reg = atoi(row->GetField(0));
-      TString label = row->GetField(1);
-      int value = atoi(row->GetField(2));
-      int defaultvalue = atoi(row->GetField(3));
-      mEM201->setRegister(reg, (value == -1) ? defaultvalue : value);
-      LOG_INFO << setw(25) << reg
-	       << setw(25) << label
-	       << setw(25) << value
-	       << setw(25) << defaultvalue
-	       << endm;
-      delete row;
-    }
-    delete result;
-  }
-
-  // LD301
-
-  LOG_INFO << "Get last DSM registers" << endm;
-
-  TString query8 = Form("select reg,label,value,defaultvalue from dict where object = 1 and idx = 30 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
-
-  LOG_INFO << query8 << endm;
-
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query8)) {
-    LOG_INFO << setw(25) << "reg"
-             << setw(25) << "label"
-             << setw(25) << "value"
-	     << setw(25) << "defaultvalue"
-             << endm;
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int reg = atoi(row->GetField(0));
-      TString label = row->GetField(1);
-      int value = atoi(row->GetField(2));
-      int defaultvalue = atoi(row->GetField(3));
-      mLD301->setRegister(reg, (value == -1) ? defaultvalue : value);
-      LOG_INFO << setw(25) << reg
-               << setw(25) << label
-               << setw(25) << value
-               << setw(25) << defaultvalue
-               << endm;
-      delete row;
-    }
-    delete result;
-  }
-
-  // Close connection to Run 9 database
-
-  LOG_INFO << "Close connection to Run 9 database" << endm;
-
-  mysql->Close();
-#endif
   return kStOk;
 }
