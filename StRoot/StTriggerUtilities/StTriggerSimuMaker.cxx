@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.27 2009/09/23 22:35:30 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.28 2009/09/26 18:46:28 pibero Exp $
 
 
 #include <Stiostream.h>
@@ -141,10 +141,6 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
       emc->setBemc(bemc);
       emc->setEemc(eemc);
       mSimulators[3] = emc;
-
-      // If MC, get real run number from database time stamp
-      //if (mMCflag) runNumber = get2009RunNumberFromTimestamp(GetDBTime());
-      get2009RunNumberFromTimestamp(GetDBTime()); // TESTING
     }
 
     for (Int_t i = 0; i < numSimulators; ++i)
@@ -225,28 +221,11 @@ Int_t StTriggerSimuMaker::Finish() {
   return StMaker::Finish();
 }
 
-#include "tables/St_triggerID_Table.h"
-
-int StTriggerSimuMaker::get2009RunNumberFromTimestamp(const TDatime& timestamp)
-{
-  LOG_INFO << "Get table RunLog/onl/triggerID" << endm;
-
-  St_triggerID* triggerID_Table = (St_triggerID*)GetDataBase("RunLog/onl/triggerID");
-  assert(triggerID_Table);
-
-  triggerID_st* triggerID = (triggerID_st*)triggerID_Table->GetArray();
-  assert(triggerID);
-
-  int nrows = triggerID_Table->GetNRows();
-  int runNumber = nrows ?  triggerID[0].runNumber : 0;
-
-  LOG_INFO << "Run number = " << runNumber << endm;
-
-  return runNumber;
-}
-
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.28  2009/09/26 18:46:28  pibero
+ * Migration from ROOT MySQL to STAR DB API
+ *
  * Revision 1.27  2009/09/23 22:35:30  pibero
  * Removed dependencies on ROOT MySQL
  *

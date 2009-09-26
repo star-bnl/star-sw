@@ -28,12 +28,8 @@
 // DSM 2009 Utilities
 #include "StTriggerUtilities/StDSMUtilities/StDSM2009Utilities.hh"
 
-// MySQL
-#if 0
-#include "TMySQLServer.h"
-#include "TMySQLResult.h"
-#include "TMySQLRow.h"
-#endif
+// DSM threshold tables
+#include "tables/St_trgDsmReg_Table.h"
 
 ClassImp(StBemcTriggerSimu)
 //==================================================
@@ -2685,123 +2681,78 @@ int StBemcTriggerSimu::getJetPatchThreshold(int trigId, int dsmid) const {
 
 int StBemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 {
-#if 0
-  // Open connection to Run 9 database
-
-  LOG_INFO << "Open connection to Run 9 database" << endm;
-
-  TString database = "mysql://dbbak.starp.bnl.gov:3408/Conditions_rts";
-  TString user = "";
-  TString pass = "";
-
-  LOG_INFO << "database:\t" << database << endm;
-  LOG_INFO << "user:\t" << user << endm;
-  LOG_INFO << "pass:\t" << pass << endm;
-  
-  TMySQLServer* mysql = (TMySQLServer*)TMySQLServer::Connect(database, user, pass);
-
-  if (!mysql) {
-    LOG_WARN << "Could not connect to Run 9 database" << endm;
+  // Get chain
+  StMaker* chain = StMaker::GetChain();
+  if (!chain) {
+    LOG_WARN << "Can't get chain" << endm;
     return kStWarn;
   }
 
-  // B001 (BCW)
+  // Retrieve DSM threshold table from offline DB
+  TDataSet* db = chain->GetDataBase("RunLog/onl/trgDsmReg");
 
-  LOG_INFO << "Get DSM registers for West BEMC layer 0" << endm;
+  if (!db) {
+    LOG_WARN << "Can't get DB table RunLog/onl/trgDsmReg" << endm;
+    return kStWarn;
+  }
 
-  TString query6 = Form("select reg,label,value,defaultvalue from dict where object = 5 and idx = 16 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
+  // Fetch ROOT descriptor of DB table
+  St_trgDsmReg* des = (St_trgDsmReg*)db->Find("trgDsmReg");
 
-  LOG_INFO << query6 << endm;
+  if (!des) {
+    LOG_WARN << "Can't get DB table descriptor trgDsmReg" << endm;
+    return kStWarn;
+  }
 
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query6)) {
-    LOG_INFO << setw(20) << "reg"
-	     << setw(20) << "label"
-	     << setw(20) << "value"
-	     << setw(20) << "defaultvalue"
-	     << endm;
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int reg = atoi(row->GetField(0));
-      TString label = row->GetField(1);
-      int value = atoi(row->GetField(2));
-      int defaultvalue = atoi(row->GetField(3));
-      for (int dsm = 0; dsm < 15; ++dsm)
-	(*mB001)[dsm].registers[reg] = (value == -1) ? defaultvalue : value;
+  trgDsmReg_st* table = des->GetTable();
+  int nrows = des->GetNRows();
+
+  LOG_INFO << "Found " << nrows << " rows in table trgDsmReg for run " << chain->GetRunNumber() << endm;
+
+  // Loop over rows and set DSM thresholds in registers
+
+  LOG_INFO << setw(20) << "register"
+	   << setw(30) << "label"
+	   << setw(20) << "value"
+	   << endm;
+
+  for (int i = 0; i < nrows; ++i) {
+    int object = table[i].dcObject;
+    int index  = table[i].dcIndex;
+    int reg    = table[i].dcRegister;
+    TString label = table[i].dcLabel;
+    int value  = table[i].dcValue != -1 ? table[i].dcValue : table[i].dcDefaultvalue;
+
+    // BCW crate
+    if (object == 5 && index == 16) {
       LOG_INFO << setw(20) << reg
-	       << setw(20) << label
+	       << setw(30) << label
 	       << setw(20) << value
-	       << setw(20) << defaultvalue
 	       << endm;
-      delete row;
+
+      for (int dsm = 0; dsm < 15; ++dsm) (*mB001)[dsm].registers[reg] = value;
     }
-    delete result;
-  }
 
-  // B001 (BCE)
-
-  LOG_INFO << "Get DSM registers for East BEMC layer 0" << endm;
-
-  TString query9 = Form("select reg,label,value,defaultvalue from dict where object = 6 and idx = 16 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
-
-  LOG_INFO << query6 << endm;
-
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query9)) {
-    LOG_INFO << setw(20) << "reg"
-             << setw(20) << "label"
-             << setw(20) << "value"
-             << setw(20) << "defaultvalue"
-             << endm;
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int reg = atoi(row->GetField(0));
-      TString label = row->GetField(1);
-      int value = atoi(row->GetField(2));
-      int defaultvalue = atoi(row->GetField(3));
-      for (int dsm = 15; dsm < 30; ++dsm)
-	(*mB001)[dsm].registers[reg] = (value == -1) ? defaultvalue : value;
+    // BCE crate
+    if (object == 6 && index == 16) {
       LOG_INFO << setw(20) << reg
-               << setw(20) << label
+               << setw(30) << label
                << setw(20) << value
-               << setw(20) << defaultvalue
                << endm;
-      delete row;
+
+      for (int dsm = 15; dsm < 30; ++dsm) (*mB001)[dsm].registers[reg] = value;
     }
-    delete result;
-  }
 
-  // B101
-
-  LOG_INFO << "Get DSM registers for BEMC layer 1" << endm;
-
-  TString query3 = Form("select reg,label,value,defaultvalue from dict where object = 2 and idx = 33 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
-
-  LOG_INFO << query3 << endm;
-
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query3)) {
-    LOG_INFO << setw(20) << "reg"
-             << setw(20) << "label"
-             << setw(20) << "value"
-             << setw(20) << "defaultvalue"
-             << endm;
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int reg = atoi(row->GetField(0));
-      TString label = row->GetField(1);
-      int value = atoi(row->GetField(2));
-      int defaultvalue = atoi(row->GetField(3));
-      mB101->setRegister(reg, (value == -1) ? defaultvalue : value);
+    // B101
+    if (object == 2 && index == 33) {
       LOG_INFO << setw(20) << reg
-               << setw(20) << label
+               << setw(30) << label
                << setw(20) << value
-               << setw(20) << defaultvalue
                << endm;
-      delete row;
+
+      mB101->setRegister(reg, value);
     }
-    delete result;
-  }
+  } // End loop over rows
 
-  // Close connection to Run 9 database
-
-  LOG_INFO << "Close connection to Run 9 database" << endm;
-
-  mysql->Close();
-#endif
   return kStOk;
 }

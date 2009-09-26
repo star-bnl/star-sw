@@ -42,12 +42,8 @@
 #include "StEEmcUtil/EEdsm/EEdsm3.h"
 #include "StEEmcUtil/EEdsm/EemcTrigUtil.h"
 
-// ROOT MySQL
-#if 0
-#include "TMySQLServer.h"
-#include "TMySQLResult.h"
-#include "TMySQLRow.h"
-#endif
+// DSM threshold tables
+#include "tables/St_trgDsmReg_Table.h"
 
 // #### modified by Liaoyuan ####
 // DSM 2009 Utilities
@@ -572,97 +568,77 @@ StEemcTriggerSimu::get2009_DSMLayer1(){
 
 int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 {
-#if 0
-  // Open connection to Run 9 database
-
-  LOG_INFO << "Open connection to Run 9 database" << endm;
-
-  TString database = "mysql://dbbak.starp.bnl.gov:3408/Conditions_rts";
-  TString user = "";
-  TString pass = "";
-
-  LOG_INFO << "database:\t" << database << endm;
-  LOG_INFO << "user:\t" << user << endm;
-  LOG_INFO << "pass:\t" << pass << endm;
-  
-  TMySQLServer* mysql = (TMySQLServer*)TMySQLServer::Connect(database, user, pass);
-
-  if (!mysql) {
-    LOG_WARN << "Could not connect to Run 9 database" << endm;
+  // Get chain
+  StMaker* chain = StMaker::GetChain();
+  if (!chain) {
+    LOG_WARN << "Can't get chain" << endm;
     return kStWarn;
   }
 
-  // E001
+  // Retrieve DSM threshold table from offline DB
+  TDataSet* db = chain->GetDataBase("RunLog/onl/trgDsmReg");
 
-  LOG_INFO << "Get DSM registers for EEMC layer 0" << endm;
-
-  TString query6 = Form("select reg,label,value,defaultvalue from dict where object = 2 and idx = 23 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
-
-  LOG_INFO << query6 << endm;
-
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query6)) {
-    LOG_INFO << setw(20) << "reg"
-             << setw(20) << "label"
-             << setw(20) << "value"
-             << setw(20) << "defaultvalue"
-             << endm;
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int reg = atoi(row->GetField(0));
-      TString label = row->GetField(1);
-      int value = atoi(row->GetField(2));
-      int defaultvalue = atoi(row->GetField(3));
-      mE001->setRegister(reg, (value == -1) ? defaultvalue : value);
-      LOG_INFO << setw(20) << reg
-               << setw(20) << label
-               << setw(20) << value
-               << setw(20) << defaultvalue
-               << endm;
-      delete row;
-    }
-    delete result;
+  if (!db) {
+    LOG_WARN << "Can't get DB table RunLog/onl/trgDsmReg" << endm;
+    return kStWarn;
   }
 
-  // E101
+  // Fetch ROOT descriptor of DB table
+  St_trgDsmReg* des = (St_trgDsmReg*)db->Find("trgDsmReg");
 
-  LOG_INFO << "Get DSM registers for EEMC layer 1" << endm;
-
-  TString query3 = Form("select reg,label,value,defaultvalue from dict where object = 2 and idx = 21 and hash = (select dicthash from run where idx_rn = %d)", runNumber);
-
-  LOG_INFO << query3 << endm;
-
-  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query3)) {
-    LOG_INFO << setw(20) << "reg"
-             << setw(20) << "label"
-             << setw(20) << "value"
-             << setw(20) << "defaultvalue"
-             << endm;
-    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
-      int reg = atoi(row->GetField(0));
-      TString label = row->GetField(1);
-      int value = atoi(row->GetField(2));
-      int defaultvalue = atoi(row->GetField(3));
-      mE101->setRegister(reg, (value == -1) ? defaultvalue : value);
-      LOG_INFO << setw(20) << reg
-               << setw(20) << label
-               << setw(20) << value
-               << setw(20) << defaultvalue
-               << endm;
-      delete row;
-    }
-    delete result;
+  if (!des) {
+    LOG_WARN << "Can't get DB table descriptor trgDsmReg" << endm;
+    return kStWarn;
   }
 
-  // Close connection to Run 9 database
+  trgDsmReg_st* table = des->GetTable();
+  int nrows = des->GetNRows();
 
-  LOG_INFO << "Close connection to Run 9 database" << endm;
+  LOG_INFO << "Found " << nrows << " rows in table trgDsmReg for run " << chain->GetRunNumber() << endm;
 
-  mysql->Close();
-#endif
+  // Loop over rows and set DSM thresholds in registers
+
+  LOG_INFO << setw(20) << "register"
+           << setw(30) << "label"
+           << setw(20) << "value"
+           << endm;
+
+  for (int i = 0; i < nrows; ++i) {
+    int object = table[i].dcObject;
+    int index  = table[i].dcIndex;
+    int reg    = table[i].dcRegister;
+    TString label = table[i].dcLabel;
+    int value  = table[i].dcValue != -1 ? table[i].dcValue : table[i].dcDefaultvalue;
+
+    // E001
+    if (object == 2 && index == 23) {
+      LOG_INFO << setw(20) << reg
+               << setw(30) << label
+               << setw(20) << value
+               << endm;
+
+      mE001->setRegister(reg, value);
+    }
+
+    // E101
+    if (object == 2 && index == 21) {
+      LOG_INFO << setw(20) << reg
+               << setw(30) << label
+               << setw(20) << value
+               << endm;
+
+      mE101->setRegister(reg, value);
+    }
+  } // End loop over rows
+
   return kStOk;
 }
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.16  2009/09/26 18:46:37  pibero
+// Migration from ROOT MySQL to STAR DB API
+//
 // Revision 1.15  2009/09/23 22:35:43  pibero
 // Removed dependencies on ROOT MySQL
 //
