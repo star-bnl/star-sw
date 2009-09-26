@@ -1,4 +1,4 @@
-// $Id: StSpinDbMaker.h,v 1.6 2006/10/24 20:19:37 balewski Exp $
+// $Id: StSpinDbMaker.h,v 1.7 2009/09/26 20:34:50 balewski Exp $
 
 /*! \class StSpinDbMaker 
 \author Jan Balewski
@@ -24,7 +24,7 @@ class StSpinDbMaker : public StMaker {
   spinDbStar_st   *mTabSpinStar;
   spinDbBXmask_st *mTabSpinBXmask;
 
-  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.6 2006/10/24 20:19:37 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.7 2009/09/26 20:34:50 balewski Exp $";
 
   void clearTables(); /// clear local lookup tables
   void requestDataBase(); /// reads tables from STAR-DB
@@ -71,11 +71,18 @@ class StSpinDbMaker : public StMaker {
   int   offsetBX48minusBX7(int bx48, int bx7); ///should be zero for every run
   bool  isBXfilledUsingBXyellow(int bxStar);
   bool  isBXmaskedUsingBXyellow(int bxStar);
-  //BXstarUsingBX7() is deprecaited, use BXyellow.. instead,JB
+  //BXyellowUsingBX7() is deprecaited, use BXstar.. instead,JB
   int   numberOfFilledBunchesBlue() { return numberOfFilledBunches(blueRing); }
 
   int   numberOfFilledBunchesYellow(){ return numberOfFilledBunches(yellRing);}
   TString cadPolPattern() { return  mCADpolPattern; } /// defined only for 2005 run by CAD , based on first 4 filled bunches in both rings. Note, those pairs do NOT collide at STAR with each other.
+
+  // added in 2009, Jan B.
+  bool isBXfilledUsingInternalBX(int bx); // w/o any bXing offsets added, only cogging included
+  const char *getV124comment();
+  int   BXstarUsingBX48(int bx48); /// bXing at STAR IP, [0,119]
+  int   BXstarUsingBX7(int bx7); /// bXing at STAR IP, [0,119]
+
  
   const unsigned char *getRawV124bits();  /// experts only
   const int  *getBucketOffsets();  /// experts only
@@ -89,7 +96,7 @@ class StSpinDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.6 2006/10/24 20:19:37 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.7 2009/09/26 20:34:50 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -100,6 +107,10 @@ class StSpinDbMaker : public StMaker {
 #endif
 
 // $Log: StSpinDbMaker.h,v $
+// Revision 1.7  2009/09/26 20:34:50  balewski
+// additional methods added for 2009 data processing,
+// since allignment of STAR bXing changed from yellow beam (2005) to blue (2009) the names of some methods were adjusted
+//
 // Revision 1.6  2006/10/24 20:19:37  balewski
 // cleanup: - spin4 for abort gaps, drop STARbXing
 //
