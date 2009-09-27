@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.9 2009/09/01 19:43:16 perev Exp $
+!// $Id: tpcegeo3.g,v 1.10 2009/09/27 23:52:33 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.10  2009/09/27 23:52:33  perev
+!// 1st (wrong) version of prompt hits
+!//
 !// Revision 1.9  2009/09/01 19:43:16  perev
 !// Fix FEEA position bug #1570
 !//
@@ -85,7 +88,7 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
           TWGC,TWGB,TPIP,TMAN,TRDV,TRDS,TRDC,TIAD,TOIG,
           FEES,FEEP,FEER,FEEI,FEEA,
 	  TSAS,TWAS,TALS,TSGT,TWBT,TWRC,TWRG,TWRI,TWTR,TWMR,
-          TRDO,TBRW,TWRB,TCOO,TCAB,TRIB,TWIR,TGGR
+          TRDO,TBRW,TWRB,TCOO,TCAB,TRIB,TWIR
 *
 	Real INCH ,CM; 
 	Parameter (INCH=2.54,CM=1.); 
@@ -102,7 +105,7 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
   Real x,x0,x1,x2,dx,dx1,dx2,xc;
   Real y,y0,y1,y2,dy,dy1,dy2;
   Real z,z0,z1,z2,dz,dz1,dz2;
-  Real zGG,zGG1,zGG2;
+  Real zBeg,zDed,zPmt,zEnd;
   Real r,r0,r1,r2,dr;
   Real alpha,beta;
   Real xw,dxw,yw,dyw,zw,dzw,dYdX
@@ -242,10 +245,10 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
 	Rmin =    	46.107    	!// Rmin	  => TPC envelope inner radius
 	Rmax =    	207.750   	!// Rmax	  => TPC envelope outer radius
 	RminIFC = 	46.6	  	!// RminIFC    => inner radius TPC IFC  : A.Lebedev measurement 10/16/08
-	LengthT = 	2*271.0   	!// LengthT    => TPC full length up to fron of EEMC
-	Length  =   2*259.685 		!// Length	  => TPC full length including RDOs
+	LengthT = 	2*271.0   	!// LengthT    => TPC full length up to front of EEMC
+	Length  =       2*259.685 	!// Length	  => TPC full length including RDOs
 	LengthW = 	2*229.71  	!// LengthW    => TPC length including Wheel
-	LengthV = 	2*209.99  	!// LengthV    => TPC gas volume length
+	LengthV = 	2*210.00 	!// LengthV    => TPC gas volume length
 	WheelIR = 	38.620*INCH/2 	!// 49.60 WheelIR    => support wheel inner radius
 	WheelR0 = 	21.500*INCH 	!// WheelR0 => Distance from IP of end of inner cylindrical part
 	WheelR1 = 	47.867*INCH 	!// WheelR1 => Distance from IP of middle Rib
@@ -1600,50 +1603,40 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
       shape Division  NDIV=12  IAXIS=2
 *
       ag_ncopy = 1;
-      do kase=1,3
+      do kase=1,2
       do i_sec=1,2
          Use    TPRS  sec=i_sec;
          Use    TECW  sec=i_sec;
          z1 = 0;
-	 z2 = tpgvLeng - TECW_Thick;
-         zGG2 = z2-TPRS_dAnode;
-         zGG1 = zGG2 - TPCG_distanceGG2AnodeWire;
-         if (kase .eq.1) {dz = (zGG1 - z1  )/2; z = (zGG1 + z1  -tpgvLeng)/2;}
-         if (kase .eq.2) {dz = (z2   - zGG2)/2; z = (zGG2 + z2  -tpgvLeng)/2;}
-         if (kase .eq.3) {dz = (zGG2 - zGG1)/2; z = (zGG2 + zGG1-tpgvLeng)/2;}
+         zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK
+	 z1 = zWheel1 - TECW_Thick;
+
+         zBeg = TPCG_MembTHK/2
+         zEnd = (z1);
+         zPmt = zEnd - 2*TPRS_dAnode;
+         zDed = zPmt - TPCG_distanceGG2AnodeWire;
+         dx=tprs_width/2;
+         write(*,*) 'zBeg,zDed,Zpmt,zEnd = ',zBeg,zDed,Zpmt,zEnd;
+         if (kase == 1) { dz = (zDed - zBeg)/2; z= (zDed + zBeg)/2 -tpgvz;}
+         if (kase == 2) { dz = (zEnd - zPmt)/2; z= (zEnd + zPmt)/2 -tpgvz;}
 *        position within supersector (this assumes rectangular padrows)
            do i_row = 1,nint(tprs_nRow)
-
-               If (kase ==1 .and. (nint(tprs_super)==3 | i_row==1)) then
-         	 Create and Position TPAD  x=tprs_Rpads(i_row)-tprs_width z=z,
-                             dx=tprs_width/2,
-			     dy=tprs_npads(i_row)*tprs_pitch/2,
-                             dz=dz
-!//              write(*,*) 'A Ncopy=',ag_ncopy;
+              if ((nint(tprs_super)==3 | i_row==1)) then
+                 dy=tprs_npads(i_row)*tprs_pitch/2;
+                 x=tprs_Rpads(i_row)-tprs_width;
+		 Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
+                 write(*,*) 'TPAD.A Sec=',i_sec,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
-              If (kase==1 .or. kase==2)  then
-        	 create and position TPAD  x=tprs_Rpads(i_row) z=z,
-                            dx=tprs_width/2 ,
-			    dy=tprs_npads(i_row)*tprs_pitch/2,
-                            dz=dz
-!//              if (kase==1) write(*,*) 'B Ncopy=',ag_ncopy;
-!//              if (kase==2) write(*,*) 'C Ncopy=',ag_ncopy;
-              endif
+		 dy=tprs_npads(i_row)*tprs_pitch/2;
+        	 x=tprs_Rpads(i_row);
+		 create and position TPAD  x=x z=z dx=dx dy=dy dz=dz
+                 write(*,*) 'TPAD.B Sec=',i_sec,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
 
-              If (kase==1 .and. (nint(tprs_super)==3 | i_row==nint(tprs_nRow)))  then
-         	 Create and Position TPAD  x=tprs_Rpads(i_row)+tprs_width z=z,
-                             dx=tprs_width/2, 
- 			     dy=tprs_npads(i_row)*tprs_pitch/2,
-                             dz=dz
-!//              write(*,*) 'D Ncopy=',ag_ncopy;
-              endif
-
-              If (kase==3 )  then
-        	 create and position TGGR  x=tprs_Rpads(i_row) z=z,
-                            dx=tprs_width/2 ,
-			    dy=tprs_npads(i_row)*tprs_pitch/2,
-                            dz=dz
-!//              write(*,*) 'E Ncopy=',ag_ncopy;
+              if ((nint(tprs_super)==3 | i_row==nint(tprs_nRow)))  then
+ 		 x=tprs_Rpads(i_row)+tprs_width
+		 dy=tprs_npads(i_row)*tprs_pitch/2;
+		 Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
+                 write(*,*) 'TPAD.C Sec=',i_sec,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
            enddo
       enddo
@@ -1670,12 +1663,7 @@ block TPAD is a real padrow with dimensions defined at positioning time
                      LPtot:18:(-3,2)      Sleng:.1:(0,800),
                      ToF:16:(0,1.e-6)     LGAM:16:(-2,2),    
                      Step:11:(0,10)       USER:21:(-.01,.01) 
-
 endblock
-block TGGR dead region between Gating Grid and Cathode wires
-      attribute TGGR seen=1 colo=7
-      material p10
-      SHAPE    BOX   dx=0   dy=0   dz=0    
-endblock
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       
       end
