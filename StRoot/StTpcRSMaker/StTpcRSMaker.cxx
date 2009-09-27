@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.18 2009/09/21 13:20:39 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.19 2009/09/27 01:24:58 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.19  2009/09/27 01:24:58  fisyak
+// Restate T0Jitter
+//
 // Revision 1.18  2009/09/21 13:20:39  fisyak
 // Variant O4, no mSigmaJitter, 100 keV
 //
@@ -76,7 +79,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.18 2009/09/21 13:20:39 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.19 2009/09/27 01:24:58 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -93,8 +96,8 @@ static const Int_t nz = 42;
 static const Double_t zmin = -210;
 static const Double_t zmax = -zmin;
 struct Name_t {
-  Char_t *Name;
-  Char_t *Title;
+  const Char_t *Name;
+  const Char_t *Title;
 };
 static const Name_t InOut[4] = {
   {"Inner","Inner old electronics"},
@@ -123,7 +126,11 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mCluster(3.2), tauGlobalOffSet(0), 
   OmegaTauC(2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
   transverseDiffusionConstant(0.0450), // L(0.0475), // K(0.0443),// J(0.040), // (0.049), // (0.0514), // (0.0623), 
-  longitudinalDiffusionConstant(0.0360), 
+#if 0
+  longitudinalDiffusionConstant(0.0450), 
+#else
+  longitudinalDiffusionConstant(0.0360),
+#endif
   Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision with data
   Outer_wire_to_plane_couplingScale(5.0718e-01*1.43), //  -"-
   FanoFactor(0.3),
@@ -170,7 +177,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   tauF(394.0e-9), 
   //not used  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
   tauP(775.0e-9),
-#if 0
+#if 1
   mSigmaJitterTI(0.6), // v30(0.5),  //v29 (0.25), // v28 (0.10), // timebuckets from comparison rho*phi 
   mSigmaJitterTO(0.5), // v30 (0.3),  //v29 (0.25), // v28 (0.20), // and z resolutions
 #else
@@ -291,9 +298,11 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
     m_TpcdEdxCorrection = new StTpcdEdxCorrection(Mask);
   }
   if (Debug() && gStTpcDb->PadResponse()) gStTpcDb->PadResponse()->Table()->Print(0,1);
+#if 1
   longitudinalDiffusionConstant = gStTpcDb->PadResponse()->longitudinalDiffusionConstant();
   //  transverseDiffusionConstant   = gStTpcDb->PadResponse()->transverseDiffusionConstant();
   //  firstOuterSectorAnodeWire  = gStTpcDb->WirePlaneGeometry()->firstOuterSectorAnodeWire();
+#endif
   samplingFrequency = 1.e6*gStTpcDb->Electronics()->samplingFrequency(); // Hz
   mTimeBinWidth     = 1./samplingFrequency;
   numberOfInnerSectorAnodeWires  = gStTpcDb->WirePlaneGeometry()->numberOfInnerSectorAnodeWires ();
@@ -759,7 +768,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  dSSum += dS;
 	  dESumC += dE;
 	  dSSumC += dS;
-#if 0
+#if 1
 	  Double_t xRange = ElectronRange*TMath::Power(dE/ElectronRangeEnergy,ElectronRangePower);
 	  Double_t phiXY = 2*TMath::Pi()*gRandom->Rndm();
 	  Double_t rX = TMath::Cos(phiXY);
@@ -1398,6 +1407,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.19  2009/09/27 01:24:58  fisyak
+// Restate T0Jitter
+//
 // Revision 1.18  2009/09/21 13:20:39  fisyak
 // Variant O4, no mSigmaJitter, 100 keV
 //
