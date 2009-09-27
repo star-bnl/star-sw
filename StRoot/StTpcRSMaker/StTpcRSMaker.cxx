@@ -1,7 +1,10 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.19 2009/09/27 01:24:58 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.20 2009/09/27 01:30:48 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.20  2009/09/27 01:30:48  fisyak
+// Restate T0Jitter
+//
 // Revision 1.19  2009/09/27 01:24:58  fisyak
 // Restate T0Jitter
 //
@@ -79,7 +82,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.19 2009/09/27 01:24:58 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.20 2009/09/27 01:30:48 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -815,7 +818,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // transport to wire
 	    Double_t rX, rY;
 	    gRandom->Rannor(rX,rY);
-#if 0
+#if 1
 	    StTpcLocalSectorCoordinate xyzE(xyzC.x()+xyzR[0]+rX*sigmaT,
 					    xyzC.y()+xyzR[1]+rY*sigmaT,
 					    xyzC.z()+xyzR[2]+gRandom->Gaus(0,sigmaL), sector, iPadrow);
@@ -1407,6 +1410,9 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 
 //________________________________________________________________________________
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.20  2009/09/27 01:30:48  fisyak
+// Restate T0Jitter
+//
 // Revision 1.19  2009/09/27 01:24:58  fisyak
 // Restate T0Jitter
 //
