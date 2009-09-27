@@ -111,7 +111,7 @@ class Altro{
 	void setElement(short* Array,int index,short value);
 
 	int inBand(int ADC,int bsl, int LowThreshold, int HighThreshold);
-	int	inRange(int parameter,int Low,int High,char *Module,char *ParameterName);
+	int	inRange(int parameter,int Low,int High,const char *Module,const char *ParameterName);
 	short GetShortChannel(int i);
 	short GetKeepChannel(int i);
 	int multiply36(int P, int N);

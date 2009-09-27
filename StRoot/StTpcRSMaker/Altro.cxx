@@ -709,7 +709,7 @@ int Altro::inBand(int ADC,int bsl, int LowThreshold, int HighThreshold){
 		return 0;
 }
 
-int	Altro::inRange(int parameter,int Low,int High,char *Module,char *ParameterName){
+int	Altro::inRange(int parameter,int Low,int High,const char *Module,const char *ParameterName){
 	char out[255];
 	int retval;
 	if(parameter > High){
