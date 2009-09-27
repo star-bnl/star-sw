@@ -40,7 +40,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,-EventQA,-EvOut,-dstout,analysis,dEdxY2,noHistos,";
   ChainOpt += "McTpcAna,IdTruth,useInTracker,-hitfilt,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
-    ChainOpt += "tpc_daq,tpcI";
+    ChainOpt += "tpc_daq,tpcI,";
     RunOpt.ReplaceAll("TpcRS,","");
     RunOpt.ReplaceAll("trs,","");
   } else {
@@ -60,7 +60,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
     RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
     RootFile.ReplaceAll(".daq","");
   } else {
-    ChainOpt += "McAna,";
+    ChainOpt += ",McAna,";
     if (FileIn.Contains(".fz",TString::kIgnoreCase)) {
       RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
       ChainOpt += "fzin,";
@@ -218,7 +218,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
 }
 //________________________________________________________________________________
 void TpcRS(Int_t NEvents=100,
-	   const Char_t *Run = "trs,fcf", // "TpcRS,fcf",
+	   const Char_t *Run = "y2009,TpcRS",//trs,fcf", // "TpcRS,fcf",
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
 	   //		 const Char_t *fileIn = 0,
 	   //"/star/rcf/simu/auau200/hijing/b0_20/inverse/year2001/hadronic_on/gstardata/rcf0191_01_380evts.fzd",
