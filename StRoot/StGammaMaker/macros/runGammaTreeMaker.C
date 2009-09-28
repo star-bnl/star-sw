@@ -43,6 +43,19 @@ void runGammaTreeMaker
     StChain *chain = new StChain("chain");
     
     StMuDstMaker *muDstMaker = new StMuDstMaker(0, 0, "", inputFile, "", 1e6, "MuDst");
+    muDstMaker->SetStatus("*", 0);
+    muDstMaker->SetStatus("MuEvent", 1);
+    muDstMaker->SetStatus("Event", 1);
+    muDstMaker->SetStatus("PrimaryVertices", 1);
+    muDstMaker->SetStatus("PrimaryTracks", 1);
+    muDstMaker->SetStatus("GlobalTracks", 1);
+    muDstMaker->SetStatus("EmcTow", 1);   // BEMC Only   
+    muDstMaker->SetStatus("EmcPrs", 1);   // BEMC only   
+    muDstMaker->SetStatus("EmcSmde", 1);  // BEMC Only   
+    muDstMaker->SetStatus("EmcSmdp", 1);  // BEMC Only
+    muDstMaker->SetStatus("EemcPrs", 1);  // EEMC Only
+    muDstMaker->SetStatus("EemcSmdu", 1); // EEMC Only
+    muDstMaker->SetStatus("EemcSmdv", 1); // EEMC Only
 
     St_db_Maker *StarDatabase = new St_db_Maker("StarDb", "MySQL:StarDb", "$STAR/StarDb");
 
@@ -121,7 +134,8 @@ void runGammaTreeMaker
     chain->Init();
     chain->ls(3);
 
-    int ntotal = 1e6;
+    int ntotal = 50;
+    //int ntotal = 1e6;
 
     Int_t stat  = 0;
     Int_t total = 0;
