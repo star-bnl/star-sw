@@ -5,6 +5,7 @@
 
 #include "SystemOfUnits.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
 
 #include "StBarrelEmcCluster.h"
 #include "StBarrelEmcClusterMaker.h"
@@ -133,6 +134,8 @@ Int_t StGammaCandidateMaker::MakeBarrel()
 
     StEmcGeom *smdEtaGeom = new StEmcGeom("bsmde");
     StEmcGeom *smdPhiGeom = new StEmcGeom("bsmdp");
+
+    StEmcPosition emcPosition;
 
     // Loop over BEMC clusters
     for(unsigned int i = 0; i < mBemcClusterMaker->clusters().size(); ++i) 
@@ -335,121 +338,149 @@ Int_t StGammaCandidateMaker::MakeBarrel()
         float smdEtaEnergy = 0;
         float smdPhiEnergy = 0;
         
-        // Loop over strips
-        for(int id = 1; id <= 18000; ++id)
+        int centralId = 0;
+        smdEtaGeom->getId(cluster->position().Phi(), cluster->position().Eta(), centralId);         
+
+        int sector = 0; // Dummy variable in the BEMC
+
+        for(int dPhiStrip = -1; dPhiStrip <= 1; ++dPhiStrip)
         {
-        
-            int sector = 0; // Dummy variable in the BEMC
 
-            // Find vertex corrected position of the strip
-            float x, y, z;
-            smdEtaGeom->getXYZ(id, x, y, z);
-            TVector3 vEta(x, y, z);
-
-            float deta = cluster->position().Eta() - vEta.Eta();
-            float dphi = cluster->position().Phi() - vEta.Phi();
-            dphi = TVector2::Phi_mpi_pi(dphi);
-            float r = hypot(deta, dphi);
-            
-            // If the strip is within range then associate the strip
-            if(r <= mBsmdRange)
-            {                      
-                
-                // Use strip is already created in StGammaRawMaker
-                if(StGammaStrip* strip = mGammaRawMaker->strip(sector, kBEmcSmdEta, id)) 
-                {
-            
-                    candidate->addSmdEta(strip);
-                    strip->candidates.Add(candidate);
-                    smdEtaEnergy += strip->energy;
-                
-                }
-                // Otherwise create a new, empty strip
-                else
-                {
-
-                    float eta;
-
-                    smdEtaGeom->getEta(id, eta);
-             
-                    StGammaStrip *bstrip = mGammaEvent->newStrip();
-         
-                    bstrip->index = id;
-                    bstrip->sector = sector;
-                    bstrip->plane  = kBEmcSmdEta;
-                    // bstrip->stat Filled in StGammaRawMaker::AddEtaStrip()
-                    // bstrip->fail Filled in StGammaRawMaker::AddEtaStrip()
-                    bstrip->energy = 0;
-                    bstrip->position = 230.705 * sinh(eta);
-         
-                    double offset = fabs(eta) < 0.5 ? 0.73 : 0.94;
-            
-                    bstrip->left = bstrip->position - offset;
-                    bstrip->right = bstrip->position + offset;
-
-                    mGammaRawMaker->AddEtaStrip(bstrip);
-            
-                    candidate->addSmdEta(bstrip);
-                    bstrip->candidates.Add(candidate);
-
-                }
-
-            }
-
-            smdPhiGeom->getXYZ(id, x, y, z);
-            TVector3 vPhi(x, y, z);
-
-            deta = cluster->position().Eta() - vPhi.Eta();
-            dphi = cluster->position().Phi() - vPhi.Phi();
-            dphi = TVector2::Phi_mpi_pi(dphi);
-            r = hypot(deta, dphi);
-
-            // If the strip is within range then associate the strip
-            if(r < mBsmdRange)
+            for(int dEtaStrip = -20; dEtaStrip <= 20; ++dEtaStrip)
             {
 
-                // Use strip is already created in StGammaRawMaker
-                if(StGammaStrip* strip = mGammaRawMaker->strip(sector, kBEmcSmdPhi, id)) 
-                {
+                int id = emcPosition.getNextId(3, centralId, dEtaStrip, dPhiStrip);
+        
+                int sector = 0; // Dummy variable in the BEMC
+
+                // Find vertex corrected position of the strip
+                float x, y, z;
+                smdEtaGeom->getXYZ(id, x, y, z);
+                TVector3 vEta(x, y, z);
+
+                float deta = cluster->position().Eta() - vEta.Eta();
+                float dphi = cluster->position().Phi() - vEta.Phi();
+                dphi = TVector2::Phi_mpi_pi(dphi);
+                float r = hypot(deta, dphi);
             
-                    candidate->addSmdPhi(strip);
-                    strip->candidates.Add(candidate);
-                    smdPhiEnergy += strip->energy;
-                  
-                }
-                // Otherwise create a new, empty strip
-                else
+                // If the strip is within range then associate the strip
+                if(r <= mBsmdRange)
+                {                      
+                
+                    // Use strip is already created in StGammaRawMaker
+                    if(StGammaStrip* strip = mGammaRawMaker->strip(sector, kBEmcSmdEta, id)) 
+                    {
+                
+                        candidate->addSmdEta(strip);
+                        strip->candidates.Add(candidate);
+                        smdEtaEnergy += strip->energy;
+                
+                    }
+                    // Otherwise create a new, empty strip
+                    else
+                    {
+
+                        float eta;
+
+                        smdEtaGeom->getEta(id, eta);
+             
+                        StGammaStrip *strip = mGammaEvent->newStrip();
+         
+                        strip->index = id;
+                        strip->sector = sector;
+                        strip->plane  = kBEmcSmdEta;
+                        // strip->stat Filled in StGammaRawMaker::AddEtaStrip()
+                        // strip->fail Filled in StGammaRawMaker::AddEtaStrip()
+                        strip->energy = 0;
+                        strip->position = 230.705 * sinh(eta);
+         
+                        double offset = fabs(eta) < 0.5 ? 0.73 : 0.94;
+              
+                        strip->left = strip->position - offset;
+                        strip->right = strip->position + offset;
+
+                        mGammaRawMaker->AddEtaStrip(strip);
+            
+                        candidate->addSmdEta(strip);
+                        strip->candidates.Add(candidate);
+
+                    } // if exist
+
+                } // if range
+
+            } // dEtaStrips
+
+        } // dPhiStrips
+
+        centralId = 0;
+        smdPhiGeom->getId(cluster->position().Phi(), cluster->position().Eta(), centralId);
+                        
+        for(int dEtaStrip = -1; dEtaStrip <= 1; ++dEtaStrip)
+        {
+       	                
+            for(int dPhiStrip = -20; dPhiStrip <= 20; ++dPhiStrip)
+            {
+            
+                int id = emcPosition.getNextId(4, centralId, dEtaStrip, dPhiStrip);
+
+                // Find vertex corrected position of the strip
+                float x, y, z;
+                smdPhiGeom->getXYZ(id, x, y, z);
+                TVector3 vPhi(x, y, z);
+
+                float deta = cluster->position().Eta() - vPhi.Eta();
+                float dphi = cluster->position().Phi() - vPhi.Phi();
+                dphi = TVector2::Phi_mpi_pi(dphi);
+                float r = hypot(deta, dphi);
+
+                // If the strip is within range then associate the strip
+                if(r < mBsmdRange)
                 {
 
-                    float phi;
-
-                    smdPhiGeom->getPhi(id, phi);
-
-                    StGammaStrip *estrip = mGammaEvent->newStrip();
-
-                    estrip->index = id;
-                    estrip->sector = sector;
-                    estrip->plane  = kBEmcSmdPhi;
-                    //estrip->stat Filled in StGammaRawMaker::AddPhiStrip()
-                    //estrip->fail Filled in StGammaRawMaker::AddPhiStrip()
-                    estrip->energy = 0;
-                    estrip->position = phi;
-
-                    double offset = 0.00293;
-
-                    estrip->left = phi - offset;
-                    estrip->right = phi + offset;
-
-                    mGammaRawMaker->AddPhiStrip(estrip);
-
-                    candidate->addSmdPhi(estrip);
-                    estrip->candidates.Add(candidate);
-
-                }
+                    // Use strip is already created in StGammaRawMaker
+                    if(StGammaStrip* strip = mGammaRawMaker->strip(sector, kBEmcSmdPhi, id)) 
+                    {
+            
+                        candidate->addSmdPhi(strip);
+                        strip->candidates.Add(candidate);
+                        smdPhiEnergy += strip->energy;
                   
-            }
-    
-        } // SMD Strips
+                    }
+                    // Otherwise create a new, empty strip
+                    else
+                    {
+
+                        float phi;
+
+                        smdPhiGeom->getPhi(id, phi);
+
+                        StGammaStrip *strip = mGammaEvent->newStrip();
+
+                        strip->index = id;
+                        strip->sector = sector;
+                        strip->plane  = kBEmcSmdPhi;
+                        //strip->stat Filled in StGammaRawMaker::AddPhiStrip()
+                        //strip->fail Filled in StGammaRawMaker::AddPhiStrip()
+                        strip->energy = 0;
+                        strip->position = phi;
+
+                        double offset = 0.00293;
+
+                        strip->left = phi - offset;
+                        strip->right = phi + offset;
+
+                        mGammaRawMaker->AddPhiStrip(strip);
+
+                        candidate->addSmdPhi(strip);
+                        strip->candidates.Add(candidate);
+
+                    } // if exist
+                  
+                } // if range
+
+            } // dEtaStrips
+
+        } // dPhiStrips
 
         candidate->SetSmdEtaEnergy(smdEtaEnergy);
         candidate->SetSmdPhiEnergy(smdPhiEnergy);
