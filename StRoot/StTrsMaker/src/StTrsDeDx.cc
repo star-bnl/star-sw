@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.16 2004/05/03 23:31:12 perev Exp $
+ * $Id: StTrsDeDx.cc,v 1.17 2009/09/28 18:36:14 perev Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
+ * Revision 1.17  2009/09/28 18:36:14  perev
+ * Weird comparison fixed
+ *
  * Revision 1.16  2004/05/03 23:31:12  perev
  * Possible non init WarnOff
  *
@@ -98,6 +101,7 @@
  * Initial Revision
  *
  ******************************************************************/
+#include <string.h>
 #ifndef ST_NO_EXCEPTIONS
 #include <stdexcept>
 #   if !defined(ST_NO_NAMESPACES)
@@ -132,8 +136,10 @@ StTrsDeDx::StTrsDeDx(const char* gas, double pad)
     : mPadLength(pad)
 {
     mGas = gas;
-    if((gas != "Ne")  && (gas != "Ar") &&
-       (gas != "P10") && (gas != "p10")) {
+//VP     if((gas != "Ne")  && (gas != "Ar") &&
+//VP        (gas != "P10") && (gas != "p10")) {
+    if (strcmp(gas, "Ne") && strcmp(gas,"Ar")
+     && strcmp(gas,"P10") && strcmp(gas,"p10")) {
 #ifdef ST_USES_EXCEPTIONS
 	cerr << "oops" << endl;
 	throw invalid_argument("Gas not currently Implemented.\nMust use either \"Ne\" or \"Ar\" or \"P10\".");
