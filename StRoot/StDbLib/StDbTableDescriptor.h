@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.11 2009/09/10 18:06:08 dmitry Exp $
+ * $Id: StDbTableDescriptor.h,v 1.12 2009/09/28 19:14:10 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.12  2009/09/28 19:14:10  dmitry
+ * row size is not *static* anymore, tables have different row sizes
+ *
  * Revision 1.11  2009/09/10 18:06:08  dmitry
  * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
  *
@@ -102,8 +105,7 @@ protected:
  // db unique ids
  int mstructID;
  int mschemaID;
-//MPD
-  static int rowSizeTT;
+ int rowSizeTT;
  bool misValid;  // schema has been filled
  bool mhasDouble;
  unsigned int maxAlign;

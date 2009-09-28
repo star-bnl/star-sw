@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.27 2009/09/10 20:01:30 dmitry Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.28 2009/09/28 19:14:10 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.28  2009/09/28 19:14:10  dmitry
+ * row size is not *static* anymore, tables have different row sizes
+ *
  * Revision 1.27  2009/09/10 20:01:30  dmitry
  * removed redundant output
  *
@@ -146,8 +149,6 @@ struct StCompilerAlignTest {
                                                                                                                                                                    
 #define st_alignof(TYPE)     (size_t)&(((StCompilerAlignTest<TYPE>*)0)->m1) 
 
-int StDbTableDescriptor::rowSizeTT = 0;
-
 /////////////////////////////////////////////////////////////////////////
 
 StDbTableDescriptor::StDbTableDescriptor(){  init(); }
@@ -180,6 +181,7 @@ memset(mcols,0,mMax*sizeof(tableDescriptor));
 mschemaID=mstructID=0;
 misValid=false;
 mhasDouble=false;
+rowSizeTT = 0;
 
 mAlign[Stchar] = st_alignof(char);
 mAlign[Stuchar] = st_alignof(unsigned char);
@@ -213,6 +215,7 @@ mstructID=d.getStructID();
 misValid=d.IsValid();
 mhasDouble=d.mhasDouble;
 maxAlign=d.maxAlign;
+rowSizeTT = d.rowSizeTT;
 
 mAlign[Stchar] = st_alignof(char);
 mAlign[Stuchar] = st_alignof(unsigned char);
