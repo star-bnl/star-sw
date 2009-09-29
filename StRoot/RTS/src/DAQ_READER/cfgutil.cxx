@@ -12,7 +12,7 @@
 static int init=0;
 static char evpgroups[32][40];
 
-int getRccnf(char *fn, rccnf *desc)
+int getRccnf(const char *fn, rccnf *desc)
 {
   char buff[80];
 
