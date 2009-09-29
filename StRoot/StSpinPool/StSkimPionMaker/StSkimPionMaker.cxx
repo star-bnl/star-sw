@@ -512,8 +512,9 @@ StThreeVectorF StSkimPionMaker::getPoint(StEmcPoint *p, Int_t &id, Float_t &e, F
     if(!event)
 	{
 	    cout << "++++++++++++ StSkimPionMaker::getPoint: Can't get Event pointer" << endl;
-       assert ( 0 && " Can't convert kStOk to StThreeVectorF. Please fix me!!!");
-//	    return kStOk;
+	    //       assert ( 0 && " Can't convert kStOk to StThreeVectorF. Please fix me!!!");
+	    StThreeVectorF abortVector(-10000.,0.,0.);
+	    return abortVector;
 	}
     
     // get primary vertex
@@ -825,6 +826,8 @@ Float_t StSkimPionMaker::getNeutralEnergySum(TObjArray *photonlist)
 	    StThreeVectorF v1 = getPoint(p1, id1,e1,pt1,n1,t1, eSMDe1, eSMDp1, eTower1,sSMDe1, sSMDp1, sTower1);
 	    if ((n1 == 0)&&(id1 < 4801))
 		eSum += e1;
+	    if (v1(0) == -10000.)
+		eSum = 0;
 	}
     
     return eSum;
@@ -853,6 +856,8 @@ void StSkimPionMaker::getPhotonSpectra(TObjArray *photonlist, int runnm, float v
 	    
 	    // get EMC point information 
 	    StThreeVectorF v1 = getPoint(p1, id1,e1,pt1,n1,t1, eSMDe1, eSMDp1, eTower1,sSMDe1, sSMDp1, sTower1);
+	    if (v1(0) == -10000.)
+		     return;
 	    //cout <<"--------------------> pt1 = " <<pt1<<endl;
 	    
 	    if (debug) cout << "Photon track association: " << n1 << endl;
@@ -897,6 +902,8 @@ void StSkimPionMaker::getInvMass(int mode, TObjArray *photonlist1, TObjArray *ph
 	    Float_t sSMDe1, sSMDp1, sTower1;
 	    
 	    StThreeVectorF v1 = getPoint(p1, id1,e1,pt1,n1,t1, eSMDe1, eSMDp1, eTower1,sSMDe1, sSMDp1, sTower1);
+	    if (v1(0) == -10000.)
+		return;
 	    chargedAssociation1 = n1;
 	    
 	    // here I fill the hit container for Pi0Event
@@ -944,6 +951,8 @@ void StSkimPionMaker::getInvMass(int mode, TObjArray *photonlist1, TObjArray *ph
 		    Float_t sSMDe2, sSMDp2, sTower2;
 		    
 		    StThreeVectorF v2 = getPoint(p2, id2,e2,pt2,n2,t2, eSMDe2, eSMDp2, eTower2,sSMDe2, sSMDp2, sTower2);
+		    if (v2(0) == -10000)
+			return;
 		    chargedAssociation2 = n2;
 		    //cout << "!!!!!!!!!!! HitRadius2: " << v2.perp() << endl;
 		    // Pi0 CUTS 
