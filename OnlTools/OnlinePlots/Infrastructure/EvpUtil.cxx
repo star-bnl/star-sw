@@ -71,13 +71,13 @@ char* EvpUtil::cat(const char* a, const char* b) {
 
 
 
-unsigned int EvpUtil::evpgroupmask( char* group ) {
+unsigned int EvpUtil::evpgroupmask( const char* group ) {
   unsigned int ret = str2evpgroupmask(group);
   if ( strstr(group,"any")!=0 )  ret = 0xffffffff; 
   return ret;
 }
  
-unsigned int EvpUtil::detmask( char* group) {
+unsigned int EvpUtil::detmask( const char* group) {
   if ( strstr(group,"any")!=0 ) return 0xffffffff; 
   return str2detmask(group);
 }
@@ -960,7 +960,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.12 2009/04/30 01:57:18 dkettler Exp $
+ * $Id: EvpUtil.cxx,v 1.13 2009/09/29 19:20:11 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -970,6 +970,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.13  2009/09/29 19:20:11  genevb
+ * A couple char to const char fixes
+ *
  * Revision 1.12  2009/04/30 01:57:18  dkettler
  * Extra check when printing groups
  *

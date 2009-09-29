@@ -88,8 +88,8 @@ class EvpUtil {
   static int Map2Root(const char* map, const char* root);
   static int Root2Map(const char* root, const char* map);
 
-  static unsigned int evpgroupmask( char* );
-  static unsigned int detmask( char* );
+  static unsigned int evpgroupmask( const char* );
+  static unsigned int detmask( const char* );
 
   static void Draw(TH1*h, const char* options="");
 
@@ -106,7 +106,7 @@ class EvpUtil {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.h,v 1.8 2009/09/15 23:15:09 fine Exp $
+ * $Id: EvpUtil.h,v 1.9 2009/09/29 19:20:11 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -116,6 +116,9 @@ class EvpUtil {
  ***************************************************************************
  *
  * $Log: EvpUtil.h,v $
+ * Revision 1.9  2009/09/29 19:20:11  genevb
+ * A couple char to const char fixes
+ *
  * Revision 1.8  2009/09/15 23:15:09  fine
  * Adjust for SL5
  *
