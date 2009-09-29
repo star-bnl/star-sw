@@ -8,8 +8,8 @@ struct rccnf
   UINT32 grpMask;
 };
 
-UINT32 str2detmask(char *str);
-UINT32 str2evpgroupmask(char *str);
-int getRccnf(char *fn, rccnf *desc);
+UINT32 str2detmask(const char *str);
+UINT32 str2evpgroupmask(const char *str);
+int getRccnf(const char *fn, rccnf *desc);
 
 #endif
