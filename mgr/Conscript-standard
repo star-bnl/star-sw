@@ -38,6 +38,7 @@ my $SO_MAP  = "";
 my $SO_MAPT = "";
 my $pkg;
 my $PKG;
+my $OnlinePackage=0;
 my @LinkDefs = ();
 my @LinkDefsT = (); # for tables if any
 my @PlainObj = ();
@@ -56,10 +57,10 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
     $pkg = "StarMiniCern"       if ($pkg =~ m/minicern/);
     $PKG = $pkg;
     print "\t[".File::Basename::basename($Dir)."] (possible name clash) changed to $pkg\n";
-
 } else {
     $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
     $PKG = $pkg;
+    $OnlinePackage=true if $Dir =~ /^OnlTools/;
 }
 $env1 = $env->clone('Package'  => $pkg);
 my $CXXFLAGS= $env1->{CXXFLAGS};
@@ -119,10 +120,10 @@ if ($pkg eq "RTS") {
   $CFLAGS =~   s/-D__ROOT__//;# print " ------------  CFLAGS WHERE \"__ROOT__\" coming from ??? ==== " .  $CFLAGS . "\n";
   $CPPPATH = $main::PATH_SEPARATOR . "#StRoot/RTS/include" .
     $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include" .
-      $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC" .
-	$main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" .
-	  $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
-	    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
+    $main::PATH_SEPARATOR . "#StRoot/RTS/include/TPC" .
+    $main::PATH_SEPARATOR . "#StRoot/RTS/src/SFS" .
+    $main::PATH_SEPARATOR . "#StRoot/RTS/src" .
+    $main::PATH_SEPARATOR . "#StRoot/RTS/src/EVP_READER" . $main::PATH_SEPARATOR . $CPPPATH;
   my @src = ();
 #  print "srcL : @srcL\n";
 #  print "skip /^src\/(DAQ_LEGACY|EVP_READER|RTS_READER)/\n";
@@ -134,31 +135,22 @@ if ($pkg eq "RTS") {
   @srcL = @src;
   @src = ();
 }
-my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker  OnlinePlots  StEmcRawMaker  StEEmcPoolmuEztPanitkin  StBEMCPlots Stl3RawReaderMaker StBTofHitMaker );
+my @VF_daq_pkgs = qw(StDAQMaker  StTofHitMaker  StTpcHitMaker StEmcRawMaker  StEEmcPoolmuEztPanitkin  StBEMCPlots Stl3RawReaderMaker StBTofHitMaker );
 my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/include"
                      . $main::PATH_SEPARATOR . "#StRoot/RTS/trg/include"
                      ;
-foreach my $p (@VF_daq_pkgs) {
-#  print "compare $p with pkg = $pkg\n";
-  if ($pkg eq $p) {
+
+if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@VF_daq_pkgs); }
+
+if ($OnlinePackage) {
     $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
-#    $ROOTCINT_CPPFLAGS = " -DNEW_DAQ_READER"; 
-#    print "new CPPPATH = $CPPPATH\nfor $p\n";
-    last;
-  }
 }
 if ( $pkg eq "OnlinePlots") {
-    $ONLINEPLOTPATH  =  $RTS_READER_PATH;
-    $CPPPATH  .=  $ONLINEPLOTPATH
-              .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure" 
-              .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/Infrastructure" 
+    $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure" 
               .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/HistogramGroups"
-              .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/HistogramGroups"
               .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure/EEmcDb"
-              .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/Infrastructure/EEmcDb"
               .   $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/QEvpClient"
-              .   $main::PATH_SEPARATOR . "#StRoot/OnlinePlots/QEvpClient"
               .   $main::PATH_SEPARATOR . "#StRoot/RTS/EventTracker"
               .   $main::PATH_SEPARATOR .  $CPPPATH;
     $CPPFLAGS .= " -DQT_THREAD_SUPPORT -DQT_SHARED -DQT_NO_DEBUG ";
