@@ -1,4 +1,10 @@
+// To build profile histograms: root.exe -q -b TpcT.C+
+// To fit them                : root.exe -q *G.root FitTpcT.C
+// To draw all of them        : root.exe */*Fit.root
+//                              .L DrawList.C+
+//                              DrawFAll()
 #define PRINT
+//#define runY2008
 //#define __LASER__
 //#define __REAL_DATA__
 //#define __useGainT0__
@@ -268,7 +274,7 @@ void TpcT(const Char_t *opt = "G", const Char_t *files="*.root", const Char_t *O
     Char_t *Name;
     Char_t *Title;
   };
-#if 0
+#ifdef runY2008
   Name_t InOut[4] = {
     {"Inner","Inner for all except 16"},
     {"Outer","Outer for all except 16"},
@@ -295,8 +301,13 @@ void TpcT(const Char_t *opt = "G", const Char_t *files="*.root", const Char_t *O
   TH1D       *histA[4][2];
   TH2D       *histB[4];
   memset (hist, 0, sizeof(hist));
-  //  for (Int_t io = 0; io < 4; io++) {// TPC + TPX
-  for (Int_t io = 0; io < 2; io++) {// TPX
+#ifdef   runY2008
+  Int_t NS = 4; // TPC + TPX
+#else
+  Int_t NS = 2; // TPX
+#endif
+  //  for (Int_t io = 0; io < 4; io++) {
+  for (Int_t io = 0; io < NS; io++) {
     Int_t color = 1;
     for (Int_t rmt = 0; rmt < 3; rmt++) {
 #ifdef __REAL_DATA__
@@ -385,7 +396,7 @@ void TpcT(const Char_t *opt = "G", const Char_t *files="*.root", const Char_t *O
 #endif    
     Int_t io = 0;
     if (row > 13) io = 1;
-#if 0
+#ifdef runY2008
     if (sector  == 16) io += 2;
 #endif
     for (Int_t i = 0; i < fNoPixels; i++) {
@@ -803,10 +814,14 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
 #if 0
   TF1* off = new TF1("off","exp(log(1.+[0]/exp(x)))",3,10);
 #endif
-  TProfile2D *inout[2];
-  inout[0] = new TProfile2D("inner","simulated ADC versus log(recon. ADC) and Z",
+  TProfile2D *inout[4];
+  inout[0] = new TProfile2D("inner","log(simulated ADC) versus log(recon. ADC) and Z",
 			    70,3.,10.,210,-210,210,"");
-  inout[1] = new TProfile2D("outer","simulated ADC versus log(recon. ADC) and Z",
+  inout[1] = new TProfile2D("outer","log(simulated ADC) versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  inout[2] = new TProfile2D("innerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
+			    70,3.,10.,210,-210,210,"");
+  inout[3] = new TProfile2D("outerR","log(simulated ADC)-log(recon. ADC) versus log(recon. ADC) and Z",
 			    70,3.,10.,210,-210,210,"");
   Double_t dsCut[2] = {1., 2.};
   while (iter.Next()) {
@@ -824,6 +839,7 @@ void TpcTAdc(const Char_t *files="*.root", const Char_t *Out = "") {
       Double_t ratio = fMcHit_mLgamma[k]/fAdcSum;
       if (ratio < 0.1 || ratio > 10) continue;
       inout[io]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mLgamma[k]));
+      inout[io+2]->Fill(TMath::Log(fAdcSum),fMcHit_mPosition_mX3[k], TMath::Log(fMcHit_mLgamma[k])-TMath::Log(fAdcSum));
     }
   }
   fOut->Write();
@@ -860,8 +876,12 @@ innerM
   Double_t adc    = adcL*(par[3] + adcL*(par[4] + adcL*par[5]));
   Double_t adcS   = offset + TMath::Exp(adc);
   Double_t result = 0;
-  if (adcS > 0) result = TMath::Log(adcS);
+  if (adcS > 0) result = TMath::Log(adcS) - adcL;
   return result;
+}
+//________________________________________________________________________________
+Double_t fun2r(Double_t *x, Double_t *par) {
+  return fun2(x,par) - x[0];
 }
 //________________________________________________________________________________
 Double_t fun1(Double_t *x, Double_t *par) {
@@ -881,6 +901,11 @@ Double_t fun1(Double_t *x, Double_t *par) {
   return fun2(xz,par);
 }
 //________________________________________________________________________________
+Double_t fun1r(Double_t *x, Double_t *par) {
+  Double_t xz[2] = {x[0], par[6]};
+  return fun2r(xz,par);
+}
+//________________________________________________________________________________
 void DrawF1(const Char_t *name = "innerM", Int_t i = 111, Char_t *opt="") {
   TProfile2D *hist = (TProfile2D *) gDirectory->Get(name);
   if (! hist) return;
@@ -888,6 +913,23 @@ void DrawF1(const Char_t *name = "innerM", Int_t i = 111, Char_t *opt="") {
   if (! f2) return;
   TAxis *y = hist->GetYaxis();
   TF1 *f1 = new TF1("f1",fun1,3,9,7);
+  f1->SetParNames("offset","z","zxAdcL","adcL","adcL2","adcL3","Z");
+  Double_t params[7];
+  f2->GetParameters(params);
+  TH1D *h = hist->ProjectionX(Form("i%i",i),i,i);  
+  params[6] = y->GetBinCenter(i); 
+  h->SetTitle(Form("%s at z = %5.2f",hist->GetTitle(),params[6]));
+  h->SetStats(0); h->Draw(opt);
+  f1->SetParameters(params);  f1->Draw("same");
+}
+//________________________________________________________________________________
+void DrawF1r(const Char_t *name = "innerM", Int_t i = 111, Char_t *opt="") {
+  TProfile2D *hist = (TProfile2D *) gDirectory->Get(name);
+  if (! hist) return;
+  TF2 *f2 = (TF2 *) hist->GetListOfFunctions()->FindObject("f2r");
+  if (! f2) return;
+  TAxis *y = hist->GetYaxis();
+  TF1 *f1 = new TF1("f1r",fun1r,3,9,7);
   f1->SetParNames("offset","z","zxAdcL","adcL","adcL2","adcL3","Z");
   Double_t params[7];
   f2->GetParameters(params);
@@ -967,51 +1009,71 @@ Outer
    6  adcL3        0.00000e+00     fixed    
  Font metric w =  133  h =  21 points= 9 pixels= 12 QFont( "Arial,9,12,0,80,0,0,0,0,0" ) 
   */
-  Char_t *histNames[2] = {"inner","outer"};
+  Char_t *histNames[4] = {"inner","outer","innerR","outerR"};
   Char_t *parNames[7] = {"offset","z","zxAdcL","adcL","adcL2","adcL3","Z"};
-  TF2 *f2 = new TF2("f2",fun2,3.5,8.5,-210,210, 6);
-  f2->SetParameters(6.52745e+01,  3.29340e-01, -8.19982e-02,  1.11882e+00, -1.30767e-02,  0.00000e+00);
-  f2->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5]);
-  f2->FixParameter(5,0);
-  TCanvas *c1 = new TCanvas("c1","Adc Corrections");
-  TCanvas *c2 = new TCanvas("c2","Adc Corrections Projections");
-  c1->Divide(2,1);
-  c2->Divide(2,1);
-  for (Int_t i = 0; i < 2; i++) {
-    TProfile2D *hist = (TProfile2D *) gDirectory->Get(histNames[i]);
-    if (! hist) continue;
-    //    Int_t nx = hist->GetNbinsX();
-    Int_t ny = hist->GetNbinsY();
-    TProfile2D *histM = (TProfile2D *) gDirectory->Get(Form("%sM",histNames[i]));
-    if (! histM) histM = CleanAdc(histNames[i]);
-    c1->cd(i+1);
-    histM->Fit("f2","er");
-    histM->Draw("colz");
-    f2->Draw("cont1 same");
-    c2->cd(i+1);
-    TLegend *leg = new TLegend(0.6,0.1,0.9,0.4);
-    TAxis *y = histM->GetYaxis();
-    Double_t params[7];
-    f2->GetParameters(params);
-    Int_t color = 0;
-    for (Int_t j = 106; j <= ny; j += 20) {
-      TH1D *h = histM->ProjectionX(Form("%sj%i",histM->GetName(),j),j,j);  
-      params[6] = y->GetBinCenter(j); 
-      h->SetTitle(Form("%s at z = %5.2f",histM->GetTitle(),params[6]));
-      color++;
-      h->SetMarkerStyle(20);
-      h->SetMarkerColor(color);
-      h->SetStats(0); 
-      TF1 *f1 = new TF1(Form("f%i_%i",i,j),fun1,3,9,7);
-      f1->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5],parNames[6]);
-      f1->SetParameters(params); 
-      f1->SetLineColor(color);
-      if (color == 1) h->Draw();
-      else            h->Draw("same");
-      f1->Draw("same");
-      leg->AddEntry(h,Form("z = %5.2f",params[6]));
+  TF2 *f2;
+  TF1 *f1;
+  TCanvas *c1, *c2;
+  for (Int_t k = 0; k < 1; k++) {
+    if (k == 0) {
+      f2 = new TF2("f2",fun2,3.5,8.5,-210,210, 6);
+      c1 = new TCanvas("c1","Adc Corrections");
+      c2 = new TCanvas("c2","Adc Corrections Projections");
     }
-    leg->Draw();
+    else {
+      f2 = new TF2("f2r",fun2r,3.5,8.5,-210,210, 6);
+      c1 = new TCanvas("c1r","Relative Adc Corrections");
+      c2 = new TCanvas("c2r","Relative Adc Corrections Projections");
+    }
+    f2->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5]);
+    c1->Divide(2,1);
+    c2->Divide(2,1);
+    for (Int_t i = 0; i < 2; i++) {
+      TProfile2D *hist = (TProfile2D *) gDirectory->Get(histNames[2*k+i]);
+      if (! hist) continue;
+      if (k == 0) hist->SetMinimum(3);
+      else        hist->SetMinimum(-0.5);
+      //    Int_t nx = hist->GetNbinsX();
+      Int_t ny = hist->GetNbinsY();
+      TProfile2D *histM = (TProfile2D *) gDirectory->Get(Form("%sM",histNames[i]));
+      if (! histM) histM = CleanAdc(histNames[i]);
+      c1->cd(i+1);
+      f2->SetParameters(6.52745e+01,  0, 0,  1.11882e+00, -1.30767e-02,  0.00000e+00);
+      f2->FixParameter(1,0);
+      f2->FixParameter(2,0);
+      f2->FixParameter(5,0);
+      histM->Fit(f2,"er");
+      f2->ReleaseParameter(1);
+      f2->ReleaseParameter(2);
+      histM->Fit(f2,"er");
+      histM->Draw("colz");
+      f2->Draw("cont1 same");
+      c2->cd(i+1);
+      TLegend *leg = new TLegend(0.6,0.1,0.9,0.4);
+      TAxis *y = histM->GetYaxis();
+      Double_t params[7];
+      f2->GetParameters(params);
+      Int_t color = 0;
+      for (Int_t j = 106; j <= ny; j += 20) {
+	TH1D *h = histM->ProjectionX(Form("%sj%i",histM->GetName(),j),j,j);  
+	params[6] = y->GetBinCenter(j); 
+	h->SetTitle(Form("%s at z = %5.2f",histM->GetTitle(),params[6]));
+	color++;
+	h->SetMarkerStyle(20);
+	h->SetMarkerColor(color);
+	h->SetStats(0); 
+	if (k == 0)  f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1,3,9,7);
+	else         f1 = new TF1(Form("%s%i_%i",f2->GetName(),i,j),fun1r,3,9,7);
+	f1->SetParNames(parNames[0],parNames[1],parNames[2],parNames[3],parNames[4],parNames[5],parNames[6]);
+	f1->SetParameters(params); 
+	f1->SetLineColor(color);
+	if (color == 1) h->Draw();
+	else            h->Draw("same");
+	f1->Draw("same");
+	leg->AddEntry(h,Form("z = %5.2f",params[6]));
+      }
+      leg->Draw();
+    }
   }
 }
 //________________________________________________________________________________
@@ -1308,16 +1370,16 @@ void FitSlices(const Char_t *name="OuterPadRc", const Char_t *opt="K3", Int_t iy
     proj->Fit(ga,"rev","",xFmin,xFmax);
     c1->Update();
     //    Double_t prob = ga->GetProb();
-    Double_t chisq = ga->GetChisquare(); 
+    //    Double_t chisq = ga->GetChisquare(); 
     //    out[Npar]->SetBinContent(i,chisq);
-    if (chisq < 1.e5) {
+    //    if (chisq < 1.e5) {
       for (Int_t j = 2; j < Npar; j++) {
 	if (out[j]) {
 	  out[j]->SetBinContent(i,ga->GetParameter(j));
 	  out[j]->SetBinError(i,ga->GetParError(j));
 	}
       } 
-    }
+      //    }
   }
   if (! iy && out[2]) {
     out[2]->SetMarkerStyle(20);
