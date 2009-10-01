@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.38 2008/03/27 00:09:54 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.39 2009/10/01 22:40:11 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.39  2009/10/01 22:40:11  jhthomas
+ * Update grid spacing for UndoShort, and prepare for other future gridding upgrades to achieve higher resolution results.
+ *
  * Revision 1.38  2008/03/27 00:09:54  jhthomas
  * Modify previous magfield changes and set 'zero' field to ~1 Gauss in a more robust way.
  * Add SpaceChargeEWRatio and appropriate functions that allow us to calibrate d-Au collisions.
@@ -123,8 +126,8 @@
 #define  nZ               57            // Standard STAR B field Map. Number of Z points in table
 #define  nR               28            // Number of R points in table
 #define  nPhi             37            // Number of Phi points in table
-#define  neZ              69            // Standard STAR E field Map. Number of Z points in table
-#define  neR              33            // Number of R points in table
+#define  neZ             224            // Standard STAR E field Map. Number of Z points in table
+#define  neR              80            // Number of R points in table
 #define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
 
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
@@ -258,13 +261,16 @@ class StMagUtilities {
   Float_t  Radius[nR], ZList[nZ] ;         
   Float_t  Bz3D[nPhi][nZ][nR], Br3D[nPhi][nZ][nR], Bphi3D[nPhi][nZ][nR] ;         
   Float_t  R3D[nR], Z3D[nZ], Phi3D[nPhi] ;         
-  Float_t  cmEr[neZ][nePhi][neR],    cmEphi[neZ][nePhi][neR] ;
-  Float_t  endEr[neZ][nePhi][neR],   endEphi[neZ][nePhi][neR] ;
+//Float_t  cmEr[neZ][nePhi][neR],    cmEphi[neZ][nePhi][neR]  ;
+//Float_t  endEr[neZ][nePhi][neR],   endEphi[neZ][nePhi][neR] ;
   Float_t  shiftEr[neZ][neR] ;
   Float_t  spaceEr[neZ][neR] ;
   Float_t  spaceR2Er[neZ][neR] ;
   Float_t  shortEr[neZ][neR] ;
-  Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
+
+  static   Float_t ePhiList[nePhi] ;   // Note: These are initialized near CommonStart() in the .cxx file
+  static   Float_t eRadius[neR]    ;
+  static   Float_t eZList[neZ]     ;
 
  public:
 
