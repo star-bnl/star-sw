@@ -1,43 +1,5 @@
 /// \author Y.Fisyak, fisyak@bnl.gov
 /// \date
-// $Id: StTpcRSMaker.cxx,v 1.20 2009/09/27 01:30:48 fisyak Exp $
-// $Log: StTpcRSMaker.cxx,v $
-// Revision 1.20  2009/09/27 01:30:48  fisyak
-// Restate T0Jitter
-//
-// Revision 1.19  2009/09/27 01:24:58  fisyak
-// Restate T0Jitter
-//
-// Revision 1.18  2009/09/21 13:20:39  fisyak
-// Variant O4, no mSigmaJitter, 100 keV
-//
-// Revision 1.17  2009/09/01 15:06:44  fisyak
-// Version N
-//
-// Revision 1.16  2009/08/25 20:39:40  fisyak
-// Variant K
-//
-// Revision 1.15  2009/08/25 15:45:58  fisyak
-// Version J
-//
-// Revision 1.14  2009/08/24 20:16:41  fisyak
-// Freeze with new Altro parameters
-//
-// Revision 1.13  2008/12/29 15:24:54  fisyak
-// Freeze ~/WWW/star/Tpc/TpcRS/ComparisonMIP31
-//
-// Revision 1.12  2008/12/18 23:06:37  fisyak
-// Take care about references to TGiant
-//
-// Revision 1.11  2008/12/12 21:41:41  fisyak
-// Freeze
-//
-// Revision 1.10  2008/10/06 19:10:23  fisyak
-// BichlePPMIP3
-//
-// Revision 1.9  2008/10/03 20:25:29  fisyak
-// Version BichselMIP2
-//
 // doxygen info here
 /*
   The maker's algorithms and formulae based on 
@@ -82,7 +44,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.20 2009/09/27 01:30:48 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.21 2009/10/01 14:53:06 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -180,12 +142,12 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   tauF(394.0e-9), 
   //not used  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
   tauP(775.0e-9),
-#if 1
+#if 0
   mSigmaJitterTI(0.6), // v30(0.5),  //v29 (0.25), // v28 (0.10), // timebuckets from comparison rho*phi 
   mSigmaJitterTO(0.5), // v30 (0.3),  //v29 (0.25), // v28 (0.20), // and z resolutions
 #else
-  mSigmaJitterTI(0.0), 
-  mSigmaJitterTO(0.0), 
+  mSigmaJitterTI(0.3), 
+  mSigmaJitterTO(0.3), 
 #endif
 #if 0
   mSigmaJitterXI(0.1), // v30 (0.057), //v28 0.172), // cm
@@ -323,18 +285,19 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   Double_t timeBinMin = -0.5;
   Double_t timeBinMax = 44.5;
   const Char_t *Names[2] = {"I","O"};
+  Double_t CathodeAnodeGap[2] = {0.2, 0.4};
   for (Int_t io = 0; io < 2; io++) {// In/Out
     if (io == 0) {
       cout << "Inner Sector ======================" << endl;
       InnerAlphaVariation = InducedCharge(anodeWirePitch,
-					  gStTpcDb->PadPlaneGeometry()->innerSectorPadWidth(),
+					  CathodeAnodeGap[io],
 					  anodeWireRadius,
 					  innerSectorAnodeVoltage, t0IO[io]);
     }
     else {
       cout << "Outer Sector ======================" << endl;
       OuterAlphaVariation = InducedCharge(anodeWirePitch,
-					  gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth(),
+					  CathodeAnodeGap[io],
 					  anodeWireRadius,
 					  outerSectorAnodeVoltage, t0IO[io]);
     }
@@ -1407,9 +1370,12 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
   memset (m_SignalSum, 0, NoOfRows*NoOfPads*NoOfTimeBins*sizeof(SignalSum_t));
   return m_SignalSum;
 }
-
 //________________________________________________________________________________
+// $Id: StTpcRSMaker.cxx,v 1.21 2009/10/01 14:53:06 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.21  2009/10/01 14:53:06  fisyak
+// Add T0Jitter
+//
 // Revision 1.20  2009/09/27 01:30:48  fisyak
 // Restate T0Jitter
 //
