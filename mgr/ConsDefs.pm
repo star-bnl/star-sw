@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.114 2009/09/25 13:21:09 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.115 2009/10/02 16:34:09 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -274,14 +274,23 @@
 	# now check
 	if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
 	     -e "$CERN_ROOT/lib/libkernlib_noshift.a") {
-	  $packl = "packlib_noshift";
-	  $kernl = "kernlib_noshift";
-	  if (-e "$CERN_ROOT/bin/cernlib_noshift"){
-	    $cernl = "$CERN_ROOT/bin/cernlib_noshift";
-	  }
-	  else {
-	    $cernl = "cernlib";
-	  }
+	    $packl = "packlib_noshift";
+	    $kernl = "kernlib_noshift";
+	    if (-e "$CERN_ROOT/bin/cernlib_noshift"){
+		$cernl = "$CERN_ROOT/bin/cernlib_noshift";
+	    } else {
+		$cernl = "cernlib";
+	    }
+	} elsif ( -e "$CERN_ROOT/lib/libpacklib-noshift.a" &&
+		  -e "$CERN_ROOT/lib/libkernlib-noshift.a") 
+	    $packl = "packlib-noshift";
+	    $kernl = "kernlib-noshift";
+	    if (-e "$CERN_ROOT/bin/cernlib-noshift"){
+		$cernl = "$CERN_ROOT/bin/cernlib-noshift";
+	    } else {
+		$cernl = "cernlib";
+	    }
+
 	} else {
 	    print "WARNING: using cernlib from the default path\n"
 		unless ($param::quiet); 
