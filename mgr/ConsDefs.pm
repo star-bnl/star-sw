@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.115 2009/10/02 16:34:09 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.116 2009/10/02 16:57:34 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -282,7 +282,7 @@
 		$cernl = "cernlib";
 	    }
 	} elsif ( -e "$CERN_ROOT/lib/libpacklib-noshift.a" &&
-		  -e "$CERN_ROOT/lib/libkernlib-noshift.a") 
+		  -e "$CERN_ROOT/lib/libkernlib-noshift.a") {
 	    $packl = "packlib-noshift";
 	    $kernl = "kernlib-noshift";
 	    if (-e "$CERN_ROOT/bin/cernlib-noshift"){
