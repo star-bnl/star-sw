@@ -163,8 +163,15 @@ print $ADDMESS if ($ADDMESS ne "");
 #+
 # Now back on the shift stuff, the main purpose of this helper script
 #-
-if ( ! -e "$CERN/$CERNL/lib/libpacklib_noshift.a"){
-    die "$CERN/$CERNL/lib/libpacklib_noshift.a does not exist. Would not know what to do...\n";
+$packlib = "";
+$packlib = "$CERN/$CERNL/lib/libpacklib_noshift.a" if ( -e "$CERN/$CERNL/lib/libpacklib_noshift.a");
+$packlib = "$CERN/$CERNL/lib/libpacklib-noshift.a" if ( -e "$CERN/$CERNL/lib/libpacklib-noshift.a");
+
+if ( $packlib eq "" ){
+    die "$CERN/$CERNL/lib/libpacklib{_|-}noshift.a does not exist.\n".
+        "Would not know what to do...\n";
+} else {
+    
 }
 
 if ( ! open(FI, "config/Makefile.config") || ! open(FO,">config/Makefile.config.new") ){
@@ -176,8 +183,8 @@ $done = 0;
 while ( defined($line = <FI>) ){
     chomp($line);
     if ($line =~ m/CERNLIBS\s+:=\s*$/){
-	print FO "CERNLIBS := $CERN/$CERNL/lib/libpacklib_noshift.a $CERN/$CERNL/lib/libkernlib.a\n";
-	print    "CERNLIBS := $CERN/$CERNL/lib/libpacklib_noshift.a $CERN/$CERNL/lib/libkernlib.a\n";
+	print FO "CERNLIBS := $packlib $CERN/$CERNL/lib/libkernlib.a\n";
+	print    "CERNLIBS := $packlib $CERN/$CERNL/lib/libkernlib.a\n";
 	$done = 1;
     } elsif ( $line =~ m/BUILDHBOOK/){
 	# Introduced at ROOT 4.04.02
