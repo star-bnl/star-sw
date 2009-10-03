@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.13 2009/09/26 20:34:50 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.14 2009/10/03 03:16:26 balewski Exp $
  
 
 #include <time.h>
@@ -158,11 +158,11 @@ void  StSpinDbMaker::optimizeTables  (){
     if( (yNib==nibZ && bNib==nibZ) ||  (yNib==nibE && bNib==nibE) )
       spin4=0;
     else if ( yNib==nibE && bNib==nibP )  spin4=4;
-    else if ( yNib==nibE && bNib==nibN )  spin4=2;
+    else if ( yNib==nibE && bNib==nibN )  spin4=8;
     else if ( yNib==nibP && bNib==nibE )  spin4=1;
     else if ( yNib==nibP && bNib==nibP )  spin4=5;
     else if ( yNib==nibN && bNib==nibP )  spin4=6;
-    else if ( yNib==nibN && bNib==nibE )  spin4=8;
+    else if ( yNib==nibN && bNib==nibE )  spin4=2;
     else if ( yNib==nibP && bNib==nibN )  spin4=9;
     else if ( yNib==nibN && bNib==nibN )  spin4=10;
     // if(spin4>=0)  printf("bx=%3d bucket: B%03d Y%03d spin8=%3d spin4=%d\n",bx,bBucket,yBucket,bNib<<4+yNib,spin4);
@@ -574,6 +574,9 @@ StSpinDbMaker::auxilairyVariables(){
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.14  2009/10/03 03:16:26  balewski
+// fix of swap between spin4= 8 & 2
+//
 // Revision 1.13  2009/09/26 20:34:50  balewski
 // additional methods added for 2009 data processing,
 // since allignment of STAR bXing changed from yellow beam (2005) to blue (2009) the names of some methods were adjusted
