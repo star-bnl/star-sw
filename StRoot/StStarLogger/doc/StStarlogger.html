@@ -23,7 +23,7 @@ Table of Contents:
 <li><a href="#makers">Logger for STAR Makers</a>
 <li><a href="#global">Global logger: "BFC","QA, and "UCM"</a>
 <li><a href="#default">The STAR logger default parameters</a>
-<li><a href="#macros">New macros</a>
+<li><a href="#macros">Standard CPP macros</a>
 <li><a href="#use">How to use</a>
 <li><a href="#conf">How to configure</a>
 <li><a href="#print">"Print statement" transition</a>
@@ -89,7 +89,7 @@ Table of Contents:
   This allows to set the logger list of appenders, filters and level of 
   the severity for entire production chain or / and for each STAR maker subclass separately.
   The end user code is not to worry about the proper selection of the appropriated logger.
-  The user via set of the CPP <a href="#macros">macro</a> or 
+  The user via set of the CPP <a href="#macros">macros</a> or 
   via the <a href="/public/comp/sofi/StMessMgr#i1"><code>gMessMgr</code> 
   global pointer</a>
   communicate with the so-called "current logger".
@@ -111,7 +111,8 @@ Table of Contents:
 <li>
 <blockquota>
   The <b><code>"QA"</code></b> logger is a dedicated global logger to  handle all messages 
-  sent with <a href="#macros"><b><code>LOG_QA</code></b></a> macro (see: "New macro" section below)</a> 
+  sent with <a href="#macros"><b><code>LOG_QA</code></b></a> macro 
+  (see: <a href="#macros">"CPP macro"</a> section below)</a> 
   for the so-called <a href="/public/comp/sofi/StMessMgr/#i1">"QAInfo - Q"-type messages.</a> 
 </blockquota> 
 
@@ -159,7 +160,7 @@ the optional logger <a href=#file>configuration XML file</a> also.
 <!-- ------------------------------------------------------------------------------ -->
 <a name="macros"></a>
 <!-- ------------------------------------------------------------------------------ -->
-<h2> CPP macros </h2>
+<h2> Standard CPP macros </h2>
 
 The base STAR message manager abstract interface was improved to provide better performance.
 It is recommended now instead of the direct using of the Messager global pointer one should apply 
