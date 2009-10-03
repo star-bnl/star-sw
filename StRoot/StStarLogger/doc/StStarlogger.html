@@ -21,7 +21,7 @@ Table of Contents:
 <ul>
 <li><a href="#logger">Integration log4j package for STAR framework</a>
 <li><a href="#makers">Logger for STAR Makers</a>
-<li><a href="#global">Global logger: "BFC" and "QA"</a>
+<li><a href="#global">Global logger: "BFC","QA, and "UCM"</a>
 <li><a href="#default">The STAR logger default parameters</a>
 <li><a href="#macros">New macros</a>
 <li><a href="#use">How to use</a>
@@ -83,8 +83,8 @@ Table of Contents:
 <!-- ------------------------------------------------------------------------------ -->
 <h2> "Loggers" for STAR Makers  </h2>
 
-  With the new implementation, the STAR framework initiates two common loggers: <b><code>"BFC"</code></b> 
-  and <b><code>"QA"</code></b> and each STAR StMaker subclass instantiates 
+  The STAR framework initiates three common loggers: <b><code>"BFC"</code></b> 
+  ,<b><code>"QA"</code></b>, and <b><code>"UCM"</code></b> and each STAR StMaker subclass instantiates 
   its own logger. The logger name is the subclass class name.
   This allows to set the logger list of appenders, filters and level of 
   the severity for entire production chain or / and for each STAR maker subclass separately.
@@ -99,7 +99,7 @@ Table of Contents:
 <!-- ------------------------------------------------------------------------------ -->
 <a name="global"></a>
 <!-- ------------------------------------------------------------------------------ -->
-<h2>Global "Loggers": <b><code>"BFC"</code></b> and <b><code>"QA"</code></b></h2>
+<h2>Global "Loggers": <b><code>"BFC"</code></b>,<b><code>"QA"</code>, and <b><code>"UCM"</code></b></h2>
  The STAR software infrastructure provides two default global loggers. 
 <ul>
 <li>
@@ -114,9 +114,20 @@ Table of Contents:
   sent with <a href="#macros"><b><code>LOG_QA</code></b></a> macro (see: "New macro" section below)</a> 
   for the so-called <a href="/public/comp/sofi/StMessMgr/#i1">"QAInfo - Q"-type messages.</a> 
 </blockquota> 
+
+<li>
+<blockquota>
+  The <b><code>"UCM"</code></b> logger is a dedicated global logger to  handle all messages 
+  sent with <a href="#macros"><b><code>LOG_UCM</code></b></a> macro (see: "CPP macro" section below)</a> 
+  The logger can be configured to forward all messages 
+  to the STAR 
+  <a href="http://drupal.star.bnl.gov/STAR/ucm-project-status-and-results">UCM ("<b>U</b>ser <b>C</b>entric <b>M</b>onitoting") </a>
+  MySQL Database at run-time. The job trac king can be actrivated by SUMS and it is available via the UCM Web portal
+  <a href="http://fc3.star.bnl.gov:8080/gridsphere">http://fc3.star.bnl.gov:8080/gridsphere</a<
+</blockquota> 
 </ul>
 
-Since both <b><code>"QA"</code></b> as well as <b><code>"BFC"</code></b> are the normal loggers 
+Since each global logger ( <b><code>"UCM"</code></b>, <b><code>"QA"</code></b>, <b><code>"BFC"</code></b>) is the normal logger 
 it can be provided with the dedicated filters, layouts, and appenders to <a href="#conf">customize</a> it output.
 <!-- ------------------------------------------------------------------------------ -->
 <a name="default"></a>
@@ -148,7 +159,7 @@ the optional logger <a href=#file>configuration XML file</a> also.
 <!-- ------------------------------------------------------------------------------ -->
 <a name="macros"></a>
 <!-- ------------------------------------------------------------------------------ -->
-<h2> New macros </h2>
+<h2> CPP macros </h2>
 
 The base STAR message manager abstract interface was improved to provide better performance.
 It is recommended now instead of the direct using of the Messager global pointer one should apply 
@@ -164,6 +175,7 @@ the CPP macros as follows:
   <a name="log_qa_macros"></a>
 <!-- ------------------------------------------------------------------------------ -->
   <li> <b><code>LOG_QA</code></a> </b>
+  <li> <b><code>LOG_UCM</code></a> </b>
 </ul>
 are followed by the C++ output "stream" elements  and ended up with the <b><code>"endm"</code></b> object.
 For example, to direct the message to the "error" logger on needs:
@@ -247,6 +259,13 @@ Just add into your implementation the lines as follows:
 <b><code> <pre>
 #ifndef LOG_QA
 #  define LOG_QA cout
+#endif
+</pre> </code> </b>
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_UCM
+#  define LOG_UCM cout
 #endif
 </pre> </code> </b>
 </ul>
