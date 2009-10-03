@@ -52,9 +52,6 @@ class StTpcRSMaker : public StMaker {
   virtual              ~StTpcRSMaker();
   virtual Int_t         InitRun(int runnumber);
   virtual Int_t         Make();
-#if 0
-  virtual void   	Clear(Option_t *option="");
-#endif
   virtual Int_t  	Finish();
   virtual void          AlignHits(Bool_t flag=kFALSE){mAlignSector=flag;}
   TF1 *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1 *) mShaperResponses[io][sector-1];}          
@@ -153,10 +150,6 @@ class StTpcRSMaker : public StMaker {
   const Double_t mAveragePedestalRMS; //!
   const Double_t mAveragePedestalRMSX; //!
   const Double_t minSignal;    //!
-#if 0
-  const Double_t LorenzAngle;  //!
-  Double_t TanLorenzAngle; //!
-#endif
   Double_t InnerAlphaVariation; //!
   Double_t OuterAlphaVariation; //!
   Double_t innerSectorAnodeVoltage; //!
@@ -186,14 +179,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.10 2009/09/21 13:20:39 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.11 2009/10/03 21:29:09 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.10 2009/09/21 13:20:39 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.11 2009/10/03 21:29:09 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.11  2009/10/03 21:29:09  fisyak
+// Clean up, move all TpcT related macro into StTpcMcAnalysisMaker
+//
 // Revision 1.10  2009/09/21 13:20:39  fisyak
 // Variant O4, no mSigmaJitter, 100 keV
 //
