@@ -44,7 +44,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.21 2009/10/01 14:53:06 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.22 2009/10/03 21:29:09 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -91,33 +91,19 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mCluster(3.2), tauGlobalOffSet(0), 
   OmegaTauC(2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
   transverseDiffusionConstant(0.0450), // L(0.0475), // K(0.0443),// J(0.040), // (0.049), // (0.0514), // (0.0623), 
-#if 0
-  longitudinalDiffusionConstant(0.0450), 
-#else
   longitudinalDiffusionConstant(0.0360),
-#endif
   Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision with data
   Outer_wire_to_plane_couplingScale(5.0718e-01*1.43), //  -"-
   FanoFactor(0.3),
-#if 1
   K3IP(0.68),    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 0.5
   K3IR(0.89),    // K3 from E.Mathieson, Fig. 5.3a (row)  for a/s = 2.5e-3 and h/s = 0.5
   K3OP(0.55),    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 1.0
   K3OR(0.61),    // K3 from E.Mathieson, Fig. 5.3a (row)  for a/s = 2.5e-3 and h/s = 1.0
-#else
-  K3IP(0.68*1.291/1.758),    // Correction for Run VIII AuAu 9 GeV
-  K3IR(0.89*1.291/1.758),    
-  K3OP(0.55*1.852/2.175),    
-  K3OR(0.61*1.852/2.175),    
-#endif
   mAveragePedestal(50.0), //1.24102e+02), 
   mAveragePedestalRMS(0.5), //  tonko's rms =1.4), //1.95684e+01),
   //  mAveragePedestalRMSX(0.3), // tonkos rms = 0.8), //1.95684e+01),
   mAveragePedestalRMSX(0.7), // 0.06), // tonkos rms = 0.04 - 0.08 06/22/09
   minSignal(1e-4),
-#if 0
-  LorenzAngle(8), // degrees for P10 at B = 4 kG and E = 1.5 kV/cm
-#endif
   InnerAlphaVariation(0),
   OuterAlphaVariation(0),
   innerSectorAnodeVoltage(1170),
@@ -128,11 +114,6 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   CrossTalkInner    (0), //(4e-3), //0.15),
   CrossTalkOuter    (0), //(4e-3)  //0.025)
   //  mtauIntegrationX(74.6e-9), // secs
-#if 0
-  mtauIntegrationX(2.5* 74.6e-9), // secs
-#else
-  //E  mtauIntegrationX(     74.6e-9/2.5), // secs
-#endif
   mtauIntegration (2.5* 74.6e-9), // secs
   NoOfSectors(24),
   NoOfRows(45),
@@ -142,20 +123,10 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   tauF(394.0e-9), 
   //not used  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
   tauP(775.0e-9),
-#if 0
-  mSigmaJitterTI(0.6), // v30(0.5),  //v29 (0.25), // v28 (0.10), // timebuckets from comparison rho*phi 
-  mSigmaJitterTO(0.5), // v30 (0.3),  //v29 (0.25), // v28 (0.20), // and z resolutions
-#else
   mSigmaJitterTI(0.3), 
   mSigmaJitterTO(0.3), 
-#endif
-#if 0
-  mSigmaJitterXI(0.1), // v30 (0.057), //v28 0.172), // cm
-  mSigmaJitterXO(0.1), // v30 (0.066), //v28 (0.198),
-#else
   mSigmaJitterXI(0.0), // v30 (0.057), //v28 0.172), // cm
   mSigmaJitterXO(0.0), // v30 (0.066), //v28 (0.198),
-#endif
   mAltro(0),
   mCutEle(1e-3)
 {
@@ -164,9 +135,6 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mtauIntegrationX[1] = 20e-9; mtauCX[1] = 50e-9; // Outer
   SETBIT(m_Mode,kPAI); 
   //  SETBIT(m_Mode,kTree);
-#if 0
-  TanLorenzAngle = TMath::Tan(LorenzAngle/180.*TMath::Pi())*5./4.; // for 5 kG
-#endif
 }
 //________________________________________________________________________________
 StTpcRSMaker::~StTpcRSMaker() {
@@ -222,9 +190,9 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   else if (TESTBIT(m_Mode, kBICHSEL)) {
     gMessMgr->Warning() << "StTpcRSMaker:: use H.Bichsel model for dE/dx simulation" << endm;
     if (! mdNdE || ! mdNdx) {
-      Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
+      const Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx"
 	":./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
-      Char_t *Files[2] = {"dNdE_Bichsel.root","dNdx_Bichsel.root"};
+      const Char_t *Files[2] = {"dNdE_Bichsel.root","dNdx_Bichsel.root"};
       for (Int_t i = 0; i < 2; i++) {
 	Char_t *file = gSystem->Which(path,Files[i],kReadPermission);
 	if (! file) Fatal("StTpcRSMaker::Init","File %s has not been found in path %s",Files[i],path);
@@ -540,8 +508,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	break;
       }
       sortedIndex++;
-      Int_t isDet  = tpc_hit->volume_id/100000;
 #if 0
+      Int_t isDet  = tpc_hit->volume_id/100000;
       if (isDet) continue; // skip pseudo padrow
 #endif
       do {
@@ -637,9 +605,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	transform(BA,BLocalSector);
 	Float_t BField[3] = {BLocalSector.position().x(), BLocalSector.position().y(), BLocalSector.position().z()};
 	Double_t OmegaTau = OmegaTauC*BField[2]/5.0;// from diffusion 586 um / 106 um at B = 0/ 5kG
-#if 0
-	Double_t tangLorenzAngle = TanLorenzAngle*BField[2]/5.;
-#endif
 	StPhysicalHelixD track(dirLocalSector.position(),
 			       xyzLocalSector.position(),
 			       BField[2]*kilogauss,charge);  if (Debug() % 10 > 1) PrPP(Make,track);
@@ -650,8 +615,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t dSD    = s_upper - s_low;
 	Double_t driftLength = xyzLocalSector.position().z(); 
 	if (driftLength <= 0) {
-	  if (Pad.row() >  13 && driftLength > -gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation() ||
-	      Pad.row() <= 13 && driftLength > -gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation()) 
+	  if ((Pad.row() >  13 && driftLength > -gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation()) ||
+	      (Pad.row() <= 13 && driftLength > -gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation())) 
 	    driftLength = TMath::Abs(driftLength);
 	  else continue; 
 	}
@@ -707,10 +672,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t tbksdE[64]; memset (tbksdE,  0, sizeof(tbksdE));
 	Double_t dESumC = 0;
 	Double_t dSSumC = 0;
-#if 0
-	Double_t sigma2X = 0, sigma2Y = 0, sigma2Z = 0;
-	Double_t xOnWireW = 0, yOnWireW = 0, zOnWireW = 0;
-#endif
 	Double_t QAvC = 0;
 	do {// Clusters
 	  Float_t dS = 0;
@@ -821,14 +782,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // Ground plane (1 mm spacing) focusing effect
 	    Int_t iGroundWire = (Int_t ) TMath::Abs(10.*dist2Grid);
 	    Double_t distFocused = TMath::Sign(0.05 + 0.1*iGroundWire, dist2Grid);
-#if 0
-	    xOnWire += distFocused*tangLorenzAngle; // Lorentz shift
-#else
 	    xOnWire += distFocused*OmegaTau/1.47; // OmegaTau near wires taken from comparison with data
-#endif
-#if 1
 	    zOnWire += TMath::Abs(distFocused);
-#endif
 	    zOnWire += tof*gStTpcDb->DriftVelocity(sector);
 	    if (! iGroundWire ) QAv *= TMath::Exp( alphaVariation);
 	    else                QAv *= TMath::Exp(-alphaVariation);
@@ -1048,9 +1003,6 @@ void  StTpcRSMaker::Print(Option_t *option) const {
     PrPP(Print, mAveragePedestalRMSX);
   }
   PrPP(Print, FanoFactor);
-#if 0
-  PrPP(Print, TanLorenzAngle);
-#endif
   PrPP(Print, innerSectorAnodeVoltage);
   PrPP(Print, outerSectorAnodeVoltage);
   PrPP(Print, K3IP);
@@ -1089,12 +1041,6 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
   Int_t row, pad, bin;
   Int_t Sector = TMath::Abs(sector);
   StTpcDigitalSector *digitalSector = data->GetSector(Sector);
-#if 0
-  static Double_t gainCorrection[2][2] = {
-    { 1.30, 1.44}, // Inner Tpc / Tpx
-    { 1.13, 1.01}  // Outer Tpc / Tpx
-  };
-#endif
   if (! digitalSector) {
     digitalSector = new StTpcDigitalSector();
     data->setSector(Sector,digitalSector);
@@ -1107,9 +1053,6 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
     for (pad = 1; pad <= NoOfPadsAtRow; pad++) {
       gain = St_tpcPadGainT0C::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
-#if 0
-      gain  /= gainCorrection[io][itpc];
-#endif
       ped    = mAveragePedestal;
       if (pedRMS > 5.0) continue; // noisy pads
       static  Short_t ADCs[512];
@@ -1371,8 +1314,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
   return m_SignalSum;
 }
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.21 2009/10/01 14:53:06 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.22 2009/10/03 21:29:09 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.22  2009/10/03 21:29:09  fisyak
+// Clean up, move all TpcT related macro into StTpcMcAnalysisMaker
+//
 // Revision 1.21  2009/10/01 14:53:06  fisyak
 // Add T0Jitter
 //
