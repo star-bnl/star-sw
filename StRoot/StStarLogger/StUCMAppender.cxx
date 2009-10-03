@@ -213,7 +213,7 @@ void StUCMAppender::flushBuffer()
              TObjArray &keyValue = *nextString.Tokenize("=");
              // expect:
              // StageID='1',MessageKey='ProgSize',MessageValue='419'
-             // More srobust parser should be added later on
+             // More robust parser should be added later on
              ucmParamters[keyCounter]  = ((TObjString *)keyValue[1])->String().Strip();
              delete &keyValue;
              keyCounter++;
