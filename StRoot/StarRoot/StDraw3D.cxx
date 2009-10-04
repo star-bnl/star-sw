@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.45 2009/09/11 23:51:21 fine Exp $
+// $Id: StDraw3D.cxx,v 1.46 2009/10/04 02:34:16 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -377,12 +377,26 @@ const StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t st
    return Style(type);
 }
 
+
+//! Return the reference to the predefined StDraw3DStyle object
+/*! 
+    \param type - The pre-defined \a type we want to get the reference to
+ */
 //___________________________________________________
 const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
 {
     return fStyles[type];
 }
 
+//! Add \a n 3D coordinates from the \xyz array to the display list with the \a col color, \a sty style, and \a siz size if provided
+/*! 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
 //___________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_t siz)
 { 
@@ -399,6 +413,13 @@ TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_
    fView = plMk;
    return Draw(plMk);
 }
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \xyz array to the display list with the \a sty pre-defined style if provided 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
 //___________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, EDraw3DStyle sty)
 {
