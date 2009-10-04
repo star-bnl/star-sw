@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.5 2009/09/07 05:07:52 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.6 2009/10/04 01:35:53 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -97,7 +97,7 @@ void StuDraw3DMuEvent::Tracks(StTrackType type)
 }
 
 
-//! Add \a track to the display list with the \a col color \a sty and \a size if provided
+//! Add \a track to the display list with the \a col color, \a sty style, and \a siz size if provided
 /*! 
    \param track - reference to the StMuTrack object from StMuDst data structure
    \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
@@ -127,7 +127,7 @@ TObject *StuDraw3DMuEvent::Track(const StMuTrack &track, EDraw3DStyle sty)
    return Track(track, style.Col(),style.Sty(),style.Siz() );
 }
 
-//! Add  the \a in  point of the given \a track to the display list with the \a col color \a sty and \a siz size if provided
+//! Add  the \a in  point of the given \a track to the display list with the \a col color, \a sty style, and \a siz size if provided
 /*! 
    \param track - reference to the StMuTrack object from StMuDst data structure
    \param in      flag \c true (default) is to be set to add the \a track  \c in point \n
@@ -150,7 +150,7 @@ TObject *StuDraw3DMuEvent::TrackInOut(const StMuTrack &track, Bool_t in
 //! This is an overloaded member function, provided for convenience.
 /*! 
    \param track - reference to the StMuTrack object from StMuDst data structure
-   \param in    - flag \c true (default) is to be set to ad the \a track  \c in point \n
+   \param in    - flag \c true (default) is to be set to add the \a track  \c in point \n
                       \c false is to be set to add the \a track  \c out point to the list
    \param   sty - EDraw3DStyle pre-defined visual style of this object.
    \return - a pointer to the ROOT "view" TObject of star/end point of \a track model
