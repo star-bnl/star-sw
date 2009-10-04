@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.46 2009/10/04 02:34:16 fine Exp $
+// $Id: StDraw3D.cxx,v 1.47 2009/10/04 03:37:10 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -346,7 +346,7 @@ TObject *StDraw3D::Draw(TObject *o)
    }
    return o;
 }
-//! The the TROOT color as the widget background
+//! Set the ROOT color as the widget background
 /*! 
     \param newBkColor - ROOT index of the color to paint the widget backgorund ( \sa http://root.cern.ch/root/html/TColor.html )
 */
