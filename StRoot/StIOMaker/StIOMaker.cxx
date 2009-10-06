@@ -39,14 +39,14 @@ ClassImp(StIOMaker)
 //_____________________________________________________________________________
 StIOMaker::StIOMaker(const char *name,  const char *iomode,
                      const char *ioFile,const char *treeName)
-:StIOInterFace(name,iomode)
+:StIOInterFace(name,iomode),fFileSet(0),fCurrMk(0)
 {
     Build(0,ioFile,treeName);
 }
 //_____________________________________________________________________________
 StIOMaker::StIOMaker(const char *name,   const char *iomode, 
                      StFileI  *fileSet,const char *treeName )
-:StIOInterFace(name,iomode)
+:StIOInterFace(name,iomode),fFileSet(0),fCurrMk(0)
 {
   Build( fileSet,0,treeName);
 }
