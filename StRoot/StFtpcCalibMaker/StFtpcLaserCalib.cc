@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.cc,v 1.7 2008/05/15 22:39:47 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.8 2009/10/06 14:51:45 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.8  2009/10/06 14:51:45  jcs
+// exit laser_fit to avoid FPE if either <=2 hits on track or if helix fit fails to converge
+//
 // Revision 1.7  2008/05/15 22:39:47  jcs
 // re-activate helix fit
 //
@@ -255,7 +258,10 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
     }
   
   nhits=new_nhits;
-  if (nhits==0) return -1;
+  if (nhits <= 2 ) {
+    //LOG_WARN << "StFtpcLaserCalib::laser_fit - Can't fit a laser track with " << nhits << " hits"  << endm;
+    return -1;
+  }
 
   // ***************************************************
   // * calculate new space point depending on gas & t0 *
@@ -321,6 +327,10 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
 
 //  mLaserTrack->Fit(laser_vertex,10.,true);
   mLaserTrack->Fit(laser_vertex,10.,false);
+  if (mLaserTrack->GetP() == 0 && mLaserTrack->GetPt() == 0) {
+    //LOG_WARN << "StFtpcLaserCalib::laser_fit - Fit laser track with Helix was unsuccessful" << endm;
+    return -1;
+  }
   
   // DEBUG :
   //LOG_DEBUG<<"p = "<<mLaserTrack->GetP()<<" | pt = "<<mLaserTrack->GetPt()<<" | charge = "<<mLaserTrack->GetCharge()<<endm;
