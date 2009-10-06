@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.14 2009/09/09 20:47:03 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.15 2009/10/06 15:17:50 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -52,7 +52,7 @@ enum EStuDraw3DEvent {kUnusedHitsOnly=-1 //!< Render the unused hits only
 ///  \image  html Draw3DClass.png "Example of the STAR reconstructed event rendering"
 ///
 ////////////////////////////////////////////////////////////////////////
-class StuDraw3DEvent : public StDraw3D
+class StuDraw3DEvent : public virtual StDraw3D
 {
   private:
      StuDraw3DEvent(const StuDraw3DEvent&):StDraw3D(){;}
