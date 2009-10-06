@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.13 2009/03/31 16:18:05 fisyak Exp $
+ * $Id: TDirIter.cxx,v 1.14 2009/10/06 21:01:30 fine Exp $
  *
  ***************************************************************************
  *
@@ -126,10 +126,10 @@ void TDirIter::ResetQQ(const char *path)
   fRegx=TRegexp(QWE);
 
   p = myPath.Data();
-  if (*p!='^' && strstr(p,"#")==0) {//calculate maxlevQQ
-    fMaxLevQQ=1;
-    for(int i=fTop+1;p[i];i++) {if (p[i]=='/') fMaxLevQQ++;}}
-
+  int lP = myPath.Length();
+  if (lP && *p!='^' && strstr(p,"#")==0) {//calculate maxlevQQ
+     fMaxLevQQ=1;
+     for(int i=fTop+1;i<lP;i++) {  if (p[i]=='/') fMaxLevQQ++; } }
 }
 //______________________________________________________________________________
 const char *TDirIter::NextFile()
