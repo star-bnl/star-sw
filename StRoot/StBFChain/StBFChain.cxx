@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.549 2009/09/23 23:31:10 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.550 2009/10/06 19:54:36 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -584,7 +584,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("EastOff")) {cmd += "tclMk->EastOff();"; kopts++;}
       if (GetOption("WestOff")) {cmd += "tclMk->WestOff();"; kopts++;}
       if (GetOption("AllOn"))   {cmd += "tclMk->AllOn();"; kopts++;}
-      if (GetOption("ITTF") || GetOption("StiVMCF"))    {cmd += "tclMk->SetMode(1);"; kopts++;}
+      if (GetOption("ITTF") || GetOption("StiVMC"))    {cmd += "tclMk->SetMode(1);"; kopts++;}
       if (GetOption("Eval")) {
 	cmd += "tclMk->tclPixTransOn();";// Turn on flat adcxyz table
 	cmd += "tclMk->tclEvalOn();";    //Turn on the hit finder evaluation
