@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.6 2009/09/09 23:13:58 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.7 2009/10/06 15:17:50 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -56,7 +56,7 @@ enum EStuDraw3DMuEvent {
 ///  \endhtmlonly
 ///
 ///////////////////////////////////////////////////////////////////////
-class StuDraw3DMuEvent : public StDraw3D
+class StuDraw3DMuEvent : public virtual StDraw3D
 {
   private:
      StuDraw3DMuEvent(const StuDraw3DMuEvent&):StDraw3D(){;}
