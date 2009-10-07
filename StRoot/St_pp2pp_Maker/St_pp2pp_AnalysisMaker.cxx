@@ -39,11 +39,11 @@ Int_t St_pp2pp_AnalysisMaker::Init() {
   fClusterTree->Branch("event_info", &event_info,"run_number/i:event_number:seq:daqbits:token");
 
   fClusterTree->Branch("tcubits", &tcubits,"tcubits/s");
-  fClusterTree->Branch("silicon_bunch", &silicon_bunch,"silicon_bunch/s");
+  fClusterTree->Branch("silicon_bunch", &silicon_bunch,"silicon_bunch/b");
 
 
   char rpname[St_pp2pp_Maker::MAXSEQ][5] = { "EHI", "EHO", "EVU", "EVD", "WHI", "WHO", "WVD", "WVU" };
-  char title[20], format[30];
+  char title[25], format[35];
 
   for ( int s=0; s<St_pp2pp_Maker::MAXSEQ ; s++)
     for ( int c=0; c<St_pp2pp_Maker::MAXCHAIN; c++) {
@@ -114,9 +114,10 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 
     TGenericTable::iterator iword = DaqDta()->begin();
     if ( iword != DaqDta()->end() ) {
-        pp2pp_t &d = *(pp2pp_t *)*iword;
-        silicon_bunch = d.bunch_xing ;
-     }
+      //        pp2pp_t &d = *(pp2pp_t *)*iword;
+      //        silicon_bunch = d.bunch_xing ;
+      silicon_bunch = ( (pp2pp_t *) *iword )->bunch_xing ;
+    }
     NotGotIt = kFALSE ;
   }
   
