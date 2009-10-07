@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.7 2009/01/26 15:07:26 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.8 2009/10/07 13:46:35 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -51,8 +51,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   rtsLogOutput(RTS_LOG_STDERR);
   rtsLogLevel(WARN);
 #endif
-  m_Rts_Reader = new rts_reader("r_sim");
-  rts_reader &r = *m_Rts_Reader;
+  m_Rts_Reader = new daqReader("r_sim");
+  daqReader &r = *m_Rts_Reader;
 #ifndef NEW_DAQ_READER
   r.enable("*");
 #else
@@ -117,7 +117,7 @@ Int_t StTpcRTSHitMaker::Make() {
     LOG_WARN << "There is not Tpc Raw Data" << endm;
     return kStWarn;
   }
-  rts_reader &r = *m_Rts_Reader;
+  daqReader &r = *m_Rts_Reader;
   // create (or reuse) the adc_sim bank...
   // add a bunch of adc data for a specific sector:row:pad
   for (Int_t sec = 1; sec <= 24; sec++) {
