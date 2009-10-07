@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.2 2008/12/15 21:04:01 fine Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.3 2009/10/07 13:46:35 fine Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.3  2009/10/07 13:46:35  fine
+ * replace  the obsolete rts_reader with the modern daqReader
+ *
  * Revision 1.2  2008/12/15 21:04:01  fine
  * For for the NEW_DAQ_READER
  *
@@ -23,12 +26,10 @@
  ***************************************************************************/
 
 #include "StMaker.h"
+
 class StTpcDigitalSector;
-#ifndef NEW_DAQ_READER
-  class rts_reader;
-#else  
-#  include "StDAQMaker/StRtsReaderMaker.h"
-#endif  
+
+#include "StDAQMaker/StRtsReaderMaker.h"
 class StTpcRTSHitMaker : public StMaker {
  public:
   StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), m_Rts_Reader(0) {}
@@ -37,7 +38,7 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t               InitRun(Int_t runumber);
   Int_t               Make();
  private:
-  rts_reader *m_Rts_Reader; //!
+  daqReader *m_Rts_Reader; //!
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
