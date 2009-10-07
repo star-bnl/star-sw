@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.39 2009/04/06 18:22:33 fine Exp $
+ * $Id: StDAQReader.h,v 1.40 2009/10/07 00:52:32 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.40  2009/10/07 00:52:32  fine
+ * Move daqReader instantiation from StDAQMaker to StDAQReader to switch between input files properly
+ *
  * Revision 1.39  2009/04/06 18:22:33  fine
  * remove the redundant methods and fix L1/L2/L3 summary
  *
@@ -175,6 +178,7 @@ public:
   int L2summary[2];
   int L3summary[4];
 };
+class StRtsReaderMaker;
 //
 
  
@@ -188,7 +192,7 @@ public:
   virtual int open(const char *file);
   virtual int close();
   virtual int isOpened(){ return (fFd != (-1));};
-  virtual int readEvent();
+  virtual int Make();
   virtual int skipEvent(int nskip);
   virtual int getRunNumber() const;
   virtual int getEventNumber() const;
@@ -233,6 +237,7 @@ public:
 
 protected:
   void nextEvent();
+  virtual int readEvent();
   int  fEventStatus;
 
 protected:
@@ -260,6 +265,7 @@ protected:
   StTrigSummary *fTrigSummary; //!
   daqReader     *fDaqFileReader;
   char *fDATAP;
+  StRtsReaderMaker *fRtsMaker;  //! pointer to the RTS_READER
 };
 #ifndef __CINT__
 #include "StTPCReader.h"

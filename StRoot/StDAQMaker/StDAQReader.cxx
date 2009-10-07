@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.78 2009/08/08 18:04:03 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.79 2009/10/07 00:52:31 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.79  2009/10/07 00:52:31  fine
+ * Move daqReader instantiation from StDAQMaker to StDAQReader to switch between input files properly
+ *
  * Revision 1.78  2009/08/08 18:04:03  fine
  * Add Event num / Run num to the error message
  *
@@ -278,6 +281,7 @@
 #include "StSVTReader.h"
 #include "StMessMgr.h" 
 #include "TString.h" 
+#include "StRtsReaderMaker.h"
 //
 
 
@@ -312,6 +316,7 @@ StDAQReader::StDAQReader(const char *file)
   fDaqFileReader = 0;
   fDATAP = 0;
   if(file && file[0]) open(file);
+  fRtsMaker = new  StRtsReaderMaker;
 }
 
 //_____________________________________________________________________________
@@ -331,6 +336,8 @@ int StDAQReader::open(const char *file)
 #else
   if (fDaqFileReader) close();
   fDaqFileReader = new daqReader((char *)file);
+  if (!fRtsMaker) fRtsMaker = new  StRtsReaderMaker;
+  fRtsMaker->SetReader(fDaqFileReader);
   LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via daqReader " << endm;
 #endif
   fOffset =0;
@@ -350,6 +357,7 @@ int StDAQReader::close()
   fFd = -1;
 #else
   delete fDaqFileReader; fDaqFileReader = 0;
+  if (fRtsMaker)fRtsMaker->SetReader(0);
 #endif
   delete fEventReader;	fEventReader 	= 0;  
 
@@ -420,7 +428,13 @@ void StDAQReader::nextEvent()
     fEventStatus = fDaqFileReader->status;
 #endif
  }
-
+//_____________________________________________________________________________
+int StDAQReader::Make() 
+{
+   int ret = readEvent();
+   if (fRtsMaker) fRtsMaker->Make();
+   return ret;
+}
 //_____________________________________________________________________________
 int StDAQReader::readEvent()
 {  

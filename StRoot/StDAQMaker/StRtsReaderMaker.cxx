@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.22 2009/07/22 21:42:52 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.23 2009/10/07 00:52:32 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.23  2009/10/07 00:52:32  fine
+ * Move daqReader instantiation from StDAQMaker to StDAQReader to switch between input files properly
+ *
  * Revision 1.22  2009/07/22 21:42:52  fine
  * Add DAQ event header to pass
  *
@@ -184,7 +187,7 @@ Int_t StRtsReaderMaker::Init() {
 }
 
 //_____________________________________________________________
-rts_reader *StRtsReaderMaker::InitReader()
+daqReader *StRtsReaderMaker::InitReader()
 {
    // Init EVP_READER 
    if (!fRtsReader) {
@@ -203,7 +206,7 @@ rts_reader *StRtsReaderMaker::InitReader()
             LOG_INFO << "StRtsReaderMaker::InitReader: evpReader was found: "  << daqEvp << endm;
             fRtsReader = daqEvp->rts();
             if (!fRtsReader) {
-              LOG_ERROR << "StRtsReaderMaker::InitReader: no rts_reader was found!" << endm;
+              LOG_ERROR << "StRtsReaderMaker::InitReader: no daqReader was found!" << endm;
             }
          }
       }
@@ -220,7 +223,11 @@ void StRtsReaderMaker::Clear(Option_t *option)
    // StMaker::Clear will delete fRtsTable
    StMaker::Clear(option);
 }
-
+//_____________________________________________________________
+void StRtsReaderMaker::SetReader(daqReader *reader)
+{
+   fRtsReader = reader;
+}
 #if 0
 //_____________________________________________________________
 static const char*RtsDataTypeByBankName(const char *bankName) 
@@ -352,7 +359,11 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
         // Pick the detector name
         TString detName = tokens->At(1)->GetName();
            // we found the detector 
-        daq_det *rts_det = fRtsReader->det((const char*)detName);
+        char *detNameBuf =  new char[detName.Length()+1];
+        strncpy(detNameBuf,detName.Data(),detName.Length());
+        detNameBuf[detName.Length()]=0;
+        daq_det *rts_det = fRtsReader->det(detNameBuf);
+        delete [] detNameBuf;
         if (rts_det) {
            // Pick the rts bank
            StRtsReaderMaker *thisMaker = (StRtsReaderMaker *)this;
