@@ -1,6 +1,7 @@
 //! \file Draw3D.C 
 /*!
   \brief Draw3D.C macro is to test STAR EventDisplay facility
+  \Author  Valeri Fine ( fine@bnl.gov )
  */
 void Draw3D()
 {
