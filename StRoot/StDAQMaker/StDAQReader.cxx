@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.79 2009/10/07 00:52:31 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.80 2009/10/07 23:21:56 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.80  2009/10/07 23:21:56  fine
+ * Move the StRtsReaderMaker instantiation fro  StDAQReader to StDAQMaker to make sure it is located just after StDAQMaker in chain
+ *
  * Revision 1.79  2009/10/07 00:52:31  fine
  * Move daqReader instantiation from StDAQMaker to StDAQReader to switch between input files properly
  *
@@ -287,8 +290,9 @@
 
 typedef EventInfo DAQEventInfo;
 //_____________________________________________________________________________
-StDAQReader::StDAQReader(const char *file)
-{
+StDAQReader::StDAQReader(const char *file, StRtsReaderMaker* rtsMaker) :
+ fRtsMaker(rtsMaker)
+ {
   fFd = -1;
   fVerbose = 0;
   fEventReader	= 0;
@@ -316,7 +320,6 @@ StDAQReader::StDAQReader(const char *file)
   fDaqFileReader = 0;
   fDATAP = 0;
   if(file && file[0]) open(file);
-  fRtsMaker = new  StRtsReaderMaker;
 }
 
 //_____________________________________________________________________________
