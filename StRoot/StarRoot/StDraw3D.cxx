@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.47 2009/10/04 03:37:10 fine Exp $
+// $Id: StDraw3D.cxx,v 1.48 2009/10/07 18:26:47 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -564,12 +564,39 @@ void StDraw3D::AddComment(const char *cmnt)
    if (fView) fView->addComment(cmnt);
 }
 
+//! Save the current 3D schene using "wrl" file format
+/*! \param  filename - the file name to save the 3d scene
+   \Note: The "wrl" format can be converted to the standatd 3D PDF format 
+   \htmlonly 
+   It can be done <a href="http://blogs.adobe.com/mfg/2009/04/more_3d_reviewer_features">
+   "Adobe 3D reviewer"</a>  
+   <P>See examples:  
+  <blockquote>
+  You need to install the <a href="http://get.adobe.com/reader/?promoid=BUIGO">Adobe Reader version 9 or higher
+  <img src="http://www.adobe.com/images/shared/download_buttons/get_adobe_reader.png"></a>
+  to be able to "click and see" the interactive ( zoom, pan, select / highlight the pieces, etc )  3D image also
+  </blockquote>
+  <center> 
+   <a href="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/production_dAu2008.pdf">
+  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/StMuTracks.png"></a>
+  <br>
+  <a href="http://www.star.bnl.gov/public/comp/vis/GeomBrowser/StDraw3D/y2009.pdf">
+  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/StarGeometryY2007.png"></a>
+  </center><p>
+  \endhtmlonly
+*/   
 //___________________________________________________
 void StDraw3D::Print(const char *filename) const
 {
    Save(filename,"wrl");
 }
 
+//! This is an overloaded member function, provided for convenience.
+/*! Save the current 3D schene using the \a type  fileformat 
+   \param  filename - the file name to save the 3d scene
+   \param  type - the pre-defined file format.
+   It can be 3D scene format like "wrl"/"iv" or the well-known pixmap formats lile "pnd", "jpg" etc 
+*/
 //___________________________________________________
 void StDraw3D::Print(const char *filename, const char*type) const
 {
