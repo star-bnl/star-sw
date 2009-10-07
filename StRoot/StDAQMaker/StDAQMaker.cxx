@@ -11,14 +11,16 @@
 #include "StTPCReader.h"
 #include "StSCReader.h"
 #include "StRtsTable.h"
+#include "StRtsReaderMaker.h"
 
 ClassImp(StDAQMaker)
 
 //_____________________________________________________________________________
   StDAQMaker::StDAQMaker(const char *name, const char *inputFile):
-    StIOInterFace(name),fEvtHddr(0),fDAQReader(0),fDAQReaderSet(0)
+    StIOInterFace(name),fEvtHddr(0),fDAQReader(0),fDAQReaderSet(0),fRtsMaker(0)
 {
   if (inputFile && inputFile[0]) SetFile(inputFile);
+  fRtsMaker = new StRtsReaderMaker; // Create StRtsMaker to assure its correct position
 }
 //_____________________________________________________________________________
 StDAQMaker::~StDAQMaker()
@@ -44,7 +46,7 @@ Int_t StDAQMaker::Open(const char*)
 {
   if (fDAQReader && fDAQReader->isOpened()) return 0;
   LOG_INFO << "Open Input file" << GetFile() << endm;
-  if(!fDAQReader) fDAQReader = new StDAQReader();
+  if(!fDAQReader) fDAQReader = new StDAQReader(0,fRtsMaker);
   if (GetDebug()>1) fDAQReader->setVerbose(1);
   fDAQReader->open(GetFile());
   fDAQReaderSet->SetObject((TObject*)fDAQReader,kFALSE);

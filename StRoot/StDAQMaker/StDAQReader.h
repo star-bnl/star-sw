@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.40 2009/10/07 00:52:32 fine Exp $
+ * $Id: StDAQReader.h,v 1.41 2009/10/07 23:21:56 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.41  2009/10/07 23:21:56  fine
+ * Move the StRtsReaderMaker instantiation fro  StDAQReader to StDAQMaker to make sure it is located just after StDAQMaker in chain
+ *
  * Revision 1.40  2009/10/07 00:52:32  fine
  * Move daqReader instantiation from StDAQMaker to StDAQReader to switch between input files properly
  *
@@ -185,7 +188,7 @@ class StRtsReaderMaker;
 class StDAQReader 
 {
 public:
-  StDAQReader(const char *file=0);
+  StDAQReader(const char *file=0, StRtsReaderMaker* rtsMaker=0);
   virtual ~StDAQReader();
           void clear();
   virtual void setVerbose(int ver=1){fVerbose=ver;};
