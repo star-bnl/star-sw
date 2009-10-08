@@ -82,6 +82,7 @@ private:
   int                        mNumberTBinsToClear;//!///number of first time bins which are set to 0 by DAQ - default 2
   bool                       mSaveAnode2Raw;     //!
   bool                       mSaveAnode239Raw;   //!
+  bool                       mRunSvtOnlineSeqAdj;//!
 
   ///number of extra pixels around the sequence to save
   int   mExtraBefore;//!
@@ -117,7 +118,7 @@ private:
   void  FillRawData();
  public:
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtOnlineSeqAdjSimMaker.h,v 1.5 2009/01/28 23:03:42 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtOnlineSeqAdjSimMaker.h,v 1.6 2009/10/08 01:56:22 baumgart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  
  ClassDef(StSvtOnlineSeqAdjSimMaker,1)
 };
