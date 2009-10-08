@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.11 2009/02/21 14:19:50 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.12 2009/10/08 01:56:28 baumgart Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -35,6 +35,7 @@ StSvtOnlineSeqAdjSimMaker::StSvtOnlineSeqAdjSimMaker(const char* name):StMaker(n
   mSvtBadAnodes=NULL;
   mCurrentPixelData=NULL;
   mCurrent8bitPixelData=NULL;
+  mRunSvtOnlineSeqAdj=false;
  
   //This is because of some Makers downd the chain
   GetConfig();
@@ -374,9 +375,11 @@ void StSvtOnlineSeqAdjSimMaker::WriteSequence(int anode,int begins, int ends, in
 {
   //check the proper size
   //cout<<"anode:"<<anode<<"start:"<<begins<<"ends:"<<ends<<"hi:"<<NumOfHigh<<endl;
-  //if (NumOfHigh<=m_n_seq_hi) return;
-  //if ((ends-begins+1)<=m_n_seq_lo) return;
-  
+  if (mRunSvtOnlineSeqAdj){
+    if (NumOfHigh<=m_n_seq_hi) return;
+    if ((ends-begins+1)<=m_n_seq_lo) return;
+  }  
+
   //extra anodes
   begins= begins-mExtraBefore;
   if (begins<0) begins=0;
