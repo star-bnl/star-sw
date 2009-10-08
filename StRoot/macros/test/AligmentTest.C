@@ -22,20 +22,25 @@ int AligmentTest() {
   int       iProbe;
   float     fProbe;
   short     sProbe;
-  char      cProbe;
+  char      cProbe[8];
   double    dProbe;
   long      lProbe;
   long long llProbe;
          
-  cout << "Checking  paddings  - the number of the bytes to be added to the some type to align the other type properly. . .  " << endl;
+  cout << "Checking  paddings  - the number of the bytes to be added to some type to align the other type properly. . .  " << endl;
 
     cout 
        << "         int to get the char=" <<  StArchInfo::padding<char>(iProbe)   << endl
        << "      float to get the short=" <<  StArchInfo::padding<short>(fProbe)<< endl
        << "        short to get the int=" <<  StArchInfo::padding<int>(sProbe)<< endl
-       << "        char to get the long=" <<  StArchInfo::padding<long>(cProbe)<< endl
+       << "        char to get the long=" <<  StArchInfo::padding<long>(cProbe[0])<< endl
        << " double to get the long long=" <<  StArchInfo::padding<long long>(dProbe)<< endl
        << "       long to get the float=" << StArchInfo::padding<float>(lProbe)<< endl
+       << "        char to get the long=" << StArchInfo::padding<long>(cProbe[0])<< endl
+       << "        char to get the long=" << StArchInfo::padding<long>(cProbe[1])<< endl
+       << "        char to get the long=" << StArchInfo::padding<long>(cProbe[2])<< endl
+       << "        char to get the long=" << StArchInfo::padding<long>(cProbe[3])<< endl
+       << "        char to get the long=" << StArchInfo::padding<long>(cProbe[4])<< endl
        << "        char to get the long=" << StArchInfo::padding<long>(cProbe)<< endl
        << " long long to get the double=" <<  StArchInfo::padding<double>(llProbe)
        << endl;
