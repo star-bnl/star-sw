@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.50 2009/10/08 13:44:31 fine Exp $
+// $Id: StDraw3D.cxx,v 1.51 2009/10/08 14:04:18 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -564,7 +564,7 @@ void StDraw3D::AddComment(const char *cmnt)
    if (fView) fView->addComment(cmnt);
 }
 
-//! Save the current 3D schene using "wrl" file format
+//! Save the current 3D scene using "wrl" file format
 /*! \param  filename - the file name to save the 3d scene
    \Note: The "wrl" format can be converted to the standatd 3D PDF format 
    \htmlonly 
@@ -592,16 +592,25 @@ void StDraw3D::Print(const char *filename) const
 }
 
 //! This is an overloaded member function, provided for convenience.
-/*! Save the current 3D schene using the \a type  fileformat 
+/*! Save the current 3D scene using the \a type  file format 
    \param  filename - the file name to save the 3d scene
    \param  type - the pre-defined file format.
-   It can be 3D scene format like "wrl"/"iv" or the well-known pixmap formats lile "pnd", "jpg" etc 
+   It can be 3D scene format like "wrl"/"iv" 
+   or the well-known pixmap formats like "pnd", "jpg" etc 
 */
 //___________________________________________________
 void StDraw3D::Print(const char *filename, const char*type) const
 {
    Save(filename,type);
 }
+
+//! This is an overloaded member function, provided for convenience.
+/*! Save the current 3D scene using the 3D "wrl" format if possible otherwise use the \a type file format 
+   \param  filename - the file name to save the 3d scene
+   \param  type - the pre-defined file format.
+   It can be 3D scene format like "wrl"/"iv" 
+   or the well-known pixmap formats like "pnd", "jpg" etc 
+*/
 //___________________________________________________
 void StDraw3D::Save(const char *filename, const char*type) const
 {
