@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.9 2009/09/23 05:19:30 fine Exp $
+ * $Id: StRichArea.cxx,v 2.10 2009/10/08 20:18:57 fine Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 2.10  2009/10/08 20:18:57  fine
+ *  fix issue #1662
+ *
  *  Revision 2.9  2009/09/23 05:19:30  fine
  *  add assert and file #1648 RT
  *
@@ -1378,9 +1381,8 @@ StRichArea::adjacentCheck(StThreeVectorF& ixy, StThreeVectorF& oxy) {
   //
   // check to see if points are in adjacent quadrants
   //
-   assert (0 && "Fix me please, There is no suitable StThreeVectorF method yet");
-         
-  StThreeVectorF check;// = ixy*oxy;
+
+  StThreeVectorF check(ixy*oxy,0,0); // one probably wanted the cross product here by who knows. VF.2009
   if (check.x() > 0 || check.y() > 0) { return true;}
   
   return false;
