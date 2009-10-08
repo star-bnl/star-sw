@@ -13,6 +13,7 @@
 
 #include "TString.h"		// Form()
 #include "StMessMgr.h"		// LOG_INFO, LOG_WARN, LOG_ERROR, LOG_DEBUG, etc.
+#include <algorithm>
 
 using namespace OLDEVP;
 namespace OLDEVP {
@@ -606,8 +607,7 @@ char* OLDEVP::getEmcTrgData(DATAP* datap, int index)
   if (swaptrgd) {
     const size_t SIZE = sizeof(TrgTowerTrnfer2008) / 4;
     unsigned int* p = (unsigned int*)&trgd->tow;
-    assert(0 && "Unknow function \"transform\" : \"transform(p, p + SIZE, p, bswap);\"!!! Please fix me. VF");
-//    transform(p, p + SIZE, p, bswap);
+    std::transform(p, p + SIZE, p, bswap);
   }
 
   TrgTowerTrnfer2008* trgtowertrnfer = &trgd->tow;
