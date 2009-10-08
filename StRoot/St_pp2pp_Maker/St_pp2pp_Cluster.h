@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: St_pp2pp_Cluster.h,v 1.3 2009/10/08 18:38:17 yipkin Exp $
+ * $Id: St_pp2pp_Cluster.h,v 1.4 2009/10/08 21:30:34 yipkin Exp $
  *
  * Author: Kin Yip, Oct. 2009
  ***************************************************************************
@@ -25,7 +25,7 @@ class St_pp2pp_Cluster : public StObject {
  public:
     St_pp2pp_Cluster();
 
-    St_pp2pp_Cluster(UChar_t sequencer, UChar_t chain, UChar_t length, Double_t position, Double_t energy, Double_t x, Double_t y, Double_t z);
+    St_pp2pp_Cluster(UChar_t sequencer, UChar_t chain, UChar_t length, Double_t position, Double_t energy, Double_t x, Double_t y, Double_t z, UChar_t quality);
 
     ~St_pp2pp_Cluster();    
 
@@ -35,12 +35,12 @@ class St_pp2pp_Cluster : public StObject {
     UChar_t   sequencer() const;
     UChar_t   chain() const;
     UChar_t   length() const;
-    Double_t   position() const;
-    Double_t   energy() const;
-    Double_t   x() const;
-    Double_t   y() const;
-    Double_t   z() const;
-
+    Double_t  position() const;
+    Double_t  energy() const;
+    Double_t  x() const;
+    Double_t  y() const;
+    Double_t  z() const;
+    UChar_t   quality() const;
 
     void      setSequencer(UChar_t);
     void      setChain(UChar_t);
@@ -50,6 +50,7 @@ class St_pp2pp_Cluster : public StObject {
     void      setX(Double_t);
     void      setY(Double_t);
     void      setZ(Double_t);
+    void      setQuality(UChar_t);
     
  protected:
 
@@ -61,6 +62,7 @@ class St_pp2pp_Cluster : public StObject {
     Double_t m_x ;
     Double_t m_y ;
     Double_t m_z ;
+    UChar_t  m_quality ;       // 1 : a normal cluster; 2 : one including a hot channel;
 
     ClassDef(St_pp2pp_Cluster,1)
 };
@@ -75,6 +77,7 @@ inline void St_pp2pp_Cluster::setEnergy(Double_t energy) { m_energy = energy; }
 inline void St_pp2pp_Cluster::setX(Double_t x) { m_x = x; }
 inline void St_pp2pp_Cluster::setY(Double_t y) { m_y = y; }
 inline void St_pp2pp_Cluster::setZ(Double_t z) { m_z = z; }
+inline void St_pp2pp_Cluster::setQuality(UChar_t quality) { m_quality = quality; }
 
 
 inline UChar_t St_pp2pp_Cluster::sequencer() const { return m_sequencer; }
@@ -85,5 +88,6 @@ inline Double_t St_pp2pp_Cluster::energy() const { return m_energy; }
 inline Double_t St_pp2pp_Cluster::x() const { return m_x; }
 inline Double_t St_pp2pp_Cluster::y() const { return m_y; }
 inline Double_t St_pp2pp_Cluster::z() const { return m_z; }
+inline UChar_t St_pp2pp_Cluster::quality() const { return m_quality; }
 
 #endif
