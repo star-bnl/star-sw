@@ -34,13 +34,32 @@ class StArchInfo :public TNamed {
 
    Bool_t isBigEndian();
    Bool_t isLittleEndian();
-   Int_t  Endian();
-   
+   Int_t  Endian(); 
+  /// Returns the number of bytes the type \a T has to be align to 
+   template<typename T> static long align(const T &)
+   {
+       return align<T>();
+   }
+   /// Returns the number of bytes the type \a T has to be align to 
+   template<typename T> static long align()
+   {
+      struct { char c; T test; } probe;
+      return ((char*)&probe.test)-&probe.c;
+   }
+   template <typename C, typename T> static long padding(const T&offset)
+   {
+      long offchar = (long)&offset;
+      long  alg = align<C>();
+      return long((alg + ((offchar - 1) & ~(alg - 1))) - offchar);
+   }
+   template <typename T, typename C> static int padding(const T&offset, const C&)
+   {
+      return padding<C,T>(offset);
+   }
  private:
    Int_t fEndian;
    
    ClassDef(StArchInfo,0)
 };
-
 
 #endif
