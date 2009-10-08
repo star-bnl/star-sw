@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.49 2009/10/08 13:41:51 fine Exp $
+// $Id: StDraw3D.cxx,v 1.50 2009/10/08 13:44:31 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -580,8 +580,8 @@ void StDraw3D::AddComment(const char *cmnt)
    <a href="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/production_dAu2008.pdf">
   <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/production_dAu2008.png"></a>
   <br>
-  <a href="http://www.star.bnl.gov/public/comp/vis/GeomBrowser/StDraw3D/y2009.pdf">
-  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/StarGeometryY2007.png"></a>
+  <a href="http://www.star.bnl.gov/public/comp/vis/GeomBrowser/y2009.pdf">
+  <img src="http://www.star.bnl.gov/public/comp/vis/GeomBrowser/StarGeometryY2007.png"></a>
   </center><p>
   \endhtmlonly
 */   
