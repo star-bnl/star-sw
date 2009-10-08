@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: St_pp2pp_Cluster.h,v 1.2 2009/10/08 18:33:33 yipkin Exp $
+ * $Id: St_pp2pp_Cluster.h,v 1.3 2009/10/08 18:38:17 yipkin Exp $
  *
  * Author: Kin Yip, Oct. 2009
  ***************************************************************************
@@ -53,9 +53,9 @@ class St_pp2pp_Cluster : public StObject {
     
  protected:
 
-    UChar_t  m_sequencer;       // sequencer id: ( 1 - 8 ) .. Roman Pot
-    UChar_t  m_chain;           // 0 - 3 (A: 0, B: 1, C: 2, D: 3) .. Si plane in Roman Pot
-    UChar_t  m_length ; // > 0 
+    UChar_t  m_sequencer;     // sequencer id: ( 1 - 8 ) .. Roman Pot
+    UChar_t  m_chain;         // 0 - 3 (A: 0, B: 1, C: 2, D: 3) .. Si plane in Roman Pot
+    UChar_t  m_length ;       // > 0 
     Double_t m_position ;     // 0 - 755
     Double_t m_energy ;       // in ADC
     Double_t m_x ;
