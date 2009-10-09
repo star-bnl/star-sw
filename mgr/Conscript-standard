@@ -291,7 +291,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   # Search path depth for Makers.
   #-
   print "-=-=-=-=- Will now test $pkg\n" if ($param::debug);
-  if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0){
+  if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0 || $OnlinePackage ) {
     # This make requires both ROOT Qt and QT libraries
     if ( defined($env1->{Packages}->{QT}->{DIR})) {# && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
       #print "-=-=-=-=-=-=-=- QT is defined -=-=-=-=-=-=-=-=-=-=\n";
