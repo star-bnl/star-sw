@@ -853,7 +853,7 @@ Int_t StFile::AddFile(const char *file,const char *opt)
     return kStWarn;}
 
   const char* cc = strrchr(tfile,'.');
-  if (!cc || !strstr(".root .daq",cc)){// No extention
+  if (!cc || !strstr(".root .daq .dat",cc)){// No extention
     Warning("AddFile","*** IGNORED *** File %s has wrong extention \n",
     (const char *)tfile);
     return kStWarn;}
