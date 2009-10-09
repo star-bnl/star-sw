@@ -15,23 +15,27 @@
 enum { kStTREE=1,
        kStXDF=2,
        kStMDC2=3,
-       kStDAQ=4, 
-       kStMuDst=5 
+       kStDAQ=4,
+       kStMuDst=5,
+       kStDAT=6 
 };
-const char  IOFMTS[] = "root  xdf   mdc2  daq   mudst ";
-const char *IOCLAS[] = {0,
-			"StTreeMaker",
-			"St_xdfin_Maker",
-			"St_io_Maker",
-			"StDAQMaker",
-			"StMuIOMaker"
+const char  IOFMTS[] = "root  xdf   mdc2  daq   mudst dat   ";
+const char *IOCLAS[] = {0
+			,"StTreeMaker"
+			,"St_xdfin_Maker"
+			,"St_io_Maker"
+			,"StDAQMaker"
+			,"StMuIOMaker"
+			,"StDAQMaker"
+//         ,"StTrgDatFileReader"
 };
 const char *IONAME[] = {0,
 			"Root",
 			"XDF",
 			"MDC2",
 			"DAQ",
-			"MuDst"
+			"MuDst",
+         "DAT"
 };
 
 ClassImp(StIOMaker)
@@ -263,7 +267,8 @@ StIOInterFace *StIOMaker::Load()
   if (! klass || klass->Size()==0) {        // lib not loaded
     Int_t Loaded=0;      // library load stack may be self-sufficient, set to 1
 //  if (fCase==kStXDF)   gSystem->Load("xdf2root");
-    if (fCase==kStDAQ)   {
+    if (fCase==kStDAQ || fCase==kStDAT)
+    {
        gSystem->Load("RTS");
        gSystem->Load("StDaqLib");
     }
