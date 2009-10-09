@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.h,v 1.7 2009/10/07 00:52:32 fine Exp $
+ * $Id: StRtsReaderMaker.h,v 1.8 2009/10/09 22:36:34 fine Exp $
  * StRtsReaderMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -22,7 +22,6 @@ class StRtsReaderMaker:public StMaker
      StRtsTable *fRtsTable;
      TString     fLastQuery;
      daq_dta    *fBank;
-     bool        fSlaveMode; // use  evpReader to advance the event
 
    protected:
       TDataSet   *FillTable();

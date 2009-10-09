@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.23 2009/10/07 00:52:32 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.24 2009/10/09 22:36:34 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.24  2009/10/09 22:36:34  fine
+ * remove the redundant components
+ *
  * Revision 1.23  2009/10/07 00:52:32  fine
  * Move daqReader instantiation from StDAQMaker to StDAQReader to switch between input files properly
  *
@@ -160,7 +163,7 @@ ClassImp(StRtsReaderMaker);
 
 //_____________________________________________________________
 StRtsReaderMaker::StRtsReaderMaker(const char *name):StMaker(name)
-      ,fRtsReader(0),fRtsTable(0),fBank(0),fSlaveMode(true)
+      ,fRtsReader(0),fRtsTable(0),fBank(0)
 {
   // LOG_DEBUG << "StRtsReaderMaker::ctor"  << endm;
 }
@@ -168,22 +171,14 @@ StRtsReaderMaker::StRtsReaderMaker(const char *name):StMaker(name)
 //_____________________________________________________________
 StRtsReaderMaker::~StRtsReaderMaker() 
 {
-   if (!fSlaveMode) delete fRtsReader; 
+   delete fRtsReader; 
    fRtsReader = 0;
    // fRtsTable will be deleted by the base StMaker dtor.
    fRtsTable = 0;
 }
 //_____________________________________________________________
 Int_t StRtsReaderMaker::Init() {
-#if 0
-   if (!fFileName.IsNull() ) {
-     fRtsReader = new rts_reader("R") ;  // call myself "R"; used for debugging prints...
-     fRtsReader->enable("*") ;           // enable the selected det or dets
-     fRtsReader->add_input(fFileName);   // add all files to the list...
-     fSlaveMode = false;
-   }
-#endif
-   return 0;
+   return StMaker::Init();
 }
 
 //_____________________________________________________________
@@ -417,15 +412,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
 //_____________________________________________________________
 Int_t StRtsReaderMaker::InitRun(int run)
 {
-  Int_t res = kStOK;
-#ifndef NEW_EVP_READER
-  if (!fSlaveMode && fRtsReader) {
-     // LOG_DEBUG << "StRtsReaderMaker::InitRun"  << endm;
-     fRtsReader->InitRun(run);               // some dummy for now
-     fRtsReader->det("tpx")->SetMode(3);     // make TPX do all!  
-  }
-#endif
-  return res;
+  return StMaker::InitRun(run);
 }
 
 //_____________________________________________________________
@@ -434,31 +421,5 @@ Int_t StRtsReaderMaker::Make()
    // Force  RTS_READER to get the next event if it is not slave
    int res = kStOk;
    InitReader();
-#ifndef NEW_EVP_READER
-   if (fSlaveMode)  return kStOk;
-   //-------------------------------------
-   int rtsReturn = fRtsReader->Make();  //
-   //-------------------------------------
-   
-   // Check the outcome:
-   if (rtsReturn == EOF)  {
-      res = kStEOF;
-   } else {
-      if(fRtsReader->l_errno) {
-         rts_reader *r = fRtsReader;
-         LOG_ERROR << Form("At file \"%s\", event %d: error [%s]"
-               , r->select_files[r->cur_file_ix]
-               , r->cur_event_in_file
-               , strerror(r->l_errno))
-         << endm ;
-         res = kStErr;
-       }
-       LOG_DEBUG << "StRtsReaderMaker::Make() was Ok  < ----- ! " 
-                 << kStOk << endm;
-   }
    return res;
-#else
-   // with NEW_EVP_READER we are always in "slave" mode
-   return res;
-#endif
 }
