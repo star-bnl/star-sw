@@ -959,6 +959,13 @@ void StFile::SetInfo(TDataSet *ds)
     goto RETN;
   }
 
+//              DAT
+  if (strcmp(".dat",ext)==0) {
+    tit.Replace(0,0," format=dat ");
+    known = 3;
+    goto RETN;
+  }
+
 //              ROOT
   if (strcmp(".root",ext)==0) {
     int lfname = strlen(fname);
@@ -1129,7 +1136,3 @@ const char *StFile::GetAttr(TDataSet *ds,const char *att)
   brName.Replace(0,999,bn,n);
   return (const char*)brName;
 }
-
-
-
-
