@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.6 2009/07/22 21:42:52 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.7 2009/10/09 20:30:08 fine Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -41,17 +41,17 @@ class StRTSBaseMaker : public StMaker
 
      // DAQ Event raw data
 
-     UInt_t Token()      const;    // current token
-     UInt_t Trgcmd()     const;    // current trigger command
-     UInt_t Daqcmd()     const;    // current DAQ command
-     UInt_t Trgword()    const;    // the Trigger Word
-     UInt_t Phyword()    const;    // the Physics Word
-     UInt_t Daqbits()    const;    // "offline" bits aka L3 summary...
-     UInt_t Daqbits_l1() const;    // triggers satisfying l1 
-     UInt_t Daqbits_l2() const;    // triggers satisfying l2
-     UInt_t Evpgroups()  const;    // evp groups aka L3 summary[2]     
+     static UInt_t Token();      //< current token
+     static UInt_t Trgcmd();     //< current trigger command
+     static UInt_t Daqcmd();     //< current DAQ command
+     static UInt_t Trgword();    //< the Trigger Word
+     static UInt_t Phyword();    //< the Physics Word
+     static UInt_t Daqbits();    //< "offline" bits aka L3 summary...
+     static UInt_t Daqbits_l1(); //< triggers satisfying l1 
+     static UInt_t Daqbits_l2(); //< triggers satisfying l2
+     static UInt_t Evpgroups() ; //< evp groups aka L3 summary[2]     
   
-     UInt_t Detectors()  const;	  // detectors present bit mask according to DAQ!
+     UInt_t Detectors()  const;  //< detectors present bit mask according to DAQ!
      
      const TString &DetectorName() const { return fDetectorName; }
 

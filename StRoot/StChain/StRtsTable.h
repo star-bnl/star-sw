@@ -11,20 +11,20 @@ class StRtsTable : public TGenericTable {
      Int_t  fPad ;
 
      //  the global daqReader paramenters (see daqReader.h for details)
-     UInt_t fToken ;       // current token
-     UInt_t fTrgcmd ;      // current trigger command
-     UInt_t fDaqcmd ;      // current DAQ command
-     UInt_t fTrgword ;     // the Trigger Word
-     UInt_t fPhyword ;     // the Physics Word
-     UInt_t fDaqbits ;     // "offline" bits aka L3 summary...
-     UInt_t fDaqbits_l1;   // triggers satisfying l1 
-     UInt_t fDaqbits_l2;   // triggers satisfying l2
-     UInt_t fEvpgroups ;   // evp groups aka L3 summary[2]     
-  
-     UInt_t fDetectors ;	// detectors present bit mask according to DAQ!
+     static UInt_t fToken ;       // current token
+     static UInt_t fTrgcmd ;      // current trigger command
+     static UInt_t fDaqcmd ;      // current DAQ command
+     static UInt_t fTrgword ;     // the Trigger Word
+     static UInt_t fPhyword ;     // the Physics Word
+     static UInt_t fDaqbits ;     // "offline" bits aka L3 summary...
+     static UInt_t fDaqbits_l1;   // triggers satisfying l1 
+     static UInt_t fDaqbits_l2;   // triggers satisfying l2
+     static UInt_t fEvpgroups ;   // evp groups aka L3 summary[2]     
 
-     UInt_t fDetsinrun ;         // I nave no idea what it is about (vf)
-     UInt_t fEvpgroupsinrun;     // I nave no idea what it is about (vf)
+     static UInt_t fDetectors ;	// detectors present bit mask according to DAQ!
+
+     static UInt_t fDetsinrun ;         // I nave no idea what it is about (vf)
+     static UInt_t fEvpgroupsinrun;     // I nave no idea what it is about (vf)
 
    public:
       StRtsTable(const char* structName, Int_t n) : TGenericTable(structName,n){}
@@ -40,27 +40,27 @@ class StRtsTable : public TGenericTable {
       Int_t Rdo () const;
       Int_t Row () const;
 
-      UInt_t Token()      const;    // current token
-      void   SetToken(UInt_t token);
-      UInt_t Trgcmd()     const;    // current trigger command
-      void   SetTrgcmd(UInt_t trgcmd);
-      UInt_t Daqcmd()     const;    // current DAQ command
-      void   SetDaqcmd(UInt_t daqcmd);
-      UInt_t Trgword()    const;    // the Trigger Word
-      void   SetTrgword(UInt_t trgword);
-      UInt_t Phyword()    const;    // the Physics Word
-      void   SetPhyword(UInt_t phyword);
-      UInt_t Daqbits()    const;    // "offline" bits aka L3 summary...
-      void   SetDaqbits(UInt_t daqbits);
-      UInt_t Daqbits_l1() const;    // triggers satisfying l1 
-      void   SetDaqbits_l1(UInt_t daqbits_l1);
-      UInt_t Daqbits_l2() const;    // triggers satisfying l2
-      void   SetDaqbits_l2(UInt_t daqbits_l2);
-      UInt_t Evpgroups()  const;    // evp groups aka L3 summary[2]     
-      void   SetEvpgroups(UInt_t evpgroups);
+      static UInt_t Token();               // current token
+      static void   SetToken(UInt_t token);
+      static UInt_t Trgcmd();              // current trigger command
+      static void   SetTrgcmd(UInt_t trgcmd);
+      static UInt_t Daqcmd();              // current DAQ command
+      static void   SetDaqcmd(UInt_t daqcmd);
+      static UInt_t Trgword();             // the Trigger Word
+      static void   SetTrgword(UInt_t trgword);
+      static UInt_t Phyword();             // the Physics Word
+      static void   SetPhyword(UInt_t phyword);
+      static UInt_t Daqbits();             // "offline" bits aka L3 summary...
+      static void   SetDaqbits(UInt_t daqbits);
+      static UInt_t Daqbits_l1();          // triggers satisfying l1 
+      static void   SetDaqbits_l1(UInt_t daqbits_l1);
+      static UInt_t Daqbits_l2();          // triggers satisfying l2
+      static void   SetDaqbits_l2(UInt_t daqbits_l2);
+      static UInt_t Evpgroups();          // evp groups aka L3 summary[2]     
+      static void   SetEvpgroups(UInt_t evpgroups);
   
-      UInt_t Detectors()  const;	  // detectors present bit mask according to DAQ!
-      void   SetDetectors(UInt_t detectors);
+      static UInt_t Detectors();          // detectors present bit mask according to DAQ!
+      static void   SetDetectors(UInt_t detectors);
 
      ClassDef(StRtsTable,1);
 };
@@ -70,17 +70,17 @@ inline  Int_t StRtsTable::Pad() const    {return fPad;}
 inline  Int_t StRtsTable::Rdo() const    {return fRdo;}
 inline  Int_t StRtsTable::Row() const    {return fRow;}
 
-inline  UInt_t StRtsTable::Token()      const {return fToken;   }    // current token
-inline  UInt_t StRtsTable::Trgcmd()     const {return fTrgcmd;  }    // current trigger command
-inline  UInt_t StRtsTable::Daqcmd()     const {return fDaqcmd;  }    // current DAQ command
-inline  UInt_t StRtsTable::Trgword()    const {return fTrgword; }    // the Trigger Word
-inline  UInt_t StRtsTable::Phyword()    const {return fPhyword; }    // the Physics Word
-inline  UInt_t StRtsTable::Daqbits()    const {return fDaqbits; }    // "offline" bits aka L3 summary...
-inline  UInt_t StRtsTable::Daqbits_l1() const {return fDaqbits_l1;}  // triggers satisfying l1 
-inline  UInt_t StRtsTable::Daqbits_l2() const {return fDaqbits_l2;}  // triggers satisfying l2
-inline  UInt_t StRtsTable::Evpgroups()  const {return fEvpgroups;}   // evp groups aka L3 summary[2]     
+inline  UInt_t StRtsTable::Token()        {return fToken;   }    // current token
+inline  UInt_t StRtsTable::Trgcmd()       {return fTrgcmd;  }    // current trigger command
+inline  UInt_t StRtsTable::Daqcmd()       {return fDaqcmd;  }    // current DAQ command
+inline  UInt_t StRtsTable::Trgword()      {return fTrgword; }    // the Trigger Word
+inline  UInt_t StRtsTable::Phyword()      {return fPhyword; }    // the Physics Word
+inline  UInt_t StRtsTable::Daqbits()      {return fDaqbits; }    // "offline" bits aka L3 summary...
+inline  UInt_t StRtsTable::Daqbits_l1()   {return fDaqbits_l1;}  // triggers satisfying l1 
+inline  UInt_t StRtsTable::Daqbits_l2()   {return fDaqbits_l2;}  // triggers satisfying l2
+inline  UInt_t StRtsTable::Evpgroups()    {return fEvpgroups;}   // evp groups aka L3 summary[2]     
   
-inline  UInt_t StRtsTable::Detectors()  const {return fDetectors;}   // detectors present bit mask according to DAQ!
+inline  UInt_t StRtsTable::Detectors()   {return fDetectors;}   // detectors present bit mask according to DAQ!
 
       
 inline void  StRtsTable::SetAll(Int_t sec,Int_t pad,Int_t rdo,Int_t row)

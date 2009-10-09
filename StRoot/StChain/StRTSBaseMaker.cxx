@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.7 2009/07/22 21:42:52 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.8 2009/10/09 20:30:08 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.8  2009/10/09 20:30:08  fine
+ * make the global daqReader to be the static data-member to fix   issue #1657
+ *
  * Revision 1.7  2009/07/22 21:42:52  fine
  * Add DAQ event header to pass
  *
@@ -145,62 +148,62 @@ Int_t StRTSBaseMaker::Row () const
 }
  
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Token()      const { 
+UInt_t StRTSBaseMaker::Token()  { 
    // current token
-   return fDaq_Dta ? fDaq_Dta->Token() : 0;
+   return StRtsTable::Token();
 }
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Trgcmd()     const {
+UInt_t StRTSBaseMaker::Trgcmd()  {
    // current trigger command
-   return fDaq_Dta ? fDaq_Dta->Trgcmd() : 0;
+   return StRtsTable::Trgcmd();
 }
 
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Daqcmd()     const {
+UInt_t StRTSBaseMaker::Daqcmd()  {
    // current DAQ command
-   return fDaq_Dta ? fDaq_Dta->Daqcmd() : 0; 
+   return StRtsTable::Daqcmd(); 
 }
 
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Trgword()    const {
+UInt_t StRTSBaseMaker::Trgword()  {
    // the Trigger Word
-   return fDaq_Dta ? fDaq_Dta->Trgword() : 0; 
+   return StRtsTable::Trgword(); 
 }
 
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Phyword()    const {
+UInt_t StRTSBaseMaker::Phyword()  {
    // the Physics Word
-   return fDaq_Dta ? fDaq_Dta->Phyword() : 0; 
+   return StRtsTable::Phyword(); 
 }
 
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Daqbits()    const {
+UInt_t StRTSBaseMaker::Daqbits()  {
    // "offline" bits aka L3 summary...
-   return fDaq_Dta ? fDaq_Dta->Daqbits() : 0; 
+   return StRtsTable::Daqbits(); 
 }
 
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Daqbits_l1() const {
+UInt_t StRTSBaseMaker::Daqbits_l1() {
      // triggers satisfying l1 
-   return fDaq_Dta ? fDaq_Dta->Daqbits_l1() : 0;
+   return StRtsTable::Daqbits_l1();
 }
 
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Daqbits_l2() const {
+UInt_t StRTSBaseMaker::Daqbits_l2() {
     // triggers satisfying l2
-   return fDaq_Dta ? fDaq_Dta->Daqbits_l2() : 0;
+   return StRtsTable::Daqbits_l2();
 }
 
 //_____________________________________________________________
-UInt_t StRTSBaseMaker::Evpgroups()  const 
+UInt_t StRTSBaseMaker::Evpgroups()
 {
    // evp groups aka L3 summary[2]     
-   return fDaq_Dta ? fDaq_Dta->Evpgroups() : 0;
+   return StRtsTable::Evpgroups();
 }
 
 //_____________________________________________________________
 UInt_t StRTSBaseMaker::Detectors()  const {
    // detectors present bit mask according to DAQ!
-   return fDaq_Dta ? fDaq_Dta->Detectors() : 0;
+   return StRtsTable::Detectors();
 }
 
