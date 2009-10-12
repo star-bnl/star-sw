@@ -44,7 +44,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.22 2009/10/03 21:29:09 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.23 2009/10/12 23:54:12 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -100,9 +100,8 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   K3OP(0.55),    // K3 from E.Mathieson, Fig. 5.3b (pads) for a/s = 2.5e-3 and h/s = 1.0
   K3OR(0.61),    // K3 from E.Mathieson, Fig. 5.3a (row)  for a/s = 2.5e-3 and h/s = 1.0
   mAveragePedestal(50.0), //1.24102e+02), 
-  mAveragePedestalRMS(0.5), //  tonko's rms =1.4), //1.95684e+01),
-  //  mAveragePedestalRMSX(0.3), // tonkos rms = 0.8), //1.95684e+01),
-  mAveragePedestalRMSX(0.7), // 0.06), // tonkos rms = 0.04 - 0.08 06/22/09
+  mAveragePedestalRMS(1.4), //  tonko's rms =1.4), //1.95684e+01),
+  mAveragePedestalRMSX(0.07), // tonkos rms = 0.04 - 0.08 06/22/09
   minSignal(1e-4),
   InnerAlphaVariation(0),
   OuterAlphaVariation(0),
@@ -123,16 +122,21 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   tauF(394.0e-9), 
   //not used  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
   tauP(775.0e-9),
-  mSigmaJitterTI(0.3), 
-  mSigmaJitterTO(0.3), 
+  mSigmaJitterTI(0.32), // For tpx
+  mSigmaJitterTO(0.38), //  -"- 
   mSigmaJitterXI(0.0), // v30 (0.057), //v28 0.172), // cm
   mSigmaJitterXO(0.0), // v30 (0.066), //v28 (0.198),
   mAltro(0),
   mCutEle(1e-3)
 {
   memset (mShaperResponses, 0, sizeof(mShaperResponses));
+#if 0
   mtauIntegrationX[0] = 15e-9; mtauCX[0] = 30e-9; // Inner
   mtauIntegrationX[1] = 20e-9; mtauCX[1] = 50e-9; // Outer
+#else
+  mtauIntegrationX[0] = 74.6e-9; mtauCX[0] = 0; // Inner
+  mtauIntegrationX[1] = 74.6e-9; mtauCX[1] = 0; // Outer
+#endif
   SETBIT(m_Mode,kPAI); 
   //  SETBIT(m_Mode,kTree);
 }
@@ -775,6 +779,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    Int_t iGridWire = (Int_t ) TMath::Abs(10.*distanceToWire);
 	    Double_t dist2Grid = TMath::Sign(0.05 + 0.1*iGridWire, distanceToWire);
 #if 0
+	    // Focusing on Grid wires  => Effectively accounted by focusing on Anode wires
 	    Double_t yShift   = dist2Grid - distanceToWire;
 	    xOnWire -= yShift*OmegaTau;
 	    zOnWire += TMath::Abs(yShift);
@@ -1314,8 +1319,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
   return m_SignalSum;
 }
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.22 2009/10/03 21:29:09 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.23 2009/10/12 23:54:12 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.23  2009/10/12 23:54:12  fisyak
+// Restore T0Jitter, remove differential in Tpx signal
+//
 // Revision 1.22  2009/10/03 21:29:09  fisyak
 // Clean up, move all TpcT related macro into StTpcMcAnalysisMaker
 //
