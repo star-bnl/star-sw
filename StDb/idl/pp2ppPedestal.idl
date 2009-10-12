@@ -1,0 +1,24 @@
+/* pp2ppPedestal.idl
+
+*
+
+* Table: pp2ppPedestal for each of the 20480 channels
+
+*
+
+* description: // Pedestals for each of the 20480 channels
+
+*
+
+*/
+
+struct pp2ppPedestal {
+
+  octet   sequencer ; /* Sequencer no. (1-8)   */
+  octet   chain ;     /* Chain no.     (0-3)   */
+  octet   SVX       ; /* SVX no.       (0-5)   */
+  octet   channel ;   /* Channel no.   (0-127) */
+  double  mean ;      /* Pedestal mean         */
+  double  rms ;       /* Standard Deviation    */
+
+} ;
