@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.32 2009/09/11 13:11:49 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.33 2009/10/12 15:06:11 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.33  2009/10/12 15:06:11  dmitry
+ * added new domain: pp2pp
+ *
  * Revision 1.32  2009/09/11 13:11:49  dmitry
  * added FMS to domain list
  *
@@ -354,6 +357,7 @@ addDbDomain(dbBbc,"bbc");
 addDbDomain(dbTracker,"tracker"); 
 addDbDomain(dbZdc,"zdc"); 
 addDbDomain(dbFms,"fms"); 
+addDbDomain(dbpp2pp,"pp2pp"); 
 
 }
 
