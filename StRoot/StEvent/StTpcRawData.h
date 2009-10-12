@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.5 2008/07/31 20:47:27 fisyak Exp $
+ * $Id: StTpcRawData.h,v 2.6 2009/10/12 23:52:32 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.6  2009/10/12 23:52:32  fisyak
+ * Fix relation npad from pad row
+ *
  * Revision 2.5  2008/07/31 20:47:27  fisyak
  * Modify operator += and =
  *
@@ -102,6 +105,7 @@ public:
     void   clear();
     Int_t  cleanup();
     virtual void   Print(const Option_t *opt="") const;
+    virtual Int_t  PrintTimeAdc(Int_t row, Int_t pad) const;
     StTpcDigitalSector &operator+= (StTpcDigitalSector& v);
     static Int_t numberOfPadsAtRow(Int_t row);
     StTpcDigitalSector& operator=(const StTpcDigitalSector&);
@@ -120,7 +124,7 @@ private:
 
 class StTpcRawData : public StObject {
 public:
-    StTpcRawData(Int_t noSectors = 0) {setNoSectors(noSectors);}
+    StTpcRawData(Int_t noSectors = 24) {setNoSectors(noSectors);}
     virtual ~StTpcRawData() {clear();}
     UInt_t size() {return mSectors.size();}
     UInt_t getNoSectors() {return size();}
