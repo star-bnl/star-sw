@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.6 2008/07/31 20:47:26 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.7 2009/10/12 23:52:32 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.7  2009/10/12 23:52:32  fisyak
+ * Fix relation npad from pad row
+ *
  * Revision 2.6  2008/07/31 20:47:26  fisyak
  * Modify operator += and =
  *
@@ -51,7 +54,7 @@ Int_t StTpcDigitalSector::numberOfPadsAtRow(Int_t row) {return (row >= 1 && row 
 //________________________________________________________________________________
 StTpcDigitalSector::StTpcDigitalSector(void *db) {
   StDigitalTimeBins  timeBins;
-  for(UInt_t row=0; row< __NumberOfRows__; row++) {
+  for(UInt_t row=0; row < __NumberOfRows__; row++) {
     StDigitalPadRow    padRow;
     for (Int_t pad = 0; pad < NumberOfPadsAtRow[row]; pad++) {
       padRow.push_back( timeBins);
@@ -69,8 +72,8 @@ void StTpcDigitalSector::clear() {// clears only the time bins
 }
 //________________________________________________________________________________
 void StTpcDigitalSector::assignTimeBins(Int_t rowN, Int_t padN, StDigitalTimeBins* tbins) {
-  if (rowN < 0 || rowN > __NumberOfRows__ ||
-      padN < 0 || padN > NumberOfPadsAtRow[rowN]) return;
+  if (rowN < 1 || rowN > __NumberOfRows__ ||
+      padN < 1 || padN > NumberOfPadsAtRow[rowN-1]) return;
   StDigitalPadRow    &Row = mData[(rowN-1)];
   StDigitalTimeBins  &Pad = Row[(padN-1)];
   if (Pad.size() > 0)  Pad.clear();
@@ -225,6 +228,26 @@ Int_t StTpcDigitalSector::getTimeAdc(Int_t row, Int_t pad,
   return nTimeSeqs;
  }
 //________________________________________________________________________________
+Int_t StTpcDigitalSector::PrintTimeAdc(Int_t row, Int_t pad) const {
+  UInt_t nTimeSeqs = 0;
+  const StDigitalTimeBins* TrsPadData = timeBinsOfRowAndPad(row,pad);
+  if (! TrsPadData) return nTimeSeqs;
+  const StDigitalTimeBins &trsPadData = *TrsPadData;
+  nTimeSeqs = trsPadData.size();
+  if (! nTimeSeqs) return nTimeSeqs;
+  cout << "Time/Adc/IdTruth for row " << row << "\tpad " << pad << endl;
+  for (UInt_t i = 0; i < nTimeSeqs; i++) {
+    StDigitalPair digPair = trsPadData[i];
+    UInt_t ntbk = digPair.size();
+    UInt_t tb   = digPair.time();
+    for (UInt_t j = 0; j < ntbk; j++, tb++) {
+      if (digPair.adc()[j] <= 0) continue;
+      cout << "\t" << tb << "\t" << digPair.adc()[j] << "\t" << digPair.idt()[j] << endl;
+    }
+  }
+  return nTimeSeqs;
+ }
+//________________________________________________________________________________
 StTpcDigitalSector &StTpcDigitalSector::operator+= (StTpcDigitalSector& v) {
   static Short_t ADCs1[__MaxNumberOfTimeBins__], ADCs2[__MaxNumberOfTimeBins__];
   static UShort_t IDTs1[__MaxNumberOfTimeBins__], IDTs2[__MaxNumberOfTimeBins__];
@@ -272,6 +295,7 @@ StTpcDigitalSector &StTpcDigitalSector::operator= (const StTpcDigitalSector& v) 
 //________________________________________________________________________________
 void StTpcDigitalSector::Print(const Option_t *opt) const {
   Int_t nrows = __NumberOfRows__;
+  TString Opt(opt);
   for (Int_t row = 1; row <= nrows; row++) {
     //    cout << "sector/row " << mSector << "/" << row << endl;
     Int_t npads = numberOfPadsInRow(row);
@@ -280,6 +304,7 @@ void StTpcDigitalSector::Print(const Option_t *opt) const {
       Int_t ntb = numberOfTimeBins(row,pad);
       if (! ntb) continue;
       cout << "sector/row/pad = " << mSector << "/" << row << "/" << pad << " = " << ntb << " time sequences" << endl;
+      if (Opt.Contains("all",TString::kIgnoreCase)) PrintTimeAdc(row,pad);
     }
   }
 }
@@ -318,7 +343,10 @@ Int_t StTpcRawData::getVecOfPixels(StVectPixel &pixels, Int_t sector, Int_t row,
 //________________________________________________________________________________
 void StTpcRawData::Print(const Option_t *opt) const {
   Int_t N = ((StTpcRawData *) this)->size();
-  for (Int_t i = 0; i < N; i++) ((StTpcDigitalSector* )mSectors[i])->Print(opt);
+  for (Int_t i = 0; i < N; i++) {
+    StTpcDigitalSector *sector =  ((StTpcDigitalSector* )mSectors[i]);
+    if (sector) sector->Print(opt);
+  }
 }
 //________________________________________________________________________________
 StTpcRawData &StTpcRawData::operator+= (StTpcRawData& v) {
