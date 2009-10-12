@@ -9,13 +9,13 @@
 #include "EEdsmAna.h"
 
 #define EEmapTP_USE // trick instattiates data only in the cxx
-#include "StEEmcUtil/EEdsm/EEmapTP.h" 
+#include "StTriggerUtilities/Eemc/EEmapTP.h" 
 #undef EEmapTP_USE
 
-#include "StEEmcUtil/EEdsm/EEdsm0.h"
-#include "StEEmcUtil/EEdsm/EEdsm1.h"
-#include "StEEmcUtil/EEdsm/EEdsm2.h"
-#include "StEEmcUtil/EEdsm/EEdsm3.h"
+#include "StTriggerUtilities/Eemc/EEdsm0.h"
+#include "StTriggerUtilities/Eemc/EEdsm1.h"
+#include "StTriggerUtilities/Eemc/EEdsm2.h"
+#include "StTriggerUtilities/Eemc/EEdsm3.h"
 
 #include "StTriggerUtilities/StDSMUtilities/DSM.hh"
 #include "StTriggerUtilities/StDSMUtilities/DSMAlgo_EE101_2009.hh"
