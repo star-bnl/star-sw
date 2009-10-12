@@ -34,13 +34,13 @@
 #include <StEEmcUtil/database/cstructs/eemcConstDB.hh>
 
 
-#include "StEEmcUtil/EEdsm/EEfeeTPTree.h" 
-#include "StEEmcUtil/EEdsm/EEfeeTP.h" 
-#include "StEEmcUtil/EEdsm/EEdsm0Tree.h"
-#include "StEEmcUtil/EEdsm/EEdsm1Tree.h"
-#include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"
-#include "StEEmcUtil/EEdsm/EEdsm3.h"
-#include "StEEmcUtil/EEdsm/EemcTrigUtil.h"
+#include "EEfeeTPTree.h" 
+#include "EEfeeTP.h" 
+#include "EEdsm0Tree.h"
+#include "EEdsm1Tree.h"
+#include "EMCdsm2Tree.h"
+#include "EEdsm3.h"
+#include "EemcTrigUtil.h"
 
 // DSM threshold tables
 #include "tables/St_trgDsmReg_Table.h"
@@ -636,6 +636,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.17  2009/10/12 18:04:28  pibero
+// Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
+//
 // Revision 1.16  2009/09/26 18:46:37  pibero
 // Migration from ROOT MySQL to STAR DB API
 //

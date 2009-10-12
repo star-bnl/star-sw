@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: StGenericL2Emulator.cxx,v 1.17 2009/02/04 20:26:22 rfatemi Exp $
+// $Id: StGenericL2Emulator.cxx,v 1.18 2009/10/12 18:04:36 pibero Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -54,7 +54,7 @@
 // L0-trigSimu
 #include "StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Eemc/StEemcTriggerSimu.h"
-#include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"
+#include "StTriggerUtilities/Eemc/EMCdsm2Tree.h"
 
 #include "StGenericL2Emulator.h"
 
@@ -532,6 +532,9 @@ const unsigned int * StGenericL2Emulator::result() const {
 }
 
 // $Log: StGenericL2Emulator.cxx,v $
+// Revision 1.18  2009/10/12 18:04:36  pibero
+// Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
+//
 // Revision 1.17  2009/02/04 20:26:22  rfatemi
 // Update include for StEmcDecoder as well as access to StEEmc
 //
