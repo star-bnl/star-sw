@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.28 2009/09/26 18:46:28 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.29 2009/10/12 18:04:12 pibero Exp $
 
 
 #include <Stiostream.h>
@@ -23,7 +23,7 @@
 #include "StEmcUtil/database/StEmcDecoder.h"
 
 #include "St_db_Maker/St_db_Maker.h" // just for time stamp
-#include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"// to access Etot
+#include "Eemc/EMCdsm2Tree.h"// to access Etot
 
 //StEvent
 #include "StEvent/StEvent.h"
@@ -31,8 +31,8 @@
 //get  EEMC
 #include "Eemc/StEemcTriggerSimu.h"
 #include "Eemc/EemcHttpInfo.h"
-#include "StEEmcUtil/EEdsm/EEfeeTPTree.h" // for printouts only
-#include "StEEmcUtil/EEdsm/EEfeeTP.h"  // for printouts only
+#include "Eemc/EEfeeTPTree.h" // for printouts only
+#include "Eemc/EEfeeTP.h"  // for printouts only
 
 //get BEMC
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
@@ -223,6 +223,9 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.29  2009/10/12 18:04:12  pibero
+ * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
+ *
  * Revision 1.28  2009/09/26 18:46:28  pibero
  * Migration from ROOT MySQL to STAR DB API
  *
