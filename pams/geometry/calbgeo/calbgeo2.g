@@ -4,8 +4,11 @@ MODULE  CALBGEO2 is the geometry of the Barrel EM Calorimeter
    Created   December 12, 2006
 * Based on CALBGEO1 -- tower map removed due to a full calorimeter
 *
-* $Id: calbgeo2.g,v 1.3 2008/11/08 02:35:36 perev Exp $
+* $Id: calbgeo2.g,v 1.4 2009/10/13 18:44:22 perev Exp $
 * $Log: calbgeo2.g,v $
+* Revision 1.4  2009/10/13 18:44:22  perev
+* Remove redundant sensitives
+*
 * Revision 1.3  2008/11/08 02:35:36  perev
 * CSZO CSZU poligons now. Simplification
 *
@@ -57,7 +60,7 @@ external etsphit
       real      strap_spacing
       real      cut_radius2,cutAng,calg_Rmin2,Rmax2,Rmax3
 
-      integer   layer,super,sub,i,j,ii,nn,imod,nslug
+      integer   layer,super,sub,i,j,ii,nn,imod,nslug,iCSHI
       real      geang(6)
 
 *
@@ -390,9 +393,9 @@ Block CSUP  is a super layer with few layers inside
       Component C  A=12.01   Z=6.    W=6./21.
       Component H  A=1.      Z=1.    W=10./21.
       Component O  A=16.     Z=8.    W=5./21.
-      Mixture   Cellulose Dens=0.35 Isvol=1       
+      Mixture   Cellulose Dens=0.35        
       attribute CSUP  seen=0   colo=1
-      shape     PCON  Phi1=-DphiMod/2  Dphi=DphiMod  Nz=3,
+      shape     PGON  Phi1=-DphiMod/2  Dphi=DphiMod  Npdv = 1 Nz=3,
                       zi ={zz1, current_depth/tan_theta, future_depth/tan_theta},
                       rmn={ current_depth,    current_depth,    future_depth },
                       rmx={ future_depth,     future_depth,     future_depth };
@@ -465,7 +468,7 @@ EndBlock
 * 
 Block CBTW  is the  Module Front Back Plate
       Material  Aluminium
-      Material  EAluminium Isvol=1
+      Material  EAluminium Isvol=0
       Medium Al_emc 
       attribute CBTW  seen=1  colo=6
       Shape     BOX   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
@@ -480,7 +483,7 @@ Block CSMD is the shower maximum detector envelope
       Component C  A=12.01   Z=6.    W=6./21.
       Component H  A=1.      Z=1.    W=10./21.
       Component O  A=16.     Z=8.    W=5./21.
-      Mixture   Cellulose Dens=0.35 Isvol=1       
+      Mixture   Cellulose Dens=0.35      
       attribute CSMD  seen=1  colo=6
       Shape BOX dx=smd_width,
                 dy=current_depth*tan(TwoPi/120.)-calg_CrackWd,
@@ -596,9 +599,9 @@ Block CSME is the part of CSDA Al box with Ar/CO2 sensiteve gas
       Call CALBPAR(ag_imed,'SENSITIVE')
 
 * sensitive Ar/CO2 box 
-      do i=1,2
+      do iCSHI=1,2
           Create CSHI
-        if(i.eq.1) then
+        if(iCSHI.eq.1) then
           Position CSHI  x = -calg_SmAlfThk+calg_SmGasThk
         else
           Position CSHI  x = 2.*calg_SmGasThk-calg_SmAlfThk
@@ -612,7 +615,7 @@ Block CSHI is a sensiteve Ar/CO2 box
       Component O  A=16.     Z=8.    W=0.1*2*16./44.01
       Mixture   sens_gas  Dens=0.0018015  Isvol=1        
       attribute CSHI      seen=1   colo=4
-      if(i.eq.1) then
+      if(iCSHI.eq.1) then
         Shape BOX  dx = calg_SmGasThk,
                    dy = calg_SmGasWdh
       else
