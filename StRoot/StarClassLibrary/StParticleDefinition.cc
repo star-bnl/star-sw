@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleDefinition.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: StParticleDefinition.cc,v 1.3 2009/10/13 18:31:39 perev Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleDefinition.cc,v $
+ * Revision 1.3  2009/10/13 18:31:39  perev
+ * Unonimous update
+ *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
  *
@@ -25,7 +28,10 @@
 #include "StParticleTable.hh"
 #include "PhysicalConstants.h"
 // #include <typeinfo>
-
+#ifdef __ROOT__
+ClassImp(StParticleDefinition)
+#endif
+ 
 StParticleDefinition::StParticleDefinition(
 					   const string  &     aName,  
 					   double              aMass,
