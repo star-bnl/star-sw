@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.80 2009/10/07 23:21:56 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.81 2009/10/13 15:51:48 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.81  2009/10/13 15:51:48  fine
+ * Activate the new DAT file format
+ *
  * Revision 1.80  2009/10/07 23:21:56  fine
  * Move the StRtsReaderMaker instantiation fro  StDAQReader to StDAQMaker to make sure it is located just after StDAQMaker in chain
  *
@@ -285,6 +288,9 @@
 #include "StMessMgr.h" 
 #include "TString.h" 
 #include "StRtsReaderMaker.h"
+#include "StStreamFileFactory.h"
+#include "StStreamFile.h"
+
 //
 
 
@@ -318,6 +324,7 @@ StDAQReader::StDAQReader(const char *file, StRtsReaderMaker* rtsMaker) :
   setFTPCVersion();
   fTrigSummary = new StTrigSummary();
   fDaqFileReader = 0;
+  fDatFileReader = 0;
   fDATAP = 0;
   if(file && file[0]) open(file);
 }
@@ -326,42 +333,51 @@ StDAQReader::StDAQReader(const char *file, StRtsReaderMaker* rtsMaker) :
 int StDAQReader::open(const char *file)
 {
   assert(file);
-#ifdef OLD_EVP_READER
-  if (fFd!=(-1) && fFile && strcmp(file,fFile)==0) return 0;
-  close();
-  fFile = new char[strlen(file)+1];  strcpy(fFile,file);
-
-  fFd = ::open(fFile,O_RDONLY);
-   if (fFd==-1) { 
-     LOG_INFO << fFile << "  " << strerror( errno ) << endm;
-     return kStErr;
+  if (!fRtsMaker) fRtsMaker = new StRtsReaderMaker;
+  if (StStreamFileFactory::Factory()) {
+     // check the file extension.
+     const char *dat_ext= ".dat";
+     LOG_INFO << " StDAQReader::open(const char *file):  " << file  << "  - "
+              << (const char*)&file[strlen(file)-sizeof(dat_ext)] 
+              << "  len=" << strlen(file) 
+              << " size=" << sizeof(dat_ext) 
+              << fDatFileReader << endm;
+     if (TString(dat_ext) ==  (const char*)&file[strlen(file)-sizeof(dat_ext)] && !fDatFileReader) {
+        fDatFileReader = StStreamFileFactory::Factory()->Create();
+        fRtsMaker->SetDatReader(fDatFileReader);
+     }
   }
-#else
-  if (fDaqFileReader) close();
-  fDaqFileReader = new daqReader((char *)file);
-  if (!fRtsMaker) fRtsMaker = new  StRtsReaderMaker;
-  fRtsMaker->SetReader(fDaqFileReader);
-  LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via daqReader " << endm;
-#endif
+  if (fDatFileReader) {
+     fDatFileReader->open(file);
+  } else {
+     if (fDaqFileReader) close();
+     fDaqFileReader = new daqReader((char *)file);
+     fRtsMaker->SetDaqReader(fDaqFileReader);
+  }
+  LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via "
+        << (fDatFileReader ? "DAT reader " : "" ) << fDatFileReader
+        << (fDaqFileReader ? "daqReader" : "") << fDaqFileReader 
+        << endm;
   fOffset =0;
   return 0;  
 }
 //_____________________________________________________________________________
 void StDAQReader::clear()
 {
-  delete fEventReader;	fEventReader 	= 0;  
+  delete fEventReader;	fEventReader 	= 0;
 }
 //_____________________________________________________________________________
 int StDAQReader::close()
 {
-#ifdef OLD_EVP_READER
-  delete [] fFile; fFile=0;
-  if (fFd != (-1)) ::close(fFd);
-  fFd = -1;
-#else
-  delete fDaqFileReader; fDaqFileReader = 0;
-  if (fRtsMaker)fRtsMaker->SetReader(0);
-#endif
+  if (fDaqFileReader ) {
+     delete fDaqFileReader; 
+     fDaqFileReader = 0;
+  } else if (fDatFileReader) {
+     fDatFileReader->close();
+  }
+  if (fRtsMaker) {
+     fRtsMaker->SetDaqReader(0);
+  }
   delete fEventReader;	fEventReader 	= 0;  
 
   if(fTPCReader) 	fTPCReader ->close();  
@@ -386,14 +402,14 @@ StDAQReader::~StDAQReader()
   free(fDATAP);
   fDATAP = 0;
   close();
+  delete fDatFileReader; fDatFileReader=0;
 }
 //_____________________________________________________________________________
-/// NextEvent - this method is called open the next daq file if any
+/// NextEvent - this method is called to advance the next daq event if any
 void StDAQReader::nextEvent()
 {
 #ifndef OLD_EVP_READER
    // Create the next event from evp data
-   if (!fDaqFileReader) return;
    // qDebug() << " StEvpReader::NextEvent() - fEventType = " <<  fEventType;
    char *currentData = fDaqFileReader->get(0,EVP_TYPE_ANY); // EventNumber(),fEventType);
    LOG_DEBUG << " StEvpReader::NextEvent - data = "
@@ -440,28 +456,33 @@ int StDAQReader::Make()
 }
 //_____________________________________________________________________________
 int StDAQReader::readEvent()
-{  
-#ifndef OLD_EVP_READER
-  nextEvent();
-#endif  
-  delete fEventReader;	fEventReader=0;
-  delete fRICHReader; 	fRICHReader = 0;
-  delete fL3Reader; 	fL3Reader   = 0;
+{
+  int retStatus = kStOk;
+
+  if (fDatFileReader) {
+     fDatFileReader->Read();
+     if (!fDatFileReader->good()) {
+         fOffset   = -1;
+         retStatus =  kStErr;
+         if (fDatFileReader->eof() )   retStatus = kStEOF;
+     }
+  } else if (!fDaqFileReader) {
+     nextEvent();
+     if (fOffset == -1)    retStatus = kStEOF;
+  }
+
+  delete fEventReader;  fEventReader=0;
+  delete fRICHReader;   fRICHReader = 0;
+  delete fL3Reader;     fL3Reader   = 0;
   delete fTOFReader;    fTOFReader  = 0;
   delete fFPDReader;    fFPDReader  = 0;
-  if (fOffset == -1) return kStEOF;
+  if (retStatus == kStOk) {
   fEventReader = new EventReader();
   fEventReader->setVerbose(fVerbose);
-  //  fEventReader->InitEventReader(fFd, fOffset, 0);
-#ifdef OLD_EVP_READER
-  fEventReader->InitEventReader(fFd, fOffset);
-  int oldOffset = fOffset;
-  fOffset = fEventReader->NextEventOffset();
-  if(fEventReader->eventIsCorrupted(fFd,oldOffset)) return kStErr; // Herb, Aug 28 2000
-  if(fEventReader->errorNo()) return kStErr;  
-#else
+
   fEventReader->setDaqReader(fDaqFileReader);
-  if (fDaqFileReader->mem) {
+  if (fDaqFileReader) {
+     if (fDaqFileReader->mem) {
      //
      // the buffer of the new EVP_READER is mmap read-only file.
      // This means one can not chnage the buffer the kind of thing
@@ -469,63 +490,52 @@ int StDAQReader::readEvent()
      // To fix the issue we have to create the memory resided copy of the buffer
      // vf 26.12.2007
 #  if 1
-     fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes);
-     memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes);
-     // Fix the DATAP Summary data
-     fDaqFileReader->fixDatapSummary((DATAP*)fDATAP);
+        fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes);
+        memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes);
+        // Fix the DATAP Summary data
+        fDaqFileReader->fixDatapSummary((DATAP*)fDATAP);
 #  else
-     fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes_mapped);
-     memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes_mapped);
+        fDATAP = (char *)realloc(fDATAP, fDaqFileReader->bytes_mapped);
+        memcpy(fDATAP,fDaqFileReader->mem, fDaqFileReader->bytes_mapped);
 #  endif
-     fEventReader->InitEventReader(fDATAP);
-    *fEventInfo = fEventReader->getEventInfo();
-     if(fEventInfo->Token==0){
-        LOG_INFO << 
-           Form("StDAQReader::readEvent: found event with token==0") << endm;
-        m_ZeroTokens++;
-    // return kStErr;  // Herb, July 5 2000
-  }
-}
-#  ifndef NEW_DAQ_READER 
- // if the the new DAQ file (2008 Edition) lacks of the DATAP structure
- // it is the normal and it should not be treated as a fatal error anymore ;
- else {
-    delete fEventReader;
-    fEventReader = 0;
-    assert(0);
- }
-#  else
- else if(fDaqFileReader->token==0){
-    LOG_INFO << 
-           Form("StDAQReader::readEvent: found event with token==0") << endm;
-    m_ZeroTokens++;
- }
-#  endif
-#endif  /* OLD_EVP_READER */
-
-  if (fTPCReader  && TPCPresent() ) fTPCReader ->Update();
-  if (fFTPCReader && FTPCPresent()) fFTPCReader->Update();
-  if (fTRGReader  && TRGPresent() ) {
-      fTRGReader ->Update();
-      if ( ! fTRGReader->thereIsTriggerData() ){
-         LOG_INFO <<
-            Form("StDAQReader::readEvent: No or bad TRG data - Skipping event: ") 
-            << getRunNumber() << " : " <<getEventNumber()<< endm;
-            return kStErr;
-      }
-  }
-  if (fSVTReader  && SVTPresent() ) fSVTReader ->Update();
-  if (fSSDReader  && SSDPresent() ) fSSDReader ->Update();
-  if (fEMCReader  && EMCPresent() ) fEMCReader ->Update();
-  if (fEEMCReader && EMCPresent() ) fEEMCReader->Update();
-  if (fPMDReader  && PMDPresent() ) fPMDReader ->Update();
-
-// Trigger Summary
-  int i;
-  for(i=0;i<2;i++) fTrigSummary->L1summary[i]=fDaqFileReader->L1summary[i];
-  for(i=0;i<2;i++) fTrigSummary->L2summary[i]=fDaqFileReader->L2summary[i];
-  for(i=0;i<4;i++) fTrigSummary->L3summary[i]=fDaqFileReader->L3summary[i];
-  return 0;
+        fEventReader->InitEventReader(fDATAP);
+       *fEventInfo = fEventReader->getEventInfo();
+        if(fEventInfo->Token==0){
+           LOG_INFO << 
+              Form("StDAQReader::readEvent: found event with token==0") << endm;
+           m_ZeroTokens++;
+       // return kStErr;  // Herb, July 5 2000
+     }
+   }
+    else if(fDaqFileReader && fDaqFileReader->token==0){
+       LOG_INFO << 
+              Form("StDAQReader::readEvent: found event with token==0") << endm;
+       m_ZeroTokens++;
+    }
+    if (fTPCReader  && TPCPresent() ) fTPCReader ->Update();
+    if (fFTPCReader && FTPCPresent()) fFTPCReader->Update();
+    if (fTRGReader  && TRGPresent() ) {
+         fTRGReader ->Update();
+         if ( ! fTRGReader->thereIsTriggerData() ){
+            LOG_INFO <<
+               Form("StDAQReader::readEvent: No or bad TRG data - Skipping event: ") 
+               << getRunNumber() << " : " <<getEventNumber()<< endm;
+               return kStErr;
+         }
+     }
+     if (fSVTReader  && SVTPresent() ) fSVTReader ->Update();
+     if (fSSDReader  && SSDPresent() ) fSSDReader ->Update();
+     if (fEMCReader  && EMCPresent() ) fEMCReader ->Update();
+     if (fEEMCReader && EMCPresent() ) fEEMCReader->Update();
+     if (fPMDReader  && PMDPresent() ) fPMDReader ->Update();
+   
+   // Trigger Summary
+     int i;
+     for(i=0;i<2;i++) fTrigSummary->L1summary[i]=fDaqFileReader->L1summary[i];
+     for(i=0;i<2;i++) fTrigSummary->L2summary[i]=fDaqFileReader->L2summary[i];
+     for(i=0;i<4;i++) fTrigSummary->L3summary[i]=fDaqFileReader->L3summary[i];
+  } }
+  return retStatus;
 }
 //_____________________________________________________________________________
 int StDAQReader::skipEvent(int nskip)

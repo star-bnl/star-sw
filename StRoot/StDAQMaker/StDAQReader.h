@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.41 2009/10/07 23:21:56 fine Exp $
+ * $Id: StDAQReader.h,v 1.42 2009/10/13 15:51:48 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.42  2009/10/13 15:51:48  fine
+ * Activate the new DAT file format
+ *
  * Revision 1.41  2009/10/07 23:21:56  fine
  * Move the StRtsReaderMaker instantiation fro  StDAQReader to StDAQMaker to make sure it is located just after StDAQMaker in chain
  *
@@ -182,6 +185,7 @@ public:
   int L3summary[4];
 };
 class StRtsReaderMaker;
+class StStreamFile;
 //
 
  
@@ -235,8 +239,9 @@ public:
   StTrigSummary *getTrigSummary () const {return fTrigSummary;}
   virtual void printEventInfo();
   virtual int  getEventSize() const;
-  virtual EventReader *getEventReader() const {return fEventReader;}  
-  virtual daqReader   *getFileReader() const  {return  fDaqFileReader;}
+  virtual EventReader  *getEventReader()   const {return fEventReader;  }
+  virtual daqReader    *getFileReader()    const {return fDaqFileReader;}
+  virtual StStreamFile *getDatFileReader() const {return fDatFileReader;}
 
 protected:
   void nextEvent();
@@ -267,6 +272,7 @@ protected:
   char fFTPCVersion[12];
   StTrigSummary *fTrigSummary; //!
   daqReader     *fDaqFileReader;
+  StStreamFile  *fDatFileReader;
   char *fDATAP;
   StRtsReaderMaker *fRtsMaker;  //! pointer to the RTS_READER
 };

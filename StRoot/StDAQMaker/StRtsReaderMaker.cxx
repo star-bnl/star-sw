@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.24 2009/10/09 22:36:34 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.25 2009/10/13 15:51:48 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.25  2009/10/13 15:51:48  fine
+ * Activate the new DAT file format
+ *
  * Revision 1.24  2009/10/09 22:36:34  fine
  * remove the redundant components
  *
@@ -157,6 +160,7 @@
 #  include "RTS/src/DAQ_READER/daqReader.h"
 #endif
 
+#include "StStreamFile.h"
 
 
 ClassImp(StRtsReaderMaker);
@@ -185,9 +189,9 @@ Int_t StRtsReaderMaker::Init() {
 daqReader *StRtsReaderMaker::InitReader()
 {
    // Init EVP_READER 
-   if (!fRtsReader) {
+   if (!fRtsReader && !fDatReader) {
       StDAQReader *daqReader = 0;
-      LOG_DEBUG << "StRtsReaderMaker::InitReader"  << endm;
+      // LOG_DEBUG << "StRtsReaderMaker::InitReader"  << endm;
       TDataSet *dr = GetDataSet("StDAQReader");
       if(dr) daqReader = (StDAQReader *)(dr->GetObject());
 
@@ -219,10 +223,22 @@ void StRtsReaderMaker::Clear(Option_t *option)
    StMaker::Clear(option);
 }
 //_____________________________________________________________
-void StRtsReaderMaker::SetReader(daqReader *reader)
+void StRtsReaderMaker::SetDaqReader(daqReader *reader)
 {
+   if (reader) {
+      assert(reader && !fDatReader && "Can not use two readers simultaneously");
+   }
    fRtsReader = reader;
 }
+//_____________________________________________________________
+void StRtsReaderMaker::SetDatReader(StStreamFile *reader)
+{
+   if (reader) {
+      assert(reader && !fRtsReader && "Can not use two readers simultaneously");
+   }
+   fDatReader = reader;
+}
+
 #if 0
 //_____________________________________________________________
 static const char*RtsDataTypeByBankName(const char *bankName) 
@@ -265,11 +281,9 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
        delete fRtsTable; 
        fRtsTable = 0; // forget this table. It will be deleted by Clear method anyway
    }
-#ifndef NEW_DAQ_READER
-   size_t dtBankSize = daq_dta_dict(detName,bankName);
-#else
-   size_t dtBankSize = fBank->get_size_t();
-#endif
+   size_t dtBankSize = 0;
+   if (fBank) { dtBankSize = fBank->get_size_t(); }
+   else if (fDatReader) { dtBankSize = fDatReader->Length() ; }
    if ( dtBankSize )  {
        // we will reallocate it within FillTable() method
       fRtsTable = new StRtsTable(dtBankSize,2);
@@ -281,23 +295,25 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
 //_____________________________________________________________
 void StRtsReaderMaker::FillDaqHeader() 
 {
-   fRtsTable->SetToken   (fRtsReader->token  );
-   fRtsTable->SetTrgcmd  (fRtsReader->trgcmd );
-   fRtsTable->SetDaqcmd  (fRtsReader->daqcmd );
-   fRtsTable->SetTrgword (fRtsReader->trgword);
-   fRtsTable->SetPhyword (fRtsReader->phyword);
-   fRtsTable->SetDaqbits (fRtsReader->daqbits);
-   fRtsTable->SetDaqbits_l1 (fRtsReader->daqbits_l1);
-   fRtsTable->SetDaqbits_l2 (fRtsReader->daqbits_l2);
-   fRtsTable->SetEvpgroups (fRtsReader->evpgroups);
-   fRtsTable->SetDetectors (fRtsReader->detectors);
+   if (fRtsReader) {
+      fRtsTable->SetToken   (fRtsReader->token  );
+      fRtsTable->SetTrgcmd  (fRtsReader->trgcmd );
+      fRtsTable->SetDaqcmd  (fRtsReader->daqcmd );
+      fRtsTable->SetTrgword (fRtsReader->trgword);
+      fRtsTable->SetPhyword (fRtsReader->phyword);
+      fRtsTable->SetDaqbits (fRtsReader->daqbits);
+      fRtsTable->SetDaqbits_l1 (fRtsReader->daqbits_l1);
+      fRtsTable->SetDaqbits_l2 (fRtsReader->daqbits_l2);
+      fRtsTable->SetEvpgroups (fRtsReader->evpgroups);
+      fRtsTable->SetDetectors (fRtsReader->detectors);
+   }
 }
 
 //_____________________________________________________________
 TDataSet *StRtsReaderMaker::FillTable() 
 {
    assert(fRtsTable);
-   if (fBank->iterate()) {
+   if (fBank && fBank->iterate()) {
       fRtsTable->SetAll(  fBank->sec
                         , fBank->pad
                         , fBank->rdo
@@ -309,6 +325,11 @@ TDataSet *StRtsReaderMaker::FillTable()
             << fRtsTable->GetRowSize() << " bytes each" << endm;
       fRtsTable->AppendRows(fBank->Byte,fBank->ncontent);
       fRtsTable->SetNRows(fBank->ncontent);
+   } else if (fDatReader) {
+      fRtsTable->SetAll(0,0,0,0);
+      fRtsTable->SetNRows(0);
+      fRtsTable->AppendRows(fDatReader->Record(),1);
+      fRtsTable->SetNRows(1);
    } else {
       if (!fLastQuery.IsNull()) {
          LOG_DEBUG <<" StRtsReaderMaker::FillTable(): No data has been found for \"" 
@@ -319,7 +340,6 @@ TDataSet *StRtsReaderMaker::FillTable()
       delete fRtsTable; 
       fRtsTable = 0; // forget this table. It will be deleted by Clear method anyway
       fLastQuery = ""; 
-
    }
    return fRtsTable;
 }
@@ -332,11 +352,13 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
    // Input: Query: RTS/[detector[/rts_bank[ [bank_parameters] ]]]
    // for example:  RTS/tpx/cld[16] - to get the clusters for the
    //                                 16th sector of tpx
+   // Special case: /RTS/trg/raw - the tge data can be provided by fDatReader too
    // Return the RTS bank  decorated as TGenericTable
    //--------------------------------------------------------------
    
   // Do not process the empty request:
-
+  //LOG_INFO << " StRtsReaderMaker::FindDataSet: " 
+  //       << logInput << endm;
   if ( !(logInput && logInput[0]) )
      return StMaker::FindDataSet(logInput,uppMk,dowMk);
 
@@ -347,7 +369,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
 
   if (fLastQuery == rtsRequest) {
      rtsSystem = true;
-  } else if (fRtsReader) {
+  } else if (fRtsReader || fDatReader) {
      TObjArray *tokens = rtsRequest.Tokenize("/[],");
      Int_t nItems = tokens->GetEntries();  
      if ( !strcmp(tokens->At(0)->GetName(),"RTS") ) {
@@ -357,7 +379,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
         char *detNameBuf =  new char[detName.Length()+1];
         strncpy(detNameBuf,detName.Data(),detName.Length());
         detNameBuf[detName.Length()]=0;
-        daq_det *rts_det = fRtsReader->det(detNameBuf);
+        daq_det *rts_det = fRtsReader ? fRtsReader->det(detNameBuf) : 0;
         delete [] detNameBuf;
         if (rts_det) {
            // Pick the rts bank
@@ -395,6 +417,12 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
            } else {
               thisMaker->fLastQuery = "";
            }
+        } else if (fDatReader && detName=="trg" && TString("raw") == tokens->At(2)->GetName()) {
+           thisMaker->InitTable(detName,tokens->At(2)->GetName());
+           thisMaker->fLastQuery = rtsRequest;
+           rtsSystem = fDatReader->Record();
+           LOG_DEBUG << " StRtsReaderMaker::FindDataSet: DAT request was found: " 
+                    << fDatReader->Length() << (void *)fDatReader->Record() << endm;
         }
         delete tokens;
      }
