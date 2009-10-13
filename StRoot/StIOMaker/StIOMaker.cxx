@@ -272,6 +272,9 @@ StIOInterFace *StIOMaker::Load()
        gSystem->Load("RTS");
        gSystem->Load("StDaqLib");
     }
+    if (fCase==kStDAT) {
+       gSystem->Load("StTrgDatFileReader");
+    }
     if (fCase==kStMuDst){
       Loaded = 1;
       gSystem->Load("St_Tables");
