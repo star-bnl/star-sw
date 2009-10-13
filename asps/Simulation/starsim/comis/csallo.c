@@ -1,7 +1,10 @@
 /*
- * $Id: csallo.c,v 1.4 2005/08/30 14:26:25 fisyak Exp $
+ * $Id: csallo.c,v 1.5 2009/10/13 18:39:35 perev Exp $
  *
  * $Log: csallo.c,v $
+ * Revision 1.5  2009/10/13 18:39:35  perev
+ * assert for 64bit added
+ *
  * Revision 1.4  2005/08/30 14:26:25  fisyak
  * CERNLIB_QX_SC ==> CERNLIB_QXNO_SC
  *
@@ -48,6 +51,7 @@
 /*-- Author :*/
 
 #include <cfortran/cfortran.h>
+#include <assert.h>
 
 typedef struct {
     int iq[6];
@@ -77,7 +81,9 @@ int type_of_call csallo_(lenb)
 
   lpntr= (unsigned long)( malloc(*lenb) );
   /*  pntr=lpntr - iqpntr; */
-  pntr=(lpntr - iqpntr)/sizeof(int); /* yf 092404 */
+  pntr=(lpntr - iqpntr);
+  assert((lpntr - iqpntr)==pntr);
+  pntr/=sizeof(int); /* yf 092404 */
   return pntr;
 }
 
