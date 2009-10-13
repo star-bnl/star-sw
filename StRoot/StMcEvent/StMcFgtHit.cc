@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHit.cc,v 2.4 2005/11/22 21:44:51 fisyak Exp $
+ * $Id: StMcFgtHit.cc,v 2.5 2009/10/13 19:14:27 perev Exp $
  * $Log: StMcFgtHit.cc,v $
+ * Revision 2.5  2009/10/13 19:14:27  perev
+ * Wei-Ming update
+ *
  * Revision 2.4  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -23,7 +26,7 @@
 #include "StMcFgtHit.hh"
 #include "tables/St_g2t_fgt_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFgtHit.cc,v 2.4 2005/11/22 21:44:51 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcFgtHit.cc,v 2.5 2009/10/13 19:14:27 perev Exp $";
 
 ClassImp(StMcFgtHit)
 
@@ -54,31 +57,40 @@ ostream&  operator<<(ostream& os, const StMcFgtHit& h)
     os << "StMcFgtHit" << endl;
     os << *((StMcHit *) &h);
     os << "Layer           : " << h.layer()    << endl;
+    os << "Quad            : " << h.quad()     << endl;
     return os;
 }
 
 unsigned long
 StMcFgtHit::layer() const
 {    
-  // this function is still a dummy
-  //unsigned long iModule = mVolumeId/1000000;
-  unsigned long iLayer = 1;
-  
-  return iLayer;
+  unsigned long iLayer; // layer = disk in StFgtGeom
+
+  // volumeId encoded in UPGR16  
+  int numbv1 = volumeId()/1000000;
+  int numbv2 = (volumeId()/10000)%100;
+  if(numbv2 != 0) iLayer = (unsigned long) numbv1 - 1;
+  else iLayer = 8;
+  return iLayer; 
 }
 
 unsigned long
-StMcFgtHit::ladder() const
+StMcFgtHit::quad() const
 {
-  // this function is still a dummy
-  //unsigned long iModule = mVolumeId/1000000;
-  unsigned long iLadder = 1;
+  unsigned long iQuad;
+
+  // volumeId encoded in UPGR16  
+  int numbv1 = volumeId()/1000000;
+  int numbv2 = (volumeId()/10000)%100;
+  if(numbv2 != 0) iQuad = (unsigned long) (numbv2 - 1);
+  else iQuad = (unsigned long) (numbv1 - 1); 
   
-  return iLadder;
+  return iQuad;
 }
 //________________________________________________________________________________
 void StMcFgtHit::Print(Option_t *option) const {
   cout << "FgtHit\t"; 
   StMcHit::Print();
-  cout  << "\tLayer: " << layer();  
+  cout  << "\tLayer: " << layer() 
+        <<  "\tQuad: " << quad() << endl;;  
 }
