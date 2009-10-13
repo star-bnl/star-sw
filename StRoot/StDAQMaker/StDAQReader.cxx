@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.81 2009/10/13 15:51:48 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.82 2009/10/13 19:32:44 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.82  2009/10/13 19:32:44  fine
+ * Re-Activate DAQ reader
+ *
  * Revision 1.81  2009/10/13 15:51:48  fine
  * Activate the new DAT file format
  *
@@ -355,8 +358,8 @@ int StDAQReader::open(const char *file)
      fRtsMaker->SetDaqReader(fDaqFileReader);
   }
   LOG_INFO << "StDAQReader::open the DAQ " <<  file << " via "
-        << (fDatFileReader ? "DAT reader " : "" ) << fDatFileReader
-        << (fDaqFileReader ? "daqReader" : "") << fDaqFileReader 
+        << (fDatFileReader ? "DAT reader ->" : "" ) << fDatFileReader
+        << (fDaqFileReader ? "daqReader ->" : "") << fDaqFileReader 
         << endm;
   fOffset =0;
   return 0;  
@@ -466,7 +469,7 @@ int StDAQReader::readEvent()
          retStatus =  kStErr;
          if (fDatFileReader->eof() )   retStatus = kStEOF;
      }
-  } else if (!fDaqFileReader) {
+  } else if (fDaqFileReader) {
      nextEvent();
      if (fOffset == -1)    retStatus = kStEOF;
   }
