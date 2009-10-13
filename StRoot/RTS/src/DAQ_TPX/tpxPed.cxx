@@ -294,9 +294,11 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 			*ptr++ = (u_short) ped->ped[t] ;
 			tcou++ ;
 		}
+
 		// need to be even
 		if(tcou & 1) {
-			*ptr++ = (u_short) ped->ped[t] ;
+			//LOG(WARN,"tcou %d is odd, adding ped of tb %d?",tcou,t) ;
+			*ptr++ = (u_short) ped->ped[0]; // was ped[t]; then ped[0]
 			tcou++ ;
 		}
 
@@ -527,8 +529,12 @@ int tpxPed::special_setup(int run_type, int sub_type)
 
 		
 		switch(run_type) {
-		case RUN_TYPE_PULSER :
 		case RUN_TYPE_PULSER_A :
+			//ped->ped[0] = 0.0 ;
+			for(t=100;t<110;t++) ped->ped[t] = 0.0 ;
+			for(t=400;t<415;t++) ped->ped[t] = 0.0 ;
+			break ;
+		case RUN_TYPE_PULSER :
 			for(t=95;t<110;t++) ped->ped[t] = 0.0 ;
 			break ;
 		case RUN_TYPE_PED_A :	// starts with ped=0

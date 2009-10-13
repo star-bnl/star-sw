@@ -118,6 +118,16 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 
 	if(stripes) {
 		LOG(WARN,"saw %d occurences of more than 400 timebins",stripes) ;
+		for(int i=0;i<6;i++) {
+		for(int a=0;a<256;a++) {
+		for(int c=0;c<16;c++) {
+			if(r[i].a[a].c[c].stripes) {
+				LOG(WARN,"Stripes %d/%d: RDO %d: AID %3d:%2d",
+				    r[i].a[a].c[c].stripes,r[i].a[a].c[c].count,i+1,a,c) ;
+			}
+		}
+		}
+		}
 	}
 
 for(int i=0;i<6;i++) {
@@ -340,18 +350,19 @@ void tpxStat::accum(char *rdobuff, int bytes)
 
 	sector = rdo.sector ;
 
+	if(rdo.rdo > 6) {
+		LOG(ERR,"rdo error: %d",rdo.rdo) ;
+		return ;
+	}
+
 	a.what = TPX_ALTRO_DO_ADC ;
 	a.rdo = rdo.rdo - 1 ;	// a.rdo counts from 0
 	a.t = t ;
 	a.sector = rdo.sector ;
 
 
-	if(a.rdo > 5) {
-		LOG(ERR,"rdo error: %d",rdo.rdo) ;
-		return ;
-	}
 
-	if(r[a.rdo].errs > MAX_ERRORS) {
+	if(r[a.rdo].errs >= MAX_ERRORS) {
 		a.log_err = 0 ;
 	}
 	else {
@@ -372,6 +383,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 		else {
 			if(a.count >= 400) {
 				stripes++ ;
+				r[a.rdo].a[a.id].c[a.ch].stripes++ ;				
 				if((stripes % 100)==0) {
 					LOG(NOTE,"A lot of stripes: %d",stripes) ;
 				}

@@ -47,6 +47,7 @@ public:
 				u_int count ;
 				u_short max_adc ;
 				u_short min_adc ;
+				u_int stripes ;
 			} c[16] ;
 		} a[256] ;
 	} r[6] ;

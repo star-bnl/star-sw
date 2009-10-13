@@ -72,6 +72,19 @@ struct tpx_rdo_dbg
 	u_int old_rhic ;
 } ;
 
+struct tpx_rdo_heartbeat_t {
+			u_char pll ;
+			u_char status ;
+			u_short retries ;
+			
+			u_int trgs ;
+			u_int trg_csr ;	// shows i.e. BUSY
+			u_int a_ticks ;
+			u_int sta_reg ;	// status
+			u_int rhic_ticks ; // rhic clocks..
+} ;
+
+
 extern int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log)  ;
 extern u_int *tpx_scan_to_next(u_int *now, u_int *data_start, struct tpx_altro_struct *a) ;
 
