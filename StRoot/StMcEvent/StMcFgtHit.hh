@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHit.hh,v 2.5 2005/11/22 21:44:51 fisyak Exp $
+ * $Id: StMcFgtHit.hh,v 2.6 2009/10/13 19:14:27 perev Exp $
  * $Log: StMcFgtHit.hh,v $
+ * Revision 2.6  2009/10/13 19:14:27  perev
+ * Wei-Ming update
+ *
  * Revision 2.5  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -48,7 +51,7 @@ public:
 #endif
 
     unsigned long layer() const; // 
-    unsigned long ladder() const; // 
+    unsigned long quad() const; // 
   virtual void Print(Option_t *option="") const; // *MENU* 
     
 private:

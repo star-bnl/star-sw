@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHitCollection.cc,v 2.1 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcFgtHitCollection.cc,v 2.2 2009/10/13 19:14:27 perev Exp $
  *
  * Authors: Kai Schweda (FGT Software)
  * Manuel Calderon de la Barca Sanchez (StMcEvent), Apr 2005
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMcFgtHitCollection.cc,v $
+ * Revision 2.2  2009/10/13 19:14:27  perev
+ * Wei-Ming update
+ *
  * Revision 2.1  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -19,7 +22,7 @@
 #include "StMcFgtHitCollection.hh"
 #include "StMcFgtHit.hh"
 
-static const char rcsid[] = "$Id: StMcFgtHitCollection.cc,v 2.1 2005/04/18 20:11:33 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFgtHitCollection.cc,v 2.2 2009/10/13 19:14:27 perev Exp $";
 
 ClassImp(StMcFgtHitCollection)
 
@@ -31,7 +34,7 @@ bool
 StMcFgtHitCollection::addHit(StMcFgtHit* hit)
 {
     unsigned int p;
-    if (hit && (p = hit->layer()-1) < mNumberOfLayers) {
+    if (hit && (p = hit->layer()) < mNumberOfLayers) { // layer = disk WMZ
       mLayers[p].hits().push_back(hit);
       return true;
     }
