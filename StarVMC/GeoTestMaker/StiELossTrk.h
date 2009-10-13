@@ -1,4 +1,4 @@
-// $Id: StiELossTrk.h,v 1.1 2009/06/07 02:28:36 perev Exp $
+// $Id: StiELossTrk.h,v 1.2 2009/10/13 17:19:35 perev Exp $
 //
 //
 // Class StiELossTrk
@@ -7,8 +7,10 @@
 
 #ifndef STIELOSSTRK_H
 #define STIELOSSTRK_H
+#include "TObject.h"
+
 static const double PiMASS=0.13956995;
- class StiELossTrk
+ class StiELossTrk : public TObject
 {
 public:
          StiELossTrk(){Reset();}
@@ -28,6 +30,7 @@ double fFak;
 double fTotLen;
 double fMCS[3];
 char   fEnd[1];
+ClassDef(StiELossTrk,0) 
 };
 #endif //STIELOSSTRK_H   
    

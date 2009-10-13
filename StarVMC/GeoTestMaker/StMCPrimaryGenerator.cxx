@@ -1,4 +1,4 @@
-// $Id: StMCPrimaryGenerator.cxx,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: StMCPrimaryGenerator.cxx,v 1.2 2009/10/13 17:19:35 perev Exp $
 //
 //
 // Class StMCPrimaryGenerator
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "StMCPrimaryGenerator.h"
 #include "TVirtualMC.h"
 #include "TPDGCode.h"

@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.4 2009/09/21 23:42:20 perev Exp $
+// $Id: StTGeoHelper.h,v 1.5 2009/10/13 17:19:35 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -22,6 +22,7 @@ class StVoluExt;
 class StTGeoHitShape;
 class StTGeoIter;
 class StGenHitPlane;
+class StMultiKeyMap;
 
 class StTGeoHelper : public TObject
 {
@@ -101,10 +102,7 @@ bool operator()(const TString& s1, const TString& s2) const
     int n1 = s1.Length(),n2 = s2.Length();
     if (n1 != n2) return n1<n2;
     const char *c1 = s1.Data(),*c2 = s2.Data();
-    for (int j=n1-1; j>=0; --j) {
-      if (c1[j]==c2[j]) continue;
-      return (c1[j]<c2[j]);
-    }
+    for (int j=n1-1; j>=0; --j) {if (c1[j]!=c2[j]) return (c1[j]<c2[j]);}
     return 0;
   }
 };
@@ -133,7 +131,7 @@ double fDir[3][3];
 StHitPlaneMap fMap;
 };
 
-class StHitPlane 
+class StHitPlane : public TObject
 {
 friend class StTGeoHelper;
 friend class StGenHitPlane;
@@ -145,6 +143,7 @@ const double  *GetOrg() const {return fOrg;}
 protected:
 double fOrg[3];
 double fDir[3][3];
+StMultiKeyMap *fMap;
 };
 
 
