@@ -1,5 +1,8 @@
-// $Id: StStreamFile.h,v 1.1 2009/10/12 04:21:06 fine Exp $
+// $Id: StStreamFile.h,v 1.2 2009/10/13 15:44:59 fine Exp $
 // $Log: StStreamFile.h,v $
+// Revision 1.2  2009/10/13 15:44:59  fine
+// add the method to provide the error message
+//
 // Revision 1.1  2009/10/12 04:21:06  fine
 // Add abstract STAR iostream-base file interface
 //
@@ -13,23 +16,30 @@
 #ifndef __StStreamFile_h__
 #define __StStreamFile_h__
 
-#include <fstream>
+#include <fstream> 
+#include <errno.h>
+#include <string>
+
 using namespace std;
 
 class StStreamFile {
 private:
-    fstream fStream;
     int mDebug;
+    string fFilename; //< last open file name
+    fstream fStream;
+
 public:
-  explicit StStreamFile():fStream(), mDebug(0) {}
+  explicit StStreamFile(): mDebug(0), fStream(){}
 
   explicit StStreamFile(const char *fileName, ios_base::openmode mode 
-      = ios_base::in):fStream(fileName,mode), mDebug(0) {}
+      = ios_base::in) : mDebug(0), fStream() { open(fileName,mode); }
   virtual ~StStreamFile();
-  int Debug() const { return mDebug; }
+  int   Debug() const { return mDebug; }
   void  SetDebug(int debug) {  mDebug=debug; }
+  void  Perror(const char * header=0) const;
 
-public: // abstract interface
+public: // abstract interface  
+  virtual fstream &Read()       = 0;
   virtual char *Record()        = 0;
   virtual int   Length()  const = 0;
   virtual int   Version() const = 0;
@@ -37,6 +47,7 @@ public: // abstract interface
 public: // fstream proxy interface   
   // fstream proxy methods
   void open(const char *fileName, ios_base::openmode mode = ios_base::in);
+  void close();
   bool bad()        const { return fStream.bad();     }
   bool good()       const { return fStream.good();    }
   bool fail()       const { return fStream.fail();    }
@@ -49,6 +60,5 @@ public: // fstream proxy interface
   
 protected:
   istream &read(char *s, streamsize n);
-  void close();
 };
 #endif
