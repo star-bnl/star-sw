@@ -287,19 +287,19 @@ c
         dphia=abs(p(ic,2)-phi)
         if(dphia.gt.r_shower.and.dphia.lt.C_2PI-r_shower) goto 152
         phic=p(ic,2)
-c        if(dphia.gt.C_PI) phic=phic+sign(C_2PI,phi)
+c        if(dphia.gt.C_PI) phic=phic+sign(C_2PI,phi+0.)
 c***
 c        if(dphia.gt.C_PI) then
-c          phic=phic-sign(C_2PI,phi)
+c          phic=phic-sign(C_2PI,phi+0.)
 c          write(*,884)phic,dphia
 c 884      format(1x,'phic-3,dphia'2f9.5)
 c        endif
 c***
         if(dphia.ge.C_2PI-r_shower) then
           if(phic.le.r_shower) then
-            phic=phic+sign(C_2PI,phi)
+            phic=phic+sign(C_2PI,phi+0.)
           else
-            phic=phic-sign(C_2PI,phi)
+            phic=phic-sign(C_2PI,phi+0.)
           endif
         endif
 c***
@@ -312,7 +312,7 @@ c
       if(p(nj,5)*cosh(p(nj,3)/p(nj,5)).lt.energy_cut) go to 153
       eta=p(nj,3)/p(nj,5)
       phi=p(nj,4)/p(nj,5)
-      if(abs(phi).gt.C_PI) phi=phi-sign(C_2PI,phi)
+      if(abs(phi).gt.C_PI) phi=phi-sign(C_2PI,phi+0.)
       r_int=sqrt((eta_old-eta)**2+(phi_old-phi)**2)
       if(r_int.ge.0.5*r_shower) then
         eta=eta_b
@@ -337,15 +337,15 @@ c
         dphia=abs(p(ic,2)-phi)
         if(dphia.gt.r_shower.and.dphia.lt.C_2PI-r_shower) goto 154
         phic=p(ic,2)
-c        if(dphia.gt.C_PI) phic=phic+sign(C_2PI,phi)
+c        if(dphia.gt.C_PI) phic=phic+sign(C_2PI,phi+0.)
 c***
-c        if(dphia.gt.C_PI) phic=phic-sign(C_2PI,phi)
+c        if(dphia.gt.C_PI) phic=phic-sign(C_2PI,phi+0.)
 c***
         if(dphia.ge.C_2PI-r_shower) then
           if(phic.le.r_shower) then
-            phic=phic+sign(C_2PI,phi)
+            phic=phic+sign(C_2PI,phi+0.)
           else
-            phic=phic-sign(C_2PI,phi)
+            phic=phic-sign(C_2PI,phi+0.)
           endif
         endif
 c
@@ -366,7 +366,7 @@ c        if(p(ic,5)*cosh(p(ic,1)).gt.0.01*energy_cut) then
         dphia=abs(p(ic,2)-phi)
         if(dphia.gt.r_isol.and.dphia.lt.C_2PI-r_isol) goto 160
         phic=p(ic,2)
-        if(dphia.gt.C_PI) phic=phic+sign(C_2PI,phi)
+        if(dphia.gt.C_PI) phic=phic+sign(C_2PI,phi+0.)
         if((p(ic,1)-eta)**2+(phic-phi)**2.gt.r_isol**2) goto 160
         pt_sum_out(nj-nc)=pt_sum_out(nj-nc)+p_sim(ic)
  160  continue
