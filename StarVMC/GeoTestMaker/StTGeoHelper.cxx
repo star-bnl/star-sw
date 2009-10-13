@@ -1,4 +1,5 @@
-// $Id: StTGeoHelper.cxx,v 1.4 2009/09/21 23:42:40 perev Exp $
+
+// $Id: StTGeoHelper.cxx,v 1.5 2009/10/13 17:19:35 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -10,6 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string>
+#include <assert.h>
 #include <set>
 #include "TROOT.h"
 #include "TObjArray.h"
@@ -114,7 +116,12 @@ void StTGeoHelper::Init()
 
     StGenHitPlane *ghp = IsHitPlane(vol);
     if (!ghp) continue;
-    ghp->MakeHitPlane(it);
+    StHitPlane *hp = ghp->MakeHitPlane(it);
+    if (!hp) continue;
+    
+
+
+
   }
 
 
@@ -219,7 +226,6 @@ static int nCall=0; nCall++;
            for (int jk=0;jk<3;jk++){bhp->fDir[jk][(ax+jk-1)%3]=1;}
 	   memcpy(bhp->fOrg,bb->GetOrigin(),3*sizeof(double));
 	   SetExt(bhp);
-	   SetPlane(bhp);
 	   delete ext;
 	   break;
 
@@ -339,7 +345,7 @@ StHitPlane *StGenHitPlane::MakeHitPlane(const StTGeoIter &it)
 {
   TString path(it.GetPath());
   StHitPlane *hp= (StHitPlane *)GetHitPlane(path);
-  if (hp) return hp;
+  if (hp) return 0;
   hp = new StHitPlane;
   fMap[path] = hp;
   it.LocalToMaster(fOrg, hp->fOrg);

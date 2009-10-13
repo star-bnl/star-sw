@@ -1,4 +1,4 @@
-// $Id: StMCConstructGeometry.cxx,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: StMCConstructGeometry.cxx,v 1.2 2009/10/13 17:19:35 perev Exp $
 //
 //
 // Class StMCConstructGeometry
@@ -6,6 +6,7 @@
 // Base class for Magnetic field calculation
 
 #include <stdio.h>
+#include <assert.h>
 #include "Stiostream.h"
 #include "StMessMgr.h"
 #include "StMCConstructGeometry.h"

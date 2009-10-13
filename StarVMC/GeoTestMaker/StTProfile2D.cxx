@@ -1,4 +1,5 @@
 #include <math.h>
+#include <assert.h>
 #include "StTProfile2D.h"
 #include "TROOT.h"
 #include "TVirtualHistPainter.h"

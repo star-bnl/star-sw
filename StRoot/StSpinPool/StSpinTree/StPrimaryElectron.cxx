@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "StPrimaryElectron.h"
 #include "StGlobalElectron.h"
 #include <cassert>

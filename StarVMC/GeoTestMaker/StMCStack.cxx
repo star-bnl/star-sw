@@ -1,5 +1,6 @@
-// $Id: StMCStack.cxx,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: StMCStack.cxx,v 1.2 2009/10/13 17:19:35 perev Exp $
 #include <iostream>
+#include <assert.h>
 #include "StMCStack.h"
 #include <TParticle.h>
 #include <TObjArray.h>

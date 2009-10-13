@@ -1,4 +1,4 @@
-// $Id: StMCStepping2Hist.cxx,v 1.3 2009/08/29 21:21:37 perev Exp $
+// $Id: StMCStepping2Hist.cxx,v 1.4 2009/10/13 17:19:35 perev Exp $
 //
 //
 // Class StMCStepping2Hist
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "TROOT.h"
 #include "TColor.h"
 #include "TVirtualMC.h"

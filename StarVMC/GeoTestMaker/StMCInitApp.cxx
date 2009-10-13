@@ -1,4 +1,4 @@
-// $Id: StMCInitApp.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
+// $Id: StMCInitApp.cxx,v 1.3 2009/10/13 17:19:35 perev Exp $
 //
 //
 // Class StMCInitApp
@@ -6,6 +6,7 @@
 // Base class for Magnetic field calculation
 
 #include <stdio.h>
+#include <assert.h>
 #include "Stiostream.h"
 #include "StMCInitApp.h"
 #include "TVirtualMC.h"

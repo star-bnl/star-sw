@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
+// $Id: StMCStepping.cxx,v 1.3 2009/10/13 17:19:35 perev Exp $
 //
 //
 // Class StMCStepping
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include "StMCStepping.h"
 #include "TPDGCode.h"
 #include "TVirtualMC.h"
