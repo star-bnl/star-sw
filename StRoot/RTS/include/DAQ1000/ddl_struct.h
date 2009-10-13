@@ -91,6 +91,7 @@ struct ddl_file_header {
 
 #define DDL_MSC_ANY	0
 #define DDL_MSC_CONFIG	1
+#define DDL_MSC_HEARTBEAT	2
 
 /*
 struct altro_ch_v0 {
