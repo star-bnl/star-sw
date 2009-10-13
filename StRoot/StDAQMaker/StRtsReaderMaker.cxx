@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.26 2009/10/13 19:32:44 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.27 2009/10/13 19:42:28 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.27  2009/10/13 19:42:28  fine
+ * remove the redundant assert
+ *
  * Revision 1.26  2009/10/13 19:32:44  fine
  * Re-Activate DAQ reader
  *
@@ -382,7 +385,6 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
         char *detNameBuf =  new char[detName.Length()+1];
         strncpy(detNameBuf,detName.Data(),detName.Length());
         detNameBuf[detName.Length()]=0;
-        assert(fRtsReader && detNameBuf);
         daq_det *rts_det = fRtsReader ? fRtsReader->det(detNameBuf) : 0;
         delete [] detNameBuf;
         if (rts_det) {
