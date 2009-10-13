@@ -16,6 +16,7 @@ void runGammaTreeMaker
     gROOT->Macro("loadMuDst.C");
     gROOT->Macro("LoadLogger.C");
   
+    gSystem->Load("libMinuit");
     gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StDbBroker");
