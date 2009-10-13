@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEfeeTPTree.cxx,v 1.1 2009/10/12 18:04:27 pibero Exp $
+ * $Id: EEfeeTPTree.cxx,v 1.2 2009/10/13 17:02:49 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -7,10 +7,10 @@
 
 
 #include "EEfeeTPTree.h"
-#include "StEEmcUtil/EEdsm/EEfeeTP.h"
+#include "EEfeeTP.h"
 
 #define EEmapFEE_USE // trick instattiates data only in the cxx
-#include "StEEmcUtil/EEdsm/EEmapTP.h"
+#include "EEmapTP.h"
 #undef EEmapFEE_USE
 
 
@@ -130,6 +130,9 @@ EEfeeTPTree::print( int k) {
 #endif 
 /*
  * $Log: EEfeeTPTree.cxx,v $
+ * Revision 1.2  2009/10/13 17:02:49  pibero
+ * Changed location of #include file
+ *
  * Revision 1.1  2009/10/12 18:04:27  pibero
  * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
  *
