@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEdsm0Tree.cxx,v 1.1 2009/10/12 18:04:25 pibero Exp $
+ * $Id: EEdsm0Tree.cxx,v 1.2 2009/10/13 16:57:25 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -7,7 +7,7 @@
 
 
 #include "EEdsm0Tree.h"
-#include "StEEmcUtil/EEdsm/EEdsm0.h"
+#include "EEdsm0.h"
 
 
 //--------------------------------------------------
@@ -133,6 +133,9 @@ EEdsm0Tree::print( int k) const {
  
 /*
  * $Log: EEdsm0Tree.cxx,v $
+ * Revision 1.2  2009/10/13 16:57:25  pibero
+ * Changed location of #include file
+ *
  * Revision 1.1  2009/10/12 18:04:25  pibero
  * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
  *
