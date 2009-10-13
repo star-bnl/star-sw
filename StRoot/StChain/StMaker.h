@@ -129,9 +129,8 @@ public:
    virtual TDataSet *ToWhiteBoard(const char *name, void *dat, void *del);
    virtual TDataSet *ToWhiteBoard(const char *name, TObject *dat, Int_t owner);
 
+   virtual TDataSet *ToWhiteConst(const char *name, TObject *dat);
    virtual TDataSet *ToWhiteConst(const char *name, void *dat);
-   virtual TDataSet *ToWhiteConst(const char *name, TObject *dat, Int_t owner);
-   virtual TDataSet *ToWhiteConst(const char *name, void *dat, void *del);
 
 //  called WhiteBoard(name,&ptr)
    virtual TDataSet *WhiteBoard  (const char *name, void *v=0) const;
@@ -248,7 +247,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.92 2009/04/28 22:45:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.93 2009/10/13 18:56:50 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
@@ -312,8 +311,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.92 2009/04/28 22:45:43 perev Exp $
+// $Id: StMaker.h,v 1.93 2009/10/13 18:56:50 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.93  2009/10/13 18:56:50  perev
+// WhiteBoard improve
+//
 // Revision 1.92  2009/04/28 22:45:43  perev
 // WhiteBoard cleanup
 //
