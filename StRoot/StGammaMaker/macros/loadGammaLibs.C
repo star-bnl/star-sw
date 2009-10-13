@@ -4,6 +4,7 @@ void loadGammaLibs()
   gROOT -> LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
+  gSystem->Load("libMinuit")
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib");
