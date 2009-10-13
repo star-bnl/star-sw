@@ -4,12 +4,12 @@
 
 #include "StMuDSTMaker/COMMON/StMuEvent.h" // for triggerID
 
-#include "StEEmcUtil/EEdsm/EEfeeTPTree.h" 
-#include "StEEmcUtil/EEdsm/EEfeeTP.h" 
-#include "StEEmcUtil/EEdsm/EEdsm0Tree.h"
-#include "StEEmcUtil/EEdsm/EEdsm1Tree.h"
-#include "StEEmcUtil/EEdsm/EMCdsm2Tree.h"
-#include "StEEmcUtil/EEdsm/EEdsm3.h"
+#include "EEfeeTPTree.h" 
+#include "EEfeeTP.h" 
+#include "EEdsm0Tree.h"
+#include "EEdsm1Tree.h"
+#include "EMCdsm2Tree.h"
+#include "EEdsm3.h"
 
 
 //==================================================
@@ -723,6 +723,9 @@ StEemcTriggerSimu::DSM2EsumSpectra(){
 
 //
 // $Log: StEemcTriggerCompare.cxx,v $
+// Revision 1.3  2009/10/13 17:06:52  pibero
+// Changed location of #include files
+//
 // Revision 1.2  2007/07/23 02:59:59  balewski
 // cleanup, bbc for M-C still not working
 //
