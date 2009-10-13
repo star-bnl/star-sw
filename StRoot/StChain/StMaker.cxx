@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.218 2009/04/28 22:45:57 perev Exp $
+// $Id: StMaker.cxx,v 1.219 2009/10/13 18:56:47 perev Exp $
 //
 //
 /*!
@@ -365,9 +365,12 @@ TDataSet *StMaker::AddObj(TObject *obj,const Char_t *dir,int owner)
   assert (dir[0]=='.');
   if (strcmp(".hist",dir)==0) 	{ //Histogram directory
     AddHist((TH1*)obj); return 0;
-  } else 			{ //NonHistogram
+  } else if (strcmp(".data",dir)==0)			{ //.data
     return ToWhiteBoard(obj->GetName(),obj,owner);
-  }
+
+  } else if (strcmp(".const",dir)==0)			{ //.const
+    return ToWhiteConst(obj->GetName(),obj);
+  } else { assert(0 && "No .data || .const ||.hist");}
 }
 //______________________________________________________________________________
  void StMaker::AddHist(TH1 *h,const Char_t *)
@@ -462,17 +465,9 @@ TDataSet *StMaker::ToWhiteConst(const Char_t *name, void *dat)
    return envelop;
 }
 //______________________________________________________________________________
-TDataSet *StMaker::ToWhiteConst(const Char_t *name, void *dat, void *owner)
+TDataSet *StMaker::ToWhiteConst(const Char_t *name, TObject *dat)
 {
-   MyObjectSet *envelop = new MyObjectSet(name,dat,owner);
-   envelop->SetTitle(".envelop");
-   AddData(envelop,".const");
-   return envelop;
-}
-//______________________________________________________________________________
-TDataSet *StMaker::ToWhiteConst(const Char_t *name, TObject *dat, Int_t owner)
-{
-   TObjectSet *envelop = new TObjectSet(name,dat,owner);
+   TObjectSet *envelop = new TObjectSet(name,dat,0);
    envelop->SetTitle(".envelop");
    AddData(envelop,".const");
    return envelop;
@@ -1929,6 +1924,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.219  2009/10/13 18:56:47  perev
+// WhiteBoard improve
+//
 // Revision 1.218  2009/04/28 22:45:57  perev
 // WhiteBoard cleanup
 //
