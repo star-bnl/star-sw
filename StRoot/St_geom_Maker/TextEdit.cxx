@@ -179,7 +179,7 @@ void TextEdit::load( const QString &f )
 //__________________________________________________________________________________
 void TextEdit::findBlock(const QString & expr)
 {
-   QRegExp exp(QString("^Block\\s+%1").arg(expr));
+   QRegExp exp(QString("^Block\\s+%1").arg(expr),Qt::CaseInsensitive);
    if (QTextDocument *d = editor->document() ) // currentEditor())
    {
       QTextCursor block(d);
@@ -187,7 +187,7 @@ void TextEdit::findBlock(const QString & expr)
          block = d->find(exp,block, QTextDocument::FindWholeWords);
          if ( ! block.isNull() ) 
          {
-            QTextCursor volumeName = d->find(QRegExp("^EndBlock"),block,QTextDocument::FindWholeWords);
+            QTextCursor volumeName = d->find(QRegExp("^EndBlock",Qt::CaseInsensitive),block,QTextDocument::FindWholeWords);
             if (! volumeName.isNull() )  {
                block.setPosition(volumeName.position(), QTextCursor::KeepAnchor);
                editor->setTextCursor(block);

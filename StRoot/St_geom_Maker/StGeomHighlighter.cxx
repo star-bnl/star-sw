@@ -161,6 +161,6 @@ const char *StGeomHighlighter::Keywords()
             "then to type unformatted unit use value volatile wait where "
             "while write "
             "Block Component Content Create Fill endFill Material Medium Mixture Attribute "
-            "Shape Structure EndBlock and or not";
+            "Module Shape Structure EndBlock and or not";
 }
 
