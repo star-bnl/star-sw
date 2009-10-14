@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.27 2009/10/13 19:42:28 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.28 2009/10/14 14:46:29 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.28  2009/10/14 14:46:29  fine
+ * Initialize fDatReader to zero at class ctor. Issue #1665
+ *
  * Revision 1.27  2009/10/13 19:42:28  fine
  * remove the redundant assert
  *
@@ -173,7 +176,7 @@ ClassImp(StRtsReaderMaker);
 
 //_____________________________________________________________
 StRtsReaderMaker::StRtsReaderMaker(const char *name):StMaker(name)
-      ,fRtsReader(0),fRtsTable(0),fBank(0)
+      ,fRtsReader(0),fDatReader(0),fRtsTable(0),fBank(0)
 {
   // LOG_DEBUG << "StRtsReaderMaker::ctor"  << endm;
 }
