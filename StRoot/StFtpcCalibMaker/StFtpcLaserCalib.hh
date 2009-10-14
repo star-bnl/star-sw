@@ -1,6 +1,10 @@
-// $Id: StFtpcLaserCalib.hh,v 1.4 2008/05/15 21:12:49 jcs Exp $
+// $Id: StFtpcLaserCalib.hh,v 1.5 2009/10/14 15:59:55 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.hh,v $
+// Revision 1.5  2009/10/14 15:59:55  jcs
+// changes to be able to vary the gas temperature in addition to varying t0 and
+// gas composition
+//
 // Revision 1.4  2008/05/15 21:12:49  jcs
 // replace StMagUtilities.h with StarMagField.h - necessary for HELIX_FIT
 //
@@ -64,7 +68,7 @@ class StFtpcLaserCalib : public StFtpcLaser
 
   Float_t MINZ,MAXZ,MINRAD,MAXRAD,GAUSFIT;
   //Int_t FTPC,LSEC,STRAIGHT,usedfit;
-  float deltat0, deltagas;
+  float deltat0, deltagas,deltaTemp;
 
   TString filename;
 
@@ -118,14 +122,14 @@ class StFtpcLaserCalib : public StFtpcLaser
   Float_t radius[11];
 
   StFtpcLaserCalib();
-  StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, StFtpcLaserTrafo *trafo,StarMagField *gmagf);
+  StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, float gTemp, StFtpcLaserTrafo *trafo,StarMagField *gmagf);
   virtual ~StFtpcLaserCalib();
 
   //Double_t funcxz(float x,float z,Double_t *par);
   //Double_t funcyz(float y,float z,Double_t *par);
   //void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
 
-  void MakeOutput(TString eingabe,char* t0, char* gas);
+  void MakeOutput(TString eingabe,char* t0, char* gas, float gastemp);
   void MakePs();
   bool cut(int i);
   void Fill(int l);

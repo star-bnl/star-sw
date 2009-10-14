@@ -1,6 +1,10 @@
-// $Id: StFtpcCalibMaker.h,v 1.5 2008/05/15 22:39:47 jcs Exp $
+// $Id: StFtpcCalibMaker.h,v 1.6 2009/10/14 15:59:55 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.h,v $
+// Revision 1.6  2009/10/14 15:59:55  jcs
+// changes to be able to vary the gas temperature in addition to varying t0 and
+// gas composition
+//
 // Revision 1.5  2008/05/15 22:39:47  jcs
 // re-activate helix fit
 //
@@ -101,6 +105,11 @@ class StFtpcCalibMaker : public StMaker
  Int_t time;
    
  Float_t micropertime;
+ Float_t normalizedNowPressure;
+ Float_t standardPressure;
+ Float_t baseTemperature;
+ Float_t gasTemperatureWest;
+ Float_t gasTemperatureEast;
  Float_t deltapW;
  Float_t deltapE;
  Float_t deltap;
@@ -115,7 +124,7 @@ class StFtpcCalibMaker : public StMaker
 
    //void DoLaserCalib(TString filename);
    void GetRunInfo(TString filename);
-   void DoLaserCalib(TString filename,int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, char* t0, char* gas,float mbfield);
+   void DoLaserCalib(TString filename,int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, char* t0, char* gas,float gastemp,float mbfield);
    void DoT0Calib(TString filename,char* t0, char* gas, float mbfield);
    virtual Int_t DbInit(float mbfield);
    void HistInit(int nradbins,TString fname, char* t0, char* gas);
@@ -130,7 +139,7 @@ class StFtpcCalibMaker : public StMaker
    Int_t Time() {return time;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.5 2008/05/15 22:39:47 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.6 2009/10/14 15:59:55 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(StFtpcCalibMaker,1)   //StAF chain virtual base class for Makers

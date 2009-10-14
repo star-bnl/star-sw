@@ -1,6 +1,10 @@
-// $Id: StFtpcLaserCalib.cc,v 1.8 2009/10/06 14:51:45 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.9 2009/10/14 15:59:55 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.9  2009/10/14 15:59:55  jcs
+// changes to be able to vary the gas temperature in addition to varying t0 and
+// gas composition
+//
 // Revision 1.8  2009/10/06 14:51:45  jcs
 // exit laser_fit to avoid FPE if either <=2 hits on track or if helix fit fails to converge
 //
@@ -56,7 +60,7 @@ StFtpcLaserCalib::StFtpcLaserCalib()
 //______________________________________________________________________________
 
 //StFtpcLaserCalib::StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, StFtpcLaserTrafo *trafo, StMagUtilities *gmagf)
-StFtpcLaserCalib::StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, StFtpcLaserTrafo *trafo, StarMagField *gmagf)
+StFtpcLaserCalib::StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, float gt0, float ggas, float gTemp, StFtpcLaserTrafo *trafo, StarMagField *gmagf)
 {
   FTPC=ftpc;
   LSEC=lsec;
@@ -69,6 +73,7 @@ StFtpcLaserCalib::StFtpcLaserCalib(int ftpc, int lsec, int straight, int gfit, i
   mMinuit=new TMinuit(4);
   deltat0=gt0;
   deltagas=ggas;
+  deltaTemp=gTemp;
 
   usedfit=0;
 
@@ -785,19 +790,19 @@ void StFtpcLaserCalib::MakePs()
   c1->cd(1);
   hresx->DrawCopy();
   hresx->Fit(gfit,"QR");
-  logfile<<deltat0<<" "<<deltagas<<" "<<gfit->GetParameter(2)<<" "<<gfit->GetChisquare()<<endl;
+  logfile<<deltat0<<" "<<deltagas<<" "<<deltaTemp<<" "<<gfit->GetParameter(2)<<" "<<gfit->GetChisquare()<<endl;
   c1->cd(2);
   hresy->DrawCopy();
   hresy->Fit(gfit,"QR");
-  logfile<<deltat0<<" "<<deltagas<<" "<<gfit->GetParameter(2)<<" "<<gfit->GetChisquare()<<endl;
+  logfile<<deltat0<<" "<<deltagas<<" "<<deltaTemp<<" "<<gfit->GetParameter(2)<<" "<<gfit->GetChisquare()<<endl;
   c1->cd(3);
   hresrad->DrawCopy();
   hresrad->Fit(gfit,"QR");
-  logfile<<deltat0<<" "<<deltagas<<" "<<gfit->GetParameter(2)<<" "<<gfit->GetChisquare()<<endl;
+  logfile<<deltat0<<" "<<deltagas<<" "<<deltaTemp<<" "<<gfit->GetParameter(2)<<" "<<gfit->GetChisquare()<<endl;
   c1->cd(4);
   hresphi->DrawCopy();
   hresphi->Fit(gfit,"QR");
-  logfile<<deltat0<<" "<<deltagas<<" "<<gfit->GetParameter(2)<<" "<<gfit->GetChisquare()<<endl;
+  logfile<<deltat0<<" "<<deltagas<<" "<<deltaTemp<<" "<<gfit->GetParameter(2)<<" "<<gfit->GetChisquare()<<endl;
   //logfile<<"Delta t0 | Delta Gas | Sigma res (x,y,r,phi)"<<endl;
   //logfile.close();
   
@@ -834,8 +839,8 @@ void StFtpcLaserCalib::MakePs()
     {
       c1->cd(i);
       ((TH1F*) hradpolcut[i])->DrawCopy();
-      logfile<<deltat0<<" "<<deltagas<<" "<<((TH1F*) hradpolcut[i])->GetMean()<<" "<<((TH1F*) hradpolcut[i])->GetRMS()<<endl;
-      logfile<<deltat0<<" "<<deltagas<<" "<<(((TH1F*) hradpolcut[i])->GetXaxis())->GetBinCenter(((TH1F*) hradpolcut[i])->GetMaximumBin())<<endl;
+      logfile<<deltat0<<" "<<deltagas<<" "<<deltaTemp<<" "<<((TH1F*) hradpolcut[i])->GetMean()<<" "<<((TH1F*) hradpolcut[i])->GetRMS()<<endl;
+      logfile<<deltat0<<" "<<deltagas<<" "<<deltaTemp<<" "<<(((TH1F*) hradpolcut[i])->GetXaxis())->GetBinCenter(((TH1F*) hradpolcut[i])->GetMaximumBin())<<endl;
     }
   c1->Update();
 
@@ -910,9 +915,13 @@ void StFtpcLaserCalib::MakePs()
 
 //______________________________________________________________________________
 
-void StFtpcLaserCalib::MakeOutput(TString eingabe,char* t0, char* gas)
+void StFtpcLaserCalib::MakeOutput(TString eingabe,char* t0, char* gas, float gastemp)
 {
 
+stringstream dT;
+dT << gastemp;
+std::string dTstring = dT.str();
+const char *dTemp = dTstring.c_str();
   
   eingabe +="-pos_";  
   if (FTPC==1)
@@ -936,6 +945,7 @@ void StFtpcLaserCalib::MakeOutput(TString eingabe,char* t0, char* gas)
 
   eingabe +="_dt"; eingabe +=t0;
   eingabe +="_dg"; eingabe +=gas;
+  eingabe +="_dT"; eingabe +=dTemp;
 
   filename=eingabe;
 
