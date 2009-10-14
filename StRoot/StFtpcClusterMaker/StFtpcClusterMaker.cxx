@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.101  2009/10/14 15:52:43  jcs
+// write out all gas temperature, air pressure info to Run branch of FTPC debug root file
+//
 // Revision 1.100  2009/08/04 08:37:28  jcs
 // When the flaser option is included in the bfc, the 'perfect' gain table and
 // adjustAverageWest = adjustAverageEast = 0.0, will be used for cluster finding
@@ -760,9 +763,12 @@ Int_t StFtpcClusterMaker::Make()
 
  
        // Calculate and set adjustedAirPressureWest
+
        paramReader.setAdjustedAirPressureWest(paramReader.normalizedNowPressure()*((dbReader.baseTemperature()+STP_Temperature)/(paramReader.gasTemperatureWest()+STP_Temperature)));
 
+
        // Calculate and set adjustedAirPressureEast
+
       paramReader.setAdjustedAirPressureEast(paramReader.normalizedNowPressure()*((dbReader.baseTemperature()+STP_Temperature)/(paramReader.gasTemperatureEast()+STP_Temperature)));
 
       LOG_INFO << " Using normalizedNowPressure = "<<paramReader.normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader.gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader.gasTemperatureEast()<< " to calculate and set adjustedAirPressureWest = "<<paramReader.adjustedAirPressureWest()<<" and adjustedAirPressureEast = "<<paramReader.adjustedAirPressureEast()<<endm;
@@ -817,7 +823,7 @@ Int_t StFtpcClusterMaker::Make()
 
     if (m_Mode == 2 || m_Mode==3) {
        StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
-       cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), dbReader.microsecondsPerTimebin(), paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
+       cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), dbReader.microsecondsPerTimebin(), paramReader.normalizedNowPressure(), paramReader.standardPressure(),dbReader.baseTemperature(), paramReader.gasTemperatureWest(), paramReader.gasTemperatureEast(),paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
 
        StFtpcClusterFinder fcl(                        ftpcReader, 
 						       &paramReader, 

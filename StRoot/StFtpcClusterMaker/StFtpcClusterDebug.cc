@@ -20,6 +20,8 @@ struct RUN
   Int_t date;
   Int_t time;
   Float_t micropertimebin;
+  Float_t normalizedNowPressure, standardPressure;
+  Float_t baseTemperature, gasTemperatureWest, gasTemperatureEast;
   Float_t deltapW,deltapE;
 } Run;
 
@@ -171,7 +173,7 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
       histofile=new TFile(histodatei,"RECREATE","FTPC Cluster Finder histograms");
 
       drtree=new TTree("rinfo","Run calibration information");
-        drtree->Branch("Run",&Run,"run/I:date/I:time/I:micropertimebin/F:deltapW/F:deltapE/F");
+        drtree->Branch("Run",&Run,"run/I:date/I:time/I:micropertimebin/F:normalizedNowPressure/F:standardPressure/F:baseTemperature/F:gasTemperatureWest/F:gasTemperatureEast/F:deltapW/F:deltapE/F");
 
       dtree=new TTree("cl","Cluster calibration informations");
         dtree->Branch("hit",&hit,"x/F:y/F:z/F:rad/F:phi/F:raderror/F:phierror/F");
@@ -367,12 +369,17 @@ void StFtpcClusterDebug::drawhisto(int hardsec, int hardrow, int iPad, TPCSequen
     }
 }
 
-void StFtpcClusterDebug::fillRun(Int_t grun, Int_t gdate, Int_t gtime, Float_t micropertimebin, Float_t deltapW, Float_t deltapE)
+void StFtpcClusterDebug::fillRun(Int_t grun, Int_t gdate, Int_t gtime, Float_t micropertimebin, Float_t normalizedNowPressure, Float_t standardPressure, Float_t baseTemperature, Float_t gasTemperatureWest, Float_t gasTemperatureEast, Float_t deltapW, Float_t deltapE)
 {
    Run.run = grun;
    Run.date = gdate;
    Run.time = gtime;
    Run.micropertimebin = micropertimebin;
+   Run.normalizedNowPressure = normalizedNowPressure;
+   Run.standardPressure = standardPressure;
+   Run.baseTemperature = baseTemperature;
+   Run.gasTemperatureWest = gasTemperatureWest;
+   Run.gasTemperatureEast = gasTemperatureEast;
    Run.deltapW = deltapW;
    Run.deltapE = deltapE;
    drtree->Fill();
