@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.74 2008/07/14 19:47:02 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.75 2009/10/14 15:52:43 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.75  2009/10/14 15:52:43  jcs
+// write out all gas temperature, air pressure info to Run branch of FTPC debug root file
+//
 // Revision 1.74  2008/07/14 19:47:02  jcs
 // The inner cathode correction is an Ftpc geometry correction; it should be applied to both data and laser runs
 //
@@ -435,12 +438,12 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
    if ( iftpc == 0 ) {
       deltaAirPressure = mParam->adjustedAirPressureWest() - mParam->standardPressure();
       firstPadrowToSearch = mDb->firstPadrowToSearch() - 1;
-      LOG_DEBUG <<"Ftpc West: deltaAirPressure = "<<deltaAirPressure<<endm;
+      LOG_DEBUG << "Ftpc West: deltaAirPressure = adjustedAirPressureWest ("<<mParam->adjustedAirPressureWest()<<") - standardPressure ("<<mParam->standardPressure()<<") = "<<deltaAirPressure<<endm;
    }
    if ( iftpc == 1 ) {
       deltaAirPressure = mParam->adjustedAirPressureEast() - mParam->standardPressure();
       firstPadrowToSearch = mDb->firstPadrowToSearch() - 1 + mDb->numberOfPadrowsPerSide();
-      LOG_DEBUG <<"Ftpc East: deltaAirPressure = "<<deltaAirPressure<<endm;
+      LOG_DEBUG <<"Ftpc East: deltaAirPressure = adjustedAirPressureEast ("<<mParam->adjustedAirPressureEast()<<") - standardPressure ("<<mParam->standardPressure()<<") = "<<deltaAirPressure<<endm;
    }
 
   /* integrate padtrans table from magboltz database */
