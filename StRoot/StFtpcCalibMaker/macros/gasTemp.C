@@ -1,41 +1,19 @@
-// $Id: lasertest_single.C,v 1.9 2009/10/14 15:58:43 jcs Exp $
+// $Id: gasTemp.C,v 1.1 2009/10/14 15:58:43 jcs Exp $
 //
-// $Log: lasertest_single.C,v $
-// Revision 1.9  2009/10/14 15:58:43  jcs
+// $Log: gasTemp.C,v $
+// Revision 1.1  2009/10/14 15:58:43  jcs
 // change and add macros so that in addition to varying t0 and the gas compostion,
 // the gas temperature can be varied
 //
-// Revision 1.8  2009/09/12 14:45:48  jcs
-// For ROOT 5.22.00 must load libMinuit.so and libSpectrum.so
-//
-// Revision 1.7  2009/08/04 08:42:23  jcs
-// The 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0
-// are used for laser run calibration
-//
-// Revision 1.6  2008/05/14 21:46:01  jcs
-// remove minz,maxz,minrad,maxrad from argument list and set values in macro
-//
-// Revision 1.5  2008/04/23 19:42:18  jcs
-// load the libStDb_Tables.so and StDetectorDbMaker.so which are needed as of STAR version SL07d
-//
-// Revision 1.4  2006/04/05 08:50:36  jcs
-// set t0 = ".000001" if t0 = "0" and gas = "0" to avoid seg fault
-//
-// Revision 1.3  2006/04/04 11:17:15  jcs
-// simplify macro
-//
-// Revision 1.2  2006/03/15 15:14:06  jcs
-// add lines for listing CVS update info
 //
 
-void lasertest_single(TString filename,int ftpc, int lsec, int straight, int gfit, char* t0, char* gas, float gastemp, float mbfield)
+void gasTemp(TString filename,int ftpc, int lsec, int straight, int gfit,char* t0, char* gas,float gastemp,float mbfield)
 {
 
   Int_t minz, maxz;
   Int_t minrad = 0;
   Int_t maxrad = 30;
-
-  cout<<"Starting lasertest_single.C:"<<endl;
+  cout<<"Starting lasertest.C:"<<endl;
   cout<<"                            filename = "<<filename<<".root"<<endl;
   cout<<"                            ftpc     = "<<ftpc;
   if ( ftpc == 1 ) cout<<" FTPC West"<<endl;
@@ -57,7 +35,7 @@ void lasertest_single(TString filename,int ftpc, int lsec, int straight, int gfi
   cout<<"                            maxz     = "<<maxz<<endl;
   cout<<"                            minrad   = "<<minrad<<endl;
   cout<<"                            maxrad   = "<<maxrad<<endl;
-  // if both t0 and gas = "0", set t0=".000001" otherwise program will seg fault
+// if both t0 and gas = "0", set t0=".000001" otherwise program will seg fault
   if (atof(t0)==0 && atof(gas)==0) {
      t0 = ".000001";
      cout<<"     changed t0=0 to        t0       = "<<t0<<" to avoid seg fault"<<endl;
@@ -78,7 +56,6 @@ void lasertest_single(TString filename,int ftpc, int lsec, int straight, int gfi
 
   gSystem->Load("libtpc_Tables");
 
-  gSystem->Load("StStarLogger");
   gSystem->Load("StUtilities");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
@@ -86,7 +63,7 @@ void lasertest_single(TString filename,int ftpc, int lsec, int straight, int gfi
   gSystem->Load("StMagF");
 
   gSystem->Load("libStDb_Tables.so");
-  gSystem->Load("StDetectorDbMaker.so");  
+  gSystem->Load("StDetectorDbMaker.so");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib.so");
   gSystem->Load("StDbBroker.so");
@@ -105,31 +82,48 @@ void lasertest_single(TString filename,int ftpc, int lsec, int straight, int gfi
       //const char *paramsDB = "$PWD/StarDb";
       
       StChain *chain =  new StChain();
-
-     StFtpcCalibMaker *laser=new StFtpcCalibMaker();
-
-     laser->GetRunInfo(filename);
-     cout<<" run = "<<laser->RunNum()<<" date = "<<laser->Date()<<" time = "<<laser->Time()<<endl;
       
+      StFtpcCalibMaker *laser=new StFtpcCalibMaker();
+      laser->GetRunInfo(filename);
+      cout<<" date = "<<laser->Date()<<" time = "<<laser->Time()<<endl;
+
       St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
-      dbMk->SetDateTime(laser->Date(),laser->Time());
-
-      Bool_t laserRun = kTRUE; 
-
-      dbMk->InitRun(laser->RunNum());
+      dbMk->SetDateTime(laser->Date(),laser->Time()); 
+      
       dbMk->Init();
       dbMk->Make();
       
       cout<<"dbDate = "<<dbMk->GetDateTime().GetDate()<<endl;
       cout<<"After Database init !!!"<<endl;
       cout<<endl;
-
+    
       if (laser->DbInit(mbfield) == kStWarn) {
          delete laser;
          break;
       }
-  
-      laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,t0,gas,gastemp,mbfield);
 
-      delete laser;
+  // Interation over temperature
+  for (gastemp = -2; gastemp<4.5; gastemp+=0.5)
+    {
+      // Interation over gas composition
+      for (int k=-5;k<8;k++)
+	{
+	  float step2=k/10.0;
+	  //char t[3];char g[3];
+          char g[3]; 
+	  
+	  //sprintf(T,"%.2f",step);
+	  sprintf(g,"%.2f",step2);
+	  cout<<endl;
+          cout<<"laser->DoLaserCalib: deltaT = "<<gastemp<<" und deltaGas = "<<g<<endl;
+	  if (k==0 && gastemp==0)
+	    cout<<"Comes at the end !!!"<<endl;
+	  else
+	    laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,t0,g,gastemp,mbfield);
+	}
+    }
+
+  laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0.000001","0",0,mbfield);
+
+  delete laser;
 }

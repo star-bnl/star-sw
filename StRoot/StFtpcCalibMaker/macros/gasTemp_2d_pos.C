@@ -1,20 +1,15 @@
-// $Id: laser_2d_pos.C,v 1.4 2009/10/14 15:58:43 jcs Exp $
+// $Id: gasTemp_2d_pos.C,v 1.1 2009/10/14 15:58:43 jcs Exp $
 //
-// $Log: laser_2d_pos.C,v $
-// Revision 1.4  2009/10/14 15:58:43  jcs
+// $Log: gasTemp_2d_pos.C,v $
+// Revision 1.1  2009/10/14 15:58:43  jcs
 // change and add macros so that in addition to varying t0 and the gas compostion,
 // the gas temperature can be varied
 //
-// Revision 1.3  2006/08/02 11:04:55  jcs
-// measured laser position in histogram titles now depend on ftpc and lsec
-//
-// Revision 1.2  2006/03/15 15:14:06  jcs
-// add lines for listing CVS update info
 //
 
 //======================================================================
 //
-//   laser_2d_pos reads the file produced in StFtpcLaserCalib::MakePs()
+//   gasTemp_2d_pos reads the file produced in StFtpcLaserCalib::MakePs()
 //   and draws the reconstructed position histograms
 //
 //   Inputs to macro:
@@ -31,7 +26,7 @@
 //
 //======================================================================
 
-void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
+void gasTemp_2d_pos(int ftpc, int lsec,TString a,char *opt)
 {
 
 // FTPC WEST
@@ -41,9 +36,9 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
         const Float_t lpos1=11.88;
         const Float_t lpos2=19.55;
         const Float_t lpos3=28.56;
-        TH2F *hr1 = new TH2F("hr1","Laser I(west,lsec 1): nominal (11.88cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr2 = new TH2F("hr2","Laser II(west,lsec 1): nominal (19.55cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr3 = new TH2F("hr3","Laser III(west,lsec 1): nominal (28.56cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
+        TH2F *hr1 = new TH2F("hr1","Laser I(west,lsec 1): nominal (11.88cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr2 = new TH2F("hr2","Laser II(west,lsec 1): nominal (19.55cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr3 = new TH2F("hr3","Laser III(west,lsec 1): nominal (28.56cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
         cout<<"Initialized for ftpc = "<<ftpc<<"(west) lsec = "<<lsec<<endl;
      }
      else if (lsec == 2) {
@@ -51,9 +46,9 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
         const Float_t lpos1=11.68;
         const Float_t lpos2=19.45;
         const Float_t lpos3=28.51;
-        TH2F *hr1 = new TH2F("hr1","Laser I(west,lsec 2): nominal (11.68cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr2 = new TH2F("hr2","Laser II(west,lsec 2): nominal (19.45cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr3 = new TH2F("hr3","Laser III(west,lsec 2): nominal (28.51cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
+        TH2F *hr1 = new TH2F("hr1","Laser I(west,lsec 2): nominal (11.68cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr2 = new TH2F("hr2","Laser II(west,lsec 2): nominal (19.45cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr3 = new TH2F("hr3","Laser III(west,lsec 2): nominal (28.51cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
         cout<<"Initialized for ftpc = "<<ftpc<<"(west) lsec = "<<lsec<<endl;
      }
      else if (lsec == 3) {
@@ -61,9 +56,9 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
         const Float_t lpos1=11.78;
         const Float_t lpos2=19.35;
         const Float_t lpos3=28.41;
-        TH2F *hr1 = new TH2F("hr1","Laser I(west,lsec 3): nominal (11.78cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr2 = new TH2F("hr2","Laser II(west,lsec 3): nominal (19.35cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr3 = new TH2F("hr3","Laser III(west,lsec 3): nominal (28.41cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
+        TH2F *hr1 = new TH2F("hr1","Laser I(west,lsec 3): nominal (11.78cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr2 = new TH2F("hr2","Laser II(west,lsec 3): nominal (19.35cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr3 = new TH2F("hr3","Laser III(west,lsec 3): nominal (28.41cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
         cout<<"Initialized for ftpc = "<<ftpc<<"(west) lsec = "<<lsec<<endl;
      }
      else {
@@ -79,9 +74,9 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
         const Float_t lpos1=11.75;
         const Float_t lpos2=19.44;
         const Float_t lpos3=28.41;
-        TH2F *hr1 = new TH2F("hr1","Laser I(east,lsec 1): nominal (11.75cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr2 = new TH2F("hr2","Laser II(east,lsec 1): nominal (19.44cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr3 = new TH2F("hr3","Laser III(east,lsec 1): nominal (28.41cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
+        TH2F *hr1 = new TH2F("hr1","Laser I(east,lsec 1): nominal (11.75cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr2 = new TH2F("hr2","Laser II(east,lsec 1): nominal (19.44cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr3 = new TH2F("hr3","Laser III(east,lsec 1): nominal (28.41cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
         cout<<"Initialized for ftpc = "<<ftpc<<"(east) lsec = "<<lsec<<endl;
      }
      else if (lsec == 2) {
@@ -89,9 +84,9 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
         const Float_t lpos1=11.85;
         const Float_t lpos2=19.44;
         const Float_t lpos3=28.41;
-        TH2F *hr1 = new TH2F("hr1","Laser I(east,lsec 2): nominal (11.85cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr2 = new TH2F("hr2","Laser II(east,lsec 2): nominal (19.44cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr3 = new TH2F("hr3","Laser III(east,lsec 2): nominal (28.41cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
+        TH2F *hr1 = new TH2F("hr1","Laser I(east,lsec 2): nominal (11.85cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr2 = new TH2F("hr2","Laser II(east,lsec 2): nominal (19.44cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr3 = new TH2F("hr3","Laser III(east,lsec 2): nominal (28.41cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
         cout<<"Initialized for ftpc = "<<ftpc<<"(east) lsec = "<<lsec<<endl;
      }
      else if (lsec == 3) {
@@ -99,9 +94,9 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
         const Float_t lpos1=11.86;
         const Float_t lpos2=19.45;
         const Float_t lpos3=28.31;
-        TH2F *hr1 = new TH2F("hr1","Laser I(east,lsec 3): nominal (11.86cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr2 = new TH2F("hr2","Laser II(east,lsec 3): nominal (19.45cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
-        TH2F *hr3 = new TH2F("hr3","Laser III(east,lsec 3): nominal (28.31cm) - reconstructed position",12,-0.55,0.65,12,-0.45,0.75); 
+        TH2F *hr1 = new TH2F("hr1","Laser I(east,lsec 3): nominal (11.86cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr2 = new TH2F("hr2","Laser II(east,lsec 3): nominal (19.45cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
+        TH2F *hr3 = new TH2F("hr3","Laser III(east,lsec 3): nominal (28.31cm) - reconstructed position",12,-2.00,4.00,12,-0.45,0.75); 
         cout<<"Initialized for ftpc = "<<ftpc<<"(east) lsec = "<<lsec<<endl;
      }
      else {
@@ -124,15 +119,15 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
   gStyle->SetStatColor(0);
 */
 
-  TH2F *hr0 = new TH2F("hr","",12,-0.55,0.65,12,-0.45,0.75); 
+  TH2F *hr0 = new TH2F("hr","",12,-2.00,4.00,12,-0.45,0.75); 
   hr0->GetYaxis()->SetTitle("#Delta Ar [%]");
-  hr0->GetXaxis()->SetTitle("#Delta t_{0}");
+  hr0->GetXaxis()->SetTitle("#Delta T");
   hr1->GetYaxis()->SetTitle("#Delta Ar [%]");
-  hr1->GetXaxis()->SetTitle("#Delta t_{0}");
+  hr1->GetXaxis()->SetTitle("#Delta T");
   hr2->GetYaxis()->SetTitle("#Delta Ar [%]");
-  hr2->GetXaxis()->SetTitle("#Delta t_{0}");
+  hr2->GetXaxis()->SetTitle("#Delta T");
   hr3->GetYaxis()->SetTitle("#Delta Ar [%]");
-  hr3->GetXaxis()->SetTitle("#Delta t_{0}");
+  hr3->GetXaxis()->SetTitle("#Delta T");
   //
 
   FILE *file1=fopen ("res.log","r");
@@ -143,7 +138,6 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
 
   float resx,resy,resrad,resphi, t0, gas, T, c2,rad1,rad11, rad2, rad21, rad3, rad31, err;
   
-
   while(!feof(file1))
     {
       datab1 = fscanf(file1,"%f %f %f %f %f",&t0,&gas,&T,&resx,&c2);
@@ -160,22 +154,22 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
 
 	  if (a=='a')
 	    {
-	      hr0->Fill(t0,gas,lpos1-rad1);
+	      hr0->Fill(T,gas,lpos1-rad1);
 	    }
 	  else if (a=='b')
 	    {
-	      hr0->Fill(t0,gas,lpos2-rad2);
+	      hr0->Fill(T,gas,lpos2-rad2);
 	    }
 	  else if (a=='c')
 	    {
-	      hr0->Fill(t0,gas,lpos3-rad3);
+	      hr0->Fill(T,gas,lpos3-rad3);
 	    }
 	  else if (a=='d')
 	    {
-	      hr1->Fill(t0,gas,lpos1-rad1);
-	      hr2->Fill(t0,gas,lpos2-rad2);
-	      hr3->Fill(t0,gas,lpos3-rad3);
-	    }
+	      hr1->Fill(T,gas,lpos1-rad1);
+	      hr2->Fill(T,gas,lpos2-rad2);
+	      hr3->Fill(T,gas,lpos3-rad3);
+    }
 	  else
 	    {cout<<"Funktion nicht vorhanden !"<<endl;break;}
 	}
