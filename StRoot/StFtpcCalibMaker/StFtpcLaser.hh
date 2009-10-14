@@ -1,6 +1,10 @@
-// $Id: StFtpcLaser.hh,v 1.3 2006/04/04 10:57:05 jcs Exp $
+// $Id: StFtpcLaser.hh,v 1.4 2009/10/14 15:59:55 jcs Exp $
 //
 // $Log: StFtpcLaser.hh,v $
+// Revision 1.4  2009/10/14 15:59:55  jcs
+// changes to be able to vary the gas temperature in addition to varying t0 and
+// gas composition
+//
 // Revision 1.3  2006/04/04 10:57:05  jcs
 // Fix memory leak
 //
@@ -45,6 +49,8 @@ struct RUN
   Int_t date;
   Int_t time;
   Float_t micropertimebin;
+  Float_t normalizedNowPressure, standardPressure;
+  Float_t baseTemperature, gasTemperatureWest, gasTemperatureEast;
   Float_t deltapW,deltapE;
 };
 

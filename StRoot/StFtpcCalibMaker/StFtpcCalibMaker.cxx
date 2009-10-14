@@ -1,6 +1,10 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.10 2009/08/04 08:42:09 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.11 2009/10/14 15:59:55 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.11  2009/10/14 15:59:55  jcs
+// changes to be able to vary the gas temperature in addition to varying t0 and
+// gas composition
+//
 // Revision 1.10  2009/08/04 08:42:09  jcs
 // The 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0
 // are used for laser run calibration
@@ -43,6 +47,7 @@
 #include <Stiostream.h>
 #include <fstream>
 #include <cmath>
+#include "PhysicalConstants.h"
 
 #include "StMessMgr.h"
 #include "StFtpcCalibMaker.h"
@@ -83,13 +88,16 @@ void StFtpcCalibMaker::GetRunInfo(TString filename){
  
   j->Init(filename);
   j->GetTreeEntry(0);
-  //LOG_DEBUG<<"StFtpcCalibMaker::GetRunInfo  j->Run.run = "<<j->Run.run<<" j->Run.date = "<<j->Run.date<<" j->Run.time = "<<j->Run.time<<" j->Run.micropertimebin = "<<j->Run.micropertimebin<<" j->Run.deltapW = "<<j->Run.deltapW<<" j->Run.deltapE = "<<j->Run.deltapE<<endm;
+  LOG_DEBUG<<"StFtpcCalibMaker::GetRunInfo  j->Run.run = "<<j->Run.run<<" j->Run.date = "<<j->Run.date<<" j->Run.time = "<<j->Run.time<<" j->Run.micropertimebin = "<<j->Run.micropertimebin<<" j->Run.normalizedNowPressure = "<<j->Run.normalizedNowPressure <<" j->Run.standardPressure = "<<j->Run.standardPressure<<" j->Run.baseTemperature = "<<j->Run.baseTemperature<<" j->Run.gasTemperatureWest = "<<j->Run.gasTemperatureWest<<" j->Run.gasTemperatureEast = "<<j->Run.gasTemperatureEast<<endm;
   run  = j->Run.run;
   date = j->Run.date;
   time = j->Run.time;
   micropertime = j->Run.micropertimebin;
-  deltapW      = j->Run.deltapW;
-  deltapE      = j->Run.deltapE;
+  normalizedNowPressure = j->Run.normalizedNowPressure;
+  standardPressure = j->Run.standardPressure;
+  baseTemperature = j->Run.baseTemperature;
+  gasTemperatureWest = j->Run.gasTemperatureWest;
+  gasTemperatureEast = j->Run.gasTemperatureEast;
   delete j;  // destructor matches second constructor only
   return;
   
@@ -200,7 +208,7 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
  *
  */
 
-void StFtpcCalibMaker::DoLaserCalib(TString filename,int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, char* t0, char* gas, float mbfield)
+void StFtpcCalibMaker::DoLaserCalib(TString filename,int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, char* t0, char* gas, float gastemp, float mbfield)
 {
 if (ftpc == 1) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC West"<<endm;
 if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East"<<endm;
@@ -208,8 +216,16 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
   Int_t ntracksold=0;
   Int_t neventold=2;
 
-  if (ftpc == 1) deltap = deltapW;
-  if (ftpc == 2) deltap = deltapE;
+  if (ftpc == 1){
+      Float_t adjustedAirPressureWest = normalizedNowPressure*((baseTemperature+STP_Temperature)/(gasTemperatureWest+gastemp+STP_Temperature));
+      deltap = adjustedAirPressureWest - standardPressure;
+      LOG_INFO << "d_TempWest = " << gastemp << " adjustedAirPressureWest = " << adjustedAirPressureWest << " deltap West = " << deltap << endm;
+  }
+  if (ftpc == 2) {
+      Float_t adjustedAirPressureEast = normalizedNowPressure*((baseTemperature+STP_Temperature)/(gasTemperatureEast+gastemp+STP_Temperature));
+      deltap = adjustedAirPressureEast - standardPressure;
+      LOG_INFO << "d_TempEast = " << gastemp << " adjustedAirPressureEast = " << adjustedAirPressureEast << " deltap East = " << deltap << endm;
+  }
 
   Bool_t laserRun = kTRUE;
   dbReader->setLaserRun(laserRun);
@@ -243,10 +259,10 @@ if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East
       }
     }
 
-  StFtpcLaserCalib *l=new StFtpcLaserCalib(ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,atof(t0),atof(gas),trafo,m_magf);
+  StFtpcLaserCalib *l=new StFtpcLaserCalib(ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,atof(t0),atof(gas),gastemp,trafo,m_magf);
  
   l->Init(filename);
-  l->MakeOutput(filename,t0,gas);
+  l->MakeOutput(filename,t0,gas,gastemp);
  
   Int_t maxentries=l->btcluster->GetEntries();
   LOG_INFO<<" "<<endm;
@@ -345,6 +361,7 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
       // FTPC West
 
       deltap = deltapW;
+      LOG_INFO<<"StFtpcCalibMaker::DoT0Calib deltap = deltapW = "<<deltap<<endm;
  
 
       trafo = new StFtpcLaserTrafo(dbReader,paramReader,atof(t0),atof(gas),micropertime,deltap,mbfield,tZero);
@@ -361,6 +378,7 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
       // FTPC East
 
       deltap = deltapE;
+      LOG_INFO<<"StFtpcCalibMaker::DoT0Calib deltap = deltapE = "<<deltap<<endm;
 
       trafo2 = new StFtpcLaserTrafo(dbReader,paramReader,atof(t0),atof(gas),micropertime,deltap,mbfield,tZero);
 
