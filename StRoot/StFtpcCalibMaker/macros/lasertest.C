@@ -1,6 +1,10 @@
-// $Id: lasertest.C,v 1.9 2009/09/12 16:00:23 jcs Exp $
+// $Id: lasertest.C,v 1.10 2009/10/14 15:58:43 jcs Exp $
 //
 // $Log: lasertest.C,v $
+// Revision 1.10  2009/10/14 15:58:43  jcs
+// change and add macros so that in addition to varying t0 and the gas compostion,
+// the gas temperature can be varied
+//
 // Revision 1.9  2009/09/12 16:00:23  jcs
 // Necessary to load the following additional libraries for ROOT 5.22.00:libMinuit.so, libSpectrum.so
 //
@@ -28,7 +32,7 @@
 // add lines for listing CVS update info
 //
 
-void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char* t0, char* gas,float mbfield)
+void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char* t0, char* gas,float gastemp,float mbfield)
 {
 
   Int_t minz, maxz;
@@ -63,6 +67,7 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char*
   } else
   cout<<"                            t0       = "<<t0<<endl;
   cout<<"                            gas      = "<<gas<<endl;
+  cout<<"                            gastemp  = "<<gastemp<<endl;
   cout<<"                            mbfield  = "<<mbfield<<endl;
   cout<<endl;
 
@@ -140,11 +145,11 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit,char*
 	  if (k==0 && i==0)
 	    cout<<"Kommt zum Schluss !!!"<<endl;
 	  else
-	    laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,t,g,mbfield);
+	    laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,t,g,gastemp,mbfield);
 	}
     }
 
-  laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0.000001","0",mbfield);
+  laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0.000001","0",gastemp,mbfield);
 
   delete laser;
 }

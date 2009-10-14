@@ -1,6 +1,10 @@
-// $Id: res_laser.C,v 1.5 2008/05/15 21:00:06 jcs Exp $
+// $Id: res_laser.C,v 1.6 2009/10/14 15:58:43 jcs Exp $
 //
 // $Log: res_laser.C,v $
+// Revision 1.6  2009/10/14 15:58:43  jcs
+// change and add macros so that in addition to varying t0 and the gas compostion,
+// the gas temperature can be varied
+//
 // Revision 1.5  2008/05/15 21:00:06  jcs
 // change histogram limits
 // add improved comments
@@ -59,22 +63,22 @@ void res_laser()
 
   float resx[nhits],resy[nhits],resrad[nhits],resphi[nhits], t0[nhits], gas[nhits];
   
-  float gas_temp, t0_temp, c2,rad, err, resphi_temp, resrad_temp;
+  float gas_temp, t0_temp, T, c2,rad, err, resphi_temp, resrad_temp;
 
   int ihits==0;
   while(!feof(file1))
     {
 
-      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&resx,&c2);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&resy,&c2);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&resrad_temp,&c2);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&resphi_temp,&c2);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&rad,&err);
-      datab1 = fscanf(file1,"%f %f %f",&t0_temp,&gas_temp,&rad);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&rad,&err);
-      datab1 = fscanf(file1,"%f %f %f",&t0_temp,&gas_temp,&rad);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&rad,&err);
-      datab1 = fscanf(file1,"%f %f %f",&t0_temp,&gas_temp,&rad);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0_temp,&gas_temp,&T,&resx,&c2);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0_temp,&gas_temp,&T,&resy,&c2);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0_temp,&gas_temp,&T,&resrad_temp,&c2);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0_temp,&gas_temp,&T,&resphi_temp,&c2);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0_temp,&gas_temp,&T,&rad,&err);
+      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&T,&rad);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0_temp,&gas_temp,&T,&rad,&err);
+      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&T,&rad);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0_temp,&gas_temp,&T,&rad,&err);
+      datab1 = fscanf(file1,"%f %f %f %f",&t0_temp,&gas_temp,&T,&rad);
       
       //cout<<t0_temp<<endl;
       //if (t0_temp!=0)

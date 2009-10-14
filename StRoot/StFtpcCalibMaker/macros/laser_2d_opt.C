@@ -1,6 +1,10 @@
-// $Id: laser_2d_opt.C,v 1.3 2008/05/15 20:58:34 jcs Exp $
+// $Id: laser_2d_opt.C,v 1.4 2009/10/14 15:58:43 jcs Exp $
 //
 // $Log: laser_2d_opt.C,v $
+// Revision 1.4  2009/10/14 15:58:43  jcs
+// change and add macros so that in addition to varying t0 and the gas compostion,
+// the gas temperature can be varied
+//
 // Revision 1.3  2008/05/15 20:58:34  jcs
 // removed debug print out statement
 //
@@ -61,20 +65,20 @@ cout<<"a = "<<a<<" opt "<<opt<<endl;
 
   Int_t datab1;
 
-  float resx,resy,resrad,resphi, t0, gas, c2,rad1,rad11, rad2, rad21, rad3, rad31, err;
+  float resx,resy,resrad,resphi, t0, gas, T, c2,rad1,rad11, rad2, rad21, rad3, rad31, err;
   
   while(!feof(file1))
     {
-      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&resx,&c2);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&resy,&c2);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&resrad,&c2);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&resphi,&c2);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&rad1,&err);
-      datab1 = fscanf(file1,"%f %f %f",&t0,&gas,&rad11);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&rad2,&err);
-      datab1 = fscanf(file1,"%f %f %f",&t0,&gas,&rad21);
-      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&rad3,&err);
-      datab1 = fscanf(file1,"%f %f %f",&t0,&gas,&rad31);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0,&gas,&T,&resx,&c2);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0,&gas,&T,&resy,&c2);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0,&gas,&T,&resrad,&c2);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0,&gas,&T,&resphi,&c2);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0,&gas,&T,&rad1,&err);
+      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&T,&rad11);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0,&gas,&T,&rad2,&err);
+      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&T,&rad21);
+      datab1 = fscanf(file1,"%f %f %f %f %f",&t0,&gas,&T,&rad3,&err);
+      datab1 = fscanf(file1,"%f %f %f %f",&t0,&gas,&T,&rad31);
       if (feof(file1)) break;
       
 	  if (a=='x')
