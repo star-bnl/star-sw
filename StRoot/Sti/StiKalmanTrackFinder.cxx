@@ -419,6 +419,7 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
 StiDebug::tally("Tracks");
 
     StiKalmanTrackNode *bestNode=0;  
+    int bestVertex=0;
     StThreeVectorD nearBeam;
     track->getNearBeam(&nearBeam);
     if (nearBeam.perp2()>RMAX2d*RMAX2d) 		continue;
@@ -433,15 +434,16 @@ StiDebug::tally("PrimCandidates");
 
       if (!extended) 					continue;
 StiDebug::tally("PrimExtended");
-      if (!bestNode) {bestNode=extended;		continue;}
+      if (!bestNode) {bestNode=extended;bestVertex=iVertex+1;continue;}
       if (bestNode->getChi2()+log(bestNode->getDeterm())
          <extended->getChi2()+log(extended->getDeterm()))continue;
       BFactory::Free(bestNode);
-      bestNode = extended;
+      bestNode = extended; bestVertex=iVertex+1;
     }//End vertex loop
     
     if(!bestNode) 			continue;
     track->add(bestNode,kOutsideIn);
+    track->setPrimary(bestVertex);
 StiDebug::tally("PrimAdded");
     int         ifail = 0;
 static int REFIT=2005;
@@ -792,8 +794,8 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
       if (node->getContigNullCount()>maxContiguousNullCount)	qa.qa= -3;
   }//node->getHit()
 
-  double xg = node->x_g();
-  double yg = node->y_g();
+//  double xg = node->x_g();
+//  double yg = node->y_g();
 //VP??  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
 
 }

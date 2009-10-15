@@ -198,7 +198,8 @@ class StiKalmanTrack : public StiTrack
    * vertex was included as a point to the track because it had low enough
    * a incremental chi2.
    */
-   virtual bool isPrimary() const;
+   int isPrimary() const	{return mVertex;}
+   void setPrimary(int vertex) 	{mVertex=vertex;}
 
 	double calculateTrackLength() const;
 	double calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const;
@@ -301,6 +302,7 @@ protected:
   StiKalmanTrackNode * lastNode;
 
   int     mSeedHitCount; //number of points used to seed the track
+  int     mVertex;
   long    mFlag;         //A flag to pack w/ topo info
   double  m;             // mass hypothesis
 
