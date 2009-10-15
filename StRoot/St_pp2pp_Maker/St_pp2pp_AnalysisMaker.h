@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_AnalysisMaker.h,v 1.2 2009/10/07 21:57:43 yipkin Exp $
+// $Id: St_pp2pp_AnalysisMaker.h,v 1.3 2009/10/15 04:03:03 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_AnalysisMaker
 #define STAR_St_pp2pp_AnalysisMaker
@@ -31,6 +31,7 @@ class St_pp2pp_AnalysisMaker : public StRTSBaseMaker {
   // For making root-tree
   TFile     *fTreeFile ;
   TTree     *fClusterTree;
+  string    output_filename ;
 
   struct P2P {
     unsigned short RPWVD2_ADC;
@@ -113,9 +114,12 @@ class St_pp2pp_AnalysisMaker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_AnalysisMaker.h,v 1.2 2009/10/07 21:57:43 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_AnalysisMaker.h,v 1.3 2009/10/15 04:03:03 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
+
+  void SetOutputFileName(const char* filename) { output_filename = filename ; }
+
   ClassDef(St_pp2pp_AnalysisMaker,0)   //StAF chain virtual base class for Makers
 };
 

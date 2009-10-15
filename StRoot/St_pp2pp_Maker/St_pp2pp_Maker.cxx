@@ -3,6 +3,11 @@
 #include "TDataSetIter.h"
 #include "RTS/src/DAQ_PP2PP/pp2pp.h"
 
+#include "St_db_Maker/St_db_Maker.h"
+
+#include "pp2ppPedestal.h"
+#include "tables/St_pp2ppPedestal_Table.h"
+
 #ifdef NO_GLOBAL_VARIABLE_IS_ALLOWED
 // Silicon stuff
 // const Int_t MAXSEC = 2 ;  // 2 sides
@@ -59,14 +64,18 @@ Int_t St_pp2pp_Maker::Init() {
   fLast_svx   = ErrorCode;
   fLast_chain = ErrorCode;
   fLast_seq   = ErrorCode ;
-  if ( LDoCluster ) read_pedestal_perchannel() ;
   return StMaker::Init();
+}
+
+Int_t St_pp2pp_Maker::InitRun(int runumber) {
+  if ( LDoCluster ) read_pedestal_perchannel() ;
+  return 0;
 }
 
 Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 
-  Int_t i, j, k, l, ncounts = 0 ;
-  
+  //  cout << "Size of each struct in DB : " << sizeof(pp2ppPedestal_st) << endl ;
+
   //  cout << "Size of pedave : " << sizeof(pedave) << " , Size of pedrms : " << sizeof(pedrms) << endl ;
 
   memset(pedave,0,sizeof(pedave));
@@ -81,7 +90,9 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
       }
   */
 
-
+  /*
+  Int_t i, j, k, l, ncounts = 0 ;
+  
   ifstream ipedestal(pedestal_perchannel_filename.c_str(), ifstream::in);
 
   Double_t mean, rms ;
@@ -104,6 +115,65 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
   cout << ncounts << " pedestal lines read. " << endl ;
 
   ipedestal.close();
+
+  */
+
+  Int_t s, c, sv, ch ;
+
+  Int_t idb = 0 ;
+
+  //  cout << GetTime() << " " << GetDate() << endl ;
+
+  St_db_Maker *dbMk = (St_db_Maker*) GetMaker("db");
+  if ( ! dbMk ) {
+    LOG_WARN << "No St_db_Maker existed ?! " << endm ;
+  }
+  else {
+    //    cout << "I got St_db_Maker ?? " << endl ;
+    dbMk->SetDateTime(this->GetDate(), this->GetTime());
+  }
+
+
+  // Database
+  TDataSet *DB = 0;
+  DB = GetInputDB("Calibrations/pp2pp");
+  if (!DB) {
+    LOG_WARN << "ERROR: cannot find database Calibrations_pp2pp?" << endm ;
+  }
+  else {
+    //    cout << "I got the DB !" << endl ;
+    // fetch ROOT fmsMap descriptor of db table
+    St_pp2ppPedestal *descr = 0;
+    descr = (St_pp2ppPedestal*) DB->Find("pp2ppPedestal");
+    // fetch data and place it to appropriate structure
+    if (descr) {
+        pp2ppPedestal_st *table = descr->GetTable();
+        // cout << "Reading pp2ppPedestal table with nrows = " << descr->GetNRows() << endl ;
+                for ( idb = 0; idb < descr->GetNRows(); idb++ ) {
+		  s = (Int_t) table[idb].sequencer ;
+		  c = (Int_t) table[idb].chain ;
+		  sv = (Int_t) table[idb].SVX ;
+		  ch = (Int_t) table[idb].channel ;
+
+		  /*
+		    if ( pedave[s-1][c][sv][ch] != table[idb].mean || pedrms[s-1][c][sv][ch] != table[idb].rms )
+		      cout << "Different ? " << s << " " << c << " "  << sv << " " << ch << " "
+			   << table[idb].mean << " " << table[idb].rms << endl ; 
+		  */
+
+		  pedave[s-1][c][sv][ch] = table[idb].mean ;
+		  pedrms[s-1][c][sv][ch] = table[idb].rms ;
+
+		  //		  cout << s << " " << c << " "  << sv << " " << ch << " " << pedave[s-1][c][sv][ch] << " " << pedrms[s-1][c][sv][ch] << endl ; 
+
+                }
+    } else {
+      LOG_WARN << "WARNING: No data in pp2ppPedestal table (wrong timestamp?). Nothing to return, then." << endm ;
+    }
+  }
+
+  cout << idb << " pedestal entries read from DB table Calibration/pp2pp read. " << endl ;
+
 
   return 0 ;
 
