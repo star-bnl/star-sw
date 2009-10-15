@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.114 2009/03/16 13:50:15 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.114 2009/03/16 13:50:15 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.115 2009/10/15 03:30:20 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.115 2009/10/15 03:30:20 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.115  2009/10/15 03:30:20  perev
+ * Add primary vertex number
+ *
  * Revision 2.114  2009/03/16 13:50:15  fisyak
  * Move out all Sti Chairs into StDetectorDb
  *
@@ -402,6 +405,7 @@ static int mIdCount = 0;
   firstNode = 0;
   lastNode  = 0;
   mSeedHitCount = 0;
+  mVertex = 0;
   m      = -1.;
   mFlag  = 0;
   _dca   = 0;
@@ -924,26 +928,6 @@ int StiKalmanTrack::getNNodes(int qua)  const
   }
   return nn;
 }
-
-//_____________________________________________________________________________
-/*! Return true if inner most hit associated with this track is main vertex.
-   <h3>Algorithm</h3>
-   <ol>
-   <li>Find the inner most hit node associated with this tracks.</li>
-   <li>Return true if "x" of inner most hit is less than 2 cm.
-   </ol>
-	 \return true if "x" of inner most hit is less than 2 cm.
-*/
-//_____________________________________________________________________________
-bool  StiKalmanTrack::isPrimary() const
-{
-  StiKalmanTrackNode * node = getInnerMostHitNode(3);
-  if (node->getDetector()) 	return 0;
-  const StiHit *hit = node->getHit();
-  if (hit->isDca()) 		return 0;
-  return 1;
-}
-
 
 //_____________________________________________________________________________
 ///return vector of nodes with hits

@@ -125,7 +125,6 @@ public:
   virtual vector<StiHit*> getHits()=0;
   // Convenience Accessor using a switch
   virtual double  getValue(int key) const;
-  virtual bool isPrimary() const=0;
           int    getId() const {return mId;}
           void   setId(int id)  {mId=id;}
   virtual StiTrackNode *extendToVertex(StiHit* vertex)=0;
