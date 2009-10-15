@@ -16,7 +16,7 @@
 ClassImp(St_pp2pp_AnalysisMaker)
 
 St_pp2pp_AnalysisMaker::St_pp2pp_AnalysisMaker(const char *name) : StRTSBaseMaker("pp2pp",name), // "pp2pp" is needed to specify the detector
-								   fTreeFile(0),fClusterTree(0),nevt_count(0)
+								   fTreeFile(0),fClusterTree(0),output_filename("pp2ppClustersTree.root"),nevt_count(0)
   //								   fTreeFile(0),fClusterTree(0),fBuffer(0)
 {  
    // ctor 
@@ -31,7 +31,7 @@ St_pp2pp_AnalysisMaker::~St_pp2pp_AnalysisMaker() {
 Int_t St_pp2pp_AnalysisMaker::Init() {
 
   // create the TTree 
-  fTreeFile    = new TFile("pp2ppClustersTree.root","RECREATE");
+  fTreeFile    = new TFile(output_filename.c_str(),"RECREATE");
   fClusterTree = new TTree("pp2pp",GetName());
 
   fClusterTree->Branch("xing", &xing,"xing_lo/i:xing_hi:bunch_number:b120");
@@ -108,9 +108,11 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
   event_info.event_number = GetEventNumber() ;
   event_info.seq = GetIventNumber() ;
 
+  event_info.token = Token();
+  event_info.daqbits = Daqbits();    
+
+
   while ( GetNextAdc() && NotGotIt ) {
-    event_info.token = Token();
-    event_info.daqbits = Daqbits();    
 
     TGenericTable::iterator iword = DaqDta()->begin();
     if ( iword != DaqDta()->end() ) {
@@ -118,10 +120,14 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
       //        silicon_bunch = d.bunch_xing ;
       silicon_bunch = ( (pp2pp_t *) *iword )->bunch_xing ;
     }
+
     NotGotIt = kFALSE ;
   }
   
-  if ( event_info.token == 0 ) return kStSKIP ; //
+  if ( event_info.token == 0 ) {
+    cout << " Token == 0 for Run : " << event_info.run_number << ", Event no. : " << event_info.event_number << endl ;
+    return kStOK ; //
+  }
 
   memset( allclusters, 0, sizeof(allclusters) ) ;
   /*
