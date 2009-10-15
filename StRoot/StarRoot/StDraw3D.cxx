@@ -1,7 +1,10 @@
-// $Id: StDraw3D.cxx,v 1.51 2009/10/08 14:04:18 fine Exp $
+// $Id: StDraw3D.cxx,v 1.52 2009/10/15 22:30:50 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
+#include "TTRAP.h"
+#include "TVolume.h"
+#include "TMath.h"
 #include "TPolyMarker3D.h"
 #include "TPolyLine3D.h"
 #include "TSystem.h"
@@ -760,4 +763,51 @@ void StDraw3D::ShowTest()
   for (int i=0;i<2;i++) { fine[i]->Modified(); fine[i]->Update();}
 //  while(!gSystem->ProcessEvents()){}; 
 }
+
+//______________________________________________________________________________
+TObject *StDraw3D::Trap(float radius, float lambda, float phi,float alpha1, float alpha2, Color_t col,Style_t sty, Size_t siz)
+{
+   float zNear, xNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, xFar, yFar, x1Far,x2Far, y1Far, y2Far;
+   zNear  = radius;
+   xNear  = zNear*TMath::Tan(lambda );
+   x1Near = zNear*TMath::Tan(lambda - alpha1/2);
+   x2Near = zNear*TMath::Tan(lambda + alpha1/2);
+   yNear  = 0;
+   y1Near = TMath::Sqrt(x1Near*x1Near + zNear*zNear) * TMath::Tan(alpha2/2);
+   y2Near = TMath::Sqrt(x2Near*x2Near + zNear*zNear) * TMath::Tan(alpha2/2); 
+   
+   zFar  = radius+siz;
+   xFar  = zFar*TMath::Tan(lambda);
+   x1Far = zFar*TMath::Tan(lambda - alpha1/2);
+   x2Far = zFar*TMath::Tan(lambda + alpha1/2);
+   yFar  = 0;
+   y1Far = TMath::Sqrt(x1Far*x1Far + zFar*zFar) * TMath::Tan(alpha2/2);
+   y2Far = TMath::Sqrt(x2Far*x2Far + zFar*zFar) * TMath::Tan(alpha2/2); 
+   TTRAP *trap = new TTRAP(  "CALO", Form("Angle%d",lambda)
+         , "Barrel"
+         , siz/2                   // dz
+         , TMath::PiOver2()-lambda  // Float_t theta
+         , 0                       // Float_t phi
+         , (x2Near-x1Near )/2      // Float_t h1
+         , y1Near                  // Float_t bl1
+         , y2Near                  // Float_t tl1
+         , 0                       // Float_t alpha1
+         , (x2Far-x1Far )/2        // Float_t h2
+         , y1Far                   // Float_t bl2
+         , y2Far                   // Float_t tl2
+         , 0 //Float_t alpha2
+         );
+   static TVolume *view = 0;
+   bool draw = !view;
+   view = new TVolume();
+   TVolume *thisShape = new TVolume("a","b",trap);
+   view->Add(thisShape,-xNear,0,zNear + siz/2);
+   thisShape->SetFillColor(col);
+   thisShape->SetLineColor(col);
+   thisShape->SetFillStyle(sty);
+   if (draw) Draw(view);
+   return trap;
+}
+
+
 ClassImp(StDraw3D)
