@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.4 2007/10/16 20:56:00 fisyak Exp $
+ * $Id: StiPullEvent.h,v 1.5 2009/10/15 03:28:58 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.5  2009/10/15 03:28:58  perev
+ * Add primary vertex number and charge(GVB)
+ *
  * Revision 1.4  2007/10/16 20:56:00  fisyak
  * Add pull entries for Pxl and Ist
  *
@@ -48,6 +51,7 @@ int TestIt();
 public:
 char mBeg[1];
 short mTrackNumber; 		//track number of hit
+unsigned char mVertex; 		//vertex number for primary track
 unsigned char nAllHits; 	//number of all hits in track
 unsigned char nTpcHits; 	//number of tpc hits in track
 unsigned char nSvtHits; 	//number of svt hits in track
@@ -78,6 +82,7 @@ int TestIt();
 public:
 char mBeg[1];
 short mTrackNumber; 		//track number of hit
+unsigned char mVertex; 		//vertex number for primary track
 unsigned char nAllHits; 	//number of all hits in track
 unsigned char nTpcHits; 	//number of tpc hits in track
 unsigned char nSvtHits; 	//number of svt hits in track
@@ -98,6 +103,7 @@ float mZCenter;
 float mChi2;
 float mCurv;        		//curvature
 float mPt;        		//pt
+float mCharge;                  //charge (Q)
 //		locals
 float lXHit;			// x of  Hit  in local  Sti frame
 float lYHit;			// y of  Hit  in local  Sti frame

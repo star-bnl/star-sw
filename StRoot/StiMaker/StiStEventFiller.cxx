@@ -1,13 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.86 2009/08/19 21:27:57 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.87 2009/10/15 03:29:30 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.87  2009/10/15 03:29:30  perev
+ * Add primary vertex number and charge(GVB)
+ *
  * Revision 2.86  2009/08/19 21:27:57  perev
- * Account time of flight for StiPulls
+ *  Account time of flight for StiPulls
  *
  * Revision 2.85  2009/03/16 13:50:14  fisyak
  * Move out all Sti Chairs into StDetectorDb
@@ -466,6 +469,7 @@ using namespace std;
 
 #include "TMath.h"
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
+
 
 //_____________________________________________________________________________
 StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
@@ -1236,6 +1240,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   int dets[kMaxDetectorId][3];
   track->getAllPointCount(dets,kMaxDetectorId-1);
   StiPullTrk aux;
+  aux.mVertex = (unsigned char)track->isPrimary();
   aux.mTrackNumber=mTrackNumber;
   aux.nAllHits = dets[0][2];
   aux.nTpcHits = dets[kTpcId][2];
@@ -1301,6 +1306,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   StiPullHit aux;
 // local frame
 // local HIT
+  aux.mVertex = (unsigned char)track->isPrimary();
   aux.nHitCand = node->getHitCand();
   aux.iHitCand = node->getIHitCand();
   if (!aux.nHitCand)  aux.nHitCand=1;
@@ -1397,6 +1403,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   // invariant
   aux.mCurv   = mFP._curv;
   aux.mPt     = fabs(1./mFP._ptin);
+  aux.mCharge = stHit->charge();
   aux.mChi2   = node->getChi2();
   aux.mNormalRefAngle = alfa;
   aux.mHardwarePosition=0;
