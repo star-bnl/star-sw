@@ -124,7 +124,8 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 
   //  cout << GetTime() << " " << GetDate() << endl ;
 
-  St_db_Maker *dbMk = (St_db_Maker*) GetMaker("db");
+  St_db_Maker *dbMk = 0;
+  dbMk = (St_db_Maker*) GetMaker("db");
   if ( ! dbMk ) {
     LOG_WARN << "No St_db_Maker existed ?! " << endm ;
   }
