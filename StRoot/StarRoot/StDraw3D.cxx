@@ -1,9 +1,11 @@
-// $Id: StDraw3D.cxx,v 1.56 2009/10/16 18:13:26 fine Exp $
+// $Id: StDraw3D.cxx,v 1.57 2009/10/16 21:16:42 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
 #include "TTRAP.h"
 #include "TVolume.h"
+#include "TVolumePosition.h"
+#include "TRotMatrix.h"
 #include "TMath.h"
 #include "TPolyMarker3D.h"
 #include "TPolyLine3D.h"
@@ -828,7 +830,28 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
        fTopVolume = new TVolume();
    }
    TVolume *thisShape = new TVolume("a","b",trap);
-   fTopVolume->Add(thisShape,0,yNear+dy,zNear + siz/2);
+ //  TRotMatrix *rotaion = new TRotMatrix("a","b",90,90,0,90- phi*TMath::RadToDeg(),0);
+ //  TRotMatrix *rotaion = new TRotMatrix("a","b",90,90,0,90,90,0);
+//   fTopVolume->Add(thisShape,0,yNear+dy,zNear + siz/2,rotaion);
+  bool barrel = true;
+
+   double rotmatrixZ[] = {  1,        0,        0
+                          , 0,        0,       -1
+                          , 0,        1,        0
+                         };
+   double rotmatrixX[] = {  cos(phi), -sin(phi), 0
+                          , sin(phi),  cos(phi), 0
+                          , 0,          0,       1
+                         };
+   TRotMatrix *rootMatrixX   = new TRotMatrix("rotx","rotx",rotmatrixX);
+   TVolumePosition *position = fTopVolume->Add(thisShape,0,0,0,rootMatrixX);
+   if (barrel) {
+      TRotMatrix *rootMatrixZ   = new TRotMatrix("rotz","rotZ",rotmatrixZ);
+      TVolumePosition zpos(thisShape,0,0,0,rootMatrixZ);
+      position->Mult(zpos);   
+   }
+   TVolumePosition rpos(thisShape,0,yNear+dy,zNear + siz/2);
+   position->Mult(rpos);   
    thisShape->SetFillColor(col);
    thisShape->SetLineColor(col);
    thisShape->SetFillStyle(sty);
