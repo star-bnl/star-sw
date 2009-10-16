@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.52 2009/10/15 22:30:50 fine Exp $
+// $Id: StDraw3D.cxx,v 1.53 2009/10/16 02:24:20 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -652,11 +652,27 @@ void StDraw3D::Modified()
    }
 }
 
+//_______________________________________________________________
+void StDraw3D::UpdateModified()
+{
+   // One doesn't need to call this method
+   // because one can not change any object yet
+   TVirtualPad *pad = Pad();
+   if (pad) {
+      TVirtualPad *sav = gPad;
+      if (pad != sav)  pad->cd();
+      assert (pad==gPad);
+      pad->Modified();
+      pad->Update();
+      if (sav && (pad != sav)) sav->cd();
+   }
+}
+
 //___________________________________________________
 void StDraw3D::Draw3DTest(){
    //  ------------------------------------------------
    //  The  method to test the class
-   //   It should produce the #D Coin widget:
+   //  It should produce the 3D Coin widget:
    //  <begin_html> <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">end_html
    //  ------------------------------------------------
    //                 x             y              z  
@@ -760,33 +776,33 @@ void StDraw3D::ShowTest()
   
   fine[1]->Line  (nN, NodL[0], kGlobalTrack);
   fine[1]->SetComment("Track no Geometry");
-  for (int i=0;i<2;i++) { fine[i]->Modified(); fine[i]->Update();}
+  for (int i=0;i<2;i++) { fine[i]->UpdateModified(); }
 //  while(!gSystem->ProcessEvents()){}; 
 }
 
 //______________________________________________________________________________
-TObject *StDraw3D::Trap(float radius, float lambda, float phi,float alpha1, float alpha2, Color_t col,Style_t sty, Size_t siz)
+TObject *StDraw3D::Tower(float radius, float lambda, float phi, float alphaZ, float alphaPhi, Color_t col,Style_t sty, Size_t siz)
 {
    float zNear, xNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, xFar, yFar, x1Far,x2Far, y1Far, y2Far;
    zNear  = radius;
    xNear  = zNear*TMath::Tan(lambda );
-   x1Near = zNear*TMath::Tan(lambda - alpha1/2);
-   x2Near = zNear*TMath::Tan(lambda + alpha1/2);
+   x1Near = zNear*TMath::Tan(lambda - alphaZ/2);
+   x2Near = zNear*TMath::Tan(lambda + alphaZ/2);
    yNear  = 0;
-   y1Near = TMath::Sqrt(x1Near*x1Near + zNear*zNear) * TMath::Tan(alpha2/2);
-   y2Near = TMath::Sqrt(x2Near*x2Near + zNear*zNear) * TMath::Tan(alpha2/2); 
+   y1Near = TMath::Sqrt(x1Near*x1Near + zNear*zNear) * TMath::Tan(alphaPhi/2);
+   y2Near = TMath::Sqrt(x2Near*x2Near + zNear*zNear) * TMath::Tan(alphaPhi/2); 
    
    zFar  = radius+siz;
    xFar  = zFar*TMath::Tan(lambda);
-   x1Far = zFar*TMath::Tan(lambda - alpha1/2);
-   x2Far = zFar*TMath::Tan(lambda + alpha1/2);
+   x1Far = zFar*TMath::Tan(lambda - alphaZ/2);
+   x2Far = zFar*TMath::Tan(lambda + alphaZ/2);
    yFar  = 0;
-   y1Far = TMath::Sqrt(x1Far*x1Far + zFar*zFar) * TMath::Tan(alpha2/2);
-   y2Far = TMath::Sqrt(x2Far*x2Far + zFar*zFar) * TMath::Tan(alpha2/2); 
+   y1Far = TMath::Sqrt(x1Far*x1Far + zFar*zFar) * TMath::Tan(alphaPhi/2);
+   y2Far = TMath::Sqrt(x2Far*x2Far + zFar*zFar) * TMath::Tan(alphaPhi/2); 
    TTRAP *trap = new TTRAP(  "CALO", Form("Angle%d",lambda)
-         , "Barrel"
+         , "Barrel"                // Material
          , siz/2                   // dz
-         , TMath::PiOver2()-lambda  // Float_t theta
+         , TMath::PiOver2()-lambda // Float_t theta
          , 0                       // Float_t phi
          , (x2Near-x1Near )/2      // Float_t h1
          , y1Near                  // Float_t bl1
@@ -805,8 +821,12 @@ TObject *StDraw3D::Trap(float radius, float lambda, float phi,float alpha1, floa
    thisShape->SetFillColor(col);
    thisShape->SetLineColor(col);
    thisShape->SetFillStyle(sty);
-   if (draw) Draw(view);
-   return trap;
+   if (draw) {
+      Draw(view);
+   } else {
+      UpdateModified();
+   }
+   return view;
 }
 
 
