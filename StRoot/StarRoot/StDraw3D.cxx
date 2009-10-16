@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.54 2009/10/16 02:46:38 fine Exp $
+// $Id: StDraw3D.cxx,v 1.55 2009/10/16 03:00:57 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -198,7 +198,7 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
 */
 //___________________________________________________
 StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
-      , fDetectorName(detectorName),fMaster(0)
+      , fDetectorName(detectorName),fMaster(0),fTopVolume(0)
 {
 
    // The detectorName is a comma separated list of the OpenInventor files with no extension
@@ -255,8 +255,9 @@ StDraw3D::~StDraw3D()
     if (fPad) {
        if (!fMaster) fPad->Clear();
        delete fPad;
-       fPad    = 0;
-       fMaster = 0;
+       fPad       = 0;
+       fMaster    = 0;
+       fTopVolume = 0;
     }
 }
 
@@ -329,6 +330,7 @@ void  StDraw3D::Clear(Option_t *opt)
    TVirtualPad *pad = Pad();
    if (pad) {
       pad->Clear(opt);
+      fTopVolume = 0;
       Update();
    }
 }
@@ -813,20 +815,22 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float alphaZ, fl
          , y2Far                   // Float_t tl2
          , 0 //Float_t alpha2
          );
-   static TVolume *view = 0;
-   bool draw = !view;
-   view = new TVolume();
+   bool draw = false;
+   if (!fTopVolume) {
+       draw = true;
+       fTopVolume = new TVolume();
+   }
    TVolume *thisShape = new TVolume("a","b",trap);
-   view->Add(thisShape,-xNear,0,zNear + siz/2);
+   fTopVolume->Add(thisShape,-xNear,0,zNear + siz/2);
    thisShape->SetFillColor(col);
    thisShape->SetLineColor(col);
    thisShape->SetFillStyle(sty);
    if (draw) {
-      Draw(view,"same");
+      Draw(fTopVolume,"same");
    } else {
       UpdateModified();
    }
-   return view;
+   return thisShape;
 }
 
 
