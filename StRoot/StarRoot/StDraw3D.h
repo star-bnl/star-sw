@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.35 2009/10/16 03:00:57 fine Exp $
+// $Id: StDraw3D.h,v 1.36 2009/10/16 21:47:55 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -13,14 +13,15 @@ class TVirtualViewer3D;
 class TVolume;
 
 //! EDraw3DStyle defines the set of the pre-defined "STAR event component" styles
-enum EDraw3DStyle {kVtx           //!< "Vertex" style
-                  ,kPrimaryTrack  //!< "Primary" track style
-                  ,kGlobalTrack   //!< "Global" track style
-                  ,kUsedHit       //!< "Used" hit style
-                  ,kUnusedHit     //!< "Unsed" hit style
-                  ,kTrackBegin    //!< The track "begin" point
-                  ,kTrackEnd      //!< The track "end" point
-                  ,kUser          //!< "Custom" style
+enum EDraw3DStyle {kVtx              //!< "Vertex" style
+                  ,kPrimaryTrack     //!< "Primary" track style
+                  ,kGlobalTrack      //!< "Global" track style
+                  ,kUsedHit          //!< "Used" hit style
+                  ,kUnusedHit        //!< "Unsed" hit style
+                  ,kTrackBegin       //!< The track "begin" point
+                  ,kTrackEnd         //!< The track "end" point
+                  ,kBarrelStyle=5000 //!< The calorimetr barrel tower (is not end cap towers)
+                  ,kUser             //!< "Custom" style
 };
 
 //! StDraw3DStyle maps "STAR event" EDraw3DStyle onto ROOT  \b (color,style,size) attributes

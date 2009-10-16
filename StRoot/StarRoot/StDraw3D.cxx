@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.57 2009/10/16 21:16:42 fine Exp $
+// $Id: StDraw3D.cxx,v 1.58 2009/10/16 21:47:55 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -833,7 +833,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
  //  TRotMatrix *rotaion = new TRotMatrix("a","b",90,90,0,90- phi*TMath::RadToDeg(),0);
  //  TRotMatrix *rotaion = new TRotMatrix("a","b",90,90,0,90,90,0);
 //   fTopVolume->Add(thisShape,0,yNear+dy,zNear + siz/2,rotaion);
-  bool barrel = true;
+  bool barrel = (sty >= kBarrelStyle);
 
    double rotmatrixZ[] = {  1,        0,        0
                           , 0,        0,       -1
@@ -854,7 +854,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    position->Mult(rpos);   
    thisShape->SetFillColor(col);
    thisShape->SetLineColor(col);
-   thisShape->SetFillStyle(sty);
+   thisShape->SetFillStyle(barrel ? sty-kBarrelStyle : sty );
    if (draw) {
       Draw(fTopVolume,"same");
    } else {
