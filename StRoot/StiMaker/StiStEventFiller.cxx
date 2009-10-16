@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.87 2009/10/15 03:29:30 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.88 2009/10/16 14:56:02 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.88  2009/10/16 14:56:02  fisyak
+ * Add check that pHit exists
+ *
  * Revision 2.87  2009/10/15 03:29:30  perev
  * Add primary vertex number and charge(GVB)
  *
@@ -734,6 +737,7 @@ void StiStEventFiller::fillEventPrimaries()
       if (!kTrack->isPrimary())			continue;
       StiKalmanTrackNode *lastNode = kTrack->getLastNode();
       StiHit *pHit = lastNode->getHit();
+      if (! pHit)                               continue;
       if (fabs(pHit->z_g()-zPrim)>0.1)		continue;//not this primary
 
       fillTrackCount1++;
