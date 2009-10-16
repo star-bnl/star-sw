@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.55 2009/10/16 03:00:57 fine Exp $
+// $Id: StDraw3D.cxx,v 1.56 2009/10/16 18:13:26 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -783,37 +783,44 @@ void StDraw3D::ShowTest()
 }
 
 //______________________________________________________________________________
-TObject *StDraw3D::Tower(float radius, float lambda, float phi, float alphaZ, float alphaPhi, Color_t col,Style_t sty, Size_t siz)
+TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, float dPhi, Color_t col,Style_t sty, Size_t siz)
 {
    float zNear, xNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, xFar, yFar, x1Far,x2Far, y1Far, y2Far;
    zNear  = radius;
-   xNear  = zNear*TMath::Tan(lambda );
-   x1Near = zNear*TMath::Tan(lambda - alphaZ/2);
-   x2Near = zNear*TMath::Tan(lambda + alphaZ/2);
-   yNear  = 0;
-   y1Near = TMath::Sqrt(x1Near*x1Near + zNear*zNear) * TMath::Tan(alphaPhi/2);
-   y2Near = TMath::Sqrt(x2Near*x2Near + zNear*zNear) * TMath::Tan(alphaPhi/2); 
    
+   yNear  = zNear*TMath::Tan(lambda );
+   y1Near = zNear*TMath::Tan(lambda - dlambda/2);
+   y2Near = zNear*TMath::Tan(lambda + dlambda/2);
+   
+   xNear  = 0;
+   x1Near = TMath::Sqrt(y1Near*y1Near + zNear*zNear) * TMath::Tan(dPhi/2);
+   x2Near = TMath::Sqrt(y2Near*y2Near + zNear*zNear) * TMath::Tan(dPhi/2); 
+
    zFar  = radius+siz;
-   xFar  = zFar*TMath::Tan(lambda);
-   x1Far = zFar*TMath::Tan(lambda - alphaZ/2);
-   x2Far = zFar*TMath::Tan(lambda + alphaZ/2);
-   yFar  = 0;
-   y1Far = TMath::Sqrt(x1Far*x1Far + zFar*zFar) * TMath::Tan(alphaPhi/2);
-   y2Far = TMath::Sqrt(x2Far*x2Far + zFar*zFar) * TMath::Tan(alphaPhi/2); 
+   
+   yFar  = zFar*TMath::Tan(lambda);
+   y1Far = zFar*TMath::Tan(lambda - dlambda/2);
+   y2Far = zFar*TMath::Tan(lambda + dlambda/2);
+   
+   xFar  = 0;
+   x1Far = TMath::Sqrt(y1Far*y1Far + zFar*zFar) * TMath::Tan(dPhi/2);
+   x2Far = TMath::Sqrt(y2Far*y2Far + zFar*zFar) * TMath::Tan(dPhi/2); 
+   
+   float dy = TMath::Tan(lambda )*siz/2;
+   
    TTRAP *trap = new TTRAP(  "CALO", Form("Angle%d",lambda)
          , "Barrel"                // Material
          , siz/2                   // dz
-         , TMath::PiOver2()-lambda // Float_t theta
-         , 0                       // Float_t phi
-         , (x2Near-x1Near )/2      // Float_t h1
-         , y1Near                  // Float_t bl1
-         , y2Near                  // Float_t tl1
-         , 0                       // Float_t alpha1
-         , (x2Far-x1Far )/2        // Float_t h2
-         , y1Far                   // Float_t bl2
-         , y2Far                   // Float_t tl2
-         , 0 //Float_t alpha2
+         , lambda*TMath::RadToDeg()// Float_t theta (ROOT needs degree)
+         , 90                      // Float_t phi   (ROOT needs degree)
+         , (y2Near-y1Near )/2      // Float_t h1
+         , x1Near                  // Float_t bl1
+         , x2Near                  // Float_t tl1
+         , 0                       // Float_t alpha1 (ROOT needs degree)
+         , (y2Far-y1Far )/2        // Float_t h2
+         , x1Far                   // Float_t bl2
+         , x2Far                   // Float_t tl2
+         , 0                       // Float_t alpha2 (ROOT needs degree)
          );
    bool draw = false;
    if (!fTopVolume) {
@@ -821,7 +828,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float alphaZ, fl
        fTopVolume = new TVolume();
    }
    TVolume *thisShape = new TVolume("a","b",trap);
-   fTopVolume->Add(thisShape,-xNear,0,zNear + siz/2);
+   fTopVolume->Add(thisShape,0,yNear+dy,zNear + siz/2);
    thisShape->SetFillColor(col);
    thisShape->SetLineColor(col);
    thisShape->SetFillStyle(sty);
