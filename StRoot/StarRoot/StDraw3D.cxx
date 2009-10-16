@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.58 2009/10/16 21:47:55 fine Exp $
+// $Id: StDraw3D.cxx,v 1.59 2009/10/16 22:58:21 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -783,6 +783,21 @@ void StDraw3D::ShowTest()
   for (int i=0;i<2;i++) { fine[i]->UpdateModified(); }
 //  while(!gSystem->ProcessEvents()){}; 
 }
+
+//! Draw the TTRAP object suitable to represent the calorimeter data
+/*! The method creates one "tower" object
+   \param  radius - the distance between the the the base ofd the ower and the "origin"
+   it can be either the distance to the Z-axis for the kBarrelStyle 
+   tower or the distance to the xy plane (for End Cap towers, for example)n
+   \param  lamda - the tower direction (in rads). It is the angle in respect of the Y-axis for kBarrelStyle tower or Z-axis.
+   \param  dlambda - the angle "width" of the tower.
+   \param dphi   - the angle "length" of the tower
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+             one can ad kBarrelStyle constant to ROOT style to get the "barrel" style tower
+   \param   siz - the height of the tower. It can used to visualize the energy deposit or for any other reason.
+   \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
+ */
 
 //______________________________________________________________________________
 TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, float dPhi, Color_t col,Style_t sty, Size_t siz)
