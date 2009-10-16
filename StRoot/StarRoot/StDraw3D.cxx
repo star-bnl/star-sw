@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.53 2009/10/16 02:24:20 fine Exp $
+// $Id: StDraw3D.cxx,v 1.54 2009/10/16 02:46:38 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -334,7 +334,7 @@ void  StDraw3D::Clear(Option_t *opt)
 }
 
 //___________________________________________________
-TObject *StDraw3D::Draw(TObject *o)
+TObject *StDraw3D::Draw(TObject *o,const char *option)
 {
    // Draw the 3d object 
    // and set the new background color if needed
@@ -343,7 +343,7 @@ TObject *StDraw3D::Draw(TObject *o)
       if (!Pad())        InitPad();
       if (Pad() != sav)  Pad()->cd();
       assert (fPad==gPad);
-      o->Draw();
+      o->Draw(option);
       if (sav && (Pad() != sav)) sav->cd();
       if (!Viewer()) InitViewer();
    }
@@ -822,7 +822,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float alphaZ, fl
    thisShape->SetLineColor(col);
    thisShape->SetFillStyle(sty);
    if (draw) {
-      Draw(view);
+      Draw(view,"same");
    } else {
       UpdateModified();
    }

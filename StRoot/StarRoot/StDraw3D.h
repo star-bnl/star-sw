@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.33 2009/10/16 02:24:20 fine Exp $
+// $Id: StDraw3D.h,v 1.34 2009/10/16 02:46:38 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -116,7 +116,7 @@ public:
    TVirtualPad *Pad() const;
    TVirtualViewer3D *Viewer() const;
    virtual void  Clear(Option_t *opt="");
-   virtual TObject *Draw(TObject *o);
+   virtual TObject *Draw(TObject *o, const char *option="");
    virtual const TString &DetectorNames() const;
    virtual void  SetDetectors(const char*nameDetectors);
    virtual void  AddDetectors(const char*nameDetectors);
