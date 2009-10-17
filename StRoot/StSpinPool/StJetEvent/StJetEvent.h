@@ -10,8 +10,6 @@
 #define ST_JET_EVENT_H
 
 class TClonesArray;
-class StMuTrackEmu;
-class StMuTowerEmu;
 class StJetCandidate;
 class StJetTrack;
 class StJetTower;
@@ -41,8 +39,8 @@ public:
   void setRunId(int runId) { mRunId = runId; }
   void setEventId(int eventId) { mEventId = eventId; }
   StJetCandidate* addJet(const StJetCandidate* jet);
-  StJetTrack* addTrack(const StMuTrackEmu* track);
-  StJetTower* addTower(const StMuTowerEmu* tower);
+  StJetTrack* newTrack();
+  StJetTower* newTower();
 
 private:
   int mRunId;
@@ -52,7 +50,7 @@ private:
   TClonesArray* mTracks;
   TClonesArray* mTowers;
 
-  ClassDef(StJetEvent, 1);
+  ClassDef(StJetEvent,1);
 };
 
 #endif // ST_JET_EVENT_H
