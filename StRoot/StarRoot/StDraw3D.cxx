@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.60 2009/10/17 00:03:29 fine Exp $
+// $Id: StDraw3D.cxx,v 1.61 2009/10/17 05:29:34 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -797,7 +797,17 @@ void StDraw3D::ShowTest()
              one can ad kBarrelStyle constant to ROOT style to get the "barrel" style tower
    \param   siz - the height of the tower. It can used to visualize the energy deposit or for any other reason.
    \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
- */
+ \htmlonly
+ <table>
+ <tr>
+ <th>Explanation of the StDraw::Tower(...) method parameters (side view)
+ <th>XY plane view
+ </tr>
+ <tr>
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlane.png">
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png">
+ </tr></table>
+ \endhtmlonly */
 
 //______________________________________________________________________________
 TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, float dPhi, Color_t col,Style_t sty, Size_t siz)
@@ -855,9 +865,9 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
                           , 0,        1,        0
                          };
    float a = -phi+TMath::PiOver2();
-   double rotmatrixX[] = {  cos(a), -sin(a), 0
-                          , sin(a),  cos(a), 0
-                          , 0,          0,       1
+   double rotmatrixX[] = {  cos(a), -sin(a),    0
+                          , sin(a),  cos(a),    0
+                          ,   0,        0,      1
                          };
    TRotMatrix *rootMatrixX   = new TRotMatrix("rotx","rotx",rotmatrixX);
    TVolumePosition *position = fTopVolume->Add(thisShape,0,0,0,rootMatrixX);
