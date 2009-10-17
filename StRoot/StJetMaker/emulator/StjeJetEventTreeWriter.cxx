@@ -91,18 +91,49 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj)
 
   // Loop over jet particles
   StProtoJet::FourVecList& particleList = pj.list();
-  for (StProtoJet::FourVecList::const_iterator iParticle = particleList.begin(); iParticle != particleList.end(); ++iParticle)  {
+  for (StProtoJet::FourVecList::const_iterator iParticle = particleList.begin(); iParticle != particleList.end(); ++iParticle) {
     const StMuTrackFourVec* particle = dynamic_cast<const StMuTrackFourVec*>(*iParticle);
 
-    assert(particle && particle->getIndex() >= 0);
-
     if (StMuTrackEmu* t = particle->track()) {
-      StJetTrack* track = jetEvent.addTrack(t);
+      StJetTrack* track = jetEvent.newTrack();
+      track->mId             = t->id();
+      track->mDetectorId     = t->detectorId();
+      track->mFlag           = t->flag();
+      track->mCharge         = t->charge();
+      track->mNHits          = t->nHits();
+      track->mNHitsFit       = t->nHitsFit();
+      track->mNHitsPoss      = t->nHitsPoss();
+      track->mNHitsDedx      = t->nHitsDedx();
+      track->mDedx           = t->dEdx();
+      track->mNSigmaPion     = t->nSigmaPion();
+      track->mNSigmaKaon     = t->nSigmaKaon();
+      track->mNSigmaProton   = t->nSigmaProton();
+      track->mNSigmaElectron = t->nSigmaElectron();
+      track->mExitTowerId    = t->exitTowerId();
+      track->mExitDetectorId = t->exitDetectorId();
+      track->mExitPoint.SetPtEtaPhi(t->bemcRadius(),t->etaext(),t->phiext());
+      track->mDca            = t->Tdca();
+      track->mDcaZ           = t->dcaZ();
+      track->mDcaD           = t->dcaD();
+      TVector3 mom(t->px(),t->py(),t->pz());
+      track->mPt             = mom.Pt();
+      track->mEta            = mom.Eta();
+      track->mPhi            = mom.Phi();
       jet->addTrack(track)->setJet(jet);
     }
 
     if (StMuTowerEmu* t = particle->tower()) {
-      StJetTower* tower = jetEvent.addTower(t);
+      StJetTower* tower = jetEvent.newTower();
+      tower->mId         = t->id();
+      tower->mDetectorId = t->detectorId();
+      tower->mAdc        = t->adc();
+      tower->mPedestal   = t->pedestal();
+      tower->mRms        = t->rms();
+      tower->mStatus     = t->status();
+      TVector3 mom(t->px(),t->py(),t->pz());
+      tower->mPt         = mom.Pt();
+      tower->mEta        = mom.Eta();
+      tower->mPhi        = mom.Phi();
       jet->addTower(tower)->setJet(jet);
     }
   } // End loop over jet particles
