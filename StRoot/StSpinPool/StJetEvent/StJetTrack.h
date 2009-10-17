@@ -9,14 +9,13 @@
 #ifndef ST_JET_TRACK_H
 #define ST_JET_TRACK_H
 
-class StMuTrackEmu;
-
 #include "StJetElement.h"
 
 class StJetTrack : public StJetElement {
 public:
   StJetTrack();
-  StJetTrack(const StMuTrackEmu* track);
+
+  friend class StjeJetEventTreeWriter;
 
   short flag()                const { return mFlag; }
   short charge()              const { return mCharge; }

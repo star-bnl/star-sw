@@ -9,14 +9,13 @@
 #ifndef ST_JET_TOWER_H
 #define ST_JET_TOWER_H
 
-class StMuTowerEmu;
-
 #include "StJetElement.h"
 
 class StJetTower : public StJetElement {
 public:
   StJetTower();
-  StJetTower(const StMuTowerEmu* tower);
+
+  friend class StjeJetEventTreeWriter;
 
   float energy()   const { return momentum().Mag(); }
   short adc()      const { return mAdc; }
@@ -30,7 +29,7 @@ private:
   float mRms;
   short mStatus;
 
-  ClassDef(StJetTower, 1);
+  ClassDef(StJetTower,1);
 };
 
 #endif // ST_JET_TOWER_H
