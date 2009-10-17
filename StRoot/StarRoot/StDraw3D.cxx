@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.59 2009/10/16 22:58:21 fine Exp $
+// $Id: StDraw3D.cxx,v 1.60 2009/10/17 00:03:29 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -854,8 +854,9 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
                           , 0,        0,       -1
                           , 0,        1,        0
                          };
-   double rotmatrixX[] = {  cos(phi), -sin(phi), 0
-                          , sin(phi),  cos(phi), 0
+   float a = -phi+TMath::PiOver2();
+   double rotmatrixX[] = {  cos(a), -sin(a), 0
+                          , sin(a),  cos(a), 0
                           , 0,          0,       1
                          };
    TRotMatrix *rootMatrixX   = new TRotMatrix("rotx","rotx",rotmatrixX);
