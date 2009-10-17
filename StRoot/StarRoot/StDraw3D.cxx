@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.61 2009/10/17 05:29:34 fine Exp $
+// $Id: StDraw3D.cxx,v 1.62 2009/10/17 06:02:59 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -806,6 +806,10 @@ void StDraw3D::ShowTest()
  <tr>
  <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlane.png">
  <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png">
+ </tr>
+ <tr>
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlaneEC.png">
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png">
  </tr></table>
  \endhtmlonly */
 
