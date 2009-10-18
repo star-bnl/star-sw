@@ -120,6 +120,7 @@ void StiPullEvent::Add(StiPullTrk &trk,int gloPrim)
   int iTrk = trks->GetLast()+1;
   StiPullTrk *kTrk = (StiPullTrk*)trks->New(iTrk);
   *kTrk = trk;
+  assert(trk.mTrackNumber);
   ++mNTrks[gloPrim];
 }
 //_____________________________________________________________________________
@@ -136,11 +137,35 @@ void StiPullEvent::Clear(const char*)
   memset(mVtx,0,sizeof(mVtx));
   memset(mEtx,0,sizeof(mEtx));
   mRun=0; mEvt=0;
-  memset(mNHits,0,sizeof(mNHits));
+  memset(mNTrks,0,sizeof(mNTrks)+sizeof(mNHits));
   
 }
-  
-  
+//_____________________________________________________________________________
+void StiPullEvent::Finish()
+{
+  int ihit=0;
+  int nHits = mHitsG.GetLast()+1;
+  for (int iprim=0;iprim<mNTrks[1];iprim++) 
+  {
+    const StiPullTrk* pTrk = (const StiPullTrk*)mTrksP[iprim];
+    assert(pTrk); 
+    int iTrk = pTrk->mTrackNumber;
+    assert(iTrk>0);
+    StiPullTrk* gTrk = (StiPullTrk*)mTrksG[iTrk-1];
+    assert(gTrk);
+    assert(gTrk->mTrackNumber==iTrk);
+    gTrk->mVertex = pTrk->mVertex;
+    int nUpd=0;
+    for (;ihit<nHits;ihit++) {
+      StiPullHit *gHit = (StiPullHit*)mHitsG[ihit];
+      if (gHit->mTrackNumber!=iTrk) {
+        if (nUpd) {break;} else {continue;}}
+      gHit->mVertex = pTrk->mVertex; nUpd++;
+    }
+    assert(nUpd);
+  }
+
+}  
   
   
   
