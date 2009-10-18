@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.88 2009/10/16 14:56:02 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.89 2009/10/18 22:47:29 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.89  2009/10/18 22:47:29  perev
+ * assert instead of skip
+ *
  * Revision 2.88  2009/10/16 14:56:02  fisyak
  * Add check that pHit exists
  *
@@ -737,7 +740,7 @@ void StiStEventFiller::fillEventPrimaries()
       if (!kTrack->isPrimary())			continue;
       StiKalmanTrackNode *lastNode = kTrack->getLastNode();
       StiHit *pHit = lastNode->getHit();
-      if (! pHit)                               continue;
+      assert (pHit);
       if (fabs(pHit->z_g()-zPrim)>0.1)		continue;//not this primary
 
       fillTrackCount1++;

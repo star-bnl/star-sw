@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.190 2009/03/16 13:50:14 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.191 2009/10/18 22:47:29 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.191  2009/10/18 22:47:29  perev
+// assert instead of skip
+//
 // Revision 1.190  2009/03/16 13:50:14  fisyak
 // Move out all Sti Chairs into StDetectorDb
 //
@@ -779,6 +782,7 @@ Int_t StiMaker::FillPulls()
     mPullEvent->mVtx[2] = vertex->z_g();
     TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
   }
+  mPullEvent->Finish();
   mPullTTree->Fill();
   for (int i=0; i<3; i++) {mPullHits[i]+=mPullEvent->mNHits[i];}
   if (! IAttr(".Privilege")) return kStOK;
