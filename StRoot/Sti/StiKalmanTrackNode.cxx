@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.124 2009/08/19 21:19:37 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.125 2009/10/18 22:48:58 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.125  2009/10/18 22:48:58  perev
+ * remove STAR LOG in print()
+ *
  * Revision 2.124  2009/08/19 21:19:37  perev
  * getTime() is a const now
  *
@@ -2037,8 +2040,8 @@ static const char *HHH = "xyzXYZ";
   TString ts;
   if (!isValid()) ts+="*";
   if (hit) {ts+=(getChi2()>1e3)? "h":"H";}
-  LOG_DEBUG << Form("%p(%s)",(void*)this,ts.Data());
-  if (strchr(opt,'2')) LOG_DEBUG << Form("\t%s=%g","ch2",getChi2());
+  printf("%p(%s)",(void*)this,ts.Data());
+  if (strchr(opt,'2')) printf("\t%s=%g","ch2",getChi2());
 
   for (int i=0;txt[i];i++) {
     if (!strchr(opt,txt[i])) continue;
@@ -2056,8 +2059,8 @@ static const char *HHH = "xyzXYZ";
         case 2: val = z_g(); 	break;
         case 3: val = getPsi();	break;
     } }
-    LOG_DEBUG << Form("\t%c=%g",txt[i],val);
-    if (err) LOG_DEBUG << Form("(%6.1g)",err);
+    printf("\t%c=%g",txt[i],val);
+    if (err) printf("(%6.1g)",err);
   }//end for i
 
   for (int i=0;hit && hhh[i];i++) {
@@ -2071,10 +2074,10 @@ static const char *HHH = "xyzXYZ";
       case 4:val = hit->y_g(); 	break;
       case 5:val = hit->z_g();	err = ::sqrt(getEzz());break;
     }
-    LOG_DEBUG << Form("\th%c=%g",HHH[i],val);
-    if (err) LOG_DEBUG << Form("(%6.1g)",err);
+    printf("\th%c=%g",HHH[i],val);
+    if (err) printf("(%6.1g)",err);
   }
-  LOG_DEBUG << endm;
+  printf("\n");
   return 1;
 }    
 //________________________________________________________________________________
