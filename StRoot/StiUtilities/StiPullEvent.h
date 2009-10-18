@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.5 2009/10/15 03:28:58 perev Exp $
+ * $Id: StiPullEvent.h,v 1.6 2009/10/18 22:02:12 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.6  2009/10/18 22:02:12  perev
+ * Propagate primary info into globals(Finish())
+ *
  * Revision 1.5  2009/10/15 03:28:58  perev
  * Add primary vertex number and charge(GVB)
  *
@@ -45,12 +48,13 @@ class StiPullTrk : public TObject {
 public:
     StiPullTrk();
    ~StiPullTrk(){}
+    void Finish();
     void Clear(const char *opt = "");
     void Print(const char* option = "") const;
 int TestIt();
 public:
 char mBeg[1];
-short mTrackNumber; 		//track number of hit
+short mTrackNumber; 		//track number 
 unsigned char mVertex; 		//vertex number for primary track
 unsigned char nAllHits; 	//number of all hits in track
 unsigned char nTpcHits; 	//number of tpc hits in track
@@ -160,6 +164,7 @@ public:
    StiPullEvent();
   ~StiPullEvent()			{;}
 void Clear(const char *opt = "");	
+void Finish();	
 void Add(StiPullHit &ph,int gloPrim);
 void Add(StiPullTrk &pt,int gloPrim=0);
 const int *GetNHits() const;
