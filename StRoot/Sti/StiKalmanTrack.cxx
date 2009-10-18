@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.115 2009/10/15 03:30:20 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.115 2009/10/15 03:30:20 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.116 2009/10/18 22:49:52 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.116 2009/10/18 22:49:52 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.116  2009/10/18 22:49:52  perev
+ * remove STAR LOG in print()
+ *
  * Revision 2.115  2009/10/15 03:30:20  perev
  * Add primary vertex number
  *
@@ -1466,8 +1469,7 @@ void StiKalmanTrack::unset()
 //_____________________________________________________________________________
 void StiKalmanTrack::print(const char *opt) const
 {
-  LOG_DEBUG <<
-    Form("Track %p",(void*)this) << endm;
+  printf("Track %p",(void*)this);
 
   StiKTNIterator it;
   int n=0;
@@ -1477,7 +1479,7 @@ void StiKalmanTrack::print(const char *opt) const
     if (!hit && strchr(opt,'h')) continue;
     if (!hit && strchr(opt,'H')) continue;
     n++;
-    LOG_DEBUG << Form("%3d - ",n);
+    printf("%3d - ",n);
     node->print(opt);
   }
 }
@@ -1628,7 +1630,7 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
   m            =tk.m;             	// mass hypothesis
   _dca	       =tk._dca;
   _vChi2       =tk._vChi2;		//
-
+  mVertex      =tk.mVertex;
   StiKTNIterator it;
   for (it=tk.begin();it!=tk.end();it++){
     const StiKalmanTrackNode *node = &(*it);
