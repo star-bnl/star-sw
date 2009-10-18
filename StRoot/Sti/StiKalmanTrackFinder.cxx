@@ -454,7 +454,7 @@ if (REFIT) {
 }
     track->reduce();
 // something is wrong. It is not a primary
-    if (ifail) { track->removeLastNode();continue;}
+    if (ifail) { track->removeLastNode(); track->setPrimary(0); continue;}
     goodCount++;
 StiDebug::tally("PrimRefited");
     if (track->getCharge()>0) plus++; else minus++;
