@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.57 2009/02/11 20:03:40 ogrebeny Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.58 2009/10/18 22:46:01 perev Exp $
  
 
 #include <time.h>
@@ -32,15 +32,14 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name)
 //________________________________________________________
 //_______________________________________________________
 StEEmcDbMaker::~StEEmcDbMaker(){
-    if (this->mEEmcDb) delete this->mEEmcDb;
-    this->mEEmcDb = 0;
+    mEEmcDb = 0;
 }
 
 //________________________________________________________
 //________________________________________________________
 //________________________________________________________
 Int_t StEEmcDbMaker::Init(){
-    if (this->mEEmcDb) this->AddConst(this->mEEmcDb);
+    if (mEEmcDb) AddConst(mEEmcDb);
     return StMaker::Init();
 }
 
@@ -58,6 +57,9 @@ Int_t  StEEmcDbMaker::InitRun(int runNumber) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.58  2009/10/18 22:46:01  perev
+// bfc .q crash fix
+//
 // Revision 1.57  2009/02/11 20:03:40  ogrebeny
 // Initialize all 12 sectors
 //
