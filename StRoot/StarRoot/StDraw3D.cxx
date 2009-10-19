@@ -1,8 +1,9 @@
-// $Id: StDraw3D.cxx,v 1.62 2009/10/17 06:02:59 fine Exp $
+// $Id: StDraw3D.cxx,v 1.63 2009/10/19 17:08:45 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
 #include "TTRAP.h"
+#include "TGeometry.h"
 #include "TVolume.h"
 #include "TVolumePosition.h"
 #include "TRotMatrix.h"
@@ -76,7 +77,6 @@ Color_t StDraw3DStyle::Pt2Color(double pt)
    float factor = 1./sqrt(1.*r*r+1.*g*g+1.*b*b);
    return  TColor::GetColor(r*factor,g*factor,b*factor);
 }
-
 //___________________________________________________
 //
 //   view_3D
@@ -104,7 +104,7 @@ class view_3D  {
      void addComment(const char *comment) { fComment += comment; makeInfo(); }
      const TString &info() const { return fObjectInfo;              }
 };
-
+namespace {
 //___________________________________________________
 //
 //   poly_line_3D
@@ -152,7 +152,34 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
         else TPolyMarker3D::Inspect();
      }
 };
-      
+
+//___________________________________________________
+//
+//   TVolume_3D
+//___________________________________________________
+class volume_view_3D : public TVolume, public view_3D {
+   public:
+     volume_view_3D(const Text_t *name, const Text_t *title, TShape *shape, Option_t *option="")
+   : TVolume(name,title, shape,option),view_3D(){;}
+     volume_view_3D() : TVolume(),view_3D(){;}
+     virtual ~volume_view_3D(){;}
+     virtual char  *GetObjectInfo(Int_t x, Int_t y) const
+     {
+        const TString &customInfo = info();
+        const char *info = 0;
+        if (customInfo.IsNull()) 
+           info = TVolume::GetObjectInfo(x,y);
+        else 
+           info = customInfo.Data();
+        return (char *)info;
+     }
+     void Inspect() const {
+        if ( model() ) model()->Inspect();
+        else TVolume::Inspect();
+     }
+};
+}
+
 //! StDraw3D( const char *detectorName,TVirtualPad *pad) ctor
 /*!  
      \param detectorName (default = "TPC") - the names of the STAR detectors 
@@ -856,28 +883,42 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    bool draw = false;
    if (!fTopVolume) {
        draw = true;
-       fTopVolume = new TVolume();
+       fTopVolume = new volume_view_3D();
    }
-   TVolume *thisShape = new TVolume("a","b",trap);
+   volume_view_3D *thisShape = new volume_view_3D("a","b",trap);
  //  TRotMatrix *rotaion = new TRotMatrix("a","b",90,90,0,90- phi*TMath::RadToDeg(),0);
  //  TRotMatrix *rotaion = new TRotMatrix("a","b",90,90,0,90,90,0);
 //   fTopVolume->Add(thisShape,0,yNear+dy,zNear + siz/2,rotaion);
-  bool barrel = (sty >= kBarrelStyle);
+   bool barrel = (sty >= kBarrelStyle);
 
-   double rotmatrixZ[] = {  1,        0,        0
-                          , 0,        0,       -1
-                          , 0,        1,        0
-                         };
+   static double rotmatrixZ[] =  {   1,        0,        0
+                                   , 0,        0,       -1
+                                   , 0,        1,        0
+                                 };
+   static double rotmatrixZNeg[] = {   1,        0,        0
+                                     , 0,       -1,        0
+                                     , 0,        0,       -1
+                                   }; // for the lambda < 0 and End_Cup style
    float a = -phi+TMath::PiOver2();
    double rotmatrixX[] = {  cos(a), -sin(a),    0
                           , sin(a),  cos(a),    0
                           ,   0,        0,      1
                          };
    TRotMatrix *rootMatrixX   = new TRotMatrix("rotx","rotx",rotmatrixX);
+   if (gGeometry) gGeometry->GetListOfMatrices()->Remove(rootMatrixX);
    TVolumePosition *position = fTopVolume->Add(thisShape,0,0,0,rootMatrixX);
+   position->SetMatrixOwner();
    if (barrel) {
       TRotMatrix *rootMatrixZ   = new TRotMatrix("rotz","rotZ",rotmatrixZ);
+      if (gGeometry) gGeometry->GetListOfMatrices()->Remove(rootMatrixZ);
       TVolumePosition zpos(thisShape,0,0,0,rootMatrixZ);
+      zpos.SetMatrixOwner();
+      position->Mult(zpos);   
+   } else if (lambda < 0) {
+      TRotMatrix *rootMatrixZ   = new TRotMatrix("rotz","rotZ",rotmatrixZNeg);
+      if (gGeometry) gGeometry->GetListOfMatrices()->Remove(rootMatrixZ);
+      TVolumePosition zpos(thisShape,0,0,0,rootMatrixZ);
+      zpos.SetMatrixOwner();
       position->Mult(zpos);   
    }
    TVolumePosition rpos(thisShape,0,yNear+dy,zNear + siz/2);
@@ -890,6 +931,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    } else {
       UpdateModified();
    }
+   fView = thisShape;
    return thisShape;
 }
 
