@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.39 2009/10/01 22:40:11 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.40 2009/10/19 21:29:01 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.40  2009/10/19 21:29:01  jhthomas
+ * Improved execution speed for many algorithms: especially GridLeak.
+ *
  * Revision 1.39  2009/10/01 22:40:11  jhthomas
  * Update grid spacing for UndoShort, and prepare for other future gridding upgrades to achieve higher resolution results.
  *
@@ -123,11 +126,11 @@
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 #include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
 
-#define  nZ               57            // Standard STAR B field Map. Number of Z points in table
-#define  nR               28            // Number of R points in table
-#define  nPhi             37            // Number of Phi points in table
-#define  neZ             224            // Standard STAR E field Map. Number of Z points in table
-#define  neR              80            // Number of R points in table
+#define  nZ               57            // Number of Z points in table. Measured STAR B field Maps from Steve T. 
+#define  nR               28            // Number of R points in table.
+#define  nPhi             37            // Number of Phi points in table.
+#define  neZ             224            // Number of Z points in table. Standard STAR distortion tables for interpolating. 
+#define  neR              82            // Number of R points in table
 #define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
 
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
@@ -197,9 +200,9 @@ class StMagUtilities {
   virtual Int_t   IsPowerOfTwo (Int_t i) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
 				const Int_t ORDER, const Float_t x ) ;
-  virtual Float_t Interpolate2DTable  ( const Float_t x, const Float_t y, const Int_t nx, const Int_t ny, 
+  virtual Float_t Interpolate2DTable  ( const Int_t ORDER, const Float_t x, const Float_t y, const Int_t nx, const Int_t ny, 
  				        const Float_t XV[], const Float_t YV[], const TMatrix &Array ) ;
-  virtual Float_t Interpolate3DTable ( const Float_t x,    const Float_t y,    const Float_t z,
+  virtual Float_t Interpolate3DTable ( const Int_t ORDER, const Float_t x,    const Float_t y,    const Float_t z,
 				       const Int_t  nx,    const Int_t  ny,    const Int_t  nz,
 				       const Float_t XV[], const Float_t YV[], const Float_t ZV[],
 				       TMatrix **ArrayofArrays ) ;
@@ -207,9 +210,9 @@ class StMagUtilities {
 					Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
 					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
-  virtual void    Interpolate2DEdistortion ( const Float_t r, const Float_t z, 
+  virtual void    Interpolate2DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t z, 
 					     const Float_t Er[neZ][neR], Float_t &Er_value ) ;
-  virtual void    Interpolate3DEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
+  virtual void    Interpolate3DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t phi, const Float_t z, 
 					     const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
 					     Float_t &Er_value, Float_t &Ephi_value ) ;
   virtual void    PoissonRelaxation  ( TMatrix &ArrayV, const TMatrix &Charge, TMatrix &EroverEz, 
@@ -269,7 +272,7 @@ class StMagUtilities {
   Float_t  shortEr[neZ][neR] ;
 
   static   Float_t ePhiList[nePhi] ;   // Note: These are initialized near CommonStart() in the .cxx file
-  static   Float_t eRadius[neR]    ;
+  static   Float_t eRList[neR]     ;
   static   Float_t eZList[neZ]     ;
 
  public:
