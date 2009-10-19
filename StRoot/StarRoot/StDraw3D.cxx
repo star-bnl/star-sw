@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.64 2009/10/19 17:19:22 fine Exp $
+// $Id: StDraw3D.cxx,v 1.65 2009/10/19 22:12:21 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -726,6 +726,22 @@ void StDraw3D::Draw3DTest(){
    
    Line(sizeXYZ,xyz,kGlobalTrack);
    SetComment("The recontstructed track");
+
+   Tower(192,0.365*TMath::PiOver2(),TMath::Pi()/22
+            ,TMath::Pi()/65,TMath::Pi()/80
+            ,kYellow, kBarrelStyle+4050, 250);
+   SetComment(Form("The EMC tower lambda=%f phi=%f energy=%f",0.365*TMath::PiOver2(),TMath::Pi()/22,250.0));
+   Tower(192,-0.365*TMath::PiOver2(),-TMath::Pi()/22-TMath::Pi()/4
+            ,TMath::Pi()/65,TMath::Pi()/80
+            ,kBlue, kBarrelStyle+4050, 50);
+   Tower(230,-0.365*TMath::PiOver2(),-TMath::Pi()/22-3*TMath::Pi()/4
+            ,TMath::Pi()/65,TMath::Pi()/80
+            ,kCyan, 4050, 50);
+   SetComment(Form("The EndCup tower lambda=%f phi=%f energy=%f",-0.365*TMath::PiOver2(),-TMath::Pi()/22,50.0));
+   Tower(230,0.365*TMath::PiOver2(),-TMath::Pi()/22+TMath::PiOver2()
+            ,TMath::Pi()/65,TMath::Pi()/80
+            ,kGreen, 0, 150);
+
 }
 
 //______________________________________________________________________________
@@ -851,8 +867,11 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
        Warning("StDraw3D::Tower", "The illegal negative value for dphi = %f", dphi);
        dphi = -dphi;
    }
-
    float zNear, xNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, xFar, yFar, x1Far,x2Far, y1Far, y2Far;
+
+   bool barrel = (sty >= kBarrelStyle);
+   if (barrel) lambda = -lambda;
+
    zNear  = radius;
    
    yNear  = zNear*TMath::Tan(lambda );
@@ -872,7 +891,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    xFar  = 0;
    x1Far = TMath::Sqrt(y1Far*y1Far + zFar*zFar) * TMath::Tan(dphi/2);
    x2Far = TMath::Sqrt(y2Far*y2Far + zFar*zFar) * TMath::Tan(dphi/2); 
-   
+
    float dy = TMath::Tan(lambda )*siz/2;
    
    TTRAP *trap = new TTRAP(  "CALO", Form("Angle%d",lambda)
@@ -894,11 +913,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
        draw = true;
        fTopVolume = new volume_view_3D();
    }
-   volume_view_3D *thisShape = new volume_view_3D("a","b",trap);
- //  TRotMatrix *rotaion = new TRotMatrix("a","b",90,90,0,90- phi*TMath::RadToDeg(),0);
- //  TRotMatrix *rotaion = new TRotMatrix("a","b",90,90,0,90,90,0);
-//   fTopVolume->Add(thisShape,0,yNear+dy,zNear + siz/2,rotaion);
-   bool barrel = (sty >= kBarrelStyle);
+   volume_view_3D *thisShape = new volume_view_3D(Form("Lamda=%f : Phi=%f; ",lambda,phi),"tower",trap);
 
    static double rotmatrixZ[] =  {   1,        0,        0
                                    , 0,        0,       -1
