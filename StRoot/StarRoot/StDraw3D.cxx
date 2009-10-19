@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.63 2009/10/19 17:08:45 fine Exp $
+// $Id: StDraw3D.cxx,v 1.64 2009/10/19 17:19:22 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -812,16 +812,16 @@ void StDraw3D::ShowTest()
 }
 
 //! Draw the TTRAP object suitable to represent the calorimeter data
-/*! The method creates one "tower" object
+/*! The method creates one "tower" object (see:  http://root.cern.ch/root/html/TTRAP.html#TTRAP:description )
    \param  radius - the distance between the the the base ofd the ower and the "origin"
    it can be either the distance to the Z-axis for the kBarrelStyle 
    tower or the distance to the xy plane (for End Cap towers, for example)n
    \param  lamda - the tower direction (in rads). It is the angle in respect of the Y-axis for kBarrelStyle tower or Z-axis.
-   \param  dlambda - the angle "width" of the tower.
-   \param dphi   - the angle "length" of the tower
-   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
-   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
-             one can ad kBarrelStyle constant to ROOT style to get the "barrel" style tower
+   \param  dlambda - the non-negative angle "width" of the tower.
+   \param  dphi   - the non-negative angle "length" of the tower
+   \param  col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param  sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+                one can ad kBarrelStyle constant to ROOT style to get the "barrel" style tower
    \param   siz - the height of the tower. It can used to visualize the energy deposit or for any other reason.
    \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
  \htmlonly
@@ -841,8 +841,17 @@ void StDraw3D::ShowTest()
  \endhtmlonly */
 
 //______________________________________________________________________________
-TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, float dPhi, Color_t col,Style_t sty, Size_t siz)
-{
+TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, float dphi, Color_t col,Style_t sty, Size_t siz)
+{ 
+   if (dlambda < 0 ) {
+       Warning("StDraw3D::Tower", "The illegal negative value for dlambda = %f", dlambda);
+       dlambda = -dlambda;
+   }
+   if (dphi < 0 ) {
+       Warning("StDraw3D::Tower", "The illegal negative value for dphi = %f", dphi);
+       dphi = -dphi;
+   }
+
    float zNear, xNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, xFar, yFar, x1Far,x2Far, y1Far, y2Far;
    zNear  = radius;
    
@@ -851,8 +860,8 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    y2Near = zNear*TMath::Tan(lambda + dlambda/2);
    
    xNear  = 0;
-   x1Near = TMath::Sqrt(y1Near*y1Near + zNear*zNear) * TMath::Tan(dPhi/2);
-   x2Near = TMath::Sqrt(y2Near*y2Near + zNear*zNear) * TMath::Tan(dPhi/2); 
+   x1Near = TMath::Sqrt(y1Near*y1Near + zNear*zNear) * TMath::Tan(dphi/2);
+   x2Near = TMath::Sqrt(y2Near*y2Near + zNear*zNear) * TMath::Tan(dphi/2); 
 
    zFar  = radius+siz;
    
@@ -861,8 +870,8 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    y2Far = zFar*TMath::Tan(lambda + dlambda/2);
    
    xFar  = 0;
-   x1Far = TMath::Sqrt(y1Far*y1Far + zFar*zFar) * TMath::Tan(dPhi/2);
-   x2Far = TMath::Sqrt(y2Far*y2Far + zFar*zFar) * TMath::Tan(dPhi/2); 
+   x1Far = TMath::Sqrt(y1Far*y1Far + zFar*zFar) * TMath::Tan(dphi/2);
+   x2Far = TMath::Sqrt(y2Far*y2Far + zFar*zFar) * TMath::Tan(dphi/2); 
    
    float dy = TMath::Tan(lambda )*siz/2;
    
