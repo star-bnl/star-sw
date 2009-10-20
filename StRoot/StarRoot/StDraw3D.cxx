@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.66 2009/10/20 01:41:54 fine Exp $
+// $Id: StDraw3D.cxx,v 1.67 2009/10/20 03:04:38 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -290,13 +290,17 @@ StDraw3D::~StDraw3D()
     }
 }
 
+
+//__________________________________________________________________________________________
 //! \return The TString of the comma separated names 
 //__________________________________________________________________________________
 const TString &StDraw3D::DetectorNames() const 
 {
    // return the list of the names 
    return fDetectorName; 
-} 
+}
+
+//__________________________________________________________________________________________ 
 /*! \return The TPad pointer used to paint onto.
  */
 //__________________________________________________________________________________
@@ -305,6 +309,7 @@ TVirtualPad *StDraw3D::Pad() const
    return fMaster ? fMaster->Pad() : fPad;
 }
 
+//__________________________________________________________________________________________
 //! \return The TVirtualViewer3D viewer pointer used to render into.
 //__________________________________________________________________________________
 TVirtualViewer3D *StDraw3D::Viewer() const
@@ -312,6 +317,7 @@ TVirtualViewer3D *StDraw3D::Viewer() const
    return fMaster ? fMaster->Viewer() : fViewer;
 }
 
+//__________________________________________________________________________________________
 //! Set the list of the detector names to be used as the event "background"
 /*! \param  nameDetectors - a comma separated list of the OpenInventor files with no extension\n
                                For all names on the list one should provide the iv file with 
@@ -330,6 +336,8 @@ void StDraw3D::SetDetectors(const char*nameDetectors)
       fDetectorName = nameDetectors;
    }
 }
+
+//__________________________________________________________________________________________
 //! Append the detector names to the list of  the event "background" shapes.
 /*! \param  nameDetectors - a comma separated list of the OpenInventor files with no extension\n
                                For all names on the list one should provide the iv file with 
@@ -380,6 +388,8 @@ TObject *StDraw3D::Draw(TObject *o,const char *option)
    }
    return o;
 }
+
+//__________________________________________________________________________________________
 //! Set the ROOT color as the widget background
 /*! 
     \param newBkColor - ROOT index of the color to paint the widget backgorund ( \sa http://root.cern.ch/root/html/TColor.html )
@@ -394,6 +404,8 @@ void StDraw3D::SetBkColor(Color_t newBkColor)
        pad->SetFillColor(fBkColor);
 }
 
+
+//__________________________________________________________________________________________
 //! Map the predefined style \a type to the ROOT graphical attributes \a col color \a sty style \a siz size
 /*! 
     Normally one does not need to call this  method. All pre-defined styles are to be filled by  StDraw3D class ctor
@@ -412,17 +424,19 @@ const StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t st
 }
 
 
+//__________________________________________________________________________________________
 //! Return the reference to the predefined StDraw3DStyle object
 /*! 
     \param type - The pre-defined \a type we want to get the reference to
  */
-//___________________________________________________
+//__________________________________________________________________________________________
 const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
 {
     return fStyles[type];
 }
 
-//! Add \a n 3D coordinates from the \xyz array to the display list with the \a col color, \a sty style, and \a siz size if provided
+//__________________________________________________________________________________________
+//! Add \a n 3D coordinates from the \a xyz array to the display list with the \a col color, \a sty style, and \a siz size if provided
 /*! 
    \param     n - the number of the 3D coordinates 
    \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
@@ -431,7 +445,7 @@ const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
    \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
    \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
 */
-//___________________________________________________
+//__________________________________________________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_t siz)
 { 
    //
@@ -447,14 +461,16 @@ TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_
    fView = plMk;
    return Draw(plMk);
 }
+
+//__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
-/*! Add \a n 3D coordinates from the \xyz array to the display list with the \a sty pre-defined style if provided 
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the \a sty pre-defined style if provided 
    \param     n - the number of the 3D coordinates 
    \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
    \param   sty  - EDraw3DStyle value selecting some predefined style 
    \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
 */
-//___________________________________________________
+//__________________________________________________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, EDraw3DStyle sty)
 {
    //
@@ -507,11 +523,21 @@ TObject *StDraw3D::Point(float x, float y, float z, EDraw3DStyle sty)
    return Point(x,y, z, style.Col(),style.Sty(),style.Siz());
 }
 
-//___________________________________________________
+//__________________________________________________________________________________________
+//! Add \a n connected points defined by the \a "xyz" array of the 3D coordinates to the display list with the \a col color, \a sty style, and \a siz size if provided
+/*! 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
 TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t siz)
 {
    //
-   // Draw "n" points of the "xyz" array of the float coordinates 
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
    // with ROOT TPolyline3D class
    // with the ROOT color, style, size attributes
    //
@@ -523,11 +549,19 @@ TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t
    return Draw(plLine);
 }
 
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n  connected points defined by the \xyz array of 3D coordinates to the display list with the \a sty pre-defined style if provided 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
 //___________________________________________________
 TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
 {
    //
-   // Draw "n" points of the "xyz" array of the float coordinates 
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
    // with ROOT TPolyLine3D class and the predefined attrbutes
    //
    // This is an overloaded member function, provided for convenience.
@@ -536,6 +570,7 @@ TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
    const StDraw3DStyle &style =  Style(sty);
    return Line(n,xyz,  style.Col(),style.Sty(),style.Siz() );
 }
+
 //___________________________________________________
 void StDraw3D::Joint(StDraw3D *dsp)
 {
@@ -600,7 +635,7 @@ void StDraw3D::AddComment(const char *cmnt)
 
 //! Save the current 3D scene using "wrl" file format
 /*! \param  filename - the file name to save the 3d scene
-   \Note: The "wrl" format can be converted to the standatd 3D PDF format 
+   \note : The "wrl" format can be converted to the standatd 3D PDF format 
    \htmlonly 
    It can be done <a href="http://blogs.adobe.com/mfg/2009/04/more_3d_reviewer_features">
    "Adobe 3D reviewer"</a>  
@@ -832,7 +867,7 @@ void StDraw3D::ShowTest()
    \param  radius - the distance between the the the base ofd the ower and the "origin"
    it can be either the distance to the Z-axis for the kBarrelStyle 
    tower or the distance to the xy plane (for End Cap towers, for example)n
-   \param  lamda - the tower direction (in rads). It is the angle in respect of the Y-axis for kBarrelStyle tower or Z-axis.
+   \param  lambda - the tower direction (in rads). It is the angle in respect of the Y-axis for kBarrelStyle tower or Z-axis.
    \param  dlambda - the non-negative angle "width" of the tower.
    \param  dphi   - the non-negative angle "length" of the tower
    \param  col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
@@ -844,23 +879,25 @@ void StDraw3D::ShowTest()
  <table>
  <tr>
  <th>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
+</tr>
  <tr>
  <th>XZ plane view
  <th>XY plane view
  </tr>
  <tr>
- <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlane.png" width=200px>
- <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png" width=240px>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlane.png" width=340px></center>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png" width=340px></center>
  </tr>
  <tr>
- <th>Explanation of the StDraw::Tower(...) method parameters ("endcap" style )
+ <th>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
+ </tr>
  <tr>
  <th>XZ plane view
  <th>XY plane view
- </tr
+ </tr>
  <tr>
- <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlaneEC.png" width=240px>
- <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png" width=240px>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlaneEC.png" width=340px></center>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png" width=340px></center>
  </tr></table>
  \endhtmlonly */
 
