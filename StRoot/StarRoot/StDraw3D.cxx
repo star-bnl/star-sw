@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.65 2009/10/19 22:12:21 fine Exp $
+// $Id: StDraw3D.cxx,v 1.66 2009/10/20 01:41:54 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -843,16 +843,24 @@ void StDraw3D::ShowTest()
  \htmlonly
  <table>
  <tr>
- <th>Explanation of the StDraw::Tower(...) method parameters (side view)
+ <th>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
+ <tr>
+ <th>XZ plane view
  <th>XY plane view
  </tr>
  <tr>
- <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlane.png">
- <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png">
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlane.png" width=200px>
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png" width=240px>
  </tr>
  <tr>
- <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlaneEC.png">
- <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png">
+ <th>Explanation of the StDraw::Tower(...) method parameters ("endcap" style )
+ <tr>
+ <th>XZ plane view
+ <th>XY plane view
+ </tr
+ <tr>
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYPlaneEC.png" width=240px>
+ <td><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png" width=240px>
  </tr></table>
  \endhtmlonly */
 

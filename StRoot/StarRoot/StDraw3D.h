@@ -1,11 +1,12 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.37 2009/10/16 22:58:21 fine Exp $
+// $Id: StDraw3D.h,v 1.38 2009/10/20 01:41:54 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
 #include "Gtypes.h"
 #include "TString.h"
+#include "TMath.h"
 #include <map>
 
 class TVirtualPad;
@@ -53,6 +54,22 @@ class StDraw3DStyle {
      static Color_t Pt2Color(double pt);
 };
 
+class  StEta {
+  protected:
+    double fAngle;
+    StEta &SetAngle(double eta) {
+         static Float_t p2=TMath::PiOver2();
+         fAngle =  (p2 - 2*TMath::ATan(TMath::Exp(-eta)));
+         return *this;
+    }
+    public:
+      StEta(double pseudoRapidity)  { SetAngle(pseudoRapidity);   }
+      StEta &operator=(double eta)  { return SetAngle(eta); }
+      operator double() const { return fAngle; }
+      operator float()  const { return fAngle; }
+      StEta &operator-(const StEta &eta) { return SetAngle(fAngle-(double)eta); }
+      StEta &operator+(const StEta &eta) { return SetAngle(fAngle+(double)eta); }
+};
 
 class view_3D;
 
