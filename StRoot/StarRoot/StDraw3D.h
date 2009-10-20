@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.39 2009/10/20 04:51:05 fine Exp $
+// $Id: StDraw3D.h,v 1.40 2009/10/20 18:23:32 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -12,7 +12,6 @@
 class TVirtualPad;
 class TVirtualViewer3D;
 class TVolume;
-
 //! EDraw3DStyle defines the set of the pre-defined "STAR event component" styles
 enum EDraw3DStyle {kVtx              //!< "Vertex" style
                   ,kPrimaryTrack     //!< "Primary" track style
@@ -53,23 +52,63 @@ class StDraw3DStyle {
                   { SetCol(col); SetSiz(siz); SetSty(sty);  }
      static Color_t Pt2Color(double pt);
 };
-
+namespace StarRoot {
 class  StEta {
   protected:
-    double fAngle;
-    StEta &SetAngle(double eta) {
-         static Float_t p2=TMath::PiOver2();
-         fAngle =  (p2 - 2*TMath::ATan(TMath::Exp(-eta)));
-         return *this;
-    }
-    public:
-      StEta(double pseudoRapidity)  { SetAngle(pseudoRapidity);   }
-      StEta &operator=(double eta)  { return SetAngle(eta); }
-      operator double() const { return fAngle; }
-      operator float()  const { return fAngle; }
-      StEta &operator-(const StEta &eta) { return SetAngle(fAngle-(double)eta); }
-      StEta &operator+(const StEta &eta) { return SetAngle(fAngle+(double)eta); }
+    double fLambda;
+    double fDLambda1;
+    double fDLambda2;
+    double fEta;
+    double fDEta;
+ protected:
+    StEta &SetAngle(double eta, double dEta);
+ public:
+      StEta(double eta,double dEta);
+      ~StEta(){;}
+      StEta(const StEta &eta);
+      StEta &operator=(const StEta &eta);
+      double dLambda1() const;
+      double dLambda2() const;
+      operator double() const;
+      const StEta operator-(double eta);
+      const StEta operator+(double eta);
+      const StEta operator-(const StEta &eta);
+      const StEta operator+(const StEta &eta);
+      
+      StEta &operator+=(const StEta &eta);
+      StEta &operator+=(double eta);
 };
+
+inline StEta &StEta::SetAngle(double eta, double dEta) {
+   fEta = eta; fDEta = fDEta;
+   static Float_t p2=TMath::PiOver2();
+   fLambda   =  p2 - 2*TMath::ATan(TMath::Exp(-eta));
+   fDLambda1 =  p2 - 2*TMath::ATan(TMath::Exp(-(eta-dEta/2)));
+   fDLambda2 =  p2 - 2*TMath::ATan(TMath::Exp(-(eta+dEta/2)));
+   return *this;
+}
+inline StEta::StEta(double eta,double dEta)  { SetAngle(eta,dEta); }
+inline StEta::StEta(const StEta &eta){ 
+   fLambda = eta.fLambda; fDLambda1 = eta.fDLambda1; fDLambda2 = eta.fDLambda2; 
+   fEta = eta.fEta;  fDEta = eta.fDEta;
+}
+inline StEta &StEta::operator=(const StEta &eta) { 
+   fLambda = eta.fLambda; fDLambda1 = eta.fDLambda1; fDLambda2 = eta.fDLambda2;
+   fEta = eta.fEta;  fDEta = eta.fDEta; 
+   return *this;
+}
+inline double StEta::dLambda1() const { return fDLambda1; }
+inline double StEta::dLambda2() const { return fDLambda2; }
+inline StEta::operator double() const { return fLambda;   }
+inline const StEta StEta::operator-(double eta) { return StEta(fEta-eta,fDEta); }
+inline const StEta StEta::operator+(double eta) { return StEta(fEta+eta,fDEta); }
+inline const StEta StEta::operator-(const StEta &eta) { return operator-(eta.fEta); }
+inline const StEta StEta::operator+(const StEta &eta) { return operator+(eta.fEta); }
+
+inline  StEta &StEta::operator+=(const StEta &eta) { return operator+=(eta.fEta); }
+inline  StEta &StEta::operator+=(double eta)       { return SetAngle(fEta+eta,fDEta); }
+}
+
 
 class view_3D;
 
@@ -170,8 +209,15 @@ public:
    virtual TObject *Line(int n,  const float *xyz
          ,  EDraw3DStyle sty);
 
+   virtual TObject *Tower(float radius
+                       , float lambda, float dlambda1, float dlambda2
+                       , float phi,float dphi
+                       , Color_t col,Style_t sty, Size_t siz);
    virtual TObject *Tower( float radius, float lambda, float phi
                          , float dlambda, float dphi
+                         , Color_t col,Style_t sty, Size_t siz);
+   virtual TObject *Tower( float radius, const StarRoot::StEta &eta
+                         , float phi, float dphi
                          , Color_t col,Style_t sty, Size_t siz);
 
    virtual void Joint(StDraw3D *dsp);
