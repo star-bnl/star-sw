@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.69 2009/10/20 18:23:32 fine Exp $
+// $Id: StDraw3D.cxx,v 1.70 2009/10/20 23:07:00 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -776,7 +776,22 @@ void StDraw3D::Draw3DTest(){
    Tower(230,0.365*TMath::PiOver2(),-TMath::Pi()/22+TMath::PiOver2()
             ,TMath::Pi()/65,TMath::Pi()/80
             ,kGreen, 0, 150);
-
+   // Use the pseidorapidity units:
+   int sector=20;
+   double stepEta = (0.9-0.22)*TMath::Pi()/sector;
+   StarRoot::StEta eta(0.9*TMath::Pi(),stepEta);
+   StarRoot::StEta eta2(-0.2*TMath::Pi(),stepEta);
+   float phi = 0;
+   int n  = sector;
+   for (int i=0;i<n;i++) {
+      Tower(193,eta,phi,TMath::Pi()/80,(i+1)%8,kBarrelStyle,5*i+25);
+      SetComment(Form("The EMC tower pseudorapidity=%f phi=%f energy=%f",eta.Eta(),phi,5*i+25.));
+      Tower(230,eta2,phi+0.1,TMath::Pi()/80,(i+2)%8,4060,10*i+40);
+      SetComment(Form("The Endcap tower pseudorapidity=%f phi=%f energy=%f",eta2.Eta(),phi,10*i+40.));
+      eta  -=stepEta;
+      eta2 +=stepEta/5.4;
+      phi += 4*TMath::Pi()/n;
+   }
 }
 
 //______________________________________________________________________________
