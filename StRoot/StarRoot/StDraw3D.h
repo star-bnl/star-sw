@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.38 2009/10/20 01:41:54 fine Exp $
+// $Id: StDraw3D.h,v 1.39 2009/10/20 04:51:05 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -170,7 +170,7 @@ public:
    virtual TObject *Line(int n,  const float *xyz
          ,  EDraw3DStyle sty);
 
-   virtual TObject *Tower( float radius, float lamda, float phi
+   virtual TObject *Tower( float radius, float lambda, float phi
                          , float dlambda, float dphi
                          , Color_t col,Style_t sty, Size_t siz);
 
