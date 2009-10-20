@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.116 2009/10/02 16:57:34 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.117 2009/10/20 15:13:12 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -97,8 +97,13 @@
     # We make the assumption that STAR_HOST_SYS will contain the string 64_
     # 64 bits test does not suffice. It comes in two flavors with lib and lib64
     # depending of backward 32 support or not. We can extend here later
-    $IS_64BITS     = ($STAR_HOST_SYS =~ m/64_/ && -e "/usr/lib64" );
-    if ($IS_64BITS){
+    #
+    # ATTENTION: Scheme change 2009/10/20 (but before full transition so could
+    # be cleaned later). USE_64BITS defined externally.
+    #
+    # $USE_64BITS     = ($STAR_HOST_SYS =~ m/64_/ && -e "/usr/lib64" );
+    #
+    if ($USE_64BITS){
 	$LLIB = "lib64";
     } else {
 	$LLIB = "lib";
