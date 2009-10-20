@@ -55,4 +55,6 @@
 #pragma link C++ class StMultiKeyNode;
 #pragma link C++ class StMultiKeyMapIter;
 #pragma link C++ class StDraw3DStyle;
+#pragma link C++ namespace StarRoot;
+#pragma link C++ class StarRoot::StEta;
 #pragma link C++ enum  EDraw3DStyle;

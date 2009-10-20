@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.68 2009/10/20 03:16:04 fine Exp $
+// $Id: StDraw3D.cxx,v 1.69 2009/10/20 18:23:32 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -901,13 +901,24 @@ void StDraw3D::ShowTest()
  <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png" width=340px></center>
  </tr></table>
  \endhtmlonly */
+//__________________________________________________________________________________________
+TObject *StDraw3D::Tower(float radius
+        , float lambda, float phi
+        , float dlambda, float dphi
+        , Color_t col,Style_t sty, Size_t siz)
+{
+   float d2 =  dlambda/2;
+   return Tower(radius, lambda,lambda-d2, lambda+d2,phi, dphi, col, sty, siz);
+}
 
-//______________________________________________________________________________
-TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, float dphi, Color_t col,Style_t sty, Size_t siz)
+//__________________________________________________________________________________________
+TObject *StDraw3D::Tower(float radius, float lambda, float dlambda1, float dlambda2, float phi,float dphi, Color_t col,Style_t sty, Size_t siz)
 { 
-   if (dlambda < 0 ) {
-       Warning("StDraw3D::Tower", "The illegal negative value for dlambda = %f", dlambda);
-       dlambda = -dlambda;
+   if (dlambda2-dlambda1 < 0 ) {
+       Warning("StDraw3D::Tower", "The illegal negative value for dlambda = %f", dlambda2-dlambda1);
+       float swp = dlambda1;
+       dlambda1 = dlambda2;
+       dlambda2 = swp;
    }
    if (dphi < 0 ) {
        Warning("StDraw3D::Tower", "The illegal negative value for dphi = %f", dphi);
@@ -916,13 +927,17 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    float zNear, xNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, xFar, yFar, x1Far,x2Far, y1Far, y2Far;
 
    bool barrel = (sty >= kBarrelStyle);
-   if (barrel) lambda = -lambda;
+   if (barrel) {
+      lambda   = -lambda;
+    //  dlambda1 = -dlambda1;
+    //  dlambda2 = -dlambda2;
+   }
 
    zNear  = radius;
    
-   yNear  = zNear*TMath::Tan(lambda );
-   y1Near = zNear*TMath::Tan(lambda - dlambda/2);
-   y2Near = zNear*TMath::Tan(lambda + dlambda/2);
+   yNear  = zNear*TMath::Tan(lambda);
+   y1Near = zNear*TMath::Tan(dlambda1);
+   y2Near = zNear*TMath::Tan(dlambda2);
    
    xNear  = 0;
    x1Near = TMath::Sqrt(y1Near*y1Near + zNear*zNear) * TMath::Tan(dphi/2);
@@ -931,8 +946,8 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    zFar  = radius+siz;
    
    yFar  = zFar*TMath::Tan(lambda);
-   y1Far = zFar*TMath::Tan(lambda - dlambda/2);
-   y2Far = zFar*TMath::Tan(lambda + dlambda/2);
+   y1Far = zFar*TMath::Tan(dlambda1);
+   y2Far = zFar*TMath::Tan(dlambda2);
    
    xFar  = 0;
    x1Far = TMath::Sqrt(y1Far*y1Far + zFar*zFar) * TMath::Tan(dphi/2);
@@ -1005,5 +1020,23 @@ TObject *StDraw3D::Tower(float radius, float lambda, float phi, float dlambda, f
    return thisShape;
 }
 
+//__________________________________________________________________________________________
+TObject *StDraw3D::Tower( float radius, const StarRoot::StEta &eta
+                         , float phi, float dphi
+                         , Color_t col,Style_t sty, Size_t siz)
+{
+   bool barrel = (sty >= kBarrelStyle);
+   double  lambda,lambda1,lambda2;
+   if (barrel) {
+      lambda  = TMath::PiOver2()-eta;
+      lambda1 = TMath::PiOver2()-eta.dLambda2();
+      lambda2 = TMath::PiOver2()-eta.dLambda1();
+   } else {
+      lambda  = eta;
+      lambda1 = eta.dLambda1();
+      lambda2 = eta.dLambda2();
+   }
+   return Tower(radius,lambda,lambda1,lambda2, phi, dphi, col, sty, siz);
+}
 
 ClassImp(StDraw3D)
