@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.40 2009/10/20 18:23:32 fine Exp $
+// $Id: StDraw3D.h,v 1.41 2009/10/20 23:07:00 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -67,6 +67,12 @@ class  StEta {
       ~StEta(){;}
       StEta(const StEta &eta);
       StEta &operator=(const StEta &eta);
+      double Eta() const;
+      double Deta() const;
+      double TettaDeg() const;
+      double Lambda() const;
+      double LambdaDeg() const ;
+      static double Lambda(double eta);
       double dLambda1() const;
       double dLambda2() const;
       operator double() const;
@@ -77,16 +83,24 @@ class  StEta {
       
       StEta &operator+=(const StEta &eta);
       StEta &operator+=(double eta);
+      StEta &operator-=(const StEta &eta);
+      StEta &operator-=(double eta);
 };
 
 inline StEta &StEta::SetAngle(double eta, double dEta) {
-   fEta = eta; fDEta = fDEta;
-   static Float_t p2=TMath::PiOver2();
-   fLambda   =  p2 - 2*TMath::ATan(TMath::Exp(-eta));
-   fDLambda1 =  p2 - 2*TMath::ATan(TMath::Exp(-(eta-dEta/2)));
-   fDLambda2 =  p2 - 2*TMath::ATan(TMath::Exp(-(eta+dEta/2)));
+   fEta = eta; fDEta = dEta;
+   fLambda   = Lambda(eta);
+   fDLambda1 = Lambda(eta-dEta/2);
+   fDLambda2 = Lambda(eta+dEta/2);
    return *this;
 }
+inline double StEta::Lambda() const { return fLambda; }
+
+inline double StEta::Lambda(double eta) {
+   static  Float_t p2=TMath::PiOver2();
+   return  p2 - 2*TMath::ATan(TMath::Exp(-eta));
+}
+
 inline StEta::StEta(double eta,double dEta)  { SetAngle(eta,dEta); }
 inline StEta::StEta(const StEta &eta){ 
    fLambda = eta.fLambda; fDLambda1 = eta.fDLambda1; fDLambda2 = eta.fDLambda2; 
@@ -97,6 +111,10 @@ inline StEta &StEta::operator=(const StEta &eta) {
    fEta = eta.fEta;  fDEta = eta.fDEta; 
    return *this;
 }
+inline double StEta::Deta()     const { return fDEta;                      }
+inline double StEta::Eta()      const { return fEta;                       }
+inline double StEta::LambdaDeg() const{ return fLambda*TMath::RadToDeg();  }
+inline double StEta::TettaDeg() const { return 90-LambdaDeg();             }
 inline double StEta::dLambda1() const { return fDLambda1; }
 inline double StEta::dLambda2() const { return fDLambda2; }
 inline StEta::operator double() const { return fLambda;   }
@@ -107,6 +125,9 @@ inline const StEta StEta::operator+(const StEta &eta) { return operator+(eta.fEt
 
 inline  StEta &StEta::operator+=(const StEta &eta) { return operator+=(eta.fEta); }
 inline  StEta &StEta::operator+=(double eta)       { return SetAngle(fEta+eta,fDEta); }
+inline  StEta &StEta::operator-=(const StEta &eta) { return operator-=(eta.fEta); }
+inline  StEta &StEta::operator-=(double eta)       { return SetAngle(fEta-eta,fDEta); }
+
 }
 
 
