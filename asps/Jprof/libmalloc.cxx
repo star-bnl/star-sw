@@ -19,6 +19,7 @@
 // The __linux__ glibc hides part of sigaction if _POSIX_SOURCE is defined
 #if defined(__linux__)
 #undef _POSIX_SOURCE
+#include "bfd.h"
 #endif
 
 // Some versions of glibc (i.e., the one that comes with RedHat 6.0 rather
@@ -41,14 +42,14 @@
 #include <dlfcn.h>
 
 
-#ifdef NTO
+#if defined(NTO) 
 #include <sys/link.h>
 extern r_debug _r_debug;
 #else
 #include <link.h>
 #endif
 
-#ifdef NTO
+#if defined(NTO) || defined(__linux__)
 #define JB_BP 0x08
 #include <setjmp.h>
 #endif
