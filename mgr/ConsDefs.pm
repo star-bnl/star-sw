@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.118 2009/10/21 22:09:53 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.119 2009/10/21 23:08:08 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -103,12 +103,12 @@
     #
     # $USE_64BITS     = ($STAR_HOST_SYS =~ m/64_/ && -e "/usr/lib64" );
     #
-    $XGCMPOPT = "";
+    $XMACHOPT = "";
     if ($USE_64BITS){
-	if ($STAR_HOST_SYS =~ /(gcc)(\d)/){ if ( $2 >= 4 ){   $XGCMPOPT = "-m64";}}
+	if ($STAR_HOST_SYS =~ /(gcc)(\d)/){ if ( $2 >= 4 ){   $XMACHOPT = "-m64";}}
 	$LLIB = "lib64";
     } else {
-	if ($STAR_HOST_SYS =~ /(gcc)(\d)/){ if ( $2 >= 4 ){   $XGCMPOPT = "-m32";}}
+	if ($STAR_HOST_SYS =~ /(gcc)(\d)/){ if ( $2 >= 4 ){   $XMACHOPT = "-m32";}}
 	$LLIB = "lib";
     }
 
@@ -116,26 +116,26 @@
 	# give preference to gfortran for now - JL 200908
 	$G77       = "gfortran";
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG )  {
-	    $G77FLAGS  = "$XGCMPOPT -fd-lines-as-comments ";
+	    $G77FLAGS  = "$XMACHOPT -fd-lines-as-comments ";
 	} else {
-	    $G77FLAGS  = "$XGCMPOPT -fd-lines-as-code ";
+	    $G77FLAGS  = "$XMACHOPT -fd-lines-as-code ";
 	}
 	$G77FLAGS .= "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
     } else {
 	$G77       = "g77";
-	$G77FLAGS  = "$XGCMPOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
+	$G77FLAGS  = "$XMACHOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
     }
 
     if ($STAR_HOST_SYS =~ /gcc3/) {  $G77FLAGS    = "-pipe " . $G77FLAGS;}
     $G77EXTEND     = "-ffixed-line-length-132";
 
     $CXX           = "g++";
-    $CXXFLAGS      = "$XGCMPOPT -fPIC -w";
+    $CXXFLAGS      = "$XMACHOPT -fPIC -w";
     $EXTRA_CXXFLAGS= "";
     $CXXOPT        = "";
 
     $CC            = "gcc";
-    $CFLAGS        = "$XGCMPOPT -fPIC -w";
+    $CFLAGS        = "$XMACHOPT -fPIC -w";
     $EXTRA_CFLAGS  = "";
 
     $FC            = $G77;
@@ -153,13 +153,13 @@
     $AR            = "ar";
     $ARFLAGS       = "rvu";
     $LD            = $CXX;
-    $LDFLAGS       = "$XGCMPOPT ";#--no-warn-mismatch";#$CXXFLAGS;
+    $LDFLAGS       = "$XMACHOPT ";#--no-warn-mismatch";#$CXXFLAGS;
     $LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
     $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
     $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
     $EXTRA_LDFLAGS = "";
     $F77LD         = $LD;
-    $F77LDFLAGS    = "$XGCMPOPT ";#$LDFLAGS;
+    $F77LDFLAGS    = "$XMACHOPT ";#$LDFLAGS;
     $SO            = $CXX;
     $SOFLAGS       = "";
     $STIC          = "stic";
@@ -335,8 +335,8 @@
 	$CC            = "icc";
 	$CXX           = "icc";
 	$CPP           = $CC . " -EP";
-	$CXXFLAGS      = "-w -ansi $XGCMPOPT -fPIC -wd1476"; #-fpstkchk";
-	$CFLAGS        = "-restrict -w $XGCMPOPT -fPIC";     # -fpstkchk";# -restrict";# -Wall
+	$CXXFLAGS      = "-w -ansi $XMACHOPT -fPIC -wd1476"; #-fpstkchk";
+	$CFLAGS        = "-restrict -w $XMACHOPT -fPIC";     # -fpstkchk";# -restrict";# -Wall
 	$ICC_MAJOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f1; /bin/rm  /tmp/icc_version;`;
         $ICC_MINOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f2; /bin/rm  /tmp/icc_version;`;
 	chomp($ICC_MAJOR); chomp($ICC_MINOR);
@@ -360,14 +360,14 @@
 	}
 	$F77LIBS      .= " -lg2c";
 	$FLIBS         = $F77LIBS;
-	$FFLAGS        = "$XGCMPOPT -save";
+	$FFLAGS        = "$XMACHOPT -save";
 	$FEXTEND       = "-132";
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
 	$SYSLIBS       = "-lm -ldl -lrt";# -rdynamic";
 	$CLIBS         = "-lm -ldl -lrt";# -rdynamic";
 	$CRYPTLIBS     = "-lcrypt";
 	$LD            = "icpc";
-	$LDFLAGS       = "$XGCMPOPT ";#--no-warn-mismatch";
+	$LDFLAGS       = "$XMACHOPT ";#--no-warn-mismatch";
 	$F77LD         = $LD;
 	$SO            = $CXX;
 	$SOFLAGS       = "-shared -u*";
@@ -492,7 +492,7 @@
 	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
 
         # print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
-        $CXXFLAGS     = "$XGCMPOPT -fPIC -pipe -Wall -Woverloaded-virtual";
+        $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual";
 	my $optflags = "";
 
         if ($CXX_VERSION < 3) {
@@ -502,7 +502,8 @@
 	    $CXXFLAGS    .= " -ansi";
 	}
 
-	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; } # -fpermissive ?
+        # -fpermissive ?
+	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; } 
 	#	  else {
 	#	  print "CXXFLAGS = $CXXFLAGS\n"; die;
 	#	}
@@ -526,7 +527,7 @@
 	    $CXXFLAGS .= " " . $optflags;
 	    $G77FLAGS .= " " . $optflags;
 	}
-        $CFLAGS    = "$XGCMPOPT -fPIC -pipe -Wall -Wshadow";
+        $CFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Wshadow";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
 
 	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
@@ -584,12 +585,19 @@
     $CLIBS     .= $threadlib;
     $CFLAGS    .= $ROOTCFLAGS;
     $CXXFLAGS  .= $ROOTCFLAGS;
-    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
+
+    if ( $STAR_SYS ne $STAR_HOST_SYS ) { 
+	$OSFID   .= " " . $STAR_HOST_SYS; 
+	$OSFCFID .= " " . $STAR_HOST_SYS;
+    }
+
     $OSFID    .= " __ROOT__";
     $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $OSFID ) );
     $CFLAGS   .= " -D" . join ( " -D", split ( " ", $OSFID ) );
 
-    if ($OSFCFID) {$FPPFLAGS  .= " -D" . join ( " -D", split ( " ", $OSFCFID ) );}
+    if ($OSFCFID) {
+	$FPPFLAGS  .= " -D" . join ( " -D", split ( " ", $OSFCFID ) );
+    }
 
     $ROOTSRC = $ROOTSYS . "/include";
 
@@ -720,6 +728,7 @@
 	#    }
 	#    print "*** ATTENTION *** IVROOT $IVROOT\n";
 	#}
+	if ( ! defined($IVROOT) ){  $IVROOT = $OPTSTAR;}
 	if ( defined($IVROOT) &&  -d $IVROOT) {
 	    # This is an initial logic relying on IVROOT to be defined
 	    if (-e $IVROOT . "/bin/coin-config") {
@@ -742,7 +751,7 @@
 	    if ( defined($coin) ){
 		chomp($COIN3DINCDIR = `$coin --includedir`);
 		chomp($COIN3DFLAGS  = "");
-		chomp($COIN3DLIBDIR = `$coin  --prefix`); $COIN3DLIBDIR .= "/lib";
+		chomp($COIN3DLIBDIR = `$coin --prefix`); $COIN3DLIBDIR .= "/lib";
 		chomp($COIN3DLIBS   = `$coin --libs`);
 	    }
 	}
