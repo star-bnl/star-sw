@@ -6,7 +6,8 @@ $build =~ s/\\/\//g;
 (my $obj_dir = DirPath '.') =~ s/\\/\//g;
 (my $Dir = $obj_dir) =~ s/$build\///g;
 my $ObjDir = "#" . $obj_dir; 
-my $STAR_SYS = $env->{ENV}->{STAR_SYS};
+my $STAR_SYS   = $env->{ENV}->{STAR_SYS};
+my $USE_64BITS = $env->{ENV}->{USE_64BITS};
 
 my $libr = "libJprof." . $env->{SUFSOLIB};
 my $pkg  = "jprof";
@@ -29,7 +30,11 @@ if($^O eq "solaris"){
     print "---> $pkg package cannot be assembled on $^O\n";
     return;
 
-} elsif ($STAR_SYS =~ /64_/ || $STAR_HOST_SYS =~ /alpha/ ) {
+} elsif ($STAR_SYS =~ /64_/ || $STAR_HOST_SYS =~ /alpha/ || $USE_64BITS == 1) {
+    print "---> $pkg package will be skipped for now ... \n";
+    return;
+
+} elsif ( $STAR_SYS =~ m/sl5/ ) {
     print "---> $pkg package will be skipped for now ... \n";
     return;
 
