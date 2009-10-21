@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.117 2009/10/20 15:13:12 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.118 2009/10/21 22:09:53 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -103,9 +103,12 @@
     #
     # $USE_64BITS     = ($STAR_HOST_SYS =~ m/64_/ && -e "/usr/lib64" );
     #
+    $XGCMPOPT = "";
     if ($USE_64BITS){
+	if ($STAR_HOST_SYS =~ /(gcc)(\d)/){ if ( $2 >= 4 ){   $XGCMPOPT = "-m64";}}
 	$LLIB = "lib64";
     } else {
+	if ($STAR_HOST_SYS =~ /(gcc)(\d)/){ if ( $2 >= 4 ){   $XGCMPOPT = "-m32";}}
 	$LLIB = "lib";
     }
 
@@ -113,26 +116,26 @@
 	# give preference to gfortran for now - JL 200908
 	$G77       = "gfortran";
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG )  {
-	    $G77FLAGS  = "-fd-lines-as-comments ";
+	    $G77FLAGS  = "$XGCMPOPT -fd-lines-as-comments ";
 	} else {
-	    $G77FLAGS  = "-fd-lines-as-code ";
+	    $G77FLAGS  = "$XGCMPOPT -fd-lines-as-code ";
 	}
 	$G77FLAGS .= "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
     } else {
 	$G77       = "g77";
-	$G77FLAGS  = "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
+	$G77FLAGS  = "$XGCMPOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
     }
 
     if ($STAR_HOST_SYS =~ /gcc3/) {  $G77FLAGS    = "-pipe " . $G77FLAGS;}
     $G77EXTEND     = "-ffixed-line-length-132";
 
     $CXX           = "g++";
-    $CXXFLAGS      = "-fpic -w";
+    $CXXFLAGS      = "$XGCMPOPT -fPIC -w";
     $EXTRA_CXXFLAGS= "";
     $CXXOPT        = "";
 
     $CC            = "gcc";
-    $CFLAGS        = "-fpic -w";
+    $CFLAGS        = "$XGCMPOPT -fPIC -w";
     $EXTRA_CFLAGS  = "";
 
     $FC            = $G77;
@@ -150,13 +153,13 @@
     $AR            = "ar";
     $ARFLAGS       = "rvu";
     $LD            = $CXX;
-    $LDFLAGS       = "";#--no-warn-mismatch";#$CXXFLAGS;
+    $LDFLAGS       = "$XGCMPOPT ";#--no-warn-mismatch";#$CXXFLAGS;
     $LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
     $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
     $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
     $EXTRA_LDFLAGS = "";
     $F77LD         = $LD;
-    $F77LDFLAGS    = "";#$LDFLAGS;
+    $F77LDFLAGS    = "$XGCMPOPT ";#$LDFLAGS;
     $SO            = $CXX;
     $SOFLAGS       = "";
     $STIC          = "stic";
@@ -308,7 +311,7 @@
 	$CERNLIBS =~ s/packlib\./$packl\./g;
 	$CERNLIBS =~ s/kernlib\./$kernl\./g;
 	$CERNLIBS =~ s/$strip//g     if ($strip ne "");
-	$CERNLIBS =~ s/lib /lib64 /g if ($IS_64BITS);
+	$CERNLIBS =~ s/lib /lib64 /g if ($USE_64BITS);
 
 
 	chop($CERNLIBS);
@@ -332,8 +335,8 @@
 	$CC            = "icc";
 	$CXX           = "icc";
 	$CPP           = $CC . " -EP";
-	$CXXFLAGS      = "-w -ansi -fPIC -wd1476"; #-fpstkchk";
-	$CFLAGS        = "-restrict -w -fPIC";# -fpstkchk";# -restrict";# -Wall
+	$CXXFLAGS      = "-w -ansi $XGCMPOPT -fPIC -wd1476"; #-fpstkchk";
+	$CFLAGS        = "-restrict -w $XGCMPOPT -fPIC";     # -fpstkchk";# -restrict";# -Wall
 	$ICC_MAJOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f1; /bin/rm  /tmp/icc_version;`;
         $ICC_MINOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f2; /bin/rm  /tmp/icc_version;`;
 	chomp($ICC_MAJOR); chomp($ICC_MINOR);
@@ -357,14 +360,14 @@
 	}
 	$F77LIBS      .= " -lg2c";
 	$FLIBS         = $F77LIBS;
-	$FFLAGS        = "-save";
+	$FFLAGS        = "$XGCMPOPT -save";
 	$FEXTEND       = "-132";
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
 	$SYSLIBS       = "-lm -ldl -lrt";# -rdynamic";
 	$CLIBS         = "-lm -ldl -lrt";# -rdynamic";
 	$CRYPTLIBS     = "-lcrypt";
 	$LD            = "icpc";
-	$LDFLAGS       = "";#--no-warn-mismatch";
+	$LDFLAGS       = "$XGCMPOPT ";#--no-warn-mismatch";
 	$F77LD         = $LD;
 	$SO            = $CXX;
 	$SOFLAGS       = "-shared -u*";
@@ -489,7 +492,7 @@
 	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
 
         # print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
-        $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";
+        $CXXFLAGS     = "$XGCMPOPT -fPIC -pipe -Wall -Woverloaded-virtual";
 	my $optflags = "";
 
         if ($CXX_VERSION < 3) {
@@ -523,7 +526,7 @@
 	    $CXXFLAGS .= " " . $optflags;
 	    $G77FLAGS .= " " . $optflags;
 	}
-        $CFLAGS    = "-pipe -fPIC -Wall -Wshadow";
+        $CFLAGS    = "$XGCMPOPT -fPIC -pipe -Wall -Wshadow";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
 
 	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
