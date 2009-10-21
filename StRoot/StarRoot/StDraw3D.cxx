@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.70 2009/10/20 23:07:00 fine Exp $
+// $Id: StDraw3D.cxx,v 1.71 2009/10/21 03:05:45 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -776,7 +776,7 @@ void StDraw3D::Draw3DTest(){
    Tower(230,0.365*TMath::PiOver2(),-TMath::Pi()/22+TMath::PiOver2()
             ,TMath::Pi()/65,TMath::Pi()/80
             ,kGreen, 0, 150);
-   // Use the pseidorapidity units:
+   // Use the pseudorapidity units:
    int sector=20;
    double stepEta = (0.9-0.22)*TMath::Pi()/sector;
    StarRoot::StEta eta(0.9*TMath::Pi(),stepEta);
@@ -879,17 +879,18 @@ void StDraw3D::ShowTest()
 
 //! Draw the TTRAP object suitable to represent the calorimeter data
 /*! The method creates one "tower" object (see:  http://root.cern.ch/root/html/TTRAP.html#TTRAP:description )
-   \param  radius - the distance between the the the base ofd the ower and the "origin"
-   it can be either the distance to the Z-axis for the kBarrelStyle 
-   tower or the distance to the xy plane (for End Cap towers, for example)n
+   \param  radius - the distance between the  base of the tower and the "origin".
+   It can be either the distance from the Z-axis for the kBarrelStyle 
+   or the distance from the xy plane for EndCap tower (default) style, for example.
    \param  lambda  - the tower direction (in rads). It is the angle in respect of the Y-axis for kBarrelStyle tower or Z-axis.
    \param  phi     - the angle (in rads) in XY plane against of the Ox
    \param  dlambda - the non-negative angle "width" of the tower.
    \param  dphi    - the non-negative angle "length" of the tower
-   \param  col     - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
-   \param  sty     - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
-                one can ad kBarrelStyle constant to ROOT style to get the "barrel" style tower
-   \param   siz - the height of the tower. It can used to visualize the energy deposit or for any other reason.
+   \param  col     - ROOT fill color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
+   \param  sty     - ROOT fill style ( see: http://root.cern.ch/root/html/TAttFIll.html ) 
+                The default style is "Endcap".  One can add \c kBarrelStyle constant to ROOT style to get the "barrel" style tower\n 
+		= 0 - solid color,  4001 - wired view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
+   \param   siz - the height of the tower. It can be used to visualize the energy deposit or for any other reason.
    \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
  \htmlonly
  <table>
@@ -925,15 +926,55 @@ TObject *StDraw3D::Tower(float radius
    float d2 =  dlambda/2;
    return Tower(radius, lambda,lambda-d2, lambda+d2,phi, dphi, col, sty, siz);
 }
-
+//! This is an overloaded member function, provided for convenience.
+/*! The method creates one "tower" object (see:  http://root.cern.ch/root/html/TTRAP.html#TTRAP:description )
+   \param  radius - the distance between the  base of the tower and the "origin".
+   It can be either the distance from the Z-axis for the kBarrelStyle 
+   or the distance from the xy plane for EndCap tower (default) style, for example.
+   \param  lambda  - the tower direction (in rads). It is the angle in respect of the Y-axis for kBarrelStyle tower or Z-axis.
+   \param  lambda1  - the tower near edge  (in rads)
+   \param  lambda2  - the tower far  edge  (in rads)
+   \param  phi     - the angle (in rads) in XY plane against of the Ox
+   \param  dphi    - the non-negative angle "length" of the tower
+   \param  col     - ROOT fill color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
+   \param  sty     - ROOT fill style ( see: http://root.cern.ch/root/html/TAttFIll.html ) 
+                The default style is "Endcap".  One can add \c kBarrelStyle constant to ROOT style to get the "barrel" style tower \n
+		= 0 - solid color,  4001 - wired view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
+   \param   siz - the height of the tower. It can be used to visualize the energy deposit or for any other reason.
+   \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
+ \htmlonly
+ <table>
+ <tr>
+ <th>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
+</tr>
+ <tr>
+ <th>XZ plane view
+ <th>XY plane view
+ </tr>
+ <tr>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYL1Plane.png" width=340px></center>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png" width=340px></center>
+ </tr>
+ <tr>
+ <th>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
+ </tr>
+ <tr>
+ <th>XZ plane view
+ <th>XY plane view
+ </tr>
+ <tr>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYL1PlaneEC.png" width=340px></center>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png" width=340px></center>
+ </tr></table>
+ \endhtmlonly */
 //__________________________________________________________________________________________
-TObject *StDraw3D::Tower(float radius, float lambda, float dlambda1, float dlambda2, float phi,float dphi, Color_t col,Style_t sty, Size_t siz)
+TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda2, float phi,float dphi, Color_t col,Style_t sty, Size_t siz)
 { 
-   if (dlambda2-dlambda1 < 0 ) {
-       Warning("StDraw3D::Tower", "The illegal negative value for dlambda = %f", dlambda2-dlambda1);
-       float swp = dlambda1;
-       dlambda1 = dlambda2;
-       dlambda2 = swp;
+   if (lambda2-lambda1 < 0 ) {
+       Warning("StDraw3D::Tower", "The illegal negative value for dlambda = %f", lambda2-lambda1);
+       float swp = lambda1;
+       lambda1 = lambda2;
+       lambda2 = swp;
    }
    if (dphi < 0 ) {
        Warning("StDraw3D::Tower", "The illegal negative value for dphi = %f", dphi);
@@ -951,8 +992,8 @@ TObject *StDraw3D::Tower(float radius, float lambda, float dlambda1, float dlamb
    zNear  = radius;
    
    yNear  = zNear*TMath::Tan(lambda);
-   y1Near = zNear*TMath::Tan(dlambda1);
-   y2Near = zNear*TMath::Tan(dlambda2);
+   y1Near = zNear*TMath::Tan(lambda1);
+   y2Near = zNear*TMath::Tan(lambda2);
    
    xNear  = 0;
    x1Near = TMath::Sqrt(y1Near*y1Near + zNear*zNear) * TMath::Tan(dphi/2);
@@ -961,8 +1002,8 @@ TObject *StDraw3D::Tower(float radius, float lambda, float dlambda1, float dlamb
    zFar  = radius+siz;
    
    yFar  = zFar*TMath::Tan(lambda);
-   y1Far = zFar*TMath::Tan(dlambda1);
-   y2Far = zFar*TMath::Tan(dlambda2);
+   y1Far = zFar*TMath::Tan(lambda1);
+   y2Far = zFar*TMath::Tan(lambda2);
    
    xFar  = 0;
    x1Far = TMath::Sqrt(y1Far*y1Far + zFar*zFar) * TMath::Tan(dphi/2);
@@ -1034,7 +1075,45 @@ TObject *StDraw3D::Tower(float radius, float lambda, float dlambda1, float dlamb
    fView = thisShape;
    return thisShape;
 }
-
+//! This is an overloaded member function, provided for convenience.
+/*! The method creates one "tower" object (see:  http://root.cern.ch/root/html/TTRAP.html#TTRAP:description )
+   \param  radius - the distance between the  base of the tower and the "origin". 
+   It can be either the distance from the Z-axis for the kBarrelStyle
+   or the distance from the xy plane for Endcap towers (default), for example.
+   \param  eta \a (eta,dEta)  - the tower direction \a eta and width \a dEta (in eta units). (See: http://en.wikipedia.org/wiki/Pseudorapidity ) 
+   \param  phi     - the angle (in rads) in XY plane against of the Ox
+   \param  dphi    - the non-negative angle "length" of the tower
+   \param  col     - ROOT fill color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
+   \param  sty     - ROOT fill style ( see: http://root.cern.ch/root/html/TAttFill.html ) 
+                one can add kBarrelStyle constant to ROOT style to get the "barrel" style tower \n
+			= 0 - solid color,  4001 - wired view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
+   \param   siz - the height of the tower. It can be used to visualize the energy deposit or for any other reason.
+   \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
+ \htmlonly
+ <table>
+ <tr>
+ <th>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
+</tr>
+ <tr>
+ <th>XZ plane view
+ <th>XY plane view
+ </tr>
+ <tr>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYEtaPlane.png" width=340px></center>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png" width=340px></center>
+ </tr>
+ <tr>
+ <th>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
+ </tr>
+ <tr>
+ <th>XZ plane view
+ <th>XY plane view
+ </tr>
+ <tr>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYEtaPlaneEC.png" width=340px></center>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png" width=340px></center>
+ </tr></table>
+ \endhtmlonly */
 //__________________________________________________________________________________________
 TObject *StDraw3D::Tower( float radius, const StarRoot::StEta &eta
                          , float phi, float dphi
