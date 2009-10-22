@@ -51,7 +51,7 @@ private:
 
 	// algorithms
 	class tpxPed *ped_algo ;
-	class tpxGain *gain_algo ;
+
 	class tpxStat *stat_algo ;
 
 	class tpxFCF *fcf_algo[25] ;
@@ -69,6 +69,8 @@ protected:
 public:
 	daq_tpx(daqReader *rts_caller=0) ;
 	~daq_tpx() ;
+
+	class tpxGain *gain_algo ;
 
 	int InitRun(int run_num) ;	// used in send_config
 	int FinishRun(int old_run) ;	// used in inject_token0

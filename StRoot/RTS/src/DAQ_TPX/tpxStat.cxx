@@ -116,14 +116,16 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 
 	if(ofile==0) return 0 ;
 
-	if(stripes) {
-		LOG(WARN,"saw %d occurences of more than 400 timebins",stripes) ;
+	if(stripes && (run_type != RUN_TYPE_PED)) {
+		LOG(NOTE,"saw %d occurences of more than 400 timebins",stripes) ;
 		for(int i=0;i<6;i++) {
 		for(int a=0;a<256;a++) {
 		for(int c=0;c<16;c++) {
 			if(r[i].a[a].c[c].stripes) {
-				LOG(WARN,"Stripes %d/%d: RDO %d: AID %3d:%2d",
-				    r[i].a[a].c[c].stripes,r[i].a[a].c[c].count,i+1,a,c) ;
+				int row, pad ;
+				tpx_from_altro(i,a,c,row,pad) ;
+				LOG(WARN,"Stripes %d/%d: RDO %d: AID %3d:%02d, r:p %2d:%03d",
+				    r[i].a[a].c[c].stripes,r[i].a[a].c[c].count,i+1,a,c,row,pad) ;
 			}
 		}
 		}

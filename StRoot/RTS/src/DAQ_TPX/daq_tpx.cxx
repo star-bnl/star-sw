@@ -1362,6 +1362,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			LOG(NOTE,"No algo assigned for sector %d -- creating one!",sim->sec) ;
 			fcf_algo[sim->sec] = new tpxFCF ;
 			fcf_algo[sim->sec]->config(0x3F,1) ;	// assume all 6 RDOs; extra data + annotations
+			
 
 			fcf_algo[sim->sec]->apply_gains(sim->sec,gain_algo) ;
 			fcf_algo[sim->sec]->start_evt() ;
@@ -1387,7 +1388,6 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			a.adc[i] = sim->sim_adc[i].adc ;
 			a.tb[i] = sim->sim_adc[i].tb ;
 			track_id[i] = sim->sim_adc[i].track_id ;
-
 			a.count++ ;
 		}
 
