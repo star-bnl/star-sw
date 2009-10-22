@@ -349,7 +349,7 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 
 
 
-int daq_bsmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int prompt)
+int daq_bsmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int rdo)
 {
 	u_short *us = (u_short *)buff ;
 
@@ -365,6 +365,8 @@ int daq_bsmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int p
 	trg[1].daq = us[1] ;
 	trg[1].rhic = trg[0].rhic + 1 ;
 
+
+	LOG(TERR,"BSMD: token %d, rhic %d, us 0x%04X 0x%04X",trg[0].t,trg[0].rhic,us[0],us[1]) ;
 	
 	return 2 ;
 }
