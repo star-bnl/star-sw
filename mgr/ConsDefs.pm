@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.119 2009/10/21 23:08:08 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.120 2009/10/22 14:34:53 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -153,15 +153,15 @@
     $AR            = "ar";
     $ARFLAGS       = "rvu";
     $LD            = $CXX;
-    $LDFLAGS       = "$XMACHOPT ";#--no-warn-mismatch";#$CXXFLAGS;
+    $LDFLAGS       = "$XMACHOPT";#--no-warn-mismatch";#$CXXFLAGS;
     $LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
     $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
     $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
     $EXTRA_LDFLAGS = "";
     $F77LD         = $LD;
-    $F77LDFLAGS    = "$XMACHOPT ";#$LDFLAGS;
+    $F77LDFLAGS    = "$XMACHOPT";#$LDFLAGS;
     $SO            = $CXX;
-    $SOFLAGS       = "";
+    $SOFLAGS       = "$XMACHOPT";
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
@@ -528,7 +528,7 @@
 	    $G77FLAGS .= " " . $optflags;
 	}
         $CFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Wshadow";
-        $SOFLAGS   = "-shared -Wl,-Bdynamic";
+        $SOFLAGS   = "$XMACHOPT -shared -Wl,-Bdynamic";
 
 	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
 
