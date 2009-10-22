@@ -46,7 +46,8 @@ daq_bsmd::daq_bsmd(daqReader *rts_caller)
 	adc_non_zs = new daq_dta ;
 	ped = new daq_dta ;
 	rms = new daq_dta ;
-	
+	raw = new daq_dta ;
+
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
 }
@@ -60,6 +61,7 @@ daq_bsmd::~daq_bsmd()
 	delete ped ;
 	delete rms ;
 	delete adc_non_zs ;
+	delete raw ;
 
 	return ;
 }
@@ -84,6 +86,9 @@ daq_dta *daq_bsmd::get(const char *bank, int sec, int row, int pad, void *p1, vo
 	}
 	else if(strcasecmp(bank,"rms")==0) {
 		return handle_ped_rms(row,0) ;
+	}
+	else if(strcasecmp(bank,"raw")==0) {
+		return handle_raw(row) ;
 	}
 
 
@@ -347,17 +352,79 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 }
 
 
+daq_dta *daq_bsmd::handle_raw(int rdo)
+{
+	struct bsmd_desc bsmd_d ;
+	int start_r, stop_r ;
+	int bytes ;
+
+	assert(caller) ;	// sanity...
+
+	if(!present) return 0 ;
+
+	if(rdo <= 0) {
+		start_r = 1 ;
+		stop_r = BSMD_FIBERS ;
+	}
+	else {
+		start_r = stop_r = rdo ;
+	}
+
+	bytes = 0 ;
+
+	if(present & DET_PRESENT_DATAP) {	// in datap!
+		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
+
+		if(bsmd_reader(emcp, &bsmd_d)==0) return 0 ;
+	}
+	else return 0 ;	// SFS does not exist yet!
+
+	//LOG(NOTE,"BSMD: rdo %d: start %d, stop %d",rdo,start_r, stop_r) ;
+
+	for(int r=start_r;r<=stop_r;r++) {	
+		//LOG(NOTE,"BSMD: adc_non_zs: fiber %d, bytes %d",r,bsmd_d.bytes[r-1][0]) ;
+		bytes += bsmd_d.bytes[r-1][0] ;
+	}
+
+	if(bytes==0) return 0 ;
+
+	raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+
+	for(int r=start_r;r<=stop_r;r++) {
+		bytes = bsmd_d.bytes[r-1][0] ;
+
+		if(bytes == 0) continue ;
+
+		char *st  = (char *) raw->request(bytes) ;
+
+		memcpy(st,(char *)bsmd_d.dta[r-1][0],bytes) ;
+
+		raw->finalize(bytes,0,r,0) ;
+	}
+		
+	raw->rewind() ;
+
+	return raw ;
+	
+}
+
+
 
 
 int daq_bsmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int rdo)
 {
+	const int BSMD_BYTES = 9856 ;
+
 	u_short *us = (u_short *)buff ;
 
+	// this is all wrong!!!!
+	LOG(ERR,"Hack -- I don't know Gerard's format yet!") ;
+
 	// L0 part
-	trg[0].t = l2h16(us[2])*256 + l2h16(us[3]) ;
+	trg[0].t = l2h16(us[6])*256 + l2h16(us[8]) ;
 	trg[0].daq = 0 ;
 	trg[0].trg = 4 ;	// BSMD does not give the correct L0, only L2 so we invent 4
-	trg[0].rhic = l2h16(us[4]) ;
+	trg[0].rhic = l2h16(us[10]) ;
 	
 	// L2 part
 	trg[1].t = trg[0].t ;	// copy over token
@@ -367,6 +434,28 @@ int daq_bsmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int r
 
 
 	LOG(TERR,"BSMD: token %d, rhic %d, us 0x%04X 0x%04X",trg[0].t,trg[0].rhic,us[0],us[1]) ;
+
+	// here I will put the sanity check!
+	int bad = 0 ;
+	if(buff_bytes != BSMD_BYTES) {
+		LOG(ERR,"BSMD: rdo %d: expect %d bytes, received %d",rdo,BSMD_BYTES,buff_bytes) ;
+		bad = 1 ;
+	}
+
+
+	if(us[16] > 127) {
+		LOG(ERR,"RDO %d: bad cap %d",rdo,us[16]) ;
+		bad = 1 ;
+	}
+	if((us[0]>15) || (us[1]>15)) {
+		LOG(ERR,"RDO %d: bad trg or daq cmd: 0x%04X 0x%04X",us[0],us[1]) ;
+		bad = 1 ;
+	}
+
+
+
+	
+
 	
 	return 2 ;
 }

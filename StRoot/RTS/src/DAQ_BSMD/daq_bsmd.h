@@ -16,6 +16,7 @@ struct bsmd_t {
 class daq_bsmd : public daq_det {
 private:
 	class daq_dta *handle_adc(int rdo) ;
+	class daq_dta *handle_raw(int rdo) ;
 	class daq_dta *handle_adc_non_zs(int rdo) ;
 	class daq_dta *handle_ped_rms(int rdo, int is_ped) ;
 
@@ -24,6 +25,7 @@ private:
 	class daq_dta *adc_non_zs ;
 	class daq_dta *ped ;	
 	class daq_dta *rms ;	
+	class daq_dta *raw ;
 
 	static const char *help_string ;
 
