@@ -80,11 +80,9 @@ endif
 # Make it easy to do SL5/64 to SL4/32
 #
 
-if ( -e .sl44_gcc346 && ! -e .sl53_x8664_gcc432 ) then
+if ( -e .sl44_gcc346 && ! -e .sl53_gcc432 ) then
     # as above, request confirmation
-    if ( $1 != "") then
-	/bin/ln -s .sl44_gcc346 .sl53_x8664_gcc432 && echo "SL44 compatibility link created"
-    endif
+    /bin/ln -s .sl44_gcc346 .sl53_gcc432 && echo "SL44 compatibility link created"
 endif
 
 
