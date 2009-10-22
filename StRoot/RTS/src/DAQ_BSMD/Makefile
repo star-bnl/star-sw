@@ -12,7 +12,7 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 
-OBJS := daq_bsmd.o bsmd_reader.o
+OBJS := daq_bsmd.o bsmd_reader.o bsmdPed.o
 
 LIBS = libbsmd.a
 BINS = 
