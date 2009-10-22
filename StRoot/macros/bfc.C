@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.172 2009/10/22 19:19:45 jeromel Exp $
+// $Id: bfc.C,v 1.173 2009/10/22 19:19:53 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -50,7 +50,7 @@ void Load(const Char_t *options){
 	TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
       //
-      // ATTENTION: The below will FAIL for 64 bits systems
+      // ATTENTION: The below will FAIL for 64 bits systems (JL 2009/10/22)
       //
       Char_t *libs[]  = {"", "/usr/mysql/lib/","/usr/lib/", 0}; // "$ROOTSYS/mysql-4.1.20/lib/",
       //Char_t *libs[]  = {"/usr/lib/", 0};
