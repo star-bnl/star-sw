@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.h,v 1.3 2009/03/18 20:14:10 dongx Exp $
+ * $Id: StBTofSortRawHit.h,v 1.4 2009/10/22 19:06:00 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -66,11 +66,14 @@ class StBTofSortRawHit : public StObject {
   static const Int_t mNTRAY = 122;
   static const Int_t mNCHAN = 192;
   static const Int_t mNFIBER = 4;
+  static const Int_t mNVPD  = 19;
   tofRawHitVector mRawHitVec[mNTRAY];
   
   Float_t mTriggerTimeWindow[mNTRAY][2];    //
   Float_t mTriggerOffset;                   //
   UInt_t  mTriggerTime[mNFIBER];            //
+  
+  Float_t mVpdDelay[2*mNVPD];               //! VPD delays
 
   Bool_t  mDebug;                           //! switch for debugging 
   StBTofDaqMap     *mDaqMap;
@@ -84,6 +87,8 @@ class StBTofSortRawHit : public StObject {
   /// Need Daq Map for VPD Le/Te mapping
   void Init(StMaker *maker, StBTofDaqMap *daqMap);
   void Reset();
+  /// set to use the VPD delays
+  void setVpdDelay(Int_t runnumber);
   
   void setBTofCollection(StBTofCollection* tofColl);
 
