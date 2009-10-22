@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.20 2009/09/09 20:47:03 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.21 2009/10/22 23:51:07 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -8,13 +8,17 @@
 #include "StTrack.h"
 #include "StHit.h"
 #include "StTpcHit.h"
+#include "StEmcRawHit.h"
 #include "StTrackNode.h"
 #include "StTrackGeometry.h"
 #include "StTpcHitCollection.h"
+#include "StEmcCollection.h"
+#include "StEmcDetector.h"
+#include "StEmcModule.h"
 #include "StMeasuredPoint.h"
 #include "TMath.h"
 #include "StTrackDetectorInfo.h"
-
+#include "StEmcUtil/geometry/StEmcGeom.h"
 
 //! StuDraw3DEvent( const char *detectorName,TVirtualPad *pad) ctor
 /*!  
@@ -63,6 +67,65 @@ StuDraw3DEvent::~StuDraw3DEvent()
    if (gEventDisplay == this) gEventDisplay = 0;
 }
 
+//! Add \a emcHit to the display list with the \a col color \a sty and \a size if provided
+/*! 
+   \param   emcHit - tEmcRawHit reference one wants to be present as the ROOT TTRAP 
+                    object with ROOT visual attributes \a col \a sty \a siz
+   \param   col - Tower color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
+   \param   sty - Tower style ( see: http://root.cern.ch/root/html/TAttFill.html ) 
+   \param   siz - Tower size
+   \return - a pointer to the ROOT "view" TObject of \a emcHit model
+*/
+//___________________________________________________
+TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t sty,Size_t siz)
+{
+   int m, e, s;
+   Int_t softId;
+   Float_t eta;
+   Float_t phi;
+   emcHit.modEtaSub(m,e,s);
+   StEmcGeom *emcGeom =StEmcGeom::getEmcGeom("bemc");
+   emcGeom->getId(m,e,s,softId);
+   emcGeom->getEtaPhi(softId,eta,phi);
+   Float_t etaStep = 1./emcGeom->NEta();
+   Float_t phiStep = TMath::Pi()/60; 
+   printf(" m=%d, e=%d, s=%d; eta=%e deta=%e phi=%e dphi=%e id %d\n",m, e, s,eta,etaStep ,phi, phiStep, softId);
+
+   TObject *l = Tower(emcGeom->Radius(), StarRoot::StEta(eta,etaStep)
+                         , phi, phiStep
+                         , col,sty+kBarrelStyle,siz);
+   SetModel((TObject*)&emcHit);
+   return l;
+}
+
+//______________________________________________________________________________________
+void StuDraw3DEvent::EmcHits(const StEvent* event) 
+{
+   Color_t colorResponce = 0;
+   StEmcCollection* emcC =(StEmcCollection*)event->emcCollection();
+   StEmcDetector* det = emcC->detector(kBarrelEmcTowerId); 
+   for(unsigned int md=1; md <=det->numberOfModules(); md++) {
+      StEmcModule*  module=det->module(md);
+      StSPtrVecEmcRawHit&   hit=  module->hits();
+      for(unsigned int ih=0;ih < hit.size();ih++){
+         StEmcRawHit *h=hit[ih];
+         int  rawAdc=1.5*h->adc(); // raw ADC 
+         float energy =  h->energy();
+         if ( rawAdc && energy > 0 ) {
+  	// If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
+            if (  rawAdc  < 20)      colorResponce = kBlue;
+	// If edep large then MIP but less then 1 GeV 
+            else if (  rawAdc  < 68 ) colorResponce = kGreen;
+	// If between 1 GeV and lowest HT threshold (4 GeV for Run7)
+            else if (  rawAdc  < 256)   colorResponce = kYellow;
+	// If above lowest HT thershold
+            else                         colorResponce = kRed;
+            EmcHit(*h,colorResponce,0, energy*10);
+            printf(" Emchit adc = %d energy = %e\n",rawAdc, 10*h->energy());
+         }
+      }
+   }
+}
 //! Add \a track to the display list with the \a col color \a sty and \a size if provided
 /*! 
    \param   track - StTrack reference one wants to be present as the ROOT TPolyLine3D 
