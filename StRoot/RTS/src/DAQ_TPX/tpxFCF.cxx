@@ -378,7 +378,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 	int row, pad ;
 
-	LOG(NOTE,"Applying gains to sector %d",sec) ;
+	LOG(NOTE,"Applying gains to sector %d [%p ?]",sec,gain) ;
 
 	// clear all flags but the existing ones
 	for(row=1;row<=45;row++) {
@@ -487,6 +487,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 	s->count = 0 ;
 
 	if(unlikely(a->count<=1)) return 0 ;	// no point....
+
 
 	// HACK put in on Mar 6th, 2009 to suppress those
 	// long strips (>=415 tb) of unknown nature (to that date).
@@ -682,6 +683,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 					adc_sum += a->adc[i] ;
 
 					if(a->adc[i] >= adc_min) {
+						adc_min = a->adc[i] ;	// bug before Oct 09!
 						cl->track_id = sim_adc[i].track_id ;
 					}
 				}
