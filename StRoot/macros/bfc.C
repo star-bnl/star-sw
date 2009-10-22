@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.171 2009/05/01 19:05:41 fisyak Exp $
+// $Id: bfc.C,v 1.172 2009/10/22 19:19:45 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -49,6 +49,9 @@ void Load(const Char_t *options){
     if (!TString(options).Contains("nodefault",TString::kIgnoreCase) || 
 	TString(options).Contains("mysql",TString::kIgnoreCase)) {
       Char_t *mysql = "libmysqlclient";
+      //
+      // ATTENTION: The below will FAIL for 64 bits systems
+      //
       Char_t *libs[]  = {"", "/usr/mysql/lib/","/usr/lib/", 0}; // "$ROOTSYS/mysql-4.1.20/lib/",
       //Char_t *libs[]  = {"/usr/lib/", 0};
       Int_t i = 0;
