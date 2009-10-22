@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.71 2009/10/21 03:05:45 fine Exp $
+// $Id: StDraw3D.cxx,v 1.72 2009/10/22 23:51:07 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -1070,7 +1070,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    if (draw) {
       Draw(fTopVolume,"same");
    } else {
-      UpdateModified();
+//      UpdateModified();
    }
    fView = thisShape;
    return thisShape;

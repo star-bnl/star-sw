@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.15 2009/10/06 15:17:50 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.16 2009/10/22 23:51:07 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -14,6 +14,7 @@ class StMeasuredPoint;
 class StEvent;
 class StTpcHitCollection;
 class StSPtrVecTrackNode;
+class StEmcRawHit;
 
 /*! The constant defining the StTrack components to be rendered
  */
@@ -95,6 +96,8 @@ class StuDraw3DEvent : public virtual StDraw3D
                   ,  Color_t col
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
+     virtual TObject *EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t sty,Size_t siz);
+     virtual void EmcHits(const StEvent* event);
      template <class T> TObject *Vector(const StThreeVector<T> &vector, EDraw3DStyle sty=kVtx);
      ClassDef(StuDraw3DEvent,0);
 };
