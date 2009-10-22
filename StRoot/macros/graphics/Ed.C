@@ -1,4 +1,4 @@
-// $Id: Ed.C,v 1.7 2009/09/09 20:47:03 fine Exp $
+// $Id: Ed.C,v 1.8 2009/10/22 23:52:22 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file Ed.C 
@@ -62,12 +62,15 @@ StEvent* event = 0;
                    first (before any new component is added)
 */
 //__________________________________________
-void rd(bool hits=false, bool clear=false) 
+void rd(int  hits=0, bool clear=false) 
 {  
    // redraw the event
    if (event) {
       if (clear) gEventDisplay->Clear();
-      if (hits) gEventDisplay->Hits(event);
+      if (hits) {
+        if (hits & 1) gEventDisplay->Hits(event);
+        if (hits & 2) gEventDisplay->EmcHits(event);
+      }
       else gEventDisplay->Tracks(event);
    }
  }
