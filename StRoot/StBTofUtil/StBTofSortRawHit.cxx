@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.5 2009/03/18 20:14:10 dongx Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.6 2009/10/22 19:06:00 dongx Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -38,6 +38,7 @@ void StBTofSortRawHit::Reset() {
 void StBTofSortRawHit::Init() {
   Reset();
   memset(mTriggerTimeWindow,0,sizeof(mTriggerTimeWindow));
+  memset(mVpdDelay,0,sizeof(mVpdDelay));
 }
 
 void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
@@ -72,6 +73,40 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
   mDaqMap = daqMap;
 
   if(maker->Debug()) mDebug = kTRUE;
+
+  return;
+}
+
+void StBTofSortRawHit::setVpdDelay(Int_t runnumber) {
+
+  // default delays after run9 200 GeV
+  float delay[2*mNVPD]={
+    0,-0.564753,-4.62291,-4.84402,-4.05943,6.32389,-9.4035,-10.3113,-17.0374,-17.3734,-6.04608,-11.9614,-12.7579,8.79609,3.8467,-17.2994,-17.6424,-21.4749,-22.9736,
+    0,-2.1707,  -4.8195, -6.5161, -4.3109, 6.3116, -8.8655,-10.1037,-16.5970,-17.9588,-5.2079, -12.1249,-12.2412,8.4001, 5.5702,-16.5936,-16.4152,-21.3076,-21.1452
+  };
+
+  if (runnumber<10107025) {         // VpdDelay not used before Run-9 500 GeV finished
+    memset(mVpdDelay,0,sizeof(mVpdDelay));
+  } 
+  else if (runnumber<10154045) {  // Run-9 200 GeV till run 10154045
+    for(int i=0;i<2*mNVPD;i++) {
+      mVpdDelay[i] = delay[i];
+    }
+    // additional delay due to trigger time drift in some boards
+    mVpdDelay[6]  -= 25.0;
+    mVpdDelay[7]  -= 25.0;
+    mVpdDelay[17] -= 25.0;
+    mVpdDelay[18] -= 25.0;
+    mVpdDelay[25] -= 25.0;
+    mVpdDelay[26] -= 25.0;
+    mVpdDelay[36] -= 25.0;
+    mVpdDelay[37] -= 25.0;
+  } 
+  else {                          // default delays
+    for(int i=0;i<2*mNVPD;i++) {
+      mVpdDelay[i] = delay[i];
+    }
+  }
 
   return;
 }
@@ -222,6 +257,12 @@ UIntVec StBTofSortRawHit::GetLeadingTdc(int tray, int channel, bool triggerevent
       } 
       else {   
 	if(triggerevent){ //vpds, keep physical hits in trigger window
+
+          // add Vpd delay
+          int iTube = (tray==121) ? mDaqMap->TDIGLeChan2WestPMT(channel) : mDaqMap->TDIGLeChan2EastPMT(channel);
+          timeDiff -= mVpdDelay[(tray-121)*mNVPD+(iTube-1)];
+          while(timeDiff<0) timeDiff += 51200;
+
 	  double stime = timeDiff;
 	  if(stime > ftime+300.){ //all hits thereafter within 300ns are not physical
 	    if(timeDiff>=mTriggerTimeWindow[tray-1][0]&&timeDiff<=mTriggerTimeWindow[tray-1][1])
@@ -252,7 +293,7 @@ UIntVec StBTofSortRawHit::GetTrailingTdc(int tray, int channel, bool triggereven
       while(timeDiff<0) timeDiff += 51200;
       if(tray<=120){  //trays, keep all hits
 	if(triggerevent){ 
-	  if(timeDiff>=mTriggerTimeWindow[tray-1][0]&&timeDiff<=mTriggerTimeWindow[tray-1][1])
+	  if(timeDiff>=mTriggerTimeWindow[tray-1][0]&&timeDiff<=mTriggerTimeWindow[tray-1][1]+25.)  // trailing edge - allow 25 ns shaping time
 	    teTdc.push_back(mRawHitVec[tray-1][i].trailingTdc[j]);   
 	}
 	else {
@@ -261,9 +302,15 @@ UIntVec StBTofSortRawHit::GetTrailingTdc(int tray, int channel, bool triggereven
       } 
       else {  
 	if(triggerevent){  //vpds, keep physical hits in trigger window
+
+          // add Vpd delay - Note: channel should be the corresponding leading edge channel
+          int iTube = (tray==121) ? mDaqMap->TDIGLeChan2WestPMT(channel) : mDaqMap->TDIGLeChan2EastPMT(channel);
+          timeDiff -= mVpdDelay[(tray-121)*mNVPD+(iTube-1)];
+          while(timeDiff<0) timeDiff += 51200;
+
 	  double stime = timeDiff;
 	  if(stime > ftime+300.){ //all hits thereafter within 300ns are not physical
-	    if(timeDiff>=mTriggerTimeWindow[tray-1][0]&&timeDiff<=mTriggerTimeWindow[tray-1][1])
+	    if(timeDiff>=mTriggerTimeWindow[tray-1][0]&&timeDiff<=mTriggerTimeWindow[tray-1][1]+25.)  // trailing edge - allow 25ns shaping time
 	      teTdc.push_back(mRawHitVec[tray-1][i].trailingTdc[j]);   
 	    ftime = stime;
 	  }
