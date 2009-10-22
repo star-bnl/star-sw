@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.76 2009/10/19 21:29:42 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.77 2009/10/22 04:46:44 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.77  2009/10/22 04:46:44  jhthomas
+ * Update scheme for pad row numbering in Predict Space Charge
+ *
  * Revision 1.76  2009/10/19 21:29:42  jhthomas
  * Improved execution speed of many algorithms: especially GridLeak.
  *
@@ -3013,8 +3016,9 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
   // Return default values if passed a whacko input value (i.e. infinite or NaN)
   if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
 
-  const Int_t   INNER = 13 ;               // Number of TPC rows in the inner sectors 
-  const Int_t   ROWS  = 45 ;               // Total number of TPC rows per sector (Inner + Outer)
+  const Int_t   INNER8 =  8 ;               // Number of TPC rows in the inner sector with 4.8 cm spacing
+  const Int_t   INNER  = 13 ;               // Number of TPC rows in the inner sectors 
+  const Int_t   ROWS   = 45 ;               // Total number of TPC rows per sector (Inner + Outer)
   const Float_t TestRadius =  77.00 ;      // A random test radius inside the TPC to compare which way the track is going
 
   Int_t    ChargeB ;
@@ -3034,8 +3038,12 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
 
   for ( Int_t i = 0 ; i < ROWS ; i++ )
     {
-      if ( i < INNER )  R[i] = 60.0 + i*4.96666 ;           // Not correct because TPC rows aren't circles ... but we dont' care
-      else              R[i] = 127.195 + (i-INNER)*2.0 ;
+      if ( i < INNER8 ) 
+	R[i] = 60.0 + i*4.8 ;                // Not correct because TPC rows aren't circles ... but we dont' care
+      else if ( i < INNER ) 
+	R[i] = 93.6 + (i-INNER8+1)*5.2 ;
+      else               
+	R[i] = 127.195 + (i-INNER)*2.0 ;
     }
 
   if (Y0 == 0.0)  Direction = TMath::Sign((float)1.0,p[1]) ;
@@ -3191,6 +3199,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
 
    const Float_t InnerOuterRatio = 0.6 ; // Ratio of size of the inner pads to the outer pads (real world == 0.5, GVB likes 0.6)
+   const Int_t   INNER8   =  8  ;        // Number of TPC rows in the inner sector with 4.8 cm spacing
    const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sectors
    const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
@@ -3219,10 +3228,14 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    Y0 = x[1] - ChargeB * p[0] * R0 / Pt ;
    DCA = TMath::Sqrt( X0*X0 + Y0*Y0 ) - R0 ;  // Negative means (0,0) is inside the circle
 
-   for ( Int_t i = 0 ; i < ROWS ; i++ )
+   for ( Int_t i = 0 ; i < ROWS ; i++ )       // Note that i starts at zero
      {
-       if ( i < INNER )  R[i] = 60.0 + i*4.96666 ;           // Not correct because TPC rows aren't circles ... but we dont' care
-       else              R[i] = 127.195 + (i-INNER)*2.0 ;
+      if ( i < INNER8 ) 
+	R[i] = 60.0 + i*4.8 ;                 // Not correct because TPC rows aren't circles ... but we dont' care
+      else if ( i < INNER ) 
+	R[i] = 93.6 + (i-INNER8+1)*5.2 ;
+      else              
+	R[i] = 127.195 + (i-INNER)*2.0 ;
      }
 
    // Test which of the two directions the particle goes on the circle
@@ -3377,6 +3390,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 	       Float_t DCA,  const unsigned int RowMask1, const unsigned int RowMask2, Float_t &pSpace )
 {
 
+   const Int_t   INNER8           =   8  ;       // Number of TPC rows in the inner sector with 4.8 cm spacing
    const Int_t   INNER            =  13  ;       // Number of TPC rows in the inner sector
    const Int_t   ROWS             =  45  ;       // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex         =   7  ;       // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm)
@@ -3430,10 +3444,14 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    Y0 = ChargeB * -0.707107 * R0  ;
    Pz = Pt * TMath::SinH(PseudoRapidity) ;
  
-   for ( Int_t i = 0 ; i < ROWS ; i++ )
+   for ( Int_t i = 0 ; i < ROWS ; i++ )       // Note that i starts at zero
      {
-       if ( i < INNER )  R[i] = 60.0 + i*4.96666 ;           // Not correct because TPC rows aren't circles ... but we dont' care
-       else              R[i] = 127.195 + (i-INNER)*2.0 ;
+      if ( i < INNER8 ) 
+	R[i] = 60.0 + i*4.8 ;                 // Not correct because TPC rows aren't circles ... but we dont' care
+      else if ( i < INNER ) 
+	R[i] = 93.6 + (i-INNER8+1)*5.2 ;
+      else              
+	R[i] = 127.195 + (i-INNER)*2.0 ;
      }
 
    Float_t InnerOuterRatio = 0.0 ; // JT test. Ratio of size of the inner pads to the outer pads (Set after daisy chain, below)
@@ -3592,6 +3610,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 
    const Int_t   INNERDETECTORS   =   6  ;       // Number of inner detector rows in represented in the bit masks
    const Int_t   SSDLAYERS        =   1  ;       // Number of SSD layers
+   const Int_t   INNER8           =   8  ;       // Number of TPC rows in the inner sector with 4.8 cm spacing
    const Int_t   INNER            =  13  ;       // Number of TPC rows in the inner sector
    const Int_t   TPCROWS          =  45  ;       // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   MinInnerTPCHits  =   5  ;       // Minimum number of hits on a track.  If less than this, then no action taken.
@@ -3660,10 +3679,14 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    R[7] = 22.8   ;  // SSD (average) Radius (8th bit)
 
    // JT TEST Add the radii for the TPC Rows.  Note the hardwired offsets.
-   for ( Int_t i = TPCOFFSET ; i < TPCROWS+TPCOFFSET ; i++ )
+   for ( Int_t i = TPCOFFSET ; i < TPCROWS + TPCOFFSET ; i++ )
      {
-       if ( (i-TPCOFFSET) < INNER )  R[i] = 60.0 + (i-TPCOFFSET)*4.8 ; // Not completly correct because TPC rows are flat.
-       else                          R[i] = 127.195 + (i-TPCOFFSET-INNER)*2.0 ;
+       if ( (i-TPCOFFSET) < INNER8 )  
+	 R[i] = 60.0 + (i-TPCOFFSET)*4.8 ; // Not completly correct because TPC rows are flat.
+       else if ( (i-TPCOFFSET) < INNER )  
+	 R[i] = 93.6 + (i-TPCOFFSET-INNER8+1)*5.2 ; // Not completly correct because TPC rows are flat.
+       else                          
+	 R[i] = 127.195 + (i-TPCOFFSET-INNER)*2.0 ;
      }
 
    for ( Int_t i = 0 ; i < BITS ; i++ )
