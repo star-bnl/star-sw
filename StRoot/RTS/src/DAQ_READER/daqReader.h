@@ -56,6 +56,8 @@ enum Input_Type { none, live, file, pointer, dir };
 #define EVP_STAT_CRIT   (-3)
 #define EVP_STAT_LOG  (-4)
 
+typedef unsigned int u_int;
+
 class daqReader {
  public:
   
