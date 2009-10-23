@@ -1,4 +1,4 @@
-// $Id: Ed.C,v 1.8 2009/10/22 23:52:22 fine Exp $
+// $Id: Ed.C,v 1.9 2009/10/23 17:29:52 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file Ed.C 
@@ -57,7 +57,10 @@ StEvent* event = 0;
 //! This function \b redraws all hits and/or tracks from the \c current event
 /*! 
    \param hits - flag to mark whether the hits from the event should be rendered 
-   if the \a hits = \c true the hits is to be drawn otherwise it is to render the tracks
+   if the \a hits = \c 1 - the TPC hits is to be drawn,\n
+                       2 - the EMC barrel hits to be drawn\n
+                       3 - The TPC + EMC hits \n
+                       0 - no hit to be rendered. It is to render the tracks
    \param clear - flag to mark whether the screen has to be cleaned 
                    first (before any new component is added)
 */
@@ -80,18 +83,26 @@ void rd(int  hits=0, bool clear=false)
    if the \a hist = \c true the hits is to be drawn otherwise it is to render the tracks
 */
 //__________________________________________
-void ae(bool hits=false) 
+void ae(int tracks=-1, int  hits=-1) 
 {
  // Advance till next "good" event
  // One may want to replace the "plain"  "if" clause below
  // with the full-flegded filter
-    gEventDisplay->Clear();
+   static int defaultTracks = 0;
+   static int defaultHits   = 2;
+
+   if (tracks != -1 ) defaultTracks = tracks;
+   else tracks = defaultTracks;
+
+   if (hits != -1 )   defaultHits = hits;
+   else  hits = defaultHits;
+   gEventDisplay->Clear();
  newevent:
      chain->MakeEvent();
      event = (StEvent*)chain->GetDataSet("StEvent");
      if (event && !event->trackNodes().empty())) {
-         rd();     // Draw the tracks
-         rd(hits); // Add the hits to the image
+         if (tracks) rd();     // Draw the tracks
+         if (hits)  rd(hits); // Add the hits to the image
     } else {
         printf(" event is empty\n");
         goto newevent;
@@ -140,8 +151,9 @@ void ae(bool hits=false)
    ae();
    printf(" call:\n");   
    printf("\t---\n");
-   printf("\tae() - to draw the tracks\n");
-   printf("\tae(1) - to draw the tracksand its hits\n");
+   printf("\tae()    - to draw   the default setting\n");
+   printf("\tae(1,1) - to change the default and draw the tracks and its tpc hits\n");
+   printf("\tae(0,2) - to change the default and draw the Bemc towers\n");
    printf("\t---\n");
    printf("method to see the next event\n");
  }
