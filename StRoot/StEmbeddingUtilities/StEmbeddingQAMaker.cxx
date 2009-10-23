@@ -128,7 +128,6 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
   const Float_t etaMax =  2.5 ;
 
   // Track-wise informations
-//  TString particleName(StEmbeddingQAUtilities::GetParticleName(kParticleId, kTRUE));
   TString particleName(mParticles->GetParent()->GetTitle());
 
   // Common histograms for all categories
@@ -136,23 +135,22 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
     TString categoryTitle(StEmbeddingQAUtilities::GetCategoryTitle(ic));
 
     // Initialize histograms
-//    const Int_t nHistogram = ( StEmbeddingQAUtilities::GetCategoryName(ic).Contains("CONTAM") )
-//      ? 1 + StEmbeddingQAUtilities::GetNDaughter(kParticleId) : 1 ;
-    Int_t nHistogram = ( StEmbeddingQAUtilities::GetCategoryName(ic).Contains("CONTAM") ) ? mParticles->GetNDaughter() : 1 ;
-    if ( nHistogram == 0 ) nHistogram = 1 ;
+    const Int_t nHistogram = GetNumberOfHistograms(ic);
 
-    hGeantId[ic]   = new TH1*[nHistogram] ;
-    hNHit[ic]      = new TH3*[nHistogram] ;
-    hDca[ic]       = new TH3*[nHistogram] ;
-    hPtVsEta[ic]   = new TH2*[nHistogram] ;
-    hPtVsY[ic]     = new TH2*[nHistogram] ;
-    hPtVsPhi[ic]   = new TH2*[nHistogram] ;
-    hPtVsMom[ic]   = new TH2*[nHistogram] ;
-    hdPtVsPt[ic]   = new TH2*[nHistogram] ;
-    hdEdxVsMom[ic] = new TH2*[nHistogram] ;
-    hEtaVsPhi[ic]  = new TH2*[nHistogram] ;
-    hEtaVsVz[ic]   = new TH2*[nHistogram] ;
-    hYVsVz[ic]     = new TH2*[nHistogram] ;
+    hGeantId[ic]         = new TH1*[nHistogram] ;
+    hNHit[ic]            = new TH3*[nHistogram] ;
+    hDca[ic]             = new TH3*[nHistogram] ;
+    hPtVsEta[ic]         = new TH2*[nHistogram] ;
+    hPtVsY[ic]           = new TH2*[nHistogram] ;
+    hPtVsPhi[ic]         = new TH2*[nHistogram] ;
+    hPtVsMom[ic]         = new TH2*[nHistogram] ;
+    hdPtVsPt[ic]         = new TH2*[nHistogram] ;
+    hMomVsEta[ic]        = new TH2*[nHistogram] ;
+    hdEdxVsMom[ic]       = new TH2*[nHistogram] ;
+    hdEdxVsMomPidCut[ic] = new TH2*[nHistogram] ;
+    hEtaVsPhi[ic]        = new TH2*[nHistogram] ;
+    hEtaVsVz[ic]         = new TH2*[nHistogram] ;
+    hYVsVz[ic]           = new TH2*[nHistogram] ;
 
     for(Int_t ih=0; ih<nHistogram; ih++){
 
@@ -228,6 +226,14 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
       if( ic == 0 )                 hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T}, %s", title.Data()) );
       else if( ic >= 1 && ic <= 3 ) hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T} (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s", title.Data()) );
       else                          hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T} (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
+
+      // momentum vs eta
+      hMomVsEta[ic][ih] = new TH2D(Form("hMomVsEta%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
+      hMomVsEta[ic][ih]->SetXTitle("#eta");
+      hMomVsEta[ic][ih]->SetYTitle("momentum (GeV/c)");
+      if( ic == 0 )                 hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta, %s", title.Data()) );
+      else if( ic >= 1 && ic <= 3 ) hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s", title.Data()) );
+      else                          hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
  
       // dE/dx vs momentum
       hdEdxVsMom[ic][ih] = new TH2D(Form("hdEdxVsMom%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
@@ -235,6 +241,13 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
       hdEdxVsMom[ic][ih]->SetYTitle("dE/dx (KeV/cm)");
       if( ic == 0 ) hdEdxVsMom[ic][ih]->SetTitle( Form("dE/dx vs momentum, %s", title.Data()) );
       else          hdEdxVsMom[ic][ih]->SetTitle( Form("dE/dx vs momentum, (|dcaGl|<3cm), %s", title.Data()) );
+
+      // dE/dx vs momentum (with pid cut)
+      hdEdxVsMomPidCut[ic][ih] = new TH2D(Form("hdEdxVsMomPidCut%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
+      hdEdxVsMomPidCut[ic][ih]->SetXTitle("momentum (GeV/c)");
+      hdEdxVsMomPidCut[ic][ih]->SetYTitle("dE/dx (KeV/cm)");
+      if( ic == 0 ) hdEdxVsMomPidCut[ic][ih]->SetTitle( Form("dE/dx vs momentum (with 2#sigma pid cut), %s", title.Data()) );
+      else          hdEdxVsMomPidCut[ic][ih]->SetTitle( Form("dE/dx vs momentum (with 2#sigma pid cut), (|dcaGl|<3cm), %s", title.Data()) );
  
       TString pt("0.2 < p_{T} < 5 GeV/c");
  
@@ -556,10 +569,9 @@ void StEmbeddingQAMaker::FillMcTracks(const StMiniMcEvent& mcevent, const Int_t 
   // Make sure geant id is equal to the input particle id
   if( track->geantId() != mParticles->GetParent()->GetParticleId() ) return ;
 
-//  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), *track, StEmbeddingQAUtilities::GetMass2(kParticleId)) ;
   StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), *track, mParticles->GetParent()->GetMass2());
 
-  FillHistograms(miniTrack, trackid, 0);
+  FillHistograms(miniTrack, trackid, 0, kParticleId);
 }
 
 //__________________________________________________________________________________________
@@ -571,10 +583,9 @@ void StEmbeddingQAMaker::FillMatchedPairs(const StMiniMcEvent& mcevent, const In
     return ;
   }
 
-//  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, StEmbeddingQAUtilities::GetMass2(kParticleId)) ;
   StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
 
-  FillHistograms(miniTrack, trackid, 0);
+  FillHistograms(miniTrack, trackid, 0, kParticleId);
 }
 
 //__________________________________________________________________________________________
@@ -587,9 +598,8 @@ void StEmbeddingQAMaker::FillGhostPairs(const StMiniMcEvent& mcevent, const Int_
     return ;
   }
 
-//  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, StEmbeddingQAUtilities::GetMass2(kParticleId)) ;
   StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
-  FillHistograms(miniTrack, trackid, 0);
+  FillHistograms(miniTrack, trackid, 0, kParticleId);
 }
 
 //__________________________________________________________________________________________
@@ -601,11 +611,11 @@ void StEmbeddingQAMaker::FillContamPairs(const StMiniMcEvent& mcevent, const Int
     return ;
   }
 
-//  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, StEmbeddingQAUtilities::GetMass2(kParticleId)) ;
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
-
   for(UInt_t id=0; id<mParticles->GetNDaughter(); id++){
+    // Mass2 for daughter particles (fixed on Oct/22/2009)
+
     StEmbeddingQAParticle* daughter = mParticles->GetDaughter(id) ;
+    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, daughter->GetMass2());
 
     // Daughter id selection
     if ( miniTrack.GetGeantId() == daughter->GetParticleId() ){
@@ -617,7 +627,7 @@ void StEmbeddingQAMaker::FillContamPairs(const StMiniMcEvent& mcevent, const Int
 //          id, itrk, miniTrack.GetGeantId(), daughter->GetParticleId(),
 //          miniTrack.GetCharge(), daughter->GetCharge())
 //        << endl;
-      FillHistograms(miniTrack, trackid, id);
+      FillHistograms(miniTrack, trackid, id, daughter->GetParticleId());
 
       // Store arrays for invariant mass
       // NOTE:
@@ -670,22 +680,36 @@ void StEmbeddingQAMaker::FillMatGlobPairs(const StMiniMcEvent& mcevent, const In
     return ;
   }
 
-//  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, StEmbeddingQAUtilities::GetMass2(kParticleId)) ;
   StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
-  FillHistograms(miniTrack, trackid, 0);
+
+  FillHistograms(miniTrack, trackid, 0, kParticleId);
 }
 
 //__________________________________________________________________________________________
 void StEmbeddingQAMaker::FillRealTracks(const StMuTrack& track, const Int_t trackid, const Int_t itrk)
 {
-//  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, StEmbeddingQAUtilities::GetMass2(kParticleId)) ;
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
+  // Fill daughters separately for the comparison with embedded tracks (Oct/21/2009)
+  if ( mParticles->GetNDaughter() == 0 ){
+    // stable particles
+    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
+ 
+    FillHistograms(miniTrack, trackid, 0, kParticleId);
+  }
+  else{
+    // decay daughters
 
-  FillHistograms(miniTrack, trackid, 0);
+    for(UInt_t id=0; id<mParticles->GetNDaughter(); id++){
+      StEmbeddingQAParticle* daughter = mParticles->GetDaughter(id) ;
+      StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, daughter->GetMass2());
+ 
+      FillHistograms(miniTrack, trackid, id, daughter->GetParticleId());
+    }
+  }
+
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle)
+void StEmbeddingQAMaker::FillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle, const Int_t geantId)
 {
   // Track selections will be made for embedding/real tracks
   // Only pt cut will be applied for MC tracks
@@ -701,12 +725,26 @@ void StEmbeddingQAMaker::FillHistograms(const StEmbeddingQATrack& track, const I
   // Fill geant id
   hGeantId[trackid][iparticle]->Fill(track.GetGeantId());
 
+  // dE/dx (no PID cut)
+  if( track.IsDcaOk() ){
+    hdEdxVsMom[trackid][iparticle]->Fill(mom, track.GetdEdx()*1.0e+06);
+  }
+
+  //  Oct/21/2009
+  // NSigma cut for real data
+  // Add particle id from nSigma cuts (2 sigma)
+  // for e/pi/K/p
+  // 
+  // Do not apply nSigma cuts for others
+
+  if ( !track.IsNSigmaOk(geantId) ) return ;
+
   if( track.IsDcaOk() ){
     // Fill NHit points
     hNHit[trackid][iparticle]->Fill(pt, eta, track.GetNHit());
 
-    // dE/dx
-    hdEdxVsMom[trackid][iparticle]->Fill(mom, track.GetdEdx()*1.0e+06);
+    // dE/dx (with PID cut)
+    hdEdxVsMomPidCut[trackid][iparticle]->Fill(mom, track.GetdEdx()*1.0e+06);
 
     // Pt, eta, phi
     if( track.IsNHitOk() ){
@@ -717,12 +755,11 @@ void StEmbeddingQAMaker::FillHistograms(const StEmbeddingQATrack& track, const I
       hPtVsPhi[trackid][iparticle]->Fill(phi, pt);
       hPtVsMom[trackid][iparticle]->Fill(mom, pt);
       hdPtVsPt[trackid][iparticle]->Fill(pt, pt-track.GetPtMc());
+      hMomVsEta[trackid][iparticle]->Fill(eta, mom);
 
-      if( pt >= 0.2 && pt < 5.0 ){
-        hEtaVsPhi[trackid][iparticle]->Fill(phi, eta);
-        hEtaVsVz[trackid][iparticle]->Fill(mVz, eta);
-        hYVsVz[trackid][iparticle]->Fill(mVz, y);
-      }
+      hEtaVsPhi[trackid][iparticle]->Fill(phi, eta);
+      hEtaVsVz[trackid][iparticle]->Fill(mVz, eta);
+      hYVsVz[trackid][iparticle]->Fill(mVz, y);
     }
   }
 
@@ -816,4 +853,36 @@ Bool_t StEmbeddingQAMaker::GetTrackSelectionForDaughters(const StEmbeddingQATrac
 
   return isTrackOk ;
 }
+
+//__________________________________________________________________________________________
+Int_t StEmbeddingQAMaker::GetNumberOfHistograms(const Int_t categoryId) const
+{
+  // Get # of histograms
+  //   Contaminated pairs : # of decay daughters
+  //   Real data :
+  //     if ( ndecay >= 2 ) # of decay daughters
+  //     else               1
+
+  Int_t n = 0 ; // number of histograms
+
+  if( StEmbeddingQAUtilities::GetCategoryName(categoryId).Contains("CONTAM") ){
+    // Contaminated pairs (daughters)
+    n = mParticles->GetNDaughter() ;
+  }
+  else if ( StEmbeddingQAUtilities::GetCategoryName(categoryId).Contains("PRIMARY") 
+      || StEmbeddingQAUtilities::GetCategoryName(categoryId).Contains("GLOBAL") ){
+    // Real data (daughter)
+    n = mParticles->GetNDaughter() ; // will be 0 if parent particle is stable
+  }
+  else{
+    // Others
+    n = 1 ;
+  }
+
+  // Set n = 1
+  if ( n == 0 ) n = 1 ;
+
+  return n ;
+}
+
 
