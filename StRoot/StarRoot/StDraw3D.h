@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.42 2009/10/21 03:05:45 fine Exp $
+// $Id: StDraw3D.h,v 1.43 2009/10/23 16:10:44 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -97,8 +97,7 @@ inline StEta &StEta::SetAngle(double eta, double dEta) {
 inline double StEta::Lambda() const { return fLambda; }
 
 inline double StEta::Lambda(double eta) {
-   static  Float_t p2=TMath::PiOver2();
-   return  p2 - 2*TMath::ATan(TMath::Exp(-eta));
+   return  2*TMath::ATan(TMath::Exp(-eta));
 }
 
 inline StEta::StEta(double eta,double dEta)  { SetAngle(eta,dEta); }
@@ -114,7 +113,6 @@ inline StEta &StEta::operator=(const StEta &eta) {
 inline double StEta::Deta()     const { return fDEta;                      }
 inline double StEta::Eta()      const { return fEta;                       }
 inline double StEta::LambdaDeg() const{ return fLambda*TMath::RadToDeg();  }
-inline double StEta::TettaDeg() const { return 90-LambdaDeg();             }
 inline double StEta::dLambda1() const { return fDLambda1; }
 inline double StEta::dLambda2() const { return fDLambda2; }
 inline StEta::operator double() const { return fLambda;   }

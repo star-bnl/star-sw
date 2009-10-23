@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.72 2009/10/22 23:51:07 fine Exp $
+// $Id: StDraw3D.cxx,v 1.73 2009/10/23 16:10:44 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -32,7 +32,9 @@ Color_t StDraw3D::fgBkColor      = kBlack;
 // Canvas counter to create the Unique Canvas names
 Int_t   StDraw3D::fDrawCanvasCounter = -1; 
 
-
+namespace {
+    const double p2 = TMath::PiOver2();
+}
 
 //___________________________________________________
 static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorName) 
@@ -762,35 +764,47 @@ void StDraw3D::Draw3DTest(){
    Line(sizeXYZ,xyz,kGlobalTrack);
    SetComment("The recontstructed track");
 
-   Tower(192,0.365*TMath::PiOver2(),TMath::Pi()/22
+   Tower(192,0.365*p2,TMath::Pi()/22
             ,TMath::Pi()/65,TMath::Pi()/80
             ,kYellow, kBarrelStyle+4050, 250);
-   SetComment(Form("The EMC tower lambda=%f phi=%f energy=%f",0.365*TMath::PiOver2(),TMath::Pi()/22,250.0));
-   Tower(192,-0.365*TMath::PiOver2(),-TMath::Pi()/22-TMath::Pi()/4
+   SetComment(Form("The EMC tower lambda=%f phi=%f energy=%f",0.365*p2,TMath::Pi()/22,250.0));
+   Tower(192,-0.365*p2,-TMath::Pi()/22-TMath::Pi()/4
             ,TMath::Pi()/65,TMath::Pi()/80
             ,kBlue, kBarrelStyle+4050, 50);
-   Tower(230,-0.365*TMath::PiOver2(),-TMath::Pi()/22-3*TMath::Pi()/4
+   Tower(230,-0.365*p2,-TMath::Pi()/22-3*TMath::Pi()/4
             ,TMath::Pi()/65,TMath::Pi()/80
             ,kCyan, 4050, 50);
-   SetComment(Form("The EndCup tower lambda=%f phi=%f energy=%f",-0.365*TMath::PiOver2(),-TMath::Pi()/22,50.0));
-   Tower(230,0.365*TMath::PiOver2(),-TMath::Pi()/22+TMath::PiOver2()
+   SetComment(Form("The EndCup tower lambda=%f phi=%f energy=%f",-0.365*p2,-TMath::Pi()/22,50.0));
+   Tower(230,0.365*p2,-TMath::Pi()/22+p2
             ,TMath::Pi()/65,TMath::Pi()/80
             ,kGreen, 0, 150);
    // Use the pseudorapidity units:
    int sector=20;
-   double stepEta = (0.9-0.22)*TMath::Pi()/sector;
-   StarRoot::StEta eta(0.9*TMath::Pi(),stepEta);
-   StarRoot::StEta eta2(-0.2*TMath::Pi(),stepEta);
+   double stepEta = (1.0-0.0)/sector;
+   StarRoot::StEta eta(1-stepEta,stepEta);
+   StarRoot::StEta eta2(1,stepEta);
+   StarRoot::StEta eta3(-1,stepEta);
+   StarRoot::StEta eta4(-1+stepEta,stepEta);
    float phi = 0;
    int n  = sector;
    for (int i=0;i<n;i++) {
-      Tower(193,eta,phi,TMath::Pi()/80,(i+1)%8,kBarrelStyle,5*i+25);
-      SetComment(Form("The EMC tower pseudorapidity=%f phi=%f energy=%f",eta.Eta(),phi,5*i+25.));
-      Tower(230,eta2,phi+0.1,TMath::Pi()/80,(i+2)%8,4060,10*i+40);
-      SetComment(Form("The Endcap tower pseudorapidity=%f phi=%f energy=%f",eta2.Eta(),phi,10*i+40.));
+      Tower(193,eta,phi,TMath::Pi()/120,(i+1)%8,kBarrelStyle,5*i+25);
+      SetComment(Form("The East EMC tower pseudorapidity=%f phi=%f energy=%f",eta.Eta(),phi,5*i+25.));
+
+      Tower(193,eta4,phi+0.2,TMath::Pi()/120,(i+1)%8,kBarrelStyle,5*i+25);
+      SetComment(Form("The West EMC tower pseudorapidity=%f phi=%f energy=%f",eta4.Eta(),phi+0.2,5*i+25.));
+
+      Tower(230,eta2,phi+0.1,TMath::Pi()/60,(i+2)%8,4060,10*i+40);
+      SetComment(Form("The East Endcap tower pseudorapidity=%f phi=%f energy=%f",eta2.Eta(),phi,10*i+40.));
+
+      Tower(230,eta3,phi+0.1,TMath::Pi()/60,(i+2)%8,4060,10*i+40);
+      SetComment(Form("The West Endcap tower pseudorapidity=%f phi=%f energy=%f",eta2.Eta(),phi,10*i+40.));
+
       eta  -=stepEta;
-      eta2 +=stepEta/5.4;
-      phi += 4*TMath::Pi()/n;
+      eta2 +=stepEta;
+      eta3 -=stepEta;
+      eta4 +=stepEta;
+      phi  += 4*TMath::Pi()/n;
    }
 }
 
@@ -1040,7 +1054,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
                                      , 0,       -1,        0
                                      , 0,        0,       -1
                                    }; // for the lambda < 0 and End_Cup style
-   float a = -phi+TMath::PiOver2();
+   float a = -phi+p2;
    double rotmatrixX[] = {  cos(a), -sin(a),    0
                           , sin(a),  cos(a),    0
                           ,   0,        0,      1
@@ -1121,14 +1135,15 @@ TObject *StDraw3D::Tower( float radius, const StarRoot::StEta &eta
 {
    bool barrel = (sty >= kBarrelStyle);
    double  lambda,lambda1,lambda2;
+   lambda  = eta;
+   if ( lambda > p2 ) lambda -= 2*p2;
    if (barrel) {
-      lambda  = TMath::PiOver2()-eta;
-      lambda1 = TMath::PiOver2()-eta.dLambda2();
-      lambda2 = TMath::PiOver2()-eta.dLambda1();
+      lambda  = p2-eta;
+      lambda2 = p2-eta.dLambda2();
+      lambda1 = p2-eta.dLambda1();
    } else {
-      lambda  = eta;
-      lambda1 = eta.dLambda1();
-      lambda2 = eta.dLambda2();
+      lambda2 = eta.dLambda1();
+      lambda1 = eta.dLambda2();
    }
    return Tower(radius,lambda,lambda1,lambda2, phi, dphi, col, sty, siz);
 }

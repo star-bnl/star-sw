@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.22 2009/10/23 05:19:52 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.23 2009/10/23 16:10:44 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -93,7 +93,7 @@ TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t s
   // if (entries) return 0;
   //  printf(" m=%d, e=%d, s=%d; eta=%e deta=%e phi=%e dphi=%e id %d\n",m, e, s,eta,etaStep ,phi, phiStep, softId);
    entries++;
-   TObject *l = Tower(emcGeom->Radius(), StarRoot::StEta((eta>0?1:-1)*( TMath::PiOver2()-eta),etaStep)
+   TObject *l = Tower(emcGeom->Radius(), StarRoot::StEta(eta,etaStep)
                          , phi, phiStep
                          , col,sty+kBarrelStyle,siz);
    SetModel((TObject*)&emcHit);
