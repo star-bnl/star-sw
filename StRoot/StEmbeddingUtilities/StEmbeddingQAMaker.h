@@ -38,6 +38,7 @@
 //----------------------------------------------------------------------------------------------------
 //   Revised history
 //
+//   Oct/23/2009 : Add pid cuts (nsigma <2) for e/pi/K/p for real data
 //   Sep/20/2009 : Fix title for Nhit histograms. Wider eta/y range (-2.5,2.5)
 //   Sep/18/2009 : Added QA histograms for decay daughters (H. Masui)
 //   Sep/09/2009 : 1st version checked in   (H. Masui)
@@ -110,12 +111,15 @@ class StEmbeddingQAMaker {
     void FillContamPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
     void FillMatGlobPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
     void FillRealTracks(const StMuTrack& track, const Int_t trackid, const Int_t itrk);
-    void FillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle);
+    void FillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle, const Int_t geantId);
     void FillPair() ;
     Bool_t GetTrackSelectionForDaughters(const StEmbeddingQATrack& track) const;
 
     // Cuts
     Bool_t isZVertexOk(const StMiniMcEvent& mcevent, const Float_t vertexCut = 30.0) const ;
+
+    // Number of histograms for each branch
+    Int_t GetNumberOfHistograms(const Int_t categoryId) const ;
 
     Int_t mDebug ;
     StMuDstMaker* mMuDstMaker ;
@@ -142,15 +146,17 @@ class StEmbeddingQAMaker {
 
     // Tracks
     //  Fill Daughters for contaminated pairs
-    TH1** hGeantId[StEmbeddingQAUtilities::kNCategory];   // Geant id
-    TH3** hNHit[StEmbeddingQAUtilities::kNCategory];      // Nhit distribution vs eta vs pt
-    TH3** hDca[StEmbeddingQAUtilities::kNCategory];       // Dca vs eta vs pt
-    TH2** hPtVsEta[StEmbeddingQAUtilities::kNCategory];   // pt vs pseudo-rapidity
-    TH2** hPtVsY[StEmbeddingQAUtilities::kNCategory];     // pt vs rapidity
-    TH2** hPtVsPhi[StEmbeddingQAUtilities::kNCategory];   // pt vs phi
-    TH2** hPtVsMom[StEmbeddingQAUtilities::kNCategory];   // pt vs momentum
-    TH2** hdPtVsPt[StEmbeddingQAUtilities::kNCategory];   // pt - pt(MC) vs pt
-    TH2** hdEdxVsMom[StEmbeddingQAUtilities::kNCategory]; // dE/dx vs momentum
+    TH1** hGeantId[StEmbeddingQAUtilities::kNCategory];         // Geant id
+    TH3** hNHit[StEmbeddingQAUtilities::kNCategory];            // Nhit distribution vs eta vs pt
+    TH3** hDca[StEmbeddingQAUtilities::kNCategory];             // Dca vs eta vs pt
+    TH2** hPtVsEta[StEmbeddingQAUtilities::kNCategory];         // pt vs pseudo-rapidity
+    TH2** hPtVsY[StEmbeddingQAUtilities::kNCategory];           // pt vs rapidity
+    TH2** hPtVsPhi[StEmbeddingQAUtilities::kNCategory];         // pt vs phi
+    TH2** hPtVsMom[StEmbeddingQAUtilities::kNCategory];         // pt vs momentum
+    TH2** hdPtVsPt[StEmbeddingQAUtilities::kNCategory];         // pt - pt(MC) vs pt
+    TH2** hMomVsEta[StEmbeddingQAUtilities::kNCategory];        // momentum vs eta
+    TH2** hdEdxVsMom[StEmbeddingQAUtilities::kNCategory];       // dE/dx vs momentum (no PID cut)
+    TH2** hdEdxVsMomPidCut[StEmbeddingQAUtilities::kNCategory]; // dE/dx vs momentum (with PID cut, 2 sigma)
 
     TH2** hEtaVsPhi[StEmbeddingQAUtilities::kNCategory];  // pseudo-rapidity vs phi
     TH2** hEtaVsVz[StEmbeddingQAUtilities::kNCategory];   // pseudo-rapidity vs vz
