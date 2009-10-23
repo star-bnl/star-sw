@@ -1,4 +1,4 @@
-// $Id: Ed.C,v 1.9 2009/10/23 17:29:52 fine Exp $
+// $Id: Ed.C,v 1.10 2009/10/23 17:30:28 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file Ed.C 
@@ -87,7 +87,7 @@ void ae(int tracks=-1, int  hits=-1)
 {
  // Advance till next "good" event
  // One may want to replace the "plain"  "if" clause below
- // with the full-flegded filter
+ // with the full-fledged filter
    static int defaultTracks = 0;
    static int defaultHits   = 2;
 
