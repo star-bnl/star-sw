@@ -20,7 +20,7 @@ void drawEmbeddingQA(
   maker->SetOutputDirectory(outputDirectory);
 
   // Draw all QA plots
-//  maker->Draw();
+  maker->Draw();
 
   // or draw each QA
   // Event-wise QA
@@ -35,7 +35,8 @@ void drawEmbeddingQA(
   // or
 //  maker->DrawGeantId();
 //  maker->DrawRapidity();
-//  maker->DrawMomentumAndPt();
+//  maker->DrawMomentum();
+//  maker->DrawPt();
 //  maker->DrawdEdx();
 //  maker->DrawDca();
 //  maker->DrawNHit();
