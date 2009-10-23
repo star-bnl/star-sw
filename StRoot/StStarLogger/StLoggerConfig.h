@@ -27,11 +27,11 @@
 #  include <log4cxx/filter/stringmatchfilter.h>
 #  include <log4cxx/filter/denyallfilter.h>
 #  include <log4cxx/helpers/messagebuffer.h>
-#  define LOG4CXX_LEVEL_FATAL    Level::FATAL_INT
-#  define LOG4CXX_LEVEL_ERROR    Level::ERROR_INT
-#  define LOG4CXX_LEVEL_WARN     Level::WARN_INT
-#  define LOG4CXX_LEVEL_INFO     Level::INFO_INT
-#  define LOG4CXX_LEVEL_DEBUG    Level::DEBUG_INT
+#  define LOG4CXX_LEVEL_FATAL    Level::getFatal()
+#  define LOG4CXX_LEVEL_ERROR    Level::getError()
+#  define LOG4CXX_LEVEL_WARN     Level::getWarn()
+#  define LOG4CXX_LEVEL_INFO     Level::getInfo()
+#  define LOG4CXX_LEVEL_DEBUG    Level::getDebug()
    namespace log4cxx {
      typedef LogString String;
      typedef helpers::CharMessageBuffer StringBuffer;
