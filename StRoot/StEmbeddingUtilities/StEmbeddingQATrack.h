@@ -21,11 +21,16 @@ class StEmbeddingQATrack {
 
     Bool_t IsMc() const ;
     Bool_t IsEmbedding() const ;
+    Bool_t IsReal() const ;
     Bool_t IsPtAndEtaOk() const ;
 
     Bool_t IsNHitOk() const ;
     Bool_t IsDcaOk() const ;
     Bool_t IsCommonHitOk() const ;
+
+    // if ( real tracks ) return |nSigma| < 2 
+    // else               return true (i.e. no nSigma cut)
+    Bool_t IsNSigmaOk(const Int_t particleId) const ;
 
     StLorentzVectorD GetVectorMc() const ;
     StLorentzVectorD GetVectorRc() const ;
@@ -56,15 +61,22 @@ class StEmbeddingQATrack {
     Float_t GetdEdx()          const ;
     Float_t GetDcaGl()         const ;
 
+    // nSigma (e, pi, K, p) for real data
+    Double_t GetNSigmaElectron() const ;
+    Double_t GetNSigmaPion()     const ;
+    Double_t GetNSigmaKaon()     const ;
+    Double_t GetNSigmaProton()   const ;
+
     void Print() const ;
     const TString GetName() const ;
 
   private:
-    static const Float_t kPtMinCut ;  // minimum pt cut
-    static const Float_t kPtMaxCut ;  // maximum pt cut
-    static const Float_t kEtaCut ;    // maximum eta cut
-    static const Short_t kNHitCut ;   // NHit cut
-    static const Float_t kDcaCut ;    // Dca cut
+    static const Float_t kPtMinCut ;   // minimum pt cut
+    static const Float_t kPtMaxCut ;   // maximum pt cut
+    static const Float_t kEtaCut ;     // maximum eta cut
+    static const Short_t kNHitCut ;    // NHit cut
+    static const Float_t kDcaCut ;     // Dca cut
+    static const Double_t kNSigmaCut ; // NSigma cut
 
     const Short_t mNCommonHit ;
     const Short_t mParentGeantId ;
@@ -77,6 +89,10 @@ class StEmbeddingQATrack {
     const Float_t mPhi ;
     const Float_t mdEdx ;
     const Float_t mDcaGl ;
+    const Double_t mNSigmaElectron ;
+    const Double_t mNSigmaPion ;
+    const Double_t mNSigmaKaon ;
+    const Double_t mNSigmaProton ;
     TString mName ; // Track name
 
     ClassDef(StEmbeddingQATrack, 1)
