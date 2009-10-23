@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.24 2009/10/23 17:17:11 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.25 2009/10/23 21:04:28 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -69,22 +69,23 @@ StuDraw3DEvent::~StuDraw3DEvent()
 
 //! Add \a emcHit to the display list with the \a col color \a sty and \a size if provided
 /*! 
-   \param   emcHit - tEmcRawHit reference one wants to be present as the ROOT TTRAP 
+   \param   emcHit - StEmcRawHit reference one wants to be present as the ROOT TTRAP 
                     object with ROOT visual attributes \a col \a sty \a siz
    \param   col - Tower color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
    \param   sty - Tower style ( see: http://root.cern.ch/root/html/TAttFill.html ) 
-   \param   siz - Tower size
+   \param   siz - Tower size (cm) ( \sa StDraw3D::Tower( float radius, const StarRoot::StEta &eta,float phi,float dphi, Color_t col,Style_t sty, Size_t siz) )
    \return - a pointer to the ROOT "view" TObject of \a emcHit model
 */
 //___________________________________________________
-TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t sty,Size_t siz)
-{
+TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t sty,Size_t siz, const char *detId)
+{  
+   if (!detId || !detId[0]) detId = "bemc";
    int m, e, s;
    Int_t softId;
    Float_t eta;
    Float_t phi;
    emcHit.modEtaSub(m,e,s);
-   StEmcGeom *emcGeom =StEmcGeom::getEmcGeom("bemc");
+   StEmcGeom *emcGeom =StEmcGeom::getEmcGeom(detId);
    emcGeom->getId(m,e,s,softId);
    emcGeom->getEtaPhi(softId,eta,phi);
    Float_t etaStep = 1.0/emcGeom->NEta();
@@ -95,17 +96,26 @@ TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t s
    entries++;
    TObject *l = Tower(emcGeom->Radius(), StarRoot::StEta(eta,etaStep)
                          , phi, phiStep
-                         , col,sty+kBarrelStyle,siz);
+                         , col,sty+(strcmp(detId,"bemc")?0:kBarrelStyle),siz);
    SetModel((TObject*)&emcHit);
    return l;
 }
 
+//! Add all emcHits those can pass the internal filter from the given detector \a detId type from the \a event to the display list.
+/*! 
+    \param  event - The pointer to the instance of the StEvent class
+    \param type   - The Emc detector name as defined by StEmcGeom::getDetNumFromName(const Char_t *cdet) method
+    \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Run.dAu.2008.9025036.666030.BEMC.hits.png "Event 666030 from Run 9025036 produced by Ed.C macros"  
+    \note You normally do not need to use this method directly. It is just a pattern you can follow to customise the macro Ed.C to 
+    use your own coloring schema and selection criteria.
+*/
 //______________________________________________________________________________________
-void StuDraw3DEvent::EmcHits(const StEvent* event) 
+void StuDraw3DEvent::EmcHits(const StEvent* event,const char *detId) 
 {
    Color_t colorResponce = 0;
+   if (!detId || !detId[0]) detId = "bemc";
    StEmcCollection* emcC =(StEmcCollection*)event->emcCollection();
-   StEmcDetector* det = emcC->detector(kBarrelEmcTowerId); 
+   StEmcDetector* det = emcC->detector( strcmp(detId,"bemc") ? kEndcapEmcTowerId : kBarrelEmcTowerId); 
    for(unsigned int md=1; md <=det->numberOfModules(); md++) {
       StEmcModule*  module=det->module(md);
       StSPtrVecEmcRawHit&   hit=  module->hits();
@@ -127,7 +137,7 @@ void StuDraw3DEvent::EmcHits(const StEvent* event)
             static const double scale   =  200.; // (cm/Gev)
             double size =(energy > 0.3 ? scale : scale/30.)*energy;
             if (size > maxSize)  size = maxSize ;
-            EmcHit(*h,colorResponce,0, size );
+            EmcHit(*h,colorResponce,0, size,detId);
          }
       }
    }
