@@ -12,6 +12,6 @@ struct tpcAnodeHVavg {
    unsigned short  socket;   /*  MWC socket/card (ISOR=17,OSIR=18,OSOR=19)  */
    float  voltage;           /*  average voltage  */
    float  rms;               /*  rms for averaged voltage */
-   int    numentries;		 /*  number of entries used for average */
-   int    numoutliers;       /*  number of encountered outliers */
+   long    numentries;		 /*  number of entries used for average */
+   long    numoutliers;       /*  number of encountered outliers */
  };  
