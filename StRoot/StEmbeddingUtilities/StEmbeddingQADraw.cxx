@@ -3,7 +3,9 @@
 
 #include "TCanvas.h"
 #include "TError.h"
+#include "TF1.h"
 #include "TFile.h"
+#include "TGraphErrors.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
@@ -287,19 +289,17 @@ Int_t StEmbeddingQADraw::GetNDaughters() const
 //____________________________________________________________________________________________________
 TObject* StEmbeddingQADraw::GetHistogram(const TString name, const Int_t daughter, const Bool_t isEmbedding)
 {
+  const Int_t category = GetCategoryId(isEmbedding) ;
+
   if( isEmbedding ){
-    const Int_t category = GetCategoryId() ;
-
-    TString histoName = (IsDecay()) ? Form("%s_%d_%d", name.Data(), category, daughter)
-      : Form("%s_%d", name.Data(), category)
+    return (IsDecay()) ? mInputEmbedding->Get(Form("%s_%d_%d", name.Data(), category, daughter))
+      : mInputEmbedding->Get(Form("%s_%d", name.Data(), category))
       ;
-
-    return mInputEmbedding->Get(histoName);
   }
   else{
-    const Int_t category = GetCategoryId(kFALSE) ;
-
-    return mInputRealData->Get(Form("%s_%d", name.Data(), category));
+    return (IsDecay()) ?  mInputRealData->Get(Form("%s_%d_%d", name.Data(), category, daughter)) 
+      : mInputRealData->Get(Form("%s_%d", name.Data(), category))
+      ;
   }
 
 }
@@ -497,7 +497,8 @@ Bool_t StEmbeddingQADraw::DrawTrack()
   DrawRapidity();
  
   //  3: Momentum and pt
-  DrawMomentumAndPt();
+  DrawMomentum();
+  DrawPt();
  
   //  4: dE/dx
   DrawdEdx();
@@ -597,171 +598,190 @@ Bool_t StEmbeddingQADraw::DrawGeantId()
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::DrawRapidity()
 {
-  cout << "QA for (pseudo-)rapidity ..." << endl;
+  // Pseudo-rapidity
+  DrawProjection2D("eta");
 
-  gStyle->SetOptStat(0);
-
-  for(Int_t id=0; id<GetNDaughters(); id++){
-    TCanvas* canvas = new TCanvas(Form("c%d", kCanvasId), Form("c%d", kCanvasId++), 1200, 400);
-    canvas->Divide(3, 1);
-
-    // Embedding
-    TH2* hPtVsEtaEmbed = (TH2D*) GetHistogram("hPtVsEta", id);
-    TH2* hPtVsYEmbed   = (TH2D*) GetHistogram("hPtVsY", id);
-    TH1* hEtaEmbed     = (TH1D*) hPtVsEtaEmbed->ProjectionX(Form("hEtaEmbed_%d", id));
-    TH1* hYEmbed       = (TH1D*) hPtVsYEmbed->ProjectionX(Form("hYEmbed_%d", id));
-    SetStyle(hEtaEmbed);
-    SetStyle(hYEmbed);
-    hEtaEmbed->SetLineColor(kRed);
-    hYEmbed  ->SetLineColor(kRed);
-    hEtaEmbed->Sumw2();
-    hYEmbed->Sumw2();
-    hEtaEmbed->Scale( GetNormalization(*hEtaEmbed) );
-    hYEmbed->Scale( GetNormalization(*hYEmbed) );
-
-    // Real data
-    TH2* hPtVsEtaReal = (TH2D*) GetHistogram("hPtVsEta", id, kFALSE);
-    TH2* hPtVsYReal   = (TH2D*) GetHistogram("hPtVsY", id, kFALSE);
-    TH1* hEtaReal     = (TH1D*) hPtVsEtaReal->ProjectionX(Form("hEtaReal_%d", id));
-    TH1* hYReal       = (TH1D*) hPtVsYReal->ProjectionX(Form("hYReal_%d", id));
-    SetStyle(hEtaReal);
-    SetStyle(hYReal);
-    hEtaReal->SetLineColor(kBlue);
-    hYReal  ->SetLineColor(kBlue);
-    hEtaReal->Scale( GetNormalization(*hEtaReal) );
-    hYReal->Scale( GetNormalization(*hYReal) );
-
-    hEtaReal->SetMaximum(TMath::Max(hEtaEmbed->GetMaximum(), hEtaReal->GetMaximum())*1.2) ;
-    hYReal->SetMaximum(TMath::Max(hYEmbed->GetMaximum(), hYReal->GetMaximum())*1.2) ;
-
-    // Get particle name
-    TString title(hEtaEmbed->GetTitle());
-    title.Remove(0, title.Last(',')+1);
-
-    hEtaReal->SetTitle("");
-    hYReal->SetTitle("");
-    hEtaReal->SetYTitle("(1/N_{trk})dN/d#eta") ;
-    hYReal->SetYTitle("(1/N_{trk})dN/dy");
-
-    // pseudo-rapidity
-    canvas->cd(1);
-    hEtaReal->Draw();
-    hEtaEmbed->Draw("same");
-
-    // rapidity
-    canvas->cd(2);
-    hYReal->Draw();
-    hYEmbed->Draw("same");
-
-    canvas->cd(3);
-
-    TLegend* leg = new TLegend(0.1, 0.7, 0.9, 0.9);
-    leg->SetFillColor(10);
-    leg->SetTextSize(0.05);
-    leg->AddEntry( hEtaEmbed, Form("Embedding, %s", title.Data()), "L");
-    leg->AddEntry( hEtaReal, "Real data", "L");
-    leg->Draw();
-
-    DrawStatistics(0.1, 0.2, 0.9, 0.5);
-
-    canvas->cd();
-    canvas->Update();
-
-    if( GetNDaughters() == 1 ){
-      Print(*canvas, "eta_and_y");
-    }
-    else{
-      Print(*canvas, Form("eta_and_y_daughter%d", id));
-    }
-  }
+  // Rapidity
+  DrawProjection2D("y");
 
   return kTRUE ;
 }
 
 //____________________________________________________________________________________________________
-Bool_t StEmbeddingQADraw::DrawMomentumAndPt()
+Bool_t StEmbeddingQADraw::DrawMomentum()
 {
-  cout << "QA for momentum and pt ..." << endl;
+  return DrawProjection2D("momentum");
+}
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQADraw::DrawPt()
+{
+  return DrawProjection2D("pt");
+}
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQADraw::DrawProjection2D(const TString name)
+{
+  // Input 2D histogram is pt or momentum vs eta or y
+  //
+  // Projection into eta or y for pt = 0.2 - 5 GeV/c (0.5 GeV/c step)
+  // or
+  // Projection into pt or momentum for |Delta eta| = 0.5 in |eta| < 2
+
+  TString nameLower(name);
+  nameLower.ToLower();
+
+  cout << "QA for " << name << " ..." << endl;
+
+  TString histoName("");
+  Bool_t isProjectionX = kFALSE ;
+
+  TString yTitle("");
+
+  if( nameLower.Contains("pt") ){
+    yTitle = "p_{T}";
+    histoName = "hPtVsEta";
+    isProjectionX = kFALSE ;
+  }
+  else if( nameLower.Contains("momentum") ){
+    yTitle = "p";
+    histoName = "hMomVsEta";
+    isProjectionX = kFALSE ;
+  }
+  else if( nameLower.Contains("eta") || name.Contains("pseudorapidity") ){
+    yTitle = "#eta";
+    histoName = "hPtVsEta";
+    isProjectionX = kTRUE ;
+  }
+  else if( nameLower.Contains("y") || name.Contains("rapidity") ){
+    yTitle = "y";
+    histoName = "hPtVsY";
+    isProjectionX = kTRUE ;
+  }
+  else{
+    Error("DrawProjection2D", "Unknown variable, %s", name.Data());
+    cout << "  Current implemented variables are" << endl;
+    cout << "-----------------------------------------------------------------" << endl;
+    cout << "   Input                       variable" << endl;
+    cout << "-----------------------------------------------------------------" << endl;
+    cout << "   pt                           p_{T}" << endl;
+    cout << "   momentum                     p" << endl;
+    cout << "   eta or pseudorapidity        eta" << endl;
+    cout << "   y or rapidity                y" << endl;
+    cout << "-----------------------------------------------------------------" << endl;
+    cout << endl;
+    cout << "NOTE : Input is case insensitive" << endl;
+    cout << endl;
+
+    return kFALSE ;
+  }
 
   gStyle->SetOptStat(0);
+  gStyle->SetPadRightMargin(0.05);
 
   for(Int_t id=0; id<GetNDaughters(); id++){
-    TCanvas* canvas = new TCanvas(Form("c%d", kCanvasId), Form("c%d", kCanvasId++), 1200, 400);
-    canvas->Divide(3, 1);
+    TH2* h2DEmbed = (TH2D*) GetHistogram(histoName, id);
+    TH2* h2DReal  = (TH2D*) GetHistogram(histoName, id, kFALSE);
 
-    // Embedding
-    TH2* hPtVsMomEmbed = (TH2D*) GetHistogram("hPtVsMom", id);
-    TH1* hPtEmbed      = (TH1D*) hPtVsMomEmbed->ProjectionY(Form("hPtEmbed_%d", id));
-    TH1* hMomEmbed     = (TH1D*) hPtVsMomEmbed->ProjectionX(Form("hMomEmbed_%d", id));
-    SetStyle(hPtEmbed);
-    SetStyle(hMomEmbed);
-    hPtEmbed->SetLineColor(kRed);
-    hMomEmbed->SetLineColor(kRed);
-    hPtEmbed->Sumw2();
-    hMomEmbed->Sumw2();
-    hPtEmbed->Scale( GetNormalization(*hPtEmbed) );
-    hMomEmbed->Scale( GetNormalization(*hMomEmbed) );
+    Int_t npad = 0 ;
+    TCanvas* canvas = 0;
+    if( isProjectionX ){
+      canvas = new TCanvas(Form("c%d", kCanvasId), Form("c%d", kCanvasId++), 1200, 800);
+      canvas->Divide(4, 3);
+      npad = 12 ;
+    }
+    else{
+      canvas = new TCanvas(Form("c%d", kCanvasId), Form("c%d", kCanvasId++), 1200, 600);
+      canvas->Divide(4, 2);
+      npad = 8 ;
+    }
 
-    // Real data
-    TH2* hPtVsMomReal = (TH2D*) GetHistogram("hPtVsMom", id, kFALSE);
-    TH1* hPtReal      = (TH1D*) hPtVsMomReal->ProjectionY(Form("hPtReal_%d", id));
-    TH1* hMomReal     = (TH1D*) hPtVsMomReal->ProjectionX(Form("hMomReal_%d", id));
+    // Get bins
+    // eta bins = 6 : |eta| < 1.5
+    // pt bins  = 10 : pt = 0.2 - 5 GeV/c
+    const Int_t nbins = (isProjectionX) ? 10 : 6 ;
+    const Double_t binStep = 0.5 ;
+    const Double_t binMin  = (isProjectionX) ? 0.0 : -1.5 ;
 
-    SetStyle(hPtReal);
-    SetStyle(hMomReal);
-    hPtReal->SetLineColor(kBlue);
-    hMomReal->SetLineColor(kBlue);
-    hPtReal->Scale( GetNormalization(*hPtReal) );
-    hMomReal->Scale( GetNormalization(*hMomReal) );
+    for(Int_t ibin=0; ibin<nbins; ibin++){
+      const Double_t xMin = (isProjectionX && ibin==0) ? 0.2 : binMin + binStep * ibin ;
+      const Double_t xMax = (isProjectionX && ibin==0) ? 0.5 : binMin + binStep * (ibin+1.0) ;
+      const Int_t xMinBin = (isProjectionX) ? h2DEmbed->GetYaxis()->FindBin(xMin)     : h2DEmbed->GetXaxis()->FindBin(xMin) ;
+      const Int_t xMaxBin = (isProjectionX) ? h2DEmbed->GetYaxis()->FindBin(xMax) - 1 : h2DEmbed->GetXaxis()->FindBin(xMax) - 1;
 
-    hPtReal->SetMaximum(TMath::Max(hPtEmbed->GetMaximum(), hPtReal->GetMaximum())*1.2) ;
-    hMomReal->SetMaximum(TMath::Max(hMomEmbed->GetMaximum(), hMomReal->GetMaximum())*1.2) ;
+      TH1* hEmbed = 0;
+      TH1* hReal  = 0;
+      if( isProjectionX ){
+        hEmbed = (TH1D*) h2DEmbed->ProjectionX(Form("h%sEmbed_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+        hReal  = (TH1D*) h2DReal->ProjectionX(Form("h%sReal_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+      }
+      else{
+        hEmbed = (TH1D*) h2DEmbed->ProjectionY(Form("h%sEmbed_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+        hReal  = (TH1D*) h2DReal->ProjectionY(Form("h%sReal_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+      }
 
-    // Get particle name
-    TString title(hMomEmbed->GetTitle());
-    title.Remove(0, title.Last(',')+1);
+      SetStyle(hEmbed);
+      SetStyle(hReal);
+      hEmbed->SetLineColor(kRed);
+      hReal->SetLineColor(kBlue);
+      hEmbed->Sumw2();
+      hReal->Sumw2();
+      hEmbed->Scale( GetNormalization(*hEmbed) );
+      hReal->Scale( GetNormalization(*hReal) );
 
-    hPtReal->SetTitle("");
-    hPtReal->SetYTitle("(1/N_{trk})dN/dp_{T}") ;
-    hMomReal->SetTitle("");
-    hMomReal->SetYTitle("(1/N_{trk})dN/dp") ;
+      // Set maximum
+      Double_t yMax = 0.0 ;
+      if ( hEmbed->GetEntries() < 100 ){
+        // Use real data if N(embedding) < 100
+        yMax = hReal->GetMaximum() ;
+      }
+      else{
+        yMax = TMath::Max(hEmbed->GetMaximum(), hReal->GetMaximum())*1.2 ;
+      }
+      hReal->SetMaximum( yMax * 1.2 );
 
-    // Transverse momentum
-    canvas->cd(1);
-    hPtReal->SetAxisRange(0, kPtMax, "X");
-    hPtEmbed->SetAxisRange(0, kPtMax, "X");
+      if( isProjectionX ){
+        hReal->SetTitle(Form("%1.1f < p_{T} < %1.1f (GeV/c)", xMin, xMax));
+      }
+      else{
+        hReal->SetTitle(Form("%1.1f < #eta < %1.1f", xMin, xMax));
+        hReal->SetAxisRange(0, kPtMax, "X");
+      }
+      hReal->SetYTitle(Form("(1/N_{trk})dN/%s", yTitle.Data()));
 
-    hPtReal->Draw();
-    hPtEmbed->Draw("same");
+      canvas->cd(ibin+1);
+      hReal->Draw("h");
+      if( hEmbed->GetEntries() >= 100 ) hEmbed->Draw("same");
 
-    // Momentum
-    canvas->cd(2);
-    hMomReal->SetAxisRange(0, kPtMax, "X");
-    hMomEmbed->SetAxisRange(0, kPtMax, "X");
-    hMomReal->Draw();
-    hMomEmbed->Draw("same");
+      if( ibin == 0 ){
+        // Get particle name
+        TString title(hEmbed->GetTitle());
+        title.Remove(0, title.Last(',')+1);
 
-    canvas->cd(3);
-    TLegend* leg = new TLegend(0.1, 0.7, 0.9, 0.9);
-    leg->SetFillColor(10);
-    leg->SetTextSize(0.05);
-    leg->AddEntry( hPtEmbed, Form("Embedding, %s", title.Data()), "L");
-    leg->AddEntry( hPtReal, "Real data", "L");
-    leg->Draw();
+        canvas->cd(npad);
+        TLegend* leg = new TLegend(0.1, 0.7, 0.9, 0.9);
+        leg->SetFillColor(10);
+        leg->SetTextSize(0.05);
+        leg->AddEntry( hEmbed, Form("Embedding, %s", title.Data()), "L");
+        leg->AddEntry( hReal, "Real data", "L");
+        leg->Draw();
 
-    DrawStatistics(0.1, 0.2, 0.9, 0.5);
+        DrawStatistics(0.1, 0.2, 0.9, 0.5);
+      }
+    }
 
     canvas->cd();
     canvas->Update();
 
     if( GetNDaughters() == 1 ){
-      Print(*canvas, "pt_and_mom");
+      Print(*canvas, Form("%s", nameLower.Data()));
     }
     else{
-      Print(*canvas, Form("pt_and_mom_daughter%d", id));
+      Print(*canvas, Form("%s_daughter%d", nameLower.Data(), id));
     }
   }
 
+  gStyle->SetPadRightMargin(0.15);
 
   return kTRUE ;
 }
@@ -772,6 +792,8 @@ Bool_t StEmbeddingQADraw::DrawdEdx()
   cout << "QA for dE/dx ..." << endl;
 
   gStyle->SetOptStat(0);
+  gStyle->SetOptFit(0);
+  gStyle->SetPadRightMargin(0.05);
 
   for(Int_t id=0; id<GetNDaughters(); id++){
     // 2D
@@ -787,8 +809,14 @@ Bool_t StEmbeddingQADraw::DrawdEdx()
     // Real data
     TH2* hdEdxVsMomReal = (TH2D*) GetHistogram("hdEdxVsMom", id, kFALSE);
     SetStyle(hdEdxVsMomReal);
-    hdEdxVsMomReal->SetLineColor(kBlue);
-    hdEdxVsMomReal->SetMarkerColor(kBlue);
+    hdEdxVsMomReal->SetLineColor(kBlack);
+    hdEdxVsMomReal->SetMarkerColor(kBlack);
+
+    // Real data (with PID)
+    TH2* hdEdxVsMomPidReal = (TH2D*) GetHistogram("hdEdxVsMomPidCut", id, kFALSE);
+    SetStyle(hdEdxVsMomPidReal);
+    hdEdxVsMomPidReal->SetLineColor(kBlue);
+    hdEdxVsMomPidReal->SetMarkerColor(kBlue);
 
     TString title(hdEdxVsMomEmbed->GetTitle());
     title.Remove(0, title.Last(',')+1);
@@ -796,7 +824,10 @@ Bool_t StEmbeddingQADraw::DrawdEdx()
 
     // dE/dx vs momentum
     canvas2D->cd(1);
+    hdEdxVsMomReal->SetAxisRange(0, kPtMax, "X");
+
     hdEdxVsMomReal->Draw();
+    hdEdxVsMomPidReal->Draw("same");
     hdEdxVsMomEmbed->Draw("same");
 
     canvas2D->cd(2);
@@ -806,6 +837,7 @@ Bool_t StEmbeddingQADraw::DrawdEdx()
     leg->SetTextSize(0.05);
     leg->AddEntry( hdEdxVsMomEmbed, Form("Embedding, %s", title.Data()), "L");
     leg->AddEntry( hdEdxVsMomReal, "Real data", "L");
+    leg->AddEntry( hdEdxVsMomPidReal, "Real data with PID cut (#sigma<2)", "L");
     leg->Draw();
 
     DrawStatistics(0.1, 0.2, 0.9, 0.5);
@@ -822,8 +854,22 @@ Bool_t StEmbeddingQADraw::DrawdEdx()
 
     // 1D projections for each momentum bin
     //  From 0.2 GeV/c to 5.0 GeV/c (5*5)
-    TCanvas* canvas = new TCanvas(Form("c%d", kCanvasId), Form("c%d", kCanvasId++), 1200, 800);
-    canvas->Divide(5, 5);
+    TCanvas* canvas0 = new TCanvas(Form("c%d", kCanvasId), Form("c%d", kCanvasId++), 1200, 800);
+    canvas0->Divide(5, 5);
+
+    TGraphErrors* gMeanVsMom[2];  // 0:embedding, 1:real data
+    TGraphErrors* gSigmaVsMom[2]; // 0:embedding, 1:real data
+
+    for(Int_t i=0; i<2; i++){
+      gMeanVsMom[i]  = new TGraphErrors();
+      gSigmaVsMom[i] = new TGraphErrors();
+      gMeanVsMom[i] ->SetMarkerStyle(24 - i*4);
+      gSigmaVsMom[i]->SetMarkerStyle(24 - i*4);
+    }
+    gMeanVsMom[0] ->SetMarkerColor(kRed);    gMeanVsMom[0] ->SetLineColor(kRed);
+    gSigmaVsMom[0]->SetMarkerColor(kRed);    gSigmaVsMom[0]->SetLineColor(kRed);
+    gMeanVsMom[1] ->SetMarkerColor(kBlue);   gMeanVsMom[1] ->SetLineColor(kBlue);
+    gSigmaVsMom[1]->SetMarkerColor(kBlue);   gSigmaVsMom[1]->SetLineColor(kBlue);
 
     const Int_t npt      = 24 ;
     const Double_t ptBin = 0.2 ;
@@ -838,7 +884,7 @@ Bool_t StEmbeddingQADraw::DrawdEdx()
 
       // Projections
       TH1* hdEdxEmbed = (TH1D*) hdEdxVsMomEmbed->ProjectionY(Form("hdEdxEmbed_%d_%d", id, ipt), ptMinBin, ptMaxBin);
-      TH1* hdEdxReal  = (TH1D*) hdEdxVsMomReal->ProjectionY(Form("hdEdxReal_%d_%d", id, ipt), ptMinBin, ptMaxBin);
+      TH1* hdEdxReal  = (TH1D*) hdEdxVsMomPidReal->ProjectionY(Form("hdEdxReal_%d_%d", id, ipt), ptMinBin, ptMaxBin);
       SetStyle(hdEdxEmbed);
       SetStyle(hdEdxReal );
       hdEdxEmbed->Sumw2() ;
@@ -851,19 +897,43 @@ Bool_t StEmbeddingQADraw::DrawdEdx()
       hdEdxReal->SetTitle(Form("%1.1f < p_{T} < %1.1f GeV/c", ptMin, ptMax));
       hdEdxReal->SetYTitle("(1/N_{trk})dN/d(dE/dx)");
 
-      canvas->cd(ipt+1);
+      canvas0->cd(ipt+1);
       hdEdxReal->Draw("h");
       hdEdxEmbed->Draw("hsame");
 
+      // Extract mean and sigma (Oct/22/2009)
+      TF1 fEmbed(Form("fEmbed_%d_%d", id, ipt), "gaus", 0, 10);
+      TF1 fReal(Form("fReal_%d_%d", id, ipt), "gaus", 0, 10);
+      fEmbed.SetLineColor(kRed);
+      fReal.SetLineColor(kBlue);
+      fEmbed.SetLineWidth(1);
+      fReal.SetLineWidth(1);
+
+      hdEdxReal->Fit(fReal.GetName(), "rq0");
+      hdEdxEmbed->Fit(fEmbed.GetName(), "rq0");
+      fReal.Draw("same");
+      fEmbed.Draw("same");
+
+      const Double_t pt = (ptMin+ptMax)/2.0 ;
+      gMeanVsMom[0]->SetPoint(ipt, pt, fEmbed.GetParameter(1));
+      gMeanVsMom[0]->SetPointError(ipt, 0.0, fEmbed.GetParError(1));
+      gMeanVsMom[1]->SetPoint(ipt, pt, fReal.GetParameter(1));
+      gMeanVsMom[1]->SetPointError(ipt, 0.0, fReal.GetParError(1));
+      gSigmaVsMom[0]->SetPoint(ipt, pt, fEmbed.GetParameter(2));
+      gSigmaVsMom[0]->SetPointError(ipt, 0.0, fEmbed.GetParError(2));
+      gSigmaVsMom[1]->SetPoint(ipt, pt, fReal.GetParameter(2));
+      gSigmaVsMom[1]->SetPointError(ipt, 0.0, fReal.GetParError(2));
+
       // Legend
       if( ipt == npt - 1 ){
-        canvas->cd(25);
+        canvas0->cd(25);
         TString title(hdEdxVsMomEmbed->GetTitle());
         title.Remove(0, title.Last(',')+1);
         TLegend* leg = new TLegend(0.1, 0.7, 0.9, 0.9);
         leg->SetFillColor(10);
         leg->SetTextSize(0.08);
-        leg->AddEntry( hdEdxEmbed, Form("Embedding, %s", title.Data()), "L");
+        leg->SetHeader(title.Data());
+        leg->AddEntry( hdEdxEmbed, "Embedding", "L");
         leg->AddEntry( hdEdxReal,  "Real data", "L");
         leg->Draw();
       
@@ -871,14 +941,61 @@ Bool_t StEmbeddingQADraw::DrawdEdx()
       }
     }// pt loop
 
-    canvas->cd();
-    canvas->Update();
+    canvas0->cd();
+    canvas0->Update();
 
     if( GetNDaughters() == 1 ){
-      Print(*canvas, "dedx");
+      Print(*canvas0, "dedx");
     }
     else{
-      Print(*canvas, Form("dedx_daughter%d", id));
+      Print(*canvas0, Form("dedx_daughter%d", id));
+    }
+
+    // Mean/Sigma vs momentum (real vs embed)
+    TCanvas* canvas1 = new TCanvas(Form("c%d", kCanvasId), Form("c%d", kCanvasId++), 1200, 500);
+    canvas1->Divide(2, 1);
+
+    for(Int_t i=0; i<2; i++){
+      canvas1->cd(i+1);
+
+      const Double_t ymax = (i==0) ? 5.2 : 1.4 ;
+      TH1* frame = canvas1->GetPad(i+1)->DrawFrame(0, 0.0, 5.0, ymax);
+      frame->SetXTitle("momentum (GeV/c)");
+      if( i == 0 ) frame->SetYTitle("Mean (KeV/cm)");
+      if( i == 1 ) frame->SetYTitle("#sigma (KeV/cm)");
+
+      TLegend* leg = new TLegend(0.55, 0.7, 0.88, 0.86);
+      leg->SetTextSize(0.05);
+      leg->SetFillColor(10);
+      TString title(hdEdxVsMomEmbed->GetTitle());
+      title.Remove(0, title.Last(',')+1);
+      leg->SetHeader(title);
+
+      if( i == 0 ){
+        gMeanVsMom[0]->Draw("P");
+        gMeanVsMom[1]->Draw("P");
+
+        leg->AddEntry( gMeanVsMom[0], "Embedding", "P");
+        leg->AddEntry( gMeanVsMom[1], "Real data", "P");
+      }
+      if( i == 1 ){
+        gSigmaVsMom[0]->Draw("P");
+        gSigmaVsMom[1]->Draw("P");
+
+        leg->AddEntry( gSigmaVsMom[0], "Embedding", "P");
+        leg->AddEntry( gSigmaVsMom[1], "Real data", "P");
+      }
+      leg->Draw();
+    }
+
+    canvas1->cd();
+    canvas1->Update();
+
+    if( GetNDaughters() == 1 ){
+      Print(*canvas1, "mean_sigma_dedx");
+    }
+    else{
+      Print(*canvas1, Form("mean_sigma_dedx_daughter%d", id));
     }
   }
 
