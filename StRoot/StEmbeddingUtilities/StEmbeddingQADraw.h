@@ -49,6 +49,17 @@ class TObject ;
 //          by "root4star -b ..." rather than "root4star -l ..."
 //          if you don't want to see a bunch of canvas.
 //
+//
+//----------------------------------------------------------------------------------------------------
+//   Revised history
+//
+//   Oct/23/2009 : 
+//     - eta and rapidity comparison with different pt bins
+//     - pt and momentum comparison with different eta bins
+//     - Add mean and sigma of dE/dx as a function of momentum
+//       from gaussian fit
+//----------------------------------------------------------------------------------------------------
+
 class StEmbeddingQADraw {
   public:
     StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile);  // input embedding file name made by StEmbeddingQAAnalyzer
@@ -64,9 +75,11 @@ class StEmbeddingQADraw {
     // Track-wise
     Bool_t DrawMcTrack();        // Draw MC track histograms
     Bool_t DrawTrack();          // Draw Reconstructed track histograms
+
     Bool_t DrawGeantId();        // Geant id
-    Bool_t DrawRapidity();       // (pseudo-)rapidity
-    Bool_t DrawMomentumAndPt();  // momentum and pt
+    Bool_t DrawRapidity();       // (pseudo-)rapidity in different eta bins
+    Bool_t DrawPt();             // pt (|eta|<2, 0.5 eta increment)
+    Bool_t DrawMomentum();       // momentum (|eta|<2, 0.5 eta increment)
     Bool_t DrawdEdx();           // dE/dx (2D) and projections
     Bool_t DrawDca();            // Dca vs (pt, eta)
     Bool_t DrawNHit();           // NHit vs (pt, eta)
@@ -103,6 +116,7 @@ class StEmbeddingQADraw {
         const Double_t x2=0.9, const Double_t y2=0.8,
         const Double_t textSize = 0.05); // Number of events, year, production and particle name
 
+    Bool_t DrawProjection2D(const TString name); // (pseudo-)rapidity, momentum, pt
     Bool_t DrawProjection3D(const TString name); // For dca and nhit projections in (pt, eta) space
 
     ClassDef(StEmbeddingQADraw, 1)
