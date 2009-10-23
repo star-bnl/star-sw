@@ -25,6 +25,7 @@ ClassImp(StTriggerDataMaker)
 StTriggerDataMaker::StTriggerDataMaker(const char *name):StRTSBaseMaker("trg",name)
 {
   LOG_INFO << "Constructing StTriggerDataMaker with name=" << name << endm;
+  mDebug=0;
 }
 
 //_____________________________________________________________________________
@@ -80,7 +81,7 @@ Int_t StTriggerDataMaker::Make(){
       break;
     }
   } else {
-    LOG_INFO << "StTriggerDataMaker Make() found no old format data, trying to get new data format" << endm;
+    if(mDebug>1) LOG_INFO << "StTriggerDataMaker Make() found no old format data, trying to get new data format" << endm;
 
     StRtsTable *daqData = GetNextRaw();
     if ( daqData ){
@@ -113,6 +114,15 @@ Int_t StTriggerDataMaker::Make(){
     return kStWarn;
   }else{
     LOG_INFO << "StTriggerDataMaker Make() finished. Found trigger data for year "<< year << endm;  
+    if(mDebug>0){
+      TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
+      if (os) {
+	StTriggerData* pTrg = (StTriggerData*)os->GetObject();
+	if(pTrg){
+	  pTrg->dump();
+	}
+      }
+    }    
     return kStOK;
   }
 }
