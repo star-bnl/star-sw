@@ -18,9 +18,13 @@ public:
   virtual const char *GetCVS() const
   {static const char cvs[]="Tag "__DATE__" "__TIME__ ; return cvs;}
   
+  void setDebug(int v) {mDebug=v;}
+  
 protected:
   
 private:
+  int mDebug;
+
   ClassDef(StTriggerDataMaker, 0)   //StAF chain virtual base class for Makers
 };
 #endif
