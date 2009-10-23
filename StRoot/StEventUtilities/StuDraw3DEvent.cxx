@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.21 2009/10/22 23:51:07 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.22 2009/10/23 05:19:52 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -89,9 +89,11 @@ TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t s
    emcGeom->getEtaPhi(softId,eta,phi);
    Float_t etaStep = 1./emcGeom->NEta();
    Float_t phiStep = TMath::Pi()/60; 
-   printf(" m=%d, e=%d, s=%d; eta=%e deta=%e phi=%e dphi=%e id %d\n",m, e, s,eta,etaStep ,phi, phiStep, softId);
-
-   TObject *l = Tower(emcGeom->Radius(), StarRoot::StEta(eta,etaStep)
+   static int entries = 0;
+  // if (entries) return 0;
+  //  printf(" m=%d, e=%d, s=%d; eta=%e deta=%e phi=%e dphi=%e id %d\n",m, e, s,eta,etaStep ,phi, phiStep, softId);
+   entries++;
+   TObject *l = Tower(emcGeom->Radius(), StarRoot::StEta((eta>0?1:-1)*( TMath::PiOver2()-eta),etaStep)
                          , phi, phiStep
                          , col,sty+kBarrelStyle,siz);
    SetModel((TObject*)&emcHit);
@@ -109,9 +111,9 @@ void StuDraw3DEvent::EmcHits(const StEvent* event)
       StSPtrVecEmcRawHit&   hit=  module->hits();
       for(unsigned int ih=0;ih < hit.size();ih++){
          StEmcRawHit *h=hit[ih];
-         int  rawAdc=1.5*h->adc(); // raw ADC 
+         double  rawAdc=h->adc(); // raw ADC 
          float energy =  h->energy();
-         if ( rawAdc && energy > 0 ) {
+         if ( rawAdc >2 && energy > 0 ) {
   	// If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
             if (  rawAdc  < 20)      colorResponce = kBlue;
 	// If edep large then MIP but less then 1 GeV 
@@ -120,8 +122,8 @@ void StuDraw3DEvent::EmcHits(const StEvent* event)
             else if (  rawAdc  < 256)   colorResponce = kYellow;
 	// If above lowest HT thershold
             else                         colorResponce = kRed;
-            EmcHit(*h,colorResponce,0, energy*10);
-            printf(" Emchit adc = %d energy = %e\n",rawAdc, 10*h->energy());
+            EmcHit(*h,colorResponce,0, rawAdc);
+            // printf(" Emchit adc = %e energy = %e\n",rawAdc, 10*h->energy());
          }
       }
    }
