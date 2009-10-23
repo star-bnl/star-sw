@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.170 2009/01/26 15:27:37 fisyak Exp $
+// $Id: bfc.C,v 1.170.2.1 2009/10/23 15:57:56 didenko Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -69,7 +69,7 @@ void Load(const Char_t *options){
   // Look up for the logger option
   Bool_t needLogger  = kFALSE;
   if (!TString(options).Contains("-logger",TString::kIgnoreCase)) {
-    needLogger = gSystem->Load("liblog4cxx.so") <= 0;              //  StMemStat::PrintMem("load log4cxx");
+    needLogger = kTRUE;              //  StMemStat::PrintMem("load log4cxx");
   }
 #endif
   gSystem->Load("libSt_base");                                        //  StMemStat::PrintMem("load St_base");
