@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.25 2009/10/23 21:04:28 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.26 2009/10/23 21:47:33 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -106,7 +106,7 @@ TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t s
     \param  event - The pointer to the instance of the StEvent class
     \param type   - The Emc detector name as defined by StEmcGeom::getDetNumFromName(const Char_t *cdet) method
     \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Run.dAu.2008.9025036.666030.BEMC.hits.png "Event 666030 from Run 9025036 produced by Ed.C macros"  
-    \note You normally do not need to use this method directly. It is just a pattern you can follow to customise the macro Ed.C to 
+    \note You normally do not need to use this method directly. It is just a pattern you can follow to customize the macro Ed.C to 
     use your own coloring schema and selection criteria.
 */
 //______________________________________________________________________________________
