@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.26 2009/10/23 21:47:33 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.27 2009/10/24 04:22:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -19,6 +19,8 @@
 #include "TMath.h"
 #include "StTrackDetectorInfo.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StMessMgr.h"
+
 
 //! StuDraw3DEvent( const char *detectorName,TVirtualPad *pad) ctor
 /*!  
@@ -79,6 +81,7 @@ StuDraw3DEvent::~StuDraw3DEvent()
 //___________________________________________________
 TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t sty,Size_t siz, const char *detId)
 {  
+   TObject *model = 0;
    if (!detId || !detId[0]) detId = "bemc";
    int m, e, s;
    Int_t softId;
@@ -86,19 +89,23 @@ TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t s
    Float_t phi;
    emcHit.modEtaSub(m,e,s);
    StEmcGeom *emcGeom =StEmcGeom::getEmcGeom(detId);
-   emcGeom->getId(m,e,s,softId);
-   emcGeom->getEtaPhi(softId,eta,phi);
-   Float_t etaStep = 1.0/emcGeom->NEta();
-   Float_t phiStep = TMath::Pi()/60; 
-   static int entries = 0;
-   //if (entries) return 0;
-   // printf(" m=%d, e=%d, s=%d; eta=%e deta=%e phi=%e dphi=%e id %d\n",m, e, s,eta,etaStep ,phi, phiStep, softId);
-   entries++;
-   TObject *l = Tower(emcGeom->Radius(), StarRoot::StEta(eta,etaStep)
+   if (emcGeom) {
+      emcGeom->getId(m,e,s,softId);
+      emcGeom->getEtaPhi(softId,eta,phi);
+      Float_t etaStep = 1.0/emcGeom->NEta();
+      Float_t phiStep = TMath::Pi()/60; 
+      static int entries = 0;
+        //if (entries) return 0;
+        // printf(" m=%d, e=%d, s=%d; eta=%e deta=%e phi=%e dphi=%e id %d\n",m, e, s,eta,etaStep ,phi, phiStep, softId);
+      entries++;
+      model  = Tower(emcGeom->Radius(), StarRoot::StEta(eta,etaStep)
                          , phi, phiStep
                          , col,sty+(strcmp(detId,"bemc")?0:kBarrelStyle),siz);
-   SetModel((TObject*)&emcHit);
-   return l;
+      SetModel((TObject*)&emcHit);
+   } else {
+      LOG_ERROR <<  __FILE__ << ":  there is no geometry information for \"" << detId << "\"" << endm;
+   }
+   return model;
 }
 
 //! Add all emcHits those can pass the internal filter from the given detector \a detId type from the \a event to the display list.
@@ -119,25 +126,31 @@ void StuDraw3DEvent::EmcHits(const StEvent* event,const char *detId)
    for(unsigned int md=1; md <=det->numberOfModules(); md++) {
       StEmcModule*  module=det->module(md);
       StSPtrVecEmcRawHit&   hit=  module->hits();
+     
       for(unsigned int ih=0;ih < hit.size();ih++){
          StEmcRawHit *h=hit[ih];
          double  rawAdc=h->adc()-5; // raw ADC 
          float energy =  h->energy();
+	 Style_t style=0; // solid
+//	 energy = (rawAdc+5)/5;
+//	  printf(" EmcHits %d adc = %e energy = %e\n", ih,rawAdc, energy);
          if ( rawAdc>0  && energy > 0  && energy < 30) {
             // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
-            if (  energy  < 0.3)      colorResponce = kBlue;
+            if (  energy  < 0.3)   {   
+	       colorResponce = kBlue; 
+	       // style = 4001;                 //wireframe 
             // If edep large then MIP but less then 1 GeV 
-            else if (  energy  < 1.0 ) colorResponce = kGreen;
+            } else if (  energy  < 1.0 ) colorResponce = kGreen;
             // If between 1 GeV and lowest HT threshold (4 GeV for Run7)
             else if (  energy  < 4.0 )   colorResponce = kYellow;
             // If above lowest HT thershold
             else                         colorResponce = kRed;
             if (energy > 1.0) printf(" Emchit adc = %e energy = %e\n",rawAdc, energy);
-            static const double maxSize =  300.; // (cm)
+            static const double maxSize =  400.; // (cm)
             static const double scale   =  200.; // (cm/Gev)
             double size =(energy > 0.3 ? scale : scale/30.)*energy;
             if (size > maxSize)  size = maxSize ;
-            EmcHit(*h,colorResponce,0, size,detId);
+            EmcHit(*h,colorResponce,style, size,detId);
          }
       }
    }
