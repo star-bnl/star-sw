@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.6 2009/10/18 22:02:12 perev Exp $
+ * $Id: StiPullEvent.h,v 1.7 2009/10/24 20:35:33 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.7  2009/10/24 20:35:33  perev
+ * Remove redundante definition of StiPullEvent::~StiPullEvent()
+ *
  * Revision 1.6  2009/10/18 22:02:12  perev
  * Propagate primary info into globals(Finish())
  *
@@ -162,7 +165,6 @@ char mEnd[1];
 class StiPullEvent : public TObject {
 public:
    StiPullEvent();
-  ~StiPullEvent()			{;}
 void Clear(const char *opt = "");	
 void Finish();	
 void Add(StiPullHit &ph,int gloPrim);
