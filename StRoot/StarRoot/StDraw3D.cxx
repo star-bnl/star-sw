@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.73 2009/10/23 16:10:44 fine Exp $
+// $Id: StDraw3D.cxx,v 1.74 2009/10/24 04:23:19 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -995,7 +995,9 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
        dphi = -dphi;
    }
    float zNear, xNear, x1Near,x2Near, yNear, y1Near,y2Near, zFar, xFar, yFar, x1Far,x2Far, y1Far, y2Far;
-
+   // redefine size 
+   siz = siz *TMath::Cos(lambda);
+   
    bool barrel = (sty >= kBarrelStyle);
    if (barrel) {
       lambda   = -lambda;
@@ -1024,7 +1026,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    x2Far = TMath::Sqrt(y2Far*y2Far + zFar*zFar) * TMath::Tan(dphi/2); 
 
    float dy = TMath::Tan(lambda )*siz/2;
-   
+      
    TTRAP *trap = new TTRAP(  "CALO", Form("Angle%d",lambda)
          , "Barrel"                // Material
          , siz/2                   // dz
