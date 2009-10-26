@@ -92,7 +92,7 @@ void StMuEmcCollection::packbits(unsigned char *data, unsigned int value, unsign
   data[startByte+3] = (unsigned char)((b & 0xFF000000)>>24);
   return;
 }
-unsigned int StMuEmcCollection::unpackbits(unsigned char *data, unsigned int nbits, unsigned int index)
+unsigned int StMuEmcCollection::unpackbits(const unsigned char *data, unsigned int nbits, unsigned int index) const
 {
   unsigned int start     = index*nbits;
   unsigned int startByte = start/8;
@@ -104,7 +104,7 @@ unsigned int StMuEmcCollection::unpackbits(unsigned char *data, unsigned int nbi
   unsigned int b = (unsigned int)(a&(mask<<startBit))>>startBit;
   return b;
 }
-int StMuEmcCollection::getTowerADC(int id, int detector)
+int StMuEmcCollection::getTowerADC(int id, int detector) const
 {
   if (mTowerData) 
     return mTowerData->towerADC(id,detector);
@@ -310,7 +310,7 @@ void StMuEmcCollection::addEndcapPoint()
 
 
 void StMuEmcCollection
-::getEndcapTowerADC(int ihit1, int &adc, int &sec, int &sub, int & eta)
+::getEndcapTowerADC(int ihit1, int &adc, int &sec, int &sub, int & eta) const 
 {
   int ihit=ihit1+1;  // it was not my idea to abort on index=0, JB
   adc=getTowerADC(ihit,eemc);
