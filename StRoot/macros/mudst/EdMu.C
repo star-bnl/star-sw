@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.7 2009/10/03 18:42:35 fine Exp $
+// $Id: EdMu.C,v 1.8 2009/10/26 22:46:57 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file EdMu.C 
@@ -68,13 +68,16 @@ StuDraw3DMuEvent *gEd = 0;
    \note No StMuHits can be rendered directly for the time being.
 */
 //____________________________________________________________________________________
-void mrd(bool hits=false, bool clear=false) 
+void mrd(bool hits=true, bool clear=false) 
 {  
    // redraw the event
    if (muEvent) {
       if (clear) gEd->Clear();
-      if (hits) { // gEd->Hits();         
-      } else gEd->Tracks();
+      if (hits) { 
+         gEd->Endcaps();
+      } else {
+         gEd->Tracks();
+      }
    }
  }
  
@@ -95,7 +98,7 @@ void mae(bool hits=false)
  newevent:
      chain->Make();
      if (muEvent = chain->muDst()->event()) {
-         mrd();     // Draw the tracks
+         mrd(hits);     // Draw the tracks
       } else {
         printf(" muEvent is empty\n");
         goto newevent;
@@ -133,6 +136,7 @@ void mae(bool hits=false)
    }
    TString muDstFile=file;
    gROOT->Macro("loadMuDst.C");
+   gSystem->Load("StEEmcUtil");
    chain=new StMuDstMaker(0,0,muDstFile.Data());
    chain->Init();
    delete gEd; // destroy the built-in display

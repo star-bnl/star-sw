@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.7 2009/10/06 15:17:50 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.8 2009/10/26 22:46:56 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -10,6 +10,8 @@
   
 class StMuTrack;
 class StMuDst;
+class EEmcGeomSimple;
+class StMuEmcCollection;
 
 /*! The constant defining the StMuTrack components to be rendered
  */
@@ -58,11 +60,15 @@ enum EStuDraw3DMuEvent {
 ///////////////////////////////////////////////////////////////////////
 class StuDraw3DMuEvent : public virtual StDraw3D
 {
-  private:
+  private: 
+     EEmcGeomSimple *fEndcapGeom; // tower geomtry
+
      StuDraw3DMuEvent(const StuDraw3DMuEvent&):StDraw3D(){;}
      void operator=(const StuDraw3DMuEvent&){;}
 
      static StuDraw3DMuEvent *gMuEventDisplay;
+  protected:
+     EEmcGeomSimple *EndcapGeom();
 
   public:
      StuDraw3DMuEvent(const char *detectorName="TPC",TVirtualPad *pad = 0);
@@ -79,6 +85,8 @@ class StuDraw3DMuEvent : public virtual StDraw3D
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
      virtual TObject *TrackInOut(const StMuTrack &track, EDraw3DStyle sty=kUsedHit, Bool_t in=kTRUE);
+     virtual void     Endcaps(Style_t sty=0);
+     virtual void     Endcaps(const StMuEmcCollection &e, Style_t sty=0);
      ClassDef(StuDraw3DMuEvent,0);
 };
 
