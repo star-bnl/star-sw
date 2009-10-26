@@ -35,7 +35,7 @@ class StMuEmcCollection: public TObject
     void              Clear(Option_t *option=""){clear();}     
     void              DeleteThis();
     
-    int               getTowerADC(int id, int detector = bemc);    
+    int               getTowerADC(int id, int detector = bemc) const;    
     StEmcCrateStatus  getCrateStatus(int crate, int detector = bemc) { if (mTowerData) return mTowerData->crateStatus(crate,detector); else return crateUnknown; }    
     int               getNSmdHits(int detector);
     StMuEmcHit*       getSmdHit(int hitId, int detector = bsmde);    
@@ -44,17 +44,17 @@ class StMuEmcCollection: public TObject
     StMuEmcHit*       getPrsHit(int hitId, int detector = bprs);    
     int               getNClusters(int detector);
     StMuEmcCluster*   getCluster(int clusterId,int detector);    
-    int               getNPoints();
+    int               getNPoints() ;
     StMuEmcPoint*     getPoint(int);
     int               getNEndcapPoints();
     StMuEmcPoint*     getEndcapPoint(int);
 
     // EEMC utility methods
-    int   getNEndcapTowerADC(){ return 720;}
+    int   getNEndcapTowerADC() const { return 720;}
     void  getEndcapTowerADC(int ihit, 
-			    int &adc, int &sec, int &sub, int & eta);
+			    int &adc, int &sec, int &sub, int & eta) const ;
 
-    int   getNEndcapPrsHits(){ return getNPrsHits(eprs);}
+    int   getNEndcapPrsHits()  { return getNPrsHits(eprs);}
     StMuEmcHit *getEndcapPrsHit(int ihit, 
 			  int &sec, int &sub, int & eta, int &pre);
 
@@ -76,7 +76,7 @@ class StMuEmcCollection: public TObject
   protected:
     void              init();
     void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
-    unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);
+    unsigned int      unpackbits(const unsigned char*, unsigned int, unsigned int) const ;
     
     // The char arrays are obsolete, but needed for backward compatibility
     unsigned char     mTowerADC[7200];
