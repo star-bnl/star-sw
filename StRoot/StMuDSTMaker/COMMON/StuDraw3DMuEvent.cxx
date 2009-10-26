@@ -1,11 +1,11 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.6 2009/10/04 01:35:53 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.7 2009/10/26 22:46:56 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
 #include "StHelixHelper.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StThreeVector.hh"
-
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
       
 //! StuDraw3DMuEvent( const char *detectorName,TVirtualPad *pad) ctor
@@ -37,7 +37,7 @@
 */
 //___________________________________________________
 StuDraw3DMuEvent::StuDraw3DMuEvent( const char *detectorName,TVirtualPad *pad): 
-StDraw3D(detectorName,pad)
+StDraw3D(detectorName,pad),fEndcapGeom(0)
 {
    // The detectorName is a comma separated list of the OpenInventor files with no extension
    // For all names on the list one should provide the iv file with the "iv extension:
@@ -53,6 +53,7 @@ StDraw3D(detectorName,pad)
 StuDraw3DMuEvent::~StuDraw3DMuEvent()
 {
    if (gMuEventDisplay == this) gMuEventDisplay = 0;
+   delete fEndcapGeom; fEndcapGeom=0;
 }
 
 //! Add all tracks of the given \a type from the  current event to the display list.
@@ -160,6 +161,67 @@ TObject *StuDraw3DMuEvent::TrackInOut(const StMuTrack &track, EDraw3DStyle sty,B
 {
    const StDraw3DStyle &style =  Style(sty);
    return TrackInOut(track, in, style.Col(),style.Sty(),style.Siz() );
+} 
+
+//___________________________________________________
+EEmcGeomSimple *StuDraw3DMuEvent::EndcapGeom()
+{
+   // endcap tower geometry:
+   // see http://drupal.star.bnl.gov/STAR/subsys/eemc/endcap-calorimeter/db-usage
+   if  (!fEndcapGeom) fEndcapGeom = new EEmcGeomSimple();
+   return fEndcapGeom; 
+}
+//___________________________________________________
+void   StuDraw3DMuEvent::Endcaps(Style_t sty)
+{
+   StMuEmcCollection *emc= StMuDst::muEmcCollection();
+   if (emc)  Endcaps(*emc,sty);
+}
+
+//___________________________________________________
+void   StuDraw3DMuEvent::Endcaps(const StMuEmcCollection &emc,Style_t sty)
+{
+  Color_t colorResponce = 0;
+  int nTowers = emc.getNEndcapTowerADC();
+  for (int i=0; i< nTowers; i++) { 
+    int adc,  isec, isub, ieta;
+    emc.getEndcapTowerADC(i,adc,isec,isub,ieta);
+    isec--;    ieta--;    isub--;
+    if (adc<=0) continue; // print only non-zero values
+    // access geometry info
+    float etaCenter     =EndcapGeom()->getEtaMean(ieta);
+    if (etaCenter <= 0) continue;
+    float phiCenter     =EndcapGeom()->getPhiMean(isec,isub);
+    if (phiCenter <= 0) continue;
+    float dPhi = 2*EndcapGeom()->getPhiHalfWidth(isec,isub);
+    float deta = 2*EndcapGeom()->getEtaHalfWidth(ieta);
+    const float radius = 230.; // no idea where I should pick it from.
+    float energy = adc*60./4096;
+    if ( energy > 0.1 ) {
+       // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
+       if (  energy  < 0.3)   {   
+	       colorResponce = kBlue; 
+          // If edep large then MIP but less then 1 GeV 
+       } else if (  energy  < 1.0 ) colorResponce = kGreen;
+           // If between 1 GeV and lowest HT threshold (4 GeV for Run7)
+        else if (  energy  < 4.0 )   colorResponce = kYellow;
+           // If above lowest HT thershold
+        else                         colorResponce = kRed;
+        static const double maxSize =  400.; // (cm)
+        static const double scale   =  200.; // (cm/Gev)
+        double size =(energy > 0.3 ? scale : scale/30.)*energy;
+        if (size > maxSize)  size = maxSize ;
+      // printf(" %d %e %e %e %e \n",i,etaCenter,deta,phiCenter, EndcapGeom()->getZMean());
+//        TObject *tw = 
+              Tower( radius
+                    , StarRoot::StEta(etaCenter,deta)
+                    , phiCenter, dPhi
+                    , colorResponce
+                    , sty
+                    , size);
+              SetComment(Form("Endcap eta=%f, phi=%f, energy=%f",etaCenter,phiCenter,energy));
+     }
+  }
 }
 
 /*! \return The pointer to the current instance of the StuDraw3DMuEvent  class 
