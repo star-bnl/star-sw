@@ -44,7 +44,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) cout << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endl;
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.23 2009/10/12 23:54:12 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.24 2009/10/26 18:50:58 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -512,6 +512,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	break;
       }
       sortedIndex++;
+      if (tpc_hit->volume_id <= 0 || tpc_hit->volume_id > 1000000) continue;
 #if 0
       Int_t isDet  = tpc_hit->volume_id/100000;
       if (isDet) continue; // skip pseudo padrow
@@ -1180,6 +1181,7 @@ Double_t StTpcRSMaker::InducedCharge(Double_t s, Double_t h, Double_t ra, Double
   Double_t k = 2*B/3.*TMath::Power((pi/E0/s),2)*TMath::Power(C*Va,3); cout << "k = " << k << endl;
   // Induced charge variation
   t0 = ra*ra/(4*mu*C*Va); cout << "t0 = " << 1e9*t0 << " ns" << endl;                                     // E.Mathieson (2.10)
+  if (h/s < 0.8) t0 *= 0.5;
   Double_t Tav = t0*h/s/(2*pi*C);  cout << "Tav = " << 1e9*Tav << " ns" << endl;
   //  Double_t t = 5*55e-9;             cout << "t = " << 1e9*t << " ns" << endl;
   Double_t t = 180e-9;             cout << "t = " << 1e9*t << " ns" << endl; 
@@ -1319,8 +1321,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
   return m_SignalSum;
 }
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.23 2009/10/12 23:54:12 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.24 2009/10/26 18:50:58 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.24  2009/10/26 18:50:58  fisyak
+// Clean up from Bichel's stuff
+//
 // Revision 1.23  2009/10/12 23:54:12  fisyak
 // Restore T0Jitter, remove differential in Tpx signal
 //
