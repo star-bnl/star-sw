@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.7 2009/10/26 22:46:56 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.8 2009/10/27 04:57:52 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -193,33 +193,32 @@ void   StuDraw3DMuEvent::Endcaps(const StMuEmcCollection &emc,Style_t sty)
     if (etaCenter <= 0) continue;
     float phiCenter     =EndcapGeom()->getPhiMean(isec,isub);
     if (phiCenter <= 0) continue;
-    float dPhi = 2*EndcapGeom()->getPhiHalfWidth(isec,isub);
-    float deta = 2*EndcapGeom()->getEtaHalfWidth(ieta);
-    const float radius = 230.; // no idea where I should pick it from.
-    float energy = adc*60./4096;
-    if ( energy > 0.1 ) {
+    static const float dPhi = 2*EndcapGeom()->getPhiHalfWidth(isec,isub);
+    static const float deta = 2*EndcapGeom()->getEtaHalfWidth(ieta);
+    static const float radius = 230.; // no idea where I should pick it from.
+    float energy = adc*60./4096-0.1;
+    if ( energy > 0.15 ) {
+    
        // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
-       if (  energy  < 0.3)   {   
-	       colorResponce = kBlue; 
+       if (  energy  < 0.3) {         colorResponce = kBlue; 
           // If edep large then MIP but less then 1 GeV 
-       } else if (  energy  < 1.0 ) colorResponce = kGreen;
+       } else if (  energy  < 1.0 ) { colorResponce = kGreen;
            // If between 1 GeV and lowest HT threshold (4 GeV for Run7)
-        else if (  energy  < 4.0 )   colorResponce = kYellow;
+       } else if (  energy  < 4.0 ) { colorResponce = kYellow;
            // If above lowest HT thershold
-        else                         colorResponce = kRed;
-        static const double maxSize =  400.; // (cm)
-        static const double scale   =  200.; // (cm/Gev)
-        double size =(energy > 0.3 ? scale : scale/30.)*energy;
-        if (size > maxSize)  size = maxSize ;
-      // printf(" %d %e %e %e %e \n",i,etaCenter,deta,phiCenter, EndcapGeom()->getZMean());
-//        TObject *tw = 
-              Tower( radius
-                    , StarRoot::StEta(etaCenter,deta)
-                    , phiCenter, dPhi
-                    , colorResponce
-                    , sty
-                    , size);
-              SetComment(Form("Endcap eta=%f, phi=%f, energy=%f",etaCenter,phiCenter,energy));
+       } else                         colorResponce = kRed;
+	
+       static const double maxSize =  400.; // (cm)
+       static const double scale   =   90.; // (cm/Gev)
+       double size =(energy > 0.3 ? scale : scale/30.)*energy;
+       if (size > maxSize)  size = maxSize ;
+       Tower( radius
+                , StarRoot::StEta(etaCenter,deta)
+                , phiCenter, dPhi
+                , colorResponce
+                , sty
+                , size);
+        SetComment(Form("Endcap eta=%f, phi=%f, energy=%f",etaCenter,phiCenter,energy));
      }
   }
 }
