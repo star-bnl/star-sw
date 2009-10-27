@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.1 2009/10/13 15:53:31 fine Exp $
+// $Id: StTrgDatReader.cxx,v 1.2 2009/10/27 14:23:20 jeromel Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.2  2009/10/27 14:23:20  jeromel
+// Fixed declaration of assert
+//
 // Revision 1.1  2009/10/13 15:53:31  fine
 // Akio\'s DAT file format reader
 //
@@ -14,6 +17,7 @@
 #include "StTrgDatReader.h"
 #include "StArchInfo.h"
 #include <iostream>
+#include <assert.h>
 
 namespace {
 //__________________________________________________________________________
