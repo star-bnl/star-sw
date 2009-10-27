@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDcaGeometry.cxx,v 2.2 2008/03/04 01:03:36 perev Exp $
+ * $Id: StDcaGeometry.cxx,v 2.3 2009/10/27 22:50:25 fisyak Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.cxx,v $
+ * Revision 2.3  2009/10/27 22:50:25  fisyak
+ * Add set from double
+ *
  * Revision 2.2  2008/03/04 01:03:36  perev
  * remove redundant mHz
  *
@@ -18,10 +21,15 @@
  *
  **************************************************************************/
 #include "StDcaGeometry.h"
+#if ROOT_VERSION_CODE < 331013
+#include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 
 ClassImp(StDcaGeometry)
     
-static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.2 2008/03/04 01:03:36 perev Exp $";
+static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.3 2009/10/27 22:50:25 fisyak Exp $";
 
 StDcaGeometry::StDcaGeometry()
 {
@@ -49,7 +57,12 @@ StThreeVectorF StDcaGeometry::momentum() const
 void StDcaGeometry::set(const float pars[7],const float errs[15])
 {
     if (pars) memcpy(&mImp   ,pars,sizeof(float)*6 );
-    if (pars) memcpy(&mImpImp,errs,sizeof(float)*15);
+    if (errs) memcpy(&mImpImp,errs,sizeof(float)*15);
+}
+void StDcaGeometry::set(const double pars[7],const double errs[15])
+{
+  if (pars) TCL::ucopy(pars, &mImp, 6);
+  if (errs) TCL::ucopy(errs, &mImpImp, 15);
 }
 
 StPhysicalHelixD StDcaGeometry::helix() const
