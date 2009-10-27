@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.9 2009/10/27 20:17:39 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.10 2009/10/27 23:22:03 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -18,7 +18,7 @@
                                the "iv" extension:\n
                                      \code   <name>.iv \endcode   
          \param detectorName = 0  - no detector geometry is to be rendered
-         \param pad (default = 0) - The ROOT TPad to be used to render the event wired view
+         \param pad (default = 0) - The ROOT TPad to be used to render the event wireframe view
 \htmlonly
 <table>
 <tr>
@@ -176,7 +176,7 @@ EEmcGeomSimple *StuDraw3DMuEvent::EndcapGeom()
 /*!
   \param   sty - is the ROOT TAttFill style: \n
    =0 - solid view,\n 
-   =4001 - "wire" view,\n 
+   =4001 - "wireframe" view,\n 
    =4002-4100 - solid semitransparent view
   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.C.Endcap.tracks.png "The first event  from Run 9046031 pProduction2008 produced by EdMu.C macros"
 */
@@ -187,13 +187,36 @@ void   StuDraw3DMuEvent::Endcaps(Style_t sty)
    if (emc)  Endcaps(*emc,sty);
 }
 
+
 //! This is an overloaded member function, provided for convenience.
 /*!
   \param emc - the reference to the collection (singletone) of the emc properties.
   \param   sty - is the ROOT TAttFill style: \n
    =0 - solid view,\n 
-   =4001 - "wire" view,\n 
-   =4002-4100 - solid semitransparent view
+   =4001 - "wireframe" view,\n 
+   =4002-4100 - solid semitransparent view\n
+ \htmlonly
+ <table>
+ <tr>
+ <th colspan=2>Endcap towers and tpc tracks rendering example
+</tr>
+ <tr>
+ <th>XY plane view
+ <th>ZX plane view
+ </tr>
+ <tr>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.XY.png" width=340px></center>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.ZX.png" width=340px></center>
+ </tr>
+ <tr>
+ <th>YZ plane view
+ <th>3D plane view
+ </tr>
+ <tr>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.YZ.png" width=340px></center>
+ <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.XYZ.png" width=340px></center>
+ </tr></table>
+ \endhtmlonly 
 */
 //___________________________________________________
 void   StuDraw3DMuEvent::Endcaps(const StMuEmcCollection &emc,Style_t sty)

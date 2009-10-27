@@ -1,4 +1,4 @@
-// $Id: Ed.C,v 1.10 2009/10/23 17:30:28 fine Exp $
+// $Id: Ed.C,v 1.11 2009/10/27 23:22:40 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file Ed.C 
@@ -73,14 +73,21 @@ void rd(int  hits=0, bool clear=false)
       if (hits) {
         if (hits & 1) gEventDisplay->Hits(event);
         if (hits & 2) gEventDisplay->EmcHits(event);
+ //       if (hits & 4) gEventDisplay->EmcHits(event,"eemc");
       }
       else gEventDisplay->Tracks(event);
    }
  }
 //! This function is to search for the next non-empty event and draw it by looping over StBFChain (reading the next events from the file)
 /*! 
-   \param hits - flag to mark whether the hits from the event should be rendered 
-   if the \a hist = \c true the hits is to be drawn otherwise it is to render the tracks
+   \param tracks - flag to mark whether the tracks from the event should be rendered \n
+            = 0 - no track \n
+            = -1 -  use the "default" value,\n
+            != -1 -  use the value provided and change the default.
+   \param hits - flag to mark whether the hits to be drawn\n
+            = 0 - no hit \n
+            = -1  -  use the "default" value,\n
+            != -1 - use the value provided and change the default.
 */
 //__________________________________________
 void ae(int tracks=-1, int  hits=-1) 
