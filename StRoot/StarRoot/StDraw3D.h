@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.43 2009/10/23 16:10:44 fine Exp $
+// $Id: StDraw3D.h,v 1.44 2009/10/27 19:37:44 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -147,13 +147,14 @@ class view_3D;
 ///
 /// \n Try:
   /// \code
-  ///  > starnew	
+  ///  > star.dev	
   ///  > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
   ///  > root.exe Draw3D.C
   /// \endcode
   ///  to get the test picture below:\n
   ///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">
-  ///  \image html Draw3DClass.png
+  ///  \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.png "Test image is to show several tpc points , tpc track, barrel and endcap towers"
+  ///  \sa StDraw3D::Draw3DTest()
   ///  The base StDraw3D class is a controller connecting the arbitrary "model" object 
   ///  with the arbitrary ROOT 3D class "view" object to implement the so-called 
   ///  <a href="http://en.wikipedia.org/wiki/Model-view-controller"> "Model / View" paradigm</a>. \n

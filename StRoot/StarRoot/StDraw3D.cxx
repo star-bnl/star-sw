@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.74 2009/10/24 04:23:19 fine Exp $
+// $Id: StDraw3D.cxx,v 1.75 2009/10/27 19:37:44 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -736,6 +736,18 @@ void StDraw3D::UpdateModified()
    }
 }
 
+//___________________________________________________
+//!  The built-in quick test to check the application environment and test the basic methods
+/*! 
+  \n Try:
+  \code
+   > star.dev	
+   > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+   > root.exe Draw3D.C
+  \endcode
+   to get the picture:
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.png "Test image is to show several tpc points , tpc track, barrel and endcap towers"
+*/
 //___________________________________________________
 void StDraw3D::Draw3DTest(){
    //  ------------------------------------------------
