@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.h,v 1.7 2009/10/27 16:03:47 fine Exp $
+ * $Id: StBTofHitMaker.h,v 1.8 2009/10/27 16:17:54 fine Exp $
  * StBTofHitMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -78,11 +78,12 @@ class StBTofHitMaker:public StRTSBaseMaker
      StBTofDaqMap*            mBTofDaqMap;           //! pointer to the TOF daq map
      StBTofINLCorr*           mBTofINLCorr;          //! INL corretion;
      StBTofSortRawHit*        mBTofSortRawHit;       //! to sort the TOF hits
+     enum {
+            mNVPD = 19
+          , mWestVpdTrayId = 121
+          , mEastVpdTrayId = 122
+     };
 
-     static const Int_t  mNVPD;          // = 19;
-     static const Int_t  mWestVpdTrayId; // = 121;
-     static const Int_t  mEastVpdTrayId; // = 122;
-          
    protected:
       StRtsTable *GetNextRaw();
       
