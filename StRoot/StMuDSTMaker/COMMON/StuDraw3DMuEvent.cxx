@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.8 2009/10/27 04:57:52 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.9 2009/10/27 20:17:39 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -172,12 +172,29 @@ EEmcGeomSimple *StuDraw3DMuEvent::EndcapGeom()
    return fEndcapGeom; 
 }
 //___________________________________________________
+//! Add the endcap towers to the list to display 
+/*!
+  \param   sty - is the ROOT TAttFill style: \n
+   =0 - solid view,\n 
+   =4001 - "wire" view,\n 
+   =4002-4100 - solid semitransparent view
+  \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.C.Endcap.tracks.png "The first event  from Run 9046031 pProduction2008 produced by EdMu.C macros"
+*/
+//___________________________________________________
 void   StuDraw3DMuEvent::Endcaps(Style_t sty)
 {
    StMuEmcCollection *emc= StMuDst::muEmcCollection();
    if (emc)  Endcaps(*emc,sty);
 }
 
+//! This is an overloaded member function, provided for convenience.
+/*!
+  \param emc - the reference to the collection (singletone) of the emc properties.
+  \param   sty - is the ROOT TAttFill style: \n
+   =0 - solid view,\n 
+   =4001 - "wire" view,\n 
+   =4002-4100 - solid semitransparent view
+*/
 //___________________________________________________
 void   StuDraw3DMuEvent::Endcaps(const StMuEmcCollection &emc,Style_t sty)
 {
