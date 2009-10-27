@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.h,v 1.5 2009/04/08 04:04:30 dongx Exp $
+ * $Id: StBTofHitMaker.h,v 1.6 2009/10/27 15:59:38 jeromel Exp $
  * StBTofHitMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -48,6 +48,10 @@ typedef vector<Int_t, allocator<Int_t>>  IntVec;
 typedef vector<UInt_t, allocator<UInt_t>>  UIntVec;
 #endif
 
+// const for the code
+static const Int_t  mNVPD          = 19;
+static const Int_t  mWestVpdTrayId = 121;
+static const Int_t  mEastVpdTrayId = 122;
 
 /**
    \class StBTofHitMaker
@@ -79,9 +83,6 @@ class StBTofHitMaker:public StRTSBaseMaker
      StBTofINLCorr*           mBTofINLCorr;          //! INL corretion;
      StBTofSortRawHit*        mBTofSortRawHit;       //! to sort the TOF hits
 
-     static const Int_t  mNVPD          = 19;
-     static const Int_t  mWestVpdTrayId = 121;
-     static const Int_t  mEastVpdTrayId = 122;
           
    protected:
       StRtsTable *GetNextRaw();
