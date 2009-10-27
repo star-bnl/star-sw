@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.9 2009/10/27 20:08:11 fine Exp $
+// $Id: EdMu.C,v 1.10 2009/10/27 23:22:03 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file EdMu.C 
@@ -119,7 +119,7 @@ void mae(bool hits=false)
 //____________________________________________________________________________________
  void EdMu(const char* file =
  "/star/data15/reco/ppProduction2008/ReversedFullField/P08ie/2008/046/9046031/st_physics_adc_9046031_raw_2070002.MuDst.root"
- , const char * detectorNames="TPC")
+ , const char * detectorNames="TPC,TPC_BLUE_SECTORS")
  {
    // Start application open the file provided.
    if ( gSystem->AccessPathName(file)) {

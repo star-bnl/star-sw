@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.27 2009/10/24 04:22:51 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.28 2009/10/27 23:22:02 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -22,6 +22,7 @@
 #include "StMessMgr.h"
 
 
+//____________________________________________________________________________________
 //! StuDraw3DEvent( const char *detectorName,TVirtualPad *pad) ctor
 /*!  
          \param detectorName (default = "TPC") - the names of the STAR detectors 
@@ -59,16 +60,18 @@ StuDraw3DEvent::StuDraw3DEvent( const char *detectorName,TVirtualPad *pad):StDra
    if (!gEventDisplay) gEventDisplay = this;
 }
 
+//____________________________________________________________________________________
 //! ~StuDraw3DEvent( ) dtor
 /*! 
     Reset the global  \c gEventDisplay pointer to the current display if the current display is \c this 
 */
-//___________________________________________________
+//____________________________________________________________________________________
 StuDraw3DEvent::~StuDraw3DEvent()
 {
    if (gEventDisplay == this) gEventDisplay = 0;
 }
 
+//____________________________________________________________________________________
 //! Add \a emcHit to the display list with the \a col color \a sty and \a size if provided
 /*! 
    \param   emcHit - StEmcRawHit reference one wants to be present as the ROOT TTRAP 
@@ -78,7 +81,7 @@ StuDraw3DEvent::~StuDraw3DEvent()
    \param   siz - Tower size (cm) ( \sa StDraw3D::Tower( float radius, const StarRoot::StEta &eta,float phi,float dphi, Color_t col,Style_t sty, Size_t siz) )
    \return - a pointer to the ROOT "view" TObject of \a emcHit model
 */
-//___________________________________________________
+//____________________________________________________________________________________
 TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t sty,Size_t siz, const char *detId)
 {  
    TObject *model = 0;
@@ -108,10 +111,11 @@ TObject *StuDraw3DEvent::EmcHit(const StEmcRawHit &emcHit, Color_t col,Style_t s
    return model;
 }
 
+//____________________________________________________________________________________
 //! Add all emcHits those can pass the internal filter from the given detector \a detId type from the \a event to the display list.
 /*! 
     \param  event - The pointer to the instance of the StEvent class
-    \param type   - The Emc detector name as defined by StEmcGeom::getDetNumFromName(const Char_t *cdet) method
+    \param detId  - The Emc detector name as defined by StEmcGeom::getDetNumFromName(const Char_t *cdet) method
     \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Run.dAu.2008.9025036.666030.BEMC.hits.png "Event 666030 from Run 9025036 produced by Ed.C macros"  
     \note You normally do not need to use this method directly. It is just a pattern you can follow to customize the macro Ed.C to 
     use your own coloring schema and selection criteria.
@@ -155,6 +159,8 @@ void StuDraw3DEvent::EmcHits(const StEvent* event,const char *detId)
       }
    }
 }
+
+//____________________________________________________________________________________
 //! Add \a track to the display list with the \a col color \a sty and \a size if provided
 /*! 
    \param   track - StTrack reference one wants to be present as the ROOT TPolyLine3D 
@@ -164,7 +170,7 @@ void StuDraw3DEvent::EmcHits(const StEvent* event,const char *detId)
    \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
    \return - a pointer to the ROOT "view" TObject of \a track model
 */
-//___________________________________________________
+//____________________________________________________________________________________
 TObject *StuDraw3DEvent::Track(const StTrack &track, Color_t col,Style_t sty,Size_t siz)
 {
    StTrackHelper trPnt(&track);
@@ -185,6 +191,7 @@ TObject *StuDraw3DEvent::Track(const StTrack &track, EDraw3DStyle sty)
    return Track(track, style.Col(),style.Sty(),style.Siz() );
 }
 
+//____________________________________________________________________________________
 //! Add one \a hit to the display list with the \a col color \a sty and \a siz size if provided
 /*! Draw the StMeasuredPoint, StHit, StVertex with the graphical attribute provided
    \param   hit - The reference to StMeasuredPoint  STAR object 
@@ -194,7 +201,7 @@ TObject *StuDraw3DEvent::Track(const StTrack &track, EDraw3DStyle sty)
    \param   siz - ROOT marker size (see:  http://root.cern.ch/root/html/TAttMarker.html )
    \return - a pointer to the ROOT "view" TObject of \a hit model
 */
-//___________________________________________________
+//____________________________________________________________________________________
 TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit
                   ,  Color_t col,  Style_t sty,  Size_t siz)
 {
@@ -205,16 +212,18 @@ TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit
    return p;
 }
 
+//____________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Add \a hit to the display list with the \a sty pre-defined style if provided 
  */
-//___________________________________________________
+//____________________________________________________________________________________
 TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
 {
    const StDraw3DStyle &style =  Style(sty);
    return Hit(hit, style.Col(),style.Sty(),style.Siz() );
 }
 
+//____________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Add \a vertex to the display list with the \a col color \a sty and \a siz size if provided
    \param   vertex - The reference to StMeasuredPoint  STAR object 
@@ -224,13 +233,14 @@ TObject *StuDraw3DEvent::Hit(const StMeasuredPoint &hit, EDraw3DStyle sty)
    \param   siz - ROOT marker size (see:  http://root.cern.ch/root/html/TAttMarker.html )
    \return - a pointer to the ROOT "view" TObject of \a vertex model
  */
-//___________________________________________________
+//____________________________________________________________________________________
 TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vertex
                   ,  Color_t col,  Style_t sty, Size_t siz)
 {
    return Hit(vertex,col,sty,siz);
 }
 
+//____________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Add \a vtx to the display list with the \a sty style if provided 
    \param   vtx - The reference to StMeasuredPoint  STAR object 
@@ -238,20 +248,21 @@ TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vertex
    \param   sty - EDraw3DStyle EventDisplay pre-defined style 
    \return - pointer to the ROOT "view" TObject of \a vertex model
 */
-//___________________________________________________
+//____________________________________________________________________________________
 TObject *StuDraw3DEvent::Vertex(const StMeasuredPoint &vtx, EDraw3DStyle sty)
 {
    const StDraw3DStyle &style =  Style(sty);
    return Vertex(vtx, style.Col(),style.Sty(),style.Siz() );
 }
 
+//____________________________________________________________________________________
 //! Add all \b good hits for the given \a track to the display
 /*! the \c style and \c size vizual attributes are defined by the kUsedHit style
     the \c color is defined by the track \c pt 
     \code double pt = track.geometry()->momentum().perp(); \endcode
    \return - a pointer to the ROOT "view" TObject of \a vtx model
  */
-//___________________________________________________
+//____________________________________________________________________________________
 void  StuDraw3DEvent::Hits(const StTrack &track)
 {
     // Draw hits the "track" was built from
@@ -264,6 +275,7 @@ void  StuDraw3DEvent::Hits(const StTrack &track)
    }
 }
 
+//____________________________________________________________________________________
 //! Add all hits of the given \a track to the display list with the \a col color \a sty and \a siz size if provided
 /*!
    \param   track - StTrack reference one wants its "used" hits to be present as the ROOT TPolyMarker3D 
@@ -272,7 +284,7 @@ void  StuDraw3DEvent::Hits(const StTrack &track)
    \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
    \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
 */
-//___________________________________________________
+//____________________________________________________________________________________
 void  StuDraw3DEvent::Hits(const StTrack &track
                   ,  Color_t col
                   ,  Style_t sty
@@ -292,10 +304,11 @@ void  StuDraw3DEvent::Hits(const StTrack &track
    Points(hitPoints.size()/3,&*xyz,col,sty,siz); 
 }
 
+//____________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Add all hits fof the given \a track to the display list with the \a sty pre-defined style if provided
  */
-//___________________________________________________
+//____________________________________________________________________________________
 void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
 {
    // Draw hits the "track" was built from
@@ -304,6 +317,7 @@ void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
    Hits(track, style.Col(),style.Sty(),style.Siz());
 }
 
+//____________________________________________________________________________________
 //! Add  the \a in  point of the given \a track to the display list with the \a col color \a sty and \a siz size if provided
 /*! 
    \param track - reference to the StTrack object from StEvent data structure
@@ -314,7 +328,7 @@ void  StuDraw3DEvent::Hits(const StTrack &track,  EDraw3DStyle sty)
    \param   siz - ROOT marker size (see:  http://root.cern.ch/root/html/TAttMarker.html )
    \return - a pointer to the ROOT "view" TObject of star/end point of \a track model
 */
-//___________________________________________________
+//____________________________________________________________________________________
 TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
                   ,  Color_t col,  Style_t sty,  Size_t siz)
 {
@@ -322,6 +336,7 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
    return Points(trInOut.Size(),trInOut.GetXYZ(0),col,sty,siz);
 }
 
+//____________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! 
    \param track - reference to the StTrack object from StEvent data structure
@@ -330,7 +345,7 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, Bool_t in
    \param   sty - EDraw3DStyle pre-defined visual style of this object.
    \return - a pointer to the ROOT "view" TObject of star/end point of \a track model
 */
-//___________________________________________________
+//____________________________________________________________________________________
 TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_t in)
 {
    const StDraw3DStyle &style =  Style(sty);
@@ -338,6 +353,7 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_
 }
 
 
+//____________________________________________________________________________________
 //! Add all tracks of the given \a type from the \a event to the display list.
 /*! 
     \param  event - The pointer to the instance of the StEvent class
@@ -347,12 +363,13 @@ TObject *StuDraw3DEvent::TrackInOut(const StTrack &track, EDraw3DStyle sty,Bool_
     the \c color is defined by the track \c pt 
     \code double pt = track.geometry()->momentum().perp(); \endcode
  */
-//___________________________________________________
+//____________________________________________________________________________________
 void StuDraw3DEvent::Tracks(const StEvent* event, StTrackType type)
 {
    Hits(event,kTracksOnly,type);
 }
 
+//____________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Add all tracks of the given \a type from the \a theNodes to the display list.
     \param theNodes  - The reference to the StSPtrVecTrackNode track container from the StEvent object    
@@ -362,7 +379,7 @@ void StuDraw3DEvent::Tracks(const StEvent* event, StTrackType type)
     the \c color is defined by the track \c pt 
     \code double pt = track.geometry()->momentum().perp(); \endcode
  */
-//___________________________________________________
+//____________________________________________________________________________________
 void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes
       , StTrackType type)
 {
@@ -437,8 +454,9 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
    }
 }
 
+//____________________________________________________________________________________
 //! \return The pointer to the current instance of the StuDraw3DEvent  class to visualize StEvent components
-//___________________________________________________
+//____________________________________________________________________________________
 StuDraw3DEvent *StuDraw3DEvent::Display(){ return gEventDisplay;}
 
 StuDraw3DEvent *gEventDisplay = new StuDraw3DEvent();
