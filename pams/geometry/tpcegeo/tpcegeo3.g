@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.11 2009/10/24 21:41:55 perev Exp $
+!// $Id: tpcegeo3.g,v 1.12 2009/10/27 00:33:31 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.12  2009/10/27 00:33:31  perev
+!// All assemblies must be MANY
+!//
 !// Revision 1.11  2009/10/24 21:41:55  perev
 !// Prompt hits from GateGrid==>PadPlane
 !//
@@ -354,7 +357,7 @@ Fill TECW       !// EC trapezoid and support Wheel
    widthRib     =         1.47*Cos(15./180*acos(-1.))*INCH !// widthRib => side rib width
    Height       =         27.373*INCH   !// Drawing 24A3685B 27.77*INCH from drawing 24A0325,
                                         !// => 69.527 => (Wire Plane)  69.52,  Height   => sector radial Height
-   thick        =         3.300*INCH    !// 24A3685B  3.219*INCH        !// Thick    => sector thickness
+   Thick        =         3.300*INCH    !// 24A3685B  3.219*INCH        !// Thick    => sector thickness
    thickAl      =         0.375*INCH    !// " 9.525mm ThickAl  => Thick - air gap"
    rMin         =         51.905        !// rMin     => Minimum distance to beam line (wire plane)
    Rcenter      =         86.669        !// Rcenter  => sector center radius (set by precision holes)
@@ -954,11 +957,11 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
       do i = 0,noHolesRows(inOut)-1 { xHoles(i) = r2 - (1.988 + 1.575*i)*INCH;}
     }
 
-    Create And Position TSAS
+    Create And Position TSAS kOnly='MANY'
 
 !//    tpcWheel[inOut] = new TGeoVolumeAssembly(Form("TpcWheel%sAssembly",InnerOuter[inOut]));
 !//    tpcWheel[inOut]->SetTitle(Form("the %s wheel assembly",InnerOuter[inOut]));
-    Create And Position TWAS
+    Create And Position TWAS kOnly='MANY'
 
 !//  TGeoVolume *WheelRibBox = gGeoManager->MakeBox("WheelRibBox",GetMed("TPCE_ALUMINIUM"), TPCG_WheelBoxDy/2, TPCG_WheelBoxDx/2, TPCG_WheelTHK/2);
 !//  TpcSectorAndWheel->AddNodeOverlap(WheelRibBox, 1, new TGeoTranslation(TPCG_WheelR1, 0., zWheel1+TPCG_WheelTHK/2));
