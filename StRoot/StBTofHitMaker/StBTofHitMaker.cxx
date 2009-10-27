@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.11 2009/10/22 19:06:54 dongx Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.12 2009/10/27 16:03:47 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -28,6 +28,10 @@
 
 #include "StRtsTable.h"
 #include "DAQ_TOF/daq_tof.h"
+
+const Int_t  StBTofHitMaker::mNVPD          = 19;
+const Int_t  StBTofHitMaker::mWestVpdTrayId = 121;
+const Int_t  StBTofHitMaker::mEastVpdTrayId = 122;
 
 ClassImp(StBTofHitMaker);
 
