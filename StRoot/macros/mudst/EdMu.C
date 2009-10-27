@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.8 2009/10/26 22:46:57 fine Exp $
+// $Id: EdMu.C,v 1.9 2009/10/27 20:08:11 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file EdMu.C 
@@ -65,7 +65,10 @@ StuDraw3DMuEvent *gEd = 0;
    if the \a hits = \c true the hits is to be drawn otherwise it is to render the tracks
    \param clear - flag to mark whether the screen has to be cleaned 
                    first (before any new component is added)
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.C.Endcap.tracks.png "The first event  from Run 9046031 pProduction2008 produced by EdMu.C macros"
+   \sa 
    \note No StMuHits can be rendered directly for the time being.
+   
 */
 //____________________________________________________________________________________
 void mrd(bool hits=true, bool clear=false) 
