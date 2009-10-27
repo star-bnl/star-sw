@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.12 2009/10/27 00:33:31 perev Exp $
+!// $Id: tpcegeo3.g,v 1.13 2009/10/27 20:07:41 fisyak Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.13  2009/10/27 20:07:41  fisyak
+!// Reduce cuts from 1 MeV to 100 keV
+!//
 !// Revision 1.12  2009/10/27 00:33:31  perev
 !// All assemblies must be MANY
 !//
@@ -1647,6 +1650,10 @@ block TPAD is a real padrow with dimensions defined at positioning time
       material p10
       material sensitive_gas  ISVOL=1  stemax=2.5*tprs_width
       SHAPE    BOX   dx=0   dy=0   dz=0
+      Call     GSTPAR(ag_imed,'CUTGAM',1e-4)
+      Call     GSTPAR(ag_imed,'CUTELE',1e-4)
+      Call     GSTPAR(ag_imed,'DCUTE', 1e-4)
+      Call     GSTPAR(ag_imed,'DCUTM', 1e-4)
       Call     GSTPAR(ag_imed,'STRA',1.)
 *
 *     The following is the corrected hits definition: 25-dec-98 (PN)
