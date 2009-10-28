@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDcaGeometry.h,v 2.3 2008/03/04 01:03:14 perev Exp $
+ * $Id: StDcaGeometry.h,v 2.4 2009/10/28 13:54:35 fisyak Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.h,v $
+ * Revision 2.4  2009/10/28 13:54:35  fisyak
+ * Forgot one more set
+ *
  * Revision 2.3  2008/03/04 01:03:14  perev
  * remove redundant mHz
  *
@@ -55,6 +58,7 @@ public:
     // Experts only set function
     //
     void set(const float pars[6], const float errs[15]);
+    void set(const double pars[6], const double errs[15]);
 
 private:
     char mBeg[1];//!
