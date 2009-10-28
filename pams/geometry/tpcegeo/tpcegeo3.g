@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.13 2009/10/27 20:07:41 fisyak Exp $
+!// $Id: tpcegeo3.g,v 1.14 2009/10/28 23:59:28 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.14  2009/10/28 23:59:28  perev
+!// Assembly volumes seen=0
+!//
 !// Revision 1.13  2009/10/27 20:07:41  fisyak
 !// Reduce cuts from 1 MeV to 100 keV
 !//
@@ -1061,6 +1064,7 @@ Block TSAS  TpcInnerSectorAssembly &  TpcOuterSectorAssembly TSAS and TSA1
        SHAPE     PGON    Phi1=-15  Dphi=30  Nz=2, nPDV=1,
        zi = {zzzSA(1),zzzSA(2)}, Rmn={rmnSA(inOut),rmnSA(inOut)},
                                  Rmx={rmxSA(inOut),rmxSA(inOut)}
+       Attribute TSAS  seen=0 
        Create and Position TALS         "!//TpcSectorAlSupport"
        Create and Position TSGT         "!//TpcSectorG10 (GTen)"
 !// Ribs
@@ -1137,6 +1141,7 @@ Block TWAS  TpcWheelInnerAssembly & TpcWheelOuterAssembly     TWAS and TWA1
        SHAPE     PGON    Phi1=-15  Dphi=30  Nz=2, nPDV=1,
        zi = {zzzWA(1),zzzWA(2)}, Rmn={rmnWA(inOut),rmnWA(inOut)},
                                  Rmx={rmxWA(inOut),rmxWA(inOut)}
+       Attribute TWAS  seen=0 
 
 !// put holes, cooling tube and FEE
 !//    cout << "put holes in " << noHolesRows(inOut) << " rows for sector\t" << inOut << endl;
@@ -1202,6 +1207,7 @@ Block FEEA  TGeoVolumeAssembly(FEE)
 !//TGeoVolumeAssembly *FEE = new TGeoVolumeAssembly("FEE"); // Weight = 181*FEE = 26 kG (A.Lebedev)
       Attribute FEEA      seen=1  colo=kGreen
       SHAPE     BOX    dX=TFEE_Ass(1), dY=TFEE_Ass(2), dZ=TFEE_Ass(3)
+      Attribute FEEA  seen=0 
 
 
 
@@ -1415,6 +1421,7 @@ Attribute TRDO seen=1  colo=kYellow
         zi ={zzzRDO(1),zzzRDO(2)},
         Rmn={rmnRDO(1),rmnRDO(2)},
         Rmx={rmxRDO(1),rmxRDO(2)}
+        Attribute TRDO  seen=0 
 
 !// RDOs and their cooling
 !//  TGeoVolume *coolingTube = gGeoManager->MakePara("CoolingTube", GetMed("TPCE_Water_Pipe"), TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, +15, 0, 0);
