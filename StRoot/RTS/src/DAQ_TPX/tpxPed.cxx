@@ -530,8 +530,9 @@ int tpxPed::special_setup(int run_type, int sub_type)
 		
 		switch(run_type) {
 		case RUN_TYPE_PULSER_A :
-			//ped->ped[0] = 0.0 ;
+			// make it about 5% occupancy
 			for(t=100;t<110;t++) ped->ped[t] = 0.0 ;
+			//for(t=200;t<220;t++) ped->ped[t] = 0.0 ;
 			for(t=400;t<415;t++) ped->ped[t] = 0.0 ;
 			break ;
 		case RUN_TYPE_PULSER :
