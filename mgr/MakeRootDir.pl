@@ -16,7 +16,7 @@
 #
 # Usage:
 #   % MakeRootDir.pl 
-#   % MakeRootDir.pl  1
+#   % MakeRootDir.pl  {1|2}
 #   % MakeRootDir.pl  Grootdeb 
 #
 
@@ -51,6 +51,7 @@ if( $PWD =~ m|^/afs|){
 
 
 # Startup values for directory names
+my $pass = 0;
 my $root = "rootdeb"; 
 my $lib  = "lib";
 my $bin  = "bin";
@@ -67,14 +68,22 @@ if ( defined($ARGV[0]) ){
 	print "Would create .$SYS/$root - please confirm: ";
 	chomp($ans = <STDIN>);
 	exit if ($ans !~ m/y/i);
-    #} else {
-	# Assume syntax $0 1 for one version
+    } else {
+	# Assume syntax $0 {1|2} for one version
+	$pass = $tmp;
     }
 }
 
 
 # Loop over 2 possibilities
 for ( my $iter=0; $iter < 2; $iter++ ) {
+    
+   if( $pass == 2 ){ 
+       $pass--;
+       print "Skippping iteration $iter for $root\n";
+       goto NEXTPASS;
+   }
+
    # First task, don't do it twice ...
    if(  -d ".$SYS/$root"){
        print "The directory structure already exists for $SYS\n";
@@ -141,7 +150,8 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
    }
 
    # Change name between 0 and 1 ($iter)
-   if( $^O ne "linux" || defined($ARGV[0]) ){ last;}
+   if( $^O ne "linux" || $pass == 1 ){ last;}
+ NEXTPASS:
    $root = "root"; 
    $lib  = "LIB";
    $bin  = "BIN";
