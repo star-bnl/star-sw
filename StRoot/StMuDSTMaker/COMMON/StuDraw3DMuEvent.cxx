@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.10 2009/10/27 23:22:03 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.11 2009/10/28 18:57:41 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -215,6 +215,8 @@ void   StuDraw3DMuEvent::Endcaps(Style_t sty)
  <tr>
  <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.YZ.png" width=340px></center>
  <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.XYZ.png" width=340px></center>
+ </tr> 
+ <tr><td colspan=2><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.C.Endcap.tracks.in.mag.png"  width=100%></center>
  </tr></table>
  \endhtmlonly 
 */
@@ -235,7 +237,7 @@ void   StuDraw3DMuEvent::Endcaps(const StMuEmcCollection &emc,Style_t sty)
     if (phiCenter <= 0) continue;
     static const float dPhi = 2*EndcapGeom()->getPhiHalfWidth(isec,isub);
     static const float deta = 2*EndcapGeom()->getEtaHalfWidth(ieta);
-    static const float radius = 230.; // no idea where I should pick it from.
+    static const float radius = 270.; // no idea where I should pick it from.
     float energy = adc*60./4096-0.1;
     if ( energy > 0.15 ) {
     
@@ -249,7 +251,7 @@ void   StuDraw3DMuEvent::Endcaps(const StMuEmcCollection &emc,Style_t sty)
        } else                         colorResponce = kRed;
 	
        static const double maxSize =  400.; // (cm)
-       static const double scale   =   90.; // (cm/Gev)
+       static const double scale   =   120.; // (cm/Gev)
        double size =(energy > 0.3 ? scale : scale/30.)*energy;
        if (size > maxSize)  size = maxSize ;
        Tower( radius
