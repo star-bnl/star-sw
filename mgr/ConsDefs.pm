@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.120 2009/10/22 14:34:53 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.121 2009/10/28 23:55:37 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -208,6 +208,13 @@
 	$GPROF= undef;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG ) {
 	    $DEBUG = "-O -g";
+	    # JL patch for gcc 4.1 -> 4.3.x (report that it is broken in 4.4 as well)
+	    if ( $STAR_HOST_SYS =~ m/(_gcc4)(\d+)/ ){
+		print "Notice: Enabling gcc patch for V4.x series\n";
+		if ( $2 <= 49 ){
+		    $DEBUG .= " -fno-inline";
+		}
+	    }
 	    $FDEBUG= $DEBUG;
 	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	}
