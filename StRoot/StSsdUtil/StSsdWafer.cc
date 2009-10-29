@@ -1,8 +1,11 @@
 
 
-// $Id: StSsdWafer.cc,v 1.12 2009/02/23 21:10:40 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.13 2009/10/29 18:36:00 fine Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.13  2009/10/29 18:36:00  fine
+// Char_t *xyz type to be const
+//
 // Revision 1.12  2009/02/23 21:10:40  bouchet
 // increase NSaturationSignal to reflect the energy increase of the GEANT hit
 //
@@ -2624,7 +2627,7 @@ Int_t StSsdWafer::printborder()
       LocalToMaster(actives[j], templs[j]);
       LocalToMaster(activee[j], temple[j]);
     }
-    Char_t *xyz[3] = {"x","y","z"};
+    const Char_t *xyz[3] = {"x","y","z"};
     for (Int_t i = 0; i < 3; i++) {
       printf("%ssSsdLadder%d set {",xyz[i],mId-7100);
       for (Int_t j = 0; j < 4; j++)  printf("%.2f ",templs[j][i]);
