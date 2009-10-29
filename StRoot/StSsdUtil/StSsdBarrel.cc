@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.14 2009/10/29 18:37:21 fine Exp $
+// $Id: StSsdBarrel.cc,v 1.15 2009/10/29 19:21:14 fine Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.15  2009/10/29 19:21:14  fine
+// Add fix me please message
+//
 // Revision 1.14  2009/10/29 18:37:21  fine
 // Fix me: assert(tempo.size() == 5);
 //
@@ -1218,7 +1221,7 @@ Int_t StSsdBarrel::FindMcHit(const vector<int> &tempo,const vector<const StMcSsd
 {
   float ChargeTrack = 0.0;
   int idTrack =0;
-  assert(tempo.size() == 5);
+  assert(tempo.size() == 5 && "Fix me, please !!!");
   for(int e=0;e<5;e++){
     for (unsigned int hit = 0 ; hit<hitCol.size();hit++){
       const StMcSsdHit* currHit = hitCol[hit];
