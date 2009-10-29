@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.121 2009/10/28 23:55:37 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.122 2009/10/29 14:34:46 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -142,7 +142,7 @@
     $FCPATH        = "";
     $EXTRA_FCPATH  = "";
     $FFLAGS        = $G77FLAGS;
-    $FEXTEND       = $G77EXTEND; 
+    $FEXTEND       = $G77EXTEND;
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
     $EXTRA_FPPFLAGS= "";
@@ -280,12 +280,12 @@
 	# A small sanity check in case user redefines improperly CERN_ROOT
 	if ( $CERN_ROOT eq "") {
 	    print "WARNING: CERN_ROOT is not defined (you may define it as \$CERN/\$CERN_LEVEL)\n"
-		unless ($param::quiet); 
+		unless ($param::quiet);
 	} elsif ( ! -d "$CERN_ROOT/lib"){
 	    print "WARNING: $CERN_ROOT/lib does not exists (may have CERN_ROOT ill-defined)\n"
-		unless ($param::quiet); 
-	} 
-	
+		unless ($param::quiet);
+	}
+
 	# now check
 	if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
 	     -e "$CERN_ROOT/lib/libkernlib_noshift.a") {
@@ -308,7 +308,7 @@
 
 	} else {
 	    print "WARNING: using cernlib from the default path\n"
-		unless ($param::quiet); 
+		unless ($param::quiet);
 	    $cernl = "cernlib -s";
 	    $packl = "packlib";
 	    $kernl = "kernlib";
@@ -327,7 +327,7 @@
 
     print "DEBUG >>> We will select architecture/compiler based on $STAR_HOST_SYS\n" if ($param::debug);
 
-    
+
     if ( ($STAR_HOST_SYS =~ m/^rh/ && $STAR_HOST_SYS =~ /_icc/) ||
 	 ($STAR_HOST_SYS =~ m/^sl/ && $STAR_HOST_SYS =~ /_icc/) ) {
 	#
@@ -492,7 +492,7 @@
 	 $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
 	 $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
 	}
-		 
+
         #print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);
@@ -510,7 +510,7 @@
 	}
 
         # -fpermissive ?
-	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; } 
+	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; }
 	#	  else {
 	#	  print "CXXFLAGS = $CXXFLAGS\n"; die;
 	#	}
@@ -553,7 +553,7 @@
 	}
 	# print "*** $CXX_VERSION $SYSLIBS\n";
 
-        if ($PGI) { 
+        if ($PGI) {
             # under SL5 where PGI is installed, this test make PGI used
 	    # but eventually fail at link-time - TBC [TODO: JL 200908]
 	    $FC    = "pgf77";
@@ -593,8 +593,8 @@
     $CFLAGS    .= $ROOTCFLAGS;
     $CXXFLAGS  .= $ROOTCFLAGS;
 
-    if ( $STAR_SYS ne $STAR_HOST_SYS ) { 
-	$OSFID   .= " " . $STAR_HOST_SYS; 
+    if ( $STAR_SYS ne $STAR_HOST_SYS ) {
+	$OSFID   .= " " . $STAR_HOST_SYS;
 	$OSFCFID .= " " . $STAR_HOST_SYS;
     }
 
@@ -627,7 +627,7 @@
     #
     # *** Standard package first, then OPTSTAR ***
     #
-    my ($MYSQLINCDIR,$mysqlheader) = 
+    my ($MYSQLINCDIR,$mysqlheader) =
 	script::find_lib( $MYSQL . " " .
 			 "/include /usr/include ".
 			 "/usr/include/mysql  ".
@@ -638,7 +638,7 @@
 
     if (! $MYSQLINCDIR) {
 	die "Can't find mysql.h in standard path and $OPTSTAR/include  $OPTSTAR/include/mysql\n";
-    } 
+    }
 
     # search for the config
     my ($MYSQLCONFIG,$mysqlconf) =
@@ -694,7 +694,7 @@
 		my $QtIncBase = $QTINCDIR;
 		if( opendir(QT4INCLUDE,$QtIncBase)) {
 		    my $Qt4Header;
-		    while($Qt4Header = readdir(QT4INCLUDE)) 
+		    while($Qt4Header = readdir(QT4INCLUDE))
 		    {
 			if ($Qt4Header =~ /^Qt\D*/ && -d $QtIncBase . "/" . $Qt4Header ) {
 			    $QTINCDIR .= $main::PATH_SEPARATOR . "$QtIncBase/" . $Qt4Header;
@@ -702,7 +702,7 @@
 		    }
 		    $QTFLAGS .=  " -DQT_QT3SUPPORT_LIB -DQT3_SUPPORT -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED ";
 		    closedir(QT4INCLUDE);
-		    
+
 		    if( opendir(QT4LIBS,$QTLIBDIR)) {
 			my $Qt4Lib;
 			while($Qt4Lib = readdir(QT4LIBS)) {
@@ -726,10 +726,10 @@
 		if $QTLIBDIR && ! $param::quiet;
 	}
 
-	# Coin3D - WHAT??! JL 2009 
+	# Coin3D - WHAT??! JL 2009
 	#if ( !defined($IVROOT)) {
 	#    if ($QT_VERSION==4) {
-	#	$IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package 
+	#	$IVROOT   = $ROOT . "/5.99.99/Coin2Qt4/$STAR_HOST_SYS/coin3d"; # the temporary place with the coin package
 	#    } else {
 	#	$IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package
 	#    }
@@ -748,7 +748,7 @@
 		$COIN3DFLAGS  = ""; # "-DR__QT";#-DQT_THREAD_SUPPORT";
 		$COIN3DLIBS   = "-lCoin -lSmallChange -lSoQt -lsimage";
 	    }
-	    
+
 	} else {
 	    # try finding it in $OPTSTAR
 	    my($coin);
@@ -778,7 +778,7 @@
 	$LoggerINCDIR = $OPTSTAR . "/include";
 	$LoggerLIBDIR = $OPTSTAR . "/lib";
 	$LoggerLIBS   = "-llog4cxx";
-	print 
+	print
 	    "Use Logger  ",
 	    "LIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
 	    if $LoggerLIBDIR && ! $param::quiet;
@@ -811,7 +811,7 @@
 	#    $XMLLIBDIR =~ s/-L//;
 	#} else {
 	#    # may not have any -L
-	#    if ($XMLLIBS 
+	#    if ($XMLLIBS
 	#}
 
 	my $XMLVersion = `$xml --version`;            # print "XMLVersion = $XMLVersion\n";
@@ -982,7 +982,7 @@
 			   'LIBDIR'=> $MYSQLLIBDIR,
 			   'INCDIR'=> $MYSQLINCDIR,
 			   'LIBS'  => $MYSQLLIB
-		           }, 
+		           },
 		       'QT' => {
 			    'QT_VERSION' => $QT_VERSION,
 			    'DIR'        => $QTDIR,
