@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.204 2009/09/25 18:02:16 perev Exp $
+* $Id: geometry.g,v 1.205 2009/10/29 00:00:21 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.205  2009/10/29 00:00:21  perev
+* y2010=y2009+Full BTOF
+*
 * Revision 1.204  2009/09/25 18:02:16  perev
 * Comment corrected
 *
@@ -1238,6 +1241,13 @@ replace [exe y2009;] with [;
     exe PIPE12;
 };]
 
+!//______________________________________________________________________________
+*********   y2010   ***
+replace [exe y2010;] with [;
+{ "y2010 baseline: right now y2010+full btof"
+  exe y2009; exe BTOF66;
+};]
+
 
 !//______________________________________________________________________________
 replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
@@ -1811,6 +1821,9 @@ If LL>0
   Case Y2009   { y2009 
                 exe y2009;}
 
+****************************************************************************************
+  Case Y2010   { y2010 
+                exe y2010;}
 ****************************************************************************************
   Case DUMM01   { R and D geometry: TPC+DUMM
 
