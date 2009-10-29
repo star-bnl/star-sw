@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.219 2009/10/13 18:56:47 perev Exp $
+// $Id: StMaker.cxx,v 1.220 2009/10/29 18:34:17 perev Exp $
 //
 //
 /*!
@@ -216,7 +216,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone is lost"},
   {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
   // 
-  {"y2009",       20081215,     0, "y2009",    "Practically place holder yet(VP)"},
+  {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
+  {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1924,6 +1925,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.220  2009/10/29 18:34:17  perev
+// y2010 added
+//
 // Revision 1.219  2009/10/13 18:56:47  perev
 // WhiteBoard improve
 //
