@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.12 2009/02/23 21:10:40 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.13 2009/10/29 18:34:25 fine Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.13  2009/10/29 18:34:25  fine
+// Fix FindMcHit signature
+//
 // Revision 1.12  2009/02/23 21:10:40  bouchet
 // increase NSaturationSignal to reflect the energy increase of the GEANT hit
 //
@@ -1208,7 +1211,7 @@ void StSsdBarrel::Calculation_Ratio(int idWafer,int idClusterP,int idClusterN,ve
   if(GTrackN.size()>0) GTrackN.clear();
 }
 //__________________________________________________________________
-Int_t StSsdBarrel::FindMcHit(vector<int> tempo,vector<const StMcSsdHit*> hitCol)
+Int_t StSsdBarrel::FindMcHit(const vector<int> &tempo,const vector<const StMcSsdHit*> &hitCol)
 {
   float ChargeTrack = 0.0;
   int idTrack =0;
