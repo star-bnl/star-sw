@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.13 2009/10/29 18:34:25 fine Exp $
+// $Id: StSsdBarrel.cc,v 1.14 2009/10/29 18:37:21 fine Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.14  2009/10/29 18:37:21  fine
+// Fix me: assert(tempo.size() == 5);
+//
 // Revision 1.13  2009/10/29 18:34:25  fine
 // Fix FindMcHit signature
 //
@@ -1215,6 +1218,7 @@ Int_t StSsdBarrel::FindMcHit(const vector<int> &tempo,const vector<const StMcSsd
 {
   float ChargeTrack = 0.0;
   int idTrack =0;
+  assert(tempo.size() == 5);
   for(int e=0;e<5;e++){
     for (unsigned int hit = 0 ; hit<hitCol.size();hit++){
       const StMcSsdHit* currHit = hitCol[hit];
