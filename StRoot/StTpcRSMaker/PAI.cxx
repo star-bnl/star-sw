@@ -1,3 +1,6 @@
+// $Id: PAI.cxx,v 1.2 2009/10/30 21:12:00 fisyak Exp $
+// This is wrapper for Pavel Nevski version of Photo Aborption Model 
+// which can be used an alternative to Bichsel model which  we have  only for P10 mixture.
 #include "Stiostream.h"
 #include <assert.h>
 #include "PAI.h"
@@ -88,6 +91,7 @@ PAI::PAI(Int_t NoBetaGammas, Int_t NoEntries, Double_t BetaGammaLog10Min, Double
 }
 //____________________________________________________________________________ 
 PAI::~PAI() {
+  fgInstance = 0;
   delete [] mEnergy;
   delete [] mdNdE;
   delete [] mdNdX;
@@ -155,3 +159,7 @@ void PAI::xGenerate(Int_t NsSteps, Int_t Nevents) {
     }
   }
 }
+// $Log: PAI.cxx,v $
+// Revision 1.2  2009/10/30 21:12:00  fisyak
+// Freeze version rcf9108.F, Clean up
+//
