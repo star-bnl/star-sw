@@ -1,3 +1,4 @@
+// $Id: PAI.h,v 1.2 2009/10/30 21:12:00 fisyak Exp $
 //////////////////////////////////////////////////////////
 //   This class has been automatically generated 
 //     (Thu Nov 29 16:25:03 2001 by ROOT version3.02/01)
@@ -35,4 +36,7 @@ private:
   ClassDef(PAI,0)
 };
 #endif
-
+//$Log: PAI.h,v $
+//Revision 1.2  2009/10/30 21:12:00  fisyak
+//Freeze version rcf9108.F, Clean up
+//

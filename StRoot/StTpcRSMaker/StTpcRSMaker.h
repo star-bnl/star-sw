@@ -15,6 +15,7 @@
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
+#include "StTpcRawData.h"
 #include "TF1.h"
 #include "TH1.h"
 #include "TTree.h"
@@ -68,9 +69,7 @@ class StTpcRSMaker : public StMaker {
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
   void SetSigmaJitterTI(Double_t p) {mSigmaJitterTI = p;}
   void SetSigmaJitterTO(Double_t p) {mSigmaJitterTO = p;}
-  void SetSigmaJitterXI(Double_t p) {mSigmaJitterXI = p;}
-  void SetSigmaJitterXO(Double_t p) {mSigmaJitterXO = p;}
-  static Int_t    AsicThresholds(Short_t ADCs[512]);
+  static Int_t    AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]);
   static Int_t    SearchT(const void *elem1, const void **elem2);
   static Int_t    CompareT(const void **elem1, const void **elem2);
   static Double_t shapeEI(Double_t *x, Double_t *par=0);
@@ -157,8 +156,6 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRange; //!
   const Double_t ElectronRangeEnergy; //!
   const Double_t ElectronRangePower; //!
-  const Double_t CrossTalkInner; //!
-  const Double_t CrossTalkOuter; //!
   Double_t      mtauIntegrationX[2]; //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];           //! -"- 
   Double_t      mtauIntegration;  //! for TPC
@@ -172,21 +169,22 @@ class StTpcRSMaker : public StMaker {
   const Double_t tauP;//!
   Double_t   mSigmaJitterTI;
   Double_t   mSigmaJitterTO;
-  Double_t   mSigmaJitterXI;
-  Double_t   mSigmaJitterXO;
   Altro *mAltro;//!
   Double_t   mCutEle; //! cut for delta electrons
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.11 2009/10/03 21:29:09 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.12 2009/10/30 21:12:00 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.11 2009/10/03 21:29:09 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.12 2009/10/30 21:12:00 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.12  2009/10/30 21:12:00  fisyak
+// Freeze version rcf9108.F, Clean up
+//
 // Revision 1.11  2009/10/03 21:29:09  fisyak
 // Clean up, move all TpcT related macro into StTpcMcAnalysisMaker
 //
