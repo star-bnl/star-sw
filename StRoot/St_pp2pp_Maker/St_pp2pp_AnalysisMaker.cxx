@@ -205,8 +205,8 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 
 
   if ( nevt_count%1000 == 0 ) cout << "St_pp2pp_AnalysisMaker:: Event count : " << nevt_count << ", Run : " << event_info.run_number 
-				  << ", Event no.: " << event_info.event_number << ", Token : " << event_info.token <<  ", Daqbits : " << event_info.daqbits 
-				  << ", tcubits : " << tcubits << endl ;
+				   << ", Event no.: " << event_info.event_number << ", Token : " << event_info.token <<  ", Daqbits : " << event_info.daqbits 
+				   << ", tcubits : " << tcubits << " Date/Time : " << GetDate() << " " << GetTime() << endl ;
   nevt_count++ ;
 
 
