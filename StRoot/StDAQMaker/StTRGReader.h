@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.h,v 1.7 2007/11/19 19:40:11 akio Exp $
+ * $Id: StTRGReader.h,v 1.8 2009/11/02 21:42:52 fine Exp $
  *
  * Author: Herbert Ward
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.h,v $
+ * Revision 1.8  2009/11/02 21:42:52  fine
+ * allow the Akio DAT file to be read in 1999-2008 format
+ *
  * Revision 1.7  2007/11/19 19:40:11  akio
  * Change fro run8
  *
@@ -69,6 +72,8 @@ class  StTRGReader {
   const TrgDataType2008 *getDataType2008() const;
 
   virtual void Update();
+  enum { kTrgOldVersionFormat=0};
+  static bool OldFormat(int version) { return (version <= kTrgOldVersionFormat); }
 protected:
   TRG_Reader  *fTRGImpReader; // Making this protected hide implementation from the user
 
