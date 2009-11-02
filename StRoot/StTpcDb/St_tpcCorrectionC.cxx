@@ -2,12 +2,12 @@
 #include "TMath.h"
 ClassImp(St_tpcCorrectionC);
 //________________________________________________________________________________
-Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x) {
+Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z) {
   tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
-  return SumSeries(cor, x);
+  return SumSeries(cor, x, z);
 }
 //________________________________________________________________________________
-Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x) {
+Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z) {
   Double_t Sum = 0;
   if (! cor) return Sum;
   Int_t N = TMath::Abs(cor->npar)%100;
@@ -19,6 +19,7 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x) {
   else {
     switch  (cor->type) {
     case 10:// ADC correction offset + poly for ADC
+    case 11:// ADC correction offset + poly for log(ADC) and |Z|  
       X = TMath::Log(x);      break;
     case 1: // Tchebyshev [-1,1] 
       if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
@@ -75,6 +76,10 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x) {
     Sum += TMath::Log(1. + cor->OffSet/x);
     Sum  = TMath::Exp(Sum);
     Sum *= x;
+    break;
+  case 11: // ADC correction offset + poly for log(ADC) and |Z|
+    Sum = cor->a[1] + z*cor->a[2] + z*X*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*(cor->a[5] + X*cor->a[6])));
+    Sum *= TMath::Exp(-cor->a[0]);
     break;
   default: // polynomials
     Sum = cor->a[N-1];

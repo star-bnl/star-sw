@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.46 2009/08/11 20:38:04 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.47 2009/11/02 17:31:41 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.47  2009/11/02 17:31:41  fisyak
+ * use directly field from StarMagField, replace St_tpcGainC and St_tpcT0C by St_tpcPadGainT0C, add remove defaults in coordinate transformations
+ *
  * Revision 1.46  2009/08/11 20:38:04  genevb
  * slightly more detailed message
  *
@@ -148,11 +151,12 @@
 #include "StDbUtilities/StTpcPadCoordinate.hh"
 #include "tables/St_tpg_pad_plane_Table.h"
 #include "tables/St_tpg_detector_Table.h"
-#include "tables/St_MagFactor_Table.h"
+#include "StarMagField.h"
 #include "math_constants.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
-#include "StDetectorDbMaker/St_tpcAnodeHVC.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
 #else
@@ -299,7 +303,7 @@ int type_of_call tpc_time_to_z_(int *time,int *padin, int* row, int* sector,floa
 //            timeBin)/
 //            (tbwidth)
 //           ); 
-  double zztop = trans->zFromTB(*time);
+  double zztop = trans->zFromTB(*time,*sector,*row);
        if (*row<14){ 
 	 zoff = gStTpcDb->Dimensions()->zInnerOffset(); 
        }
@@ -326,7 +330,7 @@ int type_of_call tpc_z_to_time_(float* z, int* padin, int* padrow, int* sector, 
 	 zoff = gStTpcDb->Dimensions()->zOuterOffset(); 
        }
        zin = *z + zoff;
-       *time = (Int_t )trans->tBFromZ(zin);
+       *time = (Int_t )trans->tBFromZ(zin,*sector,*padrow);
 
 //    int temp[1];
 //    *temp = 100;
@@ -381,8 +385,8 @@ int type_of_call tpc_sec24_to_sec12_(int *isecin, int *isecout){
   return 1;
 }
 int type_of_call tpc_pad_time_offset_(int *isec, int *irow, int *ipad, float *t0value){
-  if (gStTpcDb->tpcT0()) {
-    *t0value = gStTpcDb->tpcT0()->T0(*isec,*irow, *ipad);
+  if (St_tpcPadGainT0C::instance()) {
+    *t0value = St_tpcPadGainT0C::instance()->T0(*isec,*irow, *ipad);
   }
   else {
    *t0value = 0;
@@ -468,9 +472,7 @@ Int_t StTpcDbMaker::Init(){
 Int_t StTpcDbMaker::InitRun(int runnumber){
     if (m_TpcDb) return 0;
     // Create Needed Tables:    
-    TDataSet *RunLog = GetDataBase("RunLog");                              assert(RunLog);
-    St_MagFactor *fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
-    Float_t gFactor = (*fMagFactor)[0].ScaleFactor;
+    Float_t gFactor = StarMagField::Instance()->GetFactor();
     gMessMgr->Info() << "StTpcDbMaker::Magnetic Field gFactor = " << gFactor << endm;
     if (fabs(gFactor)>0.8){
       gMessMgr->Info() << "StTpcDbMaker::Using full field TPC hit errors" << endm;
@@ -538,7 +540,10 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   m_TpcDb = new StTpcDb(this); if (Debug()) m_TpcDb->SetDebug(Debug());
   if (m_Mode%1000000 & 2) {
     Int_t option = (m_Mode & 0xfffc) >> 2;
-    m_TpcDb->SetExB(new StMagUtilities(gStTpcDb, RunLog, option));
+    StMagUtilities *magU = new StMagUtilities(gStTpcDb, 0, option);
+    magU->SetMagFactor(gFactor);
+    m_TpcDb->SetExB(magU);
+    
   }
   m_TpcDb->SetDriftVelocity();
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
@@ -590,7 +595,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Make(){
   // check that TPC is tripped 
-  if (St_tpcAnodeHVC::instance()->tripped()) {
+  if (St_tpcAnodeHVavgC::instance()->tripped()) {
     gMessMgr->Info() << "StTpcDbMaker::TPC has tripped - declaring EOF to avoid possibly bad data" << endm;
     return kStEOF;
   }
