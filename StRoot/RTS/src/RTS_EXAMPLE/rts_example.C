@@ -502,6 +502,25 @@ static int bsmd_doer(daqReader *rdr, char *do_print)
 	if(strcasestr(do_print,"bsmd")) ;	// leave as is...
 	else do_print = 0 ;
 
+
+	// do I see the non-zero-suppressed bank? let's do this by fiber...
+	for(int f=1;f<=12;f++) {
+		dd = rdr->det("bsmd")->get("raw",0,f) ;	// sector is ignored (=0)
+		if(dd) {
+			while(dd->iterate()) {
+				found = 1 ;
+
+				if(do_print) printf("BSMD RAW: fiber %2d, sector %d %d:\n",dd->rdo,dd->sec) ;
+
+
+				for(int i=0;i<8;i++) {
+					if(do_print) printf("   %2d = %08X\n",i,dd->Int32[i]) ;
+				}
+			}
+		}
+	}
+
+
 	// do I see the non-zero-suppressed bank? let's do this by fiber...
 	for(int f=1;f<=12;f++) {
 		dd = rdr->det("bsmd")->get("adc_non_zs",0,f) ;	// sector is ignored (=0)
