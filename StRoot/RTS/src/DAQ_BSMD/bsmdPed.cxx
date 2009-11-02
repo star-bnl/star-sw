@@ -63,12 +63,13 @@ int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	int fiber ;
 	u_short cap ;
 	u_short *d ;
+	u_int *d32 = (u_int *) src ;
 
 	LOG(TERR,"BSMD ZS: rdo %d: in bytes %d",rdo1,in_bytes) ;
 
-	d = (u_short *)(src + 256) ;	// data start!
+	d = (u_short *)(src + 8*4) ;	// data start at 8th word
 
-	cap = *((u_short *)(src + 4*16)) & 0x7F ;	// 16th int...
+	cap = (u_short) (d32[7] & 0x7F) ;
 
 	fiber = (sector-1)*2 + (rdo1 - 1) ;
 
@@ -107,12 +108,13 @@ void bsmdPed::accum(char *evbuff, int bytes, int rdo)
 {
 	int cap ;
 	u_short *d_in ;
+	u_int *d32 ;
 
 	d_in = (u_short *) evbuff ;
-
+	d32 = (u_int *) evbuff ;
 
 	// this is where the cap should be...
-	cap = d_in[32] & 0x7F ;	// mask off, in case of problems...
+	cap = d32[7] & 0x7F ;	// mask off, in case of problems...
 	
 
 	evts[rdo]++ ;
@@ -136,7 +138,7 @@ void bsmdPed::accum(char *evbuff, int bytes, int rdo)
 	p->cou[cap]++ ;
 	
 	// move to start of data
-	d_in = (u_short *)(evbuff + 256) ;
+	d_in = (u_short *)(evbuff + 8*4) ;
 
 	for(int j=0;j<4800;j++) {
 

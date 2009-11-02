@@ -411,51 +411,86 @@ daq_dta *daq_bsmd::handle_raw(int rdo)
 
 
 
-int daq_bsmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int rdo)
+int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
-	const int BSMD_BYTES = 9856 ;
+//	const int BSMD_BYTES = ((2400+8)*4) ;	// this is the minimum
+	const int BSMD_BYTES = (1024*4) ;	// this is the test!
+	int buff_bytes = 4 * words ;
 
-	u_short *us = (u_short *)buff ;
+	u_int *d32 = (u_int *)buff ;
 
-	// this is all wrong!!!!
-	LOG(ERR,"Hack -- I don't know Gerard's format yet!") ;
 
 	// L0 part
-	trg[0].t = l2h16(us[6])*256 + l2h16(us[8]) ;
-	trg[0].daq = 0 ;
-	trg[0].trg = 4 ;	// BSMD does not give the correct L0, only L2 so we invent 4
-	trg[0].rhic = l2h16(us[10]) ;
+	trg[0].t = d32[0] & 0xFFF ;
+	trg[0].daq = d32[2] & 0xF ;
+	trg[0].trg = (d32[2] >> 4) & 0xF ;
+	trg[0].rhic = d32[4] ;
 	
-	// L2 part
+
+
+	// L2 part is INVENTED for now!!!
 	trg[1].t = trg[0].t ;	// copy over token
-	trg[1].trg = us[0] ;	// this is where the trg cmd ought to be
-	trg[1].daq = us[1] ;
+	trg[1].trg = 15 ;	// this is where the trg cmd ought to be
+	trg[1].daq = 0 ;
 	trg[1].rhic = trg[0].rhic + 1 ;
 
 
-	LOG(TERR,"BSMD: token %d, rhic %d, us 0x%04X 0x%04X",trg[0].t,trg[0].rhic,us[0],us[1]) ;
+	LOG(NOTE,"RDO %d: token %d, trg %d, daq %d: rhic %u",rdo, 
+		trg[0].t, trg[0].trg, trg[0].daq, trg[0].rhic) ;
 
 	// here I will put the sanity check!
 	int bad = 0 ;
-	if(buff_bytes != BSMD_BYTES) {
+	if(buff_bytes < BSMD_BYTES) {
 		LOG(ERR,"BSMD: rdo %d: expect %d bytes, received %d",rdo,BSMD_BYTES,buff_bytes) ;
 		bad = 1 ;
 	}
 
-
-	if(us[16] > 127) {
-		LOG(ERR,"RDO %d: bad cap %d",rdo,us[16]) ;
-		bad = 1 ;
-	}
-	if((us[0]>15) || (us[1]>15)) {
-		LOG(ERR,"RDO %d: bad trg or daq cmd: 0x%04X 0x%04X",us[0],us[1]) ;
+	if(trg[0].t == 0) {
+		LOG(ERR,"RDO %d: token 0?",rdo) ;
+		trg[0].t = trg[1].t = 4097 ;	// turn it to sanity!
 		bad = 1 ;
 	}
 
+	switch(trg[0].trg) {
+	case 4 :
+	case 8 :
+	case 10 :
+	case 11 :
+	case 12 :
+	case 15 :
+		break ;
+	default :
+		LOG(ERR,"RDO %d: bad trg_cmd %d",rdo, trg[0].trg) ;
+		trg[0].trg = 5 ;
+		bad = 1 ;
+		break ;
+	}
 
+	if(d32[1] != 0x42534D44) {	// "BSMD"
+		LOG(ERR,"BSMD: rdo %d: bad sig 0x%08X",rdo,d32[1]) ;
+		bad = 1 ;
+	}
 
+	if((d32[2] & 0xFFFFFF00) != 0) {	// should be 0
+		LOG(ERR,"BSMD: rdo %d: bad 0 0x%08X",rdo,d32[2]&0xFFFFFF00) ;
+		bad = 1 ;
+	}
+
+	if((d32[3] & 0xFFFF0000)) {	// error_flags
+		LOG(ERR,"BSMD: rdo %d: error flags 0x%08X",rdo,d32[3]&0xFFFF0000) ;
+		bad = 1 ;
+	}
+
+	if(((d32[3]>>8) & 0xFF) != 5) {	// det_id
+		LOG(ERR,"BSMD: rdo %d: bad det_id 0x%08X",(d32[3]>>8)&0xFF) ;
+		bad = 1 ;
+	}
 	
-
+	if(bad) {	// dump the whole header
+		for(int i=0;i<8;i++) {
+			LOG(WARN,"\tRDO %d: %d: 0x%08X",rdo,i,d32[i]) ;
+		}
+	}
 	
 	return 2 ;
 }
