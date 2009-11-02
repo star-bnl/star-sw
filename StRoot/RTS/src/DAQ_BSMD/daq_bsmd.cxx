@@ -32,6 +32,25 @@ public:
 
 static daq_det_bsmd_factory bsmd_factory ;
 
+static const struct bsmd_old_to_new_map_t {
+	char new_sec ;
+	char new_rdo ;
+} bsmd_old_to_new_map[13] = {
+	{ 0, 0 },	// we start from 1 so this a dummy!
+	{ 1, 1 },
+	{ 1, 2 },
+	{ 1, 3 },
+	{ 1, 4 },
+	{ 1, 5 },
+	{ 1, 6 },
+	{ 2, 1 },
+	{ 2, 2 },
+	{ 2, 3 },
+	{ 2, 4 },
+	{ 2, 5 },
+	{ 2, 6 }
+
+} ;
 
 daq_bsmd::daq_bsmd(daqReader *rts_caller) 
 {
@@ -376,31 +395,86 @@ daq_dta *daq_bsmd::handle_raw(int rdo)
 		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
 
 		if(bsmd_reader(emcp, &bsmd_d)==0) return 0 ;
+
+
+		for(int r=start_r;r<=stop_r;r++) {	
+			//LOG(NOTE,"BSMD: adc_non_zs: fiber %d, bytes %d",r,bsmd_d.bytes[r-1][0]) ;
+			bytes += bsmd_d.bytes[r-1][0] ;
+		}
+
+		if(bytes==0) return 0 ;
+
+		raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+
+		for(int r=start_r;r<=stop_r;r++) {
+			bytes = bsmd_d.bytes[r-1][0] ;
+
+			if(bytes == 0) continue ;
+
+			char *st  = (char *) raw->request(bytes) ;
+
+			memcpy(st,(char *)bsmd_d.dta[r-1][0],bytes) ;
+
+			raw->finalize(bytes,0,r,0) ;
+		}
 	}
-	else return 0 ;	// SFS does not exist yet!
+	else if(present & DET_PRESENT_SFS) {
+		int s_new, r_new ;
+		char str[256] ;
+		char *full_name ;
 
-	//LOG(NOTE,"BSMD: rdo %d: start %d, stop %d",rdo,start_r, stop_r) ;
 
-	for(int r=start_r;r<=stop_r;r++) {	
-		//LOG(NOTE,"BSMD: adc_non_zs: fiber %d, bytes %d",r,bsmd_d.bytes[r-1][0]) ;
-		bytes += bsmd_d.bytes[r-1][0] ;
+		for(int r=start_r;r<=stop_r;r++) {
+
+			s_new = bsmd_old_to_new_map[r].new_sec ;
+			r_new = bsmd_old_to_new_map[r].new_rdo ;
+
+			sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name,s_new,r_new) ;
+
+			full_name = caller->get_sfs_name(str) ;
+
+			if(!full_name) continue ;
+
+			bytes += caller->sfs->fileSize(full_name) ;
+
+		}
+
+		
+		LOG(NOTE,"BSMD raw: total of %d bytes",bytes) ;
+		if(bytes == 0) return 0 ;
+
+		raw->create(bytes,"bsmd_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+
+
+		for(int r=start_r;r<=stop_r;r++) {
+
+			s_new = bsmd_old_to_new_map[r].new_sec ;
+			r_new = bsmd_old_to_new_map[r].new_rdo ;
+
+			sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name,s_new,r_new) ;
+
+			full_name = caller->get_sfs_name(str) ;
+
+			if(!full_name) continue ;
+
+			bytes += caller->sfs->fileSize(full_name) ;
+
+			char *st = (char *) raw->request(bytes) ;
+			int ret = caller->sfs->read(str, st, bytes) ;
+			if(ret != bytes) {
+				LOG(ERR,"ret is %d") ;
+			}
+
+			raw->finalize(bytes,s_new,r) ;	// add the sector but keep the old "RDO"!
+		}
+
+
+
 	}
+	else return 0 ;
 
-	if(bytes==0) return 0 ;
 
-	raw->create(bytes,"raw",rts_id,DAQ_DTA_STRUCT(char)) ;
 
-	for(int r=start_r;r<=stop_r;r++) {
-		bytes = bsmd_d.bytes[r-1][0] ;
-
-		if(bytes == 0) continue ;
-
-		char *st  = (char *) raw->request(bytes) ;
-
-		memcpy(st,(char *)bsmd_d.dta[r-1][0],bytes) ;
-
-		raw->finalize(bytes,0,r,0) ;
-	}
 		
 	raw->rewind() ;
 

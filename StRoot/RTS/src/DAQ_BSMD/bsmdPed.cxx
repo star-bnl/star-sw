@@ -234,7 +234,7 @@ void bsmdPed::calc()
 			if(ped->cou[cap] < MIN_EVENTS) {
 				bad++ ;
 
-				if(bad<30) {
+				if(bad<50) {
 					LOG(WARN,"RDO %d: cap %3d: only %d events!",r+1,cap,ped->cou[cap]) ;
 				}
 				else if(bad==30) {
@@ -252,7 +252,7 @@ void bsmdPed::calc()
 		//LOG(TERR,"Pedestals calculated. RDO counts: %u %u %u %u %u %u",valid_evts[0],valid_evts[1],valid_evts[2],valid_evts[3],valid_evts[4],valid_evts[5]) ;
 	}
 	else {
-		LOG(CRIT,"BSMD pedestals not good (%d caps were not present",bad) ;
+		LOG(ERR,"BSMD pedestals not good (%d caps were not present",bad) ;
 	}
 
 	return ;
@@ -270,7 +270,7 @@ int bsmdPed::to_evb(char *buff)
 
 	if(!valid) {
 		// log error but continue...
-		LOG(ERR,"ped::to_evb peds are bad: valid %d",valid) ;
+		LOG(WARN,"ped::to_evb peds are bad: valid %d",valid) ;
 	}
 
 	LOG(NOTE,"Preparing pedestals for later EVB...") ;
@@ -309,7 +309,7 @@ int bsmdPed::from_cache(char *fname)
 	FILE *f ;
 	char *fn ;
 
-	init(0x3F) ;	// to clear ped storage...
+	init(0x3F) ;	// to clear ped storage for all 6 RDOs
 	
 	// trivial load from disk...
 	if(fname) {
