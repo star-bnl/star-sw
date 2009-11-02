@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.cxx,v 1.9 2007/11/19 19:40:10 akio Exp $
+ * $Id: StTRGReader.cxx,v 1.10 2009/11/02 21:42:52 fine Exp $
  *
  * Author: Herbert Ward, Dec 28 1999, 13:10 EST.
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.cxx,v $
+ * Revision 1.10  2009/11/02 21:42:52  fine
+ * allow the Akio DAT file to be read in 1999-2008 format
+ *
  * Revision 1.9  2007/11/19 19:40:10  akio
  * Change fro run8
  *
@@ -43,6 +46,7 @@
 #include "Stypes.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQReader.h"
+#include "StStreamFile.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -62,7 +66,7 @@ StTRGReader::StTRGReader(StDAQReader *daqr) {
 }
 //_____________________________________________________________________________
 void StTRGReader::Update() {
-  delete fTRGImpReader;
+  delete fTRGImpReader; fTRGImpReader = 0;
   fTRGImpReader = ::getTRGReader(fDAQReader->getEventReader());
 //VP  assert(fTRGImpReader);
 }
@@ -77,14 +81,19 @@ int StTRGReader::close() {
 }
 //_____________________________________________________________________________
 char StTRGReader::thereIsTriggerData() {
-  if(fTRGImpReader) return 7; // TRUE
+  if(fTRGImpReader || OldFormat(fDAQReader->getDatFileReader()->Version()) ) return 7; // TRUE
   return 0;                   // FALSE
 }
 //_____________________________________________________________________________
 const char *StTRGReader::getData() const
 {
-  if(!fTRGImpReader) return 0;
-  return (const char*)(fTRGImpReader->pBankTRGD)+40;
+   const char *data = 0;
+   if(fTRGImpReader) {
+      data = (const char*)(fTRGImpReader->pBankTRGD)+40;
+   } else if ( fDAQReader->getDatFileReader() ) {
+      data = fDAQReader->getDatFileReader()->Record(); 
+   }
+   return data;
 }
 //_____________________________________________________________________________
 int   StTRGReader::getYear() const

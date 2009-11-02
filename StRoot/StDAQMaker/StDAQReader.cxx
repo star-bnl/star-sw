@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.82 2009/10/13 19:32:44 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.83 2009/11/02 21:42:52 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.83  2009/11/02 21:42:52  fine
+ * allow the Akio DAT file to be read in 1999-2008 format
+ *
  * Revision 1.82  2009/10/13 19:32:44  fine
  * Re-Activate DAQ reader
  *
@@ -626,7 +629,7 @@ unsigned int StDAQReader::getTrigWord() const {
 //_____________________________________________________________________________
    int StDAQReader::RICHPresent() const {return  fEventInfo->RICHPresent;}
 //_____________________________________________________________________________
-   int StDAQReader::TRGPresent()  const {return  fEventInfo->TRGPresent;}
+   int StDAQReader::TRGPresent()  const {return  ( fEventInfo && fEventInfo->TRGPresent) ||  (fDatFileReader &&  StTRGReader::OldFormat(fDatFileReader->Version()));}
 //_____________________________________________________________________________
    int StDAQReader::L3Present()   const {return  fEventInfo->L3Present;}
 //_____________________________________________________________________________
