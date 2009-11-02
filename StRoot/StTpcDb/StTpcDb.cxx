@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.50 2009/03/16 14:13:30 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.51 2009/11/02 17:31:41 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.51  2009/11/02 17:31:41  fisyak
+ * use directly field from StarMagField, replace St_tpcGainC and St_tpcT0C by St_tpcPadGainT0C, add remove defaults in coordinate transformations
+ *
  * Revision 1.50  2009/03/16 14:13:30  fisyak
  * Use StDetectorDb chairs for TpcGlobalPosition and TpcSectorPosition
  *
@@ -454,7 +457,7 @@ void StTpcDb::SetDriftVelocity() {
   static TDatime t[2];
   UInt_t uc = TUnixTime(mk->GetDateTime(),1).GetUTime();
   if (uc != mUc) {
-    if (! dvel0 || uc < umax && (uc < u0 || uc > u1)) {//First time only
+    if (! dvel0 || (uc < umax && ((uc < u0) || (uc > u1)))) {//First time only
       dvel0 = (St_tpcDriftVelocity *) mk->GetDataBase("Calibrations/tpc/tpcDriftVelocity");
       if (! dvel0) {
 	gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
@@ -557,8 +560,6 @@ TTable *StTpcDb::FindTable(const Char_t *name, Int_t dbIndex) {
 }
 //________________________________________________________________________________
 St_tpcPedestalC        *StTpcDb::Pedestal() {return St_tpcPedestalC::instance();}
-St_tpcGainC            *StTpcDb::tpcGain() {return St_tpcGainC::instance();}
-St_tpcT0C              *StTpcDb::tpcT0() {return St_tpcT0C::instance();}
 St_tpcPadResponseC     *StTpcDb::PadResponse() {  return St_tpcPadResponseC::instance();}
 //________________________________________________________________________________
 void StTpcDb::SetTpc2GlobalMatrix(TGeoHMatrix *m) {

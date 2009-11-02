@@ -48,9 +48,6 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 
   if (!m_Mask) m_Mask = -1;
   if (!dbMk) dbMk = (St_db_Maker *) StMaker::GetChain()->Maker("db");
-  St_tss_tssparC *tsspar = St_tss_tssparC::instance();
-  mAdc2GeV[kTpcOuter] = tsspar->ave_ion_pot() * tsspar->scale() /(tsspar->gain_out()*tsspar->wire_coupling_out());
-  mAdc2GeV[kTpcInner] = tsspar->ave_ion_pot() * tsspar->scale() /(tsspar->gain_in() *tsspar->wire_coupling_in() );
   // 
   ReSetCorrections();
 }
@@ -137,6 +134,19 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
   Double_t ZdriftDistance = CdEdx.ZdriftDistance;
   ESector kTpcOutIn = kTpcOuter;
   if (row <= 13) kTpcOutIn = kTpcInner;
+  St_tss_tssparC *tsspar = St_tss_tssparC::instance();
+  Float_t gasGain = 1;
+  Float_t gainNominal = 0;
+  if (row > 13) {
+    gainNominal = tsspar->gain_out()*tsspar->wire_coupling_out();
+    gasGain = tsspar->gain_out(sector,row)*tsspar->wire_coupling_out();
+  } else {
+    gainNominal = tsspar->gain_in()*tsspar->wire_coupling_in();
+    gasGain = tsspar->gain_in(sector,row) *tsspar->wire_coupling_in();
+  }
+  if (gasGain <= 0.0) return 4;
+  mAdc2GeV = tsspar->ave_ion_pot() * tsspar->scale()/gainNominal;
+  Double_t Adc2GeVReal = tsspar->ave_ion_pot() * tsspar->scale()/gasGain;
   tpcGas_st *gas = m_tpcGas->GetTable();
   Double_t ZdriftDistanceO2 = ZdriftDistance*(*m_tpcGas)[0].ppmOxygenIn;
   Double_t ZdriftDistanceO2W = ZdriftDistanceO2*(*m_tpcGas)[0].ppmWaterOut;
@@ -168,10 +178,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
     switch (k) {
     case kAdcCorrection:
       if (CdEdx.lSimulated) {
-	dE *= 2.116;//  1.75; // 1.25 is in Trs already
+	dE *= 2.116;//  1.75; // 1.25 is in Trs already <<<< !!!!!!
       } else {
-	ADC = dE/mAdc2GeV[kTpcOutIn];
-	dE = mAdc2GeV[kTpcOutIn]*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC);
+	ADC = dE/mAdc2GeV;
+	dE = Adc2GeVReal*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC,CdEdx.xyz[2]);
       }
       goto ENDL;
     case kTpcdCharge:

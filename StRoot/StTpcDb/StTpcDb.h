@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.32 2009/03/16 14:13:31 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.33 2009/11/02 17:31:41 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.33  2009/11/02 17:31:41  fisyak
+ * use directly field from StarMagField, replace St_tpcGainC and St_tpcT0C by St_tpcPadGainT0C, add remove defaults in coordinate transformations
+ *
  * Revision 1.32  2009/03/16 14:13:31  fisyak
  * Use StDetectorDb chairs for TpcGlobalPosition and TpcSectorPosition
  *
@@ -105,9 +108,8 @@
 #include "StRTpcHitErrors.h"
 #include "TTable.h"
 #include "StDetectorDbMaker/St_tpcPedestalC.h"
-#include "StDetectorDbMaker/St_tpcT0C.h"
-#include "StDetectorDbMaker/St_tpcGainC.h"
 #include "StDetectorDbMaker/St_tpcPadResponseC.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "TGeoMatrix.h"
 class StMaker;
@@ -161,8 +163,8 @@ class StTpcDb {
    St_tpcSectorPositionC *SectorPosition() {return St_tpcSectorPositionC::instance();}
    TTable *getTpcTable(int i);
    St_tpcPedestalC *Pedestal();
-   St_tpcGainC     *tpcGain();
-   St_tpcT0C       *tpcT0();
+   St_tpcPadGainT0C     *tpcGain() {return St_tpcPadGainT0C::instance();}
+    St_tpcPadGainT0C    *tpcT0()   {return St_tpcPadGainT0C::instance();}
    St_tpcPadResponseC *PadResponse();
    TTable          *FindTable(const Char_t *name, Int_t dbIndex=kCalibration);
    //small pieces of data:
@@ -188,12 +190,3 @@ class StTpcDb {
 R__EXTERN StTpcDb* gStTpcDb;
 
 #endif
-
-
-
-
-
-
-
-
-

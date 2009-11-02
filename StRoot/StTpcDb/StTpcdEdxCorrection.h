@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.15 2008/12/23 17:23:01 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.16 2009/11/02 17:31:41 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -23,10 +23,10 @@ struct dE_t {
 };
 //________________________________________________________________________________
 struct dEdxCorrection_t {
-  dEdxCorrection_t(Char_t *name = 0, Char_t *title = 0, St_tpcCorrectionC *chair=0, Int_t n=0) 
+  dEdxCorrection_t(const Char_t *name = 0,const  Char_t *title = 0, St_tpcCorrectionC *chair=0, Int_t n=0) 
   {Name = name, Chair = chair; Title = title; nrows = n; dE = 0;} 
-  Char_t *Name;
-  Char_t *Title;
+  const Char_t *Name;
+  const Char_t *Title;
   St_tpcCorrectionC *Chair;
   Int_t   nrows;
   Double_t dE;
@@ -113,7 +113,7 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC *TpcPadTBins()         {return Correction(kTpcPadTBins);}
   Int_t Debug()                            {return m_Debug;}
   Int_t Mask()                             {return m_Mask;}
-  Double_t          Adc2GeV(ESector k)     {return mAdc2GeV[k];}
+  Double_t          Adc2GeV()              {return mAdc2GeV;}
   void Print(Option_t *opt = "") const;
  private:
   Int_t                m_Mask;                 //!
@@ -125,7 +125,7 @@ class StTpcdEdxCorrection : public TObject {
 
   St_TpcSecRowCor     *m_TpcSecRowB;            //!
   St_TpcSecRowCor     *m_TpcSecRowC;            //!
-  Double_t             mAdc2GeV[2];            //! Outer/Inner conversion factors from ADC -> GeV
+  Double_t             mAdc2GeV;               //! Outer/Inner conversion factors from ADC -> GeV
   dEdxCorrection_t     m_Corrections[kTpcAllCorrections];//!
   Int_t                m_Debug;                //!
   ClassDef(StTpcdEdxCorrection,0)   //StAF chain virtual base class for Makers
