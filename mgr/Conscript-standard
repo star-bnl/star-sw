@@ -311,6 +311,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$EXTRA_CPPFLAGS .= $env1->{Packages}->{XML}->{CPP};
       }
     }
+    if ($pkg eq 'StTpcDb') {$LIBS .=  " -lStarMagField";}
     print "CPPPATH = $CPPPATH\n" if $param::debug;
     
   } elsif ( $pkg =~ m/^apythia$/ ) {
