@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.16 2009/09/23 23:30:14 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.17 2009/11/02 17:32:25 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.17  2009/11/02 17:32:25  fisyak
+ * remove defaults in Tpc Coordinate transformations
+ *
  * Revision 1.16  2009/09/23 23:30:14  fisyak
  * Follow up Valery's corrections
  *
@@ -183,8 +186,8 @@ public:
   void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&, Int_t sector = 0, Int_t row = 0, Bool_t useT0=kTRUE, Bool_t useTau=kTRUE);
   StThreeVector<Double_t> sector12Coordinate(StThreeVector<Double_t>&, Int_t*);
   StThreeVector<Double_t> padCentroid(StTpcLocalSectorCoordinate&, Int_t*, Int_t*)  ;
-  Float_t   tBFromZ(Double_t z, Int_t sector=24, Int_t row=45) const;
-  Double_t  zFromTB(Float_t tb, Int_t sector=24, Int_t row=45) const;
+  Double_t   tBFromZ(Double_t z, Int_t sector, Int_t row) const;
+  Double_t  zFromTB(Double_t tb, Int_t sector, Int_t row) const;
   // Transformation Routines!!
   // Raw Data From tpc local Coordinates
   Int_t      sectorFromCoordinate(const StThreeVector<Double_t>&)    const;
@@ -192,14 +195,14 @@ public:
   Int_t      sectorFromCoordinate(const StTpcLocalDirection&  a)     const {return sectorFromCoordinate(a.position());}
   // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
   Int_t      rowFromLocal(const StThreeVector<Double_t>&)            const;
-  Float_t    padFromLocal(const StThreeVector<Double_t>&, Int_t)     const;
-  Float_t    padFromX(Double_t x, Int_t row)                         const; 
+  Double_t    padFromLocal(const StThreeVector<Double_t>&, Int_t)    const;
+  Double_t    padFromX(Double_t x, Int_t row)                        const; 
   Int_t      rowFromLocal(const StTpcLocalSectorCoordinate& a)       const {return rowFromLocal(a.position());}
-  Float_t    padFromLocal(const StTpcLocalSectorCoordinate& a)       const {return padFromLocal(a.position(),a.fromRow());}
+  Double_t    padFromLocal(const StTpcLocalSectorCoordinate& a)      const {return padFromLocal(a.position(),a.fromRow());}
   // tpc local sector Coordinates from Raw Data
   StThreeVector<Double_t> xyFromRaw(const StTpcPadCoordinate&);
   Double_t                yFromRow(Int_t row)                        const;
-  Double_t                xFromPad(Int_t row, Float_t pad)           const;
+  Double_t                xFromPad(Int_t row, Double_t pad)          const;
   // (3d)rotations   From means "From the TPC local  Coordinates to Tpc Local  Sector Coordinates "     
   //    "to" means " from Tpc local sector  Coordinates to  TPC local  Coordinates "
   // idir == 1 transformation for coordinate, idir != 1 transformation for direction
