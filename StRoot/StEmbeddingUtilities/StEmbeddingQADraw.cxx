@@ -13,6 +13,7 @@
 #include "TObject.h"
 #include "TPaveText.h"
 #include "TPDF.h"
+#include "TROOT.h"
 #include "TStyle.h"
 #include "TSystem.h"
 
