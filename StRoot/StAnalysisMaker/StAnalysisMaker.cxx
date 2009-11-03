@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.10 2009/11/03 15:03:56 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.11 2009/11/03 15:13:22 fisyak Exp $
  *
  */
 
@@ -337,6 +337,7 @@ bool StAnalysisMaker::accept(StTrack* track)
     //
     return track && track->flag() >= 0;
 }
+#if 0
 //________________________________________________________________________________
 void StAnalysisMaker::PrintStEvent(Int_t k) {
   static Char_t *trackType[] = {"global", "primary", "tpt", "secondary", "estGlobal", "estPrimary"};
@@ -593,9 +594,12 @@ void StAnalysisMaker::PrintRnDHits() {
     }
   }
 }
-
+#endif
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.11  2009/11/03 15:13:22  fisyak
+ * Comment print out, wait till StEvent will be mofidied
+ *
  * Revision 2.10  2009/11/03 15:03:56  fisyak
  * Add static method to print StEvent
  *
