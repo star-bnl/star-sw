@@ -11,6 +11,10 @@ class St_tpcPadGainT0C : public TChair {
   Int_t 	run()           	const {return Struct()->run;}
   Float_t 	Gain(Int_t sector, Int_t row, Int_t pad) const {return Struct()->Gain[sector-1][row-1][pad-1];}
   Float_t 	  T0(Int_t sector, Int_t row, Int_t pad) const {return Struct()->T0[sector-1][row-1][pad-1];}
+  Bool_t    livePadrow(Int_t sector, Int_t row) {
+    for (Int_t pad=1; pad<=182; pad++) if (Gain(sector,row,pad)>0) return kTRUE;
+    return kFALSE;
+  }
  protected:
   St_tpcPadGainT0C(St_tpcPadGainT0 *table=0) : TChair(table) {}
   virtual ~St_tpcPadGainT0C() {fgInstance = 0;}

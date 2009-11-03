@@ -7,14 +7,15 @@
 class St_tpcAnodeHVC : public TChair {
  public:
   static St_tpcAnodeHVC* 	instance();
-  tpcAnodeHV_st 	*Struct(Int_t i = 0) 	const {return ((St_tpcAnodeHV*) Table())->GetTable()+i;}
-  UInt_t     	getNumRows()                	const {return GetNRows();}
-  unsigned short 	sector(Int_t i = 0) 	const {return Struct(i)->sector;}
-  unsigned short 	socket(Int_t i = 0) 	const {return Struct(i)->socket;}
-  Float_t 	voltage(Int_t i = 0) 	const {return Struct(i)->voltage;}
-  bool		livePadrow(int sector = 1, int padrow = 1) { return voltagePadrow(sector,padrow) > 500; }
-  float		voltagePadrow(int sector = 1, int padrow = 1); // sector=1..24 , padrow=1..45
-  bool tripped() { return (voltage() < -100); }
+  tpcAnodeHV_st *Struct(Int_t i = 0) 	const {return ((St_tpcAnodeHV*) Table())->GetTable()+i;}
+  UInt_t     	 getNumRows()           const {return GetNRows();}
+  UShort_t 	 sector(Int_t i = 0) 	const {return Struct(i)->sector;}
+  UShort_t 	 socket(Int_t i = 0) 	const {return Struct(i)->socket;}
+  Float_t 	 voltage(Int_t i = 0) 	const {return Struct(i)->voltage;}
+  Bool_t	 livePadrow(int sector = 1, int padrow = 1) const { return voltagePadrow(sector,padrow) > 500; }
+  Float_t	 voltagePadrow(int sector = 1, int padrow = 1) const ; // sector=1..24 , padrow=1..45
+  Bool_t         tripped() const { return (voltage() < -100); }
+  static  void   sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, Float_t &f2);
  protected:
   St_tpcAnodeHVC(St_tpcAnodeHV *table=0) : TChair(table) {}
   virtual ~St_tpcAnodeHVC() {fgInstance = 0;}
