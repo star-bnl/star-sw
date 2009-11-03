@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.hh,v 1.6 2008/06/20 15:00:59 fisyak Exp $
+ * $Id: StTpcDbSlowControl.hh,v 1.7 2009/11/03 14:34:19 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.hh,v $
+ * Revision 1.7  2009/11/03 14:34:19  fisyak
+ * Remove default in zFromTB
+ *
  * Revision 1.6  2008/06/20 15:00:59  fisyak
  * move from StTrsData to StTpcRawData
  *
@@ -58,7 +61,7 @@ public:
     static StTpcSlowControl* instance();
     static StTpcSlowControl* instance(StTpcDb*);
     
-    double driftVelocity(int sector=13)   const;
+    double driftVelocity(int sector)      const;
 
     // voltage
     double driftVoltage()                 const;

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.18 2008/06/20 15:01:17 fisyak Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.19 2009/11/03 14:34:19 fisyak Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.19  2009/11/03 14:34:19  fisyak
+ * Remove default in zFromTB
+ *
  * Revision 1.18  2008/06/20 15:01:17  fisyak
  * move from StTrsData to StTpcRawData
  *
@@ -227,5 +230,5 @@ double StTrsFastChargeTransporter::chargeAttachment(double driftL) const
 //     double suppression = 1.-mAttachment*(mO2Concentration/1.e+6)*sqr(.760*bar)*driftL/mSCDb->driftVelocity();
 //     PR(suppression);
 
-    return 1.-mAttachment*(mO2Concentration/1.e+6)*sqr(.760*bar)*driftL/mSCDb->driftVelocity(13); 
+    return 1.-mAttachment*(mO2Concentration/1.e+6)*sqr(.760*bar)*driftL/mDriftVelocity; 
 }
