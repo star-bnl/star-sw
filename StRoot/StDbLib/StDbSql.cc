@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.32 2009/09/25 19:14:09 dmitry Exp $
+ * $Id: StDbSql.cc,v 1.33 2009/11/03 00:04:54 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.33  2009/11/03 00:04:54  dmitry
+ * restored missing endTime check
+ *
  * Revision 1.32  2009/09/25 19:14:09  dmitry
  * number of rows is reset to fetched number of rows, if it is less than total indexed number of rows
  *
@@ -447,8 +450,8 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
 
   Db.Release();  
 
-  //MPD - removed this to remove extra table scans updating end time
-  // if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
+  // Dmitry: returned this line, because we skip endTime completely, if we don't do this fix
+   if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
 
   delete [] idMap;
   delete [] dataIDList;
