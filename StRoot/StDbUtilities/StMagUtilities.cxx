@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.77 2009/10/22 04:46:44 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.78 2009/11/03 14:07:09 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.78  2009/11/03 14:07:09  fisyak
+ * Define Set/GetMagFactor()
+ *
  * Revision 1.77  2009/10/22 04:46:44  jhthomas
  * Update scheme for pad row numbering in Predict Space Charge
  *
@@ -326,7 +329,7 @@ To do:  <br>
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
-static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
+Float_t  StMagUtilities::gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
 static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
 
 //________________________________________
@@ -347,7 +350,6 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 { 
   gMap = kMapped        ;    // Select the B field shape (kMapped == mapped field, kConstant == constant field )
   SetDb ( dbin, dbin2 ) ;    // Put DB pointers into private/global space
-  GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
   GetTPCParams()        ;    // Get the TPC parameters from the DB
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
   GetOmegaTau ()        ;    // Get Omega Tau parameters
@@ -385,16 +387,6 @@ void StMagUtilities::SetDb ( StTpcDb* dbin , TDataSet* dbin2 )
   thedb2 = dbin2 ;
 }
 
-void StMagUtilities::GetMagFactor () 
-{ 
-  St_MagFactor *fMagFactor  =  (St_MagFactor *) thedb2->Find("MagFactor");  assert(fMagFactor) ;
-  gFactor        =  (*fMagFactor)[0].ScaleFactor ;        // Set the magnetic field scale factor
-  //if (TMath::Abs(gFactor) < 1.e-3) gFactor = 1.e-3;     // JT ... This is incorrect.  Don't do it this way.  The DB returns
-                                                          // 1.0 for full field and 0.5 for half field.  These are relative numbers
-                                                          // and are not field values in kGauss or Tesla ... so beware.
-                                                          // See Interpolate2DBField and Interpolate3DBField for a better way to
-                                                          // achieve the same goal of protecting against divide by zero with 0.0 field. 
-}
 
 void StMagUtilities::GetTPCParams ()  
 { 
