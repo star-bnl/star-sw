@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.31 2005/12/12 21:00:12 perev Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.32 2009/11/03 14:34:19 fisyak Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.32  2009/11/03 14:34:19  fisyak
+ * Remove default in zFromTB
+ *
  * Revision 1.31  2005/12/12 21:00:12  perev
  * 3 random generators ==> 1
  *
@@ -161,7 +164,7 @@ using namespace units;
 #endif
 #include "StTrsWireHistogram.hh"
 #include "StTrsRandom.hh"
-
+#include "TMath.h"
 
 StTrsWireHistogram* StTrsWireHistogram::mInstance = 0; // static data member
 HepJamesRandom  StTrsWireHistogram::mEngine;
@@ -220,10 +223,11 @@ void StTrsWireHistogram::FreqFunctionTableBuilder()
      int  cntr=0;
     
 do { 
-   
-    mFreqFunctionTable.push_back(erf(1.0*cntr*mRangeOfTable/mNumberOfEntriesInTable));
-    cntr++; 
-  }while(cntr < mNumberOfEntriesInTable);
+  Double_t x = 1.0*cntr*mRangeOfTable/mNumberOfEntriesInTable;
+  Double_t y = TMath::Erf(x);
+  mFreqFunctionTable.push_back(y);
+  cntr++; 
+ }while(cntr < mNumberOfEntriesInTable);
  
 }  
 double  StTrsWireHistogram::table_fast( double argument) const
@@ -528,6 +532,7 @@ void StTrsWireHistogram::setGasGainInnerSector(double v)
     mInnerSectorGasGain = v;
     cout << "Gas gain IS: " << mInnerSectorGasGain << endl;
 }
+
 
 void StTrsWireHistogram::setGasGainOuterSector(double v)
 {

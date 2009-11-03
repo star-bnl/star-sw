@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.40 2005/12/12 21:00:12 perev Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.41 2009/11/03 14:34:19 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.41  2009/11/03 14:34:19  fisyak
+ * Remove default in zFromTB
+ *
  * Revision 1.40  2005/12/12 21:00:12  perev
  * 3 random generators ==> 1
  *
@@ -171,7 +174,7 @@ using std::random_shuffle;
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StTrsDeDx.hh"
 #include "StTrsRandom.hh"
-
+#include "TMath.h"
 // Need a CERNLIB routine for tssSplit
 extern "C"  float dislan_(float &x);
 float dislan(float x) { return (x<-10.)? 0.:dislan_(x);}
@@ -664,7 +667,7 @@ double StTrsChargeSegment::xReflectedGauss(double x0, double sig) const
 {
     double granularity = .001;
     double root2Sigma  = M_SQRT2*sig;
-    double denom = erf((1.-x0)/root2Sigma) + erf(x0/root2Sigma);
+    double denom = TMath::Erf((1.-x0)/root2Sigma) + TMath::Erf(x0/root2Sigma);
     double testValue = mFlatDistribution.shoot();
     
     double xlo =0.;
@@ -673,7 +676,7 @@ double StTrsChargeSegment::xReflectedGauss(double x0, double sig) const
     double x,p;
     do {
 	x = .5*(xlo+xhi);
- 	p =.5*(1. + (erf((x-x0)/root2Sigma) + erf((x+x0-1)/root2Sigma))/denom);
+ 	p =.5*(1. + (TMath::Erf((x-x0)/root2Sigma) + TMath::Erf((x+x0-1)/root2Sigma))/denom);
 	if( (fabs(testValue-p)<granularity) || (fabs(xhi-xlo)<1.e-7)) {
 	    return x;
 	}

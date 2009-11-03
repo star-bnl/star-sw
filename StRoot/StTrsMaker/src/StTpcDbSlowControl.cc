@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.cc,v 1.4 2000/03/15 17:39:48 calderon Exp $
+ * $Id: StTpcDbSlowControl.cc,v 1.5 2009/11/03 14:34:19 fisyak Exp $
  *
  * Authors: Manuel Calderon de la Barca Sanchez
  *          Brian Lasiuk
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.cc,v $
+ * Revision 1.5  2009/11/03 14:34:19  fisyak
+ * Remove default in zFromTB
+ *
  * Revision 1.4  2000/03/15 17:39:48  calderon
  * Remove beeps
  *
@@ -130,7 +133,9 @@ void StTpcDbSlowControl::print(ostream& os) const
 #endif
     os << "Slow Control Parameters:" << endl;
     os << "========================" << endl;    
-    os << "Drift Velocity:      " << driftVelocity()/(centimeter/(1.e-6*second))   << " cm/us" << endl;
+    os << "Drift Velocity: East   " << driftVelocity(13)/(centimeter/(1.e-6*second))   
+       << " West   " << driftVelocity( 1)/(centimeter/(1.e-6*second))   
+       << " cm/us" << endl;
     os << "Drift Voltage:       " << driftVoltage()/volt                 << " V" << endl;
     os << endl;
     os << "Hall Temperature:    " << hallTemperature()                   << " C" << endl;

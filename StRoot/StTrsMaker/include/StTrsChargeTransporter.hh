@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.hh,v 1.3 2000/02/24 16:23:48 long Exp $
+ * $Id: StTrsChargeTransporter.hh,v 1.4 2009/11/03 14:34:19 fisyak Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.hh,v $
+ * Revision 1.4  2009/11/03 14:34:19  fisyak
+ * Remove default in zFromTB
+ *
  * Revision 1.3  2000/02/24 16:23:48  long
  * transportToWire(StTrsMiniChargeSegment&) --->transportToWire(StTrsMiniChargeSegment&,double &,double &) to calculate diffussion as a function of field
  *
@@ -67,6 +70,7 @@ public:
     void setTransverseDiffusion(bool);
     void setLongitudinalDiffusion(bool);
     void setExB(bool);
+  void setDriftVelocity(Double_t dv) {mDriftVelocity = dv;}
 
     double transparencyCalculation();
     

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.38 2008/10/13 19:56:12 fisyak Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.39 2009/11/03 14:34:19 fisyak Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.39  2009/11/03 14:34:19  fisyak
+ * Remove default in zFromTB
+ *
  * Revision 1.38  2008/10/13 19:56:12  fisyak
  * Account that Z-offset is sector dependent
  *
@@ -181,7 +184,7 @@
 using std::sort;
 #endif
 #include "StTrsRandom.hh"
-
+#include "TMath.h"
 static const double sigmaL = .037*centimeter/::sqrt(centimeter);
 //static const double sigmaT = .0633*centimeter/::sqrt(centimeter);
 static const double sqrtTwoPi = ::sqrt(twopi);
@@ -356,7 +359,9 @@ void StTrsParameterizedAnalogSignalGenerator::errorFunctionTableBuilder()
   int  cntr=0;
  
   do { 
-    mErrorFunctionTable.push_back(erf(1.0*cntr*mRangeOfTable/mNumberOfEntriesInTable));
+    Double_t x = 1.0*cntr*mRangeOfTable/mNumberOfEntriesInTable;
+    Double_t y = TMath::Erf(x);
+    mErrorFunctionTable.push_back(y);
     cntr++;
     
   }while(cntr < mNumberOfEntriesInTable);
@@ -402,7 +407,7 @@ double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
 
 
 void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram, Int_t sector)
-{ double offset=transformer.zFromTB(0,sector);
+{ double offset=transformer.zFromTB(0,sector,45);
 
     int PadsAtRow;
     double sigma_xpad2;
@@ -431,7 +436,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
         double tZero;
         tZero=mElectronicsDb->tZero();
 	//reset all the datatbase value to keep them updated
-       mDriftVelocity             = mSCDb->driftVelocity(13);
+       mDriftVelocity             = mSCDb->driftVelocity(sector);
  
        mSamplingFrequency         = mElectronicsDb->samplingFrequency();
        mTimeBinWidth              = 1./mSamplingFrequency;
@@ -480,10 +485,10 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	    //   cout<<Dx<<" "<<D[2]<<" "<<mDriftVelocity<<endl;
            
 	   if( z<0.){cout<<"wrong z in function StTrsPara..e..."<<z<<endl;continue;}   
-	    sigmaLz=sigmaL* ::sqrt(z);
-             sigmaLt=sigmaLz/mDriftVelocity;
-	     signalTime =
-	       (z-offset)/mDriftVelocity; //inner outer offset is already in z
+	   sigmaLz=sigmaL* ::sqrt(z);
+	   sigmaLt=sigmaLz/mDriftVelocity;
+	   signalTime =
+	     (z-offset)/mDriftVelocity; //inner outer offset is already in z
             
 	     //     cout<<signalTime<<" "<<z<<endl;
 	     //    cin>>z;
