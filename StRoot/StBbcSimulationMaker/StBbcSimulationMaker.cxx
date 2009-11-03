@@ -13,6 +13,7 @@ Here are
 #include "StEvent.h"
 #include "StTriggerDetectorCollection.h"
 #include "StBbcTriggerDetector.h"
+#include "StMessMgr.h"
 
 TRandom BbcRndm = TRandom(0);
 
@@ -212,78 +213,78 @@ PMT numbering: Akio Ogawa numbers channels in the data structure starting
 VID numbering: Yiqun followed STAR standard in the GSTAR code:
 first West, then East.
        */
-  //      1                    1              inner small hex tile, 12:00 pos'n
+  //      1                    1              inner small hex tile, 12:00 pos'n 90 degrees
   Geant2PMT[EW+113] = EWshift+1;
-  //      2                    2              inner small hex tile,  2:00 pos'n
+  //      2                    2              inner small hex tile,  2:00 pos'n 30 degrees
   Geant2PMT[EW+123] = EWshift+2;
-  //      3                    3              inner small hex tile,  4:00 pos'n
+  //      3                    3              inner small hex tile,  4:00 pos'n -30 degrees
   Geant2PMT[EW+133] = EWshift+3;
-  //      4                    4              inner small hex tile,  6:00 pos'n
+  //      4                    4              inner small hex tile,  6:00 pos'n -90 degrees
   Geant2PMT[EW+143] = EWshift+4;
-  //      5                    5              inner small hex tile,  8:00 pos'n
+  //      5                    5              inner small hex tile,  8:00 pos'n -150 degrees
   Geant2PMT[EW+153] = EWshift+5;
-  //      6                    6              inner small hex tile, 10:00 pos'n
+  //      6                    6              inner small hex tile, 10:00 pos'n 150 degrees
   Geant2PMT[EW+163] = EWshift+6;
-  //      7                    7              outer small hex tile, 11:00 pos'n
+  //      7                    7              outer small hex tile, 11:00 pos'n 120 degrees
   Geant2PMT[EW+111] = EWshift+7;
-  //      8                    8              outer small hex tile, 12:00 pos'n
+  //      8                    8              outer small hex tile, 12:00 pos'n 90 degrees
   Geant2PMT[EW+112] = EWshift+8;
-  //      9                    7              outer small hex tile,  1:00 pos'n
+  //      9                    7              outer small hex tile,  1:00 pos'n 60 degrees
   Geant2PMT[EW+121] = EWshift+7;
-  //     10                    9              outer small hex tile,  2:00 pos'n
+  //     10                    9              outer small hex tile,  2:00 pos'n 30 degrees
   Geant2PMT[EW+122] = EWshift+9;
-  //     11                   10              outer small hex tile,  3:00 pos'n
+  //     11                   10              outer small hex tile,  3:00 pos'n 0 degrees
   Geant2PMT[EW+131] = EWshift+10;
-  //     12                   11              outer small hex tile,  4:00 pos'n
+  //     12                   11              outer small hex tile,  4:00 pos'n -30 degrees
   Geant2PMT[EW+132] = EWshift+11;
-  //     13                   12              outer small hex tile,  5:00 pos'n
+  //     13                   12              outer small hex tile,  5:00 pos'n -60 degrees
   Geant2PMT[EW+141] = EWshift+12;
-  //     14                   13              outer small hex tile,  6:00 pos'n
+  //     14                   13              outer small hex tile,  6:00 pos'n -90 degrees
   Geant2PMT[EW+142] = EWshift+13;
-  //     15                   12              outer small hex tile,  7:00 pos'n
+  //     15                   12              outer small hex tile,  7:00 pos'n -120 degrees
   Geant2PMT[EW+151] = EWshift+12;
-  //     16                   14              outer small hex tile,  8:00 pos'n
+  //     16                   14              outer small hex tile,  8:00 pos'n -150 degrees
   Geant2PMT[EW+152] = EWshift+14;
-  //     17                   15              outer small hex tile,  9:00 pos'n
+  //     17                   15              outer small hex tile,  9:00 pos'n 180 degrees
   Geant2PMT[EW+161] = EWshift+15;
-  //     18                   16              outer small hex tile, 10:00 pos'n
+  //     18                   16              outer small hex tile, 10:00 pos'n 150 degrees
   Geant2PMT[EW+162] = EWshift+16;
 
-  //     19                   17              inner large hex tile, 12:00 pos'n
+  //     19                   17              inner large hex tile, 12:00 pos'n 90 degrees
   Geant2PMT[EW+213] = EWshift+17;
-  //     20                   18              inner large hex tile,  2:00 pos'n
+  //     20                   18              inner large hex tile,  2:00 pos'n 30 degrees
   Geant2PMT[EW+223] = EWshift+18;
-  //     21                   18              inner large hex tile,  4:00 pos'n
+  //     21                   18              inner large hex tile,  4:00 pos'n -30 degrees
   Geant2PMT[EW+233] = EWshift+18;
-  //     22                   19              inner large hex tile,  6:00 pos'n
+  //     22                   19              inner large hex tile,  6:00 pos'n -90 degrees
   Geant2PMT[EW+243] = EWshift+19;
-  //     23                   20              inner large hex tile,  8:00 pos'n
+  //     23                   20              inner large hex tile,  8:00 pos'n -150 degrees
   Geant2PMT[EW+253] = EWshift+20;
-  //     24                   20              inner large hex tile, 10:00 pos'n
+  //     24                   20              inner large hex tile, 10:00 pos'n 150 degrees
   Geant2PMT[EW+263] = EWshift+20;
-  //     25                   21              outer large hex tile, 11:00 pos'n
+  //     25                   21              outer large hex tile, 11:00 pos'n 120 degrees
   Geant2PMT[EW+211] = EWshift+21;
-  //     26                   21              outer large hex tile, 12:00 pos'n
+  //     26                   21              outer large hex tile, 12:00 pos'n 90 degrees
   Geant2PMT[EW+212] = EWshift+21;
-  //     27                   21              outer large hex tile,  1:00 pos'n
+  //     27                   21              outer large hex tile,  1:00 pos'n 60 degrees
   Geant2PMT[EW+221] = EWshift+21;
-  //     28                   22              outer large hex tile,  2:00 pos'n
+  //     28                   22              outer large hex tile,  2:00 pos'n 30 degrees
   Geant2PMT[EW+222] = EWshift+22;
-  //     29                   22              outer large hex tile,  3:00 pos'n
+  //     29                   22              outer large hex tile,  3:00 pos'n 0 degrees
   Geant2PMT[EW+231] = EWshift+22;
-  //     30                   22              outer large hex tile,  4:00 pos'n
+  //     30                   22              outer large hex tile,  4:00 pos'n -30 degrees
   Geant2PMT[EW+232] = EWshift+22;
-  //     31                   23              outer large hex tile,  5:00 pos'n
+  //     31                   23              outer large hex tile,  5:00 pos'n -60 degrees
   Geant2PMT[EW+241] = EWshift+23;
-  //     32                   23              outer large hex tile,  6:00 pos'n
+  //     32                   23              outer large hex tile,  6:00 pos'n -90 degrees
   Geant2PMT[EW+242] = EWshift+23;
-  //     33                   23              outer large hex tile,  7:00 pos'n
+  //     33                   23              outer large hex tile,  7:00 pos'n -120 degrees
   Geant2PMT[EW+251] = EWshift+23;
-  //     34                   24              outer large hex tile,  8:00 pos'n
+  //     34                   24              outer large hex tile,  8:00 pos'n -150 degrees
   Geant2PMT[EW+252] = EWshift+24;
-  //     35                   24              outer large hex tile,  9:00 pos'n
+  //     35                   24              outer large hex tile,  9:00 pos'n 180 degrees
   Geant2PMT[EW+261] = EWshift+24;
-  //     36                   24              outer large hex tile, 10:00 pos'n
+  //     36                   24              outer large hex tile, 10:00 pos'n 150 degrees
   Geant2PMT[EW+262] = EWshift+24;
     }
 
@@ -328,15 +329,19 @@ Int_t StBbcSimulationMaker::Make()
      short nBBChits = g2t_bbc_hit->GetNRows();
      BbcTOF TOFdata;
      BbcDE DEdata;
+     g2t_ctf_hit_st *bbc_hit = g2t_bbc_hit->GetTable();
      for (short iBBChit=0; iBBChit<nBBChits; iBBChit++)
        {
-	 float De = g2t_bbc_hit->operator[](iBBChit).de;
-	 float TOF = g2t_bbc_hit->operator[](iBBChit).tof;
-	 short Vid =  g2t_bbc_hit->operator[](iBBChit).volume_id;
+	 float De = bbc_hit[iBBChit].de;
+	 float TOF = bbc_hit[iBBChit].tof;
+	 short Vid =  bbc_hit[iBBChit].volume_id;
 
-         short PMTid = Geant2PMT[Vid]-1;
-
-
+         short PMTid = Geant2PMT[Vid];
+	 if (PMTid == 0) {
+	   LOG_ERROR << "Cannot find a  PMTid in Geant2PMT for Vid = " << Vid << endm;
+	   continue;
+	 }
+	 PMTid -= 1;
 	 DEdata.AddDE(PMTid,De);
 	 TOFdata.AddTOF(PMTid,TOF);
        }
