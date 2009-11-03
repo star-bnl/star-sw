@@ -1,15 +1,4 @@
-
-
-#ifndef __StEmbeddingQADraw_h__
-#define __StEmbeddingQADraw_h__
-
-class TCanvas ;
-class TH1 ;
-class TFile ;
-class TObject ;
-#include "TString.h"
-
-//____________________________________________________________________________________________________
+//----------------------------------------------------------------------------------------------------
 //   Draw QA histograms
 //     - Comparison of the results between embedding and real data
 //     - Print only png file by default. You can print other file format 
@@ -60,6 +49,15 @@ class TObject ;
 //       from gaussian fit
 //----------------------------------------------------------------------------------------------------
 
+#ifndef __StEmbeddingQADraw_h__
+#define __StEmbeddingQADraw_h__
+
+class TCanvas ;
+class TH1 ;
+class TFile ;
+class TObject ;
+#include "TString.h"
+
 class StEmbeddingQADraw {
   public:
     StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile);  // input embedding file name made by StEmbeddingQAAnalyzer
@@ -67,22 +65,22 @@ class StEmbeddingQADraw {
         const Int_t year, const TString production, const TString particleName); // if you put you own input embedding file name
     virtual ~StEmbeddingQADraw();
 
-    void SetOutputDirectory(const TString name = "./"); // default is current directory
+    void setOutputDirectory(const TString name = "./"); // default is current directory
 
-    Bool_t Draw();        // Draw all histograms (event and track histograms).
-    Bool_t DrawEvent();   // Draw event-wise histograms
+    Bool_t draw();        // Draw all histograms (event and track histograms).
+    Bool_t drawEvent();   // Draw event-wise histograms
 
     // Track-wise
-    Bool_t DrawMcTrack();        // Draw MC track histograms
-    Bool_t DrawTrack();          // Draw Reconstructed track histograms
+    Bool_t drawMcTrack();        // Draw MC track histograms
+    Bool_t drawTrack();          // Draw Reconstructed track histograms
 
-    Bool_t DrawGeantId();        // Geant id
-    Bool_t DrawRapidity();       // (pseudo-)rapidity in different eta bins
-    Bool_t DrawPt();             // pt (|eta|<2, 0.5 eta increment)
-    Bool_t DrawMomentum();       // momentum (|eta|<2, 0.5 eta increment)
-    Bool_t DrawdEdx();           // dE/dx (2D) and projections
-    Bool_t DrawDca();            // Dca vs (pt, eta)
-    Bool_t DrawNHit();           // NHit vs (pt, eta)
+    Bool_t drawGeantId();        // Geant id
+    Bool_t drawRapidity();       // (pseudo-)rapidity in different eta bins
+    Bool_t drawPt();             // pt (|eta|<2, 0.5 eta increment)
+    Bool_t drawMomentum();       // momentum (|eta|<2, 0.5 eta increment)
+    Bool_t drawdEdx();           // dE/dx (2D) and projections
+    Bool_t drawDca();            // Dca vs (pt, eta)
+    Bool_t drawNHit();           // NHit vs (pt, eta)
 
   private:
     Bool_t isGIFOn ;        // Print *.gif file if true (default is false)
@@ -90,34 +88,34 @@ class StEmbeddingQADraw {
     Bool_t isEPSOn ;        // Print *.eps file if true (default is false)
     Bool_t isPSOn ;         // Print *.ps file if true (default is false)
 
-    Int_t kYear ;           // year
-    TString kProduction ;   // production
-    TString kParticleName ; // particle name
+    Int_t mYear ;           // year
+    TString mProduction ;   // production
+    TString mParticleName ; // particle name
 
     TFile* mInputEmbedding ; // Input ROOT file (embedding)
     TFile* mInputRealData ;  // Input ROOT file (real data)
 
     TString mOutputFigureDirectory ; // Figure directory (default is current directory)
 
-    void Open(const TString embeddingFile, const TString realDataFile) ; // open input files
-    void Print(const TCanvas& canvas, const TString name); // Print figures (png only by default)
+    void open(const TString embeddingFile, const TString realDataFile) ; // open input files
+    void print(const TCanvas& canvas, const TString name) const; // Print figures (png only by default)
 
-    void SetStyle() ;      // Set overall styles
-    void SetStyle(TH1* h); // Set font, title and label styles
+    void setStyle() ;      // Set overall styles
+    void setStyle(TH1* h); // Set font, title and label styles
 
-    Int_t         GetEntries() const ;    // Get number of events in the embedding file
-    Bool_t        IsDecay() const ;      // Decay daughters
-    Int_t         GetCategoryId(const Bool_t isEmbedding = kTRUE) const ; // Get category id
-    Int_t         GetNDaughters() const ; // Get number of daughters (if 0, return 1)
-    TObject*      GetHistogram(const TString name, const Int_t daughter, const Bool_t isEmbedding=kTRUE); // Get histograms in embedding file
-    Double_t      GetNormalization(const TH1& h) const ; // (1/Ntrk) * (1/bin)
-    const Char_t* GetBaseName() const ; // Get ${year}_${production}_${particle name}
-    Bool_t        DrawStatistics(const Double_t x1=0.1, const Double_t y1=0.2, 
+    Int_t         getEntries() const ;    // Get number of events in the embedding file
+    Bool_t        isDecay() const ;      // Decay daughters
+    Int_t         getCategoryId(const Bool_t isEmbedding = kTRUE) const ; // Get category id
+    Int_t         getNDaughters() const ; // Get number of daughters (if 0, return 1)
+    TObject*      getHistogram(const TString name, const Int_t daughter, const Bool_t isEmbedding=kTRUE); // Get histograms in embedding file
+    Double_t      getNormalization(const TH1& h) const ; // (1/Ntrk) * (1/bin)
+    const Char_t* getBaseName() const ; // Get ${year}_${production}_${particle name}
+    Bool_t        drawStatistics(const Double_t x1=0.1, const Double_t y1=0.2, 
         const Double_t x2=0.9, const Double_t y2=0.8,
         const Double_t textSize = 0.05); // Number of events, year, production and particle name
 
-    Bool_t DrawProjection2D(const TString name); // (pseudo-)rapidity, momentum, pt
-    Bool_t DrawProjection3D(const TString name); // For dca and nhit projections in (pt, eta) space
+    Bool_t drawProjection2D(const TString name); // (pseudo-)rapidity, momentum, pt
+    Bool_t drawProjection3D(const TString name); // For dca and nhit projections in (pt, eta) space
 
     ClassDef(StEmbeddingQADraw, 1)
 };

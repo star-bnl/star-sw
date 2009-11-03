@@ -1,3 +1,9 @@
+//----------------------------------------------------------------------------------------------------
+// Class StEmbeddingQAParticle
+//
+//   - Single particle class to store
+//      particle geantid, particle name (text and tex formats), mass square and charge
+//----------------------------------------------------------------------------------------------------
 
 #ifndef __StEmbeddingQAParticle_h__
 #define __StEmbeddingQAParticle_h__
@@ -7,11 +13,11 @@ class StEmbeddingQAParticle {
     StEmbeddingQAParticle(const Int_t particleId = 8); // default is piplus
     virtual ~StEmbeddingQAParticle();
 
-    Int_t GetParticleId() const ;
-    const TString GetName() const ;
-    const TString GetTitle() const ;
-    Double_t GetMass2() const ;
-    Int_t GetCharge() const ;
+    Int_t getParticleId() const ;
+    const TString getName() const ;
+    const TString getTitle() const ;
+    Double_t getMass2() const ;
+    Int_t getCharge() const ;
 
   private:
     const Int_t kParticleId ; // particle geant3 id
@@ -23,11 +29,11 @@ class StEmbeddingQAParticle {
     ClassDef(StEmbeddingQAParticle, 1)
 };
 
-inline Int_t StEmbeddingQAParticle::GetParticleId()    const { return kParticleId ; }
-inline const TString StEmbeddingQAParticle::GetName()  const { return kName ; }
-inline const TString StEmbeddingQAParticle::GetTitle() const { return kTitle ; }
-inline Double_t StEmbeddingQAParticle::GetMass2()      const { return kMass2 ; }
-inline Int_t StEmbeddingQAParticle::GetCharge()        const { return kCharge ; }
+inline Int_t StEmbeddingQAParticle::getParticleId()    const { return kParticleId ; }
+inline const TString StEmbeddingQAParticle::getName()  const { return kName ; }
+inline const TString StEmbeddingQAParticle::getTitle() const { return kTitle ; }
+inline Double_t StEmbeddingQAParticle::getMass2()      const { return kMass2 ; }
+inline Int_t StEmbeddingQAParticle::getCharge()        const { return kCharge ; }
 
 #endif
 

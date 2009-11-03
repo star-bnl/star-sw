@@ -1,3 +1,9 @@
+//----------------------------------------------------------------------------------------------------
+//  Class StEmbeddingQAParticleCollection
+//
+//    - Collection of StEmbeddingQAParticle
+//    - Initialized by either particle geant id or particle name
+//----------------------------------------------------------------------------------------------------
 
 #ifndef __StEmbeddingQAParticleCollection_h__
 #define __StEmbeddingQAParticleCollection_h__
@@ -13,10 +19,10 @@ class StEmbeddingQAParticleCollection {
     StEmbeddingQAParticleCollection(const TString name);
     virtual ~StEmbeddingQAParticleCollection();
 
-    StEmbeddingQAParticle* GetParent() const ;
-    StEmbeddingQAParticle* GetDaughter(const UInt_t daughter) const ;
+    StEmbeddingQAParticle* getParent() const ;
+    StEmbeddingQAParticle* getDaughter(const UInt_t daughter) const ;
 
-    UInt_t GetNDaughter() const ; // number of daughters
+    UInt_t getNDaughter() const ; // number of daughters
 
   private:
     StEmbeddingQAParticle* mParent ;

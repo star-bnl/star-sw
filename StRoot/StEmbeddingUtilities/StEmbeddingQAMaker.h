@@ -50,8 +50,6 @@
 #include "TMath.h"
 #include "TString.h"
 
-#include <vector>
-
 #include "StEmbeddingQAUtilities.h"
 
 class TFile ;
@@ -81,15 +79,15 @@ class StEmbeddingQAMaker {
         const Bool_t isSimulation = kTRUE); // specify year, production, particle name (default is embedding QA)
     virtual ~StEmbeddingQAMaker();
 
-    Bool_t Book(const TString outputFileName = ""); // Default output is "ana_embedding_{year}_{production}_{particleId}.root" for embedding QA
-    Bool_t Make(const TString inputFileName, const Bool_t isSimulation = kTRUE);
+    Bool_t book(const TString outputFileName = ""); // Default output is "ana_embedding_{year}_{production}_{particleId}.root" for embedding QA
+    Bool_t make(const TString inputFileName, const Bool_t isSimulation = kTRUE);
 
-    Bool_t Run(const TString inputFileList) ; // Either RunRealData or RunEmbedding according to the kIsSimulation flag
-    Bool_t RunRealData(const TString inputFileList) ;
-    Bool_t RunEmbedding(const TString inputFileList) ;
-    Bool_t End(); // Close output file
+    Bool_t run(const TString inputFileList) ; // Either RunRealData or RunEmbedding according to the kIsSimulation flag
+    Bool_t runRealData(const TString inputFileList) ;
+    Bool_t runEmbedding(const TString inputFileList) ;
+    Bool_t end(); // Close output file
 
-    void SetDebug(const Int_t val) ;
+    void setDebug(const Int_t val) ;
 
   private:
     static const Float_t kVertexCut ; // z-vertex cut (Default is 30 cm)
@@ -99,37 +97,30 @@ class StEmbeddingQAMaker {
     const Bool_t kIsSimulation ;      // kTRUE : embedding QA,  kFALSE : real data QA
 
     // Initialization
-    void Init() ;
+    void init() ;
 
     // Fill
-    Bool_t FillEmbedding(const TString inputFileName) ; // Fill embedding histograms
-    Bool_t FillRealData(const TString inputFileName) ;  // Fill real data histograms
+    Bool_t fillEmbedding(const TString inputFileName) ; // Fill embedding histograms
+    Bool_t fillRealData(const TString inputFileName) ;  // Fill real data histograms
 
-    void FillMcTracks(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void FillMatchedPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void FillGhostPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void FillContamPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void FillMatGlobPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void FillRealTracks(const StMuTrack& track, const Int_t trackid, const Int_t itrk);
-    void FillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle, const Int_t geantId);
-    void FillPair() ;
-    Bool_t GetTrackSelectionForDaughters(const StEmbeddingQATrack& track) const;
+    void fillMcTracks(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
+    void fillMatchedPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
+    void fillGhostPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
+    void fillContamPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
+    void fillMatGlobPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
+    void fillRealTracks(const StMuTrack& track, const Int_t trackid, const Int_t itrk);
+    void fillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle, const Int_t geantId);
 
     // Cuts
     Bool_t isZVertexOk(const StMiniMcEvent& mcevent, const Float_t vertexCut = 30.0) const ;
 
     // Number of histograms for each branch
-    Int_t GetNumberOfHistograms(const Int_t categoryId) const ;
+    Int_t getNumberOfHistograms(const Int_t categoryId) const ;
 
     Int_t mDebug ;
     StMuDstMaker* mMuDstMaker ;
 
     StEmbeddingQAParticleCollection* mParticles ;
-
-    // Daughter's array
-    std::vector<StEmbeddingQATrack*> mDaughterPositive ; // Positive charged track
-    std::vector<StEmbeddingQATrack*> mDaughterNegative ; // Negative charged track
-    std::vector<StEmbeddingQATrack*> mDaughterNeutral ;  // Neutral charged track
 
     // Output histograms
     TFile* mOutput ;
@@ -162,14 +153,10 @@ class StEmbeddingQAMaker {
     TH2** hEtaVsVz[StEmbeddingQAUtilities::kNCategory];   // pseudo-rapidity vs vz
     TH2** hYVsVz[StEmbeddingQAUtilities::kNCategory];     // rapidity vs vz
 
-    // Pairs
-    TH1** hPtReco;         // pt distribution for decay daughters (with similar track selection as real data)
-    TH2* hInvMassVsPt[2] ; // Invariant mass vs pt (0:Unlike sign pair, 1: Like sign pair, only for contaiminated pairs)
-    
     ClassDef(StEmbeddingQAMaker, 1);
 };
 
-inline void StEmbeddingQAMaker::SetDebug(const Int_t val) { mDebug = val ; }
+inline void StEmbeddingQAMaker::setDebug(const Int_t val) { mDebug = val ; }
 
 #endif
 
