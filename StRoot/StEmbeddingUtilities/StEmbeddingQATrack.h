@@ -1,3 +1,8 @@
+//----------------------------------------------------------------------------------------------------
+//  Class StEmbeddingQATrack
+//
+//
+//----------------------------------------------------------------------------------------------------
 
 #ifndef _StEmbeddingQATrack_h__
 #define _StEmbeddingQATrack_h__
@@ -19,56 +24,56 @@ class StEmbeddingQATrack {
     StEmbeddingQATrack(const TString name, const StMuTrack& track, const Double_t mass2);
     virtual ~StEmbeddingQATrack();
 
-    Bool_t IsMc() const ;
-    Bool_t IsEmbedding() const ;
-    Bool_t IsReal() const ;
-    Bool_t IsPtAndEtaOk() const ;
+    Bool_t isMc() const ;
+    Bool_t isEmbedding() const ;
+    Bool_t isReal() const ;
+    Bool_t isPtAndEtaOk() const ;
 
-    Bool_t IsNHitOk() const ;
-    Bool_t IsDcaOk() const ;
-    Bool_t IsCommonHitOk() const ;
+    Bool_t isNHitOk() const ;
+    Bool_t isDcaOk() const ;
+    Bool_t isCommonHitOk() const ;
 
     // if ( real tracks ) return |nSigma| < 2 
     // else               return true (i.e. no nSigma cut)
-    Bool_t IsNSigmaOk(const Int_t particleId) const ;
+    Bool_t isNSigmaOk(const Int_t particleId) const ;
 
-    StLorentzVectorD GetVectorMc() const ;
-    StLorentzVectorD GetVectorRc() const ;
+    StLorentzVectorD getVectorMc() const ;
+    StLorentzVectorD getVectorRc() const ;
 
-    Short_t GetNCommonHit()    const ;
-    Short_t GetParentGeantId() const ;
-    Short_t GetGeantId()       const ;
-    Short_t GetNHit()          const ;
-    Short_t GetNHitPoss()      const ;
-    Short_t GetCharge()        const ;
+    Short_t getNCommonHit()    const ;
+    Short_t getParentGeantId() const ;
+    Short_t getGeantId()       const ;
+    Short_t getNHit()          const ;
+    Short_t getNHitPoss()      const ;
+    Short_t getCharge()        const ;
 
-    Double_t GetMassMc()         const ;
-    Float_t GetPtMc()            const ;
-    Float_t GetPxMc()            const ;
-    Float_t GetPyMc()            const ;
-    Float_t GetPzMc()            const ;
-    Float_t GetPMc()             const ;
-    Float_t GetEtaMc()           const ;
-    Double_t GetMassRc()         const ;
-    Float_t GetPtRc()            const ;
-    Float_t GetPxRc()            const ;
-    Float_t GetPyRc()            const ;
-    Float_t GetPzRc()            const ;
-    Float_t GetPRc()             const ;
-    Float_t GetEtaRc()           const ;
+    Double_t getMassMc()         const ;
+    Float_t getPtMc()            const ;
+    Float_t getPxMc()            const ;
+    Float_t getPyMc()            const ;
+    Float_t getPzMc()            const ;
+    Float_t getPMc()             const ;
+    Float_t getEtaMc()           const ;
+    Double_t getMassRc()         const ;
+    Float_t getPtRc()            const ;
+    Float_t getPxRc()            const ;
+    Float_t getPyRc()            const ;
+    Float_t getPzRc()            const ;
+    Float_t getPRc()             const ;
+    Float_t getEtaRc()           const ;
 
-    Float_t GetPhi()           const ;
-    Float_t GetdEdx()          const ;
-    Float_t GetDcaGl()         const ;
+    Float_t getPhi()           const ;
+    Float_t getdEdx()          const ;
+    Float_t getDcaGl()         const ;
 
     // nSigma (e, pi, K, p) for real data
-    Double_t GetNSigmaElectron() const ;
-    Double_t GetNSigmaPion()     const ;
-    Double_t GetNSigmaKaon()     const ;
-    Double_t GetNSigmaProton()   const ;
+    Double_t getNSigmaElectron() const ;
+    Double_t getNSigmaPion()     const ;
+    Double_t getNSigmaKaon()     const ;
+    Double_t getNSigmaProton()   const ;
 
-    void Print() const ;
-    const TString GetName() const ;
+    void print() const ;
+    const TString getName() const ;
 
   private:
     static const Float_t kPtMinCut ;   // minimum pt cut
@@ -98,33 +103,33 @@ class StEmbeddingQATrack {
     ClassDef(StEmbeddingQATrack, 1)
 };
 
-inline Short_t StEmbeddingQATrack::GetNCommonHit()    const { return mNCommonHit ; }
-inline Short_t StEmbeddingQATrack::GetParentGeantId() const { return mParentGeantId ; }
-inline Short_t StEmbeddingQATrack::GetGeantId()       const { return mGeantId ; }
-inline Short_t StEmbeddingQATrack::GetNHit()          const { return mNHit ; }
-inline Short_t StEmbeddingQATrack::GetNHitPoss()      const { return mNHitPoss ; }
-inline Short_t StEmbeddingQATrack::GetCharge()        const { return mCharge ; }
+inline Short_t StEmbeddingQATrack::getNCommonHit()    const { return mNCommonHit ; }
+inline Short_t StEmbeddingQATrack::getParentGeantId() const { return mParentGeantId ; }
+inline Short_t StEmbeddingQATrack::getGeantId()       const { return mGeantId ; }
+inline Short_t StEmbeddingQATrack::getNHit()          const { return mNHit ; }
+inline Short_t StEmbeddingQATrack::getNHitPoss()      const { return mNHitPoss ; }
+inline Short_t StEmbeddingQATrack::getCharge()        const { return mCharge ; }
 
-inline Double_t StEmbeddingQATrack::GetMassMc()       const { return mVectorMc.m() ; }
-inline Float_t StEmbeddingQATrack::GetPMc()           const { return mVectorMc.vect().mag() ; }
-inline Float_t StEmbeddingQATrack::GetPtMc()          const { return mVectorMc.perp() ; }
-inline Float_t StEmbeddingQATrack::GetPxMc()          const { return mVectorMc.x() ; }
-inline Float_t StEmbeddingQATrack::GetPyMc()          const { return mVectorMc.y() ; }
-inline Float_t StEmbeddingQATrack::GetPzMc()          const { return mVectorMc.z() ; }
-inline Float_t StEmbeddingQATrack::GetEtaMc()         const { return mVectorMc.pseudoRapidity() ; }
-inline Double_t StEmbeddingQATrack::GetMassRc()       const { return mVectorRc.m() ; }
-inline Float_t StEmbeddingQATrack::GetPRc()           const { return mVectorRc.vect().mag() ; }
-inline Float_t StEmbeddingQATrack::GetPtRc()          const { return mVectorRc.perp() ; }
-inline Float_t StEmbeddingQATrack::GetPxRc()          const { return mVectorRc.x() ; }
-inline Float_t StEmbeddingQATrack::GetPyRc()          const { return mVectorRc.y() ; }
-inline Float_t StEmbeddingQATrack::GetPzRc()          const { return mVectorRc.z() ; }
-inline Float_t StEmbeddingQATrack::GetEtaRc()         const { return mVectorRc.pseudoRapidity() ; }
+inline Double_t StEmbeddingQATrack::getMassMc()       const { return mVectorMc.m() ; }
+inline Float_t StEmbeddingQATrack::getPMc()           const { return mVectorMc.vect().mag() ; }
+inline Float_t StEmbeddingQATrack::getPtMc()          const { return mVectorMc.perp() ; }
+inline Float_t StEmbeddingQATrack::getPxMc()          const { return mVectorMc.x() ; }
+inline Float_t StEmbeddingQATrack::getPyMc()          const { return mVectorMc.y() ; }
+inline Float_t StEmbeddingQATrack::getPzMc()          const { return mVectorMc.z() ; }
+inline Float_t StEmbeddingQATrack::getEtaMc()         const { return mVectorMc.pseudoRapidity() ; }
+inline Double_t StEmbeddingQATrack::getMassRc()       const { return mVectorRc.m() ; }
+inline Float_t StEmbeddingQATrack::getPRc()           const { return mVectorRc.vect().mag() ; }
+inline Float_t StEmbeddingQATrack::getPtRc()          const { return mVectorRc.perp() ; }
+inline Float_t StEmbeddingQATrack::getPxRc()          const { return mVectorRc.x() ; }
+inline Float_t StEmbeddingQATrack::getPyRc()          const { return mVectorRc.y() ; }
+inline Float_t StEmbeddingQATrack::getPzRc()          const { return mVectorRc.z() ; }
+inline Float_t StEmbeddingQATrack::getEtaRc()         const { return mVectorRc.pseudoRapidity() ; }
 
-inline Float_t StEmbeddingQATrack::GetPhi()           const { return mPhi ; }
-inline Float_t StEmbeddingQATrack::GetdEdx()          const { return mdEdx ; }
-inline Float_t StEmbeddingQATrack::GetDcaGl()         const { return mDcaGl ; }
+inline Float_t StEmbeddingQATrack::getPhi()           const { return mPhi ; }
+inline Float_t StEmbeddingQATrack::getdEdx()          const { return mdEdx ; }
+inline Float_t StEmbeddingQATrack::getDcaGl()         const { return mDcaGl ; }
 
-inline const TString StEmbeddingQATrack::GetName() const { return mName ; }
+inline const TString StEmbeddingQATrack::getName() const { return mName ; }
 
 #endif
 

@@ -1,6 +1,4 @@
 
-#include <iostream>
-
 #include "TError.h"
 #include "StEmbeddingQAUtilities.h"
 #include "StEmbeddingQAParticle.h"
@@ -27,7 +25,7 @@ StEmbeddingQAParticleCollection::StEmbeddingQAParticleCollection(const Int_t par
 //____________________________________________________________________________________________________
 StEmbeddingQAParticleCollection::StEmbeddingQAParticleCollection(const TString name)
 {
-  mParent = new StEmbeddingQAParticle(StEmbeddingQAUtilities::GetParticleId(name));
+  mParent = new StEmbeddingQAParticle(StEmbeddingQAUtilities::getParticleId(name));
 
   InitDaughters();
 }
@@ -43,12 +41,12 @@ Bool_t StEmbeddingQAParticleCollection::InitDaughters()
 {
   mDaughters.clear();
 
-  const Int_t ndaughters = StEmbeddingQAUtilities::GetNDaughter(mParent->GetParticleId());
+  const Int_t ndaughters = StEmbeddingQAUtilities::getNDaughter(mParent->getParticleId());
 
   // Define daughters
   for(Int_t i=0; i<ndaughters; i++){
     StEmbeddingQAParticle* daughter 
-      = new StEmbeddingQAParticle( StEmbeddingQAUtilities::GetDaughterParticleId(mParent->GetName(), i) );
+      = new StEmbeddingQAParticle( StEmbeddingQAUtilities::getDaughterParticleId(mParent->getName(), i) );
     mDaughters.push_back( daughter );
   }
 
@@ -56,16 +54,16 @@ Bool_t StEmbeddingQAParticleCollection::InitDaughters()
 }
 
 //____________________________________________________________________________________________________
-StEmbeddingQAParticle* StEmbeddingQAParticleCollection::GetParent() const
+StEmbeddingQAParticle* StEmbeddingQAParticleCollection::getParent() const
 {
   return mParent ;
 }
 
 //____________________________________________________________________________________________________
-StEmbeddingQAParticle* StEmbeddingQAParticleCollection::GetDaughter(const UInt_t daughter) const
+StEmbeddingQAParticle* StEmbeddingQAParticleCollection::getDaughter(const UInt_t daughter) const
 {
   if( daughter >= mDaughters.size() ){
-    Error("GetDaughter", "Unknown daughter index, id=%3d", daughter);
+    Error("getDaughter", "Unknown daughter index, id=%3d", daughter);
     return 0;
   }
 
@@ -73,7 +71,7 @@ StEmbeddingQAParticle* StEmbeddingQAParticleCollection::GetDaughter(const UInt_t
 }
 
 //____________________________________________________________________________________________________
-UInt_t StEmbeddingQAParticleCollection::GetNDaughter() const
+UInt_t StEmbeddingQAParticleCollection::getNDaughter() const
 {
   return mDaughters.size() ;
 }

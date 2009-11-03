@@ -26,7 +26,7 @@
 
 using namespace std ;
 
-  const Float_t StEmbeddingQAMaker::kVertexCut = 30.0 ;
+  const Float_t StEmbeddingQAMaker::kVertexCut = 30.0 ; // define z-vertex cut
 
 ClassImp(StEmbeddingQAMaker)
 
@@ -34,21 +34,21 @@ ClassImp(StEmbeddingQAMaker)
 StEmbeddingQAMaker::StEmbeddingQAMaker()
   : kYear(2007), kProduction("P08ic"), kParticleId(8), kIsSimulation(kTRUE)
 {
-  Init() ;
+  init() ;
 }
 
 //__________________________________________________________________________________________
 StEmbeddingQAMaker::StEmbeddingQAMaker(const Int_t year, const TString production, const Int_t particleId, const Bool_t isSimulation)
   : kYear(year), kProduction(production), kParticleId(particleId), kIsSimulation(isSimulation)
 {
-  Init() ;
+  init() ;
 }
 
 //__________________________________________________________________________________________
 StEmbeddingQAMaker::StEmbeddingQAMaker(const Int_t year, const TString production, const TString name, const Bool_t isSimulation)
-  : kYear(year), kProduction(production), kParticleId(StEmbeddingQAUtilities::GetParticleId(name)), kIsSimulation(isSimulation)
+  : kYear(year), kProduction(production), kParticleId(StEmbeddingQAUtilities::getParticleId(name)), kIsSimulation(isSimulation)
 {
-  Init() ;
+  init() ;
 }
 
 //__________________________________________________________________________________________
@@ -58,13 +58,13 @@ StEmbeddingQAMaker::~StEmbeddingQAMaker()
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::Init()
+void StEmbeddingQAMaker::init()
 {
   cout << endl;
-  cout << Form("   StEmbeddingQAMaker::Init() for year       : %10d", kYear) << endl;
-  cout << Form("   StEmbeddingQAMaker::Init() for production : %10s", kProduction.Data()) << endl;
-  cout << Form("   StEmbeddingQAMaker::Init() for particle   : %10s (id = %3d )",
-    StEmbeddingQAUtilities::GetParticleName(kParticleId).Data(), kParticleId)
+  cout << Form("   StEmbeddingQAMaker::init() for year       : %10d", kYear) << endl;
+  cout << Form("   StEmbeddingQAMaker::init() for production : %10s", kProduction.Data()) << endl;
+  cout << Form("   StEmbeddingQAMaker::init() for particle   : %10s (id = %3d )",
+    StEmbeddingQAUtilities::getParticleName(kParticleId).Data(), kParticleId)
     << endl;
   cout << endl;
 
@@ -72,10 +72,6 @@ void StEmbeddingQAMaker::Init()
   mDebug = 0;
   mMuDstMaker = 0;
   mVz = -9999.0 ;
-
-  mDaughterPositive.clear() ;
-  mDaughterNegative.clear() ;
-  mDaughterNeutral.clear() ;
 
   mParticles = new StEmbeddingQAParticleCollection(kParticleId);
 }
@@ -87,7 +83,7 @@ Bool_t StEmbeddingQAMaker::isZVertexOk(const StMiniMcEvent& mcevent, const Float
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
+Bool_t StEmbeddingQAMaker::book(const TString outputFileName)
 {
   // Book histograms
   TString fileName(outputFileName);
@@ -96,7 +92,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
   if( fileName.IsWhitespace() ){
     const TString data = (kIsSimulation) ? "embedding" : "real" ;
     fileName = Form("qa_%s_%d_%s_%s.root", 
-        data.Data(), kYear, kProduction.Data(), StEmbeddingQAUtilities::GetParticleName(kParticleId, kFALSE).Data()) ;
+        data.Data(), kYear, kProduction.Data(), StEmbeddingQAUtilities::getParticleName(kParticleId, kFALSE).Data()) ;
   }
 
   mOutput = TFile::Open(fileName, "recreate");
@@ -128,14 +124,14 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
   const Float_t etaMax =  2.5 ;
 
   // Track-wise informations
-  TString particleName(mParticles->GetParent()->GetTitle());
+  TString particleName(mParticles->getParent()->getTitle());
 
   // Common histograms for all categories
   for(Int_t ic=0; ic<StEmbeddingQAUtilities::kNCategory; ic++){
-    TString categoryTitle(StEmbeddingQAUtilities::GetCategoryTitle(ic));
+    TString categoryTitle(StEmbeddingQAUtilities::getCategoryTitle(ic));
 
     // Initialize histograms
-    const Int_t nHistogram = GetNumberOfHistograms(ic);
+    const Int_t nHistogram = getNumberOfHistograms(ic);
 
     hGeantId[ic]         = new TH1*[nHistogram] ;
     hNHit[ic]            = new TH3*[nHistogram] ;
@@ -159,7 +155,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
 
       TString name(particleName);
       if ( nHistogram > 1 ){
-        name = Form("%s (decay daughter)", mParticles->GetDaughter(ih)->GetTitle().Data());
+        name = Form("%s (decay daughter)", mParticles->getDaughter(ih)->getTitle().Data());
       }
 
       TString title(Form("(%s), %s", categoryTitle.Data(), name.Data()));
@@ -277,26 +273,6 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
     }
   }
 
-  // Reconstructed pt
-  hPtReco = new TH1*[mParticles->GetNDaughter()];
-  for(UInt_t id=0;id<mParticles->GetNDaughter();id++){
-    hPtReco[id] = new TH1D(Form("hPtReco_%d", id), Form("p_{T} (RC), %s (decay daughter)", mParticles->GetDaughter(id)->GetTitle().Data()), 
-        50, 0, 5.0);
-    hPtReco[id]->SetXTitle("p_{T} (RC) (GeV/c)");
-  }
-
-  // Invariant mass vs pt (only for contaminated pairs)
-  //  - 1 MeV/c^2 bin up to 4 GeV/c
-  for(Int_t id=0; id<2; id++){
-    TString charge("Unlike sign pairs");
-    if( id == 1 ) charge = "Like sign pairs" ;
-
-    hInvMassVsPt[id] = new TH2D(Form("hInvMassVsPt_%d", id), 
-        Form("Invariant mass vs p_{T}, %s", charge.Data()), ptBin, ptMin, ptMax, 4000, 0, 4.0);
-    hInvMassVsPt[id]->SetXTitle("p_{T} (GeV/c)");
-    hInvMassVsPt[id]->SetYTitle("Invariant mass (GeV/c^{2})");
-  }
-
   mOutput->GetList()->Sort();
   cout << endl << endl << endl;
 
@@ -304,7 +280,7 @@ Bool_t StEmbeddingQAMaker::Book(const TString outputFileName)
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::Make(const TString inputFileName, const Bool_t isSimulation)
+Bool_t StEmbeddingQAMaker::make(const TString inputFileName, const Bool_t isSimulation)
 {
   // Check output file
   if(!mOutput || !mOutput->IsOpen()){
@@ -317,33 +293,33 @@ Bool_t StEmbeddingQAMaker::Make(const TString inputFileName, const Bool_t isSimu
     cout << "------------------------------------------------------------------------------------" << endl;
     cout << "            Fill embedding ..." << endl;
     cout << "------------------------------------------------------------------------------------" << endl;
-    FillEmbedding(inputFileName);
+    fillEmbedding(inputFileName);
   }
   else{
     // Fill real data outputs from MuDST
     cout << "------------------------------------------------------------------------------------" << endl;
     cout << "            Fill real data ..." << endl;
     cout << "------------------------------------------------------------------------------------" << endl;
-    FillRealData(inputFileName);
+    fillRealData(inputFileName);
   }
 
   return kTRUE ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::FillEmbedding(const TString inputFileName)
+Bool_t StEmbeddingQAMaker::fillEmbedding(const TString inputFileName)
 {
   // Open input file
   TFile* file = TFile::Open(inputFileName);
   if( !file || !file->IsOpen() ){
-    Error("StEmbeddingQAMaker::FillEmbedding", "can't open %s", inputFileName.Data());
+    Error("StEmbeddingQAMaker::fillEmbedding", "can't open %s", inputFileName.Data());
     return kFALSE ;
   }
 
   const TString treeName("StMiniMcTree");
   TTree* tree = (TTree*) file->Get(treeName);
   if( !tree ){
-    Error("StEmbeddingQAMaker::FillEmbedding", "can't find %s tree", treeName.Data());
+    Error("StEmbeddingQAMaker::fillEmbedding", "can't find %s tree", treeName.Data());
     return kFALSE ;
   }
 
@@ -368,11 +344,6 @@ Bool_t StEmbeddingQAMaker::FillEmbedding(const TString inputFileName)
   cout << Form("    OPEN %s,  # of event = %10d", inputFileName.Data(), nentries) << endl;
 
   for (Int_t ievent=0; ievent<nentries;ievent++) {
-    // Clear daughter's array
-    mDaughterPositive.clear() ;
-    mDaughterNegative.clear() ;
-    mDaughterNeutral.clear() ;
-
     tree->GetEntry(ievent);
 
     const Float_t vx   = mMiniMcEvent->vertexX() ;
@@ -408,33 +379,28 @@ Bool_t StEmbeddingQAMaker::FillEmbedding(const TString inputFileName)
         //   Skip it
         case 4: nTrack = 0 ; break ;
         default:
-          Error("FillEmbedding", "Unkown branch id, id=%3d", trackid);
+          Error("fillEmbedding", "Unkown branch id, id=%3d", trackid);
           return kFALSE ;
       }
 
       if( mDebug && ievent % 200 == 0 ){
         cout << Form("####  event=%4d, category=%10s, ntrack=%10d",
-            ievent, StEmbeddingQAUtilities::GetCategoryName(trackid).Data(), nTrack)
+            ievent, StEmbeddingQAUtilities::getCategoryName(trackid).Data(), nTrack)
           << endl;
       }
 
       for(Int_t itrk=0; itrk<nTrack; itrk++){
         switch ( trackid ) {
-          case 0: FillMcTracks(*mMiniMcEvent, trackid, itrk); break ;
-          case 1: FillMatchedPairs(*mMiniMcEvent, trackid, itrk); break ;
-          case 2: FillGhostPairs(*mMiniMcEvent, trackid, itrk); break ;
-          case 3: FillContamPairs(*mMiniMcEvent, trackid, itrk); break ;
-          case 4: FillMatGlobPairs(*mMiniMcEvent, trackid, itrk); break ;
+          case 0: fillMcTracks(*mMiniMcEvent, trackid, itrk); break ;
+          case 1: fillMatchedPairs(*mMiniMcEvent, trackid, itrk); break ;
+          case 2: fillGhostPairs(*mMiniMcEvent, trackid, itrk); break ;
+          case 3: fillContamPairs(*mMiniMcEvent, trackid, itrk); break ;
+          case 4: fillMatGlobPairs(*mMiniMcEvent, trackid, itrk); break ;
           default:
-            Error("FillEmbedding",  "Unkown branch id, id=%3d", trackid);
+            Error("fillEmbedding",  "Unkown branch id, id=%3d", trackid);
             return kFALSE ;
         }
       }// track loop
-
-      // Make invariant mass for contaminated pairs
-      if( trackid == StEmbeddingQAUtilities::GetCategoryId("CONTAM") ){
-        FillPair() ;
-      }
 
     }// Track category
   }// event loop
@@ -446,7 +412,7 @@ Bool_t StEmbeddingQAMaker::FillEmbedding(const TString inputFileName)
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::FillRealData(const TString inputFileName)
+Bool_t StEmbeddingQAMaker::fillRealData(const TString inputFileName)
 {
   Int_t ievent = 0;
   while( !mMuDstMaker->Make() ){ //read event
@@ -472,7 +438,7 @@ Bool_t StEmbeddingQAMaker::FillRealData(const TString inputFileName)
       const Int_t trackid = ic + StEmbeddingQAUtilities::kNEmbedding ;
       if( mDebug && ievent % 200 == 0 ){
         cout << Form("%85s ####  event=%4d, category=%10s",
-            mMuDstMaker->GetFileName(), ievent, StEmbeddingQAUtilities::GetCategoryName(trackid).Data())
+            mMuDstMaker->GetFileName(), ievent, StEmbeddingQAUtilities::getCategoryName(trackid).Data())
           << endl;
       }
 
@@ -484,7 +450,7 @@ Bool_t StEmbeddingQAMaker::FillRealData(const TString inputFileName)
       StMuTrack* track = 0;
       Int_t itrk = 0;
       while ( ( track = (StMuTrack*) trackIterator.Next() ) ){
-        FillRealTracks(*track, trackid, itrk);
+        fillRealTracks(*track, trackid, itrk);
         itrk++;
       }
     }
@@ -499,24 +465,24 @@ Bool_t StEmbeddingQAMaker::FillRealData(const TString inputFileName)
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::RunRealData(const TString inputFileList)
+Bool_t StEmbeddingQAMaker::runRealData(const TString inputFileList)
 {
   if( mMuDstMaker ) delete mMuDstMaker ;
 
   cout << "###    Read " << inputFileList << endl;
   mMuDstMaker  = new StMuDstMaker(0, 0, "", inputFileList, "MuDst", 1000);
 
-  Make(inputFileList, kFALSE);
+  make(inputFileList, kFALSE);
 
   return kTRUE ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::RunEmbedding(const TString inputFileList)
+Bool_t StEmbeddingQAMaker::runEmbedding(const TString inputFileList)
 {
   ifstream fEmbedding(inputFileList);
   if(!fEmbedding){
-    Error("StEmbeddingQAMaker::Run", "can't find %s", inputFileList.Data());
+    Error("StEmbeddingQAMaker::runEmbedding", "can't find %s", inputFileList.Data());
     return kFALSE ;
   }
     cout << "###    Read " << inputFileList << endl;
@@ -525,29 +491,29 @@ Bool_t StEmbeddingQAMaker::RunEmbedding(const TString inputFileList)
   TString file ;
   while( fEmbedding >> file ){
     cout << "####     Read file : " << file << endl;
-    Make(file, kTRUE);
+    make(file, kTRUE);
   }
 
   return kTRUE ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::Run(const TString inputFileList)
+Bool_t StEmbeddingQAMaker::run(const TString inputFileList)
 {
   if( kIsSimulation ){
     // Embedding QA
-    return RunEmbedding(inputFileList) ;
+    return runEmbedding(inputFileList) ;
   }
   else{
     // Real data QA
-    return RunRealData(inputFileList) ;
+    return runRealData(inputFileList) ;
   }
 
   return kFALSE ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::End()
+Bool_t StEmbeddingQAMaker::end()
 {
   cout << "    End of StEmbeddingQAMaker" << endl;
   cout << "    Write output " << mOutput->GetName() << endl;
@@ -558,176 +524,133 @@ Bool_t StEmbeddingQAMaker::End()
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillMcTracks(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
+void StEmbeddingQAMaker::fillMcTracks(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
 {
-  StTinyMcTrack* track = (StTinyMcTrack*) mcevent.tracks(StEmbeddingQAUtilities::GetCategory(trackid))->At(itrk) ;
+  StTinyMcTrack* track = (StTinyMcTrack*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
   if(!track){
-    Error("FillMcTracks", "Cannot find MC tracks");
+    Error("fillMcTracks", "Cannot find MC tracks");
     return ;
   }
 
   // Make sure geant id is equal to the input particle id
-  if( track->geantId() != mParticles->GetParent()->GetParticleId() ) return ;
+  if( track->geantId() != mParticles->getParent()->getParticleId() ) return ;
 
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), *track, mParticles->GetParent()->GetMass2());
+  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), *track, mParticles->getParent()->getMass2());
 
-  FillHistograms(miniTrack, trackid, 0, kParticleId);
+  fillHistograms(miniTrack, trackid, 0, kParticleId);
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillMatchedPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
+void StEmbeddingQAMaker::fillMatchedPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
 {
-  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::GetCategory(trackid))->At(itrk) ;
+  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
   if(!track){
-    Error("FillMatchedPairs", "Cannot find Matched pairs");
+    Error("fillMatchedPairs", "Cannot find Matched pairs");
     return ;
   }
 
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
+  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, mParticles->getParent()->getMass2());
 
-  FillHistograms(miniTrack, trackid, 0, kParticleId);
+  fillHistograms(miniTrack, trackid, 0, kParticleId);
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillGhostPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
+void StEmbeddingQAMaker::fillGhostPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
 {
-  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::GetCategory(trackid))->At(itrk) ;
+  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
   if(!track){
     // Suppress error messege for the recent embedding samples. There are no ghost tracks
-//    Error("FillGhostPairs", "Cannot find Ghost pairs");
+//    Error("fillGhostPairs", "Cannot find Ghost pairs");
     return ;
   }
 
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
-  FillHistograms(miniTrack, trackid, 0, kParticleId);
+  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, mParticles->getParent()->getMass2());
+  fillHistograms(miniTrack, trackid, 0, kParticleId);
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillContamPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
+void StEmbeddingQAMaker::fillContamPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
 {
-  StContamPair* track = (StContamPair*) mcevent.tracks(StEmbeddingQAUtilities::GetCategory(trackid))->At(itrk) ;
+  StContamPair* track = (StContamPair*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
   if(!track){
-    Error("FillContamPairs", "Cannot find Contaminated pairs");
+    Error("fillContamPairs", "Cannot find Contaminated pairs");
     return ;
   }
 
-  for(UInt_t id=0; id<mParticles->GetNDaughter(); id++){
+  for(UInt_t id=0; id<mParticles->getNDaughter(); id++){
     // Mass2 for daughter particles (fixed on Oct/22/2009)
 
-    StEmbeddingQAParticle* daughter = mParticles->GetDaughter(id) ;
-    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, daughter->GetMass2());
+    StEmbeddingQAParticle* daughter = mParticles->getDaughter(id) ;
+    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, daughter->getMass2());
 
     // Daughter id selection
-    if ( miniTrack.GetGeantId() == daughter->GetParticleId() ){
+    if ( miniTrack.getGeantId() == daughter->getParticleId() ){
       // Make sure daughter particles have correct charge
-      const Bool_t isChargeOk = miniTrack.GetCharge() == daughter->GetCharge() ;
+      const Bool_t isChargeOk = miniTrack.getCharge() == daughter->getCharge() ;
       if( !isChargeOk ) continue ;
 
-//      cout << Form("id=%3d, itrk=%3d, Fill daughter geantid=(%3d, %3d), charge=(%3d, %3d)",
-//          id, itrk, miniTrack.GetGeantId(), daughter->GetParticleId(),
-//          miniTrack.GetCharge(), daughter->GetCharge())
-//        << endl;
-      FillHistograms(miniTrack, trackid, id, daughter->GetParticleId());
-
-      // Store arrays for invariant mass
-      // NOTE:
-      //   Track selections may be different for different analysis.
-      const Bool_t isTrackOk = GetTrackSelectionForDaughters(miniTrack);
-      if( !isTrackOk ) continue ;
-
-      hPtReco[id]->Fill(miniTrack.GetPtRc());
-
-      if( miniTrack.GetParentGeantId() == kParticleId ) { // Make sure that parent id in contaminated pair is equal to the given particle id
-        if( miniTrack.GetCharge() == 0 && daughter->GetCharge() == 0 ){ // neutral
-          mDaughterNeutral.push_back( new StEmbeddingQATrack("neutral", track, daughter->GetMass2()) );
-        }
-        else if ( miniTrack.GetCharge() > 0 && daughter->GetCharge() > 0 ){ // positive
-          mDaughterPositive.push_back( new StEmbeddingQATrack("positive", track, daughter->GetMass2()) );
-        }
-        else if ( miniTrack.GetCharge() < 0 && daughter->GetCharge() < 0 ){ // negative
-          mDaughterNegative.push_back( new StEmbeddingQATrack("negative", track, daughter->GetMass2()) );
-        }
-        else{ // this should not be happend. something is wrong
-          Error("FillContamPairs", Form("Charge is different between data and input, (data, input) = (%3d, %3d). abort()",
-                miniTrack.GetCharge(), daughter->GetCharge()));
-          abort();
-        }
-
-      }
+      fillHistograms(miniTrack, trackid, id, daughter->getParticleId());
     }
   }
-
-  // Fill daughter's array for invariant mass
-//  if( miniTrack.GetParentGeantId() == kParticleId ) { // Make sure that parent id in contaminated pair is equal to the given particle id
-//    if( miniTrack.GetCharge() == 0 ){
-//      mDaughterNeutral.push_back( new StEmbeddingQATrack("neutral", track, StEmbeddingQAUtilities::GetMass2Daughter(kParticleId, kTRUE)) );
-//    }
-//    else if( miniTrack.GetCharge() > 0 ){
-//      mDaughterPositive.push_back( new StEmbeddingQATrack("positive", track, StEmbeddingQAUtilities::GetMass2Daughter(kParticleId, kTRUE)) );
-//    }
-//    else{
-//      mDaughterNegative.push_back( new StEmbeddingQATrack("negative", track, StEmbeddingQAUtilities::GetMass2Daughter(kParticleId, kFALSE)) );
-//    }
-//  }
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillMatGlobPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
+void StEmbeddingQAMaker::fillMatGlobPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
 {
-  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::GetCategory(trackid))->At(itrk) ;
+  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
   if(!track){
-    Error("FillMatGlobPair", "Cannot find Matched global pairs");
+    Error("fillMatGlobPair", "Cannot find Matched global pairs");
     return ;
   }
 
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
+  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, mParticles->getParent()->getMass2());
 
-  FillHistograms(miniTrack, trackid, 0, kParticleId);
+  fillHistograms(miniTrack, trackid, 0, kParticleId);
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillRealTracks(const StMuTrack& track, const Int_t trackid, const Int_t itrk)
+void StEmbeddingQAMaker::fillRealTracks(const StMuTrack& track, const Int_t trackid, const Int_t itrk)
 {
   // Fill daughters separately for the comparison with embedded tracks (Oct/21/2009)
-  if ( mParticles->GetNDaughter() == 0 ){
+  if ( mParticles->getNDaughter() == 0 ){
     // stable particles
-    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, mParticles->GetParent()->GetMass2());
+    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, mParticles->getParent()->getMass2());
  
-    FillHistograms(miniTrack, trackid, 0, kParticleId);
+    fillHistograms(miniTrack, trackid, 0, kParticleId);
   }
   else{
     // decay daughters
 
-    for(UInt_t id=0; id<mParticles->GetNDaughter(); id++){
-      StEmbeddingQAParticle* daughter = mParticles->GetDaughter(id) ;
-      StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::GetCategoryName(trackid), track, daughter->GetMass2());
+    for(UInt_t id=0; id<mParticles->getNDaughter(); id++){
+      StEmbeddingQAParticle* daughter = mParticles->getDaughter(id) ;
+      StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, daughter->getMass2());
  
-      FillHistograms(miniTrack, trackid, id, daughter->GetParticleId());
+      fillHistograms(miniTrack, trackid, id, daughter->getParticleId());
     }
   }
 
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle, const Int_t geantId)
+void StEmbeddingQAMaker::fillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle, const Int_t geantId)
 {
   // Track selections will be made for embedding/real tracks
   // Only pt cut will be applied for MC tracks
 
   // pt and eta cuts
-  if( !track.IsPtAndEtaOk() ) return ;
+  if( !track.isPtAndEtaOk() ) return ;
 
-  const Double_t pt  = (track.IsMc()) ? track.GetPtMc()  : track.GetPtRc() ;
-  const Double_t mom = (track.IsMc()) ? track.GetPMc()   : track.GetPRc() ;
-  const Double_t eta = (track.IsMc()) ? track.GetEtaMc() : track.GetEtaRc() ;
-  const Double_t y   = (track.IsMc()) ? track.GetVectorMc().rapidity() : track.GetVectorRc().rapidity() ;
+  const Double_t pt  = (track.isMc()) ? track.getPtMc()  : track.getPtRc() ;
+  const Double_t mom = (track.isMc()) ? track.getPMc()   : track.getPRc() ;
+  const Double_t eta = (track.isMc()) ? track.getEtaMc() : track.getEtaRc() ;
+  const Double_t y   = (track.isMc()) ? track.getVectorMc().rapidity() : track.getVectorRc().rapidity() ;
 
   // Fill geant id
-  hGeantId[trackid][iparticle]->Fill(track.GetGeantId());
+  hGeantId[trackid][iparticle]->Fill(track.getGeantId());
 
   // dE/dx (no PID cut)
-  if( track.IsDcaOk() ){
-    hdEdxVsMom[trackid][iparticle]->Fill(mom, track.GetdEdx()*1.0e+06);
+  if( track.isDcaOk() ){
+    hdEdxVsMom[trackid][iparticle]->Fill(mom, track.getdEdx()*1.0e+06);
   }
 
   //  Oct/21/2009
@@ -737,24 +660,24 @@ void StEmbeddingQAMaker::FillHistograms(const StEmbeddingQATrack& track, const I
   // 
   // Do not apply nSigma cuts for others
 
-  if ( !track.IsNSigmaOk(geantId) ) return ;
+  if ( !track.isNSigmaOk(geantId) ) return ;
 
-  if( track.IsDcaOk() ){
+  if( track.isDcaOk() ){
     // Fill NHit points
-    hNHit[trackid][iparticle]->Fill(pt, eta, track.GetNHit());
+    hNHit[trackid][iparticle]->Fill(pt, eta, track.getNHit());
 
     // dE/dx (with PID cut)
-    hdEdxVsMomPidCut[trackid][iparticle]->Fill(mom, track.GetdEdx()*1.0e+06);
+    hdEdxVsMomPidCut[trackid][iparticle]->Fill(mom, track.getdEdx()*1.0e+06);
 
     // Pt, eta, phi
-    if( track.IsNHitOk() ){
-      const Double_t phi = track.GetPhi() ;
+    if( track.isNHitOk() ){
+      const Double_t phi = track.getPhi() ;
 
       hPtVsEta[trackid][iparticle]->Fill(eta, pt);
       hPtVsY[trackid][iparticle]->Fill(y, pt);
       hPtVsPhi[trackid][iparticle]->Fill(phi, pt);
       hPtVsMom[trackid][iparticle]->Fill(mom, pt);
-      hdPtVsPt[trackid][iparticle]->Fill(pt, pt-track.GetPtMc());
+      hdPtVsPt[trackid][iparticle]->Fill(pt, pt-track.getPtMc());
       hMomVsEta[trackid][iparticle]->Fill(eta, mom);
 
       hEtaVsPhi[trackid][iparticle]->Fill(phi, eta);
@@ -764,98 +687,21 @@ void StEmbeddingQAMaker::FillHistograms(const StEmbeddingQATrack& track, const I
   }
 
   // Fill Dca
-  if( track.IsNHitOk() ){
-    hDca[trackid][iparticle]->Fill(pt, eta, track.GetDcaGl());
+  if( track.isNHitOk() ){
+    hDca[trackid][iparticle]->Fill(pt, eta, track.getDcaGl());
   }
 
 
   if ( mDebug > 2 ){
     cout << Form("     RC:(nhit, pt, eta, phi) = (%5d, %1.4f, %1.4f, %1.4f)  MC:(pt, eta) = (%1.4f, %1.4f)",
-        track.GetNHit(), track.GetPtRc(), track.GetEtaRc(), track.GetPhi(), track.GetPtMc(), track.GetEtaMc()
+        track.getNHit(), track.getPtRc(), track.getEtaRc(), track.getPhi(), track.getPtMc(), track.getEtaMc()
         ) << endl;
   }
 
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::FillPair()
-{
-  for(Int_t ich=0; ich<3; ich++){
-    // id    pair
-    // 0     Unlike sign
-    // 1     Like sign (positive)
-    // 2     Like sign (negative)
-    vector<StEmbeddingQATrack*> pair0 ;
-    vector<StEmbeddingQATrack*> pair1 ;
-    UInt_t nPairStop = 0 ;
-    Int_t histoId = -1 ;
-
-    switch ( ich ) {
-      case 0:
-        histoId = 0 ;
-        pair0 = mDaughterPositive ;
-        pair1 = mDaughterNegative ; nPairStop = pair1.size() ;
-        break ;
-
-      case 1:
-        histoId = 1 ;
-        pair0 = mDaughterPositive ;
-        pair1 = mDaughterPositive ; nPairStop = pair1.size() - 1;
-        break ;
-
-      case 2:
-        histoId = 1 ;
-        pair0 = mDaughterNegative ;
-        pair1 = mDaughterNegative ; nPairStop = pair1.size() - 1;
-        break ;
-    }
-
-    for(UInt_t itrk=0; itrk<pair0.size(); itrk++){
-      const UInt_t nPairStart = (ich==0) ? 0 : itrk + 1 ;
-
-      for(UInt_t jtrk=nPairStart; jtrk<nPairStop; jtrk++){
-        // Reconstructed parent
-        const StLorentzVectorD parent = pair0[itrk]->GetVectorRc() + pair1[jtrk]->GetVectorRc() ;
-
-        hInvMassVsPt[histoId]->Fill(parent.perp(), parent.m());
-      }
-    }
-  }
-
-}
-
-//__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::GetTrackSelectionForDaughters(const StEmbeddingQATrack& track) const
-{
-  // Track selection for daughters
-  //  NOTE:
-  //    Cuts are probably different from different analysis.
-  //    We may need to implement specific track selections for each analysis
-  //
-  const Bool_t isD0CuCu2005 = kYear == 2005 && (kProduction == "P06ib" || kProduction == "P07ie")
-    && kParticleId == StEmbeddingQAUtilities::GetParticleId("D0") ;
-
-  Bool_t isTrackOk = kFALSE ;
-  if ( isD0CuCu2005 ){ // D0 in Cu + Cu at 200 GeV (2005)
-    isTrackOk = track.GetNCommonHit() > 7 && track.GetNHit() > 15
-      && ((Double_t)track.GetNHitPoss()/(Double_t)track.GetNHit()>0.55)
-      && track.GetPtRc() >= 0.15
-      && TMath::Abs(track.GetEtaRc()) < 1.0
-      ;
-  }
-  else{ // default track selection
-    isTrackOk = track.GetNCommonHit() > 10 && track.GetNHit() > 20
-      && ((Double_t)track.GetNHitPoss()/(Double_t)track.GetNHit()>0.55)
-      && track.GetPtRc() >= 0.20
-      && TMath::Abs(track.GetEtaRc()) < 1.0
-      ;
-  }
-
-  return isTrackOk ;
-}
-
-//__________________________________________________________________________________________
-Int_t StEmbeddingQAMaker::GetNumberOfHistograms(const Int_t categoryId) const
+Int_t StEmbeddingQAMaker::getNumberOfHistograms(const Int_t categoryId) const
 {
   // Get # of histograms
   //   Contaminated pairs : # of decay daughters
@@ -865,14 +711,14 @@ Int_t StEmbeddingQAMaker::GetNumberOfHistograms(const Int_t categoryId) const
 
   Int_t n = 0 ; // number of histograms
 
-  if( StEmbeddingQAUtilities::GetCategoryName(categoryId).Contains("CONTAM") ){
+  if( StEmbeddingQAUtilities::getCategoryName(categoryId).Contains("CONTAM") ){
     // Contaminated pairs (daughters)
-    n = mParticles->GetNDaughter() ;
+    n = mParticles->getNDaughter() ;
   }
-  else if ( StEmbeddingQAUtilities::GetCategoryName(categoryId).Contains("PRIMARY") 
-      || StEmbeddingQAUtilities::GetCategoryName(categoryId).Contains("GLOBAL") ){
+  else if ( StEmbeddingQAUtilities::getCategoryName(categoryId).Contains("PRIMARY") 
+      || StEmbeddingQAUtilities::getCategoryName(categoryId).Contains("GLOBAL") ){
     // Real data (daughter)
-    n = mParticles->GetNDaughter() ; // will be 0 if parent particle is stable
+    n = mParticles->getNDaughter() ; // will be 0 if parent particle is stable
   }
   else{
     // Others

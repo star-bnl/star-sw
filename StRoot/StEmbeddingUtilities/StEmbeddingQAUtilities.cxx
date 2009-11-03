@@ -22,7 +22,7 @@ namespace StEmbeddingQAUtilities {
   map<TString, Int_t> kParticleId;
 
   //____________________________________________________________________________________________________
-  void RegisterParticleId()
+  void registerParticleId()
   {
     if( isParticleRegisterd ) return ;
 
@@ -43,25 +43,17 @@ namespace StEmbeddingQAUtilities {
     kParticleId.insert(pair<TString, Int_t>("jpsi", 160));                                                            // J/Psi
     kParticleId.insert(pair<TString, Int_t>("lambda1520", 995));                                                      // Lambda(1520)
 
-//    cout << "#--------------------------------------------------" << endl;
-//    cout << "List of available particles (alphabetical order)" << endl;
-//    for(map<TString, Int_t>::iterator iter = kParticleId.begin();
-//        iter != kParticleId.end(); iter++){
-//      cout << Form("Particle: %10s,   particleid: %10d", iter->first.Data(), iter->second) << endl;
-//    }
-//    cout << "#--------------------------------------------------" << endl;
-
     isParticleRegisterd = kTRUE;
   }
 
   //__________________________________________________________________________________________
-  Int_t GetParticleId(const TString name)
+  Int_t getParticleId(const TString name)
   {
     // Get particle id from particle name
     //  - Input particle name is case insensitive
     //     For example, eplus, Eplus, ePlus etc should work
  
-    RegisterParticleId();
+    registerParticleId();
 
     TString _name(name);
     _name.ToLower() ;
@@ -71,37 +63,14 @@ namespace StEmbeddingQAUtilities {
     if( particleId != kParticleId.end() ){
       const TString pname(particleId->first);
       const Int_t pid(particleId->second);
-      cout << pname << " " << pid << endl;
       return pid ;
     }
- 
-    /*
-    if ( _name.CompareTo("photon") || _name.CompareTo("gamma") )         return 1 ;
-    else if ( _name.CompareTo("eplus") || _name.CompareTo("e+") )        return 2 ;
-    else if ( _name.CompareTo("eminus") || _name.CompareTo("e-") )       return 3 ;
-    else if ( _name.CompareTo("pi0") )                                   return 7 ;
-    else if ( _name.CompareTo("piplus") || _name.CompareTo("pi+") )      return 8 ;
-    else if ( _name.CompareTo("piminus") || _name.CompareTo("pi-") )     return 9 ;
-    else if ( _name.CompareTo("kplus") || _name.CompareTo("k+") )        return 11 ;
-    else if ( _name.CompareTo("kminus") || _name.CompareTo("k-") )       return 12 ;
-    else if ( _name.CompareTo("proton") || _name.CompareTo("p") )        return 14 ;
-    else if ( _name.CompareTo("antiproton") || _name.CompareTo("pbar") ) return 15 ;
-    else if ( _name.CompareTo("d0") )                                    return 37 ;
-    else if ( _name.CompareTo("d0bar") )                                 return 38 ;
-    else if ( _name.CompareTo("phi") )                                   return 50 ;
-    else if ( _name.CompareTo("jpsi") )                                  return 160 ;
-    else if ( _name.CompareTo("lambda1520") )                            return 995 ;
-    else{
-      Error("GetParticleId", "Unknown particle name, name = %15s", name.Data());
-      Print("pid");
-    }
-    */
  
     return -1 ;
   }
 
   //__________________________________________________________________________________________
-  Int_t GetDaughterParticleId(const TString name, const Int_t daughter)
+  Int_t getDaughterParticleId(const TString name, const Int_t daughter)
   {
     // Get daughter particle id from parent particle name
     //   Currently, only 
@@ -122,8 +91,8 @@ namespace StEmbeddingQAUtilities {
         else if ( _name.Contains("jpsi") )       return  2 ;
         else if ( _name.Contains("lambda1520") ) return 14 ;
         else{
-          Error("GetDaughterParticleId", "Unknown particle name, name = %15s", name.Data());
-          Print("pid");
+          Error("getDaughterParticleId", "Unknown particle name, name = %15s", name.Data());
+          print("pid");
           return -1 ;
         }
 
@@ -135,13 +104,13 @@ namespace StEmbeddingQAUtilities {
         else if ( _name.Contains("jpsi") )       return  3 ;
         else if ( _name.Contains("lambda1520") ) return 12 ;
         else{
-          Error("GetDaughterParticleId", "Unknown particle name, name = %15s", name.Data());
-          Print("pid");
+          Error("getDaughterParticleId", "Unknown particle name, name = %15s", name.Data());
+          print("pid");
           return -1 ;
         }
 
       default:
-        Error("GetDaughterParticleId", "Currently, >= 3 body decays are not implemented yet.");
+        Error("getDaughterParticleId", "Currently, >= 3 body decays are not implemented yet.");
         return -1 ;
     }
 
@@ -149,7 +118,7 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  Int_t GetCategoryId(const TString name)
+  Int_t getCategoryId(const TString name)
   {
     // Get category id from node name in the minimc tree
     //  - Input node name is case insensitive
@@ -166,7 +135,7 @@ namespace StEmbeddingQAUtilities {
     else if ( _name.Contains("primary") ) return 5;
     else if ( _name.Contains("global") )  return 6;
     else{
-      Error("GetCategoryId", "Unknown node name, name = %15s", name.Data());
+      Error("getCategoryId", "Unknown node name, name = %15s", name.Data());
       cout << endl ;
       cout << "#====================================================================================================" << endl;
       cout << "  Current implemented nodes" << endl;
@@ -190,11 +159,11 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  Category GetCategory(const UInt_t id)
+  Category getCategory(const UInt_t id)
   {
     // Get category from category id
     if( id >= kNEmbedding ){
-      Error("GetCategory", "Unknown category id, id=%3d. Return MC.", id);
+      Error("getCategory", "Unknown category id, id=%3d. Return MC.", id);
       return kCategory[0] ;
     }
 
@@ -202,11 +171,11 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  TString GetCategoryName(const UInt_t id)
+  TString getCategoryName(const UInt_t id)
   {
     // Get category name from category id
     if( id >= kNCategory ){
-      Error("GetCategoryName", "Unknown category id, id=%3d", id);
+      Error("getCategoryName", "Unknown category id, id=%3d", id);
       return "";
     }
 
@@ -214,11 +183,11 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  TString GetCategoryTitle(const UInt_t id)
+  TString getCategoryTitle(const UInt_t id)
   {
     // Get category title from category id
     if( id >= kNCategory ){
-      Error("GetCategoryTitle", "Unknown category id, id=%3d", id);
+      Error("getCategoryTitle", "Unknown category id, id=%3d", id);
       return "";
     }
 
@@ -226,7 +195,7 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  Double_t GetMass(const Int_t particleId)
+  Double_t getMass(const Int_t particleId)
   {
     // Get mass from particle id (GeV/c^2)
  
@@ -250,7 +219,7 @@ namespace StEmbeddingQAUtilities {
       case 160 : return 3096.916    * mev2gev; // jpsi
       case 995 : return 1519.5      * mev2gev; // lambda(1520)
       default:
-        Error("GetMass", "Unknown particle id, id=%3d. set mass = 0", particleId);
+        Error("getMass", "Unknown particle id, id=%3d. set mass = 0", particleId);
         return 0.0 ;
     }
  
@@ -258,30 +227,30 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  Double_t GetMass2(const Int_t particleId)
+  Double_t getMass2(const Int_t particleId)
   {
     // Get mass square from particle id (GeV^2/c^4)
 
-    const Double_t mass = GetMass(particleId) ;
+    const Double_t mass = getMass(particleId) ;
     return mass * mass ;
   }
 
   //__________________________________________________________________________________________
-  Double_t GetMass2Daughter(const Int_t particleId, const Int_t daughter)
+  Double_t getMass2Daughter(const Int_t particleId, const Int_t daughter)
   {
     // Get mass square from particle id for daughter particles (GeV^2/c^4)
 
-    const TString parentName(GetParticleName(particleId, kFALSE)); // Parent particle name
-    const Int_t daughterId = GetDaughterParticleId(parentName, daughter); // Daughter particle id
+    const TString parentName(getParticleName(particleId, kFALSE)); // Parent particle name
+    const Int_t daughterId = getDaughterParticleId(parentName, daughter); // Daughter particle id
 
     // return 0.0 if daughterId = -1 (i.e. no decay daughters)
     if ( daughterId == -1 ) return 0.0 ;
 
-    return GetMass2(daughterId);
+    return getMass2(daughterId);
   }
 
   //__________________________________________________________________________________________
-  TString GetParticleName(const Int_t particleId, const Bool_t isTex)
+  TString getParticleName(const Int_t particleId, const Bool_t isTex)
   {
     // Get particle name from particle id (latex format)
     if( isTex ){
@@ -302,7 +271,7 @@ namespace StEmbeddingQAUtilities {
         case 160 : return "J/#Psi" ;       // jpsi
         case 995 : return "#Lambda(1520)"; // lambda(1520)
         default:
-          Error("GetParticleName", "Unknown particle id, id=%3d. return nothing", particleId);
+          Error("getParticleName", "Unknown particle id, id=%3d. return nothing", particleId);
           return "";
       }
     }
@@ -324,7 +293,7 @@ namespace StEmbeddingQAUtilities {
         case 160 : return "JPsi" ;       // jpsi
         case 995 : return "Lambda1520" ; // lambda(1520)
         default:
-          Error("GetParticleName", "Unknown particle id, id=%3d. return nothing", particleId);
+          Error("getParticleName", "Unknown particle id, id=%3d. return nothing", particleId);
           return "";
       }
     }
@@ -333,7 +302,7 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  Int_t GetNDaughter(const Int_t particleId)
+  Int_t getNDaughter(const Int_t particleId)
   {
     // Get number of daughters from particle id
 
@@ -354,7 +323,7 @@ namespace StEmbeddingQAUtilities {
       case 160 : return 2 ; // jpsi
       case 995 : return 2 ; // lambda(1520)
       default:
-        Error("GetNDaghter", "Unknown particle id, id=%3d. return 0", particleId);
+        Error("getNDaghter", "Unknown particle id, id=%3d. return 0", particleId);
         return 0;
     }
 
@@ -362,7 +331,7 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  Int_t GetCharge(const Int_t particleId)
+  Int_t getCharge(const Int_t particleId)
   {
     // Get charge
 
@@ -383,7 +352,7 @@ namespace StEmbeddingQAUtilities {
       case 160 : return  0 ; // jpsi
       case 995 : return  0 ; // lambda(1520)
       default:
-        Error("GetCharge", "Unknown particle id, id=%3d. return 1", particleId);
+        Error("getCharge", "Unknown particle id, id=%3d. return 1", particleId);
         return 1 ;
     }
 
@@ -391,14 +360,15 @@ namespace StEmbeddingQAUtilities {
   }
 
   //__________________________________________________________________________________________
-  void Print(const TString option)
+  void print(const TString option)
   {
-    // Print
+    // Print infomations
  
     TString _option(option);
     _option.ToLower() ;
  
     if( _option.Contains("pid") ){
+      // Particle id
       cout << endl ;
       cout << "#====================================================================================================" << endl;
       cout << "  Current implemented particles" << endl;

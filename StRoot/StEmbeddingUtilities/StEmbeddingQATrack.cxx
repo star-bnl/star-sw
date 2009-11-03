@@ -90,78 +90,78 @@ StEmbeddingQATrack::~StEmbeddingQATrack()
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::IsMc() const
+Bool_t StEmbeddingQATrack::isMc() const
 {
   return mName.Contains("MC") ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::IsEmbedding() const
+Bool_t StEmbeddingQATrack::isEmbedding() const
 {
   return mName.Contains("MATCHED") || mName.Contains("GHOST") || mName.Contains("CONTAM") ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::IsReal() const
+Bool_t StEmbeddingQATrack::isReal() const
 {
   return mName.Contains("PRIMARY") || mName.Contains("GLOBSL") ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::IsPtAndEtaOk() const
+Bool_t StEmbeddingQATrack::isPtAndEtaOk() const
 { 
   // Pt cut for MC tracks, pt & eta cuts for embedding/real tracks
 
-  const Bool_t isPtOk  = (IsMc()) ? GetPtMc() > kPtMinCut : GetPtRc() > kPtMinCut ;
-  const Bool_t isEtaOk = TMath::Abs(GetEtaRc()) < kEtaCut ;
+  const Bool_t isPtOk  = (isMc()) ? getPtMc() > kPtMinCut : getPtRc() > kPtMinCut ;
+  const Bool_t isEtaOk = TMath::Abs(getEtaRc()) < kEtaCut ;
 
-  return (IsMc()) ? isPtOk : (isPtOk && isEtaOk) ;
+  return (isMc()) ? isPtOk : (isPtOk && isEtaOk) ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::IsNHitOk() const
+Bool_t StEmbeddingQATrack::isNHitOk() const
 { 
-  // Add NcommonHit cuts for embedding tracks (see IsCommonHitOk())
+  // Add NcommonHit cuts for embedding tracks (see isCommonHitOk())
   // No NHit cut for MC tracks
-  const Bool_t isNHitOk = (IsMc()) ? kTRUE : mNHit >= kNHitCut ;
+  const Bool_t isNHitOk = (isMc()) ? kTRUE : mNHit >= kNHitCut ;
 
-  return IsCommonHitOk() && isNHitOk ;
+  return isCommonHitOk() && isNHitOk ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::IsDcaOk() const
+Bool_t StEmbeddingQATrack::isDcaOk() const
 { 
   // No Dca cut for MC tracks
 
-  return (IsMc()) ? kTRUE : (mDcaGl >= 0.0 && mDcaGl < kDcaCut) ;
+  return (isMc()) ? kTRUE : (mDcaGl >= 0.0 && mDcaGl < kDcaCut) ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::IsCommonHitOk() const
+Bool_t StEmbeddingQATrack::isCommonHitOk() const
 { 
   // Only for embedding tracks
 
-  return (IsEmbedding()) ? mNCommonHit >= kNHitCut : kTRUE ;
+  return (isEmbedding()) ? mNCommonHit >= kNHitCut : kTRUE ;
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::IsNSigmaOk(const Int_t particleId) const
+Bool_t StEmbeddingQATrack::isNSigmaOk(const Int_t particleId) const
 {
   // Make sure the real data track
-  if ( !IsReal() ) return kTRUE ; // No NSigma cut for embedding tracks
+  if ( !isReal() ) return kTRUE ; // No NSigma cut for embedding tracks
 
   // NSigma cut for e, pi, K and p
-  const Bool_t isE = (particleId == StEmbeddingQAUtilities::GetParticleId("EPlus"))
-    || (particleId == StEmbeddingQAUtilities::GetParticleId("EMinus")) ;
+  const Bool_t isE = (particleId == StEmbeddingQAUtilities::getParticleId("EPlus"))
+    || (particleId == StEmbeddingQAUtilities::getParticleId("EMinus")) ;
 
-  const Bool_t isPi = (particleId == StEmbeddingQAUtilities::GetParticleId("PiPlus"))
-    || (particleId == StEmbeddingQAUtilities::GetParticleId("PiMinus")) ;
+  const Bool_t isPi = (particleId == StEmbeddingQAUtilities::getParticleId("PiPlus"))
+    || (particleId == StEmbeddingQAUtilities::getParticleId("PiMinus")) ;
 
-  const Bool_t isK = (particleId == StEmbeddingQAUtilities::GetParticleId("KPlus"))
-    || (particleId == StEmbeddingQAUtilities::GetParticleId("KMinus")) ;
+  const Bool_t isK = (particleId == StEmbeddingQAUtilities::getParticleId("KPlus"))
+    || (particleId == StEmbeddingQAUtilities::getParticleId("KMinus")) ;
 
-  const Bool_t isP = (particleId == StEmbeddingQAUtilities::GetParticleId("Proton"))
-    || (particleId == StEmbeddingQAUtilities::GetParticleId("AntiProton")) ;
+  const Bool_t isP = (particleId == StEmbeddingQAUtilities::getParticleId("Proton"))
+    || (particleId == StEmbeddingQAUtilities::getParticleId("AntiProton")) ;
 
   // No NSigma cut if the particle is not pi/K/p
   const Bool_t isEPiKP = isE || isPi || isK || isP ;
@@ -179,35 +179,35 @@ Bool_t StEmbeddingQATrack::IsNSigmaOk(const Int_t particleId) const
 }
 
 //____________________________________________________________________________________________________
-StLorentzVectorD StEmbeddingQATrack::GetVectorMc() const
+StLorentzVectorD StEmbeddingQATrack::getVectorMc() const
 { 
   return mVectorMc ;
 }
 
 //____________________________________________________________________________________________________
-StLorentzVectorD StEmbeddingQATrack::GetVectorRc() const
+StLorentzVectorD StEmbeddingQATrack::getVectorRc() const
 { 
   return mVectorRc ;
 }
 
 //____________________________________________________________________________________________________
-void StEmbeddingQATrack::Print() const
+void StEmbeddingQATrack::print() const
 {
   cout << "#----------------------------------------------------------------------------------------------------" << endl;
   cout << Form("StEmbeddingQATrack::Print() : Track informations (%s)", mName.Data()) << endl;
-  cout << "  GetNCommonHit()      " <<  GetNCommonHit()  << endl;
-  cout << "  GetGeantId()         " <<  GetGeantId()     << endl;
-  cout << "  GetNHit()            " <<  GetNHit()        << endl;
-  cout << "  GetMass() (MC, RC)  (" <<  GetMassMc() << ", " << GetMassRc() << ")" << endl;
-  cout << "  GetPt() (MC, RC)    (" <<  GetPtMc() << ", " << GetPtRc() << ")" << endl;
-  cout << "  GetPx() (MC, RC)    (" <<  GetPxMc() << ", " << GetPxRc() << ")" << endl;
-  cout << "  GetPy() (MC, RC)    (" <<  GetPyMc() << ", " << GetPyRc() << ")" << endl;
-  cout << "  GetPz() (MC, RC)    (" <<  GetPzMc() << ", " << GetPzRc() << ")" << endl;
-  cout << "  GetP()  (MC, RC)    (" <<  GetPMc() << ", " << GetPRc() << ")" << endl;
-  cout << "  GetEta() (MC, RC)   (" <<  GetEtaMc() << ", " << GetEtaRc() << ")" << endl;
-  cout << "  GetPhi()             " <<  GetPhi()         << endl;
-  cout << "  GetdEdx()            " <<  GetdEdx()        << endl;
-  cout << "  GetDcaGl()           " <<  GetDcaGl()       << endl;
+  cout << "  getNCommonHit()      " <<  getNCommonHit()  << endl;
+  cout << "  getGeantId()         " <<  getGeantId()     << endl;
+  cout << "  getNHit()            " <<  getNHit()        << endl;
+  cout << "  getMass() (MC, RC)  (" <<  getMassMc() << ", " << getMassRc() << ")" << endl;
+  cout << "  getPt() (MC, RC)    (" <<  getPtMc() << ", " << getPtRc() << ")" << endl;
+  cout << "  getPx() (MC, RC)    (" <<  getPxMc() << ", " << getPxRc() << ")" << endl;
+  cout << "  getPy() (MC, RC)    (" <<  getPyMc() << ", " << getPyRc() << ")" << endl;
+  cout << "  getPz() (MC, RC)    (" <<  getPzMc() << ", " << getPzRc() << ")" << endl;
+  cout << "  getP()  (MC, RC)    (" <<  getPMc() << ", " << getPRc() << ")" << endl;
+  cout << "  getEta() (MC, RC)   (" <<  getEtaMc() << ", " << getEtaRc() << ")" << endl;
+  cout << "  getPhi()             " <<  getPhi()         << endl;
+  cout << "  getdEdx()            " <<  getdEdx()        << endl;
+  cout << "  getDcaGl()           " <<  getDcaGl()       << endl;
   cout << "#----------------------------------------------------------------------------------------------------" << endl;
 }
 
