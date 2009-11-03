@@ -1,4 +1,4 @@
-// $Id: PAI.cxx,v 1.2 2009/10/30 21:12:00 fisyak Exp $
+// $Id: PAI.cxx,v 1.3 2009/11/03 22:38:53 fisyak Exp $
 // This is wrapper for Pavel Nevski version of Photo Aborption Model 
 // which can be used an alternative to Bichsel model which  we have  only for P10 mixture.
 #include "Stiostream.h"
@@ -12,6 +12,7 @@
 #include "TString.h"
 //#include "TGraph2D.h"
 #include "TGraph.h"
+#include "StMessMgr.h" 
 #define    xgasini	 F77_NAME(xgasini,XGASINI)
 #define    xgastab	 F77_NAME(xgastab,XGASTAB)
 #define    xfintera 	 F77_NAME(xfintera,XFINTERA)
@@ -33,15 +34,15 @@ Float_t type_of_call xfintera(Float_t &x, Float_t *A, Float_t *F, Int_t &N) {
   Double_t xup  = A[bin+1];
   Double_t dx   = xup - xlow;
   if (dx < 1.e-5) {
-    cout << "bin\t" << bin << "\tN\t" << N << "\tx\t" << x << "\txlow\t" << xlow << "\txup\t" << xup << endl;
+    LOG_WARN << "bin\t" << bin << "\tN\t" << N << "\tx\t" << x << "\txlow\t" << xlow << "\txup\t" << xup << endm;
   }
   Double_t ylow = F[bin];
   Double_t yup  = F[bin+1];
   Float_t y    = ((xup*ylow-xlow*yup) + x*(yup-ylow))/dx;
 #ifdef DEBUG
   if (y > 20) {
-    cout << "bin\t" << bin << "\tN\t" << N << "\tx\t" << x 
-	 << "\txlow\t" << xlow << "\txup\t" << xup << "\ty\t" << y << endl;
+    LOG_DEBUG << "bin\t" << bin << "\tN\t" << N << "\tx\t" << x 
+	      << "\txlow\t" << xlow << "\txup\t" << xup << "\ty\t" << y << endm;
   }
 #endif
   return y; 
@@ -73,12 +74,12 @@ PAI::PAI(Int_t NoBetaGammas, Int_t NoEntries, Double_t BetaGammaLog10Min, Double
     if (mGraphs[jg]) delete mGraphs[jg];
     mGraphs[jg] = new TGraph(mNoInTable);
     Int_t N = 0;
-    cout << "jg\t" << jg << "\tBetaGammaLog10\t" << BetaGammaLog10 
+    LOG_DEBUG << "jg\t" << jg << "\tBetaGammaLog10\t" << BetaGammaLog10 
 	 << "\tBetaGamma\t" << BetaGamma << "\tgamma\t" << gamma 
 	 << "\tmdNdX\t" << mdNdX[jg] 
-	 << "\tmNoInTable\t" << mNoInTable << endl;
+	 << "\tmNoInTable\t" << mNoInTable << endm;
     for (int i = 0; i < mNoInTable; i++) {
-      cout << "\t" << i << "\tmEnergy\t" << mEnergy[i] << "\tmdNdE\t" << mdNdE[jg*mNoEntries +i] << endl;
+      LOG_DEBUG << "\t" << i << "\tmEnergy\t" << mEnergy[i] << "\tmdNdE\t" << mdNdE[jg*mNoEntries +i] << endm;
     }
     for (int i = 0; i < mNoInTable; i++) {
       //      Double_t x = BetaGammaLog10;
@@ -121,7 +122,7 @@ void PAI::xNext(Float_t BetaGamma, Float_t &dX, Float_t &dE) {
   Float_t random = gRandom->Rndm()*mdNdX[jg];
   dE = TMath::Exp(xFintera(random,&mdNdE[mNoEntries*jg],mEnergy,mNoInTable));
 #ifdef DEBUG
-  cout << "BetaGamma\t" << BetaGamma << "\trandom\t" << random << "\tdX\t" << dX << "\tdE\t" << dE << endl;
+  LOG_DEBUG << "BetaGamma\t" << BetaGamma << "\trandom\t" << random << "\tdX\t" << dX << "\tdE\t" << dE << endm;
 #endif  
 } 
 //________________________________________________________________________________
@@ -136,7 +137,7 @@ void PAI::xGenerate(Int_t NsSteps, Int_t Nevents) {
       hist[i] = new TH1D(Form("dNdE_g%i_s%i",jg,i),
 			 Form("log10(dE/dx (keV/cm)) distribution for beta*gamma=%f and dX=%f",
 			      betaGamma,step[i]),500, -0.5, 4.5);
-      cout << "Generate Histograms\t" << hist[i]->GetName() << "\t" << hist[i]->GetTitle() << endl;
+      LOG_INFO << "Generate Histograms\t" << hist[i]->GetName() << "\t" << hist[i]->GetTitle() << endm;
     }
     Float_t  dX, dE;
     for (int iev = 0; iev < Nevents; iev++) {
@@ -160,6 +161,9 @@ void PAI::xGenerate(Int_t NsSteps, Int_t Nevents) {
   }
 }
 // $Log: PAI.cxx,v $
+// Revision 1.3  2009/11/03 22:38:53  fisyak
+// Freeze version rcf9108.J
+//
 // Revision 1.2  2009/10/30 21:12:00  fisyak
 // Freeze version rcf9108.F, Clean up
 //

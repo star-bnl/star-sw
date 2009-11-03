@@ -43,7 +43,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.25 2009/10/30 21:12:00 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.26 2009/11/03 22:38:53 fisyak Exp $";
 
 #define Laserino 170
 #define Chasrino 171
@@ -111,9 +111,14 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mCutEle(1e-3)
 {
   memset (mShaperResponses, 0, sizeof(mShaperResponses));
-  mtauIntegrationX[0] = 74.6e-9; mtauCX[0] = 0; // Inner
+  //  mtauIntegrationX[0] = 74.6e-9; mtauCX[0] = 0; // Inner F
+  mtauIntegrationX[0] = 60e-9; mtauCX[0] = 0; // Inner J
+  //  mtauIntegrationX[0] = 50.0e-9; mtauCX[0] = 0; // Inner G
+  //  mtauIntegrationX[0] = 150.0e-9; mtauCX[0] = 0; // Inner H
+  //  mtauIntegrationX[0] = 100e-9; mtauCX[0] = 0; // Inner I
   mtauIntegrationX[1] = 74.6e-9; mtauCX[1] = 0; // Outer
-  SETBIT(m_Mode,kPAI); 
+  //  SETBIT(m_Mode,kPAI); 
+  SETBIT(m_Mode,kBICHSEL);  // Default is Bichsel
   //  SETBIT(m_Mode,kTree);
 }
 //________________________________________________________________________________
@@ -647,7 +652,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if (TESTBIT(m_Mode, kBICHSEL)) 
 	  NP = GetNoPrimaryClusters(betaGamma); // per cm
 	Int_t nP = 0; 
-	Int_t WireIndex;
 	Double_t xOnWire, yOnWire, zOnWire;
 	Double_t newPosition = s_low;
 	Double_t dESum = 0;
@@ -728,15 +732,14 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    Double_t alphaVariation = InnerAlphaVariation;
 	    // Transport to wire
 	    if (y < firstInnerSectorAnodeWire || y >  lastOuterSectorAnodeWire) continue;
-	    if (y >  lastInnerSectorAnodeWire && y < firstOuterSectorAnodeWire) continue;
+	    if (y > lastInnerSectorAnodeWire  && y < firstOuterSectorAnodeWire) continue;
 	    if (y < lastInnerSectorAnodeWire) {
-	      WireIndex = (int) ((y - firstInnerSectorAnodeWire)/anodeWirePitch + 0.5);
+	      Int_t WireIndex = TMath::Nint((y - firstInnerSectorAnodeWire)/anodeWirePitch);
 	      yOnWire = firstInnerSectorAnodeWire + WireIndex*anodeWirePitch;
 	    }
 	    else {
-	      WireIndex = (int) ((y - firstOuterSectorAnodeWire)/anodeWirePitch + 0.5);
+	      Int_t WireIndex = TMath::Nint((y - firstOuterSectorAnodeWire)/anodeWirePitch);
 	      yOnWire = firstOuterSectorAnodeWire + WireIndex*anodeWirePitch;
-	      WireIndex += (int) ((lastInnerSectorAnodeWire - firstInnerSectorAnodeWire)/anodeWirePitch) + 1;
 	      alphaVariation = OuterAlphaVariation;
 	    }
 	    Double_t distanceToWire = y - yOnWire; // Calculated effective distance to wire affected by Lorentz shift 
@@ -754,12 +757,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // Ground plane (1 mm spacing) focusing effect
 	    Int_t iGroundWire = (Int_t ) TMath::Abs(10.*dist2Grid);
 	    Double_t distFocused = TMath::Sign(0.05 + 0.1*iGroundWire, dist2Grid);
-#if 1
-	    Double_t tanLorentz = OmegaTau/1.47; // OmegaTau near wires taken from comparison with data
-#else
-	    Double_t tanLorentz = OmegaTau; // Outer
-	    if (y < firstOuterSectorAnodeWire) tanLorentz = OmegaTau/1.53;
-#endif
+	    Double_t tanLorentz = OmegaTau/1.2; //H;  F 1.47; // OmegaTau near wires taken from comparison with data
+	    //	    if (y < firstOuterSectorAnodeWire) tanLorentz = OmegaTau/1.4; // H
+	    if (y < firstOuterSectorAnodeWire) tanLorentz = OmegaTau/1.43; // I
 	    xOnWire += distFocused*tanLorentz; // tanLorentz near wires taken from comparison with data
 	    zOnWire += TMath::Abs(distFocused);
 	    zOnWire += tof*gStTpcDb->DriftVelocity(sector);
@@ -1295,8 +1295,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
   return m_SignalSum;
 }
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.25 2009/10/30 21:12:00 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.26 2009/11/03 22:38:53 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.26  2009/11/03 22:38:53  fisyak
+// Freeze version rcf9108.J
+//
 // Revision 1.25  2009/10/30 21:12:00  fisyak
 // Freeze version rcf9108.F, Clean up
 //
