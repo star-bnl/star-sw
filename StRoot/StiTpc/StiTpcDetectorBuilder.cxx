@@ -29,7 +29,8 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "StTpcDb/StTpcDb.h"
 #include "StMatrixD.hh"
-#include "StDetectorDbMaker/St_tpcAnodeHVC.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 //#define TPC_IDEAL_GEOM
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
@@ -206,6 +207,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       int iRdo = rdoForPadrow(row+1);
       bool west = s_pRdoMasks->isOn(sector+1, iRdo);
       bool east = s_pRdoMasks->isOn( 24-(sector+1)%12, iRdo);
+
 #if 0
       if (row==12) {
 	east = false;
@@ -214,13 +216,13 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 #endif
       if (west) {
 	Int_t sec = sector+1;
-	west = St_tpcAnodeHVC::instance()->livePadrow(sec,row+1) &&
-	       St_tpcGainC::instance()->livePadrow(sec,row+1);
+	west = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row+1) &&
+	       St_tpcPadGainT0C::instance()->livePadrow(sec,row+1);
       }
       if (east) {
 	Int_t sec = 24-(sector+1)%12;
-	east = St_tpcAnodeHVC::instance()->livePadrow(sec,row+1) &&
-	       St_tpcGainC::instance()->livePadrow(sec,row+1);
+	east = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row+1) &&
+	       St_tpcPadGainT0C::instance()->livePadrow(sec,row+1);
       }
       pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
       pDetector->setIsContinuousMedium(true);
