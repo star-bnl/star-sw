@@ -12,9 +12,6 @@ MakeChairInstance(ftpcGasOut,Calibrations/ftpc/ftpcGasOut);
 MakeChairInstance(ftpcVoltage,Calibrations/ftpc/ftpcVoltage);
 #include "St_ftpcVoltageStatusC.h"
 MakeChairInstance(ftpcVoltageStatus,Calibrations/ftpc/ftpcVoltageStatus);
-//___________________tpc_____________________________________________________________
-#include "St_tss_tssparC.h"
-MakeChairInstance(tss_tsspar,tpc/tsspars/tsspar);
 //__________________Calibrations/tpc______________________________________________________________
 #include "St_tpcGasC.h"
 MakeChairInstance(tpcGas,Calibrations/tpc/tpcGas);
@@ -42,10 +39,6 @@ MakeChairInstance(tpcHitErrors,Calibrations/tpc/tpcHitErrors);
 MakeChairInstance(tpcGainMonitor,Calibrations/tpc/tpcGainMonitor);
 #include "St_tpcHighVoltagesC.h"
 MakeChairInstance(tpcHighVoltages,Calibrations/tpc/tpcHighVoltages);
-#include "St_tpcGainC.h"
-MakeChairInstance(tpcGain,Calibrations/tpc/tpcGain);
-#include "St_tpcT0C.h"
-MakeChairInstance(tpcT0,Calibrations/tpc/tpcT0);
 #include "St_tpcPadrowT0C.h"
 MakeChairInstance(tpcPadrowT0,Calibrations/tpc/tpcPadrowT0);
 #include "St_tpcSectorT0offsetC.h"
@@ -59,11 +52,11 @@ MakeChairInstance(asic_thresholds_tpx,Calibrations/tpc/asic_thresholds_tpx);
 #include "St_tpcAnodeHVC.h"
 MakeChairInstance(tpcAnodeHV,Calibrations/tpc/tpcAnodeHV);
 //________________________________________________________________________________
-Float_t St_tpcAnodeHVC::voltagePadrow(int sector, int padrow) {
+void  St_tpcAnodeHVC::sockets(Int_t sector, Int_t padrow, Int_t &e1, Int_t &e2, Float_t &f2) {
+  e1 = (sector-1)*19;
+  e2 = e1;
+  f2 = 0;
   // sector=1..24 , padrow=1..45
-  Int_t e1 = (sector-1)*19;
-  Int_t e2 = e1;
-  Float_t f2 = 0;
   // f2 represents signal couplings from neighboring HV sections
   // see: http://www.star.bnl.gov/public/tpc/hard/signals/signal_division.html
   switch (padrow) {
@@ -114,6 +107,30 @@ Float_t St_tpcAnodeHVC::voltagePadrow(int sector, int padrow) {
     case 45: e1+=16; e2+=19; f2 = 0.40250; break;
     default: e1 = 0; e2 = 0; f2 = 0;
   }
+}
+//________________________________________________________________________________
+Float_t St_tpcAnodeHVC::voltagePadrow(Int_t sector, Int_t padrow) const {
+  Int_t e1 = 0, e2 = 0;
+  Float_t f2 = 0;
+  St_tpcAnodeHVC::sockets(sector, padrow, e1, e2, f2);
+  if (e1==0) return -99;
+  Float_t v1=voltage(e1-1);
+  if (f2==0) return v1;
+  Float_t v2=voltage(e2-1);
+  if (v2==v1) return v1;
+  // different voltages on influencing HVs
+  // effective voltage is a sum of exponential gains
+  Float_t B = (padrow <= 13 ? 13.05e-3 : 10.26e-3);
+  Float_t v_eff = TMath::Log((1.0-f2)*TMath::Exp(B*v1) + f2*TMath::Exp(B*v2)) / B;
+  return v_eff;
+}
+#include "St_tpcAnodeHVavgC.h"
+MakeChairInstance(tpcAnodeHVavg,Calibrations/tpc/tpcAnodeHVavg);
+//________________________________________________________________________________
+Float_t St_tpcAnodeHVavgC::voltagePadrow(Int_t sector, Int_t padrow) const {
+  Int_t e1 = 0, e2 = 0;
+  Float_t f2 = 0;
+  St_tpcAnodeHVC::sockets(sector, padrow, e1, e2, f2);
   if (e1==0) return -99;
   Float_t v1=voltage(e1-1);
   if (f2==0) return v1;
@@ -136,6 +153,34 @@ MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
 #include "St_trigDetSumsC.h"
 St_trigDetSumsC *St_trigDetSumsC::fgInstance = 0;
 ClassImp(St_trigDetSumsC);
+//___________________tpc_____________________________________________________________
+#include "St_tss_tssparC.h"
+MakeChairInstance(tss_tsspar,tpc/tsspars/tsspar);
+Float_t St_tss_tssparC::gain_in(Int_t i) {
+  return Struct(i)->gain_in;
+}
+//________________________________________________________________________________
+Float_t St_tss_tssparC::gain_in(Int_t sec, Int_t row) {
+  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  Float_t gain = gain_in();
+  gain *= (V > 0) ? TMath::Exp(13.087e-3*(V-1170)) : 0; //Run IX: -4.580535e-01/35V; 13.05e-3 => -13.087e-3
+  return gain;
+}
+//________________________________________________________________________________
+Float_t St_tss_tssparC::gain_out(Int_t i) 	{
+  return Struct(i)->gain_out;
+}
+//________________________________________________________________________________
+Float_t St_tss_tssparC::gain_out(Int_t sec, Int_t row) {
+  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  Float_t gain = gain_out();
+  gain *= (V > 0) ? TMath::Exp(10.211e-3*(V-1390)) : 0; //Run IX: -4.59477e-01/45V; 10.26e-3 => -10.211e-3
+  return gain;
+}
+//________________________________________________________________________________
+Float_t St_tss_tssparC::gain(Int_t sec, Int_t row) {
+  return row <= 13 ? gain_in(sec,row) : gain_out(sec,row);
+}
 //__________________Calibrations/rich______________________________________________________________
 #include "StDetectorDbRichScalers.h"
 StDetectorDbRichScalers *StDetectorDbRichScalers::fgInstance = 0;
