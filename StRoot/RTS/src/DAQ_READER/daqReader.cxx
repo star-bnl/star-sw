@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.23 2009/11/04 11:44:52 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
