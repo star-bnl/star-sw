@@ -8,8 +8,8 @@ void doEmbeddingQAMaker(
     const Char_t* outputFileName = "", // Put the filename if you want to give some specific name, otherwise leave it blank.
     const Bool_t isSimulation = kTRUE
 ){
-  TString data = (isSimulation) ? "minimc tree" : "real data" ;
-  TString title = "Embedding QA from " + data ;
+  const TString data = (isSimulation) ? "minimc tree" : "real data" ;
+  const TString title = "Embedding QA from " + data ;
 
   gBenchmark->Start(title);
 
@@ -18,10 +18,10 @@ void doEmbeddingQAMaker(
   gSystem->Load("StEmbeddingQAMaker");
 
   StEmbeddingQAMaker* maker = new StEmbeddingQAMaker(year, production, particleName, isSimulation);
-  maker->SetDebug(1);
-  maker->Book(outputFileName);
-  maker->Run(inputFileList);
-  maker->End();
+  maker->setDebug(1);
+  maker->book(outputFileName);
+  maker->run(inputFileList);
+  maker->end();
 
   gBenchmark->Stop(title);
   gBenchmark->Show(title);
@@ -60,10 +60,10 @@ void doEmbeddingQAMakerOneFile(
   gSystem->Load("StEmbeddingQAMaker");
 
   StEmbeddingQAMaker* maker = new StEmbeddingQAMaker();
-  maker->SetDebug(1);
-  maker->Book(outputFileName);
-  maker->Make(inputFileName, kTRUE);
-  maker->End();
+  maker->setDebug(1);
+  maker->book(outputFileName);
+  maker->make(inputFileName, kTRUE);
+  maker->end();
 
   gBenchmark->Stop("Embedding QA from minimc tree");
   gBenchmark->Show("Embedding QA from minimc tree");
