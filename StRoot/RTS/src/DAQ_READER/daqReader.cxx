@@ -45,8 +45,8 @@
 
 u_int evp_daqbits ;
 
-
-
+//Tonko:
+static const char cvs_id_string[] = "$Id" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -136,9 +136,20 @@ daqReader::daqReader(char *name)
 
 void daqReader::init()
 {
-  //	rtsLogLevel(WARN) ;
-  //	rtsLogOutput(RTS_LOG_NET) ;
+#ifdef __ROOT__
+// Tonko: daqman is hammered with log messages from misc rcas hosts
+// although there's an ifdef __ROOT__ in the rtsLog.h but it doesn't
+// seem to work. So I'm forcing it here to STDERR
+  rtsLogLevel(WARN) ;
   rtsLogAddDest("130.199.60.86",RTS_LOG_PORT_READER) ;	// reader.log to daqman
+
+  // allow this one message to daqman's reader log...
+  rtsLogOutout(RTS_LOG_NET) ;
+  LOG(INFO,"daqReader::init  [%s]",cvs_id_string) ;
+  // back to STDERR
+  rtsLogOutput(RTS_LOG_STDERR) ;	// STDERR only!
+
+#endif
 
   isevp = 0;   // assume not... 
   fname[0] = '\0';
