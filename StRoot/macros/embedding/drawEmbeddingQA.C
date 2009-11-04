@@ -20,26 +20,26 @@ void drawEmbeddingQA(
   maker->SetOutputDirectory(outputDirectory);
 
   // Draw all QA plots
-  maker->Draw();
+  maker->draw();
 
   // or draw each QA
   // Event-wise QA
-  maker->DrawEvent();
+  maker->drawEvent();
 
   // MC tracks
-  maker->DrawMcTrack();
+  maker->drawMcTrack();
  
   // Reconstructed track compared with real data
   // Either
-  maker->DrawTrack();
+  maker->drawTrack();
   // or
-//  maker->DrawGeantId();
-//  maker->DrawRapidity();
-//  maker->DrawMomentum();
-//  maker->DrawPt();
-//  maker->DrawdEdx();
-//  maker->DrawDca();
-//  maker->DrawNHit();
+//  maker->drawGeantId();
+//  maker->drawRapidity();
+//  maker->drawMomentum();
+//  maker->drawPt();
+//  maker->drawdEdx();
+//  maker->drawDca();
+//  maker->drawNHit();
 }
 
 //______________________________________________________________________
@@ -64,25 +64,26 @@ void drawEmbeddingQA(
   maker->SetOutputDirectory(outputDirectory);
 
   // Draw all QA plots
-//  maker->Draw();
+//  maker->draw();
 
   // or draw each QA
   // Event-wise QA
-  maker->DrawEvent();
+  maker->drawEvent();
 
   // MC tracks
-  maker->DrawMcTrack();
+  maker->drawMcTrack();
  
   // Reconstructed track compared with real data
   // Either
-  maker->DrawTrack();
+  maker->drawTrack();
   // or
-//  maker->DrawGeantId();
-//  maker->DrawRapidity();
-//  maker->DrawMomentumAndPt();
-//  maker->DrawdEdx();
-//  maker->DrawDca();
-//  maker->DrawNHit();
+//  maker->drawGeantId();
+//  maker->drawRapidity();
+//  maker->drawMomentum();
+//  maker->drawPt();
+//  maker->drawdEdx();
+//  maker->drawDca();
+//  maker->drawNHit();
 }
 
 
