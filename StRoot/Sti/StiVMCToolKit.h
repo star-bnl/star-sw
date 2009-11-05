@@ -24,11 +24,11 @@
 #include "TGeoXtru.h"
 class Elem_t;
 struct VolumeMap_t {
-  Char_t *name;
-  Char_t *comment;
-  Char_t *path;
-  Char_t *set;
-  Char_t *det;
+  const Char_t *name;
+  const Char_t *comment;
+  const Char_t *path;
+  const Char_t *set;
+  const Char_t *det;
 };
 namespace StiVMCToolKit {
   void              PrintShape(TGeoShape *shape);							 

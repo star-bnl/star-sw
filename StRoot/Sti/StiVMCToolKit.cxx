@@ -21,7 +21,7 @@ struct Elem_t {
   Double_t Z;
 };
 struct ElemV_t {
-  Char_t   *name;
+  const Char_t   *name;
   Double_t     A;
   Double_t     Z;
   Double_t     V; // by  volume 
@@ -200,7 +200,6 @@ void StiVMCToolKit::PrintShape(TGeoShape *shape) {
 	break;   
       case TGeoShape::kGeoTubeSeg:  
 	tubs = (TGeoTubeSeg *) shape; 
-	tubs->GetDz()*TMath::Abs(tubs->GetPhi2()-tubs->GetPhi1())/360.;
 	cout << "Tubs\tRmin\t" << tubs->GetRmin() << "\tRmax\t" <<  tubs->GetRmax() << "\tdZ\t" << tubs->GetDz() 
 	     << "\tPhi1\t" << tubs->GetPhi1() << "\tPhi2\t" << tubs->GetPhi2()
 	     << endl;
@@ -647,7 +646,7 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
   if (Debug()) PrintShape(shapeT);
   shapeT->ComputeBBox();  
   TGeoBBox * Box = (TGeoBBox *) shapeT; 
-  Double_t dx, dy, dz, rmin, rmax;
+  Double_t dx=-2001, dy=-2002, dz=-2003, rmin=-2009, rmax=-2010;
   Double_t paramsBC[4];
   shapeT->GetBoundingCylinder(paramsBC);
   Double_t volBB = 8*Box->GetDX()*Box->GetDY()*Box->GetDZ();
@@ -674,7 +673,7 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
       if (Debug()) cout << "\tKeep shape ===========\t";
     }
     else {
-      if (volBB <= volBC || xyzM && xyzM[0]*xyzM[0] + xyzM[1]*xyzM[1] > 1.e-3) {
+      if ( (volBB <= volBC) || (xyzM && xyzM[0]*xyzM[0] + xyzM[1]*xyzM[1] > 1.e-3) ) {
 	iShape = 1;
 	volB = volBB;
 	dx = Box->GetDX();

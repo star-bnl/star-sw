@@ -155,10 +155,18 @@ public:
   int    getNullCount() const       	{return nullCount;}
   int    getContigHitCount () const 	{return contiguousHitCount ;}
   int    getContigNullCount() const 	{return contiguousNullCount;}
-  char  &getHitCount () 		{return hitCount;}
-  char  &getNullCount()        		{return nullCount;}
-  char  &getContigHitCount ()  		{return contiguousHitCount ;}
-  char  &getContigNullCount()  		{return contiguousNullCount;}
+  //const char  &getHitCount () const 		{return hitCount;}
+  //const char  &getNullCount()  const		{return nullCount;}
+  //const char  &getContigHitCount () const 		{return contiguousHitCount ;}
+  //const char  &getContigNullCount() const 		{return contiguousNullCount;}
+  int incHitCount () 		{return ++hitCount;}
+  int incNullCount() 		{return ++nullCount;}
+  int incContigHitCount () {return ++contiguousHitCount ;}
+  int incContigNullCount() {return ++contiguousNullCount;}
+  void setHitCount (char c=0)       { hitCount=c;}
+  void setNullCount(char c=0)       { nullCount=c;}
+  void setContigHitCount (char c=0) { contiguousHitCount=c ;}
+  void setContigNullCount(char c=0) { contiguousNullCount=c;}
   double getTime() const;
 
   void   setHitCand(int nhits)		{mHitCand = nhits;}
@@ -241,9 +249,9 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   static Int_t  debug()           {return _debug;}
   static void   setDebug(Int_t m) {_debug = m;}
   static void   SetLaser(Int_t m) {_laser = m;}
-  void   PrintpT(Char_t *opt="");
+  void   PrintpT(const Char_t *opt="") const ;
   int    getFlipFlop() const 			{return mFlipFlop;}
-  static void   ResetComment(Char_t *m = "") 	{comment = m; commentdEdx = "";}
+  static void   ResetComment(const Char_t *m = "") 	{comment = m; commentdEdx = "";}
   static const Char_t *Comment() 		{return comment.Data();}
   /// rotation angle of local coordinates wrt global coordinates
   int   print(const char *opt) const;
