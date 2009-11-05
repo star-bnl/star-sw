@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.107 2007/09/01 02:26:12 fine Exp $
+// $Id: doEvents.C,v 1.108 2009/11/05 21:37:12 fisyak Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -217,8 +217,10 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   // Maker to read events from file or database into StEvent
   if (!mainBranch.Contains("mudstBranch") &&
       mainBranch.Contains("dstBranch")) {
+    gSystem->Load("libStMagF"):
       gSystem->Load("StTpcDb");
       gSystem->Load("StEventMaker");
+      new StMagFMaker;
     StEventMaker *readerMaker =  new StEventMaker("events","title");
   }
     //  Sample analysis maker
@@ -483,6 +485,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.108  2009/11/05 21:37:12  fisyak
+// Add StMagF for StTpcDb
+//
 // Revision 1.107  2007/09/01 02:26:12  fine
 // introduce Event selection to fix isseu #1051
 //
