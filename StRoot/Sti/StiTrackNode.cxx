@@ -331,8 +331,8 @@ void StiNodeErrs::print() const
 //______________________________________________________________________________
 int StiNodeErrs::check(const char *pri) const
 {
-  int i,j,kase=0;
-  double aii,ajj,aij;
+  int i=-2008,j=2009,kase=0;
+  double aii=-20091005,ajj=-20101005,aij=-20111005;
   int i0=0; if (!_cXX) i0 = 1;
   for (i=i0;i<kNPars;i++) {
     aii = A[idx66[i][i]];

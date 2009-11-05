@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.125 2009/10/18 22:48:58 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.126 2009/11/05 17:37:52 fine Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.126  2009/11/05 17:37:52  fine
+ * remove the compilation warnings
+ *
  * Revision 2.125  2009/10/18 22:48:58  perev
  * remove STAR LOG in print()
  *
@@ -2007,7 +2010,7 @@ void StiKalmanTrackNode::backStatics(double *sav)
   mgP.dy=             sav[16];
 }
 //________________________________________________________________________________
-void   StiKalmanTrackNode::PrintpT(Char_t *opt) {
+void   StiKalmanTrackNode::PrintpT(const Char_t *opt) const {
   // opt = "E" extapolation
   //       "M" Multiple scattering
   //       "V" at Vertex

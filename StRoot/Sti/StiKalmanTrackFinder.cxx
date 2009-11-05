@@ -776,19 +776,20 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
     if (node->getRxy() < kRMinTpc) {
       qa.wits+=StiKalmanTrackFinderParameters::instance()->hitWeight((int)node->getRxy());
     }
-    node->getHitCount()++;
-    node->getContigHitCount()++;
+    node->incHitCount();
+    node->incContigHitCount();
+
     if (node->getContigHitCount()>StiKalmanTrackFinderParameters::instance()->minContiguousHitCountForNullReset())
-       node->getContigNullCount() = 0;
+       node->setContigNullCount();
 
   } else if (position>0 || !active) {// detectors edge - don't really expect a hit here
     qa.qa=0;
 
   } else {// there should have been a hit but we found none
       if (debug() > 2) cout << " no hit but expected one"<<endl;
-      node->getNullCount()++; 
-      node->getContigNullCount()++;
-      node->getContigHitCount() = 0;
+      node->incNullCount(); 
+      node->incContigNullCount();
+      node->setContigHitCount();
       qa.nits++; qa.qa=-1;
       if (node->getNullCount()>maxNullCount) 			qa.qa= -3;
       if (node->getContigNullCount()>maxContiguousNullCount)	qa.qa= -3;
