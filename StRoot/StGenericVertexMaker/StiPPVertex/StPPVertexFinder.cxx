@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.34 2009/07/09 21:29:03 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.35 2009/11/05 21:40:08 rjreed Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -1183,7 +1183,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   // cout<<"#m nFit="<<nFit<<" of nPos="<<nPos<<endl;
 
   if(nFit<  mMinFitPfrac  * nPos) return false; // too short fragment of a track
-
+  t.scanNodes(hitPatt,jz0); // if central membrane is crossed
   return true;
 }
 
@@ -1225,6 +1225,10 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.35  2009/11/05 21:40:08  rjreed
+ * Last line of matchTrack2Membrane was deleted between version 1.29 and 1.30.  This line checks
+ * tracks to determine whether they've crossed the TPC CM.  This rev reinstates the line.
+ *
  * Revision 1.34  2009/07/09 21:29:03  balewski
  * allow export of prim tracks for 3D beam line fit (use VtxSeedCalG option),
  * oneTrack vertex thresholds was lowered form 15 to 10 GeV/c
