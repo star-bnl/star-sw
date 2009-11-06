@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.47 2009/11/02 17:31:41 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.48 2009/11/06 13:41:31 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.48  2009/11/06 13:41:31  fisyak
+ * Revert the change done 11/03/09
+ *
  * Revision 1.47  2009/11/02 17:31:41  fisyak
  * use directly field from StarMagField, replace St_tpcGainC and St_tpcT0C by St_tpcPadGainT0C, add remove defaults in coordinate transformations
  *
@@ -541,7 +544,9 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   if (m_Mode%1000000 & 2) {
     Int_t option = (m_Mode & 0xfffc) >> 2;
     StMagUtilities *magU = new StMagUtilities(gStTpcDb, 0, option);
+#if 0
     magU->SetMagFactor(gFactor);
+#endif
     m_TpcDb->SetExB(magU);
     
   }
