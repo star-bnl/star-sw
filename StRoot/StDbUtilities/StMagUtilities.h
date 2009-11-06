@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.41 2009/11/03 14:07:09 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.42 2009/11/06 13:38:05 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,8 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
- * Revision 1.41  2009/11/03 14:07:09  fisyak
- * Define Set/GetMagFactor()
+ * Revision 1.42  2009/11/06 13:38:05  fisyak
+ * Revert the change done 11/03/09
  *
  * Revision 1.40  2009/10/19 21:29:01  jhthomas
  * Improved execution speed for many algorithms: especially GridLeak.
@@ -186,10 +186,9 @@ class StMagUtilities {
   StDetectorDbTpcVoltages*   fTpcVolts      ;
   StDetectorDbTpcOmegaTau*   fOmegaTau      ;
   StDetectorDbGridLeak*      fGridLeak      ;
-  static Float_t gFactor;
 
   virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
-  virtual Float_t GetMagFactor ()   {return gFactor;}
+  virtual void    GetMagFactor ()     ;
   virtual void    GetTPCParams ()     ;
   virtual void    GetTPCVoltages ()   ;
   virtual void    GetSpaceCharge ()   ;
@@ -286,7 +285,6 @@ class StMagUtilities {
   StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 ) ;
   virtual ~StMagUtilities () {}
 
-  virtual void    SetMagFactor (Float_t p) {gFactor = p;}
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    B3DField ( const Float_t x[], Float_t B[] ) ;
