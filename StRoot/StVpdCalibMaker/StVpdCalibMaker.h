@@ -1,16 +1,22 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.h,v 1.1 2009/11/09 20:55:54 geurts Exp $
+ * $Id: StVpdCalibMaker.h,v 1.2 2009/11/09 21:26:02 geurts Exp $
  *
- * Author: Xin Dong
- *****************************************************************
- *
- * Description: - VPD Calibration Maker to do the calibration for upVPD 
- *              - store into StBTofHeader
- *
- *****************************************************************
+ *******************************************************************/
+/*!
+ \class StVpdCalibMaker
+ \author Xin Dong
+ The VPD Calibration Maker applies the calibration for upVPD start detectors.
+ The Maker reads the pre-determined calibration constants from either
+ database or standard formatted files. The calibrated VPD information is
+ stored in the btofheader.
+*/
+/*****************************************************************
  *
  * $Log: StVpdCalibMaker.h,v $
+ * Revision 1.2  2009/11/09 21:26:02  geurts
+ * basic doxygen added
+ *
  * Revision 1.1  2009/11/09 20:55:54  geurts
  * first release
  *
@@ -137,7 +143,7 @@ private:
   string mCalibFilePvpd; //! filename for pvpd calibration parameters
 
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.1 2009/11/09 20:55:54 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.2 2009/11/09 21:26:02 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
   ClassDef(StVpdCalibMaker,1)
 };
