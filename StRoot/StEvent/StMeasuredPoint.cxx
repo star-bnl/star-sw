@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMeasuredPoint.cxx,v 2.3 2005/07/06 18:58:15 fisyak Exp $
+ * $Id: StMeasuredPoint.cxx,v 2.4 2009/11/09 22:38:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMeasuredPoint.cxx,v $
+ * Revision 2.4  2009/11/09 22:38:15  ullrich
+ * Changed format of print out.
+ *
  * Revision 2.3  2005/07/06 18:58:15  fisyak
  * Add print out
  *
@@ -21,8 +24,9 @@
  *
  **************************************************************************/
 #include "StMeasuredPoint.h"
+#include "TString.h"
 
-static const char rcsid[] = "$Id: StMeasuredPoint.cxx,v 2.3 2005/07/06 18:58:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StMeasuredPoint.cxx,v 2.4 2009/11/09 22:38:15 ullrich Exp $";
 
 ClassImp(StMeasuredPoint)
 
@@ -53,8 +57,10 @@ StMeasuredPoint::position() const { return mPosition; }
 
 ostream&  operator<<(ostream& os, const StMeasuredPoint& v)
 {
-  return os << "StMeasuredPoint: " << v.position();
+  return os << Form("xyz:%10.3f%10.3f%10.3f",
+                    v.position().x(),
+                    v.position().y(),
+                    v.position().z());
 }
 
-void
-StMeasuredPoint::Print(Option_t *option) const {cout << *this << endl;}
+void StMeasuredPoint::Print(Option_t *option) const {cout << *this << endl;}
