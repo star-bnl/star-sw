@@ -4,6 +4,16 @@
 // 12 Jan 2009
 //
 
+// MySQL C API
+#include "/usr/include/mysql/mysql.h"
+
+#if 0
+// ROOT MySQL
+#include "TMySQLServer.h"
+#include "TMySQLResult.h"
+#include "TMySQLRow.h"
+#endif
+
 // STAR
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_trgDsmReg_Table.h"
@@ -150,13 +160,16 @@ int StEmcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 int StEmcTriggerSimu::defineTriggers()
 {
-  // Get chain
+  // Get run number from chain
   StMaker* chain = StMaker::GetChain();
   if (!chain) {
     LOG_WARN << "Can't get chain" << endm;
     return kStWarn;
   }
 
+  int runNumber = chain->GetRunNumber();
+
+#if 0
   // Retrieve triggerInfo table from offline DB
   TDataSet* db = chain->GetDataBase("RunLog/onl/triggerInfo");
 
@@ -203,6 +216,138 @@ int StEmcTriggerSimu::defineTriggers()
 
     mTcu->defineTrigger(trgDef);
   } // End loop over rows
+#endif
+
+#if 0
+  // Open connection to Run 9 database
+
+  LOG_INFO << "Open connection to Run 9 database" << endm;
+
+  TString database = "mysql://dbbak.starp.bnl.gov:3408/Conditions_rts";
+  TString user = "";
+  TString pass = "";
+
+  LOG_INFO << "database:\t" << database << endm;
+  LOG_INFO << "user:\t" << user << endm;
+  LOG_INFO << "pass:\t" << pass << endm;
+  
+  TMySQLServer* mysql = (TMySQLServer*)TMySQLServer::Connect(database, user, pass);
+
+  if (!mysql) {
+    LOG_WARN << "Could not connect to Run 9 database" << endm;
+    return kStWarn;
+  }
+
+  // Trigger definitions
+
+  LOG_INFO << "Get triggers for run " << runNumber << endm;
+
+  TriggerDefinition triggers[32];
+
+  TString query = Form("select idx_trigger,name,offlineBit from triggers where idx_rn = %d", runNumber);
+
+  LOG_INFO << query << endm;
+
+  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query)) {
+    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
+      int idx_trigger = atoi(row->GetField(0));
+      triggers[idx_trigger].idx_trigger = idx_trigger;
+      triggers[idx_trigger].name = row->GetField(1);
+      triggers[idx_trigger].triggerId = atoi(row->GetField(2));
+      delete row;
+    }
+    delete result;
+  }
+
+  TString query2 = Form("select idx_idx,onbits from pwc where idx_rn = %d", runNumber);
+
+  LOG_INFO << query2 << endm;
+
+  if (TMySQLResult* result = (TMySQLResult*)mysql->Query(query2)) {
+    LOG_INFO << setw(20) << "idx_trigger"
+             << setw(20) << "name"
+             << setw(20) << "offlineBit"
+             << setw(20) << "physicsBits"
+             << endm;
+
+    while (TMySQLRow* row = (TMySQLRow*)result->Next()) {
+      int idx_trigger = atoi(row->GetField(0));
+      triggers[idx_trigger].physicsBits = atoi(row->GetField(1));
+      mTcu->defineTrigger(triggers[idx_trigger]);
+
+      LOG_INFO << setw(20) << idx_trigger
+               << setw(20) << triggers[idx_trigger].name
+               << setw(20) << triggers[idx_trigger].triggerId
+               << setw(20) << Form("0x%04x", triggers[idx_trigger].physicsBits)
+               << endm;
+
+      delete row;
+    }
+    delete result;
+  }
+#endif
+
+  // Open connection to Run 9 database
+
+  MYSQL mysql;
+  const char* host = "dbbak.starp.bnl.gov";
+  const char* user = "";
+  const char* pass = "";
+  unsigned int port = 3408;
+  const char* database = "Conditions_rts";
+  const char* unix_socket = NULL;
+  unsigned long client_flag = 0;
+
+  mysql_init(&mysql);
+
+  if (!mysql_real_connect(&mysql,host,user,pass,database,port,unix_socket,client_flag)) {
+    LOG_WARN << "Can't connect to database: " << mysql_error(&mysql) << endm;
+    return kStWarn;
+  }
+
+  // Trigger definitions
+
+  TriggerDefinition triggers[32];
+
+  TString query = Form("select idx_trigger,name,offlineBit from triggers where idx_rn = %d", runNumber);
+  LOG_INFO << query << endm;
+  mysql_query(&mysql,query);
+
+  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+      int idx_trigger = atoi(row[0]);
+      triggers[idx_trigger].idx_trigger = idx_trigger;
+      triggers[idx_trigger].name = row[1];
+      triggers[idx_trigger].triggerId = atoi(row[2]);
+    }
+    mysql_free_result(result);
+  }
+
+  TString query2 = Form("select idx_idx,onbits from pwc where idx_rn = %d", runNumber);
+  LOG_INFO << query2 << endm;
+  mysql_query(&mysql,query2);
+
+  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+    LOG_INFO << setw(20) << "idx_trigger"
+             << setw(20) << "name"
+             << setw(20) << "offlineBit"
+             << setw(20) << "physicsBits"
+             << endm;
+
+    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+      int idx_trigger = atoi(row[0]);
+      triggers[idx_trigger].physicsBits = atoi(row[1]);
+      mTcu->defineTrigger(triggers[idx_trigger]);
+      LOG_INFO << setw(20) << idx_trigger
+               << setw(20) << triggers[idx_trigger].name
+               << setw(20) << triggers[idx_trigger].triggerId
+               << setw(20) << Form("0x%04x", triggers[idx_trigger].physicsBits)
+               << endm;
+    }
+    mysql_free_result(result);
+  }
+
+  mysql_close(&mysql);
 
   return kStOk;
 }
