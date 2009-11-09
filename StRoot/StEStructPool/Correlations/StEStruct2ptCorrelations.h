@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.14 2009/05/08 00:09:54 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.15 2009/11/09 21:32:41 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -329,7 +329,7 @@ inline int StEStruct2ptCorrelations::getInterestingPair() {
 }
 
 inline void StEStruct2ptCorrelations::logStats(ostream& os){
-  char* htp[]={"SibPP","SibPM","SibMP","SibMM","MixPP","MixPM","MixMP","MixMM"};
+  const char* htp[]={"SibPP","SibPM","SibMP","SibMM","MixPP","MixPM","MixMP","MixMM"};
   for(int i=0;i<8;i++){
     os<<"<pairType>"<<htp[i]<<" "<<endl;;
    os<<"   <processStat \"possiblePairs\">"<<getPossiblePairs(i);
@@ -350,6 +350,9 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.15  2009/11/09 21:32:41  prindle
+ * Fix warnings about casting char * to a const char * by redeclaring as const char *.
+ *
  * Revision 1.14  2009/05/08 00:09:54  prindle
  * In 2ptCorrelations we added switches to select blocks of histograms to fill.
  * (See constructor in StEStruct2ptCorrelations.cxx)

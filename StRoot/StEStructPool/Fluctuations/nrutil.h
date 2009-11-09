@@ -41,7 +41,7 @@ class numericalRecipes {
     static void free_imatrix(int **m, long nrl, long nrh, long ncl, long nch);
     static void free_submatrix(float **b, long nrl, long nrh, long ncl, long nch);
     static void free_convert_matrix(float **b, long nrl, long nrh, long ncl, long nch);
-    static void nrerror(char error_text[]);
+    static void nrerror(const char error_text[]);
 };
 
 #endif

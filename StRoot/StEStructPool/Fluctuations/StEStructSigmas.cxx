@@ -725,8 +725,6 @@ void StEStructSigmas::PHistograms() {
 
     
     int iBinFS = (int) (hnBins->GetBinContent(mNPhiBins,mNEtaBins)+hoffset->GetBinContent(mNPhiBins,mNEtaBins));
-    double nScaleSum  = (double) (hNSum[0]->GetBinContent(iBinFS) + hNSum[1]->GetBinContent(iBinFS));
-    double nScaleBins = (double) hTotEvents[0]->GetBinContent(iBinFS);
     double nplus  = (double) hNSum[0]->GetBinContent(iBinFS);
     double nminus = (double) hNSum[1]->GetBinContent(iBinFS);
     double pplus  = (double) hPSum[1]->GetBinContent(iBinFS);
@@ -797,8 +795,6 @@ void StEStructSigmas::PHistograms() {
                     double PMinus = PS[2];
                     double NSum   = NPlus + NMinus;
                     double PSum   = PPlus + PMinus;
-                    double PSig   = PS[17];
-                    double NSig   = PS[16];
                     nTracksTotal += NSum;
                     nBinsTotal   += totEvents;
                     if (NSum > 0) {

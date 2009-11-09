@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.23 2009/08/17 23:05:20 dkettler Exp $
+ * $Id: StEStructSupport.cxx,v 1.24 2009/11/09 21:32:59 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -534,9 +534,9 @@ void StEStructSupport::symmetrizeUS(const char *name, TH2D** histos) {
   // To form CD and CI combos we need the US to be symmetrized in the cases the LS are.
 
   // Histograms to be symmetrized are:
-  char *symHistos[] = {"YtYt",   "NYtYt",   "PtPt",
-                       "PhiPhi", "NPhiPhi", "PrPhiPhi", "PaPhiPhi", "PbPhiPhi",
-                       "EtaEta",            "PrEtaEta", "PaEtaEta", "PbEtaEta"};
+  const char *symHistos[] = {"YtYt",   "NYtYt",   "PtPt",
+                             "PhiPhi", "NPhiPhi", "PrPhiPhi", "PaPhiPhi", "PbPhiPhi",
+                             "EtaEta",            "PrEtaEta", "PaEtaEta", "PbEtaEta"};
   // eight input histograms ++,+-,-+,-- for Sib and Mix
   int symInt[] = {1,2, 5, 6};
   for (int xy=0;xy<12;xy++) {
@@ -562,9 +562,9 @@ void StEStructSupport::symmetrizePtUS(const char *name, TH2D** histos) {
   // To form CD and CI combos we need the US to be symmetrized in the cases the LS are.
 
   // Histograms to be symmetrized are:
-  char *symHistos[] = {"YtYt",   "NYtYt",   "PtPt",
-                       "PhiPhi", "NPhiPhi", "PrPhiPhi", "PaPhiPhi", "PbPhiPhi",
-                       "EtaEta",            "PrEtaEta", "PaEtaEta", "PbEtaEta"};
+  const char *symHistos[] = {"YtYt",   "NYtYt",   "PtPt",
+                             "PhiPhi", "NPhiPhi", "PrPhiPhi", "PaPhiPhi", "PbPhiPhi",
+                             "EtaEta",            "PrEtaEta", "PaEtaEta", "PbEtaEta"};
   int symInt[] = {1,2, 5, 6};
   //    4 groups of 8 (Sibpp,Sibpm,Sibmp,Sibmm,Mixpp,Mixpm,Mixmp,Mixmm) 
   //    1st 8 are number, 2nd 8 are pt1*pt2, 3rd 8 are pt1 and 4th 8 are pt2
@@ -1511,6 +1511,9 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.24  2009/11/09 21:32:59  prindle
+ * Fix warnings about casting char * to a const char * by redeclaring as const char *.
+ *
  * Revision 1.23  2009/08/17 23:05:20  dkettler
  * Normalization fix
  *

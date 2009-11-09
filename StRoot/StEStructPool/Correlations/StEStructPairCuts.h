@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.17 2009/05/08 00:09:55 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.18 2009/11/09 21:32:41 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -140,7 +140,7 @@ public:
   virtual bool loadBaseCuts(const char* name, const char** vals, int nvals);
   virtual void loadUserCuts(const char* name, const char** vals, int nvals);
   virtual void printCutStats(ostream& ofs);
-  virtual void printCutCounts(ostream& ofs, char* cutType,int c1, int c2);
+  virtual void printCutCounts(ostream& ofs, const char* cutType,int c1, int c2);
 
   float BField() const { return mBField; };
   void SetBField(const float bfield){ mBField=bfield; };
@@ -918,6 +918,9 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.18  2009/11/09 21:32:41  prindle
+ * Fix warnings about casting char * to a const char * by redeclaring as const char *.
+ *
  * Revision 1.17  2009/05/08 00:09:55  prindle
  * In 2ptCorrelations we added switches to select blocks of histograms to fill.
  * (See constructor in StEStruct2ptCorrelations.cxx)
