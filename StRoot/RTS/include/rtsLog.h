@@ -48,7 +48,7 @@ extern "C" {
 #define RTS_LOG_PORT_L3		8009
 #define RTS_LOG_PORT_DET	8010
 
-#define RTS_LOG_PORT	RTS_LOG_PORT_RTS	/* default, rts.log, port */
+#define RTS_LOG_PORT	RTS_LOG_PORT_TEST	/* default, test.log, port */
 
 /* the hostname _must_ be in the number notation! */
 #ifdef RTS_DAQMAN
