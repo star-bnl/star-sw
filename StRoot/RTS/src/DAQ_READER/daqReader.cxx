@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.23 2009/11/04 11:44:52 tonko Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.24 2009/11/09 21:05:29 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -144,7 +144,7 @@ void daqReader::init()
   rtsLogAddDest("130.199.60.86",RTS_LOG_PORT_READER) ;	// reader.log to daqman
 
   // allow this one message to daqman's reader log...
-  rtsLogOutout(RTS_LOG_NET) ;
+  rtsLogOutput(RTS_LOG_NET) ;
   LOG(INFO,"daqReader::init  [%s]",cvs_id_string) ;
   // back to STDERR
   rtsLogOutput(RTS_LOG_STDERR) ;	// STDERR only!
