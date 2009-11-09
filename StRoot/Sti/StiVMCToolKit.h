@@ -1,5 +1,6 @@
 #ifndef StiVMCToolKit_h
 #define StiVMCToolKit_h
+
 #include "TString.h"
 #include "TGeoManager.h"
 #include "TGeoPhysicalNode.h"
@@ -30,16 +31,16 @@ struct VolumeMap_t {
   const Char_t *set;
   const Char_t *det;
 };
+
 namespace StiVMCToolKit {
   void              PrintShape(TGeoShape *shape);							 
-  Double_t          GetShapeVolume(TGeoShape *shape);						 
   Int_t             Add2ElementList(Int_t NElem,const TGeoMaterial *mat, Elem_t *ElementList);	 
-  Int_t             Add2ElementList(Int_t NElem,  Elem_t *ElementList, 				 
-				    Int_t NElemD, Elem_t *ElementListD, Double_t weight);		 
+  Int_t             Merge2ElementList(Int_t NElem,  Elem_t *ElementList, 				 
+  				    Int_t NElemD, Elem_t *ElementListD, Double_t weight);		 
   Int_t             NormolizeElementList(Int_t NElem, Elem_t *ElementList);				 
-  Double_t          GetWeight(TGeoNode *nodeT = 0, TString pathT = "HALL_1/CAVE_1/SVTT_1", 		 
+  Double_t          GetWeight(TGeoNode *nodeT = 0, const TString &pathT = "HALL_1/CAVE_1/SVTT_1", 		 
 			      Int_t *NElem = 0, Elem_t *ElementList = 0);				 
-  Double_t          GetWeight(TGeoVolume *volT, Int_t *NElem = 0, Elem_t *ElementList = 0);		 
+  Double_t          GetVolumeWeight(TGeoVolume *volT, Int_t *NElem = 0, Elem_t *ElementList = 0);		 
   void              MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TGeoMedium *&newmed, 
         			      Double_t *xyzM=0);	 
   TGeoManager      *GetVMC();                                                                        

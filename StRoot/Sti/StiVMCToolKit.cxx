@@ -14,11 +14,20 @@
 #else
 #define BIT(n)       (1 << (n))
 #endif
+static Int_t __addelement__(Int_t NElem,const TGeoMaterial *mat, Elem_t *ElementList) {
+   cerr << __FUNCTION__ << " NElem:" << NElem
+         <<";  const TGeoMaterial *mat=" << mat
+         << "; Elem_t *ElementList=" << ElementList
+         << endl;
+   return StiVMCToolKit::Add2ElementList(NElem, mat, ElementList);
+}
+
 struct Elem_t {
   Int_t    index;
   Double_t W;
   Double_t A;
   Double_t Z;
+  Elem_t() : index(0),W(0),A(0),Z(0) {}
 };
 struct ElemV_t {
   const Char_t   *name;
@@ -461,7 +470,7 @@ Int_t StiVMCToolKit::Add2ElementList(Int_t NElem,const TGeoMaterial *mat, Elem_t
   return NElem;
 }
 //________________________________________________________________________________ 
-Int_t StiVMCToolKit::Add2ElementList(Int_t NElem, Elem_t *ElementList, 
+Int_t StiVMCToolKit::Merge2ElementList(Int_t NElem, Elem_t *ElementList, 
 						Int_t NElemD, Elem_t *ElementListD, Double_t weight) {
   assert(NElem>=0 && NElem<NoElemMax);
       for (Int_t i = 0; i < NElemD; i++) {
@@ -503,7 +512,7 @@ Int_t StiVMCToolKit::NormolizeElementList(Int_t NElem, Elem_t *ElementList){
   return N;
 }
 //________________________________________________________________________________ 
-Double_t StiVMCToolKit::GetWeight(TGeoNode *nodeT, TString pathT, 
+Double_t StiVMCToolKit::GetWeight(TGeoNode *nodeT, const TString &pathT, 
 					     Int_t *NElem, Elem_t *ElementList) {
   Double_t Weight  = 0;
   Double_t WeightT = 0;
@@ -523,13 +532,16 @@ Double_t StiVMCToolKit::GetWeight(TGeoNode *nodeT, TString pathT,
   if (! shapeT) return Weight;
   Double_t volume = GetShapeVolume(shapeT);
   WeightT = Weight = dens*volume;
+#if 0  
   if (! ElementList ) {
     ElementList = new Elem_t[NoElemMax];
-    memset (ElementList, 0, NoElemMax*sizeof(Elem_t));
     NElem = new Int_t[1]; NElem[0] = 0;
   }
+#else
+  assert(ElementList && NElem);
+#endif  
   Int_t im1 = NElem[0];
-  NElem[0] = Add2ElementList(NElem[0], mat, ElementList);
+  NElem[0] = __addelement__(NElem[0], mat, ElementList);
   Int_t im2 = NElem[0];
   //  Double_t x0 = mat->GetRadLen();
   //  cout << mat->GetName() << "\tdens = " << dens << "\tx0 = " << x0 << endl;
@@ -537,7 +549,7 @@ Double_t StiVMCToolKit::GetWeight(TGeoNode *nodeT, TString pathT,
   Int_t nd = nodeT->GetNdaughters();
   //
   if (nd > 0) {
-    Double_t *weights = new Double_t[nd];
+    vector<Double_t> weights(nd);
     for (Int_t id = 0; id < nd; id++) {
       TGeoNode *node = (TGeoNode*)nodes->UncheckedAt(id);
       if (! node) continue;
@@ -555,12 +567,11 @@ Double_t StiVMCToolKit::GetWeight(TGeoNode *nodeT, TString pathT,
       if (path != "") path += "/";
       path += node->GetName();
       Int_t  NElemD[1] = {0};
-      Elem_t ElementListD[NoElemMax]; memset(ElementListD, 0, NoElemMax*sizeof(Elem_t));
+      Elem_t ElementListD[NoElemMax];
       weights[id] = GetWeight(node,path,NElemD,ElementListD);
       Weight += weights[id]; // cout << "\tWeight\t" << Weight << endl;
-      NElem[0] = Add2ElementList(NElem[0], ElementList, NElemD[0], ElementListD, weights[id]);
+      NElem[0] = Merge2ElementList(NElem[0], ElementList, NElemD[0], ElementListD, weights[id]);
     }
-    delete [] weights;
   } // nd > 0
   for (Int_t i = im1; i < im2; i++) {// update mother weight fraction
     ElementList[i].W *= WeightT;
@@ -568,35 +579,43 @@ Double_t StiVMCToolKit::GetWeight(TGeoNode *nodeT, TString pathT,
   NElem[0] = NormolizeElementList(NElem[0],ElementList);
   return Weight;
 }
+
 //________________________________________________________________________________ 
-Double_t StiVMCToolKit::GetWeight(TGeoVolume *volT, Int_t *NElem, Elem_t *ElementList) {
+Double_t StiVMCToolKit::GetVolumeWeight(TGeoVolume *volT, Int_t *NElem, Elem_t *ElementList) 
+{
+  if (! volT || !volT->GetShape()) return 0;
+  
   Double_t Weight = 0;
   Double_t WeightT = 0;
-  if (! volT) return Weight;
   const TGeoMaterial *mat = volT->GetMaterial();
+  TGeoShape *shapeT = (TGeoShape *) volT->GetShape();
+  if (! shapeT) return 0;
 
   Double_t dens = mat->GetDensity();
-  TGeoShape *shapeT = (TGeoShape *) volT->GetShape();
-  if (! shapeT) return Weight;
   if (Debug())
     cout << "volT \t" << volT->GetName() << "\t" << volT->GetTitle() << endl;
   Double_t volume = GetShapeVolume(shapeT);
-  WeightT = Weight = dens*volume;
+  Weight = dens*volume;
+  WeightT = Weight;
+#if 0  
   if (! ElementList ) {
+     
     ElementList = new Elem_t[NoElemMax];
-    memset (ElementList, 0, NoElemMax*sizeof(Elem_t));
     NElem = new Int_t[1]; NElem[0] = 0;
   }
-  Int_t im1 = NElem[0];
-  NElem[0] = Add2ElementList(NElem[0], mat, ElementList);
-  Int_t im2 = NElem[0];
+#else
+  assert(ElementList && "StiVMCToolKit::GetWeight: Create the the array first!");
+#endif
+  Int_t im1 = *NElem;
+  Int_t im2 = __addelement__(im1, mat, ElementList);
+  *NElem    = im2;
   //  Double_t x0 = mat->GetRadLen();
   //  cout << mat->GetName() << "\tdens = " << dens << "\tx0 = " << x0 << endl;
   TObjArray *nodes = volT->GetNodes();
   Int_t nd = volT->GetNdaughters();
   //
   if (nd > 0) {
-    Double_t *weights = new Double_t[nd];
+    vector<Double_t>  weights(nd);
     for (Int_t id = 0; id < nd; id++) {
       TGeoNode *node = (TGeoNode*) nodes->UncheckedAt(id);
       if (! node) continue;
@@ -611,27 +630,47 @@ Double_t StiVMCToolKit::GetWeight(TGeoVolume *volT, Int_t *NElem, Elem_t *Elemen
       WeightT -= weight;
       Weight  -= weight;
       Int_t  NElemD[1] = {0};
-      Elem_t ElementListD[NoElemMax]; memset(ElementListD, 0, NoElemMax*sizeof(Elem_t));
-      weights[id] = GetWeight(vol,NElemD,ElementListD);
+      Elem_t ElementListD[NoElemMax];
+      weights[id] = GetVolumeWeight(vol,NElemD,ElementListD);
       Weight += weights[id]; // cout << "\tWeight\t" << Weight << endl;
-      NElem[0] = Add2ElementList(NElem[0], ElementList, NElemD[0], ElementListD, weights[id]);
+      Int_t im =*NElem;
+      Int_t imm = Merge2ElementList(im, ElementList, NElemD[0], ElementListD, weights[id]);
+      *NElem = imm;
     }
-    delete [] weights;
   } // nd > 0
   for (Int_t i = im1; i < im2; i++) {// update mother weight fraction
     ElementList[i].W *= WeightT;
   }
-  NElem[0] = NormolizeElementList(NElem[0],ElementList);
+  Int_t in = *NElem;
+  Int_t inn= NormolizeElementList(in,ElementList);
+  *NElem = inn;
   return Weight;
 }
 //________________________________________________________________________________
 void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TGeoMedium *&newmed, Double_t *xyzM) {
   if (! volT) return;
-  Elem_t *ElementList = new Elem_t[NoElemMax];
-  memset (ElementList, 0, NoElemMax*sizeof(Elem_t));  
+  vector<Elem_t> ElementList(NoElemMax);
   Int_t NElem = 0;
-  Double_t Weight = GetWeight(volT, &NElem, ElementList); 
-  //  cout << volT->GetName() << "\t" << volT->GetTitle() << "\t" << Form("%10.3f [g]",Weight) << endl;
+  // NElem = ElementList.size()-1;
+  if(!volT) {
+     cout << "StiVMCToolKit::MakeAverageVolume: There os volT" << NElem << &ElementList[0] << endl;
+  }
+  cout << "StiVMCToolKit::MakeAverageVolume: There ii volT:" << NElem << " : " << &ElementList[0] << endl;
+  Int_t *al = &NElem;
+  Elem_t *el = &ElementList[0];
+  TGeoVolume *v = volT;
+  if (!( al && el ) ) {
+      cout << "StiVMCToolKit::MakeAverageVolume:(!( al && el ) ) :" << al << " : " << el << " : " << v << endl;
+      return;
+   }
+//  Double_t Weight = GetWeight(volT, &NElem, &ElementList[0]); 
+  Double_t Weight = 
+                GetVolumeWeight(v
+                , al
+                , el
+  );
+  cout << "StiVMCToolKit::MakeAverageVolume: There os volT" << NElem << &ElementList[0] << endl;
+  cout << volT->GetName() << "\t" << volT->GetTitle() << "\t" << Form("%10.3f [g]",Weight) << endl;
   const TGeoMedium   *med = volT->GetMedium(); 
   const TGeoMaterial *mat = volT->GetMaterial();
   if (Debug()) {
@@ -718,7 +757,6 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
   else if (iShape == 2) {
     newshape = new TGeoTube(rmin, rmax, dz);
   }
-  delete [] ElementList;
 }
 //________________________________________________________________________________
 TGeoManager  * StiVMCToolKit::GetVMC() {
@@ -758,7 +796,7 @@ void StiVMCToolKit::TestVMC4Reconstruction(){
       if (! volT) {cout << "Can't find " << list[j].name << "\t" << list[j].comment << endl; continue;}
       TGeoShape *shapeT = volT->GetShape();
       Double_t volume = GetShapeVolume(shapeT);
-      Double_t weight = GetWeight(volT, 0, 0);
+      Double_t weight = GetVolumeWeight(volT, 0, 0);  // it leads to the memory leak !!!
       cout << "<tr><td>"<< list[j].name << "</td><td>" << list[j].comment << "</td>"
 	   << "<td>" << Form("%10.3g",volume) << "</td>" 
 	   << "<td>" << Form("%10.3g",weight) << "</td>" 
@@ -834,10 +872,10 @@ TGeoPhysicalNode *StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const Char
   TGeoVolume *volT = nodeT->GetVolume(); 
   const Char_t *nameT = volT->GetName();
   TGeoPhysicalNode *nodeP = 0;
-  if (name && ! strncmp(nameT,name,4)) {
+  TGeoShape *newshape = 0;
+  TGeoMedium* newmed = 0;
+  if (nameT && name && ! strncmp(nameT,name,4)) {
     //    if (TString(nameT) == TString(VolumesToBeAveraged[i].name)) {
-    TGeoShape *newshape = 0;
-    TGeoMedium* newmed = 0;
     Double_t local[3] = {0, 0, 0};
     TGeoShape *shapeT = volT->GetShape();
     if (shapeT->TestShapeBit(TGeoShape::kGeoPcon) || shapeT->TestShapeBit(TGeoShape::kGeoPgon)) {
@@ -938,7 +976,7 @@ void TestVMCTK() {
    */
   // SVT weight
   TString path("HALL_1/CAVE_1/SVTT_1");
-  Double_t weight = 1.e-3*StiVMCToolKit::GetWeight(0,path, 0, 0);
+  Double_t weight = 1.e-3*StiVMCToolKit::GetWeight(0,path, 0, 0);  // It leads to the memory leak
   cout << "StiVMCToolKit::TestVMCTK() -I- total weight for " 
        << path.Data() << "\t" << weight << "[kg]" << endl;
   StiVMCToolKit::TestVMC4Reconstruction();
