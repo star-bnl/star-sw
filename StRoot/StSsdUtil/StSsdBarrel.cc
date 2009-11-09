@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.15 2009/10/29 19:21:14 fine Exp $
+// $Id: StSsdBarrel.cc,v 1.16 2009/11/09 22:33:03 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.16  2009/11/09 22:33:03  bouchet
+// bug 1679 : declaration of size and initialization of arrays
+//
 // Revision 1.15  2009/10/29 19:21:14  fine
 // Add fix me please message
 //
@@ -1048,7 +1051,7 @@ void StSsdBarrel::Calculation_Ratio(int idWafer,int idClusterP,int idClusterN,ve
   Float_t adc_DominatorN = 0;
   vector<StSsdStrip*> ListstripP;
   vector<StSsdStrip*> ListstripN;
-  vector<int> GTrackP,GTrackN;
+  vector<int> GTrackP(5,0),GTrackN(5,0);
   int isSplittedP=0,isSplittedN =0; 
   //printf("ok, idWafer=%d idClusterP = %d idClusterN = %d\n",idWafer,idClusterP,idClusterN);
   Int_t lad = idWaferToLadderNumb(idWafer);
@@ -1221,7 +1224,7 @@ Int_t StSsdBarrel::FindMcHit(const vector<int> &tempo,const vector<const StMcSsd
 {
   float ChargeTrack = 0.0;
   int idTrack =0;
-  assert(tempo.size() == 5 && "Fix me, please !!!");
+  //assert(tempo.size() == 5 && "Fix me, please !!!");
   for(int e=0;e<5;e++){
     for (unsigned int hit = 0 ; hit<hitCol.size();hit++){
       const StMcSsdHit* currHit = hitCol[hit];
