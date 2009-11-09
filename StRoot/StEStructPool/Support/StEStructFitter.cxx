@@ -388,7 +388,7 @@ double StEStructFitter::mcComponents(double* x, double* par){
     TFile* tf=new TFile("rmxTest2.root");
     mhists=new TH2F*[6];
 
-    char* snames[]={"S001","S010","S100","S011","S101","S110"};
+    const char* snames[]={"S001","S010","S100","S011","S101","S110"};
 
     double xsum=0;
     for(int i=0;i<6;i++){

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructRQMD.h,v 1.2 2006/02/22 22:05:43 prindle Exp $
+ * $Id: StEStructRQMD.h,v 1.3 2009/11/09 21:32:58 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -40,7 +40,7 @@ class StEStructRQMD : public StEStructEventReader {
   int  mIFile;
   int  mLine;
   int  mMaxFiles;
-  char *mFileDir;
+  const char *mFileDir;
   ifstream *mFile;
 
   StEStructRQMD();
@@ -100,6 +100,9 @@ inline float* StEStructRQMD::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructRQMD.h,v $
+ * Revision 1.3  2009/11/09 21:32:58  prindle
+ * Fix warnings about casting char * to a const char * by redeclaring as const char *.
+ *
  * Revision 1.2  2006/02/22 22:05:43  prindle
  * Removed all references to multRef (?)
  *

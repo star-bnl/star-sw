@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.13 2009/05/08 00:21:42 prindle Exp $
+ * $Id: StEStructHAdd.cxx,v 1.14 2009/11/09 21:32:59 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -58,9 +58,9 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                     0,   0};
     const char* symEtaPhi[]={"DEtaDPhi", "NDEtaDPhi", "PrDEtaDPhi", "PaDEtaDPhi", "PbDEtaDPhi"};
     const char* symPhi[]={"SEtaDPhi", "NSEtaDPhi", "PrSEtaDPhi", "PaSEtaDPhi", "PbSEtaDPhi"};
-    char* Title[]={"Sibling","Mixed"};
-    char* Species[]={"A","B"};
-    char* Type[]={" : +.+"," : +.-"," : -.+"," : -.-"};
+    const char* Title[]={"Sibling","Mixed"};
+    const char* Species[]={"A","B"};
+    const char* Type[]={" : +.+"," : +.-"," : -.+"," : -.-"};
     StEStructBinning* b=StEStructBinning::Instance();
     StEStructCutBin* cb = StEStructCutBin::Instance();
 
@@ -446,10 +446,10 @@ void StEStructHAdd::addDensities(const char* outfile, TFile* inFile) {
             us[i] = (TH2D *) tmp->Clone();  us[i]->Clear();
         }
         TString hDensName;
-        char *typePP[] = {"SibppTPCMidTZ_cutBin_", "SibppTPCMidTZC_cutBin_", "SibppTPCMidTZNC_cutBin_", "MixppTPCMidTZ_cutBin_", "MixppTPCMidTZC_cutBin_", "MixppTPCMidTZNC_cutBin_"};
-        char *typeMM[] = {"SibmmTPCMidTZ_cutBin_", "SibmmTPCMidTZC_cutBin_", "SibmmTPCMidTZNC_cutBin_", "MixmmTPCMidTZ_cutBin_", "MixmmTPCMidTZC_cutBin_", "MixmmTPCMidTZNC_cutBin_"};
-        char *typePM[] = {"SibpmTPCMidTZ_cutBin_", "SibpmTPCMidTZC_cutBin_", "SibpmTPCMidTZNC_cutBin_", "MixpmTPCMidTZ_cutBin_", "MixpmTPCMidTZC_cutBin_", "MixpmTPCMidTZNC_cutBin_"};
-        char *typeMP[] = {"SibmpTPCMidTZ_cutBin_", "SibmpTPCMidTZC_cutBin_", "SibmpTPCMidTZNC_cutBin_", "MixmpTPCMidTZ_cutBin_", "MixmpTPCMidTZC_cutBin_", "MixmpTPCMidTZNC_cutBin_"};
+        const char *typePP[] = {"SibppTPCMidTZ_cutBin_", "SibppTPCMidTZC_cutBin_", "SibppTPCMidTZNC_cutBin_", "MixppTPCMidTZ_cutBin_", "MixppTPCMidTZC_cutBin_", "MixppTPCMidTZNC_cutBin_"};
+        const char *typeMM[] = {"SibmmTPCMidTZ_cutBin_", "SibmmTPCMidTZC_cutBin_", "SibmmTPCMidTZNC_cutBin_", "MixmmTPCMidTZ_cutBin_", "MixmmTPCMidTZC_cutBin_", "MixmmTPCMidTZNC_cutBin_"};
+        const char *typePM[] = {"SibpmTPCMidTZ_cutBin_", "SibpmTPCMidTZC_cutBin_", "SibpmTPCMidTZNC_cutBin_", "MixpmTPCMidTZ_cutBin_", "MixpmTPCMidTZC_cutBin_", "MixpmTPCMidTZNC_cutBin_"};
+        const char *typeMP[] = {"SibmpTPCMidTZ_cutBin_", "SibmpTPCMidTZC_cutBin_", "SibmpTPCMidTZNC_cutBin_", "MixmpTPCMidTZ_cutBin_", "MixmpTPCMidTZC_cutBin_", "MixmpTPCMidTZNC_cutBin_"};
         for (int iCut=0;iCut<nCut;iCut++) {
             for (int zBuf=0;zBuf<nZBuf;zBuf++) {
                 for (int it=0;it<6;it++) {
@@ -547,6 +547,9 @@ void StEStructHAdd::combineUS(TFile * modFile) {
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.14  2009/11/09 21:32:59  prindle
+ * Fix warnings about casting char * to a const char * by redeclaring as const char *.
+ *
  * Revision 1.13  2009/05/08 00:21:42  prindle
  * In StEStructHadd remove support for old style of histogram names, do a better job calculating
  * errors (at least for number (\eta_\Delta,\phi_\Delta) histograms), double bins which

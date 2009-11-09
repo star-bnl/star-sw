@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.11 2009/05/08 00:09:55 prindle Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.12 2009/11/09 21:32:41 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -338,7 +338,7 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
   return false;
 };
 
-void StEStructPairCuts::printCutCounts(ostream& ofs, char* cutName,int c1,int c2){
+void StEStructPairCuts::printCutCounts(ostream& ofs, const char* cutName,int c1,int c2){
   ofs<<cutName<<c1<<" + "<<c2<<"  =  "<<c1+c2<<endl;
 }
   
@@ -352,8 +352,8 @@ void StEStructPairCuts::printCutStats(ostream& ofs){
   // ofs<<"# ***      Mix LS + US = Total             *** "<<endl;
   //  ofs<<"# ******************************************** "<<endl;
   ofs<<endl;
-  char* cutTypes[]={"#---  Sibling Pairs : LS + US = ",
-                    "#---  Mixed   Pairs : LS + US = "};
+  const char* cutTypes[]={"#---  Sibling Pairs : LS + US = ",
+                          "#---  Mixed   Pairs : LS + US = "};
   if(mdeltaPhiCut){
     ofs<<mdphiName.name<<","<<mdphi[0]/M_PI<<","<<mdphi[1]/M_PI<<"\t\t\t"<<" # pair dphi cut"<<endl;
     printCutCounts(ofs,cutTypes[0],mdphiCounter[0],mdphiCounter[1]);
@@ -897,6 +897,9 @@ int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.12  2009/11/09 21:32:41  prindle
+ * Fix warnings about casting char * to a const char * by redeclaring as const char *.
+ *
  * Revision 1.11  2009/05/08 00:09:55  prindle
  * In 2ptCorrelations we added switches to select blocks of histograms to fill.
  * (See constructor in StEStruct2ptCorrelations.cxx)

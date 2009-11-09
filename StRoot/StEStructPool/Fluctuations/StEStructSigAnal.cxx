@@ -9,7 +9,7 @@
 ClassImp(StEStructSigAnal)
 
 //--------------------------------------------------------------------------
-StEStructSigAnal::StEStructSigAnal( char *inputFile, char *prefix ) {
+StEStructSigAnal::StEStructSigAnal( const char *inputFile, const char *prefix ) {
   printf("Creating StEStructSigAnal object.\n");
     mInputFile = strdup( inputFile );
     mpreFix    = strdup( prefix );

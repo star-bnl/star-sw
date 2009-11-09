@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.25 2009/05/08 00:09:54 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.26 2009/11/09 21:32:41 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -115,8 +115,8 @@ void StEStruct2ptCorrelations::init(){
   mtimer=NULL;
 
    //--> code to simplify hist-creation via class held name defs
-   char* _tmpName[]={"Sibpp","Sibpm","Sibmp","Sibmm","Mixpp","Mixpm","Mixmp","Mixmm"};
-   char* _tmpTitle[]={"Sibling : +.+","Sibling : +.-","Sibling : -.+","Sibling : -.-",
+   const char* _tmpName[]={"Sibpp","Sibpm","Sibmp","Sibmm","Mixpp","Mixpm","Mixmp","Mixmm"};
+   const char* _tmpTitle[]={"Sibling : +.+","Sibling : +.-","Sibling : -.+","Sibling : -.-",
                       "Mixed : +.+","Mixed : +.-","Mixed : -.+","Mixed : -.-"};
 
    for(int i=0;i<8;i++){
@@ -2107,6 +2107,9 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.26  2009/11/09 21:32:41  prindle
+ * Fix warnings about casting char * to a const char * by redeclaring as const char *.
+ *
  * Revision 1.25  2009/05/08 00:09:54  prindle
  * In 2ptCorrelations we added switches to select blocks of histograms to fill.
  * (See constructor in StEStruct2ptCorrelations.cxx)

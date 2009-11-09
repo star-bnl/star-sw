@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.12 2008/12/02 23:45:06 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.13 2009/11/09 21:32:41 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -485,11 +485,11 @@ int StEStructCutBin::notSymmetrizedXX5(int cutBin, int pairCharge) {
 void StEStructCutBin::initCutBinHists5(){
     if (mcutBinHistMode) {
         TString hname;
-        char *types[] = {"Sibpp", "Sibpm", "Sibmp", "Sibmm",
-                         "Mixpp", "Mixpm", "Mixmp", "Mixmm"};
-        char *bases[] = {"piAll", "pipi", "piK", "pip",
-                         "KAll",  "KK",   "Kp",  "pAll",
-                         "pp",    "OO",   "All"};
+        const char *types[] = {"Sibpp", "Sibpm", "Sibmp", "Sibmm",
+                               "Mixpp", "Mixpm", "Mixmp", "Mixmm"};
+        const char *bases[] = {"piAll", "pipi", "piK", "pip",
+                               "KAll",  "KK",   "Kp",  "pAll",
+                               "pp",    "OO",   "All"};
         for (int pairCase=0;pairCase<8;pairCase++) {
             mHCutBinHists[pairCase] = new TH1D*[11];
             for (int it=0;it<11;it++) {
@@ -643,6 +643,9 @@ int StEStructCutBin::notSymmetrizedXX8(int cutBin, int pairCharge) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.13  2009/11/09 21:32:41  prindle
+ * Fix warnings about casting char * to a const char * by redeclaring as const char *.
+ *
  * Revision 1.12  2008/12/02 23:45:06  prindle
  * Changed switchYt to switchXX (etc.) to better reflect function.
  * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)

@@ -29,7 +29,7 @@ class StEStructSigAnal {
     void  initArrays();
     void  deleteArrays();
 
-    StEStructSigAnal( char *inputFile, char *prefix = "" );
+    StEStructSigAnal( const char *inputFile, const char *prefix = "" );
     virtual ~StEStructSigAnal();
 
     void newFile( char *inputFile );
