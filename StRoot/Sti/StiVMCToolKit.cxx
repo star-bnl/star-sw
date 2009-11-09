@@ -15,10 +15,6 @@
 #define BIT(n)       (1 << (n))
 #endif
 static Int_t __addelement__(Int_t NElem,const TGeoMaterial *mat, Elem_t *ElementList) {
-   cerr << __FUNCTION__ << " NElem:" << NElem
-         <<";  const TGeoMaterial *mat=" << mat
-         << "; Elem_t *ElementList=" << ElementList
-         << endl;
    return StiVMCToolKit::Add2ElementList(NElem, mat, ElementList);
 }
 
