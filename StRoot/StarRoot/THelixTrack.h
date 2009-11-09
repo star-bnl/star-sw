@@ -125,7 +125,6 @@ double Fit();
 void   MakeErrs();
 double FixAt(const double vals[5],int flag); 
 void   Skip(int idx); 
-double FitZ ();   
 double GetZ0() const			{return fZ0    ;}
 double GetTanL() const			{return fTanL  ;}
 void   SetCase(int kase=0) 		{fCase=kase    ;}
