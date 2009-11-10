@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.13 2007/10/03 21:47:35 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.14 2009/11/10 00:40:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.14  2009/11/10 00:40:18  ullrich
+ * Changed print-out format.
+ *
  * Revision 2.13  2007/10/03 21:47:35  ullrich
  * Added several new member to hold hit length info.
  *
@@ -58,7 +61,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.13 2007/10/03 21:47:35 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.14 2009/11/10 00:40:18 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -139,3 +142,13 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
 }
 
 StTpcHit::~StTpcHit() {/* noop */}
+
+ostream&  operator<<(ostream& os, const StTpcHit& v)
+{
+    return os << Form("Tpc s/r %3i/%3i ",v.sector(),v.padrow())
+	    << *((StHit *)&v)
+	    << Form(" min/max pad %3i/%3i npad %2i min/max t %3i/%3i ntime %2i time %10.3f pad %10.3f",
+                      (int)  v.minPad(), (int)  v.maxPad(),(int) v.padsInHit(), 
+                      (int) v.minTmbk(), (int) v.maxTmbk(),(int) v.timeBucketsInHit(),
+                      v.timeBucket(),v.pad()); 
+}

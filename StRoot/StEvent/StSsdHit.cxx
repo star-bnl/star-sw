@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.11 2006/04/27 21:58:53 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.12 2009/11/10 00:40:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
+ * Revision 2.12  2009/11/10 00:40:17  ullrich
+ * Changed print-out format.
+ *
  * Revision 2.11  2006/04/27 21:58:53  ullrich
  * Added data member and methods to deal with local positions.
  *
@@ -49,7 +52,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.11 2006/04/27 21:58:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.12 2009/11/10 00:40:17 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -144,7 +147,7 @@ StSsdHit::centralStripNSide() const
 unsigned int
 StSsdHit::centralStripPSide() const
 {
-  return (bits(23, 5)+bits(13,10)-15);      // bits 23-27
+    return (bits(23, 5)+bits(13,10)-15);      // bits 23-27
 }
 
 unsigned int
@@ -173,4 +176,11 @@ StSsdHit::setLocalPosition(float u, float v)
 {
     mLocalPosition[0] = u;
     mLocalPosition[1] = v;
+}
+
+ostream&  operator<<(ostream& os, const StSsdHit& v)
+{
+    return os << Form("Ssd l:%2i w:%2i",v.ladder(), v.wafer())
+	    << *((StHit *)&v)
+	    << Form(" Luv: %8.3f %8.3f",v.localPosition(0),v.localPosition(1));
 }

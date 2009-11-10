@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.22 2008/04/02 20:43:58 fisyak Exp $
+ * $Id: StHit.h,v 2.23 2009/11/10 00:40:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.23  2009/11/10 00:40:17  ullrich
+ * Changed print-out format.
+ *
  * Revision 2.22  2008/04/02 20:43:58  fisyak
  * Don't store  mPositionError in file
  *
@@ -161,7 +164,7 @@ inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
 }
 
 inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
-inline int  	   StHit::id()      const {return mId;}
+inline int  	       StHit::id()      const {return mId;}
 inline const StHit*    StHit::nextHit() const {return mNextHit;}
 
 ostream&              operator<<(ostream& os, StHit const & v);
