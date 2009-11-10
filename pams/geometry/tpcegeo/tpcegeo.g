@@ -1,7 +1,10 @@
 ****************************************************************************
-* $Id: tpcegeo.g,v 1.29 2005/07/14 22:06:43 potekhin Exp $
+* $Id: tpcegeo.g,v 1.30 2009/11/10 02:14:31 perev Exp $
 *
 * $Log: tpcegeo.g,v $
+* Revision 1.30  2009/11/10 02:14:31  perev
+* Where GSTPAR, set local material avoid bug in gphysi
+*
 * Revision 1.29  2005/07/14 22:06:43  potekhin
 * An informative diagnostics about the TPC gas density added,
 * prompted by a recent debugging session with Yuri
@@ -622,7 +625,7 @@ end
 
 
 *******************************************************************************
-                Subroutine   T P C E L A S E R
+                Subroutine   TPCELASER
 *                                                                             *
 * Description: generate correct energy deposition produced by the laser beam  *
 *   Regarding the beam intensity and ionization, A. Lebedev wrote in his      *

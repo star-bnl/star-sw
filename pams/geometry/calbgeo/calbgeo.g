@@ -3,8 +3,11 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *                                                                            *
    Author    K. Shestermanov, IHEP. First version W. Llope 
    Created   November 17 1995
-* $Id: calbgeo.g,v 1.20 2004/01/19 21:19:42 potekhin Exp $
+* $Id: calbgeo.g,v 1.21 2009/11/10 02:14:30 perev Exp $
 * $Log: calbgeo.g,v $
+* Revision 1.21  2009/11/10 02:14:30  perev
+* Where GSTPAR, set local material avoid bug in gphysi
+*
 * Revision 1.20  2004/01/19 21:19:42  potekhin
 * Had to separate a couple of subs into separate source files to avoid
 * clashes when building with the new version of calbgeo1
@@ -183,8 +186,7 @@ external etsphit
 *
 block CALB is  EMC Barrel envelope
       Material  Air
-      Medium    Standard
-      attribute CALB  seen=0  colo=7
+            attribute CALB  seen=0  colo=7
 *
       SHAPE     PCON  Phi1=0  Dphi=360  Nz=4,
                       zi  = {-Hleng,      -cut_length, cut_length, Hleng},
@@ -286,9 +288,8 @@ EndBlock
 *-----------------------------------------------------------------------------
 Block CPBP
       Material  Lead
-      Material  CLead Isvol=0
-      Medium    Lead_emc
-      Attribute CPBP seen=1  colo=1
+      Material  Lead_CPBP Isvol=0
+            Attribute CPBP seen=1  colo=1
       SHAPE  BOX  dx = calg_AbsorThk,
                   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
                   dz = current_depth/tan_theta/2
@@ -299,8 +300,7 @@ Endblock
 Block CSCI a scintillator layer.
       Material  polystyren
       Material  Cpolystyren   Isvol=1
-      Medium    sens_sci
-      attribute CSCI  seen=1  colo=4
+            attribute CSCI  seen=1  colo=4
       Shape     BOX   dx=calg_ScintThk(super),  
                       dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
                       dz = current_depth/tan_theta/2
@@ -322,8 +322,7 @@ EndBlock
 Block CBTW  is the  Module Front Back Plate
       Material  Aluminium
       Material  EAluminium Isvol=1
-      Medium Al_emc 
-      attribute CBTW  seen=1  colo=6
+            attribute CBTW  seen=1  colo=6
       Shape     BOX   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
                       dz = current_depth/tan_theta/2
       Call CALBPAR(ag_imed,'ABSORBER')
@@ -410,9 +409,8 @@ EndBlock
 *
 Block CSDA is Al block with sensitive gas volume
       Material Aluminium 
-      Material CAluminium Isvol=0
-      Medium Al_smd
-      attribute CSDA seen=1 colo=6 Serial=j      
+      Material Alu_CSDA Isvol=0
+            attribute CSDA seen=1 colo=6 Serial=j      
       Shape BOX   dx = calg_SmAlfThk,
                   dy = calg_SmAlfWdh, 
                   dz = eta_lenght
@@ -423,9 +421,8 @@ EndBlock
 *
 Block CSMC is the front first (last) Al rib 
       Material Aluminium 
-      Material CAluminium Isvol=0
-      Medium Al_smd
-      attribute CSMC seen=1 colo=6
+      Material Alu_CSMC Isvol=0
+            attribute CSMC seen=1 colo=6
       Shape BOX dx = calg_SmAlfThk,
                 dy = calg_SmAffWdh
       Call CALBPAR(ag_imed,'SENSITIVE')
@@ -434,9 +431,8 @@ EndBlock
 *
 Block CSMB is the back first (last) Al rib 
       Material Aluminium 
-      Material CAluminium Isvol=0
-      Medium Al_smd
-      attribute CSMB seen=1 colo=6
+      Material Alu_CSMB Isvol=0
+            attribute CSMB seen=1 colo=6
       Shape BOX dx = calg_SmAlfThk,
                 dy = calg_SmAfbWdh
       Call CALBPAR(ag_imed,'SENSITIVE')
@@ -445,9 +441,8 @@ EndBlock
 *
 Block CSME is the part of CSDA Al box with Ar/CO2 sensiteve gas 
       Material Aluminium 
-      Material CAluminium Isvol=0
-      Medium Al_smd
-      attribute CSME seen=1 colo=6
+      Material Alu_CSME Isvol=0
+            attribute CSME seen=1 colo=6
       Shape Division Iaxis=2 Ndiv = nint(calg_NSmdAlw)
       Call CALBPAR(ag_imed,'SENSITIVE')
 
