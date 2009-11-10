@@ -93,19 +93,17 @@ Bool_t TRArray::Verify(const TRArray &A, Double_t zeru, Int_t Level) const {
 //________________________________________________________________________________
 void TRArray::Print(Option_t *opt) const {if (opt) {}; cout << *this << endl;}
 //______________________________________________________________________________
-void TRArray::AdoptA(Int_t n, Double_t *arr)
-{
+void TRArray::AdoptA(Int_t n, Double_t *arr) {
    // Adopt array arr into TRArray, i.e. don't copy arr but use it directly
    // in TRArray. User may delete arr, TRArray dtor will not do it.
-
-   if (fArray && fIsNotOwn) delete [] fArray;
-   fIsNotOwn = kTRUE;
    fN     = n;
+   if (fArray == arr) return;
+   if (fArray && arr != arr && ! fIsNotOwn) delete [] fArray;
+   fIsNotOwn = kTRUE;
    fArray = arr;
 }
 //______________________________________________________________________________
-void TRArray::Set(Int_t n)
-{
+void TRArray::Set(Int_t n) {
    // Set size of this array to n doubles.
    // A new array is created, the old contents copied to the new array,
    // then the old array is deleted.
@@ -151,8 +149,7 @@ void TRArray::Set(Int_t n, const Float_t *array) {
   TCL::ucopy(array,fArray,n);
 }
 //______________________________________________________________________________
-void TRArray::Set(Int_t n, const Double_t *array)
-{
+void TRArray::Set(Int_t n, const Double_t *array) {
    // Set size of this array to n doubles and set the contents
    // This function should not be called if the array was declared via Adopt.
    if (fArray && fN != n && ! fIsNotOwn) {
