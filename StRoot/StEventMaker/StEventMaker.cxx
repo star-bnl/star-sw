@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.85 2009/08/24 23:06:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.86 2009/11/10 03:55:49 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -182,7 +182,7 @@ StEventMaker::Make()
     //
     int status = mEventManager->openEvent("dst");
     if (status == oocError) {
-        gMessMgr->Warning() << "StEventMaker::Make(): cannot open dataset 'dst'." << endm;
+//vp        gMessMgr->Warning() << "StEventMaker::Make(): cannot open dataset 'dst'." << endm;
         mCreateEmptyInstance = kTRUE;
     }
     else
@@ -1806,8 +1806,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.85 2009/08/24 23:06:11 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.86 2009/11/10 03:55:49 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.86  2009/11/10 03:55:49  perev
+ * Remove redundant printing
+ *
  * Revision 2.85  2009/08/24 23:06:11  ullrich
  * Added checks for corruption in StTriggerData.
  *
