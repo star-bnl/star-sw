@@ -84,6 +84,7 @@ tpxGain.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxGain.o: tpxGain.h
 tpxPed.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
+tpxPed.o: ../../../../StRoot/RTS/include/daqModes.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxPed.o: tpxCore.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
@@ -94,6 +95,9 @@ tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxStat.o: tpxCore.h
 tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxStat.o: tpxStat.h
+tpxDecodeGains.o: ../DAQ_TPX/tpxGain.h
+tpxDecodeGains.o: tpxCore.h
+tpxDecodeGains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 daq_tpx.o: ../DAQ_READER/daq_det.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxGain.o: tpxCore.h
