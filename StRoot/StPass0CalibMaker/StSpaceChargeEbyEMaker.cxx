@@ -960,9 +960,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   // Average SC
   scehist->Fit("pol0","Q");
   TF1* pl0 = scehist->GetFunction("pol0");
-  float pm = pl0->GetParameter(0);
-  float pw = pl0->GetParError(0);
-
+  float pm = 0, pw = 0;
+  if (pl0) {
+    pm = pl0->GetParameter(0);
+    pw = pl0->GetParError(0);
+  }
   // Other counts
   float spc = (float) (scehist->GetEntries());
   float dcc = (float) (dcehist->GetEntries());
@@ -970,7 +972,8 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   timehist->GetXaxis()->SetRange(1,(int) evc);
   timehist->Fit("pol0","LQ");
   pl0 = timehist->GetFunction("pol0");
-  float epsec = pl0->GetParameter(0); // events per second
+  float epsec = 0;
+  if (pl0) epsec = pl0->GetParameter(0); // events per second
 
   // Quality measures
   float wid = TMath::Min(10.,TMath::Log10(gw1*gw1+gw*gw));
@@ -990,8 +993,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.22 2008/07/24 19:17:55 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.23 2009/11/10 20:54:13 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.23  2009/11/10 20:54:13  fisyak
+// pams Cleanup
+//
 // Revision 1.22  2008/07/24 19:17:55  genevb
 // SpaceChargeEWRatio must be written to prepass output table
 //

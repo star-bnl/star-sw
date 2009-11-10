@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.11 2002/04/18 23:29:35 jeromel Exp $
+ * $Id: StEventMaker.h,v 2.12 2009/11/10 20:45:08 fisyak Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
+ * Revision 2.12  2009/11/10 20:45:08  fisyak
+ * pams Cleanup
+ *
  * Revision 2.11  2002/04/18 23:29:35  jeromel
  * Implementation of the SVT 2 tables scheme ...
  *
@@ -53,7 +56,6 @@
 #define STAR_StEventMaker
 
 #include "StMaker.h"
-
 #include "StEventMaker/StEventManager.hh"
 class StEvent;
 class StTrack;
@@ -73,7 +75,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.11 2002/04/18 23:29:35 jeromel Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.12 2009/11/10 20:45:08 fisyak Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -100,6 +102,6 @@ private:
     StEventManager*       mEventManager;		//!
     StEvent*              mCurrentEvent;                //!
     Bool_t                mCreateEmptyInstance;         //!
-    ClassDef(StEventMaker, 3)
+    ClassDef(StEventMaker, 0)
 };
 #endif
