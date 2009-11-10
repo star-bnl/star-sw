@@ -1,5 +1,5 @@
 //
-// $Id: StTrackPing.hh,v 1.1 2004/09/13 22:04:53 calderon Exp $
+// $Id: StTrackPing.hh,v 1.2 2009/11/10 20:57:28 fisyak Exp $
 // simple struct
 // for keeping track of common hits between tracks
 //
