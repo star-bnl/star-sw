@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.14 2007/09/20 20:02:47 ullrich Exp $
+ * $Id: StSvtHit.h,v 2.15 2009/11/10 00:41:11 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.15  2009/11/10 00:41:11  ullrich
+ * Changed print-out format and added new method shell().
+ *
  * Revision 2.14  2007/09/20 20:02:47  ullrich
  * Added new members to hold and access the number of anodes and of pixels.
  *
@@ -84,6 +87,7 @@ public:
     void  operator delete(void* p) { mPool.free(p); }
 
     unsigned int layer() const;      // layer=[1,6]
+    static unsigned int layer(unsigned int barrel, unsigned int ladder);
     unsigned int ladder() const;     // ladder=[1-8]
     unsigned int wafer() const;      // wafer=[1-7]
     unsigned int barrel() const;     // barrel=[1-3]
@@ -95,6 +99,9 @@ public:
     float localPosition(unsigned int) const;
     int numberOfAnodes() const;
     int numberOfPixels() const;
+
+    static unsigned int shell(unsigned int barrel, unsigned int ladder);
+    unsigned int shell() const;    
     
     void setPeak(float);
     void setAnode(float);
