@@ -46,11 +46,11 @@ class StTestMaker;
 class StChainOpt;
 
 struct DbAlias_t {
-  char *tag;
+  const char *tag;
   Int_t date;
   Int_t time;
-  char *geometry;
-  char *comment;
+  const char *geometry;
+  const char *comment;
 };
 
 
@@ -240,14 +240,14 @@ public:
    static const char *RetCodeAsString(Int_t kode);
    static      Int_t    AliasDate(const char *alias);
    static      Int_t    AliasTime(const char *alias);
-   static      char  *AliasGeometry(const char *alias);
+   static      const char  *AliasGeometry(const char *alias);
    static const DbAlias_t  *GetDbAliases();
    static      void     SetTestMaker(StTestMaker *mk)	{fgTestMaker=mk;}
 
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.93 2009/10/13 18:56:50 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.94 2009/11/10 17:41:19 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
@@ -311,8 +311,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.93 2009/10/13 18:56:50 perev Exp $
+// $Id: StMaker.h,v 1.94 2009/11/10 17:41:19 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.94  2009/11/10 17:41:19  fine
+// remove the compilation warning on SL5
+//
 // Revision 1.93  2009/10/13 18:56:50  perev
 // WhiteBoard improve
 //
