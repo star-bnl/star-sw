@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.16 2009/11/10 02:14:31 perev Exp $
+!// $Id: tpcegeo3.g,v 1.17 2009/11/10 23:04:42 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.17  2009/11/10 23:04:42  perev
+!// remove debug prints
+!//
 !// Revision 1.16  2009/11/10 02:14:31  perev
 !// Where GSTPAR, set local material avoid bug in gphysi
 !//
@@ -1623,7 +1626,7 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
          zDed = TPCG_zGatingGrid - TPCG_DeadZone;
 	 zPmt = TPCG_zGatingGrid;
          dx=tprs_width/2;
-         write(*,*) 'zBeg,zDed,Zpmt,zEnd = ',zBeg,zDed,Zpmt,zEnd;
+!//          write(*,*) 'zBeg,zDed,Zpmt,zEnd = ',zBeg,zDed,Zpmt,zEnd;
          if (kase == 1) { dz = (zDed - zBeg)/2; z= (zDed + zBeg)/2 -tpgvz;}
          if (kase == 2) { dz = (zEnd - zPmt)/2; z= (zEnd + zPmt)/2 -tpgvz;}
 *        position within supersector (this assumes rectangular padrows)
@@ -1632,18 +1635,18 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  x=tprs_Rpads(i_row)-tprs_width;
                  Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
-                 write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+!//                 write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  x=tprs_Rpads(i_row);
                  create and position TPAD  x=x z=z dx=dx dy=dy dz=dz
-                 write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+!//                  write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
 
               if ((nint(tprs_super)==3 | i_row==nint(tprs_nRow)))  then
                  x=tprs_Rpads(i_row)+tprs_width
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
-                 write(*,*) 'TPAD.C Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+!//                  write(*,*) 'TPAD.C Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
            enddo
       enddo
