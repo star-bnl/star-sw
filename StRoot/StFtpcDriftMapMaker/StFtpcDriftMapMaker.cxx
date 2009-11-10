@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.22 2007/04/28 17:56:10 perev Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.23 2009/11/10 12:30:48 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.23  2009/11/10 12:30:48  jcs
+// replace StMagUtilities with StarMagField
+//
 // Revision 1.22  2007/04/28 17:56:10  perev
 // Redundant StChain.h removed
 //
@@ -91,7 +94,7 @@ ClassImp(StFtpcDriftMapMaker)
 StFtpcDriftMapMaker::~StFtpcDriftMapMaker(){
 }
 //_____________________________________________________________________________
-StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor,const Float_t deltaAr):
+StFtpcDriftMapMaker::StFtpcDriftMapMaker(const StarMagField::EBField map,const Float_t factor,const Float_t deltaAr):
     m_dimensions(0),
     m_padrow_z(0),
     m_efield(0),
@@ -180,7 +183,7 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor,
 
   
 
-  StMagUtilities  *magField = new StMagUtilities(map,factor,0);
+    StarMagField *magField = new StarMagField(map, factor, kTRUE);
 
   
   // create magboltz
