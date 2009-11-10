@@ -21,7 +21,6 @@
 //#include "StSvtPool/SvtMatchedTree/SvtMatchedTree.h"
 #include "TRVector.h"
 #include "TRSymMatrix.h"
-#include "TrackParameterDeriv.h"
 #include "StSvtBarrelHitCollection.h"
 #include "StSvtHitCollection.h"
 #include "StSvtLadderHitCollection.h"
@@ -449,7 +448,6 @@ void EventT::Print(Option_t *opt) const {
   
 }
 //________________________________________________________________________________
-//HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track, TrackParameterDeriv *TPDeriv) {
 HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
   struct RDO_t {
     Char_t *name;

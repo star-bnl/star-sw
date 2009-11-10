@@ -90,7 +90,7 @@ void MakeSvtWaferOnGlobal(Int_t date = 20050101, Int_t time = 65 ){
 		  SHG.SetRotation(&shellOnGlobal1->r00);
 		  SHG.SetTranslation(&shellOnGlobal1->t0);
 		}		    
-	      // 	shellOnGlobal *	ladderOnShell * ladderOnSurvey * waferOnLadder 
+	      //   SsdOnGlobal * ShellOnGlobal * LadderOnShell * LadderOnSurvey * WaferOnLadder 
 	      WG = GL * SHG * LSH * LSU * WL; //  WG.Print();
 	      //			    TGeoHMatrix WGInv = WG.Inverse();
 	      Double_t *r = WG.GetRotationMatrix();
