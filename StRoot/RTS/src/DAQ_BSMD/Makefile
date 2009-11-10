@@ -26,6 +26,9 @@ libbsmd.a : $(OBJS)
 
 # DO NOT DELETE
 
+bsmdPed.o: ../../../../StRoot/RTS/include/rtsLog.h
+bsmdPed.o: ../../../../StRoot/RTS/include/daqModes.h
+bsmdPed.o: bsmdPed.h
 bsmd_reader.o: ../../../../StRoot/RTS/include/rtsLog.h
 bsmd_reader.o: ../../../../StRoot/RTS/include/rtsSystems.h
 bsmd_reader.o: ../../../../StRoot/RTS/include/daqFormats.h
