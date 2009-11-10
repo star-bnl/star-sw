@@ -1,6 +1,7 @@
 #ifndef ROOT_TRSymMatrix
 #define ROOT_TRSymMatrix
 #include "TRArray.h"
+#include <assert.h>
 class TRMatrix;
 class TRVector;
 class TDiagMatrix;
@@ -55,12 +56,14 @@ inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
     ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
 	    j, fNrows, this); 
     j = 0;
+    assert(0);
   }
   //  assert(! (i < 0 || i >= fNrows));
   if (i < 0 || i >= fNrows) {
     ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
 	    i, fNrows, this); 
     i = 0;
+    assert(0);
   }
   Int_t m = i;
   Int_t l = j;
@@ -73,12 +76,14 @@ inline Double_t TRSymMatrix::operator()(Int_t i,Int_t j) const {
     ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
 	    j, fNrows, this); 
     j = 0;
+    assert(0);
   }
   //  assert(! (i < 0 || i >= fNrows));
   if (i < 0 || i >= fNrows) {
     ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
 	    i, fNrows, this); 
     i = 0;
+    assert(0);
   }
   Int_t m = i;
   Int_t l = j;
