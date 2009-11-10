@@ -9,7 +9,6 @@
 #include "TRef.h"
 #include "THashList.h"
 class TGeoHMatrix;
-class TrackParameterDeriv;
 class EventTHeader {
  private:
   Int_t      fEvtNum;
@@ -61,7 +60,6 @@ class EventT : public TObject {
   void              SetHeader(Int_t i, Int_t run, Int_t date, Double32_t field);				     
   TrackT           *AddTrackT();										      
   HitT             *AddHitT();										      
-  //  HitT             *SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track, TrackParameterDeriv *TPDeriv);
   HitT             *SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track);
   Double32_t        GetVertex(UInt_t i=0) {return (i<3)?fVertex[i]:0;}  
   UInt_t            GetTotalNoTracks() const {return fNPTracks;}	       
