@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.8 2009/11/10 17:41:20 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.9 2009/11/10 19:17:39 fine Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -20,18 +20,17 @@ class StRtsTable;
 /*! \brief  Class StRTSBaseMaker - is an abstract StMaker to define 
  *       the  interface to access the DAQ data from the STAR production chain
  */
-/// \author Valery Fine (fine@bnl.gov)
-/// \date 27/04/2008
 /// \sa StRtsReaderMaker.h
 ///
 ///  Class provides the interface and the default implementation to access the DAQ data 
-///  defined by \sa http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en "A DAQ_READER Cookbook"/n
-///  The user has to subclass it to re-implement the pure virtual function StRTSBaseMaker::Make() (\sa StMaker::Make() )
-///  (\sa the http://en.wikipedia.org/wiki/Virtual_function#C.2B.2B_2 "Virtual function" )
-///  StRTSBaseMaker  is a base class (\sa http://en.wikipedia.org/wiki/Base_class ""A DAQ_READER Cookbook" ) 
-///  to implement the concrete StMaker class accessing 
-///  and parse the concrete detector  subsystem DAQ information and make it available and suitable 
+///  defined by
+///  \htmlonly <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a>. \endhtmlonly
+///  The user has to subclass it to re-implement the pure virtual function StRTSBaseMaker::Make() 
+///  StRTSBaseMaker  is a base class to implement the concrete StMaker::Make() method accessing 
+///  and parsing the concrete detector subsystem DAQ information and make it available and suitable 
 ///  for the offline production.
+///  \sa \htmlonly <a href="http://en.wikipedia.org/wiki/Virtual_function#C.2B.2B_2">"Virtual function"</a> \endhtmlonly 
+///  \sa \htmlonly <a href="http://en.wikipedia.org/wiki/Base_class">"A DAQ_READER Cookbook"</a> \endhtmlonly
 ///
 class StRTSBaseMaker : public StMaker
 {
@@ -74,7 +73,10 @@ class StRTSBaseMaker : public StMaker
      UInt_t Detectors()  const;  //< detectors present bit mask according to DAQ!
      
      const TString &DetectorName() const { return fDetectorName; }
-
+     //! One has to implement this method
+     /// to access the concrete detector subsystem DAQ information via the suitable method such as 
+     /// #GetNextRaw, #GetNextAdc, #GetNextLegacy, #GetNext, 
+     /// parse it and make it available for the STAR production chain
      virtual Int_t Make() = 0;
 
   // cvs

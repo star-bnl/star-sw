@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.9 2009/11/10 17:41:19 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.10 2009/11/10 19:17:39 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.10  2009/11/10 19:17:39  fine
+ * Add doxygen docs
+ *
  * Revision 1.9  2009/11/10 17:41:19  fine
  * remove the compilation warning on SL5
  *
@@ -60,9 +63,13 @@
 const char *StRTSBaseMaker::fRTSRootDataset="RTS/"; // The name of the Root dataset
 
 ClassImp(StRTSBaseMaker);
-//
-// The maker name must mutch the detectot DAQ name
-//
+//! StRTSBaseMaker( const char *detectorName,TVirtualPad *pad) ctor
+/*!
+ * \param detectorName - the  DAQ name of the detector as defined by the column \b detector 
+ * FROM THE "Table 1" 
+ * of the <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a>
+ * \param makerName - The object name. It is adviced to provide each object instance with its own name
+ */
 //_____________________________________________________________
 StRTSBaseMaker::StRTSBaseMaker(const char *detectorName,const char *makerName)
       :StMaker(detectorName), fDaq_Dta(0), fDetectorName(detectorName)
@@ -71,10 +78,35 @@ StRTSBaseMaker::StRTSBaseMaker(const char *detectorName,const char *makerName)
   LOG_DEBUG << "StRTSBaseMaker::ctor"  << endm;
 }
 
+//! StRTSBaseMaker class dtor
 //_____________________________________________________________
 StRTSBaseMaker::~StRTSBaseMaker() 
 { }
 
+//_____________________________________________________________
+//! Query the STAR production chain for the DAQ data
+/*! Use the syntax defined by 
+    \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">A DAQ_READER Cookbook"</a> 
+    \endhtmlonly
+ *  to query the DAQ data for the current event. 
+ *  It generates the text query using the format  \c RTS/detector/bank[%d] \n
+ *  where 
+ *  \arg \c "RTS" is a text constant \n
+ *  \arg \c detector is the name  of the detector defined by the class ctor \sa StRTSBaseMaker::StRTSBaseMaker \n
+ *  \arg\c bank is the name of the bank 
+ *    as defined by the "DAQ_READER bank name" column from the \b "A DAQ_READER Cookbook" \b "Table 1" 
+ *    \sa   \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">A DAQ_READER Cookbook"</a> 
+      \endhtmlonly
+ *  \arg \c [%d] - is an optional component which is a comma separated list of the indexis surrounding by the square brackets.
+ *
+ *  For example the  text "RTS/tpx/cld[1]" is to query the DAQ cluster data for the first sector of TPX detector
+ * \return  the pointer the StRtsTable object filled with the query data\n
+         \b =0; no data for the \a "elementPath" was found
+ *  \note the methgod is designed to be called from the StMaker::Make implementation indirectly.
+ * Normally one does not need to invoke this method from the end-user code.\n
+ */
 //_____________________________________________________________
 StRtsTable *StRTSBaseMaker::GetNextDaqElement(const char *elementPath)
 {
@@ -89,6 +121,19 @@ StRtsTable *StRTSBaseMaker::GetNextDaqElement(const char *elementPath)
   }
   return fDaq_Dta;
 }
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! 
+   \param bank - the name of the bank. \n
+     The format is \c bank[%d], where 
+     \arg\c bank is the name of the bank 
+      as defined by the "DAQ_READER bank name" column from the \b "A DAQ_READER Cookbook" Table 1.
+   \arg \c [%d] - is an optional component which is a comma separated list of the indexis surrounding by the square brackets.
+   \return the DAQ data for the bank \a "bank" if exists
+   \sa \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a> 
+    \endhtmlonly
+ */
 //_____________________________________________________________
 StRtsTable *StRTSBaseMaker::GetNext(const char* bank) 
 {
@@ -105,6 +150,14 @@ StRtsTable *StRTSBaseMaker::GetNext(const char* bank)
    return daqData;
 }
 
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! 
+   \return the DAQ data for the bank \c "raw" if exists
+   \sa \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a> 
+    \endhtmlonly
+ */
 //_____________________________________________________________
 StRtsTable *StRTSBaseMaker::GetNextRaw()
 {
@@ -112,6 +165,14 @@ StRtsTable *StRTSBaseMaker::GetNextRaw()
    // matches the "detector name"
    return GetNext("raw");
 }
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! 
+   \return the DAQ data for the bank \c "adc" if exists
+   \sa \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a> 
+    \endhtmlonly
+ */
 //_____________________________________________________________
 StRtsTable *StRTSBaseMaker::GetNextAdc()
 {
@@ -119,6 +180,14 @@ StRtsTable *StRTSBaseMaker::GetNextAdc()
    // matches the "detector name"
    return GetNext("adc");
 }
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! 
+   \return the DAQ data for the bank \c "legacy" if exists
+   \sa \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a> 
+    \endhtmlonly
+ */
 //_____________________________________________________________
 StRtsTable *StRTSBaseMaker::GetNextLegacy()
 {
