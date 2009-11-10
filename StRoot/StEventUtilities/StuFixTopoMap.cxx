@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuFixTopoMap.cxx,v 1.2 2007/11/08 00:37:52 ullrich Exp $
+ * $Id: StuFixTopoMap.cxx,v 1.3 2009/11/10 20:46:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, May 2000
  ***************************************************************************
@@ -141,12 +141,12 @@ bool StuFixTopoMap(StTrack* track)
 	    else if (hits[i]->detector() == kTpcId) {
 		k = dynamic_cast<const StTpcHit*>(hits[i])->padrow();
 		if (k < 25) {
-		    if (word1 & 1U<<k+7) word2 |= 1U<<30; // turnaround flag    
-		    word1 |= 1U<<k+7;
+		  if (word1 & 1U<<(k+7)) word2 |= 1U<<30; // turnaround flag    
+		  word1 |= 1U<<(k+7);
 		}
 		else {
-		    if (word2 & 1U<<k-25) word2 |= 1U<<30; // turnaround flag    
-		    word2 |= 1U<<k-25;
+		  if (word2 & 1U<<(k-25)) word2 |= 1U<<30; // turnaround flag    
+		  word2 |= 1U<<(k-25);
 		}
 	    }		
 	}	
