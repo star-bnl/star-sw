@@ -1,5 +1,8 @@
-* $Id: g2t_tpc.F,v 1.3 2004/03/31 20:16:27 fisyak Exp $
+* $Id: g2t_tpc.F,v 1.4 2009/11/10 19:54:54 fisyak Exp $
 * $Log: g2t_tpc.F,v $
+* Revision 1.4  2009/11/10 19:54:54  fisyak
+* pams Cleanup
+*
 * Revision 1.3  2004/03/31 20:16:27  fisyak
 * Add lgam =  log10(GEKin/AMass) field
 *
@@ -92,6 +95,7 @@
             g2t_tpc_hit(i).track_p       = trac
             g2t_tpc_hit(i).volume_id     = volume
             g2t_tpc_hit(i).lgam          = lgam
+            g2t_tpc_hit(i).length        = Slen
 *     
 *                  add to track linked list 
 *

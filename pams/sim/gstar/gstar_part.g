@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.20 2009/01/10 02:45:04 perev Exp $
+* $Id: gstar_part.g,v 1.21 2009/11/10 19:54:54 fisyak Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.21  2009/11/10 19:54:54  fisyak
+* pams Cleanup
+*
 * Revision 1.20  2009/01/10 02:45:04  perev
 * Hypertriton added
 *
@@ -58,7 +61,7 @@
 *
 ***********************************************************************
 *
-                      Subroutine gstar_PART
+                      real function gstar_PART(dummy)
 *
 * Remark: the particle ID numbers used by the original STAR Geant v3.15 
 * can no longer be used in v3.21 because of a significant expansion of 
@@ -73,6 +76,8 @@
 * Branching ratios taken from Particle Data Book of July '94. pmj 15/2/95
 ***********************************************************************
 +CDE,agecom,gconst.
+	real dummy
+	star_PART = 0
    print *,' *             omega,phi,rho(0,+,-) and laserino defined. *'
    print *,' *             Read program comments for more information *'
 *

@@ -1,5 +1,0 @@
- macro run
- macro/global/import *
- message ' run_user '
-
- return

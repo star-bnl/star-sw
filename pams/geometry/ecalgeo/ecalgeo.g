@@ -768,7 +768,7 @@ Block EALP  is ALuminium  Plate in calorimeter cell
       Call GSTPAR (ag_imed,'CUTGAM',0.00001)
       Call GSTPAR (ag_imed,'CUTELE',0.00001)
       Call GSTPAR (ag_imed,'LOSS',1.)
-      Call GSTPAR (ag_imed,'STRA',1.)
+*yf 08/26/09      Call GSTPAR (ag_imed,'STRA',1.)
 endblock
 * ----------------------------------------------------------------------------
 Block ESPL  is one of the Shower max  PLanes
