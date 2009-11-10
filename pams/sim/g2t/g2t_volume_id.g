@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.61 2009/10/26 19:44:03 perev Exp $
+* $Id: g2t_volume_id.g,v 1.62 2009/11/10 19:54:54 fisyak Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.62  2009/11/10 19:54:54  fisyak
+* pams Cleanup
+*
 * Revision 1.61  2009/10/26 19:44:03  perev
 * (1-73) normal TPC hits, (74-146) prompt hits
 *
@@ -128,7 +131,7 @@
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          ftpv,padrow,ftpc_sector,innour,lnumber,wafer,lsub,phi_30d
-      Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder
+      Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder,nwafer
       Integer          module,layer
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
@@ -202,7 +205,9 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           endif
       endif
 *
-      volume_id = 0
+      volume_id = 0	
+      g2t_volume_id = volume_id
+      
       nv        = nvb(1)  ! number of real volume levels in NUMBV
 *
 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -224,14 +229,17 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * Set First barrel ids
            else If (lnumber.le.2) then
                 nladder = 8
+		nwafer  = 4
 *               wafer   = 5-wafer 
 * Set 2nd barrel ids
            else If (lnumber.le.4) then
                 nladder  = 12
+		nwafer   = 6	
 *               wafer   = 7-wafer   
 * Set 3rd barrel ids
            else If (lnumber.le.6) then
                 nladder  = 16
+		nwafer   = 7
 *               wafer   = 8-wafer
            else
              print *,' G2T warning: layer number ',lnumber,
@@ -251,9 +259,8 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 ladder=nladder-(ladder-1)*2-lsub
               endif
            endif
-
-           volume_id  = 1000*lnumber+100*wafer+ladder
-
+	if (ladder < 1 | ladder > nladder | wafer < 1 | wafer > nwafer) return
+        volume_id  = 1000*lnumber+100*wafer+ladder
         else If (Cd=='SFSD') then
            volume_id =  7000+100*numbv(2)+numbv(1)
         endif
@@ -348,9 +355,11 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      +         ((innout==1).AND.(sub_sector.gt.4)).or.
      +         ((innout==2).AND.(sub_sector.gt.5)).or.
      +        (section.lt.1).OR.(section.gt.9).or.
-     +         ((innout.eq.2).AND.(section.ne.1)))
-     +    print *,' g2t_volume_id: TOF sanity check failed.',
+     +         ((innout.eq.2).AND.(section.ne.1))) then
+          print *,' g2t_volume_id: TOF sanity check failed.',
      +              rileft,sector,innout,sub_sector,section
+	  return
+	endif
 
 *  -------- combine 4wide and 5wide sections ---------
           if (innout==1) then
@@ -366,7 +375,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 * ------- TOFr detector (single tray) --------------
       else If (Csys=='tfr') then   ! TOFr
-         if (btog_choice==5 .or. btog_choice==7) then      !  single tray
+         if (btog_choice==5 .or. btog_choice==7 .or. btog_choice==8) then      !  single tray
             rileft     = 2               !  east (pre-set)
             sector     = btog_posit2     !  tray (pre-set)
             module     = numbv(1)        !  module (eta)
@@ -389,10 +398,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
       else If (Csys=='ctb') then
 *5*
-        rileft    = numbv(1)
-        sector    = numbv(2)
-        innout    = numbv(3)
-        volume_id = 1000*rileft+100*innout+sector
+        volume_id = 1000*numbv(1)+100*numbv(3)+numbv(2)
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *   ------------------  calorimetry  ---------------------
 
@@ -518,7 +524,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 * we signal this once
             if(printOnce) then
-               if (6+shift != nv) print *,' G2T_VOL_ID: new inconsistency in ECAL'
+               if (6+shift != nv) print *,' G2T_VOL_ID: new inconsistency in ECAL
                printOnce=.false.
             endif
 
@@ -675,8 +681,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else
         print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
-
-      g2t_volume_id=volume_id
+      g2t_volume_id = volume_id
 
       end
       

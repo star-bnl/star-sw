@@ -9,4 +9,5 @@
        float     tof;        /* time of flight */
        float     x[3];       /* coordinate (Cartesian) */
        float     lgam;       /* ALOG10(GEKin/AMass) */
+       float     length;     /* track length up to this hit */
 };
