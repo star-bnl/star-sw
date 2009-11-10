@@ -1,6 +1,6 @@
 /****************************************************************
  *
- * $Id: St_pp2pp_ClusterCollection.cxx,v 1.1 2009/10/08 18:12:57 yipkin Exp $
+ * $Id: St_pp2pp_ClusterCollection.cxx,v 1.2 2009/11/10 18:34:28 yipkin Exp $
  *
  * Author: Kin Yip
  *
@@ -12,8 +12,8 @@
  *****************************************************************
  *
  * $Log: St_pp2pp_ClusterCollection.cxx,v $
- * Revision 1.1  2009/10/08 18:12:57  yipkin
- * StEvent stuff ..
+ * Revision 1.2  2009/11/10 18:34:28  yipkin
+ * The stuff before I clean up.
  *
  * Revision 1.0  2009/10/08 16:57:21  yipkin
  * first release

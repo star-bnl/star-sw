@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_pp2pp_Cluster.cxx,v 1.2 2009/10/08 21:30:34 yipkin Exp $
+ * $Id: St_pp2pp_Cluster.cxx,v 1.3 2009/11/10 18:34:28 yipkin Exp $
  *
  * Author: Kin Yip, Oct. 2009
  ***************************************************************************
@@ -13,7 +13,7 @@
 
 #include "St_pp2pp_Cluster.h"
 
-static const char rcsid[] = "$Id: St_pp2pp_Cluster.cxx,v 1.2 2009/10/08 21:30:34 yipkin Exp $";
+static const char rcsid[] = "$Id: St_pp2pp_Cluster.cxx,v 1.3 2009/11/10 18:34:28 yipkin Exp $";
 
 ClassImp(St_pp2pp_Cluster)
 
