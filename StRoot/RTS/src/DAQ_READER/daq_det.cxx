@@ -58,6 +58,7 @@ daq_det *daq_det_factory::make_det(int wh)
 
 
 	if(use_factory == 0) {	// not inserted? need shared lib load...
+#if 0	// this was never completed...
 #ifdef __ROOT__
 		gSomething->Loadsomething(libname) ;
 #else
@@ -72,6 +73,7 @@ daq_det *daq_det_factory::make_det(int wh)
 			LOG(NOTE,"dlopen OK for det %d, lib %s",wh,libname) ;
 		}
 		#endif
+#endif
 #endif
 	}
 
