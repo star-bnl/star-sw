@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.10 2009/11/10 19:20:30 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.11 2009/11/10 19:28:51 fine Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -41,7 +41,14 @@ class StRTSBaseMaker : public StMaker
 
    protected:
       StRtsTable *GetNextDaqElement(const char *elementPath);
+   
+      //! Return the current DAQ data block. This member function is provided for convenience.
+      /*! One of the suitable method such as 
+       *  #GetNextRaw, #GetNextAdc, #GetNextLegacy, #GetNext, 
+       *  has to be called first to assign this pointer
+       */ 
       StRtsTable *DaqDta() {return fDaq_Dta;}
+
       StRtsTable *GetNext(const char* bank);
 
       virtual StRtsTable *GetNextRaw();
