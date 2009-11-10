@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.50 2007/04/28 17:55:43 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.51 2009/11/10 20:19:36 fisyak Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.51  2009/11/10 20:19:36  fisyak
+ * Change default to ITTF
+ *
  * Revision 1.50  2007/04/28 17:55:43  perev
  * Redundant StChain.h removed
  *
@@ -436,9 +439,9 @@ ClassImp(StAssociationMaker)
   
   doPrintMemoryInfo = kFALSE;
   mL3TriggerOn = false;
-  mInTrackerOn = false;
+  mInTrackerOn = kTRUE;
   mEstTracksOn = false;
-  mDistanceAssoc = true;
+  mDistanceAssoc = kFALSE;
 }
 
 //_________________________________________________
