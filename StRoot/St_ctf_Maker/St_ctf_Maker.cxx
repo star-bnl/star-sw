@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.16 2007/04/28 17:55:47 perev Exp $
+// $Id: St_ctf_Maker.cxx,v 1.17 2009/11/10 21:09:59 fisyak Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.17  2009/11/10 21:09:59  fisyak
+// pams clean up
+//
 // Revision 1.16  2007/04/28 17:55:47  perev
 // Redundant StChain.h removed
 //
@@ -78,7 +81,9 @@
 #include "ctf/St_ctg_Module.h"
 #include "ctf/St_cts_Module.h"
 #include "ctf/St_ctu_Module.h"
+#ifdef __TPT__
 #include "ctf/St_fill_dst_tof_Module.h"
+#endif
 #include "TH1.h"
 #include "TH2.h"
 
@@ -176,6 +181,7 @@ Int_t St_ctf_Maker::Make(){
       Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
 			      m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
 			      tof_event, tof_mslat, tof_raw);if(Res_cts_tof){}
+#ifdef __TPT__
       St_DataSet *tpc_tracks = GetDataSet("tpc_tracks");
       St_tpt_track  *tptrack = 0;
       St_tte_mctrk  *mctrk   = 0;
@@ -214,6 +220,7 @@ Int_t St_ctf_Maker::Make(){
       for (Int_t i=0; i<tof_raw->GetNRows();i++,raw++){
         m_adct->Fill((Float_t) raw->adc);
       }
+#endif
     }
   }
   return iMake;
