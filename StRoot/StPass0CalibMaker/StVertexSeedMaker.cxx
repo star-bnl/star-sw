@@ -18,7 +18,6 @@
 #include "StDbLib/StDbConfigNode.hh"
 #include "StDbLib/StDataBaseI.hh"
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
-#include "St_tcl_Maker/St_tcl_Maker.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_L0_Trigger_Table.h"
 #include "StMessMgr.h"
@@ -341,7 +340,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.40 2009/05/22 23:50:50 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.41 2009/11/10 20:54:13 fisyak Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -665,8 +664,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.40 2009/05/22 23:50:50 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.41 2009/11/10 20:54:13 fisyak Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.41  2009/11/10 20:54:13  fisyak
+// pams Cleanup
+//
 // Revision 1.40  2009/05/22 23:50:50  genevb
 // Code mods for BEMC matches, BeamWidth
 //

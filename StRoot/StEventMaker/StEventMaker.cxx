@@ -13,6 +13,7 @@
 #include <utility>
 #include <cstdlib>
 #include "TError.h"
+#include "TString.h"
 #include "StEventMaker/StEventMaker.h"
 #include "StEventMaker/StRootEventManager.hh"
 #include "PhysicalConstants.h"
@@ -32,7 +33,8 @@
 #include "StMath.hh"
 #include <typeinfo>
 #include <map>
-
+#include "StarMagField.h"
+#include "TUnixTime.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 using std::max;
@@ -46,8 +48,9 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.86 2009/11/10 03:55:49 perev Exp $";
-
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.87 2009/11/10 20:45:08 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.87 2009/11/10 20:45:08 fisyak Exp $";
+#ifdef __KEEP_DST__
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
 {
@@ -100,7 +103,7 @@ static int badDstTkfVertex(dst_tkf_vertex_st *t)
     if ( StMath::tooBig(&(t->dca),dcaLen)) 	return 1; 
     return 0;
 }
-
+#endif
 //______________________________________________________________________________
 ClassImp(StEventMaker)
     //______________________________________________________________________________
@@ -137,7 +140,6 @@ StEventMaker::Clear(const char*)
 
 StEventManager*
 StEventMaker::eventManager() {return mEventManager;};
-
 StEvent*
 StEventMaker::event() { return mCurrentEvent;};
 
@@ -146,7 +148,6 @@ StEventMaker::setEventManager(StEventManager* mgr)
 {
     mEventManager = mgr;
 }
-
 Int_t
 StEventMaker::Init()
 {
@@ -180,6 +181,7 @@ StEventMaker::Make()
     //  If no DST dataset is available we cannot setup StEvent
     //  properly. Nevertheless we will create an empty instance.
     //
+#ifdef __KEEP_DST__
     int status = mEventManager->openEvent("dst");
     if (status == oocError) {
 //vp        gMessMgr->Warning() << "StEventMaker::Make(): cannot open dataset 'dst'." << endm;
@@ -187,16 +189,18 @@ StEventMaker::Make()
     }
     else
         mCreateEmptyInstance = kFALSE;
-    
+#else
+    if (TString(GetName()) == "0Event") mCreateEmptyInstance = kTRUE;
+    else                                mCreateEmptyInstance = kFALSE;
+#endif    
     //
     //  Setup the event (StEvent and all subclasses)
     //
-    status = makeEvent();
+    Int_t status = makeEvent();
     if (status != kStOK)
         gMessMgr->Warning() << "StEventMaker::Make(): error in makeEvent(), no StEvent object created." << endm;
     
     mEventManager->closeEvent();
-    
     //
     //  Print out some timing, memory usage and StEvent
     //  info if requested
@@ -278,15 +282,20 @@ StEventMaker::makeEvent()
     //  case and therefore we do not return a warning or an
     //  error message.
     //
+#ifdef __KEEP_DST__
     if (mCreateEmptyInstance) {
         mCurrentEvent = getStEventInstance();
         return kStOK;
     }
-    
+#else
+    if (! mCreateEmptyInstance &&  mCurrentEvent) return kStOK;
+    mCurrentEvent = getStEventInstance();
+#endif    
     //
     //  Create AND setup/fill StEvent.
     //
     long nrows;
+#ifdef __KEEP_DST__
     
     //
     //  Event header and event summary
@@ -294,11 +303,12 @@ StEventMaker::makeEvent()
     event_header_st* dstEventHeader = mEventManager->returnTable_event_header(nrows);
     dst_event_summary_st* dstEventSummary = mEventManager->returnTable_dst_event_summary(nrows);
     
-    
+#endif    
     //
     //  Create instance of StEvent, using whatever we got so far.
     //
     mCurrentEvent = getStEventInstance();
+#ifdef __KEEP_DST__
     if (dstEventHeader  && !mCurrentEvent->info())
         mCurrentEvent->setInfo(new StEventInfo(*dstEventHeader));
     if (dstEventSummary && !mCurrentEvent->summary())
@@ -327,6 +337,7 @@ StEventMaker::makeEvent()
     mon->setRichSoftwareMonitor  (dstSoftMonRich  );
     mon->setGlobalSoftwareMonitor(dstSoftMonGlobal);
     mon->setL3SoftwareMonitor    (dstSoftMonL3    );
+#endif
     
     //
     //        Load trigger & trigger detector data
@@ -334,7 +345,24 @@ StEventMaker::makeEvent()
     dst_TrgDet_st* dstTriggerDetectors = mEventManager->returnTable_dst_TrgDet(nrows);
     dst_L0_Trigger_st* dstL0Trigger    = mEventManager->returnTable_dst_L0_Trigger(nrows);
     dst_L1_Trigger_st* dstL1Trigger    = mEventManager->returnTable_dst_L1_Trigger(nrows);
-    
+
+#ifndef __KEEP_DST__
+    event_header_st  event =   {"Collision", //event_type
+				0,           // n_event
+				0, 0, 0, 0, // exp_run_id,time,trig_mask,bunch_cross
+				{0,0}}; // bunchXing
+    event.n_event    = GetEventNumber();
+    event.exp_run_id = GetRunNumber();
+    event.time = TUnixTime::Convert(GetDateTime(),1);
+    mCurrentEvent->setInfo(new StEventInfo(event));
+
+    dst_event_summary_st dstEventSummary;
+    memset(&dstEventSummary, 0, sizeof(dst_event_summary_st));
+    Float_t   xlocal[3] = {0,0,0}, bfield[3] = {0,0,0};
+    if (StarMagField::Instance()) StarMagField::Instance()->BField(xlocal,bfield);
+    dstEventSummary.field = bfield[2];
+    mCurrentEvent->setSummary(new StEventSummary(dstEventSummary));
+#endif    
     //
     // Get trgStructure structures from StTriggerDataMaker
     // and store them in StEvent. Note that they are need
@@ -377,7 +405,6 @@ StEventMaker::makeEvent()
     
     if (dstL0Trigger && dstL1Trigger && !mCurrentEvent->l1Trigger())
         mCurrentEvent->setL1Trigger(new StL1Trigger(*dstL0Trigger, *dstL1Trigger));
-    
     //
     //  Trigger ID summary
     //
@@ -529,6 +556,7 @@ StEventMaker::makeEvent()
     
     
     
+#ifdef __KEEP_DST__
     
     //
     //  Some variables we need in the following
@@ -543,7 +571,7 @@ StEventMaker::makeEvent()
     unsigned int               id, k, nfailed, nfailed2, idvtx;
     int                        i, h;
     int signOfField = mCurrentEvent->summary()->magneticField() < 0 ? -1 : 1;
-    
+#endif    
     //
     //  Complete information in StEventInfo
     //
@@ -552,6 +580,7 @@ StEventMaker::makeEvent()
         theInfo->setBunchCrossingNumber(dstTriggerDetectors->bunchXing_lo,0);
         theInfo->setBunchCrossingNumber(dstTriggerDetectors->bunchXing_hi,1);
     }
+#ifdef __KEEP_DST__
     
     //
     //  Create global tracks.
@@ -1315,7 +1344,7 @@ StEventMaker::makeEvent()
                                     << " FTPC hits, wrong hardware address." << endm;
         }
     }
-    
+#endif    
     //
     //  Add data from StEvtHddr we cannot get elsewhere
     //
@@ -1806,8 +1835,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.86 2009/11/10 03:55:49 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.87 2009/11/10 20:45:08 fisyak Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.87  2009/11/10 20:45:08  fisyak
+ * pams Cleanup
+ *
  * Revision 2.86  2009/11/10 03:55:49  perev
  * Remove redundant printing
  *
