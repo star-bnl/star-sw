@@ -48,8 +48,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.87 2009/11/10 20:45:08 fisyak Exp $";
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.87 2009/11/10 20:45:08 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.88 2009/11/10 21:59:30 fisyak Exp $";
 #ifdef __KEEP_DST__
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -1835,8 +1834,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.87 2009/11/10 20:45:08 fisyak Exp $
+ * $Id: StEventMaker.cxx,v 2.88 2009/11/10 21:59:30 fisyak Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.88  2009/11/10 21:59:30  fisyak
+ * Fix
+ *
  * Revision 2.87  2009/11/10 20:45:08  fisyak
  * pams Cleanup
  *
