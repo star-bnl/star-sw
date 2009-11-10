@@ -1,7 +1,9 @@
 #include "StTpcHitMoverMaker.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StMessMgr.h"
+#ifdef __USE_TCL__
 #include "tables/St_tcl_tphit_Table.h"
+#endif
 #include "StDbUtilities/StMagUtilities.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StEventTypes.h"
@@ -10,10 +12,12 @@ ClassImp(StTpcHitMover)
 //________________________________________________________________________________
 StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name),
 						   mAlignSector(kFALSE),
-						   mExB(NULL), mTpcTransForm(0) {
+						   mTpcTransForm(0), mExB(NULL) {
   gMessMgr->Info("StTpcHitMover::StTpcHitMover: constructor called");
+#ifdef __USE_TCL__
   setInputDataSetName("tpc_hits");
   setInputHitName("tphit");
+#endif
   setOutputMode(0);
 }
 //________________________________________________________________________________
@@ -97,10 +101,14 @@ Int_t StTpcHitMover::Make() {
 	}
       }
     }
-
     return kStOK;
+  } 
+#ifndef __USE_TCL__
+  else {
+    LOG_WARN << "StTpcHitMover::Make there is  StEvent " << endm;
+    return kStWarn;
   }
-
+#else /*  __USE_TCL__ */
   St_DataSet *tpc_data = GetInputDS(mInputDataSetName);
   if (!tpc_data){
     // no TPC ???
@@ -144,6 +152,7 @@ Int_t StTpcHitMover::Make() {
     }
   }
   return kStOk;
+#endif
 }
 //________________________________________________________________________________
 Int_t StTpcHitMover::Finish() {
