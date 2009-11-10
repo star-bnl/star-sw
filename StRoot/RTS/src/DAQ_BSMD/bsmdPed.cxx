@@ -65,17 +65,17 @@ int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	u_short *d ;
 	u_int *d32 = (u_int *) src ;
 
-	LOG(TERR,"BSMD ZS: rdo %d: in bytes %d",rdo1,in_bytes) ;
+	LOG(NOTE,"BSMD ZS: rdo %d: in bytes %d",rdo1,in_bytes) ;
 
-	d = (u_short *)(src + 8*4) ;	// data start at 8th word
+	d = (u_short *)(src + 10*4) ;	// data start at 10th word
 
-	cap = (u_short) (d32[7] & 0x7F) ;
+	cap = (u_short) (d32[8] & 0x7F) ;	// cap is now 16 bits!
 
 	fiber = (sector-1)*2 + (rdo1 - 1) ;
 
-	*d_out++ = 0x0001 ;
+	*d_out++ = 0x0002 ;	// version 2!
 	u_short *count = d_out++ ;	// save counter spot
-	*d_out++ = cap ;
+	*d_out++ = d32[8] & 0xFFFF ;	// save 16 bits of the cap!
 	*d_out++ = fiber ;
 
 	u_short *tmp = d_out ;
@@ -95,26 +95,35 @@ int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	}
 	*count = (d_out - tmp)/2 ;
 
-	LOG(TERR,"BSMD ZS: rdo %d: in bytes %d, out bytes %d",rdo1,in_bytes,(char *)d_out-dst) ;
+	int out_bytes = (char *)d_out - dst ;
 
-	return (char *)d_out - dst ;
+	if(out_bytes > in_bytes) {
+		LOG(WARN,"BSMD ZS: rdo %d: in bytes %d, out bytes %d",rdo1,in_bytes,out_bytes) ;
+	}
+	else {
+		LOG(NOTE,"BSMD ZS: rdo %d: in bytes %d, out bytes %d",rdo1,in_bytes,out_bytes) ;
+	}
+
+	return out_bytes ;
 }
 
 
 /*
-	Called per event, per RDO. evbbuff is the raw RDO contribuition
+	Called per event, per RDO. evbbuff is the raw RDO contribuition.
+	rdo counts from 1.
 */
-void bsmdPed::accum(char *evbuff, int bytes, int rdo)
+void bsmdPed::accum(char *evbuff, int bytes, int rdo1)
 {
 	int cap ;
 	u_short *d_in ;
 	u_int *d32 ;
+	int rdo = rdo1 - 1 ;	// since rdo1 is from 1
 
 	d_in = (u_short *) evbuff ;
 	d32 = (u_int *) evbuff ;
 
 	// this is where the cap should be...
-	cap = d32[7] & 0x7F ;	// mask off, in case of problems...
+	cap = d32[8] & 0x7F ;	// mask off, in case of problems...
 	
 
 	evts[rdo]++ ;
@@ -132,13 +141,13 @@ void bsmdPed::accum(char *evbuff, int bytes, int rdo)
 
         LOG(NOTE,"RDO %d: event %d",rdo,evts[rdo]) ;
 
-	struct peds *p = ped_store + (rdo - 1);	// rdo is from 1
+	struct peds *p = ped_store + rdo ;
 
 	if(p->cou[cap] > 0xFFF0) return ;
 	p->cou[cap]++ ;
 	
 	// move to start of data
-	d_in = (u_short *)(evbuff + 8*4) ;
+	d_in = (u_short *)(evbuff + 10*4) ;	// start at the 10th
 
 	for(int j=0;j<4800;j++) {
 
@@ -223,6 +232,7 @@ void bsmdPed::calc()
 
 
 	bad = 0 ;
+	int real_bad = 0 ;
 
 	for(r=0;r<6;r++) {
 		if(rb_mask & (1<<r)) ;
@@ -237,10 +247,13 @@ void bsmdPed::calc()
 				if(bad<50) {
 					LOG(WARN,"RDO %d: cap %3d: only %d events!",r+1,cap,ped->cou[cap]) ;
 				}
-				else if(bad==30) {
+				else if(bad==50) {
 					LOG(WARN,"Stopping detailed bad cap logging...") ;
 				}
+
+				if(ped->cou[cap] == 0) real_bad++ ;
 			}
+		
 		}
 	}
 
@@ -252,7 +265,11 @@ void bsmdPed::calc()
 		//LOG(TERR,"Pedestals calculated. RDO counts: %u %u %u %u %u %u",valid_evts[0],valid_evts[1],valid_evts[2],valid_evts[3],valid_evts[4],valid_evts[5]) ;
 	}
 	else {
-		LOG(ERR,"BSMD pedestals not good (%d caps were not present",bad) ;
+		LOG(ERR,"BSMD pedestals not good (%d caps not good, %d missing)",bad,real_bad) ;
+		if(!real_bad) {
+			LOG(WARN,"But since no real bad I will allow it!") ;
+			valid = 1 ;
+		}
 	}
 
 	return ;
@@ -385,7 +402,7 @@ int bsmdPed::to_cache(char *fname, u_int run)
 
 		for(p=0;p<128;p++) {
 			for(t=0;t<4800;t++) {
-				fprintf(f,"%2d %3d %3d %8.3f %.3f\n",r+1,p,t,peds->ped[p][t],peds->rms[p][t]) ;
+				fprintf(f,"%d %d %d %8.3f %.3f\n",r+1,p,t,peds->ped[p][t],peds->rms[p][t]) ;
 			}
 		}
 	}

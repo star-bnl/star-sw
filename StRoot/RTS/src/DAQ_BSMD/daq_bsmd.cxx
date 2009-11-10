@@ -1,3 +1,4 @@
+
 #include <sys/types.h>
 #include <errno.h>
 #include <assert.h>
@@ -52,12 +53,16 @@ static const struct bsmd_old_to_new_map_t {
 
 } ;
 
+
+
 daq_bsmd::daq_bsmd(daqReader *rts_caller) 
 {
 	rts_id = BSMD_ID ;
 	name = rts2name(rts_id) ;
 	sfs_name = "bsmd" ;
 	caller = rts_caller ;
+	t_data = 0 ;
+
 	if(caller) caller->insert(this, rts_id) ;
 
 
@@ -457,12 +462,12 @@ daq_dta *daq_bsmd::handle_raw(int rdo)
 
 			if(!full_name) continue ;
 
-			bytes += caller->sfs->fileSize(full_name) ;
+			bytes = caller->sfs->fileSize(full_name) ;
 
 			char *st = (char *) raw->request(bytes) ;
 			int ret = caller->sfs->read(str, st, bytes) ;
 			if(ret != bytes) {
-				LOG(ERR,"ret is %d") ;
+				LOG(ERR,"ret is %d != %d",ret,bytes) ;
 			}
 
 			raw->finalize(bytes,s_new,r) ;	// add the sector but keep the old "RDO"!
@@ -487,84 +492,232 @@ daq_dta *daq_bsmd::handle_raw(int rdo)
 
 int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
-//	const int BSMD_BYTES = ((2400+8)*4) ;	// this is the minimum
-	const int BSMD_BYTES = (1024*4) ;	// this is the test!
-	int buff_bytes = 4 * words ;
+	const int BSMD_BYTES_MIN = ((2400+10+3)*4) ;	// this is the minimum
+	const int BSMD_BYTES_MAX = ((2400+10+3+30)*4) ;
+	const u_int BSMD_VERSION = 0x8033 ;		// Nov 09
+	const u_int BSMD_SIGNATURE = 0x42534D44 ;	// "BSMD"
+	const u_int BSMD_HDR_ID = 5 ;	// by some definiton somewhere...
 
+	int t_cou = 0 ;
+	int bad = 0 ;
 	u_int *d32 = (u_int *)buff ;
 
 
+	//HACKINTOSH!
+	words = 2413 ;
+
+	// FIRST we check the length
+	int buff_bytes = 4 * words ;
+
+	if((buff_bytes < BSMD_BYTES_MIN) || (buff_bytes > BSMD_BYTES_MAX)) {
+		LOG(ERR,"RDO %d: expect %d bytes, received %d",rdo,BSMD_BYTES_MIN,buff_bytes) ;
+		bad |= 1 ;
+	}
+
+
+	// grab crc from the last word
+	int last_ix = words - 1 ;
+
+	u_int crc_in_data = d32[last_ix] ;
+	u_int crc = 0xFFFFFFFF ;
+	if(crc_in_data) {	
+		for(int i=0;i<last_ix;i++) {
+			const u_int g = 0x04C11DB7 ;
+
+			for(int j=31;j>=0;j--) {
+				u_int data_j = (d32[i] >> j) & 1 ;
+				u_int crc_31 = (crc & 0x80000000) ? 1 : 0 ;
+
+				if(crc_31 == data_j) {
+					crc = (crc<<1) ^ g ;
+				}
+				else {
+					crc = (crc<<1) ;
+				}
+			}
+		}
+
+		if(crc != crc_in_data) {
+			LOG(ERR,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
+			bad |= 1 ;
+		}
+	}	
+
+	LOG(DBG,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
+
+	// misc signatures and errors from the header
+	if(d32[1] != BSMD_SIGNATURE) {	// "BSMD"
+		LOG(ERR,"RDO %d: bad header sig 0x%08X, expect 0x%08X",rdo,d32[1], BSMD_SIGNATURE) ;
+		bad |= 1 ;
+	}
+
+	if(d32[9] != 0xDEADFACE) {	// deadface
+		LOG(ERR,"RDO %d: bad deadface 0x%08X",rdo,d32[9]) ;
+		bad |= 1 ;
+	}
+
+
+	if((d32[2] >> 16) != BSMD_VERSION) {
+		LOG(ERR,"RDO %d: bad version 0x%04X, expect 0x%04X",rdo,d32[2] >> 16, BSMD_VERSION) ;
+		bad |= 2 ;	// soft error
+	
+	}
+
+	if((d32[3] & 0xFFFF0000)) {	// error_flags
+		LOG(ERR,"RDO %d: error flags 0x%04X",rdo,d32[3]>>16) ;
+		bad |= 2 ;
+	}
+
+	if(((d32[3]>>8) & 0xFF) != BSMD_HDR_ID) {	// det_id
+		LOG(ERR,"RDO %d: bad det_id 0x%02X",(d32[3]>>8)&0xFF) ;
+		bad |= 1 ;
+	}
+
+	int rdo_id = d32[3] & 0xFF ;	// fiber ID via jumpers...
+	// compare to what?
+	LOG(DBG,"RDO %d: in data %d",rdo,rdo_id) ;
+
+
+
 	// L0 part
+	t_cou = 0 ;
 	trg[0].t = d32[0] & 0xFFF ;
 	trg[0].daq = d32[2] & 0xF ;
 	trg[0].trg = (d32[2] >> 4) & 0xF ;
 	trg[0].rhic = d32[4] ;
 	
-
-
-	// L2 part is INVENTED for now!!!
-	trg[1].t = trg[0].t ;	// copy over token
-	trg[1].trg = 15 ;	// this is where the trg cmd ought to be
-	trg[1].daq = 0 ;
-	trg[1].rhic = trg[0].rhic + 1 ;
+	t_cou++ ;
 
 
 	LOG(NOTE,"RDO %d: token %d, trg %d, daq %d: rhic %u",rdo, 
 		trg[0].t, trg[0].trg, trg[0].daq, trg[0].rhic) ;
 
-	// here I will put the sanity check!
-	int bad = 0 ;
-	if(buff_bytes < BSMD_BYTES) {
-		LOG(ERR,"BSMD: rdo %d: expect %d bytes, received %d",rdo,BSMD_BYTES,buff_bytes) ;
-		bad = 1 ;
-	}
 
+	// check token and trg_cmd sanity...
 	if(trg[0].t == 0) {
 		LOG(ERR,"RDO %d: token 0?",rdo) ;
-		trg[0].t = trg[1].t = 4097 ;	// turn it to sanity!
-		bad = 1 ;
+		trg[0].t = 4097 ;	// turn it to sanity!
+		bad |= 2 ;
 	}
 
 	switch(trg[0].trg) {
 	case 4 :
 	case 8 :
-	case 10 :
 	case 11 :
 	case 12 :
 	case 15 :
 		break ;
 	default :
 		LOG(ERR,"RDO %d: bad trg_cmd %d",rdo, trg[0].trg) ;
-		trg[0].trg = 5 ;
-		bad = 1 ;
+		// sanitize
+		trg[0].t = 4097 ;
+		bad |= 2 ;
 		break ;
 	}
 
-	if(d32[1] != 0x42534D44) {	// "BSMD"
-		LOG(ERR,"BSMD: rdo %d: bad sig 0x%08X",rdo,d32[1]) ;
-		bad = 1 ;
+
+	// get mesg_length
+	int mesg_length = d32[last_ix-1] & 0xFFF ;	// 12 bits only
+	if(mesg_length > 30) {
+		LOG(ERR,"RDO %d: bad trigger length %d",rdo,mesg_length) ;
+		// kill it! this will make the main length bad too
+		mesg_length = 0 ;
+		bad |= 2 ;
 	}
 
-	if((d32[2] & 0xFFFFFF00) != 0) {	// should be 0
-		LOG(ERR,"BSMD: rdo %d: bad 0 0x%08X",rdo,d32[2]&0xFFFFFF00) ;
-		bad = 1 ;
-	}
+	for(int i=0;i<mesg_length;i++) {
+		u_int trg_data = d32[last_ix - 2 - i] ;
 
-	if((d32[3] & 0xFFFF0000)) {	// error_flags
-		LOG(ERR,"BSMD: rdo %d: error flags 0x%08X",rdo,d32[3]&0xFFFF0000) ;
-		bad = 1 ;
-	}
+		
+		
+		trg[t_cou].t = (trg_data >> 8) & 0xFFF ;
+		trg[t_cou].trg = (trg_data >> 4) & 0xF ;
+		trg[t_cou].daq = trg_data & 0xF ;
+		trg[t_cou].rhic = (trg_data >> 20) & 0x7FF ;
 
-	if(((d32[3]>>8) & 0xFF) != 5) {	// det_id
-		LOG(ERR,"BSMD: rdo %d: bad det_id 0x%08X",(d32[3]>>8)&0xFF) ;
-		bad = 1 ;
-	}
-	
-	if(bad) {	// dump the whole header
-		for(int i=0;i<8;i++) {
-			LOG(WARN,"\tRDO %d: %d: 0x%08X",rdo,i,d32[i]) ;
+
+		// check the triggers here!
+		if(trg_data & 0x80000000) {
+			LOG(ERR,"RDO %d: FIFO limit 0x%08X",rdo,trg_data) ;
+			bad |= 2 ;
 		}
+
+
+		// need some sane limit here on t_cou
+		if(t_cou >= 120) {
+			LOG(ERR,"RDO %d: too many triggers %d",rdo,t_cou) ;
+			bad |= 2 ;
+			break ;
+		}
+
+		t_cou++ ;
+	}
+
+	int main_length = d32[last_ix - 2 - mesg_length] & 0xFFFF ;
+
+	if(main_length != 2410) {
+		LOG(ERR,"RDO %d: bad main_length %d",rdo,main_length) ;
+		bad |= 2 ;
+	}
+
+
+	// HACK!!!!
+	trg[t_cou].t = trg[0].t ;
+	trg[t_cou].trg = 15 ;
+	trg[t_cou].daq = 0 ;
+	trg[t_cou].rhic = trg[0].rhic + 1 ;
+	t_cou++ ;
+
+
+	
+	if(bad) {	
+		LOG(WARN,"RDO %d: words %d: bad %d:",rdo,words,bad) ;
+		// dump the whole header
+		for(int i=0;i<10;i++) {
+			LOG(WARN,"\tRDO %d: %4d: 0x%08X",rdo,i,d32[i]) ;
+		}
+		// dump last 4 words of the trailer as well
+		for(int i=(words-4);i<words;i++) {
+			LOG(WARN,"\tRDO %d: %4d: 0x%08X",rdo,i,d32[i]) ;
+		}
+		
+	}
+	else if(trg[0].trg==11) {	// special test pattern!
+		int bad_cou = 0;
+		int shutup = 0 ;
+		for(int i=10;i<2410;i++) {
+			u_int should ;
+			u_int b31, b21, b1, b0 ;
+
+			b31 = (t_data >> 31) & 1 ;
+			b21 = (t_data >> 21) & 1 ;
+			b1 = (t_data >> 1) & 1 ;
+			b0 = (t_data >> 0) & 1 ;
+
+			should = !(b31 ^ b21 ^ b1 ^b0) ;
+			should = (t_data << 1) | should ;
+
+			if(d32[i] != t_data) {
+				if(!shutup) LOG(WARN,"word %4d: should 0x%08X, is 0x%08X",i,t_data,d32[i]) ;
+				bad_cou++ ;
+			}
+
+			if(bad_cou > 2) shutup = 1  ;
+
+			should = !(b31 ^ b21 ^ b1 ^b0) ;
+			should = (t_data << 1) | should ;
+
+			t_data = should ;
+
+		}
+
+		if(bad_cou) LOG(ERR,"RDO %d: bad locations %d",rdo,bad_cou) ;
 	}
 	
-	return 2 ;
+	if(bad & 1) {	// critical errors
+		return 0 ;	// no trigger!
+	}
+	else {
+		return t_cou ;
+	}
 }
