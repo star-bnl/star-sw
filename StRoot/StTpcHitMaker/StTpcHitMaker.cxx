@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.18 2009/09/11 22:11:58 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.19 2009/11/10 21:05:08 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.19  2009/11/10 21:05:08  fisyak
+ * Add attributes for sector and pad  row selections
+ *
  * Revision 1.18  2009/09/11 22:11:58  genevb
  * Introduce TPC slewing corrections
  *
@@ -145,7 +148,7 @@ TableClassImpl(St_daq_sim_adc_tb,daq_sim_adc_tb);
 ClassImp(StTpcHitMaker);
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
-  LOG_INFO << "StTpcHitMaker::Init as"  << GetName() << endm;
+  LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
   const Char_t *Names[kAll] = {"undef",
 			       "tpc_hits","tpx_hits",
 			       "TpcPulser","TpxPulser",
@@ -157,14 +160,19 @@ Int_t StTpcHitMaker::Init() {
     if (MkName.CompareTo(Names[k],TString::kIgnoreCase) == 0) {kMode = (EMode) k; break;}
   }
   assert(kMode);
+  SetAttr("minSector",1);
+  SetAttr("maxSector",24);
+  SetAttr("minRow",1);
+  SetAttr("maxRow",45);
   return kStOK ;
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::Make() {
-  Int_t minSector = 1;
-  Int_t maxSector = 24;
-  if (IAttr("minSector")) minSector = IAttr("minSector");
-  if (IAttr("maxSector")) maxSector = IAttr("maxSector");
+  Int_t minSector = IAttr("minSector");
+  Int_t maxSector = IAttr("maxSector");
+  Int_t minRow    = IAttr("minRow");
+  Int_t maxRow    = IAttr("maxRow");
+  
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
     // invoke tpcReader to fill the TPC DAQ sector structure
     TString cldadc("cld");
@@ -192,7 +200,7 @@ Int_t StTpcHitMaker::Make() {
       fTpc = 0;
       if (kReaderType == kLegacyTpx || kReaderType == kLegacyTpc) fTpc = (tpc_t*)*DaqDta()->begin();
       else 	                                                  row = daqTpcTable->Row();
-      if (row > 0 && row <= 45) {
+      if (row >= minRow && row <= maxRow) {
 	switch (kMode) {
 	case kTpc: 
 	case kTpx:             UpdateHitCollection(sector); break;
@@ -249,7 +257,7 @@ void StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	tpc_cl *c = &tpc->cl[row][0];
 	Int_t ncounts = tpc->cl_counts[row];
 	for(Int_t j=0;j<ncounts;j++,c++) {
-	  if (! c) continue;
+	  if (! c || ! c->charge) continue;
 	  Int_t iok = hitCollection->addHit(CreateTpcHit(*c,sector,row+1));
 	  assert(iok);
 	}
@@ -273,7 +281,7 @@ void StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 			 cld->flags
 			 ) << endm;
       }
-      if (! cld->pad) continue;
+      if (! cld->pad || ! cld->charge) continue;
       if (cld->tb >= __MaxNumberOfTimeBins__) continue;
       Int_t iok = hitCollection->addHit(CreateTpcHit(*cld,sector,row));
       assert(iok);
@@ -340,11 +348,11 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   Double_t wire_coupling = (row<=13) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
   Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
 				   (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
-
+#if 0
   // Correct for slewing (needs corrected q, and time in microsec)
   Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
   time = freq * St_tpcSlewingC::instance()->correctedT(row,q,time/freq);
-
+#endif
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;
   static StTpcLocalCoordinate global;
@@ -381,7 +389,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 //________________________________________________________________________________
 void StTpcHitMaker::DoPulser(Int_t sector) {
   struct Pulser_t {Float_t sector, row, pad, gain, t0, nnoise, noise, npeak;};
-  static Char_t *names = "sector:row:pad:gain:t0:nnoise:noise:npeak";
+  static const Char_t *names = "sector:row:pad:gain:t0:nnoise:noise:npeak";
   static Pulser_t Pulser;
   if (! pulserP) {
     TFile *f = GetTFile();
@@ -647,10 +655,10 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   Int_t r_old = -1;
   Int_t p_old = -1;
   Int_t Total_data = 0;
-  int r=Row() ;	// I count from 1
+  Int_t r=Row() ;	// I count from 1
   if(r==0) return 0 ;	// TPC does not support unphy. rows so we skip em
   r-- ;			// TPC wants from 0
-  int p = Pad() - 1 ;	// ibid.
+  Int_t p = Pad() - 1 ;	// ibid.
   if (p < 0 || p >= StTpcDigitalSector::numberOfPadsAtRow(r+1)) return 0;
   if (r_old != r || p_old != p) {
     if (some_data) {
@@ -672,8 +680,8 @@ Int_t StTpcHitMaker::RawTpxData(Int_t sector) {
   TGenericTable::iterator iword = DaqDta()->begin();
   for (;iword != DaqDta()->end();++iword) {
     daq_adc_tb &daqadc = (*(daq_adc_tb *)*iword);
-    int tb   = daqadc.tb;
-    int adc  = daqadc.adc;
+    Int_t tb   = daqadc.tb;
+    Int_t adc  = daqadc.adc;
     ADCs[tb] = adc;
     IDTs[tb] = 65535;
     some_data++ ;	// I don't know the bytecount but I'll return something...
