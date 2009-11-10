@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixelsD.cc,v 1.4 2007/03/21 17:22:21 fisyak Exp $
+ * $Id: StSvtHybridPixelsD.cc,v 1.5 2009/11/10 21:00:17 fisyak Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -155,7 +155,11 @@ void StSvtHybridPixelsD::updateTruth()
 {
 
   if (!mTruthTmp) return;
-  long index=-1;
+#if ROOT_VERSION_CODE <= ROOT_VERSION(5,22,0)
+  Long_t index=-1;
+#else
+  Long64_t index=-1;
+#endif
   while(1) {
     StMCTruth tru = mTruthTmp->Iter(index);
     if (index==-1) break;
