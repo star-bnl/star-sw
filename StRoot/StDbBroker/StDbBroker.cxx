@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.55 2008/01/17 20:55:00 deph Exp $
+ * $Id: StDbBroker.cxx,v 1.56 2009/11/10 20:24:00 fisyak Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.56  2009/11/10 20:24:00  fisyak
+ * Use SafeDelete
+ *
  * Revision 1.55  2008/01/17 20:55:00  deph
  * Removed annoying repetative printing of Statistics
  *
@@ -264,9 +267,9 @@ StDbBroker::~StDbBroker(){
   if(m_tableVersion) delete [] m_tableVersion;
   if(m_database) delete [] m_database;
   if(m_flavor) delete [] m_flavor;
-  if(m_Nodes) delete m_Nodes;
-  if(m_Tree) delete m_Tree;
-  if(mgr) delete mgr;
+  SafeDelete(m_Nodes);
+  SafeDelete(m_Tree);
+  SafeDelete(mgr);
 }
 
 //_____________________________________________________________________________

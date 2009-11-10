@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.33 2009/10/12 15:06:11 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.34 2009/11/10 20:24:45 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.34  2009/11/10 20:24:45  fisyak
+ * Use SafeDelete
+ *
  * Revision 1.33  2009/10/12 15:06:11  dmitry
  * added new domain: pp2pp
  *
@@ -291,14 +294,11 @@ StDbManagerImpl::~StDbManagerImpl(){
   deleteServers();
   deleteDomains();
   deleteTypes();
-  delete mfactory;
-  delete Messenger;
+  SafeDelete(mfactory);
+  SafeDelete(Messenger);
   mInstance=0;
 #ifndef NoXmlTreeReader
-  if (myServiceBroker)
-    {
-      delete myServiceBroker;
-    }
+  SafeDelete(myServiceBroker);
 #endif
 }
 
