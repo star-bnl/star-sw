@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.4 2009/11/10 10:59:26 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.5 2009/11/10 11:07:09 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.5  2009/11/10 11:07:09  jcs
+// Now necessary to also load StDetectorDbMaker library
+//
 // Revision 1.4  2009/11/10 10:59:26  jcs
 // change map to Map to avoid conflict with cint
 //
@@ -45,6 +48,7 @@ void FtpcDriftMapMaker(const Int_t Map=2, const Float_t factor=1.0, const Float_
     gSystem->Load("St_Tables");
     gSystem->Load("StUtilities");
     gSystem->Load("StarClassLibrary");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StDbLib");
     gSystem->Load("StDbBroker");
