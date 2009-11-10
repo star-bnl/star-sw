@@ -42,7 +42,7 @@ BetheBloch::BetheBloch(){
   cout << "but use instead :                                                                       " << endl;
   cout << "for production before P03h static function 1.e-6*BetheBloch::Sirrf(Poverm)              " << endl;
   cout << "for production after  P03h (including P03h)                                             " << endl; 
-  cout << "gSystem->Load(\"StBichsel\");m = new Bichsel(); 1.e-6*m->GetI70(TMath::Log10(poverm),1.)" << endl;
+  cout << "gSystem->Load(\"StBichsel\"); I70 = 1.e-6*mBichsel::Instance()->GetI70(TMath::Log10(poverm),1.)" << endl;
   cout << "see an example in  $STAR/StRoot/macros/analysis/bichsel.C                               " << endl;
   cout << "BetheBloch::BetheBloch =================================================================" << endl;
   noWarn = 1;
