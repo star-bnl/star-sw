@@ -1,5 +1,5 @@
 //
-// $Id: StTrackMateMaker.cxx,v 1.1 2004/09/13 22:04:53 calderon Exp $
+// $Id: StTrackMateMaker.cxx,v 1.2 2009/11/10 20:57:28 fisyak Exp $
 //
 #include <iostream>
 #include <map>
@@ -19,10 +19,14 @@
 #include "StTpcHitCollection.h"
 #include "StContainers.h"
 #include "StTrackNode.h"
+#include "StPrimaryTrack.h"
 #include "StTrack.h"
 #include "StTrackDetectorInfo.h"
 #include "StTpcHit.h"
 #include "StTrackGeometry.h"
+
+#include "StEventUtilities/StuRefMult.hh"
+#include "StMessMgr.h"
 
 // //#include "StMemoryInfo.hh"
 // #include "StParticleDefinition.hh"
@@ -35,36 +39,89 @@ using std::vector;
 size_t buildRecHitTrackMap(const StSPtrVecTrackNode& nodes,map<StHit*,StTrack*>& htMap);
 float getTpcDedx(StTrack* trk);
 
-static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.1 2004/09/13 22:04:53 calderon Exp $";
+static const char rcsid[] = "$Id: StTrackMateMaker.cxx,v 1.2 2009/11/10 20:57:28 fisyak Exp $";
 ClassImp(StTrackMateMaker)
+// tpt => old
+// sti => new
 
-StTrackMateMaker::StTrackMateMaker(const char *name): StMaker(name)
-{
-    // if this line is not present, causes a seg fault?
-    cout << "StTrackMateMaker::StTrackMateMaker() not zeroing pointer" << endl;
-//     mCorrectionAccPeriphAll = 0;
-
+TString names("oldPtGl/F:newPtGl/F:oldEtaGl/F:newEtaGl/F:oldPhiGl/F:newPhiGl/F:oldPGl/F:newPGl/F:oldFitPtsGl/F:"
+	      "newFitPtsGl/F:oldPtPr/F:newPtPr/F:oldEtaPr/F:newEtaPr/F:oldPhiPr/F:newPhiPr/F:oldPPr/F:newPPr/F:"
+	      "oldFitPtsPr/F:newFitPtsPr/F:oldDedx/F:newDedx/F:oldCharge/F:newCharge/F:maxPing/F:Prim/F:"
+	      "oldChi2Gl0/F:newChi2Gl0/F:oldChi2Gl1/F:newChi2Gl1/F:oldChi2Pr0/F:newChi2Pr0/F:oldChi2Pr1/F:"
+	      "newChi2Pr1/F:firstHitsDist/F:lastHitsDist/F:"
+	      "oldPrimX/F:oldPrimY/F:oldPrimZ/F:newPrimX/F:newPrimY/F:newPrimZ/F");
+struct mc_data_array {
+  Char_t begin;
+  float oldPtGl;
+  float newPtGl;
+  float oldEtaGl;
+  float newEtaGl;
+  float oldPhiGl;
+  float newPhiGl;
+  float oldPGl;
+  float newPGl;
+  float oldFitPtsGl;
+  float newFitPtsGl;
+  float oldPtPr;
+  float newPtPr;
+  float oldEtaPr;
+  float newEtaPr;
+  float oldPhiPr;
+  float newPhiPr;
+  float oldPPr;
+  float newPPr;
+  float oldFitPtsPr;
+  float newFitPtsPr;
+  float oldDedx;
+  float newDedx;
+  float oldCharge;
+  float newCharge;
+  float maxPing;
+  float Prim;
+  float oldChi2Gl0;
+  float newChi2Gl0;
+  float oldChi2Gl1;
+  float newChi2Gl1;
+  float oldChi2Pr0;
+  float newChi2Pr0;
+  float oldChi2Pr1;
+  float newChi2Pr1;
+  float firstHitsDist;
+  float lastHitsDist;
+  float oldPrimX;
+  float oldPrimY;
+  float oldPrimZ;
+  float newPrimX;
+  float newPrimY;
+  float newPrimZ;
+  Char_t end;
+ public:
+  void set() {memset(&begin, 0, &end-&begin);}
+};
+mc_data_array data;    
+//________________________________________________________________________________
+Int_t StTrackMateMaker::Init() {
+  TFile *f = GetTFile();
+  if (f) {
+    f->cd();
+  }
+  gMessMgr->QAInfo() << "StTrackMateMaker::Init() - creating histogram" << endm;
+  TString evNames = "refMult/F";
+  trackTree = new TTree("trackMateComp","trackMateComp");
+  trackBr = trackTree->Branch("data_array",&data.oldPtGl,names.Data());
+  eventBr = trackTree->Branch("ev_array",evOutput,evNames.Data());
+  gMessMgr->QAInfo() << "StTrackMateMaker::Init() - successful" << endm;
+  
+  return StMaker::Init();
 }
-StTrackMateMaker::~StTrackMateMaker() { /* nopt */ }
-Int_t StTrackMateMaker::Init()
-{
-    cout << "StTrackMateMaker::Init() - creating histogram" << endl;
-    mPtDiff = new TH2D("mPtDiff","mPtDiff",40,0,4,160,-1,1);
-    mPtDiff->Sumw2();
-    TString names = "tptPt/F:ittfPt/F:tptP/F:ittfP/F:tptFitPts/F:ittfFitPts/F:tptDedx/F:ittfDedx/F";
-    trackTree = new TTree("trackMateComp","trackMateComp");
-    trackTree->Branch("data_array",output,names.Data());
-    cout << "StTrackMateMaker::Init() - successful" << endl;
-    
-    return StMaker::Init();
-}
+//________________________________________________________________________________
 void StTrackMateMaker::Clear(const char* c)
 {
     return StMaker::Clear(c);
 }
-
+//________________________________________________________________________________
 Int_t StTrackMateMaker::Make(){
-    cout << "In StTrackMateMaker::Make " << endl;
+    gMessMgr->QAInfo() << "In StTrackMateMaker::Make " << endm;
     StEvent* rEvent1 = 0;
     StEvent* rEvent2 = 0;
     
@@ -72,44 +129,61 @@ Int_t StTrackMateMaker::Make(){
     rEvent1 = (StEvent*) GetDataSet("IO1/.make/IO1_Root/.data/bfcTree/eventBranch/StEvent");
     rEvent2 = (StEvent*) GetDataSet("IO2/.make/IO2_Root/.data/bfcTree/eventBranch/StEvent");
 
-    cout << "Pointers obtained from GetDataSet" << endl;
-    cout << "Event1 At: " << rEvent1 << endl;
-    cout << "Event2 At: " << rEvent2 << endl;
+    gMessMgr->QAInfo() << "Pointers obtained from GetDataSet" << endm;
+    gMessMgr->QAInfo() << "Event1 At: " << rEvent1 << endm;
+    gMessMgr->QAInfo() << "Event2 At: " << rEvent2 << endm;
 
     if (!rEvent1 || !rEvent2) {
-	cout << "Bailing out! One of the StEvent's is missing!" << endl;
-	return kStOk;
+      gMessMgr->Warning() << "Bailing out! One of the StEvent's is missing!" << endm;
+      return kStWarn;
     }
-    cout << "Run # and Event #, should be the same for both StEvents" << endl;
-    cout << "Event1: Run "<< rEvent1->runId() << " Event1 No: " << rEvent1->id() << endl;
-    cout << "Event2: Run "<< rEvent2->runId() << " Event2 No: " << rEvent2->id() << endl;
-    cout << "Vertex Positions" << endl;
+    gMessMgr->QAInfo() << "Run # and Event #, should be the same for both StEvents" << endm;
+    gMessMgr->QAInfo() << "Event1: Run "<< rEvent1->runId() << " Event1 No: " << rEvent1->id() << endm;
+    gMessMgr->QAInfo() << "Event2: Run "<< rEvent2->runId() << " Event2 No: " << rEvent2->id() << endm;
+    gMessMgr->QAInfo() << "Vertex Positions" << endm;
     if (rEvent1->primaryVertex() ) {
-	cout << "Event1: Vertex Position " << rEvent1->primaryVertex()->position() << endl;
+	gMessMgr->QAInfo() << "Event1: Vertex Position " << rEvent1->primaryVertex()->position() << endm;
     }
     else {
-	cout << "Event1: Vertex Not Found" << endl;
+	gMessMgr->QAInfo() << "Event1: Vertex Not Found" << endm;
     }
     if (rEvent2->primaryVertex() ) {
-	cout << "Event2: Vertex Position " << rEvent2->primaryVertex()->position() << endl;
+	gMessMgr->QAInfo() << "Event2: Vertex Position " << rEvent2->primaryVertex()->position() << endm;
     }
     else {
-	cout << "Event2: Vertex Not Found" << endl;
+	gMessMgr->QAInfo() << "Event2: Vertex Not Found" << endm;
     }
-
-    cout << "Size of track containers" << endl;
+#if 0
+    if (rEvent1->runInfo()->spaceChargeCorrectionMode() != 21 ||
+	rEvent2->runInfo()->spaceChargeCorrectionMode() != 21) {
+      gMessMgr->QAInfo() << "Event1:  spaceChargeCorrectionMode "
+			 << rEvent1->runInfo()->spaceChargeCorrectionMode() << endm;
+      gMessMgr->QAInfo() << "Event2:  spaceChargeCorrectionMode "
+			 << rEvent2->runInfo()->spaceChargeCorrectionMode() << endm;
+      gMessMgr->QAInfo() << " Skip it " << endm;
+      return kStWarn;
+    }
+#endif
+    gMessMgr->QAInfo() << "Size of track containers" << endm;
     const StSPtrVecTrackNode& trackNodes1 = rEvent1->trackNodes();
-    cout << "Event1: Track Nodes " << trackNodes1.size() << endl;
+    gMessMgr->QAInfo() << "Event1: Track Nodes " << trackNodes1.size() << endm;
 
     const StSPtrVecTrackNode& trackNodes2 = rEvent2->trackNodes();
-    cout << "Event2: Track Nodes " << trackNodes2.size() << endl;
-
-    cout << "Tpc Hits" << endl;
+    gMessMgr->QAInfo() << "Event2: Track Nodes " << trackNodes2.size() << endm;
+    if (! trackNodes1.size() || ! trackNodes2.size()) return kStWarn;
+    //eventwise info
+    evOutput[0] = uncorrectedNumberOfPrimaries(*rEvent2);
+    //eventBr->Fill();
+    gMessMgr->Debug() << "Tpc Hits" << endm;
     // Note:
     // For StTpcHits: sector = [1-24], padrow = [1-45]
     // For StTpcHitCollections: sector [0-23], padrow = [0,44]
     const StTpcHitCollection* tpchitcoll1 = rEvent1->tpcHitCollection();
     const StTpcHitCollection* tpchitcoll2 = rEvent2->tpcHitCollection();
+    if (! tpchitcoll1 || ! tpchitcoll2) {
+      gMessMgr->Warning() << "Empty tpc hit collection in one of the events" << endm;
+      return kStWarn;
+    }
     if (Debug()>2) {
 	for (size_t iSec=0; iSec<tpchitcoll1->numberOfSectors(); ++iSec) { // [0,23]
 	    const StTpcSectorHitCollection* sectorcoll1 = tpchitcoll1->sector(iSec);
@@ -117,12 +191,12 @@ Int_t StTrackMateMaker::Make(){
 	    for (size_t iPadR=0; iPadR<sectorcoll1->numberOfPadrows(); ++iPadR) { //[0,44]
 		const StTpcPadrowHitCollection* padrowcoll1 = sectorcoll1->padrow(iPadR);
 		const StTpcPadrowHitCollection* padrowcoll2 = sectorcoll2->padrow(iPadR);
-		cout << "Sector(+1) " << iSec+1 << ", Padrow(+1) " << iPadR+1 << endl;
-		cout << "hits1 " << padrowcoll1->hits().size() << endl;
-		cout << "hits2 " << padrowcoll2->hits().size() << endl;
+		gMessMgr->Debug() << "Sector(+1) " << iSec+1 << ", Padrow(+1) " << iPadR+1 << endm;
+		gMessMgr->Debug() << "hits1 " << padrowcoll1->hits().size() << endm;
+		gMessMgr->Debug() << "hits2 " << padrowcoll2->hits().size() << endm;
 		if (padrowcoll1->hits().size()) {
-		    cout << "hits1[0] position " << padrowcoll1->hits()[0]->position() << endl;
-		    cout << "hits1[0] position " << padrowcoll2->hits()[0]->position() << endl;
+		    gMessMgr->Debug() << "hits1[0] position " << padrowcoll1->hits()[0]->position() << endm;
+		    gMessMgr->Debug() << "hits2[0] position " << padrowcoll2->hits()[0]->position() << endm;
 		}
 		// Here we assume (CHECK!) that the hits are the same for both events.
 		// So we don't need to associate them.  That is, if there is are hits in this
@@ -153,13 +227,14 @@ Int_t StTrackMateMaker::Make(){
     //buildRecHitTrackMap(trackNodes1,hitTrackMap1);
     map<StHit*,StTrack*> hitTrackMap2;
     size_t failedTries = buildRecHitTrackMap(trackNodes2,hitTrackMap2);
-    cout << "Hits used by more than 1 track: " << failedTries << endl;
+    gMessMgr->QAInfo() << "Hits used by more than 1 track: " << failedTries << endm;
     
     // Do Track association.
-    cout << "Begin Track Association..." << endl;
+    gMessMgr->QAInfo() << "Begin Track Association..." << endm;
     int matcTrkCounter = 0;
     int origTrkCounter = 0;
-
+    int oldOnlyCounter = 0;
+    int oldDoubCounter = 0;
     // Algorithm is a simplified version of the one in StAssociationMaker
     // since we don't need to worry about merged tracks, or splitting, or
     // multiple matches.  Just worry about the simple case of one-to-one matching.
@@ -182,12 +257,14 @@ Int_t StTrackMateMaker::Make(){
     set<StTrack*> assocTracks2;
     for (size_t iTrk=0; iTrk<trackNodes1.size();++iTrk) {
 	StTrack* trk1 = trackNodes1[iTrk]->track(global);
-	if (!trk1 || trk1->flag()<=0) continue;
-	if (Debug()>2) cout << "Processing Track " << iTrk << endl;
+	if (!trk1 || trk1->flag()<=0 || trk1->topologyMap().trackFtpc()) continue;
+	StTrack* ptrk1 = trackNodes1[iTrk]->track(primary);
+	if (Debug()>2) gMessMgr->QAInfo() << "Processing Track " << iTrk << endm;
 	++origTrkCounter;
 	vector<StTrackPing> candidates(20,initTrackPing); //make sure it's filled with null pointers and zeros
 	size_t nCandidates = 0;
 	StPtrVecHit trkhits1 = trk1->detectorInfo()->hits(kTpcId);
+	
 	for (StPtrVecHitIterator hIterTrk = trkhits1.begin(); hIterTrk != trkhits1.end(); ++hIterTrk) {
 	    // get the hit from the track
 	    const StTpcHit* hit1 = static_cast<const StTpcHit*>(*hIterTrk);
@@ -232,7 +309,7 @@ Int_t StTrackMateMaker::Make(){
 			// if so increase the size of the vector in steps of 20 candidates
 			if (nCandidates>=candidates.size()) {
 			    candidates.resize(nCandidates+20);
-			    if (Debug()) cout << "Resizing in the TPC hits of the track " << endl;
+			    if (Debug()) gMessMgr->QAInfo() << "Resizing in the TPC hits of the track " << endm;
 			}
 			break;
 		    }
@@ -247,103 +324,141 @@ Int_t StTrackMateMaker::Make(){
 	// could rewrite using
 	// max_element...
 	if (!nCandidates) {
-	    // the track was not found in the 2nd event!
-	    const StThreeVectorF& mom1 = trk1->geometry()->momentum();
-	    output[0] = mom1.perp(); // ptTptg;
-	    output[1] = -9999;       // ptIttf;
-	    output[2] = mom1.mag();  //  pTptg;
-	    output[3] = -9999;       //  pIttf;
-	    output[4] = trk1->fitTraits().numberOfFitPoints(kTpcId); //fitPtsTptg;
-	    output[5] = -9999;                                       //fitPtsIttf;
-	    output[6] = getTpcDedx(trk1);
-	    output[7] = -9999;
-	    output[8] = 0;
-	    trackTree->Fill();
+	    ++oldOnlyCounter;
+	    Fill(trk1,ptrk1,0,0,0);
 	    continue;
 	}
 	vector<StTrackPing>::iterator max = max_element(candidates.begin(),candidates.end(),compStTrackPing);
 	
 	if (Debug()>2) {
-	    cout << "Matching track " << (*max).mTrack << " has " << (*max).mNPings << ", index " << max-candidates.begin() << endl;
+	    gMessMgr->Debug() << "Matching track " << (*max).mTrack << " has " << (*max).mNPings << ", index " << max-candidates.begin() << endm;
 	}
 	
 	StTrack* trk2 = (*max).mTrack;
-	if (trk2->flag()<=0) continue;
+	StTrack* ptrk2 = trk2->node()->track(primary);
+	if (trk2->flag()<=0 || trk2->topologyMap().trackFtpc()) {
+	    ++oldOnlyCounter;
+	    Fill(trk1,ptrk1,0,0,-1);
+	    continue;
+	    
+	}
+	if (assocTracks2.find(trk2)!=assocTracks2.end()) {
+	    //This is a match to an New track that has already been matched.
+	    // We can enter the old track and flag this double match by
+	    // setting the fit points to be negative.
+	    ++oldDoubCounter;
+	    Fill(trk1,ptrk1,trk2,ptrk2,(*max).mNPings);
+	    continue;
+	}
+	// Ok! Now we found a pair if we're here!	
 	++matcTrkCounter;
 	assocTracks2.insert(trk2);
-	// Ok! Now we found a pair!
-	// So now we can make histograms and compare
-	// momentum... add code below.
-	const StThreeVectorF& mom1 = trk1->geometry()->momentum();
-	const StThreeVectorF& mom2 = trk2->geometry()->momentum();
-	output[0] = mom1.perp();// ptTptg;
-	output[1] = mom2.perp();// ptIttf;
-	output[2] = mom1.mag(); //  pTptg;
-	output[3] = mom2.mag(); //  pIttf;
-	output[4] = trk1->fitTraits().numberOfFitPoints(kTpcId); //fitPtsTptg;
-	output[5] = trk2->fitTraits().numberOfFitPoints(kTpcId); //fitPtsIttf;
-	output[6] = getTpcDedx(trk1);
-	output[7] = getTpcDedx(trk2);
-	output[8] = (*max).mNPings;
-	trackTree->Fill();
-
+	Fill(trk1,ptrk1,trk2,ptrk2,(*max).mNPings);
     }//track loop
 
-    // simple track loop to count ittf global tracks with flag>0
-    int stigTrkCounter = 0;
+    // simple track loop to count new global tracks with flag>0
+    int newgTrkCounter = 0;
+    int newOnlyCounter = 0;    
     for (size_t iTrk=0; iTrk<trackNodes2.size();++iTrk) {
 	StTrack* trk2 = trackNodes2[iTrk]->track(global);
-	if (!trk2 || trk2->flag()<=0) continue;
-	++stigTrkCounter;
+	if (!trk2 || trk2->flag()<=0 || trk2->topologyMap().trackFtpc()) continue;
+	++newgTrkCounter;
 	// Now try to see if this track was associated
 	set<StTrack*>::iterator itTrk2 = find(assocTracks2.begin(),assocTracks2.end(),trk2);
 	if (itTrk2==assocTracks2.end()) {
-	    // Track was not associated.  Enter it into output tree
-	    const StThreeVectorF& mom2 = trk2->geometry()->momentum();
-	    output[0] = -9999;
-	    output[1] = mom2.perp(); 
-	    output[2] = -9999;       
-	    output[3] = mom2.mag();  
-	    output[4] = -9999;                                       
-	    output[5] = trk2->fitTraits().numberOfFitPoints(kTpcId); 
-	    output[6] = -9999;
-	    output[7] = getTpcDedx(trk2);
-	    output[8] = 0;
-	    trackTree->Fill();
-	    
+	    ++newOnlyCounter;    	    
+	    StTrack* ptrk2 = trk2->node()->track(primary);
+	    Fill(0,0,trk2,ptrk2,-2);
 	}
     }    
     if (Debug()) {
-	cout << "Tpt+EGR  Global Tracks (flag>0) " << origTrkCounter << endl;
-	cout << "Sti      Global Tracks (flag>0) " << stigTrkCounter << endl;
-	cout << "Matched  Global Tracks (flag>0) " << matcTrkCounter << endl;
+	gMessMgr->Debug() << "Old+EGR  Global Tracks (flag>0) " << origTrkCounter << endm;
+	gMessMgr->Debug() << "New      Global Tracks (flag>0) " << newgTrkCounter << endm;
+	gMessMgr->Debug() << "Matched  Global Tracks (flag>0) " << matcTrkCounter << endm;
+	gMessMgr->Debug() << "Old+EGR  Only   Tracks (flag>0) " << oldOnlyCounter << endm;
+	gMessMgr->Debug() << "Old+EGR  Double Matches to New  " << oldDoubCounter << endm;
+	gMessMgr->Debug() << "size of Set, should = Matched.. " << assocTracks2.size() << endm; 
+	gMessMgr->Debug() << "New      Only   Tracks (flag>0) " << newOnlyCounter << endm;
     }
-//     int stiPTrkCounter = 0;
-//     int oriPTrkCounter = 0;
-//     int ftpGTrkCounter = 0;
-//     int ftpPTrkCounter = 0;
-//     for (const_StTrackNodeIterator iter = trackNodes.begin(); iter != trackNodes.end(); iter++) {
-// 	StTrackNode* node = *iter;
-// 	StTrack* track = node->track(global);
-// 	if (track->flag()<=0) continue;
-// 	int nFitPts = track->fitTraits().numberOfFitPoints(kTpcId);
-
-
-
 	
     return kStOK;
 }
-Int_t StTrackMateMaker::Finish()
-{
-    TString fileName("/trackMateFile");
-    fileName.Append(mFileIndex);
-    fileName.Append(".root");
-    fileName.Prepend(mOutDir);
-    cout << "Writing " << fileName << endl;
-    TFile* dummyFile = new TFile(fileName.Data(),"RECREATE");
-    //mPtDiff->Write(); //! 
-    trackTree->Write();
-    dummyFile->Close();
-    
-    return kStOK;
+//________________________________________________________________________________
+void StTrackMateMaker::Fill(StTrack* trk1, StTrack* ptrk1,StTrack* trk2, StTrack* ptrk2,Int_t maxPing) {
+  data.set();
+  data.firstHitsDist = data.lastHitsDist = -999.;
+  if (trk1) {
+    const StThreeVectorF& mom1 = trk1->geometry()->momentum();
+    data.oldPtGl = mom1.perp(); 
+    data.oldEtaGl = mom1.pseudoRapidity();
+    data.oldPhiGl = mom1.phi();
+    data.oldPGl = mom1.mag();
+    data.oldFitPtsGl = trk1->fitTraits().numberOfFitPoints(kTpcId);
+    data.oldDedx = getTpcDedx(trk1);
+    data.oldCharge = trk1->geometry()->charge();
+    data.oldChi2Gl0 = trk1->fitTraits().chi2(0);
+    data.oldChi2Gl1 = trk1->fitTraits().chi2(1);
+    data.maxPing = 0;
+    if (ptrk1) {
+      const StThreeVectorF& pmom1 = ptrk1->geometry()->momentum();
+      data.oldPtPr  = pmom1.perp(); 
+      data.oldEtaPr = pmom1.pseudoRapidity();
+      data.oldPhiPr = pmom1.phi();
+      data.oldPPr   = pmom1.mag();
+      data.oldFitPtsPr = trk1->fitTraits().numberOfFitPoints(kTpcId);
+      data.Prim    += 1;
+      data.oldChi2Pr0 = ptrk1->fitTraits().chi2(0);
+      data.oldChi2Pr1 = ptrk1->fitTraits().chi2(1);
+      StPrimaryTrack *prim = (StPrimaryTrack *) ptrk1;
+      const StVertex *vertex = prim->vertex();
+      if (vertex) {
+	data.oldPrimX = vertex->position().x();
+	data.oldPrimY = vertex->position().y();
+	data.oldPrimZ = vertex->position().z();
+      }
+    }
+  }
+  if (trk2) {
+    const StThreeVectorF& mom2 = trk2->geometry()->momentum();
+    data.newPtGl  = mom2.perp();
+    data.newEtaGl = mom2.pseudoRapidity();
+    data.newPhiGl = mom2.phi();
+    data.newPGl   = mom2.mag();
+    data.newFitPtsGl = trk2->fitTraits().numberOfFitPoints(kTpcId);
+    data.newDedx = getTpcDedx(trk2);
+    data.newCharge = trk2->geometry()->charge();
+    data.newChi2Gl0 = trk2->fitTraits().chi2(0);
+    data.newChi2Gl1 = trk2->fitTraits().chi2(1);
+    data.maxPing = 0;
+    if (ptrk2) {
+      const StThreeVectorF& pmom2 = ptrk2->geometry()->momentum();
+      data.newPtPr  = pmom2.perp();
+      data.newEtaPr = pmom2.pseudoRapidity();
+      data.newPhiPr = pmom2.phi();
+      data.newPPr   = pmom2.mag();
+      data.newFitPtsPr = trk2->fitTraits().numberOfFitPoints(kTpcId);
+      data.Prim    += 10;
+      data.newChi2Pr0 = ptrk2->fitTraits().chi2(0);
+      data.newChi2Pr1 = ptrk2->fitTraits().chi2(1);
+      StPrimaryTrack *prim = (StPrimaryTrack *) ptrk2;
+      const StVertex *vertex = prim->vertex();
+      if (vertex) {
+	data.newPrimX = vertex->position().x();
+	data.newPrimY = vertex->position().y();
+	data.newPrimZ = vertex->position().z();
+      }
+    }
+  }
+  data.maxPing = maxPing;
+  if (trk1 && trk2) {
+    StTrackDetectorInfo *det1 = trk1->detectorInfo();
+    StTrackDetectorInfo *det2 = trk2->detectorInfo();
+    if (det1 && det2) {
+      StThreeVectorF difFirst = det1->firstPoint() - det2->firstPoint();
+      data.firstHitsDist = difFirst.mag();
+      StThreeVectorF difLast = det1->lastPoint() - det2->lastPoint();
+      data.lastHitsDist = difLast.mag();
+    }
+  }
+  trackTree->Fill();
 }
