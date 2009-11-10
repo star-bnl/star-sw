@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.h,v 1.9 2009/11/10 19:17:39 fine Exp $
+ * $Id: StRTSBaseMaker.h,v 1.10 2009/11/10 19:20:30 fine Exp $
  * StRTSBaseMaker - class to fille the StEvewnt from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -60,17 +60,17 @@ class StRTSBaseMaker : public StMaker
 
      // DAQ Event raw data
 
-     static UInt_t Token();      //< current token
-     static UInt_t Trgcmd();     //< current trigger command
-     static UInt_t Daqcmd();     //< current DAQ command
-     static UInt_t Trgword();    //< the Trigger Word
-     static UInt_t Phyword();    //< the Physics Word
-     static UInt_t Daqbits();    //< "offline" bits aka L3 summary...
-     static UInt_t Daqbits_l1(); //< triggers satisfying l1 
-     static UInt_t Daqbits_l2(); //< triggers satisfying l2
-     static UInt_t Evpgroups() ; //< evp groups aka L3 summary[2]     
+     static UInt_t Token();      //!< current token
+     static UInt_t Trgcmd();     //!< current trigger command
+     static UInt_t Daqcmd();     //!< current DAQ command
+     static UInt_t Trgword();    //!< the Trigger Word
+     static UInt_t Phyword();    //!< the Physics Word
+     static UInt_t Daqbits();    //!< "offline" bits aka L3 summary...
+     static UInt_t Daqbits_l1(); //!< triggers satisfying l1 
+     static UInt_t Daqbits_l2(); //!< triggers satisfying l2
+     static UInt_t Evpgroups() ; //!< evp groups aka L3 summary[2]     
   
-     UInt_t Detectors()  const;  //< detectors present bit mask according to DAQ!
+     UInt_t Detectors()  const;  //!< detectors present bit mask according to DAQ!
      
      const TString &DetectorName() const { return fDetectorName; }
      //! One has to implement this method
