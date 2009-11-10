@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.15 2007/09/20 20:02:32 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.16 2009/11/10 00:41:03 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.16  2009/11/10 00:41:03  ullrich
+ * Changed print-out format and added new method shell().
+ *
  * Revision 2.15  2007/09/20 20:02:32  ullrich
  * Added new members to hold and access the number of anodes and of pixels.
  *
@@ -63,7 +66,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.15 2007/09/20 20:02:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.16 2009/11/10 00:41:03 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -166,87 +169,84 @@ StSvtHit::~StSvtHit() {/* noop */}
 
 unsigned int
 StSvtHit::barrel() const { 
-  
-  int Index = index();
-
-  if( Index < 0) return 0; // Something wrong
-
-  if( Index < 64) return 1;        // Index starts at 0 for hybrid1,wafer1, 
-  else if( Index < 208) return 2;  // ladder1,barrel1 and moves out 
-  else if( Index < 432) return 3;  // Index=431 is the largest value
-  return 0;  // Something wrong
-
+    
+    int Index = index();
+    
+    if( Index < 0) return 0; // Something wrong
+    
+    if( Index < 64) return 1;        // Index starts at 0 for hybrid1,wafer1, 
+    else if( Index < 208) return 2;  // ladder1,barrel1 and moves out 
+    else if( Index < 432) return 3;  // Index=431 is the largest value
+    return 0;  // Something wrong   
 }
 
 
 unsigned int 
 StSvtHit::ladder() const { 
-  
-  int Index = index();
-  int mLadder;
-  int mHybrid[3]={8,12,14};  // Hybrids on each ladder
-  int mLadderTot[2]={8,12};  // Ladders on each barrel
-  switch( barrel()){
-  case 1:
-    mLadder = Index/mHybrid[0];
-    return mLadder+1;
-    break;
-  case 2:
-    Index -= mHybrid[0]*mLadderTot[0];  // Subtract off hybrids from previous
-    mLadder = Index/mHybrid[1];         // layers the div. by hybrids per lay 
-    return mLadder+1;
-    break;
-  case 3:
-    Index -= mHybrid[0]*mLadderTot[0]; // Subtract off hybrids from previous
-    Index -= mHybrid[1]*mLadderTot[1]; // layers the div. by hybrids per lay
-    mLadder = Index/mHybrid[2];
-    return mLadder+1;
-    break;
-  default:
-    return 0; //Something Wrong
-  }
-
-
+    
+    int Index = index();
+    int mLadder;
+    int mHybrid[3]={8,12,14};  // Hybrids on each ladder
+    int mLadderTot[2]={8,12};  // Ladders on each barrel
+    switch( barrel()){
+    case 1:
+        mLadder = Index/mHybrid[0];
+        return mLadder+1;
+        break;
+    case 2:
+        Index -= mHybrid[0]*mLadderTot[0];  // Subtract off hybrids from previous
+        mLadder = Index/mHybrid[1];         // layers the div. by hybrids per lay 
+        return mLadder+1;
+        break;
+    case 3:
+        Index -= mHybrid[0]*mLadderTot[0]; // Subtract off hybrids from previous
+        Index -= mHybrid[1]*mLadderTot[1]; // layers the div. by hybrids per lay
+        mLadder = Index/mHybrid[2];
+        return mLadder+1;
+        break;
+    default:
+        return 0; //Something Wrong
+    }
 }
 
+unsigned int 
+StSvtHit::layer() const {return layer(barrel(), ladder());} 
+
 unsigned int
-StSvtHit::layer() const {
-
-  int Barrel = barrel();
-  int Ladder = ladder();
-
-  if( Ladder%2){
-    switch( Barrel){
-    case 1:
-      return 2;    // Outer layers are the odd numbered ladders
-      break;
-    case 2:
-      return 4;
-      break;
-    case 3:
-      return 6;
-      break;
-    default:
-      return 0;
+StSvtHit::layer(unsigned int Barrel, unsigned int Ladder) {
+    
+    if( Ladder%2){
+        switch( Barrel){
+        case 1:
+            return 2;    // Outer layers are the odd numbered ladders
+            break;
+        case 2:
+            return 4;
+            break;
+        case 3:
+            return 6;
+            break;
+        default:
+            return 0;
+        }
     }
-  }
-   else{
-     switch( Barrel){
-     case 1: 
-       return 1;  // Inner layers are the even ladders
-       break;
-     case 2:
-       return 3;
-       break;
-     case 3:
-       return 5;
-       break;
-     default:
-       return 0;
-     }
-   }
-
-  return 0;
+    else{
+        switch( Barrel){
+        case 1: 
+            return 1;  // Inner layers are the even ladders
+            break;
+        case 2:
+            return 3;
+            break;
+        case 3:
+            return 5;
+            break;
+        default:
+            return 0;
+        }
+    }
+    
+    return 0;
 }
 
 
@@ -254,22 +254,22 @@ unsigned int
 StSvtHit::wafer() const
 {
  
-  int Index = index();
-  int Barrel = barrel()-1;
-  int Ladder = ladder()-1;
-  int mHybrid[3] ={8,12,14};  // Number of hybrids per ladder
-  int mLadderTot[3] ={8,12,16}; // Number of ladders per barrel
-  
-  for( int B=0; B<Barrel; B++){
-    Index -= mHybrid[B]*mLadderTot[B]; // Sub. the hybrids from prev. barrels
-  }
-
-  for( int L=0; L<Ladder; L++){
-    Index -= mHybrid[Barrel]; // Sub. hybrids from previous ladders on  barrel
-  }
-
-  return (Index/2)+1;  // Two hybrids per wafer start counting from 1
-
+    int Index = index();
+    int Barrel = barrel()-1;
+    int Ladder = ladder()-1;
+    int mHybrid[3] ={8,12,14};  // Number of hybrids per ladder
+    int mLadderTot[3] ={8,12,16}; // Number of ladders per barrel
+    
+    for( int B=0; B<Barrel; B++){
+        Index -= mHybrid[B]*mLadderTot[B]; // Sub. the hybrids from prev. barrels
+    }
+    
+    for( int L=0; L<Ladder; L++){
+        Index -= mHybrid[Barrel]; // Sub. hybrids from previous ladders on  barrel
+    }
+    
+    return (Index/2)+1;  // Two hybrids per wafer start counting from 1
+    
 }
 
 
@@ -321,3 +321,21 @@ float StSvtHit::anode() const
 { 
     return mAnode; 
 } 
+
+unsigned int 
+StSvtHit::shell(unsigned int barrel, unsigned int ladder) {
+    return ((barrel == 1 && ladder <= 4) || 
+            (barrel == 2 && ladder <= 6) || 
+            (barrel == 3 && ladder <= 8)) ? 1 : 2;
+}
+
+unsigned int
+StSvtHit::shell() const {return shell(barrel(), ladder());}
+
+ostream&  operator<<(ostream& os, const StSvtHit& v)
+{
+    return os << Form("Svt b:%2i l:%2i w:%2i h:%1i",v.barrel(),v.ladder(), v.wafer(), v.hybrid())
+	    << *((StHit *)&v)
+	    << Form(" P:%8.3f",v.peakADC())
+	    << Form(" Luv: %8.3f %8.3f anode %8.3f timeb %8.3f",v.localPosition(0),v.localPosition(1),v.anode(),v.timebucket());
+}
