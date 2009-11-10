@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_AnalysisMaker.h,v 1.3 2009/10/15 04:03:03 yipkin Exp $
+// $Id: St_pp2pp_AnalysisMaker.h,v 1.4 2009/11/10 18:34:28 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_AnalysisMaker
 #define STAR_St_pp2pp_AnalysisMaker
@@ -14,12 +14,16 @@
  *
  */                                                                      
 
-class TFile;
-class TTree;
-
 #include "StRTSBaseMaker.h"
 //#include "pp2ppHit_Cluster.h"
 #include "St_pp2pp_Maker.h"
+
+class TFile;
+class TTree;
+
+class StEvent;
+class StRpsCollection;
+class StRpsCluster;
 
 class St_pp2pp_AnalysisMaker : public StRTSBaseMaker {
 
@@ -32,6 +36,9 @@ class St_pp2pp_AnalysisMaker : public StRTSBaseMaker {
   TFile     *fTreeFile ;
   TTree     *fClusterTree;
   string    output_filename ;
+
+  StEvent *mEvent ; // for fetching StEvent
+  StRpsCollection *pp2ppColl ; 
 
   struct P2P {
     unsigned short RPWVD2_ADC;
@@ -114,7 +121,7 @@ class St_pp2pp_AnalysisMaker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_AnalysisMaker.h,v 1.3 2009/10/15 04:03:03 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_AnalysisMaker.h,v 1.4 2009/11/10 18:34:28 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 

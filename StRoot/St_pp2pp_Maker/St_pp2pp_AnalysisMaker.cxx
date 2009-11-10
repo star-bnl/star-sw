@@ -1,3 +1,7 @@
+#include "TTree.h"
+#include "TFileIter.h"
+#include "TFile.h"
+
 #include "St_pp2pp_AnalysisMaker.h"
 #include "TDataSetIter.h"
 //#include "TGenericTable.h"
@@ -9,9 +13,9 @@
 //#include "StDaqLib/TRG/trgStructures2009.h"
 #include "StEvent/StTriggerData2009.h"
 
-#include "TTree.h"
-#include "TFileIter.h"
-#include "TFile.h"
+#include "StEvent/StEvent.h"
+#include "StEvent/StRpsCollection.h"
+#include "StEvent/StRpsCluster.h"
 
 ClassImp(St_pp2pp_AnalysisMaker)
 
@@ -100,7 +104,7 @@ void  St_pp2pp_AnalysisMaker::Clear(Option_t *) {
 /// Make - this method is called in loop for each event
 Int_t St_pp2pp_AnalysisMaker::Make(){
 
-  int s, c, k ; 
+  UInt_t s, c, k ; 
 
   Bool_t NotGotIt = kTRUE ;
 
@@ -204,9 +208,9 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
   }
 
 
-  if ( nevt_count%1000 == 0 ) cout << "St_pp2pp_AnalysisMaker:: Event count : " << nevt_count << ", Run : " << event_info.run_number 
-				   << ", Event no.: " << event_info.event_number << ", Token : " << event_info.token <<  ", Daqbits : " << event_info.daqbits 
-				   << ", tcubits : " << tcubits << " Date/Time : " << GetDate() << " " << GetTime() << endl ;
+  if ( nevt_count%10000 == 0 ) cout << "St_pp2pp_AnalysisMaker:: Event count : " << nevt_count << ", Run : " << event_info.run_number 
+				  << ", Event no.: " << event_info.event_number << ", Token : " << event_info.token <<  ", Daqbits : " << event_info.daqbits 
+				  << ", tcubits : " << tcubits << endl ;
   nevt_count++ ;
 
 
@@ -216,6 +220,7 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
      LOG_WARN << " Chain has produced no pp2pp data" << endm;
   } 
 
+  /*
   TGenericTable *Tclusters = (TGenericTable *)GetDataSet("pp2ppClusters");
 
   pp2ppCluster_st one_cluster ;
@@ -246,6 +251,39 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
     } 
 
   }
+  */
+
+  // Obtaining cluster from StEvent
+  mEvent = (StEvent *) GetInputDS("StEvent");
+  if ( mEvent ) {
+    pp2ppColl = mEvent->rpsCollection();
+  }
+  else
+    LOG_WARN << "St_pp2pp_AnalysisMaker : StEvent not found !" << endm ;
+
+
+  if ( pp2ppColl ) {
+
+    for ( s=0; s<St_pp2pp_Maker::MAXSEQ; s++)
+      for ( c=0; c<St_pp2pp_Maker::MAXCHAIN; c++) {
+
+	//	StSPtrVecRpsCluster mClusters = pp2ppColl->romanPot(s)->plane(c)->clusters() ;
+	//	for ( k=0; k<mClusters.size(); k++) {
+	for ( k=0; k<pp2ppColl->romanPot(s)->plane(c)->numberOfClusters(); k++) {
+	  if ( k < MAXClusters ) {
+	    //    allclusters[s][c].length[k] = mClusters[k]->length();
+	    allclusters[s][c].length[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->length();
+	    allclusters[s][c].position[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->position();
+	    allclusters[s][c].energy[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->energy();
+	    (allclusters[s][c].nclusters)++ ;
+	  }
+	}
+      }
+
+  }  
+  else
+    LOG_WARN << "St_pp2pp_AnalysisMaker : rpsCollection is empty ! " << endl ;
+
 
   fClusterTree->Fill();    
 

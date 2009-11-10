@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.3 2009/10/15 04:03:03 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.4 2009/11/10 18:34:28 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -19,6 +19,9 @@
 #include "pp2ppHit_Cluster.h"
 
 class TGenericTable;
+class StEvent;
+class StRpsCollection;
+
 class pp2pp_t;
 
 class St_pp2pp_Maker : public StRTSBaseMaker {
@@ -32,6 +35,9 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 	MAXSTRIP = 128 } ;
 
  private:
+  StEvent *mEvent ; // for fetching StEvent
+  StRpsCollection *pp2ppColl ; 
+
   typedef pair<Int_t, Double_t> HitChannel ; // first -> Position ; second -> Energy
 
   vector<HitChannel>  validhits[MAXSEQ][MAXCHAIN] ;
@@ -74,7 +80,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.3 2009/10/15 04:03:03 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.4 2009/11/10 18:34:28 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 

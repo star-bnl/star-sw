@@ -8,6 +8,10 @@
 #include "pp2ppPedestal.h"
 #include "tables/St_pp2ppPedestal_Table.h"
 
+#include "StEvent/StEvent.h"
+#include "StEvent/StRpsCollection.h"
+#include "StEvent/StRpsCluster.h"
+
 #ifdef NO_GLOBAL_VARIABLE_IS_ALLOWED
 // Silicon stuff
 // const Int_t MAXSEC = 2 ;  // 2 sides
@@ -30,6 +34,8 @@ ClassImp(St_pp2pp_Maker)
   St_pp2pp_Maker::St_pp2pp_Maker(const char *name) : StRTSBaseMaker("pp2pp",name),   
 						     pedestal_perchannel_filename("pedestal.in.perchannel"), LDoCluster(kTRUE) {
   // ctor
+  //  nevt_count = 0 ;
+
 }
 
 
@@ -118,14 +124,12 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 
   */
 
-  Int_t s, c, sv, ch ;
+  Int_t s, c, sv, ch, idb = 0 ;
 
-  Int_t idb = 0 ;
-
+  /*
   //  cout << GetTime() << " " << GetDate() << endl ;
 
-  St_db_Maker *dbMk = 0;
-  dbMk = (St_db_Maker*) GetMaker("db");
+  St_db_Maker *dbMk = (St_db_Maker*) GetMaker("db");
   if ( ! dbMk ) {
     LOG_WARN << "No St_db_Maker existed ?! " << endm ;
   }
@@ -133,7 +137,7 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
     //    cout << "I got St_db_Maker ?? " << endl ;
     dbMk->SetDateTime(this->GetDate(), this->GetTime());
   }
-
+  */
 
   // Database
   TDataSet *DB = 0;
@@ -142,8 +146,7 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
     LOG_WARN << "ERROR: cannot find database Calibrations_pp2pp?" << endm ;
   }
   else {
-    //    cout << "I got the DB !" << endl ;
-    // fetch ROOT fmsMap descriptor of db table
+    // fetch ROOT descriptor of db table
     St_pp2ppPedestal *descr = 0;
     descr = (St_pp2ppPedestal*) DB->Find("pp2ppPedestal");
     // fetch data and place it to appropriate structure
@@ -155,12 +158,6 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 		  c = (Int_t) table[idb].chain ;
 		  sv = (Int_t) table[idb].SVX ;
 		  ch = (Int_t) table[idb].channel ;
-
-		  /*
-		    if ( pedave[s-1][c][sv][ch] != table[idb].mean || pedrms[s-1][c][sv][ch] != table[idb].rms )
-		      cout << "Different ? " << s << " " << c << " "  << sv << " " << ch << " "
-			   << table[idb].mean << " " << table[idb].rms << endl ; 
-		  */
 
 		  pedave[s-1][c][sv][ch] = table[idb].mean ;
 		  pedrms[s-1][c][sv][ch] = table[idb].rms ;
@@ -200,6 +197,11 @@ void  St_pp2pp_Maker::Clear(Option_t *) {
 /// Make - this method is called in loop for each event
 Int_t St_pp2pp_Maker::Make(){
 
+  //  if ( nevt_count%10000 == 0 ) cout << "St_pp2pp_Maker:: Event count : " << nevt_count << endl ;
+
+  //  nevt_count++ ;
+
+
   //
   //  PrintInfo();
   //
@@ -212,12 +214,11 @@ Int_t St_pp2pp_Maker::Make(){
   // Each GetNextAdc would get a SVX ...
   while ( GetNextAdc() ) {
      counter++;
-       
      TGenericTable::iterator iword = DaqDta()->begin();
      for (;iword != DaqDta()->end();++iword) {
         pp2pp_t &d = *(pp2pp_t *)*iword;
         // do something
-        DoerPp2pp(d,*pp2ppRawHits);
+	DoerPp2pp(d,*pp2ppRawHits);
      }
   }
 
@@ -244,9 +245,19 @@ Int_t St_pp2pp_Maker::Make(){
 
     TGenericTable *pp2ppClusters = new TGenericTable("pp2ppCluster_st","pp2ppClusters");
 
+    // For inserting into StEvent
+    pp2ppColl = new StRpsCollection(); 
+
     MakeClusters(*pp2ppClusters);
 
     AddData(pp2ppClusters);  
+
+    mEvent = (StEvent *) GetInputDS("StEvent");
+    if ( mEvent ) {
+      mEvent->setRpsCollection(pp2ppColl);
+    }
+    else
+      LOG_WARN << "St_pp2pp_Maker : StEvent not found !" << endm ;
 
   }
 
@@ -410,6 +421,20 @@ Int_t St_pp2pp_Maker::MakeClusters(TGenericTable &clustersTable) {
 	    
 	    clustersTable.AddAt(&one_cluster);    
 
+	    // StEvent Clusters
+	    StRpsCluster * oneStCluster = new StRpsCluster() ;
+
+	    oneStCluster->setEnergy(ECluster);
+	    oneStCluster->setLength(NCluster_Length);
+	    if ( oneStCluster->planeId() % 2 == 0 ) // A or C : pitch_4svx = 0.00974 cm
+	      //	      oneStCluster->setPosition(POStimesE/ECluster*0.00974);
+	      oneStCluster->setPosition(POStimesE/ECluster);
+	    else                                    // B or D : pitch_6svx = 0.01050 cm
+	      //	      oneStCluster->setPosition(POStimesE/ECluster*0.01050);
+	      oneStCluster->setPosition(POStimesE/ECluster);
+	   
+	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
+
 	    /*
 	    cout << "Stored ! seq/chain : " << i+1 << "/" << j
 		 << " , length = " << (int) one_cluster.length << " , energy = " << one_cluster.energy
@@ -434,6 +459,7 @@ Int_t St_pp2pp_Maker::MakeClusters(TGenericTable &clustersTable) {
       } // while
 
     } // for ( Int_t j=0; j<MAXCHAIN; j++) {
+
 
   return 1 ;
 
