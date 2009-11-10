@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.220 2009/10/29 18:34:17 perev Exp $
+// $Id: StMaker.cxx,v 1.221 2009/11/10 17:41:19 fine Exp $
 //
 //
 /*!
@@ -759,7 +759,7 @@ Int_t StMaker::Init()
 
       // Initialise maker
 
-      assert(maker->TestBIT(kInitBeg)|maker->TestBIT(kInitEnd)==0);
+      assert( !( maker->TestBIT(kInitBeg) || maker->TestBIT(kInitEnd) ));
       StMkDeb::SetCurrent(maker,1);
       maker->SetBIT(kInitBeg);
       maker->StartTimer();
@@ -819,9 +819,9 @@ void StMaker::StartMaker()
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) if (GetNumber()>20) fMemStatMake->Start();
-  else              
-    if (GetDebug()) {
+  if (fMemStatMake) {
+     if (GetNumber()>20) fMemStatMake->Start();
+     else  if (GetDebug()) {
 #ifdef STAR_LOGGER 
         LOG_DEBUG << "StMaker::StartMaker : cannot use StMemStat (no Init()) in [" << 
               GetName() << "]" << endm;
@@ -829,6 +829,7 @@ void StMaker::StartMaker()
         printf("StMaker::StartMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
 #endif        
      }
+  }
 
   
 
@@ -845,9 +846,9 @@ void StMaker::EndMaker(Int_t ierr)
   ::doPs(GetName(),"EndMaker");
   
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) if (GetNumber()>20) fMemStatMake->Stop();
-  else               
-    if (GetDebug()) {
+  if (fMemStatMake) {
+     if (GetNumber()>20) fMemStatMake->Stop();
+     else if (GetDebug()) {
 #ifdef STAR_LOGGER     
      LOG_DEBUG << "StMaker::EndMaker : cannot use StMemStat (no Init()) in [" 
                <<   GetName() 
@@ -857,6 +858,7 @@ void StMaker::EndMaker(Int_t ierr)
         printf("StMaker::EndMaker : cannot use StMemStat (no Init()) in [%s]\n",GetName());
 #endif
      }
+  }
 
 
   StopTimer();
@@ -1007,7 +1009,7 @@ Int_t StMaker::Make()
    while ((maker = (StMaker* )nextMaker())) {
      if (!maker->IsActive()) continue;
      TURN_LOGGER(maker);
-     assert(maker->TestBIT(kMakeBeg)==0);
+     assert(!maker->TestBIT(kMakeBeg));
      maker->SetBIT(kMakeBeg);
      StMkDeb::SetCurrent(maker,2);
      oldrun = maker->m_LastRun;
@@ -1109,8 +1111,8 @@ void StMaker::PrintInfo()
    if (cvs && cvs[0]) built = strstr(cvs,"built");
    else cvs = "No CVS tag was defined";
 #ifdef STAR_LOGGER       
-   if (built > cvs) LOG_QA << Form("QAInfo:%-20s %s from %.*s",ClassName(),built,built-cvs,cvs)<< endm;
-   else             LOG_QA << Form("QAInfo:%-20s    from %s",ClassName(),cvs) << endm;
+   if (built > cvs) { LOG_QA << Form("QAInfo:%-20s %s from %.*s",ClassName(),built,built-cvs,cvs)<< endm; }
+   else             { LOG_QA << Form("QAInfo:%-20s    from %s",ClassName(),cvs) << endm; }
 #else   
    if (built > cvs) printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
    else             printf("QAInfo:%-20s    from %s\n",ClassName(),cvs);
@@ -1836,7 +1838,7 @@ Int_t StMaker::AliasTime(const Char_t *alias)
   return fDbAlias[i].time;
 }
 //_____________________________________________________________________________
-Char_t *StMaker::AliasGeometry(const Char_t *alias)
+const Char_t *StMaker::AliasGeometry(const Char_t *alias)
 
 {
 
@@ -1925,6 +1927,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.221  2009/11/10 17:41:19  fine
+// remove the compilation warning on SL5
+//
 // Revision 1.220  2009/10/29 18:34:17  perev
 // y2010 added
 //

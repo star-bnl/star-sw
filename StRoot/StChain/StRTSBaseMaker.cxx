@@ -1,14 +1,14 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.8 2009/10/09 20:30:08 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.9 2009/11/10 17:41:19 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
  *
  * Description:  Create the DAQ table from the RTS_READER
  *               StRTSBaseMaker  is a base class for the concrete
- *               StMaker classes that access teh concrete detector
- *               subsystem to fee the suitable offline production
+ *               StMaker classes that access the concrete detector
+ *               subsystem to feed the suitable offline production
  *               datasets
  * Input:  RTS_Reader
  * Output: daq tables
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.9  2009/11/10 17:41:19  fine
+ * remove the compilation warning on SL5
+ *
  * Revision 1.8  2009/10/09 20:30:08  fine
  * make the global daqReader to be the static data-member to fix   issue #1657
  *
