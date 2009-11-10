@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.3 2009/10/07 13:46:35 fine Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.4 2009/11/10 21:05:08 fisyak Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.4  2009/11/10 21:05:08  fisyak
+ * Add attributes for sector and pad  row selections
+ *
  * Revision 1.3  2009/10/07 13:46:35  fine
  * replace  the obsolete rts_reader with the modern daqReader
  *
@@ -35,6 +38,7 @@ class StTpcRTSHitMaker : public StMaker {
   StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), m_Rts_Reader(0) {}
   virtual ~StTpcRTSHitMaker();
   
+  Int_t               Init();
   Int_t               InitRun(Int_t runumber);
   Int_t               Make();
  private:

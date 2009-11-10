@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.8 2009/10/07 13:46:35 fine Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.9 2009/11/10 21:05:08 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -23,6 +23,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #include "StMessMgr.h" 
 
 #ifndef NEW_DAQ_READER
@@ -45,6 +46,14 @@ StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(m_Rts_Reader);
 }
 //________________________________________________________________________________
+Int_t StTpcRTSHitMaker::Init() {
+  SetAttr("minSector",1);
+  SetAttr("maxSector",24);
+  SetAttr("minRow",1);
+  SetAttr("maxRow",45);
+  return kStOK;
+}
+//________________________________________________________________________________
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SafeDelete(m_Rts_Reader);
 #ifndef NEW_DAQ_READER
@@ -62,25 +71,25 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 #endif  
   // do gains example; one loads them from database but I don't know how...
   daq_dta *dta  = r.det("tpx")->put("gain");
-  for(int sec=1;sec<=24;sec++) {
-    for(int row=1;row<=45;row++) {
+  for(Int_t sector=1;sector<=24;sector++) {
+    for(Int_t row=1;row<=45;row++) {
       daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
       assert(gain);
       gain[0].gain = 0.0;	// kill pad0 just in case..
       
-      for(int pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
+      for(Int_t pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
 	if (m_Mode == 2) {
-	  if (gStTpcDb->tpcGain()->Gain(sec,row,pad) > 0) 
+	  if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) > 0) 
 	    gain[pad].gain = 1.;
 	  else 
 	    gain[pad].gain = .0;
 	  gain[pad].t0   = 0.;
 	} else {
-	  gain[pad].gain = gStTpcDb->tpcGain()->Gain(sec,row,pad);
-	  gain[pad].t0   = gStTpcDb->tpcT0()->T0(sec,row,pad);
+         gain[pad].gain = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
+         gain[pad].t0   = St_tpcPadGainT0C::instance()->T0(sector,row,pad);
 	}
       }
-      dta->finalize(183,sec,row);
+      dta->finalize(183,sector,row);
     }
   }
   /*
@@ -120,10 +129,15 @@ Int_t StTpcRTSHitMaker::Make() {
   daqReader &r = *m_Rts_Reader;
   // create (or reuse) the adc_sim bank...
   // add a bunch of adc data for a specific sector:row:pad
-  for (Int_t sec = 1; sec <= 24; sec++) {
+  Int_t minSector = IAttr("minSector");
+  Int_t maxSector = IAttr("maxSector");
+  Int_t minRow    = IAttr("minRow");
+  Int_t maxRow    = IAttr("maxRow");
+  Int_t Id = 0;
+  for (Int_t sec = minSector; sec <= maxSector; sec++) {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
-    for (Int_t row = 1; row <= 45; row++) {
+    for (Int_t row = minRow; row <= maxRow; row++) {
       Double_t gain = (row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
       Double_t wire_coupling = (row<=13) ? 
 	St_tss_tssparC::instance()->wire_coupling_in() : 
@@ -173,7 +187,6 @@ Int_t StTpcRTSHitMaker::Make() {
       static StTpcLocalSectorCoordinate local;
       static StTpcLocalCoordinate global;
       static StThreeVectorF hard_coded_errors;
-      Int_t id = 0;
       //      r.det("tpx")->put("cld_sim");       // clean up clusters
       dta = r.det("tpx")->get("cld_sim"); // rerun the cluster finder on the simulated data...
       
@@ -217,12 +230,12 @@ Int_t StTpcRTSHitMaker::Make() {
 	  Int_t ntmbk = TMath::Abs(dta->sim_cld[i].cld.t2 - dta->sim_cld[i].cld.t1) + 1;
 	  hw += (ntmbk << 22);  // ntmbks...
 	  Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
-	  
+	  Id++;
 	  StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
 				       , (unsigned char ) 0  // counter 
 				       , (unsigned short) dta->sim_cld[i].track_id  // idTruth=0
 				       , (unsigned short) dta->sim_cld[i].quality   // quality=0,
-				       , (unsigned short) ++id  // id =0,
+				       , (unsigned short) Id  // id =0,
 				       , dta->sim_cld[i].cld.p1 //  mnpad
 				       , dta->sim_cld[i].cld.p2 //  mxpad
 				       , dta->sim_cld[i].cld.t1 //  mntmbk
