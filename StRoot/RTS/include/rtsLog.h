@@ -78,12 +78,12 @@ extern "C" {
 #define SHIFT	"SHIFTLOG"	/* this will go away! */
 
 
-#ifdef __ROOT__			/* Special (mis)handling for STAR Offline Code */
-#define RTS_DISABLE_LOG
-#endif
+//Tonko: not used
+//#ifdef __ROOT__			/* Special (mis)handling for STAR Offline Code */
+//#define RTS_DISABLE_LOG
+//#endif
 
 #ifdef RTS_DISABLE_LOG
-
 
 #define RTS_ASSERT(expr)	assert(expr)
 
@@ -108,7 +108,7 @@ extern "C" {
 #define rtsLogLevelInt(x)
 #define rtsLogOutput(x)
 
-#else	/* __ROOT__ */
+#else	/* RTS_DISABLE_LOG */
 
 
 #ifdef __GNUC__
@@ -245,7 +245,7 @@ INLINE_HACK void rtsLogLevel(char *level)
 #endif
 
 
-#endif	/* __ROOT__ */
+#endif	/* RTS_DISABLE_LOG */
 
 #ifdef __cplusplus
 }
