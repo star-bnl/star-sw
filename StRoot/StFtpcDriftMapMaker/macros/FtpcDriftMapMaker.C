@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.3 2006/08/02 13:59:16 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.4 2009/11/10 10:59:26 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.4  2009/11/10 10:59:26  jcs
+// change map to Map to avoid conflict with cint
+//
 // Revision 1.3  2006/08/02 13:59:16  jcs
 // add deltaAr argument to allow user to change gas compostion (default: deltaAr=0)
 //
@@ -14,7 +17,7 @@
 // owner:  Janet Seyboth  (jcs@mppmu.mpg.de)
 // what it does: compute drift map for FTPCs
 //
-//    const Int_t      map     = 2           use mapped field values
+//    const Int_t      Map     = 2           use mapped field values
 //                             = 1           use constant field values
 //    const Float_t   |factor| > 0.8         scale from full field
 //                    factor   > 0           normal field
@@ -24,16 +27,16 @@
 //                                                   % Ar + deltaAr
 //                                                   % CO2 - deltaAr
 //
-//    Default:  const Int_t   map    = 2
+//    Default:  const Int_t   Map    = 2
 //              const Float_t factor = 1.0
 //              const Float_t deltaAr = 0.0
 //   
 //======================================================================
 
-void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0, const Float_t deltaAr = 0.0)
+void FtpcDriftMapMaker(const Int_t Map=2, const Float_t factor=1.0, const Float_t deltaAr = 0.0)
 {
     cout<<"FtpcDriftMapMaker.C called with:"<<endl;
-    cout<<"                                  map     = "<<map<<endl;
+    cout<<"                                  Map     = "<<Map<<endl;
     cout<<"                                  factor  = "<<factor<<endl;
     cout<<"                                  deltaAr = "<<deltaAr<<endl;
     if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
@@ -102,5 +105,5 @@ void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0, const Float_
     
     //b=new TBrowser();
     
-    StFtpcDriftMapMaker *ftpcDriftMapMk = new StFtpcDriftMapMaker(map,factor,deltaAr);
+    StFtpcDriftMapMaker *ftpcDriftMapMk = new StFtpcDriftMapMaker(Map,factor,deltaAr);
 }
