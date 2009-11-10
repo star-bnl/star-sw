@@ -1,6 +1,9 @@
-* $Id: fpdmgeo.g,v 1.9 2009/08/27 03:20:42 perev Exp $
+* $Id: fpdmgeo.g,v 1.10 2009/11/10 02:14:30 perev Exp $
 * $Name:  $
 * $Log: fpdmgeo.g,v $
+* Revision 1.10  2009/11/10 02:14:30  perev
+* Where GSTPAR, set local material avoid bug in gphysi
+*
 * Revision 1.9  2009/08/27 03:20:42  perev
 * Stra_Air added
 *
@@ -403,6 +406,7 @@ endblock
 Block FPSE is a single EM section
       Attribute FPSE   seen=1  colo=1 
       Material Air
+      Material Air_FPSE isVol=0
       Medium standard
 *
       Shape     CONS  dz=secwid/2,  

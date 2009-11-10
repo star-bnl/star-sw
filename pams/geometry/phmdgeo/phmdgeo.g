@@ -1,5 +1,8 @@
-* $Id: phmdgeo.g,v 1.13 2005/10/06 21:46:38 potekhin Exp $
+* $Id: phmdgeo.g,v 1.14 2009/11/10 02:14:31 perev Exp $
 * $Log: phmdgeo.g,v $
+* Revision 1.14  2009/11/10 02:14:31  perev
+* Where GSTPAR, set local material avoid bug in gphysi
+*
 * Revision 1.13  2005/10/06 21:46:38  potekhin
 * Needed to reorganize the code in order to make it VMC compatible.
 * The old structure had an incosistent path to hits, and VMC had trouble
@@ -412,6 +415,7 @@ endblock
 *---------------------------------------------------------
 Block PPBA is The lead plates for different modules
       Material  Lead 
+      Material  Lead_PPBA isVol=0 
       Attribute PPBA   seen=1    colo=7
       Shape     PARA   dx=xlen0-ylen1*pmdg_boundary/(2.*root32),
                        dy=ylen0-ylen2*pmdg_boundary*root34/root32,
@@ -425,6 +429,7 @@ endblock
 *-------------------------------------------------------------
 Block PFEA is  The iron plates for different modules 
       Material  Iron 
+      Material  Iron_PFEA isVol=0 
       Attribute PFEA   seen=1    colo=2
       Shape     PARA    dx=xlen0-ylen1*pmdg_boundary/(2.*root32),
                         dy=ylen0-ylen2*pmdg_boundary*root34/root32,

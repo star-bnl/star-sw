@@ -55,7 +55,7 @@ Author    Rashid Mehdiyev
       Structure  EXSE {Jsect,Zshift,Sectype(6)}
 *
       Integer    I_section,J_section,Ie,is,isec,i_str,Nstr,Type,ii,jj,
-                 cut,fsect,lsect,ihalf,filled
+                 cut,fsect,lsect,ihalf,filled,myKase
 *                       
       Real       center,Plate,Cell,G10,diff,halfi,
                  tan_low,tan_upp,Tanf,RBot,Rtop,Deta,etax,sq2,sq3,
@@ -610,19 +610,25 @@ Endblock
 Block EMGT is a megatile EM section
       Attribute EMGT   seen=1  colo=1 
       Material Air
-      Medium standard
+      myKase=2
+      if (I_section=1 | I_section=2 | I_section=5) myKase=1
+      if (myKase==1) then
+        Material Air_EMGT1 isVol=0
+      else 
+        Material Air_EMGT2 isVol=0
+      endif
 *
       Shape     CONS  dz=mgt/2,
       rmn1=(current-diff)*Tan_Low-dd,  rmn2=(current+mgt-diff)*Tan_Low-dd,
       rmx1=(current-diff)*Tan_Upp+dup, rmx2=(current+mgt-diff)*Tan_Upp+dup
 
-      if (I_section=1 | I_section=2 | I_section=5) then
+      if (myKase==1) then
          Call GSTPAR (ag_imed,'CUTGAM',0.00001)
          Call GSTPAR (ag_imed,'CUTELE',0.00001)
       else
          Call GSTPAR (ag_imed,'CUTGAM',0.00008)
          Call GSTPAR (ag_imed,'CUTELE',0.001)
-         Call GSTPAR (ag_imed,'BCUTE',0.0001)
+         Call GSTPAR (ag_imed,'BCUTE' ,0.0001)
       end if
 *
       Do isec=1,nint(emcs_Nslices)
@@ -716,7 +722,7 @@ Block ERAD  is radiator
                 rmn1=(current)*Tan_Low-dd,
 								rmn2=(current+cell)*Tan_Low-dd,
                 rmx1=(current)*Tan_Upp+dup,
-								rmx2=(current+radiator)*Tan_Upp+dup
+		rmx2=(current+radiator)*Tan_Upp+dup
 
       		Create and Position    ELED     
 
@@ -725,10 +731,11 @@ endblock
 Block ELED  is lead absorber Plate 
 *
       Material  Lead
+      Material  Lead_ELED isVol=0
       Attribute ELED   seen=1   colo=4  fill=1
       Shape     TUBS  dz=emcs_Pbplate/2,  
                 rmin=(current)*Tan_Low,
-								rmax=(current+emcs_Pbplate)*Tan_Upp,
+	        rmax=(current+emcs_Pbplate)*Tan_Upp
 
       Call GSTPAR (ag_imed,'CUTGAM',0.00008)
       Call GSTPAR (ag_imed,'CUTELE',0.001)

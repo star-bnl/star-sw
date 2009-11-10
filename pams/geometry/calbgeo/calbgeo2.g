@@ -4,8 +4,11 @@ MODULE  CALBGEO2 is the geometry of the Barrel EM Calorimeter
    Created   December 12, 2006
 * Based on CALBGEO1 -- tower map removed due to a full calorimeter
 *
-* $Id: calbgeo2.g,v 1.4 2009/10/13 18:44:22 perev Exp $
+* $Id: calbgeo2.g,v 1.5 2009/11/10 02:14:30 perev Exp $
 * $Log: calbgeo2.g,v $
+* Revision 1.5  2009/11/10 02:14:30  perev
+* Where GSTPAR, set local material avoid bug in gphysi
+*
 * Revision 1.4  2009/10/13 18:44:22  perev
 * Remove redundant sensitives
 *
@@ -317,8 +320,7 @@ EndBlock
 *-----------------------------------------------------------------------------
 Block CSTP
       Material  Iron
-      Material  CIron Isvol=0
-      Medium    Iron_emc
+      Material  Iron_CSTP Isvol=0
       Attribute CSTP seen=1  colo=1
       SHAPE  BOX  dx = strap_dx,
                   dy = strap_dy,
@@ -328,8 +330,7 @@ Endblock
 *-----------------------------------------------------------------------------
 Block CSPT is the side aluminum skin top 
       Material Aluminium
-      Material CAluminium Isvol=0
-      Medium Al_emc
+      Material Alu_CSPT Isvol=0
       attribute CSPT seen=1 colo=6
       Shape  PCON Phi1=-2.94 DPhi=0.0045 Nz=3,
                       zi  = { 0,          cut_length,  Hleng},
@@ -340,8 +341,7 @@ EndBlock
 *-----------------------------------------------------------------------------
 Block CSPB is the side aluminum skin bottom 
       Material Aluminium
-      Material CAluminium Isvol=0
-      Medium Al_emc
+      Material Alu_CSPB Isvol=0
       attribute CSPB seen=1 colo=6
       Shape  PCON Phi1=+2.94 DPhi=0.0045 Nz=3,
                       zi  = { 0,          cut_length,  Hleng},
@@ -352,8 +352,7 @@ EndBlock
 *-----------------------------------------------------------------------------
 Block CSLG
       Material  Iron
-      Material  CIron Isvol=0
-      Medium    Iron_emc
+      Material  Cron_CSLG Isvol=0
       Attribute CSLG seen=1  colo=1
       SHAPE  BOX  dx = slug_dx,
                   dy = slug_dy,
@@ -363,8 +362,7 @@ Endblock
 *----------------------------------------------------------------------------
 Block CSZO
       Material  Iron
-      Material  CIron Isvol=0
-      Medium    Iron_emc
+      Material  Iron_CSZO Isvol=0
       Attribute CSZO seen=1  colo=1
       Shape  PGON Phi1=-DphiMod/2 DPhi=DphiMod NPDV=1 Nz=2,
                   zi  = { 0        ,ZZ0      },
@@ -375,8 +373,7 @@ Endblock
 *----------------------------------------------------------------------------
 Block CSZU 
       Material  Iron
-      Material  CIron Isvol=0
-      Medium    Iron_emc
+      Material  Iron_CSZU Isvol=0
       Attribute CSZU seen=1  colo=1
       Shape  PGON Phi1=-DphiMod/2 DPhi=DphiMod NPDV=1 Nz=2,
                   zi  = { cut_length2              ,Hleng2                    },
@@ -429,8 +426,7 @@ EndBlock
 *-----------------------------------------------------------------------------
 Block CPBP
       Material  Lead
-      Material  CLead Isvol=0
-      Medium    Lead_emc
+      Material  Lead_CPBP Isvol=0
       Attribute CPBP seen=1  colo=1
       SHAPE  BOX  dx = calg_AbsorThk,
                   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
@@ -446,7 +442,6 @@ Endblock
 Block CSCI a scintillator layer.
       Material  polystyren
       Material  Cpolystyren   Isvol=1
-      Medium    sens_sci
       attribute CSCI  seen=1  colo=4
       Shape     BOX   dx=calg_ScintThk(super),  
                       dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
@@ -468,8 +463,7 @@ EndBlock
 * 
 Block CBTW  is the  Module Front Back Plate
       Material  Aluminium
-      Material  EAluminium Isvol=0
-      Medium Al_emc 
+      Material  Alu_CBTW Isvol=0
       attribute CBTW  seen=1  colo=6
       Shape     BOX   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
                       dz = current_depth/tan_theta/2 -zz0/2
@@ -557,8 +551,7 @@ EndBlock
 *
 Block CSDA is Al block with sensitive gas volume
       Material Aluminium 
-      Material CAluminium Isvol=0
-      Medium Al_smd
+      Material Alu_CSDA Isvol=0
       attribute CSDA seen=1 colo=6 Serial=j      
       Shape BOX   dx = calg_SmAlfThk,
                   dy = calg_SmAlfWdh, 
@@ -570,8 +563,7 @@ EndBlock
 *
 Block CSMC is the front first (last) Al rib 
       Material Aluminium 
-      Material CAluminium Isvol=0
-      Medium Al_smd
+      Material Alu_CSMC Isvol=0
       attribute CSMC seen=1 colo=6
       Shape BOX dx = calg_SmAlfThk,
                 dy = calg_SmAffWdh
@@ -581,8 +573,7 @@ EndBlock
 *
 Block CSMB is the back first (last) Al rib 
       Material Aluminium 
-      Material CAluminium Isvol=0
-      Medium Al_smd
+      Material Alu_CSMB Isvol=0
       attribute CSMB seen=1 colo=6
       Shape BOX dx = calg_SmAlfThk,
                 dy = calg_SmAfbWdh
@@ -592,8 +583,7 @@ EndBlock
 *
 Block CSME is the part of CSDA Al box with Ar/CO2 sensiteve gas 
       Material Aluminium 
-      Material CAluminium Isvol=0
-      Medium Al_smd
+      Material Alu_CSME Isvol=0
       attribute CSME seen=1 colo=6
       Shape Division Iaxis=2 Ndiv = nint(calg_NSmdAlw)
       Call CALBPAR(ag_imed,'SENSITIVE')

@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.15 2009/10/30 18:40:57 perev Exp $
+!// $Id: tpcegeo3.g,v 1.16 2009/11/10 02:14:31 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.16  2009/11/10 02:14:31  perev
+!// Where GSTPAR, set local material avoid bug in gphysi
+!//
 !// Revision 1.15  2009/10/30 18:40:57  perev
 !// Some redundant prints removed
 !//
@@ -1629,18 +1632,18 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  x=tprs_Rpads(i_row)-tprs_width;
                  Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                 write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+                 write(*,*) 'TPAD.A Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  x=tprs_Rpads(i_row);
                  create and position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                 write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+                 write(*,*) 'TPAD.B Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
 
               if ((nint(tprs_super)==3 | i_row==nint(tprs_nRow)))  then
                  x=tprs_Rpads(i_row)+tprs_width
                  dy=tprs_npads(i_row)*tprs_pitch/2;
                  Create and Position TPAD  x=x z=z dx=dx dy=dy dz=dz
-!//                 write(*,*) 'TPAD.C Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
+                 write(*,*) 'TPAD.C Sec=',i_sec,AG_NCOPY,' Z1=',z-dz+tpgvz,' Z2=',z+dz+tpgvz;
               endif
            enddo
       enddo
