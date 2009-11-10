@@ -12,23 +12,6 @@
 #include "StEvent/StRpsCollection.h"
 #include "StEvent/StRpsCluster.h"
 
-#ifdef NO_GLOBAL_VARIABLE_IS_ALLOWED
-// Silicon stuff
-// const Int_t MAXSEC = 2 ;  // 2 sides
- ! const Int_t MAXCHAIN = 4 ;
- ! const Int_t MAXSVX = 6 ;
- ! const Int_t MAXSEQ = 8 ;
- ! static TTree *PP2PPTree =  0 ;
-
-
-// --------- End of Root Tree stuff ----------
-
-  ! const int ErrorCode = -999 ;
-  ! int fLast_svx = ErrorCode, fLast_chain = ErrorCode, fLast_seq = ErrorCode ;
-#endif
-
-// struct pp2ppRawHit oneSihit ;
-
 ClassImp(St_pp2pp_Maker)
 
   St_pp2pp_Maker::St_pp2pp_Maker(const char *name) : StRTSBaseMaker("pp2pp",name),   
@@ -39,29 +22,7 @@ ClassImp(St_pp2pp_Maker)
 }
 
 
-//_____________________________________________________________________________
-/// This is TLA destructor
-/*!
-  The first comment lines after the opening bracket
-  ({) of a member function are considered as a member function description 
-  
-  The first comment lines after the opening bracket
-  ({) of a member function are considered as a member function description 
-  see: <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> 
-
- */
 St_pp2pp_Maker::~St_pp2pp_Maker() {
-  // 
-
-  /*
-  for ( Int_t i=0; i<MAXSEQ; i++) 
-    for ( Int_t j=0; j<MAXCHAIN; j++)
-      for ( Int_t k=0; k<MAXSVX ; k++) {
-	delete [] pedave[i][j][k] ; pedave[i][j][k] = 0 ;
-	delete [] pedrms[i][j][k] ; pedrms[i][j][k] = 0 ;
-      }
-  */
-
 }
 
 //_____________________________________________________________________________
@@ -86,43 +47,6 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 
   memset(pedave,0,sizeof(pedave));
   memset(pedrms,0,sizeof(pedrms));
-
-  /*
-  for ( i=0; i<MAXSEQ; i++) 
-    for ( j=0; j<MAXCHAIN; j++)
-      for ( k=0; k<MAXSVX ; k++) {
-	pedave[i][j][k] = new Double_t[MAXSTRIP] ;
-	pedrms[i][j][k] = new Double_t[MAXSTRIP] ;
-      }
-  */
-
-  /*
-  Int_t i, j, k, l, ncounts = 0 ;
-  
-  ifstream ipedestal(pedestal_perchannel_filename.c_str(), ifstream::in);
-
-  Double_t mean, rms ;
-  string linestring ;
-
-  while ( ipedestal.good() && !ipedestal.eof() && ipedestal.peek() != EOF ) {
-    getline(ipedestal, linestring,'\n');
-    istringstream linestore(linestring);
-    linestore >> i >> j >> k >> l >> mean >> rms ;
-    if ( i >MAXSEQ || j>=MAXCHAIN || k>=MAXSVX || l>=MAXSTRIP) 
-      LOG_WARN << " sequence[1-8] = " << i << ", chain = " << j << ", svx = " << k << ", channel = " << l << " : " << mean << " " << rms << endm ;
-
-    pedave[i-1][j][k][l] = mean ;
-    pedrms[i-1][j][k][l] = rms ;
-
-    //    cout << i << " " << j << " " << k << " " << pedave[i-1][j][k][l] << endl ;
-    ncounts++ ;
-  } ;
-
-  cout << ncounts << " pedestal lines read. " << endl ;
-
-  ipedestal.close();
-
-  */
 
   Int_t s, c, sv, ch, idb = 0 ;
 
@@ -279,9 +203,6 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 
   // Mar. 14, 2009 (K. Yip) : checking for wrong SVX_ID
   // One known case is for SEQ 3, CHAIN 2 and SVX is 7 but it should be 3.
-  // The "known case" should be kept in Db (calibration Db is Ok) and available from there for the
-  // current event. I'll show that next time ;-). It is a job of StDbMaker
-  // see $STAR/StarDb/tpc/tptpars/tpt_pars
 
   if ( (oneSihit.svx != fLast_svx) && (fLast_svx != ErrorCode) ) {
 
