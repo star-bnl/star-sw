@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.13 2009/02/03 15:53:30 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.14 2009/11/10 21:18:53 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.14  2009/11/10 21:18:53  fisyak
+ * use local fMap variable
+ *
  * Revision 1.13  2009/02/03 15:53:30  fisyak
  * Clean up
  *
@@ -354,12 +357,9 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
     assert(0);
   }
   fgInstance = this;
-  if (map == kUndefined) {
+  if (fMap == kUndefined) {
     printf("StarMagField is instantiated with predefined factor %f and map %i\n",fFactor, fMap);
   } else {
-    fFactor = factor ;
-    fMap = map ;                        // Do once & select the requested map (mapped or constant)
-    fLock = lock;
     if (fLock) printf("StarMagField is locked, no modification from DB will be accepted\n");
   }
   ReadField() ;                       // Read the Magnetic
