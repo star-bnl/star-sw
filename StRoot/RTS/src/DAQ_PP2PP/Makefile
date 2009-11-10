@@ -52,5 +52,7 @@ pp2ppReader.o: ../DAQ_READER/daq_det.h
 pp2ppReader.o: pp2ppReader.h
 pp2ppReader.o: daq_pp2pp.h
 daq_pp2pp.o: ../DAQ_READER/daq_det.h
+pp2pp.o: daq_pp2pp.h
+pp2pp.o: ../DAQ_READER/daq_det.h
 pp2ppReader.o: daq_pp2pp.h
 pp2ppReader.o: ../DAQ_READER/daq_det.h
