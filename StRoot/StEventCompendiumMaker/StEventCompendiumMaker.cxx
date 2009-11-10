@@ -1,18 +1,17 @@
 //
-// $Id: StEventCompendiumMaker.cxx,v 1.1 2004/06/09 18:09:51 jeromel Exp $
+// $Id: StEventCompendiumMaker.cxx,v 1.2 2009/11/10 20:42:33 fisyak Exp $
 //
 //#include <iostream>
 #include "StEventCompendiumMaker.h"
-
 #include "TDataSet.h"
-#include "tables/St_MagFactor_Table.h"
+#include "StDetectorDbMaker/St_MagFactorC.h"
 
 #include "StMessMgr.h"
 
 #include "StEvent.h"
 #include "StEventSummary.h"
 
-static const char rcsid[] = "$Id: StEventCompendiumMaker.cxx,v 1.1 2004/06/09 18:09:51 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventCompendiumMaker.cxx,v 1.2 2009/11/10 20:42:33 fisyak Exp $";
 
 void fillEventSummary(StEvent* e);
 
@@ -47,16 +46,10 @@ Int_t StEventCompendiumMaker::Make(){
     
     // the magnetic field needs to be obtained from the database.
     // this are the magic words...
-    TDataSet *rlogdataset = GetDataBase("RunLog");
-    St_MagFactor* mMagTable = (St_MagFactor*) rlogdataset->Find("MagFactor");
-    if (mMagTable) {
-	double scalef = (*mMagTable)[0].ScaleFactor;
-	double bfieldz = scalef * 4.97952;  // (value returned from gufld at 0,0,0 for FullField)
-	rEvent->summary()->setMagneticField(bfieldz);
-    }
-    else {
-	gMessMgr->Warning() << "StEventCompendiumMaker::Make: St_MagFactor not found" << endm;
-    }
+    St_MagFactorC* mMagTable = St_MagFactorC::instance();
+    double scalef = mMagTable->ScaleFactor();
+    double bfieldz = scalef * 4.97952;  // (value returned from gufld at 0,0,0 for FullField)
+    rEvent->summary()->setMagneticField(bfieldz);
     
     if (Debug()) {
 	rEvent->summary()->Dump();
