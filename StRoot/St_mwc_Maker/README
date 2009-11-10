@@ -1,5 +1,0 @@
-St_mwc_Maker.cxx    StRoot/St_mwc_Maker       # druss    Jun   , 99 - C++ wrapper for pams/mwc
-St_mwc_Maker.cxx    StRoot/St_mwc_Maker       # vlmrz    Jan 31, 01 - Slow MWC simulator added
-
-see http://sseos.lbl.gov/~vlmrz/mwc for more information
-
