@@ -1,5 +1,0 @@
-# $Id $
-# package St_tpt_Maker
-# author: 
-Library:libSt_tpt_Maker.so:LIBS +=   -lglobal_Tables  -lsim_Tables  -lStChain  -l_St_tpc  -ltpc_Tables
-#Library:libSt_tpt_Maker.so:LIBS +=   -lglobal_Tables  -lsim_Tables  -lStChain  -lSt_tpc  -ltpc_Tables
