@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.41 2009/09/10 18:06:08 dmitry Exp $
+ * $Id: StDbTable.cc,v 1.42 2009/11/10 20:24:45 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.42  2009/11/10 20:24:45  fisyak
+ * Use SafeDelete
+ *
  * Revision 1.41  2009/09/10 18:06:08  dmitry
  * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
  *
@@ -177,6 +180,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.42  2009/11/10 20:24:45  fisyak
+ * Use SafeDelete
+ *
  * Revision 1.41  2009/09/10 18:06:08  dmitry
  * struct alignment fix, does not rely on fixed 4 byte cap anymore - runtime align calculation is now in use
  *
@@ -1411,12 +1417,12 @@ StDbTable::checkDescriptor(){
 int i = mdescriptor->getNumElements();
 unsigned int size = mdescriptor->getTotalSizeInBytes();
  cout <<"Descriptor for Table = " << mname<<endl;
- cout <<" number of elements = "<<i<< " with size = " << size << endl;
+ cout <<" number of elements = "<<i<< " with size = " << size <<" TrowSize = " << mdescriptor->getTrowSize()<< endl;
  for(int k=0; k<i;k++){
    cout <<"Name = " << mdescriptor->getElementName(k);
    cout <<" size = " << mdescriptor->getElementSize(k);
    cout <<" offset = " <<mdescriptor->getElementOffset(k);
-   cout <<" type = " <<(int)mdescriptor->getElementType(k)<<endl;
+   cout <<" type = " <<(int)mdescriptor->getElementType(k) <<  endl;
  }
 }
 
