@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.550 2009/10/06 19:54:36 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.551 2009/11/10 20:20:15 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -19,7 +19,8 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #define STAR_LOGGER 1
-#define __KEEP_TPCDAQ_TCL_FCF__
+#define __CLEANUP__
+#define __KEEP_TPCDAQ_FCF__
 //_____________________________________________________________________
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -54,7 +55,9 @@ ClassImp(StBFChain);
 void StBFChain::Setup(Int_t mode) {
   static const Char_t *path  = "./StRoot/StBFChain:$STAR/StRoot/StBFChain";
   TString chain("BFC.C");
+#ifndef __CLEANUP__
   if (mode == 2) chain = "BFC2.C";
+#endif
   Char_t *file = gSystem->Which(path,chain,kReadPermission);
 #ifdef STAR_LOGGER
   if (! file) { LOG_FATAL  << Form("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path) << endm; }
@@ -449,7 +452,7 @@ Int_t StBFChain::Instantiate()
     if (GetOption("ppOpt") ) {                         // pp specific stuff
       if (maker == "StTrsMaker")
 	mk->SetMode(1);       // Pile-up correction
-      
+#ifndef     __CLEANUP__  
       if (maker == "StVertexMaker"){
 	gMessMgr->QAInfo() << "ppOpt (pp mode) is turned ON" << endm;
 	if( GetOption("SvtMatchVtx"))    mk->SetMode(4); // Switch vertex finder to ppLMV using EST
@@ -482,6 +485,7 @@ Int_t StBFChain::Instantiate()
 	if ( GetOption("SvtMatchVtx") )  mk->SetMode(3);
 	else                             mk->SetMode(2);
       }
+#endif
     }
     
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
@@ -545,11 +549,12 @@ Int_t StBFChain::Instantiate()
       } else {
 	// depend on RY option i.e. take default for that RealYear data
 	// expectations.
-	if( GetOption("RY2001")  ||
-	    GetOption("RY2003")  ||
-	    GetOption("RY2003a") ||
-	    GetOption("RY2003b") ||
-	    GetOption("RY2003X")) mask = mask | 2 ;  // Jim Thomas request
+	if(GetOption("RY1H")    ||
+	   GetOption("RY2000")  ||
+	   GetOption("RY2001")  ||
+	   GetOption("RY2001N") ||
+	   GetOption("RY2003")  ||
+	   GetOption("RY2003X")) mask = mask | 2 ;  // Jim Thomas request
       }
       // Other options introduced in October 2001 for distortion corrections
       // studies and year1 re-production. Those are OR additive to the mask.
@@ -573,33 +578,8 @@ Int_t StBFChain::Instantiate()
       if (GetOption("Embedding"))       mask = - mask; // don't move embedded hits
       mk->SetMode(mask);
     }
-    if (maker == "St_tpt_Maker" && GetOption("AlignSectors"))
-      ProcessLine(Form("((St_tpt_Maker *)%p)->AlignHits(kTRUE);",mk));
     if (maker == "StTpcHitMover" && GetOption("AlignSectors"))
       ProcessLine(Form("((StTpcHitMover *)%p)->AlignHits(kTRUE);",mk));
-#ifdef __KEEP_TPCDAQ_TCL_FCF__
-    if (maker == "St_tcl_Maker") {
-      TString cmd(Form("St_tcl_Maker *tclMk = (St_tcl_Maker *) %p;",mk));
-      Int_t kopts = 0;
-      if (GetOption("EastOff")) {cmd += "tclMk->EastOff();"; kopts++;}
-      if (GetOption("WestOff")) {cmd += "tclMk->WestOff();"; kopts++;}
-      if (GetOption("AllOn"))   {cmd += "tclMk->AllOn();"; kopts++;}
-      if (GetOption("ITTF") || GetOption("StiVMC"))    {cmd += "tclMk->SetMode(1);"; kopts++;}
-      if (GetOption("Eval")) {
-	cmd += "tclMk->tclPixTransOn();";// Turn on flat adcxyz table
-	cmd += "tclMk->tclEvalOn();";    //Turn on the hit finder evaluation
-	kopts++;
-      }
-      if (kopts) ProcessLine(cmd);
-    }
-#else
-    if (maker == "StTpcHitMaker" && GetOption("fcf")) {
-      mk->SetAttr("useTpHit",kTRUE); 
-    }
-    if (maker == "StTpcRTSHitMaker" && GetOption("tcl")) {
-      mk->SetAttr("useTpHit",kTRUE); 
-    }
-#endif
     if (maker == "StTpcRSMaker") {
       if (! GetOption("TrsToF")) {
 	Int_t mode = mk->GetMode();
@@ -614,7 +594,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("TrsToF"))    mode += 2; // accoutn for particle time of flight
       if (mode) mk->SetMode(mode);
     }
-#ifdef __KEEP_TPCDAQ_TCL_FCF__
+#ifdef __KEEP_TPCDAQ_FCF__
     if (maker == "St_tpcdaq_Maker") {
       Int_t DMode=0;
       TString cmd(Form("St_tpcdaq_Maker *tcpdaqMk = (St_tpcdaq_Maker *) %p;",mk));
@@ -656,7 +636,7 @@ Int_t StBFChain::Instantiate()
     if (maker == "StTpcRTSHitMaker") {
       if (GetOption("Trs") || GetOption("Embedding"))  mk->SetMode(2); // daq, no gain
     }
-#ifdef __KEEP_TPCDAQ_TCL_FCF__
+#ifdef __KEEP_TPCDAQ_FCF__
     if (maker == "StRTSClientFCFMaker"){
       Int_t DMode=0;
       // use the online TPC clusters (DAQ100) info if any
@@ -666,19 +646,10 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("Simu") ||  GetOption("Embedding"))  DMode = DMode | 0x4;
       if (DMode) mk->SetMode(DMode);                 // set flag (matches tcpdaqMk->SetDAQFlag())
     }
-#endif
-#ifdef __KEEP_TPCDAQ_TCL_FCF__   
     if (maker == "StTpcT0Maker"){
       Int_t mask = 0;
-      if ( GetOption("tcl") ) mask = mask | 0x0;
       if ( GetOption("fcf") ) mask = mask | 0x1;
-      LOG_QA << "StBFChain::Instantiate For " << maker.Data()
-	     << " tcl is ";
-      if (GetOption("tcl")) { LOG_QA << "on";  }
-      else                  { LOG_QA << "off"; }
-      LOG_QA << ", fcf is ";
-      if (GetOption("fcf")) { LOG_QA << "on";  }
-      else                  { LOG_QA << "off"; }
+      LOG_QA << "StBFChain::Instantiate For " << maker.Data();
       LOG_QA << " => mask = " << mask << endm;
       mk->SetMode(mask);
     }
@@ -1227,9 +1198,11 @@ void StBFChain::SetFlags(const Char_t *Chain)
 {
   TString tChain(Chain);
   Int_t mode = 1;
+#ifndef __CLEANUP__
   // chain choise
   if (tChain.Contains("ittf",TString::kIgnoreCase) ||
       tChain.Contains("StiVMC",TString::kIgnoreCase) ) mode = 2;
+#endif
   Setup(mode);
   Int_t k=0;
   if (tChain == "" || tChain.CompareTo("ittf",TString::kIgnoreCase) == 0) {
@@ -1610,12 +1583,11 @@ void StBFChain::SetTreeOptions()
       treeMk->IntoBranch("geantBranch","geant/.data/particle");
       treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
     }
-#ifdef __KEEP_TPCDAQ_TCL_FCF__
+#ifdef __NEVER__
     if (GetOption("fss"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
     if (GetOption("tpc_daq") || GetOption("TpcRS"))
       treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
     if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
-    if (GetOption("tcl"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
     if (GetOption("fcf"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
     if (GetOption("tpt"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
     if (GetOption("srs"))    treeMk->IntoBranch("svt_hitsBranch","svt_hits/.data");
