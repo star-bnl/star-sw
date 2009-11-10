@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.20 2006/02/14 21:04:31 perev Exp $
+ * $Id: StHit.cxx,v 2.21 2009/11/10 00:40:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.21  2009/11/10 00:40:17  ullrich
+ * Changed print-out format.
+ *
  * Revision 2.20  2006/02/14 21:04:31  perev
  * WarnOff
  *
@@ -82,7 +85,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.20 2006/02/14 21:04:31 perev Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.21 2009/11/10 00:40:17 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -183,7 +186,7 @@ StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
     StPtrVecTrack vec;
     StPtrVecHit hvec;
     StDetectorId id = this->detector();
-
+    
     for (unsigned int i=0; i<nodes.size(); i++) {
         const StTrackNode *node = nodes[i];
         unsigned int ntracks = node->entries(type);
@@ -199,29 +202,23 @@ StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
 
 void StHit::setIdTruth(int idtru,int qatru) 
 {
-  if (qatru==0) qatru = (idtru>>16);
-  idtru    = idtru&((1<<16)-1);
-  mIdTruth = (UShort_t)(idtru);
-  mQuality = (UShort_t) qatru;
+    if (qatru==0) qatru = (idtru>>16);
+    idtru    = idtru&((1<<16)-1);
+    mIdTruth = (UShort_t)(idtru);
+    mQuality = (UShort_t) qatru;
 }
 
 int StHit::idTruth() const
 {
   return mIdTruth;
 }
+
 ostream&  operator<<(ostream& os, const StHit& v)
 {
-  return os << "StHit: charge\t" << v.charge() 
-	    << "\ttrackReferenceCount " << v.trackReferenceCount()
-	    << "\tdetector " << v.detector() 
-	    << "\tposition " << v.position()
-	    << "\tpositionError " << v.positionError()
-	    << "\tcovariantMatrix " << v.covariantMatrix()
-	    << "\tusedInFit " << v.usedInFit()
-	    << "\tidTruth " << v.idTruth()
-	    << "\tquality " << v.qaTruth()
-	    << "\tid " << v.id() 
-	    << "\thardwarePosition " << v.hardwarePosition();
+    return os << Form("id %5i",v.id()) 
+	    << *((const StMeasuredPoint *)&v )
+	    << Form(" q(keV) %10.3f", 1e6*v.charge())
+	    << Form(" idT %4i qa %4i fl %4i us %2i",v.idTruth(), v.qaTruth(), v.flag(), v.usedInFit());
 }
 
 void
