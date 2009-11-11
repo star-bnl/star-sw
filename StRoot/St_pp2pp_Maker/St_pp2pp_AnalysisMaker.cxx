@@ -276,8 +276,6 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 	    allclusters[s][c].position[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->position();
 	    allclusters[s][c].energy[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->energy();
 	    (allclusters[s][c].nclusters)++ ;
-	    cout << allclusters[s][c].length[k] << " " << allclusters[s][c].energy[k] << endl ;
-
 	  }
 	}
       }
