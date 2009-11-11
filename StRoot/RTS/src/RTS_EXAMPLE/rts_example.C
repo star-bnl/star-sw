@@ -510,11 +510,12 @@ static int bsmd_doer(daqReader *rdr, char *do_print)
 			while(dd->iterate()) {
 				found = 1 ;
 
-				if(do_print) printf("BSMD RAW: fiber %2d, sector %d:\n",dd->rdo,dd->sec) ;
 
+				if(do_print) printf("BSMD RAW: fiber %2d [==%d], sector %d:\n",dd->rdo,f,dd->sec) ;
 
-				for(int i=0;i<8;i++) {
-					if(do_print) printf("   %2d = %08X\n",i,dd->Int32[i]) ;
+				// just the header
+				for(int i=0;i<10;i++) {
+					if(do_print) printf("   Head %2d = %08X\n",i,dd->Int32[i]) ;
 				}
 			}
 		}
