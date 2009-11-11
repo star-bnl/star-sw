@@ -265,13 +265,13 @@ int daq_tof::get_token(char *addr, int words)
 }
 
 // knows how to get a/the L2 command out of the event...
-int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int do_log)
+int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 {
 	u_int *w ;
 	int cou = 0 ;
 	int t_cou = 0 ;
 	int in_words = words ;
-	int rdo = do_log ;	// hack!
+
 	int err = 0 ;
 	int trg_start ;
 
@@ -295,46 +295,45 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int do_log)
 	t_cou++ ;
 
 
-	if(do_log) LOG(NOTE,"prompt: T %4d, trg %d, daq %d [0x%08X]: words %d",trg[0].t,trg[0].trg,trg[0].daq,w[0],in_words) ;
+	LOG(NOTE,"prompt: T %4d, trg %d, daq %d [0x%08X]: words %d",trg[0].t,trg[0].trg,trg[0].daq,w[0],in_words) ;
 
-	if(in_words < 2) {
-		err = 1 ;
-		LOG(ERR,"TOF bad_words: %d: words %d: 0x%08X 0x%08X 0x%08X",rdo,in_words,w[0],w[1],w[2]);
+	if(in_words < 2) {	// absolute minimum
+		err |= 1 ;
+		LOG(ERR,"[%d] bad word count %d < 2",rdo,in_words);
 	}
 
 
 	if(w[0] == 0xA0000000) {	// trigger only
 		trg[0].t = 4097;	// trigger only contrib...
-
 	}
 	else {
-		if(in_words <= 3) {
-			err = 1 ;
-			LOG(ERR,"TOF bad_words_A: %d: words %d: 0x%08X 0x%08X 0x%08X",rdo,in_words,w[0],w[1],w[2]);
+		if(in_words <= 3) {	// minimum if not trigger-only
+			err |= 1 ;
+			LOG(ERR,"[%d] bad word count %d <= 3",rdo,in_words);
 		}
 
 		if(trg[0].t == 0) {
-			err = 1 ;
-			LOG(ERR,"TOF token 0: %d: words %d: 0x%08X 0x%08X 0x%08X",rdo,in_words,w[0],w[1],w[2]);
+			err |= 2 ;
+			LOG(ERR,"[%d] token 0",rdo);
 			trg[0].t = 4097 ;
 		}
 
 		if(trg[0].trg != 4) {	// we will allow only 4!
-			err = 1 ;
-			LOG(ERR,"TOF bad_trg: %d: words %d: 0x%08X 0x%08X 0x%08X",rdo,in_words,w[0],w[1],w[2]);
+			err |= 2 ;
+			LOG(ERR,"[%d] bad trg_cmd %d != 4",rdo,trg[0].trg);
 		}
 
 		if(w[1] != 0xDEADFACE) {
-			err = 1 ;
-			LOG(ERR,"TOF bad_sig: %d: words %d: 0x%08X 0x%08X 0x%08X",rdo,in_words,w[0],w[1],w[2]);
+			err |= 1 ;
+			LOG(ERR,"[%d] bad DEADCODE 0x%08X",rdo,w[1]);
 		}
 
 
 	}
 
 	if((w[0] >> 20) != 0xA00) {
-		err  = 1 ;
-		LOG(ERR,"TOF bad first: %d: words %d: 0x%08X 0x%08X 0x%08X",rdo,in_words,w[0],w[1],w[2]);
+		err  |= 1 ;
+		LOG(ERR,"[%d] bad first word 0x%08X doesn't start with 0xA00",rdo,w[0]);
 		trg[0].t = 4097 ;
 	}
 
@@ -351,8 +350,8 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int do_log)
 	}
 
 	if(cou==0) {
-		err = 1 ;
-		LOG(ERR,"TOF no FIFO: %d: words %d: 0x%08X 0x%08X 0x%08X",rdo,in_words,w[0],w[1],w[2]);		
+		err |= 1 ;
+		LOG(ERR,"[%d] No Trigger FIFO contribution??",rdo);		
 	}
 
 	words++ ;	// move forward to start of trigger
@@ -361,47 +360,54 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int do_log)
 	
 	// words now points to the first trigger of the FIFO block
 	for(int i=0;i<cou;i++) {
-		
+		int l_err = 0 ;
+
 		trg[t_cou].t = w[words+i] & 0xFFF ;
 		trg[t_cou].daq = (w[words+i]>>12) & 0xF ;
 		trg[t_cou].trg = (w[words+i]>>16) & 0xF ;
 		trg[t_cou].rhic = i+1 ;
 		trg[t_cou].rhic_delta = i+1 ;
 
-		if((trg[t_cou].t == 0) || (trg[t_cou].trg < 4)) {
-			err = 1 ;
-			LOG(ERR,"TOF: FIFO: %d: %d: T %4d, trg %d, daq %d (0x%08X, words %d)",rdo,words+i,trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq,w[words+i],in_words);
-			continue ;
-		}
+		if(trg[t_cou].t == 0) l_err = 1 ;	// token 0 
 
 		// we will take OUT all the non-L2 components here...
 		switch(trg[t_cou].trg) {
+		case 4 :	// normal
 		case 13 :	// abort
 		case 15 :	// accept
 			break ;
 		default :		// take out ALL other L0 commands!
-			if(trg[t_cou].trg != 4) err = 1 ;
-			continue ;
+			l_err = 1 ;
+			break ;
 		}
 
-
+		if(l_err) {
+			LOG(ERR,"[%d] bad FIFO trg (%d.): T %4d, trg %d, daq %d [0x%08X]",rdo,words+i,trg[t_cou].t,trg[t_cou].trg,trg[t_cou].daq,w[words+i]);
+			err |= 2 ;
+			continue ;	// don't use it!
+		}
 
 		t_cou++ ;
-		if(t_cou >=128) {
-			err = 1 ;
-			LOG(ERR,"TOF: %d: Too many trigger contributions (%d)!",rdo,cou) ;
+
+		if(t_cou >=120) {
+			err |= 2 ;
+			LOG(ERR,"[%d] Too many trigger contributions %d >= 120",rdo,t_cou) ;
 			break ;
 		}
 	}
 
 
 	if(err) {
-		LOG(ERR,"TOF RDO %d: T %4d: words %d, trg_words %d (start at %d) : 0x%08X 0x%08X 0x%08X",
+		LOG(ERR,"[%d] Bad Event: T %4d: words %d, trg_words %d (start at %d) : 0x%08X 0x%08X 0x%08X",
 		    rdo,trg[0].t,in_words,cou,trg_start,w[0],w[1],w[2]) ;
 
-		for(int i=0;i<cou;i++) {
-			LOG(ERR,"   TOF RDO: %d: %d/%d: 0x%08X",rdo,i,cou,w[trg_start+i]) ;
-		}
+		//for(int i=0;i<cou;i++) {
+		//	LOG(ERR,"[%d]   trigger %d: %d/%d: 0x%08X",rdo,i,cou,w[trg_start+i]) ;
+		//}
+	}
+
+	if(err & 1) {	// critical -- blow the whole event
+		return -1 ;
 	}
 
 	return t_cou ;
