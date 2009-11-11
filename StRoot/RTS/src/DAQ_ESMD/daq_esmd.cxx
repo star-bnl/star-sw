@@ -222,8 +222,10 @@ daq_dta *daq_esmd::handle_adc()
 }
 
 
-int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int do_log)
+int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int rdo1)
 {
+	const int ESMD_DDL_BYTES = 18948 ;
+
 	u_short *us = (u_short *)buff ;
 
 	u_short t_hi = l2h16(us[2]) ;
@@ -231,20 +233,21 @@ int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int d
 
 	int err = 0 ;
 
-	if((t_lo & 0xFF00) || (t_hi & 0xFFF0)) {	//error
-		err = 1 ;
-		if(do_log) {
-			LOG(ERR,"Corrupt token: t_hi 0x%04X, t_lo 0x%04X",t_hi,t_lo) ;
-		}
+	if(buff_bytes != ESMD_DDL_BYTES) {
+		err |= 1 ;
+		LOG(ERR,"Received %d bytes, expect %d!?",buff_bytes,ESMD_DDL_BYTES) ;
 	}
 
-	if(err) {
-		trg[0].t = 4097 ;
-		trg[0].trg = 0 ;
-		trg[0].daq = 0 ;
-		
-		return 1 ;
+	if((t_lo & 0xFF00) || (t_hi & 0xFFF0)) {	//error
+		err |= 1 ;
+		LOG(ERR,"Corrupt token: t_hi 0x%04X, t_lo 0x%04X",t_hi,t_lo) ;
+
+		// sanitize
+		t_lo &= 0xFF ;
+		t_hi &= 0xF ;
+
 	}
+
 
 	// L0 part
 	trg[0].t = t_hi*256 + t_lo ;
@@ -259,7 +262,22 @@ int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int d
 	trg[1].rhic = trg[0].rhic + 1 ;
 
 	if(us[0] != 0xF) {
-		LOG(ERR,"trg cmd not 15? 0x%04X 0x%04X 0x%04X 0x%04X 0x04X",us[0],us[1],us[2],us[3],us[4]) ;
+		err |= 1 ;
+		LOG(ERR,"trg cmd not 15 == 0x%04X",us[0]) ;
+	}
+
+	if(trg[0].t == 0) {
+		err |= 1 ;
+		LOG(ERR,"token 0!") ;
+	}
+
+	if(err) {
+		LOG(WARN,"RDO %d: 0x%04X 0x%04X 0x%04X 0x%04X 0x04X",rdo1, us[0],us[1],us[2],us[3],us[4]) ;
+		
+	}
+
+	if(err & 1) {	// critical
+		return -1 ;
 	}
 
 	return 2 ;
