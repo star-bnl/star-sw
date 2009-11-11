@@ -333,41 +333,90 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
 
 		if(bsmd_reader(emcp, &bsmd_d)==0) return 0 ;
+
+
+		for(int r=start_r;r<=stop_r;r++) {	
+			//LOG(NOTE,"BSMD: adc_non_zs: fiber %d, bytes %d",r,bsmd_d.bytes[r-1][0]) ;
+			bytes += bsmd_d.bytes[r-1][0] ;
+		}
+
+		if(bytes==0) return 0 ;
+
+		adc_non_zs->create(bytes,"adc_nzs",rts_id,DAQ_DTA_STRUCT(bsmd_t)) ;
+
+		for(int r=start_r;r<=stop_r;r++) {
+		
+			if(bsmd_d.bytes[r-1][0] == 0) continue ;
+
+			bsmd_t *bsmd  = (bsmd_t *) adc_non_zs->request(1) ;
+
+//			memset(bsmd,0,sizeof(bsmd_t)) ;	
+
+			// cap is 64 bytes after the start
+			bsmd->cap = *(char *)((char *)bsmd_d.dta[r-1][0] + 4 + 4*16) ;
+			
+			LOG(DBG,"Found cap %d",bsmd->cap) ;
+
+			u_short *data = (u_short *)((char *)bsmd_d.dta[r-1][0] + 4 + 256) ;	// move to data start
+		
+			for(int c=0;c<BSMD_DATSIZE;c++) {
+				bsmd->adc[c] = l2h16(*data++) ;
+			} 
+
+			adc_non_zs->finalize(1,0,r,bsmd->cap) ;
+		}
+
+
 	}
-	else return 0 ;	// SFS does not exist yet!
+	else {
+
+		for(int r=start_r;r<=stop_r;r++) {
+			bytes += sizeof(bsmd_t) ;	// approx
+		}
+
+	
+		adc_non_zs->create(bytes,"adc_nzs",rts_id,DAQ_DTA_STRUCT(bsmd_t)) ;
+
+		for(int r=start_r;r<=stop_r;r++) {
+			daq_dta *dd = handle_raw(r) ;
+			
+			if(dd==0) continue ;
+
+			if(dd->iterate() == 0) continue ;
+
+
+			u_int *d = (u_int *)dd->Void ;
+			u_int rdo_words = dd->ncontent ;
+
+			if(rdo_words == 0) continue ;
+
+			bsmd_t *bsmd  = (bsmd_t *) adc_non_zs->request(1) ;
+
+//			memset(bsmd,0,sizeof(bsmd_t)) ;	
+
+			// cap is 64 bytes after the start
+			bsmd->cap = d[9] & 0x7F ;
+			
+			
+			LOG(DBG,"Found cap %d",bsmd->cap) ;
+
+			u_short *data = (u_short *)(d+10) ;	// move to data start which is 10 words after
+		
+			for(int c=0;c<BSMD_DATSIZE;c++) {
+				bsmd->adc[c] = l2h16(*data++) ;
+			} 
+
+			adc_non_zs->finalize(1,0,r,bsmd->cap) ;
+		}
+
+
+
+
+
+	}
 
 	//LOG(NOTE,"BSMD: rdo %d: start %d, stop %d",rdo,start_r, stop_r) ;
 
-	for(int r=start_r;r<=stop_r;r++) {	
-		//LOG(NOTE,"BSMD: adc_non_zs: fiber %d, bytes %d",r,bsmd_d.bytes[r-1][0]) ;
-		bytes += bsmd_d.bytes[r-1][0] ;
-	}
-
-	if(bytes==0) return 0 ;
-
-	adc_non_zs->create(bytes,"adc_nzs",rts_id,DAQ_DTA_STRUCT(bsmd_t)) ;
-
-	for(int r=start_r;r<=stop_r;r++) {
-		
-		if(bsmd_d.bytes[r-1][0] == 0) continue ;
-
-		bsmd_t *bsmd  = (bsmd_t *) adc_non_zs->request(1) ;
-
-//		memset(bsmd,0,sizeof(bsmd_t)) ;	
-
-		// cap is 64 bytes after the start
-		bsmd->cap = *(char *)((char *)bsmd_d.dta[r-1][0] + 4 + 4*16) ;
-
-		LOG(DBG,"Found cap %d",bsmd->cap) ;
-
-		u_short *data = (u_short *)((char *)bsmd_d.dta[r-1][0] + 4 + 256) ;	// move to data start
-		
-		for(int c=0;c<BSMD_DATSIZE;c++) {
-			bsmd->adc[c] = l2h16(*data++) ;
-		} 
-
-		adc_non_zs->finalize(1,0,r,bsmd->cap) ;
-	}
 		
 	adc_non_zs->rewind() ;
 
