@@ -147,12 +147,21 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
 		//LOG(NOTE,"EMCP %p?",emcp) ;
 		if(bsmd_reader(emcp, &bsmd_d)==0) return 0 ;
-	}
-	else return 0 ;	// SFS does not exist yet!
 
-	for(int r=start_r;r<=stop_r;r++) {	
-		bytes += bsmd_d.bytes[r-1][1] ;
+		for(int r=start_r;r<=stop_r;r++) {	
+			bytes += bsmd_d.bytes[r-1][1] ;
+		}
+
 	}
+	else {
+		
+		for(int r=start_r;r<=stop_r;r++) {	
+			bytes += sizeof(bsmd_t) ;
+		}
+
+	}
+
+
 
 	LOG(DBG,"rdo %d: bytes %d",rdo,bytes) ;
 
@@ -163,14 +172,42 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 	for(int r=start_r;r<=stop_r;r++) {
 		int count ;
 		int version, fiber ;
+		u_short *data ;
+		int malloced = 0 ;
 
-		if(bsmd_d.bytes[r-1][1] == 0) continue ;
+		if(present & DET_PRESENT_DATAP) {
+			if(bsmd_d.bytes[r-1][1] == 0) continue ;
+			data = (u_short *)(bsmd_d.dta[r-1][1]) ;	// move to data start
+		}
+		else {
+			int s_new, r_new ;
+			char str[256] ;
+			char *full_name ;
+
+			s_new = bsmd_old_to_new_map[r].new_sec ;
+			r_new = bsmd_old_to_new_map[r].new_rdo ;
+
+			sprintf(str,"%s/sec%02d/rb%02d/adc",sfs_name,s_new,r_new) ;
+
+			full_name = caller->get_sfs_name(str) ;
+
+			if(!full_name) continue ;
+
+			bytes = caller->sfs->fileSize(full_name) ;
+
+			data = (u_short *)malloc(bytes) ;
+			malloced = 1 ;
+
+			caller->sfs->read(str, (char *)data, bytes) ;
+
+			bsmd_d.endian[r-1][1] = 0 ;	// little endian
+		}
 
 		bsmd_t *bsmd  = (bsmd_t *) adc->request(1) ;
 
 		memset(bsmd,0,sizeof(bsmd_t)) ;	
 
-		u_short *data = (u_short *)(bsmd_d.dta[r-1][1]) ;	// move to data start
+
 
 		if(bsmd_d.endian[r-1][1]) {	// big!
 			version = b2h16(data[0]) ;
@@ -207,8 +244,8 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 			}
 		}
 
-
-
+		if(malloced) free(data) ;
+		
 		adc->finalize(1,0,r,bsmd->cap) ;
 	}
 		
@@ -233,17 +270,58 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 		start_r = stop_r = rdo ;
 	}
 
+	// for SFS based
+	int want_sec[3] = { 0, 0, 0 } ;
+	u_short *pedrms[3] = { 0, 0, 0 } ;
+
+	for(int r=start_r;r<=stop_r;r++) {	
+
+		int s_new, r_new ;
+		s_new = bsmd_old_to_new_map[r].new_sec ;
+		r_new = bsmd_old_to_new_map[r].new_rdo ;
+
+		want_sec[s_new] = 1 ;
+	}
+
+
 	bytes = 0 ;
 
 	if(present & DET_PRESENT_DATAP) {	// in datap!
 		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
 		//LOG(NOTE,"EMCP %p?",emcp) ;
 		if(bsmd_reader(emcp, &bsmd_d)==0) return 0 ;
-	}
-	else return 0 ;	// SFS does not exist yet!
 
-	for(int r=start_r;r<=stop_r;r++) {	
-		bytes += bsmd_d.bytes[r-1][2] ;
+
+		for(int r=start_r;r<=stop_r;r++) {	
+			bytes += bsmd_d.bytes[r-1][2] ;
+		}
+
+		
+	}
+	else {
+		for(int s=1;s<=2;s++) {
+			char str[256] ;
+			char *full_name ;
+			int l_bytes ;
+
+			if(want_sec[s] == 0) continue ;
+
+			sprintf(str,"%s/sec%02d/pedrms",sfs_name,s) ;
+
+			full_name = caller->get_sfs_name(str) ;
+
+			if(!full_name) continue ;
+
+			l_bytes = caller->sfs->fileSize(full_name) ;
+
+			bytes += l_bytes ;
+
+
+			pedrms[s] = (u_short *) malloc(l_bytes) ;
+
+			caller->sfs->read(str, (char *)(pedrms[s]), l_bytes) ;
+
+		}
 	}
 
 	LOG(DBG,"rdo %d: bytes %d",rdo,bytes) ;
@@ -266,10 +344,25 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 	LOG(DBG,"doing rdos: %d-%d",start_r,stop_r) ;
 
 	for(int r=start_r;r<=stop_r;r++) {
-			
-		if(bsmd_d.bytes[r-1][2] == 0) continue ;
+		u_short *data ;
 
-		u_short *data = (u_short *)(bsmd_d.dta[r-1][2]) ;	// move to data start
+		if(present & DET_PRESENT_DATAP) {
+			if(bsmd_d.bytes[r-1][2] == 0) continue ;
+
+			data = (u_short *)(bsmd_d.dta[r-1][2]) ;	// move to data start
+		}
+		else {	// SFS
+			int s_new, r_new ;
+
+			s_new = bsmd_old_to_new_map[r].new_sec ;
+			r_new = bsmd_old_to_new_map[r].new_rdo ;
+			if(pedrms[s_new]==0) continue ;
+
+			data = pedrms[s_new] + ((4+128*4800)*(r_new-1)) ;
+			
+			bsmd_d.endian[r-1][2] = 0 ;// little endian
+			
+		}
 
 		LOG(DBG,"BSMD PEDR: rdo %d: 0x%04X 0x%04X 0x%04X 0x%04X",r,data[0],data[1],data[2],data[3]) ;
 
@@ -301,7 +394,11 @@ daq_dta *daq_bsmd::handle_ped_rms(int rdo, int is_ped)
 
 
 	}
-		
+
+	for(int s=1;s<=2;s++) {
+		if(pedrms[s]) free(pedrms[s]) ;
+	}
+
 	dta_use->rewind() ;
 
 	return dta_use ;
