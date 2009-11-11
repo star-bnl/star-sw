@@ -373,6 +373,7 @@ int daq_tof::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		// we will take OUT all the non-L2 components here...
 		switch(trg[t_cou].trg) {
 		case 4 :	// normal
+			continue ;	// don't put it in!
 		case 13 :	// abort
 		case 15 :	// accept
 			break ;
