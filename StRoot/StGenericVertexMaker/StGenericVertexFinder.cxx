@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.13 2008/10/23 20:37:31 genevb Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.14 2009/11/11 03:52:14 genevb Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -29,7 +29,7 @@ StGenericVertexFinder::~StGenericVertexFinder()
 */
 //______________________________________________________________________________
 void 
-StGenericVertexFinder::FillStEvent(StEvent* event) const{
+StGenericVertexFinder::FillStEvent(StEvent* event){
 
   for(UInt_t i=0;i<mVertexList.size(); i++) {
     //allocates new memory for each vertex
@@ -38,6 +38,14 @@ StGenericVertexFinder::FillStEvent(StEvent* event) const{
     LOG_INFO << "StGenericVertexFinder::FillStEvent: Added " <<i+1 
 		     <<" primary vertex (" << mVertexOrderMethod << ")" << endm;
   }
+
+  // Use StEvent's ordering
+  // (might be undesirable for some debugging)
+  // Also could be wrong if StEvent already has vertices for some reason
+  mVertexList.clear();
+  for(UInt_t i=0;i<event->numberOfPrimaryVertices(); i++)
+    mVertexList.push_back(*(event->primaryVertex(i)));
+
 }
 //______________________________________________________________________________
 void StGenericVertexFinder::addVertex(StPrimaryVertex* vtx)
@@ -78,6 +86,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.14  2009/11/11 03:52:14  genevb
+// Re-order the vertices upon filling StEvent
+//
 // Revision 1.13  2008/10/23 20:37:31  genevb
 // Add switches for turning on/off use of Post-Crossing Tracks [default:off]
 //

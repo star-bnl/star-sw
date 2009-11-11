@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.18 2009/07/09 00:16:12 genevb Exp $
+ * $Id: StGenericVertexFinder.h,v 1.19 2009/11/11 03:52:14 genevb Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -44,7 +44,7 @@ class StGenericVertexFinder {
   virtual void           Clear();
   const std::vector<StPrimaryVertex> *result() {return &mVertexList;} 
  
-  void                   FillStEvent(StEvent*) const;
+  void                   FillStEvent(StEvent*);
 
  protected: //................................
 
@@ -63,6 +63,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.19  2009/11/11 03:52:14  genevb
+// Re-order the vertices upon filling StEvent
+//
 // Revision 1.18  2009/07/09 00:16:12  genevb
 // Create a calib mode for StGenericVertex when using VtxSeedCalG
 //
