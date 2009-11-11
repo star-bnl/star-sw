@@ -333,7 +333,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	if ( is_candidate_to_store == kTRUE ) {
 
-	  if ( NCluster_Length <= MAX_Cls_L && ECluster >= MIN_Charge ) {
+	  //	  if ( NCluster_Length <= MAX_Cls_L && ECluster >= MIN_Charge ) {
 
 	    // StEvent Clusters
 	    StRpsCluster * oneStCluster = new StRpsCluster() ;
@@ -347,7 +347,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	   
 	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
 
-	  } 
+          //	  } 
 	  /*
 	  else
 	    cout << "NOT Stored ! seq/chain : " << i+1 << "/" << j 
