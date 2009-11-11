@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.25 2009/11/10 13:20:31 tonko Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.26 2009/11/11 14:51:07 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -136,7 +136,7 @@ daqReader::daqReader(char *name)
 
 void daqReader::init()
 {
-#ifdef RTS_ONLINE
+#ifndef RTS_ONLINE
   // this is only for Offline!
 
   rtsLogLevel(WARN) ;
