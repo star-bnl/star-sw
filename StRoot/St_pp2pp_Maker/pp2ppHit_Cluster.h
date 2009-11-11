@@ -10,7 +10,7 @@ typedef struct pp2ppRawHit_st {
   unsigned char  channel;         // 0 - 127                                             
 } PP2PPRAWHIT_ST ;
 
-
+/*
 typedef struct pp2ppCluster_st {
   unsigned char  sequencer;       // sequencer id: ( 1 - 8 )
   unsigned char  chain;           // 0 - 3 (A: 0, B: 1, C: 2, D: 3)                      
@@ -21,6 +21,6 @@ typedef struct pp2ppCluster_st {
   double y ;
   double z ;
 } PP2PPCLUSTER_ST ;
-
+*/
 
 #endif

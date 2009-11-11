@@ -167,27 +167,14 @@ Int_t St_pp2pp_Maker::Make(){
 	//	cout << "Size of vector of sequencer " << i+1 << " chain " << j << " " << dec << (validhits[i][j]).size() << endl ;
       }
 
-    TGenericTable *pp2ppClusters = new TGenericTable("pp2ppCluster_st","pp2ppClusters");
-
-    // For inserting into StEvent
-    pp2ppColl = new StRpsCollection(); 
-
-    MakeClusters(*pp2ppClusters);
-
-    AddData(pp2ppClusters);  
-
-    mEvent = (StEvent *) GetInputDS("StEvent");
-    if ( mEvent ) {
-      mEvent->setRpsCollection(pp2ppColl);
-    }
-    else
-      LOG_WARN << "St_pp2pp_Maker : StEvent not found !" << endm ;
+    MakeClusters();
 
   }
 
   return kStOK;
 
 }
+
 //_____________________________________________________________________________
 /// DoerPp2pp - this method is called as soon as next pp2pp record is read in
 Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
@@ -203,6 +190,7 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 
   // Mar. 14, 2009 (K. Yip) : checking for wrong SVX_ID
   // One known case is for SEQ 3, CHAIN 2 and SVX is 7 but it should be 3.
+  // Mostly, just some debugging codes that we've used in the past and shouldn't happen
 
   if ( (oneSihit.svx != fLast_svx) && (fLast_svx != ErrorCode) ) {
 
@@ -286,7 +274,7 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 
 }
 
-Int_t St_pp2pp_Maker::MakeClusters(TGenericTable &clustersTable) {
+Int_t St_pp2pp_Maker::MakeClusters() {
 
   const Int_t MAX_Cls_L = 5 ;
   const Int_t MIN_Charge = 20 ;
@@ -295,7 +283,8 @@ Int_t St_pp2pp_Maker::MakeClusters(TGenericTable &clustersTable) {
   Int_t NCluster_Length ;
   Double_t ECluster, POStimesE ;
 
-  pp2ppCluster_st one_cluster = { 0, 0, 0, 0.0E0, 0.0E0, 0.0E0, 0.0E0 , 0.0E0 };
+  // For inserting into StEvent
+  pp2ppColl = new StRpsCollection(); 
 
   vector< HitChannel >::iterator it, it_next ;
 
@@ -305,6 +294,17 @@ Int_t St_pp2pp_Maker::MakeClusters(TGenericTable &clustersTable) {
       NCluster_Length = 0 ;
       ECluster = 0 ;
       POStimesE = 0 ;
+
+      // Assume 4 planes have the same z at least for now
+      if ( i==0 || i==1 )
+	pp2ppColl->romanPot(i)->plane(j)->setZ(-55.496) ; 
+      else if ( i==2 || i==3 )
+	pp2ppColl->romanPot(i)->plane(j)->setZ(-58.496) ; 
+      else if ( i==4 || i==5 )
+	pp2ppColl->romanPot(i)->plane(j)->setZ(55.496) ; 
+      else if ( i==6 || i==7 )
+	pp2ppColl->romanPot(i)->plane(j)->setZ(58.496) ; 
+      
 
       it = (validhits[i][j]).begin() ;
 
@@ -334,13 +334,6 @@ Int_t St_pp2pp_Maker::MakeClusters(TGenericTable &clustersTable) {
 	if ( is_candidate_to_store == kTRUE ) {
 
 	  if ( NCluster_Length <= MAX_Cls_L && ECluster >= MIN_Charge ) {
-	    one_cluster.sequencer = i+1 ; 
-	    one_cluster.chain = j ;
-	    one_cluster.position = POStimesE/ECluster  ;
-	    one_cluster.energy = ECluster ;
-	    one_cluster.length = NCluster_Length ;
-	    
-	    clustersTable.AddAt(&one_cluster);    
 
 	    // StEvent Clusters
 	    StRpsCluster * oneStCluster = new StRpsCluster() ;
@@ -348,19 +341,12 @@ Int_t St_pp2pp_Maker::MakeClusters(TGenericTable &clustersTable) {
 	    oneStCluster->setEnergy(ECluster);
 	    oneStCluster->setLength(NCluster_Length);
 	    if ( oneStCluster->planeId() % 2 == 0 ) // A or C : pitch_4svx = 0.00974 cm
-	      //	      oneStCluster->setPosition(POStimesE/ECluster*0.00974);
-	      oneStCluster->setPosition(POStimesE/ECluster);
+	      oneStCluster->setPosition(POStimesE/ECluster*0.00974);
 	    else                                    // B or D : pitch_6svx = 0.01050 cm
-	      //	      oneStCluster->setPosition(POStimesE/ECluster*0.01050);
-	      oneStCluster->setPosition(POStimesE/ECluster);
+	      oneStCluster->setPosition(POStimesE/ECluster*0.01050);
 	   
 	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
 
-	    /*
-	    cout << "Stored ! seq/chain : " << i+1 << "/" << j
-		 << " , length = " << (int) one_cluster.length << " , energy = " << one_cluster.energy
-		 << " , position = " << one_cluster.position << endl ;
-	    */
 	  } 
 	  /*
 	  else
@@ -381,6 +367,14 @@ Int_t St_pp2pp_Maker::MakeClusters(TGenericTable &clustersTable) {
 
     } // for ( Int_t j=0; j<MAXCHAIN; j++) {
 
+
+  // Store into StEvent
+  mEvent = (StEvent *) GetInputDS("StEvent");
+  if ( mEvent ) {
+    mEvent->setRpsCollection(pp2ppColl);
+  }
+  else
+    LOG_WARN << "St_pp2pp_Maker : StEvent not found !" << endm ;
 
   return 1 ;
 
