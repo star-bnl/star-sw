@@ -142,6 +142,7 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 	}
 
 	bytes = 0 ;
+	memset(&bsmd_d,0,sizeof(bsmd_d)) ;
 
 	if(present & DET_PRESENT_DATAP) {	// in datap!
 		char *emcp = (char *)legacyDetp(rts_id, caller->mem) ;
@@ -154,9 +155,28 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 
 	}
 	else {
+		int s_new, r_new ;
+		char str[256] ;
+		char *full_name ;
 		
-		for(int r=start_r;r<=stop_r;r++) {	
-			bytes += sizeof(bsmd_t) ;
+		for(int r=start_r;r<=stop_r;r++) {
+			int l_bytes ;
+
+			s_new = bsmd_old_to_new_map[r].new_sec ;
+			r_new = bsmd_old_to_new_map[r].new_rdo ;
+
+			sprintf(str,"%s/sec%02d/rb%02d/adc",sfs_name,s_new,r_new) ;
+
+			full_name = caller->get_sfs_name(str) ;
+
+			if(!full_name) continue ;
+
+			l_bytes = caller->sfs->fileSize(full_name) ;
+			if(!l_bytes) continue ;
+
+			bsmd_d.bytes[r-1][1] = l_bytes ;
+
+			bytes += l_bytes ;
 		}
 
 	}
@@ -165,18 +185,33 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 
 	LOG(DBG,"rdo %d: bytes %d",rdo,bytes) ;
 
-	if(bytes==0) return 0 ;
+	if(bytes==0) return 0 ;	// odd, nothing found...
 
 	adc->create(bytes,"adc",rts_id,DAQ_DTA_STRUCT(bsmd_t)) ;
+
+	u_short *data_alloc ;
+	int malloced_bytes ;
+
+	if(present & DET_PRESENT_DATAP) {
+		malloced_bytes = 0 ;
+		data_alloc = 0 ;
+	}
+	else {
+		malloced_bytes = (2400+10+3+100)*4 ;
+		data_alloc = (u_short *)malloc(malloced_bytes) ;
+		assert(data_alloc) ;
+	}
+
 
 	for(int r=start_r;r<=stop_r;r++) {
 		int count ;
 		int version, fiber ;
 		u_short *data ;
-		int malloced = 0 ;
+
+		if(bsmd_d.bytes[r-1][1] == 0) continue ;
 
 		if(present & DET_PRESENT_DATAP) {
-			if(bsmd_d.bytes[r-1][1] == 0) continue ;
+
 			data = (u_short *)(bsmd_d.dta[r-1][1]) ;	// move to data start
 		}
 		else {
@@ -195,9 +230,12 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 
 			bytes = caller->sfs->fileSize(full_name) ;
 
-			data = (u_short *)malloc(bytes) ;
-			malloced = 1 ;
+			if(bytes > malloced_bytes) {
+				LOG(ERR,"Too big %s is %d",str,bytes) ;
+				continue ;
+			}
 
+			data = data_alloc ;
 			caller->sfs->read(str, (char *)data, bytes) ;
 
 			bsmd_d.endian[r-1][1] = 0 ;	// little endian
@@ -208,13 +246,13 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 		memset(bsmd,0,sizeof(bsmd_t)) ;	
 
 
-
 		if(bsmd_d.endian[r-1][1]) {	// big!
 			version = b2h16(data[0]) ;
 			count = b2h16(data[1]) ;
 			bsmd->cap = b2h16(data[2]) ;
 			fiber = b2h16(data[3]) ;
 
+			bsmd->cap &= 0x7F ;
 			LOG(NOTE,"%s: fiber %d[%d]: count %d, cap %d, version 0x%04X",name,r,fiber,count,bsmd->cap,version) ;
 		
 			data += 4 ;
@@ -232,6 +270,7 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 			bsmd->cap = l2h16(data[2]) ;
 			fiber = l2h16(data[3]) ;
 
+			bsmd->cap &= 0x7F ;
 			LOG(NOTE,"%s: fiber %d[%d]: count %d, cap %d, version 0x%04X",name,r,fiber,count,bsmd->cap,version) ;
 
 			data += 4 ;
@@ -244,12 +283,14 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 			}
 		}
 
-		if(malloced) free(data) ;
+
 		
 		adc->finalize(1,0,r,bsmd->cap) ;
 	}
 		
 	adc->rewind() ;
+
+	if(malloced_bytes) free(data_alloc) ;
 
 	return adc ;
 	
@@ -492,7 +533,7 @@ daq_dta *daq_bsmd::handle_adc_non_zs(int rdo)
 //			memset(bsmd,0,sizeof(bsmd_t)) ;	
 
 			// cap is 64 bytes after the start
-			bsmd->cap = d[9] & 0x7F ;
+			bsmd->cap = d[8] & 0x7F ;
 			
 			
 			LOG(DBG,"Found cap %d",bsmd->cap) ;
@@ -640,7 +681,7 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	const int BSMD_BYTES_MIN = ((2400+10+3)*4) ;	// this is the minimum
 	const int BSMD_BYTES_MAX = ((2400+10+3+30)*4) ;
-	const u_int BSMD_VERSION = 0x8033 ;		// Nov 09
+	const u_int BSMD_VERSION = 0x8035 ;		// Nov 09
 	const u_int BSMD_SIGNATURE = 0x42534D44 ;	// "BSMD"
 	const u_int BSMD_HDR_ID = 5 ;	// by some definiton somewhere...
 
