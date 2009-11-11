@@ -510,7 +510,7 @@ static int bsmd_doer(daqReader *rdr, char *do_print)
 			while(dd->iterate()) {
 				found = 1 ;
 
-				if(do_print) printf("BSMD RAW: fiber %2d, sector %d %d:\n",dd->rdo,dd->sec) ;
+				if(do_print) printf("BSMD RAW: fiber %2d, sector %d:\n",dd->rdo,dd->sec) ;
 
 
 				for(int i=0;i<8;i++) {
@@ -715,10 +715,8 @@ static int emc_pseudo_doer(daqReader *rdr, char *do_print)
 
 	return found ;
 
-
-
-
 }
+
 
 static int pp2pp_doer(daqReader *rdr, char *do_print)
 {
