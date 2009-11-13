@@ -25,6 +25,6 @@ struct ftpcGas {
    float  maxPressure;              /* maximum barometric pressure (in hPa) */
    float minGasTemperature;         /* minimum gas temperature (in degree C) */
    float maxGasTemperature;         /* maximum gas temperature (in degree C) */
-   float adjustAverageWest;         /* adjustment to FTPC West gas temperature calculated from only 3 thermistors */
-   float adjustAverageEast;         /* adjustment to FTPC East gas temperature calculated from only 3 thermistors */
+   float adjustAverageWest;         /* adjustment to FTPC West gas temperature calculated from laser analysis */
+   float adjustAverageEast;         /* adjustment to FTPC East gas temperature calculated from laser analysis */
  };  
