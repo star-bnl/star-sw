@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.123 2009/11/13 17:31:09 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.124 2009/11/13 18:39:31 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -137,18 +137,11 @@
 	} else {
 	    $G77FLAGS  = "$XMACHOPT -fd-lines-as-code ";
 	}
-	if ($IS_64BITS) {$G77FLAGS .= " -m64";}
-	else            {
-	  if ($STAR_HOST_SYS =~ /^sl5/) {$G77FLAGS .= " -m32";}
-	}
+
 	$G77FLAGS .= " -std=legacy -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
-	$FFLAGS = $G77FLAGS;
-	$FLIBS      = `$FC $FFLAGS -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);
-	if ($FLIBS eq "libgfortran.$SOEXT") {
-	  $FLIBS    = `$FC $FFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
-	}
-	$FLIBS     .= " " . `$FC $FFLAGS -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
-#	print "FLIBS ============ $FLIBS\n";
+	$FFLAGS    = $G77FLAGS;
+	$FLIBS     = "-lgfortran";
+
     } else {
 	$G77       = "g77";
 	$G77FLAGS  = "$XMACHOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
@@ -160,19 +153,17 @@
     $CXX           = "g++";
     $LDFLAGS       = "";
     $SOFLAGS       = "";
-    if ($IS_64BITS) {$CXXFLAGS = "-m64"; $CFLAGS = "-m64"; $LDFLAGS = "-m64"; $SOFLAGS = "-m64";}
-    else            {
-      if ($STAR_HOST_SYS =~ /^sl5/) {
-      $CXXFLAGS = "-m32"; $CFLAGS = "-m32"; $LDFLAGS = "-m32"; $SOFLAGS = "-m32";}
-    }
-    $CXXFLAGS     .= " -fpic -w";
-#    $CXXFLAGS      = "$XMACHOPT -fPIC -w";
+
+    # $XMACHOPT would switch to -m32 or -m64
+    $CXXFLAGS = $CFLAGS = $LDFLAGS = $SOFLAGS = "$XMACHOPT";
+
+    $CXXFLAGS      .= " -fPIC -w";
     $EXTRA_CXXFLAGS= "";
     $CXXOPT        = "";
 
     $CC            = "gcc";
-    $CFLAGS       .= " -fpic -w";
-#    $CFLAGS        = "$XMACHOPT -fPIC -w";
+
+    $CFLAGS       .= " -fPIC -w";
     $EXTRA_CFLAGS  = "";
 
     $FCPATH        = "";
@@ -931,16 +922,11 @@
     }
 
     # Logger
-    my $optstar = $OPTSTAR;
-    $LoggerDir = $optstar . "/include/log4cxx";
-#    if ($STAR_HOST_SYS =~ /x8664_gcc/) {
-#      $optstar = "/star/institutions/bnl/fisyak/opt/log4cxx-0.9.7";
-#      $LoggerDir = $optstar . "/include/log4cxx";
-#    }
-    if (! -d $LoggerDir) { $optstar = "/opt/star/sl44_gcc346"; $LoggerDir = $optstar . "/include/log4cxx";}
+    $LoggerDir = $OPTSTAR . "/include/log4cxx";
+
     if (-d $LoggerDir) {
-	$LoggerINCDIR = $optstar . "/include";
-	$LoggerLIBDIR = $optstar . "/lib";
+	$LoggerINCDIR = $OPTSTAR . "/include";
+	$LoggerLIBDIR = $OPTSTAR . "/lib";
 	$LoggerLIBS   = "-llog4cxx";
 	print
 	    "Use Logger  ",
