@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.18 2009/11/13 17:08:15 fisyak Exp $
+# $Id: Conscript,v 1.19 2009/11/13 17:31:45 fisyak Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.19  2009/11/13 17:31:45  fisyak
+# remove second FLIBS
+#
 # Revision 1.18  2009/11/13 17:08:15  fisyak
 # Add extra -m32 for LD
 #
@@ -173,7 +176,7 @@ if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc' ) {
 $LIBS .= $env->{LDNONE};
 $LIBS .= " -lgeant321";
 $LIBS .= " -lgcalor";
-my $Libraries = $env->{Libraries} . " " .  $env->{FLIBS};
+my $Libraries = $env->{Libraries};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 $Libraries .= " " . $env->{CERNLIBS} . " " . $env->{Packages}->{MYSQL}->{LIBS} .
 $Libraries .=  " " .   $env->{FLIBS} . " " . $env->{CLIBS} . " " . $env->{SYSLIBS};
