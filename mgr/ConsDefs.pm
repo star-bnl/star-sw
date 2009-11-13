@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.122 2009/10/29 14:34:46 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.124 2009/11/13 18:39:31 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -44,7 +44,23 @@
     $Cinp     = "";
     $CXXinp   = "";
 
+    $LIBS          = "";
+    $Libraries     = "";
+    $CLIBS         = "";
+    $FLIBS         = "";
+    $XLIBS         = "";
+    $THREAD        = "";
+    $CERNLIBS      = "";
+    $CRYPTLIBS     = "";
+    $SYSLIBS       = "";
+    $OSFID         = "";
+    $OSFCFID       = "";
+    $date   = `date +\%d\%b-%T`;
     $EXTRA_CPPFLAGS = "";
+ # MACOSX
+    $FINK_CXXFLAGS= "";
+    $FINK_CFLAGS= "";
+    $FINK_LDFLAGS = "";
 
     $AFSFLAGS = "";
     $AFSDIR   = "/usr/afsws";
@@ -112,15 +128,20 @@
 	$LLIB = "lib";
     }
 
-    if ( -x "/usr/bin/gfortran"){
+    if ( -x "/usr/bin/gfortran" or -x "/sw/bin/gfortran"){
 	# give preference to gfortran for now - JL 200908
 	$G77       = "gfortran";
+	$FC        = $G77;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG )  {
 	    $G77FLAGS  = "$XMACHOPT -fd-lines-as-comments ";
 	} else {
 	    $G77FLAGS  = "$XMACHOPT -fd-lines-as-code ";
 	}
-	$G77FLAGS .= "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
+
+	$G77FLAGS .= " -std=legacy -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
+	$FFLAGS    = $G77FLAGS;
+	$FLIBS     = "-lgfortran";
+
     } else {
 	$G77       = "g77";
 	$G77FLAGS  = "$XMACHOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
@@ -130,15 +151,21 @@
     $G77EXTEND     = "-ffixed-line-length-132";
 
     $CXX           = "g++";
-    $CXXFLAGS      = "$XMACHOPT -fPIC -w";
+    $LDFLAGS       = "";
+    $SOFLAGS       = "";
+
+    # $XMACHOPT would switch to -m32 or -m64
+    $CXXFLAGS = $CFLAGS = $LDFLAGS = $SOFLAGS = "$XMACHOPT";
+
+    $CXXFLAGS      .= " -fPIC -w";
     $EXTRA_CXXFLAGS= "";
     $CXXOPT        = "";
 
     $CC            = "gcc";
-    $CFLAGS        = "$XMACHOPT -fPIC -w";
+
+    $CFLAGS       .= " -fPIC -w";
     $EXTRA_CFLAGS  = "";
 
-    $FC            = $G77;
     $FCPATH        = "";
     $EXTRA_FCPATH  = "";
     $FFLAGS        = $G77FLAGS;
@@ -149,33 +176,35 @@
     $CXXFLAGS     .= $CPPCERN;
 
     $CPP           = $CC . " -E -P";
-
+    $FPP           = $CPP;
     $AR            = "ar";
     $ARFLAGS       = "rvu";
     $LD            = $CXX;
-    $LDFLAGS       = "$XMACHOPT";#--no-warn-mismatch";#$CXXFLAGS;
+#    $LDFLAGS       = "$XMACHOPT ";#--no-warn-mismatch";#$CXXFLAGS;
     $LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
     $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
     $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
     $EXTRA_LDFLAGS = "";
     $F77LD         = $LD;
-    $F77LDFLAGS    = "$XMACHOPT";#$LDFLAGS;
+    $F77LDFLAGS    = $LDFLAGS;
+#    $F77LDFLAGS    = "$XMACHOPT ";#$LDFLAGS;
     $SO            = $CXX;
-    $SOFLAGS       = "$XMACHOPT";
+#    $SOFLAGS       = "$XMACHOPT";
     $STIC          = "stic";
     $STICFLAGS     = "";
     $AGETOF        = "agetof";
     $AGETOFLAGS    = "-V 1";
-    $LIBSTDC       = `gcc -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
+    $LIBSTDC       = `$CC $CFLAGS -print-file-name=libstdc++.a | awk '{ if (\$1 != "libstdc++.a") print \$1}'`;
     chomp($LIBSTDC);
 
     if ( $G77 eq "gfortran" ){
-	$LIBG2C  = `gcc -print-file-name=libgfortran.a | awk '{ if (\$1 != "libgfortran.a") print \$1}'`;
+#	$LIBG2C  = `$FC $FFLAGS -print-file-name=libgfortran.a | awk '{ if (\$1 != "libgfortran.a") print \$1}'`;
+#	print "$FC $FFLAGS -print-file-name=libgfortran.a ========> LIBG2C = $LIBG2C\n";
     } else {
-	$LIBG2C  = `gcc -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
+	$LIBG2C  = `$CC $CFLAGS  -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
     }
     chomp($LIBG2C);
-
+# print "================= LIBG2C ; $LIBG2C\n";
 
     $KUIP          = $CERN_ROOT . "/bin/kuipc";
     if ( !$ROOT )       { print "ROOT_LEVEL has to be defined\n"; exit 1;}
@@ -224,18 +253,6 @@
 
 
     $CINTSYSDIR    = $ROOTSYS . "/cint";
-    $LIBS          = "";
-    $Libraries     = "";
-    $CLIBS         = "";
-    $FLIBS         = "";
-    $XLIBS         = "";
-    $THREAD        = "";
-    $CERNLIBS      = "";
-    $CRYPTLIBS     = "";
-    $SYSLIBS       = "";
-    $OSFID         = "";
-    $OSFCFID       = "";
-    $date   = `date +\%d\%b-%T`;
     $ARCOM  = "%AR %ARFLAGS %> %< ; %RANLIB %>"; # "%AR %ARFLAGS %> %<;%RANLIB %>",
 
     $CXXCOM =
@@ -245,12 +262,12 @@
     $LINKCOM =
       "%LD %DEBUG %LDFLAGS %EXTRA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
  my $FCCOM = "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
+ my $FCCOM = "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>;";
  my $FCviaAGETOFCOM
- = " test -f %>:b.g && /bin/rm %>:b.g; %CPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
- . " test -f %>:b.f && /bin/rm %>:b.f; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.f;";
-
-    $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.f %Fout%>;";
-    $FCviaAGETOFCOM .= " else ". $FCCOM . " fi";
+ = " test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
+ . " test -f %>:b.for && rm %>:b.for; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.for;";
+ $FCviaAGETOFCOM .= " if [ -f %>:b.for ]; then %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.for %Fout%>;";
+ $FCviaAGETOFCOM .= " else ". $FCCOM . " fi";
 
  my $AGETOFCOM  = "test -f %>:b.F && /bin/rm %>:b.F;";
     $AGETOFCOM .= "%AGETOF %AGETOFLAGS %< -o %>:b.F &&";
@@ -320,12 +337,19 @@
 	$CERNLIBS =~ s/$strip//g     if ($strip ne "");
 	$CERNLIBS =~ s/lib /lib64 /g if ($USE_64BITS);
 
-
 	chop($CERNLIBS);
+	
+	if ( $STAR_HOST_SYS !~ /^x86_darwin / ) {
+	  $CERNLIBS =~ s#lX11#L/usr/X11R6/lib -lX11#;
+	}
 	print "CERNLIB = $CERNLIBS\n" unless ($param::quiet);
     }
-
-    print "DEBUG >>> We will select architecture/compiler based on $STAR_HOST_SYS\n" if ($param::debug);
+    $PLATFORM      = `root-config --platform`; chomp($PLATFORM);
+    $ARCH          = `root-config --arch`; chomp($ARCH);
+    #  ============================================================
+    # Platform support should be concentrated here
+    #  ============================================================
+#   print "DEBUG >>> We will select architecture/compiler based on $STAR_HOST_SYS\n" if ($param::debug);
 
 
     if ( ($STAR_HOST_SYS =~ m/^rh/ && $STAR_HOST_SYS =~ /_icc/) ||
@@ -335,8 +359,8 @@
 	#
 
 	#print "DEBUG >>> Switching ot ICC compiler\n" if ($param::debug);
-	$PLATFORM      = "linux";
-	$ARCH          = "linuxicc";
+#	$PLATFORM      = "linux";
+#	$ARCH          = "linuxicc";
 	$PGI           = "";
 	$PGILIB        = "";
 	$CC            = "icc";
@@ -350,7 +374,8 @@
 	$LIBFRTBEGIN   = `gcc -print-file-name=libfrtbegin.a | awk '{ if (\$1 != "libfrtbegin.a") print \$1}'`;
 	chomp($LIBFRTBEGIN);
 	$NOOPT         = "-O0";
-	$CXXFLAGS     .= " -wd1476";
+#	$LIBFRTBEGIN = `gcc -print-file-name=libfrtbegin.a | sed 's|/|-L/|`;
+#	$CXXFLAGS      .= " -wd1476";
 	if ($ICC_MAJOR eq 8 and $ICC_MINOR ne 0 or $ICC_MAJOR eq 9) {
 	  $CXXFLAGS   .= " -wd1572";
 	  $CFLAGS     .= " -wd1572";
@@ -358,16 +383,18 @@
 	if ($ICC_MAJOR ge '8') {
 	  $FC          = "ifort";
 	  $LIBIFCPATH  = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
-	  $F77LIBS     =  $LIBFRTBEGIN ." -L". $LIBIFCPATH ." -lifcore ";# . $LIBG2C;
+	  $FLIBS     =  $LIBFRTBEGIN ." -L". $LIBIFCPATH ." -lifcore ";# . $LIBG2C;
 	}
 	else                   {
 	  $FC          = "ifc";
 	  $LIBIFCPATH  = `which ifc | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
-	  $F77LIBS     = $LIBG2C ." -L". $LIBIFCPATH ." -lF90 -lCEPCF90 -lintrins";
+	  $FLIBS     = $LIBG2C ." -L". $LIBIFCPATH ." -lF90 -lCEPCF90 -lintrins";
 	}
-	$F77LIBS      .= " -lg2c";
-	$FLIBS         = $F77LIBS;
-	$FFLAGS        = "$XMACHOPT -save";
+	$FLIBS      .= " -lg2c";
+	$FFLAGS        = "-save";
+#	$F77LIBS      .= " -lg2c";
+#	$FLIBS         = $F77LIBS;
+#	$FFLAGS        = "$XMACHOPT -save";
 	$FEXTEND       = "-132";
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
 	$SYSLIBS       = "-lm -ldl -lrt";# -rdynamic";
@@ -392,16 +419,15 @@
 	# Trying True64
 	#
         $ARCOM  = "%AR %ARFLAGS %>  -input %< ; %RANLIB %>";
-	$PLATFORM      = "alpha";
-	$ARCH          = "alphaxxx6";
+#	$PLATFORM      = "alpha";
+#	$ARCH          = "alphaxxx6";
 	$CC            = "cc";
 	$CXX           = "cxx";
 	$CPP           = $CC . " -EP";
 	$CXXFLAGS      = "tlocal";
 	$CFLAGS        = "";
 	$FC            = "f77";
-	$F77LIBS       = "/usr/shlib/libFutil.so /usr/shlib/libUfor.so /usr/shlib/libfor.so /usr/shlib/libots.so";
-	$FLIBS         = $F77LIBS;
+	$FLIBS       = "/usr/shlib/libFutil.so /usr/shlib/libUfor.so /usr/shlib/libfor.so /usr/shlib/libots.so";
 	$FFLAGS        = "-old_f77";
 	$FEXTEND       = "-extend_source -shared -warn argument_checking -warn nouninitialize";
 	$NOOPT         = "-O0";
@@ -428,8 +454,8 @@
 	#
 	# Solaris
 	#
-        $PLATFORM = "solaris";
-        $ARCH     = "solarisCC5";
+#        $PLATFORM = "solaris";
+#        $ARCH     = "solarisCC5";
         if (/^sun4x_56/) {$OSFCFID    = "__SunOS_5_6";}
 	if (/^sun4x_58/) {$OSFCFID    = "__SunOS_5_8";}
         $OSFCFID .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED SOLARIS";
@@ -484,20 +510,24 @@
         #
         # Case linux
         #
+	$CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+	$CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+      
 	if ( $G77 eq "gfortran" ){
-	 # TODO: Possible cleanup to do between GFORTRAN and CERNLIB_LINUX
-	 $CERNLIB_FPPFLAGS .= " -DGFORTRAN -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-	 $CERNLIB_CPPFLAGS .= " -DGFORTRAN -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-	} else {
-	 $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-	 $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+	  # TODO: Possible cleanup to do between GFORTRAN and CERNLIB_LINUX
+	  $CERNLIB_FPPFLAGS .= " -DCERNLIB_GFORTRAN";
+	}
+	if ($IS_64BITS){
+	  $CERNLIB_FPPFLAGS .= " -DCERNLIB_QMLXIA64 -DCERNLIB_LXIA64";
+	  $CERNLIB_CPPFLAGS .= " -DCERNLIB_QMLXIA64 -DCERNLIB_LXIA64";
 	}
 
         #print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);
 	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;
-
+	$CERNLIB_FPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
+	$CERNLIB_CPPFLAGS .= " -DCERNLIB_GCC" . $CXX_MAJOR;
         # print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
         $CXXFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Woverloaded-virtual";
 	my $optflags = "";
@@ -534,8 +564,10 @@
 	    $CXXFLAGS .= " " . $optflags;
 	    $G77FLAGS .= " " . $optflags;
 	}
-        $CFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Wshadow";
-        $SOFLAGS   = "$XMACHOPT -shared -Wl,-Bdynamic";
+        $CFLAGS   .= " -pipe -fPIC -Wall -Wshadow";
+        $SOFLAGS  .= " -shared -Wl,-Bdynamic";
+#        $CFLAGS    = "$XMACHOPT -fPIC -pipe -Wall -Wshadow";
+#        $SOFLAGS   = "-shared -Wl,-Bdynamic";
 
 	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
 
@@ -566,25 +598,141 @@
 	}
 
 	if ( $G77 eq "gfortran"){
-	    $F77LIBS = " -lgfortran";
+#	  $LIBIFCPATH  = `$FC -print-file-name=libgfortranbegin.a`; chomp($LIBIFCPATH);
+#	  $FLIBS     =  $LIBFRTBEGIN;
+#	  $FLIBS    .= " -lgfortran";
 	} else {
 	    if ($CXX_VERSION >= 4 && $STAR_HOST_SYS =~ m/macintosh/ ){
 		# Same comment, not sure if V4 or a Mac issue
 		# 2009/08 -> not an issue with gcc4
-		$F77LIBS = " -lg2c";
+		$FLIBS = " -lg2c";
 	    } else {
-		$F77LIBS = " -lg2c -lnsl";
+		$FLIBS = " -lg2c -lnsl";
 	    }
 	}
-        $FLIBS  .= $F77LIBS;
 
+    } elsif (/x86_darwin/) {
+      $CXX_VERSION  = `$CXX -dumpversion`;
+      chomp($CXX_VERSION);
+      ($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;  
+#      print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
+      # OS version
+      $MACOSX_MINOR = `sw_vers | sed -n 's/ProductVersion://p' | cut -d . -f 2`; chomp($MACOSX_MINOR);
+      $MACOSX_CPU   = `uname -p`; chomp($MACOSX_CPU);
+      $FINK_DIR     = `which fink | sed -ne "s/\\/bin\\/fink//p"`; chomp($FINK_DIR);
+      # Extras
+      if (-d $FINK_DIR) {
+	if (-d "$FINK_DIR/include") {
+	  $FINK_CXXFLAGS = "-I$FINK_DIR/include";
+	  $FINK_CFLAGS = "-I$FINK_DIR/include";
+	}
+	if (-d "$FINK_DIR/lib") {$FINK_LDFLAGS = "-L$FINK_DIR/lib";}
+      }
+      $CXX           = "g++";
+      $CC            = "gcc";
+      $CXXFLAGS      = "-pipe -W -Wall -Woverloaded-virtual -fsigned-char -fno-common";
+      if (! $EXTRA_CPPPATH) {$EXTRA_CPPPATH  =                         $FINK_CXXFLAGS;}
+      else                  {$EXTRA_CPPPATH .= $main::PATH_SEPARATOR . $FINK_CXXFLAGS;}
+      $CFLAGS       .= " -pipe -W -Wall -fsigned-char -fno-common";# -Df2cFortran";
+      $CINTCXXFLAGS  = "-pipe -W -Wall -Woverloaded-virtual " .
+	"-fsigned-char -fno-common $FINK_CXXFLAGS " .
+	  "-DG__REGEXP -DG__UNIX -DG__SHAREDLIB " .
+	  "-DG__ROOT -DG__REDIRECTIO -DG__OSFDLL " .
+	  "-DG__STD_EXCEPTION";
+      $CINTCFLAGS    = "-pipe -W -Wall -fsigned-char -fno-common " .
+	" $FINK_CFLAGS -DG__REGEXP -DG__UNIX -DG__SHAREDLIB " .
+	  "-DG__ROOT -DG__REDIRECTIO -DG__OSFDLL -DG__STD_EXCEPTION";
 
+      # Linker:
+      $LDEXPORT      = "";
+      $LDALL         = "";# -Wl,-all_load";
+      $LDNONE        = "";# -Wl,-noall_load";
+#    $LDEXPORT      = " -Wl,-export-dynamic -Wl,-noinhibit-exec,-Bdynamic";
+#    $LDALL         = " -Wl,--whole-archive -Wl,-Bstatic -Wl,-z -Wl,muldefs";
+#    $LDNONE        = " -Wl,--no-whole-archive -Wl,-Bdynamic";
+      $LD            = $CXX;
+      $LDFLAGS       = "-bind_at_load";
+#      $LDFLAGS      .= " -expect_unresolved \"*\"";
+      #FORCELINK     = yes
+      #NEEDFINK      = yes
+      if ($MACOSX_MINOR == 5) {$MACOSX_MINOR  = 4;}
+      if ($MACOSX_MINOR == 4) {
+	$SOFLAGS       = "-dynamiclib -single_module -undefined dynamic_lookup";# -install_name $(LIBDIR)/"
+	#FORCELINK     = no
+	#NEEDFINK      = no
+	$CXXFLAGS     .= " -fvisibility-inlines-hidden";
+	$CINTCXXFLAGS .= " -fvisibility-inlines-hidden";
+      }
+      elsif ($MACOSX_MINOR == 3) {
+	$SOFLAGS      = "-dynamiclib -single_module -undefined dynamic_lookup";# -install_name $(LIBDIR)/
+	$CXXFLAGS     .= " -Wno-long-double";
+	$CFLAGS       .= " -Wno-long-double";
+	$CINTCXXFLAGS .= " -Wno-long-double";
+	$CINTCFLAGS   .= " -Wno-long-double";
+      }
+      else {
+	$SOFLAGS       = "-dynamiclib -single_module -undefined suppress";# -install_name $(LIBDIR)/
+	$CXXFLAGS     .= " -Wno-long-double";
+	$CFLAGS       .= " -Wno-long-double";
+	$CINTCXXFLAGS .= " -Wno-long-double";
+	$CINTCFLAGS   .= " -Wno-long-double";
+      }
+      #      $SOEXT         = "dylib";
+      # System libraries:
+      $OSTHREADLIBDIR = "";
+      $OSTHREADLIB = "";
+      $SYSLIBS       = "-lm $FINK_LDFLAGS $OSTHREADLIBDIR $OSTHREADLIB -ldl";
+      #XLIBS         = "$(XPMLIBDIR) $(XPMLIB) $(X11LIBDIR) -lXext -lX11";
+      #CILIBS        = -lm $(EXTRA_LDFLAGS) $(FINK_LDFLAGS) -ldl
+
+      # Fortran:
+      $F77           = "";
+      if ($MACOSX_MINOR == 4 && $ROOTBUILD =~ /g95/) {
+	$F77          = "g95";
+	$LIBS         = `$F77 -print-search-dirs | awk '/^install:/{print \$2}'`; chomp($LIBS);
+	$FLIBS      = "-L$LIBS";
+	$FLIBS      .= " -lf95";
+      } else {
+	$F77          = "gfortran";
+	$FPP          = $F77;
+#	$CC           = "gcc-4";
+#	$CXX          = "g++-4";
+	$FFLAGS       = "-funroll-loops -fomit-frame-pointer -ftree-vectorize -fno-second-underscore";
+	$FFLAGS      .= " -w -fno-automatic -fd-lines-as-comments -Wall -W -Wsurprising -fPIC";
+#	$FFLAGS      .= "-std=legacy";
+#	$FFLAGS      .= " -fd-lines-as-comments"; # -fd-lines-as-code
+#	$FFLAGS      .= " -ff2c";
+	$FEXTEND      = $G77EXTEND;
+        $FPPFLAGS    .= " -DCERNLIB_LINUX -DCERNLIB_UNIX -DCERNLIB_LNX -DCERNLIB_QMGLIBC -DCERNLIB_MACOSX -DCERNLIB_GFORTRAN";
+#	$FLIBS      = `$F77 -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);
+	$FLIBS      = `$F77 -print-file-name=libgfortran.dylib`; chomp($FLIBS);
+	$FLIBS      .= " " . `$F77 -print-file-name=libgfortranbegin.a`; chomp($FLIBS);
+      }
+      # We add libg2c only in case of ppc because then we probably have cernlib
+      # compiled with g77. In case of Intel Mac it should be compiled wiFLAGS      = "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";th the
+      # same fortran we use.
+      if ($MACOSX_CPU eq "powerpc") {
+	$FLIBS .= " -L$(FINK_DIR)/lib -lg2c";
+      }
+      $FC = $F77;
+      $FPP = $FC . " -E -P"; 
+#      $FCviaAGETOFCOM = 
+#	" test -f %>:b.g && rm %>:b.g; %FPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;" .
+#	  " test -f %>:b.f && rm %>:b.f; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.f;" .
+#	    " if [ -f %>:b.f ]; then %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.f %Fout%>;" .
+#	      " else ". $FCCOM . " fi";
+      $CERNLIB_FPPFLAGS .= " -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC ". 
+	"-Dunix=unix -D__DARWIN__";
+      $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC ".
+	"-DCERNLIB_MACOSX -Dunix=unix -D__DARWIN__";
+#      $OSFID .= " __linux";
     } else {
 	die "Unsupported platform $STAR_HOST_SYS\n";
     }
     # ============================================================
     # End of platform specific reshape of options and tweaks
     # ============================================================
+#    print "FLIBS  ------  $FLIBS\n"; 
 
 
 
@@ -592,11 +740,11 @@
     $CLIBS     .= $threadlib;
     $CFLAGS    .= $ROOTCFLAGS;
     $CXXFLAGS  .= $ROOTCFLAGS;
+#    $OSFID .= " " . $STAR_SYS; $OSFCFID .= " " . $STAR_SYS;
+#    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
+    $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;
 
-    if ( $STAR_SYS ne $STAR_HOST_SYS ) {
-	$OSFID   .= " " . $STAR_HOST_SYS;
-	$OSFCFID .= " " . $STAR_HOST_SYS;
-    }
+
 
     $OSFID    .= " __ROOT__";
     $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $OSFID ) );
@@ -608,7 +756,7 @@
 
     $ROOTSRC = $ROOTSYS . "/include";
 
-    $CERNINO = $CERN_ROOT . "/include";
+    $CERNINO = "#asps/Simulation/geant321/include" . $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
 
     $CPPPATH = "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
 #    $CPPPATH .= $main::PATH_SEPARATOR ."#";# . $CERNINO;
@@ -629,6 +777,7 @@
     #
     my ($MYSQLINCDIR,$mysqlheader) =
 	script::find_lib( $MYSQL . " " .
+			 "/sw/include/mysql ".
 			 "/include /usr/include ".
 			 "/usr/include/mysql  ".
 			 "/usr/mysql/include  ".
@@ -774,6 +923,7 @@
 
     # Logger
     $LoggerDir = $OPTSTAR . "/include/log4cxx";
+
     if (-d $LoggerDir) {
 	$LoggerINCDIR = $OPTSTAR . "/include";
 	$LoggerLIBDIR = $OPTSTAR . "/lib";
@@ -833,6 +983,7 @@
     my @params = (
 		  'Package'       => 'None',
 		  'CPP'           => $CPP,
+		  'FPP'           => $FPP,
 		  'CPPPATH'       => $CPPPATH,
 		  'EXTRA_CPPPATH' => $EXTRA_CPPPATH,
 		  'CERNLIB_FPPFLAGS' => $CERNLIB_FPPFLAGS,
@@ -953,6 +1104,7 @@
 		      'STAF'            => $STAF,
 		      'STAR_BIN'        => $STAR_BIN,
 		      'STAR_SYS'        => $STAR_HOST_SYS,
+		      'STAR_HOST_SYS'   => $STAR_HOST_SYS,
 		      'STAR_VERSION'    => $STAR_VERSION,
 		      'PERL5LIB'        => $PERL5LIB,
 		      'OPTSTAR'         => $OPTSTAR,
