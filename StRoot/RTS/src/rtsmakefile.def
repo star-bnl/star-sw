@@ -156,6 +156,13 @@ ifeq (${TARGET_SYSTEM},LINUX)
 		HOSTFLAGS = -mcpu=$(TARGET_CPU)
 	else
 		ifeq (${TARGET_CPU},x86_64)
+			ifeq (${STAR_HOST_SYS},x86_64) 
+				HOSTFLAGS = -m64
+				LDFLAGS += -m64
+			else
+				HOSTFLAGS = -m32
+				LDFLAGS += -m32
+			endif
 		else
 			HOSTFLAGS = -march=$(TARGET_CPU)
 		endif

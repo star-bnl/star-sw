@@ -10,6 +10,8 @@ DEFINES += -DRTS_LOG_COLORED
 BINS =  fs fs_ex  sfsTest sfs_single example sfs_header
 LIBS = libsfs.a
 
+LDFLAGS += ${HOSTFLAGS}
+
 all:  libs $(BINS) 
 
 libs:	$(LIBS)
