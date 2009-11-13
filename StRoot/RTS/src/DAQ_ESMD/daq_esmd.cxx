@@ -222,9 +222,10 @@ daq_dta *daq_esmd::handle_adc()
 }
 
 
-int daq_esmd::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int rdo1)
+int daq_esmd::get_l2(char *buff, int buff_words, struct daq_trg_word *trg, int rdo1)
 {
 	const int ESMD_DDL_BYTES = 18948 ;
+	int buff_bytes = buff_words * 4 ;
 
 	u_short *us = (u_short *)buff ;
 
