@@ -3,6 +3,7 @@
 * Table: pp2ppOffset
 *
 * description: the offsets for 4 planes (A, B, C & D) of the 8 roman pots
+*			-- All nos. are in the unit of mm .
 *
 * The order in the table is as follows :
 
