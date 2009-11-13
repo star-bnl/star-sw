@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.29 2009/10/12 18:04:12 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.30 2009/11/13 20:00:52 pibero Exp $
 
 
 #include <Stiostream.h>
@@ -140,6 +140,7 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
       emc->setHeadMaker(this);
       emc->setBemc(bemc);
       emc->setEemc(eemc);
+      emc->setMC(mMCflag);
       mSimulators[3] = emc;
     }
 
@@ -223,6 +224,9 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.30  2009/11/13 20:00:52  pibero
+ * Updates for Run 9 to work on simulation
+ *
  * Revision 1.29  2009/10/12 18:04:12  pibero
  * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
  *
