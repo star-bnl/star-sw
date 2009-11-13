@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.17 2009/11/13 16:52:51 fisyak Exp $
+# $Id: Conscript,v 1.18 2009/11/13 17:08:15 fisyak Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.18  2009/11/13 17:08:15  fisyak
+# Add extra -m32 for LD
+#
 # Revision 1.17  2009/11/13 16:52:51  fisyak
 # swit LDto g++ with gfortran
 #
@@ -152,6 +155,7 @@ my $LD = $env->{LD};
 if ($LD eq 'g++' and $FC ne 'gfortran') {$LD = $env->{CC};}
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= $env->{LDEXPORT};
+if ($STAR_SYS =~ /sl53_gcc4/) {$LDFLAGS .= " -m32";}
 my $LIBPATH    = $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 
