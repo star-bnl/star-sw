@@ -35,7 +35,7 @@ public:
 
 private:
   int get2009_DSMRegisters(int runNumber);
-  int defineTriggers();
+  int defineTriggers(int runNumber);
 
   TDatime mDBTime;
   StBemcTriggerSimu* mBemc;
