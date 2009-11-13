@@ -17,10 +17,10 @@ void drawEmbeddingQA(
   gSystem->Load("StEmbeddingQAMaker");
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile);
-  maker->SetOutputDirectory(outputDirectory);
+  maker->setOutputDirectory(outputDirectory);
 
   // Draw all QA plots
-  maker->draw();
+//  maker->draw();
 
   // or draw each QA
   // Event-wise QA
@@ -61,7 +61,7 @@ void drawEmbeddingQA(
   gSystem->Load("StEmbeddingQAMaker");
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, year, production, particleName);
-  maker->SetOutputDirectory(outputDirectory);
+  maker->setOutputDirectory(outputDirectory);
 
   // Draw all QA plots
 //  maker->draw();
