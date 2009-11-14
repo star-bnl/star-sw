@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.19 2007/01/15 15:02:20 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.20 2009/11/14 13:18:33 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.20  2009/11/14 13:18:33  jcs
+// change LOG_INFO messages to LOG_DEBUG messages
+//
 // Revision 1.19  2007/01/15 15:02:20  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -196,7 +199,7 @@ void StFtpcSlowSimReadout::ShaperResponse(const StFtpcSlowSimCluster *cl)
 void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int irow)
 {
   float n_sigmas_to_calc  = 5.0;        
-  // LOG_INFO <<"StFtpcSlowSimReadout::Digitize..." << endm;
+  // LOG_DEBUG <<"StFtpcSlowSimReadout::Digitize..." << endm;
   // get the readout position in radial direction
   float time_slice = mDb->microsecondsPerTimebin()*1000;// into nsec
   float time       = cl->GetDriftTime()*1000.;       // into nsec
@@ -207,8 +210,6 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
   float phi        = cl->GetPhi();
   int isec, jsec, nsecs;
   int     ipad       = WhichPad(phi,isec);
-
-  //LOG_INFO << "FTPC SlowSimulator using time offset tables" << endm;
 
   if (DEBUG) {  
     LOG_DEBUG << "Digitize using parameters: mDb->radiansPerBoundary() = "<<mDb->radiansPerBoundary()<<" mDb->radiansPerPad() = "<<mDb->radiansPerPad()<<endm;
@@ -365,8 +366,8 @@ void StFtpcSlowSimReadout::OutputADC()
   // Gaussian distribution for Noise, Sigma 1.5 ADC channels
   TF1* noise = new TF1("noise","gaus",-5,5);
   noise->SetParameters(1,0,1.5);
-  LOG_INFO << "FTPC SlowSimulator using random noise with a sigma of 1.5" << endm;
-  LOG_INFO << "FTPC SlowSimulator using gain tables and amplitude offset" << endm;
+  LOG_DEBUG << "FTPC SlowSimulator using random noise with a sigma of 1.5" << endm;
+  LOG_DEBUG << "FTPC SlowSimulator using gain tables and amplitude offset" << endm;
 
 
   for (int row=0; row<mDb->numberOfPadrows(); row++) { 
@@ -546,7 +547,7 @@ void StFtpcSlowSimReadout::polya(const int ggnch, const float gglow,
 
     for (i=0; i<ggnch; ++i) {
         pcum[i] /= pcum[ggnch-1];             // renormalize it
-        //LOG_INFO << "i=" << i << " pcum=" << pcum[i] << endm;
+        //LOG_DEBUG << "i=" << i << " pcum=" << pcum[i] << endm;
     }
 }
 
@@ -565,7 +566,7 @@ int StFtpcSlowSimReadout::sample_polya(const float gain)
       }
 
     int     ich = Locate(gnch, pcum, ran);
-    //LOG_INFO << "ich = " << ich << endm;
+    //LOG_DEBUG << "ich = " << ich << endm;
     return  (int) ( gain * ( glow + ich * gdelta ) );
 
 }
@@ -659,7 +660,7 @@ void StFtpcSlowSimReadout::rmarin(int ij, int kl)
   k = (kl/169) % 178 + 1;
   l = (kl) % 169;
   
-  LOG_INFO << "Ranmar initialized:" << ij << " " 
+  LOG_DEBUG << "Ranmar initialized:" << ij << " " 
        << kl << " "
        << i << " "
        << j << " "

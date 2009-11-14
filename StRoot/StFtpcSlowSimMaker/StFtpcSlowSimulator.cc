@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.18 2007/01/15 15:02:20 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.19 2009/11/14 13:18:33 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.19  2009/11/14 13:18:33  jcs
+// change LOG_INFO messages to LOG_DEBUG messages
+//
 // Revision 1.18  2007/01/15 15:02:20  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -145,11 +148,11 @@ int StFtpcSlowSimulator::simulate()
     //create smearing function
     //TF1* noise = new TF1("noise","gaus",-2,2);
     //noise->SetParameters(1,0,0.035);
-    //LOG_INFO << "Using gaussian smearing of GEANT hits  with a sigma of 350 um" << endm;
+    //LOG_DEBUG << "Using gaussian smearing of GEANT hits  with a sigma of 350 um" << endm;
 
     //create smearing function
     //TF1* kickout = new TF1("kickout","1",0,1);
-    //LOG_INFO << "Using Probability Function to throw out a certain percentage of all hits" << endm;
+    //LOG_DEBUG << "Using Probability Function to throw out a certain percentage of all hits" << endm;
 
 
     for ( i=0; i<number_hits; ++i ) 
@@ -247,7 +250,7 @@ int StFtpcSlowSimulator::simulate()
                     << " zz = "<<zz
                     << " px = "<<px
                     << " py = "<<py
-                    << " pz=" << pz << endl;
+                    << " pz=" << pz << endm;
 	}
 
 	//  dip angle with respect to plane defined by z- and phi- axes	
