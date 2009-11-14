@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.23 2007/12/13 21:04:52 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.24 2009/11/14 12:51:08 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.24  2009/11/14 12:51:08  jcs
+//   added suggested parentheses to avoid warnings which appeared with system upgrade
+//
 //   Revision 1.23  2007/12/13 21:04:52  jcs
 //   insert missing LOG_DEBUG statement
 //
@@ -329,7 +332,7 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) 
          LOG_DEBUG<<" + "<<mGas->getBody4West()<<"(body4West)"<<endm;
       }		 
       // from 2003-10-31 -> 2004-01-24 and as of 2004-04-04 there are 2 additional body temperature sensors
-      if ( dbDate >= 20031031 && dbDate <= 20040124 || dbDate >= 20040404) {
+      if ( (dbDate >= 20031031 && dbDate <= 20040124) || dbDate >= 20040404) {
          LOG_DEBUG<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 ||  >= 20040404 activate additional body temperature sensors) "<<endm;
          if (mGas->getBody5West() >= mDb->minGasTemperature() && mGas->getBody5West() <= mDb->maxGasTemperature() ) {
             averageBodyTemperatureWest += mGas->getBody5West();	 
@@ -575,7 +578,7 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
 	         LOG_DEBUG<<" + "<<mGas->getBody4East()<<"(body4East)"<<endm;
       }		 
       // from 2003-10-31 -> 2004-01-24 and as of 2004-04-04 there are 2 additional body temperature sensors
-      if ( dbDate >= 20031031 && dbDate <= 20040124 || dbDate >= 20040404 ) {
+      if ( (dbDate >= 20031031 && dbDate <= 20040124) || dbDate >= 20040404 ) {
          LOG_DEBUG<<"(dbDate = "<<dbDate<<" >= 20031031 && <= 20040124 ||  >= 20040404 activate additional body temperature sensors) ";
          if (mGas->getBody5East() >= mDb->minGasTemperature() && mGas->getBody5East() <= mDb->maxGasTemperature() ) {
             averageBodyTemperatureEast += mGas->getBody5East();	 
