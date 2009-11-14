@@ -1,5 +1,8 @@
-// $Id: StFtpcRawWriter.cc,v 1.9 2007/01/15 15:02:19 jcs Exp $
+// $Id: StFtpcRawWriter.cc,v 1.10 2009/11/14 13:18:33 jcs Exp $
 // $Log: StFtpcRawWriter.cc,v $
+// Revision 1.10  2009/11/14 13:18:33  jcs
+// change LOG_INFO messages to LOG_DEBUG messages
+//
 // Revision 1.9  2007/01/15 15:02:19  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -61,7 +64,6 @@ StFtpcRawWriter::~StFtpcRawWriter()
     ftpcsqndx->SetNRows(numSqndx);
     ftpcadc->SetNRows(numAdc); 
      
-    // LOG_INFO <<"Printing..."<< endm;
   
     //ftpcsqndx->Print(0, ftpcsqndx->GetNRows());
     //ftpcadc->Print(0, ftpcadc->GetNRows());
@@ -89,7 +91,7 @@ int StFtpcRawWriter::writeArray(float *array,
 			    *numberTimebins];      
   
 
-  // LOG_INFO << " Creating copy array "<<numberPadrows<<"; "<<numberSectors<<"; "<<numberPads<<"; "<<numberTimebins<<endm;
+  // LOG_DEBUG << " Creating copy array "<<numberPadrows<<"; "<<numberSectors<<"; "<<numberPads<<"; "<<numberTimebins<<endm;
 
 
   // Correct different pad & sector numbering scheme for east & west FTPC
@@ -120,7 +122,7 @@ int StFtpcRawWriter::writeArray(float *array,
 	      +numberTimebins*numberPads*(numberSectors-sec-1)
 	      +numberTimebins*numberPads*numberSectors*row;
 	  cArray[newi]=array[i];
-	  //if (array[i] >0.1) LOG_INFO << "Copying value "<< array[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endm; 
+	  //if (array[i] >0.1) LOG_DEBUG << "Copying value "<< array[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endm; 
 	}
       }
     }
@@ -141,7 +143,7 @@ int StFtpcRawWriter::writeArray(float *array,
   adc_index=0;
   seq_flag=0;
 
-  //LOG_INFO << "RawWriter using threshold high:" << th_high << " and threshold low "<< th_low<<endl;
+  //LOG_DEBUG << "RawWriter using threshold high:" << th_high << " and threshold low "<< th_low<<endm;
 	  
 
   // Fill sequences
@@ -158,7 +160,7 @@ int StFtpcRawWriter::writeArray(float *array,
 	    +numberTimebins*pad
 	    +numberTimebins*numberPads*sec
 	    +numberTimebins*numberPads*numberSectors*row;
-	  //if (cArray[i] >1) LOG_INFO << "Table value "<< cArray[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endm; 
+	  //if (cArray[i] >1) LOG_DEBUG << "Table value "<< cArray[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endm; 
 
 	  if((int) cArray[i] < th_low) {
 	    valid_seq = 0; 
@@ -168,7 +170,7 @@ int StFtpcRawWriter::writeArray(float *array,
 	  
 	  if((int) cArray[i] >= th_low) {
 	    
-	    //LOG_INFO <<"Over threshold, seq_index = "<<seq_index <<endm;
+	    //LOG_DEBUG <<"Over threshold, seq_index = "<<seq_index <<endm;
 	    
 	    // Check if sequence is valid, apply ASIC parameters
 	    if (!valid_seq){
@@ -189,7 +191,7 @@ int StFtpcRawWriter::writeArray(float *array,
 		  t = numberTimebins;
 		}
 	      }
-	      //if (valid_seq) LOG_INFO << "Sequence "<<seq_index<< " validated! Pad " << pad << " nAboveLow "<<nAboveLow <<endm;
+	      //if (valid_seq) LOG_DEBUG << "Sequence "<<seq_index<< " validated! Pad " << pad << " nAboveLow "<<nAboveLow <<endm;
 	    }
 
 
@@ -212,8 +214,8 @@ int StFtpcRawWriter::writeArray(float *array,
 	      if(pixel_per_seq > 0) {
 		// set index for previous sequence
 		sqndx[seq_index++].index = (pixel_per_seq-1) + (start_pixel<<6);
-		//LOG_INFO << "sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
-		//LOG_INFO << "pixel_per_seq=" << pixel_per_seq << " start_pixel=" << start_pixel << endm;
+		//LOG_DEBUG << "sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
+		//LOG_DEBUG << "pixel_per_seq=" << pixel_per_seq << " start_pixel=" << start_pixel << endm;
 		if(seq_index >= maxSqndx) {
 		  // reset overflow
 		  seq_index=maxSqndx -1;
@@ -232,12 +234,12 @@ int StFtpcRawWriter::writeArray(float *array,
 		// make previous sequence last sequence on pad
                 if(seq_index>0) {
 		  sqndx[seq_index-1].index += 32;
-		  //LOG_INFO << "changed: sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
+		  //LOG_DEBUG << "changed: sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
                 }
 		if(pad != last_pad+1) {
 		  // set index for new pad
 		  sqndx[seq_index++].index = 32768 + pad + 256*(6*row + sec);
-		  //LOG_INFO << "sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
+		  //LOG_DEBUG << "sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
 		  if(seq_index >= maxSqndx) {
 		    // reset overflow
 		    seq_index=maxSqndx;
@@ -250,7 +252,7 @@ int StFtpcRawWriter::writeArray(float *array,
 	   
 	    
 	    adc[adc_index++].data=(char) cArray[i];
-	    //LOG_INFO << "adc[" << adc_index-1 << "].data=" << (int) adc[adc_index-1].data << " at " <<row << " " << sec << " " << pad << " " << bin << endm;
+	    //LOG_DEBUG << "adc[" << adc_index-1 << "].data=" << (int) adc[adc_index-1].data << " at " <<row << " " << sec << " " << pad << " " << bin << endm;
 	    if(adc_index >= maxAdc) {
 	      // reset overflow
 	      adc_index=maxAdc -1;
