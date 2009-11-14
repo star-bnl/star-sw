@@ -74,13 +74,9 @@ Int_t St_pp2pp_AnalysisMaker::Init() {
       sprintf(format,"%s.ch%d_energy[%s.ch%d_ncls]/D", rpname[s], c, rpname[s], c);
       fClusterTree->Branch(title, allclusters[s][c].energy, format) ;
 
-      sprintf(title,"%s.ch%d_x", rpname[s], c);
-      sprintf(format,"%s.ch%d_x[%s.ch%d_ncls]/D", rpname[s], c, rpname[s], c);
-      fClusterTree->Branch(title, allclusters[s][c].x, format) ;
-
-      sprintf(title,"%s.ch%d_y", rpname[s], c);
-      sprintf(format,"%s.ch%d_y[%s.ch%d_ncls]/D", rpname[s], c, rpname[s], c);
-      fClusterTree->Branch(title, allclusters[s][c].y, format) ;
+      sprintf(title,"%s.ch%d_xy", rpname[s], c);
+      sprintf(format,"%s.ch%d_xy[%s.ch%d_ncls]/D", rpname[s], c, rpname[s], c);
+      fClusterTree->Branch(title, allclusters[s][c].xy, format) ;
 
       sprintf(title,"%s.ch%d_z", rpname[s], c);
       sprintf(format,"%s.ch%d_z[%s.ch%d_ncls]/D", rpname[s], c, rpname[s], c);
@@ -275,6 +271,8 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 	    allclusters[s][c].length[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->length();
 	    allclusters[s][c].position[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->position();
 	    allclusters[s][c].energy[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->energy();
+	    allclusters[s][c].xy[k] = pp2ppColl->romanPot(s)->plane(c)->cluster(k)->xy();
+	    allclusters[s][c].z[k] = pp2ppColl->romanPot(s)->plane(c)->z();
 	    (allclusters[s][c].nclusters)++ ;
 	  }
 	}
