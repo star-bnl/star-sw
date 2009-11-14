@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.75 2009/10/14 15:52:43 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.76 2009/11/14 12:51:08 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.76  2009/11/14 12:51:08  jcs
+// added suggested parentheses to avoid warnings which appeared with system upgrade
+//
 // Revision 1.75  2009/10/14 15:52:43  jcs
 // write out all gas temperature, air pressure info to Run branch of FTPC debug root file
 //
@@ -1363,12 +1366,12 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->twoPadWeightedError()));
 	    }
-	  if(thispoint->GetNumberPads()==3 && iUseGauss & 1 == 1)
+	  if((thispoint->GetNumberPads()==3) && ((iUseGauss & 1) == 1))
 	    {
 	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->threePadGaussError()));
 	    }
-	  if(thispoint->GetNumberPads()==3 && iUseGauss & 1 == 0)
+	  if((thispoint->GetNumberPads()==3) && ((iUseGauss & 1) == 0))
 	    {
 	      fPhiError = ::sqrt(fPhiError * fPhiError
 			       + sqr(mParam->threePadWeightedError()));
