@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.34 2007/05/15 14:35:18 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.35 2009/11/14 13:17:36 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.35  2009/11/14 13:17:36  jcs
+// add LOG_DEBUG message to print out microsecondsPerTimebi
+//
 // Revision 1.34  2007/05/15 14:35:18  jcs
 // update to be compatible with changes made to StFtpcTrackParams.cc
 // use default microsecondsPerTimebin value from database if no RHIC clock info available
@@ -332,6 +335,7 @@ Int_t StFtpcSlowSimMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StFtpcSlowSimMaker::Make(){
+LOG_INFO << "Event number "<<(int) GetEventNumber()<<endm;
 
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex *)  geant("g2t_vertex");
@@ -406,6 +410,7 @@ Int_t StFtpcSlowSimMaker::Make(){
        LOG_INFO <<"          offsetCathodeEast         = " << dbReader->offsetCathodeEast() << endm;
        LOG_INFO <<"          angleOffsetEast           = " << dbReader->angleOffsetEast() << endm;
     }
+    LOG_DEBUG<<" Using microsecondsPerTimebin = "<<dbReader->microsecondsPerTimebin()<<" for this event"<<endm;
 
   // get temperatures from offline db, used for embedding!
   // as long as there is no daq data, standard temperatures are used!
