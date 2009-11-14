@@ -5,8 +5,8 @@
 
 #include "St_db_Maker/St_db_Maker.h"
 
-#include "pp2ppPedestal.h"
 #include "tables/St_pp2ppPedestal_Table.h"
+#include "tables/St_pp2ppOffset_Table.h"
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StRpsCollection.h"
@@ -18,7 +18,6 @@ ClassImp(St_pp2pp_Maker)
 						     pedestal_perchannel_filename("pedestal.in.perchannel"), LDoCluster(kTRUE) {
   // ctor
   //  nevt_count = 0 ;
-
 }
 
 
@@ -35,7 +34,10 @@ Int_t St_pp2pp_Maker::Init() {
 }
 
 Int_t St_pp2pp_Maker::InitRun(int runumber) {
-  if ( LDoCluster ) read_pedestal_perchannel() ;
+  if ( LDoCluster ) {
+    read_pedestal_perchannel() ;
+    read_offset_perplane() ;
+  }
   return 0;
 }
 
@@ -76,19 +78,19 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
     // fetch data and place it to appropriate structure
     if (descr) {
         pp2ppPedestal_st *table = descr->GetTable();
-        // cout << "Reading pp2ppPedestal table with nrows = " << descr->GetNRows() << endl ;
-                for ( idb = 0; idb < descr->GetNRows(); idb++ ) {
-		  s = (Int_t) table[idb].sequencer ;
-		  c = (Int_t) table[idb].chain ;
-		  sv = (Int_t) table[idb].SVX ;
-		  ch = (Int_t) table[idb].channel ;
+	//	cout << "Reading pp2ppPedestal table with nrows = " << descr->GetNRows() << endl ;
+	for ( idb = 0; idb < descr->GetNRows(); idb++ ) {
+	  s = (Int_t) table[idb].sequencer ;
+	  c = (Int_t) table[idb].chain ;
+	  sv = (Int_t) table[idb].SVX ;
+	  ch = (Int_t) table[idb].channel ;
 
-		  pedave[s-1][c][sv][ch] = table[idb].mean ;
-		  pedrms[s-1][c][sv][ch] = table[idb].rms ;
+	  pedave[s-1][c][sv][ch] = table[idb].mean ;
+	  pedrms[s-1][c][sv][ch] = table[idb].rms ;
 
-		  //		  cout << s << " " << c << " "  << sv << " " << ch << " " << pedave[s-1][c][sv][ch] << " " << pedrms[s-1][c][sv][ch] << endl ; 
+	  //		  cout << s << " " << c << " "  << sv << " " << ch << " " << pedave[s-1][c][sv][ch] << " " << pedrms[s-1][c][sv][ch] << endl ; 
 
-                }
+	}
     } else {
       LOG_WARN << "WARNING: No data in pp2ppPedestal table (wrong timestamp?). Nothing to return, then." << endm ;
     }
@@ -97,7 +99,42 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
   cout << idb << " pedestal entries read from DB table Calibration/pp2pp read. " << endl ;
 
 
-  return 0 ;
+  return 1 ;
+
+}
+
+Int_t St_pp2pp_Maker::read_offset_perplane() {
+
+  offset_table = 0;
+
+  TDataSet *DB = 0;
+  DB = GetInputDB("Geometry/pp2pp");
+  if (!DB) { 
+    LOG_WARN << "ERROR: cannot find database Geometry_pp2pp?" << std::endl; 
+  }
+  else {
+
+    // fetch ROOT descriptor of db table
+    St_pp2ppOffset *descr = 0;
+    descr = (St_pp2ppOffset*) DB->Find("pp2ppOffset");
+    // fetch data and place it to appropriate structure
+    if (descr) {
+      offset_table = descr->GetTable();
+      cout << "Reading pp2ppOffset table with nrows = " << descr->GetNRows() << endl ;
+      /*
+      for (Int_t i = 0; i < descr->GetNRows(); i++) {
+	for ( Int_t j = 0; j< 32 ; j++ )
+	  std::cout << offset_table[i].rp_offset_plane[j] << " "  ; 
+	cout << endl ;
+      }
+      */
+    } else {
+      LOG_WARN << "St_pp2pp_Maker : No data in pp2ppOffset table (wrong timestamp?). Nothing to return, then" << endm ;
+    }
+
+  }
+
+  return 1 ;
 
 }
 
@@ -276,12 +313,15 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 
 Int_t St_pp2pp_Maker::MakeClusters() {
 
-  const Int_t MAX_Cls_L = 5 ;
-  const Int_t MIN_Charge = 20 ;
+  //  const Int_t MAX_Cls_L = 5 ;
+  //  const Int_t MIN_Charge = 20 ;
+  //                                               EHI        EHO        EVU        EVD          WHI          WHO        WVD       WVU
+  const short orientations[MAXCHAIN*MAXSEQ] = {-1,1,-1,1,  1,-1,1,-1,  1,1,1,1, -1,-1,-1,-1,  -1,-1,-1,-1,  1,1,1,1,  -1,1,-1,1, 1,-1,1,-1 };
+
   Bool_t is_candidate_to_store ;
 
   Int_t NCluster_Length ;
-  Double_t ECluster, POStimesE ;
+  Double_t ECluster, POStimesE, position, offset ;
 
   // For inserting into StEvent
   pp2ppColl = new StRpsCollection(); 
@@ -305,6 +345,15 @@ Int_t St_pp2pp_Maker::MakeClusters() {
       else if ( i==6 || i==7 )
 	pp2ppColl->romanPot(i)->plane(j)->setZ(58.496) ; 
       
+      if ( offset_table )
+	offset = offset_table[0].rp_offset_plane[4*i+j]/1000. ; // all in m
+      else
+	offset = -9999. ;
+      //      cout << "Offsets : " <<  i << " " << j << " " << offset_table[0].rp_offset_plane[4*i+j] << endl ; 
+
+      pp2ppColl->romanPot(i)->plane(j)->setOffset( offset ) ; 
+
+      pp2ppColl->romanPot(i)->plane(j)->setOrientation( orientations[4*i+j] ) ;
 
       it = (validhits[i][j]).begin() ;
 
@@ -341,10 +390,14 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	    oneStCluster->setEnergy(ECluster);
 	    oneStCluster->setLength(NCluster_Length);
 	    if ( oneStCluster->planeId() % 2 == 0 ) // A or C : pitch_4svx = 0.00974 cm
-	      oneStCluster->setPosition(POStimesE/ECluster*0.00974);
+	      position = POStimesE/ECluster*9.74E-5 ; // in m
 	    else                                    // B or D : pitch_6svx = 0.01050 cm
-	      oneStCluster->setPosition(POStimesE/ECluster*0.01050);
+	      position = POStimesE/ECluster*1.050E-4; // in m
+
+	    oneStCluster->setPosition(position); // in m
 	   
+	    oneStCluster->setXY( offset + orientations[4*i+j]*position ) ; // all in m
+
 	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
 
           //	  } 

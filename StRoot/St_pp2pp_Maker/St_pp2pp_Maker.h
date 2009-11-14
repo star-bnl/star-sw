@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.5 2009/11/11 14:44:10 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.6 2009/11/14 16:07:48 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -22,6 +22,7 @@ class TGenericTable;
 class StEvent;
 class StRpsCollection;
 
+class pp2ppOffset_st;
 class pp2pp_t;
 
 class St_pp2pp_Maker : public StRTSBaseMaker {
@@ -46,8 +47,6 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   Double_t  pedave[MAXSEQ][MAXCHAIN][MAXSVX][MAXSTRIP] ;
   Double_t  pedrms[MAXSEQ][MAXCHAIN][MAXSVX][MAXSTRIP] ;
-  //  Double_t  *pedave[MAXSEQ][MAXCHAIN][MAXSVX] ;
-  //  Double_t  *pedrms[MAXSEQ][MAXCHAIN][MAXSVX] ;
 
   Int_t fLast_svx;
   Int_t fLast_chain;
@@ -55,6 +54,9 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   string pedestal_perchannel_filename ;
   Int_t read_pedestal_perchannel() ;
+  Int_t read_offset_perplane() ;
+  pp2ppOffset_st *offset_table ;
+
   //  Int_t nevt_count ;
 
   Bool_t LDoCluster; // to do clustering or not
@@ -80,7 +82,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.5 2009/11/11 14:44:10 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.6 2009/11/14 16:07:48 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
