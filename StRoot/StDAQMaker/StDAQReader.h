@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.34 2008/01/29 01:55:56 fine Exp $
+ * $Id: StDAQReader.h,v 1.36 2008/11/26 15:53:12 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.36  2008/11/26 15:53:12  fine
+ * fix the CPP flags for StDAQReader.h
+ *
+ * Revision 1.35  2008/11/25 21:42:53  fine
+ * preparing  DAQ maker for DAQ_READER
+ *
  * Revision 1.34  2008/01/29 01:55:56  fine
  * Add extra CPP flag to simply the Conscript
  *
@@ -129,7 +135,14 @@ class StTRGReader ;
 class StSVTReader ;
 class StSCReader  ;
 class TDataSet    ;
-class evpReader   ; // new  2007 DAQ file reader
+
+#ifdef NEW_DAQ_READER
+  class daqReader;
+  typedef daqReader evpReader;
+#else
+  class evpReader   ; // new  2007 DAQ file reader
+#endif
+
 #ifndef __CINT__
 
 struct RICH_Reader;

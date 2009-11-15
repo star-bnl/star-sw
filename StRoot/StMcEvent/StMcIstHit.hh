@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.8 2006/10/23 21:13:46 calderon Exp $
+ * $Id: StMcIstHit.hh,v 2.9 2009/02/06 15:38:13 fisyak Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.9  2009/02/06 15:38:13  fisyak
+ * Jonathan: decoding for upgr15 geometry
+ *
  * Revision 2.8  2006/10/23 21:13:46  calderon
  * Updates to layer(), wafer() and side() methods from Willie L.
  *
@@ -65,10 +68,8 @@ public:
     unsigned long layer() const; // 
     unsigned long ladder() const; // 
     
-    // Willie: Added function wafer() to return wafer number (1-10,1-13 for layers 1,2)
-    // and side() to return ladder side (1=inner,2=outer)
-    unsigned long wafer() {return ((mVolumeId/100)%20);}
-    unsigned long side() {return (mVolumeId%10);} //1=inner; 2=outer;
+    // Willie: Added function wafer() to return wafer number (1-12)
+    unsigned long wafer() const;
     virtual void Print(Option_t *option="") const; // *MENU* 
     
 private:

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgReader.h,v 1.5 2008/08/28 04:57:08 tai Exp $
+// $Id: StjTrgReader.h,v 1.3 2008/08/18 06:20:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGREADER_H
 #define STJTRGREADER_H
@@ -7,8 +7,6 @@
 #include "StjTreeReader.h"
 
 #include <Rtypes.h>
-
-#include <vector>
 
 class StjTrgReader : public StjTreeReader {
 
@@ -21,7 +19,7 @@ public:
   int              eventId()     const { return __eventId;       }
   bool             hard()        const { return __hard;          }
   bool             soft()        const { return __soft;          }
-  bool             passed()      const { return __passed;          }
+  bool             pass()        const { return __pass;          }
   double           prescale()    const { return __prescale;      }
   double           vertexZ()     const { return __vertexZ;       }
 
@@ -72,7 +70,7 @@ private:
   int              __eventId;
   bool             __hard;
   bool             __soft;
-  bool             __passed;
+  bool             __pass;
   double           __prescale;
   double           __vertexZ;
 

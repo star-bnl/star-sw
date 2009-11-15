@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.28 2008/11/07 22:37:55 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.29 2008/12/02 19:31:46 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.29  2008/12/02 19:31:46  mattheww
+// fixed bug in BPRS swap logic for run 8+
+//
 // Revision 1.28  2008/11/07 22:37:55  mattheww
 // update date for bprs swap fix
 //
@@ -640,7 +643,7 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         mDecoder->GetTowerBugCorrectionShift(id,shift);
         id+=shift;
     }
-    if(det==BPRS && mPsdMapBug2 && mDate<20090101)
+    if(det==BPRS && mPsdMapBug2 && mDate<20071101)
     {
         Int_t shift = 0;
         mDecoder->GetPreshowerBugCorrectionShift(id,shift);

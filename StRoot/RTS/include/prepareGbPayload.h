@@ -155,7 +155,7 @@ public:
     memcpy(paydesc, evt, sizeof(EvtDescData));
 
     pay->eventNumber = l2h32(eventNumber);
-    pay->token = l2h16(token);
+    pay->token = l2h32(token);
 
     // The rest should be little endian 
     pay->L1summary[0] = l2h32(l1trg);

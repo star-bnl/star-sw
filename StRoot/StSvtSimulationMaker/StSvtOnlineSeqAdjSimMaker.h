@@ -115,7 +115,10 @@ private:
   void  WriteMask();
   void  WriteSequence(int anode,int begins, int ends, int NumOfHigh);
   void  FillRawData();
-  
+ public:
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtOnlineSeqAdjSimMaker.h,v 1.5 2009/01/28 23:03:42 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ 
  ClassDef(StSvtOnlineSeqAdjSimMaker,1)
 };
 

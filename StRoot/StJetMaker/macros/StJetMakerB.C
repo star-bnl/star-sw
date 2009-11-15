@@ -38,7 +38,6 @@
 #include <StjTrgBEMCJetPatchTowerIdMap2005.h>
 
 #include <StjJetListWriter.h>
-#include <StjDijetListWriter.h>
 
 #include <StjTrackPrint.h>
 #include <StjTowerEnergyPrint.h>
@@ -110,7 +109,6 @@ private:
 
   StjFormDijet _formDijet;
 
-  StjDijetListWriter* _dijetListWriter;
 
 
   StjTrg* _trgBJP1;
@@ -165,7 +163,6 @@ private:
 
     _jetCut2.addCut(new StjJetCutDetectorEta(0.2, 0.8));
 
-    _dijetListWriter = new StjDijetListWriter("dijets", _file);
 
     return kStOk;
   }
@@ -205,13 +202,20 @@ private:
 
     _jetListWriter->Fill(jetList, fourList);
 
+    for(size_t i = 0; i !=  _trgBJP2->jetPatches().size(); ++i) {
+      cout << "JP " << _trgBJP2->jetPatches()[i] << endl;
+    }
+    for(size_t i = 0; i !=  _trgBHT2->towers().size(); ++i) {
+      cout << "HT " << _trgBHT2->towers()[i] << endl;
+    }
+
     jetList = _jetCut2(jetList);
 
     StjDijetList dijetList = _formDijet(jetList);
 
-    dijetprint(dijetList);
+    //    jetprint(jetList);
 
-    _dijetListWriter->Fill(dijetList);
+    dijetprint(dijetList);
 
     return kStOk;
   }
@@ -219,8 +223,6 @@ private:
   Int_t Finish()
   {
     _jetListWriter->Finish();
-
-    _dijetListWriter->Finish();
 
     return kStOk;
   }

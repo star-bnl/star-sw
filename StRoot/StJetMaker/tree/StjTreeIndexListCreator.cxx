@@ -1,11 +1,10 @@
-// $Id: StjTreeIndexListCreator.cxx,v 1.4 2008/09/07 17:09:30 tai Exp $
+// $Id: StjTreeIndexListCreator.cxx,v 1.2 2008/08/11 01:28:41 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTreeIndexListCreator.h"
 
 #include "StjTreeIndexList.h"
 
 #include <TTree.h>
-#include <TDirectory.h>
 
 #include <set>
 
@@ -33,10 +32,10 @@ StjTreeIndexList StjTreeIndexListCreator::getIndexListOfRunsPassedFor(const char
   Int_t indexMajor, indexMinor, passed;
   tree->SetBranchAddress(_indexMajorName.c_str(), &indexMajor);
   tree->SetBranchAddress(_indexMinorName.c_str(), &indexMinor);
-  // tree->SetBranchAddress("passed", &passed);
+  tree->SetBranchAddress("passed", &passed);
   for(Long64_t i = 0; i < tree->GetEntries(); ++i) {
     if(tree->GetEntry(i) <= 0) continue;
-    // if(!passed) continue;
+    if(!passed) continue;
     ret.push_back(StjTreeIndex(indexMajor, indexMinor));
   }
   return ret;
