@@ -283,7 +283,7 @@ void StBemcTriggerSimu::InitRun(int runnumber){
   //online replaced this with Db call in getPed()
   HT_FEE_Offset=mDbThres->GetHtFEEbitOffset(year);
   
-  for ( int tpid=0;tpid<kNPatches;tpid++) numMaskTow[tpid]=0;
+  //for ( int tpid=0;tpid<kNPatches;tpid++) numMaskTow[tpid]=0;
 
   if (year >= 2009) {
     mAllTriggers.clear();
