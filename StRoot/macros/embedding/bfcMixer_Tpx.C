@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.4 2009/02/23 20:58:03 fisyak Exp $
+// $Id: bfcMixer_Tpx.C,v 1.5 2009/11/15 23:49:27 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -18,27 +18,31 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
 		  const Char_t *tagfile="/star/rcf/test/embedding/ppProduction2008/2008/070/st_physics_adc_9070006_raw_1410001.tags.root",
 		  const Double_t pt_low=0.1,
 		  const Double_t pt_high=5.0,
-                  const Double_t eta_low=-1.0,
-                  const Double_t eta_high=1.0,
+                  const Double_t eta_low=-1.5,
+                  const Double_t eta_high=1.5,
 		  const Int_t pid=9,
 		  const Double_t mult=0.05,
-                  const Char_t *prodName = "P08icpp") {
+                  const Char_t *prodName = "P08iepp") {
   // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
-  TString prodP08icpp("DbV20080712,pp2008,ITTF,Iana,OSpaceZ2,OGridLeak3D,beamLine");
-  TString prodP08icAuAu9("DbV20080709 P2008 ITTF");
-  TString prodP08icdAu("DbV20080712 P2008 ITTF Iana OSpaceZ2 OGridLeak3D beamLine");
+  TString prodP08iepp("DbV20081117 B2008a ITTF IAna ppOpt l3onl emcDY2 fpd ftpc trgd ZDCvtx NosvtIT NossdIT Corr4 OSpaceZ2 OGridLeak3D VFMCE -hitfilt");
+  TString prodP08icpp("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine,VFMCE,TpxClu -VFPPV -hitfilt");
+  TString prodP08icAuAu9("DbV20080709 P2008 ITTF VFMCE -hitfilt");
+  TString prodP08icAuAu200("DbV20070101 P2008 ITTF VFMCE -hitfilt");  
+  TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpxClu -VFMinuit -hitfilt");
   TString geomP08ic("ry2008");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
   chain2Opt += " "; chain2Opt += geomP08ic;
   if (prodName == "P08icpp") {   TString chain3Opt = prodP08icpp; }
+  else if (prodName == "P08iepp") { TString chain3Opt = prodP08iepp; }
   else if (prodName == "P08icAuAu9") {   TString chain3Opt = prodP08icAuAu9; }
   else if (prodName == "P08icdAu") {   TString chain3Opt = prodP08icdAu; }
+  else if (prodName == "P08icAuAu200") { TString chain3Opt = prodP08icAuAu200;}
   else {
     cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
-  chain3Opt += ",TpcMixer,TpxClu,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
+  chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
   chain3Opt += ","; chain3Opt += geomP08ic;
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -61,7 +65,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
       cout << "Cannot find Trs in chain2" << endl;
       return;
     }
-    trsMk->setNormalFactor(2.67);
+    trsMk->setNormalFactor(1.32);
   }
   //________________________________________________________________________________
   //  gSystem->Load("StFtpcMixerMaker");
@@ -78,7 +82,14 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   Chain->cd();
   //________________________________________________________________________________
   StTpcMixerMaker  *mixer = (StTpcMixerMaker *) chain3->Maker("TpcMixer");
-  mixer->SetInput("Input1","TpxRaw/.data/Event");
+  if( prodName == "P08icAuAu200")
+	{
+	  mixer->SetInput("Input1","MixerEvent");
+	}
+  else
+	{
+	  mixer->SetInput("Input1","TpxRaw/.data/Event");
+        }
   mixer->SetInput("Input2","Trs/.const/Event");
   Chain->cd();
   //________________________________________________________________________________
@@ -91,6 +102,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   // embedded particle set
   StPrepEmbedMaker *embMk = (StPrepEmbedMaker *) Chain->Maker("PrepEmbed");
   if (! embMk) return;
+  cout << "bfcMixer: Setting PID: "<<pid<<endl;
   embMk->SetTagFile(tagfile);
   //            pTlow,ptHigh,etaLow,etaHigh,phiLow,phiHigh
   embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185); 
