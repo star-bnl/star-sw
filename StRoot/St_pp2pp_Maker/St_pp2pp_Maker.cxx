@@ -389,10 +389,11 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	    oneStCluster->setEnergy(ECluster);
 	    oneStCluster->setLength(NCluster_Length);
-	    if ( oneStCluster->planeId() % 2 == 0 ) // A or C : pitch_4svx = 0.00974 cm
+	    if ( (j % 2) == 0 ) // A or C : pitch_4svx = 0.00974 cm
 	      position = POStimesE/ECluster*9.74E-5 ; // in m
-	    else                                    // B or D : pitch_6svx = 0.01050 cm
+	    else                // B or D : pitch_6svx = 0.01050 cm
 	      position = POStimesE/ECluster*1.050E-4; // in m
+
 
 	    oneStCluster->setPosition(position); // in m
 	   
@@ -400,7 +401,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
 
-          //	  } 
+	  //	} 
 	  /*
 	  else
 	    cout << "NOT Stored ! seq/chain : " << i+1 << "/" << j 
