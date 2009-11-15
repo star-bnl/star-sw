@@ -33,8 +33,8 @@ public:
   UInt_t     	GetUTime() 	  const ;
   Int_t     	GetDate()  	  const {return mEventTime.GetDate();};
   Int_t     	GetTime()  	  const {return mEventTime.GetTime();};
-  TDatime       GetDateTime()     const {return mEventTime;};
-  TDatime       GetProdDateTime() const {return mProdTime;};
+  const TDatime  &GetDateTime()    const {return mEventTime;};
+  const TDatime &GetProdDateTime() const {return mProdTime;};
   Int_t     	GetIventNumber()  const {return mIventNumber;};
   Int_t     	GetEventSize()    const {return mEventSize;};
   Int_t     	GetEventNumber()  const {return mEventNumber;};
