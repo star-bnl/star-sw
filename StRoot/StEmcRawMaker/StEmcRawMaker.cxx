@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.17 2008/03/27 19:54:16 genevb Exp $
+// $Id: StEmcRawMaker.cxx,v 1.16 2007/12/26 17:47:35 kocolosk Exp $
 
 #include <math.h>
 
@@ -62,20 +62,6 @@ Int_t StEmcRawMaker::Init()
     if(IAttr("BEmcCheckStatus")) {
         LOG_INFO << "StEmcRawMaker will suppress hits from towers with bad status" << endm;
         mBemcRaw->getControlTable()->CheckStatus[0] = 1;
-    }
-
-    TString EmcOpts = SAttr(".gopt.emc");
-    if (EmcOpts.IsHex()) {
-        Int_t optionMap[] = {0, 2, 4, 4, 1, 3, 5, 5};
-        controlADCtoE_st* tab = mBemcRaw->getControlTable();
-        for(Int_t i=0; i<MAXDETBARREL; i++) {
-            Int_t optI;
-            TString optIs = EmcOpts(optionMap[i],1);
-            sscanf(optIs.Data(),"%x",&optI); // convert hex to decimal
-            tab->CheckStatus[i] = (optI>>0) & 1;
-            tab->CutOffType[i] = (optI>>1) & 1;
-            // etc.
-        }
     }
 
     mBemcRaw->initHisto();
@@ -312,9 +298,6 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
-// Revision 1.17  2008/03/27 19:54:16  genevb
-// Utilize new BFC option for GoptEMC for controlADCtoE table
-//
 // Revision 1.16  2007/12/26 17:47:35  kocolosk
 // added support for "BEmcCheckStatus" attribute to suppress hot towers in fastOffline
 //

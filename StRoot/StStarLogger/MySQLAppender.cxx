@@ -183,7 +183,7 @@ void MySQLAppender::close()
 	this->closed = true;
 }
 //_________________________________________________________________________
-static void ReplaceVariable(TString &string, const char *var)
+void ReplaceVariable(TString &string, const char *var)
 {
 // replace the $VAR with its value if any
    TString spec;

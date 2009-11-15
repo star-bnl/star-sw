@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.72 2008/03/27 00:11:23 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.71 2007/07/12 19:20:41 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,10 +11,6 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
- * Revision 1.72  2008/03/27 00:11:23  jhthomas
- * Modify previous magfield changes and set 'zero' field to ~1 gauss in a more robust way.
- * Add SpaceChargeEWRatio and appropriate functions that allow us to calibrate d-au collisions.
- *
  * Revision 1.71  2007/07/12 19:20:41  fisyak
  * Account that StDetectorDbSpaceChargeR2 is not inherit from StDetectorDbSpaceCharge anymore
  *
@@ -336,7 +332,7 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
   GetTPCVoltages()      ;    // Get the TPC Voltages from the DB
   GetOmegaTau ()        ;    // Get Omega Tau parameters
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
-  GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB and EWRatio
+  GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   GetGridLeak()         ;    // Get the parameters that describe the gating grid leaks
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
@@ -353,7 +349,8 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
   fOmegaTau      =  0   ;        // Do not get OmegaTau out of the DB      - use defaults in CommonStart
   ManualSpaceCharge(0)  ;        // Do not get SpaceCharge out of the DB   - use defaults inserted here.
-  ManualSpaceChargeR2(0,1) ;     // Do not get SpaceChargeR2 out of the DB - use defaults inserted here, SpcChg and EWRatio
+  ManualSpaceChargeR2(0);        // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
+  //ManualSpaceChargeR2(0.01) ;  // JT test - Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
   ManualShortedRing(0,0,0,0,0) ; // No shorted rings
   fGridLeak      =  0   ;        // Do not get Grid Leak data from the DB  - use defaults in CommonStart
   CommonStart( mode )   ;        // Read the Magnetic and Electric Field Data Files, set constants
@@ -372,12 +369,8 @@ void StMagUtilities::SetDb ( StTpcDb* dbin , TDataSet* dbin2 )
 void StMagUtilities::GetMagFactor () 
 { 
   St_MagFactor *fMagFactor  =  (St_MagFactor *) thedb2->Find("MagFactor");  assert(fMagFactor) ;
-  gFactor        =  (*fMagFactor)[0].ScaleFactor ;        // Set the magnetic field scale factor
-  //if (TMath::Abs(gFactor) < 1.e-3) gFactor = 1.e-3;     // JT ... This is incorrect.  Don't do it this way.  The DB returns
-                                                          // 1.0 for full field and 0.5 for half field.  These are relative numbers
-                                                          // and are not field values in kGauss or Tesla ... so beware.
-                                                          // See Interpolate2DBField and Interpolate3DBField for a better way to
-                                                          // achieve the same goal of protecting against divide by zero with 0.0 field. 
+  gFactor        =  (*fMagFactor)[0].ScaleFactor ;         // Set the magnetic field scale factor
+  if (TMath::Abs(gFactor) < 1.e-3) gFactor = 1.e-3;
 }
 
 void StMagUtilities::GetTPCParams ()  
@@ -409,7 +402,6 @@ void StMagUtilities::GetSpaceChargeR2 ()
 { 
   fSpaceChargeR2 =  StDetectorDbSpaceChargeR2::instance() ;  
   SpaceChargeR2  =  fSpaceChargeR2->getSpaceChargeCoulombs((double)gFactor) ;
-  SpaceChargeEWRatio = fSpaceChargeR2->getEWRatio() ;
 }
 
 void StMagUtilities::GetShortedRing ()
@@ -632,7 +624,6 @@ void StMagUtilities::CommonStart ( Int_t mode )
   Const_1    =  TensorV1*OmegaTau / ( 1. + TensorV1*TensorV1*OmegaTau*OmegaTau ) ;
   Const_2    =  TensorV2*TensorV2*OmegaTau*OmegaTau / ( 1. + TensorV2*TensorV2*OmegaTau*OmegaTau ) ;
 
-  cout << "StMagUtilities::BField        =  " << B[2] << " kGauss at (0,0,0)" <<  endl ; 
   cout << "StMagUtilities::DriftVel      =  " << StarDriftV << " cm/microsec" <<  endl ; 
   cout << "StMagUtilities::TPC_Z0        =  " << TPC_Z0 << " cm" << endl ; 
   cout << "StMagUtilities::TensorV1+V2   =  " << TensorV1 << " " << TensorV2 << endl ; 
@@ -640,8 +631,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   cout << "StMagUtilities::XTWIST        =  " << XTWIST << " mrad" << endl ;
   cout << "StMagUtilities::YTWIST        =  " << YTWIST << " mrad" << endl ;
   cout << "StMagUtilities::SpaceCharge   =  " << SpaceCharge << " Coulombs/epsilon-nought" << endl ;
-  cout << "StMagUtilities::SpaceChargeR2 =  " << SpaceChargeR2 << " Coulombs/epsilon-nought" << "  EWRatio = " 
-                                              << SpaceChargeEWRatio << endl ;
+  cout << "StMagUtilities::SpaceChargeR2 =  " << SpaceChargeR2 << " Coulombs/epsilon-nought" << endl ;
   cout << "StMagUtilities::IFCShift      =  " << IFCShift << " cm" << endl ;
   cout << "StMagUtilities::CathodeV      =  " << CathodeV << " volts" << endl ;
   cout << "StMagUtilities::GG            =  " << GG << " volts" << endl ;
@@ -1589,9 +1579,6 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   Many different charge distributions are hidden in the comments of the code.  All candidate distributions
   have been integrated over Z to simulate the linear increase of space charge in Z due to the slow 
   drift velocity of the ions.  Electrostatic equations solved by relaxtion.  
-  Note that on 3/26/2008, we added a new element to the DB so that the space charge in the East and
-  West halves of the TPC can be different by a constant factor.  The constant is called "SpaceChargeEWRatio"
-  and is greater than 1.0 when there is more charge in the East half to the TPC.
   Original work by H. H. Wieman, N. Smirnov, and J. Thomas 
 */
 void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xprime[] )
@@ -1613,7 +1600,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
       cout << "StMagUtilities::UndoSpace  Please wait for the tables to fill ... ~30 seconds" << endl ;
       TMatrix  ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
       TMatrix  ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
-      Float_t  Rlist[ROWS], Zedlist[COLUMNS] ;
+      Float_t   Rlist[ROWS], Zedlist[COLUMNS] ;
       //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.      
 
       for ( Int_t j = 0 ; j < COLUMNS ; j++ )  
@@ -1648,19 +1635,15 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	      // Charge(i,j) = zterm / ( ( OFCRadius - IFCRadius ) * Radius ) ; 
 	      // Next line is Wiemans fit to the HiJet Charge distribution; then integrated in Z due to drifting ions
 	      Charge(i,j) = zterm * ( 3191/(Radius*Radius) + 122.5/Radius - 0.395 ) / 15823 ;
-	      // Next line can be used in addition to the previus "Wieman" distribution in order to do d-Au assymetric distributions
-	      // JT Test Charge(i,j) *= ( 1.144 + 0.144*zed/TPC_Z0 ) ; // Note that this does the Au splash side ... not the deuteron side
-	      // JT Test - Do not use the previous line for production work.  It is only for testing purposes.
-              // JT Test - Real d-Au assymetries should be done by pulling d-Au spacecharge factors from the DB.
-	      // Next line is for 1/R**2 charge deposition in the TPC; then integrated in Z due to drifting ions
+	      // Next line is for 1/R**2 charge deposition in the TPC; then integrated in Z due to drifting iones
 	      // Charge(i,j) = zterm / ( TMath::Log(OFCRadius/IFCRadius) * ( Radius*Radius ) ) ; 
-	      // Next line is for 1/R**3 charge deposition in the TPC; then integrated in Z due to drifting ions
+	      // Next line is for 1/R**3 charge deposition in the TPC; then integrated in Z due to drifting iones
 	      // Charge(i,j) = zterm / ( ( 1/IFCRadius - 1/OFCRadius) * ( Radius*Radius*Radius ) ) ; 
 	      // Next few lines are for a 1/R**N distribution where N may be any real number but not equal to 2.0
 	      // Float_t N = 1.65 ;  // 1.65 is a fit to real charge distribution by GVB on 11/4/2004
 	      // Charge(i,j) = zterm * (2-N) /
 	      //            ( ( TMath::Power(OFCRadius,2-N) - TMath::Power(IFCRadius,2-N) ) * TMath::Power(Radius,N) ) ;
-	    } // All cases normalized to have same total charge as the Uniform Charge case == 1.0 * Volume of West End of TPC
+	    } // All cases normalized to have same total charge as the Uniform Charge case == 1.0
 	}
 
       PoissonRelaxation( ArrayV, Charge, EroverEz, ROWS, COLUMNS, ITERATIONS ) ;
@@ -1704,19 +1687,11 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   // Need to reset the instance every hit.  May be slow, but there's no per-event hook.
   if (fSpaceChargeR2) GetSpaceChargeR2(); // need to reset it. 
 
-  // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC 
+  // Subtract to Undo the distortions
   if ( r > 0.0 ) 
     {
-      if ( x[2] < 0.0 ) 
-	{
-	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
-      else
-	{
-	  phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
+      phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   Xprime[0] = r * TMath::Cos(phi) ;
@@ -1875,7 +1850,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 	      shortEr[i][j] = IntegralOverZ ;
  	    }
 	}
-      DoOnce = false ;     // Note reversed logic compared to other methods in StMagUtilies
+      DoOnce = false ;     // Note reversed logic compared to other methods in StMabUtilies
     }
   
   if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
@@ -2179,9 +2154,7 @@ void StMagUtilities::Interpolate2DBfield( const Float_t r, const Float_t z, Floa
   Float_t fscale ;
 
   fscale = 0.001*gFactor*gRescale ;                 // Scale STAR maps to work in kGauss, cm
-  if ( TMath::Abs(fscale) < 4e-7 ) fscale = 4e-7 ;  // Zero field is unphysical, so set it to Earths Field (~1 gauss)
-                                                    // Note that this assumes that the 1/2 field (0.25 Tesla) map
-                                                    // is the reference map for the scaledown.  See ReadField().
+  if ( TMath::Abs(fscale) < 1e-7 ) fscale = 1e-7 ;  // Zero field is unphysical, set it to Earths Field (~0.25 gauss)
 
   const   Int_t ORDER = 1  ;                        // Linear interpolation = 1, Quadratic = 2        
   static  Int_t jlow=0, klow=0 ;                            
@@ -2213,7 +2186,7 @@ void StMagUtilities::Interpolate3DBfield( const Float_t r, const Float_t z, cons
   Float_t fscale ;
 
   fscale = 0.001*gFactor*gRescale ;                 // Scale STAR maps to work in kGauss, cm
-  if ( TMath::Abs(fscale) < 4e-7 ) fscale = 4e-7 ;  // Zero field is unphysical, set it to Earths Field (~1 gauss)
+  if ( TMath::Abs(fscale) < 1e-7 ) fscale = 1e-7 ;  // Zero field is unphysical, set it to Earths Field (~0.25 gauss)
 
   const   Int_t ORDER = 1 ;                         // Linear interpolation = 1, Quadratic = 2   
   static  Int_t ilow=0, jlow=0, klow=0 ;
@@ -3080,7 +3053,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    // Temporarily overide settings for space charge data (only)
    StDetectorDbSpaceChargeR2* tempfSpaceChargeR2 = fSpaceChargeR2 ;
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
-   ManualSpaceChargeR2(sc,SpaceChargeEWRatio); // Set a custom value of the spacecharge parameter but keep previous E/W ratio
+   ManualSpaceChargeR2(sc); // Set a custom value of the spacecharge parameter
    
    BField(x,B) ;
    ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
@@ -3291,8 +3264,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    // Temporarily overide settings for space charge data (only)
    StDetectorDbSpaceChargeR2* tempfSpaceChargeR2 = fSpaceChargeR2 ;
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
-   ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
-                                                 // but keep EWRatio that was previously defined
+   ManualSpaceChargeR2(0.01);// Set "medium to large" value of the spacecharge parameter for tests, not critical.
+     
    Float_t x[3] = { 0, 0, 0 } ;
    BField(x,B) ;
    ChargeB  = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
@@ -3506,8 +3479,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    // Temporarily overide settings for space charge data (only)
    StDetectorDbSpaceChargeR2* tempfSpaceChargeR2 = fSpaceChargeR2 ;
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
-   ManualSpaceChargeR2(0.01,SpaceChargeEWRatio);   // Set "medium to large" value of the spacecharge parameter for tests, not critical.
-                                                   // but keep EWRatio that was previously defined 
+   ManualSpaceChargeR2(0.01);    // Set "medium to large" value of the spacecharge parameter for tests, not critical.
+     
    Float_t x[3] = { 0, 0, 0 } ;  // Get the B field at the vertex 
    BField(x,B) ;
    ChargeB = Charge * TMath::Sign((int)1,(int)(B[2]*1000)) ;
@@ -3753,19 +3726,11 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
   // Get Space Charge 
   if (fSpaceChargeR2) GetSpaceChargeR2();            // need to reset it each event 
 
-  // Subtract to Undo the distortions and apply the EWRatio factor to the data on the East end of the TPC
+  // Subtract to Undo the distortions
   if ( r > 0.0 ) 
     {
-      if ( x[2] < 0.0 )
-	{
-	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
-      else
-	{
-	  phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
+      phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   Xprime[0] = r * TMath::Cos(phi) ;
@@ -3937,19 +3902,11 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   if (fSpaceChargeR2) GetSpaceChargeR2(); // need to reset it. 
 
-  // Subtract to Undo the distortions and apply the EWRatio factor to the data on the East end of the TPC
+  // Subtract to Undo the distortions
   if ( r > 0.0 ) 
     {
-      if ( x[2] < 0.0 ) 
-	{
-	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
-      else
-	{
-	  phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
+      phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   Xprime[0] = r * TMath::Cos(phi) ;

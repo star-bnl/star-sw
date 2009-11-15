@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.186 2008/04/03 20:04:05 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.187 2008/04/08 14:22:15 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.187  2008/04/08 14:22:15  fisyak
+// remove redundant includes
+//
 // Revision 1.186  2008/04/03 20:04:05  fisyak
 // Straighten out DB access via chairs
 //
@@ -379,9 +382,6 @@ More detailed: 				<br>
 #include "StiUtilities/StiDebug.h"
 #include "StiUtilities/StiPullEvent.h"
 #include "TDataSet.h"
-#include "tables/St_KalmanTrackFinderParameters_Table.h"
-#include "tables/St_KalmanTrackFitterParameters_Table.h"
-#include "tables/St_HitError_Table.h"
 #include "TGeometry.h"
 #include "Sti/StiTimer.h"
 #include "StiDetectorVolume.h"

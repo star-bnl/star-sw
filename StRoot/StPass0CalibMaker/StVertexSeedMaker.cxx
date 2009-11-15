@@ -30,13 +30,14 @@
 #include "TFile.h"
 #include "TVirtualFitter.h"
 #include "TNtuple.h"
+#include "TEventList.h"
 #include "TArrayF.h"
 #include "StTree.h"
 #include "TMath.h"
 //_____________________________________________________________________________
 // C variables and functions for fit/minimization
 //_____________________________________________________________________________
-static TArrayF xVert, yVert, zVert, multA;
+static TArrayF xVert, yVert, zVert, multA, exVert, eyVert;
 int nverts,nsize;
 Double_t funcX(float z,Double_t *par) {
   Double_t x = par[0] + par[1]*z;
@@ -49,21 +50,29 @@ Double_t funcY(float z,Double_t *par) {
 void fnch(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
   //calculate chisquare
   double chisq = 0;
-  double delta_sq;
-  double error_sq;
   for (int i=0;i<nverts; i++) {
-    // Error1 set such that 5 tracks => ~7mm, proportional to 1/::sqrt(mult)
-    // This was determined by trying to get the chisq/dof distribution
-    // to peak near 1.0
-    //                              =>  Error1   = (0.7cm) / ::sqrt(mult/5)
-    //                              =>  Error1^2 = (2.45) cm^2 / mult
-    // Beam spot size (sigma) Error2 ~= 0.04 cm (400 microns)
-    //                              =>  Error2^2 = 0.0016 cm^2
-    // The total error should be ::sqrt(Error1^2 + Error2^2)
-    error_sq = 0.0016 + (2.45 / multA[i]); 
-    delta_sq = TMath::Power(xVert[i]-funcX(zVert[i],par),2) +
-               TMath::Power(yVert[i]-funcY(zVert[i],par),2);
-    chisq += (delta_sq/error_sq);
+    if (exVert[i]==0) {
+
+      double delta_sq, error_sq;
+      // Error1 set such that 5 tracks => ~7mm, proportional to 1/::sqrt(mult)
+      // This was determined by trying to get the chisq/dof distribution
+      // to peak near 1.0
+      //                              =>  Error1   = (0.7cm) / ::sqrt(mult/5)
+      //                              =>  Error1^2 = (2.45) cm^2 / mult
+      // Beam spot size (sigma) Error2 ~= 0.04 cm (400 microns)
+      //                              =>  Error2^2 = 0.0016 cm^2
+      // The total error should be ::sqrt(Error1^2 + Error2^2)
+      error_sq = 0.0016 + (2.45 / multA[i]); 
+      delta_sq = TMath::Power(xVert[i]-funcX(zVert[i],par),2) +
+                 TMath::Power(yVert[i]-funcY(zVert[i],par),2);
+      chisq += (delta_sq/error_sq);
+
+    } else {
+
+      chisq += TMath::Power((xVert[i]-funcX(zVert[i],par))/exVert[i],2) +
+               TMath::Power((yVert[i]-funcY(zVert[i],par))/eyVert[i],2);
+
+    }
   }
   f = chisq;
 }
@@ -72,14 +81,18 @@ void setArraySize(int n) {
   yVert.Set(n);
   zVert.Set(n);
   multA.Set(n);
+  exVert.Set(n);
+  eyVert.Set(n);
   nsize = n;
 }
-void addVert(float x, float y, float z, float m) {
+void addVert(float x, float y, float z, float m, float ex, float ey) {
   if (nverts >= nsize) setArraySize(nsize*2);
   xVert[nverts] = x;
   yVert[nverts] = y;
   zVert[nverts] = z;
   multA[nverts] = m;
+  exVert[nverts] = ex;
+  eyVert[nverts] = ey;
   nverts++;
 }
 //_____________________________________________________________________________
@@ -111,9 +124,9 @@ void StVertexSeedMaker::Reset() {
   zVertexMin = -100.0;
   r2VertexMax = 15.0;
   nverts = 0;
+  Clear("");
   xguess = 0;
   yguess = 0;
-  zvertex = -999.0;
   HIST_MIN = -3.0;
   HIST_MAX =  3.0;
   xdist->Reset();
@@ -121,7 +134,7 @@ void StVertexSeedMaker::Reset() {
   xerr->Reset();
   yerr->Reset();
   if (resNtuple) delete resNtuple;
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:ex:ey");
   date = 0;
   time = 0;
   fill = -1;
@@ -136,7 +149,6 @@ void StVertexSeedMaker::Reset() {
   a[2]   = 0.0;
   a[3] = 0.0;
   chi = 0.0;
-  weight = 0.0;
 }
 //_____________________________________________________________________________
 StVertexSeedMaker::~StVertexSeedMaker(){
@@ -156,6 +168,8 @@ void StVertexSeedMaker::Clear(Option_t *option){
   zvertex = -999.0;
   yvertex = -999.0; 
   xvertex = -999.0; 
+  exvertex = 0;
+  eyvertex = 0;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::Make(){
@@ -199,9 +213,9 @@ Int_t StVertexSeedMaker::Make(){
     yerr ->Fill(yvertex-yguess);
     eventNumber = (float)GetEventNumber();
     resNtuple->Fill(eventNumber,xvertex,yvertex,zvertex,mult,trig,
-                    (float) run,(float) fill,zdc,rank,(float) itpc,(float) otpc);
-    addVert(xvertex,yvertex,zvertex,mult);
-    weight += mult; // Fixed at 50
+                    (float) run,(float) fill,zdc,rank,
+                    (float) itpc,(float) otpc,exvertex,eyvertex);
+    addVert(xvertex,yvertex,zvertex,mult,exvertex,eyvertex);
   }
 
   return kStOk;
@@ -241,6 +255,7 @@ Bool_t StVertexSeedMaker::CheckTriggers() {
 //_____________________________________________________________________________
 Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
   // Determine if trigger id is among valid set
+  if (!dbTriggersTable) return kTRUE; // running without DB access
   vertexSeedTriggers_st* trigsTable = dbTriggersTable->GetTable();
   Int_t nTrigs = (Int_t) dbTriggersTable->GetNRows();
   for (Int_t i = 0; i < nTrigs; i++, trigsTable++) {
@@ -319,7 +334,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.36 2007/11/27 23:42:47 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.39 2008/05/21 17:48:39 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -544,7 +559,7 @@ void StVertexSeedMaker::FitData() {
      minuit->GetParameter(i, pname, p[i], ep[i], plow[i], phigh[i]);
 }
 //_____________________________________________________________________________
-Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
+Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   // Format of filenames for parsing must be:
   // vertexseedhist.DDDDDDDD.TTTTTT.root
   // where D and T are 8 and 6 digit representations of date and time
@@ -604,15 +619,23 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
     if (currentFile) currentFile->Close();
     currentFile = new TFile(fileName);
     TNtuple* curNtuple = (TNtuple*) currentFile->Get("resNtuple");
-    Int_t nentries = (Int_t) curNtuple->GetEntries();
+    if (!curNtuple) {
+      LOG_ERROR << "No resNtuple found in " << fileName << endm;
+      continue;
+    }
+    curNtuple->Draw(">>elist",cuts);
+    TEventList* elist = (TEventList*) gDirectory->Get("elist");
+    Int_t nentries = (Int_t) elist->GetN();
     for (Int_t entryn = 0; entryn < nentries; entryn++) {
-      curNtuple->GetEvent(entryn);
+      curNtuple->GetEntry(elist->GetEntry(entryn));
       vals = curNtuple->GetArgs();
       unsigned int tid = (unsigned int) vals[5];
       if (ValidTrigger(tid)) {
         resNtuple->Fill(vals);
-        addVert(vals[1],vals[2],vals[3],vals[4]);
-        weight += vals[4];
+        if (curNtuple->GetNvar()>12) 
+          addVert(vals[1],vals[2],vals[3],vals[4],vals[12],vals[13]);
+        else
+          addVert(vals[1],vals[2],vals[3],vals[4],0.,0.);
       } else {
         LOG_INFO << "Invalid trigger: " << tid << endm;
       }
@@ -628,8 +651,17 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.36 2007/11/27 23:42:47 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.39 2008/05/21 17:48:39 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.39  2008/05/21 17:48:39  genevb
+// Use vertex errors for weighting
+//
+// Revision 1.38  2008/04/29 23:30:33  genevb
+// Added cuts capability to Aggregate
+//
+// Revision 1.37  2008/04/29 19:06:06  genevb
+// handle no DB access
+//
 // Revision 1.36  2007/11/27 23:42:47  genevb
 // Move valid triggers from code to DB
 //

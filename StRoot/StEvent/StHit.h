@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.22 2008/04/02 20:43:58 fisyak Exp $
+ * $Id: StHit.h,v 2.21 2006/01/19 21:50:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 2.22  2008/04/02 20:43:58  fisyak
- * Don't store  mPositionError in file
- *
  * Revision 2.21  2006/01/19 21:50:02  ullrich
  * Made detector() virtual method.
  *
@@ -143,7 +140,7 @@ protected:
     unsigned int bits(unsigned int, unsigned int) const;
     
     UInt_t         mHardwarePosition;
-    StThreeVectorF mPositionError; //!
+    StThreeVectorF mPositionError;
     Float_t        mCharge;
     Int_t          mId;
     UShort_t       mIdTruth; // simulation track id 
@@ -152,7 +149,7 @@ protected:
     UChar_t        mTrackRefCount;
     UChar_t        mFlag;
     StHit*         mNextHit; //!
-    ClassDef(StHit,5)
+    ClassDef(StHit,4)
 };
 
 inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const

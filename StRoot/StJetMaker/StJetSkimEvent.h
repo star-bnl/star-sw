@@ -75,20 +75,11 @@ public:
     map<int,int>& towersAboveThreshold(int detector) const;
     map<int,int>& triggerPatchesAboveThreshold(int detector) const;
     map<int,int>& jetPatchesAboveThreshold(int detector) const;
-
-    // don't use these. these are for test.
-    TArrayI towersAboveThreshold_(int detector) const;
-    TArrayI triggerPatchesAboveThreshold_(int detector) const;
-    TArrayI jetPatchesAboveThreshold_(int detector) const;
-
-
+    
     int totalEnergy() const;
 
     UInt_t* L2ResultEmulated();
-
-    // don't this. this is for test.
-    UInt_t L2ResultEmulated_(int i);
-
+    
     //setters
     void setTrigId(int aTrigId);
     void setDidFire(bool aFire);
@@ -109,8 +100,6 @@ public:
     
 private:
     void init();
-
-    TArrayI map2tarrayI(map<int, int>& theMap) const;
     
     Int_t       mTrigId;
     Int_t       mDidFire;
@@ -140,7 +129,6 @@ inline int StJetSkimTrig::shouldFireEemc() const  {return mShouldFireEemc;}
 inline int StJetSkimTrig::shouldFireL2() const  {return mShouldFireL2;}
 inline int StJetSkimTrig::totalEnergy() const {return mTotalEnergy;}
 inline UInt_t* StJetSkimTrig::L2ResultEmulated() {return mL2ResultEmulated;}
-inline UInt_t StJetSkimTrig::L2ResultEmulated_(int i) {return mL2ResultEmulated[i];}
 
 inline void StJetSkimTrig::setTrigId(int aTrigId) {mTrigId = aTrigId;}
 inline void StJetSkimTrig::setDidFire(bool aFire) {mDidFire = aFire;}
@@ -312,9 +300,6 @@ public:
 
     //const TArrayI& l2Result() const {return mL2Result;}
     UInt_t* L2Result() {return mL2Result;}
-
-    // don't this. this is for test.
-    UInt_t L2Result_(int i) {return mL2Result[i];}
 
     const StPythiaEvent* mcEvent() const {return mMcEvent;}
     

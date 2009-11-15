@@ -42,6 +42,7 @@ class StSsdFastSimMaker : public StMaker {
   ssdConfiguration_st   *m_config;    //!
   St_slsCtrl            *m_ctrl;      //!
   StSsdHit              *mHit;
+  StSsdHit              *mSmearedhit;
  public:
   StSsdFastSimMaker(const char *name="SsdFastSim");   
   /* Please note: The destructor is empty. StEvent will own any hits
@@ -109,7 +110,7 @@ class StSsdFastSimMaker : public StMaker {
    of all maker versions in use. */
  virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdFastSimMaker.h,v 1.3 2008/04/02 23:45:25 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdFastSimMaker.h,v 1.2 2008/03/09 22:26:02 bouchet Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   ClassDef(StSsdFastSimMaker,0)   //StAF chain virtual base class for Makers

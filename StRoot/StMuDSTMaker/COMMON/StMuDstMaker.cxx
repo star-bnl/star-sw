@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.85 2008/03/19 14:51:03 fisyak Exp $
+ * $Id: StMuDstMaker.cxx,v 1.86 2008/04/14 21:32:12 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -313,7 +313,7 @@ void  StMuDstMaker::streamerOff() {
   StKinkMc::Class()->IgnoreTObjectStreamer();
   StMuTrack::Class()->IgnoreTObjectStreamer();
   StMuPrimaryVertex::Class()->IgnoreTObjectStreamer();
-  StDcaGeometry::Class()->IgnoreTObjectStreamer();
+  //  StDcaGeometry::Class()->IgnoreTObjectStreamer();
   StMuPrimaryTrackCovariance::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
   StMuEmcHit::Class()->IgnoreTObjectStreamer();
@@ -1327,6 +1327,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.86  2008/04/14 21:32:12  fisyak
+ * Remove stripping TObject from StDcaGeometry, because StDcaGeometry is inherit from StObject and this stripping brakes schema evolution
+ *
  * Revision 1.85  2008/03/19 14:51:03  fisyak
  * Add two clone arrays for global and primary track covariance matrices, remove mSigmaDcaD and mSigmaDcaZ
  *

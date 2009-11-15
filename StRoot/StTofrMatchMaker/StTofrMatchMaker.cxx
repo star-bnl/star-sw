@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.18 2008/03/27 00:16:03 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.17 2007/11/29 22:43:11 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,9 +12,6 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
- * Revision 1.18  2008/03/27 00:16:03  dongx
- * update for Run8 finished.
- *
  * Revision 1.17  2007/11/29 22:43:11  dongx
  * changed vpd trayId definition to 121 (East) and 122 (West)
  *
@@ -73,11 +70,6 @@
 #include "StThreeVectorF.hh"
 #include "StHelix.hh"
 #include "StTrackGeometry.h"
-#include "StDedxPidTraits.h"
-#include "StTrackPidTraits.h"
-#include "StarClassLibrary/StParticleTypes.hh"
-#include "StarClassLibrary/StParticleDefinition.hh"
-#include "StTpcDedxPidAlgorithm.h"
 #include "StEventUtilities/StuRefMult.hh"
 #include "PhysicalConstants.h"
 #include "StPhysicalHelixD.hh"
@@ -96,7 +88,6 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
-#include "TTree.h"
 #include "StMessMgr.h"
 #include "StMemoryInfo.hh"
 #include "StTimer.hh"
@@ -124,9 +115,8 @@ StTofrMatchMaker::StTofrMatchMaker(const Char_t *name): StMaker(name){
   setValidAdcRange(1,1200);
   setValidTdcRange(1,2047);
   setOuterTrackGeometry();
-  setMinHitsPerTrack(15);
-  setMinFitPointsPerTrack(15);
-  setMinFitPointsOverMax(0.52);
+  setMinHitsPerTrack(0);
+  setMinFitPointsPerTrack(0);
   setMaxDCA(9999.);
 
   setCreateHistoFlag(kFALSE);
@@ -244,10 +234,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
   // TOFr Daq map initialization -- load from StTofUtil
   //////////////////////////////////////////////////////
   mDaqMap = new StTofrDaqMap();
-  mTofINLCorr = new StTofINLCorr();
   if(mYear2||mYear3||mYear4) {
-    if(mYear3) mDaqMap->setNValidTrays(mNValidTrays_Run3);
-    if(mYear4) mDaqMap->setNValidTrays(mNValidTrays_Run4);
     mDaqMap->init(this);
     //  AddConst(new TObjectSet("tofrDaqMap",mDaqMap));
     gMessMgr->Info("","OS") << " Initialize Daq map for run 2,3,4 ... " << endm;
@@ -327,7 +314,6 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
       */
       
   } else if(mYear5) {
-    mDaqMap->setNValidTrays(mNValidTrays_Run5);
     mDaqMap->initFromDbaseY5(this);
     gMessMgr->Info("","OS") << " Initialize Daq map for run 5 ... " << endm;
     
@@ -388,11 +374,9 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
     */
 
   } else if(mYear8) {
-    mDaqMap->setNValidTrays(mNValidTrays_Run8);
     mDaqMap->initFromDbaseGeneral(this);
     gMessMgr->Info("","OS") << " Initialize Daq map for run 8 ... " << endm;
 
-    mTofINLCorr->setNValidTrays(mNValidTrays_Run8);
     mTofINLCorr->initFromDbase(this);
     gMessMgr->Info("","OS") << " Initialize INL table for run 8 ... " << endm;
 
@@ -1689,9 +1673,6 @@ Int_t StTofrMatchMaker::processEventYear5(){
   
   storeMatchData(mCellCollection,theTof);
   delete mCellCollection;
-
-  delete mSortTofRawData;
-  mSortTofRawData = 0;
   
   //check StEvent collections --
   if (theTof->dataPresent())
@@ -1742,16 +1723,24 @@ Int_t StTofrMatchMaker::processEventYear5(){
 Int_t StTofrMatchMaker::processEventYear8(){
   // leave as empty now
 
-  if(Debug()) LOG_INFO << " processing event in run 8 " << endm;
   if(mHisto) mEventCounterHisto->Fill(0);
   // event selection ...
   mEvent = (StEvent *) GetInputDS("StEvent");
-//  if (!validEvent(mEvent)){
-  if(!mEvent || !(mEvent->tofCollection()) || !(mEvent->tofCollection()->rawdataPresent()) ) {
+  if (!validEvent(mEvent)){
     gMessMgr->Info("StTofrMatchMaker -- nothing to do ... bye-bye","OS");
     return kStOK;
   }
-  if(mHisto) mEventCounterHisto->Fill(1);
+
+  // number of primary tracks
+  //  (note: different meaning in event.root and richtof.root)
+  Int_t refmult(0);
+  refmult = uncorrectedNumberOfPrimaries(*mEvent);
+  
+  if (Debug()){
+    gMessMgr->Info("","OS") << " #Tracks           :"      << mEvent->summary()->numberOfTracks()
+	 << "\n #goodPrimaryTracks:"    << mEvent->summary()->numberOfGoodPrimaryTracks()
+	 << "\n #uncorr.prim.tracks  :" << refmult << endm;
+  }
 
   // timing & memory info -only when requested-
   StTimer timer;
@@ -1773,7 +1762,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
   //  daqCellsHitVec.clear();
   idVector validModuleVec;
 
-  mSortTofRawData = new StSortTofRawData(theTof, mDaqMap);
+  mSortTofRawData = new StSortTofRawData(theTof);
 
   // multi-tray system
   IntVec validtray = mDaqMap->ValidTrays();
@@ -1783,8 +1772,8 @@ Int_t StTofrMatchMaker::processEventYear8(){
     if(Debug()) gMessMgr->Info("","OS") << " Number of fired hits on tray " << trayId << " = " << validchannel.size() << endm;
 
     for(size_t iv=0;iv<validchannel.size();iv++) {
-      IntVec leTdc = mSortTofRawData->GetLeadingTdc(trayId, validchannel[iv], kTRUE);
-      IntVec teTdc = mSortTofRawData->GetTrailingTdc(trayId, validchannel[iv], kTRUE);
+      IntVec leTdc = mSortTofRawData->GetLeadingTdc(trayId, validchannel[iv]);
+      IntVec teTdc = mSortTofRawData->GetTrailingTdc(trayId, validchannel[iv]);
 
       if(!leTdc.size() || !teTdc.size()) continue;
 
@@ -1810,12 +1799,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
 	}
       }
       if(!ifind) validModuleVec.push_back(id);
-
-      if(mHisto) {
-  //      mDaqOccupancyValid->Fill(chan);
-        mDaqOccupancyValid->Fill((moduleId-1)*mNCell+(cellId-1));
-        mDaqOccupancyValidAll->Fill((trayId-76)*mNTOF+(moduleId-1)*mNCell+(cellId-1));
-      }      
+      
       //
       // store data from trays and vpds into StTofData
       //
@@ -1836,26 +1820,23 @@ Int_t StTofrMatchMaker::processEventYear8(){
   } // end tray
 
   // vpd -> StTofData
-  for(int ivpd=0;ivpd<2;ivpd++) { // west and east sides
-    int trayId = (ivpd==0) ? mWestVpdTrayId : mEastVpdTrayId;
+  for(int i=0;i<2;i++) { // east and west sides
+    int trayId = (i==0) ? mEastVpdTrayId : mWestVpdTrayId;
     IntVec validtube = mSortTofRawData->GetValidChannel(trayId);
     if(Debug()) gMessMgr->Info("","OS") << " Number of fired hits on tray(vpd) " << trayId << " = " << validtube.size() << endm;
 
     if(!validtube.size()) continue;
     for(int i=0;i<mNVPD;i++) {
       int tubeId = i+1;
-      int lechan = (ivpd==0) ? mDaqMap->WestPMT2TDIGLeChan(tubeId) : mDaqMap->EastPMT2TDIGLeChan(tubeId);
-      IntVec leTdc = mSortTofRawData->GetLeadingTdc(trayId, lechan, kTRUE);
-      IntVec teTdc = mSortTofRawData->GetTrailingTdc(trayId, lechan, kTRUE);  // channel number should be le, sorted in StSortTofRawData
-
-      if(leTdc.size()&&mHisto) mDaqOccupancyVpd->Fill(ivpd*mNVPD+i);
+      int lechan = mDaqMap->PMT2TDIGLeChan(tubeId);
+      int techan = mDaqMap->PMT2TDIGTeChan(tubeId);
+      IntVec leTdc = mSortTofRawData->GetLeadingTdc(trayId, lechan);
+      IntVec teTdc = mSortTofRawData->GetTrailingTdc(trayId, techan);
 
       if(leTdc.size() && teTdc.size()) {
-	int dataIndex = (ivpd+120)*mNTOF + (tubeId-1);
+	int dataIndex = (i+120)*mNTOF + (tubeId-1);
 	StTofData *aData = new StTofData(dataIndex,0,0,0,0,leTdc[0],teTdc[0]);
-	theTof->addData(aData);
-
-        if(mHisto) mDaqOccupancyValidVpd->Fill(ivpd*mNVPD+i);
+	theTof->addData(aData);	
       }
     }
   }
@@ -1872,7 +1853,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     mCellsMultInEvent->Fill(daqCellsHitVec.size());
     if(daqCellsHitVec.size()) mEventCounterHisto->Fill(6);
   }
-//  if(!daqCellsHitVec.size()) return kStOK;
+  if(!daqCellsHitVec.size()) return kStOK;
 
   //.........................................................................
   // B. loop over global tracks and determine all cell-track matches
@@ -1888,58 +1869,13 @@ Int_t StTofrMatchMaker::processEventYear8(){
     //    cellHitVec.clear();
     StTrack *theTrack = nodes[iNode]->track(global);
 
-    StThreeVectorF mom = trackGeometry(theTrack)->momentum();
-    float pt = mom.perp();
-    float eta = mom.pseudoRapidity();
-    float phi = mom.phi();
-    if (phi<0.) phi += 2.*3.14159;
-
-    float dEdx = -999.;
-    int ndEdxpts = 0;
-    float nSigmaPion = -999.;
-    static StTpcDedxPidAlgorithm PidAlgorithm;
-    static StPionPlus* Pion = StPionPlus::instance();
-
-    const StParticleDefinition* pd = theTrack->pidTraits(PidAlgorithm);
-    if (pd) {
-      nSigmaPion = PidAlgorithm.numberOfSigma(Pion);
-    }
-    if ( PidAlgorithm.traits() ) {
-      dEdx = PidAlgorithm.traits()->mean();
-      ndEdxpts = PidAlgorithm.traits()->numberOfPoints();
-    }
-    int nfitpts = theTrack->fitTraits().numberOfFitPoints(kTpcId);
-//    cout << " dEdx = " << dEdx << endl;
-    cout << " nSigmaPi = " << nSigmaPion << endl;
-//    if (pt<0.2) continue;
-
     // make sure we have a track, a miniDST might have removed it...
     if (validTrack(theTrack)){
-      if(mHisto) {
-        mTrackPtEta->Fill(pt, eta);
-        mTrackPtPhi->Fill(pt, phi);
-        mTrackNFitPts->Fill(nfitpts);
-        if(dEdx>0.) mTrackdEdxvsp->Fill(mom.mag(), dEdx*1.e6);
-        if(fabs(nSigmaPion)<5.) mNSigmaPivsPt->Fill(pt, nSigmaPion+5.*theTrack->geometry()->charge());
-      }
-
-      trackTree.pt = pt;
-      trackTree.eta = eta;
-      trackTree.phi = phi;
-      trackTree.nfitpts = nfitpts;
-      trackTree.dEdx = dEdx*1.e6;
-      trackTree.ndEdxpts = ndEdxpts;
-      trackTree.charge = theTrack->geometry()->charge();      
-      trackTree.projTrayId = 0;
-      trackTree.projCellChan = -1;
-      trackTree.projY = -999.;
-      trackTree.projZ = -999.;
-
       nAllTracks++;
       StPhysicalHelixD theHelix = trackGeometry(theTrack)->helix();
 
-//      IntVec projTrayVec;
-//      if(!mTofrGeom->projTrayVector(theHelix, projTrayVec)) continue;
+      IntVec projTrayVec;
+      if(!mTofrGeom->projTrayVector(theHelix, projTrayVec)) continue;
 
       IntVec idVec;
       DoubleVec pathVec;
@@ -1950,8 +1886,8 @@ Int_t StTofrMatchMaker::processEventYear8(){
 //       crossVec.clear();
 
       Int_t ncells = 0;
-      if(mTofrGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec) ) {
-//      if(mTofrGeom->HelixCrossCellIds(theHelix, validModuleVec, projTrayVec, idVec, pathVec, crossVec)) {
+      //      if(mTofrGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec) ) {
+      if(mTofrGeom->HelixCrossCellIds(theHelix, validModuleVec, projTrayVec, idVec, pathVec, crossVec)) {
 	Int_t cells = idVec.size();
 	for (Int_t i=0; i<cells; i++) {
             Int_t icell,imodule,itray;
@@ -1976,8 +1912,8 @@ Int_t StTofrMatchMaker::processEventYear8(){
 	    StThreeVectorD glo(global[0], global[1], global[2]);
 	    StThreeVectorD hitPos(local[0], local[1], local[2]);
 	    delete sensor;
-	    if (local[2]<=2.7&&local[2]>=-3.4) {
-	      Int_t Iarray = mDaqMap->Cell2TDIGChan(imodule, icell);
+	    //	    if (local[2]<=3.4&&local[2]>=-2.7) {
+	    Int_t Iarray = mDaqMap->Cell2TDIGChan(imodule, icell);
 	      if(Iarray>=mDAQOVERFLOW||Iarray<0) continue;
 	      ncells++;
 	      cellHit.channel = Iarray;
@@ -1991,29 +1927,18 @@ Int_t StTofrMatchMaker::processEventYear8(){
 	      cellHitVec.push_back(cellHit);
 	      allCellsHitVec.push_back(cellHit);
 	      if(mHisto) {
-//		mDaqOccupancyProj->Fill(Iarray);
-                if(itray>=76&&itray<=80) {
-                  mDaqOccupancyProj->Fill((imodule-1)*mNCell+(icell-1));
-                  mDaqOccupancyProjAll->Fill((itray-76)*mNTOF+(imodule-1)*mNCell+(icell-1));
-		  mHitsPosition->Fill(hitPos.y(), hitPos.z());
-                }
+		mDaqOccupancyProj->Fill(Iarray);
+		mHitsPosition->Fill(hitPos.y(), hitPos.z());
 	      }
 	      
-              trackTree.projTrayId = itray;
-              trackTree.projCellChan = (imodule-1)*mNCell+(icell-1);
-              trackTree.projY = local[1];
-              trackTree.projZ = local[2];
-
 	      if(Debug()) {
 		gMessMgr->Info("","OS") <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
 		gMessMgr->Info("","OS") <<"   hit position " << hitPos << endm;
 	      }
-	    }
+	      //	    }
 	} // for (Int_t i=0...)
       } // endif(helixcross...)
       if(ncells>0&&mHisto) mHitsMultPerTrack->Fill(ncells);
-
-      if(mHisto) mTrackTree->Fill();
 
     } // if(ValidTrack).. 
   } // loop over nodes
@@ -2024,7 +1949,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     if(allCellsHitVec.size()) mEventCounterHisto->Fill(7);
   }
   // end of Sect.B
-
+  
   //.........................................................................
   // C. Match find Neighbours -- identify crosstalk
   //
@@ -2035,23 +1960,6 @@ Int_t StTofrMatchMaker::processEventYear8(){
   for(unsigned int idaq=0;idaq<daqCellsHitVec.size();idaq++, daqIter++) {
     tofCellHitVectorIter proIter = allCellsHitVec.begin();
     for(unsigned int ipro=0;ipro<allCellsHitVec.size();ipro++, proIter++) {
-
-      int daqIndex = (daqIter->module-1)*6 + (daqIter->cell-1);
-      int proIndex = (proIter->module-1)*6 + (proIter->cell-1);
-      int hisIndex = daqIter->tray - 76;
-      int daqAllIndex = (daqIter->tray - 76)*192 + daqIndex;
-      int proAllIndex = (proIter->tray - 76)*192 + proIndex;
-      mHitCorrAll->Fill(proAllIndex,daqAllIndex);
-      if(daqIter->tray==proIter->tray) {
-	if (mHisto) {
-	  if(hisIndex>=0&&hisIndex<5) {
-	    mHitCorr[hisIndex]->Fill(proIndex,daqIndex);
-	    mHitCorrModule[hisIndex]->Fill(proIter->module-1,daqIter->module-1);
-	  } else {
-	    cout << " weird tray # " << daqIter->tray << endl;
-	  }
-	}
-      }
       if( (daqIter->tray==proIter->tray)&& 
 	  (daqIter->module==proIter->module) &&
 	  ( ( (proIter->cell==6)&&((proIter->cell==daqIter->cell) ||
@@ -2125,8 +2033,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
 
     if(mHisto) {
       mTracksPerCellMatch1->Fill(trackIdVec.size());
-//      mDaqOccupancyMatch1->Fill(tempIter->channel);
-      mDaqOccupancyMatch1->Fill((tempIter->module-1)*mNCell+(tempIter->cell-1));
+      mDaqOccupancyMatch1->Fill(tempIter->channel);
       mDeltaHitMatch1->Fill(dy, dz);
     }
 
@@ -2169,8 +2076,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     mCellsPerEventMatch2->Fill(tempVec.size());
     for(unsigned int ii=0;ii<tempVec.size();ii++) {
       mTracksPerCellMatch2->Fill(tempVec[ii].trackIdVec.size());
- //     mDaqOccupancyMatch2->Fill(tempVec[ii].channel);
-      mDaqOccupancyMatch2->Fill((tempVec[ii].module-1)*mNCell+(tempVec[ii].cell-1));
+      mDaqOccupancyMatch2->Fill(tempVec[ii].channel);
       Float_t ycenter = (tempVec[ii].cell-1-2.5)*mWidthPad;
       Float_t dy = tempVec[ii].yhit-ycenter;
       Float_t dz = tempVec[ii].zhit;
@@ -2296,8 +2202,7 @@ Int_t StTofrMatchMaker::processEventYear8(){
     mCellsPerEventMatch3->Fill(tempVec.size());
     for(unsigned int ii=0;ii<tempVec.size();ii++) {
       mTracksPerCellMatch3->Fill(tempVec[ii].trackIdVec.size());
-//      mDaqOccupancyMatch3->Fill(tempVec[ii].channel);
-      mDaqOccupancyMatch3->Fill((tempVec[ii].module-1)*mNCell+(tempVec[ii].cell-1));
+      mDaqOccupancyMatch3->Fill(tempVec[ii].channel);
       Float_t ycenter = (tempVec[ii].cell-1-2.5)*mWidthPad;
       Float_t dy = tempVec[ii].yhit - ycenter;
       Float_t dz = tempVec[ii].zhit;
@@ -2315,44 +2220,82 @@ Int_t StTofrMatchMaker::processEventYear8(){
     Int_t module = FinalMatchedCellsVec[ii].module;
     Int_t cell = FinalMatchedCellsVec[ii].cell;
 
-//    Float_t ycenter = (cell-1-2.5)*mWidthPad;
-//    Float_t dy = FinalMatchedCellsVec[ii].yhit - ycenter;
+    Float_t ycenter = (cell-1-2.5)*mWidthPad;
+    Float_t dy = FinalMatchedCellsVec[ii].yhit - ycenter;
     if (FinalMatchedCellsVec[ii].trackIdVec.size()!=1)
       gMessMgr->Info("","OS") << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
 
 
     // Read in Leading and Trailing edge TDC, apply on INL correction
     //
-    int tmptdc = (mSortTofRawData->GetLeadingTdc(tray,jj,kTRUE))[0];
+    int tmptdc = (mSortTofRawData->GetLeadingTdc(tray,jj))[0];
     int bin = (int)tmptdc&0x3ff;
     float tmptdc_f = tmptdc + mTofINLCorr->getTrayINLCorr(tray, jj, bin);
     float letime = tmptdc_f*VHRBIN2PS;
 
-    tmptdc=(mSortTofRawData->GetTrailingTdc(tray,jj,kTRUE))[0];
+    tmptdc=(mSortTofRawData->GetTrailingTdc(tray,jj))[0];
     bin = (int)tmptdc&0x3ff;
     tmptdc_f = tmptdc + mTofINLCorr->getTrayINLCorr(tray, jj, bin);
     float tetime = tmptdc_f*VHRBIN2PS;
 
     // get track-id from cell hit vector
     unsigned int trackNode = FinalMatchedCellsVec[ii].trackIdVec[0];
-//    StTrack *theTrack = nodes[trackNode]->track(primary);
+    StTrack *theTrack = nodes[trackNode]->track(primary);
     StTrack *globalTrack = nodes[trackNode]->track(global);
 
     // 2. continue only if the (primary) track exists
-//    if (validTofTrack(theTrack) && fabs(dy)<1.9 ){
+    if (validTofTrack(theTrack) && fabs(dy)<1.9 ){
       nValidSinglePrimHitCells++;
 
       //--- store number of hits per track
- //     Int_t nHitsPerTrack = theTrack->topologyMap().numberOfHits(kTpcId);
+      Int_t nHitsPerTrack = theTrack->topologyMap().numberOfHits(kTpcId);
 	  
       // select the apropriate track geometry
- //     StTrackGeometry *theTrackGeometry = trackGeometry(globalTrack);
+      StTrackGeometry *theTrackGeometry = trackGeometry(theTrack);
 
+      //--- get momentum from track
+      const StThreeVectorF momentum = theTrackGeometry->momentum();
+	    
+      //--- calculate flight path
+      Double_t pathLength = tofPathLength(&mEvent->primaryVertex()->position(),
+					&FinalMatchedCellsVec[ii].hitPosition,
+					theTrackGeometry->helix().curvature());
+
+      //--- calculate local hit position on cell based first, last and middle plane
+      //    (middle plane is the average of first and last plane, which is mathematically
+      //     the same as CellHitVec.hitPosition ... )
+//       StThreeVectorD *pInnerLayer, *pOuterLayer;
+//       pInnerLayer =  FinalMatchedCellsVec[ii].layerHitPositions.begin();
+//       pOuterLayer =  FinalMatchedCellsVec[ii].layerHitPositions.end() - 1;
+      
+      //--- dig out from the dedx and rich pid traits
+      Float_t dedx(0.), cherang(0);
+      Int_t dedx_np(0), cherang_nph(0);
+      StSPtrVecTrackPidTraits& traits = theTrack->pidTraits();
+      for (unsigned int it=0;it<traits.size();it++){
+	if (traits[it]->detector() == kTpcId){
+	  StDedxPidTraits *pid = dynamic_cast<StDedxPidTraits*>(traits[it]);
+	  if (pid && pid->method() ==kTruncatedMeanId){
+	    dedx    = pid->mean();
+	    dedx_np =  pid->numberOfPoints();
+	  }
+	} else if  (traits[it]->detector() == kRichId){
+	  StRichPidTraits *pid = dynamic_cast<StRichPidTraits*>(traits[it]);
+	  if (pid){ 
+	    StRichSpectra* pidinfo = pid->getRichSpectra();
+	    if (pidinfo && pidinfo->getCherenkovPhotons()>2){
+	      cherang     = pidinfo->getCherenkovAngle();
+	      cherang_nph = pidinfo->getCherenkovPhotons();
+	    }
+	  }
+	}
+      }
+      
       //--- calculate local hit position on cell based on average hitposition
       //      Float_t localHitPos = mTofGeom->cellHitPosition(&allMatchedCellsVec[ii].hitPosition);
       
       // Fill TOF Cell Collection
-      StTofCell *tofCell = new StTofCell(tray, module, cell, daqId, globalTrack, FinalMatchedCellsVec[ii].zhit, FinalMatchedCellsVec[ii].matchFlag, FinalMatchedCellsVec[ii].hitPosition);
+      StTofCell *tofCell = new StTofCell(tray, module, cell, daqId, theTrack, FinalMatchedCellsVec[ii].zhit, FinalMatchedCellsVec[ii].matchFlag, FinalMatchedCellsVec[ii].hitPosition);
       tofCell->setLeadingEdgeTime(letime);
       tofCell->setTrailingEdgeTime(tetime);
       mCellCollection->push_back(tofCell);
@@ -2362,10 +2305,18 @@ Int_t StTofrMatchMaker::processEventYear8(){
 	gMessMgr->Info("","OS") << "F: itray=" << tray << " imodule=" << module << " icell=" << cell << "\tnodeid:";
 	idVectorIter ij=FinalMatchedCellsVec[ii].trackIdVec.begin();
 	while (ij != FinalMatchedCellsVec[ii].trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
+	gMessMgr->Info("","OS") << "\tR=" << 1/(theTrackGeometry->helix().curvature())
+	     << "\tpT=" << momentum.perp() << "\tp=" << momentum.mag()
+	     << "\thits="<< nHitsPerTrack << "\ts="<< pathLength
+	     << "\t#fitp=" <<theTrack->fitTraits().numberOfFitPoints(kTpcId)
+	  //	     << "\t#trkp=" <<theTrack->detectorInfo()->numberOfPoints(kTpcId)
+	     << " \tdedx=" << dedx
+	     << " \tdca="<< globalTrack->geometry()->helix().distance(mEvent->primaryVertex()->position())<<" and "<<theTrackGeometry->helix().distance(mEvent->primaryVertex()->position());
+	if (cherang!=0) LOG_INFO  << " \trich="<< cherang << " (" << cherang_nph << ")";
 	gMessMgr->Info("","OS") << endm;
       }
 
-//    } // track exists 
+    } // track exists 
   } // end final matched cells
 
 
@@ -2378,11 +2329,11 @@ Int_t StTofrMatchMaker::processEventYear8(){
     int dataIndex = aData->dataIndex();
     int trayId = dataIndex / mNTOF;
     if(trayId<120) continue;  // only vpd selected
-    int ewId = trayId - 120 + 1;  // 1: west,  2: east
+    int ewId = trayId - 120 + 1;  // 1: east,  2: west
     
     int tubeId = dataIndex % mNTOF + 1;
-    int lechan = (ewId==1) ? mDaqMap->WestPMT2TDIGLeChan(tubeId) : mDaqMap->EastPMT2TDIGLeChan(tubeId);
-    int techan = (ewId==1) ? mDaqMap->WestPMT2TDIGTeChan(tubeId) : mDaqMap->EastPMT2TDIGTeChan(tubeId);
+    int lechan = mDaqMap->PMT2TDIGLeChan(tubeId);
+    int techan = mDaqMap->PMT2TDIGTeChan(tubeId);
 
     int tmptdc = aData->leadingTdc();
     int bin = (int)tmptdc&0x3ff;
@@ -2408,9 +2359,6 @@ Int_t StTofrMatchMaker::processEventYear8(){
   
   storeMatchData(mCellCollection,theTof);
   delete mCellCollection;
-
-  delete mSortTofRawData;
-  mSortTofRawData = 0;
   
   //check StEvent collections --
   if (theTof->dataPresent())
@@ -2534,53 +2482,17 @@ void StTofrMatchMaker::bookHistograms(void){
   mCellsMultInEvent = new TH1D("cellsPerEvent","cellsPerEvent",100,0,100);
   mHitsMultInEvent  = new TH1D("hitsPerEvent","hitsPerEvent",100,0,100);
   mHitsMultPerTrack = new TH1D("hitsPerTrack","hitsPerTrack",10,0,10);
-  mDaqOccupancy     = new TH1D("daqOccupancy","daqOccupancy",192,0,192);
-  mDaqOccupancyValid= new TH1D("daqOccupancyValid","daqOccupancyValid",192,0,192);
-  mDaqOccupancyProj = new TH1D("daqOccupancyProj","daqOccupancyProj",192,0,192);
+  mDaqOccupancy     = new TH1D("daqOccupancy","daqOccupancy",120,0,120);
+  mDaqOccupancyValid= new TH1D("daqOccupancyValid","daqOccupancyValid",120,0,120);
+  mDaqOccupancyProj = new TH1D("daqOccupancyProj","daqOccupancyProj",120,0,120);
   mHitsPosition     = new TH2D("hitsPosition","hitsPositions",300,-15.,15.,200,-5.,5.);
-  
-  mDaqOccupancyValidAll = new TH1D("daqOccupancyValidAll","",960,0,960);
-  mDaqOccupancyProjAll = new TH1D("daqOccupancyProjAll","",960,0,960);
-
-  mDaqOccupancyVpd = new TH1D("daqOccupancyVpd","",38,0,38);
-  mDaqOccupancyValidVpd = new TH1D("daqOccupancyValidVpd","",38,0,38);
-
-  // correlation
-  for(int i=0;i<mNValidTrays_Run8;i++) {
-    char hisname[100];
-    sprintf(hisname,"Tray_%d",i+76);
-    mHitCorr[i] = new TH2D(hisname,"",192,0,192,192,0,192);
-    sprintf(hisname,"Tray_%d_module",i+76);
-    mHitCorrModule[i] = new TH2D(hisname,"",32,0,32,32,0,32);
-  }
-  mHitCorrAll = new TH2D("Tray_All","",960,0,960,960,0,960);
-
-  // TPC tracks
-  mTrackTree = new TTree("track","track");
-  mTrackTree->Branch("pt",&trackTree.pt,"pt/F");
-  mTrackTree->Branch("eta",&trackTree.eta,"eta/F");
-  mTrackTree->Branch("phi",&trackTree.phi,"phi/F");
-  mTrackTree->Branch("nfitpts",&trackTree.nfitpts,"nfitpts/I");
-  mTrackTree->Branch("dEdx",&trackTree.dEdx,"dEdx/F");
-  mTrackTree->Branch("ndEdxpts",&trackTree.ndEdxpts,"ndEdxpts/I");
-  mTrackTree->Branch("charge",&trackTree.charge,"charge/I");
-  mTrackTree->Branch("projTrayId",&trackTree.projTrayId,"projTrayId/I");
-  mTrackTree->Branch("projCellChan",&trackTree.projCellChan,"projCellChan/I");
-  mTrackTree->Branch("projY",&trackTree.projY,"projY/F");
-  mTrackTree->Branch("projZ",&trackTree.projZ,"projZ/F");
-
-  mTrackPtEta = new TH2D("trackPtEta","",100,0.,5.,60,-1.5,1.5);
-  mTrackPtPhi = new TH2D("trackPtPhi","",100,0.,5.,120,0.,2*3.14159);
-  mTrackNFitPts = new TH1D("trackNFitPts","",50,0.,50.);
-  mTrackdEdxvsp = new TH2D("trackdEdxvsp","",500,0.,5.,1000,0.,10.);
-  mNSigmaPivsPt = new TH2D("nSigmaPivsPt","",500,0.,5.,1000,-10.,10.);
 
   // primary association  
   mCellsPerEventMatch1 = new TH1D("cellsPerEventMatch1","cellPerEventMatch1",100,0,100);
   mHitsPerEventMatch1 = new TH1D("hitsPerEventMatch1","hitsPerEventMatch1",100,0,100);
   mCellsPerTrackMatch1 = new TH1D("cellsPerTrackMatch1","cellsPerTrackMatch1",100,0,100);
   mTracksPerCellMatch1 = new TH1D("tracksPerCellMatch1","tracksPerCellMatch1",100,0,100);
-  mDaqOccupancyMatch1 = new TH1D("daqOccupancyMatch1","daqOccupancyMatch1",192,0,192);
+  mDaqOccupancyMatch1 = new TH1D("daqOccupancyMatch1","daqOccupancyMatch1",120,0,120);
   mDeltaHitMatch1 = new TH2D("deltaHitMatch1","deltaHitMatch1",300,-15,15,200,-5.,5.);
 
   // kick out multi-hit
@@ -2588,7 +2500,7 @@ void StTofrMatchMaker::bookHistograms(void){
   mHitsPerEventMatch2 = new TH1D("hitsPerEventMatch2","hitsPerEventMatch2",100,0,100);
   mCellsPerTrackMatch2 = new TH1D("cellsPerTrackMatch2","cellsPerTrackMatch2",100,0,100);
   mTracksPerCellMatch2 = new TH1D("tracksPerCellMatch2","tracksPerCellMatch2",100,0,100);
-  mDaqOccupancyMatch2 = new TH1D("daqOccupancyMatch2","daqOccupancyMatch2",192,0,192);
+  mDaqOccupancyMatch2 = new TH1D("daqOccupancyMatch2","daqOccupancyMatch2",120,0,120);
   mDeltaHitMatch2 = new TH2D("deltaHitMatch2","deltaHitMatch2",300,-15,15,200,-5.,5.);
 
   // sort out multi matched cells
@@ -2596,7 +2508,7 @@ void StTofrMatchMaker::bookHistograms(void){
   mHitsPerEventMatch3 = new TH1D("hitsPerEventMatch3","hitsPerEventMatch3",100,0,100);
   mCellsPerTrackMatch3 = new TH1D("cellsPerTrackMatch3","cellsPerTrackMatch3",100,0,100);
   mTracksPerCellMatch3 = new TH1D("tracksPerCellMatch3","tracksPerCellMatch3",100,0,100);
-  mDaqOccupancyMatch3 = new TH1D("daqOccupancyMatch3","daqOccupancyMatch3",192,0,192);
+  mDaqOccupancyMatch3 = new TH1D("daqOccupancyMatch3","daqOccupancyMatch3",120,0,120);
   mDeltaHitMatch3 = new TH2D("deltaHitMatch3","deltaHitMatch3",300,-15,15,200,-5.,5.);
 
   return;
@@ -2614,7 +2526,6 @@ void StTofrMatchMaker::writeHistogramsToFile(){
   theHistoFile->cd();
 
   if(mHisto) {
-
     mEventCounterHisto->Write();
     mADCTDCCorelation->Write();
     mCellsMultInEvent->Write();
@@ -2624,24 +2535,7 @@ void StTofrMatchMaker::writeHistogramsToFile(){
     mDaqOccupancyValid->Write();
     mDaqOccupancyProj->Write();
     mHitsPosition->Write();
-
-    mDaqOccupancyValidAll->Write();
-    mDaqOccupancyProjAll->Write();
-    mDaqOccupancyVpd->Write();
-    mDaqOccupancyValidVpd->Write();
     
-    for(int i=0;i<mNValidTrays_Run8;i++) {
-      mHitCorr[i]->Write();
-      mHitCorrModule[i]->Write();
-    }
-    mHitCorrAll->Write();
-
-    mTrackPtEta->Write();
-    mTrackPtPhi->Write();
-    mTrackNFitPts->Write();
-    mTrackdEdxvsp->Write();
-    mNSigmaPivsPt->Write();
-
     mCellsPerEventMatch1->Write();
     mHitsPerEventMatch1->Write();
     mCellsPerTrackMatch1->Write();
@@ -2664,15 +2558,8 @@ void StTofrMatchMaker::writeHistogramsToFile(){
     mDeltaHitMatch3->Write();
     
     theHistoFile->Write();  
-    theHistoFile->Close(); 
-   
+    theHistoFile->Close();    
   }
-
-  TFile *theTreeFile =  new TFile((mHistoFileName+".tree.root").c_str(), "RECREATE");
-  theTreeFile->cd();
-  if(mHisto) mTrackTree->Write();
-  theTreeFile->Write();
-  theTreeFile->Close();
 
   return;
 }
@@ -2704,7 +2591,7 @@ bool StTofrMatchMaker::validEvent(StEvent *event){
   if(mHisto) mEventCounterHisto->Fill(1);
 
   // 2. must have a valid primary vertex 
-//  if (!event->primaryVertex()) return false;
+  if (!event->primaryVertex()) return false;
   mAcceptedEventCounter++;
   if(mHisto) mEventCounterHisto->Fill(2);
 
@@ -2716,7 +2603,7 @@ bool StTofrMatchMaker::validEvent(StEvent *event){
   if(mHisto) mEventCounterHisto->Fill(3);
 
   // 3b. must have TOF raw data available
-  if (!(event->tofCollection()->dataPresent()||event->tofCollection()->rawdataPresent())){
+  if (!(event->tofCollection()->dataPresent())){
     gMessMgr->Info("","OS") << "TOF is present but no Raw Data" << endm;
     if  (!(event->tofCollection()->cellsPresent())){
       gMessMgr->Info("","OS") << "              and no Cell Data" << endm;
@@ -2729,15 +2616,13 @@ bool StTofrMatchMaker::validEvent(StEvent *event){
   
   
   // 4. must be a TOF beam event, i.e. a non-strobe event
-  if(event->tofCollection()->dataPresent()) {
-    StSPtrVecTofData  &tofData = event->tofCollection()->tofData();
-    gMessMgr->Info("","OS") << " tofData size = " << tofData.size() << endm;
-    if (strobeEvent(tofData)){
-      mTofStrobeEventCounter++;
-      if (event->primaryVertex()) mAcceptAndStrobe++; // keep track of #valid strobed evts
-      gMessMgr->Info("strobe event","OTS");
-      return false;
-    }
+  StSPtrVecTofData  &tofData = event->tofCollection()->tofData();
+  gMessMgr->Info("","OS") << " tofData size = " << tofData.size() << endm;
+  if (strobeEvent(tofData)){
+    mTofStrobeEventCounter++;
+    if (event->primaryVertex()) mAcceptAndStrobe++; // keep track of #valid strobed evts
+    gMessMgr->Info("strobe event","OTS");
+    return false;
   }
   if(mHisto) mEventCounterHisto->Fill(5);
   
@@ -2763,9 +2648,6 @@ bool StTofrMatchMaker::validTrack(StTrack *track){
   if (track->topologyMap().numberOfHits(kTpcId) < mMinHitsPerTrack) return false;
   // 4. minimum #fit points per track
   if (track->fitTraits().numberOfFitPoints(kTpcId) < mMinFitPointsPerTrack) return false;
-  // 5. minimum #fit points over #maximum points
-  float ratio = (1.0*track->fitTraits().numberOfFitPoints(kTpcId)) / (1.0*track->numberOfPossiblePoints(kTpcId));
-  if (ratio < mMinFitPointsOverMax) return false;
 
   return true;
 }

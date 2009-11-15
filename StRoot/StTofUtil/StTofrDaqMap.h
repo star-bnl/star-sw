@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.h,v 1.7 2008/03/27 00:15:39 dongx Exp $
+ * $Id: StTofrDaqMap.h,v 1.6 2007/11/22 00:04:13 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,9 +12,6 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.h,v $
- * Revision 1.7  2008/03/27 00:15:39  dongx
- * Update for Run8 finished.
- *
  * Revision 1.6  2007/11/22 00:04:13  dongx
  * - update for tof8++
  * - added ValidTrays() function
@@ -58,13 +55,11 @@ class StTofrDaqMap{
   static const Int_t mNTOFR5 = 192;   // 192 for tofr5
 
   static const Int_t mNTOF = 192;    // 192 for tof in Run 8++
-  static const Int_t mNTray = 120;     // # of trays
+  static const Int_t mNTray = 5;     // # of valid trays
   static const Int_t mNModule = 32;  // 32 for tofr5++ 
   static const Int_t mNCell = 6;
   static const Int_t mNVPD = 19;    // 19 on each side
 
-  Int_t mNValidTrays;
-  
   Int_t mTrayId[mNTOFR], mModuleId[mNTOFR], mCellId[mNTOFR];
   Int_t mAdc[mNTOFR], mTdc[mNTOFR];
 
@@ -74,10 +69,8 @@ class StTofrDaqMap{
   // General arrays for tof8++
   Int_t mMRPC2TDIGChan[mNTOF]; // tdc channel # of MRPC channel
   Int_t mTDIG2MRPCChan[mNTOF]; // MRPC channel # of tdc channel
-  Int_t mEastPMT2TDIGLeChan[mNVPD], mEastPMT2TDIGTeChan[mNVPD]; // tdc channel of vpd PMTs
-  Int_t mTDIGLe2EastPMTChan[mNTOF], mTDIGTe2EastPMTChan[mNTOF]; // vpd PMT tube of tdc channels
-  Int_t mWestPMT2TDIGLeChan[mNVPD], mWestPMT2TDIGTeChan[mNVPD]; // tdc channel of vpd PMTs
-  Int_t mTDIGLe2WestPMTChan[mNTOF], mTDIGTe2WestPMTChan[mNTOF]; // vpd PMT tube of tdc channels
+  Int_t mPMT2TDIGLeChan[mNVPD], mPMT2TDIGTeChan[mNVPD]; // tdc channel of vpd PMTs
+  Int_t mTDIGLe2PMTChan[mNTOF], mTDIGTe2PMTChan[mNTOF]; // vpd PMT tube of tdc channels
 
   // Valid tray Ids
   Int_t mValidTrayId[mNTray];
@@ -92,8 +85,6 @@ class StTofrDaqMap{
   void initFromDbaseY5(StMaker *maker);    // tofr5 
   void initFromDbaseGeneral(StMaker *maker);    // tof8++, general
   void Reset();
-  
-  void setNValidTrays(int ntrays);
 
   IntVec DaqChan2Cell( const Int_t iTofrDaq );
   Int_t Cell2DaqChan( const Int_t iTray, const Int_t iModule, const Int_t iCell );
@@ -113,18 +104,12 @@ class StTofrDaqMap{
   // general interface, tray number obseleted
   IntVec TDIGChan2Cell( const Int_t iTdc );
   Int_t Cell2TDIGChan( const Int_t iModule, const Int_t iCell );
-  Int_t EastPMT2TDIGLeChan( const Int_t iTube );
-  Int_t TDIGLeChan2EastPMT( const Int_t iTdc );
-  Int_t EastPMT2TDIGTeChan( const Int_t iTube );
-  Int_t TDIGTeChan2EastPMT( const Int_t iTdc );
-  Int_t WestPMT2TDIGLeChan( const Int_t iTube );
-  Int_t TDIGLeChan2WestPMT( const Int_t iTdc );
-  Int_t WestPMT2TDIGTeChan( const Int_t iTube );
-  Int_t TDIGTeChan2WestPMT( const Int_t iTdc );
+  Int_t PMT2TDIGLeChan( const Int_t iTube );
+  Int_t TDIGLeChan2PMT( const Int_t iTdc );
+  Int_t PMT2TDIGTeChan( const Int_t iTube );
+  Int_t TDIGTeChan2PMT( const Int_t iTdc );
 
   IntVec ValidTrays();
 };
-
-inline void StTofrDaqMap::setNValidTrays(int ntrays) { mNValidTrays = ntrays; }
 
 #endif

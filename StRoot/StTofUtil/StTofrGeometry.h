@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.8 2008/03/27 00:15:39 dongx Exp $
+ * $Id: StTofrGeometry.h,v 1.7 2005/07/07 01:22:28 fisyak Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,9 +10,6 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.h,v $
- * Revision 1.8  2008/03/27 00:15:39  dongx
- * Update for Run8 finished.
- *
  * Revision 1.7  2005/07/07 01:22:28  fisyak
  * Hide typedefs IntVec, DoubleVec, PointVec and methods HelixCrossCellIds,HelixCross, projTrayVector from CINT
  *
@@ -477,11 +474,11 @@ class StTofrGeometry : public TNamed {
    Int_t             GetAtOfTray(const Int_t itray=0)   const;
 
    Int_t             CellIdPointIn(const StThreeVectorD& point) const;
+   //   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec,
+   //                               DoubleVec &pathVec, PointVec &crossVec) const;
 #ifndef __CINT__
-   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec,
-				       DoubleVec &pathVec, PointVec &crossVec) const;
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
-   Bool_t            HelixCross(const StHelixD &helix) const;
+   //   Bool_t            HelixCross(const StHelixD &helix) const;
    Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
    Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
 #endif

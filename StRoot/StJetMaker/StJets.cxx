@@ -1,29 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.17 2008/03/27 21:34:08 tai Exp $
+// $Id: StJets.cxx,v 1.13 2008/01/28 03:37:25 staszak Exp $
 // $Log: StJets.cxx,v $
-// Revision 1.17  2008/03/27 21:34:08  tai
-// moved the field StppJetAnalyzer::muDstJets to StJetMaker::AnalyzerCtl::mJetsy
-//
-// Revision 1.16  2008/03/27 00:41:09  tai
-// moved the method addProtoJet() from the class StJets
-// to the class StJetMaker.
-//
-// Revision 1.15  2008/03/26 23:42:03  tai
-// initialize all member variables at their constructors.
-// StJets::addProtoJet()
-//    -  this method will be moved to the class StJetMaker
-//    -  to prepare for the move
-//         +  fixed a memory leak from mMuPosition
-//         +  cleaned up the codes
-//         +  changed the direct operations on the member variables
-//            to operations through member methods
-// added StJets::addTrackToIndex()
-// added StJets::addJet()
-//
-// Revision 1.14  2008/03/24 22:43:18  tai
-// added particles_() to make test easier.
-//
 // Revision 1.13  2008/01/28 03:37:25  staszak
 // A number of updates: i) Murad's use2006cuts function which extends tracks to SMD, and includes DCA cuts, ii) emulated L2 results now included and data L2 results restructured, iii) StJet zVertex and detEta now filled
 //
@@ -157,35 +135,16 @@ ClassImp(TrackToJetIndex)
 int* global_index;
 
 TrackToJetIndex::TrackToJetIndex(int ji, int ti, StDetectorId id) 
-  : mJetIndex(ji)
-  , mTrackIndex(ti)
-  , mDetId(id)
-  , mCharge(0)
-  , mNhits(0)
-  , mNhitsPoss(0)
-  , mNhitsDedx(0)
-  , mNhitsFit(0)
-  , mNsigmaPion(0.0)
-  , mTdca(0.0)
-  , mTdcaz(0.0)
-  , mTdcaxy(0.0)
-  , metaext(0.0)
-  , mphiext(0.0)
+: mJetIndex(ji), mTrackIndex(ti) , mDetId(id) , mCharge(0), mNhits(0), mNhitsPoss(0), mNhitsDedx(0), mNhitsFit(0), mNsigmaPion(0.), mTdca(0.), mTdcaxy(0.)
 {
-
 }
 
 StJets::StJets()
-  : mDylanPoints(0)
-  , mSumEmcE(0.0)
-  , mEventId(0)
-  , mEventNumber(0)
-  , mRunId(0)
-  , mRunNumber(0)
-  , mCorrupt(false)
-  , mJets(new TClonesArray("StJet",100))
-  , mTrackToJetIndices(new TClonesArray("TrackToJetIndex",200)) 
+: mJets( new TClonesArray("StJet",100)), mTrackToJetIndices( new TClonesArray("TrackToJetIndex",200)) 
 {
+    mEventId = mEventNumber = mRunId = mRunNumber = 0;
+    mDylanPoints = 0;
+    mSumEmcE = 0.;
 	
 }
 
@@ -209,14 +168,92 @@ void StJets::Clear(bool clearAll)
     LOG_DEBUG << "Cleared the Jets" <<endm;
 }
 
-void StJets::addTrackToIndex(TrackToJetIndex& t2j)
+void StJets::addProtoJet(StProtoJet& pj, const StMuDst* muDst)
 {
-  new ((*mTrackToJetIndices)[mTrackToJetIndices->GetLast() + 1]) TrackToJetIndex(t2j);
-}
 
-void StJets::addJet(StJet& jet)
-{
-  new((*mJets)[nJets()]) StJet(jet);
+  StMuEmcPosition*  mMuPosition = new StMuEmcPosition();
+
+  //jetIndex == number of jets + 1, i.e., where to insert
+  int jetIndex = mJets->GetLast()+1;
+  
+  StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
+	
+  //Make it here and update info as we go through tracks:
+  StJet tempJet( pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0 );
+  tempJet.jetEt = pj.eT();
+  tempJet.jetPt = tempJet.Pt();
+  tempJet.jetEta = tempJet.Eta();
+  tempJet.jetPhi = tempJet.Phi();
+  
+  StMuEvent* event = muDst->event();
+  StThreeVectorF vPos = event->primaryVertexPosition();
+  tempJet.zVertex = vPos.z();
+
+  for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
+    StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
+    if (!track) {
+      cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
+      return;
+    }
+    int muTrackIndex = track->getIndex();
+    if (muTrackIndex <0) {
+      cout <<"Error, muTrackIndex<0. abort()"<<endl;
+      abort();
+    }
+    else {
+      
+      //cout <<"here's the track:\t"<<*track<<endl;
+      
+      //add to trackToJetIndices
+      int addAt = mTrackToJetIndices->GetLast()+1;
+      TrackToJetIndex t2j( jetIndex, muTrackIndex, track->detectorId() );
+      t2j.SetPxPyPzE(track->px(), track->py(), track->pz(), track->e() );
+      
+      //and cache some properties if it really came from a StMuTrack:
+      StMuTrack* muTrack = track->particle();
+      if (muTrack) {  //this will fail for calorimeter towers ;)
+
+	//----------------------------------------------
+	double bField = 0.5; //to put it in Tesla
+	double rad=238.6;//geom->Radius()+5.;
+	StThreeVectorD momentumAt,positionAt;
+	bool tok = mMuPosition->trackOnEmc(&positionAt, &momentumAt,
+					   muTrack, bField, rad );
+	t2j.setCharge( muTrack->charge() );
+	t2j.setNhits( muTrack->nHits() );
+	t2j.setNhitsPoss( muTrack->nHitsPoss() );
+	t2j.setNhitsDedx( muTrack->nHitsDedx() );
+	t2j.setNhitsFit( muTrack->nHitsFit() );
+	t2j.setNsigmaPion( muTrack->nSigmaPion() );
+	t2j.setTdca ( muTrack->dcaGlobal().mag() ); //jan 27, 2007
+	t2j.setTdcaz ( muTrack->dcaZ() ); //jan 27, 2007
+	t2j.setTdcaxy ( muTrack->dcaD() ); //jan 27, 2007
+	t2j.setetaext ( positionAt.pseudoRapidity() );
+	t2j.setphiext ( positionAt.phi() );
+      }
+     
+      //cout <<"here's the t2j:\t"<<t2j<<endl;
+      
+      new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );
+      
+      //ok, get track/tower properties here:
+      StDetectorId mDetId = track->detectorId();
+      if (mDetId==kTpcId) {
+	tempJet.nTracks++;
+	tempJet.tpcEtSum += track->eT();
+      }
+      else if (mDetId==kBarrelEmcTowerId) {
+	tempJet.nBtowers++;
+	tempJet.btowEtSum += track->eT();
+      }
+      else if (mDetId==kEndcapEmcTowerId) {
+	tempJet.nEtowers++;
+	tempJet.etowEtSum += track->eT();
+      }
+    }
+  }
+  //add in the jet container
+  new((*mJets)[jetIndex]) StJet( tempJet );
 }
 
 vector<TrackToJetIndex*> StJets::particles(int jetIndex)
@@ -232,17 +269,6 @@ vector<TrackToJetIndex*> StJets::particles(int jetIndex)
     }
     return vec;
 }
-
-TObjArray StJets::particles_(int jetIndex)
-{
-  TObjArray ret;
-
-  vector<TrackToJetIndex*> vec = particles(jetIndex);
-  for (vector<TrackToJetIndex*>::iterator iter = vec.begin(); iter != vec.end(); ++iter)
-    ret.Add(*iter);
-
-  return ret;
-} 
 
 //right now it's a linear search, even though the JetsToTrackIndices is ordered by jetIndex
 StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
