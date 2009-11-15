@@ -612,7 +612,7 @@ char* getEmcTrgData(DATAP* datap, int index)
   unsigned char version  = byteCount_Version & 0xff;
 
   switch (version) {
-  case y8TRANSFER_VERSION:
+  case y8TRANSFER_VERSION: {
     int offset = qswap32(swaptrgd, trgtowertrnfer->OffsetBlock[index].offset);
     int length = qswap32(swaptrgd, trgtowertrnfer->OffsetBlock[index].length);
 
@@ -648,6 +648,7 @@ char* getEmcTrgData(DATAP* datap, int index)
     }
 
     return (char*)trgtowertrnfer + offset;
+    }
 
  default :
    LOG_INFO << Form("Trigger transfer version 0x%02x. No EMC data in trigger banks.", version) << endm;

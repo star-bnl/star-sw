@@ -71,7 +71,8 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
 
   HN=96;  // max events used, cannot exceed 96 used in header file
   MINTRACKS=1500;
-  SCALER_ERROR = 0.0006; // by eye from hist: SCvsZDCEpW.gif (liberal)
+  //SCALER_ERROR = 0.0006; // by eye from hist: SCvsZDCEpW.gif (liberal)
+  SCALER_ERROR = 0.0007; // by RMS from hist: SCvsZDCX.gif (liberal)
 
   // MAXDIFFE is maximum different in sc from last ebye sc
   MAXDIFFE =   SCALER_ERROR;
@@ -219,7 +220,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     runid = event->runId();
   }
   if (doReset) {
-    curhist = imodHN(curhist+1);
+    if (evt>1) curhist = imodHN(curhist+1);
     schists[curhist]->Reset();
     if (doGaps) {
       gapZhist->Reset();
@@ -244,13 +245,13 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
   if (QAmode) {
     gMessMgr->Info()
-      << "StSpaceChargeEbyEMaker: used (for this event) SpaceCharge = "
+      << "used (for this event) SpaceCharge = "
       << lastsc << " (" << thistime << ")" << endm;
     gMessMgr->Info()
-      << "StSpaceChargeEbyEMaker: zdc west+east = "
+      << "zdc west+east = "
       << runinfo->zdcWestRate()+runinfo->zdcEastRate() << endm;
     gMessMgr->Info()
-      << "StSpaceChargeEbyEMaker: zdc coincidence = "
+      << "zdc coincidence = "
       << runinfo->zdcCoincidenceRate() << endm;
   }
 
@@ -366,9 +367,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       float s1 = 1.0 - s0; // fraction of tracks from current event
 
       if (QAmode) {
-        gMessMgr->Info() << "StSpaceChargeEbyEMaker: reset = " << doReset << endm;
-        gMessMgr->Info() << "StSpaceChargeEbyEMaker: nevts = " << ntent << endm;
-        gMessMgr->Info() << "StSpaceChargeEbyEMaker: ntrks = " << nttrk << endm;
+        gMessMgr->Info() << "reset = " << doReset << endm;
+        gMessMgr->Info() << "nevts = " << ntent << endm;
+        gMessMgr->Info() << "ntrks = " << nttrk << endm;
       }
 
       float ee;
@@ -441,9 +442,10 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
   Bool_t large_err = kTRUE;
   Bool_t large_dif = kTRUE;
 
+  // Cuts on difference from previous sc measure:
   // If last event was auto, use MAXDIFFA, else use between MAXDIFFE & MAXDIFFA
   //   scaled by oldness of previous sc measure (curhist-1)
-  float maxdiff;
+  float maxdiff,dif=0;
   if (did_auto)
     maxdiff = MAXDIFFA;
   else
@@ -452,24 +454,24 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
   // More than 30 seconds since last used event? Forget it...
   int timedif = time-lasttime;
   if (QAout) {
-    gMessMgr->Info() << "StSpaceChargeEbyEMaker: time since last event = "
+    gMessMgr->Info() << "time since last event = "
       << timedif << endm;
-    gMessMgr->Info() << "StSpaceChargeEbyEMaker: curhist = "
+    gMessMgr->Info() << "curhist = "
       << curhist << endm;
   }
-  if ((PrePassmode) || (Calibmode) || (lasttime==0) || (timedif < 30)) {
+  float ntrkstot = 0; // running sum using oldness scale factor
+  Bool_t decideFromData = ((PrePassmode) || (Calibmode) || (lasttime==0) || (timedif < 30));
+  if (decideFromData) {
   
     int isc;
-    float ntrkstot = 0; // running sum using oldness scale factor
-    float dif=0; // difference from lastsc
     static int iscMax = 1;  // use only one hist for calib mode, and...
     if (!Calibmode && iscMax<HN) iscMax = curhist+1; // don't use uninitialized
     for (isc=0; isc<iscMax; isc++) {
       int i = imodHN(curhist-isc);
       ntrkstot += ntrks[i] * oldness(i);
       if (QAout) {
-	if (!isc) gMessMgr->Info("StSpaceChargeEbyEMaker: i, ni, oi, nt:");
-	gMessMgr->Info() << "StSpaceChargeEbyEMaker: " << i << ", "
+	if (!isc) gMessMgr->Info("Building with: i, ni, oi, nt:");
+	gMessMgr->Info() << "Building with: " << i << ", "
 	  << ntrks[i] << ", " << oldness(i) << ", " << ntrkstot << endm;
       }
 
@@ -479,8 +481,7 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
 	BuildHist(i);
 	FindSpaceCharge();
 	if (QAout) gMessMgr->Info()
-	  << "StSpaceChargeEbyEMaker: sc = " << sc
-	  << " +/- " << esc << endm;
+	  << "sc = " << sc << " +/- " << esc << endm;
 	large_err = (esc == 0) || (esc > SCALER_ERROR);
 	if (!large_err) {
 	  if (PrePassmode) { do_auto=kFALSE; break; }
@@ -495,24 +496,12 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
 	}
       }
 
-      // shouldn't need to go past oldest event previously used
-      if (evts[i] <= oldevt) {
-	if (QAout) {
-	  if (few_stats) gMessMgr->Info()
-	    << "StSpaceChargeEbyEMaker: (RECENT) STATS TOO FEW: "
-	    << ntrkstot << " (" << MINTRACKS << ")" << endm;
-	  else if (large_err) gMessMgr->Info()
-	    << "StSpaceChargeEbyEMaker: FIT ERROR TOO LARGE: "
-	    << esc << " (" << SCALER_ERROR << ")" << endm;
-	  else if (large_dif) gMessMgr->Info()
-	    << "StSpaceChargeEbyEMaker: DIFFERENCE TOO LARGE: "
-	    << dif << " (" << maxdiff << ")" << endm;
-	}
-	break;
-      }
+      // shouldn't need to go past oldest event previously used?
+      // tough to know - allow for now as of 11 Jan 2008
+      // if (evts[i] <= oldevt)  break;
     }
     if (QAout && (isc == HN)) gMessMgr->Info()
-      << "StSpaceChargeEbyEMaker: STORED DATA EXHAUSTED: "
+      << "STORED DATA EXHAUSTED: "
       << HN << " events" << endm;
   }
 
@@ -523,11 +512,22 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
   // In Calib   mode, do_auto decides when to save entries and reset
 
   if (do_auto) {
-    gMessMgr->Info("StSpaceChargeEbyEMaker: using auto SpaceCharge");
+    if (QAout && decideFromData) {
+      if (few_stats) gMessMgr->Info()
+        << "(RECENT) STATS TOO FEW: "
+        << ntrkstot << " (" << MINTRACKS << ")" << endm;
+      else if (large_err) gMessMgr->Info()
+        << "FIT ERROR TOO LARGE: "
+        << esc << " (" << SCALER_ERROR << ")" << endm;
+      else if (large_dif) gMessMgr->Info()
+        << "DIFFERENCE TOO LARGE: "
+        << dif << " (" << maxdiff << ")" << endm;
+    }
+    gMessMgr->Info("using auto SpaceCharge");
     if (Calibmode) doReset = kFALSE;
     else m_ExB->AutoSpaceChargeR2();
   } else {
-    gMessMgr->Info() << "StSpaceChargeEbyEMaker: using SpaceCharge = "
+    gMessMgr->Info() << "using SpaceCharge = "
       << sc << " +/- " << esc << " (" << time << ")" << endm;
     scehist->SetBinContent(evt,sc);
     scehist->SetBinError(evt,esc);
@@ -682,8 +682,7 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
   if (doNtuple) ntup->Write();
   ff.Close();
 
-  gMessMgr->Info() << "StSpaceChargeEbyEMaker: QA hists file: "
-		   << fname.Data() << endm;
+  gMessMgr->Info() << "QA hists file: " << fname.Data() << endm;
 
   gSystem->cd("..");
 
@@ -730,7 +729,7 @@ void StSpaceChargeEbyEMaker::FillQAHists(float DCA, float space, int ch,
 //_____________________________________________________________________________
 int StSpaceChargeEbyEMaker::imodHN(int i) {
   // Keep index in bounds of circular queue
-  return ( i >= HN ? i-HN : (i < 0 ? i+HN : i) );
+  return ( i >= HN ? imodHN(i-HN) : (i < 0 ? imodHN(i+HN) : i) );
 }
 //_____________________________________________________________________________
 float StSpaceChargeEbyEMaker::oldness(int i, int j) {
@@ -777,13 +776,13 @@ void StSpaceChargeEbyEMaker::SetTableName() {
   ux+=-10;
   int date,time;
   ux.GetGTime(date,time);
-  gMessMgr->Info() << "StSpaceChargeEbyEMaker: first event date = " << date << endm;
-  gMessMgr->Info() << "StSpaceChargeEbyEMaker: first event time = " << time << endm;
+  gMessMgr->Info() << "first event date = " << date << endm;
+  gMessMgr->Info() << "first event time = " << time << endm;
   tabname = Form("./StarDb/Calibrations/rich/spaceChargeCorR2.%08d.%06d.C",date,time);
 }
 //_____________________________________________________________________________
 void StSpaceChargeEbyEMaker::WriteTableToFile(){
-  gMessMgr->Info() << "StSpaceChargeEbyEMaker: Writing new table to:\n  "
+  gMessMgr->Info() << "Writing new table to:\n  "
     << tabname.Data() << endm;
   TString dirname = gSystem->DirName(tabname.Data());
   TString estr = dirname;
@@ -906,8 +905,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.15 2007/01/25 19:04:04 perev Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.16 2008/01/14 19:22:49 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.16  2008/01/14 19:22:49  genevb
+// Fine tuning of parameters, removal of excess text in messages
+//
 // Revision 1.15  2007/01/25 19:04:04  perev
 // GMT fix
 //
