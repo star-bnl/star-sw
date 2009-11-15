@@ -421,7 +421,6 @@ int bsmdPed::special_setup(int run_type, int sub_type)
 
 	switch(run_type) {
 	case RUN_TYPE_PULSER_A :
-	case RUN_TYPE_PULSER :
 	case RUN_TYPE_PED_A :
 	case RUN_TYPE_PED_B :
 		LOG(WARN,"Special Pedestal setup: %d, %d",run_type, sub_type) ;
