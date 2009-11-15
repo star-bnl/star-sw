@@ -238,8 +238,8 @@ const StiNodeInf *getInfo() const 	{return _inf;}
 
   void   extend();
   void   reduce();
-  Int_t  debug() const 				{return _debug;}
-  void   setDebug(Int_t m) {_debug = m;}
+  static Int_t  debug()           {return _debug;}
+  static void   setDebug(Int_t m) {_debug = m;}
   static void   SetLaser(Int_t m) {_laser = m;}
   void   PrintpT(Char_t *opt="");
   int    getFlipFlop() const 			{return mFlipFlop;}

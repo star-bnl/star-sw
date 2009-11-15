@@ -9,7 +9,7 @@
 
 //ClassImp(StSvtAngles)
 
-StSvtAngles::StSvtAngles()
+StSvtAngles::StSvtAngles():mTheta(-1956),mPhi(-1956)
 {
 
 }

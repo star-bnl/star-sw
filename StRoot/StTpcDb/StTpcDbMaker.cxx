@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.43 2008/08/01 14:28:34 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.44 2008/09/10 15:46:37 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.44  2008/09/10 15:46:37  fisyak
+ * Recalculate Tpc drift velocity once per event, avoid expensive conversion to unix time
+ *
  * Revision 1.43  2008/08/01 14:28:34  fisyak
  * Add new getT0, clean up
  *
@@ -531,10 +534,9 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     Int_t option = (m_Mode & 0xfffc) >> 2;
     m_TpcDb->SetExB(new StMagUtilities(gStTpcDb, RunLog, option));
   }
+  m_TpcDb->SetDriftVelocity();
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
-  m_tpg_pad_plane->SetNRows(1);
   m_tpg_detector = new St_tpg_detector("tpg_detector",1);
-  m_tpg_detector->SetNRows(1);
   AddConst(m_tpg_pad_plane);
   AddConst(m_tpg_detector);
   if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
@@ -583,6 +585,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 Int_t StTpcDbMaker::Make(){
 
   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
+  m_TpcDb->SetDriftVelocity();
   if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
     Update_tpg_pad_plane();
   if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
@@ -600,33 +603,39 @@ void StTpcDbMaker::Clear(const char *opt){
 //_____________________________________________________________________________
 void StTpcDbMaker::Update_tpg_pad_plane(){
   if (m_tpg_pad_plane) {
-    St_tpg_pad_plane &pp = *m_tpg_pad_plane;
-    pp[0].nrow_in = tpcDbInterface()->PadPlaneGeometry()->numberOfInnerRows();
-    pp[0].nrow_out = tpcDbInterface()->PadPlaneGeometry()->numberOfOuterRows();
-    pp[0].pad_len_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadLength();
-    pp[0].pad_len_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadLength();
-    pp[0].pad_sep_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadPitch();
-    pp[0].pad_sep_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadPitch();
-    pp[0].pad_wid_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadWidth();
-    pp[0].pad_wid_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadWidth();
-    pp[0].nsect = tpcDbInterface()->Dimensions()->numberOfSectors();
+    tpg_pad_plane_st pp;
+    memset(&pp, 0, sizeof(tpg_pad_plane_st));
+    pp.nrow_in = tpcDbInterface()->PadPlaneGeometry()->numberOfInnerRows();
+    pp.nrow_out = tpcDbInterface()->PadPlaneGeometry()->numberOfOuterRows();
+    pp.pad_len_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadLength();
+    pp.pad_len_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadLength();
+    pp.pad_sep_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadPitch();
+    pp.pad_sep_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadPitch();
+    pp.pad_wid_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadWidth();
+    pp.pad_wid_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadWidth();
+    pp.nsect = tpcDbInterface()->Dimensions()->numberOfSectors();
     for (int i=1;i<=tpcDbInterface()->PadPlaneGeometry()->numberOfRows();i++){
-      pp[0].npads[i-1] = tpcDbInterface()->PadPlaneGeometry()->numberOfPadsAtRow(i);
-      pp[0].rad[i-1] = tpcDbInterface()->PadPlaneGeometry()->radialDistanceAtRow(i);
+      pp.npads[i-1] = tpcDbInterface()->PadPlaneGeometry()->numberOfPadsAtRow(i);
+      pp.rad[i-1] = tpcDbInterface()->PadPlaneGeometry()->radialDistanceAtRow(i);
     }
+    m_tpg_pad_plane->AddAt(&pp,0);
   }
 }
 
 //_____________________________________________________________________________
 void StTpcDbMaker::Update_tpg_detector(){
  if (m_tpg_detector) {
-     St_tpg_detector &pp = *m_tpg_detector;
-     pp[0].nsectors = 2*tpcDbInterface()->Dimensions()->numberOfSectors();
-           // note tpg table define number of sectors as 48
-     pp[0].drift_length = tpcDbInterface()->Dimensions()->outerEffectiveDriftDistance();
-     pp[0].clock_frequency = 1e6*tpcDbInterface()->Electronics()->samplingFrequency();
-     pp[0].z_inner_offset = tpcDbInterface()->Dimensions()->innerEffectiveDriftDistance() - tpcDbInterface()->Dimensions()->outerEffectiveDriftDistance();
-     pp[0].vdrift = tpcDbInterface()->DriftVelocity();
+   tpg_detector_st pp;
+   memset(&pp, 0, sizeof(tpg_detector_st));
+   pp.nsectors = 2*tpcDbInterface()->Dimensions()->numberOfSectors();
+   // note tpg table define number of sectors as 48
+   pp.drift_length = tpcDbInterface()->Dimensions()->outerEffectiveDriftDistance();
+   pp.clock_frequency = 1e6*tpcDbInterface()->Electronics()->samplingFrequency();
+   pp.z_inner_offset = 
+     tpcDbInterface()->Dimensions()->innerEffectiveDriftDistance() - 
+     tpcDbInterface()->Dimensions()->outerEffectiveDriftDistance();
+   pp.vdrift = tpcDbInterface()->DriftVelocity();
+   m_tpg_detector->AddAt(&pp,0);
  }
 }
 //_____________________________________________________________________________

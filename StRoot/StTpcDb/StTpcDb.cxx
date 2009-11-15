@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.48 2008/08/01 14:28:22 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.49 2008/09/10 15:46:36 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.49  2008/09/10 15:46:36  fisyak
+ * Recalculate Tpc drift velocity once per event, avoid expensive conversion to unix time
+ *
  * Revision 1.48  2008/08/01 14:28:22  fisyak
  * Add new getT0, clean up
  *
@@ -135,6 +138,7 @@
 #include "tables/St_trgTimeOffset_Table.h"
 #include "tables/St_dst_L0_Trigger_Table.h"
 #include "TUnixTime.h"
+#include "StMessMgr.h"
 StTpcDb* gStTpcDb = 0;
 
 // C++ routines:
@@ -470,33 +474,37 @@ TTable *StTpcDb::getTpcTable(int i){
   return (TTable *)tpctrg[i];
 }
 //-----------------------------------------------------------------------------
-float StTpcDb::DriftVelocity(Int_t sector)
-{
+float StTpcDb::DriftVelocity(Int_t sector) {
+  static UInt_t u2007 = TUnixTime(20070101,0,1).GetUTime(); // 
+  assert(mUc > 0);
+  if (mUc < u2007) sector = 24;
+  UInt_t kase = 1;
+  if (sector <= 12) kase = 0;
+  return 1e6*mDriftVel[kase];
+}
+//-----------------------------------------------------------------------------
+void StTpcDb::SetDriftVelocity() {
   static UInt_t u0 = 0; // beginTime of current Table
   static UInt_t u1 = 0; // beginTime for next Table
   static UInt_t umax = TUnixTime(20250101,0,1).GetUTime(); // maximum time allowed for next table
   // for back compartiblity switch to separated West and East drift velocities after 2007
-  static UInt_t u2007 = TUnixTime(20070101,0,1).GetUTime(); // 
-  static UInt_t ucOld = 0;
   static St_tpcDriftVelocity *dvel0 = 0;
   static St_tpcDriftVelocity *dvel1 = 0;
   static StMaker *mk = StMaker::GetChain();
   static TDatime t[2];
-  static Float_t driftvel[2] = {0,0};
   UInt_t uc = TUnixTime(mk->GetDateTime(),1).GetUTime();
-  if (uc < u2007) sector = 24;
-  UInt_t kase = 1;
-  if (sector <= 12) kase = 0;
-  if (uc != ucOld) {
+  if (uc != mUc) {
     if (! dvel0 || uc < umax && (uc < u0 || uc > u1)) {//First time only
       dvel0 = (St_tpcDriftVelocity *) mk->GetDataBase("Calibrations/tpc/tpcDriftVelocity");
       if (! dvel0) {
 	gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
-	return 0;
+	mUc = 0;
+	return;
       }
       if (mk->GetValidity(dvel0,t) < 0) {
 	gMessMgr->Message("StTpcDb::Error Wrong Validity Tpc DriftVelocity","E");
-	return 0;
+	mUc = 0;
+	return;
       }
       u0 = TUnixTime(t[0],1).GetUTime();
       u1 = TUnixTime(t[1],1).GetUTime();
@@ -516,30 +524,31 @@ float StTpcDb::DriftVelocity(Int_t sector)
       }
     }
     
-    driftvel[0] = driftvel[1] = 0;
+    mDriftVel[0] = mDriftVel[1] = 0;
     tpcDriftVelocity_st *d0 = dvel0->GetTable();
     if (dvel1) {
       tpcDriftVelocity_st *d1 = dvel1->GetTable();
       if (d0->laserDriftVelocityWest > 0 && d1->laserDriftVelocityWest > 0)
-	driftvel[0] = (d0->laserDriftVelocityWest  *(uc-u0) + d1->laserDriftVelocityWest  *(u1-uc))/(u1 - u0);
+	mDriftVel[0] = (d0->laserDriftVelocityWest  *(uc-u0) + d1->laserDriftVelocityWest  *(u1-uc))/(u1 - u0);
       if (d0->laserDriftVelocityEast > 0 && d1->laserDriftVelocityEast > 0) 
-	driftvel[1] = (d0->laserDriftVelocityEast  *(uc-u0) + d1->laserDriftVelocityEast  *(u1-uc))/(u1 - u0);
-      if (driftvel[0] <= 0.0 || driftvel[1] <= 0.0) {
+	mDriftVel[1] = (d0->laserDriftVelocityEast  *(uc-u0) + d1->laserDriftVelocityEast  *(u1-uc))/(u1 - u0);
+      if (mDriftVel[0] <= 0.0 || mDriftVel[1] <= 0.0) {
 	if (d0->cathodeDriftVelocityWest > 0 && d1->cathodeDriftVelocityWest > 0) 
-	  driftvel[0] = (d0->cathodeDriftVelocityWest*(uc-u0) + d1->cathodeDriftVelocityWest*(u1-uc))/(u1 - u0);
+	  mDriftVel[0] = (d0->cathodeDriftVelocityWest*(uc-u0) + d1->cathodeDriftVelocityWest*(u1-uc))/(u1 - u0);
 	if (d0->cathodeDriftVelocityEast > 0 && d1->cathodeDriftVelocityEast > 0) 
-	  driftvel[1] = (d0->cathodeDriftVelocityEast*(uc-u0) + d1->cathodeDriftVelocityEast*(u1-uc))/(u1 - u0);
+	  mDriftVel[1] = (d0->cathodeDriftVelocityEast*(uc-u0) + d1->cathodeDriftVelocityEast*(u1-uc))/(u1 - u0);
       }
     }
-    if (driftvel[0] <= 0.0 || driftvel[1] <= 0.0) {
-      driftvel[0] = d0->laserDriftVelocityWest;
-      driftvel[1] = d0->laserDriftVelocityEast;
-      if (driftvel[0] <= 0.0) driftvel[0] = d0->cathodeDriftVelocityWest;
-      if (driftvel[1] <= 0.0) driftvel[1] = d0->cathodeDriftVelocityEast;
+    if (mDriftVel[0] <= 0.0 || mDriftVel[1] <= 0.0) {
+      mDriftVel[0] = d0->laserDriftVelocityWest;
+      mDriftVel[1] = d0->laserDriftVelocityEast;
+      if (mDriftVel[0] <= 0.0) mDriftVel[0] = d0->cathodeDriftVelocityWest;
+      if (mDriftVel[1] <= 0.0) mDriftVel[1] = d0->cathodeDriftVelocityEast;
     }
-    ucOld = uc;
+    LOG_INFO << "Set Tpc Drift Velocity =" << mDriftVel[0]  << " (West) " << mDriftVel[0] << " (East) for "
+	     << mk->GetDateTime().AsString() << endm;
+    mUc = uc;
   }
-  return 1e6*driftvel[kase];
 }
 
 

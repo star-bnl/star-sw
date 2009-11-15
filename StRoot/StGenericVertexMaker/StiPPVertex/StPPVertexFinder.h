@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.7 2006/03/12 17:01:01 jeromel Exp $
+ * $Id: StPPVertexFinder.h,v 1.10 2008/10/23 20:37:32 genevb Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -30,6 +30,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t, float z);
   void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t, float rxy);
   bool matchTrack2Membrane(const StiKalmanTrack*, TrackData &t);
+  bool isPostCrossingTrack(const StiKalmanTrack* track);
   vector<TrackData>  mTrackData;
   vector<VertexData> mVertexData;
   bool buildLikelihood();
@@ -53,6 +54,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   float  mMinFitPfrac;    // nFit/nPossible
   bool   isMC;            // flag minor differences between Data & M-C
   bool   mUseCtb;         // disable CTB from matching/vetoing of tracks
+  bool   mDropPostCrossingTrack;  // enable/disable post crossing tarck rejection
+  int    mStoreUnqualifiedVertex; // set the max # of vertices, sorted by rank
 
   // beam line
   double          mX0  ;     // starting point of beam parameterization
@@ -77,6 +80,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
 public:
   void setMC(bool x=true){isMC=x;}
   void useCTB(bool x=true){mUseCtb=x;}
+  void usePCT(bool x=true){setDropPostCrossingTrack(!x);}
+  void setDropPostCrossingTrack(bool x=true){mDropPostCrossingTrack=x;}
   void Finish();
 
   TH1F *hA[mxH];
@@ -100,6 +105,25 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.10  2008/10/23 20:37:32  genevb
+ * Add switches for turning on/off use of Post-Crossing Tracks [default:off]
+ *
+ * Revision 1.9  2008/10/21 19:23:06  balewski
+ * store unqualified vertices on Akio's request
+ *
+ * Revision 1.8  2008/08/21 22:09:31  balewski
+ * - In matchTrack2Membrane()
+ *   - Cut on hit max R chanegd from 190 to 199cm
+ *   - Fixed logic failure of counting possible hits
+ *   - Fixed logic failure of crossing CM for certain pattern of hits
+ * - Added a new function bool isPostCrossingTrack()
+ *   - it returns true if track have 2 or more hits in wrong z
+ * - Use isPostCrossingTrack() in fit()
+ * - Added switch setDropPostCrossingTrack(bool), defaulted to true
+ * All changes tested & implemented by Akio in preparation for 2008 pp production.
+ * The key change (removing PostCrossingTrack) is in response to the change of the TPC cluster finder
+ * - now we use the on-line version which allows for longer range of TPC time buckets to be used.
+ *
  * Revision 1.7  2006/03/12 17:01:01  jeromel
  * Minor change + use ppvNoCtbVertexFinder
  *

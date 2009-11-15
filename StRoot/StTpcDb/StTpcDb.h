@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.30 2008/08/01 14:28:25 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.31 2008/09/10 15:46:36 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.31  2008/09/10 15:46:36  fisyak
+ * Recalculate Tpc drift velocity once per event, avoid expensive conversion to unix time
+ *
  * Revision 1.30  2008/08/01 14:28:25  fisyak
  * Add new getT0, clean up
  *
@@ -154,6 +157,8 @@ class StTpcDb {
  StMagUtilities*       mExB;           //!
  Int_t                 m_Debug;        //!
  TGeoHMatrix          *mTpc2GlobalMatrix;//!
+ Float_t               mDriftVel[2];   //!
+ UInt_t                mUc;            //! time for which above mDriftVel have been calculateed
  protected:
    StTpcDb() {}
    void GetDataBase(StMaker* maker);
@@ -179,6 +184,7 @@ class StTpcDb {
    St_tpcPadResponseC *PadResponse();
    TTable          *FindTable(const Char_t *name, Int_t dbIndex=kCalibration);
    //small pieces of data:
+   void  SetDriftVelocity();
    float DriftVelocity(Int_t sector=24);
    float triggerTimeOffset();
    int dvelcounter;

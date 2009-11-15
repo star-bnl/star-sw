@@ -32,6 +32,8 @@ class St_spaceChargeCorC : public TChair {
   Double_t getSpaceChargeCoulombs(Double_t scaleFactor){
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
     if (! scalers ) return 0;
+    Double_t zf = zeroField(0); // potential validity margin for scalers
+    if (zf>0 && zf<1) scalers->setValidityMargin(zf);
     Double_t coulombs = 0;
     for (int row=0;row< (int) getNumRows();row++) {
       Double_t mult = 0;

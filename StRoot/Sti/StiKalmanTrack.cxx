@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.112 2008/07/23 18:41:52 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.112 2008/07/23 18:41:52 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.113 2008/10/27 21:01:30 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.113 2008/10/27 21:01:30 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.113  2008/10/27 21:01:30  perev
+ * Free not used hits again
+ *
  * Revision 2.112  2008/07/23 18:41:52  fisyak
  * Remove 100 cm cut on hit radius to calculate DcaGeometry,,bug 1243, left after big step back
  *
@@ -1388,12 +1391,12 @@ if (oldRefit) {
       if (node == vertexNode)				continue;
       StiHit *hit = node->getHit();
       if(!hit) 						continue;
-      //hit->setTimesUsed(0);
+      hit->setTimesUsed(0);
       node->setHit(0);
       if (!node->isValid()) 				continue;
       if (node->getChi2()>10000.)			continue;
       assert(node->getChi2()<=StiKalmanTrackFitterParameters::instance()->getMaxChi2());
-      //hit->setTimesUsed(1);
+      hit->setTimesUsed(1);
       node->setHit(hit);
     }
   }

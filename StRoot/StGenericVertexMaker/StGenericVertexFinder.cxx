@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.12 2006/05/04 20:01:30 jeromel Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.13 2008/10/23 20:37:31 genevb Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -45,6 +45,12 @@ void StGenericVertexFinder::addVertex(StPrimaryVertex* vtx)
   mVertexList.push_back(*vtx);
 }
 //______________________________________________________________________________
+void StGenericVertexFinder::UsePCT(bool usePCT)
+{
+  LOG_WARN << "StGenericVertexFinder::UsePCT() not implemented for this vertex finder." << endm;
+  LOG_WARN << "StGenericVertexFinder::Expect Post-crossing tracks to be used by default in old finders." << endm;
+}
+//______________________________________________________________________________
 int StGenericVertexFinder::size() const
 {
   return mVertexList.size();
@@ -72,6 +78,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.13  2008/10/23 20:37:31  genevb
+// Add switches for turning on/off use of Post-Crossing Tracks [default:off]
+//
 // Revision 1.12  2006/05/04 20:01:30  jeromel
 // Switched to logger
 //

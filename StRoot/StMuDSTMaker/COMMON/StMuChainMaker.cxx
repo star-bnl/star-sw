@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.30 2008/07/15 18:22:34 jeromel Exp $
+ * $Id: StMuChainMaker.cxx,v 1.31 2008/10/19 21:35:55 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -337,14 +337,16 @@ void StMuChainMaker::fromList(string list) {
   }
   char line[512];
   char name[500];
+  string ltest;
   DEBUGVALUE(inputStream.good());
-  for (;inputStream.good();) {
+  while (inputStream.good()) {
       inputStream.getline(line,512);
-      if  ( inputStream.good() ) {
+	  string ltest(line);
+	  if  (inputStream.good()) {
 	  int numberOfEvents = TChain::kBigNumber;
 	  int iret = sscanf(line,"%s%i",name, &numberOfEvents);
-          if(iret) {/*warnOff*/}
-	  if ( pass(name,mSubFilters) ) {
+		  if(iret) {/*warnOff*/}
+	  if ( pass(name,mSubFilters) && ltest!="") {
 	      mFileList.push_back( StMuStringIntPair( name, numberOfEvents) );
 	  }
       }
@@ -376,6 +378,9 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.31  2008/10/19 21:35:55  tone421
+  * Code added in StMuChainMaker::fromList(string list) to ensure blank lines are ignored when they occur in the filelist paased to the StMuDstMaker constructor.
+  *
   * Revision 1.30  2008/07/15 18:22:34  jeromel
   * Replace GetEnv by HostName()
   *
