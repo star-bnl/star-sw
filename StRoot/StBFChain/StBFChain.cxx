@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.531 2008/01/20 00:32:50 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.532 2008/02/15 18:40:32 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -804,6 +804,9 @@ Int_t StBFChain::Instantiate()
   if (GetOption("nohistos")) SetAttr(".histos",0,"*");
   else                       SetAttr(".histos",1,"*");
   if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats();
+
+  if (GetOption("svt1hit"))  SetAttr("minPrecHits",1,"Sti");
+
   return status;
 }
 //_____________________________________________________________________
