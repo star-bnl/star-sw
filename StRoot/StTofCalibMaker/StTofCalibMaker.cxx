@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.17 2008/06/25 21:45:29 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.19 2008/07/30 20:03:03 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,12 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.19  2008/07/30 20:03:03  dongx
+ * mBeamLine initialized in constructor to avoid null pointer when no calibration tables
+ *
+ * Revision 1.18  2008/07/22 00:16:47  dongx
+ * initialization added for global variables in StTofCollection in each event
+ *
  * Revision 1.17  2008/06/25 21:45:29  dongx
  * Reset time values when tot/z is out of range
  *
@@ -145,6 +151,10 @@ StTofCalibMaker::StTofCalibMaker(const char *name) : StMaker(name)
   mValidStartTime = kTRUE;
   mEastPVPDValid = kTRUE;
   mSlewingCorr = kTRUE;
+
+  StThreeVectorD MomFstPt(0.,0.,9999.);
+  StThreeVectorD origin(0.,0.,0.);
+  mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
 
   resetPars();
 }
@@ -319,7 +329,7 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
   mYear8 = (runnumber>9000000&&runnumber<10000000);
   /// initialize the calibrations parameters from dbase
   /// read in and check the size
-  gMessMgr->Info("    -- retrieving run parameters from Calibrations_tof","OS");
+  gMessMgr->Info("","OS") << "   -- retrieving run parameters from Calibrations_tof" << endm;
   TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
   if (!mDbDataSet){
     gMessMgr->Error("unable to get TOF run parameters","OS");
@@ -330,7 +340,7 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
   /// year 2,3,4
   /////////////////////////////
   if(mYear2||mYear3||mYear4) {
-    gMessMgr->Info("     loading parameters for Run II/III/IV","OS");
+    gMessMgr->Info("     loading parameters for Run II/III/IV", "OS");
     // -- T0 parameters --
     St_tofTzero* tofT0 = static_cast<St_tofTzero*>(mDbDataSet->Find("tofTzero"));
     if(!tofT0) {
@@ -628,7 +638,7 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
     /// year 8
     /////////////////////////////
   }  else if(mYear8) {
-    gMessMgr->Info("     loading parameters for Run VIII","OS");
+    gMessMgr->Info("","OS") << "     loading parameters for Run VIII" << endm;
 
     // read tofTotCorr table
     St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(mDbDataSet->Find("tofTotCorr"));
@@ -868,7 +878,7 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
       dydz = vSeed->dydz;
     }
     else {
-      LOG_INFO << "StGenericVertexMaker -- No Database for beamline" << endm;
+      LOG_INFO << "StTofCalibMaker -- No Database for beamline" << endm;
     }
 
     LOG_INFO << "BeamLine Constraint: " << endm;
@@ -895,7 +905,6 @@ Int_t StTofCalibMaker::initParameters(int runnumber)
     if(mBeamHelix) delete mBeamHelix;
     mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
     
-    
   } // end if (mYear8)
 
   return kStOK;
@@ -907,6 +916,9 @@ Int_t StTofCalibMaker::FinishRun(int runnumber)
   
   if(mTofpGeom) delete mTofpGeom;
   mTofpGeom = 0;
+
+  if(mBeamHelix) delete mBeamHelix;
+  mBeamHelix = 0;
   
   return kStOK;
 }
@@ -932,6 +944,13 @@ void StTofCalibMaker::clearFormulars()
 Int_t StTofCalibMaker::Make()
 {
   gMessMgr->Info(" StTofCalibMaker::Maker: starting ...","OS");
+
+  mTDiff = -9999.;
+  mVPDVtxZ = -9999.;
+  mProjVtxZ = -9999.;
+  mVPDHitPatternEast = 0;
+  mVPDHitPatternWest = 0;
+
   Int_t iret = kStOK;
   if(mYear2||mYear3||mYear4){
     iret = processEventYear2to4();
@@ -1419,9 +1438,9 @@ Int_t StTofCalibMaker::processEventYear8(){
     StTrackGeometry *theTrackGeometry = thisTrack->geometry();
 
     StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
-    cout<<"tofPos(x,y,z)= "<<tofPos.x()<<"  "<<tofPos.y()<<"  "<<tofPos.z()<<endl;
+    LOG_INFO<<"tofPos(x,y,z)= "<<tofPos.x()<<"  "<<tofPos.y()<<"  "<<tofPos.z()<<endm;
     StThreeVectorD dcatof = tofPos - mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
-    cout<<"dcatof(x,y)= "<<dcatof.x()<<"  "<<dcatof.y()<<endl;
+    LOG_INFO<<"dcatof(x,y)= "<<dcatof.x()<<"  "<<dcatof.y()<<endm;
 
     if(dcaRmin>dcatof.perp()) {
        mProjVtxZ = tofPos.z();

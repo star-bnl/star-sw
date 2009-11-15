@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="500">
-<command> root4star -q -b writeEStructExample.C\(\"$FILELIST\",\"/star/data02/scratch/porter/estruct/\",\"$JOBNAME\",3\) </command>
-<stdout URL="file:/star/data02/scratch/porter/estruct/stdout/$JOBID.out"/>
-<input URL="catalog:star.bnl.gov?production=P02ge,trgsetupname=ppMinBias,filetype=daq_reco_MuDst,sanity=1" singleCopy="true" preferStorage="local" nFiles="26000" />
-</job>

@@ -55,7 +55,10 @@ public:
 
     /// require raw hits to have status == 1 in order to be saved in the StEmcCollection.
     /// Default is true.    
-    void setCheckStatus(StDetectorId det, int flag) { getControlTable()->CheckStatus[det-kBarrelEmcTowerId] = flag; }
+    ///Now added checking of all status tables and options to turn checking off
+    ///setCheckStatus accepts options="status","pedestal","calib","gain"
+    ///Default is to check all tables
+    void setCheckStatus(StDetectorId det, int flag, const char* option="");
     
     /// only save hits above pedestal.  Default is false for BTOW, true for others.
     /// set this flag to 2 if you want to save hits from bad capacitors in BSMD, BPRS
@@ -95,7 +98,7 @@ public:
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.51 2008/01/09 15:58:54 kocolosk Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.52 2008/07/03 20:58:47 mattheww Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 

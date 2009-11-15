@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.18 2008/04/12 10:53:19 mvl Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.19 2008/07/31 18:11:10 genevb Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.19  2008/07/31 18:11:10  genevb
+ * VFMinuit3 chain option for lower ranking of split vertices
+ *
  * Revision 1.18  2008/04/12 10:53:19  mvl
  * Changed calculation of BEMC matches based ranking to fix problems with run-7 Au+Au.
  * See also: http://www.star.bnl.gov/protected/highpt/mvl/multi_vertex/update_R7.html
@@ -186,8 +189,10 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   mUseITTF   = false;
   mUseDCA    = false;
   mUseOldBEMCRank = false;
+  mLowerSplitVtxRank = false;
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
   mMinTrack  = -1;
+  mCTBSum = 0;
 }
  
 
@@ -264,8 +269,9 @@ int StMinuitVertexFinder::findSeeds() {
 	    }
 	  }
 	  if (nTrkZ >= mMinTrack) {
-	    if (mDebugLevel) 
+	    if (mDebugLevel) {
 	      LOG_INFO << "Seed " << mNSeed << ", z " << seed_z << " nTrk " << nTrkZ << " meanZ/nTrkZ " << meanZ/nTrkZ << endm;
+            }
 	    seed_z = meanZ/nTrkZ;
 	    mSeedZ[mNSeed] = seed_z;
 	    mNSeed ++;
@@ -277,8 +283,9 @@ int StMinuitVertexFinder::findSeeds() {
       }
       slope = -1;
     }
-    if (mDebugLevel > 1) 
+    if (mDebugLevel > 1) {
       LOG_INFO << "iBin " << iBin << " nTrkBin " << nTrkBin << " nOldBin " << nOldBin << ", slope " << slope << " mNSeed " << mNSeed << endm; 
+    }
     nOldBin = nTrkBin;
   }
 
@@ -313,8 +320,9 @@ void StMinuitVertexFinder::fillBemcHits(StEvent *event){
       }
     }
   }
-  if (mDebugLevel) 
+  if (mDebugLevel) {
     LOG_INFO << "Found " << n_emc_hit << " emc hits" << endm;
+  }
 }
 
 int  
@@ -325,16 +333,18 @@ StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
   //LOG_INFO << "rBemc: " << rBemc << endm;
 
   if (track->outerGeometry()==0) {
-    if (mDebugLevel) // Happens only rarely
+    if (mDebugLevel) { // Happens only rarely
       LOG_INFO << "No outer track geom" << endm;
+    }
     return 0;
   }
 
   StPhysicalHelixD helix = track->outerGeometry()->helix();
 
   if (!helix.valid()) {
-    if (mDebugLevel) // Happens only rarely
+    if (mDebugLevel) { // Happens only rarely
       LOG_INFO << "Invalid helix" << endm;
+    }
     return 0;
   }
      
@@ -402,6 +412,9 @@ void StMinuitVertexFinder::calculateRanks() {
   // a likelihood based on the expected distributions. 
   // That's left as an excercise to the reader.
 
+  // Added by Ant: split vertices have 3 rank units deducted near the
+  // end of function (if mLowerSplitVtxRank). See hypernews post:
+  // http://www.star.bnl.gov/HyperNews-star/get/vertex/127.html 
 
   int nBemcMatchTot = 0;
   int nVtxTrackTot = 0;
@@ -427,8 +440,9 @@ void StMinuitVertexFinder::calculateRanks() {
 
     float n_cross_expected = fabs(primV->position().z())*0.0020*primV->numTracksUsedInFinder(); // old coeff 0.0016 with dca 3 and 10 points on track
 
-    if (mDebugLevel)
+    if (mDebugLevel) {
       LOG_INFO << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endm;
+    }
     float rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
     if (rank_avg_dip < -5)
       rank_avg_dip = -5;
@@ -459,10 +473,17 @@ void StMinuitVertexFinder::calculateRanks() {
       rank_cross = -5;
     if (rank_cross > 1)
       rank_cross = 1;
-    
-    if (mDebugLevel)
+
+    if (mDebugLevel) {
       LOG_INFO << "rankings: " << rank_avg_dip << " " << rank_bemc << " " << rank_cross << endm;
-    primV->setRanking(rank_cross+rank_bemc+rank_avg_dip);
+    }
+
+    //Give split vertices a lower rank...   	
+    if (mLowerSplitVtxRank &&
+        (mCTBSum > ((6000.0*(float)primV->numTracksUsedInFinder()/80)+2000)))
+      primV->setRanking(rank_cross+rank_bemc+rank_avg_dip-3); 
+    else
+      primV->setRanking(rank_cross+rank_bemc+rank_avg_dip); 
     if (primV->ranking() > mBestRank) {
       mBestRank = primV->ranking();
       mBestVtx = primV;
@@ -482,17 +503,16 @@ StMinuitVertexFinder::fit(StEvent* event)
     vector<ctbHit> ctbHits;
 
     StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
+    mCTBSum = 0;
     if(trigCol){
       ctbDet = &(trigCol->ctb());
 
-      float ctbSum = 0;
-	    	    
       for (UInt_t slat = 0; slat < ctbDet->numberOfSlats(); slat++) {
 	for (UInt_t tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
 	  ctbHit curHit;
 	  curHit.adc = ctbDet->mips(tray,slat,0);
 	  if(curHit.adc > 0){
-	    ctbSum += curHit.adc;
+	    mCTBSum += curHit.adc;
 	    ctb_get_slat_from_data(slat, tray, curHit.phi, curHit.eta);
 	    ctbHits.push_back(curHit);
 	  }
@@ -525,10 +545,10 @@ StMinuitVertexFinder::fit(StEvent* event)
     int n_cross_tot = 0;
 
     StSPtrVecTrackNode& nodes = event->trackNodes();
-    mUseDCA = kFALSE;
+    mUseDCA = false;
     for (unsigned int k=0; k<nodes.size(); k++) {
       StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
-      if (g && g->dcaGeometry()) {mUseDCA = kTRUE; break;}
+      if (g && g->dcaGeometry()) {mUseDCA = true; break;}
     }
     LOG_QA << "QAInfo: StMinuitVertexFinder::fit use DCA track parameters" <<  endm;
     for (unsigned int k=0; k<nodes.size(); k++) {
@@ -606,8 +626,9 @@ StMinuitVertexFinder::fit(StEvent* event)
 	}
       }
     }
-    if (mDebugLevel)
+    if (mDebugLevel) {
       LOG_INFO << "Found " << n_ctb_match_tot << " ctb matches, " << n_bemc_match_tot << " bemc matches, " << n_cross_tot << " tracks crossing central membrane" << endm; 
+    }
     //
     //  In case there are no tracks left we better quit
     //
@@ -667,8 +688,9 @@ StMinuitVertexFinder::fit(StEvent* event)
 
       if (mExternalSeedPresent)
 	seed_z = mExternalSeed.z();
-      if (mDebugLevel)
+      if (mDebugLevel) {
 	LOG_INFO << "Vertex seed = " << seed_z << endm;
+      }
       
       if (!mVertexConstrain){ 
 	mMinuit->mnparm(0, "x", 0, step[0], 0, 0, mStatusMin);
@@ -704,11 +726,13 @@ StMinuitVertexFinder::fit(StEvent* event)
 	    mHelixFlags[i] &= ~kFlagDcaz;
 	}
       	
-	if (mDebugLevel) 
+	if (mDebugLevel) {
 	  LOG_INFO << n_trk_vtx << " tracks within dcaZ cut (iter " << iter <<" )" << endm;
+        }
 	if (n_trk_vtx < mMinTrack) {
-	  if (mDebugLevel) 
+	  if (mDebugLevel) {
 	    LOG_INFO << "Less than mMinTrack (=" << mMinTrack << ") tracks, skipping vtx" << endm;
+          }
 	  continue;
 	}
 	mMinuit->mnexcm("MINImize", 0, 0, mStatusMin);
@@ -766,12 +790,14 @@ StMinuitVertexFinder::fit(StEvent* event)
 	continue;
       }
 
-      if (!mExternalSeedPresent && fabs(seed_z-mSeedZ[iSeed]) > mDcaZMax)
+      if (!mExternalSeedPresent && fabs(seed_z-mSeedZ[iSeed]) > mDcaZMax) {
 	LOG_WARN << "Vertex walks during fits: seed was " << mSeedZ[iSeed] << ", vertex at " << seed_z << endm;
+      }
 
       if (fabs(seed_z - old_vtx_z) < mDcaZMax) {
-	if (mDebugLevel) 
+        if (mDebugLevel) {
 	  LOG_INFO << "Vertices too close (<mDcaZMax). Skipping" << endm;
+        }
 	continue;
       }
 

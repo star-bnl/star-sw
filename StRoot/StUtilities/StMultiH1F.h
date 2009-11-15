@@ -38,6 +38,7 @@ class StMultiH1F : public TH2F {
   virtual        void SetBarOffset(Float_t offset);
   virtual    Double_t GetNonZeroMinimum() const;
   virtual    Double_t GetNonZeroMaximum() const;
+  virtual        void SavePrimitive(ostream& out, Option_t* option = "");
  protected:
   TString names[10];
   Float_t fMOffset;
@@ -47,8 +48,11 @@ class StMultiH1F : public TH2F {
 
 #endif
 
-// $Id: StMultiH1F.h,v 1.6 2006/08/10 20:46:24 genevb Exp $
+// $Id: StMultiH1F.h,v 1.7 2008/07/09 20:52:38 genevb Exp $
 // $Log: StMultiH1F.h,v $
+// Revision 1.7  2008/07/09 20:52:38  genevb
+// Implement SavePrimitive functions
+//
 // Revision 1.6  2006/08/10 20:46:24  genevb
 // additional Rebin() interface for TH1.h vers. 1.79, ROOT 5.13
 //

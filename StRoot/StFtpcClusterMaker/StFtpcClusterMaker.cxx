@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.97  2008/07/17 18:43:14  jcs
+// insure that the correct microsecondsPerTimebin is used for every event, not just for the first event
+//
 // Revision 1.96  2008/01/07 14:46:10  jcs
 // create and fill the special set of Ftpc point histograms used to evaluate
 // the Ftpc gain scan runs when bfc option fgain is in the chain
@@ -630,10 +633,15 @@ Int_t StFtpcClusterMaker::Make()
      return kStERR;
   }
 
+  // if microsecondsPerTimebin calculated from RHIC Clock Frequency,use it
+  // otherwise use default value from database (Calibrations_ftpc/ftpcElectronics.uSecondsPerTimebin)
+  if (microsecondsPerTimebin > 0.0 ) {
+      dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
+  }
+
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
      LOG_INFO<<"Using the following values from database:"<<endm;
      if (microsecondsPerTimebin > 0.0 ) {
-        dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
         LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" (calculated from RHIC Clock Frequency)"<<endm;
      } else {
         LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" (default value from database)"<<endm;
@@ -654,6 +662,7 @@ Int_t StFtpcClusterMaker::Make()
      LOG_INFO<<"          angleOffsetEast           = "<<dbReader.angleOffsetEast()<<endm;
      LOG_INFO<<"          minChargeWindow           = "<<dbReader.minChargeWindow()<<endm;
   }
+        LOG_DEBUG<<" Using    microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" for this event"<<endm;
 
   St_DataSet *daqDataset;
   StDAQReader *daqReader;
@@ -793,7 +802,7 @@ Int_t StFtpcClusterMaker::Make()
 
     if (m_Mode == 2) {
        StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
-       cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), microsecondsPerTimebin, paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
+       cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), dbReader.microsecondsPerTimebin(), paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
 
        StFtpcClusterFinder fcl(                        ftpcReader, 
 						       &paramReader, 

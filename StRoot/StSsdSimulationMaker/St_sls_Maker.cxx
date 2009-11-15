@@ -1,9 +1,15 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.17 2008/05/29 03:07:27 bouchet Exp $
+ * $Id: St_sls_Maker.cxx,v 1.19 2008/07/17 02:51:15 bouchet Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.19  2008/07/17 02:51:15  bouchet
+ * initialize StMcSsd hits collections
+ *
+ * Revision 1.18  2008/07/15 23:08:13  bouchet
+ * fix bug (1232) related to a segmentation fault to the SsdHitCollection
+ *
  * Revision 1.17  2008/05/29 03:07:27  bouchet
  * remove inactive variables;fix a potential memory leak
  *
@@ -399,8 +405,8 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
   StMcEvent* mcEvent = 0;
   mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
  
-  StMcSsdHitCollection* mcCol; 
-  StMcSsdHitCollection* mcCol1; 
+  StMcSsdHitCollection *mcCol  = 0; 
+  StMcSsdHitCollection *mcCol1 = 0; 
   if(mcEvent)
     {
       mcCol  = mcEvent->ssdHitCollection();
@@ -412,7 +418,7 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 	  LOG_WARN <<"Make() has added a non existing StSsdHitCollection" <<endm; 
 	}
       else {
-	SafeDelete(mcCol);
+	//SafeDelete(mcCol);
 	//assert(mcEvent);
 	mcCol1 = new StMcSsdHitCollection; 
 	mcEvent->setSsdHitCollection(mcCol1);
@@ -492,7 +498,7 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 	      }
 	      // fill stMcEvent
 	      g2t[j].de = Flag_Energy*g2t[j].de;
-	      StMcSsdHit *mHit =0;
+	      //StMcSsdHit *mHit =0;
 	      //mHit = new StMcSsdHit(&g2t[j]);
 	      Int_t finalVolumeId = 7000+(FinalLadder+1)+(FinalWafer+1)*100;
 	      LOG_DEBUG<<Form("New ladder=%d New Wafer=%d New volume id =%d\n",FinalLadder,FinalWafer,finalVolumeId);
@@ -528,8 +534,9 @@ Int_t St_sls_Maker::readPointFromTableWithEmbedding(St_g2t_ssd_hit *g2t_ssd_hit,
 	  }
       }
   }
-  if(mcCol) LOG_DEBUG <<Form("Size of (old) collection =%ld",mcCol->numberOfHits())<<endm; 
-  if(mcCol1)LOG_DEBUG <<Form("Size of (new) collection =%ld",mcCol1->numberOfHits())<<endm;
+  if(mcEvent){
+    LOG_DEBUG << Form("Size of collection =%ld",mcEvent->ssdHitCollection()->numberOfHits())<<endm;
+}
   return foundGoodHits;
 }
 

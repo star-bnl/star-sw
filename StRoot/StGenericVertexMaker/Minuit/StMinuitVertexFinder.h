@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.9 2008/04/12 10:53:20 mvl Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.10 2008/07/31 18:11:10 genevb Exp $
  *
  */
 
@@ -124,9 +124,10 @@ public:
 
     void            setPrintLevel(int = 0);
     int            statusMin() const {return mStatusMin;}     // Minuit status flag
-    void                   DoUseITTF(){    mUseITTF=kTRUE; }
-    void                   DoNotUseITTF(){ mUseITTF=kFALSE;}
-    void                   useOldBEMCRank() { mUseOldBEMCRank = kTRUE; }
+    void                   DoUseITTF(){    mUseITTF = true; }
+    void                   DoNotUseITTF(){ mUseITTF = false;}
+    void                   useOldBEMCRank() { mUseOldBEMCRank = true; }
+    void                   lowerSplitVtxRank() { mLowerSplitVtxRank = true; }
     void                   setFlagBase();
     void                   SetFitPointsCut(int fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;}
     void                   SetMinimumTracks(int n) {mMinTrack = n;}
@@ -148,6 +149,7 @@ private:
     bool                   mUseITTF;          // Use only tracks with ITTF encoded method
     static bool            mUseDCA;           // Use DCA track paramters
     bool                   mUseOldBEMCRank;   // Use old BEMC rank calculation (Cu+Cu production)
+    bool                   mLowerSplitVtxRank;// Use lower rank for split vertices
     UInt_t                 mFlagBase;         // ITTF track flag
     bool                   mRequireCTB;       // Set maker to use CTB
     unsigned int           mMinNumberOfFitPointsOnTrack;
@@ -184,6 +186,7 @@ private:
 
     StPrimaryVertex       *mBestVtx;    // pointer to best vertex of this event
     float                  mBestRank;   // store rank of best vertex
+    float                  mCTBSum;
 
     TMinuit*               mMinuit;
 };
@@ -194,6 +197,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.10  2008/07/31 18:11:10  genevb
+ * VFMinuit3 chain option for lower ranking of split vertices
+ *
  * Revision 1.9  2008/04/12 10:53:20  mvl
  * Changed calculation of BEMC matches based ranking to fix problems with run-7 Au+Au.
  * See also: http://www.star.bnl.gov/protected/highpt/mvl/multi_vertex/update_R7.html

@@ -1,23 +1,15 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.30 2008/06/10 09:17:58 tai Exp $
+// $Id: StBET4pMaker.h,v 1.24 2008/06/10 02:20:56 tai Exp $
 #ifndef STBET4PMAKER_HH
 #define STBET4PMAKER_HH
 
 #include "StFourPMaker.h"
 
 #include "CollectEnergyDepositsFromBEMC.h"
-#include "CollectEnergyDepositsFromEEMC.h"
-#include "CorrectTowerEnergyForTracks.h"
 
 class StMuDstMaker;
 class StBemcTables;
 class StBET4pMakerImp;
-
-namespace StSpinJet {
-
-class CollectChargedTracksFromTPC;
-class BemcEnergySumCalculator;
-}
 
 class StBET4pMaker : public StFourPMaker {
 
@@ -41,24 +33,24 @@ public:
   void setUse2005Cuts(bool v);
   void setUse2006Cuts(bool v);
 
-  int nDylanPoints() const;
-  double sumEmcEt() const;
+  int nDylanPoints() const { return mDylanPoints; }
+  double sumEmcEt() const { return mSumEmcEt; }
 
   bool bemcCorrupt() const { return isBemcCorrupted(); }
     
 private:
 
+  double sumEnergyOverBemcTowers(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
+  int numberOfBemcTowersWithEnergyAbove(double minE, const StSpinJet::TowerEnergyDepositList &energyDepositList);
+
   StBemcTables* _bemcTables;
 
-  StSpinJet::CollectChargedTracksFromTPC *_collectChargedTracksFromTPC;
-  StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
-  StSpinJet::CollectEnergyDepositsFromEEMC *_collectEnergyDepositsFromEEMC;
-  StSpinJet::CorrectTowerEnergyForTracks* _correctTowerEnergyForTracks;
+  int mDylanPoints;
+  double mSumEmcEt;
+        
   StBET4pMakerImp* _imp;
-
-  StSpinJet::BemcEnergySumCalculator* _bemcEnergySumCalculator;
-
   
+  StSpinJet::CollectEnergyDepositsFromBEMC *_collectEnergyDepositsFromBEMC;
 
   bool isBemcCorrupted() const;
 

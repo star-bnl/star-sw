@@ -18,14 +18,14 @@
 
 // globally visible
 struct tpx_rdo tpx_rdo[6] ;
+
 struct tpx_rdo_dbg tpx_rdo_dbg[6] ;
-int tpx_fee_check ;
+
 
 // statics...
 static inline u_int get10(u_int *l, u_int p) ;
 static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)  ;
-
-//static int check_emul(u_int *a) ;
+static int check_emul(u_int *a) ;
 
 static struct {
 	u_char altro ;
@@ -696,7 +696,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log)
 
 
 
-#if 0
+
 static int check_emul(u_int *a)
 {
   int i ;
@@ -724,7 +724,6 @@ static int check_emul(u_int *a)
   return 0 ;
 
 }
-#endif
 
 static inline u_int get10(u_int *l, u_int p)
 {
@@ -804,166 +803,11 @@ void tpx_analyze_log(int sector,int rdo, char *buff)
 
 }
 
-int tpx_show_status(int sector, int rb_mask, int *altro_list)
+int tpx_analyze_msc(int sector,int rb, char *buff)
 {
 	struct tpx_rdo *rdo ;
 	u_char altro[256] ;
-	int err ;
-	int rb ;
-
-	err = 0 ;
-
-	for(rb=0;rb<6;rb++) {
-	if((1<<rb) & rb_mask) ;
-	else continue ;
-
-	rdo = &(tpx_rdo[rb]) ;
-
-	if(rdo->sector != sector || (rb+1) != rdo->rdo) {
-		LOG(ERR,"Config for RDO %d: sector %d, rdo %d failed",rb+1,rdo->sector,rdo->rdo) ;
-		err |= 1 ;
-	}
-	else {
-		LOG(NOTE,"Config for RDO %d: sector %d, rdo %d",rb+1,rdo->sector,rdo->rdo) ;
-	}
-
-	LOG(NOTE,"Remote %d, temp rdo %d, temp stratix %d",rdo->remote,rdo->temp_rdo,rdo->temp_stratix) ;
-	LOG(NOTE,"Compiled on %s",rdo->compilation_date) ;
-
-	LOG(NOTE,"\t FPGAs: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",
-	    rdo->fpga_usercode[0],
-	    rdo->fpga_usercode[1],
-	    rdo->fpga_usercode[2],
-	    rdo->fpga_usercode[3],
-	    rdo->fpga_usercode[4]
-	    ) ;
-
-	if(rdo->status_xilinx) {
-		LOG(ERR,"RDO %d: xilinx status: 0x%02X",rdo->rdo,rdo->status_xilinx) ;
-		err |= 1 ;
-	}
-	else {
-		LOG(NOTE,"RDO %d: xilinx status: 0x%02X",rdo->rdo,rdo->status_xilinx) ;
-	}
-	if(rdo->status_cpld) {
-		LOG(ERR,"RDO %d: CPLD status: 0x%02X",rdo->rdo,rdo->status_cpld) ;
-		err |= 1 ;
-	}
-	else {
-		LOG(NOTE,"RDO %d: CPLD status: 0x%02X",rdo->rdo,rdo->status_cpld) ;
-	}
-
-
-	memset(altro,0,sizeof(altro)) ;
-
-	if(altro_list) {
-		for(int a=0;a<256;a++) {
-			altro[a] = altro_list[a] ;
-		}
-	}
-	else {
-		for(int a=0;a<256;a++) {
-		for(int c=0;c<16;c++) {
-			int row, pad ;
-
-			tpx_from_altro(rb,a,c,row,pad) ;
-
-			if(row <= 45) {
-				altro[a] |= 0x1 ;	// need!
-			}
-		}
-		}
-	}
-
-/*
-	u_int *dbg = (u_int *)&(rdo->fee[0][0]) ;
-	for(int i=0;i<37*3;i++) {
-		LOG(NOTE,"%2d: 0x%08X",i,dbg[i]) ;
-	}
-*/
-
-	int fcou = 1 ;
-	for(int b=0;b<3;b++) {
-		for(int c=0;c<12;c++) {
-			if(rdo->fee[b][c].fee_status) {
-				if(rdo->fee[b][c].fee_status == 1) {	// normal
-					int expect = ((rdo->fee[b][c].pad_id & 0x7F) << 1) ;
-
-
-					altro[rdo->fee[b][c].id] |= 0x2 ;	// OK
-					altro[rdo->fee[b][c].id+1] |= 0x2 ;
-
-					if((rdo->fee[b][c].jumpers != 3) || (expect != rdo->fee[b][c].id)) {
-
-						LOG(ERR,"RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X",rdo->rdo,fcou,
-						    rdo->fee[b][c].pad_id,
-						    rdo->fee[b][c].id,
-						    rdo->fee[b][c].jumpers,
-						    b,
-						    rdo->fee[b][c].x_s>>4,
-						    rdo->fee[b][c].x_s&1,
-						    rdo->fee[b][c].fee_status
-						   ) ;
-					}
-					else {
-						LOG(NOTE,"RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X",rdo->rdo,fcou,
-						    rdo->fee[b][c].pad_id,
-						    rdo->fee[b][c].id,
-						    rdo->fee[b][c].jumpers,
-						    b,
-						    rdo->fee[b][c].x_s>>4,
-						    rdo->fee[b][c].x_s&1,
-						    rdo->fee[b][c].fee_status
-						   ) ;
-
-
-
-					}
-				}
-				else {
-					altro[rdo->fee[b][c].id] |= 0x8 ;	// err!
-					altro[rdo->fee[b][c].id+1] |= 0x8 ;
-
-					LOG(ERR,"RDO %d claims err: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X",rdo->rdo,fcou,
-					    rdo->fee[b][c].pad_id,
-					    rdo->fee[b][c].id,
-					    rdo->fee[b][c].jumpers,
-					    b,
-					    rdo->fee[b][c].x_s>>4,
-					    rdo->fee[b][c].x_s&1,
-					    rdo->fee[b][c].fee_status
-					   ) ;
-
-
-
-
-
-				}
-				fcou++ ;
-			}
-		}
-	}
-	
-
-	for(int a=0;a<256;a++) {
-		if(!(altro[a] & 1)) continue ;	// skip unneeded
-
-		if(altro[a] != 3) {
-			LOG(ERR,"RDO %d: altro %3d: status 0x%X",rb+1,a,altro[a]) ;
-			err |= 1 ;
-		}
-	}
-
-
-	}
-	return err ;
-}
-
-int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
-{
-	struct tpx_rdo *rdo ;
-//	u_char altro[256] ;
-//	int err = 0 ;
+	int err = 0 ;
 
 	rdo = (struct tpx_rdo *) buff ;
 
@@ -971,12 +815,10 @@ int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 	memcpy(&(tpx_rdo[rb]),buff,sizeof(struct tpx_rdo)) ;
 
 
-	LOG(NOTE,"RDO %d: msc event, should be %d bytes",rb+1,sizeof(struct tpx_rdo)) ;
+	LOG(NOTE,"RDO %d: msc event, chould be %d bytes",rb+1,sizeof(struct tpx_rdo)) ;
 
-	return tpx_show_status(sector,1<<rb,altro_list) ;
-#if 0
 	if(rdo->sector != sector || (rb+1) != rdo->rdo) {
-		LOG(ERR,"Config for RDO %d: sector %d, rdo %d failed",rb+1,rdo->sector,rdo->rdo) ;
+		LOG(ERR,"Config for RDO %d: sector %d, rdo %d",rb+1,rdo->sector,rdo->rdo) ;
 		err |= 1 ;
 	}
 	else {
@@ -1012,24 +854,18 @@ int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 
 	memset(altro,0,sizeof(altro)) ;
 
-	if(altro_list) {
-		for(int a=0;a<256;a++) {
-			altro[a] = altro_list[a] ;
+	for(int a=0;a<256;a++) {
+	for(int c=0;c<16;c++) {
+		int row, pad ;
+
+		tpx_from_altro(rb,a,c,row,pad) ;
+
+		if(row <= 45) {
+			altro[a] |= 0x1 ;	// need!
 		}
 	}
-	else {
-		for(int a=0;a<256;a++) {
-		for(int c=0;c<16;c++) {
-			int row, pad ;
-
-			tpx_from_altro(rb,a,c,row,pad) ;
-
-			if(row <= 45) {
-				altro[a] |= 0x1 ;	// need!
-			}
-		}
-		}
 	}
+
 
 	u_int *dbg = (u_int *)&(rdo->fee[0][0]) ;
 	for(int i=0;i<37*3;i++) {
@@ -1039,19 +875,20 @@ int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 	int fcou = 1 ;
 	for(int b=0;b<3;b++) {
 		for(int c=0;c<12;c++) {
+
 			if(rdo->fee[b][c].fee_status) {
-				if(rdo->fee[b][c].fee_status == 1) {	// normal
+				if(rdo->fee[b][c].fee_status == 1) {
 					int expect = ((rdo->fee[b][c].pad_id & 0x7F) << 1) ;
 
 
-					altro[rdo->fee[b][c].id] |= 0x2 ;	// OK
+					altro[rdo->fee[b][c].id] |= 0x2 ;
 					altro[rdo->fee[b][c].id+1] |= 0x2 ;
 
 					if((rdo->fee[b][c].jumpers != 3) || (expect != rdo->fee[b][c].id)) {
 
-						LOG(ERR,"RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X",rdo->rdo,fcou,
-						    rdo->fee[b][c].pad_id,
+						LOG(ERR,"RDO %d: %2d: FEE %3d (%3d,%d) [%d:%d:%d] = 0x%X",rdo->rdo,fcou,
 						    rdo->fee[b][c].id,
+						    rdo->fee[b][c].pad_id,
 						    rdo->fee[b][c].jumpers,
 						    b,
 						    rdo->fee[b][c].x_s>>4,
@@ -1060,9 +897,9 @@ int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 						   ) ;
 					}
 					else {
-						LOG(NOTE,"RDO %d: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X",rdo->rdo,fcou,
-						    rdo->fee[b][c].pad_id,
+						LOG(NOTE,"RDO %d: %2d: FEE %3d (%3d,%d) [%d:%d:%d] = 0x%X",rdo->rdo,fcou,
 						    rdo->fee[b][c].id,
+						    rdo->fee[b][c].pad_id,
 						    rdo->fee[b][c].jumpers,
 						    b,
 						    rdo->fee[b][c].x_s>>4,
@@ -1075,12 +912,12 @@ int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 					}
 				}
 				else {
-					altro[rdo->fee[b][c].id] |= 0x8 ;	// err!
+					altro[rdo->fee[b][c].id] |= 0x8 ;
 					altro[rdo->fee[b][c].id+1] |= 0x8 ;
 
-					LOG(ERR,"RDO %d claims err: %2d: FEE %3d (A%3d,%d) [port %d:%d:%d] = 0x%X",rdo->rdo,fcou,
-					    rdo->fee[b][c].pad_id,
+					LOG(ERR,"RDO %d claims err: %2d: FEE %3d (%3d,%d) [%d:%d:%d] = 0x%X",rdo->rdo,fcou,
 					    rdo->fee[b][c].id,
+					    rdo->fee[b][c].pad_id,
 					    rdo->fee[b][c].jumpers,
 					    b,
 					    rdo->fee[b][c].x_s>>4,
@@ -1100,7 +937,7 @@ int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 	
 
 	for(int a=0;a<256;a++) {
-		if(!(altro[a] & 1)) continue ;	// skip unneeded
+		if(!(altro[a] & 1)) continue ;
 
 		if(altro[a] != 3) {
 			LOG(ERR,"RDO %d: altro %3d: status 0x%X",rb+1,a,altro[a]) ;
@@ -1109,5 +946,4 @@ int tpx_analyze_msc(int sector,int rb, char *buff, int *altro_list)
 	}
 
 	return err ;
-#endif
 }

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.11 2004/02/12 20:51:41 genevb Exp $
+ * $Id: StKinkMuDst.cc,v 3.12 2008/07/10 16:16:55 genevb Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.12  2008/07/10 16:16:55  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.11  2004/02/12 20:51:41  genevb
  * Better error messages
  *
@@ -137,6 +140,7 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
   
   mChi2Parent = parent->fitTraits().chi2(0);
   mClParent = parent->fitTraits().chi2(1);
+  if (parent->bad()) setParentBad();
   mDedxParent = 0.;
   mNumDedxParent = 0;
   // For now, get the truncated mean dE/dX from the TPC
@@ -154,6 +158,7 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex) : StKinkBase()
 
   mChi2Daughter = daughter->fitTraits().chi2(0);
   mClDaughter = daughter->fitTraits().chi2(1);
+  if (daughter->bad()) setDaughterBad();
   mDedxDaughter = 0.;
   mNumDedxDaughter = 0;
   // For now, get the truncated mean dE/dX from the TPC

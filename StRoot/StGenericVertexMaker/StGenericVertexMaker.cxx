@@ -86,6 +86,7 @@ StGenericVertexMaker::~StGenericVertexMaker()
   m_Mode = 0x20    Fixed vertex finder
   m_Mode = 0x40    Fixed vertex finder, read from MC event
   m_Mode = 0x80    Minuit, new ranking mode
+  m_Mode = 0x100   Minuit, new ranking mode, lower split vertex ranking
  
   Default          Minuit  (to preserver backward compatibility)
 
@@ -102,9 +103,10 @@ Int_t StGenericVertexMaker::Init()
   LOG_INFO << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode <<" m_Mode2=" <<  m_Mode2 <<  endm;
   bool isMinuit=false;
 
-  if ( m_Mode & 0x1 || m_Mode & 0x80 ){ // 2 versions of Minuit for ranking modes
+  if ( m_Mode & 0x1 || m_Mode & 0x80 || m_Mode & 0x100){ // 3 versions of Minuit for ranking modes
     theFinder= new StMinuitVertexFinder();
     if (m_Mode & 0x1 ) ((StMinuitVertexFinder*) theFinder)->useOldBEMCRank();
+    if (m_Mode & 0x100 ) ((StMinuitVertexFinder*) theFinder)->lowerSplitVtxRank();
     if (minTracks >= 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
     isMinuit=true;
 

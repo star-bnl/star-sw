@@ -1,8 +1,11 @@
 
 
-// $Id: StSsdWafer.cc,v 1.10 2008/05/07 22:48:37 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.11 2008/07/16 21:00:38 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.11  2008/07/16 21:00:38  bouchet
+// default writePointToContainer : no quality hits calculation
+//
 // Revision 1.10  2008/05/07 22:48:37  bouchet
 // calculation of quality of hits used embedding
 //
@@ -125,7 +128,7 @@ void StSsdWafer::init(Int_t rId, Double_t *rD, Double_t *rT, Double_t *rN, Doubl
 //________________________________________________________________________________
 void StSsdWafer::debugStrips()
 {
-  StSsdStrip *currentStripP;
+  StSsdStrip *currentStripP = 0;
   cout<<"List of "<<mStripP->getSize()<<" strips on the P side "<<endl;
   if (mStripP->getSize()>0) currentStripP = mStripP->first();
   for (Int_t i=0;i<mStripP->getSize();i++) {
@@ -135,7 +138,7 @@ void StSsdWafer::debugStrips()
     if (currentStripP!=mStripP->last()) currentStripP = mStripP->next(currentStripP);
   }
 
-  StSsdStrip *currentStripN;
+  StSsdStrip *currentStripN = 0;
   cout<<"List of "<<mStripN->getSize()<<" strips on the N side "<<endl;
   if (mStripN->getSize()>0) currentStripN = mStripN->first();
   for (Int_t i=0;i<mStripN->getSize();i++) {
@@ -148,7 +151,7 @@ void StSsdWafer::debugStrips()
 //________________________________________________________________________________
 void StSsdWafer::debugClusters()
 {
-  StSsdCluster *currentClusterP;
+  StSsdCluster *currentClusterP = 0;
   cout<<"List of "<<mClusterP->getSize()<<" clusters on the P side "<<endl;
   if (mClusterP->getSize()>0) currentClusterP = mClusterP->first();
   for (Int_t i=0;i<mClusterP->getSize();i++) {
@@ -163,7 +166,7 @@ void StSsdWafer::debugClusters()
     if (currentClusterP!=mClusterP->last()) currentClusterP = mClusterP->next(currentClusterP);
   }
 
-  StSsdCluster *currentClusterN;
+  StSsdCluster *currentClusterN = 0;
   cout<<"List of "<<mClusterN->getSize()<<" clusters on the P side "<<endl;
   if (mClusterN->getSize()>0) currentClusterN = mClusterN->first();
   for (Int_t i=0;i<mClusterN->getSize();i++) {

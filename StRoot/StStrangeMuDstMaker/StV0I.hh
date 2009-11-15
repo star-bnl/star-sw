@@ -267,6 +267,12 @@ public:
   virtual Long_t  detectorIdV0() {return 0;}
   /// Detector ID for pars used in V0 finder
   virtual Long_t detectorIdPars() {return 0;}
+  /// Set the pos. daughter as bad
+  virtual void setPosBad() {}
+  /// Set the neg. daughter as bad
+  virtual void setNegBad() {}
+  /// Test whether either daughter is bad
+  virtual Bool_t bad() const {return (chi2Pos()<0 || chi2Neg()<0);}
   //@}
 
 
@@ -594,8 +600,11 @@ inline void StV0I::Clear() {
 
 
 /***********************************************************************
- * $Id: StV0I.hh,v 3.11 2003/10/26 06:06:01 genevb Exp $
+ * $Id: StV0I.hh,v 3.12 2008/07/10 16:16:55 genevb Exp $
  * $Log: StV0I.hh,v $
+ * Revision 3.12  2008/07/10 16:16:55  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.11  2003/10/26 06:06:01  genevb
  * Added checks for sqrt of neg. numbers
  *

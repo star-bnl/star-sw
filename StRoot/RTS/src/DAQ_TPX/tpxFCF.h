@@ -59,11 +59,6 @@
 #endif
 
 
-// forwad decls
-class tpxGain ;
-struct daq_cld ;
-struct daq_sim_cld ;
-struct daq_sim_adc_tb ;
 
 
 struct tpxFCF_cl {
@@ -90,28 +85,27 @@ struct tpxFCF_cl {
 	fcf_short flags ;
 	u_short track_id ;
 
-	short quality ;	
-	short sim_length ;	// length of the corresponding sim data in *sim
-
-	daq_sim_adc_tb *sim ;	// for simulation, keep the pointer to the cluster data...
+	u_int quality ;	
 } ;
 
 
 
+// forwad decls
+class tpxGain ;
+struct daq_cld ;
+struct daq_sim_cld ;
 
 class tpxFCF {
 public:
 	tpxFCF() ;
 	~tpxFCF() ;
 
-	void config(u_int rb_mask, int modes = 0) ;	// modes bitmask
-	int modes ;	// bit mask: 1 run simulated; 2 run simulated with local id
-
+	void config(u_int rb_mask, int modes = 0) ;
 	void apply_gains(int sector, tpxGain *gains) ;
 
 	void start_evt() ;
 
-	int do_pad(tpx_altro_struct *a, daq_sim_adc_tb *extra = 0) ;
+	int do_pad(tpx_altro_struct *a, u_short *extra = 0) ;
 	int stage2(u_int *outbuff, int max_bytes) ;
 
 
@@ -123,7 +117,7 @@ public:
 	static int fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version=0) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.5 2008/06/18 19:53:35 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.4 2008/04/21 08:08:49 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:
@@ -132,7 +126,6 @@ private:
 	int cur_row ;
 	int cur_row_clusters ;
 	
-	int cl_marker ;
 
 	struct stage1 {
 		u_short count ;
@@ -160,7 +153,7 @@ private:
 
 	int row_ix[46] ;
 
-
+	int modes ;	// bit mask: 1 run extended, 2 run annotated
 
 	u_int rbs ;
 	int sector ;

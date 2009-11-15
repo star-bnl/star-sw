@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.13 2008/05/06 18:41:40 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.14 2008/07/23 19:22:03 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.14  2008/07/23 19:22:03  dongx
+ * New track quality cuts for Run8
+ *
  * Revision 1.13  2008/05/06 18:41:40  dongx
  * - Fixed bug in ouput histogram filename switch
  * - Added switch for tpc track tree output
@@ -73,9 +76,11 @@ using std::vector;
 
 class StEvent;
 class StTrack;
+class StGlobalTrack;
 class StHelix;
 #include "StThreeVectorD.hh"
 class StTrackGeometry;
+class StDcaGeometry;
 #include "StTofUtil/StSortTofRawData.h"
 class StTofINLCorr;
 class StTofrGeometry;
@@ -140,6 +145,7 @@ private:
     Bool_t validTdc(Float_t const);
     Bool_t validEvent(StEvent *);
     Bool_t validTrack(StTrack*);
+    Bool_t validTrackRun8(StGlobalTrack*);
     Bool_t validTofTrack(StTrack*);
 
     // year5 moved to calibration maker
@@ -337,7 +343,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.13 2008/05/06 18:41:40 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.14 2008/07/23 19:22:03 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };

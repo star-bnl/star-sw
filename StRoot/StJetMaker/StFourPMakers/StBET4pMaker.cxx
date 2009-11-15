@@ -1,10 +1,8 @@
-// $Id: StBET4pMaker.cxx,v 1.44 2008/06/10 09:17:57 tai Exp $
+// $Id: StBET4pMaker.cxx,v 1.37 2008/06/10 02:20:55 tai Exp $
 
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 
-#include "CollectChargedTracksFromTPC.h"
-#include "BemcEnergySumCalculator.h"
 
 #include "StEventTypes.h"
 #include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
@@ -21,35 +19,29 @@ ClassImp(StBET4pMaker)
 StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
   : StFourPMaker(name, 0)
   , _bemcTables(new StBemcTables(doTowerSwapFix))
-  , _collectChargedTracksFromTPC(new CollectChargedTracksFromTPC(uDstMaker))
+  , mDylanPoints(0)
+  , mSumEmcEt(0.0)
+  , _imp(new StBET4pMakerImp(uDstMaker, _bemcTables))
   , _collectEnergyDepositsFromBEMC(new CollectEnergyDepositsFromBEMC(uDstMaker, _bemcTables))
-  , _collectEnergyDepositsFromEEMC(new CollectEnergyDepositsFromEEMC(uDstMaker))
-  , _correctTowerEnergyForTracks(new CorrectTowerEnergyForTracks(uDstMaker))
-  , _imp(new StBET4pMakerImp(uDstMaker, _collectChargedTracksFromTPC, _collectEnergyDepositsFromBEMC, _collectEnergyDepositsFromEEMC, _correctTowerEnergyForTracks))
-  , _bemcEnergySumCalculator(new BemcEnergySumCalculator(_collectEnergyDepositsFromBEMC))
 {
 
 }
 
-void StBET4pMaker::setUseEndcap(bool v)
-{ 
-  _imp->setUseEndcap(v);
-}
+void StBET4pMaker::setUseEndcap(bool v)   { _imp->setUseEndcap(v); }
 
 void StBET4pMaker::setUse2003Cuts(bool v)
 { 
+  _imp->setUse2003Cuts(v);
   _collectEnergyDepositsFromBEMC->setUse2003Cuts(v);
 }
 
 void StBET4pMaker::setUse2005Cuts(bool v)
 {
+  _imp->setUse2005Cuts(v);
   _collectEnergyDepositsFromBEMC->setUse2005Cuts(v);
 }
 
-void StBET4pMaker::setUse2006Cuts(bool v)
-{ 
-  _collectChargedTracksFromTPC->setUse2006Cuts(v);
-}
+void StBET4pMaker::setUse2006Cuts(bool v) { _imp->setUse2006Cuts(v); }
 
 Int_t StBET4pMaker::InitRun(Int_t runId)
 {
@@ -62,16 +54,13 @@ Int_t StBET4pMaker::Init()
 {
   StEEmcDbMaker* mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
 
-  _collectEnergyDepositsFromEEMC->Init(mEeDb);
-
+  _imp->Init(mEeDb);
   return StMaker::Init();
 }
 
 void StBET4pMaker::Clear(Option_t* opt)
 {
   _imp->Clear(opt);
-
-  _bemcEnergySumCalculator->Clear();
 
   return StMaker::Clear(opt);
 }
@@ -85,12 +74,18 @@ Int_t StBET4pMaker::Make()
 {
   if(isBemcCorrupted()) return kStOk;
 
-  _bemcEnergySumCalculator->Make();
+  TowerEnergyDepositList bemcEnergyDepositList = _collectEnergyDepositsFromBEMC->Do();
 
-  if (_bemcEnergySumCalculator->sumEmcEt() > 200.) return kStOk;
+  mSumEmcEt = sumEnergyOverBemcTowers(0.4, bemcEnergyDepositList);
+
+  mDylanPoints = numberOfBemcTowersWithEnergyAbove(0.4, bemcEnergyDepositList);
+
+  if (mSumEmcEt > 200.) return kStOk;
 
   _imp->Make();
 
+  //  mSumEmcEt = _imp->sumEmcEt();
+  //  mDylanPoints = _imp->nDylanPoints();
 
   return StMaker::Make();
 }
@@ -103,12 +98,22 @@ bool StBET4pMaker::isBemcCorrupted() const
   return false;
 }
 
-int StBET4pMaker::nDylanPoints() const
-{ 
-  return _bemcEnergySumCalculator->nDylanPoints();
+double StBET4pMaker::sumEnergyOverBemcTowers(double minE, const TowerEnergyDepositList &energyDepositList)
+{
+  double ret(0.0);
+
+  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it)
+    if((*it).energy > minE) ret += (*it).energy;
+
+  return ret;
 }
 
-double StBET4pMaker::sumEmcEt() const 
-{ 
-  return _bemcEnergySumCalculator->sumEmcEt();
+int StBET4pMaker::numberOfBemcTowersWithEnergyAbove(double minE, const TowerEnergyDepositList &energyDepositList)
+{
+  int ret(0);
+
+  for(TowerEnergyDepositList::const_iterator it = energyDepositList.begin(); it != energyDepositList.end(); ++it)
+    if((*it).energy > minE) ret ++;
+
+  return ret;
 }

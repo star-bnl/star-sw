@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.73 2007/02/01 11:57:00 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.74 2008/07/14 19:47:02 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.74  2008/07/14 19:47:02  jcs
+// The inner cathode correction is an Ftpc geometry correction; it should be applied to both data and laser runs
+//
 // Revision 1.73  2007/02/01 11:57:00  jcs
 // move unessential output from INFO to DEBUG
 //
@@ -363,9 +366,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mMaxPadlengthOut = 30; 
   mMaxTimelengthOut = 30;
 
-// Set FTPC inner cathode offsets = 0  
-  mOffsetCathodeWest = 0.0;
-  mOffsetCathodeEast = 0.0;
+// Set FTPC rotation angle offsets = 0  
   mAngleOffsetWest =   0.0;
   mAngleOffsetEast =   0.0;
 
@@ -1964,10 +1965,10 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 
   // ===================================================================
   
-  // shift time => radius if there is an offset of the inner cathode :
+  // shift time => radius to correct for the offset of the inner cathode :
 
-  if (fabs(mOffsetCathodeWest)>0 || fabs(mOffsetCathodeEast)>0)
-    {
+//JCS  if (fabs(mOffsetCathodeWest)>0 || fabs(mOffsetCathodeEast)>0)
+//JCS    {
 
       if (iRow<10) // correct for west chamber
 	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeWest*cos(Peak->Phi-mAngleOffsetWest))*TimeCoordinate;
@@ -2013,7 +2014,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 	+ ((Peak->PadPosition-1) + 0.5) * mDb->radiansPerPad()
 	+ PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
 			       + mDb->radiansPerBoundary())+halfpi;
-    }
+//JCS    }
   
   /* Invert pad number (== Peak->PadPosition) for FTPC East  */
   /* (not yet understood where and why pad numbers were inverted) */

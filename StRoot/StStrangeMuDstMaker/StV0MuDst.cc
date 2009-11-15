@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 3.5 2001/11/05 23:41:06 genevb Exp $
+ * $Id: StV0MuDst.cc,v 3.6 2008/07/10 16:16:55 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
+ * Revision 3.6  2008/07/10 16:16:55  genevb
+ * Allow for marking of bad tracks -> bad secondary vertices
+ *
  * Revision 3.5  2001/11/05 23:41:06  genevb
  * Add more dEdx, B field info, careful of changes to TTree unrolling
  *
@@ -81,6 +84,7 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mTopologyMapPos = trk->topologyMap();
   mChi2Pos = trk->fitTraits().chi2(0);
   mClPos = trk->fitTraits().chi2(1);
+  if (trk->bad()) setPosBad();
   mDedxPos = 0.;
   mNumDedxPos = 0;
   // For now, get the truncated mean dE/dX from the TPC
@@ -101,6 +105,7 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mTopologyMapNeg = trk->topologyMap();
   mChi2Neg = trk->fitTraits().chi2(0);
   mClNeg = trk->fitTraits().chi2(1);
+  if (trk->bad()) setNegBad();
   mDedxNeg = 0.;
   mNumDedxNeg = 0;
   // For now, get the truncated mean dE/dX from the TPC

@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.59 2008/05/20 03:05:54 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.60 2008/07/16 21:01:57 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.60  2008/07/16 21:01:57  bouchet
+// calculation of hits quality removed : call of default writePointToContainer
+//
 // Revision 1.59  2008/05/20 03:05:54  bouchet
 // fix improper STAR logger(#1185) ; thanks to Valeri
 //
@@ -500,9 +503,10 @@ Int_t StSsdPointMaker::Make()
 	  }
       }
       //get McEvent here
-      StMcEvent* mcEvent = 0;
-      mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
-      Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster,spa_strip,mDynamicControl,mcEvent);
+      //StMcEvent* mcEvent = 0;
+      //mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
+      //Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster,spa_strip,mDynamicControl,mcEvent);
+      Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
       LOG_INFO<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endm;
       if(mSsdHitColl){
 	if (mSsdHitColl->numberOfHits()>0) {

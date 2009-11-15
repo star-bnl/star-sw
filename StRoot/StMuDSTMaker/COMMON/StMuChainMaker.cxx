@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.29 2007/08/02 18:57:49 mvl Exp $
+ * $Id: StMuChainMaker.cxx,v 1.30 2008/07/15 18:22:34 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -202,8 +202,8 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
     //cout << file.c_str() << endl;
     if ( file.find(rootdTag)==0 ) {
 	// get local machine name 
-	string machine(gSystem->Getenv("HOSTNAME"));
-	//string machine(gSystem->Getenv("HOST"));
+        string machine(gSystem->HostName());
+
 	//if (machine.find("rcas")!=string::npos) machine += ".rcf.bnl.gov";
 	//if (machine.find("rcrs")!=string::npos) machine += ".rcf.bnl.gov";
 	//if (machine.find("pdsf")!=string::npos) machine += ".nersc.gov";
@@ -376,6 +376,9 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.30  2008/07/15 18:22:34  jeromel
+  * Replace GetEnv by HostName()
+  *
   * Revision 1.29  2007/08/02 18:57:49  mvl
   * One more change to avoid reading all input files on initialisation: If the number of events is '0' for a given file, set it to TChain::kBigNumber.
   *

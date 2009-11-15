@@ -1,7 +1,10 @@
-* $Id: btofgeo6.g,v 1.2 2008/01/21 01:12:15 perev Exp $
+* $Id: btofgeo6.g,v 1.3 2008/07/08 19:36:22 perev Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo6.g,v $
+* Revision 1.3  2008/07/08 19:36:22  perev
+* phi alignment XinDong
+*
 * Revision 1.2  2008/01/21 01:12:15  perev
 * TOF weight corrected(XinDong)
 *
@@ -106,8 +109,8 @@ Module  BTOFGEO6 is the Geometry of Barrel Trigger / Time Of Flight system
 
 *
 *   Data Base interface staff:
-      Structure BTOG { Version, Rmin, Rmax, dz, X0, Z0, choice, posit1(2), 
-                       posit2, posit3, posit4(5)}
+      Structure BTOG { Version, Rmin, Rmax, dz, X0, Z0, choice,
+                       posit1(2), posit2, posit3, posit4(5), dphi1(5)}
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -183,18 +186,19 @@ Module  BTOFGEO6 is the Geometry of Barrel Trigger / Time Of Flight system
       Fill BTOG ! Barrel Trigger, CTB/TOF Basic dimensions 
          Version   = 6         ! geometry version
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
-         Rmax      = 221.00     ! maximum CTB/TOF system radius
+         Rmax      = 221.00    ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
          X0        = 0.0       ! radial global offset 
          Z0        = 0.0       ! z distance of tray edge to TPC centralplane (previous TrayEdgeZ moved here)
          choice    = 11        ! 1=CTB, 2=Full-TOFp, 3=25% TOFp, 4=1 tray-TOFp, 
-*                               ! 5=1 tray-TOFr, 6=Full-TOFr, 7=TOFp+TOFrp Run-IV
-*                               ! 8= Run-V 1 tray-TOFr, 9= Run-VI, 10= Run-VII
+*                              ! 5=1 tray-TOFr, 6=Full-TOFr, 7=TOFp+TOFrp Run-IV
+*                              ! 8= Run-V 1 tray-TOFr, 9= Run-VI, 10= Run-VII
          posit1    = {32,33}   ! TOFp tray position (0) choice 4 or 5 -> run-2,3 posn
-*                               !                    (1) choice 7 -> run-4 posn
+*                              !                    (1) choice 7 -> run-4 posn
          posit2    = 23        ! TOFr tray position for choice 5 -> run-4 posn
-		 posit3    = 33        ! TOFr tray position for choice 8,9,10 -> run-5,6,7 posn
-         posit4    = {16,17,18,19,20} ! TOFr8 tray positions for choice 11,12 -> run 8 east and west trays
+	 posit3    = 33        ! TOFr tray position for choice 8,9,10 -> run-5,6,7 posn
+         posit4    = {16,17,18,19,20}  			! TOFr8 tray positions for choice 11,12 -> run 8 east and west trays
+         dphi1     = {0.24, 0.17, 0.15, 0.08, 0.02} 	! TOFr8 tray phi alignment parameter
 *
       Fill TRAY ! general tray stats        
          Height    = 11.43      ! tray height(8.128+3.302)
@@ -573,26 +577,43 @@ Block BTOH is a half of trigger system (west-east)
       ! tof=5 means TOFr6 tray (not active), tof=6 means TOFr7 tray
       do is=1,60
          tof=0		                                !-> all CTB for choice=1                     
-         if (choice==2)                      tof=1	!-> all TOFp
-         if (choice==3 & 46<=is&is<=60)      tof=1	!-> big TOFp patch, rest CTB
-         if (choice==4 & is==btog_posit1(1)) tof=1	!-> Run-2 (one TOFp tray)
-         if (choice==5 & is==btog_posit1(1)) tof=1	!-> Run-3 (one TOFp tray
-         if (choice==5 & is==btog_posit2)    tof=2	!      and one TOFr tray)
-         if (choice==6)                      tof=2	!-> all TOFr
-         if (choice==7 & is==btog_posit1(2)) tof=1	!-> Run-4 (one TOFp tray moved 1 slot
-         if (choice==7 & is==btog_posit2)    tof=3	!      and one TOFrp tray)
-		 if (choice==8 & is==btog_posit3)    tof=4  !-> Run-5 (one TOFr5 tray)
-		 if (choice==9 & is==btog_posit3)    tof=5  !-> Run-6 (one TOFr6 tray)
-		 if (choice==10 & is==btog_posit3)   tof=6  !-> Run-7 (one TOFr7 tray)
-
-         if (choice==11 & is==btog_posit4(1)) tof=7 !-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(2)) tof=7 !-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(3)) tof=7 !-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(4)) tof=7 !-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(5)) tof=7 !-> Run-8 (5 TOFr8 trays)
+         if (choice==2)                       tof=1	!-> all TOFp
+         if (choice==3 & 46<=is&is<=60)       tof=1	!-> big TOFp patch, rest CTB
+         if (choice==4 & is==btog_posit1(1))  tof=1	!-> Run-2 (one TOFp tray)
+         if (choice==5 & is==btog_posit1(1))  tof=1	!-> Run-3 (one TOFp tray
+         if (choice==5 & is==btog_posit2)     tof=2	!      and one TOFr tray)
+         if (choice==6)                       tof=2	!-> all TOFr
+         if (choice==7 & is==btog_posit1(2))  tof=1	!-> Run-4 (one TOFp tray moved 1 slot
+         if (choice==7 & is==btog_posit2)     tof=3	!      and one TOFrp tray)
+	 if (choice==8  & is==btog_posit3)    tof=4  	!-> Run-5 (one TOFr5 tray)
+	 if (choice==9  & is==btog_posit3)    tof=5  	!-> Run-6 (one TOFr6 tray)
+	 if (choice==10 & is==btog_posit3)    tof=6  	!-> Run-7 (one TOFr7 tray)
+         if (choice==11 & is==btog_posit4(1)) tof=7 	!-> Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(2)) tof=7 	!-> Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(3)) tof=7	!-> Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(4)) tof=7 	!-> Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(5)) tof=7 	!-> Run-8 (5 TOFr8 trays)
 
 *         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
-         Create and Position BSEC  alphaz = 102+6*is
+*         Create and Position BSEC  alphaz = 102+6*is
+* Since Run 8, start to implement phi alignment parameters for trays
+         if (choice==11) then
+            if (is==btog_posit4(1)) then
+               Create and Position BSEC alphaz = 102+6*is+btog_dphi1(1)
+            else if (is==btog_posit4(2)) then
+               Create and Position BSEC alphaz = 102+6*is+btog_dphi1(2)
+            else if (is==btog_posit4(3)) then
+               Create and Position BSEC alphaz = 102+6*is+btog_dphi1(3)
+            else if (is==btog_posit4(4)) then
+               Create and Position BSEC alphaz = 102+6*is+btog_dphi1(4)
+            else if (is==btog_posit4(5)) then
+               Create and Position BSEC alphaz = 102+6*is+btog_dphi1(5)
+            else
+               Create and Position BSEC alphaz = 102+6*is
+            endif
+         else
+            Create and Position BSEC alphaz = 102+6*is
+         endif
       enddo
 EndBlock
 *
