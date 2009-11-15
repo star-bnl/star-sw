@@ -27,6 +27,7 @@ class Bichsel {
   virtual ~Bichsel() {fgBichsel = 0;};
   static Bichsel* Instance(const Char_t *tag="P10", Int_t keep3D=0);
   static Double_t GetdEdxResolution(Int_t k=1, Double_t TrackLengthInTPC=60);
+  static Double_t GetdEdxResolution(Double_t *x, Double_t *p);
   static Double_t CalcCorrection(const tpcCorrection_st *cor,const Double_t x);
   static Double_t SumSeries(const Double_t &X,const Int_t &N,const Double_t *params);
   static void Clean();
