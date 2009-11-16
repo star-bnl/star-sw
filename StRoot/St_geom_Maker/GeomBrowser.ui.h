@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.18 2007/04/18 20:06:02 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.17 2007/04/09 04:13:52 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -935,7 +935,7 @@ void GeomBrowser::ObjectSelected( TObject *obj, const QPoint &)
 {
    // [slot] to accept the selected object to expand the ListTreeView
    
-   if ( fCurrentDrawn && obj->InheritsFrom(TDataSet::Class()) ) {
+   if ( obj->InheritsFrom(TDataSet::Class()) ) {
       // suspend the list view update
       
       TUpdateList listLock(fCurrentDrawn->listView());

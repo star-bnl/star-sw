@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.19 2007/04/18 04:54:44 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.21 2007/04/28 17:56:38 perev Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,12 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.21  2007/04/28 17:56:38  perev
+ * Redundant StChain.h removed
+ *
+ * Revision 1.20  2007/04/28 07:46:02  rashmi
+ * mapping after access on date 26/04/07
+ *
  * Revision 1.19  2007/04/18 04:54:44  rashmi
  * status after 11April07 access
  *
@@ -65,6 +71,7 @@
  * Mapping of chain # and channel # to supmod,row,col
  **********************************************************/
  
+#include "Stypes.h"
 #include "StPmdGeom.h"
 #include <strings.h>
 #include <stdlib.h>
@@ -77,7 +84,6 @@
 #include<TCanvas.h>
 #include<TPolyLine.h>
 #include<TArrayF.h>
-#include "StChain.h"
 
 ClassImp(StPmdGeom)
 
@@ -1889,7 +1895,11 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
     status[32][0]=0;
     status[32][4]=0;
   }
-    
+  //access on 26/04/06
+  if(rn>114&&year==8){
+    status[46][6]=0;
+  }
+  
   for(Int_t i=0;i<48;i++){
     for(Int_t ib=0;ib<36;ib++){
       alive_stat[i]=alive_stat[i]+status[i][ib];

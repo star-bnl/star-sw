@@ -1,6 +1,9 @@
-// $Id: StDetectorDbTriggerID.h,v 1.11 2006/05/04 17:44:34 dunlop Exp $
+// $Id: StDetectorDbTriggerID.h,v 1.12 2007/05/11 05:30:33 dunlop Exp $
 //
 // $Log: StDetectorDbTriggerID.h,v $
+// Revision 1.12  2007/05/11 05:30:33  dunlop
+// Add in the additionalTriggerID table
+//
 // Revision 1.11  2006/05/04 17:44:34  dunlop
 // moved $LOG
 //
@@ -29,6 +32,7 @@ struct L0TriggerInfo_st;
 struct defaultTrgLvl_st;
 struct trigL3Expanded_st;
 struct dsmPrescales_st;
+struct additionalTriggerID_st;
 
 
 
@@ -90,6 +94,7 @@ public:
     int                        getTrigL3ExpandedL2Algo(unsigned int entry=0);
     float                      getTrigL3ExpandedL2Ps(unsigned int entry=0);
     char*                      getTrigL3ExpandedName(unsigned int entry=0);
+
         
 /*!
   Table RunLog/onl dsmPrescales.
@@ -114,6 +119,25 @@ public:
 */
     float                     getTotalPrescaleByTrgId(int trgId); /**< This will multiply the prescales at dsm*L0*L2; should be used by everybody */
     map<int,float>            getTotalPrescales(); /**< This returns all prescales active in the run */
+
+/*!
+ Table RunLog/onl additionalTriggerID
+ This table is new in 2007, allows to push back additional trigger ids
+ onto the stack of trigger ids in order to fix the trigger id problem 
+ in runs 3-6, in which the prescale was applied deterministically counting
+ from 0, and so would deplete rare overlap events 
+
+*/
+    unsigned int               getAdditionalTriggerIDNumRows();
+    unsigned int               getAdditionalTriggerIDRunNumber(unsigned int entry=0);
+    unsigned int               getAdditionalTriggerIDEventNumber(unsigned int entry = 0);
+    unsigned int               getAdditionalTriggerIDIdxTrg(unsigned int entry = 0);
+    unsigned int               getAdditionalTriggerIDDaqTrgId(unsigned int entry = 0);
+    unsigned int               getAdditionalTriggerIDOfflineTrgId(unsigned int entry = 0);
+    unsigned int               getAdditionalTriggerIDTrgNameVersion(unsigned int entry = 0);
+    unsigned int               getAdditionalTriggerIDTrgVersion(unsigned int entry = 0);
+    unsigned int               getAdditionalTriggerIDThreashVersion(unsigned int entry = 0);
+    unsigned int               getAdditionalTriggerIDPsVersion(unsigned int entry = 0);
     
     
     friend ostream& operator<<(ostream& os, StDetectorDbTriggerID& v);
@@ -130,6 +154,10 @@ protected:
     triggerID_st* mTriggerID; // points to triggerID struct
     TTable* mIDTable; // points to table, need to re-intilize mTriggerID every event
     unsigned int mIDNumRows;
+// members of additionalTriggerID 
+    additionalTriggerID_st* mAdditionalTriggerID; // points to triggerID struct
+    TTable* mAdditionalTriggerIDTable; // points to table, need to re-intilize mTriggerID every event
+    unsigned int mAdditionalTriggerIDNumRows;
 
 // members of trigPrescales
     trigPrescales_st* mTrigPrescales; // points to prescales struct

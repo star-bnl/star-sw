@@ -23,13 +23,10 @@ class StEEmcStrip : public StEEmcElement {
 
   /// Returns the sector containing this strip
   Int_t sector();
-  Int_t sector()const;
   /// Returns the plane containing this strip
   Int_t plane();
-  Int_t plane()const;
   /// Returns the index containing this strip
   Int_t index();
-  Int_t index()const;
 
   /// Prints information about strip
   void print(); 
@@ -61,10 +58,6 @@ inline void StEEmcStrip::plane(Int_t p){ mPlane=p; }
 inline Int_t StEEmcStrip::sector(){ return mSector; }
 inline Int_t StEEmcStrip::plane(){ return mPlane; }
 inline Int_t StEEmcStrip::index(){ return mIndex; }
-
-inline Int_t StEEmcStrip::sector()const{ return mSector; }
-inline Int_t StEEmcStrip::plane()const{ return mPlane; }
-inline Int_t StEEmcStrip::index()const{ return mIndex; }
 
 typedef std::vector<StEEmcStrip> StEEmcStripVec_t;
 

@@ -94,7 +94,7 @@ protected:
 
  public:
    virtual ~StLoggerManager();
-   virtual std::ostream& OperatorShift(std::ostream& os, StMessage* stm);
+   virtual ostream& OperatorShift(ostream& os, StMessage* stm);
    static  StMessMgr* StarLoggerInit();                       //!
    static  StMessMgr* StarLoggerInit(const char *loggerName); //!   
    virtual StMessMgr* Instantiate();      //!
@@ -232,4 +232,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.10 2007/01/30 19:25:51 fine Exp $
+// $Id: StLoggerManager.h,v 1.11 2007/08/03 21:34:52 fine Exp $
