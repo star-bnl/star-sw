@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.223 2009/11/16 19:52:46 fine Exp $
+// $Id: StMaker.cxx,v 1.224 2009/11/16 20:16:22 fine Exp $
 //
 //
 /*!
@@ -728,7 +728,7 @@ void StMaker::SetFlavor(const Char_t *flav,const Char_t *tabname)
   if (mk) mk->SetFlavor(flav,tabname);
 }
 //______________________________________________________________________________
-Int_t   StMaker::GetValidity(const TTable *tb, TDatime *val) const
+Int_t   StMaker::GetValidity(const TTable *tb, TDatime *const val) const
 {
    StMaker *mk = GetMaker(tb);
    if (!mk) 					return 10;
@@ -1195,7 +1195,7 @@ StMaker     *StMaker::GetParentChain() const
 //_____________________________________________________________________________
 const TDatime  &StMaker::GetDateTime() const 
 {    
-   StEvtHddr *hd = GetEvtHddr();
+   const StEvtHddr *hd = GetEvtHddr();
    return hd->GetDateTime();
 }
 //_____________________________________________________________________________
@@ -1959,6 +1959,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.224  2009/11/16 20:16:22  fine
+// Make the TDatime const interfaces
+//
 // Revision 1.223  2009/11/16 19:52:46  fine
 // Fix the signature of the StMaker::GetDate... methods
 //
