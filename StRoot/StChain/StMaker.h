@@ -35,6 +35,7 @@ class TTree;
 class TTable;
 class TMemStat;
 class StEvtHddr;
+class TAttr;
 
 class StTurnLogger;
 
@@ -159,7 +160,7 @@ public:
    virtual TDataSet  *GetInputDS (const char* logInput)   const 
                            {return GetDataSet(logInput);};
 
-   virtual TDataSet  *GetDataBase(const char* logInput);
+   virtual TDataSet  *GetDataBase(const char* logInput,const TDatime *td=0);
    virtual TDataSet  *GetInputDB (const char* logInput)
                           {return GetDataBase(logInput);};
    virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
@@ -225,7 +226,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.80 2007/01/25 06:28:04 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.81 2007/03/12 17:51:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -235,7 +236,7 @@ public:
 static int Cleanup(TDataSet *&ds);
 
 private:
-  TList m_Attr;		
+  TAttr *m_Attr;		
 ///< SetAttr(const char *opt,const char *for) 
 ///< sets value of m_Option data member
 public:
@@ -245,6 +246,7 @@ int         SetAttr(const char *key,UInt_t      val,const char *to=".");
 int         SetAttr(const char *key,double      val,const char *to=".");
 int         RemAttr(const char *key,                const char *to=".")
             {return SetAttr(key,".remove",to);}
+const TAttr *GetAttr() const 	{return m_Attr;}
 int         IAttr(const char *key) const;
 UInt_t      UAttr(const char *key) const;
 double      DAttr(const char *key) const;
@@ -286,8 +288,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.80 2007/01/25 06:28:04 fine Exp $
+// $Id: StMaker.h,v 1.81 2007/03/12 17:51:19 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.81  2007/03/12 17:51:19  perev
+// new signature of GetDataBase()
+//
 // Revision 1.80  2007/01/25 06:28:04  fine
 // connect Logger and Maker debug levels
 //

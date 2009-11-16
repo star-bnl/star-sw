@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcCtbHit.cc,v 2.6 2007/03/06 19:48:17 calderon Exp $
  * $Log: StMcCtbHit.cc,v $
+ * Revision 2.6  2007/03/06 19:48:17  calderon
+ * Added filling of g2t_ctf_hit.ds into StMcCtbHit.
+ *
  * Revision 2.5  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -25,7 +28,7 @@
  */
 #include "StMcCtbHit.hh"
 #include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.6 2007/03/06 19:48:17 calderon Exp $";
 #ifdef POOL
 StMemoryPool StMcCtbHit::mPool(sizeof(StMcCtbHit));
 #endif
@@ -43,7 +46,7 @@ StMcCtbHit::StMcCtbHit(g2t_ctf_hit_st* pt)
 : StMcHit(StThreeVectorF(pt->x[0], pt->x[1], pt->x[2]),
 	  StThreeVectorF(pt->p[0], pt->p[1], pt->p[2]),
 	  pt->de,
-	  0,
+	  pt->ds,
 	  pt->id,
 	  pt->volume_id,
 	  0), mTof(pt->tof)

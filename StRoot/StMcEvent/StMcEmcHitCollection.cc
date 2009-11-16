@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.10  2007/03/29 15:34:11  fisyak
+ * comment out print out
+ *
  * Revision 2.9  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -150,7 +153,7 @@ StMcEmcHitCollection::Browse(TBrowser *b)
   print();
 }
 
-void StMcEmcHitCollection::print() {  cout << *this << endl; }
+void StMcEmcHitCollection::print() {/*  cout << *this << endl; */}
 //________________________________________________________________________________
 ostream&  operator<<(ostream& os, const StMcEmcHitCollection &emcColl) {
   os<<"-----------\n"<<emcColl.GetName()<<" has "<<emcColl.numberOfHits()<<" hits in "

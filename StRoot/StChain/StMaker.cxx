@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.190 2007/02/22 22:50:18 potekhin Exp $
+// $Id: StMaker.cxx,v 1.191 2007/03/12 17:51:19 perev Exp $
 //
 //
 /*!
@@ -43,6 +43,7 @@
 #include "TTable.h"
 
 #include "TMemStat.h"
+#include "TAttr.h"
 #include "StMkDeb.h"
 #include "StMessMgr.h"
 
@@ -203,7 +204,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),
 						m_DebugLevel(0),m_MakeReturn(0),fStatus(0),
 						fLogger(0),fLoggerHold(0)
 {
-   m_Attr.SetOwner();
+   m_Attr=0;
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
@@ -546,7 +547,7 @@ FOUND: if (uppMk || dowMk) 	return dataset;
 
 }
 //______________________________________________________________________________
-TDataSet *StMaker::GetDataBase(const char* logInput)
+TDataSet *StMaker::GetDataBase(const char* logInput,const TDatime *td)
 {
   TURN_LOGGER(this);
   TDataSet *ds;
@@ -554,7 +555,7 @@ TDataSet *StMaker::GetDataBase(const char* logInput)
   StMakerIter mkiter(this);
   while ((mk = mkiter.NextMaker())) {//loop over makers
     if (!mk->InheritsFrom("St_db_Maker")) 	continue;
-    ds = mk->GetDataBase(logInput);
+    ds = mk->GetDataBase(logInput,td);
     if (ds) 					return ds;
   }
   return 0;
@@ -593,11 +594,7 @@ void StMaker::Clear(Option_t *option)
    StMaker *maker;
    int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker* )next())) {
-#ifdef R__ASSERT
-      R__ASSERT(maker->TestBIT(kCleaBeg)==0);
-#else
-      Assert(maker->TestBIT(kCleaBeg)==0);
-#endif
+      assert(maker->TestBIT(kCleaBeg)==0);
       StMkDeb::SetCurrent(maker,3);
       maker->SetBIT(kCleaBeg);
       maker->StartTimer();
@@ -638,11 +635,7 @@ Int_t StMaker::Init()
 
       // Initialise maker
 
-#ifdef R__ASSERT
-      R__ASSERT(maker->TestBIT(kInitBeg)|maker->TestBIT(kInitEnd)==0);
-#else
-      Assert(maker->TestBIT(kInitBeg)|maker->TestBIT(kInitEnd)==0);
-#endif
+      assert(maker->TestBIT(kInitBeg)|maker->TestBIT(kInitEnd)==0);
       StMkDeb::SetCurrent(maker,1);
       maker->SetBIT(kInitBeg);
       maker->StartTimer();
@@ -890,11 +883,7 @@ Int_t StMaker::Make()
    while ((maker = (StMaker* )nextMaker())) {
      if (!maker->IsActive()) continue;
      TURN_LOGGER(maker);
-#ifdef R__ASSERT
-     R__ASSERT(maker->TestBIT(kMakeBeg)==0);
-#else
-     Assert(maker->TestBIT(kMakeBeg)==0);
-#endif
+     assert(maker->TestBIT(kMakeBeg)==0);
      maker->SetBIT(kMakeBeg);
      StMkDeb::SetCurrent(maker,2);
      oldrun = maker->m_LastRun;
@@ -1469,18 +1458,15 @@ int StMaker::SetAttr(const char *key, const char *val, const char *to)
 
    if ((act&3)==3) { // this attribute is for this maker 
      count++;
-     if (tv == ".remove") {
-       TObject *t = m_Attr.FindObject(tk.Data());
-       if(t){
-       m_Attr.Remove(t); delete t;}}
-     else if (tk == ".call") {
+     if (tk == ".call") {
          TString command("(("); command += ClassName(); command+="*)";
          char buf[20]; sprintf(buf,"%p",(void*)this);
 	 command +=buf; command +=")->"; command+=tv;command+=";";
 	 gROOT->ProcessLineFast(command.Data(),0);}
      else {
-       m_Attr.AddFirst(new TNamed(tk.Data(),tv.Data()));}
-     Info("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data());
+       if (!m_Attr) m_Attr = new TAttr(GetName());
+       m_Attr->SetAttr(tk.Data(), tv.Data());
+       Info("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data());}
    }
    if (!(act&4)) return count;
 
@@ -1512,46 +1498,32 @@ int StMaker::SetAttr(const char *key, double val, const char *to)
 //_____________________________________________________________________________
 const char *StMaker::SAttr(const char *key) const
 {
-   TString tey(key);
-   tey.ToLower(); tey.ReplaceAll(" ",""); tey.ReplaceAll("\t","");
-   TObject *att = m_Attr.FindObject(tey.Data());
-   return (att)? att->GetTitle():"";
+   if (!m_Attr) return "";
+   return m_Attr->SAttr(key);
 }   
 //_____________________________________________________________________________
 int StMaker::IAttr(const char *key) const
 {
-   const char *val = SAttr(key);
-   if (!val) 	return 0;
-   if (!val[0]) return 0;
-   if (isdigit(*val)) return strtoul(val,0,0);
-   return strtol(val,0,0);
+   if (!m_Attr) return 0;
+   return m_Attr->IAttr(key);
 }
 //_____________________________________________________________________________
 UInt_t StMaker::UAttr(const char *key) const
 {
-   return (UInt_t)IAttr(key);
+   if (!m_Attr) return 0;
+   return m_Attr->UAttr(key);
 }
 //_____________________________________________________________________________
 double StMaker::DAttr(const char *key) const
 {
-   const char *val = SAttr(key);
-   if (!val) 	return 0;
-   if (!val[0]) return 0;
-   return strtod(val,0);
+   if (!m_Attr) return 0;
+   return m_Attr->DAttr(key);
 }
 //_____________________________________________________________________________
 void StMaker::PrintAttr() const
 {
-   if (!m_Attr.First()) return;
-   TIter next(&m_Attr);
-   printf("PrintAttr() for %s::%s\n",ClassName(),GetName());
-   TObject *object;
-   int n=0;
-   while ((object = next())) {
-      n++;
-      printf(" %2d - %s = %s\n",n,object->GetName(),object->GetTitle());
-   }
-   printf("PrintAttr() ==============================================\n");
+   if (!m_Attr) return ;
+   m_Attr->PrintAttr();
 }
 
 //_____________________________________________________________________________
@@ -1748,6 +1720,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.191  2007/03/12 17:51:19  perev
+// new signature of GetDataBase()
+//
 // Revision 1.190  2007/02/22 22:50:18  potekhin
 // Added three geometry tags: Y2005F and Y2006B, due to the added dead area in the SSD,
 // and also incorporating the updated Barrel EMC code.

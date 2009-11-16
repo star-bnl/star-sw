@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.h,v 1.4 2006/12/14 22:01:48 wleight Exp $
+// $Id: StiIstDetectorBuilder.h,v 1.5 2007/04/23 00:44:58 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.h,v $
+// Revision 1.5  2007/04/23 00:44:58  wleight
+// Made all layers, not just inner ones, active
+//
 // Revision 1.4  2006/12/14 22:01:48  wleight
 // Changed hit errors so that they are obtained from the database and are different for each layer
 //
@@ -62,5 +65,6 @@ class StiIstDetectorBuilder : public StiDetectorBuilder
 	//StSsdGeometry * _dimensions;
 	StiDefaultHitErrorCalculator _hitCalculator1;
 	StiDefaultHitErrorCalculator _hitCalculator2;
+	StiDefaultHitErrorCalculator _hitCalculator3;
 };
 #endif 

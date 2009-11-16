@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.101 2007/02/15 18:39:40 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.102 2007/03/09 20:01:03 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.102  2007/03/09 20:01:03  perev
+// Request by user defined time now allowed
+//
 // Revision 1.101  2007/02/15 18:39:40  perev
 // dbSnapshot fixes
 //
@@ -466,12 +469,13 @@ TDataSet *St_db_Maker::UpdateDB(TDataSet* ds)
   return ds;
 }
 //_____________________________________________________________________________
-int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
+int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat
+                            ,const TDatime &req,TDatime val[2] )
 {
 
   assert(fDBBroker);assert(dat);
 
-  fDBBroker->SetDateTime(GetDateTime().GetDate(),GetDateTime().GetTime());
+  fDBBroker->SetDateTime(req.GetDate(),req.GetTime());
   TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
   fTimer[1].Stop(); fTimer[3].Start(0);
   fDBBroker->SetDictionary(rowTL);
@@ -530,15 +534,12 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   return 0;
 
 }
-
- //_____________________________________________________________________________
+//_____________________________________________________________________________
 EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
 {
-  TDataSet *left,*par;
   StValiSet *val;
-  TDatime valsCINT[2],valsSQL[2];
-   
-  if (strcmp(".Val",ds->GetTitle()))		return kContinue;
+  if (strcmp("directory",ds->GetTitle())==0) 	return kContinue;
+  if (strcmp(".Val"     ,ds->GetTitle())!=0)	return kPrune;   
   //
   //	It is our place.
   val = (StValiSet*)ds;    
@@ -553,32 +554,38 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
      && val->fTimeMax.Get() >  uevent) 		return kPrune;
 
     if (!mk->fDBBroker) {
-      mk->Error("UpdateDB","DbSnapshot mode: wrong validity for %s ignored(????)");
+      mk->Error("UpdateDB","DbSnapshot mode: wrong validity for %s ignored( ???? )"
+               ,val->GetName());
       return kPrune;
     }
-
-
-
-    //	Start loop
+  TDataSet *par = val->GetParent();
+  par->Remove(val->fDat);
+  mk->UpdateValiSet(val,currenTime);
+  if (val->fGood) par->AddFirst(val->fDat);
+  return kPrune;  
+}
+//_____________________________________________________________________________
+int St_db_Maker::UpdateValiSet(StValiSet *val,const TDatime &currenTime)
+{
 static int nCall=0; nCall++;
-  
-
+  TDataSet *left;
+  TDatime valsCINT[2],valsSQL[2];
+  UInt_t uevent = currenTime.Get();
+//	Start loop
 
   val->fTimeMin.Set(kMaxTime,0);
   val->fTimeMax.Set(kMinTime,0);
-
-  par = ds->GetParent();
-  par->Remove(val->fDat);
-
+  val->fGood=0;
   int kase = 0;
   valsSQL[0].Set(kMinTime,0);
   valsSQL[1].Set(kMaxTime,0);
-  if (mk->fDBBroker && val->fDat && par->GetUniqueID() < kUNIXOBJ) {	// Try to load from MySQL
-    int ierr = mk->UpdateTable(par->GetUniqueID(),(TTable*)val->fDat, valsSQL );
+  if (fDBBroker && val->fTabId ) {	// Try to load from MySQL
+    assert(val->fTabId==val->fDat->GetUniqueID());
+    int ierr = UpdateTable(val->fParId,(TTable*)val->fDat,currenTime,valsSQL );
     if (!ierr) kase = 1;
   }
   
-  left = mk->FindLeft(val,valsCINT);
+  left = FindLeft(val,valsCINT);
   if (left) kase+=2;
   TDataSet *newGuy=0;
 SWITCH:  switch (kase) {
@@ -589,16 +596,14 @@ SWITCH:  switch (kase) {
     
     case 1:   // Only SQL object
               val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1]; 
-              ds->GetParent()->AddFirst(val->fDat);
-              kase=4; goto SWITCH;
+              val->fGood=1; kase=4; goto SWITCH;
 
     case 2:   // Only CINT object
-              newGuy = mk->LoadTable(left);
+              newGuy = LoadTable(left);
               if (!val->fDat) { val->fDat = newGuy; val->AddFirst(newGuy);}
               else            { val->fDat->Update(newGuy); delete newGuy;}
               val->fTimeMin = valsCINT[0];  val->fTimeMax = valsCINT[1];
-              ds->GetParent()->AddFirst(val->fDat);
-              kase=4; goto SWITCH;
+              val->fGood=1; kase=4; goto SWITCH;
   
     case 3:   // Both SQL and CINT objects
               if (valsCINT[0].Get()>=valsSQL[0].Get()) {
@@ -613,26 +618,29 @@ SWITCH:  switch (kase) {
     case 4:   
       if( ! ((val->fTimeMin.Get()<= uevent) && (uevent<val->fTimeMax.Get()) )){
 	(void) printf("CheckFail:: Assert will fail for Table %s TimeMin=%d TimeMax=%d uevent=%d\n",
-		      ds->GetName(),val->fTimeMin.Get(),val->fTimeMax.Get(),uevent);
+		      val->GetName(),val->fTimeMin.Get(),val->fTimeMax.Get(),uevent);
 	(void) printf("\tTimeMin "); val->fTimeMin.Print();
 	(void) printf("\tuevent  "); currenTime.Print();
 	(void) printf("\tTimeMax "); val->fTimeMax.Print();
       }
       assert((val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent));
+
       break;
 
     default:  assert(0);
   }
+  val->fVers++;
   val->Modified(1);  
   if (val->fTimeMin.Get() == val->fTimeMax.Get()) {
-    mk->Warning("UpdateDB","Zero size validity for %s",ds->GetName()); 
+    Warning("UpdateDB","Zero size validity for %s",val->GetName()); 
     printf("\tTimeMin "); val->fTimeMin.Print();
     printf("\tuevent  "); currenTime.Print();
     printf("\tTimeMax "); val->fTimeMax.Print();
-    mk->Warning("UpdateDB","Ask Mike DeFillips WHY!!!!!"); 
+    Warning("UpdateDB","Ask Mike DeFillips WHY!!!!!"); 
   }
-  return kPrune;  
+  return val->fGood;  
 }
+
 //_____________________________________________________________________________
 TDataSet *St_db_Maker::FindLeft(StValiSet *val, TDatime vals[2])
 {
@@ -741,11 +749,10 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
   
   TList *list = ds->GetList();
   if (!list) return kContinue;
-  if (strcmp("directory",ds->GetTitle())) return kPrune;
+  if (strcmp("directory",ds->GetTitle())!=0) 	return kPrune;
   dsname = ds->GetName(); ;
-  if (!strcmp("CVS",dsname)) { delete ds; return kPrune;}
+  if (!strcmp("CVS",dsname)) { delete ds; 	return kPrune;}
   //ldsname= strlen(dsname);
-
   TString newTitle = "file ";
   if (user) newTitle += *((TString*)user);
 
@@ -758,7 +765,7 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
     if (isSql) {			// Sql object
       lpsname = strlen(filename); 
     } else {				// Cint object
-      if (strncmp("file",set->GetTitle(),4))	continue;  
+      if (strncmp("file",set->GetTitle(),4)!=0)	continue;  
       if (!(dot = strchr(filename,'.'))) 	continue;
       if (!Kind(filename)){ delete set;		continue;}
       set->SetTitle(newTitle);
@@ -767,15 +774,20 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
     if (strncmp(filename,psname+1,lpsname)) {// make new pseudo directory
       psname[1]=0; strncat(psname,filename,lpsname);
       pseudo = new StValiSet(psname,ds); //VP strcat(psname,".");
+      pseudo->fParId = ds->GetUniqueID();
     }
 
     set->Shunt(pseudo);
-    if (isSql) pseudo->fDat=set; // save SQL  object
+    if (isSql) {
+      pseudo->fTabId = set->GetUniqueID();	// save SQL  Id
+      pseudo->fDat=set; 			// save SQL  object
+               					// for future validity requests
+    }
   }
   return kContinue;
 }
 //______________________________________________________________________________
-TDataSet *St_db_Maker::GetDataBase(const char* logInput)
+TDataSet *St_db_Maker::GetDataBase(const char* logInput,const TDatime *td)
 {
   fTimer[1].Start(0);  
   TString ts;
@@ -796,6 +808,33 @@ TDataSet *St_db_Maker::GetDataBase(const char* logInput)
      if (!ds) 			goto RETN;
   }
 
+  if (td) { //Case when time is defined by user. User will be owner
+    if (idir) {
+      Error("GetDataBase","Request for directory %s with user time is FORBIDDEN"
+           ,ds->GetName());
+      assert(!idir);
+    }
+    assert(!strcmp(".Val",ds->GetTitle()));
+    StValiSet *vs = (StValiSet*)ds;
+    StValiSet *myVS = new StValiSet(vs->GetName(),0);
+    myVS->fTabId = vs->fTabId;
+    myVS->fParId = vs->fParId;
+    myVS->Modified(1);
+    if (vs->fParId) { 
+      TTable *tb = (TTable *)vs->fDat;
+      myVS->fDat = TTable::New(tb->GetName(),tb->GetType(),0,0);
+    }
+    UpdateValiSet(myVS,*td);
+    if (myVS->fGood) { //object is found
+     myVS->fDat->Add(myVS);
+     return myVS->fDat;
+    }
+    delete myVS->fDat;
+    delete myVS;
+    return 0;
+  }
+  
+    
   UpdateDB(ds);
   if (idir) 			goto RETN;
   ds = GetDataSet(logInput);
@@ -813,7 +852,7 @@ void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
 { 
   fIsDBTime=0; if (idat==0) return;
   fIsDBTime=1; fDBTime.Set(idat,itim);  
-  Warning("SetDateTime","Setting Startup Date=%d Time=%d",idat,itim);
+  Info("SetDateTime","Setting Startup Date=%d Time=%d",idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetDateTime(const char *alias)
@@ -822,7 +861,7 @@ void   St_db_Maker::SetDateTime(const char *alias)
   int idat = AliasDate(alias);// <name>.YYYYMMDD.hhmmss.<ext>
   int itim = AliasTime(alias);
   assert(idat);
-  Warning("SetDateTime","(\"%s\") == Startup Date=%d Time=%d",alias,idat,itim);
+  Info("SetDateTime","(\"%s\") == Startup Date=%d Time=%d",alias,idat,itim);
   fDBTime.Set(idat,itim);
 }
 //_____________________________________________________________________________
@@ -939,17 +978,18 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 //_____________________________________________________________________________
 Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *val) const
 {
-   if (!tb) 				return 1;
-   assert(val);
-   const TDataSet *par = tb->GetParent();
-   if (!par)				return 2;
-   TString ts = tb->GetName();
-   ts.Replace(0,0,".");
-   const StValiSet *vs =  (StValiSet*)par->Find(ts);
-   if (!vs) 				return 3;
-   val[0] = vs->fTimeMin;
-   val[1] = vs->fTimeMax;
-   return 0;
+   if (!tb) 				return -1;
+   TString ts("."); ts+=tb->GetName();
+   TDataSet *pa = tb->GetParent();
+   const StValiSet *vs =0;
+   if (pa) { vs = (StValiSet*)pa->Find(ts);}
+   else    { vs = (StValiSet*)tb->Find(ts);}
+   if (!vs) 				return -2;
+   if (val) {
+     val[0] = vs->fTimeMin;
+     val[1] = vs->fTimeMax;
+   }
+   return vs->fVers;
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetOff(const char *path)

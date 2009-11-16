@@ -1,7 +1,13 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.17 2006/11/30 16:37:19 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.19 2007/05/03 06:14:56 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.19  2007/05/03 06:14:56  andrewar
+ * Geometry fix to conform to StiHit:setGlobal() test.
+ *
+ * Revision 1.18  2007/03/30 02:14:19  andrewar
+ * Removed some debug output.
+ *
  * Revision 1.17  2006/11/30 16:37:19  andrewar
  * Removed call to dbase for tracking parameter loading for the review. Dynamic
  * access will be debugged and restored after the STAR review. Hit errors are
@@ -84,7 +90,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 {
 
   char name[50];
-  cout << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endl;
+  LOG_INFO << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endl;
 
   //Now pulling values from the DBase for the tracking parameters
   //loadM(source);
@@ -166,15 +172,15 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	      add(0,(sector-18),pDetector);
 	    }
 
-	  cout << "Setting detector: " << name << " with key values: "
-	       << pDetector->getKey(1) << " "  << pDetector->getKey(2) << endl;
+	  //cout << "Setting detector: " << name << " with key values: "
+	  //     << pDetector->getKey(1) << " "  << pDetector->getKey(2) << endl;
 	}
     }
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 
 void StiPixelDetectorBuilder::useVMCGeometry() {
-  cout << "StiPixelDetectorBuilder::buildDetectors() -I- Use VMC geometry" 
+  LOG_INFO << "StiPixelDetectorBuilder::buildDetectors() -I- Use VMC geometry" 
        << endl;
   SetCurrentDetectorBuilder(this);
 
@@ -238,8 +244,8 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
 	if (! nodeT) continue;;
 	StiVMCToolKit::LoopOverNodes(nodeT, path, HftVolumes[i].name, MakeAverageVolume);
       } 
-    else gMessMgr->Info() << "StiPixelDetectorBuilder::useVMCGeometry skip node " 
-			  << pathT.Data() << endm;
+    else LOG_INFO << "StiPixelDetectorBuilder::useVMCGeometry skip node " 
+			  << pathT.Data() << endl;
   }
 }
 
@@ -249,17 +255,13 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
   // Handle pathalogical input
   if (!nodeP) 
     {
-      gMessMgr->Info() << "StiPixelDetectorBuilder::AverageVolume -E- no TGeoPhysicalNode. "
+      LOG_INFO << "StiPixelDetectorBuilder::AverageVolume -E- no TGeoPhysicalNode. "
 		       << " Perhaps Pixel is turned on in tracking, but not present in simulation. Returning."
 		       << endl;
-      printf("StiPixelDetectorBuilder::AverageVolume -E- no TGeoPhysicalNode. \n");
+     
       return;
     }
 
-  gMessMgr->Info() << "StiPixelDetectorBuilder::AverageVolume -I- TGeoPhysicalNode: " 
-		   << nodeP->GetName()
-		   << endl;
-  printf("StiPixelDetectorBuilder::AverageVolume -I- TGeoPhysicalNode: %s\n",nodeP->GetName());
 
   // Note:
   // Volumes are currently all planes. I am coding this routine appropriately. Other
@@ -307,21 +309,29 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     //In ittf parlance, normalVector is the vector normal to the detector plane that passes through 0,0
     if( normalVector.magnitude() != 1. ) 
       {
-	printf("StiPixelDetectorBuilder -I- Normal vector is not a unit vector!\n");
+	//printf("StiPixelDetectorBuilder -I- Normal vector is not a unit vector!\n");
 	normalVector/=normalVector.magnitude();
       }
     normalVector *= centerVector.magnitude()*cos(normalVector.phi()-centerVector.phi());
+    LOG_INFO <<"Setting detector normal angle: "
+	     << normalVector.phi()<<endl;
 
     double r = normalVector.perp();
-    //Set the offset 
+    //Set the offset - this will be the difference between the two vectors. Set magnitude from vector difference...
     double dY = (normalVector - centerVector).magnitude();
-    if (normalVector.phi()>centerVector.phi()) dY=-1.*dY;
+    // set direction (+/-) from vector direction...
+    // Remove auto-correction for change of ladder tilt. Assume dY is positive.
+    // if ( (normalVector-centerVector).phi() < 0 ) dY=-1.*dY;
 
 
     StiPlacement *pPlacement = new StiPlacement;
     pPlacement->setZcenter(0);
     pPlacement->setLayerRadius(centerVector.perp()); //this is only used for ordering in detector container...
     pPlacement->setLayerAngle(centerVector.phi()); //this is only used for ordering in detector container...
+    LOG_INFO << " -I- Setting detector center angle: " << centerVector.phi()
+	     << " offset: " << dY << " Ist style offset: "
+	     << centerVector.magnitude()*TMath::Sin(normalVector.phi() - centerVector.phi()) << endl;
+
     pPlacement->setRegion(StiPlacement::kMidRapidity);
     pPlacement->setNormalRep(normalVector.phi(), r, dY); 
 
@@ -331,24 +341,24 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     if( sh ) add(sh);
     else 
     {
-      gMessMgr->Info() <<"StiPixelDetectorBuilder::AverageVolume() -E- StiPlanarShape build unsuccessful. Returning."
-		       <<endl;
+      LOG_INFO <<"StiPixelDetectorBuilder::AverageVolume() -E- StiPlanarShape build unsuccessful. Returning."
+	       <<endl;
       return;
     }
     if( pPlacement ) {}
     else
       {
-      gMessMgr->Info() <<"StiPixelDetectorBuilder::AverageVolume() -E- StiPlacement unsuccessful. "
-		       << "Volume: "<<nameP.Data()<<". Returning."
-		       <<endl;
-      return;
-    }
+        LOG_INFO <<"StiPixelDetectorBuilder::AverageVolume() -E- StiPlacement unsuccessful. "
+		 << "Volume: "<<nameP.Data()<<". Returning."
+		 <<endl;
+        return;
+      }
 
     //Build final detector object
     StiDetector *p =getDetectorFactory()->getInstance();
     if ( !p ) 
       {
-	gMessMgr->Info() <<"StiPixelDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." <<endl;
+	LOG_INFO <<"StiPixelDetectorBuilder::AverageVolume() -E- StiDetector pointer invalid." <<endl;
 	return;
       }
 
@@ -360,7 +370,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     p->setShape(sh);
     p->setPlacement(pPlacement);
     p->setGas(GetCurrentDetectorBuilder()->getGasMat());
-    if(!p->getGas()) cout<<"gas not there!"<<endl;
+    if(!p->getGas()) LOG_INFO <<"gas not there!"<<endl;
     p->setMaterial(matS);
     p->setElossCalculator(ElossCalculator);
     p->setHitErrorCalculator(&_calculator);
@@ -371,8 +381,7 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     mother.Remove(0,startMoth);
     mother.Remove(1,mother.Length());
     int motherN=mother.Atoi();
-    printf("Mother Volume: %i for %s and %s\n", motherN,nameP.Data(), mother.Data());
-
+ 
     TString ladderNme(nameP);
     ladderNme.Remove(0, startLadder);
     ladderNme.Remove(2, ladderNme.Length());
@@ -403,13 +412,11 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     char name[50];
     sprintf(name, "Pixel/Layer_%d/Ladder_%d", layer, ladder);
     p->setName(name);
-    gMessMgr->Info() <<"StiPixelDetectorBuilder: -I- built detector "
-		     << p->getName()
-		     << " from " << nameP.Data()<<endl;
-    printf("StiPixelDetectorBuilder: -I- built detector %s from %s at phi: %g\n", 
-	   p->getName().c_str(), nameP.Data(), centerVector.phi());
-
-
+    LOG_INFO <<"StiPixelDetectorBuilder: -I- built detector "
+	     << p->getName()
+	     << " from " << nameP.Data()<<" center: "
+	     <<centerVector.phi() <<" normal: "<<normalVector.phi()<<endl;
+  
     p->setKey(1, layer);
     p->setKey(2, ladder);
     add(layer,ladder, p);

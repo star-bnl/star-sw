@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcFieldCage.h,v 1.1 2002/02/06 18:39:13 hardtke Exp $
+ * $Id: StRTpcFieldCage.h,v 1.1.6.1 2007/08/13 01:04:41 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,16 @@
  ***************************************************************************
  *
  * $Log: StRTpcFieldCage.h,v $
+ * Revision 1.1.6.1  2007/08/13 01:04:41  jeromel
+ * Patches for SL07a, SL44
+ *
+ * Revision 1.1.4.1  2007/08/12 23:27:41  jeromel
+ * Further fixes for SL06g built for SL44
+ *
+ * Revision 1.2  2007/08/04 00:38:03  jeromel
+ * SL4 issue: Removal of the inline func, moved to class implementation.
+ *     Symbols may otherwise be hidden.
+ *
  * Revision 1.1  2002/02/06 18:39:13  hardtke
  * Add tpc Field Cage structure
  *
@@ -46,9 +56,6 @@ public:
  ClassDef(StRTpcFieldCage,0)
 
 };
-inline double  StRTpcFieldCage::InnerFieldCageShift() const { return (*mFieldCage)[0].innerFieldCageShift;}
-inline double  StRTpcFieldCage::EastClockError() const { return (*mFieldCage)[0].eastClockError;}
-inline double  StRTpcFieldCage::WestClockError() const { return (*mFieldCage)[0].westClockError;}
 
 #endif
 

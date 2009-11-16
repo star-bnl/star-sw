@@ -222,8 +222,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx) {
     }
     cor =  ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable()+l;
     if (TMath::Abs(cor->npar) >= 100 || iCut) {
-      if (cor->min > 0 && cor->min > VarX    ) return 8;
-      if (cor->max > 0 && VarX     > cor->max) return 8;
+      if (cor->min > 0 && cor->min > VarX    ) return 2;
+      if (cor->max > 0 && VarX     > cor->max) return 2;
     }
     if (cor->npar%100) dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(l,VarX));
   ENDL:

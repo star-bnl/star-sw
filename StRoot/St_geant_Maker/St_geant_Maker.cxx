@@ -1,5 +1,14 @@
-// $Id: St_geant_Maker.cxx,v 1.111 2006/10/31 23:54:13 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.114 2007/03/07 16:46:04 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.114  2007/03/07 16:46:04  fine
+// Add the warning
+//
+// Revision 1.113  2007/03/03 02:30:50  fine
+// fix the geometry file name. Thanks P.Nebski
+//
+// Revision 1.112  2007/03/03 00:35:42  fine
+// Fix the leak of the ROOT objects and introduce the method to return the source code filename  for the arbitrary geometry node
+//
 // Revision 1.111  2006/10/31 23:54:13  potekhin
 // Corrected a typo in the GEMB hit readout -- credit goes to Ross Corliss
 //
@@ -373,6 +382,7 @@
 #include "TInterpreter.h"
 #include "TClassTable.h"    
 #include "TVolume.h"
+#include "TFileSet.h"
 #include "TMath.h"
 #include "TBRIK.h"
 #include "TTRD1.h"
@@ -563,9 +573,10 @@ St_geant_Maker *St_geant_Maker::fgGeantMk = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
   StMaker(name), 
-  fNwGeant(nwgeant), fNwPaw(nwpaw), fIwType(iwtype),
-  fVolume(0), fTopGeoVolume(0), 
-  fInputFile(""), fEvtHddr(0), mInitialization(""), mFieldOpt("")
+   fNwGeant(nwgeant), fNwPaw(nwpaw), fIwType(iwtype),
+   fVolume(0), fTopGeoVolume(0), 
+   fInputFile(""),fGeoDirectory(0), fEvtHddr(0)
+ , fRemakeGeometry(kFALSE),mInitialization(""), mFieldOpt("")
 {
   fgGeantMk = this;
   fgGeom  = new TDataSet("geom");  
@@ -576,25 +587,65 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
 TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
                                         const StMaker *dowMk) const 
 {
-  TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
-  
-  if (ds || strcmp(logInput,"HALL")) return ds;
-  
-  if (!fVolume) ((St_geant_Maker *)this)->Work();
-  
-  if (fVolume) { 
-     if (gGeometry) {
-        TList *listOfVolume = gGeometry->GetListOfNodes();
+  bool lookupHall   = !strcmp(logInput,"HALL");
+  bool lookupGeoDir = !strcmp(logInput,"GeometryDirectory");
 
-        // Remove hall from the list of ROOT nodes to make it free of ROOT control
-        listOfVolume->Remove(fVolume);
-        listOfVolume->Remove(fVolume);
+  TDataSet *ds = 0;
+  if ( !(lookupHall || lookupGeoDir) ) {
+     ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
+  } else {
+     if (lookupHall) {
+        if (!fVolume) ((St_geant_Maker *)this)->Work();
+  
+        if (fVolume) {
+           ds = fVolume;
+           if (gGeometry) {
+              TList *listOfVolume = gGeometry->GetListOfNodes();
+
+              // Remove hall from the list of ROOT nodes to make it free of ROOT control
+              listOfVolume->Remove(fVolume);
+              listOfVolume->Remove(fVolume);
+           }
+            // Add "hall" into ".const" area of this maker
+            ((St_geant_Maker *)this)->AddConst(fVolume);
+            if (Debug()) fVolume->ls(3);
+        } 
+    } else if (lookupGeoDir) {
+        if (!fGeoDirectory) {
+           TString file("pams/geometry");
+           // Check the local path first
+           TFileSet *geoDir = new TFileSet(file.Data());
+           if (!geoDir->FindByName("geometry.g")) {
+              // Try the global one
+              delete geoDir;
+              TString starRoot = "$STAR/" + file;
+              geoDir = new TFileSet(starRoot.Data());
+              if (!geoDir->FindByName("geometry.g")) {
+                  LOG_DEBUG << "NO STAR geometry source directory has been found" << endm;
+                  delete geoDir; geoDir = 0;
+              } else {
+                 TString star("$STAR/pams");
+                 gSystem->ExpandPathName(star);
+                 geoDir->SetTitle(star.Data()); 
+              }
+           } else {
+             TString wd = gSystem->WorkingDirectory();
+             wd += "/pams";
+             geoDir->SetTitle(wd.Data()); 
+           }
+           if (geoDir) {
+              ((St_geant_Maker *)this)->fGeoDirectory = geoDir;              
+               TDataSet *container = new TDataSet("GeometryDirectory");
+               container->Add(geoDir);
+               ds = fGeoDirectory;
+              ((St_geant_Maker *)this)->AddConst(container);
+              if (Debug()) fGeoDirectory->ls(3);
+           }
+        }
+        ds = fGeoDirectory;
      }
-     // Add "hall" into ".const" area of this maker
-     ((St_geant_Maker *)this)->AddConst(fVolume);
-     if (Debug()) fVolume->ls(3);
   }
-  return fVolume;
+  return ds;  
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
@@ -1315,6 +1366,22 @@ void St_geant_Maker::Call(const Char_t *name)
   if (address) csjcal_(address, &narg);
 }
 //_____________________________________________________________________________
+void St_geant_Maker::ClearRootGeoms()
+{
+  // Move the becoming obsolete ROOT representations if any
+  if (fVolume) {
+      TDataSet *dataSet = FindByName(".data");
+      fVolume->Shunt(dataSet);
+      fVolume = 0;
+   }
+   if (fTopGeoVolume) {
+      LOG_ERROR << "Fix me we !!!. Seg fault danger !!!" <<endm;
+      delete fTopGeoVolume;
+      fTopGeoVolume = 0;
+   }
+
+}
+//_____________________________________________________________________________
 TDataSet *St_geant_Maker::Work()
 {  
   struct  Medium 
@@ -1332,7 +1399,7 @@ TDataSet *St_geant_Maker::Work()
   Float_t   theta1,phi1, theta2,phi2, theta3,phi3, type;
   TObjArray nodes(nvol+1);
   
-  new TGeometry("STAR","nash STAR");
+  if (!gGeometry) new TGeometry("STAR","nash STAR");
   GtHash *H = new GtHash;
   
   printf(" looping on agvolume \n");
@@ -1541,6 +1608,37 @@ TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
  return pattern;
 }
 //_____________________________________________________________________________
+TString St_geant_Maker::GetVolumeSrcFile(const char *volumeName) const
+{
+  // Find the source code defining the "volumeName" GEANT volume
+  TDataSet *found = 0;
+  TString vName = volumeName;
+  vName.ToUpper();
+  if (fVolume && volumeName && volumeName[0]) {
+     const TDataSet *myVolume = fVolume->FindByName(vName.Data());
+     TFileSet *geoSrc = dynamic_cast<TFileSet*>(GetDataSet("GeometryDirectory"));
+     if (geoSrc && myVolume ) {
+        do {
+           // construct the source code pattern
+           TString pattern = myVolume->GetName();
+           pattern.ToLower();
+           pattern += "geo.g";
+           found = geoSrc->FindByName(pattern.Data());
+        } while (!found && (myVolume = myVolume->GetParent()) );
+     }    
+     if (found) {
+        // make the path up
+        TString path =  found->Path();
+        Ssiz_t pos = path.Index("/geometry/");
+        TString topDir = geoSrc->GetTitle();
+        path.Replace(0,pos,topDir);
+        return path;
+     }
+  }
+  return "";
+}
+
+//_____________________________________________________________________________
 void  St_geant_Maker::SetDebug(Int_t dbl)
 {
   StMaker::SetDebug(dbl);
@@ -1623,7 +1721,21 @@ void St_geant_Maker::Agnzgete (Int_t &ILK,Int_t &IDE,
 	    PASSCHARL(CGNAM));
 }
 //______________________________________________________________________________
-void St_geant_Maker::Geometry() {geometry();}
+void St_geant_Maker::Geometry() {
+   // Move the becoming obsolete ROOT representations if any
+   ClearRootGeoms();
+   if (Remake()) {
+      LOG_WARN << "The local version of the <libgeometry.so> shared library is to be re-built" << endm;
+      gSystem->Exec("cons +geometry");
+      LOG_WARN << "The local version of the <libgeometry.so> shared library has been re-built" << endm;
+      LOG_WARN << "One has to re-load Geometry browser to see the new geometry" << endm;
+      LOG_WARN << "Ask Pavel Nevski, \"Why?\"" << endm;      
+//      Do("make geometry");
+      SetRemake(kFALSE);
+   } else {
+     geometry();
+   }
+}
 //______________________________________________________________________________
 Int_t St_geant_Maker::Agstroot() {
   AgstHits();
