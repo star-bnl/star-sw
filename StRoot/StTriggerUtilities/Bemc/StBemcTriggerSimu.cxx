@@ -723,6 +723,17 @@ void StBemcTriggerSimu::FEEout() {
 	  " diff="<<(L0_TP_ADC[tpid] - (L0_TP_PED[tpid]-1)) - (LUT[tpid])<<endl;   
       }  
   }
+
+  // LOG_DEBUG messages
+  LOG_DEBUG << "Trigger patch format is HT/TPsum" << endm;
+  for (int dsm = 0; dsm < 30; ++dsm) {
+    TString line = Form("TP%d-%d: ",dsm*30,dsm*10+9);
+    for (int ch = 0; ch < 10; ++ch) {
+      int triggerPatch = dsm*10+ch;
+      line += Form("%d/%d ",L0_HT_ADC[triggerPatch],L0_TP_ADC[triggerPatch]);
+    }
+    LOG_DEBUG << line << endm;
+  }
 }
 
 //==================================================
@@ -2537,13 +2548,16 @@ void StBemcTriggerSimu::get2008pp_DSMLayer2()
 
 void StBemcTriggerSimu::get2009_DSMLayer0()
 {
-  // Loop over modules
+  // Loop over 30 modules
   for (int dsm = 0; dsm < kL0DsmModule; ++dsm) {
-    //Loop over 10 input channels to each module 
+    TString line = (*mB001)[dsm].name + ": ";
+    // Loop over 10 input channels to each module 
     for (int ch = 0 ; ch < kL0DsmInputs; ++ch) {
-      int tpid = dsm*10+ch;
+      int tpid = dsm*kL0DsmInputs+ch;
       (*mB001)[dsm].channels[ch] = L0_HT_ADC[tpid] | L0_TP_ADC[tpid] << 6;
+      line += Form("%04x ",(*mB001)[dsm].channels[ch]);
     } // End loop over channels
+    LOG_DEBUG << line << endm;
   } // End loop over modules
 
   // Emulate BEMC layer 0
@@ -2556,6 +2570,13 @@ void StBemcTriggerSimu::get2009_DSMLayer1()
 {
   // Get input from BEMC layer 0
   mB001->write(*mB101);
+
+  // LOG_DEBUG messages
+  for (size_t dsm = 0; dsm < mB101->size(); ++dsm) {
+    TString line = (*mB101)[dsm].name + ": ";
+    for (int ch = 0; ch < 8; ++ch) line += Form("%04x ",(*mB101)[dsm].channels[ch]);
+    LOG_DEBUG << line << endm;
+  }
 
   // Emulate BEMC layer 1
   mB101->run();

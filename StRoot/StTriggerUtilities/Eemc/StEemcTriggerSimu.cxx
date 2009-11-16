@@ -182,8 +182,16 @@ StEemcTriggerSimu::InitRun(int runnumber){
   LOG_INFO<<Form("Eemc::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
   char text[1000];
-  sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
+  //sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
+  sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),2006);
   EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
+
+  if (mYear != 2006) {
+    LOG_WARN << "Using EEMC FEE pedestals for Year=2006" << endm;
+    LOG_WARN << "You should really get the trigger simulator experts to setup the EEMC FEE pedestals for Year="
+	     << mYear << endm;
+    LOG_WARN << "Feel free to bribe, ahem motivate, them with baked goods..." << endm;
+  }
 
   if( mYear == 2006 ){ // #### modified line by Liaoyuan 
     DsmThreshold thresholds;
@@ -271,6 +279,17 @@ StEemcTriggerSimu::Make(){
   // ************** Emulation of trigger based on ADC ************ 
   getEemcAdc();   //  processed raw ADC
   feeTPTreeADC->compute(rawAdc,feePed,feeMask); 
+
+  // LOG_DEBUG messages
+  LOG_DEBUG << "Trigger patch format is HT/TPsum" << endm;
+  for (int dsm = 0; dsm < 9; ++dsm) {
+    TString line = Form("TP%d-%d: ",dsm*10,dsm*10+9);
+    for (int ch = 0; ch < 10; ++ch) {
+      int triggerPatch = dsm*10+ch;
+      line += Form("%d/%d ",feeTPTreeADC->TP(triggerPatch)->getOutHT(),feeTPTreeADC->TP(triggerPatch)->getOutTPsum());
+    }
+    LOG_DEBUG << line << endm;
+  }
 
   if( mYear == 2006 ){ // #### modified line by Liaoyuan 
 
@@ -546,10 +565,13 @@ StEemcTriggerSimu::getEemcFeeMask(){
 void
 StEemcTriggerSimu::get2009_DSMLayer0(){
   for( size_t dsm = 0; dsm < mE001->size(); dsm++ ){
+    TString line = (*mE001)[dsm].name + ": ";
     for( int ch = 0; ch < 10; ch++ ){
       Int_t tpid = dsm * 10 + ch;
       (*mE001)[dsm].channels[ch] = feeTPTreeADC->TP(tpid)->getOut12bit();
+      line += Form("%04x ",(*mE001)[dsm].channels[ch]);
     }
+    LOG_DEBUG << line << endm;
   }
   
   mE001->run();
@@ -558,6 +580,13 @@ StEemcTriggerSimu::get2009_DSMLayer0(){
 void
 StEemcTriggerSimu::get2009_DSMLayer1(){
   mE001->write(*mE101);
+
+  for (size_t dsm = 0; dsm < mE101->size(); ++dsm) {
+    TString line = (*mE101)[dsm].name + ": ";
+    for (int ch = 0; ch < 8; ++ch) line += Form("%04x ",(*mE101)[dsm].channels[ch]);
+    LOG_DEBUG << line << endm;
+  }
+
   mE101->run();
 }
 
@@ -636,6 +665,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.18  2009/11/16 07:51:56  pibero
+// Added LOG_DEBUG messages
+//
 // Revision 1.17  2009/10/12 18:04:28  pibero
 // Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
 //
