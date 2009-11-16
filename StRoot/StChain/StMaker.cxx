@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.222 2009/11/10 20:21:03 fisyak Exp $
+// $Id: StMaker.cxx,v 1.223 2009/11/16 19:52:46 fine Exp $
 //
 //
 /*!
@@ -1193,13 +1193,13 @@ StMaker     *StMaker::GetParentChain() const
     return (StMaker*) mk;
 }
 //_____________________________________________________________________________
-TDatime  StMaker::GetDateTime() const 
+const TDatime  &StMaker::GetDateTime() const 
 {    
    StEvtHddr *hd = GetEvtHddr();
    return hd->GetDateTime();
 }
 //_____________________________________________________________________________
-TDatime  StMaker::GetDBTime() const 
+const TDatime  &StMaker::GetDBTime() const 
 {    
   StMaker  *mk = GetMakerInheritsFrom("St_db_Maker");
   assert(mk);
@@ -1959,6 +1959,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.223  2009/11/16 19:52:46  fine
+// Fix the signature of the StMaker::GetDate... methods
+//
 // Revision 1.222  2009/11/10 20:21:03  fisyak
 // Keep only geometry tags which were used in production
 //

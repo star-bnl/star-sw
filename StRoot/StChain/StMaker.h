@@ -161,8 +161,8 @@ public:
    virtual void         SetIventNumber(Int_t iv);
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
-   virtual TDatime      GetDateTime() const;
-   virtual TDatime      GetDBTime() const;
+   virtual const TDatime &GetDateTime() const;
+   virtual const TDatime &GetDBTime() const;
    virtual void         SetDateTime(Int_t idat,Int_t itim);// 
    virtual StEvtHddr   *GetEvtHddr() const; //
    virtual Int_t        GetDate()  const ;
@@ -247,7 +247,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.94 2009/11/10 17:41:19 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.95 2009/11/16 19:52:46 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
@@ -311,8 +311,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.94 2009/11/10 17:41:19 fine Exp $
+// $Id: StMaker.h,v 1.95 2009/11/16 19:52:46 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.95  2009/11/16 19:52:46  fine
+// Fix the signature of the StMaker::GetDate... methods
+//
 // Revision 1.94  2009/11/10 17:41:19  fine
 // remove the compilation warning on SL5
 //
