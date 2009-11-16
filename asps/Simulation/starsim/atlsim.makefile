@@ -27,9 +27,9 @@ endif
 
 # STAR specific, this variable is defined
 ifeq (1,$(USE_64BITS))
-  MACHOPT := -m64
+  MACHOPT := -m64 -fPIC
 else
-  MACHOPT := -m32
+  MACHOPT := -m32 -fPIC
 endif
 
 
@@ -48,18 +48,28 @@ ifneq (1,$(words $(G3)))
 G3        := $(shell which agetof.exe 2>/dev/null)
 endif
 
+
 O         := -o
 SL        := sl
 ifeq (Linux,$(UNAME))
+ # test if gfortran exists
+ CMPL := $(shell which gfortran 2>/dev/null)
+ ifeq (,$(CMPL))
+   CMPL := g77
+   DFLG := -Df2cFortran
+ else
+   CMPL := gfortran
+   DFLG := 
+ endif
+
  SYS      := linux
  G3       += -v  1
- PP       := g77 $(MACHOPT) -E -P -Df2cFortran
- F77      := g77 $(MACHOPT) -g -w -O2 -fno-second-underscore -fno-automatic
+ PP       := $(CMPL) $(MACHOPT) -E -P $(DFLG)
+ F77      := $(CMPL) $(MACHOPT) -g -w -O2 -fno-second-underscore -fno-automatic
  PGF      := $(PGI)/linux86/bin/pgf90
  EX       := -ffixed-line-length-132
  CC       := gcc $(MACHOPT) -g -w -O2
  CPP      := g++ $(MACHOPT) -g -w -O2
-#LDS      := ld $(MACHOPT) -shared -o
  LDS      := g++ $(MACHOPT) -shared -o
  LD90     := $(PGI)/linux86/bin/pgf90 -v -shared -o
 endif
