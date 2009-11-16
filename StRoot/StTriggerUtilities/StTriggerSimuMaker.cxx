@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.30 2009/11/13 20:00:52 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.31 2009/11/16 07:51:19 pibero Exp $
 
 
 #include <Stiostream.h>
@@ -158,6 +158,12 @@ Int_t StTriggerSimuMaker::Make() {
       mSimulators[i]->Make();
     }
   }
+
+  std::vector<int> trigIds = triggerIds();
+  TString line = "Triggers: ";
+  for (size_t i = 0; i < trigIds.size(); ++i) line += Form("%d ",trigIds[i]);
+  LOG_DEBUG << line << endm;
+
   return kStOK;
 }
 
@@ -173,6 +179,17 @@ bool StTriggerSimuMaker::isTrigger(int trigId) {
   return true;
 }
 
+std::vector<int> StTriggerSimuMaker::triggerIds() const
+{
+  std::vector<int> v;
+
+  if (mYear >= 2009 && emc) {
+    std::set<int> s = emc->triggerIds();
+    std::copy(s.begin(),s.end(),std::back_inserter(v));
+  }
+
+  return v;
+}
 
 const StTriggerSimuResult& StTriggerSimuMaker::detailedResult(unsigned int trigId) {
     // first check if we already filled this result
@@ -224,6 +241,9 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.31  2009/11/16 07:51:19  pibero
+ * Added LOG_DEBUG messages and triggerIds()
+ *
  * Revision 1.30  2009/11/13 20:00:52  pibero
  * Updates for Run 9 to work on simulation
  *
