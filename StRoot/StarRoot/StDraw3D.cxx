@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.75 2009/10/27 19:37:44 fine Exp $
+// $Id: StDraw3D.cxx,v 1.76 2009/11/16 18:08:42 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -48,7 +48,7 @@ static inline TVirtualViewer3D *InitCoin(TVirtualPad *pad,const char *detectorNa
    if (CheckCoin) {
       // define the background image
       TString backShape = detectorName;
-      backShape.ReplaceAll(",",".iv:");
+      backShape.ReplaceAll(",",".iv,");
       backShape+= ".iv";
       printf(" Setting the background shape to be 	%s\n", backShape.Data());
       gEnv->SetValue("Gui.InventorShapeDir",":.:StRoot/macros/graphics:$STAR/StRoot/macros/graphics:/afs/rhic.bnl.gov/star/doc/www/comp/2/vis/iv");
@@ -192,7 +192,7 @@ class volume_view_3D : public TVolume, public view_3D {
                                the "iv" extension:\n
                                      \code   <name>.iv \endcode   
          \param detectorName = 0  - no detector geometry is to be rendered
-         \param pad (default = 0) - The ROOT TPad to be used to render the event wired view
+         \param pad (default = 0) - The ROOT TPad to be used to render the event wireframe view
  \htmlonly
  <table>
  <tr>
@@ -915,13 +915,13 @@ void StDraw3D::ShowTest()
    \param  col     - ROOT fill color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
    \param  sty     - ROOT fill style ( see: http://root.cern.ch/root/html/TAttFIll.html ) 
                 The default style is "Endcap".  One can add \c kBarrelStyle constant to ROOT style to get the "barrel" style tower\n 
-		= 0 - solid color,  4001 - wired view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
+		= 0 - solid color,  4001 - wireframe view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
    \param   siz - the height of the tower. It can be used to visualize the energy deposit or for any other reason.
    \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
  \htmlonly
  <table>
  <tr>
- <th>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
+ <th colspan=2>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
 </tr>
  <tr>
  <th>XZ plane view
@@ -932,7 +932,7 @@ void StDraw3D::ShowTest()
  <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png" width=340px></center>
  </tr>
  <tr>
- <th>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
+ <th colspan=2>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
  </tr>
  <tr>
  <th>XZ plane view
@@ -965,13 +965,13 @@ TObject *StDraw3D::Tower(float radius
    \param  col     - ROOT fill color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
    \param  sty     - ROOT fill style ( see: http://root.cern.ch/root/html/TAttFIll.html ) 
                 The default style is "Endcap".  One can add \c kBarrelStyle constant to ROOT style to get the "barrel" style tower \n
-		= 0 - solid color,  4001 - wired view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
+		= 0 - solid color,  4001 - wireframe view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
    \param   siz - the height of the tower. It can be used to visualize the energy deposit or for any other reason.
    \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
  \htmlonly
  <table>
  <tr>
- <th>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
+ <th colspan=2>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
 </tr>
  <tr>
  <th>XZ plane view
@@ -982,7 +982,7 @@ TObject *StDraw3D::Tower(float radius
  <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png" width=340px></center>
  </tr>
  <tr>
- <th>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
+ <th colspan=2>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
  </tr>
  <tr>
  <th>XZ plane view
@@ -992,7 +992,8 @@ TObject *StDraw3D::Tower(float radius
  <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerZYL1PlaneEC.png" width=340px></center>
  <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlaneEC.png" width=340px></center>
  </tr></table>
- \endhtmlonly */
+ \endhtmlonly 
+*/
 //__________________________________________________________________________________________
 TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda2, float phi,float dphi, Color_t col,Style_t sty, Size_t siz)
 { 
@@ -1114,13 +1115,13 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    \param  col     - ROOT fill color ( see: http://root.cern.ch/root/html/TAttFill.html ) 
    \param  sty     - ROOT fill style ( see: http://root.cern.ch/root/html/TAttFill.html ) 
                 one can add kBarrelStyle constant to ROOT style to get the "barrel" style tower \n
-			= 0 - solid color,  4001 - wired view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
+			= 0 - solid color,  4001 - wireframe view, 4001 ... 4100 - solid translucent color from 99% transparent to 100% opaque
    \param   siz - the height of the tower. It can be used to visualize the energy deposit or for any other reason.
    \return - a pointer to the ROOT "view" TVolume created to render the input parameters.
  \htmlonly
  <table>
  <tr>
- <th>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
+ <th colspan=2>Explanation of the StDraw::Tower(...) method parameters ("barrel" style )
 </tr>
  <tr>
  <th>XZ plane view
@@ -1131,7 +1132,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
  <td><center><img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DTowerXYPlane.png" width=340px></center>
  </tr>
  <tr>
- <th>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
+ <th colspan=2>Explanation of the StDraw::Tower(...) method parameters (default "endcap" style )
  </tr>
  <tr>
  <th>XZ plane view
