@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.114 2008/04/02 20:22:32 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.115 2009/11/16 20:16:23 fine Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.115  2009/11/16 20:16:23  fine
+// Make the TDatime const interfaces
+//
 // Revision 1.114  2008/04/02 20:22:32  perev
 // WarnOff
 //
@@ -926,7 +929,7 @@ TDataSet *St_db_Maker::GetDataBase(const char* logInput,const TDatime *td)
 RETN: fTimer[1].Stop();         return ds;
 }
 //_____________________________________________________________________________
-TDatime St_db_Maker::GetDateTime() const
+const TDatime &St_db_Maker::GetDateTime() const
 {
   if (!fIsDBTime) return StMaker::GetDateTime();
   //(void )printf("**** fIsDBTime is set, returning its value\n");
@@ -1061,7 +1064,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 
 }
 //_____________________________________________________________________________
-Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *val) const
+Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *const val) const
 {
    if (!tb)                             return -1;
    TString ts("."); ts+=tb->GetName();
