@@ -1,4 +1,4 @@
-// $Id: Ed.C,v 1.11 2009/10/27 23:22:40 fine Exp $
+// $Id: Ed.C,v 1.12 2009/11/16 18:36:48 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file Ed.C 
@@ -143,7 +143,8 @@ void ae(int tracks=-1, int  hits=-1)
            << endl;
       return;
    }
-   gROOT->Macro("Load.C");
+   gROOT->Macro("Load.C"); 
+   gSystem->Load("StDetectorDbMaker");
    gROOT->Macro(Form("bfc.C(0,\"doevents\",\"%s\")",file));
    delete gEventDisplay; // destroy the built-in display
    new StuDraw3DEvent(detectorNames); // create our own one (with no detector geometry)
