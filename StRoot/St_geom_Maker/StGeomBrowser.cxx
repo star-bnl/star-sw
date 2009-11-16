@@ -23,30 +23,24 @@ void StGeomBrowser::SetFile(const char *fileName)
    gSystem->ExpandPathName(fFileName);    
    if (!fBrowser) fBrowser = new GeomBrowser();
    if ( fFileName.EndsWith(".C") ) {
-      if (!gSystem->AccessPathName(fFileName.Data()))
-           fBrowser->fileOpenMacro(fFileName.Data()); 
-   } else if ( fFileName.EndsWith(".root") ) {         
-      if (!gSystem->AccessPathName(fFileName.Data()))
+         if (!gSystem->AccessPathName(fFileName.Data()))
+             fBrowser->fileOpenMacro(fFileName.Data()); 
+   } else if (fFileName.EndsWith(".root") ) {         
+            if (!gSystem->AccessPathName(fFileName.Data()))
                 fBrowser->fileOpenRoot(fFileName.Data()); 
-   } else if ( fFileName.EndsWith(".fz") ) {         
-      if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenZebra(fFileName.Data()); 
-   } else if ( fFileName.EndsWith(".iv") ) {         
-      if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenInventor(fFileName.Data()); 
-   } else if ( fFileName.EndsWith(".wrl") ) {         
-      if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenInventor(fFileName.Data()); 
-   }  else if ( fFileName.Length() <= 8) {
-      // STAR geometry version
-      fBrowser->SelectGeometry(fFileName.Data());
+   } else if (fFileName.EndsWith(".fz") ) {         
+        if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenZebra(fFileName.Data()); 
+   } else if (fFileName.EndsWith(".iv") ) {         
+        if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenInventor(fFileName.Data()); 
+   } else if (fFileName.EndsWith(".wrl") ) {         
+        if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenInventor(fFileName.Data()); 
+   }  else if ( ( fFileName.Length() <= 8) ||fFileName == "complete") {
+        // STAR geometry version
+        fBrowser->SelectGeometry(fFileName.Data());
    } else  {
         // The last STAR geometry
         //fBrowser->fileOpenZebra(fFileName.Data());
-   }
-}
-
-//______________________________________________________________
-void StGeomBrowser::SetSize(Int_t w,Int_t h) {
-   if (!fBrowser) fBrowser = new GeomBrowser();
-   fBrowser->resize(w,h);
+   }      
 }
 
 //______________________________________________________________

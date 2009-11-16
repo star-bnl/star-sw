@@ -48,7 +48,7 @@ class StGammaCandidate: public TObject
         ~StGammaCandidate();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidate.h,v 1.13 2008/12/03 15:33:55 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidate.h,v 1.14 2009/06/18 17:21:24 jwebb Exp $ built "__DATE__" "__TIME__; return cvs; }
 
         ////////////////////////////////////////////
         //               Accessors                //
@@ -118,7 +118,7 @@ class StGammaCandidate: public TObject
         Int_t numberOfMyPreshower2(){ return mMyPreshower2.GetLast()+1; }
         Int_t numberOfMyPostshower(){ return mMyPostshower.GetLast()+1; }
         
-        StGammaFitterResult& smdFit() { return mSmdFit; }
+        StGammaFitterResult& smdFit(Int_t plane=0) { return mSmdFit[plane]; }
         
         ////////////////////////////////////////////
         //                Mutators                //
@@ -166,7 +166,7 @@ class StGammaCandidate: public TObject
         void addMyPreshower2( StGammaTower *pre2 ){ mMyPreshower2.Add( pre2 ); }
         void addMyPostshower( StGammaTower *post ){ mMyPostshower.Add( post ); }
         
-        void SetSmdFit(const StGammaFitterResult& fit) { mSmdFit = fit; }
+        void SetSmdFit(const StGammaFitterResult& fit, Int_t plane=0) { mSmdFit[plane] = fit; }
 
 
     protected:
@@ -191,7 +191,7 @@ class StGammaCandidate: public TObject
         Float_t mSmduEnergy;    /// Energy deposited in esmdu (or bsmd eta)
         Float_t mSmdvEnergy;    /// Energy deposited in emsdv (or bsmd phi)
         
-        StGammaFitterResult mSmdFit;
+        StGammaFitterResult mSmdFit[2];
 
 
     private:
