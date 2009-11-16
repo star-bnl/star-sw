@@ -136,18 +136,23 @@ class StEmbeddingQAMaker {
     TH1* hdVz ; // vz(real) - vz(MC)
 
     // Tracks
-    //  Fill Daughters for contaminated pairs
-    TH1** hGeantId[StEmbeddingQAUtilities::kNCategory];         // Geant id
-    TH3** hNHit[StEmbeddingQAUtilities::kNCategory];            // Nhit distribution vs eta vs pt
-    TH3** hDca[StEmbeddingQAUtilities::kNCategory];             // Dca vs eta vs pt
-    TH2** hPtVsEta[StEmbeddingQAUtilities::kNCategory];         // pt vs pseudo-rapidity
-    TH2** hPtVsY[StEmbeddingQAUtilities::kNCategory];           // pt vs rapidity
-    TH2** hPtVsPhi[StEmbeddingQAUtilities::kNCategory];         // pt vs phi
-    TH2** hPtVsMom[StEmbeddingQAUtilities::kNCategory];         // pt vs momentum
-    TH2** hdPtVsPt[StEmbeddingQAUtilities::kNCategory];         // pt - pt(MC) vs pt
-    TH2** hMomVsEta[StEmbeddingQAUtilities::kNCategory];        // momentum vs eta
-    TH2** hdEdxVsMom[StEmbeddingQAUtilities::kNCategory];       // dE/dx vs momentum (no PID cut)
-    TH2** hdEdxVsMomPidCut[StEmbeddingQAUtilities::kNCategory]; // dE/dx vs momentum (with PID cut, 2 sigma)
+    //  - Fill Daughters for contaminated pairs
+    //  - Use MC momentum instead of reconstructed momentum (Update on Nov/13/2009)
+    //  - Add p (reco) vs p (MC) (Update on Nov/13/2009)
+    TH1** hGeantId[StEmbeddingQAUtilities::kNCategory];             // Geant id
+    TH3** hNHit[StEmbeddingQAUtilities::kNCategory];                // Nhit distribution vs eta vs pt
+    TH3** hDca[StEmbeddingQAUtilities::kNCategory];                 // Dca vs eta vs pt
+    TH2** hPtVsEta[StEmbeddingQAUtilities::kNCategory];             // pt vs pseudo-rapidity
+    TH2** hPtVsY[StEmbeddingQAUtilities::kNCategory];               // pt vs rapidity
+    TH2** hPtVsPhi[StEmbeddingQAUtilities::kNCategory];             // pt vs phi
+    TH2** hPtVsMom[StEmbeddingQAUtilities::kNCategory];             // pt vs momentum
+    TH2** hdPtVsPt[StEmbeddingQAUtilities::kNCategory];             // pt - pt(MC) vs pt
+    TH2** hMomVsEta[StEmbeddingQAUtilities::kNCategory];            // momentum vs eta
+    TH2** hdEdxVsMomMc[StEmbeddingQAUtilities::kNCategory];         // dE/dx vs MC momentum (no PID cut)
+    TH2** hdEdxVsMomMcPidCut[StEmbeddingQAUtilities::kNCategory];   // dE/dx vs MC momentum (with PID cut, 2 sigma)
+    TH2** hdEdxVsMomReco[StEmbeddingQAUtilities::kNCategory];       // dE/dx vs reconstructed momentum (no PID cut)
+    TH2** hdEdxVsMomRecoPidCut[StEmbeddingQAUtilities::kNCategory]; // dE/dx vs reconstructed momentum (with PID cut, 2 sigma)
+    TH2** hRecoPVsMcP[StEmbeddingQAUtilities::kNCategory];          // Reconstructed momentum vs MC momentum
 
     TH2** hEtaVsPhi[StEmbeddingQAUtilities::kNCategory];  // pseudo-rapidity vs phi
     TH2** hEtaVsVz[StEmbeddingQAUtilities::kNCategory];   // pseudo-rapidity vs vz
