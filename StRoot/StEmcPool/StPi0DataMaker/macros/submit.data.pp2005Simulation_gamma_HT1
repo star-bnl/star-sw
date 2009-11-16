@@ -1,8 +1,0 @@
-#!/bin/bash
-
-export DATA_NAME='Pure MC photon simulation using pp2005 geometry and BFC chain and HighTower-1 timestamps'
-export DATA_TAG='pp2005Simulation'
-export DATA_SUBTAG=$DATA_TAG'_gamma_HT1'
-export DATA_QUERY="file:$DATA_PATH/starsim_gamma_pp2005/*.event.root"
-export DATA_CONFIG='config_simulation_pp2005_HT1.C'
-export DATA_DIR=$DATA_PATH'/simu_pp2005_gamma_HT1'
