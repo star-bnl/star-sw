@@ -60,7 +60,7 @@ public:
   static StGammaFitter* instance();
 
   virtual const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StGammaFitter.h,v 1.5 2008/06/30 14:58:40 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StGammaFitter.h,v 1.6 2009/06/18 17:21:24 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 
   /// \brief Fit transverse SMD profile to predetermined peak in u- and v-plane.
@@ -81,7 +81,7 @@ public:
   ///     10: END command
   ///     11: EXIT or STOP command
   ///     12: RETURN command
-  int fit(StGammaCandidate* candidate, StGammaFitterResult* fits);
+  int fit(StGammaCandidate* candidate, StGammaFitterResult* fits, Int_t plane=0);
 
   /// \brief distance in yield vs. maximal-sided residual plane
   /// between the quadratic residual cut and the point (x, y).

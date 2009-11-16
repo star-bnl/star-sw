@@ -1,5 +1,5 @@
 /****************************************************************************
-** $Id: TextEdit.cxx,v 1.5 2009/02/06 00:05:00 fine Exp $
+** $Id: TextEdit.cxx,v 1.4 2007/03/06 00:44:53 fine Exp $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -10,29 +10,29 @@
 
 #include "TextEdit.h"
 
-#include <QTextEdit>
-#include <QAction>
-#include <QMenu>
-#include <QToolBar>
-#include <QTabWidget>
-#include <QApplication>
-#include <QFontDatabase>
-#include <QComboBox>
-#include <QLineEdit>
-#include <QFileInfo>
-#include <QFile>
-#include <QFileDialog>
-#include <QPrinter>
-//#include <QPaintDeviceMetrics>
-// #include <QSimpleRichText>
-#include <QColorDialog>
-#include <QPainter>
-#include <QMessageBox>
+#include <qtextedit.h>
+#include <qaction.h>
+#include <qmenubar.h>
+#include <qpopupmenu.h>
+#include <qtoolbar.h>
+#include <qtabwidget.h>
+#include <qapplication.h>
+#include <qfontdatabase.h>
+#include <qcombobox.h>
+#include <qlineedit.h>
+#include <qfileinfo.h>
+#include <qfile.h>
+#include <qfiledialog.h>
+#include <qprinter.h>
+#include <qpaintdevicemetrics.h>
+#include <qsimplerichtext.h>
+#include <qcolordialog.h>
+#include <qpainter.h>
+#include <qmessagebox.h>
 
 TextEdit::TextEdit( QWidget *parent, const char *name )
     : QMainWindow( parent, name )
 {
-#if 0
     setupFileActions();
     setupEditActions();
     setupTextActions();
@@ -50,12 +50,10 @@ TextEdit::TextEdit( QWidget *parent, const char *name )
 	    load( qApp->argv()[ i ] );
     }
 #endif    
-#endif
 }
 
 void TextEdit::setupFileActions()
 {
-#if 0
     QToolBar *tb = new QToolBar( this );
     tb->setLabel( "File Actions" );
     QPopupMenu *menu = new QPopupMenu( this );
@@ -89,12 +87,10 @@ void TextEdit::setupFileActions()
     a = new QAction( tr( "E&xit" ), 0, this, "fileExit" );
     connect( a, SIGNAL( activated() ), this, SLOT( fileExit() ) );
     a->addTo( menu );
-#endif	
 }
 
 void TextEdit::setupEditActions()
 {
-#if 0
     QToolBar *tb = new QToolBar( this );
     tb->setLabel( "Edit Actions" );
     QPopupMenu *menu = new QPopupMenu( this );
@@ -122,12 +118,10 @@ void TextEdit::setupEditActions()
     connect( a, SIGNAL( activated() ), this, SLOT( editPaste() ) );
     a->addTo( tb );
     a->addTo( menu );
-#endif	
 }
 
 void TextEdit::setupTextActions()
 {
-#if 0
     QToolBar *tb = new QToolBar( this );
     tb->setLabel( "Format Actions" );
     QPopupMenu *menu = new QPopupMenu( this );
@@ -195,12 +189,10 @@ void TextEdit::setupTextActions()
     connect( actionTextColor, SIGNAL( activated() ), this, SLOT( textColor() ) );
     actionTextColor->addTo( tb );
     actionTextColor->addTo( menu );
-#endif	
 }
 
 void TextEdit::load( const QString &f )
 {
-#if 0
    if ( QFile::exists( f ) ) {
       QTextEdit *edit = new QTextEdit( tabWidget );
       doConnections( edit );
@@ -228,22 +220,18 @@ void TextEdit::load( const QString &f )
                 );
       }
    }
-#endif   
 }
 
 QTextEdit *TextEdit::currentEditor() const
 {
-#if 0
     if ( tabWidget->currentPage() &&
 	 tabWidget->currentPage()->inherits( "QTextEdit" ) )
 	return (QTextEdit*)tabWidget->currentPage();
-#endif	
     return 0;
 }
 
 void TextEdit::doConnections( QTextEdit *e )
 {
-#if 0
     connect( e, SIGNAL( currentFontChanged( const QFont & ) ),
 	     this, SLOT( fontChanged( const QFont & ) ) );
     connect( e, SIGNAL( currentColorChanged( const QColor & ) ),
@@ -252,12 +240,10 @@ void TextEdit::doConnections( QTextEdit *e )
 	     this, SLOT( alignmentChanged( int ) ) );
     connect( e, SIGNAL(  textChanged () ),
 	     this, SLOT( textChanged() ) );
-#endif		 
 }
 
 void TextEdit::fileNew()
 {
-#if 0
     QTextEdit *edit = new QTextEdit( tabWidget );
     edit->setTextFormat( PlainText );
     edit->setFamily("Courier");
@@ -266,22 +252,18 @@ void TextEdit::fileNew()
     tabWidget->addTab( edit, tr( "noname" ) );
     tabWidget->showPage( edit );
     edit->viewport()->setFocus();
-#endif	
 }
 
 //______________________________________________________________
 void TextEdit::fileOpen()
 {
-#if 0
    QString fn = QFileDialog::getOpenFileName( QString::null, tr( "STAR Geometry (*.g);;All Files (*)" ), this );
    if ( !fn.isEmpty() ) load( fn );
-#endif   
 }
 
 //______________________________________________________________
 void TextEdit::fileSave()
 {
-#if 0
    if ( currentEditor() ) {
       QString fn;
       if ( filenames.find( currentEditor() ) == filenames.end() ) {
@@ -303,13 +285,11 @@ void TextEdit::fileSave()
          }
       }
    }
-#endif   
 }
 
 //______________________________________________________________
 void TextEdit::fileSaveAs()
 {
-#if 0
    if ( currentEditor() ) {
       QString fn = QFileDialog::getSaveFileName( QString::null, tr( "HTML-Files (*.htm *.html);;All Files (*)" ), this );
       if ( !fn.isEmpty() ) {
@@ -318,12 +298,10 @@ void TextEdit::fileSaveAs()
          tabWidget->setTabLabel( currentEditor(), QFileInfo( fn ).fileName() );
       }
    }
-#endif   
 }
 
 void TextEdit::filePrint()
 {
-#if 0
     if ( !currentEditor() )
 	return;
 #ifndef QT_NO_PRINTER
@@ -362,85 +340,66 @@ void TextEdit::filePrint()
 	} while (TRUE);
     }
 #endif
-#endif
 }
 
 //______________________________________________________________________
 void TextEdit::fileClose()
 {
-#if 0
     delete currentEditor();
     if ( currentEditor() )	currentEditor()->viewport()->setFocus();
-#endif	
 }
 
 //______________________________________________________________________
 void TextEdit::fileExit()
 {
-#if 0
    setEnabled(false);
    while (currentEditor()) delete currentEditor();
    hide();
    setEnabled(true);
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::editUndo()
 {
-#if 0
     if (currentEditor()) currentEditor()->undo();
-#endif	
 }
 
 //______________________________________________________________________
 void TextEdit::editRedo()
 {
-#if 0
     if ( currentEditor() ) currentEditor()->redo();
-#endif	
 }
 
 //______________________________________________________________________
 void TextEdit::editCut()
 {
-#if 0
     if (currentEditor())  currentEditor()->cut();
-#endif	
 }
 
 //______________________________________________________________________
 void TextEdit::editCopy()
 {
-#if 0
-
     if (currentEditor())
        currentEditor()->copy();
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::editPaste()
 {
-#if 0
    if (currentEditor() )
       currentEditor()->paste();
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::textBold()
 {
-#if 0
     if (currentEditor())
        currentEditor()->setBold( actionTextBold->isOn() );
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::textChanged()
 {
-#if 0
    QTextEdit *w = currentEditor();
    if ( w )
    {
@@ -457,52 +416,42 @@ void TextEdit::textChanged()
          tabWidget->setTabLabel(w,label);
       }
    }
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::textUnderline()
 {
-#if 0
    if (currentEditor())
       currentEditor()->setUnderline( actionTextUnderline->isOn() );
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::textItalic()
 {
-#if 0
     if (currentEditor())
        currentEditor()->setItalic( actionTextItalic->isOn() );
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::textFamily(const QString &f)
 {
-#if 0
    if (currentEditor()) {
       currentEditor()->setFamily( f );
       currentEditor()->viewport()->setFocus();
    }
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::textSize( const QString &p )
 {
-#if 0
    if (currentEditor()) {
       currentEditor()->setPointSize( p.toInt() );
       currentEditor()->viewport()->setFocus();
    }
-#endif   
 }
 
 void TextEdit::textColor()
 {
-#if 0
     if ( !currentEditor() )
        	return;
     QColor col = QColorDialog::getColor( currentEditor()->color(), this );
@@ -512,12 +461,10 @@ void TextEdit::textColor()
     QPixmap pix( 16, 16 );
     pix.fill( black );
     actionTextColor->setIconSet( pix );
-#endif   
 }
 
 void TextEdit::textAlign( QAction *a )
 {
-#if 0
     if ( !currentEditor() )
 	return;
     if ( a == actionAlignLeft )
@@ -528,32 +475,26 @@ void TextEdit::textAlign( QAction *a )
 	currentEditor()->setAlignment( AlignRight );
     else if ( a == actionAlignJustify )
 	currentEditor()->setAlignment( AlignJustify );
-#endif   
 }
 
 void TextEdit::fontChanged( const QFont &f )
 {
-#if 0
     comboFont->lineEdit()->setText( f.family() );
     comboSize->lineEdit()->setText( QString::number( f.pointSize() ) );
     actionTextBold->setOn( f.bold() );
     actionTextItalic->setOn( f.italic() );
     actionTextUnderline->setOn( f.underline() );
-#endif   
 }
 
 void TextEdit::colorChanged( const QColor &c )
 {
-#if 0
     QPixmap pix( 16, 16 );
     pix.fill( c );
     actionTextColor->setIconSet( pix );
-#endif   
 }
 
 void TextEdit::alignmentChanged( int a )
 {
-#if 0
     if ( ( a == AlignAuto ) || ( a & AlignLeft ))
 	actionAlignLeft->setOn( TRUE );
     else if ( ( a & AlignHCenter ) )
@@ -562,24 +503,20 @@ void TextEdit::alignmentChanged( int a )
 	actionAlignRight->setOn( TRUE );
     else if ( ( a & AlignJustify ) )
 	actionAlignJustify->setOn( TRUE );
-#endif   
 }
 
 //______________________________________________________________________
 void TextEdit::editorChanged( QWidget * )
 {
-#if 0
    if (currentEditor()) {
      fontChanged( currentEditor()->currentFont() );
      colorChanged( currentEditor()->color() );
      alignmentChanged( currentEditor()->alignment() );
    }
-#endif   
 }
 //______________________________________________________________________
 void TextEdit::findBlock(const QString &expr) 
 {
-#if 0
    int para=0;
    int index=0; 
    if (QTextEdit *e = currentEditor())
@@ -604,7 +541,6 @@ void TextEdit::findBlock(const QString &expr)
          break;
       } 
    }
-#endif   
 }
 //______________________________________________________________________
 void  TextEdit::searchActivated( const QString &)

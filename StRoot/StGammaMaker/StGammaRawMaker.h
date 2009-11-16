@@ -36,7 +36,7 @@ class StGammaRawMaker: public StMaker
         ~StGammaRawMaker();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.4 2008/12/03 15:36:01 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.6 2009/06/18 05:52:56 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();
@@ -54,13 +54,16 @@ class StGammaRawMaker: public StMaker
 
         StGammaTower *tower(Int_t id, Int_t layer);
         StGammaStrip *strip(Int_t sector, Int_t plane, Int_t index);
-        
+
         // Mutators
         void SetTowerCutoff( Float_t t );        
         void SetTrackCutoff( Float_t t );
         
         void useBemc() { mUseBemc = true; }
         void useEemc() { mUseEemc = true; }
+
+        void AddEtaStrip(StGammaStrip *strip);
+        void AddPhiStrip(StGammaStrip *strip);
 
     protected:
 
@@ -108,7 +111,7 @@ class StGammaRawMaker: public StMaker
         StGammaEventMaker *mGammaMaker;
         StGammaEvent *mGammaEvent;
   
-    ClassDef(StGammaRawMaker, 2);
+    ClassDef(StGammaRawMaker, 3);
 
 };
 
