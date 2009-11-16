@@ -273,6 +273,8 @@ void StDbServiceBroker::RecommendHost()
           continue;
         }
 
+      conn->options.connect_timeout = 30;
+
       if (mysql_real_connect
 	  (conn,((*I).HostName).c_str(), "loadbalancer","lbdb","test",(*I).Port,Socket,0)==NULL)
         {
