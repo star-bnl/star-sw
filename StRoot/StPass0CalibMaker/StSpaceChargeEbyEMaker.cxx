@@ -61,13 +61,12 @@ ClassImp(StSpaceChargeEbyEMaker)
 StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     event(0), Calibmode(kFALSE),
     PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE), doNtuple(kFALSE),
-    doReset(kTRUE), doGaps(kFALSE),
+    doReset(kTRUE), doGaps(kFALSE), inGapRow(0),
     m_ExB(0), tpcDbMaker(0), tpcHitMoverMaker(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
     dcahist(0), dcahistN(0), dcahistP(0), dcahistE(0), dcahistW(0),
-    gapZhist(0), gapZhistneg(0), gapZhistpos(0),
-    gapZhisteast(0), gapZhistwest(0), ntup(0) {
+    gapZhist(0), gapZhistneg(0), gapZhistpos(0), ntup(0) {
 
   HN=96;  // max events used, cannot exceed 96 used in header file
   MINTRACKS=1500;
@@ -200,14 +199,8 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   }
 
   // Select the highest ranked vertex
-  StPrimaryVertex* pvtx = 0; float rank = -1e6;
-  for (unsigned int l=0; l<event->numberOfPrimaryVertices(); l++) {
-    if (!pvtx || event->primaryVertex(l)->ranking() > rank) {
-      pvtx = event->primaryVertex(l);
-      rank = pvtx->ranking();
-    }
-  }
-  if (!pvtx || pvtx->numberOfDaughters()<10) return kStOk;
+  StPrimaryVertex* pvtx = event->primaryVertex();
+  if (!pvtx || pvtx->numberOfDaughters()<5 || pvtx->numMatchesWithBEMC()<1) return kStOk;
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   unsigned int nnodes = theNodes.size();
   if (!nnodes) return kStOk;
@@ -225,8 +218,6 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     schists[curhist]->Reset();
     if (doGaps) {
       gapZhist->Reset();
-      gapZhisteast->Reset();
-      gapZhistwest->Reset();
       gapZhistpos->Reset();
       gapZhistneg->Reset();
     }
@@ -259,6 +250,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   // Fill the StEvent information for the SpaceCharge used in this event
   runinfo->setSpaceCharge(lastsc);
   runinfo->setSpaceChargeCorrectionMode(m_ExB->GetSpaceChargeMode());
+  if (!inGapRow) {
+    if (runinfo->runId() > 10000000) inGapRow = 13; // Run 9+
+    else if (runinfo->runId() > 0) inGapRow = 12; // Run exists
+    // else undefined
+  }
 
   // Track loop
   unsigned int i,j,k;
@@ -307,6 +303,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           if (DCA3 > 4) continue; // cut out pileup tracks!
           Int_t ch = (int) triGeom->charge();
 
+          Int_t PCT = 0;
           Float_t rerrors[64];
           Float_t rphierrors[64];
           memset(rerrors,64*sizeof(Float_t),0);
@@ -317,6 +314,8 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             unsigned int maskpos = 0;
             switch (hit->detector()) {
               case (kTpcId) :
+                if ((hit->position().z() > 1 && ((StTpcHit*) hit)->sector() > 12) ||
+                    (hit->position().z() <-1 && ((StTpcHit*) hit)->sector() < 13)) PCT++;
                 maskpos = 7 + ((StTpcHit*) hit)->padrow(); break;
               case (kSvtId) :
                 maskpos = ((StSvtHit*) hit)->layer(); break;
@@ -332,6 +331,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
               rphierrors[maskpos] = herr;
             }
           }
+          if (PCT) continue; // Track has post-crossing hits
           
           Float_t space = 10000.;
           if (!(m_ExB->PredictSpaceChargeDistortion(ch,oldPt,ooo.z(),
@@ -344,7 +344,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
 
           if ((doGaps) &&
-              (map.hasHitInRow(kTpcId,12))&&(map.hasHitInRow(kTpcId,14)) &&
+              (map.hasHitInRow(kTpcId,inGapRow))&&(map.hasHitInRow(kTpcId,14)) &&
               (map.hasHitInRow(kTpcId,11))&&(map.hasHitInRow(kTpcId,15)) &&
               (e_or_w!=0) && (TMath::Abs(ch)==1) && (oldPt>0.3))
             FillGapHists(tri,hh,e_or_w,ch);
@@ -540,7 +540,10 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
       PrePassdone = kTRUE;
       return kStStop; // We're happy! Let's stop!
     }
-    if (Calibmode) doReset = kTRUE;
+    if (Calibmode) {
+      doReset = kTRUE;
+      return kStStop; // We're happy? Let's stop!
+    }
     else m_ExB->ManualSpaceChargeR2(sc,m_ExB->CurrentSpaceChargeEWRatio());
   }
   return kStOk;
@@ -632,8 +635,6 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
     gapZhist = new TH2F("Gaps","Gaps",GN,GL,GH,GZN,GZL,GZH);
     gapZhistneg = new TH2F("Gapsneg","Gaps Neg",GN,GL,GH,GZN,GZL,GZH);
     gapZhistpos = new TH2F("Gapspos","Gaps Pos",GN,GL,GH,GZN,GZL,GZH);
-    gapZhisteast = new TH2F("Gapseast","Gaps East",GN,GL,GH,GZN,GZL,GZH);
-    gapZhistwest = new TH2F("Gapswest","Gaps West",GN,GL,GH,GZN,GZL,GZH);
   }
 
 }
@@ -682,8 +683,6 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
     gapZhist->Write();
     gapZhistneg->Write();
     gapZhistpos->Write();
-    gapZhisteast->Write();
-    gapZhistwest->Write();
   }
   if (doNtuple) ntup->Write();
   ff.Close();
@@ -839,7 +838,7 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
   for (UInt_t ht=0; ht<hts.size(); ht++) {
     StTpcHit* hit = (StTpcHit*) hts[ht];
     UInt_t prow = hit->padrow();
-    if ((prow != 12) && (prow != 14)) continue;
+    if ((prow != inGapRow) && (prow != 14)) continue;
     float gsign = ( prow == 14 ? -1 : 1 );
     const StThreeVectorF& hp = hit->position();
 
@@ -849,15 +848,15 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
     if (TMath::Abs(hphi) > 0.75*TMath::Pi()/12.) break;
 
     gap += fsign * gsign * hh.geometricSignedDistance(hp.x(),hp.y());
-    zgap += (hp.z() / 12.795) * ( prow == 14 ? 7.4 : 5.395 ); // ~z at gap
+    if (inGapRow==13) zgap += (hp.z() / 7.595) * ( prow == 14 ? 2.2 : 5.395 ); // ~z at gap
+    else if (inGapRow==12) zgap += (hp.z() / 12.795) * ( prow == 14 ? 7.4 : 5.395 ); // ~z at gap
+    else return;
     ct++;
   }
 
   float abs_zgap = TMath::Abs(zgap);
   if ((ct==2) && (abs_zgap<200.0) && (abs_zgap>10.0)) {
      gapZhist->Fill(gap,zgap);
-     if (e_or_w==1) gapZhistwest->Fill(gap,zgap);
-     else gapZhisteast->Fill(gap,zgap);
      if (ch==1) gapZhistpos->Fill(gap,zgap);
      else gapZhistneg->Fill(gap,zgap);
      if (abs_zgap<150 && abs_zgap>25) { // Restrict the Z range further
@@ -866,8 +865,6 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
        //float gap_scaled = (gap * 100.0) / (350.0 - abs_zgap);
        float z_beyond = ZGGRID+1.0;
        gapZhist->Fill(gap_scaled,z_beyond);
-       if (e_or_w==1) gapZhistwest->Fill(gap_scaled,z_beyond);
-       else gapZhisteast->Fill(gap_scaled,z_beyond);
        if (ch==1) gapZhistpos->Fill(gap_scaled,z_beyond);
        else gapZhistneg->Fill(gap_scaled,z_beyond);
      }
@@ -877,8 +874,6 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
 void StSpaceChargeEbyEMaker::DetermineGaps() {
   DetermineGapHelper(gapZhistneg,gapZfitslopeneg,gapZfitinterceptneg,gapZdivslopeneg);
   DetermineGapHelper(gapZhistpos,gapZfitslopepos,gapZfitinterceptpos,gapZdivslopepos);
-  DetermineGapHelper(gapZhisteast,gapZfitslopeeast,gapZfitintercepteast,gapZdivslopeeast);
-  DetermineGapHelper(gapZhistwest,gapZfitslopewest,gapZfitinterceptwest,gapZdivslopewest);
   DetermineGapHelper(gapZhist,gapZfitslope,gapZfitintercept,gapZdivslope);
 }
 //_____________________________________________________________________________
@@ -993,8 +988,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.23 2009/11/10 20:54:13 fisyak Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.24 2009/11/16 22:02:19 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.24  2009/11/16 22:02:19  genevb
+// Loosen nDaughters cut, add BEMCmatch cut, PCT hits cut, enable padrow 13 for Run 9+
+//
 // Revision 1.23  2009/11/10 20:54:13  fisyak
 // pams Cleanup
 //
