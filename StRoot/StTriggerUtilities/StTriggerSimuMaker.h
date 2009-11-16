@@ -1,3 +1,5 @@
+// -*- mode:c++ -*-
+
 //////////////////////////////////////////////////////////////////////////
 //
 //
@@ -68,6 +70,7 @@ public:
   TObjArray  *mHList; // output histo access point
   void setHList(TObjArray * x){mHList=x;}
   bool isTrigger(int trigId);
+  std::vector<int> triggerIds() const;
   
   /// returns object containing detailed information about simulation of given trigger
   const StTriggerSimuResult& detailedResult(unsigned int trigId);
@@ -84,9 +87,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.20 2009/09/26 18:46:28 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.21 2009/11/16 07:51:20 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.21  2009/11/16 07:51:20  pibero
+// Added LOG_DEBUG messages and triggerIds()
+//
 // Revision 1.20  2009/09/26 18:46:28  pibero
 // Migration from ROOT MySQL to STAR DB API
 //

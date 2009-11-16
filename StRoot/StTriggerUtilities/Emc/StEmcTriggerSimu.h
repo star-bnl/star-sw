@@ -23,6 +23,7 @@ public:
   virtual ~StEmcTriggerSimu();
 
   bool isTrigger(int trigId);
+  set<int> triggerIds() const;
   StTriggerSimuDecision triggerDecision(int trigId);
 
   void setHeadMaker(StMaker*) { /* dummy */ }
