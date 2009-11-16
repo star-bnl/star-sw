@@ -114,6 +114,8 @@ class StEmbeddingQADraw {
         const Double_t x2=0.9, const Double_t y2=0.8,
         const Double_t textSize = 0.05); // Number of events, year, production and particle name
 
+    Bool_t drawdEdxVsMomentum(const Bool_t isMcMomentum=kTRUE) ; // dE/dx vs p, projections, mean/sigma vs momentum
+
     Bool_t drawProjection2D(const TString name); // (pseudo-)rapidity, momentum, pt
     Bool_t drawProjection3D(const TString name); // For dca and nhit projections in (pt, eta) space
 
