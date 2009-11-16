@@ -360,12 +360,12 @@ void ttrla()
   }
   else cout << "packing of upckc Passed" << endl;
   TRMatrix *A12 = new  TRMatrix(*A11);
-  if (A11->Verify(upckc,zerlev)) {
+  if (A12->Verify(upckc,zerlev)) {
     cout << "A11:" << *A11 << endl;
     cout << "upckc:" << upckc << endl;
     cout << "A12" << *A12 << endl;
   }
-  else cout << "unpacking of A11 Passed" << endl;
+  else cout << "unpacking of A12 Passed" << endl;
   delete A10;
   delete A11;
   delete A12;
