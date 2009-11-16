@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.11 2009/05/22 23:50:50 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.12 2009/11/16 22:31:11 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -52,7 +52,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.11 2009/05/22 23:50:50 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.12 2009/11/16 22:31:11 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -64,9 +64,9 @@ class StVertexSeedMaker : public StMaker {
    virtual void GetFillDateTime();
    virtual Bool_t BetterErrors();
    virtual Bool_t ChangedValues();
-   virtual Bool_t CheckTriggers();
+   virtual Bool_t CheckTriggers() = 0;
    virtual Bool_t ValidTrigger(unsigned int);
-   virtual Int_t GetEventData();
+   virtual Int_t GetEventData() = 0;
 
   TH1F* xdist;
   TH1F* ydist;
@@ -130,8 +130,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.11 2009/05/22 23:50:50 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.12 2009/11/16 22:31:11 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.12  2009/11/16 22:31:11  genevb
+// phase out usage of old tables
+//
 // Revision 1.11  2009/05/22 23:50:50  genevb
 // Code mods for BEMC matches, BeamWidth
 //
