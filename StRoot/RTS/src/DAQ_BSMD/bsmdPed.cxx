@@ -304,10 +304,15 @@ int bsmdPed::to_evb(char *buff)
 
 		for(p=0;p<128;p++) {
 			for(t=0;t<4800;t++) {
+
 				u_int rr, pp ;
 
-				rr = (u_int)(ped->rms[p][t] * 8.0 + 0.5) & 0x3F ;
-				pp = (u_int)(ped->ped[p][t] + 0.5) & 0x3FF ;
+				rr = (u_int)(ped->rms[p][t] * 8.0 + 0.5) ;
+				if(rr > 0x3F) rr = 0x3F ;	// maximum I can have!
+
+				
+				pp = (u_int)(ped->ped[p][t] + 0.5)  ;
+				if(pp > 0x3FF) pp = 0x3FF ;	// maximum I can have!
 
 				*dta++ = (rr<<10)|pp ;
 
