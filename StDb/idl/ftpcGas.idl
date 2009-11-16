@@ -19,8 +19,8 @@ struct ftpcGas {
    float  basePressure;             /* Torr  */
    float  pressureOffset;           /* Torr  */
    float  temperatureDifference;    /* gas temp diff between SVT high voltage off/on in degree C */
-   float  defaultTemperatureWest;   /* default gas temperature for FTPC West for SVT high voltage off */
-   float  defaultTemperatureEast;   /* default gas temperature for FTPC East for SVT high voltage off */
+   float  defaultTemperatureWest;   /* default gas temperature for FTPC West */
+   float  defaultTemperatureEast;   /* default gas temperature for FTPC East */
    float  minPressure;              /* minimum barometric pressure (in hPa) */
    float  maxPressure;              /* maximum barometric pressure (in hPa) */
    float minGasTemperature;         /* minimum gas temperature (in degree C) */
