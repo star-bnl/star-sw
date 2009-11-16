@@ -11,15 +11,10 @@
 
 #include "Stiostream.h"
 #include "StVertexSeedMaker.h"
-#include "St_DataSetIter.h"
-#include "StDAQMaker/StDAQReader.h"
-#include "St_db_Maker/St_db_Maker.h"
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
 #include "StDbLib/StDataBaseI.hh"
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
-#include "tables/St_dst_vertex_Table.h"
-#include "tables/St_dst_L0_Trigger_Table.h"
 #include "StMessMgr.h"
 #include "StVertexId.h"
 #include "tables/St_vertexSeed_Table.h"
@@ -232,33 +227,6 @@ Int_t StVertexSeedMaker::Finish() {
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
-Bool_t StVertexSeedMaker::CheckTriggers() {
-  // Check trigger word
-  StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
-  St_DataSet *daqReaderSet = GetDataSet("StDAQReader");
-  if (!daqReaderSet) {
-    LOG_ERROR << "No StDAQReader!" << endm;
-    return kStErr;
-  }
-  StTrigSummary* trigSummary =
-    ((StDAQReader*) (daqReaderSet->GetObject()))->getTrigSummary();
-  UInt_t summary = 0;
-  switch (dbTriggerId->getDefaultTriggerLevel()) {
-    case (1) : { summary=trigSummary->L1summary[0]; break; }
-    case (2) : { summary=trigSummary->L2summary[0]; break; }
-    case (3) : { summary=trigSummary->L3summary[0]; break; }
-    default  : {}
-  }
-  Bool_t notTrig = kTRUE;
-  for (unsigned int iTrg = 0;
-       (notTrig) && (iTrg < dbTriggerId->getIDNumRows()) ; iTrg++) {
-    if (summary & (1 << (dbTriggerId->getDaqTrgId(iTrg)))) {
-      if (ValidTrigger(dbTriggerId->getOfflineTrgId(iTrg))) notTrig = kFALSE;
-    }
-  }
-  return notTrig;
-}
-//_____________________________________________________________________________
 Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
   // Determine if trigger id is among valid set
   if (!dbTriggersTable) return kTRUE; // running without DB access
@@ -272,32 +240,6 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
     }
   }
   return kFALSE;
-}
-//_____________________________________________________________________________
-Int_t StVertexSeedMaker::GetEventData() {
-  // Get primary vertex from evr
-  TDataSet *ds=GetDataSet("dst/vertex");
-  if (!ds) {
-    LOG_ERROR << "Cannot locate vertex dataset!" << endm;
-    return kStErr;
-  }
-  TDataSetIter dsiter(ds);
-  St_dst_vertex *vert = (St_dst_vertex *) dsiter.Find("vertex");
-  if (!vert) {
-    LOG_ERROR << "Cannot locate vertex table!" << endm;
-    return kStErr;
-  }
-  dst_vertex_st *sth = vert->GetTable();
-  for (int ij=0;ij<vert->GetNRows();ij++,sth++){
-    if ((sth->iflag==1) && (sth->vtx_id==kEventVtxId)){
-      zvertex = sth->z;
-      yvertex = sth->y;
-      xvertex = sth->x;
-      mult = (float)(sth->n_daughters);
-      break;    // found primary vertex
-    }
-  }
-  return kStOk;
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::FindResult(Bool_t checkDb) {
@@ -340,7 +282,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.41 2009/11/10 20:54:13 fisyak Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.42 2009/11/16 22:31:11 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -664,8 +606,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.41 2009/11/10 20:54:13 fisyak Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.42 2009/11/16 22:31:11 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.42  2009/11/16 22:31:11  genevb
+// phase out usage of old tables
+//
 // Revision 1.41  2009/11/10 20:54:13  fisyak
 // pams Cleanup
 //
