@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.205 2009/10/29 00:00:21 perev Exp $
+* $Id: geometry.g,v 1.206 2009/11/16 22:37:48 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.206  2009/11/16 22:37:48  jwebb
+* Added logic to support multiple ecalgeoX files (subroutines).  ecalgeo6
+* (version 6.1) set as default version for y2009 tag.
+*
 * Revision 1.205  2009/10/29 00:00:21  perev
 * y2010=y2009+Full BTOF
 *
@@ -859,9 +863,14 @@
 * Revision 1.36  2000/11/22 17:51:41  nevski
 * tof geometry versions 1/2 preserved in btofgeo1, version 3 goes in btofgeo2
 ***************************************************************************
+
+
 ********* Detector definitions*********************************************
 
 replace [exe BBCMon;] with [;BBCM=on;]
+
+*                                                                                   Barrel Calorimeter 
+
 
 replace [exe CALBof;] with [;CALB=off;]
 replace [exe CALB00;] with [;"Full barrel in 2007"; CALB=on;
@@ -893,6 +902,7 @@ replace [exe CALB02;] with [;CALB=on;
 replace [exe CAVE03;] with [ "We need an even bigger Cave";   CaveConfig = 3;]
 replace [exe CAVE04;] with [ "We need an even bigger Cave";   CaveConfig = 4;]
 
+*                                                                                   Endcap Calorimeter 
 replace [exe ECALof;] with [;ECAL=off;]
 replace [exe ECAL31;] with [;"ECAL"; ECAL=on;
                              ecalFill=3; "all sectors filled " EcalConfig=1; " one ECAL patch, west ";]
@@ -904,10 +914,21 @@ replace [exe ECAL31;] with [;"ECAL"; ECAL=on;
 replace [exe ECAL33;] with [;"ECAL"; ECAL=on;
                              ecalFill=3 "all sectors filled "; EcalConfig=3; "both wheels"  ;]
 
+replace [exe ECALv6;] with[;"ECAL version 6.1 (or higher)"
+                           ;ECAL=on
+                           ;EcalFill=3;     "all sectors filled";
+                           ;EcalConfig=1;   "EEMC on west poletip only";
+                           ;EcalGeometry=6; "Version 6.1 and higher";
+                           ]
+
+*                                                                                      FPD Calorimeter 
+
 replace [exe FPDM00;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 0;]
 replace [exe FPDM01;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 1;]
 replace [exe FPDM02;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 2;]
 replace [exe FPDM03;] with [; "forward pion detector "; FPDM=on; FpdmConfig  = 3;]
+
+*                                                                                          Forward TPC 
 
 replace [exe FTPCof;] with ["ftpc configuration"; FTPC=off;]
 replace [exe FTPC00;] with ["ftpc configuration"; FTPC=on;
@@ -922,12 +943,18 @@ replace [exe MFLD23;] with [ MFLD=on; magField = 2.5; MfldConfig=3;]
 replace [exe MFLD53;] with [ MFLD=on; magField = 5.0; MfldConfig=3;]
 replace [exe MFLD54;] with [ MFLD=on; magField = 5.0; MfldConfig=4;]
 
+*                                                                                       Muon Telescope 
+
 replace [exe MUTD01;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 1;]
 replace [exe MUTD03;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 3;]
+
+*                                                                         Photon Multiplicity Detector   
 
 replace [exe PHMDof;] with ["Photon Multiplicity Detector Version ";PHMD=off; PhmdConfig = 0;]
 replace [exe PHMD01;] with ["Photon Multiplicity Detector Version ";PHMD=on;  PhmdConfig = 1;]
 replace [exe PHMD02;] with ["Photon Multiplicity Detector Version ";PHMD=on;  PhmdConfig = 2;]
+
+*                                                                                            Beam Pipe   
 
 replace [exe PIPE00;] with [ "Simplest.Gerrit"; PipeConfig = -1;PipeFlag   = -1;]
 replace [exe PIPE12;] with [ "Default pipe"; PipeConfig = 2 ; PipeFlag   = 1;]
@@ -935,6 +962,8 @@ replace [exe PIPE04;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 0;]
 replace [exe PIPE14;] with [ "The new pipe according to Kai"; PipeConfig = 4;
                              "pipe wrap only" ;               PipeFlag   = 1;]
+
+*                                                                                       Pixel Detector
 
 replace [exe PIXL00;] with [ "Simplest.Gerrit" PIXL=on; PixlConfig=-1;]
 replace [exe PIXL01;] with [ "Put the pixel detector in" PIXL=on; PixlConfig=1;]
@@ -945,6 +974,9 @@ replace [exe SCON02;] with [;SCON = off; ConeConfig=2 " new cable weight estimat
 
 replace [exe SCON12;] with [;SCON = on ; ConeConfig=2 " new cable weight estimate ";]
 replace [exe SCON13;] with [;SCON = on ; ConeConfig=3 " new cable weight estimate ";]
+
+
+*                                                                               Silicon Strip Detector
 
 replace [exe SISDof;] with ["Silicon Strip Detector off "; SISD=off;]
 replace [exe SISD02;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig= 2;]
@@ -1232,13 +1264,14 @@ replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 
 
 !//______________________________________________________________________________
-*********   y2009   ***
+*                                                                           Y2009
 replace [exe y2009;] with [;
-{ "y2009 baseline: much more detailed TPC (thnx YF)"
-    exe SCON13;exe TPCE04;exe BTOFc6;exe CALB02;exe ECAL31;
+{   "y2009 baseline: much more detailed TPC (thnx YF), ESMD closer to as built"
+    exe SCON13;exe TPCE04;exe BTOFc6;exe CALB02;exe ECALv6;
     exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
     exe PHMDof;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
     exe PIPE12;
+
 };]
 
 !//______________________________________________________________________________
@@ -1398,6 +1431,11 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
               FhcmConfig
 
+* The following flags select different base geometry files for the endcap
+
+   Integer    EcalGeometry / 5 /            ! defaults to version 5
+
+
    Integer    pipeFlag
 
 *             DensConfig, ! TPC gas density correction
@@ -1514,8 +1552,8 @@ replace[;Case#{#;] with [
    richConfig=2          " add non-sensitive hits to RICH system          "
    richPos=2             " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ECAL on right side, FPD parts on left side     "
-   EcalConfig=0         " Ecal: east, west or both                       "
-   ecalFill=3           " full wheel by default                          "
+   EcalConfig=0          " Ecal: east, west or both                       "
+   EcalFill=3            " full wheel by default                          "
    MfldConfig=2                  " default field - symmetrical, as fitted by Bill "
    Commands=' ';
 
@@ -1790,6 +1828,7 @@ If LL>0
   Case Y2006G   { Y2006C + new SVT dead material
                   exe y2006g;
                 }
+
 ****************************************************************************************
 ****************************************************************************************
   Case Y2007    { y2006 baseline which is Y2006+FMS
@@ -1818,7 +1857,7 @@ If LL>0
 	        }
 
 ****************************************************************************************
-  Case Y2009   { y2009 
+  Case Y2009   { y2009 baseline: more detailed TPC, ESMD closer to as built
                 exe y2009;}
 
 ****************************************************************************************
@@ -3313,7 +3352,8 @@ If LL>0
       call AgDETP new ('ECAL')
       call AgDETP add ('emcg.OnOff='   ,EcalConfig,1)
       call AgDETP add ('emcg.FillMode=',ecalFill,1)
-      Call ecalgeo
+      IF ( EcalGeometry .lt. 6 ) Call ecalgeo            ! version 5
+      IF ( EcalGeometry .eq. 6 ) Call ecalgeo6           ! version 6
    endif
 
 ******************************************************************
