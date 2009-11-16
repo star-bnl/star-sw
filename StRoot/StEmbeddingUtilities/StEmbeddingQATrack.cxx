@@ -112,8 +112,8 @@ Bool_t StEmbeddingQATrack::isPtAndEtaOk() const
 { 
   // Pt cut for MC tracks, pt & eta cuts for embedding/real tracks
 
-  const Bool_t isPtOk  = (isMc()) ? getPtMc() > kPtMinCut : getPtRc() > kPtMinCut ;
-  const Bool_t isEtaOk = TMath::Abs(getEtaRc()) < kEtaCut ;
+  const Bool_t isPtOk  = getPtMc() > kPtMinCut ;
+  const Bool_t isEtaOk = TMath::Abs(getEtaMc()) < kEtaCut ;
 
   return (isMc()) ? isPtOk : (isPtOk && isEtaOk) ;
 }
