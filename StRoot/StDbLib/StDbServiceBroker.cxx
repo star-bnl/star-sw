@@ -18,6 +18,7 @@
 #define LOG_QA cout
 #define endm "\n"
 #endif
+#include <algorithm>
 using namespace std;
 using namespace chapi_string_utilities;
 
@@ -263,6 +264,10 @@ void StDbServiceBroker::RecommendHost()
       MyBestHost = MyHostList.begin();
       return;
     }
+
+  srand ( unsigned ( time (NULL) ) );                                                                                                                        
+  random_shuffle( MyHostList.begin(), MyHostList.end() ); 
+
   for (vector<ChapiDbHost>::const_iterator I=MyHostList.begin(); I!=MyHostList.end(); ++I)
     {
       conn = mysql_init(0);
