@@ -98,8 +98,8 @@ void StEmbeddingQADraw::setOutputDirectory(const TString name)
 
   // Make sure if it exists
   if( gSystem->AccessPathName(name) == kTRUE ){ // 0 is true, i.e. directory exists
-    Error("setOutputDirectory", "Directory %s does not exist. Make sure you put correct path. Abort()", name.Data());
-    abort();
+    Error("setOutputDirectory", "Directory %s does not exist. Set current directory as the output location");
+    mOutputFigureDirectory = "./";
   }
 
   // Make sure you put '/' at the end of directory name
@@ -615,6 +615,27 @@ Bool_t StEmbeddingQADraw::drawRapidity()
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawMomentum()
 {
+  // Plot reconstructed momentum vs MC momentum (2D)  (Added on Nov/13/2009)
+  //   - Embedding only
+
+  for(Int_t id=0; id<getNDaughters(); id++){
+    TH2* hRecoPVsMcP = (TH2D*) getHistogram("hRecoPVsMcP", id);
+    hRecoPVsMcP->SetAxisRange(0, kPtMax, "X");
+    hRecoPVsMcP->SetAxisRange(0, kPtMax, "Y");
+    setStyle(hRecoPVsMcP);
+
+    TString title(hRecoPVsMcP->GetTitle());
+    title.Remove(0, title.Last(',')+1);
+    hRecoPVsMcP->SetTitle(title);
+
+    TCanvas* canvas = new TCanvas(Form("c%d", kCanvasId), Form("c%d", kCanvasId++));
+    hRecoPVsMcP->Draw("colz");
+
+    canvas->cd();
+    canvas->Update();
+    print(*canvas, Form("recop_vs_momp_daughter%d", id));
+  }
+
   return drawProjection2D("momentum");
 }
 
@@ -794,7 +815,25 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name)
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawdEdx()
 {
-  cout << "QA for dE/dx ..." << endl;
+  // MC momentum
+  drawdEdxVsMomentum(kTRUE) ;
+
+  // Reconstructed momentum
+  drawdEdxVsMomentum(kFALSE) ;
+
+  return kTRUE ;
+}
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum)
+{
+  // Select MC or reconstructed momentum for the embedding data
+  // Use reconstructed momentum for the real data
+  const TString momName  = (isMcMomentum) ? "Mc" : "Reco" ;
+  TString momNameUpper(momName);
+  momNameUpper.ToUpper();
+
+  cout << "QA for dE/dx (" << momNameUpper << " momentum ...)" << endl;
 
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
@@ -806,19 +845,19 @@ Bool_t StEmbeddingQADraw::drawdEdx()
     canvas2D->Divide(2, 1);
 
     // Embedding
-    TH2* hdEdxVsMomEmbed = (TH2D*) getHistogram("hdEdxVsMom", id);
+    TH2* hdEdxVsMomEmbed = (TH2D*) getHistogram(Form("hdEdxVsMom%s", momName.Data()), id);
     setStyle(hdEdxVsMomEmbed);
     hdEdxVsMomEmbed->SetLineColor(kRed);
     hdEdxVsMomEmbed->SetMarkerColor(kRed);
 
     // Real data
-    TH2* hdEdxVsMomReal = (TH2D*) getHistogram("hdEdxVsMom", id, kFALSE);
+    TH2* hdEdxVsMomReal = (TH2D*) getHistogram("hdEdxVsMomReco", id, kFALSE);
     setStyle(hdEdxVsMomReal);
     hdEdxVsMomReal->SetLineColor(kBlack);
     hdEdxVsMomReal->SetMarkerColor(kBlack);
 
     // Real data (with PID)
-    TH2* hdEdxVsMomPidReal = (TH2D*) getHistogram("hdEdxVsMomPidCut", id, kFALSE);
+    TH2* hdEdxVsMomPidReal = (TH2D*) getHistogram("hdEdxVsMomRecoPidCut", id, kFALSE);
     setStyle(hdEdxVsMomPidReal);
     hdEdxVsMomPidReal->SetLineColor(kBlue);
     hdEdxVsMomPidReal->SetMarkerColor(kBlue);
@@ -830,6 +869,7 @@ Bool_t StEmbeddingQADraw::drawdEdx()
     // dE/dx vs momentum
     canvas2D->cd(1);
     hdEdxVsMomReal->SetAxisRange(0, kPtMax, "X");
+    hdEdxVsMomReal->SetXTitle("momentum (GeV/c)");
 
     hdEdxVsMomReal->Draw();
     hdEdxVsMomPidReal->Draw("same");
@@ -837,10 +877,11 @@ Bool_t StEmbeddingQADraw::drawdEdx()
 
     canvas2D->cd(2);
 
-    TLegend* leg = new TLegend(0.1, 0.7, 0.9, 0.9);
+    TLegend* leg = new TLegend(0.1, 0.65, 0.9, 0.9);
     leg->SetFillColor(10);
     leg->SetTextSize(0.05);
-    leg->AddEntry( hdEdxVsMomEmbed, Form("Embedding, %s", title.Data()), "L");
+    leg->SetHeader(title);
+    leg->AddEntry( hdEdxVsMomEmbed, Form("Embedding (%s)", momNameUpper.Data()), "L");
     leg->AddEntry( hdEdxVsMomReal, "Real data", "L");
     leg->AddEntry( hdEdxVsMomPidReal, "Real data with PID cut (#sigma<2)", "L");
     leg->Draw();
@@ -851,10 +892,10 @@ Bool_t StEmbeddingQADraw::drawdEdx()
     canvas2D->Update();
 
     if( getNDaughters() == 1 ){
-      print(*canvas2D, "dedx_vs_mom");
+      print(*canvas2D, Form("dedx_vs_mom%s_", momName.Data()));
     }
     else{
-      print(*canvas2D, Form("dedx_vs_mom_daughter%d", id));
+      print(*canvas2D, Form("dedx_vs_mom%s_daughter%d", momName.Data(), id));
     }
 
     // 1D projections for each momentum bin
@@ -888,8 +929,8 @@ Bool_t StEmbeddingQADraw::drawdEdx()
       }
 
       // Projections
-      TH1* hdEdxEmbed = (TH1D*) hdEdxVsMomEmbed->ProjectionY(Form("hdEdxEmbed_%d_%d", id, ipt), ptMinBin, ptMaxBin);
-      TH1* hdEdxReal  = (TH1D*) hdEdxVsMomPidReal->ProjectionY(Form("hdEdxReal_%d_%d", id, ipt), ptMinBin, ptMaxBin);
+      TH1* hdEdxEmbed = (TH1D*) hdEdxVsMomEmbed->ProjectionY(Form("hdEdxEmbed%s_%d_%d", momName.Data(), id, ipt), ptMinBin, ptMaxBin);
+      TH1* hdEdxReal  = (TH1D*) hdEdxVsMomPidReal->ProjectionY(Form("hdEdxReal%s_%d_%d", momName.Data(), id, ipt), ptMinBin, ptMaxBin);
       setStyle(hdEdxEmbed);
       setStyle(hdEdxReal );
       hdEdxEmbed->Sumw2() ;
@@ -907,8 +948,8 @@ Bool_t StEmbeddingQADraw::drawdEdx()
       hdEdxEmbed->Draw("hsame");
 
       // Extract mean and sigma (Oct/22/2009)
-      TF1 fEmbed(Form("fEmbed_%d_%d", id, ipt), "gaus", 0, 10);
-      TF1 fReal(Form("fReal_%d_%d", id, ipt), "gaus", 0, 10);
+      TF1 fEmbed(Form("fEmbed%s_%d_%d", momName.Data(), id, ipt), "gaus", 0, 10);
+      TF1 fReal(Form("fReal%s_%d_%d", momName.Data(), id, ipt), "gaus", 0, 10);
       fEmbed.SetLineColor(kRed);
       fReal.SetLineColor(kBlue);
       fEmbed.SetLineWidth(1);
@@ -934,11 +975,11 @@ Bool_t StEmbeddingQADraw::drawdEdx()
         canvas0->cd(25);
         TString title(hdEdxVsMomEmbed->GetTitle());
         title.Remove(0, title.Last(',')+1);
-        TLegend* leg = new TLegend(0.1, 0.7, 0.9, 0.9);
+        TLegend* leg = new TLegend(0.1, 0.65, 0.9, 0.9);
         leg->SetFillColor(10);
         leg->SetTextSize(0.08);
         leg->SetHeader(title.Data());
-        leg->AddEntry( hdEdxEmbed, "Embedding", "L");
+        leg->AddEntry( hdEdxEmbed, Form("Embedding (%s)", momNameUpper.Data()), "L");
         leg->AddEntry( hdEdxReal,  "Real data", "L");
         leg->Draw();
       
@@ -950,10 +991,10 @@ Bool_t StEmbeddingQADraw::drawdEdx()
     canvas0->Update();
 
     if( getNDaughters() == 1 ){
-      print(*canvas0, "dedx");
+      print(*canvas0, Form("dedx_1Dprojection_mom%s", momName.Data()));
     }
     else{
-      print(*canvas0, Form("dedx_daughter%d", id));
+      print(*canvas0, Form("dedx_1Dprojection_mom%s_daughter%d", momName.Data(), id));
     }
 
     // Mean/Sigma vs momentum (real vs embed)
@@ -969,7 +1010,7 @@ Bool_t StEmbeddingQADraw::drawdEdx()
       if( i == 0 ) frame->SetYTitle("Mean (KeV/cm)");
       if( i == 1 ) frame->SetYTitle("#sigma (KeV/cm)");
 
-      TLegend* leg = new TLegend(0.55, 0.7, 0.88, 0.86);
+      TLegend* leg = new TLegend(0.48, 0.7, 0.88, 0.86);
       leg->SetTextSize(0.05);
       leg->SetFillColor(10);
       TString title(hdEdxVsMomEmbed->GetTitle());
@@ -980,14 +1021,14 @@ Bool_t StEmbeddingQADraw::drawdEdx()
         gMeanVsMom[0]->Draw("P");
         gMeanVsMom[1]->Draw("P");
 
-        leg->AddEntry( gMeanVsMom[0], "Embedding", "P");
+        leg->AddEntry( gMeanVsMom[0], Form("Embedding (%s)", momNameUpper.Data()), "P");
         leg->AddEntry( gMeanVsMom[1], "Real data", "P");
       }
       if( i == 1 ){
         gSigmaVsMom[0]->Draw("P");
         gSigmaVsMom[1]->Draw("P");
 
-        leg->AddEntry( gSigmaVsMom[0], "Embedding", "P");
+        leg->AddEntry( gSigmaVsMom[0], Form("Embedding (%s)", momNameUpper.Data()), "P");
         leg->AddEntry( gSigmaVsMom[1], "Real data", "P");
       }
       leg->Draw();
@@ -997,10 +1038,10 @@ Bool_t StEmbeddingQADraw::drawdEdx()
     canvas1->Update();
 
     if( getNDaughters() == 1 ){
-      print(*canvas1, "mean_sigma_dedx");
+      print(*canvas1, Form("mean_sigma_dedx_mom%s", momName.Data()));
     }
     else{
-      print(*canvas1, Form("mean_sigma_dedx_daughter%d", id));
+      print(*canvas1, Form("mean_sigma_dedx_mom%s_daughter%d", momName.Data(), id));
     }
   }
 
