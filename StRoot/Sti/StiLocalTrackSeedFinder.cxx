@@ -109,38 +109,39 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
   _seedHits.push_back(hit);
   //Recursively extend track:
   bool go=true;
-  while ( go && _seedHits.size()<(UInt_t) StiLocalTrackSeedFinderParameters::instance()->seedLength()) 
+  StiLocalTrackSeedFinderParameters *seedPars=StiLocalTrackSeedFinderParameters::instance();
+  int iSeedLength 	= seedPars->seedLength();
+  int iExtrapMaxLength	= seedPars->extrapMaxLength();
+  int iExtrapMinLength	= seedPars->extrapMinLength();
+  int iMaxSkipped 	= seedPars->maxSkipped();
+
+  while ( go && _seedHits.size()<iSeedLength)
     {
       go = extendHit( *_seedHits.back() );
     }
-  //Extension failed if current track length less than StiLocalTrackSeedFinderParameters::instance()->seedLength()
+  //Extension failed if current track length less than seedPars->seedLength()
   //Return 0.
-  if ( _seedHits.size()<(UInt_t)StiLocalTrackSeedFinderParameters::instance()->seedLength() ) 
+  if ( (int)_seedHits.size()<iSeedLength ) 
     {
-      //cout <<"StiLocalTrackSeedFidnder::makeTrack() -W- Hit extension failed because size()<StiLocalTrackSeedFinderParameters::instance()->seedLength()"<<endl;
       return track;
     }
   //now use straight line propogation to recursively extend
   _skipped = 0;
   go=true;
-  while ( go && _skipped<=StiLocalTrackSeedFinderParameters::instance()->maxSkipped() && 
-	  _seedHits.size()<=(UInt_t)( StiLocalTrackSeedFinderParameters::instance()->seedLength()+
-				      StiLocalTrackSeedFinderParameters::instance()->extrapMaxLength()) ) 
+  while ( go && _skipped<=iMaxSkipped && 
+	  (int)_seedHits.size()<=( iSeedLength+iExtrapMaxLength)) 
     {
       go = extrapolate();
     }
-  //Extension failed if current track length less than StiLocalTrackSeedFinderParameters::instance()->seedLength()+
-  //StiLocalTrackSeedFinderParameters::instance()->extrapMinLength()
+  //Extension failed if current track length less than seedPars->seedLength()+
+  //seedPars->extrapMinLength()
   //Return 0.
-  if ( _seedHits.size()<(UInt_t)( StiLocalTrackSeedFinderParameters::instance()->seedLength()+
-				  StiLocalTrackSeedFinderParameters::instance()->extrapMinLength()) )
+  if ( _seedHits.size()<( iSeedLength+iExtrapMinLength) )
     {
-      //cout <<"StiLocalTrackSeedFinder::makeTrack() -W- Extension failed size()<StiLocalTrackSeedFinderParameters::instance()->seedLength()+
-      //StiLocalTrackSeedFinderParameters::instance()->extrapMinLength()"<<endl;
+      //seedPars->extrapMinLength()"<<endl;
       return track;
     }
   track = initializeTrack(_trackFactory->getInstance());
-  //cout <<"StiLocalTrackSeedFinder::makeTrack() -I- Done"<<endl;
   return track;
 }
 
@@ -193,10 +194,10 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double dr = r2-r1;
   double dy = y2-y1;
   double dz = z2-z1;
-  if (fabs(dr) <1.e-3) //// || dy==0. || dz==0.) 
-    throw logic_error("StiLocalTrackSeedFinder::extrapolate() -E- Seed aborted because dr==0 ");
+  assert (fabs(dr) >1.e-3); //// || dy==0. || dz==0.);
+//    throw logic_error("StiLocalTrackSeedFinder::extrapolate() -E- Seed aborted because dr==0 ");
   //Now look for a hit in the next layer in:
-  _detectorContainer->setToDetector( hit2->detector() );
+  _detectorContainer->setToDetector( hit2->detector());
   //Test to see if move in worked
   for (int i=0; i<=_skipped; ++i) 
     {
