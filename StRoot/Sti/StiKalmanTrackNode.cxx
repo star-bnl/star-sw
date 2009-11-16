@@ -1,10 +1,16 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.106 2007/04/30 19:53:16 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.108 2007/06/07 20:13:42 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.108  2007/06/07 20:13:42  perev
+ * BugFix in getPt()
+ *
+ * Revision 2.107  2007/06/06 04:03:03  perev
+ * getTime() cleanup
+ *
  * Revision 2.106  2007/04/30 19:53:16  fisyak
  * Correct time of flight calculation, add time of flight corrrection for Laser
  *
@@ -491,7 +497,7 @@ void StiKalmanTrackNode::get(double& alpha,
 //______________________________________________________________________________
 double StiKalmanTrackNode::getPt() const
 {
-  return 1./fabs(mFP._ptin);
+  return (fabs(mFP._ptin)<1e-6) ? 1e6: 1./mFP._ptin;
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
@@ -1217,16 +1223,14 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double deltaL = deltaX/mFP._cosCA;
   double deltaY = mFP._sinCA *deltaL;
   double deltaZ = mFP._tanl  *deltaL;
-  float time = 0;
-  if (hit->vz() || hit->vy()) time = getTime();
-  double dyt=(mFP._y-hit->y(time)) + deltaY;
-  double dzt=(mFP._z-hit->z(time)) + deltaZ;
+  double dyt=(mFP._y-hit->y()) + deltaY;
+  double dzt=(mFP._z-hit->z()) + deltaZ;
   double cc= (dyt*r00*dyt + 2*r01*dyt*dzt + dzt*r11*dzt)/_det;
 
 #ifdef Sti_DEBUG
   if (debug() & 4) {
     TRSymMatrix G(R,TRArray::kInverted);
-    TRVector r(2,hit->y(time)-mFP._y,hit->z(time)-mFP._z);
+    TRVector r(2,hit->y()-mFP._y,hit->z()-mFP._z);
     Double_t chisq = G.Product(r,TRArray::kATxSxA);
     Double_t diff = chisq - cc;
     Double_t sum  = chisq + cc;
@@ -1434,10 +1438,8 @@ static int nCall=0; nCall++;
   double k20=mFE._cEY*r00+mFE._cEZ*r01, k21=mFE._cEY*r01+mFE._cEZ*r11;
   double k30=mFE._cPY*r00+mFE._cPZ*r01, k31=mFE._cPY*r01+mFE._cPZ*r11;
   double k40=mFE._cTY*r00+mFE._cTZ*r01, k41=mFE._cTY*r01+mFE._cTZ*r11;
-  float time = 0;
-  if (getHit()->vz() || getHit()->vy()) time = getTime();
-  double dyt  = getHit()->y(time) - mFP._y;
-  double dzt  = getHit()->z(time) - mFP._z;
+  double dyt  = getHit()->y() - mFP._y;
+  double dzt  = getHit()->z() - mFP._z;
   double dp3  = k30*dyt + k31*dzt;
   double dp2  = k20*dyt + k21*dzt;
   double dp4  = k40*dyt + k41*dzt;
@@ -2161,31 +2163,39 @@ void StiKalmanTrackNode::setUntouched()
   mUnTouch.set(mPP(),mPE());
 }
 //________________________________________________________________________________
-float StiKalmanTrackNode::getTime() {
-  static const Double_t smax = 1e3; 
-  Float_t time = 0;
-  Double_t dir[3] = {mFP._cosCA,mFP._sinCA,mFP._tanl};
+double StiKalmanTrackNode::getTime() {
+  static const double smax = 1e3; 
+  double time = 0;
+  double dir[3] = {mFP._cosCA,mFP._sinCA,mFP._tanl};
   if (! _laser) {
-    Double_t pt = getPt();
-    Double_t p2=(1.+mFP._tanl*mFP._tanl)*pt*pt;
-    Double_t m=pars->massHypothesis;
-    Double_t m2=m*m;
-    Double_t e2=p2+m2;
-    Double_t beta2=p2/e2;
-    Double_t beta = TMath::Sqrt(beta2);
-    TCircle tc(&mFP._x,dir,mFP._curv);
-    Double_t xy[2] = {0,0};
-    Double_t s = tc.Path(xy); 
-    if (TMath::Abs(s) < smax) 
-      time = TMath::Abs(s)/(TMath::Ccgs()*beta*1e-6); // mksec  
+    double d = sqrt(mFP._x*mFP._x+mFP._y*mFP._y);
+    double sn = fabs(mFP._cosCA*mFP._y - mFP._sinCA*mFP._x)/d;
+    if (sn<0.2) {
+      d *= (1.+sn*sn/6);
+    } else {
+      d *= asin(sn)/sn;
+    }
+    d *= sqrt(1.+mFP._tanl*mFP._tanl);
+    double beta = 1;   
+    double pt = fabs(mFP._ptin);
+    if (pt>0.1) {
+      pt = 1./pt;
+      double p2=(1.+mFP._tanl*mFP._tanl)*pt*pt;
+      double m=pars->massHypothesis;
+      double m2=m*m;
+      double e2=p2+m2;
+      double beta2=p2/e2;
+      beta = TMath::Sqrt(beta2);
+    }
+    time = d/(TMath::Ccgs()*beta*1e-6); // mksec  
   } else {
     if (TMath::Abs(mFP._z) > 20.0) {
-      static Double_t Radius = 197.;
-      static const Int_t nsurf = 6;
-      static const Double_t surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
+static const double Radius = 197.;
+static const int    nsurf  = 6;
+static const double surf[6] = {-Radius*Radius, 0, 0, 0, 1, 1};
+      double dir[3] = {mFP._cosCA,mFP._sinCA,mFP._tanl};
       THelixTrack tc(&mFP._x,dir,mFP._curv);
-      Double_t xyzG[3], dirG[3];
-      Double_t s = tc.Step(smax, surf, nsurf,xyzG,dirG,1);
+      double s = tc.Step(smax, surf, nsurf,0,0,1);
       if (TMath::Abs(s) < smax) 
 	time = TMath::Abs(s)/(TMath::Ccgs()*1e-6); // mksec
     }

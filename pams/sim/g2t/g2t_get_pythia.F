@@ -1,6 +1,10 @@
-* $Id: g2t_get_pythia.F,v 1.1 2004/08/05 16:38:50 potekhin Exp $
+* $Id: g2t_get_pythia.F,v 1.2 2007/05/24 21:17:55 potekhin Exp $
 *
 * $Log: g2t_get_pythia.F,v $
+* Revision 1.2  2007/05/24 21:17:55  potekhin
+* Add three kinematic variables to be propagated
+* from Pythia
+*
 * Revision 1.1  2004/08/05 16:38:50  potekhin
 * Propagating Pythia event characterization data
 *
@@ -15,8 +19,11 @@
       implicit   none
 #include "g2t_get_pythia.inc"
 
-      common/PYTNFO/ PYSTAT,PYT_ID,MANDS,MANDT,MANDU,HARDP,COSTH,BJOR1,BJOR2
-      integer        PYSTAT,PYT_ID
+      common/PYTNFO/ PYSTAT,PYT_ID,
+     *               MANDS,MANDT,MANDU,HARDP,COSTH,
+     *               BJOR1,BJOR2,
+     *               MSTU72,MSTU73,MSTP111
+      integer        PYSTAT,PYT_ID,MSTU72,MSTU73,MSTP111
       real           MANDS,MANDT,MANDU,HARDP,COSTH,BJOR1,BJOR2
 
 
@@ -32,6 +39,9 @@
          pythia(1).cos_th        = COSTH
          pythia(1).bjor_1        = BJOR1
          pythia(1).bjor_2        = BJOR2
+         pythia(1).mstu72        = MSTU72
+         pythia(1).mstu73        = MSTU73
+         pythia(1).mstp111       = MSTP111
       endif
 
       END
