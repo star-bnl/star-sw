@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.11 2009/11/16 18:00:10 fine Exp $
+// $Id: EdMu.C,v 1.12 2009/11/16 18:12:45 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file EdMu.C 
@@ -155,6 +155,7 @@ void mae(bool hits=false)
    printf(" call:\n");   
    printf("\t---\n");
    printf("\tmae() - to draw the tracks\n");
+   printf("\tmrd(1) - to redraw the event with the endcap towers \n");
    printf("\t---\n");
    printf("method to see the next event\n");
  }
