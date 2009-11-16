@@ -25,8 +25,22 @@ else
   SOURCE  := $(STAR)
 endif
 
+# STAR specific, this variable is defined
+ifeq (1,$(USE_64BITS))
+  MACHOPT := -m64
+else
+  MACHOPT := -m32
+endif
+
 SHARE     := share
+
+ifdef STAR_HOST_SYS
+ARCH      := $(STAR_HOST_SYS)
+else
 ARCH      := $(shell (test -x $(AFS) && $(AFS)) || (test -x /usr/bin/sys && sys) || uname -s)
+endif
+
+
 ifneq (1,$(words $(G3)))
 G3        := $(shell which geant3 2>/dev/null)
 endif
@@ -39,14 +53,14 @@ SL        := sl
 ifeq (Linux,$(UNAME))
  SYS      := linux
  G3       += -v  1
- PP       := g77 -E -P -Df2cFortran
- F77      := g77 -g -w -O2 -fno-second-underscore -fno-automatic
+ PP       := g77 $(MACHOPT) -E -P -Df2cFortran
+ F77      := g77 $(MACHOPT) -g -w -O2 -fno-second-underscore -fno-automatic
  PGF      := $(PGI)/linux86/bin/pgf90
  EX       := -ffixed-line-length-132
- CC       := gcc -g -w -O2
- CPP      := g++ -g -w -O2
+ CC       := gcc $(MACHOPT) -g -w -O2
+ CPP      := g++ $(MACHOPT) -g -w -O2
 #LDS      := ld -shared -o
- LDS      := g++   -shared -o
+ LDS      := g++ $(MACHOPT) -shared -o
  LD90     := $(PGI)/linux86/bin/pgf90 -v -shared -o
 endif
 ifeq (SunOS,$(UNAME))

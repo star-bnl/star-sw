@@ -70,10 +70,10 @@ void PowerLawFit<Number>::fit()
       y = ::log(i->second);
       _logData[x]=y;
     }
-  _points = &_logData;
+  this->_points = &_logData;
   LinearFit<Number>::fit();
-  _coeff = exp(_b);
-  _exponent = _a;
+  _coeff = exp(this->_b);
+  _exponent = this->_a;
 }
 
 template<typename Number>

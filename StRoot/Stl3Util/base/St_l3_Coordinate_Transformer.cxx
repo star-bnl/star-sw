@@ -17,11 +17,13 @@
 
 #include "Stl3Util/ftf/FtfGeneral.h"
 #include "Stl3Util/base/FtfLog.h"
+#include "StMultiArray.h"
 
 
 #include <stdio.h>
 #include <Stiostream.h>
 #include <iomanip>
+#include "Stl3Util/base/FtfLog.h"
 #include <stdlib.h>
 
 #include <unistd.h>
@@ -167,10 +169,10 @@ void St_l3_Coordinate_Transformer::raw_to_global(const St_l3_ptrs_Coordinate &ra
 
 	return;
     }
-
-    float (*binmap)[45][npad+1][ntb+1][3];
-    binmap = (float (*)[45][npad+1][ntb+1][3])TPCmap;
-    
+//    float (*binmap)[45][NPAD+1][NTB+1][3];
+//    binmap = (float (*)[45][NPAD+1][NTB+1][3])TPCmap;
+    StMultiArray<float> binmap(45,npad+1,ntb+1,3);
+    binmap = TPCmap;
     // grid coordinates
     int ipad = (int)floor(raw.Getp()/dpad);
     int itb  = (int)floor(raw.Gett()/dtb);

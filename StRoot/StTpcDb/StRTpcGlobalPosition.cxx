@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcGlobalPosition.cxx,v 1.1 2001/05/21 23:26:08 hardtke Exp $
+ * $Id: StRTpcGlobalPosition.cxx,v 1.1.4.1 2007/08/12 23:27:41 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,24 @@
 #include "StRTpcGlobalPosition.h"
 
 ClassImp(StRTpcGlobalPosition)
+
+double  StRTpcGlobalPosition::TpcCenterPositionX() const { return (*mGlobalPosition)[0].LocalxShift;}
+
+double  StRTpcGlobalPosition::TpcCenterPositionY() const { return (*mGlobalPosition)[0].LocalyShift;}
+
+double  StRTpcGlobalPosition::TpcCenterPositionZ() const { return (*mGlobalPosition)[0].LocalzShift;}
+
+double  StRTpcGlobalPosition::TpcRotationAroundGlobalAxisX() const { return (*mGlobalPosition)[0].PhiYZ_geom;}
+
+double  StRTpcGlobalPosition::TpcRotationAroundGlobalAxisY() const { return (*mGlobalPosition)[0].PhiXZ_geom;}
+
+double  StRTpcGlobalPosition::TpcRotationAroundGlobalAxisZ() const { return (*mGlobalPosition)[0].PhiXY_geom;}
+
+double  StRTpcGlobalPosition::TpcEFieldRotationX() const { return (*mGlobalPosition)[0].PhiYZ;}
+
+double  StRTpcGlobalPosition::TpcEFieldRotationY() const { return (*mGlobalPosition)[0].PhiXZ;}
+
+double  StRTpcGlobalPosition::TpcEFieldRotationZ() const { return (*mGlobalPosition)[0].PhiXY;}
 
 
 

@@ -49,6 +49,8 @@ const LinearFit<Number> & LinearFit<Number>::operator=(const LinearFit<Number> &
   _a = fit._a;
   _b = fit._b;
   _r = fit._r;
+  
+  return *this;
 }
 
 ///Perform linear fit on given points.

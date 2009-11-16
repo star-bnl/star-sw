@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.36 2006/02/27 19:20:53 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.36.2.1 2007/08/12 23:27:43 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.36.2.1  2007/08/12 23:27:43  jeromel
+ * Further fixes for SL06g built for SL44
+ *
  * Revision 1.36  2006/02/27 19:20:53  fisyak
  * Set simu flag for tpcISTimeOffsets and tpcOSTimeOffsets tables
  *
@@ -581,6 +584,10 @@ void StTpcDbMaker::Update_tpg_detector(){
 }
 
 
+StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
+void StTpcDbMaker::UseOnlyLaserDriftVelocity() {m_dvtype=2;}
+void StTpcDbMaker::UseOnlyCathodeDriftVelocity() {m_dvtype=1;}
+void StTpcDbMaker::UseAnyDriftVelocity() {m_dvtype=0;}
 
 
 

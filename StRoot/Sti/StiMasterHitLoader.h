@@ -81,22 +81,22 @@ void StiMasterHitLoader<Source1, Detector>::loadEvent(Source1 *source1,
                                                               Filter<StiTrack> * trackFilter,
                                                               Filter<StiHit>   * hitFilter)
 {
-  if(!_hitContainer)
+  if(!this->_hitContainer)
     throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
-  _hitContainer->clear();
+  this->_hitContainer->clear();
   HitLoaderConstIter iter;
-  for (iter=begin();iter!=end();iter++)
-    (*iter)->loadHits(source1,trackFilter, hitFilter);
-  _hitContainer->sortHits();
-  _hitContainer->reset();//declare all hits as unused...
+  for (iter=this->begin();iter!=this->end();iter++){
+    (*iter)->loadHits(source1,trackFilter, hitFilter);}
+  this->_hitContainer->sortHits();
+  this->_hitContainer->reset();//declare all hits as unused...
 }
 
 template<class Source1, class Detector>
 void StiMasterHitLoader<Source1, Detector>::setHitContainer(StiHitContainer* hitContainer)
 {
-  _hitContainer = hitContainer;
+  this->_hitContainer = hitContainer;
   HitLoaderIter iter;
-  for (iter=begin();iter!=end();iter++)
+  for (iter=this->begin();iter!=this->end();iter++)
     (*iter)->setHitContainer(hitContainer);
 }
 
@@ -105,7 +105,7 @@ template<class Source1, class Detector>
 void StiMasterHitLoader<Source1,Detector>::setHitFactory(Factory<StiHit>*hitFactory)
 {
   HitLoaderIter iter;
-  for (iter=begin();iter!=end();iter++)
+  for (iter=this->begin();iter!=this->end();iter++)
     (*iter)->setHitFactory(hitFactory);
 }
 

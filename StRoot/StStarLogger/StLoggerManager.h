@@ -62,6 +62,7 @@ class StLoggerManager : public StMessMgr {
    int   fLastRepeatCounter;
 #ifndef __CINT__
    log4cxx::varia::StarOptionFilterPtr  fStarOptionFilter;
+   log4cxx::LevelPtr fDefaultLevel;
 #endif
    // int building;
    // int remember;
@@ -93,7 +94,7 @@ protected:
 
  public:
    virtual ~StLoggerManager();
-   virtual std::ostream& OperatorShift(std::ostream& os, StMessage* stm);
+   virtual ostream& OperatorShift(ostream& os, StMessage* stm);
    static  StMessMgr* StarLoggerInit();                       //!
    static  StMessMgr* StarLoggerInit(const char *loggerName); //!   
    virtual StMessMgr* Instantiate();      //!
@@ -126,6 +127,9 @@ protected:
    virtual        int GetLimit(const char* str);         
    virtual       void ListLimits();
    virtual       void RemoveLimit(const char* str);
+   virtual       void SetLevel(Int_t );
+   virtual      Int_t GetLevel(Int_t ) const;
+   virtual const char *GetName() const { return 0;}
    virtual       void SwitchOff(const char* str);
    virtual       void SwitchOn(const char* str);
    virtual       void FixOn(const char* str);
@@ -228,4 +232,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.6 2006/06/05 00:21:40 fine Exp $
+// $Id: StLoggerManager.h,v 1.6.4.1 2007/08/10 20:55:33 didenko Exp $

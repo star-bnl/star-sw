@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.26 2006/07/27 18:55:41 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.27 2007/01/05 20:19:44 jeromel Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -262,7 +262,7 @@ StThreeVectorF StMuTrack::dcaGlobal(Int_t vtx_id) const {
 }
 
 StThreeVectorF StMuTrack::dca(const StThreeVectorF pos) const {
-  StPhysicalHelixD helix(helix());
+  StPhysicalHelixD helix(this->helix());
   double pathlength = helix.pathLength(pos, false); // do not scan periods
   return helix.at(pathlength)-pos;
 }
@@ -342,6 +342,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.27  2007/01/05 20:19:44  jeromel
+ * helix(helix()) cannot be interpreted by gcc 3.4.6
+ *
  * Revision 1.26  2006/07/27 18:55:41  fisyak
  * Remove DCA hack used in SSD+SVT test production (P06id)
  *
