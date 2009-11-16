@@ -133,20 +133,23 @@ Bool_t StEmbeddingQAMaker::book(const TString outputFileName)
     // Initialize histograms
     const Int_t nHistogram = getNumberOfHistograms(ic);
 
-    hGeantId[ic]         = new TH1*[nHistogram] ;
-    hNHit[ic]            = new TH3*[nHistogram] ;
-    hDca[ic]             = new TH3*[nHistogram] ;
-    hPtVsEta[ic]         = new TH2*[nHistogram] ;
-    hPtVsY[ic]           = new TH2*[nHistogram] ;
-    hPtVsPhi[ic]         = new TH2*[nHistogram] ;
-    hPtVsMom[ic]         = new TH2*[nHistogram] ;
-    hdPtVsPt[ic]         = new TH2*[nHistogram] ;
-    hMomVsEta[ic]        = new TH2*[nHistogram] ;
-    hdEdxVsMom[ic]       = new TH2*[nHistogram] ;
-    hdEdxVsMomPidCut[ic] = new TH2*[nHistogram] ;
-    hEtaVsPhi[ic]        = new TH2*[nHistogram] ;
-    hEtaVsVz[ic]         = new TH2*[nHistogram] ;
-    hYVsVz[ic]           = new TH2*[nHistogram] ;
+    hGeantId[ic]             = new TH1*[nHistogram] ;
+    hNHit[ic]                = new TH3*[nHistogram] ;
+    hDca[ic]                 = new TH3*[nHistogram] ;
+    hPtVsEta[ic]             = new TH2*[nHistogram] ;
+    hPtVsY[ic]               = new TH2*[nHistogram] ;
+    hPtVsPhi[ic]             = new TH2*[nHistogram] ;
+    hPtVsMom[ic]             = new TH2*[nHistogram] ;
+    hdPtVsPt[ic]             = new TH2*[nHistogram] ;
+    hMomVsEta[ic]            = new TH2*[nHistogram] ;
+    hdEdxVsMomMc[ic]         = new TH2*[nHistogram] ;
+    hdEdxVsMomMcPidCut[ic]   = new TH2*[nHistogram] ;
+    hdEdxVsMomReco[ic]       = new TH2*[nHistogram] ;
+    hdEdxVsMomRecoPidCut[ic] = new TH2*[nHistogram] ;
+    hRecoPVsMcP[ic]          = new TH2*[nHistogram] ;
+    hEtaVsPhi[ic]            = new TH2*[nHistogram] ;
+    hEtaVsVz[ic]             = new TH2*[nHistogram] ;
+    hYVsVz[ic]               = new TH2*[nHistogram] ;
 
     for(Int_t ih=0; ih<nHistogram; ih++){
 
@@ -167,7 +170,7 @@ Bool_t StEmbeddingQAMaker::book(const TString outputFileName)
  
       // NHit
       hNHit[ic][ih] = new TH3D(Form("hNHit%s", nameSuffix.Data()), "", 10, 0, 5, 10, -1.0, 1.0, 50, 0, 50);
-      hNHit[ic][ih]->SetXTitle("p_{T} (GeV/c)");
+      hNHit[ic][ih]->SetXTitle("MC p_{T} (GeV/c)");
       hNHit[ic][ih]->SetYTitle("#eta");
       hNHit[ic][ih]->SetZTitle("N_{hit}");
       if( ic == 0 ) hNHit[ic][ih]->SetTitle( Form("N_{fit} distribution, %s", title.Data()) );
@@ -176,74 +179,96 @@ Bool_t StEmbeddingQAMaker::book(const TString outputFileName)
       // Dca
       hDca[ic][ih] = new TH3D(Form("hDca%s", nameSuffix.Data()), "",
           10, 0, 5, 10, -1.0, 1.0, 100, 0, 3.0);
-      hDca[ic][ih]->SetXTitle("p_{T} (GeV/c)");
+      hDca[ic][ih]->SetXTitle("MC p_{T} (GeV/c)");
       hDca[ic][ih]->SetYTitle("#eta");
       hDca[ic][ih]->SetZTitle("Global dca (cm)");
-      if( ic == 0 )                 hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs p_{T}, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs p_{T} (N_{fit}>=10 & N_{common}>=10), %s", title.Data()) );
-      else                          hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs p_{T} (N_{fit}>=10), %s", title.Data()) );
+      if( ic == 0 )                 hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs MC p_{T}, %s", title.Data()) );
+      else if( ic >= 1 && ic <= 3 ) hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs MC p_{T} (N_{fit}#geq10 & N_{common}#geq10), %s", title.Data()) );
+      else                          hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs MC p_{T} (N_{fit}#geq10), %s", title.Data()) );
  
       // pt vs eta
       hPtVsEta[ic][ih] = new TH2D(Form("hPtVsEta%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
       hPtVsEta[ic][ih]->SetXTitle("#eta");
-      hPtVsEta[ic][ih]->SetYTitle("p_{T} (GeV/c)");
-      if( ic == 0 )                 hPtVsEta[ic][ih]->SetTitle( Form("p_{T} vs #eta, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hPtVsEta[ic][ih]->SetTitle( Form("p_{T} vs #eta (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hPtVsEta[ic][ih]->SetTitle( Form("p_{T} vs #eta (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
+      hPtVsEta[ic][ih]->SetYTitle("MC p_{T} (GeV/c)");
+      if( ic == 0 )                 hPtVsEta[ic][ih]->SetTitle( Form("MC p_{T} vs #eta, %s", title.Data()) );
+      else if( ic >= 1 && ic <= 3 ) hPtVsEta[ic][ih]->SetTitle( Form("MC p_{T} vs #eta (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+      else                          hPtVsEta[ic][ih]->SetTitle( Form("MC p_{T} vs #eta (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
  
       // pt vs y
       hPtVsY[ic][ih] = new TH2D(Form("hPtVsY%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
       hPtVsY[ic][ih]->SetXTitle("rapidity y");
-      hPtVsY[ic][ih]->SetYTitle("p_{T} (GeV/c)");
-      if( ic == 0 )                 hPtVsY[ic][ih]->SetTitle( Form("p_{T} vs y, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hPtVsY[ic][ih]->SetTitle( Form("p_{T} vs y (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hPtVsY[ic][ih]->SetTitle( Form("p_{T} vs y (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
+      hPtVsY[ic][ih]->SetYTitle("MC p_{T} (GeV/c)");
+      if( ic == 0 )                 hPtVsY[ic][ih]->SetTitle( Form("MC p_{T} vs y, %s", title.Data()) );
+      else if( ic >= 1 && ic <= 3 ) hPtVsY[ic][ih]->SetTitle( Form("MC p_{T} vs y (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+      else                          hPtVsY[ic][ih]->SetTitle( Form("MC p_{T} vs y (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
  
       // pt vs phi
       hPtVsPhi[ic][ih] = new TH2D(Form("hPtVsPhi%s", nameSuffix.Data()), "", 100, -TMath::Pi(), TMath::Pi(), ptBin, ptMin, ptMax);
       hPtVsPhi[ic][ih]->SetXTitle("#phi (rad)");
-      hPtVsPhi[ic][ih]->SetYTitle("p_{T} (GeV/c)");
-      if( ic == 0 )                 hPtVsPhi[ic][ih]->SetTitle( Form("p_{T} vs #phi, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hPtVsPhi[ic][ih]->SetTitle( Form("p_{T} vs #phi (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hPtVsPhi[ic][ih]->SetTitle( Form("p_{T} vs #phi (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
+      hPtVsPhi[ic][ih]->SetYTitle("MC p_{T} (GeV/c)");
+      if( ic == 0 )                 hPtVsPhi[ic][ih]->SetTitle( Form("MC p_{T} vs #phi, %s", title.Data()) );
+      else if( ic >= 1 && ic <= 3 ) hPtVsPhi[ic][ih]->SetTitle( Form("MC p_{T} vs #phi (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+      else                          hPtVsPhi[ic][ih]->SetTitle( Form("MC p_{T} vs #phi (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
 
       // pt vs momentum
       hPtVsMom[ic][ih] = new TH2D(Form("hPtVsMom%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, ptBin, ptMin, ptMax);
       hPtVsMom[ic][ih]->SetXTitle("momentum (GeV/c)");
-      hPtVsMom[ic][ih]->SetYTitle("p_{T} (GeV/c)");
-      if( ic == 0 )                 hPtVsMom[ic][ih]->SetTitle( Form("p_{T} vs momentum, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hPtVsMom[ic][ih]->SetTitle( Form("p_{T} vs momentum (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hPtVsMom[ic][ih]->SetTitle( Form("p_{T} vs momentum (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
+      hPtVsMom[ic][ih]->SetYTitle("MC p_{T} (GeV/c)");
+      if( ic == 0 )                 hPtVsMom[ic][ih]->SetTitle( Form("MC p_{T} vs momentum, %s", title.Data()) );
+      else if( ic >= 1 && ic <= 3 ) hPtVsMom[ic][ih]->SetTitle( Form("MC p_{T} vs momentum (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+      else                          hPtVsMom[ic][ih]->SetTitle( Form("MC p_{T} vs momentum (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
  
       // Delta pt vs pt
       hdPtVsPt[ic][ih] = new TH2D(Form("hdPtVsPt%s", nameSuffix.Data()), "", 100, -5, 5, ptBin, ptMin, ptMax);
       hdPtVsPt[ic][ih]->SetXTitle("reco. p_{T} (GeV/c)");
-      hdPtVsPt[ic][ih]->SetYTitle("reco. p_{T} - mc. p_{T} (GeV/c)");
+      hdPtVsPt[ic][ih]->SetYTitle("reco. p_{T} - MC p_{T} (GeV/c)");
       if( ic == 0 )                 hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T}, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T} (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T} (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
+      else if( ic >= 1 && ic <= 3 ) hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T} (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+      else                          hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T} (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
 
       // momentum vs eta
       hMomVsEta[ic][ih] = new TH2D(Form("hMomVsEta%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
       hMomVsEta[ic][ih]->SetXTitle("#eta");
       hMomVsEta[ic][ih]->SetYTitle("momentum (GeV/c)");
       if( ic == 0 )                 hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta (N_{fit}>=10 & |dcaGl|<3cm), %s", title.Data()) );
+      else if( ic >= 1 && ic <= 3 ) hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+      else                          hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
  
-      // dE/dx vs momentum
-      hdEdxVsMom[ic][ih] = new TH2D(Form("hdEdxVsMom%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
-      hdEdxVsMom[ic][ih]->SetXTitle("momentum (GeV/c)");
-      hdEdxVsMom[ic][ih]->SetYTitle("dE/dx (KeV/cm)");
-      if( ic == 0 ) hdEdxVsMom[ic][ih]->SetTitle( Form("dE/dx vs momentum, %s", title.Data()) );
-      else          hdEdxVsMom[ic][ih]->SetTitle( Form("dE/dx vs momentum, (|dcaGl|<3cm), %s", title.Data()) );
+      // dE/dx vs MC momentum
+      hdEdxVsMomMc[ic][ih] = new TH2D(Form("hdEdxVsMomMc%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
+      hdEdxVsMomMc[ic][ih]->SetXTitle("MC p (GeV/c)");
+      hdEdxVsMomMc[ic][ih]->SetYTitle("dE/dx (keV/cm)");
+      if( ic == 0 ) hdEdxVsMomMc[ic][ih]->SetTitle( Form("dE/dx vs MC p, %s", title.Data()) );
+      else          hdEdxVsMomMc[ic][ih]->SetTitle( Form("dE/dx vs MC p, (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
 
-      // dE/dx vs momentum (with pid cut)
-      hdEdxVsMomPidCut[ic][ih] = new TH2D(Form("hdEdxVsMomPidCut%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
-      hdEdxVsMomPidCut[ic][ih]->SetXTitle("momentum (GeV/c)");
-      hdEdxVsMomPidCut[ic][ih]->SetYTitle("dE/dx (KeV/cm)");
-      if( ic == 0 ) hdEdxVsMomPidCut[ic][ih]->SetTitle( Form("dE/dx vs momentum (with 2#sigma pid cut), %s", title.Data()) );
-      else          hdEdxVsMomPidCut[ic][ih]->SetTitle( Form("dE/dx vs momentum (with 2#sigma pid cut), (|dcaGl|<3cm), %s", title.Data()) );
+      // dE/dx vs MC momentum (with pid cut)
+      hdEdxVsMomMcPidCut[ic][ih] = new TH2D(Form("hdEdxVsMomMcPidCut%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
+      hdEdxVsMomMcPidCut[ic][ih]->SetXTitle("MC p (GeV/c)");
+      hdEdxVsMomMcPidCut[ic][ih]->SetYTitle("dE/dx (keV/cm)");
+      if( ic == 0 ) hdEdxVsMomMcPidCut[ic][ih]->SetTitle( Form("dE/dx vs MC p (with 2#sigma pid cut), %s", title.Data()) );
+      else          hdEdxVsMomMcPidCut[ic][ih]->SetTitle( Form("dE/dx vs MC p (with 2#sigma pid cut), (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+
+      // dE/dx vs reconstructed momentum
+      hdEdxVsMomReco[ic][ih] = new TH2D(Form("hdEdxVsMomReco%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
+      hdEdxVsMomReco[ic][ih]->SetXTitle("Reconstructed p (GeV/c)");
+      hdEdxVsMomReco[ic][ih]->SetYTitle("dE/dx (keV/cm)");
+      if( ic == 0 ) hdEdxVsMomReco[ic][ih]->SetTitle( Form("dE/dx vs Reconstructed p, %s", title.Data()) );
+      else          hdEdxVsMomReco[ic][ih]->SetTitle( Form("dE/dx vs Reconstructed p, (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+
+      // dE/dx vs Reconstructed momentum (with pid cut)
+      hdEdxVsMomRecoPidCut[ic][ih] = new TH2D(Form("hdEdxVsMomRecoPidCut%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
+      hdEdxVsMomRecoPidCut[ic][ih]->SetXTitle("Reconstructed p (GeV/c)");
+      hdEdxVsMomRecoPidCut[ic][ih]->SetYTitle("dE/dx (keV/cm)");
+      if( ic == 0 ) hdEdxVsMomRecoPidCut[ic][ih]->SetTitle( Form("dE/dx vs Reconstructed p (with 2#sigma pid cut), %s", title.Data()) );
+      else          hdEdxVsMomRecoPidCut[ic][ih]->SetTitle( Form("dE/dx vs Reconstructed p (with 2#sigma pid cut), (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+
+      // Reconstructed momentum vs MC momentum
+      hRecoPVsMcP[ic][ih] = new TH2D(Form("hRecoPVsMcP%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, ptBin, ptMin, ptMax);
+      hRecoPVsMcP[ic][ih]->SetXTitle("MC p (GeV/c)");
+      hRecoPVsMcP[ic][ih]->SetYTitle("Reconstructed p (GeV/c)");
+      if( ic == 0 ) hRecoPVsMcP[ic][ih]->SetTitle( Form("Reconstructed p vs MC p %s", title.Data()) );
+      else          hRecoPVsMcP[ic][ih]->SetTitle( Form("Reconstructed p vs MC p (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
+
  
       TString pt("0.2 < p_{T} < 5 GeV/c");
  
@@ -401,8 +426,8 @@ Bool_t StEmbeddingQAMaker::fillEmbedding(const TString inputFileName)
             return kFALSE ;
         }
       }// track loop
-
     }// Track category
+
   }// event loop
 
   delete mMiniMcEvent ;
@@ -583,6 +608,9 @@ void StEmbeddingQAMaker::fillContamPairs(const StMiniMcEvent& mcevent, const Int
     StEmbeddingQAParticle* daughter = mParticles->getDaughter(id) ;
     StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, daughter->getMass2());
 
+    // Make sure parent geantid is correct
+    if ( miniTrack.getParentGeantId() != mParticles->getParent()->getParticleId() ) continue ;
+
     // Daughter id selection
     if ( miniTrack.getGeantId() == daughter->getParticleId() ){
       // Make sure daughter particles have correct charge
@@ -640,17 +668,24 @@ void StEmbeddingQAMaker::fillHistograms(const StEmbeddingQATrack& track, const I
   // pt and eta cuts
   if( !track.isPtAndEtaOk() ) return ;
 
-  const Double_t pt  = (track.isMc()) ? track.getPtMc()  : track.getPtRc() ;
-  const Double_t mom = (track.isMc()) ? track.getPMc()   : track.getPRc() ;
-  const Double_t eta = (track.isMc()) ? track.getEtaMc() : track.getEtaRc() ;
-  const Double_t y   = (track.isMc()) ? track.getVectorMc().rapidity() : track.getVectorRc().rapidity() ;
+  // Use MC momentum for the embedding tracks
+  //     reconstructed momentum for the real tracks
+  const Double_t pt    = (track.isReal()) ? track.getPtRc()                : track.getPtMc() ;
+  const Double_t mom   = (track.isReal()) ? track.getPRc()                 : track.getPMc() ;
+  const Double_t eta   = (track.isReal()) ? track.getEtaRc()               : track.getEtaMc() ;
+  const Double_t y     = (track.isReal()) ? track.getVectorRc().rapidity() : track.getVectorMc().rapidity() ;
+
+  // Reconstructed momentum
+  const Double_t momRc = track.getPRc() ;
 
   // Fill geant id
   hGeantId[trackid][iparticle]->Fill(track.getGeantId());
 
   // dE/dx (no PID cut)
-  if( track.isDcaOk() ){
-    hdEdxVsMom[trackid][iparticle]->Fill(mom, track.getdEdx()*1.0e+06);
+  //  - Add NHit cut (Nov/13/2009)
+  if( track.isDcaOk() && track.isNHitOk() ){
+    hdEdxVsMomMc[trackid][iparticle]->Fill(mom, track.getdEdx()*1.0e+06);
+    hdEdxVsMomReco[trackid][iparticle]->Fill(momRc, track.getdEdx()*1.0e+06);
   }
 
   //  Oct/21/2009
@@ -666,13 +701,17 @@ void StEmbeddingQAMaker::fillHistograms(const StEmbeddingQATrack& track, const I
     // Fill NHit points
     hNHit[trackid][iparticle]->Fill(pt, eta, track.getNHit());
 
-    // dE/dx (with PID cut)
-    hdEdxVsMomPidCut[trackid][iparticle]->Fill(mom, track.getdEdx()*1.0e+06);
-
-    // Pt, eta, phi
     if( track.isNHitOk() ){
       const Double_t phi = track.getPhi() ;
 
+      // dE/dx (with PID cut)
+      hdEdxVsMomMcPidCut[trackid][iparticle]->Fill(mom, track.getdEdx()*1.0e+06);
+      hdEdxVsMomRecoPidCut[trackid][iparticle]->Fill(momRc, track.getdEdx()*1.0e+06);
+
+      // Correlation between reconstructed and MC momentum
+      hRecoPVsMcP[trackid][iparticle]->Fill(mom, momRc);
+
+      // Pt, eta, phi
       hPtVsEta[trackid][iparticle]->Fill(eta, pt);
       hPtVsY[trackid][iparticle]->Fill(y, pt);
       hPtVsPhi[trackid][iparticle]->Fill(phi, pt);
