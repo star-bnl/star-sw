@@ -17,7 +17,12 @@
 
 */
 
-struct ssd {
+struct ssd_t {
+        ssd_t();
+ void   reset();
+ int    check();
+ 
+        int fenceA;
 	int channels ;
 	int mode ;	// 0 normal, 1 pedestals/RMSs
 	int max_channels ;
@@ -38,10 +43,11 @@ struct ssd {
 	// this raw data is 6*64*512 bytes long
 	// There are only 2 mezzanines/RB
 	u_char *raw[4][2] ;
+        int fenceZ;
 
 } ;
 
-extern struct ssd ssd ;
+extern struct ssd_t ssd ;
 
 extern int ssdReader(char *mem) ;
 

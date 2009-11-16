@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.h,v 1.5 2004/07/12 14:45:16 subhasis Exp $
+ *$Id: StPmdReadMaker.h,v 1.6 2007/08/31 10:50:39 rashmi Exp $
  *
  *  StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Pmd Data Reader to store hits in StEvent
  ***************************************************************************
  * $Log: StPmdReadMaker.h,v $
+ * Revision 1.6  2007/08/31 10:50:39  rashmi
+ * Added routines to read badchains,HotCells,Cell_GNF,SMChain_GNF
+ *
  * Revision 1.5  2004/07/12 14:45:16  subhasis
  * QA hist added
  *
@@ -49,12 +52,13 @@ using std::vector;
 #include "StPmdUtil/StPmdDBUtil.h"
 #include "tables/St_pmdBrdMipCalib_Table.h"
 #include "tables/St_pmdCalSummary_Table.h"
+#include "tables/St_pmdSMCalib_Table.h"
+#include "tables/St_pmdSMChain_GNF_Table.h"
 
 #include  <TH1.h>
 #include  <TH2.h>
 
-
-
+#include "tables/St_pmdHotCells_Table.h"
 class StDAQReader;
 class StPMDReader;
 //SP
@@ -77,9 +81,9 @@ class StPmdReadMaker : public StMaker {
   void SetCalibFlag(Bool_t);			   //Set calib flag
   void SetChainThreshold(Float_t);		   //Set ADC Threshold
   void bookHist();
-  
+  Int_t GetCalib(int,int,int,float&);  
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.5 2004/07/12 14:45:16 subhasis Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.6 2007/08/31 10:50:39 rashmi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
   
@@ -93,6 +97,11 @@ class StPmdReadMaker : public StMaker {
   StPMDReader* mThePmdReader;//!
   St_DataSet*            mThePmdData;//!
   
+  // These give the hot channels
+  St_pmdHotCells* mHotCells;
+  Bool_t IsHot(Int_t chain, Int_t channel);
+  Bool_t Accept(Int_t chain, Int_t channel);
+
   Int_t mRunNumber;
   Int_t mVmeCond;
   //  
@@ -106,13 +115,14 @@ class StPmdReadMaker : public StMaker {
   Float_t mChainTh;
   StPmdGeom* mPmdGeom;
   StPmdDBUtil* mPmdDBUtil;
+  Int_t mHotTracks;
   
   //calib arrays 
-  pmdBrdMipCalib_st* m_PmdCalibConst;
-  
+  pmdSMCalib_st* m_PmdCalibConst;
+ 
   Int_t ApplyMapping(int*);// Reads raw data from DAQReader and applies mapping
-  Int_t GetCalib(int,int,int,float&); //Gets Calibration Constant
   Bool_t ReadCalibrationsConst(); // Reads calibration constant from DB
+  void ReadBadChains(int);//Read Bad Chain information from StPmdCleanConstants
   
   ClassDef(StPmdReadMaker, 1)   
     };

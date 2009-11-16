@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.14 2006/04/27 21:59:00 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.15 2007/09/20 20:02:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.15  2007/09/20 20:02:32  ullrich
+ * Added new members to hold and access the number of anodes and of pixels.
+ *
  * Revision 2.14  2006/04/27 21:59:00  ullrich
  * Added data member and methods to deal with local positions.
  *
@@ -60,7 +63,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.14 2006/04/27 21:59:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.15 2007/09/20 20:02:32 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -73,6 +76,8 @@ StSvtHit::StSvtHit()
     mTimebucket = 0;
     mLocalPosition[0] = 0;
     mLocalPosition[1] = 0;
+    mNumberOfAnodes = 0;
+    mNumberOfPixels = 0;
 }
 
 StSvtHit::StSvtHit(const StThreeVectorF& p,
@@ -85,6 +90,8 @@ StSvtHit::StSvtHit(const StThreeVectorF& p,
     mTimebucket = 0;
     mLocalPosition[0] = 0;
     mLocalPosition[1] = 0;
+    mNumberOfAnodes = 0; // need to be set through access functions
+    mNumberOfPixels = 0; // need to be set through access functions
 }
 
 StSvtHit::StSvtHit(const dst_point_st& pt)
@@ -147,6 +154,12 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     //
     mLocalPosition[0] = 0;
     mLocalPosition[1] = 0;
+
+    //
+    //  Those (new) ones need to be set separately through access functions
+    //
+    mNumberOfAnodes = 0;
+    mNumberOfPixels = 0;
 }
 
 StSvtHit::~StSvtHit() {/* noop */}
@@ -278,3 +291,33 @@ StSvtHit::setLocalPosition(float u, float v)
     mLocalPosition[0] = u;
     mLocalPosition[1] = v;
 }
+
+void StSvtHit::setNumberOfAnodes(unsigned short val)
+{
+    mNumberOfAnodes = val;
+}
+
+void StSvtHit::setNumberOfPixels(unsigned short val)
+{
+    mNumberOfPixels = val;
+}
+
+int StSvtHit::numberOfAnodes() const
+{
+    return mNumberOfAnodes;
+}
+
+int StSvtHit::numberOfPixels() const
+{
+    return mNumberOfPixels;
+}
+
+float StSvtHit::peakADC() const
+{
+    return mPeak;
+}
+
+float StSvtHit::anode() const
+{ 
+    return mAnode; 
+} 

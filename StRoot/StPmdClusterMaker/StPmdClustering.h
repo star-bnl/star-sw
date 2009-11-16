@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.7 2004/09/07 23:02:43 fisyak Exp $
+ * $Id: StPmdClustering.h,v 1.9 2007/11/02 11:00:14 rashmi Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,6 +13,12 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
+ * Revision 1.9  2007/11/02 11:00:14  rashmi
+ * Applying hitcalibration; eta,phi wrt primary vertex
+ *
+ * Revision 1.8  2007/08/31 10:52:00  rashmi
+ * Defined cutoff, setting it using inline SetAdcCutOff()
+ *
  * Revision 1.7  2004/09/07 23:02:43  fisyak
  * Add missing default ctors
  *
@@ -33,6 +39,7 @@
 #include <TArrayF.h>
 #include <TArrayI.h>
 #include "StPmdAbsClustering.h"
+#include "StThreeVectorF.hh"
 class StPmdHit;
 class StPmdCluster;
 class StPmdDetector;
@@ -42,23 +49,24 @@ class StPmdClustering:public StPmdAbsClustering
 
   private:
  
-  
+  Double_t cutoff;
+  StThreeVectorF mVertexPos;
+
  protected:
-
-
-   public:
+  
+  
+ public:
   // functions for clustering
-//!constructor 
+  //!constructor 
   StPmdClustering(StPmdDetector *pmd_det = 0, StPmdDetector* cpv_det = 0);
   //!destructor
   virtual ~StPmdClustering();
-
+  
   //! for Pmd clusters                     
   //  void findPmdClusters(); // old method
   void findPmdClusters(StPmdDetector *);
-
-
- //! crude clustering
+  
+  //! crude clustering
   Int_t crclust(Double_t , Double_t, Int_t, Int_t); 
   //! refined clustering
   void refclust(StPmdDetector*,Int_t, Int_t, Int_t,StPmdClusterCollection*);
@@ -75,16 +83,28 @@ class StPmdClustering:public StPmdAbsClustering
   void printclust(Int_t,Int_t, StPmdCluster*); 
   //! for Calculating cluster properties, those clusters having more then two cells
   Int_t CentroidCal(Int_t,Int_t,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&);
+  void SetAdcCutOff(Double_t adccutoff);
+  void SetVertexPos(const StThreeVectorF&);
+  void Cluster_Eta_Phi(Float_t, Float_t, Float_t,Float_t&, Float_t&);
   
-
   //! for getting hits of each cluster
   //  StPmdHit* GetHit(StPmdDetector*, Int_t, Int_t, Int_t);
   StPmdHit* GetHit(StPmdDetector*, Int_t, Double_t, Double_t);
-
+  
   ClassDef(StPmdClustering, 1) 
     };
-
     
+    inline void StPmdClustering::SetAdcCutOff(Double_t adccutoff){
+      cutoff = adccutoff;
+    }
+
+inline void StPmdClustering::SetVertexPos(const StThreeVectorF& vertexPos){
+  mVertexPos = vertexPos;
+}
+
+
+
+
 #endif
 
 

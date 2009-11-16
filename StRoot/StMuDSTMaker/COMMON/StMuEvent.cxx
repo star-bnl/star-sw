@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.14 2007/04/20 06:25:21 mvl Exp $
+ * $Id: StMuEvent.cxx,v 1.15 2007/09/05 23:21:21 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -94,6 +94,7 @@ void StMuEvent::fill(const StEvent* event){
   }
   else {
     mVpdTriggerDetector = event->triggerDetectorCollection()->vpd();
+    mMtdTriggerDetector = event->triggerDetectorCollection()->mtd();
     mCtbTriggerDetector = event->triggerDetectorCollection()->ctb();
     mZdcTriggerDetector = event->triggerDetectorCollection()->zdc();
     mBbcTriggerDetector = event->triggerDetectorCollection()->bbc();
@@ -169,6 +170,9 @@ unsigned short StMuEvent::refMultFtpc(int vtx_id) {return refMultFtpcEast(vtx_id
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.15  2007/09/05 23:21:21  mvl
+ * Added StMtdTriggerDetector
+ *
  * Revision 1.14  2007/04/20 06:25:21  mvl
  * Removed Q-vectors (will implement utility class).
  * Added Vpd info.

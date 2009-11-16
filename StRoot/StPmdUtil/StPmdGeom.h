@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.11 2007/04/17 11:19:53 rashmi Exp $
+ * $Id: StPmdGeom.h,v 1.12 2007/11/02 11:04:32 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -16,6 +16,9 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
+ * Revision 1.12  2007/11/02 11:04:32  rashmi
+ * public GetPmdZ added to get PMD z position
+ *
  * Revision 1.11  2007/04/17 11:19:53  rashmi
  * Chain19 mapping corrected, functions to return nboards in a chain/SMs added
  *
@@ -162,13 +165,18 @@ class StPmdGeom {
   void chain46(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
   void chain47(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
   void chain48(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
- 
- void ADC2Edep(Int_t, Float_t&); //! To convert the ADC value to Edep
- 
+  
+  void ADC2Edep(Int_t, Float_t&); //! To convert the ADC value to Edep
+  Float_t GetPmdZ();
+  
   ClassDef(StPmdGeom, 1)
-};
-//! for defining constants 
-//inline void StPmdGeom::SetRunNumber(Int_t var){m_RunNo =var ;}
+    };
+    //! for defining constants 
+    //inline void StPmdGeom::SetRunNumber(Int_t var){m_RunNo =var ;}
+    
+    inline Float_t StPmdGeom::GetPmdZ(){
+      return mzreal;
+    }
 
 inline void StPmdGeom::commonconstants()
 {
@@ -178,15 +186,15 @@ inline void StPmdGeom::commonconstants()
   mcelldia_x = 1.0564;
   mcelldia_y = 0.91484;   
   // changed to 535mzreal = 550.0;
-//  mzreal = 542.0;
+  //  mzreal = 542.0;
   mzreal = 539.0;  // changed on 1/4/04 after survey results
 }
 #endif
 
 
-  
 
-  
+
+
 
 
 

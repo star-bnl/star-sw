@@ -13,14 +13,16 @@ typedef unsigned char UINT8 ;
 
 
 #if (TRG_VERSION == 0x20)
-#include <TRG/trgStructures_20.h>
+#include "TRG/trgStructures_20.h"
 #elif (TRG_VERSION == 0x12)
-#include <TRG/trgStructures-Jan2002.h>
+#include "TRG/trgStructures-Jan2002.h"
 #elif (TRG_VERSION == 0x21)
-#include <TRG/trgStructures.h>
+#include "TRG/trgStructures_21.h"
+#elif (TRG_VERSION == 0x22)
+#include "TRG/trgStructures_v22.h"
 #else	// default
-#define TRG_VERSION 0x21
-#include <TRG/trgStructures.h>
+#define TRG_VERSION 0x30	// changed on Feb 22, 2007
+#include "TRG/trgStructures.h"
 #endif
 
 #define FMT_ADCD	(1 << 0)
@@ -66,6 +68,7 @@ typedef unsigned char UINT8 ;
 #define EMCP_FORMAT_NUMBER      1
 #define SSDP_FORMAT_NUMBER      1
 #define TRGID_FORMAT_NUMBER     1
+#define TPXP_FORMAT_NUMBER      1
 
 // ALL the structures and defines that share the same structure types as the TPC
 // (i.e. SVT, FTPC, SSD) will be called, by definition, TPC_
@@ -190,7 +193,7 @@ typedef unsigned char UINT8 ;
 #define CHAR_SSDRMSR	"SSDRMSR "
 #define CHAR_SSDGAINR	"SSDGAINR"
 #define CHAR_SSDBADR	"SSDBADR "
-#define CHAR_SCD        "SCD     "
+
 
 // real RICH names
 #define CHAR_RICP	"RICP    "
@@ -208,6 +211,7 @@ typedef unsigned char UINT8 ;
 #define CHAR_TOFTDCD	"TOFTDCD "
 #define CHAR_TOFA2DD	"TOFA2DD "
 #define CHAR_TOFSCAD	"TOFSCAD "
+#define CHAR_TOFDDLR	"TOFDDLR "
 
 // real FPD names
 #define CHAR_FPDP	"FPDP    "
@@ -278,12 +282,19 @@ typedef unsigned char UINT8 ;
 #define CHAR_PP2PPP	"PP2PPP  "
 #define CHAR_PP2PPR	"PP2PPR  "
 
+#define CHAR_L3P	"L3P     "
 
+// Slow Controls and friends
+#define CHAR_SCD	"SCD     "
+
+#define CHAR_TPXP       "TPXP    "
+
+/*
 #if __GNUC__ == 2 && __GNUC_MINOR__ < 96 && defined(__I960)
 #pragma align 1
 #pragma pack 1
 #endif
-
+*/
 
 
 // generic section for all of DAQ
@@ -413,6 +424,17 @@ struct TPCP {
 	struct bankHeader bh ;
 	struct offlen sb[24] ;	// 24 sectors
 } ;
+
+struct TPXP {
+  struct bankHeader bh;
+  struct offlen sb;
+};
+
+struct TPXD {
+  struct bankHeader;
+  UINT32 data[1];              // size is actually variable...
+};
+
 
 struct TRGP {
         struct bankHeader bh ;
@@ -810,19 +832,21 @@ struct BBCSCL {
 
 // TOF 
 // Format Version 2 for FY03
+// FOrmat Version ? for FY04
+// Format Version 0x50000 for FY05 - RORC! - changed type count from 4 to 8
 struct TOFP {
 	struct bankHeader bh ;
-	struct offlen type[4] ;
+	struct offlen type[8] ;
 } ;
 
 struct TOFADCD {
 	struct bankHeader bh ;
-	unsigned int data[132] ;	// 48 in FY02
+	unsigned int data[180] ;	// 48 in FY02, 132 in FY03
 } ;
 
 struct TOFTDCD {
 	struct bankHeader bh ;
-	unsigned int data[120] ;	// 48 in FY02
+	unsigned int data[184] ;	// 48 in FY02, 120 in FY03
 } ;
 
 struct TOFA2DD {
@@ -835,6 +859,10 @@ struct TOFSCAD {
 	unsigned int data[12] ;		// 12 in FY02
 } ;
 
+struct TOFDDLR {
+	struct bankHeader bh ;
+	char data[0] ;
+} ;
 
 // PMP
 // misc. counters
@@ -881,10 +909,18 @@ struct PMDTHRR {
 
 
 // EMC
+/*
+ Tonko, Nov 2, 2004 -- the Barrel people _finally_ decided
+ how the preshower looks like and it will be fibers 9-12
+ in the BSMD. This means:
+	EMC_FIBER_NUM increases from 8 to 12
+	EMC_SEC_NUM stays at 6 but the B_PRE/E_PRE is unused
 
+ NOTE: the FIBER_NUM increase may cause pain for Offline. *shrug*
 
+*/
 #define EMC_SEC_NUM	6	// num. of "sections" i.e. subparts
-#define EMC_FIBER_NUM	8	// max num of fibers per subemc
+#define EMC_FIBER_NUM	12	// max num of fibers per subemc
 
 // indices in the EMCP
 #define EMC_B_TOW	0
@@ -915,7 +951,6 @@ struct PP2PPP {	// main pointer bank
 	struct offlen sec[3] ;
 } ;
 
-#ifndef __ROOT__
 // WARNING: sizeof() will not give the correct length!
 struct PP2PPR {	// void data dump...
 	struct bankHeader bh ;
@@ -929,28 +964,26 @@ struct PP2PPR {	// void data dump...
 	unsigned int res[1] ; 
 	char data[0] ;	// unknown at compile time...
 } ;
-#endif
 
-#define SCD_FORMAT_VERSION        0x000500001    // Run FY05, version 1
+// Slow Controls and Friends
+#define SCD_FORMAT_VERSION	0x00050001	// Run FY05, version 1
 struct SCD {
-  struct bankHeader bh ;
-  unsigned int time ;    //unix time
-  int mag_field ;
-  unsigned int rich_scalers[17] ;
+	struct bankHeader bh ;
+	unsigned int time ;	// unix time
+	int mag_field ;
+	unsigned int rich_scalers[16] ;	// ask Jamie Dunlop
 } ;
-
-
 
 // Level 3 structures
 // Level 3 banks
 #include "L3/L3Formats.h"
 
-
+/*
 #if __GNUC__ == 2 && __GNUC_MINOR__ < 96 && defined(__I960)
 #pragma pack 0
 #pragma align 0
 #endif
-
+*/
 
 
 

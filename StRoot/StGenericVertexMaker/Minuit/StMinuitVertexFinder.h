@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.7 2007/05/17 01:50:35 fisyak Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.8 2007/10/23 05:29:44 genevb Exp $
  *
  */
 
@@ -128,6 +128,7 @@ public:
     void                   DoNotUseITTF(){ mUseITTF=kFALSE;}
     void                   setFlagBase();
     void                   SetFitPointsCut(int fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;}
+    void                   SetMinimumTracks(int n) {mMinTrack = n;}
 
 private:
     enum  {kFlagDcaz = 1, kFlagCTBMatch = 2, kFlagBEMCMatch = 4, kFlagCrossMembrane = 8};
@@ -191,6 +192,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.8  2007/10/23 05:29:44  genevb
+ * Replace minimum 1 track vertex code with minimum N tracks
+ *
  * Revision 1.7  2007/05/17 01:50:35  fisyak
  * Use PrimaryVertexCuts table
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.17 2007/08/02 20:46:46 mvl Exp $
+ * $Id: StMuEvent.h,v 1.18 2007/09/05 23:21:21 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -17,6 +17,7 @@
 #include "StEvent/StRunInfo.h"
 #include "StEvent/StEventSummary.h"
 #include "StEvent/StVpdTriggerDetector.h"
+#include "StEvent/StMtdTriggerDetector.h"
 #include "StEvent/StCtbTriggerDetector.h"
 #include "StEvent/StZdcTriggerDetector.h"
 #include "StEvent/StBbcTriggerDetector.h"
@@ -54,6 +55,7 @@ class StMuEvent : public TObject {
   StEventInfo& eventInfo();
   StEventSummary& eventSummary();
   StVpdTriggerDetector& vpdTriggerDetector();
+  StMtdTriggerDetector& mtdTriggerDetector();
   StCtbTriggerDetector& ctbTriggerDetector();
   StZdcTriggerDetector& zdcTriggerDetector();
   StBbcTriggerDetector& bbcTriggerDetector();
@@ -101,6 +103,7 @@ class StMuEvent : public TObject {
   StEventInfo mEventInfo;
   StEventSummary mEventSummary;
   StVpdTriggerDetector mVpdTriggerDetector;
+  StMtdTriggerDetector mMtdTriggerDetector;
   StCtbTriggerDetector mCtbTriggerDetector;
   StZdcTriggerDetector mZdcTriggerDetector;
   StBbcTriggerDetector mBbcTriggerDetector;
@@ -126,7 +129,7 @@ class StMuEvent : public TObject {
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,9)
+  ClassDef(StMuEvent,10)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -137,6 +140,7 @@ inline StRunInfo& StMuEvent::runInfo() {return mRunInfo;}
 inline StEventInfo& StMuEvent::eventInfo() {return mEventInfo;}
 inline StEventSummary& StMuEvent::eventSummary() {return mEventSummary;}
 inline StVpdTriggerDetector& StMuEvent::vpdTriggerDetector() {return mVpdTriggerDetector;}
+inline StMtdTriggerDetector& StMuEvent::mtdTriggerDetector() {return mMtdTriggerDetector;}
 inline StCtbTriggerDetector& StMuEvent::ctbTriggerDetector() {return mCtbTriggerDetector;}
 inline StZdcTriggerDetector& StMuEvent::zdcTriggerDetector() {return mZdcTriggerDetector;}
 inline StBbcTriggerDetector& StMuEvent::bbcTriggerDetector() {return mBbcTriggerDetector;}
@@ -171,6 +175,9 @@ inline TArrayI &StMuEvent::L2Result() { return mL2Result; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.18  2007/09/05 23:21:21  mvl
+ * Added StMtdTriggerDetector
+ *
  * Revision 1.17  2007/08/02 20:46:46  mvl
  * Switch off Q-vector branhces in StMuDstMaker and increase version number in StMuEvent.
  * This is to avoid wranings when reading P07ib data which has Q-vector information stored with more recent libraries.
