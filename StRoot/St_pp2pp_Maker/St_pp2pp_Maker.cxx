@@ -27,9 +27,9 @@ St_pp2pp_Maker::~St_pp2pp_Maker() {
 //_____________________________________________________________________________
 /// Init - is a first method the top level StChain calls to initialize all its makers 
 Int_t St_pp2pp_Maker::Init() {
-  fLast_svx   = ErrorCode;
-  fLast_chain = ErrorCode;
-  fLast_seq   = ErrorCode ;
+  mLast_svx   = ErrorCode;
+  mLast_chain = ErrorCode;
+  mLast_seq   = ErrorCode ;
   return StMaker::Init();
 }
 
@@ -229,30 +229,30 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
   // One known case is for SEQ 3, CHAIN 2 and SVX is 7 but it should be 3.
   // Mostly, just some debugging codes that we've used in the past and shouldn't happen
 
-  if ( (oneSihit.svx != fLast_svx) && (fLast_svx != ErrorCode) ) {
+  if ( (oneSihit.svx != mLast_svx) && (mLast_svx != ErrorCode) ) {
 
-    if (  Int_t(oneSihit.svx-1) != fLast_svx )
+    if (  Int_t(oneSihit.svx-1) != mLast_svx )
 
-      if (  ( (oneSihit.svx-fLast_svx) != -3 && ( (oneSihit.chain%2)==1 ) ) ||
-	    ( (oneSihit.svx-fLast_svx) != -5 && ( (oneSihit.chain%2)==0 ) ) ) {
+      if (  ( (oneSihit.svx-mLast_svx) != -3 && ( (oneSihit.chain%2)==1 ) ) ||
+	    ( (oneSihit.svx-mLast_svx) != -5 && ( (oneSihit.chain%2)==0 ) ) ) {
 
 	if ( oneSihit.svx == 7 && oneSihit.sequencer == 3 && oneSihit.chain == 2 )
 	  oneSihit.svx = 3 ;
-	//		  else if ( oneSihit.svx < fLast_svx ) {
-	else if ( oneSihit.svx < fLast_svx && ( GetRunNumber()<10185015 || (fLast_seq!=2 && fLast_chain!=2)) ) { // bad seq 2 and chain D
+	//		  else if ( oneSihit.svx < mLast_svx ) {
+	else if ( oneSihit.svx < mLast_svx && ( GetRunNumber()<10185015 || (mLast_seq!=2 && mLast_chain!=2)) ) { // bad seq 2 and chain D
 
-	  LOG_WARN << "Decreased ? " <<  GetEventNumber() << " : fLast_seq = " << fLast_seq << ", fLast_chain = " << fLast_chain << ", fLast_svx = " << fLast_svx << endm ;
+	  LOG_WARN << "Decreased ? " <<  GetEventNumber() << " : mLast_seq = " << mLast_seq << ", mLast_chain = " << mLast_chain << ", mLast_svx = " << mLast_svx << endm ;
 	  LOG_WARN << "Decreased ?  " << GetEventNumber() << " : Now, seq = " << (int) oneSihit.sequencer << ", chain = " << (int) oneSihit.chain << ", svx = " << (int) oneSihit.svx << endm ;
 	  
-	  oneSihit.svx = fLast_svx + 1 ;
+	  oneSihit.svx = mLast_svx + 1 ;
 		    
 	  LOG_WARN << "Decreased ? : So -> " << " svx is now = " << (int) oneSihit.svx << endm ;	      
 
 	}
-	//	else if ( fLast_seq!=2 && fLast_chain!=2 ) { // bad seq 2 and chain D
-	else if ( GetRunNumber()<10185015 || ( fLast_seq!=2 && fLast_chain!=2 ) ) { // bad seq 2 and chain D
+	//	else if ( mLast_seq!=2 && mLast_chain!=2 ) { // bad seq 2 and chain D
+	else if ( GetRunNumber()<10185015 || ( mLast_seq!=2 && mLast_chain!=2 ) ) { // bad seq 2 and chain D
 
-	  LOG_WARN << GetEventNumber() << " : fLast_seq = " << fLast_seq << ", fLast_chain = " << fLast_chain << ", fLast_svx = " << fLast_svx << endm ;
+	  LOG_WARN << GetEventNumber() << " : mLast_seq = " << mLast_seq << ", mLast_chain = " << mLast_chain << ", mLast_svx = " << mLast_svx << endm ;
 	  LOG_WARN << GetEventNumber() << " : Now, seq = " << (int) oneSihit.sequencer << ", chain = " << (int) oneSihit.chain << ", svx = " << (int) oneSihit.svx << endm ;
 
 	}
@@ -261,21 +261,21 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 	      
 
   }
-  else if ( (oneSihit.chain==fLast_chain) && (fLast_chain != ErrorCode) ) {
-    LOG_WARN << "Repeated ? :" << GetEventNumber() << " : fLast_seq = " << fLast_seq << ", fLast_chain = " << fLast_chain << ", fLast_svx = " << fLast_svx << endm ;
+  else if ( (oneSihit.chain==mLast_chain) && (mLast_chain != ErrorCode) ) {
+    LOG_WARN << "Repeated ? :" << GetEventNumber() << " : mLast_seq = " << mLast_seq << ", mLast_chain = " << mLast_chain << ", mLast_svx = " << mLast_svx << endm ;
     LOG_WARN << "Repeated ? : " << GetEventNumber() << " : Now, seq = " << (int) oneSihit.sequencer << ", chain = " << (int) oneSihit.chain << ", svx = " << (int) oneSihit.svx << endm ;
 
-    oneSihit.svx = fLast_svx + 1 ;
+    oneSihit.svx = mLast_svx + 1 ;
 
     LOG_WARN << "Repeated : So -> " << " svx is now = " << (int) oneSihit.svx << endm ;	      
   }
 
 
-  fLast_seq = oneSihit.sequencer; 
-  fLast_chain = oneSihit.chain;
-  fLast_svx = oneSihit.svx;
+  mLast_seq = oneSihit.sequencer; 
+  mLast_chain = oneSihit.chain;
+  mLast_svx = oneSihit.svx;
 
-  //  cout << "Seq: " << fLast_seq << " , chain " << fLast_chain << ", SVX = " << fLast_svx << endl ;
+  //  cout << "Seq: " << mLast_seq << " , chain " << mLast_chain << ", SVX = " << mLast_svx << endl ;
 
   for(unsigned int c=0;c<sizeof(d.adc);c++) {
     //	      if( d.adc[c] ) printf("   %3d: %3d [0x%02X]\n",c,d.adc[c],d.adc[c]) ;
@@ -290,12 +290,12 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
       if ( LDoCluster && (c != 127) && (c != 0) ) { // Avoid the channels at 2 ends of SVX
 	
 	// Getting rid of the 1st channel (0) and the last channel (127)
-	onehit.first = fLast_svx*(MAXSTRIP-2) + oneSihit.channel - 1  ; 
+	onehit.first = mLast_svx*(MAXSTRIP-2) + oneSihit.channel - 1  ; 
 
-	onehit.second = oneSihit.adc -  pedave[fLast_seq-1][fLast_chain][fLast_svx][oneSihit.channel] ;
+	onehit.second = oneSihit.adc -  pedave[mLast_seq-1][mLast_chain][mLast_svx][oneSihit.channel] ;
 
-	if ( onehit.second > 5*pedrms[fLast_seq-1][fLast_chain][fLast_svx][oneSihit.channel] ) {
-	  (validhits[fLast_seq-1][fLast_chain]).push_back(onehit);
+	if ( onehit.second > 5*pedrms[mLast_seq-1][mLast_chain][mLast_svx][oneSihit.channel] ) {
+	  (validhits[mLast_seq-1][mLast_chain]).push_back(onehit);
 	  //	  cout << "validhits : position " << onehit.first << " , energy " << onehit.second << endl ;
 	}
       }
@@ -315,40 +315,34 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
   //  const Int_t MAX_Cls_L = 5 ;
   //  const Int_t MIN_Charge = 20 ;
-  //                                               EHI        EHO        EVU        EVD          WHI          WHO        WVD       WVU
+  /// Orientations for each silicon plane
   const short orientations[MAXCHAIN*MAXSEQ] = {-1,1,-1,1,  1,-1,1,-1,  1,1,1,1, -1,-1,-1,-1,  -1,-1,-1,-1,  1,1,1,1,  -1,1,-1,1, 1,-1,1,-1 };
+  /// Assume 4 planes have the same z at least for now
+  const double zcoordinates[MAXSEQ] = { -55.496, -55.496, -58.496, -58.496, 55.496, 55.496, 58.496, 58.496 };
 
   Bool_t is_candidate_to_store ;
 
   Int_t NCluster_Length ;
   Double_t ECluster, POStimesE, position, offset ;
 
-  // For inserting into StEvent
+  /// Creating a new StEvent object
   pp2ppColl = new StRpsCollection(); 
 
   vector< HitChannel >::iterator it, it_next ;
 
-  for ( Int_t i=0; i<MAXSEQ; i++)
-    for ( Int_t j=0; j<MAXCHAIN; j++) {
+  for ( Int_t i=0; i<MAXSEQ; i++) /// each sequencer/roman-pot
+    for ( Int_t j=0; j<MAXCHAIN; j++) { /// each chain/silicon-plane
 
       NCluster_Length = 0 ;
       ECluster = 0 ;
       POStimesE = 0 ;
 
-      // Assume 4 planes have the same z at least for now
-      if ( i==0 || i==1 )
-	pp2ppColl->romanPot(i)->plane(j)->setZ(-55.496) ; 
-      else if ( i==2 || i==3 )
-	pp2ppColl->romanPot(i)->plane(j)->setZ(-58.496) ; 
-      else if ( i==4 || i==5 )
-	pp2ppColl->romanPot(i)->plane(j)->setZ(55.496) ; 
-      else if ( i==6 || i==7 )
-	pp2ppColl->romanPot(i)->plane(j)->setZ(58.496) ; 
-      
+      pp2ppColl->romanPot(i)->plane(j)->setZ(zcoordinates[i]) ; 
+
       if ( offset_table )
-	offset = offset_table[0].rp_offset_plane[4*i+j]/1000. ; // all in m
+	offset = offset_table[0].rp_offset_plane[4*i+j]/1000. ; /// all in m
       else
-	offset = -9999. ;
+	offset = double(ErrorCode) ;
       //      cout << "Offsets : " <<  i << " " << j << " " << offset_table[0].rp_offset_plane[4*i+j] << endl ; 
 
       pp2ppColl->romanPot(i)->plane(j)->setOffset( offset ) ; 
@@ -401,7 +395,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
 
-	  //	} 
+	  //	  } 
 	  /*
 	  else
 	    cout << "NOT Stored ! seq/chain : " << i+1 << "/" << j 

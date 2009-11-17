@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.6 2009/11/14 16:07:48 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.7 2009/11/17 20:33:27 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -28,7 +28,7 @@ class pp2pp_t;
 class St_pp2pp_Maker : public StRTSBaseMaker {
 
  public:
-  enum {ErrorCode = -999,
+  enum {ErrorCode = -9999,
 	MAXSEC = 2 ,  // 2 sides
 	MAXCHAIN = 4 ,
 	MAXSVX = 6 ,
@@ -48,9 +48,9 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   Double_t  pedave[MAXSEQ][MAXCHAIN][MAXSVX][MAXSTRIP] ;
   Double_t  pedrms[MAXSEQ][MAXCHAIN][MAXSVX][MAXSTRIP] ;
 
-  Int_t fLast_svx;
-  Int_t fLast_chain;
-  Int_t fLast_seq;
+  Int_t mLast_svx;
+  Int_t mLast_chain;
+  Int_t mLast_seq;
 
   string pedestal_perchannel_filename ;
   Int_t read_pedestal_perchannel() ;
@@ -82,7 +82,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.6 2009/11/14 16:07:48 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.7 2009/11/17 20:33:27 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
