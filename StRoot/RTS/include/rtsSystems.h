@@ -101,7 +101,7 @@
 //#define ESMD_GRP	6
 //#define TPX_GRP		7
 
-// 2009 Group definitions...
+// 2010 Group definitions...
 #define FTP_GRP		0
 #define PP_GRP	        1
 #define ETOW_GRP	2   
@@ -110,6 +110,8 @@
 #define TOF_GRP	        5
 #define ESMD_GRP	6
 #define TPX_GRP		7
+#define PMD_GRP         8
+#define FGT_GRP         9
 
 /* RTS Node Id, Tonko, 11/06/2000
 
@@ -685,10 +687,10 @@ extern inline u_int grp2rts_mask(int grp)
 	ret = 0 ;
 
 	if(grp & (1<<FTP_GRP)) {
-	  ret  |= (1<<TPC_SYSTEM) | (1<<SVT_SYSTEM) | (1<<FTP_SYSTEM) | (1 << PMD_SYSTEM) | (1<<HFT_SYSTEM) | (1<<SSD_SYSTEM) ;
+	  ret  |= (1<<FTP_SYSTEM) ;
 	}
 	if(grp & (1 << PP_GRP)) {
-	  ret |= (1 << PP_SYSTEM) | (1<<FGT_SYSTEM);
+	  ret |= (1 << PP_SYSTEM);
 	}
 	if(grp & (1 << ETOW_GRP)) {
 	  ret |= (1 << ETOW_SYSTEM) ;
@@ -708,6 +710,12 @@ extern inline u_int grp2rts_mask(int grp)
 	if(grp & (1 << TPX_GRP)) {
 	  ret |= (1 << TPX_SYSTEM);
 	}
+	if(grp & (1 << PMD_GRP)) {
+	  ret |= (1 << PMD_SYSTEM);
+	}
+	if(grp & (1 << FGT_GRP)) {
+	  ret |= (1 << FGT_SYSTEM);
+	}
 	return ret ;
 }
 
@@ -717,23 +725,24 @@ extern inline int rts2grp(int rts)
   switch(rts)
     {
       // Instance doesn't matter...
-    case TPC_ID: 
-    case SVT_ID: 
     case FTP_ID:
+      return FTP_GRP;
+    case PP_ID:
+      return PP_GRP;
+    case ETOW_ID:
+      return ETOW_GRP;
+    case BTOW_ID:
+      return BTOW_GRP;
+    case BSMD_ID:
+      return BSMD_GRP;
+    case TOF_ID:
+      return TOF_GRP;
+    case TPX_ID:
+      return TPX_GRP;
     case PMD_ID:
-    case HFT_ID:
-    case SSD_ID:
-    case FPD_ID: 
-	return FTP_GRP;
+      return PMD_GRP;
     case FGT_ID:
-    case PP_ID:      
-	return PP_GRP;
-    case BTOW_ID:    return BTOW_GRP;
-    case BSMD_ID:    return BSMD_GRP;
-    case ETOW_ID:    return ETOW_GRP;
-    case ESMD_ID:    return ESMD_GRP;
-    case TPX_ID:     return TPX_GRP;
-    case TOF_ID:     return TOF_GRP;
+      return FGT_GRP;
     default:
 	return 15 ;	// this is an ERROR!
     }
