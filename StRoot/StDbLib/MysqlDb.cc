@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.50 2009/09/15 21:49:06 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.51 2009/11/17 17:14:52 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.51  2009/11/17 17:14:52  dmitry
+ * enabled SSL + compression, if server supports it
+ *
  * Revision 1.50  2009/09/15 21:49:06  dmitry
  * LB timer fix, now it is accurate up to 1 ms, as planned
  *
@@ -306,8 +309,31 @@ bool MysqlDb::reConnect(){
 
     loadBalance(); // does nothing in the fall-back scenario
 
-    if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0))
-    connected=true;
+    // always returns 0, no way to check for SSL validity     
+	// "AES-128-SHA" = less CPU-intensive than AES-256                                                                                               
+    mysql_ssl_set(&mData, NULL, NULL, NULL, NULL, "AES128-SHA");
+
+	unsigned long client_flag = CLIENT_COMPRESS;
+
+    if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,client_flag)) {
+    	connected=true;
+        const char* query = "SHOW STATUS LIKE 'Ssl_cipher'";                                                                                                 
+        mysql_query(&mData, query);                                                                                                                          
+        MYSQL_RES *result = 0;                                                                                                                               
+        MYSQL_ROW row = 0;                                                                                                                                   
+        int num_fields = 0;                                                                                                                                  
+        result = mysql_store_result(&mData);                                                                                                                 
+        num_fields = mysql_num_fields(result);                                                                                                               
+        if (num_fields >= 2) {                                                                                                                               
+            row = mysql_fetch_row(result);                                                                                                                   
+            if (row && row[0] && row[1]) {                                                                                                                   
+                printf("%s = ", row[0] ? row[0] : "NULL");                                                                                                   
+                printf("%s ", row[1] ? row[1] : "NULL");                                                                                                     
+                printf("\n");                                                                                                                                
+            }                                                                                                                                                
+        } 
+	}
+
     if(!connected){
       timeOutConnect*=2;
       StString wm;
