@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.44 2009/10/27 19:37:44 fine Exp $
+// $Id: StDraw3D.h,v 1.45 2009/11/17 01:43:03 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -147,8 +147,7 @@ class view_3D;
 ///
 /// \n Try:
   /// \code
-  ///  > star.dev	
-  ///  > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+  ///  > ln -s  $STAR/StRoot/macros/.rootrc
   ///  > root.exe Draw3D.C
   /// \endcode
   ///  to get the test picture below:\n

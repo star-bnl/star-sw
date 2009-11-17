@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.8 2009/10/26 22:46:56 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.9 2009/11/17 01:43:26 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -42,8 +42,7 @@ enum EStuDraw3DMuEvent {
 ///  for example, from the GNU debugger (gdb) command prompt 
 /// \n Try:
 /// \code
-///  > star.dev	
-///  > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+///  > ln -s  $STAR/StRoot/macros/.rootrc
 ///  > root.exe $STAR/StRoot/macros/mudst/draw3DTracks.C
 /// \endcode
 ///  to  read some MuDst ROOT file and get the pictire below:

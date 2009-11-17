@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.17 2009/10/23 21:04:28 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.18 2009/11/17 01:43:21 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -44,8 +44,7 @@ enum EStuDraw3DEvent {kUnusedHitsOnly=-1 //!< Render the unused hits only
 ///  for example, from the GNU debugger (gdb) command prompt 
 /// \n Try:
 /// \code
-///  > star.dev	
-///  > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+///  > ln -s  $STAR/StRoot/macros/.rootrc
 ///  > root.exe Draw3D.C
 /// \endcode
 ///  to get the test picture below:\n
