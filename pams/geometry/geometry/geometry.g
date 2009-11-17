@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.206 2009/11/16 22:37:48 jwebb Exp $
+* $Id: geometry.g,v 1.207 2009/11/17 16:18:47 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.207  2009/11/17 16:18:47  jwebb
+* Added y2006dev with new endcap model.  y2006dev (and future y200[3-8]dev)
+* will be for testing purposes only.
+*
 * Revision 1.206  2009/11/16 22:37:48  jwebb
 * Added logic to support multiple ecalgeoX files (subroutines).  ecalgeo6
 * (version 6.1) set as default version for y2009 tag.
@@ -1233,6 +1237,18 @@ replace [exe y2006c;] with ["Y2006B without the PHMD"
 replace [exe y2006g;] with ["Y2006C new SVT dead material"
                             exe y2006c; exe SVT312;exe SISD75;]
 
+*                                                                    == y2006dev ==
+*  
+* Development geometry, not yet cleared for production.  May be altered / removed 
+* at any time.
+*
+replace [exe y2006dev;] with [;
+        "Y2006dev developmental geometry";
+        write(*,*) "y2006dev tag is for testing purposes only, and may be removed / altered at any time"
+        ;EcalGeometry=6;    "Version 6.1 and higher";
+        ;exe y2006g;
+        ]
+
 !//______________________________________________________________________________
 *********   y2007   ***
 replace [exe y2007;] with ["y2006 baseline which is Y2006+FMS"
@@ -1271,8 +1287,9 @@ replace [exe y2009;] with [;
     exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
     exe PHMDof;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
     exe PIPE12;
-
 };]
+
+
 
 !//______________________________________________________________________________
 *********   y2010   ***
@@ -1811,22 +1828,26 @@ If LL>0
   Case Y2006    { y2006 baseline which is Y2005D+fixed TPC backplane+New SSD
                 exe y2006;
               }
-****************************************************************************************
+
   Case Y2006A   { y2006 baseline which is Y2005D+fixed TPC backplane+New SSD
                 exe y2006a;
               }
-****************************************************************************************
+
   Case Y2006B   { Y2006A + improved SSD with dead area + improved CALB
                   exe y2006b;
                 }
 
-****************************************************************************************
+
   Case Y2006C   { Y2006B without the PHMD
                   exe y2006c;
                 }
-****************************************************************************************
+
   Case Y2006G   { Y2006C + new SVT dead material
                   exe y2006g;
+                }
+
+  Case Y2006DEV { Y2006 development: y2006g + version 6.1 of the endcap 
+                  exe y2006dev;
                 }
 
 ****************************************************************************************
