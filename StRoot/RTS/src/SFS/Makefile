@@ -69,10 +69,12 @@ sfs_index_daq.o: ../../include/SECTOR/sector.h
 sfs_index_daq.o: ../../trg/include/trgStructures_32.h
 sfs_index_daq.o: ../../include/L3/L3Formats.h
 blastSFS.o: ../../include/SUNRT/clock.h
+blastSFS.o: ../../include/I386/i386Lib.h
 example.o: sfs_index.h
 example.o: fs_index.h
 example.o: sfs_base.h
 fs.o: ../../include/SUNRT/clock.h
+fs.o: ../../include/I386/i386Lib.h
 fs.o: sfs_index.h
 fs.o: fs_index.h
 fs.o: sfs_base.h
@@ -83,6 +85,7 @@ fs_ex.o: sfs_index.h
 fs_ex.o: fs_index.h
 fs_ex.o: sfs_base.h
 fs_ex.o: ../../include/SUNRT/clock.h
+fs_ex.o: ../../include/I386/i386Lib.h
 sfs_header.o: sfs_index.h
 sfs_header.o: fs_index.h
 sfs_header.o: sfs_base.h
