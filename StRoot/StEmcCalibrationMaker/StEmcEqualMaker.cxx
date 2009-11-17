@@ -181,13 +181,13 @@ void StEmcEqualMaker::equalizeRelative(int ref, int channel,int mode, bool Et)
 	//cout <<"h1 = "<<h1<<"  h2 = "<<h2<<endl;
 	//cout <<"integral 1 = "<<integral1<<"  integral 2 = "<<integral2<<endl;
 	
-	if(integral1==0 || integral2==0 && h1!=h2)
+	if((integral1==0 || integral2==0) && h1!=h2)
 	{
 		delete h1;
 		delete h2;
 		return;
 	}   
-	if(integral1==0 || integral2==0 && h1==h2)
+	if((integral1==0 || integral2==0) && h1==h2)
 	{
 		delete h1;
 		return;
@@ -326,7 +326,7 @@ void StEmcEqualMaker::equalizeToFunction(int channel,TF1 *func)
 	
   if(channel<=2400)
 	{
-		float I2 = h2->Integral(h2->FindBin(MIN),h2->FindBin(MAX));
+	  //float I2 = h2->Integral(h2->FindBin(MIN),h2->FindBin(MAX));
 		h2->Fit(f,"RQN");
 		m2 = f->GetParameter(1);
 		A2 = f->GetParameter(0);

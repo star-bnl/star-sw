@@ -277,7 +277,7 @@ void StEmcPedestalMaker::saveToDb(const Char_t *timeStamp, const Char_t *tableFi
 	    Int_t id = i + 1;
 	    Float_t pedNew = getPedestal(id);
 	    Float_t rmsNew = getRms(id);
-	    Float_t chiNew = getChi(id);
+	    //Float_t chiNew = getChi(id);
 	    Int_t statusNew = (int)getStatus(id);
 	    Float_t pedLast = 0;
 	    Float_t rmsLast = 0;
