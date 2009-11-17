@@ -294,7 +294,7 @@ void StEmcCalibrationMaker::makeStatus(bool t, bool p, bool se, bool sp)
 	//////////////////////////////////////////////////////////////////////////	
 	StEmcDecoder *dec = new StEmcDecoder(20300101,0);
 	
-	char *timestamp = "2004-01-01 00:00:00";
+	const char *timestamp = "2004-01-01 00:00:00";
 	
   StDbManager* mgr=StDbManager::Instance();
 	StDbConfigNode* node=mgr->initConfig(dbCalibrations,dbEmc);

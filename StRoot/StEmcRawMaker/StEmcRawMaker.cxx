@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.21 2009/02/11 22:38:56 mattheww Exp $
+// $Id: StEmcRawMaker.cxx,v 1.22 2009/11/17 15:55:48 mattheww Exp $
 
 #include <math.h>
 
@@ -80,7 +80,7 @@ Int_t StEmcRawMaker::Init()
 
     mBemcRaw->initHisto();
     mBemcRaw->printConf();
-    if(m_Mode&0x1==1)
+    if((m_Mode&0x1)==1)
     {
 		LOG_INFO << "Setting BEMC debug Mode -> save all hits into StEvent"<<endm;
         mBemcRaw->saveAllStEvent(kTRUE);
@@ -327,6 +327,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.22  2009/11/17 15:55:48  mattheww
+// fixed a bunch of warnings
+//
 // Revision 1.21  2009/02/11 22:38:56  mattheww
 // fixed a bug in getting CAP
 //

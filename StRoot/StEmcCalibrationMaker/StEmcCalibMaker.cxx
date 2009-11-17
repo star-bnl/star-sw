@@ -248,7 +248,7 @@ void StEmcCalibMaker::calcVoltages(TH1F *gain, char* refFile, char* voltageInput
 	
 	ofstream out(GainShift);
 	ifstream inp(voltageInput);
-  TH1F *h = new TH1F("Gain","Current Gain Distribution",100,0,0.02);
+	//TH1F *h = new TH1F("Gain","Current Gain Distribution",100,0,0.02);
 	do
 	{
 	  int a,b,c,d,e,f,id;

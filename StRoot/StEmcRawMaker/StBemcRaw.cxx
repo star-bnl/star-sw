@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.37 2009/03/23 21:08:32 mattheww Exp $
+// $Id: StBemcRaw.cxx,v 1.38 2009/11/17 15:55:48 mattheww Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.38  2009/11/17 15:55:48  mattheww
+// fixed a bunch of warnings
+//
 // Revision 1.37  2009/03/23 21:08:32  mattheww
 // Update default BPRS ZS handling and fix EEMC minor bug
 //
@@ -918,7 +921,7 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
                 RAW->createBank(bank,BSMDHEADER,BSMDSIZE);
                 for(Int_t j=0; j<BSMDHEADER;  j++)
                     RAW->setHeader(bank,j,smd.SmdHeader[i][j]);
-                    int CAP = RAW->header(bank,SMDCAPACITOR);
+		//int CAP = RAW->header(bank,SMDCAPACITOR);
                     //printf("agrdl: BSMD %d CAP %d\n",bank,CAP);
                 for(Int_t j=0; j<BSMDSIZE; j++){
                     RAW->setData(bank,j,smd.SMDADCArray[i][j]);
@@ -951,7 +954,7 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
                     RAW->createBank(bank,BPRSHEADER,BPRSSIZE);
                     for(Int_t i = 0; i<BPRSHEADER;  i++)
                         RAW->setHeader(bank,i,smd.SmdHeader[SMDRDO][i]);
-                    int CAP = RAW->header(bank,SMDCAPACITOR);
+                    //int CAP = RAW->header(bank,SMDCAPACITOR);
                     //printf("agrdl: BSMD %d CAP %d\n",bank,CAP);
                     for(Int_t i = 0; i<BPRSSIZE; i++){
                         RAW->setData(bank,i,smd.SMDADCArray[SMDRDO][i]);
