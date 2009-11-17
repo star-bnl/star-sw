@@ -62,6 +62,7 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
     $PKG = $pkg;
     $OnlinePackage=true if $Dir =~ /^OnlTools/;
 }
+
 $env1 = $env->clone('Package'  => $pkg);
 my $CXXFLAGS= $env1->{CXXFLAGS};
 my $CFLAGS  = $env1->{CFLAGS};
@@ -77,6 +78,8 @@ my $LIBPATH = $env1->{LIBPATH};
 my $STIC    = $env1->{STIC};
 my $EXTRA_CPPFLAGS = $env1->{EXTRA_CPPFLAGS};
 my $CPPFLAGS = $env1->{CPPFLAGS};
+
+
 #my $ROOTCINT_CPPFLAGS = "";
 my @idlL    = script::find_idl($Dir);
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
@@ -162,16 +165,31 @@ if ($pkg eq "StDAQMaker") {
 }
 my ($i, $obj);
 my $LIBPKG = ""; 
+
 my @g77pkgs = qw(geometry gen sim tls minicern geant3); 
 my $g77pkgs = join('|', @g77pkgs); print "FC = $FC pkg = $pkg DirPath = $DirPath\n" if $param::debug;
-if($FC eq 'pgf77' and ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/)) {
-  $FC       = $env1->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
-  $FFLAGS   = $env1->{G77FLAGS}; 
-  $FEXTEND  = $env1->{G77EXTEND};
+
+
+# some compiler specific treatments below
+if( $FC eq 'pgf77'){
+    if ($DirPath  =~ /$g77pkgs/ or $DirPath !~ /pams/) {
+	$FC       = $env1->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
+	$FFLAGS   = $env1->{G77FLAGS}; 
+	$FEXTEND  = $env1->{G77EXTEND};
+    }
 }
-if(($FC eq 'g77' or $FC eq 'gfortran') and $DirPath =~ /pams/ and ($DirPath !~ /$g77pkgs/ or $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/)) {
-  $FCCOM    = $env1->{FCviaAGETOFCOM};
+if ($FC eq 'g77' or $FC eq 'gfortran'){ 
+    if ( $DirPath =~ /pams/ and 
+	 ($DirPath !~ /$g77pkgs/ or $DirPath =~ /crs/ or $DirPath =~ /g2t/ or $DirPath =~ /hij/)){
+	$FCCOM    = $env1->{FCviaAGETOFCOM};
+    }
+    # If fortran, grab the -lg2c or -lgfortran for linking
+    if ( $DirPath =~ /StarVMC/ ){
+	$LIBS .= " " . $env1->{FLIBS};
+    }
 }
+
+
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
   
