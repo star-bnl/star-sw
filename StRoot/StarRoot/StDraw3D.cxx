@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.76 2009/11/16 18:08:42 fine Exp $
+// $Id: StDraw3D.cxx,v 1.77 2009/11/17 01:43:03 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -741,8 +741,7 @@ void StDraw3D::UpdateModified()
 /*! 
   \n Try:
   \code
-   > star.dev	
-   > ln -s  $STAR/QtRoot/qtExamples/QtGBrowser/.rootrc
+   > ln -s  $STAR/StRoot/macros/.rootrc
    > root.exe Draw3D.C
   \endcode
    to get the picture:
