@@ -343,6 +343,8 @@ so we keep it here for source compatibility
 //#define EVB_NODES(x)	((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
 #define EVBL_NODES(x)   ((DAQ_SYSTEM<<12) | (EVBL_SUBSYS<<8) | (x))
 #define EVBX_NODES(x)   ((DAQ_SYSTEM<<12) | (EVB_SUBSYS<<8) | (x))
+#define EVBX_NODE_COUNT	6	// in a run epoch, used by monitoring and RICH scalers!
+
 #define GB_NODES(x)	((DAQ_SYSTEM<<12) | (GB_SUBSYS<<8 ) | (x))
 #define GB_NODE		GB_NODES(1)
 
@@ -638,21 +640,21 @@ extern inline int tcd2rts(int tcd)
         -1,
         -1,
         ESMD_SYSTEM,	//6
-        -1,		// BBC
-        ETOW_SYSTEM,
-        SSD_SYSTEM,
-        FGT_SYSTEM,
-        TOF_SYSTEM,
-        PP_SYSTEM,	//12	// moved from SVT_SYSTem to PP!
-        -1,		// EMPTY
+        -1,		//7 BBC
+        ETOW_SYSTEM,	//8
+        SSD_SYSTEM,	//9 ; used for MTD?
+        FGT_SYSTEM,	//10 ; moved from FPD
+        TOF_SYSTEM,	//11
+        PP_SYSTEM,	//12 ; moved from SVT_SYSTem to PP!
+        -1,		//13 EMPTY
         TPX_SYSTEM,	//14
         BSMD_SYSTEM,	//15
-        -1,		//CTB
-        BTOW_SYSTEM,
-        FTP_SYSTEM,
-        PMD_SYSTEM,
-        -1,		//TPC_SYSTEM,	// TPC was here... removed Sep 08
-        -1,		// VPD
+        -1,		//16 CTB aka ZDC
+        BTOW_SYSTEM,	//17
+        FTP_SYSTEM,	//18
+        PMD_SYSTEM,	//19
+        -1,		//20 EMPTY ; TPC was here... removed Sep 08
+        -1,		//21 VPD
         -1,
         -1,
         -1,
