@@ -1,4 +1,4 @@
-// $Id: StEmcMappingDb.cxx,v 1.6 2009/04/20 16:38:57 mattheww Exp $
+// $Id: StEmcMappingDb.cxx,v 1.7 2009/11/17 14:19:28 mattheww Exp $
 
 #include "StEmcMappingDb.h"
 
@@ -90,19 +90,19 @@ void StEmcMappingDb::SetDateTime(int date, int time) {
     else {
         mBeginTime.Set(date, time);
         unsigned unix = TUnixTime::Convert(mBeginTime, true);
-        if( !(mBemcTable->getBeginTime() < unix < mBemcTable->getEndTime()) ) {
+        if( !(mBemcTable->getBeginTime() < unix && unix < mBemcTable->getEndTime()) ) {
             mBemcDirty = true;
             reset_bemc_cache();
         }
-        if( !(mBprsTable->getBeginTime() < unix < mBprsTable->getEndTime()) ) {
+        if( !(mBprsTable->getBeginTime() < unix && unix < mBprsTable->getEndTime()) ) {
             mBprsDirty = true;
             reset_bprs_cache();
         }
-        if( !(mSmdeTable->getBeginTime() < unix < mSmdeTable->getEndTime()) ) {
+        if( !(mSmdeTable->getBeginTime() < unix && unix < mSmdeTable->getEndTime()) ) {
             mSmdeDirty = true;
             reset_smde_cache();
         }
-        if( !(mSmdpTable->getBeginTime() < unix < mSmdpTable->getEndTime()) ) {
+        if( !(mSmdpTable->getBeginTime() < unix && unix < mSmdpTable->getEndTime()) ) {
             mSmdpDirty = true;
             reset_smdp_cache();
         }
@@ -491,6 +491,9 @@ void StEmcMappingDb::reset_smdp_cache() const {
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.cxx,v $
+ * Revision 1.7  2009/11/17 14:19:28  mattheww
+ * fixed bug in some if statements
+ *
  * Revision 1.6  2009/04/20 16:38:57  mattheww
  * fixed case statements so that we can compile SL305
  *
