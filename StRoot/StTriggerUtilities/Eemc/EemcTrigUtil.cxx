@@ -164,8 +164,10 @@ void
 EemcTrigUtil::genPed4(int ped4val, int mxChan, int *feePed4){
   for (int crate=1; crate<=6; crate++){
     for (int board=1; board<=4; board++){
-      for (int i=0; i<32; i++){
-	feePed4[(crate-1)*mxChan+(board-1)*32+i]=ped4val;
+      for (int chan=0; chan<32; chan++){
+	int rdo = (crate-1)*mxChan+(board-1)*32+chan;
+	feePed4[rdo]=ped4val;
+	LOG_DEBUG << Form("crate=%d board=%d chan=%d rdo=%d ped4=%d",crate,board,chan,rdo,ped4val) << endm;
       }
     }
   }
@@ -186,14 +188,15 @@ EemcTrigUtil::readPed4(const char *path, int mxChan, int *feePed4) {
 	continue;
       }
       LOG_DEBUG << "Reading " << fname << endm;
-      int i;
-      for (i = 0; i < 32; ++i) {
+      int chan;
+      for (chan = 0; chan < 32; ++chan) {
 	int ped4;
 	if (fscanf(fd,"%d",&ped4) == EOF) break;
-	LOG_DEBUG << Form("ped4[%d]=%d",i,ped4) << endm;
-	feePed4[(crate-1)*mxChan+(board-1)*32+i]=ped4;
+	int rdo = (crate-1)*mxChan+(board-1)*32+chan;
+	feePed4[rdo] = ped4;
+	LOG_DEBUG << Form("crate=%d board=%d chan=%d rdo=%d ped4=%d",crate,board,chan,rdo,ped4) << endm;
       }
-      LOG_DEBUG << "Read " << i << " ped4 values" << endm;
+      LOG_DEBUG << "Read " << chan << " channels" << endm;
       fclose(fd);
     }
   }
