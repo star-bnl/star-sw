@@ -1,5 +1,13 @@
-* $Id: geometry.g,v 1.207 2009/11/17 16:18:47 jwebb Exp $
+* $Id: geometry.g,v 1.208 2009/11/18 20:46:34 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.208  2009/11/18 20:46:34  jwebb
+* Y2009A production tag added:
+*
+* (1) Y2009A includes the new model of the EEMC
+* (2) Revert to old model of EEMC in Y2009 tag for compat w/ W preproduction.
+* (3) Removed the y2006dev tag
+* (4) Added y2006 h tag, which is y2006g + new model of the endcap.
+*
 * Revision 1.207  2009/11/17 16:18:47  jwebb
 * Added y2006dev with new endcap model.  y2006dev (and future y200[3-8]dev)
 * will be for testing purposes only.
@@ -919,7 +927,7 @@ replace [exe ECAL33;] with [;"ECAL"; ECAL=on;
                              ecalFill=3 "all sectors filled "; EcalConfig=3; "both wheels"  ;]
 
 replace [exe ECALv6;] with[;"ECAL version 6.1 (or higher)"
-                           ;ECAL=on
+                           ;ECAL=on;
                            ;EcalFill=3;     "all sectors filled";
                            ;EcalConfig=1;   "EEMC on west poletip only";
                            ;EcalGeometry=6; "Version 6.1 and higher";
@@ -1237,16 +1245,12 @@ replace [exe y2006c;] with ["Y2006B without the PHMD"
 replace [exe y2006g;] with ["Y2006C new SVT dead material"
                             exe y2006c; exe SVT312;exe SISD75;]
 
-*                                                                    == y2006dev ==
-*  
+*                                                                    == y2006h ==
 * Development geometry, not yet cleared for production.  May be altered / removed 
 * at any time.
 *
-replace [exe y2006dev;] with [;
-        "Y2006dev developmental geometry";
-        write(*,*) "y2006dev tag is for testing purposes only, and may be removed / altered at any time"
-        ;EcalGeometry=6;    "Version 6.1 and higher";
-        ;exe y2006g;
+replace [exe y2006h;] with ["y2006g + new BEMC, new EEMC";
+        exe y2006g; exe CALB02; exe ECALv6;
         ]
 
 !//______________________________________________________________________________
@@ -1282,7 +1286,16 @@ replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 !//______________________________________________________________________________
 *                                                                           Y2009
 replace [exe y2009;] with [;
-{   "y2009 baseline: much more detailed TPC (thnx YF), ESMD closer to as built"
+{   "y2009 baseline: much more detailed TPC (thnx YF)"
+    exe SCON13;exe TPCE04;exe BTOFc6;exe CALB02;exe ECAL31;
+    exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
+    exe PHMDof;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
+    exe PIPE12;
+    write (*,*) "=== Warning: y2009 geometry tag contains outdated endcap geometry ==="
+};]
+
+replace [exe y2009a;] with [;
+{   "y2009a baseline: much more detailed TPC (thnx YF), version 6.1 of the endcap geometry"
     exe SCON13;exe TPCE04;exe BTOFc6;exe CALB02;exe ECALv6;
     exe BBCMon;exe FPDM03;exe VPDD07;exe FTPC01;exe SVTTof;
     exe PHMDof;exe SISDof;exe FTRO01;exe MUTD03;exe CAVE04;
@@ -1846,8 +1859,8 @@ If LL>0
                   exe y2006g;
                 }
 
-  Case Y2006DEV { Y2006 development: y2006g + version 6.1 of the endcap 
-                  exe y2006dev;
+  Case y2006h { Y2006h development: y2006g + version 6.1 of the endcap (not yet ready for production)
+                  exe y2006h;
                 }
 
 ****************************************************************************************
@@ -1878,8 +1891,11 @@ If LL>0
 	        }
 
 ****************************************************************************************
-  Case Y2009   { y2009 baseline: more detailed TPC, ESMD closer to as built
+  Case Y2009   { y2009 initial geometry: more detailed TPC
                 exe y2009;}
+
+  Case Y2009a   { y2009a baseline: more detailed TPC, version 6.1 of the endcap geometry
+                exe y2009a;}
 
 ****************************************************************************************
   Case Y2010   { y2010 
