@@ -3,7 +3,7 @@
 #ifndef EEMC_TRIG_UTIL_HH
 #define EEMC_TRIG_UTIL_HH
 
-class TDatime;
+#include "TDatime.h"
 
 struct DsmThreshold
 {
@@ -25,23 +25,26 @@ struct DsmThreshold
 
 // function class to retrieve information about dsm configuration based on timestamps
 class EemcTrigUtil {
-
  private:
-  static void readPed4(char *path, char *dataSet, int mxChan, int *feePed4); 
+  static void readPed4(const char *path, int mxChan, int *feePed4); 
   static void genPed4(int ped4val, int mxChan, int *feePed4);
 
  public:
-
   static void getDsmThresholds(int yyyymmdd, int hhmmss, DsmThreshold &thresholds);
-
-  static void getFeePed4(char *path,int yyyymmdd, int hhmmss, int mxChan, int *feePed4);
-  static void getFeePed4(const TDatime& datime, int mxChan, int* feePed4);
+  static void getFeePed4(const char *path,int yyyymmdd, int hhmmss, int mxChan, int *feePed4);
+  static void getFeePed4(const TDatime& date, int mxChan, int* feePed4);
 };
 
 //
-// $Id: EemcTrigUtil.h,v 1.2 2009/11/18 15:50:59 pibero Exp $
+// $Id: EemcTrigUtil.h,v 1.3 2009/11/18 19:12:13 pibero Exp $
 //
 // $Log: EemcTrigUtil.h,v $
+// Revision 1.3  2009/11/18 19:12:13  pibero
+// Added Endcap FEE pedestals for all years.
+// The code will scan the setup directory /afs/rhic.bnl.gov/star/users/pibero/public/StarTrigSimuSetup/ped
+// and load pedestals from the DB timestamp.
+// The plan for the future is to upload the ped4 into the STAR database and retrieve from there.
+//
 // Revision 1.2  2009/11/18 15:50:59  pibero
 // Address several compiler warnings of the type:
 //

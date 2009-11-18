@@ -1,3 +1,8 @@
+#include <dirent.h>
+#include <algorithm>
+
+using namespace std;
+
 #include "StMessMgr.h"
 #include "TString.h"
 
@@ -80,18 +85,22 @@ EemcTrigUtil::getDsmThresholds(int yyyymmdd, int hhmmss, DsmThreshold &threshold
     }
 }
 
+//==================================================
+//==================================================
 
 void 
-EemcTrigUtil::getFeePed4(char *path,int yyyyyymmdd, int hhmmss, int mxChan, int *feePed4){
-  if (!(yyyyyymmdd>=20060307)) {
-    LOG_ERROR << "not implemented before 2006" < endm;
+EemcTrigUtil::getFeePed4(const char *path,int yyyyyymmdd, int hhmmss, int mxChan, int *feePed4){
+  if (yyyyyymmdd<20060307) {
+    LOG_ERROR << "not implemented before 2006" << endm;
   }
-  if(yyyyyymmdd<=20060620) { // real data ended on June-20, day171
-    char *dataSet="03.07.2006/";
-    if(yyyyyymmdd>=20060406)  dataSet="04.06.2006/";
-    if(yyyyyymmdd>=20060428)  dataSet="04.28.2006/";
+  if (yyyyyymmdd<=20060620) { // real data ended on June-20, day171
+    const char *dataSet = "03.07.2006";
+    if (yyyyyymmdd>=20060406) dataSet = "04.06.2006";
+    if (yyyyyymmdd>=20060428) dataSet = "04.28.2006";
     LOG_DEBUG << Form("getEndcap FeePed4 input set=%s\n",dataSet) << endm;
-    readPed4(path, dataSet,mxChan, feePed4);
+    char dir[FILENAME_MAX];
+    sprintf(dir,"%s/%s",path,dataSet);
+    readPed4(dir,mxChan,feePed4);
   } else {
     // assume it is MC, 12bit ADC peds are at 0
     int ped4val=5;
@@ -103,11 +112,58 @@ EemcTrigUtil::getFeePed4(char *path,int yyyyyymmdd, int hhmmss, int mxChan, int 
 //==================================================
 //==================================================
 
+static int filter(const struct dirent* d)
+{
+  int month, day, year;
+  return sscanf(d->d_name,"%2d.%2d.%4d",&month,&day,&year) == 3;
+}
+
+static TDatime getDateTime(struct dirent* d)
+{
+  int month, day, year;
+  sscanf(d->d_name,"%2d.%2d.%4d",&month,&day,&year);
+  return TDatime(year,month,day,0,0,0);
+}
+
+static void scanPed4DirForDates(const char* dir, vector<TDatime>& dates)
+{
+  struct dirent** namelist;
+  int n = scandir(dir,&namelist,filter,0);
+  if (n == -1) return;
+  while (n--) {
+    dates.push_back(getDateTime(namelist[n]));
+    free(namelist[n]);
+  }
+  free(namelist);
+  sort(dates.begin(),dates.end());
+}
+
+static TDatime getTimeStampFromDates(const TDatime& date, const vector<TDatime>& dates)
+{
+  for (vector<TDatime>::const_reverse_iterator i = dates.rbegin(); i != dates.rend(); ++i)
+    if (date > *i) return *i;
+  return dates.front();
+}
+
+void EemcTrigUtil::getFeePed4(const TDatime& date, int mxChan, int *feePed4)
+{
+  static const char* dir = "/afs/rhic.bnl.gov/star/users/pibero/public/StarTrigSimuSetup/ped";
+  vector<TDatime> dates;
+  scanPed4DirForDates(dir,dates);
+  TDatime ts = getTimeStampFromDates(date,dates);
+  char currentdir[FILENAME_MAX];
+  sprintf(currentdir,"%s/%02d.%02d.%4d",dir,ts.GetMonth(),ts.GetDay(),ts.GetYear());
+  LOG_INFO << "Using ped4 directory " << currentdir << endm;
+  readPed4(currentdir,mxChan,feePed4);
+}
+
+//==================================================
+//==================================================
+
 void 
 EemcTrigUtil::genPed4(int ped4val, int mxChan, int *feePed4){
   for (int crate=1; crate<=6; crate++){
-    int board;
-    for ( board=1; board<=4; board++){
+    for (int board=1; board<=4; board++){
       for (int i=0; i<32; i++){
 	feePed4[(crate-1)*mxChan+(board-1)*32+i]=ped4val;
       }
@@ -119,27 +175,25 @@ EemcTrigUtil::genPed4(int ped4val, int mxChan, int *feePed4){
 //==================================================
 
 void 
-EemcTrigUtil::readPed4(char *path, char *dataSet, int mxChan, int *feePed4){
-
-  for (int crate=1; crate<=6; crate++){
-    char fname[1000];
-    int board;
-    for ( board=1; board<=4; board++){
-      sprintf(fname,"%s%scrate%dboard%d.ped4", path, dataSet, crate, board);
-      FILE *fd=fopen(fname,"r");
-      if(fd==0)  LOG_FATAL <<"EemcTrigUtil::failed open"<<fname<<endm;
+EemcTrigUtil::readPed4(const char *path, int mxChan, int *feePed4) {
+  for (int crate = 1; crate <= 6; ++crate) {
+    for (int board = 1; board <= 4; ++board) {
+      char fname[FILENAME_MAX];
+      sprintf(fname,"%s/crate%dboard%d.ped4",path,crate,board);
+      FILE* fd = fopen(fname,"r");
       if (!fd) {
-	LOG_ERROR << Form("Could not open %s for reading",fname) << endm;
+	LOG_ERROR << "Could not open " << fname << " for reading" << endm;
+	continue;
       }
-      for (int i=0; i<32; i++){
-	int ival;
-	int ret=fscanf(fd, "%d", &ival);
-	if(!(ret>=0)) {
-	  LOG_ERROR << "Failed to read 4-bit pedestal" << endm;
-	}
-	LOG_DEBUG << Form("i=%d, ival=%d\n", i, ival) << endm;
-	feePed4[(crate-1)*mxChan+(board-1)*32+i]=ival;
+      LOG_DEBUG << "Reading " << fname << endm;
+      int i;
+      for (i = 0; i < 32; ++i) {
+	int ped4;
+	if (fscanf(fd,"%d",&ped4) == EOF) break;
+	LOG_DEBUG << Form("ped4[%d]=%d",i,ped4) << endm;
+	feePed4[(crate-1)*mxChan+(board-1)*32+i]=ped4;
       }
+      LOG_DEBUG << "Read " << i << " ped4 values" << endm;
       fclose(fd);
     }
   }

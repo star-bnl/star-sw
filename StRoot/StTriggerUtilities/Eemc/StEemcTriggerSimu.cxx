@@ -181,17 +181,10 @@ StEemcTriggerSimu::InitRun(int runnumber){
 
   LOG_INFO<<Form("Eemc::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
-  char text[1000];
+  //char text[1000];
   //sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
-  sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),2006);
-  EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
-
-  if (mYear != 2006) {
-    LOG_WARN << "Using EEMC FEE pedestals for Year=2006" << endm;
-    LOG_WARN << "You should really get the trigger simulator experts to setup the EEMC FEE pedestals for Year="
-	     << mYear << endm;
-    LOG_WARN << "Feel free to bribe, ahem motivate, them with baked goods..." << endm;
-  }
+  //EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
+  EemcTrigUtil::getFeePed4(mydb->GetDateTime(),mxChan,feePed);
 
   if( mYear == 2006 ){ // #### modified line by Liaoyuan 
     DsmThreshold thresholds;
@@ -665,6 +658,12 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.19  2009/11/18 19:12:14  pibero
+// Added Endcap FEE pedestals for all years.
+// The code will scan the setup directory /afs/rhic.bnl.gov/star/users/pibero/public/StarTrigSimuSetup/ped
+// and load pedestals from the DB timestamp.
+// The plan for the future is to upload the ped4 into the STAR database and retrieve from there.
+//
 // Revision 1.18  2009/11/16 07:51:56  pibero
 // Added LOG_DEBUG messages
 //
