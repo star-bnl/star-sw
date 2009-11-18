@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEfeeTPTree.cxx,v 1.3 2009/11/18 15:50:59 pibero Exp $
+ * $Id: EEfeeTPTree.cxx,v 1.4 2009/11/18 21:27:15 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -39,8 +39,11 @@ EEfeeTPTree::EEfeeTPTree(const char *nameX, int nc) {
 //--------------------------------------------------
 //--------------------------------------------------
 EEfeeTPTree::~EEfeeTPTree() {
-  //fix it: delete 
+  for (int i = 0; i < 90; ++i) {
+    delete feeTP[i];
+    feeTP[i] = 0;
  }
+}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -130,6 +133,9 @@ EEfeeTPTree::print( int k) {
 #endif 
 /*
  * $Log: EEfeeTPTree.cxx,v $
+ * Revision 1.4  2009/11/18 21:27:15  pibero
+ * Fix memory leak.
+ *
  * Revision 1.3  2009/11/18 15:50:59  pibero
  * Address several compiler warnings of the type:
  *
