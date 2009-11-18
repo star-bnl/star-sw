@@ -758,7 +758,7 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 	if(((d32[3]>>8) & 0xFF) != BSMD_HDR_ID) {	// det_id
-		LOG(ERR,"RDO %d: bad det_id 0x%02X",(d32[3]>>8)&0xFF) ;
+		LOG(ERR,"RDO %d: bad det_id 0x%02X",rdo,(d32[3]>>8)&0xFF) ;
 		bad |= 1 ;
 	}
 
