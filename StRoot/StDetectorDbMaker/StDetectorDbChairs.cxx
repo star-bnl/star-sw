@@ -162,8 +162,21 @@ Float_t St_tss_tssparC::gain_in(Int_t i) {
 //________________________________________________________________________________
 Float_t St_tss_tssparC::gain_in(Int_t sec, Int_t row) {
   Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  //  Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
+  /* VoltageGFRunIX24DEV.root
+     FitP->Draw("mu:y-1170>>I(20,-180,20)","(i&&j&&prob>0.01&&i<=13&&abs(mu)<0.4)/(dmu*dmu)","profg")
+     I->Fit("pol1","er","",-100,0)
+ FCN=37.5062 FROM MINOS     STATUS=SUCCESSFUL     10 CALLS          64 TOTAL
+                     EDM=4.53972e-22    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0          -5.60237e-02   4.91833e-03  -4.98627e-12  -5.46491e-10
+   2  p1          -1.13903e-03   8.15059e-05   8.15059e-05  -9.89312e-08
+
+   */
   Float_t gain = gain_in();
-  gain *= (V > 0) ? TMath::Exp(13.087e-3*(V-1170)) : 0; //Run IX: -4.580535e-01/35V; 13.05e-3 => -13.087e-3
+  Double_t v = V - 1170;
+  gain *= (V > 0) ? TMath::Exp(v*(13.087e-3 -1.13903e-03 )) : 0; //Run IX24
   return gain;
 }
 //________________________________________________________________________________
@@ -173,8 +186,21 @@ Float_t St_tss_tssparC::gain_out(Int_t i) 	{
 //________________________________________________________________________________
 Float_t St_tss_tssparC::gain_out(Int_t sec, Int_t row) {
   Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  //  Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
   Float_t gain = gain_out();
-  gain *= (V > 0) ? TMath::Exp(10.211e-3*(V-1390)) : 0; //Run IX: -4.59477e-01/45V; 10.26e-3 => -10.211e-3
+  /* VoltageGFRunIX24DEV.root
+     FitP->Draw("mu:y>>O(28,1260,1400)","(i&&j&&prob>0.01&&i>13&&y>1160&&abs(mu)<0.5)/(dmu*dmu)","profg");
+     TF1 *f = new TF1("f","[0]+(x-1390)*([1]+(x-1390)*[2])");
+ FCN=62.5827 FROM MIGRAD    STATUS=CONVERGED      66 CALLS          67 TOTAL
+                     EDM=7.03069e-21    STRATEGY= 1      ERROR MATRIX ACCURATE 
+  EXT PARAMETER                                   STEP         FIRST   
+  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE 
+   1  p0           1.52940e-02   2.33532e-03   3.81142e-06   4.66062e-08
+   2  p1          -7.77617e-04   8.75985e-05   6.74118e-08   6.85122e-07
+   3  p2           9.01092e-06   8.28886e-07   1.42918e-09  -1.86438e-04
+   */
+  Double_t v = V - 1390;
+  gain *= (V > 0) ? TMath::Exp(v*(10.211e-3 + (-7.77617e-04 + v*9.01092e-06) )) : 0; //RunIX24: 
   return gain;
 }
 //________________________________________________________________________________
