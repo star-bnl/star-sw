@@ -731,6 +731,8 @@ extern inline int rts2grp(int rts)
       return PP_GRP;
     case ETOW_ID:
       return ETOW_GRP;
+    case ESMD_ID:
+      return ESMD_GRP;
     case BTOW_ID:
       return BTOW_GRP;
     case BSMD_ID:
@@ -744,7 +746,7 @@ extern inline int rts2grp(int rts)
     case FGT_ID:
       return FGT_GRP;
     default:
-	return 15 ;	// this is an ERROR!
+	return 31 ;	// this is an ERROR!
     }
 }
 
