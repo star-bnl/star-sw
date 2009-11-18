@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.16 2009/11/02 17:31:41 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.17 2009/11/18 23:43:38 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -10,7 +10,7 @@
 #include "tables/St_tpcGas_Table.h"
 //#include "tables/St_trigDetSums_Table.h"
 //#include "tables/St_tpcGainMonitor_Table.h"
-#include "tables/St_dst_dedx_Table.h"
+#include "StTrackPidTraits.h"
 //class St_trigDetSums;
 //class trigDetSums_st;
 //________________________________________________________________________________
@@ -167,6 +167,7 @@ class dEdxY2_t : public TObject {
   Double_t SigmaFee;
   Double_t zdev; 
   Double_t zP;      // the most probable value from Bichsel
+  Double_t zG;      // global z oh Hit
   Double_t sigmaP;  // sigma from Bichsel
   Double_t dCharge; // d_undershoot_Q/Q = ratio of modified - original charge normalized on original charge
   Double_t rCharge; // d_rounding_Q/Q   = estimated rounding normalized on original charge
