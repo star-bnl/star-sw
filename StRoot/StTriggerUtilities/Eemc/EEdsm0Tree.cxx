@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEdsm0Tree.cxx,v 1.2 2009/10/13 16:57:25 pibero Exp $
+ * $Id: EEdsm0Tree.cxx,v 1.3 2009/11/18 15:50:59 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -13,7 +13,7 @@
 //--------------------------------------------------
 //
 //--------------------------------------------------
-EEdsm0Tree::EEdsm0Tree( char *nameX) {
+EEdsm0Tree::EEdsm0Tree(const char *nameX) {
   ee0=new EEdsm0[Nee0];
   ee0[2-1].setType(2); // serve 2 x 0.3 JP
   ee0[5-1].setType(2);
@@ -133,6 +133,11 @@ EEdsm0Tree::print( int k) const {
  
 /*
  * $Log: EEdsm0Tree.cxx,v $
+ * Revision 1.3  2009/11/18 15:50:59  pibero
+ * Address several compiler warnings of the type:
+ *
+ * warning: deprecated conversion from string constant 'char*'
+ *
  * Revision 1.2  2009/10/13 16:57:25  pibero
  * Changed location of #include file
  *

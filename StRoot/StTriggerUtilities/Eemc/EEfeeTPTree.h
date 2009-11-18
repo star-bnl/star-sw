@@ -1,7 +1,9 @@
+// -*- mode:c++ -*-
+
 #ifndef EEfeeTPTree_h
 #define EEfeeTPTree_h
 /**************************************************************
- * $Id: EEfeeTPTree.h,v 1.1 2009/10/12 18:04:27 pibero Exp $
+ * $Id: EEfeeTPTree.h,v 1.2 2009/11/18 15:50:59 pibero Exp $
  * Emulates functionality of  Endcap FEE TP-tree
  **************************************************************/
 #include <stdlib.h> 
@@ -21,7 +23,7 @@ class EEfeeTPTree  {  // DSM0 tree emulators
   
  public:
   
-  EEfeeTPTree(char *, int nc );
+  EEfeeTPTree(const char *, int nc );
   ~EEfeeTPTree();
   void  clear();
   void  compute(int *rawAdc, int *feePed,int *feeMask);
@@ -34,6 +36,11 @@ class EEfeeTPTree  {  // DSM0 tree emulators
 
 /*
  * $Log: EEfeeTPTree.h,v $
+ * Revision 1.2  2009/11/18 15:50:59  pibero
+ * Address several compiler warnings of the type:
+ *
+ * warning: deprecated conversion from string constant 'char*'
+ *
  * Revision 1.1  2009/10/12 18:04:27  pibero
  * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
  *

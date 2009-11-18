@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEfeeTPTree.cxx,v 1.2 2009/10/13 17:02:49 pibero Exp $
+ * $Id: EEfeeTPTree.cxx,v 1.3 2009/11/18 15:50:59 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -17,7 +17,7 @@
 //--------------------------------------------------
 //
 //--------------------------------------------------
-EEfeeTPTree::EEfeeTPTree( char *nameX, int nc) {
+EEfeeTPTree::EEfeeTPTree(const char *nameX, int nc) {
 
   memset(feeTP,0,sizeof(feeTP)); // clear all pointers
   memset(TPmap,0,sizeof(TPmap));
@@ -130,6 +130,11 @@ EEfeeTPTree::print( int k) {
 #endif 
 /*
  * $Log: EEfeeTPTree.cxx,v $
+ * Revision 1.3  2009/11/18 15:50:59  pibero
+ * Address several compiler warnings of the type:
+ *
+ * warning: deprecated conversion from string constant 'char*'
+ *
  * Revision 1.2  2009/10/13 17:02:49  pibero
  * Changed location of #include file
  *
