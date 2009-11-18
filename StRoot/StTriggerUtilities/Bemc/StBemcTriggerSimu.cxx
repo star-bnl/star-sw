@@ -725,7 +725,7 @@ void StBemcTriggerSimu::FEEout() {
   }
 
   // LOG_DEBUG messages
-  LOG_DEBUG << "Trigger patch format is HT/TPsum" << endm;
+  LOG_DEBUG << "BEMC trigger patch format is HT/TPsum" << endm;
   for (int dsm = 0; dsm < 30; ++dsm) {
     TString line = Form("TP%d-%d: ",dsm*30,dsm*10+9);
     for (int ch = 0; ch < 10; ++ch) {

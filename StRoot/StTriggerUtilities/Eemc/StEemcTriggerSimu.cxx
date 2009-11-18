@@ -54,6 +54,7 @@
 ClassImp(StEemcTriggerSimu);
 
 //==================================================
+//==================================================
 
 StEemcTriggerSimu::StEemcTriggerSimu() {
   //  printf("The StEemcTriggerSimu constructor\n");
@@ -82,9 +83,9 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   LOG_INFO <<"Eemc::constructor"<<endm;
 }
 
-
-
 //==================================================
+//==================================================
+
 StEemcTriggerSimu::~StEemcTriggerSimu()
 {
   delete mE001; mE001 = 0;
@@ -113,6 +114,7 @@ StEemcTriggerSimu::Clear(){
 
 //==================================================
 //==================================================
+
 void  
 StEemcTriggerSimu::Init(){
 
@@ -128,6 +130,7 @@ StEemcTriggerSimu::Init(){
   
 //==================================================
 //==================================================
+
 void  
 StEemcTriggerSimu::addTriggerList( void * adr){
   vector <int> *trgList=( vector <int> *)adr;
@@ -153,6 +156,7 @@ StEemcTriggerSimu::addTriggerList( void * adr){
 
 //==================================================
 //==================================================
+
 StTriggerSimuDecision
 StEemcTriggerSimu::triggerDecision(int trigId) {
   vector<int> tmpTrigList;
@@ -165,6 +169,7 @@ StEemcTriggerSimu::triggerDecision(int trigId) {
  
 //==================================================
 //==================================================
+
 void  
 StEemcTriggerSimu::InitRun(int runnumber){
 
@@ -243,10 +248,10 @@ StEemcTriggerSimu::InitRun(int runnumber){
   }
   // #### modified end ####
 }
-
      
 //==================================================
 //==================================================
+
 void 
 StEemcTriggerSimu::Make(){
   nInpEve++;  
@@ -254,12 +259,10 @@ StEemcTriggerSimu::Make(){
 
 #if 0
   assert(mMCflag==0); // not sure what will it do for MC
-  StMuDstMaker* muMk = (StMuDstMaker*) StMaker::GetChain()->Maker("MuDst");
-  assert(muMk);  
-  StEventInfo &info=muMk->muDst()->event()->eventInfo();
+  StEventInfo &info=StMuDst::event()->eventInfo();
   //  mEleT->info.zVertex=ver.z();
   eveId=info.id();
-  StMuTriggerIdCollection *tic=&(muMk->muDst()->event()->triggerIdCollection());
+  StMuTriggerIdCollection *tic=&StMuDst::event()->triggerIdCollection();
   std::vector<unsigned int> trgL=(tic->nominal()).triggerIds();
   //  printf("   trigL len=%d \n",trgL.size());
   uint ii;
@@ -274,7 +277,7 @@ StEemcTriggerSimu::Make(){
   feeTPTreeADC->compute(rawAdc,feePed,feeMask); 
 
   // LOG_DEBUG messages
-  LOG_DEBUG << "Trigger patch format is HT/TPsum" << endm;
+  LOG_DEBUG << "EEMC trigger patch format is HT/TPsum" << endm;
   for (int dsm = 0; dsm < 9; ++dsm) {
     TString line = Form("TP%d-%d: ",dsm*10,dsm*10+9);
     for (int ch = 0; ch < 10; ++ch) {
@@ -364,17 +367,16 @@ StEemcTriggerSimu::Make(){
   //if(mDumpEve) printf("\nzzzzz===================================================\n\n");
   }// #### modified line by Liaoyuan 
   // #### modified by Liaoyuan ####
-  else if( mYear == 2009 ){
+  else if( mYear >= 2009 ){
     get2009_DSMLayer0();
     get2009_DSMLayer1();
   }
   // #### modified end ####  
 }
 
+//==================================================
+//==================================================
 
-//==================================================
-//==================================================
-//==================================================
 bool 
 StEemcTriggerSimu::getHttpInfo(int tpId, EemcHttpInfo &httpInfo){
   httpInfo.clear();
@@ -397,22 +399,19 @@ StEemcTriggerSimu::getHttpInfo(int tpId, EemcHttpInfo &httpInfo){
 
 //==================================================
 //==================================================
-//==================================================
+
 void 
 StEemcTriggerSimu::getEemcAdc(){
-  
-   // printf("This StEemcTriggerSimu::getting Endcap ADC values\n");
 
-  StMuDstMaker* muMk = (StMuDstMaker*) StMaker::GetChain()->Maker("MuDst");
-  assert(muMk);
-  StMuEmcCollection* emc = muMk->muDst()->muEmcCollection();
+  // printf("This StEemcTriggerSimu::getting Endcap ADC values\n");
+  StMuEmcCollection* emc = StMuDst::muEmcCollection();
   if (!emc) {
      LOG_WARN  <<"No EMC data1 for this event"<<endm;    
      return;
   }
   // printf("see %d endcap towers\n",emc->getNEndcapTowerADC());
   
-//.........................  T O W E R S .....................
+  //.........................  T O W E R S .....................
   int i;
   for (i=0; i< emc->getNEndcapTowerADC(); i++) {
     int sec,eta,sub,AdcRead; //muDst  ranges:sec:1-12, sub:1-5, eta:1-12
@@ -423,18 +422,22 @@ StEemcTriggerSimu::getEemcAdc(){
     assert(x); // it should never happened for muDst
     // do NOT drop not working channels
     
-    assert(x->crate>0 && x->crate<7);
-    assert(x->chan>=0 && x->chan<120);
-    rawAdc[ (x->crate-1)*mxChan+ x->chan]=AdcRead;
- 
+    assert(x->crate >= 1 && x->crate <=  6);
+    assert(x->chan  >= 0 && x->chan  < 120);
+    int rdo = (x->crate-1)*mxChan+x->chan;
+    rawAdc[rdo] = AdcRead;
+
+    //LOG_DEBUG << Form("crate=%d chan=%d rdo=%d adc=%d",x->crate,x->chan,rdo,AdcRead) << endm;
+
     //if(strstr(x->name,"12TD03")) printf("i=%d, name=%s, sec=%d, crate=%d, chan=%d, ped=%.1f, rawADC=%d\n",i, x->name, sec, x->crate, x->chan, x->ped, AdcRead);
     //  if(x->crate==2) printf(" name=%s crate=%d, chan=%d  ped=%.1f rawADC=%d  stat=%d fail=%d\n", x->name, x->crate, x->chan, x->ped, AdcRead, x->stat, x->fail);
-    
   }// end of loop over towers
   
 }
 
 //==================================================
+//==================================================
+
 void 
 StEemcTriggerSimu::getDsm0123inputs(){
   /*
@@ -450,10 +453,7 @@ StEemcTriggerSimu::getDsm0123inputs(){
 
   //  printf("This StEemcTriggerSimu::getting Endcap DSM0 inputs\n");
 
-  StMuDstMaker* muMk = (StMuDstMaker*) StMaker::GetChain()->Maker("MuDst");
-  assert(muMk);
-
-  StEmcTriggerDetector &emcTrgDet=muMk->muDst()->event()->emcTriggerDetector();
+  StEmcTriggerDetector &emcTrgDet=StMuDst::event()->emcTriggerDetector();
 
   int i;
   for(i=0;i<EEfeeTPTree::mxTP;i++) {
@@ -498,7 +498,7 @@ StEemcTriggerSimu::getDsm0123inputs(){
   dsm2TreeTRG->setInput16bit(3,1,emcTrgDet.emcLayer2(6));
 
   //DSM3 (lastDSM)
-  StL0Trigger &L0trg=muMk->muDst()->event()->l0Trigger();
+  StL0Trigger &L0trg=StMuDst::event()->l0Trigger();
   int L0Num;
   L0Num=L0trg.lastDsmArraySize();
   ushort L0word=L0trg.lastDsmArray(0);
@@ -530,7 +530,6 @@ StEemcTriggerSimu::getDsm0123inputs(){
   printf("\n");
 #endif
 }
-
 
 //==================================================
 //==================================================
@@ -658,6 +657,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.20  2009/11/18 23:42:50  pibero
+// More LOG_DEBUG messages...
+//
 // Revision 1.19  2009/11/18 19:12:14  pibero
 // Added Endcap FEE pedestals for all years.
 // The code will scan the setup directory /afs/rhic.bnl.gov/star/users/pibero/public/StarTrigSimuSetup/ped
