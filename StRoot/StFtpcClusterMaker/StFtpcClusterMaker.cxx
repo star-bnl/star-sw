@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.102  2009/11/18 12:10:02  jcs
+// add USE_LOCAL_DRIFTMAP instructions
+//
 // Revision 1.101  2009/10/14 15:52:43  jcs
 // write out all gas temperature, air pressure info to Run branch of FTPC debug root file
 //
@@ -501,10 +504,17 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
   St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
 
   m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
+
+  // USE_LOCAL_DRIFTMAP:
+  //                    To use the FTPC drift map tables in $PWD/StarDb instead of those
+  //                    in the MySQL offline database, comment out the following 4 lines of code
+  //                    Then go to USE_LOCAL_DRIFTMAP: in Int_t StFtpcClusterMaker::Init()
+  //                    and follow the instructions
   m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
   m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
   m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
   m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
+
   m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
   m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
   m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
@@ -554,6 +564,14 @@ Int_t StFtpcClusterMaker::Init(){
   m_clusterpars  = (St_ftpcClusterPars *)local("ftpcClusterPars");
   m_fastsimgas   = (St_ftpcFastSimGas  *)local("ftpcFastSimGas");
   m_fastsimpars  = (St_ftpcFastSimPars *)local("ftpcFastSimPars");
+
+  // USE_LOCAL_DRIFTMAP:
+  //                    To use the FTPC drift map tables in $PWD/StarDb instead of those
+  //                    in the MySQL offline database, uncomment the following 4 lines of code
+  //m_vdrift     = (St_ftpcVDrift *)local("ftpcVDrift" );
+  //m_deflection = (St_ftpcDeflection *)local("ftpcDeflection" );
+  //m_dvdriftdp     = (St_ftpcdVDriftdP *)local("ftpcdVDriftdP" );
+  //m_ddeflectiondp = (St_ftpcdDeflectiondP *)local("ftpcdDeflectiondP" );
 
   // 		Create Histograms
   m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);

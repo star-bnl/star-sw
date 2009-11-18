@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.11 2009/10/14 15:59:55 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.12 2009/11/18 12:09:50 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.12  2009/11/18 12:09:50  jcs
+// add USE_LOCAL_DRIFTMAP instructions
+//
 // Revision 1.11  2009/10/14 15:59:55  jcs
 // changes to be able to vary the gas temperature in addition to varying t0 and
 // gas composition
@@ -160,6 +163,14 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
 
   m_clusterpars  = (St_ftpcClusterPars *)local("ftpcClusterPars");
 
+  // USE_LOCAL_DRIFTMAP:
+  //                    To use the FTPC drift map tables in $PWD/StarDb instead of those
+  //                    in the MySQL offline database, uncomment the following 4 lines of code
+  //m_vdrift     = (St_ftpcVDrift *)local("ftpcVDrift");
+  //m_deflection = (St_ftpcDeflection *)local("ftpcDeflection");
+  //m_dvdriftdp     = (St_ftpcdVDriftdP *)local("ftpcdVDriftdP");
+  //m_ddeflectiondp = (St_ftpcdDeflectiondP *)local("ftpcdDeflectiondP");
+
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   St_DataSetIter dblocal_geometry(ftpc_geometry_db);
   
@@ -171,10 +182,15 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
 
   m_gas= (St_ftpcGas *)dblocal_calibrations("ftpcGas");
   m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField");
+
+  // USE_LOCAL_DRIFTMAP:
+  //                    To use the FTPC drift map tables in $PWD/StarDb instead of those
+  //                    in the MySQL offline database, comment out the following 4 lines of code
   m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift");
   m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection");
   m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP");
   m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP");
+
   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
   m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
 
