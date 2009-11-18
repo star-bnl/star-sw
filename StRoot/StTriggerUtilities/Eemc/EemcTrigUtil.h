@@ -1,5 +1,9 @@
+// -*- mode:c++ -*-
+
 #ifndef EEMC_TRIG_UTIL_HH
 #define EEMC_TRIG_UTIL_HH
+
+class TDatime;
 
 struct DsmThreshold
 {
@@ -31,13 +35,18 @@ class EemcTrigUtil {
   static void getDsmThresholds(int yyyymmdd, int hhmmss, DsmThreshold &thresholds);
 
   static void getFeePed4(char *path,int yyyymmdd, int hhmmss, int mxChan, int *feePed4);
-
+  static void getFeePed4(const TDatime& datime, int mxChan, int* feePed4);
 };
 
 //
-// $Id: EemcTrigUtil.h,v 1.1 2009/10/12 18:04:27 pibero Exp $
+// $Id: EemcTrigUtil.h,v 1.2 2009/11/18 15:50:59 pibero Exp $
 //
 // $Log: EemcTrigUtil.h,v $
+// Revision 1.2  2009/11/18 15:50:59  pibero
+// Address several compiler warnings of the type:
+//
+// warning: deprecated conversion from string constant 'char*'
+//
 // Revision 1.1  2009/10/12 18:04:27  pibero
 // Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
 //

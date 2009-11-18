@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EMCdsm2Tree.cxx,v 1.2 2009/10/13 17:04:03 pibero Exp $
+ * $Id: EMCdsm2Tree.cxx,v 1.3 2009/11/18 15:50:59 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -12,7 +12,7 @@
 
 //--------------------------------------------------
 //--------------------------------------------------
-EMCdsm2Tree::EMCdsm2Tree( char *nameX) {
+EMCdsm2Tree::EMCdsm2Tree(const char *nameX) {
   mYear=-999;
   BEsumthr8bit=1000;
   EEsumthr6bit=1000;
@@ -245,6 +245,11 @@ EMCdsm2Tree::print( int k) const {
 
 /*
  * $Log: EMCdsm2Tree.cxx,v $
+ * Revision 1.3  2009/11/18 15:50:59  pibero
+ * Address several compiler warnings of the type:
+ *
+ * warning: deprecated conversion from string constant 'char*'
+ *
  * Revision 1.2  2009/10/13 17:04:03  pibero
  * Changed location of #include file
  *

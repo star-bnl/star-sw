@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEdsm1Tree.cxx,v 1.2 2009/10/13 17:00:49 pibero Exp $
+ * $Id: EEdsm1Tree.cxx,v 1.3 2009/11/18 15:50:59 pibero Exp $
  **************************************************************/
 
 #include <iostream>
@@ -12,7 +12,7 @@
 
 //--------------------------------------------------
 //--------------------------------------------------
-EEdsm1Tree::EEdsm1Tree( char *nameX) {
+EEdsm1Tree::EEdsm1Tree(const char *nameX) {
   mYear=-999;
   int thr[3]={1000, 2000, 3000};
   int TPthr=100, HTTPthr=100;
@@ -226,6 +226,11 @@ EEdsm1Tree::print( int k) const {
 
 /*
  * $Log: EEdsm1Tree.cxx,v $
+ * Revision 1.3  2009/11/18 15:50:59  pibero
+ * Address several compiler warnings of the type:
+ *
+ * warning: deprecated conversion from string constant 'char*'
+ *
  * Revision 1.2  2009/10/13 17:00:49  pibero
  * Changed location of #include file
  *

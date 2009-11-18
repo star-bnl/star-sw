@@ -1,7 +1,9 @@
+// -*- mode:c++ -*-
+
 #ifndef EMCdsm2Tree_h
 #define EMCdsm2Tree_h
 /**************************************************************
- * $Id: EMCdsm2Tree.h,v 1.1 2009/10/12 18:04:27 pibero Exp $
+ * $Id: EMCdsm2Tree.h,v 1.2 2009/11/18 15:50:59 pibero Exp $
  * Emulates functionality of  Endcap DSM1-tree
  **************************************************************/
 #include <stdlib.h> 
@@ -38,7 +40,7 @@ class EMCdsm2Tree  {  // DSM0 tree emulators
 
  public:
   
-  EMCdsm2Tree(char *);
+  EMCdsm2Tree(const char *);
   void setYear(int x, int BEsumthr, int EEsumthr, int JPSIthrSelc, int BarreSide, int EtotThr);
   ~EMCdsm2Tree(); 
   void  print(int k=0) const;
@@ -80,6 +82,11 @@ class EMCdsm2Tree  {  // DSM0 tree emulators
 
 /*
  * $Log: EMCdsm2Tree.h,v $
+ * Revision 1.2  2009/11/18 15:50:59  pibero
+ * Address several compiler warnings of the type:
+ *
+ * warning: deprecated conversion from string constant 'char*'
+ *
  * Revision 1.1  2009/10/12 18:04:27  pibero
  * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
  *
