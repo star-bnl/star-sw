@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.19 2009/11/10 21:05:08 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.20 2009/11/18 14:29:02 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.20  2009/11/18 14:29:02  fisyak
+ * Restore slewing correction
+ *
  * Revision 1.19  2009/11/10 21:05:08  fisyak
  * Add attributes for sector and pad  row selections
  *
@@ -348,11 +351,11 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   Double_t wire_coupling = (row<=13) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
   Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
 				   (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
-#if 0
+
   // Correct for slewing (needs corrected q, and time in microsec)
   Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
   time = freq * St_tpcSlewingC::instance()->correctedT(row,q,time/freq);
-#endif
+
   static StTpcCoordinateTransform transform(gStTpcDb);
   static StTpcLocalSectorCoordinate local;
   static StTpcLocalCoordinate global;
