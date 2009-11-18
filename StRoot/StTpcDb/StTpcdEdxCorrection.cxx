@@ -181,7 +181,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	dE *= 2.116;//  1.75; // 1.25 is in Trs already <<<< !!!!!!
       } else {
 	ADC = dE/mAdc2GeV;
-	dE = Adc2GeVReal*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC,CdEdx.xyz[2]);
+	dE = Adc2GeVReal*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC,CdEdx.zG);
       }
       goto ENDL;
     case kTpcdCharge:
