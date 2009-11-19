@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.224 2009/11/16 20:16:22 fine Exp $
+// $Id: StMaker.cxx,v 1.225 2009/11/19 18:24:44 perev Exp $
 //
 //
 /*!
@@ -249,6 +249,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
   // 
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
+  {"y2009a",      20081215,     1, "y2009a",   "y2009+ecalgeo6(JW)"},
   {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF"},
 
   // development tags
@@ -1959,6 +1960,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.225  2009/11/19 18:24:44  perev
+// y2009a and inherited from it y2010
+//
 // Revision 1.224  2009/11/16 20:16:22  fine
 // Make the TDatime const interfaces
 //
