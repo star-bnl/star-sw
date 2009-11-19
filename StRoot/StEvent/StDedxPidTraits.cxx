@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.13 2004/10/11 22:58:35 ullrich Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.14 2009/11/19 17:08:34 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.14  2009/11/19 17:08:34  fisyak
+ * remove St_dst_dedx_Table
+ *
  * Revision 2.13  2004/10/11 22:58:35  ullrich
  * Changed order of initialization in constructor.
  *
@@ -50,14 +53,13 @@
  * Initial Revision
  *
  **************************************************************************/
-#include "tables/St_dst_dedx_Table.h"
 #include "StDedxPidTraits.h"
 #include "StBichsel/Bichsel.h"
 #include "TMath.h"
 #include "Stiostream.h"
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.13 2004/10/11 22:58:35 ullrich Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.14 2009/11/19 17:08:34 fisyak Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(0), mMethod(0), mDedx(0), mSigma(0) { /* noop */ }
