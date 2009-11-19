@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.34 2009/03/27 21:18:36 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.35 2009/11/19 20:34:38 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.35  2009/11/19 20:34:38  genevb
+// Remove Event Summary (using defunct old software monitors)
+//
 // Revision 2.34  2009/03/27 21:18:36  genevb
 // Add Jet Patch trigger histograms
 //
@@ -145,10 +148,6 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
   mTrigBits = 0;    // histogram for event trigger bits
   for (i=0; i<24; i++) mTpcSectorPlot[i] = 0;
 
-// for method MakeEvSum - from table software monitor
-  m_glb_trk_chg=0;          //! all charge east/west, tpc
-  m_glb_trk_chgF=0;         //! all charge east/west, ftpc
-
 // FTPC histograms
   m_ftpc_chargestepW=0; //! Chargestep from ftpc west
   m_ftpc_chargestepE=0; //! Chargestep from ftpc east
@@ -199,9 +198,6 @@ Int_t StQAMakerBase::Make() {
 
   // Those not divided by event class:
   if (firstEventClass) {
-    // histograms from table event_summary
-    MakeHistEvSum();
-    
     firstEventClass = kFALSE;
   }
 
@@ -317,7 +313,6 @@ void StQAMakerBase::BookHist() {
 
   BookHistTrigger();
   BookHistGeneral();
-  BookHistEvSum();
   BookHistFcl();
 
   Int_t tempClass2 = eventClass;
@@ -365,14 +360,6 @@ void StQAMakerBase::BookHistTrigger(){
   mTrigWord = QAH::H1F("QaTrigWord","trigger word",8,0.5,8.5);
   mTrigWord->SetXTitle("1:MinBias 2:Central 3:HiPt 4:Jet 5:HiTower 6:OtherPhys");
   mTrigBits = QAH::H1F("QaTrigBits","trigger bits",32,-0.5,31.5);
-}
-//_____________________________________________________________________________
-void StQAMakerBase::BookHistEvSum(){  
-
-// for method MakeEvSum - from software monitor
-
-  m_glb_trk_chg = MH1F("QaEvsumTotChg","softmon: all charge east/west,tpc",60,0,3);
-  m_glb_trk_chgF = MH1F("QaEvsumTotChgF","softmon: all charge east/west,ftpc",60,0,3);
 }
 //_____________________________________________________________________________
 void StQAMakerBase::BookHistFcl(){

@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.16 2007/11/30 05:38:50 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.17 2009/11/19 20:34:38 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.17  2009/11/19 20:34:38  genevb
+// Remove Event Summary (using defunct old software monitors)
+//
 // Revision 2.16  2007/11/30 05:38:50  genevb
 // Changes for Run8: mostly silicon removal, TOF addition
 //
@@ -87,7 +90,7 @@ class StQAMakerBase : public StMaker {
   virtual void   UseHistSet(Int_t s) { histsSet=s; }
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.16 2007/11/30 05:38:50 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.17 2009/11/19 20:34:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -107,9 +110,6 @@ class StQAMakerBase : public StMaker {
   // histograms for event trigger words/bits
   TH1F     *mTrigWord;            //!
   TH1F     *mTrigBits;            //!
-  // for method MakeEvSum - from software monitor
-  TH2F     *m_glb_trk_chg;        //! all charge east/west (TPC) 
-  TH2F     *m_glb_trk_chgF;       //! all charge east/west (FTPC) 
   // histograms for TPC hits sector by sector
   TH2F     *mTpcSectorPlot[24];   //!
 
@@ -142,10 +142,8 @@ class StQAMakerBase : public StMaker {
   virtual void BookHist();
   virtual void BookHistGeneral();
   virtual void BookHistTrigger();
-  virtual void BookHistEvSum();
   virtual void BookHistFcl();
 
-  virtual void MakeHistEvSum() = 0;
   virtual void MakeHistGlob() = 0;
   virtual void MakeHistDE() = 0;
   virtual void MakeHistPrim() = 0;
