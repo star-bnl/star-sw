@@ -877,15 +877,32 @@ Bfc_st BFC[] = { // standard chains
    ,                                                                          "TOF Data base chain",kFALSE},
   {"tofXDat"   ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker"
    ,                                                                                "TOF hit maker",kFALSE},
+  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker"
+   ,                                                                         "StChain","BTOF Chain",kFALSE},
+ 
   {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
    ,                                                                               "BTOF hit maker",kFALSE},
+
   {"tofsim"    ,"","TofChain","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker"
    ,                                                                                "TOF Simulator",kFALSE},
+  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker"
+   ,                                                                               "BTOF Simulator",kFALSE},
+
   {"tofrMatch" ,"","TofChain","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker"
    ,                                                                   "TPC to TOFr track matching",kFALSE},
-  {"tofpMatch"   ,"","TofChain","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker"
-   ,                                                                   "TPC to TOFp track matching",kFALSE},
+  {"tofpMatch"   ,"","TofChain","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
+                                                                       "TPC to TOFp track matching",kFALSE},
+  {"btofMatch" ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker",
+                                                                          "TPC-BTOF track matching",kFALSE},
+
   {"tofCalib"   ,"","TofChain","db,TofUtil","StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
+  {"btofCalib","","BTofChain","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker",
+                                                                                "BTOF calibration",kFALSE},
+  {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker","StVpdCalibMaker",  "VPD calibration",kFALSE}, 
+
+
+
+
   // Some global Sti stuff including vertexing
   {"StiLibs","","","StarMagField,StiTpcLib,StiSvtLib,StiSsdlib,StiRnDLib,StiUtil",""
    ,                                                                   "","ITTF:load Sti libraries",kFALSE},
