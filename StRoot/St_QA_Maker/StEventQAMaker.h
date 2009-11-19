@@ -51,7 +51,6 @@ class StEventQAMaker : public StQAMakerBase {
   virtual Int_t  Finish();
   virtual Int_t  Make();
   
-  virtual void   MakeHistEvSum();
   virtual void   MakeHistGlob();
   virtual void   MakeHistDE();
   virtual void   MakeHistPrim();
@@ -71,15 +70,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.12 2009/02/21 00:42:52 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.13 2009/11/19 20:34:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.12 2009/02/21 00:42:52 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.13 2009/11/19 20:34:38 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.13  2009/11/19 20:34:38  genevb
+// Remove Event Summary (using defunct old software monitors)
+//
 // Revision 2.12  2009/02/21 00:42:52  genevb
 // TOF updates (BTOF classes), and single primVtx pointer
 //

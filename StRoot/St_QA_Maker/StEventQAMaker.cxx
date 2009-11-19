@@ -364,36 +364,6 @@ Int_t StEventQAMaker::Make() {
 }
 
 
-//_____________________________________________________________________________
-/// Fill histograms for event summary
-void StEventQAMaker::MakeHistEvSum() {
-  
-  //PrintInfo();
-  if (Debug()) 
-    gMessMgr->Info(" *** in StEventQAMaker - filling software monitor histograms ");
-  
-  if (event->softwareMonitor()) {
-    StTpcSoftwareMonitor *tpcMon = event->softwareMonitor()->tpc();
-    StFtpcSoftwareMonitor *ftpcMon = event->softwareMonitor()->ftpc();
-    if (tpcMon) {
-      Float_t tpcChgWest=0;
-      Float_t tpcChgEast=0;
-      for (UInt_t i=0; i<24; i++) {
-        if (i<12)
-	  tpcChgWest += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
-        else
-	  tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
-      }
-      m_glb_trk_chg->Fill(tpcChgEast/(tpcChgWest+1.e-10),(float) eventClass);
-    }
-    if (ftpcMon) {
-      m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/(ftpcMon->chrg_ftpc_tot[0]+1.e-10),
-			   (float) eventClass);
-    }
-  }
-}
-
-
 //-----------------------------------------------------------------
 void StEventQAMaker::MakeHistGlob() {
   
@@ -2376,8 +2346,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.94 2009/11/19 20:12:10 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.95 2009/11/19 20:34:38 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.95  2009/11/19 20:34:38  genevb
+// Remove Event Summary (using defunct old software monitors)
+//
 // Revision 2.94  2009/11/19 20:12:10  genevb
 // Clean up compiler warnings
 //
