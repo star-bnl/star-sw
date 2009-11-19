@@ -1,7 +1,11 @@
+
 /*
-** $Id: dblib.cxx,v 1.6 2009/08/18 19:23:20 jeromel Exp $
+** $Id: dblib.cxx,v 1.7 2009/11/19 04:58:19 perev Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.7  2009/11/19 04:58:19  perev
+** DUMMY mYSql
+**
 ** Revision 1.6  2009/08/18 19:23:20  jeromel
 ** string.h needed for gcc 4 (??)
 **
@@ -66,6 +70,9 @@
 **  MySQL interface enabled
 **
 */
+#if defined(CERNLIB_MYSQL)
+#undef  CERNLIB_MYSQ
+#endif
 #if defined(CERNLIB_MYSQL)
 /*******************************************************************************/
 /*                             MYSQL INTERFACE                                 */
@@ -3291,12 +3298,13 @@ return;
 /*               dummy MySQL interface                 */
 #        include <stdio.h>
 #        include <stdlib.h>
-extern "C" void  dbset_  (){};
-extern "C" void  dbget_  (){};
-extern "C" void  dbuse_  (){};
-extern "C" void  dbfill_  (){};
-extern "C" void  adbfill_ (){ printf(" in empty adbfill \n"); }
-extern "C" void  dbls_   (){};
-extern "C" void  dbprint_(){};
+#        include <assert.h>
+extern "C" void  dbset_  (){assert(0);};
+extern "C" void  dbget_  (){assert(0);};
+extern "C" void  dbuse_  (){assert(0);};
+extern "C" void  dbfill_ (){assert(0);};
+extern "C" void  adbfill_(){assert(0); printf(" in empty adbfill \n"); }
+extern "C" void  dbls_   (){assert(0);};
+extern "C" void  dbprint_(){assert(0);};
 
 #endif
