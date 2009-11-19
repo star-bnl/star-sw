@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.208 2009/11/18 20:46:34 jwebb Exp $
+* $Id: geometry.g,v 1.209 2009/11/19 18:24:15 perev Exp $
 * $Log: geometry.g,v $
+* Revision 1.209  2009/11/19 18:24:15  perev
+* y2009a and inherited from it y2010
+*
 * Revision 1.208  2009/11/18 20:46:34  jwebb
 * Y2009A production tag added:
 *
@@ -1308,7 +1311,7 @@ replace [exe y2009a;] with [;
 *********   y2010   ***
 replace [exe y2010;] with [;
 { "y2010 baseline: right now y2010+full btof"
-  exe y2009; exe BTOF66;
+  exe y2009a; exe BTOF66;
 };]
 
 
