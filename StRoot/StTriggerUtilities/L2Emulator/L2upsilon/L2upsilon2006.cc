@@ -287,7 +287,7 @@ bool L2upsilon2006::doEvent(int L0trg, int eventNumber, TrgDataType* trgData,
 void L2upsilon2006::finishRun()
 {
   mUnfinished = false;
-  fprintf(mLogFile, "L2upsilon2006::finishRun()\n");
+  fprintf(mLogFile, (char*)"L2upsilon2006::finishRun()\n");
   finishCommonHistos() ;
   //
   // Write out events summary and close log file
@@ -388,20 +388,20 @@ void L2upsilon2006::calcCluster(int rdo)
 
 void L2upsilon2006::createHistograms()
 {
-  hL0SeedTowers = new L2Histo(100, "L0 seed towers;softId", 4800);
-  hL2SeedTowers = new L2Histo(101, "L2 seed towers;softId", 4800);
-  hNumberOfL0Seeds = new L2Histo(102, ";Number of L0 seeds", 10);
-  hNumberOfL2Seeds = new L2Histo(103, ";Number of L2 seeds", 10);
-  hInvMass = new L2Histo(104, ";m_{ee} [GeV]", 200);
-  hTime = new L2Histo(105, ";processing time [#mus]", 200);
-  hEnergyOfL0Cluster = new L2Histo(106, ";Energy of L0 cluster [GeV]", 200);
-  hEnergyOfL2Cluster = new L2Histo(107, ";Energy of L2 cluster [GeV]", 200);
-  hCosTheta = new L2Histo(108, ";cos(#Theta)", 100);
-  hVertexZ = new L2Histo(109, ";z_{vertex} (cm)", 100);
-  hCtbIndex = new L2Histo(110, ";CTB index", 256);
-  hHighTowers = new L2Histo(111, ";softId", 4800);
-  hL0rate = new L2Histo(112, "L0;time (sec);rate (Hz)", 1800);
-  hL2rate = new L2Histo(113, "L2;time (sec);rate (Hz)", 1800);
+  hL0SeedTowers = new L2Histo(100,  (char*)"L0 seed towers;softId", 4800);
+  hL2SeedTowers = new L2Histo(101,  (char*)"L2 seed towers;softId", 4800);
+  hNumberOfL0Seeds = new L2Histo(102,  (char*)";Number of L0 seeds", 10);
+  hNumberOfL2Seeds = new L2Histo(103, (char*) ";Number of L2 seeds", 10);
+  hInvMass = new L2Histo(104,  (char*)";m_{ee} [GeV]", 200);
+  hTime = new L2Histo(105,  (char*)";processing time [#mus]", 200);
+  hEnergyOfL0Cluster = new L2Histo(106,  (char*)";Energy of L0 cluster [GeV]", 200);
+  hEnergyOfL2Cluster = new L2Histo(107,  (char*)";Energy of L2 cluster [GeV]", 200);
+  hCosTheta = new L2Histo(108,  (char*)";cos(#Theta)", 100);
+  hVertexZ = new L2Histo(109,  (char*)";z_{vertex} (cm)", 100);
+  hCtbIndex = new L2Histo(110,  (char*)";CTB index", 256);
+  hHighTowers = new L2Histo(111,  (char*)";softId", 4800);
+  hL0rate = new L2Histo(112,  (char*)"L0;time (sec);rate (Hz)", 1800);
+  hL2rate = new L2Histo(113,  (char*)"L2;time (sec);rate (Hz)", 1800);
 
   mHistograms.push_back(hL0SeedTowers);
   mHistograms.push_back(hL2SeedTowers);

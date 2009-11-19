@@ -5,7 +5,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2wEemc2009.cxx,v 1.1 2009/03/28 19:43:53 balewski Exp $
+ * $Id: L2wEemc2009.cxx,v 1.2 2009/11/19 15:48:49 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -131,14 +131,17 @@ void
 L2wEemc2009::createHisto() {
   memset(hA,0,sizeof(hA));
 
-  hA[0]=new L2Histo(0,"L0triggered: highest endcap tower ET; x: tower ET; y: counts", 100); // title set in initRun
-  hA[1]=new L2Histo(1,"accepted: highest endcap tower ET; x: tower ET; y: counts", 100); // title set in initRun
+  hA[0]=new L2Histo(0,(char*)"L0triggered: highest endcap tower ET; x: tower ET; y: counts", 100); // title set in initRun
+  hA[1]=new L2Histo(1,(char*)"accepted: highest endcap tower ET; x: tower ET; y: counts", 100); // title set in initRun
 
   // printf("L2-%s::createHisto() done\n",getName());
 }
 
 /**********************************************************************
   $Log: L2wEemc2009.cxx,v $
+  Revision 1.2  2009/11/19 15:48:49  balewski
+  add (char*) to many strings to make SL5 happ, few other adjustments
+
   Revision 1.1  2009/03/28 19:43:53  balewski
   2009 code
 

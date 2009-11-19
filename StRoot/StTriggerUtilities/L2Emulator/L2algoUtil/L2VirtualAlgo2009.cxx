@@ -27,15 +27,15 @@ L2VirtualAlgo2009::L2VirtualAlgo2009(const char* name, L2EmcDb* db, char* outDir
   mEveStream_etow=globL2eventStream2009.get_etow();
 
   setOflTrigID(0); // relevant only for offline analysis
-  mhN =new   L2Histo(900,"total events. 0=anyInput 10=anyAccept 11=normalAccept 12=rndAccept",19);
-  mhTc=new   L2Histo(901,"L2 COMPUTE time per input event;  x: COMPUTE time (CPU kTics); y: events ",180);
-  mhTd=new   L2Histo(902,"L2 DECISION time per input event;  x: DECISION time (CPU kTics); y: events ",36);
-  mhTcd=new  L2Histo(903,"L2 COMP+DECI time per input event;  x: COMP+DECIS time (CPU kTics); y: events ",180);
+  mhN =new   L2Histo(900,(char*)"total events. 0=anyInput 10=anyAccept 11=normalAccept 12=rndAccept",19);
+  mhTc=new   L2Histo(901,(char*)"L2 COMPUTE time per input event;  x: COMPUTE time (CPU kTics); y: events ",180);
+  mhTd=new   L2Histo(902,(char*)"L2 DECISION time per input event;  x: DECISION time (CPU kTics); y: events ",36);
+  mhTcd=new  L2Histo(903,(char*)"L2 COMP+DECI time per input event;  x: COMP+DECIS time (CPU kTics); y: events ",180);
 
   int mxRunDration=2000;
-  mhRc= new   L2Histo(905,"rate of COMPUTE; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
-  mhRd= new   L2Histo(906,"rate of DECISION; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
-  mhRa= new   L2Histo(907,"rate of ACCEPT; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  mhRc= new   L2Histo(905,(char*)"rate of COMPUTE; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  mhRd= new   L2Histo(906,(char*)"rate of DECISION; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  mhRa= new   L2Histo(907,(char*)"rate of ACCEPT; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
   //j1 printf("L2-%s instantiated, logPath='%s'\n",getName(),mOutDir1.c_str());
   
   // consistency checks, should never fail
@@ -197,7 +197,7 @@ L2VirtualAlgo2009::finishCommonHistos() {
   }
   const int nHt=3;
   L2Histo *hT[nHt]={mhTc,mhTd,mhTcd};
-  char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
+  const char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
   int ih;
   for(ih=0;ih<nHt;ih++) {
     int iMax=-3, iFWHM=-4;
@@ -473,9 +473,11 @@ int L2VirtualAlgo2009::readDsmMask(const char *fileN)
     if(buf[0]=='\n') continue;
     
     if(n>=8) {printf("   L2VirtualAlgo2009::readDsmMask:  Too many values in %s.\n",fileN); return -3333;}
-    int ret1=sscanf(buf,"%u",DsmMask+n); 
+    unsigned int xxx;
+    int ret1=sscanf(buf,"%u",&xxx); 
     if(ret1!=1)  {printf("   L2VirtualAlgo2009::readDsmMask: Problem reading %s.\n",fileN); return -4444;} // wrong input file for this int-par
     n++;
+    DsmMask[n]=xxx; // conversion from uint to ushort to make SL5 happy, JB
   }
   fclose(fd);
   if (n!=8){printf("   L2VirtualAlgo2009::readDsmMask:  Too few values in %s.\n",fileN); return -3333;}
@@ -501,6 +503,9 @@ unsigned short L2VirtualAlgo2009::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2009.cxx,v $
+  Revision 1.3  2009/11/19 15:48:42  balewski
+  add (char*) to many strings to make SL5 happ, few other adjustments
+
   Revision 1.2  2009/08/26 19:33:57  fine
   fix the compilation issues under SL5_64_bits  gcc 4.3.2
 

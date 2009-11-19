@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2wBemc2009.cxx,v 1.1 2009/03/28 19:43:53 balewski Exp $
+ * $Id: L2wBemc2009.cxx,v 1.2 2009/11/19 15:48:49 balewski Exp $
  * \author Jan Balewski,MIT , 2009 
  *********************************************************************
  * Descripion: see .h
@@ -41,14 +41,14 @@ L2wBemc2009::L2wBemc2009(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* o
 
   mGeom=geoX; 
   if (!mGeom)
-    criticalError("L2wBemc is broken -- can't find geom.");
+    criticalError((char*)"L2wBemc is broken -- can't find geom.");
 
   setMaxHist(32); // set upper range, I uses only 2^N -it is easier to remember
   createHisto();
 
   //------- self-consistency checks, should never fail
    if (sizeof(L2wResult2009)!= L2wResult2009::mySizeChar) 
-    criticalError("L2wBemc has failed consistency check. sizeof(L2wResult2009)!= L2wResult2009::mySizeChar");
+    criticalError((char*)"L2wBemc has failed consistency check. sizeof(L2wResult2009)!= L2wResult2009::mySizeChar");
   
 }
 
@@ -329,16 +329,16 @@ L2wBemc2009::finishRunUser() {  /* called once at the end of the run */
 //=======================================
 void 
 L2wBemc2009::createHisto() {
-  hA[1]=new L2Histo(1,"W Btow delTime (decision-compute); kTicks",300);
+  hA[1]=new L2Histo(1,(char*)"W Btow delTime (decision-compute); kTicks",300);
   
-  hA[2]=new L2Histo(2,"W Btow-compute: # btow towers w/ energy /event; x: # BTOW towers; y: counts", 100); 
-  hA[3]=new L2Histo(3,"W Btow-accepted: seeds ; Seed ET (GeV)", 70); 
-  hA[4]=new L2Histo(4,"W Btow-accepted: clusters ; Cluster ET ET(GeV)", 70);
-  hA[5]=new L2Histo(5,"W Btow-accepted: cluster shape ;100*Seed Et/Cluster Et", 105);
+  hA[2]=new L2Histo(2,(char*)"W Btow-compute: # btow towers w/ energy /event; x: # BTOW towers; y: counts", 100); 
+  hA[3]=new L2Histo(3,(char*)"W Btow-accepted: seeds ; Seed ET (GeV)", 70); 
+  hA[4]=new L2Histo(4,(char*)"W Btow-accepted: clusters ; Cluster ET ET(GeV)", 70);
+  hA[5]=new L2Histo(5,(char*)"W Btow-accepted: cluster shape ;100*Seed Et/Cluster Et", 105);
   // 6-8 free
 
-  hA[9]=new L2Histo(9,"W Btow ...9 .....", 5000); // title in initRun
-  hA[10]=new L2Histo(10,"W Btow ...10 ...", BtowGeom::mxEtaBin, BtowGeom::mxPhiBin); // title in initRun
+  hA[9]=new L2Histo(9,(char*)"W Btow ...9 .....", 5000); // title in initRun
+  hA[10]=new L2Histo(10,(char*)"W Btow ...10 ...", BtowGeom::mxEtaBin, BtowGeom::mxPhiBin); // title in initRun
 
 
   char tit[100];
@@ -421,6 +421,9 @@ L2wBemc2009::print4(int token, int hitSize){ // L2-algo input list
 #endif
 /**********************************************************************
   $Log: L2wBemc2009.cxx,v $
+  Revision 1.2  2009/11/19 15:48:49  balewski
+  add (char*) to many strings to make SL5 happ, few other adjustments
+
   Revision 1.1  2009/03/28 19:43:53  balewski
   2009 code
 
