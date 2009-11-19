@@ -32,10 +32,10 @@ HitHistograms::HitHistograms(const char *name,const char *title,
   //double xmax = 1.e-4;
   double xmax = 1.e-5;
   int xbins = 100;
-  char* name1 = "StEQaInnerSectorDeDx";
-  char* name2 = "StEQaOuterSectorDeDx";
-  char* title1 = "Inner Sector De/Dx Distribution";
-  char* title2 = "Outer Sector De/Dx Distribution";
+  const char* name1 = "StEQaInnerSectorDeDx";
+  const char* name2 = "StEQaOuterSectorDeDx";
+  const char* title1 = "Inner Sector De/Dx Distribution";
+  const char* title2 = "Outer Sector De/Dx Distribution";
 
   m_innerSectorDeDxHist = new TH1F(name1,title1,xbins,xmin,xmax);
   m_outerSectorDeDxHist = new TH1F(name2,title2,xbins,xmin,xmax);
@@ -93,8 +93,11 @@ TH1F* HitHistograms::outerSectorDeDxHist() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.cxx,v 1.10 2007/03/13 18:43:43 genevb Exp $
+// $Id: HitHistograms.cxx,v 1.11 2009/11/19 20:12:10 genevb Exp $
 // $Log: HitHistograms.cxx,v $
+// Revision 1.11  2009/11/19 20:12:10  genevb
+// Clean up compiler warnings
+//
 // Revision 1.10  2007/03/13 18:43:43  genevb
 // Use StE prefix
 //
