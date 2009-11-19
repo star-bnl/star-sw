@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.19 2007/09/26 21:47:18 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.20 2009/11/19 14:05:44 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -15,6 +15,7 @@
 #include "StTpcDb/StTpcdEdxCorrection.h" 
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh" 
+#include "StPhysicalHelixD.hh"
 #include "tables/St_trigDetSums_Table.h"
 class Bichsel;
 class StGlobalTrack;
@@ -22,25 +23,27 @@ class TMinuit;
 class StEvent;
 class StGlobalCoordinate;
 class TH2S;
+class StTpcPadrowHitCollection;
 
 class StdEdxY2Maker : public StMaker {
  public: 
-  enum  EMode {kOldClusterFinder       ,
-	       kCalibration            ,
-	       kDoNotCorrectdEdx       ,
-	       kPadSelection           ,
-	       kMip                    ,
-	       kAdcHistos              ,
-	       kXYZcheck               ,
-	       kSpaceChargeStudy       ,
-	       kGASHISTOGRAMS          ,
-	       kProbabilityPlot        ,
-	       kMakeTree               ,
-	       kCORRELATION            ,
-	       kAlignment              , 
-	       kZBGX                   ,
-	       kEmbedding              ,
-	       kNoUsedHits
+  enum  EMode {kOldClusterFinder     =  0,
+	       kCalibration          = 	1,
+	       kDoNotCorrectdEdx     = 	2,
+	       kPadSelection         = 	3,
+	       kMip                  = 	4,
+	       kAdcHistos            = 	5,
+	       kXYZcheck             = 	6,
+	       kSpaceChargeStudy     = 	7,
+	       kGASHISTOGRAMS        = 	8,
+	       kProbabilityPlot      = 	9,
+	       kMakeTree             = 10,
+	       kCORRELATION          = 11,
+	       kAlignment            = 12, 
+	       kZBGX                 = 13,
+	       kEmbedding            = 15,
+	       kNoUsedHits           = 16,
+	       kEmbeddingShortCut    = 17 
   };
   StdEdxY2Maker(const char *name="dEdxY2");
   virtual       ~StdEdxY2Maker() {}
@@ -61,28 +64,36 @@ class StdEdxY2Maker : public StMaker {
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   void    PrintdEdx(Int_t iop = 0);
   void    Correlations();
-  static  Bichsel             *m_Bichsel;       //!
+  static  Bichsel             *m_Bichsel;       //
   static  void Landau(Double_t x, Double_t *val);
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
-  virtual const char *GetCVS() const {
-    static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.19 2007/09/26 21:47:18 fisyak Exp $ built "__DATE__" "__TIME__ ; 
-    return cvs;
-  }
  private:
-  TMinuit             *m_Minuit;        //!
-  StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
-  Int_t                m_Mask; //!
-  static Int_t  NdEdx;
+  static Int_t Propagate(const StThreeVectorD &middle,const StThreeVectorD &normal,
+			 const StPhysicalHelixD &helixI, const StPhysicalHelixD &helixO,
+			 Double_t bField, 
+			 StThreeVectorD &xyz, StThreeVectorD &dirG, Double_t s[2], Double_t w[2]);
+  static Int_t     NdEdx;
   static dEdxY2_t *CdEdx; // corrected
   static dEdxY2_t *FdEdx; // fit
   static dEdxY2_t *dEdxS; // dEdx sorted
+  Char_t               beg[1];
+  TMinuit             *m_Minuit;        //!
+  StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
+  Int_t                m_Mask; //!
   StThreeVectorD      *mNormal[24][45];     //!
   StThreeVectorD      *mRowPosition[24][45][3]; //!
+  StThreeVectorD      *mPromptNormal[2][2]; // West/East, Inner/Outer
+  StThreeVectorD      *mPromptPosition[2][2][3]; 
   St_trigDetSums      *m_trigDetSums;//!
   trigDetSums_st      *m_trig;//!
   TH2S                *mHitsUsage;//!
-  
+  Char_t              end[1];
+ public:
+  virtual const char *GetCVS() const {
+    static const char cvs[]=
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.20 2009/11/19 14:05:44 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
   ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers
 };
 
