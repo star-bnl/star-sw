@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventManager.hh,v 2.5 2002/04/18 23:29:35 jeromel Exp $
+ * $Id: StEventManager.hh,v 2.6 2009/11/19 16:54:09 fisyak Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEventManager.hh,v $
+ * Revision 2.6  2009/11/19 16:54:09  fisyak
+ * Clean up
+ *
  * Revision 2.5  2002/04/18 23:29:35  jeromel
  * Implementation of the SVT 2 tables scheme ...
  *
@@ -36,29 +39,9 @@
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
-#include "tables/St_particle_Table.h"
-#include "tables/St_gen_header_Table.h"
 #include "tables/St_dst_L0_Trigger_Table.h"          
 #include "tables/St_dst_L1_Trigger_Table.h"          
 #include "tables/St_dst_TrgDet_Table.h"              
-#include "tables/St_dst_dedx_Table.h"                
-#include "tables/St_dst_event_summary_Table.h"       
-#include "tables/St_dst_mon_soft_ctb_Table.h"        
-#include "tables/St_dst_mon_soft_emc_Table.h"        
-#include "tables/St_dst_mon_soft_ftpc_Table.h"       
-#include "tables/St_dst_mon_soft_glob_Table.h"       
-#include "tables/St_dst_mon_soft_l3_Table.h"         
-#include "tables/St_dst_mon_soft_rich_Table.h"       
-#include "tables/St_dst_mon_soft_svt_Table.h"        
-#include "tables/St_dst_mon_soft_tpc_Table.h"        
-#include "tables/St_dst_point_Table.h"               
-#include "tables/St_dst_summary_param_Table.h"                    
-#include "tables/St_dst_tkf_vertex_Table.h"          
-#include "tables/St_dst_track_Table.h"               
-#include "tables/St_dst_v0_vertex_Table.h"           
-#include "tables/St_dst_vertex_Table.h"              
-#include "tables/St_dst_xi_vertex_Table.h"           
-#include "tables/St_event_header_Table.h"            
 
 enum ooStatus {oocError, oocSuccess };
 
@@ -75,32 +58,9 @@ public:
     virtual void setup(){};
     virtual void shutdown(){};
     
-    virtual particle_st*  	   returnTable_particle(long&)          const =0;
-    virtual event_header_st*       returnTable_event_header(long&)      const =0;             
-    virtual dst_event_summary_st*  returnTable_dst_event_summary(long&) const =0;             
     virtual dst_L0_Trigger_st*     returnTable_dst_L0_Trigger(long&)    const =0;             
     virtual dst_L1_Trigger_st*     returnTable_dst_L1_Trigger(long&)    const =0;             
     virtual dst_TrgDet_st*         returnTable_dst_TrgDet(long&)        const =0;             
-    virtual dst_dedx_st*           returnTable_dst_dedx(long&)          const =0;                    
-    virtual dst_mon_soft_ctb_st*   returnTable_dst_mon_soft_ctb(long&)  const =0;            
-    virtual dst_mon_soft_emc_st*   returnTable_dst_mon_soft_emc(long&)  const =0;            
-    virtual dst_mon_soft_ftpc_st*  returnTable_dst_mon_soft_ftpc(long&) const =0;           
-    virtual dst_mon_soft_glob_st*  returnTable_dst_mon_soft_glob(long&) const =0;           
-    virtual dst_mon_soft_l3_st*    returnTable_dst_mon_soft_l3(long&)   const =0;             
-    virtual dst_mon_soft_rich_st*  returnTable_dst_mon_soft_rich(long&) const =0;           
-    virtual dst_mon_soft_svt_st*   returnTable_dst_mon_soft_svt(long&)  const =0;            
-    virtual dst_mon_soft_tpc_st*   returnTable_dst_mon_soft_tpc(long&)  const =0;            
-    virtual dst_point_st*          returnTable_dst_point(long&)         const =0;                   
-    virtual dst_summary_param_st*  returnTable_dst_summary_param(long&) const =0;           
-    virtual dst_tkf_vertex_st*     returnTable_dst_tkf_vertex(long&)    const =0;              
-    virtual dst_track_st*          returnTable_dst_globtrk(long&)       const =0;                   
-    virtual dst_track_st*          returnTable_dst_primtrk(long&)       const =0;                   
-    virtual dst_v0_vertex_st*      returnTable_dst_v0_vertex(long&)     const =0;               
-    virtual dst_vertex_st*         returnTable_dst_vertex(long&)        const =0;                  
-    virtual dst_xi_vertex_st*      returnTable_dst_xi_vertex(long&)     const =0;               
-    virtual dst_track_st*          returnTable_CpyTrk(long&)            const =0;               
-    virtual dst_track_st*          returnTable_EstGlobal(long&)         const =0;               
-    virtual dst_track_st*          returnTable_EstPrimary(long&)         const =0;               
     
     virtual void setMaker(StMaker* mk) {mCurrentChain=mk;};
     

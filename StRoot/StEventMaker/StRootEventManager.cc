@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.15 2007/08/24 15:37:43 perev Exp $
+ * $Id: StRootEventManager.cc,v 2.16 2009/11/19 16:54:09 fisyak Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.16  2009/11/19 16:54:09  fisyak
+ * Clean up
+ *
  * Revision 2.15  2007/08/24 15:37:43  perev
  * Decrease prints
  *
@@ -121,145 +124,8 @@ _NAME2_(TABLE_TYPE,_st)* StRootEventManager::_NAME2_(returnTable_,TABLE_TYPE)(lo
 }
 
 
-RETURN_TABLE(particle,-)
-RETURN_TABLE(event_header,event_header)
-RETURN_TABLE(dst_event_summary,event_summary)
-RETURN_TABLE(dst_summary_param,summary_param)
 RETURN_TABLE(dst_TrgDet,TrgDet)
 RETURN_TABLE(dst_L0_Trigger,L0_Trigger)         
 RETURN_TABLE(dst_L1_Trigger,L1_Trigger)         
-RETURN_TABLE(dst_dedx,dedx)            
-RETURN_TABLE(dst_mon_soft_ctb,mon_soft_ctb)    
-RETURN_TABLE(dst_mon_soft_emc,mon_soft_emc)    
-RETURN_TABLE(dst_mon_soft_ftpc,mon_soft_ftpc)  
-RETURN_TABLE(dst_mon_soft_glob,mon_soft_glob)  
-RETURN_TABLE(dst_mon_soft_l3,mon_soft_l3)    
-RETURN_TABLE(dst_mon_soft_rich,mon_soft_rich) 
-RETURN_TABLE(dst_mon_soft_svt,mon_soft_svt)   
-RETURN_TABLE(dst_mon_soft_tpc,mon_soft_tpc)   
-RETURN_TABLE(dst_point,point)          
-RETURN_TABLE(dst_tkf_vertex,kinkVertex)    
-RETURN_TABLE(dst_v0_vertex,v0_vertex)      
-RETURN_TABLE(dst_vertex,vertex)        
-RETURN_TABLE(dst_xi_vertex,xi_vertex)         
 	     
 #undef RETURN_TABLE
-
-dst_track_st*
-StRootEventManager::returnTable_dst_globtrk(long& nentries) const
-{
-static int n13=13;
-    dst_track_st* table = NULL;
-    St_dst_track  *tableWrap;
-    const char *nm =  "globtrk";
-    const char *nt =  "St_dst_track";
-    St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
-    if (! Dst->Pwd()) {nentries = 0; return table;}
-    tableWrap = (St_dst_track*) (*Dst)[nt];
-    if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
-    if (tableWrap) {
-	table = tableWrap->GetTable();
-	nentries = tableWrap->GetNRows();
-    }
-    else if (--n13 >0) {
-	   LOG_INFO <<  "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
-	nentries = 0;
-    }
-    return table;
-}
-
-dst_track_st*
-StRootEventManager::returnTable_dst_primtrk(long& nentries) const
-{
-static int n13=13;
-    dst_track_st* table = NULL;
-    St_dst_track  *tableWrap;
-    const char *nm =  "primtrk";
-    const char *nt =  "St_dst_track";
-    St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
-    if (! Dst->Pwd()) {nentries = 0; return table;}
-    tableWrap = (St_dst_track*) (*Dst)[nt];
-    if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
-    if (tableWrap) {
-	table = tableWrap->GetTable();
-	nentries = tableWrap->GetNRows();
-    }
-    else if(--n13 >0) {
-	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
-	nentries = 0;
-    }
-    return table;
-}
-
-dst_track_st*
-StRootEventManager::returnTable_CpyTrk(long& nentries) const
-{
-static int n13=13;
-    dst_track_st* table = NULL;
-    St_dst_track  *tableWrap;
-    const char *nm =  "CpyTrk";
-    const char *nt =  "St_dst_track";
-    St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
-    tableWrap = (St_dst_track*) (*Dst)[nt];
-    if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
-    if (tableWrap) {
-	table = tableWrap->GetTable();
-	nentries = tableWrap->GetNRows();
-    }
-    else if(--n13 >0) {
-	   LOG_INFO  << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
-	nentries = 0;
-    }
-    return table;
-}
-
-dst_track_st*
-StRootEventManager::returnTable_EstGlobal(long& nentries) const
-{
-static int n13=13;
-    dst_track_st* table = NULL;
-    St_dst_track  *tableWrap;
-    const char *nm =  "EstGlobal";
-    const char *nt =  "St_dst_track";
-    St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
-    if (! Dst->Pwd()) {nentries = 0; return table;}
-    tableWrap = (St_dst_track*) (*Dst)[nt];
-    if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
-    if (tableWrap) {
-	table = tableWrap->GetTable();
-	nentries = tableWrap->GetNRows();
-    }
-    else if(--n13 >0) {
-	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
-	nentries = 0;
-    }
-    return table;
-}
-
-dst_track_st*
-StRootEventManager::returnTable_EstPrimary(long& nentries) const
-{
-static int n13=13;
-    dst_track_st* table = NULL;
-    St_dst_track  *tableWrap;
-    const char *nm =  "EstPrimary";
-    const char *nt =  "St_dst_track";
-    St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
-    if (! Dst->Pwd()) {nentries = 0; return table;}
-    tableWrap = (St_dst_track*) (*Dst)[nt];
-    if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
-    if (tableWrap) {
-	table = tableWrap->GetTable();
-	nentries = tableWrap->GetNRows();
-    }
-    else if(--n13 >0){
-	   LOG_INFO << "StRootEventManager: Table type  " << nt << 
-	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endm;
-	nentries = 0;
-    }
-    return table;
-}
