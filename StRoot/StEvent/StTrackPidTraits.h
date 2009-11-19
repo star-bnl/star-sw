@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 2.7 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StTrackPidTraits.h,v 2.8 2009/11/19 14:04:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
+ * Revision 2.8  2009/11/19 14:04:33  fisyak
+ * move definition of dst_dedx_st IN
+ *
  * Revision 2.7  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -45,18 +48,24 @@
 #include "StObject.h"
 #include "StEnumerations.h"
 
-class dst_dedx_st;
-
+#ifndef DST_DEDX_H
+#define DST_DEDX_H
+struct dst_dedx_st {
+  Float_t dedx[2]; /* dE/dx summary info; mean,sigma of mean           */
+  Int_t id_track;  /* Foreign key to dst_track                         */
+  Int_t det_id;    /* Det ID-SVT,TPC,FTPC, use StDetectorDefinitions.h */
+  Int_t method;    /* dE/dx calculation method (see  comments above)   */
+  Int_t ndedx;     /* number of points used in dE/dx calcu. + 100*((int)TrackLength) for fit */
+};
+#endif
 class StTrackPidTraits : public StObject {
 public:
     StTrackPidTraits();
     StTrackPidTraits(StDetectorId);
     StTrackPidTraits(const dst_dedx_st&);
-    // StTrackPidTraits(const StTrackPidTraits&);            use default
-    // StTrackPidTraits& operator=(const StTrackPidTraits&); use default
     virtual ~StTrackPidTraits();
     
-    short detector() const;
+    Short_t detector() const;
 
 protected:
     Short_t mDetectorId;

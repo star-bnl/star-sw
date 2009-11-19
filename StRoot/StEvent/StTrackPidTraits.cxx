@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.cxx,v 2.5 2001/04/05 04:00:58 ullrich Exp $
+ * $Id: StTrackPidTraits.cxx,v 2.6 2009/11/19 14:04:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.cxx,v $
+ * Revision 2.6  2009/11/19 14:04:33  fisyak
+ * move definition of dst_dedx_st IN
+ *
  * Revision 2.5  2001/04/05 04:00:58  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -29,12 +32,10 @@
  * Completely Revised for New Version
  *
  **************************************************************************/
-#include "tables/St_dst_dedx_Table.h"
 #include "StTrackPidTraits.h"
-
 ClassImp(StTrackPidTraits)
 
-static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.5 2001/04/05 04:00:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.6 2009/11/19 14:04:33 fisyak Exp $";
 
 StTrackPidTraits::StTrackPidTraits() :
     mDetectorId(0) { /* noop */ }
@@ -47,5 +48,5 @@ StTrackPidTraits::StTrackPidTraits(const dst_dedx_st& t) :
 
 StTrackPidTraits::~StTrackPidTraits() { /* noop */ }
 
-short
+Short_t
 StTrackPidTraits::detector() const { return mDetectorId; }
