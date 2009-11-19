@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.28 2009/10/14 14:46:29 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.29 2009/11/19 22:42:22 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.29  2009/11/19 22:42:22  fine
+ * remove the token leak #1712
+ *
  * Revision 1.28  2009/10/14 14:46:29  fine
  * Initialize fDatReader to zero at class ctor. Issue #1665
  *
@@ -433,8 +436,8 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
            LOG_DEBUG << " StRtsReaderMaker::FindDataSet: DAT request was found: " 
                     << fDatReader->Length() << (void *)fDatReader->Record() << endm;
         }
-        delete tokens;
      }
+     delete tokens;
   }
 
   if (rtsSystem) {
