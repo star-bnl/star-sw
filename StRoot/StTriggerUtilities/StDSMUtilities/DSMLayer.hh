@@ -29,8 +29,11 @@ inline void copy_and_swap16(void* dest, const void* src)
   long long* x = (long long*)src;
   long long* y = (long long*)dest;
 
-  *y++ = bswap_64(*x++);
-  *y++ = bswap_64(*x++);
+  //*y++ = bswap_64(*x++);
+  //*y++ = bswap_64(*x++);
+
+  *y = bswap_64(*x); ++x; ++y;
+  *y = bswap_64(*x); ++x; ++y;
 }
 
 inline void copy_and_swap8(void* dest, const void* src)
