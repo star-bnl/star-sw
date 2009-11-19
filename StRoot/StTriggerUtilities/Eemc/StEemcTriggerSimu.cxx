@@ -534,17 +534,53 @@ StEemcTriggerSimu::getDsm0123inputs(){
 //==================================================
 //==================================================
 
+// Source: StEEmcUtil/database/cstructs/eemcConstDB.hh
+
+/*
+Use idividual bits of 'stat' to exclude individual
+channels from a particular analysis, but let other 
+analysis make a different choice.
+*/
+
+// status bits (short int) 
+/*
+#define EEMCSTAT_ONLPED   0x0001 // only pedestal is visible
+#define EEMCSTAT_STKBT    0x0002 // sticky lower bits
+#define EEMCSTAT_HOTHT    0x0004 // masked for HT trigger
+#define EEMCSTAT_HOTJP    0x0008 // masked for JP trigger
+#define EEMCSTAT_HIGPED   0x0010 // ped is very high but channel seems to work
+#define EEMCSTAT_HOTSTR   0x0020 // hot esmd strip
+#define EEMCSTAT_JUMPED   0x0040 // jumpy  ped over several chan over days
+#define EEMCSTAT_WIDPED   0x0080 // wide ped over:2.5 ch  towers, 1.5 ch MAPMT's
+*/
+
+//The remaing  bits of 'stat' are free.
+
+/* The 'fail' 16-bits are meant as general abort of a given 
+channel.
+*/
+
+// failure bits (short int)
+/*
+#define EEMCFAIL_GARBG  0x0001  // faulty channel
+#define EEMCFAIL_HVOFF  0x0002  // HV was off or varied
+#define EEMCFAIL_NOFIB  0x0004  // signal fiber is broken
+#define EEMCFAIL_CPYCT  0x0008  // stuck in copyCat mode 
+*/
+
 void 
-StEemcTriggerSimu::getEemcFeeMask(){
+StEemcTriggerSimu::getEemcFeeMask() {
   assert(mDbE);
-  for (int icr=0; icr<6; icr++){
-    int ich;
-    for(ich=0; ich<mxChan;ich++) {
-      const EEmcDbItem *x=mDbE-> getByCrate(icr+1,ich);
-      if(x==0) continue; // skip not mapped channels
-      bool killIt=x->stat & EEMCSTAT_HOTHT;
-      if(killIt)  x->print();  
-      feeMask[ (x->crate-1)*mxChan   + ich]=killIt;
+  for (int icr = 0; icr < 6; ++icr) {
+    for(int ich = 0; ich < mxChan; ++ich) {
+      const EEmcDbItem *x = mDbE->getByCrate(icr+1,ich);
+      if (!x) continue; // skip not mapped channels
+      bool killIt = (x->stat & EEMCSTAT_HOTHT) || (x->fail & EEMCFAIL_GARBG);
+      if (killIt) x->print();
+      int rdo = (x->crate-1)*mxChan+ich;
+      feeMask[rdo] = killIt;
+      LOG_DEBUG << Form("crate=%d chan=%d rdo=%d name=%s tube=%s sec=%d sub=%c eta=%d stat=0x%04x fail=0x%04x killIt=%d",
+			x->crate,x->chan,rdo,x->name,x->tube,x->sec,x->sub,x->eta,x->stat,x->fail,killIt) << endm;
     } // end of chan loop
   }// end of crate loop
 }
@@ -657,6 +693,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.21  2009/11/19 07:29:28  pibero
+// Mask out faulty EEMC towers. Add more LOG_DEBUG messages.
+//
 // Revision 1.20  2009/11/18 23:42:50  pibero
 // More LOG_DEBUG messages...
 //
