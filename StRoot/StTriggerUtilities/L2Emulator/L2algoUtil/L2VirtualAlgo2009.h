@@ -3,7 +3,7 @@
 
 
 /*************************************************************
- * $Id: L2VirtualAlgo2009.h,v 1.1 2009/03/28 19:43:40 balewski Exp $
+ * $Id: L2VirtualAlgo2009.h,v 1.2 2009/11/19 15:48:42 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -78,7 +78,7 @@ class L2VirtualAlgo2009 {
   int mxHA; // set by user
   void setMaxHist(int k) {  
     if (!(k>0)) {
-      criticalError("setMaxHist called with negative argument.");
+      criticalError((char*)"setMaxHist called with negative argument.");
       k=0;
     }
     mxHA=k;  hA=new L2Histo *[mxHA];

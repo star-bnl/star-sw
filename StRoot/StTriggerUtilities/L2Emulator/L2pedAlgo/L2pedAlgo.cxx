@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 /*********************************************************************
- * $Id: L2pedAlgo.cxx,v 1.10 2007/11/19 22:18:31 balewski Exp $
+ * $Id: L2pedAlgo.cxx,v 1.11 2009/11/19 15:48:46 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -52,16 +52,16 @@ L2pedAlgo::L2pedAlgo(const char* name, L2EmcDb* db, char* outDir, int resOff)
 
   // aux histos
   memset(hA,0,sizeof(hA));
-  hA[10]=new   L2Histo(10,"total event counter; x=cases",6);
-  hA[11]=new   L2Histo(11,"L2 time used per input event;  x: time (CPU 20*kTics); y: events ",500);
+  hA[10]=new   L2Histo(10, (char*)"total event counter; x=cases",6);
+  hA[11]=new   L2Histo(11, (char*)"L2 time used per input event;  x: time (CPU 20*kTics); y: events ",500);
 
   // BTOW  raw spectra
-  hA[20]=new   L2Histo(20,"BTOW pedRes  Y=ADC-DBped ; x: chan + 160*crate", 4800);
-  hA[21]=new   L2Histo(21,"BTOW pedRes  Z=ADC-DBped, saturated @ |3|; x:  etaBin ,[-1,+1];  y: phi bin ~sector",40,120);
+  hA[20]=new   L2Histo(20, (char*)"BTOW pedRes  Y=ADC-DBped ; x: chan + 160*crate", 4800);
+  hA[21]=new   L2Histo(21, (char*)"BTOW pedRes  Z=ADC-DBped, saturated @ |3|; x:  etaBin ,[-1,+1];  y: phi bin ~sector",40,120);
 
   // ETOW  raw spectra
-  hA[30]=new   L2Histo(30,"ETOW pedRes Y=ADC-DBped ; x: chan + 128*crate", 768);
-  hA[31]=new   L2Histo(31,"ETOW pedRes Z=ADC-DBped, saturated @ |3|; x: 12 - Endcap etaBin ,[+1,+2];  y: phi bin ~sector",12,60);
+  hA[30]=new   L2Histo(30, (char*)"ETOW pedRes Y=ADC-DBped ; x: chan + 128*crate", 768);
+  hA[31]=new   L2Histo(31, (char*)"ETOW pedRes Z=ADC-DBped, saturated @ |3|; x: 12 - Endcap etaBin ,[+1,+2];  y: phi bin ~sector",12,60);
  
 
   printf("L2pedAlgo instantiated, logPath='%s'\n",mOutDir);
@@ -387,6 +387,9 @@ L2pedAlgo::finishRun() {/* called once at the end of the run */
 
 /**********************************************************************
   $Log: L2pedAlgo.cxx,v $
+  Revision 1.11  2009/11/19 15:48:46  balewski
+  add (char*) to many strings to make SL5 happ, few other adjustments
+
   Revision 1.10  2007/11/19 22:18:31  balewski
   most L2algos provide triggerID's
 

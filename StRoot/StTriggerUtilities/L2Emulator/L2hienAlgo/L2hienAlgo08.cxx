@@ -6,7 +6,7 @@
 #include <math.h>
 
 /***********************************************************
- * $Id: L2hienAlgo08.cxx,v 1.5 2008/02/01 00:16:43 balewski Exp $
+ * $Id: L2hienAlgo08.cxx,v 1.6 2009/11/19 15:48:44 balewski Exp $
  * \author Jan Balewski, MIT, 2008 
  ***********************************************************
  * Descripion: see .h
@@ -279,8 +279,8 @@ void
 L2hienAlgo08::createHisto() {
   memset(hA,0,sizeof(hA));
 
-  hA[2]=new L2Histo(2,"compute: #towers w/ .....energy /event; x: #  towers; y: counts", 35); // title set in initRun
-  hA[3]=new L2Histo(3,"decision: #towers w/ .....energy /event; x: #  towers; y: counts", 35); // title set in initRun
+  hA[2]=new L2Histo(2, (char*)"compute: #towers w/ .....energy /event; x: #  towers; y: counts", 35); // title set in initRun
+  hA[3]=new L2Histo(3, (char*)"decision: #towers w/ .....energy /event; x: #  towers; y: counts", 35); // title set in initRun
 
   int nEtaBin=BtowGeom::mxEtaBin;
   int nPhiBin=BtowGeom::mxPhiBin;
@@ -288,10 +288,10 @@ L2hienAlgo08::createHisto() {
     nEtaBin=EtowGeom::mxEtaBin;
     nPhiBin=EtowGeom::mxPhiBin; 
   }
-  hA[4]=new L2Histo(4,"accepted: towers ET (watch units!) ; x: (ADC-ped)/16", 100);
-  hA[5]=new L2Histo(5,"accepted: #towers w/ ..... vs. eta ring",nEtaBin); // title set in initRun
-  hA[6]=new L2Histo(6,"accepted: #towers w/ .... vs. phi ring",nPhiBin); // title set in initRun
-  hA[7]=new L2Histo(7,"accepted: ADC sum ...",100); // title set in initRun
+  hA[4]=new L2Histo(4, (char*)"accepted: towers ET (watch units!) ; x: (ADC-ped)/16", 100);
+  hA[5]=new L2Histo(5, (char*)"accepted: #towers w/ ..... vs. eta ring",nEtaBin); // title set in initRun
+  hA[6]=new L2Histo(6, (char*)"accepted: #towers w/ .... vs. phi ring",nPhiBin); // title set in initRun
+  hA[7]=new L2Histo(7, (char*)"accepted: ADC sum ...",100); // title set in initRun
 
   // printf("L2-%s::createHisto() done\n",getName());
 }
@@ -318,6 +318,9 @@ L2hienAlgo08::print2(int token){ // full , local ADC array
 
 /**********************************************************************
   $Log: L2hienAlgo08.cxx,v $
+  Revision 1.6  2009/11/19 15:48:44  balewski
+  add (char*) to many strings to make SL5 happ, few other adjustments
+
   Revision 1.5  2008/02/01 00:16:43  balewski
   add mxListSize to BTOW/ETOW calibration
 

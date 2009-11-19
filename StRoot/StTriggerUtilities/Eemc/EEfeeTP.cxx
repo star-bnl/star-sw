@@ -1,5 +1,5 @@
 /**************************************************************
- * $Id: EEfeeTP.cxx,v 1.1 2009/10/12 18:04:26 pibero Exp $
+ * $Id: EEfeeTP.cxx,v 1.2 2009/11/19 15:48:40 balewski Exp $
  **************************************************************/
 
 #include <iostream>
@@ -12,7 +12,7 @@
 //--------------------------------------------------
 //
 //--------------------------------------------------
-EEfeeTP::EEfeeTP( int xcrate, char *TPname, int lenX, int xcha0L, int xcha0H) {
+EEfeeTP::EEfeeTP( int xcrate, const char *TPname, int lenX, int xcha0L, int xcha0H) {
   // if TP spans one block of channels set xcha0H<0
   assert(lenX%2==0);
   lenCh=lenX;
@@ -122,6 +122,9 @@ EEfeeTP::print( int k) const {
 
 /*
  * $Log: EEfeeTP.cxx,v $
+ * Revision 1.2  2009/11/19 15:48:40  balewski
+ * add (char*) to many strings to make SL5 happ, few other adjustments
+ *
  * Revision 1.1  2009/10/12 18:04:26  pibero
  * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
  *

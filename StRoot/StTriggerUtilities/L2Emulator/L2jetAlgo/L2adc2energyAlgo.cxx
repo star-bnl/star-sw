@@ -6,7 +6,7 @@
 #include <math.h>
 
 /*********************************************************************
- * $Id: L2adc2energyAlgo.cxx,v 1.1 2007/11/19 22:18:25 balewski Exp $
+ * $Id: L2adc2energyAlgo.cxx,v 1.2 2009/11/19 15:48:45 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -457,64 +457,64 @@ void
 L2adc2energyAlgo::createHisto() {
   memset(hA,0,sizeof(hA));
 
-  hA[10]=new   L2Histo(10,"total event counter; x=cases",9);
-  hA[11]=new   L2Histo(11,"L2 time used per input event;  x: time (CPU kTics), range=100muSec; y: events ",160);
+  hA[10]=new   L2Histo(10, (char*)"total event counter; x=cases",9);
+  hA[11]=new   L2Histo(11, (char*)"L2 time used per input event;  x: time (CPU kTics), range=100muSec; y: events ",160);
 
   int mxRunDration=2500;
-  hA[12]=new   L2Histo(12,"rate of input events; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  hA[12]=new   L2Histo(12, (char*)"rate of input events; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
   
-  hA[13]=new   L2Histo(13,"rate of  accepted one-Jet; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
-  hA[14]=new   L2Histo(14,"rate of  accepted di-Jet ; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
-  hA[15]=new   L2Histo(15,"rate of  random accepted  ; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  hA[13]=new   L2Histo(13, (char*)"rate of  accepted one-Jet; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  hA[14]=new   L2Histo(14, (char*)"rate of  accepted di-Jet ; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  hA[15]=new   L2Histo(15, (char*)"rate of  random accepted  ; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
 
   // BTOW  raw spectra
-  hA[20]=new   L2Histo(20,"BTOW tower, Et>2.0 GeV (input); x: BTOW RDO index=chan*30+fiber; y: counts", 4800);
-  hA[21]=new   L2Histo(21,"BTOW tower, Et>2.0 GeV (input); x: BTOW softID", 4800);
-  hA[22]=new   L2Histo(22,"BTOW tower, Et>2.0 GeV (input); x: eta bin, [-1,+1];  y: phi bin ~sector",40,120);
+  hA[20]=new   L2Histo(20, (char*)"BTOW tower, Et>2.0 GeV (input); x: BTOW RDO index=chan*30+fiber; y: counts", 4800);
+  hA[21]=new   L2Histo(21, (char*)"BTOW tower, Et>2.0 GeV (input); x: BTOW softID", 4800);
+  hA[22]=new   L2Histo(22, (char*)"BTOW tower, Et>2.0 GeV (input); x: eta bin, [-1,+1];  y: phi bin ~sector",40,120);
   
   // ETOW  raw spectra
-  hA[30]=new   L2Histo(30,"ETOW tower, Et>2.0 GeV (input); x: ETOW RDO index=chan*6+fiber; y: counts", 720 );
-  hA[31]=new   L2Histo(31,"ETOW tower, Et>2.0 GeV (input); x: i=chan+128*crate", 768);
-  hA[32]=new   L2Histo(32,"ETOW tower, Et>2.0 GeV (input); x: 12 - Endcap etaBin ,[+1,+2];  y: phi bin ~sector",12,60);
+  hA[30]=new   L2Histo(30, (char*)"ETOW tower, Et>2.0 GeV (input); x: ETOW RDO index=chan*6+fiber; y: counts", 720 );
+  hA[31]=new   L2Histo(31, (char*)"ETOW tower, Et>2.0 GeV (input); x: i=chan+128*crate", 768);
+  hA[32]=new   L2Histo(32, (char*)"ETOW tower, Et>2.0 GeV (input); x: 12 - Endcap etaBin ,[+1,+2];  y: phi bin ~sector",12,60);
   
  // Di-Jet raw yields
- hA[40]=new   L2Histo(40,"Et Jet1-Jet2 (input); x: Jet1 Et/GeV ; Jet2 Et/GeV",12,12);
- hA[41]=new   L2Histo(41,"diJet1 eta-phi (input); x: iEta [-1,+2] ; y: iPhi ~sector ",15,30);
- hA[42]=new   L2Histo(42,"diJet2 eta-phi (input); x: iEta [-1,+2]  ; y: iPhi ~sector",15,30);
+ hA[40]=new   L2Histo(40, (char*)"Et Jet1-Jet2 (input); x: Jet1 Et/GeV ; Jet2 Et/GeV",12,12);
+ hA[41]=new   L2Histo(41, (char*)"diJet1 eta-phi (input); x: iEta [-1,+2] ; y: iPhi ~sector ",15,30);
+ hA[42]=new   L2Histo(42, (char*)"diJet2 eta-phi (input); x: iEta [-1,+2]  ; y: iPhi ~sector",15,30);
 
- hA[43]=new  L2Histo(43,"diJet phi1-phi2 (input); x: iPhi1 ~sector ; y: iPhi2 ~sector ",30,30);
+ hA[43]=new  L2Histo(43, (char*)"diJet phi1-phi2 (input); x: iPhi1 ~sector ; y: iPhi2 ~sector ",30,30);
 
- hA[44]=new  L2Histo(44,"Jet1 Et (input); x: Et (GeV)", 60);
- hA[45]=new  L2Histo(45,"Jet2 Et (input); x: Et (GeV)", 60);
- hA[46]=new  L2Histo(46,"total Et (input); x: Et (GeV)", 60);
- hA[47]=new  L2Histo(47,"# BTOW towers>thrXX (input); x: # of towers/event", 200);
- hA[48]=new  L2Histo(48,"# ETOW towers>thrXX (input); x: # of towers/event", 100);
+ hA[44]=new  L2Histo(44, (char*)"Jet1 Et (input); x: Et (GeV)", 60);
+ hA[45]=new  L2Histo(45, (char*)"Jet2 Et (input); x: Et (GeV)", 60);
+ hA[46]=new  L2Histo(46, (char*)"total Et (input); x: Et (GeV)", 60);
+ hA[47]=new  L2Histo(47, (char*)"# BTOW towers>thrXX (input); x: # of towers/event", 200);
+ hA[48]=new  L2Histo(48, (char*)"# ETOW towers>thrXX (input); x: # of towers/event", 100);
 
  // ........accepted one-jet events
- hA[50]=new  L2Histo(50,"one-Jet Et (accepted); x: jet Et (GeV)", 60);
- hA[51]=new  L2Histo(51,"one-Jet eta-phi (accepted); x: iEta [-1,+2] ; y: iPhi ~sector ",15,30);
- hA[52]=new  L2Histo(52,"one-Jet eta (accepted); x: iEta [-1,+2]", 15);
- hA[53]=new  L2Histo(53,"one-Jet phi (accepted); x: iPhi ~sector", 30);
+ hA[50]=new  L2Histo(50, (char*)"one-Jet Et (accepted); x: jet Et (GeV)", 60);
+ hA[51]=new  L2Histo(51, (char*)"one-Jet eta-phi (accepted); x: iEta [-1,+2] ; y: iPhi ~sector ",15,30);
+ hA[52]=new  L2Histo(52, (char*)"one-Jet eta (accepted); x: iEta [-1,+2]", 15);
+ hA[53]=new  L2Histo(53, (char*)"one-Jet phi (accepted); x: iPhi ~sector", 30);
 
  // Di-Jet accepted
- hA[60]=new   L2Histo(60,"Et of Jet1 vs. Jet2  (accepted); x: Jet1/GeV ; Jet2/GeV",12,12);
- hA[61]=new   L2Histo(61,"diJet1 eta-phi   (accepted); x: iEta [-1,+2] ; y: iPhi ~sector ",15,30);
- hA[62]=new   L2Histo(62,"diJet2 eta-phi   (accepted); x: iEta [-1,+2]  ; y: iPhi ~sector",15,30);
+ hA[60]=new   L2Histo(60, (char*)"Et of Jet1 vs. Jet2  (accepted); x: Jet1/GeV ; Jet2/GeV",12,12);
+ hA[61]=new   L2Histo(61, (char*)"diJet1 eta-phi   (accepted); x: iEta [-1,+2] ; y: iPhi ~sector ",15,30);
+ hA[62]=new   L2Histo(62, (char*)"diJet2 eta-phi   (accepted); x: iEta [-1,+2]  ; y: iPhi ~sector",15,30);
 
- hA[63]=new  L2Histo(63,"diJet phi1-phi2   (accepted); x: iPhi1 ~sector ; y: iPhi2 ~sector ",30,30);
+ hA[63]=new  L2Histo(63, (char*)"diJet phi1-phi2   (accepted); x: iPhi1 ~sector ; y: iPhi2 ~sector ",30,30);
 
- hA[64]=new  L2Histo(64,"diJet1 Et  (accepted); x: Et (GeV)", 60);
- hA[65]=new  L2Histo(65,"diJet2 Et   (accepted); x: Et (GeV)", 60);
+ hA[64]=new  L2Histo(64, (char*)"diJet1 Et  (accepted); x: Et (GeV)", 60);
+ hA[65]=new  L2Histo(65, (char*)"diJet2 Et   (accepted); x: Et (GeV)", 60);
 
- hA[66]=new  L2Histo(66,"diJet1  eta (accepted); x: i Eta [-1,+2]", 15);
- hA[67]=new  L2Histo(67,"diJet2  eta (accepted); x: i Eta [-1,+2]", 15);
- hA[68]=new  L2Histo(68,"diJet1 phi (accepted); x: iPhi ~sector", 30);
- hA[69]=new  L2Histo(69,"diJet2 phi (accepted); x: iPhi ~sector", 30);
- hA[70]=new  L2Histo(70,"diJet delZeta  (accepted); x: delta zeta  (rad*10)", MxPhiRad10);
- hA[71]=new  L2Histo(71,"diJet delZeta vs. eta1 (accepted); x: iEta1 [-1,+2] ; y: delta zeta  (rad*10)",15, MxPhiRad10);
- hA[72]=new  L2Histo(72,"diJet eta2 vs. eta1  (accepted); x: iEta1 [-1,+2] ;x: iEta2 [-1,+2] ",15,15);
- hA[73]=new  L2Histo(73,"diJet   delZeta vs. avrPhi (accepted); x: (iphi1+iphi2)/2  (12 deg/bin); y: delta zeta  (rad*10)",30, MxPhiRad10);
- hA[74]=new  L2Histo(74,"total Et diJet (accepted); x: Et (GeV)", 60);
+ hA[66]=new  L2Histo(66, (char*)"diJet1  eta (accepted); x: i Eta [-1,+2]", 15);
+ hA[67]=new  L2Histo(67, (char*)"diJet2  eta (accepted); x: i Eta [-1,+2]", 15);
+ hA[68]=new  L2Histo(68, (char*)"diJet1 phi (accepted); x: iPhi ~sector", 30);
+ hA[69]=new  L2Histo(69, (char*)"diJet2 phi (accepted); x: iPhi ~sector", 30);
+ hA[70]=new  L2Histo(70, (char*)"diJet delZeta  (accepted); x: delta zeta  (rad*10)", MxPhiRad10);
+ hA[71]=new  L2Histo(71, (char*)"diJet delZeta vs. eta1 (accepted); x: iEta1 [-1,+2] ; y: delta zeta  (rad*10)",15, MxPhiRad10);
+ hA[72]=new  L2Histo(72, (char*)"diJet eta2 vs. eta1  (accepted); x: iEta1 [-1,+2] ;x: iEta2 [-1,+2] ",15,15);
+ hA[73]=new  L2Histo(73, (char*)"diJet   delZeta vs. avrPhi (accepted); x: (iphi1+iphi2)/2  (12 deg/bin); y: delta zeta  (rad*10)",30, MxPhiRad10);
+ hA[74]=new  L2Histo(74, (char*)"total Et diJet (accepted); x: Et (GeV)", 60);
 
 }
 
@@ -634,6 +634,9 @@ L2adc2energyAlgo::finishRunHisto(){
 
 /**********************************************************************
   $Log: L2adc2energyAlgo.cxx,v $
+  Revision 1.2  2009/11/19 15:48:45  balewski
+  add (char*) to many strings to make SL5 happ, few other adjustments
+
   Revision 1.1  2007/11/19 22:18:25  balewski
   most L2algos provide triggerID's
 

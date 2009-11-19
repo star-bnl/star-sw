@@ -1,7 +1,7 @@
 #ifndef EEfeeTP_h
 #define EEfeeTP_h
 /**************************************************************
- * $Id: EEfeeTP.h,v 1.1 2009/10/12 18:04:27 pibero Exp $
+ * $Id: EEfeeTP.h,v 1.2 2009/11/19 15:48:40 balewski Exp $
  * compute Endcap FEE response for a single trigger patch (TP)
  **************************************************************/
 #include <stdlib.h> 
@@ -26,7 +26,7 @@ class EEfeeTP  {
 
 public:
 
-  EEfeeTP( int xcrate, char *TPname, int lenH, int xcha0L, int xcha0H=-1);
+  EEfeeTP( int xcrate, const char *TPname, int lenH, int xcha0L, int xcha0H=-1);
 
   void  compute(int *adcA, int *ped4A, int *maskA);
   void  print(int k=0) const;
@@ -45,6 +45,9 @@ public:
 
 /*
  * $Log: EEfeeTP.h,v $
+ * Revision 1.2  2009/11/19 15:48:40  balewski
+ * add (char*) to many strings to make SL5 happ, few other adjustments
+ *
  * Revision 1.1  2009/10/12 18:04:27  pibero
  * Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
  *

@@ -2,7 +2,7 @@
 #define L2JETRESULTS2006_H
 
 /*********************************************************************
- * $Id: L2jetResults2006.h,v 1.2 2008/01/17 01:57:25 kocolosk Exp $
+ * $Id: L2jetResults2006.h,v 1.3 2009/11/19 15:48:45 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -78,7 +78,7 @@ L2jetResults2006_print(L2jetResults2006 *p) {
 //====================================
 inline unsigned char
 L2jetResults2006_doCheckSum(L2jetResults2006 *p) {
-  if(p==0) {printf("print L2jetResults2006 - NULL pointer ????\n"); return 0xffff;}
+  if(p==0) {printf("print L2jetResults2006 - NULL pointer ????\n"); return (unsigned char)0xffff;}
   unsigned char* buf=(unsigned char*) p;
   int len=sizeof( L2jetResults2006);
   unsigned char sum=0;
@@ -90,6 +90,9 @@ L2jetResults2006_doCheckSum(L2jetResults2006 *p) {
 
 /**********************************************************************
   $Log: L2jetResults2006.h,v $
+  Revision 1.3  2009/11/19 15:48:45  balewski
+  add (char*) to many strings to make SL5 happ, few other adjustments
+
   Revision 1.2  2008/01/17 01:57:25  kocolosk
   inline printing and checksum functions
 

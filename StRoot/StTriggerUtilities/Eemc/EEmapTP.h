@@ -3,7 +3,7 @@
 // used to emulate Endcap FEE TP math
 struct EEfeeTPmap {
   int JP;
-  char* name;
+  const char* name;
   int lenCh, cha0L, cha0H;
 };
 
