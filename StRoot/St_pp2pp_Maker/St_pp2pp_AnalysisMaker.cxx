@@ -151,7 +151,7 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
       tcubits = trg_p->tcuBits() ;
 
       //      cout << "pp2pp : " << trg_p->pp2ppADC(east,0,0,0) << endl;
-
+      /*
       P2P.RPEVU1_ADC = (u_short) trg_p->pp2ppADC( (StBeamDirection) 0,0,0,0)  ;
       P2P.RPEVU2_ADC = (u_short) trg_p->pp2ppADC( (StBeamDirection) 0,0,0,1)  ;
       P2P.RPEVD1_ADC = (u_short) trg_p->pp2ppADC( (StBeamDirection) 0,0,1,0)  ;
@@ -194,6 +194,7 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
       P2P.RPWHO2_TAC = (u_short) trg_p->pp2ppTAC( (StBeamDirection) 1,1,0,1)  ;
       P2P.RPWHI1_TAC = (u_short) trg_p->pp2ppTAC( (StBeamDirection) 1,1,1,0)  ;
       P2P.RPWHI2_TAC = (u_short) trg_p->pp2ppTAC( (StBeamDirection) 1,1,1,1)  ;
+      */
 
       xing.xing_lo = trg_p->bunchCounterLow();
       xing.xing_hi = trg_p->bunchCounterHigh();
@@ -260,6 +261,51 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 
   if ( pp2ppColl ) {
 
+    P2P.RPEHI1_ADC = pp2ppColl->romanPot(0)->adc(0);
+    P2P.RPEHI2_ADC = pp2ppColl->romanPot(0)->adc(1);
+    P2P.RPEHO1_ADC = pp2ppColl->romanPot(1)->adc(0);
+    P2P.RPEHO2_ADC = pp2ppColl->romanPot(1)->adc(1);
+
+    P2P.RPEHI1_TAC = pp2ppColl->romanPot(0)->tac(0);
+    P2P.RPEHI2_TAC = pp2ppColl->romanPot(0)->tac(1);
+    P2P.RPEHO1_TAC = pp2ppColl->romanPot(1)->tac(0);
+    P2P.RPEHO2_TAC = pp2ppColl->romanPot(1)->tac(1);
+
+
+    P2P.RPEVU1_ADC = pp2ppColl->romanPot(2)->adc(0);
+    P2P.RPEVU2_ADC = pp2ppColl->romanPot(2)->adc(1);
+    P2P.RPEVD1_ADC = pp2ppColl->romanPot(3)->adc(0);
+    P2P.RPEVD2_ADC = pp2ppColl->romanPot(3)->adc(1);
+
+    P2P.RPEVU1_TAC = pp2ppColl->romanPot(2)->tac(0);
+    P2P.RPEVU2_TAC = pp2ppColl->romanPot(2)->tac(1);
+    P2P.RPEVD1_TAC = pp2ppColl->romanPot(3)->tac(0);
+    P2P.RPEVD2_TAC = pp2ppColl->romanPot(3)->tac(1);
+
+
+    P2P.RPWHI1_ADC = pp2ppColl->romanPot(4)->adc(0);
+    P2P.RPWHI2_ADC = pp2ppColl->romanPot(4)->adc(1);
+    P2P.RPWHO1_ADC = pp2ppColl->romanPot(5)->adc(0);
+    P2P.RPWHO2_ADC = pp2ppColl->romanPot(5)->adc(1);
+
+    P2P.RPWHI1_TAC = pp2ppColl->romanPot(4)->tac(0);
+    P2P.RPWHI2_TAC = pp2ppColl->romanPot(4)->tac(1);
+    P2P.RPWHO1_TAC = pp2ppColl->romanPot(5)->tac(0);
+    P2P.RPWHO2_TAC = pp2ppColl->romanPot(5)->tac(1);
+
+
+    P2P.RPWVD1_ADC = pp2ppColl->romanPot(6)->adc(0);
+    P2P.RPWVD2_ADC = pp2ppColl->romanPot(6)->adc(1);
+    P2P.RPWVU1_ADC = pp2ppColl->romanPot(7)->adc(0);
+    P2P.RPWVU2_ADC = pp2ppColl->romanPot(7)->adc(1);
+
+    P2P.RPWVD1_TAC = pp2ppColl->romanPot(6)->tac(0);
+    P2P.RPWVD2_TAC = pp2ppColl->romanPot(6)->tac(1);
+    P2P.RPWVU1_TAC = pp2ppColl->romanPot(7)->tac(0);
+    P2P.RPWVU2_TAC = pp2ppColl->romanPot(7)->tac(1);
+
+
+
     for ( s=0; s<St_pp2pp_Maker::MAXSEQ; s++)
       for ( c=0; c<St_pp2pp_Maker::MAXCHAIN; c++) {
 
@@ -276,7 +322,8 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 	    (allclusters[s][c].nclusters)++ ;
 	  }
 	}
-      }
+
+      } //  for ( c=0; c<St_pp2pp_Maker::MAXCHAIN; c++)
 
   }
   else
