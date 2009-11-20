@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.35 2009/11/05 21:40:08 rjreed Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.36 2009/11/20 18:54:08 genevb Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -1210,8 +1210,8 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 	  if (r > RxyMax) continue;
 	  float z=hit->position().z();
 	  if (fabs(z) > zMax) continue;
-	  if (z < -zMembraneDepth && hit->sector() <= 12 ||
-	      z >  zMembraneDepth && hit->sector() >  12) {
+	  if ((z < -zMembraneDepth && hit->sector() <= 12) ||
+	      (z >  zMembraneDepth && hit->sector() >  12)) {
 	    nWrongZHit++;
 	    if(nWrongZHit>=nWrongZHitCut) {return true;}
 	  }	
@@ -1225,6 +1225,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.36  2009/11/20 18:54:08  genevb
+ * Avoid compiler warning about operator order precedence
+ *
  * Revision 1.35  2009/11/05 21:40:08  rjreed
  * Last line of matchTrack2Membrane was deleted between version 1.29 and 1.30.  This line checks
  * tracks to determine whether they've crossed the TPC CM.  This rev reinstates the line.
