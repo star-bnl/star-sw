@@ -332,8 +332,8 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 
 Int_t St_pp2pp_Maker::MakeClusters() {
 
-  const Int_t MAX_Cls_L = 5 ;
-  const Int_t MIN_Charge = 20 ;
+  //  const Int_t MAX_Cls_L = 5 ;
+  //  const Int_t MIN_Charge = 20 ;
   /// Orientations for each silicon plane
   const short orientations[MAXCHAIN*MAXSEQ] = {-1,1,-1,1,  1,-1,1,-1,  1,1,1,1, -1,-1,-1,-1,  -1,-1,-1,-1,  1,1,1,1,  -1,1,-1,1, 1,-1,1,-1 };
   /// Assume 4 planes have the same z at least for now
@@ -421,7 +421,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	if ( is_candidate_to_store == kTRUE ) {
 
-	  if ( NCluster_Length <= MAX_Cls_L && ECluster >= MIN_Charge ) {
+	  //	  if ( NCluster_Length <= MAX_Cls_L && ECluster >= MIN_Charge ) {
 
 	    // StEvent Clusters
 	    StRpsCluster * oneStCluster = new StRpsCluster() ;
@@ -440,7 +440,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
 
-	  } 
+	  //	  } 
 	  /*
 	  else
 	    cout << "NOT Stored ! seq/chain : " << i+1 << "/" << j 
