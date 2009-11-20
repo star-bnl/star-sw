@@ -56,8 +56,9 @@ Bfc_st BFC[] = { // standard chains
   {"RY2007","","" ,"db,detDb"                                           ,"","","y2007 for AuAu run",kFALSE},
   {"RY2007g","","","db,detDb"                                          ,"","","y2007g for AuAu run",kFALSE},
 #endif
-  {"RY2008","","","db,detDb,NosvtIT,NossdIT"                             ,"","","y2008 for dAu run",kFALSE},
-  {"RY2009","","","db,detDb,NosvtIT,NossdIT"                             ,"","","y2009 for p+p run",kFALSE},
+  {"RY2008" ,"","","db,detDb,NosvtIT,NossdIT"                            ,"","","y2008 for dAu run",kFALSE},
+  {"RY2009" ,"","","db,detDb,NosvtIT,NossdIT"                            ,"","","y2009 for p+p run",kFALSE},
+  {"RY2009a","","","db,detDb,NosvtIT,NossdIT"         ,"","","y2009a with revised EEMC for p+p run",kFALSE},
 #ifndef __CLEANUP__
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -386,16 +387,23 @@ Bfc_st BFC[] = { // standard chains
   // Chains for 2009 run p+p essentially
   // Note that we always need to start with VFMinuit as VFPPV is full of asserts
   //
-  {"B2009.1","","","ry2009,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-   ,                                                               "Base chain for 2009 ITTF (tpc)",kFALSE},
-  {"B2009.2","","","ry2009,in,tpcX,ToFx,tpcDB,TpcHitMover,Idst,tags,Tree,evout","",""
-   ,                                                           "Base chain for 2009 ITTF (tpc+tof)",kFALSE},
+  {"B2009.1","","","ry2009,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
+                                                                   "Base chain for 2009 ITTF (tpc)",kFALSE},
+  {"B2009.2","","","ry2009a,in,tpcX,tpcDB,TpcHitMover,Idst,tags,Tree,evout","","",
+                                                                   "Base chain for 2009 ITTF (tpc)",kFALSE},
+
   {"pp2009a"      ,"" ,"",   
-   "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis"
-   ,          "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+   "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
+              "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2009b"      ,"" ,"",   
-   "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis"
-   ,    "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger)",kFALSE},
+   "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
+        "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger)",kFALSE},
+  {"pp2009c"      ,"" ,"",   
+   "B2009.2,IAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis","","",
+           "Production chain for 2009 data - no Corr, no VF (+l3, bcc/fpd, ftpc, e/b-emc, no trig)",kFALSE},
+
+
+
 #endif /* __BFC2__ */
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","",""
@@ -614,7 +622,8 @@ Bfc_st BFC[] = { // standard chains
   {"QUtils"      ,""  ,"","PmdUtil,EmcUtil","",                      "","Load QA Libs dependencies",kFALSE},
   {"MuDSTDeps"   ,""  ,"","StEvent","","StEventUtilities,StStrangeMuDstMaker,Tree"
    ,                                                          "Load MuDST misc. dependencies (all)",kFALSE},
-  {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","","StMuDSTMaker","Load MuDST library",kFALSE},
+  {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,BTofUtil,PmdUtil","",
+                                                                "StMuDSTMaker","Load MuDST library",kFALSE},
   {"geantL","","","geomT,gen_T,sim_T,StarMagField,geomNoField","","Geom,St_g2t,St_geant_Maker"
    ,                                                                               "Load GeantLibs",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -864,41 +873,47 @@ Bfc_st BFC[] = { // standard chains
   {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
   {"eemcD"       ,"","","","","",                              "WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
-  {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain"
-   ,                        "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent,MuDST","StEmcSimulatorMaker","StEmcSimulatorMaker"
-   ,                                                                       "New simulator for BEMC",kFALSE},
-  {"EEfs" ,"eefs","","db,EEmcUtil,MuDst"
-   ,                                 "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+  {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent,MuDST","StEmcSimulatorMaker","StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
+                                     "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
+  // BTOF related chains
+  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
+                                                                             "StChain","BTOF Chain",kFALSE}, 
+
+  {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker",
+                                                                                   "BTOF hit maker",kFALSE},
+  {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker","StVpdCalibMaker",   "VPD calibration",kFALSE}, 
+
+  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
+                                                                                   "BTOF Simulator",kFALSE},
+  {"btofMatch"  ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker",
+                                                                          "TPC-BTOF track matching",kFALSE},
+  {"btofCalib"  ,"","BTofChain","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker",
+                                                                                 "BTOF calibration",kFALSE},
+
+
+
   // Time Of Flight related options
   {"ToF"       ,"TofChain","","tofDat,tofrMatch,tofpMatch,tofCalib","StMaker","StChain","ToF Chain",kFALSE},
   {"ToFx"      ,"TofChain","","tofXDat,tofrMatch,tofCalib"        ,"StMaker","StChain","ToFx Chain",kFALSE},
-  {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker"
-   ,                                                                          "TOF Data base chain",kFALSE},
-  {"tofXDat"   ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker"
-   ,                                                                                "TOF hit maker",kFALSE},
-  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker"
-   ,                                                                         "StChain","BTOF Chain",kFALSE},
- 
-  {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker"
-   ,                                                                               "BTOF hit maker",kFALSE},
+  {"tofDat"    ,"tof_raw","TofChain","db,Tofutil","StTofMaker","StEvent,StTofMaker",
+                                                                              "TOF Data base chain",kFALSE},
+  {"tofXDat"   ,"tof_raw","TofChain","db,Tofutil","StTofHitMaker","StEvent,StTofMaker,StTofHitMaker",
+                                                                                    "TOF hit maker",kFALSE},
 
-  {"tofsim"    ,"","TofChain","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker"
-   ,                                                                                "TOF Simulator",kFALSE},
-  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker"
-   ,                                                                               "BTOF Simulator",kFALSE},
+  {"tofsim"    ,"","TofChain","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker",
+                                                                                    "TOF Simulator",kFALSE},
 
-  {"tofrMatch" ,"","TofChain","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker"
-   ,                                                                   "TPC to TOFr track matching",kFALSE},
+  {"tofrMatch" ,"","TofChain","db,TofUtil","StTofrMatchMaker","StTofrMatchMaker",
+                                                                       "TPC to TOFr track matching",kFALSE},
   {"tofpMatch"   ,"","TofChain","db,TofUtil","StTofpMatchMaker","StTofpMatchMaker",
                                                                        "TPC to TOFp track matching",kFALSE},
-  {"btofMatch" ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker",
-                                                                          "TPC-BTOF track matching",kFALSE},
-
   {"tofCalib"   ,"","TofChain","db,TofUtil","StTofCalibMaker","StTofCalibMaker",  "TOF calibration",kFALSE},
-  {"btofCalib","","BTofChain","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker",
-                                                                                "BTOF calibration",kFALSE},
-  {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker","StVpdCalibMaker",  "VPD calibration",kFALSE}, 
+
 
 
 
