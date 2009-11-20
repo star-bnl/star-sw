@@ -44,7 +44,7 @@ public:
           float  EvalCalib(TDirectory* hdir=0);
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.9 2009/11/16 22:02:19 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.10 2009/11/20 18:51:19 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -67,7 +67,7 @@ protected:
   Bool_t doNtuple;
   Bool_t doReset;
   Bool_t doGaps;
-  Int_t inGapRow;
+  UInt_t inGapRow;
 
   int HN;
   float MINTRACKS;
@@ -158,8 +158,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.9 2009/11/16 22:02:19 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.10 2009/11/20 18:51:19 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.10  2009/11/20 18:51:19  genevb
+// Avoid compiler warning about unsigned comparison
+//
 // Revision 1.9  2009/11/16 22:02:19  genevb
 // Loosen nDaughters cut, add BEMCmatch cut, PCT hits cut, enable padrow 13 for Run 9+
 //
