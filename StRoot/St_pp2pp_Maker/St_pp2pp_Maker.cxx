@@ -1,3 +1,14 @@
+/*!
+ *                                                                     
+ * \class  St_pp2pp_Maker
+ * \author Kin Yip
+ * \date   2009/11/19
+ * \brief  For pp2pp analysis : mainly to create clusters from raw data silicon hits
+ *
+ *
+ *
+ */                                                                      
+
 #include "St_pp2pp_Maker.h"
 #include "StRtsTable.h"
 #include "TDataSetIter.h"
@@ -12,10 +23,14 @@
 #include "StEvent/StRpsCollection.h"
 #include "StEvent/StRpsCluster.h"
 
+#include "StEvent/StTriggerData2009.h"
+
+using namespace std;
+
 ClassImp(St_pp2pp_Maker)
 
   St_pp2pp_Maker::St_pp2pp_Maker(const char *name) : StRTSBaseMaker("pp2pp",name),   
-						     pedestal_perchannel_filename("pedestal.in.perchannel"), LDoCluster(kTRUE) {
+						     mpedestal_perchannel_filename("pedestal.in.perchannel"), mLDoCluster(kTRUE) {
   // ctor
   //  nevt_count = 0 ;
 }
@@ -34,7 +49,7 @@ Int_t St_pp2pp_Maker::Init() {
 }
 
 Int_t St_pp2pp_Maker::InitRun(int runumber) {
-  if ( LDoCluster ) {
+  if ( mLDoCluster ) {
     read_pedestal_perchannel() ;
     read_offset_perplane() ;
   }
@@ -45,10 +60,10 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 
   //  cout << "Size of each struct in DB : " << sizeof(pp2ppPedestal_st) << endl ;
 
-  //  cout << "Size of pedave : " << sizeof(pedave) << " , Size of pedrms : " << sizeof(pedrms) << endl ;
+  //  cout << "Size of mpedave : " << sizeof(mpedave) << " , Size of mpedrms : " << sizeof(mpedrms) << endl ;
 
-  memset(pedave,0,sizeof(pedave));
-  memset(pedrms,0,sizeof(pedrms));
+  memset(mpedave,0,sizeof(mpedave));
+  memset(mpedrms,0,sizeof(mpedrms));
 
   Int_t s, c, sv, ch, idb = 0 ;
 
@@ -69,7 +84,7 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
   TDataSet *DB = 0;
   DB = GetInputDB("Calibrations/pp2pp");
   if (!DB) {
-    LOG_WARN << "ERROR: cannot find database Calibrations_pp2pp?" << endm ;
+    LOG_ERROR << "ERROR: cannot find database Calibrations_pp2pp?" << endm ;
   }
   else {
     // fetch ROOT descriptor of db table
@@ -85,18 +100,19 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 	  sv = (Int_t) table[idb].SVX ;
 	  ch = (Int_t) table[idb].channel ;
 
-	  pedave[s-1][c][sv][ch] = table[idb].mean ;
-	  pedrms[s-1][c][sv][ch] = table[idb].rms ;
-
-	  //		  cout << s << " " << c << " "  << sv << " " << ch << " " << pedave[s-1][c][sv][ch] << " " << pedrms[s-1][c][sv][ch] << endl ; 
+	  if ( s > 0 ) { /// protect against zero entries (such as 10185015 with 2D switched off)
+	    mpedave[s-1][c][sv][ch] = table[idb].mean ;
+	    mpedrms[s-1][c][sv][ch] = table[idb].rms ;
+	  }
+	  //		  cout << s << " " << c << " "  << sv << " " << ch << " " << mpedave[s-1][c][sv][ch] << " " << mpedrms[s-1][c][sv][ch] << endl ; 
 
 	}
     } else {
-      LOG_WARN << "WARNING: No data in pp2ppPedestal table (wrong timestamp?). Nothing to return, then." << endm ;
+      LOG_ERROR << "St_pp2pp_Maker: No data in pp2ppPedestal table (wrong timestamp?). Nothing to return, then." << endm ;
     }
   }
 
-  cout << idb << " pedestal entries read from DB table Calibration/pp2pp read. " << endl ;
+  LOG_DEBUG << idb << " pedestal entries read from DB table Calibration/pp2pp read. " << endm ;
 
 
   return 1 ;
@@ -105,12 +121,12 @@ Int_t St_pp2pp_Maker::read_pedestal_perchannel() {
 
 Int_t St_pp2pp_Maker::read_offset_perplane() {
 
-  offset_table = 0;
+  moffset_table = 0;
 
   TDataSet *DB = 0;
   DB = GetInputDB("Geometry/pp2pp");
   if (!DB) { 
-    LOG_WARN << "ERROR: cannot find database Geometry_pp2pp?" << std::endl; 
+    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp?" << std::endl; 
   }
   else {
 
@@ -119,17 +135,17 @@ Int_t St_pp2pp_Maker::read_offset_perplane() {
     descr = (St_pp2ppOffset*) DB->Find("pp2ppOffset");
     // fetch data and place it to appropriate structure
     if (descr) {
-      offset_table = descr->GetTable();
-      cout << "Reading pp2ppOffset table with nrows = " << descr->GetNRows() << endl ;
+      moffset_table = descr->GetTable();
+      LOG_DEBUG << "Reading pp2ppOffset table with nrows = " << descr->GetNRows() << endm ;
       /*
       for (Int_t i = 0; i < descr->GetNRows(); i++) {
 	for ( Int_t j = 0; j< 32 ; j++ )
-	  std::cout << offset_table[i].rp_offset_plane[j] << " "  ; 
+	  std::cout << moffset_table[i].rp_offset_plane[j] << " "  ; 
 	cout << endl ;
       }
       */
     } else {
-      LOG_WARN << "St_pp2pp_Maker : No data in pp2ppOffset table (wrong timestamp?). Nothing to return, then" << endm ;
+      LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppOffset table (wrong timestamp?). Nothing to return, then" << endm ;
     }
 
   }
@@ -147,7 +163,7 @@ void  St_pp2pp_Maker::Clear(Option_t *) {
   // Deleting previous cluster info.
   for ( Int_t i=0; i<MAXSEQ; i++)
     for ( Int_t j=0; j<MAXCHAIN; j++)
-      (validhits[i][j]).clear();
+      (mvalidhits[i][j]).clear();
 
   StMaker::Clear(); // perform the basic clear (mandatory)
 
@@ -162,15 +178,18 @@ Int_t St_pp2pp_Maker::Make(){
 
   //  nevt_count++ ;
 
+  if ( Token() == 0 )  /// if Token == 0, this is not a real event.
+    return kStOK ;
 
   //
   //  PrintInfo();
   //
+  //  ls (0);
+
   int counter = -1; 
   
   TGenericTable *pp2ppRawHits = new TGenericTable("pp2ppRawHit_st","pp2ppRawHits");
 
-  //  ls (0);
 
   // Each GetNextAdc would get a SVX ...
   while ( GetNextAdc() ) {
@@ -185,9 +204,9 @@ Int_t St_pp2pp_Maker::Make(){
 
 
   if (counter < 0) {
-    LOG_INFO << "There was no pp2pp data for this event. " << endm;
+    LOG_DEBUG << "There was no pp2pp data for this event. " << endm;
   } else {
-    LOG_INFO << "End of pp2pp data for this event : " << GetEventNumber() << ", Total = "  << counter+1 
+    LOG_DEBUG << "End of pp2pp data for this event : " << GetEventNumber() << ", Total = "  << counter+1 
 	     << " records were found" << endm;
   }
 
@@ -196,12 +215,12 @@ Int_t St_pp2pp_Maker::Make(){
   // to discard the result one should call  "delete pp2ppRawHits"
 
 
-  if ( LDoCluster ) { 
+  if ( mLDoCluster ) { 
 
     for ( Int_t i=0; i<MAXSEQ; i++)
       for ( Int_t j=0; j<MAXCHAIN; j++) {
-	sort( (validhits[i][j]).begin(), (validhits[i][j]).end(), hitcompare);
-	//	cout << "Size of vector of sequencer " << i+1 << " chain " << j << " " << dec << (validhits[i][j]).size() << endl ;
+	sort( (mvalidhits[i][j]).begin(), (mvalidhits[i][j]).end(), hitcompare);
+	//	cout << "Size of vector of sequencer " << i+1 << " chain " << j << " " << dec << (mvalidhits[i][j]).size() << endl ;
       }
 
     MakeClusters();
@@ -287,16 +306,16 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 
       //      cout << "channel " << c << " , adc " << (int) d.adc[c] << endl ;
 
-      if ( LDoCluster && (c != 127) && (c != 0) ) { // Avoid the channels at 2 ends of SVX
+      if ( mLDoCluster && (c != 127) && (c != 0) ) { // Avoid the channels at 2 ends of SVX
 	
 	// Getting rid of the 1st channel (0) and the last channel (127)
 	onehit.first = mLast_svx*(MAXSTRIP-2) + oneSihit.channel - 1  ; 
 
-	onehit.second = oneSihit.adc -  pedave[mLast_seq-1][mLast_chain][mLast_svx][oneSihit.channel] ;
+	onehit.second = oneSihit.adc -  mpedave[mLast_seq-1][mLast_chain][mLast_svx][oneSihit.channel] ;
 
-	if ( onehit.second > 5*pedrms[mLast_seq-1][mLast_chain][mLast_svx][oneSihit.channel] ) {
-	  (validhits[mLast_seq-1][mLast_chain]).push_back(onehit);
-	  //	  cout << "validhits : position " << onehit.first << " , energy " << onehit.second << endl ;
+	if ( onehit.second > 5*mpedrms[mLast_seq-1][mLast_chain][mLast_svx][oneSihit.channel] ) {
+	  (mvalidhits[mLast_seq-1][mLast_chain]).push_back(onehit);
+	  //	  cout << "mvalidhits : position " << onehit.first << " , energy " << onehit.second << endl ;
 	}
       }
 
@@ -313,25 +332,51 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
 
 Int_t St_pp2pp_Maker::MakeClusters() {
 
-  //  const Int_t MAX_Cls_L = 5 ;
-  //  const Int_t MIN_Charge = 20 ;
+  const Int_t MAX_Cls_L = 5 ;
+  const Int_t MIN_Charge = 20 ;
   /// Orientations for each silicon plane
   const short orientations[MAXCHAIN*MAXSEQ] = {-1,1,-1,1,  1,-1,1,-1,  1,1,1,1, -1,-1,-1,-1,  -1,-1,-1,-1,  1,1,1,1,  -1,1,-1,1, 1,-1,1,-1 };
   /// Assume 4 planes have the same z at least for now
   const double zcoordinates[MAXSEQ] = { -55.496, -55.496, -58.496, -58.496, 55.496, 55.496, 58.496, 58.496 };
+
+  /// Mappings to deal with the trigger data
+  const short EW[MAXSEQ]   = { 0, 0, 0, 0, 1, 1, 1, 1 } ; /// East = 0, West = 1
+  const short VH[MAXSEQ]   = { 1, 1, 0, 0, 1, 1, 0, 0 } ; /// Vertical = 0, Horizontal = 1
+  const short UDOI[MAXSEQ] = { 1, 0, 0, 1, 1, 0, 1, 0 } ; /// Up=0, Down=1; Outer=0, Inner=1
 
   Bool_t is_candidate_to_store ;
 
   Int_t NCluster_Length ;
   Double_t ECluster, POStimesE, position, offset ;
 
+  StTriggerData* trg_p = 0 ;
+  /// Fetching the pointer to the Trigger Data
+  TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
+  if (os) {
+    trg_p = (StTriggerData*)os->GetObject();
+  }
+
+
   /// Creating a new StEvent object
-  pp2ppColl = new StRpsCollection(); 
+  StRpsCollection * pp2ppColl = new StRpsCollection(); 
 
   vector< HitChannel >::iterator it, it_next ;
 
   for ( Int_t i=0; i<MAXSEQ; i++) /// each sequencer/roman-pot
     for ( Int_t j=0; j<MAXCHAIN; j++) { /// each chain/silicon-plane
+
+
+      // Put in trigger stuff 
+
+      if(trg_p){ 
+	pp2ppColl->romanPot(i)->setAdc(	(u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// u_short -> u_int
+					(u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
+	pp2ppColl->romanPot(i)->setTac(	(u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// u_short -> u_int
+					(u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
+      }
+      else
+	LOG_WARN << "No StTriggerData ?! " << endm ;
+
 
       NCluster_Length = 0 ;
       ECluster = 0 ;
@@ -339,19 +384,19 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
       pp2ppColl->romanPot(i)->plane(j)->setZ(zcoordinates[i]) ; 
 
-      if ( offset_table )
-	offset = offset_table[0].rp_offset_plane[4*i+j]/1000. ; /// all in m
+      if ( moffset_table )
+	offset = moffset_table[0].rp_offset_plane[4*i+j]/1000. ; /// all in m
       else
 	offset = double(ErrorCode) ;
-      //      cout << "Offsets : " <<  i << " " << j << " " << offset_table[0].rp_offset_plane[4*i+j] << endl ; 
+      //      cout << "Offsets : " <<  i << " " << j << " " << moffset_table[0].rp_offset_plane[4*i+j] << endl ; 
 
       pp2ppColl->romanPot(i)->plane(j)->setOffset( offset ) ; 
 
       pp2ppColl->romanPot(i)->plane(j)->setOrientation( orientations[4*i+j] ) ;
 
-      it = (validhits[i][j]).begin() ;
+      it = (mvalidhits[i][j]).begin() ;
 
-      while ( it != (validhits[i][j]).end() ) {
+      while ( it != (mvalidhits[i][j]).end() ) {
 
 	//	cout << "Seq: " << i+1 << " , chain " << j << ", channel : " << it->first << " , energy : " << it->second << endl ;
 	NCluster_Length++ ;
@@ -363,7 +408,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 	is_candidate_to_store = kFALSE ;
 
 	// Deciding whether it's time to finish this particular clustering process
-	if ( it_next != (validhits[i][j]).end() ) {
+	if ( it_next != (mvalidhits[i][j]).end() ) {
 
 	  // if the next one is not a neighbor --> a candidate cluster
 	  if ( (it_next->first - it->first)!=1  ) 
@@ -376,7 +421,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	if ( is_candidate_to_store == kTRUE ) {
 
-	  //	  if ( NCluster_Length <= MAX_Cls_L && ECluster >= MIN_Charge ) {
+	  if ( NCluster_Length <= MAX_Cls_L && ECluster >= MIN_Charge ) {
 
 	    // StEvent Clusters
 	    StRpsCluster * oneStCluster = new StRpsCluster() ;
@@ -395,7 +440,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
 	    pp2ppColl->romanPot(i)->plane(j)->addCluster(oneStCluster);
 
-	  //	  } 
+	  } 
 	  /*
 	  else
 	    cout << "NOT Stored ! seq/chain : " << i+1 << "/" << j 
@@ -416,14 +461,14 @@ Int_t St_pp2pp_Maker::MakeClusters() {
     } // for ( Int_t j=0; j<MAXCHAIN; j++) {
 
 
-  // Store into StEvent
   mEvent = (StEvent *) GetInputDS("StEvent");
   if ( mEvent ) {
+    // Store into StEvent
     mEvent->setRpsCollection(pp2ppColl);
   }
   else
-    LOG_WARN << "St_pp2pp_Maker : StEvent not found !" << endm ;
-
+    LOG_ERROR << "St_pp2pp_Maker : StEvent not found !" << endm ;
+  
   return 1 ;
 
 }
