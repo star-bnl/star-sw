@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.1 2009/09/23 02:28:41 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.2 2009/11/21 00:29:52 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.2  2009/11/21 00:29:52  geurts
+ * Dtabase readout made more robust, static const moved to cxx.
+ *
  * Revision 1.1  2009/09/23 02:28:41  geurts
  * first version: Combined BTOF & VPD CalibMaker
  *
@@ -49,6 +52,17 @@
 #ifdef __ROOT__
 ClassImp(StBTofCalibMaker)
 #endif
+
+ /// Very High resolution mode, pico-second per bin
+const Double_t StBTofCalibMaker::VHRBIN2PS =  24.4140625; // 1000*25/1024 (ps/chn)
+/// High resolution mode, pico-second per bin                                                       
+const Double_t StBTofCalibMaker::HRBIN2PS = 97.65625; // 97.65625= 1000*100/1024  (ps/chn)  
+/// tdc limit                                          
+const Double_t StBTofCalibMaker::TMAX = 51200.;           
+///   VzVpd - VzProj cut
+const Double_t StBTofCalibMaker::VZDIFFCUT=6.;          
+const Double_t StBTofCalibMaker::mC_Light = C_C_LIGHT/1.e9;
+
 
 //_____________________________________________________________________________
 StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
@@ -240,13 +254,13 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     Int_t numRows = tofTotCorr->GetNRows();
 
     if(numRows!=mNTray*mNTDIG+mNVPD*2) {
-      LOG_WARN  << " Mis-matched number of rows in tofTotbCorr table! " << endm;
-      //      return kStErr;
+      LOG_WARN  << " Mis-matched number of rows in tofTotbCorr table! "  << numRows 
+		<< " (exp:" << mNTray*mNTDIG+mNVPD*2 << ")" << endm;
     }
 
     LOG_DEBUG << " Number of rows read in: " << numRows << " for ToT correction" << endm;
 
-    for (Int_t i=0;i<mNTray*mNTDIG+mNVPD*2;i++) {
+    for (Int_t i=0;i<numRows;i++) {
       short trayId = totCorr[i].trayId;
       short moduleId = totCorr[i].moduleId;
       short boardId = (moduleId-1)/4+1;      // used for trays
@@ -278,13 +292,13 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     numRows = tofZCorr->GetNRows();
     
     if(numRows!=mNTray*mNTDIG) {
-      LOG_WARN << " Mis-matched number of rows in tofZbCorr table! " << endm;
-      //      return kStErr;
+      LOG_WARN << " Mis-matched number of rows in tofZbCorr table! "  << numRows 
+		<< " (exp:" << mNTray*mNTDIG+mNVPD*2 << ")" << endm;
     }
     LOG_DEBUG << " Number of rows read in: " << numRows << " for Z correction" << endm;
 
 
-    for (Int_t i=0;i<mNTray*mNTDIG;i++) {
+    for (Int_t i=0;i<numRows;i++) {
       short trayId = totCorr[i].trayId;
       short moduleId = totCorr[i].moduleId;
       short boardId = (moduleId-1)/4+1;      // used for trays
@@ -313,10 +327,11 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     LOG_DEBUG << " Number of rows read in: " << numRows << " for TOffset correction" << endm;
 
     if(numRows!=mNTray) {
-      LOG_WARN << " Mis-matched number of rows in tofTOffset table! " << endm;
+      LOG_WARN << " Mis-matched number of rows in tofTOffset table! " << numRows 
+		<< " (exp:" << mNTray << ")" << endm;
       //      return kStErr;
     }
-    for (Int_t i=0;i<mNTray;i++) {
+    for (Int_t i=0;i<numRows;i++) {
       short trayId = tZero[i].trayId;
       LOG_DEBUG << " tray " << trayId << endm;
       

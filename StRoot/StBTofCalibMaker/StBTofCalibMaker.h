@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.1 2009/09/23 02:28:41 geurts Exp $
+ * $Id: StBTofCalibMaker.h,v 1.2 2009/11/21 00:29:52 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.2  2009/11/21 00:29:52  geurts
+ * Dtabase readout made more robust, static const moved to cxx.
+ *
  * Revision 1.1  2009/09/23 02:28:41  geurts
  * first version: Combined BTOF & VPD CalibMaker
  *
@@ -52,18 +55,18 @@ public:
   /// Default constructor
   StBTofCalibMaker(const char* name="tofCalib");
   /// Destructor
-  ~StBTofCalibMaker();
+  virtual ~StBTofCalibMaker();
     
-  Int_t Init();
-  Int_t InitRun(int);
-  Int_t FinishRun(int);
-  Int_t Make();
-  Int_t Finish();
+  virtual Int_t Init();
+  virtual Int_t InitRun(int);
+  virtual Int_t FinishRun(int);
+  virtual Int_t Make();
+  virtual Int_t Finish();
 
   /// Reset the calibration parameters
   void  resetPars();
   /// Initialize the calibration parameters from dbase
-  Int_t initParameters(int);
+  Int_t initParameters(Int_t runnumber);
 
   /// switch to select the Helix Geometry  
   void setOuterGeometry(const bool);
@@ -74,10 +77,10 @@ public:
   void setUseEventVertex(const bool);
   /// read calibration parameters from file
   void setInitFromFile(const Bool_t = kTRUE);
-  void setCalibFilePvpd(Char_t*);
-  void setCalibFileTot(Char_t*);
-  void setCalibFileZhit(Char_t*);
-  void setCalibFileT0(Char_t*);
+  void setCalibFilePvpd(const Char_t*);
+  void setCalibFileTot(const Char_t*);
+  void setCalibFileZhit(const Char_t*);
+  void setCalibFileT0(const Char_t*);
 
 
   void tsum(const Double_t *tot, const Double_t *time);
@@ -88,26 +91,27 @@ public:
   void     setVPDHitsCut(const Int_t, const Int_t);
 
 private:
-    static const Int_t mNTOF = 192;        // 192 for tof in Run 8++
-    static const Int_t mNTDIG = 8;         // 8 per tray in Run 8++
-    static const Int_t mNModule = 32;      // 32 for tofr5++ 
-    static const Int_t mNVPD = 19;         // 19 tubes at each side
-    static const Int_t mNCell = 6;         // 6 cells per module
-    static const Int_t mNBinMax = 60;      // 60 bins for T-Tot, T-Z correction
+  enum{
+    mNTOF = 192,        // 192 for tof in Run 8++
+    mNTDIG = 8,         // 8 per tray in Run 8++
+    mNModule = 32,      // 32 for tofr5++ 
+    mNVPD = 19,         // 19 tubes at each side
+    mNCell = 6,         // 6 cells per module
+    mNBinMax = 60,      // 60 bins for T-Tot, T-Z correction
 
-    static const Int_t mNTray = 120;        // 120 trays in full
-    static const Int_t mWestVpdTrayId = 121;
-    static const Int_t mEastVpdTrayId = 122;
-    
+    mNTray = 120,        // 120 trays in full
+    mWestVpdTrayId = 121,
+    mEastVpdTrayId = 122
+  };
 
-    static const Double_t VHRBIN2PS =  24.4140625;  // Very High resolution mode, pico-second per bin
-                                                 // 1000*25/1024 (ps/chn)
-    static const Double_t HRBIN2PS = 97.65625;     // High resolution mode, pico-second per bin
-                                                 // 97.65625= 1000*100/1024  (ps/chn)
-    static const Double_t TMAX = 51200.;           // tdc limit
-    static const Double_t VZDIFFCUT=6.;          //   VzVpd - VzProj cut
+  static const Double_t VHRBIN2PS; // Very High resolution mode, pico-second per bin
+                                   // 1000*25/1024 (ps/chn)
+  static const Double_t HRBIN2PS;  // High resolution mode, pico-second per bin
+                                   // 97.65625= 1000*100/1024  (ps/chn)
+  static const Double_t TMAX;      // tdc limit
+  static const Double_t VZDIFFCUT; // VzVpd - VzProj cut
 
-    static const Double_t mC_Light = C_C_LIGHT/1.e9;
+  static const Double_t mC_Light;  // = C_C_LIGHT/1.e9;
 
     Bool_t     mValidCalibPar;
     Bool_t     mValidStartTime;
@@ -155,7 +159,7 @@ private:
     string mCalibFileT0;   //! filename for T0 calibration parameters
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.1 2009/09/23 02:28:41 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.2 2009/11/21 00:29:52 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,1)
 };
@@ -166,9 +170,9 @@ inline void StBTofCalibMaker::setSlewingCorr(const bool val) { mSlewingCorr=val;
 inline void StBTofCalibMaker::setUseEventVertex(const bool val) { mUseEventVertex=val; }
 inline Double_t StBTofCalibMaker::vpdVertexZ() { return mVPDVtxZ; }
 inline void StBTofCalibMaker::setInitFromFile(const Bool_t val)  {mInitFromFile = val; }
-inline void StBTofCalibMaker::setCalibFilePvpd(Char_t* filename) {mCalibFilePvpd = filename;}
-inline void StBTofCalibMaker::setCalibFileTot(Char_t* filename)  {mCalibFileTot = filename;}
-inline void StBTofCalibMaker::setCalibFileZhit(Char_t* filename) {mCalibFileZhit = filename;}
-inline void StBTofCalibMaker::setCalibFileT0(Char_t* filename)   {mCalibFileT0 = filename;}
+inline void StBTofCalibMaker::setCalibFilePvpd(const Char_t* filename) {mCalibFilePvpd = filename;}
+inline void StBTofCalibMaker::setCalibFileTot(const Char_t* filename)  {mCalibFileTot = filename;}
+inline void StBTofCalibMaker::setCalibFileZhit(const Char_t* filename) {mCalibFileZhit = filename;}
+inline void StBTofCalibMaker::setCalibFileT0(const Char_t* filename)   {mCalibFileT0 = filename;}
 
 #endif
