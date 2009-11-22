@@ -1,6 +1,9 @@
-// $Id: gasTemp.C,v 1.1 2009/10/14 15:58:43 jcs Exp $
+// $Id: gasTemp.C,v 1.2 2009/11/22 20:48:30 jcs Exp $
 //
 // $Log: gasTemp.C,v $
+// Revision 1.2  2009/11/22 20:48:30  jcs
+// set 2D histogram limits depending on deltaT
+//
 // Revision 1.1  2009/10/14 15:58:43  jcs
 // change and add macros so that in addition to varying t0 and the gas compostion,
 // the gas temperature can be varied
@@ -102,8 +105,10 @@ void gasTemp(TString filename,int ftpc, int lsec, int straight, int gfit,char* t
          break;
       }
 
+
+  float deltaT;
   // Interation over temperature
-  for (gastemp = -2; gastemp<4.5; gastemp+=0.5)
+  for (deltaT = gastemp-2; deltaT<gastemp+4.5; deltaT+=0.5)
     {
       // Interation over gas composition
       for (int k=-5;k<8;k++)
@@ -115,11 +120,11 @@ void gasTemp(TString filename,int ftpc, int lsec, int straight, int gfit,char* t
 	  //sprintf(T,"%.2f",step);
 	  sprintf(g,"%.2f",step2);
 	  cout<<endl;
-          cout<<"laser->DoLaserCalib: deltaT = "<<gastemp<<" und deltaGas = "<<g<<endl;
-	  if (k==0 && gastemp==0)
+          cout<<"laser->DoLaserCalib: deltaT = "<<deltaT<<" und deltaGas = "<<g<<endl;
+	  if (k==0 && deltaT==0)
 	    cout<<"Comes at the end !!!"<<endl;
 	  else
-	    laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,t0,g,gastemp,mbfield);
+	    laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,t0,g,deltaT,mbfield);
 	}
     }
 
