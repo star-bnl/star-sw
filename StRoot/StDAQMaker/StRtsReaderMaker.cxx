@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.29 2009/11/19 22:42:22 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.30 2009/11/23 15:56:15 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.30  2009/11/23 15:56:15  fisyak
+ * reduce print out
+ *
  * Revision 1.29  2009/11/19 22:42:22  fine
  * remove the token leak #1712
  *
@@ -332,9 +335,11 @@ TDataSet *StRtsReaderMaker::FillTable()
                         , fBank->row);
 
       fRtsTable->SetNRows(0);
-      LOG_DEBUG <<" StRtsReaderMaker::FillTable(): the bank size is  " 
-            << fBank->ncontent << " row" << ((fBank->ncontent>1)?"s ":" ")
-            << fRtsTable->GetRowSize() << " bytes each" << endm;
+      if (Debug()) {
+	LOG_DEBUG <<" StRtsReaderMaker::FillTable(): the bank size is  " 
+		  << fBank->ncontent << " row" << ((fBank->ncontent>1)?"s ":" ")
+		  << fRtsTable->GetRowSize() << " bytes each" << endm;
+      }
       fRtsTable->AppendRows(fBank->Byte,fBank->ncontent);
       fRtsTable->SetNRows(fBank->ncontent);
    } else if (fDatReader) {
@@ -408,7 +413,7 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
                        << "\"," << atoi(tokens->At(3)->GetName())
                        << ")  "
                        << "fBank = "<< thisMaker->fBank << endm;
-                 break;
+	         break;
                case 3:
                  thisMaker->fBank = rts_det->get( tokens->At(2)->GetName()
                                  ,atoi(tokens->At(3)->GetName())
