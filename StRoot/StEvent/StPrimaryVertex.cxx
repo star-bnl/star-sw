@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.14 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.15 2009/11/23 22:25:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.15  2009/11/23 22:25:21  ullrich
+ * Added new member mNumMatchesWithBTOF and related access fcts.
+ *
  * Revision 2.14  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -62,7 +65,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.14 2009/11/23 16:34:06 fisyak Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.15 2009/11/23 22:25:21 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 {init();}
@@ -75,6 +78,7 @@ void StPrimaryVertex::init()
     mNumMatchesWithCTB = 0; 
     mNumMatchesWithBEMC = 0;
     mNumMatchesWithEEMC = 0;
+    mNumMatchesWithBTOF = 0;
     mNumTracksCrossingCentralMembrane = 0; 
     mMeanDip = 0;
     mSumOfTrackPt = 0;
