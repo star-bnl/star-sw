@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.h,v 2.7 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StPrimaryTrack.h,v 2.8 2009/11/23 22:20:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.h,v $
+ * Revision 2.8  2009/11/23 22:20:51  ullrich
+ * Minor cleanup performed, fixed compiler warnings.
+ *
  * Revision 2.7  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -58,7 +61,7 @@ public:
 private:
 //  StPrimaryVertex*         	mVertex; 	//$LINK
 #ifdef __CINT__
-    StObjLink  		     	mVertex; 	
+    StObjLink  		mVertex; 	
 #else
     StLink<StPrimaryVertex>  	mVertex; 	
 #endif //__CINT__

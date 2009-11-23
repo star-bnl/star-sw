@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.6 2009/10/12 23:52:32 fisyak Exp $
+ * $Id: StTpcRawData.h,v 2.7 2009/11/23 22:20:51 ullrich Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.7  2009/11/23 22:20:51  ullrich
+ * Minor cleanup performed, fixed compiler warnings.
+ *
  * Revision 2.6  2009/10/12 23:52:32  fisyak
  * Fix relation npad from pad row
  *
@@ -73,8 +76,8 @@ typedef StDigitalSector::iterator            StDigitalRowIterator;
 typedef std::vector<StSequence>              StVecSequence;
 typedef std::vector<UShort_t*>               StVecIds;
 typedef std::vector<UChar_t>                 StVecPads;
-typedef std::vector<UChar_t> 	             StVecUChar;
-typedef std::vector<Int_t> 	             StVecInt;
+typedef std::vector<UChar_t> 	               StVecUChar;
+typedef std::vector<Int_t> 	               StVecInt;
 typedef std::vector<StTpcPixel>              StVectPixel;
 
 class StTpcDigitalSector : public StObject {
