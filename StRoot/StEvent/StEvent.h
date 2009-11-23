@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.36 2009/11/23 19:45:42 fisyak Exp $
+ * $Id: StEvent.h,v 2.37 2009/11/23 22:22:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.37  2009/11/23 22:22:25  ullrich
+ * Minor cleanup performed and hooks for RPS added.
+ *
  * Revision 2.36  2009/11/23 19:45:42  fisyak
  * remove reference to event_header_st
  *
@@ -149,6 +152,7 @@ class StSvtHitCollection;
 class StSsdHitCollection;
 class StEmcCollection;
 class StRichCollection;
+class StRpsCollection;
 class StTofCollection;
 class StBTofCollection;
 class StTriggerDetectorCollection;
@@ -204,6 +208,8 @@ public:
     const StEmcCollection*              emcCollection() const;
     StRichCollection*                   richCollection();
     const StRichCollection*             richCollection() const;
+    StRpsCollection*                    rpsCollection();
+    const StRpsCollection*              rpsCollection() const;
     StTofCollection*                    tofCollection();
     const StTofCollection*              tofCollection() const;
     StBTofCollection*                   btofCollection();
@@ -283,6 +289,7 @@ public:
     void setSsdHitCollection(StSsdHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setRichCollection(StRichCollection*);
+    void setRpsCollection(StRpsCollection*);
     void setTofCollection(StTofCollection*);
     void setBTofCollection(StBTofCollection*);
     void setFpdCollection(StFpdCollection*);

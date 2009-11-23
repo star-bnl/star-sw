@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.21 2008/12/22 20:36:54 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.22 2009/11/23 22:22:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.22  2009/11/23 22:22:25  ullrich
+ * Minor cleanup performed and hooks for RPS added.
+ *
  * Revision 2.21  2008/12/22 20:36:54  ullrich
  * Added hooks for new ToF (BTof)
  *
@@ -77,7 +80,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.21 2008/12/22 20:36:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.22 2009/11/23 22:22:25 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -119,6 +122,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StBTofCollection",            "evt_aux",      7);
     setBranch("StFpdCollection",             "evt_aux",      7);
     setBranch("StPhmdCollection",            "evt_aux",      7);
+    setBranch("StRpsCollection",             "evt_aux",      7);
     setBranch("StSsdHitCollection",          "evt_hits",     8);
     setBranch("StSvtHitCollection",          "evt_hits",     8);
     setBranch("StTpcHitCollection",          "evt_hits",     8);
@@ -135,8 +139,9 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StEmcCollection",             "event", 1);
     setBranch("StRichCollection",            "event", 1);
     setBranch("StTofCollection",             "event", 1);
-    setBranch("StBTofCollection",             "event", 1);
+    setBranch("StBTofCollection",            "event", 1);
     setBranch("StFpdCollection",             "event", 1);
+    setBranch("StRpsCollection",             "event", 1);
     setBranch("StSsdHitCollection",          "event", 1);
     setBranch("StSvtHitCollection",          "event", 1);
     setBranch("StTpcHitCollection",          "event", 1);

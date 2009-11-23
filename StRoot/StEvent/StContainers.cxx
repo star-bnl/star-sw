@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.19 2008/12/24 22:15:53 fisyak Exp $
+ * $Id: StContainers.cxx,v 2.20 2009/11/23 22:22:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.20  2009/11/23 22:22:25  ullrich
+ * Minor cleanup performed and hooks for RPS added.
+ *
  * Revision 2.19  2008/12/24 22:15:53  fisyak
  * Add implementation for BTof containers
  *
@@ -83,6 +86,7 @@
 #include "StRichPhotonInfo.h"
 #include "StRichCluster.h"
 #include "StRichMCInfo.h"
+#include "StRpsCluster.h"
 #include "StEmcRawHit.h"
 #include "StEmcCluster.h"
 #include "StEmcPoint.h"
@@ -122,6 +126,7 @@ StCollectionImp(RichPixel)
 StCollectionImp(RichPid)
 StCollectionImp(RichPhotonInfo)
 StCollectionImp(RichMCInfo)
+StCollectionImp(RpsCluster)
 StCollectionImp(EmcRawHit)
 StCollectionImp(EmcCluster)
 StCollectionImp(EmcPoint)

@@ -85,6 +85,12 @@
 #define kFmsIdentifier                32
 
 /*
+ **  The following are for the Roman Pot
+ **  silicon detectors (pp2pp) (tu November 6, 2009)
+ */
+#define kRpsIdentifier                33
+
+/*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
 **  happen or not. (OBSOLETE)
@@ -100,9 +106,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.7 2009/04/06 19:23:53 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.8 2009/11/23 22:22:25 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.8  2009/11/23 22:22:25  ullrich
+** Minor cleanup performed and hooks for RPS added.
+**
 ** Revision 2.7  2009/04/06 19:23:53  ullrich
 ** Add detector Ids for FPD East/West and FMS.
 **

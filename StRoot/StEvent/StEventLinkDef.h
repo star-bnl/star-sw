@@ -120,5 +120,6 @@
 #pragma link C++ function operator<<(ostream&, const StMeasuredPoint&);        
 #pragma link C++ function operator<<(ostream&, const StHit&);        
 #pragma link C++ function operator<<(ostream&, const StRnDHit&);        
+#pragma link C++ function operator<<(ostream&, const StRpsCluster&);        
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.22 2008/12/22 20:36:52 ullrich Exp $
+ * $Id: StContainers.h,v 2.23 2009/11/23 22:22:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.23  2009/11/23 22:22:25  ullrich
+ * Minor cleanup performed and hooks for RPS added.
+ *
  * Revision 2.22  2008/12/22 20:36:52  ullrich
  * Added hooks for new ToF (BTof)
  *
@@ -101,6 +104,7 @@ class StRichPid;
 class StRichPhotonInfo;
 class StRichCluster;
 class StRichMCInfo;
+class StRpsCluster;
 class StEmcRawHit;
 class StEmcCluster;
 class StEmcPoint;
@@ -140,6 +144,7 @@ StCollectionDef(RichPid)
 StCollectionDef(RichPhotonInfo)
 StCollectionDef(RichCluster)
 StCollectionDef(RichMCInfo)
+StCollectionDef(RpsCluster)
 StCollectionDef(EmcRawHit)
 StCollectionDef(EmcCluster)
 StCollectionDef(EmcPoint)
