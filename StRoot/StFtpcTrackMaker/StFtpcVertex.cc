@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.24 2008/05/13 12:23:33 jcs Exp $
+// $Id: StFtpcVertex.cc,v 1.25 2009/11/23 16:38:11 fisyak Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.25  2009/11/23 16:38:11  fisyak
+// Remove dependence on dst_vertex_st
+//
 // Revision 1.24  2008/05/13 12:23:33  jcs
 // set FTPC calibration vertex flag: 0 = fit successful, 1 = fit unsuccessful
 //
@@ -113,7 +116,6 @@
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "tables/St_g2t_vertex_Table.h"
-#include "tables/St_dst_vertex_Table.h"
 
 #include "StVertex.h"
 
@@ -318,22 +320,6 @@ StFtpcVertex::StFtpcVertex(StVertex *vertex)
 
   SetIFlag(vertex->flag());
   SetId(vertex->type());
-}  
-
-
-StFtpcVertex::StFtpcVertex(dst_vertex_st *vertex)
-{
-  // constructor from dst vertex
-  
-  SetX(vertex->x);
-  SetY(vertex->y);
-  SetZ(vertex->z);
-  SetXerr(TMath::Sqrt(vertex->covar[0]));
-  SetYerr(TMath::Sqrt(vertex->covar[2]));
-  SetZerr(TMath::Sqrt(vertex->covar[5]));  
-
-  SetIFlag(vertex->iflag);
-  SetId(vertex->id);
 }  
 
 
