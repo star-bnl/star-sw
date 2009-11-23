@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.15 2005/11/09 22:08:36 fisyak Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.16 2009/11/23 16:44:55 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.16  2009/11/23 16:44:55  fisyak
+ * Remove references to tables
+ *
  * Revision 1.15  2005/11/09 22:08:36  fisyak
  * Use for IdTruth id_mctrack (instead of id_mchit)
  *
@@ -153,13 +156,6 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis,
     mGlobalPos.setX(::sqrt(mSvtAnalysis->GetCluXCov(hit)));
     mGlobalPos.setY(::sqrt(mSvtAnalysis->GetCluYCov(hit)));
     mGlobalPos.setZ(0.0042);
-
-    mGlobalPos.setX(0.03);
-    mGlobalPos.setY(0.03);
-    mGlobalPos.setZ(0.03);
-    
-    mSvtHit[hit].setPositionError(mGlobalPos); 
-
     
     mGlobalPos.setX(-9999.0);
     mGlobalPos.setY(-9999.0);
@@ -200,13 +196,6 @@ int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit,
   mPos[mNumOfHits].setX(WaferCoord->timebucket());
   mPos[mNumOfHits].setY(WaferCoord->anode());
   mPos[mNumOfHits].setZ(0.0);
-  
-  mGlobalPos.setX(mSrsHit->res[0]);
-  mGlobalPos.setY(mSrsHit->res[1]);
-  mGlobalPos.setZ(mSrsHit->res[2]);
-  
-  mSvtHit[mNumOfHits].setPositionError(mGlobalPos); 
-  
   
   mGlobalPos.setX(mSrsHit->x[0]);
   mGlobalPos.setY(mSrsHit->x[1]);
