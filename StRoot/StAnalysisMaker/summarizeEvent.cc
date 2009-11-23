@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: summarizeEvent.cc,v 2.23 2007/10/19 16:18:32 fine Exp $
+* $Id: summarizeEvent.cc,v 2.24 2009/11/23 15:54:28 fisyak Exp $
 *
 * Author: Torre Wenaus, BNL,
 *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
 ***************************************************************************
 *
 * $Log: summarizeEvent.cc,v $
+* Revision 2.24  2009/11/23 15:54:28  fisyak
+* Clean-up est tracks
+*
 * Revision 2.23  2007/10/19 16:18:32  fine
 * new Db schema from TxCorp
 *
@@ -92,7 +95,7 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.23 2007/10/19 16:18:32 fine Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.24 2009/11/23 15:54:28 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -412,18 +415,18 @@ summarizeEvent(StEvent& event, const int &nevents)
         Int_t NoHits =  rndhits->numberOfHits();
         if (NoHits) {
             struct NoHits_t {
-                StDetectorId kId;
-                Char_t     *Name;
-                Int_t       TotalNoOfHits;
-                Int_t       noBadHits;
-                Int_t       noHitsUsedInFit;
+                StDetectorId  kId;
+                const Char_t *Name;
+                Int_t         TotalNoOfHits;
+                Int_t         noBadHits;
+                Int_t         noHitsUsedInFit;
             };
             const Int_t NHtypes = 4;
             NoHits_t Hits[7] = {
-            {kPxlId, "Hft", 0, 0, 0},
-            {kIstId, "Ist", 0, 0, 0},           
-            {kFgtId, "Fgt", 0, 0, 0},           
-            {kUnknownId,"UnKnown", 0, 0, 0}
+	      {kPxlId, "Hft", 0, 0, 0},
+	      {kIstId, "Ist", 0, 0, 0},           
+	      {kFgtId, "Fgt", 0, 0, 0},           
+	      {kUnknownId,"UnKnown", 0, 0, 0}
             };           
             StRnDHit* hit;
             for (Int_t i = 0; i < NoHits; i++) {
