@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.8 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.9 2009/11/23 22:20:51 ullrich Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.9  2009/11/23 22:20:51  ullrich
+ * Minor cleanup performed, fixed compiler warnings.
+ *
  * Revision 2.8  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -78,8 +81,8 @@ void StTpcDigitalSector::assignTimeBins(Int_t rowN, Int_t padN, StDigitalTimeBin
   if (rowN < 1 || rowN > __NumberOfRows__ ||
       padN < 1 || padN > NumberOfPadsAtRow[rowN-1]) return;
 #else
-  assert(rowN >= 1 && rowN <= __NumberOfRows__ ||
-	 padN >= 1 && padN <= NumberOfPadsAtRow[rowN-1]);
+  assert( (rowN >= 1 && rowN <= __NumberOfRows__ ) ||
+	(padN >= 1 && padN <= NumberOfPadsAtRow[rowN-1]));
 #endif
   StDigitalPadRow    &Row = mData[(rowN-1)];
   StDigitalTimeBins  &Pad = Row[(padN-1)];

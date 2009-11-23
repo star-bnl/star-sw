@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.17 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StSvtHit.cxx,v 2.18 2009/11/23 22:20:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.18  2009/11/23 22:20:51  ullrich
+ * Minor cleanup performed, fixed compiler warnings.
+ *
  * Revision 2.17  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -68,7 +71,7 @@
 #include "StSvtHit.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.17 2009/11/23 16:34:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.18 2009/11/23 22:20:51 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -264,6 +267,10 @@ StSvtHit::shell(unsigned int barrel, unsigned int ladder) {
 
 unsigned int
 StSvtHit::shell() const {return shell(barrel(), ladder());}
+
+
+int
+StSvtHit::volumeID() const {return 10000 * shell() + 1000 * layer() + 100 * wafer() + ladder();}
 
 ostream&  operator<<(ostream& os, const StSvtHit& v)
 {

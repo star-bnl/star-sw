@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.11 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StSsdHit.h,v 2.12 2009/11/23 22:20:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.12  2009/11/23 22:20:51  ullrich
+ * Minor cleanup performed, fixed compiler warnings.
+ *
  * Revision 2.11  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -76,18 +79,12 @@ public:
     unsigned int centralStripPSide() const;  
     unsigned int clusterSizeNSide() const;   
     unsigned int clusterSizePSide() const;
-    float localPosition(unsigned int) const;
-    static UInt_t sector(UInt_t ladder) {
-      if (ladder <=  2 || ladder == 20) return 1;
-      if (ladder >=  3 && ladder <=  9) return 2;
-      if (ladder >= 10 && ladder <= 12) return 3;
-      if (ladder >= 13 && ladder <= 19) return 4;
-      return 0;
-    }
-    UInt_t       sector() const {return sector(ladder()); }
-    void setLocalPosition(float, float);
-    virtual Int_t  volumeID() const {return 10000 * sector() + 7000 + 100 * wafer() + ladder();}
-    virtual void   Print(const Option_t *option="") const;
+    float        localPosition(unsigned int) const;
+    static unsigned int sector(unsigned int);
+    unsigned int sector() const;
+    void         setLocalPosition(float, float);
+    virtual int  volumeID() const;
+    void         Print(const Option_t *option="") const;
 
 protected:
     static StMemoryPool mPool;  //!
@@ -97,6 +94,19 @@ private:
     enum {mWaferPerLadder=16};
     ClassDef(StSsdHit,2)
 };
+
+inline unsigned int
+StSsdHit::sector(unsigned int ladder) {
+    if (ladder <=  2 || ladder == 20) return 1;
+    if (ladder >=  3 && ladder <=  9) return 2;
+    if (ladder >= 10 && ladder <= 12) return 3;
+    if (ladder >= 13 && ladder <= 19) return 4;
+    return 0;
+}
+
+inline unsigned int
+StSsdHit::sector() const {return sector(ladder()); }
+
 ostream&              operator<<(ostream& os, StSsdHit const & v);
 
 #endif

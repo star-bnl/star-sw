@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.13 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StSsdHit.cxx,v 2.14 2009/11/23 22:20:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
+ * Revision 2.14  2009/11/23 22:20:51  ullrich
+ * Minor cleanup performed, fixed compiler warnings.
+ *
  * Revision 2.13  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -54,7 +57,7 @@
 #include "StSsdHit.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.13 2009/11/23 16:34:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.14 2009/11/23 22:20:51 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -132,6 +135,9 @@ StSsdHit::setLocalPosition(float u, float v)
     mLocalPosition[0] = u;
     mLocalPosition[1] = v;
 }
+
+int
+StSsdHit::volumeID() const {return 10000 * sector() + 7000 + 100 * wafer() + ladder();}
 
 ostream&  operator<<(ostream& os, const StSsdHit& v)
 {

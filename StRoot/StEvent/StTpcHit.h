@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.13 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.14 2009/11/23 22:20:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.14  2009/11/23 22:20:51  ullrich
+ * Minor cleanup performed, fixed compiler warnings.
+ *
  * Revision 2.13  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -93,7 +96,7 @@ public:
     float          timeBucket() const;
     float          pad() const;
     float          chargeModified() const;
-    virtual void   Print(Option_t *option="") const;
+    void           Print(Option_t *option="") const;
     
 protected:
     static StMemoryPool mPool;  //!
@@ -120,7 +123,7 @@ inline unsigned char  StTpcHit::maxPad()   const {return mMcl_x/64 + mMaxpad;}
 inline short          StTpcHit::minTmbk()  const {return mMcl_t/64 - mMintmbk;}
 inline short          StTpcHit::maxTmbk()  const {return mMcl_t/64 + mMaxtmbk;}
 inline int            StTpcHit::volumeID() const {return 100 * sector() + padrow();}
-inline short          StTpcHit::timeBucketsInHit()   const {return bits(22,7);} /* number of time bucket fired in this hit */
+inline short          StTpcHit::timeBucketsInHit()   const {return bits(22,7);} // number of time bucket fired in this hit
 inline float          StTpcHit::timeBucket() const {return static_cast<float>(mMcl_t)/64.;}
 inline float          StTpcHit::pad() const {return static_cast<float>(mMcl_x)/64.;}
 inline float          StTpcHit::chargeModified() const {return mChargeModified;}

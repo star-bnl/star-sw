@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.16 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StSvtHit.h,v 2.17 2009/11/23 22:20:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.17  2009/11/23 22:20:51  ullrich
+ * Minor cleanup performed, fixed compiler warnings.
+ *
  * Revision 2.16  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -108,10 +111,10 @@ public:
     void setAnode(float);
     void setTimebucket(float);
     void setLocalPosition(float, float);
-    virtual Int_t  volumeID() const {return 10000 * shell() + 1000 * layer() + 100 * wafer() + ladder();}
+    virtual int volumeID() const;
     void setNumberOfAnodes(unsigned short);
     void setNumberOfPixels(unsigned short);
-    virtual void   Print(Option_t *option="") const;
+    void Print(Option_t *option="") const;
 
 protected:
     static StMemoryPool mPool;  //!
