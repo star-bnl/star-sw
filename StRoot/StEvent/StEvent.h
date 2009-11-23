@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.35 2009/11/23 19:31:23 fisyak Exp $
+ * $Id: StEvent.h,v 2.36 2009/11/23 19:45:42 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.36  2009/11/23 19:45:42  fisyak
+ * remove reference to event_header_st
+ *
  * Revision 2.35  2009/11/23 19:31:23  fisyak
  * remove reference to event_header_st
  *
@@ -309,7 +312,6 @@ private:
     StEvent& operator=(const StEvent&);
     StEvent(const StEvent&);
     void initToZero();
-    void init(const event_header_st&);
     
     ClassDef(StEvent,4)
 };
