@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.9 2003/09/02 17:58:06 perev Exp $
+ * $Id: StVertex.cxx,v 2.10 2009/11/23 16:34:08 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
+ * Revision 2.10  2009/11/23 16:34:08  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.9  2003/09/02 17:58:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -45,7 +48,6 @@
 #include "TClass.h"
 #include "TFile.h"
 #include "StVertex.h"
-#include "tables/St_dst_vertex_Table.h"
 #include "StTrack.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
@@ -54,7 +56,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.9 2003/09/02 17:58:06 perev Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.10 2009/11/23 16:34:08 fisyak Exp $";
 
 StVertex::StVertex()
 {
@@ -64,19 +66,6 @@ StVertex::StVertex()
     mProbChiSquared = 0;
     mParent = 0;
     fill_n(mCovariantMatrix, 6, 0);
-}
-
-StVertex::StVertex(const dst_vertex_st& v)
-{
-    mType = kUndefinedVtxId;
-    mFlag = v.iflag;
-    copy(v.covar+0, v.covar+6, mCovariantMatrix);
-    mChiSquared     = v.chisq[0];
-    mProbChiSquared = v.chisq[1];
-    mParent = 0;
-    mPosition.setX(v.x);
-    mPosition.setY(v.y);
-    mPosition.setZ(v.z);
 }
 
 StVertex::~StVertex() {/* noop */};

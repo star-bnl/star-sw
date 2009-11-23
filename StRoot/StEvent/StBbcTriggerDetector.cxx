@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.cxx,v 2.13 2009/02/03 15:52:12 fisyak Exp $
+ * $Id: StBbcTriggerDetector.cxx,v 2.14 2009/11/23 16:34:05 fisyak Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.cxx,v $
+ * Revision 2.14  2009/11/23 16:34:05  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.13  2009/02/03 15:52:12  fisyak
  * Add include
  *
@@ -55,8 +58,8 @@
 #include "Stiostream.h"
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
-
-static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.13 2009/02/03 15:52:12 fisyak Exp $";
+#include "TMath.h"
+static const char rcsid[] = "$Id: StBbcTriggerDetector.cxx,v 2.14 2009/11/23 16:34:05 fisyak Exp $";
 
 ClassImp(StBbcTriggerDetector)
     
@@ -429,7 +432,7 @@ StBbcTriggerDetector::zVertex()
         for(int iew=0; iew<2; iew++){
             for(int ich=0; ich<16; ich++){
                 int j=iew*24+ich;	  
-                float tac = tdc(j) - offset[iew][ich] - (tc[0]+tc[1]/exp(-tc[2]*pow(adc(j),tc[3])))/slope;
+                float tac = tdc(j) - offset[iew][ich] - (tc[0]+tc[1]/TMath::Exp(-tc[2]*TMath::Power(adc(j),tc[3])))/slope;
                 if(adc(j)>10 && tac<200 && tac>maxtac[iew]) {maxtac[iew]=tac;}
             }
         }

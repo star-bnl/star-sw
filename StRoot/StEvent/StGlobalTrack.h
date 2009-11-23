@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 2.5 2006/05/24 17:28:19 ullrich Exp $
+ * $Id: StGlobalTrack.h,v 2.6 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
+ * Revision 2.6  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.5  2006/05/24 17:28:19  ullrich
  * Added track-at-DCA geometry.
  *
@@ -44,7 +47,6 @@ class StDcaGeometry;
 class StGlobalTrack : public StTrack {
 public:
     StGlobalTrack();
-    StGlobalTrack(const dst_track_st&);
     StGlobalTrack(const StGlobalTrack&);
     StGlobalTrack& operator=(const StGlobalTrack&);
     ~StGlobalTrack();

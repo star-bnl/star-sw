@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.12 2009/11/10 00:40:17 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.13 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
+ * Revision 2.13  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.12  2009/11/10 00:40:17  ullrich
  * Changed print-out format.
  *
@@ -50,9 +53,8 @@
  **************************************************************************/
 #include "StSsdHit.h"
 #include "StTrack.h"
-#include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.12 2009/11/10 00:40:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.13 2009/11/23 16:34:07 fisyak Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -74,53 +76,6 @@ StSsdHit::StSsdHit(const StThreeVectorF& p,
     mLocalPosition[1] = 0;
 }
 
-StSsdHit::StSsdHit(const dst_point_st& pt)
-{
-    //
-    // Unpack charge and status flag
-    //
-    const unsigned int iflag = pt.charge/(1L<<16);
-    const unsigned int ssdq  = pt.charge - iflag*(1L<<16);
-    mCharge = float(ssdq)/(1<<21);
-    mFlag = static_cast<unsigned char>(iflag);
-
-    //
-    // Unpack position in xyz
-    //
-    const float maxRange   = 40;
-    const float mapFactor  = 16000;
-    unsigned int ssdy11 = pt.position[0]/(1L<<20);
-    unsigned int ssdz   = pt.position[1]/(1L<<10);
-    unsigned int ssdx   = pt.position[0] - (1L<<20)*ssdy11;
-    unsigned int ssdy10 = pt.position[1] - (1L<<10)*ssdz;
-    unsigned int ssdy   = ssdy11 + (1L<<10)*ssdy10;
-    mPosition.setX(float(ssdx)/mapFactor - maxRange);
-    mPosition.setY(float(ssdy)/mapFactor - maxRange);
-    mPosition.setZ(float(ssdz)/mapFactor - maxRange);
-    
-    //
-    // Unpack error on position in xyz
-    //
-    ssdy11 = pt.pos_err[0]/(1L<<20);
-    ssdz   = pt.pos_err[1]/(1L<<10);
-    ssdx   = pt.pos_err[0] - (1L<<20)*ssdy11;
-    ssdy10 = pt.pos_err[1] - (1L<<10)*ssdz;
-    ssdy   = ssdy11 + (1L<<10)*ssdy10;
-    mPositionError.setX(float(ssdx)/(1L<<26));
-    mPositionError.setY(float(ssdy)/(1L<<26));
-    mPositionError.setZ(float(ssdz)/(1L<<26));
-
-    //
-    // The hardware position stays at it is
-    //
-    mHardwarePosition = pt.hw_position;
-
-    //
-    // Local positions (to be filled later, not in dst_point)
-    //
-    mLocalPosition[0] = 0;
-    mLocalPosition[1] = 0;
-}
 
 StSsdHit::~StSsdHit() {/* noop */}
 
@@ -184,3 +139,4 @@ ostream&  operator<<(ostream& os, const StSsdHit& v)
 	    << *((StHit *)&v)
 	    << Form(" Luv: %8.3f %8.3f",v.localPosition(0),v.localPosition(1));
 }
+void StSsdHit::Print(const Option_t *option) const { cout << *this << endl;}

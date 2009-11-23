@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.h,v 2.6 2002/11/26 02:19:11 perev Exp $
+ * $Id: StSoftwareMonitor.h,v 2.7 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.h,v $
+ * Revision 2.7  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.6  2002/11/26 02:19:11  perev
  * StEventMaker ITTF modif
  *
@@ -39,88 +42,35 @@
 
 #include "StObject.h"
 
-class StTpcSoftwareMonitor;
-class StSvtSoftwareMonitor;
 class StFtpcSoftwareMonitor;
-class StEmcSoftwareMonitor;
 class StRichSoftwareMonitor;
-class StCtbSoftwareMonitor;
-class StGlobalSoftwareMonitor;
-class StL3SoftwareMonitor;
-class StTofSoftwareMonitor;
-class dst_mon_soft_tpc_st;
-class dst_mon_soft_svt_st;
 class dst_mon_soft_ftpc_st;
-class dst_mon_soft_emc_st;
-class dst_mon_soft_ctb_st;
 class dst_mon_soft_rich_st;
-class dst_mon_soft_glob_st;
-class dst_mon_soft_l3_st;
 
 class StSoftwareMonitor : public StObject {
 public:
     StSoftwareMonitor();
-    StSoftwareMonitor(const dst_mon_soft_tpc_st*,
-                      const dst_mon_soft_svt_st*,
-                      const dst_mon_soft_ftpc_st*,
-                      const dst_mon_soft_emc_st*,
-                      const dst_mon_soft_ctb_st*,
-                      const dst_mon_soft_rich_st*,
-                      const dst_mon_soft_glob_st*,
-                      const dst_mon_soft_l3_st*);
+    StSoftwareMonitor(const dst_mon_soft_ftpc_st*,
+                      const dst_mon_soft_rich_st*);
     StSoftwareMonitor& operator=(const StSoftwareMonitor&);
     StSoftwareMonitor(const StSoftwareMonitor&);
     virtual ~StSoftwareMonitor();
                       
-    StTpcSoftwareMonitor*          tpc();
-    const StTpcSoftwareMonitor*    tpc() const;
-    StSvtSoftwareMonitor*          svt();
-    const StSvtSoftwareMonitor*    svt() const;
     StFtpcSoftwareMonitor*         ftpc();
     const StFtpcSoftwareMonitor*   ftpc() const;
-    StEmcSoftwareMonitor*          emc();
-    const StEmcSoftwareMonitor*    emc() const;
     StRichSoftwareMonitor*         rich();
     const StRichSoftwareMonitor*   rich() const;
-    StCtbSoftwareMonitor*          ctb();
-    const StCtbSoftwareMonitor*    ctb() const;
-    StGlobalSoftwareMonitor*       global();
-    const StGlobalSoftwareMonitor* global() const;
-    StL3SoftwareMonitor*           l3();
-    const StL3SoftwareMonitor*     l3() const;
-    StTofSoftwareMonitor*          tof();
-    const StTofSoftwareMonitor*    tof() const;
 
-    void setTpcSoftwareMonitor   (StTpcSoftwareMonitor*   );
-    void setSvtSoftwareMonitor   (StSvtSoftwareMonitor*   );
     void setFtpcSoftwareMonitor  (StFtpcSoftwareMonitor*  );
-    void setEmcSoftwareMonitor   (StEmcSoftwareMonitor*   );
     void setRichSoftwareMonitor  (StRichSoftwareMonitor*  );
-    void setCtbSoftwareMonitor   (StCtbSoftwareMonitor*   );
-    void setGlobalSoftwareMonitor(StGlobalSoftwareMonitor*);
-    void setL3SoftwareMonitor    (StL3SoftwareMonitor*    );
-    void setTofSoftwareMonitor   (StTofSoftwareMonitor*   );
 
-    void setTpcSoftwareMonitor   (dst_mon_soft_tpc_st*    );
-    void setSvtSoftwareMonitor   (dst_mon_soft_svt_st*    );
     void setFtpcSoftwareMonitor  (dst_mon_soft_ftpc_st*   );
-    void setEmcSoftwareMonitor   (dst_mon_soft_emc_st*    );
     void setRichSoftwareMonitor  (dst_mon_soft_rich_st*   );
-    void setCtbSoftwareMonitor   (dst_mon_soft_ctb_st*    );
-    void setGlobalSoftwareMonitor(dst_mon_soft_glob_st*   );
-    void setL3SoftwareMonitor    (dst_mon_soft_l3_st*     );
    
 protected:
-    StTpcSoftwareMonitor    *mTpcMonitor;
-    StSvtSoftwareMonitor    *mSvtMonitor;
     StFtpcSoftwareMonitor   *mFtpcMonitor;
-    StEmcSoftwareMonitor    *mEmcMonitor;
     StRichSoftwareMonitor   *mRichMonitor;
-    StCtbSoftwareMonitor    *mCtbMonitor;
-    StGlobalSoftwareMonitor *mGlobalMonitor;
-    StL3SoftwareMonitor     *mL3Monitor;
-    StTofSoftwareMonitor    *mTofMonitor;
     
-    ClassDef(StSoftwareMonitor,1)
+    ClassDef(StSoftwareMonitor,2)
 };
 #endif

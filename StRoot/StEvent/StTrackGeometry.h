@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.10 2005/07/06 19:00:52 fisyak Exp $
+ * $Id: StTrackGeometry.h,v 2.11 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.11  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.10  2005/07/06 19:00:52  fisyak
  * Add include of StThreeVectorD.hh
  *
@@ -52,12 +55,10 @@
 #include "StEnumerations.h"
 #include "StPhysicalHelixD.hh"
 #include "StThreeVectorF.hh"
-class dst_track_st;
 
 class StTrackGeometry : public StObject {
 public:
     StTrackGeometry();
-    StTrackGeometry(const dst_track_st&);
     // StTrackGeometry(const StTrackGeometry&);             use default
     // StTrackGeometry & operator=(const StTrackGeometry&); use default
     virtual ~StTrackGeometry();

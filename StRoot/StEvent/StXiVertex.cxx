@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.10 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StXiVertex.cxx,v 2.11 2009/11/23 16:34:08 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
+ * Revision 2.11  2009/11/23 16:34:08  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.10  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -50,10 +53,8 @@
 #include "StV0Vertex.h"
 #include "StTrack.h"
 #include "StTrackGeometry.h"
-#include "tables/St_dst_vertex_Table.h"
-#include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.10 2004/07/15 16:36:26 ullrich Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.11 2009/11/23 16:34:08 fisyak Exp $";
 
 ClassImp(StXiVertex)
 
@@ -65,21 +66,6 @@ StXiVertex::StXiVertex()
     mDcaDaughters = 0;
     mDcaParentToPrimaryVertex = 0;
     mV0Vertex = 0;
-}
-
-StXiVertex::StXiVertex(const dst_vertex_st& vtx,
-                       const dst_xi_vertex_st& xivtx) :
-    StVertex(vtx)
-{
-    mType = kXiVtxId;
-    mDcaBachelorToPrimaryVertex = xivtx.b_b;
-    mMomentumOfBachelor.setX(xivtx.px_b);
-    mMomentumOfBachelor.setY(xivtx.py_b);
-    mMomentumOfBachelor.setZ(xivtx.pz_b);
-    mDcaDaughters = xivtx.dca;
-    mDcaParentToPrimaryVertex = xivtx.b_xi;
-    mV0Vertex = 0;
-    mDaughter = 0;
 }
 
 StXiVertex::~StXiVertex() { /* noop */ }

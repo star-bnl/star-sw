@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.9 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StXiVertex.h,v 2.10 2009/11/23 16:34:08 fisyak Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
+ * Revision 2.10  2009/11/23 16:34:08  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.9  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -51,14 +54,11 @@
 #include "StVertex.h"
 #include "StEnumerations.h"
 
-class dst_vertex_st;
-class dst_xi_vertex_st;
 class StV0Vertex;
 
 class StXiVertex : public StVertex {
 public:
     StXiVertex();
-    StXiVertex(const dst_vertex_st&, const dst_xi_vertex_st&);
     // StXiVertex(const StXiVertex&);            use default
     // StXiVertex& operator=(const StXiVertex&); use default
     ~StXiVertex();

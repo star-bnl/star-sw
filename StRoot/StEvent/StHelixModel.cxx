@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.11 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StHelixModel.cxx,v 2.12 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.12  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.11  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -47,13 +50,12 @@
  **************************************************************************/
 #include "StHelixModel.h"
 #include "StThreeVectorF.hh"
-#include "tables/St_dst_track_Table.h"
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.11 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.12 2009/11/23 16:34:06 fisyak Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -75,23 +77,6 @@ StHelixModel::StHelixModel(short q, float psi, float c, float dip,
       mMomentum(p),
       mHelicity(h)
 {/* noop */}
-
-StHelixModel::StHelixModel(const dst_track_st& t) :  mModel(helixModel)
-{
-    mPsi       = t.psi*degree;
-    mCurvature = t.curvature;
-    mDipAngle  = atan(t.tanl);
-    mCharge    = t.icharge;
-    mOrigin.setX(t.r0*cos(t.phi0*degree));
-    mOrigin.setY(t.r0*sin(t.phi0*degree));
-    mOrigin.setZ(t.z0);
-    double pt = mCurvature > 0 ? 1./t.invpt : 0;
-    double pz = pt*t.tanl;
-    mMomentum.setX(pt*cos(mPsi));
-    mMomentum.setY(pt*sin(mPsi));
-    mMomentum.setZ(pz);
-    // mHelicity not known at this level
-}
 
 StHelixModel::~StHelixModel() { /* noop */ }
 

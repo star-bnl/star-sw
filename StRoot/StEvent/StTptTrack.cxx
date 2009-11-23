@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTptTrack.cxx,v 2.3 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StTptTrack.cxx,v 2.4 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Aug 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTptTrack.cxx,v $
+ * Revision 2.4  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.3  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -21,26 +24,13 @@
  *
  **************************************************************************/
 #include "StTptTrack.h"
-#include "tables/St_dst_track_Table.h"
 #include "StVertex.h"
 
 ClassImp(StTptTrack)
 
-static const char rcsid[] = "$Id: StTptTrack.cxx,v 2.3 2004/07/15 16:36:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StTptTrack.cxx,v 2.4 2009/11/23 16:34:07 fisyak Exp $";
 
 StTptTrack::StTptTrack() {/* noop */}
-
-StTptTrack::StTptTrack(const dst_track_st& track) : StTrack(track) {/* noop */}
-
-StTptTrack::StTptTrack(const StTptTrack& track) : StTrack(track) {/* noop */}
-
-StTptTrack&
-StTptTrack::operator=(const StTptTrack& track)
-{
-    if (this != &track)
-        static_cast<StTrack&>(*this) = track;
-    return *this;
-}
 
 StTptTrack::~StTptTrack() {/* noop */}
 

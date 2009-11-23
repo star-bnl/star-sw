@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.9 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StKinkVertex.cxx,v 2.10 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
+ * Revision 2.10  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.9  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -44,7 +47,6 @@
 #include "StKinkVertex.h"
 #include "StParticleTable.hh"
 #include "StTrack.h"
-#include "tables/St_dst_tkf_vertex_Table.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
@@ -52,7 +54,7 @@ using std::copy;
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.9 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.10 2009/11/23 16:34:06 fisyak Exp $";
 
 StKinkVertex::StKinkVertex()
 {
@@ -68,23 +70,6 @@ StKinkVertex::StKinkVertex()
     fill_n(mDeltaEnergy, 3, 0);
     mDecayAngle = 0;
     mDecayAngleCM = 0;
-}
-
-StKinkVertex::StKinkVertex(const dst_vertex_st& vtx, const dst_tkf_vertex_st& kvtx)
-    : StVertex(vtx), mParentMomentum(kvtx.p), mDaughterMomentum(kvtx.pd)
-{
-    mType = kKinkVtxId;
-    mDaughter = 0;
-    mParentGeantId = kvtx.pidp;
-    mDaughterGeantId = kvtx.pidd;
-    mDcaParentDaughter = kvtx.dca;
-    mDcaDaughterPrimaryVertex = kvtx.dcad;
-    mDcaParentPrimaryVertex = kvtx.dcap;
-    mHitDistanceParentDaughter = kvtx.dlf;
-    mHitDistanceParentVertex = kvtx.dlv;
-    copy(kvtx.dE+0, kvtx.dE+3, mDeltaEnergy);
-    mDecayAngle = kvtx.theta;
-    mDecayAngleCM = kvtx.theta_cm;
 }
 
 StKinkVertex::~StKinkVertex() {/* noop */}

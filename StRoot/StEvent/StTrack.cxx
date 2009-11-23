@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.32 2009/04/29 23:02:36 perev Exp $
+ * $Id: StTrack.cxx,v 2.33 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.33  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.32  2009/04/29 23:02:36  perev
  * check for big lenght added
  *
@@ -115,7 +118,6 @@
 #include "TClass.h"
 #include "StMath.hh"
 #include "StTrack.h"
-#include "tables/St_dst_track_Table.h"
 #include "StParticleDefinition.hh"
 #include "StVertex.h"
 #include "StTrackGeometry.h"
@@ -125,7 +127,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.32 2009/04/29 23:02:36 perev Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.33 2009/11/23 16:34:07 fisyak Exp $";
 
 StTrack::StTrack()
 {
@@ -148,27 +150,6 @@ StTrack::StTrack()
     mNode = 0;
 }
 
-StTrack::StTrack(const dst_track_st& track) :
-    mTopologyMap(track.map), mFitTraits(track)
-{
-    mKey = track.id;
-    mFlag = track.iflag;
-    mEncodedMethod = track.method;
-    mImpactParameter = track.impact;
-    mLength = track.length;
-    mNumberOfPossiblePoints = track.n_max_point;
-    mGeometry = 0;                                // has to come from outside
-    mOuterGeometry = 0;                           // has to come from outside
-    mDetectorInfo = 0;                            // has to come from outside
-    mNode = 0;                                    // has to come from outside
-    mNumberOfPossiblePointsTpc = 0;
-    mNumberOfPossiblePointsFtpcWest = 0;
-    mNumberOfPossiblePointsFtpcEast = 0;
-    mNumberOfPossiblePointsSvt = 0;
-    mNumberOfPossiblePointsSsd = 0;
-    mNumberOfPossiblePointsPxl = 0;
-    mNumberOfPossiblePointsIst = 0;
-}
 
 StTrack::StTrack(const StTrack& track)
 {

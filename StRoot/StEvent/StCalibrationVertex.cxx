@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StCalibrationVertex.cxx,v 2.3 2004/11/04 15:43:22 ullrich Exp $
+ * $Id: StCalibrationVertex.cxx,v 2.4 2009/11/23 16:34:05 fisyak Exp $
  *
  * Author: Thomas Ullrich, Nov 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StCalibrationVertex.cxx,v $
+ * Revision 2.4  2009/11/23 16:34:05  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.3  2004/11/04 15:43:22  ullrich
  * Added set funyion for type.
  *
@@ -21,7 +24,6 @@
  *
  **************************************************************************/
 #include "StCalibrationVertex.h"
-#include "tables/St_dst_vertex_Table.h"
 #include "StTrack.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::copy;
@@ -29,15 +31,12 @@ using std::copy;
 
 ClassImp(StCalibrationVertex)
 
-static const char rcsid[] = "$Id: StCalibrationVertex.cxx,v 2.3 2004/11/04 15:43:22 ullrich Exp $";
+static const char rcsid[] = "$Id: StCalibrationVertex.cxx,v 2.4 2009/11/23 16:34:05 fisyak Exp $";
 
 StCalibrationVertex::StCalibrationVertex()
 {
     mType = kOtherVtxId;
 }
-
-StCalibrationVertex::StCalibrationVertex(const dst_vertex_st& v)
-    : StVertex(v) { mType = kOtherVtxId; }
 
 StCalibrationVertex::~StCalibrationVertex() {/* noop */};
 

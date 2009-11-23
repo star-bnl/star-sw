@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.17 2008/03/13 16:57:36 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.18 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.18  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.17  2008/03/13 16:57:36  ullrich
  * Add include to comply with ROOT.
  *
@@ -72,7 +75,6 @@
 #include "StTrackFitTraits.h"
 #include "StParticleTypes.hh"
 #include "StParticleTable.hh"
-#include "tables/St_dst_track_Table.h"
 #include "TClass.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
@@ -81,7 +83,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.17 2008/03/13 16:57:36 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.18 2009/11/23 16:34:07 fisyak Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -98,21 +100,6 @@ StTrackFitTraits::StTrackFitTraits()
     fill_n(mChi2, 2, 0);
 }
 
-StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
-{
-    mPidHypothesis = t.pid;
-    mNumberOfFitPoints = t.n_fit_point;
-    copy(t.chisq+0, t.chisq+2, mChi2);
-    mCovariantMatrix.Set(15, (float*)t.covar);        //tempHackVP
-    mNumberOfFitPointsTpc = 0;
-    mNumberOfFitPointsFtpcWest = 0;
-    mNumberOfFitPointsFtpcEast = 0;
-    mNumberOfFitPointsSvt = 0;
-    mNumberOfFitPointsSsd = 0;
-    mNumberOfFitPointsPxl = 0;
-    mNumberOfFitPointsIst = 0;
-    mPrimaryVertexUsedInFit = false;
-}
 
 StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
                  float chi[2], float cov[15])

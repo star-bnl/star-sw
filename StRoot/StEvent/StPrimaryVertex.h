@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.12 2006/04/07 18:21:28 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.13 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.13  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.12  2006/04/07 18:21:28  ullrich
  * Added data member mMeanDip incl. access functions (Marco).
  *
@@ -59,7 +62,6 @@
 class StPrimaryVertex : public StVertex {
 public:
     StPrimaryVertex();
-    StPrimaryVertex(const dst_vertex_st&);
     // StPrimaryVertex(const StPrimaryVertex&);            use default
     // StPrimaryVertex& operator=(const StPrimaryVertex&); use default
     ~StPrimaryVertex();

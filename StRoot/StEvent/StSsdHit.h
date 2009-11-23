@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.10 2006/04/27 21:58:53 ullrich Exp $
+ * $Id: StSsdHit.h,v 2.11 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.11  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.10  2006/04/27 21:58:53  ullrich
  * Added data member and methods to deal with local positions.
  *
@@ -52,7 +55,6 @@
 
 #include "StHit.h"
 #include "StMemoryPool.hh"
-class dst_point_st;
 
 class StSsdHit : public StHit {
 public:
@@ -60,7 +62,6 @@ public:
     StSsdHit(const StThreeVectorF&,
              const StThreeVectorF&,
              unsigned int, float, unsigned char = 0);
-    StSsdHit(const dst_point_st&);
     // StSsdHit(const StSsdHit&);            use default
     // StSsdHit& operator=(const StSsdHit&); use default
     ~StSsdHit();
@@ -76,8 +77,17 @@ public:
     unsigned int clusterSizeNSide() const;   
     unsigned int clusterSizePSide() const;
     float localPosition(unsigned int) const;
-
+    static UInt_t sector(UInt_t ladder) {
+      if (ladder <=  2 || ladder == 20) return 1;
+      if (ladder >=  3 && ladder <=  9) return 2;
+      if (ladder >= 10 && ladder <= 12) return 3;
+      if (ladder >= 13 && ladder <= 19) return 4;
+      return 0;
+    }
+    UInt_t       sector() const {return sector(ladder()); }
     void setLocalPosition(float, float);
+    virtual Int_t  volumeID() const {return 10000 * sector() + 7000 + 100 * wafer() + ladder();}
+    virtual void   Print(const Option_t *option="") const;
 
 protected:
     static StMemoryPool mPool;  //!
@@ -87,4 +97,6 @@ private:
     enum {mWaferPerLadder=16};
     ClassDef(StSsdHit,2)
 };
+ostream&              operator<<(ostream& os, StSsdHit const & v);
+
 #endif

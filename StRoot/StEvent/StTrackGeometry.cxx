@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackGeometry.cxx,v 2.6 2005/02/05 01:01:14 perev Exp $
+ * $Id: StTrackGeometry.cxx,v 2.7 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.cxx,v $
+ * Revision 2.7  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.6  2005/02/05 01:01:14  perev
  * test for zero momentum added
  *
@@ -33,15 +36,12 @@
 #include "StTrackGeometry.h"
 #include "StThreeVectorF.hh"
 #include "StPhysicalHelixD.hh"
-class dst_track_st;
 
 ClassImp(StTrackGeometry)
 
-static const char rcsid[] = "$Id: StTrackGeometry.cxx,v 2.6 2005/02/05 01:01:14 perev Exp $";
+static const char rcsid[] = "$Id: StTrackGeometry.cxx,v 2.7 2009/11/23 16:34:07 fisyak Exp $";
 
 StTrackGeometry::StTrackGeometry() {/* noop */}
-
-StTrackGeometry::StTrackGeometry(const dst_track_st&)   {/* noop */}
 
 StTrackGeometry::~StTrackGeometry() { /* noop */ }
 

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFtpcHit.h,v 2.11 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StFtpcHit.h,v 2.12 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.h,v $
+ * Revision 2.12  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.11  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -60,7 +63,6 @@
 #include "StMemoryPool.hh"
 
 class StFtpcPoint;
-class dst_point_st;
 
 class StFtpcHit : public StHit {
 public:
@@ -68,7 +70,6 @@ public:
     StFtpcHit(const StThreeVectorF&,
               const StThreeVectorF&,
               unsigned int, float, unsigned char = 0);
-    StFtpcHit(const dst_point_st&);
     StFtpcHit(const StFtpcPoint&);
     // StFtpcHit(const StFtpcHit&);            use default
     // StFtpcHit& operator=(const StFtpcHit&); use default

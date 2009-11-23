@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.15 2005/07/06 19:00:52 fisyak Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.16 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.16  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.15  2005/07/06 19:00:52  fisyak
  * Add include of StThreeVectorD.hh
  *
@@ -61,11 +64,10 @@
 #include "StTrackDetectorInfo.h"
 #include "StFunctional.h"
 #include "StHit.h"
-#include "tables/St_dst_track_Table.h"
 #include "StThreeVectorD.hh"
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.15 2005/07/06 19:00:52 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.16 2009/11/23 16:34:07 fisyak Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
@@ -73,12 +75,6 @@ StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsFtpcEast(0),
 					     mNumberOfPointsSvt(0),
 					     mNumberOfPointsSsd(0)
-{ /* noop */ }
-
-StTrackDetectorInfo::StTrackDetectorInfo(const dst_track_st& t) :
-    mFirstPoint(t.x_first),  mLastPoint(t.x_last), mNumberOfPoints(t.n_point),
-    mNumberOfPointsTpc(0), mNumberOfPointsFtpcWest(0), mNumberOfPointsFtpcEast(0),
-    mNumberOfPointsSvt(0), mNumberOfPointsSsd(0)
 { /* noop */ }
 
 StTrackDetectorInfo::~StTrackDetectorInfo() { /* noop */ }

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2008.cxx,v 2.5 2009/03/19 02:46:01 ullrich Exp $
+ * $Id: StTriggerData2008.cxx,v 2.6 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Akio Ogawa, Nov 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2008.cxx,v $
+ * Revision 2.6  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.5  2009/03/19 02:46:01  ullrich
  * Add 2nd argument (pre/post) to vpdEarliestTDC().
  *
@@ -750,6 +753,10 @@ void StTriggerData2008::dump() const
     printf(" VPD E Earliest TAC : %d\n", vpdEarliestTDC(east));
     printf(" VPD W Earliest TAC : %d\n", vpdEarliestTDC(west));
     printf(" VPD TimeDifference : %d\n", vpdTimeDifference());
+    printf(" TOF : "); for (int j=0; j<16 ;j++) {printf("%d ",tofAtAddress(j));} printf("\n");
+    printf(" TOF Multiplicity : %d\n",tofMultiplicity());
+    printf(" NQTData=%d\n",nQTdata());
+    printf(" QTLastWord=0x%x\n",(QTdata())[nQTdata()-1]);
     printf(" L2 result : \n"); 
     for (int j=0; j<4 ;j++) { for (int k=0; k<16; k++) {printf("%u ",*(l2Result()+j*16+k)); } printf("\n");}
     printf("\n");

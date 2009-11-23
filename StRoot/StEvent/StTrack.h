@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.22 2008/08/26 12:47:38 fisyak Exp $
+ * $Id: StTrack.h,v 2.23 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -63,6 +63,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.23  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.22  2008/08/26 12:47:38  fisyak
  * add track pule up flag description
  *
@@ -144,7 +147,6 @@
 #include "StFunctional.h"
 #include "StTrackFitTraits.h"
 
-class dst_track_st;
 class StParticleDefinition;
 class StVertex;
 class StTrackGeometry;
@@ -155,7 +157,6 @@ class StTrackNode;
 class StTrack : public StObject {
 public:
     StTrack();
-    StTrack(const dst_track_st&);
     StTrack(const StTrack&);
     StTrack & operator=(const StTrack&);
     virtual ~StTrack();

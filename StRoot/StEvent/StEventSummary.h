@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEventSummary.h,v 2.8 2007/10/25 19:12:58 ullrich Exp $
+ * $Id: StEventSummary.h,v 2.9 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.h,v $
+ * Revision 2.9  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.8  2007/10/25 19:12:58  ullrich
  * Removed obsolete method setNumberOfNegativeTracks().
  *
@@ -51,12 +54,9 @@
 #include "TArrayF.h"
 #include "TArrayL.h"
 
-class dst_event_summary_st;
-
 class StEventSummary : public StObject {
 public:
     StEventSummary();
-    StEventSummary(const dst_event_summary_st&);
     virtual ~StEventSummary();
     
     // StEventSummary& operator=(const StEventSummary&); use default

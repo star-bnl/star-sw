@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelixModel.h,v 2.9 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StHelixModel.h,v 2.10 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.h,v $
+ * Revision 2.10  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.9  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -53,7 +56,6 @@ public:
     StHelixModel();
     StHelixModel(short q, float psi, float c, float dip,
                  const StThreeVectorF& o, const StThreeVectorF& p, short h);
-    StHelixModel(const dst_track_st&);
     // StHelixModel(const StHelixModel&);            use default
     // StHelixModel& operator=(const StHelixModel&); use default
     ~StHelixModel();

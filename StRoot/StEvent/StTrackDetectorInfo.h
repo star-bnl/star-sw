@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.12 2004/10/13 16:11:59 ullrich Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.13 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
+ * Revision 2.13  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.12  2004/10/13 16:11:59  ullrich
  * Added optional arg to addHit() to allow NOT to increase ref counter.
  *
@@ -77,13 +80,11 @@
 #include "StEnumerations.h"
 
 class StHitFilter;
-class dst_track_st;
 class StHit;
 
 class StTrackDetectorInfo : public StObject {
 public:
     StTrackDetectorInfo();
-    StTrackDetectorInfo(const dst_track_st&);
     // StTrackDetectorInfo(const StTrackDetectorInfo&);             use default
     // StTrackDetectorInfo & operator=(const StTrackDetectorInfo&); use default
     virtual ~StTrackDetectorInfo();

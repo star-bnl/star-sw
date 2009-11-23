@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StKinkVertex.h,v 2.8 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StKinkVertex.h,v 2.9 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.h,v $
+ * Revision 2.9  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.8  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -44,13 +47,11 @@
 #define StKinkVertex_hh
 #include "StVertex.h"
 
-class dst_tkf_vertex_st;
 class StParticleDefinition;
 
 class StKinkVertex : public StVertex {
 public:
     StKinkVertex();
-    StKinkVertex(const dst_vertex_st&, const dst_tkf_vertex_st&);
     // StKinkVertex(const StKinkVertex&);            use default
     // StKinkVertex& operator=(const StKinkVertex&); use default
     ~StKinkVertex();
