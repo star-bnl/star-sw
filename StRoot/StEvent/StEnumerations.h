@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.36 2009/04/28 13:36:32 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.37 2009/11/23 22:22:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.37  2009/11/23 22:22:25  ullrich
+ * Minor cleanup performed and hooks for RPS added.
+ *
  * Revision 2.36  2009/04/28 13:36:32  ullrich
  * Updated PWG enumarations.
  *
@@ -188,7 +191,8 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kFgtId       = kFgtIdentifier,
                    kFpdWestId   = kFpdWestIdentifier,
                    kFpdEastId   = kFpdEastIdentifier, 
-                   kFmsId       = kFmsIdentifier,    
+                   kFmsId       = kFmsIdentifier,  
+                   kRpsId       = kRpsIdentifier,
                    kMaxDetectorId};
 
 /*!
