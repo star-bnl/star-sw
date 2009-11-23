@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.34 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StEvent.h,v 2.35 2009/11/23 19:31:23 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.34  2009/11/23 16:34:06  fisyak
- * Cleanup, remove dependence on dst tables, clean up software monitors
+ * Revision 2.35  2009/11/23 19:31:23  fisyak
+ * remove reference to event_header_st
  *
  * Revision 2.33  2008/12/22 20:36:53  ullrich
  * Added hooks for new ToF (BTof)
@@ -132,7 +132,6 @@
 #include "StContainers.h"
 #include "StEnumerations.h"
 
-class event_header_st;
 class StCalibrationVertex;
 class StDetectorState;
 class StEventClusteringHints;
