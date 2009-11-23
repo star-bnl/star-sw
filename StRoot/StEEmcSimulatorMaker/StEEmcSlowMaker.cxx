@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.5 2009/02/05 20:06:53 ogrebeny Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.6 2009/11/23 23:44:32 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -246,7 +246,7 @@ Int_t StEEmcSlowMaker::Make(){
 
       StEmcCollection *emc =0; 
       if(mIsEmbeddingMode) {
-	StEEmcFastMaker *fast = (StEEmcFastMaker*)GetMaker("EEmcFastSim");
+	StEEmcFastMaker *fast = (StEEmcFastMaker*)GetMakerInheritsFrom("StEEmcFastMaker");
 	if(fast==0) {
 	  LOG_WARN << GetName() << "::Make()  no EEmcFastSim in the chain, ignore Endcap"<< endm;
 	  return kStOk;
@@ -929,6 +929,9 @@ void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t sec, Int_t uv, Int_t st
 
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.6  2009/11/23 23:44:32  ogrebeny
+// At Pibero's request, for the embedding infrastructure.
+//
 // Revision 2.5  2009/02/05 20:06:53  ogrebeny
 // Changed StEEmcDbMaker -> StEEmcDb
 //
