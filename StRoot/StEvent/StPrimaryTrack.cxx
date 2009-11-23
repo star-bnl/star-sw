@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.7 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.8 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
+ * Revision 2.8  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.7  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -35,17 +38,13 @@
  **************************************************************************/
 #include "TClass.h"
 #include "StPrimaryTrack.h"
-#include "tables/St_dst_track_Table.h"
 #include "StPrimaryVertex.h"
 
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.7 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.8 2009/11/23 16:34:06 fisyak Exp $";
 
 StPrimaryTrack::StPrimaryTrack() : mVertex(0) {/* noop */}
-
-StPrimaryTrack::StPrimaryTrack(const dst_track_st& track) :
-    StTrack(track), mVertex(0) {/* noop */}
 
 StPrimaryTrack::StPrimaryTrack(const StPrimaryTrack& track) :
     StTrack(track)

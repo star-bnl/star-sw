@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.14 2009/11/10 00:40:18 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.15 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.15  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.14  2009/11/10 00:40:18  ullrich
  * Changed print-out format.
  *
@@ -59,9 +62,7 @@
  **************************************************************************/
 #include "StTpcHit.h"
 #include "StTrack.h"
-#include "tables/St_dst_point_Table.h"
-
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.14 2009/11/10 00:40:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.15 2009/11/23 16:34:07 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -92,55 +93,6 @@ StTpcHit::StTpcHit(const StThreeVectorF& p,
     mMaxtmbk = mxtmbk - time;
     mChargeModified = 0;
 }
-
-StTpcHit::StTpcHit(const dst_point_st& pt)
-{
-    //
-    // Unpack charge and status flag
-    //
-    const unsigned int iflag = pt.charge/(1L<<16);
-    const unsigned int tpcq  = pt.charge - iflag*(1L<<16);
-    mCharge = float(tpcq)/(1<<25);
-    mFlag = static_cast<unsigned char>(iflag&255);  // First 8 bits
-    mFitFlag = static_cast<unsigned char>(iflag>>8);// Last  8 bits
-    //
-    // Unpack position in xyz
-    //
-    const float maxRange   = 220;
-    const float mapFactor  = 2380;
-    unsigned int tpcy11 = pt.position[0]/(1L<<20);
-    unsigned int tpcz   = pt.position[1]/(1L<<10);
-    unsigned int tpcx   = pt.position[0] - (1L<<20)*tpcy11;
-    unsigned int tpcy10 = pt.position[1] - (1L<<10)*tpcz;
-    unsigned int tpcy   = tpcy11 + (1L<<10)*tpcy10;
-    mPosition.setX(float(tpcx)/mapFactor - maxRange);
-    mPosition.setY(float(tpcy)/mapFactor - maxRange);
-    mPosition.setZ(float(tpcz)/mapFactor - maxRange);
-    
-    //
-    // Unpack error on position in xyz
-    //
-    tpcy11 = pt.pos_err[0]/(1L<<20);
-    tpcz   = pt.pos_err[1]/(1L<<10);
-    tpcx   = pt.pos_err[0] - (1L<<20)*tpcy11;
-    tpcy10 = pt.pos_err[1] - (1L<<10)*tpcz;
-    tpcy   = tpcy11 + (1L<<10)*tpcy10;
-    mPositionError.setX(float(tpcx)/(1L<<17));
-    mPositionError.setY(float(tpcy)/(1L<<17));
-    mPositionError.setZ(float(tpcz)/(1L<<17));
-    
-    //
-    // The hardware position stays at it is
-    //
-    mHardwarePosition = pt.hw_position;
-    mIdTruth          = pt.id_simtrk;
-    mQuality          = pt.id_quality;
-    mId               = pt.cluster;
-    mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0;
-    mMcl_x = mMcl_t = 0;
-    mChargeModified = 0;
-}
-
 StTpcHit::~StTpcHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StTpcHit& v)
@@ -152,3 +104,4 @@ ostream&  operator<<(ostream& os, const StTpcHit& v)
                       (int) v.minTmbk(), (int) v.maxTmbk(),(int) v.timeBucketsInHit(),
                       v.timeBucket(),v.pad()); 
 }
+void   StTpcHit::Print(Option_t *option) const {cout << *this << endl;}

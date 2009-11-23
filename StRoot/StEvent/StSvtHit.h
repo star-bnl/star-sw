@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.15 2009/11/10 00:41:11 ullrich Exp $
+ * $Id: StSvtHit.h,v 2.16 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.16  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.15  2009/11/10 00:41:11  ullrich
  * Changed print-out format and added new method shell().
  *
@@ -69,7 +72,6 @@
 
 #include "StHit.h"
 #include "StMemoryPool.hh"
-class dst_point_st;
 
 class StSvtHit : public StHit {
 public:
@@ -77,7 +79,6 @@ public:
     StSvtHit(const StThreeVectorF&,
              const StThreeVectorF&,
              unsigned int, float, unsigned char = 0);
-    StSvtHit(const dst_point_st&);
     // StSvtHit(const StSvtHit&);            use default
     // StSvtHit& operator=(const StSvtHit&); use default
     ~StSvtHit();
@@ -107,8 +108,10 @@ public:
     void setAnode(float);
     void setTimebucket(float);
     void setLocalPosition(float, float);
+    virtual Int_t  volumeID() const {return 10000 * shell() + 1000 * layer() + 100 * wafer() + ladder();}
     void setNumberOfAnodes(unsigned short);
     void setNumberOfPixels(unsigned short);
+    virtual void   Print(Option_t *option="") const;
 
 protected:
     static StMemoryPool mPool;  //!
@@ -136,5 +139,6 @@ inline float StSvtHit::timebucket() const { return mTimebucket; }
 inline void StSvtHit::setPeak(float val) { mPeak = val; }
 inline void StSvtHit::setAnode(float val) { mAnode = val; }
 inline void StSvtHit::setTimebucket(float val) { mTimebucket = val; }
+ostream&              operator<<(ostream& os, StSvtHit const & v);
 
 #endif

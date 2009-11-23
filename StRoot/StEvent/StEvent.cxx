@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.40 2008/12/22 20:36:53 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.41 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.41  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.40  2008/12/22 20:36:53  ullrich
  * Added hooks for new ToF (BTof)
  *
@@ -143,6 +146,7 @@
 #include <algorithm>
 #include "TClass.h"
 #include "TDataSetIter.h"
+#include "TObjectSet.h"
 #include "StCalibrationVertex.h"
 #include "StDetectorState.h"
 #include "StEvent.h"
@@ -172,8 +176,6 @@
 #include "StL3Trigger.h"
 #include "StPsd.h"
 #include "event_header.h"
-#include "dst_event_summary.h"
-#include "dst_summary_param.h"
 #include "StAutoBrowse.h"
 #include "StEventBranch.h"
 
@@ -181,8 +183,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.40 2008/12/22 20:36:53 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.40 2008/12/22 20:36:53 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.41 2009/11/23 16:34:06 fisyak Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.41 2009/11/23 16:34:06 fisyak Exp $";
 
 ClassImp(StEvent)
 
@@ -254,33 +256,12 @@ _lookupDynamicAndSet(T* val, StSPtrVecObject &vec)
 void
 StEvent::initToZero() { /* noop */ }
 
-void
-StEvent::init(const event_header_st& evtHdr)
-{
-    mContent.push_back(new StEventInfo(evtHdr));
-}
-
 StEvent::StEvent() : StXRefMain("StEvent")
 {
     GenUUId();		//Generate Universally Unique IDentifier
     initToZero();
 }
   
-StEvent::StEvent(const event_header_st& evtHdr,
-                 const dst_event_summary_st& evtSum)
-                 :StXRefMain("StEvent")
-{
-    initToZero();
-    init(evtHdr);
-    mContent.push_back(new StEventSummary(evtSum));
-}
-
-StEvent::StEvent(const event_header_st& evtHdr):StXRefMain("StEvent")
-{
-    initToZero();
-    init(evtHdr);
-}
-
 StEvent::~StEvent()
 { /* noop */ }
 
@@ -1278,4 +1259,29 @@ void StEvent::Streamer(TBuffer &R__b)
 	StXRefMain::Streamer(R__b);
 	R__b.SetByteCount(R__c, kTRUE);   
     } 
+}
+//________________________________________________________________________________
+StSPtrVecHit* StEvent::hitCollection(const Char_t *name) {
+  StSPtrVecHit *theHitCollection = 0;
+  TObjectSet *set = (TObjectSet *) FindByName(name);
+  if (set) theHitCollection = (StSPtrVecHit *) set->GetObject();
+  return theHitCollection;
+}
+//________________________________________________________________________________
+void StEvent::addHitCollection(StSPtrVecHit* p, const Char_t *name) {
+  if (p) {
+    TObjectSet *set = (TObjectSet *) FindByName(name);
+    if (set) 
+      cerr << "StEvent::addHitCollection(): Error, HitCollection with " 
+	   <<  name << " already exist. Nothing added."  << endl;
+    else {
+      set = new TObjectSet(name,p,kTRUE);
+      Add(set);
+    }
+  }
+}
+//________________________________________________________________________________
+void StEvent::removeHitCollection(const Char_t *name) {
+  TObjectSet *set = (TObjectSet *) FindByName(name);
+  if (set) set->Delete();
 }

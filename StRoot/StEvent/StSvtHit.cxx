@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.16 2009/11/10 00:41:03 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.17 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.17  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.16  2009/11/10 00:41:03  ullrich
  * Changed print-out format and added new method shell().
  *
@@ -64,9 +67,8 @@
  **************************************************************************/
 #include "StSvtHit.h"
 #include "StTrack.h"
-#include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.16 2009/11/10 00:41:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.17 2009/11/23 16:34:07 fisyak Exp $";
 
 ClassImp(StSvtHit)
     
@@ -96,75 +98,6 @@ StSvtHit::StSvtHit(const StThreeVectorF& p,
     mNumberOfAnodes = 0; // need to be set through access functions
     mNumberOfPixels = 0; // need to be set through access functions
 }
-
-StSvtHit::StSvtHit(const dst_point_st& pt)
-{
-    //
-    // Unpack charge and status flag
-    //
-    const unsigned int iflag = pt.charge>>17;    
-    const unsigned int svtq  = pt.charge &((1L<<17)-1); 
-    // mPeak is private to SvtHit
-    mPeak = (float)(svtq>>10);
-    mCharge = (float)(svtq & ((1L<<10)-1));
-    mFlag = static_cast<unsigned char>(iflag);
-    
-    mFitFlag = (pt.id_track > 0) ? 1 : 0;
-
-    //
-    // Unpack position in xyz
-    //
-    const float maxRange   = 22;
-    const float mapFactor  = 23800;
-    unsigned int svty11 = pt.position[0]>>20;
-    unsigned int svtz   = pt.position[1]>>10;
-    unsigned int svtx   = pt.position[0] & ((1L<<20)-1);
-    unsigned int svty10 = pt.position[1] & ((1L<<10)-1);
-    unsigned int svty   = svty11 + (svty10<<10);
-    mPosition.setX(float(svtx)/mapFactor - maxRange);
-    mPosition.setY(float(svty)/mapFactor - maxRange);
-    mPosition.setZ(float(svtz)/mapFactor - maxRange);
-    
-    //
-    // Unpack error on position in xyz
-    //
-    svty11 = pt.pos_err[0]>>20;
-    svtz   = pt.pos_err[1]>>10;
-    svtx   = pt.pos_err[0] & ((1L<<20)-1);
-    svty10 = pt.pos_err[1] & ((1L<<10)-1);
-    svty   = svty11 + svty10<<10;
-    mPositionError.setX(float(svtx)/(1L<<26));
-    mPositionError.setY(float(svty)/(1L<<26));
-    mPositionError.setZ(float(svtz)/(1L<<26));
-
-    //
-    // The hardware position stays at it is
-    //
-    mHardwarePosition = pt.hw_position;
-    mId               = pt.cluster;
-    setIdTruth(pt.id_simtrk,pt.id_quality);
-
-    //
-    // Unpack anode and time bin
-    //
-    mAnode = (mHardwarePosition >> 22)/4.;  // anode packed in quarters
-    float t = mHardwarePosition >> 13;
-    t = t-(mAnode*4*(1L<<9));
-    mTimebucket = t/4;                      // timebucket packed in quarters
-
-    //
-    // Local positions (to be filled later, not in dst_point)
-    //
-    mLocalPosition[0] = 0;
-    mLocalPosition[1] = 0;
-
-    //
-    //  Those (new) ones need to be set separately through access functions
-    //
-    mNumberOfAnodes = 0;
-    mNumberOfPixels = 0;
-}
-
 StSvtHit::~StSvtHit() {/* noop */}
 
 unsigned int
@@ -339,3 +272,4 @@ ostream&  operator<<(ostream& os, const StSvtHit& v)
 	    << Form(" P:%8.3f",v.peakADC())
 	    << Form(" Luv: %8.3f %8.3f anode %8.3f timeb %8.3f",v.localPosition(0),v.localPosition(1),v.anode(),v.timebucket());
 }
+void   StSvtHit::Print(Option_t *option) const {cout << *this << endl;}

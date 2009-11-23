@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.10 2001/05/30 17:45:54 perev Exp $
+ * $Id: StEventSummary.cxx,v 2.11 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
+ * Revision 2.11  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.10  2001/05/30 17:45:54  perev
  * StEvent branching
  *
@@ -45,13 +48,12 @@
 #include <float.h>
 #include "StEventSummary.h"
 #include "SystemOfUnits.h"
-#include "tables/St_dst_event_summary_Table.h"
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
 using units::degree;
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.10 2001/05/30 17:45:54 perev Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.11 2009/11/23 16:34:06 fisyak Exp $";
 
 ClassImp(StEventSummary)
 
@@ -85,51 +87,6 @@ StEventSummary::StEventSummary()
     mMagneticFieldZ = 0;
 }
 
-StEventSummary::StEventSummary(const dst_event_summary_st& runSum)
-{
-    int i;
-    
-    initBinRanges();
-
-    mNumberOfTracks            = runSum.glb_trk_tot;
-    mNumberOfGoodTracks        = runSum.glb_trk_good;
-    mNumberOfGoodPrimaryTracks = runSum.glb_trk_prim;
-    mNumberOfPositiveTracks    = runSum.glb_trk_plus;
-    mNumberOfNegativeTracks    = runSum.glb_trk_minus;
-    mNumberOfExoticTracks      = runSum.glb_trk_exotic;
-    mNumberOfVertices          = runSum.n_vert_total;
-    mNumberOfPileupVertices    = runSum.n_vert_pileup;
-    mMeanPt                    = runSum.mean_pt;
-    mMeanPt2                   = runSum.mean_pt2;
-    mMeanEta                   = runSum.mean_eta;
-    mRmsEta                    = runSum.rms_eta;
-    mPrimaryVertexPos          = StThreeVectorF(runSum.prim_vrtx);
-    mMagneticFieldZ            = runSum.field;
-
-    //
-    //   Vertex counts
-    //
-    mNumberOfVertexTypes.Set(mVertexTypeArraySize);
-    for(i=0; i<mVertexTypeArraySize; i++)
-        mNumberOfVertexTypes[i] = runSum.n_vert_type[i];
-       
-    //
-    //   Fill 'histos'
-    //
-    mEtaOfTracksHisto.Set(mHistogramSize);
-    mPtOfTracksHisto.Set(mHistogramSize);
-    mPhiOfTracksHisto.Set(mHistogramSize);
-    mEneryVsEtaHisto.Set(mHistogramSize);
-    mEnergyVsPhiHisto.Set(mHistogramSize);
-
-    for(i=0; i<mHistogramSize; i++) {
-        mEtaOfTracksHisto[i] = runSum.mult_eta[i];
-        mPtOfTracksHisto[i] = runSum.mult_pt[i];
-        mPhiOfTracksHisto[i] = runSum.mult_phi[i];
-        mEneryVsEtaHisto[i] = runSum.energy_emc_eta[i];
-        mEnergyVsPhiHisto[i] = runSum.energy_emc_phi[i];
-    }
-}
 
 StEventSummary::~StEventSummary() { /* noop */ }
 

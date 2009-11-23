@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFtpcSoftwareMonitor.h,v 2.3 2002/02/22 22:56:48 jeromel Exp $
+ * $Id: StFtpcSoftwareMonitor.h,v 2.4 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcSoftwareMonitor.h,v $
+ * Revision 2.4  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.3  2002/02/22 22:56:48  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -29,7 +32,20 @@
 #define StFtpcSoftwareMonitor_hh
 
 #include "StObject.h"
-class dst_mon_soft_ftpc_st;
+#ifndef DST_MON_SOFT_FTPC_H
+#define DST_MON_SOFT_FTPC_H
+struct dst_mon_soft_ftpc_st {
+  int n_clus_ftpc[2]; /* Tot. # clus in FTPC, east/west       */
+  int n_pts_ftpc[2]; /* Tot. # space pts in FTPC, east/west  */
+  int n_trk_ftpc[2]; /* Total # tracks in FTPC east/west     */
+  float chrg_ftpc_tot[2]; /* Tot. charge dep. in FTPC, east/west  */
+  float hit_frac_ftpc[2]; /* Frac. hits used in FTPC, east/west   */
+  float avg_trkL_ftpc[2]; /* -OR- Avg. # pts assigned             */
+  float res_pad_ftpc[2]; /* Avg. residual, pad direction,FTPC E/W*/
+  float res_drf_ftpc[2]; /* Avg. resid., drift direction,FTPC E/W*/
+};
+#endif /* DST_MON_SOFT_FTPC_H */
+
 
 class StFtpcSoftwareMonitor : public StObject {
 public:

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.h,v 2.6 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StPrimaryTrack.h,v 2.7 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.h,v $
+ * Revision 2.7  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.6  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -43,7 +46,6 @@ class StPrimaryVertex;
 class StPrimaryTrack : public StTrack {
 public:
     StPrimaryTrack();
-    StPrimaryTrack(const dst_track_st&);
     StPrimaryTrack(const StPrimaryTrack&);
     StPrimaryTrack& operator=(const StPrimaryTrack&);
     ~StPrimaryTrack();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.30 2007/07/02 20:45:04 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.31 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.31  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.30  2007/07/02 20:45:04  ullrich
  * Added FMS and MTD trigger detector classes.
  *
@@ -109,7 +112,6 @@
  
 #include "StBbcTriggerDetector.h"
 #include "StCalibrationVertex.h"
-#include "StCtbSoftwareMonitor.h"
 #include "StCtbTriggerDetector.h"
 #include "StDedxPidTraits.h"
 #include "StDetectorState.h"
@@ -120,15 +122,12 @@
 #include "StEmcModule.h"
 #include "StEmcPoint.h"
 #include "StEmcRawHit.h"
-#include "StEmcSoftwareMonitor.h"
 #include "StEmcTriggerDetector.h"
 #include "StEnumerations.h"
 #include "StEvent.h"
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
-#include "StEstGlobalTrack.h"
-#include "StEstPrimaryTrack.h"
 #include "StFmsTriggerDetector.h"
 #include "StFpdCollection.h"
 #include "StFpdTriggerDetector.h"
@@ -138,7 +137,6 @@
 #include "StFtpcSectorHitCollection.h"
 #include "StFtpcSoftwareMonitor.h"
 #include "StFunctional.h"
-#include "StGlobalSoftwareMonitor.h"
 #include "StGlobalTrack.h"
 #include "StHelixModel.h"
 #include "StHit.h"
@@ -148,7 +146,6 @@
 #include "StL3Trigger.h"
 #include "StL3EventSummary.h"
 #include "StL3AlgorithmInfo.h"
-#include "StL3SoftwareMonitor.h"
 #include "StMeasuredPoint.h"
 #include "StMtdTriggerDetector.h"
 #include "StMwcTriggerDetector.h"
@@ -183,7 +180,6 @@
 #include "StSvtHitCollection.h"
 #include "StSvtLadderHitCollection.h"
 #include "StSvtBarrelHitCollection.h"
-#include "StSvtSoftwareMonitor.h"
 #include "StSvtWaferHitCollection.h"
 #include "StTofCollection.h"
 #include "StTofHit.h"
@@ -195,14 +191,12 @@
 #include "StTofCell.h"
 #include "StTofData.h"
 #include "StTofRawData.h"
-#include "StTofSoftwareMonitor.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StTpcHit.h"
 #include "StTpcHitCollection.h"
 #include "StTpcPadrowHitCollection.h"
 #include "StTpcPixel.h"
 #include "StTpcSectorHitCollection.h"
-#include "StTpcSoftwareMonitor.h"
 #include "StTptTrack.h"
 #include "StTrack.h"
 #include "StTrackDetectorInfo.h"

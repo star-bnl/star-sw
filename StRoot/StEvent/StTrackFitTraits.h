@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.14 2008/03/19 14:40:56 fisyak Exp $
+ * $Id: StTrackFitTraits.h,v 2.15 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.15  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.14  2008/03/19 14:40:56  fisyak
  * Add access to covariance matrix array
  *
@@ -85,14 +88,12 @@
 #include "StMatrixF.hh"
 #include "TArrayF.h"
 
-class dst_track_st;
 class StParticleDefinition;
 
 class StTrackFitTraits : public StObject {
 public:
     StTrackFitTraits();
     StTrackFitTraits(unsigned short, unsigned short, float[2], float[15]);
-    StTrackFitTraits(const dst_track_st&);
     // StTrackFitTraits(const StTrackFitTraits&);            use default
     // StTrackFitTraits& operator=(const StTrackFitTraits&); use default
     virtual ~StTrackFitTraits();

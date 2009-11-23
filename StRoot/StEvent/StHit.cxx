@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.21 2009/11/10 00:40:17 ullrich Exp $
+ * $Id: StHit.cxx,v 2.22 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.22  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.21  2009/11/10 00:40:17  ullrich
  * Changed print-out format.
  *
@@ -85,7 +88,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.21 2009/11/10 00:40:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.22 2009/11/23 16:34:06 fisyak Exp $";
 
 ClassImp(StHit)
 
@@ -215,11 +218,11 @@ int StHit::idTruth() const
 
 ostream&  operator<<(ostream& os, const StHit& v)
 {
-    return os << Form("id %5i",v.id()) 
-	    << *((const StMeasuredPoint *)&v )
-	    << Form(" q(keV) %10.3f", 1e6*v.charge())
-	    << Form(" idT %4i qa %4i fl %4i us %2i",v.idTruth(), v.qaTruth(), v.flag(), v.usedInFit());
+  os << Form("id %5i ",v.id()) << *((const StMeasuredPoint *)&v );
+  if (v.charge() > 1) os << Form(" q(ADC) %10.1f", v.charge());
+  else                os << Form(" q(keV) %10.3f", 1e6*v.charge());
+  os << Form(" idT %4i qa %4i fl %4i us %2i",v.idTruth(), v.qaTruth(), v.flag(), v.usedInFit());
+  return os;
 }
 
-void
-StHit::Print(Option_t *option) const {cout << *this << endl;}
+void StHit::Print(Option_t *option) const {cout << *this << endl;}

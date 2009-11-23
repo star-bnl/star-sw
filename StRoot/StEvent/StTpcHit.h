@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.12 2007/10/03 21:47:36 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.13 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.13  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.12  2007/10/03 21:47:36  ullrich
  * Added several new member to hold hit length info.
  *
@@ -60,21 +63,16 @@
 
 #include "StHit.h"
 #include "StMemoryPool.hh"
-class dst_point_st;
-
 class StTpcHit : public StHit {
 public:
     StTpcHit();
-    StTpcHit(const StThreeVectorF&,
-             const StThreeVectorF&,
-             unsigned int, float, unsigned char = 0,
+    StTpcHit(const StThreeVectorF& p,
+             const StThreeVectorF& e,
+             unsigned int hw, float q, unsigned char c = 0,
 	   unsigned short idTruth=0, unsigned short quality=0,
 	   unsigned short id =0,
 	   short mnpad=0, short mxpad=0, short mntmbk=0,
-	   short mxtmbk=0, float cl_x = 0, float = 0);
-    StTpcHit(const dst_point_st&);
-    // StTpcHit(const StTpcHit&);            use default
-    // StTpcHit& operator=(const StTpcHit&); use default
+	   short mxtmbk=0, float cl_x = 0, float cl_t = 0);
     ~StTpcHit();
 
     void* operator new(size_t sz,void *p) { return p;}
@@ -95,7 +93,8 @@ public:
     float          timeBucket() const;
     float          pad() const;
     float          chargeModified() const;
-
+    virtual void   Print(Option_t *option="") const;
+    
 protected:
     static StMemoryPool mPool;  //!
     UChar_t     mMinpad;     /* central pad - lowest pad id in this hit*/
@@ -126,4 +125,5 @@ inline float          StTpcHit::timeBucket() const {return static_cast<float>(mM
 inline float          StTpcHit::pad() const {return static_cast<float>(mMcl_x)/64.;}
 inline float          StTpcHit::chargeModified() const {return mChargeModified;}
 
+ostream&              operator<<(ostream& os, StTpcHit const & v);
 #endif

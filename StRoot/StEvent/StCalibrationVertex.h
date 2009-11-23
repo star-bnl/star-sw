@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StCalibrationVertex.h,v 2.4 2004/11/04 15:43:22 ullrich Exp $
+ * $Id: StCalibrationVertex.h,v 2.5 2009/11/23 16:34:05 fisyak Exp $
  *
  * Author: Thomas Ullrich, Nov 2001
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StCalibrationVertex.h,v $
+ * Revision 2.5  2009/11/23 16:34:05  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.4  2004/11/04 15:43:22  ullrich
  * Added set funyion for type.
  *
@@ -41,7 +44,6 @@
 class StCalibrationVertex : public StVertex {
 public:
     StCalibrationVertex();
-    StCalibrationVertex(const dst_vertex_st&);
     // StCalibrationVertex(const StCalibrationVertex&);            use default
     // StCalibrationVertex& operator=(const StCalibrationVertex&); use default
     virtual ~StCalibrationVertex();

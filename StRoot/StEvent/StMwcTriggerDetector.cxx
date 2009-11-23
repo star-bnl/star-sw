@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcTriggerDetector.cxx,v 2.6 2007/07/11 23:06:45 perev Exp $
+ * $Id: StMwcTriggerDetector.cxx,v 2.7 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMwcTriggerDetector.cxx,v $
+ * Revision 2.7  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.6  2007/07/11 23:06:45  perev
  * Cleanup+fix StXXXTriggerDetector
  *
@@ -30,32 +33,14 @@
  *
  **************************************************************************/
 #include "StMwcTriggerDetector.h"
-#include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.6 2007/07/11 23:06:45 perev Exp $";
+static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.7 2009/11/23 16:34:06 fisyak Exp $";
 
 ClassImp(StMwcTriggerDetector)
 
 StMwcTriggerDetector::StMwcTriggerDetector()
 {
     memset(mBeg,0,mEnd-mBeg);
-}
-
-StMwcTriggerDetector::StMwcTriggerDetector(const dst_TrgDet_st& t)
-{
-    memset(mBeg,0,mEnd-mBeg);
-    int i, j, k;
-    for(i=0; i<mMaxSectors; i++)
-        for(j=0; j<mMaxSubSectors; j++)
-            for(k=0; k<mMaxEventSamples; k++)
-                mMips[i][j][k] = t.nMwc[i][j][k];
-            
-    for(i=0; i<mMaxAux; i++)
-        for(j=0; j<mMaxEventSamples; j++)
-            mAux[i][j] = t.mwcaux[i][j];
-    
-    mNumberOfPreSamples = t.npre;
-    mNumberOfPostSamples = t.npost;
 }
 
 StMwcTriggerDetector::~StMwcTriggerDetector() {/* noop */}

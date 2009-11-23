@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitCollection.cxx,v 2.4 2001/04/05 04:00:57 ullrich Exp $
+ * $Id: StTpcHitCollection.cxx,v 2.5 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitCollection.cxx,v $
+ * Revision 2.5  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.4  2001/04/05 04:00:57  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -27,7 +30,7 @@
 #include "StTpcPadrowHitCollection.h"
 #include "StTpcHit.h"
 
-static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.4 2001/04/05 04:00:57 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHitCollection.cxx,v 2.5 2009/11/23 16:34:07 fisyak Exp $";
 
 ClassImp(StTpcHitCollection)
 
@@ -48,10 +51,6 @@ StTpcHitCollection::addHit(StTpcHit* hit)
     else
         return kFALSE;
 }
-
-unsigned int
-StTpcHitCollection::numberOfSectors() const { return mNumberOfSectors; }
-
 unsigned int
 StTpcHitCollection::numberOfHits() const
 {

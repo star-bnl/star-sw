@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTptTrack.h,v 2.4 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StTptTrack.h,v 2.5 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, Aug 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTptTrack.h,v $
+ * Revision 2.5  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.4  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -36,9 +39,6 @@
 class StTptTrack : public StTrack {
 public:
     StTptTrack();
-    StTptTrack(const dst_track_st&);
-    StTptTrack(const StTptTrack&);
-    StTptTrack& operator=(const StTptTrack&);
     ~StTptTrack();
 
     StTrackType     type() const;

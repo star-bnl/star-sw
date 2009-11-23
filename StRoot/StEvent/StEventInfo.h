@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEventInfo.h,v 2.5 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEventInfo.h,v 2.6 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jun 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEventInfo.h,v $
+ * Revision 2.6  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.5  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -41,9 +44,6 @@ class event_header_st;
 class StEventInfo : public StObject {
 public:
     StEventInfo();
-    StEventInfo(const event_header_st&);
-    // StEventInfo(const StEventInfo&);            use default
-    // StEventInfo& operator=(const StEventInfo&); use default
     virtual ~StEventInfo();
 
     const TString& type() const;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventInfo.cxx,v 2.4 2001/09/19 04:48:08 ullrich Exp $
+ * $Id: StEventInfo.cxx,v 2.5 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jun 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventInfo.cxx,v $
+ * Revision 2.5  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.4  2001/09/19 04:48:08  ullrich
  * Added event size.
  *
@@ -26,7 +29,7 @@
 #include "StEventInfo.h"
 #include "tables/St_event_header_Table.h"
 
-static const char rcsid[] = "$Id: StEventInfo.cxx,v 2.4 2001/09/19 04:48:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventInfo.cxx,v 2.5 2009/11/23 16:34:06 fisyak Exp $";
 
 ClassImp(StEventInfo)
 
@@ -40,19 +43,6 @@ StEventInfo::StEventInfo()
     mBunchCrossingNumber[1] = 0;
     mEventSize = 0;
 }
- 
-StEventInfo::StEventInfo(const event_header_st& evtHdr)
-{
-    mType  = evtHdr.event_type;
-    mRunId = evtHdr.exp_run_id;
-    mId    = evtHdr.n_event;
-    mTime  = evtHdr.time;
-    mTriggerMask = evtHdr.trig_mask;
-    mBunchCrossingNumber[0] = evtHdr.bunchXing[0];
-    mBunchCrossingNumber[1] = evtHdr.bunchXing[1];
-    mEventSize = 0;
-}
-
 StEventInfo::~StEventInfo() { /* noop */ }
 
 const TString&

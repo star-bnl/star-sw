@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 2.7 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StV0Vertex.h,v 2.8 2009/11/23 16:34:08 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
+ * Revision 2.8  2009/11/23 16:34:08  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.7  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -45,12 +48,10 @@
 #include "StVertex.h"
 #include "StContainers.h"
 
-class dst_v0_vertex_st;
 
 class StV0Vertex : public StVertex {
 public:
     StV0Vertex();
-    StV0Vertex(const dst_vertex_st&, const dst_v0_vertex_st&);
     // StV0Vertex(const StV0Vertex&);            use default
     // StV0Vertex& operator=(const StV0Vertex&); use default
     ~StV0Vertex();

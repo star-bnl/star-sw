@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.33 2008/12/22 20:36:53 ullrich Exp $
+ * $Id: StEvent.h,v 2.34 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.34  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.33  2008/12/22 20:36:53  ullrich
  * Added hooks for new ToF (BTof)
  *
@@ -130,7 +133,6 @@
 #include "StEnumerations.h"
 
 class event_header_st;
-class dst_event_summary_st;
 class StCalibrationVertex;
 class StDetectorState;
 class StEventClusteringHints;
@@ -164,9 +166,6 @@ class StRnDHitCollection;
 class StEvent : public StXRefMain {
 public:
     StEvent();
-    StEvent(const event_header_st&,
-            const dst_event_summary_st&);
-    StEvent(const event_header_st&);
     virtual ~StEvent();
 
     void                                Browse(TBrowser*);
@@ -255,6 +254,8 @@ public:
     const StPsd*                        psd(StPwg, int) const;
     unsigned int                        numberOfPsds() const;
     unsigned int                        numberOfPsds(StPwg) const;
+
+    StSPtrVecHit*                       hitCollection(const Char_t *name);
     
     StSPtrVecObject&                    content();               // for IO purposes only
 
@@ -295,6 +296,8 @@ public:
     void addDetectorState(StDetectorState*);
     void addPsd(StPsd*);
     void removePsd(StPsd*);
+    void addHitCollection(StSPtrVecHit* p, const Char_t *name);
+    void removeHitCollection(const Char_t *name);
     
     virtual Bool_t Notify();
     

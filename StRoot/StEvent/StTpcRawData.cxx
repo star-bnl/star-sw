@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.7 2009/10/12 23:52:32 fisyak Exp $
+ * $Id: StTpcRawData.cxx,v 2.8 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.8  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.7  2009/10/12 23:52:32  fisyak
  * Fix relation npad from pad row
  *
@@ -37,7 +40,6 @@
 #include <assert.h>
 #include "TMath.h"
 #include "StDaqLib/TPC/trans_table.hh"
-
 static const Int_t NumberOfPadsAtRow[__NumberOfRows__] = {
     88, 96,104,112,118,126,134,142,150,158, // Inner
    166,174,182,
@@ -72,8 +74,13 @@ void StTpcDigitalSector::clear() {// clears only the time bins
 }
 //________________________________________________________________________________
 void StTpcDigitalSector::assignTimeBins(Int_t rowN, Int_t padN, StDigitalTimeBins* tbins) {
+#if 0
   if (rowN < 1 || rowN > __NumberOfRows__ ||
       padN < 1 || padN > NumberOfPadsAtRow[rowN-1]) return;
+#else
+  assert(rowN >= 1 && rowN <= __NumberOfRows__ ||
+	 padN >= 1 && padN <= NumberOfPadsAtRow[rowN-1]);
+#endif
   StDigitalPadRow    &Row = mData[(rowN-1)];
   StDigitalTimeBins  &Pad = Row[(padN-1)];
   if (Pad.size() > 0)  Pad.clear();

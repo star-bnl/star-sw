@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichSoftwareMonitor.h,v 2.4 2002/02/22 22:56:50 jeromel Exp $
+ * $Id: StRichSoftwareMonitor.h,v 2.5 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichSoftwareMonitor.h,v $
+ * Revision 2.5  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.4  2002/02/22 22:56:50  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -32,7 +35,13 @@
 #define StRichSoftwareMonitor_hh
 
 #include "StObject.h"
-class dst_mon_soft_rich_st;
+#ifndef DST_MON_SOFT_RICH_H
+#define DST_MON_SOFT_RICH_H
+struct dst_mon_soft_rich_st {
+  int mult_rich_tot; /* Total mult. (or ADC sum) in RICH      */
+};
+#endif /* DST_MON_SOFT_RICH_H */
+
 
 class StRichSoftwareMonitor : public StObject {
 public:

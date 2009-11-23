@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.10 2008/03/13 16:57:27 ullrich Exp $
+ * $Id: StV0Vertex.cxx,v 2.11 2009/11/23 16:34:08 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
+ * Revision 2.11  2009/11/23 16:34:08  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.10  2008/03/13 16:57:27  ullrich
  * Add include to comply with ROOT.
  *
@@ -48,8 +51,6 @@
 #include "StV0Vertex.h"
 #include "StTrack.h"
 #include "StTrackGeometry.h"
-#include "tables/St_dst_vertex_Table.h"
-#include "tables/St_dst_v0_vertex_Table.h"
 #include "TClass.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
@@ -58,7 +59,7 @@ using std::copy;
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.10 2008/03/13 16:57:27 ullrich Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.11 2009/11/23 16:34:08 fisyak Exp $";
 
 StV0Vertex::StV0Vertex()
 {
@@ -71,23 +72,6 @@ StV0Vertex::StV0Vertex()
     mDcaParentToPrimaryVertex = 0;
 }
 
-StV0Vertex::StV0Vertex(const dst_vertex_st& vtx, const dst_v0_vertex_st& v0vtx) : StVertex(vtx)
-{
-    mType = kV0VtxId;
-    mDaughters.resize(2);
-    mDaughters[negative] = 0;
-    mDaughters[positive] = 0;
-    mDcaDaughtersToPrimaryVertex[negative] = v0vtx.dcan;
-    mDcaDaughtersToPrimaryVertex[positive] = v0vtx.dcap;
-    mMomentumOfDaughters[0].setX(v0vtx.neg_px);
-    mMomentumOfDaughters[0].setY(v0vtx.neg_py);
-    mMomentumOfDaughters[0].setZ(v0vtx.neg_pz);
-    mMomentumOfDaughters[1].setX(v0vtx.pos_px);
-    mMomentumOfDaughters[1].setY(v0vtx.pos_py);
-    mMomentumOfDaughters[1].setZ(v0vtx.pos_pz);
-    mDcaDaughters = v0vtx.dcapn;
-    mDcaParentToPrimaryVertex = v0vtx.dcav0;
-}
 
 StV0Vertex::~StV0Vertex() { /* noop */ }
 

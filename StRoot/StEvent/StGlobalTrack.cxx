@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 2.5 2007/03/20 20:56:19 perev Exp $
+ * $Id: StGlobalTrack.cxx,v 2.6 2009/11/23 16:34:06 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
+ * Revision 2.6  2009/11/23 16:34:06  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.5  2007/03/20 20:56:19  perev
  * LeakFix StDcaGeometry was not deleted at all
  *
@@ -30,17 +33,14 @@
  *
  **************************************************************************/
 #include "StGlobalTrack.h"
-#include "tables/St_dst_track_Table.h"
 #include "StVertex.h"
 #include "StDcaGeometry.h"
 
 ClassImp(StGlobalTrack)
 
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.5 2007/03/20 20:56:19 perev Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.6 2009/11/23 16:34:06 fisyak Exp $";
 
 StGlobalTrack::StGlobalTrack() {mDcaGeometry = 0;}
-
-StGlobalTrack::StGlobalTrack(const dst_track_st& track) : StTrack(track) {mDcaGeometry = 0;}
 
 StGlobalTrack::StGlobalTrack(const StGlobalTrack& track) : StTrack(track)
 {

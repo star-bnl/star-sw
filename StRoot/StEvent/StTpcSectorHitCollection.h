@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcSectorHitCollection.h,v 2.3 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTpcSectorHitCollection.h,v 2.4 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcSectorHitCollection.h,v $
+ * Revision 2.4  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.3  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -33,13 +36,13 @@
 
 class StTpcSectorHitCollection : public StObject {
 public:
-    StTpcSectorHitCollection();
-    ~StTpcSectorHitCollection();
+  StTpcSectorHitCollection() {}
+  ~StTpcSectorHitCollection() {}
     // StTpcSectorHitCollection(const StTpcSectorHitCollection&);            use default
     // StTpcSectorHitCollection& operator=(const StTpcSectorHitCollection&); use default
     
     unsigned int numberOfHits() const;
-    unsigned int numberOfPadrows() const;
+    unsigned int numberOfPadrows() const { return mNumberOfPadrows; }
     
     StTpcPadrowHitCollection*       padrow(unsigned int);
     const StTpcPadrowHitCollection* padrow(unsigned int) const;

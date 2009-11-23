@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichHit.cxx,v 2.4 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StRichHit.cxx,v 2.5 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichHit.cxx,v $
+ * Revision 2.5  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.4  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -25,9 +28,8 @@
  **************************************************************************/
 
 #include "StRichHit.h"
-#include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StRichHit.cxx,v 2.4 2004/07/15 16:36:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichHit.cxx,v 2.5 2009/11/23 16:34:07 fisyak Exp $";
 
 ClassImp(StRichHit)
     

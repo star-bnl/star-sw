@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.9 2002/11/26 02:19:11 perev Exp $
+ * $Id: StVertex.h,v 2.10 2009/11/23 16:34:08 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.10  2009/11/23 16:34:08  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.9  2002/11/26 02:19:11  perev
  * StEventMaker ITTF modif
  *
@@ -53,14 +56,12 @@
 #include "StMatrixF.hh"
 #include "StContainers.h"
 
-class dst_vertex_st;
 class StTrack;
 class StTrackFilter;
 
 class StVertex : public StMeasuredPoint {
 public:
     StVertex();
-    StVertex(const dst_vertex_st&);
     // StVertex(const StVertex&);            use default
     // StVertex& operator=(const StVertex&); use default
     virtual ~StVertex();

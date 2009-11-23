@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSoftwareMonitor.cxx,v 2.2 1999/10/28 22:26:24 ullrich Exp $
+ * $Id: StRichSoftwareMonitor.cxx,v 2.3 2009/11/23 16:34:07 fisyak Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichSoftwareMonitor.cxx,v $
+ * Revision 2.3  2009/11/23 16:34:07  fisyak
+ * Cleanup, remove dependence on dst tables, clean up software monitors
+ *
  * Revision 2.2  1999/10/28 22:26:24  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -19,9 +22,8 @@
  **************************************************************************/
 #include <algorithm>
 #include "StRichSoftwareMonitor.h"
-#include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: StRichSoftwareMonitor.cxx,v 2.2 1999/10/28 22:26:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichSoftwareMonitor.cxx,v 2.3 2009/11/23 16:34:07 fisyak Exp $";
 
 ClassImp(StRichSoftwareMonitor)
 
