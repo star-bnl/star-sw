@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.48 2009/11/06 13:41:31 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.49 2009/11/23 16:50:27 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.49  2009/11/23 16:50:27  fisyak
+ * St_tpcAnodeHVavgC => St_tpcAnodeHVC, comment out exported for fortran coordinate transformations
+ *
  * Revision 1.48  2009/11/06 13:41:31  fisyak
  * Revert the change done 11/03/09
  *
@@ -158,7 +161,7 @@
 #include "math_constants.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
-#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -166,7 +169,7 @@
 #include "TCernLib.h"
 #endif
 ClassImp(StTpcDbMaker)
-
+#if 0
 //
 //C and Fortran routines:
 //________________________________________
@@ -458,7 +461,7 @@ int type_of_call tpc_hit_postion(int sector, int row, int pad, int timebucket, f
   z = p.z();
   return 0;
 }
-
+#endif
 //_____________________________________________________________________________
 StTpcDbMaker::StTpcDbMaker(const char *name): StMaker(name), m_TpcDb(0), m_tpg_pad_plane(0), m_tpg_detector(0) {}
 //_____________________________________________________________________________
@@ -600,7 +603,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Make(){
   // check that TPC is tripped 
-  if (St_tpcAnodeHVavgC::instance()->tripped()) {
+  if (St_tpcAnodeHVC::instance()->tripped()) {
     gMessMgr->Info() << "StTpcDbMaker::TPC has tripped - declaring EOF to avoid possibly bad data" << endm;
     return kStEOF;
   }
