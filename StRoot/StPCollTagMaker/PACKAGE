@@ -1,0 +1,5 @@
+# $Id $
+# package StPCollTagMaker
+# author: 
+Library:libStPCollTagMaker.so:LIBS +=   -lglobal_Tables  -lStChain    -l_StEvent
+#Library:libStPCollTagMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStEvent
