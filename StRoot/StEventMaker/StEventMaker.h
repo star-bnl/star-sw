@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.14 2009/11/19 19:44:05 fisyak Exp $
+ * $Id: StEventMaker.h,v 2.15 2009/11/23 16:37:08 fisyak Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
- * Revision 2.14  2009/11/19 19:44:05  fisyak
- * Step back with tables
+ * Revision 2.15  2009/11/23 16:37:08  fisyak
+ * Clean up, fix problem with bunch crossing information in StEventInfo and StHddr
+ *
+ * Revision 2.13  2009/11/19 16:54:09  fisyak
+ * Clean up
  *
  * Revision 2.12  2009/11/10 20:45:08  fisyak
  * pams Cleanup
@@ -78,7 +81,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.14 2009/11/19 19:44:05 fisyak Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.15 2009/11/23 16:37:08 fisyak Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -97,7 +100,6 @@ public:
 protected:
     Int_t     makeEvent();
     StEvent*  getStEventInstance();
-    void   fillOuterTrackGeometry(StTrack*, const dst_track_st&);    
     void   printEventInfo();
     void   printTrackInfo(StTrack*);
     
