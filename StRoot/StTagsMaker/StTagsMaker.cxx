@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.20 2008/07/29 14:43:51 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.21 2009/11/23 16:47:59 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.21  2009/11/23 16:47:59  fisyak
+// Add Primary vertex position errors
+//
 // Revision 1.20  2008/07/29 14:43:51  fisyak
 // Check that StTriggerIdCollection exists
 //
@@ -104,6 +107,10 @@ Int_t StTagsMaker::Make(){
       row.primaryVertexX =  primVertex->position().x();    // x-vertex
       row.primaryVertexY =  primVertex->position().y();    // y-vertex
       row.primaryVertexZ =  primVertex->position().z();    // z-vertex
+      const StMatrixF   &m  = primVertex->covariantMatrix();
+      if (m(1,1) > 0) row.sigmaPVX =  TMath::Sqrt(m(1,1));    // x-vertex
+      if (m(2,2) > 0) row.sigmaPVY =  TMath::Sqrt(m(2,2));    // y-vertex
+      if (m(3,3) > 0) row.sigmaPVZ =  TMath::Sqrt(m(3,3));    // z-vertex
     } else row.primaryVertexFlag = 99;
     StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
     if ( theTriggers){
