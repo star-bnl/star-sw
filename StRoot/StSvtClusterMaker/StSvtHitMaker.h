@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.19 2004/07/29 01:36:59 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.20 2009/11/23 16:44:55 fisyak Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.20  2009/11/23 16:44:55  fisyak
+// Remove references to tables
+//
 // Revision 1.19  2004/07/29 01:36:59  caines
 // Changes for using the drift curves
 //
@@ -66,17 +69,12 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-
-#include "tables/St_scs_spt_Table.h"
-#include "tables/St_dst_mon_soft_svt_Table.h"
 #include "TH2.h"
 
 //class ofstream;
 
 class TFile;
 class TNtuple;
-
-class St_scs_spt;
 class StSvtGeometry;
 class StSvtHybridCollection;
 class StSvtAnalysedHybridClusters;
@@ -103,7 +101,6 @@ class StSvtHitMaker : public StMaker
   Int_t GetSvtDriftCurve();
   Int_t GetSvtT0();
   void TransformIntoSpacePoint();
-  void SaveIntoTable(int numOfCluster, int index);
   void SaveIntoNtuple(int numOfCluster, int index);
   void SetWriteNtuple(int iwrite){iWrite = iwrite;};
   void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
@@ -111,7 +108,7 @@ class StSvtHitMaker : public StMaker
   double LaserTemperatureCorrection();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.19 2004/07/29 01:36:59 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.20 2009/11/23 16:44:55 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -130,9 +127,6 @@ class StSvtHitMaker : public StMaker
   
   StSvtData *mSvtData; //!
   StSvtGeantHits *mSvtGeantHit;  //!
-
-  St_dst_mon_soft_svt *svt_drift_mon; //!
-  
   TH2F     *m_x_vs_y;  //! x vs y of Si points
   int        mNwaf_no;  //! size of following array
   TH2F     **m_waf_no;  //! ladder no vs z of Si hit
