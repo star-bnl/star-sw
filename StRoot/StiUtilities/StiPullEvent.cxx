@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "StiPullEvent.h"
 #include "RVersion.h"
 #if ROOT_VERSION_CODE < 331013
