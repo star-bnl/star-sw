@@ -107,6 +107,7 @@ StVertexSeedMaker::StVertexSeedMaker(const char *name,
   xerr  = new TH1F("xerr","x measured - x guess",1000,HIST_MIN,HIST_MAX);
   yerr  = new TH1F("yerr","y measured - y guess",1000,HIST_MIN,HIST_MAX);
   defDir = defaultDir;
+  mTempOut = 0;
   resNtuple = 0;
   nsize = 0;
   setArraySize(512);
@@ -133,8 +134,15 @@ void StVertexSeedMaker::Reset() {
   ydist->Reset();
   xerr->Reset();
   yerr->Reset();
-  if (resNtuple) delete resNtuple;
+
+  if (mTempOut) delete mTempOut;
+  else if (resNtuple) delete resNtuple;
+  mTempOut = new TFile(Form("%s/vertexseedhist.%d.root",
+    gSystem->TempDirectory(),
+    gSystem->GetPid()),"RECREATE");
   resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc:detmap:ex:ey");
+  LOG_INFO << "Opening new temp file at " << mTempOut->GetName() << endm;
+
   date = 0;
   time = 0;
   fill = -1;
@@ -282,7 +290,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.42 2009/11/16 22:31:11 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.43 2009/11/23 21:38:56 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -331,24 +339,31 @@ void StVertexSeedMaker::WriteHistFile(){
     LOG_INFO << "Not writing histograms - no entries!!!" << endm;
     return;
   }
-  char filename[80]; 
   // .ROOT is NOT a typo !!!
   if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
-  sprintf(filename,"%svertexseedhist.%08d.%06d.ROOT",defDir.Data(),date,time);
+  TString fileName = Form("%svertexseedhist.%08d.%06d.root",
+                          defDir.Data(),date,time);
   LOG_INFO << "Writing new histograms to:\n  "
-    << filename << endm;
-  TString dirname = gSystem->DirName(filename);
+    << fileName << endm;
+  TString dirname = gSystem->DirName(fileName.Data());
   if (gSystem->OpenDirectory(dirname.Data())==0) { 
     if (gSystem->mkdir(dirname.Data())) {
       LOG_WARN << "Directory creation failed for:\n  " << dirname
       << "\n  Putting histogram file in current directory" << endm;
-      for (int i=0;i<80;i++){filename[i]=0;}
-      sprintf(filename,"vertexseedhist.%08d.%06d.ROOT",date,time);
+      fileName = Form("vertexseedhist.%08d.%06d.root",date,time);
     }
   }
-  TFile out(filename,"RECREATE");
+  if (mTempOut) {
+    mTempOut->Write();
+    mTempOut->Close();
+    if (gSystem->CopyFile(mTempOut->GetName(),fileName.Data()) ||
+        gSystem->Unlink(mTempOut->GetName())) {
+      LOG_ERROR << "Could not copy and/or delete temp vertexseedhist file!" << endm;
+    }
+    resNtuple = 0;
+  }
+  TFile out(fileName.Data(),"UPDATE");
   GetHistList()->Write();
-  resNtuple->Write();
   out.Close();
 }
 //_____________________________________________________________________________
@@ -606,8 +621,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.42 2009/11/16 22:31:11 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.43 2009/11/23 21:38:56 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.43  2009/11/23 21:38:56  genevb
+// Fix problems with memory-resident TNtuple by using a temporary disk file
+//
 // Revision 1.42  2009/11/16 22:31:11  genevb
 // phase out usage of old tables
 //
