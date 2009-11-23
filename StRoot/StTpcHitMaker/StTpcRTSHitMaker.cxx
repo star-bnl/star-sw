@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.9 2009/11/10 21:05:08 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.10 2009/11/23 23:02:59 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -138,6 +138,7 @@ Int_t StTpcRTSHitMaker::Make() {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
     for (Int_t row = minRow; row <= maxRow; row++) {
+      Int_t NoAdcs = 0;
       Double_t gain = (row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
       Double_t wire_coupling = (row<=13) ? 
 	St_tss_tssparC::instance()->wire_coupling_in() : 
@@ -166,8 +167,12 @@ Int_t StTpcRTSHitMaker::Make() {
 	    l++;
 	  }
 	}
-	dta->finalize(l,sec,row,pad);
+	if (l > 0) {
+	  dta->finalize(l,sec,row,pad);
+	  NoAdcs += l;
+	}
       }
+      if (! NoAdcs) continue;
       if (Debug() > 1) {
 	// verify data!
 	dta = r.det("tpx")->get("adc_sim");
