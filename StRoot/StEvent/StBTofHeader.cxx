@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHeader.cxx,v 2.3 2009/11/23 22:24:05 ullrich Exp $
+ * $Id: StBTofHeader.cxx,v 2.4 2009/11/23 22:45:51 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.cxx,v $
+ * Revision 2.4  2009/11/23 22:45:51  ullrich
+ * Fixed order of operator precedence in removeVpdHit().
+ *
  * Revision 2.3  2009/11/23 22:24:05  ullrich
  * Cleaned up compiler warning in removeVpdHit().
  *
@@ -118,7 +121,7 @@ StBTofHeader::setVpdHit(StBeamDirection eastwest, int tubeId)
 void
 StBTofHeader::removeVpdHit(StBeamDirection eastwest, int tubeId)
 {
-    mVpdHitPattern[eastwest] &= ( (0x7ffff - 0x1) << (tubeId-1) );
+    mVpdHitPattern[eastwest] &= ( 0x7ffff - (0x1 << (tubeId-1)) );
 }
 
 void
