@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.551 2009/11/10 20:20:15 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.552 2009/11/23 15:55:13 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -19,7 +19,6 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #define STAR_LOGGER 1
-#define __CLEANUP__
 #define __KEEP_TPCDAQ_FCF__
 //_____________________________________________________________________
 // PLease, preserve the comment after = { . It is used for documentation formatting
@@ -55,9 +54,6 @@ ClassImp(StBFChain);
 void StBFChain::Setup(Int_t mode) {
   static const Char_t *path  = "./StRoot/StBFChain:$STAR/StRoot/StBFChain";
   TString chain("BFC.C");
-#ifndef __CLEANUP__
-  if (mode == 2) chain = "BFC2.C";
-#endif
   Char_t *file = gSystem->Which(path,chain,kReadPermission);
 #ifdef STAR_LOGGER
   if (! file) { LOG_FATAL  << Form("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path) << endm; }
@@ -452,40 +448,6 @@ Int_t StBFChain::Instantiate()
     if (GetOption("ppOpt") ) {                         // pp specific stuff
       if (maker == "StTrsMaker")
 	mk->SetMode(1);       // Pile-up correction
-#ifndef     __CLEANUP__  
-      if (maker == "StVertexMaker"){
-	gMessMgr->QAInfo() << "ppOpt (pp mode) is turned ON" << endm;
-	if( GetOption("SvtMatchVtx"))    mk->SetMode(4); // Switch vertex finder to ppLMV using EST
-	else if ( GetOption("VFppLMV5")) mk->SetMode(8); // LMV4 with LMV5 cuts
-	else                             mk->SetMode(1); // Switch vertex finder to ppLMV
-	if( GetOption("beamLine"))                      // Add beam-line constrain
-	  ProcessLine(Form("((StVertexMaker *) %p)->SetBeam4ppLMV();",mk));
-	
-	if( GetOption("fzin") || GetOption("ntin") ||GetOption("gstar") || GetOption("VMC") || GetOption("PrepEmbed")){// get CTB's from MC
-	  LOG_QA << "QAInfo: Simulation is used, setting CTB Mode to 1" << endm;
-	  ProcessLine(Form("((StVertexMaker *) %p)->SetCTBMode(1);",mk));
-	} else if ( GetOption("clearDAQCTB") ){        // remove CTB from DAQ (embedding)
-	  LOG_QA << "QAInfo: clearDAQCTB used, will removed CTB hits from DAQ"  << endm;
-	  ProcessLine(Form("((StVertexMaker *) %p)->SetCTBMode(2);",mk));
-	} else{
-	  LOG_QA << "QAInfo: Will get CTB from DAQ file" << endm;
-	  ProcessLine(Form("((StVertexMaker *) %p)->SetCTBMode(0);",mk));
-	}
-      }
-    } else {
-      // See section above associated to GetOption("ppOpt") for pp specific.
-      // This part was reshaped to avoid confusion and possible
-      // option overwrite if one is not carefull enough ... VtxOffset
-      // way used in RY1h and RY2000 only and abandonned later. If re-appear,
-      // maker == StVertexmaker would have to be its own block with a ppOpt
-      // embedded logic.
-      if ((maker == "StVertexMaker"  || maker == "StPreVertexMaker") &&
-	  GetOption("VtxOffSet")){
-	LOG_QA << "QAInfo: VtxOffSet is ON" << endm;
-	if ( GetOption("SvtMatchVtx") )  mk->SetMode(3);
-	else                             mk->SetMode(2);
-      }
-#endif
     }
     
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
@@ -1198,11 +1160,6 @@ void StBFChain::SetFlags(const Char_t *Chain)
 {
   TString tChain(Chain);
   Int_t mode = 1;
-#ifndef __CLEANUP__
-  // chain choise
-  if (tChain.Contains("ittf",TString::kIgnoreCase) ||
-      tChain.Contains("StiVMC",TString::kIgnoreCase) ) mode = 2;
-#endif
   Setup(mode);
   Int_t k=0;
   if (tChain == "" || tChain.CompareTo("ittf",TString::kIgnoreCase) == 0) {
