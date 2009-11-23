@@ -1,0 +1,13 @@
+/*pvpdCalib.idl
+*
+*Table: pvpdCalib
+*
+*	description: // pvpd tot calibration parameters
+*		channelid: west 1-19, east 20-38
+*/
+
+struct pvpdCalib{
+	octet channelid; 	/* channelid: west 1-19, east 20-38 */
+	float tot[60];		/*tot*/
+	float totcorr[60];	/*tot correction*/
+};
