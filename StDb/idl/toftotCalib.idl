@@ -1,0 +1,14 @@
+/*toftotCalib.idl
+*
+*Table: toftotCalib
+*
+* 	description: // TOF tot calibration parameters
+*
+*/
+
+struct toftotCalib{
+	octet  trayid;/*TOF tray ID 1-120 */
+	octet boardid;/*board ID 1-8*/
+	float tot[60];/*tot */
+	float totcorr[60]/*tot correction*/
+};
