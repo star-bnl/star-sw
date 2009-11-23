@@ -101,7 +101,7 @@ StEEmcMixerMaker::Make(){
      it owns the StEmcCollection from simulator.
   */
   StEmcCollection *ecolB = 0;
-  StEEmcFastMaker *sim = (StEEmcFastMaker*)GetMaker("EEmcFastSim");
+  StEEmcFastMaker *sim = (StEEmcFastMaker*)GetMakerInheritsFrom("StEEmcFastMaker");
   // one can use fast simu as the source even if slow simu is used, since slow simu is set up in the overwrite mode.
   if(!sim)  {
     LOG_WARN<<"::Make() No fast EEmcSimulator found, nothing to embed"<<endm; return  kStWarn; }
@@ -253,8 +253,11 @@ into the first StEmcCollection in event for all EEMC subdetectors
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.8 2009/02/05 20:06:52 ogrebeny Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.9 2009/11/23 23:44:32 ogrebeny Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.9  2009/11/23 23:44:32  ogrebeny
+// At Pibero's request, for the embedding infrastructure.
+//
 // Revision 1.8  2009/02/05 20:06:52  ogrebeny
 // Changed StEEmcDbMaker -> StEEmcDb
 //
