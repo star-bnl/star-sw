@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.64 2009/07/24 21:00:11 posk Exp $
+// $Id: doFlowEvents.C,v 1.65 2009/11/24 19:40:35 posk Exp $
+// located at /StRoot/macros/analysis/doFlowEvents.C
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -25,7 +26,7 @@
 //             b. "-" to get just the one file you want
 //      file = a. file names in directory (takes all files)
 //             b. the one particular full file name (with directory) you want
-//      phiWgtOnly = kTRUE runs the StPhiWgtMaker only
+//      firstPass = kTRUE runs StFlowPhiWgtMaker or StFlowReCentMaker only
 //
 // Usage: 
 // doFlowEvents.C(nEvents, "-", "some_directory/some_dst_file.root")
@@ -50,7 +51,6 @@
 //              Raimond Snellings
 //              Kirill Filimonov
 //              Markus Oldenburg
-//              John Wu
 //  
 ///////////////////////////////////////////////////////////////////////////////
 class    StChain;
@@ -58,7 +58,7 @@ StChain  *chain = 0;
 TBrowser *b = 0;
 Int_t    RunType;
 Char_t*  OutPicoDir;
- class    StFileI;
+class    StFileI;
 StFileI* setFiles = 0;
 TString  mainBranch;
 
@@ -66,14 +66,14 @@ const char *dstFile = 0;
 const char *fileList[] = {dstFile, 0};
 
 //--------- Prototypes -----------
-void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly = kFALSE);
+void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass = kFALSE);
 void doFlowEvents(Int_t nEvents, const Char_t *path, const Char_t *file, 
-		  Bool_t phiWgtOnly = kFALSE);
-void doFlowEvents(Int_t nEvents, const Char_t *path/file, Bool_t phiWgtOnly = kFALSE);
-void doFlowEvents(Int_t nEvents = 2, Bool_t phiWgtOnly = kFALSE);
+		  Bool_t firstPass = kFALSE);
+void doFlowEvents(Int_t nEvents, const Char_t *path/file, Bool_t firstPass = kFALSE);
+void doFlowEvents(Int_t nEvents = 2, Bool_t firstPass = kFALSE);
 
 // -------- Here is the actual method ----------
-void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
+void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
 {
   cout <<  endl << endl <<" doFlowEvents - input # events = " << nEvents << endl;
   Int_t ilist = 0;
@@ -84,11 +84,17 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
 
   Int_t maxTheta = 5;
   Int_t nSels    = 2;
+  Bool_t reCent  = kTRUE;
 
-  if (phiWgtOnly) {
-    cout << " doFlowEvents - phiWgtOnly = kTRUE" << endl;
+  if (firstPass) {
+    cout << " doFlowEvents - firstPass makers = kTRUE" << endl;
   } else {
-    cout << " doFlowEvents - phiWgtOnly = kFALSE" << endl;
+    cout << " doFlowEvents - firstPass makers = kFALSE" << endl;
+  }
+  if (reCent) {
+    cout << " doFlowEvents - reCent = kTRUE" << endl;
+  } else {
+    cout << " doFlowEvents - phiWgt = kTRUE" << endl;
   }
   cout << endl << endl;
 
@@ -125,10 +131,10 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   sprintf(makerName, "Flow");
   
   // Determine the kind of file and instantiate the FlowMaker after the IOMaker
-  StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+  StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");	// deactivate all branches
-  if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
+  if (!mainBranch.IsNull()) { IOMk->SetBranch(mainBranch,0,"r"); }
 
   if (strstr(fileList[0], "MuDst.root")) {
     // Read mu-DST
@@ -178,13 +184,20 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Flow Makers
   //   The AnalysisMaker, CumulantMaker, ScalarProdMaker, and LeeYangZerosMaker 
   //   may be used with a selection object.
-  if (phiWgtOnly) {
-    bool phiWgtMaker = kTRUE;
+  if (firstPass) {
+    if (reCent) {
+      bool reCentMaker = kTRUE;
+      bool phiWgtMaker = kFALSE;
+    } else {
+      bool reCentMaker = kFALSE;
+      bool phiWgtMaker = kTRUE;
+    }
     bool anaMaker    = kFALSE;
     bool cumMaker    = kFALSE;
     bool spMaker     = kFALSE;
     bool lyzMaker    = kFALSE;
   } else {
+    bool reCentMaker = kFALSE;
     bool phiWgtMaker = kFALSE;
     bool anaMaker    = kTRUE;
     bool cumMaker    = kFALSE;
@@ -192,21 +205,34 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
     bool lyzMaker    = kFALSE;
   }
   Bool_t includeTpcTracks  = kTRUE;
-  Bool_t includeFtpcTracks = kTRUE;
+  Bool_t includeFtpcTracks = kTRUE; // must be kTRUE if sel 1 is FTPC EP
 
 // For LYZ and anaMaker
   Float_t ptRange_for_vEta[2] = {0.15, 2.};
   Float_t etaRange_for_vPt[2] = {0., 1.3}; // show only TPC particles in v(pt)
 //   Float_t ptRange_for_vEta[2] = {0., 0.}; // integrate over the full pt range
 //   Float_t etaRange_for_vPt[2] = {0., 0.}; // integrate over the full eta range
-//   Float_t ptRange_for_vEta[2] = {0., 2.};
 //   Float_t etaRange_for_vPt[2] = {2.5, 4.}; // show only FTPC particles in v(pt)
   
-  // Set recentering FALSE except for LYZ maker
-  // If recentering is TRUE, pass zero will be run to calculate the recentering parameters
-  if (lyzMaker) { flowMaker->SetReCent(); }
-  else { flowMaker->SetReCent(kFALSE); }
-//   flowMaker->SetReCent(kFALSE); // even for LYZ
+  // Set recentering FALSE except for ana and LYZ makers
+  // For LYZ: If recentering is TRUE, pass zero will be run to calculate the recentering
+  //   parameters
+  // For ana: If recentering is TRUE, first pass will calculate
+  //   the recentering parameters and write them to flow.reCentAnaNew.root
+  if (anaMaker) {
+    if (reCent) {
+      flowMaker->SetPhiWgtCalc(kFALSE);
+      flowMaker->SetReCentCalc(kTRUE);
+    } else {
+      flowMaker->SetPhiWgtCalc(kTRUE);
+      flowMaker->SetReCentCalc(kFALSE);
+    }
+  } else if (lyzMaker) {
+    flowMaker->SetReCentCalc();
+  } else {
+    flowMaker->SetPhiWgtCalc();
+    flowMaker->SetReCentCalc(kFALSE);
+  }
 
   // To calculate v1{EP1,EP2} use the following switch.
   // Since v1{EP1} doesn't work very well at RHIC energies, v1{EP1,EP2} is set to be 
@@ -272,6 +298,9 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
   if (phiWgtMaker) {
     StFlowPhiWgtMaker*  flowPhiWgtMaker = new StFlowPhiWgtMaker();
   }
+  if (reCentMaker) {
+    StFlowReCentMaker*  flowReCentMaker = new StFlowReCentMaker();
+  }
 
   // Set write flages and file names
 //   flowMaker->PicoEventWrite(kTRUE);
@@ -281,15 +310,15 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   flowMaker->SetPicoEventDir("./");
 
   // Set Debug status
-//  IOMk->SetDebug(1);
-//  flowMaker->SetDebug();
-//  flowAnalysisMaker->SetDebug();
-//  flowPhiWgtMaker->SetDebug();
-//  flowCumulantMaker->SetDebug();
-//  flowScalarProdMaker->SetDebug();
-//  flowLeeYangZerosMaker->SetDebug();
-//  chain->SetDebug();
-//  StMuDebug::setLevel(0);
+//   IOMk->SetDebug(1);
+//   flowMaker->SetDebug();
+//   flowAnalysisMaker->SetDebug();
+//   flowPhiWgtMaker->SetDebug();
+//   flowCumulantMaker->SetDebug();
+//   flowScalarProdMaker->SetDebug();
+//   flowLeeYangZerosMaker->SetDebug();
+//   chain->SetDebug();
+//   StMuDebug::setLevel(0);
 
   //
   // Initialize chain
@@ -308,19 +337,19 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Get centrality from RunType
   // For centrality=0 there is no centrality selection
   if (RunType) {
-    Int_t centrality = RunType % 10 ;
+    Int_t centrality = RunType % 10 ; // last digit
     StFlowCutEvent::SetCent(centrality, centrality);
   }
   
   // Set the event cuts
-//    StFlowCutEvent::SetCent(5, 5);
-//    StFlowCutEvent::SetMult(0, 0);
+//   StFlowCutEvent::SetCent(5, 5);
+//   StFlowCutEvent::SetMult(0, 0);
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
   StFlowCutEvent::SetVertexZ(-30., 30.);
 //   StFlowCutEvent::SetEtaSymTpc(0., 0.);
-//   StFlowCutEvent::SetEtaSymFtpc(0., 0.);
-   if (phiWgtOnly) { // all centralities
+  StFlowCutEvent::SetEtaSymFtpc(0., 0.); // no FTPC eta sym cut
+   if (firstPass) { // all centralities
      StFlowCutEvent::SetCent(0, 0);
    }
   
@@ -330,7 +359,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSqTpc(0., 0.);
 //   StFlowCutTrack::SetPtTpc(0.15, 12.);
-//   StFlowCutTrack::SetEtaTpc(-2.0, 2.0);
+//   StFlowCutTrack::SetEtaTpc(-1.0, 1.0);
 //   StFlowCutTrack::SetChgTpc(0., 0.);
   
    StFlowCutTrack::IncludeFtpcTracks(includeFtpcTracks);
@@ -339,22 +368,23 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
    StFlowCutTrack::SetDcaFtpc(0., 2.);
 //   StFlowCutTrack::SetDcaGlobalFtpc(0., 0.);
    StFlowCutTrack::SetPtFtpc(0.15, 2.);
-   StFlowCutTrack::SetEtaFtpc(-5.0, 0., 0., 5.0);
+//   StFlowCutTrack::SetEtaFtpc(-4.0, -2.5, 2.5, 4.0);
 //   StFlowCutTrack::SetChgFtpc(0, 0);
 
   // Set the event plane selections
-    // Harmonic 1 means odd, harmonic 2 means even
+   // Harmonic 1 means odd, harmonic 2 means even
+   // For selection 1 = FTPC event plane, selection 2 = TPC event plane
+   // (Must include FTPC paticles>):
+   StFlowEvent::SetEtaTpcCut(9., 10., 0, 0);  // harmonic 1, selection 1, no TPC
+   StFlowEvent::SetEtaTpcCut(9., 10., 1, 0);  // harmonic 2, selection 1, no TPC
+   StFlowEvent::SetEtaFtpcCut(-10., -9., 9., 10., 0, 1);  // harmonic 1, selection 2, no FTPC
+   StFlowEvent::SetEtaFtpcCut(-10., -9., 9., 10., 1, 1);  // harmonic 2, selection 2, no FTPC
   // TPC
-   StFlowEvent::SetEtaTpcCut(0.5, 2., 0, 0);    // harmonic 1, selection 1
+//   StFlowEvent::SetEtaTpcCut(0.5, 2., 0, 0);  // harmonic 1, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.0, 1., 1, 0);  // harmonic 2, selection 1
-//   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1); // harmonic 2, selection 2
 //   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);   // harmonic 2, selection 2
 //   StFlowEvent::SetDcaGlobalTpcCut(0., 1.);   // for event plane
   // FTPC
-//   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 0, 0);  // harmonic 1, selection 1
-//   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 1, 0);  // harmonic 2, selection 1
-   StFlowEvent::SetEtaFtpcCut(-10., -9., 9., 10., 0, 1);  // harmonic 1, selection 2, no FTPC
-   StFlowEvent::SetEtaFtpcCut(-10., -9., 9., 10., 1, 1);  // harmonic 2, selection 2, no FTPC
 //   StFlowEvent::SetPtFtpcCut(0., 10., 0, 0);   // harmonic 1, selection 1
 //   StFlowEvent::SetPtFtpcCut(0., 10., 1, 0);   // harmonic 2, selection 1
 //   StFlowEvent::SetPtFtpcCut(0., 10., 0, 1);   // harmonic 1, selection 2
@@ -368,24 +398,26 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
     // These correlate each particle with the other subevent plane.
     // With neither flag set the standard method is used, which
     // corelates each particle with the event plane from the full event
-    // minus the particle of interest.
+    // minus the particle of interest. Subevents are made according to eta.
     // Don't set both of these at the same time.
 //     StFlowEvent::SetEtaSubs();
 //     StFlowEvent::SetRanSubs();
 
   // Disable weights for the event plane and integrated flow
-//   StFlowEvent::SetPtWgt(kFALSE);
+    if (reCent) {
+      StFlowEvent::SetPtWgt(kFALSE);
+    }
 //   StFlowEvent::SetPtWgtSaturation(1.);
    StFlowEvent::SetEtaWgt(kFALSE);
+
+   // In LeeYangZeros do not use mixed harmonics for v1
+//    StFlowLeeYangZerosMaker::SetV1Mixed(kFALSE);
 
   // use ZDCSMD for the event plane
 //     StFlowEvent::SetUseZDCSMD(kTRUE);
 
   // Use Aihong's probability PID method
 //     StFlowEvent::SetProbPid();
-
-   // In LeeYangZeros do not use mixed harmonics for v1
-//    StFlowLeeYangZerosMaker::SetV1Mixed(kFALSE);
 
   // Set the PID deviant windows
 //   StFlowEvent::SetPiPlusCut(-3., 3.);
@@ -402,41 +434,41 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
   //
   // Event loop
   //
-  int istat = 0, iEvt = 1;
- EventLoop: if (iEvt <= nEvents && istat != 2) {
-   
-   cout << "===== Event " << iEvt << " start ===== " << endl;
-   
-   chain->Clear();
-   istat = chain->Make(iEvt);
-   if (istat == 2) 
-     {cout << "Last  event processed. Status = " << istat << endl;}
-   if (istat == 3) 
-     {cout << "Error event processed. Status = " << istat << endl;}
-   
-   iEvt++;
-   goto EventLoop;
- }
+   int istat = 0, iEvt = 1;
+EventLoop: if (iEvt <= nEvents && istat != 2) {
+     
+     cout << "===== Event " << iEvt << " start ===== " << endl;
+     
+     chain->Clear();
+     istat = chain->Make(iEvt);
+     if (istat == 2) 
+       {cout << "Last  event processed. Status = " << istat << endl;}
+     if (istat == 3) 
+       {cout << "Error event processed. Status = " << istat << endl;}
+     
+     iEvt++;
+     goto EventLoop;
+   }
   
-  iEvt--;
-  cout << "============================ Event " << iEvt
-       << " finish ============================" << endl;
+   iEvt--;
+   cout << "============================ Event " << iEvt
+	<< " finish ============================" << endl;
 
-  //
-  // Chain Finish
-  //
-  if (nEvents > 1) {
-    chain->Finish();
-  } else {
-    if (!b) { b = new TBrowser; }
-  }
+   //
+   // Chain Finish
+   //
+   if (nEvents > 1) {
+     chain->Finish();
+   } else {
+     if (!b) { b = new TBrowser; }
+   }
 
-  TVectorD* cumulConstants = new TVectorD(30); // temporary fix for a root bug
-  TObjString* cumulMethodTag = new TObjString( "cumulNew" );
+   TVectorD* cumulConstants = new TVectorD(30); // temporary fix for a root bug
+   TObjString* cumulMethodTag = new TObjString( "cumulNew" );
 
-  // Move the flow.cumulant.root, flow.scalar.root, and flow.LeeYangZeros.root files
-  // into the flow.hist.root file.
-  if (cumMaker) {
+   // Move the flow.cumulant.root, flow.scalar.root, and flow.LeeYangZeros.root files
+   // into the flow.hist.root file.
+   if (cumMaker) {
     TFile cumFile("flow.cumulant.root", "READ");
     if (cumFile.IsOpen()) { 
       cumFile.ReadAll();
@@ -446,95 +478,95 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly)
     } else {
       cout << "### Can't find file flow.cumulant.root" << endl;
     }
-  }
-  if (spMaker) {
-    TFile spFile("flow.scalar.root", "READ");
-    if (spFile.IsOpen()) { 
-      spFile.ReadAll();
-    } else {
-      cout << "### Can't find file flow.scalar.root" << endl;
-    }
-  }
-  if (lyzMaker) {
-    // combine the zero, first, and second pass outputs
-    TFile lyzFirstPassFile("flow.firstPassLYZ.root", "READ");
-    if (lyzFirstPassFile.IsOpen()) { 
-      TFile lyzZeroPassFile("flow.reCent.root", "READ");
-      if (lyzZeroPassFile.IsOpen()) { 
-	lyzZeroPassFile.ReadAll();
-	TList* zeroPassList = lyzZeroPassFile.GetList();
-	//zeroPassList->ls();
-      }
-      lyzFirstPassFile.ReadAll();
-      TList* firstPassList = lyzFirstPassFile.GetList();
-      //firstPassList->ls();
-      TString* histTitle; // remove ReG and ImG
-      for (int k = 0; k < nSels; k++) {
-	for (int j = 0; j < 2; j++) { // only 2 harmonics in the first pass file
-	  for (int Ntheta = 0; Ntheta < maxTheta; Ntheta++) {
-	    histTitle = new TString("FlowImGtheta");
-	    *histTitle += Ntheta;
-	    *histTitle += "_Sel";
-	    *histTitle += k+1;
-	    *histTitle += "_Har";
-	    *histTitle += j+1;
-	    hist = firstPassList->FindObject(histTitle->Data());
-	    firstPassList->Remove(hist);
-	    delete histTitle;
-	    histTitle = new TString("FlowReGtheta");
-	    *histTitle += Ntheta;
-	    *histTitle += "_Sel";
-	    *histTitle += k+1;
-	    *histTitle += "_Har";
-	    *histTitle += j+1;
-	    hist = firstPassList->FindObject(histTitle->Data());
-	    firstPassList->Remove(hist);
-	    delete histTitle;
-	  }
-	}
-      }
-      //firstPassList->ls();
-      TFile lyzFile("flow.LeeYangZeros.root", "UPDATE");
-      if (lyzFile.IsOpen()) {
-	if (lyzZeroPassFile.IsOpen()) { 
-	  zeroPassList->Write();
-	}
-	firstPassList->Write();
-	lyzFile.Close();
-      }
-    }
-    TFile lyzFile("flow.LeeYangZeros.root", "READ");
-    if (lyzFile.IsOpen()) {
-      lyzFile.ReadAll();
-    } else {
-      cout << "### Can't find file flow.LeeYangZeros.root" << endl;
-    }
-  }
-  if (anaMaker) {
-    TFile anaFile("flow.hist.root", "UPDATE");
-  } else {
-    TFile anaFile("flow.hist.root", "RECREATE");
-  }
-  if (anaFile.IsOpen()) {
-    if (cumMaker) {
-      cumFile.GetList()->Write();
-      cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
-      cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
-    }    
-    if (spMaker) { spFile.GetList()->Write(); }
-    if (lyzMaker) { lyzFile.GetList()->Write(); }
-    //anaFile.ls();
-    anaFile.Close();    
-  } else {
-    cout << "### Can't find file flow.hist.root" << endl;
-  }
-
+   }
+   if (spMaker) {
+     TFile spFile("flow.scalar.root", "READ");
+     if (spFile.IsOpen()) { 
+       spFile.ReadAll();
+     } else {
+       cout << "### Can't find file flow.scalar.root" << endl;
+     }
+   }
+   if (lyzMaker) {
+     // combine the zero, first, and second pass outputs
+     TFile lyzFirstPassFile("flow.firstPassLYZ.root", "READ");
+     if (lyzFirstPassFile.IsOpen()) { 
+       TFile lyzZeroPassFile("flow.reCent.root", "READ");
+       if (lyzZeroPassFile.IsOpen()) { 
+	 lyzZeroPassFile.ReadAll();
+	 TList* zeroPassList = lyzZeroPassFile.GetList();
+	 //zeroPassList->ls();
+       }
+       lyzFirstPassFile.ReadAll();
+       TList* firstPassList = lyzFirstPassFile.GetList();
+       //firstPassList->ls();
+       TString* histTitle; // remove ReG and ImG
+       for (int k = 0; k < nSels; k++) {
+	 for (int j = 0; j < 2; j++) { // only 2 harmonics in the first pass file
+	   for (int Ntheta = 0; Ntheta < maxTheta; Ntheta++) {
+	     histTitle = new TString("FlowImGtheta");
+	     *histTitle += Ntheta;
+	     *histTitle += "_Sel";
+	     *histTitle += k+1;
+	     *histTitle += "_Har";
+	     *histTitle += j+1;
+	     hist = firstPassList->FindObject(histTitle->Data());
+	     firstPassList->Remove(hist);
+	     delete histTitle;
+	     histTitle = new TString("FlowReGtheta");
+	     *histTitle += Ntheta;
+	     *histTitle += "_Sel";
+	     *histTitle += k+1;
+	     *histTitle += "_Har";
+	     *histTitle += j+1;
+	     hist = firstPassList->FindObject(histTitle->Data());
+	     firstPassList->Remove(hist);
+	     delete histTitle;
+	   }
+	 }
+       }
+       //firstPassList->ls();
+       TFile lyzFile("flow.LeeYangZeros.root", "UPDATE");
+       if (lyzFile.IsOpen()) {
+	 if (lyzZeroPassFile.IsOpen()) { 
+	   zeroPassList->Write();
+	 }
+	 firstPassList->Write();
+	 lyzFile.Close();
+       }
+     }
+     TFile lyzFile("flow.LeeYangZeros.root", "READ");
+     if (lyzFile.IsOpen()) {
+       lyzFile.ReadAll();
+     } else {
+       cout << "### Can't find file flow.LeeYangZeros.root" << endl;
+     }
+   }
+   if (anaMaker) {
+     TFile anaFile("flow.hist.root", "UPDATE");
+   } else {
+     TFile anaFile("flow.hist.root", "RECREATE");
+   }
+   if (anaFile.IsOpen()) {
+     if (cumMaker) {
+       cumFile.GetList()->Write();
+       cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
+       cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
+     }    
+     if (spMaker) { spFile.GetList()->Write(); }
+     if (lyzMaker) { lyzFile.GetList()->Write(); }
+     //anaFile.ls();
+     anaFile.Close();    
+   } else {
+     cout << "### Can't find file flow.hist.root" << endl;
+   }
+   
 END:
 }
 
 // ----------- This concatenates the path and the file name ---------------------
 void doFlowEvents(Int_t nEvents, const Char_t *path, const Char_t *file, 
-		  Bool_t phiWgtOnly)
+		  Bool_t firstPass)
 {
   const char *fileListQQ[] = {0,0};
   if (path[0] == '-') {
@@ -542,21 +574,21 @@ void doFlowEvents(Int_t nEvents, const Char_t *path, const Char_t *file,
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-  doFlowEvents(nEvents, fileListQQ, phiWgtOnly);
+  doFlowEvents(nEvents, fileListQQ, firstPass);
 }
 
 // ----------- When only a file is specified ---------------------
-void doFlowEvents(Int_t nEvents, const char *file, Bool_t phiWgtOnly)
+void doFlowEvents(Int_t nEvents, const char *file, Bool_t firstPass)
 {
-    printf("*file = %s\n",file);
-    const char *fileListQQ[]={0,0};
-    fileListQQ[0]=file;
-    cout << "Calling (nEvents, fileListQQ, phiWgtOnly)" << endl;
-    doFlowEvents(nEvents,fileListQQ,phiWgtOnly);
+  printf("*file = %s\n",file);
+  const char *fileListQQ[]={0,0};
+  fileListQQ[0]=file;
+  cout << "Calling (nEvents, fileListQQ, firstPass)" << endl;
+  doFlowEvents(nEvents, fileListQQ, firstPass);
 }
 
 // ----------- This sets default path and file names ---------------------------
-void doFlowEvents(Int_t nEvents, Bool_t phiWgtOnly) {
+void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 
 //  Char_t* filePath="./";
 //  Char_t* fileExt="*.flowpicoevent.root";
@@ -576,28 +608,33 @@ void doFlowEvents(Int_t nEvents, Bool_t phiWgtOnly) {
 
   // run 4 P05ic
   // muDST files
-  Char_t* filePath="/eliza9/starprod/reco/productionMinBias/ReversedFullField/P05ic/2004/024/";
-  if (nEvents < 450) {
-    Char_t* fileExt="st_physics_5024001_raw_1010001.MuDst.root";
-   } else {
-     Char_t* fileExt="*.MuDst.root";
-   }
+//   Char_t* filePath="/eliza9/starprod/reco/productionMinBias/ReversedFullField/P05ic/2004/024/";
+//   if (nEvents < 450) {
+//     Char_t* fileExt="st_physics_5024001_raw_1010001.MuDst.root";
+//     //Char_t* fileExt="st_physics_5024092_raw_1010002.MuDst.root";
+//   } else {
+//     Char_t* fileExt="*.MuDst.root";
+//   }
 
   // run 7 P07id
   // muDST files
-//   Char_t* filePath="/eliza12/starprod/reco/2007ProductionMinBias/FullField/P07id/2007/102/8102049/";
-//   if (nEvents < 450) {
-//     Char_t* fileExt="st_physics_8102049_raw_1010001.MuDst.root";
-//    } else {
-//      Char_t* fileExt="*.MuDst.root";
-//    }
+  Char_t* filePath="/eliza12/starprod/reco/2007ProductionMinBias/FullField/P07id/2007/131/8131027/";
+  if (nEvents < 450) {
+    Char_t* fileExt="st_physics_8131027_raw_2040050.MuDst.root";
+  } else {
+    Char_t* fileExt="*.MuDst.root";
+  }
 
-  doFlowEvents(nEvents, filePath, fileExt, phiWgtOnly);
+  doFlowEvents(nEvents, filePath, fileExt, firstPass);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.65  2009/11/24 19:40:35  posk
+// Added reCenter to remove acceptance correlations as an option instead of phiWgt.
+// Default selection 1 now calculates the event plane from the FTPCs and selection 2 from the main TPC.
+//
 // Revision 1.64  2009/07/24 21:00:11  posk
 // Removed John Wu's Grid Collector.
 //
