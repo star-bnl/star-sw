@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.98 2007/07/13 22:18:29 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.99 2009/11/24 19:29:11 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -69,8 +69,8 @@ StFlowAnalysisMaker::~StFlowAnalysisMaker() {
 Int_t StFlowAnalysisMaker::Make() {
   // Make histograms
 
-  // Get a pointer to StFlowEvent
-  StFlowMaker* pFlowMaker = NULL;
+  // Get another pointer to StFlowEvent
+  pFlowMaker = NULL;
   pFlowMaker = (StFlowMaker*)GetMaker("Flow");
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
   if (pFlowEvent && pFlowSelect->Select(pFlowEvent)) {     // event selected
@@ -83,7 +83,7 @@ Int_t StFlowAnalysisMaker::Make() {
   } else {
     gMessMgr->Info("##### FlowAnalysis: FlowEvent pointer null");
     return kStOK;
-  }
+  }// selected events
     
   if (Debug()) StMaker::PrintInfo();
   
@@ -94,6 +94,10 @@ Int_t StFlowAnalysisMaker::Make() {
 
 Int_t StFlowAnalysisMaker::Init() {
   // Book histograms
+
+  StFlowMaker* pFlowMaker = NULL;
+  pFlowMaker = (StFlowMaker*)GetMaker("Flow");
+  Bool_t reCentCalc = pFlowMaker->ReCentCalc();
 
   float ptMaxPart = Flow::ptMaxPart;
   if (pFlowSelect->PtMaxPart()) {
@@ -111,7 +115,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float chargeMin       =  -2.5;
   const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
-  const float dcaMax          =   3.6; 
+  const float dcaMax          =   0.3;
   const float glDcaMax        =   3.6; 
   const float chi2Min         =    0.;
   const float chi2Max         =    5.; 
@@ -135,12 +139,14 @@ Int_t StFlowAnalysisMaker::Init() {
   const float corrMultMax     = 2000.; 
   const float multOverOrigMin =    0.;
   const float multOverOrigMax =    1.; 
-  const float vertexZMin      = -152.5;
-  const float vertexZMax      =  152.5; 
+  const float vertexZMin      =-100.5;
+  const float vertexZMax      = 100.5; 
   const float vertexXYMin     =   -1.;
   const float vertexXYMax     =    1.; 
-  const float etaSymZMin      =  -1.15; 
-  const float etaSymZMax      =   1.15; 
+  const float QXYMin          =  -0.5;
+  const float QXYMax          =   0.5; 
+  const float etaSymZMin      = -1.15; 
+  const float etaSymZMax      =  1.15; 
   const float etaSymMin       =   -6.; 
   const float etaSymMax       =    6.; 
   const float phiMin          =    0.;
@@ -173,8 +179,9 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nTotalMultBins    = 40,
 	 nMultOverOrigBins = 50,
 	 nMultPartBins     = 40,
-	 nVertexZBins      = 61,
+	 nVertexZBins      = 51,
 	 nVertexXYBins     = 50,
+	 nQXYBins          = 50,
 	 nEtaSymBins       = 45,
 	 nPhi3DBins        = 18,
 	 nPsiBins          = 36,
@@ -202,7 +209,7 @@ Int_t StFlowAnalysisMaker::Init() {
   // Distance of closest approach
   // Tpc
   mHistDcaTpc = new TH1F("Flow_Dca_Tpc", "Flow_Dca_Tpc",
-      nDcaBins, dcaMin, 0.1);
+      nDcaBins, dcaMin, dcaMax);
   mHistDcaTpc->SetXTitle("Track dca to Vertex (cm)");
   mHistDcaTpc->SetYTitle("Counts");
 
@@ -385,13 +392,7 @@ Int_t StFlowAnalysisMaker::Init() {
     nPtBinsPart, Flow::ptMin, ptMaxPart, Flow::ptMin, ptMaxPart, "");
   mHistBinPt->SetXTitle("Pt (GeV/c)");
   mHistBinPt->SetYTitle("<Pt> (GeV/c)");
-  
-  // cos(n*phiLab)
-  mHistCosPhi = new TProfile("Flow_CosPhiLab", "Flow_CosPhiLab",
-    Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -100., 100., "");
-  mHistCosPhi->SetXTitle("Harmonic");
-  mHistCosPhi->SetYTitle("<cos(n*PhiLab)> (%)");
-    
+      
   // PID pi+
   mHistPidPiPlus = new TH1F("Flow_PidPiPlus", "Flow_PidPiPlus",
 			    nPidBins, pidMin, pidMax);
@@ -669,6 +670,7 @@ Int_t StFlowAnalysisMaker::Init() {
       *histTitle += j+1;
       histSub[i].histSubHar[j].mHistPsiSubs = new TH1F(histTitle->Data(),
 	histTitle->Data(), nPsiBins, psiMin, (psiMax / order));
+      histSub[i].histSubHar[j].mHistPsiSubs->Sumw2();
       histSub[i].histSubHar[j].mHistPsiSubs->SetXTitle
 	("Event Plane Angle (rad)");
       histSub[i].histSubHar[j].mHistPsiSubs->SetYTitle("Counts");
@@ -729,11 +731,43 @@ Int_t StFlowAnalysisMaker::Init() {
       *histTitle += j+1;
       histFull[k].histFullHar[j].mHistPsi = new TH1F(histTitle->Data(),
         histTitle->Data(), nPsiBins, psiMin, psiMax / order);
+      histFull[k].histFullHar[j].mHistPsi->Sumw2();
       histFull[k].histFullHar[j].mHistPsi->SetXTitle
 	("Event Plane Angle (rad)");
       histFull[k].histFullHar[j].mHistPsi->SetYTitle("Counts");
       delete histTitle;
       
+      // Recenter
+      histTitle = new TString("FlowReCentX_Sel");
+      *histTitle += k+1;
+      *histTitle += "_Har";
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistReCentX = new TProfile(histTitle->Data(),
+        histTitle->Data(), 3, 0.5, 3.5);
+      histFull[k].histFullHar[j].mHistReCentX->SetXTitle("FTPCE, FTPCW, TPCE, TPCW");
+      histFull[k].histFullHar[j].mHistReCentX->SetYTitle("<cos n #phi>");
+      delete histTitle;
+    
+      histTitle = new TString("FlowReCentY_Sel");
+      *histTitle += k+1;
+      *histTitle += "_Har";
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistReCentY = new TProfile(histTitle->Data(),
+        histTitle->Data(), 3, 0.5, 3.5);
+      histFull[k].histFullHar[j].mHistReCentY->SetXTitle("FTPCE, FTPCW, TPCE, TPCW");
+      histFull[k].histFullHar[j].mHistReCentY->SetYTitle("<sin n #phi>");
+      delete histTitle;
+    
+      // Recentered, for printing, not plotting
+       histTitle = new TString("FlowQreCent_Sel");
+      *histTitle += k+1;
+      *histTitle += "_Har";
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistQreCent = new TProfile(histTitle->Data(),
+        histTitle->Data(), 2, 0.5, 2.5);
+      histFull[k].histFullHar[j].mHistQreCent->SetXTitle("X, Y");
+      histFull[k].histFullHar[j].mHistQreCent->SetYTitle("<Q_{n}/M>");
+
       // event plane difference of two selections
       histTitle = new TString("Flow_Psi_Diff_Sel");
       *histTitle += k+1;
@@ -1133,7 +1167,7 @@ Int_t StFlowAnalysisMaker::Init() {
       *histTitle += k+1;
       histTitle->Append("_Har");
       *histTitle += j+1;
-      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarEast =	new TH1D(histTitle->Data(),
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarEast = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
       histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarEast->SetXTitle
 	("Azimuthal Angles (rad)");
@@ -1145,7 +1179,7 @@ Int_t StFlowAnalysisMaker::Init() {
       *histTitle += k+1;
       histTitle->Append("_Har");
       *histTitle += j+1;
-      histFull[k].histTwoHar[j].mHistPhiFlatFtpcEast =	new TH1D(histTitle->Data(),
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcEast = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
       histFull[k].histTwoHar[j].mHistPhiFlatFtpcEast->SetXTitle
 	("Azimuthal Angles (rad)");
@@ -1157,7 +1191,7 @@ Int_t StFlowAnalysisMaker::Init() {
       *histTitle += k+1;
       histTitle->Append("_Har");
       *histTitle += j+1;
-      histFull[k].histTwoHar[j].mHistPhiFlatFtpcWest =	new TH1D(histTitle->Data(),
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcWest = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
       histFull[k].histTwoHar[j].mHistPhiFlatFtpcWest->SetXTitle
 	("Azimuthal Angles (rad)");
@@ -1169,17 +1203,60 @@ Int_t StFlowAnalysisMaker::Init() {
       *histTitle += k+1;
       histTitle->Append("_Har");
       *histTitle += j+1;
-      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest =	new TH1D(histTitle->Data(),
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
       histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest->SetXTitle
 	("Azimuthal Angles (rad)");
       histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest->SetYTitle("Counts");
       delete histTitle;
+
+      // QXY
+      histTitle = new TString("Flow_QXY2D_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistQXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
+			    nQXYBins, QXYMin, QXYMax, nQXYBins, QXYMin, QXYMax);
+      histFull[k].histTwoHar[j].mHistQXY2D->SetXTitle("Q_X/M");
+      histFull[k].histTwoHar[j].mHistQXY2D->SetYTitle("Q_Y/M");
+      delete histTitle;
+    
+      // QSubXY for k=0 subevents
+      histTitle = new TString("Flow_QFTPCSubXY2D_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistQFTPCSubXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
+			    nQXYBins, QXYMin*2., QXYMax*2., nQXYBins, QXYMin*2., QXYMax*2.);
+      histFull[k].histTwoHar[j].mHistQFTPCSubXY2D->SetXTitle("QSub_X/M");
+      histFull[k].histTwoHar[j].mHistQFTPCSubXY2D->SetYTitle("QSub_Y/M");
+      delete histTitle;
+    
+      // QSubXY for k=1 subevents
+      histTitle = new TString("Flow_QTPCSubXY2D_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistQTPCSubXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
+			    nQXYBins, QXYMin*2., QXYMax*2., nQXYBins, QXYMin*2., QXYMax*2.);
+      histFull[k].histTwoHar[j].mHistQTPCSubXY2D->SetXTitle("QSub_X/M");
+      histFull[k].histTwoHar[j].mHistQTPCSubXY2D->SetYTitle("QSub_Y/M");
+      delete histTitle;
+    
     }
   }
 
+  // Calculate recenter paramerters?
+  TFile fileReCent("flow.reCentAna.root","R");
+  if (reCentCalc) {
+    gMessMgr->Info("##### FlowAnalysis: Calc reCent Pars");
+    mCalcReCentPars = kTRUE;
+  } else {
+    mCalcReCentPars = kFALSE;
+  }
+
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.98 2007/07/13 22:18:29 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.99 2009/11/24 19:29:11 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1189,6 +1266,8 @@ Int_t StFlowAnalysisMaker::Init() {
 Bool_t StFlowAnalysisMaker::FillFromFlowEvent() {
   // Get event quantities from StFlowEvent
 
+  Bool_t kRETURN;
+
   for (int k = 0; k < Flow::nSels; k++) {
     pFlowSelect->SetSelection(k);
     for (int j = 0; j < Flow::nHars; j++) {
@@ -1196,25 +1275,29 @@ Bool_t StFlowAnalysisMaker::FillFromFlowEvent() {
       for (int n = 0; n < Flow::nSubs; n++) {
 	pFlowSelect->SetSubevent(n);
 	int i = Flow::nSels*k + n;
-	// sub-event quantities
+	// sub-event quantities already recentered
+	mQSub[i][j] = pFlowEvent->Q(pFlowSelect);
 	mPsiSub[i][j] = pFlowEvent->Psi(pFlowSelect);
-	if (mPsiSub[i][j]==0.) return kFALSE; // to eliminate psi=0
-      }
+ 	mMultSub[i][j] = pFlowEvent->Mult(pFlowSelect);
+	if (mMultSub[i][j] < 3.) kRETURN = kFALSE; // to eliminate multSub < 3
+	if (mQSub[i][j].Mod()==0.) kRETURN = kFALSE; // to eliminate psiSub=0
+      }//subs
       
       pFlowSelect->SetSubevent(-1);
-      // full event quantities
+      // full event quantities already recentered
       mQ[k][j]    = pFlowEvent->Q(pFlowSelect);
       mPsi[k][j]  = pFlowEvent->Psi(pFlowSelect);
       m_q[k][j]   = pFlowEvent->q(pFlowSelect);
       mMult[k][j] = pFlowEvent->Mult(pFlowSelect);
-      if (mPsi[k][j]==0.) return kFALSE; // to eliminate psi=0
-    }
+      if (mQ[k][j].Mod()==0.) kRETURN = kFALSE; // to eliminate psi=0	
+    }//full
   }
   mZDCSMD_e_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtEast();
   mZDCSMD_w_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtWest();
   mZDCSMD_f_PsiWgt = (pFlowEvent->UseZDCSMD()) ? pFlowEvent->ZDCSMD_PsiWgtFull():1.;
   mFlowWeight  	   = (pFlowEvent->UseZDCSMD()) ? mZDCSMD_e_PsiWgt*mZDCSMD_w_PsiWgt*mZDCSMD_f_PsiWgt:1.;
-  return kTRUE;
+
+  return kRETURN;
 }
 
 //-----------------------------------------------------------------------
@@ -1260,67 +1343,84 @@ void StFlowAnalysisMaker::FillEventHistograms() {
   mHistZDCSMDPsiCorFull->Fill(pFlowEvent->ZDCSMD_PsiCorr(),mFlowWeight/mZDCSMD_f_PsiWgt);
 
   // sub-event Psi_Subs
-  for (int i = 0; i < Flow::nSubs * Flow::nSels; i++) {
+  for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
-      histSub[i].histSubHar[j].mHistPsiSubs->Fill(mPsiSub[i][j]);
+      for (int n = 0; n < Flow::nSubs; n++) {
+	int i = Flow::nSels*k + n;
+	if(mPsiSub[i][j]) { histSub[i].histSubHar[j].mHistPsiSubs->Fill(mPsiSub[i][j]); }
+	//if(mPsiSub[i][j]) { histSub[i].histSubHar[j].mHistPsiSubs->Fill(mPsiSub[i][j],mQSub[i][j].Mod()); }
+	if (mQSub[i][j].Mod() && mMultSub[i][j] && j<2) {
+	  if (k==0) { // FTPC
+	    double QSubx = mQSub[i][j].X() / (double)mMultSub[i][j];
+	    double QSuby = mQSub[i][j].Y() / (double)mMultSub[i][j];
+	    histFull[n].histTwoHar[j].mHistQFTPCSubXY2D->Fill(QSubx,QSuby);
+	  } else if (k==1) { // TPC
+	    double QSubx = mQSub[i][j].X() / (double)mMultSub[i][j];
+	    double QSuby = mQSub[i][j].Y() / (double)mMultSub[i][j];
+ 	    histFull[n].histTwoHar[j].mHistQTPCSubXY2D->Fill(QSubx,QSuby);
+	  }
+	}
+      }
     }
   }
 
-  // full event Psi, PsiSubCorr, PsiSubCorrDiff, cos, mult, q
+  // full event Psi, PsiSubCorr, PsiSubCorrDiff, cos, mult, q, reCent
   for (int k = 0; k < Flow::nSels; k++) {
+    pFlowSelect->SetSelection(k);
     for (int j = 0; j < Flow::nHars; j++) {
+      pFlowSelect->SetHarmonic(j);
       float order  = (float)(j+1);
-      histFull[k].histFullHar[j].mHistPsi->Fill(mPsi[k][j]);
 
-      if (k < 2 && j < 2) {
-	if (k == 0) { 
-	  float psi1 = mPsi[0][j];
-	  float psi2 = mPsi[1][j];
-	  
-	  float diff = psi1 - psi2;
-	  
-	  if (diff < -twopi/2./(j+1)) {
-	    diff += twopi/(j+1);
-	  } else if (diff > +twopi/2./(j+1)) {
-	    diff -= twopi/(j+1);
-	  }
-	  
-	  histFull[k].histFullHar[j].mHistPsi_Diff->Fill(diff);
-
-	} else if (k == 1) {
-	  float psi1 = 0.;
-	  float psi2 = 0.;
-	  
-	  if (j == 0) {
-	    psi1 = mPsi[0][0];
-	    psi2 = mPsi[1][1];
-	  }  else if (j == 1) {
-	    psi1 = mPsi[0][0];
-	    psi2 = mPsi[0][1];
-	  }
-	  
-	  float diff = psi1 - psi2;
-	  diff = (TMath::Abs(diff) > twopi/2.) ? ((diff > 0.) ? -(twopi - diff) :
-						  -(diff + twopi)) : diff;
-	  histFull[k].histFullHar[j].mHistPsi_Diff->Fill(diff);
-	}      
+      if (mPsi[k][j]) {
+	histFull[k].histFullHar[j].mHistPsi->Fill(mPsi[k][j]);
+	//histFull[k].histFullHar[j].mHistPsi->Fill(mPsi[k][j],mQ[k][j].Mod());
       }
-
+      if (mQ[k][j].Mod() && mMult[k][j] && j < 2) {
+	double Qx = mQ[k][j].X() / (double)mMult[k][j];
+	double Qy = mQ[k][j].Y() / (double)mMult[k][j];
+	histFull[k].histTwoHar[j].mHistQXY2D->Fill(Qx,Qy);
+      }
+      if (mPsi[0][j] && mPsi[1][j]) {
+	if (k < 2 && j < 2) {
+	  if (k == 0) { 
+	    float psi1 = mPsi[0][j];
+	    float psi2 = mPsi[1][j];	  
+	    float diff = psi1 - psi2;	  
+	    if (diff < -twopi/2./(j+1)) {
+	      diff += twopi/(j+1);
+	    } else if (diff > +twopi/2./(j+1)) {
+	      diff -= twopi/(j+1);
+	    }	  
+	    histFull[k].histFullHar[j].mHistPsi_Diff->Fill(diff);
+	  } else if (k == 1) {
+	    float psi1 = 0.;
+	    float psi2 = 0.;
+	    if (j == 0) {
+	      psi1 = mPsi[0][0];
+	      psi2 = mPsi[1][1];
+	    }  else if (j == 1) {
+	      psi1 = mPsi[0][0];
+	      psi2 = mPsi[0][1];
+	    }
+	    float diff = psi1 - psi2;
+	    diff = (TMath::Abs(diff) > twopi/2.) ? ((diff > 0.) ? -(twopi - diff) :
+						    -(diff + twopi)) : diff;
+	    histFull[k].histFullHar[j].mHistPsi_Diff->Fill(diff);
+	  }      
+	}
+      }
+      
       if (mPsiSub[Flow::nSels*k][j] != 0. && mPsiSub[Flow::nSels*k+1][j] != 0.) {
-
 	float psiSubCorr;
-
 	if(pFlowEvent->UseZDCSMD()) {
 	  psiSubCorr = pFlowEvent->ZDCSMD_PsiCorr();
 	} 
-	else if (mV1Ep1Ep2 == kFALSE || order != 1) {
+	else if (mV1Ep1Ep2 == kFALSE || order != 1) { // normal case
 	  psiSubCorr = mPsiSub[Flow::nSels*k][j] - mPsiSub[Flow::nSels*k+1][j];
 	}
-	
 	else { // mV1Ep1Ep2 == kTRUE && order == 1
 	  psiSubCorr = mPsiSub[Flow::nSels*k][0] + mPsiSub[Flow::nSels*k+1][0] - 2.*mPsi[k][1];
 	}
-
 	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr),mFlowWeight/mZDCSMD_f_PsiWgt);
 	if (psiSubCorr < 0.) psiSubCorr += twopi / order;
 	if (psiSubCorr > twopi / order) psiSubCorr -= twopi / order; // for v1Ep1Ep2 which gives -twopi < psiSubCorr < 2.*twopi
@@ -1341,15 +1441,33 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	   twopi/(double)j2) - fmod((double)mPsiSub[Flow::nSels*k+1][j2-1],
 				    twopi/(double)j2);
 	if (psiSubCorrDiff < 0.) psiSubCorrDiff += twopi/(float)j2;
-	histFull[k].histFullHar[j].mHistPsiSubCorrDiff->Fill(psiSubCorrDiff);
+	if (psiSubCorrDiff) { histFull[k].histFullHar[j].mHistPsiSubCorrDiff->Fill(psiSubCorrDiff); }
 	psiSubCorrDiff = fmod((double)mPsiSub[Flow::nSels*k][j2-1],
 	   twopi/(double)j2) - fmod((double)mPsiSub[Flow::nSels*k+1][j1-1],
 				    twopi/(double)j2);
 	if (psiSubCorrDiff < 0.) psiSubCorrDiff += twopi/(float)j2;
-	histFull[k].histFullHar[j].mHistPsiSubCorrDiff->Fill(psiSubCorrDiff);
+	if (psiSubCorrDiff) { histFull[k].histFullHar[j].mHistPsiSubCorrDiff->Fill(psiSubCorrDiff); }
       }
+
       histFull[k].histFullHar[j].mHistMult->Fill((float)mMult[k][j]);
-      histFull[k].histFullHar[j].mHist_q->Fill(m_q[k][j]);
+      if (m_q[k][j]) { histFull[k].histFullHar[j].mHist_q->Fill(m_q[k][j]); }
+
+      if (mCalcReCentPars) {
+	// calculate recentering parameters, fill 4 bins
+	TVector2 qReCent;
+	qReCent = pFlowEvent->ReCentEPPar(pFlowSelect,"FTPCE");
+	if (qReCent.X()) histFull[k].histFullHar[j].mHistReCentX->Fill(1., qReCent.X());
+	if (qReCent.Y()) histFull[k].histFullHar[j].mHistReCentY->Fill(1., qReCent.Y());
+	qReCent = pFlowEvent->ReCentEPPar(pFlowSelect,"FTPCW");
+	if (qReCent.X()) histFull[k].histFullHar[j].mHistReCentX->Fill(2., qReCent.X());
+	if (qReCent.Y()) histFull[k].histFullHar[j].mHistReCentY->Fill(2., qReCent.Y());
+	qReCent = pFlowEvent->ReCentEPPar(pFlowSelect,"TPCE");
+	if (qReCent.X()) histFull[k].histFullHar[j].mHistReCentX->Fill(3., qReCent.X());
+	if (qReCent.Y()) histFull[k].histFullHar[j].mHistReCentY->Fill(3., qReCent.Y());
+	qReCent = pFlowEvent->ReCentEPPar(pFlowSelect,"TPCW");
+	if (qReCent.X()) histFull[k].histFullHar[j].mHistReCentX->Fill(4., qReCent.X());
+	if (qReCent.Y()) histFull[k].histFullHar[j].mHistReCentY->Fill(4., qReCent.Y());
+      }
     }
   }
 }
@@ -1410,7 +1528,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 
     // distinguish between Tpc and Ftpc
     if (map.trackFtpcEast() || map.trackFtpcWest()) {
-      mHistChargeFtpc->Fill((float)charge);
+      mHistChargeFtpc   ->Fill((float)charge);
       mHistDcaFtpc      ->Fill(dca);
       mHistDcaGlobalFtpc->Fill(dcaGlobal);
       mHistChi2Ftpc     ->Fill(chi2);
@@ -1507,7 +1625,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  mHistPidElectronPart->Fill(electron);
 	}
       }
-    }
+    }//all tracks
     
     // Yield3D, Yield2D, BinEta, BinPt
     mHistEtaPtPhi3D->Fill(eta, pt, phi);
@@ -1522,16 +1640,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	mHistYieldPart2D->Fill(eta, pt);
       }
       mHistBinPt->Fill(pt, pt);
-    }
-
-    // cos(n*phiLab)
-    for (int j = 0; j < Flow::nHars; j++) {
-      bool oddHar = (j+1) % 2;
-      float order = (float)(j+1);
-      float vIn   = cos((double)order * phi)/perCent;
-      if (eta < 0 && oddHar) vIn *= -1;
-      mHistCosPhi->Fill(order, vIn);
-    }
+    }//particles correlated with the EP
 
     // For Eta symmetry
     // Tpc
@@ -1543,12 +1652,16 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       (eta > 0.) ? etaSymPosFtpcN++ : etaSymNegFtpcN++;
     }
 
+    TVector2 Q, reCent;
+    Double_t mult;
+    // Get the angle of the Event Plane
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
       for (int j = 0; j < Flow::nHars; j++) {
 	bool oddHar = (j+1) % 2;
 	pFlowSelect->SetHarmonic(j);
 	double order  = (double)(j+1);
+	double orderEP  = order;
 	float psi_i = 0., psi_2 = 0.;
 	if (pFlowEvent->EtaSubs()) { // particles with the other subevent
 	  int i = Flow::nSels*k;
@@ -1569,15 +1682,17 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  if (psi_i > twopi/order) psi_i -= twopi/order;
 	} else {
 	  psi_i = mPsi[k][j];
-	}
-	if (pFlowSelect->Select(pFlowTrack)) {
+	} // full EP
+
+	if (pFlowSelect->Select(pFlowTrack)) { // particles used for the EP
 
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
 
-	  // Get phiWgt from file
+	  // Get phiWgt and reCent from files
 	  double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
+	  TVector2 reCent = pFlowEvent->ReCentEP(k, j, pFlowTrack);
 
-	  if (j < 2) { // only first two harmonics for phiWgt
+	  if (pFlowMaker->PhiWgtCalc() && j < 2) { // only first two harmonics for phiWgt
 
 	    // Get detID
 	    StDetectorId detId;
@@ -1615,7 +1730,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 		  kTpcFarEast = kTRUE;
 		}
 	      }
-	    } else if (map.trackFtpcEast()) {
+	    } else if (map.trackFtpcEast()) { // FTPC track
 	      detId = kFtpcEastId;  // eta < 0.
 	      Float_t vertexZ = pFlowEvent->VertexPos().z();
 	      if (vertexZ > 0.) {
@@ -1637,11 +1752,11 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    
 	    // Calculate weights for filling histograms
 	    float wt = 1.;
-	    if (pFlowEvent->PtWgt()) {
+	    if (pFlowEvent->PtWgt()) { // pt wgt
 	      wt *= (pt < pFlowEvent->PtWgtSaturation()) ? pt : 
 		pFlowEvent->PtWgtSaturation();  // pt weighting going constant
 	    }
-	    float etaAbs = fabs(eta);
+	    float etaAbs = fabs(eta); // etaWgt, eta > 1.
 	    if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) { wt *= etaAbs; }
 	    
 	    // Fill histograms with selections
@@ -1663,6 +1778,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	      histFull[k].histTwoHar[j].mHistPhiFarWest->Fill(phi,wt);
 	    }
 	    
+	    // Which flat hist?
 	    if (pFlowEvent->FirstLastPoints() && !pFlowEvent->FirstLastPhiWgt()) {
 	      kTpcFarEast = kFALSE;
 	      kTpcEast    = kFALSE;
@@ -1699,35 +1815,36 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    } else if (kTpcFarWest) {
 	      histFull[k].histTwoHar[j].mHistPhiFlatFarWest->Fill(phi, phiWgt);
 	    }
-	    if (oddHar && eta < 0.) phiWgt *= -1.; // restore value
-	    
-	  }
-	  
-	  // Remove autocorrelations
+	    if (oddHar && eta < 0.) phiWgt *= -1.; // restore value	    
+	  }	  
+
+	  // Remove autocorrelations with full EP
 	  if (!pFlowEvent->EtaSubs() && !pFlowEvent->RanSubs()) {
 	    TVector2 Q_i;
 	    if (order > 3. && !oddHar) { // 2nd harmonic event plane
-	      Q_i.Set(phiWgt * cos(phi * 2.), phiWgt * sin(phi * 2.));
-	      TVector2 mQ_i = mQ[k][1] - Q_i;
-	      psi_i = mQ_i.Phi() / 2.;
-	      if (psi_i < 0.) psi_i += twopi / 2.;
-	    } else {
-	      Q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
-	      TVector2 mQ_i = mQ[k][j] - Q_i;
-	      psi_i = mQ_i.Phi() / order;
-	      if (psi_i < 0.) psi_i += twopi / order;
+	      orderEP = 2;
 	    }
+	    double Qx = phiWgt * cos(orderEP * phi) - reCent.X();
+	    double Qy = phiWgt * sin(orderEP * phi) - reCent.Y();
+	    Q_i.Set(Qx, Qy);
+	    TVector2 mQ_i = mQ[k][j] - Q_i;
+	    psi_i = mQ_i.Phi() / orderEP;
+	    if (psi_i < 0.) psi_i += twopi / orderEP;
 	  }
-	}
+	}//particles used for the EP
 	  
-	// Remove autocorrelations of the second order 'particles' which were used for v1{EP1,EP2}.
+	// Remove autocorrelations of the 2nd order 'particles' which were used for v1{EP1,EP2}.
 	if (mV1Ep1Ep2 == kTRUE && order == 1) {
 	  StFlowSelection usedForPsi2 = *pFlowSelect;
 	  usedForPsi2.SetHarmonic(1);
 	  usedForPsi2.SetSubevent(-1);
 	  if (usedForPsi2.Select(pFlowTrack)) {
+	    TVector2 Q_i;
 	    double phiWgt = pFlowEvent->PhiWeight(k, 1, pFlowTrack);
-	    TVector2 Q_i(phiWgt * cos(phi * 2.), phiWgt * sin(phi * 2.));
+	    TVector2 reCent = pFlowEvent->ReCentEP(k, 1, pFlowTrack);
+	    double Qx = phiWgt * cos(2 * phi) - reCent.X();
+	    double Qy = phiWgt * sin(2 * phi) - reCent.Y();
+	    Q_i.Set(Qx, Qy);
 	    TVector2 mQ_i = mQ[k][1] - Q_i;
 	    psi_2 = mQ_i.Phi() / 2.;
 	    if (psi_2 < 0.) psi_2 += twopi / 2.;	  
@@ -1737,14 +1854,21 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  }
 	}
 
-       	// Calculate v for all particles selected for correlation analysis
-	if (pFlowSelect->SelectPart(pFlowTrack)) {
-	  float v;
-	if (pFlowEvent->UseZDCSMD()) {
-	  v = cos(order *(phi-mQ[k][1].Phi()))/perCent;
+	// test recentering of Q per particle
+	mult = (double)(pFlowEvent->Mult(pFlowSelect));
+	if (mult > 0.) {
+	  histFull[k].histFullHar[j].mHistQreCent->Fill(1., mQ[k][j].X()/mult);
+	  histFull[k].histFullHar[j].mHistQreCent->Fill(2., mQ[k][j].Y()/mult);
 	}
-	 else if (mV1Ep1Ep2 == kFALSE || order != 1) {
-	    v = cos(order * (phi - psi_i))/perCent;
+
+      	// Calculate v for all particles selected for correlation analysis
+	if (pFlowSelect->SelectPart(pFlowTrack)) { // particles correlated with the EP
+	  float v;
+	  if (pFlowEvent->UseZDCSMD()) {
+	    v = cos(order *(phi-mQ[k][1].Phi()))/perCent;
+	  }
+	  else if (mV1Ep1Ep2 == kFALSE || order != 1) {
+	    v = cos(order * (phi - psi_i))/perCent; // normal method
 	  }
 	  else { // mV1Ep1Ep2 == kTRUE && order == 1
 	    v = cos(phi + psi_i - 2.*psi_2)/perCent;
@@ -1803,17 +1927,18 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  if (etaPtNoCut) histFull[k].mHist_vObs->Fill(order, vFlip,mFlowWeight);
 	  
 	  // Correlation of Phi of all particles with Psi
-	  float phi_i = phi;
-	  if (eta < 0 && oddHar) {
-	    phi_i += pi; // backward particle and odd harmonic
-	    if (phi_i > twopi) phi_i -= twopi;
+	  if (mPsi[k][j]) {
+	    float phi_i = phi;
+	    if (eta < 0 && oddHar) {
+	      phi_i += pi; // backward particle and odd harmonic
+	      if (phi_i > twopi) phi_i -= twopi;
+	    }
+	    float dPhi = phi_i - psi_i;
+	    if (dPhi < 0.) dPhi += twopi;
+	    histFull[k].histFullHar[j].mHistPhiCorr->
+	      Fill(fmod((double)dPhi, twopi / order));
 	  }
-	  float dPhi = phi_i - psi_i;
-	  if (dPhi < 0.) dPhi += twopi;
-	  histFull[k].histFullHar[j].mHistPhiCorr->
-	    Fill(fmod((double)dPhi, twopi / order));
-
-	}
+	}//particles correlated with the EP
       }
     }  
   }
@@ -1824,17 +1949,16 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 
   StThreeVectorF vertex = pFlowEvent->VertexPos();
   Float_t vertexZ = vertex.z();
-  mHistEtaSymVerZ2DTpc->Fill(vertexZ , etaSymTpc);
+  mHistEtaSymVerZ2DTpc ->Fill(vertexZ , etaSymTpc);
   mHistEtaSymVerZ2DFtpc->Fill(vertexZ , etaSymFtpc);
   
   // Tpc
   float etaSymZInterceptTpc = 0.00023;  // new values introduced for 200 GeV
-  float etaSymZSlopeTpc = -0.00394;     // data based on full statistics
+  float etaSymZSlopeTpc     = -0.00394; // data based on full statistics
   etaSymTpc -= (etaSymZInterceptTpc + etaSymZSlopeTpc * vertexZ); // corrected for acceptance
   etaSymTpc *= ::sqrt((etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   mHistEtaSymTpc->Fill(etaSymTpc);
 
-  
   // Ftpc
   float etaSymZInterceptFtpc = -0.0077; // values for the FTPC based on 200 GeV data with
   float etaSymZSlopeFtpc = 0.0020;      // all sectors and 'bad runs' (323-325) excluded
@@ -1844,15 +1968,15 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 
   // PID multiplicities
   float totalMult = (float)pFlowEvent->TrackCollection()->size();
-  mHistPidMult->Fill(1., totalMult);
-  mHistPidMult->Fill(2., hPlusN);
-  mHistPidMult->Fill(3., hMinusN);
-  mHistPidMult->Fill(4., piPlusN);
-  mHistPidMult->Fill(5., piMinusN);
-  mHistPidMult->Fill(6., protonN);
-  mHistPidMult->Fill(7., pbarN);
-  mHistPidMult->Fill(8., kPlusN);
-  mHistPidMult->Fill(9., kMinusN);
+  mHistPidMult->Fill(1.,  totalMult);
+  mHistPidMult->Fill(2.,  hPlusN);
+  mHistPidMult->Fill(3.,  hMinusN);
+  mHistPidMult->Fill(4.,  piPlusN);
+  mHistPidMult->Fill(5.,  piMinusN);
+  mHistPidMult->Fill(6.,  protonN);
+  mHistPidMult->Fill(7.,  pbarN);
+  mHistPidMult->Fill(8.,  kPlusN);
+  mHistPidMult->Fill(9.,  kMinusN);
   mHistPidMult->Fill(10., deuteronN);
   mHistPidMult->Fill(11., dbarN);
   mHistPidMult->Fill(12., electronN);
@@ -1883,7 +2007,7 @@ static Double_t resEventPlaneK2(double chi) {
   double con = 0.626657;                   // sqrt(pi/2)/2
   double arg = chi * chi / 4.;
 
-  double besselOneHalf = ::sqrt(arg/halfpi) * sinh(arg)/arg;
+  double besselOneHalf    = ::sqrt(arg/halfpi) * sinh(arg)/arg;
   double besselThreeHalfs = ::sqrt(arg/halfpi) * (cosh(arg)/arg - sinh(arg)/(arg*arg));
   Double_t res = con * chi * exp(-arg) * (besselOneHalf + besselThreeHalfs); 
 
@@ -1914,9 +2038,9 @@ static Double_t resEventPlaneK4(double chi) {
   double con = 0.626657;                   // sqrt(pi/2)/2
   double arg = chi * chi / 4.;
 
-  double besselOneHalf = ::sqrt(arg/halfpi) * sinh(arg)/arg;
+  double besselOneHalf    = ::sqrt(arg/halfpi) * sinh(arg)/arg;
   double besselThreeHalfs = ::sqrt(arg/halfpi) * (cosh(arg)/arg - sinh(arg)/(arg*arg));
-  double besselFiveHalfs = besselOneHalf - 3*besselThreeHalfs/arg;
+  double besselFiveHalfs  = besselOneHalf - 3*besselThreeHalfs/arg;
 
   Double_t res = con * chi * exp(-arg) * (besselThreeHalfs + besselFiveHalfs); 
 
@@ -1939,20 +2063,37 @@ Double_t chi(double res) {
   }
 
   return chi;
-
 }
 
 //-----------------------------------------------------------------------
 
 Int_t StFlowAnalysisMaker::Finish() {
   // Calculates resolution and mean flow values
-  // Outputs phiWgt values
+  // Outputs phiWgt and reCent values
+
+  cout << endl << "##### Analysis Maker:" << endl;
   TString* histTitle;
 
   // PhiWgt histogram collection
   TOrdCollection* phiWgtHistNames = new TOrdCollection(Flow::nSels*Flow::nHars+3);
 
-  cout << endl << "##### Analysis Maker:" << endl;
+  // If mCalcReCentPars write out the recentering parameters and print the recentered values
+  TOrdCollection* savedHistReCentNames  = new TOrdCollection(Flow::nSels * Flow::nHars * 2);
+  if (mCalcReCentPars) {
+    Float_t reCentX, reCentY;
+    cout << "ReCentered Q vector per particle:" << endl;
+    for (int k = 0; k < Flow::nSels; k++) {
+      for (int j = 0; j < Flow::nHars; j++) {
+	savedHistReCentNames->AddLast(histFull[k].histFullHar[j].mHistReCentX);
+	savedHistReCentNames->AddLast(histFull[k].histFullHar[j].mHistReCentY);
+	reCentX   = histFull[k].histFullHar[j].mHistQreCent->GetBinContent(1);
+	reCentY   = histFull[k].histFullHar[j].mHistQreCent->GetBinContent(2);
+	cout << setprecision(3) << "Sel = " << k+1 << ", Har = " << j+1 << " : reCentedQ_x = "
+	     << reCentX << ",\t reCentedQ_y = " << reCentY << endl;
+      }
+    }
+  }
+  cout << endl;
 
   // Calculate resolution from sqrt(mHistCos)
   double cosPair[Flow::nSels][Flow::nHars];
@@ -2004,14 +2145,13 @@ Int_t StFlowAnalysisMaker::Finish() {
 	mResErr[k][j] = ZDCSMD_resSubErr * fabs ((double)mRes[k][j]
 		- ZDCSMD_mResDelta) / ZDCSMD_deltaResSub;
 	
-      }//if(pFlowEvent->UseZDCSMD())
+      }//UseZDCSMD
       else {
 	if (cosPair[k][j] > 0.) {
-	  double resSub;
-	  double resSubErr;
-	  if (mV1Ep1Ep2 == kTRUE && order == 1) {
+	  double resSub, resSubErr;
+	  double res2, res2error;
+	  if (mV1Ep1Ep2 == kTRUE && order == 1) { // mixed harmonics
 	    // calculate resolution of second order event plane first
-	    double res2, res2error;
 	    if (histFull[k].mHistCos->GetBinContent(2) > 0.) {
 	      if (histFull[k].mHistCos->GetBinContent(2) > 0.92) { // resolution saturates
 		res2 = 0.99;
@@ -2027,16 +2167,17 @@ Int_t StFlowAnalysisMaker::Finish() {
 		res2error = res2SubErr * fabs((double)res2 - mRes2Delta) 
 		  / deltaRes2Sub;
 	      }
-	    } else {
+	    } else { // neg. corr.
 	      res2 = 0.;
 	      res2error = 0.;
 	    }
 	    // now put everything together with first order event plane
 	    mRes[k][j]    = ::sqrt(cosPair[k][0]*res2);
-	    mResErr[k][j] = 1./(2.*mRes[k][j]) * ::sqrt(res2*res2*cosPairErr[k][0]*cosPairErr[k][0]
+	    mResErr[k][j] = 1./(2.*mRes[k][j])*::sqrt(res2*res2*cosPairErr[k][0]*cosPairErr[k][0]
 	    + cosPair[k][0]*cosPair[k][0]*res2error*res2error); // Gaussian error propagation
 	    if (!pFlowEvent->EtaSubs()) {
-	      // correct for full event plane resolution
+	      // correct to full event plane resolution
+	      // 1st order res for k=1 is small and linear
 	      mRes[k][j] *= ::sqrt(2.);
 	      mResErr[k][j] *= ::sqrt(2.);
 	    }
@@ -2063,7 +2204,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 	      mResDelta = resEventPlaneK4(::sqrt(2.) * chiSubDelta);
 	    }
 	    mResErr[k][j] = resSubErr * fabs((double)mRes[k][j] - mResDelta) / deltaResSub;
-	  } else {
+	  } else { //normal case
 	    if (cosPair[k][j] > 0.92) { // resolution saturates
 	      mRes[k][j]    = 0.99;
 	      mResErr[k][j] = 0.007;
@@ -2129,8 +2270,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       // Calulate v = vObs / Resolution
       if (mRes[k][j]) {
 	cout << "##### Resolution of the " << j+1 << "th harmonic = " << 
-	  mRes[k][j] << " +/- " << mResErr[k][j] 
-	     << endl;
+	  mRes[k][j] << " +/- " << mResErr[k][j] << endl;
 	// The systematic error of the resolution is not folded in.
 	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
 	histFull[k].histFullHar[j].mHist_vEta->Scale(1. / mRes[k][j]);
@@ -2154,108 +2294,122 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_vPt ->Reset();
 	histFull[k].mHist_v->SetBinContent(j+1, 0.);
 	histFull[k].mHist_v->SetBinError(j+1, 0.);
-      }
+      }//v
 
       // Calculate PhiWgt
-      if (j < 2) {
-	double meanFarEast = histFull[k].histTwoHar[j].mHistPhiFarEast->Integral() 
-	  / (double)Flow::nPhiBins;
-	double meanEast = histFull[k].histTwoHar[j].mHistPhiEast->Integral() 
-	  / (double)Flow::nPhiBins;
-	double meanWest = histFull[k].histTwoHar[j].mHistPhiWest->Integral() 
-	  / (double)Flow::nPhiBins;
-	double meanFarWest = histFull[k].histTwoHar[j].mHistPhiFarWest->Integral() 
-	  / (double)Flow::nPhiBins;
-	double meanFtpcFarEast = histFull[k].histTwoHar[j].mHistPhiFtpcFarEast->Integral() 
-	  / (double)Flow::nPhiBinsFtpc;
-	double meanFtpcEast = histFull[k].histTwoHar[j].mHistPhiFtpcEast->Integral() 
-	  / (double)Flow::nPhiBinsFtpc;
-	double meanFtpcWest = histFull[k].histTwoHar[j].mHistPhiFtpcWest->Integral() 
-	  / (double)Flow::nPhiBinsFtpc;
-	double meanFtpcFarWest = histFull[k].histTwoHar[j].mHistPhiFtpcFarWest->Integral() 
-	  / (double)Flow::nPhiBinsFtpc;
-	
-	// Tpc
-	for (int i = 0; i < Flow::nPhiBins; i++) {
-	  histFull[k].histTwoHar[j].mHistPhiWgtFarEast->SetBinContent(i+1,meanFarEast);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFarEast->SetBinError(i+1, 0.);
-	  histFull[k].histTwoHar[j].mHistPhiWgtEast->SetBinContent(i+1, meanEast);
-	  histFull[k].histTwoHar[j].mHistPhiWgtEast->SetBinError(i+1, 0.);
-	  histFull[k].histTwoHar[j].mHistPhiWgtWest->SetBinContent(i+1, meanWest);
-	  histFull[k].histTwoHar[j].mHistPhiWgtWest->SetBinError(i+1, 0.);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFarWest->SetBinContent(i+1,meanFarWest);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFarWest->SetBinError(i+1, 0.);
+      if (pFlowMaker->PhiWgtCalc()) {
+	if (j < 2) {
+	  double meanFarEast = histFull[k].histTwoHar[j].mHistPhiFarEast->Integral() 
+	    / (double)Flow::nPhiBins;
+	  double meanEast = histFull[k].histTwoHar[j].mHistPhiEast->Integral() 
+	    / (double)Flow::nPhiBins;
+	  double meanWest = histFull[k].histTwoHar[j].mHistPhiWest->Integral() 
+	    / (double)Flow::nPhiBins;
+	  double meanFarWest = histFull[k].histTwoHar[j].mHistPhiFarWest->Integral() 
+	    / (double)Flow::nPhiBins;
+	  double meanFtpcFarEast = histFull[k].histTwoHar[j].mHistPhiFtpcFarEast->Integral() 
+	    / (double)Flow::nPhiBinsFtpc;
+	  double meanFtpcEast = histFull[k].histTwoHar[j].mHistPhiFtpcEast->Integral() 
+	    / (double)Flow::nPhiBinsFtpc;
+	  double meanFtpcWest = histFull[k].histTwoHar[j].mHistPhiFtpcWest->Integral() 
+	    / (double)Flow::nPhiBinsFtpc;
+	  double meanFtpcFarWest = histFull[k].histTwoHar[j].mHistPhiFtpcFarWest->Integral() 
+	    / (double)Flow::nPhiBinsFtpc;
+	  
+	  // Tpc
+	  for (int i = 0; i < Flow::nPhiBins; i++) {
+	    histFull[k].histTwoHar[j].mHistPhiWgtFarEast->SetBinContent(i+1,meanFarEast);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFarEast->SetBinError(i+1, 0.);
+	    histFull[k].histTwoHar[j].mHistPhiWgtEast   ->SetBinContent(i+1, meanEast);
+	    histFull[k].histTwoHar[j].mHistPhiWgtEast   ->SetBinError(i+1, 0.);
+	    histFull[k].histTwoHar[j].mHistPhiWgtWest   ->SetBinContent(i+1, meanWest);
+	    histFull[k].histTwoHar[j].mHistPhiWgtWest   ->SetBinError(i+1, 0.);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFarWest->SetBinContent(i+1,meanFarWest);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFarWest->SetBinError(i+1, 0.);
+	  }
+	  
+	  // Ftpc
+	  for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
+	    histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->SetBinContent(i+1,meanFtpcFarEast);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->SetBinError(i+1, 0.);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast   ->SetBinContent(i+1,meanFtpcEast);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast   ->SetBinError(i+1, 0.);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest   ->SetBinContent(i+1,meanFtpcWest);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest   ->SetBinError(i+1, 0.);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->SetBinContent(i+1,meanFtpcFarWest);
+	    histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->SetBinError(i+1, 0.);
+	  }
+	  
+	  // Tpc
+	  histFull[k].histTwoHar[j].mHistPhiWgtFarEast->
+	    Divide(histFull[k].histTwoHar[j].mHistPhiFarEast);
+	  phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFarEast);
+	  histFull[k].histTwoHar[j].mHistPhiWgtEast->
+	    Divide(histFull[k].histTwoHar[j].mHistPhiEast);
+	  phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtEast);
+	  histFull[k].histTwoHar[j].mHistPhiWgtWest->
+	    Divide(histFull[k].histTwoHar[j].mHistPhiWest);
+	  phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtWest);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFarWest->
+	    Divide(histFull[k].histTwoHar[j].mHistPhiFarWest);
+	  phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFarWest);
+	  
+	  // Ftpc
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->
+	    Divide(histFull[k].histTwoHar[j].mHistPhiFtpcFarEast);
+	  phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->
+	    Divide(histFull[k].histTwoHar[j].mHistPhiFtpcEast);
+	  phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->
+	    Divide(histFull[k].histTwoHar[j].mHistPhiFtpcWest);
+	  phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->
+	    Divide(histFull[k].histTwoHar[j].mHistPhiFtpcFarWest);
+	  phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest);
 	}
-	
-	// Ftpc
-	for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
-	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->SetBinContent(i+1, meanFtpcFarEast);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->SetBinError(i+1, 0.);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->SetBinContent(i+1, meanFtpcEast);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->SetBinError(i+1, 0.);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->SetBinContent(i+1, meanFtpcWest);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->SetBinError(i+1, 0.);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->SetBinContent(i+1, meanFtpcFarWest);
-	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->SetBinError(i+1, 0.);
-	}
-	
-	// Tpc
-	histFull[k].histTwoHar[j].mHistPhiWgtFarEast->
-	  Divide(histFull[k].histTwoHar[j].mHistPhiFarEast);
-	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFarEast);
-	histFull[k].histTwoHar[j].mHistPhiWgtEast->
-	  Divide(histFull[k].histTwoHar[j].mHistPhiEast);
-	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtEast);
-	histFull[k].histTwoHar[j].mHistPhiWgtWest->
-	  Divide(histFull[k].histTwoHar[j].mHistPhiWest);
-	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtWest);
-	histFull[k].histTwoHar[j].mHistPhiWgtFarWest->
-	  Divide(histFull[k].histTwoHar[j].mHistPhiFarWest);
-	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFarWest);
-	
-	// Ftpc
-	histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->
-	  Divide(histFull[k].histTwoHar[j].mHistPhiFtpcFarEast);
-	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast);
-	histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->
-	  Divide(histFull[k].histTwoHar[j].mHistPhiFtpcEast);
-	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast);
-	histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->
-	  Divide(histFull[k].histTwoHar[j].mHistPhiFtpcWest);
-	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest);
-	histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->
-	  Divide(histFull[k].histTwoHar[j].mHistPhiFtpcFarWest);
-	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest);
-      }
+      }//phiWgt
     }
   }
   phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtEast);
   phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtWest);
   TFile* pPhiWgtFile = new TFile("flowPhiWgt.hist.root", "READ");
   if (pPhiWgtFile->IsOpen())
-  phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtFull);
-  //GetHistList()->ls();
+    { phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtFull); }
 
   // Write all histograms
   TFile histFile("flow.hist.root", "RECREATE");
+  //GetHistList()->ls();
   GetHistList()->Write();
   histFile.Close();
   
   // Write PhiWgt histograms preceded by documenting text
-  TFile phiWgtNewFile("flowPhiWgtNew.hist.root", "RECREATE");
-  TText* textInfo = 0;
-  if (pFlowEvent->FirstLastPoints()) {
-    char chInfo[400];
-    sprintf(chInfo, "%s%d%s%d%s", " pt weight= ", pFlowEvent->PtWgt(),
-	    ", eta weight= ", pFlowEvent->EtaWgt(), "\n");
-    textInfo = new TText(0,0,chInfo);
-    textInfo->Write("info");
+  if (pFlowMaker->PhiWgtCalc()) {
+    TFile phiWgtNewFile("flowPhiWgtNew.hist.root", "RECREATE");
+    TText* textInfo = 0;
+    if (pFlowEvent->FirstLastPoints()) {
+      char chInfo[400];
+      sprintf(chInfo, "%s%d%s%d%s", " pt weight= ", pFlowEvent->PtWgt(),
+	      ", eta weight= ", pFlowEvent->EtaWgt(), "\n");
+      textInfo = new TText(0,0,chInfo);
+      textInfo->Write("info");
+    }
+    phiWgtNewFile.cd();
+    phiWgtHistNames->Write();
+    phiWgtNewFile.Close();
+    if (pFlowEvent->FirstLastPoints()) delete textInfo;
   }
-  phiWgtHistNames->Write();
-  phiWgtNewFile.Close();
-  if (pFlowEvent->FirstLastPoints()) delete textInfo;
   delete phiWgtHistNames;
 
+  // Write reCent values
+  if (mCalcReCentPars) {
+    TFile fileReCent("flow.reCentAnaNew.root", "RECREATE");
+    fileReCent.cd();
+    savedHistReCentNames->Write();
+    fileReCent.Close();
+  }
+  delete savedHistReCentNames;
+  
   delete pFlowSelect;
 
   return StMaker::Finish();
@@ -2318,6 +2472,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.99  2009/11/24 19:29:11  posk
+// Added reCenter to remove acceptance correlations as an option instead of phiWgt.
+//
 // Revision 1.98  2007/07/13 22:18:29  posk
 // Method chi() revised by Wang Gang: "With this modification,
 // it will give good results not only for realistic resolutions, but also
