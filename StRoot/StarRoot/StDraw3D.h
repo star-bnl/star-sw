@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.45 2009/11/17 01:43:03 fine Exp $
+// $Id: StDraw3D.h,v 1.46 2009/11/24 16:25:03 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -69,7 +69,6 @@ class  StEta {
       StEta &operator=(const StEta &eta);
       double Eta() const;
       double Deta() const;
-      double TettaDeg() const;
       double Lambda() const;
       double LambdaDeg() const ;
       static double Lambda(double eta);
