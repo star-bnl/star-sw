@@ -1,0 +1,24 @@
+The directory conatins a simpe examnpme of the trasatrioin the standlone apoplcation to ROOT loadabble macro
+
+1. MyPackageMain.cxx - this is the originalw satnd alone pacakge
+   You can build and execute it as follows:
+   
+   g++ MyPackageMain.cxx -o MyPackageMain
+   MyPackageMain
+   
+2. MyPackage.cxx is ther modidfied version of MyPackageMain.cxx 
+   suitable to be used with ROOT ACliC. 
+   The MyPackage.cxx conatins the copy of the code from MyPackageMain.cxx 
+   
+   It can be used as follows:
+   
+     >  root.exe --b -q -l MyPackage.cxx+
+       
+3. MyPackageFuncy.cxx is the modified version of MyPackage.cxx
+   This file  doesn't contain any copy of the code from MyPackageMain.cxx
+   It uses the CPP
+        #include "MyPackageMain.cxx" 
+   instead.
+
+   It can be used as follows:
+     >  root.exe --b -q -l MyPackageFuncy.cxx+
