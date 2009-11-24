@@ -1,6 +1,6 @@
-# $Id: README,v 1.3 2009/11/24 19:10:21 fine Exp $
+# $Id: README,v 1.4 2009/11/24 19:58:19 fine Exp $
 # *-- Author :    Valery Fine(fine@bnl.gov)   24/11/2009
-The directory contains a simple  example of the transition the standalone application to ROOT loadable macro
+The directory contains a simple example of the transition the standalone application to ROOT loadable macro
 
 1. MyPackageMain.cxx - this is the original stand-alone package
    You can build and execute it as follows:
@@ -16,14 +16,14 @@ The directory contains a simple  example of the transition the standalone applic
    
      >  root.exe --b -q -l MyPackage.cxx+
        
-3. MyPackageFuncy.cxx is the modified version of MyPackage.cxx
+3. MyPackageFancy.cxx is the modified version of MyPackage.cxx
    This file does not contain any copy of the code from MyPackageMain.cxx
    It uses the CPP
         #include "MyPackageMain.cxx" 
    instead.
 
    It can be used as follows:
-     >  root.exe --b -q -l MyPackageFuncy.cxx+
+     >  root.exe --b -q -l MyPackageFancy.cxx+
 
 4. MyPackage.csh is the shell script to execute all 3 steps above
 
