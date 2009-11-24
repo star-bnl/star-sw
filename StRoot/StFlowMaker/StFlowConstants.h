@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.26 2009/08/04 23:00:26 posk Exp $
+// $Id: StFlowConstants.h,v 1.27 2009/11/24 19:23:00 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -22,31 +22,31 @@ class Flow{
 
   enum {
     nHars             = 4, // 4
-    nSels             = 2, // 2
+    nSels             = 2,
     nSubs             = 2,
-    nTheta            = 5, // 5
-    nTheta1           = 5, // 5
-    nRBins            = 150,
+    nTheta            = 5, // 5 LYZ
+    nTheta1           = 5, // 5 LYZ
+    nRBins            = 150, // LYZ
     nPhiBins          = 120,
     nPhiBinsFtpc      = 120,
     nEtaBins          = 90, // 90
     nEtaBinsTpcOnly   = 30,
     nPtBins           = 40,
     nPtBinsPart       = 60,
-    nCumulIntegOrders = 3, 
-    nCumulInteg_qMax  = 8,
-    nCumulDiffOrders  = 2,
-    nCumulDiff_qMax   = 8,
+    nCumulIntegOrders = 3, // Cum
+    nCumulInteg_qMax  = 8, // Cum
+    nCumulDiffOrders  = 2, // Cum
+    nCumulDiff_qMax   = 8, // Cum
     nCumulMixHar_pMax = 8, // for directed flow. Eq.(29) in Borghini v1 paper
     nCumulMixHar_qMax = 4, // for directed flow
     nCents            = 9,
-    zdcsmd_nPsiBins   = 64
+    zdcsmd_nPsiBins   = 64 // ZDCSMD
   };
 
   typedef Double_t PhiWgt_t[nSels][2][nPhiBins]; // only odd and even harmonics
   typedef Double_t PhiWgtFtpc_t[nSels][2][nPhiBinsFtpc];
   typedef Double_t ZDCSMD_PsiWgt_t[64];  
-  typedef Double_t ReCent_t[nSels][nHars][3];   // 3 TPCs
+  typedef Double_t ReCent_t[nSels][nHars][4];   // 3 TPCs for LYZ, 4 for ana
 
   static Float_t etaMin;
   static Float_t etaMax;
@@ -54,9 +54,9 @@ class Flow{
   static Float_t etaMaxTpcOnly;
   static Float_t etaSymZSlopeTpc;
   static Float_t etaSymZSlopeFtpc;
-  static Float_t rMax;
-  static Float_t j01;
-  static Float_t epsV1;
+  static Float_t rMax; // LYZ
+  static Float_t j01;  // LYZ
+  static Float_t epsV1;// LYZ
   static Float_t ptMin;
   static Float_t ptMax;
   static Float_t ptMaxPart;
@@ -82,6 +82,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.27  2009/11/24 19:23:00  posk
+// Added reCenter option to remove acceptance correlations instead of phiWgt.
+//
 // Revision 1.26  2009/08/04 23:00:26  posk
 // Reads year 7 MuDsts.
 //

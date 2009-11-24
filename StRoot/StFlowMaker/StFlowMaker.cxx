@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.116 2009/08/04 23:00:29 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.117 2009/11/24 19:23:04 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 // Description:
-//    Maker to fill StFlowEvent from StEvent, picoevent, or microevent
+//    Maker to fill StFlowEvent from StEvent, picoevent, or muevent
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -110,6 +110,7 @@ Int_t StFlowMaker::Make() {
 
     // new file?
     if (mEventFileName != mEventFileNameOld) { 
+      //gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
       if (Debug()) gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
       if (mPicoEventWrite) {
 	if (pPicoDST->IsOpen()) {
@@ -126,22 +127,21 @@ Int_t StFlowMaker::Make() {
     }
   }
 
-  // Get a pointer to the event
+  // Instantiate a new StFlowEvent
+  pFlowEvent = new StFlowEvent;
+  if (!pFlowEvent) return kStOK;
+
+  // Get a pointer to the event read
   if (mPicoEventRead) {
-    // Instantiate a new StFlowEvent
-    pFlowEvent = new StFlowEvent;
-    if (!pFlowEvent) return kStOK;
     if (!FillFromPicoDST(pPicoEvent)) return kStEOF; // false if EOF
     if (!pFlowEvent) return kStOK; // could have been deleted
     
   } else if (mMuEventRead) {
-    // Instantiate a new StFlowEvent
-    pFlowEvent = new StFlowEvent;
-    if (!pFlowEvent) return kStOK;
     pMu = (StMuDst*)GetInputDS("MuDst");
     pMuEvent = pMu->event();
     pMuTracks = pMu->primaryTracks();
     pMuGlobalTracks = pMu->globalTracks();
+      
     if (!FillFromMuDST()) return kStEOF; // false if EOF
     if (!pFlowEvent) return kStOK; // could have been deleted
     if (mPicoEventWrite) FillPicoEvent();
@@ -155,9 +155,6 @@ Int_t StFlowMaker::Make() {
     }    
     // Check the event cuts and fill StFlowEvent
     if (StFlowCutEvent::CheckEvent(pEvent)) {
-      // Instantiate a new StFlowEvent
-      pFlowEvent = new StFlowEvent;
-      if (!pFlowEvent) return kStOK;
       FillFlowEvent();
       if (!pFlowEvent) return kStOK;  // could have been deleted
       if (mPicoEventWrite) FillPicoEvent();
@@ -221,7 +218,7 @@ Int_t StFlowMaker::Make() {
 	if (mPicoEventWrite) 
   	  for (int i=0; i<2; i++) for (int j=0; j<2; j++) for (int k=1; k<9; k++)
         	pPicoEvent->SetZDCSMD(i,j,k,pFlowEvent->ZDCSMD(i,j,k));
-      } // if (pFlowEvent->UseZDCSMD())
+      }//UseZDCSMD
     }
   }
 
@@ -237,16 +234,15 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.116 2009/08/04 23:00:29 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.117 2009/11/24 19:23:04 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
-  // Open PhiWgt or ReCent  file
+  // Open PhiWgt or ReCent file
   ReadPhiWgtFile();
   ReadReCentFile();
-  Int_t kRETURN = kStOK;
 
-  if (!mPicoEventRead || !mMuEventRead) { // ???
+  if (!mPicoEventRead || !mMuEventRead) { // StEvent
     pIOMaker = (StIOMaker*)GetMaker("IO");
     if (pIOMaker) {
       mEventFileName = "";
@@ -255,6 +251,7 @@ Int_t StFlowMaker::Init() {
   }
   StuProbabilityPidAlgorithm::readParametersFromFile("PIDTable.root");
 
+  Int_t kRETURN = kStOK;
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
   if (mMuEventRead)    kRETURN += InitMuEventRead();; 
@@ -314,21 +311,25 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 
   TDirectory* dirSave = gDirectory;
   TFile* pPhiWgtFile = new TFile("flowPhiWgt.hist.root", "READ");
-  if (!pPhiWgtFile->IsOpen()) {
-    gMessMgr->Info("##### FlowMaker: No PhiWgt file. Will set weights = 1.");
+  if (!pPhiWgtFile->IsOpen() || !mPhiWgtCalc) {
+    gMessMgr->Info("##### FlowMaker: No PhiWgt, will set weights = 1.");
+  }
+  if (!pPhiWgtFile->IsOpen() && mPhiWgtCalc) {
+    gMessMgr->Info("##### FlowMaker: Calculating PhiWgts");
   }
   gDirectory = dirSave;
 
   // Read text object
-  if (pPhiWgtFile->IsOpen()) {
+  if (pPhiWgtFile->IsOpen() && mPhiWgtCalc) {
+    gMessMgr->Info("##### FlowMaker: PhiWgt flattening being done");
     TText* textInfo = dynamic_cast<TText*>(pPhiWgtFile->Get("info"));
     if (textInfo) {
       mFirstLastPhiWgt = kTRUE;
-      gMessMgr->Info("##### FlowMaker: PhiWgt file uses z of first-last points");
+      gMessMgr->Info("##### FlowMaker: File uses z of first-last points");
       cout << "##### FlowMaker: PhiWgt file written with " ;
       textInfo->ls();
     } else {
-      gMessMgr->Info("##### FlowMaker: PhiWgt file uses vertex z and eta");
+      gMessMgr->Info("##### FlowMaker: File uses vertex z and eta");
     }
   }
 
@@ -375,7 +376,7 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       *histTitleFtpcFarWest += k+1;
       histTitleFtpcFarWest->Append("_Har");
       *histTitleFtpcFarWest += j+1;
-      if (pPhiWgtFile->IsOpen()) {
+      if (pPhiWgtFile->IsOpen() && mPhiWgtCalc) { //use phiWgt
 	TH1* phiWgtHistFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
 						 Get(histTitleFarEast->Data()));
 	TH1* phiWgtHistEast    = dynamic_cast<TH1*>(pPhiWgtFile->
@@ -413,7 +414,7 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	    phiWgtHistFtpcFarWest->GetBinContent(n+1) : 1.;
 	}
 
-      } else {
+      } else { //phiWgts = 1
 	for (int n = 0; n < Flow::nPhiBins; n++) {
 	  mPhiWgt[k][j][n]        = 1.;
 	  mPhiWgtFarEast[k][j][n] = 1.;
@@ -440,7 +441,7 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       delete histTitleFtpcWest;
       delete histTitleFtpcFarWest;
     }
-  }
+  }//phiWgt
 
   // ZDCSMD psi Wgt
   if (pPhiWgtFile->IsOpen()) {
@@ -473,14 +474,15 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	mZDCSMD_PsiWgtEast[n] = 1.;
 	mZDCSMD_PsiWgtFull[n] = 1.;
       } // zdcsmd_nPsiBins
-    } // else
+    }
   } else { // no pPhiWgtFile
     for (int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
       mZDCSMD_PsiWgtWest[n] = 1.;
       mZDCSMD_PsiWgtEast[n] = 1.;
       mZDCSMD_PsiWgtFull[n] = 1.;
-    } // zdcsmd_nPsiBins
-  } 
+    }
+  }//ZDCSMD
+ 
   // Close PhiWgt file
   if (pPhiWgtFile->IsOpen()) pPhiWgtFile->Close();
 
@@ -490,57 +492,58 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::ReadReCentFile() {
-  // Read the recentering flow.reCent.root file
+  // Read the recentering flow.reCentAna.root file
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: ReadReCentFile()" << endm;
 
-  StFlowMaker* pFlowMaker = NULL;
-  pFlowMaker = (StFlowMaker*)GetMaker("Flow");
-  Bool_t reCent = pFlowMaker->ReCent();
-
   TDirectory* dirSave = gDirectory;
-  TFile* pReCentFile = new TFile("flow.reCent.root", "READ");
-  if (pReCentFile->IsOpen() && reCent) {
-    gMessMgr->Info("##### FlowMaker: ReCentering being done for LYZ Maker.");
-  } else if (reCent) {
-    gMessMgr->Info("##### FlowMaker: ReCentering parameters being calculated.");
+  TFile* pReCentFile = new TFile("flow.reCentAna.root", "READ");
+  if (pReCentFile->IsOpen() && mReCentCalc) {
+    gMessMgr->Info("##### FlowMaker: ReCentering being done.");
+  }
+  if (mReCentCalc) {
+    gMessMgr->Info("##### FlowMaker: Calculating ReCentering parameters.");
   } else {
-    gMessMgr->Info("##### FlowMaker: ReCent not requested. Will set shifts = 0.");
+    gMessMgr->Info("##### FlowMaker: ReCent not requested. Will set values = 0.");
   }
   gDirectory = dirSave;
 
-  // Fill mReCent for each selection and harmonic
-  for (int k = 0; k < Flow::nSels; k++) {
-    for (int j = 0; j < Flow::nHars; j++) {
-
-      TString* histTitleTPC_x = new TString("FlowCentX_Sel");
-      *histTitleTPC_x += k+1;
-      *histTitleTPC_x += "_Har";
-      *histTitleTPC_x += j+1;
-      TString* histTitleTPC_y = new TString("FlowCentY_Sel");
-      *histTitleTPC_y += k+1;
-      *histTitleTPC_y += "_Har";
-      *histTitleTPC_y += j+1;
-
-      if (pReCentFile->IsOpen() && reCent) {
+  // Fill mReCentX,Y for each selection and harmonic
+  if (pReCentFile->IsOpen() && mReCentCalc) {
+    for (int k = 0; k < Flow::nSels; k++) {
+      for (int j = 0; j < Flow::nHars; j++) {
+	TString* histTitleTPC_x = new TString("FlowReCentX_Sel");
+	*histTitleTPC_x += k+1;
+	*histTitleTPC_x += "_Har";
+	*histTitleTPC_x += j+1;
+	TString* histTitleTPC_y = new TString("FlowReCentY_Sel");
+	*histTitleTPC_y += k+1;
+	*histTitleTPC_y += "_Har";
+	*histTitleTPC_y += j+1;
 	TProfile* histCentX = dynamic_cast<TProfile*>(pReCentFile->Get(histTitleTPC_x->Data()));
 	TProfile* histCentY = dynamic_cast<TProfile*>(pReCentFile->Get(histTitleTPC_y->Data()));
-
-	for (int n = 0; n < 3; n++) {
+	if (!histCentX || !histCentY) {
+	  gMessMgr->Info("##### FlowMaker: No ReCent hists.");
+	}
+	for (int n = 0; n < 4; n++) {
 	  mReCentX[k][j][n] = (histCentX) ? histCentX->GetBinContent(n+1) : 0.;
 	  mReCentY[k][j][n] = (histCentY) ? histCentY->GetBinContent(n+1) : 0.;
+	  //PR(mReCentX[k][j][n]);
 	}
-      } else {
-	for (int n = 0; n < 3; n++) {
+	delete histTitleTPC_x;
+	delete histTitleTPC_y;
+      }
+    }
+  } else {
+    for (int k = 0; k < Flow::nSels; k++) {
+      for (int j = 0; j < Flow::nHars; j++) {
+	for (int n = 0; n < 4; n++) {
 	  mReCentX[k][j][n] = 0.;
 	  mReCentY[k][j][n] = 0.;
-	}	
+	}
       }
-
-      delete histTitleTPC_x;
-      delete histTitleTPC_y;
-    }
-  }
+    }	
+  } 
 
   // Close ReCent file
   if (pReCentFile->IsOpen()) pReCentFile->Close();
@@ -561,8 +564,8 @@ Int_t StFlowMaker::ReadZDCSMDFile() {
     gMessMgr->Info("##### FlowMaker: No ZDCSMD constant file. Will use default.");
   } else { gMessMgr->Info("##### FlowMaker: ZDCSMD constant file read."); }
   gDirectory = dirSave;
-    int mRealRunID = mRunID;
-    Double_t HistTest = 0.;
+  int mRealRunID = mRunID;
+  Double_t HistTest = 0.;
   if (pZDCSMDConstFile->IsOpen()) {
     TH2* mZDCSMDBeamCenter2D = (TH2D *)pZDCSMDConstFile->Get("ZDCSMDBeamCenter");
     while (HistTest < 1.) {
@@ -618,7 +621,8 @@ Int_t StFlowMaker::ReadZDCSMDFile() {
     for (int i=0;i<2;i++) {for (int j=0;j<2;j++){for (int k=0;k<8;k++) {
 	 mZDCSMDPed[i][j][k] = Flow::zdcsmdPedstal[i][j][k];
 	 }}} // for
-  } // else
+  }
+
   // Close ZDCSMD constants file
   if (pZDCSMDConstFile->IsOpen()) pZDCSMDConstFile->Close();
 
@@ -695,16 +699,16 @@ void StFlowMaker::FillFlowEvent() {
   if (triggers)	{
     StCtbTriggerDetector &CTB = triggers->ctb();
     StZdcTriggerDetector &ZDC = triggers->zdc();
-    // get CTB
+    // Get CTB
     for (UInt_t slat = 0; slat < CTB.numberOfSlats(); slat++) {
       for (UInt_t tray = 0; tray < CTB.numberOfTrays(); tray++) {
 	ctb += CTB.mips(tray,slat,0);
       }
     }
-    // get ZDCe and ZDCw        
+    // Get ZDCe and ZDCw        
     zdce = ZDC.adcSum(east);
     zdcw = ZDC.adcSum(west);
-    // get ZDCSMD pedstal-subtracted and gain-corrected
+    // Get ZDCSMD pedstal-subtracted and gain-corrected
     for (int strip=1;strip<9;strip++) {
       if (ZDC.zdcSmd(east,1,strip)) {
 	zdcsmdEastHorizontal = (ZDC.zdcSmd(east,1,strip)
@@ -735,7 +739,7 @@ void StFlowMaker::FillFlowEvent() {
   // Get initial multiplicity before TrackCuts 
   UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
   pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
+  //PR(origMult);
   pFlowEvent->SetUncorrNegMult(uncorrectedNumberOfNegativePrimaries(*pEvent));
   pFlowEvent->SetUncorrPosMult(uncorrectedNumberOfPositivePrimaries(*pEvent));
 
@@ -905,17 +909,24 @@ void StFlowMaker::FillFlowEvent() {
     return;
   }
 
+  // Get mult for centrality
   UInt_t rawMult = pFlowEvent->UncorrNegMult() + pFlowEvent->UncorrPosMult();
   pFlowEvent->SetMultEta(rawMult);
 
+  // Set centrality
   pFlowEvent->SetCentrality();
 
+  // Set PID method
   (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
     pFlowEvent->SetPidsDeviant();
 
+  // Randomize tracks
   pFlowEvent->TrackCollection()->random_shuffle();
 
+  // Set selections
   pFlowEvent->SetSelections();
+
+  // Set subevent method
   (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
     pFlowEvent->MakeSubEvents();
 
@@ -1101,7 +1112,7 @@ Bool_t StFlowMaker::FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetEventID(pPicoEvent->EventID());
   UInt_t origMult = pPicoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
+  //PR(origMult);
   pFlowEvent->SetUncorrNegMult(pPicoEvent->UncorrNegMult());
   pFlowEvent->SetUncorrPosMult(pPicoEvent->UncorrPosMult());
   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
@@ -1264,10 +1275,10 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pFlowEvent->SetZDCSMD_PsiWeightWest(mZDCSMD_PsiWgtWest);
   pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
   pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
-  pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,
-				   mZDCSMDCenterWy);
+  pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx, mZDCSMDCenterEy,
+				   mZDCSMDCenterWx, mZDCSMDCenterWy);
 
-  // fill ReCent array
+  // Fill ReCent array
   pFlowEvent->SetReCentX(mReCentX);
   pFlowEvent->SetReCentY(mReCentY);
 
@@ -1296,7 +1307,7 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pFlowEvent->SetZDCe(pMuEvent->zdcAdcAttentuatedSumEast());
   pFlowEvent->SetZDCw(pMuEvent->zdcAdcAttentuatedSumWest());
 
-    //get ZDCSMD pedstal-subtracted and gain-corrected
+  // Get ZDCSMD pedstal-subtracted and gain-corrected
   Float_t zdcsmdEastHorizontal = -1.;
   Float_t zdcsmdEastVertical   = -1.;
   Float_t zdcsmdWestHorizontal = -1.;
@@ -1328,11 +1339,11 @@ Bool_t StFlowMaker::FillFromMuDST() {
   // Tracks
   UInt_t origMult = pMuTracks->GetEntries();
   pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);  
+  //PR(origMult);  
   int goodTracks = 0;
   // Fill FlowTracks
   for (Int_t nt=0; nt < (Int_t)origMult; nt++) {
-   StMuTrack* pMuTrack = (StMuTrack*)pMuTracks->UncheckedAt(nt);
+    StMuTrack* pMuTrack = (StMuTrack*)pMuTracks->UncheckedAt(nt);
     if (pMuTrack && pMuTrack->flag()>0 && StFlowCutTrack::CheckTrack(pMuTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
@@ -1373,19 +1384,17 @@ Bool_t StFlowMaker::FillFromMuDST() {
       pFlowTrack->SetNdedxPts(pMuTrack->nHitsDedx());
       pFlowTrack->SetDcaGlobal3(pMuTrack->dcaGlobal());
       pFlowTrack->SetTrackLength(pMuTrack->helix().pathLength(pMuEvent->
-		     primaryVertexPosition())); //???
+		     primaryVertexPosition()));
 
       if (pFlowTrack->TopologyMap().hasHitInDetector(kFtpcEastId)
 	  || pFlowTrack->TopologyMap().hasHitInDetector(kFtpcWestId)) { // FTPC track: first and last point are within these detectors
 	pFlowTrack->SetZFirstPoint(pMuTrack->firstPoint().z());
 	pFlowTrack->SetZLastPoint(pMuTrack->lastPoint().z());
-      }
-      
+      }      
       else if (pFlowTrack->TopologyMap().hasHitInDetector(kTpcId)) { // TPC track
 	Double_t innerFieldCageRadius = 46.107;
 	Double_t innerPadrowRadius = 60.0;
 	Double_t x, y;
-	
 	pFlowTrack->SetZLastPoint(pMuTrack->lastPoint().z()); 
 	
 	x = pMuTrack->firstPoint().x();
@@ -1481,7 +1490,7 @@ Bool_t StFlowMaker::FillFromMuDST() {
 	pFlowTrack->SetMostLikelihoodPID(mostLikelihoodPid); 
 	pFlowTrack->SetMostLikelihoodProb(mostLikelihoodPidProbability);
 	
-      }    
+      }//PID    
       
       if (pMuTrack->charge() < 0) {
         pFlowTrack->SetPidPiMinus(pMuTrack->nSigmaPion()); 
@@ -1501,7 +1510,7 @@ Bool_t StFlowMaker::FillFromMuDST() {
       goodTracks++;
       
     }
-  }
+  }//tracks
   
   // Check Eta Symmetry
   if (!StFlowCutEvent::CheckEtaSymmetry(pMuEvent)) {  
@@ -1513,14 +1522,19 @@ Bool_t StFlowMaker::FillFromMuDST() {
     return kTRUE;
   }
   
+  // Set PID method
   (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
     pFlowEvent->SetPidsDeviant();
 
+  // Randomize tracks
   pFlowEvent->TrackCollection()->random_shuffle();
 
+  // Set selections
   pFlowEvent->SetSelections();
-  (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
-    pFlowEvent->MakeSubEvents();
+
+  // Set subevent method
+  (pFlowEvent->RanSubs()) ? pFlowEvent->MakeSubEvents() :
+    pFlowEvent->MakeEtaSubEvents();
   
   return kTRUE;
 }
@@ -1734,11 +1748,6 @@ Int_t StFlowMaker::InitMuEventRead() {
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: InitMuEventRead()" << endm;
   
-//   pMu = (StMuDst*)GetInputDS("MuDst");
-//   pMuEvent = pMu->event(); // this does not work
-//   Int_t runID = pMuEvent->runId();
-//   cout << "######### InitMuEventRead runID = " << runID << endl;
-
   mEventCounter = 0;
   
   return kStOK;
@@ -1817,7 +1826,7 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
   // Get initial multiplicity before TrackCuts
   UInt_t origMult = hbtEvent->NumberOfTracks();
   pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
+  //PR(origMult);
   // Fill track info
   int goodTracks    = 0;
   int goodTracksEta = 0;
@@ -1914,6 +1923,9 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.117  2009/11/24 19:23:04  posk
+// Added reCenter option to remove acceptance correlations instead of phiWgt.
+//
 // Revision 1.116  2009/08/04 23:00:29  posk
 // Reads year 7 MuDsts.
 //
