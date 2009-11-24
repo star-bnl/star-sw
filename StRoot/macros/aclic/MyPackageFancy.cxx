@@ -1,4 +1,4 @@
-// $Id: MyPackageFancy.cxx,v 1.1 2009/11/24 19:58:19 fine Exp $
+// $Id: MyPackageFancy.cxx,v 1.2 2009/11/24 22:23:25 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   24/11/2009
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,7 +10,7 @@ namespace {
 #include "MyPackage.cxx"
 }
 
-int MyPackageFuncy(const char *infile="$USER/example.list"
+int MyPackageFancy(const char *infile="$USER/example.list"
              , const char *outfile = "$SCRATCH/example.root")
 {
    TString sInFile =  infile;
