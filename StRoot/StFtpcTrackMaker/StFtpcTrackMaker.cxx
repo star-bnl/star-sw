@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.90 2009/11/23 16:38:11 fisyak Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.91 2009/11/24 11:54:01 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.91  2009/11/24 11:54:01  jcs
+// Remove dst_vertex_st code commented out by Yuri
+//
 // Revision 1.90  2009/11/23 16:38:11  fisyak
 // Remove dependence on dst_vertex_st
 //
@@ -377,9 +380,6 @@
 
 #include "tables/St_ffs_gepoint_Table.h"
 #include "tables/St_g2t_track_Table.h"
-#if 0
-#include "tables/St_dst_vertex_Table.h"
-#endif
 #include "TH1.h"
 #include "TH2.h"
 
@@ -606,33 +606,6 @@ Int_t StFtpcTrackMaker::Make()
   if (event->numberOfPrimaryVertices() > 0) {
         vertex = StFtpcVertex(event->primaryVertex(0));
   }
-#if 0
-  if (vertex.GetIFlag() == 0) { // Otherwise use TPC preVertex if it exists
-
-    //pointer to preVertex dataset
-    TDataSet *preVertex = GetDataSet("preVertex");
-    
-    if (preVertex) {
-      
-      //iterator
-      TDataSetIter preVertexI(preVertex);
-      
-      //pointer to preVertex
-      St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
-      
-      dst_vertex_st *preVtxPtr = preVtx->GetTable();
-      
-      for (Int_t i = 0; i < preVtx->GetNRows(); i++, preVtxPtr++) {
-	
-	if (preVtxPtr->iflag == 101) {
-
-	  vertex = StFtpcVertex(preVtxPtr);
-	  break;
-	}
-      }
-    }  // end of if (preVertex)
-  } // end of else (preVertex)
-#endif  
   if (Int_t problem = vertex.CheckVertex()) {
     return problem;
   }
@@ -1010,7 +983,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.90 2009/11/23 16:38:11 fisyak Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.91 2009/11/24 11:54:01 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
