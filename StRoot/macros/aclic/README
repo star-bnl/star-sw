@@ -22,3 +22,15 @@ The directory conatins a simpe examnpme of the trasatrioin the standlone apoplca
 
    It can be used as follows:
      >  root.exe --b -q -l MyPackageFuncy.cxx+
+
+4. MyPackage.csh is the schell script to execute all 3 steps above
+
+   > ./MyPackage.csh 
+   
+5. To see how it works check the package out 
+   
+   >  cvs co -d./ StRoot/macros/aclic
+   
+   and invoke the MyPackage.csh  shell script
+
+   > ./MyPackage.csh 
