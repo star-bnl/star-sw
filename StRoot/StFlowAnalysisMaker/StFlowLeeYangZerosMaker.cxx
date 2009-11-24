@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.cxx,v 1.5 2007/02/06 19:00:48 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.cxx,v 1.6 2009/11/24 19:29:13 posk Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //          with advice from Jean-Yves Ollitrault and Nicolas Borghini
@@ -123,7 +123,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
 
   StFlowMaker* pFlowMaker = NULL;
   pFlowMaker = (StFlowMaker*)GetMaker("Flow");
-  Bool_t reCentCalc = pFlowMaker->ReCent();
+  Bool_t reCentCalc = pFlowMaker->ReCentCalc();
 
   const float multMin      =    0.;
   const float multMax      = 2000.;
@@ -455,7 +455,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   } // k
 
   gMessMgr->SetLimit("##### FlowLeeYangZero", 5);
-  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.5 2007/02/06 19:00:48 posk Exp $");
+  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.6 2009/11/24 19:29:13 posk Exp $");
 
   return StMaker::Init();
 }

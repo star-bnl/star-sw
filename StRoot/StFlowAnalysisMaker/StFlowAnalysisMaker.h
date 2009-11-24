@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.48 2006/02/22 19:36:27 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.49 2009/11/24 19:29:12 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -18,6 +18,7 @@
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
 #include "TString.h"
+class StFlowMaker;
 class StFlowEvent;
 class StFlowSelection;
 class TH1F;
@@ -35,7 +36,7 @@ class StFlowAnalysisMaker : public StMaker {
     Makes histograms for the flow analysis. It reads event and particle quantities
     from StFlowEvent. It removes autocorrelations of each particle with respect
     to the event plane. For each harmonic and each selection makes a 2D histogram
-    of the anisotropic flow, v, vs. y and p_t.
+    of the anisotropic flow v vs. y and p_t.
   */
   
 public:
@@ -51,14 +52,12 @@ public:
   Int_t    Init();
   Int_t    Make();
   Int_t    Finish();
-  Float_t  Res(Int_t eventN, Int_t harN) const;
-  Float_t  ResErr(Int_t eventN, Int_t harN) const;
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
   void     SetPtRange_for_vEta(Float_t lo, Float_t hi);
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   void     SetV1Ep1Ep2(Bool_t v1Ep1Ep2 = kTRUE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.48 2006/02/22 19:36:27 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.49 2009/11/24 19:29:12 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -66,6 +65,7 @@ private:
   Bool_t   FillFromFlowEvent();
   void     FillEventHistograms();
   void     FillParticleHistograms();
+  Bool_t   mCalcReCentPars;
 #ifndef __CINT__
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   Float_t  mPsi[Flow::nSels][Flow::nHars];                   //! event plane angle
@@ -79,7 +79,8 @@ private:
   Float_t  mZDCSMD_e_PsiWgt,mZDCSMD_w_PsiWgt,mZDCSMD_f_PsiWgt;   //! ZDCSMD Psi Weight
   Float_t  mFlowWeight;				//! Weight for flow
 #endif /*__CINT__*/
-  TString          xLabel;      //! label axis with rapidity or pseudorapidity 
+  TString          xLabel;      //! label axis with rapidity or pseudorapidity
+  StFlowMaker*     pFlowMaker;  //! pointer to StFlowMaker 
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   StFlowSelection* pFlowSelect; //! selection object
 
@@ -112,7 +113,6 @@ private:
   TH2D*     mHistYieldPart2D;          //!
   TProfile* mHistBinEta;               //!
   TProfile* mHistBinPt;                //!
-  TProfile* mHistCosPhi;               //!
   TH1F*     mHistPidPiPlus;            //!
   TH1F*     mHistPidPiMinus;           //!
   TH1F*     mHistPidProton;            //!
@@ -178,6 +178,9 @@ private:
     TH1F*       mHistPsiSubCorr;
     TH1F*       mHistPsiSubCorrDiff;
     TH1F*       mHistPsi;
+    TProfile*   mHistReCentX;
+    TProfile*   mHistReCentY;
+    TProfile*   mHistQreCent;
     TH1F*       mHistPsi_Diff;
     TH1F*       mHistMult;
     TH1F*       mHist_q;
@@ -216,6 +219,9 @@ private:
     TH1D*       mHistPhiFlatFtpcEast;
     TH1D*       mHistPhiFlatFtpcWest;
     TH1D*       mHistPhiFlatFtpcFarWest;
+    TH2D*       mHistQXY2D;
+    TH2D*       mHistQFTPCSubXY2D;
+    TH2D*       mHistQTPCSubXY2D;
   };
 
   // for each selection
@@ -240,22 +246,18 @@ private:
   Float_t mPtRange_for_vEta[2];
   Float_t mEtaRange_for_vPt[2];
 
-  Bool_t mV1Ep1Ep2;
+  Bool_t  mV1Ep1Ep2;
 
   ClassDef(StFlowAnalysisMaker,0)              // macro for rootcint
 };
-
-inline Float_t StFlowAnalysisMaker::Res(Int_t eventN, Int_t harN) const 
-  { return mRes[eventN][harN]; }
-
-inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const 
-  { return mResErr[eventN][harN]; }
-
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.49  2009/11/24 19:29:12  posk
+// Added reCenter to remove acceptance correlations as an option instead of phiWgt.
+//
 // Revision 1.48  2006/02/22 19:36:27  posk
 // Minor updates.
 //

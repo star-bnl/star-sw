@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.65 2006/02/22 19:35:18 posk Exp $
+// $Id: plot.C,v 1.66 2009/11/24 19:29:19 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
-// Description:  Macro to plot histograms made by StFlowAnalysisMaker and
-//                 StFlowScalarProdMaker.
+// Description:  Macro to plot histograms made by StFlowAnalysisMaker,
+//                 StFlowLeeYangZerosMaker, and StFlowScalarProdMaker.
 //               If selN = 0 plot all selections and harmonics.
 //               First time type .x plot.C() to see the menu.
 //               Run Number appended to "ana" is entered in the bottom, left box.
@@ -23,7 +23,7 @@
 #include <iomanip.h>
 
 const    Int_t nHars    = 2; // 4
-const    Int_t nSels    = 2; // 2
+const    Int_t nSels    = 2;
 const    Int_t nSubs    = 2;
 Int_t    runNumber      = 0;
 char     runName[6];
@@ -31,6 +31,7 @@ char     fileNumber[4]  = "x";
 char     fileName[30];
 TFile*   histFile;
 char     tmp[10];
+char     runNo[10];
 TCanvas* can;
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
@@ -38,6 +39,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   Bool_t includeFtpc = kTRUE;
   //Bool_t includeFtpc = kFALSE;
+  Bool_t reCent = kTRUE;
 
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
@@ -49,11 +51,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   //gROOT->SetStyle("Pub");                              // set style
   gROOT->SetStyle("Bold");                              // set style
   gROOT->ForceStyle();
-  //gStyle->SetOptStat(kFALSE);
+  gStyle->SetOptStat(10);
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
-  const char* baseName1[] = {
+  const char* baseName1[] = { // with FTPCs
     "Flow_Res_Sel",
     "Flow_Trigger",
     "Flow_VertexZ",
@@ -93,7 +95,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_YieldPart.Pt",
     //"Flow_Bin_Eta",
     //"Flow_Bin_Pt",
-    "Flow_CosPhiLab",
     "Flow_MeanDedxPos2D",
     "Flow_MeanDedxNeg2D",
 //     "Flow_PidPiPlusPart",
@@ -148,7 +149,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vPt_ScalarProd_Sel"
   };
 
-  const char* baseName2[] = {
+  const char* baseName2[] = { // without FTPCs
     "Flow_Res_Sel",
     "Flow_Trigger",
     "Flow_VertexZ",
@@ -179,7 +180,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_YieldPart.Pt",
     //"Flow_Bin_Eta",
     //"Flow_Bin_Pt",
-    "Flow_CosPhiLab",
 //     "Flow_MeanDedxPos2D",
 //     "Flow_MeanDedxNeg2D",
 //     "Flow_PidPiPlusPart",
@@ -226,13 +226,99 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vPt_ScalarProd_Sel"
   };
 
+  const char* baseName3[] = { // for reCent
+    "Flow_Res_Sel",
+    "Flow_Trigger",
+    "Flow_VertexZ",
+    "Flow_VertexXY2D",
+    "Flow_EtaSymVerZ2D_Tpc",
+    "Flow_EtaSym_Tpc",
+    "Flow_EtaSymVerZ2D_Ftpc",
+    "Flow_EtaSym_Ftpc",
+    "Flow_CTBvsZDC2D",
+    "Flow_Cent",
+    "Flow_Mult",
+    "Flow_OrigMult",
+    "Flow_MultOverOrig",
+    "Flow_MultEta",
+    "Flow_MultPart",
+    "Flow_Charge_Ftpc",
+    "Flow_DcaGlobal_Tpc",
+    "Flow_DcaGlobal_Ftpc",
+    "Flow_Dca_Tpc",
+    "Flow_Dca_Ftpc",
+    "Flow_Chi2_Tpc",
+    "Flow_Chi2_Ftpc",
+    "Flow_FitPts_Tpc",
+    "Flow_MaxPts_Tpc",
+    "Flow_FitOverMax_Tpc",
+    "Flow_FitPts_Ftpc",
+    "Flow_MaxPts_Ftpc",
+    "Flow_FitOverMax_Ftpc",
+    //"Flow_EtaPtPhi3D",
+    "Flow_EtaPtPhi2D.PhiEta",
+    "Flow_EtaPtPhi2D.PhiPt",
+    "Flow_YieldAll2D",
+    "Flow_YieldAll.Eta",
+    "Flow_YieldAll.Pt",
+    "Flow_YieldPart2D",
+    "Flow_YieldPart.Eta",
+    "Flow_YieldPart.Pt",
+    //"Flow_Bin_Eta",
+    //"Flow_Bin_Pt",
+    "Flow_MeanDedxPos2D",
+    "Flow_MeanDedxNeg2D",
+//     "Flow_PidPiPlusPart",
+//     "Flow_PidPiMinusPart",
+//     "Flow_PidProtonPart",
+//     "Flow_PidAntiProtonPart",
+//     "Flow_PidKplusPart",
+//     "Flow_PidKminusPart",
+//     "Flow_PidDeuteronPart",
+//     "Flow_PidAntiDeuteronPart",
+//     "Flow_PidElectronPart",
+//     "Flow_PidPositronPart",
+    "Flow_PidMult",
+    "Flow_Mul_Sel",                    // first multi graph hist
+    "Flow_Yield2D_Sel",
+    "Flow_Yield.Eta_Sel",
+    "Flow_Yield.Pt_Sel",
+    "Flow_Psi_Subs",
+    "Flow_Psi_Sel",
+    "Flow_Psi_Diff_Sel",
+    "Flow_Psi_Sub_Corr_Sel",
+    "Flow_Psi_Sub_Corr_Diff_Sel",
+    "Flow_Phi_Corr_Sel",
+    "Flow_QXY2D_Sel",
+    "Flow_QFTPCSubXY2D_Sel",
+    "Flow_QTPCSubXY2D_Sel",
+    "Flow_vObs2D_Sel",
+    "Flow_vObsEta_Sel",
+    "Flow_vObsPt_Sel",
+    "Flow_v2D_Sel",
+    "Flow_vEta_Sel",
+    "Flow_vPt_Sel",
+    "Flow_q_Sel",
+    "FlowLYZ_vEta_Sel",
+    "FlowLYZ_vPt_Sel",
+    "Flow_vObs2D_ScalarProd_Sel",
+    "Flow_v2D_ScalarProd_Sel",
+    "Flow_vEta_ScalarProd_Sel",
+    "Flow_vPt_ScalarProd_Sel"
+  };
+
+  const Int_t firstMultFtpc = 38; // these must be set by hand
+  const Int_t firstMultTpc  = 27;
   int nSingles;
-  if (includeFtpc) {
+  if (reCent) {
+    const int nNames = sizeof(baseName3) / sizeof(char*);
+    nSingles = firstMultFtpc + 1;
+  } else if (includeFtpc) {
     const int nNames = sizeof(baseName1) / sizeof(char*);
-    nSingles = 39 + 1;
+    nSingles = firstMultFtpc + 1;
   } else {
     const int nNames = sizeof(baseName2) / sizeof(char*);
-    nSingles = 28 + 1;
+    nSingles = firstMultTpc + 1;
   }
 
   // construct arrays of base and short names
@@ -242,7 +328,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     baseName[n]  = new char[35];
     shortName[n] = new char[35];
     float etaMax;
-    if (includeFtpc) {
+    if (reCent) {
+      strcpy(baseName[n], baseName3[n]);
+      etaMax  =   4.5;
+    } else if (includeFtpc) {
       strcpy(baseName[n], baseName1[n]);
       etaMax  =   4.5;
     } else {
@@ -257,8 +346,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // input the run number
   if (runNumber == 0) {
     cout << "     run number? ";    
-    fgets(tmp, sizeof(tmp), stdin);
-    runNumber = atoi(tmp);
+    fgets(runNo, sizeof(runNo), stdin);
+    runNumber = atoi(runNo);
     sprintf(runName, "ana%2d", runNumber);               // add ana prefix
     cout << " run name = " << runName << endl;
   }
@@ -324,8 +413,12 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   } else {
     int canvasWidth = 780, canvasHeight = 600;             // landscape
   }
-  can = new TCanvas(shortName[pageNumber], shortName[pageNumber],
-			   canvasWidth, canvasHeight);
+  TString* canName = new TString(shortName[pageNumber]);
+  if (runNumber) {
+    *canName += runNumber;
+  } 
+  cout << canName->Data() << endl;
+  can = new TCanvas(canName->Data(), canName->Data(), canvasWidth, canvasHeight);
   can->ToggleEventStatus();
   if (multiGraph) {
     TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,shortName[pageNumber]);
@@ -392,8 +485,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	   << histName->Data() << endl;
 
       // get the histogram
-      bool twoD;
-      bool threeD;
+      bool twoD = kFALSE;
+      bool threeD = kFALSE;
       if (histProjName) {
 	if (strstr(temp,"3D")) {                      // 2D projection
 	  twoD = kTRUE;
@@ -454,6 +547,22 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  projZY->SetXTitle("Pt (GeV/c)");
 	  gStyle->SetOptStat(0);
 	  if (projZY) projZY->Draw("COLZ");
+	} else	if ((strstr(shortName[pageNumber],"QXY")!=0)) { // Q XY
+	  TLine* lineZeroX = new TLine(-0.5, 0., 0.5, 0.);
+	  TLine* lineZeroY = new TLine(0., -0.5, 0., 0.5);
+	  gStyle->SetOptStat(100110);
+	  hist2D->Draw("COLZ");
+	  //hist2D->Draw("CONT");
+	  lineZeroX->Draw();
+	  lineZeroY->Draw();
+	} else	if ((strstr(shortName[pageNumber],"TPCSubXY")!=0)) { // QSub XY
+	  TLine* lineZeroX = new TLine(-1., 0., 1., 0.);
+	  TLine* lineZeroY = new TLine(0., -1., 0., 1.);
+	  gStyle->SetOptStat(100110);
+	  hist2D->Draw("COLZ");
+	  //hist2D->Draw("CONT");
+	  lineZeroX->Draw();
+	  lineZeroY->Draw();
 	} else	if (strstr(shortName[pageNumber],"XY")!=0) {    // Vertex XY
 	  TLine* lineZeroX = new TLine(-1., 0., 1., 0.);
 	  TLine* lineZeroY = new TLine(0., -1., 0., 1.);
@@ -549,12 +658,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptStat(110);
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
-// 	int bins = hist->GetNbinsX();
-// 	cout << "bins= " << bins << endl;
-// 	for (int n=1; n<bins; n++) {
-// 	  float y = hist->GetBinContent(n);
-// 	  cout << n << ": " << y << endl;
-// 	}
 	float n_qBins = (float)hist->GetNbinsX();
 	double area = hist->Integral() * max / n_qBins; 
 	TString* histName = new TString("Flow_Mul_Sel");
@@ -592,24 +695,27 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->Fit("qDist", "Q+");
 	fit_q->Draw("same");
  	fit_q->ReleaseParameter(0);               // v is unfixed
-      } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
-	TLine* lineZeroHar = new TLine(0.5, 0., nHars+0.5, 0.);
-	gStyle->SetOptStat(0);
-	hist->Draw();
-	lineZeroHar->Draw();
       } else if (strstr(shortName[pageNumber],"Phi")!=0) {  // Phi distibutions
-       	hist->SetMinimum(0.9*(hist->GetMinimum()));
-	if (strstr(shortName[pageNumber],"Weight")!=0) {
-	  gStyle->SetOptStat(0);
-	  hist->Draw(); 
-	  lineOnePhi->Draw();
-	} else {
-	  gStyle->SetOptStat(10);
-	  hist->Draw(); 
-	}
-      } else if (strstr(shortName[pageNumber],"Psi")!=0) {    // Psi distibutions
+       	//hist->SetMinimum(0.9*(hist->GetMinimum()));
+       	hist->SetMinimum(0.);
 	gStyle->SetOptStat(10);
-	hist->Draw("E1"); 
+	hist->Draw(); 
+      } else if (strstr(shortName[pageNumber],"Psi_Diff")!=0) { // Psi_Diff distibutions
+	hist->Draw("E1");
+      } else if (strstr(shortName[pageNumber],"Psi")!=0) {    // Psi distibutions
+ 	float norm = (hist->Integral()) ? ((float)(hist->GetNbinsX()) / hist->Integral()) : 1.; 
+	cout << "  Normalized by: " << norm << endl;
+	hist->Scale(norm);                           // normalize height to one
+      	hist->SetMinimum(0.);
+	if (order == 1)	TF1* funcCosSin = new TF1("funcCosSin",
+				"1.+[0]*2/100*cos(1.*x)+[1]*2/100*sin(1.*x)", 0., twopi/1.);
+	else if (order == 2)	TF1* funcCosSin = new TF1("funcCosSin",
+				"1.+[0]*2/100*cos(2.*x)+[1]*2/100*sin(2.*x)", 0., twopi/2.);
+	funcCosSin->SetParNames("cos", "sin");
+	hist->Fit("funcCosSin");
+	delete funcCosSin;
+	gStyle->SetOptFit(111);
+	hist->Draw("E1");
       } else if (strstr(shortName[pageNumber],"Eta")!=0) {    // Eta distibutions
 	gStyle->SetOptStat(100110);
  	if (strstr(shortName[pageNumber],"_v")!=0 ) {
@@ -674,6 +780,7 @@ TCanvas* plotResolution() {
 //     "Flow_Cumul_v_Order2_Sel",
 //     "Flow_Cumul_v_Order4_Sel"
   };
+  const Int_t nHars = 4; 
   int columns = nSels;
   int rows = sizeof(resName) / sizeof(char*);
   int pads = rows*columns;
@@ -742,8 +849,9 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     can->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
-    if (strstr(tmp,"y")!=0) can->Print(".ps");
+    if (strstr(tmp,"y")!=0) can->Print(".pdf");
     else if (strstr(tmp,"q")!=0) return;
+    else if (strstr(tmp," ")!=0) continue;
   }
   cout << "  plotAll Done" << endl;
 }
@@ -781,6 +889,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.66  2009/11/24 19:29:19  posk
+// Added reCenter to remove acceptance correlations as an option instead of phiWgt.
+//
 // Revision 1.65  2006/02/22 19:35:18  posk
 // Added graphs for the StFlowLeeYangZerosMaker
 //
