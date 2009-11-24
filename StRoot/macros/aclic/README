@@ -1,21 +1,23 @@
-The directory conatins a simpe examnpme of the trasatrioin the standlone apoplcation to ROOT loadabble macro
+# $Id: README,v 1.3 2009/11/24 19:10:21 fine Exp $
+# *-- Author :    Valery Fine(fine@bnl.gov)   24/11/2009
+The directory contains a simple  example of the transition the standalone application to ROOT loadable macro
 
-1. MyPackageMain.cxx - this is the originalw satnd alone pacakge
+1. MyPackageMain.cxx - this is the original stand-alone package
    You can build and execute it as follows:
    
    g++ MyPackageMain.cxx -o MyPackageMain
    MyPackageMain
    
-2. MyPackage.cxx is ther modidfied version of MyPackageMain.cxx 
+2. MyPackage.cxx is the modified version of MyPackageMain.cxx 
    suitable to be used with ROOT ACliC. 
-   The MyPackage.cxx conatins the copy of the code from MyPackageMain.cxx 
+   The MyPackage.cxx contains the copy of the code from MyPackageMain.cxx 
    
    It can be used as follows:
    
      >  root.exe --b -q -l MyPackage.cxx+
        
 3. MyPackageFuncy.cxx is the modified version of MyPackage.cxx
-   This file  doesn't contain any copy of the code from MyPackageMain.cxx
+   This file does not contain any copy of the code from MyPackageMain.cxx
    It uses the CPP
         #include "MyPackageMain.cxx" 
    instead.
@@ -23,7 +25,7 @@ The directory conatins a simpe examnpme of the trasatrioin the standlone apoplca
    It can be used as follows:
      >  root.exe --b -q -l MyPackageFuncy.cxx+
 
-4. MyPackage.csh is the schell script to execute all 3 steps above
+4. MyPackage.csh is the shell script to execute all 3 steps above
 
    > ./MyPackage.csh 
    
@@ -33,4 +35,4 @@ The directory conatins a simpe examnpme of the trasatrioin the standlone apoplca
    
    and invoke the MyPackage.csh  shell script
 
-   > ./MyPackage.csh 
+   > ./MyPackage.csh
