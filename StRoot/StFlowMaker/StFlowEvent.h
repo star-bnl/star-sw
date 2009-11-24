@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.55 2007/02/06 18:57:54 posk Exp $
+// $Id: StFlowEvent.h,v 1.56 2009/11/24 19:23:03 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -56,8 +56,10 @@ public:
   TVector2       Q(StFlowSelection*);
   TVector2       NormQ(StFlowSelection* pFlowSelect);
   TVector2       QPart(StFlowSelection*);
-  TVector2       ReCentPar(StFlowSelection*, char*);
+  TVector2       ReCentEPPar(StFlowSelection*, char*); // for ana
+  TVector2       ReCentPar(StFlowSelection*, char*); // for LYZ
   TVector2       ReCent(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
+  TVector2       ReCentEP(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   Float_t        q(StFlowSelection*);
   Float_t        MeanPt(StFlowSelection*);
   Float_t        Qtheta(StFlowSelection*, Float_t theta);
@@ -490,7 +492,6 @@ inline void StFlowEvent::SetV1FtpcEastDetctWgtG_Mix(Float_t val,  Int_t selN){
 inline void StFlowEvent::SetV1FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
   mV1FtpcWestDetctWgtG_Mix[selN]=val;}
 
-
 inline void StFlowEvent::SetV2TPCDetctWgtG_Mix(Float_t val,  Int_t selN){
   mV2TPCDetctWgtG_Mix[selN]=val;}
 inline void StFlowEvent::SetV2FtpcEastDetctWgtG_Mix(Float_t val,  Int_t selN){
@@ -498,12 +499,14 @@ inline void StFlowEvent::SetV2FtpcEastDetctWgtG_Mix(Float_t val,  Int_t selN){
 inline void StFlowEvent::SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
   mV2FtpcWestDetctWgtG_Mix[selN]=val;}
 
-
 #endif
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.56  2009/11/24 19:23:03  posk
+// Added reCenter option to remove acceptance correlations instead of phiWgt.
+//
 // Revision 1.55  2007/02/06 18:57:54  posk
 // In Lee Yang Zeros method, introduced recentering of Q vector.
 // Reactivated eta symmetry cut.

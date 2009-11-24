@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.53 2009/08/04 23:00:31 posk Exp $
+//  $Id: StFlowMaker.h,v 1.54 2009/11/24 19:23:06 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -10,7 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Description: 
-//  Maker to fill StFlowEvent from StEvent, picoevent, or microevent
+//  Maker to fill StFlowEvent from StEvent, picoevent, or muevent
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -62,14 +62,16 @@ public:
   void          SetPicoEventFileName(StFileI* fileList);
   void          SetMuEventDir(const Char_t* name="./");
   void          SetMuEventFileName(StFileI* fileList);
-  void          SetReCent(Bool_t flag=kTRUE);
-  Bool_t        ReCent();
+  void          SetReCentCalc(Bool_t flag=kTRUE);
+  void          SetPhiWgtCalc(Bool_t flag=kTRUE);
+  Bool_t        ReCentCalc();
+  Bool_t        PhiWgtCalc();
   void          FillFlowEvent(StHbtEvent* hbtEvent); //rcwells added this
 
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.53 2009/08/04 23:00:31 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.54 2009/11/24 19:23:06 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -102,7 +104,8 @@ private:
   Bool_t           mPicoEventWrite;           // switch for pico-DST
   Bool_t           mPicoEventRead;            // switch for pico-DST
   Bool_t           mMuEventRead;              // switch for Mu-DST
-  Bool_t           mReCent;                   // switch for recentering
+  Bool_t           mReCentCalc;               // switch for recentering
+  Bool_t           mPhiWgtCalc;               // switch for phi weighting
   UInt_t           mEventCounter;             // number of Bytes in pico event
   Bool_t           mFirstLastPhiWgt;          // use z of first-last for phi weights
   Int_t            mRunID;                    // last run ID
@@ -128,12 +131,12 @@ private:
   TTree*           pFlowTree;                 // pointer to pico-DST Tree
   TFile*           pPicoDST;                  //! pointer to pico-DST File
   TChain*          pPicoChain;                //! pointer to chain of pico files
-  TTree*           pMuFlowTree;               // pointer to mu-DST Tree
+  //TTree*           pMuFlowTree;               // pointer to mu-DST Tree
   TFile*           pMuDST;                    //! pointer to mu-DST File
   TChain*          pMuChain;                  //! pointer to chain of mu-DST files
   StMuDst*         pMu;                       //! pointer to Mu-DST class
   StMuEvent*       pMuEvent;                  //! pointer to Mu-DST Event
-  TClonesArray*    pMuEvents;                 //! pointer to Mu-DST Event array (not used)
+  //TClonesArray*    pMuEvents;                 //! pointer to Mu-DST Event array (not used)
   TObjArray*       pMuTracks;                 //! Mu-DST Primary Tracks
   TObjArray*       pMuGlobalTracks;           //! Mu-DST Global Tracks
 
@@ -173,17 +176,27 @@ inline void StFlowMaker::SetMuEventFileName(StFileI* fileList) {
 inline StFlowSelection* StFlowMaker::FlowSelection() {
   return pFlowSelect; }
 
-inline void StFlowMaker::SetReCent(Bool_t flag) {
-  mReCent=flag; }
+inline void StFlowMaker::SetReCentCalc(Bool_t flag) {
+  mReCentCalc=flag; }
 
-inline Bool_t StFlowMaker::ReCent() {
-  return mReCent; }
+inline Bool_t StFlowMaker::ReCentCalc() {
+  return mReCentCalc; }
+
+inline void StFlowMaker::SetPhiWgtCalc(Bool_t flag) {
+  mPhiWgtCalc=flag; }
+
+inline Bool_t StFlowMaker::PhiWgtCalc() {
+  return mPhiWgtCalc; }
+
 
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.54  2009/11/24 19:23:06  posk
+//  Added reCenter option to remove acceptance correlations instead of phiWgt.
+//
 //  Revision 1.53  2009/08/04 23:00:31  posk
 //  Reads year 7 MuDsts.
 //

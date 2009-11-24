@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.20 2009/08/04 23:00:25 posk Exp $
+// $Id: StFlowConstants.cxx,v 1.21 2009/11/24 19:22:58 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -17,7 +17,6 @@ ClassImp(Flow)
   Float_t Flow::etaMax =  4.5;
   Float_t Flow::etaMinTpcOnly = -1.5;
   Float_t Flow::etaMaxTpcOnly =  1.5;
-  //Float_t Flow::etaSymZSlopeTpc = 0.003; // run 2
   Float_t Flow::etaSymZSlopeTpc = 0.0043; // run 4
   Float_t Flow::etaSymZSlopeFtpc = -0.0067; // run 4
 
@@ -64,6 +63,9 @@ ClassImp(Flow)
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.cxx,v $
+// Revision 1.21  2009/11/24 19:22:58  posk
+// Added reCenter option to remove acceptance correlations instead of phiWgt.
+//
 // Revision 1.20  2009/08/04 23:00:25  posk
 // Reads year 7 MuDsts.
 //

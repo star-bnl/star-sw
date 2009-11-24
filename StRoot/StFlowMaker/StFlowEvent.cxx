@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.61 2009/08/04 23:00:28 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.62 2009/11/24 19:23:01 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,6 +33,7 @@ Double_t  StFlowEvent::mZDCSMDCenterey = Flow::zdcsmd_ey0;
 Double_t  StFlowEvent::mZDCSMDCenterwx = Flow::zdcsmd_wx0;
 Double_t  StFlowEvent::mZDCSMDCenterwy = Flow::zdcsmd_wy0;
 
+// CumalentMaker:
 // Main TPC particles do not participate in G Mix  calc. for the 1st Har. sel2
 // for sel 1, C{3} is ( har1(all) + har1(all) + har2(all) )
 //           differential v1{3} is ( har1(all) + har1(all) + har2(all) ) 
@@ -42,11 +43,11 @@ Double_t  StFlowEvent::mZDCSMDCenterwy = Flow::zdcsmd_wy0;
 //
 // Please note that for the mixed har analysis, only the 1st har. make sense anyway.
 
-Float_t  StFlowEvent::mV1TPCDetctWgtG_Mix[Flow::nSels] = {1., 0.};
+Float_t  StFlowEvent::mV1TPCDetctWgtG_Mix[Flow::nSels]      ={1., 0.};
 Float_t  StFlowEvent::mV1FtpcWestDetctWgtG_Mix[Flow::nSels] ={1., 1.};
 Float_t  StFlowEvent::mV1FtpcEastDetctWgtG_Mix[Flow::nSels] ={1., 1.};
 
-Float_t  StFlowEvent::mV2TPCDetctWgtG_Mix[Flow::nSels] = {1., 1.};
+Float_t  StFlowEvent::mV2TPCDetctWgtG_Mix[Flow::nSels]      ={1., 1.};
 Float_t  StFlowEvent::mV2FtpcWestDetctWgtG_Mix[Flow::nSels] ={1., 0.};
 Float_t  StFlowEvent::mV2FtpcEastDetctWgtG_Mix[Flow::nSels] ={1., 0.};
 
@@ -67,10 +68,10 @@ Float_t  StFlowEvent::mPtTpcCuts[2][2][Flow::nSels] =  {{{0.15,0.15},
 							 {0.15,0.15} },
 							{{2.,2.},
 							 {2.,2.} }};
-Float_t  StFlowEvent::mPtFtpcCuts[2][2][Flow::nSels] =  {{{0.15,0.15},
-							  {0.15,0.15} },
-							 {{2.,2.},
-							  {2.,2.} }};
+Float_t  StFlowEvent::mPtFtpcCuts[2][2][Flow::nSels] = {{{0.15,0.15},
+						         {0.15,0.15} },
+						        {{2.,2.},
+						         {2.,2.} }};
 
 Float_t StFlowEvent::mPiPlusCuts[2]        = {-3., 3.};
 Float_t StFlowEvent::mPiMinusCuts[2]       = {-3., 3.};
@@ -190,16 +191,28 @@ Double_t StFlowEvent::Weight(Int_t selN, Int_t harN, StFlowTrack*
   bool oddHar = (harN+1) % 2;
   Double_t wgt = 1.;
   wgt *= PtAbsWgtValue(pFlowTrack->Pt());
-
   float eta = pFlowTrack->Eta();
-  if (oddHar) {
-    wgt *= ( (eta>0) ? (EtaAbsWgtValue(eta)) :  (-1.*EtaAbsWgtValue(eta)) );
-  }
+  wgt *= EtaAbsWgtValue(eta);
+  if (oddHar && eta < 0.) { wgt *= -1. ; }
 
   return wgt;
 }
 
 //-------------------------------------------------------------
+
+Double_t StFlowEvent::PtAbsWgtValue(Double_t pt) const {
+
+  return  ((mPtWgt) ? ((pt < mPtWgtSaturation) ? pt : mPtWgtSaturation) : 1.);
+}
+
+//-------------------------------------------------------------
+
+Double_t StFlowEvent::EtaAbsWgtValue(Double_t eta) const {
+
+ return  ((mEtaWgt) ? ((fabs(eta)<0.005) ? 0.005 : fabs(eta)) : 1.); 
+}
+
+//-----------------------------------------------------------------------
 
 Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN, StFlowTrack*
 				pFlowTrack) const {
@@ -215,7 +228,7 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN, StFlowTrack*
 //-------------------------------------------------------------
 
 Double_t StFlowEvent::ZDCSMD_PsiWgtEast() {
-  //get psi weight for east ZDCSMD
+  // Get psi weight for east ZDCSMD
 
   TH1F *mZDCSMD_PsiWgt = new TH1F("ZDCSMD_PsiWgt","ZDCSMD_PsiWgt",
 				  Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
@@ -228,7 +241,7 @@ Double_t StFlowEvent::ZDCSMD_PsiWgtEast() {
 //-------------------------------------------------------------
 
 Double_t StFlowEvent::ZDCSMD_PsiWgtWest() {
-  //get psi weight for west ZDCSMD
+  // Get psi weight for west ZDCSMD
 
   TH1F *mZDCSMD_PsiWgt = new TH1F("ZDCSMD_PsiWgt","ZDCSMD_PsiWgt",
 				  Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
@@ -309,7 +322,7 @@ Float_t StFlowEvent::MeanPt(StFlowSelection* pFlowSelect) {
 TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
   // Event plane vector
  
-  TVector2 mQ;
+  TVector2 mQ, reCent;
   Double_t mQx=0., mQy=0.;
 
   if (mUseZDCSMD) { // pFlowSelect is disabled; only 1st order Q generated
@@ -331,8 +344,8 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
       eXsum/eXWgt - wXsum/wXWgt:0.;
     mQy= (eXWgt>0. && wXWgt>0. && eYWgt>0. && wYWgt>0.) ? 
       eYsum/eYWgt - wYsum/wYWgt:0.;
-  } //if
-  else {
+  }//ZDCSMD
+  else { // ana
     int    selN  = pFlowSelect->Sel();
     int    harN  = pFlowSelect->Har();
     double order = (double)(harN + 1);
@@ -344,19 +357,22 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
       if (pFlowSelect->Select(pFlowTrack)) {
 	double phiWgt = PhiWeight(selN, harN, pFlowTrack);
 	float phi = pFlowTrack->Phi();
-	mQx += phiWgt * cos(order * phi);
-	mQy += phiWgt * sin(order * phi);
+	reCent = ReCentEP(selN, harN, pFlowTrack);
+	mQx += (phiWgt * cos(order * phi) - reCent.X());
+	mQy += (phiWgt * sin(order * phi) - reCent.Y());
       }
     }
-  } //else
+  }//ana
   
   mQ.Set(mQx, mQy);
+
   return mQ;
 }
 
 //-------------------------------------------------------------
 
 TVector2 StFlowEvent::ReCentPar(StFlowSelection* pFlowSelect, char* TPC) {
+  // For LYZ
   // Calculate weighted recentering vector per particle for each TPC
   // TPC can be "TPC", "TPCE", or "TPCW"
   // for all particles that could be correlated with the event plane
@@ -396,8 +412,50 @@ TVector2 StFlowEvent::ReCentPar(StFlowSelection* pFlowSelect, char* TPC) {
 
 //-------------------------------------------------------------
 
+TVector2 StFlowEvent::ReCentEPPar(StFlowSelection* pFlowSelect, char* TPC) {
+  // For ana
+  // Calculate the recentering vector per particle for each TPC
+  // TPC can be "TPCE", "TPCW", "FTPCE", or "FTPCW"
+  // for particles that are used for the event plane
+
+  TVector2 mQ;
+  Double_t mult=0., mQx=0., mQy=0.;
+
+  int    selN  = pFlowSelect->Sel();
+  int    harN  = pFlowSelect->Har();
+  double order = (double)(harN + 1);
+  StTrackTopologyMap map;
+  
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->Select(pFlowTrack)) {
+      map = pFlowTrack->TopologyMap();
+      float eta = pFlowTrack->Eta();
+      if ((!strcmp(TPC,"FTPCE") && map.trackFtpcEast()) ||
+	  (!strcmp(TPC,"FTPCW") && map.trackFtpcWest()) ||
+	  (!strcmp(TPC,"TPCE") && eta < 0. && map.hasHitInDetector(kTpcId)) ||
+	  (!strcmp(TPC,"TPCW") && eta > 0. && map.hasHitInDetector(kTpcId)) ) {
+	float phi = pFlowTrack->Phi();
+	double phiWgt = PhiWeight(selN, harN, pFlowTrack);
+	mQx += phiWgt * cos(order * phi);
+	mQy += phiWgt * sin(order * phi);
+	mult++;
+      }
+    }
+  }
+
+  if (mult) { mQ.Set(mQx/mult, mQy/mult); }
+  else { mQ.Set(0.,0.); }
+
+  return mQ;
+}
+
+//-------------------------------------------------------------
+
 TVector2 StFlowEvent::ReCent(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const {
-  // Get TVector2 for recentering.
+  // Get TVector2 for recentering in LYZ makers.
 
   TVector2 reCent;
   Double_t reCentX, reCentY;
@@ -423,8 +481,41 @@ TVector2 StFlowEvent::ReCent(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) co
 
 //-------------------------------------------------------------
 
+TVector2 StFlowEvent::ReCentEP(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const {
+  // Get TVector2 for recentering in ana makers.
+
+  TVector2 reCent;
+  Double_t reCentX, reCentY;
+  StTrackTopologyMap map = pFlowTrack->TopologyMap();
+  
+  if (map.hasHitInDetector(kTpcId)) {
+    float eta = pFlowTrack->Eta();
+    if (eta > 0.) { // TPCW
+      reCentX = mReCentX[selN][harN][3];
+      reCentY = mReCentY[selN][harN][3];
+    } else { // TPCE
+      reCentX = mReCentX[selN][harN][2];
+      reCentY = mReCentY[selN][harN][2];
+    }
+  } else if (map.trackFtpcEast()) { // FTPCE
+    reCentX = mReCentX[selN][harN][0];
+    reCentY = mReCentY[selN][harN][0];
+  } else if (map.trackFtpcWest()) { // FTPCW
+    reCentX = mReCentX[selN][harN][1];
+    reCentY = mReCentY[selN][harN][1];
+  } else {
+    reCentX = 0.;
+    reCentY = 0.;
+  }
+
+  reCent.Set(reCentX, reCentY);
+  return reCent;
+}
+
+//-------------------------------------------------------------
+
 TVector2 StFlowEvent::QPart(StFlowSelection* pFlowSelect) {
-  // Event plane vector for LeeYangZeros method for all particles that could be correlated with the event plane
+  // Event plane vector for LYZ method for all particles that could be correlated with the event plane
  
   TVector2 reCent, mQ;
   Double_t mQx=0., mQy=0.;
@@ -454,8 +545,9 @@ TVector2 StFlowEvent::QPart(StFlowSelection* pFlowSelect) {
 
 TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) { 
   // Return normalized Q = Q / ::sqrt(sum of weights**2)
+  // Where is this used?
 
-  TVector2 mQ;
+  TVector2 mQ, reCent;
   Double_t mQx=0., mQy=0.;
   int selN     = pFlowSelect->Sel();
   int harN     = pFlowSelect->Har();
@@ -473,8 +565,9 @@ TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) {
       SumOfWeightSqr += phiWgt*phiWgt;
 
       float phi = pFlowTrack->Phi();
-      mQx += phiWgt * cos(order * phi);
-      mQy += phiWgt * sin(order * phi);
+      reCent = ReCent(selN, harN, pFlowTrack);
+      mQx += phiWgt * (cos(order * phi) - reCent.X());
+      mQy += phiWgt * (sin(order * phi) - reCent.Y());
     }
   }
   
@@ -490,7 +583,7 @@ TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) {
 Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) { 
   // Magnitude of normalized Q vector without pt or eta weighting
 
-  TVector2 mQ;
+  TVector2 mQ, reCent;
   Double_t mQx=0., mQy=0.;
   int selN     = pFlowSelect->Sel();
   int harN     = pFlowSelect->Har();
@@ -508,8 +601,9 @@ Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
       SumOfWeightSqr += phiWgt*phiWgt;
 
       float phi = pFlowTrack->Phi();
-      mQx += phiWgt * cos(order * phi);
-      mQy += phiWgt * sin(order * phi);
+      reCent = ReCent(selN, harN, pFlowTrack);
+      mQx += phiWgt * (cos(order * phi) - reCent.X());
+      mQy += phiWgt * (sin(order * phi) - reCent.Y());
     }
   }
   
@@ -762,7 +856,7 @@ Float_t StFlowEvent::ZDCSMD_PsiWst() {
 //-----------------------------------------------------------------------
 
 Float_t StFlowEvent::ZDCSMD_GetPosition(int eastwest,int verthori,int strip) {
-  //get position of each slat;strip starts from 1
+  // Get position of each slat;strip starts from 1
 
   Float_t zdcsmd_x[7] = {0.5,2,3.5,5,6.5,8,9.5};
   Float_t zdcsmd_y[8] = {1.25,3.25,5.25,7.25,9.25,11.25,13.25,15.25};
@@ -875,20 +969,6 @@ Double_t StFlowEvent::G_Mix(StFlowSelection* pFlowSelect, Double_t Z1x, Double_t
 }
 
 //-------------------------------------------------------------
-Double_t StFlowEvent::PtAbsWgtValue(Double_t pt) const {
-
-  return  ((mPtWgt) ? ((pt < mPtWgtSaturation) ? pt : mPtWgtSaturation) : 1.);
-}
-
-//-------------------------------------------------------------
-
-Double_t StFlowEvent::EtaAbsWgtValue(Double_t eta) const {
-
- return  ((mEtaWgt) ? ((fabs(eta)<0.005) ? 0.005 : fabs(eta)) : 1.); 
-}
-
-//-----------------------------------------------------------------------
-
 void StFlowEvent::SetSelections() {
   // for particles used for the event plane
 
@@ -922,7 +1002,6 @@ void StFlowEvent::SetSelections() {
       if (mDcaGlobalTpcCuts[1] > mDcaGlobalTpcCuts[0] &&
 	  (gDca < mDcaGlobalTpcCuts[0] || gDca >= mDcaGlobalTpcCuts[1])) continue;
     }
-
     else if (map.trackFtpcEast() || map.trackFtpcWest()) {
       // Ftpc track
       
@@ -947,8 +1026,7 @@ void StFlowEvent::SetSelections() {
 	    if (mPtTpcCuts[1][harN%2][selN] > mPtTpcCuts[0][harN%2][selN] && 
 		(Pt < mPtTpcCuts[0][harN%2][selN] ||
 		 Pt >= mPtTpcCuts[1][harN%2][selN])) continue;
-	  }
-	  
+	  }	  
 	  else if (map.trackFtpcEast() || map.trackFtpcWest()) {
 	    // Ftpc track
 	    
@@ -957,8 +1035,7 @@ void StFlowEvent::SetSelections() {
 	      if (mEtaFtpcCuts[1][harN%2][selN] > mEtaFtpcCuts[0][harN%2][selN] && 
 		  (eta < mEtaFtpcCuts[0][harN%2][selN] || 
 		   eta >= mEtaFtpcCuts[1][harN%2][selN])) continue;
-	    }
-	    
+	    }	    
 	    else { // eta > 0.
 	      if (mEtaFtpcCuts[3][harN%2][selN] > mEtaFtpcCuts[2][harN%2][selN] && 
 		  (eta < mEtaFtpcCuts[2][harN%2][selN] || 
@@ -1338,6 +1415,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.62  2009/11/24 19:23:01  posk
+// Added reCenter option to remove acceptance correlations instead of phiWgt.
+//
 // Revision 1.61  2009/08/04 23:00:28  posk
 // Reads year 7 MuDsts.
 //
