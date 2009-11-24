@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.209 2009/11/19 18:24:15 perev Exp $
+* $Id: geometry.g,v 1.210 2009/11/24 23:49:28 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.210  2009/11/24 23:49:28  jwebb
+* Changed to the TPCE04 model of the TPC in y2006h.  This is the current best
+* geometry of the TPC.  TPCE04 is present in tags from y2005 to present.
+*
 * Revision 1.209  2009/11/19 18:24:15  perev
 * y2009a and inherited from it y2010
 *
@@ -1253,7 +1257,10 @@ replace [exe y2006g;] with ["Y2006C new SVT dead material"
 * at any time.
 *
 replace [exe y2006h;] with ["y2006g + new BEMC, new EEMC";
-        exe y2006g; exe CALB02; exe ECALv6;
+        exe y2006g;   "Y2006h modifies Y2006g geometry"; 
+        exe TPCe04;   "Latest model of the TPC, with additional mass";  
+        exe CALB02;   "Latest model of the BEMC, with additional volumes";
+        exe ECALv6;   "Latest model of the EEMC, with additional volumes and bug fixes";
         ]
 
 !//______________________________________________________________________________
