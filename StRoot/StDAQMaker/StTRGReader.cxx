@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.cxx,v 1.10 2009/11/02 21:42:52 fine Exp $
+ * $Id: StTRGReader.cxx,v 1.11 2009/11/25 20:50:08 fisyak Exp $
  *
  * Author: Herbert Ward, Dec 28 1999, 13:10 EST.
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.cxx,v $
+ * Revision 1.11  2009/11/25 20:50:08  fisyak
+ * Fix the broken logic for the DAQ file with NO trigger data
+ *
  * Revision 1.10  2009/11/02 21:42:52  fine
  * allow the Akio DAT file to be read in 1999-2008 format
  *
@@ -81,7 +84,8 @@ int StTRGReader::close() {
 }
 //_____________________________________________________________________________
 char StTRGReader::thereIsTriggerData() {
-  if(fTRGImpReader || OldFormat(fDAQReader->getDatFileReader()->Version()) ) return 7; // TRUE
+  if(fTRGImpReader ||  
+  ( fDAQReader->getDatFileReader() && OldFormat(fDAQReader->getDatFileReader()->Version()) )) return 7; // TRUE
   return 0;                   // FALSE
 }
 //_____________________________________________________________________________
