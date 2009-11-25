@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.22 2007/01/15 07:49:22 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.23 2009/11/25 19:50:15 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.23  2009/11/25 19:50:15  jcs
+// remove all references to StFtpcSoftwareMonitor
+//
 // Revision 1.22  2007/01/15 07:49:22  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -79,7 +82,6 @@
 #include "StDAQMaker/StFTPCReader.h"
 #include "StFtpcParamReader.hh"
 #include "StFtpcDbReader.hh"
-#include "StFtpcSoftwareMonitor.h"
 #include "TH1.h"
 #include "TH2.h"
 
@@ -99,7 +101,6 @@ class StFtpcClusterFinder
   StFTPCReader *mReader; 
   StFtpcParamReader *mParam;
   StFtpcDbReader *mDb;
-  StFtpcSoftwareMonitor *mFtpcMon;
   TH1F *mHistoW;
   TH1F *mHistoE;
   TH2F *mHisto;
@@ -144,7 +145,6 @@ class StFtpcClusterFinder
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
                       StFtpcDbReader    *dbReader,
-		      StFtpcSoftwareMonitor *ftpcMon,
 		      TObjArray *pointarray,
 		      TH2F *hpad,
 		      TH2F *htime,
@@ -155,7 +155,6 @@ class StFtpcClusterFinder
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
                       StFtpcDbReader    *dbReader,
-		      StFtpcSoftwareMonitor *ftpcMon,
 		      TObjArray *pointarray,
 		      TH2F *hpad,
 		      TH2F *htime,

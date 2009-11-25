@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.76 2009/11/14 12:51:08 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.77 2009/11/25 19:50:15 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.77  2009/11/25 19:50:15  jcs
+// remove all references to StFtpcSoftwareMonitor
+//
 // Revision 1.76  2009/11/14 12:51:08  jcs
 // added suggested parentheses to avoid warnings which appeared with system upgrade
 //
@@ -257,7 +260,6 @@
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
                                          StFtpcDbReader *dbReader,
-					 StFtpcSoftwareMonitor *ftpcMon,
 					 TObjArray *pointarray,
 					 TH2F *hpad,
 					 TH2F *htime,
@@ -269,7 +271,6 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
-  mFtpcMon = ftpcMon;
   mPoint = pointarray;
   mHisto=histo;
   mHistoW=histoW;
@@ -315,7 +316,6 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
                                          StFtpcDbReader *dbReader,
-					 StFtpcSoftwareMonitor *ftpcMon,
 					 TObjArray *pointarray,
 					 TH2F *hpad,
 					 TH2F *htime,
@@ -328,7 +328,6 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
-  mFtpcMon = ftpcMon;
   mPoint = pointarray;
   mHisto=histo;
   mHistoW=histoW;
@@ -924,12 +923,10 @@ if (mcldebug){
     } // end of: for(iRow...)
 
   if (iftpc == 0 ) {
-  	  if (mFtpcMon) mFtpcMon->n_clus_ftpc[1] = clusters;
 	  westHits = mPoint->GetEntriesFast();
 	  LOG_INFO << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " << westHits << " hits in Ftpc West." << endm;
   }	  
   if (iftpc == 1 ) {
-	  if (mFtpcMon) mFtpcMon->n_clus_ftpc[0] = clusters;
 	  eastHits = mPoint->GetEntriesFast() - westHits;
 	  LOG_INFO << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  eastHits << " hits in Ftpc East." << endm;
   }

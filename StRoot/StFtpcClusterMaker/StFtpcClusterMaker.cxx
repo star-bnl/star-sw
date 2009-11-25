@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.103  2009/11/25 19:50:16  jcs
+// remove all references to StFtpcSoftwareMonitor
+//
 // Revision 1.102  2009/11/18 12:10:02  jcs
 // add USE_LOCAL_DRIFTMAP instructions
 //
@@ -377,10 +380,6 @@ extern "C" void gufld(float *, float *);
 #include "StFtpcHitCollection.h"
 #include "StDetectorState.h"
 
-#include "StSoftwareMonitor.h"
-#include "StFtpcSoftwareMonitor.h"
-
-
 ClassImp(StFtpcClusterMaker)
 
   //_____________________________________________________________________________
@@ -633,15 +632,6 @@ Int_t StFtpcClusterMaker::Make()
     }
   } else mFtpcHitColl = 0;
 
-  StFtpcSoftwareMonitor* ftpcMon = NULL;
-  if (mCurrentEvent->softwareMonitor()) {
-     ftpcMon = mCurrentEvent->softwareMonitor()->ftpc();
-     if (!ftpcMon){
-	ftpcMon = new StFtpcSoftwareMonitor();
-        mCurrentEvent->softwareMonitor()->setFtpcSoftwareMonitor(ftpcMon);
-     }
-  }      
-
   // create parameter reader
   StFtpcParamReader paramReader(m_clusterpars,m_fastsimgas,m_fastsimpars);
 
@@ -846,7 +836,6 @@ Int_t StFtpcClusterMaker::Make()
        StFtpcClusterFinder fcl(                        ftpcReader, 
 						       &paramReader, 
                                                        &dbReader,
-						       ftpcMon,
 						       mHitArray,
 						       m_hitsvspad,
 						       m_hitsvstime,
@@ -863,7 +852,6 @@ Int_t StFtpcClusterMaker::Make()
           StFtpcClusterFinder fcl(          ftpcReader, 
 	 				    &paramReader, 
                                             &dbReader,
-					    ftpcMon,
 					    mHitArray,
 					    m_hitsvspad,
 					    m_hitsvstime,

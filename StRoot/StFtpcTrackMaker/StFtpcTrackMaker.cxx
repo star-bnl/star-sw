@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.91 2009/11/24 11:54:01 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.92 2009/11/25 19:50:21 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.92  2009/11/25 19:50:21  jcs
+// remove all references to StFtpcSoftwareMonitor
+//
 // Revision 1.91  2009/11/24 11:54:01  jcs
 // Remove dst_vertex_st code commented out by Yuri
 //
@@ -368,8 +371,6 @@
 
 #include "TDataSet.h"
 #include "TDataSetIter.h"
-#include "StSoftwareMonitor.h"
-#include "StFtpcSoftwareMonitor.h"
 
 #include "StVertexId.h"
 #include "StFtpcHit.h"
@@ -675,17 +676,6 @@ Int_t StFtpcTrackMaker::Make()
     }
   }
 
-  StFtpcSoftwareMonitor* ftpcMon = NULL;
-  if (event->softwareMonitor()) {
-     ftpcMon = event->softwareMonitor()->ftpc();
-     if (!ftpcMon){
-       ftpcMon = new StFtpcSoftwareMonitor();
-       event->softwareMonitor()->setFtpcSoftwareMonitor(ftpcMon);
-     }      
-  }       	       
-
-  if (ftpcMon) FillMonSoftFtpc(event,&tracker,ftpcMon);
-
   // write global tracks, do primary fit, write primary tracks
   StFtpcTrackToStEvent trackToStEvent;
   trackToStEvent.FillEvent(event, tracker.GetTracks());  
@@ -901,62 +891,6 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 
 
 //_____________________________________________________________________________
-void StFtpcTrackMaker::FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker, StFtpcSoftwareMonitor *ftpcMon) {
-
-  // This is a copy of the stuff formerly done in St_dst_Maker/StFtpcGobalMaker.
-  // Make sure that this function is only called for global tracks.
-
-  Int_t iftpc;
-
-
-  // Loop over all tracks
-  for (Int_t itrk=0; itrk<tracker->GetTracks()->GetEntriesFast(); itrk++) {
-
-    StFtpcTrack* track = (StFtpcTrack*)tracker->GetTracks()->At(itrk);
-    StFtpcPoint* firstPoint =  (StFtpcPoint*)track->GetHits()->First();
-    
-    iftpc = (firstPoint->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and 1 for detId == 4
-
-   ftpcMon->n_trk_ftpc[iftpc]++;
-
-    Int_t nFitPoints = track->GetHits()->GetEntriesFast();
-    ftpcMon->res_pad_ftpc[iftpc] += track->GetChiSq()[0] / (nFitPoints - 3);
-    ftpcMon->res_drf_ftpc[iftpc] += track->GetChiSq()[1] / (nFitPoints - 2);
-
-    ftpcMon->avg_trkL_ftpc[iftpc] += track->GetTrackLength();
-  }
-
-  // Loop over all hits
-  for (Int_t iPoint=0; iPoint<tracker->GetClusters()->GetEntriesFast(); iPoint++) {
-    
-    StFtpcPoint *hit = (StFtpcPoint*)tracker->GetClusters()->At(iPoint);
- 
-    iftpc = (hit->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and 1 for detId == 4
-    
-    if (hit->GetUsage() == kTRUE) ftpcMon->hit_frac_ftpc[iftpc]++;
-    ftpcMon->n_pts_ftpc[iftpc]++;
-    ftpcMon->chrg_ftpc_tot[iftpc] += hit->GetCharge();
-  }
-
-  // Compute StFtpcSoftwareMonitor averages if tracks are found
-  for (iftpc=0; iftpc<2; iftpc++) {
-    
-    if (ftpcMon->n_pts_ftpc[iftpc] != 0) {
-      ftpcMon->hit_frac_ftpc[iftpc] = ftpcMon->hit_frac_ftpc[iftpc]/ftpcMon->n_pts_ftpc[iftpc];
-    }	       
-    
-    if (ftpcMon->n_trk_ftpc[iftpc] != 0) {
-      ftpcMon->avg_trkL_ftpc[iftpc] = ftpcMon->avg_trkL_ftpc[iftpc]/ftpcMon->n_trk_ftpc[iftpc];
-      ftpcMon->res_pad_ftpc[iftpc]  = ftpcMon->res_pad_ftpc[iftpc]/ftpcMon->n_trk_ftpc[iftpc];
-      ftpcMon->res_drf_ftpc[iftpc]  = ftpcMon->res_drf_ftpc[iftpc]/ftpcMon->n_trk_ftpc[iftpc];
-    }
-  }       
-
-  return;
-}
-
-
-//_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Finish()
 {
   // final cleanup
@@ -983,7 +917,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.91 2009/11/24 11:54:01 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.92 2009/11/25 19:50:21 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
