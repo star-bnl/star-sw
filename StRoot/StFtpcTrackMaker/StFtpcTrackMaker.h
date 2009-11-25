@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.23 2008/01/07 14:45:06 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.24 2009/11/25 19:50:21 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.24  2009/11/25 19:50:21  jcs
+// remove all references to StFtpcSoftwareMonitor
+//
 // Revision 1.23  2008/01/07 14:45:06  jcs
 // create and fill the special set of Ftpc track histograms used to evaluate
 // the Ftpc gain scan runs when the bfc option fgain is in the chain
@@ -97,7 +100,6 @@
 
 #include "StMaker.h"
 #include "StFtpcTracker.hh"
-#include "StFtpcSoftwareMonitor.h"
 
 class TH1F;
 class TH2F;
@@ -156,10 +158,9 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.23 2008/01/07 14:45:06 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.24 2009/11/25 19:50:21 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
-	   void   FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker,StFtpcSoftwareMonitor *ftpcMon);  // fills StEvent->StSoftwareMonitor->StFtpcSoftwareMonitor
 
 
    ClassDef(StFtpcTrackMaker,0)   //StAF chain virtual base class for Makers
