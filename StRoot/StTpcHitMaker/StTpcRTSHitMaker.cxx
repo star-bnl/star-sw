@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.10 2009/11/23 23:02:59 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.11 2009/11/25 21:34:04 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -43,7 +43,7 @@
 ClassImp(StTpcRTSHitMaker); 
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
-  SafeDelete(m_Rts_Reader);
+  SafeDelete(fTpx);
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::Init() {
@@ -55,22 +55,10 @@ Int_t StTpcRTSHitMaker::Init() {
 }
 //________________________________________________________________________________
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
-  SafeDelete(m_Rts_Reader);
-#ifndef NEW_DAQ_READER
-  rtsLogOutput(RTS_LOG_STDERR);
-  rtsLogLevel(WARN);
-#endif
-  m_Rts_Reader = new daqReader("r_sim");
-  daqReader &r = *m_Rts_Reader;
-#ifndef NEW_DAQ_READER
-  r.enable("*");
-#else
-  daq_tpx *tpx = new daq_tpx(m_Rts_Reader) ; 
-  //?  tpx.enable("tpx");
-  //  LOG_FATAL << " new reader has no r.enable(\"*\"); method " << endm;
-#endif  
+  SafeDelete(fTpx);
+  fTpx = new daq_tpx() ; 
   // do gains example; one loads them from database but I don't know how...
-  daq_dta *dta  = r.det("tpx")->put("gain");
+  daq_dta *dta  = fTpx->put("gain");
   for(Int_t sector=1;sector<=24;sector++) {
     for(Int_t row=1;row<=45;row++) {
       daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
@@ -98,12 +86,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
     been previously loaded as shown in the example above they
     will be set to 1.0!
   */
-#ifndef NEW_DAQ_READER
-  r.InitRun(runnumber);
-#else
   //  LOG_FATAL << " new reader has no r.InitRun(runnumber); method. Ask Tonko. " << endm;
-  tpx->InitRun(runnumber);
-#endif  
+  fTpx->InitRun(runnumber);
   return kStOK;
 }
 //________________________________________________________________________________
@@ -126,7 +110,6 @@ Int_t StTpcRTSHitMaker::Make() {
     LOG_WARN << "There is not Tpc Raw Data" << endm;
     return kStWarn;
   }
-  daqReader &r = *m_Rts_Reader;
   // create (or reuse) the adc_sim bank...
   // add a bunch of adc data for a specific sector:row:pad
   Int_t minSector = IAttr("minSector");
@@ -147,7 +130,7 @@ Int_t StTpcRTSHitMaker::Make() {
 			  (Double_t) St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       if (! Npads) continue;
-      daq_dta *dta = r.det("tpx")->put("adc_sim"); // used for any kind of data; transparent pointer
+      daq_dta *dta = fTpx->put("adc_sim"); // used for any kind of data; transparent pointer
       Int_t nup = 0;
       for(Int_t pad = 1; pad <= Npads; pad++) {
 	UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
@@ -175,7 +158,7 @@ Int_t StTpcRTSHitMaker::Make() {
       if (! NoAdcs) continue;
       if (Debug() > 1) {
 	// verify data!
-	dta = r.det("tpx")->get("adc_sim");
+	dta = fTpx->get("adc_sim");
 	while(dta && dta->iterate()) {
 	  LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
 	  for(UInt_t i=0;i<dta->ncontent;i++) {
@@ -192,8 +175,8 @@ Int_t StTpcRTSHitMaker::Make() {
       static StTpcLocalSectorCoordinate local;
       static StTpcLocalCoordinate global;
       static StThreeVectorF hard_coded_errors;
-      //      r.det("tpx")->put("cld_sim");       // clean up clusters
-      dta = r.det("tpx")->get("cld_sim"); // rerun the cluster finder on the simulated data...
+      //      fTpx->put("cld_sim");       // clean up clusters
+      dta = fTpx->get("cld_sim"); // rerun the cluster finder on the simulated data...
       
       while(dta && dta->iterate()) {
 	if (Debug() > 1) {
@@ -256,7 +239,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	if (! ntimebins) continue;
 	digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
 	// Update pixels if any
-	dta = r.det("tpx")->get("adc_sim",sec);
+	dta = fTpx->get("adc_sim",sec);
 	Int_t Updated = 0;
 	while(dta && dta->iterate()) {
 	  Int_t secC  = dta->sec;

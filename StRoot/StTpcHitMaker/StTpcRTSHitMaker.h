@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.4 2009/11/10 21:05:08 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.5 2009/11/25 21:34:04 fisyak Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.5  2009/11/25 21:34:04  fisyak
+ * replace daqReader by daq_tpx
+ *
  * Revision 1.4  2009/11/10 21:05:08  fisyak
  * Add attributes for sector and pad  row selections
  *
@@ -33,16 +36,17 @@
 class StTpcDigitalSector;
 
 #include "StDAQMaker/StRtsReaderMaker.h"
+class daq_tpx;
 class StTpcRTSHitMaker : public StMaker {
  public:
-  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), m_Rts_Reader(0) {}
+  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0) {}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
   Int_t               InitRun(Int_t runumber);
   Int_t               Make();
  private:
-  daqReader *m_Rts_Reader; //!
+  daq_tpx *fTpx; //!
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
