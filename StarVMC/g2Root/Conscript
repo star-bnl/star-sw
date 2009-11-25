@@ -11,41 +11,55 @@ my $PKG  = $pkg . $env->{SUFEXE};
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
 my @h_files = script::find_hfiles($Dir);
-my $FC = $env->{FC};
-my $FCPATH = $env->{FCPATH};
-my $FFLAGS = $env->{FFLAGS};
+
+my $FC       = $env->{FC};
+my $FCPATH   = $env->{FCPATH};
+my $FFLAGS   = $env->{FFLAGS};
 my $FPPFLAGS = $env->{FPPFLAGS};
 my $CPPFLAGS = $env->{CPPFLAGS};
-my $FLIBS = $env->{FLIBS};
-my $PGI = $env->{ENV}->{PGI};
-my $PGILIBS = "";
-my $CLIBS = $env->{CLIBS};
-print "build $pkg with cons\n";
-my $FC        = $env->{FC};
-my $FEXTEND   = $env->{FEXTEND};
-my $LD        = $env->{LD}; #!
-my $LDFLAGS   = $env->{LDFLAGS};
-my $CERNLIBS  = $env->{CERNLIBS};
+my $FLIBS    = $env->{FLIBS};
+my $PGI      = $env->{ENV}->{PGI};
+my $PGILIBS  = "";
+my $CLIBS    = $env->{CLIBS};
+
+my $FC       = $env->{FC};
+my $FEXTEND  = $env->{FEXTEND};
+my $LD       = $env->{LD};
+my $LDFLAGS  = $env->{F77LDFLAGS};
+my $CERNLIBS = $env->{CERNLIBS};
+
 
 if ($FC eq 'pgf77') { 
-#  $CERNLIBS = `cernlib kernlib`;
-#  chomp($CERNLIBS);
-  $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
+  $FC       = $env->{G77}; 
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
+  print "set FC => $FC ==============================\n" if $param::debug;
 }
-my $LD        = $env->{LD}; #!
-#if ($LD eq 'g++') {
-#  $LD = "gcc";
-#}
-if ($LD eq $env->{CC} or $LD eq $env->{CXX}) {$LD = $FC;}
-$LDFLAGS = "-lstdc++";
+
+# Get ld def
+my $LD        = $env->{LD}; 
+if ($LD eq $env->{CC} or $LD eq $env->{CXX}) {
+    $LD = $FC;
+}
+$LDFLAGS .= " -lstdc++";
+
+print "build $pkg with cons LDFLAGS now = $LDFLAGS\n";
+
+
+
 #if ($LD eq 'gcc') {$LDFLAGS = "-Wl,-Bstatic";}
 my $Libraries = $CERNLIBS .  " " . $FLIBS . " " . $CLIBS;
+
+#if ($FC eq 'g77' || $FC eq 'gfortran') { 
+#  if ($env->{CXX_VERSION} == 3) {$Libraries .= " -lfrtbegin";}
+#  $Libraries .= " " . $env->{LIBG2C};
+#}
+
 if ($FC eq 'g77' || $FC eq 'gfortran') { 
-  if ($env->{CXX_VERSION} == 3) {$Libraries .= " -lfrtbegin";}
-  $Libraries .= " " . $env->{LIBG2C};
+    $Libraries .= " ".$env->{FLIBS};
 }
+
+
 #if ($FC eq 'ifort') { 
 #  my $LIBIFCPATH    = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
 #  $Libraries .= " " . $LIBIFCPATH . "/for_main.o"; 
@@ -54,7 +68,7 @@ $env2 = $env->clone('FC'           => $FC,
 		    'LD'           => $LD,
 		    'LDFLAGS'      => $LDFLAGS,
 		    'FPPFLAGS'     => '',
-		    'FFLAGS'       => '',
+		    'FFLAGS'       => $FFLAGS,
 		    'FCPATH'       => '',
 		    'FEXTEND'      => "",
 		    'CPPFLAGS'     => $CPPFLAGS,
