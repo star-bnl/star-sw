@@ -43,8 +43,8 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.26 2009/11/03 22:38:53 fisyak Exp $";
-
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.27 2009/11/25 21:32:52 fisyak Exp $";
+//#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
 //                                    Inner        Outer
@@ -56,11 +56,13 @@ TF1*     StTpcRSMaker::fgTimeShape0[2]    = {0, 0};
 static const Int_t nx[2] = {200,500};
 static const Double_t xmin[2] =  {-10., -6};
 static const Double_t xmax[2] =  { 10., 44};
+#ifdef __ClusterProfile__
 static const Int_t nz = 42;
 static const Double_t zmin = -210;
 static const Double_t zmax = -zmin;
 //                      io pt
 static TProfile2D *hist[4][2];
+#endif
 //________________________________________________________________________________
 ClassImp(StTpcRSMaker);
 //________________________________________________________________________________
@@ -423,6 +425,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   numberOfElectronsPerADCcount = St_tss_tssparC::instance()->scale();
   
   if (Debug()) Print();
+#ifdef __ClusterProfile__
   memset (hist, 0, sizeof(hist));
   if (GetTFile()) {
     GetTFile()->cd();
@@ -454,7 +457,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
       }
     }
   }
-
+#endif
   return kStOK;
 }
 //________________________________________________________________________________
@@ -582,8 +585,12 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	transform(xyzA,xyzLocalSector);
 	static StTpcPadCoordinate Pad;
 	transform(xyzLocalSector,Pad,kTRUE,kFALSE); // use T0, don't use Tau
-	Double_t padH = Pad.pad();        Int_t pad0 = TMath::Nint(padH + xmin[0]);
-	Double_t tbkH = Pad.timeBucket(); Int_t tbk0 = TMath::Nint(tbkH + xmin[1]);
+#ifdef __ClusterProfile__
+	Double_t padH = Pad.pad();        
+	Double_t tbkH = Pad.timeBucket(); 
+        Int_t pad0 = TMath::Nint(padH + xmin[0]);
+	Int_t tbk0 = TMath::Nint(tbkH + xmin[1]);
+#endif
 	static StTpcLocalSectorAlignedDirection  dirA;
 	transform(dirL,dirA);
 	static StTpcLocalSectorDirection dirLocalSector;
@@ -656,8 +663,10 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	Double_t newPosition = s_low;
 	Double_t dESum = 0;
 	Double_t dSSum = 0;
+#ifdef __ClusterProfile__
 	Double_t padsdE[32]; memset (padsdE, 0, sizeof(padsdE));
 	Double_t tbksdE[64]; memset (tbksdE,  0, sizeof(tbksdE));
+#endif
 	Double_t dESumC = 0;
 	Double_t dSSumC = 0;
 	Double_t QAvC = 0;
@@ -814,11 +823,13 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		  //		  if (TMath::Abs(signal) < minSignal) continue; // Remember tail could be negative
 		  TotalSignal += signal;
 		  SignalSum[index].Sum += signal;
+#ifdef __ClusterProfile__
 		  if (pad >= pad0 && pad < pad0 + 32 && 
 		      itbin >= tbk0 &&  itbin < tbk0 + 64) {
 		    padsdE[pad-pad0]   += signal;
 		    tbksdE[itbin-tbk0] += signal;
 		  }
+#endif
 		  if ( TrackId ) {
 		    if (! SignalSum[index].TrackId ) SignalSum[index].TrackId = TrackId;
 		    else  // switch TrackId, works only for 2 tracks, more tracks ?
@@ -840,6 +851,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	tpc_hit->lgam = -99;
 	if (dESum > 0 && dSSum) {
 	  tpc_hit->de = dESum*eV; tpc_hit->ds = dSSum; tpc_hit->lgam = TotalSignal;
+#ifdef __ClusterProfile__
 	  if (hist[ioH][0]) {
 	    Double_t S = 0;
 	    Double_t pax = 0;
@@ -866,6 +878,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      for (Int_t t = 0; t < 64; t++) hist[ioH][1]->Fill((t+tbk0+0.5)-tbkH,xyzL.position().z(),tbksdE[t]/S);
 	    }
 	  }
+#endif
 	}
 	NoHitsInTheSector++;
       } while (0); // end do loop
@@ -1295,8 +1308,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
   return m_SignalSum;
 }
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.26 2009/11/03 22:38:53 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.27 2009/11/25 21:32:52 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.27  2009/11/25 21:32:52  fisyak
+// Comment out cluster profile histograms
+//
 // Revision 1.26  2009/11/03 22:38:53  fisyak
 // Freeze version rcf9108.J
 //

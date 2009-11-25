@@ -1,8 +1,7 @@
-macro material   ntrig=10000  rmin=0.  rmax=50.  emin=0.  emax=1.0
+macro material   ntrig=10000  rmin=0.  rmax=250.  emin=0.  emax=2.0
 macro/global/import *
 debug off
 gclos all
-opt grid
 Call HERMES(0)
 *       Particle Emin-max  EtaMin-max     PhiMin-max 
 gkine 1   48        10 10 [emin] [emax]    0  6.283  

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.52 2009/11/23 14:36:24 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.51 2009/11/17 17:14:52 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,9 +10,6 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
- * Revision 1.52  2009/11/23 14:36:24  dmitry
- * tiny fix: LB will now obey Logger commands
- *
  * Revision 1.51  2009/11/17 17:14:52  dmitry
  * enabled SSL + compression, if server supports it
  *
@@ -330,7 +327,9 @@ bool MysqlDb::reConnect(){
         if (num_fields >= 2) {                                                                                                                               
             row = mysql_fetch_row(result);                                                                                                                   
             if (row && row[0] && row[1]) {                                                                                                                   
-				LOG_INFO << row[0] << " = " << row[1] << endm; 
+                printf("%s = ", row[0] ? row[0] : "NULL");                                                                                                   
+                printf("%s ", row[1] ? row[1] : "NULL");                                                                                                     
+                printf("\n");                                                                                                                                
             }                                                                                                                                                
         } 
 	}
@@ -465,7 +464,7 @@ bool MysqlDb::loadBalance()
 
   stopTime = get_time_nanosec();
   totalTime = stopTime - startTime;
-  LOG_INFO << "MysqlDb::Connect: Load balancer took "<< totalTime <<" ms, will use "<< mdbhost << ":" << mdbPort << endm;
+  cout << "MysqlDb::Connect: Load balancer took "<< totalTime <<" ms, will use "<< mdbhost << ":" << mdbPort <<" \n";
 
 #endif
 
