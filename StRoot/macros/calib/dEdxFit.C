@@ -77,7 +77,7 @@ static const  Double_t peaks[5] = {0, //9.60848149761959647e-01,  // z pi
 				   4.22811868484973097e-01,  // e      - pi
 				   2.55316350542050152e+00}; // d      - pi
 /// <peak postion> at p = [0.45,0.50] GeV/c wrt pion
-struct peak_t {Double_t peak, sigma, mass; Char_t *Name;};
+struct peak_t {Double_t peak, sigma, mass; const Char_t *Name;};
 //                                mean         RMS
 #if 0 /* Ar */
 static const  peak_t Peaks[6] = {{0.      ,       0., 0.13956995}, // pion
@@ -196,8 +196,8 @@ void FitH(const Char_t *set="z", Int_t Hyp = -1, Int_t Bin=-1) {
   Int_t parstatus[NH];
   for (Int_t hyp = nh1; hyp<=nh2; hyp++) {
     Int_t kh = hyp%NH;
-    Char_t *HistN =  HistNames[hyp];
-    if (Set.Contains("70")) HistN = HistNames70[hyp];
+    Char_t *HistN                 = (Char_t *) HistNames[hyp];
+    if (Set.Contains("70")) HistN = (Char_t *) HistNames70[hyp];
     hists[hyp] = (TH2 *) fRootFile->Get(HistN);
     if (!hists[hyp]) {printf("Cannot histogram %s\n",HistNames[hyp]); continue;}
     histp[hyp] = (TProfile *) fRootFile->Get(HistNameP[hyp]);
@@ -261,7 +261,7 @@ void FitH(const Char_t *set="z", Int_t Hyp = -1, Int_t Bin=-1) {
 	  continue;
 	}
 	if (TMath::Abs(devZ[l]) < 0.01 || 
-	    hyp%NH == 3 && l == 4 && TMath::Abs(devZ[l]) < 0.04) {
+	    (hyp%NH == 3 && l == 4 && TMath::Abs(devZ[l]) < 0.04)) {
 	    printf("Fix %s dZ = %f\n", Names[NH*(hyp/NH)+l],devZ[l]);
 	    parstatus[l] = 1;
 	    continue;
@@ -618,7 +618,7 @@ TF1 *FitGF(TH1D *proj, Option_t *opt="") {
   TF1 *g2 = (TF1*) gROOT->GetFunction("GF");
   if (! g2) {
     g2 = new TF1("GF",gfFunc, -5, 5, 9);
-    g2->SetParName(0,"norm"); 
+    g2->SetParName(0,"norm"); g2->SetParLimits(0,-80,80);
     g2->SetParName(1,"mu");     //g2->SetParLimits(1,-1.5,1.5);
     g2->SetParName(2,"Sigma");  g2->SetParLimits(2,0.2,0.8);
     g2->SetParName(3,"P"); 
@@ -1241,6 +1241,7 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
     else {cout << "Failed to open " << NewRootFile << endl; return;}
     //  TString TupName(HistName);
     //  TupName += "FitP";
+#if 0
     if (TString(FitName) == "GF")
       FitP = new TNtuple("FitP","Fit results",
 			 "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:pi:P:K:e:d:a5:Npar:dpeak:dmu:dsigma:dpi:dP:dK:de:dd:da5");
@@ -1248,6 +1249,7 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
       FitP = new TNtuple("FitP","Fit results",
 			 "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:pi:P:K:e:d:dX:Npar:dpeak:dmu:dsigma:dpi:dP:dK:de:dd:ddX");
     else 
+#endif
       FitP = new TNtuple("FitP","Fit results",
 			 "i:j:x:y:mean:rms:peak:mu:sigma:entries:chisq:prob:a0:a1:a2:a3:a4:a5:Npar:dpeak:dmu:dsigma:da0:da1:da2:da3:da4:da5");
     FitP->SetMarkerStyle(20);
@@ -1331,9 +1333,9 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
       else if (TString(FitName) == "GB") {
 	//	Double_t dX = 1.372; // <dX> Inner
 	Double_t dX = 2.364; // <dX> Outer
-	if (nx == 48 && i > 0 && i <= 24 ||
-	    nx == 24 && j > 0 && j <= 13 ||
-	    nx == 45 && i > 0 && i <= 13) 
+	if ((nx == 48 && (i > 0 && i <= 24)) ||
+	    (nx == 24 && (j > 0 && j <= 13)) ||
+	    (nx == 45 && (i > 0 && i <= 13))) 
 	  dX = 1.372; 
 	g = FitGB(proj,opt,dX);
       }
@@ -1346,12 +1348,12 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
       Fit.peak = params[0];
       Fit.mu = params[1];
       Fit.sigma = TMath::Abs(params[2]);
-      Fit.a0  = params[3];
-      Fit.a1  = params[4];
-      Fit.a2  = params[5];
-      Fit.a3  = params[6];
-      Fit.a4  = params[7];
-      Fit.a5  = params[8];
+      Fit.a0  = params[3]; // FitGF "P"
+      Fit.a1  = params[4]; //       "K"
+      Fit.a2  = params[5]; //       "e"
+      Fit.a3  = params[6]; //       "d"
+      Fit.a4  = params[7]; //       "Total"
+      Fit.a5  = params[8]; //       "Case"
       Fit.dpeak  = g->GetParError(0);
       Fit.dmu    = g->GetParError(1);
       Fit.dsigma = g->GetParError(2);
@@ -1461,7 +1463,7 @@ void FitX(TH2 *hist=0, Double_t range=1, Int_t Ibin = 0) {
   TFile *fRootFile = (TFile *) gDirectory->GetFile();
   if (! fRootFile ) {printf("Cannot find/open %s",fRootFile->GetName()); return;}
   if (!hist) {
-    Char_t *HistName = "FPoints";
+    const Char_t *HistName = "FPoints";
     hist = (TH2D *) fRootFile->Get(HistName);
     if (!hist) {printf("Cannot histogram %s\n",HistName); return;}
   }
@@ -1990,7 +1992,7 @@ void Fit4G(Int_t ng=2, Int_t hyp=-1, Int_t bin=0,
 		Names[k],k,i,N,X[N],pionM,Nu[N],Mu[N],dMu[N],chisq,NFitPoints,NDF,prob);
 	//	if (bin < 0 && prob > 1.e-7 && TMath::Abs(Nu[N]) < 0.05) {
 	//	if ( bin >= 0 && prob > 1.e-7 && TMath::Abs(Nu[N]) < 0.10 || bin < 0) {
-	if ( bin >= 0 && TMath::Abs(Nu[N]) < 0.10 || bin < 0) {
+	if ( (bin >= 0 && TMath::Abs(Nu[N]) < 0.10) || bin < 0) {
 	  printf("{\"%-4s\",%2i,%4i,%6i,%6.3f,%7.3f,%10.6f,%10.6f,%8.5f,%10.3f},//%3i,%3i,%5.3f -- %s\n",
 		 Names[k],k,i,N,X[N],pionM,Nu[N],Mu[N],dMu[N],chisq,NFitPoints,NDF,prob,g->GetName());
 	  TString FileN("FitPars");
@@ -2706,7 +2708,7 @@ TH1 *FindHistograms(const Char_t *Name, const Char_t *fit = "") {
   TIter next(files);
   TFile *f = 0;
   TString Fit(fit);
-  if (fit != "") {
+  if (Fit != "") {
     while ((f = (TFile *) next())) {
 #ifdef DEBUG
       cout << "look in " << f->GetName() << endl;
@@ -2762,18 +2764,17 @@ void DrawSummary0(TFile *f, const Char_t *opt) {
     }
     hists.AddLast(hist);
     TString hName(hist->GetName());
-    if ( ( hist->IsA()->InheritsFrom( "TH3C" ) ||
-	   hist->IsA()->InheritsFrom( "TH3S" ) ||
-	   hist->IsA()->InheritsFrom( "TH3I" ) ||
-	   hist->IsA()->InheritsFrom( "TH3F" ) ||
+    if ((( hist->IsA()->InheritsFrom( "TH3C" )   ||
+	   hist->IsA()->InheritsFrom( "TH3S" ) 	 ||
+	   hist->IsA()->InheritsFrom( "TH3I" ) 	 ||
+	   hist->IsA()->InheritsFrom( "TH3F" ) 	 ||
 	   hist->IsA()->InheritsFrom( "TH3D" ) ) || 
-	 ( hist->IsA()->InheritsFrom( "TH2C" ) ||
-	   hist->IsA()->InheritsFrom( "TH2S" ) ||
-	   hist->IsA()->InheritsFrom( "TH2I" ) ||
-	   hist->IsA()->InheritsFrom( "TH2F" ) ||
-	   hist->IsA()->InheritsFrom( "TH2D" ) ) && 
-	 ! (hName.BeginsWith("Points") || hName.BeginsWith("TPoints") || hName.BeginsWith("MPoints")) 
-	 ) {
+	 ( hist->IsA()->InheritsFrom( "TH2C" )   ||
+	   hist->IsA()->InheritsFrom( "TH2S" ) 	 ||
+	   hist->IsA()->InheritsFrom( "TH2I" ) 	 ||
+	   hist->IsA()->InheritsFrom( "TH2F" ) 	 ||
+	   hist->IsA()->InheritsFrom( "TH2D" ) ))&& 
+	 ( ! (hName.BeginsWith("Points") || hName.BeginsWith("TPoints") || hName.BeginsWith("MPoints")) ) ) {
       TH1 *mu    = FindHistograms(key->GetName(),"mu");
       if (! mu) continue;
       mu->SetName(Form("%s_mu",hist->GetName()));
@@ -2895,7 +2896,7 @@ void DrawSummary0(TFile *f, const Char_t *opt) {
       ymax = -1e9;
       for (Int_t i = 1; i <= NbinsX; i++) {
 	Double_t y = hist->GetBinContent(i);
-	if (prof && prof->GetBinEntries(i) || y > 0) {
+	if ((prof && prof->GetBinEntries(i)) || y > 0) {
 	  Int_t x = i;
 	  xmin = TMath::Min(xmin,x);
 	  xmax = TMath::Max(xmax,x);
