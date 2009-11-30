@@ -1,4 +1,4 @@
-// $Id: Plot3Dtracks.C,v 1.3 2009/03/30 18:37:02 fine Exp $
+// $Id: Plot3Dtracks.C,v 1.4 2009/11/30 18:39:08 fine Exp $
 // Author: Valeri Fine, 26.03.2009 (fine@bnl.gov)
 
 void Plot3Dtracks_usage() 
@@ -14,9 +14,10 @@ void Plot3Dtracks_usage()
 void Plot3Dtracks(int eventNumber=22394, int trackId=425, const char *file="your_root_file"){
  // This example shows how to use Draw3D class to draw  the 
  // track if one knows the track "event number" and "track id".
-  if (!strcmp(file,"your_root_file")) { Plot3Dtracks_usage(); return;}
+ // if (!strcmp(file,"your_root_file")) { Plot3Dtracks_usage(); return;}
   gROOT->Macro("Load.C");
-  gROOT->LoadMacro("bfc.C");
+  gROOT->LoadMacro("bfc.C"); 
+  gSystem->Load("StDetectorDbMaker");
   bfc(0,"in,StEvent",file); 
   StEvent *event = 0;
   gEventDisplay->SetBkColor(kWhite);
