@@ -39,22 +39,27 @@ int StiStarVertexFinder::fit(StEvent * event)
 {
   cout <<"StiStarVertexFinder::fit(StEvent * event) -I- Started"<<endl;
 
-  
   // call the actual vertex finder method here...
   // assume the result is stored in StEvent...
   if (!mGVF) {  
     StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
-    mGVF = gvm->GetGenericFinder();
-    assert(mGVF);
+    if ( gvm ){
+      mGVF = gvm->GetGenericFinder();
+      assert(mGVF);
+    } else {
+      LOG_WARN << "Could not find a GenericVertex instance" << endm;
+    }
   }
-  clear();
   //AAR - modified
   // changed to fill primary vert only if fit returns true (okay)
-  int nVtx = mGVF->fit(event);
-  if(nVtx)
-  {
+  int nVtx=0;
+  if ( mGVF ){
+    clear(); // this calls mGVF->Clear() requiring knowing about GenericVertex 
+    nVtx = mGVF->fit(event);
+    if(nVtx){
       //vertex fit returns okay, so save
       mGVF->FillStEvent(event);
+    }
   }
   return nVtx;
 
@@ -67,8 +72,10 @@ int StiStarVertexFinder::fit(StEvent * event)
 //______________________________________________________________________________
 StiHit * StiStarVertexFinder::getVertex(int idx) 
 {
+  if (!mGVF) return 0;
   StPrimaryVertex *spv = mGVF->getVertex(idx);
-  if (!spv) return 0;
+  if (!spv) return  0;
+
   // Get an instance of StHit from the factory
   StiHit *vertex = getHitFactory()->getInstance();
   const StThreeVectorF& vp = spv->position();
