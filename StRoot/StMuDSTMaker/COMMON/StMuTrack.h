@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.33 2009/12/01 17:40:02 tone421 Exp $
+ * $Id: StMuTrack.h,v 1.34 2009/12/01 17:41:16 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -217,8 +217,8 @@ inline StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (St
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
- * Revision 1.33  2009/12/01 17:40:02  tone421
- * Added const to int vertexIndex() and StMuTrack* primaryTrack()
+ * Revision 1.34  2009/12/01 17:41:16  tone421
+ * *** empty log message ***
  *
  * Revision 1.31  2009/09/01 16:37:11  tone421
  * Fixed in a bug for setBTofPidTraits
