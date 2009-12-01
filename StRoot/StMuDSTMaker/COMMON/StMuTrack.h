@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.32 2009/12/01 03:42:54 tone421 Exp $
+ * $Id: StMuTrack.h,v 1.33 2009/12/01 17:40:02 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -61,9 +61,9 @@ class StMuTrack : public TObject {
     int index2Cov() const;
     int index2RichSpectra() const; ///< Returns index of associated rich spectra.
     int index2BTofHit() const; /// dongx
-    int vertexIndex(); ///< Returns index of associated primary vertex.
+    int vertexIndex() const; ///< Returns index of associated primary vertex.
     StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
-	StMuTrack* primaryTrack() ; ///< Returns pointer to associated primary track. Null pointer if no global track available.
+	const StMuTrack* primaryTrack() const; ///< Returns pointer to associated primary track. Null pointer if no global track available.
 	StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
     StMuBTofHit* tofHit() const;  /// dongx
     unsigned short nHits() const;     ///< Return total number of hits on track.
@@ -217,8 +217,8 @@ inline StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0) ? (St
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
- * Revision 1.32  2009/12/01 03:42:54  tone421
- * Fixed small bug in StMuDst::fixTrackIndices and StMuDst::fixTofTrackIndices(), added StMuTrack::primaryTrack() and ensured StMuTrack::vertexIndex() returns some sensible for globals.
+ * Revision 1.33  2009/12/01 17:40:02  tone421
+ * Added const to int vertexIndex() and StMuTrack* primaryTrack()
  *
  * Revision 1.31  2009/09/01 16:37:11  tone421
  * Fixed in a bug for setBTofPidTraits

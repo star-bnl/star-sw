@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.39 2009/12/01 03:42:54 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.40 2009/12/01 17:40:02 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -474,37 +474,41 @@ void StMuTrack::Print(Option_t *option) const {
 
 }
 
-StMuTrack* 	StMuTrack::primaryTrack(){
+const StMuTrack* StMuTrack::primaryTrack() const{
 
-	if(mType==1) return this;
+	const StMuTrack *prim = 0;
+	if(mType==1) return prim;
 
-	StMuTrack *prim = 0;
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0){
 		if(!(fabs(StMuDst::event()->primaryVertexPosition().x()) < 1.e-5 && fabs(StMuDst::event()->primaryVertexPosition().y()) < 1.e-5 && fabs(StMuDst::event()->primaryVertexPosition().z()) < 1.e-5)){   
 			for (int i=0;i<StMuDst::primaryTracks()->GetEntries();i++){
-				if(mId == StMuDst::primaryTracks(i)->id()) prim = StMuDst::primaryTracks(i);
+				if(mId == StMuDst::primaryTracks(i)->id()) return StMuDst::primaryTracks(i);
 			}
 //			cout<<"Return is "<<prim<<endl;
-			return prim;
 		}
-		else return 0;
+		else return prim;
 	}
 
 	Int_t Nvert = StMuDst::primaryVertices()->GetEntries();
-	if(!Nvert) return 0;
+	if(!Nvert) return prim;
 	Int_t curVer =  StMuDst::currentVertexIndex();
 	for(Int_t i=0;i<Nvert;i++){
 			StMuDst::setVertexIndex(i);
 			for(Int_t j=0;j<StMuDst::primaryTracks()->GetEntries();j++){
-				if(mId == StMuDst::primaryTracks(j)->id()) prim = StMuDst::primaryTracks (j);
+				if(mId == StMuDst::primaryTracks(j)->id()) {
+					StMuDst::setVertexIndex(curVer);
+					return StMuDst::primaryTracks(j);
+
+				}
+
 			}
 	}
 	StMuDst::setVertexIndex(curVer);
 	return prim;
 } 
 
-int StMuTrack::vertexIndex() {
+int StMuTrack::vertexIndex() const{
 
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0){
@@ -527,8 +531,8 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
- * Revision 1.39  2009/12/01 03:42:54  tone421
- * Fixed small bug in StMuDst::fixTrackIndices and StMuDst::fixTofTrackIndices(), added StMuTrack::primaryTrack() and ensured StMuTrack::vertexIndex() returns some sensible for globals.
+ * Revision 1.40  2009/12/01 17:40:02  tone421
+ * Added const to int vertexIndex() and StMuTrack* primaryTrack()
  *
  * Revision 1.38  2009/02/20 16:37:44  tone421
  * *** empty log message ***
