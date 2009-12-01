@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.46 2009/03/05 04:39:25 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.47 2009/12/01 03:42:54 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -188,7 +188,7 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   for (int i=0; i<nGlobals; i++) {
     StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
     if (g) {
-      globalIndex[g->id()] = i;
+      globalIndex[g->id()] = i+1;
       globalTracks(i)->setIndex2Global(i);
     }
   }
@@ -198,7 +198,7 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
     StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
     if (p) {
       if (globalIndex[p->id()]) 
-        p->setIndex2Global( globalIndex[ p->id() ] );
+        p->setIndex2Global( globalIndex[ p->id() ]-1 );
       else
         p->setIndex2Global(-1);
     }
@@ -235,17 +235,17 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
   for (int i=0; i<nBTofHits; i++) {
     StMuBTofHit *t = (StMuBTofHit*) btofHit->UncheckedAt(i);
     if (t) {
-      tofIndex[t->associatedTrackId()] = i;
+      tofIndex[t->associatedTrackId()] = i+1;  // starting from 1
     }
   }
 
   for (int i=0; i<nGlobals; i++) {
     StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
     if (g) {
-      globalIndex[g->id()] = i;
+      globalIndex[g->id()] = i+1;
 
       if(tofIndex[g->id()])
-        g->setIndex2BTofHit( tofIndex[g->id()] );
+        g->setIndex2BTofHit( tofIndex[g->id()]-1 );
       else
         g->setIndex2BTofHit(-1);
     }
@@ -253,10 +253,10 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
   for (int i=0; i<nPrimarys; i++) {
     StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
     if (p) {
-      primaryIndex[p->id()] = i;
+      primaryIndex[p->id()] = i+1;
 
       if(tofIndex[p->id()])
-        p->setIndex2BTofHit( tofIndex[p->id()] );
+        p->setIndex2BTofHit( tofIndex[p->id()]-1 );
       else
         p->setIndex2BTofHit(-1);
     }
@@ -267,12 +267,12 @@ void StMuDst::fixTofTrackIndices(TClonesArray* btofHit, TClonesArray* primary, T
     StMuBTofHit *t = (StMuBTofHit*) btofHit->UncheckedAt(i);
     if (t) {
       if(globalIndex[t->associatedTrackId()])
-        t->setIndex2Global( globalIndex[t->associatedTrackId()] );
+        t->setIndex2Global( globalIndex[t->associatedTrackId()]-1 );
       else
         t->setIndex2Global(-1);
 
       if(primaryIndex[t->associatedTrackId()])
-        t->setIndex2Primary( primaryIndex[t->associatedTrackId()] );
+        t->setIndex2Primary( primaryIndex[t->associatedTrackId()]-1 );
       else
         t->setIndex2Primary(-1);
     }
@@ -626,6 +626,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.47  2009/12/01 03:42:54  tone421
+ * Fixed small bug in StMuDst::fixTrackIndices and StMuDst::fixTofTrackIndices(), added StMuTrack::primaryTrack() and ensured StMuTrack::vertexIndex() returns some sensible for globals.
+ *
  * Revision 1.46  2009/03/05 04:39:25  tone421
  * Added safety check for btofcoll->setHeader(new StBTofHeader(*(btofHeader()))) on line 456
  *
