@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.41 2009/12/01 17:41:16 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.42 2009/12/01 21:56:35 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -24,6 +24,10 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "THelixTrack.h"
 #include "TMath.h"
+namespace {
+	const StThreeVectorF gDummy(-999,-999,-999);
+}
+
 StuProbabilityPidAlgorithm* StMuTrack::mProbabilityPidAlgorithm=0;
 double StMuTrack::mProbabilityPidCentrality=0;
  
@@ -317,10 +321,10 @@ StThreeVectorF StMuTrack::dca(Int_t vtx_id) const {
   if (vtx_id==mVertexIndex)
     return mDCA;
   else if (mVertexIndex == -1)  // should not happen
-    return StThreeVectorF(-999,-999,-999);
+	return gDummy;
     if(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))) 
 		return dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
-	else return StThreeVectorF(-999,-999,-999);
+	else return gDummy;
 }
 
 StThreeVectorF StMuTrack::dcaGlobal(Int_t vtx_id) const {
@@ -330,41 +334,43 @@ StThreeVectorF StMuTrack::dcaGlobal(Int_t vtx_id) const {
     return mDCAGlobal;
   }
   else if (mVertexIndex == -1)  { // should not happen
-    return StThreeVectorF(-999,-999,-999);
+    return gDummy;
   }
-	const StMuTrack *gTrack = 0;
-  if (mType == global)
-     gTrack = this;
-  else
-     gTrack = globalTrack();
+
+	const StMuTrack *gTrack = (mType == global) ? this : globalTrack();
+
 	if (gTrack && ((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))){
 		return gTrack->dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
 	}
 	else {
-    return StThreeVectorF(-999,-999,-999);
+    return gDummy;
   }
 }
 
-StThreeVectorF StMuTrack::dca(const StThreeVectorF pos) const {
-  StPhysicalHelixD helix(this->helix());
-  double pathlength = helix.pathLength(pos, false); // do not scan periods
-  return helix.at(pathlength)-pos;
+StThreeVectorF StMuTrack::dca(const StThreeVectorF &pos) const {
+  const StPhysicalHelixD &hlx = helix();
+  double pathlength = hlx.pathLength(pos, false); // do not scan periods
+  return hlx.at(pathlength)-pos;
 }
 
-StThreeVectorD StMuTrack::dca(const StTrack* track, const StVertex *vertex) {
+StThreeVectorD StMuTrack::dca(const StTrack* track, const StVertex *vertex) const{
   double pathlength = track->geometry()->helix().pathLength( vertex->position(), false ); // do not scan periods
   return track->geometry()->helix().at(pathlength)-vertex->position();
 }
 
-StThreeVectorD StMuTrack::momentumAtPrimaryVertex(const StEvent* event, const StTrack* track, const StVertex *vertex) {
+StThreeVectorD StMuTrack::momentumAtPrimaryVertex(const StEvent* event, const StTrack* track, const StVertex *vertex) const{
   double pathlength = track->geometry()->helix().pathLength( vertex->position() );
   return track->geometry()->helix().momentumAt(pathlength,event->runInfo()->magneticField()*kilogauss);
 }
 
 StPhysicalHelixD StMuTrack::helix() const 
 {
-  return StPhysicalHelixD(mHelix.p(),mHelix.origin(), mHelix.b()*kilogauss, mHelix.q());}  
-StPhysicalHelixD StMuTrack::outerHelix() const {return StPhysicalHelixD(mOuterHelix.p(),mOuterHelix.origin(), mOuterHelix.b()*kilogauss, mOuterHelix.q());}  
+  return StPhysicalHelixD(mHelix.p(),mHelix.origin(), mHelix.b()*kilogauss, mHelix.q());
+}
+  
+StPhysicalHelixD StMuTrack::outerHelix() const {
+  return StPhysicalHelixD(mOuterHelix.p(),mOuterHelix.origin(), mOuterHelix.b()*kilogauss, mOuterHelix.q());
+}  
 
 double StMuTrack::length() const { 
   return fabs( helix().pathLength(StThreeVectorD(mLastPoint)) ); }
@@ -474,7 +480,7 @@ void StMuTrack::Print(Option_t *option) const {
 
 }
 
-const StMuTrack* StMuTrack::primaryTrack() const{
+const StMuTrack*	StMuTrack::primaryTrack() const {
 
 	if(mType==1) return this;
 	const StMuTrack *prim = 0;
@@ -508,7 +514,7 @@ const StMuTrack* StMuTrack::primaryTrack() const{
 	return prim;
 } 
 
-int StMuTrack::vertexIndex() const{
+int StMuTrack::vertexIndex() const {
 
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0){
@@ -531,8 +537,8 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
- * Revision 1.41  2009/12/01 17:41:16  tone421
- * *** empty log message ***
+ * Revision 1.42  2009/12/01 21:56:35  tone421
+ * Implemented changes as per http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1734
  *
  * Revision 1.38  2009/02/20 16:37:44  tone421
  * *** empty log message ***
