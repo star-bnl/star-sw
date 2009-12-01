@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.40 2009/12/01 17:40:02 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.41 2009/12/01 17:41:16 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -476,8 +476,8 @@ void StMuTrack::Print(Option_t *option) const {
 
 const StMuTrack* StMuTrack::primaryTrack() const{
 
+	if(mType==1) return this;
 	const StMuTrack *prim = 0;
-	if(mType==1) return prim;
 
 	//For old MuDsts where there was one vertex per event
 	if (StMuDst::numberOfPrimaryVertices()==0){
@@ -531,8 +531,8 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
- * Revision 1.40  2009/12/01 17:40:02  tone421
- * Added const to int vertexIndex() and StMuTrack* primaryTrack()
+ * Revision 1.41  2009/12/01 17:41:16  tone421
+ * *** empty log message ***
  *
  * Revision 1.38  2009/02/20 16:37:44  tone421
  * *** empty log message ***
