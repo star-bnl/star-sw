@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.12 2009/12/01 19:21:23 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.13 2009/12/01 22:31:19 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -124,8 +124,17 @@ TObject *StuDraw3DMuEvent::Track(const StMuTrack &track, Color_t col,Style_t sty
 //___________________________________________________
 TObject *StuDraw3DMuEvent::Track(const StMuTrack &track, EDraw3DStyle sty)
 {
+   TObject *view = 0;
    const StDraw3DStyle &style =  Style(sty);
-   return Track(track, style.Col(),style.Sty(),style.Siz() );
+   const StMuTrack *thisTrack = 0;
+   if (sty == kPrimaryTrack) 
+       thisTrack = track.primaryTrack();
+   else
+      thisTrack = track.globalTrack();
+   if (thisTrack) 
+       view = Track(*thisTrack, style.Col(),style.Sty(),style.Siz() );
+   return view;
+
 }
 
 //! Add  the \a in  point of the given \a track to the display list with the \a col color, \a sty style, and \a siz size if provided
