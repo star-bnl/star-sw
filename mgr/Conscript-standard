@@ -147,7 +147,7 @@ my $RTS_READER_PATH =  $main::PATH_SEPARATOR . "#StRoot/RTS/src"
 if (!$OnlinePackage) { $OnlinePackage=grep(m/$pkg/,@VF_daq_pkgs); }
 
 if ($OnlinePackage) {
-    $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . $CPPPATH;
+    $CPPPATH = $RTS_READER_PATH . $main::PATH_SEPARATOR . "#OnlTools" . $main::PATH_SEPARATOR . $CPPPATH;
 }
 if ( $pkg eq "OnlinePlots") {
     $CPPPATH  .=  $main::PATH_SEPARATOR . "#OnlTools/OnlinePlots/Infrastructure" 
