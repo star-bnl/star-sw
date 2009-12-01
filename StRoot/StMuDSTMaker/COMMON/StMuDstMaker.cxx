@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.93 2009/05/22 23:48:18 fine Exp $
+ * $Id: StMuDstMaker.cxx,v 1.94 2009/12/01 21:56:35 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -105,15 +105,16 @@ ClassImp(StMuDstMaker)
 StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
   mIOMaker(0), mTreeMaker(0),
-  mIoMode(1), mIoNameMode((int)ioTreeMaker), mEventList(0), mVtxList(100),
+  mIoMode(1), mIoNameMode((int)ioTreeMaker), mEventList(0),
   mTrackType(256), mReadTracks(1),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mTrackFilter(0), mL3TrackFilter(0),
   mCurrentFile(0),
   mChain (0), mTTree(0),
-  mSplit(99), mCompression(9), mBufferSize(65536*4),
+  mSplit(99), mCompression(9), mBufferSize(65536*4), mVtxList(100),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
   mPmdCollectionArray(0), mPmdCollection(0)
+
 {
   assignArrays();
 
@@ -1382,6 +1383,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.94  2009/12/01 21:56:35  tone421
+ * Implemented changes as per http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1734
+ *
  * Revision 1.93  2009/05/22 23:48:18  fine
  * Test I/O errors after filling the TTree
  *

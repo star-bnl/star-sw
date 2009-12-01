@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuHelix.h,v 1.7 2009/07/07 19:37:54 perev Exp $
+ * $Id: StMuHelix.h,v 1.8 2009/12/01 21:56:35 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -23,7 +23,7 @@ using namespace units;
 class StMuHelix : public TObject {
  public:
   StMuHelix() { /* no-op */ }
-  StMuHelix(StPhysicalHelixD hh, double field);
+  StMuHelix(const StPhysicalHelixD &hh, double field);
   const StThreeVectorF &p() const;
   const StThreeVectorF &origin() const;
   short q() const;
@@ -51,6 +51,9 @@ inline float StMuHelix::b() const { return mB; }
 /***************************************************************************
  *
  * $Log: StMuHelix.h,v $
+ * Revision 1.8  2009/12/01 21:56:35  tone421
+ * Implemented changes as per http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1734
+ *
  * Revision 1.7  2009/07/07 19:37:54  perev
  * helix() method added
  *

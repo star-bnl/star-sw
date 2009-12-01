@@ -1,13 +1,13 @@
 /***************************************************************************
  *   
- * $Id: StMuHelix.cxx,v 1.4 2009/07/07 19:37:58 perev Exp $
+ * $Id: StMuHelix.cxx,v 1.5 2009/12/01 21:56:35 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
 
 #include "StMuHelix.h"
 
-StMuHelix::StMuHelix(StPhysicalHelixD hh, double field) {
+StMuHelix::StMuHelix(const StPhysicalHelixD &hh, double field) {
   mP = hh.momentum(field*kilogauss);
   mOrigin = hh.origin();
   mQ = hh.charge( field*kilogauss );
@@ -33,10 +33,14 @@ StPhysicalHelix  StMuHelix::helix() const
 {
    return StPhysicalHelix(mP,mOrigin,mB*kilogauss,mQ);
 }
+
 ClassImp(StMuHelix)
 /***************************************************************************
  *
  * $Log: StMuHelix.cxx,v $
+ * Revision 1.5  2009/12/01 21:56:35  tone421
+ * Implemented changes as per http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1734
+ *
  * Revision 1.4  2009/07/07 19:37:58  perev
  * helix() method added
  *
