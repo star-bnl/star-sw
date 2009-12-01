@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.11 2009/10/28 18:57:41 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.12 2009/12/01 19:21:23 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -71,7 +71,7 @@ void StuDraw3DMuEvent::Tracks(StTrackType type)
    TObjArray *primTracks = 0;
    if (type == global && ( globTracks= StMuDst::globalTracks() ) ){
       n_glob=StMuDst::GetNGlobalTrack();
-   } else if (primTracks = StMuDst::primaryTracks() ) {
+   } else if ( (primTracks = StMuDst::primaryTracks()) ) {
       n_prim=StMuDst::GetNPrimaryTrack();
    }
 
