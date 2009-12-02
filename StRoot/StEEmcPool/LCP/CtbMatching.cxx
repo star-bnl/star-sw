@@ -83,7 +83,7 @@ void CtbMatching::ctb_get_slat_from_data(int slat, int tray, double & ctbphi, do
 
 //________________________________________________
 //________________________________________________
-unsigned int CtbMatching::match(StMuTrack* rTrack) {
+unsigned int CtbMatching::match(const StMuTrack* rTrack) {
   
   // not used output from Jon
   bool  shouldHit;
@@ -106,7 +106,7 @@ unsigned int CtbMatching::match(StMuTrack* rTrack) {
     return false;
   }
   
-  StThreeVectorD pos = theHelix.at(pathLength.second);
+  const StThreeVectorD &pos = theHelix.at(pathLength.second);
   
   double phi = atan2(pos.y(),pos.x())*180/TMath::Pi();
   if(phi < 0)  phi+= 360;

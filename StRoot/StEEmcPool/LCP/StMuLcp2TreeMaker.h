@@ -1,4 +1,4 @@
-// $Id: StMuLcp2TreeMaker.h,v 1.4 2005/08/23 21:09:23 balewski Exp $
+// $Id: StMuLcp2TreeMaker.h,v 1.5 2009/12/02 16:35:58 fine Exp $
 
 #ifndef STAR_StMuLcp2TreeMaker
 #define STAR_StMuLcp2TreeMaker
@@ -53,8 +53,8 @@ class StMuLcp2TreeMaker : public StMaker {
   Int_t lcp_q,lcp_nFit;// charge, # of hits on track
  
   void clearLCP();
-  StMuTrack*  findLCP( float minPt,int minNFitP, float maxDCAxy, float maxEta,  float minFitPfrac) ;
-  void examinCut(StMuTrack* lcp0);
+  const StMuTrack*  findLCP( float minPt,int minNFitP, float maxDCAxy, float maxEta,  float minFitPfrac) ;
+  void examinCut(const StMuTrack* lcp0);
   // cuts on prim tracks
   int   C_minNFitPoint;
   float C_minFitPfrac; // fraction of fitPoints/possiblePoints
@@ -83,7 +83,7 @@ class StMuLcp2TreeMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuLcp2TreeMaker.h,v 1.4 2005/08/23 21:09:23 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuLcp2TreeMaker.h,v 1.5 2009/12/02 16:35:58 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -94,6 +94,9 @@ class StMuLcp2TreeMaker : public StMaker {
 
 
 // $Log: StMuLcp2TreeMaker.h,v $
+// Revision 1.5  2009/12/02 16:35:58  fine
+// Fix StMuTrack interface
+//
 // Revision 1.4  2005/08/23 21:09:23  balewski
 // fix to follow muDst evolution
 //
