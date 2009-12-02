@@ -117,7 +117,11 @@ daq_tpx::daq_tpx(daqReader *rts_caller)
 		fcf_algo[i] = 0 ;
 	}
 	fcf_tmp_storage = 0 ;
-	
+
+	fcf_afterburner_disable = 0 ;
+	fcf_run_compatibility = 9 ;		// FY09 default, for now...
+	fcf_do_cuts = 2 ;		// run09 default
+
 	LOG(DBG,"%s: constructor: caller %p",name, caller) ;
 	return ;
 }
@@ -1243,7 +1247,7 @@ daq_dta *daq_tpx::handle_cld(int sec, int rdo)
 	cld->rewind() ;	// wind data pointers to the beginning so that they can be used
 	
 	// and now run the afterburner if any found...
-	if(found_broken_edges) {
+	if(found_broken_edges && !fcf_afterburner_disable) {
 		// prepare afterburner
 		const int FCF_MAX_MERGED_COU = 128 ;
 
@@ -1362,7 +1366,8 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			LOG(NOTE,"No algo assigned for sector %d -- creating one!",sim->sec) ;
 			fcf_algo[sim->sec] = new tpxFCF ;
 			fcf_algo[sim->sec]->config(0x3F,1) ;	// assume all 6 RDOs; extra data + annotations
-			
+			fcf_algo[sim->sec]->run_compatibility = fcf_run_compatibility ;
+			fcf_algo[sim->sec]->do_cuts = fcf_do_cuts ;
 
 			fcf_algo[sim->sec]->apply_gains(sim->sec,gain_algo) ;
 			fcf_algo[sim->sec]->start_evt() ;
@@ -1400,6 +1405,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 
 	for(int s=min_sec;s<=max_sec;s++) {
 		if(fcf_algo[s]) {
+
 			int words = fcf_algo[s]->stage2(fcf_tmp_storage,FCF_TMP_BYTES) ;
 			if(words<=0) continue ;
 
@@ -1416,6 +1422,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 				u_int version = (row >> 16) ;
 				row &= 0xFFFF ;
 
+				
 				daq_sim_cld *cld = (daq_sim_cld *) cld_sim->request(cou) ;
 
 				while(cou) {
@@ -1428,7 +1435,6 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 
 				}
 			
-				
 				cld_sim->finalize(g_cou,s,row) ;
 			}			
 		}

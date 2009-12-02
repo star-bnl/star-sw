@@ -54,7 +54,8 @@ private:
 
 	class tpxStat *stat_algo ;
 
-	class tpxFCF *fcf_algo[25] ;
+
+
 	u_int *fcf_tmp_storage ;
 	
 	static const int FCF_TMP_BYTES = (128*1024) ;	// for local FCF
@@ -71,6 +72,13 @@ public:
 	~daq_tpx() ;
 
 	class tpxGain *gain_algo ;
+
+	char fcf_afterburner_disable ;
+	char fcf_run_compatibility ;
+	char fcf_do_cuts ;
+
+
+	class tpxFCF *fcf_algo[25] ;
 
 	int InitRun(int run_num) ;	// used in send_config
 	int FinishRun(int old_run) ;	// used in inject_token0
