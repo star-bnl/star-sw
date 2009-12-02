@@ -1,6 +1,7 @@
+
 // *-- Author : Jan Balewski
 // 
-// $Id: StMuLcp2TreeMaker.cxx,v 1.6 2005/10/11 17:28:30 balewski Exp $
+// $Id: StMuLcp2TreeMaker.cxx,v 1.7 2009/12/02 16:35:58 fine Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -199,7 +200,7 @@ Int_t StMuLcp2TreeMaker::Make(){
 
   // search for LCP  
   clearLCP();
-  StMuTrack* lcp= findLCP(C_minPt,C_minNFitPoint, C_maxDCAxy, C_maxEta,C_minFitPfrac);
+  const StMuTrack* lcp= findLCP(C_minPt,C_minNFitPoint, C_maxDCAxy, C_maxEta,C_minFitPfrac);
 
   // fill histo 1:1
   h[0]->Fill(bx7);
@@ -258,17 +259,17 @@ Int_t StMuLcp2TreeMaker::Make(){
 
 //________________________________________________
 //________________________________________________
-StMuTrack* StMuLcp2TreeMaker::findLCP( float XminPt,int XminNFitP , float XmaxDCAxy, float XmaxEta, float XminFitPfrac) {
+const StMuTrack* StMuLcp2TreeMaker::findLCP( float XminPt,int XminNFitP , float XmaxDCAxy, float XmaxEta, float XminFitPfrac) {
   
   eve_cosm=0;
-  StMuTrack* lp=0;  
+  const StMuTrack* lp=0;  
   int nTr=primTrA->GetEntries();
   int nTr0=0,nTr1=0; // counts valid prim TPC tracks
   int lpMatch=0;
   float maxPt=XminPt;// init pT  
   for (int i=0; i<nTr; i++) {
     TObject &oo=primTrA[i];
-    StMuTrack* pTr = (StMuTrack*)(&oo);// perhaps it works? JB
+    const StMuTrack* pTr = (StMuTrack*)(&oo);// perhaps it works? JB
     if(pTr->flag() <=0) continue;
     if(!pTr->topologyMap().trackTpcOnly()) continue;
     if(pTr->globalTrack()->nHitsFit()>15 ) nTr0++; // was just: nTr0++;
@@ -279,7 +280,7 @@ StMuTrack* StMuLcp2TreeMaker::findLCP( float XminPt,int XminNFitP , float XmaxDC
     if(dca.perp()>XmaxDCAxy) continue;
 
     // switch to oryginal glob-track, since vertex constrain biases pt 
-    StMuTrack* gTr=pTr->globalTrack();
+    const StMuTrack* gTr=pTr->globalTrack();
     assert(gTr);// every prim must have its global
         
     if ( gTr->nHitsFit() < XminNFitP) continue;
@@ -310,7 +311,7 @@ StMuTrack* StMuLcp2TreeMaker::findLCP( float XminPt,int XminNFitP , float XmaxDC
 
 //________________________________________________
 //________________________________________________
-void StMuLcp2TreeMaker::examinCut(StMuTrack*lcp0){
+void StMuLcp2TreeMaker::examinCut(const StMuTrack*lcp0){
 
   const float Pi=3.1416;
   
@@ -327,7 +328,7 @@ void StMuLcp2TreeMaker::examinCut(StMuTrack*lcp0){
   int i;
   for(i=1;i<=nb;i++) {// vary nFitP ......................
     float x=hc[0]->GetBinCenter(i);
-    StMuTrack* lcp1=0;
+    const StMuTrack* lcp1=0;
 
     // lcp1=findLCP(C_minPt,(int)x,C_maxDCAxy,C_maxEta,C_minFitPfrac);   // test nFitPoint
     //lcp1=findLCP(C_minPt,C_minNFitPoint,x,C_maxEta,C_minFitPfrac);       // test maxDCAxy
@@ -366,6 +367,9 @@ void StMuLcp2TreeMaker::examinCut(StMuTrack*lcp0){
 
 
 // $Log: StMuLcp2TreeMaker.cxx,v $
+// Revision 1.7  2009/12/02 16:35:58  fine
+// Fix StMuTrack interface
+//
 // Revision 1.6  2005/10/11 17:28:30  balewski
 // fix related L0trig code change
 //
