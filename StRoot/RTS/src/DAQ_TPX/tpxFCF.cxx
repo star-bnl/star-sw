@@ -31,7 +31,6 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 
 	if(likely(cou == 0)) return 0 ;	// most cases like this...
 
-//	printf("AFTER: %d\n",cou) ;
 
 	merged = 0 ;
 
@@ -52,6 +51,7 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 		
 			if(r->charge == 0) continue ;	// already merged!
 
+
 			if(r->p1==13) {	// right
 				if(l->p2 != 12) continue ;
 			}
@@ -64,6 +64,7 @@ int tpxFCF::afterburner(int cou, daq_cld *store[])
 			else if(r->p2==130) {
 				if(l->p1 != 131) continue ;
 			}
+
 
 
 			if((r->t1 >= l->t1) && (r->t1 <= l->t2)) ok = 1 ;
@@ -245,8 +246,10 @@ tpxFCF::tpxFCF()
 	gains = 0 ;
 	cl_marker = 0 ;
 
+	run_compatibility = 9 ;	// run 9
 	do_cuts = 2 ;	// 1 means always, 2 means don't cut edges (for i.e. pulser run), 0 means don't...
 	ch_min = 10 ;
+
 
 	memset(row_ix,0xFF,sizeof(row_ix)) ;
 	storage = 0 ;
@@ -404,7 +407,7 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 			u_int fl = 0 ;
 
 			if(!(s->f & 0x8000)) {	// not really here
-				//LOG(WARN,"Applying brohen edge to row:pad %d:%d",row,pad) ;
+				//LOG(WARN,"Applying broken edge to row:pad %d:%d",row,pad) ;
 				fl |= FCF_BROKEN_EDGE ;
 			}
 
@@ -423,7 +426,18 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 				}
 
 			}
-
+#if 0
+			if(row==8) {
+				switch(pad) {
+				case 12 :
+				case 13 :
+				case 130 :
+				case 131 :
+					fl |= FCF_BROKEN_EDGE ;
+					break ;
+				}
+			}
+#endif
 			// marks the first and last pad as "edge"
 			if((pad==1) || (pad==tpc_rowlen[row])) {
 				fl |= FCF_ROW_EDGE ;
@@ -474,6 +488,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 	if(unlikely(a->row > 45)) return 0 ;
 	if(unlikely(a->row == 0)) return 0 ;
+
 
 
 	s = get_stage1(a->row, a->pad) ;
@@ -620,6 +635,7 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 
 
 	s->count = cl - s->cl ;	// count of 1d clusters
+
 
 	if(unlikely( s->count == 0 )) {
 		//LOG(DBG,"No 1D clusters?") ;
@@ -776,12 +792,13 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 			cur_end = cur + cur1->count ;
 			old_end = old + old1->count ;
 			
+
 			while(old<old_end) {	// loop over old
 				int merge ;
 
 				merge = 0 ;
 				
-				
+
 				// loop over next, called "cur"
 				while(likely(cur<cur_end)) {
 
@@ -795,6 +812,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 					}
 
 					//LOG(DBG,"p %d: %d %d",p,old->t1,cur->t2) ;
+					
 
 					if(unlikely((old->t1 - cur->t2) >= 1)) {
 						// the old guy is left behind and thus
@@ -808,13 +826,6 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 					else if(unlikely((cur->t1 - old->t2) > 1)) {
 						// don't use the new guy ever again...
 
-						//if(cur->t1 < 15) {
-						//	cur->p2 = p+1 ;
-						//	cur->p1 = 200 ;
-						//	//LOG(INFO,"dump here %d:%d!",cur->t1,cur->t2) ;
-						//	dump(cur) ;
-						//}
-
 						cur++ ;
 						continue ;
 					}
@@ -827,7 +838,6 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 						// move to double and gain correct!
 						if(unlikely(cur->flags & FCF_IN_DOUBLE)) {
-
 
 						}
 						else {
@@ -843,13 +853,37 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 							cur->p_ave = (p+1) * cur->f_charge ;
 
 						}
-							
+						
+
+						// also correct the charge if the old guy is still no corrected -- first pad in a sequence
+						if(likely(old->flags & FCF_IN_DOUBLE)) {
+
+						}
+						else {
+							// correct charge here
+							old->flags |= FCF_IN_DOUBLE ;
+
+							old->f_charge = old->charge * old1->g ;
+							old->scharge = old->f_charge ;
+
+							old->f_t_ave = old->t_ave * old1->g ;
+							old->f_t_ave += old1->g * old1->t0 ;
+
+							old->t_min = old->t1 ;
+							old->t_max = old->t2 ;
+
+							old->p1 = p ;
+							old->p_ave = p * old->f_charge ;
+						}
+
+
+	
 						if(unlikely(old->flags & FCF_FALLING)) {
 							
-							if(old->flags & FCF_ONEPAD) {
+							if(unlikely(old->flags & FCF_ONEPAD)) {
 								LOG(ERR,"Can't be on a merge!") ;
 							}
-							if(!(old->flags & FCF_IN_DOUBLE)) {
+							if(unlikely(!(old->flags & FCF_IN_DOUBLE))) {
 								LOG(ERR,"Can't be on a merge!!!") ;
 							}
 
@@ -901,41 +935,19 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 
 						// sanity check: the new 1d-clusters can only be
 						// "fresh" i.e. 1pad wide...
-						if(!(cur->flags & FCF_ONEPAD)) {
+						if(unlikely(!(cur->flags & FCF_ONEPAD))) {
 							LOG(ERR,"Can;t be -- here I can have only ONEPADS!!") ;
 						}
-						if(!(cur->flags & FCF_IN_DOUBLE)) {
+						if(unlikely(!(cur->flags & FCF_IN_DOUBLE))) {
 							LOG(ERR,"Can't be -- I must be in double here!") ;
 
 						}						
-						// also correct the charge if the old pad
-						// is still 1pad wide...
-						if(old->flags & FCF_ONEPAD) {
-							if(old->flags & FCF_IN_DOUBLE) {
-								// this happens on a merge
-								//LOG(NOTE,"Corrected old pad %d:%d 0x%X",r,p,old->flags) ;
-							}
-							else {
-								// correct charge here
-								old->flags |= FCF_IN_DOUBLE ;
-								old->f_charge = old->charge * old1->g ;
-								old->scharge = old->f_charge ;
-								old->f_t_ave = old->t_ave * old1->g ;
-								old->f_t_ave += old1->g * old1->t0 ;
-
-								old->t_min = old->t1 ;
-								old->t_max = old->t2 ;
-
-								old->p1 = p ;
-								old->p_ave = p * old->f_charge ;
-							}
-						}
 
 						
 						cur->flags |= old->flags ;
 						cur->flags &= ~FCF_ONEPAD ;
 
-						if(modes) {	// merge annotated stuff
+						if(unlikely(modes)) {	// merge annotated stuff
 							double qua ;
 
 							if(cur->track_id == old->track_id) {
@@ -1009,12 +1021,12 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 						// will dump for onepad
 						old->p2 = p ;
 						old->p1 = 201 ;
-						dump(old) ;
+						dump(old,r) ;
 					}
 					else {
 						// dump OLD!
 						old->p2 = p  ;
-						dump(old) ;
+						dump(old,r) ;
 					}
 					
 					break ;
@@ -1040,7 +1052,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 		for(c=0;c<old1->count;c++) {	// loop over old
 
 			old->p2 = p ;
-			dump(old) ;
+			dump(old,r);
 
 			old++ ;
 		}
@@ -1062,7 +1074,7 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 }
 
 
-void tpxFCF::dump(tpxFCF_cl *cl)
+void tpxFCF::dump(tpxFCF_cl *cl, int row)
 {
 	u_int fla = cl->flags ;
 	u_int tmp_p, tmp_fl ;
@@ -1072,56 +1084,117 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 	u_int p1, p2 ;
 	int div_fact ;
 
+	
 
-	// first set of pre-cuts
-	if(likely(do_cuts)) {
-		if(unlikely(fla & FCF_BROKEN_EDGE)) ;	// pass hits on row 8 even when dead because of the afterburner!
-		else if((do_cuts == 1) && (fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE))) return ;	// kill clusters touching the edge or a dead pad
-	}
+	switch(run_compatibility) {
+	case 9 :	//FY09	// THIS WAS IN RUN09, right or wrong!
 
-
-	// next we will kill one pad wide clusters but not the ones close to the padplane (MWPC studies)!
-	if((fla & FCF_ONEPAD) && (cl->t1 < 15)) {	// for any hit below the trigger, we pass -- for MWPC studies!
-		if((cl->t2 - cl->t1)<=1) return ;	// I won't pass hits with less than 2 timebins
-		if(cl->t2 > 30) return ;		// too long, noise
-
-
-		//LOG(INFO,"dt %.1f: row %d: %d %d %d %d : %d %f 0x%X",dt,cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->charge,cl->f_charge,cl->flags) ;
-		return ;	// still
-	}
-	else if(likely(do_cuts)) {
-
-		if(fla & FCF_BROKEN_EDGE) {	// always pass!
-			;
+		// first set of pre-cuts
+		if(likely(do_cuts)) {
+			if(unlikely(fla & FCF_BROKEN_EDGE)) ;	// pass hits on row 8 even when dead because of the afterburner!
+			else if((do_cuts == 1) && (fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE))) return ;	// kill clusters touching the edge or a dead pad
 		}
-		else if(fla & FCF_ONEPAD) return ;
-		else if((cl->t_max - cl->t_min) <= 2) return ;	// kill if the cluster length in time is small
 
-	}
 
-	//now, I can have ONEPAD hits here:
-	//	1) because of the low timebin, MWPC studies
-	//	2) because of row 8 aka BROKEN_EDGE
+		// next we will kill one pad wide clusters but not the ones close to the padplane (MWPC studies)!
+		if((fla & FCF_ONEPAD) && (cl->t1 < 15)) {	// for any hit below the trigger, we pass -- for MWPC studies!
+			if((cl->t2 - cl->t1)<=1) return ;	// I won't pass hits with less than 2 timebins
+				if(cl->t2 > 30) return ;		// too long, noise
 
-	if(!(fla & FCF_IN_DOUBLE)) {	// the values were not turned to double
-		if(fla & FCF_ONEPAD) {	// this is the only valid case
-			cl->p1 = cl->p2 ;	// adjust the start pad...
 
-			// I don't have the gain corrections here yet (in FY09) so I use a 1.0!
-			cl->f_charge = (float)cl->charge * 1.0 ;
-			cl->p_ave = cl->p1 * cl->f_charge ;
-			cl->f_t_ave = (float)cl->t_ave * 1.0 ;
+				//LOG(INFO,"dt %.1f: row %d: %d %d %d %d : %d %f 0x%X",dt,cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->charge,cl->f_charge,cl->flags) ;
+				return ;	// still
+			}
+		else if(likely(do_cuts)) {
+
+			if(fla & FCF_BROKEN_EDGE) {	// always pass!
+				;
+			}
+			else if(fla & FCF_ONEPAD) return ;
+			else if((cl->t_max - cl->t_min) <= 2) return ;	// kill if the cluster length in time is small
+
 		}
-		else {
-			LOG(WARN,"WTF? not double: row %d: %d-%d, %d-%d (%d-%d): charge %d (%.3f): 0x%X",cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->t_min,cl->t_max,cl->charge,cl->f_charge,cl->flags) ;
+
+
+
+		//now, I can have ONEPAD hits here:
+		//	1) because of the low timebin, MWPC studies
+		//	2) because of row 8 aka BROKEN_EDGE
+
+		if(!(fla & FCF_IN_DOUBLE)) {	// the values were not turned to double
+			if(fla & FCF_ONEPAD) {	// this is the only valid case
+				cl->p1 = cl->p2 ;	// adjust the start pad...
+
+
+
+				// I don't have the gain corrections here yet (in FY09) so I use a 1.0!
+				cl->f_charge = (float)cl->charge * 1.0 ;
+				cl->p_ave = cl->p1 * cl->f_charge ;
+				cl->f_t_ave = (float)cl->t_ave * 1.0 ;
+
+			}
+			else {
+				LOG(WARN,"WTF? not double: row %d: %d-%d, %d-%d (%d-%d): charge %d (%.3f): 0x%X",cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->t_min,cl->t_max,cl->charge,cl->f_charge,cl->flags) ;
+				return ;
+			}
+		}
+
+		if(cl->f_charge < 1.0) {
+			if(!(fla & FCF_DEAD_EDGE)) LOG(WARN,"WTF? no charge: row %d: %d-%d, %d-%d (%d-%d): charge %d (%.3f): 0x%X",cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->t_min,cl->t_max,cl->charge,cl->f_charge,cl->flags) ;
 			return ;
 		}
+
+		break ;
+	default :
+		// run 10 ;
+		if(unlikely(fla & FCF_BROKEN_EDGE)) goto keep ;	// always keep
+
+		if(unlikely(do_cuts == 0)) goto keep ;	// obviously always keep
+
+		if(likely(do_cuts != 2)) {		// junk them unless do_cuts is 2
+			if(fla & (FCF_DEAD_EDGE | FCF_ROW_EDGE)) return ;	// never keep!
+		}
+
+		if(likely(fla & FCF_IN_DOUBLE)) {
+			if((cl->t_max - cl->t_min)<=2) return ;	// kill if TB width <= 3
+			if(cl->f_charge < 10.0) return ;	// kill small charge
+		}
+		else {
+			
+			if(likely(fla & FCF_ONEPAD)) ;
+			else {
+				LOG(WARN,"WTF? not onebad but not in double!?") ;
+			}
+
+			if((cl->t2 - cl->t1)<=2) return ;
+			if(cl->charge < 10) return ;
+
+			
+		}
+
+		keep:;
+
+		if(likely(fla & FCF_IN_DOUBLE)) ;
+		else {
+			struct stage1 *gain = get_stage1(row, cl->p2) ;
+
+			cl->p1 = cl->p2 ;
+
+			cl->f_charge = cl->charge * gain->g ;
+			// don't need scharge
+
+			cl->f_t_ave = cl->t_ave * gain->g ;
+			cl->f_t_ave += gain->g * gain->t0 ;
+
+			cl->p_ave = cl->p2 * cl->f_charge ;
+
+			cl->t_min = cl->t1 ;
+			cl->t_max = cl->t2 ;
+
+		}
+
 	}
 
-	if(cl->f_charge < 1.0) {
-		if(!(fla & FCF_DEAD_EDGE)) LOG(WARN,"WTF? no charge: row %d: %d-%d, %d-%d (%d-%d): charge %d (%.3f): 0x%X",cur_row,cl->p1,cl->p2,cl->t1,cl->t2,cl->t_min,cl->t_max,cl->charge,cl->f_charge,cl->flags) ;
-		return ;
-	}
 
 
 	int cha = (int) (cl->f_charge + 0.5) ;	// integerized version; 0.5 is for correct roundoff
@@ -1192,6 +1265,7 @@ void tpxFCF::dump(tpxFCF_cl *cl)
 
 
 	cur_row_clusters++ ;
+
 	
 	return ;
 }

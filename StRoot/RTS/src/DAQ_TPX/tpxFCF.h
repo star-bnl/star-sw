@@ -117,6 +117,8 @@ public:
 
 
 	char do_cuts ;
+	char run_compatibility ;
+
 	int ch_min ;
 
 	static int fcf_decode(u_int *p_buff, daq_cld *dc, u_short version=0) ;
@@ -124,7 +126,7 @@ public:
 	static int afterburner(int cou, daq_cld *store[]) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.7 2009/06/16 15:19:16 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.8 2009/12/02 22:14:56 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:
@@ -146,7 +148,7 @@ private:
 
 	struct stage1 *storage ;	// where I will allocate storage
 
-	void dump(tpxFCF_cl *cl) ;
+	void dump(tpxFCF_cl *cl, int row) ;
 
 	inline struct stage1 *get_stage1(int row, int pad)
 	{
