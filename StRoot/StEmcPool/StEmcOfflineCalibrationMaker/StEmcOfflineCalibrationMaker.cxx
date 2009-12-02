@@ -311,8 +311,8 @@ Int_t StEmcOfflineCalibrationMaker::Make()
  for(unsigned int vertex_index=0; vertex_index<myEvent->nVertices; vertex_index++){
     muDst->setVertexIndex(vertex_index);
     TObjArray* primaryTracks = muDst->primaryTracks();
-    StMuTrack* track;
-    StMuTrack* primarytrack;
+    const StMuTrack* track;
+    const StMuTrack* primarytrack;
     int nentries = muDst->numberOfPrimaryTracks();
     //cout<<nentries<<" tracks in vertex "<<vertex_index<<endl;
     assert(nentries==primaryTracks->GetEntries());
@@ -615,7 +615,7 @@ pair<float,float> StEmcOfflineCalibrationMaker::getTrackDetaDphi(float track_eta
 }
 */
 
-pair<unsigned short, pair<float,float> > StEmcOfflineCalibrationMaker::getTrackTower(StMuTrack* track, bool useExitRadius,int det){ //1=BTOW, 3=BSMDE, 4=BSMDP
+pair<unsigned short, pair<float,float> > StEmcOfflineCalibrationMaker::getTrackTower(const StMuTrack* track, bool useExitRadius,int det){ //1=BTOW, 3=BSMDE, 4=BSMDP
 	pair<unsigned short, pair<float,float> > tower;
 	tower.first = 0;
 	tower.second.first = 1000.;
