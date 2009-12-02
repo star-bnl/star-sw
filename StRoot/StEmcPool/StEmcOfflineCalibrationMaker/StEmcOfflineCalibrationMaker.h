@@ -66,7 +66,7 @@ private:
 	unsigned char mCapacitorSmd[2][18000];
 	
 	void getADCs(int det); //1==BTOW, 2==BPRS, 3=BSMDE, 4=BSMDP
-	pair<unsigned short, pair<float,float> > getTrackTower(StMuTrack* track, bool useExitRadius=false, int det=1);
+	pair<unsigned short, pair<float,float> > getTrackTower(const StMuTrack* track, bool useExitRadius=false, int det=1);
 	float getTrackDeltaR(float track_eta, float track_phi, int id);
 	pair<float, float> getTrackDetaDphi(float track_eta, float track_phi, int id, int det);
 	double highestNeighbor(int id);

@@ -167,7 +167,7 @@ void BarrelMipCalib::search(  JanBarrelEvent &fullEve){
 
     hA[0]->Fill(13);
     
-    StMuTrack* globTr= pr_track->globalTrack();
+    const StMuTrack* globTr= pr_track->globalTrack();
     
     assert(globTr);
     assert(globTr->flag()>0);
@@ -441,7 +441,7 @@ void BarrelMipCalib::searchEtaBin20(  JanBarrelEvent &fullEve){
 
     hA[0]->Fill(13);
     
-    StMuTrack* globTr= pr_track->globalTrack();
+    const StMuTrack* globTr= pr_track->globalTrack();
     
     assert(globTr);
     assert(globTr->flag()>0);
