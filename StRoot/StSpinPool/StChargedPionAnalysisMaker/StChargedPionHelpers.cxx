@@ -1,4 +1,4 @@
-// $Id: StChargedPionHelpers.cxx,v 1.4 2009/09/25 14:26:37 fine Exp $
+// $Id: StChargedPionHelpers.cxx,v 1.5 2009/12/02 21:17:31 fine Exp $
 
 #include "StChargedPionHelpers.h"
 
@@ -293,8 +293,8 @@ translateMuDst(StChargedPionBaseEv *ev) {
     for(unsigned int vertex_index=0; vertex_index<nVertices; vertex_index++){
         StMuDst::setVertexIndex(vertex_index);
         TObjArray* primaryTracks = StMuDst::primaryTracks();
-        StMuTrack* track;
-        StMuTrack* global;
+        const StMuTrack* track;
+        const StMuTrack* global;
         int nentries = StMuDst::numberOfPrimaryTracks();
         assert(nentries==primaryTracks->GetEntries());
         for(int i=0; i<nentries; i++){
@@ -364,6 +364,9 @@ translateTrack(const StMuTrack *mu, StChargedPionTrack *cp) {
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.cxx,v $
+ * Revision 1.5  2009/12/02 21:17:31  fine
+ * Fix StMuTrack interface
+ *
  * Revision 1.4  2009/09/25 14:26:37  fine
  * fix compilation error on SL5/64-bit machine
  *
