@@ -1,8 +1,0 @@
-#!/bin/bash
-
-export DATA_NAME='Pure MC pi0 simulation using 2003 geometry and BFC chain and MinBias timestamps, SMD crosstalk added'
-export DATA_TAG='dAu2003Simulation'
-export DATA_SUBTAG=$DATA_TAG'_pi0_MB_crosstalk005'
-export DATA_QUERY="file:$DATA_PATH/starsim_pi0_dAu2003/*.event.root"
-export DATA_CONFIG='config_simulation_dAu2003_MB_crosstalk005.C'
-export DATA_DIR=$DATA_PATH'/simu_dAu2003_pi0_MB_crosstalk005'

@@ -1,7 +1,0 @@
-#!/bin/bash
-
-export DATA_NAME='Real data pp2004 ppProduction dataset'
-export DATA_TAG='pp2004Production'
-export DATA_QUERY='catalog:'$CATALOG'?collision=pp200,production=P04ik,trgsetupname=productionPP,'$MYQUERY_general
-export DATA_CONFIG='config_pp2004.C'
-export DATA_DIR=$DATA_PATH'/data_pp2004'
