@@ -299,6 +299,15 @@ int checkBank(char *in, char *expect)
 	memcpy(buff,in,8) ;
 	buff[9] = 0 ;
 
+	/* SPECIAL HACK for i.e. 2000 DATA
+	In 2000 the DATAP bank was "DATAP" and not the usual "DATAP   "
+	
+
+	*/
+	if(strcmp(buff,"DATAP")==0) {
+		memcpy(buff,CHAR_DATAP,8) ;
+	}
+
 	if(memcmp(buff,expect,strlen(expect))) {
 		LOG(ERR,"Read \"%s\", expect \"%s\"",buff,expect) ;
 		return -1 ;
