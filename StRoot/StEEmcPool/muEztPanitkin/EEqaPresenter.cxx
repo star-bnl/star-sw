@@ -143,9 +143,9 @@ void eeJpQa(FileType fd, TPad *c0, EemcTwMask *m) { // out
   TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);  
   c->Draw();  c->cd();
   c->Divide(2,2);
-  Char_t *name1[]={"JPpedZoom","JPtotCor","JPtotFreq","JPpedHot"};
-  Char_t *name2[]={"JPpedZoom","JPsumTh3","JPtotFreq","xx"}; 
-  Char_t **name = (m == 0) ? name2 : name1; // dirty trick, JB
+  const Char_t *name1[]={"JPpedZoom","JPtotCor","JPtotFreq","JPpedHot"};
+  const Char_t *name2[]={"JPpedZoom","JPsumTh3","JPtotFreq","xx"}; 
+  const Char_t **name = (m == 0) ? name2 : name1; // dirty trick, JB
 
   TH1* H4jpHot = 0;
   for (int i = 0;i < 4;i++) {
@@ -200,10 +200,10 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
   static  TPad *c2 =0;
   static  TPad *c3 =0;
 
-  Char_t *nameT[]={"ETowHealth","ETowHeadCorr","ETowOFF","ETowN256","ETowOFFid","ETowGhost","ETowCorrBit"};
-  Char_t *nameE[]={"ESmdHealth","ESmdHeadCorr","ESmdOFF","ESmdN256","ESmdOFFid","ESmdGhost","ESmdCorrBit"};
+  const Char_t *nameT[]={"ETowHealth","ETowHeadCorr","ETowOFF","ETowN256","ETowOFFid","ETowGhost","ETowCorrBit"};
+  const Char_t *nameE[]={"ESmdHealth","ESmdHeadCorr","ESmdOFF","ESmdN256","ESmdOFFid","ESmdGhost","ESmdCorrBit"};
 
-  Char_t **name=nameT;
+  const Char_t **name=nameT;
   float y1=0.3;
   int n1=6;  
   if(es==2) {
@@ -259,7 +259,7 @@ void eeDaqCorr(FileType fd, TPad *c, int es) { // out
 
 //--------------------------------------
 void eeEmuVsSimu(FileType fd, TPad *c ) {
-   char *name[2]={"HighTowerTriggerCorruption","PatchSumTriggerCorruption"};
+   const Char_t *name[2]={"HighTowerTriggerCorruption","PatchSumTriggerCorruption"};
    c->Divide(1,2);
    for (int i = 0;i < 2;i++) {
      TH1 *h = GetHisto(fd, name[i]);
@@ -297,7 +297,7 @@ void eeDaqTwCr(FileType fd, TPad *c, EemcTwMask *m) {
 //--------------------------------------
 void eeFreq(FileType fd, TPad *c, EemcTwMask *m) {
   const int nh=4;
-  Char_t *name[nh]={"TowHits","Pre1Hits","Pre2Hits","PostHits"};
+  const Char_t *name[nh]={"TowHits","Pre1Hits","Pre2Hits","PostHits"};
   c->Divide(1,4);
   for (int i = 0;i < nh;i++) {
     TH1 *h = GetHisto(fd, name[i]);
@@ -317,7 +317,7 @@ void eeFreq(FileType fd, TPad *c, EemcTwMask *m) {
 //--------------------------------------
 void eeDaqTwHit(FileType fd, TPad *c) {
   const int nh=4;
-  Char_t *name[nh]={"HTow","HPre1","HPre2","HPost"};
+  const Char_t *name[nh]={"HTow","HPre1","HPre2","HPost"};
   c->Divide(2,2);
   for (int i = 0;i < nh;i++) {
     TH1 *h = GetHisto(fd, name[i]);
@@ -436,7 +436,7 @@ void eeDaqMapmtStat(FileType fd, TPad *c) {
 
 //--------------------------------------
 void eeTrigHanks(FileType fd, TPad *c ) {
-  Char_t *name[2]={"dsm0inJPall_HT","dsm0inJPall_TP"};
+  const Char_t *name[2]={"dsm0inJPall_HT","dsm0inJPall_TP"};
   c->Divide(1,2);
   for (int i = 0;i < 2;i++) {
     TH1 *h = GetHisto(fd, name[i]);
@@ -471,7 +471,7 @@ void eeTrigDsm0(FileType fd, TPad *c, const Char_t *mode ) {
 
 //--------------------------------------
 void eeTrigDsm1(FileType fd, TPad *c, const Char_t *mode ) {
-  Char_t *core="dsm1HJP";
+  const Char_t *core="dsm1HJP";
   if (mode[0] == 'H') {
     c->Divide(2, 6);
   } else {
@@ -497,7 +497,7 @@ void eeTrigDsm1(FileType fd, TPad *c, const Char_t *mode ) {
 
 //--------------------------------------
 void eeTrigDsm2HT(FileType fd, TPad *c ) {
-  Char_t *name[3]={"dsm2Half1_HTTP","dsm2Half2_HTTP","dsm3_HTTP"};
+  const Char_t *name[3]={"dsm2Half1_HTTP","dsm2Half2_HTTP","dsm3_HTTP"};
   c->Divide(2, 2);
   for (int i = 0;i < 3;i++) {
     TH1 *h = GetHisto(fd,name[i]);
@@ -513,7 +513,7 @@ void eeTrigDsm2HT(FileType fd, TPad *c ) {
 //--------------------------------------
 void eeTrigJPsum(FileType fd, TPad *c, const Char_t *mode) {
   c->Divide(2, 3);
-  Char_t *core="JP";
+  const Char_t *core="JP";
   for (int j = 0;j < 6;j++) { 
     TH1 *h = GetHisto(fd, Form("%s%d%s", core, j + 1, mode));
     if (h) {
@@ -532,7 +532,7 @@ void eeTrigJPsum(FileType fd, TPad *c, const Char_t *mode) {
 //--------------------------------------
 void eeTrigJPfreq(FileType fd, TPad *c) {
   c->Divide(2, 3);
-  Char_t *core="JPsumTh";
+  const Char_t *core="JPsumTh";
   for (int j = 0;j < 4;j++) { 
     TH1 *h = GetHisto(fd, Form("%s%d",core,j)); 
     if (h) {
@@ -559,7 +559,7 @@ void eeTrigJPfreq(FileType fd, TPad *c) {
 //--------------------------------------
 void eeTrigAdjJPsum(FileType fd, TPad *c, const Char_t *mode) {
   c->Divide(2, 3);
-  Char_t *core="JP";
+  const Char_t *core="JP";
   for (int j = 0;j < 6;j++) {
     TH1 *h = GetHisto(fd, Form("%s%d%d%s",core,j+1,((j+1)%6)+1,mode)); 
     if (h) {
@@ -574,7 +574,7 @@ void eeTrigAdjJPsum(FileType fd, TPad *c, const Char_t *mode) {
 
 //--------------------------------------
 void eeTrigEtot(FileType fd, TPad *c) {
-  Char_t *nameA[3]={"dsm2E_etot","dsm2B_etot","dsm2BE_etot"};
+  const Char_t *nameA[3]={"dsm2E_etot","dsm2B_etot","dsm2BE_etot"};
   c->Divide(1, 3);
   const int n = 6;
   TH1 *hh[n] = {0};
@@ -605,7 +605,7 @@ void eeTrigEtot(FileType fd, TPad *c) {
 //--------------------------------------
 void eeTrigAdjJPcor(FileType fd, TPad *c, const Char_t *mode) {
   c->Divide(3, 2);
-  Char_t *core="JP";
+  const Char_t *core="JP";
   for (int j = 0;j < 6;j++) { 
     TH1 *h = GetHisto(fd, Form("%s%d%d%s",core,j+1,((j+1)%6)+1,mode)); 
     if (h) {

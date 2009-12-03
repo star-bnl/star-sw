@@ -1,6 +1,6 @@
 // *-- Author : Rene Fatemi
 // 
-// $Id: MuEzPanitkinMaker.cxx,v 1.6 2009/02/24 04:07:46 ogrebeny Exp $
+// $Id: MuEzPanitkinMaker.cxx,v 1.7 2009/12/03 22:35:03 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -29,7 +29,7 @@ ClassImp(MuEzPanitkinMaker)
 
 //________________________________________________
 //________________________________________________
-MuEzPanitkinMaker::MuEzPanitkinMaker( char* self , char* muDstMakerName) : StMaker(self){
+MuEzPanitkinMaker::MuEzPanitkinMaker(const Char_t *self, const Char_t *muDstMakerName) : StMaker(self){
     mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
    assert(mMuDstMaker);
 
@@ -188,6 +188,9 @@ Int_t MuEzPanitkinMaker::Make(){
 
 //---------------------------------------------------
 // $Log: MuEzPanitkinMaker.cxx,v $
+// Revision 1.7  2009/12/03 22:35:03  ogrebeny
+// Fixed compiler warnings, mostly char* -> const char*
+//
 // Revision 1.6  2009/02/24 04:07:46  ogrebeny
 // Fixed part of the trigger histograms
 //

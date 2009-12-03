@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.17 2009/02/04 20:33:22 ogrebeny Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.18 2009/12/03 22:35:03 ogrebeny Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -21,13 +21,13 @@
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::initTileHistoAdc(char cut, char *title, int col) {
+void EEsmdCal::initTileHistoAdc(char cut, const char *title, int col) {
   int iCut=cut -'a';
   assert(iCut>=0 && iCut<kCut);
   char tt1[100], tt2[500];
 
-  char *cTile[mxTile]={"Tower","Pres1","Pres2","Post"};
-  char cT[mxTile]={'T','P','Q','R'};
+  const char *cTile[mxTile]={"Tower","Pres1","Pres2","Post"};
+  const char cT[mxTile]={'T','P','Q','R'};
 
   int iT=0;
   for(iT=0;iT<mxTile;iT++) {
@@ -59,14 +59,14 @@ void EEsmdCal::initTileHistoAdc(char cut, char *title, int col) {
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::initTileHistoEne(char cut, char *title, int col) {
+void EEsmdCal::initTileHistoEne(char cut, const char *title, int col) {
   int iCut=cut -'a';
   assert(iCut>=0 && iCut<kCut);
   char tt1[100], tt2[500];
 
-  char *cTile[mxTile]={"Tower","Pres1","Pres2","Post"};
-  char cT[mxTile]={'T','P','Q','R'};
-  char *cUnits[mxTile]={"(GeV)_EM", "(MEV)_MIP", "(MEV)_MIP", "(MEV)_MIP"};
+  const char *cTile[mxTile]={"Tower","Pres1","Pres2","Post"};
+  const char cT[mxTile]={'T','P','Q','R'};
+  const char *cUnits[mxTile]={"(GeV)_EM", "(MEV)_MIP", "(MEV)_MIP", "(MEV)_MIP"};
   
   int iT=0;
   for(iT=0;iT<mxTile;iT++) {
@@ -175,7 +175,7 @@ void EEsmdCal::addPresMipEbarsToHisto (int col, char cT) {
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::initSmdHist(char cut, char *title, int col) {
+void EEsmdCal::initSmdHist(char cut, const char *title, int col) {
   int iCut=cut -'a';
   assert(iCut>=0 && iCut<kCut);
   char tt1[100], tt2[500];
@@ -202,7 +202,7 @@ void EEsmdCal::initSmdHist(char cut, char *title, int col) {
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::initSmdEneHist(char cut, char *title, int col) {
+void EEsmdCal::initSmdEneHist(char cut, const char *title, int col) {
   int iCut=cut -'a';
   assert(iCut>=0 && iCut<kCut);
   char tt1[100], tt2[500];

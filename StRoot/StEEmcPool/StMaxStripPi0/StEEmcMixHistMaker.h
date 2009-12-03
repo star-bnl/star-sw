@@ -31,7 +31,7 @@ class StEEmcMixHistMaker : public StEEmcMixMaker {
   TH1F *hU2[3];
   TH1F *hV1[3];
   TH1F *hV2[3];
-  void book( TH1F **h, Char_t *n, Char_t *t, Int_t nbin, Float_t min, Float_t max );
+  void book( TH1F **h, const Char_t *n, const Char_t *t, Int_t nbin, Float_t min, Float_t max );
   void fill( Int_t mode, StEEmcPair &pair );
   void subtract( TH1F **h, Float_t norm );
 

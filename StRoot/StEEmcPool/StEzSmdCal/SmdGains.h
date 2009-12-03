@@ -4,7 +4,7 @@
 #ifndef SmdGains_h
 #define SmdGains_h
 /*******************************************************
- * $Id: SmdGains.h,v 1.6 2007/07/12 19:27:20 fisyak Exp $
+ * $Id: SmdGains.h,v 1.7 2009/12/03 22:35:03 ogrebeny Exp $
  *******************************************************
  This code should run only on histogram files,
  not on events, JB
@@ -65,7 +65,7 @@ class SmdGains :public TObject{
   SmdGains();
   virtual ~SmdGains(){};
   void set( TObjArray * hL, int se, char uv){ HList=hL; sectID=se, planeUV=uv;}; 
-  void plTGraph(char *shpFunc="pol1",int ig=1, int pl=0); // plot & fit tGraphs
+  void plTGraph(const Char_t *shpFunc="pol1",int ig=1, int pl=0); // plot & fit tGraphs
   void plFGC();
 
   void doGainCorr(int str1, int str2, int ns=20, int pl=0);
@@ -75,7 +75,7 @@ class SmdGains :public TObject{
   TFile* open(TString);
   void init();
   void doSlopesOnly(float fac=1.);
-  void saveHisto(char *fname=0);
+  void saveHisto(const Char_t *fname=0);
   void saveGains(FILE *fd=0);
 
   void fitSlopesSmd(int str1, int str2, int pl=0);
@@ -88,6 +88,9 @@ class SmdGains :public TObject{
 
 /*****************************************************************
  * $Log: SmdGains.h,v $
+ * Revision 1.7  2009/12/03 22:35:03  ogrebeny
+ * Fixed compiler warnings, mostly char* -> const char*
+ *
  * Revision 1.6  2007/07/12 19:27:20  fisyak
  * Add includes for TMath for ROOT 5.16
  *

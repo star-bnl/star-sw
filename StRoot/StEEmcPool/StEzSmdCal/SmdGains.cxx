@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.10 2009/01/26 14:37:42 fisyak Exp $
+// $Id: SmdGains.cxx,v 1.11 2009/12/03 22:35:03 ogrebeny Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -102,10 +102,11 @@ void SmdGains::doGainCorr(int str1, int str2, int ns, int pl){
   printf("doGainCorr() for %s, average over %d-strips pl=%d\n",gr->GetName(),ns,pl);
   TString nn=gr->GetName();
 
-  if(pl==0) 
+  if(pl==0) {
     c2=new TCanvas(nn,nn,300,400);
-  else
+  } else {
     c2=new TCanvas(nn,nn,600,800);
+  }
 
   c2->Divide(5,6);
   int i,k;
@@ -142,10 +143,11 @@ void SmdGains:: avrMipNEne( int str1,int ns){
     //  c1->cd(k+1);
     //  h->Draw(); gPad->SetLogy(0);
     
-    if(hs==0)
+    if(hs==0) {
       hs=(TH1F*) h->Clone();
-    else
+    } else {
       hs->Add(h);
+    }
   }
 
   sprintf(tit,"avr%s%03d",plCore.Data(),str1);
@@ -199,7 +201,7 @@ void SmdGains:: avrMipNEne( int str1,int ns){
 
 //-----------------------------------------
 //-----------------------------------------
-void SmdGains:: plTGraph( char *shpFunc,int ig, int pl){
+void SmdGains:: plTGraph(const Char_t *shpFunc,int ig, int pl){
   // sum MIP ene (from 2 strips) of k strips
 
   TGraphErrors  *gr= grA[ig];
@@ -260,10 +262,11 @@ void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
 
   if(c1==0) c1=new TCanvas("aa1","aa1",800,700);// big
   c1->Clear();
-  if(pl)
+  if(pl) {
     c1->Divide(5,6);
-  else
+  } else {
     c1->Divide(2,2);
+  }
   c1->SetName(ttC);
   c1->SetTitle(ttC);
   
@@ -443,10 +446,11 @@ void SmdGains::saveGains(FILE *fd) {
   for(i=0;i<mxS;i++) {
     StripG *s=str+i;
     float rer=-1;
-    if(s->gc>0) 
+    if(s->gc>0) {
       rer=100.*s->egc/s->gc;
-    else
+    } else {
       nBad++;
+    }
     fprintf(fd,"%s%03d %.1f %.1f (%.1f%c) sum1=%d flag=0x%0x mpv1=%.1f %.1f\n",plCore.Data(),s->id,s->gc,s->egc,rer,37,s->sum1,s->flag,s->mpv1,s->empv1);
   }
   fprintf(fd,"#nBad =%d\n",nBad);
@@ -454,7 +458,7 @@ void SmdGains::saveGains(FILE *fd) {
 
 //-------------------------------------------------
 //-------------------------------------------------
-void SmdGains::saveHisto(char *fname){
+void SmdGains::saveHisto(const Char_t *fname){
   TString outName;
   if(fname){
     outName=fname;
@@ -491,14 +495,18 @@ void StripG::clear(){
 //-------------------------
 void StripG::print(){
   if(flag) printf("*");
-  if (flag==0) 
+  if (flag==0) {
     printf("strip id=%d sl=%f esl=%f gc=%f egc=%f sum1=%d mpv1=%f empv1=%f\n",id,sl,esl,gc,egc,sum1,mpv1,empv1);
-  else
+  } else {
     printf("strip id=%d  --- sum1=%d\n",id,sum1);
+  }
 }
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
+ * Revision 1.11  2009/12/03 22:35:03  ogrebeny
+ * Fixed compiler warnings, mostly char* -> const char*
+ *
  * Revision 1.10  2009/01/26 14:37:42  fisyak
  * Add missing (in ROOT 5.22) includes
  *
