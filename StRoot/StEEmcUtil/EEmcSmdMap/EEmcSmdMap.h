@@ -58,7 +58,7 @@ class EEmcStrip2StripMapItem;
 
 //-- Structure to map strip ranges to towers --
 struct EEmcStripMapItem {
-  Char_t *tower;
+  const Char_t *tower;
   Int_t   uMin;   // minimum u strip, all indexed from 0
   Int_t   uMax;   // maximum u strip
   Int_t   vMin;   // minimum v strip

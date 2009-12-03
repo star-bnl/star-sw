@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.1 2009/02/04 20:33:28 ogrebeny Exp $
+// $Id: EEmcDbItem.cxx,v 1.2 2009/12/03 21:15:39 ogrebeny Exp $
  
 #include <stdio.h>
 #include <string.h>
@@ -40,10 +40,11 @@ void EEmcDbItem::print() const{
     LOG_WARN<<" item not defined ???"<<endm;
     return;
   }
-  if( isSMD() )
+  if( isSMD() ) {
     LOG_INFO<<Form("EEmcDbItem::SMD %s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,sigPed,thr,stat,fail,tube,key)<<endm;
-  else
+  } else {
     LOG_INFO<<Form("EEmcDbItem::Tail %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,sigPed,thr,stat,fail,tube,key)<<endm;
+  }
 }
 
 //----                                          ----
@@ -77,10 +78,11 @@ void EEmcDbItem::exportAscii(FILE *fd) const{
   
   if(name[0]==0) return; // item not defined
 
-  if(strchr(name,'U') || strchr(name,'V') )
+  if(strchr(name,'U') || strchr(name,'V') ) {
     fprintf(fd,"%s %3d %3d %2d %c %4d %.3f %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,plane,strip,gain,ped,thr,stat,fail,tube,key);
-  else
+  } else {
     fprintf(fd,"%s %d %3d %2d %c %2d %.3f  %.2f %.2f 0x%4.4x 0x%4.4x %s %d\n",name,crate,chan,sec,sub,eta,gain,ped,thr,stat,fail,tube,key);
+  }
 }
 
 
@@ -119,9 +121,9 @@ int EEmcDbItem::importAscii(FILE *fd){
   else if (name0[2]=='T' || name0[2]=='P' || name0[2]=='Q' || name0[2]=='R' ) {    
     n=sscanf(buf,"%s %d %d %d %c %d %f  %f %f %x %x %s %d",name,&crate,&chan,&sec,&sub,&eta,&gain,&ped,&thr,&stat,&fail,tube,&key);
   }
-  else 
+  else {
     return -3;
-
+  }
 
 
   if(n!=13) return -1000-n;
@@ -228,6 +230,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.2  2009/12/03 21:15:39  ogrebeny
+// Fixed compiler warnings
+//
 // Revision 1.1  2009/02/04 20:33:28  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //

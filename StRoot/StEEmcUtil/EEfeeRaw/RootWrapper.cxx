@@ -42,7 +42,7 @@ eemcfeerootopen_(long& run, long& runtime, char *chfile, int &nAuto, int len)
 { 
   char *comment  = new char[MaxCommentLen];
   char *basefile = new char[MaxCommentLen];
-  char *rootdir  = getenv("MINIROOTDIR");
+  const char *rootdir  = getenv("MINIROOTDIR");
   if ( rootdir == NULL ) rootdir=".";
   filename = new char[(len<MaxCommentLen)?MaxCommentLen:len]; // ???
   
