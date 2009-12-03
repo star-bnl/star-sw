@@ -1,5 +1,6 @@
 // C-style global function call by Minuit
 #include <math.h>
+#include <assert.h>
 #include <TVector3.h>
 #include <TH1.h>
 

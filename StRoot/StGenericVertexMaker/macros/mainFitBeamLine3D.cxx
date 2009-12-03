@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <math.h>
+#include <assert.h>
 #include <TMinuit.h>
 #include <TFile.h>
 #include <TH1.h>
+#include <TObjArray.h>
 #include <TRandom3.h>
 
 #include "UtilBeamLine3D.h"
@@ -14,12 +17,13 @@ int twoLineDca3D(double& lambda,double& kappa,TVector3& V, TVector3& U, TVector3
 
 //===========================
 int main() {
+  printf("THIS is main\n");
   int mode = 3; //0 = just migrad, no tilt
                 //1 = migrad - position + tilt, but not both
                 //2 = migrad - position + tilt together
                 //3 = simplex-migrad-simplex-migrad
 
-  char *chararray[40];
+  const char *chararray[40];
   chararray[0] = "F10383";
   chararray[1] = "F10398";
   chararray[2] = "F10399";
@@ -82,7 +86,7 @@ int main() {
     double pval[mxPar],perr[mxPar],plo[mxPar],phi[mxPar];
     TString paraName[mxPar];
     int istat;
-    char *core = chararray[i];
+    const char *core = chararray[i];
     double dmax2=util.cut_Dmax*util.cut_Dmax; // to speed up 
 
     TObjArray  HList;
@@ -115,7 +119,7 @@ int main() {
       gMinuit->mnexcm("SET ERR",arglist,1,error_flag);
       //Interprets a command and takes appropriate action
       //void mnexcm(const char* comand, Double_t* plist, Int_t llist, Int_t& ierflg)
-      double f_null = 0.0;
+      //double f_null = 0.0;
       
       //define range, step size and name of all parameters
       gMinuit->mnparm(0, "X0 (cm)",pval[0],0.01,-2,2,error_flag);
