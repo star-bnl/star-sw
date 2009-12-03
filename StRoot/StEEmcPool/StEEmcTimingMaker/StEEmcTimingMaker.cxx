@@ -790,7 +790,7 @@ void StEEmcTimingMaker::processFromL2( const Char_t *fname, int nevents )
   TList *l = f->GetListOfKeys();
   TIter next(l);
   TKey *key = 0;
-  while ( key = (TKey*)next() )
+  while ((key = (TKey*)next()))
     {
       TObject *o = key->ReadObj();
       TString name = o->GetName();

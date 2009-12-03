@@ -35,12 +35,12 @@ Int_t StEEmcMixHistMaker::Init()
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcMixHistMaker::book( TH1F **h, Char_t *name, Char_t *title, Int_t nbin, Float_t min, Float_t max )
+void StEEmcMixHistMaker::book( TH1F **h, const Char_t *name, const Char_t *title, Int_t nbin, Float_t min, Float_t max )
 {
 
-  Char_t *n[]={"R","B","S"};
-  Char_t *t[]={", real events", ", mixed events", ", background subtracked"};
-  Int_t  col[]={1,2,4};
+  const Char_t *n[]={"R","B","S"};
+  const Char_t *t[]={", real events", ", mixed events", ", background subtracked"};
+  const Int_t  col[]={1,2,4};
 
   for ( Int_t i=0;i<3;i++ )
     {

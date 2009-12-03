@@ -6,8 +6,8 @@
  * and smd strips.
  *
  * \author Jason C. Webb
- * $Date: 2005/09/02 02:06:39 $
- * $Revision: 1.6 $
+ * $Date: 2009/12/03 22:35:00 $
+ * $Revision: 1.7 $
  *
  * \section steemcclustermaker_towers Tower, pre- and postshower algorithm
  *
@@ -475,10 +475,11 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	    StEEmcStrip strip=mEEanalysis->strip(sector,plane,i);
 	    /// Break if not continuous (and not dead)
 
-	    if ( mSkip )
+	    if ( mSkip ) {
 	      if (strip.energy()<=0.&&!strip.fail()) break; 
-	    else
+	    } else {
 	      if ( strip.energy()<=0. ) break;
+	    }
 
 	    /// Mark this strip as owned
 	    owned[ strip.index() ] = true;
@@ -491,10 +492,11 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	    StEEmcStrip strip=mEEanalysis->strip(sector,plane,i);
 	    /// Break if not continuous (and not dead)
 
-	    if ( mSkip )
+	    if ( mSkip ) {
 	      if (strip.energy()<=0.&&!strip.fail()) break;
-	    else
+	    } else {
 	      if (strip.energy()<=0.) break;
+	    }
 
 	    /// Mark this strip as owned
 	    owned[ strip.index() ] = true;

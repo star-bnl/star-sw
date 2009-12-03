@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*******************************************************
- * $Id: EEsmdCal.h,v 1.14 2009/02/04 20:33:22 ogrebeny Exp $
+ * $Id: EEsmdCal.h,v 1.15 2009/12/03 22:35:03 ogrebeny Exp $
  *******************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -68,10 +68,10 @@ class EEsmdCal {
   void scanSpike(float adc1, TH1F *h);
 #endif
 
-  void initTileHistoAdc(char cut, char * title, int col=1); 
-  void initTileHistoEne(char cut, char * title, int col=1); 
-  void initSmdHist(char cut, char * title, int col=1);
-  void initSmdEneHist(char cut, char * title, int col=1);
+  void initTileHistoAdc(char cut, const char * title, int col=1); 
+  void initTileHistoEne(char cut, const char * title, int col=1); 
+  void initSmdHist(char cut, const char * title, int col=1);
+  void initSmdEneHist(char cut, const char * title, int col=1);
   void initAuxHisto();
   void mapTileDb();
   void histoGains();
@@ -139,6 +139,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.15  2009/12/03 22:35:03  ogrebeny
+ * Fixed compiler warnings, mostly char* -> const char*
+ *
  * Revision 1.14  2009/02/04 20:33:22  ogrebeny
  * Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
  *
