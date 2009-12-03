@@ -409,7 +409,16 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     #$SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
     
     #print "-=-=-=-=-=-= SO_PKG = $SO_PKG\n";
-    
+    if ($pkg =~ m/^Sti/ and $env1->{DEBUG} =~ /-O/ and $STAR_SYS =~ /gcc432/) { # hack for Sti with gcc432
+      $envNoDeb = $env->clone('DEBUG' => '-g');
+      for ($i = 0; $i < $#src; $i++) {
+	if ($src[$i] =~ /StiVMCToolKit\.cxx/) {
+	  my @objfiles = Objects $envNoDeb ($src[$i]);
+	  $src[$i] = $objfiles[0];
+	  last;
+	}
+      }
+    }
     
   } elsif ( $pkg =~ m/^StDaqLib$/ ) {
     $CPPPATH = "#" . $Dir;
