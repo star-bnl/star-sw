@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.32 2008/06/24 03:19:03 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.33 2009/12/03 14:15:59 rfatemi Exp $
 //
 //
 
@@ -1425,7 +1425,7 @@ int StBemcTrigger::get2006Trigger()
             //1) drop lowest bits (depends on calibration)
             //2) take next 6 LSB as HT 6 bit adc
             //3) if 6 or higher bit ==1 need to set all bits high (63)
-            HT = HT >> mTrigger.HTBits - 1;
+            HT = HT >>(mTrigger.HTBits - 1);
             int HTL = HT & 0x1F;//5 LSB
             int HTH = HT >> 5;  //>= 6 LSB
             int B5  = 0;
