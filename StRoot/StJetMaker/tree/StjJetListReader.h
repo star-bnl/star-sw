@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListReader.h,v 1.1 2008/09/15 05:50:05 tai Exp $
+// $Id: StjJetListReader.h,v 1.2 2009/12/03 09:57:36 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJJETLISTREADER_H
 #define STJJETLISTREADER_H
@@ -21,6 +21,7 @@ public:
 
 private:
 
+  void SetBranchAddress(TTree* tree) { StjTreeReaderTwoTrees::SetBranchAddress(tree); }
   void SetBranchAddress(TTree *jettree, TTree *fourtree);
 
   void clearEntry();

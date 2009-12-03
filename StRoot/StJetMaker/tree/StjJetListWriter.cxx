@@ -1,4 +1,4 @@
-// $Id: StjJetListWriter.cxx,v 1.7 2008/09/15 05:50:05 tai Exp $
+// $Id: StjJetListWriter.cxx,v 1.8 2009/12/03 09:57:36 pibero Exp $
 #include "StjJetListWriter.h"
 
 #include <TFile.h>
@@ -87,7 +87,7 @@ void StjJetListWriter::fillFourVecTree(int jetId, const StjFourVecList& fourVecL
   _four_eventId   = fourVecList[0].eventId;
   _four_vertexZ   = fourVecList[0].vertexZ;
 
-  for(int i = 0; i < fourVecList.size(); ++i) {
+  for(size_t i = 0; i < fourVecList.size(); ++i) {
     const StjFourVec& four = fourVecList[i];
     _four_fourvecId[_four_nFourVecs]    = four.fourvecId;
     _four_jetId[_four_nFourVecs]        = jetId;
