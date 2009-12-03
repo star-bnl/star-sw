@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 #include <TObjArray.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <TLine.h>
+#include <TList.h>
 
 #include "UtilBeamLine3D.h"
 
