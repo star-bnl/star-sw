@@ -5,7 +5,7 @@ CXX    = g++
 LD     = g++
 AR     = ar rul
 
-DEBUG  =-g -O 
+#DEBUG  =-g -O 
 DEFINES=
 #
 
@@ -13,12 +13,17 @@ OBJS   = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
 
 #
 #laptop: CFLAGS   = -Wall $(DEBUG) $(DEFINES) -ansi -I /Applications/root/include/
-CFLAGS   =  -m32  -Wall $(DEBUG) $(DEFINES) -ansi -I$(ROOTSYS)/include/
+ifeq ( $(USE_64BITS),1)
+CFLAGS   =  -m64 -fPIC -Wall $(DEBUG) $(DEFINES) -ansi -I$(ROOTSYS)/include/
+LDFLAGS  =  -m64  
+else
+CFLAGS   =  -m32 -fPIC -Wall $(DEBUG) $(DEFINES) -ansi -I$(ROOTSYS)/include/
+LDFLAGS  =  -m32 
+endif
 
-LDFLAGS  =  -m32 -shared 
 #laptop: RootLibDir  =/Applications/root/lib/
 RootLibDir  =$(ROOTSYS)/lib
-RootLibs  =  -lMinuit -lCore  -lPhysics -lHist -lGraf
+RootLibs  = $(shell root-config --libs) -lMinuit
 
 #-lCint -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix  -lm -ldl -rdynamic 
 
