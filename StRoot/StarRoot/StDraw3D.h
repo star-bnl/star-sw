@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.47 2009/12/03 22:06:42 fine Exp $
+// $Id: StDraw3D.h,v 1.48 2009/12/03 22:14:37 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -233,7 +233,15 @@ public:
          ,  Style_t sty= Style_t(-1)
          ,  Size_t siz = Size_t (-1));
 
+   virtual TObject *Line(const std::vector<float> &xyz
+         ,  Color_t col= Color_t(-1)
+         ,  Style_t sty= Style_t(-1)
+         ,  Size_t siz = Size_t (-1));
+   
    virtual TObject *Line(int n,  const float *xyz
+         , EDraw3DStyle sty);
+
+   virtual TObject *Line(const std::vector<float> &xyz
          ,  EDraw3DStyle sty);
 
    virtual TObject *Tower(float radius
