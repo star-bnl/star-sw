@@ -3,7 +3,7 @@
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 struct EEmcStrip2StripMapItem {
-  Char_t *strip;
+  const Char_t *strip;
   Int_t   iMin;   // minimum orthogonal strip
   Int_t   iMax;   // maximum orthogonal strip
 };
