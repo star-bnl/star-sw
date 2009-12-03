@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTreeReader.h,v 1.2 2008/09/15 05:50:06 tai Exp $
+// $Id: StjTreeReader.h,v 1.3 2009/12/03 09:57:36 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTREEREADER_H
 #define STJTREEREADER_H
@@ -22,7 +22,7 @@ public:
   virtual Long64_t GetEntryWithIndex(const StjTreeIndex& idx);
   virtual Long64_t GetEntryWithIndex(Int_t major, Int_t minor);
 
-private:
+protected:
 
   virtual void SetBranchAddress(TTree *tree) { }
 

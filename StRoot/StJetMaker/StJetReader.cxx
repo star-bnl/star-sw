@@ -327,7 +327,7 @@ void StJetReader::exampleFastAna()
 	
 	//best vertex info:
 	const float* bestPos = skEv->bestVert()->position();
-	//cout <<"best Vertex (x,y,z):\t"<<bestPos[0]<<"\t"<<bestPos[1]<<"\t"<<bestPos[2]<<endl;
+	cout <<"best Vertex (x,y,z):\t"<<bestPos[0]<<"\t"<<bestPos[1]<<"\t"<<bestPos[2]<<endl;
 	
 	//trigger info:
 	const TClonesArray* trigs = skEv->triggers();

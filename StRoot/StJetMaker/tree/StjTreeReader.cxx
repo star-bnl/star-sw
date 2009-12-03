@@ -1,4 +1,4 @@
-// $Id: StjTreeReader.cxx,v 1.2 2008/08/23 06:27:02 tai Exp $
+// $Id: StjTreeReader.cxx,v 1.3 2009/12/03 09:57:36 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTreeReader.h"
 
@@ -16,7 +16,7 @@ void StjTreeReader::Init()
 
 Long64_t StjTreeReader::GetEntryWithIndex(const StjTreeIndex& idx)
 {
-  GetEntryWithIndex(idx.major(), idx.minor());
+  return GetEntryWithIndex(idx.major(), idx.minor());
 }
 
 Long64_t StjTreeReader::GetEntryWithIndex(Int_t major, Int_t minor)

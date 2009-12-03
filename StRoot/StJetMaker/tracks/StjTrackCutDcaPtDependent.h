@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutDcaPtDependent.h,v 1.1 2008/11/27 07:09:33 tai Exp $
+// $Id: StjTrackCutDcaPtDependent.h,v 1.2 2009/12/03 09:57:32 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTDCAPTDEPENDENT_H
 #define STJTRACKCUTDCAPTDEPENDENT_H
@@ -7,29 +7,29 @@
 #include "StjTrackCut.h"
 
 class StjTrackCutDcaPtDependent : public StjTrackCut {
-  // to reduce pile up tracks
-
-  //
-  //
-  //          dca
-  //           |
-  //           |
-  //           |
-  //           |                     pass
-  //           |
-  //           |
-  //           |
-  //     dca1  |----------- \
-  //           |             \
-  //           |              \
-  //           |               \
-  //     dca2  |                \----------------------------
-  //           |
-  //           |                   not pass
-  //           |
-  //          -+--------------------------------------------- pt
-  //                      pt1 pt2
-  //
+  /* to reduce pile up tracks
+   *
+   *
+   *
+   *          dca
+   *           |
+   *           |
+   *           |
+   *           |                     pass
+   *           |
+   *           |
+   *           |
+   *     dca1  |-----------\
+   *           |	    \
+   *           |	     \
+   *           |	      \
+   *     dca2  |               \----------------------------
+   *           |
+   *           |                   not pass
+   *           |
+   *          -+--------------------------------------------- pt
+   *                      pt1 pt2
+   */
 
 public:
   StjTrackCutDcaPtDependent(double pt1 = 0.5, double dcaMax1 = 2.0, double pt2 = 1.0, double dcaMax2 = 1.0)
