@@ -1,9 +1,0 @@
-This directory is a placeholder for all FilterMakers.
-Each FilterMaker must use either default parameters or parameters
-from DB. Selection of them is based on DateTime provided by bfc
-
-It is not clear now how to do it in the case of several filters, 
-where different times could be needed. 
-Also it is not clear yet if filter from the different year is usable.
-When it will be needed we will find the way.
-Victor
