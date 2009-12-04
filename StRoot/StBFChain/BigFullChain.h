@@ -575,8 +575,8 @@ Bfc_st BFC[] = { // standard chains
                                      "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
 
   // BTOF related chains
-  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
-                                                                             "StChain","BTOF Chain",kFALSE}, 
+  //  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
+  //                                                                           "StChain","BTOF Chain",kFALSE}, 
 
   {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker",
                                                                                    "BTOF hit maker",kFALSE},
@@ -643,8 +643,6 @@ Bfc_st BFC[] = { // standard chains
 
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
-  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
-                                                                                   "BTOF Simulator",kFALSE},
   {"btofMatch"  ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker",
                                                                           "TPC-BTOF track matching",kFALSE},
   {"btofCalib"  ,"","BTofChain","db,BTofUtil","StBTofCalibMaker","StBTofCalibMaker",
@@ -665,14 +663,23 @@ Bfc_st BFC[] = { // standard chains
    ,                    "StFtpcClusterMaker and StFtpcTrackMaker will produce gain scan histograms",kFALSE},
   {"fdbg"     ,"","","fcl,fpt","","","StFtpcClusterMaker and StFtpcTrackMaker will write debugfile",kFALSE},
   {"flaser"   ,"","","fcl,fpt"   ,"","","StFtpcClusterMaker and StFtpcTrackMaker for LASERTRACKING",kFALSE},
+
   {"pmdReco"   ,"pmdReco","","PmdUtil,pmdRead,pmdClust"       ,"StMaker","StChain","PMD Reco chain",kFALSE},
   {"pmdRaw"    ,"pmdRaw","","pmdReco"                        "","","PMD Reco chain giving raw data",kFALSE},
   {"pmd"       ,"pmd","","pmdSim,pmdClust,pmdDis","StMaker"      ,"StChain", "PMD Simulation chain",kFALSE},
   {"pmdRead"   ,"","","PmdUtil","StPmdReadMaker"            ,"StPmdReadMaker", "DAQ reader for PMD",kFALSE},
   {"pmdSim"    ,"","","PmdUtil","StPmdSimulatorMaker","StPmdSimulatorMaker","Hit Simulator for PMD",kFALSE},
   {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
-  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker"
-   ,                                              "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
+  {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
+                                                  "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
+
+  // final TOF combo
+  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
+                                                                             "StChain","BTOF Chain",kFALSE}, 
+  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
+                                                                                   "BTOF Simulator",kFALSE},
+
+
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker"
    ,                                                                      "Find Kinks from StEvent",kFALSE},
   {"V02"         ,"v02","","db,MuDST,-V0","StV0FinderMaker","StSecondaryVertexMaker"
@@ -781,6 +788,9 @@ Bfc_st BFC[] = { // standard chains
   {"LanaDVtpx","","","MakeEvent,trgd,in,tpx,TpcHitMover,LaserIT,VFMinuit,Lana,Analysis,Corr4,NosvtIT,NossdIT",
    "",""                                                                        ,"get LDV with TPX",kFALSE},
   {"LaserDV.Chain","","","in,LaserCal,fcf,TpcHitMover,OGridLeak3D,OShortR,OSpaceZ2","","","get LDV",kFALSE},
+
+
+
   {"Production chain from Db","------------","-----------","-----------------------------","","","",kFALSE},
   {"ppITTFsvt.Chain" ,"" ,"","DbV20020802,pp2001,fpd,beamLine,svt_daq,SvtD,est,svtdedx,CMuDst"
    ,"","",""                                                                                       ,kFALSE},
