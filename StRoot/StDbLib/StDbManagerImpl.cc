@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.34 2009/11/10 20:24:45 fisyak Exp $
+ * $Id: StDbManagerImpl.cc,v 1.35 2009/12/04 16:06:52 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.35  2009/12/04 16:06:52  dmitry
+ * StDbLib in standalone mode cannot use SafeDelete - proper wrapper added
+ *
  * Revision 1.34  2009/11/10 20:24:45  fisyak
  * Use SafeDelete
  *
@@ -294,11 +297,32 @@ StDbManagerImpl::~StDbManagerImpl(){
   deleteServers();
   deleteDomains();
   deleteTypes();
+#ifndef __STDB_STANDALONE__
   SafeDelete(mfactory);
   SafeDelete(Messenger);
+#else
+  if (mfactory) { 
+	delete mfactory; 
+    mfactory = 0; 
+  };
+  if (Messenger) { 
+	delete Messenger; 
+	Messenger = 0; 
+  };
+
+#endif
   mInstance=0;
 #ifndef NoXmlTreeReader
+
+#ifndef __STDB_STANDALONE__
   SafeDelete(myServiceBroker);
+#else
+  if (myServiceBroker) {
+	delete myServiceBroker;
+    myServiceBroker = 0;
+  }
+#endif
+
 #endif
 }
 
