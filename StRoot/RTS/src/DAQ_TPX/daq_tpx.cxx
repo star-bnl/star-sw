@@ -318,8 +318,8 @@ int daq_tpx::InitRun(int run)
 
 
 
-	// offline setup: try our canonical location first
-	gain_algo->from_file("/RTS/conf/tpx/tpx_gains.txt",0) ;	// all sectors!
+
+
 
 
 	// if we have externally applied gains we will use them,
@@ -329,7 +329,7 @@ int daq_tpx::InitRun(int run)
 
 	LOG(DBG,"get(gain) returns %p",g) ;
 	if(g) {
-		LOG(TERR,"Using externally generated gains") ;
+		LOG(NOTE,"Using externally generated gains") ;
 		while(g->iterate()) {
 			LOG(DBG,"\tsec %d, row %d: %d",g->sec,g->row,g->ncontent) ;
 			for(u_int pad=1;pad<g->ncontent;pad++) {
@@ -337,6 +337,9 @@ int daq_tpx::InitRun(int run)
 				gain_algo->set_gains(g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
 			}
 		}
+	}
+	else {
+		gain_algo->from_file("/RTS/conf/tpx/tpx_gains.txt",0) ;	// all sectors!
 	}
 
 	
