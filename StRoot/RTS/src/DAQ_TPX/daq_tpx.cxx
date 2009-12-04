@@ -15,6 +15,7 @@
 
 #include <DAQ_TPC/daq_tpc.h>	// solely for the "legacy" use!
 #include <TPC/trans_table.hh>	// same...
+#include <TPC/rowlen.h>
 
 #include <DAQ1000/ddl_struct.h>	// for the misc DDL hardware constructs
 
@@ -330,9 +331,16 @@ int daq_tpx::InitRun(int run)
 	LOG(DBG,"get(gain) returns %p",g) ;
 	if(g) {
 		LOG(NOTE,"Using externally generated gains") ;
+		gain_algo->init(0) ;
 		while(g->iterate()) {
 			LOG(DBG,"\tsec %d, row %d: %d",g->sec,g->row,g->ncontent) ;
-			for(u_int pad=1;pad<g->ncontent;pad++) {
+			int max_pad = tpc_rowlen[g->row] ;
+			if(g->ncontent > max_pad) {
+				LOG(NOTE,"sector %d, row %d: want %d, have %d",g->sec,g->row,g->ncontent,max_pad) ;
+			}
+			else max_pad = g->ncontent ;
+
+			for(u_int pad=1;pad<=max_pad;pad++) {
 				LOG(DBG,"Gains: %d %d %d %f %f",g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
 				gain_algo->set_gains(g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
 			}
