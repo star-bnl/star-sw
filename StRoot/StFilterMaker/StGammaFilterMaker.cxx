@@ -15,6 +15,7 @@
 #include "StMcEvent/StMcEmcModuleHitCollection.hh"
 #include "StMcEvent/StMcEmcHitCollection.hh"
 #include "StMcEvent/StMcEvent.hh"
+#include "StMcEvent/StMcVertex.hh"
 
 // StEmc Libraries
 #include "StEmcClusterCollection.h"
@@ -25,9 +26,6 @@
 
 // Endcap Libraries
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
-
-// Geant Libraries
-#include "tables/St_g2t_vertex_Table.h"
 
 // Class Header
 #include "StGammaFilterMaker.h"
@@ -231,27 +229,25 @@ Int_t StGammaFilterMaker::Make()
         return kStOK;
     }
     
+    // Check for functional StMcEvent
+    if(!mMcEvent)
+    {
+     	LOG_WARN << "Reject() : Bad StMcEvent!" << endm;
+        return kStOK;
+    }
+
     // Acquire vertex information from the geant record
     // and abort the event if the vertex is too extreme
-    double zVertex = 0;
-    
-    St_DataSet *geant = StMaker::GetChain()->GetDataSet("geant");
-    assert(geant);
-    St_g2t_vertex *vertex = (St_g2t_vertex*)geant->Find("g2t_vertex");
-    if(vertex) 
-    {
-        g2t_vertex_st *vertexTable= vertex->GetTable();
-        zVertex = vertexTable->ge_x[2];
-    }
-    
+    double zVertex = mMcEvent->primaryVertex()->position().z();
+
     if(fabs(zVertex) > mMaxVertex)
     {
-        LOG_INFO << "Make() : Aborting Event " << mEvent->id()
+     	LOG_INFO << "Reject() : Aborting Event " << mEvent->id()
                  << " due to extreme geant vertex of " << zVertex << " cm " << endm;
-        
+
         ++mVertexRejected;
         return kStSKIP;
-    }     
+    }
     
     // Look for clusters in the chosen calorimeter
     Int_t status = 0;
