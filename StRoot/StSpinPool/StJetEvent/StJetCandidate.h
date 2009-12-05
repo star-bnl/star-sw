@@ -41,8 +41,9 @@ public:
   float detEta() const { return mDetEta; }
   float sumTrackPt() const;
   float sumTowerPt() const;
-  float neutralFraction() const { return sumTowerPt() / mPt; }
-  float chargedFraction() const { return sumTrackPt() / mPt; }
+  float sumPt() const { return sumTrackPt() + sumTowerPt(); }
+  float neutralFraction() const { return sumTowerPt() / sumPt(); }
+  float chargedFraction() const { return sumTrackPt() / sumPt(); }
   StJetTrack* leadingChargedParticle() const;
   float deltaPhi(const StJetCandidate* jet) const { return momentum().DeltaPhi(jet->momentum()); }
   float deltaR(const StJetCandidate* jet) const { return momentum().DeltaR(jet->momentum()); }
