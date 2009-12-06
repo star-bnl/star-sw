@@ -1,14 +1,12 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.1 2009/12/01 01:33:33 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.2 2009/12/06 06:47:52 fine Exp $
 
 
 #include "StSteeringModule.h"
 #include "TROOT.h"
 #include "TDataSetIter.h"
 #include "StDataReadModule.h"
-#include "StDisplayModule.h"
-#include "StDetectorGeometryModule.h"
 
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTpcDb/StTpcDbMaker.h"
@@ -46,7 +44,6 @@ StSteeringModule::StSteeringModule(const char *name):TModule(name)
   //  dbMk->InitRun(8343021);
   // ready to go !!!
 
-   fDetectorGeometryModule = new StDetectorGeometryModule();
    SetFileName("starcomplete.root");
 //      AddVolume("Blue ring");
 //      AddVolume("Yellow ring");
@@ -65,11 +62,9 @@ StSteeringModule::StSteeringModule(const char *name):TModule(name)
 	        daqFileName = "";
 	     }
       }
-*/      
+*/
 //      fDataReadModule->SetDaqFileName("CuCu72.daq"); // move to StStartDisplay
-      fDataReadModule->SetMagneticField(0.005);
  
-   fDisplayModule = new StDisplayModule();
 }
 
 
@@ -96,15 +91,8 @@ Int_t StSteeringModule::Init(){
   // Create Histograms 
 //   SetNumber(21);
    
-   // QMutexLocker lock(fMutex);
-   
+
    Int_t res = TModule::Init();
-   if (fDisplayModule && fDataReadModule) 
-    {
-       // Transfer providers
-       fDisplayModule->SetColorProvider( fDataReadModule->GetColorProvider());
-       fDisplayModule->SetSizeProvider ( fDataReadModule->GetSizeProvider() );
-    }
    TDataSet *ds = GetDataBase("Calibrations/emc/map");
    assert(ds);
    ds  = GetDataBase("RunLog/onl/starClockOnl");
@@ -138,14 +126,14 @@ Int_t StSteeringModule::Make(){
 void   StSteeringModule::SetFileName(const char* fileName)
 {
    // QMutexLocker lock(fMutex);
-   if (fDetectorGeometryModule) fDetectorGeometryModule->SetFileName(fileName);
+   if (fileName){}
 }
 
 //_____________________________________________________________________________
 void   StSteeringModule::SetRecording(bool on)
 {
     // QMutexLocker lock(fMutex);
-    if (fDisplayModule) fDisplayModule->SetRecording(on);
+    if (on) {}
 } 
 
 
@@ -153,46 +141,38 @@ void   StSteeringModule::SetRecording(bool on)
 bool  StSteeringModule::Recording()  const
 {
     // QMutexLocker lock(fMutex);
-    return fDisplayModule ? fDisplayModule->Recording(): false;
+    return false;
 } 
 
 
 //_____________________________________________________________________________
 Int_t  StSteeringModule::BuildGeometry()
 {
-   // QMutexLocker lock(fMutex);
-   if (fDetectorGeometryModule) return fDetectorGeometryModule->BuildGeometry();      
-   return kStErr;
+   return kStOk;
 }      
 
 //_____________________________________________________________________________
 void   StSteeringModule::AddVolume(const char *name)
 {
-   // QMutexLocker lock(fMutex);
-
    // Replace the input detector nick name with the real if available
-   if (fDetectorGeometryModule) {   }
+   if (name) {   }
 }      
 
 //_____________________________________________________________________________
 void   StSteeringModule::RemoveVolume(const char *name)
 {
    // QMutexLocker lock(fMutex);
-   if (fDetectorGeometryModule) {   }
+   if (name) {   }
 }
 
 //_____________________________________________________________________________
 void   StSteeringModule::Modified()
 {
-   // QMutexLocker lock(fMutex);
-   if (fDetectorGeometryModule)  fDetectorGeometryModule->Modified();
 }
 
 //_____________________________________________________________________________
 void   StSteeringModule::PrintVolumes()
 {
-   // QMutexLocker lock(fMutex);
-   if (fDetectorGeometryModule) fDetectorGeometryModule->PrintVolumes();        
 }
 
 //_____________________________________________________________________________
@@ -203,40 +183,34 @@ void   StSteeringModule::PrintVolumes()
 //_____________________________________________________________________________
  void StSteeringModule::SetCanvas(TCanvas *c)
  {
-    // QMutexLocker lock(fMutex);
-    if (fDisplayModule ) fDisplayModule->SetCanvas(c);   
+    if (c ){ }   
  }
 
 //_____________________________________________________________________________
 Int_t StSteeringModule::DisplayEvent(Bool_t refresh)
 {
-   // QMutexLocker lock(fMutex);
+
    Int_t ref = 0;
-   if (fDisplayModule) {
-      fDisplayModule->Clear();
-      ref  = fDisplayModule->DisplayEvent(refresh);
-   }
+   if (refresh) {   }
    return ref;
 }
 //_____________________________________________________________________________
 void  StSteeringModule::Refresh() 
 {
-   // QMutexLocker lock(fMutex);
-   if (fDisplayModule)  fDisplayModule ->Refresh();
+ 
 }
 
 //_____________________________________________________________________________
 void  StSteeringModule::Set3DViewer( TQtRootViewer3D *viewer) 
 {
-   // QMutexLocker lock(fMutex);
-   if (fDisplayModule)  fDisplayModule ->Set3DViewer(viewer);
+   if (viewer){}
 }
 
 //_____________________________________________________________________________
 Int_t StSteeringModule::DisplayGeometry(Bool_t refresh, Bool_t ifModified)
 {
-   // QMutexLocker lock(fMutex);
-   return fDisplayModule ? fDisplayModule->DisplayGeometry(refresh,ifModified) : 0;
+ 
+   return  0;
 }
 //_____________________________________________________________________________
 Int_t  StSteeringModule::NextFile()
@@ -254,23 +228,17 @@ Int_t  StSteeringModule::NextEvent()
 //_____________________________________________________________________________
 void  StSteeringModule::SetL3TracksOn(Int_t on)
 {
-   // QMutexLocker lock(fMutex);
-   if (fDisplayModule)  fDisplayModule ->SetL3TracksOn(on);
    if (fDataReadModule) fDataReadModule->SetL3TracksOn(on);
 }
  
 //_____________________________________________________________________________
 void  StSteeringModule::SetL3HitsOn(Int_t on)
 {
-   // QMutexLocker lock(fMutex);
-   if (fDisplayModule)  fDisplayModule ->SetL3HitsOn(on);
    if (fDataReadModule) fDataReadModule->SetL3HitsOn(on);
 }
 //_____________________________________________________________________________
 void  StSteeringModule::SetEmcHitsOn(Int_t on)
 {
-   // QMutexLocker lock(fMutex);
-   if (fDisplayModule)  fDisplayModule ->SetEmcHitsOn(on);
    if (fDataReadModule) fDataReadModule->SetEmcHitsOn(on);
 }
 
@@ -279,7 +247,6 @@ void  StSteeringModule::SetEmcHitsOn(Int_t on)
 //_____________________________________________________________________________
 void StSteeringModule::SetMagneticField(int field)
 {
-    // QMutexLocker lock(fMutex);
     if (fDataReadModule) 
        fDataReadModule->SetMagneticField(field/10000.0);
 }
@@ -287,7 +254,6 @@ void StSteeringModule::SetMagneticField(int field)
 //_____________________________________________________________________________
 void StSteeringModule::SetDaqFileName(const char *fileName)
 {
-    // QMutexLocker lock(fMutex);
 
     if (fDataReadModule) 
        fDataReadModule->SetDaqFileName(fileName);   
@@ -295,14 +261,12 @@ void StSteeringModule::SetDaqFileName(const char *fileName)
 //_____________________________________________________________________________
 void StSteeringModule::SetEventNumber(int eventNumber)
 {
-     // QMutexLocker lock(fMutex);
      if (fDataReadModule) 
        fDataReadModule->SetEventNumber(eventNumber);
 }
 //_____________________________________________________________________________
 Int_t StSteeringModule::RemakeEvent()
 {
-    // QMutexLocker lock(fMutex);
 
     return fDataReadModule ?
        fDataReadModule->Remake() : kStErr;
@@ -311,7 +275,6 @@ Int_t StSteeringModule::RemakeEvent()
 const TString &StSteeringModule::MountPoint() const 
 {
     static TString dummy;
-    // QMutexLocker lock(fMutex);
     return fDataReadModule ?
        fDataReadModule->MountPoint() : dummy;
 }
@@ -319,16 +282,12 @@ const TString &StSteeringModule::MountPoint() const
 //_____________________________________________________________________________
 void  StSteeringModule::SetCoin3DReady(Bool_t ready)
 {
-   // QMutexLocker lock(fMutex);
-
-    if (fDisplayModule) 
-       fDisplayModule->SetCoin3DReady(ready);
+    if (ready) {}      
 }
 
 //_____________________________________________________________________________
 void StSteeringModule::SetGuiObject(QObject *gui)
 {
-   // QMutexLocker lock(fMutex);
    if (fDataReadModule) fDataReadModule->SetGuiObject(gui);
 }
 //_____________________________________________________________________________
@@ -341,19 +300,17 @@ void  StSteeringModule::NextEventsSlot(int interval)
 //_____________________________________________________________________________
 void  StSteeringModule::ResetConnection()
 {
-   // QMutexLocker lock(fMutex);
    if (fDataReadModule) fDataReadModule->DeletePool();
 }
 
 //_____________________________________________________________________________
 void  StSteeringModule::StopEvents()
 {
-   // QMutexLocker lock(fMutex);
    if (fDataReadModule) fDataReadModule->StopEvents();
 }
 //_____________________________________________________________________________
 Bool_t  StSteeringModule::IsDisplayNext() const 
 {
-      // QMutexLocker lock(fMutex);
+
    return ((StMaker*)fDataReadModule) == CurrentMaker(); 
 }

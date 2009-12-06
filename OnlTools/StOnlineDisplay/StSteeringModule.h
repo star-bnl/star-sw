@@ -1,4 +1,4 @@
-// $Id: StSteeringModule.h,v 1.1 2009/12/01 01:33:33 fine Exp $
+// $Id: StSteeringModule.h,v 1.2 2009/12/06 06:47:52 fine Exp $
 
 #ifndef STAR_StSteeringModule
 #define STAR_StSteeringModule
@@ -35,8 +35,6 @@
 // (and compilation is much faster).
 
 class  StDataReadModule;
-class  StDetectorGeometryModule;
-class  StDisplayModule;
 class  TCanvas;
 class  TQtRootViewer3D;
 class  QObject;
@@ -48,8 +46,6 @@ class StSteeringModule : public TModule, StDetectorGeometryInterface{
  protected:
   // Protected method if any
    StDataReadModule          *fDataReadModule;
-   StDetectorGeometryModule  *fDetectorGeometryModule;
-   StDisplayModule           *fDisplayModule;
  public: 
   StSteeringModule(const char *name="Steering");
   virtual       ~StSteeringModule();
@@ -61,7 +57,7 @@ class StSteeringModule : public TModule, StDetectorGeometryInterface{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.1 2009/12/01 01:33:33 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.2 2009/12/06 06:47:52 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
           
   }

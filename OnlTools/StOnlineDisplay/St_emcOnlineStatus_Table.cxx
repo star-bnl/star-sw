@@ -1,0 +1,11 @@
+
+#include "St_emcOnlineStatus_Table.h"
+/////////////////////////////////////////////////////////////////////////
+//
+//  Class St_tfs_fsctrl wraps the emcOnlineStatus table tfs_fsctrl
+//
+/////////////////////////////////////////////////////////////////////////
+
+#include "Stypes.h"
+TableClassImpl(St_emcOnlineStatus, emcOnlineStatus_st)
+// TableImpl(emcOnlineStatus)
