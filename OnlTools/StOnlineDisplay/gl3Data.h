@@ -8,11 +8,11 @@
 
 // everything from L3
 #include "daqFormats.h"
-#include "l3CoordinateTransformer.h"
-#include "l3EmcCalibration.h"
-#include "FtfSl3.h"
-#include "gl3Event.h"
-#include "gl3EMC.h"
+#include "RTS/EventTracker/l3CoordinateTransformer.h"
+#include "RTS/EventTracker/l3EmcCalibration.h"
+#include "RTS/EventTracker/FtfSl3.h"
+#include "RTS/EventTracker/gl3Event.h"
+#include "RTS/EventTracker/gl3EMC.h"
 
 class daqReader;
 
