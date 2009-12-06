@@ -178,18 +178,17 @@ StEemcTriggerSimu::InitRun(int runnumber){
   memset(feeMask,0xff,sizeof(feeMask)); // mask everything as bad
   getEemcFeeMask();
 
-  St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("StarDb");
-  assert(mydb);
-  mYear=mydb->GetDateTime().GetYear();
-  int yyyymmdd=mydb->GetDateTime().GetDate(); //form of 19971224 (i.e. 24/12/1997)
-  int hhmmss=mydb->GetDateTime().GetTime(); //form of 123623 (i.e. 12:36:23)
+  const TDatime& dbtime = StMaker::GetChain()->GetDBTime();
+  mYear = dbtime.GetYear();
+  int yyyymmdd = dbtime.GetDate(); //form of 19971224 (i.e. 24/12/1997)
+  int hhmmss   = dbtime.GetTime(); //form of 123623 (i.e. 12:36:23)
 
   LOG_INFO<<Form("Eemc::InitRun()  yyyymmdd=%d  hhmmss=%06d\n", yyyymmdd, hhmmss )<<endm;
 
   //char text[1000];
   //sprintf(text,"%sL0/%d/EemcFeePed/",mSetupPath.Data(),mYear);  
   //EemcTrigUtil::getFeePed4(text, yyyymmdd, hhmmss, mxChan, feePed);
-  EemcTrigUtil::getFeePed4(mydb->GetDateTime(),mxChan,feePed);
+  EemcTrigUtil::getFeePed4(dbtime,mxChan,feePed);
 
   if( mYear == 2006 ){ // #### modified line by Liaoyuan 
     DsmThreshold thresholds;
@@ -693,6 +692,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.22  2009/12/06 21:57:49  pibero
+// Removed dependency on hard-coded maker's name.
+//
 // Revision 1.21  2009/11/19 07:29:28  pibero
 // Mask out faulty EEMC towers. Add more LOG_DEBUG messages.
 //
