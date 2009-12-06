@@ -1,4 +1,4 @@
-// $Id: gl3Data.cxx,v 1.1 2009/12/06 06:47:52 fine Exp $
+// $Id: gl3Data.cxx,v 1.2 2009/12/06 07:03:50 fine Exp $
 
 #include "gl3Data.h"
 
@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
-#include <gl3LMVertexFinder.h>
+#include "RTS/EventTracker/gl3LMVertexFinder.h"
 
 Gl3Data::Gl3Data(QObject* parent, const char* name)
   : QObject(parent, name) {
