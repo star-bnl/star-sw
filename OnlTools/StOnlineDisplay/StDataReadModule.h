@@ -1,4 +1,4 @@
-// $Id: StDataReadModule.h,v 1.1 2009/12/01 01:33:33 fine Exp $
+// $Id: StDataReadModule.h,v 1.2 2009/12/06 06:47:52 fine Exp $
 
 #ifndef STAR_StDataReadModule
 #define STAR_StDataReadModule
@@ -32,7 +32,7 @@
 // You do need in such simple case to add the include file
 // (and compilation is much faster).
 
-class StEvpReaderThread;
+class  StEvpReader;
 struct global_track;
 class  TColoredAxis;
 struct DATAP;
@@ -45,6 +45,8 @@ struct tpc_t;
 class  daqReader;
 struct btow_t;
 class  daq_dta;
+class  QObject;
+class  StuDraw3DEvent;
 
 class StDataReadModule : public TModule {
    friend class StSteeringModule;
@@ -62,7 +64,7 @@ class StDataReadModule : public TModule {
     Int_t       MakeColor(Double_t energy);
 
     // Protected data if any
-    StEvpReaderThread  *fEventPoolReader;
+    StEvpReader *fEventPoolReader;
     Bool_t      fNeedRecreate;
     TString      fDaqFileName;
     TString     fLastGoodDaqFileName;
@@ -90,7 +92,7 @@ class StDataReadModule : public TModule {
     Int_t         fL3HitsOn;   //! should we draw tpc hits
     St_emcOnlineStatus *fBemcOnlineStatus; // Emc barrel status
     Bool_t        fRecordReady; // The next record has been read
-    Int_t         fEmcDataLenght; // the lenght of the emc data record;
+    Int_t         fEmcDataLength; // the lenght of the emc data record;
     TObjectSet   *fTracks;
     TObjectSet   *fHits;
     QObject      *fGuiObject;
@@ -98,6 +100,10 @@ class StDataReadModule : public TModule {
     btow_t *fBtow;
     daq_dta *fEmc_in;
     Int_t   fLengthBtow;
+    StuDraw3DEvent  *fEventDisplay; 
+    std::vector<float> fHittxyz;
+    std::vector<float> fTrackXYZ;
+
     void ClearTracks(Option_t *);
     void ClearHits(Option_t *);
     int tpcReader(daqReader *m, int sector );
@@ -107,13 +113,14 @@ public:
     virtual void   Clear(Option_t *option="");
     virtual Int_t  Init();
     virtual Int_t  Make();
+    StuDraw3DEvent   *Display();
 
   // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty TModule::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty TModule::FinishRun 
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.1 2009/12/01 01:33:33 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.2 2009/12/06 06:47:52 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -127,6 +134,7 @@ public:
   void  SetMagneticField(float field=0.005) {fBField = field;}
   Int_t MakeTpcHits();
   Int_t MakeTracks();
+  Int_t MakeEmcHits();
   Int_t NextEvent();
   Int_t NextFile();
   Int_t Remake();
