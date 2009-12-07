@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.2 2009/12/06 06:47:52 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.3 2009/12/07 18:41:31 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -63,7 +63,7 @@ StSteeringModule::StSteeringModule(const char *name):TModule(name)
 	     }
       }
 */
-//      fDataReadModule->SetDaqFileName("CuCu72.daq"); // move to StStartDisplay
+     SetDaqFileName("st_physics_10168011_raw_4030001.daq"); // move to StStartDisplay
  
 }
 
@@ -93,11 +93,11 @@ Int_t StSteeringModule::Init(){
    
 
    Int_t res = TModule::Init();
-   TDataSet *ds = GetDataBase("Calibrations/emc/map");
+   TDataSet *ds = GetInputDB("Calibrations/emc/map");
    assert(ds);
-   ds  = GetDataBase("RunLog/onl/starClockOnl");
+   ds  = GetInputDB("RunLog/onl/starClockOnl");
    assert(ds);
-   ds  =GetDataBase("Geometry/tpc");
+   ds  =GetInputDB("Geometry/tpc");
    assert(ds);
    Maker("dbName")->SetActive(kFALSE);
   // Maker("tpcdb")->SetActive(kFALSE);
