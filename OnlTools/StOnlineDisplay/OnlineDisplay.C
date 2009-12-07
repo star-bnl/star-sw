@@ -1,6 +1,8 @@
-class StMaker;
-StMaker *displayMaker=0;
-StMaker *OnlineDisplay () {
+class StSteeringModule;
+StSteeringModule *displayMaker=0;
+StSteeringModule *OnlineDisplay (const char *daqFile=
+      "/star/data03/daq/2007/346/8346052/st_physics_8346052_raw_1010011.daq"
+      ) {
 gSystem->Load("StarRoot");
 gSystem->Load("StarClassLibrary");
 gROOT->Macro("Load.C");
@@ -32,7 +34,11 @@ gSystem->Load("ONLINE.so");
 #endif  
 //  a->Show();
 //  a->ShowStarEvent();
- StSteeringModule *ds = new StSteeringModule;
+ StSteeringModule *ds = new StSteeringModule; 
+ ds->SetDaqFileName(daqFile);
+ ds->SetL3TracksOn(0);
+ ds->SetL3HitsOn(1);
+ ds->SetEmcHitsOn(0);
  ds->Init();
  ds->Make();
  displayMaker=ds;

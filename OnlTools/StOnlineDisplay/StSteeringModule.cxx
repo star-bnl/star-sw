@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.3 2009/12/07 18:41:31 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.4 2009/12/07 20:46:35 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -63,7 +63,7 @@ StSteeringModule::StSteeringModule(const char *name):TModule(name)
 	     }
       }
 */
-     SetDaqFileName("st_physics_10168011_raw_4030001.daq"); // move to StStartDisplay
+//     SetDaqFileName("st_physics_10168011_raw_4030001.daq"); // move to StStartDisplay
  
 }
 
