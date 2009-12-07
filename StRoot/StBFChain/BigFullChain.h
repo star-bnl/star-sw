@@ -100,8 +100,11 @@ Bfc_st BFC[] = { // standard chains
            ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
   {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,ToF,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
+
   {"Idst"        ,""  ,"",              "dst,event,compend,EventQA"   ,"","","Turn on DST for ITTF",kFALSE},
-  {"IAna"    ,""  ,"","dEdxY2,Kink2,xi2,CMuDst,analysis","","","Turn on User Maker, dEdx and MuDst",kFALSE},
+  {"IAna"    ,""  ,"","dEdxY2,Kink2,xi2,CMuDst,analysis","",""  ,"Turn on Xi, Kink, dEdx and MuDst",kFALSE},
+  {"BAna"    ,""  ,"","dEdxY2,CMuDst,analysis"          ,"",""            ,"Turn on dEdx and MuDst",kFALSE},
+
   {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,l0,tags,Tree,evout"
    ,                                                               "","","Base chain for 2003 ITTF",kFALSE},
   {"dau2003i"    ,"","","B2003I,IAna,CtbMatchVtx,Corr2,ppOpt,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd"
@@ -224,7 +227,7 @@ Bfc_st BFC[] = { // standard chains
    "B2009.1,IAna,hitfilt,ppOpt,VFMinuit,l3onl,emcDY2,fpd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
         "","","Production chain for 2009 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger)",kFALSE},
   {"pp2009c"      ,"" ,"",   
-   "B2009.2,IAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis","","",
+   "B2009.2,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis","","",
               "Production chain for 2009 data - no Corr, no VF (+l3, bcc/fpd, ftpc, e/b-emc, trig)",kFALSE},
 
 
