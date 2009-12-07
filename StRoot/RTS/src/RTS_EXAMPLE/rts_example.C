@@ -31,6 +31,7 @@
 #include <DAQ_TPC/daq_tpc.h>
 #include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TRG/daq_trg.h>
+#include <DAQ_HLT/daq_hlt.h>
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
@@ -43,6 +44,7 @@ static int tpx_doer(daqReader *rdr, char *do_print) ;
 static int trg_doer(daqReader *rdr, char *do_print) ;
 static int ftp_doer(daqReader *rdr, char *do_print) ;
 static int pmd_doer(daqReader *rdr, char *do_print) ;
+static int hlt_doer(daqReader *rdr, char *do_print) ;
 
 static int emc_pseudo_doer(daqReader *rdr, char *do_print) ;
 static int pp2pp_doer(daqReader *rdr, char *do_print) ;
@@ -217,9 +219,12 @@ int main(int argc, char *argv[])
 		if(pp2pp_doer(evp,print_det)) LOG(INFO,"PP2PP found") ;
 
 
-		/*************************** L3/HLT **************************/
-		if(l3_doer(evp,print_det)) LOG(INFO,"L3/HLT found") ;
+		/*************************** L3/HLT09 **************************/
+		if(l3_doer(evp,print_det)) LOG(INFO,"L3/HLT_FY09 found") ;
 
+		/*************************** HLT10 **************************/
+		if(hlt_doer(evp,print_det)) LOG(INFO,"HLT_FY10 found") ;
+		
 		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
 #ifdef INSIST_ON_EMC_PSEUDO
 		if(emc_pseudo_doer(evp,print_det)) LOG(INFO,"EMC found (any detector)") ;
@@ -291,6 +296,54 @@ static int trg_doer(daqReader *rdr, char  *do_print)
 	return found ;
 }
 
+
+static int hlt_doer(daqReader *rdr, char  *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"hlt")) ;	// leave as is...
+	else do_print = 0 ;
+
+	for(int s=1;s<=24;s++) {
+		dd = rdr->det("hlt")->get("tpx",s) ;
+		while(dd && dd->iterate()) {
+			found = 1 ;
+			if(do_print) {
+				printf("HLT TPX sec %02d: bytes %d\n",dd->sec,dd->ncontent) ;
+			}
+		}
+	}
+
+	dd = rdr->det("hlt")->get("trg") ;
+	while(dd && dd->iterate()) {
+		found = 1 ;
+		if(do_print) {
+			printf("HLT TRG sec %02d: bytes %d\n",dd->sec,dd->ncontent) ;
+		}
+	}
+
+	dd = rdr->det("hlt")->get("tof") ;
+	while(dd && dd->iterate()) {
+		found = 1 ;
+		if(do_print) {
+			printf("HLT TOF sec %02d: bytes %d\n",dd->sec,dd->ncontent) ;
+		}
+	}
+
+	dd = rdr->det("hlt")->get("gl3") ;
+	while(dd && dd->iterate()) {
+		found = 1 ;
+		if(do_print) {
+			hlt_gl3_t *h = (hlt_gl3_t *) dd->Void ;
+			printf("HLT GL3 sec %02d: bytes %d: %d %s\n",dd->sec,dd->ncontent,h->bytes,h->name) ;
+		}
+	}
+
+
+
+	return found ;
+}
 
 static int tpx_doer(daqReader *rdr, char  *do_print)
 {
