@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.79 2009/12/03 22:14:37 fine Exp $
+// $Id: StDraw3D.cxx,v 1.80 2009/12/07 20:21:23 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -481,7 +481,7 @@ TObject *StDraw3D::Points(const std::vector<float> &xyz, Color_t col,Style_t sty
    // with ROOT TPolyMarker3D class
    // with the ROOT color, style, size attributes
    //
-   return Points(xyz.size(),&xyz[0],col,sty,siz);
+   return Points(xyz.size()/3,&xyz[0],col,sty,siz);
 }
 
 //__________________________________________________________________________________________
