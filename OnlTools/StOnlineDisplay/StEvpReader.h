@@ -1,4 +1,4 @@
-// $Id: StEvpReader.h,v 1.1 2009/12/06 07:04:55 fine Exp $
+// $Id: StEvpReader.h,v 1.2 2009/12/07 18:41:31 fine Exp $
 
 #ifndef STAR_StEvpReader
 #define STAR_StEvpReader
@@ -51,10 +51,10 @@ public:
     virtual       ~StEvpReader();
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEvpReader.h,v 1.1 2009/12/06 07:04:55 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEvpReader.h,v 1.2 2009/12/07 18:41:31 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
-  void SetEvpDisk(const QString &mountPoint);
+  void SetEvpDisk(const TString &mountPoint);
   int  EventNumber() const;
   daqReader *GetReader() const { return fEvpReader; }
   daqReader *GetReader()       { return fEvpReader; }

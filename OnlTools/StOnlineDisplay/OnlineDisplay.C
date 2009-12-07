@@ -1,4 +1,6 @@
-{
+class StMaker;
+StMaker *displayMaker=0;
+StMaker *OnlineDisplay () {
 gSystem->Load("StarRoot");
 gSystem->Load("StarClassLibrary");
 gROOT->Macro("Load.C");
@@ -30,4 +32,9 @@ gSystem->Load("ONLINE.so");
 #endif  
 //  a->Show();
 //  a->ShowStarEvent();
+ StSteeringModule *ds = new StSteeringModule;
+ ds->Init();
+ ds->Make();
+ displayMaker=ds;
+ return ds;
 }

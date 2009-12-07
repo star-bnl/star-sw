@@ -1,5 +1,5 @@
 
-// $Id: TModule.cxx,v 1.1 2009/12/01 01:33:33 fine Exp $
+// $Id: TModule.cxx,v 1.2 2009/12/07 18:41:31 fine Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -42,7 +42,7 @@ ClassImp(TModule)
 
 #if 1
 //_____________________________________________________________________________
-TModule::TModule(const char *name,const char *t):StMaker(name,t) , fNxtModule(0)
+TModule::TModule(const char *name,const char *t):StMaker(name,t),fNxtModule()
 , fCurrentMaker(0){ fCurrentMaker=this ;}
 //_____________________________________________________________________________
 TModule::~TModule()
@@ -61,6 +61,7 @@ void  TModule::ResetModule(bool deleteOnly)
 //_____________________________________________________________________________
 Int_t TModule::Make()
 {
+   return StMaker::Make();
 //   Loop on all makers
    Int_t ret = kStOK;
    Int_t run=-1;
@@ -928,6 +929,9 @@ AGAIN: switch (fState) {
 #endif
 //_____________________________________________________________________________
 // $Log: TModule.cxx,v $
+// Revision 1.2  2009/12/07 18:41:31  fine
+// activate daq reader
+//
 // Revision 1.1  2009/12/01 01:33:33  fine
 // Move online display udner OnlTools
 //

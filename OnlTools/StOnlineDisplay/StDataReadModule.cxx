@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.1 2009/12/06 06:47:52 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.2 2009/12/07 18:41:31 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -139,12 +139,12 @@ class StDrawableArray : public TObjArray {
 
  */
 StDataReadModule::StDataReadModule(const char *name):TModule(name)
-, fEventPoolReader(0),fNeedRecreate(kTRUE), fMountPoint("/evp"), fMountDirectory("a"),fEventType(EVP_TYPE_ANY),fEventNumber(0)
-, fBadEventCounter(0),fGoodEventCounter(0)
-, fDataP(0),fDataBuffer(0),fBField(0),fL3p(0),fEventTracker(0),fL3DataProvider(0)
-, fSizeProvider(0),fColorProvider(0)
-, fL3TracksOn(1),fEmcHitsOn(1),fL3HitsOn(0),fBemcOnlineStatus(0),fRecordReady(kFALSE)
-, fEmcDataLength(),fTracks(0),fHits(0),fGuiObject(0),fTpc(0),fBtow(0),fEmc_in(0),fLengthBtow(0)
+, fEventPoolReader(),fNeedRecreate(kTRUE), fMountPoint("/evp"), fMountDirectory("a"),fEventType(EVP_TYPE_ANY),fEventNumber(0)
+, fBadEventCounter(),fGoodEventCounter()
+, fDataP(),fDataBuffer(),fBField(),fL3p(),fEventTracker(),fL3DataProvider()
+, fSizeProvider(),fColorProvider()
+, fL3TracksOn(1),fEmcHitsOn(1),fL3HitsOn(),fBemcOnlineStatus(),fRecordReady(kFALSE)
+, fEmcDataLength(),fTracks(),fHits(),fGuiObject(),fTpc(),fBtow(),fEmc_in(),fLengthBtow()
 , fEventDisplay()
 {
   //
@@ -259,11 +259,13 @@ Int_t StDataReadModule::Init(){
 Int_t StDataReadModule::Make()
 {
    int retStatus = kStOK;
-
-   fEventPoolReader->NextEvent(); 
-   fRecordReady = fEventPoolReader->EventStatus();
    
-   retStatus = (!fEventPoolReader->GetReader()) ? NextFile() : kStOK;
+   if (fEventPoolReader ) {
+      fEventPoolReader->NextEvent(); 
+      fRecordReady = fEventPoolReader->EventStatus();
+   }
+   
+   retStatus = (!fEventPoolReader || !fEventPoolReader->GetReader()) ? NextFile() : kStOK;
 
   
    if(retStatus == kStOK)  retStatus = NextEvent();
