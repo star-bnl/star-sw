@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.2 2009/12/07 18:41:31 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.3 2009/12/07 20:46:35 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -143,7 +143,7 @@ StDataReadModule::StDataReadModule(const char *name):TModule(name)
 , fBadEventCounter(),fGoodEventCounter()
 , fDataP(),fDataBuffer(),fBField(),fL3p(),fEventTracker(),fL3DataProvider()
 , fSizeProvider(),fColorProvider()
-, fL3TracksOn(1),fEmcHitsOn(1),fL3HitsOn(),fBemcOnlineStatus(),fRecordReady(kFALSE)
+, fL3TracksOn(0),fEmcHitsOn(1),fL3HitsOn(1),fBemcOnlineStatus(),fRecordReady(kFALSE)
 , fEmcDataLength(),fTracks(),fHits(),fGuiObject(),fTpc(),fBtow(),fEmc_in(),fLengthBtow()
 , fEventDisplay()
 {
@@ -201,12 +201,12 @@ StuDraw3DEvent  *StDataReadModule::Display()
 //_____________________________________________________________________________
 void  StDataReadModule::Clear(Option_t * option)
 {
-   if (fEventDisplay) fEventDisplay->Clear();
    ClearTracks(option);
    ClearHits(option);
-   if (fSizeProvider)  fSizeProvider ->ResetAvailable();
-   if (fColorProvider) fColorProvider->ResetAvailable();
+   if (fSizeProvider)  { fSizeProvider ->ResetAvailable(); fSizeProvider->ResetCounter();  }
+   if (fColorProvider) { fColorProvider->ResetAvailable(); fColorProvider->ResetCounter(); }
    TModule::Clear();
+   if (fEventDisplay) fEventDisplay->Clear();
  }
 //_____________________________________________________________________________
 void  StDataReadModule::ClearHits(Option_t * /*option*/)
@@ -309,7 +309,7 @@ Int_t StDataReadModule::MakeEvent()
     {
        readerName = "Emc";
        fEmcDataLength = EmcReader(); 
-       counter +=  fEmcDataLength;
+       counter +=  fEmcDataLength >0 ? fEmcDataLength : 0;
   	    fprintf(stderr,"%s:  %d bytes...\n", readerName, counter);
        MakeEmcHits();
     }
@@ -336,7 +336,13 @@ Int_t StDataReadModule::MakeEvent()
     }
     if (fL3HitsOn) {
       readerName = "tpc";
-      counter += MakeTpcHits();
+      int l3HitsCount = MakeTpcHits();
+      if (l3HitsCount == 0 ) 
+                 fprintf(stderr,"%s: hits were not present...\n", readerName);
+      else if (l3HitsCount > 0 ) 
+                 fprintf(stderr,"%s: %d hits were rendered...\n", readerName,l3HitsCount );
+  
+      counter += l3HitsCount;
     }
     return  ( counter > 0) ? kStOK : kStErr;
 }
@@ -424,19 +430,6 @@ int StDataReadModule::L3Reader()
 //_____________________________________________________________________________
 int StDataReadModule::MakeTpcHits()
 { 
-   class StTpcHitsPoints : public TPolyMarker3D {
-      private:
-         QString   fObjectInfo;
-      public:
-         StTpcHitsPoints(Int_t n) : TPolyMarker3D (n) {}  
-         char   *GetObjectInfo(Int_t /* px */, Int_t /* py */) const
-         { 
-             QString &info = ((StTpcHitsPoints*)this)->fObjectInfo;
-             info  = QString("<p><b>Total TPC hits: </b>%1").arg( Size() );
-             return (char *)(const char*) fObjectInfo; 
-         }
-   };
-
    UInt_t nHits = 0; 
    
    vector<float> &hittxyz = fHittxyz;
@@ -462,6 +455,8 @@ int StDataReadModule::MakeTpcHits()
   nHits = hittxyz.size()/3;
   if (nHits) {
      Display()->Points(fHittxyz, 17,8,0.12);
+     TString info = Form("<p><b>Total TPC hits: </b>%d",nHits );
+     Display()->SetComment(info.Data()) ;
   }
 
   return nHits;
