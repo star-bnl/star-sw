@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.12 2009/12/06 16:27:42 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.13 2009/12/07 21:01:41 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -57,6 +57,7 @@ Int_t StTpcRTSHitMaker::Init() {
 Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SafeDelete(fTpx);
   fTpx = new daq_tpx() ; 
+  if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
   // do gains example; one loads them from database but I don't know how...
   daq_dta *dta  = fTpx->put("gain");
   for(Int_t sector=1;sector<=24;sector++) {
