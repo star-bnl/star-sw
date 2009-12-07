@@ -15,15 +15,16 @@ St2009ZMaker::initHistos(){
 
   //...... data histograms
   memset(hA,0,sizeof(hA));
-  TList *Lx;  TLine *ln;TH1 *h;
-  char txt[1000], txt0[100];
+  //TList *Lx;  TLine *ln;
+  TH1 *h;
+  char txt[1000];
   int nCase=2;
 
   hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
 
-  char *key[]={"L2W","L2Wnormal","L2Wrandom"};
+  const char *key[]={"L2W","L2Wnormal","L2Wrandom"};
   for(int i=0;i<3;i++) h->Fill(key[i],0.); // preset the order of keys
   
   //final selection stuff:
