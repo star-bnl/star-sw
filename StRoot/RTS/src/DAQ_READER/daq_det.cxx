@@ -35,6 +35,9 @@ daq_det *daq_det_factory::make_det(int wh)
 		case -BTOW_ID :
 			sprintf(libname,"libdaq_emc.so") ;
 			break ;
+		case -L3_ID :
+			sprintf(libname,"libdaqhlt.so") ;
+			break ;
 		}
 	}
 	else {
