@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.33 2009/11/02 17:31:41 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.34 2009/12/07 23:44:58 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.34  2009/12/07 23:44:58  fisyak
+ * Drop coordinate transformation for fortran, remove TpcHitErr
+ *
  * Revision 1.33  2009/11/02 17:31:41  fisyak
  * use directly field from StarMagField, replace St_tpcGainC and St_tpcT0C by St_tpcPadGainT0C, add remove defaults in coordinate transformations
  *
@@ -105,7 +108,6 @@
 #include "StDetectorDbMaker/St_tpcGlobalPositionC.h"
 #include "StDetectorDbMaker/St_tpcSectorPositionC.h"
 #include "StRTpcFieldCage.h"
-#include "StRTpcHitErrors.h"
 #include "TTable.h"
 #include "StDetectorDbMaker/St_tpcPedestalC.h"
 #include "StDetectorDbMaker/St_tpcPadResponseC.h"
@@ -129,7 +131,6 @@ class StTpcDb {
  StTpcElectronicsI*    electronics;   //!
  StTpcT0I*             t0[24];        //!
  StTpcFieldCageI*      FC;
- StTpcHitErrorsI*      hitErrors;
  TDataSet*           tpctrg[3];     //!
  St_tpcDriftVelocity*  dvel;          //!
  St_trgTimeOffset*     toff;          //!
@@ -158,7 +159,6 @@ class StTpcDb {
    StTpcElectronicsI* Electronics();
    St_tpcGlobalPositionC* GlobalPosition() {return St_tpcGlobalPositionC::instance();}
    StTpcFieldCageI* FieldCage();
-   StTpcHitErrorsI* HitErrors();
    StTpcT0I* T0(int sector);
    St_tpcSectorPositionC *SectorPosition() {return St_tpcSectorPositionC::instance();}
    TTable *getTpcTable(int i);
