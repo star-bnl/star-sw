@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.51 2009/11/02 17:31:41 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.52 2009/12/07 23:44:58 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.52  2009/12/07 23:44:58  fisyak
+ * Drop coordinate transformation for fortran, remove TpcHitErr
+ *
  * Revision 1.51  2009/11/02 17:31:41  fisyak
  * use directly field from StarMagField, replace St_tpcGainC and St_tpcT0C by St_tpcPadGainT0C, add remove defaults in coordinate transformations
  *
@@ -160,7 +163,6 @@ ClassImp(StTpcPadPlaneI)
 ClassImp(StTpcSlowControlSimI)
 ClassImp(StTpcT0I)
 ClassImp(StTpcFieldCageI)
-ClassImp(StTpcHitErrorsI)
 #endif
 //_____________________________________________________________________________
 StTpcDb::StTpcDb(TDataSet* input) : m_Debug(0) {
@@ -385,25 +387,6 @@ StTpcFieldCageI* StTpcDb::FieldCage(){
   }
   return FC;
 }
-
-//_____________________________________________________________________________
-StTpcHitErrorsI* StTpcDb::HitErrors(){
-  if (!hitErrors){            // get hit errors from data base
-   const int dbIndex = kCalibration;
-   if (tpctrg[dbIndex]){
-     //    TDataSet* tpd = tpctrg[dbIndex]->Find("tpcHitErrors");
-     St_tpcHitErrors *tpd = (St_tpcHitErrors* ) FindTable("tpcHitErrors",dbIndex);
-     if (!(tpd && tpd->HasData()) ){
-       gMessMgr->Message("StTpcDb::Error Finding Tpc Hit Error Info","E");
-       return 0;
-     }
-     if (Debug()) tpd->Print(0,1);
-     hitErrors = new StRTpcHitErrors(tpd);
-   }
-  }
- return hitErrors;
-}
-
 //_____________________________________________________________________________
 StTpcT0I* StTpcDb::T0(int sector){
   if(sector<1||sector>24){
