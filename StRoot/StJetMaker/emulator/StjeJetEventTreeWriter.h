@@ -28,7 +28,7 @@ using namespace std;
 class StjeJetEventTreeWriter : public StjeTreeWriter {
 
 public:
-  StjeJetEventTreeWriter(const string& outFileName);
+  StjeJetEventTreeWriter(const char* outFileName);
   virtual ~StjeJetEventTreeWriter() {}
 
   void Init();
@@ -54,7 +54,7 @@ private:
 
   vector<AnalyzerCtl> _analyzerCtlList;
 
-  string        _OutFileName;
+  TString       _OutFileName;
   TTree*        _jetTree;
   TFile*        _outFile;
 
