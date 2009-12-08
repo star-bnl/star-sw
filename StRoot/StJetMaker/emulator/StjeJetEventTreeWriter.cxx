@@ -27,7 +27,7 @@
 
 ClassImp(StjeJetEventTreeWriter);
 
-StjeJetEventTreeWriter::StjeJetEventTreeWriter(const string& outFileName)
+StjeJetEventTreeWriter::StjeJetEventTreeWriter(const char* outFileName)
   : _OutFileName(outFileName)
   , _jetTree(0)
   , _outFile(0)
@@ -48,7 +48,7 @@ void StjeJetEventTreeWriter::addJetFinder(StFourPMaker* fourPMaker, const vector
 
 void StjeJetEventTreeWriter::Init()
 {
-  _outFile = new TFile(_OutFileName.c_str(), "recreate");
+  _outFile = new TFile(_OutFileName, "recreate");
   _jetTree = new TTree("jet", "jetTree");
 
   for (vector<AnalyzerCtl>::iterator iAnalyzer = _analyzerCtlList.begin(); iAnalyzer != _analyzerCtlList.end(); ++iAnalyzer)
