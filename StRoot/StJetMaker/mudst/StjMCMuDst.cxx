@@ -1,4 +1,4 @@
-// $Id: StjMCMuDst.cxx,v 1.7 2009/12/08 14:54:35 pibero Exp $
+// $Id: StjMCMuDst.cxx,v 1.8 2009/12/08 14:56:51 pibero Exp $
 
 #include <StjMCMuDst.h>
 
@@ -36,10 +36,8 @@ StjMCParticleList StjMCMuDst::getMCParticleList()
 	vertexZ = g2t_vertex_table[0].ge_x[2];
 
     // Get particles from table particle
-    const St_particle* particle_descriptor = (const St_particle*)geantDstI("particle");
-    if (particle_descriptor) {
-      const particle_st* particle_table = particle_descriptor->GetTable();
-      if (particle_table) {
+    if (const St_particle* particle_descriptor = (const St_particle*)geantDstI("particle"))
+      if (const particle_st* particle_table = particle_descriptor->GetTable()) {
 	StjMCParticle particle;
 
 	particle.runNumber = runNumber;
@@ -68,9 +66,7 @@ StjMCParticleList StjMCMuDst::getMCParticleList()
 	  }
 	}
       }
-    }
   }
 
   return theList;
 }
-
