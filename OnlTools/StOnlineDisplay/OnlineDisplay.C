@@ -9,8 +9,11 @@ gSystem->Load("StTpcDb");
 gSystem->Load("St_db_Maker");
 gSystem->Load("StDetectorDbMaker");
 gSystem->Load("StDbUtilities");
+  gSystem->Load("StDbLib");
+  gSystem->Load("StDbBroker");
 gSystem->Load("StDaqLib");
 gSystem->Load("StEmcUtil"); 
+gSystem->Load("StMagF");
 gSystem->Load("StOnlineDisplay");
 #if 0
  TString ivrootDir = "$IVROOT/lib/";

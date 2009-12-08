@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.4 2009/12/08 01:23:38 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.5 2009/12/08 20:56:58 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -261,19 +261,12 @@ Int_t StDataReadModule::Init(){
 Int_t StDataReadModule::Make()
 {
    int retStatus = kStOK;
-   
-   if (fEventPoolReader ) {
-      fEventPoolReader->NextEvent(); 
-      fRecordReady = fEventPoolReader->EventStatus();
-   }
-   
-   retStatus = (!fEventPoolReader || !fEventPoolReader->GetReader()) ? NextFile() : kStOK;
 
-  
-   if(retStatus == kStOK)  retStatus = NextEvent();
+   if (!fEventPoolReader )   retStatus = NextFile();
 
+   if ( retStatus == kStOk ) retStatus = NextEvent();
 
-   if(retStatus == kStOK)  retStatus = MakeEvent();
+   if ( retStatus == kStOK ) retStatus = MakeEvent();
 
    return retStatus;
 }
@@ -353,15 +346,18 @@ Int_t StDataReadModule::MakeEvent()
 Int_t StDataReadModule::NextEvent()
 {
    // Create the next event from evp data
-   int retStatus=kStOK;
+   int retStatus=kStErr;
 #if 0
      char *currentData =  fDataP = fEventPoolReader->get(fEventNumber,fEventType); 
 #else
+     fEventPoolReader->NextEvent(); 
+     fRecordReady = fEventPoolReader->EventStatus();
      daqReader *currentData =  fDataP = fEventPoolReader->GetReader(); 
 #endif         
 //     fprintf(stderr," StDataReadModule::NextEvent - evpReader = %x, event # = %d event type %d; mem %p\n",fDataP, fEventNumber,fEventType
 //           ,((evpReader*)fDataP)->mem);
-     if(currentData) {	// event  valid
+     if(currentData && fRecordReady) {
+        retStatus=kStOk;    	// event  valid
         StEvtHddr *eventHeader =  GetEvtHddr();
         daqReader *reader = fEventPoolReader->GetReader();
         eventHeader->SetEventNumber(reader->event_number);
@@ -383,7 +379,7 @@ Int_t StDataReadModule::NextEvent()
 /// NextFile - this method is called open the next daq file if any
 Int_t StDataReadModule::NextFile()
 {
-    int retStatus = kStOK;
+   int retStatus = kStOK;
    if (! fEventPoolReader) {
       fEventPoolReader = new StEvpReader(fDaqFileName,fMountPoint);
       LOG_DEBUG << " new StEvpReaderThread to be started with "
