@@ -35,32 +35,32 @@
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
-static int bsmd_doer(daqReader *rdr, char  *do_print) ;
-static int esmd_doer(daqReader *rdr, char  *do_print) ;
-static int btow_doer(daqReader *rdr, char  *do_print) ;
-static int etow_doer(daqReader *rdr, char  *do_print) ;
-static int tpc_doer(daqReader *rdr, char *do_print) ;
-static int tpx_doer(daqReader *rdr, char *do_print) ;
-static int trg_doer(daqReader *rdr, char *do_print) ;
-static int ftp_doer(daqReader *rdr, char *do_print) ;
-static int pmd_doer(daqReader *rdr, char *do_print) ;
-static int hlt_doer(daqReader *rdr, char *do_print) ;
+static int bsmd_doer(daqReader *rdr, const char  *do_print) ;
+static int esmd_doer(daqReader *rdr, const char  *do_print) ;
+static int btow_doer(daqReader *rdr, const char  *do_print) ;
+static int etow_doer(daqReader *rdr, const char  *do_print) ;
+static int tpc_doer(daqReader *rdr, const char *do_print) ;
+static int tpx_doer(daqReader *rdr, const char *do_print) ;
+static int trg_doer(daqReader *rdr, const char *do_print) ;
+static int ftp_doer(daqReader *rdr, const char *do_print) ;
+static int pmd_doer(daqReader *rdr, const char *do_print) ;
+static int hlt_doer(daqReader *rdr, const char *do_print) ;
 
-static int emc_pseudo_doer(daqReader *rdr, char *do_print) ;
-static int pp2pp_doer(daqReader *rdr, char *do_print) ;
-static int l3_doer(daqReader *rdr, char *do_print) ;
+static int emc_pseudo_doer(daqReader *rdr, const char *do_print) ;
+static int pp2pp_doer(daqReader *rdr, const char *do_print) ;
+static int l3_doer(daqReader *rdr, const char *do_print) ;
 
 int main(int argc, char *argv[])
 {
 	extern char *optarg ;
 	extern int optind ;
 	int c ;
-	char *print_det = "" ;
+	const char *print_det = "" ;
 	char _mountpoint[256];
 	char *mountpoint = NULL;
 
 	rtsLogOutput(RTS_LOG_STDERR) ;
-	rtsLogLevel(WARN) ;
+	rtsLogLevel((char *)WARN) ;
 
 
 	while((c = getopt(argc, argv, "D:d:m:h")) != EOF) {
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
 	return 0 ;
 }
 
-static int trg_doer(daqReader *rdr, char  *do_print)
+static int trg_doer(daqReader *rdr, const char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -297,7 +297,7 @@ static int trg_doer(daqReader *rdr, char  *do_print)
 }
 
 
-static int hlt_doer(daqReader *rdr, char  *do_print)
+static int hlt_doer(daqReader *rdr, const char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -345,7 +345,7 @@ static int hlt_doer(daqReader *rdr, char  *do_print)
 	return found ;
 }
 
-static int tpx_doer(daqReader *rdr, char  *do_print)
+static int tpx_doer(daqReader *rdr, const char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -446,7 +446,7 @@ static int tpx_doer(daqReader *rdr, char  *do_print)
 
 }
 
-static int ftp_doer(daqReader *rdr, char *do_print)
+static int ftp_doer(daqReader *rdr, const char *do_print)
 {
   int found = 0;
   daq_dta *dd;
@@ -484,7 +484,7 @@ static int ftp_doer(daqReader *rdr, char *do_print)
 }
 
 
-static int tpc_doer(daqReader *rdr, char  *do_print)
+static int tpc_doer(daqReader *rdr, const char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -520,7 +520,7 @@ static int tpc_doer(daqReader *rdr, char  *do_print)
 }
 
 
-static int pmd_doer(daqReader *rdr, char  *do_print)
+static int pmd_doer(daqReader *rdr, const char  *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -547,7 +547,7 @@ static int pmd_doer(daqReader *rdr, char  *do_print)
 	
 }
 	
-static int bsmd_doer(daqReader *rdr, char *do_print)
+static int bsmd_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -653,7 +653,7 @@ static int bsmd_doer(daqReader *rdr, char *do_print)
 	return found ;
 }
 
-static int esmd_doer(daqReader *rdr, char *do_print)
+static int esmd_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -684,7 +684,7 @@ static int esmd_doer(daqReader *rdr, char *do_print)
 	return found ;
 }
 
-static int etow_doer(daqReader *rdr, char *do_print)
+static int etow_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -715,7 +715,7 @@ static int etow_doer(daqReader *rdr, char *do_print)
 	return found ;
 }
 
-static int btow_doer(daqReader *rdr, char *do_print)
+static int btow_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -746,7 +746,7 @@ static int btow_doer(daqReader *rdr, char *do_print)
 	return found ;
 }
 
-static int emc_pseudo_doer(daqReader *rdr, char *do_print)
+static int emc_pseudo_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -772,7 +772,7 @@ static int emc_pseudo_doer(daqReader *rdr, char *do_print)
 }
 
 
-static int pp2pp_doer(daqReader *rdr, char *do_print)
+static int pp2pp_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
@@ -802,7 +802,7 @@ static int pp2pp_doer(daqReader *rdr, char *do_print)
 	return found ;
 }
 
-static int l3_doer(daqReader *rdr, char *do_print)
+static int l3_doer(daqReader *rdr, const char *do_print)
 {
 	int found = 0 ;
 	daq_dta *dd ;
