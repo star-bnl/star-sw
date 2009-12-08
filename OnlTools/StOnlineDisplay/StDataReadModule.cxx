@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.3 2009/12/07 20:46:35 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.4 2009/12/08 01:23:38 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -22,7 +22,9 @@
 
 #include "Riostream.h"
 #include "TCanvas.h"
-
+#ifdef nPhi
+#  undef nPhi
+#endif
 #include "RTS/EventTracker/eventTrackerLib.hh"
 #include "TPolyMarker3D.h"
 #include "RTS/EventTracker/gl3Event.h"
@@ -141,7 +143,7 @@ class StDrawableArray : public TObjArray {
 StDataReadModule::StDataReadModule(const char *name):TModule(name)
 , fEventPoolReader(),fNeedRecreate(kTRUE), fMountPoint("/evp"), fMountDirectory("a"),fEventType(EVP_TYPE_ANY),fEventNumber(0)
 , fBadEventCounter(),fGoodEventCounter()
-, fDataP(),fDataBuffer(),fBField(),fL3p(),fEventTracker(),fL3DataProvider()
+, fDataP(),fDataBuffer(),fBField(0.05),fL3p(),fEventTracker(),fL3DataProvider()
 , fSizeProvider(),fColorProvider()
 , fL3TracksOn(0),fEmcHitsOn(1),fL3HitsOn(1),fBemcOnlineStatus(),fRecordReady(kFALSE)
 , fEmcDataLength(),fTracks(),fHits(),fGuiObject(),fTpc(),fBtow(),fEmc_in(),fLengthBtow()
@@ -468,8 +470,6 @@ int StDataReadModule::MakeTracks()
    int retStatus = kStOK;
     UInt_t nTrack =  fL3DataProvider->GetNTracks();
    if ( (nTrack >0) &&  fL3TracksOn ) {
-       fTrackXYZ.clear();
-       fTrackXYZ.reserve(nTrack);
        retStatus = nTrack;
        
        Distribution(fL3DataProvider,nTrack);
@@ -477,6 +477,7 @@ int StDataReadModule::MakeTracks()
        gl3Track *track =  fL3DataProvider->getFirstTrack();
 
        for (UInt_t i = 0; i < nTrack; i++, track =  fL3DataProvider->getNextTrack() ){
+          fTrackXYZ.clear();
           Color_t trackColor = kRed;
             if (trackColor > 0) {
                  
@@ -512,7 +513,15 @@ int StDataReadModule::MakeTracks()
                Float_t step = len / nSteps;
 
                StHelix3DPoints tracksPoints(&helix,step,nSteps,kFALSE);
-
+               LOG_INFO << i << ": " <<  helix << ": Len="<< len << ": nSteps="<< nSteps  << endm; 
+               for (Int_t j=0; j<= nSteps; j++ ) {
+                  fTrackXYZ.push_back(tracksPoints.GetX(j));
+                  fTrackXYZ.push_back(tracksPoints.GetY(j));
+                  fTrackXYZ.push_back(tracksPoints.GetZ(j));
+                        
+               }
+               LOG_INFO <<" Color" << MakeColor(track->dedx) << ": "<<  fTrackXYZ.size() 
+                         << " de/dx=" << track->dedx << " pT="  << track->pt << endm; 
                Display()->Line(fTrackXYZ,MakeColor(track->dedx));
                Display()->SetComment(Form("<p><b>De/Dx=</b>%f<br><b>pT=   </b>%f",track->dedx,track->pt));
            }
