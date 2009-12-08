@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.5 2009/10/13 17:19:35 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.6 2009/12/08 20:02:11 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -21,24 +21,50 @@
 #include "TGeoVolume.h"
 #include "TGeoShape.h"
 #include "TGeoBBox.h"
+#include "TCernLib.h"
 #include "StTGeoHelper.h"
+#include "StMultiKeyMap.h"
 
 static StTGeoHelper *gStTGeoHelper=0;
 
 ClassImp(StTGeoHelper)
+ClassImp(StVoluInfo)
+ClassImp(StHitPlaneInfo)
+ClassImp(StHitPlane)
+
 enum EMEDIUM {kISVOL =0,kIFIELD=1,kFIELDM=2,kTMAXFD=3
              ,kSTEMAX=4,kDEEMAX=5,kEPSIL =6,kSTMIN =7};
+void myBreak(int i) 
+{ 
+static int iCatch=-999;
+  if (iCatch!=i) return;
+  printf("myBreak:iCatch=%d\n",i);
+}
 //_____________________________________________________________________________
 StTGeoHelper::StTGeoHelper()
 {
+  assert(!gStTGeoHelper);
+  gStTGeoHelper=this;
   memset(fBeg,0,fEnd-fBeg);  
-  fExtArr = new TObjArray();
-  fPlaArr = new TObjArray();
+  fVoluInfoArr = new TObjArray();
+  fHitPlaneArr = new TObjArray();
   fModuLev = 2;
 }
 //_____________________________________________________________________________
-void StTGeoHelper::Init()
+void StTGeoHelper::Init(int mode)
 {
+  fMode = mode;
+  InitInfo();
+  if (fMode&1) InitHitShape();
+  if (fMode&2) InitHitPlane();
+
+#if 0
+  if (fMode >0 ) {
+    fHitPlaneHardMap = new StHitPlaneHardMap;
+    fSeedMap =         new StMultiKeyMap(2);
+  }
+  gGeoManager->CdTop();
+  
   StTGeoIter it;
   it.Print("StTGeoHelper_Init");
 //	Create HitShape
@@ -54,29 +80,29 @@ void StTGeoHelper::Init()
   fHitShape = new StTGeoHitShape(z1,z2);
 
   int nHits=0;
-  StVoluExt *myModu=0;
+  StVoluInfo *myModu=0;
   for (;(vol=*it);++it) {
     vol->GetShape()->ComputeBBox();
-//	Check for MODULE    
-
     int volId = vol->GetNumber();
 //		First visit
+    TString path(it.GetPath());
     if (it.IsFirst()) {		//First visit
 //			Recognize module
+//			Check for MODULE    
       do {
 	if (IsModule(vol)) 		break;
 	if (fModuLev != it.GetLev()) 	break;
-	StVoluExt *ext = GetExt(volId);
-	if (!ext) { ext = new StVoluExt(volId); SetExt(ext);}
+	StVoluInfo *ext = GetINFO(volId);
 	ext->SetModule();
         myModu = ext; nHits=0;
  	printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
       } while(0);
 
-      MakeGenHitPlane(it);
+//			try to make HitPlaneInfo  
+      if (fMode >0 ) MakeHitPlaneInfo(it);
 
-
-      if (IsSensitive(vol)) {//Update HitShape
+//			Update HitShape
+      if (IsSensitive(vol)) {		
         nHits++;
         double global[8][3],local[3],D[3];
         TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
@@ -102,10 +128,13 @@ void StTGeoHelper::Init()
         fHitShape->Update(z1,z2,rMax);
       }
 
+
     } else if (it.IsLast()) { 		//Last visit 
 
+//		Define for MODULE (capital letters, module with hits)   
         if (!myModu) 		continue;
 	if (!IsModule(vol)) 	continue;
+	if ( IsMODULE(vol)) 	continue;
         if (nHits) {
 	  myModu->SetMODULE();
  	  printf("MODULE = %s(%d) hits=%d",vol->GetName(),volId,nHits);
@@ -113,23 +142,145 @@ void StTGeoHelper::Init()
         }  
       myModu=0; nHits=0;
     }
-
-    StGenHitPlane *ghp = IsHitPlane(vol);
-    if (!ghp) continue;
-    StHitPlane *hp = ghp->MakeHitPlane(it);
-    if (!hp) continue;
+  }
+  if (fMode==0) return;
+  it.Reset();
+  for (;(vol=*it);++it) {
+    if (!it.IsFirst()) 	continue;	//First visit only
+    StHitPlaneInfo *ghp = IsHitPlane(vol);
+    if (!ghp) 		continue;
+    StHitPlane *hp = ghp->MakeHitPlane(it); if(hp){;}
     
+  }
+#endif //0
+}
+//_____________________________________________________________________________
+void StTGeoHelper::InitInfo()
+{
+  gGeoManager->CdTop();
+  
+  StTGeoIter it;
+  it.Print("StTGeoHelper_Init");
+  const TGeoVolume *vol= *it;
 
+  int nHits=0;
+  StVoluInfo *myModu=0;
+  for (;(vol=*it);++it) {
+    vol->GetShape()->ComputeBBox();
+    int volId = vol->GetNumber();
+//		First visit
+    if (it.IsFirst()) {		//First visit
+//			Recognize module
+//			Check for MODULE    
+      do {
+	if (IsModule(vol)) 		break;
+	if (fModuLev != it.GetLev()) 	break;
+	StVoluInfo *ext = GetINFO(volId);
+	ext->SetModule();
+        myModu = ext; nHits=0;
+ 	printf("Module = %s(%d) ",vol->GetName(),volId); it.Print(0);
+      } while(0);
 
+//			Update HitShape
+      if (IsSensitive(vol)) nHits++;
+
+    } else if (it.IsLast()) { 		//Last visit 
+
+//		Define for MODULE (capital letters, module with hits)   
+        if (!myModu) 		continue;
+	if (!IsModule(vol)) 	continue;
+	if ( IsMODULE(vol)) 	continue;
+        if (nHits) {
+	  myModu->SetMODULE();
+ 	  printf("MODULE = %s(%d) hits=%d",vol->GetName(),volId,nHits);
+	  it.Print(0);
+        }  
+      myModu=0; nHits=0;
+    }
+  }
+
+}
+//_____________________________________________________________________________
+void StTGeoHelper::InitHitShape()
+{
+  
+  StTGeoIter it;
+  it.Print("StTGeoHelper_Init");
+//	Create HitShape
+  const TGeoVolume *vol= *it;
+  TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
+  bb->ComputeBBox();
+  const double *ori = bb->GetOrigin();
+  double z1 = ori[2]-bb->GetDZ();
+  double z2 = ori[2]+bb->GetDZ();
+//  double rxy = sqrt(pow(fabs(ori[0])+bb->GetDX(),2)
+//                   +pow(fabs(ori[1])+bb->GetDY(),2));
+  fHitShape = new StTGeoHitShape(z1,z2);
+
+  for (;(vol=*it);++it) {
+    vol->GetShape()->ComputeBBox();
+    int volId = vol->GetNumber();
+//		First visit
+    if (!it.IsFirst()) continue;	//First visit only
+//			Update HitShape
+    if (!IsSensitive(vol)) continue;		
+
+    double global[8][3],local[3],D[3];
+    TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
+    bb->ComputeBBox();
+    ori = bb->GetOrigin();
+    D[0] = bb->GetDX();
+    D[1] = bb->GetDY();
+    D[2] = bb->GetDZ();
+    for (int jk=0;jk<8;jk++) {
+      for (int ix=0,im=1; ix<3; ix++,im<<=1) {
+	local[ix] = ori[ix] + D[ix]* ((!!(jk&im))*2 -1);}
+      it.LocalToMaster(local,global[jk]);
+    } 
+    z1 = 3e33; z2 = -3e33; 
+    double rMax = 0;
+    for (int jk=0;jk<8;jk++) {
+      if (z1 > global[jk][2]) z1 = global[jk][2];
+      if (z2 < global[jk][2]) z2 = global[jk][2];
+      double r2 = pow(global[jk][0],2)+pow(global[jk][1],2);
+      if (rMax<r2) rMax=r2;
+    }
+    rMax = sqrt(rMax);
+    fHitShape->Update(z1,z2,rMax);
+  }
+
+}
+//_____________________________________________________________________________
+void StTGeoHelper::InitHitPlane()
+{
+  fHitPlaneHardMap = new StHitPlaneHardMap;
+  fSeedMap =         new StMultiKeyMap(2);
+  
+  StTGeoIter it;
+  const TGeoVolume *vol=0;
+  for (;(vol=*it);++it) {
+    vol->GetShape()->ComputeBBox();
+//		First visit
+    if (!it.IsFirst()) continue;		//First visit only
+//			try to make HitPlaneInfo  
+    MakeHitPlaneInfo(it);
 
   }
 
+  it.Reset();
+  for (;(vol=*it);++it) {
+    if (!it.IsFirst()) 	continue;	//First visit only
+    StHitPlaneInfo *ghp = IsHitPlane(vol);
+    if (!ghp) 		continue;
+    StHitPlane *hp = ghp->MakeHitPlane(it); if(hp){;}
+    
+  }
 
 }
 //_____________________________________________________________________________
 StTGeoHelper::~StTGeoHelper()
 {
-  delete fExtArr;
+  delete fVoluInfoArr;
 }
 //_____________________________________________________________________________
 StTGeoHelper *StTGeoHelper::Instance()
@@ -138,31 +289,40 @@ StTGeoHelper *StTGeoHelper::Instance()
   return gStTGeoHelper;
 }
 //_____________________________________________________________________________
-StVoluExt *StTGeoHelper::GetExt(int idx) const
+StVoluInfo *StTGeoHelper::GetInfo(int idx) const
 {
-  return (StVoluExt*)((idx<fExtArr->GetSize())? (*fExtArr)[idx]:0);
+  return (StVoluInfo*)((idx<fVoluInfoArr->GetSize())? (*fVoluInfoArr)[idx]:0);
 }    
 //_____________________________________________________________________________
-void StTGeoHelper::SetExt(StVoluExt* ext)
+StVoluInfo *StTGeoHelper::GetINFO(int idx) 
 {
-  fExtArr->AddAtAndExpand(ext,ext->GetNumber());
+  StVoluInfo *inf = GetInfo(idx);
+  if (inf) return inf;
+  inf = new StVoluInfo(idx);
+  SetInfo(inf);
+  return inf;
 }    
 //_____________________________________________________________________________
-void StTGeoHelper::SetPlane(StGenHitPlane* pla)
+void StTGeoHelper::SetInfo(StVoluInfo* ext)
 {
-  fPlaArr->Add(pla);
+  fVoluInfoArr->AddAtAndExpand(ext,ext->GetNumber());
+}    
+//_____________________________________________________________________________
+void StTGeoHelper::AddHitPlane(StHitPlane* pla)
+{
+  fHitPlaneArr->Add(pla);
 }    
 //_____________________________________________________________________________
 int StTGeoHelper::IsModule(const TGeoVolume *volu)  const
 {
-  StVoluExt *ext = GetExt(volu->GetNumber());
+  StVoluInfo *ext = GetInfo(volu->GetNumber());
   if (!ext) return 0;
   return ext->IsModule();
 }    
 //_____________________________________________________________________________
 int StTGeoHelper::IsMODULE(const TGeoVolume *volu)  const
 {
-  StVoluExt *ext = GetExt(volu->GetNumber());
+  StVoluInfo *ext = GetInfo(volu->GetNumber());
   if (!ext) return 0;
   return ext->IsMODULE();
 }    
@@ -170,15 +330,15 @@ int StTGeoHelper::IsMODULE(const TGeoVolume *volu)  const
 int StTGeoHelper::IsModule(const TGeoNode   *node)  const
 { return IsModule(node->GetVolume()); }
 //_____________________________________________________________________________
-StGenHitPlane* StTGeoHelper::IsHitPlane(const TGeoVolume *volu)  const
+StHitPlaneInfo* StTGeoHelper::IsHitPlane(const TGeoVolume *volu) const
 {
-  StVoluExt *ext = GetExt(volu->GetNumber());
+  StVoluInfo *ext = GetInfo(volu->GetNumber());
   if (!ext) 			return 0;
   if (!ext->IsHitPlane())	return 0;
-  return (StGenHitPlane*)ext;
+  return (StHitPlaneInfo*)ext;
 }    
 //_____________________________________________________________________________
-StGenHitPlane* StTGeoHelper::IsHitPlane(const TGeoNode   *node)  const
+StHitPlaneInfo* StTGeoHelper::IsHitPlane(const TGeoNode   *node) const
 { return IsHitPlane(node->GetVolume()); }
 
 //_____________________________________________________________________________
@@ -189,6 +349,8 @@ int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
   const TGeoShape* sh=volu->GetShape() ;
   if (!sh) 			return 0;
   if (!sh->IsValidBox()) 	return 0;     
+  if (strncmp("TGeoTub",sh->ClassName(),7)==0) return 0;
+
   const TGeoBBox *bb = (const TGeoBBox*)sh;
   double dd[3]={bb->GetDX(),bb->GetDY(),bb->GetDZ()};
   int jMin = 0;
@@ -197,48 +359,47 @@ int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
   return jMin+1;
 }
 //_____________________________________________________________________________
-int StTGeoHelper::MakeGenHitPlane(const StTGeoIter &it) 
+int StTGeoHelper::MakeHitPlaneInfo(const StTGeoIter &it) 
 {
 static int nCall=0; nCall++;   
 
    const TGeoVolume *myVolu = *it;
    if (!IsSensitive(myVolu)) 			return 0;
    const TGeoVolume *volu=0;
-   StGenHitPlane *bhp=0;
-   for (int force=0;force<2;force++) { 
-     for (int up=0;volu=it.GetVolu(up);up++) {
-       int ax = (force)? 1: MayHitPlane(volu);
-       if (!ax) 	continue;
+   StHitPlaneInfo *bhp=0;
+   for (int up=0;(volu=it.GetVolu(up));up++) {
 
-       const TGeoShape *sh = volu->GetShape();
-       const TGeoBBox *bb = (const TGeoBBox*)sh;
-       int iv = volu->GetNumber();
-       StVoluExt *ext = GetExt(iv);
-       int kase = 0;
-       if (ext) kase = ext->Kind()+1;
-       switch(kase) {
+     int ax = MayHitPlane(volu);
+     if (!ax) 	continue;
 
-	 case 0: //no extention
-	 case 1: //basic extention
-	   bhp = new StGenHitPlane(iv);
-	   if (ext) *bhp = *ext;
-	   bhp->SetHitPlane();
-           for (int jk=0;jk<3;jk++){bhp->fDir[jk][(ax+jk-1)%3]=1;}
-	   memcpy(bhp->fOrg,bb->GetOrigin(),3*sizeof(double));
-	   SetExt(bhp);
-	   delete ext;
-	   break;
+     const TGeoShape *sh = volu->GetShape();
+     const TGeoBBox *bb = (const TGeoBBox*)sh;
+     int iv = volu->GetNumber();
+     StVoluInfo *ext = GetInfo(iv);
+     int kase = 0;
+     if (ext) kase = ext->Kind()+1;
+     switch(kase) {
 
-	 case 2: //HitPlane  extention
-	   bhp = (StGenHitPlane*)ext; 
-	   break;
-	 default: assert(0 && " Wrong kind of StVoluExt");
-       }
-       break;
-    }
-    if (bhp) return 0;
-    printf(" ***Warning: Default HitPlane for:"); it.Print(0);
+       case 0: //no extention
+       case 1: //basic extention
+	 bhp = new StHitPlaneInfo(iv);
+	 if (ext) *bhp = *ext;
+	 bhp->SetHitPlane();
+         for (int jk=0;jk<3;jk++){bhp->fDir[jk][(ax+jk-1)%3]=1;}
+	 memcpy(bhp->fOrg,bb->GetOrigin(),3*sizeof(double));
+	 SetInfo(bhp);
+	 delete ext;
+	 break;
+
+       case 2: //HitPlane  extention
+	 bhp = (StHitPlaneInfo*)ext; 
+	 break;
+       default: assert(0 && " Wrong kind of StVoluInfo");
+     }
+     break;
   }
+  if (bhp) return 0;
+  printf(" ***Warning: HitPlane not found for:"); it.Print(0);
   return 0;
 }
 //_____________________________________________________________________________
@@ -280,6 +441,7 @@ void StTGeoHelper::Print(const char *tit) const
 //_____________________________________________________________________________
 void StTGeoHelper::ls(const char *opt) const
 {
+static int nCall=0;nCall++;
 static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
   int opta = strstr(opt,"a")!=0;
   int optm = strstr(opt,"m")!=0;
@@ -294,7 +456,7 @@ static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
     if (!it.IsFirst()) continue;
 //    int volId = vol->GetNumber();
     int jk= (opta)? 0:-1;
-    StGenHitPlane *ghp=0;
+    StHitPlaneInfo *ghp=0;
     do {
       if (optM && IsMODULE   (vol)) 	{jk=1;break;}
       if (optm && IsModule   (vol)) 	{jk=2;break;}
@@ -303,13 +465,23 @@ static const char *types[]={"Dead","MODU","Modu","HitP","Sens"};
     } while (0);
     if (jk<0) continue;
     num++;
+//Break(num);
+    TString path(it.GetPath());
     const TGeoShape    *sh = vol->GetShape();
     const TGeoMaterial *ma = vol->GetMaterial();
     printf("%3d - %s(%s",num,vol->GetName(),types[jk]);
-    if (ghp) printf("#%d",ghp->fMap.size());
-    printf(",%s,%s)\t %s\n"
+    if (ghp) {
+      StHitPlane *hp = ghp->GetHitPlane(path);
+      if (!hp) {
+        path+=" Not Found"; ghp->Print(path.Data());}
+      assert(hp);    
+      printf("#%d",hp->GetNHits());
+    }
+    printf(",%s,%s)\t %s"
            ,sh->ClassName()+4
-	   ,ma->GetName(),it.GetPath());
+	   ,ma->GetName(),path.Data());
+    
+    printf("\n");
   }
 }
 //_____________________________________________________________________________
@@ -321,9 +493,29 @@ const char *StTGeoHelper::GetPath() const
 void StTGeoHelper::Test()
 {
    gROOT->Macro("$STAR/StarDb/VmcGeometry/y2009.h");
-   StTGeoHelper hlp;
-   hlp.Init();
-   hlp.ls("p");
+   StTGeoHelper &hlp = *StTGeoHelper::Instance();
+   hlp.Init(1+2);
+//   hlp.ls("p");
+  StTGeoIter it;
+  const TGeoVolume *vol= 0;
+  int num=0;
+  hlp.ClearHits();
+  for (;(vol=*it);++it) {
+    if (!it.IsFirst())       continue;
+    StHitPlaneInfo *hpi = hlp.IsHitPlane(vol);
+    if (!hpi) continue;
+    TString path(it.GetPath());
+    StHitPlane *hp = hpi->GetHitPlane(path);
+    assert(hp);
+    num++;
+    hlp.AddHit((void*)hp,hp->GetOrg(),num,1);
+  }
+  hlp.InitHits();
+  hlp.ls("p");
+
+
+
+
 }
 //_____________________________________________________________________________
 void StTGeoHelper::Break(int kase) 
@@ -333,39 +525,162 @@ if (kase!=myKase) return;
 printf("Break(%d)\n",kase); 
 }
 //_____________________________________________________________________________
-
+const StHitPlane *StTGeoHelper::AddHit(void *hit,const double xyz[3],unsigned int hardw,int seed)
+{
+static int nCall = 0;  nCall++;  
+//   Break(nCall);
+   if (seed) {//add to seed hit collection
+     float r = sqrt(xyz[0]*xyz[0]+xyz[1]*xyz[1]);
+     float env[3]={r,atan2(xyz[1],xyz[0]),xyz[2]};
+     fSeedMap->Add(hit,env);
+  } 
+  StHitPlaneHardMapIter it(fHitPlaneHardMap->find(hardw));
+  StHitPlane *hp=0;
+  TGeoNode   *node;
+  if (it !=  fHitPlaneHardMap->end()) { //HitPlane found
+     hp = (*it).second;
+  } else {   
+     node = gGeoManager->FindNode(double(xyz[0]),double(xyz[1]),double(xyz[2]));
+     assert(node);
+     hp = GetCurrentHitPlane();     
+     (*fHitPlaneHardMap)[hardw]=hp;
+  }
+  assert(hp);
+  hp->AddHit(hit,xyz);
+  return hp;
+}
 //_____________________________________________________________________________
-StGenHitPlane::StGenHitPlane(int volId) : StVoluExt(volId)	
+StHitPlane *StTGeoHelper::GetCurrentHitPlane ()
+{
+  const TGeoNode *node = 0;
+  const StHitPlaneInfo *inf=0;
+  TString path(gGeoManager->GetPath());
+  int inc=0;
+  for (; inc<=3; inc++) {
+    node = gGeoManager->GetMother(inc);
+    if (!node) return 0;
+    inf = IsHitPlane(node);
+    if (inf) break;
+  }
+  if (!inf) return 0;
+  for (int jnc = 1; jnc<=inc; jnc++) {gGeoManager->CdUp();}
+  path=gGeoManager->GetPath();
+  StHitPlane *hp= inf->GetHitPlane(path);
+  return hp;
+}
+//_____________________________________________________________________________
+void StTGeoHelper::ClearHits()
+{
+  fSeedMap->Clear();
+  int n = fHitPlaneArr->GetLast()+1;
+  for (int i=0;i<n;i++) {
+    StHitPlane *hp = (StHitPlane *)fHitPlaneArr->At(i);
+    hp->Clear();
+  }
+}    
+//_____________________________________________________________________________
+void StTGeoHelper::InitHits()
+{
+
+  fSeedMap->MakeTree();
+  int n = fHitPlaneArr->GetLast()+1;
+  for (int i=0;i<n;i++) {
+    StHitPlane *hp = (StHitPlane *)fHitPlaneArr->At(i);
+    hp->InitHits();
+  }
+}    
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+const char *StVoluInfo::GetName() const
+{
+ int volId = GetUniqueID();
+ return (volId) ? gGeoManager->GetVolume(volId)->GetName():"NoName";
+} 
+ 
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+StHitPlaneInfo::StHitPlaneInfo(int volId) : StVoluInfo(volId)	
 {
    memset(fOrg,0,sizeof(fOrg)+sizeof(fDir));
 }
 //_____________________________________________________________________________
-StHitPlane *StGenHitPlane::MakeHitPlane(const StTGeoIter &it)
+StHitPlane *StHitPlaneInfo::MakeHitPlane(const StTGeoIter &it)
 
 {
   TString path(it.GetPath());
   StHitPlane *hp= (StHitPlane *)GetHitPlane(path);
   if (hp) return 0;
-  hp = new StHitPlane;
-  fMap[path] = hp;
+  hp = new StHitPlane(path);
+  StTGeoHelper::Instance()->AddHitPlane(hp);
+  fHitPlanePathMap[path] = hp;
   it.LocalToMaster(fOrg, hp->fOrg);
   for (int i=0;i<3;i++) {it.LocalToMasterVect(fDir[i], hp->fDir[i]);}
   return hp;
 }
 //_____________________________________________________________________________
-const StHitPlane *StGenHitPlane::GetHitPlane (const TString &path) const	
+StHitPlane *StHitPlaneInfo::GetHitPlane (const TString &path) const	
 {
 static int nCall=0; nCall++;
-   StHitPlaneMapIter it = fMap.find(path);
-   if (it ==  fMap.end()) return 0;
+   StHitPlanePathMapIter it = fHitPlanePathMap.find(path);
+   if (it ==  fHitPlanePathMap.end()) {return 0;}
    return (*it).second;
 }
 //_____________________________________________________________________________
-StHitPlane::StHitPlane() 	
+void StHitPlaneInfo::Print(const char* tit ) const
 {
-   memset(fOrg,0,sizeof(fOrg)+sizeof(fDir));
+  printf("\nStHitPlaneInfo(%s) %s\n",GetName(),tit);
+  printf("fOrg:     %g %g %g\n",fOrg[0],fOrg[1],fOrg[2]);
+  for (int i=0;i<3;i++) {;
+    printf("fDir[%d]: %g %g %g\n",i,fDir[i][0],fDir[i][1],fDir[i][2]);}
+  int njk = fHitPlanePathMap.size();
+  printf("HitPlanes %d:\n",njk);
+  int j=0;
+  for (StHitPlanePathMapIter it =fHitPlanePathMap.begin();
+       it!=fHitPlanePathMap.end();++it) {printf(" %3d - %s\n",j,(*it).first.Data());j++;}
+  printf("\n");
+   
 }
 //_____________________________________________________________________________
+StHitPlane::StHitPlane(const char *path): TNamed(path,"") 	
+{
+   memset(fOrg,0,sizeof(fOrg)+sizeof(fDir));
+   fHitMap = new StMultiKeyMap(2);
+}
+//_____________________________________________________________________________
+StHitPlane::~StHitPlane() 	
+{
+   delete fHitMap;fHitMap = 0;
+}
+//_____________________________________________________________________________
+void StHitPlane::AddHit(void *hit,const double xyz[3])
+{
+  double x[3],xx[3];
+  TCL::vsub(xyz, fOrg, x,3);
+  TCL::vmatl(fDir[0], x, xx, 3, 3);
+  double delta = (fabs(x[0])+fabs(x[1])+fabs(x[2]))*1e-2;
+  if (delta < 1e-3) delta = 1e-3;
+  assert(fabs(xx[0])<delta);
+  fHitMap->Add(hit,xx+1);
+
+}
+//_____________________________________________________________________________
+int StHitPlane::GetNHits() const	
+{
+return (fHitMap)?fHitMap->Size():0;
+}
+//_____________________________________________________________________________
+void StHitPlane::InitHits()
+{
+  fHitMap->MakeTree();
+}
+//_____________________________________________________________________________
+void StHitPlane::Clear(const char*)
+{
+  fHitMap->Clear();
+}
+
+
+
 //_____________________________________________________________________________
 //_____________________________________________________________________________
   enum {kEND,kDOWN,kNEXT,kUPP};
@@ -373,10 +688,15 @@ StHitPlane::StHitPlane()
 //_____________________________________________________________________________
   StTGeoIter::StTGeoIter()
 {
-  fLev = 0;
-  fStk[0]=0;
   fNavi = new TGeoNavigator(gGeoManager);
   fNavi->BuildCache();
+  Reset();
+}
+//_____________________________________________________________________________
+void StTGeoIter::Reset()
+{
+  fLev = 0;
+  fStk[0]=0;
   fNavi->CdTop();
   fVolu = fNavi->GetCurrentVolume();
   fNow = 1;
@@ -435,7 +755,7 @@ CASE:
 
   case kUPP: {
     if (!fLev) {fVolu=0; 			fKase=kEND  ; fNow=0; break;}
-    TGeoNode *node = fNavi->GetCurrentNode();
+//  TGeoNode *node = fNavi->GetCurrentNode();
     fNavi->CdUp(); fLev--;
     fVolu = fNavi->GetCurrentVolume();	 
   assert(fLev == fNavi->GetLevel());
@@ -476,6 +796,14 @@ void StTGeoIter::Print(const char *tit) const
   }
   printf("(%s)",v->GetMaterial()->GetName());
   if (v->GetMedium()->GetParam(kISVOL)>0.)printf("*");  
+    
+  v = GetVolu(0);
+  const TGeoShape* sh=v->GetShape() ;
+  if (sh && sh->IsValidBox()) {   
+    const TGeoBBox *bb = (const TGeoBBox*)sh;
+    double dd[3]={bb->GetDX(),bb->GetDY(),bb->GetDZ()};
+    printf(" // shape=%s dx=%g dy=%g dz=%g",sh->ClassName(),dd[0],dd[1],dd[2]);
+  }
   printf("\n");    
 
 }
