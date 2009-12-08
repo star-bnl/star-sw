@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.4 2009/12/07 20:46:35 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.5 2009/12/08 20:56:58 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -11,7 +11,7 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StTpcDb/StTpcDb.h"
-
+#include "StMagFMaker.h"
 
 // STAR makers
 
@@ -34,6 +34,8 @@ StSteeringModule::StSteeringModule(const char *name):TModule(name)
    if (gSystem->AccessPathName("dbSnapshot.root")) {
      LOG_ERROR << "Can not open Db snapshot file. " << "Check the \"dbSnapshot.root\" file" << endm;
    }
+   new StMagFMaker;
+//   St_db_Maker *dbMk = new St_db_Maker("dbName","MySQL:StarDb","$STAR/StarDb");
    St_db_Maker *dbMk = new St_db_Maker("dbName","$STAR/StarDb","");
    new StTpcDbMaker("tpcdb");
    dbMk->SetAttr("dbSnapshot","dbSnapshot.root");
