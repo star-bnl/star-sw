@@ -427,8 +427,7 @@ StEemcTriggerSimu::getEemcAdc(){
 
 	//if(strstr(x->name,"12TD03")) printf("i=%d, name=%s, sec=%d, crate=%d, chan=%d, ped=%.1f, rawADC=%d\n",i, x->name, sec, x->crate, x->chan, x->ped, AdcRead);
 	//  if(x->crate==2) printf(" name=%s crate=%d, chan=%d  ped=%.1f rawADC=%d  stat=%d fail=%d\n", x->name, x->crate, x->chan, x->ped, AdcRead, x->stat, x->fail);
-      }// end of loop over towers
-      return;
+      }	// end of loop over towers
     }
   } else if (mSource == "StEvent") { // Useful for running in BFC
     if (StEvent* event = (StEvent*)StMaker::GetChain()->GetDataSet("StEvent")) {
@@ -450,8 +449,7 @@ StEemcTriggerSimu::getEemcAdc(){
 	      //LOG_DEBUG << Form("crate=%d chan=%d rdo=%d adc=%d",x->crate,x->chan,rdo,adc) << endm;
 	    } // End loop over hits
 	  } // End loop over sectors
-	  return;
-	}	// if (det)
+	} // if (det)
       } // if (emc)
     } // if (event)
   } else {
@@ -717,6 +715,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.24  2009/12/08 02:12:42  pibero
+// Removed extraneous "return;"
+//
 // Revision 1.23  2009/12/08 02:06:59  pibero
 // Add support for StEvent when running in BFC.
 //
