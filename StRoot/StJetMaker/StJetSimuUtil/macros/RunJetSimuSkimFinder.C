@@ -34,6 +34,7 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StJets");
+  gSystem->Load("StJetEvent");
   gSystem->Load("StJetMaker");
   gSystem->Load("StEEmcSimulatorMaker");
 
