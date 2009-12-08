@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.63 2009/11/19 14:05:44 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.64 2009/12/08 21:07:30 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -52,7 +52,8 @@ using namespace units;
 #endif
 #include "StTpcDedxPidAlgorithm.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
-#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVC.h"
+#include "StDetectorDbMaker/St_tpcAcChargeC.h"
 const static StPidParticle NHYPS = kPidHe3;//kPidTriton;
 const static Int_t tZero= 19950101;
 const static Int_t tMin = 20090301;
@@ -191,7 +192,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
   StTpcCoordinateTransform transform(gStTpcDb);
   for (Int_t sector = 1; sector<= numberOfSectors; sector++) {
     for (Int_t row = 1; row <= NumberOfRows; row++) {
-      //      if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
+      //      if (! St_tpcAnodeHVC::instance()->livePadrow(sector,row)) continue;
       if (Debug()>1) cout << "========= sector/row ========" << sector << "/" << row << endl;
       StTpcLocalSectorDirection  dirLS(0.,1.,0.,sector,row);  if (Debug()>1) cout << "dirLS\t" << dirLS << endl;
       StTpcLocalDirection        dirL;      
@@ -329,10 +330,10 @@ Int_t StdEdxY2Maker::Make(){
     if (!node) continue;
     StGlobalTrack  *gTrack = static_cast<StGlobalTrack *>(node->track(global));
     StPrimaryTrack *pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
-#if 0 /* No primary track cut */
+#if 1 /* No primary track cut */
     if (TESTBIT(m_Mode, kCalibration)) {
       if (! pTrack) continue; // reject non primary tracks
-#if 0
+#if 1
       if (pTrack->vertex() != pEvent->primaryVertex()) continue; // only the first primary vertex
 #else
       if ( ((StPrimaryVertex *) pTrack->vertex() )->numMatchesWithBEMC() <= 0) continue;
@@ -395,7 +396,7 @@ Int_t StdEdxY2Maker::Make(){
 	if (Debug() > 1) {tpcHit->Print();}
 	Int_t sector = tpcHit->sector();
 	Int_t row    = tpcHit->padrow();
-	if (! St_tpcAnodeHVavgC::instance()->livePadrow(sector,row)) continue;
+	if (! St_tpcAnodeHVC::instance()->livePadrow(sector,row)) continue;
 	xyz[3] = StThreeVectorD(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z());
 	//________________________________________________________________________________      
 	const StThreeVectorD &normal = *mNormal[sector-1][row-1];
@@ -444,7 +445,7 @@ Int_t StdEdxY2Maker::Make(){
 	}
 	Double_t zP = TMath::Abs(xyz[0].z());
 	//----------------------------- Prompt Hits ? ------------------------------
-	if (zP > 195.0 && zP < 215.) {
+	if (zP > 205.0 && zP < 215.) {
 	  Int_t iWestEast = 0;
 	  if (sector > 12) iWestEast = 1;
 	  Int_t io = 0;
@@ -499,7 +500,6 @@ Int_t StdEdxY2Maker::Make(){
 	transform(localSect[0],PadOfTrack);
 	transform(globalDirectionOfTrack,localADirectionOfTrack,sector,row);
 	transform(localADirectionOfTrack,localDirectionOfTrack);
-	transform(localSect[3],Pad);
 	transform(localSect[3],Pad);
 	CdEdx[NdEdx].Reset();
 	CdEdx[NdEdx].resXYZ[0] = localSect[3].position().x() - localSect[0].position().x();
@@ -782,9 +782,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   static TH2S *Time = 0, *TimeP = 0, *TimeC = 0;
   static TH3S *Pressure = 0, *PressureC = 0, *PressureA = 0;
   static TH3S *PressureT = 0, *PressureTC = 0, *PressureTA = 0;
-#if 1
   static TH3S *Voltage = 0, *VoltageC = 0;
-#endif
+  static TH3S *AcCharge = 0; 
   // ZBGX
   static TH3S **zbgx = 0;
   // end of ZBGX
@@ -1095,12 +1094,12 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 			   NumberOfRows,0.5, NumberOfRows+0.5,150, 6.84, 6.99,nZBins,ZdEdxMin,ZdEdxMax);
     PressureTC  = new TH3S("PressureTC","log(dE/dx)_{corrected} - row & log(I(pi)) versus Log(Pressure*298.2/outputGasTemperature)", 
 			   NumberOfRows,0.5, NumberOfRows+0.5,150, 6.84, 6.99,nZBins,ZdEdxMin,ZdEdxMax);
-#if 1
     Voltage   = new TH3S("Voltage","log(dE/dx)_{uncorrected} - log(I(pi)) versus Row and Voltage", 
 			  NumberOfRows,0.5, NumberOfRows+0.5,410,990.,1400.,nZBins,ZdEdxMin,ZdEdxMax);
     VoltageC  = new TH3S("VoltageC","log(dE/dx)_{corrected} - row & log(I(pi)) versus Row and Voltage", 
 			  NumberOfRows,0.5, NumberOfRows+0.5,410,990.,1400.,nZBins,ZdEdxMin,ZdEdxMax);
-#endif
+    AcCharge  = new TH3S("AcCharge","log(dE/dx)_{corrected} - row & log(I(pi)) versus Row and Accumulated Charge", 
+			  NumberOfRows,0.5, NumberOfRows+0.5,100,5.,30.,nZBins,ZdEdxMin,ZdEdxMax);
     //     GainMonitor  = new TH2S("GainMonitor","log(dE/dx)_{corrected} - log(I(pi)) versus GainMonitor", 
     // 			    100,70.,120.,nZBins,ZdEdxMin,ZdEdxMax);
     Time   = new TH2S("Time","log(dE/dx)_{uncorrected} - log(I(pi)) versus Date& Time", 
@@ -1127,7 +1126,7 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
     percentMethaneInPC = new TH2S("percentMethaneInPC","log(dE/dx/Pion)(corrected) vs percentMethaneIn (percent)",100,9.6,10.6,nZBins,ZdEdxMin,ZdEdxMax);
     percentMethaneInPA = new TH2S("percentMethaneInPA","log(dE/dx/Pion)(just after correction) vs percentMethaneIn (percent)",
 				  100,9.6,10.6,nZBins,ZdEdxMin,ZdEdxMax);
-    ppmOxygenInP = new TH2S("ppmOxygenInP","log(dE/dx/Pion) vs ppmOxygenIn (ppm)",100,20.,30.,nZBins,ZdEdxMin,ZdEdxMax);
+    ppmOxygenInP = new TH2S("ppmOxygenInP","log(dE/dx/Pion) vs ppmOxygenIn (ppm)",100,10.,15.,nZBins,ZdEdxMin,ZdEdxMax);
     flowRateExhaustP = new TH2S("flowRateExhaustP","log(dE/dx/Pion) vs flowRateExhaust (liters/min)",100,5.,20.,nZBins,ZdEdxMin,ZdEdxMax);
     ppmWaterOutP = new TH2S("ppmWaterOutP","log(dE/dx/Pion) vs ppmWaterOut (ppm)",100,0.,20.,nZBins,ZdEdxMin,ZdEdxMax);
     ppmWaterOutPC = new TH2S("ppmWaterOutPC","log(dE/dx/Pion) corrected vs ppmWaterOut (ppm)",100,0.,20.,nZBins,ZdEdxMin,ZdEdxMax);
@@ -1681,15 +1680,16 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (PressureA) PressureA->Fill(FdEdx[k].row,press,FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure].dEdxN);
 	    if (PressureC) PressureC->Fill(FdEdx[k].row,press,FdEdx[k].dEdxN);
 	  }
-#if 1
-	  Double_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(FdEdx[k].sector,FdEdx[k].row);
+	  Double_t V = St_tpcAnodeHVC::instance()->voltagePadrow(FdEdx[k].sector,FdEdx[k].row);
 	  if (V > 0) {
 	    if (Voltage)  Voltage ->Fill(FdEdx[k].row,
 					 V,FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure-1].dEdxN);
 	    if (VoltageC) VoltageC->Fill(FdEdx[k].row,
 					 V,FdEdx[k].dEdxN);
 	  }
-#endif
+	  Double_t               Q = St_tpcAcChargeC::instance()->chargeI();
+	  if (FdEdx[k].row > 13) Q = St_tpcAcChargeC::instance()->chargeO();
+	  AcCharge->Fill(FdEdx[k].row,Q,FdEdx[k].dEdxN);
 	  if (p*t > 0) {
 	    Double_t temp = TMath::Log(p/t);
 	    if (PressureT)  PressureT ->Fill(FdEdx[k].row,temp,FdEdx[k].C[StTpcdEdxCorrection::ktpcPressure-1].dEdxN);
