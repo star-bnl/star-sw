@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.2  2009/12/08 15:14:24  pibero
+// Added Pythia tune per Helen Caines request.
+//
 // Revision 1.1  2008/06/01 05:31:42  tai
 // moved StPythiaEvent to StSpinPool/StJetSkimEvent
 //
@@ -46,6 +49,7 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
     mRunId      = t.mRunId;
     mEventId    = t.mEventId;
     mProcessId  = t.mProcessId;
+    mTune       = t.mTune;
     mVertex     = t.mVertex;
     mS          = t.mS;
     mT          = t.mT;
@@ -79,6 +83,7 @@ StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs)
     mRunId      = rhs.mRunId;
     mEventId    = rhs.mEventId;
     mProcessId  = rhs.mProcessId;
+    mTune       = rhs.mTune;
     mVertex     = rhs.mVertex;
     mS          = rhs.mS;
     mT          = rhs.mT;
