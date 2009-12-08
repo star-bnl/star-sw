@@ -139,6 +139,7 @@ int rdMuWana(
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
+    dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }
 
     
@@ -255,6 +256,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.4  2009/12/08 17:00:06  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2009/12/08 16:53:01  balewski
 // *** empty log message ***
 //
