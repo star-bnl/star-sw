@@ -121,7 +121,7 @@ int rdMuWana(
     // .... Barrel....
     dbMk->SetFlavor("sim","bemcPed"); // set all ped=0
     dbMk->SetFlavor("sim","bemcStatus");  // ideal, all=on
-    
+    dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains 
     dbMk->SetFlavor("sim","bsmdePed"); // set all ped=0
     dbMk->SetFlavor("sim","bsmdeCalib"); // load those, not used in algo
     dbMk->SetFlavor("sim","bsmdeStatus"); // ideal, all=on
@@ -141,7 +141,6 @@ int rdMuWana(
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
   }
 
-  dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
     
   //.... load EEMC database
   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
@@ -256,6 +255,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.3  2009/12/08 16:53:01  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2009/12/07 20:57:48  rcorliss
 // Updated rdMuWana macro to include Z finder and use current directory for the test files hardcoded in.
 //
