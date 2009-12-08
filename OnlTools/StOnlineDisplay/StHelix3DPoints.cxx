@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.cxx,v 1.1 2009/12/06 06:47:52 fine Exp $
+// $Id: StHelix3DPoints.cxx,v 1.2 2009/12/08 01:23:38 fine Exp $
 // $Log: StHelix3DPoints.cxx,v $
+// Revision 1.2  2009/12/08 01:23:38  fine
+// Create the container of the tracks
+//
 // Revision 1.1  2009/12/06 06:47:52  fine
 // Move the Online display package
 //
@@ -139,6 +142,7 @@ Float_t StHelix3DPoints::GetAnyPoint(Int_t idx,Int_t iAxis)  const
       }
     }
   }
+  // printf("StHelix3DPoints::GetAnyPoint %d  %d %e %e\n", idx, iAxis, point, idx*GetStep());
   return point;
 }
 //________________________________________________________________________________
