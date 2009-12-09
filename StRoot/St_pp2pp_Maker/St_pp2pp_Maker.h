@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.9 2009/12/09 01:39:03 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.10 2009/12/09 13:28:40 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -22,8 +22,9 @@ class TGenericTable;
 class StEvent;
 class StRpsCollection;
 
-class pp2ppOffset_st;
 class pp2pp_t;
+class pp2ppOffset_st;
+class pp2ppZ_st;
 
 class St_pp2pp_Maker : public StRTSBaseMaker {
 
@@ -54,7 +55,9 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
   string mPedestalPerchannelFilename ; /// filename to read in pedestal_per_channel
   Int_t readPedestalPerchannel() ;
   Int_t readOffsetPerplane() ;
+  Int_t readZPerplane() ;
   pp2ppOffset_st *mOffsetTable ;
+  pp2ppZ_st *mZTable ;
 
   //  Int_t nevt_count ;
 
@@ -100,7 +103,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.9 2009/12/09 01:39:03 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.10 2009/12/09 13:28:40 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 

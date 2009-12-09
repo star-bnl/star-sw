@@ -18,6 +18,7 @@
 
 #include "tables/St_pp2ppPedestal_Table.h"
 #include "tables/St_pp2ppOffset_Table.h"
+#include "tables/St_pp2ppZ_Table.h"
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StRpsCollection.h"
@@ -52,6 +53,7 @@ Int_t St_pp2pp_Maker::InitRun(int runumber) {
   if ( mLDoCluster ) {
     readPedestalPerchannel() ;
     readOffsetPerplane() ;
+    readZPerplane() ;
   }
   return 0;
 }
@@ -146,6 +148,42 @@ Int_t St_pp2pp_Maker::readOffsetPerplane() {
       */
     } else {
       LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppOffset table (wrong timestamp?). Nothing to return, then" << endm ;
+    }
+
+  }
+
+  return kStOk ;
+
+}
+
+
+Int_t St_pp2pp_Maker::readZPerplane() {
+
+  mZTable = 0;
+
+  TDataSet *DB = 0;
+  DB = GetInputDB("Geometry/pp2pp");
+  if (!DB) { 
+    LOG_ERROR << "ERROR: cannot find database Geometry_pp2pp?" << std::endl; 
+  }
+  else {
+
+    // fetch ROOT descriptor of db table
+    St_pp2ppZ *descr = 0;
+    descr = (St_pp2ppZ*) DB->Find("pp2ppZ");
+    // fetch data and place it to appropriate structure
+    if (descr) {
+      mZTable = descr->GetTable();
+      LOG_DEBUG << "Reading pp2ppZ table with nrows = " << descr->GetNRows() << endm ;
+      /*
+      for (Int_t i = 0; i < descr->GetNRows(); i++) {
+	for ( Int_t j = 0; j< 32 ; j++ )
+	  std::cout << mZTable[i].rp_z_plane[j] << " "  ; 
+	cout << endl ;
+      }
+      */
+    } else {
+      LOG_ERROR << "St_pp2pp_Maker : No data in pp2ppZ table (wrong timestamp?). Nothing to return, then" << endm ;
     }
 
   }
@@ -382,10 +420,13 @@ Int_t St_pp2pp_Maker::MakeClusters() {
       ECluster = 0 ;
       POStimesE = 0 ;
 
-      pp2ppColl->romanPot(i)->plane(j)->setZ(zcoordinates[i]) ; 
+      if ( mZTable )
+	pp2ppColl->romanPot(i)->plane(j)->setZ( mZTable[0].rp_z_plane[4*i+j] ) ; /// z coordinates all in m
+      else
+	pp2ppColl->romanPot(i)->plane(j)->setZ(zcoordinates[i]) ; 
 
       if ( mOffsetTable )
-	offset = mOffsetTable[0].rp_offset_plane[4*i+j]/1000. ; /// all in m
+	offset = mOffsetTable[0].rp_offset_plane[4*i+j]/1000. ; /// offsets all in m
       else
 	offset = double(ErrorCode) ;
       //      cout << "Offsets : " <<  i << " " << j << " " << mOffsetTable[0].rp_offset_plane[4*i+j] << endl ; 
