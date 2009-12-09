@@ -40,7 +40,7 @@ gSystem->Load("ONLINE.so");
  ds->SetL3TracksOn(0);
  ds->SetL3HitsOn(1);
  ds->SetEmcHitsOn(0);
- ds->SetMagneticField();
+ ds->SetMagneticField(0.5);
  ds->Init();
  ds->Make();
  displayMaker=ds;

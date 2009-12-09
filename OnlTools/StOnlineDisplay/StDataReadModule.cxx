@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.5 2009/12/08 20:56:58 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.6 2009/12/09 20:48:45 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -381,7 +381,10 @@ Int_t StDataReadModule::NextFile()
 {
    int retStatus = kStOK;
    if (! fEventPoolReader) {
-      fEventPoolReader = new StEvpReader(fDaqFileName,fMountPoint);
+      fEventPoolReader = fDaqFileName.IsNull() ?
+                 new StEvpReader()
+            :
+                 new StEvpReader(fDaqFileName,fMountPoint);
       LOG_DEBUG << " new StEvpReaderThread to be started with "
                 << fDaqFileName << endm;
       LOG_DEBUG << " new StEvpReaderThread has been started" << endm;

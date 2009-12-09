@@ -1,4 +1,4 @@
-// $Id: StSteeringModule.h,v 1.2 2009/12/06 06:47:52 fine Exp $
+// $Id: StSteeringModule.h,v 1.3 2009/12/09 20:48:45 fine Exp $
 
 #ifndef STAR_StSteeringModule
 #define STAR_StSteeringModule
@@ -25,6 +25,11 @@
 #endif
 
 #include "StDetectorGeometryInterface.h"
+#ifdef __CINT__
+  class QObject;
+#else
+#  include "qobject.h"
+#endif
 
 
 // You may forward declare other classes if you have data-members
@@ -37,12 +42,15 @@
 class  StDataReadModule;
 class  TCanvas;
 class  TQtRootViewer3D;
-class  QObject;
    
-class StSteeringModule : public TModule, StDetectorGeometryInterface{
+class StSteeringModule : public QObject, public TModule, StDetectorGeometryInterface{
+#ifndef __CINT__
+   Q_OBJECT
+#endif
  private:
   // Private method declaration if any
- 
+  Bool_t fAnimate;
+  Bool_t fAnimating;
  protected:
   // Protected method if any
    StDataReadModule          *fDataReadModule;
@@ -57,7 +65,7 @@ class StSteeringModule : public TModule, StDetectorGeometryInterface{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.2 2009/12/06 06:47:52 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.3 2009/12/09 20:48:45 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
           
   }
@@ -86,7 +94,7 @@ class StSteeringModule : public TModule, StDetectorGeometryInterface{
     virtual void ResetConnection();
     
     // StDisplayInterface methods
-        
+    void  Animate(Bool_t on=kTRUE);
     virtual Int_t DisplayEvent(Bool_t refresh=kTRUE);
     virtual Int_t DisplayGeometry(Bool_t refresh=kTRUE, Bool_t ifModified=kTRUE);
     virtual  void Refresh();
@@ -102,8 +110,13 @@ class StSteeringModule : public TModule, StDetectorGeometryInterface{
     virtual void   StopEvents();
     // Thread synch:
     Bool_t IsDisplayNext() const ;
-
-    ClassDef(StSteeringModule,0)   //StSteeringModule for online display
+#ifndef __CINT__
+   public slots:
+   void  Animating();
+#endif
+#ifndef Q_MOC_RUN
+    ClassDef(StSteeringModule,0)   //StSteeringModule for online display          
+#endif
 };
 
 #endif
