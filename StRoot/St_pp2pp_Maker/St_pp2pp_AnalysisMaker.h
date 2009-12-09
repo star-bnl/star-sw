@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_AnalysisMaker.h,v 1.5 2009/11/14 16:07:48 yipkin Exp $
+// $Id: St_pp2pp_AnalysisMaker.h,v 1.6 2009/12/09 01:39:03 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_AnalysisMaker
 #define STAR_St_pp2pp_AnalysisMaker
@@ -89,7 +89,7 @@ class St_pp2pp_AnalysisMaker : public StRTSBaseMaker {
     double energy[MAXClusters] ;       // in ADC
     double xy[MAXClusters] ;
     double z[MAXClusters] ;
-  } allclusters[St_pp2pp_Maker::MAXSEQ][St_pp2pp_Maker::MAXCHAIN] ;
+  } allclusters[St_pp2pp_Maker::kMAXSEQ][St_pp2pp_Maker::kMAXCHAIN] ;
 
 
   struct event_info {
@@ -120,7 +120,7 @@ class St_pp2pp_AnalysisMaker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_AnalysisMaker.h,v 1.5 2009/11/14 16:07:48 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_AnalysisMaker.h,v 1.6 2009/12/09 01:39:03 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
