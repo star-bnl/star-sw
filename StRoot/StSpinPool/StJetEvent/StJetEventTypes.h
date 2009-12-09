@@ -12,6 +12,7 @@
 #include "StJetElement.h"
 #include "StJetTrack.h"
 #include "StJetTower.h"
+#include "StJetParticle.h"
 #include "StJetCandidate.h"
 #include "StJetEvent.h"
 #include "StJetEventReader.h"
