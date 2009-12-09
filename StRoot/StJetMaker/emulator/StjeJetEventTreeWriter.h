@@ -43,7 +43,7 @@ public:
 private:
   
   void fillJetTreeForOneJetFindingAlgorithm(StJetEvent& jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
-  void fillJet(StJetEvent& jetEvent, StProtoJet& pj);
+  void fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFourPMaker* fourPMaker);
 
   struct AnalyzerCtl {
     string            _branchName;
