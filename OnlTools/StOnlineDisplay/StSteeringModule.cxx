@@ -1,10 +1,11 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.5 2009/12/08 20:56:58 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.6 2009/12/09 20:48:45 fine Exp $
 
 
 #include "StSteeringModule.h"
 #include "TROOT.h"
+#include "TPad.h"
 #include "TDataSetIter.h"
 #include "StDataReadModule.h"
 
@@ -12,6 +13,8 @@
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StMagFMaker.h"
+#include <QtCore/QCoreApplication>
+#include <QtCore/QTimer>
 
 // STAR makers
 
@@ -28,6 +31,7 @@
 
  */
 StSteeringModule::StSteeringModule(const char *name):TModule(name)
+, fAnimate(kFALSE),fAnimating(kFALSE)
 {
  // -----------------------------------
  //  St_db_Maker *dbMk = new St_db_Maker("dbName","MySQL:StarDb","$STAR/StarDb");
@@ -308,11 +312,31 @@ void  StSteeringModule::ResetConnection()
 //_____________________________________________________________________________
 void  StSteeringModule::StopEvents()
 {
-   if (fDataReadModule) fDataReadModule->StopEvents();
+   Animate(kFALSE);
+//   if (fDataReadModule) fDataReadModule->StopEvents();
 }
 //_____________________________________________________________________________
 Bool_t  StSteeringModule::IsDisplayNext() const 
 {
 
    return ((StMaker*)fDataReadModule) == CurrentMaker(); 
+}
+
+//_____________________________________________________________________________
+void  StSteeringModule::Animating() 
+{
+  fAnimating = kTRUE; 
+    Clear();
+    QCoreApplication::processEvents();
+    Make();
+    if (gPad) gPad->Update();
+    QCoreApplication::processEvents();
+  fAnimating = kFALSE; 
+  if (fAnimate) Animate();
+}
+//_____________________________________________________________________________
+void  StSteeringModule::Animate(Bool_t on) 
+{
+  fAnimate = on;
+  if (fAnimate )  QTimer::singleShot(1000, this, SLOT(Animating())); 
 }
