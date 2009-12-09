@@ -46,11 +46,11 @@ Int_t St_pp2pp_AnalysisMaker::Init() {
   fClusterTree->Branch("silicon_bunch", &silicon_bunch,"silicon_bunch/b");
 
 
-  char rpname[St_pp2pp_Maker::MAXSEQ][5] = { "EHI", "EHO", "EVU", "EVD", "WHI", "WHO", "WVD", "WVU" };
+  char rpname[St_pp2pp_Maker::kMAXSEQ][5] = { "EHI", "EHO", "EVU", "EVD", "WHI", "WHO", "WVD", "WVU" };
   char title[25], format[35];
 
-  for ( int s=0; s<St_pp2pp_Maker::MAXSEQ ; s++)
-    for ( int c=0; c<St_pp2pp_Maker::MAXCHAIN; c++) {
+  for ( int s=0; s<St_pp2pp_Maker::kMAXSEQ ; s++)
+    for ( int c=0; c<St_pp2pp_Maker::kMAXCHAIN; c++) {
 
       sprintf(title,"%s.ch%d_ncls", rpname[s], c);
       sprintf(format,"%s.ch%d_ncls/I", rpname[s], c);
@@ -131,8 +131,8 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 
   memset( allclusters, 0, sizeof(allclusters) ) ;
   /*
-  for ( s=0; s<St_pp2pp_Maker::MAXSEQ ; s++ )
-    for ( c=0; c<St_pp2pp_Maker::MAXCHAIN ; c++ )
+  for ( s=0; s<St_pp2pp_Maker::kMAXSEQ ; s++ )
+    for ( c=0; c<St_pp2pp_Maker::kMAXCHAIN ; c++ )
       memset(allclusters[s][c],0, sizeof(allclusters[s][c]));
       //      (allclusters[s][c]).nclusters = 0 ;
   */
@@ -233,7 +233,7 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
       c = one_cluster.chain ;
       k = allclusters[s][c].nclusters ;
 
-      if ( k < MAXClusters ) {
+      if ( k < kMAXClusters ) {
 	  
 	allclusters[s][c].length[k] = one_cluster.length ;
 	allclusters[s][c].position[k] = one_cluster.position ;
@@ -306,8 +306,8 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 
 
 
-    for ( s=0; s<St_pp2pp_Maker::MAXSEQ; s++)
-      for ( c=0; c<St_pp2pp_Maker::MAXCHAIN; c++) {
+    for ( s=0; s<St_pp2pp_Maker::kMAXSEQ; s++)
+      for ( c=0; c<St_pp2pp_Maker::kMAXCHAIN; c++) {
 
 	//	StSPtrVecRpsCluster mClusters = pp2ppColl->romanPot(s)->plane(c)->clusters() ;
 	//	for ( k=0; k<mClusters.size(); k++) {
@@ -323,7 +323,7 @@ Int_t St_pp2pp_AnalysisMaker::Make(){
 	  }
 	}
 
-      } //  for ( c=0; c<St_pp2pp_Maker::MAXCHAIN; c++)
+      } //  for ( c=0; c<St_pp2pp_Maker::kMAXCHAIN; c++)
 
   }
   else
