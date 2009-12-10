@@ -55,7 +55,7 @@ Int_t St_pp2pp_Maker::InitRun(int runumber) {
     readOffsetPerplane() ;
     readZPerplane() ;
   }
-  return 0;
+  return kStOk ;
 }
 
 Int_t St_pp2pp_Maker::readPedestalPerchannel() {
