@@ -156,7 +156,7 @@ ifeq (${TARGET_SYSTEM},LINUX)
 		HOSTFLAGS = -mcpu=$(TARGET_CPU)
 	else
 		ifeq (${TARGET_CPU},x86_64)
-			ifeq (${USE_64BITS},x86_64) 
+			ifeq (${USE_64BITS},1) 
 				HOSTFLAGS = -m64
 				LDFLAGS += -m64
 			else
