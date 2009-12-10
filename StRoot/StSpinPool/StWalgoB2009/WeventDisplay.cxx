@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: WeventDisplay.cxx,v 1.2 2009/12/10 16:01:31 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -248,9 +248,9 @@ WeventDisplay::exportEvent(  WeveVertex myV, WeveEleTrack myTr){
 
   hEmcET->SetMinimum(0.3);  hEmcET->SetMaximum(30.);
  // compute approximate event eta for barrel
-  float  z;
+  float x,y,z;
   float Rcylinder= wMK->mBtowGeom->Radius();
-  //  wMK->mBtowGeom->getXYZ(20,x,y,z)+6.; // this is approximate Z of last tower
+  assert(wMK->mBtowGeom->getXYZ(20,x,y,z)==0); // this is approximate Z of last tower
   TVector3 rL(Rcylinder,0,z+myV.z);
   TVector3 rR(Rcylinder,0,z-myV.z);
   float etaL=-rL.Eta(), etaR=rR.Eta();
@@ -397,6 +397,9 @@ WeventDisplay::export2sketchup(  WeveVertex myV, WeveEleTrack myTr){
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.2  2009/12/10 16:01:31  stevens4
+// fixed zero-length vector
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //
