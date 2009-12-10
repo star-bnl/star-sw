@@ -1,4 +1,4 @@
-// $Id: StDataReadModule.h,v 1.2 2009/12/06 06:47:52 fine Exp $
+// $Id: StDataReadModule.h,v 1.3 2009/12/10 22:43:55 fine Exp $
 
 #ifndef STAR_StDataReadModule
 #define STAR_StDataReadModule
@@ -103,6 +103,7 @@ class StDataReadModule : public TModule {
     StuDraw3DEvent  *fEventDisplay; 
     std::vector<float> fHittxyz;
     std::vector<float> fTrackXYZ;
+    Bool_t   fDemo; //< Demo mode: re-open the file after end-of-file
 
     void ClearTracks(Option_t *);
     void ClearHits(Option_t *);
@@ -120,7 +121,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.2 2009/12/06 06:47:52 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.3 2009/12/10 22:43:55 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -130,8 +131,10 @@ public:
   void  SetDaqFileName(const char *fileName);
   void  SetEventNumber(int eventNumber2beRead);
   void  SetMountPoint(const char *mountPoint);
-  const TString &MountPoint() const { return fMountPoint; }
-  void  SetMagneticField(float field=0.005) {fBField = field;}
+  void  SetDemo(Bool_t on = kTRUE);
+  Bool_t Demo() const;
+  const TString &MountPoint() const;
+  void  SetMagneticField(float field=0.005);
   Int_t MakeTpcHits();
   Int_t MakeTracks();
   Int_t MakeEmcHits();
@@ -148,5 +151,14 @@ public:
 
   // ClassDef(StDataReadModule,0)   // 
 };
+
+//____________________________________________________________________
+inline   void  StDataReadModule::SetDemo(Bool_t on) { fDemo = on; }
+//____________________________________________________________________
+inline   Bool_t  StDataReadModule::Demo() const { return fDemo; }
+//____________________________________________________________________
+inline const TString &StDataReadModule::MountPoint() const { return fMountPoint; }
+//____________________________________________________________________
+inline   void  StDataReadModule::SetMagneticField(float field) {fBField = field;}
 
 #endif

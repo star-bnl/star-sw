@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.6 2009/12/09 20:48:45 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.7 2009/12/10 22:43:55 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -147,7 +147,8 @@ StDataReadModule::StDataReadModule(const char *name):TModule(name)
 , fSizeProvider(),fColorProvider()
 , fL3TracksOn(0),fEmcHitsOn(1),fL3HitsOn(1),fBemcOnlineStatus(),fRecordReady(kFALSE)
 , fEmcDataLength(),fTracks(),fHits(),fGuiObject(),fTpc(),fBtow(),fEmc_in(),fLengthBtow()
-, fEventDisplay()
+, fEventDisplay(), fDemo(kFALSE)
+
 {
   //
    Int_t lookUpSize = sizeof(fDeLookUp);
@@ -196,7 +197,7 @@ StDataReadModule::~StDataReadModule()
 //_____________________________________________________________________________
 StuDraw3DEvent  *StDataReadModule::Display()
 {
-   if (!fEventDisplay)  fEventDisplay = new StuDraw3DEvent();
+   if (!fEventDisplay)  fEventDisplay = new StuDraw3DEvent("TPC,StarLogo");
    return fEventDisplay;
 }
 
@@ -266,7 +267,9 @@ Int_t StDataReadModule::Make()
 
    if ( retStatus == kStOk ) retStatus = NextEvent();
 
-   if ( retStatus == kStOK ) retStatus = MakeEvent();
+   if ( fDemo && retStatus == kStEOF ) retStatus = NextFile();
+
+   if ( retStatus == kStOk )  retStatus = MakeEvent();
 
    return retStatus;
 }
@@ -347,31 +350,30 @@ Int_t StDataReadModule::NextEvent()
 {
    // Create the next event from evp data
    int retStatus=kStErr;
-#if 0
-     char *currentData =  fDataP = fEventPoolReader->get(fEventNumber,fEventType); 
-#else
-     fEventPoolReader->NextEvent(); 
-     fRecordReady = fEventPoolReader->EventStatus();
-     daqReader *currentData =  fDataP = fEventPoolReader->GetReader(); 
-#endif         
+   fEventPoolReader->NextEvent(); 
+   retStatus = fRecordReady = fEventPoolReader->EventStatus();
+   if ( retStatus  == kStOk ) {
+      daqReader *currentData =  fDataP = fEventPoolReader->GetReader(); 
+
 //     fprintf(stderr," StDataReadModule::NextEvent - evpReader = %x, event # = %d event type %d; mem %p\n",fDataP, fEventNumber,fEventType
 //           ,((evpReader*)fDataP)->mem);
-     if(currentData && fRecordReady) {
-        retStatus=kStOk;    	// event  valid
-        StEvtHddr *eventHeader =  GetEvtHddr();
-        daqReader *reader = fEventPoolReader->GetReader();
-        eventHeader->SetEventNumber(reader->event_number);
-        eventHeader->SetIventNumber(reader->seq         );
-        eventHeader->SetEventSize  (reader->bytes       );
-        eventHeader->SetTriggerMask(reader->daqbits     );
-        eventHeader->SetRunNumber  (reader->run         );
-        eventHeader->SetGMTime     (reader->evt_time    );   
-        if (fSizeProvider) 
-           ((TEmcSizeProvider *)fSizeProvider)->ResetEmcDecoder(eventHeader->GetDate(),eventHeader->GetTime());
-        if (fColorProvider) 
-           ((TEmcColorProvider *)fColorProvider)->ResetEmcDecoder(eventHeader->GetDate(),eventHeader->GetTime());
-     }
-  return retStatus;
+       if(currentData && fRecordReady) {
+          retStatus=kStOk;    	// event  valid
+          StEvtHddr *eventHeader =  GetEvtHddr();
+          daqReader *reader = fEventPoolReader->GetReader();
+          eventHeader->SetEventNumber(reader->event_number);
+          eventHeader->SetIventNumber(reader->seq         );
+          eventHeader->SetEventSize  (reader->bytes       );
+          eventHeader->SetTriggerMask(reader->daqbits     );
+          eventHeader->SetRunNumber  (reader->run         );
+          eventHeader->SetGMTime     (reader->evt_time    );   
+          if (fSizeProvider) 
+              ((TEmcSizeProvider *)fSizeProvider)->ResetEmcDecoder(eventHeader->GetDate(),eventHeader->GetTime());
+          if (fColorProvider) 
+              ((TEmcColorProvider *)fColorProvider)->ResetEmcDecoder(eventHeader->GetDate(),eventHeader->GetTime());
+       }
+    }
+    return retStatus;
 }
 
       

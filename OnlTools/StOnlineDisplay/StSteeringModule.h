@@ -1,4 +1,4 @@
-// $Id: StSteeringModule.h,v 1.3 2009/12/09 20:48:45 fine Exp $
+// $Id: StSteeringModule.h,v 1.4 2009/12/10 22:43:55 fine Exp $
 
 #ifndef STAR_StSteeringModule
 #define STAR_StSteeringModule
@@ -65,7 +65,7 @@ class StSteeringModule : public QObject, public TModule, StDetectorGeometryInter
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.3 2009/12/09 20:48:45 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.4 2009/12/10 22:43:55 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
           
   }
@@ -87,6 +87,8 @@ class StSteeringModule : public QObject, public TModule, StDetectorGeometryInter
     virtual void SetEventNumber(int eventNumber);
     virtual void SetMagneticField(int field=50);
     virtual void SetRecording(bool on=true);
+    virtual void SetDemo(Bool_t on=kTRUE);
+    virtual Bool_t Demo() const;
     virtual bool Recording()  const;
     virtual void SetDaqFileName(const char *fileName);
     virtual Int_t RemakeEvent();

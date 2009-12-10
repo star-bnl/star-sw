@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.6 2009/12/09 20:48:45 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.7 2009/12/10 22:43:55 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -318,7 +318,6 @@ void  StSteeringModule::StopEvents()
 //_____________________________________________________________________________
 Bool_t  StSteeringModule::IsDisplayNext() const 
 {
-
    return ((StMaker*)fDataReadModule) == CurrentMaker(); 
 }
 
@@ -327,10 +326,12 @@ void  StSteeringModule::Animating()
 {
   fAnimating = kTRUE; 
     Clear();
-    QCoreApplication::processEvents();
-    Make();
-    if (gPad) gPad->Update();
-    QCoreApplication::processEvents();
+    if (Make() == kStOk ) {
+       if (gPad) gPad->Update();
+       QCoreApplication::processEvents();
+    } else {
+       StopEvents();
+    }
   fAnimating = kFALSE; 
   if (fAnimate) Animate();
 }
@@ -339,4 +340,16 @@ void  StSteeringModule::Animate(Bool_t on)
 {
   fAnimate = on;
   if (fAnimate )  QTimer::singleShot(1000, this, SLOT(Animating())); 
+}
+
+//_____________________________________________________________________________
+void  StSteeringModule::SetDemo(Bool_t on)
+{
+   if (fDataReadModule) fDataReadModule->SetDemo(on); 
+} 
+
+//_____________________________________________________________________________
+Bool_t  StSteeringModule::Demo() const
+{
+     return (fDataReadModule) ? fDataReadModule->Demo(): kFALSE; 
 }
