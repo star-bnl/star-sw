@@ -648,25 +648,15 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
   vector<Elem_t> ElementList(NoElemMax);
   Int_t NElem = 0;
   // NElem = ElementList.size()-1;
-  if(!volT) {
-     cout << "StiVMCToolKit::MakeAverageVolume: There os volT" << NElem << &ElementList[0] << endl;
-  }
-  cout << "StiVMCToolKit::MakeAverageVolume: There ii volT:" << NElem << " : " << &ElementList[0] << endl;
   Int_t *al = &NElem;
   Elem_t *el = &ElementList[0];
   TGeoVolume *v = volT;
-  if (!( al && el ) ) {
-      cout << "StiVMCToolKit::MakeAverageVolume:(!( al && el ) ) :" << al << " : " << el << " : " << v << endl;
-      return;
-   }
 //  Double_t Weight = GetWeight(volT, &NElem, &ElementList[0]); 
   Double_t Weight = 
                 GetVolumeWeight(v
                 , al
                 , el
   );
-  cout << "StiVMCToolKit::MakeAverageVolume: There os volT" << NElem << &ElementList[0] << endl;
-  cout << volT->GetName() << "\t" << volT->GetTitle() << "\t" << Form("%10.3f [g]",Weight) << endl;
   const TGeoMedium   *med = volT->GetMedium(); 
   const TGeoMaterial *mat = volT->GetMaterial();
   if (Debug()) {
