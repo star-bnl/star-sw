@@ -46,7 +46,7 @@ DAQREADER_OBJS += daq_tpc.o tpc_FCFReader.o tpc_reader.o
 DAQREADER_OBJS += fcfAfterburner.o fcfClass.o
 DAQREADER_OBJS += daq_l3.o l3_reader.o 
 
-L3_SUPPORT_OBJS := gl3_trg_send.o gl3_trg_parse.o
+L3_SUPPORT_OBJS := l3_support.o
 
 MYRINET_OBJS := myriLib.o platform.o vxFileRequestServer.o
 
