@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StEvpReader.cxx,v 1.1 2009/12/07 18:41:31 fine Exp $
+// $Id: StEvpReader.cxx,v 1.2 2009/12/10 22:43:55 fine Exp $
 
 #include "StEvpReader.h"
 #include "Riostream.h"
@@ -192,13 +192,13 @@ void StEvpReader::NextEvent()
                   qDebug () << "Critical error - halting...";
                   break;
             };
-            fEventStatus = fEvpReader->status;
             if (fLiveEvent && fInterval>=0) {
 // emit               QTimer::singleShot (340, this, SLOT(NextEvent()));
             } else {
 // emit               emit EvpEOF();
             }
         }
+        fEventStatus = fEvpReader->status;
    } while (searchEvent );
 //    if (fInterval>=0 ) QTimer::siEXgleShot(fInterval, this, SLOT(NextEvent()));
 }
