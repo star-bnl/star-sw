@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.7 2009/12/10 22:43:55 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.8 2009/12/11 00:08:53 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -90,46 +90,9 @@ static inline int  tpc_hit_postion(int sector, int row, const tpc_cl &cluster, f
 }
 
 //_________________________________________________________________________________
-class StEventTracker : public  EventTracker {
-   public:
-     StEventTracker() : EventTracker() { constructor_helper();}
-     StEventTracker(float magField): EventTracker(magField) { constructor_helper();}
-   private:
-       void constructor_helper() {
-          fprintf(stderr, "StEventTracker::constructor_helper() \n");
-          getL3Event()->setHitProcessing(2);
-       }
-};
-
-//_________________________________________________________________________________
 // const int GL3_TRACK_MEM_SIZE=0x800000/sizeof(L3_P);
 const int GL3_TRACK_MEM_SIZE=szL3_max/sizeof(L3_P);
 // ClassImp(StDataReadModule)
-
-//_____________________________________________________________________________
-class StDrawableArray : public TObjArray {
-   public:
-     StDrawableArray(Int_t s = TCollection::kInitCapacity): TObjArray(s) {}
-    ~StDrawableArray(){ }
-     virtual void   Draw(Option_t *option=""){ TObject::Draw(option); }
-     virtual void   Paint(Option_t *option="")
-    {
-     // Paint all objects in this collection.
-     // wildcarding supported, eg option="xxx*" draws only objects
-     // with names xxx*
-
-     TRegexp re(option,kTRUE);
-     TIter next(this);
-     TObject *object;
-     Int_t nch = strlen(option);
-
-     while ((object = next())) {
-        TString s = object->GetName();
-        if (nch && strcmp(option,object->GetName()) && s.Index(re) == kNPOS) continue;
-        object->Paint(option);
-     }
-   }
-};
 
 //_____________________________________________________________________________
 /// StDataReadModule constructor
@@ -286,6 +249,7 @@ Int_t StDataReadModule::MakeEmcHits()
 #endif 
        if (dr > 0.1) {
           Display()->EmcHit(i,colorAttribute,4070,dr);
+          Display()->SetComment(fSizeProvider->GetObjectInfo(i,0));
        }
      }
   }

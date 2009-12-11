@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.7 2009/12/10 22:43:55 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.8 2009/12/11 00:08:53 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -46,31 +46,9 @@ StSteeringModule::StSteeringModule(const char *name):TModule(name)
   
    dbMk->SetDateTime(20090312, 94451);
    dbMk->SetDebug(1);
-  //   dbMk->SetDateTime(20071117,103638);
-  //  dbMk->InitRun(8343021);
-  // ready to go !!!
-
-   SetFileName("starcomplete.root");
-//      AddVolume("Blue ring");
-//      AddVolume("Yellow ring");
 
    //  data module
    fDataReadModule         = new StDataReadModule();
-/*   
-   int argc = qApp->argc();
-   if (argc > 1) {
-         const char *daqFileArg = qApp->argv()[2];
-         if (daqFileArg[0] == '@') daqFileArg++; // workaround; ROOT eats the real file names ;-(
-         QString daqFileName = daqFileArg;
-	      if (QFileInfo(daqFileName).isReadable()) 
-             fDataReadModule->SetDaqFileName(daqFileName);
-	      else   { 
-	        daqFileName = "";
-	     }
-      }
-*/
-//     SetDaqFileName("st_physics_10168011_raw_4030001.daq"); // move to StStartDisplay
- 
 }
 
 
@@ -85,7 +63,8 @@ StSteeringModule::StSteeringModule(const char *name):TModule(name)
   see: <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> 
 
  */
-StSteeringModule::~StSteeringModule(){
+StSteeringModule::~StSteeringModule()
+{
   //
 }
 

@@ -27,7 +27,7 @@ TEmcSizeProvider::~TEmcSizeProvider()
 //______________________________________________________________________________
 char   * TEmcSizeProvider::GetObjectInfo(Int_t towerId, Int_t /* py */) const
 { 
-   TString info = fObjectInfo;
+   TString info = fObjectInfo + Form("<p><b>EmcTower</b> %d" ,towerId);
    if (fBemcOnlineStatus) {
     //    int SoftId;
     //    int PatchMaskHT;   /* Patch unmasked in HT? */
@@ -40,8 +40,8 @@ char   * TEmcSizeProvider::GetObjectInfo(Int_t towerId, Int_t /* py */) const
            info += Form("<br><b>Trigger</b> %d" ,row.TriggerPatch);
            info += Form("<br><b>Pedestal</b> %d",row.Pedestal    );
    } 
-   ((TEmcSizeProvider*)this)->fObjectInfo = info;
-   return (char *)fObjectInfo.Data();
+  // ((TEmcSizeProvider*)this)->fObjectInfo = info;
+   return (char *)info.Data();
 }
 
 //!  ComputerScale returns the extra factor each tower size should be mulitplied to
