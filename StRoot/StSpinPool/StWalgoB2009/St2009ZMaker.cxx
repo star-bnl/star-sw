@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.1 2009/12/07 20:37:56 rcorliss Exp $
+// $Id: St2009ZMaker.cxx,v 1.2 2009/12/11 20:37:09 rcorliss Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -59,12 +59,12 @@ St2009ZMaker::find_Z_boson(){
   Wevent2009 &wEve=wMK->wEve;
   // printf("========= find_Z_boson() \n");
   
-  hA[9]->Fill(wEve.vertex.size());
+  hA[31]->Fill(wEve.vertex.size());
 
   // search for  Zs ............
   for(uint iv=0;iv<wEve.vertex.size();iv++) {
     WeveVertex &V=wEve.vertex[iv];
-    hA[10]->Fill(V.eleTrack.size());
+    hA[32]->Fill(V.eleTrack.size());
     //only one Z can come from a vertex, and it should be the highest-energy object
     //hence, the two highest-et clusters should correspond to the z.  Pick those 
     //eventually, but for now, just try all of them.
@@ -74,7 +74,7 @@ St2009ZMaker::find_Z_boson(){
       if(T1.isMatch2Cl==false) continue;
       assert(T1.cluster.nTower>0); // internal logical error
       assert(T1.nearTotET>0); // internal logical error
-      hA[7]->Fill(T1.cluster.ET);
+      hA[23]->Fill(T1.cluster.ET);
       //if(T1.cluster.ET /T1.nearTotET< par_nearTotEtFracZ) continue; // too large nearET
 
 
@@ -87,8 +87,8 @@ St2009ZMaker::find_Z_boson(){
 
 	float e1=T1.cluster.energy;
 	float e2=T2.cluster.energy;
-	TVector3 p1=T1.cluster.position; p1.SetMag(e1);
-	TVector3 p2=T2.cluster.position; p2.SetMag(e2);
+	TVector3 p1=T1.primP; p1.SetMag(e1);//cluster.position; p1.SetMag(e1);
+	TVector3 p2=T2.primP; p2.SetMag(e2);//cluster.position; p2.SetMag(e2);
 	TVector3 psum=p1+p2;
 	float mass_sqrd=(e1+e2)*(e1+e2)-(psum.Dot(psum));
 	float mass=sqrt(mass_sqrd);
@@ -97,9 +97,12 @@ St2009ZMaker::find_Z_boson(){
 	//float phi_diff=(p1.Phi()-p2.Phi()+2*TMath::Pi())%(2*Tmath::Pi());
 	float rel_phi=sqrt((p1.Phi()-p2.Phi())*(p1.Phi()-p2.Phi()));
 
+	hA[21]->Fill(fmax1,fmax2);
+	hA[22]->Fill(T1.cluster.ET,T2.cluster.ET);
+
 	hA[40]->Fill(mass>0?mass:0);//the greater of mass and 0, just in case.
 
-	//this first cut could be moved out of the internal for loop, but I need it here
+	//these first cuts could be moved out of the internal for loop, but I need it here
 	//so that it can be used in the stacked plot.
 	if(T1.cluster.ET /T1.nearTotET< par_nearTotEtFracZ) continue; // too large nearET
 	hA[41]->Fill(mass_sqrd>0?mass:0);
@@ -129,25 +132,30 @@ St2009ZMaker::find_Z_boson(){
 	hA[1]->Fill(mass);
 	hA[2]->Fill(T1.prMuTrack->charge(),T2.prMuTrack->charge());
 	hA[3]->Fill(T1.prMuTrack->charge()*T2.prMuTrack->charge());
-	hA[4]->Fill(rel_phi);
-	hA[11]->Fill(mass,T1.prMuTrack->charge()*T2.prMuTrack->charge());
-
-	hA[5]->Fill(fmax1,fmax2);
-	hA[6]->Fill(T1.cluster.ET,T2.cluster.ET);
-
-	hA[8]->Fill(mass,rel_phi);
-	hA[12]->Fill(p1.Phi(),p2.Phi());
-	hA[13]->Fill(T1.cluster.ET);
+	hA[4]->Fill(p1.Phi(),p2.Phi());
+	hA[5]->Fill(rel_phi);
+	hA[6]->Fill(mass,T1.prMuTrack->charge()/T1.primP.Perp()*T2.prMuTrack->charge()/T1.primP.Perp());
+	hA[7]->Fill(mass,T1.prMuTrack->charge()*T2.prMuTrack->charge());
+	hA[8]->Fill(T1.cluster.ET);
 	if (T1.prMuTrack->charge()>0)
 	  {
-	    hA[14]->Fill(p1.Eta(),p1.Phi());
-	    hA[15]->Fill(p2.Eta(),p2.Phi());
+	    hA[9]->Fill(p1.Eta(),p1.Phi());
+	    hA[10]->Fill(p2.Eta(),p2.Phi());
 	  }
 	else
 	  {
-	    hA[15]->Fill(p1.Eta(),p1.Phi());
-	    hA[14]->Fill(p2.Eta(),p2.Phi());
+	    hA[10]->Fill(p1.Eta(),p1.Phi());
+	    hA[9]->Fill(p2.Eta(),p2.Phi());
 	  }
+
+	hA[11]->Fill(fmax1,fmax2);
+	hA[12]->Fill(T1.cluster.ET,T2.cluster.ET);
+	hA[13]->Fill(mass,rel_phi);
+	if (T1.prMuTrack->charge()*T2.prMuTrack->charge()==1)
+	  hA[14]->Fill(mass);
+	if (T1.prMuTrack->charge()*T2.prMuTrack->charge()==-1)
+	  hA[15]->Fill(mass);
+
       }
 
 
@@ -159,6 +167,9 @@ St2009ZMaker::find_Z_boson(){
 
 
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.2  2009/12/11 20:37:09  rcorliss
+// Updated Z Maker to use track direction rather than tower direction when computing invariant mass.  Added new histograms.
+//
 // Revision 1.1  2009/12/07 20:37:56  rcorliss
 // Start
 //
