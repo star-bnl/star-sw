@@ -46,6 +46,13 @@ typedef char           byte ;
 typedef unsigned char UINT8;
 typedef unsigned short UINT16;
 typedef unsigned int UINT32;
+typedef unsigned long long int UINT64;
+
+#if USE_64BITS == 1
+typedef unsigned long long int UINTPTR;
+#else
+typedef unsigned int UINTPTR;
+#endif
 
 #ifndef vxworks
 #include <stdlib.h>
@@ -334,7 +341,7 @@ struct ic_gb_build
   uint flags;       // bit 0 set, tpc raw data inside
 } ; 
 
-struct ic_gl3_send_sl3 { uint* dest_header ; uint*  dest_clusters ; uint* dest_tracks ; uint* dest_debug; };
+//struct ic_gl3_send_sl3 { uint* dest_header ; uint*  dest_clusters ; uint* dest_tracks ; uint* dest_debug; };
 struct ic_gl3_stat     { uint dummy   ;};       
 struct ic_gl3_announce_data
 {
@@ -342,7 +349,7 @@ struct ic_gl3_announce_data
   uint size_TRG_data ;
   uint size_L3_data[11] ;
 };
-struct ic_announce_trg_sum {uint* addr ;};
+//struct ic_announce_trg_sum {uint* addr ;};
 // SB
 struct ic_sb_announce_sl3{ uint size_of_header ; uint size_of_clusters ; uint size_of_tracks ; uint size_of_debug ; } ;
 struct ic_sb_announce_formatted_data
@@ -451,9 +458,9 @@ struct ic_evp_event_done {
 struct ic_rcf_writer_flush {
   uint dummy;
 };
-struct ic_rcf_list_written {
-  struct rcfEventList *el;
-};
+//struct ic_rcf_list_written {
+// struct rcfEventList *el;
+//};
 struct ic_vx_request_file {
   uint direction;
   uint addr_hi;
@@ -535,6 +542,7 @@ union ic_load
   ic_evbx_spool_event_written           evbx_spool_event_written ;
   ic_evbx_spool_write_event             evbx_spool_write_event;
 
+  
   ic_daq_run_start                 daq_run_start ;
   ic_daq_run_stop                  daq_run_stop ;
   ic_daq_run_pause                 daq_run_pause ;
@@ -553,15 +561,17 @@ union ic_load
   ic_drc_flush_tokens              drc_flush_tokens ;
   ic_drc_query_tokens              drc_query_tokens ;
   ic_mz_emul_fiber                 mz_emul_fiber ;
-
+  
   ic_gb_build                      gb_build ;
-
+  
   ic_gl3_build                     gl3_build  ;   
-  ic_gl3_send_sl3                  gl3_snd_sl3;
+  
+  //ic_gl3_send_sl3                  gl3_snd_sl3 ;
+  
   ic_gl3_stat                      gl3_stat ;
   ic_gl3_announce_data             gl3_announce_data ;
-  ic_announce_trg_sum              announce_trg_sum;               // this is not a nice name !!! 
-  
+  //ic_announce_trg_sum              announce_trg_sum;               // this is not a nice name !!! 
+
   ic_sb_announce_sl3               sb_announce_sl3 ;
   ic_sb_announce_formatted_data    sb_announce_data ;              // this is for the evb
   ic_sb_stat                       sb_stat ;
@@ -572,15 +582,16 @@ union ic_load
   //ic_bb_confirm_send               bb_confirm_send;
   //  ic_rcf_write_event               rcf_write_event;
   ic_rcf_writer_flush              rcf_writer_flush;
-  ic_rcf_list_written              rcf_list_written;
+  //ic_rcf_list_written              rcf_list_written;
   //  ic_rcf_confirm_event             rcf_confirm_event;
   //  ic_bbm_send_data                 bbm_send_data;
   //ic_bbm_announce_data             bbm_announce_data;
+  
 
   //ic_qmyri_memcpy_start            qmyri_memcpy_start;
   //ic_qmyri_memcpy_done             qmyri_memcpy_done; 
   //ic_qmyri_ctl                     qmyri_ctl;
-
+  
   ic_evp_req_event                 evp_req_event;
   ic_evp_announce_event            evp_announce_event;
   ic_evp_send_event                evp_send_event;
@@ -600,6 +611,7 @@ union ic_load
   ic_spool_free_disk               spool_free_disk;
 
   ic_eth_announce                  eth_announce;
+  
 #endif /* NOT_DAQ */
   //  ic_qdsend_announce_chunk         qdsend_announce_chunk;
   // ic_qdsend_send_chunk             qdsend_send_chunk;
