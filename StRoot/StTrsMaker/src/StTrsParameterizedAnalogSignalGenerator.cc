@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.39 2009/11/03 14:34:19 fisyak Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.40 2009/12/11 21:55:15 fisyak Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.40  2009/12/11 21:55:15  fisyak
+ * Account that the space between anode wires and pad plane is sensitive, bug #1715
+ *
  * Revision 1.39  2009/11/03 14:34:19  fisyak
  * Remove default in zFromTB
  *
@@ -477,14 +480,22 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 	for(iter  = currentWire.begin();
 	    iter != currentWire.end();
 	    iter++) {
-            const int id = iter->id(); // track Id
-	    z=iter->position().z();
-            D=iter->d();
-            Dx=D[0]+dAvalanch;// approximation
-            Dt=D[2]/mDriftVelocity;   //mDriftVelocity :  cm/s
-	    //   cout<<Dx<<" "<<D[2]<<" "<<mDriftVelocity<<endl;
-           
-	   if( z<0.){cout<<"wrong z in function StTrsPara..e..."<<z<<endl;continue;}   
+	  const int id = iter->id(); // track Id
+	  z=iter->position().z();
+	  D=iter->d();
+	  Dx=D[0]+dAvalanch;// approximation
+	  Dt=D[2]/mDriftVelocity;   //mDriftVelocity :  cm/s
+	  //   cout<<Dx<<" "<<D[2]<<" "<<mDriftVelocity<<endl;
+          
+	  if( z < 0.0) { // account anode wire pad plane space
+	    mCentralRow = transformer.rowFromLocal(iter->position());
+	    if ((mCentralRow <= 13 && z > -0.2) || 
+		(mCentralRow >  13  && z > -0.4)) {z = - z;}
+	    else {
+	      cout<<"wrong z in function StTrsPara..e..."<<z<<endl;
+	      continue;
+	    } 
+ 	  }  
 	   sigmaLz=sigmaL* ::sqrt(z);
 	   sigmaLt=sigmaLz/mDriftVelocity;
 	   signalTime =
