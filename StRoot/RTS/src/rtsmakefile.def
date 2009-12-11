@@ -309,6 +309,11 @@ endif
 endif
 #endif
 
+
+ifeq (${USE_64BITS}, 1)
+	HOSTDEFINES += -DUSE_64BITS=1
+endif
+
 export LIBDIR = $(PROJDIR)/$(RTS_DEV_PREFIX)lib/${INSTALL_SUFFIX}
 export BINDIR = $(PROJDIR)/$(RTS_DEV_PREFIX)bin/${INSTALL_SUFFIX}
 
