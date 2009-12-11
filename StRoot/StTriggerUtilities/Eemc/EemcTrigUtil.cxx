@@ -147,7 +147,8 @@ static TDatime getTimeStampFromDates(const TDatime& date, const vector<TDatime>&
 
 void EemcTrigUtil::getFeePed4(const TDatime& date, int mxChan, int *feePed4)
 {
-  static const char* dir = "/afs/rhic.bnl.gov/star/users/pibero/public/StarTrigSimuSetup/ped";
+  //static const char* dir = "/afs/rhic.bnl.gov/star/users/pibero/public/StarTrigSimuSetup/ped";
+  static const char* dir = "/star/u/pibero/public/StarTrigSimuSetup/ped";
   vector<TDatime> dates;
   scanPed4DirForDates(dir,dates);
   TDatime ts = getTimeStampFromDates(date,dates);
