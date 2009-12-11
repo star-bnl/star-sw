@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.42 2009/11/06 13:38:05 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.43 2009/12/11 03:55:21 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.43  2009/12/11 03:55:21  genevb
+ * Singleton implementation + no defines in header
+ *
  * Revision 1.42  2009/11/06 13:38:05  fisyak
  * Revert the change done 11/03/09
  *
@@ -129,13 +132,6 @@
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 #include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
 
-#define  nZ               57            // Number of Z points in table. Measured STAR B field Maps from Steve T. 
-#define  nR               28            // Number of R points in table.
-#define  nPhi             37            // Number of Phi points in table.
-#define  neZ             224            // Number of Z points in table. Standard STAR distortion tables for interpolating. 
-#define  neR              82            // Number of R points in table
-#define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
-
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
 enum   Prime    { IsPrimary = 0 , IsGlobal = 1 } ;
 
@@ -178,7 +174,16 @@ class StMagUtilities {
 
 
  private:
-  
+  enum   EBMapSizes {
+    nZ    =          57,           // Number of Z points in table. Measured STAR B field Maps from Steve T. 
+    nR    =          28,           // Number of R points in table.
+    nPhi  =          37,           // Number of Phi points in table.
+    neZ   =         224,           // Number of Z points in table. Standard STAR distortion tables for interpolating. 
+    neR   =          82,           // Number of R points in table
+    nePhi =          13            // Number of Phi points in table ( add one for 360 == 0 )
+  } ;
+  static StMagUtilities *fgInstance;
+ 
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
   StDetectorDbSpaceCharge*   fSpaceCharge   ;
@@ -283,7 +288,8 @@ class StMagUtilities {
   StMagUtilities () ;
   StMagUtilities ( StTpcDb* dbin,  TDataSet* dbin2, Int_t mode = 0 ) ;
   StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 ) ;
-  virtual ~StMagUtilities () {}
+  virtual ~StMagUtilities () { fgInstance = 0; }
+  static StMagUtilities* Instance() { return fgInstance; }
 
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;

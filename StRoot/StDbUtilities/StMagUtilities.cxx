@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.79 2009/11/06 13:38:05 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.80 2009/12/11 03:55:21 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.80  2009/12/11 03:55:21  genevb
+ * Singleton implementation + no defines in header
+ *
  * Revision 1.79  2009/11/06 13:38:05  fisyak
  * Revert the change done 11/03/09
  *
@@ -331,6 +334,7 @@ To do:  <br>
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
 static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
+StMagUtilities *StMagUtilities::fgInstance = 0;
 
 //________________________________________
 
@@ -348,6 +352,11 @@ StMagUtilities::StMagUtilities ()
 /// StMagUtilities constructor using the DataBase
 StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 { 
+  if (fgInstance) {
+    cout << "ReInstate StMagUtilities. Be sure that this is want you want !" << endl;
+    SafeDelete(fgInstance);
+  }
+  fgInstance = this;
   gMap = kMapped        ;    // Select the B field shape (kMapped == mapped field, kConstant == constant field )
   SetDb ( dbin, dbin2 ) ;    // Put DB pointers into private/global space
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
@@ -365,6 +374,11 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 /// StMagUtilities constructor not using the DataBase
 StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t mode )       
 { 
+  if (fgInstance) {
+    cout << "ReInstate StMagUtilities. Be sure that this is want you want !" << endl;
+    SafeDelete(fgInstance);
+  }
+  fgInstance = this;
   gMap    = map         ;        // Select the type of field (mapped field shape or constant field)
   thedb2  = 0           ;        // Do not get MagFactor from the DB       - use manual selection above
   thedb   = 0           ;        // Do not get TPC parameters from the DB  - use defaults in CommonStart
