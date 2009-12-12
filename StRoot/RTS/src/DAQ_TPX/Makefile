@@ -90,6 +90,7 @@ tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxPed.o: tpxCore.h
 tpxPed.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxPed.o: tpxPed.h
+tpxPed.o: tpxGain.h
 tpxStat.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxStat.o: ../../../../StRoot/RTS/include/daqModes.h
 tpxStat.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h

@@ -14,7 +14,7 @@
 
 #include "tpxCore.h"
 #include "tpxPed.h"
-
+#include "tpxGain.h"
 	
 tpxPed::tpxPed()
 {
@@ -28,6 +28,8 @@ tpxPed::tpxPed()
 	sizeof_ped = sizeof(struct peds) * 46 * 183 ;
 
 	ped_store = 0 ;	// unassigned!
+
+	max_events = 1000 ;
 
 	sector = -1 ;	// uniti...
 	return ;
@@ -139,7 +141,7 @@ void tpxPed::accum(tpx_altro_struct *a)
 	}
 
 	// do not allow more than 1000 events; use tb[20]'s counter...
-	if(p->cou[20] > 1000) return ;
+	if(p->cou[20] > max_events) return ;
 	
 	
 	LOG(DBG,"count %d",a->count) ;
@@ -536,7 +538,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 			for(t=400;t<415;t++) ped->ped[t] = 0.0 ;
 			break ;
 		case RUN_TYPE_PULSER :
-			for(t=95;t<110;t++) ped->ped[t] = 0.0 ;
+			for(t=TPX_PULSER_PED_START;t<=TPX_PULSER_PED_STOP;t++) ped->ped[t] = 0.0 ;
 			break ;
 		case RUN_TYPE_PED_A :	// starts with ped=0
 			m = 0 ;			

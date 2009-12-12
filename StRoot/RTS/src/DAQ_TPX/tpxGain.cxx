@@ -15,10 +15,8 @@
 #include "tpxCore.h"
 #include "tpxGain.h"
 
-#define TPX_PULSER_PED		95
-#define TPX_PULSER_START	100
-#define TPX_PULSER_STOP		103
-#define TPX_PULSER_TIME		100.84	// or perhaps 100.90?
+
+
 
 struct tpx_odd_fee_t tpx_odd_fee[256] ;
 int tpx_odd_fee_count = 0 ;
@@ -83,6 +81,9 @@ tpxGain::tpxGain()
 	sector = 0 ;	// assume all...
 	c_run = c_date = c_time = 0 ;
 
+	// no raw dump
+	raw_gains_fname = 0 ;
+
 	// mark memory as cleared
 	aux = 0 ;
 	means = 0 ;
@@ -94,6 +95,12 @@ tpxGain::tpxGain()
 	tpx_odd_fee_count = 0 ;
 
 	memset(bad_rdo_mask,0,sizeof(bad_rdo_mask)) ;
+
+	pulser_ped = TPX_TCU_PED ;
+	pulser_start = TPX_TCU_START ;
+	pulser_stop = TPX_TCU_STOP ;
+	pulser_time_0 = TPX_TCU_TIME_0 ;
+
 	return ;
 }
 
@@ -172,6 +179,7 @@ void tpxGain::init(int sec)
 	}
 
 
+
 	memset(tpx_pulser_peak,0,sizeof(tpx_pulser_peak))  ;
 
 //	tb_start = 181 ;
@@ -195,7 +203,7 @@ void tpxGain::init(int sec)
 void tpxGain::ev_done() 
 {
 	if(events==0) {
-		LOG(WARN,"Using hardcoded tb range [%3d:%3d]!",TPX_PULSER_START,TPX_PULSER_STOP) ;
+		LOG(WARN,"Using hardcoded tb range: ped at %d, peak at [%3d:%3d], T0 at %f!",pulser_ped, pulser_start,pulser_stop,pulser_time_0) ;
 	}
 
 	events++ ;
@@ -239,8 +247,6 @@ void tpxGain::accum(char *evbuff, int bytes)
 	struct fee_found_t *fee_f = get_fee_found(sec,rdo.rdo) ;
 	fee_f->got_one++ ;
 
-
-
 	LOG(DBG,"gain: evt %d (got_one %d), sector %d, rdo %d",events, fee_f->got_one,rdo.sector, rdo.rdo) ;
 
 	do {
@@ -273,10 +279,10 @@ void tpxGain::accum(char *evbuff, int bytes)
 			int tb_i = a.tb[i] ;
 
 			// sum up the main pulser peak...
-			if((tb_i>=TPX_PULSER_PED) && (tb_i<=TPX_PULSER_STOP)) {
-				as->adc_store[tb_i - TPX_PULSER_PED] += adc_i ;
+			if((tb_i>=pulser_ped) && (tb_i<=pulser_stop)) {
+				as->adc_store[tb_i - pulser_ped] += adc_i ;
 			}
-			else if(tb_i < TPX_PULSER_PED) {	// sum up stuff before the peak
+			else if(tb_i < pulser_ped) {	// sum up stuff before the peak
 				noise += adc_i ;
 				cou++ ;
 			}
@@ -297,6 +303,67 @@ void tpxGain::accum(char *evbuff, int bytes)
 }
 
 /*
+	When I run from file I don't know
+	about bad FEEs or bad RDOs or no sectors
+	so I need to figure this out from took data
+
+*/
+void tpxGain::if_file()
+{
+	memset(bad_rdo_mask, 0, sizeof(bad_rdo_mask)) ;
+
+	for(int s=1;s<=24;s++) {
+	for(int r=1;r<=6;r++) {
+		struct fee_found_t *fee_f = get_fee_found(s,r) ;
+
+		if(fee_f->got_one) {
+			for(int a=0;a<256;a+=2) {
+				int not_bad ;
+
+				if(tpx_altro_to_fee(r,a)<0) continue ;	// not there
+
+				not_bad = 0 ;
+
+				for(int w=a;w<(a+2);w++) {
+				for(int c=0;c<16;c++) {
+					if(fee_f->ch_count[w][c]) {
+						not_bad = 1 ;
+						break ;
+					}
+				}
+				if(not_bad) break ;
+				}
+
+				if(!not_bad) {	// no FEE has this channel
+					int c = bad_fee[s][r][0] ;
+
+					bad_fee[s][r][c+1] = a ;
+					bad_fee[s][r][0]++ ;
+
+					int fee = tpx_altro_to_fee(r,a) ;
+
+					LOG(WARN,"Possible bad FEE %3d (ALTRO %3d) on sector %2d, RDO %d",fee,a,s,r) ;
+					LOG(WARN,"     to tpx_gains.txt: %d %d %d 0.000 0.000",-s,r,fee) ;
+				}
+			}
+		}
+		else {
+			bad_rdo_mask[s] |= (1<<(r-1)) ;
+			LOG(WARN,"Possible masked RDO %d on sector %2d",r,s) ;
+		}
+
+	}
+
+
+	}
+
+
+	return ;
+
+}
+
+
+/*
 	Called at end of run
 */
 void tpxGain::calc()
@@ -304,6 +371,11 @@ void tpxGain::calc()
 	int s, r, p ;
 	int c ;
 	double g_rms, t0_rms, c_rms ;
+	int t0_mean_count[25]  ;
+	double t0_mean[25] ;
+
+	memset(t0_mean_count,0,sizeof(t0_mean_count)) ;
+	memset(t0_mean,0,sizeof(t0_mean)) ;
 
 	g_rms = t0_rms = c_rms = 0 ;
 
@@ -330,15 +402,19 @@ void tpxGain::calc()
 
 
 	char fname[128];
-	sprintf(fname,"/RTS/log/tpx/tpx_raw_gains_%02d.txt",sector) ;
-	FILE *ofile = fopen(fname,"w") ;
-	//FILE *ofile = stdout ;
+	FILE *ofile = 0 ;
+	if(raw_gains_fname) {
+		sprintf(fname,"%s_%02d",raw_gains_fname,sector) ;
+		ofile = fopen(fname,"w") ;
+	}
+	
 
 	for(s=s_start;s<=s_stop;s++) {
 
 
 	for(r=1;r<=45;r++) {	// I changed this so it skips row 0, i.e. diconnected pads...
 
+	// sanity check...
 	if(get_means(s,r)->g || get_means(s,r)->t0) {
 		LOG(ERR,"%f %f",get_means(s,r)->g,get_means(s,r)->t0) ;
 	}
@@ -357,7 +433,7 @@ void tpxGain::calc()
 			if(bad_rdo_mask[s] & (1<<rdo)) {
 				// kill all the rows & pads in this RDO
 				//LOG(WARN,"Masked Sector %d, RDO %d, row %d, pad %d",s,rdo+1,r,p) ;
-				get_gains(s,r,p)->t0 = -5.0 ;
+				get_gains(s,r,p)->t0 = -9.990 ;
 
 			}
 
@@ -371,7 +447,7 @@ void tpxGain::calc()
 					//LOG(WARN,"Checking ALTRO %3d against %3d, RDO %d, row %d, pad %d",aa,al,rdo,r,p) ;
 					if(aa == (int)al) {
 						//LOG(WARN,"Masked ALTRO %3d, RDO %d, row %d, pad %d",aa,rdo,r,p) ;
-						get_gains(s,r,p)->t0 = -5.0 ;
+						get_gains(s,r,p)->t0 = -9.900 ;
 					}
 					al++ ;
 				}
@@ -384,8 +460,8 @@ void tpxGain::calc()
 
 			struct aux *as = get_aux(s,r,p) ;
 
-			for(int i=TPX_PULSER_PED;i<TPX_PULSER_START;i++) {
-				ped += (double) as->adc_store[i-TPX_PULSER_PED] / (double) c ;
+			for(int i=pulser_ped;i<pulser_start;i++) {
+				ped += (double) as->adc_store[i-pulser_ped] / (double) c ;
 				ped_cou++ ;
 			}
 
@@ -394,8 +470,8 @@ void tpxGain::calc()
 			double charge, t0 ;
 			charge = t0 = 0.0 ;
 
-			for(int i=TPX_PULSER_START;i<TPX_PULSER_STOP;i++) {
-				double val = (double) as->adc_store[i-TPX_PULSER_PED] / (double) c - ped ; 
+			for(int i=pulser_start;i<=pulser_stop;i++) {
+				double val = (double) as->adc_store[i-pulser_ped] / (double) c - ped ; 
 				charge += val ;
 				t0 += i * val ;
 			}
@@ -537,7 +613,9 @@ void tpxGain::calc()
 		if(get_gains(s,r,p)->g) {			
 			// this is the actual correction...
 			get_gains(s,r,p)->g = get_means(s,r)->g / get_gains(s,r,p)->g ;	// relative to row
-			get_gains(s,r,p)->t0 = TPX_PULSER_TIME - get_gains(s,r,p)->t0;	// absolute to TPX!
+			t0_mean[s] += get_gains(s,r,p)->t0 ;
+			t0_mean_count[s]++ ;
+			get_gains(s,r,p)->t0 = pulser_time_0 - get_gains(s,r,p)->t0;	// absolute to TPX!
 		}
 
 		if(ofile) fprintf(ofile,"%.3f %.3f\n",get_gains(s,r,p)->g, get_gains(s,r,p)->t0) ;
@@ -584,7 +662,28 @@ void tpxGain::calc()
 
 	if(ofile) fclose(ofile) ;
 
-	LOG(TERR,"gain_calc: %d events used: Mean RMS: %.3f gain, %.3f T0",events,g_rms,t0_rms) ;
+	double t0_all_mean = 0.0 ;
+	int t0_all_mean_count = 0 ;
+	for(int s=s_start;s<=s_stop;s++) {
+		if(t0_mean_count[s]) {
+			t0_mean[s] /= (double) t0_mean_count[s] ;
+			if(s!=16) {
+				t0_all_mean += t0_mean[s] ;
+				t0_all_mean_count++ ;
+			}
+			//LOG(TERR,"sector %d: t0_mean %f",s,t0_mean[s]) ;
+		}
+	}
+
+	// for sector 16 specially in case we are running online!!!
+	if((s_start==16) && (s_stop==16)) {
+		t0_all_mean += t0_mean[16] ;
+		t0_all_mean_count = 1 ;
+	}
+
+	if(t0_all_mean_count) t0_all_mean /= (double) t0_all_mean_count ;
+
+	LOG(TERR,"gain_calc: sectors [%d:%d]: %d events used: Mean RMS: %.3f gain, %.3f T0: mean T0 %f",s_start,s_stop,events,g_rms,t0_rms,t0_all_mean) ;
 
 
 	return ;
@@ -780,7 +879,7 @@ int tpxGain::from_file(char *fname, int sec)
 						continue ;
 					}
 
-					set_gains(s,row,pad,0.0,-5.0) ;	// t0 -5 signifies the whole FEE was killed...
+					set_gains(s,row,pad,0.0,-9.900) ;	// t0 9.900 signifies the whole FEE was killed...
 
 
 					LOG(DBG,"Killing rp %d:%d for bad FEE %3d in sector %2d",row,pad,fee,s) ;
@@ -837,7 +936,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.20 2009/08/31 19:33:30 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.21 2009/12/12 22:34:57 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -866,6 +965,9 @@ void tpxGain::compare(char *fname, int mysec)
 	FILE *f ;
 	int s, r, p ;
 	float g, t0 ;
+	double dg_mean, dg_rms ;
+	double dt_mean, dt_rms ;
+	int dg_count ;
 
 	int both, old_only, new_only ;
 
@@ -878,6 +980,8 @@ void tpxGain::compare(char *fname, int mysec)
 		return  ;
 	}
 
+	dg_mean = dg_rms = dt_mean = dt_rms = 0.0 ;
+	dg_count = 0 ;
 
 	while(!feof(f)) {
 		char str[1024] ;
@@ -905,24 +1009,54 @@ void tpxGain::compare(char *fname, int mysec)
 
 			// here I need to differentiate between bad FEEs and masked RDOs!
 			if(get_gains(s,r,p)->g == 0.0) {
-				if(get_gains(s,r,p)->t0 == -5.0) {
-					LOG(DBG,"FEE was marked as bad (%d,%d,%d) -- skipping",s,r,p) ;
+				if(get_gains(s,r,p)->t0 <  -9.0) {
+					LOG(DBG,"FEE/RDO was marked as bad (%d,%d,%d) -- skipping",s,r,p) ;
 				}
 				else {
 					new_only++ ;
 				}
+			}
+			else {	// both OK
+				double dg = get_gains(s,r,p)->g / g ;
+				double dt0 = get_gains(s,r,p)->t0 - t0 ;
+
+				dg_mean += dg ;
+				dg_rms += dg * dg ;
+
+				dt_mean += dt0 ;
+				dt_rms += dt0 * dt0 ;
+
+				dg_count++ ;
 			}
 		}
 	}
 	
 	fclose(f) ;
 
-	if(new_only>10) {
-		LOG(ERR, "gain_compare, sector %d: seems to have new bad pads: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
+	if(dg_count) {
+		dg_mean /= (double) dg_count ;
+		dg_rms /= (double) dg_count ;
+		dt_mean /= (double) dg_count ;
+		dt_rms /= (double) dg_count ;
+
+		dg_rms = sqrt(dg_rms - dg_mean * dg_mean) ;
+		dt_rms = sqrt(dt_rms - dt_mean * dt_mean) ;
+	}
+	
+	int max_allowed = 4 ;
+	if(mysec == 0) {	// whole TPC, I will allow more
+		max_allowed *= 24 ;
+	}
+	
+	if(new_only>max_allowed) {
+		LOG(ERR, "gain_compare: sector %d: seems to have new bad pads: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
 	}
 	else {
-		LOG(INFO,"gain_compare, sector %d: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
+		LOG(INFO,"gain_compare: sector %d: both %3d, new_only %3d, old_only %d",mysec,both,new_only,old_only) ;
 	}
+
+	LOG(INFO,"gain_compare: sector %d: gain %f +- %f, T0 %f +- %f",mysec,dg_mean, dg_rms, dt_mean, dt_rms) ;
+
 	return ;
 }
 

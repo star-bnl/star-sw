@@ -335,12 +335,12 @@ int daq_tpx::InitRun(int run)
 		while(g->iterate()) {
 			LOG(DBG,"\tsec %d, row %d: %d",g->sec,g->row,g->ncontent) ;
 			int max_pad = tpc_rowlen[g->row] ;
-			if(g->ncontent > max_pad) {
+			if((int)g->ncontent > max_pad) {
 				LOG(NOTE,"sector %d, row %d: want %d, have %d",g->sec,g->row,g->ncontent,max_pad) ;
 			}
 			else max_pad = g->ncontent ;
 
-			for(u_int pad=1;pad<=max_pad;pad++) {
+			for(int pad=1;pad<=max_pad;pad++) {
 				LOG(DBG,"Gains: %d %d %d %f %f",g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
 				gain_algo->set_gains(g->sec,g->row,pad,g->gain[pad].gain,g->gain[pad].t0) ;
 			}
@@ -1509,9 +1509,10 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			trgs[cou].rhic = rhic ;
 
 			switch(trgs[cou].trg) {
-			case 4 :
-			case 9 :
-			case 10 :
+			case 4 :	// physics
+			case 8 :	// interleaved laser
+			case 9 :	// usual laser
+			case 10 :	// pulser
 				break ;
 			default :
 				LOG(ERR,"RDO %d: T %d: prompt: bad trg: 0x%08X",rdo.rdo,trgs[cou].t,dta) ;

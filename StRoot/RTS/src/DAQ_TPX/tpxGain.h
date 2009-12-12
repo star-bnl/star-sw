@@ -5,7 +5,18 @@
 
 #include "tpxCore.h"
 
+#define TPX_TCD_PED		92
+#define TPX_TCD_START		100
+#define TPX_TCD_STOP		103
+#define TPX_TCD_TIME_0		100.84	// or perhaps 100.90?
 
+#define TPX_TCU_PED		92	// will move to 92
+#define TPX_TCU_START		97
+#define TPX_TCU_STOP		101
+#define TPX_TCU_TIME_0		98.668442	// measured with run 10346005
+
+#define TPX_PULSER_PED_START	92
+#define TPX_PULSER_PED_STOP	103
 
 class tpxGain
 {
@@ -38,6 +49,10 @@ public:
 
 	// sector 1..24
 	u_int bad_rdo_mask[25] ;	// bad if set to 1
+
+	void if_file() ;
+
+	char *raw_gains_fname ;
 
 	// below used while calculating only
 	struct aux {
@@ -95,6 +110,11 @@ public:
 	u_int c_date ;	// date of file as YYYYMMDD
 	u_int c_time ;	// time of file as HHMMSS
 	u_int c_run ;	// run of file
+
+	int pulser_ped ;	// first timebin with ped=0
+	int pulser_start ;	// timebin with peak
+	int pulser_stop ;	// last timebin which we use for the mean
+	double pulser_time_0 ;
 
 private:
 	void do_default(int sector) ;
