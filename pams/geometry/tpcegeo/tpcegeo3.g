@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.17 2009/11/10 23:04:42 perev Exp $
+!// $Id: tpcegeo3.g,v 1.18 2009/12/12 03:38:37 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.18  2009/12/12 03:38:37  perev
+!// extrudedFix
+!//
 !// Revision 1.17  2009/11/10 23:04:42  perev
 !// remove debug prints
 !//
@@ -111,15 +114,16 @@ Content   TPCE,TOFC,TOFS,TOST,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,
           TSAS,TWAS,TALS,TSGT,TWBT,TWRC,TWRG,TWRI,TWTR,TWMR,
           TRDO,TBRW,TWRB,TCOO,TCAB,TRIB,TWIR
 *
-        Real INCH ,CM;
+        Real INCH ,CM,sind,cosd,tand,cos15,sin15,tan15;
         Parameter (INCH=2.54,CM=1.);
         integer kBlack,kRed,kGreen,kBlue,kYellow,kViolet,kLightBlue;
         parameter (kBlack=1,kRed=2,kGreen=3,kBlue=4);
         parameter (kYellow=5,kViolet=6,kLightBlue=7);
 
 !//  Real lb   = 0.45359; !// kG
-        Real cos15 /.965925826289068312/ !// Cos(15./180*Pi);
-        Real tan15 /.267949192431122696/ !// Tan(Pi*15./180);
+        parameter (cos15 =.965925826289068312) !// Cos(15./180*Pi);
+        parameter (sin15 =.258819045102520739) !// Sin(15./180*Pi);
+        parameter (tan15 =.267949192431122696) !// Tan(Pi*15./180);
 !//   int's
    Integer i,j,iSecAng,nCount/0/,jTRIB,kase;
 !//   real's
@@ -152,7 +156,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
         Real del;
 
    Real zWheel1,zTOFCend ,zTIFCend,zTIFCFlangeBegin;
-
+   Real qwe(10);
 
 
 !//
@@ -198,14 +202,14 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
   Integer inOut;
 
 !//     Tpc(Inner/Outer)SectorAssembly
-  Real zzzSA(2)         /207.4,218/
-  Real rmnSA(0:1)       /52   ,122/
-  Real rmxSA(0:1)       /122  ,194/
+  Real zzzSA(2)         /207.4   ,219   /
+  Real rmnSA(0:1)       /51      ,121.07/
+  Real rmxSA(0:1)       /121.07  ,194   /
 
 !//     Tpc(Inner/Outer)WheelAssembly
   Real zzzWA(2)         /211.4,229.2/
-  Real rmnWA(0:1)       /54   ,126  /
-  Real rmxWA(0:1)       /116  ,188  /
+  Real rmnWA(0:1)       /54   ,121  /
+  Real rmxWA(0:1)       /121  ,189  /
 
 !//             TpcRDOAssembly
   Real zzzRDO(2)/232. ,252./;
@@ -260,7 +264,6 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
                 AssemblyThickness,RibDX ,RibDY  ,RibDZ, Ass(3) }
 
 
-
   Fill  TPCG !//   TPC basic dimensions
         version =       3               !// version    => current version
         Rmin =          46.107          !// Rmin          => TPC envelope inner radius
@@ -303,7 +306,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
         dzYF3  =        208.02          !// dz of YF3
         PadPlaneThickness = 0.182       !// 1.82 mm  Drawing 24A0314 & 24A0304
         dGateGround = 0.6            !//
-        WireMountWidth  = 5*0.130*INCH  !//
+        WireMountWidth  = 5*((0.130+0.1376)/2)*INCH  !//
         WireMountHeight = 1.340*inch    !// Drawing 24A0434
         dxRDO   = 1.75/2                !// A.Lebedev 1 RDO = 5 lb
         dyRDO   = 45./2                 !//
@@ -1006,24 +1009,25 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
     Create  And Position TWRB x=x, y=y, z=z ORT=YX-Z
 
 
+  }
 !//    TString rotm("R345");
 !//    if (inOut == 1) rotm = "R015";
-    r = 0;
-    alpha = 345
-    if (inOut == 1) alpha = 15;
+  do alpha = -15,15,30
+  {
     do j = 0,3
     {
       if (j == 0) r = TPCG_WheelR2 - 1.5/8.5*(TPCG_WheelR2 - TPCG_WheelR1);
       if (j == 1) r = TPCG_WheelR2 - 6.5/8.5*(TPCG_WheelR2 - TPCG_WheelR1);
       if (j == 2) r = TPCG_WheelR1 - 2.0/8.5*(TPCG_WheelR1 - TPCG_WheelR0);
       if (j == 3) r = TPCG_WheelR1 - 7.0/8.5*(TPCG_WheelR1 - TPCG_WheelR0);
-      x = r;
-      y = x *tan15*(2*inOut-1);
+      x = r ;
+      y = r *tand(alpha);
 !//      TpcSectorAndWheel->AddNodeOverlap(WheelRibBox, 3+4*inOut+j, new TGeoCombiTrans(x, y, zWheel1+TPCG_WheelTHK/2, GetRot(rotm)));
      Position TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha kOnly='Many'
     }
+    qwe(1) = -qwe(1);
+    qwe(2) = -qwe(2);
   }
-
 
   Create And Position TWBT                      "//WheelBottom"
   Create And Position TWRI      kOnly='MANY'    "//WheelOuterRing"
@@ -1082,13 +1086,12 @@ Block TSAS  TpcInnerSectorAssembly &  TpcOuterSectorAssembly TSAS and TSA1
     dx = TECW_widthRib/2;
     dz = (TECW_Thick - TPCG_PadPlaneThickness - TECW_ThickAl)/2;
     z  = z2 - dz;
-    dxW = TPCG_WireMountWidth/2;
+    dxW = TPCG_WireMountWidth/cos15/2;
     dzW = TPCG_WireMountHeight/2;
     xW = 0;
     do iRib = 0,1
     {
 !//      TGeoVolume *trib = gGeoManager->MakePara("TRIB", GetMed("TPCE_ALUMINIUM"), dx, dy, dz,-(1-2*iRib)*alpha, 0, 0);
-      mySha = 'PARA';
       mySha = 'PARA';
       myPar = {dx, dy, dz, -(1-2*iRib)*alpha};
       Create TRIB;
@@ -1096,7 +1099,8 @@ Block TSAS  TpcInnerSectorAssembly &  TpcOuterSectorAssembly TSAS and TSA1
       x  = ((y1 + y2)/2 - dx)*(1-2*iRib);
       Position TRIB x=y y=-x z=z ORT=YX-Z
 
-      xW = ((y1 + y2)/2 +  dxW)*(1-2*iRib);
+!//VP      xW = ((y1 + y2)/2 +  dxW)*(1-2*iRib);
+      xW = ((y1 + y2)/2 -  dxW)*(1-2*iRib);
 !//      TGeoVolume *wireMount = gGeoManager->MakePara("WireMount", GetMed("TPCE_G10"), dxW, dy, dzW,-(1-2*iRib)*alpha, 0, 0);
       myPar = {dxW, dy, dzW, -(1-2*iRib)*alpha, 0, 0};
       Create TWIR;
@@ -1335,8 +1339,8 @@ block TWRI      WheelOuterRing
 Attribute TWRI seen=0  colo=kGreen
       SHAPE     PCON    Phi1=-15  Dphi=30  Nz=4,
                 zi ={zWheel1      ,zTOFCend     ,zTOFCend    ,TPCG_LengthW/2},
-                Rmn={TPCG_WheelR2 ,TPCG_WheelR2 ,TPCG_WheelR2,TPCG_WheelR2  },
-                Rmx={TPCG_WheelOR1,TPCG_WheelOR1,TPCG_WheelOR,TPCG_WheelOR  }
+                Rmn={TPCG_WheelR2*cos15 ,TPCG_WheelR2*cos15 ,TPCG_WheelR2*cos15,TPCG_WheelR2*cos15  },
+                Rmx={TPCG_WheelOR1      ,TPCG_WheelOR1      ,TPCG_WheelOR      ,TPCG_WheelOR        }
 
            Create And Position TWRC
 
@@ -1359,7 +1363,7 @@ endBlock        "end TWRI"
 *------------------------------------------------------------------------------
 *
 block TWRG WheelOuterRing PGON part
-Attribute TWRC seen=1  colo=kGreen
+Attribute TWRG seen=1  colo=kGreen
 Material ALUMINIUM
       SHAPE     PGON    Phi1=-alpha  Dphi=alpha*2  Nz=2 Npdv=1,
        zi ={zWheel1,TPCG_LengthW/2},
@@ -1441,6 +1445,7 @@ Attribute TRDO seen=1  colo=kYellow
   y = x*tan15 - TPCG_RDOCoolingdY ;
   z = TPCG_zRDO - 2*dy;
   Create And Position TCOO x=x y=y z=z ORT=YX-Z
+*===================================================
 
 !//  coolingTube = gGeoManager->MakePara("CoolingTube", GetMed("TPCE_Water_Pipe"), TPCG_RDOCoolingdY, TPCG_RDOCoolingdX,TPCG_RDOCoolingdZ, -15, 0, 0);
 !//  TpcRDO->AddNode(coolingTube,2,new TGeoCombiTrans(x,-y, TPCG_zRDO - 2*dy,GetRot("YZXZ")));
@@ -1448,9 +1453,9 @@ Attribute TRDO seen=1  colo=kYellow
   myPar = {TPCG_RDOCoolingdY, TPCG_RDOCoolingdX, TPCG_RDOCoolingdZ, -15};
   x = TPCG_WheelR2 - TPCG_RDOCoolingdX;
   y = x*tan15 - TPCG_RDOCoolingdY ;
-  z =  - 2*dy;
+  z = TPCG_zRDO - 2*dy;
   Create And Position TCOO x=x y=-y z=z ORT=YX-Z
-
+*===================================================
 
 
   RCoolingTube = TPCG_WheelR2 - TPCG_heigTube - 2*TPCG_dxRDO;
@@ -1499,7 +1504,7 @@ endBlock        "end TBRW"
 *
 !//    wheelRib = gGeoManager->MakePara("TpcWheelRib", GetMed("TPCE_ALUMINIUM"), dy, dx, dz,-(1-2*inOut)*15, 0, 0);
 block TWRB TpcWheelRib
-Attribute TBRW seen=1  colo=kYellow
+Attribute TWRB seen=1  colo=kYellow
 Material ALUMINIUM
 SHAPE PARA dX=myDx dY=myDy dz=myDz Alph=myAlph
 endBlock        "end TWRB"
