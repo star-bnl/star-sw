@@ -40,7 +40,7 @@ public:
 	void smooth() ;					// from ped_store to ped_store
 	int summarize(FILE *log=0) ;
 
-
+	int max_events ;	// max events allowed in the calculation
 
 private:
 	struct peds {
