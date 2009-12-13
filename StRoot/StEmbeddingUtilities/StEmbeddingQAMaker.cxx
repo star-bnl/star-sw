@@ -1,6 +1,6 @@
 
+#include <algorithm>
 #include <fstream>
-#include <iostream>
 #include <string>
 
 #include "TClonesArray.h"
@@ -9,299 +9,195 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TFile.h"
-#include "TObject.h"
 #include "TTree.h"
 #include "TObjArray.h"
 
+#include "StMessMgr.h"
 #include "StMiniMcEvent/StMiniMcEvent.h"
 #include "StMiniMcEvent/StTinyMcTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StParticleDefinition.hh"
+#include "StParticleTable.hh"
 
 #include "StEmbeddingQAMaker.h"
-#include "StEmbeddingQAParticle.h"
-#include "StEmbeddingQAParticleCollection.h"
 #include "StEmbeddingQATrack.h"
 
 using namespace std ;
-
-  const Float_t StEmbeddingQAMaker::kVertexCut = 30.0 ; // define z-vertex cut
 
 ClassImp(StEmbeddingQAMaker)
 
 //__________________________________________________________________________________________
 StEmbeddingQAMaker::StEmbeddingQAMaker()
-  : kYear(2007), kProduction("P08ic"), kParticleId(8), kIsSimulation(kTRUE)
+  : mYear(2007), mProduction("P08ic"), mIsSimulation(kTRUE)
 {
+  // Default constructor
+
   init() ;
 }
 
 //__________________________________________________________________________________________
-StEmbeddingQAMaker::StEmbeddingQAMaker(const Int_t year, const TString production, const Int_t particleId, const Bool_t isSimulation)
-  : kYear(year), kProduction(production), kParticleId(particleId), kIsSimulation(isSimulation)
+StEmbeddingQAMaker::StEmbeddingQAMaker(const Int_t year, const TString production, const Bool_t isSimulation)
+  : mYear(year), mProduction(production), mIsSimulation(isSimulation)
 {
-  init() ;
-}
+  // Define year, production from the input arguments
 
-//__________________________________________________________________________________________
-StEmbeddingQAMaker::StEmbeddingQAMaker(const Int_t year, const TString production, const TString name, const Bool_t isSimulation)
-  : kYear(year), kProduction(production), kParticleId(StEmbeddingQAUtilities::getParticleId(name)), kIsSimulation(isSimulation)
-{
   init() ;
 }
 
 //__________________________________________________________________________________________
 StEmbeddingQAMaker::~StEmbeddingQAMaker()
 {
-  delete mParticles ;
+  clear();
+}
+
+//__________________________________________________________________________________________
+void StEmbeddingQAMaker::clear()
+{
+  // Clear all histograms
+  LOG_DEBUG << "StEmbeddingQAMaker::clear()" << endm;
+
+  if ( mhVz ) delete mhVz ;
+  if ( mhVzAccepted ) delete mhVzAccepted ;
+  if ( mhVyVx ) delete mhVyVx ;
+  if ( mhdVx ) delete mhdVx ;
+  if ( mhdVy ) delete mhdVy ;
+  if ( mhdVz ) delete mhdVz ;
+  if ( mhParentGeantId ) delete mhParentGeantId ;
+
+  for(UInt_t ic=0; ic<StEmbeddingQAConst::mNCategory; ic++){
+    if ( mhGeantId[ic] ) delete mhGeantId[ic] ;
+
+    mGeantId[ic].clear();
+    mhNHit[ic].clear();
+    mhNCommonHitVsNHit[ic].clear();
+    mhDca[ic].clear();
+    mhPtVsEta[ic].clear();
+    mhPtVsY[ic].clear();
+    mhPtVsPhi[ic].clear();
+    mhPtVsMom[ic].clear();
+    mhdPtVsPt[ic].clear();
+    mhMomVsEta[ic].clear();
+    mhdEdxVsMomMc[ic].clear();
+    mhdEdxVsMomMcPidCut[ic].clear();
+    mhdEdxVsMomReco[ic].clear();
+    mhdEdxVsMomRecoPidCut[ic].clear();
+    mhRecoPVsMcP[ic].clear();
+    mhNCommonHitVsNHit[ic].clear();
+    mhEtaVsPhi[ic].clear();
+    mhEtaVsVz[ic].clear();
+    mhYVsVz[ic].clear();
+  }
 }
 
 //__________________________________________________________________________________________
 void StEmbeddingQAMaker::init()
 {
-  cout << endl;
-  cout << Form("   StEmbeddingQAMaker::init() for year       : %10d", kYear) << endl;
-  cout << Form("   StEmbeddingQAMaker::init() for production : %10s", kProduction.Data()) << endl;
-  cout << Form("   StEmbeddingQAMaker::init() for particle   : %10s (id = %3d )",
-    StEmbeddingQAUtilities::getParticleName(kParticleId).Data(), kParticleId)
-    << endl;
-  cout << endl;
+  // Initialization of data members
 
-  mOutput = 0;
-  mDebug = 0;
+  LOG_INFO << endm;
+  LOG_INFO << Form("   StEmbeddingQAMaker::init() for year       : %10d", mYear) << endm;
+  LOG_INFO << Form("   StEmbeddingQAMaker::init() for production : %10s", mProduction.Data()) << endm;
+  LOG_INFO << endm;
+
   mMuDstMaker = 0;
-  mVz = -9999.0 ;
+  mVertexCut = 30.0; // default z-vertex cut
+  mOutput = 0;
+  mVz = -9999. ;
 
-  mParticles = new StEmbeddingQAParticleCollection(kParticleId);
+  mhVz = 0 ;
+  mhVzAccepted = 0 ;
+  mhVyVx = 0 ;
+  mhdVx = 0 ;
+  mhdVy = 0 ;
+  mhdVz = 0 ;
+  mhParentGeantId = 0 ;
+
+  for(UInt_t ic=0; ic<StEmbeddingQAConst::mNCategory; ic++){
+    mhGeantId[ic] = 0 ;
+  }
+
+  // Clear all histograms
+  clear();
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::isZVertexOk(const StMiniMcEvent& mcevent, const Float_t vertexCut) const
+Bool_t StEmbeddingQAMaker::isZVertexOk(const StMiniMcEvent& mcevent) const
 {
-  return TMath::Abs(mcevent.vertexZ()) < vertexCut ;
+  return TMath::Abs(mcevent.vertexZ()) < mVertexCut ;
 }
 
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQAMaker::book(const TString outputFileName)
 {
+  LOG_DEBUG << "StEmbeddingQAMaker::book()" << endm;
+
   // Book histograms
   TString fileName(outputFileName);
 
   // Set default file name if output filename is blank
   if( fileName.IsWhitespace() ){
-    const TString data = (kIsSimulation) ? "embedding" : "real" ;
-    fileName = Form("qa_%s_%d_%s_%s.root", 
-        data.Data(), kYear, kProduction.Data(), StEmbeddingQAUtilities::getParticleName(kParticleId, kFALSE).Data()) ;
+    const TString data = (mIsSimulation) ? "embedding" : "real" ;
+    fileName = Form("qa_%s_%d_%s.root", data.Data(), mYear, mProduction.Data());
   }
 
+  // Open output file
   mOutput = TFile::Open(fileName, "recreate");
   mOutput->cd();
-  cout << "    OPEN " << mOutput->GetName() << endl;
+  LOG_INFO << "    OPEN " << mOutput->GetName() << endm;
+
+  // NOTE:
+  //  Initialize only event-wise histograms at this point.
+  //  Track-wise histograms will be defined for the particles
+  //  found in either MC or reconstructed tracks
+  //  in expandHistograms()
+  StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
 
   // Event-wise informations
-  hVz         = new TH1D("hVz", "z-vertex", 100, -50, 50);
-  hVzAccepted = new TH1D("hVzAccepted", "z-vertex with z-vertex cut", 100, -50, 50);
-  hVz->SetXTitle("v_{z} (cm)");
-  hVzAccepted->SetXTitle("v_{z} (cm)");
+  mhVz         = new TH1D("hVz", "z-vertex", 100, -50, 50);
+  mhVzAccepted = new TH1D("hVzAccepted", "z-vertex with z-vertex cut", 100, -50, 50);
+  mhVz->SetXTitle("v_{z} (cm)");
+  mhVzAccepted->SetXTitle("v_{z} (cm)");
 
-  hVyVx = new TH2D("hVyVx", "v_{y} vs v_{x}", 100, -10, 10, 100, -10, 10);
-  hVyVx->SetXTitle("v_{x} (cm)");
-  hVyVx->SetYTitle("v_{y} (cm)");
+  utility->setStyle(mhVz);
+  utility->setStyle(mhVzAccepted);
 
-  hdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)", 100, -10+0.5, 10+0.5);
-  hdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)", 100, -10+0.5, 10+0.5);
-  hdVz = new TH1D("hdVz", "#Delta z = v_{z} - v_{z}(MC)", 100, -10+0.5, 10+0.5);
-  hdVx->SetXTitle("#Deltav_{x} = v_{x} - v_{x}(MC) (cm)");
-  hdVy->SetXTitle("#Deltav_{y} = v_{y} - v_{y}(MC) (cm)");
-  hdVz->SetXTitle("#Deltav_{z} = v_{z} - v_{z}(MC) (cm)");
+  mhVyVx = new TH2D("hVyVx", "v_{y} vs v_{x}", 100, -10, 10, 100, -10, 10);
+  mhVyVx->SetXTitle("v_{x} (cm)");
+  mhVyVx->SetYTitle("v_{y} (cm)");
 
-  const Int_t ptBin    = 100 ;
-  const Float_t ptMin  = 0.0 ;
-  const Float_t ptMax  = 10.0 ;
-  const Int_t etaBin   = 100 ;
-  const Float_t etaMin = -2.5 ;
-  const Float_t etaMax =  2.5 ;
+  utility->setStyle(mhVyVx);
 
-  // Track-wise informations
-  TString particleName(mParticles->getParent()->getTitle());
+  mhdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)", 100, -10+0.5, 10+0.5);
+  mhdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)", 100, -10+0.5, 10+0.5);
+  mhdVz = new TH1D("hdVz", "#Delta z = v_{z} - v_{z}(MC)", 100, -10+0.5, 10+0.5);
+  mhdVx->SetXTitle("#Deltav_{x} = v_{x} - v_{x}(MC) (cm)");
+  mhdVy->SetXTitle("#Deltav_{y} = v_{y} - v_{y}(MC) (cm)");
+  mhdVz->SetXTitle("#Deltav_{z} = v_{z} - v_{z}(MC) (cm)");
 
-  // Common histograms for all categories
-  for(Int_t ic=0; ic<StEmbeddingQAUtilities::kNCategory; ic++){
-    TString categoryTitle(StEmbeddingQAUtilities::getCategoryTitle(ic));
+  utility->setStyle(mhdVx);
+  utility->setStyle(mhdVy);
+  utility->setStyle(mhdVz);
 
-    // Initialize histograms
-    const Int_t nHistogram = getNumberOfHistograms(ic);
+  // Initialize geantid histogram
 
-    hGeantId[ic]             = new TH1*[nHistogram] ;
-    hNHit[ic]                = new TH3*[nHistogram] ;
-    hDca[ic]                 = new TH3*[nHistogram] ;
-    hPtVsEta[ic]             = new TH2*[nHistogram] ;
-    hPtVsY[ic]               = new TH2*[nHistogram] ;
-    hPtVsPhi[ic]             = new TH2*[nHistogram] ;
-    hPtVsMom[ic]             = new TH2*[nHistogram] ;
-    hdPtVsPt[ic]             = new TH2*[nHistogram] ;
-    hMomVsEta[ic]            = new TH2*[nHistogram] ;
-    hdEdxVsMomMc[ic]         = new TH2*[nHistogram] ;
-    hdEdxVsMomMcPidCut[ic]   = new TH2*[nHistogram] ;
-    hdEdxVsMomReco[ic]       = new TH2*[nHistogram] ;
-    hdEdxVsMomRecoPidCut[ic] = new TH2*[nHistogram] ;
-    hRecoPVsMcP[ic]          = new TH2*[nHistogram] ;
-    hEtaVsPhi[ic]            = new TH2*[nHistogram] ;
-    hEtaVsVz[ic]             = new TH2*[nHistogram] ;
-    hYVsVz[ic]               = new TH2*[nHistogram] ;
+  for(UInt_t ic=0; ic<StEmbeddingQAConst::mNCategory; ic++){
+    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 1000, 0, 1000) ;
+    mhGeantId[ic]->SetXTitle("Geantid");
 
-    for(Int_t ih=0; ih<nHistogram; ih++){
-
-      TString nameSuffix(Form("_%d", ic));
-      if ( nHistogram > 1 ) nameSuffix = Form("_%d_%d", ic, ih);
-
-      TString name(particleName);
-      if ( nHistogram > 1 ){
-        name = Form("%s (decay daughter)", mParticles->getDaughter(ih)->getTitle().Data());
-      }
-
-      TString title(Form("(%s), %s", categoryTitle.Data(), name.Data()));
-
-      // Geant id
-      hGeantId[ic][ih] = new TH1D(Form("hGeantId%s", nameSuffix.Data()), "", 1000, 0, 1000);
-      hGeantId[ic][ih]->SetXTitle("Geant id");
-      hGeantId[ic][ih]->SetTitle( Form("Geant id, %s", title.Data()) );
- 
-      // NHit
-      hNHit[ic][ih] = new TH3D(Form("hNHit%s", nameSuffix.Data()), "", 10, 0, 5, 10, -1.0, 1.0, 50, 0, 50);
-      hNHit[ic][ih]->SetXTitle("MC p_{T} (GeV/c)");
-      hNHit[ic][ih]->SetYTitle("#eta");
-      hNHit[ic][ih]->SetZTitle("N_{hit}");
-      if( ic == 0 ) hNHit[ic][ih]->SetTitle( Form("N_{fit} distribution, %s", title.Data()) );
-      else          hNHit[ic][ih]->SetTitle( Form("N_{fit} distribution (|dcaGl|<3 cm), %s", title.Data()) );
- 
-      // Dca
-      hDca[ic][ih] = new TH3D(Form("hDca%s", nameSuffix.Data()), "",
-          10, 0, 5, 10, -1.0, 1.0, 100, 0, 3.0);
-      hDca[ic][ih]->SetXTitle("MC p_{T} (GeV/c)");
-      hDca[ic][ih]->SetYTitle("#eta");
-      hDca[ic][ih]->SetZTitle("Global dca (cm)");
-      if( ic == 0 )                 hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs MC p_{T}, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs MC p_{T} (N_{fit}#geq10 & N_{common}#geq10), %s", title.Data()) );
-      else                          hDca[ic][ih]->SetTitle( Form("Dca vs #eta vs MC p_{T} (N_{fit}#geq10), %s", title.Data()) );
- 
-      // pt vs eta
-      hPtVsEta[ic][ih] = new TH2D(Form("hPtVsEta%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
-      hPtVsEta[ic][ih]->SetXTitle("#eta");
-      hPtVsEta[ic][ih]->SetYTitle("MC p_{T} (GeV/c)");
-      if( ic == 0 )                 hPtVsEta[ic][ih]->SetTitle( Form("MC p_{T} vs #eta, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hPtVsEta[ic][ih]->SetTitle( Form("MC p_{T} vs #eta (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hPtVsEta[ic][ih]->SetTitle( Form("MC p_{T} vs #eta (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
- 
-      // pt vs y
-      hPtVsY[ic][ih] = new TH2D(Form("hPtVsY%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
-      hPtVsY[ic][ih]->SetXTitle("rapidity y");
-      hPtVsY[ic][ih]->SetYTitle("MC p_{T} (GeV/c)");
-      if( ic == 0 )                 hPtVsY[ic][ih]->SetTitle( Form("MC p_{T} vs y, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hPtVsY[ic][ih]->SetTitle( Form("MC p_{T} vs y (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hPtVsY[ic][ih]->SetTitle( Form("MC p_{T} vs y (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
- 
-      // pt vs phi
-      hPtVsPhi[ic][ih] = new TH2D(Form("hPtVsPhi%s", nameSuffix.Data()), "", 100, -TMath::Pi(), TMath::Pi(), ptBin, ptMin, ptMax);
-      hPtVsPhi[ic][ih]->SetXTitle("#phi (rad)");
-      hPtVsPhi[ic][ih]->SetYTitle("MC p_{T} (GeV/c)");
-      if( ic == 0 )                 hPtVsPhi[ic][ih]->SetTitle( Form("MC p_{T} vs #phi, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hPtVsPhi[ic][ih]->SetTitle( Form("MC p_{T} vs #phi (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hPtVsPhi[ic][ih]->SetTitle( Form("MC p_{T} vs #phi (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-
-      // pt vs momentum
-      hPtVsMom[ic][ih] = new TH2D(Form("hPtVsMom%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, ptBin, ptMin, ptMax);
-      hPtVsMom[ic][ih]->SetXTitle("momentum (GeV/c)");
-      hPtVsMom[ic][ih]->SetYTitle("MC p_{T} (GeV/c)");
-      if( ic == 0 )                 hPtVsMom[ic][ih]->SetTitle( Form("MC p_{T} vs momentum, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hPtVsMom[ic][ih]->SetTitle( Form("MC p_{T} vs momentum (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hPtVsMom[ic][ih]->SetTitle( Form("MC p_{T} vs momentum (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
- 
-      // Delta pt vs pt
-      hdPtVsPt[ic][ih] = new TH2D(Form("hdPtVsPt%s", nameSuffix.Data()), "", 100, -5, 5, ptBin, ptMin, ptMax);
-      hdPtVsPt[ic][ih]->SetXTitle("reco. p_{T} (GeV/c)");
-      hdPtVsPt[ic][ih]->SetYTitle("reco. p_{T} - MC p_{T} (GeV/c)");
-      if( ic == 0 )                 hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T}, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T} (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hdPtVsPt[ic][ih]->SetTitle( Form("p_{T} - p_{T} (MC) vs p_{T} (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-
-      // momentum vs eta
-      hMomVsEta[ic][ih] = new TH2D(Form("hMomVsEta%s", nameSuffix.Data()), "", etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
-      hMomVsEta[ic][ih]->SetXTitle("#eta");
-      hMomVsEta[ic][ih]->SetYTitle("momentum (GeV/c)");
-      if( ic == 0 )                 hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta (N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-      else                          hMomVsEta[ic][ih]->SetTitle( Form("Momentum vs #eta (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
- 
-      // dE/dx vs MC momentum
-      hdEdxVsMomMc[ic][ih] = new TH2D(Form("hdEdxVsMomMc%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
-      hdEdxVsMomMc[ic][ih]->SetXTitle("MC p (GeV/c)");
-      hdEdxVsMomMc[ic][ih]->SetYTitle("dE/dx (keV/cm)");
-      if( ic == 0 ) hdEdxVsMomMc[ic][ih]->SetTitle( Form("dE/dx vs MC p, %s", title.Data()) );
-      else          hdEdxVsMomMc[ic][ih]->SetTitle( Form("dE/dx vs MC p, (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-
-      // dE/dx vs MC momentum (with pid cut)
-      hdEdxVsMomMcPidCut[ic][ih] = new TH2D(Form("hdEdxVsMomMcPidCut%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
-      hdEdxVsMomMcPidCut[ic][ih]->SetXTitle("MC p (GeV/c)");
-      hdEdxVsMomMcPidCut[ic][ih]->SetYTitle("dE/dx (keV/cm)");
-      if( ic == 0 ) hdEdxVsMomMcPidCut[ic][ih]->SetTitle( Form("dE/dx vs MC p (with 2#sigma pid cut), %s", title.Data()) );
-      else          hdEdxVsMomMcPidCut[ic][ih]->SetTitle( Form("dE/dx vs MC p (with 2#sigma pid cut), (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-
-      // dE/dx vs reconstructed momentum
-      hdEdxVsMomReco[ic][ih] = new TH2D(Form("hdEdxVsMomReco%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
-      hdEdxVsMomReco[ic][ih]->SetXTitle("Reconstructed p (GeV/c)");
-      hdEdxVsMomReco[ic][ih]->SetYTitle("dE/dx (keV/cm)");
-      if( ic == 0 ) hdEdxVsMomReco[ic][ih]->SetTitle( Form("dE/dx vs Reconstructed p, %s", title.Data()) );
-      else          hdEdxVsMomReco[ic][ih]->SetTitle( Form("dE/dx vs Reconstructed p, (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-
-      // dE/dx vs Reconstructed momentum (with pid cut)
-      hdEdxVsMomRecoPidCut[ic][ih] = new TH2D(Form("hdEdxVsMomRecoPidCut%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, 100, 0, 10.0);
-      hdEdxVsMomRecoPidCut[ic][ih]->SetXTitle("Reconstructed p (GeV/c)");
-      hdEdxVsMomRecoPidCut[ic][ih]->SetYTitle("dE/dx (keV/cm)");
-      if( ic == 0 ) hdEdxVsMomRecoPidCut[ic][ih]->SetTitle( Form("dE/dx vs Reconstructed p (with 2#sigma pid cut), %s", title.Data()) );
-      else          hdEdxVsMomRecoPidCut[ic][ih]->SetTitle( Form("dE/dx vs Reconstructed p (with 2#sigma pid cut), (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-
-      // Reconstructed momentum vs MC momentum
-      hRecoPVsMcP[ic][ih] = new TH2D(Form("hRecoPVsMcP%s", nameSuffix.Data()), "", ptBin, ptMin, ptMax, ptBin, ptMin, ptMax);
-      hRecoPVsMcP[ic][ih]->SetXTitle("MC p (GeV/c)");
-      hRecoPVsMcP[ic][ih]->SetYTitle("Reconstructed p (GeV/c)");
-      if( ic == 0 ) hRecoPVsMcP[ic][ih]->SetTitle( Form("Reconstructed p vs MC p %s", title.Data()) );
-      else          hRecoPVsMcP[ic][ih]->SetTitle( Form("Reconstructed p vs MC p (N_{fit}#geq10 & |dcaGl|<3cm), %s", title.Data()) );
-
- 
-      TString pt("0.2 < p_{T} < 5 GeV/c");
- 
-      // eta vs phi
-      hEtaVsPhi[ic][ih] = new TH2D(Form("hEtaVsPhi%s", nameSuffix.Data()), "", 100, -TMath::Pi(), TMath::Pi(), etaBin, etaMin, etaMax);
-      hEtaVsPhi[ic][ih]->SetXTitle("#phi (rad)");
-      hEtaVsPhi[ic][ih]->SetYTitle("#eta");
-      if( ic == 0 )                 hEtaVsPhi[ic][ih]->SetTitle( Form("#eta vs #phi, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hEtaVsPhi[ic][ih]->SetTitle( Form("#eta vs #phi (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s, %s", pt.Data(), title.Data()) );
-      else                          hEtaVsPhi[ic][ih]->SetTitle( Form("#eta vs #phi (N_{fit}>=10 & |dcaGl|<3cm), %s, %s", pt.Data(), title.Data()) );
- 
-      // eta vs vz
-      hEtaVsVz[ic][ih] = new TH2D(Form("hEtaVsVz%s", nameSuffix.Data()), "", 200, -50, 50, 200, etaMin, etaMax);
-      hEtaVsVz[ic][ih]->SetXTitle("v_{z} (cm)");
-      hEtaVsVz[ic][ih]->SetYTitle("#eta");
-      if( ic == 0 )                 hEtaVsVz[ic][ih]->SetTitle( Form("#eta vs v_{z}, %s", title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hEtaVsVz[ic][ih]->SetTitle( Form("#eta vs v_{z} (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s, %s", pt.Data(), title.Data()) );
-      else                          hEtaVsVz[ic][ih]->SetTitle( Form("#eta vs v_{z} (N_{fit}>=10 & |dcaGl|<3cm), %s, %s", pt.Data(), title.Data()) );
- 
-      // rapidity vs vz
-      hYVsVz[ic][ih] = new TH2D(Form("hYVsVz%s", nameSuffix.Data()), "", 200, -50, 50, 200, etaMin, etaMax);
-      hYVsVz[ic][ih]->SetXTitle("v_{z} (cm)");
-      hYVsVz[ic][ih]->SetYTitle("rapidity y");
-      if( ic == 0 )                 hYVsVz[ic][ih]->SetTitle( Form("rapidity y vs v_{z}, %s", pt.Data(), title.Data()) );
-      else if( ic >= 1 && ic <= 3 ) hYVsVz[ic][ih]->SetTitle( Form("rapidity y vs v_{z} (N_{fit}>=10 & N_{common}>=10 & |dcaGl|<3cm), %s, %s", pt.Data(), title.Data()) );
-      else                          hYVsVz[ic][ih]->SetTitle( Form("rapidity y vs v_{z} (N_{fit}>=10 & |dcaGl|<3cm), %s, %s", pt.Data(), title.Data()) );
-    }
+    utility->setStyle(mhGeantId[ic]);
   }
 
-  mOutput->GetList()->Sort();
-  cout << endl << endl << endl;
+  mhParentGeantId = new TH1D("hParentGeantId", Form("Parent geantid, %s", 
+        utility->getCategoryTitle(utility->getCategoryId("CONTAM")).Data()), 1000, 0, 1000) ;
+  mhParentGeantId->SetXTitle("Parent Geantid");
+  utility->setStyle(mhParentGeantId);
 
-  return kTRUE ;
+  mOutput->GetList()->Sort();
+  LOG_INFO << endm << endm << endm;
+
+  return kStOk ;
 }
 
 //__________________________________________________________________________________________
@@ -310,25 +206,25 @@ Bool_t StEmbeddingQAMaker::make(const TString inputFileName, const Bool_t isSimu
   // Check output file
   if(!mOutput || !mOutput->IsOpen()){
     Error("StEmbeddingQAMaker::Make", "Output file is not opened");
-    return kFALSE ;
+    return kStErr ;
   }
 
   if( isSimulation ){
     // Fill embedding outputs from minimc tree
-    cout << "------------------------------------------------------------------------------------" << endl;
-    cout << "            Fill embedding ..." << endl;
-    cout << "------------------------------------------------------------------------------------" << endl;
+    LOG_INFO << "------------------------------------------------------------------------------------" << endm;
+    LOG_INFO << "            Fill embedding ..." << endm;
+    LOG_INFO << "------------------------------------------------------------------------------------" << endm;
     fillEmbedding(inputFileName);
   }
   else{
     // Fill real data outputs from MuDST
-    cout << "------------------------------------------------------------------------------------" << endl;
-    cout << "            Fill real data ..." << endl;
-    cout << "------------------------------------------------------------------------------------" << endl;
+    LOG_INFO << "------------------------------------------------------------------------------------" << endm;
+    LOG_INFO << "            Fill real data ..." << endm;
+    LOG_INFO << "------------------------------------------------------------------------------------" << endm;
     fillRealData(inputFileName);
   }
 
-  return kTRUE ;
+  return kStOk ;
 }
 
 //__________________________________________________________________________________________
@@ -338,14 +234,14 @@ Bool_t StEmbeddingQAMaker::fillEmbedding(const TString inputFileName)
   TFile* file = TFile::Open(inputFileName);
   if( !file || !file->IsOpen() ){
     Error("StEmbeddingQAMaker::fillEmbedding", "can't open %s", inputFileName.Data());
-    return kFALSE ;
+    return kStErr ;
   }
 
   const TString treeName("StMiniMcTree");
   TTree* tree = (TTree*) file->Get(treeName);
   if( !tree ){
     Error("StEmbeddingQAMaker::fillEmbedding", "can't find %s tree", treeName.Data());
-    return kFALSE ;
+    return kStErr ;
   }
 
   StMiniMcEvent* mMiniMcEvent = new StMiniMcEvent();
@@ -366,7 +262,7 @@ Bool_t StEmbeddingQAMaker::fillEmbedding(const TString inputFileName)
   //   enum Category { MC,MATCHED,MERGED,SPLIT,CONTAM,GHOST,MATGLOB};
 
   const Long64_t nentries = tree->GetEntries();
-  cout << Form("    OPEN %s,  # of event = %10d", inputFileName.Data(), nentries) << endl;
+  LOG_INFO << Form("    OPEN %s,  # of event = %10d", inputFileName.Data(), nentries) << endm;
 
   for (Int_t ievent=0; ievent<nentries;ievent++) {
     tree->GetEntry(ievent);
@@ -377,55 +273,33 @@ Bool_t StEmbeddingQAMaker::fillEmbedding(const TString inputFileName)
     const Float_t vxmc = mMiniMcEvent->mcVertexX() ;
     const Float_t vymc = mMiniMcEvent->mcVertexY() ;
     const Float_t vzmc = mMiniMcEvent->mcVertexZ() ;
-    hVz->Fill(vz);
+    mhVz->Fill(vz);
 
     mVz = vz ;
 
     // z-vertex cut
-    if( !isZVertexOk(*mMiniMcEvent, kVertexCut) ) continue ;
+    if( !isZVertexOk(*mMiniMcEvent) ) continue ;
 
-    hVzAccepted->Fill(vz);
-    hVyVx->Fill(vx, vy);
-    hdVx->Fill( vx - vxmc );
-    hdVy->Fill( vy - vymc );
-    hdVz->Fill( vz - vzmc );
+    mhVzAccepted->Fill(vz);
+    mhVyVx->Fill(vx, vy);
+    mhdVx->Fill( vx - vxmc );
+    mhdVy->Fill( vy - vymc );
+    mhdVz->Fill( vz - vzmc );
 
     // Get MC, MATCHED, GHOST, CONTAM and MATGLOB pairs
-    for(Int_t trackid=0; trackid<StEmbeddingQAUtilities::kNEmbedding; trackid++){
+    for(UInt_t categoryid=0; categoryid<StEmbeddingQAConst::mNEmbedding; categoryid++){
+      const Int_t nTrack = getNtrack(categoryid, *mMiniMcEvent) ;
 
-      Int_t nTrack = 0 ;
-      switch ( trackid ) {
-        case 0: nTrack = mMiniMcEvent->nMcTrack(); break ;
-        case 1: nTrack = mMiniMcEvent->nMatchedPair(); break ;
-        case 2: nTrack = mMiniMcEvent->nGhostPair(); break ;
-        case 3: nTrack = mMiniMcEvent->nContamPair(); break ;
-        // NOTE:
-        //   Currently, there is no function to get number of matched global paris in StMiniMcEvent
-        //   Skip it
-        case 4: nTrack = 0 ; break ;
-        default:
-          Error("fillEmbedding", "Unkown branch id, id=%3d", trackid);
-          return kFALSE ;
+      if( ievent % 1000 == 0 ){
+        LOG_INFO << Form("####  event=%4d, category=%10s, ntrack=%10d",
+            ievent, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data(), nTrack)
+          << endm;
       }
 
-      if( mDebug && ievent % 200 == 0 ){
-        cout << Form("####  event=%4d, category=%10s, ntrack=%10d",
-            ievent, StEmbeddingQAUtilities::getCategoryName(trackid).Data(), nTrack)
-          << endl;
-      }
-
+      // Fill track-wise histograms
       for(Int_t itrk=0; itrk<nTrack; itrk++){
-        switch ( trackid ) {
-          case 0: fillMcTracks(*mMiniMcEvent, trackid, itrk); break ;
-          case 1: fillMatchedPairs(*mMiniMcEvent, trackid, itrk); break ;
-          case 2: fillGhostPairs(*mMiniMcEvent, trackid, itrk); break ;
-          case 3: fillContamPairs(*mMiniMcEvent, trackid, itrk); break ;
-          case 4: fillMatGlobPairs(*mMiniMcEvent, trackid, itrk); break ;
-          default:
-            Error("fillEmbedding",  "Unkown branch id, id=%3d", trackid);
-            return kFALSE ;
-        }
-      }// track loop
+        fillEmbeddingTracks(*mMiniMcEvent, categoryid, itrk) ;
+      } // Track loop
     }// Track category
 
   }// event loop
@@ -433,7 +307,7 @@ Bool_t StEmbeddingQAMaker::fillEmbedding(const TString inputFileName)
   delete mMiniMcEvent ;
   file->Close() ;
 
-  return kTRUE ;
+  return kStOk ;
 }
 
 //__________________________________________________________________________________________
@@ -448,26 +322,27 @@ Bool_t StEmbeddingQAMaker::fillRealData(const TString inputFileName)
     const Double_t vx = muEvent->primaryVertexPosition().x() ;
     const Double_t vy = muEvent->primaryVertexPosition().y() ;
     const Double_t vz = muEvent->primaryVertexPosition().z() ;
-    const Bool_t isVertexBad = TMath::Abs(vz) >= kVertexCut
-      || ( vx < 1.0e-5 && vy < 1.0e-5 && vz < 1.0e-5 )
+    const Bool_t isVertexBad = TMath::Abs(vz) >= mVertexCut
+      || ( TMath::Abs(vx) < 1.0e-5 && TMath::Abs(vy) < 1.0e-5 && TMath::Abs(vz) < 1.0e-5 )
       || ( TMath::Abs(vx) > 1000 || TMath::Abs(vy) > 1000 || TMath::Abs(vz) > 1000 )
       ;
     if( isVertexBad ) continue ;
 
-    hVz->Fill(vz);
-    hVyVx->Fill(vx, vy);
+    mhVz->Fill(vz);
+    mhVyVx->Fill(vx, vy);
 
     mVz = vz ;
 
-    for(Int_t ic=0; ic<StEmbeddingQAUtilities::kNReal; ic++){
-      const Int_t trackid = ic + StEmbeddingQAUtilities::kNEmbedding ;
-      if( mDebug && ievent % 200 == 0 ){
-        cout << Form("%85s ####  event=%4d, category=%10s",
-            mMuDstMaker->GetFileName(), ievent, StEmbeddingQAUtilities::getCategoryName(trackid).Data())
-          << endl;
+    for(UInt_t ic=0; ic<StEmbeddingQAConst::mNReal; ic++){
+      const Int_t categoryid = ic + StEmbeddingQAConst::mNEmbedding ;
+
+      if( ievent % 1000 == 0 ){
+        LOG_INFO << Form("%85s ####  event=%4d, category=%10s",
+            mMuDstMaker->GetFileName(), ievent, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data())
+          << endm;
       }
 
-      TObjArray* tracks = (ic==0) 
+      const TObjArray* tracks = (ic==0) 
         ?  mMuDstMaker->muDst()->primaryTracks()   // Primary tracks
         :  mMuDstMaker->muDst()->globalTracks() ;  // Global tracks
 
@@ -475,7 +350,7 @@ Bool_t StEmbeddingQAMaker::fillRealData(const TString inputFileName)
       StMuTrack* track = 0;
       Int_t itrk = 0;
       while ( ( track = (StMuTrack*) trackIterator.Next() ) ){
-        fillRealTracks(*track, trackid, itrk);
+        fillRealTracks(*track, categoryid, itrk);
         itrk++;
       }
     }
@@ -483,10 +358,10 @@ Bool_t StEmbeddingQAMaker::fillRealData(const TString inputFileName)
     ievent++;
   }// event loop
 
-  cout << "End of real data" << endl;
-  cout << "Total # of events = " << ievent << endl;
+  LOG_INFO << "End of real data" << endm;
+  LOG_INFO << "Total # of events = " << ievent << endm;
 
-  return kTRUE ;
+  return kStOk ;
 }
 
 //__________________________________________________________________________________________
@@ -494,12 +369,37 @@ Bool_t StEmbeddingQAMaker::runRealData(const TString inputFileList)
 {
   if( mMuDstMaker ) delete mMuDstMaker ;
 
-  cout << "###    Read " << inputFileList << endl;
+  LOG_INFO << "###    Read " << inputFileList << endm;
   mMuDstMaker  = new StMuDstMaker(0, 0, "", inputFileList, "MuDst", 1000);
+
+  // Push back electrons, pions, kaons and protons for the real data.
+  LOG_INFO << "StEmbeddingQAMaker::runRealData()" << endm;
+  LOG_INFO << "Add electrons, pions, kaons and protons for the real data QA" << endm;
+  for(UInt_t ic=0; ic<StEmbeddingQAConst::mNReal; ic++){
+    const Int_t categoryid = ic + StEmbeddingQAConst::mNEmbedding ;
+
+    const Short_t parentid = 0 ; // real tracks are assumed to be primary
+    expandHistograms(categoryid, 2, parentid);
+    expandHistograms(categoryid, 3, parentid);
+    expandHistograms(categoryid, 8, parentid);
+    expandHistograms(categoryid, 9, parentid);
+    expandHistograms(categoryid, 11, parentid);
+    expandHistograms(categoryid, 12, parentid);
+    expandHistograms(categoryid, 14, parentid);
+    expandHistograms(categoryid, 15, parentid);
+
+    // Make sure the input particle list
+    for(vector<Short_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
+      const Short_t geantid = (*iter) ;
+      LOG_DEBUG << Form("  Input geant id = %10d,  name = %10s", geantid,
+          StParticleTable::instance()->findParticleByGeantId(geantid)->name().c_str()) << endm ;
+    }
+  }
+
 
   make(inputFileList, kFALSE);
 
-  return kTRUE ;
+  return kStOk ;
 }
 
 //__________________________________________________________________________________________
@@ -510,22 +410,25 @@ Bool_t StEmbeddingQAMaker::runEmbedding(const TString inputFileList)
     Error("StEmbeddingQAMaker::runEmbedding", "can't find %s", inputFileList.Data());
     return kFALSE ;
   }
-    cout << "###    Read " << inputFileList << endl;
+  LOG_INFO << "###    Read " << inputFileList << endm;
 
   // Fill embedding outputs
   TString file ;
   while( fEmbedding >> file ){
-    cout << "####     Read file : " << file << endl;
+    LOG_INFO << "####     Read file : " << file << endm;
     make(file, kTRUE);
   }
 
-  return kTRUE ;
+  return kStOk ;
 }
 
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQAMaker::run(const TString inputFileList)
 {
-  if( kIsSimulation ){
+  LOG_INFO << "StEmbeddingQAMaker::run()" << endm ;
+  LOG_INFO << "  z-vertex cut is |vz| < " << mVertexCut << endm;
+
+  if( mIsSimulation ){
     // Embedding QA
     return runEmbedding(inputFileList) ;
   }
@@ -538,154 +441,139 @@ Bool_t StEmbeddingQAMaker::run(const TString inputFileList)
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQAMaker::end()
+Bool_t StEmbeddingQAMaker::end() const
 {
-  cout << "    End of StEmbeddingQAMaker" << endl;
-  cout << "    Write output " << mOutput->GetName() << endl;
+  LOG_INFO << "    End of StEmbeddingQAMaker" << endm;
+  LOG_INFO << "    Write output " << mOutput->GetName() << endm;
+  mOutput->GetList()->Sort();
+
   mOutput->Write();
   mOutput->Close();
 
-  return kTRUE ;
+  return kStOk ;
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::fillMcTracks(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
+void StEmbeddingQAMaker::fillEmbeddingTracks(const StMiniMcEvent& mcevent, const Int_t categoryid, const Int_t itrk)
 {
-  StTinyMcTrack* track = (StTinyMcTrack*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
-  if(!track){
-    Error("fillMcTracks", "Cannot find MC tracks");
-    return ;
-  }
+  // Fill embedding data for several different minimc nodes
 
-  // Make sure geant id is equal to the input particle id
-  if( track->geantId() != mParticles->getParent()->getParticleId() ) return ;
+  // Get embedding data (need delete)
+  StEmbeddingQATrack* miniTrack = getEmbeddingQATrack(mcevent, categoryid, itrk);
 
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), *track, mParticles->getParent()->getMass2());
+  // Do not fill histograms unless geantid was found (see getEmbeddingQATrack())
+  if(!miniTrack) return ;
 
-  fillHistograms(miniTrack, trackid, 0, kParticleId);
+  fillHistograms(*miniTrack, categoryid);
+
+  delete miniTrack ;
 }
 
-//__________________________________________________________________________________________
-void StEmbeddingQAMaker::fillMatchedPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
+//____________________________________________________________________________________________________
+StEmbeddingQATrack* StEmbeddingQAMaker::getEmbeddingQATrack(const StMiniMcEvent& mcevent, const Int_t categoryid, const Int_t itrk)
 {
-  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
-  if(!track){
-    Error("fillMatchedPairs", "Cannot find Matched pairs");
-    return ;
-  }
+  // Get embedding QA track (StEmbeddingQATrack) from minimc branches
+  StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance();
 
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, mParticles->getParent()->getMass2());
+  const TString name(utility->getCategoryName(categoryid));
+  const Category category(utility->getCategory(categoryid));
 
-  fillHistograms(miniTrack, trackid, 0, kParticleId);
-}
+  if ( utility->isMc(name) ){
+    // MC tracks
+    const StTinyMcTrack* track = (StTinyMcTrack*) mcevent.tracks(category)->At(itrk) ;
 
-//__________________________________________________________________________________________
-void StEmbeddingQAMaker::fillGhostPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
-{
-  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
-  if(!track){
-    // Suppress error messege for the recent embedding samples. There are no ghost tracks
-//    Error("fillGhostPairs", "Cannot find Ghost pairs");
-    return ;
-  }
-
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, mParticles->getParent()->getMass2());
-  fillHistograms(miniTrack, trackid, 0, kParticleId);
-}
-
-//__________________________________________________________________________________________
-void StEmbeddingQAMaker::fillContamPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
-{
-  StContamPair* track = (StContamPair*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
-  if(!track){
-    Error("fillContamPairs", "Cannot find Contaminated pairs");
-    return ;
-  }
-
-  for(UInt_t id=0; id<mParticles->getNDaughter(); id++){
-    // Mass2 for daughter particles (fixed on Oct/22/2009)
-
-    StEmbeddingQAParticle* daughter = mParticles->getDaughter(id) ;
-    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, daughter->getMass2());
-
-    // Make sure parent geantid is correct
-    if ( miniTrack.getParentGeantId() != mParticles->getParent()->getParticleId() ) continue ;
-
-    // Daughter id selection
-    if ( miniTrack.getGeantId() == daughter->getParticleId() ){
-      // Make sure daughter particles have correct charge
-      const Bool_t isChargeOk = miniTrack.getCharge() == daughter->getCharge() ;
-      if( !isChargeOk ) continue ;
-
-      fillHistograms(miniTrack, trackid, id, daughter->getParticleId());
+    // Make sure that the input geantid exists in StParticleTable
+    if ( !isGeantIdOk(*track) ){
+      LOG_DEBUG << Form("StEmbeddingQAMaker::getEmbeddingQATrack", "No geantid = %3d exists in StParticleTable", track->geantId()) << endm ;
+      return 0;
     }
+
+    return (new StEmbeddingQATrack(name, *track));
   }
-}
+  else if ( utility->isMatched(name) || utility->isGhost(name) || utility->isMatchedGlobal(name) ){
+    // Matched or Ghost or Matched global pairs
+    StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(category)->At(itrk) ;
 
-//__________________________________________________________________________________________
-void StEmbeddingQAMaker::fillMatGlobPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk)
-{
-  StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(StEmbeddingQAUtilities::getCategory(trackid))->At(itrk) ;
-  if(!track){
-    Error("fillMatGlobPair", "Cannot find Matched global pairs");
-    return ;
+    // Make sure that the input geantid exists in StParticleTable
+    if ( !isGeantIdOk(*track) ){
+      LOG_DEBUG << Form("StEmbeddingQAMaker::getEmbeddingQATrack", "No geantid = %3d exists in StParticleTable", track->geantId()) << endm ;
+      return 0;
+    }
+
+    return (new StEmbeddingQATrack(name, track));
   }
+  else if ( utility->isContaminated(name) ){
+    // Contaminated pairs
+    StContamPair* track = (StContamPair*) mcevent.tracks(category)->At(itrk) ;
 
-  StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, mParticles->getParent()->getMass2());
+    // Make sure that the input geantid exists in StParticleTable
+    if ( !isGeantIdOk(*track) ){
+      LOG_DEBUG << Form("StEmbeddingQAMaker::getEmbeddingQATrack", "No geantid = %3d exists in StParticleTable", track->geantId()) << endm ;
+      return 0;
+    }
 
-  fillHistograms(miniTrack, trackid, 0, kParticleId);
-}
+    // Fill parent geant id
+    mhParentGeantId->Fill(track->parentGeantId());
 
-//__________________________________________________________________________________________
-void StEmbeddingQAMaker::fillRealTracks(const StMuTrack& track, const Int_t trackid, const Int_t itrk)
-{
-  // Fill daughters separately for the comparison with embedded tracks (Oct/21/2009)
-  if ( mParticles->getNDaughter() == 0 ){
-    // stable particles
-    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, mParticles->getParent()->getMass2());
- 
-    fillHistograms(miniTrack, trackid, 0, kParticleId);
+    return (new StEmbeddingQATrack(name, track));
   }
   else{
-    // decay daughters
-
-    for(UInt_t id=0; id<mParticles->getNDaughter(); id++){
-      StEmbeddingQAParticle* daughter = mParticles->getDaughter(id) ;
-      StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::getCategoryName(trackid), track, daughter->getMass2());
- 
-      fillHistograms(miniTrack, trackid, id, daughter->getParticleId());
-    }
+    Warning("StEmbeddingQAMaker::fillEmbeddingTracks", "Unknown category id, id=%3d", categoryid);
+    return 0;
   }
 
+  return 0;
 }
 
 //__________________________________________________________________________________________
-void StEmbeddingQAMaker::fillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle, const Int_t geantId)
+void StEmbeddingQAMaker::fillRealTracks(const StMuTrack& track, const Int_t categoryid, const Int_t itrk)
+{
+  // Loop over all registered particles
+  for(vector<Short_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
+    const Short_t geantid = (*iter) ;
+    StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::instance()->getCategoryName(categoryid), track, geantid);
+ 
+    fillHistograms(miniTrack, categoryid);
+  }
+}
+
+//__________________________________________________________________________________________
+void StEmbeddingQAMaker::fillHistograms(const StEmbeddingQATrack& track, const Int_t categoryid)
 {
   // Track selections will be made for embedding/real tracks
   // Only pt cut will be applied for MC tracks
+
+  // do not fill histograms if geantid < 0
+  const Short_t geantid = track.getGeantId() ;
+  if ( geantid < 0 ) return ;
 
   // pt and eta cuts
   if( !track.isPtAndEtaOk() ) return ;
 
   // Use MC momentum for the embedding tracks
   //     reconstructed momentum for the real tracks
-  const Double_t pt    = (track.isReal()) ? track.getPtRc()                : track.getPtMc() ;
-  const Double_t mom   = (track.isReal()) ? track.getPRc()                 : track.getPMc() ;
-  const Double_t eta   = (track.isReal()) ? track.getEtaRc()               : track.getEtaMc() ;
-  const Double_t y     = (track.isReal()) ? track.getVectorRc().rapidity() : track.getVectorMc().rapidity() ;
+  StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+  const Double_t pt    = (utility->isReal(track.getName())) ? track.getPtRc()                : track.getPtMc() ;
+  const Double_t mom   = (utility->isReal(track.getName())) ? track.getPRc()                 : track.getPMc() ;
+  const Double_t eta   = (utility->isReal(track.getName())) ? track.getEtaRc()               : track.getEtaMc() ;
+  const Double_t y     = (utility->isReal(track.getName())) ? track.getVectorRc().rapidity() : track.getVectorMc().rapidity() ;
 
   // Reconstructed momentum
   const Double_t momRc = track.getPRc() ;
 
+  // Check geant id
+  //   if it's new, expands the histogram array for it
+  //   if it has already exist, do nothing
+  expandHistograms(categoryid, geantid, track.getParentGeantId());
+
   // Fill geant id
-  hGeantId[trackid][iparticle]->Fill(track.getGeantId());
+  mhGeantId[categoryid]->Fill(track.getGeantId());
 
   // dE/dx (no PID cut)
   //  - Add NHit cut (Nov/13/2009)
   if( track.isDcaOk() && track.isNHitOk() ){
-    hdEdxVsMomMc[trackid][iparticle]->Fill(mom, track.getdEdx()*1.0e+06);
-    hdEdxVsMomReco[trackid][iparticle]->Fill(momRc, track.getdEdx()*1.0e+06);
+    mhdEdxVsMomMc[categoryid][geantid]->Fill(mom, track.getdEdxkeV());
+    mhdEdxVsMomReco[categoryid][geantid]->Fill(momRc, track.getdEdxkeV());
   }
 
   //  Oct/21/2009
@@ -695,79 +583,309 @@ void StEmbeddingQAMaker::fillHistograms(const StEmbeddingQATrack& track, const I
   // 
   // Do not apply nSigma cuts for others
 
-  if ( !track.isNSigmaOk(geantId) ) return ;
+  if ( !track.isNSigmaOk(geantid) ) return ;
 
   if( track.isDcaOk() ){
     // Fill NHit points
-    hNHit[trackid][iparticle]->Fill(pt, eta, track.getNHit());
+    mhNHit[categoryid][geantid]->Fill(pt, eta, track.getNHit());
 
     if( track.isNHitOk() ){
       const Double_t phi = track.getPhi() ;
 
+      // Fill Ncommon hits vs Nhits
+      mhNCommonHitVsNHit[categoryid][geantid]->Fill(track.getNHit(), track.getNCommonHit());
+ 
       // dE/dx (with PID cut)
-      hdEdxVsMomMcPidCut[trackid][iparticle]->Fill(mom, track.getdEdx()*1.0e+06);
-      hdEdxVsMomRecoPidCut[trackid][iparticle]->Fill(momRc, track.getdEdx()*1.0e+06);
-
+      mhdEdxVsMomMcPidCut[categoryid][geantid]->Fill(mom, track.getdEdxkeV());
+      mhdEdxVsMomRecoPidCut[categoryid][geantid]->Fill(momRc, track.getdEdxkeV());
+ 
       // Correlation between reconstructed and MC momentum
-      hRecoPVsMcP[trackid][iparticle]->Fill(mom, momRc);
-
+      mhRecoPVsMcP[categoryid][geantid]->Fill(mom, momRc);
+ 
       // Pt, eta, phi
-      hPtVsEta[trackid][iparticle]->Fill(eta, pt);
-      hPtVsY[trackid][iparticle]->Fill(y, pt);
-      hPtVsPhi[trackid][iparticle]->Fill(phi, pt);
-      hPtVsMom[trackid][iparticle]->Fill(mom, pt);
-      hdPtVsPt[trackid][iparticle]->Fill(pt, pt-track.getPtMc());
-      hMomVsEta[trackid][iparticle]->Fill(eta, mom);
-
-      hEtaVsPhi[trackid][iparticle]->Fill(phi, eta);
-      hEtaVsVz[trackid][iparticle]->Fill(mVz, eta);
-      hYVsVz[trackid][iparticle]->Fill(mVz, y);
+      mhPtVsEta[categoryid][geantid]->Fill(eta, pt);
+      mhPtVsY[categoryid][geantid]->Fill(y, pt);
+      mhPtVsPhi[categoryid][geantid]->Fill(phi, pt);
+      mhPtVsMom[categoryid][geantid]->Fill(mom, pt);
+      mhdPtVsPt[categoryid][geantid]->Fill(pt, pt-track.getPtMc());
+      mhMomVsEta[categoryid][geantid]->Fill(eta, mom);
+ 
+      mhEtaVsPhi[categoryid][geantid]->Fill(phi, eta);
+      mhEtaVsVz[categoryid][geantid]->Fill(mVz, eta);
+      mhYVsVz[categoryid][geantid]->Fill(mVz, y);
     }
   }
 
   // Fill Dca
   if( track.isNHitOk() ){
-    hDca[trackid][iparticle]->Fill(pt, eta, track.getDcaGl());
+    mhDca[categoryid][geantid]->Fill(pt, eta, track.getDcaGl());
   }
 
-
-  if ( mDebug > 2 ){
-    cout << Form("     RC:(nhit, pt, eta, phi) = (%5d, %1.4f, %1.4f, %1.4f)  MC:(pt, eta) = (%1.4f, %1.4f)",
-        track.getNHit(), track.getPtRc(), track.getEtaRc(), track.getPhi(), track.getPtMc(), track.getEtaMc()
-        ) << endl;
-  }
-
+  LOG_DEBUG << Form("     RC:(nfit, pt, eta, phi) = (%5d, %1.4f, %1.4f, %1.4f)  MC:(pt, eta) = (%1.4f, %1.4f)",
+      track.getNHit(), track.getPtRc(), track.getEtaRc(), track.getPhi(), track.getPtMc(), track.getEtaMc()
+      ) << endm;
 }
 
 //__________________________________________________________________________________________
-Int_t StEmbeddingQAMaker::getNumberOfHistograms(const Int_t categoryId) const
+Bool_t StEmbeddingQAMaker::pushBackGeantId(const Int_t categoryid, const Short_t geantid)
 {
-  // Get # of histograms
-  //   Contaminated pairs : # of decay daughters
-  //   Real data :
-  //     if ( ndecay >= 2 ) # of decay daughters
-  //     else               1
-
-  Int_t n = 0 ; // number of histograms
-
-  if( StEmbeddingQAUtilities::getCategoryName(categoryId).Contains("CONTAM") ){
-    // Contaminated pairs (daughters)
-    n = mParticles->getNDaughter() ;
-  }
-  else if ( StEmbeddingQAUtilities::getCategoryName(categoryId).Contains("PRIMARY") 
-      || StEmbeddingQAUtilities::getCategoryName(categoryId).Contains("GLOBAL") ){
-    // Real data (daughter)
-    n = mParticles->getNDaughter() ; // will be 0 if parent particle is stable
+  if ( mGeantId[categoryid].empty() ){
+    // Push back a new geantid if geantid array is empty
+    LOG_INFO << Form("StEmbeddingQAMaker::pushBackGeantId()   Find a new geant id,  geantid = %5d (%10s)", 
+        geantid, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data()) << endm;
+    mGeantId[categoryid].push_back(geantid);
   }
   else{
-    // Others
-    n = 1 ;
+    // Expand histogrm by checking the geant id
+    //   if it's new, expands the histogram array for it
+    //   if it has already exist, do nothing
+    const vector<Short_t>::iterator iter = find(mGeantId[categoryid].begin(), mGeantId[categoryid].end(), geantid) ;
+ 
+    if ( iter != mGeantId[categoryid].end() ){
+      // Geant id already exist. do nothing
+      return kFALSE;
+    }
+    else{
+      // Find a new geant id, store id in mGeantId array
+      LOG_INFO << Form("StEmbeddingQAMaker::pushBackGeantId()   Find a new geant id,  geantid = %5d (%10s)", 
+          geantid, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data()) << endm;
+      mGeantId[categoryid].push_back(geantid);
+    }
   }
 
-  // Set n = 1
-  if ( n == 0 ) n = 1 ;
-
-  return n ;
+  return kTRUE ;
 }
 
+
+//__________________________________________________________________________________________
+void StEmbeddingQAMaker::expandHistograms(const Int_t categoryid, const Short_t geantid, const Short_t parentid)
+{
+  // Push back geant id if the input geantid is new (return true)
+  // If the input geant id has already stored in mGeantId array, do nothing (return false)
+  if ( !pushBackGeantId(categoryid, geantid) ) return ;
+
+  // Expand histograms
+  mOutput->cd();
+
+  const Int_t ptBin    = 100 ;
+  const Float_t ptMin  = 0.0 ;
+  const Float_t ptMax  = 10.0 ;
+  const Int_t etaBin   = 100 ;
+  const Float_t etaMin = -2.5 ;
+  const Float_t etaMax =  2.5 ;
+
+  // Add parent geantid information if the particle is decay daughters
+  StParticleTable* table = StParticleTable::instance() ;
+  StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+  const Char_t* categoryTitle(utility->getCategoryTitle(categoryid).Data());
+
+  // Suffix for each histogram. Put parentid if we have decay daughters
+  const TString nameSuffix = (parentid>0) ? Form("_%d_%d_%d", categoryid, parentid, geantid) : Form("_%d_%d", categoryid, geantid);
+
+  // Category title and particle name put in the histogram title
+  const TString CategoryAndGeantId = (parentid>0) ?  Form("%s (%s from %s)", categoryTitle, 
+      table->findParticleByGeantId(geantid)->name().c_str(), table->findParticleByGeantId(parentid)->name().c_str())
+    : Form("%s (%s)", categoryTitle, table->findParticleByGeantId(geantid)->name().c_str());
+
+  const TString categoryName(utility->getCategoryName(categoryid));
+  const Bool_t isMc        = utility->isMc(categoryName);
+  const Bool_t isEmbedding = utility->isEmbedding(categoryName);
+
+  // NHit vs eta vs MC pt
+  TString title(Form("N_{fit} distribution (|dcaGl|<3cm), %s", CategoryAndGeantId.Data()));
+  if( isMc ) title = Form("N_{fit} distribution, %s", CategoryAndGeantId.Data());
+  TH3* hNhit = new TH3D(Form("hNHit%s", nameSuffix.Data()), title, 10, 0, 5, 10, -1.0, 1.0, 50, 0, 50) ;
+  hNhit->SetXTitle("MC p_{T} (GeV/c)");
+  hNhit->SetYTitle("#eta");
+  hNhit->SetZTitle("N_{fit}");
+  utility->setStyle(hNhit);
+  mhNHit[categoryid].insert( pair<Int_t, TH3*>(geantid, hNhit) );
+
+  // Ncommon hit vs Nfit
+  title = Form("N_{common} hit vs N_{fit} (|dcaGl|<3cm), %s", CategoryAndGeantId.Data());
+  if( isMc ) title = Form("N_{common} hit vs N_{fit}, %s", CategoryAndGeantId.Data());
+  TH2* hNCommonHitVsNHit = new TH2D(Form("hNCommonHitVsNHit%s", nameSuffix.Data()), title, 50, 0, 50, 50, 0, 50) ;
+  hNCommonHitVsNHit->SetXTitle("N_{fit}");
+  hNCommonHitVsNHit->SetYTitle("N_{common}");
+  utility->setStyle(hNCommonHitVsNHit);
+  mhNCommonHitVsNHit[categoryid].insert( pair<Int_t, TH2*>(geantid, hNCommonHitVsNHit) );
+
+  // Dca vs eta vs MC pt
+  title = Form("Dca vs #eta vs MC p_{T} (N_{fit}#geq10), %s", CategoryAndGeantId.Data());
+  if( isMc ) title = Form("Dca vs #eta vs MC p_{T}, %s", CategoryAndGeantId.Data());
+  else if ( isEmbedding ) title = Form("Dca vs #eta vs MC p_{T} (N_{fit}#geq10 & N_{common}#geq10), %s", CategoryAndGeantId.Data());
+
+  TH3* hDca = new TH3D(Form("hDca%s", nameSuffix.Data()), title, 10, 0, 5, 10, -1.0, 1.0, 100, 0, 3.0);
+  hDca->SetXTitle("MC p_{T} (GeV/c)");
+  hDca->SetYTitle("#eta");
+  hDca->SetZTitle("Global dca (cm)");
+  utility->setStyle(hDca);
+  mhDca[categoryid].insert( pair<Int_t, TH3*>(geantid, hDca) );
+
+  //--------------------------------------------------
+  // Common cuts for the 
+  //  - pt vs eta
+  //  - pt vs y
+  //  - pt vs phi
+  //  - pt vs momentum
+  //  - delta pt vs pt
+  //  - momentum vs eta
+  //  - dE/dx vs momentum
+  //  - reco. momentum vs MC momentum
+  //  - eta vs phi
+  //  - eta vs vz
+  //  - rapidity vs vz
+  //
+  //  - dE/dx vs momentum (with pid cuts for the real data)
+  //--------------------------------------------------
+  TString cut(" (N_{fit}#geq10 & |dcaGl|<3cm)"); // real data
+  if( isMc ) cut = "";
+  else if ( isEmbedding ) cut = "(N_{fit}#geq10 & N_{common}#geq10 & |dcaGl|<3cm)";
+
+  const TString titleSuffix(Form("%s, %s", cut.Data(), CategoryAndGeantId.Data()));
+
+  // pt vs eta
+  TH2* hPtVsEta = new TH2D(Form("hPtVsEta%s", nameSuffix.Data()), Form("MC p_{T} vs #eta%s", titleSuffix.Data()),
+      etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
+  hPtVsEta->SetXTitle("#eta");
+  hPtVsEta->SetYTitle("MC p_{T} (GeV/c)");
+  utility->setStyle(hPtVsEta);
+  mhPtVsEta[categoryid].insert( pair<Int_t, TH2*>(geantid, hPtVsEta) );
+
+  // pt vs y
+  TH2* hPtVsY = new TH2D(Form("hPtVsY%s", nameSuffix.Data()), Form("MC p_{T} vs y%s", titleSuffix.Data()),
+      etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
+  hPtVsY->SetXTitle("rapidity y");
+  hPtVsY->SetYTitle("MC p_{T} (GeV/c)");
+  utility->setStyle(hPtVsY);
+  mhPtVsY[categoryid].insert( pair<Int_t, TH2*>(geantid, hPtVsY) );
+
+  // pt vs phi
+  TH2* hPtVsPhi = new TH2D(Form("hPtVsPhi%s", nameSuffix.Data()), Form("MC p_{T} vs #phi%s", titleSuffix.Data()),
+      100, -TMath::Pi(), TMath::Pi(), ptBin, ptMin, ptMax);
+  hPtVsPhi->SetXTitle("#phi (rad)");
+  hPtVsPhi->SetYTitle("MC p_{T} (GeV/c)");
+  utility->setStyle(hPtVsPhi);
+  mhPtVsPhi[categoryid].insert( pair<Int_t, TH2*>(geantid, hPtVsPhi) );
+
+  // pt vs momentum
+  TH2* hPtVsMom = new TH2D(Form("hPtVsMom%s", nameSuffix.Data()), Form("MC p_{T} vs momentum%s", titleSuffix.Data()),
+      ptBin, ptMin, ptMax, ptBin, ptMin, ptMax);
+  hPtVsMom->SetXTitle("momentum (GeV/c)");
+  hPtVsMom->SetYTitle("MC p_{T} (GeV/c)");
+  utility->setStyle(hPtVsMom);
+  mhPtVsMom[categoryid].insert( pair<Int_t, TH2*>(geantid, hPtVsMom) );
+
+  // Delta pt vs pt
+  TH2* hdPtVsPt = new TH2D(Form("hdPtVsPt%s", nameSuffix.Data()), Form("p_{T} - p_{T} (MC) vs p_{T}%s", titleSuffix.Data()),
+      100, -5, 5, ptBin, ptMin, ptMax);
+  hdPtVsPt->SetXTitle("reco. p_{T} (GeV/c)");
+  hdPtVsPt->SetYTitle("reco. p_{T} - MC p_{T} (GeV/c)");
+  utility->setStyle(hdPtVsPt);
+  mhdPtVsPt[categoryid].insert( pair<Int_t, TH2*>(geantid, hdPtVsPt) );
+
+  // momentum vs eta
+  TH2* hMomVsEta = new TH2D(Form("hMomVsEta%s", nameSuffix.Data()), Form("Momentum vs #eta%s", titleSuffix.Data()),
+      etaBin, etaMin, etaMax, ptBin, ptMin, ptMax);
+  hMomVsEta->SetXTitle("#eta");
+  hMomVsEta->SetYTitle("momentum (GeV/c)");
+  utility->setStyle(hMomVsEta);
+  mhMomVsEta[categoryid].insert( pair<Int_t, TH2*>(geantid, hMomVsEta) );
+
+  // dE/dx vs MC momentum
+  TH2* hdEdxVsMomMc = new TH2D(Form("hdEdxVsMomMc%s", nameSuffix.Data()), Form("dE/dx vs MC p%s", titleSuffix.Data()),
+      ptBin, ptMin, ptMax, 100, 0, 10.0);
+  hdEdxVsMomMc->SetXTitle("MC p (GeV/c)");
+  hdEdxVsMomMc->SetYTitle("dE/dx (keV/cm)");
+  utility->setStyle(hdEdxVsMomMc);
+  mhdEdxVsMomMc[categoryid].insert( pair<Int_t, TH2*>(geantid, hdEdxVsMomMc) );
+
+  // dE/dx vs reconstructed momentum
+  TH2* hdEdxVsMomReco = new TH2D(Form("hdEdxVsMomReco%s", nameSuffix.Data()), Form("dE/dx vs Reconstructed p%s", titleSuffix.Data()),
+      ptBin, ptMin, ptMax, 100, 0, 10.0);
+  hdEdxVsMomReco->SetXTitle("Reconstructed p (GeV/c)");
+  hdEdxVsMomReco->SetYTitle("dE/dx (keV/cm)");
+  utility->setStyle(hdEdxVsMomReco);
+  mhdEdxVsMomReco[categoryid].insert( pair<Int_t, TH2*>(geantid, hdEdxVsMomReco) );
+
+  // Reconstructed momentum vs MC momentum
+  TH2* hRecoPVsMcP = new TH2D(Form("hRecoPVsMcP%s", nameSuffix.Data()), Form("Reconstructed p vs MC p%s", titleSuffix.Data()),
+      ptBin, ptMin, ptMax, ptBin, ptMin, ptMax);
+  hRecoPVsMcP->SetXTitle("MC p (GeV/c)");
+  hRecoPVsMcP->SetYTitle("Reconstructed p (GeV/c)");
+  utility->setStyle(hRecoPVsMcP);
+  mhRecoPVsMcP[categoryid].insert( pair<Int_t, TH2*>(geantid, hRecoPVsMcP) );
+
+  // eta vs phi
+  TH2* hEtaVsPhi = new TH2D(Form("hEtaVsPhi%s", nameSuffix.Data()), Form("#eta vs #phi%s", titleSuffix.Data()),
+      100, -TMath::Pi(), TMath::Pi(), etaBin, etaMin, etaMax);
+  hEtaVsPhi->SetXTitle("#phi (rad)");
+  hEtaVsPhi->SetYTitle("#eta");
+  utility->setStyle(hEtaVsPhi);
+  mhRecoPVsMcP[categoryid].insert( pair<Int_t, TH2*>(geantid, hRecoPVsMcP) );
+  mhEtaVsPhi[categoryid].insert( pair<Int_t, TH2*>(geantid, hEtaVsPhi) );
+
+  // eta vs vz
+  TH2* hEtaVsVz = new TH2D(Form("hEtaVsVz%s", nameSuffix.Data()), Form("#eta vs v_{z}%s", titleSuffix.Data()),
+      200, -50, 50, 200, etaMin, etaMax);
+  hEtaVsVz->SetXTitle("v_{z} (cm)");
+  hEtaVsVz->SetYTitle("#eta");
+  utility->setStyle(hEtaVsVz);
+  mhEtaVsVz[categoryid].insert( pair<Int_t, TH2*>(geantid, hEtaVsVz) );
+ 
+  // rapidity vs vz
+  TH2* hYVsVz = new TH2D(Form("hYVsVz%s", nameSuffix.Data()), Form("rapidity y vs v_{z}%s", titleSuffix.Data()),
+      200, -50, 50, 200, etaMin, etaMax);
+  hYVsVz->SetXTitle("v_{z} (cm)");
+  hYVsVz->SetYTitle("rapidity y");
+  utility->setStyle(hYVsVz);
+  mhYVsVz[categoryid].insert( pair<Int_t, TH2*>(geantid, hYVsVz) );
+
+  // dE/dx vs MC momentum (with pid cut)
+  TH2* hdEdxVsMomMcPidCut = new TH2D(Form("hdEdxVsMomMcPidCut%s", nameSuffix.Data()), Form("dE/dx vs MC p (with 2#sigma pid cut)%s", titleSuffix.Data()),
+      ptBin, ptMin, ptMax, 100, 0, 10.0);
+  hdEdxVsMomMcPidCut->SetXTitle("MC p (GeV/c)");
+  hdEdxVsMomMcPidCut->SetYTitle("dE/dx (keV/cm)");
+  utility->setStyle(hdEdxVsMomMcPidCut);
+  mhdEdxVsMomMcPidCut[categoryid].insert( pair<Int_t, TH2*>(geantid, hdEdxVsMomMcPidCut) );
+
+  // dE/dx vs Reconstructed momentum (with pid cut)
+  TH2* hdEdxVsMomRecoPidCut = new TH2D(Form("hdEdxVsMomRecoPidCut%s", nameSuffix.Data()), 
+      Form("dE/dx vs Reconstructed p (with 2#sigma pid cut)%s", titleSuffix.Data()),
+      ptBin, ptMin, ptMax, 100, 0, 10.0);
+  hdEdxVsMomRecoPidCut->SetXTitle("Reconstructed p (GeV/c)");
+  hdEdxVsMomRecoPidCut->SetYTitle("dE/dx (keV/cm)");
+  utility->setStyle(hdEdxVsMomRecoPidCut);
+  mhdEdxVsMomRecoPidCut[categoryid].insert( pair<Int_t, TH2*>(geantid, hdEdxVsMomRecoPidCut) );
+}
+
+//__________________________________________________________________________________________
+Int_t StEmbeddingQAMaker::getNtrack(const Int_t categoryid, const StMiniMcEvent& mcevent) const
+{
+  switch ( categoryid ) {
+    case 0: return mcevent.nMcTrack() ;
+    case 1: return mcevent.nMatchedPair() ;
+    case 2: return mcevent.nGhostPair() ;
+    case 3: return mcevent.nContamPair() ;
+    // NOTE:
+    //   Currently, there is no function to get number of matched global paris in StMiniMcEvent
+    //   Skip it
+    case 4: return 0 ;
+    default:
+      Warning("getNtrack", "Unkown category id, id=%3d", categoryid);
+      return 0 ;
+  }
+
+  return 0 ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAMaker::isGeantIdOk(const StTinyMcTrack& track) const
+{
+  // Check geant id in StTinyMcTrack
+  //  can be used for the StMiniMcPair and StContamPair
+  //  since both of them inherit from StTinyMcTrack
+
+  return StParticleTable::instance()->containsGeantId(track.geantId()) ;
+}
 
