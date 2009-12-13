@@ -17,25 +17,37 @@ class StMuTrack ;
 
 class StEmbeddingQATrack {
   public:
+    /// Default constructor
     StEmbeddingQATrack();
-    StEmbeddingQATrack(const TString name, const StTinyMcTrack& track, const Double_t mass2);
-    StEmbeddingQATrack(const TString name, StMiniMcPair* track, const Double_t mass2);
-    StEmbeddingQATrack(const TString name, StContamPair* track, const Double_t mass2);
-    StEmbeddingQATrack(const TString name, const StMuTrack& track, const Double_t mass2);
+
+    /// Constructor for Monte Carlo (MC) tracks
+    StEmbeddingQATrack(const TString name, const StTinyMcTrack& track) ;
+
+    /// Constructor for Matched pairs
+    StEmbeddingQATrack(const TString name, StMiniMcPair* track) ;
+
+    /// Constructor for Contaminated pairs
+    StEmbeddingQATrack(const TString name, StContamPair* track) ;
+
+    /// Constructor for real tracks both Primary and Global tracks
+    //  Need to put the geantid by hand 
+    //  in order to calculate rapidity (and maybe invariant mass if you like)
+    //  since the real tracks don't have geantid
+    StEmbeddingQATrack(const TString name, const StMuTrack& track, const Short_t geantid);
+
+    /// Destructor
     virtual ~StEmbeddingQATrack();
 
-    Bool_t isMc() const ;
-    Bool_t isEmbedding() const ;
-    Bool_t isReal() const ;
-    Bool_t isPtAndEtaOk() const ;
+    Bool_t isPtAndEtaOk() const ;  /// Pt and eta cuts
 
-    Bool_t isNHitOk() const ;
-    Bool_t isDcaOk() const ;
-    Bool_t isCommonHitOk() const ;
+    Bool_t isNHitOk() const ;      /// Nhits cut
+    Bool_t isDcaOk() const ;       /// Dca cut
+    Bool_t isCommonHitOk() const ; /// Common hit cut
 
+    /// NSigma cut for electrons, pions, kaons and protons
     // if ( real tracks ) return |nSigma| < 2 
     // else               return true (i.e. no nSigma cut)
-    Bool_t isNSigmaOk(const Int_t particleId) const ;
+    Bool_t isNSigmaOk(const Short_t geantid) const ;
 
     StLorentzVectorD getVectorMc() const ;
     StLorentzVectorD getVectorRc() const ;
@@ -64,6 +76,7 @@ class StEmbeddingQATrack {
 
     Float_t getPhi()           const ;
     Float_t getdEdx()          const ;
+    Float_t getdEdxkeV()       const ;
     Float_t getDcaGl()         const ;
 
     // nSigma (e, pi, K, p) for real data
@@ -72,16 +85,19 @@ class StEmbeddingQATrack {
     Double_t getNSigmaKaon()     const ;
     Double_t getNSigmaProton()   const ;
 
+    /// Print track informations
     void print() const ;
+
+    /// Get track node name
     const TString getName() const ;
 
   private:
-    static const Float_t kPtMinCut ;   // minimum pt cut
-    static const Float_t kPtMaxCut ;   // maximum pt cut
-    static const Float_t kEtaCut ;     // maximum eta cut
-    static const Short_t kNHitCut ;    // NHit cut
-    static const Float_t kDcaCut ;     // Dca cut
-    static const Double_t kNSigmaCut ; // NSigma cut
+    static const Float_t kPtMinCut ;   /// Minimum pt cut
+    static const Float_t kPtMaxCut ;   /// Maximum pt cut
+    static const Float_t kEtaCut ;     /// Maximum eta cut
+    static const Short_t kNHitCut ;    /// NHit cut
+    static const Float_t kDcaCut ;     /// Dca cut
+    static const Double_t kNSigmaCut ; /// NSigma cut
 
     const Short_t mNCommonHit ;
     const Short_t mParentGeantId ;
@@ -98,7 +114,8 @@ class StEmbeddingQATrack {
     const Double_t mNSigmaPion ;
     const Double_t mNSigmaKaon ;
     const Double_t mNSigmaProton ;
-    TString mName ; // Track name
+
+    TString mName ; /// Track name
 
     ClassDef(StEmbeddingQATrack, 1)
 };
@@ -127,6 +144,7 @@ inline Float_t StEmbeddingQATrack::getEtaRc()         const { return mVectorRc.p
 
 inline Float_t StEmbeddingQATrack::getPhi()           const { return mPhi ; }
 inline Float_t StEmbeddingQATrack::getdEdx()          const { return mdEdx ; }
+inline Float_t StEmbeddingQATrack::getdEdxkeV()       const { return mdEdx * 1.0e+06 ; }
 inline Float_t StEmbeddingQATrack::getDcaGl()         const { return mDcaGl ; }
 
 inline const TString StEmbeddingQATrack::getName() const { return mName ; }
