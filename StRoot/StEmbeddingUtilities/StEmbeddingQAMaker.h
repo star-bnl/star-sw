@@ -47,6 +47,8 @@
 #ifndef __StEmbeddingQAMaker_h__
 #define __StEmbeddingQAMaker_h__
 
+#include <map>
+
 #include "TMath.h"
 #include "TString.h"
 
@@ -66,102 +68,119 @@ class StMuDstMaker ;
 class StMuTrack ;
 class StTinyMcTrack ;
 
-class StEmbeddingQAParticleCollection ;
-
 //____________________________________________________________________________________________________
 //  Analyze either minimc trees for embedding QA or microDST for real data QA
 class StEmbeddingQAMaker {
   public:
-    StEmbeddingQAMaker() ; // Default is 2007, P08ic, pi+
-    StEmbeddingQAMaker(const Int_t year, const TString production, const Int_t particleId, 
-        const Bool_t isSimulation = kTRUE); // specify year, production, particle id (default is embedding QA)
-    StEmbeddingQAMaker(const Int_t year, const TString production, const TString name,
-        const Bool_t isSimulation = kTRUE); // specify year, production, particle name (default is embedding QA)
+    /// Default constructor (default argument is 2007, P08ic)
+    StEmbeddingQAMaker() ;
+
+    /// Specify year, production (isSimulation=kTRUE --> do embedding QA)
+    StEmbeddingQAMaker(const Int_t year, const TString production, const Bool_t isSimulation = kTRUE);
+
+    /// Destructor
     virtual ~StEmbeddingQAMaker();
 
-    Bool_t book(const TString outputFileName = ""); // Default output is "ana_embedding_{year}_{production}_{particleId}.root" for embedding QA
+    /// Book histograms
+    /// Default output is 'ana_{type}_{year}_{production}_{particleId}.root'
+    /// if you don't put any words in the argument (i.e. whitespace)
+    /// {type} is either embedding or real
+    Bool_t book(const TString outputFileName = "");
     Bool_t make(const TString inputFileName, const Bool_t isSimulation = kTRUE);
 
     Bool_t run(const TString inputFileList) ; // Either RunRealData or RunEmbedding according to the kIsSimulation flag
     Bool_t runRealData(const TString inputFileList) ;
     Bool_t runEmbedding(const TString inputFileList) ;
-    Bool_t end(); // Close output file
+    Bool_t end() const; // Close output file
 
-    void setDebug(const Int_t val) ;
+    void setZVertexCut(const Float_t vz) ; /// set z-vertex cut (default is |vz|<30cm unless otherwise specified)
 
   private:
-    static const Float_t kVertexCut ; // z-vertex cut (Default is 30 cm)
-    const Int_t kYear ;               // Year
-    const TString kProduction ;       // Production
-    const Int_t kParticleId ;         // Input particle id
-    const Bool_t kIsSimulation ;      // kTRUE : embedding QA,  kFALSE : real data QA
+    const Int_t mYear ;               /// Year
+    const TString mProduction ;       /// Production
+    const Bool_t mIsSimulation ;      /// kTRUE : embedding QA,  kFALSE : real data QA
 
-    // Initialization
-    void init() ;
+    void clear() ; /// Clear all histograms
+    void init() ;  /// Initialization
 
-    // Fill
+    // Fill histograms
     Bool_t fillEmbedding(const TString inputFileName) ; // Fill embedding histograms
     Bool_t fillRealData(const TString inputFileName) ;  // Fill real data histograms
 
-    void fillMcTracks(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void fillMatchedPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void fillGhostPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void fillContamPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void fillMatGlobPairs(const StMiniMcEvent& mcevent, const Int_t trackid, const Int_t itrk);
-    void fillRealTracks(const StMuTrack& track, const Int_t trackid, const Int_t itrk);
-    void fillHistograms(const StEmbeddingQATrack& track, const Int_t trackid, const Int_t iparticle, const Int_t geantId);
+    /// Fill embedding tracks
+    void fillEmbeddingTracks(const StMiniMcEvent& mcevent, const Int_t categoryid, const Int_t itrk) ;
 
-    // Cuts
-    Bool_t isZVertexOk(const StMiniMcEvent& mcevent, const Float_t vertexCut = 30.0) const ;
+    /// Get StEmbeddingQATrack from different minimc branches
+    StEmbeddingQATrack* getEmbeddingQATrack(const StMiniMcEvent& mcevent, const Int_t categoryid, const Int_t itrk) ;
 
-    // Number of histograms for each branch
-    Int_t getNumberOfHistograms(const Int_t categoryId) const ;
+    /// Fill real data tracks
+    void fillRealTracks(const StMuTrack& track, const Int_t categoryid, const Int_t itrk);
 
-    Int_t mDebug ;
+    /// Fill histograms for trakcs from both embedding and real tracks
+    void fillHistograms(const StEmbeddingQATrack& track, const Int_t categoryid);
+
+    /// Expand histograms if a new geantid is found in either MC or reconstructed track
+    void expandHistograms(const Int_t categoryid, const Short_t geantid, const Short_t parentid);
+
+    /// Push back a new geant id in mGeantId array
+    Bool_t pushBackGeantId(const Int_t categoryid, const Short_t geantid) ;
+
+    /// Z-vertex cut
+    Bool_t isZVertexOk(const StMiniMcEvent& mcevent) const ;
+
+    /// Number of tracks
+    Int_t getNtrack(const Int_t categoryid, const StMiniMcEvent& mcevent) const ;
+
+    /// Check geant id in StParticleTable
+    Bool_t isGeantIdOk(const StTinyMcTrack& track) const ;
+
     StMuDstMaker* mMuDstMaker ;
-
-    StEmbeddingQAParticleCollection* mParticles ;
+    Float_t mVertexCut ; /// z-vertex cut (Default is 30 cm)
 
     // Output histograms
     TFile* mOutput ;
 
     // Event-wise histograms
     Double_t mVz ;
-    TH1* hVz ;         // z-vertex
-    TH1* hVzAccepted ; // z-vertex (with z-vertex cut)
+    TH1* mhVz ;         // z-vertex
+    TH1* mhVzAccepted ; // z-vertex (with z-vertex cut)
 
-    TH2* hVyVx ; // y vs x vertices
-    TH1* hdVx ; // vx(real) - vx(MC)
-    TH1* hdVy ; // vy(real) - vy(MC)
-    TH1* hdVz ; // vz(real) - vz(MC)
+    TH2* mhVyVx ; // y vs x vertices
+    TH1* mhdVx ; // vx(real) - vx(MC)
+    TH1* mhdVy ; // vy(real) - vy(MC)
+    TH1* mhdVz ; // vz(real) - vz(MC)
 
-    // Tracks
-    //  - Fill Daughters for contaminated pairs
+    /// Track-wise histograms
+    ///   Fill all available MC and reconstructed tracks
+    //
     //  - Use MC momentum instead of reconstructed momentum (Update on Nov/13/2009)
     //  - Add p (reco) vs p (MC) (Update on Nov/13/2009)
-    TH1** hGeantId[StEmbeddingQAUtilities::kNCategory];             // Geant id
-    TH3** hNHit[StEmbeddingQAUtilities::kNCategory];                // Nhit distribution vs eta vs pt
-    TH3** hDca[StEmbeddingQAUtilities::kNCategory];                 // Dca vs eta vs pt
-    TH2** hPtVsEta[StEmbeddingQAUtilities::kNCategory];             // pt vs pseudo-rapidity
-    TH2** hPtVsY[StEmbeddingQAUtilities::kNCategory];               // pt vs rapidity
-    TH2** hPtVsPhi[StEmbeddingQAUtilities::kNCategory];             // pt vs phi
-    TH2** hPtVsMom[StEmbeddingQAUtilities::kNCategory];             // pt vs momentum
-    TH2** hdPtVsPt[StEmbeddingQAUtilities::kNCategory];             // pt - pt(MC) vs pt
-    TH2** hMomVsEta[StEmbeddingQAUtilities::kNCategory];            // momentum vs eta
-    TH2** hdEdxVsMomMc[StEmbeddingQAUtilities::kNCategory];         // dE/dx vs MC momentum (no PID cut)
-    TH2** hdEdxVsMomMcPidCut[StEmbeddingQAUtilities::kNCategory];   // dE/dx vs MC momentum (with PID cut, 2 sigma)
-    TH2** hdEdxVsMomReco[StEmbeddingQAUtilities::kNCategory];       // dE/dx vs reconstructed momentum (no PID cut)
-    TH2** hdEdxVsMomRecoPidCut[StEmbeddingQAUtilities::kNCategory]; // dE/dx vs reconstructed momentum (with PID cut, 2 sigma)
-    TH2** hRecoPVsMcP[StEmbeddingQAUtilities::kNCategory];          // Reconstructed momentum vs MC momentum
+    std::vector<Short_t> mGeantId[StEmbeddingQAConst::mNCategory] ; /// Geant id in both MC tracks and reconstructed pairs
+    TH1* mhGeantId[StEmbeddingQAConst::mNCategory];                               /// Geant id
+    TH1* mhParentGeantId ;                                                            /// Parent geantid (only for Contaminated pairs)
+    std::map<Int_t, TH3*> mhNHit[StEmbeddingQAConst::mNCategory] ;                /// Nhit distribution vs eta vs pt
+    std::map<Int_t, TH3*> mhDca[StEmbeddingQAConst::mNCategory] ;                 /// Dca vs eta vs pt
+    std::map<Int_t, TH2*> mhPtVsEta[StEmbeddingQAConst::mNCategory] ;             /// pt vs pseudo-rapidity
+    std::map<Int_t, TH2*> mhPtVsY[StEmbeddingQAConst::mNCategory] ;               /// pt vs rapidity
+    std::map<Int_t, TH2*> mhPtVsPhi[StEmbeddingQAConst::mNCategory] ;             /// pt vs phi
+    std::map<Int_t, TH2*> mhPtVsMom[StEmbeddingQAConst::mNCategory] ;             /// pt vs momentum
+    std::map<Int_t, TH2*> mhdPtVsPt[StEmbeddingQAConst::mNCategory] ;             /// pt - pt(MC) vs pt
+    std::map<Int_t, TH2*> mhMomVsEta[StEmbeddingQAConst::mNCategory] ;            /// momentum vs eta
+    std::map<Int_t, TH2*> mhdEdxVsMomMc[StEmbeddingQAConst::mNCategory] ;         /// dE/dx vs MC momentum (no PID cut)
+    std::map<Int_t, TH2*> mhdEdxVsMomMcPidCut[StEmbeddingQAConst::mNCategory] ;   /// dE/dx vs MC momentum (with PID cut, 2 sigma)
+    std::map<Int_t, TH2*> mhdEdxVsMomReco[StEmbeddingQAConst::mNCategory] ;       /// dE/dx vs reconstructed momentum (no PID cut)
+    std::map<Int_t, TH2*> mhdEdxVsMomRecoPidCut[StEmbeddingQAConst::mNCategory] ; /// dE/dx vs reconstructed momentum (with PID cut, 2 sigma)
+    std::map<Int_t, TH2*> mhRecoPVsMcP[StEmbeddingQAConst::mNCategory] ;          /// Reconstructed momentum vs MC momentum
+    std::map<Int_t, TH2*> mhNCommonHitVsNHit[StEmbeddingQAConst::mNCategory] ;      /// Ncommon hit vs Nhit
 
-    TH2** hEtaVsPhi[StEmbeddingQAUtilities::kNCategory];  // pseudo-rapidity vs phi
-    TH2** hEtaVsVz[StEmbeddingQAUtilities::kNCategory];   // pseudo-rapidity vs vz
-    TH2** hYVsVz[StEmbeddingQAUtilities::kNCategory];     // rapidity vs vz
+    std::map<Int_t, TH2*> mhEtaVsPhi[StEmbeddingQAConst::mNCategory] ;  /// pseudo-rapidity vs phi
+    std::map<Int_t, TH2*> mhEtaVsVz[StEmbeddingQAConst::mNCategory] ;   /// pseudo-rapidity vs vz
+    std::map<Int_t, TH2*> mhYVsVz[StEmbeddingQAConst::mNCategory] ;     /// rapidity vs vz
 
     ClassDef(StEmbeddingQAMaker, 1);
 };
 
-inline void StEmbeddingQAMaker::setDebug(const Int_t val) { mDebug = val ; }
+inline void StEmbeddingQAMaker::setZVertexCut(const Float_t vz) { mVertexCut = vz ; }
 
 #endif
 
