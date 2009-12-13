@@ -28,7 +28,7 @@ extern inline int daq100Decision(int t, u_int daq_cmd, u_int run_type, u_int cl_
 		else if((t % cl_run)==0) proc = 1 ;
 
 		// HLT
-		if(daq_cmd & DAQCMD_HLT_RUN) hlt = 1 ;
+//		if(daq_cmd & DAQCMD_HLT_RUN) hlt = 1 ;	// Tonko: removed on Dec 13, 2009
 	}
 
 	// raw formatting
@@ -47,6 +47,13 @@ extern inline int daq100Decision(int t, u_int daq_cmd, u_int run_type, u_int cl_
 //	case RUN_TYPE_LASER :	// Tonko: removed laser on Apr 14, 2009
 		fmt = 1 ;
 		break ;
+	}
+
+	// assume HLT for physics runs whenever we also want clusterfinding.
+	// should not really be used but just for completness
+	// Tonko: Dec 13, 2009
+	if(run_type == RUN_TYPE_PHYS) {
+		if(proc) hlt = 1 ;
 	}
 
 	return (hlt << 2) | (proc << 1) | fmt ;
