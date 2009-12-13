@@ -180,6 +180,9 @@ daq_dta *daq_sc::handle_legacy()
 		memcpy(&(sc_p->mag_field),&tmp_f,4) ;
 		
 
+		sc_p->timelag = 0 ;	// I don't have DATAP! I can't tell the time difference!
+		sc_p->valid = 1 ;	// what else can I say????
+
 		for(u_int i=0;i<(sizeof(sc_p->rich_scalers)/4);i++) {
 			sc_p->rich_scalers[i] = qswap32(swapit, scd->rich_scalers[i]) ;
 		}
