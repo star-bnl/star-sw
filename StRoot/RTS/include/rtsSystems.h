@@ -451,7 +451,7 @@ so we keep it here for source compatibility
 #define SL3_NODES(x)	((L3_SYSTEM<<12) | (SL3_SUBSYS<<8) | (x)) 
 #define GL3_NODES(x)	((L3_SYSTEM<<12) | (GL3_SUBSYS<<8) | (x)) 
 #define GL3_NODE	GL3_NODES(1) 
-#define GL3_NODE_COUNT	4		// maximum count of nodes per run epoch
+#define GL3_NODE_COUNT	5		// maximum count of nodes per run epoch
 
 #define L3EVP_NODE      ((L3_SYSTEM<<12) | 1)
 #define L3DISP_NODE     ((L3_SYSTEM<<12) | 2)
