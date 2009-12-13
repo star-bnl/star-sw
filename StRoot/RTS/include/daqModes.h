@@ -9,10 +9,10 @@
 #define PED_MODE_ON	1
 #define PED_MODE_AUTO	4	// ALTRO: automatic pedestal
 
-#define GAIN_MODE_LINEAR	0	// everything above 255 stays at 255
+#define GAIN_MODE_LINEAR	0	// pedestal; everything above 255 stays at 255
 #define GAIN_MODE_SEESAW	1	// most significant 2 bits (8 & 9) are stripped
-#define GAIN_MODE_LOG		2	// canonical logaritmic response
-#define GAIN_MODE_CORRECTED	3	// canonical log. resp. X correct gain
+#define GAIN_MODE_LOG		2	// pulser; canonical logaritmic response
+#define GAIN_MODE_CORRECTED	3	// tail cancellation; canonical log. resp. X correct gain
 #define GAIN_MODE_SVT		4	// SVT
 #define GAIN_MODE_SVT_CORRECTED	5	// SVT X correct gain
 
