@@ -154,6 +154,17 @@ int main(int argc, char *argv[])
 			LOG(INFO,"SC found") ;
 			if(strcasecmp(print_det,"sc")==0) {
 				sc_t *sc_p = (sc_t *) dd->Void ;
+				
+				// oh well, one needs to to these calculations here
+				// since the SFS daq_sc.cxx doesn't know the absolute time
+				int alag ;
+
+				sc_p->timelag = evp->evt_time - sc_p->time ;
+				if(sc_p->timelag > 0) alag = sc_p->timelag ;
+				else alag = -sc_p->timelag ;
+
+				if(alag > 5) sc_p->valid = 0 ;
+				else sc_p->valid = 1 ;
 
 				printf("SC: valid %d, time %u, timelag %d, B field %.3f\n",sc_p->valid,sc_p->time,sc_p->timelag,sc_p->mag_field) ;
 				for(int i=0;i<16;i++) {
