@@ -17,6 +17,7 @@ public:
 	~tpxPed() ;
 
 
+	int clock_source ;	// 0 TCD, 1 RCC-local, 3 RCC-RHIC, 9-unknown
 	int sector ; // if fee is overriden...
 	int valid ;	// when calced or loaded
 

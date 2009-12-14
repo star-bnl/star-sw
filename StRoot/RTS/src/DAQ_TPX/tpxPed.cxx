@@ -30,7 +30,8 @@ tpxPed::tpxPed()
 	ped_store = 0 ;	// unassigned!
 
 	max_events = 1000 ;
-
+	
+	clock_source = 9 ; // non-existant
 	sector = -1 ;	// uniti...
 	return ;
 }
@@ -205,7 +206,7 @@ void tpxPed::calc()
 		}
 	}
 
-	LOG(TERR,"Pedestals calculated. RDO counts: %u %u %u %u %u %u",valid_evts[0],valid_evts[1],valid_evts[2],valid_evts[3],valid_evts[4],valid_evts[5]) ;
+//	LOG(TERR,"Pedestals calculated. RDO counts: %u %u %u %u %u %u",valid_evts[0],valid_evts[1],valid_evts[2],valid_evts[3],valid_evts[4],valid_evts[5]) ;
 
 	valid = ! bad ;	// if there's any problem I invalidate validity!
 
@@ -225,15 +226,15 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 	int row, pad, t ;
 	int a, ch ;
 
-	FILE *fff ;
+	FILE *fff = 0 ;
 	char fname[128] ;
 
 	sprintf(fname,"/RTScache/altro_ped_%d_%03d.txt",rb+1,timebins) ;
 
-	fff = fopen(fname,"w") ;
-	if(fff==0) {
-		LOG(WARN,"Can't open \"%s\"",fname) ;
-	}
+//	fff = fopen(fname,"w") ;
+//	if(fff==0) {
+//		LOG(WARN,"Can't open \"%s\"",fname) ;
+//	}
 
 	char *rbuff = buff ;
 
@@ -462,10 +463,10 @@ int tpxPed::to_cache(char *fname, u_int run)
 	}
 
 	if(run==0) {
-		sprintf(f_sum_name,"/RTScache/ped_sum_%u.txt",(u_int)time(NULL)) ;
+		sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_%u_%d.txt",sector,(u_int)time(NULL),clock_source) ;
 	}
 	else {
-		sprintf(f_sum_name,"/RTScache/ped_sum_%08u.txt",run) ;
+		sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_%08u_%d.txt",sector,run,clock_source) ;
 	}
 
 	f_sum = fopen(f_sum_name,"w") ;
@@ -491,12 +492,12 @@ int tpxPed::to_cache(char *fname, u_int run)
 				cou++ ;
 			}
 
-			fprintf(f_sum,"%2d %3d %9.4f\n",r,p,sum/(double)cou) ;
+			fprintf(f_sum,"%d %d %.5f\n",r,p,sum/(double)cou) ;
 
 			for(t=0;t<512;t++) {	
 			
 				//if((r==12) && (p==158) && (t==0)) LOG(TERR,"peds row %d, pad %d: %f %f",r,p,peds->ped[t],peds->rms[t]) ;
-				fprintf(f,"%2d %3d %3d %8.3f %.3f\n",r,p,t,peds->ped[t],peds->rms[t]) ;
+				fprintf(f,"%d %d %d %.3f %.3f\n",r,p,t,peds->ped[t],peds->rms[t]) ;
 			}
 		}
 	}
