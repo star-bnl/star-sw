@@ -613,9 +613,14 @@ void tpxGain::calc()
 		if(get_gains(s,r,p)->g) {			
 			// this is the actual correction...
 			get_gains(s,r,p)->g = get_means(s,r)->g / get_gains(s,r,p)->g ;	// relative to row
-			t0_mean[s] += get_gains(s,r,p)->t0 ;
-			t0_mean_count[s]++ ;
-			get_gains(s,r,p)->t0 = pulser_time_0 - get_gains(s,r,p)->t0;	// absolute to TPX!
+
+			if((p==1) || (p==2) || (p==tpc_rowlen[r]) || (p==(tpc_rowlen[r]-1))) ;
+			else {
+				t0_mean[s] += get_gains(s,r,p)->t0 ;
+				t0_mean_count[s]++ ;
+			}
+
+//			get_gains(s,r,p)->t0 = pulser_time_0 - get_gains(s,r,p)->t0;	// absolute to TPX!
 		}
 
 		if(ofile) fprintf(ofile,"%.3f %.3f\n",get_gains(s,r,p)->g, get_gains(s,r,p)->t0) ;
@@ -683,7 +688,27 @@ void tpxGain::calc()
 
 	if(t0_all_mean_count) t0_all_mean /= (double) t0_all_mean_count ;
 
-	LOG(TERR,"gain_calc: sectors [%d:%d]: %d events used: Mean RMS: %.3f gain, %.3f T0: mean T0 %f",s_start,s_stop,events,g_rms,t0_rms,t0_all_mean) ;
+
+	// re-do T0 with this new mean!
+	for(int s=s_start;s<=s_stop;s++) {
+	for(int r=1;r<=45;r++) {
+	for(int p=1;p<=tpc_rowlen[r];p++) {
+		double t0 = get_gains(s,r,p)->t0 ;
+
+		if(get_gains(s,r,p)->g) {
+			get_gains(s,r,p)->t0 = t0_all_mean - t0 ;
+		}
+
+	}
+	}
+	}
+
+	LOG(TERR,"gain_calc: sectors [%d:%d]: %d events used: Mean RMS: %f gain; T0 %f +- %f, diff from canonical %f",
+	    s_start,s_stop,
+	    events,
+	    g_rms,
+	    t0_all_mean, t0_rms, 
+	    pulser_time_0-t0_all_mean) ;
 
 
 	return ;
@@ -936,7 +961,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.21 2009/12/12 22:34:57 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.22 2009/12/14 21:43:06 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -1001,6 +1026,10 @@ void tpxGain::compare(char *fname, int mysec)
 
 		if(r==0) continue ;	// skip unphysical channels
 
+		// skip edge pads, they are always a hassle
+		if((p==1) || (p==2)) continue ;
+		if((p==tpc_rowlen[r]) || (p==(tpc_rowlen[r]-1))) continue ;
+		
 		if(g==0.0) {	// bad in old file
 			if(get_gains(s,r,p)->g == 0.0) both++ ;
 			else old_only++ ;
