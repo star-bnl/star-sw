@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.2 2009/12/08 15:14:24 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.3 2009/12/14 01:22:47 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.3  2009/12/14 01:22:47  pibero
+// const correctness
+//
 // Revision 1.2  2009/12/08 15:14:24  pibero
 // Added Pythia tune per Helen Caines request.
 //
@@ -59,7 +62,6 @@ public:
   int eventId() const;
   int processId() const;
   int tune() const;
-  TVector3& vertex();
   const TVector3& vertex() const;
   float s() const;
   float t() const;
@@ -76,9 +78,9 @@ public:
   float f2(PDF scenario = STD) const;
   float ALL(PDF scenario = STD) const;
 
-  TClonesArray* particles();
+  const TClonesArray* particles() const;
   int numberOfParticles() const;
-  TParticle* particle(int i);
+  const TParticle* particle(int i) const;
   
   void Clear(Option_t* option = "");
   void setRunId(int id);
@@ -129,7 +131,6 @@ inline int StPythiaEvent::runId() const { return mRunId; }
 inline int StPythiaEvent::eventId() const { return mEventId; }
 inline int StPythiaEvent::processId() const { return mProcessId; }
 inline int StPythiaEvent::tune() const { return mTune; }
-inline TVector3& StPythiaEvent::vertex() { return mVertex; }
 inline const TVector3& StPythiaEvent::vertex() const { return mVertex; }
 inline float StPythiaEvent::s() const { return mS; }
 inline float StPythiaEvent::t() const { return mT; }
@@ -193,9 +194,9 @@ inline float StPythiaEvent::ALL(PDF scenario) const
     }
 }
 
-inline TClonesArray* StPythiaEvent::particles() { return mParticles; }
+inline const TClonesArray* StPythiaEvent::particles() const { return mParticles; }
 inline int StPythiaEvent::numberOfParticles() const { return mParticles->GetEntriesFast(); }
-inline TParticle* StPythiaEvent::particle(int i) { return (TParticle*)mParticles->At(i); }
+inline const TParticle* StPythiaEvent::particle(int i) const { return (TParticle*)mParticles->At(i); }
 
 inline void StPythiaEvent::addParticle(const TParticle& particle)
 {
