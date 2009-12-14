@@ -3,10 +3,10 @@
 void doEmbeddingQAMaker(
     const Int_t year = 2007,
     const TString production = "P08ic",
-    const TString particleName = "PiPlus",
     const Char_t* inputFileList = "minimc.list",
     const Char_t* outputFileName = "", // Put the filename if you want to give some specific name, otherwise leave it blank.
-    const Bool_t isSimulation = kTRUE
+    const Bool_t isSimulation = kTRUE,
+    const Float_t vzCut = 30.0
 ){
   const TString data = (isSimulation) ? "minimc tree" : "real data" ;
   const TString title = "Embedding QA from " + data ;
@@ -17,8 +17,11 @@ void doEmbeddingQAMaker(
   gSystem->Load("StMiniMcEvent");
   gSystem->Load("StEmbeddingQAMaker");
 
-  StEmbeddingQAMaker* maker = new StEmbeddingQAMaker(year, production, particleName, isSimulation);
-  maker->setDebug(1);
+  StEmbeddingQAMaker* maker = new StEmbeddingQAMaker(year, production, isSimulation);
+
+  /// Set z-vertex cut (default is 30cm unless otherwise specified)
+  maker->setZVertexCut(vzCut);
+
   maker->book(outputFileName);
   maker->run(inputFileList);
   maker->end();
@@ -32,20 +35,18 @@ void doEmbeddingQAMaker(
 void doEmbeddingQA(
     const Int_t year = 2007,
     const TString production = "P08ic",
-    const TString particleName = "PiPlus",
     const TString inputFileList = "minimc.list"
 ){
-  doEmbeddingQAMaker(year, production, particleName, inputFileList, "", kTRUE);
+  doEmbeddingQAMaker(year, production, inputFileList, "", kTRUE);
 }
 
 //______________________________________________________________________
 void doRealDataQA(
     const Int_t year = 2007,
     const TString production = "P08ic",
-    const TString particleName = "PiPlus",
     const Char_t* inputFileList = "MuDst.list"
 ){
-  doEmbeddingQAMaker(year, production, particleName, inputFileList, "", kFALSE);
+  doEmbeddingQAMaker(year, production, inputFileList, "", kFALSE);
 }
 
 //______________________________________________________________________
@@ -60,7 +61,6 @@ void doEmbeddingQAMakerOneFile(
   gSystem->Load("StEmbeddingQAMaker");
 
   StEmbeddingQAMaker* maker = new StEmbeddingQAMaker();
-  maker->setDebug(1);
   maker->book(outputFileName);
   maker->make(inputFileName, kTRUE);
   maker->end();
