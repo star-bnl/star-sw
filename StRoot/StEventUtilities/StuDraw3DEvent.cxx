@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.29 2009/12/04 19:51:30 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.30 2009/12/14 23:59:06 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -171,7 +171,9 @@ void StuDraw3DEvent::EmcHits(const StEvent* event,const char *detId)
             else if (  energy  < 4.0 )   colorResponce = kYellow;
             // If above lowest HT thershold
             else                         colorResponce = kRed;
-            if (energy > 1.0) printf(" Emchit adc = %e energy = %e\n",rawAdc, energy);
+            if (energy > 1.0) {
+             //  printf(" Emchit adc = %e energy = %e\n",rawAdc, energy);
+            }
             static const double maxSize =  400.; // (cm)
             static const double scale   =  200.; // (cm/Gev)
             double size =(energy > 0.3 ? scale : scale/30.)*energy;
