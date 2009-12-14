@@ -9,15 +9,22 @@
 //      are printed.
 void drawEmbeddingQA(
     const TString outputDirectory = "./",
-    const TString embeddingFile = "qa_embedding_2005_P07ie_D0.root",
-    const TString realDataFile  = "qa_real_2005_P07ie_D0.root"
+    const TString embeddingFile = "qa_embedding_2005_P07ie.root",
+    const TString realDataFile  = "qa_real_2005_P07ie.root",
+    const Int_t geantid = 8
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
   gSystem->Load("StEmbeddingQAMaker");
 
-  StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile);
+  StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, geantid);
   maker->setOutputDirectory(outputDirectory);
+
+  // Flag for output figures (default is false, only png file will be printed)
+//  maker->setGIFOn() ; // Print gif file
+//  maker->setJPGOn() ; // Print jpg file
+//  maker->setEPSOn() ; // Print eps file
+//  maker->setPSOn() ;  // Print ps file
 
   // Draw all QA plots
 //  maker->draw();
@@ -54,13 +61,13 @@ void drawEmbeddingQA(
     const TString realDataFile,
     const Int_t year,
     const TString production,
-    const TString particleName
+    const Int_t geantid
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
   gSystem->Load("StEmbeddingQAMaker");
 
-  StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, year, production, particleName);
+  StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, year, production, geantid);
   maker->setOutputDirectory(outputDirectory);
 
   // Draw all QA plots
