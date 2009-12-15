@@ -1,4 +1,4 @@
-// $Id: StDataReadModule.h,v 1.3 2009/12/10 22:43:55 fine Exp $
+// $Id: StDataReadModule.h,v 1.4 2009/12/15 17:42:46 fine Exp $
 
 #ifndef STAR_StDataReadModule
 #define STAR_StDataReadModule
@@ -121,7 +121,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.3 2009/12/10 22:43:55 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.4 2009/12/15 17:42:46 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -148,7 +148,7 @@ public:
   virtual void   SetGuiObject(QObject *gui);
   virtual void   NextEventsSlot(int interval);
   virtual void   StopEvents();
-
+  virtual void   MakeTitle();
   // ClassDef(StDataReadModule,0)   // 
 };
 
