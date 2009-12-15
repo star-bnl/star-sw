@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.11 2009/12/15 17:42:46 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.12 2009/12/15 18:06:51 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -314,24 +314,24 @@ Int_t StDataReadModule::MakeEvent()
 /// MakeTitle - Make event title
 void StDataReadModule::MakeTitle()
 {
-   Int_t date  = GetDate();
+   StEvtHddr *eventHeader =  GetEvtHddr();
+   Int_t date  = eventHeader->GetDate();
    Int_t year  = date/10000;
    Int_t day   = (date - year*10000);
    Int_t month = day/100;
    day         = day  - month*100;
 
-   Int_t time  = GetTime();
+   Int_t time  = eventHeader->GetTime();
    Int_t hours = time/10000;
    Int_t sec   = (time - hours*10000);
    Int_t min   =  sec/100;
    sec         =  sec  - min*100;
    
    Display()->SetFooter(
-       Form("STAR Event -> Run=%d; Event=%d; Date=%d/%02d/%02d/%02d-02d-%02d",
-             GetRunNumber(),GetEventNumber(),year,month,day,hours,min,sec)
+       Form("STAR Event -> Run=%d; Event=%d; Trig=0%x Date=%d/%02d/%02d %02dh%02dm%02ds GMT"
+             , eventHeader->GetRunNumber(),eventHeader->GetEventNumber(),eventHeader->GetTriggerMask()
+             , year,month,day,hours,min,sec)
    );
-   Printf("Event Display: Run=%d; Event=%d; Date=%d.%02d.%02d/%02d:%02d:%02d",
-             GetRunNumber(),GetEventNumber(),year,month,day,hours,min,sec);
 }
 
 //_____________________________________________________________________________
@@ -341,13 +341,13 @@ Int_t StDataReadModule::NextEvent()
    // Create the next event from evp data
    int retStatus=kStErr;
    fEventPoolReader->NextEvent(); 
-   retStatus = fRecordReady = fEventPoolReader->EventStatus();
+   retStatus = fEventPoolReader->EventStatus();
    if ( retStatus  == kStOk ) {
       daqReader *currentData =  fDataP = fEventPoolReader->GetReader(); 
 
 //     fprintf(stderr," StDataReadModule::NextEvent - evpReader = %x, event # = %d event type %d; mem %p\n",fDataP, fEventNumber,fEventType
 //           ,((evpReader*)fDataP)->mem);
-       if(currentData && fRecordReady) {
+       if(currentData) {
           retStatus=kStOk;    	// event  valid
           StEvtHddr *eventHeader =  GetEvtHddr();
           daqReader *reader = fEventPoolReader->GetReader();
