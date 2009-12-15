@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.13 2009/12/15 20:49:24 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.14 2009/12/15 20:58:52 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -330,7 +330,7 @@ void StDataReadModule::MakeTitle()
    
    Display()->SetFooter(
        Form("STAR Event -> Run=%d; Event=%d; Trig=0%x Date=%d/%02d/%02d %02dh%02dm%02ds GMT"
-             , eventHeader->GetRunNumber(),eventHeader->GetEventNumber(),eventHeader->GetTriggerMask()
+             , eventHeader->GetRunNumber(), eventHeader->GetIventNumber(),eventHeader->GetTriggerMask()
              , year,month,day,hours,min,sec)
    );
 }
