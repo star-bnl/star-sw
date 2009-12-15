@@ -27,6 +27,7 @@ StEmcTriggerSimu::StEmcTriggerSimu()
   , mLD301(new DSMLayer_LD301_2009)
   , mTcu(new TCU)
 {
+  fill(mOverlapJetPatchTh,mOverlapJetPatchTh+3,-1);
 }
 
 StEmcTriggerSimu::~StEmcTriggerSimu()
@@ -164,6 +165,20 @@ int StEmcTriggerSimu::get2009_DSMRegisters(int runNumber)
       mLD301->setRegister(reg, value);
     }
   } // End loop over rows
+
+  // Overwrite thresholds from the database if set explicitly
+  LOG_INFO << "The following registers have new values:" << endm;
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mOverlapJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-EEMC-overlap-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      mEM201->setRegister(reg,value);
+    }
+  }
 
   return kStOk;
 }

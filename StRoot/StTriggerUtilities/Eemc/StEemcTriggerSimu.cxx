@@ -81,6 +81,9 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   mE001 = new DSMLayer_E001_2009;
   mE101 = new DSMLayer_E101_2009;
 
+  fill(mEndcapJetPatchTh,mEndcapJetPatchTh+3,-1);
+  fill(mEndcapHighTowerTh,mEndcapHighTowerTh+2,-1);
+
   LOG_INFO <<"Eemc::constructor"<<endm;
 }
 
@@ -710,11 +713,40 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
     }
   } // End loop over rows
 
+  // Overwrite thresholds from database if set explicitly
+  LOG_INFO << "The following registers have new values:" << endm;
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mEndcapJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "EEMC-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      mE101->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 2; ++reg) {
+    int value = mEndcapHighTowerTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "EEMC-HT-th" << reg
+	       << setw(20) << value
+	       << endm;
+      mE001->setRegister(reg,value);
+    }
+  }
+
   return kStOk;
 }
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.25  2009/12/15 16:33:33  pibero
+// Added support to set thresholds manually for Run 9
+// and overwrite those from the database.
+//
 // Revision 1.24  2009/12/08 02:12:42  pibero
 // Removed extraneous "return;"
 //

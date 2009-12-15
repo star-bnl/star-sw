@@ -77,6 +77,10 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   void get2009_DSMLayer1();     // Reads output from mE101 & process
   int  get2009_DSMRegisters(int runNumber);
 
+  // Used to overwrite thresholds from the database
+  int mEndcapJetPatchTh[3];
+  int mEndcapHighTowerTh[2];
+
   // Access to 2009 EEMC Layer 0 + 1
  public:
   DSMLayer_E001_2009* get2009_DSMLayer0_Result() { return mE001; };
@@ -122,6 +126,15 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   StTriggerSimuDecision triggerDecision(int trigId);
   void connectBemcL0(int  *x) { mBemcEsum5bit=x;};
   bool getHttpInfo(int tpId, EemcHttpInfo &httpInfo);
+
+  // Use these setters to overwrite thresholds from the database
+  void setEndcapJetPatchTh0(int value) { mEndcapJetPatchTh[0] = value; }
+  void setEndcapJetPatchTh1(int value) { mEndcapJetPatchTh[1] = value; }
+  void setEndcapJetPatchTh2(int value) { mEndcapJetPatchTh[2] = value; }
+
+  void setEndcapHighTowerTh0(int value) { mEndcapHighTowerTh[0] = value; }
+  void setEndcapHighTowerTh1(int value) { mEndcapHighTowerTh[1] = value; }
+
   ClassDef(StEemcTriggerSimu, 1)
  };
 
@@ -130,6 +143,10 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.15  2009/12/15 16:33:33  pibero
+// Added support to set thresholds manually for Run 9
+// and overwrite those from the database.
+//
 // Revision 1.14  2009/12/08 02:06:59  pibero
 // Add support for StEvent when running in BFC.
 //
