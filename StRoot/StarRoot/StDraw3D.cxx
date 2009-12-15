@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.82 2009/12/15 00:00:21 fine Exp $
+// $Id: StDraw3D.cxx,v 1.83 2009/12/15 17:36:22 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -1206,7 +1206,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    thisShape->SetFillColor(col);
    thisShape->SetLineColor(col);
    thisShape->SetFillStyle(barrel ? sty-kBarrelStyle : sty );
-   if ( draw && Pad() ) {
+   if ( draw /* && Pad() */ ) {
       Draw(fTopVolume,"same");
    }
    fView = thisShape;
