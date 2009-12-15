@@ -48,6 +48,8 @@ StBemcTriggerSimu::StBemcTriggerSimu()
   mB001     = new DSMLayer_B001_2009;
   mB101     = new DSMLayer_B101_2009;
 
+  fill(mBarrelJetPatchTh,mBarrelJetPatchTh+3,-1);
+  fill(mBarrelHighTowerTh,mBarrelHighTowerTh+4,-1);
 }
 //==================================================
 //==================================================
@@ -2774,6 +2776,31 @@ int StBemcTriggerSimu::get2009_DSMRegisters(int runNumber)
       mB101->setRegister(reg, value);
     }
   } // End loop over rows
+
+  // Overwrite thresholds from database if set explicitly
+  LOG_INFO << "The following registers have new values:" << endm;
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mBarrelJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      mB101->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 4; ++reg) {
+    int value = mBarrelHighTowerTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-HT-th" << reg
+	       << setw(20) << value
+	       << endm;
+      mB001->setRegister(reg,value);
+    }
+  }
 
   return kStOk;
 }

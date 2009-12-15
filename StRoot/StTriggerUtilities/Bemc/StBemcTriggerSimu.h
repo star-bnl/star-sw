@@ -1,3 +1,5 @@
+// -*- mode:c++ -*-
+
 #ifndef STAR_StBemcTriggerSimu
 #define STAR_StBemcTriggerSimu
 
@@ -125,6 +127,10 @@ private:
   // DSM layers for 2009
   DSMLayer_B001_2009* mB001;
   DSMLayer_B101_2009* mB101;
+
+  // Used to overwrite thresholds from the database
+  int mBarrelJetPatchTh[3];
+  int mBarrelHighTowerTh[4];
   
   void getTowerStatus();
   void getDSM_TPStatus();
@@ -200,6 +206,16 @@ public:
   void setHeadMaker(StTriggerSimuMaker *maker) { mHeadMaker = maker; }
   
   void setHList(TObjArray * x){mHList=x;}
+
+  // Use these setters to overwrite thresholds from the database
+  void setBarrelJetPatchTh0(int value) { mBarrelJetPatchTh[0] = value; }
+  void setBarrelJetPatchTh1(int value) { mBarrelJetPatchTh[1] = value; }
+  void setBarrelJetPatchTh2(int value) { mBarrelJetPatchTh[2] = value; }
+
+  void setBarrelHighTowerTh0(int value) { mBarrelHighTowerTh[0] = value; }
+  void setBarrelHighTowerTh1(int value) { mBarrelHighTowerTh[1] = value; }
+  void setBarrelHighTowerTh2(int value) { mBarrelHighTowerTh[2] = value; }
+  void setBarrelHighTowerTh3(int value) { mBarrelHighTowerTh[3] = value; }
   
   public:
   enum {kOnline=1, kOffline, kExpert};
