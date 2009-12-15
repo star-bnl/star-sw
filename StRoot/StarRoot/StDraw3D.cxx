@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.81 2009/12/08 00:47:53 fine Exp $
+// $Id: StDraw3D.cxx,v 1.82 2009/12/15 00:00:21 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -229,7 +229,7 @@ class volume_view_3D : public TVolume, public view_3D {
 */
 //___________________________________________________
 StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColor(fgBkColor),fViewer(0),fView(0)
-      , fDetectorName(detectorName),fMaster(0),fTopVolume(0)
+      , fDetectorName(detectorName),fMaster(0),fTopVolume(0),fWantPad(0)
 {
 
    // The detectorName is a comma separated list of the OpenInventor files with no extension
@@ -253,7 +253,7 @@ StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColo
 TVirtualPad *StDraw3D::InitPad() 
 {
    if (fMaster) fMaster->InitPad();
-   else if (!fPad ) {
+   else if (!fPad && !fWantPad ) {
       fDrawCanvasCounter++;
       TString canvasName = "STAR";
       TString canvasTitle;
@@ -371,6 +371,8 @@ void  StDraw3D::Clear(Option_t *opt)
       pad->Clear(opt);
       fTopVolume = 0;
       Update();
+   } else if ( TVirtualViewer3D *viewer = Viewer() ) {
+      viewer->Clear();
    }
 }
 
@@ -382,11 +384,19 @@ TObject *StDraw3D::Draw(TObject *o,const char *option)
    if (o) {
       TVirtualPad *sav = gPad;
       if (!Pad())        InitPad();
-      if (Pad() != sav)  Pad()->cd();
-      assert (fPad==gPad);
-      o->Draw(option);
-      if (sav && (Pad() != sav)) sav->cd();
+      TVirtualPad *thisPad = Pad(); 
+      if (thisPad) {
+        if (thisPad != sav)  thisPad->cd();
+        assert (fPad==gPad);
+        o->Draw(option);
+      }
+      if (thisPad && sav && (thisPad != sav))  sav->cd();
       if (!Viewer()) InitViewer();
+      if (!thisPad) {
+         // no TPad was provided by the user 
+         // Use TVirtualViewer3D directly
+         Viewer()->ObjectPaint(o,option);
+      }
    }
    return o;
 }
@@ -773,6 +783,12 @@ void StDraw3D::Save(const char *filename, const char*type) const
     }
     else if (Pad()) Pad()->Print(filename,type);
 }
+//___________________________________________________
+void StDraw3D::SetDrawOption(Option_t *option)
+{ 
+   if ( TVirtualViewer3D *viewer = Viewer() ) 
+       viewer->SetDrawOption(option);
+}
 
 //___________________________________________________
 void StDraw3D::Update()
@@ -784,6 +800,8 @@ void StDraw3D::Update()
       assert (pad==gPad);
       pad->Update();
       if (sav && (pad != sav)) sav->cd();
+   } else {
+       UpdateViewer(0);
    }
 }
 
@@ -815,6 +833,16 @@ void StDraw3D::UpdateModified()
       pad->Modified();
       pad->Update();
       if (sav && (pad != sav)) sav->cd();
+   }
+}
+
+//_______________________________________________________________
+void StDraw3D::UpdateViewer(TVirtualPad *pad) 
+{
+   TVirtualViewer3D *viewer = Viewer();
+   if (viewer) {
+      if (fTopVolume) Draw(fTopVolume,"same");
+      viewer->PadPaint(pad);
    }
 }
 
@@ -899,6 +927,7 @@ void StDraw3D::Draw3DTest(){
       eta4 +=stepEta;
       phi  += 4*TMath::Pi()/n;
    }
+   if (!Pad()) Update();
 }
 
 //______________________________________________________________________________
@@ -1177,10 +1206,8 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    thisShape->SetFillColor(col);
    thisShape->SetLineColor(col);
    thisShape->SetFillStyle(barrel ? sty-kBarrelStyle : sty );
-   if (draw) {
+   if ( draw && Pad() ) {
       Draw(fTopVolume,"same");
-   } else {
-//      UpdateModified();
    }
    fView = thisShape;
    return thisShape;
@@ -1242,6 +1269,13 @@ TObject *StDraw3D::Tower( float radius, const StarRoot::StEta &eta
       lambda1 = eta.dLambda2();
    }
    return Tower(radius,lambda,lambda1,lambda2, phi, dphi, col, sty, siz);
+}
+//__________________________________________________________________________________________
+void StDraw3D::SetFooter(const char *footer)
+{
+   TString viewerFooter = "{footer:";
+   viewerFooter += footer; viewerFooter += "}";
+   SetDrawOption(viewerFooter.Data());
 }
 
 ClassImp(StDraw3D)

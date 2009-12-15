@@ -1,4 +1,5 @@
-// $Id: Ed.C,v 1.12 2009/11/16 18:36:48 fine Exp $
+
+// $Id: Ed.C,v 1.13 2009/12/15 00:00:21 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file Ed.C 
@@ -76,8 +77,9 @@ void rd(int  hits=0, bool clear=false)
  //       if (hits & 4) gEventDisplay->EmcHits(event,"eemc");
       }
       else gEventDisplay->Tracks(event);
+      // gEventDisplay->Update();
    }
- }
+}
 //! This function is to search for the next non-empty event and draw it by looping over StBFChain (reading the next events from the file)
 /*! 
    \param tracks - flag to mark whether the tracks from the event should be rendered \n
@@ -111,7 +113,7 @@ void ae(int tracks=-1, int  hits=-1)
          if (tracks) rd();     // Draw the tracks
          if (hits)  rd(hits); // Add the hits to the image
     } else {
-        printf(" event is empty\n");
+        printf(" event is empty %p\n", event);
         goto newevent;
      }
  }

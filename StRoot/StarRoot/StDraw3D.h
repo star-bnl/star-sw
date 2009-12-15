@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.48 2009/12/03 22:14:37 fine Exp $
+// $Id: StDraw3D.h,v 1.49 2009/12/15 00:00:21 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -176,6 +176,7 @@ class StDraw3D : public TObject
        TString fDetectorName;
        StDraw3D *fMaster;
        TVolume  *fTopVolume;
+       Bool_t    fWantPad;  // create the default pad  if none is provided by user?
 
        static Color_t fgColorDefault;
        static Style_t fgStyDefault;
@@ -186,6 +187,8 @@ class StDraw3D : public TObject
        void SetMaster(StDraw3D *master);
        void InitViewer();
        void Redraw();
+protected:
+       virtual void UpdateViewer(TVirtualPad *pad=0);
 
 public:
    StDraw3D(const char *detectorName="TPC",TVirtualPad *pad = 0);
@@ -265,6 +268,8 @@ public:
    virtual void Update();
    virtual void Modified();
    virtual void UpdateModified();
+   virtual void SetDrawOption(Option_t *option="");
+   virtual void SetFooter(const char *footer);
 
     void Draw3DTest();
     static void ShowTest();
