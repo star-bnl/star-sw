@@ -4,7 +4,7 @@
    Material {
             diffuseColor  0.8 0.8 0.0
             specularColor 0.7 0.7 0.0
-            shininess     1.9
+            shininess     0.99
             transparency  0.9
    }
    DEF BEAM_ARROW Separator {
@@ -23,7 +23,7 @@
    Material {
             diffuseColor  0 0 0.8
             specularColor 0 0 0.7
-            shininess     1.9
+            shininess     0.99
             transparency  0.9
      }
      USE BEAM_ARROW 
