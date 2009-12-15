@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.12 2009/12/15 18:06:51 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.13 2009/12/15 20:49:24 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -129,6 +129,7 @@ StDataReadModule::StDataReadModule(const char *name):TModule(name)
          if (reply == QMessageBox::Abort ) gApplication->Terminate(0);
          fBemcOnlineStatus  = 0;
       }
+      SetAttr(".Privilege" ,1);
 }
 
 //_____________________________________________________________________________
@@ -244,7 +245,7 @@ Int_t StDataReadModule::MakeEmcHits()
      for ( int i=1; i<=4800; i++ ) { 
         Int_t colorAttribute = (fColorProvider) ? fColorProvider->NextAttribute() : -1;
         Float_t dr = (fSizeProvider) ?  fSizeProvider->NextAttribute() : 0;
-#ifndef CONTROLROOM    
+#ifndef CONTROLROOM
        dr /= 4;
 #endif 
        if (dr > 0.1) {

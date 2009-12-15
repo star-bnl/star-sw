@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.8 2009/12/11 00:08:53 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.9 2009/12/15 20:49:24 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -93,14 +93,9 @@ Int_t StSteeringModule::Init(){
 //_____________________________________________________________________________
 /// Make - this method is called in loop for each event
 Int_t StSteeringModule::Make(){
-   //
+
    //  PrintInfo();
-   //
-   // QMutexLocker lock(fMutex);
-   TModule::Make();
-//   printf("\n"); 
-//   ls(0); 
-   return kStOK;
+   return TModule::Make();
 }
 //____________________________________________________________________________
 //
@@ -110,14 +105,12 @@ Int_t StSteeringModule::Make(){
 //_____________________________________________________________________________
 void   StSteeringModule::SetFileName(const char* fileName)
 {
-   // QMutexLocker lock(fMutex);
    if (fileName){}
 }
 
 //_____________________________________________________________________________
 void   StSteeringModule::SetRecording(bool on)
 {
-    // QMutexLocker lock(fMutex);
     if (on) {}
 } 
 
@@ -125,7 +118,6 @@ void   StSteeringModule::SetRecording(bool on)
 //_____________________________________________________________________________
 bool  StSteeringModule::Recording()  const
 {
-    // QMutexLocker lock(fMutex);
     return false;
 } 
 
