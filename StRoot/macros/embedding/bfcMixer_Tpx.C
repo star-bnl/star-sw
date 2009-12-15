@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.5 2009/11/15 23:49:27 andrewar Exp $
+// $Id: bfcMixer_Tpx.C,v 1.6 2009/12/15 01:28:37 andrewar Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,15 +13,15 @@ StChain  *Chain=0;
 class StBFChain;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
-void bfcMixer_Tpx(const Int_t Nevents=100,
-		  const Char_t *daqfile="/star/rcf/test/daq/2008/070/st_physics_adc_9070006_raw_1410001.daq",
-		  const Char_t *tagfile="/star/rcf/test/embedding/ppProduction2008/2008/070/st_physics_adc_9070006_raw_1410001.tags.root",
+void bfcMixer_Tpx(const Int_t Nevents=1,
+		  const Char_t *daqfile=" /star/institutions/lbl_prod/andrewar/transfer/daq/2009/st_zerobias_adc_10102033_raw_5450001.daq",
+		  const Char_t *tagfile="/star/institutions/lbl/andrewar/embed/tags/st_zerobias_adc_10102033_raw_5450001.tags.root",
 		  const Double_t pt_low=0.1,
 		  const Double_t pt_high=5.0,
                   const Double_t eta_low=-1.5,
                   const Double_t eta_high=1.5,
 		  const Int_t pid=9,
-		  const Double_t mult=0.05,
+		  const Double_t mult=100,
                   const Char_t *prodName = "P08iepp") {
   // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
   TString prodP08iepp("DbV20081117 B2008a ITTF IAna ppOpt l3onl emcDY2 fpd ftpc trgd ZDCvtx NosvtIT NossdIT Corr4 OSpaceZ2 OGridLeak3D VFMCE -hitfilt");
@@ -29,6 +29,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   TString prodP08icAuAu9("DbV20080709 P2008 ITTF VFMCE -hitfilt");
   TString prodP08icAuAu200("DbV20070101 P2008 ITTF VFMCE -hitfilt");  
   TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10iapp("DbV20091001 pp2009c TpcRS ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpcRS -VFMinuit -hitfilt");
   TString geomP08ic("ry2008");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
@@ -38,6 +39,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P08icAuAu9") {   TString chain3Opt = prodP08icAuAu9; }
   else if (prodName == "P08icdAu") {   TString chain3Opt = prodP08icdAu; }
   else if (prodName == "P08icAuAu200") { TString chain3Opt = prodP08icAuAu200;}
+  else if (prodName == "P10iapp") { TString chain3opt = prodP10iapp;}
   else {
     cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -92,6 +94,47 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
         }
   mixer->SetInput("Input2","Trs/.const/Event");
   Chain->cd();
+
+ //............. begin of EMC embedding makers................
+
+  //.............. Add BEmc stuff here ....................
+  gSystem->Load("StEmcSimulatorMaker");
+  gSystem->Load("StEmcMixerMaker");
+  gSystem->Load("StEEmcSimulatorMaker");
+
+  StMcEventMaker* mcEventMaker = new StMcEventMaker();
+  StEmcSimulatorMaker *bemcSim   = new StEmcSimulatorMaker();
+  StEmcMixerMaker     *bemcMixer = new StEmcMixerMaker();
+  chain3->AddAfter("emcRaw",bemcMixer); 
+  chain3->AddAfter("emcRaw",bemcSim); 
+  chain3->AddAfter("emcRaw",mcEventMaker);
+  bemcMixer->SetDebug(0); // set it to 1 for more printouts
+ // note, Barrel slow sim is always ON, said Adam 
+
+  //........... Add EEmc Stuff ( Simu, and Mixer) here ..............
+  StEEmcFastMaker  *eemcFastSim = new StEEmcFastMaker();
+  StEEmcMixerMaker *eemcMixer   = new StEEmcMixerMaker();
+
+  /* position B+E EMC makers in the chain 
+     (order is reverse because 'After' is used - looks funny but is right)
+  */
+  chain3->AddAfter("emcRaw",eemcMixer); 
+  chain3->AddAfter("emcRaw",eemcFastSim); 
+
+  
+  eemcFastSim->SetEmbeddingMode();
+  //  eemcFastSim->SetDebug();
+  // eemcMixer->SetDebug();
+  
+  bool useEndcapSlowSim = true;
+  if(useEndcapSlowSim) { // turn Endcap slow simu On/Off 
+    StEEmcSlowMaker *slowSim=new StEEmcSlowMaker();
+    chain3->AddAfter("EEmcFastSim",slowSim); 
+    slowSim->setEmbeddingMode();
+  }
+
+
+  
   //________________________________________________________________________________
   {
     TDatime t;
