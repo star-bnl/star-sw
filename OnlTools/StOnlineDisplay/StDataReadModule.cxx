@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.10 2009/12/12 01:02:03 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.11 2009/12/15 17:42:46 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -306,8 +306,34 @@ Int_t StDataReadModule::MakeEvent()
   
       counter += l3HitsCount;
     }
+    if (counter > 0) MakeTitle();
     return  ( counter > 0) ? kStOK : kStErr;
 }
+
+//_____________________________________________________________________________
+/// MakeTitle - Make event title
+void StDataReadModule::MakeTitle()
+{
+   Int_t date  = GetDate();
+   Int_t year  = date/10000;
+   Int_t day   = (date - year*10000);
+   Int_t month = day/100;
+   day         = day  - month*100;
+
+   Int_t time  = GetTime();
+   Int_t hours = time/10000;
+   Int_t sec   = (time - hours*10000);
+   Int_t min   =  sec/100;
+   sec         =  sec  - min*100;
+   
+   Display()->SetFooter(
+       Form("STAR Event -> Run=%d; Event=%d; Date=%d/%02d/%02d/%02d-02d-%02d",
+             GetRunNumber(),GetEventNumber(),year,month,day,hours,min,sec)
+   );
+   Printf("Event Display: Run=%d; Event=%d; Date=%d.%02d.%02d/%02d:%02d:%02d",
+             GetRunNumber(),GetEventNumber(),year,month,day,hours,min,sec);
+}
+
 //_____________________________________________________________________________
 /// NextEvent - this method is called open the next daq file if any
 Int_t StDataReadModule::NextEvent()
