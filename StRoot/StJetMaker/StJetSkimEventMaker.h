@@ -24,30 +24,31 @@ class StJetSkimEventMaker : public StMaker
 public:
 	
     StJetSkimEventMaker(const Char_t *name, StMuDstMaker* uDstMaker, const char *outputFile);
-	virtual ~StJetSkimEventMaker();
+    virtual ~StJetSkimEventMaker();
     
     virtual Int_t Init();
     virtual Int_t InitRun(int runnumber);
     virtual Int_t Make();
     virtual Int_t Finish();
-	virtual void Clear(const Option_t*);
+    virtual void Clear(const Option_t*);
     
-    TTree* tree();
+    TTree* tree() const { return mTree; }
+    StJetSkimEvent* event() const { return mEvent; }
     
     void addSimuTrigger(int trigId) {mSimuTrigIds.push_back(trigId);}
 
     const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.6 2008/08/02 22:43:05 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StJetSkimEventMaker.h,v 1.7 2009/12/15 19:08:12 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
     	
 protected:
-	StMuDstMaker*   muDstMaker;         //!
+    StMuDstMaker*   muDstMaker;         //!
     StMCAsymMaker*  mcAsymMaker;        //!
     	
 private:
-	const char*     outName;            //!
+    const char*     outName;            //!
     TFile*          mOutfile;           //!
     TTree*          mTree;              //!
-	StJetSkimEvent* mEvent;             //!
+    StJetSkimEvent* mEvent;             //!
     TRef            mCurrentHeaderRef;  //!
     vector<int>     mSimuTrigIds;       //!
     bool            isRealData;         //!
