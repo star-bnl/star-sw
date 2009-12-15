@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.18 2009/12/12 03:38:37 perev Exp $
+!// $Id: tpcegeo3.g,v 1.19 2009/12/15 02:44:07 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.19  2009/12/15 02:44:07  perev
+!// TPCE increased in R & Z to avoid extruding
+!//
 !// Revision 1.18  2009/12/12 03:38:37  perev
 !// extrudedFix
 !//
@@ -267,7 +270,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
   Fill  TPCG !//   TPC basic dimensions
         version =       3               !// version    => current version
         Rmin =          46.107          !// Rmin          => TPC envelope inner radius
-        Rmax =          207.750         !// Rmax          => TPC envelope outer radius
+        Rmax =          206.75/cos15    !// Rmax          => TPC envelope outer radius
         RminIFC =       46.6            !// RminIFC    => inner radius TPC IFC  : A.Lebedev measurement 10/16/08
         LengthT =       2*271.0         !// LengthT    => TPC full length up to front of EEMC
         Length  =       2*259.685       !// Length        => TPC full length including RDOs
@@ -622,7 +625,7 @@ Block TPCE is the TPC envelope
       material  Air
       Medium    Standard
       Attribute TPCE  seen=0 colo=kRed
-      shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_length/2
+      shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_lengthT/2
 
       tpgvz  = (tpcg_MembTHK + tpgvLeng)/2               " z center of gas volume   "
       zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK;        !// write(*,*) 'zWheel1 ', zWheel1;
