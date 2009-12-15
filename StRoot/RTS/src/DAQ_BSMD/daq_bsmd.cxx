@@ -810,7 +810,7 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		break ;
 	}
 
-#if 0	// skip for the temporary 0x8129 V
+#if 1	// skip for the temporary 0x8129 V
 
 	// get mesg_length
 	int mesg_length = d32[last_ix-1] & 0xFFF ;	// 12 bits only
@@ -853,10 +853,10 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	int trailer_event = d32[last_ix - 2 - mesg_length] & 0xFFFF ;
 
 
-	if(trailer_event != d32[0]) {
-		LOG(ERR,"RDO %d: bad trailer event 0x%08X != header 0x%08X",rdo,trailer_event,d32[0]) ;
-		bad |= 2 ;
-	}
+//	if(trailer_event != d32[0]) {
+//		LOG(ERR,"RDO %d: bad trailer event 0x%08X != header 0x%08X",rdo,trailer_event,d32[0]) ;
+//		bad |= 2 ;
+//	}
 #endif
 
 	// HACK!!!!
