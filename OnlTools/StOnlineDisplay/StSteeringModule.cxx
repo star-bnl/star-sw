@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.9 2009/12/15 20:49:24 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.10 2009/12/15 23:17:37 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -296,8 +296,9 @@ Bool_t  StSteeringModule::IsDisplayNext() const
 void  StSteeringModule::Animating() 
 {
   fAnimating = kTRUE; 
-    Clear();
-    if (Make() == kStOk ) {
+        Clear();
+        int res = Make();
+    if ( (res == kStOk) || (res == kStERR) ) {
        if (gPad) gPad->Update();
        QCoreApplication::processEvents();
     } else {
@@ -310,7 +311,7 @@ void  StSteeringModule::Animating()
 void  StSteeringModule::Animate(Bool_t on) 
 {
   fAnimate = on;
-  if (fAnimate )  QTimer::singleShot(1000, this, SLOT(Animating())); 
+  if (fAnimate )  QTimer::singleShot(340, this, SLOT(Animating())); 
 }
 
 //_____________________________________________________________________________

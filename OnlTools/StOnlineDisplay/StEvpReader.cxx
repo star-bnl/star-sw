@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StEvpReader.cxx,v 1.2 2009/12/10 22:43:55 fine Exp $
+// $Id: StEvpReader.cxx,v 1.3 2009/12/15 23:17:37 fine Exp $
 
 #include "StEvpReader.h"
 #include "Riostream.h"
@@ -26,7 +26,7 @@ bool StEvpReader::fgRts_LogActive=false;
  */
 //_____________________________________________________________________________
 StEvpReader::StEvpReader() :
- fEventType(EVP_TYPE_ANY),fEventNumber(0),fInterval(-1), fEvpReader(0)
+ fEventType(EVP_TYPE_ANY),fEventNumber(0),fEventStatus(kStEOF),fInterval(-1), fEvpReader(0)
 , fLiveEvent(false)
 {
    if (!fgRts_LogActive) {
@@ -36,11 +36,12 @@ StEvpReader::StEvpReader() :
    }
    fEvpReader = new daqReader(0);
    fLiveEvent = true;
+   fEventStatus = kStOK;
    qDebug() << " Live event StEvpReader::StEvpReader - fEventType = " <<  fEventType << " evp=" << fEvpReader;
 }
 //_____________________________________________________________________________
 StEvpReader::StEvpReader(const TString &fileName, const TString &mountPoint):
-  fEventType(EVP_TYPE_ANY),fEventNumber(0),fInterval(-1), fEvpReader(0)
+  fEventType(EVP_TYPE_ANY),fEventNumber(0),fEventStatus(kStEOF),fInterval(-1), fEvpReader(0)
 , fLiveEvent(false)
 {
    if (!fgRts_LogActive) {
@@ -108,6 +109,7 @@ void StEvpReader::RestartReader(const TString &fileName, const TString &mountPoi
        qDebug() << " --> Live event StEvpReader::StEvpReader - fEventType = " <<  fEventType << " evp=" << fEvpReader;
    }
    SetEvpDisk(mountPoint);
+   fEventStatus = kStOk;
    qDebug() << " StEvpReader::StEvpReader - fEventType = " <<  fEventType 
             << " evp=" << fEvpReader << " from file:" <<fileName;
 }
@@ -132,73 +134,66 @@ void StEvpReader::NextEvent()
 {
    // vf 24.02.2009 QMutexLocker locker(StEvpReaderThread::Mutex());
    // Create the next event from evp data
-   if (!fEvpReader) return;
-   int retStatus=kStOK;
-   qDebug() << " StEvpReader::NextEvent() - getting event ... ' "
-            <<  EventNumber() << " fEventType = " <<  fEventType;
-   bool searchEvent = false;
-   do {
-       searchEvent  = false;
-       daqReader *currentData =(daqReader *) fEvpReader->get(EventNumber(),fEventType); 
+   if ( fEvpReader && ((fEventStatus == kStOK) || (fEventStatus == kStERR) ) ) {
+      int retStatus=fEventStatus;
+      qDebug() << " StEvpReader::NextEvent() - getting event ... ' "
+               <<  EventNumber() << " fEventType = " <<  fEventType;
+      bool searchEvent = false;
+      do {
+          searchEvent  = false;
+          daqReader *currentData =(daqReader *) fEvpReader->get(EventNumber(),fEventType); 
 #if 1
 //   if (EventNumber() != reader->event_number) continue;
-   qDebug() << " StEvpReader::NextEvent - data = " 
-            <<  (void *)currentData << fEvpReader 
-            << ", event # = " << EventNumber() << " :: " << fEvpReader->seq
-            << ", run   # = " << fEvpReader->run
-            << " event type " << fEventType << "::" << EVP_TYPE_ANY
-            << " status " << fEvpReader->status << " EVP_STAT_OK=" << EVP_STAT_OK
-            << " token " << fEvpReader->token << " Interval= " << fInterval << fLiveEvent;
-         ;
+      qDebug() << " StEvpReader::NextEvent - data = " 
+               <<  (void *)currentData << fEvpReader 
+               << ", event # = " << EventNumber() << " :: " << fEvpReader->seq
+               << ", run   # = " << fEvpReader->run
+               << " event type " << fEventType << "::" << EVP_TYPE_ANY
+               << " status " << fEvpReader->status << " EVP_STAT_OK=" << EVP_STAT_OK
+               << " token " << fEvpReader->token << " Interval= " << fInterval << fLiveEvent;
+            ;
 #endif
-        retStatus = kStErr; 
-        if (currentData && fEvpReader->status == EVP_STAT_OK  && fEvpReader->token) {
-            // qDebug () << " StEvpReader::NextEvent - Ok" << fEvpReader->token;
-            if ( EventNumber() ) {
-               if ( EventNumber() ==  (int) fEvpReader->seq  )  {  
-                   // qDebug() << "1. Emitting event " << currentData;
-// emit            emit EvpEvent();
-                   SetEventNumber(0);
-               } else if ( EventNumber() < (int)fEvpReader->seq) {
-                  QMessageBox::warning(0,"No Event Number",QString(EventNumber()));
-//                       s.release();
-               } else {
-                  searchEvent = true;
-//                       s.release();
-               }
-            } else  if (fInterval >=0 ) {
-               qDebug() << "1. Emitting event " << currentData <<" : " << fInterval;
-// emit                emit EvpEvent();
-            }
-//                 s.acquire();
-//               emit EvpEvent((char *)currentData);
-         } else {
-            switch(fEvpReader->status) {
-               case EVP_STAT_EOR :	// EOR or EOR - might contain token 0!
-                  if(fEvpReader->isevp) {	// keep going until the next run...
-                     //  				retStatus = kOK;
-                     qDebug() << " StEvpReader::NextEvent - End OfRun" ;
+           retStatus = kStErr; 
+           if (currentData && fEvpReader->status == EVP_STAT_OK  && fEvpReader->token) {
+               retStatus = kStOk;
+               if ( EventNumber() ) {
+                  if ( EventNumber() ==  (int) fEvpReader->seq  )  {  
+                      SetEventNumber(0);
+                  } else if ( EventNumber() < (int)fEvpReader->seq) {
+                     QMessageBox::warning(0,"No Event Number",QString(EventNumber()));
                   } else {
-                     retStatus = kStEOF;
-                     qDebug() << " StEvpReader::NextEvent - End Of File" ;
-                  // let's kill this reader 
-                     delete fEvpReader;  fEvpReader = 0;
+                     searchEvent = true;
                   }
-                  break;
-               case EVP_STAT_EVT :
-                  qDebug () << "Problem getting event - skipping";
-                  break;
-               case EVP_STAT_CRIT :
-                  qDebug () << "Critical error - halting...";
-                  break;
-            };
-            if (fLiveEvent && fInterval>=0) {
-// emit               QTimer::singleShot (340, this, SLOT(NextEvent()));
+               } else  if (fInterval >=0 ) {
+               }
             } else {
-// emit               emit EvpEOF();
-            }
-        }
-        fEventStatus = fEvpReader->status;
-   } while (searchEvent );
+               switch(fEvpReader->status) {
+                  case EVP_STAT_EOR :	// EOR or EOR - might contain token 0!
+                     if(fEvpReader->isevp) {	// keep going until the next run...
+                        //  				retStatus = kOK;
+                        qDebug() << " StEvpReader::NextEvent - End OfRun" ;
+                     } else {
+                        retStatus = kStEOF;
+                        qDebug() << " StEvpReader::NextEvent - End Of File" ;
+                     // let's kill this reader 
+                        delete fEvpReader;  fEvpReader = 0;
+                     }
+                     break;
+                  case EVP_STAT_EVT :
+                     qDebug () << "Problem getting event - skipping";
+                     break;
+                  case EVP_STAT_CRIT :
+                     qDebug () << "Critical error - halting...";
+                     break;
+               };
+               if (fLiveEvent && fInterval>=0) {
+   // emit               QTimer::singleShot (340, this, SLOT(NextEvent()));
+               } else {
+   // emit               emit EvpEOF();
+               }
+           }
+           fEventStatus = retStatus;
+      } while (searchEvent );
+   }
 //    if (fInterval>=0 ) QTimer::siEXgleShot(fInterval, this, SLOT(NextEvent()));
 }

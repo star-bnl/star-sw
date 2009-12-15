@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.14 2009/12/15 20:58:52 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.15 2009/12/15 23:17:37 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -227,11 +227,13 @@ Int_t StDataReadModule::Make()
 {
    int retStatus = kStOK;
 
-   if (!fEventPoolReader )   retStatus = NextFile();
+   if (!fEventPoolReader || fNeedRecreate)   retStatus = NextFile();
 
    if ( retStatus == kStOk ) retStatus = NextEvent();
-
-   if ( fDemo && retStatus == kStEOF ) retStatus = NextFile();
+   if ( retStatus == kStEOF) {
+      fNeedRecreate = kTRUE;
+      if ( fDemo  ) retStatus = NextFile();
+   }
 
    if ( retStatus == kStOk )  retStatus = MakeEvent();
 
@@ -341,7 +343,8 @@ Int_t StDataReadModule::NextEvent()
 {
    // Create the next event from evp data
    int retStatus=kStErr;
-   fEventPoolReader->NextEvent(); 
+   fDataP =0;
+   fEventPoolReader->NextEvent();
    retStatus = fEventPoolReader->EventStatus();
    if ( retStatus  == kStOk ) {
       daqReader *currentData =  fDataP = fEventPoolReader->GetReader(); 
@@ -425,34 +428,34 @@ int StDataReadModule::L3Reader()
 int StDataReadModule::MakeTpcHits()
 { 
    UInt_t nHits = 0; 
-   
-   vector<float> &hittxyz = fHittxyz;
-   hittxyz.clear();
-   hittxyz.reserve(TPC_READER_MAX_CLUSTERS);
-   daqReader *reader = fDataP; // *fEventPoolReader;
+   if (fDataP) {
+      vector<float> &hittxyz = fHittxyz;
+      hittxyz.clear();
+      hittxyz.reserve(TPC_READER_MAX_CLUSTERS);
+      daqReader *reader = fDataP; // *fEventPoolReader;
 
-   for(int sector=0;sector<24;sector++) {
-      if ( tpcReader(reader,  sector) && tpc.has_clusters ) {
-      for(int row=0;row<45;row++) {
-        for(int j=0;j<tpc.cl_counts[row];j++) {
-           float x,y,z;
-           tpc_cl *c = &tpc.cl[row][j];
-           int time = int(c->t);
-           tpc_hit_postion(sector+1,row+1,*c, x, y,z);
-           if (time) {
-              // skip next hit
-              hittxyz.push_back(x); hittxyz.push_back(y); hittxyz.push_back(z);
-           }
-       }
-     }}
+      for(int sector=0;sector<24;sector++) {
+         if ( tpcReader(reader,  sector) && tpc.has_clusters ) {
+         for(int row=0;row<45;row++) {
+           for(int j=0;j<tpc.cl_counts[row];j++) {
+              float x,y,z;
+              tpc_cl *c = &tpc.cl[row][j];
+              int time = int(c->t);
+              tpc_hit_postion(sector+1,row+1,*c, x, y,z);
+              if (time) {
+                 // skip next hit
+                 hittxyz.push_back(x); hittxyz.push_back(y); hittxyz.push_back(z);
+              }
+          }
+        }}
+     }
+     nHits = hittxyz.size()/3;
+     if (nHits) {
+        Display()->Points(fHittxyz, 17,8,0.12);
+        TString info = Form("<p><b>Total TPC hits: </b>%d",nHits );
+        Display()->SetComment(info.Data()) ;
+     }
   }
-  nHits = hittxyz.size()/3;
-  if (nHits) {
-     Display()->Points(fHittxyz, 17,8,0.12);
-     TString info = Form("<p><b>Total TPC hits: </b>%d",nHits );
-     Display()->SetComment(info.Data()) ;
-  }
-
   return nHits;
 }
 
@@ -460,7 +463,7 @@ int StDataReadModule::MakeTpcHits()
 int StDataReadModule::MakeTracks()
 {    
    int retStatus = kStOK;
-    UInt_t nTrack =  fL3DataProvider->GetNTracks();
+   UInt_t nTrack =  fL3DataProvider->GetNTracks();
    if ( (nTrack >0) &&  fL3TracksOn ) {
        retStatus = nTrack;
        
