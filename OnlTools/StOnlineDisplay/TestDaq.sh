@@ -46,7 +46,13 @@ TestDaq::TestDaq(const char* fileName)
 namespace {
   TestDaq  a;
 }
-int main(int argc, const char *arv[]) {return 0;}
+int main(int argc, const char *argv[]){
+  fprintf(stderr,"\n Usage: TestDAq [daq file name]\n");
+  fprintf(stderr," --------------------------------\n\n");
+  if (argc == 2 ) TestDaq a(argv[1]);
+  else    TestDaq  a;
+  return 0;
+}
 
 TESTDAQ
 ls -l TestDaq.cxx
