@@ -1,10 +1,11 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.14 2009/12/09 05:12:02 pibero Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.15 2009/12/16 01:54:17 pibero Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
 
 #include "StjMCMuDst.h"
 
+#include "StjMCParticleList.h"
 #include "StjMCParticleListCut.h"
 #include "StjMCParticleCut.h"
 #include "StjMCParticleCutEta.h"
