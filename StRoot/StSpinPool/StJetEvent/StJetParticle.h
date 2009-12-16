@@ -9,12 +9,16 @@
 #define ST_JET_PARTICLE_H
 
 #include "TLorentzVector.h"
+#include "TParticlePDG.h"
+#include "TDatabasePDG.h"
+
 #include "StJetElement.h"
 
 class StJetParticle : public StJetElement {
 public:
   StJetParticle() {}
 
+  const char*            name() const;
   float                     m() const;
   float                     e() const;
   int                     pdg() const;
@@ -42,6 +46,13 @@ inline TLorentzVector StJetParticle::fourMomentum() const
   TLorentzVector p;
   p.SetPtEtaPhiE(mPt,mEta,mPhi,mE);
   return p;
+}
+
+inline const char* StJetParticle::name() const
+{
+  static const char* noname = "???";
+  const TParticlePDG* ap = TDatabasePDG::Instance()->GetParticle(mPdg);
+  return ap ? ap->GetName() : noname;
 }
 
 #endif	// ST_JET_PARTICLE_H
