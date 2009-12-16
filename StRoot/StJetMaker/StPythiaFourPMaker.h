@@ -1,11 +1,9 @@
 // -*- mode: c++;-*-
-// $Id: StPythiaFourPMaker.h,v 1.11 2009/12/09 05:12:02 pibero Exp $
+// $Id: StPythiaFourPMaker.h,v 1.12 2009/12/16 01:54:17 pibero Exp $
 #ifndef STPYTHIAFOURPMAKER_H
 #define STPYTHIAFOURPMAKER_H
 
 #include "StFourPMaker.h"
-
-#include <StjMCParticleList.h>
 
 #include <vector>
 
