@@ -36,6 +36,7 @@ gSystem->Load("ONLINE.so");
 //  a->Show();
 //  a->ShowStarEvent();
  StSteeringModule *ds = new StSteeringModule; 
+ ds->SetNumber(21);
  ds->SetDaqFileName(daqFile);
  ds->SetL3TracksOn(0);
  ds->SetL3HitsOn(1);
