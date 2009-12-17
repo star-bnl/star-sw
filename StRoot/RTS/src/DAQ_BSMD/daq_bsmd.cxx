@@ -197,7 +197,8 @@ daq_dta *daq_bsmd::handle_adc(int rdo)
 		data_alloc = 0 ;
 	}
 	else {
-		malloced_bytes = (2400+10+3+100)*4 ;
+		// ZS _could_ be larger than raw by factors of 2!
+		malloced_bytes = (2400+10+3+100)*4   *2 ;
 		data_alloc = (u_short *)malloc(malloced_bytes) ;
 		assert(data_alloc) ;
 	}
