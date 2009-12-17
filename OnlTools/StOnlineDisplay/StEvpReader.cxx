@@ -1,7 +1,8 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StEvpReader.cxx,v 1.3 2009/12/15 23:17:37 fine Exp $
+// $Id: StEvpReader.cxx,v 1.4 2009/12/17 21:39:45 fine Exp $
 
+#include "StMemStat.h"
 #include "StEvpReader.h"
 #include "Riostream.h"
 #include <QMutexLocker>
@@ -99,7 +100,12 @@ void StEvpReader::RestartReader(const TString &fileName, const TString &mountPoi
 {
    fInterval = -1;  // to stop event.
    std::string fn = fileName.Data();
-   if (fEvpReader) { delete fEvpReader;  fEvpReader = 0; }
+   StMemStat::PrintMem("1. StEvpReader::RestartReader  . . .");
+   if (fEvpReader) { 
+      StMemStat::PrintMem("2. StEvpReader::RestartReader  . . .");
+      delete fEvpReader;  fEvpReader = 0; 
+      StMemStat::PrintMem("3. StEvpReader::RestartReader daqReader has been deleted . . .");
+   }
    const char *c_fn = fn.c_str();
    if (c_fn && c_fn[0]) 
        fEvpReader = new daqReader((char *)fn.c_str());
@@ -108,10 +114,12 @@ void StEvpReader::RestartReader(const TString &fileName, const TString &mountPoi
        fEvpReader = new daqReader(0);
        qDebug() << " --> Live event StEvpReader::StEvpReader - fEventType = " <<  fEventType << " evp=" << fEvpReader;
    }
+   StMemStat::PrintMem("4. StEvpReader::RestartReader  daqReader has been recreated. . .");
    SetEvpDisk(mountPoint);
    fEventStatus = kStOk;
    qDebug() << " StEvpReader::StEvpReader - fEventType = " <<  fEventType 
             << " evp=" << fEvpReader << " from file:" <<fileName;
+   StMemStat::PrintMem("5. StEvpReader::RestartReader  Done. . .");
 }
 //_____________________________________________________________________________
 /// StopEvents - this method is called open the next daq file if any
