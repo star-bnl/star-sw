@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.19 2009/12/15 02:44:07 perev Exp $
+!// $Id: tpcegeo3.g,v 1.20 2009/12/17 23:07:11 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.20  2009/12/17 23:07:11  perev
+!// More exact envelopes for TPCE,TSAW,TSWH
+!//
 !// Revision 1.19  2009/12/15 02:44:07  perev
 !// TPCE increased in R & Z to avoid extruding
 !//
@@ -236,7 +239,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 
 !//             TPC Parameters
     structure TPCG {    version,Rmin,Rmax,RminIFC,
-                        LengthT,Length,LengthW,LengthV,WheelIR,
+                        LengthT,Length,LengthW,LengthV,dZEnvelop,WheelIR,
                         WheelR0,WheelR1,WheelR2,WheelTotalRibWidth,WheelRibWidth,
                         WheelRibHeight,WheelBoxDx,WheelBoxDy,WheelOR1,WheelOR,
                         WheelTHK1,WheelTHK,SenGasOR,MembTHK,tocsDR,
@@ -276,6 +279,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
         Length  =       2*259.685       !// Length        => TPC full length including RDOs
         LengthW =       2*229.71        !// LengthW    => TPC length including Wheel
         LengthV =       2*210.00        !// LengthV    => TPC gas volume length
+        DzEnvelop =     268.            !// TPCE envelop dz
         WheelIR =       38.620*INCH/2   !// 49.60 WheelIR    => support wheel inner radius
         WheelR0 =       21.500*INCH     !// WheelR0 => Distance from IP of end of inner cylindrical part
         WheelR1 =       47.867*INCH     !// WheelR1 => Distance from IP of middle Rib
@@ -625,7 +629,8 @@ Block TPCE is the TPC envelope
       material  Air
       Medium    Standard
       Attribute TPCE  seen=0 colo=kRed
-      shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_lengthT/2
+!//   shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_lengthT/2
+      shape     TUBE  rmin=tpcg_rmin  rmax=tpcg_rmax  dz=tpcg_DzEnvelop
 
       tpgvz  = (tpcg_MembTHK + tpgvLeng)/2               " z center of gas volume   "
       zWheel1  = TPCG_LengthW/2 - TPCG_WheelTHK;        !// write(*,*) 'zWheel1 ', zWheel1;
@@ -712,7 +717,7 @@ endBlock        "end TIAD"
 *******************************************************************************
 *
 Block TOFC  defines outer field cage - fill it with insulating gas already
-      material  Nitrogen_gas
+      material  ALUMINIUM
       Attribute TOFC   seen=1 colo=kGreen
       SHAPE     PCON   Phi1=0  Dphi=360  Nz=6,
       zi =  {-zTOFCend, -zWheel1,-zWheel1,zWheel1,zWheel1,zTOFCend},
@@ -852,7 +857,7 @@ Block TSWH  TpcSectorWhole is Sector as Whole
       Attribute TSWH      seen=1  colo=kViolet
       SHAPE     PCON    Phi1=-15  Dphi=30  Nz=8,
       zi ={TPCG_MembTHK/2,zWheel1                 ,zWheel1                 ,zTOFCend,
-           zTOFCend      ,zTIFCFlangeBegin        ,zTIFCFlangeBegin        ,TPCG_LengthT/2},
+           zTOFCend      ,zTIFCFlangeBegin        ,zTIFCFlangeBegin        ,TPCG_DzEnvelop},
       Rmn={tifcOR        ,tifcOR                  ,tifcOR                  ,tifcOR,
            tifcOR        ,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT,TPCG_tifcRF+TPCG_tifcDRT},
       Rmx={tofcIR        ,tofcIR                  ,TPCG_WheelOR1           ,TPCG_WheelOR1,
@@ -869,7 +874,8 @@ Block TSAW  TpcSectorAndWheel
       medium  STANDARD
       Attribute TSAW      seen=1  colo=kYellow
       SHAPE     PCON    Phi1=-15  Dphi=30  Nz=2,
-      zi = {204,274}, Rmn={48,48}, Rmx={208,208}
+      zi = {204,TPCG_DzEnvelop-TPCG_MembTHK/2}, Rmn={48,48}, Rmx={208,208}
+!//   zi = {204,274}, Rmn={48,48}, Rmx={208,208}
 
 
 
