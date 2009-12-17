@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMCTruth.cxx,v 1.2 2009/08/28 16:38:26 fine Exp $
+ * $Id: StMCTruth.cxx,v 1.3 2009/12/17 08:37:26 fisyak Exp $
  *
  * Author: Victor Perev, Jun 2005
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMCTruth.cxx,v $
+ * Revision 1.3  2009/12/17 08:37:26  fisyak
+ * account signature change snce root 5.24
+ *
  * Revision 1.2  2009/08/28 16:38:26  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *
@@ -18,6 +21,7 @@
  *
  *
  **************************************************************************/
+#include "assert.h"
 #include "StMCTruth.h"
 #include "TMath.h"
 #include "TExMap.h"
@@ -103,30 +107,29 @@ StMCPivotTruthMap::StMCPivotTruthMap(int normInput)
 //__________________________________________________________________________________________________
 StMCPivotTruthMap::~StMCPivotTruthMap()
 {
-  long key,val;
+  LongKey_t key,val;
   TExMapIter it(fMap);
   while (it.Next(key,val)) { delete (StMCPivotTruth*)val; }
   delete fMap; fMap=0;
   delete fIter; fIter=0;
 }
 //__________________________________________________________________________________________________
-void StMCPivotTruthMap::Add(long token, int trackId, double wt)
+void StMCPivotTruthMap::Add(LongKey_t token, int trackId, double wt)
 {
-  
-  long& word = (*fMap)(TMath::Hash(&token,sizeof(token)),token);
+  LongKey_t& word = (*fMap)(TMath::Hash(&token,sizeof(token)),token);
   StMCPivotTruth *&pivo = (StMCPivotTruth *&)word;
   if (!pivo) pivo = new StMCPivotTruth(fNorm);
   pivo->Add(trackId,wt);
 }
 //__________________________________________________________________________________________________
-void StMCPivotTruthMap::Add(long token, StMCTruth truth)
+void StMCPivotTruthMap::Add(LongKey_t token, StMCTruth truth)
 {
   Add(token,truth.trackId,truth.trackWt);
 }
 //__________________________________________________________________________________________________
-StMCTruth StMCPivotTruthMap::Get(long token,int byCount) const
+StMCTruth StMCPivotTruthMap::Get(LongKey_t token,int byCount) const
 {
-  long word = fMap->GetValue(TMath::Hash(&token,sizeof(token)),token);
+  LongKey_t word = fMap->GetValue(TMath::Hash(&token,sizeof(token)),token);
   assert(word);
   if (!word) return StMCTruth(0,0);
   
@@ -135,9 +138,9 @@ StMCTruth StMCPivotTruthMap::Get(long token,int byCount) const
 }
 
 //__________________________________________________________________________________________________
-StMCTruth StMCPivotTruthMap::Iter(long &token) const
+StMCTruth StMCPivotTruthMap::Iter(LongKey_t &token) const
 {
-  long val;
+  LongKey_t val;
   if (token == -1L) {
     if (!fIter) fIter = new TExMapIter(fMap);
     fIter->Reset();

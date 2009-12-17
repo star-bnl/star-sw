@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMCTruth.h,v 1.2 2005/09/09 21:42:03 perev Exp $
+ * $Id: StMCTruth.h,v 1.3 2009/12/17 08:37:26 fisyak Exp $
  *
  * Author: Victor Perev, Jun 2005
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMCTruth.h,v $
+ * Revision 1.3  2009/12/17 08:37:26  fisyak
+ * account signature change snce root 5.24
+ *
  * Revision 1.2  2005/09/09 21:42:03  perev
  * Method Size() added
  *
@@ -20,7 +23,12 @@
  **************************************************************************/
 #ifndef ST_MCTRUTH_H
 #define ST_MCTRUTH_H
-
+#include "Rtypes.h"
+#if ROOT_VERSION_CODE <= 333312 /*  ROOT_VERSION(5,22,0) */
+typedef Long_t   LongKey_t;
+#else
+typedef Long64_t LongKey_t;
+#endif
 struct StMCTruth {
     StMCTruth(int id,int wt) 		{trackId=(short)id; trackWt=(short)wt;}
     StMCTruth(int word=0) 		{*this=word;}
@@ -60,10 +68,10 @@ public:
        StMCPivotTruthMap(int normInput=0);
       ~StMCPivotTruthMap();
 //void Reset();
-  void Add(long token, int trackId, double wt);
-  void Add(long token, StMCTruth truth);
-  StMCTruth Get(long token,int byCount=0) const;
-  StMCTruth Iter(long &token) const; //token=-1 to start iteration
+  void Add(LongKey_t token, int trackId, double wt);
+  void Add(LongKey_t token, StMCTruth truth);
+  StMCTruth Get(LongKey_t token,int byCount=0) const;
+  StMCTruth Iter(LongKey_t &token) const; //token=-1 to start iteration
                                      //token=-1 at the end of iteration
 private:
 int    fNorm;
