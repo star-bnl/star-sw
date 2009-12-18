@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.19 2009/09/24 15:41:55 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.20 2009/12/18 00:52:23 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -15,6 +15,7 @@
 #include "TKey.h"
 #include "TGeoManager.h"
 #include "TPad.h"
+#include "StDraw3D.h"
 #include "TVirtualViewer3D.h"
 #include "TQtGLViewerImp.h"
 #include "TQtRootViewer3D.h"
@@ -64,7 +65,7 @@ static void RefreshCanvas(TQtWidget *w)
  GeomBrowser::GeomBrowser(QWidget *parent): QMainWindow (parent) 
  , fTreeWidget(0),fFile(0),fChain(0),fGeant(0),fGeometrySelector(0)
  , fCurrentViewer(0),fGeometryLoaded(false)
- , fSingleVolumeCanvas(0), fComplexVolumeCanvas(0)
+ , fSingleVolumeCanvas(0), fComplexVolumeCanvas(0),fEventDisplay()
  , fRootCommand(0), fCurrentWidget(0)
  , fFile_New(0),  fFile_Open(0),  fFile_Reload(0), fFile_Save(0), fFile_SaveAs(0)
  , fFile_Print(0), fFile_Exit(0)  
@@ -84,6 +85,7 @@ static void RefreshCanvas(TQtWidget *w)
 GeomBrowser::~GeomBrowser()
 {
     delete fFile; fFile = 0;
+    delete fEventDisplay;  fEventDisplay = 0;
 }
 
 //_____________________________________________________________________________
@@ -532,6 +534,7 @@ TVirtualViewer3D *GeomBrowser::viewCoin3DSlot()
                connect(&viewerImp->Signals(),SIGNAL( destroyed())
                  , this, SLOT(ViewerDestroyed()));
            }
+           fEventDisplay = new StDraw3D(fCurrentViewer,pad3d);
        }
     } else {
          fView_Coin3DAction->setEnabled(false);

@@ -19,6 +19,7 @@ class TextEdit;
 class QAction;
 class QStatusBar;
 class StQtDelayRedrawTimer;
+class StDraw3D;
 
 class GeomBrowser : public QMainWindow {
   Q_OBJECT
@@ -33,6 +34,7 @@ class GeomBrowser : public QMainWindow {
 	bool                 fGeometryLoaded;
    TQtWidget           *fSingleVolumeCanvas;
    TQtWidget           *fComplexVolumeCanvas;
+   StDraw3D            *fEventDisplay;
    TQtRootCommandCombo *fRootCommand;
 	TextEdit            *fTextEdit;
 	 
