@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.27 2009/12/07 15:13:42 tonko Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.28 2009/12/18 11:00:42 tonko Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -249,6 +249,19 @@ daqReader::~daqReader(void)
 	if(memmap) delete(memmap);
 	if(sfs) delete(sfs) ;
         if(runconfig) free(runconfig) ;
+
+	// call detector destructors!
+	for(int i=0;i<32;i++) {
+		if(dets[i]) {
+			LOG(DBG,"Will destruct det %d",i) ;
+			delete(dets[i]) ;
+		}
+		if(pseudo_dets[i]) {
+			LOG(DBG,"Will destruct pseudo det %d",i) ;
+			delete(pseudo_dets[i]) ;
+		}
+	}
+
 
 	return ;
 }
@@ -1393,6 +1406,9 @@ void daqReader::de_insert(int id)
 	LOG(DBG,"calling de_insert(%d)",id) ;
 
 	if((id>=0) && (id<DAQ_READER_MAX_DETS)) {
+		if(dets[id]) {
+			LOG(DBG,"Should destruct %d?",id) ;
+		}
 		dets[id] = 0 ;	// mark as freed
 		return ;
 	}
@@ -1400,6 +1416,7 @@ void daqReader::de_insert(int id)
 		id *= -1 ;
 		if(id >= DAQ_READER_MAX_DETS) ;
 		else {
+			if(pseudo_dets[id]) LOG(DBG,"Should destruct %d?",id) ;
 			pseudo_dets[id] = 0 ;
 			return ;
 		}
