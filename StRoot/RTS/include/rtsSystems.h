@@ -73,7 +73,7 @@
 #define TCD_ESMD        6
 #define TCD_BBC         7
 #define TCD_ETOW        8
-#define TCD_SSD         9
+#define TCD_MTD         9	// Dec 18, was SSD before
 #define TCD_FGT         10	// Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //
 #define TCD_PP          12      // added Oct 20, 07
