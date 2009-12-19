@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.16 2009/12/17 21:39:45 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.17 2009/12/19 18:07:05 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -168,7 +168,10 @@ StDataReadModule::~StDataReadModule()
 //_____________________________________________________________________________
 StuDraw3DEvent  *StDataReadModule::Display()
 {
-   if (!fEventDisplay)  fEventDisplay = new StuDraw3DEvent("TPC,StarLogo,StarFloor,StarBeam");
+   if (!fEventDisplay)  {
+      delete gEventDisplay;  gEventDisplay = 0;
+      fEventDisplay = new StuDraw3DEvent("TPC,StarFloor,StarBeam"); // ("TPC,StarLogo,StarFloor,StarBeam");
+   }
    return fEventDisplay;
 }
 
