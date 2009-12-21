@@ -15,6 +15,8 @@
 #ifndef STAR_StGammaEventMaker
 #define STAR_StGammaEventMaker
 
+#include <vector>
+
 #include <StMaker.h>
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
@@ -37,7 +39,7 @@ class StGammaEventMaker: public StMaker
         ~StGammaEventMaker();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaEventMaker.h,v 1.6 2008/12/03 15:34:55 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaEventMaker.h,v 1.7 2009/12/21 18:25:12 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();
@@ -46,13 +48,15 @@ class StGammaEventMaker: public StMaker
         Int_t Finish() { return StMaker::Finish(); }
         
         StGammaEvent *event() { return mGammaEvent; }
-        
+        void addSimuTrigger(unsigned int triggerId) { mRequestedTriggers.push_back(triggerId); }        
+
     private:
         
         StGammaEvent *mGammaEvent;
         StGammaPythiaEvent* mPythia;
         StGammaPythiaEventMaker* mPythiaMaker;
         StMuDstMaker *muDstMaker;
+        vector<unsigned int> mRequestedTriggers;
         
         ClassDef(StGammaEventMaker, 1);
   
