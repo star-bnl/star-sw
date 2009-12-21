@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofMaker.cxx,v 1.2 2009/03/06 19:25:40 dongx Exp $
+ * $Id: StBTofMaker.cxx,v 1.3 2009/12/21 23:32:16 dongx Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -77,7 +77,6 @@ Int_t StBTofMaker::InitRun(Int_t runnumber)
   if(mDoINLCorr) {
     LOG_INFO << " Initialize INL table ... " << endm;
     mBTofINLCorr = new StBTofINLCorr();
-    mBTofINLCorr->setNValidTrays(mNValidTrays);
     mBTofINLCorr->initFromDbase(this);
   }
 
