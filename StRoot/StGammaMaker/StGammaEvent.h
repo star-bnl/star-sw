@@ -43,7 +43,7 @@ class StGammaEvent: public TObject
         ~StGammaEvent();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaEvent.h,v 1.12 2008/12/03 15:34:37 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaEvent.h,v 1.13 2009/12/21 18:24:35 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         void Clear(Option_t *opts= "");
         
@@ -74,6 +74,7 @@ class StGammaEvent: public TObject
         Int_t eventNumber() const { return mEventNumber; }          /// Returns event number
         set<int>& triggerIds() { return mTriggerIds; }
         bool isTrigger(int id) const { return mTriggerIds.find(id) != mTriggerIds.end(); }
+        bool isSimuTrigger(int id) const { return mSimuTriggerIds.find(id) != mSimuTriggerIds.end(); }
         TObjString muDstFileName() const { return mMudstFileName; } /// Returns muDst file from which event originated
         TVector3& vertex(){ return mVertex; }                       /// Returns the vertex
         Float_t magneticField() const { return mMagneticField; }    /// Magnetic field (kG)
@@ -98,6 +99,7 @@ class StGammaEvent: public TObject
         void SetRunNumber( Int_t run ){ mRunNumber=run; }
         void SetEventNumber( Int_t event ){ mEventNumber=event; }
         void SetTriggerIds(const vector<unsigned int>& triggerIds) { copy(triggerIds.begin(), triggerIds.end(), inserter(mTriggerIds, mTriggerIds.begin())); }
+        void SetSimuTriggerIds(const vector<unsigned int>& triggerIds) { copy(triggerIds.begin(), triggerIds.end(), inserter(mSimuTriggerIds, mSimuTriggerIds.begin())); }
         void SetMudstFileName(const TObjString &i) { mMudstFileName = i; }
         void SetVertex(const TVector3& vertex ){ mVertex=vertex; }
         void SetMagneticField( Float_t magneticField) { mMagneticField = magneticField; }
@@ -116,6 +118,7 @@ class StGammaEvent: public TObject
         Int_t mRunNumber;            /// Run number
         Int_t mEventNumber;          /// Event number  
         set<int> mTriggerIds;        /// Trigger ID's
+        set<int> mSimuTriggerIds;    /// Simulated Trigger ID's        
         TObjString mMudstFileName;   /// File from which StGammaEvent originatedt
         TVector3 mVertex;            /// Event vertex (TPC)
         Float_t mMagneticField;      /// Magnetic field (kG)
