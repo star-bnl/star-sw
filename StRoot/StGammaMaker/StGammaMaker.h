@@ -76,7 +76,7 @@ class StGammaMaker: public StMaker
         ~StGammaMaker() {};
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaMaker.h,v 1.2 2009/06/17 06:22:52 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaMaker.h,v 1.3 2009/12/21 18:25:56 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();
@@ -126,6 +126,9 @@ class StGammaMaker: public StMaker
         
         // Add timestamps when running over simulation
         void addTimestamp(int date, int time, double weight);
+
+        // Add trigger Ids to be simulated if trigger emulation is in the chain
+        void addSimuTrigger(unsigned int triggerId) { mEventMaker->addSimuTrigger(triggerId); }
         
     private:
     

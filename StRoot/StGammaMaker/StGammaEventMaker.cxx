@@ -10,6 +10,8 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
+#include "StTriggerUtilities/StTriggerSimuMaker.h"
+
 ClassImp(StGammaEventMaker);
 
 //////////////////////////////////////////////////
@@ -94,6 +96,33 @@ Int_t StGammaEventMaker::Make()
     mGammaEvent->SetMudstFileName( muDstMaker->chain()->GetFile()->GetName() );
     mGammaEvent->SetMagneticField( StMuDst::event()->magneticField() );
     mGammaEvent->SetTriggerIds( StMuDst::event()->triggerIdCollection().nominal().triggerIds() );
+
+    // Store simulated triggers
+    vector<unsigned int> simuTriggers;
+
+    StTriggerSimuMaker *triggerSimu = dynamic_cast<StTriggerSimuMaker*>(GetMakerInheritsFrom("StTriggerSimuMaker"));
+    if(triggerSimu)
+    {
+
+        for(unsigned int i = 0; i < mRequestedTriggers.size(); ++i)
+        {
+
+            if(triggerSimu->isTrigger(mRequestedTriggers.at(i)))
+            {
+                simuTriggers.push_back(mRequestedTriggers.at(i));
+                cout << "StGammaEventMaker::Make() - " << mRequestedTriggers.at(i) << " fired!" << endl;
+            }
+            else
+            {
+                cout << "StGammaEventMaker::Make() - " << mRequestedTriggers.at(i) << " did not fire!" << endl;
+            }
+
+        }
+
+    }
+
+    mGammaEvent->SetSimuTriggerIds(simuTriggers); 
+
     
     // Store timestamp index in place of run number in simulation
     StGammaScheduleMaker *scheduler = dynamic_cast<StGammaScheduleMaker*>(GetMakerInheritsFrom("StGammaScheduleMaker"));
