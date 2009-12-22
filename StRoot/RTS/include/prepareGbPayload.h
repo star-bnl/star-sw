@@ -214,7 +214,12 @@ public:
     LOG(NOTE, "final det_mask = 0x%x",detmask,0,0,0,0);
 
     pay->rtsDetMask = l2h32(detmask);
-    
+
+    if(pay->flags & EVBFLAG_L25ABORT) {
+      LOG(WARN, "Sending L25Abort: token=%d event=%d 1l=0x%x l2=0x%x l2abort=%d",
+	  token, eventNumber, l1trg, l2trg, l25abort);
+    }
+
     return 0;
   }
 
