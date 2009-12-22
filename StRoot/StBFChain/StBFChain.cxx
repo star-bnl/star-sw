@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.552 2009/11/23 15:55:13 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.553 2009/12/22 23:01:54 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -438,7 +438,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("IdTruth")) cmd += Form("((StAssociationMaker *) %p)->useIdAssoc();",mk);
       ProcessLine(cmd);
     }
-    if (maker == "StMiniMcMaker" && GetOption("IdTruth")) {
+    if (maker == "StMiniMcMaker" && GetOption("IdTruth") && ! GetOption("OldMiniMc")) {
       mk->SetMode(1);
       gMessMgr->QAInfo() << "StBFChain::Instantiate create simplified MiniMcTree in " << maker  << endm;
     }
