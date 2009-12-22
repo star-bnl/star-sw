@@ -357,9 +357,9 @@ Fill ESEN                  ! EM cuts in absorbing material
     DCutE   =  10 keV      ! electron delta ray cut
     DCutM   =  10 keV      ! muon delta ray cut
     BCutE   =  10 keV      ! electron brem cut
+    BCutM   =  10 keV      ! muon brem cut
 
 Fill ESEN                  ! EM cuts in absorbing material
-    BCutM   =  10 keV      ! muon brem cut
     Version =   2          ! versioning
     CutGAM  =  30 keV      ! gamma transport cut
     CutELE  =  30 keV      ! electron transport cut
@@ -1879,8 +1879,11 @@ c 		B) Introduced sector overlaps
 c 		C) All other changes are documentede here:
 c	 	   http://drupal.star.bnl.gov/STAR/subsys/eemc/endcap-geometry-update-2009
 c
-c $Id: ecalgeo6.g,v 1.2 2009/12/22 13:38:49 jwebb Exp $
+c $Id: ecalgeo6.g,v 1.3 2009/12/22 18:27:15 jwebb Exp $
 c $Log: ecalgeo6.g,v $
+c Revision 1.3  2009/12/22 18:27:15  jwebb
+c Corrected error in definition of 10 keV cuts for bcutm.
+c
 c Revision 1.2  2009/12/22 13:38:49  jwebb
 c Added options to change the geant tracking cuts for electrons and photons in
 c all volumes to 10, 30, 100 or 1000 keV.
