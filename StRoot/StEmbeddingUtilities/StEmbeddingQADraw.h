@@ -43,14 +43,14 @@
 //
 //
 //----------------------------------------------------------------------------------------------------
-//   Revised history
-//
-//   Oct/23/2009 : 
-//     - eta and rapidity comparison with different pt bins
-//     - pt and momentum comparison with different eta bins
-//     - Add mean and sigma of dE/dx as a function of momentum
-//       from gaussian fit
-//----------------------------------------------------------------------------------------------------
+/****************************************************************************************************
+ * $Id: StEmbeddingQADraw.h,v 1.6 2009/12/22 21:40:11 hmasui Exp $
+ * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.6  2009/12/22 21:40:11  hmasui
+ * Add comments for functions and members
+ *
+ ****************************************************************************************************/
+
 
 #ifndef __StEmbeddingQADraw_h__
 #define __StEmbeddingQADraw_h__
