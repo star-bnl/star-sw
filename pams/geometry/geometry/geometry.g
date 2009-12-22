@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.210 2009/11/24 23:49:28 jwebb Exp $
+* $Id: geometry.g,v 1.211 2009/12/22 13:42:16 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.211  2009/12/22 13:42:16  jwebb
+* Added options to set geant tracking cuts for electrons and photons in the
+* B/EEMC to 10, 30, 100 or 1000 keV.
+*
 * Revision 1.210  2009/11/24 23:49:28  jwebb
 * Changed to the TPCE04 model of the TPC in y2006h.  This is the current best
 * geometry of the TPC.  TPCE04 is present in tags from y2005 to present.
@@ -1472,8 +1476,11 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               FhcmConfig
 
 * The following flags select different base geometry files for the endcap
-
    Integer    EcalGeometry / 5 /            ! defaults to version 5
+
+* Selects the configuration for EM cuts in the EEMC and BEMC
+   Integer    EmCutConfig / 0 /             !
+
 
 
    Integer    pipeFlag
@@ -1623,7 +1630,7 @@ If LL>0
   TOFMAX        = 1.e-4
 *
   for(jGotCom=1;jGotCom>0;) { jGotCom=0;
-  Case HELP       { you may select the following keywords: ;
+  Case HELP       { you may select the following (incomplete) list of keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
                   <W>;('               : year_2a                      ');
@@ -1637,6 +1644,9 @@ If LL>0
                   <W>;('Auxillary keys : Debug_on/off, Split_on/off   ');
                   <W>;('--------------------------------------------- ');
                   <W>;('Default: complete STAR with hadr_on,auto-split');
+                  <W>;('--------------------------------------------- ');
+                  <W>;('EEMC/BEMC Cuts : EMC_10keV,  EMC_30keV,       ');
+                  <W>;('               : EMC_100keV, EMC_1MeV         ');
                   <W>;('--------------------------------------------- ');
                 }
 
@@ -3074,6 +3084,19 @@ If LL>0
                   DCUTM =0.00001;
                 }
 
+  Case EMC_10keV    { 10 keV cuts on Electromagnetic processes in the barrel and endcap;
+                    EmCutConfig = 1;
+                    }
+  Case EMC_30keV    { 30 keV cuts on Electromagnetic processes in the barrel and endcap;
+                    EmCutConfig = 2;
+                    }
+  Case EMC_100keV   { 100 keV cuts on Electromagnetic processes in the barrel and endcap;
+                    EmCutConfig = 3;
+                    }
+  Case EMC_1MeV     { 1 MeV cuts on Electromagnetic processes in the barrel and endcap;
+                    EmCutConfig = 4;
+                    }
+
   Case TPC_ONLY   { Minimal geometry - only TPC;
                   {PIPE,SVTT,ftpc,BTOF,VPDD,CALB,ECAL,MAGP,UPST,ZCAL,PHMD,FPDM,BBCM,SISD,FTRO}=off; }
   Case TPC_AND_SVTT  { Only TPC and SVT;
@@ -3378,6 +3401,8 @@ If LL>0
 
        if(CalbConfig==2) then
            write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
+           Call AgDetp add ('ccut.absorber=',  emcutconfig, 1)
+           Call AgDetp add ('ccut.sensitive=', emcutconfig, 1)
            Call calbgeo2
        endif
 
@@ -3400,7 +3425,11 @@ If LL>0
       call AgDETP add ('emcg.OnOff='   ,EcalConfig,1)
       call AgDETP add ('emcg.FillMode=',ecalFill,1)
       IF ( EcalGeometry .lt. 6 ) Call ecalgeo            ! version 5
-      IF ( EcalGeometry .eq. 6 ) Call ecalgeo6           ! version 6
+      IF ( EcalGeometry .eq. 6 ) THEN 
+                                 Call AgDetp add ('ecut.absorber=',  emcutconfig, 1)
+                                 Call AgDetp add ('ecut.sensitive=', emcutconfig, 1)
+                                 Call ecalgeo6           ! version 6
+      ENDIF
    endif
 
 ******************************************************************
