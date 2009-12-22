@@ -1,3 +1,10 @@
+/****************************************************************************************************
+ * $Id: StEmbeddingQADraw.cxx,v 1.7 2009/12/22 21:40:09 hmasui Exp $
+ * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.7  2009/12/22 21:40:09  hmasui
+ * Add comments for functions and members
+ *
+ ****************************************************************************************************/
 
 #include <assert.h>
 #include <string>
@@ -29,17 +36,19 @@ using namespace std ;
 
 ClassImp(StEmbeddingQADraw)
 
-  // Initialize static data members
+  /// Initialize static data members
   UInt_t StEmbeddingQADraw::mCanvasId = 0;
 
 //____________________________________________________________________________________________________
 StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile, const Int_t geantid)
   : mIsGIFOn(kFALSE), mIsJPGOn(kFALSE), mIsEPSOn(kFALSE), mIsPSOn(kFALSE), mGeantId(geantid)
 {
-  // Open input files
+  /// Constructor for StEmbeddingQADraw
+
+  /// Open input files, see Bool_t open(const TString embeddingFile, const TString realDataFile)
   mIsOpen = open(embeddingFile, realDataFile);
 
-  // Year, production and particle name from input file
+  /// Get year and production from input file
   if(mIsOpen){
     TString fileName(embeddingFile);
     fileName.Remove(fileName.Index(".root"), fileName.Length()); // remove .root
@@ -52,12 +61,13 @@ StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString 
       fileName.Remove(start, stop+1);
  
       if( i == 2 ){
-        mYear = subString.Atoi();
+        mYear = subString.Atoi(); // Convert character to integer
         mProduction = fileName ;
       }
     }
   }
   else{
+    /// Do not define the year and production if input files have not been opened properly
     mYear = -10 ;
     mProduction = "";
   }
@@ -70,10 +80,13 @@ StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString 
     const Int_t year, const TString production, const Int_t geantid)
   : mIsGIFOn(kFALSE), mIsJPGOn(kFALSE), mIsEPSOn(kFALSE), mIsPSOn(kFALSE), mGeantId(geantid)
 {
-  // Open input files
+  /// Constructor for StEmbeddingQADraw
+  /// Define year and production from the input arguments
+
+  /// Open input files, see Bool_t open(const TString embeddingFile, const TString realDataFile)
   mIsOpen = open(embeddingFile, realDataFile);
 
-  // Year, production and particle name by hand
+  /// Year, production and particle name by hand
   mYear         = year ;
   mProduction   = production ;
 
@@ -83,9 +96,12 @@ StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString 
 //____________________________________________________________________________________________________
 StEmbeddingQADraw::~StEmbeddingQADraw()
 {
+  /// Destructor
+
+  /// Clear daughter geantid array
   mDaughterGeantId.clear();
 
-  // Close input files
+  /// Close input files
   mInputEmbedding->Close();
   mInputRealData->Close();
 }
@@ -93,6 +109,8 @@ StEmbeddingQADraw::~StEmbeddingQADraw()
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::open(const TString embeddingFile, const TString realDataFile)
 {
+  /// Open input embedding and real data files
+
   // OPEN embedding file
   mInputEmbedding = TFile::Open(embeddingFile);
 
@@ -120,8 +138,12 @@ Bool_t StEmbeddingQADraw::open(const TString embeddingFile, const TString realDa
 //____________________________________________________________________________________________________
 void StEmbeddingQADraw::init()
 {
-  mPtMax = 5.0; // Draw up to 5 GeV/c
+  /// Initialization of data members
 
+  /// Set maximum pt. Default is 5 GeV/c --> Draw histograms up to 5 GeV/c
+  mPtMax = 5.0;
+
+  /// Clear daughter geantid array
   mDaughterGeantId.clear();
 
   LOG_INFO << "#------------------------------------------------------------" << endm;
@@ -130,28 +152,30 @@ void StEmbeddingQADraw::init()
   LOG_INFO << Form("  Particle   =  %10s", getParticleName()) << endm;
   LOG_INFO << "#------------------------------------------------------------" << endm;
 
-  // set global ROOT styles
+  /// set global ROOT styles
   StEmbeddingQAUtilities::instance()->setStyle();
 
-  // Make sure that we have histograms for the input geant id
+  /// Make sure that we have histograms for the input geant id
   checkInputGeantId() ;
 
-  // Find daughter geant id from Contaminated pair histograms 
+  /// Find daughter geant id from Contaminated pair histograms 
   setDaughterGeantId();
 }
 
 //____________________________________________________________________________________________________
 void StEmbeddingQADraw::setOutputDirectory(const TString name)
 {
+  /// Set output directory
+
   mOutputFigureDirectory = name ;
 
-  // Make sure if it exists
+  /// Make sure that the directory exists or not
   if( gSystem->AccessPathName(name) == kTRUE ){ // 0 is true, i.e. directory exists
     Error("setOutputDirectory", "Directory %s does not exist. Set current directory as the output location");
     mOutputFigureDirectory = "./";
   }
 
-  // Make sure you put '/' at the end of directory name
+  /// Make sure you put '/' at the end of directory name. If not, add '/'
   if ( mOutputFigureDirectory.Last('/') + 1 != mOutputFigureDirectory.Length() ){
     LOG_INFO << endm;
     LOG_INFO << "Put / at the end of output directory name" << endm;
@@ -164,7 +188,9 @@ void StEmbeddingQADraw::setOutputDirectory(const TString name)
 //____________________________________________________________________________________________________
 void StEmbeddingQADraw::print(const TCanvas& canvas, const TString name) const
 {
-  // Output directory needs "/" at the end of name
+  /// Print output figure (default is png only)
+  /// You can print other file formants, like gif etc by setGIFOn()
+  /// See header for other file formants.
 
   canvas.Print(Form("%s%s_%s.png", mOutputFigureDirectory.Data(), name.Data(), getBaseName()));
   if( mIsGIFOn ) canvas.Print(Form("%s%s_%s.gif", mOutputFigureDirectory.Data(), name.Data(), getBaseName()));
@@ -176,11 +202,12 @@ void StEmbeddingQADraw::print(const TCanvas& canvas, const TString name) const
 //____________________________________________________________________________________________________
 void StEmbeddingQADraw::checkInputGeantId()
 {
-  // Check input geant id
-  //  if we don't have histograms for the input geantid
-  //  put the geantid from the MC histogram
+  /// Check input geant id
+  ///  if we don't have histograms for the input geantid put the geantid from the MC histogram
 
   TH1* hGeantId = (TH1D*) getHistogram("hGeantId_0");
+
+  /// mGeantId = -1 if geantid histogram doesn't exist
   if(!hGeantId){
     mGeantId = -1 ;
     return ;
@@ -189,7 +216,7 @@ void StEmbeddingQADraw::checkInputGeantId()
   const Int_t mcIdBin      = hGeantId->GetMaximumBin() ;
   const Int_t geantidFound = TMath::Nint(hGeantId->GetBinCenter(mcIdBin));
 
-  if ( mGeantId == geantidFound ) return ; // do nothing if input geantid is correct
+  if ( mGeantId == geantidFound ) return ; /// do nothing if input geantid is correct
   else{
     LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
     LOG_INFO << "  Input geant id doesn't correspond to the geant id in the MC histogram" << endm ;
@@ -203,9 +230,11 @@ void StEmbeddingQADraw::checkInputGeantId()
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::isOpen() const
 {
-  // Check if
-  //  - input files (both embedding and real data) are found
-  //  - input geantid is correct
+  /// Check if
+  ///  - input files (both embedding and real data) are found
+  ///  - input geantid is correct
+  ///
+  ///  Stop program by assert if one of them is false
 
   if(!mIsOpen) LOG_INFO << "No input files found" << endm;
   assert(mIsOpen);
@@ -220,7 +249,7 @@ Bool_t StEmbeddingQADraw::isOpen() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::isMatchedPairOk() const
 {
-  // Check # of matched pairs > 0
+  /// Check # of matched pairs > 0
   TH1* hGeantId = (TH1D*) getHistogram("hGeantId_1");
   if(!hGeantId) return kFALSE ;
 
@@ -231,14 +260,16 @@ Bool_t StEmbeddingQADraw::isMatchedPairOk() const
 //____________________________________________________________________________________________________
 void StEmbeddingQADraw::setDaughterGeantId()
 {
-  // Check # of matched pairs > 0
+  /// Find daughter geantid from histogram
+
+  /// Check # of matched pairs > 0
   if(isMatchedPairOk()){
-    // Do not use contaminated pairs, set mGeantid
+    /// Use matched pairs, not contaminated pairs. Set input geantid (mGeantid) into daughter geantid array
     mDaughterGeantId.push_back(mGeantId);
     return;
   }
 
-  // Try to find out the daughter geantid from the histogram
+  /// Try to find out the daughter geantid from the histogram
   const StParticleTable* table = StParticleTable::instance() ;
 
   for(UInt_t id=0; id<1000; id++){
@@ -255,13 +286,15 @@ void StEmbeddingQADraw::setDaughterGeantId()
     }
   }
 
-  // If no daughter particles, set mGeantId
+  /// If no daughter particles, set mGeantId
   if ( mDaughterGeantId.empty() ) mDaughterGeantId.push_back(mGeantId);
 }
 
 //____________________________________________________________________________________________________
 Int_t StEmbeddingQADraw::getEntries() const
 {
+  /// Get number of events from the z-vertex histogram
+
   TH1* hVz = (TH1D*) getHistogram("hVz");
   if(!hVz) return 0;
 
@@ -271,18 +304,21 @@ Int_t StEmbeddingQADraw::getEntries() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::isDecay() const
 {
-  // Check whether we have decay daughters in our QA histograms
-  // 1. Check matched pairs
-  if(isMatchedPairOk()) return kFALSE ; // Matched pairs > 0, i.e. don't need to look at the contaminated pairs
+  /// Check whether we have decay daughters in our QA histograms
 
-  return ( mDaughterGeantId.size() > 1 ) ; // Number of decay daughters should be >= 2
+  /// Check matched pairs
+  /// Matched pairs > 0, i.e. don't need to look at the contaminated pairs
+  if(isMatchedPairOk()) return kFALSE ;
+
+  /// Number of decay daughters should be >= 2
+  return ( mDaughterGeantId.size() > 1 ) ;
 }
 
 //____________________________________________________________________________________________________
 Int_t StEmbeddingQADraw::getGeantIdReal(const Int_t daughter) const
 {
-  // Get daughter particle id for the real data
-  //   if daughters are not e/pi/K/p, return pi+ (geantid=8)
+  /// Get daughter particle id for the real data
+  ///   if daughters are not e/pi/K/p, return pi+ (geantid=8)
 
   return ( StEmbeddingQAUtilities::instance()->isEPiKP(mDaughterGeantId[daughter]) ) ? mDaughterGeantId[daughter] : 8 ;
 }
@@ -290,8 +326,11 @@ Int_t StEmbeddingQADraw::getGeantIdReal(const Int_t daughter) const
 //____________________________________________________________________________________________________
 Int_t StEmbeddingQADraw::getCategoryId(const Bool_t isEmbedding) const
 {
-  // isDecay = kTRUE  --> Contaminated pairs
-  // isDecay = kFALSE --> Matched pairs
+  /// For embedding QA
+  ///   isDecay = kTRUE  --> Contaminated pairs
+  ///   isDecay = kFALSE --> Matched pairs
+  /// For real data QA
+  ///   Use primary track
   const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
 
   if ( isEmbedding ){
@@ -305,6 +344,8 @@ Int_t StEmbeddingQADraw::getCategoryId(const Bool_t isEmbedding) const
 //____________________________________________________________________________________________________
 TObject* StEmbeddingQADraw::getHistogram(const TString name, const Bool_t isEmbedding) const
 {
+  /// Get histogram from either embedding or real data ROOT file
+
   if(!isOpen()) return 0;
 
   TObject* obj = (isEmbedding) ? mInputEmbedding->Get(name) : mInputRealData->Get(name) ;
@@ -322,7 +363,9 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const Bool_t isEmbe
 //____________________________________________________________________________________________________
 TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daughter, const Bool_t isEmbedding) const
 {
-  // Get histogram name
+  /// Get histogram from either embedding or real data ROOT file
+  /// Define histogram name from daughter number and category id
+
   if ( daughter >= mDaughterGeantId.size() ){
     Error("StEmbeddingQADraw::getHistogram", "Unknown daughter index, index=%3d", daughter);
     return 0;
@@ -331,16 +374,16 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daught
   const Int_t category = getCategoryId(isEmbedding) ;
 
   if( isEmbedding ){
-    // Histogram name is 
-    //   - {histogram name}_{category id}_{particle id} for stable particles
-    //   - {histogram name}_{category id}_{parent particle id}_{daughter particle id} for unstable particles
+    /// Histogram name is 
+    ///   - {histogram name}_{category id}_{particle id} for stable particles
+    ///   - {histogram name}_{category id}_{parent particle id}_{daughter particle id} for unstable particles
     return (isDecay()) ? getHistogram(Form("%s_%d_%d_%d", name.Data(), category, mGeantId, mDaughterGeantId[daughter])) 
       : getHistogram(Form("%s_%d_%d", name.Data(), category, mGeantId)) ;
   }
   else{
-    // Only primary particles in the real data
-    //   - If mDaughterGeantId is not e/pi/K/p, use pi+
-    //   NOTE: mDaughterGeantId[0] = mGeantId for stable particles
+    /// Only primary particles in the real data
+    ///   - If mDaughterGeantId is not e/pi/K/p, use pi+
+    ///   NOTE: mDaughterGeantId[0] = mGeantId for stable particles
     const Int_t geantidReal = getGeantIdReal(daughter) ;
 
     return getHistogram(Form("%s_%d_%d", name.Data(), category, geantidReal), kFALSE) ;
@@ -350,7 +393,8 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daught
 //____________________________________________________________________________________________________
 Double_t StEmbeddingQADraw::getNormalization(const TH1& h) const
 {
-  // Normalization: 1/(Nevts * binWidth)
+  /// Get normalization of histogram
+  /// Normalization = 1/(Nevts * binWidth)
 
   const Double_t ntrack   = h.Integral() ;
   if( ntrack == 0 ) return 1.0 ;
@@ -364,6 +408,8 @@ Double_t StEmbeddingQADraw::getNormalization(const TH1& h) const
 //____________________________________________________________________________________________________
 const Char_t* StEmbeddingQADraw::getBaseName() const
 {
+  /// Get {year}_{production}_{particle name}
+
   return Form("%d_%s_%s", mYear, mProduction.Data(), getParticleName());
 }
 
@@ -371,11 +417,11 @@ const Char_t* StEmbeddingQADraw::getBaseName() const
 Bool_t StEmbeddingQADraw::drawStatistics(const Double_t x1, const Double_t y1, const Double_t x2, const Double_t y2,
     const Double_t textSize) const
 {
-  // Print
-  //  - number of events
-  //  - Year
-  //  - Production
-  //  - Particle name
+  /// Print
+  ///  - number of events
+  ///  - Year
+  ///  - Production
+  ///  - Particle name
 
   TPaveText* statistics = new TPaveText(x1, y1, x2, y2);
   statistics->SetTextFont(42);
@@ -394,7 +440,9 @@ Bool_t StEmbeddingQADraw::drawStatistics(const Double_t x1, const Double_t y1, c
 //____________________________________________________________________________________________________
 const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
 {
-  // Default input geantid = -1 --> return particle name for mGeantid
+  /// Get particle name
+
+  /// Default input geantid = -1 --> return particle name for mGeantid
   const StParticleTable* table = StParticleTable::instance() ;
   const StParticleDefinition* particle = (geantid<0)
     ? table->findParticleByGeantId(mGeantId)
@@ -407,9 +455,11 @@ const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawEvent() const
 {
+  /// Event-wise QA
+
   LOG_INFO << "QA for Event-wise informations ..." << endm;
 
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
   //----------------------------------------------------------------------------------------------------
@@ -417,7 +467,7 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 600);
   canvas->Divide(3, 2);
 
-  // z-vertex
+  /// z-vertex
   canvas->cd(1);
   TH1* hVz = (TH1D*) getHistogram("hVz");
   if(!hVz) return kFALSE ;
@@ -431,7 +481,7 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   hVzAccepted->Draw("same");
   hVz->Draw("same");
 
-  // y vs x vertices
+  /// y vs x vertices
   canvas->cd(2);
   TH2* hVyVx = (TH2D*) mInputEmbedding->Get("hVyVx");
   if(!hVyVx) return kFALSE ;
@@ -440,7 +490,7 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   hVyVx->SetAxisRange(-5, 5, "Y");
   hVyVx->Draw("colz");
 
-  // dVx, dVy, dVz
+  /// dVx, dVy, dVz
   for(Int_t i=0; i<3; i++){
     canvas->cd(i+3);
     TH1* hdV = 0 ;
@@ -452,14 +502,14 @@ Bool_t StEmbeddingQADraw::drawEvent() const
     hdV->Draw();
   }
 
-  // Statistics
+  /// Statistics
   canvas->cd(6);
   drawStatistics();
 
   canvas->cd();
   canvas->Update();
 
-  // Print figures
+  /// Print figures
   print(*canvas, "eventqa");
 
   return kTRUE ;
@@ -468,9 +518,11 @@ Bool_t StEmbeddingQADraw::drawEvent() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawMcTrack() const
 {
+  /// MC track QA
+
   LOG_INFO << "QA for MC tracks (pt, eta, y, phi) ..." << endm;
 
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
   //----------------------------------------------------------------------------------------------------
@@ -478,7 +530,7 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   TCanvas* canvas2D = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 800, 600);
   canvas2D->Divide(2, 2);
 
-  // 2D
+  /// pT vs eta
   canvas2D->cd(1);
   TH2* hPtVsEta = (TH2D*) getHistogram(Form("hPtVsEta_0_%d", mGeantId));
   if(!hPtVsEta) return kFALSE;
@@ -486,6 +538,7 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hPtVsEta->Draw("colz");
   hPtVsEta->SetAxisRange(0, mPtMax, "Y");
 
+  /// pT vs y
   canvas2D->cd(2);
   TH2* hPtVsY = (TH2D*) getHistogram(Form("hPtVsY_0_%d", mGeantId));
   if(!hPtVsY) return kFALSE ;
@@ -493,6 +546,7 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hPtVsY->Draw("colz");
   hPtVsY->SetAxisRange(0, mPtMax, "Y");
 
+  /// pT vs phi
   canvas2D->cd(3);
   TH2* hPtVsPhi = (TH2D*) getHistogram(Form("hPtVsPhi_0_%d", mGeantId));
   if(!hPtVsPhi) return kFALSE ;
@@ -500,21 +554,21 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hPtVsPhi->Draw("colz");
   hPtVsPhi->SetAxisRange(0, mPtMax, "Y");
 
-  // Statistics
+  /// Statistics
   canvas2D->cd(4);
   drawStatistics();
 
   canvas2D->cd();
   canvas2D->Update();
 
-  // Print figures
+  /// Print figures for 2D histograms
   print(*canvas2D, "mctrack2d");
 
   // 1D projections
   TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 800, 600);
   canvas->Divide(2, 2);
 
-  // Projections (pt, eta, y)
+  /// Projections (pt, eta, y, phi)
   TH1* hPt  = (TH1D*) hPtVsPhi->ProjectionY("hPtMc");
   TH1* hEta = (TH1D*) hPtVsEta->ProjectionX("hEtaMc");
   TH1* hY   = (TH1D*) hPtVsY->ProjectionX("hYMc");
@@ -564,7 +618,7 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   canvas->cd();
   canvas->Update();
 
-  // Print figures
+  /// Print figures for 1D histograms
   print(*canvas, "mctrack");
 
   return kTRUE ;
@@ -573,28 +627,30 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawTrack() const
 {
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// Track-wise QA
+
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
   //----------------------------------------------------------------------------------------------------
   // Track-wise informations (Comparison between MC and reconstructed particles)
-  //  1: Geant id
+  ///  1: Geant id
   const Bool_t isGeantIdOk = drawGeantId();
  
-  //  2: (pseudo-)rapidity distributions
+  ///  2: (pseudo-)rapidity distributions
   const Bool_t isRapidityOk = drawRapidity();
  
-  //  3: Momentum and pt
+  ///  3: Momentum and pt
   const Bool_t isMomentumOk = drawMomentum();
   const Bool_t isPtOk       = drawPt();
  
-  //  4: dE/dx
+  ///  4: dE/dx
   const Bool_t isdEdxOk     = drawdEdx();
  
-  //  5: Global dca
+  ///  5: Global dca
   const Bool_t isDcaOk      = drawDca();
  
-  //  6: NHit
+  ///  6: NHit
   const Bool_t isNHitOk     = drawNHit();
   
   return isGeantIdOk && isRapidityOk && isMomentumOk && isPtOk && isdEdxOk && isDcaOk && isNHitOk ;
@@ -603,24 +659,26 @@ Bool_t StEmbeddingQADraw::drawTrack() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawGeantId() const
 {
+  /// QA for geantid
+
   LOG_INFO << "QA for geant id ..." << endm;
 
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
-  // pad0: MC tracks
-  // pad1: Reconstructed tracks
-  // pad2: Statistics
+  /// pad0: MC tracks
+  /// pad1: Reconstructed tracks
+  /// pad2: Statistics
   TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
   canvas->Divide(2, 2);
 
-  // Draw MC tracks
+  /// Draw MC tracks
   Int_t ipad = 1 ;
   canvas->cd(ipad++);
   TH1* hGeantIdMc = (TH1D*) getHistogram("hGeantId_0");
   if(!hGeantIdMc) return kFALSE ;
 
-  // Draw MC id +/- 10
+  /// Draw MC id +/- 10
   const Int_t mcIdBin    = hGeantIdMc->GetMaximumBin() ;
   const Double_t mcId    = hGeantIdMc->GetBinCenter(mcIdBin);
   const Double_t mcIdMin = (mcId-10<0) ? 0 : mcId-10 ;
@@ -631,12 +689,12 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
   hGeantIdMc->SetAxisRange(mcIdMin, mcIdMax, "X");
   hGeantIdMc->Draw();
 
-  // Draw line at expected particle id
+  /// Draw line at expected geantid id for MC tracks
   TLine* hGeantIdMcExpected = new TLine(mGeantId+0.5, 0, mGeantId+0.5, hGeantIdMc->GetMaximum()) ; 
   hGeantIdMcExpected->SetLineColor(kBlue);
   hGeantIdMcExpected->Draw();
 
-  // Draw reconstructed geant id
+  /// Draw reconstructed geant id
   canvas->cd(ipad++);
   TH1* hGeantIdReco = (TH1D*) getHistogram(Form("hGeantId_%d", getCategoryId()));
   if(!hGeantIdReco) return kFALSE ;
@@ -646,7 +704,7 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
   hGeantIdReco->SetAxisRange(0, 50, "X"); // Max geant id is 50
   hGeantIdReco->Draw();
 
-  // Draw expected geant id lines for decay daughters
+  /// Draw expected geant id lines for decay daughters
   TLine** hGeantIdRecoExpected = new TLine*[mDaughterGeantId.size()];
 
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
@@ -681,7 +739,7 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
   canvas->cd();
   canvas->Update();
 
-  // Print figures
+  /// Print figures
   print(*canvas, "geantid");
 
   return kTRUE ;
@@ -690,13 +748,15 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawRapidity() const
 {
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// QA for (pseudo-)rapidity
+
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
-  // Pseudo-rapidity
+  /// Pseudo-rapidity
   const Bool_t isEtaOk = drawProjection2D("eta");
 
-  // Rapidity
+  /// Rapidity
   const Bool_t isYOk   = drawProjection2D("y");
 
   return isEtaOk && isYOk ;
@@ -705,12 +765,12 @@ Bool_t StEmbeddingQADraw::drawRapidity() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawMomentum() const
 {
-  // Plot reconstructed momentum vs MC momentum (2D)  (Added on Nov/13/2009)
-  //   - Embedding only
+  /// QA for momentum
 
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
+  /// Plot reconstructed momentum vs MC momentum (2D) (Embedding only)
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
     TH2* hRecoPVsMcP = (TH2D*) getHistogram("hRecoPVsMcP", id, kTRUE);
     if(!hRecoPVsMcP) return kFALSE ;
@@ -734,7 +794,9 @@ Bool_t StEmbeddingQADraw::drawMomentum() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawPt() const
 {
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// QA for pt
+
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
   return drawProjection2D("pt");
@@ -743,20 +805,21 @@ Bool_t StEmbeddingQADraw::drawPt() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
 {
-  // Input 2D histogram is pt or momentum vs eta or y
-  //
-  // Projection into eta or y for pt = 0.2 - 5 GeV/c (0.5 GeV/c step)
-  // or
-  // Projection into pt or momentum for |Delta eta| = 0.5 in |eta| < 2
+  /// Utility function to draw 1D projection histgrams from 2D
+
+  /// Input 2D histogram is pt or momentum vs eta or y
+  /// Projection into eta or y for pt = 0.2 - 5 GeV/c (0.5 GeV/c step)
+  /// or
+  /// Projection into pt or momentum for |Delta eta| = 0.5 in |eta| < 2
 
   TString nameLower(name);
   nameLower.ToLower();
 
   LOG_INFO << "QA for " << name << " ..." << endm;
 
+  /// Define y-axis title, histogram name and projection axis from the input argument
   TString histoName("");
   Bool_t isProjectionX = kFALSE ;
-
   TString yTitle("");
 
   if( nameLower.Contains("pt") ){
@@ -806,6 +869,7 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
     TH2* h2DReal  = (TH2D*) getHistogram(histoName, id, kFALSE);
     if(!h2DReal) return kFALSE ;
 
+    /// Define canvas Ndivisions
     Int_t npad = 0 ;
     TCanvas* canvas = 0;
     if( isProjectionX ){
@@ -819,9 +883,9 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
       npad = 8 ;
     }
 
-    // Get bins
-    // eta bins = 6 : |eta| < 1.5
-    // pt bins  = 10 : pt = 0.2 - 5 GeV/c
+    /// Get bins
+    /// eta bins = 6 : |eta| < 1.5
+    /// pt bins  = 10 : pt = 0.2 - 5 GeV/c
     const Int_t nbins = (isProjectionX) ? 10 : 6 ;
     const Double_t binStep = 0.5 ;
     const Double_t binMin  = (isProjectionX) ? 0.0 : -1.5 ;
@@ -850,10 +914,10 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
       hEmbed->Scale( getNormalization(*hEmbed) );
       hReal->Scale( getNormalization(*hReal) );
 
-      // Set maximum
+      /// Set maximum of y-axis
+      /// Use real data if N(embedding) < 100
       Double_t yMax = 0.0 ;
       if ( hEmbed->GetEntries() < 100 ){
-        // Use real data if N(embedding) < 100
         yMax = hReal->GetMaximum() ;
       }
       else{
@@ -906,13 +970,15 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawdEdx() const
 {
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// QA for dE/dx
+
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
-  // MC momentum
+  /// vs MC momentum
   const Bool_t isMcOk   = drawdEdxVsMomentum(kTRUE) ;
 
-  // Reconstructed momentum
+  /// vs Reconstructed momentum
   const Bool_t isRecoOk = drawdEdxVsMomentum(kFALSE) ;
 
   return isMcOk && isRecoOk ;
@@ -921,8 +987,14 @@ Bool_t StEmbeddingQADraw::drawdEdx() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
 {
-  // Select MC or reconstructed momentum for the embedding data
-  // Use reconstructed momentum for the real data
+  /// Draw dE/dx vs momentum variables (either momentum or pt)
+  /// Draw projection of dE/dx distribution for each momentum slice
+  /// Draw mean/sigma as a function of momentum variables
+  //
+  /// Compare (1) embedding, (2) real data without PID, (3) real data with PID
+
+  /// Select MC or reconstructed momentum for the embedding data
+  /// Use reconstructed momentum for the real data
   const TString momName  = (isMcMomentum) ? "Mc" : "Reco" ;
 
   LOG_INFO << "QA for dE/dx (" << momName << " momentum ...)" << endm;
@@ -988,8 +1060,8 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
       print(*canvas2D, Form("dedx_vs_mom%s_daughter%d", momName.Data(), id));
     }
 
-    // 1D projections for each momentum bin
-    //  From 0.2 GeV/c to 5.0 GeV/c (5*5)
+    /// 1D projections for each momentum bin
+    ///  From 0.2 GeV/c to 5.0 GeV/c (5*5)
     TCanvas* canvas0 = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
     canvas0->Divide(5, 5);
 
@@ -1134,9 +1206,11 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawDca() const
 {
+  /// QA for global DCA distributions for each (pt, eta) slice
+
   LOG_INFO << "QA for dca distributions ..." << endm;
 
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
   return drawProjection3D("Dca");
@@ -1145,12 +1219,14 @@ Bool_t StEmbeddingQADraw::drawDca() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawNHit() const
 {
+  /// QA for Nfit distributions for each (pt, eta) slice
+
   LOG_INFO << "QA for NHit distributions ..." << endm;
 
-  // Make sure (1) input ROOT files and (2) input geantid
+  /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
-  // NCommon hit vs NHit
+  /// QA for NCommon hit vs NHit
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
     TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++));
     TH2* hNCommonHitVsNHit = (TH2D*) getHistogram("hNCommonHitVsNHit", id, kTRUE);
@@ -1164,10 +1240,12 @@ Bool_t StEmbeddingQADraw::drawNHit() const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
 {
-  // Plot histograms in each (pt, eta) space
-  // Suppose the input histogram is TH3 (x:pt, y:eta, z:variable you want to plot)
-  // Force to set batch mode to reduce the processing time
+  /// Utility function to get 1D projection from 3D histogram
 
+  /// Plot histograms in each (pt, eta) space
+  /// Suppose the input histogram is TH3 (x:pt, y:eta, z:variable you want to plot)
+
+  /// Force to set batch mode to reduce the processing time
   const Bool_t isBatch = gROOT->IsBatch() ;
   if( !isBatch ){
     LOG_INFO << "Enter batch mode ..." << endm;
@@ -1180,8 +1258,9 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
   TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 600, 800);
   canvas->Divide(2, 3);
 
-  const TString psFileName(Form("%s%s_%s.pdf", mOutputFigureDirectory.Data(), nameLower.Data(), getBaseName()));
-  TPDF* pdf = new TPDF(psFileName);
+  /// Define output PDF file
+  const TString pdfFileName(Form("%s%s_%s.pdf", mOutputFigureDirectory.Data(), nameLower.Data(), getBaseName()));
+  TPDF* pdf = new TPDF(pdfFileName);
 
   const Int_t npad = 5 ;
 
@@ -1252,9 +1331,9 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
     }
   }
   pdf->Close();
-  LOG_INFO << "Print PDF file : " << psFileName << endm;
+  LOG_INFO << "Print PDF file : " << pdfFileName << endm;
 
-  // Back to the normal
+  // Back to the original mode
   if( isBatch ) gROOT->SetBatch(kTRUE);  // Stay batch mode if you've started the macro by batch mode
   else          gROOT->SetBatch(kFALSE); // Exit batch mode if you've not
 
@@ -1265,6 +1344,8 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::draw() const
 {
+  /// QA for event-wise and track-wise (both MC and reconstructed) histograms
+
   //====================================================================================================
   //
   // Start drawing
@@ -1272,17 +1353,17 @@ Bool_t StEmbeddingQADraw::draw() const
   //====================================================================================================
 
   //----------------------------------------------------------------------------------------------------
-  // (1) Event-wise informations
+  /// (1) Event-wise informations
   const Bool_t isEventOk = drawEvent();
   //----------------------------------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------------------------------
-  // (2-1) Track-wise informations (MC)
+  /// (2-1) Track-wise informations (MC)
   const Bool_t isMcTrackOk = drawMcTrack();
   //----------------------------------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------------------------------
-  // (2-2) Track-wise informations (Real vs Embedding)
+  /// (2-2) Track-wise informations (Real vs Embedding)
   const Bool_t isTrackOk = drawTrack();
   //----------------------------------------------------------------------------------------------------
 

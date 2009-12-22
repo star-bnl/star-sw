@@ -1,3 +1,10 @@
+/****************************************************************************************************
+ * $Id: StEmbeddingQATrack.cxx,v 1.6 2009/12/22 21:39:30 hmasui Exp $
+ * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.6  2009/12/22 21:39:30  hmasui
+ * Add comments for functions and members
+ *
+ ****************************************************************************************************/
 
 #include <iostream>
 
@@ -16,12 +23,13 @@
 
 using namespace std ;
 
-  const Float_t StEmbeddingQATrack::kPtMinCut   = 0.1 ;
-  const Float_t StEmbeddingQATrack::kPtMaxCut   = 10.0 ;
-  const Float_t StEmbeddingQATrack::kEtaCut     = 1.5 ;
-  const Short_t StEmbeddingQATrack::kNHitCut    = 10 ;
-  const Float_t StEmbeddingQATrack::kDcaCut     = 3.0 ;
-  const Double_t StEmbeddingQATrack::kNSigmaCut = 2.0 ;
+  /// Define static const data members here
+  const Float_t StEmbeddingQATrack::kPtMinCut   = 0.1 ;   /// Minimum pt cut, pt > 0.1 GeV/c
+  const Float_t StEmbeddingQATrack::kPtMaxCut   = 10.0 ;  /// Minimum pt cut, pt < 10 GeV/c
+  const Float_t StEmbeddingQATrack::kEtaCut     = 1.5 ;   /// Eta cut, |eta| < 1.5
+  const Short_t StEmbeddingQATrack::kNHitCut    = 10 ;    /// Minimum Nfit cut, Nfit >= 10
+  const Float_t StEmbeddingQATrack::kDcaCut     = 3.0 ;   /// Global dca cut, |dca_{gl}| < 3 cm
+  const Double_t StEmbeddingQATrack::kNSigmaCut = 2.0 ;   /// Nsigma cut, |Nsigma| < 2
 
 ClassImp(StEmbeddingQATrack)
 
@@ -34,6 +42,7 @@ StEmbeddingQATrack::StEmbeddingQATrack()
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName("MC")
 {
+  /// Default constructor
 }
 
 //____________________________________________________________________________________________________
@@ -47,6 +56,8 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StTinyMcTrack& 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
 {
+  /// Constructor for embedding MC tracks (StTinyMcTrack)
+  /// No NcommontHit, maximum number of fit points, reconstructed momentum, dEdx, global dca and Nsigma informations
 }
 
 //____________________________________________________________________________________________________
@@ -61,6 +72,8 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
 {
+  /// Constructor for Matched or Mathced global pairs (StMiniMcPair)
+  /// No Nsigma informations
 }
 
 //____________________________________________________________________________________________________
@@ -75,6 +88,8 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
 {
+  /// Constructor for Contaminated pairs (StContamPair)
+  /// No Nsigma informations
 }
 
 //____________________________________________________________________________________________________
@@ -88,6 +103,10 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& trac
   mNSigmaElectron(track.nSigmaElectron()), mNSigmaPion(track.nSigmaPion()), mNSigmaKaon(track.nSigmaKaon()), mNSigmaProton(track.nSigmaProton()),
   mName(name)
 {
+  /// Constructor for real data track (StMuTrack)
+  /// No NcommonHit, parent geantid and MC momentum informations
+  /// NOTE: subtract primary vertex from number of fit points in order to compare the nfit with the embedding tracks
+
   // Sep/21/2009
   // - Get NHit only from TPC in order to avoid the SVT/SSD hit, and remove primary vertex from the NHit
   // - Get nSigma(pi/K/p) for real data
@@ -96,6 +115,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& trac
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::~StEmbeddingQATrack()
 {
+  /// Destructor
 }
 
 //__________________________________________________________________________________________
@@ -125,6 +145,7 @@ Bool_t StEmbeddingQATrack::isNHitOk() const
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQATrack::isDcaOk() const
 { 
+  /// Dca cut
   /// No Dca cut for MC tracks
 
   return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE : (mDcaGl >= 0.0 && mDcaGl < kDcaCut) ;
@@ -133,7 +154,7 @@ Bool_t StEmbeddingQATrack::isDcaOk() const
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQATrack::isCommonHitOk() const
 { 
-  /// Only for embedding tracks
+  /// NcommonHit cuts (only for embedding tracks)
 
   return (StEmbeddingQAUtilities::instance()->isEmbedding(mName)) ? mNCommonHit >= kNHitCut : kTRUE ;
 }
@@ -141,16 +162,17 @@ Bool_t StEmbeddingQATrack::isCommonHitOk() const
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQATrack::isNSigmaOk(const Short_t geantid) const
 {
-  // Make sure the real data track
+  /// Nsigma cut for electrons/pions/kaons/protons
+
   StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
 
-   // No NSigma cut for embedding tracks
+  /// No NSigma cut for embedding tracks
   if ( !utility->isReal(mName) ) return kTRUE ;
 
-  // NSigma cut will only apply for e/pi/K/p
+  /// NSigma cut will only apply for e/pi/K/p
   if ( !utility->isEPiKP(geantid) ) return kTRUE ;
 
-  // NSigma cut for e, pi, K and p
+  /// NSigma cut for e, pi, K and p
   if ( utility->isElectrons(geantid) )    return TMath::Abs(mNSigmaElectron) < kNSigmaCut ;
   else if ( utility->isPions(geantid) )   return TMath::Abs(mNSigmaPion) < kNSigmaCut ;
   else if ( utility->isKaons(geantid) )   return TMath::Abs(mNSigmaKaon) < kNSigmaCut ;
@@ -165,18 +187,24 @@ Bool_t StEmbeddingQATrack::isNSigmaOk(const Short_t geantid) const
 //____________________________________________________________________________________________________
 StLorentzVectorD StEmbeddingQATrack::getVectorMc() const
 { 
+  /// Get MC 4-momentum vector
+
   return mVectorMc ;
 }
 
 //____________________________________________________________________________________________________
 StLorentzVectorD StEmbeddingQATrack::getVectorRc() const
 { 
+  /// Get reconstructed 4-momentum vector
+
   return mVectorRc ;
 }
 
 //____________________________________________________________________________________________________
 void StEmbeddingQATrack::print() const
 {
+  /// Print track informations
+
   LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
   LOG_INFO << Form("StEmbeddingQATrack::print() : Track informations (%s)", mName.Data()) << endm;
   LOG_INFO << "  getNCommonHit()      " <<  getNCommonHit()  << endm;

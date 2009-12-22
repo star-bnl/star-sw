@@ -1,7 +1,14 @@
 //----------------------------------------------------------------------------------------------------
-//  Namespace StEmbeddingQAUtilities
+//  Class StEmbeddingQAUtilities
 //    - Provide category id, such as 'MC' track in the minimc tree
 //----------------------------------------------------------------------------------------------------
+/****************************************************************************************************
+ * $Id: StEmbeddingQAUtilities.h,v 1.5 2009/12/22 21:37:55 hmasui Exp $
+ * $Log: StEmbeddingQAUtilities.h,v $
+ * Revision 1.5  2009/12/22 21:37:55  hmasui
+ * Add comments for functions and members
+ *
+ ****************************************************************************************************/
 
 #ifndef __StEmbeddingQAUtilities_h__
 #define __StEmbeddingQAUtilities_h__
