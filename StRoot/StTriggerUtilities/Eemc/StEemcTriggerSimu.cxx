@@ -64,7 +64,6 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   mBemcEsum5bit=0;
   mExternDsmSetup=0;
   mSetupPath="wrong1";
-  mSource = "MuDst";
 
   feeTPTreeADC=new EEfeeTPTree("ADC",mxChan);
   dsm0TreeADC =new EEdsm0Tree("ADC");
@@ -431,8 +430,9 @@ StEemcTriggerSimu::getEemcAdc(){
 	//if(strstr(x->name,"12TD03")) printf("i=%d, name=%s, sec=%d, crate=%d, chan=%d, ped=%.1f, rawADC=%d\n",i, x->name, sec, x->crate, x->chan, x->ped, AdcRead);
 	//  if(x->crate==2) printf(" name=%s crate=%d, chan=%d  ped=%.1f rawADC=%d  stat=%d fail=%d\n", x->name, x->crate, x->chan, x->ped, AdcRead, x->stat, x->fail);
       }	// end of loop over towers
-    }
-  } else if (mSource == "StEvent") { // Useful for running in BFC
+    } // if (emc)
+  }
+  else if (mSource == "StEvent") { // Useful for running in BFC
     if (StEvent* event = (StEvent*)StMaker::GetChain()->GetDataSet("StEvent")) {
       if (StEmcCollection* emc = event->emcCollection()) {
 	if (StEmcDetector* det = emc->detector(kEndcapEmcTowerId)) {
@@ -455,8 +455,9 @@ StEemcTriggerSimu::getEemcAdc(){
 	} // if (det)
       } // if (emc)
     } // if (event)
-  } else {
-    LOG_WARN << "No EEMC data for this event" << endm;
+  }
+  else {
+    LOG_ERROR << "Unknown source" << endm;
   }
 }
 
@@ -743,6 +744,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.26  2009/12/22 18:11:05  pibero
+// Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
+//
 // Revision 1.25  2009/12/15 16:33:33  pibero
 // Added support to set thresholds manually for Run 9
 // and overwrite those from the database.

@@ -1,8 +1,10 @@
-// $Id: StVirtualTriggerSimu.cxx,v 1.4 2007/11/18 21:58:50 balewski Exp $
+// $Id: StVirtualTriggerSimu.cxx,v 1.5 2009/12/22 18:10:57 pibero Exp $
 
 #include <StMessMgr.h>
 
 #include "StVirtualTriggerSimu.h"
+
+ClassImp(StVirtualTriggerSimu)
 
 bool StVirtualTriggerSimu::isTrigger(int trigId) {
     if (this->triggerDecision(trigId) == kYes) return true;
@@ -15,6 +17,9 @@ void StVirtualTriggerSimu::Clear() { /* no-op */ }
 
 /*****************************************************************************
  * $Log: StVirtualTriggerSimu.cxx,v $
+ * Revision 1.5  2009/12/22 18:10:57  pibero
+ * Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
+ *
  * Revision 1.4  2007/11/18 21:58:50  balewski
  * L2algos triggerId list fixed
  *

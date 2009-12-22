@@ -1,20 +1,11 @@
 //Author :: Renee Fatemi
 //Emulates BBC trigger
 
-#include "StChain.h"
-#include "StMaker.h"
-
-//STAR
-#include "StMessMgr.h"
+//StEvent
+#include "StEventTypes.h"
 
 //StMuDSTMaker
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-
-//StEvent
-#include "StEvent/StBbcTriggerDetector.h"
-#include "StEvent/StTriggerData.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 //StBBC
 #include "StTriggerUtilities/Bbc/StBbcTriggerSimu.h"
@@ -57,41 +48,61 @@ void StBbcTriggerSimu::Clear(){
 
 void StBbcTriggerSimu::Make()
 {
-  
-  muDstMaker = (StMuDstMaker*)StMaker::GetChain()->GetMaker("MuDst");  assert(muDstMaker);
-  
-  muDst = muDstMaker->muDst();
-  assert(muDst);
 
-  muEvent = muDst->event();
-  assert(muEvent);
-  
-  StBbcTriggerDetector *bbc=&(muEvent->bbcTriggerDetector());
-  for (UInt_t pmt=0; pmt < bbc->numberOfPMTs(); pmt++){   
-    
-    BBCadc[pmt]=bbc->adc(pmt);
-    
-    int bbcadc=bbc->adc(pmt);
-    
-    if (bbcadc>AdcTrigThresh) {
-      if (pmt<16) Ebbc=1;      
-      if (23<pmt && pmt<40)  Wbbc=1;
-    }
-
+  if (mSource == "MuDst") {
+    StMuDst* mudst = (StMuDst*)StMaker::GetChain()->GetDataSet("MuDst");
+    if (mudst) Make(mudst);
   }
-  
+  else if (mSource == "StEvent") {
+    StEvent* event = (StEvent*)StMaker::GetChain()->GetDataSet("StEvent");
+    if (event) Make(event);
+  }
+
   if ((Ebbc==1)&&(Wbbc==1)) bbcTrig=kYes;
 
   LOG_DEBUG<<" Wbbc ="<<Wbbc<<" Ebbc="<<Ebbc<<" bbcTrig="<<bbcTrig<<endm;
   for (int i=0;i<BBCadcNum;i++) {
     LOG_DEBUG<<i<<" adc="<<BBCadc[i]<<endm;
   }
-  
+
+}
+
+void StBbcTriggerSimu::Make(StMuDst*)
+{
+  StBbcTriggerDetector& bbc = StMuDst::event()->bbcTriggerDetector();
+  Make(bbc);
+}
+
+void StBbcTriggerSimu::Make(StEvent* event)
+{
+  StTriggerDetectorCollection* trig = event->triggerDetectorCollection();
+  if (trig) {
+    StBbcTriggerDetector& bbc = trig->bbc();
+    Make(bbc);
+  }
+}
+
+void StBbcTriggerSimu::Make(StBbcTriggerDetector& bbc)
+{
+  for (UInt_t pmt=0; pmt<bbc.numberOfPMTs(); pmt++) {
+
+    BBCadc[pmt]=bbc.adc(pmt);
+    
+    int bbcadc=bbc.adc(pmt);
+
+    if (bbcadc>AdcTrigThresh) {
+      if (pmt<16) Ebbc=1;
+      if (23<pmt && pmt<40) Wbbc=1;
+    }
+  }
 }
 
 
 //
 // $Log: StBbcTriggerSimu.cxx,v $
+// Revision 1.5  2009/12/22 18:11:01  pibero
+// Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
+//
 // Revision 1.4  2007/11/08 20:59:43  kocolosk
 // subdet isTrigger returns a bool
 // triggerDecision returns enumerator including kDoNotCare

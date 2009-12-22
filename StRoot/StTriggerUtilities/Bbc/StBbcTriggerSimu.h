@@ -1,3 +1,4 @@
+// -*- mode:c++ -*-
 
 #ifndef STAR_StBbcTriggerMaker
 #define STAR_StBbcTriggerMaker
@@ -17,33 +18,31 @@
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 
-class StChain;
 class StMuDst;
-class StMuDstMaker;
 class StEvent;
-class StMuEvent;
 class StBbcTriggerDetector;
 
 class StBbcTriggerSimu : public StVirtualTriggerSimu {
 
  private:
- StMuDstMaker *muDstMaker;
- StMuDst *muDst;
- StMuEvent *muEvent;
+ void Make(StMuDst*);
+ void Make(StEvent*);
+  void Make(StBbcTriggerDetector&);
+
  int BBCadcNum;
  static const int AdcTrigThresh=5;
  //int mMCflag; // set yo 0 for real data
 
  protected:
 
- public: 
+ public:
   StBbcTriggerSimu();
   virtual ~StBbcTriggerSimu();
   void Init();
-  void InitRun(int runnumber){};
+  void InitRun(int runnumber){}
   void Clear();
   void Make();
-  
+
   StTriggerSimuDecision triggerDecision(int trigId) { return bbcTrig; }
 
   int Wbbc, Ebbc, BBCadc[48];
@@ -58,6 +57,9 @@ class StBbcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StBbcTriggerSimu.h,v $
+// Revision 1.8  2009/12/22 18:11:01  pibero
+// Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
+//
 // Revision 1.7  2007/11/08 20:59:43  kocolosk
 // subdet isTrigger returns a bool
 // triggerDecision returns enumerator including kDoNotCare

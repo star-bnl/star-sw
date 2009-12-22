@@ -29,13 +29,12 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
  public:
   enum {kOnlyAdc=0,kAdcAndTrig, kAdcCompareTrig};
   void setConfig(int x) {mConfig=x;}
-  void setSource(const char* source) { mSource = source; } // "MuDst" (default) or "StEvent"
+
  private:
   StEEmcDb *mDbE;
   int * mBemcEsum5bit; // output from Bemc emulation, not working
   int * mExternDsmSetup;
   TString  mSetupPath;
-  TString mSource;
 
   int mConfig; // see enum
   enum {nThr=3};
@@ -143,6 +142,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.16  2009/12/22 18:11:05  pibero
+// Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
+//
 // Revision 1.15  2009/12/15 16:33:33  pibero
 // Added support to set thresholds manually for Run 9
 // and overwrite those from the database.
