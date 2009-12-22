@@ -1,11 +1,38 @@
+* Human-readable units
+  Replace [GeV] with [*1.0E+0]
+  Replace [MeV] with [*1.0E-3]
+  Replace [keV] with [*1.0E-6]
+
+* Fake Subroutine for passing a structure and setting cuts
+* based on the contents of that structure
+  Replace [SET EmCuts(#)] with [
+         IF ( #1_Version .gt. 0 ) THEN
+            Call GsTPar( ag_imed, 'CUTGAM', #1_CUTGAM );
+            Call GsTPar( ag_imed, 'CUTELE', #1_CUTELE );
+            Call GsTPar( ag_imed, 'CUTNEU', #1_CUTNEU );
+            Call GsTPar( ag_imed, 'CUTHAD', #1_CUTHAD );
+            Call GsTPar( ag_imed, 'CUTMUO', #1_CUTMUO );
+            Call GsTPar( ag_imed, 'DCUTE',  #1_DCUTE  );
+            Call GsTPar( ag_imed, 'DCUTM',  #1_DCUTM  );
+            Call GsTPar( ag_imed, 'BCUTE',  #1_BCUTE  );
+            Call GsTPar( ag_imed, 'BCUTM',  #1_BCUTM  );
+         ENDIF
+   ]
+
+
 ******************************************************************************
 MODULE  CALBGEO2 is the geometry of the Barrel EM Calorimeter
    Author    Maxim Potekhin BNL
    Created   December 12, 2006
 * Based on CALBGEO1 -- tower map removed due to a full calorimeter
 *
-* $Id: calbgeo2.g,v 1.5 2009/11/10 02:14:30 perev Exp $
+* $Id: calbgeo2.g,v 1.6 2009/12/22 13:40:34 jwebb Exp $
 * $Log: calbgeo2.g,v $
+* Revision 1.6  2009/12/22 13:40:34  jwebb
+* Added options to set tracking cuts for electrons, photons to 10, 30, 100
+* or 1000 keV.  Default behaviour is to take no action, i.e. it reverts to
+* the tracking cuts used before this set of modifications was made.
+*
 * Revision 1.5  2009/11/10 02:14:30  perev
 * Where GSTPAR, set local material avoid bug in gphysi
 *
@@ -46,6 +73,10 @@ external etsphit
                        Nmodule(2), Shift(2), MaxModule, NetaT, Nsub,
                        NetaSMDp}
       Structure CALR { Rmin, Rprs, Rsmd1, Rsmd2, Rmax } 
+
+      Structure CCUT { Version, Absorber, Sensitive }
+      Structure CABS { Version, CUTGAM, CUTELE, CUTNEU, CUTHAD, CUTMUO, DCUTE, DCUTM, BCUTE, BCUTM }
+      Structure CSEN { Version, CUTGAM, CUTELE, CUTNEU, CUTHAD, CUTMUO, DCUTE, DCUTM, BCUTE, BCUTM }
 
       Real      RKB2sc/0.013/, RKB3sc/9.6E-6/
 *---- local definitions...
@@ -113,7 +144,138 @@ external etsphit
    Endfill
 *
 
+Fill CCUT                  ! cut selection
+    Version   = 1          ! selector
+    Absorber  = 0          ! absorber cuts
+    Sensitive = 0          ! sensitive cuts
+
+Fill CABS                  ! The values below are the untuned defaults in the original geometry
+    Version = 0            ! versioning
+    CutGAM  =  80 keV      ! gamma transport cut
+    CutELE  =   1 MeV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =   1 MeV      ! electron delta ray cut
+    DCutM   =   1 MeV      ! muon delta ray cut
+    BCutE   = 100 keV      ! electron brem cut
+    BCutM   =   1 MeV      ! muon brem cut     
+
+Fill CABS                  ! EM cuts in absorbing material
+    Version =   1          ! versioning
+    CutGAM  =  10 keV      ! gamma transport cut
+    CutELE  =  10 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =  10 keV      ! electron delta ray cut
+    DCutM   =  10 keV      ! muon delta ray cut
+    BCutE   =  10 keV      ! electron brem cut
+    BCutM   =  10 keV      ! muon brem cut
+
+Fill CABS                  ! EM cuts in absorbing material
+    Version =   2          ! versioning
+    CutGAM  =  30 keV      ! gamma transport cut
+    CutELE  =  30 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =  30 keV      ! electron delta ray cut
+    DCutM   =  30 keV      ! muon delta ray cut
+    BCutE   =  30 keV      ! electron brem cut
+    BCutM   =  30 keV      ! muon brem cut
+
+Fill CABS                  ! EM cuts in absorbing material
+    Version =   3          ! versioning
+    CutGAM  = 100 keV      ! gamma transport cut
+    CutELE  = 100 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   = 100 keV      ! electron delta ray cut
+    DCutM   = 100 keV      ! muon delta ray cut
+    BCutE   = 100 keV      ! electron brem cut
+    BCutM   = 100 keV      ! muon brem cut
+
+Fill CABS                  ! EM cuts in absorbing material
+    Version =   4          ! versioning
+    CutGAM  =   1 MeV      ! gamma transport cut
+    CutELE  =   1 MeV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =   1 MeV      ! electron delta ray cut
+    DCutM   =   1 MeV      ! muon delta ray cut
+    BCutE   =   1 MeV      ! electron brem cut
+    BCutM   =   1 MeV      ! muon brem cut
+
+
+
+Fill CSEN                  ! The values below are the untuned defaults in the original geometry
+    Version = 0            ! versioning
+    CutGAM  =  80 keV      ! gamma transport cut
+    CutELE  =   1 MeV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =   1 MeV      ! electron delta ray cut
+    DCutM   =   1 MeV      ! muon delta ray cut
+    BCutE   = 100 keV      ! electron brem cut
+    BCutM   =   1 MeV      ! muon brem cut     
+
+Fill CSEN                  ! EM cuts in absorbing material
+    Version =   1          ! versioning
+    CutGAM  =  10 keV      ! gamma transport cut
+    CutELE  =  10 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =  10 keV      ! electron delta ray cut
+    DCutM   =  10 keV      ! muon delta ray cut
+    BCutE   =  10 keV      ! electron brem cut
+    BCutM   =  10 keV      ! muon brem cut
+
+Fill CSEN                  ! EM cuts in absorbing material
+    Version =   2          ! versioning
+    CutGAM  =  30 keV      ! gamma transport cut
+    CutELE  =  30 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =  30 keV      ! electron delta ray cut
+    DCutM   =  30 keV      ! muon delta ray cut
+    BCutE   =  30 keV      ! electron brem cut
+    BCutM   =  30 keV      ! muon brem cut
+
+Fill CSEN                  ! EM cuts in absorbing material
+    Version =   3          ! versioning
+    CutGAM  = 100 keV      ! gamma transport cut
+    CutELE  = 100 keV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   = 100 keV      ! electron delta ray cut
+    DCutM   = 100 keV      ! muon delta ray cut
+    BCutE   = 100 keV      ! electron brem cut
+    BCutM   = 100 keV      ! muon brem cut
+
+Fill CSEN                  ! EM cuts in absorbing material
+    Version =   4          ! versioning
+    CutGAM  =   1 MeV      ! gamma transport cut
+    CutELE  =   1 MeV      ! electron transport cut
+    CutHAD  =   1 MeV      ! hadron transport cut
+    CutNEU  =   1 MeV      ! neutron transport cut
+    CutMUO  =   1 MeV      ! muon transport cut
+    DCutE   =   1 MeV      ! electron delta ray cut
+    DCutM   =   1 MeV      ! muon delta ray cut
+    BCutE   =   1 MeV      ! electron brem cut
+    BCutM   =   1 MeV      ! muon brem cut
+
    USE    CALG
+   USE    CCUT  Version=1
+   USE    CABS  Version=CCUT_Absorber
+   USE    CSEN  Version=CCUT_Sensitive
+   
 *
 * ---------------------------------------------------------------------------
 *                          primary geometrical constant
@@ -326,6 +488,7 @@ Block CSTP
                   dy = strap_dy,
                   dz = strap_dz
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 Endblock
 *-----------------------------------------------------------------------------
 Block CSPT is the side aluminum skin top 
@@ -337,6 +500,7 @@ Block CSPT is the side aluminum skin top
                       rmn = { Calg_Rmin2,  Calg_Rmin2,   cut_radius2},
                       rmx = { Rmax2,       Rmax2,        Rmax2 };
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 EndBlock
 *-----------------------------------------------------------------------------
 Block CSPB is the side aluminum skin bottom 
@@ -348,6 +512,7 @@ Block CSPB is the side aluminum skin bottom
                       rmn = { Calg_Rmin2,  Calg_Rmin2,   cut_radius2},
                       rmx = { Rmax2,       Rmax2,        Rmax2 };
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 EndBlock
 *-----------------------------------------------------------------------------
 Block CSLG
@@ -358,6 +523,7 @@ Block CSLG
                   dy = slug_dy,
                   dz = slug_dz
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 Endblock
 *----------------------------------------------------------------------------
 Block CSZO
@@ -369,6 +535,7 @@ Block CSZO
                   rmn = { Calg_Rmin,Calg_Rmin},
                   rmx = { Rmax     ,Rmax     };
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 Endblock
 *----------------------------------------------------------------------------
 Block CSZU 
@@ -380,6 +547,7 @@ Block CSZU
                   rmn = { Calg_Rmin                ,cut_radius                },
                   rmx = { Calg_Rmin+zz0/cos(cutAng),cut_radius+zz0/cos(cutAng)};
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 Endblock
 *-----------------------------------------------------------------------------
 Block CSUP  is a super layer with few layers inside
@@ -397,6 +565,7 @@ Block CSUP  is a super layer with few layers inside
                       rmn={ current_depth,    current_depth,    future_depth },
                       rmx={ future_depth,     future_depth,     future_depth };
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 
       Do sub = 1,nint(calg_NsubLay(super))
          layer = layer + 1
@@ -432,6 +601,7 @@ Block CPBP
                   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
                   dz = current_depth/tan_theta/2 -zz1/2
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 
 *      write(*,*) 'super,sub:',super,' ',sub,' Pb dx,dy,dz ',
      *calg_AbsorThk,current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
@@ -447,6 +617,7 @@ Block CSCI a scintillator layer.
                       dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
                       dz = current_depth/tan_theta/2 -zz1/2
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 
 * define Birks law parameters
       Call GSTPAR (ag_imed,'BIRK1',1.)
@@ -468,6 +639,7 @@ Block CBTW  is the  Module Front Back Plate
       Shape     BOX   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
                       dz = current_depth/tan_theta/2 -zz0/2
       Call CALBPAR(ag_imed,'ABSORBER')
+      Set EmCuts(CABS)
 
 EndBlock
 * ----------------------------------------------------------------------------
@@ -483,6 +655,7 @@ Block CSMD is the shower maximum detector envelope
                 dy=current_depth*tan(TwoPi/120.)-calg_CrackWd,
                 dz=current_depth/tan_theta/2 -zz0/2
       Call CALBPAR(ag_imed,'SENSITIVE')
+      Set EmCuts(CSEN)
 *
 * front back G10 plate
       Create CSMG 
@@ -546,6 +719,7 @@ Block CSMG is G10 front back plate
       attribute CSMG seen=1 colo=1
       Shape BOX dx=calg_g10SbThk
       Call CALBPAR(ag_imed,'SENSITIVE')
+      Set EmCuts(CSEN)
 
 EndBlock
 *
@@ -557,6 +731,7 @@ Block CSDA is Al block with sensitive gas volume
                   dy = calg_SmAlfWdh, 
                   dz = eta_lenght -zz0/2
       Call CALBPAR(ag_imed,'SENSITIVE')
+      Set EmCuts(CSEN)
 
       Create CSME
 EndBlock
@@ -568,6 +743,7 @@ Block CSMC is the front first (last) Al rib
       Shape BOX dx = calg_SmAlfThk,
                 dy = calg_SmAffWdh
       Call CALBPAR(ag_imed,'SENSITIVE')
+      Set EmCuts(CSEN)
 
 EndBlock
 *
@@ -578,6 +754,7 @@ Block CSMB is the back first (last) Al rib
       Shape BOX dx = calg_SmAlfThk,
                 dy = calg_SmAfbWdh
       Call CALBPAR(ag_imed,'SENSITIVE')
+      Set EmCuts(CSEN)
 
 EndBlock
 *
@@ -587,6 +764,7 @@ Block CSME is the part of CSDA Al box with Ar/CO2 sensiteve gas
       attribute CSME seen=1 colo=6
       Shape Division Iaxis=2 Ndiv = nint(calg_NSmdAlw)
       Call CALBPAR(ag_imed,'SENSITIVE')
+      Set EmCuts(CSEN)
 
 * sensitive Ar/CO2 box 
       do iCSHI=1,2
@@ -615,6 +793,7 @@ Block CSHI is a sensiteve Ar/CO2 box
       endif
       call CALBPAR(ag_imed,'SENSITIVE')
       CAll GSTPAR (ag_imed,'STRA',1.0)
+      Set EmCuts(CSEN)
 *
       h_eta1=2.*(calg_Seta1Wdh+calg_Set12Wdh)
       sh_eta1=calg_Netfirst*h_eta1
