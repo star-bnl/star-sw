@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.6 2009/12/15 01:28:37 andrewar Exp $
+// $Id: bfcMixer_Tpx.C,v 1.7 2009/12/23 15:21:59 didenko Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -14,8 +14,8 @@ class StBFChain;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
 void bfcMixer_Tpx(const Int_t Nevents=1,
-		  const Char_t *daqfile=" /star/institutions/lbl_prod/andrewar/transfer/daq/2009/st_zerobias_adc_10102033_raw_5450001.daq",
-		  const Char_t *tagfile="/star/institutions/lbl/andrewar/embed/tags/st_zerobias_adc_10102033_raw_5450001.tags.root",
+		  const Char_t *daqfile="/star/rcf/test/daq/2009/emb/st_zerobias_adc_10102033_raw_5450001.daq",
+		  const Char_t *tagfile="/star/rcf/test/daq/2009/emb/st_zerobias_adc_10102033_raw_5450001.tags.root",
 		  const Double_t pt_low=0.1,
 		  const Double_t pt_high=5.0,
                   const Double_t eta_low=-1.5,
