@@ -1,15 +1,15 @@
 #ifndef _DAQ_HLT_H_
 #define _DAQ_HLT_H_
 
-
-#include <DAQ_READER/daq_det.h>
-
 struct hlt_gl3_t {
 	char *buff ;
 	int bytes ;
 	char name[32] ;
 	char data[] ;
 } ;
+
+#ifndef DAQ_HLT_DATA_STRUCTURE
+#include <DAQ_READER/daq_det.h>
 
 class daq_hlt : public daq_det {
 private:
@@ -43,5 +43,5 @@ public:
 
 } ;
 
-
+#endif   //  DAQ_HLT_DATA_STRUCTURE
 #endif	// _DAQ_HLT_H_
