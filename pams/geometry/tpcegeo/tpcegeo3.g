@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.20 2009/12/17 23:07:11 perev Exp $
+!// $Id: tpcegeo3.g,v 1.21 2009/12/23 21:35:35 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.21  2009/12/23 21:35:35  perev
+!// TSAS zmax increased by 0.1
+!//
 !// Revision 1.20  2009/12/17 23:07:11  perev
 !// More exact envelopes for TPCE,TSAW,TSWH
 !//
@@ -208,7 +211,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
   Integer inOut;
 
 !//     Tpc(Inner/Outer)SectorAssembly
-  Real zzzSA(2)         /207.4   ,219   /
+  Real zzzSA(2)         /207.4   ,219.1 /
   Real rmnSA(0:1)       /51      ,121.07/
   Real rmxSA(0:1)       /121.07  ,194   /
 
