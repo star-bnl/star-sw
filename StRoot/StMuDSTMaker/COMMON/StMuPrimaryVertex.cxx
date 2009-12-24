@@ -3,7 +3,7 @@
  * A simple class to store porimary vertex information
  * All functions are inline
  *
- * $Id: StMuPrimaryVertex.cxx,v 1.4 2007/09/18 02:29:58 mvl Exp $ 
+ * $Id: StMuPrimaryVertex.cxx,v 1.5 2009/12/24 21:19:31 tone421 Exp $ 
  */
 
 #include "StMuPrimaryVertex.h"
@@ -19,6 +19,7 @@ StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex*& vertex) {
   mVertexFinderId = vertex->vertexFinderId();
   mRanking        = vertex->ranking();
   mNTracksUsed    = vertex->numTracksUsedInFinder();
+  mNBTOFMatch     = vertex->numMatchesWithBTOF();
   mNCTBMatch      = vertex->numMatchesWithCTB();
   mNBEMCMatch     = vertex->numMatchesWithBEMC();
   mNEEMCMatch     = vertex->numMatchesWithEEMC();

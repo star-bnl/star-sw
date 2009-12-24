@@ -4,7 +4,7 @@
  * Simple class to store primary vertices. Data members are a mainly a copy of 
  * StPrimaryVertex
  *
- * $Id: StMuPrimaryVertex.h,v 1.4 2007/09/18 02:29:58 mvl Exp $ 
+ * $Id: StMuPrimaryVertex.h,v 1.5 2009/12/24 21:19:31 tone421 Exp $ 
  */
 
 #include "TObject.h"
@@ -25,6 +25,7 @@ class StMuPrimaryVertex : public TObject {
    StVertexFinderId vertexFinderId()  const { return mVertexFinderId; } 
    Float_t          ranking()  const        { return mRanking; }
    UShort_t         nTracksUsed() const     { return mNTracksUsed; }
+   UShort_t         nBTOFMatch() const      { return mNBTOFMatch; }
    UShort_t         nCTBMatch() const       { return mNCTBMatch; }
    UShort_t         nBEMCMatch() const      { return mNBEMCMatch; }
    UShort_t         nEEMCMatch() const      { return mNEEMCMatch; }
@@ -44,7 +45,7 @@ class StMuPrimaryVertex : public TObject {
 
    virtual void     Print(Option_t *option="") const; ///< Print essential vertex info
 
-  ClassDef(StMuPrimaryVertex,3)
+  ClassDef(StMuPrimaryVertex,4)
     
     private:
   StThreeVectorF   mPosition;
@@ -52,6 +53,7 @@ class StMuPrimaryVertex : public TObject {
   StVertexFinderId mVertexFinderId;
   Float_t          mRanking;
   UShort_t         mNTracksUsed;
+  UShort_t         mNBTOFMatch;
   UShort_t         mNCTBMatch;
   UShort_t         mNBEMCMatch;
   UShort_t         mNEEMCMatch;
@@ -69,6 +71,9 @@ class StMuPrimaryVertex : public TObject {
 #endif
 /*
  * $Log: StMuPrimaryVertex.h,v $
+ * Revision 1.5  2009/12/24 21:19:31  tone421
+ * Added StMuPrimaryVertex::nBTOFMatch()
+ *
  * Revision 1.4  2007/09/18 02:29:58  mvl
  * Added basic printing functionality. For convenience and to assist data consistency checks
  *
