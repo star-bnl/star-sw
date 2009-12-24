@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.17 2009/12/19 18:07:05 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.18 2009/12/24 09:14:35 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -56,18 +56,14 @@ int StDataReadModule::tpcReader(daqReader*m, int sector )
   if(!m) return -1;
   fTpc = 0;
   daqReader *rrr = m;
-  if (!sector) StMemStat::PrintMem("1. StDataReadModule::tpcReader  . . .");
   daq_dta *dd= rrr->det("tpx")->get("legacy",sector+1);
-  if (!sector) StMemStat::PrintMem("2. StDataReadModule::tpcReader  . . .");
   int size = 0;
   if (!dd)  {
      dd= rrr->det("tpc")->get("legacy",sector+1);
-     if (!sector)  StMemStat::PrintMem("3. StDataReadModule::tpcReader  . . .");
   }
   if (dd && (size = dd->iterate())) {
     fTpc = (tpc_t *)dd->Void;
   }
-  if (!sector)  StMemStat::PrintMem("4. StDataReadModule::tpcReader  . . .");
   return dd ? dd->ncontent : 0;
 }
 
@@ -170,7 +166,7 @@ StuDraw3DEvent  *StDataReadModule::Display()
 {
    if (!fEventDisplay)  {
       delete gEventDisplay;  gEventDisplay = 0;
-      fEventDisplay = new StuDraw3DEvent("TPC,StarFloor,StarBeam"); // ("TPC,StarLogo,StarFloor,StarBeam");
+      fEventDisplay = new StuDraw3DEvent("TPC,StarFloor,StarBeam"); // ("TPC,StarLogo,StarFloor,StarBeamMAG_HALF_YZ_CUT,ENDCAP,MAG_HALF_XZ_CUT");
    }
    return fEventDisplay;
 }
@@ -183,7 +179,7 @@ void  StDataReadModule::Clear(Option_t * option)
    if (fSizeProvider)  { fSizeProvider ->ResetAvailable(); fSizeProvider->ResetCounter();  }
    if (fColorProvider) { fColorProvider->ResetAvailable(); fColorProvider->ResetCounter(); }
    TModule::Clear();
-   if (fEventDisplay) fEventDisplay->Clear();
+   if (fEventDisplay) fEventDisplay->Clear("");
  }
 //_____________________________________________________________________________
 void  StDataReadModule::ClearHits(Option_t * /*option*/)
@@ -254,6 +250,10 @@ Int_t StDataReadModule::Make()
 
    if ( retStatus == kStOk )  {
       retStatus = MakeEvent();
+   }
+
+   if ( retStatus == kStOk )  {
+       Display()->Update();
    }
 
    return retStatus;
@@ -396,24 +396,21 @@ Int_t StDataReadModule::NextEvent()
 Int_t StDataReadModule::NextFile()
 {
    int retStatus = kStOK;
-   StMemStat::PrintMem("1. StDataReadModule::NextFile() begin  . .");
    if (! fEventPoolReader) {
-      StMemStat::PrintMem("2. StDataReadModule::NextFile  new StEvpReader . . .");
       fEventPoolReader = fDaqFileName.IsNull() ?
                  new StEvpReader()
             :
                  new StEvpReader(fDaqFileName,fMountPoint);
-      LOG_DEBUG << " new StEvpReaderThread to be started with "
+      LOG_INFO << " new StEvpReaderThread to be started with "
                 << fDaqFileName << endm;
       LOG_DEBUG << " new StEvpReaderThread has been started" << endm;
    } else if (fNeedRecreate || true ) {  
-      StMemStat::PrintMem("3. StDataReadModule::NextFile  fNeedRecreate. . .");
       fEventPoolReader->RestartReader(fDaqFileName,fMountPoint);
-      LOG_DEBUG << " existent StEvpReaderThread recreated"  << fDaqFileName << fMountPoint << endm;
+      LOG_INFO << " existent StEvpReaderThread recreated"  << fDaqFileName << fMountPoint << endm;
       fNeedRecreate = kFALSE;
    }
    if(!fEventPoolReader->GetReader()) {
-      LOG_DEBUG  << "Error initializing reader for file " << fDaqFileName << endm;
+      LOG_INFO  << "Error initializing reader for file " << fDaqFileName << endm;
       retStatus = kStErr;
    }
    return retStatus;
@@ -452,7 +449,6 @@ int StDataReadModule::MakeTpcHits()
 { 
    UInt_t nHits = 0; 
    if (fDataP) {
-      StMemStat::PrintMem("1. StDataReadModule::MakeTpcHits()  . . .");
       vector<float> &hittxyz = fHittxyz;
       hittxyz.clear();
       // if (hittxyz.capacity() < TPC_READER_MAX_CLUSTERS) hittxyz.reserve(TPC_READER_MAX_CLUSTERS);
@@ -465,25 +461,20 @@ int StDataReadModule::MakeTpcHits()
               float x,y,z;
               tpc_cl *c = &tpc.cl[row][j];
               int time = int(c->t);
-              if (sector+row == 0 ) StMemStat::PrintMem("1.2. StDataReadModule::MakeTpcHits()  . . .");
               tpc_hit_postion(sector+1,row+1,*c, x, y,z);
               if (time) {
                  // skip next hit
                  hittxyz.push_back(x); hittxyz.push_back(y); hittxyz.push_back(z);
               }
-              if (sector+row == 0 ) StMemStat::PrintMem("1.3 StDataReadModule::MakeTpcHits()  . . .");
-
           }
         }}
      }
-     StMemStat::PrintMem(Form("2 . StDataReadModule::MakeTpcHits()  %d points have been filled. . .",hittxyz.size()));
 
      nHits = hittxyz.size()/3;
      if (nHits) {
         Display()->Points(fHittxyz, 17,8,0.12);
         TString info = Form("<p><b>Total TPC hits: </b>%d",nHits );
         Display()->SetComment(info.Data()) ;
-        StMemStat::PrintMem(Form("3 . StDataReadModule::MakeTpcHits()  %d hits have been rendered. . .",nHits ));     
      }
   }
   return nHits;
@@ -674,7 +665,7 @@ void  StDataReadModule::NextEventsSlot(int interval)
 void  StDataReadModule::StopEvents()
 {
   if (fEventPoolReader) { 
-   //    assert (0); // fEventPoolReader->StopEventsSlot();
+    //  assert (0); // fEventPoolReader->StopEventsSlot();
   }
 }
 
