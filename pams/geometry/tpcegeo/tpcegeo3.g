@@ -1,7 +1,10 @@
-!// $Id: tpcegeo3.g,v 1.21 2009/12/23 21:35:35 perev Exp $
+!// $Id: tpcegeo3.g,v 1.22 2009/12/24 17:36:46 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.22  2009/12/24 17:36:46  perev
+!// Gas volume 210
+!//
 !// Revision 1.21  2009/12/23 21:35:35  perev
-!// TSAS zmax increased by 0.1
+!//  TSAS zmax increased by 0.1
 !//
 !// Revision 1.20  2009/12/17 23:07:11  perev
 !// More exact envelopes for TPCE,TSAW,TSWH
@@ -463,6 +466,7 @@ USE TECW
 
  tofcLENG = tpcg_Length-2*tpcg_WheelTHK-2*TPCR_RdoVthk  !// gas plus endcaps
  tpgvLeng = (tofcLeng-tpcg_MembTHK)/2   !// active gas
+ tpgvLeng = 210-tpcg_MembTHK/2   !// active gas
 
 
 !// calculate radii of outer finest structureures
@@ -1625,12 +1629,17 @@ Block TPGV is the Gas Volume placed in TPC
       Attribute TPGV      seen=1  colo=kRed
       Material P10
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
-      Create    TPSS
+!//VP      Create    TPSS
+     do iSecAng = 0,360-30,30
+       Create and Position TPSS            alphaz=iSecAng kOnly='MANY'
+     endDo
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block  TPSS is a division of gas volume corresponding to a supersectors
       attribute TPSS  seen=1  colo=kBlue
-      shape Division  NDIV=12  IAXIS=2
+!//      shape Division  NDIV=12  IAXIS=2
+      SHAPE TUBS Phi1=-15 Phi2=15
+
 *
       ag_ncopy = 1;
       do kase=1,2
