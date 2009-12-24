@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.84 2009/12/18 00:52:23 fine Exp $
+// $Id: StDraw3D.cxx,v 1.85 2009/12/24 09:11:48 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -383,7 +383,7 @@ void StDraw3D::AddDetectors(const char*nameDetectors)
    }
 }
 
-//! Remove all objects from the screen
+//! Remove all objects from the list and update the screen if \a opt is "update"
 //___________________________________________________
 void  StDraw3D::Clear(Option_t *opt)
 {
@@ -392,7 +392,7 @@ void  StDraw3D::Clear(Option_t *opt)
    if (pad) {
       pad->Clear(opt);
       fTopVolume = 0;
-      Update();
+      if ( !strcmp(opt,"update") ) Update();
    } else if ( TVirtualViewer3D *viewer = Viewer() ) {
       viewer->Clear();
    }
