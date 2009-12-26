@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.10 2009/12/15 23:17:37 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.11 2009/12/26 09:30:14 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -235,6 +235,14 @@ void StSteeringModule::SetDaqFileName(const char *fileName)
     if (fDataReadModule) 
        fDataReadModule->SetDaqFileName(fileName);   
 }
+
+//_____________________________________________________________________________
+void StSteeringModule::SetRunNumber(int runNumber)
+{
+     if (fDataReadModule) 
+       fDataReadModule->SetRunNumber(runNumber);
+}
+
 //_____________________________________________________________________________
 void StSteeringModule::SetEventNumber(int eventNumber)
 {
@@ -311,7 +319,7 @@ void  StSteeringModule::Animating()
 void  StSteeringModule::Animate(Bool_t on) 
 {
   fAnimate = on;
-  if (fAnimate )  QTimer::singleShot(340, this, SLOT(Animating())); 
+  if (fAnimate )  QTimer::singleShot(800, this, SLOT(Animating())); 
 }
 
 //_____________________________________________________________________________
