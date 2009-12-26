@@ -1,9 +1,9 @@
 #Inventor V2.1 ascii
- DEF YELLOW_BEAM Separator {
+ DEF BLUE_BEAM Separator {
    Rotation { rotation 1 0 0  1.57 }
    Material {
-            diffuseColor  0.8 0.8 0.0
-            specularColor 0.7 0.7 0.0
+            diffuseColor  0 0 0.8
+            specularColor 0 0 0.7
             shininess     0.99
             transparency  0.9
    }
@@ -18,11 +18,11 @@
  }
  
 
- DEF BLUE_BEAM Separator {
+ DEF YELLOW_BEAM Separator {
    Rotation { rotation 1 0 0  -1.57 }
    Material {
-            diffuseColor  0 0 0.8
-            specularColor 0 0 0.7
+            diffuseColor  0.8 0.8 0.0
+            specularColor 0.7 0.7 0.0
             shininess     0.99
             transparency  0.9
      }
