@@ -59,7 +59,8 @@ class TextEdit : public QMainWindow
 public:
     TextEdit(QWidget *parent = 0);
     void load( const QString &f );
-
+signals:
+    void  textSaved(const QString &fileName); 
 public slots:
     void about();
     void newFile();
