@@ -1,4 +1,4 @@
-// $Id: StDataReadModule.h,v 1.4 2009/12/15 17:42:46 fine Exp $
+// $Id: StDataReadModule.h,v 1.5 2009/12/26 09:30:14 fine Exp $
 
 #ifndef STAR_StDataReadModule
 #define STAR_StDataReadModule
@@ -121,7 +121,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.4 2009/12/15 17:42:46 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.5 2009/12/26 09:30:14 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -129,6 +129,7 @@ public:
   TDataProvider *GetColorProvider() const { return  fColorProvider;}
   TDataProvider *GetSizeProvider() const  { return  fSizeProvider;}
   void  SetDaqFileName(const char *fileName);
+  void  SetRunNumber(int runNumber2beOpen);
   void  SetEventNumber(int eventNumber2beRead);
   void  SetMountPoint(const char *mountPoint);
   void  SetDemo(Bool_t on = kTRUE);

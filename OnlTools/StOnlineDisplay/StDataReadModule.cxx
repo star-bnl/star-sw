@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.18 2009/12/24 09:14:35 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.19 2009/12/26 09:30:14 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -423,6 +423,16 @@ void StDataReadModule::SetDaqFileName(const char *fileName)
    if (!fDaqFileName.IsNull()) fLastGoodDaqFileName = fDaqFileName;
    DeletePool();
 }
+//_____________________________________________________________________________
+void StDataReadModule::SetRunNumber(int runNumber2beOpen)
+{
+   // convert runmumber to the Event Pool directory name 
+   if (runNumber2beOpen > 0) 
+      SetDaqFileName( Form("%s/a/%d",MountPoint().Data(),runNumber2beOpen));
+   else 
+      SetDaqFileName("");  // "Live" event
+}
+
 //_____________________________________________________________________________
 void StDataReadModule::SetMountPoint(const char *mountPoint)
 {
