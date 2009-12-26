@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.19 2009/12/26 09:30:14 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.20 2009/12/26 11:59:24 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -45,7 +45,10 @@
 
 #include <vector>
 #include <QMessageBox>
-
+#include <QDateTime>
+#include <QString>
+#include <string>
+ 
 #define tpc  (*fTpc)
 
 
@@ -251,7 +254,7 @@ Int_t StDataReadModule::Make()
    if ( retStatus == kStOk )  {
       retStatus = MakeEvent();
    }
-
+   MakeTitle(retStatus);
    if ( retStatus == kStOk )  {
        Display()->Update();
    }
@@ -328,33 +331,38 @@ Int_t StDataReadModule::MakeEvent()
   
       counter += l3HitsCount;
     }
-    if (counter > 0) MakeTitle();
+//    if (counter > 0) 
+//    MakeTitle();
     return  ( counter > 0) ? kStOK : kStErr;
 }
 
 //_____________________________________________________________________________
 /// MakeTitle - Make event title
-void StDataReadModule::MakeTitle()
+void StDataReadModule::MakeTitle(int ok)
 {
-   StEvtHddr *eventHeader =  GetEvtHddr();
-   Int_t date  = eventHeader->GetDate();
-   Int_t year  = date/10000;
-   Int_t day   = (date - year*10000);
-   Int_t month = day/100;
-   day         = day  - month*100;
+   if (ok==kStOk) {
+     StEvtHddr *eventHeader =  GetEvtHddr();
+     Int_t date  = eventHeader->GetDate();
+     Int_t year  = date/10000;
+     Int_t day   = (date - year*10000);
+     Int_t month = day/100;
+     day         = day  - month*100;
 
-   Int_t time  = eventHeader->GetTime();
-   Int_t hours = time/10000;
-   Int_t sec   = (time - hours*10000);
-   Int_t min   =  sec/100;
-   sec         =  sec  - min*100;
-   
-
-   Display()->SetFooter(
-       Form("STAR Event -> Run=%d; Event=%d; Trig=0%x Date=%d/%02d/%02d %02dh%02dm%02ds GMT"
-             , eventHeader->GetRunNumber(), eventHeader->GetIventNumber(),eventHeader->GetTriggerMask()
-             , year,month,day,hours,min,sec)
-   );
+     Int_t time  = eventHeader->GetTime();
+     Int_t hours = time/10000;
+     Int_t sec   = (time - hours*10000);
+     Int_t min   =  sec/100;
+     sec         =  sec  - min*100;
+     
+     Display()->SetFooter(
+         Form("STAR Event -> Run=%d; Event=%d; \n Trig=0%x Date=%d/%02d/%02d %02dh%02dm%02ds GMT"
+               , eventHeader->GetRunNumber(), eventHeader->GetIventNumber(),eventHeader->GetTriggerMask()
+               , year,month,day,hours,min,sec)
+     );
+   } else {
+      std::string currentDateTime = QDateTime::currentDateTime ().toUTC().toString("hh.mm.ss UTC yyyy/mm/dd").toStdString();
+      Display()->SetFooter(Form("Waiting STAR Event -> %s ",currentDateTime.c_str()));
+   }
 }
 
 //_____________________________________________________________________________
