@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.20 2009/12/26 11:59:24 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.21 2009/12/27 08:57:43 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -355,12 +355,12 @@ void StDataReadModule::MakeTitle(int ok)
      sec         =  sec  - min*100;
      
      Display()->SetFooter(
-         Form("STAR Event -> Run=%d; Event=%d; \n Trig=0%x Date=%d/%02d/%02d %02dh%02dm%02ds GMT"
+         Form("STAR Event -> Run=%d; Event=%d; \n Trig=0%x Date=%d/%02d/%02d %02d:%02d:%02d GMT"
                , eventHeader->GetRunNumber(), eventHeader->GetIventNumber(),eventHeader->GetTriggerMask()
                , year,month,day,hours,min,sec)
      );
    } else {
-      std::string currentDateTime = QDateTime::currentDateTime ().toUTC().toString("hh.mm.ss UTC yyyy/mm/dd").toStdString();
+      std::string currentDateTime = QDateTime::currentDateTime ().toUTC().toString("hh:mm:ss UTC yyyy/mm/dd").toStdString();
       Display()->SetFooter(Form("Waiting STAR Event -> %s ",currentDateTime.c_str()));
    }
 }
