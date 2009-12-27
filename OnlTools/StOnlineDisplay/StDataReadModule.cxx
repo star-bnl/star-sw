@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.22 2009/12/27 09:33:44 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.23 2009/12/27 09:38:23 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -362,8 +362,8 @@ void StDataReadModule::MakeTitle(int ok)
      static bool init = true;
      if (init) {
         init = false;
-       fEventDisplay->SetDrawOption(" { screen : full }");
-       fEventDisplay->SetDrawOption(" { view    : all }");
+        Display()->SetDrawOption(" { screen : full }");
+        Display()->SetDrawOption(" { view    : all }");
      }
    } else {
       std::string currentDateTime = QDateTime::currentDateTime ().toUTC().toString("hh:mm:ss UTC yyyy/mm/dd").toStdString();
