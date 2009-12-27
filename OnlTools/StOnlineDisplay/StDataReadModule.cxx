@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.21 2009/12/27 08:57:43 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.22 2009/12/27 09:33:44 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -359,6 +359,12 @@ void StDataReadModule::MakeTitle(int ok)
                , eventHeader->GetRunNumber(), eventHeader->GetIventNumber(),eventHeader->GetTriggerMask()
                , year,month,day,hours,min,sec)
      );
+     static bool init = true;
+     if (init) {
+        init = false;
+       fEventDisplay->SetDrawOption(" { screen : full }");
+       fEventDisplay->SetDrawOption(" { view    : all }");
+     }
    } else {
       std::string currentDateTime = QDateTime::currentDateTime ().toUTC().toString("hh:mm:ss UTC yyyy/mm/dd").toStdString();
       Display()->SetFooter(Form("Waiting STAR Event -> %s ",currentDateTime.c_str()));
