@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.11 2009/12/26 09:30:14 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.12 2009/12/28 08:31:33 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -111,14 +111,14 @@ void   StSteeringModule::SetFileName(const char* fileName)
 //_____________________________________________________________________________
 void   StSteeringModule::SetRecording(bool on)
 {
-    if (on) {}
+     if (fDataReadModule) fDataReadModule->SetRecording(on);
 } 
 
 
 //_____________________________________________________________________________
 bool  StSteeringModule::Recording()  const
 {
-    return false;
+    return (fDataReadModule) ? fDataReadModule->Recording() : kFALSE;
 } 
 
 
@@ -160,7 +160,7 @@ void   StSteeringModule::PrintVolumes()
 //_____________________________________________________________________________
  void StSteeringModule::SetCanvas(TCanvas *c)
  {
-    if (c ){ }   
+    if (c ){ }
  }
 
 //_____________________________________________________________________________

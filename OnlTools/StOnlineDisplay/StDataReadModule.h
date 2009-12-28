@@ -1,4 +1,4 @@
-// $Id: StDataReadModule.h,v 1.6 2009/12/26 11:59:24 fine Exp $
+// $Id: StDataReadModule.h,v 1.7 2009/12/28 08:31:33 fine Exp $
 
 #ifndef STAR_StDataReadModule
 #define STAR_StDataReadModule
@@ -104,7 +104,9 @@ class StDataReadModule : public TModule {
     std::vector<float> fHittxyz;
     std::vector<float> fTrackXYZ;
     Bool_t   fDemo; //< Demo mode: re-open the file after end-of-file
-
+    Bool_t   fRecording; //< The status of the record mode
+    Bool_t   fSuspendRecording; //< The suspend recording temporary
+    
     void ClearTracks(Option_t *);
     void ClearHits(Option_t *);
     int tpcReader(daqReader *m, int sector );
@@ -121,7 +123,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.6 2009/12/26 11:59:24 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.7 2009/12/28 08:31:33 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -134,6 +136,7 @@ public:
   void  SetMountPoint(const char *mountPoint);
   void  SetDemo(Bool_t on = kTRUE);
   Bool_t Demo() const;
+  Bool_t Recording() const;
   const TString &MountPoint() const;
   void  SetMagneticField(float field=0.005);
   Int_t MakeTpcHits();
@@ -145,6 +148,7 @@ public:
   void  SetL3TracksOn(Int_t on = 1)  { fL3TracksOn = on; }
   void  SetL3HitsOn  (Int_t on = 1)  { fL3HitsOn   = on; }
   void  SetEmcHitsOn (Int_t on = 1)  { fEmcHitsOn  = on; }
+  void  SetRecording(bool on=true);
 
   virtual void   SetGuiObject(QObject *gui);
   virtual void   NextEventsSlot(int interval);
@@ -161,5 +165,7 @@ inline   Bool_t  StDataReadModule::Demo() const { return fDemo; }
 inline const TString &StDataReadModule::MountPoint() const { return fMountPoint; }
 //____________________________________________________________________
 inline   void  StDataReadModule::SetMagneticField(float field) {fBField = field;}
+//____________________________________________________________________
+inline   Bool_t StDataReadModule::Recording() const { return fRecording ;}
 
 #endif
