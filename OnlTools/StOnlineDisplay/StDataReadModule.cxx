@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.24 2009/12/27 09:44:06 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.25 2009/12/28 08:31:33 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -116,7 +116,7 @@ StDataReadModule::StDataReadModule(const char *name):TModule(name)
 , fSizeProvider(),fColorProvider()
 , fL3TracksOn(0),fEmcHitsOn(1),fL3HitsOn(1),fBemcOnlineStatus(),fRecordReady(kFALSE)
 , fEmcDataLength(),fTracks(),fHits(),fGuiObject(),fTpc(),fBtow(),fEmc_in(),fLengthBtow()
-, fEventDisplay(), fDemo(kFALSE)
+, fEventDisplay(), fDemo(kFALSE),fRecording (kFALSE),fSuspendRecording(kTRUE)
 
 {
   //
@@ -365,7 +365,15 @@ void StDataReadModule::MakeTitle(int ok)
         Display()->SetDrawOption(" { screen : full }");
         Display()->SetDrawOption(" { view    : all }");
      }
+     if (Recording() && fSuspendRecording) {
+        Display()->SetDrawOption(" { record : true }");
+        fSuspendRecording = kFALSE;
+     }
    } else {
+      if ( Recording() && !fSuspendRecording ) {
+         fSuspendRecording = kTRUE;
+         Display()->SetDrawOption(" { record : false }");
+      }
       std::string currentDateTime = QDateTime::currentDateTime ().toUTC().toString("hh:mm:ss UTC yyyy/MM/dd").toStdString();
       Display()->SetFooter(Form("Waiting STAR Event -> %s ",currentDateTime.c_str()));
    }
@@ -436,6 +444,11 @@ void StDataReadModule::SetDaqFileName(const char *fileName)
    fDaqFileName = fileName;
    if (!fDaqFileName.IsNull()) fLastGoodDaqFileName = fDaqFileName;
    DeletePool();
+}
+//_____________________________________________________________________________
+void  StDataReadModule::SetRecording(bool on)
+{
+   fRecording = on;
 }
 //_____________________________________________________________________________
 void StDataReadModule::SetRunNumber(int runNumber2beOpen)
