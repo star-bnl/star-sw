@@ -186,7 +186,7 @@ int  EndOfRunAction::WriteFileToDB(const char* basename ) {
 
   cout << __PRETTY_FUNCTION__ << " return code " << iret << endl; 
   switch (iret) {
-  case 0: LOG(OPER,"Online plots: saving to db successfull:  %s",mPdfName); break;
+  case 0: LOG(OPER,"Online plots: saving to db successful:  %s",mPdfName); break;
   case 256: LOG(CAUTION,"Online plots: saving to db failed : doublicate db entry :  %s",mPdfName); break;
   default: LOG(CAUTION,"Online plots: unknown return code:  %s",cmd); break;
   }
@@ -230,7 +230,7 @@ void EndOfRunAction::Cleanup() {
 
 /***************************************************************************
  *
- * $Id: EndOfRunAction.cxx,v 1.2 2009/04/30 01:23:33 dkettler Exp $
+ * $Id: EndOfRunAction.cxx,v 1.3 2009/12/30 08:43:48 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -240,6 +240,9 @@ void EndOfRunAction::Cleanup() {
  ***************************************************************************
  *
  * $Log: EndOfRunAction.cxx,v $
+ * Revision 1.3  2009/12/30 08:43:48  genevb
+ * Fixed annoying typo
+ *
  * Revision 1.2  2009/04/30 01:23:33  dkettler
  * Histogram group printing improvements
  *
