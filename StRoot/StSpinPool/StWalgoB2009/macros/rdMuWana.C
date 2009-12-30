@@ -11,7 +11,7 @@ int rdMuWana(
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=0 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
+	     int isMC=1 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
  ) { 
 
 
@@ -256,6 +256,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.5  2009/12/30 18:37:08  balewski
+// code tagged in the form close to that used for the Fall 2009 DNP preliminary Jacobian peak
+//
 // Revision 1.4  2009/12/08 17:00:06  balewski
 // *** empty log message ***
 //

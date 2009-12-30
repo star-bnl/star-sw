@@ -2,13 +2,13 @@ TCanvas *can=0;
 
 //=================================================
 plWana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  iPath="out-sl09g/";
+  iPath="out-sl09g-Dec27/";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
   //iPath="/star/data05/scratch/balewski/2009-Wana-out6/data/";
   //core0="R10097000";
   //core0="run9setABCD";
   //core0="run9setP1234";
-  core0="run9setABCD-wEtow-BoflG";
+  core0="run9setABCD-wEtow-simBgain-Dec27";
   //core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter";
   //core0="mcSetD1_ppZprod";
@@ -592,6 +592,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.3  2009/12/30 18:37:08  balewski
+// code tagged in the form close to that used for the Fall 2009 DNP preliminary Jacobian peak
+//
 // Revision 1.2  2009/12/08 16:53:01  balewski
 // *** empty log message ***
 //
