@@ -1,4 +1,6 @@
-//$Id: haddWana.C,v 1.3 2009/12/30 18:27:02 balewski Exp $
+//$Id: haddWana.C,v 1.4 2009/12/30 18:27:52 balewski Exp $
+// line added after tag=DNP2009 by Jan
+
 #include <string.h>
 #include "TChain.h"
 #include "TFile.h"
@@ -213,6 +215,9 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
+// Revision 1.4  2009/12/30 18:27:52  balewski
+// after tag I added a test line
+//
 // Revision 1.3  2009/12/30 18:27:02  balewski
 // added tag for testing
 //
