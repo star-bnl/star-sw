@@ -1,7 +1,8 @@
-// $Id: St2009WMaker.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009WMaker.cxx,v 1.2 2009/12/30 19:49:58 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
+// test 1, after DNP2009 tag, Jan
 
 #include <TH1.h>
 #include <TH2.h>
@@ -288,12 +289,18 @@ St2009WMaker::L2algoEtaPhi2IJ(float etaF,float phiF,int &iEta, int &iPhi) {
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.2  2009/12/30 19:49:58  balewski
+// test
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.2  2009/12/30 19:49:58  balewski
+// test
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //
