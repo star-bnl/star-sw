@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.22 2009/12/24 17:36:46 perev Exp $
+!// $Id: tpcegeo3.g,v 1.23 2009/12/30 19:10:28 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.23  2009/12/30 19:10:28  perev
+!// Wrong rotation(15) of TPSS fixed
+!//
 !// Revision 1.22  2009/12/24 17:36:46  perev
 !// Gas volume 210
 !//
@@ -465,8 +468,8 @@ USE TECW
 !//   */
 
  tofcLENG = tpcg_Length-2*tpcg_WheelTHK-2*TPCR_RdoVthk  !// gas plus endcaps
- tpgvLeng = (tofcLeng-tpcg_MembTHK)/2   !// active gas
- tpgvLeng = 210-tpcg_MembTHK/2   !// active gas
+ tpgvLeng = (tofcLeng-tpcg_MembTHK)/2   	!// active gas
+ tpgvLeng = TPCG_LengthV-tpcg_MembTHK/2 	!// active gas
 
 
 !// calculate radii of outer finest structureures
@@ -1630,7 +1633,7 @@ Block TPGV is the Gas Volume placed in TPC
       Material P10
       SHAPE     TUBE  rmin=tpgvIR  rmax=tpcg_SenGasOR  dz=tpgvLeng/2
 !//VP      Create    TPSS
-     do iSecAng = 0,360-30,30
+     do iSecAng = 15,360-15,30
        Create and Position TPSS            alphaz=iSecAng kOnly='MANY'
      endDo
 endblock
