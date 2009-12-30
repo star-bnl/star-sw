@@ -1,3 +1,4 @@
+//$Id: haddWana.C,v 1.3 2009/12/30 18:27:02 balewski Exp $
 #include <string.h>
 #include "TChain.h"
 #include "TFile.h"
@@ -28,7 +29,7 @@ void haddWanaX() {
   haddWana("run9setP1234");
 }
 
-void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-btowGain-ofl/data/") {
+void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Dec28a/data/") {
 
   TString out=iPath;
 
@@ -212,6 +213,9 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
+// Revision 1.3  2009/12/30 18:27:02  balewski
+// added tag for testing
+//
 // Revision 1.2  2009/12/08 16:53:01  balewski
 // *** empty log message ***
 //
