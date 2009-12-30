@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
-#include <algorithm>
 
 #include "TVirtualPad.h"
 #include "TLine.h"
@@ -239,8 +238,8 @@ bool TOFupvpdHistogramGroup::fill(evpReader* evp, char* datap) {
     }  // end loop nword
   }  // end loop fiber
   
-  sort(leadinghits.begin(),leadinghits.end());
-  sort(trailinghits.begin(),trailinghits.end());
+  std::sort(leadinghits.begin(),leadinghits.end());
+  std::sort(trailinghits.begin(),trailinghits.end());
 
   float leadingtime[54],trailingtime[54];  // will only get one hit of each channel
   for(int i=0;i<54;i++){leadingtime[i]=0.;trailingtime[i]=0;}
@@ -286,16 +285,17 @@ int TOFupvpdHistogramGroup::tdcchan2upvpdPMTchan(int globaltdcchan, int edgeid,i
   if(trayid<121 || trayid >122) return -1;
   if(globaltdcchan<0 || globaltdcchan>191) {cout<<"Wrong global tdc chan: "<<globaltdcchan<<endl; return -1;}
 
+  /* run 9 ---->
 //                      1   2   3  4  5  6  7  8  9  10  11 12  13  14  15 16 17 18 19
-/* Run 9
   int upvpdLEchan[54]={142,122,118,98,46,26,22,2,112,101,24,136,123,120,99,40,27,16,3,  //west
                        142,122,118,98,46,26,22,2,112,101,24,136,123,120,99,40,27,16,3,  //east
 		       48,64,50,70,0,29,5,96,   48,64,50,70,0,29,5,96};                 //pp2pp 
   int upvpdTEchan[54]={129,131,105,107,33,35,9,11,109,110,39,133,132,135,108,37,36,13,12,  //west
                        129,131,105,107,33,35,9,11,109,110,39,133,132,135,108,37,36,13,12,  //east
 		       63,61,59,57,15,38,14,111,    63,61,59,57,15,38,14,111};             //pp2pp 
-*/
-// Run 10
+  */
+  // run10--->
+//                      1   2   3  4  5  6  7  8  9  10  11 12  13  14  15 16  17  18 19
   int upvpdLEchan[54]={  5, 22, 12,29,46,36,53,70,60,101, 0,24,118,108,125,142,132,48,96,  //west
 			 5, 22, 12,29,46,36,53,70,60,101, 0,24,118,108,125,142,132,48,96,  //east
 		        -1,-1,-1,-1,-1,-1,-1,-1, -1,-1,-1,-1,-1,-1,-1,-1};               //pp2pp 
