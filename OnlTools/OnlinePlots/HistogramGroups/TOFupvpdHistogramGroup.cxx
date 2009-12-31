@@ -25,6 +25,7 @@
 #include "TMapFile.h"
 #include "EvpUtil.h"
 #include "HistoHandler.h"
+#include <algorithm>
 
 using namespace std;
 
