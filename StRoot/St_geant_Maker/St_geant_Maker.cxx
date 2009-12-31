@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.123 2008/10/28 22:28:34 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.124 2009/12/31 00:02:59 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.124  2009/12/31 00:02:59  perev
+// Add the material name to the volume name
+//
 // Revision 1.123  2008/10/28 22:28:34  perev
 // FGZD hits added
 //
@@ -399,6 +402,7 @@
 #include "Stiostream.h"
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include "TSystem.h"
 #include "GtHash.h"
 #include "TGeometry.h"
@@ -555,21 +559,11 @@ R__EXTERN "C" {
   void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, Int_t&,Char_t * 
 				  DEFCHARL DEFCHARL DEFCHARL);
   Int_t type_of_call agvolume(TVolume*&,Float_t*&,Float_t*&,Float_t*&,
-    			      Int_t&,Int_t&,Float_t*&,Int_t&);
-#if 0
-  Int_t type_of_call agvolume(void*&,Float_t*&,Float_t*&,Float_t*&,
-			      Int_t&,Int_t&,Float_t*&,Int_t&);
-#endif
+    			      Int_t&,Int_t&,Float_t*&,Int_t&,int *);
   Int_t type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
   void type_of_call uhtoc(Int_t&,Int_t &,DEFCHARD,Int_t& DEFCHARL);
-#if 0
-  void type_of_call mfldgeo();
-#endif
   int  type_of_call agfdig0 (const char*,const char*,int,int);
   void type_of_call agfdpar (float &hits,const char *chit, float &alim, float &blim, float &bin, int);
-#if 0
-  Char_t type_of_call *acfromr(Float_t r=8009359);
-#endif
   void  type_of_call agfpath(Int_t *);
 }
 Char_t type_of_call *acfromr(Float_t r=8009359);
@@ -764,10 +758,10 @@ Int_t St_geant_Maker::Init(){
       }
       gMessMgr->Info()  << "St_geant_Maker::Init mfscale = " << mfscale		       << endm;
       struct Field_t {
-	Char_t *name;
+	const char *name;
 	Float_t scale;
       };
-      Field_t FieldOptions[5] = {
+      const Field_t FieldOptions[5] = {
 	{"FullMagFNegative", -1.0},
 	{"FullMagFPositive",  1.0},
 	{"HalfMagFNegative", -0.5},
@@ -1233,7 +1227,7 @@ void St_geant_Maker::Draw(const char* opt)
   Int_t two = 2;
   Int_t zero = 0;
   Int_t one = 1;
-  Char_t *path = " ";
+  const char *path = " ";
   Dzddiv (two,zero,path,opt,one,zero,one,one);
 }
 //_____________________________________________________________________________
@@ -1429,7 +1423,7 @@ TDataSet *St_geant_Maker::Work()
   { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
   struct  Volume
   { Char_t name[4],nick[4]; Int_t npar; Float_t par[50]; };
-  
+  char matName[21];  
   //  Int_t node = 0;
   //  TVolume   *volume=0;
   TVolume   *node=0;
@@ -1447,7 +1441,7 @@ TDataSet *St_geant_Maker::Work()
   //   ===============================================================
   //  while(agvolume(node,volu,position,mother,who,copy,p,npar)) {
     //  while(agvolume(&node,&volu,&position,&mother,&who,&copy,&p,&npar)) {
-    while (Agvolume(node,volu,position,mother,who,copy,p,npar)) 
+    while (Agvolume(node,volu,position,mother,who,copy,p,npar,matName)) 
     { // ===============================================================
       
       typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
@@ -1472,31 +1466,31 @@ TDataSet *St_geant_Maker::Work()
       Hp = (TVolume *) H->GetPointer(p,npar+1);
       if (Hp)  newVolume = Hp; 
       else
-	{ // printf(" creating object %s  %f  %f  %f \n", name,p[0],p[1],p[2]);
+	{ // printf(" creating object %s  %f  %f  %f %s \n", name,p[0],p[1],p[2], );
 	  switch (shape) 
-	    { case BOX:  t=new TBRIK(nick,"BRIK","void",
+	    { case BOX:  t=new TBRIK(nick,"BRIK",matName,
 				     p[0],p[1],p[2]);                         break;
-	    case TRD1: t=new TTRD1(nick,"TRD1","void",
+	    case TRD1: t=new TTRD1(nick,"TRD1",matName,
 				   p[0],p[1],p[2],p[3]);                    break;
-	    case TRD2: t=new TTRD2(nick,"TRD2","void",
+	    case TRD2: t=new TTRD2(nick,"TRD2",matName,
 				   p[0],p[1],p[2],p[3],p[4]);               break;
-	    case TRAP: t=new TTRAP(nick,"TRAP","void",
+	    case TRAP: t=new TTRAP(nick,"TRAP",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5],
 				   p[6],p[7],p[8],p[9],p[10]);              break;
-	    case TUBE: t=new TTUBE(nick,"TUBE","void",
+	    case TUBE: t=new TTUBE(nick,"TUBE",matName,
 				   p[0],p[1],p[2]);                         break;
-	    case TUBS: t=new TTUBS(nick,"TUBS","void",
+	    case TUBS: t=new TTUBS(nick,"TUBS",matName,
 				   p[0],p[1],p[2],p[3],p[4]);               break;
-	    case CONE: t=new TCONE(nick,"CONE","void",
+	    case CONE: t=new TCONE(nick,"CONE",matName,
 				   p[0],p[1],p[2],p[3],p[4]);               break;
-	    case CONS: t=new TCONS(nick,"CONS","void",    // take care !
+	    case CONS: t=new TCONS(nick,"CONS",matName,    // take care !
 				   p[0],p[1],p[2],p[3],p[4],p[5],p[6]);     break;
 	    //                         p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
-	    case SPHE: t=new TSPHE(nick,"SPHE","void",
+	    case SPHE: t=new TSPHE(nick,"SPHE",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-	    case PARA: t=new TPARA(nick,"PARA","void",
+	    case PARA: t=new TPARA(nick,"PARA",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-	    case PGON: t=new TPGON(nick,"PGON","void",p[0],p[1],(int)p[2],(int)p[3]);  
+	    case PGON: t=new TPGON(nick,"PGON",matName,p[0],p[1],(int)p[2],(int)p[3]);  
 	      { Float_t *pp = p+4;
 	      for (Int_t i=0; i<p[3]; i++) {
 		Float_t z    = *pp++;
@@ -1507,7 +1501,7 @@ TDataSet *St_geant_Maker::Work()
 		//                         (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
 	      }
 	      }                                              break;
-	    case PCON: t=new TPCON(nick,"PCON","void",p[0],p[1],(int)p[2]);
+	    case PCON: t=new TPCON(nick,"PCON",matName,p[0],p[1],(int)p[2]);
 	      { Float_t *pp = p+3;
 	      for (Int_t i=0; i<p[2]; i++) {
 		Float_t z    = *pp++;
@@ -1518,23 +1512,24 @@ TDataSet *St_geant_Maker::Work()
 		//                         ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
 	      }
 	      }                                              break;
-	    case ELTU: t=new TELTU(nick,"ELTU","void",
+	    case ELTU: t=new TELTU(nick,"ELTU",matName,
 				   p[0],p[1],p[2]);                         break;
-	    //      case HYPE: t=new THYPE(nick,"HYPE","void",
+	    //      case HYPE: t=new THYPE(nick,"HYPE",matName,
 	    //                       p[0],p[1],p[2],p[3]);                    break;
-	    case GTRA: t=new TGTRA(nick,"GTRA","void",
+	    case GTRA: t=new TGTRA(nick,"GTRA",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5],
 				   p[6],p[7],p[8],p[9],p[10],p[11]);        break;
-	    case CTUB: t=new TCTUB(nick,"CTUB","void",
+	    case CTUB: t=new TCTUB(nick,"CTUB",matName,
 				   p[0],p[1],p[2],p[3],p[4],p[5],
 				   p[6],p[7],p[8],p[9],p[10]);              break;
-	    default:   t=new TBRIK(nick,"BRIK","void",
+	    default:   t=new TBRIK(nick,"BRIK",matName,
 				   p[0],p[1],p[2]);                         break;
 	    };
 	  t->SetLineColor((int)att[4]);
 	  
 	  // to build a compressed tree, name should be checked for repetition
-	  newVolume = new TVolume(name,nick,t);
+	  std::string nickMat = Form("%s(%s)", nick,matName);
+	  newVolume = new TVolume(name,nickMat.c_str(),t);
 	  //      newVolume -> SetVisibility(ENodeSEEN(MapGEANT2StNodeVis(att[1])));
 	  newVolume -> SetVisibility((TVolume::ENodeSEEN)TVolume::MapGEANT2StNodeVis((int)att[1]));
 	  H->SetPointer(newVolume);
@@ -1743,8 +1738,13 @@ Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
-			       Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar){
-  return agvolume(node,par,pos,mot,who,copy,par1,npar);
+			       Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar,char matName[21]){
+
+  int ans = agvolume(node,par,pos,mot,who,copy,par1,npar,(int*)matName);
+  matName[20]=0;
+  char *cc = strstr(matName," "); if (cc) *cc=0;
+  return ans;
+
 }
 
 //_____________________________________________________________________________
