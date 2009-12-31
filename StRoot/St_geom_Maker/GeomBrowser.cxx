@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.20 2009/12/18 00:52:23 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.21 2009/12/31 00:01:50 perev Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -608,7 +608,7 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
 ///
 /// Only TVolume obejct is drawn. All other types are ignored
 ///  obj != 0: The pointer to TVolume obj to be draw
-///      == 0 The pointer to obkect is defined by StarGeomTreeWidget::CurrentObject()
+///      == 0 The pointer to object is defined by StarGeomTreeWidget::CurrentObject()
 ///
 ///  bool expanded == true; choose fComplexVolumeCanvas TCanbas as the desination TCanvas
 ///                         and use  fDepthControl->Value() to define the number of the layers to be drawn down
