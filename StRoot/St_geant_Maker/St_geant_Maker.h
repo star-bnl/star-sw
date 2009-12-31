@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.43 2008/07/30 15:04:36 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.44 2009/12/31 00:02:59 perev Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.44  2009/12/31 00:02:59  perev
+// Add the material name to the volume name
+//
 // Revision 1.43  2008/07/30 15:04:36  fisyak
 // Remove custom SetDebug, fix bug #1252
 //
@@ -157,7 +160,7 @@ public:
    virtual Int_t    G2t_volume_id(const Char_t *name, Int_t *numbv);
 #if 1
    virtual Int_t    Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
-   			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar);
+   			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar, char mat[21]);
 #else
    virtual Int_t    Agvolume(void *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
 			     Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar);
@@ -201,7 +204,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.43 2008/07/30 15:04:36 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.44 2009/12/31 00:02:59 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 

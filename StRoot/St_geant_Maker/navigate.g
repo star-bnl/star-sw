@@ -32,9 +32,21 @@
  end
 *
 *----------------------------------------------------------------------------
- function agvolume(node,par,pos,mot,who,copy,par1,npar)
+     function AGVOLUME(node,par,pos,mot,who,copy,par1,npar,matName)
+*----------------------------------------------------------------------------
+*	node - ????
+*	par  - pointer to current volume (address of q(volu+1))
+*	mot  - pointer to current mother volume parameters
+*	who  - id of current volume
+*	copy - copy number of current volume
+*	par1 - pointer to current volume parameters
+*	npar - number of current volume parameters
+*	matName - name of material
+
 +CDE,TYPING,GCBANK,GCVOLU,GCUNIT.
  integer  agvolume,node,par,pos,mot,old,LOCB,par1,np,ish,npar,natt,npr
+ integer matName(6);
+ 
 *
  Integer k,n,mother,daughter,where,who,copy,found,ier,ia,mcopy,nvol
  Integer item(20),count(20),list(20),nodes(0:20),
@@ -45,7 +57,11 @@
 
  character cn*4;
  real    para(100),attr(100),parb(100),vdist;
+ save    para
  integer i;
+
+ integer numed,jmed,imat,jmat,ln;
+
 
  agvolume=0;
  If node==0
@@ -69,6 +85,14 @@
    daughter=LQ(JVOLUM-who); found+=1; 
    par=LOCB(Q(daughter+1)); np=Q(daughter+5); ish=Q(daughter+2);
    pos=LOCB(Q(where+1)); 
+
+
+   numed = Q(daughter+4);
+   jmed = LQ(JTMED-numed);
+   imat = Q(jmed+6);
+   jmat = LQ(JMATE-imat);
+   call uhtoc(Q(jmat+1),99,matName,20);
+   
    mot=0; mcopy=1;  
    if (k>1) { mot=LOCB(Q(mother+1)); mcopy=Lnum(k-1); }
    node=nodes(k-1); agvolume=1;
