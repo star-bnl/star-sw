@@ -839,6 +839,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
       for(int j=0; j<2; j++){
 	for(int k=1; k<=8; k++){
 	  int adc = trgd->zdcSMD((StBeamDirection)i,j,k);
+	  adc -= zdc_smd_ped[i][j][k-1];
 	  if(adc>0){
 	    oth->fill(h1[331 +j -i*2],float(k));	    
 	    oth->fill(h1[335 +j -i*2],float(k),float(adc));
@@ -1886,7 +1887,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.17 2009/09/15 23:39:23 fine Exp $
+   * $Id: HistoHandler.cxx,v 1.18 2010/01/01 00:16:03 genevb Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -1896,6 +1897,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.18  2010/01/01 00:16:03  genevb
+   * More ZDC updates
+   *
    * Revision 1.17  2009/09/15 23:39:23  fine
    * fix goto issue
    *
