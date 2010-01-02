@@ -5,7 +5,7 @@
 # /star/u/jecc/tpcwrk/StarDb/Calibrations/tpc
 #
 # Modifieded on 31 Jan 2007 by G. Van Buren to use
-# tags.root files with LoopOverLaserTree.C and
+# tags.root (now laser.root) files with LoopOverLaserTree.C and
 # handle possibility of additional files for
 # laser runs already processed
 #
@@ -55,22 +55,22 @@ if (! -e $timeFile) then
 endif
 
 #
-# Determine what new tags files exist
+# Determine what new laser.root files exist
 # copy them to $DIR and determine runs to process
 #
-set tagdirs = (/star/data09/reco/laser_rhicclock  /star/data10/reco/laser_rhicclock \
+set laserdirs = (/star/data09/reco/laser_rhicclock  /star/data10/reco/laser_rhicclock \
                /star/data09/reco/laser_localclock /star/data10/reco/laser_localclock)
 set listOfRuns = ()
-foreach tagdir ($tagdirs)
-  if (-d $tagdir) then
-    cd $tagdir
-    set tagfiles = `$FIND . -name "st_laser_*tags.root" -cnewer $timeFile `
-    foreach tagfile ($tagfiles)
-        set run = ${tagfile:h:t}
+foreach laserdir ($laserdirs)
+  if (-d $laserdir) then
+    cd $laserdir
+    set laserfiles = `$FIND . -name "st_laser_*.laser.root" -cnewer $timeFile `
+    foreach laserfile ($laserfiles)
+        set run = ${laserfile:h:t}
         if ($listOfRuns[$#listOfRuns] != $run) set listOfRuns = ($listOfRuns $run)
         set runDir = $DIR/runs/$run
         $MKDIR -p $runDir
-        $CP $tagfile $runDir
+        $CP $laserfile $runDir
     end
   endif
 end
@@ -98,7 +98,7 @@ foreach run ($listOfRuns)
     set runDir = $DIR/runs/$run
     cd $runDir
     ${ROOTSYS}/bin/root.exe -b -l <<EOF 
-.x $WDIR/LoopOverLaserTrees.C+("st_laser_*tags.root")
+.x $WDIR/LoopOverLaserTrees.C+("st_laser_*.laser.root")
 .q
 EOF
     set laserMacro = `$LS tpcDriftVelocity*`

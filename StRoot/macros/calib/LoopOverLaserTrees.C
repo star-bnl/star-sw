@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.7 2009/03/11 14:39:33 fisyak Exp $
+// $Id: LoopOverLaserTrees.C,v 1.8 2010/01/02 19:29:35 genevb Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.8  2010/01/02 19:29:35  genevb
+// switch to laser.root files as default
+//
 // Revision 1.7  2009/03/11 14:39:33  fisyak
 // relax cuts on no. of good lasers and drift velocity precision
 //
@@ -177,7 +180,7 @@ void Fit() {
   MakeTable();
 }
 //________________________________________________________________________________
-void LoopOverLaserTrees(const Char_t *files="./st_laser_*.tags.root") {
+void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
   TDirIter Dir(files);
   TTreeIter iter("laser");
   iter.AddFile(files);
