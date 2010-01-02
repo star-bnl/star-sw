@@ -573,3 +573,5 @@
 1,h479_zdc_unatt_west3,ZDC Unattenuated West3,200,0.,4000.,0xffffffff,0xffffffff
 1,h480_zdc_unatt_eastsum,ZDC Unattenuated East Sum,200,0.,4000.,0xffffffff,0xffffffff
 1,h481_zdc_unatt_westsum,ZDC Unattenuated West Sum,200,0.,4000.,0xffffffff,0xffffffff
+2,h482_zdc_sum_bbc,ZDC Sum vs. BBC Sum,100,0.,60000.,100,0.,3000.,0xffffffff,0xffffffff
+1,h483_zdc_hardwaresum,ZDC Hardware Sum Central,300,0.,3000.,0xffffffff,0xffffffff

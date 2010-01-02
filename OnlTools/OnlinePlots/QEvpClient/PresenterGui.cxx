@@ -309,10 +309,11 @@ void PresenterGui::SetDefaults()
   //
 
   // Trigger
-  nSubTabs[0]=3;// Number of subTabs for this tab
+  nSubTabs[0]=4;// Number of subTabs for this tab
   TabNames[0][1]="ZDC";    // SubTab name
   TabNames[0][2]="ZDC Seg";// SubTab name
-  TabNames[0][3]="Bunch Crossing Counter";
+  TabNames[0][3]="ZDC Sums";
+  TabNames[0][4]="Bunch Crossing Counter";
 
   //New For 2005 from Misha Kopytine
   //TabNames[0][1]="CTB slats and Killer Bits";// SubTab name
