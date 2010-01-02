@@ -783,7 +783,8 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     if(tw>20 && tw<4000) oth->fill(h1[77], float(tw));    
     if(te>20 && te<4000 && tw>20 && tw<4000){
       mZdcTimeDiff = float(tw-te);
-      mZdcVertex   = mZdcTimeDiff/2*40.0/0.03;
+      //mZdcVertex   = mZdcTimeDiff/2*40.0/0.03;
+      mZdcVertex   = (mZdcTimeDiff/2)*0.02*30;
       oth->fill(h1[78], mZdcTimeDiff);          
       oth->fill(h1[146],mZdcVertex);
     }          
@@ -829,10 +830,13 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
     if( trgd->bbcEarliestTDC(east)>10 && trgd->bbcEarliestTDC(east)<3000 &&
 	trgd->bbcEarliestTDC(west)>10 && trgd->bbcEarliestTDC(west)<3000 ) {
       mBbcTimeDiff = trgd->bbcTimeDifference()-4096;
-      mBbcVertex   = mBbcTimeDiff/3/10.0;      
+      //mBbcVertex   = mBbcTimeDiff/3/10.0;      
+      mBbcVertex   = mBbcTimeDiff/2 *0.02*30;      
       oth->fill(h1[204],mBbcTimeDiff);
       oth->fill(h1[452],mBbcVertex);
     }
+    oth->fill(h1[482], float(trgd->bbcADCSum(east))+float(trgd->bbcADCSum(west)), float(trgd->zdcHardwareSum()));
+    oth->fill(h1[483], float(trgd->zdcHardwareSum()));
     
     //ZDCSMD
     for(int i=0; i<2; i++){
@@ -1887,7 +1891,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.18 2010/01/01 00:16:03 genevb Exp $
+   * $Id: HistoHandler.cxx,v 1.19 2010/01/02 20:23:26 dkettler Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -1897,6 +1901,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.19  2010/01/02 20:23:26  dkettler
+   * ZDC Sum plots added
+   *
    * Revision 1.18  2010/01/01 00:16:03  genevb
    * More ZDC updates
    *

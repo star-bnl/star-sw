@@ -46,7 +46,8 @@ int EvpUtil::mSharedMemorySize = 140*1000*1000;
 const char* EvpUtil::mInputPath = gEnv->GetValue("Online.InputPath","/a");
 const char* EvpUtil::mOutputPath =  gEnv->GetValue("Online.OutputPath","/a/pplot/histos/");
 const char* EvpUtil::mReference = gEnv->GetValue("Online.Reference","/a/pplot/histos/run10029077.map");
-char* EvpUtil::mMapFilePath = EvpUtil::cat(EvpUtil::mOutputPath,"/evpEventServer.map");
+//char* EvpUtil::mMapFilePath = EvpUtil::cat(EvpUtil::mOutputPath,"/evpEventServer.map");
+char* EvpUtil::mMapFilePath = EvpUtil::cat("/home/operator/pplots","/evpEventServer.map");
 char* EvpUtil::mCanvasDescriptionFile = EvpUtil::cat(EvpUtil::mProjectPath,"/local/CanvasDescriptions.txt");
 int EvpUtil::mNumberOfTabs = 0;
 int EvpUtil::mNumberOfSubTabs[MAX_TABS];
@@ -106,7 +107,7 @@ int EvpUtil::GetLogY(const int i,const int j)
 
   //trigger words
 
-  if(i==0 && j==3)
+  if(i==0 && j==4)
     {
       mLogY = 1;  // changed from 1. May 16th SP
     }
@@ -791,7 +792,7 @@ bool  EvpUtil::DisplayOneCanvas(GenericFile* gFile , TPad* gcc, const int i, con
   //     }
   
   // Special footwork for bunch counter
-  if(i==0 && j==3)
+  if(i==0 && j==4)
     {
       gStyle->SetOptStat(0);
       
@@ -960,7 +961,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.13 2009/09/29 19:20:11 genevb Exp $
+ * $Id: EvpUtil.cxx,v 1.14 2010/01/02 20:23:26 dkettler Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -970,6 +971,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.14  2010/01/02 20:23:26  dkettler
+ * ZDC Sum plots added
+ *
  * Revision 1.13  2009/09/29 19:20:11  genevb
  * A couple char to const char fixes
  *
