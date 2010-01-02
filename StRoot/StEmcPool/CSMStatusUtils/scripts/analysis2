@@ -1,4 +1,0 @@
-#!/bin/bash
-
-root4star -b -q 'StRoot/StEmcPool/CSMStatusUtils/macros/makeStatusPlots.C()'
-
