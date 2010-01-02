@@ -71,8 +71,32 @@ void StEmcTriggerSimu::Make()
     mEM201->run();
     mEM201->write(*mLD301);
 
+    // (0:3) Barrel HT bits (4)
+    // (4:5) Endcap HT bits (2)
+    // (6) JP1, unified over the BEMC+EEMC (1)
+    // (7) JP2, unified over the BEMC+EEMC (1)
+    // (8) BJP1 for the 18 BEMC-only patches (1)
+    // (9) BJP2 for the 18 BEMC-only patches (1)
+    // (10) EJP1 for the 6 EEMC-only patches (1)
+    // (11) EJP2 for the 6 EEMC-only patches (1)
+    // (12) AJP for BEMC and EEMC but NOT the boundary (1)
+    // (13) BAJP for the BEMC-only patches (1)
+    // (14) EAJP for the EEMC-only patches (1)
+
+    int bht  = (*mEM201)[0].output       & 0xf;
+    int eht  = (*mEM201)[0].output >>  4 & 0x3;
+    int jp1  = (*mEM201)[0].output >>  6 & 0x1;
+    int jp2  = (*mEM201)[0].output >>  7 & 0x1;
+    int bjp1 = (*mEM201)[0].output >>  8 & 0x1;
+    int bjp2 = (*mEM201)[0].output >>  9 & 0x1;
+    int ejp1 = (*mEM201)[0].output >> 10 & 0x1;
+    int ejp2 = (*mEM201)[0].output >> 11 & 0x1;
+    int ajp  = (*mEM201)[0].output >> 12 & 0x1;
+    int bajp = (*mEM201)[0].output >> 13 & 0x1;
+    int eajp = (*mEM201)[0].output >> 14 & 0x1;
+
     LOG_DEBUG << Form("EM201 OUTPUT: BHT=%d EHT=%d JP1=%d JP2=%d BJP1=%d BJP2=%d EJP1=%d EJP2=%d AJP=%d BAJP=%d EAJP=%d",
-                      BHT(),EHT(),JP1(),JP2(),BJP1(),BJP2(),EJP1(),EJP2(),AJP(),BAJP(),EAJP()) << endm;
+                      bht,eht,jp1,jp2,bjp1,bjp2,ejp1,ejp2,ajp,bajp,eajp) << endm;
 
     TString LD301String = "LD301: ";
     for (int ch = 0; ch < 8; ++ch) LD301String += Form("%04x ",(*mLD301)[0].channels[ch]);
@@ -251,9 +275,4 @@ int StEmcTriggerSimu::defineTriggers(int runNumber)
   mysql_close(&mysql);
 
   return kStOk;
-}
-
-int StEmcTriggerSimu::EM201output() const
-{
-  return (*mEM201)[0].output;
 }
