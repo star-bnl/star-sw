@@ -1,5 +1,8 @@
-// $Id: LoopOverLaserTrees.C,v 1.8 2010/01/02 19:29:35 genevb Exp $
+// $Id: LoopOverLaserTrees.C,v 1.9 2010/01/02 23:41:19 genevb Exp $
 // $Log: LoopOverLaserTrees.C,v $
+// Revision 1.9  2010/01/02 23:41:19  genevb
+// Fix issues with dates starting with 2010
+//
 // Revision 1.8  2010/01/02 19:29:35  genevb
 // switch to laser.root files as default
 //
@@ -135,7 +138,7 @@ void Fit() {
   TDatime t(date, Time);
   UInt_t u = t.Convert();
   Run.day = 1. + (u - u0)/(24.*60.*60.);
-  run  = (Int_t) (1000000*((Int_t) (Run.date/100000)) + Run.run);
+  run  = (Int_t) (1000000*((Int_t) (Run.date/1000000)) + Run.run);
   memset(&DVAll[0][0], 0, 6*sizeof(Double_t));
   memset(&dDVAll[0][0], 0, 6*sizeof(Double_t));
   Run.events = slope->GetEntries();
@@ -242,7 +245,7 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
 	if (oldRun != -1) Fit();
 	cout << "New run " << fEvtHdr_fRun << " Date Old/New " << oldDate << "/" << Date << endl;
 	Run.run  = fEvtHdr_fRun%1000000;
-	Run.date = fEvtHdr_fDate%100000;
+	Run.date = fEvtHdr_fDate%1000000;
 	Run.time = fEvtHdr_fTime;
 	Run.events = 0;
 #ifdef ADJUSTABLE_BINNING
@@ -270,7 +273,7 @@ void LoopOverLaserTrees(const Char_t *files="./st_laser_*.laser.root") {
     Double_t dt =  fEvtHdr_fDate%100000 + ((Double_t) fEvtHdr_fTime)*1e-6;
     Double_t DT =  Run.date + Run.time*1e-6;
     if (dt < DT) {
-      Run.date = fEvtHdr_fDate%100000;
+      Run.date = fEvtHdr_fDate%1000000;
       Run.time = fEvtHdr_fTime;
     }
     for (Int_t k = 0; k < 12; k++) {
