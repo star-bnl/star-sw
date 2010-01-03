@@ -870,7 +870,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   // GVB (March 11, 2009): perhaps preferable to use the laser hist groups,
   //   but evpReader::evpgroups is 0 presently
-  if (trgcmd == 9) {
+  if (trgcmd == 8 || trgcmd == 9) {
     float vDrift = mLaser->Make(int(evp->run), int(evp->event_number), datap);
     if(vDrift == 1972.){ mLaser->resetAll();}//try twice, bad value triggered by laser->Make
 
@@ -1007,8 +1007,8 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
   }
   if(tpc_max_channels != 0.) {
     tpc_occ = 100.0 *(tpc_channels/tpc_max_channels);
-    if (trgcmd == 9) hist_index=44; // laser triggers
-    else if (trgcmd==8 || trgcmd==10) hist_index=43; // pulser triggers
+    if (trgcmd == 8 || trgcmd == 9) hist_index=44; // laser triggers
+    else if (trgcmd == 10) hist_index=43; // pulser triggers
     else hist_index = 3; // physics triggers
     oth->fill(	  h1[hist_index],tpc_occ);
   }
@@ -1144,7 +1144,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 	  svt_occ_rec[reci]= 100.0 *((double)n_pixels_rec[reci]/receiver_max_pixels);// Bo added 02/08/03
 	}
       // Physics triggers goes here
-      if(trgcmd != 8 && trgcmd != 9 && trgcmd !=10)
+      if(trgcmd != 8 && trgcmd != 9 && trgcmd != 10)
 	{
 	  oth->fill(	  h1[45],svt_occ); // Bo removed 01/24/03
 	  oth->fill(	  h1[267],svt_occ_west);
@@ -1156,14 +1156,14 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 	    }
 	}
       // Occupancy for Pulser triggers goes here
-      if(trgcmd == 8 && trgcmd ==10)
+      if(trgcmd == 10)
 	{
 	  oth->fill(	  h1[46],svt_occ); // Bo removed 01/24/03
 	  oth->fill(	  h1[268],svt_occ_west);
 	  oth->fill(	  h1[271],svt_occ_east);
 	}
       //Occupancy for Laser triggers goes here
-      if(trgcmd == 9)
+      if(trgcmd == 8 || trgcmd == 9)
 	{
 	  oth->fill(	  h1[47],svt_occ); // Bo removed 01/24/03
 	  oth->fill(	  h1[269],svt_occ_west);
@@ -1498,17 +1498,17 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 	}
       double ftp_occ = 100.0 *((double)ftp.channels/(double)ftp.max_channels);
       // Physics triggers goes here
-      if(trgcmd != 8 && trgcmd != 9 && trgcmd !=10)
+      if(trgcmd != 8 && trgcmd != 9 && trgcmd != 10)
 	{
 	  oth->fill(	  h1[49],ftp_occ);
 	}
       // Occupancy for Pulser triggers goes here
-      if(trgcmd == 8 && trgcmd ==10)
+      if(trgcmd == 10)
 	{
 	  oth->fill(	  h1[50],ftp_occ);
 	}
       //Occupancy for Laser triggers goes here
-      if(trgcmd == 9)
+      if(trgcmd == 8 || trgcmd == 9)
 	{
 	  oth->fill(	  h1[51],ftp_occ);
 	}
@@ -1891,7 +1891,7 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
 
   /***************************************************************************
    *
-   * $Id: HistoHandler.cxx,v 1.19 2010/01/02 20:23:26 dkettler Exp $
+   * $Id: HistoHandler.cxx,v 1.20 2010/01/03 18:07:18 genevb Exp $
    *
    * Author: Frank Laue, laue@bnl.gov
    ***************************************************************************
@@ -1901,6 +1901,9 @@ int HistoHandler::fill(evpReader* evp, char* mem, float mPhiAngleMap[24][45][182
    ***************************************************************************
    *
    * $Log: HistoHandler.cxx,v $
+   * Revision 1.20  2010/01/03 18:07:18  genevb
+   * TPC pulser & laser re-arrangement
+   *
    * Revision 1.19  2010/01/02 20:23:26  dkettler
    * ZDC Sum plots added
    *
