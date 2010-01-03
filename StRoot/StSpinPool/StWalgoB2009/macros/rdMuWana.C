@@ -7,11 +7,11 @@ bool isRoss=true;
 int geant=false;
 
 int rdMuWana(
-	     int nEve=1e3,
+	     int nEve=2e3,
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=1 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
+	     int isMC=3 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
  ) { 
 
 
@@ -203,7 +203,7 @@ int rdMuWana(
     ZMk->setHList(HList); 
     ZMk->setNearEtFrac(0.25);
     ZMk->setClusterMinEt(25);
-    ZMk->set4x4fmax(0.90);
+    ZMk->setPhi12Min(3.1416/2.);
     ZMk->setMinZMass(60);
     ZMk->setMaxZMass(150);
   }
@@ -256,6 +256,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.6  2010/01/03 04:38:27  balewski
+// reorganized Z-algo
+//
 // Revision 1.5  2009/12/30 18:37:08  balewski
 // code tagged in the form close to that used for the Fall 2009 DNP preliminary Jacobian peak
 //

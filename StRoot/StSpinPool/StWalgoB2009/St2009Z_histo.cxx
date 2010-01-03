@@ -9,29 +9,25 @@
 //________________________________________________
 void
 St2009ZMaker::initHistos(){
-    const float PI=TMath::Pi();
+  const float PI=TMath::Pi();
   TString core="_Z_"; // prefix added to every histo name, to allow for multipl maker saving histos in the same root file
 
 
   //...... data histograms
   memset(hA,0,sizeof(hA));
-  //TList *Lx;  TLine *ln;
-  TH1 *h;
+  TList *Lx;  TLine *ln;
+  TH1 *h; float yMax=1e3;
   char txt[1000];
-  int nCase=2;
+  int nCase=14;
 
   hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
 
-  const char *key[]={"L2W","L2Wnormal","L2Wrandom"};
-  for(int i=0;i<3;i++) h->Fill(key[i],0.); // preset the order of keys
   
   //final selection stuff:
 
   hA[1]=h=new TH1F(core+"Zmass","  Final Z selection; Invariant Mass (GeV)", 100,0,200);
-  //  Lx=h->GetListOfFunctions();
-  //  ln=new TLine(par_highET,0,par_highET,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   sprintf(txt,"Reconstructed Charge of each track in candidate  ;First Charge;Second Charge");
   hA[2]=h=new TH2F(core+"charge_v_charge", txt,3,-1.5,1.5,3,-1.5,1.5);
   sprintf(txt,"Product of Reconstructed Charges of each track in candidate");
@@ -50,14 +46,38 @@ St2009ZMaker::initHistos(){
   hA[13]=h=new TH2F(core+"rel_phi_v_mass","Relative Phi vs Invariant Mass;mass;phi",50,0,200,100,0,PI*2.02);
   hA[14]=h=new TH1F(core+"ZmassLike","  Final Z selection with Like Charges on both tracks; Invariant Mass (GeV)", 100,0,200);
   hA[15]=h=new TH1F(core+"ZmassUnlike","  Final Z selection with Unlike Charges on both tracks; Invariant Mass (GeV)", 100,0,200);
-//  Lx=h->GetListOfFunctions();
-  //  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
 
   //cut details:
   hA[21]=h=new TH2F(core+"fmax_v_fmaxbefore","Final Z Selection, Fmax v Fmax;fmax1;fmax2",100,0,1,100,0,1);
   hA[22]=h=new TH2F(core+"et_v_etbefore","Transverse Energies of the two Clusters;Et1;Et2",100,0,100,100,0,100);
-  hA[23]=h=new TH1F(core+"et1before","Transverse Energy of first Cluster (before cuts)",100,0,100);
+
+  // new
+  hA[23]=h=new TH1F(core+"et1val","Track-1 ET before cuts; 2x2ET (GeV)",100,0,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_clusterEtZ,0,par_clusterEtZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  hA[24]=h=new TH1F(core+"et1frac","Track-1 ET fraction; 2x2ET/nearET",105,0,1.05);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_nearTotEtFracZ,0,par_nearTotEtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  hA[25]=h=new TH1F(core+"et2val","Track-2 ET before cuts; 2x2ET (GeV)",100,0,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_clusterEtZ,0,par_clusterEtZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  hA[26]=h=new TH1F(core+"et2frac","Track-2 ET fraction; 2x2ET/nearET",105,0,1.05);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_nearTotEtFracZ,0,par_nearTotEtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  hA[27]=h=new TH1F(core+"phi12","delta phi tr1-tr2; delPhi12(rad)", 100 ,-PI,PI);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_delPhi12,0,par_delPhi12,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  ln=new TLine(-par_delPhi12,0,-par_delPhi12,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  hA[28]=h=new TH1F(core+"m2","inv mass^2; M^2 (GeV^2)", 100 ,-1e6,1e6);
+  h->SetFillColor(kBlue);
+
+
 
   //event/vertex details:
   hA[31]=h=new TH1F(core+"nVertices","Number of vertices per event",10,0,10);

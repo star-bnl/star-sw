@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.h,v 1.1 2009/12/07 20:37:56 rcorliss Exp $
+// $Id: St2009ZMaker.h,v 1.2 2010/01/03 04:38:24 balewski Exp $
 
 #ifndef STAR_St2009ZMaker
 #define STAR_St2009ZMaker
@@ -26,7 +26,7 @@ class St2009ZMaker : public StMaker {
   // parameters
   float  par_nearTotEtFracZ;
   float  par_clusterEtZ;
-  float  par_4x4fmaxZ;
+  float  par_delPhi12;
   float par_minMassZ;
   float par_maxMassZ;
 
@@ -50,7 +50,7 @@ class St2009ZMaker : public StMaker {
   void attachMuMaker(StMuDstMaker *mk) { muMK=mk;}
   void setNearEtFrac(float x) {par_nearTotEtFracZ=x; return;}
   void setClusterMinEt(float x) {par_clusterEtZ=x; return;}
-  void set4x4fmax(float x) {par_4x4fmaxZ=x; return;}
+ void setPhi12Min(float x) {par_delPhi12=x; return;}
   void setMinZMass(float x) {par_minMassZ=x; return;}
   void setMaxZMass(float x) {par_maxMassZ=x; return;}
   virtual Int_t InitRun(int runnumber); // Overload empty StMaker::InitRun 
@@ -59,7 +59,7 @@ class St2009ZMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009ZMaker.h,v 1.1 2009/12/07 20:37:56 rcorliss Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009ZMaker.h,v 1.2 2010/01/03 04:38:24 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -70,6 +70,9 @@ class St2009ZMaker : public StMaker {
 
 
 // $Log: St2009ZMaker.h,v $
+// Revision 1.2  2010/01/03 04:38:24  balewski
+// reorganized Z-algo
+//
 // Revision 1.1  2009/12/07 20:37:56  rcorliss
 // Start
 //
