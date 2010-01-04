@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.h,v 1.2 2010/01/03 04:38:24 balewski Exp $
+// $Id: St2009ZMaker.h,v 1.3 2010/01/04 05:12:00 balewski Exp $
 
 #ifndef STAR_St2009ZMaker
 #define STAR_St2009ZMaker
@@ -6,9 +6,9 @@
 /*!
  *                                                                     
  * \class  St2009ZMaker
- * \author Jan Balewski, MIT
- * \date   August 2009
- * \brief  gathers all results from  W-analysis, Jan's analysis
+ * \author Ross
+ * \date   December 2009
+ * \brief  uses tree from W-algo to find Zs
  *
  *
  *
@@ -25,6 +25,7 @@ class St2009ZMaker : public StMaker {
  private:
   // parameters
   float  par_nearTotEtFracZ;
+  float  par_4x4EtFracZ;
   float  par_clusterEtZ;
   float  par_delPhi12;
   float par_minMassZ;
@@ -49,8 +50,9 @@ class St2009ZMaker : public StMaker {
   void attachWalgoMaker(St2009WMaker *mk) { wMK=mk;}
   void attachMuMaker(StMuDstMaker *mk) { muMK=mk;}
   void setNearEtFrac(float x) {par_nearTotEtFracZ=x; return;}
+  void set4x4EtFrac(float x) {par_4x4EtFracZ=x; return;}
   void setClusterMinEt(float x) {par_clusterEtZ=x; return;}
- void setPhi12Min(float x) {par_delPhi12=x; return;}
+  void setPhi12Min(float x) {par_delPhi12=x; return;}
   void setMinZMass(float x) {par_minMassZ=x; return;}
   void setMaxZMass(float x) {par_maxMassZ=x; return;}
   virtual Int_t InitRun(int runnumber); // Overload empty StMaker::InitRun 
@@ -59,7 +61,7 @@ class St2009ZMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009ZMaker.h,v 1.2 2010/01/03 04:38:24 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009ZMaker.h,v 1.3 2010/01/04 05:12:00 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -70,6 +72,9 @@ class St2009ZMaker : public StMaker {
 
 
 // $Log: St2009ZMaker.h,v $
+// Revision 1.3  2010/01/04 05:12:00  balewski
+// added 4x4 cut to Z-algo, cleanup
+//
 // Revision 1.2  2010/01/03 04:38:24  balewski
 // reorganized Z-algo
 //
