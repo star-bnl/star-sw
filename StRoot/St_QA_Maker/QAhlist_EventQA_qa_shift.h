@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.34 2009/03/19 01:08:08 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.35 2010/01/04 19:44:52 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.35  2010/01/04 19:44:52  genevb
+// Remove V0s from QA shift set, revert to large multiplicity ranges
+//
 // Revision 2.34  2009/03/19 01:08:08  genevb
 // Show both xy and rphi TPC hit hists
 //
@@ -155,7 +158,7 @@
   "QaGtrkPF",
   "QaGtrkChisq0T",
   "QaGtrkFlag",
-  "QaGtrkGoodsm",
+  "QaGtrkGood",
   "QaGtrkNPntFitTTS",
   "QaGtrkNPntF",
   "QaGtrkGoodTTS",
@@ -177,7 +180,7 @@
   "QaPtrkMeanEtaTTS",
   "QaPtrkMeanPtF",
   "QaPtrkMeanEtaF",
-  "QaPtrkGoodsm",
+  "QaPtrkGood",
   "QaPtrkGoodTTS",
   "QaPtrkChisq0TTS",
   "QaPtrkFlag",
@@ -200,14 +203,6 @@
   "QaDedxBBTTS",
   "QaEvsumTotChg",
   "QaEvsumTotChgF",
-  "QaV0Vtx",
-  "QaV0VtxRDist",
-  "QaV0VtxZDist",
-  "QaV0VtxPhiDist",
-  "QaV0LambdaMass",
-  "QaV0K0Mass",
-  "QaXiVtxTot",
-  "QaKinkTot",
   "QaGtrkRZf0",
   "QaGtrkRZf0TS",
   "QaPtrkRZf0",
