@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.3 2010/01/03 04:38:24 balewski Exp $
+// $Id: St2009ZMaker.cxx,v 1.4 2010/01/04 05:12:00 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -31,8 +31,8 @@ Int_t St2009ZMaker::Init(){
 //_____________________________________________________________________________
 //
 Int_t St2009ZMaker::InitRun  (int runumber){
-  LOG_INFO<<Form("::InitRun(%d) done, Z-algo params: nearTotEtFrac=%.2f, clusterEt=%.1f GeV, delPhi12>%.2f rad, Zmass in[%.1f,%.1f]\n",
-		 runumber, par_nearTotEtFracZ,par_clusterEtZ,par_delPhi12,par_minMassZ,par_maxMassZ)<<endm;
+  LOG_INFO<<Form("::InitRun(%d) done, Z-algo params: nearTotEtFrac=%.2f, 4x4EtFrac=%.2f,  clusterEt=%.1f GeV, delPhi12>%.2f rad, Zmass in[%.1f,%.1f]\n",
+		 runumber, par_nearTotEtFracZ,par_4x4EtFracZ,par_clusterEtZ,par_delPhi12,par_minMassZ,par_maxMassZ)<<endm;
   return 0;
 }
 
@@ -81,10 +81,16 @@ St2009ZMaker::find_Z_boson(){
       hA[0]->Fill("tr1",1.);
       if(T1.cluster.ET<par_clusterEtZ) continue;
       hA[0]->Fill("et1",1.);
+
       float fracET1=T1.cluster.ET /T1.nearTotET;
       hA[24]->Fill(fracET1);
       if(fracET1< par_nearTotEtFracZ) continue; 
-      hA[0]->Fill("frac1",1.);
+      hA[0]->Fill("Tfr1",1.);
+
+      float isoET1=T1.cluster.ET /T1.cl4x4.ET;
+      hA[29]->Fill(isoET1);
+      if(isoET1< par_4x4EtFracZ) continue; 
+      hA[0]->Fill("4fr1",1.);
 
       for (uint it2=it+1;it2<V.eleTrack.size();it2++) {	//.....select second track:
 	WeveEleTrack &T2=V.eleTrack[it2];
@@ -96,10 +102,16 @@ St2009ZMaker::find_Z_boson(){
 	hA[0]->Fill("tr2",1.);
 	if(T2.cluster.ET<par_clusterEtZ) continue;
 	hA[0]->Fill("et2",1.);
+
 	float fracET2=T2.cluster.ET /T2.nearTotET;
 	hA[26]->Fill(fracET2);
 	if(fracET2< par_nearTotEtFracZ) continue; 
-	hA[0]->Fill("frac2",1.);
+	hA[0]->Fill("Tfr2",1.);
+
+	float isoET2=T2.cluster.ET /T2.cl4x4.ET;
+	hA[30]->Fill(isoET2);
+	if(isoET2< par_4x4EtFracZ) continue; 
+	hA[0]->Fill("4fr2",1.);
 
 	float e1=T1.cluster.energy;
 	float e2=T2.cluster.energy;
@@ -192,6 +204,9 @@ St2009ZMaker::find_Z_boson(){
 
 
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.4  2010/01/04 05:12:00  balewski
+// added 4x4 cut to Z-algo, cleanup
+//
 // Revision 1.3  2010/01/03 04:38:24  balewski
 // reorganized Z-algo
 //

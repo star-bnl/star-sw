@@ -7,11 +7,11 @@ bool isRoss=true;
 int geant=false;
 
 int rdMuWana(
-	     int nEve=2e3,
+	     int nEve=2e6,
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=3 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
+	     int isMC=2 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
  ) { 
 
 
@@ -201,11 +201,12 @@ int rdMuWana(
     ZMk=new St2009ZMaker("Z"); 
     ZMk->attachWalgoMaker(WmuMk);
     ZMk->setHList(HList); 
-    ZMk->setNearEtFrac(0.25);
+    ZMk->setNearEtFrac(0.88);
+    ZMk->set4x4EtFrac(0.95);
     ZMk->setClusterMinEt(25);
     ZMk->setPhi12Min(3.1416/2.);
-    ZMk->setMinZMass(60);
-    ZMk->setMaxZMass(150);
+    ZMk->setMinZMass(75);
+    ZMk->setMaxZMass(105);
   }
 
   TChain* tree=muMk->chain(); assert(tree);
@@ -256,6 +257,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.7  2010/01/04 05:12:02  balewski
+// added 4x4 cut to Z-algo, cleanup
+//
 // Revision 1.6  2010/01/03 04:38:27  balewski
 // reorganized Z-algo
 //

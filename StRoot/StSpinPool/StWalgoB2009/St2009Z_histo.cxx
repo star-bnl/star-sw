@@ -18,11 +18,14 @@ St2009ZMaker::initHistos(){
   TList *Lx;  TLine *ln;
   TH1 *h; float yMax=1e3;
   char txt[1000];
-  int nCase=14;
+  int nCase=16;
 
   hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
+  const char *key[]={"inp","vert","tr1","et1","Tfr1","4fr1","tr2","et2","Tfr2","4fr2","phi12","m2","QQ","Zlow","Zhigh"};
+  for(int i=0;i<15;i++) h->Fill(key[i],0.); // preset the order of keys
+
 
   
   //final selection stuff:
@@ -45,10 +48,13 @@ St2009ZMaker::initHistos(){
   hA[12]=h=new TH2F(core+"et_v_et","Transverse Energies of the two Clusters;Et1;Et2",100,0,100,100,0,100);
   hA[13]=h=new TH2F(core+"rel_phi_v_mass","Relative Phi vs Invariant Mass;mass;phi",50,0,200,100,0,PI*2.02);
   hA[14]=h=new TH1F(core+"ZmassLike","  Final Z selection with Like Charges on both tracks; Invariant Mass (GeV)", 100,0,200);
-  hA[15]=h=new TH1F(core+"ZmassUnlike","  Final Z selection with Unlike Charges on both tracks; Invariant Mass (GeV)", 100,0,200);
-
 
   //cut details:
+  hA[15]=h=new TH1F(core+"ZmassUnlike","  Final Z selection with Unlike Charges on both tracks; Invariant Mass (GeV)", 100,0,200);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_minMassZ,0,par_minMassZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  ln=new TLine(par_maxMassZ,0,par_maxMassZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
   hA[21]=h=new TH2F(core+"fmax_v_fmaxbefore","Final Z Selection, Fmax v Fmax;fmax1;fmax2",100,0,1,100,0,1);
   hA[22]=h=new TH2F(core+"et_v_etbefore","Transverse Energies of the two Clusters;Et1;Et2",100,0,100,100,0,100);
 
@@ -57,7 +63,7 @@ St2009ZMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_clusterEtZ,0,par_clusterEtZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
-  hA[24]=h=new TH1F(core+"et1frac","Track-1 ET fraction; 2x2ET/nearET",105,0,1.05);
+  hA[24]=h=new TH1F(core+"et1frac","Track-1 cone ET fraction; 2x2ET/nearET",105,0,1.05);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_nearTotEtFracZ,0,par_nearTotEtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
@@ -65,7 +71,7 @@ St2009ZMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_clusterEtZ,0,par_clusterEtZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
-  hA[26]=h=new TH1F(core+"et2frac","Track-2 ET fraction; 2x2ET/nearET",105,0,1.05);
+  hA[26]=h=new TH1F(core+"et2frac","Track-2 cone ET fraction; 2x2ET/nearET",105,0,1.05);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_nearTotEtFracZ,0,par_nearTotEtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
@@ -77,6 +83,14 @@ St2009ZMaker::initHistos(){
   hA[28]=h=new TH1F(core+"m2","inv mass^2; M^2 (GeV^2)", 100 ,-1e6,1e6);
   h->SetFillColor(kBlue);
 
+
+  hA[29]=h=new TH1F(core+"et1iso","Track-1 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_4x4EtFracZ,0,par_4x4EtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+
+  hA[30]=h=new TH1F(core+"et2iso","Track-2 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_4x4EtFracZ,0,par_4x4EtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
 
   //event/vertex details:
