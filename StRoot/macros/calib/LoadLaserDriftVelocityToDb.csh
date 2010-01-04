@@ -58,13 +58,12 @@ endif
 # Determine what new laser.root files exist
 # copy them to $DIR and determine runs to process
 #
-set laserdirs = (/star/data09/reco/laser_rhicclock  /star/data10/reco/laser_rhicclock \
-               /star/data09/reco/laser_localclock /star/data10/reco/laser_localclock)
+set laserdirs = (/star/data09/reco  /star/data10/reco)
 set listOfRuns = ()
 foreach laserdir ($laserdirs)
   if (-d $laserdir) then
     cd $laserdir
-    set laserfiles = `$FIND . -name "st_laser_*.laser.root" -cnewer $timeFile `
+    set laserfiles = `$FIND . -name "st_laser_*.laser.root" -cnewer $timeFile -wholename "*ield/dev/20*"`
     foreach laserfile ($laserfiles)
         set run = ${laserfile:h:t}
         if ($listOfRuns[$#listOfRuns] != $run) set listOfRuns = ($listOfRuns $run)
