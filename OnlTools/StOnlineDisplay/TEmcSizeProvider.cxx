@@ -106,7 +106,7 @@ Int_t TEmcSizeProvider::ReportValue(UShort_t val)
    if (flag) {
       final = val;
       if (UsePedestals()) final -= ped;
-      if (final <= 3) final = 0;           
+      if (final <= 10) final = 0;           
    }
 #else
    if (val >190) final = val-190+70;
