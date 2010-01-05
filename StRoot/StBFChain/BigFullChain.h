@@ -237,10 +237,10 @@ Bfc_st BFC[] = { // standard chains
                                                                    "Base chain for 2010 ITTF (tpc)",kFALSE},
 
   {"P2010a","" ,"",  // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt
-   "B2010,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
+   "B2010,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
         "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger)",kFALSE},
   {"pp2010a","" ,"", // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt,VFPPVnoCTB
-   "B2010,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
+   "B2010,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
   "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger, no VF)",kFALSE},   
    
   
@@ -494,10 +494,11 @@ Bfc_st BFC[] = { // standard chains
   {"tpc"         ,"","","fcf,tpcI" ,"","","WARNING *** Option is OBSOLETE *** use tpcI,fcf instead",kFALSE},
   {"tpcI" ,"tpcChain","","tpc_T,globT,db,tpcDB,TpcHitMover",    "StMaker","StChain","tpc with ITTF",kFALSE},
   {"tpcX" ,"tpcChain","","-tpcI,tpx,MakeEvent"            ,"StMaker","StChain","tpc+tpcx with ITTF",kFALSE},
-  {"Trs","Trs","tpcChain","scl,tpcDB,TrsToF,StEvent,EmbeddingShortCut","StTrsMaker","StTrsMaker","",kFALSE},
-  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbeddingShortCut","StTpcRSMaker","libMathMore,StTpcRSMaker"
-   ,                                                                   "New Tpc Response Simulator",kFALSE},
-  {"EmbeddingShortCut","","","","","","" ,"Embedding Short Cut for StdEdxY2Maker and StTpcHitMover",kFALSE},
+  {"Trs","Trs","tpcChain",    "scl,tpcDB,TrsToF,StEvent,EmbedShortCut","StTrsMaker","StTrsMaker","",kFALSE},
+  {"TpcRS","","tpcChain","scl,tpcDB,-Trs,-EmbedShortCut","StTpcRSMaker","libMathMore,StTpcRSMaker",
+                                                                       "New Tpc Response Simulator",kFALSE},
+
+  {"EmbedShortCut","","","",                  "","","Short Cut for StdEdxY2Maker and StTpcHitMover",kFALSE},
   {"StMcEvent"   ,"","","gen_t,sim_T"                                            ,"","StMcEvent","",kFALSE},
   {"McEvent" ,"","","StEvent,tpcDb,EEmcUtil,EmcUtil,StMcEvent","StMcEventMaker","StMcEventMaker","",kFALSE},
   {"Mixer"       ,"tpc_raw","","daq","StMixerMaker"                   ,"StTrsMaker,StMixerMaker","",kFALSE},
