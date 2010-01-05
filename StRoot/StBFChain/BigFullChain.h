@@ -238,10 +238,10 @@ Bfc_st BFC[] = { // standard chains
 
   {"P2010a","" ,"",  // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt
    "B2010,BAna,hitfilt,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,NosvtIT,NossdIT,analysis",
-        "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger)",kFALSE},
+                    "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc)",kFALSE},
   {"pp2010a","" ,"", // initial chain - Add some to all of BEmcChkStat,QAalltrigs,trgd,btof,Corr3,-hitfilt,VFPPVnoCTB
    "B2010,BAna,hitfilt,ppOpt,l3onl,emcDY2,fpd,trgd,ftpc,ZDCvtx,NosvtIT,NossdIT,analysis",
-  "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no trigger, no VF)",kFALSE},   
+             "","","Production chain for 2010 data - no Corr (+ l3, bcc/fpd, ftpc, e/b-emc, no VF)",kFALSE},   
    
   
    
