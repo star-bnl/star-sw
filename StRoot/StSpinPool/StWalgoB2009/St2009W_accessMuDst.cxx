@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.2 2009/12/08 04:48:35 balewski Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -199,13 +199,6 @@ St2009WMaker::accessTracks(){ // return non-zero on abort
       if(prTr->charge()<0)hA[30]->Fill(prTr->p().perp());
 
       hA[26]->Fill(ro.pseudoRapidity(),ro.phi());
-      /* Victor: in reality mChiSqXY is a normal Xi2 for track and
-	 mChiSqZ is Xi2 of fit to  primary vertex
-      */
-      float globChi2dof=glTr->chi2();
-      hA[35]->Fill(globChi2dof);
-      hA[36]->Fill(globChi2dof,ro.pseudoRapidity());
-
       float dedx=glTr->dEdx()*1e6;
       //printf("%f %f\n",glTr->p().mag(),dedx); 
       hA[28]->Fill(glTr->p().mag(),dedx);
@@ -593,9 +586,6 @@ St2009WMaker::hadronicRecoil(){ //add up all vector pt outside of 'nearJet' regi
 }
 
 //$Log: St2009W_accessMuDst.cxx,v $
-//Revision 1.2  2009/12/08 04:48:35  balewski
-//*** empty log message ***
-//
 //Revision 1.1  2009/11/23 23:00:18  balewski
 //code moved spin-pool
 //

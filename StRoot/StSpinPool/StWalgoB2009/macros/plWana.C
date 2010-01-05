@@ -2,13 +2,13 @@ TCanvas *can=0;
 
 //=================================================
 plWana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  iPath="out-sl09g/";
+  //  iPath="/star/u/stevens4/wAnalysis/";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
   //iPath="/star/data05/scratch/balewski/2009-Wana-out6/data/";
   //core0="R10097000";
   //core0="run9setABCD";
-  //core0="run9setP1234";
-  core0="run9setABCD-wEtow-BoflG";
+  core0="run9setP1234";
+  //core0="run9setC";
   //core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter";
   //core0="mcSetD1_ppZprod";
@@ -38,7 +38,7 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
   char *nameB[]={"muVRf","muZv","muNV","mubX48"};//pg 2
   char *nameC[]={"mubX7","mubX7v"};//pg 3
   char *nameD[]={"muDsm1","muDsm2","muDsm3","muDsm4"};//pg 4
-  char *nameE[]={"muTrNfit","muTrFitFrac","muTrch2","muTrRxyIn","muTrRxyOut","muTrch2b"};//pg 5
+  char *nameE[]={"muTrNfit","muTrFitFrac","muTrRxyIn","muTrRxyOut"};//pg 5
   char *nameF[]={"muTr2D1","muTrPt1","muTrPt1N","muTrPt1Pr","muTrPt1NPr"};//pg 6
   char *nameG[]={"muBmaxAdc","muBtotAdc","muBclAdcPt","muBclET"};//pg 7
   char *nameH[]={"muBclET24","muBclE242D","muBclET24R"};//pg 8
@@ -173,14 +173,13 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
 
  case 5:{    sprintf(padTit,"Track selection cuts, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(3,2);gStyle->SetOptStat(110);
+    c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameE;
-    for(int i=0;i<6;i++) {
+    for(int i=0;i<4;i++) {
       char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
-      if(i==5) h->Draw("colz");
     }
     //c->GetPad(1)->SetLogy();
  } break;//--------------------------------------
@@ -573,7 +572,7 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(){
- for(int i=1;i<=23;i++)  {
+ for(int i=1;i<=25;i++)  {
    if(i==14) continue;
   plWana(i,2);
  }
@@ -592,9 +591,6 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
-// Revision 1.2  2009/12/08 16:53:01  balewski
-// *** empty log message ***
-//
 // Revision 1.1  2009/11/23 23:00:20  balewski
 // code moved spin-pool
 //

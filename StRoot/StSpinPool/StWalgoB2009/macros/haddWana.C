@@ -12,7 +12,7 @@ TFile *Target;
 
 void MergeRootfile( TDirectory *target, TList *sourcelist );
 
-void haddWana() {
+void haddWanaX() {
   haddWana("run9setA");
   haddWana("run9setB");
   haddWana("run9setC");
@@ -20,7 +20,7 @@ void haddWana() {
   haddWana("run9setABCD");
 }
 
-void haddWanaX() {
+void haddWana() {
   haddWana("run9setP1");
   haddWana("run9setP2");
   haddWana("run9setP3");
@@ -28,7 +28,7 @@ void haddWanaX() {
   haddWana("run9setP1234");
 }
 
-void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-btowGain-ofl/data/") {
+void haddWana(char *set,TString iPath="/star/data05/scratch/stevens4/wAnalysisOut/ver4.41/data/") {
 
   TString out=iPath;
 
@@ -212,9 +212,6 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
-// Revision 1.2  2009/12/08 16:53:01  balewski
-// *** empty log message ***
-//
 // Revision 1.1  2009/11/23 23:00:20  balewski
 // code moved spin-pool
 //

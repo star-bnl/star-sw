@@ -1,4 +1,4 @@
-// $Id: StEmcSimpleSimulator.cxx,v 1.15 2008/11/17 21:08:36 kocolosk Exp $
+// $Id: StEmcSimpleSimulator.cxx,v 1.16 2009/12/10 19:54:22 mattheww Exp $
 
 #include "StEmcSimpleSimulator.h"
 
@@ -21,9 +21,9 @@ StEmcSimpleSimulator::StEmcSimpleSimulator(StDetectorId det, StEmcSimulatorMode 
     switch(mDetectorId) {
         case kBarrelEmcTowerId:
             mMaxADC = 4095.0;     
-            mSF[0]  = 14.69;
-            mSF[1]  = -0.1022;
-            mSF[2]  = 0.7484;
+            mSF[0]  = 14.365;
+            mSF[1]  = -0.512;
+            mSF[2]  = 0.668;
             break;
         
         // BPRS should only report energy in scintillator
@@ -137,6 +137,9 @@ double StEmcSimpleSimulator::samplingFraction(double eta) {
 
 /*****************************************************************************
  *  $Log: StEmcSimpleSimulator.cxx,v $
+ *  Revision 1.16  2009/12/10 19:54:22  mattheww
+ *  Updated BEMC Sampling Fraction for use with LOW_EM
+ *
  *  Revision 1.15  2008/11/17 21:08:36  kocolosk
  *  set BPRS sampling fraction to 1.0 so energy is just energy in scintillator
  *

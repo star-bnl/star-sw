@@ -28,7 +28,7 @@ using namespace std;
 class StjeJetEventTreeWriter : public StjeTreeWriter {
 
 public:
-  StjeJetEventTreeWriter(const char* outFileName);
+  StjeJetEventTreeWriter(const string& outFileName);
   virtual ~StjeJetEventTreeWriter() {}
 
   void Init();
@@ -43,7 +43,7 @@ public:
 private:
   
   void fillJetTreeForOneJetFindingAlgorithm(StJetEvent& jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
-  void fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFourPMaker* fourPMaker);
+  void fillJet(StJetEvent& jetEvent, StProtoJet& pj);
 
   struct AnalyzerCtl {
     string            _branchName;
@@ -54,7 +54,7 @@ private:
 
   vector<AnalyzerCtl> _analyzerCtlList;
 
-  TString       _OutFileName;
+  string        _OutFileName;
   TTree*        _jetTree;
   TFile*        _outFile;
 
