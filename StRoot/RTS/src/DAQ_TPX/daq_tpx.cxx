@@ -1604,6 +1604,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 
 				switch(trgs[cou].trg) {
 				case 4 :	// physics
+				case 8 :	// interspersed laser
 				case 9 :	// laser
 				case 10 :	// pulser
 					break ;
