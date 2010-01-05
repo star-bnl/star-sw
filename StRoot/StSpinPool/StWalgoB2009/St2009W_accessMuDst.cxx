@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.2 2009/12/08 04:48:35 balewski Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.3 2010/01/05 03:22:55 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -311,6 +311,9 @@ St2009WMaker::accessBTOW(){
       wEve.bemc.statTile[ibp][softID-1]=4;
       n3++; continue;} 
 
+    wEve.bemc.statTile[ibp][softID-1]=0 ; 
+
+
     float ped,sigPed,gain;
     int capID=0;// just one value for btow
     mBarrelTables->getPedestal(jBP,softID,capID,ped,sigPed); 
@@ -326,7 +329,6 @@ St2009WMaker::accessBTOW(){
     n5++;
     wEve.bemc.adcTile[ibp][softID-1]=adc;
     wEve.bemc.eneTile[ibp][softID-1]=adc*gain;
-    wEve.bemc.statTile[ibp][softID-1]=0 ; 
 
     if(maxADC<adc) { maxID=softID; maxADC=adc;}
     adcSum+=adc;
@@ -593,6 +595,9 @@ St2009WMaker::hadronicRecoil(){ //add up all vector pt outside of 'nearJet' regi
 }
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.3  2010/01/05 03:22:55  balewski
+//change logic for filling btow status tables, added printout to Z-code
+//
 //Revision 1.2  2009/12/08 04:48:35  balewski
 //*** empty log message ***
 //

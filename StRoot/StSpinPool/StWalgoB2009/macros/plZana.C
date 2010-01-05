@@ -4,10 +4,10 @@ TCanvas *can=0;
 plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
   //iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Jan2b/data/";
-  core0="run9setABCD";
+  //core0="run9setABCD";
   //core0="mcSetD1_ppWprod";
-  //core0="mcSetD2_ppQCD10_inf_filter";
-  core0="mcSetD1_ppZprod";
+  core0="mcSetD2_ppQCD10_inf_filter";
+  //core0="mcSetD1_ppZprod";
   if(page==0) {
     doAll();
     return;
@@ -162,6 +162,9 @@ void doAllMC(){
 
 
 // $Log: plZana.C,v $
+// Revision 1.2  2010/01/05 03:23:02  balewski
+// change logic for filling btow status tables, added printout to Z-code
+//
 // Revision 1.1  2010/01/04 05:12:02  balewski
 // added 4x4 cut to Z-algo, cleanup
 //
