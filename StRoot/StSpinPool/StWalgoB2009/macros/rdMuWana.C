@@ -7,11 +7,11 @@ bool isRoss=true;
 int geant=false;
 
 int rdMuWana(
-	     int nEve=2e6,
+	     int nEve=2e2,
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=2 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
+	     int isMC=3 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
  ) { 
 
 
@@ -139,7 +139,7 @@ int rdMuWana(
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
-    dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
+    //dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }
 
     
@@ -257,6 +257,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.8  2010/01/05 03:23:02  balewski
+// change logic for filling btow status tables, added printout to Z-code
+//
 // Revision 1.7  2010/01/04 05:12:02  balewski
 // added 4x4 cut to Z-algo, cleanup
 //

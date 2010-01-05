@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.4 2010/01/04 05:12:00 balewski Exp $
+// $Id: St2009ZMaker.cxx,v 1.5 2010/01/05 03:22:55 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -52,6 +52,20 @@ St2009ZMaker::Make(){
 
   return kStOK;
 }
+
+//============================
+void
+St2009ZMaker::printJan(WeveEleTrack *T) {
+  int ibp=kBTow;
+  WevePointTower poiTw=T->pointTower;
+  WeveCluster cl=T->cluster;
+  int id= poiTw.id;
+  float adc= wMK->wEve.bemc.adcTile[ibp][id-1];
+  float frac= adc/4096*60 /cl.ET;
+  printf("Ztower Q=%d pointTw: id=%d ADC=%.0f  2x2ET=%.1f frac=%.2f\n",T->prMuTrack->charge(),id,adc,cl.ET,frac);
+}
+
+
 
 //_____________________________________________________________________________
 //
@@ -146,6 +160,9 @@ St2009ZMaker::find_Z_boson(){
 
 	if (mass>par_maxMassZ) continue; //enforce an upper bound
 	hA[0]->Fill("Zhigh",1.);
+	printf("RCC:  Found Z! invmass=%f\n",mass);
+        printJan(&T1);
+        printJan(&T2);
 
 	// **** I stoped changes here, Jan 
 
@@ -204,6 +221,9 @@ St2009ZMaker::find_Z_boson(){
 
 
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.5  2010/01/05 03:22:55  balewski
+// change logic for filling btow status tables, added printout to Z-code
+//
 // Revision 1.4  2010/01/04 05:12:00  balewski
 // added 4x4 cut to Z-algo, cleanup
 //
