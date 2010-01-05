@@ -41,12 +41,19 @@ static const int fee_check[] = {
 
 static const int fee_check_count = sizeof(fee_check)/sizeof(fee_check[0]) ;
 
+static FILE *stripes_f ;
+
 void tpxStat::run_start(u_int rb_mask, int run_type)
 {
 
 	memset(r,0,sizeof(r)) ;
 	sector = 0 ;	// will get this from the data!
 	stripes = 0 ;	
+
+	stripes_f = 0 ;
+	if(run_type != RUN_TYPE_PED) {
+//		stripes_f = fopen("/RTScache/stripes.txt","w") ;
+	}
 
 	if((run_type == RUN_TYPE_DAQCHECK) && (rb_mask==4)) {	// RDO #3
 		fee_check_on = 1 ;
@@ -113,8 +120,12 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 
 	int should ;
 	int err = 0 ;
+	int str_cou = 0 ;
 
 	if(ofile==0) return 0 ;
+
+	if(stripes_f) fclose(stripes_f) ;
+	stripes_f = 0 ;
 
 	if(stripes && (run_type != RUN_TYPE_PED)) {
 		LOG(NOTE,"saw %d occurences of more than 400 timebins",stripes) ;
@@ -123,9 +134,18 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 		for(int c=0;c<16;c++) {
 			if(r[i].a[a].c[c].stripes) {
 				int row, pad ;
+
+				str_cou++ ;
+
+				if(str_cou > 10) continue ;
+
 				tpx_from_altro(i,a,c,row,pad) ;
 				LOG(WARN,"Stripes %d/%d: RDO %d: AID %3d:%02d, r:p %2d:%03d",
 				    r[i].a[a].c[c].stripes,r[i].a[a].c[c].count,i+1,a,c,row,pad) ;
+
+				if(str_cou == 10) {
+					LOG(WARN,"Stripes logging stopped, stripes %d",stripes) ;
+				}
 			}
 		}
 		}
@@ -389,9 +409,19 @@ void tpxStat::accum(char *rdobuff, int bytes)
 				if((stripes % 100)==0) {
 					LOG(NOTE,"A lot of stripes: %d",stripes) ;
 				}
+
+				if(stripes_f) {
+					fprintf(stripes_f,"==> RDO %d, cou %d: %d %d\n",a.rdo,r[a.rdo].count,a.row,a.pad) ;
+					for(int i=0;i<a.count;i++) {
+						fprintf(stripes_f,"%d %d\n",a.tb[i],a.adc[i]) ;
+					}
+				}
+
 			}
 		}
 		
+
+
 		r[a.rdo].a[a.id].c[a.ch].count++ ;
 
 
