@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.3 2010/01/06 20:09:39 fine Exp $
+// $Id: StTrgDatReader.cxx,v 1.4 2010/01/06 20:24:29 fine Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.4  2010/01/06 20:24:29  fine
+// fix typo
+//
 // Revision 1.3  2010/01/06 20:09:39  fine
 // RT #1794. Add EventNumber method to the StStreamFile interface RT # 1794
 //
@@ -92,7 +95,7 @@ int StTrgDatReader::EventNumber() const   {
       const   char    *pattern = "^.*run\\.(\\d+)\\..+\\.dat$";
       int     rc;
       char    buffer[100];
-      if (!(rc = regcomp(&rx, pattern, REG_EXTENDED))) {
+      if ((rc = regcomp(&rx, pattern, REG_EXTENDED))) {
          regerror(rc, &rx, buffer, 100);
          LOG_ERROR << "Can not extract the event number from the file name \'" 
                 << f << "\' because \'" 
