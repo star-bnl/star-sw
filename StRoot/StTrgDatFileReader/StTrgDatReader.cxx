@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.4 2010/01/06 20:24:29 fine Exp $
+// $Id: StTrgDatReader.cxx,v 1.5 2010/01/06 20:42:26 fine Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.5  2010/01/06 20:42:26  fine
+// Fix type EventNumber shoould be RunNumber . Thanks Akio
+//
 // Revision 1.4  2010/01/06 20:24:29  fine
 // fix typo
 //
@@ -39,7 +42,7 @@ inline unsigned int swapI(unsigned int var){
 }
 const int StTrgDatReader::mLheader=8;
 //__________________________________________________________________________
-StTrgDatReader::StTrgDatReader():StStreamFile(), mLength(0),mVersion(0), mEventNumber(-1)
+StTrgDatReader::StTrgDatReader():StStreamFile(), mLength(0),mVersion(0), mRunNumber(-1)
                                                , mData(0)  , mAllocated(0) 
 {
    Buffer(mLheader);
@@ -47,7 +50,7 @@ StTrgDatReader::StTrgDatReader():StStreamFile(), mLength(0),mVersion(0), mEventN
 
 //__________________________________________________________________________
 StTrgDatReader::StTrgDatReader(const char *fileName, ios_base::openmode mode)
-      :StStreamFile(fileName,mode), mLength(0), mVersion(0),mEventNumber(-1), mData(0),mAllocated(0)
+      :StStreamFile(fileName,mode), mLength(0), mVersion(0),mRunNumber(-1), mData(0),mAllocated(0)
 {
    Buffer(mLheader);
 }
@@ -88,8 +91,8 @@ fstream &StTrgDatReader::Read(){
   return stream();
 }
 //__________________________________________________________________________
-int StTrgDatReader::EventNumber() const   { 
-   if (mEventNumber == -1) { 
+int StTrgDatReader::RunNumber()  const   { 
+   if (mRunNumber == -1) { 
       string f = filename();
       regex_t rx;
       const   char    *pattern = "^.*run\\.(\\d+)\\..+\\.dat$";
@@ -103,13 +106,13 @@ int StTrgDatReader::EventNumber() const   {
                 << endm;
          assert(0&&"Can not extract the event number from the file name");
       } else {
-         regmatch_t matchptr[1];
+         regmatch_t matchptr[2];
          if ( !(regexec (&rx, f.c_str(), sizeof(matchptr)/sizeof(regmatch_t), matchptr, 0)) ) {
-           ((StTrgDatReader*) this)->mEventNumber = atoi(f.substr(matchptr[0].rm_so,matchptr[0].rm_eo).c_str());
+           ((StTrgDatReader*) this)->mRunNumber = atoi(f.substr(matchptr[1].rm_so,matchptr[1].rm_eo).c_str());
          }
       }
    }
-   return mEventNumber;  
+   return mRunNumber;  
 }
 
 //__________________________________________________________________________

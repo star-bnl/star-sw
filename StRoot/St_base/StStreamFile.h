@@ -1,5 +1,8 @@
-// $Id: StStreamFile.h,v 1.3 2010/01/06 20:09:39 fine Exp $
+// $Id: StStreamFile.h,v 1.4 2010/01/06 20:42:26 fine Exp $
 // $Log: StStreamFile.h,v $
+// Revision 1.4  2010/01/06 20:42:26  fine
+// Fix type EventNumber shoould be RunNumber . Thanks Akio
+//
 // Revision 1.3  2010/01/06 20:09:39  fine
 // RT #1794. Add EventNumber method to the StStreamFile interface RT # 1794
 //
@@ -44,9 +47,9 @@ public:
 public: // abstract interface  
   virtual fstream &Read()           = 0;
   virtual char *Record()            = 0;
-  virtual int   Length()  const     = 0;
-  virtual int   Version() const     = 0;
-  virtual int   EventNumber() const = 0;
+  virtual int   Length()    const   = 0;
+  virtual int   Version()   const   = 0;
+  virtual int   RunNumber() const   = 0;
 
 public: // fstream proxy interface   
   // fstream proxy methods

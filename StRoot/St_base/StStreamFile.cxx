@@ -1,6 +1,9 @@
-// $Id: StStreamFile.cxx,v 1.2 2009/10/13 15:44:59 fine Exp $
+// $Id: StStreamFile.cxx,v 1.3 2010/01/06 20:42:26 fine Exp $
 //
 // $Log: StStreamFile.cxx,v $
+// Revision 1.3  2010/01/06 20:42:26  fine
+// Fix type EventNumber shoould be RunNumber . Thanks Akio
+//
 // Revision 1.2  2009/10/13 15:44:59  fine
 // add the method to provide the error message
 //
@@ -41,6 +44,7 @@ void StStreamFile::close()
    if (is_open()) { 
      fStream.clear();
      fStream.close();
+     fFilename.erase();
    }
 }
 //__________________________________________________________________________
