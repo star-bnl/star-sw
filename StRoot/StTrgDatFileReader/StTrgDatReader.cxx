@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.5 2010/01/06 20:42:26 fine Exp $
+// $Id: StTrgDatReader.cxx,v 1.6 2010/01/06 20:57:24 fine Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.6  2010/01/06 20:57:24  fine
+// Adjust  file pattern
+//
 // Revision 1.5  2010/01/06 20:42:26  fine
 // Fix type EventNumber shoould be RunNumber . Thanks Akio
 //
@@ -95,7 +98,7 @@ int StTrgDatReader::RunNumber()  const   {
    if (mRunNumber == -1) { 
       string f = filename();
       regex_t rx;
-      const   char    *pattern = "^.*run\\.(\\d+)\\..+\\.dat$";
+      const   char    *pattern =  "^.*run\\.([0-9]+)\\..+\\.dat$";
       int     rc;
       char    buffer[100];
       if ((rc = regcomp(&rx, pattern, REG_EXTENDED))) {
