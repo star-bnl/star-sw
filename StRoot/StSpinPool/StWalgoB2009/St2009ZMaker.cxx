@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.5 2010/01/05 03:22:55 balewski Exp $
+// $Id: St2009ZMaker.cxx,v 1.6 2010/01/06 04:22:15 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -31,8 +31,8 @@ Int_t St2009ZMaker::Init(){
 //_____________________________________________________________________________
 //
 Int_t St2009ZMaker::InitRun  (int runumber){
-  LOG_INFO<<Form("::InitRun(%d) done, Z-algo params: nearTotEtFrac=%.2f, 4x4EtFrac=%.2f,  clusterEt=%.1f GeV, delPhi12>%.2f rad, Zmass in[%.1f,%.1f]\n",
-		 runumber, par_nearTotEtFracZ,par_4x4EtFracZ,par_clusterEtZ,par_delPhi12,par_minMassZ,par_maxMassZ)<<endm;
+  LOG_INFO<<Form("::InitRun(%d) done, Z-algo params: nearTotEtFrac=%.2f,  clusterEt=%.1f GeV, delPhi12>%.2f rad, Zmass in[%.1f,%.1f]\n",
+		 runumber, par_nearTotEtFracZ,par_clusterEtZ,par_delPhi12,par_minMassZ,par_maxMassZ)<<endm;
   return 0;
 }
 
@@ -82,14 +82,20 @@ St2009ZMaker::find_Z_boson(){
     hA[0]->Fill("vert",1.);
     WeveVertex &V=wEve.vertex[iv];
     hA[32]->Fill(V.eleTrack.size());
+    if(V.eleTrack.size()<2) continue;
+    hA[0]->Fill("TT",1.); // at least 2 isolated tracks exist
+
     //only one Z can come from a vertex, and it should be the highest-energy object
     //hence, the two highest-et clusters should correspond to the z.  Pick those 
     //eventually, but for now, just try all of them.
-    for(uint it=0;it<V.eleTrack.size();it++) { //.....select first track:
+    for(uint it=0;it<V.eleTrack.size()-1;it++) { //.....select first track:
       WeveEleTrack &T1=V.eleTrack[it];
       if(T1.isMatch2Cl==false) continue;
       assert(T1.cluster.nTower>0); // internal logical error
       assert(T1.nearTotET>0); // internal logical error
+
+      float isoET1=T1.cluster.ET /T1.cl4x4.ET;
+      hA[29]->Fill(isoET1);
 
       hA[23]->Fill(T1.cluster.ET);
       hA[0]->Fill("tr1",1.);
@@ -101,16 +107,14 @@ St2009ZMaker::find_Z_boson(){
       if(fracET1< par_nearTotEtFracZ) continue; 
       hA[0]->Fill("Tfr1",1.);
 
-      float isoET1=T1.cluster.ET /T1.cl4x4.ET;
-      hA[29]->Fill(isoET1);
-      if(isoET1< par_4x4EtFracZ) continue; 
-      hA[0]->Fill("4fr1",1.);
-
       for (uint it2=it+1;it2<V.eleTrack.size();it2++) {	//.....select second track:
 	WeveEleTrack &T2=V.eleTrack[it2];
 	if(T2.isMatch2Cl==false) continue;
 	assert(T2.cluster.nTower>0); // internal logical error
 	assert(T2.nearTotET>0); // internal logical error
+
+	float isoET2=T2.cluster.ET /T2.cl4x4.ET;
+	hA[30]->Fill(isoET2);
 
 	hA[25]->Fill(T2.cluster.ET);
 	hA[0]->Fill("tr2",1.);
@@ -121,11 +125,6 @@ St2009ZMaker::find_Z_boson(){
 	hA[26]->Fill(fracET2);
 	if(fracET2< par_nearTotEtFracZ) continue; 
 	hA[0]->Fill("Tfr2",1.);
-
-	float isoET2=T2.cluster.ET /T2.cl4x4.ET;
-	hA[30]->Fill(isoET2);
-	if(isoET2< par_4x4EtFracZ) continue; 
-	hA[0]->Fill("4fr2",1.);
 
 	float e1=T1.cluster.energy;
 	float e2=T2.cluster.energy;
@@ -140,7 +139,6 @@ St2009ZMaker::find_Z_boson(){
 
 	TVector3 psum=p1+p2;
 	float mass2=(e1+e2)*(e1+e2)-(psum.Dot(psum));
-	hA[28]->Fill(mass2);
 	if(mass2<1.) continue; // 9GeV^2) should be param, I'm tired today
 	hA[0]->Fill("m2",1.);
 
@@ -150,19 +148,21 @@ St2009ZMaker::find_Z_boson(){
 	  hA[14]->Fill(mass);
 	  continue;
 	}
+	printf("RCC:  Found Z! invmass=%f\n",mass);
+        printJan(&T1);
+        printJan(&T2);
 
 	//..... now only opposite sign
 	hA[0]->Fill("QQ",1.);
 	hA[15]->Fill(mass);
+	hA[33]->Fill(T1.cluster.ET,T1.prMuTrack->charge()/T1.prMuTrack->pt()); 
+	hA[33]->Fill(T2.cluster.ET,T2.prMuTrack->charge()/T2.prMuTrack->pt()); 
 
 	if (mass<par_minMassZ) continue; //enforce a lower bound
 	hA[0]->Fill("Zlow",1.);
 
 	if (mass>par_maxMassZ) continue; //enforce an upper bound
 	hA[0]->Fill("Zhigh",1.);
-	printf("RCC:  Found Z! invmass=%f\n",mass);
-        printJan(&T1);
-        printJan(&T2);
 
 	// **** I stoped changes here, Jan 
 
@@ -172,17 +172,10 @@ St2009ZMaker::find_Z_boson(){
 	hA[21]->Fill(fmax1,fmax2);
 	hA[22]->Fill(T1.cluster.ET,T2.cluster.ET);
 
-	hA[40]->Fill(mass);//the greater of mass and 0, just in case.
-	hA[41]->Fill(mass);
-	hA[42]->Fill(mass);
-	hA[43]->Fill(mass);
-	hA[44]->Fill(mass);
-	hA[45]->Fill(mass);
-	hA[46]->Fill(mass);
 
-	if (!wMK->isMC)
-	  {
-	    wMK->wDisaply->exportEvent(V,T1);
+	if (!wMK->isMC || (wMK->isMC&& wEve.id<500) )
+	  { printf("\n ZZZZZZZZZZZZZZZZZZZ\n");
+	    wMK->wDisaply->exportEvent("Z",V,T1);
 	    printf("RCC:  Found Z! invmass=%f\n",mass);
 	    wEve.print();
 	  }
@@ -221,6 +214,9 @@ St2009ZMaker::find_Z_boson(){
 
 
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.6  2010/01/06 04:22:15  balewski
+// added Q/PT plot for Zs, more cleanup
+//
 // Revision 1.5  2010/01/05 03:22:55  balewski
 // change logic for filling btow status tables, added printout to Z-code
 //

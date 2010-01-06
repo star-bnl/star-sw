@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.h,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: WeventDisplay.h,v 1.2 2010/01/06 04:22:15 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -32,10 +32,10 @@ class WeventDisplay {
 
   WeventDisplay( St2009WMaker* mk, int mxEv);
   void clear();
-  void exportEvent(  WeveVertex myV, WeveEleTrack myTr);
-  void export2sketchup(  WeveVertex myV, WeveEleTrack myTr);
+  void exportEvent(  const char *tit,WeveVertex myV, WeveEleTrack myTr);
+  void export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack myTr);
   void getPrimTracks(  int vertID);
-  void draw(int eveID, int daqSeq, int runNo,  WeveVertex myV, WeveEleTrack myTr);
+  void draw( const char *tit,int eveID, int daqSeq, int runNo,  WeveVertex myV, WeveEleTrack myTr);
 
 };
 
@@ -43,6 +43,9 @@ class WeventDisplay {
 
 
 // $Log: WeventDisplay.h,v $
+// Revision 1.2  2010/01/06 04:22:15  balewski
+// added Q/PT plot for Zs, more cleanup
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

@@ -3,11 +3,12 @@ TCanvas *can=0;
 //=================================================
 plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
-  //iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Jan2b/data/";
-  //core0="run9setABCD";
+  //iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Jan2/data/";
+  core0="run9setABCD";
   //core0="mcSetD1_ppWprod";
-  core0="mcSetD2_ppQCD10_inf_filter";
-  //core0="mcSetD1_ppZprod";
+  //core0="mcSetD2_ppQCD10_inf_filter";
+  core0="mcSetD1_ppZprod";
+
   if(page==0) {
     doAll();
     return;
@@ -19,8 +20,8 @@ plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
   
 
   char *nameA[]={"_Z_EventType"}; //pg 1
-  char *nameB[]={"_Z_et1val","_Z_et1frac","_Z_et1iso","_Z_et2val","_Z_et2frac","_Z_et2iso"}; //pg 2
-  char *nameC[]={"_Z_phi12","_Z_m2","_Z_ZmassLike","_Z_ZmassUnlike","_Z_Zmass"}; //pg 3
+  char *nameB[]={"_Z_et1iso","_Z_et1val","_Z_et1frac","_Z_et2iso","_Z_et2val","_Z_et2frac"}; //pg 2
+  char *nameC[]={"_Z_phi12","_Z_ZmassLike","_Z_chRecPNp","_Z_ZmassUnlike"};
 
   gStyle->SetOptFit(1);
   TString fullInpName=iPath;  fullInpName+=core0;
@@ -71,8 +72,8 @@ plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
     }
-   c->GetPad(1)->SetLogy();
-   c->GetPad(4)->SetLogy();
+   c->GetPad(2)->SetLogy();
+   c->GetPad(5)->SetLogy();
  } break;//--------------------------------------
 
 
@@ -85,6 +86,14 @@ plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
+      if(i==2) {
+	h2=(TH2F*) h;
+	h2->Rebin2D(2,2);
+	h2->Draw("box"); h2->SetFillColor(kMagenta);
+	h3=(TH2F*)pubchRecPNp;
+	h3->Draw("colz same");	h3->Rebin2D(2,2);
+	h2->Draw("box same");  
+      }
     }
  
         
@@ -162,6 +171,9 @@ void doAllMC(){
 
 
 // $Log: plZana.C,v $
+// Revision 1.3  2010/01/06 04:22:18  balewski
+// added Q/PT plot for Zs, more cleanup
+//
 // Revision 1.2  2010/01/05 03:23:02  balewski
 // change logic for filling btow status tables, added printout to Z-code
 //

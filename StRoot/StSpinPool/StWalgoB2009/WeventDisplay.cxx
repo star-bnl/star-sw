@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.2 2009/12/10 16:01:31 stevens4 Exp $
+// $Id: WeventDisplay.cxx,v 1.3 2010/01/06 04:22:15 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -88,7 +88,7 @@ WeventDisplay::clear(){
 //-----------------------------
 //-----------------------------
 void
-WeventDisplay::draw( int eveID, int daqSeq,  int runNo,  WeveVertex myV, WeveEleTrack myTr){
+WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVertex myV, WeveEleTrack myTr){
   if(maxEve<=0) return;
   maxEve--;
   TStyle *myStyle=new TStyle();
@@ -97,7 +97,7 @@ WeventDisplay::draw( int eveID, int daqSeq,  int runNo,  WeveVertex myV, WeveEle
   myStyle->SetOptStat(1000010);
   
   char txt[1000];
-  sprintf(txt,"display_run%d.eventId%06dvert%d",runNo,eveID,myV.id);
+  sprintf(txt,"display-%s_run%d.eventId%06dvert%d",tit,runNo,eveID,myV.id);
  
   printf("WeventDisplay::Draw %s\n",txt);
   TCanvas *c0=new TCanvas(txt,txt,850,600);
@@ -194,7 +194,7 @@ WeventDisplay::draw( int eveID, int daqSeq,  int runNo,  WeveVertex myV, WeveEle
 //-----------------------------
 //-----------------------------
 void
-WeventDisplay::exportEvent(  WeveVertex myV, WeveEleTrack myTr){
+WeventDisplay::exportEvent( const char *tit, WeveVertex myV, WeveEleTrack myTr){
   if(maxEve<=0) return;
   clear();
   int eveId=wMK->mMuDstMaker->muDst()->event()->eventId();
@@ -206,14 +206,14 @@ WeventDisplay::exportEvent(  WeveVertex myV, WeveEleTrack myTr){
 
   TVector3 rTw=myTr.cluster.position;
   rTw.SetZ(rTw.z()-myV.z);
-  printf("#xcheck run=%d daqSeq=%d eveID=%7d vertID=%2d zVert=%.1f prTrID=%4d  prTrEta=%.3f prTrPhi/deg=%.1f globPT=%.1f hitTwId=%4d twAdc=%.1f clEta=%.3f clPhi/deg=%.1f  clET=%.1f\n",
+  printf("#xcheck-%s run=%d daqSeq=%d eveID=%7d vertID=%2d zVert=%.1f prTrID=%4d  prTrEta=%.3f prTrPhi/deg=%.1f globPT=%.1f hitTwId=%4d twAdc=%.1f clEta=%.3f clPhi/deg=%.1f  clET=%.1f\n",tit,
 	 runNo,daqSeq,eveId,myV.id,myV.z,
 	 myTr.prMuTrack->id(),myTr.prMuTrack->eta(),myTr.prMuTrack->phi()/3.1416*180.,myTr.glMuTrack->pt(),
 	 myTr.pointTower.id,wMK->wEve.bemc.adcTile[kBTow][myTr.pointTower.id-1],
 	 rTw.Eta(),rTw.Phi()/3.1416*180.,myTr.cluster.ET);
 
   float zVert=myV.z;
-   printf("WeventDisplay::export run=%d eve=%d\n",runNo,eveId);
+  printf("WeventDisplay-%s::export run=%d eve=%d\n",tit,runNo,eveId);
 
  //.... process BTOW hits
   for(int i=0;i< mxBtow;i++) {
@@ -285,8 +285,8 @@ WeventDisplay::exportEvent(  WeveVertex myV, WeveEleTrack myTr){
   }// end of eta,phi-planes
 
   //.... produce plot & save
-  draw(eveId, daqSeq,runNo,myV, myTr);
-  export2sketchup(myV, myTr);
+  draw(tit,eveId, daqSeq,runNo,myV, myTr);
+  export2sketchup(tit,myV, myTr);
 }
 
 //-----------------------------
@@ -320,11 +320,11 @@ WeventDisplay::getPrimTracks( int vertID) {
 //-----------------------------
 //-----------------------------
 void
-WeventDisplay::export2sketchup(  WeveVertex myV, WeveEleTrack myTr){
+WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack myTr){
   int eveId=wMK->mMuDstMaker->muDst()->event()->eventId();
   int runNo=wMK->mMuDstMaker->muDst()->event()->runId();
   char txt[1000];
-  sprintf(txt,"display3D_run%d.eventId%05d_vert%d.txt",runNo,eveId,myV.id);
+  sprintf(txt,"display3D-%s_run%d.eventId%05d_vert%d.txt",tit,runNo,eveId,myV.id);
   FILE *fd=fopen(txt,"w"); assert(fd);
   
   //........ DUMP PRIM TRACKS..........
@@ -397,6 +397,9 @@ WeventDisplay::export2sketchup(  WeveVertex myV, WeveEleTrack myTr){
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.3  2010/01/06 04:22:15  balewski
+// added Q/PT plot for Zs, more cleanup
+//
 // Revision 1.2  2009/12/10 16:01:31  stevens4
 // fixed zero-length vector
 //
