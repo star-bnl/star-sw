@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.cxx,v 1.2 2009/12/30 19:49:58 balewski Exp $
+// $Id: St2009WMaker.cxx,v 1.3 2010/01/06 19:16:47 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -62,6 +62,7 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   par_clustFrac24=0.95; // ET ratio 2x2/4x4 cluster
   par_nearDeltaR=0.7; //(~rad) near-cone size
   par_nearTotEtFrac=0.88;  // ratio 2x2/near Tot ET 
+  par_smallNearDeltaR=0.1; //(~rad) small near-cone size for tpc tracks
 
   //... track-cluster
   par_delR3D=7.; // cm, dist between projected track and center of cluster 
@@ -72,7 +73,6 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   
   //... search for W's
   par_awayDeltaPhi=0.7; // (rad) away-'cone' size
-  par_awayDeltaR=0.5; // (rad) away 'real cone' size  //JS
   par_awayTotET=8.; // (GeV), maximal allowed away-cone  ET
   par_highET=28.; // (GeV), cut-off for final W-cluster ET
 
@@ -132,7 +132,7 @@ St2009WMaker::InitRun(int runNo){
 #endif
 
   mRunNo=runNo;
-   LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, globEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d mcScaleFact=%.2f\nmcBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV",
+   LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d mcScaleFact=%.2f\nmcBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV",
 		 mRunNo,par_bht3TrgID, par_l2wTrgID,isMC,
 		 par_minPileupVert,par_vertexZ,
 		 par_nFitPts,par_nHitFrac,  par_trackRin,  par_trackRout, par_trackPt,
@@ -193,8 +193,6 @@ St2009WMaker::Make(){
      on the list  till the end. */
   findNearJet();
   findAwayJet();
-
-  findAwayCone();
 
   hadronicRecoil();
 
@@ -289,6 +287,9 @@ St2009WMaker::L2algoEtaPhi2IJ(float etaF,float phiF,int &iEta, int &iPhi) {
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.3  2010/01/06 19:16:47  stevens4
+// track cuts now on primary component, cleanup
+//
 // Revision 1.2  2009/12/30 19:49:58  balewski
 // test
 //
@@ -298,6 +299,9 @@ St2009WMaker::L2algoEtaPhi2IJ(float etaF,float phiF,int &iEta, int &iPhi) {
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.3  2010/01/06 19:16:47  stevens4
+// track cuts now on primary component, cleanup
+//
 // Revision 1.2  2009/12/30 19:49:58  balewski
 // test
 //

@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.3 2010/01/06 04:22:15 balewski Exp $
+// $Id: WeventDisplay.cxx,v 1.4 2010/01/06 19:16:48 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -124,10 +124,6 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
   TEllipse *te2=new TEllipse(rW.Eta(),rW.Phi(), 0.7, 0.7);
   te2->SetFillStyle(0);te2->SetLineStyle(3); te2->SetLineColor(kBlack);
 
-  TVector3 rAwayCone=myTr.awayConeAxis; // away cone 
-  TEllipse *te3=new TEllipse(rAwayCone.Eta(),rAwayCone.Phi(), 0.5, wMK->par_awayDeltaR);
-  te3->SetFillStyle(0);te3->SetLineStyle(3); te3->SetLineColor(kBlack);
-
   TVector3 rA=-rW; // away direction
   bxT->SetY1(rA.Phi() - wMK->par_awayDeltaPhi);
   bxT->SetY2(rA.Phi() + wMK->par_awayDeltaPhi);
@@ -138,14 +134,12 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
 
   te1->Draw();   te2->Draw(); bxT->Draw("l");
   etaBL_ln->Draw();  etaBR_ln->Draw(); etaEL_ln->Draw();
-  if(rAwayCone!=TVector3(0,0,0)) te3->Draw();
-
+  
   cU2->cd();    hEmcET->Draw("colz");
   te1->Draw();  te2->Draw(); bxE->Draw("l");
   etaBL_ln->Draw();  etaBR_ln->Draw();
   etaEL_ln->Draw();  etaER_ln->Draw();
-  if(rAwayCone!=TVector3(0,0,0)) te3->Draw();
-
+  
   for(int iep=0;iep<mxBSmd;iep++) {
     cU3->cd(1+iep);
     hBsmdAdc[iep]->Draw("colz");
@@ -172,7 +166,7 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
   printf("WeventDisplay:: BTOW+ETOW  %s\n",txt);
   pvt->AddText(txt);
 
-  sprintf(txt,"total ET/GeV:   near= %.1f   away= %.1f   awayCone= %.1f",myTr.nearTotET,myTr.awayTotET,myTr.awayTotCone);
+  sprintf(txt,"total ET/GeV:   near= %.1f   away= %.1f",myTr.nearTotET,myTr.awayTotET);
   printf("WeventDisplay:: BTOW  %s\n",txt);
   pvt->AddText(txt);
 
@@ -397,6 +391,9 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.4  2010/01/06 19:16:48  stevens4
+// track cuts now on primary component, cleanup
+//
 // Revision 1.3  2010/01/06 04:22:15  balewski
 // added Q/PT plot for Zs, more cleanup
 //

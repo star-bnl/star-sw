@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.2 2009/12/07 20:37:56 rcorliss Exp $
+// $Id: St2009WMaker.h,v 1.3 2010/01/06 19:16:47 stevens4 Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -63,7 +63,7 @@ class St2009WMaker : public StMaker {
     
   int   par_kSigPed, par_AdcThres;
   float par_maxADC, par_clustET, par_clustFrac24, par_nearTotEtFrac;
-  float par_nearDeltaR, par_awayDeltaPhi, par_awayDeltaR;
+  float par_nearDeltaR, par_awayDeltaPhi, par_smallNearDeltaR;
   float par_delR3D, par_highET, par_awayTotET;
  
   float par_countTrPt,par_countTowEt; 
@@ -103,8 +103,7 @@ class St2009WMaker : public StMaker {
   StEEmcDb        *mDbE; // access to EEMC database        
   EEmcGeomSimple  *geomE;// access to EEMC geometry        
   TVector3 positionEtow[mxEtowSec*mxEtowSub][mxEtowEta];  
-  //  float etowR[mxEtowEta];                                
-
+  
   int   accessTrig();
   int   accessVertex();
   int   accessTracks();
@@ -119,15 +118,14 @@ class St2009WMaker : public StMaker {
   int   matchTrack2Cluster();
   void  findNearJet();
   void  findAwayJet();
-  void  findAwayCone();
   void  hadronicRecoil();
 
   // tools
-  float sumTpcCone( int vertID, TVector3 refAxis, int flag, int &nTrCnt, TVector3 &maxTrVec);
-  float sumBtowCone( float zVert,  TVector3 refAxis, int flag,int &nTow, TVector3 &maxTowVec);
+  float sumTpcCone( int vertID, TVector3 refAxis, int flag, int &nTrCnt);
+  float sumBtowCone( float zVert,  TVector3 refAxis, int flag,int &nTow);
   WeveCluster maxBtow2x2(int iEta, int iPhi, float zVert);
   WeveCluster sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi,float zVert);
-  float sumEtowCone(float zVert, TVector3 refAxis,int flag,int &nTow, TVector3  &maxTowVec);
+  float sumEtowCone(float zVert, TVector3 refAxis,int flag,int &nTow);
 
   // histograms
   TObjArray *HList;
@@ -154,7 +152,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.2 2009/12/07 20:37:56 rcorliss Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.3 2010/01/06 19:16:47 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -165,6 +163,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.3  2010/01/06 19:16:47  stevens4
+// track cuts now on primary component, cleanup
+//
 // Revision 1.2  2009/12/07 20:37:56  rcorliss
 // Start
 //

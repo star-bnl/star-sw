@@ -1,4 +1,4 @@
-// $Id: Wevent2009.h,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: Wevent2009.h,v 1.2 2010/01/06 19:16:48 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -53,18 +53,12 @@ class WeveEleTrack { // electron track info
   const StMuTrack *glMuTrack, *prMuTrack;
   WeveCluster cluster,cl4x4;
   TVector3 primP; // primary momentum vector
-  float nearTpcPT, nearEmcET, nearBtowET, nearEtowET; // (GeV/c), around prim track direction
+  float nearTpcPT, nearEmcET, nearBtowET, nearEtowET, smallNearTpcPT; // (GeV/c), around prim track direction
   float awayTpcPT, awayEmcET, awayBtowET, awayEtowET; // (GeV/c), opposite in phi to  prim track direction
   float nearTotET, awayTotET; // (GeV), for nearCone 10 GeV is subtracted to avoid double counting
-  int awayNTr,nearNTr;  // # tracks on away side  
+  int awayNTr,nearNTr,smallNearNTr;  // # tracks on away side  
   int awayNTow,nearNTow; // # towers on away aide  
-  
-  TVector3 maxAwayBtow,maxNearBtow;  // highest ET tower momentum vector  
-  TVector3 maxAwayEtow,maxNearEtow;  // highest ET tower momentum vector 
-  TVector3 maxAwayTr,maxNearTr;  // track vector for highest PT track on away side 
-  float awayTotCone;    
-  TVector3 awayConeAxis; // max of all away high ET vectors
-
+   
   TVector3 hadronicRecoil; 
 
   WeveEleTrack() {clear();}
@@ -72,13 +66,12 @@ class WeveEleTrack { // electron track info
   void clear() {  pointTower.clear();
     cluster.clear();cl4x4.clear();  isMatch2Cl=false;  primP=TVector3(0,0,0);
     prMuTrack=glMuTrack=0; 
-    awayTpcPT=nearTpcPT=nearTotET=awayTotET=nearEmcET=awayEmcET=nearBtowET=awayBtowET=nearEtowET=awayEtowET=0; awayNTr=awayNTow=nearNTr=nearNTow=0; 
-
-    maxAwayTr=TVector3(0,0,0); maxNearTr=TVector3(0,0,0); maxAwayBtow=TVector3(0,0,0); maxNearBtow=TVector3(0,0,0); maxAwayEtow=TVector3(0,0,0); maxNearEtow=TVector3(0,0,0); awayConeAxis=TVector3(0,0,0); awayTotCone=0;
+    awayTpcPT=nearTpcPT=nearTotET=awayTotET=nearEmcET=awayEmcET=nearBtowET=awayBtowET=nearEtowET=awayEtowET=smallNearTpcPT=0; awayNTr=awayNTow=nearNTr=nearNTow=smallNearNTr=0; 
+    
     hadronicRecoil=TVector3(0,0,0); } 
   
   void print( int flag=0){
-    if(glMuTrack==0) {  printf("   Track NULL pointer???\n"); return;}
+    if(prMuTrack==0) {  printf("   Track NULL pointer???\n"); return;}
     printf("   Track glPT=%.1f GeV/c   isMatch2Cl=%d, nearTotET=%.1f, awayTotET=%.1f primPT=%.1f\n",
 	   glMuTrack->pt(),isMatch2Cl,nearTotET, awayTotET,primP.Pt());
     pointTower.print(flag);
@@ -222,6 +215,9 @@ class Wevent2009 {
 
 
 // $Log: Wevent2009.h,v $
+// Revision 1.2  2010/01/06 19:16:48  stevens4
+// track cuts now on primary component, cleanup
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

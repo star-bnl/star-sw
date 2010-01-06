@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.3 2010/01/05 03:22:55 balewski Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.4 2010/01/06 19:16:47 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -172,49 +172,49 @@ St2009WMaker::accessTracks(){ // return non-zero on abort
       if(prTr->flag()<=0) continue;
       const StMuTrack *glTr=prTr->globalTrack();
       if(glTr==0) continue; // see the reason at the end of this method
-      if(glTr->flag()!=101) continue;// TPC-only regular tracks
-      hA[20]->Fill("101",1.);
-      float pt=glTr->pt();
+      if(prTr->flag()!=301) continue;// TPC+prim vertex tracks
+      hA[20]->Fill("101",1.); 
+      float pt=prTr->pt();
       if(pt<1.0) continue;
       hA[20]->Fill("pt1",1.);
-      hA[21]->Fill(glTr->nHitsFit());
-      if(glTr->nHitsFit()<=par_nFitPts) continue;
+      hA[21]->Fill(prTr->nHitsFit());
+      if(prTr->nHitsFit()<=par_nFitPts) continue;
       hA[20]->Fill("nHit",1.);
-      float hitFrac=1.*glTr->nHitsFit()/glTr->nHitsPoss();
+      float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
       hA[22]->Fill(hitFrac);
       if(hitFrac<par_nHitFrac) continue;
       hA[20]->Fill("Hfrac",1.);
-      StThreeVectorF ri=glTr->firstPoint();
+      StThreeVectorF ri=prTr->firstPoint();
       hA[23]->Fill(ri.perp());
       if(ri.perp()>par_trackRin) continue;
       hA[20]->Fill("Rin",1.);
-      StThreeVectorF ro=glTr->lastPoint();
+      StThreeVectorF ro=prTr->lastPoint();
       hA[24]->Fill(ro.perp());
       if(ro.perp()<par_trackRout) continue;
       hA[20]->Fill("Rout",1.);
-      hA[25]->Fill(pt);
-      if(glTr->charge()<0) hA[27]->Fill(pt);
+      hA[25]->Fill(glTr->p().perp());
+      if(glTr->charge()<0) hA[27]->Fill(glTr->p().perp());
 
-      hA[29]->Fill(prTr->p().perp());
-      if(prTr->charge()<0)hA[30]->Fill(prTr->p().perp());
+      hA[29]->Fill(pt);
+      if(prTr->charge()<0)hA[30]->Fill(pt);
 
       hA[26]->Fill(ro.pseudoRapidity(),ro.phi());
       /* Victor: in reality mChiSqXY is a normal Xi2 for track and
-	 mChiSqZ is Xi2 of fit to  primary vertex
+       mChiSqZ is Xi2 of fit to  primary vertex
       */
       float globChi2dof=glTr->chi2();
       hA[35]->Fill(globChi2dof);
       hA[36]->Fill(globChi2dof,ro.pseudoRapidity());
 
-      float dedx=glTr->dEdx()*1e6;
+      float dedx=prTr->dEdx()*1e6;
       //printf("%f %f\n",glTr->p().mag(),dedx); 
-      hA[28]->Fill(glTr->p().mag(),dedx);
+      hA[28]->Fill(prTr->p().mag(),dedx);
 
       if(pt<par_trackPt) continue;
       hA[20]->Fill("ptOK",1.);
       nTrOK++;
       WeveEleTrack wTr;
-     
+
       wTr.prMuTrack=prTr;
       wTr.glMuTrack=glTr;
       StThreeVectorF prPvect=prTr->p();
@@ -403,13 +403,13 @@ St2009WMaker::accessETOW(){
 //________________________________________________
 //________________________________________________
 float
-St2009WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag, int &nTrCnt, TVector3 &maxTrVec){ 
+St2009WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag, int &nTrCnt){ 
 
   // flag=2 use 2D cut, 1= only delta phi
 
   // printf("******* sumTpcCone, flag=%d eveId=%d vertID=%d  eta0=%.2f phi0/rad=%.2f  \n",flag,wEve.id,vertID,refAxis.PseudoRapidity() ,refAxis.Phi());
 
-  int nTR=0; float maxTrPT=0.3;
+  int nTR=0;
   assert(vertID>=0);
   assert(vertID<(int)mMuDstMaker->muDst()->numberOfPrimaryVertices());
   
@@ -431,18 +431,13 @@ St2009WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag, int &nTrCnt, TV
     // printf(" prTrID=%4d  prTrEta=%.3f prTrPhi/deg=%.1f prPT=%.1f  nFitPts=%d\n", prTr->id(),prTr->eta(),prTr->phi()/3.1416*180.,prTr->pt(),prTr->nHitsFit());
     if(flag==1) {
       float deltaPhi=refAxis.DeltaPhi(primP);
-      if(fabs(deltaPhi)<(TMath::Pi()/2) && primP.Perp()>maxTrPT) 
-	{maxTrVec=primP; maxTrPT=primP.Perp();} 
       if(fabs(deltaPhi)> par_awayDeltaPhi) continue;
     }
-    if(flag==2) {
+    if(flag==2 || flag==3) {
       float deltaR=refAxis.DeltaR(primP);
       //printf("delR=%.3f\n",deltaR);
-      if(deltaR> par_nearDeltaR) continue;
-    }
-    if(flag==3) {                                
-      float deltaR=refAxis.DeltaR(primP);        
-      if(deltaR> par_awayDeltaR) continue;       
+      if(flag==2 && deltaR>par_nearDeltaR) continue;
+      if(flag==3 && deltaR>par_smallNearDeltaR) continue;
     }
     float pT=prTr->pt();
     //    printf(" passed pt=%.1f\n",pT);
@@ -595,6 +590,9 @@ St2009WMaker::hadronicRecoil(){ //add up all vector pt outside of 'nearJet' regi
 }
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.4  2010/01/06 19:16:47  stevens4
+//track cuts now on primary component, cleanup
+//
 //Revision 1.3  2010/01/05 03:22:55  balewski
 //change logic for filling btow status tables, added printout to Z-code
 //
