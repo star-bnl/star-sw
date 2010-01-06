@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.2 2009/10/27 14:23:20 jeromel Exp $
+// $Id: StTrgDatReader.cxx,v 1.3 2010/01/06 20:09:39 fine Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.3  2010/01/06 20:09:39  fine
+// RT #1794. Add EventNumber method to the StStreamFile interface RT # 1794
+//
 // Revision 1.2  2009/10/27 14:23:20  jeromel
 // Fixed declaration of assert
 //
@@ -16,8 +19,10 @@
 
 #include "StTrgDatReader.h"
 #include "StArchInfo.h"
+#include "StMessMgr.h"
 #include <iostream>
 #include <assert.h>
+#include <regex.h>
 
 namespace {
 //__________________________________________________________________________
@@ -31,14 +36,15 @@ inline unsigned int swapI(unsigned int var){
 }
 const int StTrgDatReader::mLheader=8;
 //__________________________________________________________________________
-StTrgDatReader::StTrgDatReader():StStreamFile(), mLength(0),mVersion(0), mData(0),mAllocated(0) 
+StTrgDatReader::StTrgDatReader():StStreamFile(), mLength(0),mVersion(0), mEventNumber(-1)
+                                               , mData(0)  , mAllocated(0) 
 {
    Buffer(mLheader);
 }
 
 //__________________________________________________________________________
 StTrgDatReader::StTrgDatReader(const char *fileName, ios_base::openmode mode)
-      :StStreamFile(fileName,mode), mLength(0), mVersion(0),mData(0),mAllocated(0)
+      :StStreamFile(fileName,mode), mLength(0), mVersion(0),mEventNumber(-1), mData(0),mAllocated(0)
 {
    Buffer(mLheader);
 }
@@ -77,6 +83,30 @@ fstream &StTrgDatReader::Read(){
     }
   }
   return stream();
+}
+//__________________________________________________________________________
+int StTrgDatReader::EventNumber() const   { 
+   if (mEventNumber == -1) { 
+      string f = filename();
+      regex_t rx;
+      const   char    *pattern = "^.*run\\.(\\d+)\\..+\\.dat$";
+      int     rc;
+      char    buffer[100];
+      if (!(rc = regcomp(&rx, pattern, REG_EXTENDED))) {
+         regerror(rc, &rx, buffer, 100);
+         LOG_ERROR << "Can not extract the event number from the file name \'" 
+                << f << "\' because \'" 
+                << buffer << "\'" 
+                << endm;
+         assert(0&&"Can not extract the event number from the file name");
+      } else {
+         regmatch_t matchptr[1];
+         if ( !(regexec (&rx, f.c_str(), sizeof(matchptr)/sizeof(regmatch_t), matchptr, 0)) ) {
+           ((StTrgDatReader*) this)->mEventNumber = atoi(f.substr(matchptr[0].rm_so,matchptr[0].rm_eo).c_str());
+         }
+      }
+   }
+   return mEventNumber;  
 }
 
 //__________________________________________________________________________

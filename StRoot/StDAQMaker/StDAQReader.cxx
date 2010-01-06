@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.83 2009/11/02 21:42:52 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.84 2010/01/06 20:09:38 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.84  2010/01/06 20:09:38  fine
+ * RT #1794. Add EventNumber method to the StStreamFile interface RT # 1794
+ *
  * Revision 1.83  2009/11/02 21:42:52  fine
  * allow the Akio DAT file to be read in 1999-2008 format
  *
@@ -579,6 +582,7 @@ void StDAQReader::setFTPCVersion(const char* vers)
 int StDAQReader::getRunNumber()   const 
 {
      // return the run number from the DAQ file header
+
    return
            fDaqFileReader  ?
              fDaqFileReader->run 
@@ -587,10 +591,14 @@ int StDAQReader::getRunNumber()   const
 }
 //_____________________________________________________________________________
 int StDAQReader::getEventNumber() const {
-     return fDaqFileReader  ? 
-           fDaqFileReader->seq
-                     :
-           fEventInfo->EventSeqNo;
+   int evtNum = -1;
+   if (fDatFileReader) 
+      evtNum = fDatFileReader->EventNumber();
+   else if (fDaqFileReader ) 
+      evtNum = fDaqFileReader->seq;
+   else 
+      evtNum = fEventInfo->EventSeqNo;
+   return evtNum;
 }
 //_____________________________________________________________________________
 unsigned int StDAQReader::getUnixTime() const {

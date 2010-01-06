@@ -1,5 +1,8 @@
-// $Id: StStreamFile.h,v 1.2 2009/10/13 15:44:59 fine Exp $
+// $Id: StStreamFile.h,v 1.3 2010/01/06 20:09:39 fine Exp $
 // $Log: StStreamFile.h,v $
+// Revision 1.3  2010/01/06 20:09:39  fine
+// RT #1794. Add EventNumber method to the StStreamFile interface RT # 1794
+//
 // Revision 1.2  2009/10/13 15:44:59  fine
 // add the method to provide the error message
 //
@@ -39,10 +42,11 @@ public:
   void  Perror(const char * header=0) const;
 
 public: // abstract interface  
-  virtual fstream &Read()       = 0;
-  virtual char *Record()        = 0;
-  virtual int   Length()  const = 0;
-  virtual int   Version() const = 0;
+  virtual fstream &Read()           = 0;
+  virtual char *Record()            = 0;
+  virtual int   Length()  const     = 0;
+  virtual int   Version() const     = 0;
+  virtual int   EventNumber() const = 0;
 
 public: // fstream proxy interface   
   // fstream proxy methods
@@ -55,8 +59,9 @@ public: // fstream proxy interface
   bool is_open()          { return fStream.is_open(); }
   ios_base::iostate rdstate() const { return fStream.rdstate(); }
 
-  fstream &stream()             { return fStream ;    }
-  const fstream &stream() const { return fStream ;    }
+  fstream &stream()                 { return fStream ;    }
+  const fstream &stream()  const    { return fStream ;    }
+  const string &filename() const    { return fFilename;   }
   
 protected:
   istream &read(char *s, streamsize n);

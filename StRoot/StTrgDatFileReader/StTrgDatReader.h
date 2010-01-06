@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.h,v 1.1 2009/10/13 15:53:31 fine Exp $
+// $Id: StTrgDatReader.h,v 1.2 2010/01/06 20:09:39 fine Exp $
 //
 // $Log: StTrgDatReader.h,v $
+// Revision 1.2  2010/01/06 20:09:39  fine
+// RT #1794. Add EventNumber method to the StStreamFile interface RT # 1794
+//
 // Revision 1.1  2009/10/13 15:53:31  fine
 // Akio\'s DAT file format reader
 //
@@ -30,6 +33,7 @@ public: // implementation of StStreamFile abstract interface
   char *Record();
   int   Length()  const;
   int   Version() const;
+  int   EventNumber() const;
   
 protected :
   char *Buffer(streamsize n);
@@ -38,6 +42,7 @@ private:
         
   int     mLength;
   int     mVersion;
+  int     mEventNumber;
   char   *mData;
   streamsize mAllocated;
   static const int mLheader; // the length of the header
