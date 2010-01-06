@@ -34,7 +34,7 @@
 //    histsSetB/* 4 1.7e-8 12.0
 //    histsSetC/* 4 1.7e-8 15.0
 // A ! at the beginning of a file spec will cause the optional SpaceCharge
-// oofset to be read in on that line:
+// offset to be read in on that line:
 //    !histsSetC/* 4 0 12.0 550
 // A # at the beginning of a file spec will cause that dataset to be skipped:
 //    #histsSetC/* 4 0 12.0
@@ -51,8 +51,11 @@
 #include "TGraphErrors.h"
 #include "TF1.h"
 #include "TProfile.h"
+#include "TArrayD.h"
 #include "TCut.h"
 #include "TPolyMarker.h"
+#include "TVirtualFitter.h"
+#include "TMath.h"
 #include <Stiostream.h>
 #endif
 
@@ -66,11 +69,12 @@ int  FitLine(TTree* SC, const char* v0, const char* v1, double window,
 int  Waiting();
 double Differ(double s0, double s1, double* co);
 void FindMinMax(TH1* h, double& min, double& max);
+int SetDivb(TH1I& hh, TArrayD& divb);
 
 
 // Global parameters:
 const int nfip=128;
-const int nsca=5;
+const int nsca=32;
 const int npos=nfip*nsca;
 TCanvas* c1 = 0;
 TChain* SCi[nfip];
@@ -87,13 +91,10 @@ TCut cut;
 // outliers from the distributions. No good ways to determine
 // this a priori, so set by hand for now
 
-//double MAX_GAPD = 0.012; // 0.005
-//double MAX_SC = 0.0010; // 0.0003
-double MAX_GAPF = 0.025; // 0.005
-double MAX_GAPD = 0.015; // 0.005
 double MAX_SC = 0.0010; // 0.0003
-//double MAX_GAPD = 0.010; // 0.005
-//double MAX_SC = 0.0010; // 0.0003
+//double MAX_GAPF = 0.025; // 0.005
+double MAX_GAPF = 0.035; // 0.005
+//double MAX_SC = 0.0006; // 0.0003
 
 //////////////////////////////////////////////////
 
@@ -110,6 +111,8 @@ dets[2] = "zdcx"     ;
 dets[3] = "zdce+zdcw";
 dets[4] = "bbce+bbcw";
 
+int dets_used[nsca];
+memset(dets_used,0,nsca*sizeof(int));
 int minsca = 0;
 int maxsca = nsca;
 if (scaler>=0) { minsca = scaler; maxsca = scaler+1; }
@@ -141,6 +144,7 @@ for (i=0;i<nfi;i++) {
   } else {
     uso[i] = 0;
   }
+  dets_used[det[i]] = 1;
  
   if (fname[0]=='#') i--; // Skip lines beginning with #
 }
@@ -182,6 +186,8 @@ for (i=0;i<nfi;i++) { // run
 
   // Loop over available scaler detectors
   for (j=minsca;j<maxsca;j++) {
+    if (scaler>=0 && !(dets_used[j] || j==scaler)) continue;
+    if (dets[j].Length()<1) continue;
     indx = i + j*nfi;
     double pr,pg,pl,po,pgE,plE,poE,pgo,pgoE;
     const char* dt = dets[j].Data();
@@ -194,10 +200,10 @@ for (i=0;i<nfi;i++) { // run
     result = FitLine(SCi[i],"sc",dt,MAX_SC,po,pl,poE,plE,debug);
     if (result<0) return;
   
-    TString plot = Form("sc-(%5.3g+(%5.3g)*(%s))",po,pl,dt);
+    TString plot = Form("sc-(%6.4g+(%6.4g)*(%s))",po,pl,dt);
     SCi[i]->Draw(plot.Data(),cut);
     pr = SCi[i]->GetHistogram()->GetRMS();
-    if (debug>0) printf("RMS = %5.3g for %s\n",pr,dt);
+    if (debug>0) printf("RMS = %6.4g for %s\n",pr,dt);
 
     rms[indx] = pr;
     glk[indx] = pg;
@@ -256,7 +262,7 @@ for (i=0; i<nfi; i++) {
     if (j==i) {
       // determine scale factors between the scaler quantities
       double temp1,temp2,temp3;
-      result = FitLine(SCi[nfip-1],dets[det[i]],dets[jmin],1e10,temp1,sca[i],temp2,temp3,debug);
+      result = FitLine(SCi[nfip-1],dets[det[i]],dets[jmin],0,temp1,sca[i],temp2,temp3,debug);
       if (result<0) return;
     }
     uindx = i + det[i]*nfi; // for the detector used in the dataset
@@ -264,7 +270,7 @@ for (i=0; i<nfi; i++) {
     sca[i] = 1.0;
     uindx = indx;
   }
-  if (debug>2) printf("RMS=%5.3g Lum=%5.3g Glk=%5.3g\n",
+  if (debug>2) printf("RMS=%6.4g Lum=%6.4g Glk=%6.4g\n",
     rms[indx],lum[indx],glk[indx]);
 
   // Fill the graphs which will be fit
@@ -293,7 +299,7 @@ p0 = go_fit->GetParameter(0);
 p1 = go_fit->GetParError(0);
 p2 = go_fit->GetParameter(1);
 p3 = go_fit->GetParError(1);
-//printf("\nGap at zero correction = (%5.3g +/- %5.3g) + zdc*(%5.3g +/- %5.3g)\n",p0,p1,p2,p3);
+//printf("\nGap at zero correction = (%6.4g +/- %6.4g) + zdc*(%6.4g +/- %6.4g)\n",p0,p1,p2,p3);
 
 
 //////////////////////////////////////////
@@ -305,7 +311,7 @@ if (allZeros) {
   for (i=0; i<nfi; i++) {
     indx = i + jmin*nfi;
     double sop = -off[indx]/lum[indx];
-    printf("SC = %5.3g * ((%s) - (%5.3g))",lum[indx],detbest,sop);
+    printf("SC = %6.4g * ((%s) - (%6.4g))",lum[indx],detbest,sop);
     printf(" with GL = %4.1f\n\n",ugl[i]);
   }
   c1->cd(1);
@@ -332,6 +338,7 @@ if (allZeros) {
 // GLK(obs) = 0  when  SC*GL = -p0/p1
 c1->cd(1);
 gr_lk->Fit("pol1","Q");
+double* cov = TVirtualFitter::GetFitter()->GetCovarianceMatrix();
 TF1* lk_fit = gr_lk->GetFunction("pol1");
 lk_fit->SetLineColor(4);
 gr_lk->Draw("AP");
@@ -340,8 +347,8 @@ p1 = lk_fit->GetParameter(1);
 ep0 = lk_fit->GetParError(0);
 ep1 = lk_fit->GetParError(1);
 double scXgl = -p0/p1;
-double escXgl = scXgl*TMath::Sqrt(pow(ep0/p0,2)+pow(ep1/p1,2));
-printf("* Constraint on SC x GL = %5.3g +/- %5.3g\n",scXgl,escXgl);
+double escXgl = scXgl*TMath::Sqrt(cov[0]/(p0*p0)+cov[3]/(p1*p1)+2.*cov[1]/(-p0*p1));
+printf("* Constraint on SC x GL = %6.4g +/- %6.4g\n",scXgl,escXgl);
 
 if (!scgl_fit) scgl_fit = new TF1("scgl_fit","[0]/x",-5.,100.);
 scgl_fit->SetParameter(0,scXgl);
@@ -426,10 +433,10 @@ coefs[1] = p1*scXgl;
 coefs[0] = p2*scXgl*scXgl;
 one_sol = TMath::RootsCubic(coefs,s0,s1,s2); // Find root of cubic polynomial
 if (one_sol) {
-  printf("* Guesses on SC = %5.3g , %5.3g\n",scp,s0);
+  printf("* Guesses on SC = %6.4g , %6.4g\n",scp,s0);
   scp1 = s0;
 } else {
-  printf("* Guesses on SC = %5.3g , %5.3g , %5.3g , %5.3g\n",scp,s0,s1,s2);
+  printf("* Guesses on SC = %6.4g , %6.4g , %6.4g , %6.4g\n",scp,s0,s1,s2);
   diff0 = Differ(scp,s0,coefs);
   diff1 = Differ(scp,s1,coefs);
   diff2 = Differ(scp,s2,coefs);
@@ -445,10 +452,10 @@ coefs[1] = p0;
 coefs[0] = -scXgl;
 one_sol = TMath::RootsCubic(coefs,s0,s1,s2); // Find root of cubic polynomial
 if (one_sol) {
-  printf("* Guesses on GL = %5.3g , %5.3g\n",glp,s0);
+  printf("* Guesses on GL = %6.4g , %6.4g\n",glp,s0);
   glp2 = s0;
 } else {
-  printf("* Guesses on GL = %5.3g , %5.3g , %5.3g , %5.3g\n",glp,s0,s1,s2);
+  printf("* Guesses on GL = %6.4g , %6.4g , %6.4g , %6.4g\n",glp,s0,s1,s2);
   diff0 = Differ(glp,s0,coefs);
   diff1 = Differ(glp,s1,coefs);
   diff2 = Differ(glp,s2,coefs);
@@ -487,7 +494,7 @@ gr_s2->Fit("pol2","Q");
 gr_s2->Draw("AP");
 TF1* s2_fit = gr_s2->GetFunction("pol2");
 double s2p = -(s2_fit->Eval(scp))/scp;
-printf("* Guesses on SO = %5.3g , %5.3g\n",sop,s2p);
+printf("* Guesses on SO = %6.4g , %6.4g\n",sop,s2p);
 sop = 0.5*(sop+s2p);
 
 double som = -scp*sop;
@@ -499,7 +506,7 @@ mark.DrawPolyMarker(1,&glp,&som);
 //////////////////////////////////////////
 // Done
 printf("\n*** FINAL CALIBRATION VALUES: ***\n");
-printf("SC = %5.3g * ((%s) - (%5.3g))",scp,detbest,sop);
+printf("SC = %6.4g * ((%s) - (%6.4g))",scp,detbest,sop);
 printf(" with GL = %5.2f\n\n",glp);
 
 
@@ -507,7 +514,7 @@ c1->Update(); c1->Draw();
 
 // Set colors/markers for any further fun
 for (i=0;i<nfi;i++) {
-  int color = 60+40.0*((float) i)/((float) (nfi-1));
+  int color = 60 + (int) (40.0*((float) i)/((float) (nfi-1)));
   SCi[i]->SetMarkerColor(color);
   SCi[i]->SetLineColor(color);
   SCi[i]->SetMarkerStyle(22+i);
@@ -528,7 +535,7 @@ int FitLine(TTree* SC, const char* v0, const char* v1, double window,
   TF1 fline("fline","[0]+[1]*x");
   fline.SetParameters(0,0);
   p0 = 0; p1 = 0;
-  int i,j,nbinsc = 12;
+  int i,j,nbinsc = 8;
   if (gr_temp) delete gr_temp;
   gr_temp = new TGraphErrors(nbinsc);
   gr_temp->SetMarkerStyle(25);
@@ -536,39 +543,66 @@ int FitLine(TTree* SC, const char* v0, const char* v1, double window,
 
   TCut cut2 = "";
   TString plot = Form("%s:%s",v0,v1);
-  TString prof = plot + ">>hsca";
-  TString profp = Form("%s:%s>>hscap",v1,v1);
+  //TString prof = plot + ">>hsca";
+  //TString profp = Form("%s:%s>>hscap",v1,v1);
+  TString plotb = Form("%s>>hscab",v1);
   if (debug>2) printf("FitLine for \"%s\" from \"%s\"\n",plot.Data(),SC->GetTitle());
   SC->Draw(v1,cut);
   TH1* HSC = SC->GetHistogram();
   if (!HSC) printf("Problem creating hist of \"%s\" from \"%s\"\n",v1,SC->GetTitle());
   double hmin,hmax;
   FindMinMax(HSC,hmin,hmax);
-  TProfile hsca("hsca","hschist",nbinsc,hmin,hmax);
-  TProfile hscap("hscap","hschistp",nbinsc,hmin,hmax);
+  //TProfile hsca("hsca","hschist",nbinsc,hmin,hmax);
+  //TProfile hscap("hscap","hschistp",nbinsc,hmin,hmax);
+  TH1I hscab("hscab","hschistb",nbinsc*100,hmin,hmax);
+  TArrayD divb(nbinsc+1);
+  divb[0] = hmin;
+  divb[nbinsc] = hmax;
 
   int count=0;
   double oldp1[256];
   while (dif>mindif && count<256) {
     if (count>0)
-      cut2 = Form("abs(%s-(%5.3g+(%5.3g)*(%s)))<%5.3g",v0,p0,p1,v1,window);
-    SC->Draw(prof.Data(),cut&&cut2,"prof"); // prof vs. profs doesn't seem to make a difference
-    SC->Draw(profp.Data(),cut&&cut2,"prof");
+      cut2 = Form("abs(%s-(%6.4g+(%6.4g)*(%s)))<%6.4g",v0,p0,p1,v1,window);
+    SC->Draw(plotb.Data(),cut&&cut2);
+    int divbs = SetDivb(hscab,divb);
+    if (divbs<3) return -5;
+    if (divbs<=nbinsc) divb[divbs] = hmax; 
     i = 0;
     double xi,yi,xf,yf;
-    for (j=1; j<=nbinsc; j++) {
-      if (TMath::Abs(hscap.GetBinError(j)) > 1e-10) {
-        gr_temp->SetPoint(i,hscap.GetBinContent(j),hsca.GetBinContent(j));
-        gr_temp->SetPointError(i,hscap.GetBinError(j),hsca.GetBinError(j));
-        if (!count) {
-          if (i>0) {
-            xf = hscap.GetBinContent(j); yf = hsca.GetBinContent(j);
-          } else {
-            xi = hscap.GetBinContent(j); yi = hsca.GetBinContent(j);
-          }
-        }
-        i++;
+    for (j=1; j<=divbs; j++) {
+      TCut cut3 = cut && cut2 &&
+                  Form("((%s)>(%6.4g)&&(%s)<(%6.4g))",v1,divb[j-1],v1,divb[j]);
+      SC->Draw(v0,cut3);
+      HSC = SC->GetHistogram();
+      if (!HSC) {
+        printf("Problem creating hist of \"%s\" from \"%s\"\n",v0,SC->GetTitle());
+        continue;
       }
+      double yj = HSC->GetMean();
+      //double eyj = HSC->GetRMS(); // spread of the points tells the y error
+      //double eyj = HSC->GetMeanError();
+      double eyj = TMath::Sqrt(HSC->GetRMS()*HSC->GetRMS()
+                             + HSC->GetMeanError()*HSC->GetMeanError());
+      SC->Draw(v1,cut3);
+      HSC = SC->GetHistogram();
+      if (!HSC) {
+        printf("Problem creating hist of \"%s\" from \"%s\"\n",v1,SC->GetTitle());
+        continue;
+      }
+      double xj = HSC->GetMean();
+      //double exj = HSC->GetRMS();
+      double exj = HSC->GetMeanError(); // scaler position error is mean error
+      gr_temp->SetPoint(i,xj,yj);
+      gr_temp->SetPointError(i,exj,eyj);
+      if (!count) { // prepare initial guess on slope
+        if (i>0) {
+          xf = xj; yf = yj;
+        } else {
+          xi = xj; yi = yj;
+        }
+      }
+      i++;
     }
     if (i<2) {
       printf("Problem with fit! Too few points remain!\n");
@@ -576,25 +610,33 @@ int FitLine(TTree* SC, const char* v0, const char* v1, double window,
     }
     if (!count) fline.SetParameter(1,(yf-yi)/(xf-xi));
     gr_temp->Set(i);
-    //hsca.Fit(&fline,"C");
     gr_temp->Fit(&fline,"QC");
     if (debug>4) {
       c1->Clear();
       gr_temp->Draw("AP");
-      //hsca.Draw("same");
 
       SC->Draw(plot.Data(),cut&&cut2,"same");
       c1->Update(); c1->Draw();
       if (debug>5 && Waiting()<0) return -1;
     }
     p0 = fline.GetParameter(0); p1 = fline.GetParameter(1);
-    e0 = fline.GetParError(0) ; e1 = fline.GetParError(1);
-    dif = 1.0;
-    for (int cmp=0; cmp<count; cmp++) {
-      double olddif = 1e10;
-      if (oldp1[cmp]!=0) olddif = TMath::Abs(1.0-(p1/oldp1[cmp]));
-      dif = TMath::Min(dif,olddif);
-    }
+    //e0 = fline.GetParError(0) ; e1 = fline.GetParError(1);
+    fline.FixParameter(0,p0);
+    gr_temp->Fit(&fline,"QC");
+    e1 = fline.GetParError(1);
+    fline.ReleaseParameter(0);
+    fline.FixParameter(1,p1);
+    gr_temp->Fit(&fline,"QC");
+    e0 = fline.GetParError(0);
+    fline.ReleaseParameter(1);
+    if (window>1e-19) {
+      dif = 1.0;
+      for (int cmp=0; cmp<count; cmp++) {
+        double olddif = 1e10;
+        if (oldp1[cmp]!=0) olddif = TMath::Abs(1.0-(p1/oldp1[cmp]));
+        dif = TMath::Min(dif,olddif);
+      }
+    } else dif = 0;
     oldp1[count]=p1;
     if (debug>3) printf("Finishing iteration %d\n",count);
     count++;
@@ -630,9 +672,31 @@ void FindMinMax(TH1* h, double& min, double& max) {
   max += margin;
 }
 
+int SetDivb(TH1I& hh, TArrayD& divb) {
+  // Find the divisions which make for equal stats
+  double* integrals = hh.GetIntegral();
+  int nbins = divb.GetSize()-1;
+  double frac = 1.0/((float) nbins);
+  int bin=1; int step=1; int count=0;
+  while (step<nbins && bin<=hh.GetNbinsX()) {
+    // Require at least 2 entries per bin
+    count += (int) hh.GetBinContent(bin);
+    if (integrals[bin] >= step*frac && count>1) {
+      divb.AddAt(hh.GetXaxis()->GetBinCenter(bin),step);
+      step++; count=0;
+    }
+    bin++;
+  }
+  return step;
+}
+
+
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 1.4 2008/04/30 14:54:38 genevb Exp $
+// $Id: Calib_SC_GL.C,v 1.5 2010/01/06 17:56:43 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 1.5  2010/01/06 17:56:43  genevb
+// Improvements to the fitter
+//
 // Revision 1.4  2008/04/30 14:54:38  genevb
 // Use gapf; get initial guess on linear fit
 //
