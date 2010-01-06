@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.84 2010/01/06 20:09:38 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.85 2010/01/06 20:42:26 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.85  2010/01/06 20:42:26  fine
+ * Fix type EventNumber shoould be RunNumber . Thanks Akio
+ *
  * Revision 1.84  2010/01/06 20:09:38  fine
  * RT #1794. Add EventNumber method to the StStreamFile interface RT # 1794
  *
@@ -583,22 +586,21 @@ int StDAQReader::getRunNumber()   const
 {
      // return the run number from the DAQ file header
 
-   return
-           fDaqFileReader  ?
-             fDaqFileReader->run 
-          :
-             fEventReader->runno();
+   int runNum = -1;
+   if (fDatFileReader) 
+      runNum = fDatFileReader->RunNumber();
+   else if (fDaqFileReader ) 
+      runNum = fDaqFileReader->run;
+   else 
+      runNum =  fEventReader->runno(); 
+   return runNum;
 }
 //_____________________________________________________________________________
 int StDAQReader::getEventNumber() const {
-   int evtNum = -1;
-   if (fDatFileReader) 
-      evtNum = fDatFileReader->EventNumber();
-   else if (fDaqFileReader ) 
-      evtNum = fDaqFileReader->seq;
-   else 
-      evtNum = fEventInfo->EventSeqNo;
-   return evtNum;
+     return fDaqFileReader  ? 
+           fDaqFileReader->seq
+                     :
+           fEventInfo->EventSeqNo;
 }
 //_____________________________________________________________________________
 unsigned int StDAQReader::getUnixTime() const {
