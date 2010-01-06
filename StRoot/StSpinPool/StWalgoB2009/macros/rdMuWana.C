@@ -139,7 +139,7 @@ int rdMuWana(
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
-    //dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
+    //mak it off  dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }
 
     
@@ -202,11 +202,10 @@ int rdMuWana(
     ZMk->attachWalgoMaker(WmuMk);
     ZMk->setHList(HList); 
     ZMk->setNearEtFrac(0.88);
-    ZMk->set4x4EtFrac(0.95);
     ZMk->setClusterMinEt(25);
     ZMk->setPhi12Min(3.1416/2.);
-    ZMk->setMinZMass(75);
-    ZMk->setMaxZMass(105);
+    ZMk->setMinZMass(73.); // Zmass -20%
+    ZMk->setMaxZMass(114.);// Zmass +20%
   }
 
   TChain* tree=muMk->chain(); assert(tree);
@@ -257,6 +256,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.9  2010/01/06 04:22:18  balewski
+// added Q/PT plot for Zs, more cleanup
+//
 // Revision 1.8  2010/01/05 03:23:02  balewski
 // change logic for filling btow status tables, added printout to Z-code
 //

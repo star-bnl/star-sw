@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.2 2010/01/06 04:22:15 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -37,10 +37,9 @@ St2009WMaker::find_W_boson(){
       hA[117]->Fill(T.cluster.ET,T.awayTotCone/T.cluster.ET);
 
       //     if(T.cluster.ET /T.nearTotET<0.6 && T.awayTotET >20) // di-jets
-      if(T.awayTotET>45 && T.cluster.ET >35) // Z-candidates
-	if(1){/***************************/
+ 	if(0){/***************************/
 	  printf("\n WWWWWWWWWWWWWWWWWWWWW\n");
-	  wDisaply->exportEvent(  V, T);
+	  wDisaply->exportEvent( "W", V, T);
 	  wEve.print();
 	}/***************************/
  
@@ -452,6 +451,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow, TVe
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.2  2010/01/06 04:22:15  balewski
+// added Q/PT plot for Zs, more cleanup
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 // 

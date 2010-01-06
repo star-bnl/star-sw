@@ -3,6 +3,8 @@
 #include <TLine.h>
 #include <TMath.h>
 
+#include "St2009WMaker.h"
+
 #include "St2009ZMaker.h"
 
 //________________________________________________
@@ -23,9 +25,8 @@ St2009ZMaker::initHistos(){
   hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
-  const char *key[]={"inp","vert","tr1","et1","Tfr1","4fr1","tr2","et2","Tfr2","4fr2","phi12","m2","QQ","Zlow","Zhigh"};
-  for(int i=0;i<15;i++) h->Fill(key[i],0.); // preset the order of keys
-
+  const char *key[]={"inp","vert","TT","tr1","et1","Tfr1","tr2","et2","Tfr2","phi12","m2","QQ","Zlow","Zhigh"};
+  for(int i=0;i<14;i++) h->Fill(key[i],0.); // preset the order of keys
 
   
   //final selection stuff:
@@ -50,10 +51,11 @@ St2009ZMaker::initHistos(){
   hA[14]=h=new TH1F(core+"ZmassLike","  Final Z selection with Like Charges on both tracks; Invariant Mass (GeV)", 100,0,200);
 
   //cut details:
-  hA[15]=h=new TH1F(core+"ZmassUnlike","  Final Z selection with Unlike Charges on both tracks; Invariant Mass (GeV)", 100,0,200);
+  hA[15]=h=new TH1F(core+"ZmassUnlike","  Final Zs,  Unlike Charge pairs; Invariant Mass (GeV)", 100,0,200);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_minMassZ,0,par_minMassZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   ln=new TLine(par_maxMassZ,0,par_maxMassZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  ln=new TLine(91.2,-.02,91.2,0.8);  ln->SetLineColor(kRed); ln->SetLineWidth(3);  Lx->Add(ln);
 
   hA[21]=h=new TH2F(core+"fmax_v_fmaxbefore","Final Z Selection, Fmax v Fmax;fmax1;fmax2",100,0,1,100,0,1);
   hA[22]=h=new TH2F(core+"et_v_etbefore","Transverse Energies of the two Clusters;Et1;Et2",100,0,100,100,0,100);
@@ -75,36 +77,29 @@ St2009ZMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_nearTotEtFracZ,0,par_nearTotEtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
-  hA[27]=h=new TH1F(core+"phi12","delta phi tr1-tr2; delPhi12(rad)", 100 ,-PI,PI);
+  hA[27]=h=new TH1F(core+"phi12","delta phi tr1-tr2; delPhi12(rad)", 100 ,-PI+1.,PI+1.);
+  h->SetFillColor(kBlue);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_delPhi12,0,par_delPhi12,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   ln=new TLine(-par_delPhi12,0,-par_delPhi12,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
-  hA[28]=h=new TH1F(core+"m2","inv mass^2; M^2 (GeV^2)", 100 ,-1e6,1e6);
-  h->SetFillColor(kBlue);
-
 
   hA[29]=h=new TH1F(core+"et1iso","Track-1 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
   Lx=h->GetListOfFunctions();
-  ln=new TLine(par_4x4EtFracZ,0,par_4x4EtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  ln=new TLine(wMK->par_clustFrac24,0,wMK->par_clustFrac24,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
   hA[30]=h=new TH1F(core+"et2iso","Track-2 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
   Lx=h->GetListOfFunctions();
-  ln=new TLine(par_4x4EtFracZ,0,par_4x4EtFracZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  ln=new TLine(wMK->par_clustFrac24,0,wMK->par_clustFrac24,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
 
   //event/vertex details:
   hA[31]=h=new TH1F(core+"nVertices","Number of vertices per event",10,0,10);
   hA[32]=h=new TH1F(core+"nTracks","Number of tracks per vertex",20,0,20);
 
-  //evolution of cuts:
-  hA[40]=h=new TH1F(core+"Zmass_cut0","Before cuts; Invariant Mass (GeV)", 50,0,200);
-  hA[41]=h=new TH1F(core+"Zmass_cut1","after first fmax cut; Invariant Mass (GeV)", 50,0,200);
-  hA[42]=h=new TH1F(core+"Zmass_cut2","after both fmax cuts; Invariant Mass (GeV)", 50,0,200);
-  hA[43]=h=new TH1F(core+"Zmass_cut3","after both ET cuts; Invariant Mass (GeV)", 50,0,200);
-  hA[44]=h=new TH1F(core+"Zmass_cut4","after shared cluster cut; Invariant Mass (GeV)", 50,0,200);
-  hA[45]=h=new TH1F(core+"Zmass_cut5","after min mass cut; Invariant Mass (GeV)", 50,0,200);
-  hA[46]=h=new TH1F(core+"Zmass_cut6","after max mass cut; Invariant Mass (GeV)", 50,0,200);
+  hA[33]=h=new TH2F(core+"chRecPNp","TPC PRIM  Q/PT , pairs of unlike Qs; 2x2 cluster ET (GeV); Q/PT",100,0.,100.,100,-0.1,0.1);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
 
   // add histos to the list (if provided)
