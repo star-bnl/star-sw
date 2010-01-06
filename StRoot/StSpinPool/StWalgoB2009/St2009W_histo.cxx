@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.3 2010/01/06 14:11:13 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.4 2010/01/06 19:16:48 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -76,23 +76,22 @@ St2009WMaker::initHistos(){
   for(int i=0;i<14;i++) h->Fill(keyT[i],0.); // preset the order of keys
 
 
-
-  hA[21]=h=new TH1F("muTrNfit","global track  in-selection & vertexZ; nFitPoints",50,0,50);
+  hA[21]=h=new TH1F("muTrNfit","primary track  in-selection & vertexZ; nFitPoints",50,0,50);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_nFitPts,0,par_nFitPts,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-  hA[22]=h=new TH1F("muTrFitFrac","global track in-selection & vertexZ; nFit/nPoss ",50,0,1.1);
+  hA[22]=h=new TH1F("muTrFitFrac","primary track in-selection & vertexZ; nFit/nPoss ",50,0,1.1);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_nHitFrac,0,par_nHitFrac,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-  hA[23]=h=new TH1F("muTrRxyIn","global track first hit  in-selection & vertexZ; Rxy (cm)",60,50,170.);
+  hA[23]=h=new TH1F("muTrRxyIn","primary track first hit  in-selection & vertexZ; Rxy (cm)",60,50,170.);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_trackRin,0,par_trackRin,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-  hA[24]=h=new TH1F("muTrRxyOut","global track last hit  in-selection & vertexZ; Rxy (cm)",60,100,220.);
+  hA[24]=h=new TH1F("muTrRxyOut","primary track last hit  in-selection & vertexZ; Rxy (cm)",60,100,220.);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_trackRout,0,par_trackRout,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-
+  
   hA[25]=h=new TH1F("muTrPt1","global track PT ; track PT (GeV/c)",160,0,80);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_trackPt,0,par_trackPt,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln); h->SetFillColor(kYellow);
@@ -130,6 +129,7 @@ St2009WMaker::initHistos(){
    hA[38]=h=new TH2F("muBclE242D","Excess energy in 4x4 cluster vs. 2x2 E;2x2 cluster E (GeV); E(4x4)-E(2x2)  E (GeV)",50,0,80,50,0,60);
 
    hA[39]=h=new TH1F("muBclET24R"," ratio (2x2/4x4) cluster ET ; fraction: cluster ET 2x2/ 4x4 ET",100,0,1.2);
+   //hA[39]=h=new TH1F("muBclET24R",Form(" ratio (2x2 ET)/(4x4 ET + Tpc pT #Delta R=%.1f) ; fraction: (2x2 ET)/(4x4 ET + Tpc pT in #Delta R=%.1f) ET",par_smallNearDeltaR,par_smallNearDeltaR),100,0,1.2);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_clustFrac24,0,par_clustFrac24,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
@@ -173,8 +173,10 @@ St2009WMaker::initHistos(){
   ln=new TLine(par_awayTotET,0,par_awayTotET,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   hA[55]=h=new TH1F("muEwayET"," ETOW away-cone ET sum;   ET (GeV)",100,0,100); // away side energy  
+  
+  hA[56]=h=new TH1F("muSmallNearTpcPT",Form("TPC PT in #Delta R =%.1f from lepton candidate; PT (GeV)",par_smallNearDeltaR),100,0,100);
 
-  //free 56-59
+  //free 57-59
 
   //... final golden plots ....
 
@@ -228,8 +230,6 @@ St2009WMaker::initHistos(){
   
   // free 
 
-  hA[117]=h=new TH2F("awayCone_Clust"," away Cone ET Ratio vs. 2x2 cluster ET;  2x2 ET (GeV); away Cone ET / 2x2 ET ",50,0,100,40,0,2); //JS
-
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
     if(  hA[i]==0) continue;
@@ -242,6 +242,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.4  2010/01/06 19:16:48  stevens4
+// track cuts now on primary component, cleanup
+//
 // Revision 1.3  2010/01/06 14:11:13  balewski
 // one Z-plot added
 //

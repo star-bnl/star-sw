@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.3 2010/01/06 14:11:13 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.4 2010/01/06 19:16:47 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -35,8 +35,7 @@ St2009WMaker::find_W_boson(){
       hA[55]->Fill(T.awayEtowET);
       hA[60]->Fill(T.cluster.ET,T.awayTpcPT);
       hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
-      hA[117]->Fill(T.cluster.ET,T.awayTotCone/T.cluster.ET);
-
+      
       //     if(T.cluster.ET /T.nearTotET<0.6 && T.awayTotET >20) // di-jets
  	if(0){/***************************/
 	  printf("\n WWWWWWWWWWWWWWWWWWWWW\n");
@@ -74,52 +73,6 @@ St2009WMaker::find_W_boson(){
 //________________________________________________
 //________________________________________________
 void
-St2009WMaker::findAwayCone(){              
-
-  for(uint iv=0;iv<wEve.vertex.size();iv++) {
-    WeveVertex &V=wEve.vertex[iv];
-    for(uint it=0;it<V.eleTrack.size();it++) {
-      WeveEleTrack &T=V.eleTrack[it];
-      if(T.isMatch2Cl==false) continue;
-
-      
-      TVector3 maxBtow=T.maxAwayBtow;
-      TVector3 maxEtow=T.maxAwayEtow;
-      TVector3 maxTr=T.maxAwayTr;
-      TVector3 zero;
-      if(maxBtow==zero && maxEtow==zero && maxTr==zero) continue;//no high pT seed
-            
-      TVector3 refAxis; float awayTpcCone,awayBtowCone,awayEtowCone,awayTotCone;
-      
-      int blank=0;
-      for(int j=0;j<3;j++){ //loop over seed vectors
-	if(j==0) refAxis=maxBtow;
-	else if(j==1) refAxis=maxEtow;
-	else if(j==2) refAxis=maxTr;
-	
-	if(refAxis==zero) continue;//skip if seed vector==0
-	
-	//sum cone around seed vector
-	awayBtowCone=sumBtowCone(V.z,refAxis,3,blank,zero);
-	awayEtowCone=sumEtowCone(V.z,refAxis,3,blank,zero);
-	awayTpcCone=sumTpcCone(V.id,refAxis,3,blank,zero);
-	awayTotCone=awayBtowCone+awayTpcCone+awayEtowCone;
-	
-	//find seed with max cone sum 
-	if(awayTotCone>T.awayTotCone){ 
-	  T.awayTotCone=awayTotCone;
-	  T.awayConeAxis=refAxis;
-	}
-      }
-            
-    }// end of loop over tracks
-  }// end of loop over vertices
-}                                      
-
-
-//________________________________________________
-//________________________________________________
-void
 St2009WMaker::findAwayJet(){
   // printf("\n******* find AwayJet() nVert=%d\n",wEve.vertex.size());
   //wEve.print();
@@ -130,13 +83,13 @@ St2009WMaker::findAwayJet(){
       if(T.isMatch2Cl==false) continue;
       
       // .... sum opposite in phi EMC components
-      T.awayBtowET=sumBtowCone(V.z,-T.primP,1,T.awayNTow,T.maxAwayBtow); // '1'= only cut on delta phi
+      T.awayBtowET=sumBtowCone(V.z,-T.primP,1,T.awayNTow); // '1'= only cut on delta phi
       T.awayEmcET=T.awayBtowET;
-      T.awayEtowET=sumEtowCone(V.z,-T.primP,1,T.awayNTow,T.maxAwayEtow);
-      if(par_useEtow >= 2) T.awayEmcET+=T.awayEtowET;     
+      T.awayEtowET=sumEtowCone(V.z,-T.primP,1,T.awayNTow);
+      if(par_useEtow >= 2) T.awayEmcET+=T.awayEtowET;
 
       //..... add TPC ET
-      T.awayTpcPT=sumTpcCone(V.id,-T.primP,1,T.awayNTr,T.maxAwayTr); 
+      T.awayTpcPT=sumTpcCone(V.id,-T.primP,1,T.awayNTr);
       T.awayTotET=T.awayEmcET+T.awayTpcPT;
       //printf("\n*** in   awayTpc=%.1f awayEmc=%.1f\n  ",T.awayTpcPT,T.awayEmcET); T.print(); 
     }// end of loop over tracks
@@ -155,17 +108,17 @@ St2009WMaker::findNearJet(){
       WeveEleTrack &T=V.eleTrack[it];
       if(T.isMatch2Cl==false) continue;
 
-      // .... sum EMC-jet component
-      T.nearBtowET=sumBtowCone(V.z,T.primP,2,T.nearNTow,T.maxNearBtow); // '2'=2D cone
+       // .... sum EMC-jet component
+      T.nearBtowET=sumBtowCone(V.z,T.primP,2,T.nearNTow); // '2'=2D cone
       T.nearEmcET+=T.nearBtowET;
-      T.nearEtowET=sumEtowCone(V.z,T.primP,2,T.nearNTow,T.maxNearEtow);
-      if(par_useEtow >= 3) T.nearEmcET+=T.nearEtowET;    
+      T.nearEtowET=sumEtowCone(V.z,T.primP,2,T.nearNTow);
+      if(par_useEtow >= 3) T.nearEmcET+=T.nearEtowET;
       // .... sum TPC-near component
-      T.nearTpcPT=sumTpcCone(V.id,T.primP,2,T.nearNTr,T.maxNearTr); // '2'=2D cone
+      T.nearTpcPT=sumTpcCone(V.id,T.primP,2,T.nearNTr); // '2'=2D cone
       hA[47]->Fill(T.nearTpcPT);
       hA[48]->Fill(T.nearEmcET,T.nearTpcPT);
       float nearSum=T.nearEmcET+T.nearTpcPT;
-
+      
       /* correct for double counting of electron track in near cone
 	 rarely primTrPT<10 GeV & globPT>10 - handle this here */
       if(T.primP.Pt()>par_trackPt) nearSum-=par_trackPt; 
@@ -203,7 +156,7 @@ St2009WMaker::matchTrack2Cluster(){
       T.isMatch2Cl=false; // just in case (was already set in constructor)
       if(T.pointTower.id==0) continue;
       
-      float trackPT=T.glMuTrack->momentum().perp();
+      float trackPT=T.prMuTrack->momentum().perp();
       T.cluster=maxBtow2x2( T.pointTower.iEta, T.pointTower.iPhi,zVert);      
       hA[33]->Fill( T.cluster.ET);
       hA[34]->Fill(T.cluster.adcSum,trackPT);
@@ -218,7 +171,14 @@ St2009WMaker::matchTrack2Cluster(){
       T.cl4x4=sumBtowPatch(iEta-1,iPhi-1,4,4,zVert);
       hA[37]->Fill( T.cl4x4.ET);
       hA[38]->Fill(T.cluster.energy, T.cl4x4.energy-T.cluster.energy);
-      float frac24=T.cluster.ET/ T.cl4x4.ET;
+      
+      //sum tpc PT  near lepton candidate track
+      T.smallNearTpcPT=sumTpcCone(V.id,T.primP,3,T.smallNearNTr);
+      hA[56]->Fill(T.smallNearTpcPT);
+      T.smallNearTpcPT-=par_trackPt;
+
+      float frac24=T.cluster.ET/(T.cl4x4.ET);
+      //float frac24=T.cluster.ET/(T.cl4x4.ET+T.smallNearTpcPT);
       hA[39]->Fill(frac24);
       if(frac24<par_clustFrac24) continue;
   
@@ -332,7 +292,7 @@ St2009WMaker::extendTrack2Barrel(){// return # of extended tracks
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
       //.... extrapolate track to the barrel @ R=entrance....
-      const StPhysicalHelixD TrkHlx=T.glMuTrack->outerHelix(); 
+      const StPhysicalHelixD TrkHlx=T.prMuTrack->outerHelix(); 
       float Rcylinder= mBtowGeom->Radius();
       pairD  d2; 
       d2 = TrkHlx.pathLength(Rcylinder);
@@ -377,13 +337,13 @@ St2009WMaker::extendTrack2Barrel(){// return # of extended tracks
 
 //________________________________________________
 //________________________________________________
+//________________________________________________
 float
-St2009WMaker::sumBtowCone( float zVert,  TVector3 refAxis, int flag, int &nTow, TVector3 &maxTowVec){ 
+St2009WMaker::sumBtowCone( float zVert,  TVector3 refAxis, int flag, int &nTow){ 
   /* flag=1 : only delta phi cut;  flag=2 use 2D cut */
-  assert(flag==1 || flag==2  || flag==3);
+  assert(flag==1 || flag==2);
   double ptSum=0;
-  float maxTowET=0.3;  
-
+  
   //.... process BTOW hits
   for(int i=0;i< mxBtow;i++) {
     float ene=wEve.bemc.eneTile[kBTow][i];
@@ -392,22 +352,16 @@ St2009WMaker::sumBtowCone( float zVert,  TVector3 refAxis, int flag, int &nTow, 
     primP.SetMag(ene); // it is 3D momentum in the event ref frame
     if(flag==1) {
       float deltaPhi=refAxis.DeltaPhi(primP);
-      if(fabs(deltaPhi)<(TMath::Pi()/2) && primP.Perp()>maxTowET)                                             
-	{ maxTowVec=primP; maxTowET=primP.Perp();}
       if(fabs(deltaPhi)> par_awayDeltaPhi) continue;
     }
     if(flag==2) {
       float deltaR=refAxis.DeltaR(primP);
       if(deltaR> par_nearDeltaR) continue;
     }
-    if(flag==3) {                                
-      float deltaR=refAxis.DeltaR(primP);        
-      if(deltaR> par_awayDeltaR) continue;       
-    }      
-    if(primP.Perp()>par_countTowEt) nTow++; 
+    if(primP.Perp()>par_countTowEt) nTow++;
     ptSum+=primP.Perp();
   }
-   
+  
   return ptSum;  
 }
 
@@ -415,13 +369,12 @@ St2009WMaker::sumBtowCone( float zVert,  TVector3 refAxis, int flag, int &nTow, 
 //________________________________________________
 //________________________________________________
 float
-St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow, TVector3 &maxTowVec){
+St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
   /* flag=1 : only delta phi cut;  flag=2 use 2D cut */
-  assert(flag==1 || flag==2 || flag==3);
+  assert(flag==1 || flag==2);
   
-  float ptsum=0; 
-  float maxTowET=0.3;
-
+  float ptsum=0;
+  
   //....loop over all phi bins
   for(int iphi=0; iphi<mxEtowPhiBin; iphi++){
     for(int ieta=0; ieta<mxEtowEta; ieta++){//sum all eta rings
@@ -430,28 +383,25 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow, TVe
       TVector3 primP=positionEtow[iphi][ieta]-TVector3(0,0,zVert);
       primP.SetMag(ene); // it is 3D momentum in the event ref frame
       if(flag==1) {
-	float deltaPhi=refAxis.DeltaPhi(primP);
-	if(fabs(deltaPhi)<(TMath::Pi()/2) && primP.Perp()>maxTowET)                                             
-	{ maxTowVec=primP; maxTowET=primP.Perp();}
-	if(fabs(deltaPhi)> par_awayDeltaPhi) continue;
+        float deltaPhi=refAxis.DeltaPhi(primP);
+        if(fabs(deltaPhi)> par_awayDeltaPhi) continue;
       }
       if(flag==2) {
-	float deltaR=refAxis.DeltaR(primP);
-	if(deltaR> par_nearDeltaR) continue;
+        float deltaR=refAxis.DeltaR(primP);
+        if(deltaR> par_nearDeltaR) continue;
       }
-      if(flag==3) {                                
-	float deltaR=refAxis.DeltaR(primP);        
-	if(deltaR> par_awayDeltaR) continue;       
-      }     
-      if(primP.Perp()>par_countTowEt) nTow++; 
+      if(primP.Perp()>par_countTowEt) nTow++;
       ptsum+=primP.Perp();
     }
   }
-    
+  
   return ptsum;
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.4  2010/01/06 19:16:47  stevens4
+// track cuts now on primary component, cleanup
+//
 // Revision 1.3  2010/01/06 14:11:13  balewski
 // one Z-plot added
 //
