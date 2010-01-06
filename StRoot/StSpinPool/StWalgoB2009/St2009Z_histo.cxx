@@ -55,7 +55,7 @@ St2009ZMaker::initHistos(){
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_minMassZ,0,par_minMassZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   ln=new TLine(par_maxMassZ,0,par_maxMassZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
-  ln=new TLine(91.2,-.02,91.2,0.8);  ln->SetLineColor(kRed); ln->SetLineWidth(3);  Lx->Add(ln);
+  ln=new TLine(91.2,-.2,91.2,10.);  ln->SetLineColor(kGreen); ln->SetLineWidth(3);  ln->SetLineStyle(2); Lx->Add(ln);
 
   hA[21]=h=new TH2F(core+"fmax_v_fmaxbefore","Final Z Selection, Fmax v Fmax;fmax1;fmax2",100,0,1,100,0,1);
   hA[22]=h=new TH2F(core+"et_v_etbefore","Transverse Energies of the two Clusters;Et1;Et2",100,0,100,100,0,100);
@@ -86,21 +86,22 @@ St2009ZMaker::initHistos(){
 
   hA[29]=h=new TH1F(core+"et1iso","Track-1 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
   Lx=h->GetListOfFunctions();
-  ln=new TLine(wMK->par_clustFrac24,0,wMK->par_clustFrac24,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  ln=new TLine(wMK->par_clustFrac24,0,wMK->par_clustFrac24,yMax);  ln->SetLineColor(kMagenta);  ln->SetLineStyle(2); Lx->Add(ln);
 
   hA[30]=h=new TH1F(core+"et2iso","Track-2 4x4 ET fract; 2x2ET / 4x4 ET",105,0,1.05);
   Lx=h->GetListOfFunctions();
-  ln=new TLine(wMK->par_clustFrac24,0,wMK->par_clustFrac24,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+  ln=new TLine(wMK->par_clustFrac24,0,wMK->par_clustFrac24,yMax);  ln->SetLineColor(kMagenta);  ln->SetLineStyle(2); Lx->Add(ln);
 
 
   //event/vertex details:
   hA[31]=h=new TH1F(core+"nVertices","Number of vertices per event",10,0,10);
   hA[32]=h=new TH1F(core+"nTracks","Number of tracks per vertex",20,0,20);
 
-  hA[33]=h=new TH2F(core+"chRecPNp","TPC PRIM  Q/PT , pairs of unlike charges; 2x2 cluster ET (GeV); Q/PT",100,0.,100.,100,-0.1,0.1);
+  hA[33]=h=new TH2F(core+"chRecPNp","TPC PRIM  Q/PT , black=pairs of unlike charges; 2x2 cluster ET (GeV); Q/PT",100,0.,100.,100,-0.1,0.1);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 
+  hA[34]=h=new TH2F(core+"Ene_Deta","final Z: cluster energy vs. detector eta; barrel eta bin; 2x2 Energy (GeV)",40,0,40,50,0,100);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {

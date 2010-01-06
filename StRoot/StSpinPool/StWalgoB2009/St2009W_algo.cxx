@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.2 2010/01/06 04:22:15 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.3 2010/01/06 14:11:13 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -34,6 +34,7 @@ St2009WMaker::find_W_boson(){
       hA[53]->Fill(T.cluster.ET,T.awayEmcET);
       hA[55]->Fill(T.awayEtowET);
       hA[60]->Fill(T.cluster.ET,T.awayTpcPT);
+      hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
       hA[117]->Fill(T.cluster.ET,T.awayTotCone/T.cluster.ET);
 
       //     if(T.cluster.ET /T.nearTotET<0.6 && T.awayTotET >20) // di-jets
@@ -451,6 +452,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow, TVe
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.3  2010/01/06 14:11:13  balewski
+// one Z-plot added
+//
 // Revision 1.2  2010/01/06 04:22:15  balewski
 // added Q/PT plot for Zs, more cleanup
 //
