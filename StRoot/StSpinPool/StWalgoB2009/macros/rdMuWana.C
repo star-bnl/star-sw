@@ -7,7 +7,7 @@ bool isRoss=true;
 int geant=false;
 
 int rdMuWana(
-	     int nEve=2e2,
+	     int nEve=2e3,
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
@@ -256,6 +256,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.10  2010/01/06 05:21:59  balewski
+// cleanup
+//
 // Revision 1.9  2010/01/06 04:22:18  balewski
 // added Q/PT plot for Zs, more cleanup
 //

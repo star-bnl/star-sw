@@ -25,7 +25,7 @@ St2009ZMaker::initHistos(){
   hA[0]=h=new TH1F(core+"EventType",core+" event type",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
-  const char *key[]={"inp","vert","TT","tr1","et1","Tfr1","tr2","et2","Tfr2","phi12","m2","QQ","Zlow","Zhigh"};
+  const char *key[]={"inp","vert","TT","tr1","et1","con1","tr2","et2","con2","phi12","m2","QQ","Zlow","Zhigh"};
   for(int i=0;i<14;i++) h->Fill(key[i],0.); // preset the order of keys
 
   
@@ -97,7 +97,7 @@ St2009ZMaker::initHistos(){
   hA[31]=h=new TH1F(core+"nVertices","Number of vertices per event",10,0,10);
   hA[32]=h=new TH1F(core+"nTracks","Number of tracks per vertex",20,0,20);
 
-  hA[33]=h=new TH2F(core+"chRecPNp","TPC PRIM  Q/PT , pairs of unlike Qs; 2x2 cluster ET (GeV); Q/PT",100,0.,100.,100,-0.1,0.1);
+  hA[33]=h=new TH2F(core+"chRecPNp","TPC PRIM  Q/PT , pairs of unlike charges; 2x2 cluster ET (GeV); Q/PT",100,0.,100.,100,-0.1,0.1);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
 

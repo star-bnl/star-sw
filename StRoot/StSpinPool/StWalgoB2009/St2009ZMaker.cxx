@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.6 2010/01/06 04:22:15 balewski Exp $
+// $Id: St2009ZMaker.cxx,v 1.7 2010/01/06 05:21:57 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -71,6 +71,7 @@ St2009ZMaker::printJan(WeveEleTrack *T) {
 //
 void
 St2009ZMaker::find_Z_boson(){
+  const float PI=TMath::Pi();
   Wevent2009 &wEve=wMK->wEve;
   // printf("========= find_Z_boson() \n");
   
@@ -105,7 +106,7 @@ St2009ZMaker::find_Z_boson(){
       float fracET1=T1.cluster.ET /T1.nearTotET;
       hA[24]->Fill(fracET1);
       if(fracET1< par_nearTotEtFracZ) continue; 
-      hA[0]->Fill("Tfr1",1.);
+      hA[0]->Fill("con1",1.);
 
       for (uint it2=it+1;it2<V.eleTrack.size();it2++) {	//.....select second track:
 	WeveEleTrack &T2=V.eleTrack[it2];
@@ -124,7 +125,7 @@ St2009ZMaker::find_Z_boson(){
 	float fracET2=T2.cluster.ET /T2.nearTotET;
 	hA[26]->Fill(fracET2);
 	if(fracET2< par_nearTotEtFracZ) continue; 
-	hA[0]->Fill("Tfr2",1.);
+	hA[0]->Fill("con2",1.);
 
 	float e1=T1.cluster.energy;
 	float e2=T2.cluster.energy;
@@ -132,8 +133,10 @@ St2009ZMaker::find_Z_boson(){
 	TVector3 p2=T2.primP; p2.SetMag(e2);//cluster.position;
 
 	float del_phi=p1.DeltaPhi(p2);
-	printf("del Phi=%f\n",del_phi);
-	hA[27]->Fill(del_phi);
+	//printf("del Phi=%f\n",del_phi);
+	float xx=del_phi;
+	if(xx<-PI+1) xx+=2*PI;
+	hA[27]->Fill(xx);
 	if(fabs(del_phi)<par_delPhi12) continue;
 	hA[0]->Fill("phi12",1.);
 
@@ -214,6 +217,9 @@ St2009ZMaker::find_Z_boson(){
 
 
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.7  2010/01/06 05:21:57  balewski
+// cleanup
+//
 // Revision 1.6  2010/01/06 04:22:15  balewski
 // added Q/PT plot for Zs, more cleanup
 //
