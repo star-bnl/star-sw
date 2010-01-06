@@ -1,20 +1,16 @@
 TCanvas *can=0;
 
 //=================================================
-plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
+plZana(  int page=3,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
-  //iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Jan2x/data/";
+  //iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Jan2/data/";
   core0="run9setABCD";
-  //core0="mcSetD1_ppWprod";
+  core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter";
-  core0="mcSetD1_ppZprod";
+  //core0="mcSetD1_ppZprod";
 
   if(page==0) {
     doAll();
-    return;
-  }
-  if(page==-1) {
-    doAllMC();
     return;
   }
   
@@ -22,6 +18,7 @@ plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
   char *nameA[]={"_Z_EventType"}; //pg 1
   char *nameB[]={"_Z_et1iso","_Z_et1val","_Z_et1frac","_Z_et2iso","_Z_et2val","_Z_et2frac"}; //pg 2
   char *nameC[]={"_Z_phi12","_Z_ZmassLike","_Z_chRecPNp","_Z_ZmassUnlike"};
+  char *nameD[]={"muEne_Deta","_Z_Ene_Deta"};// pg 4
 
   gStyle->SetOptFit(1);
   TString fullInpName=iPath;  fullInpName+=core0;
@@ -73,7 +70,7 @@ plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
       c->cd(i+1); h->Draw();
     }
    c->GetPad(2)->SetLogy();
-   c->GetPad(5)->SetLogy();
+   
  } break;//--------------------------------------
 
 
@@ -99,6 +96,20 @@ plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
         
  } break;//--------------------------------------
 
+ case 4:{   
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    c->Divide(1,2);gStyle->SetOptStat(1110);
+    char **nameX=nameD;
+    for(int i=0;i<2;i++) {
+      char txt[100];
+      printf("->%s<\n",nameX[i]);
+      h2=(TH2F*)fd->Get(nameX[i]);  assert(h2);
+      h2->Rebin2D(2,2);
+      c->cd(i+1); h2->Draw("colz");	
+    }
+  
+   
+ } break;//--------------------------------------
  
  default:
      printf("page=%d NOT defined\n",page);
@@ -152,25 +163,18 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(){
- for(int i=1;i<=23;i++)  {
-   if(i==14) continue;
-  plWana(i,2);
+ for(int i=1;i<=3;i++)  {
+  plZana(i,2);
  }
 }
 
-//============================
-void doAllMC(){
- for(int i=1;i<=18;i++){
-   if(i==2) continue;
-   if(i==3) continue;
-   if(i==4) continue;
-   if(i==14) continue;
-   plWana(i,2);
- }
-}
+
 
 
 // $Log: plZana.C,v $
+// Revision 1.5  2010/01/06 14:11:17  balewski
+// one Z-plot added
+//
 // Revision 1.4  2010/01/06 05:21:59  balewski
 // cleanup
 //

@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.2 2009/12/08 04:48:35 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.3 2010/01/06 14:11:13 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -180,8 +180,10 @@ St2009WMaker::initHistos(){
 
   hA[60]=h=new TH2F("muBclETPt"," TPC PT vs.  isolated cluster 2x2 ET, matched;2x2 cluster ET (GeV) ; TPC  PT (GeV)",50,0,100,75,0,150);
   
-  hA[61]=new TH1F("mubX7bht3","L2W-BHT3-rnd  events vs. bXing; bXing= raw bx7",128,-0.5,127.5);
-  // free 62-69
+  hA[61]=new TH1F("mubX7bht3","L2W-BHT3-rnd  events vs. bXing; bXing= raw bx7",128,-0.5,127.5); // filled on input
+  hA[62]=h=new TH2F("muEne_Deta","final W: cluster energy vs. detector eta; barrel eta bin; 2x2 Energy (GeV)",40,0,40,50,0,100);
+
+  // free 63-69
 
   //..... BSMD ......reserve 2x10= [70:e.... 80:p.... 89]
   const char cPlane[ mxBSmd]={'E','P'};
@@ -240,6 +242,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.3  2010/01/06 14:11:13  balewski
+// one Z-plot added
+//
 // Revision 1.2  2009/12/08 04:48:35  balewski
 // *** empty log message ***
 //

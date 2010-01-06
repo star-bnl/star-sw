@@ -139,7 +139,7 @@ int rdMuWana(
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
-    //mak it off  dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
+    //make it off  dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }
 
     
@@ -202,7 +202,7 @@ int rdMuWana(
     ZMk->attachWalgoMaker(WmuMk);
     ZMk->setHList(HList); 
     ZMk->setNearEtFrac(0.88);
-    ZMk->setClusterMinEt(25);
+    ZMk->setClusterMinEt(15);
     ZMk->setPhi12Min(3.1416/2.);
     ZMk->setMinZMass(73.); // Zmass -20%
     ZMk->setMaxZMass(114.);// Zmass +20%
@@ -256,6 +256,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.11  2010/01/06 14:11:17  balewski
+// one Z-plot added
+//
 // Revision 1.10  2010/01/06 05:21:59  balewski
 // cleanup
 //

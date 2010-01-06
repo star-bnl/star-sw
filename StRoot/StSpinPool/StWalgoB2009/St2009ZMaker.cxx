@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.7 2010/01/06 05:21:57 balewski Exp $
+// $Id: St2009ZMaker.cxx,v 1.8 2010/01/06 14:11:13 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -160,6 +160,9 @@ St2009ZMaker::find_Z_boson(){
 	hA[15]->Fill(mass);
 	hA[33]->Fill(T1.cluster.ET,T1.prMuTrack->charge()/T1.prMuTrack->pt()); 
 	hA[33]->Fill(T2.cluster.ET,T2.prMuTrack->charge()/T2.prMuTrack->pt()); 
+	hA[34]->Fill(T1.pointTower.iEta ,T1.cluster.energy);
+	hA[34]->Fill(T2.pointTower.iEta ,T2.cluster.energy);
+
 
 	if (mass<par_minMassZ) continue; //enforce a lower bound
 	hA[0]->Fill("Zlow",1.);
@@ -217,6 +220,9 @@ St2009ZMaker::find_Z_boson(){
 
 
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.8  2010/01/06 14:11:13  balewski
+// one Z-plot added
+//
 // Revision 1.7  2010/01/06 05:21:57  balewski
 // cleanup
 //
