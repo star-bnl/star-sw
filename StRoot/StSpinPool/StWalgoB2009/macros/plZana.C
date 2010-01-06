@@ -3,7 +3,7 @@ TCanvas *can=0;
 //=================================================
 plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
-  //iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Jan2/data/";
+  //iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Jan2x/data/";
   core0="run9setABCD";
   //core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter";
@@ -37,7 +37,7 @@ plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
    fd->ls(); 
    h0=(TH1*)fd->Get("_Z_EventType"); assert(h0);
    printf("%s: ",h0->GetName());
-   for(int k=1;k<=12;k++) printf("%.0f, ",h0->GetBinContent(k));
+   for(int k=1;k<=14;k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
  }
  gStyle->SetPalette(1,0);
@@ -88,10 +88,10 @@ plZana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
       c->cd(i+1); h->Draw();
       if(i==2) {
 	h2=(TH2F*) h;
-	h2->Rebin2D(2,2);
-	h2->Draw("box"); h2->SetFillColor(kMagenta);
-	h3=(TH2F*)pubchRecPNp;
-	h3->Draw("colz same");	h3->Rebin2D(2,2);
+	h2->Rebin2D(2,2);h2->SetMaximum(3);
+	h2->Draw("box"); h2->SetFillColor(kBlack);
+	h3=(TH2F*)pubchRecPNp;	h3->Rebin2D(2,2);
+	h3->Draw("colz same");
 	h2->Draw("box same");  
       }
     }
@@ -171,6 +171,9 @@ void doAllMC(){
 
 
 // $Log: plZana.C,v $
+// Revision 1.4  2010/01/06 05:21:59  balewski
+// cleanup
+//
 // Revision 1.3  2010/01/06 04:22:18  balewski
 // added Q/PT plot for Zs, more cleanup
 //
