@@ -191,7 +191,8 @@ if ($FC eq 'g77' or $FC eq 'gfortran'){
     }
 
     if ( $FC eq 'gfortran' && grep(/.F$/,@srcL) ){
-	print "Found .F in sources and adding [".$env1->{FLIBS}."] to $pkg\n";
+	print "\tFound .F in sources and adding [".
+	      $env1->{FLIBS}."] to $pkg\n";
 	$SOFLAGS .= " " . $env1->{FLIBS};
     }
 }
