@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.124 2009/12/31 00:02:59 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.125 2010/01/07 19:16:24 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.125  2010/01/07 19:16:24  perev
+// mArgs for agvolume is 9 now
+//
 // Revision 1.124  2009/12/31 00:02:59  perev
 // Add the material name to the volume name
 //
@@ -558,8 +561,8 @@ R__EXTERN "C" {
    */
   void type_of_call rootmaptable_(DEFCHARD,DEFCHARD,DEFCHARD, Int_t&,Char_t * 
 				  DEFCHARL DEFCHARL DEFCHARL);
-  Int_t type_of_call agvolume(TVolume*&,Float_t*&,Float_t*&,Float_t*&,
-    			      Int_t&,Int_t&,Float_t*&,Int_t&,int *);
+  Int_t type_of_call agvolume(TVolume*&, Float_t*&, Float_t*&, Float_t*&, Int_t&
+                             ,Int_t&,    Float_t*&, Int_t&,    int *);
   Int_t type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
   void type_of_call uhtoc(Int_t&,Int_t &,DEFCHARD,Int_t& DEFCHARL);
   int  type_of_call agfdig0 (const char*,const char*,int,int);
@@ -1423,7 +1426,7 @@ TDataSet *St_geant_Maker::Work()
   { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
   struct  Volume
   { Char_t name[4],nick[4]; Int_t npar; Float_t par[50]; };
-  char matName[21];  
+  char matName[24];  
   //  Int_t node = 0;
   //  TVolume   *volume=0;
   TVolume   *node=0;
@@ -1737,12 +1740,13 @@ Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
   return g2t_volume_id(PASSCHARD(name),numbv PASSCHARL(name));
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
-			       Int_t &who, Int_t &copy,Float_t *&par1,Int_t &npar,char matName[21]){
+Int_t St_geant_Maker::Agvolume(TVolume *&node, Float_t *&par, Float_t *&pos
+                              ,Float_t *&mot,  Int_t &who,    Int_t &copy
+			      ,Float_t *&par1, Int_t &npar,   char matName[24])
+{
 
   int ans = agvolume(node,par,pos,mot,who,copy,par1,npar,(int*)matName);
-  matName[20]=0;
-  char *cc = strstr(matName," "); if (cc) *cc=0;
+  matName[20]=0; char *cc = strstr(matName," "); if (cc) *cc=0;
   return ans;
 
 }
