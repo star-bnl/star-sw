@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.7 2010/01/07 17:37:58 fine Exp $
+// $Id: StTrgDatReader.cxx,v 1.8 2010/01/07 17:51:45 fine Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.8  2010/01/07 17:51:45  fine
+// fix regexp to match the  Akio filename format
+//
 // Revision 1.7  2010/01/07 17:37:58  fine
 // introduce closeFileSignal to process several DAT files at once. RT # 1794
 //
@@ -101,7 +104,7 @@ int StTrgDatReader::RunNumber()  const  {
    if (mRunNumber == -1) { 
       string f = filename();
       regex_t rx;
-      const   char    *pattern =  "^.*run\\.([0-9]+)\\..+\\.dat$";
+      const   char    *pattern =  "^.*run([0-9]+)\\..+\\.dat$";
       int     rc;
       char    buffer[100];
       if ((rc = regcomp(&rx, pattern, REG_EXTENDED))) {
