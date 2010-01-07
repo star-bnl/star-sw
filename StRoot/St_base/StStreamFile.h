@@ -1,5 +1,8 @@
-// $Id: StStreamFile.h,v 1.4 2010/01/06 20:42:26 fine Exp $
+// $Id: StStreamFile.h,v 1.5 2010/01/07 17:37:59 fine Exp $
 // $Log: StStreamFile.h,v $
+// Revision 1.5  2010/01/07 17:37:59  fine
+// introduce closeFileSignal to process several DAT files at once. RT # 1794
+//
 // Revision 1.4  2010/01/06 20:42:26  fine
 // Fix type EventNumber shoould be RunNumber . Thanks Akio
 //
@@ -68,5 +71,6 @@ public: // fstream proxy interface
   
 protected:
   istream &read(char *s, streamsize n);
+  virtual bool closeFileSignal()  { return true; } //< the method to be overriden in subclass to customize the "new file has been open" status
 };
 #endif

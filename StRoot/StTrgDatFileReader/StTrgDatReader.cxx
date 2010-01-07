@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.6 2010/01/06 20:57:24 fine Exp $
+// $Id: StTrgDatReader.cxx,v 1.7 2010/01/07 17:37:58 fine Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.7  2010/01/07 17:37:58  fine
+// introduce closeFileSignal to process several DAT files at once. RT # 1794
+//
 // Revision 1.6  2010/01/06 20:57:24  fine
 // Adjust  file pattern
 //
@@ -94,7 +97,7 @@ fstream &StTrgDatReader::Read(){
   return stream();
 }
 //__________________________________________________________________________
-int StTrgDatReader::RunNumber()  const   { 
+int StTrgDatReader::RunNumber()  const  {
    if (mRunNumber == -1) { 
       string f = filename();
       regex_t rx;
@@ -126,3 +129,10 @@ int  StTrgDatReader::Version() const { return  mVersion;}
 
 //__________________________________________________________________________
 char* StTrgDatReader::Record()       { return mData;    }
+//__________________________________________________________________________
+bool  StTrgDatReader::closeFileSignal()
+{
+//< the method to be overriden in subclass to customize the "new file has been open" status
+    mRunNumber = -1;
+    return true;
+}
