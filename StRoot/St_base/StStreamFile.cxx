@@ -1,6 +1,9 @@
-// $Id: StStreamFile.cxx,v 1.3 2010/01/06 20:42:26 fine Exp $
+// $Id: StStreamFile.cxx,v 1.4 2010/01/07 17:37:59 fine Exp $
 //
 // $Log: StStreamFile.cxx,v $
+// Revision 1.4  2010/01/07 17:37:59  fine
+// introduce closeFileSignal to process several DAT files at once. RT # 1794
+//
 // Revision 1.3  2010/01/06 20:42:26  fine
 // Fix type EventNumber shoould be RunNumber . Thanks Akio
 //
@@ -45,6 +48,7 @@ void StStreamFile::close()
      fStream.clear();
      fStream.close();
      fFilename.erase();
+     closeFileSignal();
    }
 }
 //__________________________________________________________________________
