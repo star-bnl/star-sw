@@ -241,7 +241,7 @@ daq_dta *daq_hlt::handle_gl3(int sec, const char *bank)
 		return 0 ;
 	}
 	else {
-		LOG(DBG,"%s: present %d",name,present) ;
+		LOG(DBG,"%s: sec %d, bank %s: present %d",name,sec,bank,present) ;
 	}
 
 	char str[256] ;
@@ -249,10 +249,14 @@ daq_dta *daq_hlt::handle_gl3(int sec, const char *bank)
 
 	sprintf(str,"%s/gl3",sfs_name) ;
 	full_name = caller->get_sfs_name(str) ;
-		
+
+	LOG(DBG,"Trying 1: %s: got %s",str,full_name) ;
+
 	if(!full_name) {	// alternate, old form
 		sprintf(str,"%s/gl3/sec%02d",sfs_name, 1) ;
 		full_name = caller->get_sfs_name(str) ;
+
+		LOG(DBG,"Trying 2: %s: got %s",str,full_name) ;
 		if(!full_name) return 0 ;
 	}
 
