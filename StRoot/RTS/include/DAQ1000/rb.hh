@@ -41,6 +41,11 @@ public:
 	virtual int stop() = 0 ;			// at stop run
 
 	virtual int get(char **addr, u_int *status) = 0 ;
+	virtual int get_priority(char **addr, u_int *status, int *fifo_ix=0) {
+		if(fifo_ix) *fifo_ix = -1 ;
+		return get(addr,status) ;
+	}
+
 	virtual int free(char *addr) = 0 ;
 	virtual int mark(char *addr, u_int how=0) = 0 ;
 
