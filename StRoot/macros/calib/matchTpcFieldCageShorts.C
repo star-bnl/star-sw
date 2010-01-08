@@ -76,6 +76,7 @@ void ReadLine1() {
   ff1[0] = nexttime;
   for (i=1; i<size1; i++) in1 >> ff1[i];
   in1 >> nexttime;
+  ff1[3]-=0.377; // ignore permanent short at locaton 181.4
   if (in1.eof()) nexttime = maxsec;
   for (i=size1; i<size1+size2; i++) ff1[i] = 0;
   if ((++li1)%LI==0) printf("Line1 = %d , time = %f\n",li1,ff1[0]);
@@ -135,7 +136,7 @@ void WriteTable() {
       last_missing_resistance,missing_resistance,missing_resistance-last_missing_resistance);
     pflag=3;
   }
-  if (last_missing_resistance && TMath::Abs(missing_resistance - last_missing_resistance) < 0.1
+  if ((last_missing_resistance && TMath::Abs(missing_resistance - last_missing_resistance) < 0.1)
     || (last_missing_resistance > 0.2 && missing_resistance > 0.2)
     || (last_missing_resistance < 0.2 && missing_resistance < 0.2)) {
     //&& TMath::Abs(last_resistor - resistor) < 0.1) {
@@ -265,8 +266,11 @@ void matchTpcFieldCageShorts(char* T, float lr, float lm, int i) {
 }
 
 //////////////////////////////////////////
-// $Id: matchTpcFieldCageShorts.C,v 1.2 2009/09/23 00:06:55 genevb Exp $
+// $Id: matchTpcFieldCageShorts.C,v 1.3 2010/01/08 19:48:36 genevb Exp $
 // $Log: matchTpcFieldCageShorts.C,v $
+// Revision 1.3  2010/01/08 19:48:36  genevb
+// Update for permanent short at OFCW ring 181.4
+//
 // Revision 1.2  2009/09/23 00:06:55  genevb
 // More precise resistances
 //
