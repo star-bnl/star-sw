@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.20 2009/08/28 16:01:31 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.21 2010/01/08 22:44:37 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.21  2010/01/08 22:44:37  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.20  2009/08/28 16:01:31  ullrich
  * Set debug level in constructor to 0
  *
@@ -83,42 +86,63 @@ ClassImp(StTriggerData2009)
 
 StTriggerData2009::StTriggerData2009()
 {
-    mYear=2009;
-    mData=0;
+    printf("StTriggerData2009 Default Constructor\n");    
+    if (mData) readData(0,0);
 }
 
 StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
 {
-    mYear=2009;
-    mRun = run;
-    mData= new TriggerDataBlk2009;
-    debug = 0;
-    
-    unsigned int ver = data->FormatVersion; 
-    swapI(&ver);
+    printf("StTriggerData2009 Constructor with trigger data block\n");    
+    mYear=2009; mRun = run; debug = 0;
+    mData = new TriggerDataBlk2009;
+    readData(data,1);
+}
 
-    if (ver != y9FORMAT_VERSION  && ver != 0x08121140) {
-        gMessMgr->Warning() << "StTriggerData2009: Data format version = " << data->FormatVersion
-                            << " is different from program format version = " << y9FORMAT_VERSION
-                            << endm;
-        assert(0);
-    }
-    if (debug>0) printf("StTriggerData2009: version = %x\n",ver);
+StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs)
+{
+    printf("StTriggerData2009 Constructor with trigger data block and byteswap option=%d\n",bs);    
+    mYear=2009; mRun = run; debug = 0;
+    mData = new TriggerDataBlk2009; 
+    readData(data,bs);
+}
+
+void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
+    int copyflag=1;
+    if (data==0) {copyflag=0;}
+    if (debug) printf("StTriggerData2009::readData copyflag=%d byteswap=%d data=%x mData=%x\n",copyflag,bs,data,mData);
     
-    unsigned int size = data->totalTriggerLength; 
-    swapI(&size);
-    if (size > y9MAX_TRG_BLK_SIZE) {
-        gMessMgr->Warning() << "StTriggerData2009: Data length = " << size
-                            << " is bigger than max = " << y9MAX_TRG_BLK_SIZE
-                            << endm;
-        assert(0);
+    if (copyflag==1){
+        unsigned int ver = data->FormatVersion; 
+        if (bs) swapI(&ver);
+        
+        if (ver == y9FORMAT_VERSION  || ver == 0x08121140) {
+            if (debug>1) printf("StTriggerData2009: version = 0x%x (0x%x or 0x08121140)\n",ver,y9FORMAT_VERSION);
+        }
+        else {
+            printf("StTriggerData2009: version = 0x%x != (0x%x or 0x08121140)\n",ver,y9FORMAT_VERSION);
+            gMessMgr->Warning() << "StTriggerData2009: Data format version = " << data->FormatVersion
+                                << " is different from program format version = " << y9FORMAT_VERSION
+                                << endm;
+            assert(0);
+        }
+        
+        unsigned int size = data->totalTriggerLength; 
+        if (bs) swapI(&size);
+        if (size > y9MAX_TRG_BLK_SIZE) {
+            gMessMgr->Warning() << "StTriggerData2009: Data length = " << size
+                                << " is bigger than max = " << y9MAX_TRG_BLK_SIZE
+                                << endm;
+            assert(0);
+        }
+        if (debug>1) printf("StTriggerData2009: size = %d, maxsize = %d\n",size,y9MAX_TRG_BLK_SIZE);
+        memcpy(mData,data,size); 
+        memset((char*)mData+size,0,sizeof(TriggerDataBlk2009)-size);      
     }
-    if (debug>0) printf("StTriggerData2009: size = %d, maxsize = %d\n",size,y9MAX_TRG_BLK_SIZE);
     
-    memcpy(mData,data,size); 
-    memset((char*)mData+size,0,sizeof(TriggerDataBlk2009)-size);
-    swapDataBlk(mData);
+    if (bs) swapDataBlk(mData);
     if (debug>0){
+        printf("StTriggerData2009: version = 0x%x (0x%x or 0x08121140)\n",mData->FormatVersion,y9FORMAT_VERSION);
+        printf("StTriggerData2009: size = %d, maxsize = %d\n",mData->totalTriggerLength,y9MAX_TRG_BLK_SIZE);
         printf("EventDesc  length=%10d   offset=%10d\n",mData->EventDesc_ofl.length,mData->EventDesc_ofl.offset);
         printf("L1_DSM     length=%10d   offset=%10d\n",mData->L1_DSM_ofl.length,mData->L1_DSM_ofl.offset);
         printf("Summary    length=%10d   offset=%10d\n",mData->Summary_ofl.length,mData->Summary_ofl.offset);
@@ -128,9 +152,11 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     if (mData->EventDesc_ofl.length > 0) EvtDesc = (EvtDescData2009*)((char*)mData + mData->EventDesc_ofl.offset);
     if (mData->L1_DSM_ofl.length > 0)    L1_DSM  = (L1_DSM_Data2009*)((char*)mData + mData->L1_DSM_ofl.offset);
     if (mData->Summary_ofl.length   > 0) TrgSum  = (TrgSumData2009* )((char*)mData + mData->Summary_ofl.offset);
-    if (EvtDesc) swapEvtDesc(EvtDesc);
-    if (L1_DSM)  swapL1_DSM(L1_DSM);
-    if (TrgSum)  swapTrgSum(TrgSum);
+    if (bs){
+        if (EvtDesc) swapEvtDesc(EvtDesc);
+        if (L1_DSM) swapL1_DSM(L1_DSM);
+        if (TrgSum) swapTrgSum(TrgSum);
+    }
     if (EvtDesc==0 || L1_DSM==0 || TrgSum==0){
         gMessMgr->Warning() << "StTriggerData2009: EvtDesc, L1_DSM or TrgSum is missing" << endm;
         assert(0);        
@@ -166,38 +192,38 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     memset(qt3,0,sizeof(qt3)); memset(tqt3,0,sizeof(tqt3));
     memset(qt4,0,sizeof(qt4)); memset(tqt4,0,sizeof(tqt4));
     TrgOfflen2009* offlen;
-
+    
     for (int i=0; i<1+npre+npost; i++){
         //printf("Doing prepost = %d\n",i);
         if (i==0)
 	  {offlen = mData->MainX;}
         else {
             //printf("Prepost list offset = %d\n",mData->PrePostList[i-1]);
-	  if(mData->PrePostList[i-1]==0) continue;
+	  if (mData->PrePostList[i-1]==0) continue;
 	  offlen = (TrgOfflen2009*) ((char*)mData + mData->PrePostList[i-1]);
         }
-        swapRawDetOfflen(offlen);
+        if (bs) swapRawDetOfflen(offlen);
         for(int k=0; k<y9MAX_OFFLEN; k++){
-	  if(static_cast<unsigned int>(offlen[k].length + offlen[k].offset) > size) {
+	  if (static_cast<unsigned int>(offlen[k].length + offlen[k].offset) > mData->totalTriggerLength) {
                 gMessMgr->Warning() << "StTriggerData2009: offset ("<<offlen[k].offset<<") + length ("<<offlen[k].length
-                                    <<") exceeds total size("<<size<<") for data block id="<<k<< endm;
+                                    <<") exceeds total size("<<mData->totalTriggerLength<<") for data block id="<<k<< endm;
                 assert(0);
 	  }
         }
         int j;
-        j=offlen[y9BC1_CONF_NUM].length; if(j>0){mBC1[i] = (BELayerBlock2009*)((char*)mData + offlen[y9BC1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBC1[i],y9BC1_CONF_NUM,j);}
-        j=offlen[y9MXQ_CONF_NUM].length; if(j>0){mMXQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9MXQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMXQ[i],y9MXQ_CONF_NUM,j);}
-        j=offlen[y9MIX_CONF_NUM].length; if(j>0){mMIX[i] = (MIXBlock2009*    )((char*)mData + offlen[y9MIX_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMIX[i],y9MIX_CONF_NUM,j);}
-        j=offlen[y9BCW_CONF_NUM].length; if(j>0){mBCW[i] = (BWestBlock2009*  )((char*)mData + offlen[y9BCW_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBCW[i],y9BCW_CONF_NUM,j);}
-        j=offlen[y9BCE_CONF_NUM].length; if(j>0){mBCE[i] = (BEastBlock2009*  )((char*)mData + offlen[y9BCE_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBCE[i],y9BCE_CONF_NUM,j);}
-        j=offlen[y9FEQ_CONF_NUM].length; if(j>0){mFEQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9FEQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mFEQ[i],y9FEQ_CONF_NUM,j);}
-        j=offlen[y9BBC_CONF_NUM].length; if(j>0){mBBC[i] = (BBCBlock2009*    )((char*)mData + offlen[y9BBC_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBBC[i],y9BBC_CONF_NUM,j);}
-        j=offlen[y9BBQ_CONF_NUM].length; if(j>0){mBBQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9BBQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBBQ[i],y9BBQ_CONF_NUM,j);}
-        j=offlen[y9FMS_CONF_NUM].length; if(j>0){mFMS[i] = (FMSBlock2009*    )((char*)mData + offlen[y9FMS_CONF_NUM].offset); swapRawDet((DataBlock2009*)mFMS[i],y9FMS_CONF_NUM,j);}
-        j=offlen[y9QT1_CONF_NUM].length; if(j>0){mQT1[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT1[i],y9QT1_CONF_NUM,j);}
-        j=offlen[y9QT2_CONF_NUM].length; if(j>0){mQT2[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT2_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT2[i],y9QT2_CONF_NUM,j);}
-        j=offlen[y9QT3_CONF_NUM].length; if(j>0){mQT3[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT3_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT3[i],y9QT3_CONF_NUM,j);}
-        j=offlen[y9QT4_CONF_NUM].length; if(j>0){mQT4[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT4_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT4[i],y9QT4_CONF_NUM,j);}
+        j=offlen[y9BC1_CONF_NUM].length; if (j>0){mBC1[i] = (BELayerBlock2009*)((char*)mData + offlen[y9BC1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBC1[i],y9BC1_CONF_NUM,j,bs);}
+        j=offlen[y9MXQ_CONF_NUM].length; if (j>0){mMXQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9MXQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMXQ[i],y9MXQ_CONF_NUM,j,bs);}
+        j=offlen[y9MIX_CONF_NUM].length; if (j>0){mMIX[i] = (MIXBlock2009*    )((char*)mData + offlen[y9MIX_CONF_NUM].offset); swapRawDet((DataBlock2009*)mMIX[i],y9MIX_CONF_NUM,j,bs);}
+        j=offlen[y9BCW_CONF_NUM].length; if (j>0){mBCW[i] = (BWestBlock2009*  )((char*)mData + offlen[y9BCW_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBCW[i],y9BCW_CONF_NUM,j,bs);}
+        j=offlen[y9BCE_CONF_NUM].length; if (j>0){mBCE[i] = (BEastBlock2009*  )((char*)mData + offlen[y9BCE_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBCE[i],y9BCE_CONF_NUM,j,bs);}
+        j=offlen[y9FEQ_CONF_NUM].length; if (j>0){mFEQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9FEQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mFEQ[i],y9FEQ_CONF_NUM,j,bs);}
+        j=offlen[y9BBC_CONF_NUM].length; if (j>0){mBBC[i] = (BBCBlock2009*    )((char*)mData + offlen[y9BBC_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBBC[i],y9BBC_CONF_NUM,j,bs);}
+        j=offlen[y9BBQ_CONF_NUM].length; if (j>0){mBBQ[i] = (QTBlock2009*     )((char*)mData + offlen[y9BBQ_CONF_NUM].offset); swapRawDet((DataBlock2009*)mBBQ[i],y9BBQ_CONF_NUM,j,bs);}
+        j=offlen[y9FMS_CONF_NUM].length; if (j>0){mFMS[i] = (FMSBlock2009*    )((char*)mData + offlen[y9FMS_CONF_NUM].offset); swapRawDet((DataBlock2009*)mFMS[i],y9FMS_CONF_NUM,j,bs);}
+        j=offlen[y9QT1_CONF_NUM].length; if (j>0){mQT1[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT1_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT1[i],y9QT1_CONF_NUM,j,bs);}
+        j=offlen[y9QT2_CONF_NUM].length; if (j>0){mQT2[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT2_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT2[i],y9QT2_CONF_NUM,j,bs);}
+        j=offlen[y9QT3_CONF_NUM].length; if (j>0){mQT3[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT3_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT3[i],y9QT3_CONF_NUM,j,bs);}
+        j=offlen[y9QT4_CONF_NUM].length; if (j>0){mQT4[i] = (QTBlock2009*     )((char*)mData + offlen[y9QT4_CONF_NUM].offset); swapRawDet((DataBlock2009*)mQT4[i],y9QT4_CONF_NUM,j,bs);}
         if (mMXQ[i]) decodeQT(mMXQ[i]->length/4, mMXQ[i]->data, mxq[i], tmxq[i]); 
         if (mFEQ[i]) decodeQT(mFEQ[i]->length/4, mFEQ[i]->data, feq[i], tfeq[i]); 
         if (mBBQ[i]) decodeQT(mBBQ[i]->length/4, mBBQ[i]->data, bbq[i], tbbq[i]); 
@@ -206,7 +232,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
         if (mQT3[i]) decodeQT(mQT3[i]->length/4, mQT3[i]->data, qt3[i], tqt3[i]); 
         if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4[i], tqt4[i]); 
     }
-    if (debug>0) dump();
+    if (debug>1) dump();
 }
 
 StTriggerData2009::~StTriggerData2009() {delete mData;}
@@ -214,6 +240,11 @@ StTriggerData2009::~StTriggerData2009() {delete mData;}
 unsigned int StTriggerData2009::version() const
 {
     return EvtDesc->TrgDataFmtVer;
+}
+
+unsigned int StTriggerData2009::eventNumber() const
+{
+    return mData->eventNumber;
 }
 
 unsigned int StTriggerData2009::token() const
@@ -407,9 +438,9 @@ unsigned short StTriggerData2009::bbcADCSumLargeTile(StBeamDirection eastwest, i
 unsigned short StTriggerData2009::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if(buffer >=0){
-      if(mBBC[buffer]){
-            if(eastwest==east) {return mBBC[buffer]->BBClayer1[2]%4096;}
+    if (buffer >=0){
+        if (mBBC[buffer]){
+            if (eastwest==east) {return mBBC[buffer]->BBClayer1[2]%4096;}
             else               {return mBBC[buffer]->BBClayer1[0]%4096;}
         }
     }
@@ -468,7 +499,7 @@ unsigned short StTriggerData2009::zdcUnAttenuated(StBeamDirection eastwest, int 
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
-        if(eastwest == east) return bbq[buffer][14][2];
+        if (eastwest == east) return bbq[buffer][14][2];
         else                 return bbq[buffer][14][18];
     }
     return 0;
@@ -478,7 +509,7 @@ unsigned short StTriggerData2009::zdcAttenuated(StBeamDirection eastwest, int pr
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
-        if(eastwest == east) return bbq[buffer][14][3];
+        if (eastwest == east) return bbq[buffer][14][3];
         else                 return bbq[buffer][14][19];
     }
     return 0;
@@ -488,15 +519,15 @@ unsigned short StTriggerData2009::zdcADC(StBeamDirection eastwest, int pmt, int 
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt>=1 && pmt<=3) {
-        if(eastwest == east) {
-            if(pmt == 1) return bbq[buffer][14][0];
-            if(pmt == 2) return bbq[buffer][14][8];
-            if(pmt == 3) return bbq[buffer][14][9];
+        if (eastwest == east) {
+            if (pmt == 1) return bbq[buffer][14][0];
+            if (pmt == 2) return bbq[buffer][14][8];
+            if (pmt == 3) return bbq[buffer][14][9];
         }
-        else{
-            if(pmt == 1) return bbq[buffer][14][16];
-            if(pmt == 2) return bbq[buffer][14][24];
-            if(pmt == 3) return bbq[buffer][14][25];
+        else {
+            if (pmt == 1) return bbq[buffer][14][16];
+            if (pmt == 2) return bbq[buffer][14][24];
+            if (pmt == 3) return bbq[buffer][14][25];
         }
     }
     return 0;
@@ -506,7 +537,7 @@ unsigned short StTriggerData2009::zdcTDC(StBeamDirection eastwest, int prepost) 
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) {
-        if(eastwest == east) return bbq[buffer][14][6];
+        if (eastwest == east) return bbq[buffer][14][6];
         else                 return bbq[buffer][14][22];
     }
     return 0;
@@ -516,15 +547,15 @@ unsigned short StTriggerData2009::zdcPmtTDC(StBeamDirection eastwest, int pmt, i
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt>=1 && pmt<=3) {
-        if(eastwest == east) {
-            if(pmt == 1) return bbq[buffer][14][4];
-            if(pmt == 2) return bbq[buffer][14][12];
-            if(pmt == 3) return bbq[buffer][14][13];
+        if (eastwest == east) {
+            if (pmt == 1) return bbq[buffer][14][4];
+            if (pmt == 2) return bbq[buffer][14][12];
+            if (pmt == 3) return bbq[buffer][14][13];
         }
-        else{
-            if(pmt == 1) return bbq[buffer][14][20];
-            if(pmt == 2) return bbq[buffer][14][28];
-            if(pmt == 3) return bbq[buffer][14][29];
+        else {
+            if (pmt == 1) return bbq[buffer][14][20];
+            if (pmt == 2) return bbq[buffer][14][28];
+            if (pmt == 3) return bbq[buffer][14][29];
         }
     }
     return 0;
@@ -562,9 +593,9 @@ unsigned short StTriggerData2009::zdcSMD(StBeamDirection eastwest, int verthori,
 unsigned short StTriggerData2009::zdcEarliestTDC(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if(buffer >=0){
-        if(mBBC[buffer]){
-            if(eastwest==east) {return ((mBBC[buffer]->ZDClayer1[3] >> 12) % 16) | ((mBBC[buffer]->ZDClayer1[2] % 256) << 4);}
+    if (buffer >=0){
+        if (mBBC[buffer]){
+            if (eastwest==east) {return ((mBBC[buffer]->ZDClayer1[3] >> 12) % 16) | ((mBBC[buffer]->ZDClayer1[2] % 256) << 4);}
             else               {return (mBBC[buffer]->ZDClayer1[3]) % 4096;}
         }
     }
@@ -573,9 +604,9 @@ unsigned short StTriggerData2009::zdcEarliestTDC(StBeamDirection eastwest, int p
 
 bool StTriggerData2009::zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
     int buffer = prepostAddress(prepost);
-    if(buffer >=0){
-        if(mBBC[buffer]){
-            if(eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (27-16));}
+    if (buffer >=0){
+        if (mBBC[buffer]){
+            if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (27-16));}
             else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (24-16));}
         }
     }
@@ -584,9 +615,9 @@ bool StTriggerData2009::zdcSumADCaboveThreshold(StBeamDirection eastwest, int pr
 
 bool StTriggerData2009::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
     int buffer = prepostAddress(prepost);
-    if(buffer >=0){
-        if(mBBC[buffer]){
-            if(eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (29-16));}
+    if (buffer >=0){
+        if (mBBC[buffer]){
+            if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (29-16));}
             else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (26-16));}
         }
     }
@@ -595,9 +626,9 @@ bool StTriggerData2009::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int 
 
 bool StTriggerData2009::zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost) const {
     int buffer = prepostAddress(prepost);
-    if(buffer >=0){
-        if(mBBC[buffer]){
-            if(eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (28-16));}
+    if (buffer >=0){
+        if (mBBC[buffer]){
+            if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (28-16));}
             else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (25-16));}
         }
     }
@@ -642,9 +673,9 @@ unsigned short StTriggerData2009::pp2ppADC(StBeamDirection eastwest, int vh, int
 {
     static const int map[2][2][2][2] ={ { { { 0, 1}, { 2, 3} } , { {16,17}, {18,19} } , } ,
                                         { { { 8, 9}, {10,11} } , { {24,25}, {26,27} } , } };
-    if(vh<0   || vh>1)   return 0;
-    if(udio<0 || udio>1) return 0;
-    if(ch<0   || ch>1)   return 0;
+    if (vh<0   || vh>1)   return 0;
+    if (udio<0 || udio>1) return 0;
+    if (ch<0   || ch>1)   return 0;
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) return mxq[buffer][2][map[eastwest][vh][udio][ch]];
     return 0;  
@@ -654,17 +685,17 @@ unsigned short StTriggerData2009::pp2ppTAC(StBeamDirection eastwest, int vh, int
 {
     static const int map[2][2][2][2] ={ { { { 0, 1}, { 2, 3} } , { {16,17}, {18,19} } , } ,
                                         { { { 8, 9}, {10,11} } , { {24,25}, {26,27} } , } };
-    if(vh<0   || vh>1)   return 0;
-    if(udio<0 || udio>1) return 0;
-    if(ch<0   || ch>1)   return 0;
+    if (vh<0   || vh>1)   return 0;
+    if (udio<0 || udio>1) return 0;
+    if (ch<0   || ch>1)   return 0;
     int buffer = prepostAddress(prepost);
     if (buffer >= 0) return mxq[buffer][2][map[eastwest][vh][udio][ch]+4];
     return 0;  
 }
 
 unsigned long StTriggerData2009::pp2ppDSM(int prepost) const {
-  if(prepost!=0) return 0;
-  return L1_DSM->TOF[7];
+    if (prepost!=0) return 0;
+    return L1_DSM->TOF[7];
 }
 
 unsigned short StTriggerData2009::bemcLayer1DSM(int channel, int prepost) const {
@@ -931,38 +962,40 @@ unsigned short StTriggerData2009::vpdEarliestTDC(StBeamDirection eastwest, int p
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
-      if(mBBC[buffer]){
-	if(mRun<=10096084){
-	  if(eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
-	  else               {return mBBC[buffer]->VPD[4]%4096;}
-	}else{
-	  if(eastwest==east) {return mBBC[buffer]->VPD[2]%4096;}
-	  else               {return mBBC[buffer]->VPD[0]%4096;}
-	}
-      }
+        if (mBBC[buffer]){
+            if (mRun<=10096084){
+                if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+                else               {return mBBC[buffer]->VPD[4]%4096;}
+            }
+            else {
+                if (eastwest==east) {return mBBC[buffer]->VPD[2]%4096;}
+                else               {return mBBC[buffer]->VPD[0]%4096;}
+            }
+        }
     }
     return 0;
 }
- 
+
 unsigned short StTriggerData2009::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
-      if(mBBC[buffer]){
-	if(mRun<=10365999){ 
-	  return 0;
-	}else{
-	  if(eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
-	  else               {return mBBC[buffer]->VPD[4]%4096;}
-	}
-      }
+        if (mBBC[buffer]){
+            if (mRun<=10365999){ 
+                return 0;
+            }
+            else {
+                if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+                else               {return mBBC[buffer]->VPD[4]%4096;}
+            }
+        }
     }
     return 0;
 }
 
 unsigned short StTriggerData2009::vpdTimeDifference() const
 {
-  return L1_DSM->VTX[7]%8192;
+    return L1_DSM->VTX[7]%8192;
 }
 
 unsigned short StTriggerData2009::nQTdata(int prepost) const
@@ -978,12 +1011,28 @@ unsigned int* StTriggerData2009::QTdata(int prepost) const
 unsigned short StTriggerData2009::fmsADC(int crt, int adr, int ch, int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0 && crt>=1 && crt<=4 && adr>=0 && adr<=10 && ch>=0 && ch<=31){
+    if (buffer >= 0 && crt>=1 && crt<=5 && adr>=0 && adr<16 && ch>=0 && ch<=31){
         switch(crt){
         case 1: return qt1[buffer][adr][ch]; 
         case 2: return qt2[buffer][adr][ch]; 
         case 3: return qt3[buffer][adr][ch];
         case 4: return qt4[buffer][adr][ch];
+        case 5: return feq[buffer][adr][ch];
+        }
+    }
+    return 0;
+}
+
+unsigned short StTriggerData2009::fmsTDC(int crt, int adr, int ch, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && crt>=1 && crt<=5 && adr>=0 && adr<16 && ch>=0 && ch<=31){
+        switch(crt){
+        case 1: return tqt1[buffer][adr][ch]; 
+        case 2: return tqt2[buffer][adr][ch]; 
+        case 3: return tqt3[buffer][adr][ch];
+        case 4: return tqt4[buffer][adr][ch];
+        case 5: return tfeq[buffer][adr][ch];
         }
     }
     return 0;
@@ -992,14 +1041,14 @@ unsigned short StTriggerData2009::fmsADC(int crt, int adr, int ch, int prepost) 
 unsigned char* StTriggerData2009::getDsm_FMS(int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) if(mFMS[buffer]) return mFMS[buffer]->FMS;
+    if (buffer >= 0) if (mFMS[buffer]) return mFMS[buffer]->FMS;
     return 0;  
 }
 
 unsigned short* StTriggerData2009::getDsm1_FMS(int prepost) const
 {
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) if(mMIX[buffer]) return mMIX[buffer]->FPDEastNSLayer1;
+    if (buffer >= 0) if (mMIX[buffer]) return mMIX[buffer]->FPDEastNSLayer1;
     return 0;
 }
 
@@ -1017,11 +1066,11 @@ unsigned short StTriggerData2009::mtdAdc(StBeamDirection eastwest, int pmt, int 
     //pmt in not used for 2009, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt==0){
-      if(eastwest==east) {
-	if(mRun<=10133008) return mxq[buffer][0][0];
-	else               return mxq[buffer][0][24];
-      }
-      if(eastwest==west) return mxq[buffer][0][8];
+        if (eastwest==east) {
+            if (mRun<=10133008) return mxq[buffer][0][0];
+            else               return mxq[buffer][0][24];
+        }
+        if (eastwest==west) return mxq[buffer][0][8];
     }
     return 0;
 }
@@ -1031,11 +1080,11 @@ unsigned short StTriggerData2009::mtdTdc(StBeamDirection eastwest, int pmt, int 
     //pmt in not used for 2009, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && pmt==0){
-        if(eastwest==east) {
-	  if(mRun<=10133008) return mxq[buffer][0][4];
+        if (eastwest==east) {
+	  if (mRun<=10133008) return mxq[buffer][0][4];
 	  else               return mxq[buffer][0][28];
-	}
-        if(eastwest==west) return mxq[buffer][0][12];
+        }
+        if (eastwest==west) return mxq[buffer][0][12];
     }
     return 0;
 }
@@ -1045,7 +1094,7 @@ unsigned char StTriggerData2009::mtdDsmAtCh(int ch, int prepost) const
     int map[16] = {7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8};
     int buffer = prepostAddress(prepost);    
     if (buffer >= 0 && ch>=0 && ch<16){
-        if(mMIX[buffer]) return mMIX[buffer]->MTD_P2PLayer1[map[ch]];
+        if (mMIX[buffer]) return mMIX[buffer]->MTD_P2PLayer1[map[ch]];
     }
     return 0;
 }
@@ -1055,8 +1104,8 @@ bool StTriggerData2009::mtdDsmHit(int pmt, int prepost) const
     //pmt in not used for 2009, it is place holder for next year
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
-        if(mMIX[buffer] && mRun<10133008){
-            if( (mMIX[buffer]->MTD_P2PLayer1[5] & 0x1) && (mMIX[buffer]->MTD_P2PLayer1[5] & 0x10) ) return true;
+        if (mMIX[buffer] && mRun<10133008){
+            if ( (mMIX[buffer]->MTD_P2PLayer1[5] & 0x1) && (mMIX[buffer]->MTD_P2PLayer1[5] & 0x10) ) return true;
         }
     }
     return false;
@@ -1065,8 +1114,8 @@ bool StTriggerData2009::mtdDsmHit(int pmt, int prepost) const
 unsigned short StTriggerData2009::tofAtAddress(int address, int prepost) const 
 {
     int buffer = prepostAddress(prepost);
-    if(buffer>=0 && address>=0 && address<48) {
-        if(mMIX[buffer]) return mMIX[buffer]->TOF[address];
+    if (buffer>=0 && address>=0 && address<48) {
+        if (mMIX[buffer]) return mMIX[buffer]->TOF[address];
     }
     return 0;
 }
@@ -1099,14 +1148,16 @@ unsigned short StTriggerData2009::tofTrayMultiplicity(int tray, int prepost) con
 
 unsigned short StTriggerData2009::tofMultiplicity(int prepost) const 
 {  
-    if(prepost==0) return L1_DSM->TOF[1]%8192;
+    if (prepost==0) return L1_DSM->TOF[1]%8192;
     return 0;
 }
 
 void StTriggerData2009::dump() const
 {
     printf("***** StTriggerData Dump *****\n");
+    printf(" debug=%d mData=%x\n",debug,mData);
     printf(" Year=%d  Version=%x\n",year(),version());
+    printf(" Run#=%d Event#=%d\n",mRun,eventNumber());
     printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
     printf(" Token=%d  TriggerWord=%x  ActionWord=%x  BusyStatus=%x\n",
 	 token(), triggerWord(), actionWord(), busyStatus());    
@@ -1150,38 +1201,57 @@ void StTriggerData2009::dump() const
     printf(" VPD TimeDifference : %d\n", vpdTimeDifference());
     printf(" L2 result : \n"); 
     for (int j=0; j<4 ;j++) { for (int k=0; k<16; k++) {printf("%u ",*(l2Result()+j*16+k)); } printf("\n");}
-    printf("\n");
     printf("BBClayer1:");
     int buffer = prepostAddress(0);
-    if(buffer >=0){
-        if(mBBC[buffer]){
+    if (buffer >=0){
+        if (mBBC[buffer]){
             for (int i = 0;i < 16;i++) printf(" %1x %04X", i, mBBC[buffer]->BBClayer1[i]);
-	}
+        }
     }
     printf("\n");
     printf("ZDClayer1:");
-    if(buffer >=0){
-        if(mBBC[buffer]){
+    if (buffer >=0){
+        if (mBBC[buffer]){
             for (int i = 0;i < 8;i++) printf(" %1x %04X", i, mBBC[buffer]->ZDClayer1[i]);
-	}
+        }
     }
     printf("\n");
     printf("VPDlayer1:");
-    if(buffer >=0){
-        if(mBBC[buffer]){
+    if (buffer >=0){
+        if (mBBC[buffer]){
             for (int i = 0;i < 8;i++) printf(" %1x %04X", i, mBBC[buffer]->VPD[i]);
-	}
+        }
     }
     printf("\n");
     printf("VTX:");
-    if(L1_DSM){
+    if (L1_DSM){
         for (int i = 0;i < 8;i++) printf(" %1x %04X", i, L1_DSM->VTX[i]);
     }
     printf("\n");
     printf("Last DSM:");
-    if(L1_DSM){
+    if (L1_DSM){
         for (int i = 0;i < 8;i++) printf(" %1x %04X", i, L1_DSM->lastDSM[i]);
     }
     printf("\n");
-    printf("***** StTriggerData Dump *****\n");
+    printf("***** End StTriggerData Dump *****\n");
+}
+
+void StTriggerData2009::killFMS(){
+    TrgOfflen2009* offlen;
+    int npre  = numberOfPreXing();
+    int npost = numberOfPostXing();
+    for (int i=0; i<1+npre+npost; i++){
+        if (i==0)
+            {offlen = mData->MainX;}
+        else {
+            if (mData->PrePostList[i-1]==0) continue;
+            offlen = (TrgOfflen2009*) ((char*)mData + mData->PrePostList[i-1]);
+        }
+        int j;
+        j=offlen[y9FEQ_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y9FEQ_CONF_NUM].offset, 0, j); offlen[y9FEQ_CONF_NUM].length=0;};
+        j=offlen[y9QT1_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y9QT1_CONF_NUM].offset, 0, j); offlen[y9QT1_CONF_NUM].length=0;};
+        j=offlen[y9QT2_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y9QT2_CONF_NUM].offset, 0, j); offlen[y9QT2_CONF_NUM].length=0;};
+        j=offlen[y9QT3_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y9QT3_CONF_NUM].offset, 0, j); offlen[y9QT3_CONF_NUM].length=0;};
+        j=offlen[y9QT4_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y9QT4_CONF_NUM].offset, 0, j); offlen[y9QT4_CONF_NUM].length=0;};
+    }
 }

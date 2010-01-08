@@ -121,5 +121,6 @@
 #pragma link C++ function operator<<(ostream&, const StHit&);        
 #pragma link C++ function operator<<(ostream&, const StRnDHit&);        
 #pragma link C++ function operator<<(ostream&, const StRpsCluster&);        
+#pragma link C++ function operator<<(ostream&, const StFmsHit&);        
 #endif
 

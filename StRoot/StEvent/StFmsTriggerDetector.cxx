@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.cxx,v 2.6 2009/02/23 22:29:49 ullrich Exp $
+ * $Id: StFmsTriggerDetector.cxx,v 2.7 2010/01/08 22:44:37 ullrich Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.cxx,v $
+ * Revision 2.7  2010/01/08 22:44:37  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.6  2009/02/23 22:29:49  ullrich
  * Fixed problem when running over 2009 data (solution by Pibero)
  *
@@ -34,7 +37,7 @@
 #include "Stiostream.h"
 #include <stdio.h>
 
-static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.6 2009/02/23 22:29:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.7 2010/01/08 22:44:37 ullrich Exp $";
 
 ClassImp(StFmsTriggerDetector)
     
@@ -55,14 +58,14 @@ StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
 
     mNumHeader=-1;
     mNumQTdata = (int)t.nQTdata();
-    if( !(mMaxLine>=mNumQTdata)){
+    if ( !(mMaxLine>=mNumQTdata)){
         {LOG_ERROR << "StFmsTriggerDetector::StFmsTriggerDetector() mMaxLine < mNumQTdata" << endm;}
     }
     else {
         i = t.QTdata(); if (i && mNumQTdata>0) memcpy(mQTdata,i, mNumQTdata*sizeof(int ));  
     }      
     c = t.getDsm_FMS()  ; if (c) memcpy(mDSM   ,c, sizeof(mDSM  ));
-    c = t.getDsm02_FMS(); if (c) memcpy(mDSM01 ,c, sizeof(mDSM01));
+    c = t.getDsm01_FMS(); if (c) memcpy(mDSM01 ,c, sizeof(mDSM01));
     c = t.getDsm02_FMS(); if (c) memcpy(mDSM02 ,c, sizeof(mDSM02));
     s = t.getDsm1_FMS() ; if (s) memcpy(mDSM1  ,s, sizeof(mDSM1 ));
     s = t.getDsm2_FMS() ; if (s) memcpy(mDSM2  ,s, sizeof(mDSM2 ));
@@ -75,7 +78,7 @@ void
 StFmsTriggerDetector::decode()
 {
     mNumHeader=0;
-    if(mNumQTdata==0) return;
+    if (mNumQTdata==0) return;
     memset(mADC,0,sizeof(mADC));
     memset(mTDC,0,sizeof(mTDC));
     int header=1, nline=0, iline;
@@ -86,26 +89,26 @@ StFmsTriggerDetector::decode()
             crate = getCRT(d);
             addr  = getADR(d);
             nline = getNHT(d);
-	  if(crate-mOffsetCrate<0 || crate-mOffsetCrate>mMaxCrate){
+	  if (crate-mOffsetCrate<0 || crate-mOffsetCrate>mMaxCrate){
 	      {LOG_ERROR << "StFmsTriggerDetector::decode() Wrong QT crate#=" <<crate<< endm;}
 	  }
-	  if(addr-mOffsetAddr<0 || addr-mOffsetAddr>mMaxAddr){
+	  if (addr-mOffsetAddr<0 || addr-mOffsetAddr>mMaxAddr){
 	      {LOG_ERROR << "StFmsTriggerDetector::decode() Wrong QT Addr#=" <<addr<< endm;}
 	  }
-	  if(nline<0 || nline>32){
+	  if (nline<0 || nline>32){
 	      {LOG_ERROR << "StFmsTriggerDetector::decode() Wrong QT # of lines=" <<nline<< endm;}
 	  }
-            if(nline>0) {header=0; iline=0;}
+            if (nline>0) {header=0; iline=0;}
             mNumHeader++;
         }
         else {
 	  iline++;
             unsigned short dcard = getQT8(d);
             unsigned short dch   = getCHA(d);
-	    if(dcard>mMaxDCard){
+	    if (dcard>mMaxDCard){
 	        {LOG_ERROR << "StFmsTriggerDetector::decode() Wrong QT DCard=" <<dcard<< endm;}
 	    }
-	    if(dch>mMaxChan){
+	    if (dch>mMaxChan){
 	        {LOG_ERROR << "StFmsTriggerDetector::decode() Wrong QT DChan=" <<dch<< endm;}
 	    }
 	    int tst=(char*)&mADC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]
@@ -117,7 +120,7 @@ StFmsTriggerDetector::decode()
 	        mADC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]=getADC(d);
 	        mTDC[crate-mOffsetCrate][addr-mOffsetAddr][dcard][dch]=getTDC(d);
 	    }
-	    if(nline==iline) header=1;
+	    if (nline==iline) header=1;
         }
     }
 }
@@ -125,17 +128,17 @@ StFmsTriggerDetector::decode()
 unsigned int
 StFmsTriggerDetector::hit(int line) const
 {
-    if(line>=0 && line<mMaxLine && line<(int)mNumQTdata) return mQTdata[line];
+    if (line>=0 && line<mMaxLine && line<(int)mNumQTdata) return mQTdata[line];
     return 0;
 }
 
 unsigned short
 StFmsTriggerDetector::adc(int crate,  int addr,  int dcard,  int dch)
 {
-    if(mNumHeader==-1) decode();
+    if (mNumHeader==-1) decode();
     crate -= mOffsetCrate;
     addr  -= mOffsetAddr;
-    if(crate >= 0 && crate < mMaxCrate && 
+    if (crate >= 0 && crate < mMaxCrate && 
        addr  >= 0 && addr  < mMaxAddr && 
        dcard >= 0 && dcard < mMaxDCard && 
        dch   >= 0 && dch   < mMaxChan ){
@@ -150,10 +153,10 @@ StFmsTriggerDetector::adc(int crate,  int addr,  int dcard,  int dch)
 unsigned short
 StFmsTriggerDetector::tdc(int crate,  int addr,  int dcard,  int dch)
 {
-    if(mNumHeader==-1) decode();
+    if (mNumHeader==-1) decode();
     crate -= mOffsetCrate;
     addr  -= mOffsetAddr;
-    if(crate >= 0 && crate < mMaxCrate && 
+    if (crate >= 0 && crate < mMaxCrate && 
        addr  >= 0 && addr  < mMaxAddr && 
        dcard >= 0 && dcard < mMaxDCard && 
        dch   >= 0 && dch   < mMaxChan ){
@@ -168,10 +171,10 @@ StFmsTriggerDetector::tdc(int crate,  int addr,  int dcard,  int dch)
 void
 StFmsTriggerDetector::dump()
 {
-    if(mNumHeader==-1) decode();
+    if (mNumHeader==-1) decode();
     cout << "FMS data dump" << endl;
     cout << "Number of data lines = " << mNumQTdata << endl;
-    if(mNumQTdata>0){
+    if (mNumQTdata>0){
         printf("Number of header lines = %d\n", mNumHeader);
         printf("Last check line (should be 0xAC10) = %x\n",mQTdata[mNumQTdata-1]);
         printf("ADC\n");

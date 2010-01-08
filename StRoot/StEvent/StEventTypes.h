@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.31 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StEventTypes.h,v 2.32 2010/01/08 22:43:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.32  2010/01/08 22:43:44  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.31  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -128,6 +131,8 @@
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
+#include "StFmsCollection.h"
+#include "StFmsHit.h"
 #include "StFmsTriggerDetector.h"
 #include "StFpdCollection.h"
 #include "StFpdTriggerDetector.h"
@@ -170,6 +175,10 @@
 #include "StRichSpectra.h"
 #include "StRichSoftwareMonitor.h"
 #include "StRichPixel.h"
+#include "StRpsCluster.h"
+#include "StRpsCollection.h"
+#include "StRpsPlane.h"
+#include "StRpsRomanPot.h"
 #include "StRunInfo.h"
 #include "StSoftwareMonitor.h"
 #include "StSsdHit.h"
