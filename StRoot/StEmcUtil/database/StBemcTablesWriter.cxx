@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBemcTablesWriter.cxx,v 1.4 2007/12/11 20:37:19 kocolosk Exp $
+ * $Id: StBemcTablesWriter.cxx,v 1.5 2010/01/08 18:22:47 mattheww Exp $
  * Author:      Adam Kocoloski, MIT, kocolosk@mit.edu
  *
  ***************************************************************************/
@@ -372,8 +372,8 @@ void StBemcTablesWriter::writeToDb(const char * tableName, const char * timeStam
 
 void StBemcTablesWriter::writeToFile(const char * fileName) {
     TFile *f = new TFile(fileName,"recreate");
+    if (f) {
     string baseName = gSystem->BaseName(fileName);
-    
     
     if(baseName.find("bemcCalib") == 0) {
         St_emcCalib* table = new St_emcCalib("bemcCalib",1);
@@ -458,8 +458,25 @@ void StBemcTablesWriter::writeToFile(const char * fileName) {
         table->AddAt(static_cast<void*>(mSmdpS),0);
         table->Write();
     }
+
+    else if(baseName.find("bemcTriggerPed") == 0) {
+        St_emcTriggerPed* table = new St_emcTriggerPed("bemcTriggerPed",1);
+        table->AddAt(static_cast<void*>(mTrigP),0);
+        table->Write();
+    }
+    else if(baseName.find("bemcTriggerStatus") == 0) {
+        St_emcTriggerStatus* table = new St_emcTriggerStatus("bemcTriggerStatus",1);
+        table->AddAt(static_cast<void*>(mTrigS),0);
+        table->Write();
+    }
+    else if(baseName.find("bemcTriggerLUT") == 0) {
+        St_emcTriggerLUT* table = new St_emcTriggerLUT("bemcTriggerLUT",1);
+        table->AddAt(static_cast<void*>(mTrigL),0);
+        table->Write();
+    }
     
     f->Close();
+    }
 }
 
 void StBemcTablesWriter::loadTableFromFile(TFile *f) {
@@ -608,6 +625,9 @@ void StBemcTablesWriter::setTable(const char * tableName, void * data) {
 /***************************************************************************
  *
  * $Log: StBemcTablesWriter.cxx,v $
+ * Revision 1.5  2010/01/08 18:22:47  mattheww
+ * bemcTrigger tables now written to file (fixed by Oleksandr)
+ *
  * Revision 1.4  2007/12/11 20:37:19  kocolosk
  * use memcpy to grab setTable data
  *
