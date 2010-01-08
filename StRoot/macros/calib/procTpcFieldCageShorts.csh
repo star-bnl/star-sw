@@ -19,8 +19,8 @@ source ${GROUP_DIR}/.stardev
 set ID=`/usr/bin/whoami`
 echo "procTpcFieldCageShorts: running at `/bin/date`"
 
-set tpc_db = "-h onldb.starp.bnl.gov --port=3502"
-set daq_db = "-h onldb.starp.bnl.gov --port=3501"
+set tpc_db = "-h onldb2.starp.bnl.gov --port=3502"
+set daq_db = "-h onldb2.starp.bnl.gov --port=3501"
 set fcs_db = "-h dbx.star.bnl.gov --port=3316"
 
 set qq = "/tmp/FCS_short1_$ID.txt"
@@ -69,6 +69,7 @@ set last_res = "$last_resA,$last_resB"
 @ thistime2 = $thistime - $yearstart
 set tlimited = "between from_unixtime($lasttime) and from_unixtime($thistime)"
 set daqtables = "daqSummary as ds left join detectorSet as de on ds.runNumber=de.runNumber"
+set daqtables = "$daqtables left join runStatus as rs on ds.runNumber=rs.runNumber"
 
 # determine TPC detectorID
 set query = "select detectorID from detectorTypes where name in ('tpc','tpx');"
@@ -82,6 +83,8 @@ from $daqtables
 where ds.beginTime $tlimited
 and de.detectorID in ($tpcxid[1],$tpcxid[2])
 and ds.firstEventTime>0 and ds.lastEventTime>ds.firstEventTime
+and rs.rtsStatus=0
+and ds.runTypeID in (3,4)
 order by ds.firstEventTime asc;
 EOF
 /bin/cat $qq >> log; echo "" >> log
@@ -166,8 +169,11 @@ cd $cdir
 /bin/rm -rf $logdir
 
 #####################################
-# $Id: procTpcFieldCageShorts.csh,v 1.2 2009/02/26 23:01:15 genevb Exp $
+# $Id: procTpcFieldCageShorts.csh,v 1.3 2010/01/08 19:48:01 genevb Exp $
 # $Log: procTpcFieldCageShorts.csh,v $
+# Revision 1.3  2010/01/08 19:48:01  genevb
+# More selective runs, use backup DB
+#
 # Revision 1.2  2009/02/26 23:01:15  genevb
 # Updated for tpx detector
 #
