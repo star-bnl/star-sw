@@ -36,12 +36,15 @@ static daq_det_hlt_factory hlt_factory ;
 
 daq_hlt::daq_hlt(daqReader *rts_caller) 
 {
-	rts_id = L3_ID ;
+	rts_id = -L3_ID ;	// note negative number!!!
+
 	name = "hlt" ;
 	sfs_name = "hlt" ;
 	caller = rts_caller ;
 	
-	if(caller) caller->insert(this, rts_id) ;
+	if(caller) {
+		caller->insert(this, rts_id) ;
+	}
 
 	tpx = new daq_dta ;
 	tof = new daq_dta ;
@@ -244,10 +247,16 @@ daq_dta *daq_hlt::handle_gl3(int sec, const char *bank)
 	char str[256] ;
 	char *full_name ;
 
-	sprintf(str,"%s/gl3/sec%02d",sfs_name, 1) ;
+	sprintf(str,"%s/gl3",sfs_name) ;
 	full_name = caller->get_sfs_name(str) ;
 		
-	if(!full_name) return 0 ;
+	if(!full_name) {	// alternate, old form
+		sprintf(str,"%s/gl3/sec%02d",sfs_name, 1) ;
+		full_name = caller->get_sfs_name(str) ;
+		if(!full_name) return 0 ;
+	}
+
+
 	bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
 
 	gl3->create(1024,"hlt_gl3",rts_id,DAQ_DTA_STRUCT(char)) ;
@@ -259,6 +268,11 @@ daq_dta *daq_hlt::handle_gl3(int sec, const char *bank)
 	while((entry = caller->sfs->readdir(dir))) {
 
 		bytes = caller->sfs->fileSize(entry->full_name) ;	// this is bytes
+		if(bytes == 0) {
+			LOG(WARN,"%s: 0 bytes?",entry->full_name) ;
+			continue ;
+		}
+
 		cou++ ;
 
 		LOG(DBG,"%d: %s %s %d",cou,entry->full_name,entry->d_name,bytes) ;
