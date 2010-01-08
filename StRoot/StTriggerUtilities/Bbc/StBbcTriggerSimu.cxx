@@ -58,6 +58,9 @@ void StBbcTriggerSimu::Make()
     StEvent* event = (StEvent*)StMaker::GetChain()->GetDataSet("StEvent");
     if (event) Make(event);
   }
+  else {
+    LOG_ERROR << "StBbcTriggerSimu - Unknown source \"" << mSource << "\"" << endm;
+  }
 
   if ((Ebbc==1)&&(Wbbc==1)) bbcTrig=kYes;
 
@@ -101,6 +104,9 @@ void StBbcTriggerSimu::Make(StBbcTriggerDetector& bbc)
 
 //
 // $Log: StBbcTriggerSimu.cxx,v $
+// Revision 1.7  2010/01/08 06:38:54  pibero
+// Set default input source to "MuDst" in constructor.
+//
 // Revision 1.6  2010/01/08 06:32:48  pibero
 // Set default input source to "MuDst" in constructor.
 //
