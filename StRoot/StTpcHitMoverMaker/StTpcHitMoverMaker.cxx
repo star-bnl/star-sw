@@ -92,6 +92,13 @@ Int_t StTpcHitMover::Make() {
 		      tpcHit->qaTruth() > 95) continue; // don't move embedded hits
 		  StTpcLocalCoordinate  coorL(tpcHit->position().x(),tpcHit->position().y(),tpcHit->position().z(),i+1,j+1);
 		  moveTpcHit(coorL,coorG);
+
+                  if (mExB && mExB->GetSpaceChargeMode() &&
+                    StDetectorDbSpaceChargeR2::instance()->IsMarked()) {
+                    gMessMgr->Error() << "StTpcHitMover::Make questionable hit corrections" << endm;
+                    return kStSkip;
+                  }
+
 		  StThreeVectorF xyzF(coorG.position().x(),coorG.position().y(),coorG.position().z());
 		  tpcHit->setPosition(xyzF);
 		}
