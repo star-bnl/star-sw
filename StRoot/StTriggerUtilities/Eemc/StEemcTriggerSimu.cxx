@@ -64,7 +64,6 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   mBemcEsum5bit=0;
   mExternDsmSetup=0;
   mSetupPath="wrong1";
-  mSource="MuDst";
 
   feeTPTreeADC=new EEfeeTPTree("ADC",mxChan);
   dsm0TreeADC =new EEdsm0Tree("ADC");
@@ -745,6 +744,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.28  2010/01/08 15:18:39  pibero
+// Default input source is "MuDst" for all subdetectors.
+//
 // Revision 1.27  2010/01/08 06:39:05  pibero
 // Set default input source to "MuDst" in constructor.
 //
