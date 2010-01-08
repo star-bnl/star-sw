@@ -98,12 +98,14 @@ int bsmdPed::do_zs(char *src, int in_bytes, char *dst, int rdo1)
 	int out_bytes = (char *)d_out - dst ;
 
 	if(out_bytes > in_bytes) {
-		LOG(WARN,"BSMD ZS: rdo %d: in bytes %d, out bytes %d",rdo1,in_bytes,out_bytes) ;
+		valid_evts[rdo1-1]++ ;	// not really!
+		LOG(NOTE,"BSMD ZS: rdo %d: in bytes %d, out bytes %d",rdo1,in_bytes,out_bytes) ;
 	}
 	else {
 		LOG(NOTE,"BSMD ZS: rdo %d: in bytes %d, out bytes %d",rdo1,in_bytes,out_bytes) ;
 	}
 
+	evts[rdo1-1]++ ;
 	return out_bytes ;
 }
 
