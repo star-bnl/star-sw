@@ -16,7 +16,6 @@ ClassImp(StBbcTriggerSimu)
 
 StBbcTriggerSimu::StBbcTriggerSimu(){
     BBCadcNum=48;
-    mSource="MuDst";
 }
 //==================================================
 //==================================================
@@ -104,6 +103,9 @@ void StBbcTriggerSimu::Make(StBbcTriggerDetector& bbc)
 
 //
 // $Log: StBbcTriggerSimu.cxx,v $
+// Revision 1.8  2010/01/08 15:18:37  pibero
+// Default input source is "MuDst" for all subdetectors.
+//
 // Revision 1.7  2010/01/08 06:38:54  pibero
 // Set default input source to "MuDst" in constructor.
 //

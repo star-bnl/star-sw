@@ -1,7 +1,7 @@
 #ifndef STAR_StVirtualTriggerSimu
 #define STAR_StVirtualTriggerSimu
 
-// $Id: StVirtualTriggerSimu.h,v 1.5 2009/12/22 18:10:57 pibero Exp $
+// $Id: StVirtualTriggerSimu.h,v 1.6 2010/01/08 15:18:27 pibero Exp $
 
 /*****************************************************************************
  * @class StVirtualTriggerSimu
@@ -17,6 +17,7 @@ enum StTriggerSimuDecision { kNo, kYes, kDoNotCare };
 class StVirtualTriggerSimu
 {
 public:
+    StVirtualTriggerSimu() : mSource("MuDst") {}
     virtual ~StVirtualTriggerSimu() {}
     virtual bool isTrigger(int trigId);
     
@@ -45,6 +46,9 @@ protected:
 
 /*****************************************************************************
  * $Log: StVirtualTriggerSimu.h,v $
+ * Revision 1.6  2010/01/08 15:18:27  pibero
+ * Default input source is "MuDst" for all subdetectors.
+ *
  * Revision 1.5  2009/12/22 18:10:57  pibero
  * Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
  *
