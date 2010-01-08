@@ -16,6 +16,7 @@ ClassImp(StBbcTriggerSimu)
 
 StBbcTriggerSimu::StBbcTriggerSimu(){
     BBCadcNum=48;
+    mSource="MuDst";
 }
 //==================================================
 //==================================================
@@ -100,6 +101,9 @@ void StBbcTriggerSimu::Make(StBbcTriggerDetector& bbc)
 
 //
 // $Log: StBbcTriggerSimu.cxx,v $
+// Revision 1.6  2010/01/08 06:32:48  pibero
+// Set default input source to "MuDst" in constructor.
+//
 // Revision 1.5  2009/12/22 18:11:01  pibero
 // Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
 //
