@@ -705,40 +705,6 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 	// grab crc from the last word
 	int last_ix = words - 1 ;
-#if 1
-#define	 G_CONST  0x04C11DB7 
-
-	u_int crc_in_data = d32[last_ix] ;
-	register u_int crc = 0xFFFFFFFF ;
-	if(crc_in_data) {	
-		for(int i=0;i<last_ix;i++) {
-			u_int datum ;
-
-			datum = d32[i] ;
-			register u_int data_j ;
-			register u_int crc_31 ;
-
-			for(register int j=31;j>=0;j--) {
-				data_j = (datum >> j) & 1 ;
-				crc_31 = (crc & 0x80000000) ? 1 : 0 ;
-
-				if(crc_31 == data_j) {
-					crc = (crc<<1) ^ G_CONST ;
-				}
-				else {
-					crc = (crc<<1) ;
-				}
-			}
-		}
-
-		if(crc != crc_in_data) {
-			LOG(ERR,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
-			bad |= 1 ;
-		}
-	}	
-
-	LOG(DBG,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
-#endif
 	// misc signatures and errors from the header
 	if(d32[1] != BSMD_SIGNATURE) {	// "BSMD"
 		LOG(ERR,"RDO %d: bad header sig 0x%08X, expect 0x%08X",rdo,d32[1], BSMD_SIGNATURE) ;
@@ -773,6 +739,54 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	// compare to what?
 	LOG(DBG,"RDO %d: in data %d",rdo,rdo_id) ;
 
+
+	int format_code = (d32[2] >> 8) & 0xFF ;
+	if(format_code == 0x02) {	// null event
+		LOG(NOTE,"RDO %d: null event",rdo) ;
+
+		trg[0].t = 4097 ;
+		trg[0].daq = 0 ;
+		trg[0].trg = 0 ;
+		trg[0].rhic = d32[4] ;
+
+		return 1 ;
+
+	}
+
+#if 1
+#define	 G_CONST  0x04C11DB7 
+
+	u_int crc_in_data = d32[last_ix] ;
+	register u_int crc = 0xFFFFFFFF ;
+	if(crc_in_data) {	
+		for(int i=0;i<last_ix;i++) {
+			u_int datum ;
+
+			datum = d32[i] ;
+			register u_int data_j ;
+			register u_int crc_31 ;
+
+			for(register int j=31;j>=0;j--) {
+				data_j = (datum >> j) & 1 ;
+				crc_31 = (crc & 0x80000000) ? 1 : 0 ;
+
+				if(crc_31 == data_j) {
+					crc = (crc<<1) ^ G_CONST ;
+				}
+				else {
+					crc = (crc<<1) ;
+				}
+			}
+		}
+
+		if(crc != crc_in_data) {
+			LOG(ERR,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
+			bad |= 1 ;
+		}
+	}	
+
+	LOG(DBG,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
+#endif
 
 
 	// L0 part
