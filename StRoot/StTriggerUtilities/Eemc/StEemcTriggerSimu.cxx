@@ -64,6 +64,7 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   mBemcEsum5bit=0;
   mExternDsmSetup=0;
   mSetupPath="wrong1";
+  mSource="MuDst";
 
   feeTPTreeADC=new EEfeeTPTree("ADC",mxChan);
   dsm0TreeADC =new EEdsm0Tree("ADC");
@@ -457,7 +458,7 @@ StEemcTriggerSimu::getEemcAdc(){
     } // if (event)
   }
   else {
-    LOG_ERROR << "Unknown source" << endm;
+    LOG_ERROR << "StEemcTriggerSimu - Unknown source \"" << mSource << "\"" << endm;
   }
 }
 
@@ -744,6 +745,9 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.27  2010/01/08 06:39:05  pibero
+// Set default input source to "MuDst" in constructor.
+//
 // Revision 1.26  2009/12/22 18:11:05  pibero
 // Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
 //
