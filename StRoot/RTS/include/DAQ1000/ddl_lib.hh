@@ -28,11 +28,16 @@ public:
 
 	int mark(char *addr, u_int how) ;
 	int get(char **addr, u_int *status) ;		// returns word count; 0 for no data; negative for error
+	int get_priority(char **addr, u_int *status, int *ix=0) ;		// returns word count; 0 for no data; negative for error
 	int free(char *addr) ;		// return the particular buffer to the free pile
 
 	u_int status ;	// bitmask: xxx1=requested; xx1x=opened; x1xx=error
 //	u_int alloced ;	// how many bytes we used of physmem...
 	int start_ix ;
+
+	unsigned int fifo_order[128] ;
+	unsigned int fifo_order_cou ;
+
 private:
 	// from the initializer
 //	char *buff ;
