@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.42 2009/11/23 22:22:25 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.43 2010/01/08 22:43:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.43  2010/01/08 22:43:44  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.42  2009/11/23 22:22:25  ullrich
  * Minor cleanup performed and hooks for RPS added.
  *
@@ -163,6 +166,7 @@
 #include "StSsdHitCollection.h"
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
+#include "StFmsCollection.h"
 #include "StRichCollection.h"
 #include "StRpsCollection.h"
 #include "StRunInfo.h"
@@ -187,8 +191,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.42 2009/11/23 22:22:25 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.42 2009/11/23 22:22:25 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.43 2010/01/08 22:43:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.43 2010/01/08 22:43:44 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -478,6 +482,22 @@ StEvent::emcCollection() const
     StEmcCollection *emc = 0;
     _lookup(emc, mContent);
     return emc;
+}
+
+StFmsCollection*
+StEvent::fmsCollection()
+{
+    StFmsCollection *fms = 0;
+    _lookup(fms, mContent);
+    return fms;
+}
+
+const StFmsCollection*
+StEvent::fmsCollection() const
+{
+    StFmsCollection *fms = 0;
+    _lookup(fms, mContent);
+    return fms;
 }
 
 StRichCollection*
@@ -1009,6 +1029,12 @@ StEvent::setEmcCollection(StEmcCollection* val)
 }
 
 void
+StEvent::setFmsCollection(StFmsCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setRichCollection(StRichCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1189,6 +1215,7 @@ void StEvent::statistics()
     cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
     cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
     cout << "\tStEmcCollection:             " << static_cast<void*>(emcCollection());
+    cout << "\tStFmsCollection:             " << static_cast<void*>(fmsCollection());
     cout << "\tStRichCollection:            " << static_cast<void*>(richCollection());
     cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection());
     cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());

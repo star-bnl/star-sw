@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.31 2009/08/24 22:38:28 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.32 2010/01/08 22:44:37 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.32  2010/01/08 22:44:37  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.31  2009/08/24 22:38:28  ullrich
  * New data member mErrorFlag and referring access fct.
  *
@@ -133,6 +136,7 @@ public:
     virtual unsigned int errorFlag() const;            // error flag
 
     // generic trigger infomations
+    virtual unsigned int eventNumber() const;
     virtual unsigned int token() const = 0;
     virtual unsigned int triggerWord() const = 0;
     virtual unsigned int actionWord() const = 0;  
@@ -239,6 +243,7 @@ public:
     virtual unsigned short nQTdata(int prepost=0) const;
     virtual unsigned int*  QTdata(int prepost=0) const;
     virtual unsigned short fmsADC(int crt, int adr, int ch, int prepost=0) const;
+    virtual unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
 
     // VPD
     virtual unsigned short vpdADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
@@ -287,6 +292,9 @@ public:
     virtual unsigned short* getDsm2_FMS() const;
     virtual unsigned int    l2ResultLength() const = 0;  // Length of raw info
     virtual const unsigned int* l2Result() const = 0;  // Pointer to raw info
+
+    // StFmsHitMaker only!!!
+    virtual void killFMS();
 
 protected:
     int prepostAddress(int prepost) const; //get pre&post xsing addess, return negative if bad.

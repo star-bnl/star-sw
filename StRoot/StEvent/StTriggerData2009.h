@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.12 2009/08/24 22:39:13 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.13 2010/01/08 22:44:37 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.13  2010/01/08 22:44:37  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.12  2009/08/24 22:39:13  ullrich
  * Flag corruption in new member mErrorFlag.
  *
@@ -59,9 +62,11 @@
 class StTriggerData2009 : public StTriggerData {
 public:
     StTriggerData2009();
-    StTriggerData2009(const TriggerDataBlk2009*, int run);
+    StTriggerData2009(const TriggerDataBlk2009* data, int run);
+    StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs);
     ~StTriggerData2009();
     
+    void readData(const TriggerDataBlk2009* data, int bs);
     void dump() const;  //dump data into text
     
     // Versison and data type information
@@ -70,6 +75,7 @@ public:
     unsigned int numberOfPostXing() const;  
     
     // Generic trigger informations
+    unsigned int   eventNumber() const;
     unsigned int   token() const;
     unsigned int   triggerWord() const;
     unsigned int   actionWord() const;      
@@ -106,15 +112,15 @@ public:
     unsigned short eemcLayer1DSM(int channel, int prepost=0) const;
     unsigned short emcLayer2DSM(int channel) const;
     unsigned short fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost=0) const;
-  //    unsigned short fpdLayer1DSM(StBeamDirection eastwest, int module, int board, int prepost=0) const;
+    //    unsigned short fpdLayer1DSM(StBeamDirection eastwest, int module, int board, int prepost=0) const;
     unsigned short fpdLayer2DSMRaw(int channel) const;
-  //  unsigned short fpdLayer2DSM(StBeamDirection eastwest, int module) const;
+    //  unsigned short fpdLayer2DSM(StBeamDirection eastwest, int module) const;
     
     // CTB
-  //    unsigned short ctbRaw(int address, int prepost=0) const;
-  //  unsigned short ctb(int pmt, int prepost=0) const;
-  //  unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;    
-  //  unsigned short ctbSum(int prepost=0) const;
+    //  unsigned short ctbRaw(int address, int prepost=0) const;
+    //  unsigned short ctb(int pmt, int prepost=0) const;
+    //  unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;    
+    //  unsigned short ctbSum(int prepost=0) const;
     
     // BBC
     unsigned short bbcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
@@ -132,6 +138,7 @@ public:
     unsigned short nQTdata(int prepost=0) const;
     unsigned int*  QTdata(int prepost=0) const;    
     unsigned short fmsADC(int crt, int adr, int ch, int prepost=0) const;
+    unsigned short fmsTDC(int crt, int adr, int ch, int prepost=0) const;
 
     //ZDC
     bool zdcPresent(int prepost=0) const;
@@ -218,6 +225,9 @@ public:
     unsigned int     l2ResultLength() const;
     const unsigned int*  l2Result() const;
     
+    // StFmsHitMaker only!!!
+    void killFMS();
+
 protected:
     TriggerDataBlk2009 *mData;
   
@@ -247,7 +257,7 @@ protected:
     void swapL1_DSM(L1_DSM_Data2009* L1_DSM);
     void swapTrgSum(TrgSumData2009* TrgSum);
     void swapRawDetOfflen(TrgOfflen2009* offlen);
-    void swapRawDet(DataBlock2009* data, int name, int hlength);
+    void swapRawDet(DataBlock2009* data, int name, int hlength, int bs);
 
     ClassDef(StTriggerData2009,1) 
 };
@@ -296,68 +306,70 @@ inline void StTriggerData2009::swapRawDetOfflen(TrgOfflen2009* offlen)
     }
 }
 
-inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name, int hlength)
+inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name, int hlength,int bs)
 {
     BELayerBlock2009* bc1;
     MIXBlock2009* mix;
     BBCBlock2009 *bbc;
     QTBlock2009* qtdata;
     int header_length = 8;
-    swapI((unsigned int*)&data->length);
+    if(bs) swapI((unsigned int*)&data->length);
     switch(name){
     case y9MXQ_CONF_NUM : case y9FEQ_CONF_NUM : case y9BBQ_CONF_NUM : 
     case y9QT1_CONF_NUM : case y9QT2_CONF_NUM : case y9QT3_CONF_NUM : case y9QT4_CONF_NUM :
-      header_length = 12; break;
+        header_length = 12; break;
     }
     if(hlength != data->length + header_length){
-      mErrorFlag = mErrorFlag | (1 << name);
-      printf("StTriggerData2009: Error reading Block=%2d [%1c%1c%1c%1c] length %d != %d + %d\n",
+        mErrorFlag = mErrorFlag | (1 << name);
+        printf("StTriggerData2009: Error reading Block=%2d [%1c%1c%1c%1c] length %d != %d + %d\n",
 	     name,data->name[0],data->name[1],data->name[2],data->name[3],
 	     hlength,data->length,header_length);      
-      printf("StTriggerData2009: Droping the data block =%2d [%1c%1c%1c%1c] with ErrorFlag=0x%x\n",
+        printf("StTriggerData2009: Droping the data block =%2d [%1c%1c%1c%1c] with ErrorFlag=0x%x\n",
 	     name,data->name[0],data->name[1],data->name[2],data->name[3],mErrorFlag);
-      data=0;
-      return;
+        data=0;
+        return;
     }
-    switch(name){
-    case y9BC1_CONF_NUM :
-        bc1 = (BELayerBlock2009*) data;
-        swapSSn((unsigned int*)bc1->BEMClayer1,48);
-        swapSSn((unsigned int*)bc1->EEMClayer1,16);
-        break;
-    case y9MIX_CONF_NUM :
-        mix = (MIXBlock2009*) data;
-        swapSSn((unsigned int*)mix->FPDEastNSLayer1,8);
-        swapSSn((unsigned int*)mix->TOFLayer1,8+48);
-        break;
-    case y9BCW_CONF_NUM :
-        //only char
-        break;
-    case y9BCE_CONF_NUM :
-        //only char
-        break;
-    case y9BBC_CONF_NUM :
-        bbc = (BBCBlock2009*) data;
-        swapSSn((unsigned int*)bbc->BBClayer1,16+8+8);
-        break;
-    case y9FMS_CONF_NUM :
-        //only char
-        break;
-    case y9MXQ_CONF_NUM :
-    case y9FEQ_CONF_NUM :
-    case y9BBQ_CONF_NUM :
-    case y9QT1_CONF_NUM :
-    case y9QT2_CONF_NUM :
-    case y9QT3_CONF_NUM :
-    case y9QT4_CONF_NUM :
+    if(bs){
+        switch(name){
+        case y9BC1_CONF_NUM :
+            bc1 = (BELayerBlock2009*) data;
+            swapSSn((unsigned int*)bc1->BEMClayer1,48);
+            swapSSn((unsigned int*)bc1->EEMClayer1,16);
+            break;
+        case y9MIX_CONF_NUM :
+            mix = (MIXBlock2009*) data;
+            swapSSn((unsigned int*)mix->FPDEastNSLayer1,8);
+            swapSSn((unsigned int*)mix->TOFLayer1,8+48);
+            break;
+        case y9BCW_CONF_NUM :
+            //only char
+            break;
+        case y9BCE_CONF_NUM :
+            //only char
+            break;
+        case y9BBC_CONF_NUM :
+            bbc = (BBCBlock2009*) data;
+            swapSSn((unsigned int*)bbc->BBClayer1,16+8+8);
+            break;
+        case y9FMS_CONF_NUM :
+            //only char
+            break;
+        case y9MXQ_CONF_NUM :
+        case y9FEQ_CONF_NUM :
+        case y9BBQ_CONF_NUM :
+        case y9QT1_CONF_NUM :
+        case y9QT2_CONF_NUM :
+        case y9QT3_CONF_NUM :
+        case y9QT4_CONF_NUM :
         qtdata = (QTBlock2009*) data;
         swapI((unsigned int*)&qtdata->dataLoss);
         swapIn(qtdata->data, qtdata->length/4);
         break;
+        }
     }
     if(debug>0) 
         printf("Read id=%2d name=%1c%1c%1c%1c length=%d\n",
-               name,data->name[0],data->name[1],data->name[2],data->name[3],data->length);
+	     name,data->name[0],data->name[1],data->name[2],data->name[3],data->length);
 }
 
 #endif

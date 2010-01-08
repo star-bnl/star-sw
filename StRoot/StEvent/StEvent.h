@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.37 2009/11/23 22:22:25 ullrich Exp $
+ * $Id: StEvent.h,v 2.38 2010/01/08 22:43:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.38  2010/01/08 22:43:44  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.37  2009/11/23 22:22:25  ullrich
  * Minor cleanup performed and hooks for RPS added.
  *
@@ -151,6 +154,7 @@ class StFtpcHitCollection;
 class StSvtHitCollection;
 class StSsdHitCollection;
 class StEmcCollection;
+class StFmsCollection;
 class StRichCollection;
 class StRpsCollection;
 class StTofCollection;
@@ -206,6 +210,8 @@ public:
     const StSsdHitCollection*           ssdHitCollection() const;
     StEmcCollection*                    emcCollection();
     const StEmcCollection*              emcCollection() const;
+    StFmsCollection*                    fmsCollection();
+    const StFmsCollection*              fmsCollection() const;
     StRichCollection*                   richCollection();
     const StRichCollection*             richCollection() const;
     StRpsCollection*                    rpsCollection();
@@ -288,6 +294,7 @@ public:
     void setSvtHitCollection(StSvtHitCollection*);
     void setSsdHitCollection(StSsdHitCollection*);
     void setEmcCollection(StEmcCollection*);
+    void setFmsCollection(StFmsCollection*);
     void setRichCollection(StRichCollection*);
     void setRpsCollection(StRpsCollection*);
     void setTofCollection(StTofCollection*);

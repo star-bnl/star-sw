@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.22 2009/11/23 22:22:25 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.23 2010/01/08 22:43:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.23  2010/01/08 22:43:44  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.22  2009/11/23 22:22:25  ullrich
  * Minor cleanup performed and hooks for RPS added.
  *
@@ -80,7 +83,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.22 2009/11/23 22:22:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.23 2010/01/08 22:43:44 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -117,6 +120,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecXiVertex",           "evt_vertices", 5);
     setBranch("StSPtrVecCalibrationVertex",  "evt_vertices", 5);
     setBranch("StEmcCollection",             "evt_emc",      6);
+    setBranch("StFmsCollection",             "evt_emc",      6);
     setBranch("StRichCollection",            "evt_aux",      7);
     setBranch("StTofCollection",             "evt_aux",      7);
     setBranch("StBTofCollection",            "evt_aux",      7);
@@ -137,6 +141,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StEventClusteringHints",      "event", 1);
     setBranch("StSoftwareMonitor",           "event", 1);
     setBranch("StEmcCollection",             "event", 1);
+    setBranch("StFmsCollection",             "event", 1);
     setBranch("StRichCollection",            "event", 1);
     setBranch("StTofCollection",             "event", 1);
     setBranch("StBTofCollection",            "event", 1);

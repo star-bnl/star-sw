@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.20 2009/11/23 22:22:25 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.21 2010/01/08 22:43:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.21  2010/01/08 22:43:44  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.20  2009/11/23 22:22:25  ullrich
  * Minor cleanup performed and hooks for RPS added.
  *
@@ -90,6 +93,7 @@
 #include "StEmcRawHit.h"
 #include "StEmcCluster.h"
 #include "StEmcPoint.h"
+#include "StFmsHit.h"
 #include "StTofHit.h"
 #include "StTofSlat.h"
 #include "StTofCell.h"
@@ -130,6 +134,7 @@ StCollectionImp(RpsCluster)
 StCollectionImp(EmcRawHit)
 StCollectionImp(EmcCluster)
 StCollectionImp(EmcPoint)
+StCollectionImp(FmsHit)
 StCollectionImp(TofHit)
 StCollectionImp(TofSlat)
 StCollectionImp(TofCell)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.12 2009/08/24 22:38:28 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.13 2010/01/08 22:44:37 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.13  2010/01/08 22:44:37  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.12  2009/08/24 22:38:28  ullrich
  * New data member mErrorFlag and referring access fct.
  *
@@ -49,7 +52,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.12 2009/08/24 22:38:28 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.13 2010/01/08 22:44:37 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -79,10 +82,10 @@ unsigned short StTriggerData::decodeEmc12bit(const int dsm, const int channel, c
         return (crate_p[dsmmap[k+1]]<<4) + (crate_p[dsmmap[k]]>>4);
     }
     else {
-      // channel is even, take lower byte + lowest 4 bits of next 
-      int k=channel/2*3; // position of low byte
-      return ((crate_p[dsmmap[k+1]]&0xF) << 8) + crate_p[dsmmap[k]];
-  }
+        // channel is even, take lower byte + lowest 4 bits of next 
+        int k=channel/2*3; // position of low byte
+        return ((crate_p[dsmmap[k+1]]&0xF) << 8) + crate_p[dsmmap[k]];
+    }
 }
 
 void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned short adc[16][32], unsigned char tdc[16][32])
@@ -123,6 +126,7 @@ void StTriggerData::decodeQT(unsigned int ndata, unsigned int* data, unsigned sh
 
 int StTriggerData::year() const {return mYear;}
 unsigned int StTriggerData::errorFlag() const {return mErrorFlag;}
+unsigned int StTriggerData::eventNumber() const {return 0;}
 float StTriggerData::zdcVertexZ() const {return mZdcVertexZ;}
 void StTriggerData::setZdcVertexZ(float val) {mZdcVertexZ = val;}
 unsigned short StTriggerData::dsmInput() const {return 0;}
@@ -218,6 +222,7 @@ unsigned short StTriggerData::pp2ppADC(StBeamDirection eastwest, int vh, int udi
 unsigned short StTriggerData::pp2ppTAC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const {return 0;}
 unsigned long  StTriggerData::pp2ppDSM(int prepost) const {return 0;}
 unsigned short StTriggerData::fmsADC(int crt, int adr, int ch, int prepost) const {return 0;}
+unsigned short StTriggerData::fmsTDC(int crt, int adr, int ch, int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm_FMS(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm01_FMS(int prepost) const {return 0;}
 unsigned char* StTriggerData::getDsm02_FMS(int prepost) const {return 0;}
@@ -225,3 +230,4 @@ unsigned short* StTriggerData::getDsm1_FMS(int prepost) const {return 0;}
 unsigned short* StTriggerData::getDsm2_FMS() const {return 0;}
 int StTriggerData::L2ResultsOffset(StL2AlgorithmId id) const {return -1;}  
 bool StTriggerData::isL2Triggered(StL2TriggerResultType id) const {return false;}  
+void StTriggerData::killFMS() {return;}

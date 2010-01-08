@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.h,v 2.4 2009/02/23 22:29:57 ullrich Exp $
+ * $Id: StFmsTriggerDetector.h,v 2.5 2010/01/08 22:44:37 ullrich Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.h,v $
+ * Revision 2.5  2010/01/08 22:44:37  ullrich
+ * Updates needed to add StFmsCollection and related classes.
+ *
  * Revision 2.4  2009/02/23 22:29:57  ullrich
  * Fixed problem when running over 2009 data (solution by Pibero)
  *
@@ -35,7 +38,7 @@
 class StTriggerData;
 
 class StFmsTriggerDetector : public StObject {
-public:
+public: 
     StFmsTriggerDetector();
     StFmsTriggerDetector(const StTriggerData&);
     virtual ~StFmsTriggerDetector();
@@ -46,6 +49,13 @@ public:
     unsigned int   hit(int line) const;
     unsigned short adc(int crate,  int addr,  int dcard,  int dch);
     unsigned short tdc(int crate,  int addr,  int dcard,  int dch);
+
+    unsigned char  DSM(int ch) const {return mDSM[ch];}
+    unsigned char  DSM01(int ch) const {return mDSM01[ch];}
+    unsigned char  DSM02(int ch) const {return mDSM02[ch];}
+    unsigned short DSM1(int ch) const {return mDSM1[ch];}
+    unsigned short DSM2(int ch) const {return mDSM2[ch];}
+
     void  dump();
         
 protected:
