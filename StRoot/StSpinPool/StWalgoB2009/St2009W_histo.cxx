@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.5 2010/01/09 00:07:16 stevens4 Exp $
+// $Id: St2009W_histo.cxx,v 1.6 2010/01/09 02:29:19 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -240,11 +240,11 @@ St2009WMaker::initHistos(){
   ln=new TLine(0,par_ptBalance,par_awayTotET,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
   hA[134]=h=new TH2F("musPtBalance_clust","sPtBalance vs cluster ET; 2x2 Cluster ET; sPtBalance",100,0,100,100,-100,100);
   hA[135]=h=new TH2F("musPtBalance_awayTot","sPtBalance vs awayside PT; awayside PT; sPtBalance",100,0,100,100,-100,100);
-  hA[136]=h=new TH1F("muclustPtBal",Form("PT Balance > %.1f && awaySide PT < .1f ; 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
-  hA[137]=h=new TH1F("muclustPtBal_bckgrd",Form("PT Balance < .1f || awaySide PT > .1f ; 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
+  hA[136]=h=new TH1F("muclustPtBal",Form("PT Balance > %.1f && awaySide PT < %.1f ; 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
+  hA[137]=h=new TH1F("muclustPtBal_bckgrd",Form("PT Balance < %.1f || awaySide PT > %.1f ; 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
   hA[138]=h=new TH1F("muclustAwayPt","AwaySide PT < 8 ; 2x2 Cluster ET",100,0,100);
   hA[139]=h=new TH1F("muclustAwayPt_bckgrd","AwaySide PT > 8 ; 2x2 Cluster ET",100,0,100);
-  hA[140]=h=new TH1F("muclustPtBalnoE",Form("PT Balance > .1f && awaySide PT < .1f (EEMC not included); 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
+  hA[140]=h=new TH1F("muclustPtBalnoE",Form("PT Balance > %.1f && awaySide PT < %.1f (EEMC not included); 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
   hA[141]=h=new TH1F("muclustAwayPtnoE","AwaySide PT < 8 (EEMC not included); 2x2 Cluster ET",100,0,100);
   
   // free 
@@ -261,6 +261,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.6  2010/01/09 02:29:19  stevens4
+// fix histo names
+//
 // Revision 1.5  2010/01/09 00:07:16  stevens4
 // add jet finder
 //
