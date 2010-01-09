@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.4 2010/01/06 19:16:48 stevens4 Exp $
+// $Id: St2009W_histo.cxx,v 1.5 2010/01/09 00:07:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -129,8 +129,7 @@ St2009WMaker::initHistos(){
    hA[38]=h=new TH2F("muBclE242D","Excess energy in 4x4 cluster vs. 2x2 E;2x2 cluster E (GeV); E(4x4)-E(2x2)  E (GeV)",50,0,80,50,0,60);
 
    hA[39]=h=new TH1F("muBclET24R"," ratio (2x2/4x4) cluster ET ; fraction: cluster ET 2x2/ 4x4 ET",100,0,1.2);
-   //hA[39]=h=new TH1F("muBclET24R",Form(" ratio (2x2 ET)/(4x4 ET + Tpc pT #Delta R=%.1f) ; fraction: (2x2 ET)/(4x4 ET + Tpc pT in #Delta R=%.1f) ET",par_smallNearDeltaR,par_smallNearDeltaR),100,0,1.2);
-  Lx=h->GetListOfFunctions();
+   Lx=h->GetListOfFunctions();
   ln=new TLine(par_clustFrac24,0,par_clustFrac24,1.e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
    //..... jet energy , fraction
@@ -228,6 +227,26 @@ St2009WMaker::initHistos(){
     hA[110+i]=h=new TH1F(txt0,txt, 100,0,100);
   }
   
+  //free 114-131
+
+  hA[117]=h=new TH2F("mujetQAeta_phi","Input Jet phi vs eta ;  eta ; phi ",50,-3,3,63,-PI,PI);
+  hA[118]=h=new TH1F("mujetQApt","Input Jet pt; pt;",100,0,100);
+
+  hA[132]=h=new TH2F("muptBalance_clust","ptBalance vs cluster ET; 2x2 Cluster ET; ptBalance",100,0,100,100,0,100);
+  hA[133]=h=new TH2F("muptBalance_awayTot","ptBalance vs awayside PT; awayside PT; ptBalance",100,0,100,100,0,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_awayTotET,par_ptBalance,par_awayTotET,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_ptBalance,par_awayTotET,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  hA[134]=h=new TH2F("musPtBalance_clust","sPtBalance vs cluster ET; 2x2 Cluster ET; sPtBalance",100,0,100,100,-100,100);
+  hA[135]=h=new TH2F("musPtBalance_awayTot","sPtBalance vs awayside PT; awayside PT; sPtBalance",100,0,100,100,-100,100);
+  hA[136]=h=new TH1F("muclustPtBal",Form("PT Balance > %.1f && awaySide PT < .1f ; 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
+  hA[137]=h=new TH1F("muclustPtBal_bckgrd",Form("PT Balance < .1f || awaySide PT > .1f ; 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
+  hA[138]=h=new TH1F("muclustAwayPt","AwaySide PT < 8 ; 2x2 Cluster ET",100,0,100);
+  hA[139]=h=new TH1F("muclustAwayPt_bckgrd","AwaySide PT > 8 ; 2x2 Cluster ET",100,0,100);
+  hA[140]=h=new TH1F("muclustPtBalnoE",Form("PT Balance > .1f && awaySide PT < .1f (EEMC not included); 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
+  hA[141]=h=new TH1F("muclustAwayPtnoE","AwaySide PT < 8 (EEMC not included); 2x2 Cluster ET",100,0,100);
+  
   // free 
 
   // add histos to the list (if provided)
@@ -242,6 +261,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.5  2010/01/09 00:07:16  stevens4
+// add jet finder
+//
 // Revision 1.4  2010/01/06 19:16:48  stevens4
 // track cuts now on primary component, cleanup
 //

@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.4 2010/01/06 19:16:48 stevens4 Exp $
+// $Id: WeventDisplay.cxx,v 1.5 2010/01/09 00:07:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -166,7 +166,7 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
   printf("WeventDisplay:: BTOW+ETOW  %s\n",txt);
   pvt->AddText(txt);
 
-  sprintf(txt,"total ET/GeV:   near= %.1f   away= %.1f",myTr.nearTotET,myTr.awayTotET);
+  sprintf(txt,"total ET/GeV:   near= %.1f   away= %.1f  ptBalance= %.1f",myTr.nearTotET,myTr.awayTotET,myTr.ptBalance.Perp());
   printf("WeventDisplay:: BTOW  %s\n",txt);
   pvt->AddText(txt);
 
@@ -391,6 +391,9 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.5  2010/01/09 00:07:16  stevens4
+// add jet finder
+//
 // Revision 1.4  2010/01/06 19:16:48  stevens4
 // track cuts now on primary component, cleanup
 //

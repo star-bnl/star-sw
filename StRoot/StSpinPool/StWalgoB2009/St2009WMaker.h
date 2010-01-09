@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.3 2010/01/06 19:16:47 stevens4 Exp $
+// $Id: St2009WMaker.h,v 1.4 2010/01/09 00:07:16 stevens4 Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -8,6 +8,7 @@
  * \class  St2009WMaker
  * \author Jan Balewski, MIT; 
  * \author Endcap: Justin Stevens, IUCF
+ * \author JetFinder/JetReader interface: Ilya Selyuzhenkov, IUCF
  * \date   August 2009
  * \brief  muDst based extraction of W-signal from pp500 data from 2009
  *
@@ -33,6 +34,11 @@ class  St2009pubWanaMaker;
 class  St2009pubJSMaker;
 class  St2009pubSpinMaker;
 class  St2009pubMcMaker;
+class  StJetReader;
+class  StJets;
+class  StJet;
+class  TClonesArray;
+
 
 class St2009WMaker : public StMaker {
  friend class WeventDisplay;
@@ -44,6 +50,10 @@ class St2009WMaker : public StMaker {
  friend class St2009ZMaker;
  private:
   StMuDstMaker* mMuDstMaker;
+  StJetReader* mJetReaderMaker;
+  int nJets;
+  TString mJetTreeBranch,mJetTreeBranch_noEEMC;
+  TClonesArray* mJets;
   Wevent2009 wEve;
   WeventDisplay *wDisaply;
   int  nInpEve,nTrigEve, nAccEve; //  event counters
@@ -64,7 +74,7 @@ class St2009WMaker : public StMaker {
   int   par_kSigPed, par_AdcThres;
   float par_maxADC, par_clustET, par_clustFrac24, par_nearTotEtFrac;
   float par_nearDeltaR, par_awayDeltaPhi, par_smallNearDeltaR;
-  float par_delR3D, par_highET, par_awayTotET;
+  float par_delR3D, par_highET, par_awayTotET, par_ptBalance;
  
   float par_countTrPt,par_countTowEt; 
   int par_useEtow;                    
@@ -78,8 +88,8 @@ class St2009WMaker : public StMaker {
   void setEleTrackCuts(int nfp, int hfr, float rin, float rout, float mpt) {
     par_nFitPts=nfp;  par_nHitFrac=hfr; 
     par_trackRin=rin;  par_trackRout=rout; par_trackPt=mpt;}
-  void setWbosonCuts(float a, float fr2, float b) {
-    par_highET=a; par_nearTotEtFrac=fr2;  par_awayTotET=b;}
+  void setWbosonCuts(float a, float fr2, float b, float bal) {
+    par_highET=a; par_nearTotEtFrac=fr2;  par_awayTotET=b; par_ptBalance=bal;}
   void setEmcCuts(int ksp , float madc, float clet, float fr1, float dr){
     par_kSigPed=ksp; par_maxADC=madc; par_clustET=clet; 
     par_clustFrac24=fr1;}
@@ -88,6 +98,7 @@ class St2009WMaker : public StMaker {
   void setL0AdcThresh(int x){ par_l0emulAdcThresh=x; }
   void setL2ClusterThresh(float x){ par_l2emulClusterThresh=x; }
   void setL2SeedThresh(float x){ par_l2emulSeedThresh=x; }
+  void setJetTreeBranch(TString jetTreeBranch, TString jetTreeBranch_noEEMC){ mJetTreeBranch = jetTreeBranch; mJetTreeBranch_noEEMC = jetTreeBranch_noEEMC; }
  private:   
 
   //.... not used in the algo
@@ -118,7 +129,12 @@ class St2009WMaker : public StMaker {
   int   matchTrack2Cluster();
   void  findNearJet();
   void  findAwayJet();
+  void  findPtBalance();
   void  hadronicRecoil();
+
+  // jets
+  StJet* getJet(int i){return (StJet*)mJets->At(i);}
+  TClonesArray* getJets(TString branchName);
 
   // tools
   float sumTpcCone( int vertID, TVector3 refAxis, int flag, int &nTrCnt);
@@ -129,7 +145,7 @@ class St2009WMaker : public StMaker {
 
   // histograms
   TObjArray *HList;
-  enum {mxHA=128}; TH1 * hA[mxHA];
+  enum {mxHA=150}; TH1 * hA[mxHA];
     
   void initHistos();
   void initGeom();
@@ -152,7 +168,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.3 2010/01/06 19:16:47 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.4 2010/01/09 00:07:16 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -163,6 +179,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.4  2010/01/09 00:07:16  stevens4
+// add jet finder
+//
 // Revision 1.3  2010/01/06 19:16:47  stevens4
 // track cuts now on primary component, cleanup
 //
