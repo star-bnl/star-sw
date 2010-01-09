@@ -1,8 +1,8 @@
 class StChain;
 StChain *chain=0;
 int spinSort=false;
-int useEtow=2;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
-int isJustin=true;
+int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
+int isJustin=false;
 bool isRoss=true; 
 int geant=false;
 
@@ -11,7 +11,9 @@ int rdMuWana(
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=3 // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
+	     int isMC=3, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
+	     int useJetFinder = 0, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
+             TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //location of jet trees to be used
  ) { 
 
 
@@ -78,12 +80,34 @@ int rdMuWana(
   assert( !gSystem->Load("StWalgoB2009"));
   if(spinSort)  assert( !gSystem->Load("StSpinDbMaker"));
   
+  if (useJetFinder ==1 || useJetFinder == 2){ // jetfinder/jetreader libraries
+    cout << "BEGIN: loading jetfinder libs" << endl;
+    gSystem->Load("StEmcRawMaker");
+    gSystem->Load("StEmcADCtoEMaker");
+    gSystem->Load("StPreEclMaker");
+    gSystem->Load("StEpcMaker");
+    gSystem->Load("StJetSkimEvent");
+    gSystem->Load("StJets");
+    gSystem->Load("StSpinDbMaker");
+    gSystem->Load("StEmcTriggerMaker");
+    gSystem->Load("StTriggerUtilities");
+    gSystem->Load("StMCAsymMaker");
+    gSystem->Load("StJetEvent");
+    gSystem->Load("StJetFinder");
+    gSystem->Load("StJetMaker");
+    cout << "END: loading jetfinder libs" << endl;
+  }
+  else  {
+    cout << "Jets finder is not configured: exiting" << endl;
+    return;
+  }
+
   // libraries for access to MC record         
   if(geant){                                  
     assert( !gSystem->Load("StMcEvent"));      
     assert( !gSystem->Load("StMcEventMaker")); 
   }
-
+  
   // create chain    
   chain = new StChain("StChain"); 
   
@@ -139,15 +163,125 @@ int rdMuWana(
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
-    //make it off  dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
+    dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }
 
     
   //.... load EEMC database
   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
   
+  //.... Jet finder code ....
+  if (useJetFinder > 0)  {
+    cout << "BEGIN: running jet finder " << endl;
+    TString outFile = "jets_"+outF+".root";
+  }
+  if (useJetFinder == 1){
+    double pi = atan(1.0)*4.0;
+    
+    // Makers for clusterfinding
+    StSpinDbMaker* spDbMaker = new StSpinDbMaker("spinDb");
+    StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
+    StPreEclMaker *pre_ecl=new StPreEclMaker();
+    StEpcMaker *epc=new StEpcMaker();
+
+    //test Mike's new 4p maker:
+    //here we also tag whether or not to do the swap:
+    bool doTowerSwapFix = true;
+    bool use2003TowerCuts = false;
+    bool use2006TowerCuts = true;
+    //4p maker using 100% tower energy correction
+    StBET4pMaker* bet4pMakerFrac100 = new StBET4pMaker("BET4pMakerFrac100",muMk,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.0));
+    bet4pMakerFrac100->setUse2003Cuts(use2003TowerCuts);
+    bet4pMakerFrac100->setUseEndcap(true);
+    bet4pMakerFrac100->setUse2006Cuts(use2006TowerCuts);
+    //4p maker using 100% tower energy correction (no endcap)
+    StBET4pMaker* bet4pMakerFrac100_noEEMC = new StBET4pMaker("BET4pMakerFrac100_noEEMC",muMk,doTowerSwapFix,new StjTowerEnergyCorrectionForTracksFraction(1.0));
+    bet4pMakerFrac100_noEEMC->setUse2003Cuts(use2003TowerCuts);
+    bet4pMakerFrac100_noEEMC->setUseEndcap(false);
+    bet4pMakerFrac100_noEEMC->setUse2006Cuts(use2006TowerCuts);
+
+    //Instantiate the JetMaker
+    StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muMk, outFile);
+
+    //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
+    StppAnaPars* anapars = new StppAnaPars();
+    anapars->setFlagMin(0); //track->flag() > 0
+    anapars->setNhits(5); //track->nHitsFit()>10
+    anapars->setCutPtMin(0.2); //track->pt() > 0.2
+    anapars->setAbsEtaMax(2.0); //abs(track->eta())<1.6
+    anapars->setJetPtMin(3.5);
+    anapars->setJetEtaMax(100.0);
+    anapars->setJetEtaMin(0);
+    anapars->setJetNmin(0);
+
+    //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
+    StConePars* cpars = new StConePars();
+    cpars->setGridSpacing(105, -3.0, 3.0, 120, -pi, pi);  //include EEMC
+    cpars->setConeRadius(0.7);
+    cpars->setSeedEtMin(0.5);
+    cpars->setAssocEtMin(0.1);
+    cpars->setSplitFraction(0.5);
+    cpars->setPerformMinimization(true);
+    cpars->setAddMidpoints(true);
+    cpars->setRequireStableMidpoints(true);
+    cpars->setDoSplitMerge(true);
+    cpars->setDebug(false);
+    
+    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets5_100"); //100% subtraction 
+    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets5_100_noEEMC"); //100% subtraction (no Endcap)
+
+    anapars->setNhits(12); //track->nHitsFit()>12
+    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction 
+    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
+
+    //Tight cuts (esp. SMD)
+    pre_ecl->SetClusterConditions("bemc", 4, 0.4, 0.05, 0.02, kFALSE);
+    pre_ecl->SetClusterConditions("bsmde", 5, 0.4,0.005, 0.1,kFALSE);
+    pre_ecl->SetClusterConditions("bsmdp", 5, 0.4,0.005, 0.1,kFALSE);
+    pre_ecl->SetClusterConditions("bprs", 1, 500., 500., 501., kFALSE);
+
+    TChain* tree=muMk->chain(); assert(tree);
+    int nEntries=(int) tree->GetEntries();
+    printf("total eve in muDst chain =%d\n",nEntries);  // return ;
+    if(nEntries<0) return;
+
+    chain->Init();
+    chain->ls(3);
+
+    char txt[1000];
+    //---------------------------------------------------
+    int eventCounter=0;
+    int t1=time(0);
+    TStopwatch tt;
+    for (Int_t iev=0;iev<nEntries; iev++) {
+      if(eventCounter>=nEve) break;
+      chain->Clear();
+      int stat = chain->Make();
+      if(stat) break; // EOF or input error
+        eventCounter++;
+    }
+    cout<<"R"<<runNo<<" nEve="<<eventCounter<<" total "; tt.Print();
+    printf("****************************************** \n");
+
+    int t2=time(0);
+    if(t2==t1) t2=t1+1;
+    float tMnt=(t2-t1)/60.;
+    float rate=1.*eventCounter/(t2-t1);
+    printf("#sorting R%d done %d of   nEve= %d, CPU rate= %.1f Hz, total time %.1f minute(s) \n\n",runNo,eventCounter,nEntries,rate,tMnt);
+
+    cout << "END: jet finder " << endl;
+    return;
+  }
+  if (useJetFinder == 2)
+  {
+    cout << "Configure to read jet trees " << endl;
+    StJetReader *jetReader = new StJetReader("JetReader",muMk);
+    jetReader->InitFile(jetTreeDir+outFile);
+  }
+
+
   //.... W reconstruction code ....
-  WmuMk=new St2009WMaker();
+  St2009WMaker *WmuMk=new St2009WMaker();
   if(isMC) { // MC specific
     WmuMk->setMC(isMC); //pass "version" of MC to maker
     WmuMk->setEtowScaleMC(1.3);
@@ -155,12 +289,13 @@ int rdMuWana(
     WmuMk->setTrigID(bht3ID,l2wID);
   }
   
+  if (useJetFinder == 2) WmuMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
   
   /* to change default cuts activate any of the lines below */
   //WmuMk->setVertexCuts(101.,3);// vertexZ (cm), minPileupVert
   //WmuMk->setEleTrackCuts(16,0.52,91.,169.,10.1); //nFitP, fitFrac, Rin,Rout, elePt  
   //WmuMk->setEmcCuts(3,200.,15.,0.9,0.97);// kSigPed, maxAdc, clET, fr2/4
-  //WmuMk->setWbosonCuts(28.,0.8,8.0); // 2x2ET, 2x2/nearJet, awayJet
+  //WmuMk->setWbosonCuts(28.,0.8,8.0,15); // 2x2ET, 2x2/nearJet, awayJet, ptBalance
   
   WmuMk->setMaxDisplayEve(10); // only first N events will get displayed 
   WmuMk->useEtow(useEtow);// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
@@ -256,6 +391,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.12  2010/01/09 00:07:36  stevens4
+// add jet finder
+//
 // Revision 1.11  2010/01/06 14:11:17  balewski
 // one Z-plot added
 //

@@ -1,7 +1,8 @@
-// $Id: St2009WMaker.cxx,v 1.3 2010/01/06 19:16:47 stevens4 Exp $
+// $Id: St2009WMaker.cxx,v 1.4 2010/01/09 00:07:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
+//*-- Author for JetFinder/JetReader interface: Ilya Selyuzhenkov, IUCF
 // test 1, after DNP2009 tag, Jan
 
 #include <TH1.h>
@@ -22,6 +23,15 @@
 #include "StEEmcUtil/database/EEmcDbItem.h"     
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h" 
 
+//jets
+#include "StSpinPool/StJets/StJet.h"
+#include "StSpinPool/StJets/StJets.h"
+#include "StJetMaker/StJetMaker.h"
+#include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
+#include "StJetMaker/StJetReader.h"
+#include "StJetMaker/StJetSkimEventMaker.h"
+
+
 #include "WeventDisplay.h"
 #include "St2009WMaker.h"
 
@@ -32,6 +42,7 @@ ClassImp(St2009WMaker)
 St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   char muDstMakerName[]="MuDst"; 
   mMuDstMaker= (StMuDstMaker*)GetMaker(muDstMakerName);  assert(mMuDstMaker);
+  mJetReaderMaker = (StJetReader*)GetMaker("JetReader");  assert(mJetReaderMaker);
 
   // preset or clear some params
   par_bht3TrgID= par_l2wTrgID=0;
@@ -73,8 +84,9 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   
   //... search for W's
   par_awayDeltaPhi=0.7; // (rad) away-'cone' size
-  par_awayTotET=8.; // (GeV), maximal allowed away-cone  ET
+  par_awayTotET=30.; // (GeV), maximal allowed away-cone  ET
   par_highET=28.; // (GeV), cut-off for final W-cluster ET
+  par_ptBalance=15.; // (GeV), ele cluster vector + jet sum vector
 
   par_useEtow=1; // flag for how to use ETOW in algo
   // flag == 0 -> don't use ETOW
@@ -132,7 +144,7 @@ St2009WMaker::InitRun(int runNo){
 #endif
 
   mRunNo=runNo;
-   LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d mcScaleFact=%.2f\nmcBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV",
+   LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d mcScaleFact=%.2f\nmcBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV ptBalance>%.1fGeV",
 		 mRunNo,par_bht3TrgID, par_l2wTrgID,isMC,
 		 par_minPileupVert,par_vertexZ,
 		 par_nFitPts,par_nHitFrac,  par_trackRin,  par_trackRout, par_trackPt,
@@ -140,7 +152,7 @@ St2009WMaker::InitRun(int runNo){
 		  par_delR3D,par_nearDeltaR,
 		  par_countTrPt,par_countTowEt,par_useEtow,par_mcEtowScale,
 		  par_mcBtowScale,
-		  par_highET,par_awayDeltaPhi,par_awayTotET
+		  par_highET,par_awayDeltaPhi,par_awayTotET,par_ptBalance
 		 )<<endm;
 
    return kStOK;
@@ -180,6 +192,17 @@ St2009WMaker::Make(){
 
   accessBSMD(); 
   if( accessVertex()) return kStOK; //skip event w/o ~any reasonable vertex  
+
+  mJets = getJets(mJetTreeBranch); //get input jet info
+  for (int i_jet=0; i_jet< nJets; ++i_jet){
+    StJet* jet = getJet(i_jet);
+    float jet_pt = jet->Pt();
+    float jet_eta = jet->Eta();
+    float jet_phi = jet->Phi();
+    hA[117]->Fill(jet_eta,jet_phi);
+    hA[118]->Fill(jet_pt);
+  }
+
   if( accessTracks()) return kStOK; //skip event w/o ~any highPt track
   if( accessBTOW()) return kStOK; //skip event w/o energy in BTOW
   accessETOW();// get energy in ETOW 
@@ -193,6 +216,8 @@ St2009WMaker::Make(){
      on the list  till the end. */
   findNearJet();
   findAwayJet();
+
+  findPtBalance();
 
   hadronicRecoil();
 
@@ -285,8 +310,34 @@ St2009WMaker::L2algoEtaPhi2IJ(float etaF,float phiF,int &iEta, int &iPhi) {
 }
 
 
+//________________________________________________
+//________________________________________________
+TClonesArray*
+St2009WMaker::getJets(TString branchName)
+{
+  StJetReader::JetBranchesMap &jetM= mJetReaderMaker->jetsMap();
+  for(StJetReader::JetBranchesMap::iterator it=jetM.begin(); it!=jetM.end(); ++it)
+  {
+    StJets *stjets = (*it).second;
+    nJets = stjets->nJets();
+    //cout << "wEve.id " << wEve.id << " stjets->eventId() " << stjets->eventId() << endl;
+    assert(stjets->eventId()==wEve.id);
+    assert(stjets->runId()==mRunNo);
+    if ((*it).first!=branchName) continue;
+//     cout << "stjets->nJets():: " <<  nJets << endl;
+//     cout << "wEve.id " << wEve.id << " mRunNo " << mRunNo << " branchName: " << (*it).first << endl;
+    TClonesArray *jets = stjets->jets();
+    return jets;
+  }
+  
+  return 0;
+}
+
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.4  2010/01/09 00:07:16  stevens4
+// add jet finder
+//
 // Revision 1.3  2010/01/06 19:16:47  stevens4
 // track cuts now on primary component, cleanup
 //
@@ -299,6 +350,9 @@ St2009WMaker::L2algoEtaPhi2IJ(float etaF,float phiF,int &iEta, int &iPhi) {
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.4  2010/01/09 00:07:16  stevens4
+// add jet finder
+//
 // Revision 1.3  2010/01/06 19:16:47  stevens4
 // track cuts now on primary component, cleanup
 //

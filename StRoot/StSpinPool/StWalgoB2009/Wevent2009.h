@@ -1,4 +1,4 @@
-// $Id: Wevent2009.h,v 1.2 2010/01/06 19:16:48 stevens4 Exp $
+// $Id: Wevent2009.h,v 1.3 2010/01/09 00:07:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -59,6 +59,9 @@ class WeveEleTrack { // electron track info
   int awayNTr,nearNTr,smallNearNTr;  // # tracks on away side  
   int awayNTow,nearNTow; // # towers on away aide  
    
+  TVector3 ptBalance,ptBalance_noEEMC;
+  float sPtBalance;
+
   TVector3 hadronicRecoil; 
 
   WeveEleTrack() {clear();}
@@ -68,6 +71,8 @@ class WeveEleTrack { // electron track info
     prMuTrack=glMuTrack=0; 
     awayTpcPT=nearTpcPT=nearTotET=awayTotET=nearEmcET=awayEmcET=nearBtowET=awayBtowET=nearEtowET=awayEtowET=smallNearTpcPT=0; awayNTr=awayNTow=nearNTr=nearNTow=smallNearNTr=0; 
     
+    ptBalance=TVector3(0,0,0); ptBalance_noEEMC=TVector3(0,0,0); sPtBalance=0;
+
     hadronicRecoil=TVector3(0,0,0); } 
   
   void print( int flag=0){
@@ -215,6 +220,9 @@ class Wevent2009 {
 
 
 // $Log: Wevent2009.h,v $
+// Revision 1.3  2010/01/09 00:07:16  stevens4
+// add jet finder
+//
 // Revision 1.2  2010/01/06 19:16:48  stevens4
 // track cuts now on primary component, cleanup
 //

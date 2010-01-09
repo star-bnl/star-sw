@@ -1,10 +1,11 @@
-// $Id: St2009W_algo.cxx,v 1.4 2010/01/06 19:16:47 stevens4 Exp $
+// $Id: St2009W_algo.cxx,v 1.5 2010/01/09 00:07:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "WeventDisplay.h"
+#include "StSpinPool/StJets/StJet.h"
 
 #include "St2009WMaker.h"
 
@@ -35,6 +36,27 @@ St2009WMaker::find_W_boson(){
       hA[55]->Fill(T.awayEtowET);
       hA[60]->Fill(T.cluster.ET,T.awayTpcPT);
       hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
+
+      hA[132]->Fill(T.cluster.ET,T.ptBalance.Perp());
+      hA[133]->Fill(T.awayTotET,T.ptBalance.Perp());
+      hA[134]->Fill(T.cluster.ET,T.sPtBalance);
+      hA[135]->Fill(T.awayTotET,T.sPtBalance);
+
+      //plots for backg sub yield
+      if(T.ptBalance.Perp()>par_ptBalance && T.awayTotET<par_awayTotET)
+        hA[136]->Fill(T.cluster.ET);//signal
+      else 
+        hA[137]->Fill(T.cluster.ET);//background
+      if(T.ptBalance_noEEMC.Perp()>par_ptBalance && (T.awayBtowET+T.awayTpcPT)<par_awayTotET)
+        hA[140]->Fill(T.cluster.ET);//signal w/o EEMC in veto
+      
+      //plots for backg sub yield (old awayTot cut DNP)
+      if(T.awayTotET < 8)
+        hA[138]->Fill(T.cluster.ET);//old signal
+      else 
+        hA[139]->Fill(T.cluster.ET);//old background
+      if(T.awayBtowET+T.awayTpcPT < 8)
+        hA[141]->Fill(T.cluster.ET);//old signal w/o EEMC in veto
       
       //     if(T.cluster.ET /T.nearTotET<0.6 && T.awayTotET >20) // di-jets
  	if(0){/***************************/
@@ -43,9 +65,9 @@ St2009WMaker::find_W_boson(){
 	  wEve.print();
 	}/***************************/
  
-
-
-      if(T.awayTotET>  par_awayTotET)  continue;// too large awayET
+	
+      //put final W cut here
+      if(T.ptBalance.Perp()<par_ptBalance || T.awayTotET>par_awayTotET)  continue;
       hA[20]->Fill("noAway",1.0);  
       hA[113]->Fill( T.cluster.ET);//for Joe
 
@@ -67,6 +89,52 @@ St2009WMaker::find_W_boson(){
     }// loop over tracks
   }// loop over vertices
  
+}
+
+
+//________________________________________________
+//________________________________________________
+void
+St2009WMaker::findPtBalance(){
+
+  for(uint iv=0;iv<wEve.vertex.size();iv++) {
+    WeveVertex &V=wEve.vertex[iv];
+    for(uint it=0;it<V.eleTrack.size();it++) {
+      WeveEleTrack &T=V.eleTrack[it];
+      if(T.isMatch2Cl==false) continue;
+
+      //****loop over branch with EEMC****
+      mJets = getJets(mJetTreeBranch);
+      int nJetsWE=nJets;
+      for (int i_jet=0; i_jet< nJetsWE; i_jet++){//loop over jets
+	StJet* jet = getJet(i_jet);
+	TVector3 jetVec; //vector for jet momentum
+	jetVec.SetPtEtaPhi(jet->Pt(),jet->Eta(),jet->Phi());
+	if(jetVec.DeltaR(T.primP) > par_nearDeltaR)
+              T.ptBalance+=jetVec;
+      }
+      TVector3 clustPt(T.primP.X(),T.primP.Y(),0);
+      clustPt.SetMag(T.cluster.ET);
+      T.ptBalance+=clustPt;
+      T.sPtBalance=T.ptBalance.Dot(clustPt);
+      T.sPtBalance/=T.cluster.ET;
+
+      //****loop over branch without EEMC****
+      mJets = getJets(mJetTreeBranch_noEEMC);
+      int nJetsNE=nJets;
+      TVector3 highJet; //zero out highJet 
+      for (int i_jet=0; i_jet< nJetsNE; i_jet++){//loop over jets
+	StJet* jet = getJet(i_jet);
+	TVector3 jetVec; //vector for jet momentum
+	jetVec.SetPtEtaPhi(jet->Pt(),jet->Eta(),jet->Phi());
+	if(jetVec.DeltaR(T.primP) > par_nearDeltaR)
+	  T.ptBalance_noEEMC+=jetVec;
+      }
+      T.ptBalance_noEEMC+=clustPt;
+
+    }// end of loop over tracks
+  }// end of loop over vertices
+  
 }
 
 
@@ -178,7 +246,6 @@ St2009WMaker::matchTrack2Cluster(){
       T.smallNearTpcPT-=par_trackPt;
 
       float frac24=T.cluster.ET/(T.cl4x4.ET);
-      //float frac24=T.cluster.ET/(T.cl4x4.ET+T.smallNearTpcPT);
       hA[39]->Fill(frac24);
       if(frac24<par_clustFrac24) continue;
   
@@ -399,6 +466,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.5  2010/01/09 00:07:16  stevens4
+// add jet finder
+//
 // Revision 1.4  2010/01/06 19:16:47  stevens4
 // track cuts now on primary component, cleanup
 //
