@@ -51,11 +51,12 @@ St2009ZMaker::initHistos(){
   hA[14]=h=new TH1F(core+"ZmassLike","  Final Z selection with Like Charges on both tracks; Invariant Mass (GeV)", 100,0,200);
 
   //cut details:
-  hA[15]=h=new TH1F(core+"ZmassUnlike","  Final Zs,  Unlike Charge pairs; Invariant Mass (GeV)", 100,0,200);
+  hA[15]=h=new TH1F(core+"ZmassUnlike","  Final Zs,  Unlike Charge pairs; Invariant Mass (GeV)", 100,0,200);   h->SetFillColor(kYellow);
+
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_minMassZ,0,par_minMassZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
   ln=new TLine(par_maxMassZ,0,par_maxMassZ,yMax);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
-  ln=new TLine(91.2,-.2,91.2,10.);  ln->SetLineColor(kGreen); ln->SetLineWidth(3);  ln->SetLineStyle(2); Lx->Add(ln);
+  ln=new TLine(91.2,-.2,91.2,10.);  ln->SetLineColor(kGreen); ln->SetLineWidth(3);  ln->SetLineStyle(1); Lx->Add(ln);
 
   hA[21]=h=new TH2F(core+"fmax_v_fmaxbefore","Final Z Selection, Fmax v Fmax;fmax1;fmax2",100,0,1,100,0,1);
   hA[22]=h=new TH2F(core+"et_v_etbefore","Transverse Energies of the two Clusters;Et1;Et2",100,0,100,100,0,100);

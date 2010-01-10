@@ -1,4 +1,4 @@
-// $Id: WeventDisplay.cxx,v 1.5 2010/01/09 00:07:16 stevens4 Exp $
+// $Id: WeventDisplay.cxx,v 1.6 2010/01/10 03:01:37 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -175,7 +175,7 @@ WeventDisplay::draw(  const char *tit,int eveID, int daqSeq,  int runNo,  WeveVe
 
   c0->Print();
   // save dump of histos
-  sprintf(txt,"display_run%d.eventId%05dvert%d.root",runNo,eveID,myV.id);
+  sprintf(txt,"display-%s_run%d.eventId%05dvert%d.root",tit,runNo,eveID,myV.id);
   TFile hf(txt,"recreate");
   if(hf.IsOpen()) {
     hEmcET->Write();
@@ -391,6 +391,9 @@ WeventDisplay::export2sketchup(  const char *tit, WeveVertex myV, WeveEleTrack m
 
 
 // $Log: WeventDisplay.cxx,v $
+// Revision 1.6  2010/01/10 03:01:37  balewski
+// cleanup & nicer histos
+//
 // Revision 1.5  2010/01/09 00:07:16  stevens4
 // add jet finder
 //
