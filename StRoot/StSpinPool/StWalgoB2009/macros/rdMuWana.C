@@ -12,7 +12,7 @@ int rdMuWana(
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
 	     int isMC=3, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
-	     int useJetFinder = 0, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
+	     int useJetFinder = 2, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
              TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //location of jet trees to be used
  ) { 
 
@@ -391,6 +391,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.13  2010/01/10 03:01:39  balewski
+// cleanup & nicer histos
+//
 // Revision 1.12  2010/01/09 00:07:36  stevens4
 // add jet finder
 //

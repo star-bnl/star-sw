@@ -3,11 +3,11 @@ TCanvas *can=0;
 //=================================================
 plZana(  int page=3,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
-  //iPath="/star/data05/scratch/balewski/2009-WanaN-SL09g-Jan2/data/";
+  //iPath="/star/data05/scratch/balewski/2009-WanaJ-SL09g-x/data/";
   core0="run9setABCD";
   core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter";
-  //core0="mcSetD1_ppZprod";
+  core0="mcSetD1_ppZprod";
 
   if(page==0) {
     doAll();
@@ -91,6 +91,11 @@ plZana(  int page=3,int pl=0, char *core0="R10096140", char *iPath="", char *oPa
 	h3->Draw("colz same");
 	h2->Draw("box same");  
       }
+      if(i==3)  {
+	//h->SetFillColor(kYellow);
+	h->SetAxisRange(0,130);
+	h->Fit("gaus","","RH",75.,115.);
+      }
     }
  
         
@@ -163,7 +168,7 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(){
- for(int i=1;i<=3;i++)  {
+ for(int i=1;i<=4;i++)  {
   plZana(i,2);
  }
 }
@@ -172,6 +177,9 @@ void doAll(){
 
 
 // $Log: plZana.C,v $
+// Revision 1.6  2010/01/10 03:01:39  balewski
+// cleanup & nicer histos
+//
 // Revision 1.5  2010/01/06 14:11:17  balewski
 // one Z-plot added
 //

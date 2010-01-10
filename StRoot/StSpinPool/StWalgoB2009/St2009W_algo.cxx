@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.6 2010/01/10 01:45:10 stevens4 Exp $
+// $Id: St2009W_algo.cxx,v 1.7 2010/01/10 03:01:37 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -44,7 +44,6 @@ St2009WMaker::find_W_boson(){
       hA[53]->Fill(T.cluster.ET,T.awayEmcET);
       hA[55]->Fill(T.awayEtowET);
       hA[60]->Fill(T.cluster.ET,T.awayTpcPT);
-      hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
 
       hA[132]->Fill(T.cluster.ET,T.ptBalance.Perp());
       hA[133]->Fill(T.awayTotET,T.ptBalance.Perp());
@@ -52,8 +51,10 @@ St2009WMaker::find_W_boson(){
       hA[135]->Fill(T.awayTotET,T.sPtBalance);
 
       //plots for backg sub yield
-      if(T.ptBalance.Perp()>par_ptBalance && T.awayTotET<par_awayTotET)
+      if(T.ptBalance.Perp()>par_ptBalance && T.awayTotET<par_awayTotET) {
         hA[136]->Fill(T.cluster.ET);//signal
+	hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
+      }
       else 
         hA[137]->Fill(T.cluster.ET);//background
             
@@ -476,6 +477,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.7  2010/01/10 03:01:37  balewski
+// cleanup & nicer histos
+//
 // Revision 1.6  2010/01/10 01:45:10  stevens4
 // fix plots w/o EEMC in veto
 //

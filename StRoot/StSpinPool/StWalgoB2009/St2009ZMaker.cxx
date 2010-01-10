@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.8 2010/01/06 14:11:13 balewski Exp $
+// $Id: St2009ZMaker.cxx,v 1.9 2010/01/10 03:01:37 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -151,7 +151,7 @@ St2009ZMaker::find_Z_boson(){
 	  hA[14]->Fill(mass);
 	  continue;
 	}
-	printf("RCC:  Found Z! invmass=%f\n",mass);
+	printf("RCC:  Found Z w/ invmass=%f\n",mass);
         printJan(&T1);
         printJan(&T2);
 
@@ -162,6 +162,17 @@ St2009ZMaker::find_Z_boson(){
 	hA[33]->Fill(T2.cluster.ET,T2.prMuTrack->charge()/T2.prMuTrack->pt()); 
 	hA[34]->Fill(T1.pointTower.iEta ,T1.cluster.energy);
 	hA[34]->Fill(T2.pointTower.iEta ,T2.cluster.energy);
+
+	if (!wMK->isMC || (wMK->isMC&& wEve.id<500) )
+	  { printf("\n ZZZZZZZZZZZZZZZZZZZ\n");
+	    if(mass<par_minMassZ) 
+	    wMK->wDisaply->exportEvent("Zlow",V,T1);
+	    else
+	      wMK->wDisaply->exportEvent("Zgood",V,T1);
+	    printf("RCC:  Found Z w/ invmass=%f\n",mass);
+	    wEve.print();
+	  }
+	
 
 
 	if (mass<par_minMassZ) continue; //enforce a lower bound
@@ -177,14 +188,6 @@ St2009ZMaker::find_Z_boson(){
 
 	hA[21]->Fill(fmax1,fmax2);
 	hA[22]->Fill(T1.cluster.ET,T2.cluster.ET);
-
-
-	if (!wMK->isMC || (wMK->isMC&& wEve.id<500) )
-	  { printf("\n ZZZZZZZZZZZZZZZZZZZ\n");
-	    wMK->wDisaply->exportEvent("Z",V,T1);
-	    printf("RCC:  Found Z! invmass=%f\n",mass);
-	    wEve.print();
-	  }
 
 	hA[1]->Fill(mass);
 	hA[2]->Fill(T1.prMuTrack->charge(),T2.prMuTrack->charge());
@@ -220,6 +223,9 @@ St2009ZMaker::find_Z_boson(){
 
 
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.9  2010/01/10 03:01:37  balewski
+// cleanup & nicer histos
+//
 // Revision 1.8  2010/01/06 14:11:13  balewski
 // one Z-plot added
 //
