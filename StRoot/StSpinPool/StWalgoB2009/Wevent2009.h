@@ -1,4 +1,4 @@
-// $Id: Wevent2009.h,v 1.3 2010/01/09 00:07:16 stevens4 Exp $
+// $Id: Wevent2009.h,v 1.4 2010/01/10 01:45:10 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -55,7 +55,7 @@ class WeveEleTrack { // electron track info
   TVector3 primP; // primary momentum vector
   float nearTpcPT, nearEmcET, nearBtowET, nearEtowET, smallNearTpcPT; // (GeV/c), around prim track direction
   float awayTpcPT, awayEmcET, awayBtowET, awayEtowET; // (GeV/c), opposite in phi to  prim track direction
-  float nearTotET, awayTotET; // (GeV), for nearCone 10 GeV is subtracted to avoid double counting
+  float nearTotET, awayTotET, nearTotET_noEEMC, awayTotET_noEEMC; // (GeV), for nearCone 10 GeV is subtracted to avoid double counting
   int awayNTr,nearNTr,smallNearNTr;  // # tracks on away side  
   int awayNTow,nearNTow; // # towers on away aide  
    
@@ -69,7 +69,7 @@ class WeveEleTrack { // electron track info
   void clear() {  pointTower.clear();
     cluster.clear();cl4x4.clear();  isMatch2Cl=false;  primP=TVector3(0,0,0);
     prMuTrack=glMuTrack=0; 
-    awayTpcPT=nearTpcPT=nearTotET=awayTotET=nearEmcET=awayEmcET=nearBtowET=awayBtowET=nearEtowET=awayEtowET=smallNearTpcPT=0; awayNTr=awayNTow=nearNTr=nearNTow=smallNearNTr=0; 
+    awayTpcPT=nearTpcPT=nearTotET=awayTotET=nearEmcET=awayEmcET=nearBtowET=awayBtowET=nearEtowET=awayEtowET=smallNearTpcPT=nearTotET_noEEMC=awayTotET_noEEMC=0; awayNTr=awayNTow=nearNTr=nearNTow=smallNearNTr=0; 
     
     ptBalance=TVector3(0,0,0); ptBalance_noEEMC=TVector3(0,0,0); sPtBalance=0;
 
@@ -220,6 +220,9 @@ class Wevent2009 {
 
 
 // $Log: Wevent2009.h,v $
+// Revision 1.4  2010/01/10 01:45:10  stevens4
+// fix plots w/o EEMC in veto
+//
 // Revision 1.3  2010/01/09 00:07:16  stevens4
 // add jet finder
 //

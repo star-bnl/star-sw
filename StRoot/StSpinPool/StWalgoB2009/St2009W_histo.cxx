@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.6 2010/01/09 02:29:19 stevens4 Exp $
+// $Id: St2009W_histo.cxx,v 1.7 2010/01/10 01:45:10 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -19,14 +19,14 @@ St2009WMaker::initHistos(){
   memset(hA,0,sizeof(hA));
   TList *Lx;  TLine *ln;TH1 *h; 
   char txt[1000], txt0[100];
-  int nCase=20;
+  int nCase=18;
   hA[0]=h=new TH1F("muStatEve","W-algo: event count",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
 
   char key[][200]={"inp","BHT3Id","L2wId","L2wBits","L2wET","L2wRnd","tpcOn","primVert","vertZ","Pt10",
-	       "B-in","B200","TrB","Tr2Cl","noNear","noAway","goldW","bigAway","goldZ"};
-  for(int i=0;i<19;i++) h->Fill(key[i],0.); // preset the order of keys
+	       "B-in","B200","TrB","Tr2Cl","goldW"};
+  for(int i=0;i<15;i++) h->Fill(key[i],0.); // preset the order of keys
   
   hA[1]=h=new TH1F("muInTrg","muW input triggers, WARN: scrambled if manyruns are combined by hadd.C; trigID (random order)",nCase,0,nCase);
   h->GetXaxis()->SetLabelSize(0.06);
@@ -71,9 +71,9 @@ St2009WMaker::initHistos(){
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kGreen); h->SetLineWidth(2);
   char keyT[][200]={"101","pt1","nHit","Hfrac","Rin","Rout","ptOK","@B","CL","fr24",
-"#Delta R","noNear","noAway","bigAway"};
+"#Delta R","noNear","noAway"};
 	     
-  for(int i=0;i<14;i++) h->Fill(keyT[i],0.); // preset the order of keys
+  for(int i=0;i<13;i++) h->Fill(keyT[i],0.); // preset the order of keys
 
 
   hA[21]=h=new TH1F("muTrNfit","primary track  in-selection & vertexZ; nFitPoints",50,0,50);
@@ -261,6 +261,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.7  2010/01/10 01:45:10  stevens4
+// fix plots w/o EEMC in veto
+//
 // Revision 1.6  2010/01/09 02:29:19  stevens4
 // fix histo names
 //

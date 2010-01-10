@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.5 2010/01/09 00:07:16 stevens4 Exp $
+// $Id: St2009W_algo.cxx,v 1.6 2010/01/10 01:45:10 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -15,7 +15,8 @@ void
 St2009WMaker::find_W_boson(){
   
   // printf("========= find_W_boson() \n");
-  
+  int nGoldW=0;
+
   // search for  Ws ............
   for(uint iv=0;iv<wEve.vertex.size();iv++) {
     WeveVertex &V=wEve.vertex[iv];
@@ -25,6 +26,14 @@ St2009WMaker::find_W_boson(){
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
       
+      //signal plots w/o EEMC in veto
+      if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
+	if(T.ptBalance_noEEMC.Perp()>par_ptBalance && T.awayTotET_noEEMC<par_awayTotET)//ptBalance cut && awayside pt cut
+	  hA[140]->Fill(T.cluster.ET);
+	if(T.awayTotET_noEEMC < 8)//old awayside pt cut
+	  hA[141]->Fill(T.cluster.ET);
+      }
+
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
       hA[20]->Fill("noNear",1.);
       hA[112]->Fill( T.cluster.ET); // for Joe
@@ -47,16 +56,13 @@ St2009WMaker::find_W_boson(){
         hA[136]->Fill(T.cluster.ET);//signal
       else 
         hA[137]->Fill(T.cluster.ET);//background
-      if(T.ptBalance_noEEMC.Perp()>par_ptBalance && (T.awayBtowET+T.awayTpcPT)<par_awayTotET)
-        hA[140]->Fill(T.cluster.ET);//signal w/o EEMC in veto
-      
+            
       //plots for backg sub yield (old awayTot cut DNP)
       if(T.awayTotET < 8)
         hA[138]->Fill(T.cluster.ET);//old signal
       else 
         hA[139]->Fill(T.cluster.ET);//old background
-      if(T.awayBtowET+T.awayTpcPT < 8)
-        hA[141]->Fill(T.cluster.ET);//old signal w/o EEMC in veto
+      
       
       //     if(T.cluster.ET /T.nearTotET<0.6 && T.awayTotET >20) // di-jets
  	if(0){/***************************/
@@ -84,11 +90,13 @@ St2009WMaker::find_W_boson(){
       hA[97]->Fill(V.funnyRank);
       hA[98]->Fill(V.z);
       hA[20]->Fill("goldW",1.);
-
+      nGoldW++;
     
     }// loop over tracks
   }// loop over vertices
- 
+  if(nGoldW>0)
+    hA[0]->Fill("goldW",1.);
+
 }
 
 
@@ -159,6 +167,7 @@ St2009WMaker::findAwayJet(){
       //..... add TPC ET
       T.awayTpcPT=sumTpcCone(V.id,-T.primP,1,T.awayNTr);
       T.awayTotET=T.awayEmcET+T.awayTpcPT;
+      T.awayTotET_noEEMC=T.awayBtowET+T.awayTpcPT;
       //printf("\n*** in   awayTpc=%.1f awayEmc=%.1f\n  ",T.awayTpcPT,T.awayEmcET); T.print(); 
     }// end of loop over tracks
   }// end of loop over vertices
@@ -192,6 +201,7 @@ St2009WMaker::findNearJet(){
       if(T.primP.Pt()>par_trackPt) nearSum-=par_trackPt; 
       else  nearSum-=T.primP.Pt();
       T.nearTotET=nearSum;
+      T.nearTotET_noEEMC=nearSum-T.nearEtowET;
 
       hA[49]->Fill(nearSum);
 
@@ -466,6 +476,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.6  2010/01/10 01:45:10  stevens4
+// fix plots w/o EEMC in veto
+//
 // Revision 1.5  2010/01/09 00:07:16  stevens4
 // add jet finder
 //
