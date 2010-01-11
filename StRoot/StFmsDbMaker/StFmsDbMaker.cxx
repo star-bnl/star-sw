@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.1 2009/10/28 16:11:15 jgma Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.2 2010/01/11 20:35:30 jgma Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.2  2010/01/11 20:35:30  jgma
+ * Added reversed map and some other minor updates
+ *
  * Revision 1.1  2009/10/28 16:11:15  jgma
  * This is the first check in of the code.
  *
@@ -28,8 +31,8 @@ StFmsDbMaker* gStFmsDbMaker=NULL;
 
 ClassImp(StFmsDbMaker)
 
-StFmsDbMaker::StFmsDbMaker(const Char_t *name) : StMaker(name), mDebug(0),mChannelGeometry(0),mDetectorPosition(0),mMap(0),mPatchPanelMap(0),
-						 mQTMap(0),mGain(0),mGainCorrection(0){gStFmsDbMaker = this;}
+StFmsDbMaker::StFmsDbMaker(const Char_t *name) : StMaker(name), mDebug(0),mChannelGeometry(0),mDetectorPosition(0),mMap(0),mmMap(0),mPatchPanelMap(0),
+						 mQTMap(0),mGain(0),mmGain(0),mGainCorrection(0),mmGainCorrection(0){gStFmsDbMaker = this;}
 StFmsDbMaker::~StFmsDbMaker() {deleteArrays(); gStFmsDbMaker = 0;}
 Int_t StFmsDbMaker::Init(){LOG_DEBUG<<"StFmsDbMaker Init Start"<<endm; return StMaker::Init();}
 Int_t StFmsDbMaker::Make(){LOG_DEBUG<<"StFmsDbMaker Make"<<endm; return kStOK;}
@@ -121,6 +124,8 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
   mMaxMap = dbMap->GetNRows();
   mmMap = new fmsMap_st* [mMaxDetectorId+1];
   memset(mmMap,0,sizeof(fmsMap_st*)*(mMaxDetectorId+1));
+  memset(mReverseMapDetectorId,0,sizeof(mReverseMapDetectorId));
+  memset(mReverseMapChannel,0,sizeof(mReverseMapChannel));
   for(Int_t i=0; i<mMaxMap; i++){
     Int_t d=mMap[i].detectorId;
     Int_t c=mMap[i].ch;
@@ -137,9 +142,15 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       memset(mmMap[d],0,sizeof(fmsMap_st)*maxChannel(d));
     }
     memcpy(&mmMap[d][c-1],&mMap[i],sizeof(fmsMap_st));
+    //creating reverse mapping
+    Int_t crt,slot,ch;
+    getMap(d,c,&crt,&slot,&ch);
+    mReverseMapDetectorId[crt][slot][ch]=d;
+    mReverseMapChannel[crt][slot][ch]=c;
   }
+  
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/mapping/fmsMap with mMaxMap = "<<mMaxMap<< endm;
-    
+  
   //!fmsGain
   mGain = (fmsGain_st*) dbGain->GetTable();
   mMaxGain = dbGain->GetNRows();
@@ -165,7 +176,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
       memset(mmGain[d],0,sizeof(fmsGain_st)*maxChannel(d));
     }
     memcpy(&mmGain[d][c-1],&mGain[i],sizeof(fmsGain_st));
-    }
+  }
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Calibration/fms/fmsGain with mMaxGain = "<<mMaxGain<< endm;
   
   //!fmsGainCorrection
@@ -195,7 +206,7 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     memcpy(&mmGainCorrection[d][c-1],&mGainCorrection[i],sizeof(fmsGainCorrection_st));
   }
   LOG_DEBUG << "StFmsDbMaker::InitRun - Got Geometry/fms/fmsGainCorrection with mMaxGainCorrection = "<<mMaxGainCorrection<< endm;
-
+  
   //!Debug
   if(mDebug>0){
     dumpFmsChannelGeometry();
@@ -206,7 +217,6 @@ Int_t StFmsDbMaker::InitRun(Int_t runNumber) {
     dumpFmsGain();
     dumpFmsGainCorrection();
   }
-
   return kStOK;
 }
 
@@ -265,7 +275,7 @@ fmsGainCorrection_st*  StFmsDbMaker::GainCorrection()  {if(mGainCorrection)  ret
 //!ChannelGeometry
 Int_t StFmsDbMaker::maxDetectorId()             {return mMaxDetectorId;}
 Int_t StFmsDbMaker::eastWest(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mChannelGeometry+detectorId)) return mChannelGeometry[detectorId].ew;
+  if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].ew;
   else{
     LOG_WARN<<"StFmsDbMaker::eastWest: Corresponding channel geometry not found."<<endm;
     return -1;
@@ -273,7 +283,7 @@ Int_t StFmsDbMaker::eastWest(Int_t detectorId){
 }
 
 Int_t StFmsDbMaker::northSouth(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mChannelGeometry+detectorId)) return mChannelGeometry[detectorId].ns;
+  if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].ns;
   else{
     LOG_WARN<<"StFmsDbMaker::northSouth: Corresponding channel geometry not found."<<endm;
     return -1;
@@ -281,7 +291,7 @@ Int_t StFmsDbMaker::northSouth(Int_t detectorId){
 }
 
 Int_t StFmsDbMaker::type(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mChannelGeometry+detectorId)) return mChannelGeometry[detectorId].type;
+  if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].type;
   else{
     LOG_WARN<<"StFmsDbMaker::type: Corresponding channel geometry not found."<<endm;
     return -1;
@@ -289,7 +299,7 @@ Int_t StFmsDbMaker::type(Int_t detectorId){
 }
 
 Int_t StFmsDbMaker::nRow(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mChannelGeometry+detectorId)) return mChannelGeometry[detectorId].nX;
+  if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].nX;
   else{
     LOG_WARN<<"StFmsDbMaker::nRow: Corresponding channel geometry not found."<<endm;
     return -1;
@@ -297,7 +307,8 @@ Int_t StFmsDbMaker::nRow(Int_t detectorId){
 }
 
 Int_t StFmsDbMaker::nColumn(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mChannelGeometry+detectorId)) return mChannelGeometry[detectorId].nY;
+  if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0)
+    return mChannelGeometry[detectorId].nY;
   else{
     LOG_WARN<<"StFmsDbMaker::nColumn: Corresponding channel geometry not found."<<endm;
     return -1;
@@ -305,7 +316,8 @@ Int_t StFmsDbMaker::nColumn(Int_t detectorId){
 }
 
 Int_t StFmsDbMaker::maxChannel(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mChannelGeometry+detectorId)) return mChannelGeometry[detectorId].nX*mChannelGeometry[detectorId].nY;
+  if(detectorId>=0 && detectorId<=mMaxDetectorId && mChannelGeometry[detectorId].nX>0)
+    return mChannelGeometry[detectorId].nX*mChannelGeometry[detectorId].nY;
   else{
     LOG_WARN<<"StFmsDbMaker::maxChannel: Corresponding channel geometry not found."<<endm;
     return -1;
@@ -322,34 +334,34 @@ Int_t StFmsDbMaker::detectorId(Int_t ew, Int_t ns, Int_t type){
   return -1;
 }
 
-Int_t StFmsDbMaker::getRow(Int_t detectorId, Int_t ch){
+Int_t StFmsDbMaker::getRowNumber(Int_t detectorId, Int_t ch){
   if(maxChannel(detectorId)>0) return mChannelGeometry[detectorId].nY - (ch-1)/mChannelGeometry[detectorId].nX;
   return -1;
 }
 
-Int_t StFmsDbMaker::getColumn(Int_t detectorId, Int_t ch){
+Int_t StFmsDbMaker::getColumnNumber(Int_t detectorId, Int_t ch){
   if(maxChannel(detectorId)>0) return (ch-1)%mChannelGeometry[detectorId].nX + 1;
   return -1;
 }
 
-Int_t StFmsDbMaker::getChannel(Int_t detectorId, Int_t row, Int_t column){
+Int_t StFmsDbMaker::getChannelNumber(Int_t detectorId, Int_t row, Int_t column){
   if(maxChannel(detectorId)>0) return column + mChannelGeometry[detectorId].nX * (mChannelGeometry[detectorId].nY - row);
   return -1;
 }
 
-StThreeVectorF StFmsDbMaker::detectorOffset(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mDetectorPosition+detectorId))
+StThreeVectorF StFmsDbMaker::getDetectorOffset(Int_t detectorId){
+  if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0)
     return StThreeVectorF(mDetectorPosition[detectorId].xoffset, mDetectorPosition[detectorId].yoffset, mDetectorPosition[detectorId].zoffset);
-  return StThreeVectorF(-9999, -9999, -9999);
+  return StThreeVectorF(0, 0, 0);
 }
 
 Float_t StFmsDbMaker::getXWidth(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mDetectorPosition+detectorId))
+  if(detectorId>=0 && detectorId<=mMaxDetectorId)
   return mDetectorPosition[detectorId].xwidth; return -1;
 }
 
 Float_t StFmsDbMaker::getYWidth(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && (mDetectorPosition+detectorId))
+  if(detectorId>=0 && detectorId<=mMaxDetectorId)
   return mDetectorPosition[detectorId].ywidth; return -1;
 }
 
@@ -363,6 +375,15 @@ void StFmsDbMaker::getMap(Int_t detectorId, Int_t ch, Int_t* qtCrate, Int_t* qtS
   *qtCrate   = mmMap[detectorId][ch-1].qtCrate;
   *qtSlot    = mmMap[detectorId][ch-1].qtSlot;
   *qtChannel = mmMap[detectorId][ch-1].qtChannel;
+}
+void StFmsDbMaker::getReverseMap(Int_t qtCrate, Int_t qtSlot, Int_t qtChannel, Int_t* detectorId, Int_t* ch){
+  if(qtCrate==0 && qtSlot==0 && qtChannel==0) {
+    *detectorId = 0;
+    *ch         = 0;
+  }else{
+    *detectorId = mReverseMapDetectorId[qtCrate][qtSlot][qtChannel];
+    *ch         = mReverseMapChannel[qtCrate][qtSlot][qtChannel];
+  }
 }
 
 //!fmsPatchPanelMap
@@ -384,10 +405,10 @@ Float_t StFmsDbMaker::getGainCorrection(Int_t detectorId, Int_t ch){
 }
 
 //!text dump for debugging
-void StFmsDbMaker::dumpFmsChannelGeometry(Char_t* filename) {
+void StFmsDbMaker::dumpFmsChannelGeometry(const Char_t* filename) {
   FILE* fp;
   LOG_INFO << "Writing "<<filename<<endm;
-  if(fp=fopen(filename,"w")){
+  if((fp=fopen(filename,"w"))){
     fprintf(fp,"maxDetectorId = %d\n",maxDetectorId());
     fprintf(fp,"    i detiid  ew   ns type nRow nCol maxCh\n");
     for(Int_t i=0; i<mMaxDetectorId+1; i++){    
@@ -400,48 +421,50 @@ void StFmsDbMaker::dumpFmsChannelGeometry(Char_t* filename) {
       fprintf(fp,"detiid  ch   getCh  getRow getCol\n");
       for(Int_t j=1; j<=maxChannel(i); j++){
 	fprintf(fp,"%6d%4d%8d%8d%7d\n",
-		i,j,getChannel(i,getRow(i,j),getColumn(i,j)),getRow(i,j),getColumn(i,j));
+		i,j,getChannelNumber(i,getRowNumber(i,j),getColumnNumber(i,j)),getRowNumber(i,j),getColumnNumber(i,j));
       }	    
     }
     fclose(fp);
   }
 }
 
-void StFmsDbMaker::dumpFmsDetectorPosition(Char_t* filename) {
+void StFmsDbMaker::dumpFmsDetectorPosition(const Char_t* filename) {
   FILE* fp;
   LOG_INFO << "Writing "<<filename<<endm;
-  if(fp=fopen(filename,"w")){
+  if((fp=fopen(filename,"w"))){
     fprintf(fp,"maxDetectorId = %d\n",maxDetectorId());
     fprintf(fp,"  detiid   zoffset   xoffset yoffset    xwidth    ywidth\n");
     for(Int_t i=0; i<mMaxDetectorId+1; i++)
       if((mDetectorPosition+i))
-	fprintf(fp,"%8d%10.1f%10.2f%8.1f%10.3f%10.3f\n", i,detectorOffset(i).z(),detectorOffset(i).x(),detectorOffset(i).y(),getXWidth(i),getYWidth(i));
+	fprintf(fp,"%8d%10.1f%10.2f%8.1f%10.3f%10.3f\n", i,getDetectorOffset(i).z(),getDetectorOffset(i).x(),getDetectorOffset(i).y(),getXWidth(i),getYWidth(i));
     fclose(fp);
   }
 }
 
-void StFmsDbMaker::dumpFmsMap(Char_t* filename) {
+void StFmsDbMaker::dumpFmsMap(const Char_t* filename) {
   FILE* fp;
   LOG_INFO << "Writing "<<filename<<endm;
-  if(fp=fopen(filename,"w")){
+  if((fp=fopen(filename,"w"))){
     fprintf(fp,"maxMap = %d\n",maxMap());
     fprintf(fp,"    i DetId    ch  crt  slt qtch    getmap()   \n");
     for(Int_t i=0; i<mMaxMap; i++){
       Int_t d=mMap[i].detectorId;
       Int_t c=mMap[i].ch;
-      Int_t crt,slot,ch;
+      Int_t crt,slot,ch,dd,cc;
       getMap(d,c,&crt,&slot,&ch);
-      fprintf(fp,"%5d%6d%6d%5d%5d%5d%5d%5d%5d\n",
-	      i,d,c,mMap[i].qtCrate,mMap[i].qtSlot,mMap[i].qtChannel,crt,slot,ch);
+      getReverseMap(crt,slot,ch,&dd,&cc);
+      fprintf(fp,"%5d%6d%6d%5d%5d%5d%5d%5d%5d%5d%5d\n",
+	      i,d,c,mMap[i].qtCrate,mMap[i].qtSlot,mMap[i].qtChannel,crt,slot,ch,dd,cc);
+      if(mMap[i].qtCrate>0 && (d-dd!=0 || c-cc!=0)) fprintf(fp,"Problem in reverse map!\n");
     }
     fclose(fp);
   }      
 }
 
-void StFmsDbMaker::dumpFmsPatchPanelMap(Char_t* filename) {
+void StFmsDbMaker::dumpFmsPatchPanelMap(const Char_t* filename) {
   FILE* fp;
   LOG_INFO << "Writing "<<filename<<endm;
-  if(fp=fopen(filename,"w")){
+  if((fp=fopen(filename,"w"))){
     fprintf(fp,"  mod channel ppPanel ppRow ppColumn\n");
     for(Int_t i=0; i<mMaxModule; i++)
       for(Int_t j=0; j<maxChannel(i+8); j++)
@@ -450,10 +473,10 @@ void StFmsDbMaker::dumpFmsPatchPanelMap(Char_t* filename) {
   }
 }
 
-void StFmsDbMaker::dumpFmsQTMap(Char_t* filename) {
+void StFmsDbMaker::dumpFmsQTMap(const Char_t* filename) {
   FILE* fp;
   LOG_INFO << "Writing "<<filename<<endm;
-  if(fp=fopen(filename,"w")){
+  if((fp=fopen(filename,"w"))){
     fprintf(fp,"ns ppPanel   row column crate slot channel\n");
     for(Int_t ns=0; ns<2; ns++)
       for(Int_t pp=0; pp<2; pp++)
@@ -469,10 +492,10 @@ void StFmsDbMaker::dumpFmsQTMap(Char_t* filename) {
   }
 }
 
-void StFmsDbMaker::dumpFmsGain(Char_t* filename) {
+void StFmsDbMaker::dumpFmsGain(const Char_t* filename) {
   FILE* fp;
   LOG_INFO << "Writing "<<filename<<endm;
-  if(fp=fopen(filename,"w")){
+  if((fp=fopen(filename,"w"))){
     fprintf(fp,"maxGain = %d\n",maxGain());
     fprintf(fp,"    i DetId    ch    gain  getGain()\n");
     for(Int_t i=0; i<mMaxGain; i++){
@@ -485,10 +508,10 @@ void StFmsDbMaker::dumpFmsGain(Char_t* filename) {
   }      
 }
 
-void StFmsDbMaker::dumpFmsGainCorrection(Char_t* filename) {
+void StFmsDbMaker::dumpFmsGainCorrection(const Char_t* filename) {
   FILE* fp;
   LOG_INFO << "Writing "<<filename<<endm;
-  if(fp=fopen(filename,"w")){
+  if((fp=fopen(filename,"w"))){
     fprintf(fp,"maxGainCorrection = %d\n",maxGainCorrection());
     fprintf(fp,"    i DetId    ch    gain  getGainCorrection()\n");
     for(Int_t i=0; i<mMaxGainCorrection; i++){
@@ -500,3 +523,4 @@ void StFmsDbMaker::dumpFmsGainCorrection(Char_t* filename) {
     fclose(fp);
   }      
 }
+
