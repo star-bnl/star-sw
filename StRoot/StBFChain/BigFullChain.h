@@ -477,10 +477,6 @@ Bfc_st BFC[] = { // standard chains
   {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
 
 
-  // fms
-  {"fmsdat"     ,"","", "StEvent,fmsdb", 
-                                     "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",kFALSE},
-
 
   {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker",
                                                                          "<Early StEvent creation>",kFALSE},
@@ -641,6 +637,10 @@ Bfc_st BFC[] = { // standard chains
   {"FiltGamma" ,"","","StEvent,StMcEvent,EmcUtil",
                                            "StGammaFilterMaker","StFilterMaker",  "Gamma filtering",kFALSE},
 
+
+  // fms
+  {"fmsdat"     ,"","", "StEvent,fmsdb", 
+                                     "StFmsHitMaker","StFmsHitMaker","Fill FMS struct and zero TRG",kFALSE},
 
 
   // Some global Sti stuff including vertexing
