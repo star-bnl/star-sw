@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.173 2009/10/22 19:19:53 jeromel Exp $
+// $Id: bfc.C,v 1.174 2010/01/11 20:39:17 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -161,10 +161,11 @@ void bfc(Int_t First, Int_t Last,
   gMessMgr->QAInfo() << Form("with %s", chain->GetCVS()) << endm;
   // Init the chain and all its makers
   TAttr::SetDebug(0);
-  chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
-  chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	//All IO makers are priviliged
-  chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	//It is also IO maker
-  chain->SetAttr(".Privilege",1,"StTpcDbMaker::*"); 	//It is also TpcDb maker to catch trips
+  chain->SetAttr(".Privilege",0,"*"                ); 	  //All  makers are NOT priviliged
+  chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	  //All IO makers are priviliged
+  chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	  //It is also IO maker
+  chain->SetAttr(".Privilege",1,"StTpcDbMaker::*"); 	  //It is also TpcDb maker to catch trips
+  chain->SetAttr(".Privilege",1,"StTpcHitMoverMaker::*"); //May be allowed to act upon corrupt events
   Int_t iInit = chain->Init();
   if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return;}
   if (Last == 0) return;
