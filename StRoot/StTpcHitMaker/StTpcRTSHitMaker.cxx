@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.13 2009/12/07 21:01:41 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.14 2010/01/12 22:55:17 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -58,6 +58,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   SafeDelete(fTpx);
   fTpx = new daq_tpx() ; 
   if (GetDate() >= 20091215) fTpx->fcf_run_compatibility = 10 ;
+  if (GetDate() <= 20090101) fminCharge = 40;
   // do gains example; one loads them from database but I don't know how...
   daq_dta *dta  = fTpx->put("gain");
   for(Int_t sector=1;sector<=24;sector++) {
@@ -195,6 +196,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	}
 	if (! dta->sim_cld[i].cld.pad) continue;
 	if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
+	if (dta->sim_cld[i].cld.charge < fminCharge) continue;
 	if (! hitCollection )  {
 	  hitCollection = new StTpcHitCollection();
 	  rEvent->setTpcHitCollection(hitCollection);
