@@ -19,15 +19,15 @@ int pmd_reader(char *m, struct pmd_t *pmd, u_int driver)
 {
 	struct DATAP *datap = (struct DATAP *)m ;
 	struct DATAPX *datapx  ;
-	struct PMDP *pmdp ;
-	struct PMDSECP *secp ;
+	struct PMDP *pmdp = 0;
+	struct PMDSECP *secp = 0;
 	struct PMDADCD *adcd ;
 	struct PMDPEDR *pedr ;
 	struct PMDRMSR *rmsr ;
 	struct PMDTHRR *thrr ;
 
 	int off ;
-	int len ;
+	int len = 0 ;
 
 	int start_sec, stop_sec ;
 	int sec, type ;
