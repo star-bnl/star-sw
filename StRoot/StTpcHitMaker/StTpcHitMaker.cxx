@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.20 2009/11/18 14:29:02 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.21 2010/01/12 22:54:36 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.21  2010/01/12 22:54:36  fisyak
+ * Propagate flags from online clustering into StEvent
+ *
  * Revision 1.20  2009/11/18 14:29:02  fisyak
  * Restore slewing correction
  *
@@ -337,6 +340,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
             , cluster.t2 //  mxtmbk
             , pad
             , time );
+  hit->setFlag(cluster.flags);
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
   return hit;
 }
@@ -386,6 +390,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
             , cluster.t2 //  mxtmbk
             , pad
             , time );
+  hit->setFlag(cluster.flags);
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
   return hit;
 }
