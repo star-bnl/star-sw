@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.5 2009/11/25 21:34:04 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.6 2010/01/12 22:55:17 fisyak Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.6  2010/01/12 22:55:17  fisyak
+ * Add minimum cluster charge in ADC for <= 20090101
+ *
  * Revision 1.5  2009/11/25 21:34:04  fisyak
  * replace daqReader by daq_tpx
  *
@@ -39,7 +42,7 @@ class StTpcDigitalSector;
 class daq_tpx;
 class StTpcRTSHitMaker : public StMaker {
  public:
-  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0) {}
+  StTpcRTSHitMaker(const char *name="tpc_hits") : StMaker(name), fTpx(0), fminCharge(0) {}
   virtual ~StTpcRTSHitMaker();
   
   Int_t               Init();
@@ -47,6 +50,7 @@ class StTpcRTSHitMaker : public StMaker {
   Int_t               Make();
  private:
   daq_tpx *fTpx; //!
+  Double_t fminCharge; // ! minimum cluster charge in ADC
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
