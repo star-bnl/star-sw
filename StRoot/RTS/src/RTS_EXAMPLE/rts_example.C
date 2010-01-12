@@ -545,7 +545,21 @@ static int pmd_doer(daqReader *rdr, const char  *do_print)
 		struct pmd_t *pmd_p = (pmd_t *) dd->Void ;
 
 		if(do_print) {
-			printf("PMD statuses %d %d: channels %d\n",pmd_p->status[0],pmd_p->status[1],pmd_p->channels) ;
+			for(int crate=0;crate<2;crate++) {
+				printf("Crate %s: status %d, mode %d\n",crate==0?"Up":"Dn",pmd_p->status[crate],pmd_p->mode) ;
+
+				for(int c=0;c<PMD_CRAMS_MAX;c++) {
+				for(int s=0;s<2;s++) {
+				for(int ch=0;ch<PMD_CRAMS_CH_MAX;ch++) {
+					printf("  CRAM %2d: side %d: ch %4d: adc %4d [ped %4.1f, rms %4.1f]\n",
+					       c,s,ch,
+					       pmd_p->adc[crate][c][s][ch],
+					       (double)pmd_p->ped[crate][c][s][ch]/16.0,
+					       (double)pmd_p->rms[crate][c][s][ch]/16.0) ;
+
+				}}}
+			}
+
 		}
 
 		found = 1  ;	// mark as found..
