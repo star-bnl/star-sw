@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.h,v 2.5 2010/01/08 22:44:37 ullrich Exp $
+ * $Id: StFmsTriggerDetector.h,v 2.6 2010/01/13 17:51:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.h,v $
- * Revision 2.5  2010/01/08 22:44:37  ullrich
- * Updates needed to add StFmsCollection and related classes.
+ * Revision 2.6  2010/01/13 17:51:55  ullrich
+ * New clearFlag() for mudst reading, Data member mNumHeader gets //!
  *
  * Revision 2.4  2009/02/23 22:29:57  ullrich
  * Fixed problem when running over 2009 data (solution by Pibero)
@@ -44,7 +44,9 @@ public:
     virtual ~StFmsTriggerDetector();
     // StFmsTriggerDetector(const StFmsTriggerDetector&);            use default
     // StFmsTriggerDetector& operator=(const StFmsTriggerDetector&); use default
-    
+
+    void clearFlag();
+ 
     unsigned int   nHit() const;
     unsigned int   hit(int line) const;
     unsigned short adc(int crate,  int addr,  int dcard,  int dch);
@@ -93,12 +95,12 @@ protected:
     UShort_t mDSM1[mMaxDSM1];
     UShort_t mDSM2[mMaxDSM2];
 
-    int  mNumHeader;
+    int  mNumHeader; //!
     unsigned short mADC[mMaxCrate][mMaxAddr][mMaxDCard][mMaxChan]; //!
     unsigned short mTDC[mMaxCrate][mMaxAddr][mMaxDCard][mMaxChan]; //!
     char mEnd[1];//!
 
-    ClassDef(StFmsTriggerDetector,3)      
+    ClassDef(StFmsTriggerDetector,4)      
 };
 
 inline unsigned int   StFmsTriggerDetector::nHit() const {return mNumQTdata;} 
