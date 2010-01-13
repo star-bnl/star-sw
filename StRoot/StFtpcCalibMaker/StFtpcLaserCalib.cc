@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.cc,v 1.10 2009/12/09 14:41:30 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.11 2010/01/13 15:43:33 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.11  2010/01/13 15:43:33  jcs
+// improved  LOG_DEBUG output
+//
 // Revision 1.10  2009/12/09 14:41:30  jcs
 // delta_t0 and delta_gas can now both = 0
 // new space point calculation always necessary since reconstruction done with data t0
@@ -137,7 +140,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
 bool StFtpcLaserCalib::cut(int i)
 {
-  //LOG_DEBUG<<"in cut mit "<< z[i]<< " "<<hsec[i]<<endm;
+  LOG_DEBUG<<"StFtpcLaserCalib::cut i "<<i<<" z "<< z[i]<<" MINZ "<<MINZ<<" MAXZ "<<MAXZ<<" radius "<<radius[i]<<" MINRAD "<<MINRAD<<" MAXRAD "<<MAXRAD<< " laser_sector "<<hsec[i]<<endm;
   if ((z[i]>MINZ && z[i]<MAXZ) && (radius[i]>MINRAD && radius[i]<MAXRAD) && laser_sector(FTPC,LSEC,hsec[i]) )
     return kTRUE;
   else
