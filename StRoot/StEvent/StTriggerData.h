@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.32 2010/01/08 22:44:37 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.33 2010/01/13 17:55:39 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.33  2010/01/13 17:55:39  ullrich
+ * Better mErrorFlags, abort, and debug flag handling, updated MTD DSM access function for run10, clean up compiler warning messages.
+ *
  * Revision 2.32  2010/01/08 22:44:37  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -126,15 +129,17 @@ public:
     StTriggerData();
     virtual ~StTriggerData();
     
+    virtual void readData() {};
     virtual void dump() const = 0;   //dump data into text
-    
+    virtual void setDebug(unsigned int v) {debug=v;};     
+       
     // version and data type information   
     virtual int year() const;                          // year of the data
     virtual unsigned int version() const = 0;          // TrgDataType Version Number 
     virtual unsigned int numberOfPreXing() const = 0;  // # of pre xing data for detectors
     virtual unsigned int numberOfPostXing() const = 0; // # of post xing data for detectors
     virtual unsigned int errorFlag() const;            // error flag
-
+  
     // generic trigger infomations
     virtual unsigned int eventNumber() const;
     virtual unsigned int token() const = 0;
@@ -319,6 +324,8 @@ protected:
     float mZdcVertexZ;    
     int   mRun;
     unsigned int mErrorFlag;
+
+    unsigned int debug; //!
 
     ClassDef(StTriggerData,4) 
 };

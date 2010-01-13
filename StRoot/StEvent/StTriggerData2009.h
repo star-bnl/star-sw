@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.13 2010/01/08 22:44:37 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.14 2010/01/13 17:55:47 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.14  2010/01/13 17:55:47  ullrich
+ * Better mErrorFlags, abort, and debug flag handling, updated MTD DSM access function for run10, clean up compiler warning messages.
+ *
  * Revision 2.13  2010/01/08 22:44:37  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -63,12 +66,13 @@ class StTriggerData2009 : public StTriggerData {
 public:
     StTriggerData2009();
     StTriggerData2009(const TriggerDataBlk2009* data, int run);
-    StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs);
+    StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs, int dbg=0);
     ~StTriggerData2009();
     
+    void readData() {readData(0,0);}
     void readData(const TriggerDataBlk2009* data, int bs);
     void dump() const;  //dump data into text
-    
+
     // Versison and data type information
     unsigned int version() const;           
     unsigned int numberOfPreXing() const;   
@@ -231,7 +235,6 @@ public:
 protected:
     TriggerDataBlk2009 *mData;
   
-    int debug;                  //!
     EvtDescData2009*  EvtDesc;  //!
     L1_DSM_Data2009*  L1_DSM;   //!
     TrgSumData2009*   TrgSum;   //!
@@ -300,9 +303,9 @@ inline void StTriggerData2009::swapTrgSum(TrgSumData2009* TrgSum)
 inline void StTriggerData2009::swapRawDetOfflen(TrgOfflen2009* offlen)
 {
     int i;
-    for(i=0; i<y9MAX_OFFLEN; i++) { 
+    for (i=0; i<y9MAX_OFFLEN; i++) { 
         swapOfflen(&offlen[i]); 
-        if(debug>0) printf("Offlen id=%2d offset=%d length=%d\n", i, offlen[i].offset, offlen[i].length);
+        if (debug>0) printf("Offlen id=%2d offset=%d length=%d\n", i, offlen[i].offset, offlen[i].length);
     }
 }
 
@@ -319,7 +322,7 @@ inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name, int hle
     case y9QT1_CONF_NUM : case y9QT2_CONF_NUM : case y9QT3_CONF_NUM : case y9QT4_CONF_NUM :
         header_length = 12; break;
     }
-    if(hlength != data->length + header_length){
+    if (hlength != data->length + header_length){
         mErrorFlag = mErrorFlag | (1 << name);
         printf("StTriggerData2009: Error reading Block=%2d [%1c%1c%1c%1c] length %d != %d + %d\n",
 	     name,data->name[0],data->name[1],data->name[2],data->name[3],
@@ -329,7 +332,7 @@ inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name, int hle
         data=0;
         return;
     }
-    if(bs){
+    if (bs){
         switch(name){
         case y9BC1_CONF_NUM :
             bc1 = (BELayerBlock2009*) data;
@@ -361,10 +364,10 @@ inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name, int hle
         case y9QT2_CONF_NUM :
         case y9QT3_CONF_NUM :
         case y9QT4_CONF_NUM :
-        qtdata = (QTBlock2009*) data;
-        swapI((unsigned int*)&qtdata->dataLoss);
-        swapIn(qtdata->data, qtdata->length/4);
-        break;
+            qtdata = (QTBlock2009*) data;
+            swapI((unsigned int*)&qtdata->dataLoss);
+            swapIn(qtdata->data, qtdata->length/4);
+            break;
         }
     }
     if(debug>0) 
