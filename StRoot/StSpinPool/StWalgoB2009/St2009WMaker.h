@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.2 2009/12/07 20:37:56 rcorliss Exp $
+// $Id: St2009WMaker.h,v 1.1 2009/11/23 23:00:18 balewski Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -41,7 +41,6 @@ class St2009WMaker : public StMaker {
  friend class St2009pubSpinMaker;
  friend class St2009pubMcMaker;
  friend class St2009WlumiMaker;
- friend class St2009ZMaker;
  private:
   StMuDstMaker* mMuDstMaker;
   Wevent2009 wEve;
@@ -154,7 +153,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.2 2009/12/07 20:37:56 rcorliss Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.1 2009/11/23 23:00:18 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -165,9 +164,6 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
-// Revision 1.2  2009/12/07 20:37:56  rcorliss
-// Start
-//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

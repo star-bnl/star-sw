@@ -4,28 +4,30 @@
 // 1 September 2009
 //
 
+#include <StMuDSTMaker/COMMON/StMuDst.h>
+#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
+
 #include "StSpinPool/StJets/StJets.h"
 #include "StSpinPool/StJets/StJet.h"
 #include "StMuTrackFourVec.h"
 
 #include "StMuTrackEmu.h"
 #include "StMuTowerEmu.h"
-#include "StMcTrackEmu.h"
 #include "StSpinPool/StJetEvent/StJetEventTypes.h"
 
-#include "StJetFinder/StProtoJet.h"
+#include <StJetFinder/StProtoJet.h>
 
-#include "StFourPMaker.h"
-#include "StBET4pMaker.h"
+#include <StFourPMaker.h>
+#include <StBET4pMaker.h>
 
-#include "TFile.h"
-#include "TTree.h"
+#include <TTree.h>
 
 #include "StjeJetEventTreeWriter.h"
 
 ClassImp(StjeJetEventTreeWriter);
 
-StjeJetEventTreeWriter::StjeJetEventTreeWriter(const char* outFileName)
+StjeJetEventTreeWriter::StjeJetEventTreeWriter(const string& outFileName)
   : _OutFileName(outFileName)
   , _jetTree(0)
   , _outFile(0)
@@ -46,7 +48,7 @@ void StjeJetEventTreeWriter::addJetFinder(StFourPMaker* fourPMaker, const vector
 
 void StjeJetEventTreeWriter::Init()
 {
-  _outFile = new TFile(_OutFileName, "recreate");
+  _outFile = new TFile(_OutFileName.c_str(), "recreate");
   _jetTree = new TTree("jet", "jetTree");
 
   for (vector<AnalyzerCtl>::iterator iAnalyzer = _analyzerCtlList.begin(); iAnalyzer != _analyzerCtlList.end(); ++iAnalyzer)
@@ -66,10 +68,9 @@ void StjeJetEventTreeWriter::Finish()
 void StjeJetEventTreeWriter::fillJetTree()
 {
   static const StThreeVectorF noVertex(-999,-999,-999);
+  if (StMuDst::event()->primaryVertexPosition() == noVertex) return;
   for(vector<AnalyzerCtl>::iterator iAnalyzer = _analyzerCtlList.begin(); iAnalyzer != _analyzerCtlList.end(); ++iAnalyzer) {
     StFourPMaker* fourPMaker = iAnalyzer->_fourPMaker;
-    // If just one branch has no vertex, bail out...
-    if (fourPMaker->getVertex() == noVertex) return;
     list<StProtoJet>* protoJetList = iAnalyzer->_protoJetList;
     fillJetTreeForOneJetFindingAlgorithm(*iAnalyzer->_jetEvent, protoJetList, fourPMaker);
   }
@@ -79,15 +80,14 @@ void StjeJetEventTreeWriter::fillJetTree()
 void StjeJetEventTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJetEvent& jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
 {
   jetEvent.Clear();
-  jetEvent.setRunId(fourPMaker->GetRunNumber());
-  jetEvent.setEventId(fourPMaker->GetEventNumber());
-  for (list<StProtoJet>::iterator iJet = protoJetList->begin(); iJet != protoJetList->end(); ++iJet)
-    fillJet(jetEvent, *iJet, fourPMaker);
+  jetEvent.setRunId(StMuDst::event()->runId());
+  jetEvent.setEventId(StMuDst::event()->eventId());
+  for (list<StProtoJet>::iterator iJet = protoJetList->begin(); iJet != protoJetList->end(); ++iJet) fillJet(jetEvent, *iJet);
 }
 
-void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFourPMaker* fourPMaker)
+void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj)
 {
-  StJetCandidate* jet = jetEvent.addJet(new StJetCandidate(fourPMaker->getVertex().xyz(), pj.pt(), pj.eta(), pj.phi(), pj.e()));
+  StJetCandidate* jet = jetEvent.addJet(new StJetCandidate(StMuDst::event()->primaryVertexPosition().xyz(), pj.pt(), pj.eta(), pj.phi(), pj.e()));
 
   // Loop over jet particles
   StProtoJet::FourVecList& particleList = pj.list();
@@ -135,19 +135,6 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
       tower->mEta        = mom.Eta();
       tower->mPhi        = mom.Phi();
       jet->addTower(tower)->setJet(jet);
-    }
-
-    if (StMcTrackEmu* t = particle->mctrack()) {
-      StJetParticle* part = jetEvent.newParticle();
-      part->mId     = t->id();
-      part->mPt     = t->pt();
-      part->mEta    = t->eta();
-      part->mPhi    = t->phi();
-      part->mM      = t->m();
-      part->mE      = t->e();
-      part->mPdg    = t->pdg();
-      part->mStatus = t->status();
-      jet->addParticle(part)->setJet(jet);
     }
   } // End loop over jet particles
 }

@@ -247,15 +247,13 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
     free(sectp);
   }
   // LOG(NOTE, "FINAL2");
-  
-#ifdef EMC_LEGACY 
+
   // If calibrations not loaded nothing should happen here...
 #ifdef OLD_DAQ_READER
   emc.readFromEvpReader(evp, mem);
 #else /* OLD_DAQ_READER */
   emc.readFromEvpReader(rdr, mem);
 #endif /* OLD_DAQ_READER */
-#endif
 
   delete tracker;
   return 0;

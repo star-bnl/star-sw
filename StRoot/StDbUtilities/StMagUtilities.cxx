@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.79 2009/11/06 13:38:05 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.81 2009/12/11 04:53:57 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.81  2009/12/11 04:53:57  genevb
+ * Give the enum constants unique names
+ *
+ * Revision 1.80  2009/12/11 03:55:21  genevb
+ * Singleton implementation + no defines in header
+ *
  * Revision 1.79  2009/11/06 13:38:05  fisyak
  * Revert the change done 11/03/09
  *
@@ -331,6 +337,7 @@ To do:  <br>
 static EBField  gMap  =  kUndefined ;   // Global flag to indicate static arrays are full
 static Float_t  gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
 static Float_t  gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
+StMagUtilities *StMagUtilities::fgInstance = 0;
 
 //________________________________________
 
@@ -348,6 +355,11 @@ StMagUtilities::StMagUtilities ()
 /// StMagUtilities constructor using the DataBase
 StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 { 
+  if (fgInstance) {
+    cout << "ReInstate StMagUtilities. Be sure that this is want you want !" << endl;
+    SafeDelete(fgInstance);
+  }
+  fgInstance = this;
   gMap = kMapped        ;    // Select the B field shape (kMapped == mapped field, kConstant == constant field )
   SetDb ( dbin, dbin2 ) ;    // Put DB pointers into private/global space
   GetMagFactor()        ;    // Get the magnetic field scale factor from the DB
@@ -365,6 +377,11 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 /// StMagUtilities constructor not using the DataBase
 StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t mode )       
 { 
+  if (fgInstance) {
+    cout << "ReInstate StMagUtilities. Be sure that this is want you want !" << endl;
+    SafeDelete(fgInstance);
+  }
+  fgInstance = this;
   gMap    = map         ;        // Select the type of field (mapped field shape or constant field)
   thedb2  = 0           ;        // Do not get MagFactor from the DB       - use manual selection above
   thedb   = 0           ;        // Do not get TPC parameters from the DB  - use defaults in CommonStart
@@ -538,7 +555,7 @@ void StMagUtilities::GetGridLeak ()
 //  These maps have enough resolution for all fields except the Grid Leak Calculations.  So note that the Grid Leak calculations
 //  (and PadRow13 calculations) don't use these tables but have custom lists of eRList[] built into each function.
 //
-Float_t StMagUtilities::eRList[neR]     = {   48.0,   49.0,
+Float_t StMagUtilities::eRList[EMap_nR] = {   48.0,   49.0,
                                               50.0,   52.0,   54.0,   56.0,   58.0,   60.0,   62.0,   64.0,   66.0,   68.0, 
 					      70.0,   72.0,   74.0,   76.0,   78.0,   80.0,   82.0,   84.0,   86.0,   88.0, 
 					      90.0,   92.0,   94.0,   96.0,   98.0,  100.0,  102.0,  104.0,  106.0,  108.0, 
@@ -548,10 +565,10 @@ Float_t StMagUtilities::eRList[neR]     = {   48.0,   49.0,
 					     170.0,  172.0,  174.0,  176.0,  178.0,  180.0,  182.0,  184.0,  186.0,  188.0, 
 					     190.0,  192.0,  193.0,  194.0,  195.0,  196.0,  197.0,  198.0,  199.0,  199.5  } ;
 
-Float_t StMagUtilities::ePhiList[nePhi] = {  0.0000, 0.5236, 1.0472, 1.5708, 2.0944, 2.6180, 3.1416,
-					     3.6652, 4.1888, 4.7124, 5.2360, 5.7596, 6.2832  } ;  // 13 planes of phi - so can wrap around
+Float_t StMagUtilities::ePhiList[EMap_nPhi] = {  0.0000, 0.5236, 1.0472, 1.5708, 2.0944, 2.6180, 3.1416,
+					         3.6652, 4.1888, 4.7124, 5.2360, 5.7596, 6.2832  } ;  // 13 planes of phi - so can wrap around
 
-Float_t StMagUtilities::eZList[neZ]     = { -208.5, -208.0, -207.0, -206.0, -205.0, -204.0, -202.0,
+Float_t StMagUtilities::eZList[EMap_nZ] = { -208.5, -208.0, -207.0, -206.0, -205.0, -204.0, -202.0,
 					    -200.0, -198.0, -196.0, -194.0, -192.0, -190.0, -188.0, -186.0, -184.0, -182.0,
 					    -180.0, -178.0, -176.0, -174.0, -172.0, -170.0, -168.0, -166.0, -164.0, -162.0,
 					    -160.0, -158.0, -156.0, -154.0, -152.0, -150.0, -148.0, -146.0, -144.0, -142.0,
@@ -1067,7 +1084,7 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] )
 void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
 {
 
-  static  Float_t dx3D[nePhi][neR][neZ], dy3D[nePhi][neR][neZ] ;
+  static  Float_t dx3D[EMap_nPhi][EMap_nR][EMap_nZ], dy3D[EMap_nPhi][EMap_nR][EMap_nZ] ;
   static  Int_t   ilow = 0, jlow = 0, klow = 0 ;
   static  Int_t   DoOnce = 0 ;
   const   Int_t   PHIORDER = 1 ;                    // Linear interpolation = 1, Quadratic = 2 ... PHI Table is crude so use linear interp
@@ -1088,13 +1105,13 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
   if ( DoOnce == 0 )
     {
       cout << "StMagUtilities::FastUndoD  Please wait for the tables to fill ... ~90 seconds" << endl ;
-      for ( k = 0 ; k < nePhi ; k++ )
+      for ( k = 0 ; k < EMap_nPhi ; k++ )
 	{
-	  for ( i = 0 ; i < neR ; i++ )
+	  for ( i = 0 ; i < EMap_nR ; i++ )
 	    {
 	      xx[0] = eRList[i] * TMath::Cos(ePhiList[k]) ;
 	      xx[1] = eRList[i] * TMath::Sin(ePhiList[k]) ;
-	      for ( j = 0 ; j < neZ ; j++ )
+	      for ( j = 0 ; j < EMap_nZ ; j++ )
 		{
 		  xx[2] = eZList[j] ;
 		  UndoBDistortion(xx,Xprime) ;
@@ -1106,15 +1123,15 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
       DoOnce = 1 ;
     }
 
-  Search( nePhi, ePhiList, phi, klow ) ;
-  Search( neR,   eRList,   r,   ilow ) ;
-  Search( neZ,   eZList,   z,   jlow ) ;
+  Search( EMap_nPhi, ePhiList, phi, klow ) ;
+  Search( EMap_nR,   eRList,   r,   ilow ) ;
+  Search( EMap_nZ,   eZList,   z,   jlow ) ;
   if ( klow < 0 ) klow = 0 ;
   if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( jlow < 0 ) jlow = 0 ;
-  if ( klow + ORDER  >=  nePhi-1 ) klow =  nePhi - 1 - ORDER ;
-  if ( ilow + ORDER  >=  neR-1   ) ilow =  neR   - 1 - ORDER ;
-  if ( jlow + ORDER  >=  neZ-1   ) jlow =  neZ   - 1 - ORDER ;
+  if ( klow + ORDER  >=  EMap_nPhi-1 ) klow =  EMap_nPhi - 1 - ORDER ;
+  if ( ilow + ORDER  >=  EMap_nR-1   ) ilow =  EMap_nR   - 1 - ORDER ;
+  if ( jlow + ORDER  >=  EMap_nZ-1   ) jlow =  EMap_nZ   - 1 - ORDER ;
   
   for ( k = klow ; k < klow + ORDER + 1 ; k++ )
     {
@@ -1148,7 +1165,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
 void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] )
 {
 
-  static  Float_t dR[neR][neZ], dRPhi[neR][neZ] ;
+  static  Float_t dR[EMap_nR][EMap_nZ], dRPhi[EMap_nR][EMap_nZ] ;
   static  Int_t   ilow = 0, jlow = 0 ;
   static  Int_t   DoOnce = 0 ;
   const   Int_t   ORDER  = 1 ;                      // Linear interpolation = 1, Quadratic = 2         
@@ -1168,11 +1185,11 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
   if ( DoOnce == 0 )
     {
       cout << "StMagUtilities::FastUndo2  Please wait for the tables to fill ...  ~5 seconds" << endl ;
-      for ( i = 0 ; i < neR ; i++ )
+      for ( i = 0 ; i < EMap_nR ; i++ )
 	{
 	  xx[0] = eRList[i] ;
 	  xx[1] = 0 ;
-	  for ( j = 0 ; j < neZ ; j++ )
+	  for ( j = 0 ; j < EMap_nZ ; j++ )
 	    {
 	      xx[2] = eZList[j] ;
 	      Undo2DBDistortion(xx,Xprime) ;
@@ -1183,12 +1200,12 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
       DoOnce = 1 ;
     }
 
-  Search( neR, eRList, r, ilow ) ;
-  Search( neZ, eZList, z, jlow ) ;
+  Search( EMap_nR, eRList, r, ilow ) ;
+  Search( EMap_nZ, eZList, z, jlow ) ;
   if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( jlow < 0 ) jlow = 0 ;
-  if ( ilow + ORDER  >=  neR-1 ) ilow =  neR - 1 - ORDER ;
-  if ( jlow + ORDER  >=  neZ-1 ) jlow =  neZ - 1 - ORDER ;
+  if ( ilow + ORDER  >=  EMap_nR-1 ) ilow =  EMap_nR - 1 - ORDER ;
+  if ( jlow + ORDER  >=  EMap_nZ-1 ) jlow =  EMap_nZ - 1 - ORDER ;
   
   for ( i = ilow ; i < ilow + ORDER + 1 ; i++ )
     {
@@ -1497,10 +1514,10 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
     {
       cout << "StMagUtilities::IFCShift   Please wait for the tables to fill ...  ~5 seconds" << endl ;
       Int_t Nterms = 100 ;
-      for ( Int_t i = 0 ; i < neZ ; ++i ) 
+      for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = TMath::Abs( eZList[i] ) ;
-	  for ( Int_t j = 0 ; j < neR ; ++j ) 
+	  for ( Int_t j = 0 ; j < EMap_nR ; ++j ) 
 	    {
 	      r = eRList[j] ;
 	      shiftEr[i][j] = 0.0 ; 	    
@@ -1575,10 +1592,10 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   if ( DoOnce == 0 )
     {
       Int_t Nterms = 100 ;
-      for ( Int_t i = 0 ; i < neZ ; ++i ) 
+      for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = TMath::Abs( eZList[i] ) ;
-	  for ( Int_t j = 0 ; j < neR ; ++j ) 
+	  for ( Int_t j = 0 ; j < EMap_nR ; ++j ) 
 	    {
 	      r = eRList[j] ;
 	      spaceEr[i][j] = 0.0 ; 
@@ -1731,10 +1748,10 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
       //Interpolate results onto standard grid for Electric Fields
       Int_t ilow=0, jlow=0 ;
       Float_t save_Er[2] ;	      
-      for ( Int_t i = 0 ; i < neZ ; ++i ) 
+      for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = TMath::Abs( eZList[i] ) ;
-	  for ( Int_t j = 0 ; j < neR ; ++j ) 
+	  for ( Int_t j = 0 ; j < EMap_nR ; ++j ) 
 	    { // Linear interpolation
 	      r = eRList[j] ;
 	      Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
@@ -1883,10 +1900,10 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       //Float_t deltaV    = GG*0.99 - CathodeV * (1.0-TPC_Z0*RStep/(Pitch*Rtot)) ;    // (test) Error on GG voltage from nominal (99% effective)
       
       Int_t Nterms = 100 ;
-      for ( Int_t i = 0 ; i < neZ ; ++i ) 
+      for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
 	{
 	  z = eZList[i] ;
-	  for ( Int_t j = 0 ; j < neR ; ++j ) 
+	  for ( Int_t j = 0 ; j < EMap_nR ; ++j ) 
 	    {
 	      r = eRList[j] ;
 	      shortEr[i][j] = 0.0 ; 	    
@@ -2056,9 +2073,9 @@ void StMagUtilities::ReadField( )
       fgets  ( cname, sizeof(cname) , magfile ) ;
       fgets  ( cname, sizeof(cname) , magfile ) ;
 
-      for ( Int_t j=0 ; j < nZ ; j++ ) 
+      for ( Int_t j=0 ; j < BMap_nZ ; j++ ) 
 	{
-	  for ( Int_t k=0 ; k < nR ; k++ )
+	  for ( Int_t k=0 ; k < BMap_nR ; k++ )
 	    {
 	      fgets  ( cname, sizeof(cname) , magfile ) ; 
 	      sscanf ( cname, " %f %f %f %f ", &Radius[k], &ZList[j], &Br[j][k], &Bz[j][k] ) ;  
@@ -2091,11 +2108,11 @@ void StMagUtilities::ReadField( )
       fgets  ( cname, sizeof(cname) , b3Dfile ) ;    // Read comment lines at begining of file
       fgets  ( cname, sizeof(cname) , b3Dfile ) ;    // Read comment lines at begining of file
       
-      for ( Int_t i=0 ; i < nPhi ; i++ ) 
+      for ( Int_t i=0 ; i < BMap_nPhi ; i++ ) 
 	{
-	  for ( Int_t j=0 ; j < nZ ; j++ ) 
+	  for ( Int_t j=0 ; j < BMap_nZ ; j++ ) 
 	    {
-	      for ( Int_t k=0 ; k < nR ; k++ )
+	      for ( Int_t k=0 ; k < BMap_nR ; k++ )
 		{
 		  fgets  ( cname, sizeof(cname) , b3Dfile ) ; 
 		  sscanf ( cname, " %f %f %f %f %f %f ",
@@ -2109,11 +2126,11 @@ void StMagUtilities::ReadField( )
   else if ( gMap == kConstant )             // Constant field values
 
     {
-      for ( Int_t i=0 ; i < nPhi ; i++ ) 
+      for ( Int_t i=0 ; i < BMap_nPhi ; i++ ) 
 	{
-	  for ( Int_t j=0 ; j < nZ ; j++ ) 
+	  for ( Int_t j=0 ; j < BMap_nZ ; j++ ) 
 	    {
-	      for ( Int_t k=0 ; k < nR ; k++ )
+	      for ( Int_t k=0 ; k < BMap_nR ; k++ )
 		{
 		  Br3D[i][j][k] = Br[j][k] ;
 		  Bz3D[i][j][k] = Bz[j][k] ;
@@ -2152,13 +2169,13 @@ void StMagUtilities::ReadField( )
       fgets  ( cname, sizeof(cname) , efile ) ;
       fgets  ( cname, sizeof(cname) , efile ) ;
       
-      for ( Int_t i=0 ; i < neZ ; i++ ) 
+      for ( Int_t i=0 ; i < EMap_nZ ; i++ ) 
 	{
-	  for ( Int_t j=0 ; j < nePhi ; j++ )
+	  for ( Int_t j=0 ; j < EMap_nPhi ; j++ )
 	    {
-	      for ( Int_t k=0 ; k < neR ; k++ )
+	      for ( Int_t k=0 ; k < EMap_nR ; k++ )
 		{
-		  if ( j == nePhi-1 )
+		  if ( j == EMap_nPhi-1 )
 		    {
 		      ePhiList[j] = 6.2832 ;    // Repeat phi = 0 column in phi == 2 PI column
 		      cmEr[i][j][k] = cmEr[i][0][k] ;
@@ -2207,13 +2224,13 @@ void StMagUtilities::ReadField( )
       fgets  ( cname, sizeof(cname) , eefile ) ;
       fgets  ( cname, sizeof(cname) , eefile ) ;
       
-      for ( Int_t i=0 ; i < neZ ; i++ ) 
+      for ( Int_t i=0 ; i < EMap_nZ ; i++ ) 
 	{
-	  for ( Int_t j=0 ; j < nePhi ; j++ )
+	  for ( Int_t j=0 ; j < EMap_nPhi ; j++ )
 	    {
-	      for ( Int_t k=0 ; k < neR ; k++ )
+	      for ( Int_t k=0 ; k < EMap_nR ; k++ )
 		{
-		  if ( j == nePhi-1 )
+		  if ( j == EMap_nPhi-1 )
 		    {
 		      ePhiList[j] = 6.2832 ;    // Repeat phi = 0 column in phi == 2 PI column
 		      endEr[i][j][k] = endEr[i][0][k] ;
@@ -2264,12 +2281,12 @@ void StMagUtilities::Interpolate2DBfield( const Float_t r, const Float_t z, Floa
   Float_t save_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1] ;
 
-  Search ( nZ, ZList,  z, jlow ) ;
-  Search ( nR, Radius, r, klow ) ;
+  Search ( BMap_nZ, ZList,  z, jlow ) ;
+  Search ( BMap_nR, Radius, r, klow ) ;
   if ( jlow < 0 ) jlow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( klow < 0 ) klow = 0 ;
-  if ( jlow + ORDER  >=    nZ - 1 ) jlow =   nZ - 1 - ORDER ;
-  if ( klow + ORDER  >=    nR - 1 ) klow =   nR - 1 - ORDER ;
+  if ( jlow + ORDER  >=    BMap_nZ - 1 ) jlow =   BMap_nZ - 1 - ORDER ;
+  if ( klow + ORDER  >=    BMap_nR - 1 ) klow =   BMap_nR - 1 - ORDER ;
 
   for ( Int_t j = jlow ; j < jlow + ORDER + 1 ; j++ )
     {
@@ -2298,16 +2315,16 @@ void StMagUtilities::Interpolate3DBfield( const Float_t r, const Float_t z, cons
   Float_t save_Bz[ORDER+1],   saved_Bz[ORDER+1] ;
   Float_t save_Bphi[ORDER+1], saved_Bphi[ORDER+1] ;
 
-  Search( nPhi, Phi3D, phi, ilow ) ;
-  Search( nZ,   Z3D,   z,   jlow ) ;
-  Search( nR,   R3D,   r,   klow ) ;
+  Search( BMap_nPhi, Phi3D, phi, ilow ) ;
+  Search( BMap_nZ,   Z3D,   z,   jlow ) ;
+  Search( BMap_nR,   R3D,   r,   klow ) ;
   if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( jlow < 0 ) jlow = 0 ;
   if ( klow < 0 ) klow = 0 ;
 
-  if ( ilow + ORDER  >=  nPhi - 1 ) ilow = nPhi - 1 - ORDER ;
-  if ( jlow + ORDER  >=    nZ - 1 ) jlow =   nZ - 1 - ORDER ;
-  if ( klow + ORDER  >=    nR - 1 ) klow =   nR - 1 - ORDER ;
+  if ( ilow + ORDER  >=  BMap_nPhi - 1 ) ilow = BMap_nPhi - 1 - ORDER ;
+  if ( jlow + ORDER  >=    BMap_nZ - 1 ) jlow =   BMap_nZ - 1 - ORDER ;
+  if ( klow + ORDER  >=    BMap_nR - 1 ) klow =   BMap_nR - 1 - ORDER ;
 
   for ( Int_t i = ilow ; i < ilow + ORDER + 1 ; i++ )
     {
@@ -2357,18 +2374,18 @@ Float_t StMagUtilities::Interpolate2DTable( const Int_t ORDER, const Float_t x, 
 
 /// Interpolate the E field map - 2D interpolation
 void StMagUtilities::Interpolate2DEdistortion( const Int_t ORDER, const Float_t r, const Float_t z, 
- 					       const Float_t Er[neZ][neR], Float_t &Er_value )
+ 					       const Float_t Er[EMap_nZ][EMap_nR], Float_t &Er_value )
 {
 
   static  Int_t jlow = 0, klow = 0 ;
   Float_t save_Er[ORDER+1] ;
 
-  Search( neZ,   eZList,  z,   jlow   ) ;
-  Search( neR,   eRList,  r,   klow   ) ;
+  Search( EMap_nZ,   eZList,  z,   jlow   ) ;
+  Search( EMap_nR,   eRList,  r,   klow   ) ;
   if ( jlow < 0 ) jlow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( klow < 0 ) klow = 0 ;
-  if ( jlow + ORDER  >=    neZ - 1 ) jlow =   neZ - 1 - ORDER ;
-  if ( klow + ORDER  >=    neR - 1 ) klow =   neR - 1 - ORDER ;
+  if ( jlow + ORDER  >=    EMap_nZ - 1 ) jlow =   EMap_nZ - 1 - ORDER ;
+  if ( klow + ORDER  >=    EMap_nR - 1 ) klow =   EMap_nR - 1 - ORDER ;
 
   for ( Int_t j = jlow ; j < jlow + ORDER + 1 ; j++ )
     {
@@ -2380,7 +2397,7 @@ void StMagUtilities::Interpolate2DEdistortion( const Int_t ORDER, const Float_t 
 
 /// Interpolate the E field map - 3D interpolation
 void StMagUtilities::Interpolate3DEdistortion( const Int_t ORDER, const Float_t r, const Float_t phi, const Float_t z,
-					     const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
+					     const Float_t Er[EMap_nZ][EMap_nPhi][EMap_nR], const Float_t Ephi[EMap_nZ][EMap_nPhi][EMap_nR], 
                                              Float_t &Er_value, Float_t &Ephi_value )
 {
 
@@ -2388,16 +2405,16 @@ void StMagUtilities::Interpolate3DEdistortion( const Int_t ORDER, const Float_t 
   Float_t save_Er[ORDER+1],   saved_Er[ORDER+1] ;
   Float_t save_Ephi[ORDER+1], saved_Ephi[ORDER+1] ;
 
-  Search( neZ,   eZList,   z,   ilow   ) ;
-  Search( nePhi, ePhiList, phi, jlow   ) ;
-  Search( neR,   eRList,   r,   klow   ) ;
+  Search( EMap_nZ,   eZList,   z,   ilow   ) ;
+  Search( EMap_nPhi, ePhiList, phi, jlow   ) ;
+  Search( EMap_nR,   eRList,   r,   klow   ) ;
   if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( jlow < 0 ) jlow = 0 ;
   if ( klow < 0 ) klow = 0 ;
 
-  if ( ilow + ORDER  >=    neZ - 1 ) ilow =   neZ - 1 - ORDER ;
-  if ( jlow + ORDER  >=  nePhi - 1 ) jlow = nePhi - 1 - ORDER ;
-  if ( klow + ORDER  >=    neR - 1 ) klow =   neR - 1 - ORDER ;
+  if ( ilow + ORDER  >=    EMap_nZ - 1 ) ilow =   EMap_nZ - 1 - ORDER ;
+  if ( jlow + ORDER  >=  EMap_nPhi - 1 ) jlow = EMap_nPhi - 1 - ORDER ;
+  if ( klow + ORDER  >=    EMap_nR - 1 ) klow =   EMap_nR - 1 - ORDER ;
 
   for ( Int_t i = ilow ; i < ilow + ORDER + 1 ; i++ )
     {
@@ -4000,8 +4017,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
     
       for ( Int_t k = 0 ; k < PHISLICES ; k++ )
 	{
-	  ArrayoftiltEr[k]   =  new TMatrix(neR3D,neZ) ;
-	  ArrayoftiltEphi[k] =  new TMatrix(neR3D,neZ) ;
+	  ArrayoftiltEr[k]   =  new TMatrix(neR3D,EMap_nZ) ;
+	  ArrayoftiltEphi[k] =  new TMatrix(neR3D,EMap_nZ) ;
 	}
 
       for ( Int_t k = 0 ; k < PHISLICES ; k++ )
@@ -4083,7 +4100,7 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 	  TMatrix &tiltEr   = *ArrayoftiltEr[k] ;
 	  TMatrix &tiltEphi = *ArrayoftiltEphi[k] ;
 	  phi = Philist[k] ;
-	  for ( Int_t i = 0 ; i < neZ ; i++ ) 
+	  for ( Int_t i = 0 ; i < EMap_nZ ; i++ ) 
 	    {
 	      z = TMath::Abs(eZList[i]) ;              // Assume a symmetric solution in Z that depends only on ABS(Z)
 	      for ( Int_t j = 0 ; j < neR3D ; j++ ) 
@@ -4129,8 +4146,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
   if ( local_y > GAPRADIUS - GAP13_14 && local_y < GAPRADIUS ) r_eff = (GAPRADIUS - GAP13_14) / TMath::Cos(phi_prime) ;
   if ( local_y < GAPRADIUS + GAP13_14 && local_y > GAPRADIUS ) r_eff = (GAPRADIUS + GAP13_14) / TMath::Cos(phi_prime) ;
 
-  Er_integral   = Interpolate3DTable( ORDER, r_eff, z, phi_prime, neR3D, neZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEr )   ;
-  Ephi_integral = Interpolate3DTable( ORDER, r_eff, z, phi_prime, neR3D, neZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEphi ) ;
+  Er_integral   = Interpolate3DTable( ORDER, r_eff, z, phi_prime, neR3D, EMap_nZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEr )   ;
+  Ephi_integral = Interpolate3DTable( ORDER, r_eff, z, phi_prime, neR3D, EMap_nZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEphi ) ;
   Ephi_integral *= FLIP ;                           // Note possible change of sign if we have reflection symmetry!!
 
   if (fSpaceChargeR2) GetSpaceChargeR2();           // Get latest spacecharge values from DB 

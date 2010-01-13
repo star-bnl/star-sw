@@ -1,4 +1,4 @@
-// -*- mode: c++ -*-
+//
 //  StEemcTriggerSimu.h,v 0.01
 //
 #ifndef STAR_StEemcTriggerSimu
@@ -29,13 +29,11 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
  public:
   enum {kOnlyAdc=0,kAdcAndTrig, kAdcCompareTrig};
   void setConfig(int x) {mConfig=x;}
-  void setSource(const char* source) { mSource = source; } // "MuDst" (default) or "StEvent"
  private:
   StEEmcDb *mDbE;
   int * mBemcEsum5bit; // output from Bemc emulation, not working
   int * mExternDsmSetup;
   TString  mSetupPath;
-  TString mSource;
 
   int mConfig; // see enum
   enum {nThr=3};
@@ -130,9 +128,6 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
-// Revision 1.14  2009/12/08 02:06:59  pibero
-// Add support for StEvent when running in BFC.
-//
 // Revision 1.13  2009/09/20 06:46:42  pibero
 // Updates for Run 9
 //
