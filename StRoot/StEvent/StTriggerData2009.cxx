@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.21 2010/01/08 22:44:37 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.22 2010/01/13 17:55:47 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.22  2010/01/13 17:55:47  ullrich
+ * Better mErrorFlags, abort, and debug flag handling, updated MTD DSM access function for run10, clean up compiler warning messages.
+ *
  * Revision 2.21  2010/01/08 22:44:37  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -98,10 +101,10 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     readData(data,1);
 }
 
-StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs)
+StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs, int dbg)
 {
     printf("StTriggerData2009 Constructor with trigger data block and byteswap option=%d\n",bs);    
-    mYear=2009; mRun = run; debug = 0;
+    mYear=2009; mRun = run; debug = dbg;
     mData = new TriggerDataBlk2009; 
     readData(data,bs);
 }
@@ -109,7 +112,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, in
 void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
     int copyflag=1;
     if (data==0) {copyflag=0;}
-    if (debug) printf("StTriggerData2009::readData copyflag=%d byteswap=%d data=%x mData=%x\n",copyflag,bs,data,mData);
+    if(debug) printf("StTriggerData2009::readData copyflag=%d byteswap=%d data=%x mData=%x\n",copyflag,bs,(unsigned int)data,(unsigned int)mData);
     
     if (copyflag==1){
         unsigned int ver = data->FormatVersion; 
@@ -119,10 +122,8 @@ void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
             if (debug>1) printf("StTriggerData2009: version = 0x%x (0x%x or 0x08121140)\n",ver,y9FORMAT_VERSION);
         }
         else {
+	    mErrorFlag = mErrorFlag | 0x1;
             printf("StTriggerData2009: version = 0x%x != (0x%x or 0x08121140)\n",ver,y9FORMAT_VERSION);
-            gMessMgr->Warning() << "StTriggerData2009: Data format version = " << data->FormatVersion
-                                << " is different from program format version = " << y9FORMAT_VERSION
-                                << endm;
             assert(0);
         }
         
@@ -134,7 +135,7 @@ void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
                                 << endm;
             assert(0);
         }
-        if (debug>1) printf("StTriggerData2009: size = %d, maxsize = %d\n",size,y9MAX_TRG_BLK_SIZE);
+        if (debug>0) printf("StTriggerData2009: size = %d, maxsize = %d\n",size,y9MAX_TRG_BLK_SIZE);
         memcpy(mData,data,size); 
         memset((char*)mData+size,0,sizeof(TriggerDataBlk2009)-size);      
     }
@@ -158,16 +159,17 @@ void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
         if (TrgSum) swapTrgSum(TrgSum);
     }
     if (EvtDesc==0 || L1_DSM==0 || TrgSum==0){
-        gMessMgr->Warning() << "StTriggerData2009: EvtDesc, L1_DSM or TrgSum is missing" << endm;
-        assert(0);        
+	mErrorFlag = mErrorFlag | 0x1;
+        gMessMgr->Warning() << "StTriggerData2009: EvtDesc, L1_DSM or TrgSum is missing"
+			    <<" mErrorFlag="<<mErrorFlag<<endm;
     }
     
     int npre  = numberOfPreXing();
     int npost = numberOfPostXing();
-    if (npre<0 || npre>5 && npost<0 && npost>5){
-        gMessMgr->Warning() << "StTriggerData2009: Invalid npre/post  = "
-                            << npre << " / " << npost << endm;
-        assert(0);
+    if (npre<0 || npre>10 || npost<0 || npost>10){
+        mErrorFlag = mErrorFlag | 0x2;
+        gMessMgr->Warning() << "StTriggerData2009: Invalid npre/post  = "<< npre << " / " << npost
+			    <<" mErrorFlag="<<mErrorFlag<<endm;
     }
     if (debug>0) printf("StTriggerData2009: pre=%d post=%d\n",npre,npost);
     
@@ -204,10 +206,11 @@ void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
         }
         if (bs) swapRawDetOfflen(offlen);
         for(int k=0; k<y9MAX_OFFLEN; k++){
-	  if (static_cast<unsigned int>(offlen[k].length + offlen[k].offset) > mData->totalTriggerLength) {
+	  if(static_cast<unsigned int>(offlen[k].length + offlen[k].offset) > static_cast<unsigned int>(mData->totalTriggerLength)) {
+		mErrorFlag = mErrorFlag | (1 << k);
                 gMessMgr->Warning() << "StTriggerData2009: offset ("<<offlen[k].offset<<") + length ("<<offlen[k].length
-                                    <<") exceeds total size("<<mData->totalTriggerLength<<") for data block id="<<k<< endm;
-                assert(0);
+                                    <<") exceeds total size("<<mData->totalTriggerLength<<") for data block id="<<k
+				    <<" mErrorFlag="<<mErrorFlag<<endm;
 	  }
         }
         int j;
@@ -232,7 +235,7 @@ void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
         if (mQT3[i]) decodeQT(mQT3[i]->length/4, mQT3[i]->data, qt3[i], tqt3[i]); 
         if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4[i], tqt4[i]); 
     }
-    if (debug>1) dump();
+    if (debug>0) dump();
 }
 
 StTriggerData2009::~StTriggerData2009() {delete mData;}
@@ -1102,11 +1105,16 @@ unsigned char StTriggerData2009::mtdDsmAtCh(int ch, int prepost) const
 bool StTriggerData2009::mtdDsmHit(int pmt, int prepost) const
 {
     //pmt in not used for 2009, it is place holder for next year
-    int buffer = prepostAddress(prepost);
+    int buffer = prepostAddress(prepost);    
     if (buffer >= 0){
-        if (mMIX[buffer] && mRun<10133008){
-            if ( (mMIX[buffer]->MTD_P2PLayer1[5] & 0x1) && (mMIX[buffer]->MTD_P2PLayer1[5] & 0x10) ) return true;
-        }
+      if(mMIX[buffer]){
+	if(mRun<10133008 && mRun<11000000){
+	  if( (mMIX[buffer]->MTD_P2PLayer1[5] & 0x1) && (mMIX[buffer]->MTD_P2PLayer1[5] & 0x10) ) return true;
+        }else{
+	  if(prepost!=0) return false;
+	  return (L1_DSM->TOF[3] & 0x1);
+	}
+      }
     }
     return false;
 }
@@ -1155,7 +1163,7 @@ unsigned short StTriggerData2009::tofMultiplicity(int prepost) const
 void StTriggerData2009::dump() const
 {
     printf("***** StTriggerData Dump *****\n");
-    printf(" debug=%d mData=%x\n",debug,mData);
+    printf(" debug=%d mData=%x\n",debug,(unsigned int)mData);
     printf(" Year=%d  Version=%x\n",year(),version());
     printf(" Run#=%d Event#=%d\n",mRun,eventNumber());
     printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
