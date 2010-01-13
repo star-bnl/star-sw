@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.cxx,v 2.7 2010/01/08 22:44:37 ullrich Exp $
+ * $Id: StFmsTriggerDetector.cxx,v 2.8 2010/01/13 17:51:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.cxx,v $
- * Revision 2.7  2010/01/08 22:44:37  ullrich
- * Updates needed to add StFmsCollection and related classes.
+ * Revision 2.8  2010/01/13 17:51:55  ullrich
+ * New clearFlag() for mudst reading, Data member mNumHeader gets //!
  *
  * Revision 2.6  2009/02/23 22:29:49  ullrich
  * Fixed problem when running over 2009 data (solution by Pibero)
@@ -37,12 +37,13 @@
 #include "Stiostream.h"
 #include <stdio.h>
 
-static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.7 2010/01/08 22:44:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.8 2010/01/13 17:51:55 ullrich Exp $";
 
 ClassImp(StFmsTriggerDetector)
     
 StFmsTriggerDetector::StFmsTriggerDetector()
 {
+    cout << "StFmsTriggerDetector default constructor" << endl;
     memset(mBeg,0,mEnd-mBeg);
     mNumHeader=-1;
     mNumQTdata=0;
@@ -50,6 +51,7 @@ StFmsTriggerDetector::StFmsTriggerDetector()
 
 StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
 {
+    cout << "StFmsTriggerDetector constructor with StTriggerData" << endl;
     const unsigned char  *c=0;
     const unsigned short *s=0;
     const unsigned int   *i=0;
@@ -75,8 +77,15 @@ StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
 StFmsTriggerDetector::~StFmsTriggerDetector() {/* noop */}
 
 void
+StFmsTriggerDetector::clearFlag() { 
+    cout << "StFmsTriggerDetector::clearFlag" << endl;
+    mNumHeader=-1;
+}
+
+void
 StFmsTriggerDetector::decode()
 {
+    cout << "FMS data decode!!!" << endl;
     mNumHeader=0;
     if (mNumQTdata==0) return;
     memset(mADC,0,sizeof(mADC));
@@ -171,8 +180,9 @@ StFmsTriggerDetector::tdc(int crate,  int addr,  int dcard,  int dch)
 void
 StFmsTriggerDetector::dump()
 {
-    if (mNumHeader==-1) decode();
     cout << "FMS data dump" << endl;
+    cout << "mNumHeader = "<<mNumHeader<<endl;
+    if (mNumHeader==-1) decode();
     cout << "Number of data lines = " << mNumQTdata << endl;
     if (mNumQTdata>0){
         printf("Number of header lines = %d\n", mNumHeader);
