@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.30 2009/12/14 23:59:06 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.31 2010/01/13 19:39:19 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -148,37 +148,39 @@ void StuDraw3DEvent::EmcHits(const StEvent* event,const char *detId)
    Color_t colorResponce = 0;
    if (!detId || !detId[0]) detId = "bemc";
    StEmcCollection* emcC =(StEmcCollection*)event->emcCollection();
-   StEmcDetector* det = emcC->detector( strcmp(detId,"bemc") ? kEndcapEmcTowerId : kBarrelEmcTowerId); 
-   for(unsigned int md=1; md <=det->numberOfModules(); md++) {
-      StEmcModule*  module=det->module(md);
-      StSPtrVecEmcRawHit&   hit=  module->hits();
+   if (emcC) {
+      StEmcDetector* det = emcC->detector( strcmp(detId,"bemc") ? kEndcapEmcTowerId : kBarrelEmcTowerId); 
+      for(unsigned int md=1; md <=det->numberOfModules(); md++) {
+         StEmcModule*  module=det->module(md);
+         StSPtrVecEmcRawHit&   hit=  module->hits();
      
-      for(unsigned int ih=0;ih < hit.size();ih++){
-         StEmcRawHit *h=hit[ih];
-         double  rawAdc=h->adc()-5; // raw ADC 
-         float energy =  h->energy();
-	 Style_t style=0; // solid
-//	 energy = (rawAdc+5)/5;
-//	  printf(" EmcHits %d adc = %e energy = %e\n", ih,rawAdc, energy);
-         if ( rawAdc>0  && energy > 0  && energy < 30) {
-            // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
-            if (  energy  < 0.3)   {   
-	       colorResponce = kBlue; 
-	       // style = 4001;                 //wireframe 
-            // If edep large then MIP but less then 1 GeV 
-            } else if (  energy  < 1.0 ) colorResponce = kGreen;
-            // If between 1 GeV and lowest HT threshold (4 GeV for Run7)
-            else if (  energy  < 4.0 )   colorResponce = kYellow;
-            // If above lowest HT thershold
-            else                         colorResponce = kRed;
-            if (energy > 1.0) {
-             //  printf(" Emchit adc = %e energy = %e\n",rawAdc, energy);
+         for(unsigned int ih=0;ih < hit.size();ih++){
+            StEmcRawHit *h=hit[ih];
+            double  rawAdc=h->adc()-5; // raw ADC 
+            float energy =  h->energy();
+	         Style_t style=0; // solid
+//	         energy = (rawAdc+5)/5;
+//	         printf(" EmcHits %d adc = %e energy = %e\n", ih,rawAdc, energy);
+            if ( rawAdc>0  && energy > 0  && energy < 30) {
+               // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
+               if (  energy  < 0.3)   {   
+                 colorResponce = kBlue; 
+                // style = 4001;                 //wireframe 
+               // If edep large then MIP but less then 1 GeV 
+               } else if (  energy  < 1.0 ) colorResponce = kGreen;
+               // If between 1 GeV and lowest HT threshold (4 GeV for Run7)
+               else if (  energy  < 4.0 )   colorResponce = kYellow;
+               // If above lowest HT thershold
+               else                         colorResponce = kRed;
+               if (energy > 1.0) {
+                //  printf(" Emchit adc = %e energy = %e\n",rawAdc, energy);
+               }
+               static const double maxSize =  400.; // (cm)
+               static const double scale   =  200.; // (cm/Gev)
+               double size =(energy > 0.3 ? scale : scale/30.)*energy;
+               if (size > maxSize)  size = maxSize ;
+               EmcHit(*h,colorResponce,style, size,detId);
             }
-            static const double maxSize =  400.; // (cm)
-            static const double scale   =  200.; // (cm/Gev)
-            double size =(energy > 0.3 ? scale : scale/30.)*energy;
-            if (size > maxSize)  size = maxSize ;
-            EmcHit(*h,colorResponce,style, size,detId);
          }
       }
    }
