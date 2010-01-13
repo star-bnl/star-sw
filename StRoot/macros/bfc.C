@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.175 2010/01/13 18:30:50 jeromel Exp $
+// $Id: bfc.C,v 1.176 2010/01/13 21:17:49 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -23,13 +23,13 @@ StBFChain    *chain=0;
 //_________________ Prototypes _______________________________________________
 void Usage();
 void Load(const Char_t *options="");
-TString defChain("y2005e,Test.default.ITTF");
+TString defChain("y2005h,Test.default.ITTF");
 void bfc(Int_t First, Int_t Last,const Char_t *Chain = defChain + ",Display",
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
-//	 const Char_t *Chain="gstar,y2005e,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
+//	 const Char_t *Chain="gstar,y2005h,MakeEvent,trs,sss,svt,ssd,fss,bbcSim,emcY2,tpcI,fcf,ftpc,SvtCL,svtDb,ssdDb,svtIT,ssdIT,ITTF,genvtx,Idst,event,analysis,EventQA,tags,Tree,EvOut,McEvOut,GeantOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna,Display",//,,NoSimuDb, display, //McQa, 
 void bfc(Int_t Last, const Char_t *Chain = defChain,
 	 const Char_t *infile=0, const Char_t *outfile=0, const Char_t *TreeFile=0);
-	 //	 const Char_t *Chain="gstar,y2005e,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
+	 //	 const Char_t *Chain="gstar,y2005h,tpcDb,trs,tpc,Physics,Cdst,Kalman,tags,Tree,EvOut,McEvOut,IdTruth,miniMcMk,StarMagField,FieldOn,McAna", // McQA
 //_____________________________________________________________________
 void Load(const Char_t *options){
   cout << "Load system libraries" << endl;
