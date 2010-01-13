@@ -32,7 +32,7 @@ StTriggerDataMaker::StTriggerDataMaker(const char *name):StRTSBaseMaker("trg",na
 
 Int_t StTriggerDataMaker::Make(){
   LOG_INFO << "StTriggerDataMaker Make() starting..........Run=" 
-        << GetRunNumber() << " : Event=" << GetEventNumber() << endl;
+        << GetRunNumber() << " : Event=" << GetEventNumber() << endm;
 
   int year=0, run=0;
   const TrgDataType2003    *trgdata2003=0;
@@ -52,7 +52,7 @@ Int_t StTriggerDataMaker::Make(){
   StTRGReader* trgReader = daqReader->getTRGReader();
   if (trgReader  && ( year = trgReader->getYear()) ){ 
     
-    LOG_INFO << "StTriggerDataMaker Make() found old data for year " << year << endl;  
+    LOG_INFO << "StTriggerDataMaker Make() found old data for year " << year << endm;  
     switch(year){
     case 2003:
       trgdata2003=trgReader->getDataType2003();
@@ -96,7 +96,7 @@ Int_t StTriggerDataMaker::Make(){
 	case 0x40:
 	  year=2009;
 	  trgdata2009 = (TriggerDataBlk2009*)data;
-	  AddData(new TObjectSet("StTriggerData",new StTriggerData2009(trgdata2009,run),kTRUE));	
+	  AddData(new TObjectSet("StTriggerData",new StTriggerData2009(trgdata2009,run,1,mDebug),kTRUE));	
 	  break;	
 	default:
 	  LOG_INFO << "StTriggerDataMaker Make() found new data but with unknown version = " << version << endm;
@@ -111,18 +111,27 @@ Int_t StTriggerDataMaker::Make(){
 
   if(year==0){
     LOG_INFO << "StTriggerDataMaker Make() finished. Found no trigger data" << endm;  
-    return kStWarn;
+    return kStErr;
   }else{
-    LOG_INFO << "StTriggerDataMaker Make() finished. Found trigger data for year "<< year << endm;  
-    if(mDebug>0){
-      TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
-      if (os) {
-	StTriggerData* pTrg = (StTriggerData*)os->GetObject();
-	if(pTrg){
-	  pTrg->dump();
+    TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
+    if (os) {
+      StTriggerData* pTrg = (StTriggerData*)os->GetObject();
+      if(pTrg){
+	//if(mDebug>0) pTrg->dump();
+	unsigned int err = pTrg->errorFlag();
+	LOG_INFO << "StTriggerDataMaker Make() finished. Found trigger data for year "<< year <<" mErrorFlag="<<err<<endm;  
+	if(err==0){
+	  return kStOK;
+	}else{
+	  LOG_INFO << "StTriggerDataMaker Make() found fatal decording error "<< endm;	  
+	  pTrg->setDebug(1);
+	  if(year>=2009) pTrg->readData();
+	  pTrg->setDebug(mDebug);
+	  return kStErr;
 	}
-      }
-    }    
-    return kStOK;
+      }    
+    }
+    LOG_INFO << "StTriggerDataMaker Make() finished. Failed to addData trigger data" << endm;  
+    return kStErr;
   }
 }
