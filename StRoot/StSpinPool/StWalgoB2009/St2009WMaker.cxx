@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.cxx,v 1.4 2010/01/09 00:07:16 stevens4 Exp $
+// $Id: St2009WMaker.cxx,v 1.5 2010/01/13 03:34:20 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -185,9 +185,9 @@ St2009WMaker::Make(){
   if(nInpEve%2000==1) printf("\n-----in---- %s, nEve: inp=%d trig=%d accpt=%d daqFile=%s\n", GetName(),nInpEve,nTrigEve, nAccEve,afile);
   hA[0]->Fill("inp",1.); 
   
-  if(!isMC) { // skip TRG data for MC
-    if( accessTrig()) return kStOK; //skip event w/o valid trig ID
-  }
+  int btowStat=accessBTOW(); //need btow info for MC trg simu
+  
+  if( accessTrig()) return kStOK; //skip event w/o valid trig ID
   nTrigEve++; 
 
   accessBSMD(); 
@@ -204,7 +204,12 @@ St2009WMaker::Make(){
   }
 
   if( accessTracks()) return kStOK; //skip event w/o ~any highPt track
-  if( accessBTOW()) return kStOK; //skip event w/o energy in BTOW
+  
+  if(wEve.bemc.tileIn[0]==1) 
+    hA[0]->Fill("B-in",1.0);
+  if( btowStat ) return kStOK; //skip event w/o energy in BTOW
+  hA[0]->Fill("B200",1.0);
+  
   accessETOW();// get energy in ETOW 
 
   if( extendTrack2Barrel()) return  kStOK; //skip if not extends to barrel
@@ -335,6 +340,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.5  2010/01/13 03:34:20  stevens4
+// give trig emulator access to barrel hits
+//
 // Revision 1.4  2010/01/09 00:07:16  stevens4
 // add jet finder
 //
@@ -350,6 +358,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.5  2010/01/13 03:34:20  stevens4
+// give trig emulator access to barrel hits
+//
 // Revision 1.4  2010/01/09 00:07:16  stevens4
 // add jet finder
 //
