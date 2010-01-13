@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.60 2009/08/24 20:27:10 jml Exp $
+ * $Id: EventReader.cxx,v 1.61 2010/01/13 21:50:45 fine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.61  2010/01/13 21:50:45  fine
+ * Rt #1803. treat zero DAQ time as error. Print error message
+ *
  * Revision 1.60  2009/08/24 20:27:10  jml
  * fixed typos
  *
@@ -798,6 +801,7 @@ EventInfo EventReader::getEventInfo()
     ei.TrigWord      = dp->TriggerWord;
     ei.TrigInputWord = dp->TriggerInWord;
     int detpre       = dp->DetectorPresence;
+    ei.UnixTime      = -1;// special case: time was not defined (=0 means : now() )
     LOG_INFO<<"EventReader::getEventInfo  detector presence = "<<detpre<<endm;
 
     int sys = 0;

@@ -82,6 +82,18 @@ Int_t StDAQMaker::Make(){
     fDAQReader->printEventInfo();
     fEvtHddr->Print();
   }
+  
+  if ( !( fDAQReader->getUnixTime() || fDAQReader->getEventSize() ) ) {
+     LOG_ERROR << " The run: " << fDAQReader->getRunNumber() 
+               << "/ event:  " << fDAQReader->getEventNumber() 
+               <<  ((!fDAQReader->getUnixTime()) ? " timestamp " : " size" )
+               << " is not correct "
+               << endm;
+     fDAQReader->printEventInfo();
+     fEvtHddr->Print();
+     iret = kStEOF;
+     return iret;
+  }
 
   StRtsTable *daqTofTable = GetNextLegacy();
   if (daqTofTable) {
