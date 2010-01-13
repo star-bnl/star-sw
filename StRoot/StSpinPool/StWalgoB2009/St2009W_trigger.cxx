@@ -1,4 +1,4 @@
-// $Id: St2009W_trigger.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009W_trigger.cxx,v 1.2 2010/01/13 03:34:20 stevens4 Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
@@ -34,8 +34,10 @@ St2009WMaker::passes_L2(){
   for (int i=0;i<mxBtow;i++)
     if (wEve.bemc.statTile[0][i]==0)//zero means good
       if (wEve.bemc.eneTile[0][i]>par_l2emulSeedThresh){
-	int ieta=i%mxBTetaBin;
-	int iphi=i/mxBTetaBin;
+	int ieta=-1; int iphi=-1;
+	float etaF=positionBtow[i].Eta();
+	float phiF=positionBtow[i].Phi();
+	L2algoEtaPhi2IJ(etaF, phiF,ieta,iphi);
 	WeveCluster c=maxBtow2x2(ieta,iphi,0);
 	if (c.ET>par_l2emulClusterThresh) return true;
       }
@@ -43,6 +45,9 @@ St2009WMaker::passes_L2(){
 }
 
 //$Log: St2009W_trigger.cxx,v $
+//Revision 1.2  2010/01/13 03:34:20  stevens4
+//give trig emulator access to barrel hits
+//
 //Revision 1.1  2009/11/23 23:00:18  balewski
 //code moved spin-pool
 //

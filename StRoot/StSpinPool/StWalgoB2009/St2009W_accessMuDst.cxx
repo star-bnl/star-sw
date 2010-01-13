@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.4 2010/01/06 19:16:47 stevens4 Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.5 2010/01/13 03:34:20 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -339,9 +339,8 @@ St2009WMaker::accessBTOW(){
   if(n0==mxBtow) return -1 ;  // BTOW was not present in this events
 
   wEve.bemc.tileIn[ibp]=1; //tag usable data
-  hA[0]->Fill("B-in",1.0);
-
-  if(nTrigEve%5000==1) { 
+  
+  if(nInpEve%5000==1) { 
     LOG_INFO << Form("unpackMuBTOW() dataIn=%d, nBbad: ped=%d stat=%d gain=%d ; nAdc: %d>0, %d>thres\n    maxADC=%.0f softID=%d adcSum=%.0f",
 		     wEve.bemc.tileIn[ibp],n1,n2,n3,n4,n5,
 		     maxADC,maxID,adcSum
@@ -352,8 +351,6 @@ St2009WMaker::accessBTOW(){
 
   if(maxADC<par_maxADC)  return -2 ;  // not enough energy
   
-  hA[0]->Fill("B200",1.0);
-
   return 0;
 }
 
@@ -590,6 +587,9 @@ St2009WMaker::hadronicRecoil(){ //add up all vector pt outside of 'nearJet' regi
 }
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.5  2010/01/13 03:34:20  stevens4
+//give trig emulator access to barrel hits
+//
 //Revision 1.4  2010/01/06 19:16:47  stevens4
 //track cuts now on primary component, cleanup
 //
