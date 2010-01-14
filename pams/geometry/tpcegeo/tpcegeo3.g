@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.23 2009/12/30 19:10:28 perev Exp $
+!// $Id: tpcegeo3.g,v 1.24 2010/01/13 22:36:24 perev Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.24  2010/01/13 22:36:24  perev
+!// Typo is fixed. TPCG was twice as bigger
+!//
 !// Revision 1.23  2009/12/30 19:10:28  perev
 !// Wrong rotation(15) of TPSS fixed
 !//
@@ -469,7 +472,7 @@ USE TECW
 
  tofcLENG = tpcg_Length-2*tpcg_WheelTHK-2*TPCR_RdoVthk  !// gas plus endcaps
  tpgvLeng = (tofcLeng-tpcg_MembTHK)/2   	!// active gas
- tpgvLeng = TPCG_LengthV-tpcg_MembTHK/2 	!// active gas
+ tpgvLeng = (TPCG_LengthV-tpcg_MembTHK)/2 	!// active gas
 
 
 !// calculate radii of outer finest structureures
