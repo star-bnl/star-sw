@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.44 2009/12/11 15:41:06 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.45 2010/01/14 18:23:00 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.45  2010/01/14 18:23:00  jcs
+// store laser tZero in electronicsTable for laser runs so that all events in a
+// laser run are reconstructed with the laser tZero
+//
 // Revision 1.44  2009/12/11 15:41:06  jcs
 // For laser run use laserTZero and no inner cathode correction
 //
@@ -825,6 +829,8 @@ Bool_t StFtpcDbReader::setLaserRun(Bool_t laserRun)
       gasTable->adjustAverageEast = 0.0;
       LOG_INFO << "LASER RUN:   Using 'perfect' gain table and adjustAverageWest = adjustAverageEast = 0.0"<< endm;
       mTZero = mLaserTZero;
+      // set mTZero = mLaserTzero in electronicsTable
+      electronicsTable->tZero = mLaserTZero;
       LOG_INFO << "             mTZero = mLaserTZero = "<<mTZero<<endm;      
    }
    return 0;
