@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.63 2009/05/11 17:52:14 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.64 2010/01/14 19:29:53 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.64  2010/01/14 19:29:53  genevb
+// Fix ROOT quirk with 1 page print, fix string/char conversions, protect LOG calls
+//
 // Revision 2.63  2009/05/11 17:52:14  genevb
 // Fix fit-not-attached-to-hist-for-empty-hists, needed for ROOT 5.22
 //
@@ -226,10 +229,10 @@
 #include "StHistUtil.h"
 
 typedef TH1* TH1ptr;
-typedef char* charptr;
+typedef const char* charptr;
 
-char* possibleQAPrefixes[10] = {"","LM","MM","HM","HP","XX","MB","CL","HT","JP"};
-char* possibleQASuffixes[10] = {
+const char* possibleQAPrefixes[10] = {"","LM","MM","HM","HP","XX","MB","CL","HT","JP"};
+const char* possibleQASuffixes[10] = {
   "General",
   "Low Mult",
   "Mid Mult",
@@ -264,6 +267,7 @@ StHistUtil::StHistUtil(){
   m_HistCanvasR = 0;
   debug = kFALSE;
   m_CurPrefix = -1;
+  m_CurPage = 0;
   m_OutType = "ps"; // postscript output by default
   m_OutMultiPage = kTRUE;
   m_RunYear = 0;
@@ -335,10 +339,11 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
   // Multipage output for ps,pdf
   m_OutMultiPage = !(m_OutType.CompareTo("ps")
                   && m_OutType.CompareTo("pdf") );
-  if (m_OutMultiPage)
+  if (m_OutMultiPage) {
     LOG_INFO << "StHistUtil::SetOutFile(): Multipage output" << endm;
-  else
+  } else {
     LOG_INFO << "StHistUtil::SetOutFile(): Single page output" << endm;
+  }
 }
 //_____________________________________________________________________________
 void StHistUtil::CloseOutFile() {
@@ -346,9 +351,11 @@ void StHistUtil::CloseOutFile() {
   m_HistCanvas->Update();
   if (!m_CurFileName.IsNull()) {
     if (m_OutMultiPage) m_CurFileName.Append(")");
-    if (m_OutType.CompareTo("CC"))
+    if (m_OutType.CompareTo("CC")) {
+      // single page seems to have a bug with "()" notation as of Root 5.22.00
+      if (m_CurPage==1) m_CurFileName.Remove(m_CurFileName.Length()-2);
       m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
-    else
+    } else
       m_HistCanvas->SaveSource(m_CurFileName.Data());
     if (m_refInFile) {
       m_HistCanvasR->Modified();
@@ -480,8 +487,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
 
   // now put in page # at bottom left of canvas - first page
-  Int_t Ipagenum=1;
-  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.16,0.03,Form("%d",Ipagenum),"br");
+  m_CurPage=1;
+  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.16,0.03,Form("%d",m_CurPage),"br");
   Lpage->SetTextSize(0.6);
   Lpage->Draw();
   if (m_refInFile) {
@@ -515,7 +522,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   // get the TList pointer to the histograms:
   if (dirName) strcpy(m_dirName,dirName);
   TList* dirList = FindHists(m_dirName);
-  if (!dirList) LOG_INFO << " DrawHists - histograms not available! " << endm;
+  if (!dirList) { LOG_INFO << " DrawHists - histograms not available! " << endm; }
 
   TIter nextHist(dirList);
   Int_t histCounter = 0;
@@ -592,16 +599,16 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           // Switch to a new page...............................
 	  if (CheckOutFile(oname)) {
 	    padCount = numPads;
-	    Ipagenum = 0;
+	    m_CurPage = 0;
 	  }
           if (padCount == numPads) {
             // must redraw the histcanvas for each new page!
             m_HistCanvas->Modified();
             m_HistCanvas->Update();
-	    if (Ipagenum>0 && !m_CurFileName.IsNull()) {
-              if (m_OutType.CompareTo("CC"))
+	    if (m_CurPage>0 && !m_CurFileName.IsNull()) {
+              if (m_OutType.CompareTo("CC")) {
 	        m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
-              else
+              } else
                 m_HistCanvas->SaveSource(m_CurFileName.Data());
 	      m_CurFileName.ReplaceAll("(",0); // doesn't hurt to do > once
             } else {
@@ -613,7 +620,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             if (m_refInFile) {
               m_HistCanvasR->Modified();
               m_HistCanvasR->Update();
-	      if (Ipagenum>0 && !m_CurFileName.IsNull()) {
+	      if (m_CurPage>0 && !m_CurFileName.IsNull()) {
 	        m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
 	        m_CurFileNameR.ReplaceAll("(",0); // doesn't hurt to do > once
 	      } else m_HistCanvasR->Draw();
@@ -622,13 +629,13 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             }
 
             // update the page number
-            Ipagenum++;
-            Lpage->SetLabel(Form("%d",Ipagenum));
+            m_CurPage++;
+            Lpage->SetLabel(Form("%d",m_CurPage));
 
 	    if (!m_OutMultiPage && !m_CurFileName.IsNull()) {
               Ssiz_t last_us = m_CurFileName.Last('_') + 1;
               Ssiz_t lastdot = m_CurFileName.Last('.') - last_us;
-              m_CurFileName.Replace(last_us,lastdot,Form("%d",Ipagenum));
+              m_CurFileName.Replace(last_us,lastdot,Form("%d",m_CurPage));
 	    }
           }
 
@@ -901,7 +908,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                         histReadCounter,mode,result,cut,
                         (result < cut ? "FAIL" : "PASS")) << endm;
             if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
-            (*R_ostr) << Ipagenum << " " << curPad << " " << oname << " " << result << endl;
+            (*R_ostr) << m_CurPage << " " << curPad << " " << oname << " " << result << endl;
           }
 
         }
@@ -1077,15 +1084,16 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
 // Method ListHists -->
 // List of all histograms
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::ListHists **** " << endm;
+  }
 
 // get the TList pointer to the histograms:
   TList  *dirList = 0;
   if (dirName) strcpy(m_dirName,dirName);
   dirList = FindHists(m_dirName);
 
-  if (!dirList) LOG_INFO << " ListHists - histograms not available! " << endm;
+  if (!dirList) { LOG_INFO << " ListHists - histograms not available! " << endm; }
 
 //Now want to loop over all histograms
 // Create an iterator
@@ -1122,7 +1130,7 @@ Int_t StHistUtil::PrintInfoHists(TList *dirList,  const Char_t *fname )
 
   ofstream fout(fname);
 
-  if (!dirList) LOG_INFO << " PrintInfoHists - histograms not available! " << endm;
+  if (!dirList) { LOG_INFO << " PrintInfoHists - histograms not available! " << endm; }
 
   Int_t histInfoCount = 0;
 
@@ -1176,10 +1184,11 @@ Int_t StHistUtil::PrintInfoHists(TList *dirList,  const Char_t *fname )
 
 Int_t StHistUtil::CopyHists(TList *dirList)
 {  
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::CopyHists **** " << endm;
+  }
 
-  if (!dirList) LOG_INFO << " StHistUtil::CopyHists - histogram Pointer not set! " << endm;
+  if (!dirList) { LOG_INFO << " StHistUtil::CopyHists - histogram Pointer not set! " << endm; }
 
 // create array of pointers to the new histograms I will create
 
@@ -1238,12 +1247,13 @@ Int_t StHistUtil::CopyHists(TList *dirList)
 
 Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 {  
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::AddHists **** " << endm;
+  }
   //  LOG_INFO << " num hists to copy = " << numHistCopy << endm;
 
-  if (!dirList) LOG_INFO << 
-        " StHistUtil::AddHists - histogram Pointer not set! " << endm;
+  if (!dirList) { LOG_INFO << 
+        " StHistUtil::AddHists - histogram Pointer not set! " << endm; }
 
   Int_t histAddCount = 0;
   Int_t tempInt=0;
@@ -1290,8 +1300,9 @@ Int_t StHistUtil::ExamineLogYList()
 // Method ExamineLogYList
 // List of all histograms that will be drawn with logy scale
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::ExamineLogYList **** " << endm;
+  }
 
 // m_ListOfLogY -  is a list of log plots
 // construct a TObject
@@ -1303,7 +1314,7 @@ Int_t StHistUtil::ExamineLogYList()
 // use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
   while ((obj = nextObj())) {
 
-    if (Debug()) LOG_INFO << " StHistUtil::ExamineLogYList has hist " <<  obj->GetName() << endm;
+    if (Debug()) { LOG_INFO << " StHistUtil::ExamineLogYList has hist " <<  obj->GetName() << endm; }
     LogYCount++;
 
   }
@@ -1320,8 +1331,9 @@ Int_t StHistUtil::ExamineLogXList()
 // Method ExamineLogXList
 // List of all histograms that will be drawn with logX scale
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::ExamineLogXList **** " << endm;
+  }
 
 // m_ListOfLogX -  is a list of log plots
 // construct a TObject
@@ -1333,8 +1345,9 @@ Int_t StHistUtil::ExamineLogXList()
 // use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
   while ((obj = nextObj())) {
 
-    if (Debug())
+    if (Debug()) {
       LOG_INFO << " StHistUtil::ExamineLogXList has hist " <<  obj->GetName() << endm;
+    }
     LogXCount++;
 
   }
@@ -1351,8 +1364,9 @@ Int_t StHistUtil::ExaminePrintList()
 // Method ExaminePrintList
 // List of all histograms that will be drawn,printed
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::ExaminePrintList **** " << endm;
+  }
 
 // m_ListOfPrint -  is a list of hist to print,draw
 
@@ -1373,8 +1387,9 @@ Int_t StHistUtil::ExaminePrintList()
 // use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
   while ((obj = nextObj())) {
 
-    if (Debug())
+    if (Debug()) {
       LOG_INFO << " StHistUtil::ExaminePrintList has hist " <<  obj->GetName() << endm;
+    }
     PrintCount++;
 
   }
@@ -1390,8 +1405,9 @@ Int_t StHistUtil::AddToLogYList(const Char_t *HistName){
 // Method AddToLogYList
 //   making list of all histograms that we want drawn with LogY scale
 
-   if (Debug())
+   if (Debug()) {
      LOG_INFO << " **** Now in StHistUtil::AddToLogYList  **** " << endm;
+   }
 
 // Since I'm creating a new list, must delete it in the destructor!!
 //make a new TList on heap(persistant); have already defined m_ListOfLogY in header file
@@ -1407,10 +1423,12 @@ Int_t StHistUtil::AddToLogYList(const Char_t *HistName){
 // now can use Add method of TList
     if (!lobj) {
        m_ListOfLogY->Add(HistNameObj);
-       if (Debug())
+       if (Debug()) {
          LOG_INFO << " StHistUtil::AddToLogYList: " << HistName  <<endm;
+       }
+    } else {
+      LOG_INFO << " StHistUtil::AddToLogYList: " << HistName << " already in list - not added" <<endm;
     }
-    else  LOG_INFO << " StHistUtil::AddToLogYList: " << HistName << " already in list - not added" <<endm;
  
 // return using a method of TList (inherits GetSize from TCollection)
   return m_ListOfLogY->GetSize();
@@ -1424,8 +1442,9 @@ Int_t StHistUtil::AddToLogXList(const Char_t *HistName){
 // Method AddToLogXList
 //   making list of all histograms that we want drawn with LogX scale
 
-   if (Debug())
+   if (Debug()) {
      LOG_INFO << " **** Now in StHistUtil::AddToLogXList  **** " << endm;
+   }
 
 // Since I'm creating a new list, must delete it in the destructor!!
 //make a new TList on heap(persistant); have already defined m_ListOfLogX in header file
@@ -1441,10 +1460,12 @@ Int_t StHistUtil::AddToLogXList(const Char_t *HistName){
 // now can use Add method of TList
     if (!lobj) {
        m_ListOfLogX->Add(HistNameObj);
-       if (Debug())
+       if (Debug()) {
          LOG_INFO << " StHistUtil::AddToLogXList: " << HistName  <<endm;
+       }
+    } else {
+      LOG_INFO << " StHistUtil::AddToLogXList: " << HistName << " already in list - not added" <<endm;
     }
-    else  LOG_INFO << " StHistUtil::AddToLogXList: " << HistName << " already in list - not added" <<endm;
  
 // return using a method of TList (inherits GetSize from TCollection)
  return m_ListOfLogX->GetSize();
@@ -1459,8 +1480,9 @@ Int_t StHistUtil::AddToPrintList(const Char_t *HistName){
 // Method AddToPrintList
 //   making list of all histograms that we want drawn,printed
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::AddToPrintList  **** " << endm;
+  }
 
 // Since I'm creating a new list, must delete it in the destructor!!
 //make a new TList on heap(persistant); have already defined m_ListOfPrint in header file
@@ -1473,10 +1495,12 @@ Int_t StHistUtil::AddToPrintList(const Char_t *HistName){
 // now can use Add method of TList
     if (!m_ListOfPrint->Contains(HistName)) {
        m_ListOfPrint->Add(HistNameObj);
-       if (Debug())
+       if (Debug()) {
          LOG_INFO << " StHistUtil::AddToPrintList: " << HistName  <<endm;
+       }
+    } else {
+      LOG_INFO << " StHistUtil::AddToPrintList: " << HistName << " already in list - not added" <<endm;
     }
-    else  LOG_INFO << " StHistUtil::AddToPrintList: " << HistName << " already in list - not added" <<endm;
  
 // return using a method of TList (inherits GetSize from TCollection)
  return m_ListOfPrint->GetSize();
@@ -1489,8 +1513,9 @@ Int_t StHistUtil::RemoveFromLogYList(const Char_t *HistName){
 // Method RemoveFromLogYList
 //   remove hist from  list  that we want drawn with LogY scale
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::RemoveFromLogYList  **** " << endm;
+  }
 
 // check if list exists:
   if (m_ListOfLogY) {
@@ -1502,10 +1527,12 @@ Int_t StHistUtil::RemoveFromLogYList(const Char_t *HistName){
 // now can use Remove method of TList
     if (lobj) {
       m_ListOfLogY->Remove(lobj);
-      if (Debug())
+      if (Debug()) {
         LOG_INFO << " RemoveLogYList: " << HistName << " has been removed from list" <<endm;
+      }
+    } else {
+      LOG_INFO << " RemoveLogYList: " << HistName << " not on list - not removing" <<endm;
     }
-    else  LOG_INFO << " RemoveLogYList: " << HistName << " not on list - not removing" <<endm;
 
   } 
 // return using a method of TList (inherits GetSize from TCollection)
@@ -1519,8 +1546,9 @@ Int_t StHistUtil::RemoveFromLogXList(const Char_t *HistName){
 // Method RemoveFromLogXList
 //   remove hist from  list  that we want drawn with LogX scale
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::RemoveFromLogXList  **** " << endm;
+  }
 
 // check if list exists:
   if (m_ListOfLogX) {
@@ -1532,10 +1560,12 @@ Int_t StHistUtil::RemoveFromLogXList(const Char_t *HistName){
 // now can use Remove method of TList
     if (lobj) {
       m_ListOfLogX->Remove(lobj);
-      if (Debug())
+      if (Debug()) {
         LOG_INFO << " RemoveLogXList: " << HistName << " has been removed from list" <<endm;
+      }
+    } else {
+      LOG_INFO << " RemoveLogXList: " << HistName << " not on list - not removing" <<endm;
     }
-    else  LOG_INFO << " RemoveLogXList: " << HistName << " not on list - not removing" <<endm;
 
   } 
 // return using a method of TList (inherits GetSize from TCollection)
@@ -1549,8 +1579,9 @@ Int_t StHistUtil::RemoveFromPrintList(const Char_t *HistName){
 // Method RemoveFromPrintList
 //   remove hist from  list  that we want drawn,printed
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::RemoveFromPrintList  **** " << endm;
+  }
 
 // check if list exists:
   if (m_ListOfPrint) {
@@ -1562,10 +1593,12 @@ Int_t StHistUtil::RemoveFromPrintList(const Char_t *HistName){
 // now can use Remove method of TList
     if (lobj) {
       m_ListOfPrint->Remove(lobj);
-      if (Debug())
+      if (Debug()) {
         LOG_INFO << " RemovePrintList: " << HistName << " has been removed from list" <<endm;
+      }
+    } else {
+      LOG_INFO << " RemovePrintList: " << HistName << " not on list - not removing" <<endm;
     }
-    else  LOG_INFO << " RemovePrintList: " << HistName << " not on list - not removing" <<endm;
 
   } 
 // return using a method of TList (inherits GetSize from TCollection)
@@ -1582,8 +1615,9 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
 // Method SetDefaultLogYList
 //    - create default list of histograms we want plotted in LogY scale
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::SetDefaultLogYList  **** " << endm;
+  }
 
 
   if (dirName) strcpy(m_dirName,dirName);
@@ -1595,7 +1629,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
   else // default for now
     type = "StE";
 
-  Char_t* sdefList[] = {
+  const Char_t* sdefList[] = {
     #include "St_QA_Maker/QAhlist_logy.h"
   };
 
@@ -1625,8 +1659,9 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
 // Method SetDefaultLogXList
 //    - create default list of histograms we want plotted in LogX scale
 
-  if (Debug())
+  if (Debug()) {
     LOG_INFO << " **** Now in StHistUtil::SetDefaultLogXList  **** " << endm;
+  }
 
   if (dirName) strcpy(m_dirName,dirName);
   TString type;
@@ -1637,7 +1672,7 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
   else // default for now
     type = "StE";
 
-  Char_t* sdefList[] = {
+  const Char_t* sdefList[] = {
     #include "St_QA_Maker/QAhlist_logx.h"
   };
 
@@ -1672,7 +1707,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 
   LOG_INFO << " **** Now in StHistUtil::SetDefaultPrintList  **** " << endm;
 
-  Char_t **sdefList=0;
+  const Char_t **sdefList=0;
   Int_t lengofList = 0;
 
   if (dirName) strcpy(m_dirName,dirName);
@@ -1692,7 +1727,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // Cosmic Data Table QA list .................................................
-  Char_t* sdefList1[] = {
+  const Char_t* sdefList1[] = {
     #include "St_QA_Maker/QAhlist_QA_Cosmic.h"
   };
   if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"Cosmic"))) {
@@ -1700,7 +1735,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // Test Table QA list.........................................................
-  Char_t* sdefList2[] = {
+  const Char_t* sdefList2[] = {
     #include "St_QA_Maker/QAhlist_QA_TestQATable.h"
   };
   if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"TestQATable"))) {
@@ -1708,7 +1743,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // FTPC Table QA list.........................................................
-  Char_t* sdefList3[] = {
+  const Char_t* sdefList3[] = {
     #include "St_QA_Maker/QAhlist_QA_Ftpc.h"
   };
   if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"Ftpc"))) {
@@ -1716,7 +1751,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // FTPC Table QA list.........................................................
-  Char_t* sdefList4[] = {
+  const Char_t* sdefList4[] = {
     #include "St_QA_Maker/QAhlist_QA_MDC3.h"
   };
   if ((!strcmp(m_dirName,"FlowTag")) && (!strcmp(analType,"MDC3"))) {
@@ -1724,7 +1759,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // St_QA_Maker histograms without svt and ftpc histograms.....................
-  Char_t* sdefList5[] = {
+  const Char_t* sdefList5[] = {
     #include "St_QA_Maker/QAhlist_QA_year1.h"
   };
   if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"year1"))) {
@@ -1732,7 +1767,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // St_QA_Maker histograms without the svt and ftpc histograms.................
-  Char_t* sdefList6[] = {
+  const Char_t* sdefList6[] = {
     #include "St_QA_Maker/QAhlist_EventQA_year1.h"
   };
   if ((!strcmp(m_dirName,"EventQA")) && (!strcmp(analType,"year1"))) {
@@ -1740,7 +1775,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // St_QA_Maker histograms for QA shift........................................
-  Char_t* sdefList7[] = {
+  const Char_t* sdefList7[] = {
     #include "St_QA_Maker/QAhlist_QA_qa_shift.h"
   };
   if ((!strcmp(m_dirName,"QA")) && (!strcmp(analType,"qa_shift"))) {
@@ -1748,7 +1783,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // St_QA_Maker histograms for QA shift........................................
-  Char_t* sdefList8[] = {
+  const Char_t* sdefList8[] = {
     #include "St_QA_Maker/QAhlist_EventQA_qa_shift.h"
   };
   if ((!strcmp(m_dirName,"EventQA")) && (!strcmp(analType,"qa_shift"))) {
@@ -1756,7 +1791,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // St_QA_Maker histograms for tpcSectors......................................
-  Char_t* sdefList9[] = {
+  const Char_t* sdefList9[] = {
     #include "St_QA_Maker/QAhlist_tpcSectors.h"
   };
   if ((!strcmp(m_dirName,"EventQA")) && (!strcmp(analType,"tpcSectors"))) {
@@ -1764,7 +1799,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   }
 
 // St_QA_Maker histograms for Svt.............................................
-  Char_t* sdefList10[] = {
+  const Char_t* sdefList10[] = {
     #include "St_QA_Maker/QAhlist_Svt.h"
   };
   if (!strcmp(analType,"Svt")) {
@@ -1822,8 +1857,9 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
         numPrt = AddToPrintList(listString.Data());
       }
     } else numPrt = AddToPrintList(listString.Data());
-    if (Debug())
+    if (Debug()) {
       LOG_INFO <<  " !!! adding histogram " << sdefList[ilg] << " to print list "  << endm ;
+    }
   }
   
   LOG_INFO <<  " !!!  StHistUtil::SetDefaultPrintList, # histogram put in list " << numPrt << endm;
@@ -1883,9 +1919,9 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
 	    *hist1f2 = *(TH1F *)obj;
 	    n1dHists++;
 	  }
-	}
-	else
+	} else {
 	  LOG_INFO << " ERROR: histogram not of type TH1F !!!" << endm;
+        }
       }
     }
   }
@@ -2005,9 +2041,9 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
 	    *hist2f2 = *(TH2F *)obj;
 	    n2dHists++;
 	  }
-	}
-	else
+	} else {
 	  LOG_INFO << " ERROR: histogram is not of type TH2F !!!" << endm;
+        }
       }
     }
   }

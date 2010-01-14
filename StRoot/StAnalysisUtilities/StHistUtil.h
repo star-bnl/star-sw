@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.8 2009/01/08 23:40:14 genevb Exp $
+// $Id: StHistUtil.h,v 2.9 2010/01/14 19:29:53 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.9  2010/01/14 19:29:53  genevb
+// Fix ROOT quirk with 1 page print, fix string/char conversions, protect LOG calls
+//
 // Revision 2.8  2009/01/08 23:40:14  genevb
 // Introduce analyses with reference histograms
 //
@@ -74,6 +77,7 @@ class StHistUtil {
   TString m_OutType;    // Output file type
   Bool_t  m_OutMultiPage; // Output file is multipage
   Int_t   m_CurPrefix;
+  Int_t   m_CurPage;
   TString m_GlobalTitle; // Title at top of each page of output
   TPaveLabel* Ltitle;   //! PaveLabel with title for pages
   TPaveText*  Ldesc;    //! PaveLabel with descriptor for hists
@@ -88,8 +92,8 @@ class StHistUtil {
   Char_t  m_dirName[256];//! Directory name for histograms in StIO tree
   Bool_t  ignorePrefixes;// whether or not to ignore prefixes when combining histograms
   Int_t numOfPosPrefixes; // number of possible prefixes
-  Char_t** possiblePrefixes; //!
-  Char_t** possibleSuffixes; //!
+  const Char_t** possiblePrefixes; //!
+  const Char_t** possibleSuffixes; //!
 
   // For reference analyses:
   Bool_t m_analMode;
@@ -160,12 +164,12 @@ class StHistUtil {
   Int_t getNewHistSize();
   
   Int_t GetNumOfPosPrefixes() {return numOfPosPrefixes;}
-  Char_t* GetPrefix(Int_t n) {return possiblePrefixes[n];}
-  Char_t* GetSuffix(Int_t n) {return possibleSuffixes[n];}
+  const Char_t* GetPrefix(Int_t n) {return possiblePrefixes[n];}
+  const Char_t* GetSuffix(Int_t n) {return possibleSuffixes[n];}
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.8 2009/01/08 23:40:14 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.9 2010/01/14 19:29:53 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
