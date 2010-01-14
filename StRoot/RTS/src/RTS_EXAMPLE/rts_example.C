@@ -551,11 +551,12 @@ static int pmd_doer(daqReader *rdr, const char  *do_print)
 				for(int c=0;c<PMD_CRAMS_MAX;c++) {
 				for(int s=0;s<2;s++) {
 				for(int ch=0;ch<PMD_CRAMS_CH_MAX;ch++) {
-					printf("  CRAM %2d: side %d: ch %4d: adc %4d [ped %4.1f, rms %4.1f]\n",
+					printf("  CRAM %2d: side %d: ch %4d: adc %4d [ped %4.1f, rms %4.2f, thr %4.1f]\n",
 					       c,s,ch,
 					       pmd_p->adc[crate][c][s][ch],
 					       (double)pmd_p->ped[crate][c][s][ch]/16.0,
-					       (double)pmd_p->rms[crate][c][s][ch]/16.0) ;
+					       (double)pmd_p->rms[crate][c][s][ch]/16.0,
+					       (double)pmd_p->thr[crate][c][s][ch]/16.0) ;
 
 				}}}
 			}
