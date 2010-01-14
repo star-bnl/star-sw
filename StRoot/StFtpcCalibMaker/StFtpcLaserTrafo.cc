@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserTrafo.cc,v 1.7 2009/12/09 14:40:01 jcs Exp $
+// $Id: StFtpcLaserTrafo.cc,v 1.8 2010/01/14 18:44:28 jcs Exp $
 //
 // $Log: StFtpcLaserTrafo.cc,v $
+// Revision 1.8  2010/01/14 18:44:28  jcs
+// change padtrans so that the code is the same as StFtpcClusterFinder::padtrans
+//
 // Revision 1.7  2009/12/09 14:40:01  jcs
 // update comment
 //
@@ -341,8 +344,10 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
   int PadtransPerTimebin;
   int PadtransLower;
   float PhiDeflect, TimeCoordinate;
+  iRow = iRow - 1;
+  iSec = iSec - 1;
   
-  TimeCoordinate = timepos; 
+  TimeCoordinate = timepos + 0.5; /*time start at beginning of bin 0*/; 
 
   // Laser t0 from Calibrations_ftpc/ftpcElectronics 
   // Data  t0 from Calibrations_ftpc/ftpcElectronics
@@ -365,30 +370,32 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
 
   // Aenderungen damit Koord. richtig (vgl. chain+Frank)
 
-  //PhiDeflect=0.0; // ? genauer vgl auch ZerfieldMaker !???
+  //PhiDeflect=0.0; // ? genauer vgl auch ZerofieldMaker !???
   
   float Phi;
 
-  Phi = mDb->radiansPerBoundary() / 2 
-    + (padpos + 0.5) * mDb->radiansPerPad()
-    + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
-    + mDb->radiansPerBoundary())+halfpi;
+  /* calculate phi angle from pad position */
+    // for FTPC West
+  if (iRow <10) {
+     Phi = mDb->radiansPerBoundary() / 2 
+       + ((padpos-1) + 0.5) * mDb->radiansPerPad()
+       + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+       + mDb->radiansPerBoundary())+halfpi;
+  }
 
   //LOG_DEBUG<<"mDb->radiansPerBoundary() = "<<mDb->radiansPerBoundary()<<endm;
   //LOG_DEBUG<<"mDb->radiansPerPad() = "<<mDb->radiansPerPad()<<endm;
   //LOG_DEBUG<<"mDb->numberOfPads() = "<<mDb->numberOfPads()<<endm;
 
-  /* 
-  // macht Probleme bei fit usw. !??? auch wenn nur West !????
-  // Wie !!!!!!!!!!???????????????????
-   if (iRow>=10)
-     { 
+   // for FTPC East
+  /* Invert pad number (== Peak->PadPosition) for FTPC East  */
+  /* (not yet understood where and why pad numbers were inverted) */
+   if (iRow>=10) { 
      Phi = mDb->radiansPerBoundary() / 2 
-     + (159.5-padpos) * mDb->radiansPerPad()
-     -PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
-     + mDb->radiansPerBoundary())+halfpi;
+       + (159.5-(padpos-1)) * mDb->radiansPerPad()
+       -PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+       + mDb->radiansPerBoundary())+halfpi;
      }
-  */
 
   // debug
   //LOG_DEBUG<<"====================================="<<endm;
@@ -397,27 +404,13 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
 
   // Anm : Pointer genauer !!!!!!!??????????
 
-  (*x1) = -Rad*cos(Phi); 
-
-  /*
+  /* transform to cartesian */
+  (*x1) = Rad*cos(Phi); 
   if (iRow <10) {
-   (*x1) = -Rad*cos(Phi);
+    (*x1) = -(*x1);
   } 
-  */
 
   (*y1) = Rad*sin(Phi);
-
-  //float z = mDb->padrowZPosition(iRow)
-
-  /*
-  if (iRow<10)
-    {
-      LOG_DEBUG<<iRow<<" "<<iSec<<" "<<timepos<<" "<<padpos<<endm;
-      LOG_DEBUG<<pdeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]<<" "<<pdeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]<<endm;
-      LOG_DEBUG<<PhiDeflect<<" "<<Phi<<" "<<Rad<<endm;
-      LOG_DEBUG<<(*x1)<<" "<<(*y1)<<endm;
-    }
-  */
 
   return kTRUE;
 }
