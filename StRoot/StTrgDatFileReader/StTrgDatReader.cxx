@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.8 2010/01/07 17:51:45 fine Exp $
+// $Id: StTrgDatReader.cxx,v 1.9 2010/01/15 21:26:51 fine Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.9  2010/01/15 21:26:51  fine
+// RT #1816. Eliminate the side effect from RT 1803 fix
+//
 // Revision 1.8  2010/01/07 17:51:45  fine
 // fix regexp to match the  Akio filename format
 //
@@ -122,6 +125,19 @@ int StTrgDatReader::RunNumber()  const  {
       }
    }
    return mRunNumber;  
+}
+
+//__________________________________________________________________________
+int  StTrgDatReader::RecordUnixTime() const
+{ 
+   // the current record /event unix time (-1 = "unknown") 
+   return -1; 
+}
+//__________________________________________________________________________
+int  StTrgDatReader::RecordSize()     const
+{ 
+   // the current record /event sinz in bytes (-1 = "unknown") 
+   return -1; 
 }
 
 //__________________________________________________________________________
