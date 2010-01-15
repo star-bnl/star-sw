@@ -30,7 +30,7 @@ public:
 	int to_evb(char *buff) ;			// to EVB format from ped_store
 	int from_evb(char *buff, int bytes) ;		// decode from EVB to ped_store
 
-	int from_cache(char *fname = 0) ;		// from cached file to ped_store
+	int from_cache(char *fname = 0, u_int r_mask = 0x3F) ;		// from cached file to ped_store
 	int to_cache(char *fname = 0, u_int run = 0) ;			// to cached file from ped_store
 
 	int special_setup(int run_type, int sub_type) ;
@@ -43,6 +43,7 @@ public:
 
 	int max_events ;	// max events allowed in the calculation
 
+	int rb_mask ;
 private:
 	struct peds {
 		double ped[512] ;
@@ -58,7 +59,7 @@ private:
 
 	u_int evts[6] ;	// RDOs count from 0 here!
 	u_int valid_evts[6] ;
-	int rb_mask ;
+
 
 	void accum(tpx_altro_struct *a) ;	// adds values into ped_store
 
