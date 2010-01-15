@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.85 2010/01/06 20:42:26 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.86 2010/01/15 21:26:50 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.86  2010/01/15 21:26:50  fine
+ * RT #1816. Eliminate the side effect from RT 1803 fix
+ *
  * Revision 1.85  2010/01/06 20:42:26  fine
  * Fix type EventNumber shoould be RunNumber . Thanks Akio
  *
@@ -603,12 +606,18 @@ int StDAQReader::getEventNumber() const {
            fEventInfo->EventSeqNo;
 }
 //_____________________________________________________________________________
-unsigned int StDAQReader::getUnixTime() const {
-     return  fDaqFileReader  ?
-           fDaqFileReader->evt_time
-                     :
-           fEventInfo->UnixTime;
-     }
+unsigned int StDAQReader::getUnixTime() const 
+{
+   int unixTime = 0;
+   if (fDatFileReader) 
+      unixTime = fDatFileReader->RecordUnixTime();
+   else if (fDaqFileReader ) 
+      unixTime = fDaqFileReader->evt_time;
+   else 
+      unixTime = fEventInfo->UnixTime;
+   return unixTime;
+}
+
 //_____________________________________________________________________________
 unsigned int StDAQReader::getTrigWord() const {
      return fDaqFileReader  ?  
@@ -643,7 +652,15 @@ unsigned int StDAQReader::getTrigWord() const {
 //_____________________________________________________________________________
    int StDAQReader::L3Present()   const {return  fEventInfo->L3Present;}
 //_____________________________________________________________________________
-   int StDAQReader::getEventSize()const {return  fEventInfo->EventLength;}
+int StDAQReader::getEventSize()const 
+{
+   int eventSize = 0;
+   if (fDatFileReader) 
+      eventSize = fDatFileReader->RecordSize();
+   else
+      eventSize = fEventInfo->EventLength; 
+   return eventSize;
+ }
 //_____________________________________________________________________________
 StTPCReader *StDAQReader::getTPCReader(char mergeSequences) 
 {

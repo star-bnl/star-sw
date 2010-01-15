@@ -1,5 +1,8 @@
-// $Id: StStreamFile.h,v 1.5 2010/01/07 17:37:59 fine Exp $
+// $Id: StStreamFile.h,v 1.6 2010/01/15 21:26:51 fine Exp $
 // $Log: StStreamFile.h,v $
+// Revision 1.6  2010/01/15 21:26:51  fine
+// RT #1816. Eliminate the side effect from RT 1803 fix
+//
 // Revision 1.5  2010/01/07 17:37:59  fine
 // introduce closeFileSignal to process several DAT files at once. RT # 1794
 //
@@ -53,6 +56,8 @@ public: // abstract interface
   virtual int   Length()    const   = 0;
   virtual int   Version()   const   = 0;
   virtual int   RunNumber() const   = 0;
+  virtual int   RecordUnixTime() const   = 0;
+  virtual int   RecordSize()     const   = 0;
 
 public: // fstream proxy interface   
   // fstream proxy methods

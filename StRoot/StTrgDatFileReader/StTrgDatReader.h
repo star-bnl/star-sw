@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.h,v 1.4 2010/01/07 17:37:58 fine Exp $
+// $Id: StTrgDatReader.h,v 1.5 2010/01/15 21:26:51 fine Exp $
 //
 // $Log: StTrgDatReader.h,v $
+// Revision 1.5  2010/01/15 21:26:51  fine
+// RT #1816. Eliminate the side effect from RT 1803 fix
+//
 // Revision 1.4  2010/01/07 17:37:58  fine
 // introduce closeFileSignal to process several DAT files at once. RT # 1794
 //
@@ -40,6 +43,9 @@ public: // implementation of StStreamFile abstract interface
   int   Length()  const;
   int   Version() const;
   int   RunNumber() const;
+  int   RecordUnixTime() const;
+  int   RecordSize()     const;
+
   
 protected :
   char *Buffer(streamsize n);
