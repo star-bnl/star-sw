@@ -15,7 +15,10 @@
 #include "tpxCore.h"
 #include "tpxPed.h"
 #include "tpxGain.h"
-	
+
+static	const u_int MIN_EVENTS = 500 ;
+#define TPX_PED_FILENAME	"/RTScache/pedestals"
+
 tpxPed::tpxPed()
 {
 	smoothed = 0 ;
@@ -165,7 +168,7 @@ void tpxPed::calc()
 {
 	int r,p,t ;
 	int bad ;
-	const u_int MIN_EVENTS = 500 ;
+
 
 	LOG(NOTE,"Calculating pedestals for sector %2d",sector) ;
 
@@ -239,7 +242,7 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 	char *rbuff = buff ;
 
 	if(!valid || !smoothed) {
-		LOG(ERR,"ped::to_altro peds are bad: valid %d, smoothed %d",valid,smoothed) ;
+		LOG(ERR,"ped::to_altro peds are bad: RDO %d: valid %d, smoothed %d",rb+1,valid,smoothed) ;
 	}
 
 	LOG(NOTE,"Preparing pedestals for RDO %d...",rb) ;
@@ -387,51 +390,71 @@ int tpxPed::to_evb(char *buff)
 	return (rbuff-buff) ;
 }
 
-int tpxPed::from_cache(char *fname) 
+int tpxPed::from_cache(char *fname, u_int rb_msk) 
 {
 	FILE *f ;
-	char *fn ;
+	char fn[64]  ;
+	char *pn ;
 
-	init(0x3F) ;	// to clear
+	init(rb_msk) ;	// to clear
 	
 	// trivial load from disk...
 	if(fname) {
-		fn = fname ;
-		f = fopen(fname,"r") ;
+		pn = fname ;
 	}
 	else {
-		fn = "/RTScache/pedestals.txt" ;
+		pn = "/RTScache/pedestals" ;
+	}
+
+
+	int err = 0 ;
+
+	for(int rdo=1;rdo<=6;rdo++) {
+		if(rb_mask & (1<<(rdo-1))) ;
+		else continue ;
+		
+		sprintf(fn,"%s_r%d.txt",pn,rdo) ;
 		f = fopen(fn,"r") ;
+
+		if(f==0) {
+			LOG(ERR,"ped::from_cache can't open output file \"%s\" [%s]",fn,strerror(errno)) ;
+			err++ ;
+			continue ;
+		}
+
+
+		LOG(NOTE,"Loading pedestals from cache \"%s\"...",fn) ;
+
+		while(!feof(f)) {
+			int r, p , t ;
+			float pp, rr ;
+
+			int ret = fscanf(f,"%d %d %d %f %f",&r,&p,&t,&pp,&rr) ;
+			if(ret != 5) continue ;
+
+			struct peds *peds = get(r,p) ;
+
+			//if((r==12) && (p==158) && (t==0)) LOG(TERR,"peds row %d, pad %d: %f %f",r,p,pp,rr) ;
+
+			peds->ped[t] = pp ;
+			peds->rms[t] = rr ;
+		}
+
+		fclose(f) ;
 	}
 
-	if(f==0) {
-		LOG(ERR,"ped::from_cache can't open output file \"%s\" [%s]",fn,strerror(errno)) ;
-		return -1 ;
+
+	if(!err) {
+		LOG(TERR,"Pedestals loaded from cache (last was \"%s\"): sector %2d [0x%02X].",fn,sector,rb_mask) ;
+		valid = 1 ;
 	}
-
-
-	LOG(NOTE,"Loading pedestals from cache \"%s\"...",fn) ;
-
-	while(!feof(f)) {
-		int r, p , t ;
-		float pp, rr ;
-
-		int ret = fscanf(f,"%d %d %d %f %f",&r,&p,&t,&pp,&rr) ;
-		if(ret != 5) continue ;
-
-		struct peds *peds = get(r,p) ;
-
-		//if((r==12) && (p==158) && (t==0)) LOG(TERR,"peds row %d, pad %d: %f %f",r,p,pp,rr) ;
-
-		peds->ped[t] = pp ;
-		peds->rms[t] = rr ;
+	else {
+		LOG(ERR,"Pedestals failed from cache (last was \"%s\"): sector %2d [0x%02X].",fn,sector,rb_mask) ;
+		valid = 0 ;
 	}
-
-	fclose(f) ;
-	LOG(TERR,"Pedestals loaded from cache \"%s\": sector %2d.",fn,sector) ;
 
 	smoothed = 0 ;
-	valid = 1 ;
+
 
 	return valid ;
 }
@@ -440,8 +463,9 @@ int tpxPed::to_cache(char *fname, u_int run)
 {
 	FILE *f, *f_sum ;
 	int r, p, t ;
-	char *fn ;
+	char fn[64] ;
 	char f_sum_name[128] ;
+	char *pn ;
 
 	if(!valid || smoothed) {
 		LOG(ERR,"ped::to_cache peds are bad: valid %d, smoothed %d -- not caching",valid,smoothed) ;
@@ -449,39 +473,56 @@ int tpxPed::to_cache(char *fname, u_int run)
 	}
 
 	if(fname) {
-		fn = fname ;
+		pn = fname ;
 	}
 	else {
-		fn = "/RTScache/pedestals.txt" ;
+		pn = "/RTScache/pedestals" ;
 	}
 
+	// changed to per-RDO on Jan 13, 2010.
 
-	f = fopen(fn,"w") ;
-	if(f==0) {
-		LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]",fn,strerror(errno)) ;
-		return -1 ;
-	}
+	for(int rdo=1;rdo<=6;rdo++) {
 
-	if(run==0) {
-		sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_%u_%d.txt",sector,(u_int)time(NULL),clock_source) ;
-	}
-	else {
-		sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_%08u_%d.txt",sector,run,clock_source) ;
-	}
+		// check if the RDO was present!
+		if(valid_evts[rdo-1] < MIN_EVENTS) {
+			LOG(WARN,"Sector %2d, RDO %d has %d events -- not caching!",sector,rdo,valid_evts[rdo-1]) ;
+			continue ;
+		}
 
-	f_sum = fopen(f_sum_name,"w") ;
-	if(f_sum==0) {
-		LOG(ERR,"ped::to_cache can't open trace file \"%s\" [%s]",f_sum_name,strerror(errno)) ;
-		return -1 ;
-	}
+		sprintf(fn,"%s_r%d.txt",pn,rdo) ;
+
+		
+
+		f = fopen(fn,"w") ;
+		if(f==0) {
+			LOG(ERR,"ped::to_cache can't open output file \"%s\" [%s]",fn,strerror(errno)) ;
+			continue ;
+		}
+
+		if(run==0) {
+			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%u_%d.txt",sector,rdo,(u_int)time(NULL),clock_source) ;
+		}
+		else {
+			sprintf(f_sum_name,"/RTScache/ped_sum_s%02d_r%d_%08u_%d.txt",sector,rdo,run,clock_source) ;
+		}
+
+		f_sum = fopen(f_sum_name,"w") ;
+		if(f_sum==0) {
+			LOG(ERR,"ped::to_cache can't open trace file \"%s\" [%s]",f_sum_name,strerror(errno)) ;
+		}
 
 
-	LOG(NOTE,"Writing pedestals to cache \"%s\"...",fn) ;
+		LOG(NOTE,"Writing pedestals to cache \"%s\"...",fn) ;
 
-	for(r=0;r<=45;r++) {
+		for(r=0;r<=45;r++) {
 
 		// ONLY from 1 to rowlen!
 		for(p=1;p<=tpc_rowlen[r];p++) {
+			int t_rdo, t_a, t_ch ;
+
+			tpx_to_altro(r,p,t_rdo,t_a,t_ch) ;
+			if(t_rdo != rdo) continue ;
+
 			struct peds *peds = get(r, p) ;
 
 			double sum = 0.0 ;
@@ -492,7 +533,7 @@ int tpxPed::to_cache(char *fname, u_int run)
 				cou++ ;
 			}
 
-			fprintf(f_sum,"%d %d %.5f\n",r,p,sum/(double)cou) ;
+			if(f_sum) fprintf(f_sum,"%d %d %.5f\n",r,p,sum/(double)cou) ;
 
 			for(t=0;t<512;t++) {	
 			
@@ -500,10 +541,11 @@ int tpxPed::to_cache(char *fname, u_int run)
 				fprintf(f,"%d %d %d %.3f %.3f\n",r,p,t,peds->ped[t],peds->rms[t]) ;
 			}
 		}
-	}
+		}
 
-	fclose(f) ;	
-	fclose(f_sum) ;
+		fclose(f) ;	
+		if(f_sum) fclose(f_sum) ;
+	}
 
 	LOG(TERR,"Pedestals written to cache \"%s\", for sector %2d...",fn,sector) ;
 
