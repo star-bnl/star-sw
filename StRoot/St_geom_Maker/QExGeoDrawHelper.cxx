@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: QExGeoDrawHelper.cxx,v 1.7 2009/02/07 20:44:12 fine Exp $
+** $Id: QExGeoDrawHelper.cxx,v 1.8 2010/01/17 21:17:38 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -38,6 +38,7 @@
 #include "TGeoSphere.h"
 #include "TGeoCompositeShape.h"
 #include "TGeoBoolNode.h"
+#include "TGeoMaterial.h"
 
 #include "TBRIK.h"
 #include "TPARA.h"
@@ -258,7 +259,12 @@ TVolume *TGeoDrawHelper::MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVol
          }
       }
       TString title = top->GetTitle();
-      if (title.IsNull() ) title = top->ClassName();
+      if (title.IsNull() && ( top->Class() != TGeoVolume::Class()) ) title = top->ClassName();
+      // extract the material if any
+      TGeoMaterial *matter = top->GetMaterial();
+      title +=  matter ? Form("(%s)",matter->GetName())
+                       : Form("(unknown material)");
+
       topVolume = new TVolume(top->GetName(),title,thisShape); 
       topVolume->SetLineColor(top->GetLineColor()); topVolume->SetLineStyle(top->GetLineStyle());
       topVolume->SetLineWidth(top->GetLineWidth()); topVolume->SetFillColor(top->GetLineColor());
