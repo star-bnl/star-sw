@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.cxx,v 1.5 2010/01/13 03:34:20 stevens4 Exp $
+// $Id: St2009WMaker.cxx,v 1.6 2010/01/18 03:26:15 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -112,6 +112,13 @@ Int_t
 St2009WMaker::Init(){
   assert(HList);
   initHistos();
+
+  for(int isec=0;isec<mxTpcSec;isec++) {
+    int sec=isec+1;
+    mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,par_trackRin,par_trackRout);
+    mTpcFilter[isec].init("sec",sec,HList);
+  }
+
   mBarrelTables = new StBemcTables();
   mBtowGeom = StEmcGeom::instance("bemc");
   mBSmdGeom[kBSE] = StEmcGeom::instance("bsmde");
@@ -125,6 +132,7 @@ St2009WMaker::Init(){
   initGeom();
   
   if(isMC) par_minPileupVert=1;
+
   return StMaker::Init();
 }
 
@@ -340,6 +348,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.6  2010/01/18 03:26:15  balewski
+// expanded TPC track filtering, not finished
+//
 // Revision 1.5  2010/01/13 03:34:20  stevens4
 // give trig emulator access to barrel hits
 //
@@ -358,6 +369,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.6  2010/01/18 03:26:15  balewski
+// expanded TPC track filtering, not finished
+//
 // Revision 1.5  2010/01/13 03:34:20  stevens4
 // give trig emulator access to barrel hits
 //

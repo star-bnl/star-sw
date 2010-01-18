@@ -11,12 +11,12 @@ int rdMuWana(
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=3, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
+	     int isMC=1, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
 	     int useJetFinder = 2, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
              TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //location of jet trees to be used
  ) { 
 
-
+  // jetTreeDir = "./";
   if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
   if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
   if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppZprod.lis";
@@ -391,6 +391,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.14  2010/01/18 03:26:21  balewski
+// expanded TPC track filtering, not finished
+//
 // Revision 1.13  2010/01/10 03:01:39  balewski
 // cleanup & nicer histos
 //

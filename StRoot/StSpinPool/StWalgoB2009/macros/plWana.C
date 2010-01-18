@@ -1,17 +1,17 @@
 TCanvas *can=0;
+const float PI=2*acos(0);
 
 //=================================================
-plWana(  int page=4,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
+plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
-  //iPath="/star/data05/scratch/balewski/2009-WanaJ-SL09g-x/data/";
+  iPath="/star/data05/scratch/balewski/2009-WanaJ-SL09g-x/data/";
   //core0="R10097000";
   core0="run9setABCD";
   //core0="run9setP1234";
-  //core0="run9setABCD-wEtow-simBgain-Dec27";
-  core0="mcSetD1_ppWprod";
-  //core0="mcSetD2_ppQCD10_inf_filter";
-  core0="mcSetD1_ppZprod";
+  //core0="mcSetD1_ppWprod";
+   //core0="mcSetD2_ppQCD10_inf_filter_tot";
+   // core0="mcSetD1_ppZprod";
   if(page==0) {
     doAll();
     return;
@@ -201,8 +201,15 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       if(i==0) { cL->cd();  
 	h->Draw("colz");
+	for( float eta=-0.8; eta<.6; eta+=1.4) // print sectors IDs
+	  for(float x=-PI-.1; x<PI; x+=PI/6) {
+	    int sec=tpcSec(x, eta);;
+	    char txt[100];
+	    sprintf(txt,"sec %d",sec);
+	    tx=new TText(eta,x,txt); tx->Draw();
+	  }
       }
-     
+      
       if(i==1 || i==3) {cR->cd(1+i/2); h1=h; h->Draw(); h->SetMinimum(.1);}
       if(i==4) h->SetFillColor(9);
       if(i==2 || i==4) {  h2=h; h->Draw("same");  cR->cd(2+i/2);
@@ -317,17 +324,17 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
 
 
  case 13:{    sprintf(padTit,"best W selection, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    can=new TCanvas("aa","aa",900,800);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameW;
     for(int i=0;i<4;i++) {
       char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
-      if(i==3) {
+      if(i==3) { // draw on previous
 	float sum=h->GetEntries();
 	sprintf(txt,"%.0f eve >thres",sum);
-	tx=new TText(30,62,txt); tx->Draw();
+	tx=new TText(30,55,txt); tx->Draw();
       }
 
       c->cd(i+1); h->Draw();
@@ -547,6 +554,23 @@ void splitPadX(float x, TPad **cL, TPad **cR) {
 }
 
 //------------------------
+int tpcSec(float phiRad, float etaDet){ // finds TPC sector for hit(phi,eta) 
+  int sec=0;
+  float phi=phiRad/PI*180; // now in degrees
+  if (etaDet>0) { // West TPC
+    float x=75-phi;
+    while(x<0) x+=360;
+    sec=1+(int)( x/30.);
+  } else {
+    float x=phi-105;
+    while(x<0) x+=360;
+    sec=13+(int)( x/30.);
+  }
+  printf("phi/deg=%.1f, x=%.1f\n",phi,x);
+  return sec;
+}
+
+//------------------------
 TPad *makeTitle(TCanvas *c,char *core, int page) {
   c->Range(0,0,1,1);
   TPad *pad0 = new TPad("pad0", "apd0",0.0,0.95,1.,1.);
@@ -592,6 +616,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.5  2010/01/18 03:26:21  balewski
+// expanded TPC track filtering, not finished
+//
 // Revision 1.4  2010/01/10 03:01:39  balewski
 // cleanup & nicer histos
 //

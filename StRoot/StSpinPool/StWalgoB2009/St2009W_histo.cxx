@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.7 2010/01/10 01:45:10 stevens4 Exp $
+// $Id: St2009W_histo.cxx,v 1.8 2010/01/18 03:26:15 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -256,11 +256,14 @@ St2009WMaker::initHistos(){
   }
   
   //  HList->ls();
-  LOG_INFO<<Form("%s::initHistos done1",GetName())<<endm;
+  LOG_INFO<<Form("%s::initHistos done",GetName())<<endm;
 
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.8  2010/01/18 03:26:15  balewski
+// expanded TPC track filtering, not finished
+//
 // Revision 1.7  2010/01/10 01:45:10  stevens4
 // fix plots w/o EEMC in veto
 //

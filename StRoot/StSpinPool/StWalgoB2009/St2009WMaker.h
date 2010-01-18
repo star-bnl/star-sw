@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.4 2010/01/09 00:07:16 stevens4 Exp $
+// $Id: St2009WMaker.h,v 1.5 2010/01/18 03:26:15 balewski Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -18,7 +18,9 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
 #include "Wevent2009.h"
+#include "WtpcFilter.h"
 
 class TObjArray;
 class TH1I;
@@ -56,6 +58,7 @@ class St2009WMaker : public StMaker {
   TClonesArray* mJets;
   Wevent2009 wEve;
   WeventDisplay *wDisaply;
+  WtpcFilter mTpcFilter[mxTpcSec]; // allows sector dependent track filtering 
   int  nInpEve,nTrigEve, nAccEve; //  event counters
   int mRunNo;
   int isMC; //0 for real data
@@ -152,7 +155,7 @@ class St2009WMaker : public StMaker {
   int L2algoEtaPhi2IJ(float etaF,float phiF,int &kEta, int &kPhi);
   
  public: 
-  St2009WMaker(const char *name="2009WalgoB4.3s");
+  St2009WMaker(const char *name="2009WalgoB5.1");
   virtual  ~St2009WMaker(){};
   virtual Int_t Init();
   virtual Int_t  Make();
@@ -168,7 +171,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.4 2010/01/09 00:07:16 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.5 2010/01/18 03:26:15 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -179,6 +182,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.5  2010/01/18 03:26:15  balewski
+// expanded TPC track filtering, not finished
+//
 // Revision 1.4  2010/01/09 00:07:16  stevens4
 // add jet finder
 //

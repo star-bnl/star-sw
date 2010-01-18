@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.5 2010/01/13 03:34:20 stevens4 Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.6 2010/01/18 03:26:15 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -177,21 +177,20 @@ St2009WMaker::accessTracks(){ // return non-zero on abort
       float pt=prTr->pt();
       if(pt<1.0) continue;
       hA[20]->Fill("pt1",1.);
+
+      // TPC  sector dependent filter
+      StThreeVectorF ro=glTr->lastPoint();
+      int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
+      if ( mTpcFilter[secID-1].accept(prTr)==false) continue;
+
+      //accepted ......
+
       hA[21]->Fill(prTr->nHitsFit());
-      if(prTr->nHitsFit()<=par_nFitPts) continue;
-      hA[20]->Fill("nHit",1.);
       float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
       hA[22]->Fill(hitFrac);
-      if(hitFrac<par_nHitFrac) continue;
-      hA[20]->Fill("Hfrac",1.);
-      StThreeVectorF ri=prTr->firstPoint();
-      hA[23]->Fill(ri.perp());
-      if(ri.perp()>par_trackRin) continue;
-      hA[20]->Fill("Rin",1.);
-      StThreeVectorF ro=prTr->lastPoint();
+      hA[23]->Fill(glTr->firstPoint().perp());
       hA[24]->Fill(ro.perp());
-      if(ro.perp()<par_trackRout) continue;
-      hA[20]->Fill("Rout",1.);
+
       hA[25]->Fill(glTr->p().perp());
       if(glTr->charge()<0) hA[27]->Fill(glTr->p().perp());
 
@@ -587,6 +586,9 @@ St2009WMaker::hadronicRecoil(){ //add up all vector pt outside of 'nearJet' regi
 }
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.6  2010/01/18 03:26:15  balewski
+//expanded TPC track filtering, not finished
+//
 //Revision 1.5  2010/01/13 03:34:20  stevens4
 //give trig emulator access to barrel hits
 //
