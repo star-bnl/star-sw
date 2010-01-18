@@ -1,4 +1,4 @@
-// $Id: WanaConst.h,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: WanaConst.h,v 1.2 2010/01/18 03:26:15 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -18,10 +18,15 @@ enum {mxBMod2Pi=60}; // # of barrel modules over 2pi strip in module
 
 enum {mxEtow=720,mxEtowSec=12,mxEtowSub=5,mxEtowEta=12}; 
 enum {mxEtowPhiBin=mxEtowSec*mxEtowSub};                                  
+
+enum {mxTpcSec=24};
 #endif
 
 
 // $Log: WanaConst.h,v $
+// Revision 1.2  2010/01/18 03:26:15  balewski
+// expanded TPC track filtering, not finished
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //
