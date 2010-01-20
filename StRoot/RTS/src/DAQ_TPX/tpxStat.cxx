@@ -137,13 +137,13 @@ int tpxStat::run_stop(FILE *ofile, u_int rb_mask, int run_type, char *fname)
 
 				str_cou++ ;
 
-				if(str_cou > 10) continue ;
+				if(str_cou > 4) continue ;
 
 				tpx_from_altro(i,a,c,row,pad) ;
 				LOG(WARN,"Stripes %d/%d: RDO %d: AID %3d:%02d, r:p %2d:%03d",
 				    r[i].a[a].c[c].stripes,r[i].a[a].c[c].count,i+1,a,c,row,pad) ;
 
-				if(str_cou == 10) {
+				if(str_cou == 4) {
 					LOG(WARN,"Stripes logging stopped, stripes %d",stripes) ;
 				}
 			}
@@ -359,7 +359,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 	tpx_rdo_event rdo ;
 	tpx_altro_struct a ;
 	int errors = 0 ;
-	const u_int MAX_ERRORS = 20 ;
+	const u_int MAX_ERRORS = 10 ;
 
 	t = tpx_get_start(rdobuff, bytes/4, &rdo, 0) ;
 

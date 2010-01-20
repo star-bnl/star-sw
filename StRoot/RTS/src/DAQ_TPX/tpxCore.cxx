@@ -552,7 +552,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
   // we bomb out here if there was any error
   if(ret) {
-	if(log) LOG(ERR,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [1]",a->rdo+1,a->t,a->id,a->ch) ;
+	if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [1]",a->rdo+1,a->t,a->id,a->ch) ;
 	return 0 ;	// already error...
   }
 
@@ -689,7 +689,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 #endif
 
   if(ret) {
-	if(log) LOG(ERR,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [2]",a->rdo+1,a->t,a->id,a->ch) ;
+	if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [2]",a->rdo+1,a->t,a->id,a->ch) ;
 	return 0 ;	// already error...
   }
 
@@ -735,7 +735,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 	}
 
 	if(ret) {
-		if(log) LOG(ERR,"RDO %d: token %d: Altro %03d:%02d (?)  bad data [1]",a->rdo+1,a->t,a->id,a->ch) ;
+		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad data [1]",a->rdo+1,a->t,a->id,a->ch) ;
 		return 0 ;
 	}
 
