@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.h,v 1.4 2009/10/22 19:06:00 dongx Exp $
+ * $Id: StBTofSortRawHit.h,v 1.5 2010/01/20 06:34:13 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -63,7 +63,8 @@ struct TOFRawHit {
  */ 
 class StBTofSortRawHit : public StObject {
  private:
-  static const Int_t mNTRAY = 122;
+  // increase #trays to 124 (120 TOF + 2 VPD + 1 MTD)
+  static const Int_t mNTRAY = 124;
   static const Int_t mNCHAN = 192;
   static const Int_t mNFIBER = 4;
   static const Int_t mNVPD  = 19;
