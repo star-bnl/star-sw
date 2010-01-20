@@ -7,7 +7,7 @@ class TOFL1multHistogramGroup : public HistogramGroup {
 
 public:
   TOFL1multHistogramGroup();
-  TOFL1multHistogramGroup(const char* group, const char* subGroup="TOF L1 multiplicity", const char* trigger="any", const char* detector="TOF");
+  TOFL1multHistogramGroup(const char* group, const char* subGroup="TOF trigger", const char* trigger="any", const char* detector="trg");
 
   ~TOFL1multHistogramGroup();
 
@@ -18,7 +18,10 @@ public:
 private:
 
   TH2* TOF_L1mult_vs_ZDCadcsum;
+  TH2* TOF_L1mult_vs_sumL0;
 
+  int TDIGChan2TINOChan(int,int);
+  int Get_TOFTHUB(int);
   //
   ClassDef(TOFL1multHistogramGroup,1) ;
 
