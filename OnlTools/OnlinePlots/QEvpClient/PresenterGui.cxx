@@ -408,14 +408,18 @@ void PresenterGui::SetDefaults()
   //TabNames[7][1]="TOFp Global";
   //TabNames[7][2]="TOFp Test";
   // Jing Liu changes the following, for run8 and future runs, 02/25/2008:
-  nSubTabs[8]=7;
+  nSubTabs[8]=11;
   TabNames[8][1]="upvpd";
   TabNames[8][2]="Error check";  
   TabNames[8][3]="TrayHitmap 01-30";  
   TabNames[8][4]="TrayHitmap 31-60";  
   TabNames[8][5]="TrayHitmap 61-90";  
   TabNames[8][6]="TrayHitmap 91-120";  
-  TabNames[8][7]="TOF L1 Multiplicity";
+  TabNames[8][7]="L1 Multiplicity";  
+  TabNames[8][8]="Tray 01-30 L0";  
+  TabNames[8][9]="Tray 31-60 L0";  
+  TabNames[8][10]="Tray 61-90 L0";  
+  TabNames[8][11]="Tray 91-120 L0";  
 
   //BBC
   nSubTabs[9]=6;

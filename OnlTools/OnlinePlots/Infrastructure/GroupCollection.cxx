@@ -24,6 +24,7 @@
 #include "TOFupvpdHistogramGroup.h"
 #include "TOFtrayHistogramGroup.h"
 #include "TOFcheckHistogramGroup.h"
+#include "TOFL0HistogramGroup.h"
 #include "TOFL1multHistogramGroup.h"
 #include "MTDhitsHistogramGroup.h"
 #include "MTDtriggerinfoHistogramGroup.h"
@@ -61,7 +62,11 @@ void GroupCollection::serverCreate() {
   insert( new TOFtrayHistogramGroup(1,"TOF", "east Tray 31-60","any","TOF") );
   insert( new TOFtrayHistogramGroup(2,"TOF", "west Tray 61-90","any","TOF") );
   insert( new TOFtrayHistogramGroup(3,"TOF", "west Tray 91-120","any","TOF") );
-  insert( new TOFL1multHistogramGroup("TOF", "TOF L1 Multiplicity","any","TOF") );
+  insert( new TOFL1multHistogramGroup("TOF", "TOF L1 Multiplicity","any","trg") );
+  insert( new TOFL0HistogramGroup(0,"TOF","L0 Tray 1-30","any","trg") );
+  insert( new TOFL0HistogramGroup(1,"TOF", "L0 Tray 31-60","any","trg") );
+  insert( new TOFL0HistogramGroup(2,"TOF", "L0 Tray 61-90","any","trg") );
+  insert( new TOFL0HistogramGroup(3,"TOF", "L0 Tray 91-120","any","trg") );
   insert( new MTDhitsHistogramGroup("MTD", "MTD hits","any","TOF") );
   insert( new MTDtriggerinfoHistogramGroup("MTD", "MTD trigger","any","TOF") );
 

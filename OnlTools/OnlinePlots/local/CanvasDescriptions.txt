@@ -85,7 +85,11 @@
 8,4,1,1,1,[any|any],hGroup:TOF#east Tray 31-60#any#TOF
 8,5,1,1,1,[any|any],hGroup:TOF#west Tray 61-90#any#TOF
 8,6,1,1,1,[any|any],hGroup:TOF#west Tray 91-120#any#TOF
-8,7,1,1,1,[any|any],hGroup:TOF#TOF L1 Multiplicity#any#TOF
+8,7,1,1,1,[any|any],hGroup:TOF#TOF L1 Multiplicity#any#trg
+8,8,1,1,1,[any|any],hGroup:TOF#L0 Tray 1-30#any#trg
+8,9,1,1,1,[any|any],hGroup:TOF#L0 Tray 31-60#any#trg
+8,10,1,1,1,[any|any],hGroup:TOF#L0 Tray 61-90#any#trg
+8,11,1,1,1,[any|any],hGroup:TOF#L0 Tray 91-120#any#trg
 
 //
 // end of tof display
