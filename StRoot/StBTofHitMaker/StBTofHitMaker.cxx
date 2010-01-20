@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.14 2009/12/14 19:39:44 dongx Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.15 2010/01/20 06:33:57 geurts Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -211,7 +211,7 @@ Int_t StBTofHitMaker::UnpackTofRawData()
         continue;
       }
       if(halftrayid<0) continue;
-      if(trayid<1 || trayid >122) {
+      if(trayid<1 || trayid >124) {
         LOG_ERROR<<"StBTofHitMaker::DATA ERROR!! unexpected trayID ! "<<endm;
         continue;
       }
