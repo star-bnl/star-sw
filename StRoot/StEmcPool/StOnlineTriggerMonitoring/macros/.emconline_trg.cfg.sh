@@ -1,4 +1,9 @@
-export EMCONLINE_TRG_DIR=/home/emc/online/emc/trigger
+# main directory
+export EMCONLINE_TRG_DIR=/ldaphome/onlmon/bemctrgdb2010
+
+# web output directory
+#export EMCONLINE_TRG_WEBDIR=/onlineweb/www/test2009/ogrebeny
+export EMCONLINE_TRG_WEBDIR=/afs/rhic.bnl.gov/star/doc_protected/www/spin/ogrebeny/bemctrgdb2010
 
 # ROOT script
 export EMCONLINE_TRG_SCRIPT=${EMCONLINE_TRG_DIR}/saveTriggerLoad.C
@@ -37,15 +42,22 @@ export EMCONLINE_TRG_BCWCONF_FILE=${EMCONLINE_TRG_DIR}/bcw_table.txt
 # bemcStatus.txt file with the latest BEMC configuration
 export EMCONLINE_TRG_BEMCSTATUS_FILE=${EMCONLINE_TRG_DIR}/bemcStatus.txt
 
+# web page
+export EMCONLINE_TRG_WEBTEMPLATE_BEGIN=${EMCONLINE_TRG_DIR}/index_template_begin.html
+export EMCONLINE_TRG_WEBTEMPLATE_LINE=${EMCONLINE_TRG_DIR}/index_template_line.html
+export EMCONLINE_TRG_WEBTEMPLATE_END=${EMCONLINE_TRG_DIR}/index_template_end.html
+export EMCONLINE_TRG_WEBPAGE=${EMCONLINE_TRG_WEBDIR}/index.html
+export EMCONLINE_TRG_WEBPAGE_BODY=${EMCONLINE_TRG_WEBDIR}/index_body.html
+
 # STAR library version
 export EMCONLINE_TRG_STARVER=dev
 # Save tables into the DB?
-export EMCONLINE_TRG_SAVEDB=true
+export EMCONLINE_TRG_SAVEDB=false
 # Save tables on disk?
 export EMCONLINE_TRG_SAVETABLES=true
 
 # Update the desktop icon when status changes?
-export EMCONLINE_TRG_UPDATEDESKTOPICON=true
+export EMCONLINE_TRG_UPDATEDESKTOPICON=false
 # Desktop icon file
 export EMCONLINE_TRG_DESKTOPICON_FILE=~/.gnome-desktop/emconline_trg.desktop
 
@@ -91,28 +103,23 @@ function update_desktop_icon_trg () {
 # Most recent real configuration in the control room
 
 # Directory that contains pedestal files
-if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_PED_DIR='sysuser@sc3.starp.bnl.gov:/export/home/users/sysuser/epics/R3.12.2-LBL.4/radstone/unix' ; fi
+if [[ "${EMCONLINE_SLOWCTRL_PED_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_PED_DIR='sysuser@sc5.starp.bnl.gov:/home/sysuser/GUI/emc/unix' ; fi
 
 # Directory that contains crate configuration files
-if [[ "${EMCONLINE_SLOWCTRL_CFG_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_CFG_DIR='sysuser@sc3.starp.bnl.gov:/export/home/users/sysuser/epics/R3.12.2-LBL.4/radstone/unix' ; fi
+if [[ "${EMCONLINE_SLOWCTRL_CFG_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_CFG_DIR='sysuser@sc5.starp.bnl.gov:/home/sysuser/GUI/emc/unix' ; fi
 
 # Directory that contains DSM mask files
-if [[ "${EMCONLINE_SLOWCTRL_DSMMASK_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_DSMMASK_DIR='staruser@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT' ; fi
-
-# Directory that contains EMC Pplots installation
-#if [[ "${EMCONLINE_PPLOTS_DIR}" == "" ]] ; then export EMCONLINE_PPLOTS_DIR='/home/emc/online/emc/pplots' ; fi
+if [[ "${EMCONLINE_SLOWCTRL_DSMMASK_DIR}" == "" ]] ; then export EMCONLINE_SLOWCTRL_DSMMASK_DIR='operator@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT' ; fi
 
 # Directory that contains pedestal monitoring installation
-if [[ "${EMCONLINE_PED_DIR}" == "" ]] ; then export EMCONLINE_PED_DIR='/home/emc/online/emc/pedestal' ; fi
+#if [[ "${EMCONLINE_PED_DIR}" == "" ]] ; then export EMCONLINE_PED_DIR='/home/emc/online/emc/pedestal' ; fi
 
-if [[ "${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}" == "" ]] ; then export EMCONLINE_TRG_BEMCSTATUS_CONSUMERS="\
-operator@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
-operator@evp.starp.bnl.gov:/a/pplot/files/bemc \
-${EMCONLINE_PPLOTS_DIR} \
-${EMCONLINE_PED_DIR} \
-" ; fi
+#if [[ "${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}" == "" ]] ; then export EMCONLINE_TRG_BEMCSTATUS_CONSUMERS="\
+#operator@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
+#bemc@evp.starp.bnl.gov:/a/pplot/files/bemc \
+#" ; fi
 
-if [[ "${SCP}" == "" ]] ; then export SCP='/home/emc/online/emc/scp' ; fi
+if [[ "${SCP}" == "" ]] ; then export SCP="${EMCONLINE_TRG_DIR}/scp" ; fi
 
 ########################################################
 

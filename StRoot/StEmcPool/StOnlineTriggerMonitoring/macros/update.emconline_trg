@@ -65,6 +65,22 @@ else
     exit 1
 fi
 
+if { which expect &> /dev/null ; }
+then
+    echo "Command \"expect\" was found." > /dev/null
+else
+    echo "Command \"expect\" was not found. Please contact the machine admin. Exiting now..."
+    exit
+fi
+
+if { which root4star &> /dev/null ; }
+then
+    echo "Command \"root4star\" was found." > /dev/null
+else
+    echo "Command \"root4star\" was not found. Is the STAR environment set up? Exiting now..."
+    exit
+fi
+
 cd ${EMCONLINE_TRG_DIR}
 
 echo "EMC Online trigger monitoring"
@@ -262,10 +278,8 @@ then
 
     mkdir -p ${EMCONLINE_TRG_TABLES_DIR}
 
-    starver ${EMCONLINE_TRG_STARVER}
-
     echo "Saving data in the last saved directory with TS = ${TIMESTAMP}"
-    root4star -b -q ${EMCONLINE_TRG_SCRIPT}\(\"${TIMESTAMP}\",${UPDATESTATUS},${UPDATEPEDESTAL},${UPDATELUT},${EMCONLINE_TRG_SAVEDB},${EMCONLINE_TRG_SAVETABLES},\"${EMCONLINE_TRG_TABLES_DIR}\",\"${EMCONLINE_TRG_LASTCONF_DIR}\",\"${EMCONLINE_TRG_BEMCSTATUS_FILE}\",\"${EMCONLINE_TRG_BCECONF_FILE}\",\"${EMCONLINE_TRG_BCWCONF_FILE}\"\)
+    csh -c "starver ${EMCONLINE_TRG_STARVER}; setenv STDB_SERVERS $STAR/StDb/servers/dbServers_robinson.xml; if ( \"$EMCONLINE_TRG_SAVEDB\" == \"true\" )setenv DB_ACCESS_MODE write; root4star -b -q ${EMCONLINE_TRG_SCRIPT}\(\\\"${TIMESTAMP}\\\",${UPDATESTATUS},${UPDATEPEDESTAL},${UPDATELUT},${EMCONLINE_TRG_SAVEDB},${EMCONLINE_TRG_SAVETABLES},\\\"${EMCONLINE_TRG_TABLES_DIR}\\\",\\\"${EMCONLINE_TRG_LASTCONF_DIR}\\\",\\\"${EMCONLINE_TRG_BEMCSTATUS_FILE}\\\",\\\"${EMCONLINE_TRG_BCECONF_FILE}\\\",\\\"${EMCONLINE_TRG_BCWCONF_FILE}\\\"\)"
 
     cp -f ${EMCONLINE_TRG_BEMCSTATUS_FILE} ${EMCONLINE_TRG_BACKUP_DIR}/${TIMESTAMP}/
     cp -f ${EMCONLINE_TRG_BEMCSTATUS_FILE} ${EMCONLINE_TRG_LASTCONF_DIR}/
@@ -281,7 +295,19 @@ then
 	    ${SCP} ${EMCONLINE_TRG_BEMCSTATUS_FILE} ${consumer}/
 	done
     fi
-    
+
+    echo "Updating webpage ${EMCONLINE_TRG_WEBDIR} ..."
+    mkdir -p ${EMCONLINE_TRG_WEBDIR}
+    touch ${EMCONLINE_TRG_WEBPAGE_BODY}
+    eval `cat ${EMCONLINE_TRG_WEBTEMPLATE_LINE}` >> ${EMCONLINE_TRG_WEBPAGE_BODY}
+    rm -f ${EMCONLINE_TRG_WEBPAGE}.tmp
+    touch ${EMCONLINE_TRG_WEBPAGE}.tmp
+    cat ${EMCONLINE_TRG_WEBTEMPLATE_BEGIN} >> ${EMCONLINE_TRG_WEBPAGE}.tmp
+    cat ${EMCONLINE_TRG_WEBPAGE_BODY} >> ${EMCONLINE_TRG_WEBPAGE}.tmp
+    cat ${EMCONLINE_TRG_WEBTEMPLATE_END} >> ${EMCONLINE_TRG_WEBPAGE}.tmp
+    mv -f ${EMCONLINE_TRG_WEBPAGE}.tmp ${EMCONLINE_TRG_WEBPAGE}
+    rm -f ${EMCONLINE_TRG_WEBPAGE}.tmp
+    echo "Finished updating webpage ${EMCONLINE_TRG_WEBDIR}"
 else
     echo "Nothing to do" >| ${EMCONLINE_TRG_RUNSTATUS_FILE}
     update_desktop_icon_trg

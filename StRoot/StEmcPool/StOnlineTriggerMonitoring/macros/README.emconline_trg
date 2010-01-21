@@ -8,7 +8,7 @@ A. STAR computing environment
 The STAR computing environment must be set up for the user who will
 run this monitoring job.
 
-D. Write access to the database
+B. Write access to the database
 Here we assume that the monitoring job has write access to the database, in Calibrations/emc.
 Please consult EMC or DB experts on how to set it up.
 
@@ -42,13 +42,6 @@ The following files are created:
     status.emconline_trg  - set or report the current status
     update.emconline_trg  - shell script to run monitoring
     bce_table.txt, bcw_table.txt - DSM internal patches numeration
-Files created for backward compatibility:
-    job                   - (obsolete) cron job
-    startTriggerDB        - (obsolete) script to start monitoring
-    stopTriggerDB         - (obsolete) script to stop monitoring
-    updateTriggerDB       - (obsolete) script to run monitoring
-    LAST_TIME_RUN
-    RUNMODE
 
 The "Trigger monitoring" icon also appears on the GNOME desktop showing the current status of the job.
 
