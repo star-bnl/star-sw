@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.22 2010/01/13 17:55:47 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.23 2010/01/21 14:45:31 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.23  2010/01/21 14:45:31  ullrich
+ * Some print-outs only in debug mode.
+ *
  * Revision 2.22  2010/01/13 17:55:47  ullrich
  * Better mErrorFlags, abort, and debug flag handling, updated MTD DSM access function for run10, clean up compiler warning messages.
  *
@@ -95,7 +98,7 @@ StTriggerData2009::StTriggerData2009()
 
 StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
 {
-    printf("StTriggerData2009 Constructor with trigger data block\n");    
+    //printf("StTriggerData2009 Constructor with trigger data block\n");    
     mYear=2009; mRun = run; debug = 0;
     mData = new TriggerDataBlk2009;
     readData(data,1);
@@ -103,8 +106,8 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
 
 StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs, int dbg)
 {
-    printf("StTriggerData2009 Constructor with trigger data block and byteswap option=%d\n",bs);    
     mYear=2009; mRun = run; debug = dbg;
+    if(debug) printf("StTriggerData2009 Constructor with trigger data block and byteswap option=%d\n",bs);    
     mData = new TriggerDataBlk2009; 
     readData(data,bs);
 }
