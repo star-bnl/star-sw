@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.cxx,v 1.6 2010/01/18 03:26:15 balewski Exp $
+// $Id: St2009WMaker.cxx,v 1.7 2010/01/21 00:15:25 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -62,7 +62,7 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   //... track
   par_nFitPts=15; // hits on the track
   par_nHitFrac=0.51;
-  par_trackRin=90;  par_trackRout=170; // cm
+  par_trackRin=90;  par_trackRout=160; // cm
   par_trackPt=10.;//GeV
 
   //... ETOW
@@ -113,12 +113,6 @@ St2009WMaker::Init(){
   assert(HList);
   initHistos();
 
-  for(int isec=0;isec<mxTpcSec;isec++) {
-    int sec=isec+1;
-    mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,par_trackRin,par_trackRout);
-    mTpcFilter[isec].init("sec",sec,HList);
-  }
-
   mBarrelTables = new StBemcTables();
   mBtowGeom = StEmcGeom::instance("bemc");
   mBSmdGeom[kBSE] = StEmcGeom::instance("bsmde");
@@ -132,6 +126,25 @@ St2009WMaker::Init(){
   initGeom();
   
   if(isMC) par_minPileupVert=1;
+
+  // ..... initialization of TPC cuts is run dependent, call it 'hack of the day', should be moved to InitRun() and handle multipl runs per job, after APS, JB
+  for(int isec=0;isec<mxTpcSec;isec++) {
+    int sec=isec+1;
+    float Rin=par_trackRin,Rout=par_trackRout;
+    //.... Rin ..... changes
+    if(sec==4  && par_inpRunNo>=10090089) Rin=125.;
+    if(sec==11 && par_inpRunNo>=10083013) Rin=125.;
+    if(sec==15 && par_inpRunNo>=10088096 && par_inpRunNo<=10090112 ) Rin=125.;
+    //.... Rout ..... changes
+    if(sec==5 && par_inpRunNo>=10098029) Rout=140.;
+    if(sec==6 ) Rout=140.;
+    if(sec==20 && par_inpRunNo>=10095120 && par_inpRunNo<=10099078 ) Rout=140.;
+
+    mTpcFilter[isec].setCuts(par_nFitPts,par_nHitFrac,Rin,Rout);
+    mTpcFilter[isec].init("sec",sec,HList);
+  }
+
+
 
   return StMaker::Init();
 }
@@ -152,6 +165,8 @@ St2009WMaker::InitRun(int runNo){
 #endif
 
   mRunNo=runNo;
+  if(runNo>1000000) assert(mRunNo==par_inpRunNo); // what a hack, assurs TPC cuts change w/ time for data, JB. It will crash if multiple runs are analyzed by the same job.
+
    LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d mcScaleFact=%.2f\nmcBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV ptBalance>%.1fGeV",
 		 mRunNo,par_bht3TrgID, par_l2wTrgID,isMC,
 		 par_minPileupVert,par_vertexZ,
@@ -348,6 +363,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.7  2010/01/21 00:15:25  balewski
+// added sector & run  dependent TPC cuts on Rin, Rout
+//
 // Revision 1.6  2010/01/18 03:26:15  balewski
 // expanded TPC track filtering, not finished
 //
@@ -369,6 +387,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.7  2010/01/21 00:15:25  balewski
+// added sector & run  dependent TPC cuts on Rin, Rout
+//
 // Revision 1.6  2010/01/18 03:26:15  balewski
 // expanded TPC track filtering, not finished
 //

@@ -134,6 +134,8 @@ int rdMuWana(
   muMk->SetStatus("GlobalTracks",1);
   muMk->SetStatus("PrimaryTracks",1);
 
+
+
   if(geant){                                            
     StMcEventMaker *mcEventMaker = new StMcEventMaker();  
     mcEventMaker->doPrintEventInfo = false;               
@@ -286,16 +288,11 @@ int rdMuWana(
     WmuMk->setMC(isMC); //pass "version" of MC to maker
     WmuMk->setEtowScaleMC(1.3);
   }else {// real data specific
-    WmuMk->setTrigID(bht3ID,l2wID);
+    WmuMk->setTrigID(bht3ID,l2wID,runNo);
   }
   
   if (useJetFinder == 2) WmuMk->setJetTreeBranch("ConeJets12_100","ConeJets12_100_noEEMC"); //select jet tree braches used
   
-  /* to change default cuts activate any of the lines below */
-  //WmuMk->setVertexCuts(101.,3);// vertexZ (cm), minPileupVert
-  //WmuMk->setEleTrackCuts(16,0.52,91.,169.,10.1); //nFitP, fitFrac, Rin,Rout, elePt  
-  //WmuMk->setEmcCuts(3,200.,15.,0.9,0.97);// kSigPed, maxAdc, clET, fr2/4
-  //WmuMk->setWbosonCuts(28.,0.8,8.0,15); // 2x2ET, 2x2/nearJet, awayJet, ptBalance
   
   WmuMk->setMaxDisplayEve(10); // only first N events will get displayed 
   WmuMk->useEtow(useEtow);// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
@@ -391,6 +388,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.15  2010/01/21 00:15:30  balewski
+// added sector & run  dependent TPC cuts on Rin, Rout
+//
 // Revision 1.14  2010/01/18 03:26:21  balewski
 // expanded TPC track filtering, not finished
 //
