@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.94 2009/12/01 21:56:35 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.95 2010/01/21 02:08:17 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -399,7 +399,6 @@ void StMuDstMaker::Clear(const char *){
 
   DEBUGMESSAGE3("out");
 }
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -411,23 +410,65 @@ void StMuDstMaker::Clear(const char *){
 */
 int StMuDstMaker::Make(){
   DEBUGMESSAGE2("");
+  int returnStarCode = kStOK;
   StTimer timer;
   timer.start();
-  try {
-    if (mIoMode == ioWrite) write();
-    if (mIoMode == ioRead)  read();
-  }
-  catch(StMuExceptionEOF e) {
-    e.print();
-    return kStEOF;
-  }
-  catch(StMuException e) {
-    e.print();
-    return kStERR;
-  }
+  if (mIoMode == ioWrite)     returnStarCode = MakeWrite();
+  else if (mIoMode == ioRead) returnStarCode = MakeRead();
   DEBUGVALUE2(timer.elapsedTime());
-  return kStOK;
+  return returnStarCode;
 }
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+Int_t StMuDstMaker::MakeRead(const StUKey &RunEvent)
+{
+   return MakeRead();
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+Int_t StMuDstMaker::MakeRead() 
+{
+   int returnStarCode = kStOK;
+   if (mIoMode == ioRead) {
+     try {
+       read();
+     }
+     catch(StMuExceptionEOF e) {
+       e.print();
+       returnStarCode = kStEOF;
+     }
+     catch(StMuException e) {
+        e.print();
+        returnStarCode = kStERR;
+     }
+  }
+  return returnStarCode;
+}
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+Int_t StMuDstMaker::MakeWrite(){
+   int returnStarCode = kStOK;
+   if (mIoMode == ioWrite) {
+     try {
+       write();
+     }
+     catch(StMuExceptionEOF e) {
+       e.print();
+       returnStarCode = kStEOF;
+     }
+     catch(StMuException e) {
+        e.print();
+        returnStarCode = kStERR;
+     }
+  }
+  return returnStarCode;
+}
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1383,6 +1424,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.95  2010/01/21 02:08:17  fine
+ * RT #1803: Restore the broken MakeRead/MakeWrite interface to fix Skip event method
+ *
  * Revision 1.94  2009/12/01 21:56:35  tone421
  * Implemented changes as per http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1734
  *
