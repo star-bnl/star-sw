@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.48 2009/02/20 16:37:44 tone421 Exp $
+ * $Id: StMuDstMaker.h,v 1.49 2010/01/21 02:08:17 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -107,6 +107,9 @@ class StMuDstMaker : public StIOInterFace {
   virtual int Init();
   virtual void Clear(Option_t *option="");
   virtual int  Make();
+  virtual  Int_t MakeRead(const StUKey &RunEvent);
+  virtual  Int_t MakeRead();
+  virtual  Int_t MakeWrite();
   virtual int  Finish();
           void printArrays();
           void SetStatus(const char *arrType,int status);
@@ -158,7 +161,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.48 2009/02/20 16:37:44 tone421 Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.49 2010/01/21 02:08:17 fine Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -352,6 +355,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.49  2010/01/21 02:08:17  fine
+ * RT #1803: Restore the broken MakeRead/MakeWrite interface to fix Skip event method
+ *
  * Revision 1.48  2009/02/20 16:37:44  tone421
  * *** empty log message ***
  *
