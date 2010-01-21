@@ -74,33 +74,14 @@
 
 	touch $DST_PATH/RUNSTATUS.emconline_trg
 
+	touch $DST_PATH/RUNMODE.emconline_trg
+	echo "STOP" >> $DST_PATH/RUNMODE.emconline_trg
+
+        ln -sf $SRC_PATH/macros/index_template_begin.html $DST_PATH
+        ln -sf $SRC_PATH/macros/index_template_line.html $DST_PATH
+        ln -sf $SRC_PATH/macros/index_template_end.html $DST_PATH
+
 	source $DST_PATH/.emconline_trg.cfg.sh
 	update_desktop_icon_trg
-
-	### The rest is for backward compatibility only, otherwise can be safely skipped
-	#
-	export JOBFILE=$DST_PATH/job
-	rm -f $JOBFILE
-        echo "" > $JOBFILE
-        #echo "csh -c \"bash $DST_PATH/job.emconline_trg\"" > $JOBFILE
-	chmod a+x $JOBFILE
-
-	export STARTFILE=$DST_PATH/startTriggerDB
-	rm -f $STARTFILE
-	echo './status.emconline_trg RUN' > $STARTFILE
-        chmod a+x $STARTFILE
-
-	export STOPFILE=$DST_PATH/stopTriggerDB
-	rm -f $STOPFILE
-	echo './status.emconline_trg STOP' > $STOPFILE
-        chmod a+x $STOPFILE
-
-        ln -sf $DST_PATH/update.emconline_trg $DST_PATH/updateTriggerDB
-
-        ln -sf $DST_PATH/RUNMODE.emconline_trg $DST_PATH/RUNMODE
-
-        ln -sf $DST_PATH/LAST_TIME_RUN.emconline_trg $DST_PATH/LAST_TIME_RUN
-	#
-	###
 
     fi

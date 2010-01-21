@@ -23,7 +23,7 @@ then
 	echo ${RUNMODE} >| ${EMCONLINE_TRG_RUNMODE_FILE}
 	update_desktop_icon_trg
     else
-	echo "Cannot recognize run mode: ${RUNMODE}, should be RUN or STOP"
+	echo "Cannot recognize run mode: ${RUNMODE}, should be either RUN or STOP"
     fi
 fi
 
