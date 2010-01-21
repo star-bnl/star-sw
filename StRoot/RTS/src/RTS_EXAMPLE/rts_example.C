@@ -141,11 +141,13 @@ int main(int argc, char *argv[])
 
 		if(print_det[0]) {
 		  if(strcmp(print_det, "tinfo") == 0) {		    
-		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%x\n",
+		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%x  evptriggers=0x%x/0x%x\n",
 			   evp->seq,
 			   evp->token,
 			   evp->detectors,
-			   evp->daqbits);
+			   evp->daqbits,
+			   evp->evpgroups,
+			   evp->evpgroupsinrun);
 		  }
 		}
 
