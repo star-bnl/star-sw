@@ -1,4 +1,4 @@
-// $Id: St2009pubMcMaker.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009pubMcMaker.cxx,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
 //
 //*-- Author : Justin Stevens, IUCF
 // 
@@ -7,6 +7,7 @@
 #include "St2009pubMcMaker.h"
 
 //need these to get MC record
+#include "tables/St_g2t_tpc_hit_Table.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcVertex.hh"
@@ -48,6 +49,7 @@ St2009pubMcMaker::Make(){
     doMCanalysis();
   
   doWanalysis();
+  doWefficiency();
   return kStOK;
 }
 
@@ -177,6 +179,63 @@ St2009pubMcMaker::doWanalysis(){
   }
 }
 
+
+//_______________________________________________________
+//_______________________________________________________
+void 
+St2009pubMcMaker::doWefficiency(){
+  
+  //only count leptons in our eta range
+  if(fabs(mElectronP.Eta()) > 1.) return;
+  //ele has |eta| < 1
+  hA[50]->Fill(mElectronP.Perp());
+  hA[54]->Fill(mElectronP.Eta());
+  hA[58]->Fill(mVertex.Z());
+  hA[62]->Fill(mElectronP.Phi());
+
+  //trigger efficiency
+  if(!wMK->wEve.l2bitET) return;
+  //good trig
+  hA[51]->Fill(mElectronP.Perp());
+  hA[55]->Fill(mElectronP.Eta());
+  hA[59]->Fill(mVertex.Z());
+  hA[63]->Fill(mElectronP.Phi());
+
+  //vertex efficiency
+  if(wMK->wEve.vertex.size()<=0) return;
+  //vertex rank>0 and |z|<100
+  hA[52]->Fill(mElectronP.Perp()); 
+  hA[56]->Fill(mElectronP.Eta());
+  hA[60]->Fill(mVertex.Z());
+  hA[64]->Fill(mElectronP.Phi());
+
+  //float diff=wMK->wEve.vertex[0].z - mVertex.Z();
+  //cout<<"diff="<<diff<<endl;
+
+  //reco efficiency
+  for(uint iv=0;iv<wMK->wEve.vertex.size();iv++) {
+    WeveVertex &V=wMK->wEve.vertex[iv];
+    for(uint it=0;it<V.eleTrack.size();it++) {
+      WeveEleTrack &T=V.eleTrack[it];
+      if(T.isMatch2Cl==false) continue;
+      assert(T.cluster.nTower>0); // internal logical error
+      assert(T.nearTotET>0); // internal logical error
+      
+      if(T.cluster.ET/T.nearTotET< wMK->par_nearTotEtFrac) 
+	continue; // too large nearET
+      if(T.ptBalance.Perp() < wMK->par_ptBalance || T.awayTotET > wMK->par_awayTotET)
+	continue;
+      
+      //pass all W cuts 
+      hA[53]->Fill(mElectronP.Perp());
+      hA[57]->Fill(mElectronP.Eta());
+      hA[61]->Fill(mVertex.Z());
+      hA[65]->Fill(mElectronP.Phi());
+    }
+  }
+}
+
+
 //________________________________________________
 //________________________________________________
 void
@@ -190,20 +249,34 @@ St2009pubMcMaker::doMCanalysis(){
   StThreeVectorF pNeutrino; 
   StThreeVectorF pElectron;
 
-  for (int i = 0; i<20;i++){//loop 20 tracks in pythia record
+  StMcVertex *V=mMcEvent->primaryVertex(); 
+  mVertex=TVector3(V->position().x(),V->position().y(),V->position().z());
+  
+  uint i=1;
+  int found=0;
+  while(found<2 && i<mMcEvent->tracks().size()){//loop tracks
     StMcTrack* mcTrack = mMcEvent->tracks()[i];
     int pdgId=mcTrack->pdgId();
-    //float pt=mcTrack->momentum().x()*mcTrack->momentum().x()+mcTrack->momentum().y()*mcTrack->momentum().y(); 
-    //LOG_INFO<<"pdgId "<<pdgId<<" pt "<<pt<<endm;
-    if(pdgId==24 || pdgId==-24){ //select W+ and W-
-      pW=mcTrack->momentum();
-    }
+    //float pt=mcTrack->pt(); 
     if(pdgId==11 || pdgId==-11){ //select e+ and e-
-      pElectron=mcTrack->momentum();
+      if(abs(mcTrack->parent()->pdgId()) == 24 ){ 
+	pElectron=mcTrack->momentum();
+	//LOG_INFO<<"pdgId "<<pdgId<<" pt "<<pt<<" pz "<<mcTrack->momentum().z()<<endm;
+	pW=mcTrack->parent()->momentum();
+	//LOG_INFO<<"pdgId "<<mcTrack->parent()->pdgId()<<" pt "<<mcTrack->parent()->pt()<<" pz "<<mcTrack->parent()->momentum().z()<<endm;
+	found++;
+      }
     }
     if(pdgId==12 || pdgId==-12){ //select neutrino
-      pNeutrino=mcTrack->momentum();
+      if(abs(mcTrack->parent()->pdgId()) == 24 ){ 
+	pNeutrino=mcTrack->momentum();
+	//LOG_INFO<<"pdgId "<<pdgId<<" pt "<<pt<<" pz "<<mcTrack->momentum().z()<<endm;
+	pW=mcTrack->parent()->momentum();
+	//LOG_INFO<<"pdgId "<<mcTrack->parent()->pdgId()<<" pt "<<mcTrack->parent()->pt()<<" pz "<<mcTrack->parent()->momentum().z()<<endm;
+	found++;
+      }
     }
+    i++;
   }
   
   mWP=TVector3(pW.x(),pW.y(),pW.z());
@@ -211,10 +284,13 @@ St2009pubMcMaker::doMCanalysis(){
   mElectronP=TVector3(pElectron.x(),pElectron.y(),pElectron.z());
   TVector3 diff=mWP-mNeutrinoP-mElectronP;
   if(diff.Mag() > 0.0001) //should get exactly right
-    LOG_INFO<<"vector difference "<<diff.Mag()<<endm;
+    LOG_INFO<<"\n \n W+e+nu vector sum ="<<diff.Mag()<<endm;
 }
 
 // $Log: St2009pubMcMaker.cxx,v $
+// Revision 1.2  2010/01/21 17:54:31  stevens4
+// add effic histos and charge seperated background plots
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

@@ -1,4 +1,4 @@
-// $Id: St2009pubMc_histo.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009pubMc_histo.cxx,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
 //
 //*-- Author :  Justin Stevens, IUCF
 
@@ -20,6 +20,7 @@ St2009pubMcMaker::initHistos(){
   memset(hA,0,sizeof(hA));
   TH1 *h; //TH2 *h2;
   //TList *Lx;  TLine *ln; 
+  const float PI=TMath::Pi();
     
 
   //Quantities from geant and correlations w/ reconstructed values 
@@ -83,6 +84,25 @@ St2009pubMcMaker::initHistos(){
   hA[43]=h=new TH1F(core+"ElectronE_pos","Electron E for #eta > 0.8;  Reco Electron E",100,0,100);
   hA[44]=h=new TH1F(core+"ElectronE_zero","Electron E for -0.1 < #eta < 0.1; Reco Electron E",100,0,100);
 
+  //free 45-49
+
+  //efficiency histos
+  hA[50]=h=new TH1F(core+"eleETall","pt of all leptons ; lepton pt (from Geant)",100,0,100);
+  hA[51]=h=new TH1F(core+"eleETtrig","pt of leptons that satisfy trigger ; lepton pt (from Geant)",100,0,100);
+  hA[52]=h=new TH1F(core+"eleETvert","pt of leptons that w/ good vertex ; lepton pt (from Geant)",100,0,100);
+  hA[53]=h=new TH1F(core+"eleETreco","pt of leptons that pass W cuts ; lepton pt (from Geant)",100,0,100);
+  hA[54]=h=new TH1F(core+"eleEtaAll","#eta of all leptons ; lepton #eta (from Geant)",100,-1.1,1.1);
+  hA[55]=h=new TH1F(core+"eleEtaTrig","#eta of leptons that satisfy trigger ; lepton #eta (from Geant)",100,-1.1,1.1);
+  hA[56]=h=new TH1F(core+"eleEtaVert","#eta of leptons that w/ good vertex ; lepton #eta (from Geant)",100,-1.1,1.1);
+  hA[57]=h=new TH1F(core+"eleEtaReco","#eta of leptons that pass W cuts ; lepton #eta (from Geant)",100,-1.1,1.1);
+  hA[58]=h=new TH1F(core+"eleZvertAll","zVertex of all events ; zVertex (from Geant)",100,-100,100);
+  hA[59]=h=new TH1F(core+"eleZvertTrig","zVertex of events that satisfy trigger ; zVertex (from Geant)",100,-100,100);
+  hA[60]=h=new TH1F(core+"eleZvertVert","zVertex of events that w/ good vertex ; zVertex (from Geant)",100,-100,100);
+  hA[61]=h=new TH1F(core+"eleZvertReco","zVertex of events that pass W cuts ; zVertex (from Geant)",100,-100,100);
+  hA[62]=h=new TH1F(core+"elePhiAll","#phi of all leptons; lepton #phi (from Geant)",64,-PI,PI);
+  hA[63]=h=new TH1F(core+"elePhiTrig","#phi of leptons that satisfy trigger ; lepton #phi (from Geant)",64,-PI,PI);
+  hA[64]=h=new TH1F(core+"elePhiVert","#phi of leptons that w/ good vertex ; lepton #phi (from Geant)",64,-PI,PI);
+  hA[65]=h=new TH1F(core+"elePhiReco","#phi of leptons that pass W cuts ; lepton #phi (from Geant)",64,-PI,PI);
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
     if(  hA[i]==0) continue;
@@ -94,6 +114,9 @@ St2009pubMcMaker::initHistos(){
 }
 
 // $Log: St2009pubMc_histo.cxx,v $
+// Revision 1.2  2010/01/21 17:54:31  stevens4
+// add effic histos and charge seperated background plots
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

@@ -1,4 +1,4 @@
-// $Id: St2009pubWanaMaker.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009pubWanaMaker.cxx,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -67,10 +67,6 @@ St2009pubWanaMaker::evalWeleTrackSign(){
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
-      if(T.cluster.ET /T.nearTotET< wMK->par_nearTotEtFrac) continue; // too large nearET
-      if(T.awayTotET> wMK-> par_awayTotET) continue; // too large awayET
-      
-      hA[0]->Fill("acc",1.);
       
       // work with W-track
       float ET=T.cluster.ET;
@@ -83,6 +79,64 @@ St2009pubWanaMaker::evalWeleTrackSign(){
       int g_ipn=0, p_ipn=0; // plus
       if( g_chrg<0 ) g_ipn=1;// minus
       if( p_chrg<0 ) p_ipn=1;// minus
+
+      //make cut on lepton |eta| for cross section
+      if(fabs(T.primP.Eta()) > 1) continue; 
+
+      float absEta=fabs(T.primP.Eta());
+      if(T.cluster.ET/T.nearTotET_noEEMC>wMK->par_nearTotEtFrac){
+        if(T.ptBalance_noEEMC.Perp()>wMK->par_ptBalance && T.awayTotET_noEEMC<wMK->par_awayTotET){//signal w/o endcap in veto
+	  //charge sorted
+	  if(p_ipn==0)
+	    hA[43]->Fill(T.cluster.ET);
+	  else
+	    hA[46]->Fill(T.cluster.ET);
+	  //eta sorted
+	  if(absEta > 0.6 && absEta < 1)
+	    hA[38]->Fill(T.cluster.ET);
+	  if(absEta > 0.3 && absEta < 0.6)
+	    hA[39]->Fill(T.cluster.ET);
+	  if(absEta > 0.0 && absEta < 0.3)
+	    hA[40]->Fill(T.cluster.ET);
+	}
+      }
+
+      if(T.cluster.ET /T.nearTotET< wMK->par_nearTotEtFrac) continue; // too large nearET
+      
+      //xSec binned 
+      if(T.ptBalance.Perp()>wMK->par_ptBalance && T.awayTotET<wMK->par_awayTotET){//signal
+	//charge sorted
+	if(p_ipn==0)
+	  hA[41]->Fill(T.cluster.ET);
+	else
+	  hA[44]->Fill(T.cluster.ET);
+	//eta sorted
+	if(absEta > 0.6 && absEta < 1)
+	  hA[32]->Fill(T.cluster.ET);
+	if(absEta > 0.3 && absEta < 0.6)
+	  hA[33]->Fill(T.cluster.ET);
+	if(absEta > 0.0 && absEta < 0.3)
+	  hA[34]->Fill(T.cluster.ET);
+      }
+      else {//background
+	//charge sorted
+	if(p_ipn==0)
+	  hA[42]->Fill(T.cluster.ET);
+	else
+	  hA[45]->Fill(T.cluster.ET);
+	//eta sorted
+	if(absEta > 0.6 && absEta < 1)
+	  hA[35]->Fill(T.cluster.ET);
+	if(absEta > 0.3 && absEta < 0.6)
+	  hA[36]->Fill(T.cluster.ET);
+	if(absEta > 0.0 && absEta < 0.3)
+	  hA[37]->Fill(T.cluster.ET);
+      }
+	
+      if(T.ptBalance.Perp()<wMK->par_ptBalance || T.awayTotET>wMK->par_awayTotET)  continue;
+      
+      hA[0]->Fill("acc",1.);
+      
       hA[5]->Fill(ET);
       hA[10+g_ipn]->Fill(ET);
       hA[12+p_ipn]->Fill(ET);
@@ -191,6 +245,9 @@ St2009pubWanaMaker::varyCuts4backgStudy(){
 }
 
 // $Log: St2009pubWanaMaker.cxx,v $
+// Revision 1.2  2010/01/21 17:54:31  stevens4
+// add effic histos and charge seperated background plots
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

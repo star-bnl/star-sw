@@ -1,4 +1,4 @@
-// $Id: St2009pubWana_histo.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009pubWana_histo.cxx,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -7,6 +7,7 @@
 #include <TLine.h>
 #include <TMath.h>
 
+#include "St2009WMaker.h"
 #include "St2009pubWanaMaker.h"
 
 //________________________________________________
@@ -96,6 +97,27 @@ St2009pubWanaMaker::initHistos(){
   hA[30]=h=new TH1F(core+"diffGT1_clustET"," 2x2 cluster ET for global-primary > 1 GeV",100,0,100);  
   hA[31]=h=new TH1F(core+"diffprimPT_globPT_Qflip","global - primary pT when Q flipped; global-primary pT",100,-50,50);  
 
+  
+  //eta bins for X sec
+  hA[32]=h=new TH1F(core+"etaBin1sig","electron .6 < |#eta| < 1 ; 2x2 cluster ET",100,1,101);
+  hA[33]=h=new TH1F(core+"etaBin2sig","electron .3 < |#eta| < .6; 2x2 cluster ET",100,1,101);
+  hA[34]=h=new TH1F(core+"etaBin3sig","electron 0 < |#eta| < .3; 2x2 cluster ET",100,1,101);
+  hA[35]=h=new TH1F(core+"etaBin1back","electron .6 < |#eta| < 1; 2x2 cluster ET",100,1,101);
+  hA[36]=h=new TH1F(core+"etaBin2back","electron .3 < |#eta| < .6; 2x2 cluster ET",100,1,101);
+  hA[37]=h=new TH1F(core+"etaBin3back","electron 0 < |#eta| < .3; 2x2 cluster ET",100,1,101);
+  hA[38]=h=new TH1F(core+"etaBin1sigNoE","electron .6 < |#eta| < 1; 2x2 cluster ET",100,1,101);
+  hA[39]=h=new TH1F(core+"etaBin2sigNoE","electron .3 < |#eta| < .6; 2x2 cluster ET",100,1,101);
+  hA[40]=h=new TH1F(core+"etaBin3sigNoE","electron 0 < |#eta| < .3; 2x2 cluster ET",100,1,101);
+  
+  //charge sorted for X sec
+  hA[41]=h=new TH1F(core+"clustPtBalP",Form("PT Balance > %.1f && awaySide PT < %.1f Q=+; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
+  hA[42]=h=new TH1F(core+"clustPtBal_bckgrdP",Form("PT Balance < %.1f || awaySide PT > %.1f Q=+; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
+  hA[43]=h=new TH1F(core+"clustPtBalnoEP",Form("PT Balance > %.1f && awaySide PT < %.1f (EEMC not included) Q=+; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
+  hA[44]=h=new TH1F(core+"clustPtBalN",Form("PT Balance > %.1f && awaySide PT < %.1f Q=-; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
+  hA[45]=h=new TH1F(core+"clustPtBal_bckgrdN",Form("PT Balance < %.1f || awaySide PT > %.1f Q=-; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
+  hA[46]=h=new TH1F(core+"clustPtBalnoEN",Form("PT Balance > %.1f && awaySide PT < %.1f (EEMC not included) Q=-; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
+  
+  
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
