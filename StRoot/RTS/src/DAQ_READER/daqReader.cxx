@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.28 2009/12/18 11:00:42 tonko Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.29 2010/01/21 21:11:28 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -992,7 +992,7 @@ int daqReader::fillSummaryInfo_v02(gbPayload *pay) {
   detectors = l2h32(pay->rtsDetMask);
   daqbits_l1 = l2h32(pay->L1summary[0]);
   daqbits_l2 = l2h32(pay->L2summary[0]);
-  evpgroups = l2h32(pay->L3summary[2]);
+  evpgroups = l2h32(pay->L3summary[3]);
   daqbits = l2h32(pay->L3summary[0]);
   evp_daqbits = daqbits;
 
