@@ -1,4 +1,4 @@
-// $Id: WtpcFilter.cxx,v 1.1 2010/01/18 03:30:01 balewski Exp $
+// $Id: WtpcFilter.cxx,v 1.2 2010/01/21 00:15:25 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -39,7 +39,7 @@ WtpcFilter::init(const char *core, int sec, TObjArray *HListX) {
   assert(secID);
   assert(par_nFitPts>0);
   
-  LOG_INFO<<Form("::InitTPC filter (sec=%d) done, name=%s=  nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm\n",secID,name.Data(),par_nFitPts, par_nHitFrac, par_Rmin, par_Rmax)<<endm;
+  LOG_INFO<<Form("::InitTPC filter (sec=%d) done, name=%s=  nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm",secID,name.Data(),par_nFitPts, par_nHitFrac, par_Rmin, par_Rmax)<<endm;
 
   initHistos();
 }
@@ -147,6 +147,6 @@ WtpcFilter::initHistos() {
   }
   
   //  HList->ls();
-  LOG_INFO<<Form("TpcFilter-%s::initHistos done",name.Data())<<endm;
+  //  LOG_INFO<<Form("TpcFilter-%s::initHistos done",name.Data())<<endm;
 
 }

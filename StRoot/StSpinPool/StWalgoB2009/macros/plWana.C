@@ -3,10 +3,10 @@ const float PI=2*acos(0);
 
 //=================================================
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  iPath="./";
+  iPath="out-Jan10-Austin/";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
   iPath="/star/data05/scratch/balewski/2009-WanaJ-SL09g-x/data/";
-  //core0="R10097000";
+  //core0="R10090081";
   core0="run9setABCD";
   //core0="run9setP1234";
   //core0="mcSetD1_ppWprod";
@@ -65,7 +65,7 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
   char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N","spinY3_P","spinY2_N"};// pg 24
   char *nameS3[]={"spinY4_P","spinY4_N"};// pg 25
 
-
+  //use  Page 30 -50 TPC sectors per cut, 2 pages per cut
 
   gStyle->SetOptFit(1);
   TString fullInpName=iPath;  fullInpName+=core0;
@@ -96,7 +96,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(1,2);gStyle->SetOptStat(0);
     char **nameX=nameA;
     for(int i=0;i<2;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -111,7 +110,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(2,2);gStyle->SetOptStat(1110);
     char **nameX=nameB;
     for(int i=0;i<4;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -129,7 +127,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     TH1F *hA[2];
     c->cd(1);
     for(int i=0;i<2;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       hA[i]=(TH1F*)fd->Get(nameX[i]);  assert(hA[i]);
       if(i==0)  hA[i]->Draw();
@@ -156,7 +153,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(2,2);gStyle->SetOptStat(1001111);
     char **nameX=nameD;
     for(int i=0;i<4;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -176,7 +172,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(3,2);gStyle->SetOptStat(110);
     char **nameX=nameE;
     for(int i=0;i<6;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -196,7 +191,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     char **nameX=nameF;
     TH1F *h1,*h2;
     for(int i=0;i<5;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       if(i==0) { cL->cd();  
@@ -227,7 +221,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(2,2);gStyle->SetOptStat(1000110);
     char **nameX=nameG;
     for(int i=0;i<4;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -245,7 +238,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameH;
     for(int i=0;i<3;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -260,7 +252,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameJ;
     for(int i=0;i<4;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); 
@@ -274,7 +265,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameL;
     for(int i=0;i<3;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -291,7 +281,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameK;
     for(int i=0;i<3;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -307,7 +296,6 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameM;
     for(int i=0;i<4;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -348,17 +336,14 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
     }
    
  } break;//--------------------------------------
-
- case 14:{   //free 
-
- } break;//--------------------------------------
+   
+   // case 14:   //free 
 
  case 15:{    sprintf(padTit,"BSMD raw spectra, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(1,2);gStyle->SetOptStat(10);
     char **nameX=nameB1;
     for(int i=0;i<2;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -373,7 +358,6 @@ case 16:{    sprintf(padTit,"TPC dEdx for all & W tracks, %s",core0);
     c->Divide(2,1);gStyle->SetOptStat(10);
     char **nameX=nameN;
     for(int i=0;i<2;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("colz");
@@ -386,7 +370,6 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameO;
     for(int i=0;i<3;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("colz");
@@ -403,7 +386,6 @@ case 17:{    sprintf(padTit,"TPC global DCA to Vertex for W tracks, %s",core0);
     c->cd(); TPad *cL,*cR;   splitPadX(0.5,&cL,&cR);
     cL->cd(); cR->Divide(1,3);
     for(int i=0;i<7;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       if(i==0) { h->Draw(); h->SetAxisRange(0,60);}
@@ -429,7 +411,6 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     c->Divide(3,3);gStyle->SetOptStat(10);
     char **nameX=nameQ;
     for(int i=0;i<8;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw();
@@ -445,8 +426,7 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameR1;
     for(int i=0;i<3;i++) {
-      char txt[100];
-      printf("->%s<\n",nameX[i]);
+        printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       if(i==4) {
 	h->Draw("same e");
@@ -466,7 +446,6 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     c->Divide(2,1);gStyle->SetOptStat(10);
     char **nameX=nameR2;
     for(int i=0;i<2;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
@@ -479,7 +458,6 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     c->Divide(3,2);gStyle->SetOptStat(10);
     char **nameX=nameR3;
     for(int i=0;i<6;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw();
@@ -493,7 +471,6 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     c->Divide(2,3);gStyle->SetOptStat(1000010);
     char **nameX=nameS1;
     for(int i=0;i<6;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
@@ -508,7 +485,6 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     c->Divide(2,2);gStyle->SetOptStat(1000010);
     char **nameX=nameS2;
     for(int i=0;i<4;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("h  text");
@@ -520,7 +496,6 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     c->Divide(2,1);gStyle->SetOptStat(10);
     char **nameX=nameS3;
     for(int i=0;i<2;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
@@ -528,9 +503,65 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
  } break;//--------------------------------------
 
 
+ case 30: // TPC stats 
+ case 31: 
+ case 32: // TPC nFitPts 
+ case 33: 
+ case 34: // TPC nFit/nPossibe
+ case 35: 
+ case 36: // TPC 1st hit R
+ case 37: 
+ case 38: // TPC last hit R
+ case 39: 
+ case 40: // TPC dE/dX
+ case 41: 
+   {    
+   int iew=(page-30)%2; // East-West
+   int iCut=(page-30)/2;
+   int sec1=1, sec2=12; if(iew) sec1=13, sec2=24;
+   char *titA[]={"stats","nFitPoints", " nFit/nPossible","1st hit Rxy","last hit Rxy","dE/dX"};
+   char *titB[]={"Stat","TrNfit","TrFitFrac","TrRxyIn","TrRxyOut","TrdEdX"};
+   sprintf(padTit,"TPC %s   sectors[%d,%d], %s",titA[iCut],sec1,sec2,core0);
+   can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+   c->Divide(4,3);gStyle->SetOptStat(10);
+   for(int i=0;i<12;i++) {
+     char name[100];
+     sprintf(name,"sec%d_%s",i+sec1,titB[iCut]);
+     printf("->%s<\n",name);
+      h=(TH1*)fd->Get(name);  assert(h);
+      c->cd(i+1);
+      if(iCut==5) 
+	h->Draw("colz");
+      else
+	h->Draw();
+      int col=30+i+sec1;
+      h->SetFillColor(col);
+
+      
+   }
+ } break;//--------------------------------------
+
+ case 42:{    sprintf(padTit,"TPC accepted tracks, %s",core0);
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    c->Divide(2,1);gStyle->SetOptStat(10);
+    h2=muTr2D1; // cumulative
+    c->cd(1); h2->Draw("colz");
+    c->cd(2);
+  
+    for(int i=0;i<24;i++) {
+      char name[100];
+      sprintf(name,"sec%d_Tr2D1",i+1);
+      printf("->%s<\n",name);
+      h=(TH1*)fd->Get(name);  assert(h); h->SetLineColor(30+i);
+      if(i==0) h->Draw("box");
+      else h->Draw("box same");
+    }
+
+ } break;//--------------------------------------
+
  default:
      printf("page=%d NOT defined\n",page);
-
+     return;
  }
 
  char text[100];
@@ -552,6 +583,19 @@ void splitPadX(float x, TPad **cL, TPad **cR) {
   (*cR) = new TPad("padL", "apdL",x+0.005,0.,1.0,0.95);
   (*cR)->Draw();
 }
+
+//------------------------
+void splitPadY(float y, TPad **cU, TPad **cD) {  
+  (*cU) = new TPad("padD", "apdD",0,y+0.005,1.0,1.); 
+  (*cU)->Draw();     
+  (*cD) = new TPad("padU", "apdU",0.0,0.,1.,y);  
+  (*cD)->Draw();  
+
+  /* use case:    
+     TPad *cU,*cD;   splitPadY(0.4,&cU,&cD);    cU->cd(); h->Draw()   
+  */
+}
+
 
 //------------------------
 int tpcSec(float phiRad, float etaDet){ // finds TPC sector for hit(phi,eta) 
@@ -597,10 +641,15 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(){
- for(int i=1;i<=23;i++)  {
+ for(int i=1;i<=22;i++)  {
    if(i==14) continue;
-  plWana(i,2);
+   // plWana(i,2);
  }
+ plWana(6,2);
+
+ // TPC by sector:
+ for(int i=30;i<=42;i++)  plWana(i,2);
+
 }
 
 //============================
@@ -616,8 +665,8 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
-// Revision 1.5  2010/01/18 03:26:21  balewski
-// expanded TPC track filtering, not finished
+// Revision 1.6  2010/01/21 00:15:30  balewski
+// added sector & run  dependent TPC cuts on Rin, Rout
 //
 // Revision 1.4  2010/01/10 03:01:39  balewski
 // cleanup & nicer histos

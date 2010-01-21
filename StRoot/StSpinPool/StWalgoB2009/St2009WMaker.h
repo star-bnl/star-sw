@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.5 2010/01/18 03:26:15 balewski Exp $
+// $Id: St2009WMaker.h,v 1.6 2010/01/21 00:15:25 balewski Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -78,7 +78,8 @@ class St2009WMaker : public StMaker {
   float par_maxADC, par_clustET, par_clustFrac24, par_nearTotEtFrac;
   float par_nearDeltaR, par_awayDeltaPhi, par_smallNearDeltaR;
   float par_delR3D, par_highET, par_awayTotET, par_ptBalance;
- 
+  int par_inpRunNo; // to control run dependent cuts, ugly solution JB
+
   float par_countTrPt,par_countTowEt; 
   int par_useEtow;                    
   float par_mcEtowScale;
@@ -155,7 +156,7 @@ class St2009WMaker : public StMaker {
   int L2algoEtaPhi2IJ(float etaF,float phiF,int &kEta, int &kPhi);
   
  public: 
-  St2009WMaker(const char *name="2009WalgoB5.1");
+  St2009WMaker(const char *name="2009WalgoB5.2");
   virtual  ~St2009WMaker(){};
   virtual Int_t Init();
   virtual Int_t  Make();
@@ -164,14 +165,14 @@ class St2009WMaker : public StMaker {
   virtual void Clear(const Option_t* = "");
   virtual Int_t FinishRun(int runumber);
 
-  void setTrigID(int bht3, int l2w) { par_bht3TrgID=bht3; par_l2wTrgID=l2w;}
+  void setTrigID(int bht3, int l2w, int runNo) { par_bht3TrgID=bht3; par_l2wTrgID=l2w; par_inpRunNo=runNo;}
   void setHList(TObjArray * x){HList=x;}
   void setMC(int x){isMC=x;}
   void setMaxDisplayEve(int n) { par_maxDisplEve=n;}
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.5 2010/01/18 03:26:15 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.6 2010/01/21 00:15:25 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -182,6 +183,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.6  2010/01/21 00:15:25  balewski
+// added sector & run  dependent TPC cuts on Rin, Rout
+//
 // Revision 1.5  2010/01/18 03:26:15  balewski
 // expanded TPC track filtering, not finished
 //
