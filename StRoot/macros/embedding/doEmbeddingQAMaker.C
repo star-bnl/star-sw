@@ -58,9 +58,9 @@ void doEmbeddingQAMakerOneFile(
 
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
-  gSystem->Load("StEmbeddingQAMaker");
+  gSystem->Load("StEmbeddingUtilities");
 
-  StEmbeddingQAMaker* maker = new StEmbeddingQAMaker();
+  StEmbeddingQA* maker = new StEmbeddingQA();
   maker->book(outputFileName);
   maker->make(inputFileName, kTRUE);
   maker->end();
