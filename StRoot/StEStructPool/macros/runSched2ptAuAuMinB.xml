@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="10">
-<command> root.exe -q -b doEStruct2ptAuAu.C\(\"$FILELIST\",\"/star/data01/pwg/estruct/porter/estruct/\",\"AuAuCuts.txt\",\"$JOBNAME\",4\) </command>
-<stdout URL="file:/star/data01/pwg/estruct/porter/estruct/stdout/$JOBID.out"/>
-<input URL="catalog:star.bnl.gov?production=P02gc,trgsetupname=ProductionMinBias,filetype=daq_reco_MuDst,sanity=1,magscale=FullField" singleCopy="true" preferStorage="local" nFiles="100" />
-</job>
