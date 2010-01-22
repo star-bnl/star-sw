@@ -4,24 +4,37 @@ int stage=3;
 float yMax=175; 
 float etMax=70;
 
-void plWJacob() {
+void plWJacob(int charge=0) {
   gStyle->SetPalette(1,0);
   gStyle->SetOptStat(1000000);
 
-  TString iPath="out-Jan10-Austin/";
+  TString iPath="/star/data05/scratch/stevens4/wAnalysisOut/apsXsec/data/";
   TString core="run9setABCD";
 
   TFile *fd = TFile::Open(iPath+core+".wana.hist.root"); 
  
   assert(fd->IsOpen());
   
-  
-  //ptBalance and awayside pt cut 
-  hwE=(TH1F*)fd->Get("muclustPtBal"); assert(hwE);
-  hnE=(TH1F*)fd->Get("muclustPtBalnoE"); assert(hnE);
-  hQCD=(TH1F*)fd->Get("muclustPtBal_bckgrd"); assert(hQCD);
+  if(charge==0){
+    //charge summed histos 
+    hwE=(TH1F*)fd->Get("muclustPtBal"); assert(hwE);
+    hnE=(TH1F*)fd->Get("muclustPtBalnoE"); assert(hnE);
+    hQCD=(TH1F*)fd->Get("muclustPtBal_bckgrd"); assert(hQCD);
+  }
+  else if(charge==1){
+    //charge summed histos 
+    hwE=(TH1F*)fd->Get("pubclustPtBalP"); assert(hwE);
+    hnE=(TH1F*)fd->Get("pubclustPtBalnoEP"); assert(hnE);
+    hQCD=(TH1F*)fd->Get("pubclustPtBal_bckgrdP"); assert(hQCD);
+  }
+  else if(charge==-1){
+    //charge summed histos 
+    hwE=(TH1F*)fd->Get("pubclustPtBalN"); assert(hwE);
+    hnE=(TH1F*)fd->Get("pubclustPtBalnoEN"); assert(hnE);
+    hQCD=(TH1F*)fd->Get("pubclustPtBal_bckgrdN"); assert(hQCD);
+  }
 
-    // plot raw spectra ..........  
+  // plot raw spectra ..........  
   c=new TCanvas();
   c->Divide(2,3);
   c->cd(2);
@@ -143,7 +156,12 @@ void plWJacob() {
   lg=new TLegend(0.32,0.64,0.66,0.80); // top
   TDatime dt;lg->SetHeader(dt.AsString());
   //lg->SetHeader("     cluster |#eta|_{ }<_{ }1");
-  lg->AddEntry(hA,"#font[52]{W} candidates","l");
+  if(charge==0) 
+    lg->AddEntry(hA,"#font[52]{W} candidates (charge summed)","l");
+  else if(charge==1)
+    lg->AddEntry(hA,"#font[52]{W+} candidates ","l");
+  else 
+    lg->AddEntry(hA,"#font[52]{W-} candidates ","l");
   lg->AddEntry(hCB,"QCD backg. est.","lfep");
   lg->AddEntry(hDD,"Backg. subtr. #font[52]{W}s","lfep");
   lg->SetFillColor(kWhite);
