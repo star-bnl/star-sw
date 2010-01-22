@@ -14,4 +14,5 @@ void Draw3D()
    gEventDisplay->SetDrawOption("{file:rotation.iv}");
    gEventDisplay->SetFooter("STAR Event Display Example");
    gEventDisplay->Print("Draw3DTest.wrl"); //< Save the 3D scene into the file
+   gEventDisplay->SetDrawOption("{view:all}");
 }
