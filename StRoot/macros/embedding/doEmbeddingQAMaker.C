@@ -15,9 +15,9 @@ void doEmbeddingQAMaker(
 
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
-  gSystem->Load("StEmbeddingQAMaker");
+  gSystem->Load("StEmbeddingUtilities");
 
-  StEmbeddingQAMaker* maker = new StEmbeddingQAMaker(year, production, isSimulation);
+  StEmbeddingQA* maker = new StEmbeddingQA(year, production, isSimulation);
 
   /// Set z-vertex cut (default is 30cm unless otherwise specified)
   maker->setZVertexCut(vzCut);
