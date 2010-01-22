@@ -11,8 +11,8 @@ int rdMuWana(
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=1, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve
-	     int useJetFinder = 2, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
+	     int isMC=27, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
+	     int useJetFinder = 1, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
              TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //location of jet trees to be used
  ) { 
 
@@ -25,6 +25,12 @@ int rdMuWana(
   if(isMC==6) file  = "fillListA/mcSetD1_ppWdec.lis";
   if(isMC==7) file  = "fillListA/mcSetD1_ppZdec.lis";
   if(isMC==8) geant=true; //uses geant files 
+
+  //  official simu January 2010 , rcf10010-rcf10016
+  if(isMC==20) file = "fillListD/mcRcf10010_ppWplusProd.lis";
+  if(isMC==21) file = "fillListD/mcRcf10016_ppWminusProd.lis";
+  // ... add all others
+  if(isMC==27) file = "fillListD/mcList_rcf16.lis"; // for testing
 
   if(isMC) spinSort=false;
 
@@ -135,7 +141,6 @@ int rdMuWana(
   muMk->SetStatus("PrimaryTracks",1);
 
 
-
   if(geant){                                            
     StMcEventMaker *mcEventMaker = new StMcEventMaker();  
     mcEventMaker->doPrintEventInfo = false;               
@@ -143,7 +148,7 @@ int rdMuWana(
   }
 
   St_db_Maker   *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
-  if(isMC) { // use different DB tables for M-C data
+  if(isMC>0 && isMC<20) { // private 2008 M-C samples
     // .... Barrel....
     dbMk->SetFlavor("sim","bemcPed"); // set all ped=0
     dbMk->SetFlavor("sim","bemcStatus");  // ideal, all=on
@@ -161,12 +166,16 @@ int rdMuWana(
     dbMk->SetFlavor("sim","eemcPMTstat");
     dbMk->SetFlavor("sim","eemcPMTped");
   } 
-  else { // run 9 data
+  elseif (isMC==0) { // run 9 data
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
     dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
+  }  if(isMC>=20) { // official rcf1001N M-C samples, January 2010
+    dbMk->SetFlavor("sim","eemcPMTped"); // to compensate action of fast simu
+    dbMk->SetDateTime(20090329,123411); // make it variable, dpending on data set
   }
+
 
     
   //.... load EEMC database
@@ -286,7 +295,7 @@ int rdMuWana(
   St2009WMaker *WmuMk=new St2009WMaker();
   if(isMC) { // MC specific
     WmuMk->setMC(isMC); //pass "version" of MC to maker
-    WmuMk->setEtowScaleMC(1.3);
+    if(isMC<20) WmuMk->setEtowScaleMC(1.3); // rcf simu should have correct SF
   }else {// real data specific
     WmuMk->setTrigID(bht3ID,l2wID,runNo);
   }
@@ -388,6 +397,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.16  2010/01/22 20:20:18  balewski
+// partialy addopted to handle new offial MC, time stamp is hardcoded
+//
 // Revision 1.15  2010/01/21 00:15:30  balewski
 // added sector & run  dependent TPC cuts on Rin, Rout
 //
