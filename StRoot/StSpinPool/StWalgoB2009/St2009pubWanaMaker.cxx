@@ -1,4 +1,4 @@
-// $Id: St2009pubWanaMaker.cxx,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
+// $Id: St2009pubWanaMaker.cxx,v 1.3 2010/01/23 02:35:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -143,7 +143,7 @@ St2009pubWanaMaker::evalWeleTrackSign(){
       if(g_chrg* p_chrg <-0.5) hA[14+p_ipn]->Fill(ET); // charge flip
       hA[6]->Fill(ET,g_chrg/PT);
 
-      //Change in pT from global to primary //JS
+      //Change in pT from global to primary 
       float primPT=prTr->pt();
       float globPT=glTr->pt();
       hA[28]->Fill(primPT,globPT);
@@ -245,6 +245,9 @@ St2009pubWanaMaker::varyCuts4backgStudy(){
 }
 
 // $Log: St2009pubWanaMaker.cxx,v $
+// Revision 1.3  2010/01/23 02:35:38  stevens4
+// add ability to scale jet et and use real btow peds for rcf mc
+//
 // Revision 1.2  2010/01/21 17:54:31  stevens4
 // add effic histos and charge seperated background plots
 //

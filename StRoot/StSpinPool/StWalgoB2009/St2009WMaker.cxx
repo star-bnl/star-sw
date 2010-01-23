@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.cxx,v 1.7 2010/01/21 00:15:25 balewski Exp $
+// $Id: St2009WMaker.cxx,v 1.8 2010/01/23 02:35:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -96,6 +96,8 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   setEtowScaleMC(1.0); // for old the Endcap geometr you need ~1.3
   setBtowScaleMC(1.0);
   
+  setJetNeutScaleMC(1.0);//vary neutral ET scale for systematic
+  setJetChrgScaleMC(1.0);//vary charged ET scale for systematic
 
   mRunNo=0;
 
@@ -363,6 +365,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.8  2010/01/23 02:35:38  stevens4
+// add ability to scale jet et and use real btow peds for rcf mc
+//
 // Revision 1.7  2010/01/21 00:15:25  balewski
 // added sector & run  dependent TPC cuts on Rin, Rout
 //
@@ -387,6 +392,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.8  2010/01/23 02:35:38  stevens4
+// add ability to scale jet et and use real btow peds for rcf mc
+//
 // Revision 1.7  2010/01/21 00:15:25  balewski
 // added sector & run  dependent TPC cuts on Rin, Rout
 //

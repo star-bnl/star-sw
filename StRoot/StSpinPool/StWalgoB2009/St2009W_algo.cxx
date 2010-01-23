@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.7 2010/01/10 03:01:37 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.8 2010/01/23 02:35:38 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -26,6 +26,9 @@ St2009WMaker::find_W_boson(){
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
       
+      //make cut on lepton |eta| for cross section 
+      //if(fabs(T.primP.Eta()) > 1) continue;      
+
       //signal plots w/o EEMC in veto
       if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
 	if(T.ptBalance_noEEMC.Perp()>par_ptBalance && T.awayTotET_noEEMC<par_awayTotET)//ptBalance cut && awayside pt cut
@@ -118,7 +121,13 @@ St2009WMaker::findPtBalance(){
       for (int i_jet=0; i_jet< nJetsWE; i_jet++){//loop over jets
 	StJet* jet = getJet(i_jet);
 	TVector3 jetVec; //vector for jet momentum
-	jetVec.SetPtEtaPhi(jet->Pt(),jet->Eta(),jet->Phi());
+	//vary neutral and charged et in jets for systematic
+	float neutral=jet->neutralFraction()*jet->Pt();
+	float charged=jet->chargedFraction()*jet->Pt();
+	neutral=neutral*par_mcJetNeutScale;
+	charged=charged*par_mcJetChrgScale;
+	float sum=neutral+charged;
+	jetVec.SetPtEtaPhi(sum,jet->Eta(),jet->Phi());
 	if(jetVec.DeltaR(T.primP) > par_nearDeltaR)
               T.ptBalance+=jetVec;
       }
@@ -135,7 +144,13 @@ St2009WMaker::findPtBalance(){
       for (int i_jet=0; i_jet< nJetsNE; i_jet++){//loop over jets
 	StJet* jet = getJet(i_jet);
 	TVector3 jetVec; //vector for jet momentum
-	jetVec.SetPtEtaPhi(jet->Pt(),jet->Eta(),jet->Phi());
+	//vary neutral and charged et in jets for systematic
+	float neutral=jet->neutralFraction()*jet->Pt();
+	float charged=jet->chargedFraction()*jet->Pt();
+	neutral=neutral*par_mcJetNeutScale;
+	charged=charged*par_mcJetChrgScale;
+	float sum=neutral+charged;
+	jetVec.SetPtEtaPhi(sum,jet->Eta(),jet->Phi());
 	if(jetVec.DeltaR(T.primP) > par_nearDeltaR)
 	  T.ptBalance_noEEMC+=jetVec;
       }
@@ -477,6 +492,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.8  2010/01/23 02:35:38  stevens4
+// add ability to scale jet et and use real btow peds for rcf mc
+//
 // Revision 1.7  2010/01/10 03:01:37  balewski
 // cleanup & nicer histos
 //

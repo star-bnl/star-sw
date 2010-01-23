@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.6 2010/01/21 00:15:25 balewski Exp $
+// $Id: St2009WMaker.h,v 1.7 2010/01/23 02:35:38 stevens4 Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -85,6 +85,10 @@ class St2009WMaker : public StMaker {
   float par_mcEtowScale;
   float par_mcBtowScale;
 
+  float par_mcJetNeutScale;
+  float par_mcJetChrgScale;
+   
+
  public: // to overwrite default params from .C macro
   void useEtow(int x){ par_useEtow=x; }
   void setVertexCuts(float zm, int npv) {
@@ -103,6 +107,8 @@ class St2009WMaker : public StMaker {
   void setL2ClusterThresh(float x){ par_l2emulClusterThresh=x; }
   void setL2SeedThresh(float x){ par_l2emulSeedThresh=x; }
   void setJetTreeBranch(TString jetTreeBranch, TString jetTreeBranch_noEEMC){ mJetTreeBranch = jetTreeBranch; mJetTreeBranch_noEEMC = jetTreeBranch_noEEMC; }
+  void setJetNeutScaleMC(float x){ par_mcJetNeutScale=x; }
+  void setJetChrgScaleMC(float x){ par_mcJetChrgScale=x; }
  private:   
 
   //.... not used in the algo
@@ -172,7 +178,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.6 2010/01/21 00:15:25 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.7 2010/01/23 02:35:38 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -183,6 +189,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.7  2010/01/23 02:35:38  stevens4
+// add ability to scale jet et and use real btow peds for rcf mc
+//
 // Revision 1.6  2010/01/21 00:15:25  balewski
 // added sector & run  dependent TPC cuts on Rin, Rout
 //
