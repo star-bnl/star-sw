@@ -11,7 +11,7 @@ int rdMuWana(
 	     char* inDir   = "",// make it empty for scheduler 
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=27, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
+	     int isMC=1, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
 	     int useJetFinder = 1, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
              TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //location of jet trees to be used
  ) { 
@@ -26,11 +26,20 @@ int rdMuWana(
   if(isMC==7) file  = "fillListA/mcSetD1_ppZdec.lis";
   if(isMC==8) geant=true; //uses geant files 
 
-  //  official simu January 2010 , rcf10010-rcf10016
-  if(isMC==20) file = "fillListD/mcRcf10010_ppWplusProd.lis";
-  if(isMC==21) file = "fillListD/mcRcf10016_ppWminusProd.lis";
-  // ... add all others
-  if(isMC==27) file = "fillListD/mcList_rcf16.lis"; // for testing
+  //** official simu January 2010 , rcf10010-rcf10016
+  //** because of hardcoding timestamp these MC muDst's  must be fed 
+  //** individually by external file lists that can be found at 
+  //** /star/institutions/iucf/stevens4/wAnalysis/aps2010/fillListD/
+  //** and submitted to scheduler by scripts there 
+  
+  //single files for testing
+  string dir = "/star/data56/reco/pp500/pythia6_422/";
+  if(isMC==20) file =Form("%sWplus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10010_1000_1000evts.MuDst.root",dir);
+  if(isMC==21) file =Form("%sminus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10011_1000_1000evts.MuDst.root",dir);
+  if(isMC==22) file =Form("%sZ_eplus_eminus/perugia320/y2009a/gheisha_on/p09ig/rcf10014_1000_1000evts.MuDst.root",dir);
+  //submit via scheduler 
+  if(isMC==30) geant=true; //uses geant files
+  
 
   if(isMC) spinSort=false;
 
@@ -52,14 +61,20 @@ int rdMuWana(
     outF=outF;
     printf("OutF=%s=\n",outF.Data());
   } 
-  else if(geant){ //include geant.root files             
+  else if(isMC==8){ //include geant.root files from private MC
     char *file1=strstr(file,"/pp")+1;                      
     printf("file1=%s=%s=\n",file1);                        
     outF=file1; outF.ReplaceAll(".MuDst.root","");          
     TString fileG=file; fileG.ReplaceAll("MuDst","geant"); 
     fileG.ReplaceAll("/mu/","/geant/");                     
-  }                                                        
-  else { // MC events
+  }
+  else if(isMC>=20){ //official rcf MC 
+    char *file1=strstr(file,"/rcf")+1;
+    printf("file1=%s=%s=\n",file1);
+    outF=file1; outF.ReplaceAll(".MuDst.root","");
+    TString fileG=file; fileG.ReplaceAll("MuDst","geant");
+  }
+  else { // private MC events
     char *file1=strstr(file,"/mc")+1;
     printf("file1=%s=%s=\n",file1);
     outF=file1; file1=outF.Data();
@@ -166,17 +181,34 @@ int rdMuWana(
     dbMk->SetFlavor("sim","eemcPMTstat");
     dbMk->SetFlavor("sim","eemcPMTped");
   } 
-  elseif (isMC==0) { // run 9 data
+  else if (isMC==0) { // run 9 data
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
     dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
-  }  if(isMC>=20) { // official rcf1001N M-C samples, January 2010
+  }  
+  if(isMC>=20) { // official rcf1001N M-C samples, January 2010
     dbMk->SetFlavor("sim","eemcPMTped"); // to compensate action of fast simu
-    dbMk->SetDateTime(20090329,123411); // make it variable, dpending on data set
+    //get timestamp from static txt file
+    int timestamp=-999;
+    ifstream mcTimeStamp("/star/institutions/iucf/stevens4/wAnalysis/aps2010/mcRcfSDT.txt");
+    string line;
+    while(mcTimeStamp.good()){ //loop over file names
+      getline(mcTimeStamp,line);
+      if(mcTimeStamp.eof()) break;
+      string fileName = line.substr(0,33);
+      if(fileName.compare(file1)==0){ //find correct timestamp
+	timestamp = atoi(line.substr(34,8).data());
+	break;
+      }
+    }
+    if(timestamp==-999) {
+      cout<<"Unknown input file, no timestamp found"<<endl;
+      return 0; 
+    }
+    cout<<fileName<<" "<<timestamp<<endl;
+    dbMk->SetDateTime(timestamp,0); //set timestamp
   }
-
-
     
   //.... load EEMC database
   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
@@ -306,6 +338,10 @@ int rdMuWana(
   WmuMk->setMaxDisplayEve(10); // only first N events will get displayed 
   WmuMk->useEtow(useEtow);// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 
+  //set parameters in W algo manually
+  //WmuMk->setJetNeutScaleMC(1.00);
+  //WmuMk->setJetChrgScaleMC(1.00);
+
   /* evaluation of result, has full acess to W-algo internal data
      including overwrite - be careful */
   
@@ -397,6 +433,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.17  2010/01/23 21:24:45  stevens4
+// finish hardcode timestamp for new official rcf mc
+//
 // Revision 1.16  2010/01/22 20:20:18  balewski
 // partialy addopted to handle new offial MC, time stamp is hardcoded
 //
