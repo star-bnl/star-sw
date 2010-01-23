@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.8 2010/01/23 20:01:00 stevens4 Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.9 2010/01/23 20:07:03 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -333,7 +333,7 @@ St2009WMaker::accessBTOW(){
     adcSum+=adc;
   }
 
-  if(isMC<20) assert(n1==0);//prevent using real peds for private MC
+  if(isMC>0 && isMC<20) assert(n1==0);//prevent using real peds for private MC
   //printf("NNN %d %d %d %d %d %d id=%d\n",n0,n1,n2,n3,n4,n5,maxID);
   if(n0==mxBtow) return -1 ;  // BTOW was not present in this events
 
@@ -586,6 +586,9 @@ St2009WMaker::hadronicRecoil(){ //add up all vector pt outside of 'nearJet' regi
 }
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.9  2010/01/23 20:07:03  stevens4
+//fix use of real btow peds for rcf mc
+//
 //Revision 1.8  2010/01/23 20:01:00  stevens4
 //fix real peds for rcf mc
 //
