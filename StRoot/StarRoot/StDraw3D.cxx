@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.86 2010/01/24 05:45:45 fine Exp $
+// $Id: StDraw3D.cxx,v 1.87 2010/01/24 05:47:07 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -830,7 +830,7 @@ void StDraw3D::Save(const char *filename, const char*type) const
    }   
    \endcode
    is to produce the  animated image:
-   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Animatede version of the test image"
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Animated version of the test image"
    \sa Draw3D.C 
 */   
 //___________________________________________________
