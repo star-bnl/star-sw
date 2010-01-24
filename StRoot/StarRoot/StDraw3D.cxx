@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.87 2010/01/24 05:47:07 fine Exp $
+// $Id: StDraw3D.cxx,v 1.88 2010/01/24 06:02:25 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -807,7 +807,7 @@ void StDraw3D::Save(const char *filename, const char*type) const
 }
 
 
-//! Set the varous drawing option. The  functions passes the input \a options to TQtCoinWidged::SetDrawOption method 
+//! Set the varous drawing option. The method passes the input \a options to TQtCoinWidget::SetDrawOption method 
 /*! \param  options - [ <shape1> [, shape2 [, . . .  shape-n] - a comma separated list of the OpenInventor files with no extension\n
                     | <em> { parameter : value } </em> - enclosed into the curly brackets a pair "parameter : value"\n
                      \param - <em> { file : file.iv } </em> - the iv file defining the top level OpenInventor node. 
@@ -1321,6 +1321,10 @@ TObject *StDraw3D::Tower( float radius, const StarRoot::StEta &eta
    }
    return Tower(radius,lambda,lambda1,lambda2, phi, dphi, col, sty, siz);
 }
+//! Set the footer (caption) defined by the input \a footer text string 
+/*!
+\param footer - the text string to be drawn onto the bottom of the 3D scene image. The string may contain sevral lines separated by \\n end-of-line symbol
+ */
 //__________________________________________________________________________________________
 void StDraw3D::SetFooter(const char *footer)
 {

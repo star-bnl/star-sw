@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.51 2009/12/24 09:11:48 fine Exp $
+// $Id: StDraw3D.h,v 1.52 2010/01/24 06:02:25 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -137,8 +137,6 @@ class view_3D;
 /*! \brief  Class StDraw3D - to draw the 3D primitives like 3D points and 3D lines
  *          decorated with the STAR detector geometry
  */
-/// \author Valery Fine (fine@bnl.gov)
-/// \date 27/04/2008
 /// \sa Draw3D.C
 ///
 ///  Class provides the simple way to visualize the event 
@@ -152,7 +150,7 @@ class view_3D;
   /// \endcode
   ///  to get the test picture below:\n
   ///  <img src="http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3DClass.png">
-  ///  \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.png "Test image is to show several tpc points , tpc track, barrel and endcap towers"
+  ///  \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Test image is to show several tpc points , tpc track, barrel and endcap towers"
   ///  \sa StDraw3D::Draw3DTest()
   ///  The base StDraw3D class is a controller connecting the arbitrary "model" object 
   ///  with the arbitrary ROOT 3D class "view" object to implement the so-called 
