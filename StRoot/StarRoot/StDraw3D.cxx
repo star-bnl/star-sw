@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.88 2010/01/24 06:02:25 fine Exp $
+// $Id: StDraw3D.cxx,v 1.89 2010/01/24 06:03:34 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -906,7 +906,7 @@ void StDraw3D::UpdateViewer(TVirtualPad *pad)
   \endcode
    to get the picture:
    \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.png "Test image is to show several tpc points , tpc track, barrel and endcap towers"
-   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Animatede version of the test image"
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Animated version of the test image"
 */
 //___________________________________________________
 void StDraw3D::Draw3DTest(){
