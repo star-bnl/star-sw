@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.85 2009/12/24 09:11:48 fine Exp $
+// $Id: StDraw3D.cxx,v 1.86 2010/01/24 05:45:45 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -805,11 +805,39 @@ void StDraw3D::Save(const char *filename, const char*type) const
     }
     else if (Pad()) Pad()->Print(filename,type);
 }
+
+
+//! Set the varous drawing option. The  functions passes the input \a options to TQtCoinWidged::SetDrawOption method 
+/*! \param  options - [ <shape1> [, shape2 [, . . .  shape-n] - a comma separated list of the OpenInventor files with no extension\n
+                    | <em> { parameter : value } </em> - enclosed into the curly brackets a pair "parameter : value"\n
+                     \param - <em> { file : file.iv } </em> - the iv file defining the top level OpenInventor node. 
+                          For example, it can be useful to customize the entire screen rotation / animation )\n
+                     \param - <em>{ footer: text }</em>  - define the image footer (caption)\n
+                     \param - <em>{ record : true | false }</em> - toogle the <em>"record scene"</em> option\n
+                     \param - <em>{ save : filename }</em> - save the current image into file\n
+                     \param - <em>{ screen : full }</em> - turn the <em>"fullscreen view"</em> option\n
+                     \param - <em>{ view : all  }</em> - zoom the image  in/out to make sure it fits the entire screen\n
+   <P>For example, the ROOT macro:
+   \code
+   void Draw3D()
+   {
+      gROOT->Macro("Load.C");  //< Load STAR framework shared libraries
+      gEventDisplay->Draw3DTest(); //< Invoke the built-in rendering test
+      gEventDisplay->SetDrawOption("{file:rotation.iv}");//< Add rotation to the scene
+      gEventDisplay->SetFooter("STAR Event Display Example");
+      gEventDisplay->Print("Draw3DTest.wrl"); //< Save the 3D scene into the file
+      gEventDisplay->SetDrawOption("{view:all}"); // zoom the scene in/out to fit the entire screen
+   }   
+   \endcode
+   is to produce the  animated image:
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Animatede version of the test image"
+   \sa Draw3D.C 
+*/   
 //___________________________________________________
-void StDraw3D::SetDrawOption(Option_t *option)
+void StDraw3D::SetDrawOption(Option_t *options)
 { 
    if ( TVirtualViewer3D *viewer = Viewer() ) 
-       viewer->SetDrawOption(option);
+       viewer->SetDrawOption(options);
 }
 
 //___________________________________________________
@@ -878,6 +906,7 @@ void StDraw3D::UpdateViewer(TVirtualPad *pad)
   \endcode
    to get the picture:
    \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.png "Test image is to show several tpc points , tpc track, barrel and endcap towers"
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/Draw3D.C.gif "Animatede version of the test image"
 */
 //___________________________________________________
 void StDraw3D::Draw3DTest(){
