@@ -166,9 +166,9 @@ void  GroupCollection::fill(evpReader* evp, char* datap, unsigned int triggerBit
     // Extra checks added to force filling of VPD histograms
     // Remove when testBits is fixed!
     //if((*iter)->testBits( triggerBits, detectorBits)){ 
-    if(!strcmp((*iter)->subGroupName(),"vpd") || !strcmp((*iter)->subGroupName(),"vpdHi") || !strcmp((*iter)->groupName(),"P2P") || (*iter)->testBits( triggerBits, detectorBits)){ 
+    //if(!strcmp((*iter)->subGroupName(),"vpd") || !strcmp((*iter)->subGroupName(),"vpdHi") || !strcmp((*iter)->groupName(),"P2P") || (*iter)->testBits( triggerBits, detectorBits)){ 
       (*iter)->fill(evp,datap);
-    }
+    //}
 
   }
 }
@@ -216,7 +216,8 @@ bool  GroupCollection::contains(const char* name) {
 
 void  GroupCollection::setActive() {
   for ( GroupIterator iter = begin(); iter != end(); iter++) {
-    bool act = (*iter)->testBits(mTriggerBits,mDetectorBits);
+    //bool act = (*iter)->testBits(mTriggerBits,mDetectorBits);
+    bool act = true;
     (*iter)->setActive( act );
     //cout << " set active " <<  (*iter)->id() << "    " << act << "   " << (*iter)->active() << endl;
   }
