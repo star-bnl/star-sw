@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.96 2010/01/25 03:57:39 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.97 2010/01/25 18:46:16 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -1103,7 +1103,7 @@ void StMuDstMaker::fillpp2pp(StEvent* ev) {
   StMuRpsCollection *typeOfRps=0;
 
   const StRpsCollection *rps=ev->rpsCollection();
-   addType( mArrays[mupp2pp], rps, typeOfRps );
+  if (rps) addType( mArrays[mupp2pp], *rps, typeOfRps );
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
@@ -1483,6 +1483,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.97  2010/01/25 18:46:16  fine
+ * RT #1826. Add protection against of the zero rps pointer and add the safe version of the StMuRpsCollection(const StRpsCollection & rps)  ctor
+ *
  * Revision 1.96  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
  *
