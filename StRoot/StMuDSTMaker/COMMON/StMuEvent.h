@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.24 2009/08/25 15:49:49 fine Exp $
+ * $Id: StMuEvent.h,v 1.25 2010/01/25 03:57:39 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -11,6 +11,7 @@
 #include "TArrayI.h"
 #include "StMuL3EventSummary.h"
 #include "StMuEmcCollection.h"
+#include "StMuFmsCollection.h"
 #include "StMuTriggerIdCollection.h"
 
 #include "StEvent/StEventInfo.h"
@@ -210,6 +211,9 @@ inline float StMuEvent::vpdVz() { return mVpdVz; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.25  2010/01/25 03:57:39  tone421
+ * Added FMS and Roman pot arrays
+ *
  * Revision 1.24  2009/08/25 15:49:49  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *

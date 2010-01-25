@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.95 2010/01/21 02:08:17 fine Exp $
+ * $Id: StMuDstMaker.cxx,v 1.96 2010/01/25 03:57:39 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -42,6 +42,7 @@
 #include "StMuException.hh"
 #include "StMuEvent.h"
 #include "StMuPrimaryVertex.h"
+#include "StMuRpsCollection.h"
 #include "StMuTrack.h"
 #include "StMuDebug.h"
 #include "StMuCut.h"
@@ -50,6 +51,9 @@
 #include "StMuChainMaker.h"
 #include "StMuEmcCollection.h"
 #include "StMuEmcUtil.h"
+#include "StMuFmsCollection.h"
+#include "StMuFmsUtil.h"
+#include "StMuFmsHit.h"
 #include "StMuPmdCollection.h"
 #include "StMuPmdUtil.h"
 #include "StMuPmdHit.h"
@@ -113,7 +117,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mChain (0), mTTree(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4), mVtxList(100),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mPmdCollectionArray(0), mPmdCollection(0)
+  mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 
 {
   assignArrays();
@@ -128,11 +132,12 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mEventCounter=0;
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
+  mFmsUtil = new StMuFmsUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
   mBTofUtil = new StMuBTofUtil();   /// dongx
   mEzTree  = new StMuEzTree();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil || ! mBTofUtil || ! mEzTree ) /// dongx
+  if ( ! mStMuDst || ! mEmcUtil || ! mFmsUtil || ! mPmdUtil  || ! mTofUtil || ! mBTofUtil || ! mEzTree ) /// dongx
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
 
@@ -160,7 +165,8 @@ void StMuDstMaker::assignArrays()
   mArrays         = mAArrays       + 0;       
   mStrangeArrays  = mArrays        + __NARRAYS__;
   mEmcArrays      = mStrangeArrays + __NSTRANGEARRAYS__;    
-  mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;    
+  mFmsArrays      = mEmcArrays     + __NEMCARRAYS__;      
+  mPmdArrays      = mFmsArrays     + __NFMSARRAYS__;    
   mTofArrays      = mPmdArrays     + __NPMDARRAYS__;    
   mBTofArrays     = mTofArrays     + __NTOFARRAYS__;  /// dongx
   mEztArrays      = mBTofArrays    + __NBTOFARRAYS__; /// dongx
@@ -169,7 +175,7 @@ void StMuDstMaker::assignArrays()
 void StMuDstMaker::clearArrays()
 {
   const int ezIndex=__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
-    __NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__;  /// dongx
+    __NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__;  /// dongx
   for ( int i=0; i<ezIndex; i++) {
     mAArrays[i]->Clear();
     StMuArrays::arrayCounters[i]=0;
@@ -187,7 +193,7 @@ void StMuDstMaker::zeroArrays()
   memset(mStatusArrays,(char)1,sizeof(mStatusArrays) ); //default all ON
   // ezt arrays switched off
   memset(&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
-			__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
+			__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
   
 }
 //-----------------------------------------------------------------------
@@ -219,16 +225,17 @@ void StMuDstMaker::zeroArrays()
 */
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
-  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll","BTofAll","EztAll",0};  /// dongx
+  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","FMSAll","PmdAll","TofAll","BTofAll","EztAll",0};  /// dongx
   static const int   specIndex[]={
     0, 
     __NARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
     -1};
 
   if (strncmp(arrType,"St",2)==0) arrType+=2;  //Ignore first "St"
@@ -267,7 +274,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mPmdCollectionArray(0), mPmdCollection(0)
+mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 {
   assignArrays();
   streamerOff();
@@ -281,6 +288,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mEventCounter=0;
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
+  mFmsUtil = new StMuFmsUtil();
   mPmdUtil = new StMuPmdUtil();
   mTofUtil = new StMuTofUtil();
   mBTofUtil= new StMuBTofUtil();  /// dongx
@@ -334,7 +342,8 @@ void  StMuDstMaker::streamerOff() {
   StMuHelix::Class()->IgnoreTObjectStreamer();
   StMuEmcHit::Class()->IgnoreTObjectStreamer();
   StMuEmcTowerData::Class()->IgnoreTObjectStreamer();
-  StMuPmdHit::Class()->IgnoreTObjectStreamer();
+  StMuFmsHit::Class()->IgnoreTObjectStreamer();
+   StMuPmdHit::Class()->IgnoreTObjectStreamer();
   StMuPmdCluster::Class()->IgnoreTObjectStreamer();
   EztEventHeader::Class()->IgnoreTObjectStreamer();
   EztTrigBlob::Class()->IgnoreTObjectStreamer();
@@ -348,7 +357,7 @@ void StMuDstMaker::createArrays() {
   /// all stuff
   for ( int i=0; i<__NALLARRAYS__; i++) {
     DEBUGVALUE2(mAArrays[i]);
-    clonesArray(mAArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
+	clonesArray(mAArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
     DEBUGVALUE2(mAArrays[i]);
   }
   mStMuDst->set(this);
@@ -392,10 +401,10 @@ int StMuDstMaker::Init(){
 //-----------------------------------------------------------------------
 void StMuDstMaker::Clear(const char *){
   DEBUGMESSAGE2("");
-
   if (mIoMode==ioRead)
     return;
   clearArrays();
+  if(mStMuDst->event()) mStMuDst->event()->fmsTriggerDetector().clearFlag(); //Clear flag for every event
 
   DEBUGMESSAGE3("out");
 }
@@ -409,16 +418,18 @@ void StMuDstMaker::Clear(const char *){
    will hold the current event if the io was successful, or return a null pointer.
 */
 int StMuDstMaker::Make(){
+
   DEBUGMESSAGE2("");
   int returnStarCode = kStOK;
   StTimer timer;
-  timer.start();
+  timer.start(); 
   if (mIoMode == ioWrite)     returnStarCode = MakeWrite();
   else if (mIoMode == ioRead) returnStarCode = MakeRead();
   DEBUGVALUE2(timer.elapsedTime());
   return returnStarCode;
-}
 
+
+}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -429,7 +440,7 @@ Int_t StMuDstMaker::MakeRead(const StUKey &RunEvent)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-Int_t StMuDstMaker::MakeRead() 
+Int_t StMuDstMaker::MakeRead()
 {
    int returnStarCode = kStOK;
    if (mIoMode == ioRead) {
@@ -446,8 +457,8 @@ Int_t StMuDstMaker::MakeRead()
      }
   }
   return returnStarCode;
-}
-
+} 
+    
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -468,7 +479,6 @@ Int_t StMuDstMaker::MakeWrite(){
   }
   return returnStarCode;
 }
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -639,6 +649,12 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     mStMuDst->set(this);
   }
 
+  if (!mFmsCollection) {
+    mFmsCollection=new StMuFmsCollection();
+    connectFmsCollection();
+    mStMuDst->set(this);
+  }
+
   if (pmd_oldformat) {
     TBranch *branch=chain->GetBranch("PmdCollection");
     if (branch) {
@@ -789,9 +805,10 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
 
  try {
     fillEvent(ev);
-    fillL3AlgorithmInfo(ev);
+	fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
     fillEmc(ev);
+	fillFms(ev);
     fillPmd(ev);
     fillTof(ev);
     fillBTof(ev);  /// dongx
@@ -811,13 +828,19 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
 
   try {
+	fillpp2pp(ev);
+  }
+  catch(StMuException e) {
+    e.print();
+    throw e;
+  }
+  try {
     fillTracks(ev,mTrackFilter);
   }
   catch(StMuException e) {
     e.print();
     throw e;
   }
-
   try {
     fillL3Tracks(ev, mL3TrackFilter);
   }
@@ -877,7 +900,25 @@ void StMuDstMaker::fillEmc(StEvent* ev) {
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillFms(StEvent* ev) {
+  DEBUGMESSAGE2("");
+  StFmsCollection* fmscol=(StFmsCollection*)ev->fmsCollection();
+  if (!fmscol)  return; //throw StMuExceptionNullPointer("no StFmsCollection",__PRETTYF__);
+  StTimer timer;
+  timer.start();
 
+  if (!mFmsCollection) {
+    mFmsCollection=new StMuFmsCollection();
+    connectFmsCollection();
+    mStMuDst->set(this);
+  }
+  mFmsUtil->fillMuFms(mFmsCollection,fmscol);
+
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillPmd(StEvent* ev) {
@@ -1052,6 +1093,21 @@ void StMuDstMaker::fillVertices(StEvent* ev) {
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
+
+
+void StMuDstMaker::fillpp2pp(StEvent* ev) {
+  DEBUGMESSAGE2("");
+  StTimer timer;
+  timer.start();
+
+  StMuRpsCollection *typeOfRps=0;
+
+  const StRpsCollection *rps=ev->rpsCollection();
+   addType( mArrays[mupp2pp], rps, typeOfRps );
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1412,7 +1468,10 @@ void StMuDstMaker::connectEmcCollection() {
   mEmcCollection->setSmdArray(7,mEmcArrays[muEEmcSmdu]);
   mEmcCollection->setSmdArray(8,mEmcArrays[muEEmcSmdv]);
 }
-
+//-----------------------------------------------------------------------
+void StMuDstMaker::connectFmsCollection() {
+  mFmsCollection->setFmsHitArray(mFmsArrays[muFmsHit]);
+}
 //-----------------------------------------------------------------------
 void StMuDstMaker::connectPmdCollection() {
   mPmdCollection->setPmdHitArray(mPmdArrays[muPmdHit]);
@@ -1424,6 +1483,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.96  2010/01/25 03:57:39  tone421
+ * Added FMS and Roman pot arrays
+ *
  * Revision 1.95  2010/01/21 02:08:17  fine
  * RT #1803: Restore the broken MakeRead/MakeWrite interface to fix Skip event method
  *

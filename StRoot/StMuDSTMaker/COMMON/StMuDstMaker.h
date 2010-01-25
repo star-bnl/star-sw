@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.49 2010/01/21 02:08:17 fine Exp $
+ * $Id: StMuDstMaker.h,v 1.50 2010/01/25 03:57:39 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -56,6 +56,10 @@ class StStrangeCuts;
 #include "StMuEmcCollection.h"
 class StMuEmcUtil;
 
+/// fms stuff
+#include "StMuFmsCollection.h"
+class StMuFmsUtil;
+
 /// PMD by Supriya Das
 #include "StMuPmdCollection.h"
 class StMuPmdUtil;
@@ -83,6 +87,8 @@ class TTree;
 class TChain;
 class TClonesArray;
 class TEventList;
+
+class StMuRpsCollection;
 
 /**
    \class StMuDstMaker
@@ -157,11 +163,12 @@ class StMuDstMaker : public StIOInterFace {
   void setCompression(int comp=9);
 
   StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
+  StMuFmsUtil* muFmsUtil() { return mFmsUtil; } ///< return pointer to StMuFmsUtil;
   StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.49 2010/01/21 02:08:17 fine Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.50 2010/01/25 03:57:39 tone421 Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -170,6 +177,7 @@ class StMuDstMaker : public StIOInterFace {
 protected:
   /// routine to set up connection between mEmcCollection and Emc arrays
   void connectEmcCollection();
+  void connectFmsCollection();
   void connectPmdCollection();
   enum ioMode {ioRead, ioWrite};
   /** Specifies the way the output file name is contructed when creating muDsts.
@@ -188,6 +196,7 @@ protected:
   StIOMaker* mIOMaker;
   StTreeMaker* mTreeMaker;
   StMuEmcUtil* mEmcUtil;
+  StMuFmsUtil* mFmsUtil;
   StMuPmdUtil* mPmdUtil;
   StMuTofUtil* mTofUtil;
   /// dongx
@@ -256,8 +265,10 @@ virtual   void closeRead();
   void fillTrees(StEvent* ev, StMuCut* cut=0);
   void fillEvent(StEvent* ev, StMuCut* cut=0);
   void fillVertices(StEvent* ev);
+  void fillpp2pp(StEvent* ev);
   void fillPmd(StEvent* ev);
   void fillEmc(StEvent* ev);
+  void fillFms(StEvent* ev);
   void fillStrange(StStrangeMuDstMaker*);
   void fillL3Tracks(StEvent* ev, StMuCut* cut=0);
   void fillTracks(StEvent* ev, StMuCut* cut=0);
@@ -310,6 +321,7 @@ virtual   void closeRead();
   TClonesArray** mArrays;       //[__NARRAYS__       ];
   TClonesArray** mStrangeArrays;//[__NSTRANGEARRAYS__];
   TClonesArray** mEmcArrays;    //[__NEMCARRAYS__    ];
+  TClonesArray** mFmsArrays;    //[__NFMSARRAYS__    ];
   TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
   TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
   /// dongx
@@ -318,6 +330,7 @@ virtual   void closeRead();
   char           mStatusArrays    [__NALLARRAYS__    ];
   TClonesArray*  mEmcCollectionArray; // Needed to hold old format
   StMuEmcCollection *mEmcCollection;
+  StMuFmsCollection *mFmsCollection;
   TClonesArray*  mPmdCollectionArray; // Needed to hold old format
   StMuPmdCollection *mPmdCollection;
 
@@ -355,6 +368,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.50  2010/01/25 03:57:39  tone421
+ * Added FMS and Roman pot arrays
+ *
  * Revision 1.49  2010/01/21 02:08:17  fine
  * RT #1803: Restore the broken MakeRead/MakeWrite interface to fix Skip event method
  *
