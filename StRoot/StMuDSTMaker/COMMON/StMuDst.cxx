@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.47 2009/12/01 03:42:54 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.48 2010/01/25 03:57:39 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -16,9 +16,11 @@
 #include "StMuDstMaker.h"
 #include "StMuEvent.h"
 #include "StMuPrimaryVertex.h"
+#include "StMuRpsCollection.h"
 #include "StMuTrack.h"
 #include "StMuDebug.h"
 #include "StMuEmcUtil.h"
+#include "StMuFmsUtil.h"
 #include "StMuPmdUtil.h"
 ///dongx
 #include "StBTofCollection.h"
@@ -36,14 +38,17 @@
 TClonesArray** StMuDst::arrays       = 0;
 TClonesArray** StMuDst::strangeArrays= 0;
 TClonesArray** StMuDst::emcArrays    = 0;
+TClonesArray** StMuDst::fmsArrays    = 0;
 TClonesArray** StMuDst::pmdArrays    = 0;
 TClonesArray** StMuDst::tofArrays    = 0;
 TClonesArray** StMuDst::btofArrays    = 0;   /// dongx
 TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
 StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
+StMuFmsCollection *StMuDst::mMuFmsCollection = 0;
 TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
 StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
 StEmcCollection *StMuDst::mEmcCollection = 0;
+StFmsCollection *StMuDst::mFmsCollection = 0;
 TClonesArray** StMuDst::eztArrays    = 0;
 
 Int_t StMuDst::mCurrVertexId = 0;
@@ -61,14 +66,17 @@ void StMuDst::unset() {
     arrays        = 0;
     strangeArrays = 0;
     emcArrays     = 0;
+	fmsArrays     = 0;
     pmdArrays     = 0;
     tofArrays     = 0;
     btofArrays    = 0;   // dongx
     mMuEmcCollectionArray = 0;
-    mMuEmcCollection = 0;
+    mMuEmcCollection = 0; 
+	mMuFmsCollection = 0;
     mMuPmdCollectionArray = 0;
     mMuPmdCollection = 0;
     mEmcCollection = 0;
+	mFmsCollection = 0;
     eztArrays      = 0;
 }
 //-----------------------------------------------------------------------
@@ -80,12 +88,14 @@ void StMuDst::set(StMuDstMaker* maker) {
   arrays        = maker->mArrays;
   strangeArrays = maker->mStrangeArrays;
   emcArrays     = maker->mEmcArrays;
+  fmsArrays     = maker->mFmsArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
   btofArrays    = maker->mBTofArrays;   // dongx
   mMuEmcCollectionArray = maker->mEmcCollectionArray;
   mMuEmcCollection      = maker->mEmcCollection;
-  mMuPmdCollectionArray = maker->mPmdCollectionArray;
+  mMuFmsCollection      = maker->mFmsCollection;
+   mMuPmdCollectionArray = maker->mPmdCollectionArray;
   mMuPmdCollection = maker->mPmdCollection;
   eztArrays     = maker->mEztArrays;
 
@@ -101,11 +111,13 @@ void StMuDst::set(StMuDstMaker* maker) {
 void StMuDst::set(TClonesArray** theArrays, 
 		  TClonesArray** theStrangeArrays, 
 		  TClonesArray** theEmcArrays,
+		  TClonesArray** theFmsArrays,
 		  TClonesArray** thePmdArrays,
                   TClonesArray** theTofArrays,
                   TClonesArray** theBTofArrays,    // dongx
                   TClonesArray* emc_arr,
 		  StMuEmcCollection *emc,
+ 		  StMuFmsCollection *fms,		  
                   TClonesArray* pmd_arr,
 		  StMuPmdCollection *pmd,
 		  TClonesArray** theEztArrays) 
@@ -115,12 +127,14 @@ void StMuDst::set(TClonesArray** theArrays,
   DEBUGMESSAGE2("");
   arrays        = theArrays;
   strangeArrays = theStrangeArrays;
-  emcArrays     = theEmcArrays;
+  emcArrays     = theEmcArrays;   
+  fmsArrays     = theFmsArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
   btofArrays    = theBTofArrays;    // dongx
   mMuEmcCollectionArray = emc_arr;  
-  mMuEmcCollection = emc;  
+  mMuEmcCollection = emc; 
+  mMuFmsCollection = fms;  
   mMuPmdCollectionArray = pmd_arr;
   mMuPmdCollection = pmd;
   eztArrays     = theEztArrays;
@@ -395,6 +409,13 @@ StEvent* StMuDst::createStEvent() {
     StEmcCollection *EMC = mEmcUtil->getEmc(emc);
     if(EMC) ev->setEmcCollection(EMC);
   }
+  // now get the FMS stuff and put it in the StEvent
+  static StMuFmsUtil* mFmsUtil = new StMuFmsUtil();
+  StMuFmsCollection *fms = muFmsCollection();
+  if(fms) { // transform to StEvent format and fill it
+     StFmsCollection *FMS = mFmsUtil->getFms(fms);
+     if(FMS) ev->setFmsCollection(FMS);
+  }
   // now get the PMD stuff and put it in the StEvent
   static StMuPmdUtil* mPmdUtil = new StMuPmdUtil();
   StMuPmdCollection *pmd = pmdCollection();
@@ -566,8 +587,12 @@ void StMuDst::Print(Option_t *option) const {
     cout << "EMC data present" << endl;
   else
     cout << "No EMC data present" << endl;
-
-  if (pmdCollection())
+   cout << endl;
+   if (muFmsCollection())
+     cout << "FMS data present" << endl;
+   else
+     cout << "No FMS data present" << endl;
+   if (pmdCollection())
     cout << "PMD data present" << endl;
   else
     cout << "No PMD data present" << endl;
@@ -626,6 +651,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.48  2010/01/25 03:57:39  tone421
+ * Added FMS and Roman pot arrays
+ *
  * Revision 1.47  2009/12/01 03:42:54  tone421
  * Fixed small bug in StMuDst::fixTrackIndices and StMuDst::fixTofTrackIndices(), added StMuTrack::primaryTrack() and ensured StMuTrack::vertexIndex() returns some sensible for globals.
  *

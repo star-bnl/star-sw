@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.18 2009/02/20 16:37:44 tone421 Exp $
+ * $Id: StMuArrays.h,v 1.19 2010/01/25 03:57:39 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -17,11 +17,13 @@
 //enum emcTypes {muEmc=0};
 enum emcTypes {muEmcTow=0, muEmcPrs, muEmcSmde, muEmcSmdp, muEEmcPrs, muEEmcSmdu, muEEmcSmdv};
 
+enum fmsTypes {muFmsHit=0};
+
 /// @enum strangeTypes enumeration to to index the strangeArrays
 enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
 
 /// @enum enumeration to to index the arrays
-enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject, muCovGlobTrack, muCovPrimTrack}; 
+enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject, muCovGlobTrack, muCovPrimTrack, mupp2pp}; 
 
 /// @enum pmdTypes enumeration to to index the pmdArrays
 enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster}; 
@@ -37,16 +39,17 @@ enum btofTypes {muBTofHit=0, muBTofRawHit, muBTofHeader};
 enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
 
 enum NARRAYS {
-__NARRAYS__        =12,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  (add two more for global and primary track covariance matrices)
+__NARRAYS__        =13,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  (add two more for global and primary track covariance matrices)
 __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
+ __NFMSARRAYS__     =1 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
 __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
 /// dongx
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__
 };
 class StMuArrays {
  public:
@@ -55,6 +58,7 @@ class StMuArrays {
     static const char*         arrayNames    [__NALLARRAYS__    ];
     static const char** strangeArrayNames; //[__NSTRANGEARRAYS__]
     static const char**      emcArrayNames;//[__NEMCARRAYS__    ]
+	static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
     static const char**      pmdArrayNames;//[__NPMDARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
     static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
@@ -64,6 +68,7 @@ class StMuArrays {
     static const char*   arrayTypes          [__NALLARRAYS__    ];
     static const char**  strangeArrayTypes;//[__NSTRANGEARRAYS__]
     static const char**  emcArrayTypes;//    [__NEMCARRAYS__    ]
+    static const char**  fmsArrayTypes;//    [__NFMSARRAYS__    ]
     static const char**  pmdArrayTypes;//    [__NPMDARRAYS__    ]
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
     static const char**  btofArrayTypes;//   [__NBTOFARRAYS__   ]  // dongx
@@ -73,7 +78,8 @@ class StMuArrays {
     static int           arraySizes    [__NALLARRAYS__    ];
     static int*   strangeArraySizes;// [__NSTRANGEARRAYS__]
     static int*       emcArraySizes;// [__NEMCARRAYS__    ]
-    static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
+	static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
+	static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
     static int*      btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
     static int*       eztArraySizes;// [__NEZARRAYS__    ]
@@ -82,6 +88,7 @@ class StMuArrays {
     static int        arrayCounters    [__NALLARRAYS__    ];
     static int*strangeArrayCounters;// [__NSTRANGEARRAYS__]
     static int*    emcArrayCounters;// [__NEMCARRAYS__    ]
+	static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
     static int*    pmdArrayCounters;// [__NPMDARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
@@ -93,6 +100,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.19  2010/01/25 03:57:39  tone421
+ * Added FMS and Roman pot arrays
+ *
  * Revision 1.18  2009/02/20 16:37:44  tone421
  * *** empty log message ***
  *

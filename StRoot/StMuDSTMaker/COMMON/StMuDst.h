@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.35 2009/08/28 14:55:55 tone421 Exp $
+ * $Id: StMuDst.h,v 1.36 2010/01/25 03:57:39 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -30,12 +30,14 @@ class StStrangeAssoc;
 class TCut;
 
 class StMuEmcCollection;
+class StMuFmsCollection;
 class StMuPmdCollection;
 
 class StEvent;
 class StTrack;
 class StTrackGeometry;
 class StEmcCollection;
+class StFmsCollection;;
 
 class StMuTofHit;
 class StTofData;
@@ -54,6 +56,8 @@ class EztEmcRawData;
 
 class StDcaGeometry;
 class StMuPrimaryTrackCovariance;
+
+class StMuRpsCollection;
 
 #include "StPhysicalHelixD.hh"
 
@@ -87,10 +91,12 @@ public:
   void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
   /// dongx
-  void set(TClonesArray**, TClonesArray**, TClonesArray** emc_ptca=0, TClonesArray** pmd_ptca=0, TClonesArray** tof_ptca=0, TClonesArray** btof_ptca=0, TClonesArray *emc_tca=0, StMuEmcCollection *emc_col=0, TClonesArray *pmd_tca=0, StMuPmdCollection *pmd_col=0, TClonesArray** ezt_ptca=0);
+  void set(TClonesArray**, TClonesArray**, TClonesArray** emc_ptca=0, TClonesArray** fms_ptca=0, TClonesArray** pmd_ptca=0, TClonesArray** tof_ptca=0, TClonesArray** btof_ptca=0, TClonesArray *emc_tca=0, StMuEmcCollection *emc_col=0, StMuFmsCollection *fms_col=0, TClonesArray *pmd_tca=0, StMuPmdCollection *pmd_col=0, TClonesArray** ezt_ptca=0);
   /// set pointer to current StEmcCollection
   static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
+  static void setFmsCollection(StFmsCollection *fms_coll) { mFmsCollection=fms_coll; }
+
   /// resets the pointers to the TClonesArrays to 0
   void unset();
   /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
@@ -115,6 +121,8 @@ public:
   static TClonesArray** strangeArrays;
   /// array of TClonesArrays for the stuff inherited from the Emc
   static TClonesArray** emcArrays;
+  /// array of TClonesArrays for the stuff inherited from the Fms
+  static TClonesArray** fmsArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
   static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
@@ -127,10 +135,14 @@ public:
   static StMuEmcCollection *mMuEmcCollection;
   // pointer to array with MuPmdCollection (for backward compatible mode)
   static TClonesArray *mMuPmdCollectionArray;
+  /// pointer to FmsCollection (manages the FmsArrays)
+  static StMuFmsCollection *mMuFmsCollection; 
   /// pointer to PmdCollection (manages the PmdArrays)
   static StMuPmdCollection *mMuPmdCollection;
   /// pointer to EmcCollecion (for Emc clusterfinding etc)
   static StEmcCollection *mEmcCollection;
+  /// pointer to FmsCollecion (for Fms clusterfinding etc)
+  static StFmsCollection *mFmsCollection;
   /// array of TClonesArrays for the stuff inherited from the EZT (ezTree)
   static TClonesArray** eztArrays;
 
@@ -152,7 +164,9 @@ public:
   static TClonesArray* strangeArray(int type) { return strangeArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the emc arrays
   static TClonesArray* emcArray(int type) { return emcArrays[type]; }
-  /// returns pointer to the n-th TClonesArray from the pmd arrays
+   /// returns pointer to the n-th TClonesArray from the fms arrays
+  static TClonesArray* fmsArray(int type) { return fmsArrays[type]; }
+    /// returns pointer to the n-th TClonesArray from the pmd arrays
   static TClonesArray* pmdArray(int type) { return pmdArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the tof arrays
   static TClonesArray* tofArray(int type) { return tofArrays[type]; }
@@ -204,6 +218,9 @@ public:
   static StL3AlgorithmInfo* l3AlgoAccept(int i) { return (StL3AlgorithmInfo*)arrays[muAccept]->UncheckedAt(i); }
   /// returns pointer to i-th rejected StL3AlgorithmInfo
   static StL3AlgorithmInfo* l3AlgoReject(int i) { return (StL3AlgorithmInfo*)arrays[muReject]->UncheckedAt(i); }
+  //returns pp2pp infomation
+  static StMuRpsCollection* RpsCollection() { return (StMuRpsCollection*)arrays[mupp2pp]->UncheckedAt(0); }
+
   static StDcaGeometry* covGlobTracks(int i) { return (StDcaGeometry*)arrays[muCovGlobTrack]->UncheckedAt(i); }
   static StMuPrimaryTrackCovariance* covPrimTracks(int i) { return (StMuPrimaryTrackCovariance*)arrays[muCovPrimTrack]->UncheckedAt(i); }
  
@@ -248,10 +265,14 @@ public:
 
   /// returns pointer to current StMuEmcCollection
   static StMuEmcCollection* muEmcCollection() { if (mMuEmcCollectionArray) return (StMuEmcCollection*) mMuEmcCollectionArray->UncheckedAt(0); else return mMuEmcCollection; }
+   /// returns pointer to current StMuFmsCollection
+  static StMuFmsCollection* muFmsCollection() { return mMuFmsCollection; }
   /// returns pointer to current StMuPmdCollection
   static StMuPmdCollection* pmdCollection() { if (mMuPmdCollectionArray)  return (StMuPmdCollection*) mMuPmdCollectionArray->UncheckedAt(0); else return mMuPmdCollection; }
   /// returns pointer to current StEmcCollection
   static StEmcCollection* emcCollection() {  return mEmcCollection; }
+  /// returns pointer to current StFmsCollection
+  static StFmsCollection* fmsCollection() {  return mFmsCollection; }
 
   /// returns pointer to the i-th muTofHit
   static StMuTofHit* tofHit(int i) { return (StMuTofHit*)tofArrays[muTofHit]->UncheckedAt(i); }
@@ -359,6 +380,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.36  2010/01/25 03:57:39  tone421
+ * Added FMS and Roman pot arrays
+ *
  * Revision 1.35  2009/08/28 14:55:55  tone421
  * Changed tofArrays to btofArrays returned objects in numberOfBTofHit() and numberOfBTofRawHit()
  *
