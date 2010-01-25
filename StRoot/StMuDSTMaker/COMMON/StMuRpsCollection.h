@@ -13,7 +13,7 @@ class StMuRpsCollection : public TObject {
 public:
 
 	StMuRpsCollection() {; }
-	StMuRpsCollection(const StRpsCollection*& vertex);
+	StMuRpsCollection(const StRpsCollection& vertex);
 	~StMuRpsCollection() {;}
 
 //Roman pot Level Info
