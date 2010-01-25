@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.cxx,v 1.9 2010/01/15 21:26:51 fine Exp $
+// $Id: StTrgDatReader.cxx,v 1.10 2010/01/25 17:41:53 akio Exp $
 //
 // $Log: StTrgDatReader.cxx,v $
+// Revision 1.10  2010/01/25 17:41:53  akio
+// Remove RecordSize, and RecordUnixTime to return 2019686401 (Sat Dec 31 19:00:01 2033)
+//
 // Revision 1.9  2010/01/15 21:26:51  fine
 // RT #1816. Eliminate the side effect from RT 1803 fix
 //
@@ -131,13 +134,7 @@ int StTrgDatReader::RunNumber()  const  {
 int  StTrgDatReader::RecordUnixTime() const
 { 
    // the current record /event unix time (-1 = "unknown") 
-   return -1; 
-}
-//__________________________________________________________________________
-int  StTrgDatReader::RecordSize()     const
-{ 
-   // the current record /event sinz in bytes (-1 = "unknown") 
-   return -1; 
+   return 2019686401; 
 }
 
 //__________________________________________________________________________

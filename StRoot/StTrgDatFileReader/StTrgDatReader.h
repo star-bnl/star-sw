@@ -1,6 +1,9 @@
-// $Id: StTrgDatReader.h,v 1.5 2010/01/15 21:26:51 fine Exp $
+// $Id: StTrgDatReader.h,v 1.6 2010/01/25 17:41:53 akio Exp $
 //
 // $Log: StTrgDatReader.h,v $
+// Revision 1.6  2010/01/25 17:41:53  akio
+// Remove RecordSize, and RecordUnixTime to return 2019686401 (Sat Dec 31 19:00:01 2033)
+//
 // Revision 1.5  2010/01/15 21:26:51  fine
 // RT #1816. Eliminate the side effect from RT 1803 fix
 //
@@ -44,8 +47,6 @@ public: // implementation of StStreamFile abstract interface
   int   Version() const;
   int   RunNumber() const;
   int   RecordUnixTime() const;
-  int   RecordSize()     const;
-
   
 protected :
   char *Buffer(streamsize n);
