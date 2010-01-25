@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.86 2010/01/15 21:26:50 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.87 2010/01/25 17:17:10 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.87  2010/01/25 17:17:10  fine
+ * Remove the redundant RecordSize method
+ *
  * Revision 1.86  2010/01/15 21:26:50  fine
  * RT #1816. Eliminate the side effect from RT 1803 fix
  *
@@ -656,7 +659,7 @@ int StDAQReader::getEventSize()const
 {
    int eventSize = 0;
    if (fDatFileReader) 
-      eventSize = fDatFileReader->RecordSize();
+      eventSize = fDatFileReader->Length();
    else
       eventSize = fEventInfo->EventLength; 
    return eventSize;

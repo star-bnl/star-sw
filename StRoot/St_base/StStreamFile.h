@@ -1,5 +1,8 @@
-// $Id: StStreamFile.h,v 1.6 2010/01/15 21:26:51 fine Exp $
+// $Id: StStreamFile.h,v 1.7 2010/01/25 17:17:11 fine Exp $
 // $Log: StStreamFile.h,v $
+// Revision 1.7  2010/01/25 17:17:11  fine
+// Remove the redundant RecordSize method
+//
 // Revision 1.6  2010/01/15 21:26:51  fine
 // RT #1816. Eliminate the side effect from RT 1803 fix
 //
@@ -57,7 +60,6 @@ public: // abstract interface
   virtual int   Version()   const   = 0;
   virtual int   RunNumber() const   = 0;
   virtual int   RecordUnixTime() const   = 0;
-  virtual int   RecordSize()     const   = 0;
 
 public: // fstream proxy interface   
   // fstream proxy methods
