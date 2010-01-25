@@ -217,7 +217,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       int dataword=tof.ddl[ifib][iword];
       //cout<<"TOF:: ifib="<<ifib<<" dataword=0x"<<hex<<dataword<<dec<<endl;
       int packetid = (dataword&0xF0000000)>>28;
-      //if(TOF_EventCount->GetEntries()>0) {
+      if(TOF_EventCount->GetEntries()>1) {
       if(!ValidDataword(packetid)) TOF_Error1->Fill(trayid+0.5*halftrayid);
       //if(!ValidDataword(packetid)) cout<<"ERROR!!!!"<<hex<<"dataword=0x"<<dataword<<dec<<"tray="<<trayid<<endl;
       //}
@@ -254,7 +254,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       //if(trayid<121) {
       //if(halftrayid==0) TOF_Tray_hits1->Fill(trayid-1);
       //if(halftrayid==1) TOF_Tray_hits2->Fill(trayid-0.5);
-      //}
+      }
 
     }  // end loop nword
   }  // end loop fiber
