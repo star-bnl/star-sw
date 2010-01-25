@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFmsTriggerDetector.cxx,v 2.8 2010/01/13 17:51:55 ullrich Exp $
+ * $Id: StFmsTriggerDetector.cxx,v 2.9 2010/01/25 17:25:00 ullrich Exp $
  *
  * Author: Akio Ogawa, Apr 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFmsTriggerDetector.cxx,v $
+ * Revision 2.9  2010/01/25 17:25:00  ullrich
+ * Removed some redundant messages.
+ *
  * Revision 2.8  2010/01/13 17:51:55  ullrich
  * New clearFlag() for mudst reading, Data member mNumHeader gets //!
  *
@@ -37,13 +40,13 @@
 #include "Stiostream.h"
 #include <stdio.h>
 
-static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.8 2010/01/13 17:51:55 ullrich Exp $";
+static const char rcsid[] = "$Id: StFmsTriggerDetector.cxx,v 2.9 2010/01/25 17:25:00 ullrich Exp $";
 
 ClassImp(StFmsTriggerDetector)
     
 StFmsTriggerDetector::StFmsTriggerDetector()
 {
-    cout << "StFmsTriggerDetector default constructor" << endl;
+    //cout << "StFmsTriggerDetector default constructor" << endl;
     memset(mBeg,0,mEnd-mBeg);
     mNumHeader=-1;
     mNumQTdata=0;
@@ -51,7 +54,7 @@ StFmsTriggerDetector::StFmsTriggerDetector()
 
 StFmsTriggerDetector::StFmsTriggerDetector(const StTriggerData& t)
 {
-    cout << "StFmsTriggerDetector constructor with StTriggerData" << endl;
+    //cout << "StFmsTriggerDetector constructor with StTriggerData" << endl;
     const unsigned char  *c=0;
     const unsigned short *s=0;
     const unsigned int   *i=0;
@@ -78,14 +81,14 @@ StFmsTriggerDetector::~StFmsTriggerDetector() {/* noop */}
 
 void
 StFmsTriggerDetector::clearFlag() { 
-    cout << "StFmsTriggerDetector::clearFlag" << endl;
+    //cout << "StFmsTriggerDetector::clearFlag" << endl;
     mNumHeader=-1;
 }
 
 void
 StFmsTriggerDetector::decode()
 {
-    cout << "FMS data decode!!!" << endl;
+    //cout << "FMS data decode!!!" << endl;
     mNumHeader=0;
     if (mNumQTdata==0) return;
     memset(mADC,0,sizeof(mADC));
