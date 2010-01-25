@@ -15,7 +15,7 @@ void drawEmbeddingQA(
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
-  gSystem->Load("StEmbeddingQAMaker");
+  gSystem->Load("StEmbeddingUtilities");
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, geantid);
   maker->setOutputDirectory(outputDirectory);
@@ -65,7 +65,7 @@ void drawEmbeddingQA(
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
-  gSystem->Load("StEmbeddingQAMaker");
+  gSystem->Load("StEmbeddingUtilities");
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, year, production, geantid);
   maker->setOutputDirectory(outputDirectory);
