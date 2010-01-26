@@ -3,15 +3,16 @@ const float PI=2*acos(0);
 
 //=================================================
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  iPath="out-Jan10-Austin/";
+  //iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
-  iPath="/star/data05/scratch/balewski/2009-WanaJ-SL09g-x/data/";
+  iPath="/star/data05/scratch/balewski/2009-WanaJ-SL09g-jan20-APScode0/data/";
   //core0="R10090081";
   core0="run9setABCD";
   //core0="run9setP1234";
   //core0="mcSetD1_ppWprod";
-   //core0="mcSetD2_ppQCD10_inf_filter_tot";
-   // core0="mcSetD1_ppZprod";
+  //core0="mcSetD2_ppQCD10_inf_filter_tot";
+  // core0="mcSetD1_ppZprod";
+
   if(page==0) {
     doAll();
     return;
@@ -20,17 +21,9 @@ plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oP
     doAllMC();
     return;
   }
-  
+   
 /*
 cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
-
-
-cat R10097000*ps | ps2pdf - all.pdf
-cp all.pdf ~/WWW/tmp/all-F10505x.pdf
-
-cat run9setABCD*ps | ps2pdf - all.pdf
-cp all.pdf ~/WWW/tmp/all-run9.pdf
-
 */
 
 
@@ -49,7 +42,7 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
   char *nameM[]={"muTwayET","muBwayET","muBclETPt","muEwayET"};//pg 12
   
   char *nameW[]={"muTotwayET2D","muAwayTotEt","muWET","muW2D1"};//pg 13
-  // pg 14 -free
+  char *namePB[]={"muptBalance_clust", "muptBalance_awayTot"};// pg 14 -Pt-Balance plots
   char *nameB1[]={"muSEadc1","muSPadc1"}; // pg 15 BSMD spectra
   char *nameN[]={"muTrdEdX","muWdedx"}; //pg 16
   char *nameO[]={"muWglDca","muWglDcaSP","muWglDcaSN"}; // pg 17
@@ -65,7 +58,7 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
   char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N","spinY3_P","spinY2_N"};// pg 24
   char *nameS3[]={"spinY4_P","spinY4_N"};// pg 25
 
-  //use  Page 30 -50 TPC sectors per cut, 2 pages per cut
+  //use  Page 30 -42 TPC sectors per cut, 2 pages per cut
 
   gStyle->SetOptFit(1);
   TString fullInpName=iPath;  fullInpName+=core0;
@@ -84,6 +77,8 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
    for(int k=1;k<=10;k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
  }
+  if(page>=23 && page<=25 && fd->Get("spinStatEve")==0) return; // skip spin plots if maker was not used
+
  gStyle->SetPalette(1,0);
  gStyle->SetOptStat(0);
  char padTit[1000];
@@ -337,7 +332,18 @@ cp all.pdf ~/WWW/tmp/all-run9.pdf
    
  } break;//--------------------------------------
    
-   // case 14:   //free 
+ case 14: {   sprintf(padTit,"pT-Balance plots (out of order)  %s",core0);
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    c->Divide(2,2);gStyle->SetOptStat(10);
+    char **nameX=namePB;
+    for(int i=0;i<2;i++) {
+      printf("->%s<\n",nameX[i]);
+      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      c->cd(i+1); h->Draw("colz");
+    }
+   
+ } break;//--------------------------------------
+
 
  case 15:{    sprintf(padTit,"BSMD raw spectra, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
@@ -641,30 +647,31 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(){
- for(int i=1;i<=22;i++)  {
-   if(i==14) continue;
-   // plWana(i,2);
- }
- plWana(6,2);
-
- // TPC by sector:
- for(int i=30;i<=42;i++)  plWana(i,2);
+  for(int i=1;i<=25;i++)  { 
+    plWana(i,2);
+  }
+  // TPC by sector:
+  for(int i=30;i<=42;i++)  plWana(i,2);
 
 }
 
 //============================
 void doAllMC(){
- for(int i=1;i<=18;i++){
+ for(int i=1;i<=25;i++){
    if(i==2) continue;
    if(i==3) continue;
    if(i==4) continue;
-   if(i==14) continue;
    plWana(i,2);
  }
+  // TPC by sector:
+ for(int i=30;i<=42;i++)  plWana(i,2);
 }
 
 
 // $Log: plWana.C,v $
+// Revision 1.7  2010/01/26 19:28:07  balewski
+// added pt-balanc eplots
+//
 // Revision 1.6  2010/01/21 00:15:30  balewski
 // added sector & run  dependent TPC cuts on Rin, Rout
 //
