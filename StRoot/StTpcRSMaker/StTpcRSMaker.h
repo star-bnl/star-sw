@@ -45,7 +45,7 @@ class StTpcRSMaker : public StMaker {
  	      //              and Gaus(0,mPedestalRMS) for noise
 	      kNONOISE     = 7,// No pedestal noise
 	      kdEdxCorr    = 8,// do use TpcdEdxCorrection
-	      kPseudoPadRow= 9,// include pseudo padrows in simulation
+	      kDistortion  = 9,// include distortions
 	      kNoToflight  =10,// don't account for particle time of flight
 	      kTree        =11// make Tree
   };
@@ -54,7 +54,6 @@ class StTpcRSMaker : public StMaker {
   virtual Int_t         InitRun(int runnumber);
   virtual Int_t         Make();
   virtual Int_t  	Finish();
-  virtual void          AlignHits(Bool_t flag=kFALSE){mAlignSector=flag;}
   TF1 *GetShaperResponse(Int_t io = 0, Int_t sector = 1) {return (TF1 *) mShaperResponses[io][sector-1];}          
   TF1 *GetChargeFractionInner()     {return (TF1 *) mChargeFractionInner;}     
   TF1 *GetPadResponseFunctionInner(){return (TF1 *) mPadResponseFunctionInner;}
@@ -100,8 +99,6 @@ class StTpcRSMaker : public StMaker {
   TF1  *mChargeFractionOuter;        //!
   TF1  *mPadResponseFunctionOuter;   //!
   TF1  *mPolya;                      //!
-  Bool_t mAlignSector;                //! 
-  Int_t  mMagUtilitiesMask;           //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   PAI  *mPAI;                        //!
   Double_t             mLaserScale;  //!
@@ -174,14 +171,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.12 2009/10/30 21:12:00 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.13 2010/01/26 19:47:26 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.12 2009/10/30 21:12:00 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.13 2010/01/26 19:47:26 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.13  2010/01/26 19:47:26  fisyak
+// Include dE/dx calibration and distortions in the simulation
+//
 // Revision 1.12  2009/10/30 21:12:00  fisyak
 // Freeze version rcf9108.F, Clean up
 //
