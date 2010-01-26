@@ -43,7 +43,7 @@ TDataSet *CreateTable() {
   row.a[0]	 = 9.03792e-03-4.91396e+00; // 
   row.a[1]	 = 7.64195e-04+5.55089e-01; //
   row.a[2]	 = 1.58852e-05-2.04351e-02; //
-  row.a[3]       =             2.46384e-04
+  row.a[3]       =             2.46384e-04;
   tableSet->AddAt(&row);        // Outer 2
   memset(&row,0,tableSet->GetRowSize()); 
   row.idx	 =           4; // 
