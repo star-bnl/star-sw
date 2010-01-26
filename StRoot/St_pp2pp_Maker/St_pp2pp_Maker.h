@@ -1,4 +1,4 @@
-// $Id: St_pp2pp_Maker.h,v 1.10 2009/12/09 13:28:40 yipkin Exp $
+// $Id: St_pp2pp_Maker.h,v 1.11 2010/01/26 20:21:44 yipkin Exp $
 
 #ifndef STAR_St_pp2pp_Maker
 #define STAR_St_pp2pp_Maker
@@ -47,6 +47,8 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   Double_t  mPedave[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
   Double_t  mPedrms[kMAXSEQ][kMAXCHAIN][kMAXSVX][kMAXSTRIP] ;
+
+  unsigned char mRpStatus[kMAXSEQ] ;
 
   Int_t mLastSvx;
   Int_t mLastChain;
@@ -103,7 +105,7 @@ class St_pp2pp_Maker : public StRTSBaseMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.10 2009/12/09 13:28:40 yipkin Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_pp2pp_Maker.h,v 1.11 2010/01/26 20:21:44 yipkin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
