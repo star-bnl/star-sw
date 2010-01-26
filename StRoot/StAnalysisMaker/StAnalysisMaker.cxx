@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.13 2009/11/23 15:54:28 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.14 2010/01/26 20:35:51 fisyak Exp $
  *
  */
 
@@ -379,15 +379,8 @@ void StAnalysisMaker::PrintStEvent(Int_t k) {
 	    line++;
 	  }
 	  Double_t eta = - TMath::Log(TMath::Tan((TMath::Pi()/2-dca->dipAngle())/2));
-	  cout << Form("%4d%10s%4d%8.3f%8.3f%8.3f%8.3f%8.2f",
-		       i,trackType[l],track->flag(),dca->z(),dca->momentum().mag(),dca->pt(),eta,180./TMath::Pi()*dca->psi());
-	  Short_t charge = track->geometry()->charge();
-	  const Float_t *errMx =  dca->errMatrix();
-	  Double_t sigmaX = TMath::Sqrt(errMx[0]);
-	  Double_t sigmaZ = TMath::Sqrt(errMx[2]);
-	  Double_t rho = errMx[1]/(sigmaX*sigmaZ);
-	  cout << Form(" %2d %8.3f+-%8.3f",charge,dca->impact(), sigmaX);
-	  cout << Form(" %8.3f+-%8.3f %8.3f",dca->z(), sigmaZ, rho);
+	  cout << Form("%4d%10s%4d",i,trackType[l],track->flag());
+	  cout << *dca;
 	  Double_t length = track->length();
 	  if (length > 9999.) length = 9999.;
 	  cout << Form(" %4d%8.3f%8.3f", track->numberOfPossiblePoints(),length,track->impactParameter());
@@ -595,6 +588,9 @@ void StAnalysisMaker::PrintRnDHits() {
 }
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.14  2010/01/26 20:35:51  fisyak
+ * use dca print out
+ *
  * Revision 2.13  2009/11/23 15:54:28  fisyak
  * Clean-up est tracks
  *
