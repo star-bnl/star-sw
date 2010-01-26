@@ -23,7 +23,7 @@
 #include "TTable.h"
 #include "Ttypes.h"
 
-/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.45 2008/03/22 23:45:43 jeromel Exp $ */
+/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.46 2010/01/26 20:37:41 fisyak Exp $ */
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
@@ -37,7 +37,7 @@ struct Bfc_st {
 class St_Bfc : public TTable {
  public:
   ClassDefTable(St_Bfc,Bfc_st)
-  ClassDef(St_Bfc,1) //C++ container for VMC detector path
+  ClassDef(St_Bfc,1) //C++ container for chain/makers status 
 };
 //_____________________________________________________________________
 
@@ -115,7 +115,7 @@ class StBFChain : public StChain {
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.45 2008/03/22 23:45:43 jeromel Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.46 2010/01/26 20:37:41 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
