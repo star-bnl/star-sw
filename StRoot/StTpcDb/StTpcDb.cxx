@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.52 2009/12/07 23:44:58 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.53 2010/01/26 21:04:42 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.53  2010/01/26 21:04:42  fisyak
+ * Add new dE/dx calibration tables: TpcRowQ, tpcMethaneIn, tpcWaterOut, TpcZDC
+ *
  * Revision 1.52  2009/12/07 23:44:58  fisyak
  * Drop coordinate transformation for fortran, remove TpcHitErr
  *
@@ -165,7 +168,7 @@ ClassImp(StTpcT0I)
 ClassImp(StTpcFieldCageI)
 #endif
 //_____________________________________________________________________________
-StTpcDb::StTpcDb(TDataSet* input) : m_Debug(0) {
+  StTpcDb::StTpcDb(TDataSet* input) : m_Debug(0), mUc(0) {
  assert(gStTpcDb==0);
  memset(this,0,sizeof(StTpcDb));
  if (input){
@@ -199,7 +202,7 @@ StTpcDb::StTpcDb(TDataSet* input) : m_Debug(0) {
 }
 
 //_____________________________________________________________________________
-StTpcDb::StTpcDb(StMaker* maker) : m_Debug(0) {
+StTpcDb::StTpcDb(StMaker* maker) : m_Debug(0), mUc(0) {
  assert(gStTpcDb==0);
  memset(this,0,sizeof(StTpcDb));
  mk = maker;
@@ -253,6 +256,7 @@ StTpcDb::~StTpcDb() {
     SafeDelete(mTpcSectorAlignment[i][1]);
   }
 #endif
+  SafeDelete(mExB);
   SafeDelete(mTpc2GlobalMatrix);
   gStTpcDb = 0;
 }

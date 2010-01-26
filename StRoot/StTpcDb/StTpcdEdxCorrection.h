@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.17 2009/11/18 23:43:38 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.18 2010/01/26 21:04:42 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -37,30 +37,31 @@ class StTpcdEdxCorrection : public TObject {
  public:
   enum ESector  {kTpcOuter = 0, kTpcInner = 1};
   enum EOptions {
-    kUncorrected = 0     , //U
-    kEdge                , //E correction near edge of chamber
-    kAdcCorrection       , //R
-    kTpcdCharge          , //D
-    kTpcrCharge          , //D
-    kTpcSecRow,
-    kTpcSecRowB=kTpcSecRow,//S
-    kTpcSecRowC          , //S
-    ktpcPressure         , //P
-    ktpcTime             , //t
-    kDrift               , //O
-    kMultiplicity        , //M
-    kzCorrection         , //Z
-    ktpcMethaneIn        , //m
-    ktpcGasTemperature   , //T
-    ktpcWaterOut         , //W 
-    kSpaceCharge         , //C space charge near the wire
-    kPhiDirection        , //p correction wrt local interception angle 
-    kdXCorrection        , //X
-    kTpcPadTBins         , //d
-    kTpcLast             ,
-    kTpcLengthCorrection ,
-    kTpcdEdxCor          ,
-    kTpcAllCorrections
+    kUncorrected   = 0   , //U
+    kEdge          = 1   , //E correction near edge of chamber
+    kAdcCorrection = 2   , //R
+    kTpcdCharge    = 3   , //D
+    kTpcrCharge    = 4   , //D
+    kTpcRowQ       = 5   ,
+    kTpcSecRowB    = 6   ,//S
+    kTpcSecRowC    = 7   , //S
+    ktpcPressure   = 8   , //P
+    ktpcTime       = 9   , //t
+    kDrift         =10   , //O
+    kMultiplicity  =11   , //M
+    kzCorrection   =12   , //Z
+    ktpcMethaneIn  =13   , //m
+    ktpcGasTemperature=14, //T
+    ktpcWaterOut   =15   , //W 
+    kSpaceCharge   =16   , //C space charge near the wire
+    kPhiDirection  =17   , //p correction wrt local interception angle 
+    kdXCorrection  =18   , //X
+    kTpcPadTBins   =19   , //d
+    kTpcZDC        =20   ,
+    kTpcLast       =21   ,
+    kTpcLengthCorrection=22,
+    kTpcdEdxCor    =23   ,
+    kTpcAllCorrections=24
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -172,6 +173,8 @@ class dEdxY2_t : public TObject {
   Double_t dCharge; // d_undershoot_Q/Q = ratio of modified - original charge normalized on original charge
   Double_t rCharge; // d_rounding_Q/Q   = estimated rounding normalized on original charge
   Int_t    lSimulated;
+  Double_t Qcm;     // accumulated charge uC/cm
+  Double_t Zdc;     // ZDC rate from trigger
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections]; //!
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
