@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDcaGeometry.cxx,v 2.3 2009/10/27 22:50:25 fisyak Exp $
+ * $Id: StDcaGeometry.cxx,v 2.4 2010/01/26 20:34:39 fisyak Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.cxx,v $
+ * Revision 2.4  2010/01/26 20:34:39  fisyak
+ * Add print out and  conversion from DCA to x,y,z,px,py,pz
+ *
  * Revision 2.3  2009/10/27 22:50:25  fisyak
  * Add set from double
  *
@@ -26,10 +29,12 @@
 #else
 #include "TCernLib.h"
 #endif
-
+#include "TRMatrix.h"
+#include "TRSymMatrix.h"
+#include "TMath.h"
 ClassImp(StDcaGeometry)
     
-static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.3 2009/10/27 22:50:25 fisyak Exp $";
+static const char rcsid[] = "$Id: StDcaGeometry.cxx,v 2.4 2010/01/26 20:34:39 fisyak Exp $";
 
 StDcaGeometry::StDcaGeometry()
 {
@@ -108,4 +113,42 @@ THelixTrack StDcaGeometry::thelix() const
     myHelx.SetEmx(errXY,errSZ);
     return myHelx;
 }
-
+//________________________________________________________________________________
+ostream&  operator<<(ostream& os, const StDcaGeometry& dca) {
+  const Float_t *errMx =  dca.errMatrix();
+  return os << Form("\tDca: imp %8.3f +/-%8.3f,Z %8.3f +/- %8.3f,psi %8.3f +/- %8.3f,-q/pT %8.3f +/- %8.3f,TanL %8.3f +/- %8.3f",
+		    dca.impact(),    (errMx[0] >= 0)  ? TMath::Sqrt(errMx[0]) : -13,
+		    dca.z(),         (errMx[2] >= 0)  ? TMath::Sqrt(errMx[2]) : -13,
+		    dca.psi(),       (errMx[5] >= 0)  ? TMath::Sqrt(errMx[5]) : -13,
+		    dca.curvature(), (errMx[9] >= 0)  ? TMath::Sqrt(errMx[9]) : -13,
+		    dca.tanDip(),    (errMx[14] >= 0) ? TMath::Sqrt(errMx[14]): -13);
+}
+//________________________________________________________________________________
+void   StDcaGeometry::Print(Option_t *option) const {cout << *this << endl;}
+//________________________________________________________________________________
+void   StDcaGeometry::GetXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const {
+  static const Float_t one = 1;
+  Double_t sinP = TMath::Sin(mPsi);
+  Double_t cosP = TMath::Cos(mPsi);
+  Double_t pT   = pt();
+  xyzp[0] = - mImp*sinP; // x 
+  xyzp[1] =   mImp*cosP; // y
+  xyzp[2] =   mZ;        // z
+  xyzp[3] =   pT*cosP;   // px
+  xyzp[4] =   pT*sinP;   // py
+  xyzp[5] =   pT*mTan;   // pz
+  Double_t dpTdPti = -pT*pT*TMath::Sign(one,mPti);
+  Double_t f[30] = {
+    //mImp,mZ,       mPsi,         mPti, mTan
+    -sinP,  0, -mImp*cosP,            0,    0
+    ,cosP,  0, -mImp*sinP,            0,    0
+    ,   0,  1,	        0,            0,    0
+    ,   0,  0,	 -pT*sinP, dpTdPti*cosP,    0
+    ,   0,  0, 	  pT*cosP, dpTdPti*sinP,    0
+    ,   0,  0,	        0, dpTdPti*mTan,   pT
+  };
+  TRMatrix F(6,5,f);
+  TRSymMatrix C(5,errMatrix());
+  TRSymMatrix Cov(F,TRArray::kAxSxAT,C);
+  TCL::ucopy(Cov.GetArray(),CovXyzp,21);
+}
