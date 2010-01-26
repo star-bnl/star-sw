@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.50 2009/12/07 23:44:58 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.51 2010/01/26 21:04:42 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.51  2010/01/26 21:04:42  fisyak
+ * Add new dE/dx calibration tables: TpcRowQ, tpcMethaneIn, tpcWaterOut, TpcZDC
+ *
  * Revision 1.50  2009/12/07 23:44:58  fisyak
  * Drop coordinate transformation for fortran, remove TpcHitErr
  *
@@ -186,74 +189,89 @@ Int_t StTpcDbMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
-    if (m_TpcDb) return 0;
-    // Create Needed Tables:    
-    Float_t gFactor = StarMagField::Instance()->GetFactor();
+  if (m_TpcDb) return 0;
+  // Create Needed Tables:    
+  Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
-   if (m_Mode%1000000==1){
-     const Char_t *tabNames[5] = {"tpcGlobalPosition","tpcSectorPosition", "tpcISTimeOffsets", 
-				  "tpcOSTimeOffsets","starClockOnl"};
-     for (Int_t i = 0; i < 5; i++) {
-       SetFlavor("sim",tabNames[i]); 
-       gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for table " << "\t" << tabNames[i] << endm;
-     }
-   }
-   if ((m_Mode/1000000)%10==0) {
-   SetFlavor("ofl+laserDV","tpcDriftVelocity");
-   gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
-   }
-   else if ((m_Mode/1000000)%10==1) {
-   SetFlavor("ofl","tpcDriftVelocity");
-   gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from T0 analysis" << endm;
-   }
-   else if ((m_Mode/1000000)%10==2) {
-   SetFlavor("laserDV","tpcDriftVelocity");
-   gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from laser analysis" << endm;
-   }
-   else if ((m_Mode/1000000)%10==3) {
-   SetFlavor("NewlaserDV","tpcDriftVelocity");
-   gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from New laser analysis" << endm;
-   }
-   else {
-     gMessMgr->Info() << "StTpcDbMaker::Undefined drift velocity flavor requested" << endm;
-   }
-   
- 
-//
-  if (m_Mode%1000000 != 1){
-   if (gFactor<-0.8) {
-     gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-     SetFlavor("FullMagFNegative","tpcGlobalPosition");
-   }
-   else if (gFactor<-0.2) {
-     gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-     SetFlavor("HalfMagFNegative","tpcGlobalPosition");
-   }
-   else if (gFactor<0.2) {
-     gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-     SetFlavor("ZeroMagF","tpcGlobalPosition");
-   }
-   else if (gFactor<0.8) {
-     gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-     SetFlavor("HalfMagFPositive","tpcGlobalPosition");
-   }
-   else if (gFactor<1.2) {
-     gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-     SetFlavor("FullMagFPositive","tpcGlobalPosition");
-   }
+  if (IAttr("Simu")){
+    const Char_t *tabNames[5] = {"tpcGlobalPosition","tpcSectorPosition", "tpcISTimeOffsets", 
+				 "tpcOSTimeOffsets","starClockOnl"};
+    for (Int_t i = 0; i < 5; i++) {
+      SetFlavor("sim",tabNames[i]); 
+      gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for table " << "\t" << tabNames[i] << endm;
+    }
+  } else {
+    if (gFactor<-0.8) {
+      gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("FullMagFNegative","tpcGlobalPosition");
+    }
+    else if (gFactor<-0.2) {
+      gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("HalfMagFNegative","tpcGlobalPosition");
+    }
+    else if (gFactor<0.2) {
+      gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("ZeroMagF","tpcGlobalPosition");
+    }
+    else if (gFactor<0.8) {
+      gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("HalfMagFPositive","tpcGlobalPosition");
+    }
+    else if (gFactor<1.2) {
+      gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
+      SetFlavor("FullMagFPositive","tpcGlobalPosition");
+    }
+  }
+  if         (IAttr("useLDV")) {
+    SetFlavor("laserDV","tpcDriftVelocity");
+    gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from laser analysis" << endm;
+  } else if (IAttr("useNewLDV")) {
+    SetFlavor("NewlaserDV","tpcDriftVelocity");
+    gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from New laser analysis" << endm;
+  } else if (IAttr("useCDV")) {
+    SetFlavor("ofl","tpcDriftVelocity");
+    gMessMgr->Info() << "StTpcDbMaker::Using drift velocity from T0 analysis" << endm;
+  } else {
+    SetFlavor("ofl+laserDV","tpcDriftVelocity");
+    gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
   }
 
   m_TpcDb = new StTpcDb(this); if (Debug()) m_TpcDb->SetDebug(Debug());
-  if (m_Mode%1000000 & 2) {
-    Int_t option = (m_Mode & 0xfffc) >> 2;
-    StMagUtilities *magU = new StMagUtilities(gStTpcDb, 0, option);
-#if 0
-    magU->SetMagFactor(gFactor);
-#endif
-    m_TpcDb->SetExB(magU);
-    
-  }
   m_TpcDb->SetDriftVelocity();
+  
+  if (IAttr("ExB")) {
+    // Backward compatibility preserved.
+    Int_t mask=1;                                    // Al Saulys request
+    if        ( IAttr("EB1") ){      // Do nothing (i.e. bit 1 at 0)
+    } else if ( IAttr("EB2") ){      // Force bit 1 at 1 regardless
+      mask = mask | 2;
+    } else {
+      if(IAttr("OldRuns")) mask = mask | 2 ;  // Jim Thomas request
+    }
+    // Other options introduced in October 2001 for distortion corrections
+    // studies and year1 re-production. Those are OR additive to the mask.
+    //(void) printf("StBFChain:: Options list : %d %d %d %d %d %d %d %d\n",
+    //		  kPadrow13,kTwist,kClock,kMembrane,kEndcap,
+    //            kIFCShift,kSpaceCharge,kSpaceChargeR2);
+    if( IAttr("OBmap")      ) mask |= ( kBMap         << 1);
+    if( IAttr("OPr13")      ) mask |= ( kPadrow13     << 1);
+    if( IAttr("OTwist")     ) mask |= ( kTwist        << 1);
+    if( IAttr("OClock")     ) mask |= ( kClock        << 1);
+    if( IAttr("OCentm")     ) mask |= ( kMembrane     << 1);
+    if( IAttr("OECap")      ) mask |= ( kEndcap       << 1);
+    if( IAttr("OIFC")       ) mask |= ( kIFCShift     << 1);
+    if( IAttr("OSpaceZ")    ) mask |= ( kSpaceCharge  << 1);
+    if( IAttr("OSpaceZ2")   ) mask |= ( kSpaceChargeR2<< 1);
+    if( IAttr("OShortR")    ) mask |= ( kShortedRing  << 1);
+    if( IAttr("OBMap2d")    ) mask |= ( kFast2DBMap   << 1);
+    if( IAttr("OGridLeak")  ) mask |= ( kGridLeak     << 1);
+    if( IAttr("OGridLeak3D")) mask |= ( k3DGridLeak   << 1);
+    LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
+    // option handling needs some clean up, but right now we stay compatible
+    Int_t option = (mask & 0x7FFFFFFE) >> 1;
+    StMagUtilities *magU = new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
+    m_TpcDb->SetExB(magU);
+  }
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
   m_tpg_detector = new St_tpg_detector("tpg_detector",1);
   AddConst(m_tpg_pad_plane);

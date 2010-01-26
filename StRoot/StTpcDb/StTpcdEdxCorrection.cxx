@@ -27,8 +27,10 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   memset (&m_Corrections, 0, kTpcAllCorrections*sizeof(dEdxCorrection_t));
   m_Corrections[kAdcCorrection       ] = dEdxCorrection_t("TpcAdcCorrectionB"   ,"ADC/Clustering nonlinearity correction");
   m_Corrections[kEdge                ] = dEdxCorrection_t("TpcEdge"             ,"Dependence of the Gain on distance from Chamber edge");
-  m_Corrections[kTpcdCharge]           = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction");
-  m_Corrections[kTpcrCharge]           = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction");
+  m_Corrections[kTpcdCharge          ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction");
+  m_Corrections[kTpcrCharge          ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction");
+  m_Corrections[kTpcRowQ             ] = dEdxCorrection_t("TpcRowQ"         	,"Gas gain correction for row versus accumulated charge, absolute normalization");
+  m_Corrections[kTpcSecRowB          ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
   m_Corrections[kTpcSecRowB          ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
   m_Corrections[kTpcSecRowC          ] = dEdxCorrection_t("TpcSecRowC"         	,"Additional Gas gain correction for sector/row");
   m_Corrections[kDrift               ] = dEdxCorrection_t("TpcDriftDistOxygen" 	,"Correction for Electron Attachment due to O2");
@@ -36,10 +38,11 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   m_Corrections[kzCorrection         ] = dEdxCorrection_t("TpcZCorrectionB"    	,"Variation on drift distance");
   m_Corrections[kdXCorrection        ] = dEdxCorrection_t("TpcdXCorrectionB"   	,"dX correction");
   m_Corrections[ktpcPressure         ] = dEdxCorrection_t("tpcPressureB"       	,"Dependence of the Gain on Gas Density due to Pressure");
-  //  m_Corrections[ktpcMethaneIn        ] = dEdxCorrection_t("tpcMethaneIn"       	,"Dependence of the Gain on Methane content");
+  m_Corrections[ktpcMethaneIn        ] = dEdxCorrection_t("tpcMethaneIn"       	,"Dependence of the Gain on Methane content");
   m_Corrections[ktpcGasTemperature   ] = dEdxCorrection_t("tpcGasTemperature"  	,"Dependence of the Gain on Gas Density due to Temperature");
-  //  m_Corrections[ktpcWaterOut         ] = dEdxCorrection_t("tpcWaterOut"        	,"Dependence of the Gain on Water content");
+  m_Corrections[ktpcWaterOut         ] = dEdxCorrection_t("tpcWaterOut"        	,"Dependence of the Gain on Water content");
   m_Corrections[kTpcdCharge          ] = dEdxCorrection_t("TpcdCharge"        	,"Dependence of the Gain on total charge accumulated so far");
+  m_Corrections[kTpcZDC              ] = dEdxCorrection_t("TpcZDC"        	,"Dependence of the Gain on Zdc CoincidenceRate");
   //  m_Corrections[kTpcPadTBins         ] = dEdxCorrection_t("TpcPadTBins"        	,"Variation on cluster size");
   m_Corrections[kSpaceCharge         ] = dEdxCorrection_t("TpcSpaceCharge"      ,"Dependence of the Gain on space charge near the wire");
   m_Corrections[kPhiDirection        ] = dEdxCorrection_t("TpcPhiDirection"     ,"Dependence of the Gain on interception angle");
@@ -170,7 +173,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       if (! cor) goto ENDL;
       nrows = cor->nrows;
       l = kTpcOuter;
-      if (nrows == 2) l = kTpcOutIn;
+      if (nrows > 1 && nrows < 45) l = kTpcOutIn;
       else if (nrows == 45) l = row - 1;
       corl = cor + l;
     }
@@ -189,9 +192,12 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       dE *=  TMath::Exp(-slope*CdEdx.dCharge);
       dE *=  TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(2+kTpcOutIn,CdEdx.dCharge));
       goto ENDL;
+    case kTpcZDC: VarX = (CdEdx.Zdc > 0) ? TMath::Log10(CdEdx.Zdc) : 0; break;
     case kTpcrCharge:
       VarX =  CdEdx.rCharge;
       break;
+    case kTpcRowQ:
+      VarX = CdEdx.Qcm; break;
     case kTpcSecRowB:
     case kTpcSecRowC:
       if (k == kTpcSecRowB)  {gain = m_TpcSecRowB->GetTable() + sector - 1;
@@ -258,8 +264,19 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       goto ENDL;
     }
     if (TMath::Abs(corl->npar) >= 100 || iCut) {
-      if (corl->min > 0 && corl->min > VarX    ) return 2;
-      if (corl->max > 0 && VarX     > corl->max) return 2;
+      Int_t iok = 2;
+      if (corl->min >= corl->max) {
+	iok = 0;
+      } else {
+	for (; l < nrows; l += 2) {
+	  corl = cor + l;
+	  if (corl->min <= VarX && VarX <= corl->max) {
+	    iok = 0;
+	    break;
+	  }
+	}
+      }
+      if (iok) return iok;
     }
     if (corl->npar%100) dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(l,VarX));
   ENDL:
