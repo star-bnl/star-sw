@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.23 2010/01/21 14:45:31 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.24 2010/01/26 20:33:16 fisyak Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.24  2010/01/26 20:33:16  fisyak
+ * Fix for 64 bit
+ *
  * Revision 2.23  2010/01/21 14:45:31  ullrich
  * Some print-outs only in debug mode.
  *
@@ -115,7 +118,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, in
 void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
     int copyflag=1;
     if (data==0) {copyflag=0;}
-    if(debug) printf("StTriggerData2009::readData copyflag=%d byteswap=%d data=%x mData=%x\n",copyflag,bs,(unsigned int)data,(unsigned int)mData);
+    if(debug) printf("StTriggerData2009::readData copyflag=%d byteswap=%d data=%p mData=%p\n",copyflag,bs,data,mData);
     
     if (copyflag==1){
         unsigned int ver = data->FormatVersion; 
@@ -1166,7 +1169,7 @@ unsigned short StTriggerData2009::tofMultiplicity(int prepost) const
 void StTriggerData2009::dump() const
 {
     printf("***** StTriggerData Dump *****\n");
-    printf(" debug=%d mData=%x\n",debug,(unsigned int)mData);
+    printf(" debug=%d mData=%p\n",debug,mData);
     printf(" Year=%d  Version=%x\n",year(),version());
     printf(" Run#=%d Event#=%d\n",mRun,eventNumber());
     printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
