@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.2 2010/01/26 17:47:33 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.3 2010/01/26 18:07:33 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.3  2010/01/26 18:07:33  hmasui
+ * Change the binning for delta v_{x,y,z} from +/- 10 to +/- 1 cm
+ *
  * Revision 1.2  2010/01/26 17:47:33  hmasui
  * Add histograms for eventid, runnumber and # of particles. Fix binning for delta pt vs pt
  *
@@ -192,9 +195,9 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
 
   utility->setStyle(mhVyVx);
 
-  mhdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)", 100, -10+0.5, 10+0.5);
-  mhdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)", 100, -10+0.5, 10+0.5);
-  mhdVz = new TH1D("hdVz", "#Delta z = v_{z} - v_{z}(MC)", 100, -10+0.5, 10+0.5);
+  mhdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)", 100, -1+0.5, 1+0.5);
+  mhdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)", 100, -1+0.5, 1+0.5);
+  mhdVz = new TH1D("hdVz", "#Delta z = v_{z} - v_{z}(MC)", 100, -1+0.5, 1+0.5);
   mhdVx->SetXTitle("#Deltav_{x} = v_{x} - v_{x}(MC) (cm)");
   mhdVy->SetXTitle("#Deltav_{y} = v_{y} - v_{y}(MC) (cm)");
   mhdVz->SetXTitle("#Deltav_{z} = v_{z} - v_{z}(MC) (cm)");
