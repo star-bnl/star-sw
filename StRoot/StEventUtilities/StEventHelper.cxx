@@ -170,9 +170,7 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
   }
 
   if (obj->InheritsFrom(StXRef::Class())){
-
-     Long_t &inmap = (*fMap)(TMath::Hash(&obj,sizeof(void*)),(Long_t)obj);
-
+     LongKey_t &inmap = (*fMap)(TMath::Hash(&obj,sizeof(void*)),(Long_t)obj);
      myFinder = myMap.find((long)obj);
      assert((inmap==0) == (myFinder==myMap.end()));
 
@@ -185,8 +183,8 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
 //     if (obj->IsA()==StSPtrVecTrackNode::Class()) Break();
     if (((StStrArray*)obj)->size()) {
 
-       Long_t &inmap = (*fMap)(TMath::Hash(&obj,sizeof(void*)),(Long_t)obj);
 
+       LongKey_t &inmap = (*fMap)(TMath::Hash(&obj,sizeof(void*)),(Long_t)obj);
        myFinder = myMap.find((long)obj);
        assert((inmap==0) == (myFinder==myMap.end()));
        if (inmap) return;
@@ -278,11 +276,11 @@ void StEventHelper::ls(Option_t* option) const
 
    TExMap map;
    TExMapIter  it(fMap); 
-   Long_t key,val;
+   LongKey_t key,val;
    while( it.Next(key,val) ) {
      if (val != 2) continue;
      StStrArray *a = (StStrArray *)(key);
-     Long_t &cnt = map((Long_t)a->IsA());
+     LongKey_t &cnt = map((Long_t)a->IsA());
 //     printf("%s %p\n",a->ClassName(),(void*)a);
      if (!cnt) {
        qwe = new QWE;
@@ -316,7 +314,7 @@ TObjArray *StEventHelper::SelConts(const char *sel)
   TRegexp reg(sel);
 
   TExMapIter  it(fMap); 
-  Long_t key,val;
+   LongKey_t key,val;
   while( it.Next(key,val) ) {
      if (val == 1) 	continue;
      StStrArray *a = (StStrArray *)(key);
@@ -1193,7 +1191,8 @@ void StErrorHelper::MakeArray()
   fKErr = fMap->GetSize();
   fArr->Set(fKErr*3);
   TExMapIter it(fMap);
-  long lerr,lnum;
+  LongKey_t lerr,lnum;
+
   int idx=0;
   while(it.Next(lerr,lnum)) {
     (*fArr)[idx+    0] = lnum;
