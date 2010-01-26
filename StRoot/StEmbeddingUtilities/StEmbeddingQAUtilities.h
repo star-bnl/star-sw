@@ -3,8 +3,11 @@
 //    - Provide category id, such as 'MC' track in the minimc tree
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.h,v 1.5 2009/12/22 21:37:55 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.h,v 1.6 2010/01/26 17:45:06 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.h,v $
+ * Revision 1.6  2010/01/26 17:45:06  hmasui
+ * Add runid functions
+ *
  * Revision 1.5  2009/12/22 21:37:55  hmasui
  * Add comments for functions and members
  *
@@ -78,6 +81,10 @@ class StEmbeddingQAUtilities {
     void setStyle() const ;       /// Set overall styles
     void setStyle(TH1* h) const ; /// Set font, title and label styles
 
+    // Run id
+    Int_t getRunId(const Int_t runnumber, const Int_t year) const ; /// get runid from runnumber
+    Int_t getRunNumber(const Int_t runid, const Int_t year) const ; /// runnumber = runid - (year - 2000 + 1) * 10^6
+
   private:
     /// Default constructor
     StEmbeddingQAUtilities();
@@ -94,8 +101,26 @@ class StEmbeddingQAUtilities {
     TString mCategoryTitle[StEmbeddingQAConst::mNCategory] ; /// Category title of minimc nodes
     std::map<const TString, const UInt_t> mCategoryId ;      /// Pair of category name and category id
 
+    // Run id
+    Int_t getYearNumber(const Int_t year) const ; // (year - 2000 + 1) * 10^6
+
     ClassDef(StEmbeddingQAUtilities, 1)
 };
+
+//____________________________________________________________________________________________________
+inline Int_t StEmbeddingQAUtilities::getYearNumber(const Int_t year) const { return (year - 1999) * 1000000 ; }
+
+//____________________________________________________________________________________________________
+inline Int_t StEmbeddingQAUtilities::getRunId(const Int_t runnumber, const Int_t year) const
+{
+  return runnumber + getYearNumber(year) ;
+}
+
+//____________________________________________________________________________________________________
+inline Int_t StEmbeddingQAUtilities::getRunNumber(const Int_t runid, const Int_t year) const
+{
+  return runid - getYearNumber(year) ;
+}
 
 #endif
 
