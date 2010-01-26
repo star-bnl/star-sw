@@ -328,6 +328,8 @@ Int_t St_pp2pp_Maker::DoerPp2pp(const pp2pp_t &d, TGenericTable &hitsTable) {
   }
 
 
+  mRpStatus[oneSihit.sequencer - 1] = d.bunch_xing ; // hack to store the silicon_bunch
+
   mLastSeq = oneSihit.sequencer; 
   mLastChain = oneSihit.chain;
   mLastSvx = oneSihit.svx;
@@ -384,7 +386,7 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
   Bool_t is_candidate_to_store ;
 
-  Int_t NCluster_Length ;
+  Int_t NCluster_Length, Diff_Bunch ;
   Double_t ECluster, POStimesE, position, offset ;
 
   StTriggerData* trg_p = 0 ;
@@ -411,6 +413,9 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 					(u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
 	pp2ppColl->romanPot(i)->setTac(	(u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// u_short -> u_int
 					(u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
+	Diff_Bunch = mRpStatus[i] - trg_p->bunchId7Bit() ;
+	if ( Diff_Bunch < 0 ) Diff_Bunch += 120 ;
+	pp2ppColl->romanPot(i)->setStatus( (unsigned char) Diff_Bunch ) ;
       }
       else
 	LOG_WARN << "No StTriggerData ?! " << endm ;
