@@ -51,8 +51,6 @@
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection&, StTpcLocalDirection&,int, int);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcPadCoordinate&, StGlobalCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate&, StTpcPadCoordinate&);
-
-#pragma link C++ enum  EBField;
 #pragma link C++ enum  Prime;
 #pragma link C++ enum  DistortSelect;
 
