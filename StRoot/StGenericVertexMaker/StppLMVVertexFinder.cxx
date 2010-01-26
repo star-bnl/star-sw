@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.23 2006/05/05 18:35:39 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.24 2010/01/26 21:01:49 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -113,7 +113,6 @@ StppLMVVertexFinder::fit(StEvent* event) {
   mBfield = event->runInfo()->magneticField(); 
   LOG_INFO << Form("ppLMV5:: mBfield[Tesla]=%e ",mBfield)<<endm;
   
-  //changeCuts();
 
   gMessMgr->Message("","I") << "ppLMV5::cuts"
 			    <<"\n CtbThres_ch (real)="<<mCtbThres_ch
@@ -604,34 +603,12 @@ int  StppLMVVertexFinder::NCtbMatches() {
   return nTr;
 }
 
-//==========================================================
-//==========================================================
-void  
-StppLMVVertexFinder::changeCuts(){
-  StGenericVertexMaker *mk=(StGenericVertexMaker *)StMaker::GetChain()->GetMaker("GenericVertex");
-  int mode2=mk->GetMode2();
-
-  LOG_INFO<< "ccc m_mode2=" << mode2 << endm;
-  switch(mode2) {
-  case 'a': mMaxTrkDcaRxy=1.5; break;
-  case 'b': mMaxTrkDcaRxy=2.5; break;
-  case 'c':mMinTrkPt=0.3; break;
-  case 'd':mMinTrkPt=0.4; break;
-  case 'e':mMinNumberOfFitPointsOnTrack =10;break; // do nothing
-  case 'f': mMinNumberOfFitPointsOnTrack =20; break; // do nothing
-  case 'g':  mMatchCtbMax_phi=mCtbPhiSeg/2.+C_PI*0.5/180.;break; // do nothing
-  case 'h': mMatchCtbMax_phi=mCtbPhiSeg/2.+C_PI*1./180.;break; break; // do nothing
-  case 'i':mMaxZrange=150; break; // do nothing
-  case 'j':mMaxZrange=50; break; // do nothing
-  default: break; // do nothing
-
-  }
-}
-
-
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.24  2010/01/26 21:01:49  fisyak
+ * Clean up, switch from bit mask to attributes
+ *
  * Revision 1.23  2006/05/05 18:35:39  balewski
  * block the fake second prim vertex
  *

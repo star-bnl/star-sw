@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of ppLMV
- * $Id: StppLMVVertexFinder.h,v 1.10 2005/07/19 21:57:40 perev Exp $
+ * $Id: StppLMVVertexFinder.h,v 1.11 2010/01/26 21:01:49 fisyak Exp $
  *
  */
 
@@ -57,7 +57,6 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
     int    mTotEve;
     int    eveID;
     int    NCtbMatches();
-    void   changeCuts();
 
     /*!
      * \struct
@@ -73,6 +72,9 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
 /***************************************************************************
  *
  * $Log: StppLMVVertexFinder.h,v $
+ * Revision 1.11  2010/01/26 21:01:49  fisyak
+ * Clean up, switch from bit mask to attributes
+ *
  * Revision 1.10  2005/07/19 21:57:40  perev
  * MultiVertex
  *
