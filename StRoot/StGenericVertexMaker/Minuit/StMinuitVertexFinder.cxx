@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.19 2008/07/31 18:11:10 genevb Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.20 2010/01/26 21:01:49 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.20  2010/01/26 21:01:49  fisyak
+ * Clean up, switch from bit mask to attributes
+ *
  * Revision 1.19  2008/07/31 18:11:10  genevb
  * VFMinuit3 chain option for lower ranking of split vertices
  *
@@ -145,19 +148,18 @@
 #include "StDcaGeometry.h"
 #include "St_VertexCutsC.h"
 #include "StMaker.h"
-vector<StDcaGeometry*>   StMinuitVertexFinder::mDCAs;
-vector<StPhysicalHelixD> StMinuitVertexFinder::mHelices;
-vector<unsigned short>   StMinuitVertexFinder::mHelixFlags;
-vector<double>           StMinuitVertexFinder::mSigma;
-vector<double>           StMinuitVertexFinder::mZImpact;
-double                   StMinuitVertexFinder::mWidthScale = 1;
-double                   StMinuitVertexFinder::mX0;
-double                   StMinuitVertexFinder::mY0;
-double                   StMinuitVertexFinder::mdxdz;
-double                   StMinuitVertexFinder::mdydz;
-bool                     StMinuitVertexFinder::requireCTB;
-int                      StMinuitVertexFinder::nCTBHits;
-bool                     StMinuitVertexFinder::mUseDCA;
+vector<StDcaGeometry*>     StMinuitVertexFinder::mDCAs;
+vector<StPhysicalHelixD>   StMinuitVertexFinder::mHelices;
+vector<UShort_t>           StMinuitVertexFinder::mHelixFlags;
+vector<Double_t >          StMinuitVertexFinder::mSigma;
+vector<Double_t >          StMinuitVertexFinder::mZImpact;
+Double_t                   StMinuitVertexFinder::mWidthScale = 1;
+Double_t                   StMinuitVertexFinder::mX0;
+Double_t                   StMinuitVertexFinder::mY0;
+Double_t                   StMinuitVertexFinder::mdxdz;
+Double_t                   StMinuitVertexFinder::mdydz;
+Bool_t                     StMinuitVertexFinder::requireCTB;
+Int_t                      StMinuitVertexFinder::nCTBHits;
 //==========================================================
 //==========================================================
 void StMinuitVertexFinder::Clear(){
@@ -169,7 +171,7 @@ void StMinuitVertexFinder::Clear(){
 void
 StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 {
-    mExternalSeedPresent = true;
+    mExternalSeedPresent = kTRUE;
     mExternalSeed = s;
 }
 
@@ -182,14 +184,13 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
   mMinuit->SetPrintLevel(-1);
   mMinuit->SetMaxIterations(1000);
-  mExternalSeedPresent = false;
-  mVertexConstrain = false;
-  mRequireCTB = false;
-  requireCTB = false;
-  mUseITTF   = false;
-  mUseDCA    = false;
-  mUseOldBEMCRank = false;
-  mLowerSplitVtxRank = false;
+  mExternalSeedPresent = kFALSE;
+  mVertexConstrain = kFALSE;
+  mRequireCTB = kFALSE;
+  requireCTB = kFALSE;
+  mUseITTF   = kFALSE;
+  mUseOldBEMCRank = kFALSE;
+  mLowerSplitVtxRank = kFALSE;
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
   mMinTrack  = -1;
   mCTBSum = 0;
@@ -208,7 +209,7 @@ StMinuitVertexFinder::~StMinuitVertexFinder()
    mSigma.clear();
 }
 //________________________________________________________________________________
-void StMinuitVertexFinder::InitRun(int runumber) {
+void StMinuitVertexFinder::InitRun(Int_t runumber) {
   St_VertexCutsC *cuts = St_VertexCutsC::instance();
   mMinNumberOfFitPointsOnTrack = cuts->MinNumberOfFitPointsOnTrack();
   mDcaZMax                     = cuts->DcaZMax();     // Note: best to use integer numbers
@@ -232,26 +233,26 @@ StMinuitVertexFinder::setFlagBase(){
   }
 }
 
-int StMinuitVertexFinder::findSeeds() {
+Int_t StMinuitVertexFinder::findSeeds() {
   mNSeed = 0;
 
-  int zImpactArr[400]; // simple array to 'histogram' zImpacts
-  for (int i=0; i < 400; i++)
+  Int_t zImpactArr[400]; // simple array to 'histogram' zImpacts
+  for (Int_t i=0; i < 400; i++)
     zImpactArr[i]=0;
 
   Int_t nTrk = mZImpact.size();
-  for (int iTrk=0; iTrk < nTrk; iTrk++) {
+  for (Int_t iTrk=0; iTrk < nTrk; iTrk++) {
     if (fabs(mZImpact[iTrk]) < 200)
       zImpactArr[int(mZImpact[iTrk]+200)]++;
   }
 
   // Search for maxima using sliding 3-bin window
   Int_t nOldBin = 0;
-  int slope = 0;
-  int nBinZ = 3;
-  for (int iBin=0; iBin < 400 - nBinZ; iBin++) {
-    int nTrkBin = 0;
-    for (int iBin2=0; iBin2 < nBinZ; iBin2++) {
+  Int_t slope = 0;
+  Int_t nBinZ = 3;
+  for (Int_t iBin=0; iBin < 400 - nBinZ; iBin++) {
+    Int_t nTrkBin = 0;
+    for (Int_t iBin2=0; iBin2 < nBinZ; iBin2++) {
       nTrkBin += zImpactArr[iBin + iBin2];
     }
     if (nTrkBin > nOldBin)
@@ -259,10 +260,10 @@ int StMinuitVertexFinder::findSeeds() {
     else if (nTrkBin < nOldBin) {
       if (slope == 1) {
 	if (mNSeed < maxSeed) {
-	  float seed_z = -200 + iBin + (Float_t)nBinZ / 2 - 1;
+	  Float_t seed_z = -200 + iBin + (Float_t)nBinZ / 2 - 1;
 	  Double_t meanZ = 0;
-	  int nTrkZ = 0;
-	  for (int iTrk = 0; iTrk < nTrk; iTrk ++ ) {
+	  Int_t nTrkZ = 0;
+	  for (Int_t iTrk = 0; iTrk < nTrk; iTrk ++ ) {
 	    if ( fabs(mZImpact[iTrk] - seed_z ) < mDcaZMax ) {
 	      meanZ += mZImpact[iTrk];
 	      nTrkZ++;
@@ -294,19 +295,19 @@ int StMinuitVertexFinder::findSeeds() {
 }
 
 void StMinuitVertexFinder::fillBemcHits(StEvent *event){
-  static int nMod = 120;
-  static int nEta = 20;
-  static int nSub = 2;
-  static float mEmcThres = 0.15;
-  for (int m=0; m < nMod; m++) 
-    for (int e=0; e < nEta; e++) 
-      for (int s=0; s < nSub; s++) 
+  static Int_t nMod = 120;
+  static Int_t nEta = 20;
+  static Int_t nSub = 2;
+  static Float_t mEmcThres = 0.15;
+  for (Int_t m=0; m < nMod; m++) 
+    for (Int_t e=0; e < nEta; e++) 
+      for (Int_t s=0; s < nSub; s++) 
 	mBemcHit[m][e][s]=0;
 
-  int n_emc_hit=0;
+  Int_t n_emc_hit=0;
   if (event->emcCollection() && event->emcCollection()->detector(kBarrelEmcTowerId)) {
     StEmcDetector* bemcDet = event->emcCollection()->detector(kBarrelEmcTowerId);
-    for (int iMod=0; iMod < nMod; iMod++) {
+    for (Int_t iMod=0; iMod < nMod; iMod++) {
       if (!bemcDet->module(iMod)) 
         continue;
       StEmcModule *mod = bemcDet->module(iMod);
@@ -325,11 +326,11 @@ void StMinuitVertexFinder::fillBemcHits(StEvent *event){
   }
 }
 
-int  
+Int_t  
 StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
-  static const double rBemc = 242; // middle of tower
+  static const Double_t rBemc = 242; // middle of tower
   static StEmcGeom *bemcGeom = StEmcGeom::getEmcGeom("bemc");
-  //static double rBemc = bemcGeom->Radius(); // front face??
+  //static Double_t rBemc = bemcGeom->Radius(); // front face??
   //LOG_INFO << "rBemc: " << rBemc << endm;
 
   if (track->outerGeometry()==0) {
@@ -352,7 +353,7 @@ StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
   d2 = helix.pathLength(rBemc);
   if (d2.first > 99999999 && d2.second > 99999999)
     return 0;
-  double path=d2.second;
+  Double_t path=d2.second;
   if (d2.first >= 0 && d2.first < d2.second)
     path = d2.first;
   else if(d2.first>=0 || d2.second<=0) {
@@ -365,11 +366,11 @@ StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
   }
   StThreeVectorD posCyl = helix.at(path);
 
-  float phi=posCyl.phi();
-  float eta=posCyl.pseudoRapidity();
+  Float_t phi=posCyl.phi();
+  Float_t eta=posCyl.pseudoRapidity();
 
   if (fabs(eta) < 1) {
-    int mod, ieta, sub;
+    Int_t mod, ieta, sub;
     if (bemcGeom->getBin(phi, eta, mod, ieta, sub) == 0) {
       // There is some edge effect leading to sub=-1. 
       // Strange, but leave in for now// HOW CAN IT be: sub == -1????
@@ -381,8 +382,8 @@ StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
   return 0;
 }
 
-int StMinuitVertexFinder::checkCrossMembrane(const StTrack *track) {
-  int n_pnt_neg=0, n_pnt_pos=0;
+Int_t StMinuitVertexFinder::checkCrossMembrane(const StTrack *track) {
+  Int_t n_pnt_neg=0, n_pnt_pos=0;
   
   StPtrVecHit hits = track->detectorInfo()->hits(kTpcId);
   for (StHitIterator hitIter = hits.begin(); hitIter != hits.end(); hitIter++) {
@@ -416,9 +417,9 @@ void StMinuitVertexFinder::calculateRanks() {
   // end of function (if mLowerSplitVtxRank). See hypernews post:
   // http://www.star.bnl.gov/HyperNews-star/get/vertex/127.html 
 
-  int nBemcMatchTot = 0;
-  int nVtxTrackTot = 0;
-  for (int iVertex=0; iVertex < size(); iVertex++) {
+  Int_t nBemcMatchTot = 0;
+  Int_t nVtxTrackTot = 0;
+  for (Int_t iVertex=0; iVertex < size(); iVertex++) {
     StPrimaryVertex *primV = getVertex(iVertex);
     nVtxTrackTot += primV->numTracksUsedInFinder();
     nBemcMatchTot += primV->numMatchesWithBEMC();
@@ -426,11 +427,11 @@ void StMinuitVertexFinder::calculateRanks() {
 
   mBestRank = -999;
   mBestVtx  = 0;
-  for (int iVertex=0; iVertex < size(); iVertex++) {
+  for (Int_t iVertex=0; iVertex < size(); iVertex++) {
     StPrimaryVertex *primV = getVertex(iVertex);
     // expected values based on Cu+Cu data
-    float avg_dip_expected = -0.0033*primV->position().z();
-    float n_bemc_expected = 0;
+    Float_t avg_dip_expected = -0.0033*primV->position().z();
+    Float_t n_bemc_expected = 0;
     if (nVtxTrackTot) {
       if (mUseOldBEMCRank) 
         n_bemc_expected = (1-0.25*(1-(float)primV->numTracksUsedInFinder()/nVtxTrackTot))*nBemcMatchTot; 
@@ -438,19 +439,19 @@ void StMinuitVertexFinder::calculateRanks() {
         n_bemc_expected = (float)primV->numTracksUsedInFinder()/nVtxTrackTot*nBemcMatchTot; 
     }
 
-    float n_cross_expected = fabs(primV->position().z())*0.0020*primV->numTracksUsedInFinder(); // old coeff 0.0016 with dca 3 and 10 points on track
+    Float_t n_cross_expected = fabs(primV->position().z())*0.0020*primV->numTracksUsedInFinder(); // old coeff 0.0016 with dca 3 and 10 points on track
 
     if (mDebugLevel) {
       LOG_INFO << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endm;
     }
-    float rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
+    Float_t rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
     if (rank_avg_dip < -5)
       rank_avg_dip = -5;
 
-    float rank_bemc = 0;
+    Float_t rank_bemc = 0;
     if (n_bemc_expected >= 1) { 
-      //float sigma = 0.12*n_bemc_match_tot;
-      float sigma = 0.5*sqrt(n_bemc_expected);
+      //Float_t sigma = 0.12*n_bemc_match_tot;
+      Float_t sigma = 0.5*sqrt(n_bemc_expected);
       if ( sigma < 0.75 ) { // limit sigma to avoid large weights 
 	// at small multiplicity
 	sigma = 0.75;
@@ -464,9 +465,9 @@ void StMinuitVertexFinder::calculateRanks() {
     if (rank_bemc > 1)
       rank_bemc = 1;
     
-    float rank_cross = 0;
+    Float_t rank_cross = 0;
     if ( n_cross_expected >= 1 ) {
-      float sigma=1.1*sqrt(n_cross_expected);
+      Float_t sigma=1.1*sqrt(n_cross_expected);
       rank_cross = (primV->numTracksCrossingCentralMembrane() - n_cross_expected)/sigma;
     }
     if (rank_cross < -5)
@@ -494,7 +495,7 @@ void StMinuitVertexFinder::calculateRanks() {
 int
 StMinuitVertexFinder::fit(StEvent* event)
 {
-    double arglist[4];
+    Double_t arglist[4];
 
     setFlagBase();
 
@@ -537,93 +538,47 @@ StMinuitVertexFinder::fit(StEvent* event)
 
     fillBemcHits(event);
 
-    double sigma;
-    bool ctb_match;
+    Bool_t ctb_match;
 
-    int n_ctb_match_tot = 0;
-    int n_bemc_match_tot = 0;
-    int n_cross_tot = 0;
+    Int_t n_ctb_match_tot = 0;
+    Int_t n_bemc_match_tot = 0;
+    Int_t n_cross_tot = 0;
 
     StSPtrVecTrackNode& nodes = event->trackNodes();
-    mUseDCA = false;
-    for (unsigned int k=0; k<nodes.size(); k++) {
+    UInt_t Nnodes = nodes.size();
+    for (UInt_t k = 0; k < Nnodes; k++) {
       StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
-      if (g && g->dcaGeometry()) {mUseDCA = true; break;}
-    }
-    LOG_QA << "QAInfo: StMinuitVertexFinder::fit use DCA track parameters" <<  endm;
-    for (unsigned int k=0; k<nodes.size(); k++) {
-      StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
-      if (accept(g)&&
-	  ((mUseITTF&&g->fittingMethod()==kITKalmanFitId)||
-	   (!mUseITTF&&g->fittingMethod()!=kITKalmanFitId))) {	
-	///LSB This should not be necessary and could be removed in future
-#ifndef __alpha__
-	if (!finite(g->geometry()->helix().curvature()) ){
-	  LOG_WARN << "NON-FINITE curvature in track !!" << endm;
-	  continue;
-	}
-#endif
-	if (! mUseDCA ) {
-	  mWidthScale = 1;
-	  const StPhysicalHelixD helix = g->geometry()->helix(); 
-	  Double_t r_c = sqrt(helix.xcenter()*helix.xcenter()+helix.ycenter()*helix.ycenter());
-	  if (fabs(r_c - 1./helix.curvature()) > mRImpactMax)
-	    continue;
-	  
-	  mHelices.push_back(g->geometry()->helix());
-	  mHelixFlags.push_back(1);
-	  
-	  Double_t path=(TMath::ATan2(-helix.ycenter(),-helix.xcenter())-helix.phase())/2/TMath::Pi();
-          if ( path < -0.5 )
-            path += 1;
-          if ( path > 0.5 )
-            path -= 1;
-	  path *= helix.h()*helix.period();
-	  StThreeVectorD tmp_pos = helix.at(path);
-	  
-	  Double_t z_lin=tmp_pos.z();
-	  if (r_c - 1./helix.curvature() > 0) 
-	    z_lin -= tmp_pos.perp()*tan(helix.dipAngle());
-	  else
-	    z_lin += tmp_pos.perp()*tan(helix.dipAngle());
-	  
-	  mZImpact.push_back(z_lin);
-
-	  // sigma = 0.45+0.0093*::sqrt(g->length())/abs(g->geometry()->momentum()); HIJING + TRS
-	  sigma = 0.6+0.0086*::sqrt(g->length())/abs(g->geometry()->momentum());
-	  mSigma.push_back(sigma);
-	} else { // use DCA parameters
-	  mWidthScale = 0.1;// 1./TMath::Sqrt(5.);
-	  StDcaGeometry* gDCA = g->dcaGeometry();
-	  if (! gDCA) continue;
-	  if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
-	  mDCAs.push_back(gDCA);
-// 	  StPhysicalHelixD helix = gDCA->helix(); 
-// 	  mHelices.push_back(helix);
-	  mHelices.push_back(g->geometry()->helix());
-	  mHelixFlags.push_back(1);
-	  Double_t z_lin = gDCA->z();
-	  mZImpact.push_back(z_lin);
-	  mSigma.push_back(-1);
-	  
-	}
-	bool shouldHitCTB = false;
-	double etaInCTBFrame = -999;
-	ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
-	if (ctb_match) {
-	  mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
-	  n_ctb_match_tot++;
-	}
-
-	if (matchTrack2BEMC(g)) {
-	  mHelixFlags[mHelixFlags.size()-1] |= kFlagBEMCMatch;
-	  n_bemc_match_tot++;
-	}
-
-	if (checkCrossMembrane(g)) {
-	  mHelixFlags[mHelixFlags.size()-1] |= kFlagCrossMembrane;
-	  n_cross_tot++;
-	}
+      if (accept(g)) {
+	mWidthScale = 0.1;// 1./TMath::Sqrt(5.);
+	StDcaGeometry* gDCA = g->dcaGeometry();
+	if (! gDCA) continue;
+	if (TMath::Abs(gDCA->impact()) >  mRImpactMax) continue;
+	mDCAs.push_back(gDCA);
+	// 	  StPhysicalHelixD helix = gDCA->helix(); 
+	// 	  mHelices.push_back(helix);
+	mHelices.push_back(g->geometry()->helix());
+	mHelixFlags.push_back(1);
+	Double_t z_lin = gDCA->z();
+	mZImpact.push_back(z_lin);
+	mSigma.push_back(-1);
+	
+      }
+      Bool_t shouldHitCTB = kFALSE;
+      Double_t etaInCTBFrame = -999;
+      ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
+      if (ctb_match) {
+	mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
+	n_ctb_match_tot++;
+      }
+      
+      if (matchTrack2BEMC(g)) {
+	mHelixFlags[mHelixFlags.size()-1] |= kFlagBEMCMatch;
+	n_bemc_match_tot++;
+      }
+      
+      if (checkCrossMembrane(g)) {
+	mHelixFlags[mHelixFlags.size()-1] |= kFlagCrossMembrane;
+	n_cross_tot++;
       }
     }
     if (mDebugLevel) {
@@ -640,7 +595,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     LOG_INFO << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
 
     // Set some global pars
-    if (mRequireCTB) requireCTB = true;
+    if (mRequireCTB) requireCTB = kTRUE;
     
     //
     //  Reset and clear Minuit parameters
@@ -656,7 +611,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     // values which it can tend to, implies zero not allowed.
     // Also need different initialization when vertex constraint.
 
-    static double step[3] = {0.03, 0.03, 0.03};
+    static Double_t step[3] = {0.03, 0.03, 0.03};
 
     //
     //  Scan z to find best seed for the actual fit.
@@ -708,16 +663,16 @@ StMinuitVertexFinder::fit(StEvent* event)
 	arglist[0] = 1;
       }
 
-      int done = 0;
-      int iter = 0;
+      Int_t done = 0;
+      Int_t iter = 0;
 
-      int n_trk_vtx = 0;
+      Int_t n_trk_vtx = 0;
       Int_t n_helix = mHelices.size();
       do {  
 	// For most vertices one pass is fine, but multiple passes 
 	// can be done
 	n_trk_vtx = 0;
-	for (int i=0; i < n_helix; i++) {
+	for (Int_t i=0; i < n_helix; i++) {
 	  if (fabs(mZImpact[i]-seed_z) < mDcaZMax) {
 	    mHelixFlags[i] |= kFlagDcaz;
 	    n_trk_vtx++;
@@ -758,7 +713,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	}
 	mMinuit->mnhess();
 
-	double new_z, zerr;
+	Double_t new_z, zerr;
 	if (!mVertexConstrain) {
 	  mMinuit->GetParameter(2, new_z, zerr); 
 	}
@@ -769,8 +724,8 @@ StMinuitVertexFinder::fit(StEvent* event)
 	if (fabs(new_z - seed_z) > 1) // refit if vertex shifted
 	  done = 0;
 
-	int n_trk = 0;
-	for (int i=0; i < n_helix; i++) {
+	Int_t n_trk = 0;
+	for (Int_t i=0; i < n_helix; i++) {
 	  if ( fabs(mZImpact[i] - new_z) < mDcaZMax ) {
 	    n_trk++;
 	  }
@@ -839,14 +794,14 @@ StMinuitVertexFinder::fit(StEvent* event)
       primV.setRanking(333);
       primV.setNumTracksUsedInFinder(n_trk_vtx);
 
-      int n_ctb_match = 0;
-      int n_bemc_match = 0;
-      int n_cross = 0;
+      Int_t n_ctb_match = 0;
+      Int_t n_bemc_match = 0;
+      Int_t n_cross = 0;
       n_trk_vtx = 0;
 
-      double mean_dip = 0;
-      double sum_pt = 0;
-      for (unsigned int i=0; i < mHelixFlags.size(); i++) {
+      Double_t mean_dip = 0;
+      Double_t sum_pt = 0;
+      for (UInt_t i=0; i < mHelixFlags.size(); i++) {
 	if (!(mHelixFlags[i] & kFlagDcaz))
 	  continue;
 	n_trk_vtx++;
@@ -882,92 +837,54 @@ StMinuitVertexFinder::fit(StEvent* event)
 
     //  Reset the flag which tells us about external
     //  seeds. This needs to be provided for every event.
-    mExternalSeedPresent = false;
+    mExternalSeedPresent = kFALSE;
     
-    requireCTB = false;
+    requireCTB = kFALSE;
 
     return 1;
 } 
 //________________________________________________________________________________
 Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
-static int nCall=0; nCall++;
+static Int_t nCall=0; nCall++;
   Double_t f = 0;
-  Double_t e, s;
+  Double_t e;
   nCTBHits = 0;
   if (fabs(vtx.x())> 10) return 1e6;
   if (fabs(vtx.y())> 10) return 1e6;
   if (fabs(vtx.z())>300) return 1e6;
-  if (! mUseDCA) {
-    for (unsigned int i=0; i<mHelices.size(); i++) {
-      if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
-	s = mWidthScale*mSigma[i];
-	e = mHelices[i].distance(vtx, false);  // false: don't do multiple loops
-	f -= exp(-(e*e)/(2*s*s));  // robust potential
-	if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
-      }
-    }
-  } else {// UseDCA
-    for (unsigned int i=0; i<mDCAs.size(); i++) {
-      if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
-	const StDcaGeometry* gDCA = mDCAs[i];
-	if (! gDCA) continue;
-	const StPhysicalHelixD helix = gDCA->helix();
-	e = helix.distance(vtx, false);  // false: don't do multiple loops
-#if 0
-	StPhysicalHelixD helixA = mHelices[i];
-        Double_t eA = helixA.distance(vtx, false);
-	// linear approximation, ignore error in angles
-	StThreeVectorD dcaP = helix.at(e) - vtx;
-	StThreeVectorD dcaPA = helixA.at(eA) - vtx;
-	Double_t impact = gDCA->impact();
-	if (impact);
-	Double_t x = dcaP.x();
-	Double_t y = dcaP.y();
-	StThreeVectorF mom = gDCA->momentum();
-	Double_t px = mom.x();
-	Double_t py = mom.y();
-	Double_t Imp = TMath::Sqrt(x*x + y*y);
-	Double_t sgn = x*py-y*px;
-	Double_t sgnA = helixA.curvatureSignedDistance(dcaPA);
-        if (sgnA);
-	if (sgn < 0) Imp = - Imp;
-	Double_t Z  = dcaP.z();
-#endif
-#if 0
-	const Float_t *errMatrix = gDCA->errMatrix();
-	Double_t d = errMatrix[0]*errMatrix[2] - errMatrix[1]*errMatrix[1];
-	if (TMath::Abs(d) < 1e-7) continue;
-	Double_t a[3] = {errMatrix[2]/d, -errMatrix[1]/d, errMatrix[0]/d};
-// 	Double_t chi2     = a[0]*Imp*Imp + 2*a[1]*Imp*Z + a[2]*Z*Z; 
-#endif
-//VP version
-//VP	Double_t chi2     = e*e/(errMatrix[0] + errMatrix[2]);
-static int nCall=0;
-nCall++;
-        double err2;
-        double chi2 = gDCA->thelix().Dca(&(vtx.x()),&err2);
-        chi2*=chi2/err2;
-//EndVP
-	Double_t scale = 1./(mWidthScale*mWidthScale);
-	f += scale*(1. - TMath::Exp(-chi2/scale)); // robust potential
-	//	f -= scale*TMath::Exp(-chi2/scale); // robust potential
-	if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
-      }
+  for (UInt_t i=0; i<mDCAs.size(); i++) {
+    if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
+      const StDcaGeometry* gDCA = mDCAs[i];
+      if (! gDCA) continue;
+      const StPhysicalHelixD helix = gDCA->helix();
+      e = helix.distance(vtx, kFALSE);  // false: don't do multiple loops
+      //VP version
+      //VP	Double_t chi2     = e*e/(errMatrix[0] + errMatrix[2]);
+      static Int_t nCall=0;
+      nCall++;
+      Double_t err2;
+      Double_t chi2 = gDCA->thelix().Dca(&(vtx.x()),&err2);
+      chi2*=chi2/err2;
+      //EndVP
+      Double_t scale = 1./(mWidthScale*mWidthScale);
+      f += scale*(1. - TMath::Exp(-chi2/scale)); // robust potential
+      //	f -= scale*TMath::Exp(-chi2/scale); // robust potential
+      if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
     }
   }
   return f;
 }
 //________________________________________________________________________________
 
-void StMinuitVertexFinder::fcn1D(int& npar, double* gin, double& f, double* par, int iflag)
+void StMinuitVertexFinder::fcn1D(int& npar, double* gin, double& f, double* par, Int_t iflag)
 {
-    double z = par[0];
-    double x = beamX(z);
-    double y = beamY(z);
+    Double_t z = par[0];
+    Double_t x = beamX(z);
+    Double_t y = beamY(z);
     StThreeVectorD vtx(x,y,z);
     f = Chi2atVertex(vtx);
 }
-void StMinuitVertexFinder::fcn(int& npar, double* gin, double& f, double* par, int iflag)
+void StMinuitVertexFinder::fcn(int& npar, double* gin, double& f, double* par, Int_t iflag)
 {
   StThreeVectorD vtx(par);
   f = Chi2atVertex(vtx);
@@ -993,7 +910,7 @@ StMinuitVertexFinder::accept(StTrack* track) const
 
 /// Use mMinuit print level 
 void
-StMinuitVertexFinder::setPrintLevel(int level) 
+StMinuitVertexFinder::setPrintLevel(Int_t level) 
 {
   mMinuit->SetPrintLevel(level);
 }
@@ -1016,8 +933,8 @@ StMinuitVertexFinder::printInfo(ostream& os) const
     os << "final potential width scale .... " << mWidthScale << endl;
 }
 
-void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight) {
-  mVertexConstrain = true;
+void StMinuitVertexFinder::UseVertexConstraint(Double_t x0, Double_t y0, Double_t dxdz, Double_t dydz, Double_t weight) {
+  mVertexConstrain = kTRUE;
   mX0 = x0;
   mY0 = y0;
   mdxdz = dxdz;
@@ -1030,16 +947,16 @@ void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz
   LOG_INFO << "slope dydz = " << mdydz << endm;
   LOG_INFO << "weight in fit = " << weight <<  endm;
   StThreeVectorD origin(mX0,mY0,0.0);
-  double pt  = 88889999;   
-  double nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
+  Double_t pt  = 88889999;   
+  Double_t nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
     if(nxy<1.e-5){ // beam line _MUST_ be tilted
       LOG_WARN << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
       nxy=mdxdz=1.e-5; 
     }
-    double p0=pt/nxy;  
-    double px   = p0*mdxdz;
-    double py   = p0*mdydz;
-    double pz   = p0; // approximation: nx,ny<<0
+    Double_t p0=pt/nxy;  
+    Double_t px   = p0*mdxdz;
+    Double_t py   = p0*mdydz;
+    Double_t pz   = p0; // approximation: nx,ny<<0
     StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
     delete mBeamHelix;
     mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
@@ -1049,30 +966,30 @@ void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz
     mMinuit->SetFCN(&StMinuitVertexFinder::fcn1D);
     mMinuit->SetPrintLevel(1);
     mMinuit->SetMaxIterations(1000);
-    mExternalSeedPresent = false;
+    mExternalSeedPresent = kFALSE;
 
 
 }
 
 
-double StMinuitVertexFinder::beamX(double z) {
-  float x = mX0 + mdxdz*z;
+Double_t StMinuitVertexFinder::beamX(Double_t z) {
+  Float_t x = mX0 + mdxdz*z;
   return x;
 }
 
-double StMinuitVertexFinder::beamY(double z) {
-  float y = mY0 + mdydz*z;
+Double_t StMinuitVertexFinder::beamY(Double_t z) {
+  Float_t y = mY0 + mdydz*z;
   return y;
 }
 
-int  StMinuitVertexFinder::NCtbMatches() { 
+Int_t  StMinuitVertexFinder::NCtbMatches() { 
   return nCTBHits;
 }
-int  StMinuitVertexFinder::NCtbSlats() { 
+Int_t  StMinuitVertexFinder::NCtbSlats() { 
   return -777; // dum result, perhaps not needed at all,JB
 }
 
 
-//void StMinuitVertexFinder::SetFitPointsCut(int fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;return;}
+//void StMinuitVertexFinder::SetFitPointsCut(Int_t fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;return;}
 
 

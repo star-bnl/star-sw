@@ -38,7 +38,7 @@
  * StThreeVectorD StMinuitVertexFinder::result()
  * Returns the found vertex.
  *
- * int StMinuitVertexFinder::status()
+ * Int_t StMinuitVertexFinder::status()
  * The meaning of the return values of status() is as follows:
  *   -1 = not enough good tracks for fit
  *        in this case fit() returns false.
@@ -58,7 +58,7 @@
  * The seed has to be provided for every fit (fit()). It will only
  * be used for the next fit.
  *
- * void StMinuitVertexFinder::setPrintLevel(int level);
+ * void StMinuitVertexFinder::setPrintLevel(Int_t level);
  * Set Minuit print level: 0-3
  * 0 means essentially no output
  * 3 prints a lot, for debugging only
@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.10 2008/07/31 18:11:10 genevb Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.11 2010/01/26 21:01:49 fisyak Exp $
  *
  */
 
@@ -107,56 +107,55 @@ public:
     StMinuitVertexFinder();
 
     // mandatory implementations
-    virtual         ~StMinuitVertexFinder();
-    int             fit(StEvent*);       
+    virtual        ~StMinuitVertexFinder();
+    Int_t           fit(StEvent*);       
     void            printInfo(ostream& = cout) const;
-    void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
-    virtual void           InitRun  (int runumber);
-    void           Clear();
+    void            UseVertexConstraint(Double_t x0, Double_t y0, Double_t dxdz, Double_t dydz, Double_t weight);
+    virtual void    InitRun  (Int_t runumber);
+    void            Clear();
 
 
     // Added, not part of base-class  and used by the Minuit vertex finder
-    int            NCtbMatches();    // returns the number of tracks matched to CTB                                                               
-    int            NCtbSlats();   // returns the number of CTB slats above threshold
-    void                   CTBforSeed(){   mRequireCTB = true;}
-    void                   NoCTBforSeed(){ mRequireCTB = false;}
-    void                   setExternalSeed(const StThreeVectorD&);
+    Int_t           NCtbMatches();    // returns the number of tracks matched to CTB                                                               
+    Int_t           NCtbSlats();   // returns the number of CTB slats above threshold
+    void            CTBforSeed(){   mRequireCTB = kTRUE;}
+    void            NoCTBforSeed(){ mRequireCTB = kFALSE;}
+    void            setExternalSeed(const StThreeVectorD&);
 
-    void            setPrintLevel(int = 0);
-    int            statusMin() const {return mStatusMin;}     // Minuit status flag
-    void                   DoUseITTF(){    mUseITTF = true; }
-    void                   DoNotUseITTF(){ mUseITTF = false;}
-    void                   useOldBEMCRank() { mUseOldBEMCRank = true; }
-    void                   lowerSplitVtxRank() { mLowerSplitVtxRank = true; }
-    void                   setFlagBase();
-    void                   SetFitPointsCut(int fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;}
-    void                   SetMinimumTracks(int n) {mMinTrack = n;}
+    void            setPrintLevel(Int_t = 0);
+    Int_t           statusMin() const {return mStatusMin;}     // Minuit status flag
+    void            DoUseITTF(){    mUseITTF = kTRUE; }
+    void            DoNotUseITTF(){ mUseITTF = kFALSE;}
+    void            useOldBEMCRank() { mUseOldBEMCRank = kTRUE; }
+    void            lowerSplitVtxRank() { mLowerSplitVtxRank = kTRUE; }
+    void            setFlagBase();
+    void            SetFitPointsCut(Int_t fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;}
+    void            SetMinimumTracks(Int_t n) {mMinTrack = n;}
 
 private:
     enum  {kFlagDcaz = 1, kFlagCTBMatch = 2, kFlagBEMCMatch = 4, kFlagCrossMembrane = 8};
 
-    bool accept(StTrack*) const;   // track filter
-    void  fillBemcHits(StEvent *);
-    int   matchTrack2BEMC(const StTrack *);
-    int   checkCrossMembrane(const StTrack *);
-    void  calculateRanks();
-    int   findSeeds();
+    bool    accept(StTrack*) const;   // track filter
+    void    fillBemcHits(StEvent *);
+    Int_t   matchTrack2BEMC(const StTrack *);
+    Int_t   checkCrossMembrane(const StTrack *);
+    void    calculateRanks();
+    Int_t   findSeeds();
 
-    static void fcn(int&, double*, double&, double*, int); // fit function
-    static void fcn1D(int&, double*, double&, double*, int); // fit function
+    static void fcn(Int_t&, Double_t*, Double_t&, Double_t*, Int_t); // fit function
+    static void fcn1D(Int_t&, Double_t*, Double_t&, Double_t*, Int_t); // fit function
     static Double_t Chi2atVertex(StThreeVectorD &vtx);
     
     bool                   mUseITTF;          // Use only tracks with ITTF encoded method
-    static bool            mUseDCA;           // Use DCA track paramters
     bool                   mUseOldBEMCRank;   // Use old BEMC rank calculation (Cu+Cu production)
     bool                   mLowerSplitVtxRank;// Use lower rank for split vertices
     UInt_t                 mFlagBase;         // ITTF track flag
     bool                   mRequireCTB;       // Set maker to use CTB
-    unsigned int           mMinNumberOfFitPointsOnTrack;
-    float                  mDcaZMax;
-    double                 mWeight ;          // Weight in fit for vertex contraint
-    double                 mRImpactMax;       // Max distance between helix and nominal beamline (0,0,z)
-    int                    mMinTrack;         // Min number of tracks
+    UInt_t                 mMinNumberOfFitPointsOnTrack;
+    Float_t                mDcaZMax;
+    Double_t               mWeight ;          // Weight in fit for vertex contraint
+    Double_t               mRImpactMax;       // Max distance between helix and nominal beamline (0,0,z)
+    Int_t                  mMinTrack;         // Min number of tracks
 
     StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
     
@@ -166,37 +165,33 @@ private:
     Int_t                  mBemcHit[120][20][2];  // modules, eta, sub
     static vector<StDcaGeometry*>   mDCAs;
     static vector<StPhysicalHelixD> mHelices;
-    static vector<unsigned short>   mHelixFlags;
-    static vector<double>           mSigma;
-    static vector<double>           mZImpact;
-    //static vector<bool>             mCTB;
-    static bool                     requireCTB;
-    static int                      nCTBHits;
-    static double                   mWidthScale;
-    static double                   mX0  ; // starting point of beam parameterization
-    static double                   mY0  ; // starting point of beam parameterization
-    static double                   mdxdz; // beam slope
-    static double                   mdydz; // beam slope
-    static double beamX(double z); // beamline parameterization
-    static double beamY(double z); // beamline parameterization
-    
-    int                    mStatusMin;           // Minuit status flag 
-    StThreeVectorD         mExternalSeed;
-    bool                   mExternalSeedPresent;
-
-    StPrimaryVertex       *mBestVtx;    // pointer to best vertex of this event
-    float                  mBestRank;   // store rank of best vertex
-    float                  mCTBSum;
-
-    TMinuit*               mMinuit;
+    static vector<UShort_t>         mHelixFlags;
+    static vector<Double_t>         mSigma;
+    static vector<Double_t>         mZImpact;
+    //static vector<Bool_t>         mCTB;
+    static Bool_t                   requireCTB;
+    static Int_t                    nCTBHits;
+    static Double_t                 mWidthScale;
+    static Double_t                 mX0  ; // starting point of beam parameterization
+    static Double_t                 mY0  ; // starting point of beam parameterization
+    static Double_t                 mdxdz; // beam slope
+    static Double_t                 mdydz; // beam slope
+    static Double_t beamX(Double_t z); // beamline parameterization
+    static Double_t beamY(Double_t z); // beamline parameterization
+    Int_t                    mStatusMin;           // Minuit status flag 
+    StThreeVectorD           mExternalSeed;
+    Bool_t                   mExternalSeedPresent;
+    StPrimaryVertex         *mBestVtx;    // pointer to best vertex of this event
+    Float_t                  mBestRank;   // store rank of best vertex
+    Float_t                  mCTBSum;
+    TMinuit*                 mMinuit;
 };
-
-
-
-
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.11  2010/01/26 21:01:49  fisyak
+ * Clean up, switch from bit mask to attributes
+ *
  * Revision 1.10  2008/07/31 18:11:10  genevb
  * VFMinuit3 chain option for lower ranking of split vertices
  *

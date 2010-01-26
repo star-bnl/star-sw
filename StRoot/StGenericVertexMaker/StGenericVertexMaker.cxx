@@ -56,12 +56,11 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
   eval = kFALSE;
   nEvTotal=nEvGood=0;
   externalFindUse=kTRUE; ///Default means that no finding actually done
-  m_Mode2=0;
   mEvalNtuple = 0;
   mEvent = 0;
   primV = 0;
   theFinder = 0;
-  minTracks = -1;
+  minTracks = 0;
 }
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
@@ -80,18 +79,6 @@ StGenericVertexMaker::~StGenericVertexMaker()
   (will need to have stack-like of VertexFinders and loop over
   them adding vertices in the collection)
 
-  m_Mode = 0x1     Minuit
-  m_Mode = 0x2     ppLMV4  This will not be able to run in parrallele of ppLMV5
-  m_Mode = 0x4     ppLMV5  This will not be able to run in parrallele of ppLMV4
-  m_Mode = 0x8     PPV with CTB matching
-  m_Mode = 0x10    PPV without CTB matching
-  m_Mode = 0x20    Fixed vertex finder
-  m_Mode = 0x40    Fixed vertex finder, read from MC event
-  m_Mode = 0x80    Minuit, new ranking mode
-  m_Mode = 0x100   Minuit, new ranking mode, lower split vertex ranking
- 
-  Default          Minuit  (to preserver backward compatibility)
-
   All VertexFinder-s need to have the same methods (like DoUseITTF()
   NCtbMatches() etc ...) described in the GenericVertexFinder() class).
   Currentely, methods are not part of the base class and need
@@ -101,36 +88,42 @@ StGenericVertexMaker::~StGenericVertexMaker()
 Int_t StGenericVertexMaker::Init()
 {
   // setup params
+  useITTF       = IAttr("ITTF");
+  useBeamline   = IAttr("beamLine");
+  calibBeamline = IAttr("calibBeamline");
+  useCTB        = IAttr("CTB");
+  usePCT        = IAttr("PCT");
+  eval          = IAttr("eval");
+  minTracks     = IAttr("minTracks");
 
-  LOG_INFO << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode <<" m_Mode2=" <<  m_Mode2 <<  endm;
-  bool isMinuit=false;
+  Bool_t isMinuit=kFALSE;
 
-  if ( m_Mode & 0x1 || m_Mode & 0x80 || m_Mode & 0x100){ // 3 versions of Minuit for ranking modes
+  if ( IAttr("VFMinuit") || IAttr("VFMinuit2") || IAttr("VFMinuit3")){ // 3 versions of Minuit for ranking modes
     theFinder= new StMinuitVertexFinder();
-    if (m_Mode & 0x1 ) ((StMinuitVertexFinder*) theFinder)->useOldBEMCRank();
-    if (m_Mode & 0x100 ) ((StMinuitVertexFinder*) theFinder)->lowerSplitVtxRank();
-    if (minTracks >= 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
-    isMinuit=true;
+    if (IAttr("VFMinuit") ) ((StMinuitVertexFinder*) theFinder)->useOldBEMCRank();
+    if (IAttr("VFMinuit3") ) ((StMinuitVertexFinder*) theFinder)->lowerSplitVtxRank();
+    if (minTracks > 0) ((StMinuitVertexFinder*) theFinder)->SetMinimumTracks(minTracks);
+    isMinuit=kTRUE;
 
-  } else if ( m_Mode & 0x2){
+  } else if ( IAttr("VFppLMV")){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(0);                 // this mode is an internal to ppLMV option switch
 
-  } else if ( m_Mode & 0x4){
+  } else if ( IAttr("VFppLMV5")){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
 
-  } else if ( m_Mode & 0x8 ||  m_Mode & 0x10){ // 2 version of PPV w/ & w/o CTB
+  } else if ( IAttr("VFPPV") ||  IAttr("VFPPVnoCTB")){ // 2 version of PPV w/ & w/o CTB
     LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
     theFinder= new StPPVertexFinder();
-    if ( m_Mode & 0x10) ((StPPVertexFinder*) theFinder)->useCTB(false);	
+    if ( IAttr("VFPPVnoCTB")) ((StPPVertexFinder*) theFinder)->useCTB(kFALSE);	
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
-      ((StPPVertexFinder*) theFinder)->setMC(true);
+      ((StPPVertexFinder*) theFinder)->setMC(kTRUE);
     }
 
-  } else if ( m_Mode & 0x20 || m_Mode & 0x40) {
+  } else if ( IAttr("VFFV") || IAttr("VFMCE")) {
       theFinder = new StFixedVertexFinder();
-      if (m_Mode & 0x40){
+      if (IAttr("VFMCE")){
 	LOG_INFO << "StGenericVertexMaker::Init: fixed vertex using MC vertex" << endm;
 	theFinder->SetMode(1);
       } else {
@@ -141,7 +134,7 @@ Int_t StGenericVertexMaker::Init()
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
     theFinder= new StMinuitVertexFinder();
-    isMinuit=true;
+    isMinuit=kTRUE;
 
   }
 
