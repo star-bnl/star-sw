@@ -409,13 +409,17 @@ Int_t St_pp2pp_Maker::MakeClusters() {
       // Put in trigger stuff 
 
       if(trg_p){ 
+
 	pp2ppColl->romanPot(i)->setAdc(	(u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// u_short -> u_int
 					(u_int) trg_p->pp2ppADC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
 	pp2ppColl->romanPot(i)->setTac(	(u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],0),/// u_short -> u_int
 					(u_int) trg_p->pp2ppTAC( (StBeamDirection) EW[i],VH[i],UDOI[i],1) ); 
+
+	// for now (Jan. 2010) : use the status byte as "silicon_bunch - bunchId7Bit()"
 	Diff_Bunch = mRpStatus[i] - trg_p->bunchId7Bit() ;
 	if ( Diff_Bunch < 0 ) Diff_Bunch += 120 ;
 	pp2ppColl->romanPot(i)->setStatus( (unsigned char) Diff_Bunch ) ;
+
       }
       else
 	LOG_WARN << "No StTriggerData ?! " << endm ;
