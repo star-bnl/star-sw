@@ -12,15 +12,15 @@ int rdMuWana(
 	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
 	     int nFiles  = 1000, // max # of muDst files
 	     int isMC=1, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
-	     int useJetFinder = 1, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
+	     int useJetFinder = 2, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
              TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //location of jet trees to be used
  ) { 
 
-  // jetTreeDir = "./";
+  //jetTreeDir = "./";
   if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
   if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
   if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppZprod.lis";
-  if(isMC==4) file  = "fillListA/mcSetD1_ppWplusProd.lis";
+  if(isMC==4) file  = "/star/u/balewski/2009-Wana-pp500/fillListA/mcSetD1_ppWplusProd.lis";
   if(isMC==5) file  = "fillListA/mcSetD1_ppWminusProd.lis";
   if(isMC==6) file  = "fillListA/mcSetD1_ppWdec.lis";
   if(isMC==7) file  = "fillListA/mcSetD1_ppZdec.lis";
@@ -188,7 +188,10 @@ int rdMuWana(
     dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }  
   if(isMC>=20) { // official rcf1001N M-C samples, January 2010
+    dbMk->SetMaxEntryTime(20100124,0); //use 'ofl' beginTime 2008-12-15 00:00:02 BTOW 'ofl' gains these MC were generated with
     dbMk->SetFlavor("sim","eemcPMTped"); // to compensate action of fast simu
+    dbMk->SetFlavor("sim","eemcPMTcal"); // to compensate action of fast simu
+
     //get timestamp from static txt file
     int timestamp=-999;
     ifstream mcTimeStamp("/star/institutions/iucf/stevens4/wAnalysis/aps2010/mcRcfSDT.txt");
@@ -341,6 +344,8 @@ int rdMuWana(
   //set parameters in W algo manually
   //WmuMk->setJetNeutScaleMC(1.00);
   //WmuMk->setJetChrgScaleMC(1.00);
+  //WmuMk->setBtowScaleMC(1.00);
+  //WmuMk->SetEtowScaleMC(1.00);
 
   /* evaluation of result, has full acess to W-algo internal data
      including overwrite - be careful */
@@ -433,8 +438,8 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
-// Revision 1.17  2010/01/23 21:24:45  stevens4
-// finish hardcode timestamp for new official rcf mc
+// Revision 1.18  2010/01/26 12:02:38  stevens4
+// load proper gain tables for official rcf mc
 //
 // Revision 1.16  2010/01/22 20:20:18  balewski
 // partialy addopted to handle new offial MC, time stamp is hardcoded
