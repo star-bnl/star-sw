@@ -21,7 +21,8 @@ void bfc (const Int_t Last,
 	  const Char_t *TreeFile);
 //R__EXTERN StBFChain *chain;
 #else
-#define SETBIT(n,i)  ((n) |= (1 << i))
+#define SETBIT(n,i)  ((n) |=  (1 << i))
+#define CLRBIT(n,i)  ((n) &= ~(1 << i))
 class StBFChain;
 StBFChain *chain;
 class St_db_Maker;
@@ -37,10 +38,12 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   TString Opt(opt);
   TString RunOpt(Run);
   RunOpt.ToLower();
-  ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,-EventQA,-EvOut,-dstout,analysis,dEdxY2,noHistos,";
-  ChainOpt += "McTpcAna,IdTruth,useInTracker,-hitfilt,";
+  //  ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
+  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
+  ChainOpt += "Corr3,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
+  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
-    ChainOpt += "tpc_daq,tpcI,";
+    ChainOpt += "tpl,tpcI,";
     RunOpt.ReplaceAll("TpcRS,","");
     RunOpt.ReplaceAll("trs,","");
   } else {
@@ -87,15 +90,12 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   if (ChainOpt.Contains("TpcRS",TString::kIgnoreCase)) {
     StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
     if (tpcRS) {
-      Int_t m_Mode = 0;
-      if (Opt.Contains("pai",TString::kIgnoreCase))  SETBIT(m_Mode,StTpcRSMaker::kPAI); 
-      if (Opt.Contains("bichsel",TString::kIgnoreCase))  SETBIT(m_Mode,StTpcRSMaker::kBICHSEL); 
-      //    SETBIT(m_Mode,StTpcRSMaker::kNONOISE);
-      //    SETBIT(m_Mode,StTpcRSMaker::kPseudoPadRow);
-      //    SETBIT(m_Mode,StTpcRSMaker::kPedestal);
-      //    SETBIT(m_Mode,StTpcRSMaker::kAVERAGEPEDESTAL);
-      //    SETBIT(m_Mode,StTpcRSMaker::kdEdxCorr);
-      //    SETBIT(m_Mode,StTpcRSMaker::kTree);
+      Int_t m_Mode = tpcRS->GetMode();
+#if 1
+      if (Opt.Contains("pai",TString::kIgnoreCase))     {SETBIT(m_Mode,StTpcRSMaker::kPAI); CLRBIT(m_Mode,StTpcRSMaker::kBICHSEL);}
+      if (Opt.Contains("bichsel",TString::kIgnoreCase)) {SETBIT(m_Mode,StTpcRSMaker::kBICHSEL); CLRBIT(m_Mode,StTpcRSMaker::kPAI);}
+#endif
+      //      CLRBIT(m_Mode,StTpcRSMaker::kDistortion);  // Check that distorton are IN chain
       tpcRS->SetMode(m_Mode);
       if (tauIX  > 0) tpcRS->SettauIntegrationX(1e-9*tauIX);
       if (tauCX  > 0) tpcRS->SettauCX(1e-9*tauCX);
@@ -134,15 +134,14 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
     SETBIT(mask,StTpcdEdxCorrection::kdXCorrection);
     //  SETBIT(mask,StTpcdEdxCorrection::kTpcdEdxCor);
     //  SETBIT(mask,StTpcdEdxCorrection::kTpcLengthCorrection);
-#endif    
     SETBIT(mask,StTpcdEdxCorrection::kAdcCorrection);
     SETBIT(mask,StTpcdEdxCorrection::kTpcLast);
-    Int_t Mode = 0; // kDoNotCorrectdEdx
     //    SETBIT(Mode,StdEdxY2Maker::kOldClusterFinder); 
     //    SETBIT(Mode,StdEdxY2Maker::kDoNotCorrectdEdx);
+#endif    
+    Int_t Mode = 2;
     SETBIT(Mode,StdEdxY2Maker::kPadSelection); 
     SETBIT(Mode,StdEdxY2Maker::kCalibration);
-    
     if (Mode) {
       cout << " set dEdxY2 Mode" << Mode << " =======================================" << endl;
       dEdx->SetMode(Mode); 
