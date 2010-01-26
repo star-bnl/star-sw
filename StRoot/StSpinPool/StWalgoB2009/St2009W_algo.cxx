@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.8 2010/01/23 02:35:38 stevens4 Exp $
+// $Id: St2009W_algo.cxx,v 1.9 2010/01/26 18:48:11 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -27,7 +27,7 @@ St2009WMaker::find_W_boson(){
       assert(T.nearTotET>0); // internal logical error
       
       //make cut on lepton |eta| for cross section 
-      //if(fabs(T.primP.Eta()) > 1) continue;      
+      if(fabs(T.primP.Eta()) > 1) continue;      
 
       //signal plots w/o EEMC in veto
       if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
@@ -492,6 +492,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.9  2010/01/26 18:48:11  stevens4
+// include |eta|<1 cut for all W yields
+//
 // Revision 1.8  2010/01/23 02:35:38  stevens4
 // add ability to scale jet et and use real btow peds for rcf mc
 //
