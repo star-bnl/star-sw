@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.7 2009/12/22 21:40:09 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.8 2010/01/26 17:50:54 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.8  2010/01/26 17:50:54  hmasui
+ * Fix geantidFound to match the correct geant id. Use number of accepted events, not number of all events without vertex cuts. Add QA for eventid, runid and # of particles per event
+ *
  * Revision 1.7  2009/12/22 21:40:09  hmasui
  * Add comments for functions and members
  *
@@ -214,7 +217,7 @@ void StEmbeddingQADraw::checkInputGeantId()
   }
 
   const Int_t mcIdBin      = hGeantId->GetMaximumBin() ;
-  const Int_t geantidFound = TMath::Nint(hGeantId->GetBinCenter(mcIdBin));
+  const Int_t geantidFound = TMath::Nint(hGeantId->GetBinLowEdge(mcIdBin));
 
   if ( mGeantId == geantidFound ) return ; /// do nothing if input geantid is correct
   else{
@@ -274,7 +277,7 @@ void StEmbeddingQADraw::setDaughterGeantId()
 
   for(UInt_t id=0; id<1000; id++){
     const Int_t contamCategoryId = StEmbeddingQAUtilities::instance()->getCategoryId("CONTAM") ;
-    TH3* hDca = (TH3D*) getHistogram(Form("hDca_%d_%d_%d", contamCategoryId, mGeantId, id));
+    TH3* hDca = (TH3D*) mInputEmbedding->Get(Form("hDca_%d_%d_%d", contamCategoryId, mGeantId, id));
 
     if ( hDca ){
       const Char_t* daughterName = table->findParticleByGeantId(id)->name().c_str() ;
@@ -295,7 +298,7 @@ Int_t StEmbeddingQADraw::getEntries() const
 {
   /// Get number of events from the z-vertex histogram
 
-  TH1* hVz = (TH1D*) getHistogram("hVz");
+  TH1* hVz = (TH1D*) getHistogram("hVzAccepted");
   if(!hVz) return 0;
 
   return (Int_t)( hVz->GetEntries() );
@@ -464,11 +467,15 @@ Bool_t StEmbeddingQADraw::drawEvent() const
 
   //----------------------------------------------------------------------------------------------------
   // Event-wise informations
-  TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 600);
-  canvas->Divide(3, 2);
+  //----------------------------------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------------------------------
+  // Vertices
+  TCanvas* canvas1 = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 600);
+  canvas1->Divide(3, 2);
 
   /// z-vertex
-  canvas->cd(1);
+  canvas1->cd(1);
   TH1* hVz = (TH1D*) getHistogram("hVz");
   if(!hVz) return kFALSE ;
 
@@ -482,7 +489,7 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   hVz->Draw("same");
 
   /// y vs x vertices
-  canvas->cd(2);
+  canvas1->cd(2);
   TH2* hVyVx = (TH2D*) mInputEmbedding->Get("hVyVx");
   if(!hVyVx) return kFALSE ;
 
@@ -492,7 +499,7 @@ Bool_t StEmbeddingQADraw::drawEvent() const
 
   /// dVx, dVy, dVz
   for(Int_t i=0; i<3; i++){
-    canvas->cd(i+3);
+    canvas1->cd(i+3);
     TH1* hdV = 0 ;
     if( i == 0 ) hdV = (TH1D*) mInputEmbedding->Get("hdVx");
     if( i == 1 ) hdV = (TH1D*) mInputEmbedding->Get("hdVy");
@@ -503,14 +510,96 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   }
 
   /// Statistics
-  canvas->cd(6);
+  canvas1->cd(6);
   drawStatistics();
 
-  canvas->cd();
-  canvas->Update();
+  canvas1->cd();
+  canvas1->Update();
 
   /// Print figures
-  print(*canvas, "eventqa");
+  print(*canvas1, "eventqa_vertices");
+  //----------------------------------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------------------------------
+  /// Run id, event id QA
+  TCanvas* canvas2 =  new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
+  canvas2->Divide(2, 2);
+
+  canvas2->cd(1);
+  TH1* hRunNumber = (TH1D*) mInputEmbedding->Get("hRunNumber");
+  if(!hRunNumber) return kFALSE ;
+  hRunNumber->Draw();
+
+  canvas2->cd(2);
+  TH1* hEventId = (TH1D*) mInputEmbedding->Get("hEventId");
+  if(!hEventId) return kFALSE ;
+  hEventId->Draw();
+
+  /// List of run id
+  canvas2->cd(3);
+  TPaveText* runlist = new TPaveText(0.1, 0.2, 0.9, 0.8);
+  runlist->SetTextFont(42);
+  runlist->SetTextSize(0.05);
+  runlist->SetBorderSize(1);
+  runlist->SetFillColor(10);
+  runlist->AddText("Run id         statistics");
+
+  for(Int_t irun=0; irun<hRunNumber->GetNbinsX(); irun++){
+    const Double_t count = hRunNumber->GetBinContent(irun+1);
+    if(count==0.0) continue ;
+
+    const Int_t runid = StEmbeddingQAUtilities::instance()->getRunId((Int_t)hRunNumber->GetBinLowEdge(irun+1), mYear);
+    runlist->AddText(Form("%10d  %10d events", runid, (Int_t)count));
+  }
+  runlist->Draw();
+
+  /// Statistics
+  canvas2->cd(4);
+  drawStatistics();
+
+  canvas2->cd();
+  canvas2->Update();
+
+  /// Print figures
+  print(*canvas2, "eventqa_run_event_id");
+  //----------------------------------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------------------------------
+  /// Number of particles
+  TCanvas* canvas3 =  new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 600);
+  canvas3->Divide(3, 2);
+
+  for(UInt_t ic=0; ic<StEmbeddingQAConst::mNEmbedding; ic++){
+    canvas3->cd(ic+1);
+    canvas3->GetPad(ic+1)->SetLogy();
+    TH1* hNParticles = (TH1D*) mInputEmbedding->Get(Form("hNParticles_%d", ic));
+    if(!hNParticles) return kFALSE ;
+
+    TString title(hNParticles->GetTitle());
+    title.Remove(0, title.Index(',')+2);
+    hNParticles->SetTitle(title);
+
+    // Set x-axis range
+    StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+    if( utility->isGhost(utility->getCategoryName(ic)) ){
+      hNParticles->SetAxisRange(0, 800, "X");
+    }
+    else{
+      hNParticles->SetAxisRange(0, 50, "X");
+    }
+
+    hNParticles->Draw();
+  }
+
+  /// Statistics
+  canvas3->cd(6);
+  drawStatistics();
+
+  canvas3->cd();
+  canvas3->Update();
+
+  /// Print figures
+  print(*canvas3, "eventqa_nparticles");
 
   return kTRUE ;
 }
