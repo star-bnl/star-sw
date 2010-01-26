@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDcaGeometry.h,v 2.4 2009/10/28 13:54:35 fisyak Exp $
+ * $Id: StDcaGeometry.h,v 2.5 2010/01/26 20:34:39 fisyak Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.h,v $
+ * Revision 2.5  2010/01/26 20:34:39  fisyak
+ * Add print out and  conversion from DCA to x,y,z,px,py,pz
+ *
  * Revision 2.4  2009/10/28 13:54:35  fisyak
  * Forgot one more set
  *
@@ -39,63 +42,56 @@ public:
     StDcaGeometry();
     virtual ~StDcaGeometry();
 
-    int              charge()    const;
-    double           impact()    const;
-    double           curvature() const;
-    double           psi()       const;
-    double           dipAngle()  const;
-    double           tanDip()    const;
-    double           pt()        const;
-    double           z()         const;
-    double           hz()        const;
-    StThreeVectorF   origin()    const;
-    StThreeVectorF   momentum()  const;
+    Int_t            charge()    const {return (mPti<0)? -1:1;}  
+    Double_t         impact()    const {return mImp;}		  
+    Double_t         curvature() const {return mCurv;}		  
+    Double_t         psi()       const {return mPsi ;}		  
+    Double_t         dipAngle()  const {return atan(mTan);}	  
+    Double_t         tanDip()    const {return mTan ;}		  
+    Double_t         pt()        const {return 1./fabs(mPti);}	  
+    Double_t         z()         const {return mZ   ;}		  
+    Double_t         hz()        const {return mCurv/mPti;}	  
+    StThreeVectorF   origin()    const;         
+    StThreeVectorF   momentum()  const;        
     StPhysicalHelixD helix()     const;
     THelixTrack      thelix()    const;
-    const float*     errMatrix() const;
-
+    const float*     params()    const {return &mImp;}	  
+    const float*     errMatrix() const {return &mImpImp;} 
+    void GetXYZ(Double_t xyzp[6], Double_t CovXyzp[21]) const;
+    virtual void     Print(Option_t *option) const;
     //
     // Experts only set function
     //
-    void set(const float pars[6], const float errs[15]);
-    void set(const double pars[6], const double errs[15]);
+    void set(const Float_t pars[6], const Float_t errs[15]);
+    void set(const Double_t pars[6], const Double_t errs[15]);
 
 private:
-    char mBeg[1];//!
+    Char_t  mBeg[1];//!
     /// signed impact parameter; Signed in such a way that:
     ///     x =  -impact*sin(Psi)
     ///     y =   impact*cos(Psi)
-    float  mImp;
+    Float_t  mImp;
     ///  Z-coordinate of this track (reference plane)
-    float  mZ;
+    Float_t  mZ;
     ///  Psi angle of the track
-    float  mPsi;
+    Float_t  mPsi;
     /// signed invert pt [sign = sign(-qB)]
-    float  mPti;
+    Float_t  mPti;
     /// tangent of the track momentum dip angle
-    float  mTan;
+    Float_t  mTan;
     /// signed curvature
-    float  mCurv;
+    Float_t  mCurv;
     
     /// pars errors
-    float  mImpImp;
-    float  mZImp, mZZ;
-    float  mPsiImp, mPsiZ, mPsiPsi;
-    float  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
-    float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
-    char   mEnd[1];//!
+    Float_t  mImpImp;
+    Float_t  mZImp, mZZ;
+    Float_t  mPsiImp, mPsiZ, mPsiPsi;
+    Float_t  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
+    Float_t  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
+    Char_t   mEnd[1];//!
     
-    ClassDef(StDcaGeometry,2)
+    ClassDef(StDcaGeometry,3)
 };
-inline int     StDcaGeometry::charge() const 		{return (mPti<0)? -1:1;}
-inline double  StDcaGeometry::impact() const 		{return mImp;}
-inline double  StDcaGeometry::curvature() const 	{return mCurv;}
-inline double  StDcaGeometry::psi()       const 	{return mPsi ;}
-inline double  StDcaGeometry::dipAngle()  const 	{return atan(mTan);}
-inline double  StDcaGeometry::tanDip() const 		{return mTan ;}
-inline double  StDcaGeometry::pt()     const 		{return 1./fabs(mPti);}
-inline double  StDcaGeometry::z()      const 		{return mZ   ;}
-inline double  StDcaGeometry::hz()     const 		{return mCurv/mPti;}
-inline const float* StDcaGeometry::errMatrix() const 	{return &mImpImp;}
+ostream&  operator<<(ostream& os, StDcaGeometry const & dca);
 
 #endif
