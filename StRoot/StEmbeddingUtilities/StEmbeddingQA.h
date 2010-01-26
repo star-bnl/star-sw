@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.1 2009/12/22 21:41:17 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.2 2010/01/26 17:46:31 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.2  2010/01/26 17:46:31  hmasui
+ * Add histograms for eventid, runnumber, and number of particles
+ *
  * Revision 1.1  2009/12/22 21:41:17  hmasui
  * Change class name from StEmbeddingQAMaker to StEmbeddingQA
  *
@@ -126,6 +129,10 @@ class StEmbeddingQA {
     TH1* mhdVx ; /// vx(real) - vx(MC)
     TH1* mhdVy ; /// vy(real) - vy(MC)
     TH1* mhdVz ; /// vz(real) - vz(MC)
+
+    TH1* mhEventId ; /// Event id
+    TH1* mhRunNumber ; /// Run number (see StEmbeddingQAUtilities for the definition of run number)
+    TH1* mhNParticles[StEmbeddingQAConst::mNCategory] ; /// Number of particles
 
     /// Track-wise histograms
     ///   Fill all available MC and reconstructed tracks
