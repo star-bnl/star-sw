@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.554 2010/01/02 18:23:29 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.555 2010/01/26 20:43:44 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -19,8 +19,6 @@
 #include "StEnumerations.h"
 #include "TTree.h"
 #define STAR_LOGGER 1
-#define __KEEP_TPCDAQ_FCF__
-//_____________________________________________________________________
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
 #if 0
@@ -36,6 +34,7 @@
 #endif
 
 // NoChainOptions -> Number of chain options auto-calculated
+#define __KEEP_TPCDAQ_FCF__
 TableImpl(Bfc);
 ClassImp(StBFChain);
 
@@ -323,9 +322,9 @@ Int_t StBFChain::Instantiate()
 	mk->SetActive(kTRUE);
 	if (GetOption("PrepEmbed")) mk->SetMode(10*(mk->GetMode()/10)+1);
       }
-      else   mk->SetActive(kFALSE);
+      else mk->SetActive(kFALSE);
       if (! mk) goto Error;
-	SetGeantOptions(mk);
+      SetGeantOptions(mk);
     }
     
     // special maker options
@@ -335,15 +334,16 @@ Int_t StBFChain::Instantiate()
     //        z = 1 Mixer Mode
     if (maker == "StVMCMaker") {
       if (GetOption("VMCPassive")) {// don't use mk->SetActive(kFALSE) because we want to have InitRun
-	mk->SetMode(mk->GetMode() + TMath::Sign(10,mk->GetMode()));
+	mk->SetAttr("VMCPassive",kTRUE);
       }
       else {
-	if (GetOption("phys_off")) mk->SetMode(mk->GetMode() + TMath::Sign(100,mk->GetMode()));
+	if (GetOption("phys_off")) mk->SetAttr("phys_off",kTRUE);
 	if (fInFile != "")  {
 	  if (ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data())))
 	    goto Error;
 	}
       }
+      if (GetOption("Embedding")) mk->SetAttr("Embedding",kTRUE);
     }
     //		Sti(ITTF) start
     if (maker == "StiMaker" || maker == "StiVMCMaker") {
@@ -382,36 +382,24 @@ Int_t StBFChain::Instantiate()
     }
     //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
-      int                   VtxOpt = 0;
       // VertexFinder methods
-      if ( GetOption("VFMinuit") ){  VtxOpt |= (0x1 << 0);} //  1 0x01
-      if ( GetOption("VFppLMV") ){   VtxOpt |= (0x1 << 1);} //  2 0x02
-      if ( GetOption("VFppLMV5") ){  VtxOpt |= (0x1 << 2);} //  4 0x04
-      if ( GetOption("VFPPV") ){     VtxOpt |= (0x1 << 3);} //  8 0x08
-      if ( GetOption("VFPPVnoCTB") ){VtxOpt |= (0x1 << 4);} // 16 0x10
-      if ( GetOption("VFFV") ){      VtxOpt |= (0x1 << 5);} // 32 0x20
-      if ( GetOption("VFMCE") ){     VtxOpt |= (0x1 << 6);} // 64 0x40
-      if ( GetOption("VFMinuit2") ){ VtxOpt |= (0x1 << 7);} //128 0x80
-      if ( GetOption("VFMinuit3") ){ VtxOpt |= (0x1 << 8);} //256 0x100
-      mk->SetMode(VtxOpt);
-      
-      // All VertexFinders implement those (or not)
-      if (GetOption("beamLine") || GetOption("CtbMatchVtx") || GetOption("min2trkVtx") ||
-          GetOption("usePct4Vtx") || GetOption("VtxSeedCalG")) {
-	TString  cmd(Form("StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) %p;",mk));
-	if (GetOption("beamLine"))    {cmd += "gvtxMk->UseBeamLine();";}
-	if (GetOption("CtbMatchVtx")) {cmd += "gvtxMk->UseCTB();";}
-	if (GetOption("min2trkVtx"))  {cmd += "gvtxMk->SetMinimumTracks(2);";}
-	if (GetOption("VtxSeedCalG")) {cmd += "gvtxMk->CalibBeamLine();";}
-
-        // WARNING: introduction of this option (usePct4Vtx) with default:false
-        // breaks backward compatibility for any StGenericVertexMaker
-        // which implements dropping of Post-Crossing Tracks via a UsePCT()
-        // function. Use this option (make it true) to reproduce results
-        // from before the introduction of this option.
-	if (GetOption("usePct4Vtx"))  {cmd += "gvtxMk->UsePCT();";}
-	ProcessLine(cmd);
-      }
+      if (GetOption("Sti") || 
+	  GetOption("StiVMC"     ) ) mk->SetAttr("ITTF"         , kTRUE);
+      if (GetOption("VFMinuit"   ) ) mk->SetAttr("VFMinuit"   	, kTRUE);
+      if (GetOption("VFppLMV"    ) ) mk->SetAttr("VFppLMV"    	, kTRUE);
+      if (GetOption("VFppLMV5"   ) ) mk->SetAttr("VFppLMV5"   	, kTRUE);
+      if (GetOption("VFPPV"      ) ) mk->SetAttr("VFPPV"      	, kTRUE);
+      if (GetOption("VFPPVnoCTB" ) ) mk->SetAttr("VFPPVnoCTB" 	, kTRUE);
+      if (GetOption("VFFV"       ) ) mk->SetAttr("VFFV"       	, kTRUE);
+      if (GetOption("VFMCE"      ) ) mk->SetAttr("VFMCE"      	, kTRUE);
+      if (GetOption("VFMinuit2"  ) ) mk->SetAttr("VFMinuit2"  	, kTRUE);
+      if (GetOption("VFMinuit3"  ) ) mk->SetAttr("VFMinuit3"  	, kTRUE);
+      if (GetOption("beamLine"   ) ) mk->SetAttr("BeamLine"   	, kTRUE);
+      if (GetOption("CtbMatchVtx") ) mk->SetAttr("CTB"        	, kTRUE);
+      if (GetOption("min2trkVtx" ) ) mk->SetAttr("minTracks" 	, 2);
+      if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
+      if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , kTRUE);
+      mk->PrintAttr();
     }
     if (maker=="StAssociationMaker") {
       
@@ -422,18 +410,24 @@ Int_t StBFChain::Instantiate()
 	cmd = Form ("((StAssociationMaker *) %p)->useInTracker();",mk);
       cmd += "StMcParameterDB* parameterDB = StMcParameterDB::instance();";
       // TPC
+#if 0
       cmd += "parameterDB->setXCutTpc(.5);"; // 5 mm
       cmd += "parameterDB->setYCutTpc(.5);"; // 5 mm
       cmd += "parameterDB->setZCutTpc(.5);"; // 5 mm
+#endif
       cmd += "parameterDB->setReqCommonHitsTpc(3);"; // Require 3 hits in common for tracks to be associated
       // FTPC
+#if 0
       cmd += "parameterDB->setRCutFtpc(.3);"; // 3 mm
       cmd += "parameterDB->setPhiCutFtpc(5*(3.1415927/180.0));"; // 5 degrees
+#endif
       cmd += "parameterDB->setReqCommonHitsFtpc(3);"; // Require 3 hits in common for tracks to be associated
       // SVT
+#if 0
       cmd += "parameterDB->setXCutSvt(.08);"; // 800 um
       cmd += "parameterDB->setYCutSvt(.08);"; // 800 um
       cmd += "parameterDB->setZCutSvt(.08);"; // 800 um
+#endif
       cmd += "parameterDB->setReqCommonHitsSvt(1);"; // Require 1 hits in common for tracks to be associated
       if (GetOption("IdTruth")) cmd += Form("((StAssociationMaker *) %p)->useIdAssoc();",mk);
       ProcessLine(cmd);
@@ -479,76 +473,18 @@ Int_t StBFChain::Instantiate()
       ProcessLine(cmd);
     }
     
-    if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
-    if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2);
-    if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
     if (maker == "StLaserEventMaker"){
       // Bill stuff - Empty place-holder
     }
     if (maker == "StDetectorDbMaker") {
       if ( GetOption("DbRichSca") ) mk->SetMode(1);
     }
-    
-    if (maker == "St_tpt_Maker" && (GetOption("MINIDAQ") || GetOption("Eval"))) {
-      TString cmd(Form("St_tpt_Maker *tptMk = (St_tpt_Maker *) %p;",mk));
-      if (GetOption("MINIDAQ")) cmd += "tptMk->Set_final(kTRUE);";// Turn on the final ntuple.
-      if (GetOption("Eval")) {
-	cmd += "tptMk->tteEvalOn();";   //Turn on the tpc evaluation
-	cmd += "tptMk->tptResOn();";    // Turn on the residual table
-      }
-      ProcessLine(cmd);
-    }
-    if ( (maker == "StTpcHitMover" || maker == "St_tpt_Maker") && GetOption("ExB")){
-      // bit 0 is ExB ON or OFF
-      // The next 3 bits are reserved for yearly changes.
-      // Backward compatibility preserved.
-      int mask=1;                                    // Al Saulys request
-      if( GetOption("EB1") ){
-	// Do nothing (i.e. bit 1 at 0)
-      } else if ( GetOption("EB2") ){
-	// Force bit 1 at 1 regardless
-	mask = mask | 2;
-      } else {
-	// depend on RY option i.e. take default for that RealYear data
-	// expectations.
-	if(GetOption("RY1H")    ||
-	   GetOption("RY2000")  ||
-	   GetOption("RY2001")  ||
-	   GetOption("RY2001N") ||
-	   GetOption("RY2003")  ||
-	   GetOption("RY2003X")) mask = mask | 2 ;  // Jim Thomas request
-      }
-      // Other options introduced in October 2001 for distortion corrections
-      // studies and year1 re-production. Those are OR additive to the mask.
-      //(void) printf("StBFChain:: Options list : %d %d %d %d %d %d %d %d\n",
-      //		  kPadrow13,kTwist,kClock,kMembrane,kEndcap,
-      //            kIFCShift,kSpaceCharge,kSpaceChargeR2);
-      if( GetOption("OBmap")      ){	mask |=   (kBMap          << 1); }
-      if( GetOption("OBMap2d")    ){    mask |=   (kFast2DBMap    << 1); }
-      if( GetOption("OPr13")      ){	mask |=   (kPadrow13      << 1); }
-      if( GetOption("OTwist")     ){	mask |=   (kTwist         << 1); }
-      if( GetOption("OClock")     ){	mask |=   (kClock         << 1); }
-      if( GetOption("OCentm")     ){	mask |=   (kMembrane      << 1); }
-      if( GetOption("OECap")      ){	mask |=   (kEndcap        << 1); }
-      if( GetOption("OIFC")       ){	mask |=   (kIFCShift      << 1); }
-      if( GetOption("OSpaceZ")    ){	mask |=   (kSpaceCharge   << 1); }
-      if( GetOption("OSpaceZ2")   ){    mask |=   (kSpaceChargeR2 << 1); }
-      if( GetOption("OShortR")    ){    mask |=   (kShortedRing   << 1); }
-      if( GetOption("OGridLeak")  ){    mask |=   (kGridLeak      << 1); }
-      if( GetOption("OGridLeak3D")){    mask |=   (k3DGridLeak    << 1); }
-      LOG_QA << "StBFChain::Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
-      if (GetOption("Embedding"))       mask = - mask; // don't move embedded hits
-      mk->SetMode(mask);
-    }
-    if (maker == "StTpcHitMover" && GetOption("AlignSectors"))
-      ProcessLine(Form("((StTpcHitMover *)%p)->AlignHits(kTRUE);",mk));
     if (maker == "StTpcRSMaker") {
       if (! GetOption("TrsToF")) {
 	Int_t mode = mk->GetMode();
 	mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
 	mk->SetMode(mode);
       }
-      
     }
     if (maker == "StTrsMaker") {
       Int_t mode = 0;
@@ -616,27 +552,11 @@ Int_t StBFChain::Instantiate()
       mk->SetMode(mask);
     }
 #endif    
-    if (maker == "StRchMaker") {
-      if (GetOption("Rrs")) mk->SetMode(1); // rrs
-      else                  mk->SetMode(0); // daq
-    }
-    
     // Place-holder. Would possibly be a bitmask
     if (maker == "StTofrMatchMaker"){
       mk->SetMode(0);
     }
     
-    // Turn on alternative V0 method
-    if (maker == "StV0Maker") {
-      if (GetOption("Ev03")) mk->SetMode(1);
-      if (GetOption("Eval")) ProcessLine(Form("((StV0Maker *) %p)->ev0EvalOn();",mk));
-    }
-    //if (maker == "StKinkMaker"){
-    // // Placeholder for KinkMaker control.
-    // // - SetMode(1)   TPT,
-    // // - SetMode(2)   ITTF
-    // // Default = Both
-    //}
     if (maker == "StSpaceChargeEbyEMaker") {
       if ( GetOption("SpcChgCal") ||
 	   GetOption("SpcChgCalG"))   mk->SetMode(2);
@@ -660,38 +580,50 @@ Int_t StBFChain::Instantiate()
       cmd += "Ximk->SetXiLanguageUsage(5);";
       ProcessLine(cmd);
     }
-#ifndef YF_CLeanUp
-    if (maker == "St_trg_Maker") {
-      Int_t mode = 0;
-      if (! GetOption("alltrigger")){
-	if (GetOption("Physics"))   mode += 1;
-	if (GetOption("LaserTest")) mode += 2;
-	if (GetOption("PulserSvt")) mode += 4;
-      } else {
-	LOG_QA << "'alltrigger' option on. All others ignored" << endm;
-      }
-      if (mode) mk->SetMode(mode);
-    }
-#endif
-    if (maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) {
-      if (GetOption("Simu"))      mk->SetMode(-10);
-      if (GetOption("Embedding")) mk->SetMode(-11);
-    }
     if (maker == "StTpcDbMaker"){
-      mk->SetMode(0);
-      // this change may be temporary i.e. if Simulation includes
-      // rotation/translation, this won't be necessarily true.
-      // Will investigate further.
-      if (GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetMode(1);
-      // This is commented for now but may be used. Those extensions
-      // were implemented by David H. on Jan 2 2002. DEfault is ofl+laserDV
-      //mk->UseOnlyLaserDriftVelocity();    // uses laserDV database
-      //mk->UseOnlyCathodeDriftVelocity();  // uses offl database
-      if ( GetOption("useLDV") || GetOption("useCDV") || GetOption("useNewLDV") ) {
-	if ( GetOption("useLDV")    ) mk->SetMode(mk->GetMode()%1000000 + 2000000);// uses laserDV database
-	if ( GetOption("useCDV")    ) mk->SetMode(mk->GetMode()%1000000 + 1000000);// uses ofl database
-	if ( GetOption("useNewLDV") ) mk->SetMode(mk->GetMode()%1000000 + 3000000);// uses new laserDV 
+      if (GetOption("Simu") && ! GetOption("NoSimuDb")) mk->SetAttr("Simu",kTRUE);
+      if ( GetOption("useLDV")    ) mk->SetAttr("useLDV",kTRUE) ;// uses laserDV database
+      if ( GetOption("useCDV")    ) mk->SetAttr("useCDV",kTRUE) ;// uses ofl database
+      if ( GetOption("useNewLDV") ) mk->SetAttr("useNewLDV",kTRUE);// uses new laserDV
+      if (GetOption("ExB")){
+	mk->SetAttr("ExB", kTRUE);	// bit 0 is ExB ON or OFF
+	if      ( GetOption("EB1") ) mk->SetAttr("EB1", kTRUE);
+	else if ( GetOption("EB2") ) mk->SetAttr("EB2", kTRUE);
+	else {
+	  // depend on RY option i.e. take default for that RealYear data
+	  // expectations.
+	  if(GetOption("RY1H")    ||
+	     GetOption("RY2000")  ||
+	     GetOption("RY2001")  ||
+	     GetOption("RY2001N") ||
+	     GetOption("RY2003")  ||
+	     GetOption("RY2003X"))   mk->SetAttr("OldRuns", kTRUE); 
+	}
+	// Other options introduced in October 2001 for distortion corrections
+	// studies and year1 re-production. Those are OR additive to the mask.
+	//(void) printf("StBFChain:: Options list : %d %d %d %d %d %d %d %d\n",
+	//		  kPadrow13,kTwist,kClock,kMembrane,kEndcap,
+	//            kIFCShift,kSpaceCharge,kSpaceChargeR2);
+	if( GetOption("OBmap")      ) mk->SetAttr("OBmap"      , kTRUE);      
+	if( GetOption("OPr13")      ) mk->SetAttr("OPr13"      , kTRUE);      
+	if( GetOption("OTwist")     ) mk->SetAttr("OTwist"     , kTRUE);     
+	if( GetOption("OClock")     ) mk->SetAttr("OClock"     , kTRUE);     
+	if( GetOption("OCentm")     ) mk->SetAttr("OCentm"     , kTRUE);     
+	if( GetOption("OECap")      ) mk->SetAttr("OECap"      , kTRUE);      
+	if( GetOption("OIFC")       ) mk->SetAttr("OIFC"       , kTRUE);       
+	if( GetOption("OSpaceZ")    ) mk->SetAttr("OSpaceZ"    , kTRUE);    
+	if( GetOption("OSpaceZ2")   ) mk->SetAttr("OSpaceZ2"   , kTRUE);   
+	if( GetOption("OShortR")    ) mk->SetAttr("OShortR"    , kTRUE);    
+	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);    
+	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);  
+	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", kTRUE);
       }
+      mk->PrintAttr();
+    }
+    if ((maker == "StdEdxY2Maker"  || maker == "StTpcHitMover") && 
+	GetOption("EmbeddingShortCut"))  {
+      mk->SetAttr("EmbeddingShortCut", kTRUE);
+      mk->PrintAttr();
     }
     if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
       mk->SetMode(0);
@@ -737,12 +669,6 @@ Int_t StBFChain::Instantiate()
       if (GetOption("KeepTpcHit")) mode |= (1 << kTpcId);
       if (GetOption("KeepSvtHit")) mode |= (1 << kSvtId);
       mk->SetMode(mode);
-    }
-    if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
-      ProcessLine(Form("((StEventMaker *) %p)->doLoadTpcHits  = kFALSE;", mk));
-      ProcessLine(Form("((StEventMaker *) %p)->doLoadFtpcHits = kFALSE;", mk));
-      ProcessLine(Form("((StEventMaker *) %p)->doLoadSvtHits  = kFALSE;", mk));
-      ProcessLine(Form("((StEventMaker *) %p)->doLoadSsdHits  = kFALSE;", mk));
     }
     if (maker == "StMiniMcMaker" && fFileOut != "") {
       ProcessLine(Form("((StMiniMcMaker *) %p)->setFileName(\"%s\");", mk, fFileOut.Data()));
