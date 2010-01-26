@@ -163,8 +163,8 @@ Float_t St_tss_tssparC::gain_in(Int_t i) {
 }
 //________________________________________________________________________________
 Float_t St_tss_tssparC::gain_in(Int_t sec, Int_t row) {
-  //  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
-  Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
+  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  //  Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
   /* VoltageGFRunIX24DEV.root
      FitP->Draw("mu:y-1170>>I(20,-180,20)","(i&&j&&prob>0.01&&i<=13&&abs(mu)<0.4)/(dmu*dmu)","profg")
      I->Fit("pol1","er","",-100,0)
@@ -204,8 +204,8 @@ Float_t St_tss_tssparC::gain_out(Int_t i) 	{
 }
 //________________________________________________________________________________
 Float_t St_tss_tssparC::gain_out(Int_t sec, Int_t row) {
-  //  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
-  Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
+  Float_t V = St_tpcAnodeHVavgC::instance()->voltagePadrow(sec,row);
+  //  Float_t V = St_tpcAnodeHVC::instance()->voltagePadrow(sec,row);
   /* VoltageGFRunIX24DEV.root
      FitP->Draw("mu:y>>O(28,1260,1400)","(i&&j&&prob>0.01&&i>13&&y>1160&&abs(mu)<0.5)/(dmu*dmu)","profg");
      TF1 *f = new TF1("f","[0]+(x-1390)*([1]+(x-1390)*[2])");
