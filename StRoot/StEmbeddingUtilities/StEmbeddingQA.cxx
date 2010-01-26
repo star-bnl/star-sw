@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.1 2009/12/22 21:41:18 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.2 2010/01/26 17:47:33 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.2  2010/01/26 17:47:33  hmasui
+ * Add histograms for eventid, runnumber and # of particles. Fix binning for delta pt vs pt
+ *
  * Revision 1.1  2009/12/22 21:41:18  hmasui
  * Change class name from StEmbeddingQAMaker to StEmbeddingQA
  *
@@ -73,10 +76,13 @@ void StEmbeddingQA::clear()
   if ( mhdVx ) delete mhdVx ;
   if ( mhdVy ) delete mhdVy ;
   if ( mhdVz ) delete mhdVz ;
+  if ( mhEventId ) delete mhEventId ;
+  if ( mhRunNumber ) delete mhRunNumber ;
 
   /// Clear geantid histogram and all maps
   for(UInt_t ic=0; ic<StEmbeddingQAConst::mNCategory; ic++){
     if ( mhGeantId[ic] ) delete mhGeantId[ic] ;
+    if ( mhNParticles[ic] ) delete mhNParticles[ic] ;
 
     mGeantId[ic].clear();
     mhNHit[ic].clear();
@@ -124,8 +130,11 @@ void StEmbeddingQA::init()
   mhdVx = 0 ;
   mhdVy = 0 ;
   mhdVz = 0 ;
+  mhEventId = 0 ;
+  mhRunNumber = 0 ;
 
   for(UInt_t ic=0; ic<StEmbeddingQAConst::mNCategory; ic++){
+    mhNParticles[ic] = 0 ;
     mhGeantId[ic] = 0 ;
   }
 
@@ -194,9 +203,22 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   utility->setStyle(mhdVy);
   utility->setStyle(mhdVz);
 
-  // Initialize geantid histogram
+  mhEventId   = new TH1D("hEventId", "Event id", 500000, 0, 500000);
+  mhRunNumber = new TH1D("hRunNumber", "Run id - (Year - 1999)#times10^{6}", 400000, 0, 400000);
+  mhEventId->SetXTitle("Event id");
+  mhRunNumber->SetXTitle("Run number");
+
+  utility->setStyle( mhEventId   ) ;
+  utility->setStyle( mhRunNumber ) ;
 
   for(UInt_t ic=0; ic<StEmbeddingQAConst::mNCategory; ic++){
+    mhNParticles[ic] = new TH1D(Form("hNParticles_%d", ic), 
+        Form("Number of particles per event, %s", utility->getCategoryTitle(ic).Data()), 1000, 0, 1000);
+    mhNParticles[ic]->SetXTitle("# of particles / event");
+
+    utility->setStyle(mhNParticles[ic]);
+
+    // Initialize geantid histogram
     mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 1000, 0, 1000) ;
     mhGeantId[ic]->SetXTitle("Geantid");
 
@@ -296,15 +318,21 @@ Bool_t StEmbeddingQA::fillEmbedding(const TString inputFileName)
     /// z-vertex cut
     if( !isZVertexOk(*mMiniMcEvent) ) continue ;
 
+    /// Event vertecies
     mhVzAccepted->Fill(vz);
     mhVyVx->Fill(vx, vy);
     mhdVx->Fill( vx - vxmc );
     mhdVy->Fill( vy - vymc );
     mhdVz->Fill( vz - vzmc );
 
+    /// Event id, trigger id, run number and # of particles
+    mhEventId->Fill( mMiniMcEvent->eventId() );
+    mhRunNumber->Fill( StEmbeddingQAUtilities::instance()->getRunNumber(mMiniMcEvent->runId(), mYear) );
+
     /// Get MC, MATCHED, GHOST, CONTAM and MATGLOB pairs
     for(UInt_t categoryid=0; categoryid<StEmbeddingQAConst::mNEmbedding; categoryid++){
       const Int_t nTrack = getNtrack(categoryid, *mMiniMcEvent) ;
+      mhNParticles[categoryid]->Fill(nTrack);
 
       if( ievent % 1000 == 0 ){
         LOG_INFO << Form("####  event=%4d, category=%10s, ntrack=%10d",
@@ -637,7 +665,7 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
       mhPtVsY[categoryid][geantid]->Fill(y, pt);
       mhPtVsPhi[categoryid][geantid]->Fill(phi, pt);
       mhPtVsMom[categoryid][geantid]->Fill(mom, pt);
-      mhdPtVsPt[categoryid][geantid]->Fill(pt, pt-track.getPtMc());
+      mhdPtVsPt[categoryid][geantid]->Fill(pt, pt-track.getPtRc());
       mhMomVsEta[categoryid][geantid]->Fill(eta, mom);
  
       mhEtaVsPhi[categoryid][geantid]->Fill(phi, eta);
@@ -810,7 +838,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
 
   // Delta pt vs pt
   TH2* hdPtVsPt = new TH2D(Form("hdPtVsPt%s", nameSuffix.Data()), Form("p_{T} - p_{T} (MC) vs p_{T}%s", titleSuffix.Data()),
-      100, -5, 5, ptBin, ptMin, ptMax);
+      ptBin, ptMin, ptMax, 100, -5, 5);
   hdPtVsPt->SetXTitle("reco. p_{T} (GeV/c)");
   hdPtVsPt->SetYTitle("reco. p_{T} - MC p_{T} (GeV/c)");
   utility->setStyle(hdPtVsPt);
