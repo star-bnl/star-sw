@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.20 2010/01/26 21:01:49 fisyak Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.21 2010/01/26 22:36:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.21  2010/01/26 22:36:31  fisyak
+ * Fix bracket
+ *
  * Revision 1.20  2010/01/26 21:01:49  fisyak
  * Clean up, switch from bit mask to attributes
  *
@@ -562,23 +565,23 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mZImpact.push_back(z_lin);
 	mSigma.push_back(-1);
 	
-      }
-      Bool_t shouldHitCTB = kFALSE;
-      Double_t etaInCTBFrame = -999;
-      ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
-      if (ctb_match) {
-	mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
-	n_ctb_match_tot++;
-      }
-      
-      if (matchTrack2BEMC(g)) {
-	mHelixFlags[mHelixFlags.size()-1] |= kFlagBEMCMatch;
-	n_bemc_match_tot++;
-      }
-      
-      if (checkCrossMembrane(g)) {
-	mHelixFlags[mHelixFlags.size()-1] |= kFlagCrossMembrane;
-	n_cross_tot++;
+	Bool_t shouldHitCTB = kFALSE;
+	Double_t etaInCTBFrame = -999;
+	ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
+	if (ctb_match) {
+	  mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
+	  n_ctb_match_tot++;
+	}
+	
+	if (matchTrack2BEMC(g)) {
+	  mHelixFlags[mHelixFlags.size()-1] |= kFlagBEMCMatch;
+	  n_bemc_match_tot++;
+	}
+	
+	if (checkCrossMembrane(g)) {
+	  mHelixFlags[mHelixFlags.size()-1] |= kFlagCrossMembrane;
+	  n_cross_tot++;
+	}
       }
     }
     if (mDebugLevel) {
