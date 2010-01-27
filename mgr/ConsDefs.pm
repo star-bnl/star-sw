@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.124 2009/11/13 18:39:31 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.125 2010/01/27 23:12:19 perev Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -758,7 +758,7 @@
 
     $CERNINO = "#asps/Simulation/geant321/include" . $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
 
-    $CPPPATH = "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
+    $CPPPATH = "#".  $main::PATH_SEPARATOR . "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
 #    $CPPPATH .= $main::PATH_SEPARATOR ."#";# . $CERNINO;
 
     my $pwd = cwd();
