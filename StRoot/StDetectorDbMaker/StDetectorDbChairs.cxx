@@ -396,7 +396,6 @@ St_tpcSectorPositionC *St_tpcSectorPositionC::fgInstance = 0;
 St_tpcSectorPosition  *St_tpcSectorPositionC::fgTables[24] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 St_tpcSectorPositionC *St_tpcSectorPositionC::instance() { 
   if (fgInstance) return fgInstance;					
-  St_db_Maker *dbMk = (St_db_Maker *) StMaker::GetChain()->Maker("db");	
   for (Int_t sec = 1; sec <= 24; sec++) {
     TString path = Form("Geometry/tpc/Sector_%02i/tpcSectorPosition",sec);
     fgTables[sec-1] = (St_tpcSectorPosition  *) StMaker::GetChain()->GetDataBase(path.Data()); 
@@ -404,9 +403,9 @@ St_tpcSectorPositionC *St_tpcSectorPositionC::instance() {
       LOG_WARN << "St_tpcSectorPositionC::instance " << path.Data() << "\twas not found" << endm; 
       assert(fgTables[sec-1]);							
     }						
-    if (dbMk && dbMk->Debug() ) {						
+    {						
       TDatime t[2];							
-      dbMk->GetValidity(fgTables[sec-1],t);					        
+      St_db_Maker::GetValidity(fgTables[sec-1],t);					        
       Int_t Nrows = fgTables[sec-1]->GetNRows();					
       LOG_WARN << "St_tpcSectorPositionC::instance found table " << fgTables[sec-1]->GetName() 
 	       << " with NRows = " << Nrows << " in db" << endm;		
