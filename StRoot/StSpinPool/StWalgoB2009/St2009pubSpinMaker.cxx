@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.2 2010/01/27 22:12:25 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -19,6 +19,8 @@ ClassImp(St2009pubSpinMaker)
 St2009pubSpinMaker::St2009pubSpinMaker(const char *name):StMaker(name){
   wMK=0;HList=0;
   core="fixMe";
+  par_QPTplus=0.015;
+  par_QPTminus=-0.015; 
  }
 
 
@@ -73,7 +75,8 @@ St2009pubSpinMaker::InitRun  (int runNo){
   sprintf(txt,"bXing= bx7+off=%d",spinDb->BX7offset());
   hA[4]->GetXaxis()->SetTitle(txt);
 
-  
+  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude Q/PT in [%.2f, %.2f]",
+		 par_QPTplus,par_QPTminus)<<endm;	 
   return kStOK;
 }
 
@@ -85,7 +88,6 @@ St2009pubSpinMaker::Make(){
   if(Tlast<T) Tlast=T;
   if(Tfirst>T) Tfirst=T;
 
-  hA[0]->Fill("inp",1.);
   bXingSort();
   return kStOK;
 }
@@ -96,11 +98,11 @@ void
 St2009pubSpinMaker::bXingSort(){
   //has access to whole W-algo-maker data via pointer 'wMK'
   
-  
+  hA[0]->Fill("inp",1.);
+
   assert(spinDb->isValid());  // all 3 DB records exist 
   assert(spinDb->isPolDirLong());  // you do not want mix Long & Trans by accident
   
-
   if(wMK->wEve.vertex.size()<=0) return; 
   //......... require: L2W-trig (ET or rnd) & vertex is reasonable .......
   
@@ -113,7 +115,7 @@ St2009pubSpinMaker::bXingSort(){
    //  assert(spinDb->offsetBX48minusBX7(bx48,bx7)==0); // both counters must be in sync
   }
 
-  
+ 
   hA[1]->Fill(bx48);
   hA[2]->Fill(bx7);
 
@@ -126,7 +128,7 @@ St2009pubSpinMaker::bXingSort(){
   hA[5]->Fill(bxStar7,spin4);
 
   float par_maxDsmThr=58;
-  float par_large2x2ET=20;
+  float par_myET=25; // monitoring cut
   if( wMK->wEve.l2bitRnd) { // lumi monitor BHT3-random
     StMuEvent* muEve = wMK->mMuDstMaker->muDst()->event();
     int max=0;
@@ -135,12 +137,12 @@ St2009pubSpinMaker::bXingSort(){
       if(max<val) max=val;
     }
     // avoid too much energy - can be W-events (1/milion :)
-    if(max<par_maxDsmThr)    hA[6]->Fill(spin4);
+    if(max<par_maxDsmThr)  {  hA[6]->Fill(spin4);  hA[0]->Fill("BG1",1.);}
     return;
   }
   
   if( wMK->wEve.l2bitET==0) return; 
-  //..... it is guaranteed ..... L2W-ET did fired  ......
+  //..... it is guaranteed ..... L2W-ET>13 did fired  ......
   
   
   // search for  Ws ............
@@ -148,31 +150,45 @@ St2009pubSpinMaker::bXingSort(){
     WeveVertex &V=wMK->wEve.vertex[iv];
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
-      /* Collect QCD background
-	 avoid too much energy - can be W-events (1/milion :) */
-      if(iv==0 && it==0 && T.cluster.ET< par_large2x2ET) hA[7]->Fill(spin4);
+
+      /* Collect QCD background for lumi monitors */
+      if(iv==0 && it==0 && T.cluster.ET <wMK->par_clustET) {
+	hA[7]->Fill(spin4);  hA[0]->Fill("BG2",2.);
+      }
 
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
-      if(T.cluster.ET /T.nearTotET< wMK->par_nearTotEtFrac) continue; // too large nearET
       
+       //put final W cut here
+      if(fabs(T.primP.Eta()) > wMK->par_leptonEta) continue;     
+      if(T.cluster.ET /T.nearTotET<  wMK->par_nearTotEtFrac) continue; // too large nearET
+      if(T.ptBalance.Perp()<wMK->par_ptBalance || T.awayTotET>  wMK->par_awayTotET)  continue;
+      hA[0]->Fill("Wcut",1.);
       float ET=T.cluster.ET;
+      if(ET>par_myET) hA[0]->Fill("W25",1.);
+      float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
+      if(ET>par_myET) hA[8]->Fill(q2pt);
+      hA[9]->Fill(ET,q2pt);
+      if( q2pt> par_QPTminus && q2pt< par_QPTplus) continue;
+
       const StMuTrack *prTr=T.prMuTrack; assert(prTr);
       float p_Q=prTr->charge();
+      if(ET>par_myET) {
+	hA[0]->Fill("Q/pT",1.);
+	if(p_Q>0) hA[0]->Fill("Q +",1.);
+	else  hA[0]->Fill("Q -",1.);
+      }
+
       int iQ=0; // plus
       if( p_Q<0 ) iQ=1;// minus
-
-      if(T.awayTotET<  wMK-> par_awayTotET) {
-	//.....  W-like event
-        hA[0]->Fill("noAwayET",1.);   
-	if(ET>30 &&ET<50 ) hA[10+iQ]->Fill(spin4);
-	if(ET<20) hA[12+iQ]->Fill(spin4);
-	hA[14+iQ]->Fill(spin4,ET);	 
-      }  else {   
-	//....... too large awayET
-        hA[0]->Fill("hasAwayET",1.);   
-      }            
+     
+      hA[10+iQ]->Fill(ET);
+      if(ET>25 &&ET<50 ) hA[12+iQ]->Fill(spin4);
+      if(ET>32 &&ET<44 ) hA[14+iQ]->Fill(spin4);
+      if(ET>15 &&ET<20 ) hA[16+iQ]->Fill(spin4);
+      hA[18+iQ]->Fill(spin4,ET);	 
+     
     } // end of loop over tracks
   }// end of loop ove vertices
 
@@ -180,6 +196,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.2  2010/01/27 22:12:25  balewski
+// spin code matched to x-section code
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

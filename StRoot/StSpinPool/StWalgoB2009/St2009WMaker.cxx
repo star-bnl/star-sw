@@ -1,4 +1,5 @@
-// $Id: St2009WMaker.cxx,v 1.8 2010/01/23 02:35:38 stevens4 Exp $
+
+// $Id: St2009WMaker.cxx,v 1.9 2010/01/27 22:12:24 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -87,6 +88,7 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   par_awayTotET=30.; // (GeV), maximal allowed away-cone  ET
   par_highET=28.; // (GeV), cut-off for final W-cluster ET
   par_ptBalance=15.; // (GeV), ele cluster vector + jet sum vector
+  par_leptonEta=1.0; // bracket acceptance
 
   par_useEtow=1; // flag for how to use ETOW in algo
   // flag == 0 -> don't use ETOW
@@ -169,7 +171,7 @@ St2009WMaker::InitRun(int runNo){
   mRunNo=runNo;
   if(runNo>1000000) assert(mRunNo==par_inpRunNo); // what a hack, assurs TPC cuts change w/ time for data, JB. It will crash if multiple runs are analyzed by the same job.
 
-   LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d mcScaleFact=%.2f\nmcBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV ptBalance>%.1fGeV",
+   LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d mcScaleFact=%.2f\nmcBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV ptBalance>%.1fGeV  |leptonEta|<%.1f",
 		 mRunNo,par_bht3TrgID, par_l2wTrgID,isMC,
 		 par_minPileupVert,par_vertexZ,
 		 par_nFitPts,par_nHitFrac,  par_trackRin,  par_trackRout, par_trackPt,
@@ -177,7 +179,7 @@ St2009WMaker::InitRun(int runNo){
 		  par_delR3D,par_nearDeltaR,
 		  par_countTrPt,par_countTowEt,par_useEtow,par_mcEtowScale,
 		  par_mcBtowScale,
-		  par_highET,par_awayDeltaPhi,par_awayTotET,par_ptBalance
+		  par_highET,par_awayDeltaPhi,par_awayTotET,par_ptBalance,par_leptonEta
 		 )<<endm;
 
    return kStOK;
@@ -365,6 +367,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.9  2010/01/27 22:12:24  balewski
+// spin code matched to x-section code
+//
 // Revision 1.8  2010/01/23 02:35:38  stevens4
 // add ability to scale jet et and use real btow peds for rcf mc
 //
@@ -392,6 +397,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.9  2010/01/27 22:12:24  balewski
+// spin code matched to x-section code
+//
 // Revision 1.8  2010/01/23 02:35:38  stevens4
 // add ability to scale jet et and use real btow peds for rcf mc
 //

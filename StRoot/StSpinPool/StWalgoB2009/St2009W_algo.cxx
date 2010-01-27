@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.9 2010/01/26 18:48:11 stevens4 Exp $
+// $Id: St2009W_algo.cxx,v 1.10 2010/01/27 22:12:24 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -27,7 +27,9 @@ St2009WMaker::find_W_boson(){
       assert(T.nearTotET>0); // internal logical error
       
       //make cut on lepton |eta| for cross section 
-      if(fabs(T.primP.Eta()) > 1) continue;      
+      if(fabs(T.primP.Eta()) > par_leptonEta) continue;      
+      hA[0]->Fill("eta1",1.);
+
 
       //signal plots w/o EEMC in veto
       if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
@@ -38,6 +40,7 @@ St2009WMaker::find_W_boson(){
       }
 
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
+
       hA[20]->Fill("noNear",1.);
       hA[112]->Fill( T.cluster.ET); // for Joe
       hA[50]->Fill(T.awayTpcPT);
@@ -67,9 +70,7 @@ St2009WMaker::find_W_boson(){
       else 
         hA[139]->Fill(T.cluster.ET);//old background
       
-      
-      //     if(T.cluster.ET /T.nearTotET<0.6 && T.awayTotET >20) // di-jets
- 	if(0){/***************************/
+      if(0){/***************************/
 	  printf("\n WWWWWWWWWWWWWWWWWWWWW\n");
 	  wDisaply->exportEvent( "W", V, T);
 	  wEve.print();
@@ -78,6 +79,10 @@ St2009WMaker::find_W_boson(){
 	
       //put final W cut here
       if(T.ptBalance.Perp()<par_ptBalance || T.awayTotET>par_awayTotET)  continue;
+      //::::::::::::::::::::::::::::::::::::::::::::::::
+      //:::::accepted W events for x-section :::::::::::
+      //::::::::::::::::::::::::::::::::::::::::::::::::
+
       hA[20]->Fill("noAway",1.0);  
       hA[113]->Fill( T.cluster.ET);//for Joe
 
@@ -86,13 +91,15 @@ St2009WMaker::find_W_boson(){
       hA[93]->Fill( T.cluster.ET,T.glMuTrack->dca().mag());
       int k=0; if(T.prMuTrack->charge()<0) k=1;
       hA[94+k]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
-      
+      // h95 used above
+
  
       if(T.cluster.ET<par_highET) continue;  // very likely Ws
       hA[91]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.position.Phi());
       hA[96]->Fill(V.id);
       hA[97]->Fill(V.funnyRank);
       hA[98]->Fill(V.z);
+      hA[99]->Fill( T.prMuTrack->eta());
       hA[20]->Fill("goldW",1.);
       nGoldW++;
     
@@ -492,6 +499,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.10  2010/01/27 22:12:24  balewski
+// spin code matched to x-section code
+//
 // Revision 1.9  2010/01/26 18:48:11  stevens4
 // include |eta|<1 cut for all W yields
 //
