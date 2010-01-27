@@ -1,4 +1,4 @@
-// $Id: StMCConstructGeometry.cxx,v 1.2 2009/10/13 17:19:35 perev Exp $
+// $Id: StMCConstructGeometry.cxx,v 1.3 2010/01/27 23:02:57 perev Exp $
 //
 //
 // Class StMCConstructGeometry
@@ -15,7 +15,11 @@
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TGeoManager.h"
+#include "TGeoShape.h"
+#include "TGeoBBox.h"
+#include "TGeoMatrix.h"
 #include "TEnv.h"
+#include "TRegexp.h"
 #include "StMCStack.h"
 
 
@@ -30,8 +34,10 @@ StMCConstructGeometry::StMCConstructGeometry(const char *gy)
 //_____________________________________________________________________________
 int  StMCConstructGeometry::Fun()
 {
+  TString ts,tsn(GetName()),star("${STAR}"),top;
   if (! gGeoManager) {
-    TString ts,tsn(GetName()),star("${STAR}");
+    top = tsn(TRegexp("(.*)"));
+    if (top[0]=='(') {tsn.ReplaceAll(top,""); top = top(1, top.Length()-2); }  
     
     if (tsn.Contains("yf")) {
       star = "${STAR_PATH}/.DEV2";
@@ -54,14 +60,36 @@ int  StMCConstructGeometry::Fun()
     assert(fail==0);
     gROOT->ProcessLine("CreateTable()");
   }
-  TGeoVolume *cave = gGeoManager->GetVolume("CAVE");
-  gGeoManager->SetTopVolume(cave);
+  if (top.Length()) SetTop(top);
 
   gMC->SetRootGeometry();
 
   return 0;
 }
+//_____________________________________________________________________________
+void StMCConstructGeometry::SetTop(const char *topName)
+{
+  TGeoVolume *vol= gGeoManager->GetVolume(topName);
+  assert(vol);
+  if (strcmp(topName,"CAVE")==0) {gGeoManager->SetTopVolume(vol);return;}
 
+  const TGeoMedium *meVac = gGeoManager->GetMedium("Vacuum");
+  if(!meVac) {
+    const TGeoMaterial *maVac = gGeoManager->GetMaterial("Vacuum");
+    if (!maVac)         maVac = new TGeoMaterial("Vacuum", 0,0,0);
+    meVac = new TGeoMedium("Vacuum",1000000,maVac);
+  }
+  TGeoBBox *bb = (TGeoBBox*)vol->GetShape();
+  bb->ComputeBBox();
+  TString myName("."); myName+=vol->GetName(); 
+  TGeoVolume *top = gGeoManager->MakeBox(myName,meVac
+                     ,bb->GetDX(),bb->GetDY(),bb->GetDZ());
+
+  top->AddNode(vol,1,new TGeoTranslation(bb->GetOrigin()[0]
+                                        ,bb->GetOrigin()[1]
+					,bb->GetOrigin()[2]));
+  gGeoManager->SetTopVolume(top);
+}
 
 
 

@@ -1,7 +1,7 @@
 int loaded=0;
 
 void Load();
-void GeoTestChain(const char *gy="y2009",int nEv = 10000)
+void GeoTestChain(const char *gy="y2009a(TPCE)",int nEv = 10000)
 {
 if (!loaded) Load();
 
