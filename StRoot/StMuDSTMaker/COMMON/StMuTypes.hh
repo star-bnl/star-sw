@@ -22,3 +22,7 @@
 #include "StMuTrack.h"
 #include "StMuTriggerIdCollection.h"
 #include "StMuUtilities.h"
+#include "StMuRpsCollection.h"
+#include "StMuFmsCollection.h"
+#include "StMuFmsHit.h"
+#include "StMuFmsUtil.h"
