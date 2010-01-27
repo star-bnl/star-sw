@@ -1,13 +1,10 @@
 #
 # Evaluation of hit errors.
 # invoking:
-# fiterr.csh daqfile.daq  
-# fiterr.csh daqfile.daq tpcOnly 
+# fiterr.csh daqfile.daq pp2009 <noPrepass>
 #
 # daqfile must be the fullname of daq file, including full path
-# This path is used now to obtain the year. If year is not found in path,
-# year 2005 is assumed.
-#
+# 
 #  At the beginning empty working directory must be created
 #  At the end in subdirectory StarDb/Calibrations/tracker/
 #  will be created files:
@@ -23,8 +20,9 @@
 # All questions to Victor Perev
 # Victor Perev Feb 17, 2007
 ############################################################################
-source ${GROUP_DIR}/.starver  DEV
-
+#source ${GROUP_DIR}/.starver  DEV
+source ${GROUP_DIR}/.starver  .DEV
+echo STAR = $STAR $ROOTSYS
 
 #		Check input file
 if ( ! ${%1} ) then
@@ -39,14 +37,21 @@ if (!( -e ${daqFile} )) then
 endif
 echo "fiterr: Input daq file=${daqFile}"
 
-set tpcOnly = ${2}
+set Opt = ${2}
+set myOpt = ${3}
+set noPrepass = 0
+set x = (`echo $myOpt | grep -i noPrepass`) 
+if ($#x) set noPrepass = 1
+
+
+
 
 #		FloatPointException OFF
 setenv STARFPE NO
 
 #		Fit Sti errors
 touch sti.log
-touch fit.log
+
 
 #		Create DB directories
 mkdir -p StarDb/Calibrations/tracker/
@@ -58,6 +63,7 @@ if ( ! ( -e fiterr.C  ) ) ln -sf $STAR/StRoot/macros/calib/fiterr.C .
 @ iter = 0
 #		Run prepass
 if (${daqFile:e} == "fz") touch fiterrPrepass.DONE
+if (${noPrepass}        ) touch fiterrPrepass.DONE
 
 if (!(-e fiterrPrepass.DONE)) then
 rm fit.log sti.log
@@ -69,9 +75,12 @@ echo '*** Prepass Started *** '>> sti.log
 
 root4star -b  <<EOF  >>& sti.log
 .L calib/prepass.C
+#include <stdlib.h>
 int ans =13;
-ans =prepass("$daqFile");
+ans =prepass("$daqFile","$Opt");
+printf("ptrepass ans=%d\n",ans);\n");
 if (ans != 99) exit(13);
+printf("exit(0)\n");
 exit(0);
 EOF
 set myerr = $status
@@ -90,14 +99,18 @@ endif
 
 AGAIN:
 @ iter = $iter + 1
+if ( (-e pulls.root) && !(-e fit.log) ) goto FIT
+
 if (-e pulls.root) mv pulls.root pulls.root.BAK
 echo '*** STI Started *** Iter=' $iter
 echo '*** STI Started *** Iter=' $iter >> sti.log
 
+STI:
 root4star -b  <<EOF  >>& sti.log
 .L calib/fiterrSti.C
+#include <stdlib.h>
 int ans =13;
-ans =runsti("$daqFile",999,"${tpcOnly}");
+ans =runsti("$daqFile",999,"${Opt}");
 if (ans != 99) exit(13);
 ans =chain->Finish(); 
 if (ans) exit(14);
@@ -108,12 +121,16 @@ echo '*** STI Ended *** Status=' $myerr
 echo '*** STI Ended *** Iter=' $iter >> sti.log
 if ($myerr) goto STIERR
 
+FIT:
 echo '*** FitErr Started *** Iter=' $iter
 set timstamp = ( `grep 1stEventTimeStamp sti.log` )
 echo $timstamp
 
-
-root.exe <<EOF  >>& fit.log
+touch fit.log
+echo STAR = $STAR $ROOTSYS
+echo LIBP = $LD_LIBRARY_PATH
+root.exe -b <<EOF  >>& fit.log
+#include <stdlib.h>
 .L fiterr.C+
 int ans = 13;
 ans = fiterr("U ${timstamp[2]}");
