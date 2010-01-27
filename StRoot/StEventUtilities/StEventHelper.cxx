@@ -1309,13 +1309,17 @@ TString ts;
 //________________________________________________________________________________
  StHitIter::StHitIter(const void *cont)
 {
-  fCont = cont; fKase=kINI;
+  fCont=0;Reset(cont);
+} 
+//________________________________________________________________________________
+ StHitIter::StHitIter(const StEvent *ev)
+{
+  fCont=0;Reset(ev);
 } 
 //________________________________________________________________________________
 void StHitIter::Reset(const void *cont)
 {
  if (cont) fCont = cont; fKase=kINI;
- if (fCont) ++(*this);
 }  
 //________________________________________________________________________________
 int StHitIter::operator++()
@@ -1372,6 +1376,14 @@ StHit *StHitIter::operator*()
 { 
   if (fKase==kINI) ++(*this);
   return (StHit*)((fKase==kHIT)? fStk[fLev].mV:0);
+}     
+//________________________________________________________________________________
+UInt_t StHitIter::UPath() const
+{ 
+  assert (fKase==kHIT);
+  UInt_t u=0;
+  for (int j=0;j<fLev;j++) { u = u*(fStk[j].mN+1)+fStk[j].mJ+1;}
+  return u;
 }     
 //________________________________________________________________________________
 void StHitIter::Print(const char *opt) 
@@ -1590,34 +1602,34 @@ int StTofHitIter::GetSize(const void *cont,int lev) const
 }
 //________________________________________________________________________________
 //________________________________________________________________________________
-StAllHitIter::StAllHitIter(const StEvent *ev):StHitIter(0)
+StEventHitIter::StEventHitIter(const StEvent *ev):StHitIter((StEvent*)0)
 {
  fStEvent = ev;
  fJter=0; fNter=0;
  memset(fIter,0,sizeof(fIter));
 }
 //________________________________________________________________________________
-StAllHitIter::~StAllHitIter()
+StEventHitIter::~StEventHitIter()
 {
   for (int jk=0;jk<fNter;jk++) {delete fIter[jk];fIter[jk]=0;}
 }
 //________________________________________________________________________________
-int StAllHitIter::AddDetector(StDetectorId detId)
+int StEventHitIter::AddDetector(StDetectorId detId)
 {
    switch ((int)detId) {
    
-     case kTpcId: fIter[fNter++] = new StTpcHitIter(fStEvent->tpcHitCollection());break;
-     case kSvtId: fIter[fNter++] = new StSvtHitIter(fStEvent->svtHitCollection());break;
-     case kSsdId: fIter[fNter++] = new StSsdHitIter(fStEvent->ssdHitCollection());break;
+     case kTpcId: fIter[fNter++] = new StTpcHitIter(fStEvent);break;
+     case kSvtId: fIter[fNter++] = new StSvtHitIter(fStEvent);break;
+     case kSsdId: fIter[fNter++] = new StSsdHitIter(fStEvent);break;
      case kFtpcWestId:; 
      case kFtpcEastId:
-                  fIter[fNter++] = new StFtpcHitIter(fStEvent->ftpcHitCollection());break;
+                  fIter[fNter++] = new StFtpcHitIter(fStEvent);break;
      case kPxlId: case kIstId: case kFgtId: case kFmsId: 
-                  fIter[fNter++] = new StRnDHitIter(fStEvent->rndHitCollection(),detId);break;
+                  fIter[fNter++] = new StRnDHitIter(fStEvent,detId);break;
 
-     case kTofId: fIter[fNter++] = new StTofHitIter(fStEvent->tofCollection())   ;break;
+     case kTofId: fIter[fNter++] = new StTofHitIter(fStEvent)   ;break;
 
-     default: printf("StAllHitIter::AddDetector: No iterator for detectorId=%d",(int)detId);
+     default: printf("StEventHitIter::AddDetector: No iterator for detectorId=%d",(int)detId);
      assert(0 && "No iterator for detectorId");
      return 1;
   }
@@ -1625,7 +1637,7 @@ int StAllHitIter::AddDetector(StDetectorId detId)
 }
 
 //________________________________________________________________________________
-void StAllHitIter::Reset(const StEvent *ev)
+void StEventHitIter::Reset(const StEvent *ev)
 {
   fJter = 0;
   if (ev) fStEvent = ev;
@@ -1633,20 +1645,26 @@ void StAllHitIter::Reset(const StEvent *ev)
 }
 
 //________________________________________________________________________________
-int StAllHitIter::operator++()
+int StEventHitIter::operator++()
 {
   for (;fJter<fNter;fJter++) {if (++(*fIter[fJter])) return 1;}
   return 0;
 }
 
 //________________________________________________________________________________
-StDetectorId StAllHitIter::DetectorId() const
+StDetectorId StEventHitIter::DetectorId() const
 {
    if (fJter >= fNter) return kUnknownId;
    return fIter[fJter]->DetectorId();
 }
 //________________________________________________________________________________
-StHit *StAllHitIter::operator*() 
+UInt_t StEventHitIter::UPath() const
+{
+   if (fJter >= fNter) return 0;
+   return fIter[fJter]->UPath();
+}
+//________________________________________________________________________________
+StHit *StEventHitIter::operator*() 
 {
    if (fJter>=fNter) return 0;
    return *(*(fIter[fJter]));
