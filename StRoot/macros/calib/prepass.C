@@ -1,11 +1,7 @@
-int prepass(const char *daqFile)
+int prepass(const char *daqFile,const char *flg)
 {
 gROOT->ProcessLine(".L bfc.C");
-TString opt("P2005");
-for (int god=2001;god <=2009;god++) {
-  TString ts("/"); ts+=god; ts +="/";
-  if (strstr(daqFile,ts.Data())) {opt ="P";opt+=god;break;}
-}
+TString opt(flg);
 opt += ",SpcChgCalG,MakeEvent,ITTF,OShortR,OSpaceZ2,MuDst,-dstout";
 bfc(0,opt,daqFile);
 chain->SetAttr(".call","SetActive(0)","MuDst");		//NO MuDst
