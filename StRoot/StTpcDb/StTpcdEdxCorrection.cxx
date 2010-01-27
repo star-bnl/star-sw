@@ -14,7 +14,6 @@
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 ClassImp(dEdxY2_t);
 ClassImp(StTpcdEdxCorrection)
-static St_db_Maker *dbMk = 0;
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
@@ -50,7 +49,6 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   m_Corrections[kTpcLengthCorrection ] = dEdxCorrection_t("TpcLengthCorrectionB","Variation on Track length and relative error in Ionization");
 
   if (!m_Mask) m_Mask = -1;
-  if (!dbMk) dbMk = (St_db_Maker *) StMaker::GetChain()->Maker("db");
   // 
   ReSetCorrections();
 }
@@ -330,9 +328,9 @@ void StTpcdEdxCorrection::SetCorrection(Int_t k, St_tpcCorrection *m) {
     m_Corrections[k].nrows = cor->nrows;
     gMessMgr->Warning() << "StTpcdEdxCorrection::SetCorrection " << m_Corrections[k].Name
 			<< " \thas been set with nrows = " << m_Corrections[k].nrows << endm;
-    if (dbMk) {
+    {
       TDatime t[2];
-      dbMk->GetValidity(m,t);
+      St_db_Maker::GetValidity(m,t);
       gMessMgr->Warning()  << " \tValidity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }
@@ -346,9 +344,9 @@ void StTpcdEdxCorrection::SetTpcSecRowB   (St_TpcSecRowCor *m) {
     gMessMgr->Warning() << "StTpcdEdxCorrection::SetTpcSecRowB " << m_Corrections[kTpcSecRowB].Name << "/" 
 			<< m_Corrections[kTpcSecRowB].Title <<  endm; 
     gMessMgr->Warning() << " \tcorrection has been set" << endm;
-    if (dbMk) {
+    {
       TDatime t[2];
-      dbMk->GetValidity(m,t);
+      St_db_Maker::GetValidity(m,t);
       gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }
@@ -361,9 +359,9 @@ void StTpcdEdxCorrection::SetTpcSecRowC   (St_TpcSecRowCor *m) {
     gMessMgr->Warning() << "StTpcdEdxCorrection::SetTpcSecRowC " << m_Corrections[kTpcSecRowC].Name << "/" 
 			<< m_Corrections[kTpcSecRowC].Title <<  endm; 
     gMessMgr->Warning() << " \tcorrection has been set" << endm;
-    if (dbMk) {
+    {
       TDatime t[2];
-      dbMk->GetValidity(m,t);
+      St_db_Maker::GetValidity(m,t);
       gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }
@@ -376,9 +374,9 @@ void StTpcdEdxCorrection::SettpcGas      (St_tpcGas       *m) {
   if (m) {
     m_tpcGas = m;
     gMessMgr->Warning() << "StTpcdEdxCorrection::SettpcGas St_tpcGas has been set" << endm; 
-    if (dbMk) {
+    {
       TDatime t[2];
-      dbMk->GetValidity(m,t);
+      St_db_Maker::GetValidity(m,t);
       gMessMgr->Warning()  << " Validity:" << t[0].GetDate() << "/" << t[0].GetTime()
 			   << "  -----   " << t[1].GetDate() << "/" << t[1].GetTime() << endm;
     }

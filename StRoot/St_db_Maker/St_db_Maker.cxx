@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.115 2009/11/16 20:16:23 fine Exp $
+// $Id: St_db_Maker.cxx,v 1.116 2010/01/27 21:34:20 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.116  2010/01/27 21:34:20  perev
+// GetValidity now is static
+//
 // Revision 1.115  2009/11/16 20:16:23  fine
 // Make the TDatime const interfaces
 //
@@ -1064,7 +1067,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 
 }
 //_____________________________________________________________________________
-Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *const val) const
+Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *const val)
 {
    if (!tb)                             return -1;
    TString ts("."); ts+=tb->GetName();

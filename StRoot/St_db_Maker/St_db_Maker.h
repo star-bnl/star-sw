@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.33 2009/11/16 20:16:23 fine Exp $
+// $Id: St_db_Maker.h,v 1.34 2010/01/27 21:34:20 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.34  2010/01/27 21:34:20  perev
+// GetValidity now is static
+//
 // Revision 1.33  2009/11/16 20:16:23  fine
 // Make the TDatime const interfaces
 //
@@ -113,7 +116,7 @@ private:
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.33 2009/11/16 20:16:23 fine Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.34 2010/01/27 21:34:20 perev Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -125,7 +128,7 @@ private:
    virtual        ~St_db_Maker();
    virtual TDataSet *GetDataBase(const char* logInput, const TDatime *td=0);
    virtual const TDatime &GetDateTime() const;
-   virtual Int_t   GetValidity(const TTable *tb, TDatime * const val) const;
+   static  Int_t   GetValidity(const TTable *tb, TDatime *const val);
    virtual void    SetDateTime(int idat,int itim);
    virtual void    SetDateTime(const char *datalias);
    virtual Int_t   InitRun(int runumber);
@@ -155,7 +158,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.33 2009/11/16 20:16:23 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.34 2010/01/27 21:34:20 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };
