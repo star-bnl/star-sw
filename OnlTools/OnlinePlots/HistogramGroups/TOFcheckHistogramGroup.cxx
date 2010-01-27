@@ -201,23 +201,22 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
     fprintf(stderr,"TOF: problems in data (%d) - continuing...",ret);
     return false;
   }
-  TOF_EventCount->Fill(1);
-
   // 
   int halftrayid=-1;
   int trayid=-1;
   int allbunchid[2][124];
   for(int i=0;i<2;i++)for(int j=0;j<124;j++)allbunchid[i][j]=-9999;
 
+  int totaltofdataword=0;
   for(int ifib=0;ifib<4;ifib++){
     int ndataword = tof.ddl_words[ifib];    // 
+    totaltofdataword=totaltofdataword+ndataword;
     if(ndataword<=0) continue;
     int thebunchid =0; 
     for(int iword=0;iword<ndataword;iword++){
       int dataword=tof.ddl[ifib][iword];
       //cout<<"TOF:: ifib="<<ifib<<" dataword=0x"<<hex<<dataword<<dec<<endl;
       int packetid = (dataword&0xF0000000)>>28;
-      if(TOF_EventCount->GetEntries()>1) {
       if(!ValidDataword(packetid)) TOF_Error1->Fill(trayid+0.5*halftrayid);
       //if(!ValidDataword(packetid)) cout<<"ERROR!!!!"<<hex<<"dataword=0x"<<dataword<<dec<<"tray="<<trayid<<endl;
       //}
@@ -254,14 +253,18 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       //if(trayid<121) {
       //if(halftrayid==0) TOF_Tray_hits1->Fill(trayid-1);
       //if(halftrayid==1) TOF_Tray_hits2->Fill(trayid-0.5);
-      }
-
+      
     }  // end loop nword
   }  // end loop fiber
 
+  if(totaltofdataword==0) {
+    cout<<"ERROR!!!! TOF data: no data word!"<<endl;
+    return false;
+  }
+
+  TOF_EventCount->Fill(1);
 
   // check bunch id shift
-
   int bunchidref1 =   allbunchid[0][mReferenceTray-1];   // bunchid from tray 1 as reference.
   int bunchidref2 =   allbunchid[1][mReferenceTray-1];   // bunchid from tray 1 as reference.
   if(bunchidref1 != bunchidref2) {TOF_Error2->Fill(3);}
