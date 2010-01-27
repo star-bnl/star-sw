@@ -52,6 +52,9 @@ public:
   /// Extent all tracks to the given vertex
           void extendTracksToVertex(StiHit* vertex);
           void extendTracksToVertices(const std::vector<StiHit*> &vertices);
+  /// get number of tracks
+  int getNTracks() const ;
+  int getNPrims()  const { return _nPrimTracks;}
   /// Reset the tracker
   virtual void reset();
   virtual void unset(){}
@@ -86,7 +89,7 @@ class QAFind;
     StiDetectorContainer        * _detectorContainer;
     StiHitContainer             * _hitContainer;
     StiTrackContainer           * _trackContainer;
-
+    int                           _nPrimTracks;
 private:
         
     double    chi2;

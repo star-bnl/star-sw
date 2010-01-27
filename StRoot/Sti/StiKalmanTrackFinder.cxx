@@ -460,6 +460,7 @@ StiDebug::tally("PrimRefited");
     if (track->getCharge()>0) plus++; else minus++;
 
   }//End track loop 
+  _nPrimTracks = goodCount;
   if (debug()) {
     cout << "SKTF::extendTracksToVertices(...) -I- rawCount:"<<nTracks<<endl
 	 << "                                 extendedCount:"<<goodCount<<endl
@@ -874,6 +875,10 @@ static const char *timg[] = {"SeedFnd","TrakFnd","PrimFnd",0};
       ,mTimg[i]->CpuTime()/mTimg[i]->Counter());    
   } }
 }
+//______________________________________________________________________________
+int StiKalmanTrackFinder::getNTracks() const 
+{ return _trackContainer->size();}
+
 //______________________________________________________________________________
 CloserAngle::CloserAngle(double refAngle)
   : _refAngle(refAngle)
