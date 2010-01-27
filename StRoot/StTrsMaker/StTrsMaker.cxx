@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.85 2009/11/03 14:34:19 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.86 2010/01/27 21:33:08 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.86  2010/01/27 21:33:08  perev
+// Account Prompt hits
+//
 // Revision 1.85  2009/11/03 14:34:19  fisyak
 // Remove default in zFromTB
 //
@@ -397,7 +400,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.85 2009/11/03 14:34:19 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.86 2010/01/27 21:33:08 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -590,7 +593,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
 void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
 
     //gMessMgr->QAInfo()  << "StTrsMaker::whichSector()" << endm;
-    *isDet  = (volId/100000);
+    *isDet  = (volId/100000)%10;
 
     volId  -= (*isDet)*100000;
     *sector = volId/100;
