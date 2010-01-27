@@ -1,4 +1,4 @@
-// $Id: StMCConstructGeometry.h,v 1.1 2009/03/25 23:15:10 perev Exp $
+// $Id: StMCConstructGeometry.h,v 1.2 2010/01/27 23:02:57 perev Exp $
 //
 //
 // Class StMCConstructGeometry
@@ -16,6 +16,9 @@ class StMCConstructGeometry : public GCall
     virtual ~StMCConstructGeometry(){}    
     // methods
     int Fun();
+  private:
+  void SetTop(const char *topName);
+
   protected:
     // data members
   

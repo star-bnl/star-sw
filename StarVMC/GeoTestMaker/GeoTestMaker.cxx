@@ -1,7 +1,10 @@
 //*-- Author : Victor Perev
 // 
-// $Id: GeoTestMaker.cxx,v 1.3 2009/08/29 21:19:04 perev Exp $
+// $Id: GeoTestMaker.cxx,v 1.4 2010/01/27 23:02:57 perev Exp $
 // $Log: GeoTestMaker.cxx,v $
+// Revision 1.4  2010/01/27 23:02:57  perev
+// Development
+//
 // Revision 1.3  2009/08/29 21:19:04  perev
 // 100 * 10000 tracks
 //
@@ -70,6 +73,7 @@ GeoTestMaker::Init()
 #include "StMCInitApp.h"
 //#include "StMCSteppingHist.h"
 #include "StMCStepping2Hist.h"
+#include "StTGeoHelper.h"
 
 ClassImp(GeoTestMaker);
 
@@ -91,7 +95,6 @@ int GeoTestMaker::Init()
   if (*SAttr("EtaMin")) {ini->SetEta(DAttr("EtaMin"),DAttr("EtaMax"));}
   if (*SAttr("PhiMin")) {ini->SetEta(DAttr("PhiMin"),DAttr("PhiMax"));}
   if (*SAttr("ZMin"  )) {ini->SetZ  (DAttr(  "ZMin"),DAttr(  "ZMax"));}
-
   app->SetInit(ini);
 //StMCSteppingHist *steps =   new StMCSteppingHist(fGeo);
   StMCStepping2Hist *steps =   new StMCStepping2Hist(fGeo);
@@ -99,6 +102,9 @@ int GeoTestMaker::Init()
   if (*SAttr("SteppingDebug")) {steps->SetDebug(IAttr("SteppingDebug"));}
   
   app->Init();
+
+  StTGeoHelper::Instance()->Init(1);
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________

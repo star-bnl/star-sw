@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.6 2009/12/08 20:02:11 perev Exp $
+// $Id: StTGeoHelper.h,v 1.7 2010/01/27 23:02:57 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -9,7 +9,8 @@
 #ifndef ST_TGEOHELPER_H
 #define ST_TGEOHELPER_H
 #include <map>
-
+#include <vector>
+#include "StEnumerations.h"
 #include "TString.h"
 #include "TObject.h"
 class TObjArray;
@@ -39,102 +40,44 @@ bool operator()(const TString& s1, const TString& s2) const
 };
 
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
+class StiHit; 
 class StHitPlane; 
-typedef std::map< unsigned int, StHitPlane*>  		    StHitPlaneHardMap;
-typedef std::pair<unsigned int, StHitPlane*>                StHitPlaneHardPair;
-typedef StHitPlaneHardMap::const_iterator                   StHitPlaneHardMapIter;
+typedef std::map< unsigned int, StHitPlane*>  	StHitPlaneHardMap;
+typedef std::pair<unsigned int, StHitPlane*>    StHitPlaneHardPair;
+typedef StHitPlaneHardMap::const_iterator       StHitPlaneHardMapIter;
+
+typedef std::vector<void*>  		    	StVoidArr;
+
 
 typedef std::map< const TString, StHitPlane*, InvertLtStr>  StHitPlanePathMap;
 typedef std::pair<const TString, StHitPlane*>               StHitPlanePathPair;
 typedef StHitPlanePathMap::const_iterator                   StHitPlanePathMapIter;
-typedef double Mtx33_t[3][3];
-// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
-class StTGeoHelper : public TObject
-{
-         StTGeoHelper();
-virtual ~StTGeoHelper();
-
-public:
-       void Init(int mode=0);
-       void InitHits();
-       void ClearHits();
-
-static	StTGeoHelper *Instance(); 
-
-public:
-	void  Print(const char *tit=0) const;
-        void  ls(const char* opt="Mmps")                const;
-	void  SetInfo   (StVoluInfo *ext);
-	void  SetModule (const char *voluName);
-	void  SetModule (int   moduLevl=2) {fModuLev = moduLevl;}
-	 int  IsModule  (const TGeoVolume *volu) 	const;
-	 int  IsModule  (const TGeoNode   *node) 	const;
-	 int  IsMODULE  (const TGeoVolume *volu) 	const;
-static	 int  IsSensitive(const TGeoVolume *volu);
-   StVoluInfo *GetInfo  (int idx) 	const;
-   StVoluInfo *GetINFO  (int idx);
-const   char  *GetPath() const;     
-const TGeoVolume *GetModule() const;
-StMultiKeyMap     *GetSeedMap()      const {return fSeedMap;  }
-StHitPlaneHardMap *GetPlaneHardMap() const {return fHitPlaneHardMap;}
-
-StHitPlaneInfo* IsHitPlane(const TGeoVolume *volu) const;
-StHitPlaneInfo* IsHitPlane(const TGeoNode   *node) const;
-StHitPlane   *GetCurrentHitPlane ();
-
-	     int  MayHitPlane     (const TGeoVolume *volu) const;
-	     int  MakeHitPlaneInfo(const StTGeoIter &iter);
-	void  AddHitPlane(StHitPlane *pla);
-
-const StHitPlane *AddHit(void *hit,const double xyz[3],unsigned int hardw,int seed);
-
-        void  ShootZR(double z,double rxy);
-
-const StTGeoHitShape* GetHitShape() const {return fHitShape;}
-
-static void Test();
-static void Break(int kase);
-private:
-void InitInfo();
-void InitHitShape();
-void InitHitPlane();
-
-
-private:
-char fBeg[1];
-int fMode; 	//0=fill infos + hitShape, 1= hit planes
-int fModuLev;
-TObjArray      *fVoluInfoArr;		// array of all StVoluIinfo
-TObjArray      *fHitPlaneArr;           // array of StHitPlane's
-StHitPlaneHardMap *fHitPlaneHardMap;	// StHitPlane[hardwarePosition]
-StMultiKeyMap  *fSeedMap;		// Map for hits used in seed finder
-StTGeoHitShape *fHitShape;
-char fEnd[1];
-ClassDef(StTGeoHelper,0) //
-};
+typedef float Mtx33_t[3][3];
 
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
 class StVoluInfo : public TObject
 {
-enum E_StVoluInfo {
-      kModule      = BIT(15),   // The volume is a module, like TPCE,SVTT
-      kHitPlane    = BIT(16),   // The volume is a Hit plane
-      kMODULE      = BIT(17)    // The volume is a Module with Hits 
-};
 public:
-enum E_Kind { kVoluExt,kBaseHitPlane };
+enum E_VoluInfo {
+      kModule      = BIT(15),   // The volume is a module, like TPCE,SVTT
+      kMODULE      = BIT(16),   // The volume is a Module with Hits 
+      kActive      = BIT(17),  	// The volume is active 
+      kHitPlane    = BIT(21)};	// The volume is a Hit plane
+public:
+enum E_Kind { kVoluInfo=1,kHitPlaneInfo=2};
 
    	 StVoluInfo(int voluNumber)	{SetUniqueID(voluNumber);}
 virtual ~StVoluInfo(){;}
 	int IsModule  ()   	const 	{return TestBit(kModule);}
 	int IsMODULE() 		const 	{return TestBit(kMODULE);}
 	int IsHitPlane() 	const 	{return TestBit(kHitPlane);}
+	int IsActive() 	        const 	{return TestBit(kActive);}
        void SetModule  (int s=1)        {SetBit(kModule,s)      ;}
        void SetMODULE  (int s=1)     	{SetBit(kMODULE,s)      ;}
        void SetHitPlane(int s=1)     	{SetBit(kHitPlane,s)    ;}
         int GetNumber() 	const 	{return GetUniqueID()   ;}
 const  TGeoVolume* GetVolu() 	const; 
-virtual int Kind() 		const	{return kVoluExt;}
+virtual int Kind() 		const	{return kVoluInfo;}
 const char *GetName() const;
 public:
 ClassDef(StVoluInfo,0) //
@@ -150,15 +93,18 @@ public:
       StHitPlaneInfo(int volId);	
 virtual ~StHitPlaneInfo(){;}
 void  operator=(const StVoluInfo& ext){*((StVoluInfo*)this)=ext;}
-      int Kind() const		{return kBaseHitPlane;}
+      int Kind() const		{return kHitPlaneInfo;}
+      int Axis() const		{return fAxi;}
 const Mtx33_t &GetDir() const 	{return fDir;}
-const double  *GetOrg() const	{return fOrg;}
+const float   *GetOrg() const	{return fOrg;}
       StHitPlane *MakeHitPlane(const StTGeoIter &it);
       StHitPlane *GetHitPlane (const TString &path) const;
+      void SetAxis(int axi)	{fAxi=axi;}
 void  Print(const char* opt="") const;
 protected:
-double fOrg[3];
-double fDir[3][3];
+int    fAxi;
+float fOrg[3];
+float fDir[3][3];
 StHitPlanePathMap fHitPlanePathMap;
 ClassDef(StHitPlaneInfo,0) //
 };
@@ -169,20 +115,123 @@ class StHitPlane : public TNamed
 friend class StTGeoHelper;
 friend class StHitPlaneInfo;
 public:
-      StHitPlane(const char *path);	
+      StHitPlane(const char *path, int volId);	
 virtual ~StHitPlane();
 void  Clear(const char *opt="");
 void  InitHits();
 
-const Mtx33_t &GetDir() const {return fDir;}
-const double  *GetOrg() const {return fOrg;}
-void  AddHit(void *hit,const double xyz[3]);
+virtual const Mtx33_t &GetDir(const float *) const {return fDir;}
+virtual const float   *GetOrg(const float *) const {return fOrg;}
+virtual const float   *GetPnt()        const {return fOrg;}
+virtual       void  AddHit(void *hit,const float xyz[3]);
+virtual       int   Kind() const {return 0;}
+              int   GetNumber()  { return GetUniqueID(); }
 int   GetNHits() const;
 protected:
-double fOrg[3];
-double fDir[3][3];
+float fOrg[3];
+float fDir[3][3];
 StMultiKeyMap *fHitMap;
 ClassDef(StHitPlane,0) //
+};
+// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
+class StHitTube : public StHitPlane
+{
+friend class StTGeoHelper;
+friend class StHitPlaneInfo;
+public:
+      StHitTube(const char *path, int volId);	
+virtual ~StHitTube(){;}
+
+virtual const Mtx33_t &GetDir(const float *)	const ;
+virtual const float   *GetPnt()	const {return fPnt;}
+virtual       int      Kind() 	const {return 1;}
+protected:
+float fPnt[3];
+ClassDef(StHitTube,0) //
+};
+// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
+class StTGeoHelper : public TObject
+{
+         StTGeoHelper();
+virtual ~StTGeoHelper();
+
+public:
+       void Init(int mode=0);
+
+       void SetModule (const char *voluName,int akt=1);
+       void SetModule (int   moduLevl=2) {fModuLev = moduLevl;}
+       void InitInfo();
+       void InitModuLev();
+
+       void InitHitShape();
+
+       void SetHitPlane(const char *moduName,const char *voluName,int axis=1);
+       void InitHitPlane();
+       void InitHits();
+       void ClearHits();
+
+static	StTGeoHelper *Instance(); 
+static	StTGeoHelper *Inst(){return Instance();}; 
+
+public:
+	void  Print(const char *tit=0) const;
+        void  ls(const char* opt="Mmps")                const;
+	void  SetInfo   (StVoluInfo *ext);
+	void  SetActive (const char *voluName,int act=1);
+	void  SetActive (StDetectorId did,int act=1);
+  StVoluInfo *SetFlag   (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act=1);
+	 int  IsFlag    (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const;
+	 int  IsModule  (const TGeoVolume *volu) 	const;
+	 int  IsModule  (const TGeoNode   *node) 	const;
+	 int  IsMODULE  (const TGeoVolume *volu) 	const;
+	 int  IsActive  () 				const;
+	 int  IsActive  (StDetectorId did) 		const;
+static	 int  IsSensitive(const TGeoVolume *volu);
+static	 int  DetId(const char *detName);
+static	const char *DetName(int detId);
+static	const char *ModName(int detId);
+
+
+
+   StVoluInfo *GetInfo  (int idx) 	const;
+   StVoluInfo *GetINFO  (int idx);
+const   char  *GetPath() const;     
+const TGeoVolume *GetModu() const;
+const TGeoVolume *GetVolu() const;
+StVoidArr     *GetSeedHits()        const {return fSeedHits       ;}
+StHitPlaneHardMap *GetPlaneHardMap() const {return fHitPlaneHardMap;}
+
+StHitPlaneInfo* IsHitPlane(const TGeoVolume *volu) const;
+StHitPlaneInfo* IsHitPlane(const TGeoNode   *node) const;
+StHitPlane   *GetCurrentHitPlane ();
+
+	     int  MayHitPlane     (const TGeoVolume *volu) const;
+	     int  MakeHitPlaneInfo(const StTGeoIter &iter);
+	void  AddHitPlane(StHitPlane *pla);
+
+const StHitPlane *AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed);
+
+        void  ShootZR(double z,double rxy);
+
+const StTGeoHitShape* GetHitShape() const {return fHitShape;}
+
+static void Test();
+static void Break(int kase);
+private:
+
+
+private:
+char fBeg[1];
+int fMode; 	//0=fill infos + hitShape, 1= hit planes
+int fModuLev;
+Long64_t fActiveModu;
+TObjArray      *fVoluInfoArr;		// array of all StVoluIinfo
+TObjArray      *fHitPlaneArr;           // array of StHitPlane's
+StHitPlaneHardMap *fHitPlaneHardMap;	// StHitPlane[hardwarePosition]
+StVoidArr  *fSeedHits;			// Vector for hits used in seed finder
+StTGeoHitShape *fHitShape;
+char fEnd[1];
+ClassDef(StTGeoHelper,0) //
 };
 
 
@@ -211,6 +260,8 @@ const        int *GetStk() const {return fStk;}
              int  State()  const {return fNow;}
             void  LocalToMaster    (const double* local, double* master) const;
             void  LocalToMasterVect(const double* local, double* master) const;
+            void  LocalToMaster    (const float*  local, float*  master) const;
+            void  LocalToMasterVect(const float*  local, float*  master) const;
             void  Print(const char *tit="") const;
 const       char *GetPath() const;     
 private:

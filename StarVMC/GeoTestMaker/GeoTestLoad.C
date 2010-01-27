@@ -1,3 +1,4 @@
+int loaded=0;
 void GeoTestLoad()
 {
 TH1D h1d; h1d.GetPainter();

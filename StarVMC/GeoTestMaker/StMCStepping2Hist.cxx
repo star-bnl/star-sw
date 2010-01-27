@@ -1,4 +1,4 @@
-// $Id: StMCStepping2Hist.cxx,v 1.4 2009/10/13 17:19:35 perev Exp $
+// $Id: StMCStepping2Hist.cxx,v 1.5 2010/01/27 23:02:57 perev Exp $
 //
 //
 // Class StMCStepping2Hist
@@ -523,12 +523,10 @@ void StMCStepping2Hist::Print(const Option_t*) const
 int StMCStepping2Hist::Fun()
 {
 static int nCall = 0;
-if (!nCall)  {
-  StTGeoHelper *hlp = StTGeoHelper::Instance();
-  hlp->Init();
-  fHitShape = hlp->GetHitShape();
-}
 nCall++;
+
+if (!fHitShape)  fHitShape = StTGeoHelper::Instance()->GetHitShape();
+
   const TGeoVolume *modu = 0;     TString ts,modName;
   Case();
 // Sensitive volume
@@ -579,7 +577,7 @@ if (strcmp(fVolume->GetName(),"TPAD")==0) Break(1);
       fVolRadL = fabs(dL)/fX0;
       fTotRadL    += fVolRadL;
 //??      assert(fTotRadL<100);
-      modu = StTGeoHelper::Instance()->GetModule();   
+      modu = StTGeoHelper::Instance()->GetModu();   
       fModName = (modu)? modu->GetName(): "CAVE";
       fModName = Alias(fModName);
       fELossTrk[0]->Add(dL,fX0);
