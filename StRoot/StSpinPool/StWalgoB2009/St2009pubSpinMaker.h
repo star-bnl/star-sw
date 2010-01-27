@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.h,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009pubSpinMaker.h,v 1.2 2010/01/27 22:12:25 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -31,13 +31,15 @@ class St2009pubSpinMaker : public StMaker {
   int nRun;
   int Tfirst,Tlast;
 
+  float par_QPTplus,par_QPTminus; // cuts to drop not sure charges
+
   St2009WMaker *wMK; // W-algo maker with all data
   StSpinDbMaker *spinDb;
   TString core; // name attached to all histos
 
   // histograms
   TObjArray *HList;
-  enum {mxHA=16}; TH1 * hA[mxHA];
+  enum {mxHA=32}; TH1 * hA[mxHA];
   TH1 *hbxIdeal;
   
   void initHistos();
@@ -57,7 +59,7 @@ class St2009pubSpinMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009pubSpinMaker.h,v 1.1 2009/11/23 23:00:18 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009pubSpinMaker.h,v 1.2 2010/01/27 22:12:25 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -68,6 +70,9 @@ class St2009pubSpinMaker : public StMaker {
 
 
 // $Log: St2009pubSpinMaker.h,v $
+// Revision 1.2  2010/01/27 22:12:25  balewski
+// spin code matched to x-section code
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

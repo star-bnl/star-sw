@@ -3,12 +3,12 @@ const float PI=2*acos(0);
 
 //=================================================
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  //iPath="./";
+  iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
-  iPath="/star/data05/scratch/balewski/2009-WanaJ-SL09g-jan20-APScode0/data/";
-  //core0="R10090081";
-  core0="run9setABCD";
-  //core0="run9setP1234";
+  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-p/data/";
+  //core0="R10090018";
+  //core0="run9setABCD";
+  core0="run9setP1234";
   //core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter_tot";
   // core0="mcSetD1_ppZprod";
@@ -42,7 +42,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameM[]={"muTwayET","muBwayET","muBclETPt","muEwayET"};//pg 12
   
   char *nameW[]={"muTotwayET2D","muAwayTotEt","muWET","muW2D1"};//pg 13
-  char *namePB[]={"muptBalance_clust", "muptBalance_awayTot"};// pg 14 -Pt-Balance plots
+  char *namePB[]={"muptBalance_clust", "muptBalance_awayTot","muWeta"};// pg 14 -Pt-Balance plots
   char *nameB1[]={"muSEadc1","muSPadc1"}; // pg 15 BSMD spectra
   char *nameN[]={"muTrdEdX","muWdedx"}; //pg 16
   char *nameO[]={"muWglDca","muWglDcaSP","muWglDcaSN"}; // pg 17
@@ -54,9 +54,12 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameR1[]={"pubStatEve","pubCrR","pubWET","pubchEtaCP","pubchEtaCN"};// pg 20
   char *nameR2[]={"pubchRecPNg","pubchRecPNp"};// pg 21
   char *nameR3[]={"pubchWETPg"  ,"pubchWETPp","pubchCFP0" ,"pubchWETNp","pubchWETNg" ,"pubchCFN0"};// pg 22
+
   char *nameS1[]={"spinStatEve","spins4mon","spinbX48","spinbX7","spinbX48c","spinbX7c"};// pg 23
-  char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N","spinY3_P","spinY2_N"};// pg 24
-  char *nameS3[]={"spinY4_P","spinY4_N"};// pg 25
+  char *nameS5[]={"spinET_P","spinET_N","spinQpT","spinQpT2"};// pg 24
+  char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N"};// pg 25
+  char *nameS3[]={,"spinY3_P","spinY3_N","spinY3_P","spinY3_N"};// pg 26
+  char *nameS4[]={"spinY5_P","spinY5_N"};// pg 27
 
   //use  Page 30 -42 TPC sectors per cut, 2 pages per cut
 
@@ -336,10 +339,14 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=namePB;
-    for(int i=0;i<2;i++) {
+    for(int i=0;i<3;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
-      c->cd(i+1); h->Draw("colz");
+      c->cd(i+1); 
+      if(i<2) h->Draw("colz");
+      else  h->Draw();
+      if(i==2) h->Rebin(4);
+);
     }
    
  } break;//--------------------------------------
@@ -483,13 +490,38 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
       if(i==1) { h->Draw("colz");}
     }
     c->GetPad(1)->SetLogy();
-
+    
  } break;//--------------------------------------
+
+
+ case 24:{    sprintf(padTit,"Final Ws for spin analysis, %s",core0);
+   can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+   c->Divide(2,2);gStyle->SetOptStat(10);
+   char **nameX=nameS5;
+   for(int i=0;i<4;i++) {
+     printf("->%s<\n",nameX[i]);
+     h=(TH1*)fd->Get(nameX[i]);  assert(h);
+     c->cd(i+1);  h->Draw();
+     if(i==2) { hx=(TH1*) h->Clone(); h->SetFillColor(46); hx->SetFillColor(9);
+       hx->SetAxisRange(0,1); hx->Draw("same");
+     }
+     
+     if(i==3) { h->Draw("colz"); ((TH2F*)h)->Rebin2D(1,2);}
+     if(i<2||i==3) h->SetAxisRange(0,70);
+     gPad->SetGrid(0,0);
+   }
+ } break;//--------------------------------------
+   
+
  
- case 24:{    sprintf(padTit,"spin sorting: QCD events, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(2,2);gStyle->SetOptStat(1000010);
-    char **nameX=nameS2;
+ case 25:
+ case 26:
+   {    sprintf(padTit,"spin sorting: lumi & Ws, %s",core0);
+     char **nameX=nameS2;
+     if(page==26) { nameX=nameS3;sprintf(padTit,"spin sorting: QCD background, %s",core0);}
+     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+     c->Divide(2,2);gStyle->SetOptStat(1000010);
+
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
@@ -497,16 +529,17 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
     }
  } break;//--------------------------------------
  
-  case 25:{    sprintf(padTit,"charge & ET vs. spin state, %s",core0);
+  case 27:{    sprintf(padTit,"charge & ET vs. spin state, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,1);gStyle->SetOptStat(10);
-    char **nameX=nameS3;
+    char **nameX=nameS4;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
     }
  } break;//--------------------------------------
+
 
 
  case 30: // TPC stats 
@@ -669,6 +702,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.8  2010/01/27 22:12:26  balewski
+// spin code matched to x-section code
+//
 // Revision 1.7  2010/01/26 19:28:07  balewski
 // added pt-balanc eplots
 //

@@ -1,4 +1,4 @@
-//$Id: haddWana.C,v 1.11 2010/01/10 03:01:39 balewski Exp $
+//$Id: haddWana.C,v 1.12 2010/01/27 22:12:26 balewski Exp $
 // line added after tag=DNP2009 by Jan
 // run list chaned to match final run selection for SL09g 
 
@@ -16,7 +16,7 @@ TFile *Target;
 
 void MergeRootfile( TDirectory *target, TList *sourcelist );
 
-void haddWana() {
+void haddWanaX() {
   haddWana("run9setA");
   haddWana("run9setB");
   haddWana("run9setC");
@@ -24,7 +24,7 @@ void haddWana() {
   haddWana("run9setABCD");
 }
 
-void haddWanaX() {
+void haddWana() {
   haddWana("run9setP1");
   haddWana("run9setP2");
   haddWana("run9setP3");
@@ -32,7 +32,7 @@ void haddWanaX() {
   haddWana("run9setP1234");
 }
 
-void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-WanaJ-SL09g-x/data/") {
+void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-p/data/") {
 
   TString out=iPath;
 
@@ -214,6 +214,9 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
+// Revision 1.12  2010/01/27 22:12:26  balewski
+// spin code matched to x-section code
+//
 // Revision 1.11  2010/01/10 03:01:39  balewski
 // cleanup & nicer histos
 //

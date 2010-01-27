@@ -9,11 +9,11 @@ int geant=false;
 int rdMuWana(
 	     int nEve=2e3,
 	     char* inDir   = "",// make it empty for scheduler 
-	     char* file    = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/R10097000_230531_230601.lis",// full fill F10505
+	     char* file    = "fillListD/F10434/R10085016_230530_230600.lis",
 	     int nFiles  = 1000, // max # of muDst files
 	     int isMC=1, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
-	     int useJetFinder = 2, // 0 - no jets from finder are used; 1 generate jet trees; 2 read jet trees
-             TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //location of jet trees to be used
+	     int useJetFinder = 2, // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees
+             TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //default location of jet trees to be used
  ) { 
 
   //jetTreeDir = "./";
@@ -438,6 +438,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.19  2010/01/27 22:12:26  balewski
+// spin code matched to x-section code
+//
 // Revision 1.18  2010/01/26 12:02:38  stevens4
 // load proper gain tables for official rcf mc
 //

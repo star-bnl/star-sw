@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.8 2010/01/18 03:26:15 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.9 2010/01/27 22:12:24 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -25,8 +25,8 @@ St2009WMaker::initHistos(){
   h->SetLineColor(kBlue);h->SetLineWidth(2);
 
   char key[][200]={"inp","BHT3Id","L2wId","L2wBits","L2wET","L2wRnd","tpcOn","primVert","vertZ","Pt10",
-	       "B-in","B200","TrB","Tr2Cl","goldW"};
-  for(int i=0;i<15;i++) h->Fill(key[i],0.); // preset the order of keys
+		   "B-in","B200","TrB","Tr2Cl","eta1","goldW"};
+  for(int i=0;i<16;i++) h->Fill(key[i],0.); // preset the order of keys
   
   hA[1]=h=new TH1F("muInTrg","muW input triggers, WARN: scrambled if manyruns are combined by hadd.C; trigID (random order)",nCase,0,nCase);
   h->GetXaxis()->SetLabelSize(0.06);
@@ -71,9 +71,9 @@ St2009WMaker::initHistos(){
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kGreen); h->SetLineWidth(2);
   char keyT[][200]={"101","pt1","nHit","Hfrac","Rin","Rout","ptOK","@B","CL","fr24",
-"#Delta R","noNear","noAway"};
+		    "#Delta R","noNear","noAway","goldW"};
 	     
-  for(int i=0;i<13;i++) h->Fill(keyT[i],0.); // preset the order of keys
+  for(int i=0;i<14;i++) h->Fill(keyT[i],0.); // preset the order of keys
 
 
   hA[21]=h=new TH1F("muTrNfit","primary track  in-selection & vertexZ; nFitPoints",50,0,50);
@@ -174,7 +174,7 @@ St2009WMaker::initHistos(){
   hA[55]=h=new TH1F("muEwayET"," ETOW away-cone ET sum;   ET (GeV)",100,0,100); // away side energy  
   
   hA[56]=h=new TH1F("muSmallNearTpcPT",Form("TPC PT in #Delta R =%.1f from lepton candidate; PT (GeV)",par_smallNearDeltaR),100,0,100);
-
+  
   //free 57-59
 
   //... final golden plots ....
@@ -216,8 +216,9 @@ St2009WMaker::initHistos(){
   
   sprintf(txt,"Vertex Z , final W selection, 2x2 ET>%.0f GeV; Z(cm)",par_highET);
   hA[98]=new TH1F("muWcar3",txt, 100, -200,200);
+  hA[99]=h=new TH1F("muWeta","final Ws ; event eta",100, -1.5,1.5);
 
-  // free 98-109
+  // free 100-109
 
   //..... series of electron ET plots after succesive cuts
   char tt2[][200]={"max 2x2","track matched","no near ET","no away ET"};
@@ -261,6 +262,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.9  2010/01/27 22:12:24  balewski
+// spin code matched to x-section code
+//
 // Revision 1.8  2010/01/18 03:26:15  balewski
 // expanded TPC track filtering, not finished
 //
