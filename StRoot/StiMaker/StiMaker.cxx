@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.191 2009/10/18 22:47:29 perev Exp $
+// $Id: StiMaker.cxx,v 1.192 2010/01/27 21:43:49 perev Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.192  2010/01/27 21:43:49  perev
+// Add _nPrimTracks for case of fiterr
+//
 // Revision 1.191  2009/10/18 22:47:29  perev
 // assert instead of skip
 //
@@ -427,7 +430,7 @@ StiMaker::StiMaker(const Char_t *name) :
   cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
   mPullFile=0; mPullEvent=0;mPullTTree=0;
   memset(mPullHits,0,sizeof(mPullHits));
-
+  mTotPrimTks[0]=mTotPrimTks[1]=0;
   if (!StiToolkit::instance()) new StiDefaultToolkit;
   _toolkit = StiToolkit::instance();
   SetAttr("useTpc"		,kTRUE);
@@ -498,6 +501,10 @@ Int_t StiMaker::Init()
 	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
   
   _loaderHitFilter = 0; // not using this yet.
+  mTotPrimTks[1] = IAttr("maxTotPrims");
+  if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
+
+
   if (*SAttr("maxRefiter")) StiKalmanTrack::setMaxRefiter(IAttr("maxRefiter"));
   if (IAttr("useTiming")) {
     for (int it=0;it<(int)(sizeof(mTimg)/sizeof(mTimg[0]));it++){
@@ -707,7 +714,7 @@ Int_t StiMaker::Make()
               if (mTimg[kPriTimg]) mTimg[kPriTimg]->Start(0);
 
 	      _tracker->extendTracksToVertices(*vertexes);
-
+              mTotPrimTks[0]+=_tracker->getNPrims();
               if (mTimg[kPriTimg]) mTimg[kPriTimg]->Stop();
 
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
@@ -725,6 +732,8 @@ Int_t StiMaker::Make()
   MyClear();
   if (iAns) return iAns;
   if (iAnz) return iAnz;
+  if (mTotPrimTks[1] && mTotPrimTks[0]>mTotPrimTks[1]) return kStStop;
+
   return kStOK;
 }
 //_____________________________________________________________________________

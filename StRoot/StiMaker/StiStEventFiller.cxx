@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.89 2009/10/18 22:47:29 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.90 2010/01/27 21:43:49 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.90  2010/01/27 21:43:49  perev
+ * Add _nPrimTracks for case of fiterr
+ *
  * Revision 2.89  2009/10/18 22:47:29  perev
  * assert instead of skip
  *
@@ -1032,8 +1035,8 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
       Int_t NoWrongSignZ = 0;
       for (Int_t i = 0; i < Nhits; i++) {
 	const StTpcHit *hit = (StTpcHit *) hits[i];
-	if (hit->position().z() < -1.0 && hit->sector() <= 12 ||
-	    hit->position().z() >  1.0 && hit->sector() >  12) NoWrongSignZ++;
+	if ((hit->position().z() < -1.0 && hit->sector() <= 12) ||
+	    (hit->position().z() >  1.0 && hit->sector() >  12)) NoWrongSignZ++;
       }
       if (NoWrongSignZ >= 2) 
 	gTrack->setFlag((flag%1000) + 1000); // +1000
@@ -1244,6 +1247,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
 {
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   if (!mPullEvent) return;
+  if (gloPri && track->isPrimary()!=1) return;
   int dets[kMaxDetectorId][3];
   track->getAllPointCount(dets,kMaxDetectorId-1);
   StiPullTrk aux;
