@@ -478,16 +478,18 @@ private:
   };
 enum {kINI=0,kDOW=1,kHOR=2,kUPP=3,kHIT=4,kEND};
 protected:
-    StHitIter(const void    *cont=0);
+    StHitIter(const StEvent    *cont);
+    StHitIter(const void    *cont);
 virtual const void *GetObj(const void *cont,int lev,int idx) const =0; 
 virtual       int  GetSize(const void *cont,int lev        ) const =0; 
 public:
-virtual void Reset(const StEvent *evt=0){Reset(GetContainer(evt));}
-virtual void Reset(const void *cont=0);
+virtual void Reset(const StEvent *evt=0){Reset((evt)?GetContainer(evt):0);}
+virtual void Reset(const void *cont);
 virtual StDetectorId DetectorId() const = 0;
 virtual int          HitPlaneId() const{return 0;};
 virtual int operator++();
 virtual StHit *operator*();
+virtual UInt_t UPath() const;
 virtual const void *GetContainer(const StEvent *ev) const=0;
 virtual void Print(const char *opt="");
 protected:
@@ -502,7 +504,7 @@ class StTpcHitCollection;
 class StTpcHitIter : public StHitIter {
 public:
   StTpcHitIter(const StTpcHitCollection *hc):StHitIter(hc){}
-  StTpcHitIter(const StEvent            *ev):StHitIter(GetContainer(ev)){}
+  StTpcHitIter(const StEvent            *ev):StHitIter(ev){}
   StDetectorId DetectorId() const {return kTpcId;}
   const void *GetContainer(const StEvent *ev) const;
 
@@ -515,7 +517,7 @@ const void *GetObj(const void *cont,int lev,int idx) const;
 class StSvtHitCollection;
 class StSvtHitIter : public StHitIter {
 public:
-  StSvtHitIter(const StEvent            *ev):StHitIter(GetContainer(ev)){}
+  StSvtHitIter(const StEvent            *ev):StHitIter(ev){}
   StSvtHitIter(const StSvtHitCollection *hc):StHitIter(hc){}
   StDetectorId DetectorId() const {return kSvtId;}
   const void *GetContainer(const StEvent *ev) const;
@@ -529,7 +531,7 @@ const void *GetObj(const void *cont,int lev,int idx) const;
 class StSsdHitCollection;
 class StSsdHitIter : public StHitIter {
 public:
-  StSsdHitIter(const StEvent            *ev):StHitIter(GetContainer(ev)){}
+  StSsdHitIter(const StEvent            *ev):StHitIter(ev){}
   StSsdHitIter(const StSsdHitCollection *hc):StHitIter(hc){}
   StDetectorId DetectorId() const {return kSsdId;}
   const void *GetContainer(const StEvent *ev) const;
@@ -543,7 +545,7 @@ const void *GetObj(const void *cont,int lev,int idx) const;
 class StFtpcHitCollection;
 class StFtpcHitIter : public StHitIter {
 public:
-  StFtpcHitIter(const StEvent             *ev):StHitIter(GetContainer(ev)){}
+  StFtpcHitIter(const StEvent             *ev):StHitIter(ev){}
   StFtpcHitIter(const StFtpcHitCollection *hc):StHitIter(hc){}
   StDetectorId DetectorId() const {return kFtpcWestId;}
   const void *GetContainer(const StEvent *ev) const;
@@ -557,7 +559,7 @@ const void *GetObj(const void *cont,int lev,int idx) const;
 class StRnDHitCollection;
 class StRnDHitIter : public StHitIter {
 public:
-  StRnDHitIter(const StEvent*ev,StDetectorId id):StHitIter(GetContainer(ev)){fId=id;}
+  StRnDHitIter(const StEvent*ev,StDetectorId id):StHitIter(ev){fId=id;}
   StRnDHitIter(const StRnDHitCollection *hc,StDetectorId id):StHitIter(hc){fId=id;}
   StDetectorId DetectorId() const {return fId;}
   const void *GetContainer(const StEvent *ev) const;
@@ -572,7 +574,7 @@ private:
 class StTofCollection;
 class StTofHitIter : public StHitIter {
 public:
-  StTofHitIter(const StEvent *ev):StHitIter(GetContainer(ev)){}
+  StTofHitIter(const StEvent *ev):StHitIter(ev){}
   StTofHitIter(const StTofCollection *hc):StHitIter(hc){}
   StDetectorId DetectorId() const {return kTofId;}
   const void *GetContainer(const StEvent *ev) const;
@@ -583,16 +585,17 @@ const void *GetObj(const void *cont,int lev,int idx) const;
 
 //..............................................................................
 class StEvent;
-class StAllHitIter : public StHitIter {
+class StEventHitIter : public StHitIter {
   enum {kMaxIters=10};
 public:
-  StAllHitIter(const StEvent *ev);
-  virtual ~StAllHitIter();
+  StEventHitIter(const StEvent *ev);
+  virtual ~StEventHitIter();
   void  Reset(const StEvent *evt=0);
   int   AddDetector(StDetectorId detId);
   StDetectorId DetectorId() const;
-  int operator++();
-  StHit *operator*();
+   UInt_t      UPath() const;
+   int operator++();
+   StHit *operator*();
 
 protected:
   const void *GetObj(const void *cont,int lev,int idx) const{return 0;} 
