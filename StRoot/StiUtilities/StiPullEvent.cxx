@@ -22,7 +22,7 @@ ClassImp(StiPullEvent)
  ,mHitsR("StiPullHit",100)
  {
  mHitsG.SetOwner(0); mHitsP.SetOwner(0); mHitsR.SetOwner(0);
- memset(mNHits,0,sizeof(mNHits));
+ Clear();
  };
 //_____________________________________________________________________________
 void StiPullTrk::Clear(const char*)
@@ -124,7 +124,7 @@ void StiPullEvent::Add(StiPullTrk &trk,int gloPrim)
   StiPullTrk *kTrk = (StiPullTrk*)trks->New(iTrk);
   *kTrk = trk;
   assert(trk.mTrackNumber);
-  ++mNTrks[gloPrim];
+  mNTrks[gloPrim]++;
 }
 //_____________________________________________________________________________
 
