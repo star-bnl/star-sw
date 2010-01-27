@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.226 2009/11/19 18:35:02 perev Exp $
+// $Id: StMaker.cxx,v 1.227 2010/01/27 20:36:56 perev Exp $
 //
 //
 /*!
@@ -237,7 +237,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 //{"y2006b",      20051201,     2, "y2006b",   "y2006+new FPD+SSD5/CALB2"},// code versions indicated
   {"y2006c",      20051201,     3, "y2006c",   "y2006+new FPD+SSD5/CALB2+noPMD"},// 
   {"y2006g",      20051201,     4, "y2006g",   "y2006c + SVT dead material"},
-  {"y2006h",      20051201,     5, "y2006g",   "y2006g + ecal6(JW)"},
+  {"y2006h",      20051201,     5, "y2006g",   "y2006g + ecal6+tpc2009(JW)"},
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
@@ -728,14 +728,6 @@ void StMaker::SetFlavor(const Char_t *flav,const Char_t *tabname)
 {
   StMaker *mk = GetMakerInheritsFrom("St_db_Maker");
   if (mk) mk->SetFlavor(flav,tabname);
-}
-//______________________________________________________________________________
-Int_t   StMaker::GetValidity(const TTable *tb, TDatime *const val) const
-{
-   StMaker *mk = GetMaker(tb);
-   if (!mk) 					return 10;
-   if (!mk->InheritsFrom("St_db_Maker"))	return 11;
-   return mk->GetValidity(tb,val);
 }
 //_____________________________________________________________________________
 void StMaker::Clear(Option_t *option)
@@ -1961,6 +1953,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.227  2010/01/27 20:36:56  perev
+// GetValidity removed. It is St_db_Maker::GetValidity() now
+//
 // Revision 1.226  2009/11/19 18:35:02  perev
 // y2006h = y200hg+ecalgeo6
 //
