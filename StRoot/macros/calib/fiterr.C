@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include "TSystem.h"
+#include "TMath.h"
 #include "TBenchmark.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -10,7 +11,7 @@
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TGraph.h"
-#include "TCL.h"
+#include "TCernLib.h"
 #include "TMatrixD.h"
 #include "TRandom.h"
 #include "TVectorD.h"
@@ -188,26 +189,6 @@ HitPars_t operator+(const HitPars_t &a,const TVectorD &add);
 
 
 
-class LogDensity {
-public:
-LogDensity(double y,double z,double dens,double A,double B);
-void   Set(double y,double z,double dens,double A,double B);
-void   Set(double dens,double A,double B);
-double Fcn();
-double Deriv(int dXi2,int dMu=0);
-double Deriv(double dd[4][3]);
-int    Teriv();
-double dNdRho() const {return mMuF;}
-static void Test();
-static void Test2();
-private:
-double mXi2;
-double mYZ[2];
-double mMu;
-double mMuF;
-double mAB[2];
-double mFcn;
-}; 
 
 //______________________________________________________________________________
 class Poli2 {
@@ -277,6 +258,11 @@ static char dbFile[4][100] = {
 "StarDb/Calibrations/tracker/svtHitError.20050101.235959.C"    };
 
 static TTable *dbTab[4];
+void myBreak(int kase) { 
+  static int myKase=-1946; 
+  if (kase != myKase) return;
+  printf("BOT OHO\n");
+}
 
 int fiterr(const char *opt)
 {
@@ -406,245 +392,6 @@ int fiterr(const char *opt)
   if (optH) HEnd();
 //return (maxPct<10) ? 99:0;
   return (maxPct< 3) ? 99:0;
-}
-//______________________________________________________________________________
-//______________________________________________________________________________
-LogDensity::LogDensity(double y,double z,double dens,double A,double B)
-{
-  Set(y,z,dens,A,B);
-}
-//______________________________________________________________________________
-void LogDensity::Set(double y,double z,double dens,double A,double B)
-{
-  mYZ[0]=y*y; mYZ[1]=z*z;
-  Set(dens,A,B);
-}
-//______________________________________________________________________________
-void LogDensity::Set(double dens,double A,double B)
-{
-  mAB[0] = A;mAB[1] = B;
-  mXi2   = mYZ[0]/mAB[0]+mYZ[1]/mAB[1];
-  mMuF   = TMath::Pi()*sqrt(mAB[0]*mAB[1]);
-  mMu    = mMuF*dens;
-  mFcn   = -(0.5+mMu)*mXi2 -0.5*log(mAB[0]*mAB[1])+log(0.5+mMu);
-
-}
-//______________________________________________________________________________
-double LogDensity::Fcn()
-{
-//  k = Pi*Rho*a*b
-// Dtot(R2) = (0.5+k)exp(-(0.5+k)*R2)/(a*b)
-//
-  return mFcn;
-}
-//______________________________________________________________________________
-double LogDensity::Deriv(int dXi2,int dMu)
-{
-
-   int kase = dXi2+10*dMu;
-   switch(kase) {
-   case 0:  return mFcn;
-   case 1:  return -(0.5+mMu);
-   case 2:  return 0;
-   case 10: return (-mXi2 +1./(0.5+mMu));
-   case 20: return -1./pow(0.5+mMu,2);
-   case 11: return -1;
-   default: assert(0); return 0;
-   }
-}
-//______________________________________________________________________________
-double LogDensity::Deriv(double der[4][3])
-{
-// fcn = -(0.5+k)*R2 +log(0.5+k)-log(a*b)
-//  enum {kGrad=3};
-  int kGrad=3;
-  double g[2][3],gg[2][3][3],d[2],dd[2][2];
-  g[0][0]    = mMuF;
-               g[0][1]      = 0.5*mMu/mAB[0];
-	                      g[0][2]     = 0.5*mMu/mAB[1]; 
-  g[1][0]    =0   ;
-               g[1][1]      =-mYZ[0]/(mAB[0]*mAB[0]); 
-	                      g[1][2]     =-mYZ[1]/(mAB[1]*mAB[1]);
-
-  gg[0][0][0] = 0;
-                gg[0][0][1] = 0.5*mMuF/mAB[0];
-		              gg[0][0][2] = 0.5*mMuF/mAB[1];
-  gg[0][1][0] = gg[0][0][1];
-                gg[0][1][1] =-0.25*mMu/(mAB[0]*mAB[0]);
-	                      gg[0][1][2] = 0.25*mMu/(mAB[0]*mAB[1]);
-  gg[0][2][0] = gg[0][0][2];
-                gg[0][2][1] = gg[0][1][2];
-                              gg[0][2][2] =-0.25*mMu/(mAB[1]*mAB[1]);
-
-  gg[1][0][0] = 0;
-                gg[1][0][1] = 0;
-		              gg[1][0][2] = 0;
-  gg[1][1][0] = gg[1][0][1];
-                gg[1][1][1] =2*mYZ[0]/(mAB[0]*mAB[0]*mAB[0]);
-	                      gg[1][1][2] = 0;
-  gg[1][2][0] = gg[1][0][2];
-                gg[1][2][1] = gg[1][1][2];
-                              gg[1][2][2] = 2*mYZ[1]/(mAB[1]*mAB[1]*mAB[1]);
-
- 
-
-
-
-  d[0] = Deriv(0,1);
-  d[1] = Deriv(1,0);
-  dd[0][0] = Deriv(0,2); dd[1][1] = Deriv(2,0);
-  dd[1][0] = Deriv(1,1); dd[0][1] = dd[1][0];
-
-  double *gra = der[kGrad];
-//  for (int i=0;i<3;i++) { gra[i]=d[0]*g[0][i]+d[1]*g[1][i];}
-
-
-  TCL::mxmpy2(g[0],d    ,gra   ,3,2,1);
-  TCL::mxmltr(g[0],dd[0],der[0],3,2  );
-
-  for (int muxi =0; muxi <2; muxi++) {
-    TCL::vlinco(gg[muxi][0],d[muxi],der[0],1,der[0],3*3);
-  }
-  for (int i=0;i<2;i++) {
-    gra[i+1] += -0.5/mAB[i]; 
-    der[i+1][i+1] += 0.5/(mAB[i]*mAB[i]);
-  }
-  return Fcn();
-
-}
-//______________________________________________________________________________
-void LogDensity::Test2()
-{
-double Xi2Max=20, y=1,z=2,Mu=3.1,A=1.1*1.1,B=2.2*2.2;
-LogDensity ld( y,z,Mu,A,B);
-double fcn = ld.Fcn();
-printf("fcn = %g\n",fcn);
-  double sum=0;
-  int n = 5000;
-  double dXi2 = Xi2Max/n;
-  double val2,val1=0,val0;
-
-  for (int i=0;i<n;i++) {
-    double Xi2= (i+0.5)*dXi2;
-    double y=sqrt(Xi2*A);
-    double z=0;
-    LogDensity ld( y,z,Mu,A,B);
-    val2 =(ld.Fcn());
-    sum += exp(val2)*dXi2;
-    if (i>1 && i<4) {
-      double a1 = ld.Deriv(1);
-      double n1 = (val2-val1)/dXi2;
-      double a2 = ld.Deriv(2);
-      double n2 = (val2-2*val1+val0)/dXi2/dXi2;
-      printf("%d Deriv a1=%g n1=%g   \ta2=%g n2=%g\n",i,a1,n1,a2,n2); 
-    }
-    val0=val1; val1 = val2;
-  }  
-  sum*= sqrt(A*B);
-printf("sum = %g ~= 1.0\n",sum);
-
-  double sml = 0.05;
-  double dMu = Mu*sml;
-  y=sqrt(0.7*Xi2Max*A); z=0;
-  LogDensity ld0m( y,z,Mu    ,A,B);
-  double f = ld0m.dNdRho();
-  LogDensity ld1m( y,z,Mu+dMu,A,B);
-  LogDensity ld2m( y,z,Mu+2*dMu,A,B);
-  double a1 = f*(ld2m.Deriv(0,1)+ ld1m.Deriv(0,1) + ld0m.Deriv(0,1))/3;
-  double n1 = (ld2m.Fcn() - ld0m.Fcn())/dMu*0.5;
-  double a2 = f*f*(ld2m.Deriv(0,2)+ ld1m.Deriv(0,2) + ld0m.Deriv(0,2))/3;
-  double n2 = (ld2m.Fcn() - 2*ld1m.Fcn()+ld0m.Fcn())/(dMu*dMu);
-  printf("d/dMu a1=%g n1=%g \ta2=%g n2=%g\n",a1,n1,a2,n2); 
-
-  double a11 = f*ld0m.Deriv(1,1);
-  double n11 = (ld1m.Deriv(1,0)-ld0m.Deriv(1,0))/dMu;
-  printf("d/dMu a11=%g n11=%g \n",a11,n11); 
-
-  y=2;z=2;
-  printf("Mu,A,B = %g %g %g\n",Mu,A,B);
-  ld.Set        ( y,z,Mu        ,A        ,B);
-  LogDensity ld0( y,z,Mu*(1+sml),A        ,B);
-  LogDensity ld1( y,z,Mu        ,A*(1+sml),B);
-  LogDensity ld2( y,z,Mu        ,A        ,B*(1+sml));
-  double tst[3],der[4][3],ner[4][3],par[3]={Mu,A,B};
-
-  ld.Deriv(der);
-  tst[0] = (ld0.Fcn()-ld.Fcn())/(Mu*sml);
-  tst[1] = (ld1.Fcn()-ld.Fcn())/(A *sml);
-  tst[2] = (ld2.Fcn()-ld.Fcn())/(B *sml);
-  for (int i=0;i<3;i++) {
-    printf("Grad:  A%d = %g \tN%d = %g\n",i,tst[i],i,der[3][i]);
-  }
-  for (int i=0;i<3;i++) {
-    double sav = par[i]; par[i] *=(1+sml);
-    ld1.Set( y,z,par[0],par[1],par[2]);
-    par[i] =sav;
-    ld1.Deriv(ner);
-    for (int j=0;j<3;j++) {
-      double num = (ner[3][j]-der[3][j])/(par[i]*sml);
-      printf("Der[%d][%d]:  A = %g \tN = %g\n",i,j,der[i][j],num);}     
-  }
-
-}
-//______________________________________________________________________________
-void LogDensity::Test()
-{
-  double y=1,z=2,Mu=3.1,A=1.1*1.1,B=2.2*2.2;
-  LogDensity ld( y,z,Mu,A,B);
-  ld.Teriv();
-}
-//______________________________________________________________________________
-int LogDensity::Teriv()
-{
-
-  int iFail=0;
-  LogDensity ld(*this);
-
-  double derA[4][3],derB[4][3],derC[4][3];
-  double par[3]={ld.mMu/ld.mMuF,ld.mAB[0],ld.mAB[1]};
-static const double EPS = 0.001,SML=1e-4;
-  double num,ana,dif,fcn0,fcn1,fcn2;
-
-  ld.Set(par[0],par[1],par[2]);
-  fcn0=ld.Deriv(derA);
-  for (int kase=0;kase<2;kase++) {
-  for (int i=0;i<3;i++) {
-    double sav = par[i];
-    double dlt = sav*EPS/(fabs(derA[3][i])+SML);
-    if (dlt>sav*EPS) dlt = sav*EPS;
-    if (dlt<1e-6) dlt=1e-6;
-
-    dlt*=2;
-    for (int iter=0;iter<10;iter++) {
-      dlt/=2;
-      par[i] = sav-dlt;
-      ld.Set(par[0],par[1],par[2]);
-      fcn1 = ld.Deriv(derB);
-      par[i] =sav+dlt;
-      ld.Set(par[0],par[1],par[2]);
-      fcn2 = ld.Deriv(derC);
-      par[i] =sav;
-      num = (fcn2-fcn1)/(2*dlt);
-      ana = derA[3][i];
-      dif = (fcn1-fcn0)/dlt;
-      dif = 2*fabs(num-dif)/(fabs(num+dif)+SML);
-      if (dif>0.1) continue;
-    }
-    dif = 2*fabs(ana-num)/(fabs(ana+num)+SML);
-    if (!kase && fabs(dif) >0.1) {
-      iFail++;
-      printf("Der(%d): ana = %g \tnum = %g \tdif = %g\n",i,ana,num,dif);
-    }
-    for (int j=0;kase && j<3;j++) {
-      num = (derC[3][j]-derB[3][j])/(2*dlt);
-      ana = derA[i][j];
-      dif = 2*fabs(ana-num)/(fabs(ana+num)+SML);
-      if (dif <0.1) continue;
-      if (fabs(ana*dlt) < 1e-5*fabs(derA[3][j])) continue;
-      iFail++;
-      printf("Der[%d][%d]: ana = %g \tnum = %g \tdif=%g\n",i,j,ana,num,dif);}     
-  }}
-  return iFail;
 }
 //______________________________________________________________________________
 Poli2::Poli2(int npw):fP(npw+1),fB(npw+1),fA(npw+1,npw+1),fAi(npw+1,npw+1)
@@ -915,114 +662,6 @@ void poli2()
 Poli2::Test();
 }
 //______________________________________________________________________________
-class LogErf {
-public:
-LogErf(double s,double d);
-double Deriv(int der);
-double Deriv(int der,double x2);
-
-static double Erf(double x);
-static void Test();
-private:
-double fErf;
-double fS;
-double fD;
-}; 
-//______________________________________________________________________________
-LogErf::LogErf(double s2,double d)
-{
-   fS=s2; fD=d; fErf=Erf(fD/sqrt(2*fS));		
-}
-//______________________________________________________________________________
-double LogErf::Erf(double x)
-{
-static const double f = 1.12837916709551256e+00;
-
-  if (fabs(x)>0.1) return TMath::Erf(x);
-  double xx = x*x;
-  return f*x*(1+xx*(-1./3+xx*(1./10-xx/42)));
-}
-//______________________________________________________________________________
-double LogErf::Deriv(int der)
-{
-//static double fak = 2./sqrt(TMath::Pi());
-static const double fak    = 1.12837916709551256e+00;
-   switch(der) {
-   case 0: return log(fErf);
-   case 1: {
-     double a    = fD/sqrt(2.*fS);
-     double da = -a*0.5/fS;
-     double texp = exp(-a*a);
-     double derf = fak*texp*da;
-     return derf/fErf;}
-
-   case 2: {
-     double a    = fD/sqrt(2*fS);
-     double da = -a*0.5/fS;
-     double dda = 0.5*(-da+ a/fS)/fS;
-     double texp = exp(-a*a);
-     double dexp = -texp*2*a*da;
-     double derf = fak*texp*da;
-     return fak*(dexp*da+texp*dda-texp*da/fErf*derf)/fErf;}
-   default: assert(0); return 0;
-
-  }
-}
-//______________________________________________________________________________
-double LogErf::Deriv(int der,double x2)
-{
-//                  LF =log(sqrt(2/pi))
-static const double LF =-0.225791352644727380;
-   switch(der) {
-   case 0: return LF -0.5*(x2/fS + log(fS)) -Deriv(0);
-
-   case 1: return -0.5*(fS-x2)/fS/fS        -Deriv(1);
-     
-   case 2: return -0.5*(2*x2-fS)/fS/fS/fS   -Deriv(2);
-
-   default: assert(0); return 0;
-   }
-}
-//______________________________________________________________________________
-void LogErf::Test()
-{
- const char *mess[]={"\t OK ","\t*** WARNING ***"};
- int warn;
- double x2=9.;
- double s2=4.;
- s2 =0.0020253375740469752;
- x2 =0.0014216406552001321;
- double kkk = 2;
- double lim = kkk*sqrt(s2);
-  lim = 0.082794256508350372;
-  double delta = s2/100;
-  LogErf le1(s2,lim); 
-  LogErf le2(s2+delta,lim); 
-  double da = le1.Deriv(1);
-  double dn = (le2.Deriv(0)-le1.Deriv(0))/delta;
-  printf("\n ========== Check LogErf::Deriv(1)===========\n");
-  warn = 2*fabs(dn-da)/(fabs(dn)+fabs(da)+1e10) > 0.1;
-  printf("Da=%g == Dn=%g %s\n",da,dn,mess[warn]);
- 
-
-
-  da = le1.Deriv(1,x2);
-  dn = (le2.Deriv(0,x2)-le1.Deriv(0,x2))/delta;
-  printf("\n ========== Check LogErf::Deriv(1,x2)===========\n");
-  warn = 2*fabs(dn-da)/(fabs(dn)+fabs(da)+1e10) > 0.1;
-  printf("Da=%g == Dn=%g %s\n",da,dn,mess[warn]);
-
-  da = le1.Deriv(2,x2);
-  dn = (le2.Deriv(1,x2)-le1.Deriv(1,x2))/delta;
-  printf("\n ========== Check LogErf::Deriv(2,x2)===========\n");
-  warn = 2*fabs(dn-da)/(fabs(dn)+fabs(da)+1e10) > 0.1;
-  printf("Da=%g == Dn=%g %s\n",da,dn,mess[warn]);
-
-
-
-
-}
-//______________________________________________________________________________
 void Init(HitPars_t &hiterr)
 {
   hiterr[0] = 0.0;
@@ -1035,8 +674,6 @@ void Init(HitPars_t &hiterr)
     hiterr.Min(iDet,1,0) = pow(MinErr[iDet][1]*1.e-4,2);
   }
 }
-
-
 //______________________________________________________________________________
 //______________________________________________________________________________
 class FitState_t : public HitPars_t { 
@@ -1560,13 +1197,11 @@ HitPars_t::HitPars_t (const HitPars_t &fr)
 HitPars_t &HitPars_t::operator=(const HitPars_t &fr)
 {
   memcpy(this,&fr,sizeof(HitPars_t));
-  int inc = mDat-fr.mDat;
-  int n   = sizeof(mPars)/sizeof(mPars[0][0])*2;
-  double **p = mPars[0];
-  for (int i=0;i<n;i++) {
-    if (!p[i]) continue;
-    p[i] += inc;
-  }
+  int inc = (char*)mDat-(char*)fr.mDat;
+  int n   = sizeof(mPars)/sizeof(mPars[0][0]);
+  char **p = (char**)mPars[0];
+  for (int i=0;i<n;i++) {if (p[i]) p[i] += inc;}
+  assert(mDat <=mPars[0][0]);
   return *this;
 }
 //_____________________________________________________________________________
@@ -1599,7 +1234,9 @@ HitPars_t operator+(const HitPars_t &a,const TVectorD &add)
 int HitPars_t::IPar(int iDet,int iYZ, int *npars) const
 { 
   if (npars) *npars=Len(iDet,iYZ);
-  return mPars[iDet][iYZ]-mDat;
+  int ans = mPars[iDet][iYZ]-mDat;
+  assert(ans>=0 && ans < 100);
+  return ans;
 }
 //_____________________________________________________________________________
 int HitPars_t::Lim(int i) const
@@ -1639,6 +1276,7 @@ void HitPars_t::Set(int iDet,int iYZ,int nini,const double *ini)
   mNPars+=nini;
   for (int i=0;i<nini;i++) {
     int ipar = IPar(iDet,iYZ);
+    assert(ipar>=0);
     mDat[ipar+i]=ini[i];
     if (mDat[ipar+i]< mMin[ipar+i]) mDat[ipar+i]= mMin[ipar+i];
     if (mDat[ipar+i]> mMax[ipar+i]) mDat[ipar+i]= mMax[ipar+i];
@@ -1703,7 +1341,7 @@ double HitPars_t::Deriv(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij) co
   cos2Psi=1.;
   TPoliFitter pfy(2),pfz(1); //?????
   TCircleFitter cf;
-//#define  NEWPOLIFIT
+#define  NEWPOLIFIT
 #ifndef  NEWPOLIFIT
   double len = 0,oldCurv,oldXyz[3],nowXyz[3];
   assert(pt[0].xyz[0]<pt[npt-1].xyz[0]);
@@ -1740,6 +1378,7 @@ double HitPars_t::Deriv(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij) co
     for (int jk=0;jk<2;jk++) { 
       int ip = 1 +ipt + jk*npt;
       ipar = IPar(iDet,jk,&n);
+      assert(ipar>=0);
       for (int in=0;in<n;in++) {toPars[ipar+in][ip]+=ha.A[jk][in];}
     } 
     memcpy(oldXyz,nowXyz,sizeof(oldXyz));
@@ -1761,25 +1400,17 @@ double HitPars_t::Deriv(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij) co
     double emx[3]={1./(wy[ipt]*fake),0,1./(wy[ipt]*fake)};
     cf.Add(S[ipt],Y[ipt],emx);
     int n,ipar,iDet = ha.iDet;
+static int myCall=0; myCall++;
     for (int jk=0;jk<2;jk++) { 
       int ip = 1 +ipt + jk*npt;
       ipar = IPar(iDet,jk,&n);
+      assert(ipar>=0);
       for (int in=0;in<n;in++) {toPars[ipar+in][ip]+=ha.A[jk][in];}
     } 
   }
 #endif //0
   ply.Init();
   plz.Init();
-#if 0
-  double cfyXi2 = cf.Fit()*cf.Ndf();
-  double pfyXi2 = pfy.Fit()*pfy.Ndf();
-  double pfzXi2 = pfz.Fit()*pfz.Ndf();
-  double plyXi2 = ply.Xi2();
-  double plzXi2 = plz.Xi2();
-static int printIt=0;
-if (printIt)
-printf("Xi2Y = %g %g %g \tXi2Z =  %g %g\n",plyXi2,pfyXi2,cfyXi2,plzXi2,pfzXi2);
-#endif
 
 static int testIt=1;
   if (testIt) {testIt--; ply.TestIt(); plz.TestIt(); }
@@ -1989,6 +1620,7 @@ void HitPars_t::Print(const HitPars_t *init) const
     for (int iYZ=0;iYZ<2;iYZ++) 	{
       int ln = Len(iDet,iYZ);
       int ipar0 = IPar(iDet,iYZ);
+      assert(ipar0>=0);
       for (int ip=0;ip<ln;ip++) {
         bnd = (Lim(ipar0+ip))? "*":" ";
         double p = mPars[iDet][iYZ][ip];
@@ -2067,49 +1699,6 @@ void HitPars_t::Limit()
     if (mDat[i]>mMax[i]) mDat[i]=mMax[i];
   }
 }
-#if 0
-//______________________________________________________________________________
-void HitPars_t::Prep(int npt, const MyPull *pt,TVectorD &Y,TVectorD &Z
-                      ,TVectorD &S,TVectorD &cos2Psi)
-{
-static int myDebug=0;
-
-  Y.ResizeTo(npt);
-  Z.ResizeTo(npt);
-  S.ResizeTo(npt);
-  if (myDebug) Show(npt,pt);
-  int npt21 = npt*2+1;
-  cos2Psi.ResizeTo(npt21);cos2Psi = 1.;
-  TVector2 fst(pt[0].x_g(),pt[0].y_g());
-  TVector2 tst(fst.Rotate(-pt[0].ang));
-  assert(fabs(tst.X()-pt[0].xyz[0])+fabs(tst.Y()-pt[0].xyz[1])<1);
-  int l = npt-1;
-  TVector2 lst(pt[l].x_g(),pt[l].y_g());
-  tst = lst.Rotate(-pt[l].ang);
-  assert(fabs(tst.X()-pt[l].xyz[0])+fabs(tst.Y()-pt[l].xyz[1])<1);
-  double sA = fst.Mod();
-  double sB = lst.Mod();
-  double Z0 = pt[0].z_g();
-  double dZdS = (pt[l].z_g()-Z0)/(sB-sA);
-  TVector2 dir((lst-fst).Unit());
-
-  for (int ipt=0;ipt<npt;ipt++) {
-    TVector2 fstL(fst.Rotate(-pt[ipt].ang));
-    TVector2 dirL(dir.Rotate(-pt[ipt].ang));
-    TVector2 meas(pt[ipt].xyz[0],pt[ipt].xyz[1]);
-    meas -=fstL;
-    double s = (meas)*dirL;
-    TVector2 ort(-dirL.Y(),dirL.X());
-    double dy = meas*ort;
-    double dz = pt[ipt].xyz[2]-(Z0 + dZdS*(s));
-    S[ipt]=s;
-    Y[ipt]=dy;
-    Z[ipt]=dz;
-    cos2Psi[ipt+1]=dirL.X()*dirL.X();
-  }
-
-}
-#endif //0
 #if 1
 //______________________________________________________________________________
 void HitPars_t::Prep(int npt, const MyPull *pt,TVectorD &Y,TVectorD &Z
@@ -2307,9 +1896,12 @@ void myTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: fiterr.C,v 1.6 2008/01/20 00:43:02 perev Exp $
+* $Id: fiterr.C,v 1.7 2010/01/27 21:38:06 perev Exp $
 *
 * $Log: fiterr.C,v $
+* Revision 1.7  2010/01/27 21:38:06  perev
+* bugFix + remove not used code
+*
 * Revision 1.6  2008/01/20 00:43:02  perev
 * Mess with timestamps fixed
 *
