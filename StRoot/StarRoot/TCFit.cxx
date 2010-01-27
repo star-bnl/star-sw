@@ -1,4 +1,4 @@
-// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.4 2008/10/29 19:19:41 perev Exp $
+// @(#)root/base:$Name:  $:$Id: TCFit.cxx,v 1.5 2010/01/27 21:36:40 perev Exp $
 // Author: Victor Perev   05/08/03
 
 
@@ -416,7 +416,7 @@ TCFitData::~TCFitData()
 int TCFitData::AddPar(int tyPar, int idPar,double *par,int nPars,const char *name,double tiny)
 {
   assert(0<=tyPar && tyPar<=2);
-  assert(0<=idPar && tyPar<kMaxId);
+  assert(0<=idPar && idPar+nPars<kMaxId);
   if (fFail  ) return fFail;
   if (!name) name="";
   if (tiny<=0) tiny = 1e-3;
