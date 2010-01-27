@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.29 2009/02/02 19:30:50 fisyak Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.30 2010/01/27 21:28:10 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.30  2010/01/27 21:28:10  perev
+ * CleanUp
+ *
  * Revision 1.29  2009/02/02 19:30:50  fisyak
  * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
  *
@@ -140,6 +143,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.30  2010/01/27 21:28:10  perev
+ * CleanUp
+ *
  * Revision 1.29  2009/02/02 19:30:50  fisyak
  * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
  *
@@ -268,7 +274,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.29 2009/02/02 19:30:50 fisyak Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.30 2010/01/27 21:28:10 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -920,10 +926,9 @@ StMiniMcMaker::trackLoop()
     // 02/25/02
     // accept all mc primary tracks within some eta window
     if(acceptRaw(mcTrack)){
-      StTinyMcTrack* tinyMcTrack    = new StTinyMcTrack;
-      fillMcTrackInfo(tinyMcTrack,mcTrack,nAssocGl,nAssocPr);
-      mMiniMcEvent->addMcTrack(tinyMcTrack);
-      delete tinyMcTrack;
+      StTinyMcTrack tinyMcTrack;
+      fillMcTrackInfo(&tinyMcTrack,mcTrack,nAssocGl,nAssocPr);
+      mMiniMcEvent->addMcTrack(&tinyMcTrack);
     }
   } // mc track iter
 
@@ -2497,6 +2502,9 @@ size_t StMiniMcMaker::getIndex(size_t mult) {
 }
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.30  2010/01/27 21:28:10  perev
+// CleanUp
+//
 // Revision 1.29  2009/02/02 19:30:50  fisyak
 // Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
 //
