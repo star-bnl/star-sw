@@ -8,10 +8,9 @@
  *            Jerome Lauret (Brookhaven National Laboratory)
  *            
  *
- * This file is part of the UCM project funded under an SBIR
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StDbFieldI.cxx,v 1.1 2010/01/26 23:43:45 fine Exp $
+ * @(#)cpp/api:$Id: StDbFieldI.cxx,v 1.2 2010/01/27 20:16:57 fine Exp $
  *
  *
  *
@@ -35,9 +34,15 @@
 #include "StDbFieldI.h"
 using namespace std;
 
+struct Init_StDbFieldI {
+   Init_StDbFieldI() { StDbFieldI::MakeTypeMap();} 
+};
+namespace {
+  Init_StDbFieldI a;
+}
 //________________________________________________________________________________
-StDbFieldI::StDbFieldI(const char* name, StDbFieldI::DataType type, int length)
-  : fType(INVALID), 
+StDbFieldI::StDbFieldI(const char* name, StDbFieldI::EDataType type, int length)
+  : fType(kINVALID), 
     fEncodedValue(""),
     fNull(true),
     fIgnore(true) {
@@ -48,7 +53,7 @@ StDbFieldI::StDbFieldI(const char* name, StDbFieldI::DataType type, int length)
 			  StUCMException::ERROR);
   }
 
-  if (type == STRING)
+  if (type == kSTRING)
   {
     if (length < 0)
     {
@@ -76,8 +81,8 @@ StDbFieldI::StDbFieldI(const char* name, StDbFieldI::DataType type, int length)
 
 //________________________________________________________________________________
 StDbFieldI::StDbFieldI(const char* name, const char*value,
-		 StDbFieldI::DataType type, int length)
-  : fType(INVALID),
+		 StDbFieldI::EDataType type, int length)
+  : fType(kINVALID),
     fIgnore(true) {
   if (string(name).empty()) {
     throw StDataException("Attempted to define field with empty name.",
@@ -85,7 +90,7 @@ StDbFieldI::StDbFieldI(const char* name, const char*value,
 			  StUCMException::ERROR);
   }
 
-  if (type == STRING)
+  if (type == kSTRING)
   {
     if (length <= 0)
     {
@@ -162,7 +167,7 @@ void
 StDbFieldI::setValueFromString(const char* strValue)
 {
   std::string value = strValue;
-  if (fType == STRING) {
+  if (fType == kSTRING) {
     if (value.length() > fMaxLength) {
       value = string(strValue).substr(0,fMaxLength);
     }
@@ -178,7 +183,7 @@ StDbFieldI::setValueFromString(const char* strValue)
 
 
 //________________________________________________________________________________
-StDbFieldI::DataType
+StDbFieldI::EDataType
 StDbFieldI::getType() const
 {
   return fType;
@@ -191,10 +196,6 @@ StDbFieldI::getValueAsString() const
 {
   return fEncodedValue.c_str();
 }
-
-
-// template<class T> T StDbFieldI::getValue() in HEADER
-
 
 //________________________________________________________________________________
 bool
@@ -221,39 +222,7 @@ StDbFieldI::setNull(bool null)
 const char *
 StDbFieldI::getTypeAsString() const
 {
-  static std::string typeStr;
-  
-  switch ( getType() )
-  {
-    case BOOL:
-      typeStr = "BOOL";
-      break;
-    case INT:
-      typeStr = "INT";
-      break;
-    case UINT:
-      typeStr = "UINT";
-      break;
-    case LONG:
-      typeStr = "LONG";
-      break;
-    case ULONG:
-      typeStr = "ULONG";
-      break;
-    case DOUBLE:
-      typeStr = "DOUBLE";
-      break;
-    case CHAR:
-      typeStr = "CHAR";
-      break;
-    case STRING:
-      typeStr = "STRING";
-      break;
-    default:
-      typeStr = "INVALID";
-  }
-  
-  return typeStr.c_str();
+  return fTypeMapName[getType()].c_str();
 }
 
 
@@ -274,4 +243,35 @@ bool StDbFieldI::isIgnore() const {
 //________________________________________________________________________________
 void StDbFieldI::setIgnore(bool ignore) {
   fIgnore = ignore;
+}
+//________________________________________________________________________________
+void StDbFieldI::MakeTypeMap() {
+#ifdef TYPEtypeNAME
+#error   TYPEtypeNAME  redefinitions
+#else
+#define TYPEtypeNAME(TYPENAME,datatype)                                                              \
+      case k##TYPENAME: {                                                                \
+      fTypeMap.insert(pair<EDataType,std::string>(k##TYPENAME,typeid(datatype).name())); \
+      fTypeMapName.insert(pair<EDataType,std::string>(k##TYPENAME,#TYPENAME));        \
+      fTypeMapInv.insert(pair<std::string,EDataType>(typeid(datatype).name(),k##TYPENAME));         \
+      break;}
+#endif
+  for (int i=0;i<kEND;++i) {
+    switch (i) {
+       TYPEtypeNAME(BOOL,bool)
+       TYPEtypeNAME(INT,int)
+       TYPEtypeNAME(UINT,unsigned int)
+       TYPEtypeNAME(LONG,long)
+       TYPEtypeNAME(ULONG,unsigned long)
+       TYPEtypeNAME(DOUBLE,double)
+       TYPEtypeNAME(CHAR,char)
+       TYPEtypeNAME(STRING,string)
+       default: {
+         fTypeMap.insert(pair<EDataType,std::string>(kINVALID,"invalid"));
+         fTypeMapName.insert(pair<EDataType,std::string>(kINVALID,"unkown"));
+         fTypeMapInv.insert(pair<std::string,EDataType>("unkown",kINVALID));
+         break;
+      }
+    }
+  }
 }

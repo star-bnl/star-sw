@@ -11,7 +11,7 @@
  * This file is part of the UCM project funded under an SBIR
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StDbFieldI.h,v 1.1 2010/01/26 23:43:45 fine Exp $
+ * @(#)cpp/api:$Id: StDbFieldI.h,v 1.2 2010/01/27 20:16:57 fine Exp $
  *
  *
  *
@@ -44,6 +44,7 @@
  * Abstraction for the field in memory.
  */
 class StDbFieldI {
+ friend class Init_StDbFieldI;
  public:
   /**
    * List of types supported by UCM.  The INVALID type is provided to set
@@ -52,16 +53,17 @@ class StDbFieldI {
    * TODO: Since values are stored as a string right now, we may need
    * to add BLOB support in some other way if/when required.
    */
-  enum DataType {
-    INVALID=0,
-    BOOL,
-    INT,
-    UINT,
-    LONG,
-    ULONG,
-    DOUBLE,
-    CHAR,
-    STRING
+  enum EDataType {
+    kINVALID=0,
+    kBOOL,
+    kINT,
+    kUINT,
+    kLONG,
+    kULONG,
+    kDOUBLE,
+    kCHAR,
+    kSTRING,
+    kEND
   };
   
  public:
@@ -73,7 +75,7 @@ class StDbFieldI {
    * @param type The field type, as a TxEType.
    * @param length The field length.  Not optional for STRING type.
    */
-  StDbFieldI(const char* name, StDbFieldI::DataType type, int length=0);
+  StDbFieldI(const char* name, StDbFieldI::EDataType type, int length=0);
 
     /**
    * Constructor: The constructor takes an argument of type T, and
@@ -104,7 +106,7 @@ class StDbFieldI {
    * @param length The length of the field.  Not optional for STRING type.
    */
   StDbFieldI(const char* name, const char* value,
-	  StDbFieldI::DataType type, int length=0);
+	  StDbFieldI::EDataType type, int length=0);
 
   /**
    * Copy operators: Copy constructor and operator=.
@@ -150,7 +152,7 @@ class StDbFieldI {
    * Returns the type information of the field.  Useful for type
    * safety and returning a true value.
    */
-  DataType getType() const;
+  EDataType getType() const;
 
   /**
    * Returns the max length of the field for those of type STRING.
@@ -225,14 +227,16 @@ class StDbFieldI {
   template<class T> void typeMatches() const;
 
  private:
+  static void MakeTypeMap();
   std::string fName;
-  DataType fType;
+  EDataType fType;
   std::string fEncodedValue;
   size_t fMaxLength;
   bool fNull;
   bool fIgnore;
-  static std::map<DataType,std::type_info> fTypeMap;
-  static std::map<std::type_info,DataType> fTypeMapInv;
+  static std::map<EDataType,std::string> fTypeMap;
+  static std::map<EDataType,std::string> fTypeMapName;
+  static std::map<std::string,EDataType> fTypeMapInv;
 };
 
 
@@ -244,7 +248,7 @@ class StDbFieldI {
 //---------------
 
 template<class T> StDbFieldI::StDbFieldI(const char* name, T value, int length)
-  : fType(INVALID),
+  : fType(kINVALID),
     fNull(true),
     fEncodedValue(""),
     fIgnore(true),
@@ -255,7 +259,7 @@ template<class T> StDbFieldI::StDbFieldI(const char* name, T value, int length)
 			  StDataException::FIELD,
 			  StUCMException::ERROR);
   }
-   std::map<std::type_info,DataType>::const_iterator t =  fTypeMapInv.find(typeid(T));
+   std::map<std::string,EDataType>::const_iterator t =  fTypeMapInv.find(typeid(T).name());
    if (t != fTypeMapInv.end()) fType = (*t).second;
   
    if ( typeid(T) == typeid(std::string) )
@@ -270,14 +274,14 @@ template<class T> StDbFieldI::StDbFieldI(const char* name, T value, int length)
 			    StUCMException::ERROR);;
     }
     fMaxLength = length;
-    fType = STRING;
+    fType = kSTRING;
     fEncodedValue = value;
     return;
   }
   else
   {
     // Invalid type
-    fType = INVALID;
+    fType = kINVALID;
     throw StDataException( "Invalid type provided for field '" + std::string(name) + "'.",
 			   StDataException::FIELD,
 			   StUCMException::ERROR );
@@ -306,7 +310,7 @@ StDbFieldI::setValue(T value)
   encodingStream << value;
 
   // If we have a string type..
-  if ( fType == STRING ) {
+  if ( fType == kSTRING ) {
     if ( encodingStream.str().length() > fMaxLength ) {
       std::ostringstream lenStr;
       lenStr << fMaxLength;
@@ -344,8 +348,8 @@ StDbFieldI::typeMatches() const
 {
    // Massive check: If the provided type T does not match the stored
    // data type, throw an exception.
-   std::map<std::type_info,DataType>::const_iterator t =  fTypeMap.find(getType());
-   if (t == std::map<std::type_info,DataType>::end()) {
+   std::map<std::string,EDataType>::const_iterator t =  fTypeMap.find(getType());
+   if (t == std::map<std::string,EDataType>::end()) {
    throw StDataException( "Type mismatch in field '" + fName + "': Actual type " 
            + getTypeAsString() + std::string(", requested type ") 
            + typeid(T).name(),
