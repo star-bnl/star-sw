@@ -61,7 +61,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     event(0), Calibmode(kFALSE),
     PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE), doNtuple(kFALSE),
     doReset(kTRUE), doGaps(kFALSE), inGapRow(0),
-    m_ExB(0), tpcDbMaker(0),
+    m_ExB(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
     dcahist(0), dcahistN(0), dcahistP(0), dcahistE(0), dcahistW(0),
@@ -154,8 +154,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   if (!m_ExB) {
     TDataSet *RunLog = GetDataBase("RunLog");
     if (!RunLog) gMessMgr->Warning("StSpaceChargeEbyEMaker: No RunLog found.");
-    m_ExB = new StMagUtilities(
-      ((StTpcDbMaker*) tpcDbMaker)->tpcDbInterface(),RunLog,(kSpaceChargeR2 | kGridLeak));
+    m_ExB = new StMagUtilities(gStTpcDb,RunLog,(kSpaceChargeR2 | kGridLeak));
   }
   lastsc = m_ExB->CurrentSpaceChargeR2();
 
@@ -969,8 +968,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.25 2010/01/27 14:42:33 fisyak Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.26 2010/01/27 15:11:00 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.26  2010/01/27 15:11:00  fisyak
+// eliminate access to StTpcDbMaker, use directly gStTpcDb
+//
 // Revision 1.25  2010/01/27 14:42:33  fisyak
 // Use  StMagUtilities::Instance instead of asking tpcHitMoverMaker
 //
