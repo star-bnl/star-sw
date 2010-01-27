@@ -13,7 +13,6 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcDbMaker.h"
 #include "St_db_Maker/St_db_Maker.h"
-#include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 #include "tables/St_spaceChargeCor_Table.h"
 #include "StEvent/StDcaGeometry.h"
 #include "TUnixTime.h"
@@ -62,7 +61,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     event(0), Calibmode(kFALSE),
     PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE), doNtuple(kFALSE),
     doReset(kTRUE), doGaps(kFALSE), inGapRow(0),
-    m_ExB(0), tpcDbMaker(0), tpcHitMoverMaker(0),
+    m_ExB(0), tpcDbMaker(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
     dcahist(0), dcahistN(0), dcahistP(0), dcahistE(0), dcahistW(0),
@@ -142,23 +141,6 @@ Int_t StSpaceChargeEbyEMaker::Init() {
   did_auto=kTRUE;
   InitQAHists();
   if (QAmode) gMessMgr->Info("StSpaceChargeEbyEMaker: Initializing");
-    
-  // Find StTpcHitMoverMaker
-  tpcHitMoverMaker = GetMaker("tpc_hit_mover");
-  
-  // Find StTpcDbMaker if no StTpcHitMoverMaker
-  if (!tpcHitMoverMaker) {
-    StMakerIter iter(GetParentChain());
-    StMaker* mkr;
-    while ((mkr = iter.NextMaker())) {
-      if (mkr->IsA() == StTpcDbMaker::Class()) {
-        tpcDbMaker = mkr;
-        break;
-      }
-    }
-    if (!tpcDbMaker)
-      gMessMgr->Warning("StSpaceChargeEbyEMaker: No StTpcDbMaker found.");
-  }
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -168,9 +150,8 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   if (PrePassmode && (tabname.Length() == 0)) SetTableName();
   
   // Get instance of StMagUtilities
-  if (tpcHitMoverMaker) {
-    m_ExB = ((StTpcHitMover*) tpcHitMoverMaker)->getExB();
-  } else if (!m_ExB) {
+  m_ExB = StMagUtilities::Instance();
+  if (!m_ExB) {
     TDataSet *RunLog = GetDataBase("RunLog");
     if (!RunLog) gMessMgr->Warning("StSpaceChargeEbyEMaker: No RunLog found.");
     m_ExB = new StMagUtilities(
@@ -988,8 +969,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.24 2009/11/16 22:02:19 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.25 2010/01/27 14:42:33 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.25  2010/01/27 14:42:33  fisyak
+// Use  StMagUtilities::Instance instead of asking tpcHitMoverMaker
+//
 // Revision 1.24  2009/11/16 22:02:19  genevb
 // Loosen nDaughters cut, add BEMCmatch cut, PCT hits cut, enable padrow 13 for Run 9+
 //
