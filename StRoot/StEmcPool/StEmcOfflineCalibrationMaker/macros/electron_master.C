@@ -23,12 +23,12 @@ double fit_function2(double *x, double *par);
 double background_only_fit(double *x, double *par);
 int lookup_crate(float,float);
 
-void electron_master(const char* file_list="electrons.list",const char* output="electronmaster.root", const char* dbDate="1999-01-01 00:09:00", const char* geantfile="geant_func.root", const char* gfname="mip.gains.final", const char* ngname="electron.gains"){
+void electron_master(const char* file_list="electrons.list",const char* output="electronmaster.root", const char* dbDate="1999-01-01 00:11:00", const char* geantfile="geant_func.root", const char* gfname="mip.gains.final", const char* ngname="electron.gains", const char* rgname="matrel.gains"){
   //**********************************************//
   //Load Libraries                                //
   //**********************************************//
   gROOT->Macro("LoadLogger.C");
-  gROOT->Macro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  gROOT->Macro("loadMuDst.C");
   gSystem->Load("StTpcDb");
   gSystem->Load("StDaqLib");
   gSystem->Load("StDetectorDbMaker");
@@ -80,6 +80,21 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   int status[ntowers];
   float peaks[ntowers];
   float peakerr[ntowers];
+  float gainerr[ntowers];
+
+  
+  ifstream rgfile(rgname);
+  while(1){
+    int id;
+    float rg,rgerr;
+    rgfile >> id >> rg >> rgerr;
+    if(!rgfile.good())break;
+    gains[id-1] = 0;
+    if(rg > 0)gains[id-1] = rg;
+    gainerr[id-1] = rgerr;
+    status[id-1] = 0;
+    if(rg != 0 && rgerr < 1)status[id-1] = 1;
+  }
 
   ifstream gainfile(gfname);
   while(1){
@@ -87,16 +102,18 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     float peak,err,gain,eta,theta;
     gainfile >> id >> peak >> err >> stat;
     if(!gainfile.good())break;
-    eta = helper->getEta(id);
-    theta = helper->getTheta(id);
-    gain = 0.264*(1+0.056*eta*eta)/(sin(theta)*peak);
-    peaks[id-1] = peak;
-    gains[id-1] = gain;
-    status[id-1] = stat;
-    peakerr[id-1] = err;
+    //eta = helper->getEta(id);
+    //theta = helper->getTheta(id);
+    //gain = 0.264*(1+0.056*eta*eta)/(sin(theta)*peak);
+    //peaks[id-1] = peak;
+    //gains[id-1] = gain;
+    if(status[id-1] != 1 || stat != 1) status[id-1] = stat;
+    //peakerr[id-1] = err;
     //cout<<id<<" "<<gain;
   }
 
+
+  
   TFile* geant_file = new TFile(geantfile,"READ");
   TF1* geant_fit = (TF1*)geant_file->Get("geant_fit");
 
@@ -108,6 +125,9 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   TF1 *fit[ntowers];
   TH1 *prs_histo[ntowers];
   TH1 *ring_histo[nrings];
+  TH1 *ring2_histo[nrings/2];
+  TF1 *ring2fit[nrings/2];
+
   TF1 *ringfit[nrings];
   TH2F* ring_pve[nrings];
   TH2F* jan_pve[6];
@@ -117,6 +137,14 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   TH1F* ringprec2 = new TH1F("ringprec2","",40,-1.0,1.0);
   ringprec->SetYTitle("E/p");
   ringprec->SetXTitle("#eta");
+  ringprec2->SetYTitle("E/p");
+  ringprec2->SetXTitle("#eta");
+  TH1F* ring2prec = new TH1F("ring2prec","",nrings/2,-1.0,1.0);
+  TH1F* ring2prec2 = new TH1F("ring2prec2","",nrings/2,-1.0,1.0);
+  ring2prec->SetYTitle("E/p");
+  ring2prec->SetXTitle("#eta");
+  ring2prec2->SetYTitle("E/p");
+  ring2prec2->SetXTitle("#eta");
   double ew[nrings];
 
   TH1F* crateprec = new TH1F("crateprec","",30,0.5,30.5);
@@ -131,7 +159,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   energyleak->SetYTitle("leaked energy / total energy");
   findbg->SetXTitle("#DeltaR");
   findbg->SetYTitle("Total energy / track momentum");
-  TH2F *tevsp = new TH2F("tevsp","",20,0.0,15.0,20,0.0,15.0);
+  TH2F *tevsp = new TH2F("tevsp","",50,0.0,20.0,50,0.0,30.0);
   TH1F *pmean = new TH1F("pmean","",20,0.0,15.0);
   tevsp->SetXTitle("track momentum (GeV)");
   tevsp->SetYTitle("Total Energy (GeV)");
@@ -142,9 +170,15 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   TH2F *sistertracks = new TH2F("sistertracks","",20,0.0,8.0,20,0.0,8.0);
   sistertracks->SetXTitle("Track momentum (GeV)");
   sistertracks->SetYTitle("Neighbor momentum (GeV)");
-  TH2F* dEdxvsp = new TH2F("dEdxvsp","",40,0.15,0.85,40,-5.5,-5.3);
+  TH2F* dEdxvsp = new TH2F("dEdxvsp","",100,0.15,1.3,100,-5.7,-5.);
   dEdxvsp->SetXTitle("Log(p)");
   dEdxvsp->SetYTitle("Log(dE/dx)");
+  TH2F* dEdxvsp_east = new TH2F("dEdxvsp_east","",100,0.15,1.3,100,-5.7,-5.0);
+  dEdxvsp_east->SetXTitle("Log(p)");
+  dEdxvsp_east->SetYTitle("Log(dE/dx)");
+  TH2F* dEdxvsp_west = new TH2F("dEdxvsp_west","",100,0.15,1.3,100,-5.7,-5.0);
+  dEdxvsp_west->SetXTitle("Log(p)");
+  dEdxvsp_west->SetYTitle("Log(dE/dx)");
   TH2F* energyleak2 = new TH2F("energyleak2","",20,0.0,0.03,20,0.0,1.0);
   TH1F* energymean2 = new TH1F("energymean2","",20,0.0,0.03);
   TH1F* towermult = new TH1F("towermult","",9,0.0,9.0);
@@ -172,6 +206,41 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   TH1F* east_histo = new TH1F("east_histo","Electron E/p in East",40,0.0,2.0);
   TH1F* west_histo = new TH1F("west_histo","Electron E/p in West",40,0.0,2.0);
   TH1F* all_histo = new TH1F("all_histo","Electron E/p",40,0.0,2.0);
+  TH2F* pvsep = new TH2F("pvsep","Electron p vs E/p",120,0,3.0,20,0,20.0);
+  pvsep->SetYTitle("p (Gev)");
+  pvsep->SetXTitle("E/p");
+  TH2F* pvsep0 = new TH2F("pvsep0","Electron p vs E/p",120,0,3.0,20,0,20.0);
+  pvsep0->SetYTitle("p (Gev)");
+  pvsep0->SetXTitle("E/p");
+  TH2F* evsep = new TH2F("evsep","Electron E vs E/p",120,0,3.0,20,0,20.0);
+  evsep->SetYTitle("E (GeV)");
+  evsep->SetXTitle("E/p");
+
+  TH1F* bsmde = new TH1F("bsmde","BSMDE ADC TOT",1500,0,1500);
+  TH1F* bsmdp = new TH1F("bsmdp","BSMDP ADC TOT",1500,0,1500);
+
+  TH1F* bsmde_central = new TH1F("bsmde_central","BSMDE ADC TOT",100,0,1500);
+  TH1F* bsmde_mid = new TH1F("bsmde_mid","BSMDE ADC TOT",100,0,1500);
+  TH1F* bsmde_outer = new TH1F("bsmde_outer","BSMDE ADC TOT",100,0,1500);
+
+  TH2F* bsmdep = new TH2F("bsmdep","BSMDE v BSMDP",100,0,1500,100,0,1500);
+
+  TH2F* bsmdevp = new TH2F("bsmdevp","BSMDE v p",100,1.0,15.0,100,0,1500);
+  TH2F* bsmdpvp = new TH2F("bsmdpvp","BSMDP v p",100,1.0,15.0,100,0,1500);
+  TH2F* bsmdevep = new TH2F("bsmdevep","BSMDE v E/p",100,0.0,2.0,100,0,1500);
+  TH2F* bsmdpvep = new TH2F("bsmdpvep","BSMDP v E/p",100,0.0,2.0,100,0,1500);
+
+  TH2F* bsmdeve = new TH2F("bsmdeve","BSMDE v E",100,1.0,30.0,100,0,1500);
+  TH2F* bsmdpve = new TH2F("bsmdpve","BSMDP v E",100,1.0,30.0,100,0,1500);
+
+  TH1F* httrig = new TH1F("httrig","HT Trigger",5,-0.5,4.5);
+
+  TH1F* pplus = new TH1F("pplus","e+ p",100,0,20);
+  TH1F* pminus = new TH1F("pminus","e- p",100,0,20);
+
+  TH1F* posep = new TH1F("posep","e+ E/p",60,0,3.0);
+  TH1F* negep = new TH1F("negep","e- E/p",60,0,3.0);
+
 
   double mipgains[40] = {0.0153384,0.0199435,0.0213435,0.0195892,0.0200876,0.0182992,0.0178393,0.0174514,0.0174794,0.0164953,0.0158151,0.0166528,0.0162374,0.0146685,0.0149648,0.0153254,0.0146326,0.0151221,0.0145512,0.0148793,0.0150701,0.0145633,0.0150305,0.0154839,0.0142929,0.0147277,0.0150759,0.0158363,0.0156365,0.0160211,0.0164128,0.0172054,0.017725,0.0172588,0.0177851,0.0187099,0.0200016,0.0200538,0.0169604,0.014336};
 
@@ -193,8 +262,15 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     char title[100];
     sprintf(name,"crate_%i",i+1);
     sprintf(title,"E/p for Crate %i",i+1);
-    crate_histo[i] = new TH1F(name,title,50,0.,3.0);
+    crate_histo[i] = new TH1F(name,title,60,0.,3.0);
     crate_histo[i]->SetXTitle("E/p");
+  }
+
+  for(int i = 0; i < nrings/2; i++){
+    char name[100];
+    sprintf(name,"ring2_histo_%i",i);
+    ring2_histo[i] = new TH1F(name,"",60,0.,3.0);
+    ring2_histo[i]->SetXTitle("E/p");
   }
 
   char name2[100];
@@ -203,7 +279,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
       sprintf(name2,"ring_histo_%i",i);
       //ring_histo[i] = new TH1D(name2,"",30,0.,140.0);
       //ring_histo[i]->SetXTitle("ADC / GeV Sin(#theta)");
-      ring_histo[i] = new TH1D(name2,"",50,0.,3.0);
+      ring_histo[i] = new TH1D(name2,"",60,0.,3.0);
       ring_histo[i]->SetXTitle("E/p");
       char namerpve[100];
       sprintf(namerpve,"ring_pve_%i",i);
@@ -238,149 +314,195 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 
   int nentries = tree->GetEntries();
   cout<<nentries<<endl;
+  int ngoodhit = 0;
+  int nplt10 = 0;
+  int nnosis = 0;
+  int nfinal = 0;
+  int nbsmdgood = 0;
+  int nnottrig = 0;
+  int nfidu = 0;
+  int nenterexit = 0;
   for(int j=0; j<nentries; j++){
     tree->GetEntry(j);
     track = &(cluster->centralTrack);
     TClonesArray *tracks = cluster->tracks;
     //if(1) cout<<"reading "<<j<<" of "<<nentries<<endl;
 
-    if((track->tower_adc[0] - track->tower_pedestal[0]) < 2.5 * track->tower_pedestal_rms[0])continue;
-    if(track->p < 1.5)continue;
-    //if(track->p > 6.0)continue;				
-    //change the fiducial cut to a square with diagonal = 0.06 in deta, dphi space
-    float squarefid = 0.02;//0.03/TMath::Sqrt(2.0);
-    //if(TMath::Abs(track->deta) > squarefid || TMath::Abs(track->dphi) > squarefid)continue;
+    httrig->Fill((float)track->htTrig);
 
-    //calculate geant scaled, pedestal subtracted adc
+    if(track->charge > 0)pplus->Fill(track->p);
+    if(track->charge < 0)pminus->Fill(track->p);
+
+    int bsmdeadctot = 0;
+    int bsmdpadctot = 0;
+    for(int i = 0; i < 11; i++){
+      if(track->smde_adc[i] > track->smde_pedestal[i])bsmdeadctot += track->smde_adc[i] - track->smde_pedestal[i];
+      if(track->smdp_adc[i] > track->smdp_pedestal[i])bsmdpadctot += track->smdp_adc[i] - track->smdp_pedestal[i];
+    }
+
     double dR = TMath::Sqrt(track->deta*track->deta + track->dphi*track->dphi);
-    //if(dR > 0.0125)continue;
-    //if(dR > 0.025)continue;
-    if(track->p > 15)continue;
-    //cout<<track->dEdx<<endl;
-    if(track->dEdx*1000000 > 4.5 || track->dEdx*1000000 < 3.5)continue;
-    if(!track->nonhtTrig)continue;
-    //if(track->nHits < 25)continue;
+
+
     double scaled_adc = (track->tower_adc[0] - track->tower_pedestal[0]) / track->p;
     double geant_scale = geant_fit->Eval(dR);
     scaled_adc *= geant_scale;
     //cout<<scaled_adc<<endl;
     int index = track->tower_id[0];
-    //cout<<index<<" "<<helper->getTheta(index)<<endl;
-    //optionally scale by sin theta to put all peaks nominally in the same place = 4066/60 = 67
-    //scaled_adc = scaled_adc/TMath::Sin(helper->getTheta(index));
-
-    //fill tower and prs histo
-    //if(index <= ntowers)electron_histo[index - 1]->Fill(scaled_adc);
-    //if(index <= ntowers && (track->preshower_adc[0] - track->preshower_pedestal[0]) > 1.5 * track->preshower_pedestal_rms[0])prs_histo[index - 1]->Fill(track->preshower_adc[0] - track->preshower_pedestal[0]);
 
     //figure out eta and etaindex
     eta = helper->getEta(index);
     if(TMath::Abs(eta) > 0.968) eta += 0.005 * TMath::Abs(eta)/eta;
     etaindex = ((TMath::Nint(eta * 1000.0) + 25)/50 + 19);
-    //cout<<eta<<" "<<index<<endl;
-    //if(eta > 0.224 && eta < 0.226)cout<<etaindex<<endl;
-    //get gain to calculate E/p
-    //1.15 corrects to proper full scale
-    //double tgain = bemctables->calib(1,track->tower_id[0])*1.15;
-    double tgain = gains[index-1];
-    if(status[index-1]==1)ring_histo[etaindex]->Fill(scaled_adc*gains[index-1]);
+
+    double tgain = bemctables->calib(1,track->tower_id[0])*gains[index-1];
+    //double tgain = gains[index-1];
+
+
+    if((track->tower_adc[0] - track->tower_pedestal[0]) < 2.5 * track->tower_pedestal_rms[0])continue;
+    ngoodhit++;
+    dEdxvsp->Fill(TMath::Log10(track->p),TMath::Log10(track->dEdx));
+    if(track->tower_id[0] <= 2400)dEdxvsp_west->Fill(TMath::Log10(track->p),TMath::Log10(track->dEdx));
+    if(track->tower_id[0] > 2400)dEdxvsp_east->Fill(TMath::Log10(track->p),TMath::Log10(track->dEdx));
+
+    if(track->tower_id[0] != track->tower_id_exit)continue;
+    nenterexit++;
+
+    pvsep0->Fill(scaled_adc*tgain,track->p);
+    if(track->p > 6)continue;	
+    nplt10++;		
+
+    //if(track->p < 1.5)continue;
+    //if(track->p < 3.0)continue;
+    if(track->htTrig == 2)continue;
+    nnottrig++;
+    //change the fiducial cut to a square with diagonal = 0.06 in deta, dphi space
+    float squarefid = 0.02;//0.03/TMath::Sqrt(2.0);
+    //if(TMath::Abs(track->deta) > squarefid || TMath::Abs(track->dphi) > squarefid)continue;
+
+    //calculate geant scaled, pedestal subtracted adc
+    //if(dR > 0.0125)continue;
+    if(dR > 0.025)continue;
+    nfidu++;
+    //if(track->p > 6.0)continue;				
+    //if(track->p > 15)continue;
+    //cout<<track->dEdx<<endl;
+
+
+    //if(track->dEdx*1000000 > 4.5 || track->dEdx*1000000 < 3.5)continue;
+
+    //cout<<track->htTrig<<endl;
+
+
+    if(track->dEdx < 3.4e-6)continue;
+    if((bsmdeadctot > -1 && bsmdeadctot < 50) && (bsmdpadctot < 50 && bsmdpadctot > -1))continue;
+    nbsmdgood++;
+    //if(bsmdeadctot < 500) continue;
+
+    //if(bsmdeadctot < 84.*track->p)continue;
+    //if(bsmdeadctot > 200.*track->p + 1500)continue;
+
+    //if(bsmdpadctot < 800)continue;
+
+    int numsis = tracks->GetEntries();
+    if(numsis > 0)continue;
+
+    float totalbtow = 0;
+    float maxEt = 0;
+    int maxId = -1;
+    for(int i = 0; i < 9; i++){
+      if(track->tower_adc[i] - track->tower_pedestal[i] < 0)continue;
+      float theta = helper->getTheta(track->tower_id[i]);
+      float nextEt = (track->tower_adc[i] - track->tower_pedestal[i]) * bemctables->calib(1,track->tower_id[i])*sin(theta);
+      totalbtow += nextEt;
+      if(nextEt > maxEt){
+	maxEt = nextEt;
+	maxId = i;
+      }
+    }
+    nnosis++;
+    if(maxId != 0) continue;
+
+
+    nfinal++;
+
+    //if(!track->nonhtTrig)continue;
+    //if(track->nHits < 25)continue;
+    //if(status[index-1]==1)ring_histo[etaindex]->Fill(scaled_adc*gains[index-1]);
+
+    //scaled_adc = totalbtow/track->p;
+    //tgain = 1.0;
+
+    ring_histo[etaindex]->Fill(scaled_adc*tgain);
+    if(etaindex == 0 || etaindex == 39){
+      //cout<<etaindex<<" "<<tgain<<" "<<track->p<<" "<<scaled_adc*tgain*track->p<<" "<<scaled_adc*tgain<<endl;
+    }
     //cout<<index<<" "<<gains[index-1]<<" "<<scaled_adc*track->p<<" "<<track->p<<" "<<status[index-1]<<endl;
-    ring_pve[etaindex]->Fill(scaled_adc*gains[index-1]*track->p,track->p);
+    ring_pve[etaindex]->Fill(scaled_adc*tgain*track->p,track->p);
+
+    dEdxvsp->Fill(TMath::Log10(track->p),TMath::Log10(track->dEdx));
 
     float abseta = TMath::Abs(eta);
     if(abseta > 0.95){
-      jan_pve[5]->Fill(scaled_adc*gains[index-1],track->p);
+      jan_pve[5]->Fill(scaled_adc*tgain,track->p);
     }else if(abseta > 0.9){
-      jan_pve[4]->Fill(scaled_adc*gains[index-1],track->p);
+      jan_pve[4]->Fill(scaled_adc*tgain,track->p);
     }else if(abseta > 0.6){
-      jan_pve[3]->Fill(scaled_adc*gains[index-1],track->p);
+      jan_pve[3]->Fill(scaled_adc*tgain,track->p);
     }else if(abseta > 0.3){
-      jan_pve[2]->Fill(scaled_adc*gains[index-1],track->p);
+      jan_pve[2]->Fill(scaled_adc*tgain,track->p);
     }else if(abseta > 0.05){
-      jan_pve[1]->Fill(scaled_adc*gains[index-1],track->p);
+      jan_pve[1]->Fill(scaled_adc*tgain,track->p);
     }else{
-      jan_pve[0]->Fill(scaled_adc*gains[index-1],track->p);
+      jan_pve[0]->Fill(scaled_adc*tgain,track->p);
     }
 
-    if(track->tower_id[0] <= 2400)west_histo->Fill(scaled_adc*tgain);
-    if(track->tower_id[0] > 2400)east_histo->Fill(scaled_adc*tgain);
     all_histo->Fill(scaled_adc*tgain);
+    pvsep->Fill(scaled_adc*tgain,track->p);
+    evsep->Fill(scaled_adc*tgain,track->p*scaled_adc*tgain);
+    tevsp->Fill(track->p,scaled_adc*tgain*track->p);
 
-    //calculate leaked adcs
-    double leaked_adc = 0;
-    for(int k = 1; k < 9; k++)
-      {
-	if((track->tower_adc[k] - track->tower_pedestal[k]) > 1.5 * track->tower_pedestal_rms[k]) leaked_adc +=(track->tower_adc[k] - track->tower_pedestal[k]);
-      }
+    if(track->charge > 0)posep->Fill(scaled_adc*tgain);
+    if(track->charge < 0)negep->Fill(scaled_adc*tgain);
 
-    float leaked = leaked_adc/(leaked_adc + track->tower_adc[0] - track->tower_pedestal[0]);
-    float leakedenergy = 0;
-    float nTowerneighbors = 0;
-    //calculate leaked energy, the towen < 5 removes trigger towers
-    for(int k = 1; k < 9; k++)
-      {
-	float sgain = gains[track->tower_id[k]-1];
-	float towen = (track->tower_adc[k] - track->tower_pedestal[k])*sgain;
-	if(track->tower_adc[k] > track->tower_pedestal[k])
-	  {
-	    if(towen < 5) leakedenergy += towen;
-	  }
-	if((track->tower_adc[k] - track->tower_pedestal[k]) > 2 * track->tower_pedestal_rms[k] && towen < 5)
-	  {
-	    nTowerneighbors++;
-	    multen->Fill(towen);
-	  }
-      }
+    //if(scaled_adc*tgain < 0.7 || scaled_adc*tgain > 5.0)continue;
+    bsmde->Fill(bsmdeadctot);
+    bsmdp->Fill(bsmdpadctot);
+    bsmdep->Fill(bsmdeadctot,bsmdpadctot);
 
-    //find tracks hitting surrounding towers
-    float sisterp = 0;
-    int numsis = tracks->GetEntries();
-    if(numsis > 0)
-      {
-	for(int h = 0; h<numsis;h++)
-	  {
-	    dumtrack = (StEmcOfflineCalibrationTrack*)tracks->At(h);
-	    if(dumtrack)sisterp += dumtrack->p;
-	  }
-	sistertracks->Fill(track->p,sisterp);
-      }
+    if(abseta > 0.6){
+      bsmde_outer->Fill(bsmdeadctot);
+    }else if(abseta > 0.3){
+      bsmde_mid->Fill(bsmdeadctot);
+    }else{
+      bsmde_central->Fill(bsmdeadctot);
+    }
 
-    if((track->tower_adc[0] - track->tower_pedestal[0]) > 1.5 * track->tower_pedestal_rms[0] && bemctables->calib(1,track->tower_id[0])> 0)
-      {
-	float leaked = leakedenergy/(leakedenergy + (track->tower_adc[0] - track->tower_pedestal[0])*bemctables->calib(1,track->tower_id[0]));
-	//float leaked1 = leakedenergy/track->p;
-	float leaked1 = (leakedenergy + (track->tower_adc[0] - track->tower_pedestal[0])*bemctables->calib(1,track->tower_id[0]))/track->p;
-	if(numsis == 0)
-	  {
-	    energyleak->Fill(dR,leaked);
-	    findbg->Fill(dR,leaked1);
-	    tevsp->Fill(track->p,(leakedenergy + (track->tower_adc[0] - track->tower_pedestal[0])*bemctables->calib(1,track->tower_id[0])));
-	    tevspcent->Fill(track->p,((track->tower_adc[0] - track->tower_pedestal[0])*bemctables->calib(1,track->tower_id[0])));
-	    towermult->Fill(nTowerneighbors);
-	    multvsp->Fill(track->p,nTowerneighbors);
-	    if(track->p >= 2 && track->p <= 3)
-	      {
-		tep3->Fill(dR,leaked1);
-	      }
-	    else if(track->p > 3 && track->p <= 5)
-	      {
-		tep5->Fill(dR,leaked1);
-	      }
-	    else if(track->p > 5 && track->p < 10)
-	      {
-		tep10->Fill(dR,leaked1);
-	      }
-	  }
-	else if(numsis!=0)
-	  {
-	    energyleak2->Fill(dR,leaked);
-	  }
-      }
-    dEdxvsp->Fill(TMath::Log10(track->p),TMath::Log10(track->dEdx));
+    bsmdevp->Fill(track->p,bsmdeadctot);
+    bsmdpvp->Fill(track->p,bsmdpadctot);
+    bsmdevep->Fill(scaled_adc*tgain,bsmdeadctot);
+    bsmdpvep->Fill(scaled_adc*tgain,bsmdpadctot);
 
+    bsmdeve->Fill(scaled_adc*tgain*track->p,bsmdeadctot);
+    bsmdpve->Fill(scaled_adc*tgain*track->p,bsmdpadctot);
+
+    if(dR > 0.015)continue;
+    if(track->tower_id[0] <= 2400){
+      west_histo->Fill(scaled_adc*tgain);
+    }
+    if(track->tower_id[0] > 2400){
+      east_histo->Fill(scaled_adc*tgain);
+    }
 
   }
   cout<<"processed electron tree"<<endl;
+  cout<<"ngoodhit: "<<ngoodhit<<endl;
+  cout<<"nenterexit: "<<nenterexit<<endl;
+  cout<<"n not trig: "<<nnottrig<<endl;
+  cout<<"n p < 10: "<<nplt10<<endl;
+  cout<<"n in fidu: "<<nfidu<<endl;
+  cout<<"nbsmdhit: "<<nbsmdgood<<endl;
+  cout<<"n no sis: "<<nnosis<<endl;
+  cout<<"n final: "<<nfinal<<endl;
 
   double ew[21];
   for(int h=0;h<21;h++){
@@ -463,10 +585,18 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     ringfit[i]->SetParNames("Constant","Mean","Sigma","Peak Ratio","Bg Mean","Bg Sigma");
     */		
     //TF1* ffff = new TF1("ffff","expo(0) + gaus(2)",0.4,1.7);
-    ringfit[i] = new TF1(name,"pol1(0) + gaus(2)",0.3,1.6);
+
+    ring_histo[i]->Sumw2();
+    //ring_histo[i]->Rebin(3);
+
+    ringfit[i] = new TF1(name,"pol1(0) + gaus(2)",0.3,1.7);
+    ringfit[i]->SetParLimits(0,0,10.0*ring_histo[i]->GetBinContent(1));
     ringfit[i]->SetParLimits(1,-10000,0);
-    ringfit[i]->SetParLimits(2,0,10000);
+    ringfit[i]->SetParLimits(2,0,10.0*ring_histo[i]->GetMaximum());
     ringfit[i]->SetParLimits(3,0,10);
+    ringfit[i]->SetParameter(0,ring_histo[i]->GetBinContent(1));
+    ringfit[i]->SetParameter(1,-ring_histo[i]->GetBinContent(1)/6.0);
+    ringfit[i]->SetParameter(2,ring_histo[i]->GetMaximum());
     ringfit[i]->SetParameter(3,0.95);
     ringfit[i]->SetParameter(4,0.15);
     ringfit[i]->SetParNames("constant1","Slope","constant2","Mean","Sigma");
@@ -483,8 +613,8 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     */
     ringfit[i]->SetLineColor(kBlue);
     ringfit[i]->SetLineWidth(0.6);
-		
-    ring_histo[i]->Fit(ringfit[i],"rq","",0.3,1.6);
+    
+    ring_histo[i]->Fit(ringfit[i],"rql","",0.3,1.7);
 		
     ringprec->SetBinContent(i+1,(ringfit[i]->GetParameter(3)));
     ringprec->SetBinError(i+1,ringfit[i]->GetParameter(4));
@@ -494,8 +624,41 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 
     float mean = ringfit[i]->GetParameter(3);
     float merr = ringfit[i]->GetParError(3);
-    cout<<"ring "<<i<<" "<<mean<<" "<<merr/mean<<endl;
+    cout<<"ring "<<i<<" "<<mean<<" "<<merr/mean<<" "<<ring_histo[i]->GetEntries()<<endl;
   }
+
+  for(int i = 0; i < nrings/2; i++){
+    ring2_histo[i]->Add(ring_histo[2*i]);
+    ring2_histo[i]->Add(ring_histo[2*i+1]);
+    sprintf(name,"ring2_fit_%i",i);
+    ring2fit[i] = new TF1(name,"pol1(0) + gaus(2)",0.3,1.7);
+
+    ring2_histo[i]->Rebin(3);
+
+    ring2fit[i]->SetParLimits(0,0,10.0*ring2_histo[i]->GetBinContent(1));
+    ring2fit[i]->SetParLimits(1,-10000,0);
+    ring2fit[i]->SetParLimits(2,0,10.0*ring2_histo[i]->GetMaximum());
+    ring2fit[i]->SetParLimits(3,0,10);
+    ring2fit[i]->SetParLimits(4,0.17,0.175);
+    ring2fit[i]->SetParameter(0,ring2_histo[i]->GetBinContent(1));
+    ring2fit[i]->SetParameter(1,-ring2_histo[i]->GetBinContent(1)/6.0);
+    ring2fit[i]->SetParameter(2,ring2_histo[i]->GetMaximum());
+    ring2fit[i]->SetParameter(3,0.95);
+    ring2fit[i]->SetParameter(4,0.11245);
+    ring2fit[i]->SetParNames("constant1","Slope","constant2","Mean","Sigma");
+
+    ring2_histo[i]->Fit(ring2fit[i],"rql","",0.3,1.7);
+
+    ring2prec->SetBinContent(i+1,(ring2fit[i]->GetParameter(3)));
+    ring2prec->SetBinError(i+1,ring2fit[i]->GetParameter(4));
+    ring2prec2->SetBinContent(i+1,(ring2fit[i]->GetParameter(3)));
+    ring2prec2->SetBinError(i+1,ring2fit[i]->GetParError(3));
+
+    cout<<"ring2 "<<i<<" "<<ring2fit[i]->GetParameter(3)<<" "<<ring2fit[i]->GetParError(3)<<endl;
+  }
+
+  ofstream newgain(ngname);
+  
 
   float gains2[ntowers];
   float gerr2[ntowers];
@@ -503,42 +666,92 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     float eta = helper->getEta(i+1);
     if(TMath::Abs(eta) > 0.968) eta += 0.005 * TMath::Abs(eta)/eta;
     int etaindex = ((TMath::Nint(eta * 1000.0) + 25)/50 + 19);
-    float adjust = ringfit[etaindex]->GetParameter(3);
-    float og = gains[i];
-    float ng = og/adjust;
-    float aerr = ringfit[etaindex]->GetParError(3);
-    float ne = sqrt(pow(og*peakerr[i]/(adjust*peaks[i]),2)+pow(og*aerr/(adjust*adjust),2));
-    //newgain << i+1 << " " << ng << " " << ne << " " << status[i] << endl;
+    float adjust = ring2fit[(int)etaindex/2]->GetParameter(3);
+    //cout<<etaindex<<" "<<(int)etaindex/2<<" "<<adjust<<endl;
+    float ng = 0;
+    float ne = 0;
+    if(status[i] == 1){
+      float og = bemctables->calib(1,i+1)*gains[i];
+      ng = og/adjust;
+      float aerr = ring2fit[(int)etaindex/2]->GetParError(3);
+      ne = sqrt(pow(og*aerr/(adjust*adjust),2));
+    }
+    newgain << i+1 << " " << ng << " " << ne << " " << status[i] << endl;
     gains2[i] = ng;
     gerr2[i] = ne;
+
+
   }
+
+  newgain.close();
 
     ///////////////////////////////////////
    //Using new gains regenerate by crate//
   ///////////////////////////////////////
 
+
+  /*
   for(int j=0; j<nentries; j++){
     tree->GetEntry(j);
     track = &(cluster->centralTrack);
     TClonesArray *tracks = cluster->tracks;
 
-    if((track->tower_adc[0] - track->tower_pedestal[0]) < 2.5 * track->tower_pedestal_rms[0])continue;
-    if(track->p < 1.5)continue;
-    float squarefid = 0.02;//0.03/TMath::Sqrt(2.0);
+    int bsmdeadctot = 0;
+    int bsmdpadctot = 0;
+    for(int i = 0; i < 11; i++){
+      if(track->smde_adc[i] > track->smde_pedestal[i])bsmdeadctot += track->smde_adc[i] - track->smde_pedestal[i];
+      if(track->smdp_adc[i] > track->smdp_pedestal[i])bsmdpadctot += track->smdp_adc[i] - track->smdp_pedestal[i];
+    }
 
     double dR = TMath::Sqrt(track->deta*track->deta + track->dphi*track->dphi);
-    if(track->p > 15)continue;
-    if(track->dEdx*1000000 > 4.5 || track->dEdx*1000000 < 3.5)continue;
-    if(track->htTrig && !track->nonhtTrig)continue;
-    //if(track->nHits < 25)continue;
+
+
     double scaled_adc = (track->tower_adc[0] - track->tower_pedestal[0]) / track->p;
     double geant_scale = geant_fit->Eval(dR);
     scaled_adc *= geant_scale;
     //cout<<scaled_adc<<endl;
     int index = track->tower_id[0];
 
+    //figure out eta and etaindex
     eta = helper->getEta(index);
-    double tgain = gains2[index-1];
+    if(TMath::Abs(eta) > 0.968) eta += 0.005 * TMath::Abs(eta)/eta;
+    etaindex = ((TMath::Nint(eta * 1000.0) + 25)/50 + 19);
+
+    double tgain = bemctables->calib(1,track->tower_id[0])*gains[index-1]*gains2[index-1];
+    //double tgain = gains[index-1];
+
+
+    if((track->tower_adc[0] - track->tower_pedestal[0]) < 2.5 * track->tower_pedestal_rms[0])continue;
+
+    if(track->tower_id[0] != track->tower_id_exit)continue;
+
+    if(track->htTrig == 2)continue;
+    if(track->p > 6)continue;	
+
+    if(dR > 0.025)continue;
+
+    if(track->dEdx < 3.4e-6)continue;
+    if((bsmdeadctot > -1 && bsmdeadctot < 50) && (bsmdpadctot < 50 && bsmdpadctot > -1))continue;
+
+    int numsis = tracks->GetEntries();
+    if(numsis > 0)continue;
+
+    float totalbtow = 0;
+    float maxEt = 0;
+    int maxId = -1;
+    for(int i = 0; i < 9; i++){
+      if(track->tower_adc[i] - track->tower_pedestal[i] < 0)continue;
+      float theta = helper->getTheta(track->tower_id[i]);
+      float nextEt = (track->tower_adc[i] - track->tower_pedestal[i]) * bemctables->calib(1,track->tower_id[i])*sin(theta);
+      totalbtow += nextEt;
+      if(nextEt > maxEt){
+	maxEt = nextEt;
+	maxId = i;
+      }
+    }
+    if(maxId != 0) continue;
+
+    eta = helper->getEta(index);
     float phi = helper->getPhi(index);
     int crate = lookup_crate(eta,phi);
     if(status[index-1]==1)crate_histo[crate-1]->Fill(scaled_adc*tgain);
@@ -546,24 +759,32 @@ void electron_master(const char* file_list="electrons.list",const char* output="
 
   for(int i = 0; i < ncrates; i++){
     sprintf(name,"crate_fit_%i",i);
-    crate_fit[i] = new TF1(name,"pol1(0) + gaus(2)",0.3,1.6);
+    crate_histo[i]->Sumw2();	
+    crate_histo[i]->Rebin(4);	
+
+    crate_fit[i] = new TF1(name,"pol1(0) + gaus(2)",0.3,1.7);
+    crate_fit[i]->SetParLimits(0,0,10.0*crate_histo[i]->GetBinContent(1));
     crate_fit[i]->SetParLimits(1,-10000,0);
-    crate_fit[i]->SetParLimits(2,0,10000);
+    crate_fit[i]->SetParLimits(2,0,10.0*crate_histo[i]->GetMaximum());
     crate_fit[i]->SetParLimits(3,0,10);
-    crate_fit[i]->SetParameter(3,0.95);
-    crate_fit[i]->SetParameter(4,0.15);
+    crate_fit[i]->SetParameter(0,crate_histo[i]->GetBinContent(1));
+    crate_fit[i]->SetParameter(1,-crate_histo[i]->GetBinContent(1)/6.0);
+    crate_fit[i]->SetParameter(2,-crate_histo[i]->GetMaximum());
+    crate_fit[i]->SetParameter(3,0.929);
+    crate_fit[i]->SetParameter(4,0.156);
     crate_fit[i]->SetParNames("constant1","Slope","constant2","Mean","Sigma");
     crate_fit[i]->SetLineColor(kBlue);
     crate_fit[i]->SetLineWidth(0.6);
-		
-    crate_histo[i]->Fit(crate_fit[i],"rq","",0.6,1.4);
+
+
+    crate_histo[i]->Fit(crate_fit[i],"rql","",0.3,1.8);
     float mean = crate_histo[i]->GetFunction(name)->GetParameter(3);
     float merr = crate_histo[i]->GetFunction(name)->GetParError(3);
     crateprec->SetBinContent(i+1,mean);
     crateprec->SetBinError(i+1,merr);
     cout<<"crate "<<i+1<<" "<<mean<<" "<<merr/mean<<endl;
   }
-
+  
   ofstream newgain(ngname);
 
   float gains3[ntowers];
@@ -573,12 +794,12 @@ void electron_master(const char* file_list="electrons.list",const char* output="
     float phi = helper->getPhi(i+1);
     int crate = lookup_crate(eta,phi);
     float adjust = crate_fit[crate-1]->GetParameter(3);
-    float og = gains2[i];
+    float og = bemctables->calib(1,i)*gains[i]*gains2[i];
     float ng = og;
     float aerr = crate_fit[crate-1]->GetParError(3);
-    float ne = gerr2[i];
+    float ne = sqrt(pow(gains[i]*gerr2[i],2) + pow(gains2[i]*gainerr[i],2));
     if(fabs(adjust-1)/aerr > 1.5){
-      ne = sqrt(pow(gerr2[i]/(adjust),2)+pow(og*aerr/(adjust*adjust),2));
+      ne = sqrt(pow(ne/(adjust),2)+pow(og*aerr/(adjust*adjust),2));
       ng /= adjust;
     }
     newgain << i+1 << " " << ng << " " << ne << " " << status[i] << endl;
@@ -587,7 +808,7 @@ void electron_master(const char* file_list="electrons.list",const char* output="
   }
 
   newgain.close();
-
+  */
   outfile.Write();
   outfile.Close();
 

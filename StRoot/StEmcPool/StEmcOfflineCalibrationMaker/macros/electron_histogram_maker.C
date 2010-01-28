@@ -4,9 +4,22 @@
 #include <fstream>
 #include <vector>
 #include <set>
+//#include <StTriggerUtilities/L2Emulator/L2wAlgo/L2wResult2009.h>
 using namespace std;
 
-void electron_histogram_maker(const char* file_list="",const char* skimfile="electronskimfile.root") 
+struct L2wResult2009 { // must be N*4 bytes
+  enum {mySizeChar=8};// negotiate size w/ Ross before extending 
+  unsigned char seedEt;      // seed Et with 60Gev Max.  bits=Et*256/60
+  unsigned char clusterEt;   // cluster Et with 60Gev Max.  bits=Et*256/60
+  unsigned char seedEtaBin;  // iEta bin 
+  unsigned char seedPhiBin;  // iPhi bin 
+
+  unsigned char trigger;     // bit0=rnd, bit1=ET>thr
+  unsigned char dum1,dum2,dum3;
+};
+
+
+void electron_histogram_maker(const char* file_list="ctest.list",const char* skimfile="electronskimfile.root") 
 {
   gROOT->Macro("LoadLogger.C");
   gROOT->Macro("loadMuDst.C");
@@ -41,11 +54,17 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 		calib_tree->Add(file);
 	}
 	
+	StEmcGeom* geom = StEmcGeom::instance("bemc");
+
+
 	vector<unsigned int> htTriggers;
+	htTriggers.push_back(230531);
+	htTriggers.push_back(230601);
+	/*
 	htTriggers.push_back(220500);
 	htTriggers.push_back(220510);
 	htTriggers.push_back(220520);
-
+	*/
 	StEmcOfflineCalibrationEvent* myEvent = new StEmcOfflineCalibrationEvent();
 	calib_tree->SetBranchAddress("event_branch",&myEvent);
 	StEmcOfflineCalibrationCluster* cluster = new StEmcOfflineCalibrationCluster();
@@ -56,6 +75,8 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 	TTree *electron_tree = new TTree("skimTree","electron tracks");
 	electron_tree->Branch("clusters",&cluster);
 	
+	TH2F* dEdxvsp = new TH2F("dEdxvsp","",100,0.0,10.0,100,0.0,1e-5);
+
 	//keep track of all hit towers and exclude any with >1 track/tower
 	set<int> track_towers;
 	set<int> excluded_towers;
@@ -63,13 +84,42 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 	unsigned int nAccept = 0;
 	unsigned int nGoodEvents = 0;
 	unsigned int nentries = calib_tree->GetEntries();
+  int ngoodhit = 0;
+  int nplt10 = 0;
+  int nnosis = 0;
+  int nfinal = 0;
+  int nbsmdgood = 0;
+  int nnottrig = 0;
+  int nfidu = 0;
+  int nenterexit = 0;
 	for(unsigned int i=0; i<nentries; i++){
-		if(i%100000 == 0) cout<<"processing "<<i<<" of "<<nentries<<endl;
+		if(i%1000000 == 0) cout<<"processing "<<i<<" of "<<nentries<<endl;
 		//cout<<i<<endl;
 		calib_tree->GetEntry(i);
 		
 		//event level cuts
 		if(TMath::Abs(myEvent->vz[0]) > 60.) continue;
+
+		TArrayI& l2Array = myEvent->l2Result;
+		unsigned int *l2res=(unsigned int *)l2Array.GetArray();
+		//printf(" L2-jet online results below:\n");
+		const int BEMCW_off=20; // valid only for 2009 run
+		L2wResult2009* l2wresult = NULL;
+		l2wresult = (L2wResult2009*) &l2res[BEMCW_off];
+		int l2wbit = (l2wresult->trigger&2)>0;
+		int l2wrnd = (l2wresult->trigger&1)>0;
+		float trigeta = -999;
+		float trigphi = -999;
+
+		//cout<<i<<" "<<l2wbit<<" "<<l2wrnd<<endl;
+
+		if(l2wbit || l2wrnd){
+		  trigeta = (float)(l2wresult->seedEtaBin - 1)*0.05-1 + 0.025;
+		  int kPhi = l2wresult->seedPhiBin;
+		  if(kPhi > 24)kPhi -= 120;
+		  trigphi = (float)(24 - kPhi)*TMath::Pi()/60.;
+		  if(trigphi > TMath::Pi())trigphi -= 2*TMath::Pi();
+		}
 
 		int nht = 0;
 		int yht = 0;
@@ -103,33 +153,56 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 		//now we loop again and look for electrons / hadrons
 		for(int j=0; j<myEvent->tracks->GetEntries(); j++){
 			track = (StEmcOfflineCalibrationTrack*)myEvent->tracks->At(j);
-			
+			dEdxvsp->Fill(track->p,track->dEdx);
 			if(j==0) nGoodEvents++;
 			
 			double dR = TMath::Sqrt(track->deta*track->deta + track->dphi*track->dphi);
 			//if(dR > 0.03) continue;
 			//cout<<track->nSigmaElectron<<" "<<track->p<<" "<<track->nHits<<" "<<track->tower_id[0]<<" "<<track->tower_id_exit<<endl;
 			float squarefid = 0.03/TMath::Sqrt(2.0);
-			if(TMath::Abs(track->deta) > squarefid || TMath::Abs(track->dphi) > squarefid)continue;
+			//if(TMath::Abs(track->deta) > squarefid || TMath::Abs(track->dphi) > squarefid)continue;
 			
 			if(track->p < 1.5) continue;
 			if(track->p > 20.) continue;
+			ngoodhit++;
 			if(track->tower_status[0] != 1)					continue;
-			if(track->tower_id[0] != track->tower_id_exit)	continue;
+			nenterexit++;
+			//if(track->tower_id[0] != track->tower_id_exit)	continue;
 			if(track->nHits < 10)							continue;
+			nplt10++;
 			//if(track->vertexIndex != 0)						continue;
 			
 			if(excluded_towers.find(track->tower_id[0]) != excluded_towers.end()) continue;
-
-			track->htTrig = yht;
-			track->nonhtTrig = nht;
-
+			nfidu++;
+			if((track->tower_adc[0] - track->tower_pedestal[0]) < 1.5 * track->tower_pedestal_rms[0])continue;
+			nnottrig++;
+			//cout<<track->dEdx<<endl;
+			if(track->dEdx < 3.0e-6)continue;
+			nbsmdgood++;
 			//looking for tracks at surrounding towers
 			//cout<<"passed basic cuts"<<endl;
 
-			if(track->nSigmaElectron > -2.){
+			//if(track->nSigmaElectron > -2.){
 			  //create start using cluster
 			  cluster->centralTrack = *track;
+
+			  float toweta,towphi;
+			  geom->getEtaPhi(track->tower_id[0],toweta,towphi);
+
+			  int tr = 0;
+			  if(yht){
+			    float tcdeta = fabs(toweta - trigeta);
+			    float tcdphi = fabs(towphi - trigphi);
+			    if(tcdphi > TMath::Pi())tcdphi -= TMath::Pi();
+			    float tcdR = sqrt(pow(tcdeta,2) + pow(tcdphi,2));
+			    if(tcdR < 0.7)tr = 1;
+			    //cout<<i<<" "<<trigeta<<" "<<trigphi<<" "<<tcdR<<" "<<yht<<" "<<tr<<" "<<nht<<endl;
+			  }
+
+
+			  track->htTrig = yht + tr;
+			  track->nonhtTrig = nht;
+			  //cout<<track->htTrig<<endl;
 
 			  for (int k = 1; k < 9; k++)//loop over surrounding towers
 			  {
@@ -152,14 +225,21 @@ void electron_histogram_maker(const char* file_list="",const char* skimfile="ele
 				electron_tree->Fill();
 				track->Clear();
 				cluster->Clear();
-			}
+				//}
 		}
 		myEvent->Clear();
 	}
 	
 	cout<<"found "<<nGoodEvents<<" events with at least one good track"<<endl;
 	cout<<"accepted "<<nAccept<<" electrons"<<endl;
-	
+	//cout<<"ngoodhit: "<<ngoodhit<<endl;
+	//cout<<"nenterexit: "<<nenterexit<<endl;
+	//cout<<"n p < 10: "<<nplt10<<endl;
+	//cout<<"n in fidu: "<<nfidu<<endl;
+	//cout<<"n not trig: "<<nnottrig<<endl;
+	//cout<<"nbsmdhit: "<<nbsmdgood<<endl;
+	//cout<<"n no sis: "<<nnosis<<endl;
+	//cout<<"n final: "<<nfinal<<endl;
 	skim_file->cd();
 	skim_file->Write();
 	skim_file->Close();

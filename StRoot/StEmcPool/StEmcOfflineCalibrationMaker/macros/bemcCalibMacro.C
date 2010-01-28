@@ -50,7 +50,7 @@ void bemcCalibMacro(const char* dir="./",
 	control_table->CutOff[1] = -1;
 	control_table->CutOffType[1] = 0;
 	control_table->DeductPedestal[1] = 2;
-
+	adc->saveAllStEvent(kTRUE);
 	//StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
 	//emcTrig->setDbMaker(dbMaker);
 
@@ -85,6 +85,7 @@ void bemcCalibMacro(const char* dir="./",
 	*/
 
 	//2008 Triggers
+	/*
 	bemcCalibMaker->addMinBiasTrigger(220000);
 	bemcCalibMaker->addHighTowerTrigger(220500);//bht0
 	bemcCalibMaker->addHighTowerTrigger(220510);//bht1
@@ -97,7 +98,21 @@ void bemcCalibMacro(const char* dir="./",
 	bemcCalibMaker->addFastTrigger(220920);//fpd e fast
 	bemcCalibMaker->addFastTrigger(220710);//tof reading only tpx and tof
 	bemcCalibMaker->addFastTrigger(19);//bbc-fast
-	
+	*/
+
+	//2009 500 GeV triggers
+	bemcCalibMaker->addMinBiasTrigger(230010);//BBCMB
+	bemcCalibMaker->addMinBiasTrigger(230011);//BBCMB-Cat0
+	bemcCalibMaker->addMinBiasTrigger(230012);//Cat1
+	bemcCalibMaker->addMinBiasTrigger(230013);//Cat2
+	bemcCalibMaker->addMinBiasTrigger(230014);//Cat3
+	bemcCalibMaker->addMinBiasTrigger(230015);//Cat4
+
+	bemcCalibMaker->addMinBiasTrigger(230020);//VPBMB didn't work
+
+	bemcCalibMaker->addHighTowerTrigger(230531);//bht3
+	bemcCalibMaker->addHighTowerTrigger(230601);//l2w
+
 	StMemStat memory;
 	memory.PrintMem(NULL);
 	
@@ -122,6 +137,6 @@ void bemcCalibMacro(const char* dir="./",
 	
 	chain->ls(3);
 	chain->Finish();
-	printf("my macro processed %i events",i);
+	printf("my macro processed %i events in %s",i,name);
 	cout<<"\tcpu: "<<total.CpuTime()<<"\treal: "<<total.RealTime()<<"\tratio: "<<total.CpuTime()/total.RealTime()<<endl;
 }

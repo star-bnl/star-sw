@@ -77,6 +77,10 @@ StEmcOfflineCalibrationMaker::~StEmcOfflineCalibrationMaker() { }
 
 Int_t StEmcOfflineCalibrationMaker::Init()
 {
+  TString mfname;
+  mfname += filename;
+  mfname.ReplaceAll(".calib.",".map.");
+  mapFile = new TFile(mfname.Data(),"RECREATE");
   myFile = new TFile(filename,"RECREATE");
   calibTree = new TTree("calibTree","BTOW calibration tree");
   myEvent = new StEmcOfflineCalibrationEvent();
@@ -282,6 +286,8 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	
 	
   LOG_DEBUG << "got ADCs" << endm;
+
+
 	
 	//trigger maker
   for(unsigned int i = 0; i < htTriggers.size(); i++){
@@ -292,6 +298,8 @@ Int_t StEmcOfflineCalibrationMaker::Make()
     myEvent->triggerResult[httpTriggers[i]]=emcTrigMaker->isTrigger(httpTriggers[i]);
     myEvent->towersAboveThreshold[httpTriggers[i]] = emcTrigMaker->bemc->getTriggerPatchesAboveThreshold(httpTriggers[i]);
   }
+
+
   /*
   for(unsigned int i = 0; i < mbTriggers.size(); i++){
     myEvent->triggerResult[mbTriggers[i]]=emcTrigMaker->isTrigger(mbTriggers[i]);
@@ -313,6 +321,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
     TObjArray* primaryTracks = muDst->primaryTracks();
     const StMuTrack* track;
     const StMuTrack* primarytrack;
+
     int nentries = muDst->numberOfPrimaryTracks();
     //cout<<nentries<<" tracks in vertex "<<vertex_index<<endl;
     assert(nentries==primaryTracks->GetEntries());
@@ -348,33 +357,35 @@ Int_t StEmcOfflineCalibrationMaker::Make()
       smd_eta_center=getTrackTower(track,false,3);
       smd_phi_center=getTrackTower(track,false,4);
 
-      track_ids.push_back(center_tower.first);
 
 			//project track to BEMC
 
       int id = center_tower.first;
+      int exitid = (getTrackTower(track, true)).first;
+
 			
 			//cout<<p<<endl;
 
       //cout<<i<<" "<<id<<" "<<primused<<" "<<p<<" "<<testeta<<endl;
 			
       if(id > 0 && p > 1.0){
+	if (id == exitid)track_ids.push_back(id);
 	int etaid=smd_eta_center.first;
 	int phiid=smd_phi_center.first;
 	LOG_DEBUG<<"using track projection to the SMD, we get strips eta: "<<etaid<<" and phi: "<<phiid<<endm;
 	if(etaid>0){
 	  int smdeids[11];
 	  smdeids[0] = etaid;
-	  smdeids[1] = mEmcPosition->getNextId(3,etaid,0,1);
-	  smdeids[2] = mEmcPosition->getNextId(3,etaid,0,2);
-	  smdeids[3] = mEmcPosition->getNextId(3,etaid,0,3);
-	  smdeids[4] = mEmcPosition->getNextId(3,etaid,0,4);
-	  smdeids[5] = mEmcPosition->getNextId(3,etaid,0,5);
-	  smdeids[6] = mEmcPosition->getNextId(3,etaid,0,-1);
-	  smdeids[7] = mEmcPosition->getNextId(3,etaid,0,-2);
-	  smdeids[8] = mEmcPosition->getNextId(3,etaid,0,-3);
-	  smdeids[9] = mEmcPosition->getNextId(3,etaid,0,-4);
-	  smdeids[10] = mEmcPosition->getNextId(3,etaid,0,-5);
+	  smdeids[1] = mEmcPosition->getNextId(3,etaid,1,0);
+	  smdeids[2] = mEmcPosition->getNextId(3,etaid,2,0);
+	  smdeids[3] = mEmcPosition->getNextId(3,etaid,3,0);
+	  smdeids[4] = mEmcPosition->getNextId(3,etaid,4,0);
+	  smdeids[5] = mEmcPosition->getNextId(3,etaid,5,0);
+	  smdeids[6] = mEmcPosition->getNextId(3,etaid,-1,0);
+	  smdeids[7] = mEmcPosition->getNextId(3,etaid,-2,0);
+	  smdeids[8] = mEmcPosition->getNextId(3,etaid,-3,0);
+	  smdeids[9] = mEmcPosition->getNextId(3,etaid,-4,0);
+	  smdeids[10] = mEmcPosition->getNextId(3,etaid,-5,0);
 
 	  for(int i = 0; i < 11; i++){
 	    myTrack->smde_id[i] = smdeids[i];
@@ -394,17 +405,17 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	}
 	if(phiid>0){
 	  int smdpids[11];
-	  smdpids[0] = etaid;
-	  smdpids[1] = mEmcPosition->getNextId(4,phiid,1,0);
-	  smdpids[2] = mEmcPosition->getNextId(4,phiid,2,0);
-	  smdpids[3] = mEmcPosition->getNextId(4,phiid,3,0);
-	  smdpids[4] = mEmcPosition->getNextId(4,phiid,4,0);
-	  smdpids[5] = mEmcPosition->getNextId(4,phiid,5,0);
-	  smdpids[6] = mEmcPosition->getNextId(4,phiid,-1,0);
-	  smdpids[7] = mEmcPosition->getNextId(4,phiid,-2,0);
-	  smdpids[8] = mEmcPosition->getNextId(4,phiid,-3,0);
-	  smdpids[9] = mEmcPosition->getNextId(4,phiid,-4,0);
-	  smdpids[10] = mEmcPosition->getNextId(4,phiid,-5,0);
+	  smdpids[0] = phiid;
+	  smdpids[1] = mEmcPosition->getNextId(4,phiid,0,1);
+	  smdpids[2] = mEmcPosition->getNextId(4,phiid,0,2);
+	  smdpids[3] = mEmcPosition->getNextId(4,phiid,0,3);
+	  smdpids[4] = mEmcPosition->getNextId(4,phiid,0,4);
+	  smdpids[5] = mEmcPosition->getNextId(4,phiid,0,5);
+	  smdpids[6] = mEmcPosition->getNextId(4,phiid,0,-1);
+	  smdpids[7] = mEmcPosition->getNextId(4,phiid,0,-2);
+	  smdpids[8] = mEmcPosition->getNextId(4,phiid,0,-3);
+	  smdpids[9] = mEmcPosition->getNextId(4,phiid,0,-4);
+	  smdpids[10] = mEmcPosition->getNextId(4,phiid,0,-5);
 
 	  for(int i = 0; i < 11; i++){
 	    myTrack->smdp_id[i] = smdpids[i];
@@ -509,9 +520,11 @@ Int_t StEmcOfflineCalibrationMaker::Finish()
 	LOG_INFO << "write preshower histogram" << preshowerSlopes->Write() << endm;
 	LOG_INFO << "write smd histogram" <<smdSlopes[0]->Write() << endm;
 	smdSlopes[1]->Write();
-	mapcheck->Write();
 	LOG_INFO << "close the output file" << endm;
 	myFile->Close();
+	mapFile->cd();
+	mapcheck->Write();
+	mapFile->Close();
 	LOG_INFO << "StEmcOfflineCalibrationMaker::Finish() == kStOk"<<endm;
 	return kStOk;
 }
