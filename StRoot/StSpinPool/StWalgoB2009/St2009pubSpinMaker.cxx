@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.3 2010/01/28 03:42:55 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.4 2010/01/28 20:10:05 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -18,9 +18,10 @@ ClassImp(St2009pubSpinMaker)
 //
 St2009pubSpinMaker::St2009pubSpinMaker(const char *name):StMaker(name){
   wMK=0;HList=0;
-  core="fixMe";
+  core=name;
   par_QPTplus=0.015;
   par_QPTminus=-0.015; 
+  par_leptonEta1=-1.; par_leptonEta2=1.;
  }
 
 
@@ -75,8 +76,9 @@ St2009pubSpinMaker::InitRun  (int runNo){
   sprintf(txt,"bXing= bx7+off=%d",spinDb->BX7offset());
   hA[4]->GetXaxis()->SetTitle(txt);
 
-  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude Q/PT in [%.2f, %.2f]",
-		 par_QPTplus,par_QPTminus)<<endm;	 
+  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude Q/PT in [%.2f, %.2f], leptonEta in[%.1f,%.1f]",
+		 par_QPTplus,par_QPTminus,par_leptonEta1, par_leptonEta2
+		 )<<endm;	 
   return kStOK;
 }
 
@@ -166,6 +168,16 @@ St2009pubSpinMaker::bXingSort(){
       if(T.cluster.ET /T.nearTotET<  wMK->par_nearTotEtFrac) continue; // too large nearET
       if(T.ptBalance.Perp()<wMK->par_ptBalance || T.awayTotET>  wMK->par_awayTotET)  continue;
       hA[0]->Fill("Wcut",1.);
+
+      hA[30]->Fill(T.prMuTrack->eta());
+      if(T.prMuTrack->eta()<par_leptonEta1) continue;
+      if(T.prMuTrack->eta()>par_leptonEta2) continue;
+      hA[0]->Fill("eta",1.);
+
+      //::::::::::::::::::::::::::::::::::::::::::::::::
+      //:::::accepted W events for x-section :::::::::::
+      //::::::::::::::::::::::::::::::::::::::::::::::::
+
       float ET=T.cluster.ET;
       if(ET>par_myET) hA[0]->Fill("W25",1.);
       float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
@@ -197,6 +209,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.4  2010/01/28 20:10:05  balewski
+// added eta dependent spin sorting
+//
 // Revision 1.3  2010/01/28 03:42:55  balewski
 // cleanup
 //

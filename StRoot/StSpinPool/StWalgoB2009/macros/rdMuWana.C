@@ -360,11 +360,19 @@ int rdMuWana(
   
   if(spinSort){
     spDb=new StSpinDbMaker("spinDb");
-    pubSpinMk=new St2009pubSpinMaker("pubSpin"); 
-    pubSpinMk->attachWalgoMaker(WmuMk);
-    pubSpinMk->attachSpinDb(spDb);
-    pubSpinMk->setHList(HList); 
-  }  
+    enum {mxSM=3};
+    St2009pubSpinMaker *spinMkA[mxSM];
+    for(int kk=0;kk<mxSM;kk++) {
+      char ttx[100]; sprintf(ttx,"%cspin",'A'+kk);
+      printf("add spinMaker %s %d \n",ttx,kk);
+      spinMkA[kk]=new St2009pubSpinMaker(ttx); 
+      spinMkA[kk]->attachWalgoMaker(WmuMk);
+      spinMkA[kk]->attachSpinDb(spDb);
+      spinMkA[kk]->setHList(HList); 
+      if(kk==1) spinMkA[kk]->setEta(-1.,0.);
+      if(kk==2) spinMkA[kk]->setEta(0,1.);
+    }  
+  }
   
   if(geant){
     pubMcMk=new St2009pubMcMaker("pubMc");
@@ -438,6 +446,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.20  2010/01/28 20:10:08  balewski
+// added eta dependent spin sorting
+//
 // Revision 1.19  2010/01/27 22:12:26  balewski
 // spin code matched to x-section code
 //

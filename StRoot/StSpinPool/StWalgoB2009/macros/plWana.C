@@ -1,10 +1,12 @@
 TCanvas *can=0;
 const float PI=2*acos(0);
+TString spinPre='A';
 
 //=================================================
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
+  //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-Jan27-3rdAL/data/";
   iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-p/data/";
   //core0="R10090018";
   //core0="run9setABCD";
@@ -80,7 +82,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
    for(int k=1;k<=10;k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
  }
-  if(page>=23 && page<=25 && fd->Get("spinStatEve")==0) return; // skip spin plots if maker was not used
+  if(page>=23 && page<=25 && fd->Get("AspinStatEve")==0) return; // skip spin plots if maker was not used
 
  gStyle->SetPalette(1,0);
  gStyle->SetOptStat(0);
@@ -479,13 +481,13 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
 
 
 
- case 23:{    sprintf(padTit,"bXing /spin QA, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+ case 23:{    sprintf(padTit,"bXing & spin QA, %s",core0);
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
     c->Divide(2,3);gStyle->SetOptStat(1000010);
     char **nameX=nameS1;
     for(int i=0;i<6;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1); h->Draw();
       if(i==1) { h->Draw("colz");}
     }
@@ -495,18 +497,19 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
 
 
  case 24:{    sprintf(padTit,"Final Ws for spin analysis, %s",core0);
-   can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+   can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
    c->Divide(2,2);gStyle->SetOptStat(10);
    char **nameX=nameS5;
    for(int i=0;i<4;i++) {
      printf("->%s<\n",nameX[i]);
-     h=(TH1*)fd->Get(nameX[i]);  assert(h);
+     h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
      c->cd(i+1);  h->Draw();
-     if(i==2) { hx=(TH1*) h->Clone(); h->SetFillColor(46); hx->SetFillColor(9);
+     if(i==2) { hx=(TH1*) h->Clone(); h->SetFillColor(9); hx->SetFillColor(46);
        hx->SetAxisRange(0,1); hx->Draw("same");
      }
      
      if(i==3) { h->Draw("colz"); ((TH2F*)h)->Rebin2D(1,2);}
+     if(i<2) h->Rebin();
      if(i<2||i==3) h->SetAxisRange(0,70);
      gPad->SetGrid(0,0);
    }
@@ -519,23 +522,23 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
    {    sprintf(padTit,"spin sorting: lumi & Ws, %s",core0);
      char **nameX=nameS2;
      if(page==26) { nameX=nameS3;sprintf(padTit,"spin sorting: QCD background, %s",core0);}
-     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
      c->Divide(2,2);gStyle->SetOptStat(1000010);
 
     for(int i=0;i<4;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("h  text");
     }
  } break;//--------------------------------------
  
   case 27:{    sprintf(padTit,"charge & ET vs. spin state, %s",core0);
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
     c->Divide(2,1);gStyle->SetOptStat(10);
     char **nameX=nameS4;
     for(int i=0;i<2;i++) {
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
     }
  } break;//--------------------------------------
@@ -611,7 +614,7 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
 
  
  if(pl&1) can->Print(tit+".gif");
- if(pl&2) can->Print(tit+".ps");
+ if(pl&2) can->Print(tit+spinPre+".ps");
  
 }
 
@@ -680,7 +683,7 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 
 //============================
 void doAll(){
-  for(int i=1;i<=25;i++)  { 
+  for(int i=1;i<=27;i++)  { 
     plWana(i,2);
   }
   // TPC by sector:
@@ -690,7 +693,7 @@ void doAll(){
 
 //============================
 void doAllMC(){
- for(int i=1;i<=25;i++){
+ for(int i=1;i<=23;i++){
    if(i==2) continue;
    if(i==3) continue;
    if(i==4) continue;
@@ -702,6 +705,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.9  2010/01/28 20:10:08  balewski
+// added eta dependent spin sorting
+//
 // Revision 1.8  2010/01/27 22:12:26  balewski
 // spin code matched to x-section code
 //

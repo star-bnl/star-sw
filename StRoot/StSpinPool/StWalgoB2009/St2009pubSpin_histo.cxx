@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.3 2010/01/28 03:42:55 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.4 2010/01/28 20:10:06 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -15,8 +15,6 @@
 void
 St2009pubSpinMaker::initHistos(){
   //  const float PI=TMath::Pi();
-  core="spin"; // prefix added to every histo name, to allow for multipl maker saving histos in the same root file
-
 
   //...... data histograms
   memset(hA,0,sizeof(hA));
@@ -29,8 +27,8 @@ St2009pubSpinMaker::initHistos(){
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
  
-  const char *key[]={"inp","badBx48","BG1","BG2","Wcut","W25","Q/pT","Q +","Q -"};
-  for(int i=0;i<9;i++) h->Fill(key[i],0.); // preset the order of keys
+  const char *key[]={"inp","badBx48","BG1","BG2","Wcut","eta","W25","Q/pT","Q +","Q -"};
+  for(int i=0;i<10;i++) h->Fill(key[i],0.); // preset the order of keys
  
 
   hA[1]=new TH1F(core+"bX48","Rate vs. raw bx48; bXing= raw bx48",128,-0.5,127.5);
@@ -56,7 +54,6 @@ St2009pubSpinMaker::initHistos(){
   ln=new TLine(0,par_QPTminus,100,par_QPTminus);  ln->SetLineColor(kRed);  Lx->Add(ln);  
   ln=new TLine(0,par_QPTplus,100,par_QPTplus);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(25,-0.1, 25,0.1);  ln->SetLineColor(kRed);  Lx->Add(ln);
-
 
   //use 10-19
   char cPM[2]={'P','N'}; // Positive, Negative
@@ -90,8 +87,16 @@ St2009pubSpinMaker::initHistos(){
     sprintf(txt,"Final 2x2 ET  Q=%c; spin4 ; 2x2 cluster ET (GeV) ",cPM[ipn]);
     hA[18+ipn]=h=new TH2F(core+txt0,txt,16,-0.5,15.5,10,0,100);
     h->SetFillColor(iCol[ipn]);
+  }
+  // free 20-29
 
-}
+  hA[30]=h=new TH1F(core+"LepEta","selecting Ws ; lepton eta",100, -1.5,1.5);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(par_leptonEta1,0,par_leptonEta1,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(par_leptonEta2,0,par_leptonEta2,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
+
+
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -105,6 +110,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.4  2010/01/28 20:10:06  balewski
+// added eta dependent spin sorting
+//
 // Revision 1.3  2010/01/28 03:42:55  balewski
 // cleanup
 //
