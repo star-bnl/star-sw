@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 
-// colored output, :-)
+/* colored output, :-) */
 #define ANSI_GREEN      "\033[32m"
 #define ANSI_RED        "\033[31m"
 #define ANSI_BLUE       "\033[34m"
@@ -78,10 +78,11 @@ extern "C" {
 #define SHIFT	"SHIFTLOG"	/* this will go away! */
 
 
-//Tonko: not used
-//#ifdef __ROOT__			/* Special (mis)handling for STAR Offline Code */
-//#define RTS_DISABLE_LOG
-//#endif
+/*Tonko: not used Special (mis)handling for STAR Offline Code
+#ifdef __ROOT__	
+#define RTS_DISABLE_LOG
+#endif
+*/
 
 #ifdef RTS_DISABLE_LOG
 
