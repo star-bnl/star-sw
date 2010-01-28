@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.165 2010/01/27 23:13:58 perev Exp $
+# $Id: Construct,v 1.166 2010/01/28 04:11:37 perev Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -115,7 +115,8 @@ if ( $STAR_HOST_SYS =~ /^intel_wnt/ ) {
 #   my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
     $INCLUDE_PATH .= $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/include";
     if (! $ENV{MINICERN}) {
-      $INCLUDE_PATH .= $main::PATH_SEPARATOR . $STAR . $CERN_ROOT . "/include";
+      $INCLUDE_PATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
+      $INCLUDE_PATH .= $main::PATH_SEPARATOR . $STAR ;
     print "****************************CERN*************************\n";
     } else {
       $INCLUDE_PATH .= $main::PATH_SEPARATOR . "StarVMC/minicern" ;
