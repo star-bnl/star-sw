@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.2 2010/01/27 22:12:25 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.3 2010/01/28 03:42:55 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -112,9 +112,8 @@ St2009pubSpinMaker::bXingSort(){
    printf("BAD bx7=%d bx48=%d del=%d\n",bx7,bx48,spinDb->offsetBX48minusBX7(bx48,bx7));
    hA[0]->Fill("badBx48",1.);
    return;
-   //  assert(spinDb->offsetBX48minusBX7(bx48,bx7)==0); // both counters must be in sync
+   // assert(spinDb->offsetBX48minusBX7(bx48,bx7)==0); // both counters must be in sync
   }
-
  
   hA[1]->Fill(bx48);
   hA[2]->Fill(bx7);
@@ -150,10 +149,12 @@ St2009pubSpinMaker::bXingSort(){
     WeveVertex &V=wMK->wEve.vertex[iv];
     for(uint it=0;it<V.eleTrack.size();it++) {
       WeveEleTrack &T=V.eleTrack[it];
+      if(T.pointTower.id==0) continue;
 
       /* Collect QCD background for lumi monitors */
-      if(iv==0 && it==0 && T.cluster.ET <wMK->par_clustET) {
-	hA[7]->Fill(spin4);  hA[0]->Fill("BG2",2.);
+      float frac24=T.cluster.ET/(T.cl4x4.ET);
+      if(iv==0 && it==0 && T.cluster.ET <20. && frac24<wMK->par_clustFrac24) {
+	hA[7]->Fill(spin4);  hA[0]->Fill("BG2",1.);
       }
 
       if(T.isMatch2Cl==false) continue;
@@ -196,6 +197,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.3  2010/01/28 03:42:55  balewski
+// cleanup
+//
 // Revision 1.2  2010/01/27 22:12:25  balewski
 // spin code matched to x-section code
 //
