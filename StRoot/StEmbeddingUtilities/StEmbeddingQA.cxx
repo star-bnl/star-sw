@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.3 2010/01/26 18:07:33 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.4 2010/01/28 21:50:35 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.4  2010/01/28 21:50:35  hmasui
+ * Add Vx vs Vz and Vy vs Vz histograms.
+ *
  * Revision 1.3  2010/01/26 18:07:33  hmasui
  * Change the binning for delta v_{x,y,z} from +/- 10 to +/- 1 cm
  *
@@ -76,6 +79,8 @@ void StEmbeddingQA::clear()
   if ( mhVz ) delete mhVz ;
   if ( mhVzAccepted ) delete mhVzAccepted ;
   if ( mhVyVx ) delete mhVyVx ;
+  if ( mhVxVz ) delete mhVxVz ;
+  if ( mhVyVz ) delete mhVyVz ;
   if ( mhdVx ) delete mhdVx ;
   if ( mhdVy ) delete mhdVy ;
   if ( mhdVz ) delete mhdVz ;
@@ -130,6 +135,8 @@ void StEmbeddingQA::init()
   mhVz = 0 ;
   mhVzAccepted = 0 ;
   mhVyVx = 0 ;
+  mhVxVz = 0 ;
+  mhVyVz = 0 ;
   mhdVx = 0 ;
   mhdVy = 0 ;
   mhdVz = 0 ;
@@ -189,11 +196,16 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   utility->setStyle(mhVz);
   utility->setStyle(mhVzAccepted);
 
-  mhVyVx = new TH2D("hVyVx", "v_{y} vs v_{x}", 100, -10, 10, 100, -10, 10);
-  mhVyVx->SetXTitle("v_{x} (cm)");
-  mhVyVx->SetYTitle("v_{y} (cm)");
+  mhVyVx = new TH2D("hVyVx", "v_{y} vs v_{x}", 100, -5, 5, 100, -5, 5);
+  mhVxVz = new TH2D("hVxVz", "v_{x} vs v_{z}", 100, -5, 5, 100, -5, 5);
+  mhVyVz = new TH2D("hVyVz", "v_{y} vs v_{z}", 100, -5, 5, 100, -5, 5);
+  mhVyVx->SetXTitle("v_{x} (cm)"); mhVyVx->SetYTitle("v_{y} (cm)");
+  mhVxVz->SetXTitle("v_{z} (cm)"); mhVxVz->SetYTitle("v_{x} (cm)");
+  mhVyVz->SetXTitle("v_{z} (cm)"); mhVyVz->SetYTitle("v_{y} (cm)");
 
   utility->setStyle(mhVyVx);
+  utility->setStyle(mhVxVz);
+  utility->setStyle(mhVyVz);
 
   mhdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)", 100, -1+0.5, 1+0.5);
   mhdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)", 100, -1+0.5, 1+0.5);
@@ -324,6 +336,8 @@ Bool_t StEmbeddingQA::fillEmbedding(const TString inputFileName)
     /// Event vertecies
     mhVzAccepted->Fill(vz);
     mhVyVx->Fill(vx, vy);
+    mhVxVz->Fill(vz, vx);
+    mhVyVz->Fill(vz, vy);
     mhdVx->Fill( vx - vxmc );
     mhdVy->Fill( vy - vymc );
     mhdVz->Fill( vz - vzmc );
