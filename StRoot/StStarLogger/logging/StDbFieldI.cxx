@@ -10,7 +10,7 @@
  *
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StDbFieldI.cxx,v 1.2 2010/01/27 20:16:57 fine Exp $
+ * @(#)cpp/api:$Id: StDbFieldI.cxx,v 1.3 2010/01/28 15:33:07 fine Exp $
  *
  *
  *
@@ -33,6 +33,10 @@
 
 #include "StDbFieldI.h"
 using namespace std;
+
+std::map<StDbFieldI::EDataType,std::string> StDbFieldI::fTypeMap;
+std::map<StDbFieldI::EDataType,std::string> StDbFieldI::fTypeMapName;
+std::map<std::string,StDbFieldI::EDataType> StDbFieldI::fTypeMapInv;
 
 struct Init_StDbFieldI {
    Init_StDbFieldI() { StDbFieldI::MakeTypeMap();} 
