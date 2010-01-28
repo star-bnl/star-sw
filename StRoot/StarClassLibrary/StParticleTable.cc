@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.5 2010/01/28 20:05:20 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.6 2010/01/28 21:54:20 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.6  2010/01/28 21:54:20  jwebb
+ * Added the Sigma(1385) baryons.
+ *
  * Revision 1.5  2010/01/28 20:05:20  jwebb
  * Modifications to StParticleTable.cc (1) add the 'new' particle classes
  * defined on 01/28/10 to the table and, (2) add the existing J/Psi and B
@@ -130,6 +133,11 @@ StParticleTable::StParticleTable()
     Geant2Pdg( 164,    553); // Upsilon(1S) -- mu+ mu- channel w/ incorrect partial width
     Geant2Pdg( 165, 100553); // Upsilon(2S) -- mu+ mu- channel w/ incorrect partial width
     Geant2Pdg( 166, 200553); // Uspilon(3S) -- mu+ mu- channel w/ incorrect partial width
+
+    Geant2Pdg( 701, +3224 ); // Sigma 1385 +
+    Geant2Pdg( 702, +3114 ); // Sigma 1385 -
+    Geant2Pdg( 703, -3114 ); // Sigma 1385 plus bar
+    Geant2Pdg( 704, -3224 ); // Sigma 1385 minus bar 
 
 #undef Geant2Pdg
 
