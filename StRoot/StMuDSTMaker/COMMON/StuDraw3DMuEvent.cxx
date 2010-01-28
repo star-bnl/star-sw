@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.15 2010/01/28 03:16:27 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.16 2010/01/28 05:16:24 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -309,11 +309,44 @@ TObject *StuDraw3DMuEvent::EmcHit(Int_t emcHitsSoftId, Color_t col,Style_t sty,S
    return model;
 }
 
+//____________________________________________________________________________________
+TObject *StuDraw3DMuEvent::EmcHit(Int_t emcHitsSoftId, float energy, const char *detIdt)
+{
+   return EmcHit<StEmcTowerColor>(emcHitsSoftId, energy, detIdt);
+}
+
+
 /*! \return The pointer to the current instance of the StuDraw3DMuEvent  class 
    to visualize StMuDst components
 */
 //___________________________________________________
 StuDraw3DMuEvent *StuDraw3DMuEvent::Display(){ return gMuEventDisplay;}
+
+//___________________________________________________
+StEmcTowerColor::StEmcTowerColor(float energy)
+{
+   Color_t colorResponce=0;
+   Size_t  size=0;
+   if (energy > 0  && energy < 30) {
+       // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
+      if (  energy  < 0.3)   {   
+           colorResponce = kBlue; 
+                // style = 4001;                 //wireframe 
+               // If edep large then MIP but less then 1 GeV 
+      } else if (  energy  < 1.0 ) colorResponce = kGreen;
+               // If between 1 GeV and lowest HT threshold (4 GeV for Run7)
+      else if (  energy  < 4.0 )   colorResponce = kYellow;
+               // If above lowest HT thershold
+      else                         colorResponce = kRed;
+
+      static const double maxSize =  400.; // (cm)
+      static const double scale   =  200.; // (cm/Gev)
+      size =(energy > 0.3 ? scale : scale/30.)*energy;
+      if (size > maxSize)  size = maxSize ;
+      fStyle.SetCol(colorResponce);
+      fStyle.SetSiz(size);
+  }
+}
 
 StuDraw3DMuEvent *StuDraw3DMuEvent::gMuEventDisplay = new StuDraw3DMuEvent();
 
