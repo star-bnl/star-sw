@@ -115,7 +115,7 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
   int iExtrapMinLength	= seedPars->extrapMinLength();
   int iMaxSkipped 	= seedPars->maxSkipped();
 
-  while ( go && _seedHits.size()<iSeedLength)
+  while ( go && (int)_seedHits.size()<iSeedLength)
     {
       go = extendHit( *_seedHits.back() );
     }
@@ -136,7 +136,7 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
   //Extension failed if current track length less than seedPars->seedLength()+
   //seedPars->extrapMinLength()
   //Return 0.
-  if ( _seedHits.size()<( iSeedLength+iExtrapMinLength) )
+  if ( (int)_seedHits.size()<( iSeedLength+iExtrapMinLength) )
     {
       //seedPars->extrapMinLength()"<<endl;
       return track;

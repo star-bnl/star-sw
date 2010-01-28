@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.33 2007/04/17 05:08:36 perev Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.34 2010/01/28 18:11:46 perev Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.34  2010/01/28 18:11:46  perev
+ * WarnOff
+ *
  * Revision 1.33  2007/04/17 05:08:36  perev
  * GetTFile()==>StMaker. Jerome request
  *
@@ -184,21 +187,21 @@ struct TpcHitMRPair_t {
     xM, yM, zM, pxM, pyM, pzM, dEM, dSM, nM,
     xR, yR, zR, dER, IdM, IdR, qR, nR;
 };
-static Char_t *vTpcHitMRPair = "sector:row:isDet:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
+static const Char_t *vTpcHitMRPair = "sector:row:isDet:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
 static TpcHitMRPair_t TpcHitMRPair;
 struct SvtHitMRPair_t {
   Float_t barrel, layer, ladder, wafer,  hybrid, index,
     xM, yM, zM, pxM, pyM, pzM, dEM, dSM, nM,
     xR, yR, zR, dER, IdM, IdR, qR, nR;
 };
-static Char_t *vSvtHitMRPair = "barrel:layer:ladder:wafer:hybrid:index:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
+static const Char_t *vSvtHitMRPair = "barrel:layer:ladder:wafer:hybrid:index:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
 static SvtHitMRPair_t SvtHitMRPair;
 struct SsdHitMRPair_t {
   Float_t ladder, wafer,
     xM, yM, zM, pxM, pyM, pzM, dEM, dSM, nM,
     xR, yR, zR, dER, IdM, IdR, qR, nR;
 };
-static Char_t *vSsdHitMRPair = "ladder:wafer:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
+static const Char_t *vSsdHitMRPair = "ladder:wafer:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
 static SsdHitMRPair_t SsdHitMRPair;
 ClassImp(StMcAnalysisMaker)
 
@@ -298,7 +301,7 @@ Int_t StMcAnalysisMaker::Init()
 
     mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
     
-    char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ:mcTrkId:mostCommIdTruth:nHitsIdTruth:nMcHits:nFitPts:nDetPts:quality";
+    const char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ:mcTrkId:mostCommIdTruth:nHitsIdTruth:nMcHits:nFitPts:nDetPts:quality";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
     mTrackNtuple->SetAutoSave(100000000);
     if (! m_Mode || m_Mode & 0x1) {

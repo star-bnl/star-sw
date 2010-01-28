@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.67 2009/07/24 19:06:41 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.68 2010/01/28 18:12:26 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.68  2010/01/28 18:12:26  perev
+ * WarnOff
+ *
  * Revision 1.67  2009/07/24 19:06:41  perev
  * Btof added (Geurts)
  *
@@ -295,7 +298,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.67 2009/07/24 19:06:41 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.68 2010/01/28 18:12:26 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -411,7 +414,7 @@ Int_t StMcEventMaker::Make()
     if (Debug()>=1) cout << "Inside StMcEventMaker::Make()" << endl;
     // We're supposed to get the dataset from the chain. I don't know how yet. I think it is:
     
-    Char_t* geaTmp[3]={"geant","event/geant/Event","bfcTree/geantBranch"};
+    const Char_t* geaTmp[3]={"geant","event/geant/Event","bfcTree/geantBranch"};
     St_DataSet* dsGeant = 0;
     for(UInt_t i=0; i<3; i++){ 
       dsGeant = GetDataSet(geaTmp[i]);
@@ -909,7 +912,7 @@ Int_t StMcEventMaker::Make()
 				<< "because it has not been created yet!" << endm;
 			}
 		    }
-		    else t->setParent(ttemp[motherIndex-1]);
+		    else {t->setParent(ttemp[motherIndex-1]);}
 	    }
 	    
 	}} // Track loop
