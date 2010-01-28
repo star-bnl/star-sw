@@ -90,12 +90,13 @@ StEEmcMixerMaker::Make(){
    StEEmcCollection* is used to build an embedded StEvent.  
     
 */  
-    
+
   StEEmcPrint eemcPrint;
   eemcPrint.setMode(15);//bits= 1:Tower, 2:Pre, 4:SmdU, 8:SmdV, 15:all
   
   LOG_DEBUG<<"::Make() -------------- print data: Ecoll-A ---- real backg eve  ---------"<<endm;
   if(Debug()) eemcPrint.print(ecolA);
+
     
   /* If the second source is the EEMC simulator,
      it owns the StEmcCollection from simulator.
@@ -116,7 +117,7 @@ StEEmcMixerMaker::Make(){
   
   
   LOG_DEBUG<<GetName() <<"::Make() -------------- print data: Ecoll-A+B ----- before mrging -----"<<endm;   
-  eemcPrint.printChange(ecolA,ecolB,"before merging");
+  if(Debug()) eemcPrint.printChange(ecolA,ecolB,Form("before merging"));
 
   if(!mergeADCs(ecolA,ecolB))    return  kStErr;
   
@@ -126,7 +127,7 @@ StEEmcMixerMaker::Make(){
   if(Debug())   eemcPrint.print(ecolA);
   
   LOG_DEBUG <<"::Make() -------------- print data: Ecoll-A+B ----- after mrging -----"<<endm;   
-  if(Debug())    eemcPrint.printChange(ecolA,ecolB,"after merging");
+  if(Debug())    eemcPrint.printChange(ecolA,ecolB,Form("after merging"));
   return kStOK; 
 }
 
@@ -253,8 +254,13 @@ into the first StEmcCollection in event for all EEMC subdetectors
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.9 2009/11/23 23:44:32 ogrebeny Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.10 2010/01/28 14:16:46 jwebb Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.10  2010/01/28 14:16:46  jwebb
+// (1) Use "Form" to get around deprecated conversion from string constant to
+//     char *
+// (2) eemcPrint called on debug only.
+//
 // Revision 1.9  2009/11/23 23:44:32  ogrebeny
 // At Pibero's request, for the embedding infrastructure.
 //
