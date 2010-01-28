@@ -45,10 +45,9 @@ public:
     
     void   writeToDb(char* data);
     
-    static std::string& timeToSqlTime(const char* apiTime);
+    static std::string timeToSqlTime(const char* apiTime);
 
 protected:
-    StDbTable*      mTable;                 ///< EMC database table
     std::string     mFlavor;                ///< flavor for BEMC tables
     std::string     mTableNode;             ///< Database node for EMC tables
     std::string     mTableName;             ///< EMC database table name, according to input
