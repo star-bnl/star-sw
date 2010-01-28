@@ -27,7 +27,7 @@ bool checkDbTable(char* fileSource, char* MAXENTRY = "2030-01-01 00:00:00",char*
   TFile* tableFile=new TFile(fileSource);    
   
   TString tempString = fileSource;
-  char slash = "/";
+  char slash = '/';
   int index = tempString.Last(slash);
   TString fileName = tempString(index+1,tempString.Length()-index);
   
@@ -45,6 +45,7 @@ bool checkDbTable(char* fileSource, char* MAXENTRY = "2030-01-01 00:00:00",char*
   TString timeStamp = date + " " + time;  
 
   StEmcDbHandler* dbHandler = new StEmcDbHandler();
+cout << "Requesting table name=" << tableName << ", timestamp=" << timeStamp << " flavor=" << flavor << " maxentry=" << MAXENTRY << endl;
   dbHandler->setTableName(tableName.Data());
   dbHandler->setTimeStamp(timeStamp.Data());
   dbHandler->setMaxEntryTime(MAXENTRY);    
@@ -129,8 +130,9 @@ bool checkDbTable(char* fileSource, char* MAXENTRY = "2030-01-01 00:00:00",char*
     equal=compare(tableInFile,tableInDb);
   }
   tableFile->Close();
-  delete tableInFile;
+  delete tableFile;
   delete dbHandler;
+    cout << (equal ? "EQUAL" : "NOT EQUAL") << endl;
   return equal;
 
 }
@@ -143,7 +145,7 @@ bool compare(emcCalib_st* t1, emcCalib_st* t2)
   for(int i = 0; i<4800;i++) 
   {
     for(int j=0;j<5;j++)
-      if(t1->AdcToE[i][j]!=t2->AdcToE[i][j]) equal = false
+      if(t1->AdcToE[i][j]!=t2->AdcToE[i][j]) equal = false;
     if(t1->Status[i]!=t2->Status[i]) equal = false;
   }
   return equal;
@@ -155,7 +157,7 @@ bool compare(smdCalib_st* t1, smdCalib_st* t2)
   for(int i = 0; i<18000;i++) 
   { 
     for(int j=0;j<5;j++)
-      if(t1->AdcToE[i][j]!=t2->AdcToE[i][j]) equal = false
+      if(t1->AdcToE[i][j]!=t2->AdcToE[i][j]) equal = false;
     if(t1->Status[i]!=t2->Status[i]) equal = false;
   }
   return equal;
