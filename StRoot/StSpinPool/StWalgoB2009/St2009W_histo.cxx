@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.9 2010/01/27 22:12:24 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.10 2010/01/28 20:10:05 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -216,7 +216,7 @@ St2009WMaker::initHistos(){
   
   sprintf(txt,"Vertex Z , final W selection, 2x2 ET>%.0f GeV; Z(cm)",par_highET);
   hA[98]=new TH1F("muWcar3",txt, 100, -200,200);
-  hA[99]=h=new TH1F("muWeta","final Ws ; event eta",100, -1.5,1.5);
+  hA[99]=h=new TH1F("muWeta","final Ws ; lepton eta",100, -1.5,1.5);
 
   // free 100-109
 
@@ -262,6 +262,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.10  2010/01/28 20:10:05  balewski
+// added eta dependent spin sorting
+//
 // Revision 1.9  2010/01/27 22:12:24  balewski
 // spin code matched to x-section code
 //
