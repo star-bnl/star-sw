@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.11 2010/01/28 03:16:27 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.12 2010/01/28 05:16:24 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -21,6 +21,18 @@ enum EStuDraw3DMuEvent {
                      ,kUsedHitsTracks=1  //!< Render the "used" hits and tracks
                      ,kTracksOnly=2      //!< Render the tracks only no hit
  };
+
+class StEmcTowerColor {
+   private:
+       StDraw3DStyle  fStyle; 
+       StEmcTowerColor();
+       //StEmcTowerColor(const StEmcTowerColor&);
+       //void operator=(const StEmcTowerColor&);
+   public:
+     StEmcTowerColor(float energy);
+     virtual ~StEmcTowerColor() {}
+     virtual const StDraw3DStyle& operator()() const { return fStyle;}
+};
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -87,8 +99,18 @@ class StuDraw3DMuEvent : public virtual StDraw3D
      virtual void     Endcaps(Style_t sty=0);
      virtual void     Endcaps(const StMuEmcCollection &e, Style_t sty=0);
      virtual TObject *EmcHit(Int_t emcHitsSoftId, Color_t col,Style_t sty,Size_t siz, const char *detIdt="bemc");
+     virtual TObject *EmcHit(Int_t emcHitsSoftId, float energy, const char *detIdt="bemc");
+     template <class Predicate>
+     TObject *EmcHit(Int_t emcHitsSoftId, Predicate sty, const char *detIdt="bemc");
      ClassDef(StuDraw3DMuEvent,0);
 };
+
+//_________________________________________________________________________________________________
+template <class Predicate>
+TObject *StuDraw3DMuEvent::EmcHit(Int_t emcHitsSoftId, Predicate sty, const char *detIdt)
+{
+   return EmcHit(emcHitsSoftId, sty().Col(),sty().Sty(), sty().Siz(), detIdt);
+}
 
 
 #endif
