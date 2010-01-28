@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.2 2010/01/27 22:12:25 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.3 2010/01/28 03:42:55 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -43,9 +43,9 @@ St2009pubSpinMaker::initHistos(){
 
 
   hA[6]=new TH1F(core+"Y0","BG1: L2W-BHT3-rnd & vertex OK & low ET; spin4 ",16,-0.5,15.5);
-  hA[7]=new TH1F(core+"Y1","BG2: L2W-ET>13 & vertex & ET 2x2 << 4x4 ; spin4 ",16,-0.5,15.5);
+  hA[7]=new TH1F(core+"Y1","BG2: vertex & ET<20 &  ET 2x2 << 4x4 ; spin4 ",16,-0.5,15.5);
 
-  hA[8]=h=new TH1F(core+"QpT","reco Q/PT,W ET>25 GeV",100,-0.1,0.1);
+  hA[8]=h=new TH1F(core+"QpT","reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.1,0.1);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_QPTplus,0,par_QPTplus,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(par_QPTminus,0,par_QPTminus,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
@@ -105,6 +105,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.3  2010/01/28 03:42:55  balewski
+// cleanup
+//
 // Revision 1.2  2010/01/27 22:12:25  balewski
 // spin code matched to x-section code
 //

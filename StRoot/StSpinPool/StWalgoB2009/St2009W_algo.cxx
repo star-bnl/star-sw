@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.10 2010/01/27 22:12:24 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.11 2010/01/28 03:42:55 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -263,13 +263,13 @@ St2009WMaker::matchTrack2Cluster(){
       hA[34]->Fill(T.cluster.adcSum,trackPT);
       hA[110]->Fill( T.cluster.ET);
 
-      if (T.cluster.ET <par_clustET) continue; // too low energy
-      hA[20]->Fill("CL",1.);
-
       // ........compute surroinding cluster energy
       int iEta=T.cluster.iEta;
       int iPhi=T.cluster.iPhi;
-      T.cl4x4=sumBtowPatch(iEta-1,iPhi-1,4,4,zVert);
+      T.cl4x4=sumBtowPatch(iEta-1,iPhi-1,4,4,zVert); // needed for lumi monitor
+      if (T.cluster.ET <par_clustET) continue; // too low energy
+      hA[20]->Fill("CL",1.);
+
       hA[37]->Fill( T.cl4x4.ET);
       hA[38]->Fill(T.cluster.energy, T.cl4x4.energy-T.cluster.energy);
       
@@ -499,6 +499,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.11  2010/01/28 03:42:55  balewski
+// cleanup
+//
 // Revision 1.10  2010/01/27 22:12:24  balewski
 // spin code matched to x-section code
 //
