@@ -27,6 +27,7 @@ class StEmcOfflineCalibrationMaker : public StMaker
 private:
 	const char* filename;
 	TFile* myFile;
+	TFile* mapFile;
 	TTree* calibTree;
 	TH2* mapcheck;
 	TH2* towerSlopes[2]; //[MB][HT]

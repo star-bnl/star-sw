@@ -114,7 +114,7 @@ const int ntowers = 4800;
 
 		if((i+1) % 20 == 0){
 		  //cout<<i+1<<endl;
-		  mip_histo[i]->Rebin(4);
+		  mip_histo[i]->Rebin(5);
 		  mip_histo[i]->GetXaxis()->SetRangeUser(6.,100.);
 		}else{
 		  mip_histo[i]->Rebin(2);
@@ -147,7 +147,7 @@ const int ntowers = 4800;
 		double histogram_top = mip_histo[i]->GetBinContent(mip_histo[i]->GetMaximumBin());
 		double gaussian_mean = 0;
 		
-		if(mip_histo[i]->Integral() > 0){
+		if(mip_histo[i]->Integral() > 25){
 		  mip_histo[i]->Fit(gaussian_fit[i],"rql","",guesspeak-2*guessrms,guesspeak+2*guessrms);
 		  mipstatus[i]+=1;
 		  double gauss_const = gaussian_fit[i]->GetParameter(0);

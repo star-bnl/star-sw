@@ -48,6 +48,9 @@ void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskim
   StEmcOfflineCalibrationTrack* mip;
 	
 	//create the 4800 mip histograms
+  TH2F* mapcheck = new TH2F("mapcheck","check mapping",4800,0.5,4800.5,4800,0.5,4800.5);
+  mapcheck->SetXTitle("Track Projection ID");
+  mapcheck->SetYTitle("Tower hit above 5 rms");
   TH1* mip_histo[ntowers];
   char name[100];
   for(int k=0; k<ntowers; k++){
@@ -97,9 +100,15 @@ void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskim
       if(excluded_towers.find(mip->tower_id[0]) != excluded_towers.end()) continue;
       if(mip->p < 1.) continue;
       //if(mip->preshower_status[0] != 1) continue;
+      if(mip->tower_id[0] != mip->tower_id_exit) continue;
+
+      for(int k = 0; k < 9; k++){
+	if(mip->tower_adc[k] - mip->tower_pedestal[k] < 5*mip->tower_pedestal_rms[k])continue;
+	mapcheck->Fill(mip->tower_id[0],mip->tower_id[k]);
+      }
+
       if(mip->highest_neighbor > 2.) continue;
       if(pedsub < 1.5*mip->tower_pedestal_rms[0])continue;
-      if(mip->tower_id[0] != mip->tower_id_exit) continue;
       //if(mip->vertexIndex > 0) continue;
 			
       int index = mip->tower_id[0];
@@ -112,5 +121,6 @@ void mip_histogram_maker(const char* file_list="", const char* skimfile="mipskim
   cout<<"Added "<<ngood<<" tracks of "<<ntracks<<endl;
   TFile* output_file = new TFile(skimfile,"RECREATE");
   for(int k=0; k<ntowers; k++) mip_histo[k]->Write();
+  mapcheck->Write();
   output_file->Close();
 }
