@@ -42,7 +42,8 @@ public:
 
   Lxgbx() {};
   
-  int configEvp(STAR_CFG *cfg)
+  // divisor is for use in EVB where rate gets divided by number of evbs...
+  int configEvp(STAR_CFG *cfg, int divisor=1)
   {
     // zero out counters...
     evpCtrs.runStartTime = -1;   // untill the first event!
@@ -54,6 +55,10 @@ public:
     for(int i=0;i<TRIGGERS_MAX;i++) {
       evpCfg.groupdef[i] = groups[i].definition;
       evpCfg.rate[i] = groups[i].rate;
+      if((evpCfg.rate[i] > 0) && (divisor > 1)) {
+	evpCfg.rate[i] /= divisor;
+      }
+	
     } 
     return 0;
   }

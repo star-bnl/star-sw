@@ -21,6 +21,7 @@
 // Appended by prepare_gb_payload
 #define EVBFLAG_L25ABORT (1<<12)
 #define EVBFLAG_L25TIMEOUT (1<<13)
+#define EVBFLAG_L3ABORT (1<<14)
 
 //#ifdef RTS_LITTLE_ENDIAN
 struct iccp2k {   
