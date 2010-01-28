@@ -457,60 +457,60 @@
 
 // PMD Chain Histograms 
 // GVB: pmd hists unneeded, setting to 1 bin (originally 1729(x49) bins)
-1,h382_pmd_Chain_1,Channel_vs_ADC for CPV Chain 1,1,1.,1728.5,0xffffffff,0xffffffff
-1,h383_pmd_Chain_2,Channel_vs_ADC for CPV Chain 2,1,1.,1728.5,0xffffffff,0xffffffff
-1,h384_pmd_Chain_3,Channel_vs_ADC for CPV Chain 3,1,1.,1728.5,0xffffffff,0xffffffff
-1,h385_pmd_Chain_4,Channel_vs_ADC for CPV Chain 4,1,1.,1728.5,0xffffffff,0xffffffff
-1,h386_pmd_Chain_5,Channel_vs_ADC for CPV Chain 5,1,1.,1728.5,0xffffffff,0xffffffff
-1,h387_pmd_Chain_6,Channel_vs_ADC for Preshower Chain 36,1,1.,1728.5,0xffffffff,0xffffffff
-1,h388_pmd_Chain_7,Channel_vs_ADC for CPV Chain 7,1,1.,1728.5,0xffffffff,0xffffffff
-1,h389_pmd_Chain_8,Channel_vs_ADC for CPV Chain 8,1,1.,1728.5,0xffffffff,0xffffffff
-1,h390_pmd_Chain_9,Channel_vs_ADC for CPV Chain 9,1,1.,1728.5,0xffffffff,0xffffffff
+1,h382_pmd_Chain_1,Channel_vs_ADC for CPV Chain 1,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h383_pmd_Chain_2,Channel_vs_ADC for CPV Chain 2,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h384_pmd_Chain_3,Channel_vs_ADC for CPV Chain 3,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h385_pmd_Chain_4,Channel_vs_ADC for CPV Chain 4,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h386_pmd_Chain_5,Channel_vs_ADC for CPV Chain 5,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h387_pmd_Chain_6,Channel_vs_ADC for Preshower Chain 36,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h388_pmd_Chain_7,Channel_vs_ADC for CPV Chain 7,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h389_pmd_Chain_8,Channel_vs_ADC for CPV Chain 8,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h390_pmd_Chain_9,Channel_vs_ADC for CPV Chain 9,1729,1.,1728.5,0xffffffff,0xffffffff
 // 39 and 40 are plugged into 10,11
-1,h391_pmd_Chain_10,Channel_vs_ADC for CPV Chain 10,1,1.,1728.5,0xffffffff,0xffffffff
-1,h392_pmd_Chain_11,Channel_vs_ADC for CPV Chain 11,1,1.,1728.5,0xffffffff,0xffffffff
-1,h393_pmd_Chain_12,Channel_vs_ADC for CPV Chain 12,1,1.,1728.5,0xffffffff,0xffffffff
-1,h394_pmd_Chain_13,Channel_vs_ADC for CPV Chain 13,1,1.,1728.5,0xffffffff,0xffffffff
-1,h395_pmd_Chain_14,Channel_vs_ADC for CPV Chain 14,1,1.,1728.5,0xffffffff,0xffffffff
-1,h396_pmd_Chain_15,Channel_vs_ADC for CPV Chain 15,1,1.,1728.5,0xffffffff,0xffffffff
-1,h397_pmd_Chain_16,Channel_vs_ADC for CPV Chain 16,1,1.,1728.5,0xffffffff,0xffffffff
-1,h398_pmd_Chain_17,Channel_vs_ADC for CPV Chain 17,1,1.,1728.5,0xffffffff,0xffffffff
-1,h399_pmd_Chain_18,Channel_vs_ADC for CPV Chain 18,1,1.,1728.5,0xffffffff,0xffffffff
-1,h400_pmd_Chain_19,Channel_vs_ADC for CPV Chain 19,1,1.,1728.5,0xffffffff,0xffffffff
-1,h401_pmd_Chain_20,Channel_vs_ADC for CPV Chain 20,1,1.,1728.5,0xffffffff,0xffffffff
-1,h402_pmd_Chain_21,Channel_vs_ADC for CPV Chain 21,1,1.,1728.5,0xffffffff,0xffffffff
-1,h403_pmd_Chain_22,Channel_vs_ADC for CPV Chain 22,1,1.,1728.5,0xffffffff,0xffffffff
-1,h404_pmd_Chain_23,Channel_vs_ADC for CPV Chain 23,1,1.,1728.5,0xffffffff,0xffffffff
-1,h405_pmd_Chain_24,Channel_vs_ADC for CPV Chain 24,1,1.,1728.5,0xffffffff,0xffffffff
+1,h391_pmd_Chain_10,Channel_vs_ADC for CPV Chain 10,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h392_pmd_Chain_11,Channel_vs_ADC for CPV Chain 11,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h393_pmd_Chain_12,Channel_vs_ADC for CPV Chain 12,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h394_pmd_Chain_13,Channel_vs_ADC for CPV Chain 13,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h395_pmd_Chain_14,Channel_vs_ADC for CPV Chain 14,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h396_pmd_Chain_15,Channel_vs_ADC for CPV Chain 15,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h397_pmd_Chain_16,Channel_vs_ADC for CPV Chain 16,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h398_pmd_Chain_17,Channel_vs_ADC for CPV Chain 17,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h399_pmd_Chain_18,Channel_vs_ADC for CPV Chain 18,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h400_pmd_Chain_19,Channel_vs_ADC for CPV Chain 19,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h401_pmd_Chain_20,Channel_vs_ADC for CPV Chain 20,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h402_pmd_Chain_21,Channel_vs_ADC for CPV Chain 21,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h403_pmd_Chain_22,Channel_vs_ADC for CPV Chain 22,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h404_pmd_Chain_23,Channel_vs_ADC for CPV Chain 23,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h405_pmd_Chain_24,Channel_vs_ADC for CPV Chain 24,1729,1.,1728.5,0xffffffff,0xffffffff
 //
-1,h406_pmd_Chain_25,Channel_vs_ADC for PreShower Chain 25,1,1.,1728.5,0xffffffff,0xffffffff
-1,h407_pmd_Chain_26,Channel_vs_ADC for PreShower Chain 26,1,1.,1728.5,0xffffffff,0xffffffff
-1,h408_pmd_Chain_27,Channel_vs_ADC for PreShower Chain 27,1,1.,1728.5,0xffffffff,0xffffffff
-1,h409_pmd_Chain_28,Channel_vs_ADC for PreShower Chain 28,1,1.,1728.5,0xffffffff,0xffffffff
-1,h410_pmd_Chain_29,Channel_vs_ADC for PreShower Chain 29,1,1.,1728.5,0xffffffff,0xffffffff
-1,h411_pmd_Chain_30,Channel_vs_ADC for PreShower Chain 30,1,1.,1728.5,0xffffffff,0xffffffff
-1,h412_pmd_Chain_31,Channel_vs_ADC for PreShower Chain 31,1,1.,1728.5,0xffffffff,0xffffffff
-1,h413_pmd_Chain_32,Channel_vs_ADC for PreShower Chain 32,1,1.,1728.5,0xffffffff,0xffffffff
-1,h414_pmd_Chain_33,Channel_vs_ADC for PreShower Chain 33,1,1.,1728.5,0xffffffff,0xffffffff
-1,h415_pmd_Chain_34,Channel_vs_ADC for PreShower Chain 34,1,1.,1728.5,0xffffffff,0xffffffff
-1,h416_pmd_Chain_35,Channel_vs_ADC for PreShower Chain 35,1,1.,1728.5,0xffffffff,0xffffffff
-1,h417_pmd_Chain_36,Channel_vs_ADC for CPV Chain 6,1,1.,1728.5,0xffffffff,0xffffffff
-1,h418_pmd_Chain_37,Channel_vs_ADC for PreShower Chain 37,1,1.,1728.5,0xffffffff,0xffffffff
-1,h419_pmd_Chain_38,Channel_vs_ADC for PreShower Chain 38,1,1.,1728.5,0xffffffff,0xffffffff
-1,h420_pmd_Chain_39,Channel_vs_ADC for PreShower Chain 39,1,1.,1728.5,0xffffffff,0xffffffff
-1,h421_pmd_Chain_40,Channel_vs_ADC for PreShower Chain 40,1,1.,1728.5,0xffffffff,0xffffffff
-1,h422_pmd_Chain_41,Channel_vs_ADC for PreShower Chain 41,1,1.,1728.5,0xffffffff,0xffffffff
-1,h423_pmd_Chain_42,Channel_vs_ADC for PreShower Chain 42,1,1.,1728.5,0xffffffff,0xffffffff
-1,h424_pmd_Chain_43,Channel_vs_ADC for PreShower Chain 43,1,1.,1728.5,0xffffffff,0xffffffff
-1,h425_pmd_Chain_44,Channel_vs_ADC for PreShower Chain 44,1,1.,1728.5,0xffffffff,0xffffffff
+1,h406_pmd_Chain_25,Channel_vs_ADC for PreShower Chain 25,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h407_pmd_Chain_26,Channel_vs_ADC for PreShower Chain 26,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h408_pmd_Chain_27,Channel_vs_ADC for PreShower Chain 27,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h409_pmd_Chain_28,Channel_vs_ADC for PreShower Chain 28,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h410_pmd_Chain_29,Channel_vs_ADC for PreShower Chain 29,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h411_pmd_Chain_30,Channel_vs_ADC for PreShower Chain 30,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h412_pmd_Chain_31,Channel_vs_ADC for PreShower Chain 31,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h413_pmd_Chain_32,Channel_vs_ADC for PreShower Chain 32,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h414_pmd_Chain_33,Channel_vs_ADC for PreShower Chain 33,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h415_pmd_Chain_34,Channel_vs_ADC for PreShower Chain 34,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h416_pmd_Chain_35,Channel_vs_ADC for PreShower Chain 35,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h417_pmd_Chain_36,Channel_vs_ADC for CPV Chain 6,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h418_pmd_Chain_37,Channel_vs_ADC for PreShower Chain 37,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h419_pmd_Chain_38,Channel_vs_ADC for PreShower Chain 38,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h420_pmd_Chain_39,Channel_vs_ADC for PreShower Chain 39,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h421_pmd_Chain_40,Channel_vs_ADC for PreShower Chain 40,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h422_pmd_Chain_41,Channel_vs_ADC for PreShower Chain 41,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h423_pmd_Chain_42,Channel_vs_ADC for PreShower Chain 42,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h424_pmd_Chain_43,Channel_vs_ADC for PreShower Chain 43,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h425_pmd_Chain_44,Channel_vs_ADC for PreShower Chain 44,1729,1.,1728.5,0xffffffff,0xffffffff
 //45 and 46th chains interchanged
-1,h426_pmd_Chain_45,Channel_vs_ADC for PreShower Chain 46,1,1.,1728.5,0xffffffff,0xffffffff
-1,h427_pmd_Chain_46,Channel_vs_ADC for PreShower Chain 45,1,1.,1728.5,0xffffffff,0xffffffff
-1,h428_pmd_Chain_47,Channel_vs_ADC for PreShower Chain 47,1,1.,1728.5,0xffffffff,0xffffffff
-1,h429_pmd_Chain_48,Channel_vs_ADC for PreShower Chain 48,1,1.,1728.5,0xffffffff,0xffffffff
-2,h430_pmd_Chain_vs_channel,Chain vs Channel 2D,1,1.,1728.5,1,1.,48.5,0xffffffff,0xffffffff
+1,h426_pmd_Chain_45,Channel_vs_ADC for PreShower Chain 46,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h427_pmd_Chain_46,Channel_vs_ADC for PreShower Chain 45,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h428_pmd_Chain_47,Channel_vs_ADC for PreShower Chain 47,1729,1.,1728.5,0xffffffff,0xffffffff
+1,h429_pmd_Chain_48,Channel_vs_ADC for PreShower Chain 48,1729,1.,1728.5,0xffffffff,0xffffffff
+2,h430_pmd_Chain_vs_channel,Chain vs Channel 2D,1729,1.,1728.5,49,1.,48.5,0xffffffff,0xffffffff
 
-2,h431_pmd_Chain_vs_channel_adc,Chain vs Channel 2D (ADC weighted),1,1.,1728.5,1,1.,48.5,0xffffffff,0xffffffff
+2,h431_pmd_Chain_vs_channel_adc,Chain vs Channel 2D (ADC weighted),1729,1.,1728.5,49,1.,48.5,0xffffffff,0xffffffff
 
 // Jing Liu, tof histograms , tofr5, 02/04/2005
 1,h432_tofr_hits_tdigchan_leading,h432_tofr_hits_tdigchan_leading, 1,-0.5,191.5,0xffffffff,0xffffffff
