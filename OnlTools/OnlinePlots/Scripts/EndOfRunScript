@@ -1,6 +1,8 @@
 #!/bin/csh
 
 unset DISPLAY
+source /home/evpops/.login
+
 
 if ($#argv != 1) then
   echo "Usage: $0 rootfile"
@@ -10,17 +12,21 @@ endif
 
 set file=$1
 
-cd /home/operator/pplots/
+cd /home/evpops/pplots/
 
 rm endOfRunAction.C
 echo "--- Creating the ROOT macro"
 cat >endOfRunAction.C<<ROOTMACRO
 {
-  gSystem->Load("$QTDIR/lib/libqt-mt.so");
-  gSystem->Load("libGui.so");
-  gSystem->Load("libGQt.so");
   gROOT->Macro("Load.C");
   gSystem->Load("RTS");
+  if (gROOT->IsBatch()) {
+     gSystem->Load("libQtCore.so");
+     gSystem->Load("libQtGui.so");
+     gSystem->Load("libGui.so");
+     gSystem->Load("libGQt.so");
+     gSystem->Load("libQt3Support.so");
+  }
   gSystem->Load("StDaqLib");
   gSystem->Load("OnlinePlots");
   gSystem->Load("StDbLib");
@@ -28,6 +34,8 @@ cat >endOfRunAction.C<<ROOTMACRO
   gSystem->Load("StEmcUtil");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StTriggerUtilities");
   gSystem->Load("StEEmcPoolmuEztPanitkin");
   gSystem->Load("StBEMCPlots");
   const char *homedir = gSystem->Getenv("ONLINEPLOTSDIR");
