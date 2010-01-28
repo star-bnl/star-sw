@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.8 2010/01/26 17:50:54 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.9 2010/01/28 21:51:24 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.9  2010/01/28 21:51:24  hmasui
+ * Add Vx vs Vz and Vy vs Vz histograms in the event-wise QA
+ *
  * Revision 1.8  2010/01/26 17:50:54  hmasui
  * Fix geantidFound to match the correct geant id. Use number of accepted events, not number of all events without vertex cuts. Add QA for eventid, runid and # of particles per event
  *
@@ -471,8 +474,8 @@ Bool_t StEmbeddingQADraw::drawEvent() const
 
   //----------------------------------------------------------------------------------------------------
   // Vertices
-  TCanvas* canvas1 = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 600);
-  canvas1->Divide(3, 2);
+  TCanvas* canvas1 = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
+  canvas1->Divide(3, 3);
 
   /// z-vertex
   canvas1->cd(1);
@@ -489,17 +492,26 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   hVz->Draw("same");
 
   /// y vs x vertices
-  canvas1->cd(2);
+  canvas1->cd(4);
   TH2* hVyVx = (TH2D*) mInputEmbedding->Get("hVyVx");
   if(!hVyVx) return kFALSE ;
-
-  hVyVx->SetAxisRange(-5, 5, "X");
-  hVyVx->SetAxisRange(-5, 5, "Y");
   hVyVx->Draw("colz");
+
+  /// x vs z vertices
+  canvas1->cd(5);
+  TH2* hVxVz = (TH2D*) mInputEmbedding->Get("hVxVz");
+  if(!hVxVz) return kFALSE ;
+  hVxVz->Draw("colz");
+
+  /// y vs z vertices
+  canvas1->cd(6);
+  TH2* hVyVz = (TH2D*) mInputEmbedding->Get("hVyVz");
+  if(!hVyVz) return kFALSE ;
+  hVyVz->Draw("colz");
 
   /// dVx, dVy, dVz
   for(Int_t i=0; i<3; i++){
-    canvas1->cd(i+3);
+    canvas1->cd(i+7);
     TH1* hdV = 0 ;
     if( i == 0 ) hdV = (TH1D*) mInputEmbedding->Get("hdVx");
     if( i == 1 ) hdV = (TH1D*) mInputEmbedding->Get("hdVy");
@@ -510,7 +522,7 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   }
 
   /// Statistics
-  canvas1->cd(6);
+  canvas1->cd(3);
   drawStatistics();
 
   canvas1->cd();
