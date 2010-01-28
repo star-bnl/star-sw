@@ -14,7 +14,7 @@ Float_t Value[200000]={0.};
 
 
 /// Constructor 
-StPmdNeuNet::StPmdNeuNet(Text_t *name, Int_t nInput, Text_t *hidden, Int_t nOutput):TNamed(name,"Neural Network")
+StPmdNeuNet::StPmdNeuNet(const Text_t *name, Int_t nInput, const Text_t *hidden, Int_t nOutput):TNamed(name,"Neural Network")
 {
   ZeroAll();
   AllocateVW(nInput,hidden,nOutput);
@@ -91,7 +91,7 @@ void StPmdNeuNet::ZeroAll()
 }
 
 
-void StPmdNeuNet::SetHidden(Text_t *ttext)
+void StPmdNeuNet::SetHidden(const Text_t *ttext)
 {
   Int_t i,j;
   TString *number;
@@ -156,7 +156,7 @@ void StPmdNeuNet::FreeVW()
   if (fNUnits){ delete [] fNUnits; fNUnits=0;}
 }
 
-void StPmdNeuNet::AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput)
+void StPmdNeuNet::AllocateVW(Int_t nInput, const Text_t *hidden, Int_t nOutput)
 {
   Int_t i,l;
   
@@ -206,7 +206,7 @@ void StPmdNeuNet::AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput)
   
 }
 
-void StPmdNeuNet::SetKernel(Int_t nInput, Text_t *hidden, Int_t nOutput)
+void StPmdNeuNet::SetKernel(Int_t nInput, const Text_t *hidden, Int_t nOutput)
 {  
    FreeVW();
    AllocateVW(nInput,hidden,nOutput);
@@ -561,7 +561,7 @@ void StPmdNeuNet::TrainNCycles(Int_t nCycles)
  * in decimal part.      
  * Learning parameters are not stored
  */
-void StPmdNeuNet::Export(Text_t *fileName)
+void StPmdNeuNet::Export(const Text_t *fileName)
 {
   Int_t i,l,c;
   
@@ -603,7 +603,7 @@ void StPmdNeuNet::Export(Text_t *fileName)
  * in decimal part.
  * Learning parameteres are not stored.  
  */
-void StPmdNeuNet::Import(Text_t *fileName)
+void StPmdNeuNet::Import(const Text_t *fileName)
 {
   Int_t i,l,c,newI,newHL,newO;
   Text_t hidden[100],piece[5];

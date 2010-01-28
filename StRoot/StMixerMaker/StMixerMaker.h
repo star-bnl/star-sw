@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.11 2008/06/20 14:57:43 fisyak Exp $
+ * $Id: StMixerMaker.h,v 1.12 2010/01/28 18:14:28 perev Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
+ * Revision 1.12  2010/01/28 18:14:28  perev
+ * WarningOff
+ *
  * Revision 1.11  2008/06/20 14:57:43  fisyak
  * Change interal presentation for ADC from UChat_t to Short_t
  *
@@ -103,7 +106,7 @@ private:
 class StMixerMaker : public StMaker {
 
  private:
-    char            *gConfig[2]; //!
+    const char            *gConfig[2]; //!
     StMixerMaker(const StMixerMaker&);
     StMixerMaker& operator=(const StMixerMaker&);
 
@@ -118,7 +121,7 @@ class StMixerMaker : public StMaker {
     // Container
     StTrsSector               *mSector; //!
     // I/O streams
-    char*                        mOutputFileName; //!
+    const char*                  mOutputFileName; //!
     int                          mNumberOfEvents; //!
 
     // Output
@@ -135,7 +138,8 @@ class StMixerMaker : public StMaker {
  protected:
 
  public:
-    StMixerMaker(const char *name="Mixer",char *kind1="undefined",char *kind2="undefined");
+  
+    StMixerMaker(const char *name="Mixer",const char *kind1="undefined",const char *kind2="undefined");
     ~StMixerMaker();
     Int_t  InitRun(int);
     Int_t  Make();
@@ -143,14 +147,14 @@ class StMixerMaker : public StMaker {
     
     void Clear(Option_t *option="");  // called after every event to cleanup 
 
-    char   *GetConfig(int i) {return gConfig[i-1];}
+    const char *GetConfig(int i) {return gConfig[i-1];}
 
-    int   writeFile(char*, int);   //!
+    int   writeFile(const char*, int);   //!
     char SetSequenceMerging(char); //!
 
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.11 2008/06/20 14:57:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.12 2010/01/28 18:14:28 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StMixerMaker, 0)  // 
 };

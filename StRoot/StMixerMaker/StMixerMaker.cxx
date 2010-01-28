@@ -62,7 +62,7 @@
 ClassImp(StMixerMaker)
 
 //______________________________________________________________________________
-StMixerMaker::StMixerMaker(const char *name,char *kind1,char *kind2):StMaker(name), 
+StMixerMaker::StMixerMaker(const char *name,const char *kind1,const char *kind2):StMaker(name), 
 			   mMergeSequences(1),mFirstSector(1),mLastSector(24)  
 { gConfig[0]=kind1; gConfig[1]=kind2; mAllTheDataMixer=0; }
 
@@ -72,7 +72,7 @@ StMixerMaker::~StMixerMaker() { /* nopt */ }
 
 
 //______________________________________________________________________________
-int StMixerMaker::writeFile(char* file, int numEvents)
+int StMixerMaker::writeFile(const char* file, int numEvents)
 {
     mOutputFileName = file;
     mNumberOfEvents = numEvents;

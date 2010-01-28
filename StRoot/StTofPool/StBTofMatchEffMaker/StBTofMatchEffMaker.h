@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchEffMaker.h,v 1.1 2009/02/26 21:23:17 dongx Exp $
+ * $Id: StBTofMatchEffMaker.h,v 1.2 2010/01/28 18:17:53 perev Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchEffMaker.h,v $
+ * Revision 1.2  2010/01/28 18:17:53  perev
+ * WarningOff
+ *
  * Revision 1.1  2009/02/26 21:23:17  dongx
  * first release - example to calculate the TPC->TOF matching efficiency
  *
@@ -55,7 +58,7 @@ public:
     void setMinFitPointsPerTrack(Int_t);
     void setMinFitPointsOverMax(Float_t);
     void setMaxDCA(Float_t);
-    void setHistoFileName(Char_t*);
+    void setHistoFileName(const Char_t*);
 
 private:
     /// book and write histograms
@@ -104,7 +107,7 @@ private:
     TH2D* mAntiPNum;
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchEffMaker.h,v 1.1 2009/02/26 21:23:17 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchEffMaker.h,v 1.2 2010/01/28 18:17:53 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchEffMaker,1)
 };
@@ -116,7 +119,7 @@ inline void StBTofMatchEffMaker::setMinFitPointsOverMax(Float_t ratio) {mMinFitP
 
 inline void StBTofMatchEffMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 
-inline void StBTofMatchEffMaker::setHistoFileName(Char_t* filename){mHistoFileName=filename;}
+inline void StBTofMatchEffMaker::setHistoFileName(const Char_t* filename){mHistoFileName=filename;}
 
 inline void StBTofMatchEffMaker::setCreateHistoFlag(Bool_t histos){mHisto = histos;}
 

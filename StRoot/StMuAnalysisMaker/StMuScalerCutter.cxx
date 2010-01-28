@@ -8,8 +8,11 @@
  * TPC distortion corrections.
  *
  *
- * $Id: StMuScalerCutter.cxx,v 1.2 2009/02/18 19:50:57 genevb Exp $
+ * $Id: StMuScalerCutter.cxx,v 1.3 2010/01/28 18:15:10 perev Exp $
  * $Log: StMuScalerCutter.cxx,v $
+ * Revision 1.3  2010/01/28 18:15:10  perev
+ * WarningOff
+ *
  * Revision 1.2  2009/02/18 19:50:57  genevb
  * Minor error in defining Run 8 dAu data
  *
@@ -79,8 +82,8 @@ bool StMuScalerCutter::accept(StMuEvent* event)
       // bbcbb check (for 1-second scalers)
       double R1 = 1.4923e-3*pow(zdcw,-2.57818)*pow(bbcw,3.6488);
       double R2 = bbcbb/R1;
-      if ((R2 > 0.2) && (R2 < 0.72) ||
-          (R2 > 1.4) && (R2 < 4.6)) return false;
+      if (((R2 > 0.2) && (R2 < 0.72)) ||
+          ((R2 > 1.4) && (R2 < 4.6) )) return false;
 
     } // Run 8 dAu cuts
 

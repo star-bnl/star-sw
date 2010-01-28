@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TAttr.cxx,v 1.5 2010/01/26 20:03:50 fisyak Exp $
+ * $Id: TAttr.cxx,v 1.6 2010/01/28 18:18:32 perev Exp $
  *
  ***************************************************************************
  *
@@ -55,7 +55,7 @@ int TAttr::SetAttr(const TAttr *att)
 {
    TListIter iter(att,kIterBackward);
    int add=0; const TNamed *tn=0; 
-   while (tn = (const TNamed*)iter()) {AddFirst(new TNamed(*tn));add++;}
+   while ((tn = (const TNamed*)iter())) {AddFirst(new TNamed(*tn));add++;}
    return add;
 }
 //_____________________________________________________________________________

@@ -96,8 +96,8 @@ class StPmdNeuNet : public TNamed
   void Error(const char*, const char*, ...) const{}//WarnOff
   void FreeVW();
   void ZeroAll();
-  void AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput);
-  void SetHidden(Text_t *ttext);
+  void AllocateVW(Int_t nInput, const Text_t *hidden, Int_t nOutput);
+  void SetHidden(const Text_t *ttext);
   Float_t Alea();
   void DeleteArray();
 
@@ -113,10 +113,10 @@ class StPmdNeuNet : public TNamed
 
  public:
   StPmdNeuNet();
-  StPmdNeuNet(Text_t *name, Int_t nInput=5, Text_t *hidden="6:7:8", Int_t nOutput=4);
+  StPmdNeuNet(const Text_t *name, Int_t nInput=5, const Text_t *hidden="6:7:8", Int_t nOutput=4);
   void setDiscMaker(StPmdDiscriminatorMaker*);
   virtual ~StPmdNeuNet(); // destructor
-  virtual void SetKernel(Int_t nInput, Text_t *hidden, Int_t nOutput);
+  virtual void SetKernel(Int_t nInput, const Text_t *hidden, Int_t nOutput);
   virtual void SetLearnParam(Double_t learnParam=0.2,Double_t fse=0.,Double_t mu=0.);
   virtual void SetInitParam(Float_t lowerInitWeight=-1., Float_t upperInitWeight=1.);
   virtual void Init();   // init biases and weights
@@ -124,8 +124,8 @@ class StPmdNeuNet : public TNamed
   virtual void Mix();    // mix the events before learning
   virtual Double_t TrainOneCycle();  // one loop on internal events = one cycle
   virtual void ResetCycles(){fNTrainCycles=0;};
-  virtual void Export(Text_t *fileName="exportNN.dat");
-  virtual void Import(Text_t *fileName="exportNN.dat");
+  virtual void Export(const Text_t *fileName="exportNN.dat");
+  virtual void Import(const Text_t *fileName="exportNN.dat");
   virtual void SetUseBiases(Bool_t trueForUse=1){fUseBiases=(Double_t)trueForUse;};
   virtual void SetRandomSeed(UInt_t seed=0){fRandom.SetSeed(seed);};
   virtual UInt_t GetRandomSeed(){return fRandom.GetSeed();};
