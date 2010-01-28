@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.9 2009/11/17 01:43:26 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.10 2010/01/28 01:40:45 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -86,6 +86,7 @@ class StuDraw3DMuEvent : public virtual StDraw3D
      virtual TObject *TrackInOut(const StMuTrack &track, EDraw3DStyle sty=kUsedHit, Bool_t in=kTRUE);
      virtual void     Endcaps(Style_t sty=0);
      virtual void     Endcaps(const StMuEmcCollection &e, Style_t sty=0);
+     virtual TObject *EmcHit(Int_t emcHitsSoftId, Color_t col,Style_t sty,Size_t siz, const char *detId);
      ClassDef(StuDraw3DMuEvent,0);
 };
 
