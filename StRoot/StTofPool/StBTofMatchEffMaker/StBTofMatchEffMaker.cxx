@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchEffMaker.cxx,v 1.1 2009/02/26 21:23:17 dongx Exp $
+ * $Id: StBTofMatchEffMaker.cxx,v 1.2 2010/01/28 18:16:53 perev Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchEffMaker.cxx,v $
+ * Revision 1.2  2010/01/28 18:16:53  perev
+ * WarningOff
+ *
  * Revision 1.1  2009/02/26 21:23:17  dongx
  * first release - example to calculate the TPC->TOF matching efficiency
  *
@@ -133,7 +136,7 @@ Int_t StBTofMatchEffMaker::Make(){
 
   //.........................................................................
   // check for tofCollection and fill local copy with ADC and TDC data
-  StBTofCollection *theTof = mEvent->btofCollection();
+  StBTofCollection *theTof = mEvent->btofCollection(); if (theTof){};
 
   //.........................................................................
   /// loop over primary tracks

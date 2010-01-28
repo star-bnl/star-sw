@@ -1,10 +1,13 @@
 /*************************************************
  *
- * $Id: StMcQaMaker.cxx,v 1.2 2007/10/17 19:32:06 fisyak Exp $
+ * $Id: StMcQaMaker.cxx,v 1.3 2010/01/28 18:13:18 perev Exp $
  * Author: Manuel Calderon de la Barca
  * Make standard Histograms for
  * StMcEvent 
  * $Log: StMcQaMaker.cxx,v $
+ * Revision 1.3  2010/01/28 18:13:18  perev
+ * WarningOff
+ *
  * Revision 1.2  2007/10/17 19:32:06  fisyak
  * The pixel story, remove Igt and Fst
  *
@@ -57,7 +60,7 @@ void StMcQaMaker::QAPlots(StMcEvent *mEvent) {
   // quantities.
   struct TrackDetector_t {
     StDetectorId    Id;
-    Char_t       *Name;
+    const Char_t *Name;
     Int_t         NHMax; // max. no. of hit per track per detector
     TH1F         *NHits[2];// 
     Int_t         NZ;
