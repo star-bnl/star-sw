@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.2 2010/01/26 17:46:31 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.3 2010/01/28 21:50:37 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.3  2010/01/28 21:50:37  hmasui
+ * Add Vx vs Vz and Vy vs Vz histograms.
+ *
  * Revision 1.2  2010/01/26 17:46:31  hmasui
  * Add histograms for eventid, runnumber, and number of particles
  *
@@ -126,6 +129,8 @@ class StEmbeddingQA {
     TH1* mhVzAccepted ; /// z-vertex (with z-vertex cut)
 
     TH2* mhVyVx ; /// y vs x vertices
+    TH2* mhVxVz ; /// x vs z vertices
+    TH2* mhVyVz ; /// y vs z vertices
     TH1* mhdVx ; /// vx(real) - vx(MC)
     TH1* mhdVy ; /// vy(real) - vy(MC)
     TH1* mhdVz ; /// vz(real) - vz(MC)
