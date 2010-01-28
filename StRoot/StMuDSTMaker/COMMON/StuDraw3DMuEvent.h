@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DMuEvent
 #define STAR_StuDraw3DMuEvent
 
-// $Id: StuDraw3DMuEvent.h,v 1.12 2010/01/28 05:16:24 fine Exp $
+// $Id: StuDraw3DMuEvent.h,v 1.13 2010/01/28 05:27:06 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   01/09/2009
 
 #include "StDraw3D.h"
@@ -101,13 +101,13 @@ class StuDraw3DMuEvent : public virtual StDraw3D
      virtual TObject *EmcHit(Int_t emcHitsSoftId, Color_t col,Style_t sty,Size_t siz, const char *detIdt="bemc");
      virtual TObject *EmcHit(Int_t emcHitsSoftId, float energy, const char *detIdt="bemc");
      template <class Predicate>
-     TObject *EmcHit(Int_t emcHitsSoftId, Predicate sty, const char *detIdt="bemc");
+     TObject *EmcHit(Int_t emcHitsSoftId, const Predicate &sty, const char *detIdt="bemc");
      ClassDef(StuDraw3DMuEvent,0);
 };
 
 //_________________________________________________________________________________________________
 template <class Predicate>
-TObject *StuDraw3DMuEvent::EmcHit(Int_t emcHitsSoftId, Predicate sty, const char *detIdt)
+TObject *StuDraw3DMuEvent::EmcHit(Int_t emcHitsSoftId, const Predicate &sty, const char *detIdt)
 {
    return EmcHit(emcHitsSoftId, sty().Col(),sty().Sty(), sty().Siz(), detIdt);
 }
