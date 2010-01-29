@@ -10,7 +10,7 @@
  *
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StDbFieldI.cxx,v 1.3 2010/01/28 15:33:07 fine Exp $
+ * @(#)cpp/api:$Id: StDbFieldI.cxx,v 1.4 2010/01/29 00:08:38 fine Exp $
  *
  *
  *
@@ -156,7 +156,7 @@ StDbFieldI::getName() const {
 
 //________________________________________________________________________________
 const char *
-StDbFieldI::toString() const {
+StDbFieldI::fieldAsString() const {
   static  string tostring;
    tostring = string(getName()) + "::"
     + getValueAsString()
@@ -279,3 +279,19 @@ void StDbFieldI::MakeTypeMap() {
     }
   }
 }
+#ifdef DBVALUECONV_
+#error DBVALUECONV_ redefinitions
+#else
+#define DBVALUECONV_(DATATYPE,dataname)                                         \
+  void StDbFieldI::setValue(const DATATYPE &value) {setValue<DATATYPE>(value);} \
+  DATATYPE  StDbFieldI::to##dataname() const { return toValue<DATATYPE>(); }
+#endif
+    DBVALUECONV_(int,Int)
+    DBVALUECONV_(unsigned int,UInt)
+    DBVALUECONV_(long,Long)
+    DBVALUECONV_(unsigned long,ULong)
+    DBVALUECONV_(double,Double)
+//    DBVALUECONV_(std::string,String)
+
+
+

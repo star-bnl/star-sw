@@ -11,7 +11,7 @@
  * This file is part of the UCM project funded under an SBIR
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StDbFieldI.h,v 1.2 2010/01/27 20:16:57 fine Exp $
+ * @(#)cpp/api:$Id: StDbFieldI.h,v 1.3 2010/01/29 00:08:38 fine Exp $
  *
  *
  *
@@ -35,10 +35,14 @@
 
 #include <string>
 #include <sstream>
-#include <typeinfo>
 #include <map>
+#include <vector>
+#include <typeinfo>
 
 #include "StDataException.h"
+
+class StDbFieldI;
+typedef std::vector<StDbFieldI*> FieldList;
 
 /**
  * Abstraction for the field in memory.
@@ -65,7 +69,7 @@ class StDbFieldI {
     kSTRING,
     kEND
   };
-  
+
  public:
 
   /**
@@ -94,7 +98,7 @@ class StDbFieldI {
    * @param value The value to encode in the variant.
    * @param length Non-optional for strings; sets the max length of the string.
    */
-  template<class T> StDbFieldI(const char* name, T value, int length=0);
+    StDbFieldI(const char* name, void *value, int length=0);
 
   /**
    * Constructor: Creates a complete field.  Note that it may
@@ -117,7 +121,7 @@ class StDbFieldI {
   /**
    * Destructor: No-op.
    */
-  ~StDbFieldI();
+  virtual ~StDbFieldI();
 	       
   /**
    * Returns the name of the field.
@@ -128,7 +132,7 @@ class StDbFieldI {
    * Returns the field information in the form (name)::(type)::(value).
    * Included for debugging purposes.
    */
-  const char* toString() const;
+  const char* fieldAsString() const;
 
   /**
    * Sets the value (and type) of the data in the variant.  Setting 
@@ -137,8 +141,22 @@ class StDbFieldI {
    * @throws StDataException If there is a type mismatch between the type of
    *                         T and the stored type information.
    */
-  template<class T> void setValue(T value);
 
+   void setValue(const int           &value);
+   void setValue(const unsigned int  &value);
+   void setValue(const long          &value);
+   void setValue(const unsigned long &value);
+   void setValue(const double        &value);
+   void setValue(const char          &value);
+   void setValue(const std::string   &value);
+   
+   int           toInt() const;
+   unsigned      toUInt() const;
+   long          toLong() const;
+   unsigned long toULong() const;
+   double        toDouble() const;
+   char          toChar() const;
+   // const std::string toString() const;
   /**
    * Sets the value from the provided string. Setting a value implicitly
    * unsets the IGNORE flag.
@@ -176,14 +194,6 @@ class StDbFieldI {
   const char*getValueAsString() const;
 
   /**
-   * Returns the 'real' value of the data stored in the object.  If
-   * the provided type does NOT match the data type stored in the
-   * field, a StDataException is thrown.
-   * @throws StDataException If provided type does not match actual type.
-   */
-  template<class T> T getValue() const;
-
-  /**
    * Returns true if the field represents a NULL value.
    */
   bool isNull() const;
@@ -209,6 +219,23 @@ class StDbFieldI {
    * execute operations.
    */
   bool isIgnore() const;
+  
+ protected:
+   template<class T> 
+   StDbFieldI(const char* name, const T &value, int length);
+
+
+   template <class T>
+   void setValue(const T &value);
+ 
+   /**
+   * Returns the 'real' value of the data stored in the object.  If
+   * the provided type does NOT match the data type stored in the
+   * field, a StDataException is thrown.
+   * @throws StDataException If provided type does not match actual type.
+   */
+   template <class T>
+   T toValue() const;
 
  private:
   /**
@@ -216,7 +243,6 @@ class StDbFieldI {
    * Used by copy constructor and op= to perform copying.
    */
   void copy(const StDbFieldI &f);
-
   /**
    * @internal
    * Confirms that the type of the argument matches the type
@@ -247,10 +273,12 @@ class StDbFieldI {
 // functions.
 //---------------
 
-template<class T> StDbFieldI::StDbFieldI(const char* name, T value, int length)
+//_______________________________________________________________________________
+template<class T> StDbFieldI::StDbFieldI(const char* name, const T &value, int length)
   : fType(kINVALID),
     fNull(true),
     fEncodedValue(""),
+    fMaxLength(length),
     fIgnore(true),
     fName(name)
 {
@@ -259,49 +287,13 @@ template<class T> StDbFieldI::StDbFieldI(const char* name, T value, int length)
 			  StDataException::FIELD,
 			  StUCMException::ERROR);
   }
-   std::map<std::string,EDataType>::const_iterator t =  fTypeMapInv.find(typeid(T).name());
-   if (t != fTypeMapInv.end()) fType = (*t).second;
-  
-   if ( typeid(T) == typeid(std::string) )
-   {
-    // If we already have a string, don't bother doing
-    // a conversion - but throw an exception if length=0.
-    if (length <= 0)
-    {
-      throw StDataException("String type specified with length <= 0 in field '"
- 			     + std::string(name) + "'.",
-			    StDataException::FIELD,
-			    StUCMException::ERROR);;
-    }
-    fMaxLength = length;
-    fType = kSTRING;
-    fEncodedValue = value;
-    return;
-  }
-  else
-  {
-    // Invalid type
-    fType = kINVALID;
-    throw StDataException( "Invalid type provided for field '" + std::string(name) + "'.",
-			   StDataException::FIELD,
-			   StUCMException::ERROR );
-  }
-
-  fIgnore = false;
-
-  // Existing value is guaranteed to be flushed.
-  std::ostringstream encodingStream;
-
-  // Convert value to string
-  encodingStream << value;
-  fEncodedValue = encodingStream.str();
-  fNull = false;
-  fMaxLength = 0;
+  setValue(value);
 }
 
 
+//_______________________________________________________________________________
 template <class T> void
-StDbFieldI::setValue(T value)
+StDbFieldI::setValue(const T &value)
 {
   typeMatches<T>();
 
@@ -331,8 +323,9 @@ StDbFieldI::setValue(T value)
 }
 
 
-template<class T> T
-StDbFieldI::getValue() const
+//_______________________________________________________________________________
+template<class T> 
+T StDbFieldI::toValue() const
 {
   typeMatches<T>();
 
@@ -343,13 +336,15 @@ StDbFieldI::getValue() const
   return realValue;
 }
 
+//_______________________________________________________________________________
 template<class T> void
 StDbFieldI::typeMatches() const 
 {
    // Massive check: If the provided type T does not match the stored
    // data type, throw an exception.
-   std::map<std::string,EDataType>::const_iterator t =  fTypeMap.find(getType());
-   if (t == std::map<std::string,EDataType>::end()) {
+   std::map<EDataType,std::string>::const_iterator t  =  fTypeMap.find(getType());
+
+   if (t == fTypeMap.end()) {
    throw StDataException( "Type mismatch in field '" + fName + "': Actual type " 
            + getTypeAsString() + std::string(", requested type ") 
            + typeid(T).name(),
@@ -359,6 +354,3 @@ StDbFieldI::typeMatches() const
 }
 
 #endif
-
-
-    
