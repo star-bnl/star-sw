@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.9 2010/01/23 20:07:03 stevens4 Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.10 2010/01/29 01:56:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -183,6 +183,8 @@ St2009WMaker::accessTracks(){ // return non-zero on abort
       int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
       if ( mTpcFilter[secID-1].accept(prTr)==false) continue;
 
+      if (secID==20) continue; //remove poorly calibrated sector
+
       //accepted ......
 
       hA[21]->Fill(prTr->nHitsFit());
@@ -198,6 +200,9 @@ St2009WMaker::accessTracks(){ // return non-zero on abort
       if(prTr->charge()<0)hA[30]->Fill(pt);
 
       hA[26]->Fill(ro.pseudoRapidity(),ro.phi());
+      if(pt>5) //estimate TPC inefficiency in data
+        hA[57]->Fill(ro.pseudoRapidity(),ro.phi());
+
       /* Victor: in reality mChiSqXY is a normal Xi2 for track and
        mChiSqZ is Xi2 of fit to  primary vertex
       */
@@ -586,6 +591,9 @@ St2009WMaker::hadronicRecoil(){ //add up all vector pt outside of 'nearJet' regi
 }
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.10  2010/01/29 01:56:01  stevens4
+//disable lepton track reco in TPC sector 20
+//
 //Revision 1.9  2010/01/23 20:07:03  stevens4
 //fix use of real btow peds for rcf mc
 //

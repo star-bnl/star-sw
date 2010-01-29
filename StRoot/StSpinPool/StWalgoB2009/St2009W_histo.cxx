@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.10 2010/01/28 20:10:05 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.11 2010/01/29 01:56:01 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -174,8 +174,9 @@ St2009WMaker::initHistos(){
   hA[55]=h=new TH1F("muEwayET"," ETOW away-cone ET sum;   ET (GeV)",100,0,100); // away side energy  
   
   hA[56]=h=new TH1F("muSmallNearTpcPT",Form("TPC PT in #Delta R =%.1f from lepton candidate; PT (GeV)",par_smallNearDeltaR),100,0,100);
-  
-  //free 57-59
+  hA[57]=h=new TH2F("muTr2D1pt5","lastHit on track (pt > 5); detector eta ; detector phi (rad)",100,-1.1,1.1,240,-PI,PI);
+
+  //free 58-59
 
   //... final golden plots ....
 
@@ -262,6 +263,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.11  2010/01/29 01:56:01  stevens4
+// disable lepton track reco in TPC sector 20
+//
 // Revision 1.10  2010/01/28 20:10:05  balewski
 // added eta dependent spin sorting
 //
