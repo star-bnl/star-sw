@@ -6,7 +6,7 @@ TString spinPre='A';
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
-  //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-Jan27-3rdAL/data/";
+  //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-Jan29/data/";
   iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-p/data/";
   //core0="R10090018";
   //core0="run9setABCD";
@@ -705,6 +705,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.10  2010/01/30 02:02:56  balewski
+// manore tunes
+//
 // Revision 1.9  2010/01/28 20:10:08  balewski
 // added eta dependent spin sorting
 //

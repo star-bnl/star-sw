@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.4 2010/01/28 20:10:06 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.5 2010/01/30 02:02:54 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -43,12 +43,12 @@ St2009pubSpinMaker::initHistos(){
   hA[6]=new TH1F(core+"Y0","BG1: L2W-BHT3-rnd & vertex OK & low ET; spin4 ",16,-0.5,15.5);
   hA[7]=new TH1F(core+"Y1","BG2: vertex & ET<20 &  ET 2x2 << 4x4 ; spin4 ",16,-0.5,15.5);
 
-  hA[8]=h=new TH1F(core+"QpT","reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.1,0.1);
+  hA[8]=h=new TH1F(core+"QpT","reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_QPTplus,0,par_QPTplus,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(par_QPTminus,0,par_QPTminus,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
-  hA[9]=h=new TH2F(core+"QpT2","TPC PRIM  Q/PT , black=pairs of unlike charges; 2x2 cluster ET (GeV); Q/PT",100,0.,100.,100,-0.1,0.1);
+  hA[9]=h=new TH2F(core+"QpT2","TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT  (1/GeV)",100,0.,100.,100,-0.099,0.099);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kBlue);  Lx->Add(ln);
   ln=new TLine(0,par_QPTminus,100,par_QPTminus);  ln->SetLineColor(kRed);  Lx->Add(ln);  
@@ -64,7 +64,7 @@ St2009pubSpinMaker::initHistos(){
     //.... J-peak 
     sprintf(txt0,"ET_%c",cPM[ipn]);
     sprintf(txt,"Final W, charge=%c ; 2x2 ET (GeV) ",cPM[ipn]);
-    hA[10+ipn]=h=new TH1F(core+txt0,txt, 100,0,100);
+    hA[10+ipn]=h=new TH1F(core+txt0,txt, 100,1,101); // shifted by 1 for nicer Rebin
     h->SetFillColor(iCol[ipn]);
 
     //.... 1D spin sorting         
@@ -90,7 +90,7 @@ St2009pubSpinMaker::initHistos(){
   }
   // free 20-29
 
-  hA[30]=h=new TH1F(core+"LepEta","selecting Ws ; lepton eta",100, -1.5,1.5);
+  hA[30]=h=new TH1F(core+"LepEta","selecting Ws ; lepton LAB eta",100, -1.5,1.5);
   Lx=h->GetListOfFunctions();
   ln=new TLine(par_leptonEta1,0,par_leptonEta1,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(par_leptonEta2,0,par_leptonEta2,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
@@ -110,6 +110,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.5  2010/01/30 02:02:54  balewski
+// manore tunes
+//
 // Revision 1.4  2010/01/28 20:10:06  balewski
 // added eta dependent spin sorting
 //
