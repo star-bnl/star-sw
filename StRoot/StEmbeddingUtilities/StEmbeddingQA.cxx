@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.4 2010/01/28 21:50:35 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.5 2010/02/01 21:28:14 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.5  2010/02/01 21:28:14  hmasui
+ * Fix bugs for the binning of delta vx, vy, vz histograms
+ *
  * Revision 1.4  2010/01/28 21:50:35  hmasui
  * Add Vx vs Vz and Vy vs Vz histograms.
  *
@@ -207,9 +210,9 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   utility->setStyle(mhVxVz);
   utility->setStyle(mhVyVz);
 
-  mhdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)", 100, -1+0.5, 1+0.5);
-  mhdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)", 100, -1+0.5, 1+0.5);
-  mhdVz = new TH1D("hdVz", "#Delta z = v_{z} - v_{z}(MC)", 100, -1+0.5, 1+0.5);
+  mhdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)", 100, -1-0.5, 1+0.5);
+  mhdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)", 100, -1-0.5, 1+0.5);
+  mhdVz = new TH1D("hdVz", "#Delta z = v_{z} - v_{z}(MC)", 100, -1-0.5, 1+0.5);
   mhdVx->SetXTitle("#Deltav_{x} = v_{x} - v_{x}(MC) (cm)");
   mhdVy->SetXTitle("#Deltav_{y} = v_{y} - v_{y}(MC) (cm)");
   mhdVz->SetXTitle("#Deltav_{z} = v_{z} - v_{z}(MC) (cm)");
