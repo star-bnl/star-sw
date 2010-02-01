@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.37 2010/02/01 22:54:34 fine Exp $
+ * $Id: StMuDst.h,v 1.38 2010/02/01 23:15:27 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -366,9 +366,9 @@ public:
   static unsigned int GetNBTofRawHit()      { return numberOfBTofRawHit(); }
 
   virtual void Print(Option_t *option = "") const; ///< Print basic event info
-  void printPrimaryTracks() const;
-  void printGlobalTracks() const;
-  void printVertices() const;
+  static void printPrimaryTracks();
+  static void printGlobalTracks() ;
+  static void printVertices() ;
 
   friend class StMuDstMaker;
   friend class StMuIOMaker;
@@ -380,6 +380,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.38  2010/02/01 23:15:27  fine
+ * replace non-static method
+ *
  * Revision 1.37  2010/02/01 22:54:34  fine
  * replace non-static method
  *
