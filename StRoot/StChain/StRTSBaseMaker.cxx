@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.10 2009/11/10 19:17:39 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.11 2010/02/01 01:46:59 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.11  2010/02/01 01:46:59  fine
+ * RT #1840 Add the method GetNextLegacy(int)
+ *
  * Revision 1.10  2009/11/10 19:17:39  fine
  * Add doxygen docs
  *
@@ -165,6 +168,23 @@ StRtsTable *StRTSBaseMaker::GetNextRaw()
    // matches the "detector name"
    return GetNext("raw");
 }
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! 
+   \return the DAQ data for the bank \c "raw" from sector \c sec if exists
+   \sa \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a> 
+    \endhtmlonly
+ */
+//_____________________________________________________________
+StRtsTable *StRTSBaseMaker::GetNextRaw(int sec)
+{
+   // Get "raw" DAQ data assuming the maker name 
+   // matches the "detector name"
+   assert(sec <=0 && "Only positive  value is allowed");
+   return GetNext(Form("raw[%i]",sec));
+}
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! 
@@ -183,6 +203,22 @@ StRtsTable *StRTSBaseMaker::GetNextAdc()
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! 
+   \return the DAQ data for the bank \c "adc" from sector \c sec if exists 
+   \sa \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a> 
+    \endhtmlonly
+ */
+//_____________________________________________________________
+StRtsTable *StRTSBaseMaker::GetNextAdc(int sec)
+{
+   // Get "adc" DAQ data assuming the maker name 
+   // matches the "detector name"
+   assert(sec <=0 && "Only positive  value is allowed");
+   return GetNext(Form("adc[%i]",sec));
+}
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! 
    \return the DAQ data for the bank \c "legacy" if exists
    \sa \htmlonly 
       <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a> 
@@ -194,6 +230,23 @@ StRtsTable *StRTSBaseMaker::GetNextLegacy()
    // Get "legacy" DAQ data assuming the maker name 
    // matches the "detector name"
    return GetNext("legacy");
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! 
+   \return the DAQ data for the bank \c "legacy" from sector \c sec if exists
+   \sa \htmlonly 
+      <a href="http://docs.google.com/Doc?docid=dgv8pf9t_60dwhg3zd4&hl=en">"A DAQ_READER Cookbook"</a> 
+    \endhtmlonly
+ */
+//_____________________________________________________________
+StRtsTable *StRTSBaseMaker::GetNextLegacy(int sec)
+{
+   // Get "legacy" DAQ data assuming the maker name 
+   // matches the "detector name"
+   assert(sec <=0 && "Only positive  value is allowed");
+   return GetNext(Form("legacy[%i]",sec));
 }
 
 //_____________________________________________________________
