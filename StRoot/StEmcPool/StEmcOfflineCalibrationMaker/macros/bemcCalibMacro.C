@@ -101,6 +101,7 @@ void bemcCalibMacro(const char* dir="./",
 	*/
 
 	//2009 500 GeV triggers
+	/*
 	bemcCalibMaker->addMinBiasTrigger(230010);//BBCMB
 	bemcCalibMaker->addMinBiasTrigger(230011);//BBCMB-Cat0
 	bemcCalibMaker->addMinBiasTrigger(230012);//Cat1
@@ -112,6 +113,56 @@ void bemcCalibMacro(const char* dir="./",
 
 	bemcCalibMaker->addHighTowerTrigger(230531);//bht3
 	bemcCalibMaker->addHighTowerTrigger(230601);//l2w
+	*/
+
+	//2009 200 GeV triggers
+	bemcCalibMaker->addMinBiasTrigger(240010);//BBCMB
+	bemcCalibMaker->addMinBiasTrigger(240110);//BBCMB
+	bemcCalibMaker->addMinBiasTrigger(240120);//BBCMB
+	bemcCalibMaker->addMinBiasTrigger(240220);//BBCMB
+
+	bemcCalibMaker->addMinBiasTrigger(240011);//BBCMB-Cat0
+	bemcCalibMaker->addMinBiasTrigger(240111);//BBCMB-Cat0
+	bemcCalibMaker->addMinBiasTrigger(240121);//BBCMB-Cat0
+	bemcCalibMaker->addMinBiasTrigger(240221);//BBCMB-Cat0
+
+	bemcCalibMaker->addMinBiasTrigger(240012);//BBCMB-Cat1
+	bemcCalibMaker->addMinBiasTrigger(240112);//BBCMB-Cat1
+	bemcCalibMaker->addMinBiasTrigger(240122);//BBCMB-Cat1
+	bemcCalibMaker->addMinBiasTrigger(240222);//BBCMB-Cat1
+
+	bemcCalibMaker->addMinBiasTrigger(240013);//BBCMB-Cat2
+	bemcCalibMaker->addMinBiasTrigger(240113);//BBCMB-Cat2
+	bemcCalibMaker->addMinBiasTrigger(240123);//BBCMB-Cat2
+	bemcCalibMaker->addMinBiasTrigger(240223);//BBCMB-Cat2
+
+	bemcCalibMaker->addMinBiasTrigger(240014);//BBCMB-Cat3
+	bemcCalibMaker->addMinBiasTrigger(240114);//BBCMB-Cat3
+	bemcCalibMaker->addMinBiasTrigger(240124);//BBCMB-Cat3
+	bemcCalibMaker->addMinBiasTrigger(240224);//BBCMB-Cat3
+
+	bemcCalibMaker->addMinBiasTrigger(240015);//BBCMB-Cat4
+	bemcCalibMaker->addMinBiasTrigger(240115);//BBCMB-Cat4
+	bemcCalibMaker->addMinBiasTrigger(240125);//BBCMB-Cat4
+	bemcCalibMaker->addMinBiasTrigger(240225);//BBCMB-Cat4
+
+	bemcCalibMaker->addMinBiasTrigger(240020);//VPDMB no vertex
+	bemcCalibMaker->addMinBiasTrigger(240025);//VPDMB vertex < 30
+
+	bemcCalibMaker->addMinBiasTrigger(240130);//ZDCMB
+
+	bemcCalibMaker->addHighTowerTrigger(240550);//bht0*VPDMB*!BHT1
+	bemcCalibMaker->addHighTowerTrigger(240570);//bht0*VPDMB*!BHT2
+	bemcCalibMaker->addHighTowerTrigger(240560);//bht1*VPDMB
+	bemcCalibMaker->addHighTowerTrigger(240540);//bht2*VPDMB
+	bemcCalibMaker->addHighTowerTrigger(240530);//bht3
+
+	bemcCalibMaker->addFastTrigger(240801);//fms-fast
+	bemcCalibMaker->addFastTrigger(240802);//fms-fast
+
+	bemcCalibMaker->addFastTrigger(240640);//upsilon broken so skip
+
+
 
 	StMemStat memory;
 	memory.PrintMem(NULL);
