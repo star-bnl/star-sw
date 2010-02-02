@@ -331,25 +331,26 @@ Int_t StBbcSimulationMaker::Make()
      BbcDE DEdata;
      g2t_ctf_hit_st *bbc_hit = g2t_bbc_hit->GetTable();
      for (short iBBChit=0; iBBChit<nBBChits; iBBChit++)
-       {
-	 float De = bbc_hit[iBBChit].de;
-	 float TOF = bbc_hit[iBBChit].tof;
-	 short Vid =  bbc_hit[iBBChit].volume_id;
+     {
+       float De = bbc_hit[iBBChit].de;
+       float TOF = bbc_hit[iBBChit].tof;
+       short Vid =  bbc_hit[iBBChit].volume_id;
 
-         short PMTid = Geant2PMT[Vid];
-	 if (PMTid == 0) {
-	   LOG_ERROR << "Cannot find a  PMTid in Geant2PMT for Vid = " << Vid << endm;
-	   continue;
-	 }
-	 PMTid -= 1;
-	 DEdata.AddDE(PMTid,De);
-	 TOFdata.AddTOF(PMTid,TOF);
+       short PMTid = Geant2PMT[Vid];
+       if (PMTid == 0) {
+	 LOG_ERROR << "Cannot find a  PMTid in Geant2PMT for Vid = " << Vid << endm;
+	 continue;
        }
+       PMTid -= 1;
+       DEdata.AddDE(PMTid,De);
+       TOFdata.AddTOF(PMTid,TOF);
+     }
 
-     StTriggerDetectorCollection* myTrig = event->triggerDetectorCollection();
+     StTriggerDetectorCollection* myTrig =event->triggerDetectorCollection();
      if (!myTrig) {
-       gMessMgr->Warning("StBbcSimulationMaker::Make: No StTriggerDetectorCollection\n");
-       return kStWarn;
+       Warning("Make"," NoStTriggerDetectorCollection, Make the new one\n");
+       myTrig = new StTriggerDetectorCollection;
+       event->setTriggerDetectorCollection(myTrig);
      }
      StBbcTriggerDetector& myBbc = myTrig->bbc();
 
