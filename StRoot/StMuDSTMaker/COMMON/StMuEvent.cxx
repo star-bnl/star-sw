@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.20 2009/01/09 19:43:47 tone421 Exp $
+ * $Id: StMuEvent.cxx,v 1.21 2010/02/03 04:54:45 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -27,6 +27,7 @@
 #include "StMuDebug.h"
 #include "StMuDst.h"
 #include "StMuPrimaryVertex.h"
+#include "StMuBTofHit.h"
 
 #include "TClonesArray.h"
 #include "TObject.h"
@@ -235,9 +236,20 @@ unsigned short StMuEvent::grefmult(int vtx_id){
     }
 	else return 0;
 }
+
+unsigned short StMuEvent::btofTrayMultiplicity(){
+
+	unsigned short btofmult = (unsigned short)StMuDst::numberOfBTofHit();
+	for(unsigned int i=0;i< StMuDst::numberOfBTofHit();i++) if(StMuDst::btofHit(i)->tray() > 120) btofmult--;
+	return btofmult;
+
+}
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.21  2010/02/03 04:54:45  tone421
+ * Added StMuEvent::btofTrayMultiplicity() to return only TOF hits from trays. Should be looked at instead of ctbSum for run 9 and beyond.
+ *
  * Revision 1.20  2009/01/09 19:43:47  tone421
  * OAdded gremult in StMuEvent (globals tracks with DCA < 3cm, >= 10 TPC fit hits and |eta| < 0.5)
  *
