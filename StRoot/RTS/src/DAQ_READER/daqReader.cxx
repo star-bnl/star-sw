@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.29 2010/01/21 21:11:28 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.30 2010/02/03 19:21:07 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -287,6 +287,10 @@ char *daqReader::get(int num, int type)
   //int leftover, tmp ;
   // char _evp_basedir_[40];
   //static char _last_evp_dir_[40];
+
+  memset(trgIds, 0xffffffff, sizeof(trgIds));
+  trgIdsSet = 0;
+  trgIdsNotPresent = 0;
 
   event_number++;
   LOG(DBG, "processing nth event.  n=%d from %s",event_number, getInputType());
@@ -1256,6 +1260,27 @@ int daqReader::getNextEventFilenameFromLive(int type)
 		
   LOG(DBG,"Live Event: file->%s",file_name,0,0,0,0) ;
   return 0;
+}
+
+int daqReader::getOfflineId(int bit)
+{
+  if(trgIdsNotPresent) return -1;
+
+  if(trgIdsSet) {
+    return trgIds[bit];
+  }
+
+  trgIdsSet = 1;
+
+  int ret = sfs->read("TRGID", (char *)trgIds, sizeof(trgIds));
+
+  if(ret != sizeof(trgIds)) {
+    LOG(ERR, "Can't find TRGID bank, can't get the offline id");
+    memset(trgIds, 0xffffffff, sizeof(trgIds));
+    trgIdsNotPresent = 1;
+  }
+  
+  return trgIds[bit];
 }
 
 /////// Tonko

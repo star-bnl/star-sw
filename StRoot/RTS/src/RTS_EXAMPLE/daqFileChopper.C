@@ -23,6 +23,13 @@
 #include <DAQ_READER/daqReader.h>
 #include <DAQ_READER/daq_dta.h>
 
+void displayHelp()
+{
+    LOG(ERR,"Usage:  daqFileChopper filename <filterlist>");
+    LOG(ERR,"        filterlist -->  -trg xxx yyy zzz...  // list of offline trigger bits");
+    LOG(ERR,"                        -dtrg xxx yyy zzz... // list of daq trigger bits");
+    LOG(ERR,"                        -eventnum xxx yyy... // list of event numbers");
+}
 
 // Example event filter...
 //
@@ -31,13 +38,39 @@
 int FilterEvent(daqReader *rdr, int nargs, char *argv[])
 {
   int eventNumber = rdr->seq;
-  
-  for(int i=0;i<nargs;i++) {
-    if(eventNumber == atoi(argv[i])) {
-      return 1;
+
+  if(strcmp(argv[0], "-trg")==0) {
+    unsigned int bits = rdr->daqbits;
+    for(int i=0;i<32;i++) {
+      if(bits & (1<<i)) {
+	int trgSat = rdr->getOfflineId(i);
+      
+	for(int j=1;j<nargs;j++) {
+	  if(trgSat == atoi(argv[j])) {
+	    return 1;
+	  }
+	}
+      }
     }
   }
-
+  else if(strcmp(argv[0], "-dtrg")==0) {
+    unsigned int bits = rdr->daqbits;
+    for(int i=1;i<nargs;i++) {
+      int trg = atoi(argv[i]);
+      if(bits & (1<<trg)) return 1;
+    } 
+  }
+  else if(strcmp(argv[0], "-eventnum")==0) {
+    for(int i=1;i<nargs;i++) {
+      if(eventNumber == atoi(argv[i])) {
+	return 1;
+      }
+    }
+  }
+  else {
+    displayHelp();
+    exit(0);
+  }
   return 0;
 }
 
@@ -47,7 +80,8 @@ int main(int argc, char *argv[])
   rtsLogLevel(WARN) ;
 
   if(argc < 3) {
-    LOG(ERR,"Usage:  daqFileChopper filename <filterlist>");
+    displayHelp();
+
     exit(0);
   }
 

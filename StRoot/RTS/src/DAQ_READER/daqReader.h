@@ -73,6 +73,10 @@ class daqReader {
 
   void init();
 
+  int trgIds[32];
+  int trgIdsSet;
+  int trgIdsNotPresent;
+
   static const int DAQ_READER_MAX_DETS = 32 ;
   daq_det *dets[DAQ_READER_MAX_DETS] ;
   daq_det *pseudo_dets[DAQ_READER_MAX_DETS] ;
@@ -106,6 +110,8 @@ class daqReader {
   int IsEvp() { return (input_type == live); };
   daqReader *rts() const { return (daqReader *)this; } // to simplify the offline transition
 
+  // Return the offlineId for a daqId.  If present in file...
+  int getOfflineId(int daqId);
 
   // These variables describe the event storage
   //
