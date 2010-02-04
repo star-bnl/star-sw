@@ -1,6 +1,6 @@
 class StChain;
 StChain *chain=0;
-int spinSort=true;
+int spinSort=false;
 int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 int isJustin=false;
 bool isRoss=true; 
@@ -446,6 +446,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.22  2010/02/04 03:48:55  balewski
+// *** empty log message ***
+//
 // Revision 1.21  2010/02/04 03:48:25  balewski
 // add ET for lumi monitor
 //
