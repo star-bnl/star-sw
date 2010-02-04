@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.5 2010/01/30 02:02:54 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.6 2010/02/04 03:48:12 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -48,6 +48,7 @@ St2009pubSpinMaker::initHistos(){
   ln=new TLine(par_QPTplus,0,par_QPTplus,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(par_QPTminus,0,par_QPTminus,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
+
   hA[9]=h=new TH2F(core+"QpT2","TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT  (1/GeV)",100,0.,100.,100,-0.099,0.099);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kBlue);  Lx->Add(ln);
@@ -95,6 +96,7 @@ St2009pubSpinMaker::initHistos(){
   ln=new TLine(par_leptonEta1,0,par_leptonEta1,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
   ln=new TLine(par_leptonEta2,0,par_leptonEta2,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
+  hA[31]=h=new TH1F(core+"LumET","Lumi monitor; 2x2 ET (GeV)",100,0.,100.);
 
 
 
@@ -110,6 +112,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.6  2010/02/04 03:48:12  balewski
+// add ET for lumi monitor
+//
 // Revision 1.5  2010/01/30 02:02:54  balewski
 // manore tunes
 //

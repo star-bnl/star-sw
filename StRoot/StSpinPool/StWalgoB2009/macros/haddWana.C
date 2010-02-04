@@ -1,4 +1,4 @@
-//$Id: haddWana.C,v 1.12 2010/01/27 22:12:26 balewski Exp $
+//$Id: haddWana.C,v 1.13 2010/02/04 03:48:25 balewski Exp $
 // line added after tag=DNP2009 by Jan
 // run list chaned to match final run selection for SL09g 
 
@@ -32,7 +32,7 @@ void haddWana() {
   haddWana("run9setP1234");
 }
 
-void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-p/data/") {
+void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-pt4/data/") {
 
   TString out=iPath;
 
@@ -214,6 +214,9 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
+// Revision 1.13  2010/02/04 03:48:25  balewski
+// add ET for lumi monitor
+//
 // Revision 1.12  2010/01/27 22:12:26  balewski
 // spin code matched to x-section code
 //
