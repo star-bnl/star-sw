@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRpsCollection.cxx,v 2.1 2009/11/23 22:18:25 ullrich Exp $
+ * $Id: StRpsCollection.cxx,v 2.2 2010/02/04 18:16:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Nov 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRpsCollection.cxx,v $
+ * Revision 2.2  2010/02/04 18:16:09  ullrich
+ * Added new member mSiliconBunch and referring access methods.
+ *
  * Revision 2.1  2009/11/23 22:18:25  ullrich
  * Initial Revision
  *
@@ -17,7 +20,7 @@
 #include "StRpsCollection.h"
 #include "StRpsPlane.h"
 
-static const char rcsid[] = "$Id: StRpsCollection.cxx,v 2.1 2009/11/23 22:18:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StRpsCollection.cxx,v 2.2 2010/02/04 18:16:09 ullrich Exp $";
 
 ClassImp(StRpsCollection)
 
@@ -33,6 +36,7 @@ StRpsCollection::StRpsCollection()
             mRomanPots[i].plane(j)->setRomanPotId(static_cast<unsigned char>(i));
         }
     }
+    mSiliconBunch = 0;
 }
 
 StRpsCollection::~StRpsCollection() { /* noop */ }
@@ -74,4 +78,17 @@ StRpsCollection::clusters() const
         }
     }
     return vec;
+}
+
+unsigned char
+StRpsCollection::siliconBunch() const
+{
+    return mSiliconBunch;
+}
+
+
+void
+StRpsCollection::setSiliconBunch(unsigned char val)
+{
+    mSiliconBunch = val;
 }
