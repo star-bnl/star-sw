@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.4 2010/01/28 20:10:05 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.5 2010/02/04 03:48:12 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -155,8 +155,9 @@ St2009pubSpinMaker::bXingSort(){
 
       /* Collect QCD background for lumi monitors */
       float frac24=T.cluster.ET/(T.cl4x4.ET);
-      if(iv==0 && it==0 && T.cluster.ET <20. && frac24<wMK->par_clustFrac24) {
-	hA[7]->Fill(spin4);  hA[0]->Fill("BG2",1.);
+      if(iv==0 && it==0 && frac24<wMK->par_clustFrac24) {
+	hA[31]->Fill(T.cluster.ET);
+	if( T.cluster.ET <20. ) {	hA[7]->Fill(spin4);  hA[0]->Fill("BG2",1.);}
       }
 
       if(T.isMatch2Cl==false) continue;
@@ -209,6 +210,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.5  2010/02/04 03:48:12  balewski
+// add ET for lumi monitor
+//
 // Revision 1.4  2010/01/28 20:10:05  balewski
 // added eta dependent spin sorting
 //

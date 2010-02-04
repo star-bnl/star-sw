@@ -6,8 +6,8 @@ TString spinPre='A';
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
-  //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-Jan29/data/";
-  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-p/data/";
+  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-Jan29b/data/";
+  //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-pt4/data/";
   //core0="R10090018";
   //core0="run9setABCD";
   core0="run9setP1234";
@@ -44,7 +44,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameM[]={"muTwayET","muBwayET","muBclETPt","muEwayET"};//pg 12
   
   char *nameW[]={"muTotwayET2D","muAwayTotEt","muWET","muW2D1"};//pg 13
-  char *namePB[]={"muptBalance_clust", "muptBalance_awayTot","muWeta"};// pg 14 -Pt-Balance plots
+  char *namePB[]={"musPtBalance_clust", "musPtBalance_awayTot","muWeta"};// pg 14 -Pt-Balance plots
   char *nameB1[]={"muSEadc1","muSPadc1"}; // pg 15 BSMD spectra
   char *nameN[]={"muTrdEdX","muWdedx"}; //pg 16
   char *nameO[]={"muWglDca","muWglDcaSP","muWglDcaSN"}; // pg 17
@@ -60,8 +60,8 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameS1[]={"spinStatEve","spins4mon","spinbX48","spinbX7","spinbX48c","spinbX7c"};// pg 23
   char *nameS5[]={"spinET_P","spinET_N","spinQpT","spinQpT2"};// pg 24
   char *nameS2[]={"spinY0","spinY1","spinY2_P","spinY2_N"};// pg 25
-  char *nameS3[]={,"spinY3_P","spinY3_N","spinY3_P","spinY3_N"};// pg 26
-  char *nameS4[]={"spinY5_P","spinY5_N"};// pg 27
+  char *nameS3[]={,"spinY3_P","spinY3_N","spinY4_P","spinY4_N"};// pg 26
+  char *nameS4[]={"spinY5_P","spinY5_N","spinLepEta"};// pg 27
 
   //use  Page 30 -42 TPC sectors per cut, 2 pages per cut
 
@@ -348,7 +348,6 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
       if(i<2) h->Draw("colz");
       else  h->Draw();
       if(i==2) h->Rebin(4);
-);
     }
    
  } break;//--------------------------------------
@@ -534,12 +533,13 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
  
   case 27:{    sprintf(padTit,"charge & ET vs. spin state, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,spinPre+padTit,page);
-    c->Divide(2,1);gStyle->SetOptStat(10);
+    c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameS4;
-    for(int i=0;i<2;i++) {
+    for(int i=0;i<3;i++) {
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(spinPre+nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw("colz");
+      if(i==2) h->Draw();
     }
  } break;//--------------------------------------
 
@@ -705,6 +705,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.11  2010/02/04 03:48:25  balewski
+// add ET for lumi monitor
+//
 // Revision 1.10  2010/01/30 02:02:56  balewski
 // manore tunes
 //
