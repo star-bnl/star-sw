@@ -16,6 +16,10 @@ public:
 	StMuRpsCollection(const StRpsCollection& vertex);
 	~StMuRpsCollection() {;}
 
+//Event level info
+
+	unsigned char siliconBunch() const;
+
 //Roman pot Level Info
 
      unsigned int numberOfRomanPots() const  { return mNumberOfRomanPot; }
@@ -45,6 +49,8 @@ public:
 private:
 
      enum {mNumberOfRomanPot = 8, mNumberOfPlanes = 4};
+
+	unsigned char mSiliconBunch;
 
 	int mNumberPlanes[mNumberOfRomanPot];
 	int mNumberPlanesWithClusters[mNumberOfRomanPot];
