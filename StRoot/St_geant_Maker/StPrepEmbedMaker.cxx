@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.11 2009/07/01 23:20:34 andrewar Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.12 2010/02/05 23:01:04 andrewar Exp $
  *
  */
 
@@ -26,6 +26,10 @@
 #include "TTree.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
 #include "StGenericVertexMaker/StFixedVertexFinder.h"
+
+#include "tables/St_vertexSeed_Table.h"
+#include "TString.h"
+#include "TSystem.h"
 
 #include <unistd.h>
 
@@ -39,6 +43,7 @@ struct embedSettings{
   Double_t etahigh;
   Double_t philow;
   Double_t phihigh;
+  Double_t temperature;
   Int_t rnd1;
   Int_t rnd2;
   Double_t vzlow;
@@ -80,10 +85,6 @@ Int_t StPrepEmbedMaker::Init() {
 //----
 Int_t StPrepEmbedMaker::InitRun(int runnum)
 {
-  //Field can change from event to event (malformed event headers?) - set once per run
-  //  Do("field = 5.");
-  //Input settings from setup file
-  
   //Call geant maker, set defaults
   if (! mGeant3) {
     mGeant3 = TGiant3::Geant3();
@@ -106,7 +107,8 @@ Int_t StPrepEmbedMaker::InitRun(int runnum)
       LOG_ERROR << "In TagFile : " << mTagFile << " cannot find TTree \"Tag\"" << endm;
       return kStErr;
     }
-    
+
+    // Check mode type, select settings
    if (mSpreadMode){
          mMoreTagsFile = mTagFile;
          int indx1 = mMoreTagsFile.Index(".tags",0);
@@ -124,53 +126,50 @@ Int_t StPrepEmbedMaker::InitRun(int runnum)
             return kStErr;
          }
     }
-    
-    
+
+   
+   if(mSettings->mode.Contains("Spectrum"))
+     {
+
+      // Call the old gentx binary for this request. 
+      // We need to port this code into the StPrepEmbedMaker,
+      // but the underlying functions don't exist in St_geant_Maker 
+      // at this time (11-25-09).
+      // magic numbers: 1000 events, temp.fz need to be resolved
+       TString cmd;
+       cmd = Form("root4star -q \'~starofl/embedding/getVerticiesFromTags.C\(1000,\"./\",\"%s\")\'", 
+		  mTagFile.Data());
+       cmd = Form("~starofl/embedding/GENTX/gentx %s %s %i %i %f %f %f %i %f %f %f %i",
+		  mTagFile.Data(),"temp.fz",
+		  1000,mSettings->mult,mSettings->etalow, mSettings->etahigh, 
+		  0.0,0,mSettings->ptlow, mSettings->pthigh,mSettings->temperature,
+		  mSettings->rnd1);
+       gSystem->Exec(cmd.Data());
+
+
+       Do("gfile p temp.fz");
+     }//end if Spectrum
+
+   else{
 //    Do("detp  hadr_on");
  //   Do("make gstar");
-    cout <<"Setting up Jpsi particle"<<endl;
-    Do("vec/cr JBUF(1)");
-    Do("vec/cr BR(6) R 100. 0. 0. 0. 0. 0.");
-    Do("vec/cr MODE(6) I 302 0 0 0 0 0");
-    Do("spart 160 'JPSI' 3 3.09688 0 8.E-21 JBUF 0 BR MODE");	
+       gSystem->Load("libgstar");
+   
 
-    Do("vec/cr UBUF1(1)");
-    Do("vec/cr BRATIO1(6) R 100. 0. 0. 0. 0. 0.");
-    Do("vec/cr MODE1(6) I 809 0 0 0 0 0");
-    Do("spart 16 'KAON 0 SHORT' 3 0.497671 0 8.922E-11 UBUF1 0 BRATIO1 MODE1");
-  
-    Do("vec/cr UBUF2(1)");
-    Do("vec/cr BRATIO2(6) R 100. 0. 0. 0. 0. 0.");
-    Do("vec/cr MODE2(6) I 1112 0 0 0 0 0");
-    Do("spart 151 'Phi-KK' 3 1.0194 0 1.482e-22 UBUF2 0 BRATIO2 MODE2");
-
-    Do("vec/cr UBUF2(1)");
-    Do("vec/cr BRATIO3(6) R 50. 50. 0. 0. 0. 0.");
-    Do("vec/cr MODE3(6) I 0760 0 0 0 0 0");
-    Do("spart 845 'Special DALITZ' 4 1.5318 +1 8.4e-17 UBUF2 0 BRATIO2 MODE3");
-    Do("vec/cr BRATIO4(6) R 50. 50. 0. 0. 0. 0.");
-    Do("vec/cr MODE4(6) I 010203 0 0 0 0 0");
-    Do("spart 60 'Special DALITZ' 4 .1349766 0 8.4e-17 UBUF2 0 BRATIO4 MODE4");
-
-    Do("vec/cr UBUF2(1)");
-    Do("vec/cr BRATIO2(6) R 100. 0. 0. 0. 0. 0.");
-    Do("vec/cr MODE2(6) I 203 0 0 0 0 0");
-    Do("spart 161 'Upsilon1S' 4 9.460  0 1.254e-20 UBUF2 0 BR(6) MODE2");
-    Do("spart 162 'Upsilon2S' 4 10.023 0 1.545e-20 UBUF2 0 BR(6) MODE2");
-    Do("spart 163 'Upsilon3S' 4 10.355 0 2.556e-20 UBUF2 0 BR(6) MODE2");
-
-       
-               
- 
+    
     Do("detp  hadr_on");
     TString cmd("rndm ");
     cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
     Do(cmd.Data());
     
+    Do("vec/cr BUFF(1) r 0");
+    Do("vec/cr BR2(6) R 100. 0. 0. 0. 0. 0.");
+    Do("vec/cr MODE2(6) I 1412 0 0 0 0 0");
+    Do("spart 995 'LAMBDASTAR' 3 1.5195  0  4.22e-23 BUFF 0 BR2 MODE2");
     Do("user/output o temp.fz");
 
-
-  }
+   }// end default type selection (FlatPt)
+  }//end if !mGeant3
   return 0;
 }
 
@@ -191,13 +190,15 @@ Int_t StPrepEmbedMaker::Make() {
 	      << " has been found in tag file" << nFound << " times" <<  endm;
     return kStErr;
   }
-  LOG_INFO << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber() 
+  LOG_INFO << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber()
+	   << "/" << EvtHddr->GetEventNumber() 
 	   << " has been found with uncorrectedNumberOfPrimaries = " <<  mTree->GetV1()[0] 
 	   << " and primaryVertexFlag = " << mTree->GetV2()[0]  <<  endm;
-   if (mTree->GetV1()[0] <= 0 || mTree->GetV2()[0] ) {
+   if (mTree->GetV1()[0] <= 0 || mTree->GetV2()[0] )
+   {
      LOG_ERROR << "StPrepEmbedMaker::Make reject this event" << endm;
      return kStErr;
-  }
+   }
  
   Int_t numberOfPrimaryTracks = (Int_t) mTree->GetV1()[0];
   // Extract info for mult for this event
@@ -229,7 +230,8 @@ Int_t StPrepEmbedMaker::Make() {
   if (mSkipMode == kTRUE){ 
     if (fabs(xyz[0])<1e-7 && fabs(xyz[1])<1e-7 && fabs(xyz[2])<1e-7 ){
       LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
-	       << " has tags with vertex approx at (0,0,0) - probably no PV, skipping." << endm;
+	       << " has tags with vertex approx at (0,0,0) - probably no PV, skipping."
+	       << endm;
       return kStSKIP;
     }
   }
@@ -333,16 +335,25 @@ void StPrepEmbedMaker::SetPartOpt(Int_t pid, Double_t mult)
 //________________________________________________________________________________
 void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
 			      Double_t etalow, Double_t etahigh, Double_t philow,
-			      Double_t phihigh) {
+			      Double_t phihigh, TString type) {
   mSettings->ptlow=ptlow;   mSettings->pthigh=pthigh; 
   mSettings->etalow=etalow; mSettings->etahigh=etahigh;
   mSettings->philow=philow;  mSettings->phihigh=phihigh;
+  mSettings->mode=type;
   LOG_INFO << "StPrepEmbedMaker::SetOpt ptlow = " << mSettings->ptlow << " pthigh = " << mSettings->pthigh
 	   << " etalow = " << mSettings->etalow << " etahigh = " << mSettings->etahigh
-	   << " philow = " << mSettings->philow << " phihigh = " << mSettings->phihigh << endm;
+	   << " philow = " << mSettings->philow << " phihigh = " << mSettings->phihigh
+	   <<"Mode: "<< type.Data() << endm;
+}
+void StPrepEmbedMaker::SetTemp(double t)
+{
+  mSettings->temperature=t;
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.12  2010/02/05 23:01:04  andrewar
+ * Update with spectra embedding mode.
+ *
  * Revision 1.11  2009/07/01 23:20:34  andrewar
  * Updated with codes for Strangeness embedding (taken from Xianglei's code,
  * Feb 09)
