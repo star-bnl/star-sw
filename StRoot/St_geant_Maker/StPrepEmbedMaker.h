@@ -1,15 +1,17 @@
-
 /*!
  * \class  StPrepEmbedMaker
  * \brief  
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.4 2009/07/01 23:21:03 andrewar Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.5 2010/02/05 23:01:19 andrewar Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.5  2010/02/05 23:01:19  andrewar
+ * Update with spectra embedding mode.
+ *
  * Revision 1.4  2009/07/01 23:21:03  andrewar
  * Updated with Strangeness embedding code options, taken from Xianglei's
  * code, Feb 09.
@@ -52,14 +54,15 @@ class StPrepEmbedMaker : public StMaker {
   Int_t  InitRun(int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.4 2009/07/01 23:21:03 andrewar Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.5 2010/02/05 23:01:19 andrewar Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
   void SetPartOpt(Int_t pid, Double_t mult);
   void SetOpt(Double_t ptlow, Double_t pthigh,
 	      Double_t etalow, Double_t etahigh, Double_t philow,
-	      Double_t phihigh);
+	      Double_t phihigh, TString type);
+  void SetTemp(double t);
   void SetTagFile(const Char_t *file) {mTagFile = file;}
   void SetSkipMode(Bool_t flag=kTRUE) {mSkipMode = flag;}
   void SetSpreadMode(Bool_t flag=kFALSE) {mSpreadMode=flag;}
