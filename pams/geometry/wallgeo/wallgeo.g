@@ -21,7 +21,10 @@
   REPLACE [unit(m)]      with [*100.0]
   REPLACE [unit(mm)]     with [*0.100]
 *
-  REPLACE [;ASSERT(#);] with [;call assert((#1),__LINE__,'wallgeo.g');]
+  REPLACE [;ASSERT(#);] with [;call assert((#1), __LINE__,'wallgeo.g');]
+*
+* and I really need an increment operator...
+*  REPLACE [(#)++] with [#1=#1+1]
 *
 * ==================================================================== Notes ==
 * 
@@ -106,7 +109,7 @@
 * Enumerate material types
   Replace [kConcrete] with [1]
   Replace [kSteel]    with [2]
-  Integer wall_stuff
+  Integer wall_stuff, nwall
 
 * =============================================================================
 *
@@ -136,6 +139,21 @@
 *
 * =============================================================================
 *
+  Fill SHLD                                            ! shield dimensions
+                   version  = 1.000                    ! version
+                   xwidth   = {48.0 unit(inch), 
+                               54.5 unit(inch), 
+                               45.5 unit(inch), 
+                               45.1 unit(inch) }  ! x widths
+                   ywidth   = {111. unit(inch), 
+                               111. unit(inch), 
+                               111. unit(inch), 
+                               108. unit(inch) }  ! y widths
+                   zwidth   = {48.0 unit(inch), 
+                               48.0 unit(inch), 
+                               48.0 unit(inch), 
+                               48.0 unit(inch) }      ! z widths
+  EndFILL
 * =============================================================================
 *
   Use CDIM
@@ -146,6 +164,9 @@
 *                                                Sanity: ensure cave dimensions
   assert( cdim_rmax .gt. tdim_rmax )
   assert( tdim_rmax .gt. 0. )
+*
+  nwall = 1
+*
 
                                                 "set material proerties"
                                                  wall_stuff = kConcrete
@@ -162,6 +183,7 @@
   wall_zz = 0.0                                         ! center along E-W
 *
   Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz 
+
 *
 * ================================================================== Ceiling ==
 *
@@ -183,7 +205,7 @@
   wall_yy = 0.0                                       ! center at avg wall
   wall_zz = 0.0                                       ! center along E-W
 *
-  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz
+  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz 
 *
 * =============================================================================
 *                                WEST TUNNEL
@@ -218,7 +240,7 @@
   wall_yy = 0.0                                       ! center at avg wall
   wall_zz = cdim_dz+wall_dz                           ! center along E-W
 *
-  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz
+  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz 
 *
 * =============================================================================
 *                                EAST TUNNEL
@@ -244,7 +266,7 @@
   wall_zz = cdim_dz+wall_dz                             ! center along E-W
   wall_zz = -wall_zz
 *
-  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz 
+  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz
 *
 * ==================================================================== South ==
 *
@@ -306,7 +328,8 @@
   wall_dy = 0.5 * shld_ywidth(4)
   wall_dz = 0.5 * shld_zwidth(4)
 *
-  wall_zz = +512.3 unit(inch) + 144.25 unit(inch) - 236.0 unit(inch) + wall_dz
+  wall_zz = +512.3 unit(inch) + 144.25 unit(inch) - 236.0 unit(inch) _
+            + wall_dz
   wall_yy = -tdim_dfloor + wall_dy
   wall_xx = -tdim_dnorth + wall_dx
 *
@@ -332,7 +355,7 @@
   wall_yy = -tdim_dfloor + wall_dy
 *
 * East side
-  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz
+  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz 
 *
 *                                                             Steel stack above
 *                                                             the beam pipe
@@ -347,7 +370,7 @@
   wall_xx = wall_xx                                           ! same xx
   wall_yy = -tdim_dfloor + 65.0 unit(inch) + wall_dy
 *
-  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz
+  Create and Position WALL in CAVE x=wall_xx y=wall_yy z=wall_zz 
 *
 *
 * =============================================================================
