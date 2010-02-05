@@ -237,6 +237,7 @@ Int_t St_pp2pp_Maker::Make(){
         pp2pp_t &d = *(pp2pp_t *)*iword;
         // do something
 	DoerPp2pp(d,*pp2ppRawHits);
+	if ( counter == 0 ) mSiliconBunch = d.bunch_xing ;
      }
   }
 
@@ -399,6 +400,9 @@ Int_t St_pp2pp_Maker::MakeClusters() {
 
   /// Creating a new StEvent object
   StRpsCollection * pp2ppColl = new StRpsCollection(); 
+
+  /// Set Silicon-Bunch
+  pp2ppColl->setSiliconBunch(mSiliconBunch) ;
 
   vector< HitChannel >::iterator it, it_next ;
 
