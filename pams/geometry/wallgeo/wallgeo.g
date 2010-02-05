@@ -21,7 +21,8 @@
   REPLACE [unit(m)]      with [*100.0]
   REPLACE [unit(mm)]     with [*0.100]
 *
-  REPLACE [;ASSERT(#);] with [;call assert((#1), __LINE__,'wallgeo.g');]
+* REPLACE [;ASSERT(#);] with [;call assert((#1), __LINE__,'wallgeo.g');]
+* REPLACE [;ASSERT(#);] with []
 *
 * and I really need an increment operator...
 *  REPLACE [(#)++] with [#1=#1+1]
@@ -160,10 +161,10 @@
   Use TDIM 
 *                                                    Sanity: ensure cave exists
   id_cave = AgExist('CAVE')
-  assert( id_cave .gt. 0 )
+*  assert( id_cave .gt. 0 )
 *                                                Sanity: ensure cave dimensions
-  assert( cdim_rmax .gt. tdim_rmax )
-  assert( tdim_rmax .gt. 0. )
+*  assert( cdim_rmax .gt. tdim_rmax )
+*  assert( tdim_rmax .gt. 0. )
 *
   nwall = 1
 *
