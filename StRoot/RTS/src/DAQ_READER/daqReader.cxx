@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.30 2010/02/03 19:21:07 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.31 2010/02/05 16:28:52 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -327,7 +327,14 @@ char *daqReader::get(int num, int type)
       return NULL;
     }
 
-    if(openEventFile() < 0) return NULL;
+    if(openEventFile() < 0) {
+      if(input_type == dir) {
+	LOG(NOTE,"No File, but didn't see token 0 - stopping...",event_number) ;
+	status = EVP_STAT_EOR ;
+	event_number = 1;
+      }
+      return NULL;
+    }
   }
   
   // at this point:
