@@ -1,4 +1,4 @@
-//$Id: haddWana.C,v 1.13 2010/02/04 03:48:25 balewski Exp $
+//$Id: haddWana.C,v 1.14 2010/02/06 01:12:46 balewski Exp $
 // line added after tag=DNP2009 by Jan
 // run list chaned to match final run selection for SL09g 
 
@@ -12,6 +12,11 @@
 
 TList *FileList;
 TFile *Target;
+
+
+int isAPS2010pol=1; /* affects only setP1-P4, not setA-D,
+		       set it to 0 to see all usable polarized fills */
+
 
 
 void MergeRootfile( TDirectory *target, TList *sourcelist );
@@ -32,7 +37,7 @@ void haddWana() {
   haddWana("run9setP1234");
 }
 
-void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-pt4/data/") {
+void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-pt5/data/") {
 
   TString out=iPath;
 
@@ -72,6 +77,13 @@ void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-S
   int i=1;
   do {
     printf("add run %d '%s' \n",i++,run);
+    if(isAPS2010pol && strstr(set,"run9setP")>0 ) { // remove runs from fills w/o official pol for APS-2010
+      int irun=atoi(run+1);
+      if(irun>=10083013 && irun<=10083058) { printf("\tdrop %s from F10415\n",run); continue;}
+      if(irun>=10090037 && irun<=10090047) { printf("\tdrop %s from F10464\n",run); continue;}
+      if(irun>=10098015 && irun<=10098015) { printf("\tdrop %s from F10508\n",run); continue;}
+      if(irun>=10101028 && irun<=10101040) { printf("\tdrop %s from F10528\n",run); continue;}
+    }
     TString fullName=iPath+run+".wana.hist.root";  
     FileList->Add( TFile::Open(fullName));
   } while(run=strtok(0," "));  // advance by one nam
@@ -214,6 +226,9 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
+// Revision 1.14  2010/02/06 01:12:46  balewski
+// skips unpol CNI fills
+//
 // Revision 1.13  2010/02/04 03:48:25  balewski
 // add ET for lumi monitor
 //
