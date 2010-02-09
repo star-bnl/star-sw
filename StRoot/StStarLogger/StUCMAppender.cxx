@@ -254,6 +254,7 @@ void StUCMAppender::flushBuffer()
 //_________________________________________________________________________
 void StUCMAppender::append(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& p)
 {
+    append(event);
 }
 #endif
 
