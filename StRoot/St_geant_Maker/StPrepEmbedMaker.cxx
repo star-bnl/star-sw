@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.12 2010/02/05 23:01:04 andrewar Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.13 2010/02/09 01:07:32 andrewar Exp $
  *
  */
 
@@ -65,7 +65,8 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name) {
   }
   mFile = 0;
   mTree = 0;
-  mSkipMode = kTRUE;
+  mSkipMode = kFALSE;
+  mSpreadMode = kFALSE;
 }
 //________________________________________________________________________________
 StPrepEmbedMaker::~StPrepEmbedMaker() { 
@@ -78,6 +79,12 @@ Int_t StPrepEmbedMaker::Init() {
         mSettings->rnd1 = abs(int(rand()*10000)+getpid());
         mSettings->rnd2 = abs(int(rand()*10000)+getpid());
 
+	if (mSettings->mode.Contains("trange"))
+	{
+	    mSpreadMode= kTRUE;
+	    LOG_INFO <<"Setting spreader mode for embedding mode "<<mSettings->mode
+	<<endm;
+	}
 
     return StMaker::Init();
 }
@@ -110,22 +117,27 @@ Int_t StPrepEmbedMaker::InitRun(int runnum)
 
     // Check mode type, select settings
    if (mSpreadMode){
+	LOG_INFO << "Spreader mode set."<<endm;
          mMoreTagsFile = mTagFile;
          int indx1 = mMoreTagsFile.Index(".tags",0);
          int indx2 = mMoreTagsFile.Last('.');
          if (indx1!=indx2) mMoreTagsFile.Remove(indx1+1,(indx2-indx1));
          mMoreTagsFile.Insert(indx1+1,"moretags.");
          mMoreFile = new TFile(mMoreTagsFile);
-         if (! mMoreFile ) {
-            LOG_ERROR << "MoreTagsFile : " << mMoreTagsFile << " cannot be opened" << endm;
-            return kStErr;
-         }
-         mMoreTree = (TTree *) mMoreFile->Get("MoreTags");
-         if (! mMoreTree ) {
-            LOG_ERROR << "In MoreTagsFile : " << mMoreTagsFile << " cannot find TTree \"MoreTags\"" << endm;
-            return kStErr;
-         }
-    }
+         if (mMoreFile ) {
+                 
+            mMoreTree = (TTree *) mMoreFile->Get("MoreTags");
+            if (! mMoreTree ) {
+               LOG_ERROR << "In MoreTagsFile : " << mMoreTagsFile << " cannot find TTree \"MoreTags\"" << endm;
+               return kStErr;
+            }//end if more tree
+
+	 }
+	 else
+	   {
+	     LOG_INFO << "File moretags.root not found. If this embedding is for years 2007 through 2009, this will most likely cause the embedding to quit prematurely."<<endm;
+	   }//end if mMoreFile
+   }//end spreadMode setup
 
    
    if(mSettings->mode.Contains("Spectrum"))
@@ -248,12 +260,22 @@ Int_t StPrepEmbedMaker::Make() {
    
   if(mSettings->mode.Contains("strange"))
     {
+      // For this embedding type, we smear the start position of the particle
+      // with the vertex errors. Old embedding (2007 through 2009) needs an
+      // external file (moretags.root).
+      nFound=0;
+      nFound = (Int_t) mTree->Draw("sigmaPVX:sigmaPVY:sigmaPVZ",
+				   Form("RunId==%i&&EvtId==%i",
+					EvtHddr->GetRunNumber(),
+					EvtHddr->GetEventNumber()),"goff");
      //get primary vertex errors from moretags.root
-     nFound = (Int_t) mMoreTree->Draw("VXERR:VYERR:VZERR",
+      if(!nFound && mMoreTree) {
+	nFound = (Int_t) mMoreTree->Draw("VXERR:VYERR:VZERR",
              Form("RunId==%i&&EvtId==%i",
                   EvtHddr->GetRunNumber(),
                   EvtHddr->GetEventNumber()),
              "goff");
+      }
      if (nFound != 1) {
           LOG_ERROR << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber()
              << " has been found in moretags file" << nFound << " times" <<  endm;
@@ -351,6 +373,11 @@ void StPrepEmbedMaker::SetTemp(double t)
 }
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.13  2010/02/09 01:07:32  andrewar
+ * Changed defualt setting of mSpreadMode to kFALSE. Modified logic when looking up
+ * vertex errors; first looks at tags.root, then (if failure) attempts moretags.root.
+ * Added backward compatibility for embedding mode (default is now FlatPt).
+ *
  * Revision 1.12  2010/02/05 23:01:04  andrewar
  * Update with spectra embedding mode.
  *
