@@ -339,6 +339,10 @@ Int_t StGammaCandidateMaker::MakeBarrel()
         float smdPhiEnergy = 0;
         
         int centralId = 0;
+        int module = 0;
+        int eta = 0;
+        int sub = 0;
+
         smdEtaGeom->getId(cluster->position().Phi(), cluster->position().Eta(), centralId);         
 
         int sector = 0; // Dummy variable in the BEMC
@@ -350,8 +354,9 @@ Int_t StGammaCandidateMaker::MakeBarrel()
             {
 
                 int id = emcPosition.getNextId(3, centralId, dEtaStrip, dPhiStrip);
-        
-                int sector = 0; // Dummy variable in the BEMC
+                if(id == 0) continue;        
+
+                smdEtaGeom->getBin(id, module, eta, sub);
 
                 // Find vertex corrected position of the strip
                 float x, y, z;
@@ -387,7 +392,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
                         StGammaStrip *strip = mGammaEvent->newStrip();
          
                         strip->index = id;
-                        strip->sector = sector;
+                        strip->sector = module;
                         strip->plane  = kBEmcSmdEta;
                         // strip->stat Filled in StGammaRawMaker::AddEtaStrip()
                         // strip->fail Filled in StGammaRawMaker::AddEtaStrip()
@@ -422,6 +427,9 @@ Int_t StGammaCandidateMaker::MakeBarrel()
             {
             
                 int id = emcPosition.getNextId(4, centralId, dEtaStrip, dPhiStrip);
+                if(id == 0) continue;
+
+                smdEtaGeom->getBin(id, module, eta, sub);
 
                 // Find vertex corrected position of the strip
                 float x, y, z;
@@ -457,7 +465,7 @@ Int_t StGammaCandidateMaker::MakeBarrel()
                         StGammaStrip *strip = mGammaEvent->newStrip();
 
                         strip->index = id;
-                        strip->sector = sector;
+                        strip->sector = module;
                         strip->plane  = kBEmcSmdPhi;
                         //strip->stat Filled in StGammaRawMaker::AddPhiStrip()
                         //strip->fail Filled in StGammaRawMaker::AddPhiStrip()
