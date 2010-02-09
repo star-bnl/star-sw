@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.25 2010/01/25 03:57:39 tone421 Exp $
+ * $Id: StMuEvent.h,v 1.27 2010/02/03 17:16:22 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -84,6 +84,8 @@ class StMuEvent : public TObject {
   /// Reference multiplicity of particles in the east+west FTPC as defined in StEventUtilities/StuFtpcRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
   unsigned short refMultFtpc(int vtx_id = -1);
   unsigned short grefmult(int vtx_id=-1);
+  unsigned short btofTrayMultiplicity();
+  float nearestVertexZ(int vtx_id=-1);
 
 	/// Currently not filled properly.
   double reactionPlane(unsigned short);
@@ -106,6 +108,7 @@ class StMuEvent : public TObject {
   float vpdTstart();
   float vpdTdiff(); 
   float vpdVz();
+
 
  protected:
   void clear();
@@ -211,6 +214,12 @@ inline float StMuEvent::vpdVz() { return mVpdVz; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.27  2010/02/03 17:16:22  tone421
+ * Added function StMuEvent::nearestVertexZ(int vtx_id) which returns the z distance of the nearest vertex in relation to vertex vtx_id
+ *
+ * Revision 1.26  2010/02/03 04:54:45  tone421
+ * Added StMuEvent::btofTrayMultiplicity() to return only TOF hits from trays. Should be looked at instead of ctbSum for run 9 and beyond.
+ *
  * Revision 1.25  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
  *
