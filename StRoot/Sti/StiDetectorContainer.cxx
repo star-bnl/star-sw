@@ -59,7 +59,7 @@ void StiDetectorContainer::initialize()
     {
     string name = (*bIter)->getName();
     //cout << "Detector:"<< name<<endl;
-    unsigned int where = name.find("Tpc");
+    ULong_t where = name.find("Tpc");
     if (where==name.npos)
       {
       cout <<"StiDetectorContainer::initialize() -I- Skipping group: "<<name<<endl;
