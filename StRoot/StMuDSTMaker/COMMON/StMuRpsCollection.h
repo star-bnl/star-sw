@@ -79,10 +79,10 @@ private:
 
 
 
-ClassDef(StMuRpsCollection,1)
+ClassDef(StMuRpsCollection,2)
 
 };
-
+inline unsigned char StMuRpsCollection::siliconBunch() const { return mSiliconBunch ; }
 inline unsigned int StMuRpsCollection::numberOfPlanesWithClusters(int romanPotId) const { return romanPotId < mNumberOfRomanPot ? mNumberPlanesWithClusters[romanPotId] : 0; }
 inline unsigned char StMuRpsCollection::status(int romanPotId) const { 
 	if  (romanPotId < mNumberOfRomanPot) return mStatusRomanPot[romanPotId];
