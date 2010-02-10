@@ -1,5 +1,0 @@
-# $Id $
-# package StTpcEvalMaker
-# author: 
-Library:libStTpcEvalMaker.so:LIBS +=   -lStAssociationMaker  -lStChain  -lStDbUtilities  -l_StEvent  -lStMcEventMaker  -lStMcEvent
-#Library:libStTpcEvalMaker.so:LIBS +=   -lStAssociationMaker  -lStChain  -lStDbUtilities  -lStEvent  -lStMcEventMaker  -lStMcEvent
