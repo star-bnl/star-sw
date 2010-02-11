@@ -98,7 +98,7 @@ def main():
 
     if ( opts.wrapper ):
 
-        cmd = 'root -q -b StarVMC/StarBASE/macros/starbase.C\\(\\\"'+opts.geom+'\\\",'+str(opts.etamin)+','+str(opts.etamax)+','+str(opts.phimin)+','+str(opts.phimax)+'\\)'
+        cmd = 'root.exe -q -b StarVMC/StarBASE/macros/starbase.C\\(\\\"'+opts.geom+'\\\",'+str(opts.etamin)+','+str(opts.etamax)+','+str(opts.phimin)+','+str(opts.phimax)+'\\)'
         os.system( cmd )
 
 
