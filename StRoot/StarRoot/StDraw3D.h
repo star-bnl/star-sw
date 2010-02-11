@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.52 2010/01/24 06:02:25 fine Exp $
+// $Id: StDraw3D.h,v 1.53 2010/02/11 21:59:35 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -203,7 +203,8 @@ public:
    virtual void  SetDetectors(const char*nameDetectors);
    virtual void  AddDetectors(const char*nameDetectors);
    virtual void  Draw(Option_t *option="") {TObject::Draw(option);}
-   virtual const StDraw3DStyle &Style(EDraw3DStyle type);
+   virtual const StDraw3DStyle &Style(EDraw3DStyle type) const;
+   virtual       StDraw3DStyle &Style(EDraw3DStyle type);
    virtual void  SetBkColor(Color_t newBkColor);
 
    virtual TObject *Draw3D(int n,  const float *xyz);

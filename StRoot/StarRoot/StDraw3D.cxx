@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.89 2010/01/24 06:03:34 fine Exp $
+// $Id: StDraw3D.cxx,v 1.90 2010/02/11 21:59:35 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -464,7 +464,13 @@ const StDraw3DStyle &StDraw3D::AddStyle(EDraw3DStyle type,Color_t col,Style_t st
     \param type - The pre-defined \a type we want to get the reference to
  */
 //__________________________________________________________________________________________
-const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
+const StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type) const
+{
+    return fStyles.find(type)->second;
+}
+
+//__________________________________________________________________________________________
+StDraw3DStyle &StDraw3D::Style(EDraw3DStyle type)
 {
     return fStyles[type];
 }
