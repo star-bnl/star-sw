@@ -39,6 +39,9 @@ VPDHiHistogramGroup::VPDHiHistogramGroup() {
   memset( h_vpd_cdb, 0, sizeof(h_vpd_cdb));
   h_vpd_tac_east_vs_tac_west = 0;
   h_vpd_vertex_vs_l3_vertex = 0;
+  h_vpd_earliestTAC_vs_eastchan=0;
+  h_vpd_earliestTAC_vs_westchan=0;
+
 }
 
 VPDHiHistogramGroup::VPDHiHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
@@ -75,7 +78,7 @@ VPDHiHistogramGroup::VPDHiHistogramGroup(const char* group, const char* subGroup
 
   sprintf(tmpchr,"vpd_west_ADCHi");
   h_vpd_cdb[2]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
-  h_vpd_cdb[2]->SetXTitle("Channel # (west");
+  h_vpd_cdb[2]->SetXTitle("Channel # (west)");
   h_vpd_cdb[2]->SetYTitle("Hi-Th ADC (west)");
   sprintf(tmpchr,"vpd_west_TACHi");
   h_vpd_cdb[3]=new TH2D(tmpchr,tmpchr,16,-0.5,15.5,400,-0.5,4095.5);
@@ -92,14 +95,25 @@ VPDHiHistogramGroup::VPDHiHistogramGroup(const char* group, const char* subGroup
   h_vpd_vertex_vs_l3_vertex->SetXTitle("L3 Vertex z-Position [cm]");
   h_vpd_vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 
+  sprintf(tmpchr,"vpd_earliestTAC_vs_chan_east");
+  h_vpd_earliestTAC_vs_eastchan=new TH2D(tmpchr,"EarliestTAC vs chan east", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  h_vpd_earliestTAC_vs_eastchan->SetXTitle("Chan#(east)");
+  h_vpd_earliestTAC_vs_eastchan->SetYTitle("Earliest TAC");
+
+  sprintf(tmpchr,"vpd_earliestTAC_vs_chan_west");
+  h_vpd_earliestTAC_vs_westchan=new TH2D(tmpchr,"EarliestTAC vs chan west", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  h_vpd_earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
+  h_vpd_earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
+
+
   for(int i=0;i<4;i++){
-    h_vpd_cdb[i]->GetXaxis()->SetLabelSize(0.06);
-    h_vpd_cdb[i]->GetYaxis()->SetLabelSize(0.055);
+    h_vpd_cdb[i]->GetXaxis()->SetLabelSize(0.055);
+    h_vpd_cdb[i]->GetYaxis()->SetLabelSize(0.045);
   }
-  h_vpd_tac_east_vs_tac_west->GetXaxis()->SetLabelSize(0.06);
-  h_vpd_tac_east_vs_tac_west->GetYaxis()->SetLabelSize(0.055);
-  h_vpd_vertex_vs_l3_vertex->GetXaxis()->SetLabelSize(0.06);
-  h_vpd_vertex_vs_l3_vertex->GetYaxis()->SetLabelSize(0.055);
+  h_vpd_earliestTAC_vs_eastchan->GetXaxis()->SetLabelSize(0.055);
+  h_vpd_earliestTAC_vs_eastchan->GetYaxis()->SetLabelSize(0.045);
+  h_vpd_earliestTAC_vs_westchan->GetXaxis()->SetLabelSize(0.055);
+  h_vpd_earliestTAC_vs_westchan->GetYaxis()->SetLabelSize(0.045);
 
 #endif
 
@@ -111,7 +125,10 @@ VPDHiHistogramGroup::~VPDHiHistogramGroup() {
   for (int i = 0; i < 4; ++i)delete h_vpd_cdb[i];
   delete h_vpd_tac_east_vs_tac_west;
   delete h_vpd_vertex_vs_l3_vertex;
-}
+  delete h_vpd_earliestTAC_vs_eastchan;
+  delete h_vpd_earliestTAC_vs_westchan;
+
+}  
 
 
 void VPDHiHistogramGroup::reset() {
@@ -119,6 +136,9 @@ void VPDHiHistogramGroup::reset() {
 
   h_vpd_tac_east_vs_tac_west->Reset();
   h_vpd_vertex_vs_l3_vertex->Reset();
+  h_vpd_earliestTAC_vs_eastchan->Reset();
+  h_vpd_earliestTAC_vs_westchan->Reset();
+
 }
 
 
@@ -153,7 +173,7 @@ void VPDHiHistogramGroup::draw(TCanvas* cc) {
   label.SetTextAlign(23);  // center, top
   label.SetTextSize(0.06);
   label.SetTextColor(16);
-  cc->cd();
+
   gStyle->SetPalette(1);
   gStyle->SetOptStat(0);
   gStyle->SetLabelSize(0.09,"y");
@@ -162,10 +182,9 @@ void VPDHiHistogramGroup::draw(TCanvas* cc) {
   gStyle->SetTitleW(0.8); gStyle->SetTitleH(0.088);
   gStyle->SetOptTitle(1);
 
-
-
+  cc->cd();
   cc->Clear();
-  cc->Divide(2, 2);
+  cc->Divide(2, 3);
   
   cc->cd(1);
   h_vpd_cdb[0]->Draw("colz");
@@ -176,13 +195,10 @@ void VPDHiHistogramGroup::draw(TCanvas* cc) {
   cc->cd(4); 
   h_vpd_cdb[3]->Draw("colz");
   
-  /*
   cc->cd(5);
-  h_vpd_tac_east_vs_tac_west->Draw("COLZ");
-
+  h_vpd_earliestTAC_vs_eastchan->Draw("colz");
   cc->cd(6);
-  h_vpd_vertex_vs_l3_vertex->Draw("COLZ");
-  */
+  h_vpd_earliestTAC_vs_westchan->Draw("colz");
 
   cc->Update();
 
@@ -259,34 +275,25 @@ bool VPDHiHistogramGroup::fill(evpReader* evp, char* datap) {
 #else
   StTriggerData* trgd = TriggerData::Instance(datap);
   if(!trgd) return false;  
-  
+
+  int maxTacEast = trgd->vpdEarliestTDCHighThr((StBeamDirection)0);
+  int maxTacWest = trgd->vpdEarliestTDCHighThr((StBeamDirection)1);
+  int earliestchan_east=-1;
+  int earliestchan_west=-1;
+
   for(int i=0;i<2;i++) {   //
     for(int ich=0;ich<16;ich++){
       int adc_hi = trgd->vpdADCHighThr((StBeamDirection)i,ich+1);
       int tdc_hi = trgd->vpdTDCHighThr((StBeamDirection)i,ich+1);
-      //int adc_lo = trgd->vpdADC((StBeamDirection)i,ich+1);
-      //int tdc_lo = trgd->vpdTDC((StBeamDirection)i,ich+1);
-      //cout<<"i="<<i<<" vpd:: "<<adc_hi<<" "<<tdc_hi<<" "<<adc_lo<<" "<<tdc_lo<<endl;
       h_vpd_cdb[2*i+0]->Fill(ich, adc_hi);
       h_vpd_cdb[2*i+1]->Fill(ich, tdc_hi);
+      if(i==0 && maxTacEast == tdc_hi) earliestchan_east=ich;
+      if(i==1 && maxTacWest == tdc_hi) earliestchan_west=ich;
 
     }
   }
-
-  int maxTacEast = trgd->vpdEarliestTDC((StBeamDirection)0);
-  int maxTacWest = trgd->vpdEarliestTDC((StBeamDirection)1);
-  h_vpd_tac_east_vs_tac_west->Fill(maxTacWest, maxTacEast);
-
-  int ret = evtTracker->trackEvent(evp, datap, l3p, sizL3_max);
-  if (!(ret<0)) ret = evtTracker->copyl3_t(l3,l3p);
-  if(ret < 0){
-      fprintf(stderr,"L3: problems in data (%d) - continuing...",ret) ;
-      cout<<"Error tracking event: "<<evp->seq<<endl;
-      return false;
-    }
-  unsigned int tacDiff=trgd->vpdTimeDifference();
-  //cout<<"tacdiff = "<<tacDiff<<" l3 zvertex="<<l3.zVertex<<endl;
-  h_vpd_vertex_vs_l3_vertex->Fill(l3.zVertex, tacDiff);
+  h_vpd_earliestTAC_vs_eastchan->Fill(earliestchan_east,maxTacEast);
+  h_vpd_earliestTAC_vs_westchan->Fill(earliestchan_west,maxTacWest);
 
 #endif
   return true;
