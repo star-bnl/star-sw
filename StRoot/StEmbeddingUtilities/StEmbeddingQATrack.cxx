@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.6 2009/12/22 21:39:30 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.7 2010/02/12 16:24:54 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.7  2010/02/12 16:24:54  hmasui
+ * Fix the primary vertex subtraction for nhit
+ *
  * Revision 1.6  2009/12/22 21:39:30  hmasui
  * Add comments for functions and members
  *
@@ -95,7 +98,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Short_t geantid)
   : mNCommonHit(-10), mParentGeantId(-10), mGeantId(geantid),
-  mNHit(track.nHitsFit(kTpcId)-1), mNHitPoss(track.nHitsPoss(kTpcId)-1), mCharge(track.charge()),
+  mNHit(track.nHitsFit(kTpcId)), mNHitPoss(track.nHitsPoss(kTpcId)), mCharge(track.charge()),
   mVectorMc(-9999., -9999., -9999., -9999.), // No MC momentum for real tracks
   mVectorRc(track.p().x(), track.p().y(), track.p().z(), 
       TMath::Sqrt(track.p().mag2() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(geantid)->mass(),2.0))),
