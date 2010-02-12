@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.6 2009/11/23 23:44:32 ogrebeny Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.7 2010/02/12 23:02:38 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -880,21 +880,20 @@ void StEEmcSlowMaker::setRelativeLightYield( Float_t pre1, Float_t pre2, Float_t
 void StEEmcSlowMaker::setEmbeddingMode(Bool_t x){ mIsEmbeddingMode=x;} 
 
 // ----------------------------------------------------------------------------
-void StEEmcSlowMaker::setTowerGainSpread(Float_t s)
+void StEEmcSlowMaker::setTowerGainSpread(Float_t s, Float_t mean)
 {
+    LOG_INFO << "setTowerGainSpread(): gain spread: " << s << "; gain mean value: " << mean << endm;
 
-  // initialize tower gain factors to 1
+  // initialize tower gain factors to mean +/- spread
   for ( Int_t sec=0;sec<kEEmcNumSectors;sec++ )
     for ( Int_t sub=0;sub<kEEmcNumSubSectors;sub++ )
       for ( Int_t eta=0;eta<kEEmcNumEtas;eta++ )
 	{
-	  //	  mTowerGainFact[sec][sub][eta]=1.0;
-
 	  Float_t f = -1.0E9;
 	  while ( f <= -1. || f >= 1.0 )
 	    f = gRandom->Gaus(0., s);
 
-	  mTowerGainFact[sec][sub][eta] = 1.0 + f;
+	  mTowerGainFact[sec][sub][eta] = mean + f;
 
 	}
 
@@ -929,6 +928,9 @@ void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t sec, Int_t uv, Int_t st
 
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.7  2010/02/12 23:02:38  ogrebeny
+// By the request of the photon group, added an option to shift EEMC gains in the slow simulator.
+//
 // Revision 2.6  2009/11/23 23:44:32  ogrebeny
 // At Pibero's request, for the embedding infrastructure.
 //
