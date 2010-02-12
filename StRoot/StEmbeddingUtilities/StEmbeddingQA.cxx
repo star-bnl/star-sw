@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.5 2010/02/01 21:28:14 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.6 2010/02/12 16:24:13 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.6  2010/02/12 16:24:13  hmasui
+ * Extend the range of vz to +/-150cm for vx(vy) vs vz histograms
+ *
  * Revision 1.5  2010/02/01 21:28:14  hmasui
  * Fix bugs for the binning of delta vx, vy, vz histograms
  *
@@ -200,8 +203,8 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   utility->setStyle(mhVzAccepted);
 
   mhVyVx = new TH2D("hVyVx", "v_{y} vs v_{x}", 100, -5, 5, 100, -5, 5);
-  mhVxVz = new TH2D("hVxVz", "v_{x} vs v_{z}", 100, -5, 5, 100, -5, 5);
-  mhVyVz = new TH2D("hVyVz", "v_{y} vs v_{z}", 100, -5, 5, 100, -5, 5);
+  mhVxVz = new TH2D("hVxVz", "v_{x} vs v_{z}", 300, -150, 150, 100, -5, 5);
+  mhVyVz = new TH2D("hVyVz", "v_{y} vs v_{z}", 300, -150, 150, 100, -5, 5);
   mhVyVx->SetXTitle("v_{x} (cm)"); mhVyVx->SetYTitle("v_{y} (cm)");
   mhVxVz->SetXTitle("v_{z} (cm)"); mhVxVz->SetYTitle("v_{x} (cm)");
   mhVyVz->SetXTitle("v_{z} (cm)"); mhVyVz->SetYTitle("v_{y} (cm)");
