@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 2.3 2009/02/05 20:06:53 ogrebeny Exp $
+// $Id: StEEmcSlowMaker.h,v 2.4 2010/02/12 23:02:38 ogrebeny Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -299,7 +299,7 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
   void setSamplingFraction( Float_t f ){ mSamplingFractionUser=f; }
 
   /// Defines a spread in the tower gains
-  void setTowerGainSpread( Float_t s );
+  void setTowerGainSpread( Float_t s, Float_t mean = 1.0);
 
   /// Defines a spread in the SMD gains
   void setSmdGainSpread( Float_t s, Int_t sector, Int_t uv, Int_t strip_index );
@@ -308,7 +308,7 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.3 2009/02/05 20:06:53 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.4 2010/02/12 23:02:38 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -320,6 +320,9 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 2.4  2010/02/12 23:02:38  ogrebeny
+// By the request of the photon group, added an option to shift EEMC gains in the slow simulator.
+//
 // Revision 2.3  2009/02/05 20:06:53  ogrebeny
 // Changed StEEmcDbMaker -> StEEmcDb
 //
