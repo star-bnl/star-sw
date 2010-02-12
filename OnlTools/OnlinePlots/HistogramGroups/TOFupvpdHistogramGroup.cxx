@@ -55,7 +55,7 @@ TOFupvpdHistogramGroup::TOFupvpdHistogramGroup(const char* group, const char* su
   upvpd_ToT->SetXTitle("PMT #");
   //upvpd_ToT->SetYTitle("ToT (ns)");
 
-  upvpd_eastT_vs_westT=new TH2F("upvpd_eastT_vs_westT","upvpd eastT vs westT",1024,0,51200,1024,0,51200);
+  upvpd_eastT_vs_westT=new TH2F("upvpd_eastT_vs_westT","upvpd eastT vs westT",400,0,51200,400,0,51200);
   upvpd_eastT_vs_westT->SetXTitle("east time (ns)");
   //upvpd_eastT_vs_westT->SetYTitle("west time (ns)");
 

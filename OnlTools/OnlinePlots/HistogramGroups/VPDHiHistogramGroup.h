@@ -20,8 +20,11 @@ private:
 
   TH2* h_vpd_cdb[4];                // ADC spectra of the 4 CDBs
 
-  TH2* h_vpd_tac_east_vs_tac_west;  // east vs. west TAC value
-  TH2* h_vpd_vertex_vs_l3_vertex;   // TAC difference vs. L3 vertex z-position
+  TH2* h_vpd_tac_east_vs_tac_west;
+  TH2* h_vpd_vertex_vs_l3_vertex;
+
+  TH2* h_vpd_earliestTAC_vs_eastchan;
+  TH2* h_vpd_earliestTAC_vs_westchan;
 
   ClassDef(VPDHiHistogramGroup,1) ;
 };

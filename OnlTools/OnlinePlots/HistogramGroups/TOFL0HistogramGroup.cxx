@@ -138,7 +138,7 @@ void TOFL0HistogramGroup::draw(TCanvas* cc) {
     //TOF_L0_hit[i]->SetLineColor(4);
     //TOF_L0_hit[i]->Draw("same");
 
-    label.SetTextSize(0.11);
+    label.SetTextSize(0.1);
 
     label.SetTextColor(45);
     float hmax=TOF_L0_trg[i]->GetMaximum();
@@ -148,15 +148,15 @@ void TOFL0HistogramGroup::draw(TCanvas* cc) {
 
     if(NotActiveTray[actualTrayNum[i]]) { 
       sprintf(tmpchr,"Not Active");
-      label.SetTextColor(2);
+      label.SetTextColor(54);
       label.SetTextSize(0.09);
-      label.DrawLatex(15., 0.72*hmax, tmpchr);
+      label.DrawLatex(16., 0.65*hmax, tmpchr);
     } 
     if(MaskoutTray[actualTrayNum[i]]) { 
       sprintf(tmpchr,"Mask out");
-      label.SetTextColor(4);
-      label.SetTextSize(0.1);
-      label.DrawLatex(15, 0.12*hmax, tmpchr);
+      label.SetTextColor(53);
+      label.SetTextSize(0.09);
+      label.DrawLatex(16, 0.03*hmax, tmpchr);
     }
 
   }
@@ -190,6 +190,7 @@ bool TOFL0HistogramGroup::fill(evpReader* evp, char* datap) {
     if(prepost != 0) continue;    // only look at prepost =0 data.
     for(int itray=lowtraynum;itray<hightraynum+1;itray++){
       int atrayid=itray;
+      //cout<<" TOF TRAY :::: "<<atrayid<<endl;
       int trigger_mult=trgd->tofTrayMultiplicity(atrayid,prepost);
       if(trigger_mult > 31) trigger_mult=31;
       int histogramnum = (atrayid-1)%MAXTRAYS;
@@ -226,7 +227,7 @@ void TOFL0HistogramGroup::ReadTraymaskoutList(){
   
   TString buffer;
 
-  ifstream filein(mTrayList);
+  ifstream filein(mTraymaskoutList);
   for(int i=0;i<128;i++){MaskoutTray[i]=false;}
   if(filein){ 
     while(!filein.eof()) {
@@ -237,7 +238,7 @@ void TOFL0HistogramGroup::ReadTraymaskoutList(){
       if(trayid<1 || trayid>127) continue;
       MaskoutTray[trayid]=true;
     }   
-  } else {cout<<"TOFL0HistogramGroup::Can not open file:"<<mTrayList<<endl;}
+  } else {cout<<"TOFL0HistogramGroup::Can not open file:"<<mTraymaskoutList<<endl;}
   filein.close();
 
 }

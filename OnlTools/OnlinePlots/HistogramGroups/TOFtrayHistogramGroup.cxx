@@ -139,8 +139,8 @@ void TOFtrayHistogramGroup::draw(TCanvas* cc) {
 
     if(NotActiveTray[actualTrayNum[i]]) { 
       sprintf(tmpchr,"Not Active");
-      label.SetTextColor(2);
-      label.SetTextSize(0.12);
+      label.SetTextColor(54);
+      label.SetTextSize(0.1);
       label.DrawLatex(90., 0.6*hmax, tmpchr);
     } 
 
@@ -154,6 +154,7 @@ void TOFtrayHistogramGroup::draw(TCanvas* cc) {
 bool TOFtrayHistogramGroup::fill(evpReader* evp, char* datap) { 
   
   int ret=tofReader(datap);
+
   if(ret <= 0)   {
     fprintf(stderr,"TOF: problems in data (%d) - continuing...",ret);
     return false;
@@ -194,6 +195,7 @@ bool TOFtrayHistogramGroup::fill(evpReader* evp, char* datap) {
       //
       int edgeid =int( (dataword & 0xf0000000)>>28 );
       if((edgeid !=4) && (edgeid!=5)) continue;
+
 
       int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
       //cout<<"tdcid="<<tdcid<<" halftrayid="<<halftrayid<<endl;
