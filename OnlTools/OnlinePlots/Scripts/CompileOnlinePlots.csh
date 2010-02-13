@@ -27,7 +27,7 @@ Online.bemcStatus:   /a/pplot/files/bemc/bemcStatus.txt
 Online.InputPath:    /a
 Online.OutputPath:   /a/pplot/histos/
 Online.ProjectPath:  OnlTools/OnlinePlots/
-Online.endOfRun:     /home/operator/EndOfRunScript
+Online.endOfRun:     /home/evpops/EndOfRunScript
 Online.plotsDir:     `pwd`/OnlTools/OnlinePlots/
 Online.Reference:    /a/pplot/histos/run10029077.root
 Online.testProc:     /a/pplot/bin/test_proc.csh
@@ -47,7 +47,7 @@ Plugin.TVirtualViewer3D: ogl    TQtRootViewer3D  RQTGL    "TQtRootViewer3D(TVirt
 +Plugin.TVirtualViewer3D: oiv   TQtRootCoinViewer3D  RQIVTGL    "TQtRootCoinViewer3D(TVirtualPad*)"
 
 #Local codes on evp:
-+Unix.*.Root.MacroPath:	:/home/operator/LOCAL_CODES/macros
++Unix.*.Root.MacroPath:	:/home/evpops/LOCAL_CODES/macros
 __ROOTRC__
 
 

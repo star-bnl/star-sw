@@ -47,7 +47,7 @@ const char* EvpUtil::mInputPath = gEnv->GetValue("Online.InputPath","/a");
 const char* EvpUtil::mOutputPath =  gEnv->GetValue("Online.OutputPath","/a/pplot/histos/");
 const char* EvpUtil::mReference = gEnv->GetValue("Online.Reference","/a/pplot/histos/run10029077.map");
 //char* EvpUtil::mMapFilePath = EvpUtil::cat(EvpUtil::mOutputPath,"/evpEventServer.map");
-char* EvpUtil::mMapFilePath = EvpUtil::cat("/home/operator/pplots","/evpEventServer.map");
+char* EvpUtil::mMapFilePath = EvpUtil::cat("/home/evpops/pplots","/evpEventServer.map");
 char* EvpUtil::mCanvasDescriptionFile = EvpUtil::cat(EvpUtil::mProjectPath,"/local/CanvasDescriptions.txt");
 int EvpUtil::mNumberOfTabs = 0;
 int EvpUtil::mNumberOfSubTabs[MAX_TABS];
@@ -961,7 +961,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.14 2010/01/02 20:23:26 dkettler Exp $
+ * $Id: EvpUtil.cxx,v 1.15 2010/02/13 00:14:09 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -971,6 +971,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.15  2010/02/13 00:14:09  genevb
+ * Updates for different default account
+ *
  * Revision 1.14  2010/01/02 20:23:26  dkettler
  * ZDC Sum plots added
  *

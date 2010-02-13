@@ -10,7 +10,7 @@ my $averageMem=0;
 my $diffAverageMem=0;
 my $lastMem=0;
 my $diffLastMem=0;
-my $testCmd = "ps -aux | grep operator | grep root4starN | grep Present";
+my $testCmd = "ps -aux | grep evpops| grep root4starN | grep Present";
 # ------------stat -------------
 sub statMem
 {
