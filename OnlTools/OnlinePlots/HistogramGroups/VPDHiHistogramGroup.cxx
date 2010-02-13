@@ -96,12 +96,12 @@ VPDHiHistogramGroup::VPDHiHistogramGroup(const char* group, const char* subGroup
   h_vpd_vertex_vs_l3_vertex->SetYTitle("VPD TAC Difference");
 
   sprintf(tmpchr,"vpd_earliestTAC_vs_chan_east_hi");
-  h_vpd_earliestTAC_vs_eastchan=new TH2D(tmpchr,"EarliestTAC vs chan east (hi)", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  h_vpd_earliestTAC_vs_eastchan=new TH2D(tmpchr,"EarliestTAC vs chan east", 16, -0.5, 15.5, 200, -1.5, 4095.5);
   h_vpd_earliestTAC_vs_eastchan->SetXTitle("Chan#(east)");
   h_vpd_earliestTAC_vs_eastchan->SetYTitle("Earliest TAC");
 
   sprintf(tmpchr,"vpd_earliestTAC_vs_chan_west_hi");
-  h_vpd_earliestTAC_vs_westchan=new TH2D(tmpchr,"EarliestTAC vs chan west (hi)", 16, -0.5, 15.5, 200, -1.5, 4095.5);
+  h_vpd_earliestTAC_vs_westchan=new TH2D(tmpchr,"EarliestTAC vs chan west", 16, -0.5, 15.5, 200, -1.5, 4095.5);
   h_vpd_earliestTAC_vs_westchan->SetXTitle("Chan#(west)");
   h_vpd_earliestTAC_vs_westchan->SetYTitle("Earliest TAC");
 
