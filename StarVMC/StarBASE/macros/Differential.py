@@ -285,6 +285,8 @@ class Differential1D:
                  ):
 
         self.name = volume
+        self.base = base
+        self.geom = geom
 
         baseFile = get_geom_file(base)                                       # get the files
         compFile = get_geom_file(geom)
