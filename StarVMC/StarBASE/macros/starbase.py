@@ -72,6 +72,7 @@ def main():
     #
     parser = OptionParser()
     parser.add_option( "--geom",    help="Sets the geometry to be processed",     dest="geom",   default="NONE" )
+    parser.add_option( "--name",    help="Sets the name of the geometry [default is tag name]", dest="name", default="NONE" )
     parser.add_option( "--etamin",  help="Minimum pseudorapidity cut",            dest="etamin", default=-6.0,    type="float" )
     parser.add_option( "--etamax",  help="Maximum pseudorapidity cut",            dest="etamax", default=+6.0,    type="float" )
     parser.add_option( "--phimin",  help="Minimum azimuthal angle cut [degrees]", dest="phimin", default=-15.0,   type="float" )
@@ -98,7 +99,11 @@ def main():
 
     if ( opts.wrapper ):
 
-        cmd = 'root.exe -q -b StarVMC/StarBASE/macros/starbase.C\\(\\\"'+opts.geom+'\\\",'+str(opts.etamin)+','+str(opts.etamax)+','+str(opts.phimin)+','+str(opts.phimax)+'\\)'
+        name = opts.geom
+        if ( opts.name != "NONE" ):
+            name = opts.name
+
+        cmd = 'root.exe -q -b StarVMC/StarBASE/macros/starbase.C\\(\\\"'+name+'\\\",'+str(opts.etamin)+','+str(opts.etamax)+','+str(opts.phimin)+','+str(opts.phimax)+'\\)'
         os.system( cmd )
 
 
@@ -123,6 +128,10 @@ def main():
 def make_geometry( opts, library="$STAR_LIB" ):
 
     geometry = opts.geom
+    name     = geometry
+    if ( opts.name != "NONE" ):
+        name = opts.name
+
     
     print "++ Converting geometry "+geometry+" to ROOT geometry format"
 
@@ -139,15 +148,15 @@ def make_geometry( opts, library="$STAR_LIB" ):
     for line in os.popen( 'starsim -w 0 -b /tmp/'+geometry+'.kumac' ).readlines():
         pass # execute silently
 
-    for line in os.popen( 'g2root /tmp/'+geometry+'.rz '+geometry+'.h' ).readlines():
+    for line in os.popen( 'g2root /tmp/'+geometry+'.rz '+name+'.h' ).readlines():
         pass # ditto
 
     #
     # Make the geometry available to root
     #
     if ( opts.wrapper == False ):
-        gROOT.LoadMacro( geometry+".h" )
-        gROOT.ProcessLine( geometry+"()" )
+        gROOT.LoadMacro( name + ".h" )
+        gROOT.ProcessLine( name + "()" )
     
 
 

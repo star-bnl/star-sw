@@ -3,6 +3,9 @@ import os
 import sys
 from optparse import OptionParser
 
+import ROOT
+ROOT.gErrorIgnoreLevel = 9999
+
 def main():
 
    sys.path.append(os.environ['ROOTSYS'] + "/lib")
