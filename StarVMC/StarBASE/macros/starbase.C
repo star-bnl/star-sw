@@ -79,8 +79,8 @@ void starbase( const char *gy="y2006c",
 void Load()
 {
   gSystem->Load("libVMC.so");
-  gSystem->Load("libQtRoot.so");
-  gSystem->Load("libQtRootGui.so");
+  //  gSystem->Load("libQtRoot.so");
+  //  gSystem->Load("libQtRootGui.so");
   gSystem->Load("St_base.so");
   gSystem->Load("St_Tables.so");
   gSystem->Load("StUtilities.so");
