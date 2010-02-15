@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.555 2010/01/26 20:43:44 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.556 2010/02/15 18:29:12 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -34,7 +34,7 @@
 #endif
 
 // NoChainOptions -> Number of chain options auto-calculated
-#define __KEEP_TPCDAQ_FCF__
+#define __KEEP_TPCDAQ_FCF__ /* remove St_tpcdaq_Maker and StRTSClientFCFMaker. not yet ready */
 TableImpl(Bfc);
 ClassImp(StBFChain);
 
@@ -213,12 +213,13 @@ Int_t StBFChain::Instantiate()
 	maker == "StEEmcDbMaker"  || 
 	maker == "St_geant_Maker" ||
 	maker == "StVMCMaker") {
-      mk = GetTopChain()->GetMakerInheritsFrom(maker);
+      mk = GetChain()->GetMakerInheritsFrom(maker);
       if (mk) {
 	if (name == "" || name == mk->GetName()) {
 	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker 
-		   << "(\"" << fBFC[i].Name << "\") because chain alreary has one" << endm;
-	  continue;
+		   << "(\"" << fBFC[i].Name << "\") because chain alreary has one" 
+		   << " but accumulate options" << endm;
+	  //Accumulate option for these makers	  continue;
 	} 
       }
     }
@@ -241,18 +242,20 @@ Int_t StBFChain::Instantiate()
 	if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
 	if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
 	if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
-	St_db_Maker*  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
-	if (!dbMk) goto Error;
-	mk = dbMk;
-	strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
-	if (GetOption("Simu") && ! GetOption("NoSimuDb")) dbMk->SetFlavor("sim+ofl");
-	else                                              dbMk->SetFlavor("ofl");
-	if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
+	if (! mk) {
+	  St_db_Maker* dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
+	  if (!dbMk) goto Error;
+	  strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
+	  mk = dbMk;
+	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) dbMk->SetFlavor("sim+ofl");
+	  else                                              dbMk->SetFlavor("ofl");
+	  if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
+	  SetDbOptions(mk);
+	} 
       }
-      SetDbOptions(mk);
       goto Add2Chain;
     }
-    if (maker == "StIOMaker" && fSetFiles) {
+    if (!mk && maker == "StIOMaker" && fSetFiles) {
       StIOMaker *inpMk=0;
       if (GetOption("InTree")) {
 	Char_t line[80] = "bfcTree";
@@ -278,7 +281,7 @@ Int_t StBFChain::Instantiate()
       }
       goto Error;
     }
-    if (maker == "StTreeMaker" && fFileOut != "") {
+    if (!mk && maker == "StTreeMaker" && fFileOut != "") {
       StTreeMaker    *treeMk  = 0;
       if (GetOption("OutTree")) {
 	Char_t line[80] = "bfcTree";
@@ -297,8 +300,10 @@ Int_t StBFChain::Instantiate()
     }
     // Special makers already created or action which
     // need to take place before 'maker' is created.
-    if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
-    else                          mk = New(fBFC[i].Maker);
+    if (! mk) {
+      if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
+      else                          mk = New(fBFC[i].Maker);
+    }
     if (! mk) {
       LOG_FATAL  << Form("StBFChain::Instantiate() problem with instatiation %s",fBFC[i].Maker) << endm;
       assert(mk);
