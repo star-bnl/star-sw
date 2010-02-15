@@ -464,7 +464,7 @@ class Differential:
         print mytitle
 
         if ( canvas == 0 ):
-            canvas = CanvasPDF(name="geometry_differential_"+top,title=mytitle)
+            canvas = CanvasPDF(name="geometry_differential_"+top,title=mytitle, thumbnail=True )
 
         #
         # Front page is a single histogram of the top volume
