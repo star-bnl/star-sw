@@ -461,9 +461,9 @@ class Differential:
         self.volumes_base  = {}
         self.volumes_comp  = {}
 
-        print "========================================================================="
+        #print "========================================================================="
         mytitle = "Geometry differential base="+base+" comparison="+comp+" for volume="+top
-        print mytitle
+        #print mytitle
 
         if ( canvas == 0 ):
             canvas = CanvasPDF(name="geometry_differential_"+top,title=mytitle, thumbnail=True )
@@ -536,7 +536,7 @@ class Differential:
                 self.volumes[ name ]      = name
                 self.volumes_comp[ name ] = name       # builds list of volumes in comparison geometry
 
-                print "++ adding "+name+" to comparison list"
+                #print "++ adding "+name+" to comparison list"
 
         #
         # For every volume in the base geometry we check to see if it is present
@@ -612,7 +612,7 @@ class Differential:
         #print "Reset canvas"
         canvas.divide(1,1) # 
 
-        print "========================================================================="
+        #print "========================================================================="
 
 
 # -------------------------------------------------------------------------------------------------------

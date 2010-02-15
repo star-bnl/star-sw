@@ -3,14 +3,14 @@ import os
 import sys
 from optparse import OptionParser
 
+sys.path.append(os.environ['ROOTSYS'] + "/lib")
+sys.path.append("StarVMC/StarBASE/macros")
+
 import ROOT
 ROOT.gErrorIgnoreLevel = 9999
+ROOT.gROOT.SetBatch()
 
 def main():
-
-   sys.path.append(os.environ['ROOTSYS'] + "/lib")
-   sys.path.append("StarVMC/StarBASE/macros")
-        
 
    #
    # Need to parse command line arguements first, because PyROOT is going 
