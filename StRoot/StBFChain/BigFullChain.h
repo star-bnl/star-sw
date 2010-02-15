@@ -467,7 +467,7 @@ Bfc_st BFC[] = { // standard chains
   {"magF"        ,"MagField","","StDbT,db","StMagFMaker","StarMagField,StMagF",
                                                           "Mag.field map with scale factor from Db",kFALSE},
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
-  {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db,StarMagField"            ,"StTpcDbMaker","StTpcDb","",kFALSE},
+  {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db,StarMagField,magF"       ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
   {"ssdDb"      ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run SsdDbMaker",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db",               "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
