@@ -1,7 +1,10 @@
 *
-* $Id: gzebra.F,v 1.1.1.2 2009/02/01 17:10:19 fisyak Exp $
+* $Id: gzebra.F,v 1.2 2010/02/15 19:38:39 jwebb Exp $
 *
 * $Log: gzebra.F,v $
+* Revision 1.2  2010/02/15 19:38:39  jwebb
+* Added compile time switch so that zebra initializes silently.
+*
 * Revision 1.1.1.2  2009/02/01 17:10:19  fisyak
 * Merge with .DEV2
 *
@@ -42,11 +45,16 @@ C.    *                                                                *
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
+#define  __SILENT__
 C.
 C.    ------------------------------------------------------------------
 C.
       NZEBRA=NZEB
-      CALL MZEBRA(-1)
+#ifdef __SILENT__
+      CALL MZEBRA(-2) 
+#else
+      CALL MZEBRA(-1) 
+#endif 
       CALL MZSTOR(IXSTOR,'/GCBANK/',' ',FENDQ,LQ,LR1,WS,LQ(KWWORK+100)
      +            ,LQ(NZEBRA-30))
       CALL MZLOGL(IXSTOR,0)
