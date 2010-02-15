@@ -31,6 +31,9 @@ void starbase( const char *gy="y2006c",
 	       Float_t phiMax=phi_max  )
 {
 
+  // Silence ROOT
+  gErrorIgnoreLevel = 9999;
+
   // Load shared libraries
   if (!loaded) { Load(); loaded = 1; }
 
@@ -42,6 +45,7 @@ void starbase( const char *gy="y2006c",
   // Create the geometry
   gROOT->LoadMacro   ( tsy+".h" );
   gROOT->ProcessLine ( tsy+"()" );
+
 
   // Create the baseline maker
   StarBASE *mk = new StarBASE("StarBASE",tsy.Data(), 1);
@@ -63,7 +67,7 @@ void starbase( const char *gy="y2006c",
   steps->bookVolume("HALL");
 
   // Run the code now
-  chain->EventLoop(1);
+  chain->EventLoop(1);  /// NOTE THE FUGLY HACK TO 
   chain->Finish();
 
   // Write histograms to disk

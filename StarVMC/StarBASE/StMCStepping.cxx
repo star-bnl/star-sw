@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.1 2010/02/11 19:50:59 jwebb Exp $
+// $Id: StMCStepping.cxx,v 1.2 2010/02/15 18:47:47 jwebb Exp $
 //
 //
 // Class StMCStepping
@@ -110,7 +110,7 @@ void StMCStepping::bookVolume( const Char_t *name )
 	  
 	  if ( ! hRadlenHist1D[vid] )                                    // check for existing histogram
 	    {
-	      std::cout << "+ add volume " << vid << " " << name << std::endl;	  
+	      //	      std::cout << "+ add volume " << vid << " " << name << std::endl;	  
 	      hRadlenHist1D[ vid ] = new TH1F( Form("h_radlen_%s_eta",vname), Form("Depth vs eta [%s];#eta;L/#chi_{0}",vname), 500,-5.0,+5.0 );
 	      hCountsHist1D[ vid ] = new TH1F( Form("h_counts_%s_eta",vname), Form("Number of geantinos vs eta [%s];#eta",vname), 500,-5.0,+5.0 );
 	      // This will be fraking huge	      hRadlenHist2D[ vid ] = new TH2F( Form("h_radlen_%s_eta2",vname), Form("Radiation length vs eta [%s];#phi;#eta",vname), 250,0.,30.0,500,-5.0,+5.0 );    // 1GB
@@ -168,9 +168,8 @@ StMCStepping::BookHistograms()
 {
 
 
-  TList *materials = gGeoManager -> GetListOfMaterials();
-  Int_t numberOfMaterials = materials -> GetEntries();
-
+  //$$  TList *materials = gGeoManager -> GetListOfMaterials();
+  //$$  Int_t numberOfMaterials = materials -> GetEntries();
 
   TObjArray *volumes    = gGeoManager->GetListOfVolumes();
   Int_t numberOfVolumes = volumes -> GetEntries();
@@ -374,7 +373,7 @@ int StMCStepping::Fun()
   if ( TRACK_NEW )
     {
       /// Clear from previous event
-      for ( UInt_t i=0;i<mNumberOfVolumes+1;i++ )
+      for ( Int_t i=0;i<mNumberOfVolumes+1;i++ )
 	{
 	  mRadlenSum[ i ] = 0.0;
 	}
