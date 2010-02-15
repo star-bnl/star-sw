@@ -469,7 +469,7 @@ class Differential:
         #
         # Front page is a single histogram of the top volume
         #
-        print "Page 1"
+        #print "Page 1"
         d = Differential1D( base=base, geom=comp, volume=top, xmin=xmin,xmax=xmax,canvas=canvas.next(), legend=True)
         self.hmax.Fill( d.name, d.max_differential )
         self.differentials.append(d)
@@ -478,7 +478,7 @@ class Differential:
         # Second page we print summary informtion about the 2 geometries
         #
         if ( 0 ):
-            print "Page 2"
+            #print "Page 2"
             sbase = Summary( base, volume=top )
             scomp = Summary( comp, volume=top )
             canvas.divide(1,2)
@@ -498,7 +498,7 @@ class Differential:
         baseGeometry = baseFile.Get(basegeo)
         self.top_volume = baseGeometry.FindVolumeFast( top )
 
-        print "Page 3"
+        #print "Page 3"
 
         for node in self.top_volume.GetNodes():
 
@@ -515,7 +515,7 @@ class Differential:
                 self.volumes[ name ] = name
                 self.volumes_base[ name ] = name      # builds list of volumes in baseline geometry
 
-                print "++ adding "+name+" to baseline list"
+                #print "++ adding "+name+" to baseline list"
 
 
         # Reset to comparison geometry
@@ -607,7 +607,7 @@ class Differential:
             set_hmax_range( self.hmax )
             self.hmax.Draw()
 
-        print "Reset canvas"
+        #print "Reset canvas"
         canvas.divide(1,1) # 
 
         print "========================================================================="
@@ -623,7 +623,7 @@ def set_hmax_range( hmax ):
         xbin  = axis.GetBinCenter(bin)
         label = axis.GetBinLabel(bin)
         if ( label != '' ):
-            print label+" "+str(xbin)
+            #print label+" "+str(xbin)
             xmax = xbin+0.5
         bin += 1
     if ( xmax > 0. ):
