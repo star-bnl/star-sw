@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.99 2009/11/24 19:29:11 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.100 2010/02/15 12:01:58 canson Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1256,7 +1256,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.99 2009/11/24 19:29:11 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.100 2010/02/15 12:01:58 canson Exp $");
 
   return StMaker::Init();
 }
@@ -1325,7 +1325,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
   mHistVertexZ   ->Fill(vertex.z());
   mHistVertexXY2D->Fill(vertex.x(), vertex.y());
 
-  mHistCTBvsZDC2D->Fill(pFlowEvent->ZDCe() + pFlowEvent->ZDCe(), pFlowEvent->CTB());
+  mHistCTBvsZDC2D->Fill(pFlowEvent->ZDCe() + pFlowEvent->ZDCw(), pFlowEvent->CTB());
 
   //ZDCSMD test
   for(int strip=1; strip<9; strip++) {
@@ -2472,6 +2472,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.100  2010/02/15 12:01:58  canson
+// Changed mHistCTBvsZDC2D from filling with ZDC_e + ZDC_e to filling with ZDC_e + ZDC_w
+//
 // Revision 1.99  2009/11/24 19:29:11  posk
 // Added reCenter to remove acceptance correlations as an option instead of phiWgt.
 //
