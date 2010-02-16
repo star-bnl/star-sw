@@ -7,8 +7,8 @@ sys.path.append(os.environ['ROOTSYS'] + "/lib")
 sys.path.append("StarVMC/StarBASE/macros")
 
 import ROOT
-ROOT.gErrorIgnoreLevel = 9999
-ROOT.gROOT.SetBatch()
+ROOT.gErrorIgnoreLevel = 9999      # silence messages
+ROOT.gROOT.SetBatch()              #
 
 def main():
 
@@ -20,6 +20,8 @@ def main():
    parser.add_option( "-b", "--base",   dest="baseline", help="Set the baseline geometry [required]",     metavar="BASE",   default="NONE" )
    parser.add_option( "-g", "--geom",   dest="geometry", help="Set the comparison geometry [required]",   metavar="GEOM",   default="NONE" )
    parser.add_option( "-v", "--volume", dest="volume",   help="Set the top level volume [required]",      metavar="VOLUME", default="CAVE" )
+   parser.add_option( "--thumbnail",    dest="thumbnail", default=False, action="store_true",
+                      help="Creates thumbnails of the front page of the PDF file." )
    
    (opts,args) = parser.parse_args()
 
@@ -56,13 +58,14 @@ def main():
    canvas = CanvasPDF(    name="differential-"+opts.baseline+"-vs-"+opts.geometry+"-"+opts.volume,
                           title="Geometry differential for volume="+opts.volume+ " "+opts.baseline+" vs "+opts.geometry,
                           nx=1,
-                          ny=1 
+                          ny=1,
+                          thumbnail=opts.thumbnail
                           )
 
    differ = Differential( base=opts.baseline, 
                           comp=opts.geometry,
                           top=opts.volume,
-                          canvas=canvas 
+                          canvas=canvas
                           )
 
 
