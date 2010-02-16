@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.9 2010/01/28 21:51:24 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.10 2010/02/16 02:14:03 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.10  2010/02/16 02:14:03  hmasui
+ * Print PDF file only for all QA plots
+ *
  * Revision 1.9  2010/01/28 21:51:24  hmasui
  * Add Vx vs Vz and Vy vs Vz histograms in the event-wise QA
  *
@@ -23,6 +26,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TLatex.h"
 #include "TLegend.h"
 #include "TMath.h"
 #include "TObject.h"
@@ -46,10 +50,17 @@ ClassImp(StEmbeddingQADraw)
   UInt_t StEmbeddingQADraw::mCanvasId = 0;
 
 //____________________________________________________________________________________________________
-StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile, const Int_t geantid)
-  : mIsGIFOn(kFALSE), mIsJPGOn(kFALSE), mIsEPSOn(kFALSE), mIsPSOn(kFALSE), mGeantId(geantid)
+StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile, const Int_t geantid,
+    const Bool_t isEmbeddingOnly)
+  : mIsEmbeddingOnly(isEmbeddingOnly), mIsGIFOn(kFALSE), mIsJPGOn(kFALSE), mIsEPSOn(kFALSE), mIsPSOn(kFALSE), mGeantId(geantid)
 {
   /// Constructor for StEmbeddingQADraw
+  mCanvas         = 0 ;
+  mMainPad        = 0 ;
+  mPDF            = 0 ;
+
+  mInputEmbedding = 0 ;
+  mInputRealData  = 0 ;
 
   /// Open input files, see Bool_t open(const TString embeddingFile, const TString realDataFile)
   mIsOpen = open(embeddingFile, realDataFile);
@@ -83,8 +94,8 @@ StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString 
 
 //____________________________________________________________________________________________________
 StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile,
-    const Int_t year, const TString production, const Int_t geantid)
-  : mIsGIFOn(kFALSE), mIsJPGOn(kFALSE), mIsEPSOn(kFALSE), mIsPSOn(kFALSE), mGeantId(geantid)
+    const Int_t year, const TString production, const Int_t geantid, const Bool_t isEmbeddingOnly)
+  : mIsEmbeddingOnly(isEmbeddingOnly), mIsGIFOn(kFALSE), mIsJPGOn(kFALSE), mIsEPSOn(kFALSE), mIsPSOn(kFALSE), mGeantId(geantid)
 {
   /// Constructor for StEmbeddingQADraw
   /// Define year and production from the input arguments
@@ -104,12 +115,13 @@ StEmbeddingQADraw::~StEmbeddingQADraw()
 {
   /// Destructor
 
-  /// Clear daughter geantid array
+  /// Clear MC and daughter geantid array
+  mMcGeantId.clear();
   mDaughterGeantId.clear();
 
   /// Close input files
-  mInputEmbedding->Close();
-  mInputRealData->Close();
+  if( mInputEmbedding || mInputEmbedding->IsOpen() ) mInputEmbedding->Close();
+  if( mInputRealData || mInputRealData->IsOpen() ) mInputRealData->Close();
 }
 
 //____________________________________________________________________________________________________
@@ -126,6 +138,9 @@ Bool_t StEmbeddingQADraw::open(const TString embeddingFile, const TString realDa
   }
   LOG_INFO << "OPEN input (embedding) : " << mInputEmbedding->GetName() << endm;
   LOG_INFO << endm;
+
+  /// Do not open the real data file if 'mIsEmbeddingOnly' flag is true
+  if( mIsEmbeddingOnly ) return kTRUE ;
 
   // OPEN real data file
   mInputRealData = TFile::Open(realDataFile);
@@ -149,7 +164,8 @@ void StEmbeddingQADraw::init()
   /// Set maximum pt. Default is 5 GeV/c --> Draw histograms up to 5 GeV/c
   mPtMax = 5.0;
 
-  /// Clear daughter geantid array
+  /// Clear MC and daughter geantid array
+  mMcGeantId.clear();
   mDaughterGeantId.clear();
 
   LOG_INFO << "#------------------------------------------------------------" << endm;
@@ -166,6 +182,77 @@ void StEmbeddingQADraw::init()
 
   /// Find daughter geant id from Contaminated pair histograms 
   setDaughterGeantId();
+
+  /// Initialize canvas
+  LOG_INFO << "Initialize canvas" << endm ;
+  mCanvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 700, 800);
+  mCanvas->SetFillColor(1);
+  mCanvas->cd();
+
+  /// Initialize main pad
+  mMainPad = new TPad("mainPad", "", 0.00, 0.00, 1.00, 0.90);
+  mMainPad->SetFillColor(10);
+  mMainPad->Draw();
+
+  /// Initialize PDF file
+  mPDF = new TPDF(Form("%sqa_%s.pdf", mOutputFigureDirectory.Data(), getBaseName()));
+  LOG_INFO << "Initialize PDF file : " << mPDF->GetName() << endm ;
+
+  /// Draw # of events, input MC particle name, library and year
+  mCanvas->cd();
+  TPaveText* info = new TPaveText(0.00, 0.95, 0.63, 1.00);
+  info->SetBorderSize(1);
+  info->SetFillColor(kBlack);
+  info->SetTextFont(42);
+  info->SetTextColor(10);
+  info->SetTextSize(0.035);
+
+  const Int_t nevents = getEntries() ;
+  TString neventsName(Form("%d", getEntries())) ;
+  if( nevents > 1000000 )    neventsName = Form("%1.2f M", (Double_t)nevents/1.0e+06);
+  else if ( nevents > 1000 ) neventsName = Form("%1.2f K", (Double_t)nevents/1.0e+03);
+
+  info->AddText(Form("N_{events}=%s, MC=%s, %s, (%d)", neventsName.Data(), getParticleName(), mProduction.Data(), mYear));
+  info->Draw();
+
+  /// First page
+  mMainPad->cd();
+
+  TLatex* title = new TLatex(0.1, 0.6, "Embedding QA");
+  title->SetTextSize(0.10);
+  title->Draw();
+
+  TString qaName("embedding + real");
+  if ( mIsEmbeddingOnly ){
+    qaName = "embedding only";
+  }
+
+  TLatex* qaTitle = new TLatex(0.12, 0.5, qaName);
+  qaTitle->SetTextSize(0.07);
+  qaTitle->Draw();
+
+  /// Red (embedding)
+  /// Blue and black (real)
+  TLine* lineEmbedding = new TLine(0, 0, 1, 1);
+  TLine* lineRealBlue  = new TLine(0, 0, 1, 1);
+  TLine* lineRealBlack = new TLine(0, 0, 1, 1);
+  lineEmbedding->SetLineColor(kRed);    lineEmbedding->SetLineWidth(2);
+  lineRealBlue ->SetLineColor(kBlue);   lineRealBlue ->SetLineWidth(2);
+  lineRealBlack->SetLineColor(kBlack);  lineRealBlack->SetLineWidth(2);
+
+  TLegend* colorCode = new TLegend(0.2, 0.15, 0.8, 0.45);
+  colorCode->SetTextSize(0.04);
+  colorCode->SetFillColor(10);
+  colorCode->SetHeader("Color code for embedding and real data");
+  colorCode->AddEntry(lineEmbedding, "Embedding (red)", "L");
+  colorCode->AddEntry(lineRealBlue,  "Real (blue)", "L");
+  colorCode->AddEntry(lineRealBlack, "Real (black)", "L");
+  colorCode->Draw();
+
+  mCanvas->cd();
+  mCanvas->Update();
+
+  mPDF->NewPage() ;
 }
 
 //____________________________________________________________________________________________________
@@ -194,11 +281,9 @@ void StEmbeddingQADraw::setOutputDirectory(const TString name)
 //____________________________________________________________________________________________________
 void StEmbeddingQADraw::print(const TCanvas& canvas, const TString name) const
 {
-  /// Print output figure (default is png only)
-  /// You can print other file formants, like gif etc by setGIFOn()
-  /// See header for other file formants.
+  /// Print output figure (default is false, i.e. do not print any figures)
 
-  canvas.Print(Form("%s%s_%s.png", mOutputFigureDirectory.Data(), name.Data(), getBaseName()));
+  if( mIsPNGOn ) canvas.Print(Form("%s%s_%s.png", mOutputFigureDirectory.Data(), name.Data(), getBaseName()));
   if( mIsGIFOn ) canvas.Print(Form("%s%s_%s.gif", mOutputFigureDirectory.Data(), name.Data(), getBaseName()));
   if( mIsJPGOn ) canvas.Print(Form("%s%s_%s.jpg", mOutputFigureDirectory.Data(), name.Data(), getBaseName()));
   if( mIsEPSOn ) canvas.Print(Form("%s%s_%s.eps", mOutputFigureDirectory.Data(), name.Data(), getBaseName()));
@@ -219,18 +304,71 @@ void StEmbeddingQADraw::checkInputGeantId()
     return ;
   }
 
-  const Int_t mcIdBin      = hGeantId->GetMaximumBin() ;
-  const Int_t geantidFound = TMath::Nint(hGeantId->GetBinLowEdge(mcIdBin));
+  /// Scan geantid histogram and store the id's in the geantid array
+  for(Int_t id=0; id<hGeantId->GetNbinsX(); id++){
+    const Bool_t isGeantIdOk = hGeantId->GetBinContent(id+1)>0.0;
+    if(!isGeantIdOk) continue ;
 
-  if ( mGeantId == geantidFound ) return ; /// do nothing if input geantid is correct
-  else{
-    LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
-    LOG_INFO << "  Input geant id doesn't correspond to the geant id in the MC histogram" << endm ;
-    LOG_INFO << "  Use geantid in the MC histogram, geantid = " << geantidFound
-             << ",  particle name = " << StParticleTable::instance()->findParticleByGeantId(geantidFound)->name().c_str() << endm;
-    LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
-    mGeantId = geantidFound ; 
+    const Int_t geantid = TMath::Nint(hGeantId->GetBinLowEdge(id+1));
+    mMcGeantId.push_back(geantid);
   }
+
+  if( mMcGeantId.size() == 1 ){
+    /// For single particle embedding
+    ///   Check if the input geantid = geantid found in the histogram
+    ///     - found --> do nothing
+    ///     - not found --> ask users to proceed the QA or not
+    if ( mGeantId == mMcGeantId[0] ) return ; /// do nothing if input geantid is found
+    else{
+      LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
+      LOG_INFO << "  Input geant id doesn't correspond to the geant id in the MC histogram" << endm ;
+      LOG_INFO << "  Geantid in the MC histogram, geantid = " << mMcGeantId[0]
+               << ",  particle name = " << StParticleTable::instance()->findParticleByGeantId(mMcGeantId[0])->name().c_str() << endm;
+      LOG_INFO << "  Do you want to proceed to the QA for geantid = " << mMcGeantId[0] << " ?" << endm;
+      LOG_INFO << "  [yes=true or kTRUE or 1/no=false or kFALSE or 0]:" << endm;
+      Bool_t proceedQA = kFALSE ;
+      cin >> proceedQA ;
+      LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
+
+      /// Stop the QA if you answer NO
+      assert(proceedQA);
+
+      /// Put the geantid and proceed the QA
+      mGeantId = mMcGeantId[0] ; 
+    }
+  }
+  else{
+    /// For multiple particle embedding (like pythia events)
+    ///   Check if the input geantid can be found in the MC histogram
+    ///     - found --> do nothing
+    ///     - not found --> ask users to proceed the QA or not
+    for(vector<Int_t>::iterator iter = mMcGeantId.begin(); iter != mMcGeantId.end(); iter++){
+      const Int_t geantidFound = (*iter) ;
+      if ( mGeantId == geantidFound ) return ; /// do nothing if input geantid is found
+    }
+
+    /// List all available MC particles and ask users which particles do you want to do the QA
+    LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
+    LOG_INFO << "  Cannot find input geantid in the MC histogram" << endm;
+    LOG_INFO << "  Available geantid's are listed below;" << endm;
+    LOG_INFO << "    geantid          particle name" << endm;
+    for(vector<Int_t>::iterator iter = mMcGeantId.begin(); iter != mMcGeantId.end(); iter++){
+      const Int_t geantidFound = (*iter) ;
+      LOG_INFO << Form("    %5d            %10s", geantidFound, 
+          StParticleTable::instance()->findParticleByGeantId(geantidFound)->name().c_str()) << endm;
+    }
+    LOG_INFO << "  Which geantid you want to do the QA ?" << endm;
+    LOG_INFO << "  [Put the one geantid listed above. If you want to stop the program, please put 0]:" << endm;
+    cin >> mGeantId ;
+
+    /// Stop the QA if you don't want to proceed
+    assert(mGeantId);
+
+    LOG_INFO << "  QA for geantid = " << mGeantId
+             << ",  particle name = " << StParticleTable::instance()->findParticleByGeantId(mGeantId)->name().c_str() << endm;
+    LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
+  }
+
 }
 
 //____________________________________________________________________________________________________
@@ -280,7 +418,7 @@ void StEmbeddingQADraw::setDaughterGeantId()
 
   for(UInt_t id=0; id<1000; id++){
     const Int_t contamCategoryId = StEmbeddingQAUtilities::instance()->getCategoryId("CONTAM") ;
-    TH3* hDca = (TH3D*) mInputEmbedding->Get(Form("hDca_%d_%d_%d", contamCategoryId, mGeantId, id));
+    TH3* hDca = (TH3D*) mInputEmbedding->Get(Form("hDca_%d_%d_%d_%d", contamCategoryId, 0, mGeantId, id));
 
     if ( hDca ){
       const Char_t* daughterName = table->findParticleByGeantId(id)->name().c_str() ;
@@ -354,6 +492,10 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const Bool_t isEmbe
 
   if(!isOpen()) return 0;
 
+  /// Check if 'mIsEmbeddingOnly' is true (Real data will not be drawn)
+  /// return 0 for real data
+  if( mIsEmbeddingOnly && !isEmbedding) return 0 ;
+
   TObject* obj = (isEmbedding) ? mInputEmbedding->Get(name) : mInputRealData->Get(name) ;
   if ( !obj ){
     Error("StEmbeddingQADraw::getHistogram", "Histogram %s doesn't exist", name.Data());
@@ -367,10 +509,13 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const Bool_t isEmbe
 
 
 //____________________________________________________________________________________________________
-TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daughter, const Bool_t isEmbedding) const
+TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daughter, const Bool_t isEmbedding,
+    const UInt_t parentparentid) const
 {
   /// Get histogram from either embedding or real data ROOT file
   /// Define histogram name from daughter number and category id
+  /// 
+  /// default parent-parent id is 0
 
   if ( daughter >= mDaughterGeantId.size() ){
     Error("StEmbeddingQADraw::getHistogram", "Unknown daughter index, index=%3d", daughter);
@@ -382,8 +527,8 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daught
   if( isEmbedding ){
     /// Histogram name is 
     ///   - {histogram name}_{category id}_{particle id} for stable particles
-    ///   - {histogram name}_{category id}_{parent particle id}_{daughter particle id} for unstable particles
-    return (isDecay()) ? getHistogram(Form("%s_%d_%d_%d", name.Data(), category, mGeantId, mDaughterGeantId[daughter])) 
+    ///   - {histogram name}_{category id}_{parent-parent particle id}_{parent particle id}_{daughter particle id} for unstable particles
+    return (isDecay()) ? getHistogram(Form("%s_%d_%d_%d_%d", name.Data(), category, parentparentid, mGeantId, mDaughterGeantId[daughter])) 
       : getHistogram(Form("%s_%d_%d", name.Data(), category, mGeantId)) ;
   }
   else{
@@ -444,6 +589,23 @@ Bool_t StEmbeddingQADraw::drawStatistics(const Double_t x1, const Double_t y1, c
 }
 
 //____________________________________________________________________________________________________
+TPaveText* StEmbeddingQADraw::drawHeader(const TString description,
+    const Double_t x1, const Double_t y1, const Double_t x2, const Double_t y2, const Double_t textSize) const
+{
+  /// Draw header for each QA, title for QA plots, daughter particle name etc
+  TPaveText* header = new TPaveText(x1, y1, x2, y2);
+  header->SetBorderSize(1);
+  header->SetFillColor(kBlack);
+  header->SetTextColor(10);
+  header->SetTextSize(textSize);
+  header->SetTextFont(42);
+  header->AddText(description);
+  header->Draw();
+ 
+  return header ; // need to be deleted after printing PDF
+}
+
+//____________________________________________________________________________________________________
 const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
 {
   /// Get particle name
@@ -463,6 +625,8 @@ Bool_t StEmbeddingQADraw::drawEvent() const
 {
   /// Event-wise QA
 
+  LOG_INFO << endm;
+  LOG_INFO << "----------------------------------------------------------------------------------------------------" << endm ;
   LOG_INFO << "QA for Event-wise informations ..." << endm;
 
   /// Make sure (1) input ROOT files and (2) input geantid
@@ -474,11 +638,32 @@ Bool_t StEmbeddingQADraw::drawEvent() const
 
   //----------------------------------------------------------------------------------------------------
   // Vertices
-  TCanvas* canvas1 = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
-  canvas1->Divide(3, 3);
+  drawVertices() ;
+
+  //----------------------------------------------------------------------------------------------------
+  /// Run id, event id QA
+  drawRunEventId() ;
+
+  //----------------------------------------------------------------------------------------------------
+  /// Number of particles
+  drawNumberOfParticles() ;
+
+  LOG_INFO << "----------------------------------------------------------------------------------------------------" << endm ;
+  LOG_INFO << endm;
+
+  return kTRUE ;
+}
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQADraw::drawVertices() const
+{
+  /// Draw event vertices
+  LOG_INFO << "QA for event-vertices ..." << endm;
+
+  TPaveText* header = initCanvas("Event vertices", 3, 3);
 
   /// z-vertex
-  canvas1->cd(1);
+  mMainPad->cd(1);
   TH1* hVz = (TH1D*) getHistogram("hVz");
   if(!hVz) return kFALSE ;
 
@@ -492,63 +677,69 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   hVz->Draw("same");
 
   /// y vs x vertices
-  canvas1->cd(4);
-  TH2* hVyVx = (TH2D*) mInputEmbedding->Get("hVyVx");
+  mMainPad->cd(4);
+  TH2* hVyVx = (TH2D*) getHistogram("hVyVx");
   if(!hVyVx) return kFALSE ;
   hVyVx->Draw("colz");
 
   /// x vs z vertices
-  canvas1->cd(5);
-  TH2* hVxVz = (TH2D*) mInputEmbedding->Get("hVxVz");
+  mMainPad->cd(5);
+  TH2* hVxVz = (TH2D*) getHistogram("hVxVz");
   if(!hVxVz) return kFALSE ;
   hVxVz->Draw("colz");
 
   /// y vs z vertices
-  canvas1->cd(6);
-  TH2* hVyVz = (TH2D*) mInputEmbedding->Get("hVyVz");
+  mMainPad->cd(6);
+  TH2* hVyVz = (TH2D*) getHistogram("hVyVz");
   if(!hVyVz) return kFALSE ;
   hVyVz->Draw("colz");
 
   /// dVx, dVy, dVz
   for(Int_t i=0; i<3; i++){
-    canvas1->cd(i+7);
+    mMainPad->cd(i+7);
     TH1* hdV = 0 ;
-    if( i == 0 ) hdV = (TH1D*) mInputEmbedding->Get("hdVx");
-    if( i == 1 ) hdV = (TH1D*) mInputEmbedding->Get("hdVy");
-    if( i == 2 ) hdV = (TH1D*) mInputEmbedding->Get("hdVz");
+    if( i == 0 ) hdV = (TH1D*) getHistogram("hdVx");
+    if( i == 1 ) hdV = (TH1D*) getHistogram("hdVy");
+    if( i == 2 ) hdV = (TH1D*) getHistogram("hdVz");
     if(!hdV) return kFALSE ;
 
     hdV->Draw();
   }
 
-  /// Statistics
-  canvas1->cd(3);
-  drawStatistics();
+  mCanvas->cd();
+  mCanvas->Update();
 
-  canvas1->cd();
-  canvas1->Update();
+  mPDF->NewPage() ;
 
   /// Print figures
-  print(*canvas1, "eventqa_vertices");
+  print(*mCanvas, "eventqa_vertices");
   //----------------------------------------------------------------------------------------------------
 
-  //----------------------------------------------------------------------------------------------------
-  /// Run id, event id QA
-  TCanvas* canvas2 =  new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
-  canvas2->Divide(2, 2);
+  delete header ;
 
-  canvas2->cd(1);
+  return kTRUE ;
+}
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQADraw::drawRunEventId() const
+{
+  /// Draw run and event id. List all runid in the bottom left pad
+  LOG_INFO << "QA for run and event id ..." << endm;
+
+  TPaveText* header = initCanvas("Run and event id", 2, 2);
+
+  mMainPad->cd(1);
   TH1* hRunNumber = (TH1D*) mInputEmbedding->Get("hRunNumber");
   if(!hRunNumber) return kFALSE ;
   hRunNumber->Draw();
 
-  canvas2->cd(2);
+  mMainPad->cd(2);
   TH1* hEventId = (TH1D*) mInputEmbedding->Get("hEventId");
   if(!hEventId) return kFALSE ;
   hEventId->Draw();
 
   /// List of run id
-  canvas2->cd(3);
+  mMainPad->cd(3);
   TPaveText* runlist = new TPaveText(0.1, 0.2, 0.9, 0.8);
   runlist->SetTextFont(42);
   runlist->SetTextSize(0.05);
@@ -565,25 +756,32 @@ Bool_t StEmbeddingQADraw::drawEvent() const
   }
   runlist->Draw();
 
-  /// Statistics
-  canvas2->cd(4);
-  drawStatistics();
+  mCanvas->cd();
+  mCanvas->Update();
 
-  canvas2->cd();
-  canvas2->Update();
+  mPDF->NewPage() ;
 
   /// Print figures
-  print(*canvas2, "eventqa_run_event_id");
+//  print(*mCanvas, "eventqa_run_event_id");
   //----------------------------------------------------------------------------------------------------
 
-  //----------------------------------------------------------------------------------------------------
-  /// Number of particles
-  TCanvas* canvas3 =  new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 600);
-  canvas3->Divide(3, 2);
+  delete header ;
+
+  return kTRUE ;
+}
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQADraw::drawNumberOfParticles() const
+{
+  /// Draw number of particles for all embedding branches
+  LOG_INFO << "QA for multiplicity distributions (number of particles per event) ..." << endm;
+
+  TPaveText* header = initCanvas("Multiplicity distribution", 2, 3);
 
   for(UInt_t ic=0; ic<StEmbeddingQAConst::mNEmbedding; ic++){
-    canvas3->cd(ic+1);
-    canvas3->GetPad(ic+1)->SetLogy();
+    mMainPad->cd(ic+1);
+    mMainPad->GetPad(ic+1)->SetLogy();
+
     TH1* hNParticles = (TH1D*) mInputEmbedding->Get(Form("hNParticles_%d", ic));
     if(!hNParticles) return kFALSE ;
 
@@ -603,15 +801,15 @@ Bool_t StEmbeddingQADraw::drawEvent() const
     hNParticles->Draw();
   }
 
-  /// Statistics
-  canvas3->cd(6);
-  drawStatistics();
+  mCanvas->cd();
+  mCanvas->Update();
 
-  canvas3->cd();
-  canvas3->Update();
+  mPDF->NewPage() ;
 
   /// Print figures
-  print(*canvas3, "eventqa_nparticles");
+//  print(*mCanvas, "eventqa_nparticles");
+
+  delete header ;
 
   return kTRUE ;
 }
@@ -628,11 +826,10 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
 
   //----------------------------------------------------------------------------------------------------
   // Track-wise informations
-  TCanvas* canvas2D = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 800, 600);
-  canvas2D->Divide(2, 2);
+  TPaveText* header = initCanvas("MC track QA", 2, 3);
 
   /// pT vs eta
-  canvas2D->cd(1);
+  mMainPad->cd(1);
   TH2* hPtVsEta = (TH2D*) getHistogram(Form("hPtVsEta_0_%d", mGeantId));
   if(!hPtVsEta) return kFALSE;
 
@@ -640,7 +837,7 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hPtVsEta->SetAxisRange(0, mPtMax, "Y");
 
   /// pT vs y
-  canvas2D->cd(2);
+  mMainPad->cd(2);
   TH2* hPtVsY = (TH2D*) getHistogram(Form("hPtVsY_0_%d", mGeantId));
   if(!hPtVsY) return kFALSE ;
 
@@ -648,26 +845,14 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hPtVsY->SetAxisRange(0, mPtMax, "Y");
 
   /// pT vs phi
-  canvas2D->cd(3);
+  mMainPad->cd(3);
   TH2* hPtVsPhi = (TH2D*) getHistogram(Form("hPtVsPhi_0_%d", mGeantId));
   if(!hPtVsPhi) return kFALSE ;
 
   hPtVsPhi->Draw("colz");
   hPtVsPhi->SetAxisRange(0, mPtMax, "Y");
 
-  /// Statistics
-  canvas2D->cd(4);
-  drawStatistics();
-
-  canvas2D->cd();
-  canvas2D->Update();
-
-  /// Print figures for 2D histograms
-  print(*canvas2D, "mctrack2d");
-
   // 1D projections
-  TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 800, 600);
-  canvas->Divide(2, 2);
 
   /// Projections (pt, eta, y, phi)
   TH1* hPt  = (TH1D*) hPtVsPhi->ProjectionY("hPtMc");
@@ -694,11 +879,11 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hPhi->SetMinimum(0.0);
   hPhi->SetMaximum(hPhi->GetMaximum()*1.2);
 
-  canvas->cd(1);
+  mMainPad->cd(4);
   hPt->SetAxisRange(0, mPtMax, "X");
   hPt->Draw();
 
-  canvas->cd(2);
+  mMainPad->cd(5);
   hEta->Draw("h");
   hY->Draw("hsame");
 
@@ -710,17 +895,18 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   leg->AddEntry( hY, "y", "P");
   leg->Draw();
 
-  canvas->cd(3);
+  mMainPad->cd(6);
   hPhi->Draw();
 
-  canvas->cd(4);
-  drawStatistics();
+  mCanvas->cd();
+  mCanvas->Update();
 
-  canvas->cd();
-  canvas->Update();
+  mPDF->NewPage() ;
 
   /// Print figures for 1D histograms
-  print(*canvas, "mctrack");
+//  print(*mCanvas, "mctrack");
+
+  delete header ;
 
   return kTRUE ;
 }
@@ -729,6 +915,9 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
 Bool_t StEmbeddingQADraw::drawTrack() const
 {
   /// Track-wise QA
+  LOG_INFO << endm ;
+  LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
+  LOG_INFO << "QA for reconstructed tracks ..." << endm ;
 
   /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
@@ -753,6 +942,9 @@ Bool_t StEmbeddingQADraw::drawTrack() const
  
   ///  6: NHit
   const Bool_t isNHitOk     = drawNHit();
+
+  LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
+  LOG_INFO << endm ;
   
   return isGeantIdOk && isRapidityOk && isMomentumOk && isPtOk && isdEdxOk && isDcaOk && isNHitOk ;
 }
@@ -770,12 +962,12 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
   /// pad0: MC tracks
   /// pad1: Reconstructed tracks
   /// pad2: Statistics
-  TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
-  canvas->Divide(2, 2);
+  TPaveText* header = initCanvas("Geant id", 1, 2);
 
   /// Draw MC tracks
-  Int_t ipad = 1 ;
-  canvas->cd(ipad++);
+  TPad* topPad = (TPad*) mMainPad->cd(1);
+  topPad->Divide(2, 1);
+  topPad->cd(1);
   TH1* hGeantIdMc = (TH1D*) getHistogram("hGeantId_0");
   if(!hGeantIdMc) return kFALSE ;
 
@@ -796,7 +988,7 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
   hGeantIdMcExpected->Draw();
 
   /// Draw reconstructed geant id
-  canvas->cd(ipad++);
+  topPad->cd(2);
   TH1* hGeantIdReco = (TH1D*) getHistogram(Form("hGeantId_%d", getCategoryId()));
   if(!hGeantIdReco) return kFALSE ;
 
@@ -816,7 +1008,7 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
     hGeantIdRecoExpected[id]->Draw();
   }
 
-  canvas->cd(ipad++);
+  mMainPad->cd(2);
   TLegend* leg = new TLegend(0.1, 0.2, 0.9, 0.8);
   leg->SetTextSize(0.05);
   leg->SetFillColor(10);
@@ -834,14 +1026,15 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
   }
   leg->Draw();
 
-  canvas->cd(ipad);
-  drawStatistics();
+  mCanvas->cd();
+  mCanvas->Update();
 
-  canvas->cd();
-  canvas->Update();
+  mPDF->NewPage() ;
 
   /// Print figures
-  print(*canvas, "geantid");
+//  print(*mCanvas, "geantid");
+
+  delete header ;
 
   return kTRUE ;
 }
@@ -873,6 +1066,8 @@ Bool_t StEmbeddingQADraw::drawMomentum() const
 
   /// Plot reconstructed momentum vs MC momentum (2D) (Embedding only)
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
+    TPaveText* header = initCanvas("Reconstructed momentum vs MC momentum");
+
     TH2* hRecoPVsMcP = (TH2D*) getHistogram("hRecoPVsMcP", id, kTRUE);
     if(!hRecoPVsMcP) return kFALSE ;
 
@@ -881,12 +1076,16 @@ Bool_t StEmbeddingQADraw::drawMomentum() const
 
     hRecoPVsMcP->SetTitle(getParticleName(mDaughterGeantId[id]));
 
-    TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++));
     hRecoPVsMcP->Draw("colz");
 
-    canvas->cd();
-    canvas->Update();
-    print(*canvas, Form("recop_vs_momp_daughter%d", id));
+    mCanvas->cd();
+    mCanvas->Update();
+
+    mPDF->NewPage() ;
+
+    delete header ;
+
+//    print(*canvas, Form("recop_vs_momp_daughter%d", id));
   }
 
   return drawProjection2D("momentum");
@@ -922,23 +1121,28 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
   TString histoName("");
   Bool_t isProjectionX = kFALSE ;
   TString yTitle("");
+  TString xTitle("");
 
   if( nameLower.Contains("pt") ){
+    xTitle = "#eta";
     yTitle = "p_{T}";
     histoName = "hPtVsEta";
     isProjectionX = kFALSE ;
   }
   else if( nameLower.Contains("momentum") ){
+    xTitle = "#eta";
     yTitle = "p";
     histoName = "hMomVsEta";
     isProjectionX = kFALSE ;
   }
   else if( nameLower.Contains("eta") || name.Contains("pseudorapidity") ){
+    xTitle = "p_{T}";
     yTitle = "#eta";
     histoName = "hPtVsEta";
     isProjectionX = kTRUE ;
   }
   else if( nameLower.Contains("y") || name.Contains("rapidity") ){
+    xTitle = "p_{T}";
     yTitle = "y";
     histoName = "hPtVsY";
     isProjectionX = kTRUE ;
@@ -964,24 +1168,32 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
   gStyle->SetPadRightMargin(0.05);
 
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
+    TString headerTitle("");
+    if ( mIsEmbeddingOnly ){
+      headerTitle = Form("Projection of %s for each %s bin (Embedding:%s)", 
+            yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]));
+    }
+    else{
+      headerTitle = Form("Projection of %s for each %s bin (Embedding:%s, Real:%s)", 
+          yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)));
+    }
+    TPaveText* header = initCanvas(headerTitle);
+
     TH2* h2DEmbed = (TH2D*) getHistogram(histoName, id, kTRUE);
     if(!h2DEmbed) return kFALSE ;
 
     TH2* h2DReal  = (TH2D*) getHistogram(histoName, id, kFALSE);
-    if(!h2DReal) return kFALSE ;
+//    if(!h2DReal) return kFALSE ;
 
     /// Define canvas Ndivisions
     Int_t npad = 0 ;
-    TCanvas* canvas = 0;
     if( isProjectionX ){
-      canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
-      canvas->Divide(4, 3);
-      npad = 12 ;
+      mMainPad->Divide(2, 5);
+      npad = 10 ;
     }
     else{
-      canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 600);
-      canvas->Divide(4, 2);
-      npad = 8 ;
+      mMainPad->Divide(2, 3);
+      npad = 6 ;
     }
 
     /// Get bins
@@ -1000,67 +1212,63 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
       TH1* hEmbed = 0;
       TH1* hReal  = 0;
       if( isProjectionX ){
-        hEmbed = (TH1D*) h2DEmbed->ProjectionX(Form("h%sEmbed_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
-        hReal  = (TH1D*) h2DReal->ProjectionX(Form("h%sReal_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+        if( h2DEmbed ) hEmbed = (TH1D*) h2DEmbed->ProjectionX(Form("h%sEmbed_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+        if( h2DReal )  hReal  = (TH1D*) h2DReal->ProjectionX(Form("h%sReal_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
       }
       else{
-        hEmbed = (TH1D*) h2DEmbed->ProjectionY(Form("h%sEmbed_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
-        hReal  = (TH1D*) h2DReal->ProjectionY(Form("h%sReal_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+        if( h2DEmbed ) hEmbed = (TH1D*) h2DEmbed->ProjectionY(Form("h%sEmbed_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+        if( h2DReal )  hReal  = (TH1D*) h2DReal->ProjectionY(Form("h%sReal_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
       }
 
       hEmbed->SetLineColor(kRed);
-      hReal->SetLineColor(kBlue);
       hEmbed->Sumw2();
-      hReal->Sumw2();
       hEmbed->Scale( getNormalization(*hEmbed) );
-      hReal->Scale( getNormalization(*hReal) );
+
+      if( hReal ){
+        hReal->SetLineColor(kBlue);
+        hReal->Sumw2();
+        hReal->Scale( getNormalization(*hReal) );
+      }
 
       /// Set maximum of y-axis
       /// Use real data if N(embedding) < 100
       Double_t yMax = 0.0 ;
       if ( hEmbed->GetEntries() < 100 ){
-        yMax = hReal->GetMaximum() ;
+        yMax = (hReal) ? hReal->GetMaximum() : hEmbed->GetMaximum() ;
       }
       else{
-        yMax = TMath::Max(hEmbed->GetMaximum(), hReal->GetMaximum())*1.2 ;
+        yMax = (hReal) ? TMath::Max(hEmbed->GetMaximum(), hReal->GetMaximum())*1.2 : hEmbed->GetMaximum()*1.2 ;
       }
-      hReal->SetMaximum( yMax * 1.2 );
+      hEmbed->SetMaximum( yMax * 1.2 );
 
       if( isProjectionX ){
-        hReal->SetTitle(Form("%1.1f < p_{T} < %1.1f (GeV/c)", xMin, xMax));
+        hEmbed->SetTitle(Form("%1.1f < p_{T} < %1.1f (GeV/c)", xMin, xMax));
       }
       else{
-        hReal->SetTitle(Form("%1.1f < #eta < %1.1f", xMin, xMax));
-        hReal->SetAxisRange(0, mPtMax, "X");
+        hEmbed->SetTitle(Form("%1.1f < #eta < %1.1f", xMin, xMax));
+        hEmbed->SetAxisRange(0, mPtMax, "X");
       }
-      hReal->SetYTitle(Form("(1/N_{trk})dN/%s", yTitle.Data()));
+      hEmbed->SetYTitle(Form("(1/N_{trk})dN/%s", yTitle.Data()));
 
-      canvas->cd(ibin+1);
-      hReal->Draw("h");
+      mMainPad->cd(ibin+1);
+      hEmbed->Draw();
+      if(hReal) hReal->Draw("hsame");
       hEmbed->Draw("same");
-
-      if( ibin == 0 ){
-        canvas->cd(npad);
-        TLegend* leg = new TLegend(0.1, 0.7, 0.9, 0.9);
-        leg->SetFillColor(10);
-        leg->SetTextSize(0.05);
-        leg->AddEntry( hEmbed, Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "L");
-        leg->AddEntry( hReal, Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "L");
-        leg->Draw();
-
-        drawStatistics(0.1, 0.2, 0.9, 0.5);
-      }
     }
 
-    canvas->cd();
-    canvas->Update();
+    mCanvas->cd();
+    mCanvas->Update();
 
-    if( mDaughterGeantId.size() == 1 ){
-      print(*canvas, Form("%s", nameLower.Data()));
-    }
-    else{
-      print(*canvas, Form("%s_daughter%d", nameLower.Data(), id));
-    }
+    mPDF->NewPage();
+
+    delete header ;
+
+//    if( mDaughterGeantId.size() == 1 ){
+//      print(*canvas, Form("%s", nameLower.Data()));
+//    }
+//    else{
+//      print(*canvas, Form("%s_daughter%d", nameLower.Data(), id));
+//    }
   }
 
   gStyle->SetPadRightMargin(0.15);
@@ -1104,67 +1312,92 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
   gStyle->SetPadRightMargin(0.05);
 
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
+    //----------------------------------------------------------------------------------------------------
     // 2D
-    TCanvas* canvas2D = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 500);
-    canvas2D->Divide(2, 1);
+    //----------------------------------------------------------------------------------------------------
+    TString headerTitle("");
+    if( mIsEmbeddingOnly ){
+      headerTitle = Form("dE/dx vs momentum (Embedding:%s)", getParticleName(mDaughterGeantId[id]) );
+    }
+    else{
+      headerTitle = Form("dE/dx vs momentum (Embedding:%s, Real:%s)", 
+            getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
+    }
+    TPaveText* header = initCanvas(headerTitle, 1, 2);
 
     // Embedding
     TH2* hdEdxVsMomEmbed = (TH2D*) getHistogram(Form("hdEdxVsMom%s", momName.Data()), id, kTRUE);
-    if(!hdEdxVsMomEmbed);
+    if(!hdEdxVsMomEmbed) return kFALSE ;
 
     hdEdxVsMomEmbed->SetLineColor(kRed);
     hdEdxVsMomEmbed->SetMarkerColor(kRed);
 
     // Real data
     TH2* hdEdxVsMomReal = (TH2D*) getHistogram("hdEdxVsMomReco", id, kFALSE);
-    if(!hdEdxVsMomReal);
+//    if(!hdEdxVsMomReal) return kFALSE ;
 
-    hdEdxVsMomReal->SetLineColor(kBlack);
-    hdEdxVsMomReal->SetMarkerColor(kBlack);
+    if( hdEdxVsMomReal ){
+      hdEdxVsMomReal->SetLineColor(kBlack);
+      hdEdxVsMomReal->SetMarkerColor(kBlack);
+    }
 
     // Real data (with PID)
     TH2* hdEdxVsMomPidReal = (TH2D*) getHistogram("hdEdxVsMomRecoPidCut", id, kFALSE);
-    if(!hdEdxVsMomPidReal);
+//    if(!hdEdxVsMomPidReal) return kFALSE ;
 
-    hdEdxVsMomPidReal->SetLineColor(kBlue);
-    hdEdxVsMomPidReal->SetMarkerColor(kBlue);
+    if( hdEdxVsMomPidReal ){
+      hdEdxVsMomPidReal->SetLineColor(kBlue);
+      hdEdxVsMomPidReal->SetMarkerColor(kBlue);
+    }
 
     // dE/dx vs momentum
-    canvas2D->cd(1);
-    hdEdxVsMomReal->SetAxisRange(0, mPtMax, "X");
-    hdEdxVsMomReal->SetXTitle(Form("%s momentum (GeV/c)", momName.Data()));
-    hdEdxVsMomReal->SetTitle("");
+    mMainPad->cd(1);
+    hdEdxVsMomEmbed->SetAxisRange(0, mPtMax, "X");
+    hdEdxVsMomEmbed->SetXTitle(Form("%s momentum (GeV/c)", momName.Data()));
+    hdEdxVsMomEmbed->SetTitle("");
 
-    hdEdxVsMomReal->Draw();
-    hdEdxVsMomPidReal->Draw("same");
+    hdEdxVsMomEmbed->Draw();
+    if( hdEdxVsMomReal )    hdEdxVsMomReal->Draw("same");
+    if( hdEdxVsMomPidReal ) hdEdxVsMomPidReal->Draw("same");
     hdEdxVsMomEmbed->Draw("same");
 
-    canvas2D->cd(2);
+    mMainPad->cd(2);
 
-    TLegend* leg = new TLegend(0.1, 0.65, 0.9, 0.9);
+    TLegend* leg = new TLegend(0.1, 0.25, 0.9, 0.9);
     leg->SetFillColor(10);
     leg->SetTextSize(0.05);
     leg->AddEntry( hdEdxVsMomEmbed, Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "L");
-    leg->AddEntry( hdEdxVsMomReal, "Real data", "L");
-    leg->AddEntry( hdEdxVsMomPidReal, "Real data with PID cut (#sigma<2)", "L");
+    if( hdEdxVsMomReal )    leg->AddEntry( hdEdxVsMomReal, "Real data", "L");
+    if( hdEdxVsMomPidReal ) leg->AddEntry( hdEdxVsMomPidReal, "Real data with PID cut (#sigma<2)", "L");
     leg->Draw();
 
-    drawStatistics(0.1, 0.2, 0.9, 0.5);
+    mCanvas->cd();
+    mCanvas->Update();
 
-    canvas2D->cd();
-    canvas2D->Update();
+    mPDF->NewPage();
 
-    if( mDaughterGeantId.size() == 1 ){
-      print(*canvas2D, Form("dedx_vs_mom%s_", momName.Data()));
-    }
-    else{
-      print(*canvas2D, Form("dedx_vs_mom%s_daughter%d", momName.Data(), id));
-    }
+    delete header ;
 
+//    if( mDaughterGeantId.size() == 1 ){
+//      print(*canvas2D, Form("dedx_vs_mom%s_", momName.Data()));
+//    }
+//    else{
+//      print(*canvas2D, Form("dedx_vs_mom%s_daughter%d", momName.Data(), id));
+//    }
+
+    //----------------------------------------------------------------------------------------------------
     /// 1D projections for each momentum bin
     ///  From 0.2 GeV/c to 5.0 GeV/c (5*5)
-    TCanvas* canvas0 = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 800);
-    canvas0->Divide(5, 5);
+    //----------------------------------------------------------------------------------------------------
+    headerTitle = "";
+    if( mIsEmbeddingOnly ){
+      headerTitle = Form("Projection of dE/dx for each p bin (Embedding:%s)", getParticleName(mDaughterGeantId[id]) );
+    }
+    else{
+      headerTitle = Form("Projection of dE/dx for each p bin (Embedding:%s, Real:%s)", 
+            getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
+    }
+    header = initCanvas(headerTitle, 4, 6);
 
     TGraphErrors* gMeanVsMom[2];  // 0:embedding, 1:real data
     TGraphErrors* gSigmaVsMom[2]; // 0:embedding, 1:real data
@@ -1193,22 +1426,31 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
 
       // Projections
       TH1* hdEdxEmbed = (TH1D*) hdEdxVsMomEmbed->ProjectionY(Form("hdEdxEmbed%s_%d_%d", momName.Data(), id, ipt), ptMinBin, ptMaxBin);
-      TH1* hdEdxReal  = (TH1D*) hdEdxVsMomPidReal->ProjectionY(Form("hdEdxReal%s_%d_%d", momName.Data(), id, ipt), ptMinBin, ptMaxBin);
+      TH1* hdEdxReal  = 0;
+      if( hdEdxVsMomPidReal )
+        hdEdxReal = (TH1D*) hdEdxVsMomPidReal->ProjectionY(Form("hdEdxReal%s_%d_%d", momName.Data(), id, ipt), ptMinBin, ptMaxBin);
+
       hdEdxEmbed->Sumw2() ;
-      hdEdxReal ->Sumw2() ;
       hdEdxEmbed->Scale( getNormalization(*hdEdxEmbed) ) ;
-      hdEdxReal ->Scale( getNormalization(*hdEdxReal) ) ;
 
-      hdEdxReal->SetMinimum(0.0);
-      hdEdxReal->SetMaximum( TMath::Max(hdEdxReal->GetMaximum(), hdEdxEmbed->GetMaximum())*1.2 );
-      hdEdxReal->SetTitle(Form("%1.1f < %s p < %1.1f GeV/c", ptMin, momName.Data(), ptMax));
-      hdEdxReal->SetYTitle("(1/N_{trk})dN/d(dE/dx)");
+      if( hdEdxReal ){
+        hdEdxReal->Sumw2() ;
+        hdEdxReal->Scale( getNormalization(*hdEdxReal) ) ;
+      }
 
-      canvas0->cd(ipt+1);
-      hdEdxReal->Draw("h");
+      hdEdxEmbed->SetMinimum(0.0);
+      hdEdxEmbed->SetMaximum( TMath::Max(hdEdxEmbed->GetMaximum(), hdEdxEmbed->GetMaximum())*1.2 );
+      hdEdxEmbed->SetTitle(Form("%1.1f < %s p < %1.1f GeV/c", ptMin, momName.Data(), ptMax));
+      hdEdxEmbed->SetYTitle("(1/N_{trk})dN/d(dE/dx)");
+
+      mMainPad->cd(ipt+1);
+      hdEdxEmbed->Draw("h");
+      if( hdEdxReal ) hdEdxReal->Draw("hsame");
       hdEdxEmbed->Draw("hsame");
 
+      //----------------------------------------------------------------------------------------------------
       // Extract mean and sigma (Oct/22/2009)
+      //----------------------------------------------------------------------------------------------------
       TF1 fEmbed(Form("fEmbed%s_%d_%d", momName.Data(), id, ipt), "gaus", 0, 10);
       TF1 fReal(Form("fReal%s_%d_%d", momName.Data(), id, ipt), "gaus", 0, 10);
       fEmbed.SetLineColor(kRed);
@@ -1216,89 +1458,103 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
       fEmbed.SetLineWidth(1);
       fReal.SetLineWidth(1);
 
-      hdEdxReal->Fit(fReal.GetName(), "rq0");
+      if( hdEdxReal ){
+        hdEdxReal->Fit(fReal.GetName(), "rq0");
+        fReal.Draw("same");
+      }
       hdEdxEmbed->Fit(fEmbed.GetName(), "rq0");
-      fReal.Draw("same");
       fEmbed.Draw("same");
 
       const Double_t pt = (ptMin+ptMax)/2.0 ;
       gMeanVsMom[0]->SetPoint(ipt, pt, fEmbed.GetParameter(1));
       gMeanVsMom[0]->SetPointError(ipt, 0.0, fEmbed.GetParError(1));
-      gMeanVsMom[1]->SetPoint(ipt, pt, fReal.GetParameter(1));
-      gMeanVsMom[1]->SetPointError(ipt, 0.0, fReal.GetParError(1));
       gSigmaVsMom[0]->SetPoint(ipt, pt, fEmbed.GetParameter(2));
       gSigmaVsMom[0]->SetPointError(ipt, 0.0, fEmbed.GetParError(2));
-      gSigmaVsMom[1]->SetPoint(ipt, pt, fReal.GetParameter(2));
-      gSigmaVsMom[1]->SetPointError(ipt, 0.0, fReal.GetParError(2));
 
-      // Legend
-      if( ipt == npt - 1 ){
-        canvas0->cd(25);
-
-        TLegend* leg = new TLegend(0.1, 0.65, 0.9, 0.9);
-        leg->SetFillColor(10);
-        leg->SetTextSize(0.08);
-        leg->AddEntry( hdEdxEmbed, Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "L");
-        leg->AddEntry( hdEdxReal,  Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "L");
-        leg->Draw();
-      
-        drawStatistics(0.1, 0.15, 0.9, 0.55, 0.08);
+      if( hdEdxReal ){
+        gMeanVsMom[1]->SetPoint(ipt, pt, fReal.GetParameter(1));
+        gMeanVsMom[1]->SetPointError(ipt, 0.0, fReal.GetParError(1));
+        gSigmaVsMom[1]->SetPoint(ipt, pt, fReal.GetParameter(2));
+        gSigmaVsMom[1]->SetPointError(ipt, 0.0, fReal.GetParError(2));
+      }
+      else{
+        gMeanVsMom[1]->SetPoint(ipt, pt, -9999.);
+        gMeanVsMom[1]->SetPointError(ipt, 0.0, 0.0);
+        gSigmaVsMom[1]->SetPoint(ipt, pt, -9999.);
+        gSigmaVsMom[1]->SetPointError(ipt, 0.0, 0.0);
       }
     }// pt loop
 
-    canvas0->cd();
-    canvas0->Update();
+    mCanvas->cd();
+    mCanvas->Update();
 
-    if( mDaughterGeantId.size() == 1 ){
-      print(*canvas0, Form("dedx_1Dprojection_mom%s", momName.Data()));
+    mPDF->NewPage();
+
+    delete header ;
+
+//    if( mDaughterGeantId.size() == 1 ){
+//      print(*canvas0, Form("dedx_1Dprojection_mom%s", momName.Data()));
+//    }
+//    else{
+//      print(*canvas0, Form("dedx_1Dprojection_mom%s_daughter%d", momName.Data(), id));
+//    }
+
+    //----------------------------------------------------------------------------------------------------
+    /// Mean/Sigma vs momentum (real vs embed)
+    //----------------------------------------------------------------------------------------------------
+    headerTitle = "";
+    if( mIsEmbeddingOnly ){
+      headerTitle = Form("Mean/#sigma of dE/dx vs momentum (Embedding:%s)", getParticleName(mDaughterGeantId[id]) );
     }
     else{
-      print(*canvas0, Form("dedx_1Dprojection_mom%s_daughter%d", momName.Data(), id));
+      headerTitle = Form("Mean/#sigma of dE/dx vs momentum (Embedding:%s, Real:%s)", 
+            getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
     }
-
-    // Mean/Sigma vs momentum (real vs embed)
-    TCanvas* canvas1 = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 1200, 500);
-    canvas1->Divide(2, 1);
+    header = initCanvas(headerTitle, 1, 2);
 
     for(Int_t i=0; i<2; i++){
-      canvas1->cd(i+1);
+      mMainPad->cd(i+1);
 
       const Double_t ymax = (i==0) ? 5.2 : 1.4 ;
-      TH1* frame = canvas1->GetPad(i+1)->DrawFrame(0, 0.0, 5.0, ymax);
+      TH1* frame = mMainPad->GetPad(i+1)->DrawFrame(0, 0.0, 5.0, ymax);
       frame->SetXTitle(Form("%s momentum (GeV/c)", momName.Data()));
       if( i == 0 ) frame->SetYTitle("Mean (keV/cm)");
       if( i == 1 ) frame->SetYTitle("#sigma (keV/cm)");
 
-      TLegend* leg = new TLegend(0.48, 0.7, 0.88, 0.86);
-      leg->SetTextSize(0.05);
-      leg->SetFillColor(10);
+//      TLegend* leg = new TLegend(0.48, 0.7, 0.88, 0.86);
+//      leg->SetTextSize(0.05);
+//      leg->SetFillColor(10);
 
       if( i == 0 ){
         gMeanVsMom[0]->Draw("P");
         gMeanVsMom[1]->Draw("P");
 
-        leg->AddEntry( gMeanVsMom[0], Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "P");
-        leg->AddEntry( gMeanVsMom[1], Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "P");
+//        leg->AddEntry( gMeanVsMom[0], Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "P");
+//        leg->AddEntry( gMeanVsMom[1], Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "P");
       }
       if( i == 1 ){
         gSigmaVsMom[0]->Draw("P");
         gSigmaVsMom[1]->Draw("P");
 
-        leg->AddEntry( gSigmaVsMom[0], Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "P");
-        leg->AddEntry( gSigmaVsMom[1], Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "P");
+//        leg->AddEntry( gSigmaVsMom[0], Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "P");
+//        leg->AddEntry( gSigmaVsMom[1], Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "P");
       }
-      leg->Draw();
+//      leg->Draw();
     }
 
-    canvas1->cd();
-    canvas1->Update();
+    mCanvas->cd();
+    mCanvas->Update();
 
-    if( mDaughterGeantId.size() == 1 ){
-      print(*canvas1, Form("mean_sigma_dedx_mom%s", momName.Data()));
-    }
-    else{
-      print(*canvas1, Form("mean_sigma_dedx_mom%s_daughter%d", momName.Data(), id));
-    }
+    mPDF->NewPage() ;
+
+    delete header ;
+
+//    if( mDaughterGeantId.size() == 1 ){
+//      print(*canvas1, Form("mean_sigma_dedx_mom%s", momName.Data()));
+//    }
+//    else{
+//      print(*canvas1, Form("mean_sigma_dedx_mom%s_daughter%d", momName.Data(), id));
+//    }
   }
 
   return kTRUE ;
@@ -1329,10 +1585,27 @@ Bool_t StEmbeddingQADraw::drawNHit() const
 
   /// QA for NCommon hit vs NHit
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
-    TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++));
+    TString headerTitle("");
+    if( mIsEmbeddingOnly ){
+      headerTitle = Form("N_{common} vs N_{hit} (Embedding:%s)", getParticleName(mDaughterGeantId[id]) );
+    }
+    else{
+      headerTitle = Form("N_{common} vs N_{hit} (Embedding:%s, Real:%s)", 
+            getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
+    }
+    TPaveText* header = initCanvas(headerTitle);
+
     TH2* hNCommonHitVsNHit = (TH2D*) getHistogram("hNCommonHitVsNHit", id, kTRUE);
     hNCommonHitVsNHit->Draw("colz");
-    print(*canvas, Form("ncommonhit_vs_nhit_daughter%d", id));
+
+    mCanvas->cd();
+    mCanvas->Update();
+
+    mPDF->NewPage() ;
+
+    delete header ;
+
+//    print(*canvas, Form("ncommonhit_vs_nhit_daughter%d", id));
   }
 
   return drawProjection3D("NHit") ;
@@ -1356,21 +1629,23 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
   TString nameLower(name);
   nameLower.ToLower();
 
-  TCanvas* canvas = new TCanvas(Form("c%d", mCanvasId), Form("c%d", mCanvasId++), 600, 800);
-  canvas->Divide(2, 3);
-
-  /// Define output PDF file
-  const TString pdfFileName(Form("%s%s_%s.pdf", mOutputFigureDirectory.Data(), nameLower.Data(), getBaseName()));
-  TPDF* pdf = new TPDF(pdfFileName);
-
-  const Int_t npad = 5 ;
-
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
+    TString headerTitle("");
+    if( mIsEmbeddingOnly ){
+      headerTitle = Form("%s distribution for (p_{T}, #eta) slices (Embedding:%s)", name.Data(), getParticleName(mDaughterGeantId[id]) );
+    }
+    else{
+      headerTitle = Form("%s distribution for (p_{T}, #eta) slices (Embedding:%s, Real:%s)", 
+            name.Data(), getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
+    }
+    TPaveText* header = initCanvas(headerTitle, 2, 5);
+
+    /// Get 3D histograms
     TH3* h3DEmbed = (TH3D*) getHistogram(Form("h%s", name.Data()), id, kTRUE);
     if(!h3DEmbed) return kFALSE ;
 
     TH3* h3DReal  = (TH3D*) getHistogram(Form("h%s", name.Data()), id, kFALSE);
-    if(!h3DReal) return kFALSE ;
+//    if(!h3DReal) return kFALSE ;
 
     const Int_t nPt       = h3DEmbed->GetNbinsX() ;
     const Int_t nEta      = h3DEmbed->GetNbinsY() ;
@@ -1385,54 +1660,51 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
       TString pt(Form("%1.1f < p_{T} < %1.1f (GeV/c)", ptMin+ipt*ptBin, ptMin+(ipt+1)*ptBin));
       if( ipt == 0 ) pt = Form("%1.1f < p_{T} < %1.1f (GeV/c)", 0.1, ptMin+(ipt+1)*ptBin);
 
-      Int_t ipad = 1 ;
+//      Int_t ipad = 1 ;
       for(Int_t ieta=0; ieta<nEta; ieta++){
-        if( ipad != 1 && ipad % (npad+1) == 0 ){
-          canvas->cd();
-          canvas->Update();
-          pdf->NewPage();
-          ipad = 1 ;
-        }
+//        if( ipad != 1 && ipad % (npad+1) == 0 ){
+//          mCanvas->cd();
+//          mCanvas->Update();
+//          mPDF->NewPage();
+//          ipad = 1 ;
+//        }
 
         TString eta(Form("%1.1f < #eta < %1.1f", etaMin+ieta*etaBin, etaMin+(ieta+1)*etaBin));
 
         TH1* hEmbed = (TH1D*) h3DEmbed->ProjectionZ(Form("h%sEmbed_%d_%d_%d", name.Data(), id, ipt, ieta), ipt+1, ipt+1, ieta+1, ieta+1);
-        TH1* hReal  = (TH1D*) h3DReal->ProjectionZ(Form("h%sReal_%d_%d_%d", name.Data(), id, ipt, ieta), ipt+1, ipt+1, ieta+1, ieta+1);
-        hEmbed->Sumw2();
-        hReal ->Sumw2();
-        hEmbed->Scale( getNormalization(*hEmbed) );
-        hReal ->Scale( getNormalization(*hReal) );
-        hEmbed->SetLineColor(kRed);
-        hReal ->SetLineColor(kBlue);
-
-        hReal->SetMinimum(0.0);
-        hReal->SetMaximum( TMath::Max(hEmbed->GetMaximum(), hReal->GetMaximum()) * 1.2 );
-        hReal->SetTitle(eta + ", " + pt);
-        hReal->SetYTitle(Form("(1/N_{trk})dN/d%s", name.Data())) ;
-
-        canvas->cd(ipad++);
-        hReal->Draw("h");
-        hEmbed->Draw("same");
-
-        if( ipad % (npad+1) == 0 ){
-          canvas->cd(6);
-          TLegend* leg = new TLegend(0.1, 0.7, 0.9, 0.9);
-          leg->SetFillColor(10);
-          leg->SetTextSize(0.05);
-          leg->AddEntry( hEmbed, Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "L");
-          leg->AddEntry( hReal,  Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "L");
-          leg->Draw();
-  
-          drawStatistics(0.1, 0.2, 0.9, 0.5);
+        TH1* hReal  = 0 ;
+        if( h3DReal ){
+          hReal = (TH1D*) h3DReal->ProjectionZ(Form("h%sReal_%d_%d_%d", name.Data(), id, ipt, ieta), ipt+1, ipt+1, ieta+1, ieta+1);
+          hReal ->Sumw2();
+          hReal ->Scale( getNormalization(*hReal) );
+          hReal ->SetLineColor(kBlue);
         }
-      }
-      canvas->cd();
-      canvas->Update();
-      pdf->NewPage();
-    }
-  }
-  pdf->Close();
-  LOG_INFO << "Print PDF file : " << pdfFileName << endm;
+        hEmbed->Sumw2();
+        hEmbed->Scale( getNormalization(*hEmbed) );
+        hEmbed->SetLineColor(kRed);
+        hEmbed->SetMinimum(0.0);
+        hEmbed->SetMaximum( TMath::Max(hEmbed->GetMaximum(), hEmbed->GetMaximum()) * 1.2 );
+        hEmbed->SetTitle(eta + ", " + pt);
+        hEmbed->SetYTitle(Form("(1/N_{trk})dN/d%s", name.Data())) ;
+
+//        mMainPad->cd(ipad++);
+        mMainPad->cd(ieta+1);
+        hEmbed->Draw();
+        if(hReal) hReal->Draw("hsame");
+        hEmbed->Draw("same");
+      }// eta loop
+      mCanvas->cd();
+      mCanvas->Update();
+      mPDF->NewPage();
+    }// pt loop
+
+    delete header ;
+  }// daughter particle loop
+
+//  mCanvas->cd();
+//  mCanvas->Update();
+// 
+//  mPDF->NewPage() ;
 
   // Back to the original mode
   if( isBatch ) gROOT->SetBatch(kTRUE);  // Stay batch mode if you've started the macro by batch mode
@@ -1441,6 +1713,20 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
   return kTRUE ;
 }
 
+//____________________________________________________________________________________________________
+TPaveText* StEmbeddingQADraw::initCanvas(const TString headerTitle, const Int_t nx, const Int_t ny) const
+{
+  mMainPad->Clear();
+  mCanvas->cd();
+
+  /// Drawing header in the current canvas
+  TPaveText* header = drawHeader(headerTitle);
+
+  mMainPad->cd();
+  if( nx != 0 && ny != 0 ) mMainPad->Divide(nx, ny);
+
+  return header ;
+}
 
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::draw() const
@@ -1470,4 +1756,33 @@ Bool_t StEmbeddingQADraw::draw() const
 
   return isEventOk && isMcTrackOk && isTrackOk ;
 }
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQADraw::finish()
+{
+  // Close PDF file
+  LOG_INFO << "StEmbeddingQADraw::finish()  Close PDF file : " << mPDF->GetName() << endm ;
+
+  mMainPad->cd();
+  mMainPad->Clear();
+
+  TLatex* title = new TLatex(0.1, 0.6, "End of QA");
+  title->SetTextSize(0.1);
+  title->Draw();
+
+  mCanvas->cd();
+  mCanvas->Update();
+
+  mPDF->Close() ;
+
+  return kTRUE ;
+}
+
+void StEmbeddingQADraw::setPNGOn() { LOG_INFO << endm << "Print figures to PNG file" << endm << endm; mIsPNGOn = kTRUE ; }
+void StEmbeddingQADraw::setGIFOn() { LOG_INFO << endm << "Print figures to GIF file" << endm << endm; mIsGIFOn = kTRUE ; }
+void StEmbeddingQADraw::setJPGOn() { LOG_INFO << endm << "Print figures to JPG file" << endm << endm; mIsJPGOn = kTRUE ; }
+void StEmbeddingQADraw::setEPSOn() { LOG_INFO << endm << "Print figures to EPS file" << endm << endm; mIsEPSOn = kTRUE ; }
+void StEmbeddingQADraw::setPSOn()  { LOG_INFO << endm << "Print figures to PS file"  << endm << endm; mIsPSOn = kTRUE ; }
+
+
 

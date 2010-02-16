@@ -1,51 +1,52 @@
 //----------------------------------------------------------------------------------------------------
 //   Draw QA histograms
 //     - Comparison of the results between embedding and real data
-//     - Print only png file by default. You can print other file format 
-//       by using the function "setXXXOn()"
-//       Current available file formats:
+//     - Print only one PDF file by default. 
 //
+//----------------------------------------------------------------------------------------------------
+//  NOTE: These functions are not used for the latest QA codes.
 //       file           function
+//       png            setPNGOn()
 //       gif            setGIFOn()
 //       jpg            setJPGOn()
 //       eps            setEPSOn()
 //       ps             setPSOn()
-//        
-//      NOTE : 
-//      1. Dca and NHit distributions are printed only for pdf file format.
-//      2. drawDca(), drawNHit() will be processed by the batch mode automatically,
-//         i.e. you will not see the canvas.
+//----------------------------------------------------------------------------------------------------
 //
 //  You can make the QA plots by drawEmbeddingQA.C under StRoot/macros/embedding
 //  Suppose you have output ROOT files: qa_embedding_2007_P08ic.root,
 //  and qa_real_2007_P08ic.root (the output file format is automatically 
 //  determined if you leave the output filename blank in StEmbeddingQAMaker)
+//  Suppose you have embedded single pion+ (geantid=8) in the output files.
 //
-//    > root4star -l drawEmbeddingQA.C'("./", "qa_embedding_2007_P08ic.root", "qa_real_2007_P08ic.root")'
+//    > root4star -b -q drawEmbeddingQA.C'("./", "qa_embedding_2007_P08ic.root", "qa_real_2007_P08ic.root", 8)'
 //
 //  First argument is the directory where the output figures are printed.
 //  The default output directory is the current directory.
+//  The 6th argument is the input geantid
 //
 //  If you name the output ROOT files by hand, you need to put the year,
 //  production and particle name by yourself since those are used 
 //  for the output figure name and to print those informations in 
 //  the legend for each QA plot.
 //  Suppose you have output ROOT files: qa_embedding.root and qa_real.root
-//  and the input particle is pi+ (geantid=8)
 //
-//    > root4star -l drawEmbeddingQA.C'("./", "qa_embedding.root", "qa_real.root", 2005, "P08ic", 8)'
+//    > root4star -b -q drawEmbeddingQA.C'("./", "qa_embedding.root", "qa_real.root", 2005, "P08ic", 8)'
 //
-//  where the 6th argument is the input geantid
 //
-//    NOTE: Output figures can be printed by batch mode so you can run the macro
-//          by "root4star -b ..." rather than "root4star -l ..."
-//          if you don't want to see a bunch of canvas.
+//  If you just want ot check the embedding output only, you can do 
 //
+//    > root4star -b -q drawEmbeddingQA.C'("./", "qa_embedding_2007_P08ic.root", "qa_real_2007_P08ic.root", 8, kTRUE)'
+//
+//  where the last argument is the switch to skip drawing the real data if it's true (default is false)
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.6 2009/12/22 21:40:11 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.7 2010/02/16 02:14:03 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.7  2010/02/16 02:14:03  hmasui
+ * Print PDF file only for all QA plots
+ *
  * Revision 1.6  2009/12/22 21:40:11  hmasui
  * Add comments for functions and members
  *
@@ -61,23 +62,32 @@ class TCanvas ;
 class TH1 ;
 class TFile ;
 class TObject ;
+class TPad ;
+class TPaveText ;
+class TPDF ;
 #include "TString.h"
 
 class StEmbeddingQADraw {
   public:
     /// Input embedding/real data file names made by StEmbeddingQAAnalyzer
-    StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile, const Int_t geantid);
+    /// Aded 'isEmbeddingOnly' argument
+    ///   true            --> draw QA only for the embedding
+    ///   false (default) --> draw QA both embedding and real data
+    StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile, const Int_t geantid,
+        const Bool_t isEmbeddingOnly = kFALSE);
 
     /// Specify year, production and particle geantid if you put you own input embedding/real data file names
     StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile,
-        const Int_t year, const TString production, const Int_t geantid);
+        const Int_t year, const TString production, const Int_t geantid, const Bool_t isEmbeddingOnly = kFALSE);
     virtual ~StEmbeddingQADraw();
 
     /// Default is current directory
     void setOutputDirectory(const TString name = "./") ;
 
     Bool_t draw() const ;       /// Draw all histograms (event and track histograms).
-    Bool_t drawEvent() const;   /// Draw event-wise histograms
+
+    // Event-wise
+    Bool_t drawEvent() const;     /// Draw all event-wise histograms
 
     // Track-wise
     Bool_t drawMcTrack() const;    /// Draw MC track histograms
@@ -91,6 +101,9 @@ class StEmbeddingQADraw {
     Bool_t drawDca() const;        /// Dca vs (pt, eta)
     Bool_t drawNHit() const;       /// NHit vs (pt, eta)
 
+    Bool_t finish() ;               /// Finish QA
+
+    void setPNGOn() ;        /// Set true for png file flag (default is false)
     void setGIFOn() ;        /// Set true for gif file flag (default is false)
     void setJPGOn() ;        /// Set true for jpg file flag (default is false)
     void setEPSOn() ;        /// Set true for eps file flag (default is false)
@@ -151,7 +164,9 @@ class StEmbeddingQADraw {
     TObject* getHistogram(const TString name, const Bool_t isEmbedding = kTRUE) const ;
 
     /// Get histogram for either embedding or real data
-    TObject* getHistogram(const TString name, const UInt_t daughter, const Bool_t isEmbedding) const ;
+    ///   Added parent-parent id (default is 0)
+    TObject* getHistogram(const TString name, const UInt_t daughter, const Bool_t isEmbedding,
+        const UInt_t parentparentid = 0) const ;
 
     /// (1/Ntrk) * (1/bin)
     Double_t getNormalization(const TH1& h) const ;
@@ -163,17 +178,38 @@ class StEmbeddingQADraw {
     Bool_t drawStatistics(const Double_t x1=0.1, const Double_t y1=0.2, const Double_t x2=0.9, const Double_t y2=0.8,
         const Double_t textSize = 0.05) const;
 
+    /// Header for each QA (title for QA plots, daughter particle name etc)
+    TPaveText* drawHeader(const TString description,
+        const Double_t x1=0.0, const Double_t y1=0.9, const Double_t x2=1.0, const Double_t y2=0.95, 
+        const Double_t textSize = 0.032) const;
+
+    /// Event-wise informations
+    Bool_t drawVertices() const;          /// Draw vertices
+    Bool_t drawRunEventId() const;        /// Draw run and event id
+    Bool_t drawNumberOfParticles() const; /// Draw number of particles per event
+
     /// dE/dx vs p, projections, mean/sigma vs momentum
     Bool_t drawdEdxVsMomentum(const Bool_t isMcMomentum=kTRUE) const ;
 
     Bool_t drawProjection2D(const TString name) const; /// (pseudo-)rapidity, momentum, pt
     Bool_t drawProjection3D(const TString name) const; /// For dca and nhit projections in (pt, eta) space
 
+    /// Canvas/Pad initialization
+    // Header for current QA, division of (x,y), default is (0,0), no division
+    TPaveText* initCanvas(const TString header, const Int_t nx=0, const Int_t ny=0) const;
+
     // Data members
     static UInt_t mCanvasId ; /// Canvas id
 
+    TCanvas* mCanvas ;        /// Canvas for all QA histograms
+    TPad* mMainPad ;          /// Main pad to draw histograms
+    TPDF* mPDF ;              /// Output QA in 1 pdf file
+
+    const Bool_t mIsEmbeddingOnly ;  /// Flag to draw QA for embedding or embedding + real data
+
     Bool_t mIsOpen ;          /// Flag for input files (true:successfully opened both embedding and real input files)
 
+    Bool_t mIsPNGOn ;         /// Print *.png file if true (default is false)
     Bool_t mIsGIFOn ;         /// Print *.gif file if true (default is false)
     Bool_t mIsJPGOn ;         /// Print *.jpg file if true (default is false)
     Bool_t mIsEPSOn ;         /// Print *.eps file if true (default is false)
@@ -190,14 +226,10 @@ class StEmbeddingQADraw {
     TString mOutputFigureDirectory ; /// Figure directory (default is current directory)
 
     std::vector<Int_t> mDaughterGeantId ; /// Daughter geant id
+    std::vector<Int_t> mMcGeantId ;       /// MC geant id
 
     ClassDef(StEmbeddingQADraw, 1)
 };
-
-inline void StEmbeddingQADraw::setGIFOn() { mIsGIFOn = kTRUE ; }
-inline void StEmbeddingQADraw::setJPGOn() { mIsJPGOn = kTRUE ; }
-inline void StEmbeddingQADraw::setEPSOn() { mIsEPSOn = kTRUE ; }
-inline void StEmbeddingQADraw::setPSOn()  { mIsPSOn = kTRUE ; }
 
 inline Int_t StEmbeddingQADraw::getYear()               const { return mYear ; }
 inline const Char_t* StEmbeddingQADraw::getProduction() const { return mProduction.Data() ; }
