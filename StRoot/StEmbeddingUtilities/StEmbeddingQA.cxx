@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.6 2010/02/12 16:24:13 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.7 2010/02/16 02:13:34 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.7  2010/02/16 02:13:34  hmasui
+ * Add parent-parent geant id in the histogram name
+ *
  * Revision 1.6  2010/02/12 16:24:13  hmasui
  * Extend the range of vz to +/-150cm for vx(vy) vs vz histograms
  *
@@ -92,6 +95,8 @@ void StEmbeddingQA::clear()
   if ( mhdVz ) delete mhdVz ;
   if ( mhEventId ) delete mhEventId ;
   if ( mhRunNumber ) delete mhRunNumber ;
+
+  mGeantIdCollection.clear();
 
   /// Clear geantid histogram and all maps
   for(UInt_t ic=0; ic<StEmbeddingQAConst::mNCategory; ic++){
@@ -357,9 +362,11 @@ Bool_t StEmbeddingQA::fillEmbedding(const TString inputFileName)
       const Int_t nTrack = getNtrack(categoryid, *mMiniMcEvent) ;
       mhNParticles[categoryid]->Fill(nTrack);
 
-      if( ievent % 1000 == 0 ){
-        LOG_INFO << Form("####  event=%4d, category=%10s, ntrack=%10d",
-            ievent, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data(), nTrack)
+      const Int_t nevents = (Int_t)mhVz->GetEntries();
+      if( nevents % 100 == 0 && nTrack > 0 ){
+        LOG_INFO << Form("####  accept/throw=%10d/%10d, category=%10s, ntrack=%10d",
+            (Int_t)mhVzAccepted->GetEntries(), nevents, 
+            StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data(), nTrack)
           << endm;
       }
 
@@ -387,7 +394,9 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
 
   /// Loop over all events from muDst
   Int_t ievent = 0;
+  Int_t ieventAccept = 0;
   while( !mMuDstMaker->Make() ){ //read event
+    ievent++;
     StMuEvent* muEvent = mMuDstMaker->muDst()->event() ;
     if(!muEvent) continue ;
 
@@ -411,9 +420,9 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
     for(UInt_t ic=0; ic<StEmbeddingQAConst::mNReal; ic++){
       const Int_t categoryid = ic + StEmbeddingQAConst::mNEmbedding ;
 
-      if( ievent % 1000 == 0 ){
-        LOG_INFO << Form("%85s ####  event=%4d, category=%10s",
-            mMuDstMaker->GetFileName(), ievent, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data())
+      if( ievent % 100 == 0 ){
+        LOG_INFO << Form("%85s ####  accept/throw=%10d/%10d, category=%10s",
+            mMuDstMaker->GetFileName(), ieventAccept, ievent, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data())
           << endm;
       }
 
@@ -430,7 +439,7 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
       }
     }
 
-    ievent++;
+    ieventAccept++;
   }// event loop
 
   LOG_INFO << "End of real data" << endm;
@@ -456,15 +465,16 @@ Bool_t StEmbeddingQA::runRealData(const TString inputFileList)
   for(UInt_t ic=0; ic<StEmbeddingQAConst::mNReal; ic++){
     const Int_t categoryid = ic + StEmbeddingQAConst::mNEmbedding ;
 
-    const Short_t parentid = 0 ; // real tracks are assumed to be primary
-    expandHistograms(categoryid, 2, parentid);
-    expandHistograms(categoryid, 3, parentid);
-    expandHistograms(categoryid, 8, parentid);
-    expandHistograms(categoryid, 9, parentid);
-    expandHistograms(categoryid, 11, parentid);
-    expandHistograms(categoryid, 12, parentid);
-    expandHistograms(categoryid, 14, parentid);
-    expandHistograms(categoryid, 15, parentid);
+    const Short_t parentid = 0 ;       // real tracks are assumed to be primary
+    const Short_t parentparentid = 0 ; // real tracks are assumed to be primary
+    expandHistograms(categoryid, 2, parentid, parentparentid);
+    expandHistograms(categoryid, 3, parentid, parentparentid);
+    expandHistograms(categoryid, 8, parentid, parentparentid);
+    expandHistograms(categoryid, 9, parentid, parentparentid);
+    expandHistograms(categoryid, 11, parentid, parentparentid);
+    expandHistograms(categoryid, 12, parentid, parentparentid);
+    expandHistograms(categoryid, 14, parentid, parentparentid);
+    expandHistograms(categoryid, 15, parentid, parentparentid);
 
     // Make sure the input particle list
     for(vector<Short_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
@@ -647,7 +657,7 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
   /// Check geant id
   ///   if it's new, expands the histogram array for it
   ///   if it has already exist, do nothing
-  expandHistograms(categoryid, geantid, track.getParentGeantId());
+  expandHistograms(categoryid, geantid, track.getParentGeantId(), track.getParentParentGeantId());
 
   // Fill geant id
   mhGeantId[categoryid]->Fill(track.getGeantId());
@@ -708,15 +718,31 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t geantid)
+Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t geantid, const Short_t parentid,
+    const Short_t parentparentid)
 {
   /// Add geantid if it's new. If we have already had input geantid in the array, do nothing.
+  StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
 
+  const Bool_t isContaminated = utility->isContaminated(utility->getCategoryName(categoryid)) ;
+
+  Bool_t isOk = kFALSE ;
   if ( mGeantId[categoryid].empty() ){
     /// Push back a new geantid if geantid array is empty
-    LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  geantid = %5d (%10s)", 
-        geantid, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data()) << endm;
+    LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
+    LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   mGeantId[%d] is empty", categoryid) << endm;
+    if( isContaminated ){
+      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  (geant, parent, parent-parent) = (%4d, %4d, %4d)",
+          geantid, parentid, parentparentid, utility->getCategoryName(categoryid).Data()) << endm;
+    }
+    else{
+      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  geantid = %5d (%10s)", 
+          geantid, utility->getCategoryName(categoryid).Data()) << endm;
+    }
+    LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
     mGeantId[categoryid].push_back(geantid);
+
+    isOk = kTRUE ;
   }
   else{
     /// Expand histogrm by checking the geant id
@@ -726,26 +752,78 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
  
     if ( iter != mGeantId[categoryid].end() ){
       /// Geant id already exist. do nothing
-      return kFALSE;
+      isOk = kFALSE;
     }
     else{
       /// Find a new geant id, store id in mGeantId array
-      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  geantid = %5d (%10s)", 
-          geantid, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data()) << endm;
+      if( isContaminated ){
+        LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  (geant, parent, parent-parent) = (%4d, %4d, %4d)",
+            geantid, parentid, parentparentid, utility->getCategoryName(categoryid).Data()) << endm;
+      }
+      else{
+        LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  geantid = %5d (%10s)", 
+            geantid, utility->getCategoryName(categoryid).Data()) << endm;
+      }
       mGeantId[categoryid].push_back(geantid);
+
+      isOk = kTRUE ;
     }
   }
 
-  return kTRUE ;
+  /// Return here if track != Contaminated pairs
+  if( !utility->isContaminated(utility->getCategoryName(categoryid)) ) return isOk ;
+
+  /// Check the parent and parent-parent geantid
+  ///   if they are new, add them into the map
+  ///   if they have already exist, do nothing
+
+  /// Skip if parentid == 0
+  isOk = kFALSE ;
+  if( parentid == 0 ){
+    isOk = kFALSE ;
+  }
+  else{
+    TString idcollection(Form("%d_%d_%d", parentparentid, parentid, geantid));
+
+    if( mGeantIdCollection.empty() ){
+      /// Push back a new id collection if the array is empty
+      LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
+      LOG_INFO << "StEmbeddingQA::pushBackGeantId()  mGeantIdCollection is empty." << endm;
+      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Push back             (geant, parent, parent-parent) = (%4d, %4d, %4d)", 
+          geantid, parentid, parentparentid) << endm;
+      LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
+
+      mGeantIdCollection.push_back( idcollection );
+      return kTRUE ;
+    }
+
+    /// Make sure the combination (parent-parent, parent, geantid) has already been added in the array
+    const vector<TString>::iterator iterIdCollection = find(mGeantIdCollection.begin(), mGeantIdCollection.end(), idcollection) ;
+    if ( iterIdCollection != mGeantIdCollection.end() ){
+      /// id collection already exists. do nothing
+      isOk = kFALSE;
+    }
+    else{
+      /// Push back a new id collection
+      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Push back             (geant, parent, parent-parent) = (%4d, %4d, %4d)", 
+          geantid, parentid, parentparentid) << endm;
+      mGeantIdCollection.push_back( idcollection );
+
+      isOk = kTRUE ;
+    }
+  }// parentid != 0
+
+  return isOk ;
 }
 
 
 //__________________________________________________________________________________________
-void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geantid, const Short_t parentid)
+void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geantid, const Short_t parentid,
+    const Short_t parentparentid)
 {
   /// Push back geant id if the input geantid is new (return true)
   /// If the input geant id has already stored in mGeantId array, do nothing (return false)
-  if ( !pushBackGeantId(categoryid, geantid) ) return ;
+  if ( !pushBackGeantId(categoryid, geantid, parentid, parentparentid) ) return ;
 
   // Expand histograms
   mOutput->cd();
@@ -762,13 +840,22 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
   const Char_t* categoryTitle(utility->getCategoryTitle(categoryid).Data());
 
-  /// Suffix for each histogram. Put parentid if we have decay daughters
-  const TString nameSuffix = (parentid>0) ? Form("_%d_%d_%d", categoryid, parentid, geantid) : Form("_%d_%d", categoryid, geantid);
+  /// Suffix for each histogram. Put parent-parentid and parentid if we have decay daughters
+  const TString nameSuffix = (parentid>0) ? Form("_%d_%d_%d_%d", categoryid, parentparentid, parentid, geantid)
+    : Form("_%d_%d", categoryid, geantid);
 
   /// Category title and particle name put in the histogram title
-  const TString CategoryAndGeantId = (parentid>0) ?  Form("%s (%s from %s)", categoryTitle, 
-      table->findParticleByGeantId(geantid)->name().c_str(), table->findParticleByGeantId(parentid)->name().c_str())
+  TString CategoryAndGeantId = (parentid>0) ?  Form("%s (%s #rightarrow %s)", categoryTitle, 
+      table->findParticleByGeantId(parentid)->name().c_str(), table->findParticleByGeantId(geantid)->name().c_str())
     : Form("%s (%s)", categoryTitle, table->findParticleByGeantId(geantid)->name().c_str());
+
+  if ( parentparentid > 0 ){
+    CategoryAndGeantId = Form("%s (%s #rightarrow %s #rightarrow %s)", categoryTitle,
+        table->findParticleByGeantId(parentparentid)->name().c_str(),
+        table->findParticleByGeantId(parentid)->name().c_str(),
+        table->findParticleByGeantId(geantid)->name().c_str());
+  }
+
 
   const TString categoryName(utility->getCategoryName(categoryid));
   const Bool_t isMc        = utility->isMc(categoryName);
