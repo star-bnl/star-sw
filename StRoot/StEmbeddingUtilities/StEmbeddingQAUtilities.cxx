@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.5 2009/12/22 21:37:54 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.6 2010/02/16 02:10:46 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.6  2010/02/16 02:10:46  hmasui
+ * Add TStyle date attributes
+ *
  * Revision 1.5  2009/12/22 21:37:54  hmasui
  * Add comments for functions and members
  *
@@ -317,6 +320,12 @@ void StEmbeddingQAUtilities::setStyle() const
   //_______________________________________________________________
   /// Set Legend border size (=0)
   gStyle->SetLegendBorderSize(0);
+
+  /// Set date attributes
+  gStyle->SetOptDate(3);
+  gStyle->GetAttDate()->SetTextFont(52);
+  gStyle->GetAttDate()->SetTextColor(10);
+  gStyle->GetAttDate()->SetTextSize(0.03);
 }
 
 //____________________________________________________________________________________________________
