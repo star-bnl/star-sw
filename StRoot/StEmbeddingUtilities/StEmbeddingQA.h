@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.3 2010/01/28 21:50:37 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.4 2010/02/16 02:13:34 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.4  2010/02/16 02:13:34  hmasui
+ * Add parent-parent geant id in the histogram name
+ *
  * Revision 1.3  2010/01/28 21:50:37  hmasui
  * Add Vx vs Vz and Vy vs Vz histograms.
  *
@@ -104,10 +107,12 @@ class StEmbeddingQA {
     void fillHistograms(const StEmbeddingQATrack& track, const Int_t categoryid);
 
     /// Expand histograms if a new geantid is found in either MC or reconstructed track
-    void expandHistograms(const Int_t categoryid, const Short_t geantid, const Short_t parentid);
+    void expandHistograms(const Int_t categoryid, const Short_t geantid, const Short_t parentid,
+        const Short_t parentparentid);
 
     /// Push back a new geant id in mGeantId array
-    Bool_t pushBackGeantId(const Int_t categoryid, const Short_t geantid) ;
+    Bool_t pushBackGeantId(const Int_t categoryid, const Short_t geantid, const Short_t parentid,
+        const Short_t parentparentid) ;
 
     /// Z-vertex cut
     Bool_t isZVertexOk(const StMiniMcEvent& mcevent) const ;
@@ -145,6 +150,9 @@ class StEmbeddingQA {
     //  - Use MC momentum instead of reconstructed momentum (Update on Nov/13/2009)
     //  - Add p (reco) vs p (MC) (Update on Nov/13/2009)
     std::vector<Short_t> mGeantId[StEmbeddingQAConst::mNCategory] ; /// Geant id in both MC tracks and reconstructed pairs
+    std::vector<TString> mGeantIdCollection ;                       /// Array of (parent-parent id, parent id, geantid)
+                                                                    /// for Contaminated pairs only
+
     TH1* mhGeantId[StEmbeddingQAConst::mNCategory];                               /// Geant id
     std::map<Int_t, TH3*> mhNHit[StEmbeddingQAConst::mNCategory] ;                /// Nhit distribution vs eta vs pt
     std::map<Int_t, TH3*> mhDca[StEmbeddingQAConst::mNCategory] ;                 /// Dca vs eta vs pt
