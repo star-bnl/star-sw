@@ -41,7 +41,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.28 2010/01/26 19:47:25 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.29 2010/02/16 00:21:23 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -74,9 +74,9 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mTau(0),   mTimeBinWidth(0),
   I0(13.1),
   mCluster(3.2), tauGlobalOffSet(0), 
-  OmegaTauC(2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
-  transverseDiffusionConstant(0.0450), // L(0.0475), // K(0.0443),// J(0.040), // (0.049), // (0.0514), // (0.0623), 
-  longitudinalDiffusionConstant(0.0360),
+  OmegaTauC(3.02), //fit of data// (2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
+  transverseDiffusionConstant(0.0640), // fit of data // (0.0450) 
+  longitudinalDiffusionConstant(0.0570), // W from Howard's note /(0.0360),
   Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision with data
   Outer_wire_to_plane_couplingScale(5.0718e-01*1.43), //  -"-
   FanoFactor(0.3),
@@ -106,8 +106,8 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   tauF(394.0e-9), 
   //not used  tauFx(394.0e-9*3.16409e-01/5.60817e-01), 
   tauP(775.0e-9),
-  mSigmaJitterTI(0.40), // 0.32), // For tpx
-  mSigmaJitterTO(0.40), // 0.38), //  -"- 
+  mSigmaJitterTI(0.2), // (0.40), // 0.32), // For tpx
+  mSigmaJitterTO(0.2), // (0.40), // 0.38), //  -"- 
   mAltro(0),
   mCutEle(1e-4)
 {
@@ -359,9 +359,9 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
       mPadResponseFunctionOuter = new TF1("PadResponseFunctionOuter",
 					  StTpcRSMaker::PadResponseFunc,xminP,xmaxP,6); 
       params[0] = gStTpcDb->PadPlaneGeometry()->outerSectorPadWidth();                    // w = width of pad       
-      params[1] = gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation(); // h = Anode-Cathode gap   
-      params[2] = gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                         // s = wire spacing       
-      //      params[3] = gStTpcDb->WirePlaneGeometry()->anodeWireRadius();                        // a = Anode wire radius  
+      params[1] = gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation();// h = Anode-Cathode gap   
+      params[2] = gStTpcDb->WirePlaneGeometry()->anodeWirePitch();                        // s = wire spacing       
+      //      params[3] = gStTpcDb->WirePlaneGeometry()->anodeWireRadius();               // a = Anode wire radius  
       params[3] = K3OP;
       params[4] = 0;
       params[5] = gStTpcDb->PadPlaneGeometry()->outerSectorPadPitch();
@@ -406,8 +406,8 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   // tss
   
   W = St_tss_tssparC::instance()->ave_ion_pot()*GeV; // eV
-  Inner_wire_to_plane_coupling = St_tss_tssparC::instance()->wire_coupling_in() ;//0.90914;//0.81;//avr for 2 highest points// 0.774; // average for 3 points
-  Outer_wire_to_plane_coupling = St_tss_tssparC::instance()->wire_coupling_out();//1.01459;//1.02;//                        // 0.972;
+  Inner_wire_to_plane_coupling = St_tss_tssparC::instance()->wire_coupling_in() ;
+  Outer_wire_to_plane_coupling = St_tss_tssparC::instance()->wire_coupling_out();
   numberOfElectronsPerADCcount = St_tss_tssparC::instance()->scale();
   
   if (Debug()) Print();
@@ -492,10 +492,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       }
       sortedIndex++;
       if (tpc_hit->volume_id <= 0 || tpc_hit->volume_id > 1000000) continue;
-#if 0
-      Int_t isDet  = tpc_hit->volume_id/100000;
-      if (isDet) continue; // skip pseudo padrow
-#endif
       do {
 	Int_t iPadrow = volId%100;
 	Int_t Id         = tpc_hit->track_p;
@@ -781,14 +777,14 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    // Ground plane (1 mm spacing) focusing effect
 	    Int_t iGroundWire = (Int_t ) TMath::Abs(10.*dist2Grid);
 	    Double_t distFocused = TMath::Sign(0.05 + 0.1*iGroundWire, dist2Grid);
-	    Double_t tanLorentz = OmegaTau/1.2; //H;  F 1.47; // OmegaTau near wires taken from comparison with data
-	    //	    if (y < firstOuterSectorAnodeWire) tanLorentz = OmegaTau/1.4; // H
-	    if (y < firstOuterSectorAnodeWire) tanLorentz = OmegaTau/1.43; // I
+	    Double_t tanLorentz = OmegaTau/1.8; // OmegaTau near wires taken from comparison with data
+	    if (y < firstOuterSectorAnodeWire) tanLorentz = OmegaTau/2.145; 
 	    xOnWire += distFocused*tanLorentz; // tanLorentz near wires taken from comparison with data
 	    zOnWire += TMath::Abs(distFocused);
 	    zOnWire += tof*gStTpcDb->DriftVelocity(sector);
 	    if (! iGroundWire ) QAv *= TMath::Exp( alphaVariation);
 	    else                QAv *= TMath::Exp(-alphaVariation);
+
 	    for(Int_t row = rowMin; row <= rowMax; row++) {              
 	      StTpcLocalSectorCoordinate xyzW(xOnWire, yOnWire, zOnWire, sector, row);
 	      transform(xyzW,Pad,kTRUE,kFALSE); // use T0, don't use Tau
@@ -796,12 +792,27 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      Int_t binT = TMath::Nint(bin);
 	      if (binT < 0 || binT >= NoOfTimeBins) continue;
 	      Double_t dT = bin -  binT;
+#if 1
 	      if (sigmaJitterT) {
 		dT += gRandom->Gaus(0,sigmaJitterT);
 	      }
+#endif
 	      Double_t dely[1]           = {transform.yFromRow(row)-yOnWire};            
 	      Double_t localYDirectionCoupling = ChargeFraction->GetSave(dely);
 	      if(localYDirectionCoupling < minSignal) continue;
+	      // pre calculate time bin response
+	      TF1 *mShaperResponse = mShaperResponses[io][sector-1];
+	      Double_t tbksdEonPad[64]; memset (tbksdEonPad,  0, sizeof(tbksdEonPad));
+	      Double_t dt = dT;
+	      Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+mShaperResponse->GetXmin()-0.5));
+	      Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
+	      Int_t NTimeBins = 0;
+	      for(Int_t itbin = 0; itbin <= bin_high-bin_low; itbin++){
+		Double_t t = -dt + itbin;
+		tbksdEonPad[itbin] = QAv*localYDirectionCoupling*mShaperResponse->GetSave(&t);
+		NTimeBins++;
+		if (itbin > binT - bin_low && tbksdEonPad[itbin] < minSignal) break;
+	      }
 	      Float_t padX = Pad.pad();
 	      Int_t CentralPad = TMath::Nint(padX);
 	      if (CentralPad < 1) continue;
@@ -811,17 +822,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      Int_t padMin = TMath::Max(CentralPad - DeltaPad ,1);
 	      Int_t padMax = TMath::Min(CentralPad + DeltaPad ,PadsAtRow);
 	      //	      Double_t xPad = padMin - padX;
-	      TF1 *mShaperResponse = mShaperResponses[io][sector-1];
 	      for(Int_t pad = padMin; pad <= padMax; pad++) {
-		Double_t dt = dT;
 		Double_t gain = 1;
 		if (! TESTBIT(m_Mode, kGAINOAtALL)) { 
 		  Double_t gain   = St_tpcPadGainT0C::instance()->Gain(sector,row,pad);
 		  if (gain <= 0.0) continue;
-#if 0
-		  // Have been done in transform(xyzW,Pad,kTRUE,kFALSE); 
-		  dt -= St_tpcPadGainT0C::instance()->T0(sector,row,pad);
-#endif
 		}
 		Double_t xPad = pad - padX;
 		Double_t xpad[1] = {xPad};
@@ -829,13 +834,9 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 		if (localXDirectionCoupling < minSignal) continue;
 		Double_t XYcoupling = localYDirectionCoupling*localXDirectionCoupling;
 		if(XYcoupling < minSignal)  continue;
-		Int_t bin_low  = TMath::Max(0             ,binT + TMath::Nint(dt+mShaperResponse->GetXmin()-0.5));
-		Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
 		Int_t index = NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin_low;
-		for(Int_t itbin=bin_low;itbin<=bin_high;itbin++, index++){
-		  Double_t t = -dt + (Double_t)(itbin - binT);
-		  Double_t signal = XYcoupling*QAv*mShaperResponse->GetSave(&t);
-		  //		  if (TMath::Abs(signal) < minSignal) continue; // Remember tail could be negative
+		for(Int_t itbin = 0;itbin <= NTimeBins;itbin++, index++){
+		  Double_t signal = localXDirectionCoupling*tbksdEonPad[itbin];
 		  TotalSignal += signal;
 		  SignalSum[index].Sum += signal;
 #ifdef __ClusterProfile__
@@ -1324,8 +1325,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.28 2010/01/26 19:47:25 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.29 2010/02/16 00:21:23 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.29  2010/02/16 00:21:23  fisyak
+// Speed up by a factor 3.5 by ignoring individual pad T0
+//
 // Revision 1.28  2010/01/26 19:47:25  fisyak
 // Include dE/dx calibration and distortions in the simulation
 //
