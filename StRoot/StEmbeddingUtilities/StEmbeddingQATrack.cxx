@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.7 2010/02/12 16:24:54 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.8 2010/02/16 02:11:49 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.8  2010/02/16 02:11:49  hmasui
+ * Add parent-parent geantid
+ *
  * Revision 1.7  2010/02/12 16:24:54  hmasui
  * Fix the primary vertex subtraction for nhit
  *
@@ -38,7 +41,7 @@ ClassImp(StEmbeddingQATrack)
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack()
-  : mNCommonHit(-10), mParentGeantId(-10), mGeantId(-10), mNHit(-10), mNHitPoss(-10), mCharge(-10),
+  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(-10), mGeantId(-10), mNHit(-10), mNHitPoss(-10), mCharge(-10),
   mVectorMc(-9999., -9999., -9999., -9999.),
   mVectorRc(-9999., -9999., -9999., -9999.),
   mPhi(-9999.), mdEdx(-9999.), mDcaGl(-9999.), 
@@ -50,7 +53,7 @@ StEmbeddingQATrack::StEmbeddingQATrack()
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StTinyMcTrack& track)
-  : mNCommonHit(-10), mParentGeantId(track.parentGeantId()), mGeantId(track.geantId()), 
+  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(track.parentGeantId()), mGeantId(track.geantId()), 
   mNHit(track.nHitMc()), mNHitPoss(-10), mCharge(track.chargeMc()),
   mVectorMc(track.pxMc(), track.pyMc(), track.pzMc(), 
       TMath::Sqrt(track.pMc()*track.pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track.geantId())->mass(),2.0))),
@@ -65,7 +68,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StTinyMcTrack& 
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
-  : mNCommonHit(track->commonHits()), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
+  : mNCommonHit(track->commonHits()), mParentParentGeantId(-10), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
   mNHit(track->fitPts()), mNHitPoss(track->nPossiblePts()), mCharge(track->charge()),
   mVectorMc(track->pxMc(), track->pyMc(), track->pzMc(), 
       TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
@@ -81,7 +84,8 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
-  : mNCommonHit(track->commonHits()), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
+  : mNCommonHit(track->commonHits()), 
+  mParentParentGeantId(track->mParentParentGeantId), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
   mNHit(track->fitPts()), mNHitPoss(track->nPossiblePts()), mCharge(track->charge()),
   mVectorMc(track->pxMc(), track->pyMc(), track->pzMc(), 
       TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
@@ -93,11 +97,12 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
 {
   /// Constructor for Contaminated pairs (StContamPair)
   /// No Nsigma informations
+  /// Implement parent-parent geantid 
 }
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Short_t geantid)
-  : mNCommonHit(-10), mParentGeantId(-10), mGeantId(geantid),
+  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(-10), mGeantId(geantid),
   mNHit(track.nHitsFit(kTpcId)), mNHitPoss(track.nHitsPoss(kTpcId)), mCharge(track.charge()),
   mVectorMc(-9999., -9999., -9999., -9999.), // No MC momentum for real tracks
   mVectorRc(track.p().x(), track.p().y(), track.p().z(), 

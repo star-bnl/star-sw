@@ -3,8 +3,11 @@
 //    Store relevant track informations for the embedding/real data QA
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.h,v 1.5 2009/12/22 21:39:31 hmasui Exp $
+ * $Id: StEmbeddingQATrack.h,v 1.6 2010/02/16 02:11:49 hmasui Exp $
  * $Log: StEmbeddingQATrack.h,v $
+ * Revision 1.6  2010/02/16 02:11:49  hmasui
+ * Add parent-parent geantid
+ *
  * Revision 1.5  2009/12/22 21:39:31  hmasui
  * Add comments for functions and members
  *
@@ -58,12 +61,13 @@ class StEmbeddingQATrack {
     StLorentzVectorD getVectorMc() const ; /// Get MC 4-momentum
     StLorentzVectorD getVectorRc() const ; /// Get reconstructed 4-momentum
 
-    Short_t getNCommonHit()    const ; /// Get number of common hits
-    Short_t getParentGeantId() const ; /// Get parent geant id
-    Short_t getGeantId()       const ; /// Get geant id
-    Short_t getNHit()          const ; /// Get number of fit points
-    Short_t getNHitPoss()      const ; /// Get maximum number of fit points
-    Short_t getCharge()        const ; /// Get charge
+    Short_t getNCommonHit()          const ; /// Get number of common hits
+    Short_t getParentParentGeantId() const ; /// Get parent geant id
+    Short_t getParentGeantId()       const ; /// Get parent geant id
+    Short_t getGeantId()             const ; /// Get geant id
+    Short_t getNHit()                const ; /// Get number of fit points
+    Short_t getNHitPoss()            const ; /// Get maximum number of fit points
+    Short_t getCharge()              const ; /// Get charge
 
     Double_t getMassMc()         const ; /// Get MC particle mass
     Float_t getPtMc()            const ; /// Get MC transverse momentum
@@ -105,33 +109,35 @@ class StEmbeddingQATrack {
     static const Float_t kDcaCut ;     /// Dca cut
     static const Double_t kNSigmaCut ; /// NSigma cut
 
-    const Short_t mNCommonHit ;        /// Number of common hits
-    const Short_t mParentGeantId ;     /// Parent geant id
-    const Short_t mGeantId ;           /// geant id
-    const Short_t mNHit ;              /// Number of fit points
-    const Short_t mNHitPoss ;          /// Number of maximum fit points
-    const Short_t mCharge ;            /// Charge
-    const StLorentzVectorD mVectorMc ; /// MC 4-momentum
-    const StLorentzVectorD mVectorRc ; /// Reconstructed 4-momentum
-    const Float_t mPhi ;               /// Azimuthal angle
-    const Float_t mdEdx ;              /// dE/dx
-    const Float_t mDcaGl ;             /// Global dca
-    const Double_t mNSigmaElectron ;   /// Nsigma for electrons/positrons
-    const Double_t mNSigmaPion ;       /// Nsigma for pions
-    const Double_t mNSigmaKaon ;       /// Nsigma for kaons
-    const Double_t mNSigmaProton ;     /// Nsigma for protons/anti-protons
+    const Short_t mNCommonHit ;           /// Number of common hits
+    const Short_t mParentParentGeantId ;  /// Parent-parent geant id
+    const Short_t mParentGeantId ;        /// Parent geant id
+    const Short_t mGeantId ;              /// geant id
+    const Short_t mNHit ;                 /// Number of fit points
+    const Short_t mNHitPoss ;             /// Number of maximum fit points
+    const Short_t mCharge ;               /// Charge
+    const StLorentzVectorD mVectorMc ;    /// MC 4-momentum
+    const StLorentzVectorD mVectorRc ;    /// Reconstructed 4-momentum
+    const Float_t mPhi ;                  /// Azimuthal angle
+    const Float_t mdEdx ;                 /// dE/dx
+    const Float_t mDcaGl ;                /// Global dca
+    const Double_t mNSigmaElectron ;      /// Nsigma for electrons/positrons
+    const Double_t mNSigmaPion ;          /// Nsigma for pions
+    const Double_t mNSigmaKaon ;          /// Nsigma for kaons
+    const Double_t mNSigmaProton ;        /// Nsigma for protons/anti-protons
 
     TString mName ; /// Track name
 
     ClassDef(StEmbeddingQATrack, 1)
 };
 
-inline Short_t StEmbeddingQATrack::getNCommonHit()    const { return mNCommonHit ; }
-inline Short_t StEmbeddingQATrack::getParentGeantId() const { return mParentGeantId ; }
-inline Short_t StEmbeddingQATrack::getGeantId()       const { return mGeantId ; }
-inline Short_t StEmbeddingQATrack::getNHit()          const { return mNHit ; }
-inline Short_t StEmbeddingQATrack::getNHitPoss()      const { return mNHitPoss ; }
-inline Short_t StEmbeddingQATrack::getCharge()        const { return mCharge ; }
+inline Short_t StEmbeddingQATrack::getNCommonHit()          const { return mNCommonHit ; }
+inline Short_t StEmbeddingQATrack::getParentParentGeantId() const { return mParentParentGeantId ; }
+inline Short_t StEmbeddingQATrack::getParentGeantId()       const { return mParentGeantId ; }
+inline Short_t StEmbeddingQATrack::getGeantId()             const { return mGeantId ; }
+inline Short_t StEmbeddingQATrack::getNHit()                const { return mNHit ; }
+inline Short_t StEmbeddingQATrack::getNHitPoss()            const { return mNHitPoss ; }
+inline Short_t StEmbeddingQATrack::getCharge()              const { return mCharge ; }
 
 inline Double_t StEmbeddingQATrack::getMassMc()       const { return mVectorMc.m() ; }
 inline Float_t StEmbeddingQATrack::getPMc()           const { return mVectorMc.vect().mag() ; }
