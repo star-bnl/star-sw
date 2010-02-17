@@ -1,5 +1,0 @@
-# $Id $
-# package g2t
-# author: 
-#Library:libg2t.so:LIBS +=   -lgeant3  -lminicern
-#Library:libSt_g2t.so:LIBS +=   -lgeant3  -lminicern
