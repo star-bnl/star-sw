@@ -189,8 +189,8 @@ class StiKalmanTrack : public StiTrack
     */
    int getMaxPointCount(int detectorId=0) const;
 
-   int getSeedHitCount() const;
-   void setSeedHitCount(int c);
+   UShort_t getSeedHitCount() const {return mSeedHitCount;}
+   void   setSeedHitCount(UShort_t c) {mSeedHitCount=c;}
 
   /*!
    * Identifies the track as a primary or secondary track. The track
@@ -301,7 +301,7 @@ protected:
   StiKalmanTrackNode * firstNode;
   StiKalmanTrackNode * lastNode;
 
-  int     mSeedHitCount; //number of points used to seed the track
+  UShort_t  mSeedHitCount; //number of points used to seed the track (seed quality)
   int     mVertex;
   long    mFlag;         //A flag to pack w/ topo info
   double  m;             // mass hypothesis
@@ -319,16 +319,6 @@ protected:
 inline double  StiKalmanTrack::getMass() const
 { 
   return m;  
-}
-
-inline int StiKalmanTrack::getSeedHitCount() const
-{
-  return mSeedHitCount;
-}
-
-inline void StiKalmanTrack::setSeedHitCount(int c) 
-{
-  mSeedHitCount=c;
 }
 
 inline void StiKalmanTrack::setFlag(long v) 

@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.116 2009/10/18 22:49:52 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.116 2009/10/18 22:49:52 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.117 2010/02/17 14:28:07 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.117 2010/02/17 14:28:07 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.117  2010/02/17 14:28:07  fisyak
+ * Add seed quality information
+ *
  * Revision 2.116  2009/10/18 22:49:52  perev
  * remove STAR LOG in print()
  *
@@ -471,8 +474,9 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
   reset();
   //StiKalmanTrackNode * node  = 0;
   const StiDetector* detector=0;
-  int nhits = hits.size();
-  for (int ihit=0;ihit<nhits;ihit++)
+  UInt_t nhits = hits.size();
+  setSeedHitCount(nhits);
+  for (UInt_t ihit=0;ihit<nhits;ihit++)
   {
     StiHit *hit = hits[ihit];
     detector = hit->detector();

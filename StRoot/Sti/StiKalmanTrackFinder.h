@@ -39,6 +39,8 @@ public:
   /// Set timing of tracking
           void setTiming();
   /// Find all tracks of the currently loaded event
+  virtual void findTpcTracks(); 
+  virtual void findAllTracks(); 
   virtual void findTracks(); 
   /// Find/extend the given track, in the given direction
           bool find(StiTrack *track, int direction, double rmin=0);
@@ -63,6 +65,7 @@ public:
   virtual void clear();
   /// Finish the tracker
   virtual void finish() const;
+  virtual Int_t Fit(StiKalmanTrack *track, Double_t rMin=0);
   /// Get the track filter currently used by the tracker
   virtual Filter<StiTrack> * getTrackFilter();
   /// Get the vertex finder used by this track finder
