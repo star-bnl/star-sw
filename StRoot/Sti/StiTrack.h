@@ -110,8 +110,8 @@ public:
   virtual int     getGapCount() const=0;
   virtual int     getMaxPointCount(int detectorId=0) const=0;
   /// number of hits used to seed the track
-  virtual int     getSeedHitCount() const =0;
-  virtual void    setSeedHitCount(int c)=0;
+  virtual UShort_t     getSeedHitCount() const =0;
+  virtual void    setSeedHitCount(UShort_t c)=0;
   virtual double  getTrackLength() const=0;
   virtual vector<const StMeasuredPoint*> stHits() const=0;
   /// Get mass of the particle that produced this track

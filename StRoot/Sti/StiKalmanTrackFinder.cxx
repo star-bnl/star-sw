@@ -39,7 +39,11 @@ using namespace std;
 #include "StiUtilities/StiDebug.h"
 #include "StDetectorDbMaker/StiKalmanTrackFinderParameters.h"
 #include "StMessMgr.h"
-
+#include "StTpcHit.h"
+//#define __CA_Gorbunov__
+#ifdef __CA_Gorbunov__
+#include "StiTpcSeedFinder.h"
+#endif
 #define TIME_StiKalmanTrackFinder
 #ifdef TIME_StiKalmanTrackFinder
 #include "Sti/StiTimer.h"
@@ -167,7 +171,17 @@ void StiKalmanTrackFinder::findTracks()
   _trackSeedFinder->reset();
   _trackContainer->clear();
   if (_trackFilter) _trackFilter->reset();
-
+  findTpcTracks(); // find track starting with TPC (CA seed finder)
+  findAllTracks(); // find track left
+}
+//________________________________________________________________________________
+void StiKalmanTrackFinder::findTpcTracks() {
+#ifdef __CA_Gorbunov__
+  StiTpcSeedFinder::findTpcTracks();
+#endif
+}
+//________________________________________________________________________________
+void StiKalmanTrackFinder::findAllTracks() {
 #ifdef ASSIGNVP
   vpAssign = 1;
   if (!gTAssign) { gTAssign = new TAssign(); gTAssMtx = new TAssMtxObj();}
@@ -199,15 +213,56 @@ void StiKalmanTrackFinder::findTracks()
 //  _trackContainer->sort();
 //  extendTracks( 0.);
 }
-
-
+//________________________________________________________________________________
+Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
+  Int_t nTSeed=0,nTAdd=0,nTFail=0,nTFilt=0,extend=0,status;
+  Int_t nTpcHits=0,nSvtHits=0,nSsdHits=0,nIstHits=0,nPxlHits=0;
+  Int_t iBreak=1; 
+  do { //technical do
+    track->setFlag(-1);
+    status = track->approx(0); 
+    if (status ) 	{nTSeed++; break;}
+    status = track->fit(kOutsideIn);
+    if (status ) 	{nTSeed++; break;}
+    extend = extendTrack(track,rMin);
+    if (extend<=0)	{nTFail++; break;}
+    if (_trackFilter && (!_trackFilter->filter(track))) {nTFilt++;break;}
+    //cout << "  ++++++++++++++++++++++++++++++ Adding Track"<<endl;
+    //		Add DCA node
+    StiHit dcaHit; dcaHit.makeDca();
+    StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
+    if (extenDca) {
+      track->add(extenDca,kOutsideIn);
+      if (debug() >= 1) StiKalmanTrackNode::PrintStep();
+    }
+    //		End DCA node
+    track->reduce();
+    nTAdd++;
+    track->setFlag(1);
+    _trackContainer->push_back(track);
+    track->setId(_trackContainer->size());
+    track->reserveHits();
+    nTpcHits+=track->getFitPointCount(kTpcId);
+    nSvtHits+=track->getFitPointCount(kSvtId);
+    nSsdHits+=track->getFitPointCount(kSsdId);
+    nIstHits+=track->getFitPointCount(kIstId);
+    nPxlHits+=track->getFitPointCount(kPxlId);
+    //cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
+    LOG_DEBUG << Form("StiKalmanTrackFinder::Fit:nbSeed=%d nTFail=%d nTFilt=%d nTAdd=%d", 
+		      nTSeed,nTFail,nTFilt,nTAdd) << endm;
+    LOG_DEBUG << Form("StiKalmanTrackFinder::Fit:nTpcHits=%d nSvtHits=%d  nSsdHits=%d nPxlHits=%d nIstHits=%d",
+		      nTpcHits,nSvtHits,nSsdHits,nPxlHits,nIstHits)
+	      << endm;
+  } while((iBreak=0));
+  if (iBreak) BFactory::Free(track);
+  return iBreak;
+}
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendSeeds(double rMin)
 {
-static int nCall=0;nCall++;
+  static int nCall=0;nCall++;
   StiKalmanTrack *track;
-  int nTTot=0,nTSeed=0,nTAdd=0,nTFail=0,nTFilt=0,extend=0,status;
-  int nTpcHits=0,nSvtHits=0,nSsdHits=0,nIstHits=0,nPxlHits=0;
+  Int_t nTTot=0;
 
   while (true ){
 // 		obtain track seed from seed finder
@@ -218,49 +273,11 @@ static int nCall=0;nCall++;
 
     if (mTimg[kSeedTimg]) mTimg[kSeedTimg]->Stop();
     if (!track) break; // no more seeds
-      nTTot++;
-      int iBreak=1;
-      if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
-      do { //technical do
-        track->setFlag(-1);
-        status = track->approx(0); 
-        if (status ) 	{nTSeed++; break;}
-        status = track->fit(kOutsideIn);
-        if (status ) 	{nTSeed++; break;}
-        extend = extendTrack(track,rMin);
-        if (extend<=0)	{nTFail++; break;}
-        if (_trackFilter && (!_trackFilter->filter(track))) {nTFilt++;break;}
-	//cout << "  ++++++++++++++++++++++++++++++ Adding Track"<<endl;
-//		Add DCA node
-        StiHit dcaHit; dcaHit.makeDca();
-        StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
-        if (extenDca) {
-	  track->add(extenDca,kOutsideIn);
-	  if (debug() >= 1) StiKalmanTrackNode::PrintStep();
-	}
-//		End DCA node
-        track->reduce();
-        nTAdd++;
-        track->setFlag(1);
-        _trackContainer->push_back(track);
-        track->setId(_trackContainer->size());
-        track->reserveHits();
-        nTpcHits+=track->getFitPointCount(kTpcId);
-        nSvtHits+=track->getFitPointCount(kSvtId);
-        nSsdHits+=track->getFitPointCount(kSsdId);
-        nIstHits+=track->getFitPointCount(kIstId);
-        nPxlHits+=track->getFitPointCount(kPxlId);
-	//cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
-      }while((iBreak=0));
-      if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
-      if (!iBreak) continue;
-      BFactory::Free(track);
-    }
-   LOG_DEBUG << Form("***extendSeeds***:nTTot=%d nbSeed=%d nTFail=%d nTFilt=%d nTAdd=%d", 
-     nTTot,nTSeed,nTFail,nTFilt,nTAdd) << endm;
-   LOG_DEBUG << Form("***extendSeeds***:nTpcHits=%d nSvtHits=%d  nSsdHits=%d nPxlHits=%d nIstHits=%d",
-	nTpcHits,nSvtHits,nSsdHits,nPxlHits,nIstHits)
-   << endm;
+    nTTot++;
+    if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
+    Fit(track,rMin);
+    if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
+  }
 }
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracks(double rMin)
