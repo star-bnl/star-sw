@@ -135,7 +135,7 @@ int rtsLogUnix_v(const char *str, ...)
 		}
 
 	
-		cmd_l = NULL ;
+		cmd_l = 0 ;
 
 		sockAddrSize = sizeof(struct sockaddr_in) ; 
 		memset((char *)&serverAddr,0,sockAddrSize) ;
@@ -312,7 +312,7 @@ static char *getCmd(void)
 	file = fopen("/proc/self/cmdline","r") ;
 	if(file==NULL) return str ;
 
-	fscanf(file,"%s",name) ;
+	fscanf(file,"%120s",name) ;	/* make sure we don't overwrite name */
 	fclose(file) ;
 
 	if((ptr = strrchr(name,'/'))) {
