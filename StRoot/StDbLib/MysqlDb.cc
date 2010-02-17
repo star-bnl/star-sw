@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.52 2009/11/23 14:36:24 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.53 2010/02/17 23:39:26 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.53  2010/02/17 23:39:26  dmitry
+ * indirect log info added
+ *
  * Revision 1.52  2009/11/23 14:36:24  dmitry
  * tiny fix: LB will now obey Logger commands
  *
@@ -213,6 +216,12 @@
 #include "stdb_streams.h"
 #include "StDbDefaults.hh"
 #include "StDbManagerImpl.hh"
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <string>
+
 #include <cassert>
 #include <ctime>
 
@@ -518,14 +527,30 @@ return true;
 bool MysqlDb::ExecQuery(){
 #define __METHOD__ "ExecQuery()"
 
-mqueryState=false;
+  struct passwd *pwd = 0;
+  pwd = getpwuid(geteuid());
+  std::string sysusername = "N/A";
+  if (pwd) {
+    sysusername = pwd->pw_name;
+  }
 
-// cout<<"MysqlDb::ExecQuery() ";
-// cout<<mQuery<<endl;
+  std::string mQ(mQuery,mQueryLen);
+  mQ.append(" /* RUSR: "); // real user name
+  mQ.append(sysusername);
+  mQ.append(" | SUSR: "); // set user name
+  if (mdbuser) {
+    mQ.append(mdbuser);
+  } else {
+	mQ.append("N/A");
+  }
+  mQ.append(" */"); 
+
+mqueryState=false;
 
 if(mlogTime)mqueryLog.start();
 
-int status=mysql_real_query(&mData,mQuery,mQueryLen);
+//int status=mysql_real_query(&mData,mQuery,mQueryLen);
+  int status=mysql_real_query(&mData,mQ.c_str(), mQ.size());
 
   if( (status!=0) && ( mysql_errno(&mData)==CR_SERVER_GONE_ERROR || mysql_errno(&mData)==CR_SERVER_LOST ) ){
        StDbManager::Instance()->printInfo(mysql_error(&mData)," Lost server, will try to reconnect",dbMDebug,__LINE__,__CLASS__,__METHOD__); 
