@@ -8,10 +8,12 @@
 #include <utility>
 #include <vector>
 #include <set>
+#include <map>
 #include "TDatime.h"
 
 using std::pair;
 using std::vector;
+using std::map;
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
@@ -207,7 +209,7 @@ public:
   
   void setHList(TObjArray * x){mHList=x;}
 
-  // Use these setters to overwrite thresholds from the database
+  // Use these setters to overwrite thresholds from the database (2009)
   void setBarrelJetPatchTh0(int value) { mBarrelJetPatchTh[0] = value; }
   void setBarrelJetPatchTh1(int value) { mBarrelJetPatchTh[1] = value; }
   void setBarrelJetPatchTh2(int value) { mBarrelJetPatchTh[2] = value; }
@@ -216,6 +218,17 @@ public:
   void setBarrelHighTowerTh1(int value) { mBarrelHighTowerTh[1] = value; }
   void setBarrelHighTowerTh2(int value) { mBarrelHighTowerTh[2] = value; }
   void setBarrelHighTowerTh3(int value) { mBarrelHighTowerTh[3] = value; }
+
+  int getBarrelJetPatchTh0() const;
+  int getBarrelJetPatchTh1() const;
+  int getBarrelJetPatchTh2() const;
+
+  int getBarrelHighTowerTh0() const;
+  int getBarrelHighTowerTh1() const;
+  int getBarrelHighTowerTh2() const;
+
+  int getBarrelJetPatchThreshold(int trigId) const;
+  int getBarrelJetPatchAdc(int jp) const;
   
   public:
   enum {kOnline=1, kOffline, kExpert};
@@ -257,6 +270,7 @@ public:
   const vector< pair<int, int> > getTowersAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getTriggerPatchesAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getJetPatchesAboveThreshold(int trigId) const;
+  map<int,int> getBarrelJetPatchesAboveThreshold(int trigId) const;
 
   //access to HT,TP,JP thresholds
   int getTowerThreshold(int trigId, int dsmid) const;

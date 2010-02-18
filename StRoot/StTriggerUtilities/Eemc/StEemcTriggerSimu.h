@@ -4,8 +4,10 @@
 #ifndef STAR_StEemcTriggerSimu
 #define STAR_StEemcTriggerSimu
 
-#include <TObject.h> 
-#include <vector>
+#include <TObject.h>
+#include <map>
+
+using std::map;
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 
@@ -126,13 +128,28 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   void connectBemcL0(int  *x) { mBemcEsum5bit=x;};
   bool getHttpInfo(int tpId, EemcHttpInfo &httpInfo);
 
-  // Use these setters to overwrite thresholds from the database
+  // Use these setters to overwrite thresholds from the database (2009)
   void setEndcapJetPatchTh0(int value) { mEndcapJetPatchTh[0] = value; }
   void setEndcapJetPatchTh1(int value) { mEndcapJetPatchTh[1] = value; }
   void setEndcapJetPatchTh2(int value) { mEndcapJetPatchTh[2] = value; }
 
   void setEndcapHighTowerTh0(int value) { mEndcapHighTowerTh[0] = value; }
   void setEndcapHighTowerTh1(int value) { mEndcapHighTowerTh[1] = value; }
+
+  int getEndcapJetPatchTh0() const;
+  int getEndcapJetPatchTh1() const;
+  int getEndcapJetPatchTh2() const;
+
+  int getEndcapHighTowerTh0() const;
+  int getEndcapHighTowerTh1() const;
+  int getEndcapHighTowerTh2() const;
+
+  int getEndcapJetPatchThreshold(int trigId) const;
+  int getEndcapJetPatchAdc(int jp) const;
+
+  map<int,int> getEndcapJetPatchesAboveThreshold(int trigId) const;
+  int getEndcapHighTower(int tp) const;
+  int getEndcapPatchSum(int tp) const;
 
   ClassDef(StEemcTriggerSimu, 1)
  };
@@ -142,6 +159,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.17  2010/02/18 20:07:10  pibero
+// Run 9 updates
+//
 // Revision 1.16  2009/12/22 18:11:05  pibero
 // Added ability to set input source (MuDst or StEvent) for BBC trigger simulator.
 //

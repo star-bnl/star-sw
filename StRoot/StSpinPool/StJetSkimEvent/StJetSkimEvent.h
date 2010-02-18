@@ -76,6 +76,11 @@ public:
     map<int,int>& triggerPatchesAboveThreshold(int detector) const;
     map<int,int>& jetPatchesAboveThreshold(int detector) const;
 
+    // 2009
+    const map<int,int>& barrelJetPatchesAboveThreshold() const { return mBarrelJetPatches; }
+    const map<int,int>& endcapJetPatchesAboveThreshold() const { return mEndcapJetPatches; }
+    const map<int,int>& overlapJetPatchesAboveThreshold() const { return mOverlapJetPatches; }
+
     // don't use these. these are for test.
     TArrayI towersAboveThreshold_(int detector) const;
     TArrayI triggerPatchesAboveThreshold_(int detector) const;
@@ -102,6 +107,11 @@ public:
     void addTowerAboveThreshold(int detector, int aID, int aADC);    
     void addTriggerPatchAboveThreshold(int detector, int aID, int aADC);
     void addJetPatchAboveThreshold(int detector, int aID, int aADC);
+
+    // 2009
+    void addBarrelJetPatchAboveThreshold(int jp, int adc) { mBarrelJetPatches.insert(make_pair(jp,adc)); }
+    void addEndcapJetPatchAboveThreshold(int jp, int adc) { mEndcapJetPatches.insert(make_pair(jp,adc)); }
+    void addOverlapJetPatchAboveThreshold(int jp, int adc) { mOverlapJetPatches.insert(make_pair(jp,adc)); }
     
     void setTotalEnergy(int aEnergy);
 
@@ -123,12 +133,17 @@ private:
     map<int,int> mTowers;
     map<int,int> mTriggerPatches;
     map<int,int> mJetPatches;
+
+    // 2009
+    map<int,int> mBarrelJetPatches;
+    map<int,int> mEndcapJetPatches;
+    map<int,int> mOverlapJetPatches;
     
     Int_t mTotalEnergy;
 
     UInt_t mL2ResultEmulated[9];
     
-    ClassDef(StJetSkimTrig,3);
+    ClassDef(StJetSkimTrig,4);
 };
     
 inline int StJetSkimTrig::trigId() const {return mTrigId;}

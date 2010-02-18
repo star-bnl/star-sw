@@ -101,6 +101,10 @@ StJetSkimTrig::StJetSkimTrig(const StJetSkimTrig& t) : TObject()
     this->mJetPatches               = t.mJetPatches;
     this->mTotalEnergy              = t.totalEnergy();
 
+    this->mBarrelJetPatches         = t.mBarrelJetPatches;
+    this->mEndcapJetPatches         = t.mEndcapJetPatches;
+    this->mOverlapJetPatches        = t.mOverlapJetPatches;
+
     memcpy(this->mL2ResultEmulated, t.mL2ResultEmulated, 36);
 }
 
@@ -124,6 +128,10 @@ StJetSkimTrig& StJetSkimTrig::operator=(const StJetSkimTrig& rhs)
         this->mJetPatches               = rhs.mJetPatches;
         this->mTotalEnergy              = rhs.totalEnergy();
 
+	this->mBarrelJetPatches         = rhs.mBarrelJetPatches;
+	this->mEndcapJetPatches         = rhs.mEndcapJetPatches;
+	this->mOverlapJetPatches        = rhs.mOverlapJetPatches;
+
 	memcpy(this->mL2ResultEmulated, rhs.mL2ResultEmulated, 36);
     }
         
@@ -142,6 +150,10 @@ void StJetSkimTrig::init() {
     this->mTowers.clear();
     this->mTriggerPatches.clear();
     this->mJetPatches.clear();
+
+    this->mBarrelJetPatches.clear();
+    this->mEndcapJetPatches.clear();
+    this->mOverlapJetPatches.clear();
 
     memset(mL2ResultEmulated, 0, 36);
 }   

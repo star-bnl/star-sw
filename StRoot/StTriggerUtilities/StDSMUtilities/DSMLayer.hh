@@ -49,6 +49,7 @@ template<class T> struct DSMLayer : public vector<DSM> {
   DSMLayer(int n) : vector<DSM>(n) {}
   virtual ~DSMLayer() {}
   virtual void setRegister(int i, int value);
+  virtual int  getRegister(int i) const;
   virtual bool read(const T& event) = 0;
   virtual void write(DSMLayer& layer) = 0;
   virtual void run() = 0;
@@ -60,6 +61,11 @@ template<class T> inline void DSMLayer<T>::setRegister(int i, int value)
 {
   for (vector<DSM>::iterator dsm = begin(); dsm != end(); ++dsm)
     dsm->registers[i] = value;
+}
+
+template<class T> inline int DSMLayer<T>::getRegister(int i) const
+{
+  return front().registers[i];
 }
 
 template<class T> inline void DSMLayer<T>::save(int nchannels, short* buffer)
