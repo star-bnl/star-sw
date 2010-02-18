@@ -34,13 +34,16 @@ int rdMuWana(
   
   //single files for testing
   string dir = "/star/data56/reco/pp500/pythia6_422/";
-  if(isMC==20) file =Form("%sWplus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10010_1000_1000evts.MuDst.root",dir);
-  if(isMC==21) file =Form("%sminus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10011_1000_1000evts.MuDst.root",dir);
+  if(isMC==20) {
+    file =Form("%sWplus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10010_1000_1000evts.MuDst.root",dir);
+    geant=true;
+  }
+  if(isMC==21) file =Form("%sWminus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10011_1000_1000evts.MuDst.root",dir);
   if(isMC==22) file =Form("%sZ_eplus_eminus/perugia320/y2009a/gheisha_on/p09ig/rcf10014_1000_1000evts.MuDst.root",dir);
+  if(isMC==23) file =Form("%sW_jet/perugia320/y2009a/gheisha_on/p09ig/rcf10013_1000_1000evts.MuDst.root",dir);
   //submit via scheduler 
   if(isMC==30) geant=true; //uses geant files
   
-
   if(isMC) spinSort=false;
 
   TString outF=file;
@@ -330,7 +333,12 @@ int rdMuWana(
   St2009WMaker *WmuMk=new St2009WMaker();
   if(isMC) { // MC specific
     WmuMk->setMC(isMC); //pass "version" of MC to maker
-    if(isMC<20) WmuMk->setEtowScaleMC(1.3); // rcf simu should have correct SF
+    //vary energy scales for syst. uncert. calc.
+    //WmuMk->setJetNeutScaleMC(1.0);  //vary by 7.5%
+    //WmuMk->setJetChrgScaleMC(1.0); //vary by 5.6%
+    //WmuMk->setBtowScale(1.0);     //vary by 7.5%
+    //WmuMk->setEtowScale(1.0);     //vary by 10%
+    if(isMC<20) WmuMk->setEtowScale(1.3); // rcf simu should have correct SF
   }else {// real data specific
     WmuMk->setTrigID(bht3ID,l2wID,runNo);
   }
@@ -341,11 +349,9 @@ int rdMuWana(
   WmuMk->setMaxDisplayEve(10); // only first N events will get displayed 
   WmuMk->useEtow(useEtow);// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 
-  //set parameters in W algo manually
-  //WmuMk->setJetNeutScaleMC(1.00);
-  //WmuMk->setJetChrgScaleMC(1.00);
-  //WmuMk->setBtowScaleMC(1.00);
-  //WmuMk->SetEtowScaleMC(1.00);
+  //set energy scale (works for data and MC - be careful!)
+  //WmuMk->setBtowScale(1.0);     
+  //WmuMk->setEtowScale(1.0);
 
   /* evaluation of result, has full acess to W-algo internal data
      including overwrite - be careful */
@@ -446,6 +452,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.23  2010/02/18 22:35:16  stevens4
+// add tpc effic study and allow energy scaling for data and MC
+//
 // Revision 1.22  2010/02/04 03:48:55  balewski
 // *** empty log message ***
 //

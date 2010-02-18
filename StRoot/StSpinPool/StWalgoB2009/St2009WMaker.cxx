@@ -1,5 +1,5 @@
 
-// $Id: St2009WMaker.cxx,v 1.9 2010/01/27 22:12:24 balewski Exp $
+// $Id: St2009WMaker.cxx,v 1.10 2010/02/18 22:34:50 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -95,8 +95,8 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   // flag >= 1 -> use in event display plots
   // flag >= 2 -> use in away sum
   // flag == 3 -> use in near sum
-  setEtowScaleMC(1.0); // for old the Endcap geometr you need ~1.3
-  setBtowScaleMC(1.0);
+  setEtowScale(1.0); // for old the Endcap geometr you need ~1.3
+  setBtowScale(1.0);
   
   setJetNeutScaleMC(1.0);//vary neutral ET scale for systematic
   setJetChrgScaleMC(1.0);//vary charged ET scale for systematic
@@ -126,6 +126,7 @@ St2009WMaker::Init(){
   mDbE = (StEEmcDb*)GetDataSet("StEEmcDb"); 
   assert(mDbE);                                   
   geomE= new EEmcGeomSimple();                    
+  mRand = new TRandom3(0);
 
   initGeom();
   
@@ -171,14 +172,14 @@ St2009WMaker::InitRun(int runNo){
   mRunNo=runNo;
   if(runNo>1000000) assert(mRunNo==par_inpRunNo); // what a hack, assurs TPC cuts change w/ time for data, JB. It will crash if multiple runs are analyzed by the same job.
 
-   LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d mcScaleFact=%.2f\nmcBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV ptBalance>%.1fGeV  |leptonEta|<%.1f",
+   LOG_INFO<<Form("::InitRun(%d) done, W-algo params: trigID: bht3=%d L2W=%d  isMC=%d\n TPC: nPileupVert>%d, vertex |Z|<%.1fcm, primEleTrack: nFit>%d, hitFrac>%.2f Rin<%.1fcm, Rout>%.1fcm, PT>%.1fGeV/c\n BTOW ADC: kSigPed=%d AdcThr>%d maxAdc>%.0f clustET>%.1f GeV  ET2x2/ET4x4>%0.2f  ET2x2/nearTotET>%0.2f\n dist(track-clust)<%.1fcm, nearDelR<%.1f\n Counters Thresholds: track>%.1f GeV, tower>%.1f GeV  Use ETOW: flag=%d ScaleFact=%.2f\nBtowScaleFacor=%.2f\n W selection highET>%.1f awayDelPhi<%.1frad awayTotET<%.1fGeV ptBalance>%.1fGeV  |leptonEta|<%.1f",
 		 mRunNo,par_bht3TrgID, par_l2wTrgID,isMC,
 		 par_minPileupVert,par_vertexZ,
 		 par_nFitPts,par_nHitFrac,  par_trackRin,  par_trackRout, par_trackPt,
 		  par_kSigPed, par_AdcThres,par_maxADC,par_clustET,par_clustFrac24,par_nearTotEtFrac,
 		  par_delR3D,par_nearDeltaR,
-		  par_countTrPt,par_countTowEt,par_useEtow,par_mcEtowScale,
-		  par_mcBtowScale,
+		  par_countTrPt,par_countTowEt,par_useEtow,par_etowScale,
+		  par_btowScale,
 		  par_highET,par_awayDeltaPhi,par_awayTotET,par_ptBalance,par_leptonEta
 		 )<<endm;
 
@@ -367,6 +368,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.10  2010/02/18 22:34:50  stevens4
+// add tpc effic study and allow energy scaling for data and MC
+//
 // Revision 1.9  2010/01/27 22:12:24  balewski
 // spin code matched to x-section code
 //
@@ -397,6 +401,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.10  2010/02/18 22:34:50  stevens4
+// add tpc effic study and allow energy scaling for data and MC
+//
 // Revision 1.9  2010/01/27 22:12:24  balewski
 // spin code matched to x-section code
 //
