@@ -1,10 +1,11 @@
-// $Id: St2009pubMcMaker.cxx,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
+// $Id: St2009pubMcMaker.cxx,v 1.3 2010/02/18 19:48:10 stevens4 Exp $
 //
 //*-- Author : Justin Stevens, IUCF
 // 
 
 #include "St2009WMaker.h"
 #include "St2009pubMcMaker.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 
 //need these to get MC record
 #include "tables/St_g2t_tpc_hit_Table.h"
@@ -45,7 +46,8 @@ Int_t St2009pubMcMaker::Init(){
 Int_t 
 St2009pubMcMaker::Make(){
   //printf("-----------in %s\n", GetName());
-  if(wMK->isMC==8)
+  //only get geant particle info for W MC
+  if(wMK->isMC==8 || wMK->isMC==30 || wMK->isMC==20)
     doMCanalysis();
   
   doWanalysis();
@@ -184,7 +186,7 @@ St2009pubMcMaker::doWanalysis(){
 //_______________________________________________________
 void 
 St2009pubMcMaker::doWefficiency(){
-  
+
   //only count leptons in our eta range
   if(fabs(mElectronP.Eta()) > 1.) return;
   //ele has |eta| < 1
@@ -193,6 +195,15 @@ St2009pubMcMaker::doWefficiency(){
   hA[58]->Fill(mVertex.Z());
   hA[62]->Fill(mElectronP.Phi());
 
+  hA[68]->Fill(mElectronP.Perp()); //forJoe
+
+  //plot for Scott
+  TVector3 detEle; //where lepton would hit BEMC
+  float Rcylinder= wMK->mBtowGeom->Radius();
+  detEle.SetPtEtaPhi(Rcylinder,mElectronP.Eta(),mElectronP.Phi());
+  detEle.SetZ(detEle.Z()+mVertex.Z());
+  hA[66]->Fill(detEle.Eta(),mElectronP.Perp());
+
   //trigger efficiency
   if(!wMK->wEve.l2bitET) return;
   //good trig
@@ -200,6 +211,9 @@ St2009pubMcMaker::doWefficiency(){
   hA[55]->Fill(mElectronP.Eta());
   hA[59]->Fill(mVertex.Z());
   hA[63]->Fill(mElectronP.Phi());
+  hA[69]->Fill(mElectronP.Perp());//forJoe
+
+  hA[67]->Fill(detEle.Eta(),mElectronP.Perp());
 
   //vertex efficiency
   if(wMK->wEve.vertex.size()<=0) return;
@@ -208,6 +222,8 @@ St2009pubMcMaker::doWefficiency(){
   hA[56]->Fill(mElectronP.Eta());
   hA[60]->Fill(mVertex.Z());
   hA[64]->Fill(mElectronP.Phi());
+
+  hA[70]->Fill(mElectronP.Perp());//forJoe
 
   //float diff=wMK->wEve.vertex[0].z - mVertex.Z();
   //cout<<"diff="<<diff<<endl;
@@ -231,8 +247,11 @@ St2009pubMcMaker::doWefficiency(){
       hA[57]->Fill(mElectronP.Eta());
       hA[61]->Fill(mVertex.Z());
       hA[65]->Fill(mElectronP.Phi());
+
+      hA[71]->Fill(mElectronP.Perp());//forJoe
     }
   }
+
 }
 
 
@@ -245,9 +264,9 @@ St2009pubMcMaker::doMCanalysis(){
   assert(mMcEvent);
 
   //initialize momentum vectors
-  StThreeVectorF pW;
-  StThreeVectorF pNeutrino; 
-  StThreeVectorF pElectron;
+  StThreeVectorF pW;        float eW;
+  StThreeVectorF pNeutrino; float eNeutrino;
+  StThreeVectorF pElectron; float eElectron;
 
   StMcVertex *V=mMcEvent->primaryVertex(); 
   mVertex=TVector3(V->position().x(),V->position().y(),V->position().z());
@@ -257,12 +276,14 @@ St2009pubMcMaker::doMCanalysis(){
   while(found<2 && i<mMcEvent->tracks().size()){//loop tracks
     StMcTrack* mcTrack = mMcEvent->tracks()[i];
     int pdgId=mcTrack->pdgId();
-    //float pt=mcTrack->pt(); 
+    float pt=mcTrack->pt();
+    //LOG_INFO<<"pdgId "<<pdgId<<" pt "<<pt<<" pz "<<mcTrack->momentum().z()<<endm;
     if(pdgId==11 || pdgId==-11){ //select e+ and e-
       if(abs(mcTrack->parent()->pdgId()) == 24 ){ 
 	pElectron=mcTrack->momentum();
 	//LOG_INFO<<"pdgId "<<pdgId<<" pt "<<pt<<" pz "<<mcTrack->momentum().z()<<endm;
 	pW=mcTrack->parent()->momentum();
+	eW=mcTrack->parent()->energy();
 	//LOG_INFO<<"pdgId "<<mcTrack->parent()->pdgId()<<" pt "<<mcTrack->parent()->pt()<<" pz "<<mcTrack->parent()->momentum().z()<<endm;
 	found++;
       }
@@ -272,6 +293,7 @@ St2009pubMcMaker::doMCanalysis(){
 	pNeutrino=mcTrack->momentum();
 	//LOG_INFO<<"pdgId "<<pdgId<<" pt "<<pt<<" pz "<<mcTrack->momentum().z()<<endm;
 	pW=mcTrack->parent()->momentum();
+	eW=mcTrack->parent()->energy();
 	//LOG_INFO<<"pdgId "<<mcTrack->parent()->pdgId()<<" pt "<<mcTrack->parent()->pt()<<" pz "<<mcTrack->parent()->momentum().z()<<endm;
 	found++;
       }
@@ -285,9 +307,30 @@ St2009pubMcMaker::doMCanalysis(){
   TVector3 diff=mWP-mNeutrinoP-mElectronP;
   if(diff.Mag() > 0.0001) //should get exactly right
     LOG_INFO<<"\n \n W+e+nu vector sum ="<<diff.Mag()<<endm;
+  if(mElectronP.Mag() < 0.0001)
+    LOG_INFO<<"\n \n no lepton track ="<<endm;
+
+  //calculate x1 and x2 from W rapidity
+  float rapW = 0.5*log((eW+mWP.Z())/(eW-mWP.Z()));
+  float mw2sqs=80.4/500.;
+  float x1=mw2sqs*exp(rapW);
+  float x2=mw2sqs*exp(-rapW);
+
+  hA[72]->Fill(rapW);
+  if(fabs(mElectronP.Eta())<1){ //require midrapidity e
+    hA[73]->Fill(x1);
+    hA[74]->Fill(x2);
+    hA[75]->Fill(x1,x2);
+    hA[76]->Fill(x1-x2);
+  }
+
+
 }
 
 // $Log: St2009pubMcMaker.cxx,v $
+// Revision 1.3  2010/02/18 19:48:10  stevens4
+// add more effic histograms and cleanup
+//
 // Revision 1.2  2010/01/21 17:54:31  stevens4
 // add effic histos and charge seperated background plots
 //
