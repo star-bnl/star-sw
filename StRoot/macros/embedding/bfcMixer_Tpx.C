@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.8 2010/02/10 23:59:16 didenko Exp $
+// $Id: bfcMixer_Tpx.C,v 1.9 2010/02/18 23:54:50 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +32,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   TString prodP10iapp("DbV20091001 pp2009c TpcRS ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpcRS -VFMinuit -hitfilt");
   TString geomP08ic("ry2008");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
-  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
+  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
   chain2Opt += " "; chain2Opt += geomP08ic;
   if (prodName == "P08icpp") {   TString chain3Opt = prodP08icpp; }
   else if (prodName == "P08iepp") { TString chain3Opt = prodP08iepp; }
@@ -61,6 +61,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   chain2 = chain;
   chain2->SetName("Two"); 
   Chain->cd();
+#if 0
   if (chain2->GetOption("TRS")){
     StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Trs");
     if (! trsMk) {
@@ -69,6 +70,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
     }
     trsMk->setNormalFactor(1.32);
   }
+#endif
   //________________________________________________________________________________
   //  gSystem->Load("StFtpcMixerMaker");
   //  StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
