@@ -1,4 +1,4 @@
-// $Id: St2009pubMc_histo.cxx,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
+// $Id: St2009pubMc_histo.cxx,v 1.3 2010/02/18 19:48:10 stevens4 Exp $
 //
 //*-- Author :  Justin Stevens, IUCF
 
@@ -103,6 +103,23 @@ St2009pubMcMaker::initHistos(){
   hA[63]=h=new TH1F(core+"elePhiTrig","#phi of leptons that satisfy trigger ; lepton #phi (from Geant)",64,-PI,PI);
   hA[64]=h=new TH1F(core+"elePhiVert","#phi of leptons that w/ good vertex ; lepton #phi (from Geant)",64,-PI,PI);
   hA[65]=h=new TH1F(core+"elePhiReco","#phi of leptons that pass W cuts ; lepton #phi (from Geant)",64,-PI,PI);
+  
+  //different binning for ET histograms
+  hA[68]=h=new TH1F(core+"eleETallJoe","pt of all leptons ; lepton pt (from Geant)",100,1,101);
+  hA[69]=h=new TH1F(core+"eleETtrigJoe","pt of leptons with good trigger; lepton pt (from Geant)",100,1,101);
+  hA[70]=h=new TH1F(core+"eleETvertJoe","pt of leptons with good vertex; lepton pt (from Geant)",100,1,101);
+  hA[71]=h=new TH1F(core+"eleETrecoJoe","pt of reconstructed leptons; lepton pt (from Geant)",100,1,101);
+
+  //plot for Scott to look at trigger effic W+ vs W-
+  hA[66]=h=new TH2F(core+"eleEta_ptPreTrig","Reconstructed lepton pt vs lepton detector #eta from Geant (before trig); lepton detector #eta; lepton pt (from Geant)",100,-1.1,1.1,100,0,100);
+  hA[67]=h=new TH2F(core+"eleEta_ptPostTrig","Reconstructed lepton pt vs lepton detector #eta from Geant (after trig); lepton detector #eta; lepton pt (from Geant)",100,-1.1,1.1,100,0,100);
+  
+  //x1 and x2 distributions
+  hA[72]=h=new TH1F(core+"wRapid","Rapidity of W; W rapidity",100,-2,2);
+  hA[73]=h=new TH1F(core+"x1","x1 distribution; x1",100,0,1);
+  hA[74]=h=new TH1F(core+"x2","x2 distribution; x2",100,0,1);
+  hA[75]=h=new TH2F(core+"x2_x1","x2 vs x1 ; x1; x2",100,0,1,100,0,1);
+  hA[76]=h=new TH1F(core+"x1minusx2","x1 - x2; x1-x2",100,-1,1);
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
     if(  hA[i]==0) continue;
@@ -114,6 +131,9 @@ St2009pubMcMaker::initHistos(){
 }
 
 // $Log: St2009pubMc_histo.cxx,v $
+// Revision 1.3  2010/02/18 19:48:10  stevens4
+// add more effic histograms and cleanup
+//
 // Revision 1.2  2010/01/21 17:54:31  stevens4
 // add effic histos and charge seperated background plots
 //
