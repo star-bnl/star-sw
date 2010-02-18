@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.8 2010/01/27 22:12:24 balewski Exp $
+// $Id: St2009WMaker.h,v 1.9 2010/02/18 22:34:50 stevens4 Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -18,6 +18,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include <TRandom3.h>
 
 #include "Wevent2009.h"
 #include "WtpcFilter.h"
@@ -40,6 +41,7 @@ class  StJetReader;
 class  StJets;
 class  StJet;
 class  TClonesArray;
+class  TRandom3;
 
 
 class St2009WMaker : public StMaker {
@@ -83,8 +85,8 @@ class St2009WMaker : public StMaker {
 
   float par_countTrPt,par_countTowEt; 
   int par_useEtow;                    
-  float par_mcEtowScale;
-  float par_mcBtowScale;
+  float par_etowScale;
+  float par_btowScale;
 
   float par_mcJetNeutScale;
   float par_mcJetChrgScale;
@@ -102,8 +104,8 @@ class St2009WMaker : public StMaker {
   void setEmcCuts(int ksp , float madc, float clet, float fr1, float dr){
     par_kSigPed=ksp; par_maxADC=madc; par_clustET=clet; 
     par_clustFrac24=fr1;}
-  void setEtowScaleMC(float x){ par_mcEtowScale=x; }
-  void setBtowScaleMC(float x){ par_mcBtowScale=x; }
+  void setEtowScale(float x){ par_etowScale=x; }
+  void setBtowScale(float x){ par_btowScale=x; }
   void setL0AdcThresh(int x){ par_l0emulAdcThresh=x; }
   void setL2ClusterThresh(float x){ par_l2emulClusterThresh=x; }
   void setL2SeedThresh(float x){ par_l2emulSeedThresh=x; }
@@ -121,7 +123,7 @@ class St2009WMaker : public StMaker {
   int mapBtowIJ2ID[mxBTetaBin*mxBTphiBin];// vs. (iEta, iPhi)
   TVector3 positionBtow[mxBtow]; // vs. tower ID
   TVector3 positionBsmd[mxBSmd][mxBStrips]; // vs. strip ID
-
+ 
   StEEmcDb        *mDbE; // access to EEMC database        
   EEmcGeomSimple  *geomE;// access to EEMC geometry        
   TVector3 positionEtow[mxEtowSec*mxEtowSub][mxEtowEta];  
@@ -147,6 +149,12 @@ class St2009WMaker : public StMaker {
   StJet* getJet(int i){return (StJet*)mJets->At(i);}
   TClonesArray* getJets(TString branchName);
 
+  //for TPC efficiency study
+  int getEtaBin(float etaDet);
+  float effWeight(int sec, int etaBin);
+  bool rejectMcTr(float effic);
+  TRandom3 *mRand;
+
   // tools
   float sumTpcCone( int vertID, TVector3 refAxis, int flag, int &nTrCnt);
   float sumBtowCone( float zVert,  TVector3 refAxis, int flag,int &nTow);
@@ -156,7 +164,7 @@ class St2009WMaker : public StMaker {
 
   // histograms
   TObjArray *HList;
-  enum {mxHA=150}; TH1 * hA[mxHA];
+  enum {mxHA=200}; TH1 * hA[mxHA];
     
   void initHistos();
   void initGeom();
@@ -179,7 +187,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.8 2010/01/27 22:12:24 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.9 2010/02/18 22:34:50 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -190,6 +198,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.9  2010/02/18 22:34:50  stevens4
+// add tpc effic study and allow energy scaling for data and MC
+//
 // Revision 1.8  2010/01/27 22:12:24  balewski
 // spin code matched to x-section code
 //
